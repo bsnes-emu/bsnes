@@ -12,6 +12,10 @@ struct UnmappedMemory : Memory {
 
 static UnmappedMemory unmappedMemory;
 
+uint8& StaticMemory::operator[](uint32 addr) {
+  return data[addr];
+}
+
 uint32 StaticMemory::read(uint32 addr, uint32 size) {
   switch(size) {
   case Word: addr &= ~3; return (data[addr + 0] << 0) | (data[addr + 1] << 8) | (data[addr + 2] << 16) | (data[addr + 3] << 24);

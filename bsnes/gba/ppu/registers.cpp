@@ -1,37 +1,37 @@
 PPU::Registers::Control::operator uint16() const {
   return (
-    (bgmode          <<  0)
-  | (cgbmode         <<  3)
-  | (frame           <<  4)
-  | (hblank          <<  5)
-  | (objmap          <<  6)
-  | (forceblank      <<  7)
-  | (enablebg[0]     <<  8)
-  | (enablebg[1]     <<  9)
-  | (enablebg[2]     << 10)
-  | (enablebg[3]     << 11)
-  | (enableobj       << 12)
-  | (enablebgwindow0 << 13)
-  | (enablebgwindow1 << 14)
-  | (enableobjwindow << 15)
+    (bgmode            <<  0)
+  | (cgbmode           <<  3)
+  | (frame             <<  4)
+  | (hblank            <<  5)
+  | (objmapping        <<  6)
+  | (forceblank        <<  7)
+  | (enablebg[0]       <<  8)
+  | (enablebg[1]       <<  9)
+  | (enablebg[2]       << 10)
+  | (enablebg[3]       << 11)
+  | (enableobj         << 12)
+  | (enablebgwindow[0] << 13)
+  | (enablebgwindow[1] << 14)
+  | (enableobjwindow   << 15)
   );
 }
 
 uint16 PPU::Registers::Control::operator=(uint16 source) {
-  bgmode          = source & 0x0007;
-  cgbmode         = source & 0x0008;
-  frame           = source & 0x0010;
-  hblank          = source & 0x0020;
-  objmap          = source & 0x0040;
-  forceblank      = source & 0x0080;
-  enablebg[0]     = source & 0x0100;
-  enablebg[1]     = source & 0x0200;
-  enablebg[2]     = source & 0x0400;
-  enablebg[3]     = source & 0x0800;
-  enableobj       = source & 0x1000;
-  enablebgwindow0 = source & 0x2000;
-  enablebgwindow1 = source & 0x4000;
-  enableobjwindow = source & 0x8000;
+  bgmode            = source & 0x0007;
+  cgbmode           = source & 0x0008;
+  frame             = source & 0x0010;
+  hblank            = source & 0x0020;
+  objmapping        = source & 0x0040;
+  forceblank        = source & 0x0080;
+  enablebg[0]       = source & 0x0100;
+  enablebg[1]       = source & 0x0200;
+  enablebg[2]       = source & 0x0400;
+  enablebg[3]       = source & 0x0800;
+  enableobj         = source & 0x1000;
+  enablebgwindow[0] = source & 0x2000;
+  enablebgwindow[1] = source & 0x4000;
+  enableobjwindow   = source & 0x8000;
   return operator uint16();
 }
 

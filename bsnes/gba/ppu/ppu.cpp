@@ -13,6 +13,8 @@
 namespace GBA {
 
 #include "registers.cpp"
+#include "object.cpp"
+#include "screen.cpp"
 #include "mmio.cpp"
 PPU ppu;
 
@@ -87,6 +89,11 @@ void PPU::scanline() {
 
   if(regs.status.irqvcoincidence) {
     if(regs.status.vcoincidence) cpu.regs.irq.flag.vcoincidence = 1;
+  }
+
+  if(regs.vcounter < 160) {
+    render_objects();
+    render_screen();
   }
 
   step(256 * 4);

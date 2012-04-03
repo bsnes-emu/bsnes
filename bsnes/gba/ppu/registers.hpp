@@ -4,12 +4,11 @@ struct Registers {
     bool cgbmode;
     bool frame;
     bool hblank;
-    bool objmap;
+    bool objmapping;
     bool forceblank;
     bool enablebg[4];
     bool enableobj;
-    bool enablebgwindow0;
-    bool enablebgwindow1;
+    bool enablebgwindow[2];
     bool enableobjwindow;
 
     operator uint16() const;
