@@ -39,8 +39,12 @@ void APU::Square1::sweep(bool update) {
 }
 
 void APU::Square1::clock_length() {
-  if(counter && length) {
-    if(--length == 0) enable = false;
+//if(counter && length) {
+//  if(--length == 0) enable = false;
+//}
+
+  if(counter && enable) {
+    if(++length == 0) enable = false;
   }
 }
 
@@ -70,7 +74,8 @@ void APU::Square1::write(unsigned r, uint8 data) {
 
   if(r == 1) {  //$ff11  NR11
     duty = data >> 6;
-    length = 64 - (data & 0x3f);
+  //length = 64 - (data & 0x3f);
+    length = data & 0x3f;
   }
 
   if(r == 2) {  //$ff12  NR12
@@ -98,7 +103,7 @@ void APU::Square1::write(unsigned r, uint8 data) {
       sweep_enable = sweep_period || sweep_shift;
       sweep_negate = false;
       if(sweep_shift) sweep(0);
-      if(length == 0) length = 64;
+    //if(length == 0) length = 64;
     }
   }
 

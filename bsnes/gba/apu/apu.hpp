@@ -8,6 +8,8 @@ struct APU : Thread, MMIO {
   uint8 read(uint32 addr);
   void write(uint32 addr, uint8 byte);
   void power();
+
+  void runsequencer();
 };
 
 extern APU apu;

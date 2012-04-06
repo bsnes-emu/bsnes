@@ -70,8 +70,8 @@ AudioSettings::AudioSettings() {
 
   gba.name.setText("GBA:");
   gba.slider.setLength(2001);
-  gba.base = 32768;
-  gba.step = 1;
+  gba.base = 4194304;
+  gba.step = 131;
 
   append(title,                           { ~0, 0 }, 5);
   append(outputLabel,                     { ~0, 0 }, 0);

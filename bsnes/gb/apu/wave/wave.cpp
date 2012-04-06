@@ -13,8 +13,11 @@ void APU::Wave::run() {
 }
 
 void APU::Wave::clock_length() {
-  if(counter && length) {
-    if(--length == 0) enable = false;
+//if(counter && length) {
+//  if(--length == 0) enable = false;
+//}
+  if(enable && counter) {
+    if(++length == 0) enable = false;
   }
 }
 
@@ -25,7 +28,8 @@ void APU::Wave::write(unsigned r, uint8 data) {
   }
 
   if(r == 1) {  //$ff1b  NR31
-    length = 256 - data;
+  //length = 256 - data;
+    length = data;
   }
 
   if(r == 2) {  //$ff1c  NR32
@@ -49,7 +53,7 @@ void APU::Wave::write(unsigned r, uint8 data) {
     if(initialize) {
       enable = dac_enable;
       pattern_offset = 0;
-      if(length == 0) length = 256;
+    //if(length == 0) length = 256;
     }
   }
 

@@ -6,7 +6,7 @@ struct Square1 {
   uint3 sweep_shift;
   bool sweep_negate;
   uint2 duty;
-  unsigned length;
+  uint6 length;
   uint4 envelope_volume;
   bool envelope_direction;
   uint3 envelope_frequency;

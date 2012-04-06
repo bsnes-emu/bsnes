@@ -4,14 +4,21 @@ namespace GBA {
 
 #include "registers.cpp"
 #include "mmio.cpp"
+#include "square.cpp"
+#include "square1.cpp"
+#include "square2.cpp"
+#include "wave.cpp"
+#include "noise.cpp"
+#include "sequencer.cpp"
 APU apu;
 
 void APU::Enter() { apu.enter(); }
 
 void APU::enter() {
   while(true) {
-    interface->audioSample(0, 0);
-    step(512);
+    runsequencer();
+    interface->audioSample(sequencer.lsample, sequencer.rsample);
+    step(4);
   }
 }
 
@@ -22,6 +29,12 @@ void APU::step(unsigned clocks) {
 
 void APU::power() {
   create(APU::Enter, 16777216);
+
+  square1.power();
+  square2.power();
+  wave.power();
+  noise.power();
+  sequencer.power();
 
   regs.bias = 0x0200;
 

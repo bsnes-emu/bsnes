@@ -10,7 +10,7 @@ struct Noise {
   bool counter;
 
   int16 output;
-  unsigned length;
+  uint6 length;
   uint3 envelope_period;
   uint4 volume;
   unsigned period;

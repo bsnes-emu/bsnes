@@ -8,7 +8,7 @@ struct Wave {
   uint8 pattern[32];
 
   int16 output;
-  unsigned length;
+  uint8 length;
   unsigned period;
   uint5 pattern_offset;
   uint4 pattern_sample;

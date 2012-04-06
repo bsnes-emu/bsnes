@@ -23,8 +23,12 @@ void APU::Square2::run() {
 }
 
 void APU::Square2::clock_length() {
-  if(counter && length) {
-    if(--length == 0) enable = false;
+//if(counter && length) {
+//  if(--length == 0) enable = false;
+//}
+
+  if(counter && enable) {
+    if(++length == 0) enable = false;
   }
 }
 
@@ -39,7 +43,8 @@ void APU::Square2::clock_envelope() {
 void APU::Square2::write(unsigned r, uint8 data) {
   if(r == 1) {  //$ff16  NR21
     duty = data >> 6;
-    length = 64 - (data & 0x3f);
+  //length = 64 - (data & 0x3f);
+    length = (data & 0x3f);
   }
 
   if(r == 2) {  //$ff17  NR22
@@ -62,7 +67,7 @@ void APU::Square2::write(unsigned r, uint8 data) {
       enable = dac_enable();
       envelope_period = envelope_frequency;
       volume = envelope_volume;
-      if(length == 0) length = 64;
+    //if(length == 0) length = 64;
     }
   }
 
