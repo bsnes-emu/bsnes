@@ -19,6 +19,8 @@ struct PPU : Thread, MMIO {
 
   void render_backgrounds();
   void render_background_linear(unsigned bgnumber);
+  void render_background_affine(unsigned bgnumber);
+  void render_background_bitmap(unsigned bgnumber);
 
   void render_objects();
   void render_object_linear(Object&);

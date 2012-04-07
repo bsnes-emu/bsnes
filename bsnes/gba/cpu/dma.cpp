@@ -1,13 +1,29 @@
 void CPU::dma_run() {
   for(unsigned n = 0; n < 4; n++) {
-    if(regs.dma[n].control.enable == false) continue;
-    switch(regs.dma[n].control.timingmode) {
+    auto &dma = regs.dma[n];
+
+    if(dma.control.enable == false) {
+      dma.active = false;
+      continue;
+    }
+
+    if(dma.active == false) {
+      dma.active = true;
+      dma.run.target = dma.target;
+      dma.run.source = dma.source;
+      dma.run.length = dma.length;
+      step(2);
+    }
+
+    switch(dma.control.timingmode) {
     case 0: break;
     case 1: if(pending.dma.vblank == false) continue; break;
     case 2: if(pending.dma.hblank == false) continue; break;
     case 3: if(pending.dma.hdma == false || n != 3) continue; break;
     }
-    dma_transfer(n);
+
+    dma_transfer(dma);
+    if(dma.control.irq) regs.irq.flag.dma[n] = 1;
   }
 
   pending.dma.vblank = false;
@@ -15,31 +31,28 @@ void CPU::dma_run() {
   pending.dma.hdma   = false;
 }
 
-void CPU::dma_transfer(uint2 n) {
-  auto &channel = regs.dma[n];
+void CPU::dma_transfer(Registers::DMA &dma) {
+  unsigned size = dma.control.size ? Word : Half;
+  unsigned seek = dma.control.size ? 4 : 2;
 
-  unsigned size = channel.control.size ? Word : Half;
-  unsigned seek = channel.control.size ? 4 : 2;
-  uint16 length = channel.length;
-
-  channel.basetarget = channel.target;
   do {
-    uint32 word = bus.read(channel.source, size);
-    bus.write(channel.target, size, word);
+    uint32 word = bus.read(dma.run.source, size);
+    bus.write(dma.run.target, size, word);
+    step(2);
 
-    switch(channel.control.sourcemode) {
-    case 0: channel.source += seek; break;
-    case 1: channel.source -= seek; break;
+    switch(dma.control.sourcemode) {
+    case 0: dma.run.source += seek; break;
+    case 1: dma.run.source -= seek; break;
     }
 
-    switch(channel.control.targetmode) {
-    case 0: channel.target += seek; break;
-    case 1: channel.target -= seek; break;
-    case 3: channel.target += seek; break;
+    switch(dma.control.targetmode) {
+    case 0: dma.run.target += seek; break;
+    case 1: dma.run.target -= seek; break;
+    case 3: dma.run.target += seek; break;
     }
-  } while(--length);
-  if(channel.control.targetmode == 3) channel.target = channel.basetarget;
+  } while(--dma.run.length);
 
-  channel.control.enable = false;
-  if(channel.control.irq) regs.irq.flag.dma[n] = 1;
+  if(dma.control.targetmode == 3) dma.run.target = dma.target;
+  if(dma.control.repeat == 1) dma.run.length = dma.length;
+  if(dma.control.repeat == 0) dma.active = false, dma.control.enable = false;
 }

@@ -31,7 +31,7 @@ void APU::runsequencer() {
   if(r.lenable[2]) lsample +=    wave.output;
   if(r.lenable[3]) lsample +=   noise.output;
   lsample = (lsample * 512) - 15360;
-  lsample = r.volumeadjust(lsample, r.lvolume);
+  lsample = (lsample * (r.lvolume + 1)) / 8;
   r.lsample = lsample;
 
   signed rsample = 0;
@@ -40,25 +40,12 @@ void APU::runsequencer() {
   if(r.renable[2]) rsample +=    wave.output;
   if(r.renable[3]) rsample +=   noise.output;
   rsample = (rsample * 512) - 15360;
-  rsample = r.volumeadjust(rsample, r.rvolume);
+  rsample = (rsample * (r.rvolume + 1)) / 8;
   r.rsample = rsample;
 
   if(r.masterenable == false) {
     r.lsample = 0;
     r.rsample = 0;
-  }
-}
-
-signed APU::Sequencer::volumeadjust(signed sample, uint3 volume) {
-  switch(volume) {
-  case 0: return (sample >> 3);                  // 12.5%
-  case 1: return (sample >> 2);                  // 25.0%
-  case 2: return (sample >> 2) + (sample >> 3);  // 37.5%
-  case 3: return (sample >> 1);                  // 50.0%
-  case 4: return (sample >> 1) + (sample >> 3);  // 62.5%
-  case 5: return (sample >> 0) - (sample >> 2);  // 75.0%
-  case 6: return (sample >> 0) - (sample >> 3);  // 87.5%
-  case 7: return (sample >> 0);                  //100.0%
   }
 }
 

@@ -16,7 +16,10 @@ struct CPU : Processor::ARM, Thread, MMIO {
   void write(uint32 addr, uint8 byte);
 
   void dma_run();
-  void dma_transfer(uint2 channel);
+  void dma_transfer(Registers::DMA &dma);
+
+  void timer_tick();
+  void timer_increment(unsigned n);
 
   CPU();
 };

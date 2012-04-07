@@ -1,8 +1,7 @@
 struct Pixel {
   bool exists;
   uint15 color;
-  uint2 priority;
-} pixel[5][256];
+} layer[4][240];
 
 struct Object {
   uint8  y;

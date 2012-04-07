@@ -6,16 +6,8 @@ void APU::Wave::run() {
   }
 
   output = patternsample;
-  switch(volume) {
-  case 0: output = 0;             //  0%
-  case 1: break;                  //100%
-  case 2: output >>= 1;           // 50%
-  case 3: output >>= 2;           // 25%
-  case 4: output -= output >> 2;  // 75%
-  case 5: output -= output >> 2;  // 75%
-  case 6: output -= output >> 2;  // 75%
-  case 7: output -= output >> 2;  // 75%
-  }
+  static unsigned multiplier[] = { 0, 4, 2, 1, 3, 3, 3, 3};
+  output = (output * multiplier[volume]) / 4;
   if(enable == false) output = 0;
 }
 

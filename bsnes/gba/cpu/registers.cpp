@@ -1,4 +1,4 @@
-CPU::Registers::DMA::Control::operator uint16() const {
+CPU::Registers::DMAControl::operator uint16() const {
   return (
     (targetmode <<  5)
   | (sourcemode <<  7)
@@ -11,7 +11,7 @@ CPU::Registers::DMA::Control::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::DMA::Control::operator=(uint16 source) {
+uint16 CPU::Registers::DMAControl::operator=(uint16 source) {
   targetmode = source >>  5;
   sourcemode = source >>  7;
   repeat     = source >>  9;
@@ -23,21 +23,21 @@ uint16 CPU::Registers::DMA::Control::operator=(uint16 source) {
   return operator uint16();
 }
 
-CPU::Registers::TimerControl::operator uint16() const {
+CPU::Registers::TimerControl::operator uint8() const {
   return (
-    (prescalar << 0)
-  | (countup   << 2)
+    (frequency << 0)
+  | (cascade   << 2)
   | (irq       << 6)
   | (enable    << 7)
   );
 }
 
-uint16 CPU::Registers::TimerControl::operator=(uint16 source) {
-  prescalar = (source >> 0) & 3;
-  countup   = (source >> 2) & 1;
-  irq       = (source >> 6) & 1;
-  enable    = (source >> 7) & 1;
-  return operator uint16();
+uint8 CPU::Registers::TimerControl::operator=(uint8 source) {
+  frequency = source >> 0;
+  cascade   = source >> 2;
+  irq       = source >> 6;
+  enable    = source >> 7;
+  return operator uint8();
 }
 
 CPU::Registers::KeypadControl::operator uint16() const {

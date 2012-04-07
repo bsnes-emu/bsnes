@@ -15,6 +15,12 @@ void ARM::thumb_step() {
   pipeline_step();
   step(1);
 
+  if(processor.irqline && cpsr().i == 0) {
+    vector(0x00000018, Processor::Mode::IRQ);
+    r(14) += 2;
+    return;
+  }
+
   instructions++;
   if(trace) {
     print(disassemble_registers(), "\n");

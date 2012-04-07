@@ -3,9 +3,25 @@ uint8 CPU::read(uint32 addr) {
 
   switch(addr) {
 
+  //DMA0CNT_H
+  case 0x040000ba: return regs.dma[0].control >> 0;
+  case 0x040000bb: return regs.dma[0].control >> 8;
+
+  //DMA1CNT_H
+  case 0x040000c6: return regs.dma[1].control >> 0;
+  case 0x040000c7: return regs.dma[1].control >> 8;
+
+  //DMA2CNT_H
+  case 0x040000d2: return regs.dma[2].control >> 0;
+  case 0x040000d3: return regs.dma[2].control >> 8;
+
+  //DMA3CNT_H
+  case 0x040000de: return regs.dma[3].control >> 0;
+  case 0x040000df: return regs.dma[3].control >> 8;
+
   //TM0CNT_L
-  case 0x04000100: return regs.timer[0].reload >> 0;
-  case 0x04000101: return regs.timer[0].reload >> 8;
+  case 0x04000100: return regs.timer[0].counter >> 0;
+  case 0x04000101: return regs.timer[0].counter >> 8;
 
   //TIM0CNT_H
   case 0x04000102: return regs.timer[0].control >> 0;
@@ -170,33 +186,34 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000100: regs.timer[0].reload = (regs.timer[0].reload & 0xff00) | (byte << 0); return;
   case 0x04000101: regs.timer[0].reload = (regs.timer[0].reload & 0x00ff) | (byte << 8); return;
 
-  //TM0CNT_H
-  case 0x04000102: regs.timer[0].control = (regs.timer[0].control & 0xff00) | (byte << 0); return;
-  case 0x04000103: regs.timer[0].control = (regs.timer[0].control & 0x00ff) | (byte << 8); return;
-
   //TM1CNT_L
   case 0x04000104: regs.timer[1].reload = (regs.timer[1].reload & 0xff00) | (byte << 0); return;
   case 0x04000105: regs.timer[1].reload = (regs.timer[1].reload & 0x00ff) | (byte << 8); return;
-
-  //TM1CNT_H
-  case 0x04000106: regs.timer[1].control = (regs.timer[1].control & 0xff00) | (byte << 0); return;
-  case 0x04000107: regs.timer[1].control = (regs.timer[1].control & 0x00ff) | (byte << 8); return;
 
   //TM2CNT_L
   case 0x04000108: regs.timer[2].reload = (regs.timer[2].reload & 0xff00) | (byte << 0); return;
   case 0x04000109: regs.timer[2].reload = (regs.timer[2].reload & 0x00ff) | (byte << 8); return;
 
-  //TM2CNT_H
-  case 0x0400010a: regs.timer[2].control = (regs.timer[2].control & 0xff00) | (byte << 0); return;
-  case 0x0400010b: regs.timer[2].control = (regs.timer[2].control & 0x00ff) | (byte << 8); return;
-
   //TM3CNT_L
   case 0x0400010c: regs.timer[3].reload = (regs.timer[3].reload & 0xff00) | (byte << 0); return;
   case 0x0400010d: regs.timer[3].reload = (regs.timer[3].reload & 0x00ff) | (byte << 8); return;
 
+  //TM0CNT_H
+  //TM1CNT_H
+  //TM2CNT_H
   //TM3CNT_H
-  case 0x0400010e: regs.timer[3].control = (regs.timer[3].control & 0xff00) | (byte << 0); return;
-  case 0x0400010f: regs.timer[3].control = (regs.timer[3].control & 0x00ff) | (byte << 8); return;
+  case 0x04000102:
+  case 0x04000106:
+  case 0x0400010a:
+  case 0x0400010e: {
+    auto &timer = regs.timer[(addr >> 2) & 3];
+    bool enable = timer.control.enable;
+    if(timer.control.enable == 0 && enable == 1) {
+      timer.counter = timer.reload;
+    }
+    timer.control = byte;
+    return;
+  }
 
   //KEYCNT
   case 0x04000132: regs.keypad.control = (regs.keypad.control & 0xff00) | (byte << 0); return;

@@ -65,6 +65,7 @@ PPU::Registers::BackgroundControl::operator uint16() const {
   | (mosaic             <<  6)
   | (colormode          <<  7)
   | (screenbaseblock    <<  8)
+  | (affinewrap         << 13)
   | (screensize         << 14)
   );
 }
@@ -75,6 +76,7 @@ uint16 PPU::Registers::BackgroundControl::operator=(uint16 source) {
   mosaic             = source >>  6;
   colormode          = source >>  7;
   screenbaseblock    = source >>  8;
+  affinewrap         = source >> 13;
   screensize         = source >> 14;
   return operator uint16();
 }

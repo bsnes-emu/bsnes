@@ -54,6 +54,8 @@ void PPU::power() {
     bg.pd = 0;
     bg.x = 0;
     bg.y = 0;
+    bg.lx = 0;
+    bg.ly = 0;
   }
   for(auto &w : regs.window) {
     w.x1 = 0;
@@ -82,6 +84,12 @@ void PPU::scanline() {
 
   if(regs.vcounter ==   0) {
     frame();
+
+    regs.bg[2].lx = regs.bg[2].x;
+    regs.bg[2].ly = regs.bg[2].y;
+
+    regs.bg[3].lx = regs.bg[3].x;
+    regs.bg[3].ly = regs.bg[3].y;
   }
 
   if(regs.vcounter == 160) {
@@ -94,21 +102,28 @@ void PPU::scanline() {
   }
 
   if(regs.vcounter < 160) {
+    for(unsigned x = 0; x < 240; x++) {
+      layer[0][x].exists = false;
+      layer[1][x].exists = false;
+      layer[2][x].exists = false;
+      layer[3][x].exists = false;
+    }
+
     render_backgrounds();
     render_objects();
     render_screen();
   }
 
-  step(1024);
+  step(960);
   regs.status.hblank = 1;
   if(regs.status.irqhblank) cpu.regs.irq.flag.hblank = 1;
   cpu.pending.dma.hblank = true;
 
-  step(200);
+  step(240);
   regs.status.hblank = 0;
-  cpu.pending.dma.hdma = true;
+  if(regs.vcounter < 160) cpu.pending.dma.hdma = true;
 
-  step(8);
+  step(32);
   if(++regs.vcounter == 228) regs.vcounter = 0;
 }
 

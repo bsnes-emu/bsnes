@@ -20,36 +20,18 @@ void APU::Master::run() {
   if(channel2_left_enable) sample += apu.square2.output;
   if(channel3_left_enable) sample +=    apu.wave.output;
   if(channel4_left_enable) sample +=   apu.noise.output;
-  left = (sample * 512) - 16384;
-
-  switch(left_volume) {
-    case 0: left >>= 3;                       break;  // 12.5%
-    case 1: left >>= 2;                       break;  // 25.0%
-    case 2: left = (left >> 2) + (left >> 3); break;  // 37.5%
-    case 3: left >>= 1;                       break;  // 50.0%
-    case 4: left = (left >> 1) + (left >> 3); break;  // 62.5%
-    case 5: left -= (left >> 2);              break;  // 75.0%
-    case 6: left -= (left >> 3);              break;  // 87.5%
-  //case 7:                                   break;  //100.0%
-  }
+  sample = (sample * 512) - 16384;
+  sample = (sample * (left_volume  + 1)) / 8;
+  left  = sample;
 
   sample = 0;
   if(channel1_right_enable) sample += apu.square1.output;
   if(channel2_right_enable) sample += apu.square2.output;
   if(channel3_right_enable) sample +=    apu.wave.output;
   if(channel4_right_enable) sample +=   apu.noise.output;
-  right = (sample * 512) - 16384;
-
-  switch(right_volume) {
-    case 0: right >>= 3;                         break;  // 12.5%
-    case 1: right >>= 2;                         break;  // 25.0%
-    case 2: right = (right >> 2) + (right >> 3); break;  // 37.5%
-    case 3: right >>= 1;                         break;  // 50.0%
-    case 4: right = (right >> 1) + (right >> 3); break;  // 62.5%
-    case 5: right -= (right >> 2);               break;  // 75.0%
-    case 6: right -= (right >> 3);               break;  // 87.5%
-  //case 7:                                      break;  //100.0%
-  }
+  sample = (sample * 512) - 16384;
+  sample = (sample * (right_volume + 1)) / 8;
+  right = sample;
 }
 
 void APU::Master::write(unsigned r, uint8 data) {

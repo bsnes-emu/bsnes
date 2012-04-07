@@ -1,41 +1,53 @@
 struct Registers {
+  struct DMAControl {
+    uint2 targetmode;
+    uint2 sourcemode;
+    uint1 repeat;
+    uint1 size;
+    uint1 drq;
+    uint2 timingmode;
+    uint1 irq;
+    uint1 enable;
+
+    operator uint16() const;
+    uint16 operator=(uint16 source);
+    DMAControl& operator=(const DMAControl&) = delete;
+  };
+
   struct DMA {
     uint32 source;
     uint32 target;
     uint16 length;
-    struct Control {
-      uint2 targetmode;
-      uint2 sourcemode;
-      uint1 repeat;
-      uint1 size;
-      uint1 drq;
-      uint2 timingmode;
-      uint1 irq;
-      uint1 enable;
-
-      operator uint16() const;
-      uint16 operator=(uint16 source);
-      DMA& operator=(const DMA&) = delete;
-    } control;
+    DMAControl control;
 
     //internal
+    uint1 active;
+    struct Run {
+      uint32 target;
+      uint32 source;
+      uint32 length;
+    } run;
     uint32 basetarget;
   } dma[4];
 
   struct TimerControl {
-    uint2 prescalar;
-    bool countup;
-    bool irq;
-    bool enable;
+    uint2 frequency;
+    uint1 cascade;
+    uint1 irq;
+    uint1 enable;
 
-    operator uint16() const;
-    uint16 operator=(uint16 source);
+    operator uint8() const;
+    uint8 operator=(uint8 source);
     TimerControl& operator=(const TimerControl&) = delete;
   };
 
   struct Timer {
+    uint16 counter;
     uint16 reload;
     TimerControl control;
+
+    //internal
+    uint1 active;
   } timer[4];
 
   struct KeypadControl {
@@ -122,4 +134,5 @@ struct Registers {
 
   bool postboot;
   enum class Mode : unsigned { Normal, Halt, Stop } mode;
+  unsigned clock;
 } regs;

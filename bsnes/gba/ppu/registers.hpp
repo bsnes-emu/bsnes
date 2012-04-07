@@ -40,6 +40,7 @@ struct Registers {
     uint1 mosaic;
     uint1 colormode;
     uint5 screenbaseblock;
+    uint1 affinewrap;  //BG2,3 only
     uint2 screensize;
 
     operator uint16() const;
@@ -53,8 +54,11 @@ struct Registers {
     uint9 voffset;
 
     //BG2,3 only
-    uint16 pa, pb, pc, pd;
-    uint28 x, y;
+    int16 pa, pb, pc, pd;
+    int28 x, y;
+
+    //internal
+    int28 lx, ly;
   } bg[4];
 
   struct WindowFlags {

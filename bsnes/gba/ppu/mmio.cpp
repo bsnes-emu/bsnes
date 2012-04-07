@@ -127,27 +127,27 @@ void PPU::write(uint32 addr, uint8 byte) {
 
   //BG2PC
   case 0x04000024: regs.bg[2].pc = (regs.bg[2].pc & 0xff00) | (byte << 0); return;
-  case 0x04000025: regs.bg[2].pc = (regs.bg[2].pc & 0x00ff) | (byte << 0); return;
+  case 0x04000025: regs.bg[2].pc = (regs.bg[2].pc & 0x00ff) | (byte << 8); return;
 
   //BG2PD
   case 0x04000026: regs.bg[2].pd = (regs.bg[2].pd & 0xff00) | (byte << 0); return;
   case 0x04000027: regs.bg[2].pd = (regs.bg[2].pd & 0x00ff) | (byte << 8); return;
 
   //BG2X_L
-  case 0x04000028: regs.bg[2].x = (regs.bg[2].x & 0xffffff00) | (byte <<  0); return;
-  case 0x04000029: regs.bg[2].x = (regs.bg[2].x & 0xffff00ff) | (byte <<  8); return;
+  case 0x04000028: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xffffff00) | (byte <<  0); return;
+  case 0x04000029: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xffff00ff) | (byte <<  8); return;
 
   //BG2X_H
-  case 0x0400002a: regs.bg[2].x = (regs.bg[2].x & 0xff00ffff) | (byte << 16); return;
-  case 0x0400002b: regs.bg[2].x = (regs.bg[2].x & 0x00ffffff) | (byte << 24); return;
+  case 0x0400002a: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xff00ffff) | (byte << 16); return;
+  case 0x0400002b: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0x00ffffff) | (byte << 24); return;
 
   //BG2Y_L
-  case 0x0400002c: regs.bg[2].y = (regs.bg[2].y & 0xffffff00) | (byte <<  0); return;
-  case 0x0400002d: regs.bg[2].y = (regs.bg[2].y & 0xffff00ff) | (byte <<  8); return;
+  case 0x0400002c: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xffffff00) | (byte <<  0); return;
+  case 0x0400002d: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xffff00ff) | (byte <<  8); return;
 
   //BG2Y_H
-  case 0x0400002e: regs.bg[2].y = (regs.bg[2].y & 0xff00ffff) | (byte << 16); return;
-  case 0x0400002f: regs.bg[2].y = (regs.bg[2].y & 0x00ffffff) | (byte << 24); return;
+  case 0x0400002e: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xff00ffff) | (byte << 16); return;
+  case 0x0400002f: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0x00ffffff) | (byte << 24); return;
 
   //BG3PA
   case 0x04000030: regs.bg[3].pa = (regs.bg[3].pa & 0xff00) | (byte << 0); return;
@@ -166,20 +166,20 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000037: regs.bg[3].pd = (regs.bg[3].pd & 0x00ff) | (byte << 8); return;
 
   //BG3X_L
-  case 0x04000038: regs.bg[3].x = (regs.bg[3].x & 0xffffff00) | (byte <<  0); return;
-  case 0x04000039: regs.bg[3].x = (regs.bg[3].x & 0xffff00ff) | (byte <<  8); return;
+  case 0x04000038: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xffffff00) | (byte <<  0); return;
+  case 0x04000039: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xffff00ff) | (byte <<  8); return;
 
   //BG3X_H
-  case 0x0400003a: regs.bg[3].x = (regs.bg[3].x & 0xff00ffff) | (byte << 16); return;
-  case 0x0400003b: regs.bg[3].x = (regs.bg[3].x & 0x00ffffff) | (byte << 24); return;
+  case 0x0400003a: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xff00ffff) | (byte << 16); return;
+  case 0x0400003b: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0x00ffffff) | (byte << 24); return;
 
   //BG3Y_L
-  case 0x0400003c: regs.bg[3].y = (regs.bg[3].y & 0xffffff00) | (byte <<  0); return;
-  case 0x0400003d: regs.bg[3].y = (regs.bg[3].y & 0xffff00ff) | (byte <<  8); return;
+  case 0x0400003c: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xffffff00) | (byte <<  0); return;
+  case 0x0400003d: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xffff00ff) | (byte <<  8); return;
 
   //BG3Y_H
-  case 0x0400003e: regs.bg[3].y = (regs.bg[3].y & 0xff00ffff) | (byte << 16); return;
-  case 0x0400003f: regs.bg[3].y = (regs.bg[3].y & 0x00ffffff) | (byte << 24); return;
+  case 0x0400003e: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xff00ffff) | (byte << 16); return;
+  case 0x0400003f: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0x00ffffff) | (byte << 24); return;
 
   //WIN0H
   case 0x04000040: regs.window[0].x2 = byte; return;

@@ -15,6 +15,11 @@ void ARM::arm_step() {
   pipeline_step();
   step(2);
 
+  if(processor.irqline && cpsr().i == 0) {
+    vector(0x00000018, Processor::Mode::IRQ);
+    return;
+  }
+
   instructions++;
   if(pipeline.execute.address == 0x08000000) print("Entry Point\n");
   if(trace) {

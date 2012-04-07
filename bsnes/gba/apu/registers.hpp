@@ -7,6 +7,8 @@ struct Registers {
     uint16 operator=(uint16 source);
     SoundBias& operator=(const SoundBias&) = delete;
   } bias;
+
+  unsigned clock;
 } regs;
 
 struct Sweep {
@@ -130,8 +132,31 @@ struct Sequencer {
   int16 lsample;
   int16 rsample;
 
-  signed volumeadjust(signed sample, uint3 volume);
   uint8 read(unsigned addr) const;
   void write(unsigned addr, uint8 byte);
   void power();
 } sequencer;
+
+struct FIFO {
+  int8 sample[32];
+  uint5 rdoffset;
+  uint5 wroffset;
+  uint6 size;
+
+  inline int8 pull() {
+    size--;
+    return sample[rdoffset++];
+  }
+
+  inline void push(int8 data) {
+    size++;
+    sample[wroffset++] = data;
+  }
+
+  inline void reset() {
+    rdoffset = 0;
+    wroffset = 0;
+    size = 0;
+    for(auto &byte : sample) byte = 0;
+  }
+};

@@ -23,11 +23,6 @@ void ARM::power() {
 }
 
 void ARM::exec() {
-  if(processor.irqline && cpsr().i == 0) {
-    vector(0x00000018, Processor::Mode::IRQ);
-    r(14) += 4;
-  }
-
   cpsr().t ? thumb_step() : arm_step();
 }
 

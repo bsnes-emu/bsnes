@@ -145,6 +145,10 @@ void APU::write(uint32 addr, uint8 byte) {
   case 0x04000084: return sequencer.write(2, byte);
   case 0x04000085: return;
 
+  //SOUNDBIAS
+  case 0x04000088: regs.bias = (regs.bias & 0xff00) | (byte << 0); return;
+  case 0x04000089: regs.bias = (regs.bias & 0x00ff) | (byte << 8); return;
+
   //WAVE_RAM0_L
   case 0x04000090: return wave.writeram( 0, byte);
   case 0x04000091: return wave.writeram( 1, byte);
@@ -176,10 +180,6 @@ void APU::write(uint32 addr, uint8 byte) {
   //WAVE_RAM3_H
   case 0x0400009e: return wave.writeram(14, byte);
   case 0x0400009f: return wave.writeram(15, byte);
-
-  //SOUNDBIAS
-  case 0x04000088: regs.bias = (regs.bias & 0xff00) | (byte << 0); return;
-  case 0x04000089: regs.bias = (regs.bias & 0x00ff) | (byte << 8); return;
 
   }
 }

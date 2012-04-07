@@ -5,6 +5,7 @@ namespace GBA {
 #include "registers.cpp"
 #include "mmio.cpp"
 #include "dma.cpp"
+#include "timer.cpp"
 CPU cpu;
 
 void CPU::Enter() { cpu.enter(); }
@@ -35,6 +36,8 @@ void CPU::enter() {
 }
 
 void CPU::step(unsigned clocks) {
+  for(unsigned n = 0; n < clocks; n++) timer_tick();
+
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
 
@@ -59,12 +62,18 @@ void CPU::power() {
   for(unsigned n = 0; n < iwram.size; n++) iwram.data[n] = 0;
   for(unsigned n = 0; n < ewram.size; n++) ewram.data[n] = 0;
 
-  regs.dma[0].source  = regs.dma[1].source  = regs.dma[2].source  = regs.dma[3].source  = 0;
-  regs.dma[0].target  = regs.dma[1].target  = regs.dma[2].target  = regs.dma[3].target  = 0;
-  regs.dma[0].length  = regs.dma[1].length  = regs.dma[2].length  = regs.dma[3].length  = 0;
-  regs.dma[0].control = regs.dma[1].control = regs.dma[2].control = regs.dma[3].control = 0;
-  regs.timer[0].reload  = regs.timer[1].reload  = regs.timer[2].reload  = regs.timer[3].reload  = 0;
-  regs.timer[0].control = regs.timer[1].control = regs.timer[2].control = regs.timer[3].control = 0;
+  for(auto &dma : regs.dma) {
+    dma.source = 0;
+    dma.target = 0;
+    dma.length = 0;
+    dma.control = 0;
+    dma.active = 0;
+  }
+  for(auto &timer : regs.timer) {
+    timer.counter = 0;
+    timer.reload = 0;
+    timer.control = 0;
+  }
   regs.keypad.control = 0;
   regs.ime = 0;
   regs.irq.enable = 0;
@@ -72,6 +81,7 @@ void CPU::power() {
   regs.wait.control = 0;
   regs.postboot = 0;
   regs.mode = Registers::Mode::Normal;
+  regs.clock = 0;
   regs.memory.control = 0x0d000020;
 
   pending.dma.vblank = 0;
