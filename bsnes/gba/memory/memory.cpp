@@ -73,6 +73,23 @@ uint32 Bus::mirror(uint32 addr, uint32 size) {
   return base;
 }
 
+uint32 Bus::speed(uint32 addr, uint32 size) {
+                           //B  B  E  I  M  P  V  O  R  R  R  R  R  R  S  S
+                           //I  I  R  R  M  R  R  A  O  O  O  O  O  O  R  R
+                           //O  O  A  A  I  A  A  M  M  M  M  M  M  M  A  A
+                           //S  S  M  M  O  M  M                       M  M
+  static unsigned byte[] = { 1, 1, 3, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5 };
+  static unsigned half[] = { 1, 1, 3, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5 };
+  static unsigned word[] = { 1, 1, 6, 1, 1, 2, 2, 1, 8, 8, 8, 8, 8, 8, 8, 8 };
+
+  addr = (addr >> 24) & 15;
+  switch(size) {
+  case Byte: return byte[addr];
+  case Half: return half[addr];
+  case Word: return word[addr];
+  }
+}
+
 uint32 Bus::read(uint32 addr, uint32 size) {
   if(addr & 0x08000000) return cartridge.read(addr, size);
 
@@ -85,9 +102,9 @@ uint32 Bus::read(uint32 addr, uint32 size) {
     if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->read(addr, size);
     if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).read(0x04000800 | (addr & 3), size);
     return 0u;
-  case 0x05000000: return ppu.pram.read(addr & 0x3ff, size);
-  case 0x06000000: return ppu.vram.read(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size);
-  case 0x07000000: return ppu.oam_read(addr & 0x3ff, size);
+  case 0x05000000: return ppu.pram_read(addr, size);
+  case 0x06000000: return ppu.vram_read(addr, size);
+  case 0x07000000: return ppu.oam_read(addr, size);
   }
 }
 
@@ -103,9 +120,9 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
     if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->write(addr, size, word);
     if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).write(0x04000800 | (addr & 3), size, word);
     return;
-  case 0x05000000: return ppu.pram.write(addr & 0x3ff, size, word);
-  case 0x06000000: return ppu.vram.write(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size, word);
-  case 0x07000000: return ppu.oam_write(addr & 0x3ff, size, word);
+  case 0x05000000: return ppu.pram_write(addr, size, word);
+  case 0x06000000: return ppu.vram_write(addr, size, word);
+  case 0x07000000: return ppu.oam_write(addr, size, word);
   }
 }
 

@@ -9,11 +9,9 @@ void ARM::arm_step() {
     pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
 
     pipeline_step();
-    step(2);
   }
 
   pipeline_step();
-  step(2);
 
   if(processor.irqline && cpsr().i == 0) {
     vector(0x00000018, Processor::Mode::IRQ);

@@ -21,13 +21,11 @@ struct Registers {
     DMAControl control;
 
     //internal
-    uint1 active;
     struct Run {
       uint32 target;
       uint32 source;
       uint16 length;
     } run;
-    uint32 basetarget;
   } dma[4];
 
   struct TimerControl {

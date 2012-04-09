@@ -25,7 +25,7 @@ void CPU::enter() {
 
     if(regs.mode == Registers::Mode::Halt) {
       if((regs.irq.enable & regs.irq.flag) == 0) {
-        step(1);
+        step(16);
         continue;
       }
       regs.mode = Registers::Mode::Normal;
@@ -46,12 +46,12 @@ void CPU::step(unsigned clocks) {
 }
 
 uint32 CPU::bus_read(uint32 addr, uint32 size) {
-  step(1);
+  step(bus.speed(addr, size));
   return bus.read(addr, size);
 }
 
 void CPU::bus_write(uint32 addr, uint32 size, uint32 word) {
-  step(1);
+  step(bus.speed(addr, size));
   return bus.write(addr, size, word);
 }
 
@@ -67,7 +67,6 @@ void CPU::power() {
     dma.target = 0;
     dma.length = 0;
     dma.control = 0;
-    dma.active = 0;
   }
   for(auto &timer : regs.timer) {
     timer.counter = 0;

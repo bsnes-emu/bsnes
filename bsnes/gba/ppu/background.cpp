@@ -44,7 +44,7 @@ void PPU::render_background_linear(unsigned bgnumber) {
       if(bg.control.screensize & 1) if(tx & 32) offset += 32 * 32;
       if(bg.control.screensize & 2) if(ty & 32) offset += 32 * 32 * (1 + (bg.control.screensize & 1));
       offset = basemap + offset * 2;
-      uint16 mapdata = vram.read(offset, Half);
+      uint16 mapdata = vram_read(offset, Half);
 
       tile.character = mapdata >>  0;
       tile.hflip     = mapdata >> 10;
@@ -53,12 +53,12 @@ void PPU::render_background_linear(unsigned bgnumber) {
 
       if(bg.control.colormode == 0) {
         offset = basechr + tile.character * 32 + (py ^ (tile.vflip ? 7 : 0)) * 4;
-        uint32 word = vram.read(offset, Word);
+        uint32 word = vram_read(offset, Word);
         for(unsigned n = 0; n < 8; n++) data[n] = (word >> (n * 4)) & 15;
       } else {
         offset = basechr + tile.character * 64 + (py ^ (tile.vflip ? 7 : 0)) * 8;
-        uint32 wordlo = vram.read(offset + 0, Word);
-        uint32 wordhi = vram.read(offset + 4, Word);
+        uint32 wordlo = vram_read(offset + 0, Word);
+        uint32 wordhi = vram_read(offset + 4, Word);
         for(unsigned n = 0; n < 4; n++) data[0 + n] = (wordlo >> (n * 8)) & 255;
         for(unsigned n = 0; n < 4; n++) data[4 + n] = (wordhi >> (n * 8)) & 255;
       }
@@ -68,8 +68,8 @@ void PPU::render_background_linear(unsigned bgnumber) {
     uint8 color = data[px++ ^ (tile.hflip ? 7 : 0)];
 
     if(color) {
-      if(bg.control.colormode == 0) layer[bg.control.priority][x] = { true, palette(tile.palette * 16 + color) };
-      if(bg.control.colormode == 1) layer[bg.control.priority][x] = { true, palette(color) };
+      if(bg.control.colormode == 0) layer[bg.control.priority][x] = { true, pram[tile.palette * 16 + color] };
+      if(bg.control.colormode == 1) layer[bg.control.priority][x] = { true, pram[color] };
     }
   }
 }
@@ -93,7 +93,7 @@ void PPU::render_background_affine(unsigned bgnumber) {
     if(tx < screensize && ty < screensize) {
       uint8 character = vram[basemap + ty * screensize + tx];
       uint8 color = vram[basechr + (character * 64) + py * 8 + px];
-      if(color) layer[bg.control.priority][x] = { true, palette(color) };
+      if(color) layer[bg.control.priority][x] = { true, pram[color] };
     }
 
     fx += bg.pa;
@@ -124,10 +124,10 @@ void PPU::render_background_bitmap(unsigned bgnumber) {
 
     if(px < width && py < height) {
       unsigned offset = py * width + px;
-      unsigned color  = vram.read(basemap + (offset << depth), size);
+      unsigned color  = vram_read(basemap + (offset << depth), size);
 
       if(depth || color) {  //8bpp color 0 is transparent; 15bpp color is always opaque
-        if(depth == 0) color = palette(color);
+        if(depth == 0) color = pram[color];
         if(depth == 1) color = color & 0x7fff;
         layer[bg.control.priority][x] = { true, color };
       }

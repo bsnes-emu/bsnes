@@ -2,18 +2,7 @@ void CPU::dma_run() {
   for(unsigned n = 0; n < 4; n++) {
     auto &dma = regs.dma[n];
 
-    if(dma.control.enable == false) {
-      dma.active = false;
-      continue;
-    }
-
-    if(dma.active == false) {
-      dma.active = true;
-      dma.run.target = dma.target;
-      dma.run.source = dma.source;
-      dma.run.length = dma.length;
-      step(2);
-    }
+    if(dma.control.enable == false) continue;
 
     switch(dma.control.timingmode) {
     case 0: break;
@@ -66,5 +55,5 @@ void CPU::dma_transfer(Registers::DMA &dma) {
 
   if(dma.control.targetmode == 3) dma.run.target = dma.target;
   if(dma.control.repeat == 1) dma.run.length = dma.length;
-  if(dma.control.repeat == 0) dma.active = false, dma.control.enable = false;
+  if(dma.control.repeat == 0) dma.control.enable = false;
 }

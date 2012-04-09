@@ -9,11 +9,9 @@ void ARM::thumb_step() {
     pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
 
     pipeline_step();
-    step(1);
   }
 
   pipeline_step();
-  step(1);
 
   if(processor.irqline && cpsr().i == 0) {
     vector(0x00000018, Processor::Mode::IRQ);

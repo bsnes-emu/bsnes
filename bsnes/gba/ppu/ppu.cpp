@@ -17,6 +17,7 @@ namespace GBA {
 #include "object.cpp"
 #include "screen.cpp"
 #include "mmio.cpp"
+#include "memory.cpp"
 PPU ppu;
 
 void PPU::Enter() { ppu.enter(); }
@@ -35,11 +36,11 @@ void PPU::step(unsigned clocks) {
 void PPU::power() {
   create(PPU::Enter, 16777216);
 
-  for(unsigned n = 0; n < vram.size; n++) vram.data[n] = 0;
-  for(unsigned n = 0; n < pram.size; n++) pram.data[n] = 0;
+//for(unsigned n = 0; n < vram.size; n++) vram.data[n] = 0;
   for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0;
 
-  for(unsigned n = 0; n < 1024; n++) oam_write(n, 0);
+  for(unsigned n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
+  for(unsigned n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
 
   regs.control = 0;
   regs.greenswap = 0;
@@ -138,8 +139,6 @@ void PPU::frame() {
 }
 
 PPU::PPU() {
-  vram.data = new uint8[vram.size = 96 * 1024];
-  pram.data = new uint8[pram.size = 1024];
   output = new uint16[240 * 160];
 }
 

@@ -17,21 +17,15 @@ uint8 PPU::read(uint32 addr) {
   case 0x04000006: return regs.vcounter >> 0;
   case 0x04000007: return regs.vcounter >> 8;
 
-  //BG0CNT
-  case 0x04000008: return regs.bg[0].control >> 0;
-  case 0x04000009: return regs.bg[0].control >> 8;
-
-  //BG1CNT
-  case 0x0400000a: return regs.bg[1].control >> 0;
-  case 0x0400000b: return regs.bg[1].control >> 8;
-
-  //BG2CNT
-  case 0x0400000c: return regs.bg[2].control >> 0;
-  case 0x0400000d: return regs.bg[2].control >> 8;
-
-  //BG3CNT
-  case 0x0400000e: return regs.bg[3].control >> 0;
-  case 0x0400000f: return regs.bg[3].control >> 8;
+  //BG0CNT,BG1CNT,BG2CNT,BG3CNT
+  case 0x04000008: case 0x04000009:
+  case 0x0400000a: case 0x0400000b:
+  case 0x0400000c: case 0x0400000d:
+  case 0x0400000e: case 0x0400000f: {
+    auto &bg = regs.bg[(addr >> 1) & 3];
+    unsigned shift = (addr & 1) * 8;
+    return bg.control >> shift;
+  }
 
   //WININ
   case 0x04000048: return regs.window[0].in;
@@ -69,117 +63,92 @@ void PPU::write(uint32 addr, uint8 byte) {
     regs.status.vcompare = byte;
     return;
 
-  //BG0CNT
-  case 0x04000008: regs.bg[0].control = (regs.bg[0].control & 0xff00) | (byte << 0); return;
-  case 0x04000009: regs.bg[0].control = (regs.bg[0].control & 0x00ff) | (byte << 8); return;
+  //BG0CNT,BG1CNT,BG2CNT,BG3CNT
+  case 0x04000008: case 0x04000009:
+  case 0x0400000a: case 0x0400000b:
+  case 0x0400000c: case 0x0400000d:
+  case 0x0400000e: case 0x0400000f: {
+    auto &bg = regs.bg[(addr >> 1) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.control = (bg.control & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG1CNT
-  case 0x0400000a: regs.bg[1].control = (regs.bg[1].control & 0xff00) | (byte << 0); return;
-  case 0x0400000b: regs.bg[1].control = (regs.bg[1].control & 0x00ff) | (byte << 8); return;
+  //BG0HOFS,BG1HOFS,BG2BOFS,BG3HOFS
+  case 0x04000010: case 0x04000011:
+  case 0x04000014: case 0x04000015:
+  case 0x04000018: case 0x04000019:
+  case 0x0400001c: case 0x0400001d: {
+    auto &bg = regs.bg[(addr >> 2) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.hoffset = (bg.hoffset & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG2CNT
-  case 0x0400000c: regs.bg[2].control = (regs.bg[2].control & 0xff00) | (byte << 0); return;
-  case 0x0400000d: regs.bg[2].control = (regs.bg[2].control & 0x00ff) | (byte << 8); return;
+  //BG0VOFS,BG1VOFS,BG2VOFS,BG3VOFS
+  case 0x04000012: case 0x04000013:
+  case 0x04000016: case 0x04000017:
+  case 0x0400001a: case 0x0400001b:
+  case 0x0400001e: case 0x0400001f: {
+    auto &bg = regs.bg[(addr >> 2) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.voffset = (bg.voffset & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG3CNT
-  case 0x0400000e: regs.bg[3].control = (regs.bg[3].control & 0xff00) | (byte << 0); return;
-  case 0x0400000f: regs.bg[3].control = (regs.bg[3].control & 0x00ff) | (byte << 8); return;
+  //BG2PA,BG3PA
+  case 0x04000020: case 0x04000021:
+  case 0x04000030: case 0x04000031: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.pa = (bg.pa & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG0HOFS
-  case 0x04000010: regs.bg[0].hoffset = (regs.bg[0].hoffset & 0xff00) | (byte << 0); return;
-  case 0x04000011: regs.bg[0].hoffset = (regs.bg[0].hoffset & 0x00ff) | (byte << 8); return;
+  //BG2PB,BG3PB
+  case 0x04000022: case 0x04000023:
+  case 0x04000032: case 0x04000033: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.pb = (bg.pb & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG0VOFS
-  case 0x04000012: regs.bg[0].voffset = (regs.bg[0].voffset & 0xff00) | (byte << 0); return;
-  case 0x04000013: regs.bg[0].voffset = (regs.bg[0].voffset & 0x00ff) | (byte << 8); return;
+  //BG2PC,BG3PC
+  case 0x04000024: case 0x04000025:
+  case 0x04000034: case 0x04000035: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.pc = (bg.pc & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG1HOFS
-  case 0x04000014: regs.bg[1].hoffset = (regs.bg[1].hoffset & 0xff00) | (byte << 0); return;
-  case 0x04000015: regs.bg[1].hoffset = (regs.bg[1].hoffset & 0x00ff) | (byte << 8); return;
+  //BG2PD,BG3PD
+  case 0x04000026: case 0x04000027:
+  case 0x04000036: case 0x04000037: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 1) * 8;
+    bg.pd = (bg.pd & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG1VOFS
-  case 0x04000016: regs.bg[1].voffset = (regs.bg[1].voffset & 0xff00) | (byte << 0); return;
-  case 0x04000017: regs.bg[1].voffset = (regs.bg[1].voffset & 0x00ff) | (byte << 8); return;
+  //BG2X_L,BG2X_H,BG3X_L,BG3X_H
+  case 0x04000028: case 0x04000029: case 0x0400002a: case 0x0400002b:
+  case 0x04000038: case 0x04000039: case 0x0400003a: case 0x0400003b: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 3) * 8;
+    bg.lx = bg.x = (bg.x & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
-  //BG2HOFS
-  case 0x04000018: regs.bg[2].hoffset = (regs.bg[2].hoffset & 0xff00) | (byte << 0); return;
-  case 0x04000019: regs.bg[2].hoffset = (regs.bg[2].hoffset & 0x00ff) | (byte << 8); return;
-
-  //BG2VOFS
-  case 0x0400001a: regs.bg[2].voffset = (regs.bg[2].voffset & 0xff00) | (byte << 0); return;
-  case 0x0400001b: regs.bg[2].voffset = (regs.bg[2].voffset & 0x00ff) | (byte << 8); return;
-
-  //BG3HOFS
-  case 0x0400001c: regs.bg[3].hoffset = (regs.bg[3].hoffset & 0xff00) | (byte << 0); return;
-  case 0x0400001d: regs.bg[3].hoffset = (regs.bg[3].hoffset & 0x00ff) | (byte << 8); return;
-
-  //BG3VOFS
-  case 0x0400001e: regs.bg[3].voffset = (regs.bg[3].voffset & 0xff00) | (byte << 0); return;
-  case 0x0400001f: regs.bg[3].voffset = (regs.bg[3].voffset & 0x00ff) | (byte << 8); return;
-
-  //BG2PA
-  case 0x04000020: regs.bg[2].pa = (regs.bg[2].pa & 0xff00) | (byte << 0); return;
-  case 0x04000021: regs.bg[2].pa = (regs.bg[2].pa & 0x00ff) | (byte << 8); return;
-
-  //BG2PB
-  case 0x04000022: regs.bg[2].pb = (regs.bg[2].pb & 0xff00) | (byte << 0); return;
-  case 0x04000023: regs.bg[2].pb = (regs.bg[2].pb & 0x00ff) | (byte << 8); return;
-
-  //BG2PC
-  case 0x04000024: regs.bg[2].pc = (regs.bg[2].pc & 0xff00) | (byte << 0); return;
-  case 0x04000025: regs.bg[2].pc = (regs.bg[2].pc & 0x00ff) | (byte << 8); return;
-
-  //BG2PD
-  case 0x04000026: regs.bg[2].pd = (regs.bg[2].pd & 0xff00) | (byte << 0); return;
-  case 0x04000027: regs.bg[2].pd = (regs.bg[2].pd & 0x00ff) | (byte << 8); return;
-
-  //BG2X_L
-  case 0x04000028: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xffffff00) | (byte <<  0); return;
-  case 0x04000029: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xffff00ff) | (byte <<  8); return;
-
-  //BG2X_H
-  case 0x0400002a: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0xff00ffff) | (byte << 16); return;
-  case 0x0400002b: regs.bg[2].lx = regs.bg[2].x = (regs.bg[2].x & 0x00ffffff) | (byte << 24); return;
-
-  //BG2Y_L
-  case 0x0400002c: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xffffff00) | (byte <<  0); return;
-  case 0x0400002d: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xffff00ff) | (byte <<  8); return;
-
-  //BG2Y_H
-  case 0x0400002e: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0xff00ffff) | (byte << 16); return;
-  case 0x0400002f: regs.bg[2].ly = regs.bg[2].y = (regs.bg[2].y & 0x00ffffff) | (byte << 24); return;
-
-  //BG3PA
-  case 0x04000030: regs.bg[3].pa = (regs.bg[3].pa & 0xff00) | (byte << 0); return;
-  case 0x04000031: regs.bg[3].pa = (regs.bg[3].pa & 0x00ff) | (byte << 8); return;
-
-  //BG3PB
-  case 0x04000032: regs.bg[3].pb = (regs.bg[3].pb & 0xff00) | (byte << 0); return;
-  case 0x04000033: regs.bg[3].pb = (regs.bg[3].pb & 0x00ff) | (byte << 8); return;
-
-  //BG3PC
-  case 0x04000034: regs.bg[3].pc = (regs.bg[3].pc & 0xff00) | (byte << 0); return;
-  case 0x04000035: regs.bg[3].pc = (regs.bg[3].pc & 0x00ff) | (byte << 8); return;
-
-  //BG3PD
-  case 0x04000036: regs.bg[3].pd = (regs.bg[3].pd & 0xff00) | (byte << 0); return;
-  case 0x04000037: regs.bg[3].pd = (regs.bg[3].pd & 0x00ff) | (byte << 8); return;
-
-  //BG3X_L
-  case 0x04000038: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xffffff00) | (byte <<  0); return;
-  case 0x04000039: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xffff00ff) | (byte <<  8); return;
-
-  //BG3X_H
-  case 0x0400003a: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0xff00ffff) | (byte << 16); return;
-  case 0x0400003b: regs.bg[3].lx = regs.bg[3].x = (regs.bg[3].x & 0x00ffffff) | (byte << 24); return;
-
-  //BG3Y_L
-  case 0x0400003c: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xffffff00) | (byte <<  0); return;
-  case 0x0400003d: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xffff00ff) | (byte <<  8); return;
-
-  //BG3Y_H
-  case 0x0400003e: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0xff00ffff) | (byte << 16); return;
-  case 0x0400003f: regs.bg[3].ly = regs.bg[3].y = (regs.bg[3].y & 0x00ffffff) | (byte << 24); return;
+  //BG2Y_L,BG2Y_H,BG3Y_L,BG3Y_H
+  case 0x0400002c: case 0x0400002d: case 0x0400002e: case 0x0400002f:
+  case 0x0400003c: case 0x0400003d: case 0x0400003e: case 0x0400003f: {
+    auto &bg = regs.bg[(addr >> 4) & 3];
+    unsigned shift = (addr & 3) * 8;
+    bg.ly = bg.y = (bg.y & ~(255 << shift)) | (byte << shift);
+    return;
+  }
 
   //WIN0H
   case 0x04000040: regs.window[0].x2 = byte; return;
