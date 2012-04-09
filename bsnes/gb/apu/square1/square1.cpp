@@ -96,6 +96,7 @@ void APU::Square1::write(unsigned r, uint8 data) {
 
     if(initialize) {
       enable = dac_enable();
+      period = 4 * (2048 - frequency);
       envelope_period = envelope_frequency;
       volume = envelope_volume;
       frequency_shadow = frequency;
@@ -106,8 +107,6 @@ void APU::Square1::write(unsigned r, uint8 data) {
     //if(length == 0) length = 64;
     }
   }
-
-  period = 4 * (2048 - frequency);
 }
 
 void APU::Square1::power() {

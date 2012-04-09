@@ -21,6 +21,7 @@ void CPU::enter() {
     }
 
     processor.irqline = regs.ime && (regs.irq.enable & regs.irq.flag);
+    dma_run();
 
     if(regs.mode == Registers::Mode::Halt) {
       if((regs.irq.enable & regs.irq.flag) == 0) {
@@ -30,7 +31,6 @@ void CPU::enter() {
       regs.mode = Registers::Mode::Normal;
     }
 
-    dma_run();
     exec();
   }
 }

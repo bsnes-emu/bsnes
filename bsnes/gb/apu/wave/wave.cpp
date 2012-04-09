@@ -52,12 +52,11 @@ void APU::Wave::write(unsigned r, uint8 data) {
 
     if(initialize) {
       enable = dac_enable;
+      period = 2 * (2048 - frequency);
       pattern_offset = 0;
     //if(length == 0) length = 256;
     }
   }
-
-  period = 2 * (2048 - frequency);
 }
 
 void APU::Wave::write_pattern(unsigned p, uint8 data) {

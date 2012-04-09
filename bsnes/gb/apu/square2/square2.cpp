@@ -65,13 +65,12 @@ void APU::Square2::write(unsigned r, uint8 data) {
 
     if(initialize) {
       enable = dac_enable();
+      period = 4 * (2048 - frequency);
       envelope_period = envelope_frequency;
       volume = envelope_volume;
     //if(length == 0) length = 64;
     }
   }
-
-  period = 4 * (2048 - frequency);
 }
 
 void APU::Square2::power() {

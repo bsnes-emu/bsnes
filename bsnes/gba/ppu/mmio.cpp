@@ -66,7 +66,7 @@ void PPU::write(uint32 addr, uint8 byte) {
     regs.status.irqvcoincidence = byte & (1 << 5);
     return;
   case 0x04000005:
-    regs.status.vcoincidence = byte;
+    regs.status.vcompare = byte;
     return;
 
   //BG0CNT

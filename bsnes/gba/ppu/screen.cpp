@@ -5,9 +5,13 @@ uint15 PPU::palette(uint9 index) {
   return result;
 }
 
+void PPU::render_forceblank() {
+  uint16 *line = output + regs.vcounter * 240;
+  for(unsigned x = 0; x < 240; x++) line[x] = 0x7fff;
+}
+
 void PPU::render_screen() {
   uint16 *line = output + regs.vcounter * 240;
-
   for(unsigned x = 0; x < 240; x++) {
     uint15 color = palette(0) & 0x7fff;
     if(layer[3][x].exists) color = layer[3][x].color;

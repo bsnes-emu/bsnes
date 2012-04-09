@@ -1,6 +1,5 @@
 struct PPU : Thread, MMIO {
   StaticMemory vram;
-  StaticMemory oam;
   StaticMemory pram;
   #include "registers.hpp"
   #include "state.hpp"
@@ -25,8 +24,13 @@ struct PPU : Thread, MMIO {
   void render_objects();
   void render_object_linear(Object&);
   void render_object_affine(Object&);
+  uint32 oam_read(uint32 addr, uint32 size);
+  void oam_write(uint32 addr, uint32 size, uint32 word);
+  uint8 oam_read(uint32 addr);
+  void oam_write(uint32 addr, uint8 byte);
 
   uint15 palette(uint9 index);
+  void render_forceblank();
   void render_screen();
 
   PPU();

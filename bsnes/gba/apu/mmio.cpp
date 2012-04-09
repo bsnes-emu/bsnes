@@ -138,8 +138,21 @@ void APU::write(uint32 addr, uint8 byte) {
   case 0x04000081: return sequencer.write(1, byte);
 
   //SOUND_CNT_H
-  case 0x04000082: return;
-  case 0x04000083: return;
+  case 0x04000082:
+    sequencer.volume = byte >> 0;
+    fifo[0].volume   = byte >> 2;
+    fifo[1].volume   = byte >> 3;
+    return;
+  case 0x04000083:
+    fifo[0].renable = byte >> 0;
+    fifo[0].lenable = byte >> 1;
+    fifo[0].timer   = byte >> 2;
+    if(byte & 1 << 3) fifo[0].reset();
+    fifo[1].renable = byte >> 4;
+    fifo[1].lenable = byte >> 5;
+    fifo[1].timer   = byte >> 6;
+    if(byte & 1 << 7) fifo[0].reset();
+    return;
 
   //NR52
   case 0x04000084: return sequencer.write(2, byte);
@@ -181,5 +194,16 @@ void APU::write(uint32 addr, uint8 byte) {
   case 0x0400009e: return wave.writeram(14, byte);
   case 0x0400009f: return wave.writeram(15, byte);
 
+  //FIFO_A_L
+  //FIFO_A_H
+  case 0x040000a0: case 0x040000a1:
+  case 0x040000a2: case 0x040000a3:
+    return fifo[0].write(byte);
+
+  //FIFO_B_L
+  //FIFO_B_H
+  case 0x040000a4: case 0x040000a5:
+  case 0x040000a6: case 0x040000a7:
+    return fifo[1].write(byte);
   }
 }

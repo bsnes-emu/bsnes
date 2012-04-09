@@ -28,6 +28,7 @@ void System::power() {
   cpu.power();
   ppu.power();
   apu.power();
+  cartridge.power();
   scheduler.power();
 }
 

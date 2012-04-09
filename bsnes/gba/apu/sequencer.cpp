@@ -22,31 +22,8 @@ void APU::runsequencer() {
 
   if(r.enable[0]) square1.run();
   if(r.enable[1]) square2.run();
-  if(r.enable[2]) wave.run();
-  if(r.enable[3]) noise.run();
-
-  signed lsample = 0;
-  if(r.lenable[0]) lsample += square1.output;
-  if(r.lenable[1]) lsample += square2.output;
-  if(r.lenable[2]) lsample +=    wave.output;
-  if(r.lenable[3]) lsample +=   noise.output;
-  lsample = (lsample * 512) - 15360;
-  lsample = (lsample * (r.lvolume + 1)) / 8;
-  r.lsample = lsample;
-
-  signed rsample = 0;
-  if(r.renable[0]) rsample += square1.output;
-  if(r.renable[1]) rsample += square2.output;
-  if(r.renable[2]) rsample +=    wave.output;
-  if(r.renable[3]) rsample +=   noise.output;
-  rsample = (rsample * 512) - 15360;
-  rsample = (rsample * (r.rvolume + 1)) / 8;
-  r.rsample = rsample;
-
-  if(r.masterenable == false) {
-    r.lsample = 0;
-    r.rsample = 0;
-  }
+  if(r.enable[2])    wave.run();
+  if(r.enable[3])   noise.run();
 }
 
 uint8 APU::Sequencer::read(unsigned addr) const {

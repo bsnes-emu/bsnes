@@ -21,7 +21,6 @@ void ARM::arm_step() {
   }
 
   instructions++;
-  if(pipeline.execute.address == 0x08000000) print("Entry Point\n");
   if(trace) {
     print(disassemble_registers(), "\n");
     print(disassemble_arm_instruction(pipeline.execute.address), "\n");

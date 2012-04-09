@@ -120,6 +120,7 @@ struct Noise {
 } noise;
 
 struct Sequencer {
+  uint2 volume;
   uint3 lvolume;
   uint3 rvolume;
   uint1 lenable[4];
@@ -139,24 +140,19 @@ struct Sequencer {
 
 struct FIFO {
   int8 sample[32];
+  int8 output;
+
   uint5 rdoffset;
   uint5 wroffset;
   uint6 size;
 
-  inline int8 pull() {
-    size--;
-    return sample[rdoffset++];
-  }
+  uint1 volume;  //0 = 50%, 1 = 100%
+  uint1 lenable;
+  uint1 renable;
+  uint1 timer;
 
-  inline void push(int8 data) {
-    size++;
-    sample[wroffset++] = data;
-  }
-
-  inline void reset() {
-    rdoffset = 0;
-    wroffset = 0;
-    size = 0;
-    for(auto &byte : sample) byte = 0;
-  }
-};
+  void read();
+  void write(int8 byte);
+  void reset();
+  void power();
+} fifo[2];

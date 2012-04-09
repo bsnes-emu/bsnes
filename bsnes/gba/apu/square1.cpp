@@ -64,6 +64,7 @@ void APU::Square1::write(unsigned addr, uint8 byte) {
 
     if(initialize) {
       enable = envelope.dacenable();
+      period = 4 * (2048 - frequency);
       envelope.period = envelope.frequency;
       volume = envelope.volume;
       shadowfrequency = frequency;
@@ -75,8 +76,6 @@ void APU::Square1::write(unsigned addr, uint8 byte) {
 
     break;
   }
-
-  period = 4 * (2048 - frequency);
 }
 
 void APU::Square1::power() {

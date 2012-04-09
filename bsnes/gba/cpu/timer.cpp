@@ -17,7 +17,11 @@ void CPU::timer_increment(unsigned n) {
   if(++regs.timer[n].counter == 0) {
     if(regs.timer[n].control.irq) regs.irq.flag.timer[n] = 1;
 
+    if(apu.fifo[0].timer == n) apu.fifo[0].read();
+    if(apu.fifo[1].timer == n) apu.fifo[1].read();
+
     regs.timer[n].counter = regs.timer[n].reload;
+
     if(n < 3 && regs.timer[n + 1].control.cascade) {
       timer_increment(n + 1);
     }

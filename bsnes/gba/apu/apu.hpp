@@ -2,7 +2,7 @@ struct APU : Thread, MMIO {
   #include "registers.hpp"
 
   static void Enter();
-  void enter();
+  void main();
   void step(unsigned clocks);
 
   uint8 read(uint32 addr);

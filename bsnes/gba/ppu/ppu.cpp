@@ -36,9 +36,10 @@ void PPU::power() {
   create(PPU::Enter, 16777216);
 
   for(unsigned n = 0; n < vram.size; n++) vram.data[n] = 0;
-  for(unsigned n = 0; n <  oam.size; n++)  oam.data[n] = 0;
   for(unsigned n = 0; n < pram.size; n++) pram.data[n] = 0;
   for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0;
+
+  for(unsigned n = 0; n < 1024; n++) oam_write(n, 0);
 
   regs.control = 0;
   regs.greenswap = 0;
@@ -109,15 +110,19 @@ void PPU::scanline() {
       layer[3][x].exists = false;
     }
 
-    render_backgrounds();
-    render_objects();
-    render_screen();
+    if(regs.control.forceblank) {
+      render_forceblank();
+    } else {
+      render_backgrounds();
+      render_objects();
+      render_screen();
+    }
   }
 
   step(960);
   regs.status.hblank = 1;
   if(regs.status.irqhblank) cpu.regs.irq.flag.hblank = 1;
-  cpu.pending.dma.hblank = true;
+  if(regs.vcounter < 160) cpu.pending.dma.hblank = true;
 
   step(240);
   regs.status.hblank = 0;
@@ -134,7 +139,6 @@ void PPU::frame() {
 
 PPU::PPU() {
   vram.data = new uint8[vram.size = 96 * 1024];
-  oam.data = new uint8[oam.size = 1024];
   pram.data = new uint8[pram.size = 1024];
   output = new uint16[240 * 160];
 }

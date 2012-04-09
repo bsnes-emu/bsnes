@@ -25,7 +25,7 @@ struct Registers {
     struct Run {
       uint32 target;
       uint32 source;
-      uint32 length;
+      uint16 length;
     } run;
     uint32 basetarget;
   } dma[4];

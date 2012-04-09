@@ -19,7 +19,19 @@ void CPU::dma_run() {
     case 0: break;
     case 1: if(pending.dma.vblank == false) continue; break;
     case 2: if(pending.dma.hblank == false) continue; break;
-    case 3: if(pending.dma.hdma == false || n != 3) continue; break;
+    case 3:
+      if(n == 0) {
+        continue;
+      }
+      if(n == 1 || n == 2) {
+        if(apu.fifo[n - 1].size > 16) continue;
+        dma.control.targetmode = 2;
+        dma.control.size = 1;
+        dma.run.length = 4;
+      }
+      if(n == 3) {
+        if(pending.dma.hdma == false) continue;
+      }
     }
 
     dma_transfer(dma);

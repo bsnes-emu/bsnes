@@ -74,7 +74,9 @@ uint32 Bus::mirror(uint32 addr, uint32 size) {
 }
 
 uint32 Bus::read(uint32 addr, uint32 size) {
-  switch(addr & 0x0f000000) {
+  if(addr & 0x08000000) return cartridge.read(addr, size);
+
+  switch(addr & 0x07000000) {
   case 0x00000000: return system.bios.read(addr & 0x3fff, size);
   case 0x01000000: return system.bios.read(addr & 0x3fff, size);
   case 0x02000000: return cpu.ewram.read(addr & 0x3ffff, size);
@@ -85,20 +87,14 @@ uint32 Bus::read(uint32 addr, uint32 size) {
     return 0u;
   case 0x05000000: return ppu.pram.read(addr & 0x3ff, size);
   case 0x06000000: return ppu.vram.read(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size);
-  case 0x07000000: return ppu.oam.read(addr & 0x3ff, size);
-  case 0x08000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x09000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x0a000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x0b000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x0c000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x0d000000: return cartridge.rom.read(addr & 0x1ffffff, size);
-  case 0x0e000000: return cartridge.ram.read(addr & 0xffff, size);
-  case 0x0f000000: return cartridge.ram.read(addr & 0xffff, size);
+  case 0x07000000: return ppu.oam_read(addr & 0x3ff, size);
   }
 }
 
 void Bus::write(uint32 addr, uint32 size, uint32 word) {
-  switch(addr & 0x0f000000) {
+  if(addr & 0x08000000) return cartridge.write(addr, size, word);
+
+  switch(addr & 0x07000000) {
   case 0x00000000: return;
   case 0x01000000: return;
   case 0x02000000: return cpu.ewram.write(addr & 0x3ffff, size, word);
@@ -109,15 +105,7 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
     return;
   case 0x05000000: return ppu.pram.write(addr & 0x3ff, size, word);
   case 0x06000000: return ppu.vram.write(addr & 0x10000 ? (0x10000 + (addr & 0x7fff)) : (addr & 0xffff), size, word);
-  case 0x07000000: return ppu.oam.write(addr & 0x3ff, size, word);
-  case 0x08000000: return;
-  case 0x09000000: return;
-  case 0x0a000000: return;
-  case 0x0b000000: return;
-  case 0x0c000000: return;
-  case 0x0d000000: return;
-  case 0x0e000000: return cartridge.ram.write(addr & 0xffff, size, word);
-  case 0x0f000000: return cartridge.ram.write(addr & 0xffff, size, word);
+  case 0x07000000: return ppu.oam_write(addr & 0x3ff, size, word);
   }
 }
 

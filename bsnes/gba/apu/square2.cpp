@@ -32,14 +32,13 @@ void APU::Square2::write(unsigned addr, uint8 byte) {
 
     if(initialize) {
       enable = envelope.dacenable();
+      period = 4 * (2048 - frequency);
       envelope.period = envelope.frequency;
       volume = envelope.volume;
     }
 
     break;
   }
-
-  period = 4 * (2048 - frequency);
 }
 
 void APU::Square2::power() {

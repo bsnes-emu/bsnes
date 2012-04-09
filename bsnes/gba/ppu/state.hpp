@@ -27,6 +27,13 @@ struct Object {
   unsigned height;
 } object[128];
 
+struct ObjectParam {
+  int16 pa;
+  int16 pb;
+  int16 pc;
+  int16 pd;
+} objectparam[32];
+
 struct Tile {
   uint10 character;
   uint1  hflip;

@@ -4,52 +4,40 @@ uint8 CPU::read(uint32 addr) {
   switch(addr) {
 
   //DMA0CNT_H
-  case 0x040000ba: return regs.dma[0].control >> 0;
-  case 0x040000bb: return regs.dma[0].control >> 8;
-
   //DMA1CNT_H
-  case 0x040000c6: return regs.dma[1].control >> 0;
-  case 0x040000c7: return regs.dma[1].control >> 8;
-
   //DMA2CNT_H
-  case 0x040000d2: return regs.dma[2].control >> 0;
-  case 0x040000d3: return regs.dma[2].control >> 8;
-
   //DMA3CNT_H
-  case 0x040000de: return regs.dma[3].control >> 0;
-  case 0x040000df: return regs.dma[3].control >> 8;
+  case 0x040000ba: case 0x040000bb:
+  case 0x040000c6: case 0x040000c7:
+  case 0x040000d2: case 0x040000d3:
+  case 0x040000de: case 0x040000df: {
+    auto &dma = regs.dma[(addr - 0x040000ba) / 12];
+    unsigned shift = (addr & 1) * 8;
+    return dma.control >> shift;
+  }
 
   //TM0CNT_L
-  case 0x04000100: return regs.timer[0].counter >> 0;
-  case 0x04000101: return regs.timer[0].counter >> 8;
+  //TM1CNT_L
+  //TM2CNT_L
+  //TM3CNT_L
+  case 0x04000100: case 0x04000101:
+  case 0x04000104: case 0x04000105:
+  case 0x04000108: case 0x04000109:
+  case 0x0400010c: case 0x0400010d: {
+    auto &timer = regs.timer[(addr >> 2) & 3];
+    unsigned shift = (addr & 1) * 8;
+    return timer.counter >> shift;
+  }
 
   //TIM0CNT_H
-  case 0x04000102: return regs.timer[0].control >> 0;
-  case 0x04000103: return regs.timer[0].control >> 8;
-
-  //TM1CNT_L
-  case 0x04000104: return regs.timer[1].reload >> 0;
-  case 0x04000105: return regs.timer[1].reload >> 8;
-
-  //TM1CNT_H
-  case 0x04000106: return regs.timer[1].control >> 0;
-  case 0x04000107: return regs.timer[1].control >> 8;
-
-  //TM2CNT_L
-  case 0x04000108: return regs.timer[2].reload >> 0;
-  case 0x04000109: return regs.timer[2].reload >> 8;
-
-  //TM2CNT_H
-  case 0x0400010a: return regs.timer[2].control >> 0;
-  case 0x0400010b: return regs.timer[2].control >> 8;
-
-  //TM3CNT_L
-  case 0x0400010c: return regs.timer[3].reload >> 0;
-  case 0x0400010d: return regs.timer[3].reload >> 8;
-
-  //TM3CNT_H
-  case 0x0400010e: return regs.timer[3].control >> 0;
-  case 0x0400010f: return regs.timer[3].control >> 8;
+  case 0x04000102: case 0x04000103:
+  case 0x04000106: case 0x04000107:
+  case 0x0400010a: case 0x0400010b:
+  case 0x0400010e: case 0x0400010f: {
+    auto &timer = regs.timer[(addr >> 2) & 3];
+    unsigned shift = (addr & 1) * 8;
+    return timer.control >> shift;
+  }
 
   //KEYINPUT
   case 0x04000130:
@@ -208,10 +196,10 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x0400010e: {
     auto &timer = regs.timer[(addr >> 2) & 3];
     bool enable = timer.control.enable;
-    if(timer.control.enable == 0 && enable == 1) {
+    timer.control = byte;
+    if(enable == 0 && timer.control.enable == 1) {
       timer.counter = timer.reload;
     }
-    timer.control = byte;
     return;
   }
 

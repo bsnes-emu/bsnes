@@ -55,14 +55,13 @@ void APU::Wave::write(unsigned addr, uint8 byte) {
 
     if(initialize) {
       enable = dacenable;
+      period = 2 * (2048 - frequency);
       patternaddr = 0;
       patternbank = mode ? (uint1)0 : bank;
     }
 
     break;
   }
-
-  period = 2 * (2048 - frequency);
 }
 
 uint8 APU::Wave::readram(unsigned addr) const {
