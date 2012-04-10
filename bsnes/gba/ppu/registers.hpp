@@ -89,13 +89,9 @@ struct Registers {
   } mosaic;
 
   struct BlendControl {
-    bool firstbg[4];
-    bool firstobj;
-    bool firstbd;
-    uint2 effect;
-    bool secondbg[4];
-    bool secondobj;
-    bool secondbd;
+    bool above[6];
+    bool below[6];
+    uint2 mode;
 
     operator uint16() const;
     uint16 operator=(uint16 source);

@@ -24,9 +24,11 @@ void PPU::render_backgrounds() {
 void PPU::render_background_linear(unsigned bgnumber) {
   if(regs.control.enablebg[bgnumber] == false) return;
   auto &bg = regs.bg[bgnumber];
+  bgnumber = 1 + bgnumber;
 
   uint9 voffset = regs.vcounter + bg.voffset;
   uint9 hoffset = bg.hoffset;
+  voffset = (voffset / (1 + regs.mosaic.bgvsize)) * (1 + regs.mosaic.bgvsize);
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
   unsigned basechr = bg.control.characterbaseblock << 14;
@@ -68,8 +70,8 @@ void PPU::render_background_linear(unsigned bgnumber) {
     uint8 color = data[px++ ^ (tile.hflip ? 7 : 0)];
 
     if(color) {
-      if(bg.control.colormode == 0) layer[bg.control.priority][x] = { true, pram[tile.palette * 16 + color] };
-      if(bg.control.colormode == 1) layer[bg.control.priority][x] = { true, pram[color] };
+      if(bg.control.colormode == 0) draw(x, bgnumber, bg.control.priority, pram[tile.palette * 16 + color]);
+      if(bg.control.colormode == 1) draw(x, bgnumber, bg.control.priority, pram[color]);
     }
   }
 }
@@ -77,6 +79,7 @@ void PPU::render_background_linear(unsigned bgnumber) {
 void PPU::render_background_affine(unsigned bgnumber) {
   if(regs.control.enablebg[bgnumber] == false) return;
   auto &bg = regs.bg[bgnumber];
+  bgnumber = 1 + bgnumber;
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
   unsigned basechr = bg.control.characterbaseblock << 14;
@@ -93,7 +96,7 @@ void PPU::render_background_affine(unsigned bgnumber) {
     if(tx < screensize && ty < screensize) {
       uint8 character = vram[basemap + ty * screensize + tx];
       uint8 color = vram[basechr + (character * 64) + py * 8 + px];
-      if(color) layer[bg.control.priority][x] = { true, pram[color] };
+      if(color) draw(x, bgnumber, bg.control.priority, pram[color]);
     }
 
     fx += bg.pa;
@@ -129,7 +132,7 @@ void PPU::render_background_bitmap(unsigned bgnumber) {
       if(depth || color) {  //8bpp color 0 is transparent; 15bpp color is always opaque
         if(depth == 0) color = pram[color];
         if(depth == 1) color = color & 0x7fff;
-        layer[bg.control.priority][x] = { true, color };
+        draw(x, bgnumber, bg.control.priority, color);
       }
     }
 

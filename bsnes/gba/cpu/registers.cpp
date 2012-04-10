@@ -23,6 +23,11 @@ uint16 CPU::Registers::DMAControl::operator=(uint16 source) {
   return operator uint16();
 }
 
+unsigned CPU::Registers::TimerControl::multiplier() const {
+  static unsigned multiplier[] = { 1, 64, 256, 1024 };
+  return multiplier[frequency];
+}
+
 CPU::Registers::TimerControl::operator uint8() const {
   return (
     (frequency << 0)
@@ -38,6 +43,11 @@ uint8 CPU::Registers::TimerControl::operator=(uint8 source) {
   irq       = source >> 6;
   enable    = source >> 7;
   return operator uint8();
+}
+
+//return number of clocks before counter overflow
+signed CPU::Registers::Timer::period() const {
+  return (65536 - reload) * control.multiplier() + counter;
 }
 
 CPU::Registers::KeypadControl::operator uint16() const {

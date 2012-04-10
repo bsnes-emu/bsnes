@@ -3,25 +3,25 @@
 
 namespace nall {
   template<unsigned bits>
-  constexpr inline uintmax_t uclamp(const uintmax_t x) {
+  inline uintmax_t uclamp(const uintmax_t x) {
     enum : uintmax_t { b = 1ull << (bits - 1), y = b * 2 - 1 };
     return y + ((x - y) & -(x < y));  //min(x, y);
   }
 
   template<unsigned bits>
-  constexpr inline uintmax_t uclip(const uintmax_t x) {
+  inline uintmax_t uclip(const uintmax_t x) {
     enum : uintmax_t { b = 1ull << (bits - 1), m = b * 2 - 1 };
     return (x & m);
   }
 
   template<unsigned bits>
-  constexpr inline intmax_t sclamp(const intmax_t x) {
+  inline intmax_t sclamp(const intmax_t x) {
     enum : intmax_t { b = 1ull << (bits - 1), m = b - 1 };
     return (x > m) ? m : (x < -b) ? -b : x;
   }
 
   template<unsigned bits>
-  constexpr inline intmax_t sclip(const intmax_t x) {
+  inline intmax_t sclip(const intmax_t x) {
     enum : uintmax_t { b = 1ull << (bits - 1), m = b * 2 - 1 };
     return ((x & m) ^ b) - b;
   }

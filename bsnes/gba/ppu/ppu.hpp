@@ -4,6 +4,7 @@ struct PPU : Thread, MMIO {
   #include "registers.hpp"
   #include "state.hpp"
   uint16 *output;
+  uint16 *blur;
 
   static void Enter();
   void enter();
@@ -36,6 +37,8 @@ struct PPU : Thread, MMIO {
 
   void render_forceblank();
   void render_screen();
+  void draw(unsigned x, unsigned layer, unsigned priority, unsigned color);
+  unsigned blend(unsigned above, unsigned eva, unsigned below, unsigned evb);
 
   PPU();
   ~PPU();

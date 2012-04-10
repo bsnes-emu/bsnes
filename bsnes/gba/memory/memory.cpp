@@ -74,6 +74,8 @@ uint32 Bus::mirror(uint32 addr, uint32 size) {
 }
 
 uint32 Bus::speed(uint32 addr, uint32 size) {
+  return 2;
+
                            //B  B  E  I  M  P  V  O  R  R  R  R  R  R  S  S
                            //I  I  R  R  M  R  R  A  O  O  O  O  O  O  R  R
                            //O  O  A  A  I  A  A  M  M  M  M  M  M  M  A  A

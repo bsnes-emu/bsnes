@@ -1,7 +1,10 @@
 struct Pixel {
-  bool exists;
-  uint15 color;
-} layer[4][240];
+  unsigned priority;
+  unsigned color;
+};
+
+Pixel above[240];
+Pixel below[240];
 
 struct Object {
   uint8  y;

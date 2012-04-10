@@ -178,7 +178,9 @@ void CPU::write(uint32 addr, uint8 byte) {
     bool enable = timer.control.enable;
     timer.control = byte;
     if(enable == 0 && timer.control.enable == 1) {
-      timer.counter = timer.reload;
+      timer.counter = timer.period();
+    } else if(timer.control.enable == 0) {
+      timer.counter = 0;
     }
     return;
   }

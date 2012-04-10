@@ -36,8 +36,7 @@ void PPU::step(unsigned clocks) {
 void PPU::power() {
   create(PPU::Enter, 16777216);
 
-//for(unsigned n = 0; n < vram.size; n++) vram.data[n] = 0;
-  for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0;
+  for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0, blur[n] = 0;
 
   for(unsigned n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
   for(unsigned n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
@@ -105,10 +104,8 @@ void PPU::scanline() {
 
   if(regs.vcounter < 160) {
     for(unsigned x = 0; x < 240; x++) {
-      layer[0][x].exists = false;
-      layer[1][x].exists = false;
-      layer[2][x].exists = false;
-      layer[3][x].exists = false;
+      above[x] = { (3 << 3) | 5, pram[0] };
+      below[x] = { (3 << 3) | 5, pram[0] };
     }
 
     if(regs.control.forceblank) {
@@ -140,10 +137,12 @@ void PPU::frame() {
 
 PPU::PPU() {
   output = new uint16[240 * 160];
+  blur = new uint16[240 * 160];
 }
 
 PPU::~PPU() {
   delete[] output;
+  delete[] blur;
 }
 
 }

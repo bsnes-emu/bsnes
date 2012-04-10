@@ -15,6 +15,7 @@ void PPU::render_objects() {
 void PPU::render_object_linear(Object &obj) {
   uint8 py = regs.vcounter - obj.y;
   if(obj.vflip) py ^= obj.height - 1;
+  py = (py / (1 + regs.mosaic.objvsize)) * (1 + regs.mosaic.objvsize);
 
   unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
   unsigned baseaddr = 0x10000 + obj.character * 32;
@@ -33,8 +34,8 @@ void PPU::render_object_linear(Object &obj) {
     if(obj.colors == 0) color = (px & 1) ? color >> 4 : color & 15;
 
     if(color) {
-      if(obj.colors == 0) layer[obj.priority][sx] = { true, pram[256 + obj.palette * 16 + color] };
-      if(obj.colors == 1) layer[obj.priority][sx] = { true, pram[256 + color] };
+      if(obj.colors == 0) draw(sx, 0, obj.priority, pram[256 + obj.palette * 16 + color]);
+      if(obj.colors == 1) draw(sx, 0, obj.priority, pram[256 + color]);
     }
   }
 }
@@ -75,8 +76,8 @@ void PPU::render_object_affine(Object &obj) {
       if(obj.colors == 0) color = (px & 1) ? color >> 4 : color & 15;
 
       if(color) {
-        if(obj.colors == 0) layer[obj.priority][sx] = { true, pram[256 + obj.palette * 16 + color] };
-        if(obj.colors == 1) layer[obj.priority][sx] = { true, pram[256 + color] };
+        if(obj.colors == 0) draw(sx, 0, obj.priority, pram[256 + obj.palette * 16 + color]);
+        if(obj.colors == 1) draw(sx, 0, obj.priority, pram[256 + color]);
       }
     }
 

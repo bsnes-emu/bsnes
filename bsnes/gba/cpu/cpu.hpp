@@ -19,7 +19,7 @@ struct CPU : Processor::ARM, Thread, MMIO {
   void dma_run();
   void dma_transfer(Registers::DMA &dma);
 
-  void timer_tick();
+  void timer_step(unsigned clocks);
   void timer_increment(unsigned n);
 
   CPU();

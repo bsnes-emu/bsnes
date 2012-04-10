@@ -36,7 +36,7 @@ void CPU::enter() {
 }
 
 void CPU::step(unsigned clocks) {
-  for(unsigned n = 0; n < clocks; n++) timer_tick();
+  timer_step(clocks);
 
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
@@ -69,9 +69,9 @@ void CPU::power() {
     dma.control = 0;
   }
   for(auto &timer : regs.timer) {
-    timer.counter = 0;
     timer.reload = 0;
     timer.control = 0;
+    timer.counter = 0;
   }
   regs.keypad.control = 0;
   regs.ime = 0;

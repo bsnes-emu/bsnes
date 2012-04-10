@@ -104,35 +104,35 @@ uint8 PPU::Registers::WindowFlags::operator=(uint8 source) {
 
 PPU::Registers::BlendControl::operator uint16() const {
   return (
-    (firstbg[0]  <<  0)
-  | (firstbg[1]  <<  1)
-  | (firstbg[2]  <<  2)
-  | (firstbg[3]  <<  3)
-  | (firstobj    <<  4)
-  | (firstbd     <<  5)
-  | (effect      <<  6)
-  | (secondbg[0] <<  8)
-  | (secondbg[1] <<  9)
-  | (secondbg[2] << 10)
-  | (secondbg[3] << 11)
-  | (secondobj   << 12)
-  | (secondbd    << 13)
+    (above[1] <<  0)
+  | (above[2] <<  1)
+  | (above[3] <<  2)
+  | (above[4] <<  3)
+  | (above[0] <<  4)
+  | (above[5] <<  5)
+  | (mode     <<  6)
+  | (below[1] <<  8)
+  | (below[2] <<  9)
+  | (below[3] << 10)
+  | (below[4] << 11)
+  | (below[0] << 12)
+  | (below[5] << 13)
   );
 }
 
 uint16 PPU::Registers::BlendControl::operator=(uint16 source) {
-  firstbg[0]  = source & (1 <<  0);
-  firstbg[1]  = source & (1 <<  1);
-  firstbg[2]  = source & (1 <<  2);
-  firstbg[3]  = source & (1 <<  3);
-  firstobj    = source & (1 <<  4);
-  firstbd     = source & (1 <<  5);
-  effect      = source >> 6;
-  secondbg[0] = source & (1 <<  8);
-  secondbg[1] = source & (1 <<  9);
-  secondbg[2] = source & (1 << 10);
-  secondbg[3] = source & (1 << 11);
-  secondobj   = source & (1 << 12);
-  secondbd    = source & (1 << 13);
+  above[1] = source & (1 <<  0);
+  above[2] = source & (1 <<  1);
+  above[3] = source & (1 <<  2);
+  above[4] = source & (1 <<  3);
+  above[0] = source & (1 <<  4);
+  above[5] = source & (1 <<  5);
+  mode     = source >> 6;
+  below[1] = source & (1 <<  8);
+  below[2] = source & (1 <<  9);
+  below[3] = source & (1 << 10);
+  below[4] = source & (1 << 11);
+  below[0] = source & (1 << 12);
+  below[5] = source & (1 << 13);
   return operator uint16();
 }

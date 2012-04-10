@@ -5,13 +5,13 @@
 
 namespace GB {
   namespace Info {
-    static const char Name[] = "bsgbc";
+    static const char Name[] = "bgbc";
     static const unsigned SerializerVersion = 3;
   }
 }
 
 /*
-  bsgbc - Game Boy, Super Game Boy, and Game Boy Color emulator
+  bgbc - Game Boy, Super Game Boy, and Game Boy Color emulator
   author: byuu
   license: GPLv3
   project started: 2010-12-27
