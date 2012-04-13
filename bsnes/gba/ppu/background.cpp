@@ -1,34 +1,32 @@
 void PPU::render_backgrounds() {
   switch(regs.control.bgmode) {
   case 0:
-    render_background_linear(3);
-    render_background_linear(2);
-    render_background_linear(1);
-    render_background_linear(0);
+    render_background_linear(regs.bg[3]);
+    render_background_linear(regs.bg[2]);
+    render_background_linear(regs.bg[1]);
+    render_background_linear(regs.bg[0]);
     break;
   case 1:
-    render_background_affine(2);
-    render_background_linear(1);
-    render_background_linear(0);
+    render_background_affine(regs.bg[2]);
+    render_background_linear(regs.bg[1]);
+    render_background_linear(regs.bg[0]);
     break;
   case 2:
-    render_background_affine(3);
-    render_background_affine(2);
+    render_background_affine(regs.bg[3]);
+    render_background_affine(regs.bg[2]);
     break;
   case 3: case 4: case 5:
-    render_background_bitmap(2);
+    render_background_bitmap(regs.bg[2]);
     break;
   }
 }
 
-void PPU::render_background_linear(unsigned bgnumber) {
-  if(regs.control.enablebg[bgnumber] == false) return;
-  auto &bg = regs.bg[bgnumber];
-  bgnumber = 1 + bgnumber;
+void PPU::render_background_linear(Registers::Background &bg) {
+  if(regs.control.enable[bg.id] == false) return;
+  auto &output = layer[bg.id];
 
   uint9 voffset = regs.vcounter + bg.voffset;
   uint9 hoffset = bg.hoffset;
-  voffset = (voffset / (1 + regs.mosaic.bgvsize)) * (1 + regs.mosaic.bgvsize);
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
   unsigned basechr = bg.control.characterbaseblock << 14;
@@ -70,16 +68,15 @@ void PPU::render_background_linear(unsigned bgnumber) {
     uint8 color = data[px++ ^ (tile.hflip ? 7 : 0)];
 
     if(color) {
-      if(bg.control.colormode == 0) draw(x, bgnumber, bg.control.priority, pram[tile.palette * 16 + color]);
-      if(bg.control.colormode == 1) draw(x, bgnumber, bg.control.priority, pram[color]);
+      if(bg.control.colormode == 0) output[x] = { true, false, bg.control.priority, pram[tile.palette * 16 + color] };
+      if(bg.control.colormode == 1) output[x] = { true, false, bg.control.priority, pram[color] };
     }
   }
 }
 
-void PPU::render_background_affine(unsigned bgnumber) {
-  if(regs.control.enablebg[bgnumber] == false) return;
-  auto &bg = regs.bg[bgnumber];
-  bgnumber = 1 + bgnumber;
+void PPU::render_background_affine(Registers::Background &bg) {
+  if(regs.control.enable[bg.id] == false) return;
+  auto &output = layer[bg.id];
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
   unsigned basechr = bg.control.characterbaseblock << 14;
@@ -96,7 +93,7 @@ void PPU::render_background_affine(unsigned bgnumber) {
     if(tx < screensize && ty < screensize) {
       uint8 character = vram[basemap + ty * screensize + tx];
       uint8 color = vram[basechr + (character * 64) + py * 8 + px];
-      if(color) draw(x, bgnumber, bg.control.priority, pram[color]);
+      if(color) output[x] = { true, false, bg.control.priority, pram[color] };
     }
 
     fx += bg.pa;
@@ -107,9 +104,9 @@ void PPU::render_background_affine(unsigned bgnumber) {
   bg.ly += bg.pd;
 }
 
-void PPU::render_background_bitmap(unsigned bgnumber) {
-  if(regs.control.enablebg[bgnumber] == false) return;
-  auto &bg = regs.bg[bgnumber];
+void PPU::render_background_bitmap(Registers::Background &bg) {
+  if(regs.control.enable[bg.id] == false) return;
+  auto &output = layer[bg.id];
 
   uint1 depth = regs.control.bgmode != 4;  //0 = 8-bit (Mode 4), 1 = 15-bit (Mode 3, Mode 5)
   unsigned basemap = regs.control.bgmode == 3 ? 0 : 0xa000 * regs.control.frame;
@@ -132,7 +129,7 @@ void PPU::render_background_bitmap(unsigned bgnumber) {
       if(depth || color) {  //8bpp color 0 is transparent; 15bpp color is always opaque
         if(depth == 0) color = pram[color];
         if(depth == 1) color = color & 0x7fff;
-        draw(x, bgnumber, bg.control.priority, color);
+        output[x] = { true, false, bg.control.priority, color };
       }
     }
 

@@ -1,12 +1,13 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-static const char Version[] = "087.21";
+static const char Version[] = "087.22";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
 #include <nall/array.hpp>
+#include <nall/bitarray.hpp>
 #include <nall/dl.hpp>
 #include <nall/dsp.hpp>
 #include <nall/endian.hpp>

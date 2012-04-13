@@ -63,10 +63,10 @@ void PPU::power() {
     w.x2 = 0;
     w.y1 = 0;
     w.y2 = 0;
-    w.in = 0;
-    w.out = 0;
   }
-  regs.windowobj.in = 0;
+  for(auto &f : regs.windowflags) {
+    f = 0;
+  }
   regs.mosaic.bghsize = 0;
   regs.mosaic.bgvsize = 0;
   regs.mosaic.objhsize = 0;
@@ -103,16 +103,24 @@ void PPU::scanline() {
   }
 
   if(regs.vcounter < 160) {
-    for(unsigned x = 0; x < 240; x++) {
-      above[x] = { (3 << 3) | 5, pram[0] };
-      below[x] = { (3 << 3) | 5, pram[0] };
-    }
-
     if(regs.control.forceblank) {
       render_forceblank();
     } else {
-      render_backgrounds();
+      for(unsigned x = 0; x < 240; x++) {
+        windowmask[0][x] = false;
+        windowmask[1][x] = false;
+        windowmask[2][x] = false;
+        layer[OBJ][x].enable = false;
+        layer[BG0][x].enable = false;
+        layer[BG1][x].enable = false;
+        layer[BG2][x].enable = false;
+        layer[BG3][x].enable = false;
+        layer[SFX][x] = { true, false, 3, pram[0] };
+      }
+      render_window(0);
+      render_window(1);
       render_objects();
+      render_backgrounds();
       render_screen();
     }
   }
@@ -138,6 +146,11 @@ void PPU::frame() {
 PPU::PPU() {
   output = new uint16[240 * 160];
   blur = new uint16[240 * 160];
+
+  regs.bg[0].id = BG0;
+  regs.bg[1].id = BG1;
+  regs.bg[2].id = BG2;
+  regs.bg[3].id = BG3;
 }
 
 PPU::~PPU() {

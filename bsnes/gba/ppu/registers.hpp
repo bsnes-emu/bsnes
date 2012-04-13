@@ -1,30 +1,31 @@
+enum : unsigned { OBJ = 0, BG0 = 1, BG1 = 2, BG2 = 3, BG3 = 4, SFX = 5 };
+enum : unsigned { In0 = 0, In1 = 1, Obj = 2, Out = 3 };
+
 struct Registers {
   struct Control {
     uint3 bgmode;
-    bool cgbmode;
-    bool frame;
-    bool hblank;
-    bool objmapping;
-    bool forceblank;
-    bool enablebg[4];
-    bool enableobj;
-    bool enablebgwindow[2];
-    bool enableobjwindow;
+    uint1 cgbmode;
+    uint1 frame;
+    uint1 hblank;
+    uint1 objmapping;
+    uint1 forceblank;
+    uint1 enable[5];
+    uint1 enablewindow[3];
 
     operator uint16() const;
     uint16 operator=(uint16 source);
     Control& operator=(const Control&) = delete;
   } control;
 
-  bool greenswap;
+  uint1 greenswap;
 
   struct Status {
-    bool vblank;
-    bool hblank;
-    bool vcoincidence;
-    bool irqvblank;
-    bool irqhblank;
-    bool irqvcoincidence;
+    uint1 vblank;
+    uint1 hblank;
+    uint1 vcoincidence;
+    uint1 irqvblank;
+    uint1 irqhblank;
+    uint1 irqvcoincidence;
     uint8 vcompare;
 
     operator uint16() const;
@@ -59,12 +60,11 @@ struct Registers {
 
     //internal
     int28 lx, ly;
+    unsigned id;
   } bg[4];
 
   struct WindowFlags {
-    bool enablebg[4];
-    bool enableobj;
-    bool enablesfx;
+    uint1 enable[6];
 
     operator uint8() const;
     uint8 operator=(uint8 source);
@@ -74,12 +74,9 @@ struct Registers {
   struct Window {
     uint8 x1, x2;
     uint8 y1, y2;
-    WindowFlags in, out;
   } window[2];
 
-  struct ObjectWindow {
-    WindowFlags in;
-  } windowobj;
+  WindowFlags windowflags[4];
 
   struct Mosaic {
     uint4 bghsize;
@@ -89,8 +86,8 @@ struct Registers {
   } mosaic;
 
   struct BlendControl {
-    bool above[6];
-    bool below[6];
+    uint1 above[6];
+    uint1 below[6];
     uint2 mode;
 
     operator uint16() const;

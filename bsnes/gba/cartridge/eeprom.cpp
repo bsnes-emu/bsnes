@@ -56,7 +56,8 @@ void Cartridge::EEPROM::write(bool bit) {
 }
 
 void Cartridge::EEPROM::power() {
-  for(auto &bit : data) bit = 0;
+  data.resize(64 * 1024);
+  data.clear();
   size = 6;
 
   mode = Mode::Wait;

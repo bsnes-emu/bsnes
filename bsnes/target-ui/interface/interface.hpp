@@ -1,12 +1,17 @@
 #include "palette.hpp"
 
 struct InterfaceCore {
+  virtual bool cartridgeLoaded() = 0;
+  virtual void unloadCartridge() = 0;
+
   virtual void power() = 0;
   virtual void reset() = 0;
   virtual void run() = 0;
 
   virtual serializer serialize() = 0;
   virtual bool unserialize(serializer&) = 0;
+
+  virtual void setCheats(const lstring &list = lstring{}) = 0;
 };
 
 struct CartridgePath {

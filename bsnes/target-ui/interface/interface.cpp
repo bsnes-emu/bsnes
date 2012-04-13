@@ -80,12 +80,7 @@ void Interface::updateDSP() {
 }
 
 bool Interface::cartridgeLoaded() {
-  switch(mode()) {
-  case Mode::NES:  return nes.cartridgeLoaded();
-  case Mode::SNES: return snes.cartridgeLoaded();
-  case Mode::GB:   return gb.cartridgeLoaded();
-  case Mode::GBA:  return gba.cartridgeLoaded();
-  }
+  if(core) return core->cartridgeLoaded();
   return false;
 }
 
@@ -125,13 +120,7 @@ void Interface::unloadCartridge() {
   stateManager->save(game.filename("states.bsa", ".bsa"), 0u);
   setCheatCodes();
 
-  switch(mode()) {
-  case Mode::NES:  nes.unloadCartridge(); break;
-  case Mode::SNES: snes.unloadCartridge(); break;
-  case Mode::GB:   gb.unloadCartridge(); break;
-  case Mode::GBA:  gba.unloadCartridge(); break;
-  }
-
+  if(core) core->unloadCartridge();
   cartridgeTitle = "";
   utility->setMode(mode = Mode::None);
 }
@@ -186,12 +175,7 @@ bool Interface::loadState(unsigned slot) {
 }
 
 void Interface::setCheatCodes(const lstring &list) {
-  switch(mode()) {
-  case Mode::NES:  return nes.setCheats(list);
-  case Mode::SNES: return snes.setCheats(list);
-  case Mode::GB:   return gb.setCheats(list);
-  case Mode::GBA:  return gba.setCheats(list);
-  }
+  if(core) return core->setCheats(list);
 }
 
 string Interface::sha256() {

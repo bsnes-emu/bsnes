@@ -27,17 +27,18 @@ struct PPU : Thread, MMIO {
   void oam_write(uint32 addr, uint32 size, uint32 word);
 
   void render_backgrounds();
-  void render_background_linear(unsigned bgnumber);
-  void render_background_affine(unsigned bgnumber);
-  void render_background_bitmap(unsigned bgnumber);
+  void render_background_linear(Registers::Background&);
+  void render_background_affine(Registers::Background&);
+  void render_background_bitmap(Registers::Background&);
 
   void render_objects();
   void render_object_linear(Object&);
   void render_object_affine(Object&);
+  void render_object_pixel(Object&, unsigned x, unsigned px, unsigned py, unsigned rowsize, unsigned baseaddr);
 
   void render_forceblank();
   void render_screen();
-  void draw(unsigned x, unsigned layer, unsigned priority, unsigned color);
+  void render_window(unsigned window);
   unsigned blend(unsigned above, unsigned eva, unsigned below, unsigned evb);
 
   PPU();

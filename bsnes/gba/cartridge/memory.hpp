@@ -1,5 +1,5 @@
 struct EEPROM {
-  bool data[64 * 1024];
+  bitarray data;
   unsigned size;
 
   enum class Mode : unsigned { Wait, Command, ReadAddress, ReadValidate, ReadData, WriteAddress, WriteData, WriteValidate } mode;

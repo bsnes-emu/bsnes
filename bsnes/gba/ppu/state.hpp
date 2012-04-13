@@ -1,10 +1,11 @@
 struct Pixel {
+  bool enable;
+  bool translucent;
   unsigned priority;
   unsigned color;
-};
+} layer[6][240];
 
-Pixel above[240];
-Pixel below[240];
+bool windowmask[3][240];
 
 struct Object {
   uint8  y;

@@ -28,10 +28,10 @@ uint8 PPU::read(uint32 addr) {
   }
 
   //WININ
-  case 0x04000048: return regs.window[0].in;
-  case 0x04000049: return regs.window[1].in;
-  case 0x0400004a: return regs.window[0].out;
-  case 0x0400004b: return regs.windowobj.in;
+  case 0x04000048: return regs.windowflags[In0];
+  case 0x04000049: return regs.windowflags[In1];
+  case 0x0400004a: return regs.windowflags[Out];
+  case 0x0400004b: return regs.windowflags[Obj];
 
   //BLTCNT
   case 0x04000050: return regs.blend.control >> 0;
@@ -50,14 +50,14 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000001: regs.control = (regs.control & 0x00ff) | (byte << 8); return;
 
   //GRSWP
-  case 0x04000002: regs.greenswap = byte & 0x01; return;
+  case 0x04000002: regs.greenswap = byte >> 0; return;
   case 0x04000003: return;
 
   //DISPSTAT
   case 0x04000004:
-    regs.status.irqvblank       = byte & (1 << 3);
-    regs.status.irqhblank       = byte & (1 << 4);
-    regs.status.irqvcoincidence = byte & (1 << 5);
+    regs.status.irqvblank       = byte >> 3;
+    regs.status.irqhblank       = byte >> 4;
+    regs.status.irqvcoincidence = byte >> 5;
     return;
   case 0x04000005:
     regs.status.vcompare = byte;
@@ -167,12 +167,12 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000047: regs.window[1].y1 = byte; return;
 
   //WININ
-  case 0x04000048: regs.window[0].in = byte; return;
-  case 0x04000049: regs.window[1].in = byte; return;
+  case 0x04000048: regs.windowflags[In0] = byte; return;
+  case 0x04000049: regs.windowflags[In1] = byte; return;
 
   //WINOUT
-  case 0x0400004a: regs.window[0].out = regs.window[1].out = byte; return;
-  case 0x0400004b: regs.windowobj.in = byte; return;
+  case 0x0400004a: regs.windowflags[Out] = byte; return;
+  case 0x0400004b: regs.windowflags[Obj] = byte; return;
 
   //MOSAIC
   case 0x0400004c:
