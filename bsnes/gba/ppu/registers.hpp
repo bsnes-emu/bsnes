@@ -60,6 +60,8 @@ struct Registers {
 
     //internal
     int28 lx, ly;
+    unsigned vmosaic;
+    unsigned hmosaic;
     unsigned id;
   } bg[4];
 

@@ -6,6 +6,8 @@ struct Pixel {
 } layer[6][240];
 
 bool windowmask[3][240];
+unsigned vmosaic[5];
+unsigned hmosaic[5];
 
 struct Object {
   uint8  y;

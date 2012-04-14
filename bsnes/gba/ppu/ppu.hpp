@@ -32,12 +32,11 @@ struct PPU : Thread, MMIO {
   void render_background_bitmap(Registers::Background&);
 
   void render_objects();
-  void render_object_linear(Object&);
-  void render_object_affine(Object&);
-  void render_object_pixel(Object&, unsigned x, unsigned px, unsigned py, unsigned rowsize, unsigned baseaddr);
+  void render_object(Object&);
 
   void render_forceblank();
   void render_screen();
+  void render_mosaic(unsigned id, unsigned width);
   void render_window(unsigned window);
   unsigned blend(unsigned above, unsigned eva, unsigned below, unsigned evb);
 

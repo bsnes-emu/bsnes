@@ -26,7 +26,7 @@ uint8 CPU::read(uint32 addr) {
   case 0x0400010c: case 0x0400010d: {
     auto &timer = regs.timer[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
-    return timer.counter >> shift;
+    return timer.period >> shift;
   }
 
   //TIM0CNT_H
@@ -178,9 +178,7 @@ void CPU::write(uint32 addr, uint8 byte) {
     bool enable = timer.control.enable;
     timer.control = byte;
     if(enable == 0 && timer.control.enable == 1) {
-      timer.counter = timer.period();
-    } else if(timer.control.enable == 0) {
-      timer.counter = 0;
+      timer.period = timer.reload;
     }
     return;
   }

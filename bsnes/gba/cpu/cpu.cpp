@@ -69,9 +69,9 @@ void CPU::power() {
     dma.control = 0;
   }
   for(auto &timer : regs.timer) {
+    timer.period = 0;
     timer.reload = 0;
     timer.control = 0;
-    timer.counter = 0;
   }
   regs.keypad.control = 0;
   regs.ime = 0;

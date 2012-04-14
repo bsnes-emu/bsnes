@@ -1,43 +1,28 @@
 void PPU::render_objects() {
   if(regs.control.enable[OBJ] == false) return;
-
-  for(unsigned n = 0; n < 128; n++) {
-    auto &obj = object[n];
-    uint8 py = regs.vcounter - obj.y;
-    if(py >= obj.height << obj.affinesize) continue;  //offscreen
-    if(obj.affine == 0 && obj.affinesize == 1) continue;  //hidden
-
-    if(obj.affine == 0) render_object_linear(obj);
-    if(obj.affine == 1) render_object_affine(obj);
-  }
+  for(unsigned n = 0; n < 128; n++) render_object(object[n]);
 }
 
-void PPU::render_object_linear(Object &obj) {
-  auto &output = layer[OBJ];
+//px,py = pixel coordinates within sprite [0,0 - width,height)
+//fx,fy = affine pixel coordinates
+//pa,pb,pc,pd = affine pixel adjustments
+//x,y = adjusted coordinates within sprite (linear = vflip/hflip, affine = rotation/zoom)
+void PPU::render_object(Object &obj) {
   uint8 py = regs.vcounter - obj.y;
-  if(obj.vflip) py ^= obj.height - 1;
+  if(obj.affine == 0 && obj.affinesize == 1) return;  //hidden
+  if(py >= obj.height << obj.affinesize) return;  //offscreen
 
+  auto &output = layer[OBJ];
   unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
   unsigned baseaddr = 0x10000 + obj.character * 32;
-  uint9 sx = obj.x;
 
-  for(unsigned x = 0; x < obj.width; x++, sx++) {
-    unsigned px = x;
-    if(obj.hflip) px ^= obj.width - 1;
-
-    if(sx < 240) {
-      render_object_pixel(obj, sx, px, py, rowsize, baseaddr);
-    }
+  if(obj.vflip && obj.affine == 0) {
+    py ^= obj.height - 1;
   }
-}
 
-void PPU::render_object_affine(Object &obj) {
-  auto &output = layer[OBJ];
-  uint8 py = regs.vcounter - obj.y;
-
-  unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
-  unsigned baseaddr = 0x10000 + obj.character * 32;
-  uint9 sx = obj.x;
+  if(obj.mosaic && regs.mosaic.objvsize) {
+    py = (py / (1 + regs.mosaic.objvsize)) * (1 + regs.mosaic.objvsize);
+  }
 
   int16 pa = objectparam[obj.affineparam].pa;
   int16 pb = objectparam[obj.affineparam].pb;
@@ -52,41 +37,43 @@ void PPU::render_object_affine(Object &obj) {
   int28 originx = -(centerx << obj.affinesize);
   int28 originy = -(centery << obj.affinesize) + py;
 
+  //fractional pixel coordinates
   int28 fx = originx * pa + originy * pb;
   int28 fy = originx * pc + originy * pd;
 
-  for(unsigned x = 0; x < (obj.width << obj.affinesize); x++, sx++) {
-    unsigned px = (fx >> 8) + centerx;
-    unsigned py = (fy >> 8) + centery;
+  for(unsigned px = 0; px < (obj.width << obj.affinesize); px++) {
+    unsigned x, y;
+    if(obj.affine == 0) {
+      x = px;
+      y = py;
+      if(obj.hflip) x ^= obj.width - 1;
+    } else {
+      x = (fx >> 8) + centerx;
+      y = (fy >> 8) + centery;
+    }
 
-    if(sx < 240 && px < obj.width && py < obj.height) {
-      render_object_pixel(obj, sx, px, py, rowsize, baseaddr);
+    if(obj.mosaic && regs.mosaic.objhsize) {
+      x = (x / (1 + regs.mosaic.objhsize)) * (1 + regs.mosaic.objhsize);
+    }
+
+    unsigned ox = obj.x + px;
+    if(ox < 240 && x < obj.width && y < obj.height) {
+      unsigned offset = (y / 8) * rowsize + (x / 8);
+      offset = offset * 64 + (y & 7) * 8 + (x & 7);
+
+      uint8 color = vram[baseaddr + (offset >> !obj.colors)];
+      if(obj.colors == 0) color = (x & 1) ? color >> 4 : color & 15;
+      if(color) {
+        if(obj.mode & 2) {
+          windowmask[Obj][ox] = true;
+        } else if(output[ox].enable == false || obj.priority < output[ox].priority) {
+          if(obj.colors == 0) color = obj.palette * 16 + color;
+          output[ox] = { true, obj.mode == 1, obj.priority, pram[256 + color] };
+        }
+      }
     }
 
     fx += pa;
     fy += pc;
-  }
-}
-
-void PPU::render_object_pixel(Object &obj, unsigned x, unsigned px, unsigned py, unsigned rowsize, unsigned baseaddr) {
-  auto &output = layer[OBJ];
-
-  unsigned offset = (py / 8) * rowsize + (px / 8);
-  if(obj.colors == 0) offset = baseaddr + offset * 32 + (py & 7) * 4 + (px & 7) / 2;
-  if(obj.colors == 1) offset = baseaddr + offset * 64 + (py & 7) * 8 + (px & 7);
-
-  uint8 color = vram[offset];
-  if(obj.colors == 0) color = (px & 1) ? color >> 4 : color & 15;
-
-  if(color == 0) return;  //transparent
-
-  if(obj.mode == 2) {
-    windowmask[Obj][x] = true;
-    return;
-  }
-
-  if(output[x].enable == false || obj.priority < output[x].priority) {
-    if(obj.colors == 0) output[x] = { true, obj.mode == 1, obj.priority, pram[256 + obj.palette * 16 + color] };
-    if(obj.colors == 1) output[x] = { true, obj.mode == 1, obj.priority, pram[256 + color] };
   }
 }

@@ -25,7 +25,11 @@ void PPU::render_background_linear(Registers::Background &bg) {
   if(regs.control.enable[bg.id] == false) return;
   auto &output = layer[bg.id];
 
-  uint9 voffset = regs.vcounter + bg.voffset;
+  if(bg.control.mosaic == false || (regs.vcounter % (1 + regs.mosaic.bgvsize)) == 0) {
+    bg.vmosaic = regs.vcounter;
+  }
+
+  uint9 voffset = bg.vmosaic + bg.voffset;
   uint9 hoffset = bg.hoffset;
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
@@ -83,8 +87,13 @@ void PPU::render_background_affine(Registers::Background &bg) {
   unsigned screensize = 16 << bg.control.screensize;
   unsigned screenwrap = (1 << (bg.control.affinewrap ? 7 + bg.control.screensize : 20)) - 1;
 
-  int28 fx = bg.lx;
-  int28 fy = bg.ly;
+  if(bg.control.mosaic == false || (regs.vcounter % (1 + regs.mosaic.bgvsize)) == 0) {
+    bg.hmosaic = bg.lx;
+    bg.vmosaic = bg.ly;
+  }
+
+  int28 fx = bg.hmosaic;
+  int28 fy = bg.vmosaic;
 
   for(unsigned x = 0; x < 240; x++) {
     unsigned cx = (fx >> 8) & screenwrap, tx = cx / 8, px = cx & 7;
@@ -115,8 +124,13 @@ void PPU::render_background_bitmap(Registers::Background &bg) {
   unsigned height = regs.control.bgmode == 5 ? 128 : 160;
   unsigned size   = depth ? Half : Byte;
 
-  int28 fx = bg.lx;
-  int28 fy = bg.ly;
+  if(bg.control.mosaic == false || (regs.vcounter % (1 + regs.mosaic.bgvsize)) == 0) {
+    bg.hmosaic = bg.lx;
+    bg.vmosaic = bg.ly;
+  }
+
+  int28 fx = bg.hmosaic;
+  int28 fy = bg.vmosaic;
 
   for(unsigned x = 0; x < 240; x++) {
     unsigned px = fx >> 8;

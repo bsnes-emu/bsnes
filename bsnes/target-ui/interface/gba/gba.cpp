@@ -41,7 +41,7 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
 
-  GBA::system.bios.load(biosdata, biossize);
+  GBA::bios.load(biosdata, biossize);
   GBA::cartridge.load(markup, cartdata, cartsize);
   GBA::system.power();
   delete[] biosdata;

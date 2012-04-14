@@ -96,8 +96,8 @@ uint32 Bus::read(uint32 addr, uint32 size) {
   if(addr & 0x08000000) return cartridge.read(addr, size);
 
   switch(addr & 0x07000000) {
-  case 0x00000000: return system.bios.read(addr & 0x3fff, size);
-  case 0x01000000: return system.bios.read(addr & 0x3fff, size);
+  case 0x00000000: return bios.read(addr, size);
+  case 0x01000000: return bios.read(addr, size);
   case 0x02000000: return cpu.ewram.read(addr & 0x3ffff, size);
   case 0x03000000: return cpu.iwram.read(addr & 0x7fff, size);
   case 0x04000000:

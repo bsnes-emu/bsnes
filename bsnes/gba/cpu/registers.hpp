@@ -34,19 +34,15 @@ struct Registers {
     uint1 irq;
     uint1 enable;
 
-    unsigned multiplier() const;
     operator uint8() const;
     uint8 operator=(uint8 source);
     TimerControl& operator=(const TimerControl&) = delete;
   };
 
   struct Timer {
+    uint16 period;
     uint16 reload;
     TimerControl control;
-
-    //internal
-    signed period() const;
-    signed counter;
   } timer[4];
 
   struct KeypadControl {
