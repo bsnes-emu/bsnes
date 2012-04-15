@@ -1,4 +1,25 @@
 void InterfaceGBA::initialize() {
+  string filename = application->path("GBA.system/manifest.xml");
+  string markup;
+  markup.readfile(filename);
+  XML::Document document(markup);
+
+  if(document["system"]["bios"].exists()) {
+    auto &bios = document["system"]["bios"];
+    string firmware = bios["firmware"].data;
+    string hash = bios["sha256"].data;
+
+    uint8_t *data;
+    unsigned size;
+    if(file::read({dir(filename),firmware}, data, size) == true) {
+      if(nall::sha256(data, size) == hash) {
+        GBA::bios.load(data, size);
+      } else {
+        MessageWindow::information(Window::None, "Warning: GBA BIOS SHA256 sum is incorrect.");
+      }
+    }
+  }
+
   GBA::interface = this;
   GBA::system.init();
 }
@@ -10,42 +31,27 @@ bool InterfaceGBA::cartridgeLoaded() {
 bool InterfaceGBA::loadCartridge(const string &filename) {
   interface->unloadCartridge();
 
-  uint8_t *biosdata;
-  unsigned biossize;
-
-  uint8_t *cartdata;
-  unsigned cartsize;
+  uint8_t *data;
+  unsigned size;
 
   if(filename.endswith("/")) {
-    if(file::exists({filename, "bios.rom"}) == false) {
-      message("Error: Game Boy Advance BIOS (bios.rom) not found.");
-      return false;
-    }
-    if(file::read({filename, "bios.rom"}, biosdata, biossize) == false) return false;
-    if(file::read({filename, "program.rom"}, cartdata, cartsize) == false) return false;
+    if(file::read({filename, "program.rom"}, data, size) == false) return false;
     interface->base = {true, filename};
   } else {
-    if(file::exists({dir(filename), "gbabios.rom"}) == false) {
-      message("Error: Game Boy Advance BIOS (gbabios.rom) not found.");
-      return false;
-    }
-    if(file::read({dir(filename), "gbabios.rom"}, biosdata, biossize) == false) return false;
-    if(file::read(filename, cartdata, cartsize) == false) return false;
+    if(file::read(filename, data, size) == false) return false;
     interface->base = {false, filename};
   }
 
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
-  interface->applyPatch(interface->base, cartdata, cartsize);
+  interface->applyPatch(interface->base, data, size);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
 
-  GBA::bios.load(biosdata, biossize);
-  GBA::cartridge.load(markup, cartdata, cartsize);
+  GBA::cartridge.load(markup, data, size);
   GBA::system.power();
-  delete[] biosdata;
-  delete[] cartdata;
+  delete[] data;
 
   GBA::video.generate(GBA::Video::Format::RGB30);
   interface->loadCartridge(::Interface::Mode::GBA);

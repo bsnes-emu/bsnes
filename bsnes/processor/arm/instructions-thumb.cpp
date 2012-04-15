@@ -5,6 +5,7 @@ void ARM::thumb_step() {
     pipeline.reload = false;
     r(15).data &= ~1;
 
+    sequential() = false;
     pipeline.fetch.address = r(15) & ~1;
     pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
 
@@ -62,12 +63,12 @@ void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
   switch(opcode) {
   case  0: r(d) = bit(r(d) & r(m));          break;  //AND
   case  1: r(d) = bit(r(d) ^ r(m));          break;  //EOR
-  case  2: r(d) = lsl(r(d), r(m) & 0xff);    break;  //LSL
-  case  3: r(d) = lsr(r(d), r(m) & 0xff);    break;  //LSR
-  case  4: r(d) = asr(r(d), r(m) & 0xff);    break;  //ASR
+  case  2: r(d) = bit(lsl(r(d), r(m)));      break;  //LSL
+  case  3: r(d) = bit(lsr(r(d), r(m)));      break;  //LSR
+  case  4: r(d) = bit(asr(r(d), r(m)));      break;  //ASR
   case  5: r(d) = add(r(d), r(m), cpsr().c); break;  //ADC
   case  6: r(d) = sub(r(d), r(m), cpsr().c); break;  //SBC
-  case  7: r(d) = ror(r(d), r(m) & 0xff);    break;  //ROR
+  case  7: r(d) = bit(ror(r(d), r(m)));      break;  //ROR
   case  8:        bit(r(d) & r(m));          break;  //TST
   case  9: r(d) = sub(0, r(m), 1);           break;  //NEG
   case 10:        sub(r(d), r(m), 1);        break;  //CMP
@@ -128,9 +129,9 @@ void ARM::thumb_op_shift_immediate() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: r(d) = lsl(r(m), immediate); break;
-  case 1: r(d) = lsr(r(m), immediate == 0 ? 32u : (unsigned)immediate); break;
-  case 2: r(d) = asr(r(m), immediate == 0 ? 32u : (unsigned)immediate); break;
+  case 0: r(d) = bit(lsl(r(m), immediate)); break;
+  case 1: r(d) = bit(lsr(r(m), immediate == 0 ? 32u : (unsigned)immediate)); break;
+  case 2: r(d) = bit(asr(r(m), immediate == 0 ? 32u : (unsigned)immediate)); break;
   }
 }
 
@@ -203,7 +204,7 @@ void ARM::thumb_op_load_literal() {
   uint8 displacement = instruction();
 
   unsigned rm = (r(15) & ~3) + displacement * 4;
-  r(d) = read(rm, Word);
+  r(d) = load(rm, Word);
 }
 
 //(ld(r,s),str){b,h} rd,[rn,rm]
@@ -219,14 +220,14 @@ void ARM::thumb_op_move_register_offset() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: write(r(n) + r(m), Word, r(d));        break;  //STR
-  case 1: write(r(n) + r(m), Half, r(d));        break;  //STRH
-  case 2: write(r(n) + r(m), Byte, r(d));        break;  //STRB
-  case 3: r(d) = (int8)read(r(n) + r(m), Byte);  break;  //LDSB
-  case 4: r(d) = read(r(n) + r(m), Word);        break;  //LDR
-  case 5: r(d) = read(r(n) + r(m), Half);        break;  //LDRH
-  case 6: r(d) = read(r(n) + r(m), Byte);        break;  //LDRB
-  case 7: r(d) = (int16)read(r(n) + r(m), Half); break;  //LDSH
+  case 0: store(r(n) + r(m), Word, r(d));        break;  //STR
+  case 1: store(r(n) + r(m), Half, r(d));        break;  //STRH
+  case 2: store(r(n) + r(m), Byte, r(d));        break;  //STRB
+  case 3: r(d) =  (int8)load(r(n) + r(m), Byte); break;  //LDSB
+  case 4: r(d) = load(r(n) + r(m), Word);        break;  //LDR
+  case 5: r(d) = load(r(n) + r(m), Half);        break;  //LDRH
+  case 6: r(d) = load(r(n) + r(m), Byte);        break;  //LDRB
+  case 7: r(d) = (int16)load(r(n) + r(m), Half); break;  //LDSH
   }
 }
 
@@ -237,13 +238,13 @@ void ARM::thumb_op_move_register_offset() {
 //n = rn
 //d = rd
 void ARM::thumb_op_move_word_immediate() {
-  uint1 load = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = read(r(n) + offset * 4, Word);
-  if(load == 0) write(r(n) + offset * 4, Word, r(d));
+  if(l == 1) r(d) = load(r(n) + offset * 4, Word);
+  if(l == 0) store(r(n) + offset * 4, Word, r(d));
 }
 
 //(ldr,str)b rd,[rn,#offset]
@@ -253,13 +254,13 @@ void ARM::thumb_op_move_word_immediate() {
 //n = rn
 //d = rd
 void ARM::thumb_op_move_byte_immediate() {
-  uint1 load = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = read(r(n) + offset, Byte);
-  if(load == 0) write(r(n) + offset, Byte, r(d));
+  if(l == 1) r(d) = load(r(n) + offset, Byte);
+  if(l == 0) store(r(n) + offset, Byte, r(d));
 }
 
 //(ldr,str)h rd,[rn,#offset]
@@ -269,27 +270,27 @@ void ARM::thumb_op_move_byte_immediate() {
 //n = rn
 //d = rd
 void ARM::thumb_op_move_half_immediate() {
-  uint1 load = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(load == 1) r(d) = read(r(n) + offset * 2, Half);
-  if(load == 0) write(r(n) + offset * 2, Half, r(d));
+  if(l == 1) r(d) = load(r(n) + offset * 2, Half);
+  if(l == 0) store(r(n) + offset * 2, Half, r(d));
 }
 
 //(ldr,str) rd,[sp,#immediate]
 //1001 oddd iiii iiii
-//o = opcode
+//l = load
 //d = rd
 //i = immediate
 void ARM::thumb_op_move_stack() {
-  uint1 opcode = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
 
-  if(opcode == 0) write(r(13) + immediate * 4, Word, r(d));
-  if(opcode == 1) r(d) = read(r(13) + immediate * 4, Word);
+  if(l == 1) r(d) = load(r(13) + immediate * 4, Word);
+  if(l == 0) store(r(13) + immediate * 4, Word, r(d));
 }
 
 //add rd,{pc,sp},#immediate
@@ -325,31 +326,33 @@ void ARM::thumb_op_adjust_stack() {
 //r = push lr -or- pop pc
 //l = register list
 void ARM::thumb_op_stack_multiple() {
-  uint1 load = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint1 branch = instruction() >> 8;
   uint8 list = instruction();
 
   uint32 sp = 0;
-  if(load == 1) sp = r(13);
-  if(load == 0) sp = r(13) - (bit::count(list) + branch) * 4;
+  if(l == 1) sp = r(13);
+  if(l == 0) sp = r(13) - (bit::count(list) + branch) * 4;
 
-  for(unsigned l = 0; l < 8; l++) {
-    if(list & (1 << l)) {
-      if(load == 1) r(l) = read(sp, Word);  //POP
-      if(load == 0) write(sp, Word, r(l));  //PUSH
+  sequential() = false;
+  for(unsigned m = 0; m < 8; m++) {
+    if(list & (1 << m)) {
+      if(l == 1) r(m) = read(sp, Word);  //POP
+      if(l == 0) write(sp, Word, r(m));  //PUSH
       sp += 4;
     }
   }
 
   if(branch) {
     //note: ARMv5+ POP sets cpsr().t
-    if(load == 1) r(15) = read(sp, Word);  //POP
-    if(load == 0) write(sp, Word, r(14));  //PUSH
+    if(l == 1) r(15) = read(sp, Word);  //POP
+    if(l == 0) write(sp, Word, r(14));  //PUSH
     sp += 4;
   }
 
-  if(load == 1) r(13) += (bit::count(list) + branch) * 4;
-  if(load == 0) r(13) -= (bit::count(list) + branch) * 4;
+  if(l == 1) idle();
+  if(l == 1) r(13) += (bit::count(list) + branch) * 4;
+  if(l == 0) r(13) -= (bit::count(list) + branch) * 4;
 }
 
 //(ldmia,stmia) rn!,{r...}
@@ -358,17 +361,20 @@ void ARM::thumb_op_stack_multiple() {
 //n = rn
 //l = register list
 void ARM::thumb_op_move_multiple() {
-  uint1 load = instruction() >> 11;
+  uint1 l = instruction() >> 11;
   uint3 n = instruction() >> 8;
   uint8 list = instruction();
 
-  for(unsigned l = 0; l < 8; l++) {
-    if(list & (1 << l)) {
-      if(load == 1) r(l) = read(r(n), Word);  //LDMIA
-      if(load == 0) write(r(n), Word, r(l));  //STMIA
+  sequential() = false;
+  for(unsigned m = 0; m < 8; m++) {
+    if(list & (1 << m)) {
+      if(l == 1) r(m) = read(r(n), Word);  //LDMIA
+      if(l == 0) write(r(n), Word, r(m));  //STMIA
       r(n) += 4;
     }
   }
+
+  if(l == 1) idle();
 }
 
 //swi #immediate

@@ -112,13 +112,13 @@ uint16 CPU::Registers::Interrupt::operator=(uint16 source) {
 
 CPU::Registers::WaitControl::operator uint16() const {
   return (
-    (sram     <<  0)
-  | (wait0n   <<  2)
-  | (wait0s   <<  4)
-  | (wait1n   <<  5)
-  | (wait1s   <<  7)
-  | (wait2n   <<  8)
-  | (wait2s   << 10)
+    (nwait[3] <<  0)
+  | (nwait[0] <<  2)
+  | (swait[0] <<  4)
+  | (nwait[1] <<  5)
+  | (swait[1] <<  7)
+  | (nwait[2] <<  8)
+  | (swait[2] << 10)
   | (phi      << 11)
   | (prefetch << 14)
   | (gametype << 15)
@@ -126,16 +126,17 @@ CPU::Registers::WaitControl::operator uint16() const {
 }
 
 uint16 CPU::Registers::WaitControl::operator=(uint16 source) {
-  sram     = (source >>  0) & 3;
-  wait0n   = (source >>  2) & 3;
-  wait0s   = (source >>  4) & 1;
-  wait1n   = (source >>  5) & 3;
-  wait1s   = (source >>  7) & 1;
-  wait2n   = (source >>  8) & 3;
-  wait2s   = (source >> 10) & 1;
+  nwait[3] = (source >>  0) & 3;
+  nwait[0] = (source >>  2) & 3;
+  swait[0] = (source >>  4) & 1;
+  nwait[1] = (source >>  5) & 3;
+  swait[1] = (source >>  7) & 1;
+  nwait[2] = (source >>  8) & 3;
+  swait[2] = (source >> 10) & 1;
   phi      = (source >> 11) & 3;
   prefetch = (source >> 14) & 1;
   gametype = (source >> 15) & 1;
+  swait[3] = nwait[3];
   return operator uint16();
 }
 

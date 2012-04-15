@@ -15,8 +15,6 @@ AdvancedSettings::AdvancedSettings() {
   focusPolicy[2].setText("Pause emulation");
   RadioBox::group(focusPolicy[0], focusPolicy[1], focusPolicy[2]);
   focusPolicy[config->input.focusPolicy].setChecked();
-  aboutLabel.setFont(application->boldFont);
-  aboutLabel.setText("bsnes    author: byuu    license: GPLv3    website: byuu.org");
 
   lstring list;
 
@@ -55,8 +53,6 @@ AdvancedSettings::AdvancedSettings() {
     focusPolicyLayout.append(focusPolicy[0], { ~0,  0 }, 5);
     focusPolicyLayout.append(focusPolicy[1], { ~0,  0 }, 5);
     focusPolicyLayout.append(focusPolicy[2], { ~0,  0 }, 0);
-  append(spacer,                             { ~0, ~0 }, 0);
-  append(aboutLabel,                         { ~0,  0 }, 0);
 
   videoDriver.onChange = [&] {
     lstring list;

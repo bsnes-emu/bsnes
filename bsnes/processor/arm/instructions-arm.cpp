@@ -5,6 +5,7 @@ void ARM::arm_step() {
     pipeline.reload = false;
     r(15).data &= ~3;
 
+    sequential() = false;
     pipeline.fetch.address = r(15) & ~3;
     pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
 
@@ -195,8 +196,8 @@ void ARM::arm_op_memory_swap() {
   uint4 d = instruction() >> 12;
   uint4 m = instruction();
 
-  uint32 word = read(r(n), byte ? Byte : Word);
-  write(r(n), byte ? Byte : Word, r(m));
+  uint32 word = load(r(n), byte ? Byte : Word);
+  store(r(n), byte ? Byte : Word, r(m));
   r(d) = word;
 }
 
@@ -215,7 +216,7 @@ void ARM::arm_op_move_half_register() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
-  uint1 load = instruction() >> 20;
+  uint1 l = instruction() >> 20;
   uint4 n = instruction() >> 16;
   uint4 d = instruction() >> 12;
   uint4 m = instruction();
@@ -224,8 +225,8 @@ void ARM::arm_op_move_half_register() {
   uint32 rm = r(m);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(load == 1) r(d) = read(rn, Half);
-  if(load == 0) write(rn, Half, r(d));
+  if(l == 1) r(d) = load(rn, Half);
+  if(l == 0) store(rn, Half, r(d));
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -247,7 +248,7 @@ void ARM::arm_op_move_half_immediate() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
-  uint1 load = instruction() >> 20;
+  uint1 l = instruction() >> 20;
   uint4 n = instruction() >> 16;
   uint4 d = instruction() >> 12;
   uint4 ih = instruction() >> 8;
@@ -257,8 +258,8 @@ void ARM::arm_op_move_half_immediate() {
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  if(load == 1) r(d) = read(rn, Half);
-  if(load == 0) write(rn, Half, r(d));
+  if(l == 1) r(d) = load(rn, Half);
+  if(l == 0) store(rn, Half, r(d));
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -288,7 +289,7 @@ void ARM::arm_op_load_register() {
   uint32 rm = r(m);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  uint32 word = read(rn, half ? Half : Byte);
+  uint32 word = load(rn, half ? Half : Byte);
   r(d) = half ? (int16)word : (int8)word;
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
@@ -321,7 +322,7 @@ void ARM::arm_op_load_immediate() {
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  uint32 word = read(rn, half ? Half : Byte);
+  uint32 word = load(rn, half ? Half : Byte);
   r(d) = half ? (int16)word : (int8)word;
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
@@ -486,7 +487,7 @@ void ARM::arm_op_move_immediate_offset() {
   uint1 up = instruction() >> 23;
   uint1 byte = instruction() >> 22;
   uint1 writeback = instruction() >> 21;
-  uint1 load = instruction() >> 20;
+  uint1 l = instruction() >> 20;
   uint4 n = instruction() >> 16;
   uint4 d = instruction() >> 12;
   uint12 rm = instruction();
@@ -495,8 +496,8 @@ void ARM::arm_op_move_immediate_offset() {
   auto &rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(load == 1) rd = read(rn, byte ? Byte : Word);
-  if(load == 0) write(rn, byte ? Byte : Word, rd);
+  if(l == 1) rd = load(rn, byte ? Byte : Word);
+  if(l == 0) store(rn, byte ? Byte : Word, rd);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -521,7 +522,7 @@ void ARM::arm_op_move_register_offset() {
   uint1 up = instruction() >> 23;
   uint1 byte = instruction() >> 22;
   uint1 writeback = instruction() >> 21;
-  uint1 load = instruction() >> 20;
+  uint1 l = instruction() >> 20;
   uint4 n = instruction() >> 16;
   uint4 d = instruction() >> 12;
   uint5 immediate = instruction() >> 7;
@@ -540,8 +541,8 @@ void ARM::arm_op_move_register_offset() {
   if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(load == 1) rd = read(rn, byte ? Byte : Word);
-  if(load == 0) write(rn, byte ? Byte : Word, rd);
+  if(l == 1) rd = load(rn, byte ? Byte : Word);
+  if(l == 0) store(rn, byte ? Byte : Word, rd);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -562,7 +563,7 @@ void ARM::arm_op_move_multiple() {
   uint1 up = instruction() >> 23;
   uint1 s = instruction() >> 22;
   uint1 writeback = instruction() >> 21;
-  uint1 load = instruction() >> 20;
+  uint1 l = instruction() >> 20;
   uint4 n = instruction() >> 16;
   uint16 list = instruction();
 
@@ -574,25 +575,29 @@ void ARM::arm_op_move_multiple() {
 
   Processor::Mode pmode = mode();
   bool usr = false;
-  if(s && load == 1 && (list & 0x8000) == 0) usr = true;
-  if(s && load == 0) usr = true;
+  if(s && l == 1 && (list & 0x8000) == 0) usr = true;
+  if(s && l == 0) usr = true;
 
   if(usr) processor.setMode(Processor::Mode::USR);
 
-  for(unsigned n = 0; n < 16; n++) {
-    if(list & (1 << n)) {
-      if(load == 1) r(n) = read(rn, Word);
-      if(load == 0) write(rn, Word, r(n));
+  sequential() = false;
+  for(unsigned m = 0; m < 16; m++) {
+    if(list & (1 << m)) {
+      if(l == 1) r(m) = read(rn, Word);
+      if(l == 0) write(rn, Word, r(m));
       rn += 4;
     }
   }
 
   if(usr) processor.setMode(pmode);
 
-  if(load == 1 && s && (list & 0x8000)) {
-    if(mode() != Processor::Mode::USR && mode() != Processor::Mode::SYS) {
-      cpsr() = spsr();
-      processor.setMode((Processor::Mode)cpsr().m);
+  if(l == 1) {
+    idle();
+    if(s && (list & 0x8000)) {
+      if(mode() != Processor::Mode::USR && mode() != Processor::Mode::SYS) {
+        cpsr() = spsr();
+        processor.setMode((Processor::Mode)cpsr().m);
+      }
     }
   }
 

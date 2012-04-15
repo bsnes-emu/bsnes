@@ -45,6 +45,11 @@ void CPU::step(unsigned clocks) {
   if(apu.clock < 0) co_switch(apu.thread);
 }
 
+void CPU::bus_idle(uint32 addr) {
+  step(1);
+  return bus.idle(addr);
+}
+
 uint32 CPU::bus_read(uint32 addr, uint32 size) {
   step(bus.speed(addr, size));
   return bus.read(addr, size);

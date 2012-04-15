@@ -11,6 +11,7 @@ void ARM::Processor::power() {
   pc = 0;
 
   carryout = false;
+  sequential = false;
   irqline = false;
 
   cpsr = 0;

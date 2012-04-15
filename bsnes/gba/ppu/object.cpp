@@ -56,7 +56,7 @@ void PPU::render_object(Object &obj) {
       x = (x / (1 + regs.mosaic.objhsize)) * (1 + regs.mosaic.objhsize);
     }
 
-    unsigned ox = obj.x + px;
+    uint9 ox = obj.x + px;
     if(ox < 240 && x < obj.width && y < obj.height) {
       unsigned offset = (y / 8) * rowsize + (x / 8);
       offset = offset * 64 + (y & 7) * 8 + (x & 7);

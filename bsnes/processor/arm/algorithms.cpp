@@ -55,63 +55,40 @@ uint32 ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) {
   return product;
 }
 
-uint32 ARM::lsl(uint32 source, uint32 shift) {
-  while(shift--) {
-    carryout() = source >> 31;
-    source <<= 1;
-  }
+uint32 ARM::lsl(uint32 source, uint8 shift) {
+  carryout() = cpsr().c;
+  if(shift == 0) return source;
 
-  if(cpsr().t) {
-    cpsr().n = source >> 31;
-    cpsr().z = source == 0;
-    cpsr().c = carryout();
-  }
-
+  carryout() = shift > 32 ? 0 : source & (1 << 32 - shift);
+  source     = shift > 31 ? 0 : source << shift;
   return source;
 }
 
-uint32 ARM::lsr(uint32 source, uint32 shift) {
-  while(shift--) {
-    carryout() = source & 1;
-    source >>= 1;
-  }
+uint32 ARM::lsr(uint32 source, uint8 shift) {
+  carryout() = cpsr().c;
+  if(shift == 0) return source;
 
-  if(cpsr().t) {
-    cpsr().n = source >> 31;
-    cpsr().z = source == 0;
-    cpsr().c = carryout();
-  }
-
+  carryout() = shift > 32 ? 0 : source & (1 << shift - 1);
+  source     = shift > 31 ? 0 : source >> shift;
   return source;
 }
 
-uint32 ARM::asr(uint32 source, uint32 shift) {
-  while(shift--) {
-    carryout() = source & 1;
-    source = (int32)source >> 1;
-  }
+uint32 ARM::asr(uint32 source, uint8 shift) {
+  carryout() = cpsr().c;
+  if(shift == 0) return source;
 
-  if(cpsr().t) {
-    cpsr().n = source >> 31;
-    cpsr().z = source == 0;
-    cpsr().c = carryout();
-  }
-
+  carryout() = shift > 32 ? source & (1 << 31) : source & (1 << shift - 1);
+  source     = shift > 31 ? (int32)source >> 31 : (int32)source >> shift;
   return source;
 }
 
-uint32 ARM::ror(uint32 source, uint32 shift) {
-  while(shift--) {
-    carryout() = source & 1;
-    source = (source << 31) | (source >> 1);
-  }
+uint32 ARM::ror(uint32 source, uint8 shift) {
+  carryout() = cpsr().c;
+  if(shift == 0) return source;
 
-  if(cpsr().t) {
-    cpsr().n = source >> 31;
-    cpsr().z = source == 0;
-    cpsr().c = carryout();
-  }
-
+  if(shift &= 31)
+  source     = source << 32 - shift | source >> shift;
+  carryout() = source & (1 << 31);
   return source;
 }
 

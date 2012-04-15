@@ -91,13 +91,8 @@ struct Registers {
   } irq;
 
   struct WaitControl {
-    uint2 sram;
-    uint2 wait0n;
-    uint1 wait0s;
-    uint2 wait1n;
-    uint1 wait1s;
-    uint2 wait2n;
-    uint1 wait2s;
+    uint2 nwait[4];
+    uint2 swait[4];
     uint2 phi;
     uint1 prefetch;
     uint1 gametype;

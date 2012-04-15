@@ -1,6 +1,12 @@
 #ifdef ARMDSP_CPP
 
+void ArmDSP::bus_idle(uint32 addr) {
+  step(1);
+}
+
 uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
+  step(1);
+
   static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) {
     memory += addr & ~3;
     return (memory[0] << 0) | (memory[1] << 8) | (memory[2] << 16) | (memory[3] << 24);
@@ -34,6 +40,8 @@ uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
 }
 
 void ArmDSP::bus_write(uint32 addr, uint32 size, uint32 word) {
+  step(1);
+
   static auto memory = [](uint8 *memory, uint32 addr, uint32 size, uint32 word) {
     switch(size) {
     case Word:
