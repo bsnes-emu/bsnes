@@ -46,18 +46,9 @@ struct Registers {
   } timer[4];
 
   struct KeypadControl {
-    bool a;
-    bool b;
-    bool select;
-    bool start;
-    bool right;
-    bool left;
-    bool up;
-    bool down;
-    bool r;
-    bool l;
-    bool enable;
-    bool condition;
+    uint1 flag[10];
+    uint1 enable;
+    uint1 condition;
 
     operator uint16() const;
     uint16 operator=(uint16 source);

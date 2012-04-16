@@ -3,17 +3,6 @@ struct Memory {
   virtual void write(uint32 addr, uint32 size, uint32 word) = 0;
 };
 
-struct StaticMemory : Memory {
-  uint8_t *data;
-  unsigned size;
-
-  uint8& operator[](uint32 addr);
-  uint32 read(uint32 addr, uint32 size);
-  void write(uint32 addr, uint32 size, uint32 word);
-  StaticMemory();
-  ~StaticMemory();
-};
-
 struct MMIO : Memory {
   virtual uint8 read(uint32 addr) = 0;
   virtual void write(uint32 addr, uint8 data) = 0;
@@ -31,6 +20,8 @@ struct Bus : Memory {
   uint32 read(uint32 addr, uint32 size);
   void write(uint32 addr, uint32 size, uint32 word);
   void power();
+
+  void serialize(serializer&);
 };
 
 extern Bus bus;

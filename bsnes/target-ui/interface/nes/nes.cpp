@@ -62,7 +62,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 
   if(NES::cartridge.ram_size()) {
     filemap fp;
-    if(fp.open(interface->base.filename("program.ram", ".sav"), filemap::mode::read)) {
+    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
       memcpy(NES::cartridge.ram_data(), fp.data(), min(NES::cartridge.ram_size(), fp.size()));
     }
   }
@@ -74,7 +74,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 
 void InterfaceNES::unloadCartridge() {
   if(NES::cartridge.ram_size()) {
-    file::write(interface->base.filename("program.ram", ".sav"), NES::cartridge.ram_data(), NES::cartridge.ram_size());
+    file::write(interface->base.filename("save.ram", ".sav"), NES::cartridge.ram_data(), NES::cartridge.ram_size());
   }
   NES::cartridge.unload();
   interface->base.name = "";

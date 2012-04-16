@@ -225,17 +225,17 @@ void InterfaceSNES::run() {
 
 string InterfaceSNES::memoryName(SNES::Cartridge::NonVolatileRAM &memory) {
   if(memory.slot == SNES::Cartridge::Slot::Base) {
-    if(memory.id == "program.ram") return interface->base.filename("program.ram", ".srm");
-    if(memory.id == "program.rtc") return interface->base.filename("program.rtc", ".rtc");
+    if(memory.id == "save.ram") return interface->base.filename("save.ram", ".srm");
+    if(memory.id == "rtc.ram") return interface->base.filename("rtc.ram", ".rtc");
     if(memory.id == "upd96050.ram") return interface->base.filename("upd96050.ram", ".nec");
     if(memory.id == "bsx.ram") return interface->base.filename("bsx.ram", ".bss");
     if(memory.id == "bsx.psram") return interface->base.filename("bsx.psram", ".bsp");
   }
   if(memory.slot == SNES::Cartridge::Slot::SufamiTurboA) {
-    if(memory.id == "program.ram") return interface->slot[0].filename("program.ram", ".sts");
+    if(memory.id == "save.ram") return interface->slot[0].filename("save.ram", ".sts");
   }
   if(memory.slot == SNES::Cartridge::Slot::SufamiTurboB) {
-    if(memory.id == "program.ram") return interface->slot[1].filename("program.ram", ".sts");
+    if(memory.id == "save.ram") return interface->slot[1].filename("save.ram", ".sts");
   }
   return "";
 }
@@ -259,7 +259,7 @@ void InterfaceSNES::loadMemory() {
     if(GB::cartridge.ramsize) {
       uint8_t *data;
       unsigned size;
-      if(file::read(interface->slot[0].filename("program.ram", ".sav"), data, size)) {
+      if(file::read(interface->slot[0].filename("save.ram", ".sav"), data, size)) {
         memcpy(GB::cartridge.ramdata, data, min(GB::cartridge.ramsize, size));
         delete[] data;
       }
@@ -279,7 +279,7 @@ void InterfaceSNES::saveMemory() {
 
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
     if(GB::cartridge.ramsize) {
-      file::write(interface->slot[0].filename("program.ram", ".sav"),
+      file::write(interface->slot[0].filename("save.ram", ".sav"),
         GB::cartridge.ramdata, GB::cartridge.ramsize
       );
     }

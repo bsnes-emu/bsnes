@@ -42,34 +42,34 @@ uint8 CPU::Registers::TimerControl::operator=(uint8 source) {
 
 CPU::Registers::KeypadControl::operator uint16() const {
   return (
-    (a         <<  0)
-  | (b         <<  1)
-  | (select    <<  2)
-  | (start     <<  3)
-  | (right     <<  4)
-  | (left      <<  5)
-  | (up        <<  6)
-  | (down      <<  7)
-  | (r         <<  8)
-  | (l         <<  9)
+    (flag[0]   <<  0)
+  | (flag[1]   <<  1)
+  | (flag[2]   <<  2)
+  | (flag[3]   <<  3)
+  | (flag[4]   <<  4)
+  | (flag[5]   <<  5)
+  | (flag[6]   <<  6)
+  | (flag[7]   <<  7)
+  | (flag[8]   <<  8)
+  | (flag[9]   <<  9)
   | (enable    << 14)
   | (condition << 15)
   );
 }
 
 uint16 CPU::Registers::KeypadControl::operator=(uint16 source) {
-  a         = (source >>  0) & 1;
-  b         = (source >>  1) & 1;
-  select    = (source >>  2) & 1;
-  start     = (source >>  3) & 1;
-  right     = (source >>  4) & 1;
-  left      = (source >>  5) & 1;
-  up        = (source >>  6) & 1;
-  down      = (source >>  7) & 1;
-  r         = (source >>  8) & 1;
-  l         = (source >>  9) & 1;
-  enable    = (source >> 14) & 1;
-  condition = (source >> 15) & 1;
+  flag[0]   = source >>  0;
+  flag[1]   = source >>  1;
+  flag[2]   = source >>  2;
+  flag[3]   = source >>  3;
+  flag[4]   = source >>  4;
+  flag[5]   = source >>  5;
+  flag[6]   = source >>  6;
+  flag[7]   = source >>  7;
+  flag[8]   = source >>  8;
+  flag[9]   = source >>  9;
+  enable    = source >> 14;
+  condition = source >> 15;
   return operator uint16();
 }
 

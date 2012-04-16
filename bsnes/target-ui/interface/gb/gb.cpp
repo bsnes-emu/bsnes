@@ -37,7 +37,7 @@ bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &fil
 
   if(GB::cartridge.ramsize) {
     filemap fp;
-    if(fp.open(interface->base.filename("program.ram", ".sav"), filemap::mode::read)) {
+    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
       memcpy(GB::cartridge.ramdata, fp.data(), min(GB::cartridge.ramsize, fp.size()));
     }
   }
@@ -50,7 +50,7 @@ bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &fil
 
 void InterfaceGB::unloadCartridge() {
   if(GB::cartridge.ramsize) {
-    file::write(interface->base.filename("program.ram", ".sav"), GB::cartridge.ramdata, GB::cartridge.ramsize);
+    file::write(interface->base.filename("save.ram", ".sav"), GB::cartridge.ramdata, GB::cartridge.ramsize);
   }
 
   GB::cartridge.unload();

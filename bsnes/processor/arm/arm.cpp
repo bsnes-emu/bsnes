@@ -8,6 +8,7 @@ namespace Processor {
 #include "instructions-arm.cpp"
 #include "instructions-thumb.cpp"
 #include "disassembler.cpp"
+#include "serialization.cpp"
 
 void ARM::power() {
   processor.power();
@@ -74,9 +75,6 @@ void ARM::vector(uint32 addr, Processor::Mode mode) {
   cpsr().t = 0;
   r(14) = pipeline.decode.address;
   r(15) = addr;
-}
-
-void ARM::serialize(serializer &s) {
 }
 
 }

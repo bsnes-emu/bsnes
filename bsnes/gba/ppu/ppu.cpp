@@ -18,14 +18,21 @@ namespace GBA {
 #include "screen.cpp"
 #include "mmio.cpp"
 #include "memory.cpp"
+#include "serialization.cpp"
 PPU ppu;
 
-void PPU::Enter() { ppu.enter(); }
-
-void PPU::enter() {
+void PPU::Enter() {
   while(true) {
-    scanline();
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    ppu.main();
   }
+}
+
+void PPU::main() {
+  scanline();
 }
 
 void PPU::step(unsigned clocks) {
@@ -80,6 +87,8 @@ void PPU::power() {
 }
 
 void PPU::scanline() {
+  cpu.keypad_run();
+
   regs.status.vblank = regs.vcounter >= 160 && regs.vcounter <= 226;
   regs.status.vcoincidence = regs.vcounter == regs.status.vcompare;
 
@@ -103,7 +112,7 @@ void PPU::scanline() {
   }
 
   if(regs.vcounter < 160) {
-    if(regs.control.forceblank) {
+    if(regs.control.forceblank || cpu.regs.mode == CPU::Registers::Mode::Stop) {
       render_forceblank();
     } else {
       for(unsigned x = 0; x < 240; x++) {

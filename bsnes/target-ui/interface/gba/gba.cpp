@@ -1,5 +1,5 @@
 void InterfaceGBA::initialize() {
-  string filename = application->path("GBA.system/manifest.xml");
+  string filename = application->path("Game Boy Advance.system/manifest.xml");
   string markup;
   markup.readfile(filename);
   XML::Document document(markup);
@@ -53,13 +53,25 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
   GBA::system.power();
   delete[] data;
 
+  if(GBA::cartridge.ram_size()) {
+    filemap fp;
+    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
+      memcpy(GBA::cartridge.ram_data(), fp.data(), min(GBA::cartridge.ram_size(), fp.size()));
+    }
+  }
+
   GBA::video.generate(GBA::Video::Format::RGB30);
   interface->loadCartridge(::Interface::Mode::GBA);
   return true;
 }
 
 void InterfaceGBA::unloadCartridge() {
-  return GBA::cartridge.unload();
+  if(GBA::cartridge.ram_size()) {
+    file::write(interface->base.filename("save.ram", ".sav"), GBA::cartridge.ram_data(), GBA::cartridge.ram_size());
+  }
+
+  GBA::cartridge.unload();
+  interface->base.name = "";
 }
 
 void InterfaceGBA::power() {
@@ -75,11 +87,12 @@ void InterfaceGBA::run() {
 }
 
 serializer InterfaceGBA::serialize() {
-  return serializer();
+  GBA::system.runtosave();
+  return GBA::system.serialize();
 }
 
 bool InterfaceGBA::unserialize(serializer &s) {
-  return false;
+  return GBA::system.unserialize(s);
 }
 
 void InterfaceGBA::setCheats(const lstring &list) {

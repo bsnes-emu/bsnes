@@ -38,7 +38,7 @@ void Cartridge::load(Mode cartridge_mode, const char *markup) {
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);
-    nvram.append({ "program.ram", ram.data(), ram.size() });
+    nvram.append({ "save.ram", ram.data(), ram.size() });
   }
 
   rom.write_protect(true);

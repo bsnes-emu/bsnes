@@ -23,7 +23,7 @@ void Cartridge::EEPROM::write(bool bit) {
 
   else if(mode == Mode::ReadAddress) {
     address = (address << 1) | bit;
-    if(++offset == size) {
+    if(++offset == bits) {
       mode = Mode::ReadValidate;
       offset = 0;
     }
@@ -36,7 +36,7 @@ void Cartridge::EEPROM::write(bool bit) {
 
   else if(mode == Mode::WriteAddress) {
     address = (address << 1) | bit;
-    if(++offset == size) {
+    if(++offset == bits) {
       mode = Mode::WriteData;
       offset = 0;
     }
@@ -56,9 +56,8 @@ void Cartridge::EEPROM::write(bool bit) {
 }
 
 void Cartridge::EEPROM::power() {
-  data.resize(64 * 1024);
-  data.clear();
-  size = 6;
+  data.resize(size);
+  bits = (size <= 512 ? 6 : 14);
 
   mode = Mode::Wait;
   offset = 0;

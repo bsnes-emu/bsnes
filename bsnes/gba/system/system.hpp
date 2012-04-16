@@ -18,8 +18,20 @@ struct BIOS : Memory {
 struct System {
   void init();
   void term();
+  void load();
   void power();
   void run();
+  void runtosave();
+  void runthreadtosave();
+
+  unsigned serialize_size;
+
+  serializer serialize();
+  bool unserialize(serializer&);
+
+  void serialize(serializer&);
+  void serialize_all(serializer&);
+  void serialize_init();
 };
 
 extern BIOS bios;

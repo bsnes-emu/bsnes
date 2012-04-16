@@ -9,7 +9,7 @@ uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
 
   static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) {
     memory += addr & ~3;
-    return (memory[0] << 0) | (memory[1] << 8) | (memory[2] << 16) | (memory[3] << 24);
+    return memory[0] << 0 | memory[1] << 8 | memory[2] << 16 | memory[3] << 24;
   };
 
   switch(addr & 0xe0000000) {

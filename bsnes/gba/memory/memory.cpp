@@ -3,6 +3,7 @@
 namespace GBA {
 
 #include "mmio.cpp"
+#include "serialization.cpp"
 Bus bus;
 
 struct UnmappedMemory : Memory {
@@ -11,49 +12,6 @@ struct UnmappedMemory : Memory {
 };
 
 static UnmappedMemory unmappedMemory;
-
-uint8& StaticMemory::operator[](uint32 addr) {
-  return data[addr];
-}
-
-uint32 StaticMemory::read(uint32 addr, uint32 size) {
-  switch(size) {
-  case Word: addr &= ~3; return (data[addr + 0] << 0) | (data[addr + 1] << 8) | (data[addr + 2] << 16) | (data[addr + 3] << 24);
-  case Half: addr &= ~1; return (data[addr + 0] << 0) | (data[addr + 1] << 8);
-  case Byte:             return (data[addr + 0] << 0);
-  }
-}
-
-void StaticMemory::write(uint32 addr, uint32 size, uint32 word) {
-  switch(size) {
-  case Word:
-    addr &= ~3;
-    data[addr + 0] = word >>  0;
-    data[addr + 1] = word >>  8;
-    data[addr + 2] = word >> 16;
-    data[addr + 3] = word >> 24;
-    break;
-  case Half:
-    addr &= ~1;
-    data[addr + 0] = word >>  0;
-    data[addr + 1] = word >>  8;
-    break;
-  case Byte:
-    data[addr + 0] = word >>  0;
-    break;
-  }
-}
-
-StaticMemory::StaticMemory() {
-  data = nullptr;
-  size = 0u;
-}
-
-StaticMemory::~StaticMemory() {
-  if(data) delete[] data;
-}
-
-//
 
 uint32 Bus::mirror(uint32 addr, uint32 size) {
   uint32 base = 0;
@@ -78,12 +36,20 @@ uint32 Bus::speed(uint32 addr, uint32 size) {
     static unsigned timing[] = { 5, 4, 3, 9 };
     unsigned n = cpu.regs.wait.control.nwait[addr >> 25 & 3];
     unsigned s = cpu.regs.wait.control.swait[addr >> 25 & 3];
+    n = timing[n];
+
+    switch(addr >> 25 & 3) {
+    case 0: s = s ? 3 : 2; break;
+    case 1: s = s ? 5 : 2; break;
+    case 2: s = s ? 9 : 2; break;
+    case 3: s = n; break;
+    }
 
     bool sequential = cpu.sequential();
-    if((addr & 0xffff << 1) == 0) sequential = false;
-    if(idleflag) sequential = false;
+    if((addr & 0xffff << 1) == 0) sequential = false;  //N cycle on 16-bit ROM crossing page boundary (RAM S==N)
+    if(idleflag) sequential = false;  //LDR/LDM interrupts instruction fetches
 
-    if(sequential) return s << (size == Word);  //16-bit bus
+    if(sequential) return s << (size == Word);  //16-bit bus requires two transfers for words
     if(size == Word) n += s;
     return n;
   }
@@ -91,7 +57,7 @@ uint32 Bus::speed(uint32 addr, uint32 size) {
   switch(addr >> 24 & 7) {
   case 0: return 1;
   case 1: return 1;
-  case 2: return 3 << (size == Word);
+  case 2: return (1 + 15 - cpu.regs.memory.control.ewramwait) << (size == Word);
   case 3: return 1;
   case 4: return 1;
   case 5: return 1 << (size == Word);
@@ -111,12 +77,12 @@ uint32 Bus::read(uint32 addr, uint32 size) {
   switch(addr >> 24 & 7) {
   case 0: return bios.read(addr, size);
   case 1: return bios.read(addr, size);
-  case 2: return cpu.ewram.read(addr & 0x3ffff, size);
-  case 3: return cpu.iwram.read(addr & 0x7fff, size);
+  case 2: return cpu.ewram_read(addr, size);
+  case 3: return cpu.iwram_read(addr, size);
   case 4:
     if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->read(addr, size);
     if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).read(0x04000800 | (addr & 3), size);
-    return 0u;
+    return cpu.pipeline.fetch.instruction;
   case 5: return ppu.pram_read(addr, size);
   case 6: return ppu.vram_read(addr, size);
   case 7: return ppu.oam_read(addr, size);
@@ -130,8 +96,8 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
   switch(addr >> 24 & 7) {
   case 0: return;
   case 1: return;
-  case 2: return cpu.ewram.write(addr & 0x3ffff, size, word);
-  case 3: return cpu.iwram.write(addr & 0x7fff, size, word);
+  case 2: return cpu.ewram_write(addr, size, word);
+  case 3: return cpu.iwram_write(addr, size, word);
   case 4:
     if((addr & 0xfffffc00) == 0x04000000) return mmio[addr & 0x3ff]->write(addr, size, word);
     if((addr & 0xff00ffff) == 0x04000800) return ((MMIO&)cpu).write(0x04000800 | (addr & 3), size, word);

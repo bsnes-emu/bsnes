@@ -151,7 +151,7 @@ void APU::write(uint32 addr, uint8 byte) {
     fifo[1].renable = byte >> 4;
     fifo[1].lenable = byte >> 5;
     fifo[1].timer   = byte >> 6;
-    if(byte & 1 << 7) fifo[0].reset();
+    if(byte & 1 << 7) fifo[1].reset();
     return;
 
   //NR52

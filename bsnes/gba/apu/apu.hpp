@@ -10,6 +10,8 @@ struct APU : Thread, MMIO {
   void power();
 
   void runsequencer();
+
+  void serialize(serializer&);
 };
 
 extern APU apu;

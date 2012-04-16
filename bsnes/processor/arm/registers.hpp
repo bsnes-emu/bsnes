@@ -44,6 +44,8 @@ struct PSR {
     m = d & 31;
     return *this;
   }
+
+  void serialize(serializer&);
 };
 
 struct Pipeline {

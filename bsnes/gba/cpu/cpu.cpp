@@ -4,40 +4,65 @@ namespace GBA {
 
 #include "registers.cpp"
 #include "mmio.cpp"
+#include "memory.cpp"
 #include "dma.cpp"
 #include "timer.cpp"
+#include "serialization.cpp"
 CPU cpu;
 
-void CPU::Enter() { cpu.enter(); }
-
-void CPU::enter() {
+void CPU::Enter() {
   while(true) {
-    if(crash) {
-      print(cpsr().t ? disassemble_thumb_instruction(pipeline.execute.address)
-                       : disassemble_arm_instruction(pipeline.execute.address), "\n");
-      print(disassemble_registers(), "\n");
-      print("Executed: ", instructions, "\n");
-      while(true) step(frequency);
+    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
+      scheduler.sync = Scheduler::SynchronizeMode::All;
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    processor.irqline = regs.ime && (regs.irq.enable & regs.irq.flag);
-    dma_run();
+    cpu.main();
+  }
+}
 
-    if(regs.mode == Registers::Mode::Halt) {
-      if((regs.irq.enable & regs.irq.flag) == 0) {
-        step(16);
-        continue;
-      }
+void CPU::main() {
+  #if defined(DEBUG)
+  if(crash) {
+    print(cpsr().t ? disassemble_thumb_instruction(pipeline.execute.address)
+                     : disassemble_arm_instruction(pipeline.execute.address), "\n");
+    print(disassemble_registers(), "\n");
+    print("Executed: ", instructions, "\n");
+    while(true) step(frequency);
+  }
+  #endif
+
+  processor.irqline = regs.ime && (regs.irq.enable & regs.irq.flag);
+
+  if(regs.mode == Registers::Mode::Stop) {
+    if((regs.irq.enable.keypad & regs.irq.flag.keypad) == 0) {
+      sync_step(16);  //STOP does not advance timers
+    } else {
       regs.mode = Registers::Mode::Normal;
     }
-
-    exec();
+    return;
   }
+
+  dma_run();
+
+  if(regs.mode == Registers::Mode::Halt) {
+    if((regs.irq.enable & regs.irq.flag) == 0) {
+      step(16);
+    } else {
+      regs.mode = Registers::Mode::Normal;
+    }
+    return;
+  }
+
+  exec();
 }
 
 void CPU::step(unsigned clocks) {
   timer_step(clocks);
+  sync_step(clocks);
+}
 
+void CPU::sync_step(unsigned clocks) {
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
 
@@ -60,12 +85,25 @@ void CPU::bus_write(uint32 addr, uint32 size, uint32 word) {
   return bus.write(addr, size, word);
 }
 
+void CPU::keypad_run() {
+  if(regs.keypad.control.enable == false) return;
+
+  bool test = regs.keypad.control.condition;  //0 = OR, 1 = AND
+  for(unsigned n = 0; n < 10; n++) {
+    if(regs.keypad.control.flag[n] == false) continue;
+    bool input = interface->inputPoll(n);
+    if(regs.keypad.control.condition == 0) test |= input;
+    if(regs.keypad.control.condition == 1) test &= input;
+  }
+  if(test) regs.irq.flag.keypad = true;
+}
+
 void CPU::power() {
   create(CPU::Enter, 16777216);
 
   ARM::power();
-  for(unsigned n = 0; n < iwram.size; n++) iwram.data[n] = 0;
-  for(unsigned n = 0; n < ewram.size; n++) ewram.data[n] = 0;
+  for(unsigned n = 0; n <  32 * 1024; n++) iwram[n] = 0;
+  for(unsigned n = 0; n < 256 * 1024; n++) ewram[n] = 0;
 
   for(auto &dma : regs.dma) {
     dma.source = 0;
@@ -101,8 +139,13 @@ void CPU::power() {
 }
 
 CPU::CPU() {
-  iwram.data = new uint8[iwram.size =  32 * 1024];
-  ewram.data = new uint8[ewram.size = 256 * 1024];
+  iwram = new uint8[ 32 * 1024];
+  ewram = new uint8[256 * 1024];
+}
+
+CPU::~CPU() {
+  delete[] iwram;
+  delete[] ewram;
 }
 
 }

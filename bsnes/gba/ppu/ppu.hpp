@@ -7,7 +7,7 @@ struct PPU : Thread, MMIO {
   uint16 *blur;
 
   static void Enter();
-  void enter();
+  void main();
   void step(unsigned clocks);
 
   void power();
@@ -40,6 +40,7 @@ struct PPU : Thread, MMIO {
   void render_window(unsigned window);
   unsigned blend(unsigned above, unsigned eva, unsigned below, unsigned evb);
 
+  void serialize(serializer&);
   PPU();
   ~PPU();
 };

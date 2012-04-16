@@ -79,7 +79,7 @@ else ifeq ($(platform),x)
 
 	mkdir -p ~/.config/$(name)
 	cp data/cheats.xml ~/.config/$(name)/cheats.xml
-	cp -R data/GBA.system ~/.config/$(name)
+	cp -R "data/Game Boy Advance.system" ~/.config/$(name)
 	chmod -R 777 ~/.config/$(name)
 endif
 
