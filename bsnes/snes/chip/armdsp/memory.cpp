@@ -7,9 +7,14 @@ void ArmDSP::bus_idle(uint32 addr) {
 uint32 ArmDSP::bus_read(uint32 addr, uint32 size) {
   step(1);
 
-  static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) {
-    memory += addr & ~3;
-    return memory[0] << 0 | memory[1] << 8 | memory[2] << 16 | memory[3] << 24;
+  static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) -> uint32 {
+    switch(size) {
+    case Word:
+      memory += addr & ~3;
+      return memory[0] << 0 | memory[1] << 8 | memory[2] << 16 | memory[3] << 24;
+    case Byte:
+      return memory[addr];
+    }
   };
 
   switch(addr & 0xe0000000) {

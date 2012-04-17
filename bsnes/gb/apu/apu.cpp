@@ -49,7 +49,7 @@ void APU::main() {
     interface->audioSample(master.center, master.left, master.right);
 
     clock += 1 * cpu.frequency;
-    if(clock >= 0) co_switch(scheduler.active_thread = cpu.thread);
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(scheduler.active_thread = cpu.thread);
   }
 }
 

@@ -1,10 +1,11 @@
 struct Memory {
   uint8 *data;
   unsigned size;
+  unsigned mask;
 } rom, ram;
 
 struct EEPROM {
-  bitarray data;
+  uint8 *data;
   unsigned size;
   unsigned mask;
   unsigned test;
@@ -14,9 +15,13 @@ struct EEPROM {
   unsigned offset;
   unsigned address;
 
+  bool read(unsigned addr);
+  void write(unsigned addr, bool bit);
+
   bool read();
   void write(bool bit);
   void power();
+  void serialize(serializer&);
 } eeprom;
 
 struct FlashROM {
@@ -35,4 +40,5 @@ struct FlashROM {
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 byte);
   void power();
+  void serialize(serializer&);
 } flashrom;

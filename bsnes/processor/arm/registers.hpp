@@ -30,7 +30,7 @@ struct PSR {
 
   inline operator uint32() const {
     return (n << 31) + (z << 30) + (c << 29) + (v << 28)
-         + (i << 7) + (f << 6) + (t << 5) + (m << 0);
+         + (i <<  7) + (f <<  6) + (t <<  5) + (m <<  0);
   }
 
   inline PSR& operator=(uint32 d) {

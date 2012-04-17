@@ -23,7 +23,9 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
 
     if(info["type"].data == "SRAM" || info["type"].data == "FRAM") {
       has_sram = true;
-      ram.size = 32 * 1024;
+      ram.size = numeral(info["size"].data);
+      ram.mask = ram.size - 1;
+      for(unsigned n = 0; n < ram.size; n++) ram.data[n] = 0;
     }
 
     if(info["type"].data == "EEPROM") {
@@ -31,12 +33,14 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
       eeprom.size = numeral(info["size"].data);
       eeprom.mask = size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
       eeprom.test = size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
+      for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0;
     }
 
     if(info["type"].data == "FlashROM") {
       has_flashrom = true;
       flashrom.id = numeral(info["id"].data);
       flashrom.size = numeral(info["size"].data);
+      for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0;
     }
   }
 
@@ -58,7 +62,7 @@ void Cartridge::power() {
 
 uint8* Cartridge::ram_data() {
   if(has_sram) return ram.data;
-  if(has_eeprom) return eeprom.data.data();
+  if(has_eeprom) return eeprom.data;
   if(has_flashrom) return flashrom.data;
   return nullptr;
 }
@@ -92,7 +96,7 @@ void Cartridge::write(uint8 *data, uint32 addr, uint32 size, uint32 word) {
 }
 
 uint32 Cartridge::read(uint32 addr, uint32 size) {
-  if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return read(ram.data, addr & 0x7fff, size);
+  if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return read(ram.data, addr & ram.mask, size);
   if(has_eeprom   && (addr & eeprom.mask) == eeprom.test) return eeprom.read();
   if(has_flashrom && (addr & 0x0f000000 ) == 0x0e000000 ) return flashrom.read(addr);
   if(addr < 0x0e000000) return read(rom.data, addr & 0x01ffffff, size);
@@ -100,7 +104,7 @@ uint32 Cartridge::read(uint32 addr, uint32 size) {
 }
 
 void Cartridge::write(uint32 addr, uint32 size, uint32 word) {
-  if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return write(ram.data, addr & 0x7fff, size, word);
+  if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return write(ram.data, addr & ram.mask, size, word);
   if(has_eeprom   && (addr & eeprom.mask) == eeprom.test) return eeprom.write(word & 1);
   if(has_flashrom && (addr & 0x0f000000 ) == 0x0e000000 ) return flashrom.write(addr, word);
 }
@@ -109,6 +113,7 @@ Cartridge::Cartridge() {
   loaded = false;
   rom.data = new uint8[rom.size = 32 * 1024 * 1024];
   ram.data = new uint8[ram.size = 32 * 1024];
+  eeprom.data = new uint8[eeprom.size = 8 * 1024];
   flashrom.data = new uint8[flashrom.size = 128 * 1024];
 }
 

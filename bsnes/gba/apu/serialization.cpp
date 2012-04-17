@@ -68,6 +68,7 @@ void APU::serialize(serializer &s) {
   s.integer(noise.envelope.direction);
   s.integer(noise.envelope.volume);
   s.integer(noise.envelope.period);
+
   s.integer(noise.length);
   s.integer(noise.divisor);
   s.integer(noise.narrowlfsr);

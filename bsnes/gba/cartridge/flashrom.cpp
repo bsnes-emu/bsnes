@@ -88,3 +88,16 @@ void Cartridge::FlashROM::power() {
   writeselect = false;
   bank = 0;
 }
+
+void Cartridge::FlashROM::serialize(serializer &s) {
+  s.array(data, size);
+  s.integer(size);
+  s.integer(id);
+  s.integer(unlockhi);
+  s.integer(unlocklo);
+  s.integer(idmode);
+  s.integer(erasemode);
+  s.integer(bankselect);
+  s.integer(writeselect);
+  s.integer(bank);
+}

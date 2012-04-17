@@ -33,6 +33,8 @@ bool System::unserialize(serializer &s) {
 }
 
 void System::serialize(serializer &s) {
+  s.integer(bios.size);
+  s.integer(bios.mdr);
 }
 
 void System::serialize_all(serializer &s) {

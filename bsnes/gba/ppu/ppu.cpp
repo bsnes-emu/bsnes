@@ -37,7 +37,7 @@ void PPU::main() {
 
 void PPU::step(unsigned clocks) {
   clock += clocks;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
 void PPU::power() {

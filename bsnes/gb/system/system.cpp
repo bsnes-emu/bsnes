@@ -21,8 +21,15 @@ void System::runtosave() {
   scheduler.sync = Scheduler::SynchronizeMode::CPU;
   runthreadtosave();
 
+  scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.active_thread = lcd.thread;
   runthreadtosave();
+
+  scheduler.sync = Scheduler::SynchronizeMode::All;
+  scheduler.active_thread = apu.thread;
+  runthreadtosave();
+
+  scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 
 void System::runthreadtosave() {

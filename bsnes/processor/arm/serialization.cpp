@@ -52,7 +52,7 @@ void ARM::serialize(serializer &s) {
   s.integer(processor.und.lr.data);
   processor.und.spsr.serialize(s);
 
-  s.integer(processor.pc);
+  s.integer(processor.pc.data);
   processor.cpsr.serialize(s);
   s.integer(processor.carryout);
   s.integer(processor.sequential);
@@ -67,4 +67,6 @@ void ARM::serialize(serializer &s) {
   s.integer(pipeline.fetch.instruction);
 
   s.integer(crash);
+
+  processor.setMode((Processor::Mode)cpsr().m);
 }

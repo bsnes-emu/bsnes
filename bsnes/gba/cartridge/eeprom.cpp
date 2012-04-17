@@ -1,8 +1,17 @@
+bool Cartridge::EEPROM::read(unsigned addr) {
+  return data[addr >> 3] & 0x80 >> (addr & 7);
+}
+
+void Cartridge::EEPROM::write(unsigned addr, bool bit) {
+  if(bit == 0) data[addr >> 3] &=~ (0x80 >> (addr & 7));
+  if(bit == 1) data[addr >> 3] |=  (0x80 >> (addr & 7));
+}
+
 bool Cartridge::EEPROM::read() {
   bool bit = 1;
 
   if(mode == Mode::ReadData) {
-    if(offset >= 4) bit = data[address * 64 + (offset - 4)];
+    if(offset >= 4) bit = read(address * 64 + (offset - 4));
     if(++offset == 68) mode = Mode::Wait;
   }
 
@@ -43,7 +52,7 @@ void Cartridge::EEPROM::write(bool bit) {
   }
 
   else if(mode == Mode::WriteData) {
-    data[address * 64 + offset] = bit;
+    write(address * 64 + offset, bit);
     if(++offset == 64) {
       mode = Mode::WriteValidate;
     }
@@ -56,10 +65,20 @@ void Cartridge::EEPROM::write(bool bit) {
 }
 
 void Cartridge::EEPROM::power() {
-  data.resize(size);
   bits = (size <= 512 ? 6 : 14);
 
   mode = Mode::Wait;
   offset = 0;
   address = 0;
+}
+
+void Cartridge::EEPROM::serialize(serializer &s) {
+  s.array(data, size);
+  s.integer(size);
+  s.integer(mask);
+  s.integer(test);
+  s.integer(bits);
+  s.integer((unsigned&)mode);
+  s.integer(offset);
+  s.integer(address);
 }
