@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cartridge region="NTSC">
+  <rom>
+    <map mode="linear" address="00-1f:8000-ffff"/>
+    <map mode="linear" address="80-9f:8000-ffff"/>
+  </rom>
+  <sufamiturbo>
+    <slot id="A">
+      <rom>
+        <map mode="linear" address="20-3f:8000-ffff"/>
+        <map mode="linear" address="a0-bf:8000-ffff"/>
+      </rom>
+      <ram size="131072">
+        <map mode="linear" address="60-63:8000-ffff"/>
+        <map mode="linear" address="e0-e3:8000-ffff"/>
+      </ram>
+    </slot>
+    <slot id="B">
+      <rom>
+        <map mode="linear" address="40-5f:8000-ffff"/>
+        <map mode="linear" address="c0-df:8000-ffff"/>
+      </rom>
+      <ram size="131072">
+        <map mode="linear" address="70-73:8000-ffff"/>
+        <map mode="linear" address="f0-f3:8000-ffff"/>
+      </ram>
+    </slot>
+  </sufamiturbo>
+</cartridge>

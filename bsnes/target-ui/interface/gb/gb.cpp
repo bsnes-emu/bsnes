@@ -1,4 +1,8 @@
 void InterfaceGB::initialize() {
+  loadFirmware("Game Boy.sys/manifest.xml",       "system.boot",    GB::system.bootROM.dmg,  256u);
+  loadFirmware("Super Game Boy.sfc/manifest.xml", "cartridge.boot", GB::system.bootROM.sgb,  256u);
+  loadFirmware("Game Boy Color.sys/manifest.xml", "system.boot",    GB::system.bootROM.cgb, 2048u);
+
   GB::interface = this;
   GB::system.init();
 }

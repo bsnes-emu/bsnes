@@ -27,7 +27,11 @@ void System::load() {
 }
 
 void System::run() {
-  scheduler.enter();
+  while(true) {
+    scheduler.enter();
+    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) break;
+  }
+  interface->videoRefresh(ppu.output);
 }
 
 void System::runtosave() {
@@ -49,7 +53,7 @@ void System::runthreadtosave() {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent);
+    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) interface->videoRefresh(ppu.output);
   }
 }
 

@@ -75,9 +75,10 @@ void PPU::serialize(serializer &s) {
     for(unsigned p = 0; p < 240; p++) {
       auto &pixel = layer[l][p];
       s.integer(pixel.enable);
-      s.integer(pixel.translucent);
       s.integer(pixel.priority);
       s.integer(pixel.color);
+      s.integer(pixel.translucent);
+      s.integer(pixel.mosaic);
     }
   }
 

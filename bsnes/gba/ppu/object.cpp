@@ -52,10 +52,6 @@ void PPU::render_object(Object &obj) {
       y = (fy >> 8) + centery;
     }
 
-    if(obj.mosaic && regs.mosaic.objhsize) {
-      x = (x / (1 + regs.mosaic.objhsize)) * (1 + regs.mosaic.objhsize);
-    }
-
     uint9 ox = obj.x + px;
     if(ox < 240 && x < obj.width && y < obj.height) {
       unsigned offset = (y / 8) * rowsize + (x / 8);
@@ -68,7 +64,7 @@ void PPU::render_object(Object &obj) {
           windowmask[Obj][ox] = true;
         } else if(output[ox].enable == false || obj.priority < output[ox].priority) {
           if(obj.colors == 0) color = obj.palette * 16 + color;
-          output[ox] = { true, obj.mode == 1, obj.priority, pram[256 + color] };
+          output[ox].write(true, obj.priority, pram[256 + color], obj.mode == 1, obj.mosaic);
         }
       }
     }

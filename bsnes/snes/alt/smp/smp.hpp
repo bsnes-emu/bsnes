@@ -1,5 +1,5 @@
 struct SMP : Thread {
-  static const uint8 iplrom[64];
+  uint8 iplrom[64];
   uint8 *apuram;
 
   enum : bool { Threaded = false };

@@ -11,10 +11,11 @@ void PPU::render_screen() {
   uint16 *line = output + regs.vcounter * 240;
   uint16 *last = blur + regs.vcounter * 240;
 
-  if(regs.bg[0].control.mosaic) render_mosaic(BG0, regs.mosaic.bghsize);
-  if(regs.bg[1].control.mosaic) render_mosaic(BG1, regs.mosaic.bghsize);
-  if(regs.bg[2].control.mosaic) render_mosaic(BG2, regs.mosaic.bghsize);
-  if(regs.bg[3].control.mosaic) render_mosaic(BG3, regs.mosaic.bghsize);
+  if(regs.bg[0].control.mosaic) render_mosaic_background(BG0);
+  if(regs.bg[1].control.mosaic) render_mosaic_background(BG1);
+  if(regs.bg[2].control.mosaic) render_mosaic_background(BG2);
+  if(regs.bg[3].control.mosaic) render_mosaic_background(BG3);
+  render_mosaic_object();
 
   for(unsigned x = 0; x < 240; x++) {
     Registers::WindowFlags flags;
@@ -60,19 +61,6 @@ void PPU::render_screen() {
     //output pixel; blend with previous pixel to simulate GBA LCD blur
     line[x] = ((last[x] >> 1) & 0x3def) + ((color >> 1) & 0x3def);
     last[x] = color;
-  }
-}
-
-void PPU::render_mosaic(unsigned id, unsigned width) {
-  if(++width == 1) return;
-  auto &buffer = layer[id];
-
-  for(unsigned x = 0; x < 240;) {
-    for(unsigned m = 1; m < width; m++) {
-      if(x + m >= 240) break;
-      buffer[x + m] = buffer[x];
-    }
-    x += width;
   }
 }
 

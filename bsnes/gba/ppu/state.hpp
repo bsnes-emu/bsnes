@@ -1,8 +1,15 @@
 struct Pixel {
   bool enable;
-  bool translucent;
   unsigned priority;
   unsigned color;
+
+  //objects only
+  bool translucent;
+  bool mosaic;
+
+  alwaysinline void write(bool e) { enable = e; }
+  alwaysinline void write(bool e, unsigned p, unsigned c) { enable = e; priority = p; color = c; }
+  alwaysinline void write(bool e, unsigned p, unsigned c, bool t, bool m) { enable = e; priority = p; color = c; translucent = t; mosaic = m; }
 } layer[6][240];
 
 bool windowmask[3][240];

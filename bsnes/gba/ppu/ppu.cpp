@@ -15,6 +15,7 @@ namespace GBA {
 #include "registers.cpp"
 #include "background.cpp"
 #include "object.cpp"
+#include "mosaic.cpp"
 #include "screen.cpp"
 #include "mmio.cpp"
 #include "memory.cpp"
@@ -119,12 +120,12 @@ void PPU::scanline() {
         windowmask[0][x] = false;
         windowmask[1][x] = false;
         windowmask[2][x] = false;
-        layer[OBJ][x].enable = false;
-        layer[BG0][x].enable = false;
-        layer[BG1][x].enable = false;
-        layer[BG2][x].enable = false;
-        layer[BG3][x].enable = false;
-        layer[SFX][x] = { true, false, 3, pram[0] };
+        layer[OBJ][x].write(false);
+        layer[BG0][x].write(false);
+        layer[BG1][x].write(false);
+        layer[BG2][x].write(false);
+        layer[BG3][x].write(false);
+        layer[SFX][x].write(true, 3, pram[0]);
       }
       render_window(0);
       render_window(1);
@@ -148,7 +149,6 @@ void PPU::scanline() {
 }
 
 void PPU::frame() {
-  interface->videoRefresh(output);
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 

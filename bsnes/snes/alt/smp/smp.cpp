@@ -9,7 +9,6 @@ SMP smp;
 
 #include "algorithms.cpp"
 #include "core.cpp"
-#include "iplrom.cpp"
 #include "memory.cpp"
 #include "timing.cpp"
 
@@ -140,6 +139,7 @@ void SMP::serialize(serializer &s) {
 
 SMP::SMP() {
   apuram = new uint8[64 * 1024];
+  for(auto &byte : iplrom) byte = 0;
 }
 
 SMP::~SMP() {

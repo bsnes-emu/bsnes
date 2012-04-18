@@ -34,9 +34,11 @@ struct PPU : Thread, MMIO {
   void render_objects();
   void render_object(Object&);
 
+  void render_mosaic_background(unsigned id);
+  void render_mosaic_object();
+
   void render_forceblank();
   void render_screen();
-  void render_mosaic(unsigned id, unsigned width);
   void render_window(unsigned window);
   unsigned blend(unsigned above, unsigned eva, unsigned below, unsigned evb);
 

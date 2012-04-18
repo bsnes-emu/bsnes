@@ -1,4 +1,5 @@
 #include "../base.hpp"
+#include "core.cpp"
 #include "palette.cpp"
 #include "nes/nes.cpp"
 #include "snes/snes.cpp"

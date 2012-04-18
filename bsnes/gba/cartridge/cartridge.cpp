@@ -25,7 +25,7 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
       has_sram = true;
       ram.size = numeral(info["size"].data);
       ram.mask = ram.size - 1;
-      for(unsigned n = 0; n < ram.size; n++) ram.data[n] = 0;
+      for(unsigned n = 0; n < ram.size; n++) ram.data[n] = 0xff;
     }
 
     if(info["type"].data == "EEPROM") {
@@ -33,14 +33,14 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
       eeprom.size = numeral(info["size"].data);
       eeprom.mask = size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
       eeprom.test = size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
-      for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0;
+      for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0xff;
     }
 
     if(info["type"].data == "FlashROM") {
       has_flashrom = true;
       flashrom.id = numeral(info["id"].data);
       flashrom.size = numeral(info["size"].data);
-      for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0;
+      for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0xff;
     }
   }
 

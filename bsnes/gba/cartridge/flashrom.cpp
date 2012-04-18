@@ -78,9 +78,6 @@ void Cartridge::FlashROM::write(uint16 addr, uint8 byte) {
 }
 
 void Cartridge::FlashROM::power() {
-  id = 0x09c2;
-  size = 128 * 1024;
-
   unlockhi = false;
   unlocklo = false;
   idmode = false;

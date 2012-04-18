@@ -179,6 +179,6 @@ justifier2("Justifier - Port 2", false)
 //
 
 SnesInput::SnesInput() {
-  name = "SNES";
+  name = "Super Famicom";
   append(port1, port2);
 }

@@ -132,7 +132,9 @@ void CPU::power() {
 
   for(unsigned n = 0x0b0; n <= 0x0df; n++) bus.mmio[n] = this;  //DMA
   for(unsigned n = 0x100; n <= 0x10f; n++) bus.mmio[n] = this;  //Timers
+  for(unsigned n = 0x120; n <= 0x12b; n++) bus.mmio[n] = this;  //Serial
   for(unsigned n = 0x130; n <= 0x133; n++) bus.mmio[n] = this;  //Keypad
+  for(unsigned n = 0x134; n <= 0x159; n++) bus.mmio[n] = this;  //Serial
   for(unsigned n = 0x200; n <= 0x209; n++) bus.mmio[n] = this;  //System
   for(unsigned n = 0x300; n <= 0x301; n++) bus.mmio[n] = this;  //System
   //0x080-0x083 mirrored via gba/memory/memory.cpp              //System

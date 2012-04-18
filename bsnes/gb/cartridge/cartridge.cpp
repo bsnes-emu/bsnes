@@ -103,9 +103,9 @@ uint8 Cartridge::mmio_read(uint16 addr) {
   if(bootrom_enable) {
     const uint8 *data = nullptr;
     switch(system.revision()) { default:
-    case System::Revision::GameBoy: data = System::BootROM::dmg; break;
-    case System::Revision::SuperGameBoy: data = System::BootROM::sgb; break;
-    case System::Revision::GameBoyColor: data = System::BootROM::cgb; break;
+    case System::Revision::GameBoy: data = system.bootROM.dmg; break;
+    case System::Revision::SuperGameBoy: data = system.bootROM.sgb; break;
+    case System::Revision::GameBoyColor: data = system.bootROM.cgb; break;
     }
     if(addr >= 0x0000 && addr <= 0x00ff) return data[addr];
     if(addr >= 0x0200 && addr <= 0x08ff && system.cgb()) return data[addr - 256];

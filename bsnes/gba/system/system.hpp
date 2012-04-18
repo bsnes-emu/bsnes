@@ -7,7 +7,6 @@ struct BIOS : Memory {
   unsigned size;
   uint32 mdr;
 
-  void load(const uint8 *data, unsigned size);
   uint32 read(uint32 addr, uint32 size);
   void write(uint32 addr, uint32 size, uint32 word);
 

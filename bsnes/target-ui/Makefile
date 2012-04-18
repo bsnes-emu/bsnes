@@ -78,8 +78,8 @@ else ifeq ($(platform),x)
 	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 
 	mkdir -p ~/.config/$(name)
+	cp -R profile/* ~/.config/$(name)
 	cp data/cheats.xml ~/.config/$(name)/cheats.xml
-	cp -R "data/Game Boy Advance.system" ~/.config/$(name)
 	chmod -R 777 ~/.config/$(name)
 endif
 

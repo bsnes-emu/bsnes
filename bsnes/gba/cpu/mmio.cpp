@@ -39,6 +39,27 @@ uint8 CPU::read(uint32 addr) {
     return timer.control >> shift;
   }
 
+  //SIOMULTI0 (SIODATA32_L)
+  //SIOMULTI1 (SIODATA32_H)
+  //SIOMULTI2
+  //SIOMULTI3
+  case 0x04000120: case 0x04000121:
+  case 0x04000122: case 0x04000123:
+  case 0x04000124: case 0x04000125:
+  case 0x04000126: case 0x04000127: {
+    auto &data = regs.serial.data[(addr >> 1) & 3];
+    unsigned shift = (addr & 1) * 8;
+    return data >> shift;
+  }
+
+  //SIOCNT
+  case 0x04000128: return regs.serial.control >> 0;
+  case 0x04000129: return regs.serial.control >> 8;
+
+  //SIOMLT_SEND (SIODATA8)
+  case 0x0400012a: return regs.serial.data8;
+  case 0x0400012b: return 0u;
+
   //KEYINPUT
   case 0x04000130:
     for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(n) << n;
@@ -53,6 +74,32 @@ uint8 CPU::read(uint32 addr) {
   //KEYCNT
   case 0x04000132: return regs.keypad.control >> 0;
   case 0x04000133: return regs.keypad.control >> 8;
+
+  //RCNT
+  case 0x04000134: return regs.joybus.settings >> 0;
+  case 0x04000135: return regs.joybus.settings >> 8;
+
+  //JOYCNT
+  case 0x04000140: return regs.joybus.control >> 0;
+  case 0x04000141: return regs.joybus.control >> 8;
+
+  //JOY_RECV_L
+  //JOY_RECV_H
+  case 0x04000150: return regs.joybus.receive >>  0;
+  case 0x04000151: return regs.joybus.receive >>  8;
+  case 0x04000152: return regs.joybus.receive >> 16;
+  case 0x04000153: return regs.joybus.receive >> 24;
+
+  //JOY_TRANS_L
+  //JOY_TRANS_H
+  case 0x04000154: return regs.joybus.transmit >>  0;
+  case 0x04000155: return regs.joybus.transmit >>  8;
+  case 0x04000156: return regs.joybus.transmit >> 16;
+  case 0x04000157: return regs.joybus.transmit >> 24;
+
+  //JOYSTAT
+  case 0x04000158: return regs.joybus.status >> 0;
+  case 0x04000159: return regs.joybus.status >> 8;
 
   //IE
   case 0x04000200: return regs.irq.enable >> 0;
@@ -183,9 +230,57 @@ void CPU::write(uint32 addr, uint8 byte) {
     return;
   }
 
+  //SIOMULTI0 (SIODATA32_L)
+  //SIOMULTI1 (SIODATA32_H)
+  //SIOMULTI2
+  //SIOMULTI3
+  case 0x04000120: case 0x04000121:
+  case 0x04000122: case 0x04000123:
+  case 0x04000124: case 0x04000125:
+  case 0x04000126: case 0x04000127: {
+    auto &data = regs.serial.data[(addr >> 1) & 3];
+    unsigned shift = (addr & 1) * 8;
+    data = (data & ~(255 << shift)) | (byte << shift);
+    return;
+  }
+
+  //SIOCNT
+  case 0x04000128: regs.serial.control = (regs.serial.control & 0xff00) | (byte << 0); return;
+  case 0x04000129: regs.serial.control = (regs.serial.control & 0x00ff) | (byte << 8); return;
+
+  //SIOMLT_SEND (SIODATA8)
+  case 0x0400012a: regs.serial.data8 = byte; return;
+  case 0x0400012b: return;
+
   //KEYCNT
   case 0x04000132: regs.keypad.control = (regs.keypad.control & 0xff00) | (byte << 0); return;
   case 0x04000133: regs.keypad.control = (regs.keypad.control & 0x00ff) | (byte << 8); return;
+
+  //RCNT
+  case 0x04000134: regs.joybus.settings = (regs.joybus.settings & 0xff00) | (byte << 0); return;
+  case 0x04000135: regs.joybus.settings = (regs.joybus.settings & 0x00ff) | (byte << 8); return;
+
+  //JOYCNT
+  case 0x04000140: regs.joybus.control = (regs.joybus.control & 0xff00) | (byte << 0); return;
+  case 0x04000141: regs.joybus.control = (regs.joybus.control & 0x00ff) | (byte << 8); return;
+
+  //JOY_RECV_L
+  //JOY_RECV_H
+  case 0x04000150: regs.joybus.receive = (regs.joybus.receive & 0xffffff00) | (byte <<  0); return;
+  case 0x04000151: regs.joybus.receive = (regs.joybus.receive & 0xffff00ff) | (byte <<  8); return;
+  case 0x04000152: regs.joybus.receive = (regs.joybus.receive & 0xff00ffff) | (byte << 16); return;
+  case 0x04000153: regs.joybus.receive = (regs.joybus.receive & 0x00ffffff) | (byte << 24); return;
+
+  //JOY_TRANS_L
+  //JOY_TRANS_H
+  case 0x04000154: regs.joybus.transmit = (regs.joybus.transmit & 0xffffff00) | (byte <<  0); return;
+  case 0x04000155: regs.joybus.transmit = (regs.joybus.transmit & 0xffff00ff) | (byte <<  8); return;
+  case 0x04000156: regs.joybus.transmit = (regs.joybus.transmit & 0xff00ffff) | (byte << 16); return;
+  case 0x04000157: regs.joybus.transmit = (regs.joybus.transmit & 0x00ffffff) | (byte << 24); return;
+
+  //JOYSTAT
+  case 0x04000158: regs.joybus.status = (regs.joybus.status & 0xff00) | (byte << 0); return;
+  case 0x04000159: regs.joybus.status = (regs.joybus.status & 0x00ff) | (byte << 8); return;
 
   //IE
   case 0x04000200: regs.irq.enable = (regs.irq.enable & 0xff00) | (byte << 0); return;
@@ -200,18 +295,17 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000205: regs.wait.control = (regs.wait.control & 0x00ff) | ((byte & 0x7f) << 8); return;
 
   //IME
-  case 0x04000208: regs.ime = byte & 1; return;
+  case 0x04000208: regs.ime = byte >> 0; return;
   case 0x04000209: return;
 
-  //POSTFLG + HALTCNT
-  case 0x04000300: regs.postboot = byte & 1; return;
+  //POSTFLG, HALTCNT
+  case 0x04000300: regs.postboot |= byte >> 0; return;
   case 0x04000301: regs.mode = byte & 0x80 ? Registers::Mode::Stop : Registers::Mode::Halt; return;
 
   //MEMCNT_L
+  //MEMCNT_H
   case 0x04000800: regs.memory.control = (regs.memory.control & 0xffffff00) | (byte <<  0); return;
   case 0x04000801: regs.memory.control = (regs.memory.control & 0xffff00ff) | (byte <<  8); return;
-
-  //MEMCNT_H
   case 0x04000802: regs.memory.control = (regs.memory.control & 0xff00ffff) | (byte << 16); return;
   case 0x04000803: regs.memory.control = (regs.memory.control & 0x00ffffff) | (byte << 24); return;
 

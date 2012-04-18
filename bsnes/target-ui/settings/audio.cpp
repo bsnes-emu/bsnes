@@ -53,12 +53,12 @@ AudioSettings::AudioSettings() {
   frequencyAdjustmentLabel.setFont(application->boldFont);
   frequencyAdjustmentLabel.setText("Frequency: (lower to reduce audio crackling; raise to reduce video tearing)");
 
-  nes.name.setText("NES:");
+  nes.name.setText("FC:");
   nes.slider.setLength(2001);
   nes.base = 1789772;
   nes.step = 56;
 
-  snes.name.setText("SNES:");
+  snes.name.setText("SFC:");
   snes.slider.setLength(2001);
   snes.base = 32000;
   snes.step = 1;

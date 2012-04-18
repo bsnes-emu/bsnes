@@ -1,24 +1,5 @@
 void InterfaceGBA::initialize() {
-  string filename = application->path("Game Boy Advance.system/manifest.xml");
-  string markup;
-  markup.readfile(filename);
-  XML::Document document(markup);
-
-  if(document["system"]["bios"].exists()) {
-    auto &bios = document["system"]["bios"];
-    string firmware = bios["firmware"].data;
-    string hash = bios["sha256"].data;
-
-    uint8_t *data;
-    unsigned size;
-    if(file::read({dir(filename),firmware}, data, size) == true) {
-      if(nall::sha256(data, size) == hash) {
-        GBA::bios.load(data, size);
-      } else {
-        MessageWindow::information(Window::None, "Warning: GBA BIOS SHA256 sum is incorrect.");
-      }
-    }
-  }
+  loadFirmware("Game Boy Advance.sys/manifest.xml", "system.bios", GBA::bios.data, 16384u);
 
   GBA::interface = this;
   GBA::system.init();
@@ -39,7 +20,7 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
     interface->base = {true, filename};
   } else {
     if(file::read(filename, data, size) == false) return false;
-    interface->base = {false, filename};
+    interface->base = {false, nall::basename(filename)};
   }
 
   interface->game = interface->base;

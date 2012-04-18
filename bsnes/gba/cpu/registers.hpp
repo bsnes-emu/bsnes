@@ -34,8 +34,8 @@ struct Registers {
     uint1 irq;
     uint1 enable;
 
-    operator uint8() const;
-    uint8 operator=(uint8 source);
+    operator uint16() const;
+    uint16 operator=(uint16 source);
     TimerControl& operator=(const TimerControl&) = delete;
   };
 
@@ -44,6 +44,26 @@ struct Registers {
     uint16 reload;
     TimerControl control;
   } timer[4];
+
+  struct SerialControl {
+    uint1 shiftclockselect;
+    uint1 shiftclockfrequency;
+    uint1 transferenablereceive;
+    uint1 transferenablesend;
+    uint1 startbit;
+    uint1 transferlength;
+    uint1 irqenable;
+
+    operator uint16() const;
+    uint16 operator=(uint16 source);
+    SerialControl& operator=(const SerialControl&) = delete;
+  };
+
+  struct Serial {
+    uint16 data[4];
+    SerialControl control;
+    uint8 data8;
+  } serial;
 
   struct KeypadControl {
     uint1 flag[10];
@@ -59,17 +79,63 @@ struct Registers {
     KeypadControl control;
   } keypad;
 
-  bool ime;
+  struct JoybusSettings {
+    uint1 sc;
+    uint1 sd;
+    uint1 si;
+    uint1 so;
+    uint1 scmode;
+    uint1 sdmode;
+    uint1 simode;
+    uint1 somode;
+    uint1 irqenable;
+    uint2 mode;
+
+    operator uint16() const;
+    uint16 operator=(uint16 source);
+    JoybusSettings& operator=(const JoybusSettings&) = delete;
+  };
+
+  struct JoybusControl {
+    uint1 resetsignal;
+    uint1 receivecomplete;
+    uint1 sendcomplete;
+    uint1 irqenable;
+
+    operator uint16() const;
+    uint16 operator=(uint16 source);
+    JoybusControl& operator=(const JoybusControl&) = delete;
+  };
+
+  struct JoybusStatus {
+    uint1 receiveflag;
+    uint1 sendflag;
+    uint2 generalflag;
+
+    operator uint16() const;
+    uint16 operator=(uint16 source);
+    JoybusStatus& operator=(const JoybusStatus&) = delete;
+  };
+
+  struct Joybus {
+    JoybusSettings settings;
+    JoybusControl control;
+    uint32 receive;
+    uint32 transmit;
+    JoybusStatus status;
+  } joybus;
+
+  uint1 ime;
 
   struct Interrupt {
-    bool vblank;
-    bool hblank;
-    bool vcoincidence;
-    bool timer[4];
-    bool serial;
-    bool dma[4];
-    bool keypad;
-    bool cartridge;
+    uint1 vblank;
+    uint1 hblank;
+    uint1 vcoincidence;
+    uint1 timer[4];
+    uint1 serial;
+    uint1 dma[4];
+    uint1 keypad;
+    uint1 cartridge;
 
     operator uint16() const;
     uint16 operator=(uint16 source);
@@ -98,9 +164,9 @@ struct Registers {
   } wait;
 
   struct MemoryControl {
-    bool disable;
+    uint1 disable;
     uint3 unknown1;
-    bool ewram;
+    uint1 ewram;
     uint4 ewramwait;
     uint4 unknown2;
 
@@ -113,7 +179,7 @@ struct Registers {
     MemoryControl control;
   } memory;
 
-  bool postboot;
+  uint1 postboot;
   enum class Mode : unsigned { Normal, Halt, Stop } mode;
   unsigned clock;
 } regs;

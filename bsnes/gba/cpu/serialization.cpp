@@ -31,9 +31,42 @@ void CPU::serialize(serializer &s) {
     s.integer(timer.control.enable);
   }
 
+  for(auto &value : regs.serial.data) s.integer(value);
+  s.integer(regs.serial.control.shiftclockselect);
+  s.integer(regs.serial.control.shiftclockfrequency);
+  s.integer(regs.serial.control.transferenablereceive);
+  s.integer(regs.serial.control.transferenablesend);
+  s.integer(regs.serial.control.startbit);
+  s.integer(regs.serial.control.transferlength);
+  s.integer(regs.serial.control.irqenable);
+  s.integer(regs.serial.data8);
+
   for(auto &flag : regs.keypad.control.flag) s.integer(flag);
   s.integer(regs.keypad.control.enable);
   s.integer(regs.keypad.control.condition);
+
+  s.integer(regs.joybus.settings.sc);
+  s.integer(regs.joybus.settings.sd);
+  s.integer(regs.joybus.settings.si);
+  s.integer(regs.joybus.settings.so);
+  s.integer(regs.joybus.settings.scmode);
+  s.integer(regs.joybus.settings.sdmode);
+  s.integer(regs.joybus.settings.simode);
+  s.integer(regs.joybus.settings.somode);
+  s.integer(regs.joybus.settings.irqenable);
+  s.integer(regs.joybus.settings.mode);
+
+  s.integer(regs.joybus.control.resetsignal);
+  s.integer(regs.joybus.control.receivecomplete);
+  s.integer(regs.joybus.control.sendcomplete);
+  s.integer(regs.joybus.control.irqenable);
+
+  s.integer(regs.joybus.receive);
+  s.integer(regs.joybus.transmit);
+
+  s.integer(regs.joybus.status.receiveflag);
+  s.integer(regs.joybus.status.sendflag);
+  s.integer(regs.joybus.status.generalflag);
 
   s.integer(regs.ime);
 

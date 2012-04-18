@@ -16,9 +16,9 @@ struct System : property<System> {
   inline bool cgb() const { return revision == Revision::GameBoyColor; }
 
   struct BootROM {
-    static const uint8 dmg[ 256];
-    static const uint8 sgb[ 256];
-    static const uint8 cgb[2048];
+    uint8 dmg[ 256];
+    uint8 sgb[ 256];
+    uint8 cgb[2048];
   } bootROM;
 
   void run();
@@ -40,6 +40,8 @@ struct System : property<System> {
   void serialize(serializer&);
   void serialize_all(serializer&);
   void serialize_init();
+
+  System();
 };
 
 #include <gb/interface/interface.hpp>

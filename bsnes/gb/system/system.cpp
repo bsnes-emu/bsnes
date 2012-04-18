@@ -3,9 +3,6 @@
 #define SYSTEM_CPP
 namespace GB {
 
-#include "bootrom-dmg.cpp"
-#include "bootrom-sgb.cpp"
-#include "bootrom-cgb.cpp"
 #include "serialization.cpp"
 System system;
 
@@ -42,6 +39,11 @@ void System::runthreadtosave() {
 }
 
 void System::init() {
+  file fp;
+  fp.open("/home/byuu/Desktop/boot.rom", file::mode::write);
+  fp.write(bootROM.sgb, 256);
+  fp.close();
+
   assert(interface != 0);
 }
 
@@ -59,6 +61,12 @@ void System::power() {
   scheduler.init();
 
   clocks_executed = 0;
+}
+
+System::System() {
+  for(auto &byte : bootROM.dmg) byte = 0;
+  for(auto &byte : bootROM.sgb) byte = 0;
+  for(auto &byte : bootROM.cgb) byte = 0;
 }
 
 }

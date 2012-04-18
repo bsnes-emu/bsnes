@@ -23,7 +23,7 @@ uint16 CPU::Registers::DMAControl::operator=(uint16 source) {
   return operator uint16();
 }
 
-CPU::Registers::TimerControl::operator uint8() const {
+CPU::Registers::TimerControl::operator uint16() const {
   return (
     (frequency << 0)
   | (cascade   << 2)
@@ -32,12 +32,35 @@ CPU::Registers::TimerControl::operator uint8() const {
   );
 }
 
-uint8 CPU::Registers::TimerControl::operator=(uint8 source) {
+uint16 CPU::Registers::TimerControl::operator=(uint16 source) {
   frequency = source >> 0;
   cascade   = source >> 2;
   irq       = source >> 6;
   enable    = source >> 7;
-  return operator uint8();
+  return operator uint16();
+}
+
+CPU::Registers::SerialControl::operator uint16() const {
+  return (
+    (shiftclockselect      <<  0)
+  | (shiftclockfrequency   <<  1)
+  | (transferenablereceive <<  2)
+  | (transferenablesend    <<  3)
+  | (startbit              <<  7)
+  | (transferlength        << 12)
+  | (irqenable             << 14)
+  );
+}
+
+uint16 CPU::Registers::SerialControl::operator=(uint16 source) {
+  shiftclockselect      = source >>  0;
+  shiftclockfrequency   = source >>  1;
+  transferenablereceive = source >>  2;
+  transferenablesend    = source >>  3;
+  startbit              = source >>  7;
+  transferlength        = source >> 12;
+  irqenable             = source >> 14;
+  return operator uint16();
 }
 
 CPU::Registers::KeypadControl::operator uint16() const {
@@ -73,6 +96,67 @@ uint16 CPU::Registers::KeypadControl::operator=(uint16 source) {
   return operator uint16();
 }
 
+CPU::Registers::JoybusSettings::operator uint16() const {
+  return (
+    (sc        <<  0)
+  | (sd        <<  1)
+  | (si        <<  2)
+  | (so        <<  3)
+  | (scmode    <<  4)
+  | (sdmode    <<  5)
+  | (simode    <<  6)
+  | (somode    <<  7)
+  | (irqenable <<  8)
+  | (mode      << 14)
+  );
+}
+
+uint16 CPU::Registers::JoybusSettings::operator=(uint16 source) {
+  sc        = source >>  0;
+  sd        = source >>  1;
+  si        = source >>  2;
+  so        = source >>  3;
+  scmode    = source >>  4;
+  sdmode    = source >>  5;
+  simode    = source >>  6;
+  somode    = source >>  7;
+  irqenable = source >>  8;
+  mode      = source >> 14;
+  return operator uint16();
+}
+
+CPU::Registers::JoybusControl::operator uint16() const {
+  return (
+    (resetsignal     << 0)
+  | (receivecomplete << 1)
+  | (sendcomplete    << 2)
+  | (irqenable       << 6)
+  );
+}
+
+uint16 CPU::Registers::JoybusControl::operator=(uint16 source) {
+  resetsignal     = source >> 0;
+  receivecomplete = source >> 1;
+  sendcomplete    = source >> 2;
+  irqenable       = source >> 6;
+  return operator uint16();
+}
+
+CPU::Registers::JoybusStatus::operator uint16() const {
+  return (
+    (receiveflag << 1)
+  | (sendflag    << 3)
+  | (generalflag << 4)
+  );
+}
+
+uint16 CPU::Registers::JoybusStatus::operator=(uint16 source) {
+  receiveflag = source >> 1;
+  sendflag    = source >> 3;
+  generalflag = source >> 4;
+  return operator uint16();
+}
+
 CPU::Registers::Interrupt::operator uint16() const {
   return (
     (vblank       <<  0)
@@ -93,20 +177,20 @@ CPU::Registers::Interrupt::operator uint16() const {
 }
 
 uint16 CPU::Registers::Interrupt::operator=(uint16 source) {
-  vblank       = source & (1 <<  0);
-  hblank       = source & (1 <<  1);
-  vcoincidence = source & (1 <<  2);
-  timer[0]     = source & (1 <<  3);
-  timer[1]     = source & (1 <<  4);
-  timer[2]     = source & (1 <<  5);
-  timer[3]     = source & (1 <<  6);
-  serial       = source & (1 <<  7);
-  dma[0]       = source & (1 <<  8);
-  dma[1]       = source & (1 <<  9);
-  dma[2]       = source & (1 << 10);
-  dma[3]       = source & (1 << 11);
-  keypad       = source & (1 << 12);
-  cartridge    = source & (1 << 13);
+  vblank       = source >>  0;
+  hblank       = source >>  1;
+  vcoincidence = source >>  2;
+  timer[0]     = source >>  3;
+  timer[1]     = source >>  4;
+  timer[2]     = source >>  5;
+  timer[3]     = source >>  6;
+  serial       = source >>  7;
+  dma[0]       = source >>  8;
+  dma[1]       = source >>  9;
+  dma[2]       = source >> 10;
+  dma[3]       = source >> 11;
+  keypad       = source >> 12;
+  cartridge    = source >> 13;
   return operator uint16();
 }
 
@@ -151,10 +235,10 @@ CPU::Registers::MemoryControl::operator uint32() const {
 }
 
 uint32 CPU::Registers::MemoryControl::operator=(uint32 source) {
-  disable   = (source >>  0) &  1;
-  unknown1  = (source >>  1) &  7;
-  ewram     = (source >>  5) &  1;
-  ewramwait = (source >> 24) & 15;
-  unknown2  = (source >> 28) & 15;
+  disable   = source >>  0;
+  unknown1  = source >>  1;
+  ewram     = source >>  5;
+  ewramwait = source >> 24;
+  unknown2  = source >> 28;
   return operator uint32();
 }

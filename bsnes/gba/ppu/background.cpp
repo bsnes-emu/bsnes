@@ -72,8 +72,8 @@ void PPU::render_background_linear(Registers::Background &bg) {
     uint8 color = data[px++ ^ (tile.hflip ? 7 : 0)];
 
     if(color) {
-      if(bg.control.colormode == 0) output[x] = { true, false, bg.control.priority, pram[tile.palette * 16 + color] };
-      if(bg.control.colormode == 1) output[x] = { true, false, bg.control.priority, pram[color] };
+      if(bg.control.colormode == 0) output[x].write(true, bg.control.priority, pram[tile.palette * 16 + color]);
+      if(bg.control.colormode == 1) output[x].write(true, bg.control.priority, pram[color]);
     }
   }
 }
@@ -102,7 +102,7 @@ void PPU::render_background_affine(Registers::Background &bg) {
     if(tx < screensize && ty < screensize) {
       uint8 character = vram[basemap + ty * screensize + tx];
       uint8 color = vram[basechr + (character * 64) + py * 8 + px];
-      if(color) output[x] = { true, false, bg.control.priority, pram[color] };
+      if(color) output[x].write(true, bg.control.priority, pram[color]);
     }
 
     fx += bg.pa;
@@ -143,7 +143,7 @@ void PPU::render_background_bitmap(Registers::Background &bg) {
       if(depth || color) {  //8bpp color 0 is transparent; 15bpp color is always opaque
         if(depth == 0) color = pram[color];
         if(depth == 1) color = color & 0x7fff;
-        output[x] = { true, false, bg.control.priority, color };
+        output[x].write(true, bg.control.priority, color);
       }
     }
 

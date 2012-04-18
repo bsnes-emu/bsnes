@@ -1,12 +1,3 @@
-void BIOS::load(const uint8 *biosdata, unsigned biossize) {
-  memcpy(data, biosdata, min(size, biossize));
-
-  string sha256 = nall::sha256(data, size);
-  if(sha256 != "fd2547724b505f487e6dcb29ec2ecff3af35a841a77ab2e85fd87350abd36570") {
-    interface->message("Warning: Game Boy Advance BIOS SHA256 sum is incorrect.");
-  }
-}
-
 uint32 BIOS::read(uint32 addr, uint32 size) {
   //GBA BIOS is read-protected; only the BIOS itself can read its own memory
   //when accessed elsewhere; this returns the last value read by the BIOS program

@@ -1,6 +1,8 @@
 #include "palette.hpp"
 
 struct InterfaceCore {
+  bool loadFirmware(string filename, string keyname, uint8_t *targetdata, unsigned targetsize);
+
   virtual bool cartridgeLoaded() = 0;
   virtual void unloadCartridge() = 0;
 

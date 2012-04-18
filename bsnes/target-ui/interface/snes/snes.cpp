@@ -1,4 +1,6 @@
 void InterfaceSNES::initialize() {
+  loadFirmware("Super Famicom.sys/manifest.xml", "system.smp", SNES::smp.iplrom, 64u);
+
   SNES::interface = this;
   SNES::system.init();
 }
