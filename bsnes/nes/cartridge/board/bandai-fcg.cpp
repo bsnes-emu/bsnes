@@ -111,7 +111,7 @@ void serialize(serializer &s) {
   s.integer(irq_latch);
 }
 
-BandaiFCG(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+BandaiFCG(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
 }
 
 };

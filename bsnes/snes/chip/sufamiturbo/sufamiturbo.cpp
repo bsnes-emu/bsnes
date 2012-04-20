@@ -11,13 +11,13 @@ void SufamiTurbo::load() {
   slotB.ram.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
 
   if(slotA.rom.data()) {
-    cartridge.nvram.append({ "program.ram", slotA.ram.data(), slotA.ram.size(), Cartridge::Slot::SufamiTurboA });
+    cartridge.nvram.append({ "save.ram", slotA.ram.data(), slotA.ram.size(), Cartridge::Slot::SufamiTurboA });
   } else {
     slotA.rom.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
   }
 
   if(slotB.rom.data()) {
-    cartridge.nvram.append({ "program.ram", slotB.ram.data(), slotB.ram.size(), Cartridge::Slot::SufamiTurboB });
+    cartridge.nvram.append({ "save.ram", slotB.ram.data(), slotB.ram.size(), Cartridge::Slot::SufamiTurboB });
   } else {
     slotB.rom.map(allocate<uint8>(128 * 1024, 0xff), 128 * 1024);
   }

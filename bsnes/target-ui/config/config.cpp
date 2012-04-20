@@ -37,10 +37,6 @@ Config::Config() {
   append(input.driver = "", "Input::Driver");
   append(input.focusPolicy = 1, "Input::FocusPolicy");
 
-  append(path.bios.satellaview = "", "Path::BIOS::Satellaview");
-  append(path.bios.sufamiTurbo = "", "Path::BIOS::SufamiTurbo");
-  append(path.bios.superGameBoy = "", "Path::BIOS::SuperGameBoy");
-
   append(nes.controllerPort1Device = 1, "NES::Controller::Port1");
   append(nes.controllerPort2Device = 0, "NES::Controller::Port2");
 

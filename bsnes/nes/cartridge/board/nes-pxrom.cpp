@@ -90,7 +90,7 @@ void serialize(serializer &s) {
   s.array(latch);
 }
 
-NES_PxROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
+NES_PxROM(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
   revision = Revision::PNROM;
 }
 

@@ -47,8 +47,8 @@ void serialize(serializer &s) {
   s.integer(chr_bank);
 }
 
-NES_CNROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
-  settings.mirror = board["mirror"]["mode"].data == "vertical" ? 1 : 0;
+NES_CNROM(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
+  settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 
 };

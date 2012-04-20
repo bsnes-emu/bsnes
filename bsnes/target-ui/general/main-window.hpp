@@ -9,10 +9,9 @@ struct MainWindow : Window {
     Item cartridgeLoadGameBoyColor;
     Item cartridgeLoadGameBoyAdvance;
     Separator cartridgeSeparator;
-    Item cartridgeLoadSatellaviewSlotted;
+    Item cartridgeLoadSuperGameBoy;
     Item cartridgeLoadSatellaview;
     Item cartridgeLoadSufamiTurbo;
-    Item cartridgeLoadSuperGameBoy;
 
   Menu nesMenu;
     Item nesPower;
@@ -90,6 +89,7 @@ struct MainWindow : Window {
 private:
   lstring videoFilterName;
   lstring videoShaderName;
+  string filename;
 
   void setupVideoFilters();
   void setupVideoShaders();

@@ -41,7 +41,7 @@ void serialize(serializer &s) {
   vrc7.serialize(s);
 }
 
-KonamiVRC7(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc7(*this) {
+KonamiVRC7(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), vrc7(*this) {
 }
 
 };

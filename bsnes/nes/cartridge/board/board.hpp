@@ -31,7 +31,7 @@ struct Board {
   virtual void reset();
 
   virtual void serialize(serializer&);
-  Board(XML::Node &board, const uint8_t *data, unsigned size);
+  Board(XML::Document &document, const uint8_t *data, unsigned size);
   virtual ~Board();
 
   static Board* load(const string &markup, const uint8_t *data, unsigned size);

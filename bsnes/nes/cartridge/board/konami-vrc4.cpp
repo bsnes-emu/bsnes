@@ -53,9 +53,9 @@ void serialize(serializer &s) {
   vrc4.serialize(s);
 }
 
-KonamiVRC4(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc4(*this) {
-  settings.pinout.a0 = 1 << decimal(board["chip"]["pinout"]["a0"].data);
-  settings.pinout.a1 = 1 << decimal(board["chip"]["pinout"]["a1"].data);
+KonamiVRC4(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), vrc4(*this) {
+  settings.pinout.a0 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a0"].data);
+  settings.pinout.a1 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a1"].data);
 }
 
 };

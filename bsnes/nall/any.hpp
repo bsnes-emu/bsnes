@@ -26,8 +26,9 @@ namespace nall {
       return *this;
     }
 
-    any() : container(0) {}
-    template<typename T> any(const T& value_) : container(0) { operator=(value_); }
+    any() : container(nullptr) {}
+    ~any() { if(container) delete container; }
+    template<typename T> any(const T& value_) : container(nullptr) { operator=(value_); }
 
   private:
     struct placeholder {
@@ -59,12 +60,12 @@ namespace nall {
   }
 
   template<typename T> T* any_cast(any *value) {
-    if(!value || value->type() != typeid(T)) return 0;
+    if(!value || value->type() != typeid(T)) return nullptr;
     return &static_cast<any::holder<T>*>(value->container)->value;
   }
 
   template<typename T> const T* any_cast(const any *value) {
-    if(!value || value->type() != typeid(T)) return 0;
+    if(!value || value->type() != typeid(T)) return nullptr;
     return &static_cast<any::holder<T>*>(value->container)->value;
   }
 }

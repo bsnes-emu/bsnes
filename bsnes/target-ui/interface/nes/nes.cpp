@@ -29,24 +29,11 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   unsigned size;
 
   if(filename.endswith("/")) {
-    if(file::exists({ filename, "program.rom" }) && file::exists({ filename, "character.rom" })) {
-      unsigned prgsize = file::size({ filename, "program.rom" });
-      unsigned chrsize = file::size({ filename, "character.rom" });
-      data = new uint8_t[size = prgsize + chrsize];
-      nall::file fp;
-      fp.open({ filename, "program.rom" }, file::mode::read);
-      fp.read(data, fp.size());
-      fp.close();
-      fp.open({ filename, "character.rom" }, file::mode::read);
-      fp.read(data + prgsize, fp.size());
-      fp.close();
-    } else {
-      return false;
-    }
-    interface->base = { true, filename };
+    if(file::read({filename, "program.rom"}, data, size) == false) return false;
+    interface->base = {true, filename};
   } else {
     file::read(filename, data, size);
-    interface->base = { false, nall::basename(filename) };
+    interface->base = {false, nall::basename(filename)};
   }
 
   interface->game = interface->base;

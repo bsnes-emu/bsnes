@@ -42,7 +42,7 @@ void serialize(serializer &s) {
   mmc6.serialize(s);
 }
 
-NES_HKROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), mmc6(*this) {
+NES_HKROM(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), mmc6(*this) {
 }
 
 };

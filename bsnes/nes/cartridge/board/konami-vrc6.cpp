@@ -36,7 +36,7 @@ void main() { vrc6.main(); }
 void power() { vrc6.power(); }
 void reset() { vrc6.reset(); }
 
-KonamiVRC6(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size), vrc6(*this) {
+KonamiVRC6(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), vrc6(*this) {
 }
 
 };

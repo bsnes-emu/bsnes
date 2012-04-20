@@ -36,8 +36,8 @@ void serialize(serializer &s) {
   Board::serialize(s);
 }
 
-NES_NROM(XML::Node &board, const uint8_t *data, unsigned size) : Board(board, data, size) {
-  settings.mirror = board["mirror"]["mode"].data == "vertical" ? 1 : 0;
+NES_NROM(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
+  settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 
 };

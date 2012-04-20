@@ -151,6 +151,6 @@ bool FileBrowser::loadFolder(const string &requestedPath) {
 }
 
 void FileBrowser::loadFile(const string &filename) {
-  if(callback) callback(filename);
   setVisible(false);
+  if(callback) callback(filename);
 }

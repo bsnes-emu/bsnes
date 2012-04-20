@@ -20,8 +20,6 @@ void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
     sha256 = nall::sha256(data, size);
     board = Board::load(markup, data, size);
   } else {
-  //unsigned crc32 = crc32_calculate(data + 16, size - 16);
-  //print(hex<8>(crc32), "\n");
     sha256 = nall::sha256(data + 16, size - 16);
     board = Board::load(!markup.empty() ? markup : iNES(data, size), data + 16, size - 16);
   }

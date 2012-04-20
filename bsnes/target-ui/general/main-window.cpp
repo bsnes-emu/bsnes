@@ -6,16 +6,15 @@ MainWindow::MainWindow() {
   setBackgroundColor({ 0, 0, 0 });
   windowManager->append(this, "MainWindow");
 
-  cartridgeMenu.setText("&Cartridge");
-    cartridgeLoadNES.setText("Load &Famicom Cartridge ...");
-    cartridgeLoadSNES.setText("Load &Super Famicom Cartridge ...");
-    cartridgeLoadGameBoy.setText("Load &Game Boy Cartridge ...");
-    cartridgeLoadGameBoyColor.setText("Load Game Boy &Color Cartridge ...");
-    cartridgeLoadGameBoyAdvance.setText("Load Game Boy &Advance Cartridge ...");
-    cartridgeLoadSatellaviewSlotted.setText("Load Satellaview-Slotted Cartridge ...");
-    cartridgeLoadSatellaview.setText("Load BS-X Satellaview Cartridge ...");
-    cartridgeLoadSufamiTurbo.setText("Load Sufami Turbo Cartridge ...");
-    cartridgeLoadSuperGameBoy.setText("Load Super Game Boy Cartridge ...");
+  cartridgeMenu.setText("&Load");
+    cartridgeLoadNES.setText("&Famicom ...");
+    cartridgeLoadSNES.setText("&Super Famicom ...");
+    cartridgeLoadGameBoy.setText("&Game Boy ...");
+    cartridgeLoadGameBoyColor.setText("Game Boy &Color ...");
+    cartridgeLoadGameBoyAdvance.setText("Game Boy &Advance ...");
+    cartridgeLoadSuperGameBoy.setText("Super Game Boy ...");
+    cartridgeLoadSatellaview.setText("BS-X Satellaview ...");
+    cartridgeLoadSufamiTurbo.setText("Sufami Turbo ...");
 
   nesMenu.setText("&NES");
     nesPower.setText("&Power Cycle");
@@ -110,10 +109,9 @@ MainWindow::MainWindow() {
     cartridgeMenu.append(cartridgeLoadGameBoyColor);
     cartridgeMenu.append(cartridgeLoadGameBoyAdvance);
     cartridgeMenu.append(cartridgeSeparator);
-    cartridgeMenu.append(cartridgeLoadSatellaviewSlotted);
+    cartridgeMenu.append(cartridgeLoadSuperGameBoy);
     cartridgeMenu.append(cartridgeLoadSatellaview);
     cartridgeMenu.append(cartridgeLoadSufamiTurbo);
-    cartridgeMenu.append(cartridgeLoadSuperGameBoy);
 
   append(nesMenu);
     nesMenu.append(nesPower);
@@ -210,7 +208,18 @@ MainWindow::MainWindow() {
 
   cartridgeLoadSNES.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Super Famicom", FileBrowser::Mode::SNES, [](string filename) {
-      interface->snes.loadCartridge(filename);
+      string filedata;
+      filedata.readfile({dir(filename),"manifest.xml"});
+      XML::Document document(filedata);
+      if(document["cartridge"]["bsx"]["slot"].exists()
+      && MessageWindow::question(*mainWindow, "Load BS-X Satellaview data pack?") == MessageWindow::Response::Yes) {
+        mainWindow->filename = filename;
+        fileBrowser->open("Load Cartridge - BS-X Satellaview", FileBrowser::Mode::Satellaview, [](string filename) {
+          interface->snes.loadSatellaviewSlottedCartridge(mainWindow->filename, filename);
+        });
+      } else {
+        interface->snes.loadCartridge(filename);
+      }
     });
   };
 
@@ -232,7 +241,11 @@ MainWindow::MainWindow() {
     });
   };
 
-  cartridgeLoadSatellaviewSlotted.onActivate = [&] { slotLoader->loadSatellaviewSlotted(); };
+  cartridgeLoadSuperGameBoy.onActivate = [&] {
+    fileBrowser->open("Load Cartridge - Super Game Boy", FileBrowser::Mode::GameBoy, [](string filename) {
+      interface->snes.loadSuperGameBoyCartridge(application->path("Super Game Boy.sfc/"), filename);
+    });
+  };
 
   cartridgeLoadSatellaview.onActivate = [&] {
     fileBrowser->open("Load Cartridge - BS-X Satellaview", FileBrowser::Mode::Satellaview, [](string filename) {
@@ -242,13 +255,22 @@ MainWindow::MainWindow() {
 
   cartridgeLoadSufamiTurbo.onActivate = [&] {
     fileBrowser->open("Load Cartridge - Sufami Turbo", FileBrowser::Mode::SufamiTurbo, [](string filename) {
-      interface->snes.loadSufamiTurboCartridge(application->path("Sufami Turbo.sfc/"), filename, "");
-    });
-  };
-
-  cartridgeLoadSuperGameBoy.onActivate = [&] {
-    fileBrowser->open("Load Cartridge - Super Game Boy", FileBrowser::Mode::GameBoy, [](string filename) {
-      interface->snes.loadSuperGameBoyCartridge(application->path("Super Game Boy.sfc/"), filename);
+      string filedata;
+      filedata.readfile({dir(filename),"manifest.xml"});
+      XML::Document document(filedata);
+      if(document["cartridge"]["linkable"].data == "true"
+      && MessageWindow::question(*mainWindow, "Load linkable cartridge?") == MessageWindow::Response::Yes) {
+        mainWindow->filename = filename;
+        fileBrowser->open("Load Cartridge - Sufami Turbo", FileBrowser::Mode::SufamiTurbo, [](string filename) {
+          if(mainWindow->filename == filename) {
+            MessageWindow::critical(*mainWindow, "It is physically impossible to have the same cartridge in two slots at the same time.");
+          } else {
+            interface->snes.loadSufamiTurboCartridge(application->path("Sufami Turbo.sfc/"), mainWindow->filename, filename);
+          }
+        });
+      } else {
+        interface->snes.loadSufamiTurboCartridge(application->path("Sufami Turbo.sfc/"), filename, "");
+      }
     });
   };
 

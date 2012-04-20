@@ -42,14 +42,6 @@ struct Config : public configuration {
     unsigned focusPolicy;
   } input;
 
-  struct Path {
-    struct BIOS {
-      string satellaview;
-      string sufamiTurbo;
-      string superGameBoy;
-    } bios;
-  } path;
-
   struct NES {
     unsigned controllerPort1Device;
     unsigned controllerPort2Device;

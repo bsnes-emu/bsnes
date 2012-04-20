@@ -37,6 +37,14 @@ struct zip {
     file.reset();
 
     const uint8_t *footer = data + size - 22;
+    while(true) {
+      if(footer <= data + 22) return false;
+      if(read(footer, 4) == 0x06054b50) {
+        unsigned commentlength = read(footer + 20, 2);
+        if(footer + 22 + commentlength == data + size) break;
+      }
+      footer--;
+    }
     const uint8_t *directory = data + read(footer + 16, 4);
 
     while(true) {
