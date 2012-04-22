@@ -14,6 +14,7 @@ struct EEPROM {
   enum class Mode : unsigned { Wait, Command, ReadAddress, ReadValidate, ReadData, WriteAddress, WriteData, WriteValidate } mode;
   unsigned offset;
   unsigned address;
+  unsigned addressbits;
 
   bool read(unsigned addr);
   void write(unsigned addr, bool bit);

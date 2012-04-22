@@ -1,7 +1,7 @@
 #ifdef CARTRIDGE_CPP
 
 void Cartridge::serialize(serializer &s) {
-  if(info.battery) s.array(ramdata, ramsize);
+  if(information.battery) s.array(ramdata, ramsize);
   s.integer(bootrom_enable);
 
   s.integer(mbc1.ram_enable);

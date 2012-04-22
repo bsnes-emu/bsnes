@@ -1,7 +1,5 @@
 #include <gb/gb.hpp>
 
-#include <nall/crc32.hpp>
-
 #define CARTRIDGE_CPP
 namespace GB {
 
@@ -21,35 +19,36 @@ void Cartridge::load(System::Revision revision, const string &markup, const uint
   romdata = allocate<uint8>(romsize = size, 0xff);
   if(data) memcpy(romdata, data, size);
 
-  info.mapper = Mapper::Unknown;
-  info.ram = false;
-  info.battery = false;
-  info.rtc = false;
-  info.rumble = false;
+  information.markup = markup;
+  information.mapper = Mapper::Unknown;
+  information.ram = false;
+  information.battery = false;
+  information.rtc = false;
+  information.rumble = false;
 
-  info.romsize = 0;
-  info.ramsize = 0;
+  information.romsize = 0;
+  information.ramsize = 0;
 
   XML::Document document(markup);
 
   auto &mapperid = document["cartridge"]["mapper"].data;
-  if(mapperid == "none" ) info.mapper = Mapper::MBC0;
-  if(mapperid == "MBC1" ) info.mapper = Mapper::MBC1;
-  if(mapperid == "MBC2" ) info.mapper = Mapper::MBC2;
-  if(mapperid == "MBC3" ) info.mapper = Mapper::MBC3;
-  if(mapperid == "MBC5" ) info.mapper = Mapper::MBC5;
-  if(mapperid == "MMM01") info.mapper = Mapper::MMM01;
-  if(mapperid == "HuC1" ) info.mapper = Mapper::HuC1;
-  if(mapperid == "HuC3" ) info.mapper = Mapper::HuC3;
+  if(mapperid == "none" ) information.mapper = Mapper::MBC0;
+  if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
+  if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
+  if(mapperid == "MBC3" ) information.mapper = Mapper::MBC3;
+  if(mapperid == "MBC5" ) information.mapper = Mapper::MBC5;
+  if(mapperid == "MMM01") information.mapper = Mapper::MMM01;
+  if(mapperid == "HuC1" ) information.mapper = Mapper::HuC1;
+  if(mapperid == "HuC3" ) information.mapper = Mapper::HuC3;
 
-  info.rtc = document["cartridge"]["rtc"].data == "true";
-  info.rumble = document["cartridge"]["rumble"].data == "true";
+  information.rtc = document["cartridge"]["rtc"].data == "true";
+  information.rumble = document["cartridge"]["rumble"].data == "true";
 
-  info.romsize = numeral(document["cartridge"]["rom"]["size"].data);
-  info.ramsize = numeral(document["cartridge"]["ram"]["size"].data);
-  info.battery = document["cartridge"]["ram"]["battery"].data == "true";
+  information.romsize = numeral(document["cartridge"]["rom"]["size"].data);
+  information.ramsize = numeral(document["cartridge"]["ram"]["size"].data);
+  information.battery = document["cartridge"]["ram"]["nonvolatile"].data == "true";
 
-  switch(info.mapper) { default:
+  switch(information.mapper) { default:
     case Mapper::MBC0:  mapper = &mbc0;  break;
     case Mapper::MBC1:  mapper = &mbc1;  break;
     case Mapper::MBC2:  mapper = &mbc2;  break;
@@ -60,7 +59,7 @@ void Cartridge::load(System::Revision revision, const string &markup, const uint
     case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  ramdata = new uint8_t[ramsize = info.ramsize]();
+  ramdata = new uint8_t[ramsize = information.ramsize]();
   system.load(revision);
 
   loaded = true;

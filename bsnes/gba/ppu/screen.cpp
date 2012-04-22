@@ -2,7 +2,7 @@ void PPU::render_forceblank() {
   uint16 *line = output + regs.vcounter * 240;
   uint16 *last = blur + regs.vcounter * 240;
   for(unsigned x = 0; x < 240; x++) {
-    line[x] = ((last[x] >> 1) & 0x3def) + ((0x7fff >> 1) & 0x3def);
+    line[x] = (0x7fff + last[x] - ((0x7fff ^ last[x]) & 0x0421)) >> 1;
     last[x] = 0x7fff;
   }
 }
@@ -59,7 +59,7 @@ void PPU::render_screen() {
     }
 
     //output pixel; blend with previous pixel to simulate GBA LCD blur
-    line[x] = ((last[x] >> 1) & 0x3def) + ((color >> 1) & 0x3def);
+    line[x] = (color + last[x] - ((color ^ last[x]) & 0x0421)) >> 1;
     last[x] = color;
   }
 }

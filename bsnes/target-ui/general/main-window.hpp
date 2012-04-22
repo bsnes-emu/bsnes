@@ -79,6 +79,7 @@ struct MainWindow : Window {
       Item toolsStateLoad4;
       Item toolsStateLoad5;
     Separator toolsSeparator;
+    Item toolsInformationWindow;
     Item toolsShrinkWindow;
     Item toolsCheatEditor;
     Item toolsStateManager;

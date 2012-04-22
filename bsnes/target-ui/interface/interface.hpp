@@ -3,6 +3,7 @@
 struct InterfaceCore {
   bool loadFirmware(string filename, string keyname, uint8_t *targetdata, unsigned targetsize);
 
+  virtual string markup() = 0;
   virtual bool cartridgeLoaded() = 0;
   virtual void unloadCartridge() = 0;
 
@@ -50,6 +51,8 @@ struct Interface : property<Interface> {
   void bindControllers();
   void setController(unsigned port, unsigned device);
   void updateDSP();
+
+  string markup();
 
   bool cartridgeLoaded();
   void loadCartridge(Mode mode);

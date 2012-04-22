@@ -27,9 +27,13 @@ struct CPU : Processor::ARM, Thread, MMIO {
 
   void dma_run();
   void dma_transfer(Registers::DMA &dma);
+  void dma_vblank();
+  void dma_hblank();
+  void dma_hdma();
 
   void timer_step(unsigned clocks);
   void timer_increment(unsigned n);
+  void timer_fifo_run(unsigned n);
 
   void serialize(serializer&);
   CPU();

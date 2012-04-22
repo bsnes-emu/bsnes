@@ -11,8 +11,10 @@ namespace SNES {
 
 Cartridge cartridge;
 
-void Cartridge::load(Mode cartridge_mode, const char *markup) {
+void Cartridge::load(Mode cartridge_mode, const string &markup) {
   mode = cartridge_mode;
+  information.markup = markup;
+
   region = Region::NTSC;
   ram_size = 0;
 

@@ -52,7 +52,7 @@ struct Cartridge : property<Cartridge> {
     uint8_t *data;
     unsigned size;
     Slot slot;
-    NonVolatileRAM() : id(""), data(0), size(0), slot(Slot::Base) {}
+    NonVolatileRAM() : id(""), data(nullptr), size(0), slot(Slot::Base) {}
     NonVolatileRAM(const string id, uint8_t *data, unsigned size, Slot slot = Slot::Base)
     : id(id), data(data), size(size), slot(slot) {}
   };
@@ -76,13 +76,14 @@ struct Cartridge : property<Cartridge> {
   linear_vector<Mapping> mapping;
 
   struct Information {
+    string markup;
     struct NSS {
       lstring setting;
       lstring option[16];
     } nss;
   } information;
 
-  void load(Mode, const char*);
+  void load(Mode, const string&);
   void unload();
 
   void serialize(serializer&);

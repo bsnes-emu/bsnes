@@ -138,6 +138,14 @@ optional<unsigned> lstring::find(const char *key) const {
   return { false, 0 };
 }
 
+string lstring::concatenate(const char *separator) const {
+  string output;
+  for(unsigned i = 0; i < size(); i++) {
+    output.append(operator[](i), i < size() - 1 ? separator : "");
+  }
+  return output;
+}
+
 bool lstring::operator==(const lstring &source) const {
   if(this == &source) return true;
   if(size() != source.size()) return false;

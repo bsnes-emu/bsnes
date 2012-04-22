@@ -7,6 +7,10 @@ void InterfaceGB::initialize() {
   GB::system.init();
 }
 
+string InterfaceGB::markup() {
+  return GB::cartridge.information.markup;
+}
+
 bool InterfaceGB::cartridgeLoaded() {
   return GB::cartridge.loaded();
 }
@@ -31,9 +35,7 @@ bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &fil
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-
-  GameBoyCartridge info(data, size);
-  if(markup.empty()) markup = info.markup;
+  if(markup.empty()) markup = GameBoyCartridge(data, size).markup;
 
   GB::cartridge.load(revision, markup, data, size);
   GB::system.power();

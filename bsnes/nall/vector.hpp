@@ -56,6 +56,12 @@ namespace nall {
       new(pool + objectsize++) T(data);
     }
 
+    bool appendonce(const T& data) {
+      if(find(data) == true) return false;
+      append(data);
+      return true;
+    }
+
     void insert(unsigned position, const T& data) {
       append(data);
       for(signed n = size() - 1; n > position; n--) pool[n] = pool[n - 1];

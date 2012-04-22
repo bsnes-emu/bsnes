@@ -18,7 +18,6 @@ namespace GB {
 */
 
 #include <libco/libco.h>
-#include <nall/gameboy/cartridge.hpp>
 
 namespace GB {
   struct Thread {

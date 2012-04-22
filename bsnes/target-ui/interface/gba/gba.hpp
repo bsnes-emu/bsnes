@@ -1,6 +1,8 @@
 struct InterfaceGBA : InterfaceCore, GBA::Interface {
   void initialize();
 
+  string markup();
+
   bool cartridgeLoaded();
   bool loadCartridge(const string &filename);
   void unloadCartridge();

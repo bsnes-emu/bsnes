@@ -5,6 +5,10 @@ void InterfaceGBA::initialize() {
   GBA::system.init();
 }
 
+string InterfaceGBA::markup() {
+  return GBA::cartridge.information.markup;
+}
+
 bool InterfaceGBA::cartridgeLoaded() {
   return GBA::cartridge.loaded();
 }
@@ -29,6 +33,7 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = GameBoyAdvanceCartridge(data, size).markup;
 
   GBA::cartridge.load(markup, data, size);
   GBA::system.power();

@@ -3,10 +3,9 @@
 
 namespace nall {
 
-class SnesCartridge {
-public:
+struct SuperFamicomCartridge {
   string markup;
-  inline SnesCartridge(const uint8_t *data, unsigned size);
+  inline SuperFamicomCartridge(const uint8_t *data, unsigned size);
 
 //private:
   inline void read_header(const uint8_t *data, unsigned size);
@@ -105,7 +104,7 @@ public:
   bool has_st018;
 };
 
-SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
+SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size) {
   read_header(data, size);
 
   string xml;
@@ -538,7 +537,7 @@ SnesCartridge::SnesCartridge(const uint8_t *data, unsigned size) {
   markup.append("</cartridge>\n");
 }
 
-void SnesCartridge::read_header(const uint8_t *data, unsigned size) {
+void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
   type        = TypeUnknown;
   mapper      = LoROM;
   dsp1_mapper = DSP1Unmapped;
@@ -766,7 +765,7 @@ void SnesCartridge::read_header(const uint8_t *data, unsigned size) {
   }
 }
 
-unsigned SnesCartridge::find_header(const uint8_t *data, unsigned size) {
+unsigned SuperFamicomCartridge::find_header(const uint8_t *data, unsigned size) {
   unsigned score_lo = score_header(data, size, 0x007fc0);
   unsigned score_hi = score_header(data, size, 0x00ffc0);
   unsigned score_ex = score_header(data, size, 0x40ffc0);
@@ -781,7 +780,7 @@ unsigned SnesCartridge::find_header(const uint8_t *data, unsigned size) {
   }
 }
 
-unsigned SnesCartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
+unsigned SuperFamicomCartridge::score_header(const uint8_t *data, unsigned size, unsigned addr) {
   if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 
@@ -862,7 +861,7 @@ unsigned SnesCartridge::score_header(const uint8_t *data, unsigned size, unsigne
   return score;
 }
 
-unsigned SnesCartridge::gameboy_ram_size(const uint8_t *data, unsigned size) {
+unsigned SuperFamicomCartridge::gameboy_ram_size(const uint8_t *data, unsigned size) {
   if(size < 512) return 0;
   switch(data[0x0149]) {
     case 0x00: return   0 * 1024;
@@ -875,7 +874,7 @@ unsigned SnesCartridge::gameboy_ram_size(const uint8_t *data, unsigned size) {
   }
 }
 
-bool SnesCartridge::gameboy_has_rtc(const uint8_t *data, unsigned size) {
+bool SuperFamicomCartridge::gameboy_has_rtc(const uint8_t *data, unsigned size) {
   if(size < 512) return false;
   if(data[0x0147] == 0x0f ||data[0x0147] == 0x10) return true;
   return false;

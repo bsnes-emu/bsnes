@@ -5,7 +5,7 @@
 #include <nall/type_traits.hpp>
 
 namespace nall {
-  template<unsigned bits> class uint_t {
+  template<unsigned bits> struct uint_t {
   private:
     typedef typename type_if<bits <= 8 * sizeof(unsigned), unsigned, uintmax_t>::type type_t;
     type_t data;
@@ -35,7 +35,7 @@ namespace nall {
     template<unsigned s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
   };
 
-  template<unsigned bits> class int_t {
+  template<unsigned bits> struct int_t {
   private:
     typedef typename type_if<bits <= 8 * sizeof(signed), signed, intmax_t>::type type_t;
     type_t data;
@@ -65,73 +65,46 @@ namespace nall {
     template<unsigned s> inline int_t(const int_t<s> &i) : data(sclip<bits>(i)) {}
   };
 
-  class varuint_t {
+  template<typename type_t> struct varuint_t {
   private:
-    unsigned data;
-    unsigned mask;
+    type_t data;
+    type_t mask;
 
   public:
-    inline operator unsigned() const { return data; }
-    inline unsigned operator ++(int) { unsigned r = data; data = (data + 1) & mask; return r; }
-    inline unsigned operator --(int) { unsigned r = data; data = (data - 1) & mask; return r; }
-    inline unsigned operator ++() { return data = (data + 1) & mask; }
-    inline unsigned operator --() { return data = (data - 1) & mask; }
-    inline unsigned operator  =(const unsigned i) { return data = (i) & mask; }
-    inline unsigned operator |=(const unsigned i) { return data = (data  | i) & mask; }
-    inline unsigned operator ^=(const unsigned i) { return data = (data  ^ i) & mask; }
-    inline unsigned operator &=(const unsigned i) { return data = (data  & i) & mask; }
-    inline unsigned operator<<=(const unsigned i) { return data = (data << i) & mask; }
-    inline unsigned operator>>=(const unsigned i) { return data = (data >> i) & mask; }
-    inline unsigned operator +=(const unsigned i) { return data = (data  + i) & mask; }
-    inline unsigned operator -=(const unsigned i) { return data = (data  - i) & mask; }
-    inline unsigned operator *=(const unsigned i) { return data = (data  * i) & mask; }
-    inline unsigned operator /=(const unsigned i) { return data = (data  / i) & mask; }
-    inline unsigned operator %=(const unsigned i) { return data = (data  % i) & mask; }
+    inline operator type_t() const { return data; }
+    inline type_t operator ++(int) { type_t r = data; data = (data + 1) & mask; return r; }
+    inline type_t operator --(int) { type_t r = data; data = (data - 1) & mask; return r; }
+    inline type_t operator ++() { return data = (data + 1) & mask; }
+    inline type_t operator --() { return data = (data - 1) & mask; }
+    inline type_t operator  =(const type_t i) { return data = (i) & mask; }
+    inline type_t operator |=(const type_t i) { return data = (data  | i) & mask; }
+    inline type_t operator ^=(const type_t i) { return data = (data  ^ i) & mask; }
+    inline type_t operator &=(const type_t i) { return data = (data  & i) & mask; }
+    inline type_t operator<<=(const type_t i) { return data = (data << i) & mask; }
+    inline type_t operator>>=(const type_t i) { return data = (data >> i) & mask; }
+    inline type_t operator +=(const type_t i) { return data = (data  + i) & mask; }
+    inline type_t operator -=(const type_t i) { return data = (data  - i) & mask; }
+    inline type_t operator *=(const type_t i) { return data = (data  * i) & mask; }
+    inline type_t operator /=(const type_t i) { return data = (data  / i) & mask; }
+    inline type_t operator %=(const type_t i) { return data = (data  % i) & mask; }
 
-    inline void bits(unsigned bits) { mask = (1U << (bits - 1)) + ((1U << (bits - 1)) - 1); data &= mask; }
-    inline varuint_t() : data(0), mask(~0U) {}
-    inline varuint_t(const unsigned i) : data(i), mask(~0U) {}
-  };
-
-  class varuintmax_t {
-  private:
-    uintmax_t data;
-    uintmax_t mask;
-
-  public:
-    inline operator uintmax_t() const { return data; }
-    inline uintmax_t operator ++(int) { uintmax_t r = data; data = (data + 1) & mask; return r; }
-    inline uintmax_t operator --(int) { uintmax_t r = data; data = (data - 1) & mask; return r; }
-    inline uintmax_t operator ++() { return data = (data + 1) & mask; }
-    inline uintmax_t operator --() { return data = (data - 1) & mask; }
-    inline uintmax_t operator  =(const uintmax_t i) { return data = (i) & mask; }
-    inline uintmax_t operator |=(const uintmax_t i) { return data = (data  | i) & mask; }
-    inline uintmax_t operator ^=(const uintmax_t i) { return data = (data  ^ i) & mask; }
-    inline uintmax_t operator &=(const uintmax_t i) { return data = (data  & i) & mask; }
-    inline uintmax_t operator<<=(const uintmax_t i) { return data = (data << i) & mask; }
-    inline uintmax_t operator>>=(const uintmax_t i) { return data = (data >> i) & mask; }
-    inline uintmax_t operator +=(const uintmax_t i) { return data = (data  + i) & mask; }
-    inline uintmax_t operator -=(const uintmax_t i) { return data = (data  - i) & mask; }
-    inline uintmax_t operator *=(const uintmax_t i) { return data = (data  * i) & mask; }
-    inline uintmax_t operator /=(const uintmax_t i) { return data = (data  / i) & mask; }
-    inline uintmax_t operator %=(const uintmax_t i) { return data = (data  % i) & mask; }
-
-    inline void bits(unsigned bits) { mask = (1ULL << (bits - 1)) + ((1ULL << (bits - 1)) - 1); data &= mask; }
-    inline varuintmax_t() : data(0), mask(~0ULL) {}
-    inline varuintmax_t(const uintmax_t i) : data(i), mask(~0ULL) {}
+    inline void bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
+    inline varuint_t() : data(0ull), mask((type_t)~0ull) {}
+    inline varuint_t(const type_t i) : data(i), mask((type_t)~0ull) {}
   };
 }
 
 //typedefs
-  typedef nall::uint_t< 1> uint1_t;
-  typedef nall::uint_t< 2> uint2_t;
-  typedef nall::uint_t< 3> uint3_t;
-  typedef nall::uint_t< 4> uint4_t;
-  typedef nall::uint_t< 5> uint5_t;
-  typedef nall::uint_t< 6> uint6_t;
-  typedef nall::uint_t< 7> uint7_t;
-//typedef nall::uint_t< 8> uint8_t;
-  typedef nall::uint_t< 9> uint9_t;
+  typedef nall::uint_t< 1>  uint1_t;
+  typedef nall::uint_t< 2>  uint2_t;
+  typedef nall::uint_t< 3>  uint3_t;
+  typedef nall::uint_t< 4>  uint4_t;
+  typedef nall::uint_t< 5>  uint5_t;
+  typedef nall::uint_t< 6>  uint6_t;
+  typedef nall::uint_t< 7>  uint7_t;
+//typedef nall::uint_t< 8>  uint8_t;
+
+  typedef nall::uint_t< 9>  uint9_t;
   typedef nall::uint_t<10> uint10_t;
   typedef nall::uint_t<11> uint11_t;
   typedef nall::uint_t<12> uint12_t;
@@ -139,6 +112,7 @@ namespace nall {
   typedef nall::uint_t<14> uint14_t;
   typedef nall::uint_t<15> uint15_t;
 //typedef nall::uint_t<16> uint16_t;
+
   typedef nall::uint_t<17> uint17_t;
   typedef nall::uint_t<18> uint18_t;
   typedef nall::uint_t<19> uint19_t;
@@ -156,15 +130,16 @@ namespace nall {
   typedef nall::uint_t<31> uint31_t;
 //typedef nall::uint_t<32> uint32_t;
 
-  typedef nall::int_t< 1> int1_t;
-  typedef nall::int_t< 2> int2_t;
-  typedef nall::int_t< 3> int3_t;
-  typedef nall::int_t< 4> int4_t;
-  typedef nall::int_t< 5> int5_t;
-  typedef nall::int_t< 6> int6_t;
-  typedef nall::int_t< 7> int7_t;
-//typedef nall::int_t< 8> int8_t;
-  typedef nall::int_t< 9> int9_t;
+  typedef nall::int_t< 1>  int1_t;
+  typedef nall::int_t< 2>  int2_t;
+  typedef nall::int_t< 3>  int3_t;
+  typedef nall::int_t< 4>  int4_t;
+  typedef nall::int_t< 5>  int5_t;
+  typedef nall::int_t< 6>  int6_t;
+  typedef nall::int_t< 7>  int7_t;
+//typedef nall::int_t< 8>  int8_t;
+
+  typedef nall::int_t< 9>  int9_t;
   typedef nall::int_t<10> int10_t;
   typedef nall::int_t<11> int11_t;
   typedef nall::int_t<12> int12_t;
@@ -172,6 +147,7 @@ namespace nall {
   typedef nall::int_t<14> int14_t;
   typedef nall::int_t<15> int15_t;
 //typedef nall::int_t<16> int16_t;
+
   typedef nall::int_t<17> int17_t;
   typedef nall::int_t<18> int18_t;
   typedef nall::int_t<19> int19_t;

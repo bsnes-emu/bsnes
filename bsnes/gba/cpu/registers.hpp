@@ -15,16 +15,17 @@ struct Registers {
   };
 
   struct DMA {
-    uint32 source;
-    uint32 target;
-    uint16 length;
+    varuint source;
+    varuint target;
+    varuint length;
     DMAControl control;
 
     //internal
+    bool pending;
     struct Run {
-      uint32 target;
-      uint32 source;
-      uint16 length;
+      varuint target;
+      varuint source;
+      varuint length;
     } run;
   } dma[4];
 

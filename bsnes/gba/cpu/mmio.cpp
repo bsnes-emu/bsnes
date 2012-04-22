@@ -192,9 +192,12 @@ void CPU::write(uint32 addr, uint8 byte) {
     bool enable = dma.control.enable;
     dma.control = (dma.control & ~(255 << shift)) | (byte << shift);
     if(enable == 0 && dma.control.enable) {
+      if(dma.control.timingmode == 0) dma.pending = true;  //immediate transfer mode
       dma.run.target = dma.target;
       dma.run.source = dma.source;
       dma.run.length = dma.length;
+    } else if(dma.control.enable == 0) {
+      dma.pending = false;
     }
     return;
   }

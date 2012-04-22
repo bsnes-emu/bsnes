@@ -16,7 +16,7 @@ MainWindow::MainWindow() {
     cartridgeLoadSatellaview.setText("BS-X Satellaview ...");
     cartridgeLoadSufamiTurbo.setText("Sufami Turbo ...");
 
-  nesMenu.setText("&NES");
+  nesMenu.setText("&Famicom");
     nesPower.setText("&Power Cycle");
     nesReset.setText("&Reset");
     nesPort1.setText("Controller Port &1");
@@ -31,7 +31,7 @@ MainWindow::MainWindow() {
       nesPort2Device[config->nes.controllerPort2Device].setChecked();
     nesCartridgeUnload.setText("&Unload Cartridge");
 
-  snesMenu.setText("&SNES");
+  snesMenu.setText("&Super Famicom");
     snesPower.setText("&Power Cycle");
     snesReset.setText("&Reset");
     snesPort1.setText("Controller Port &1");
@@ -98,6 +98,7 @@ MainWindow::MainWindow() {
       toolsStateLoad3.setText("Slot &3");
       toolsStateLoad4.setText("Slot &4");
       toolsStateLoad5.setText("Slot &5");
+    toolsInformationWindow.setText("&Information ...");
     toolsShrinkWindow.setText("Shrink &Window");
     toolsCheatEditor.setText("&Cheat Editor ...");
     toolsStateManager.setText("State &Manager ...");
@@ -185,6 +186,7 @@ MainWindow::MainWindow() {
       toolsStateLoad.append(toolsStateLoad4);
       toolsStateLoad.append(toolsStateLoad5);
     toolsMenu.append(toolsSeparator);
+    toolsMenu.append(toolsInformationWindow);
     toolsMenu.append(toolsShrinkWindow);
     toolsMenu.append(toolsCheatEditor);
     toolsMenu.append(toolsStateManager);
@@ -364,6 +366,7 @@ MainWindow::MainWindow() {
   toolsStateLoad4.onActivate = [&] { interface->loadState(4); };
   toolsStateLoad5.onActivate = [&] { interface->loadState(5); };
 
+  toolsInformationWindow.onActivate = [&] { informationWindow->setVisible(); };
   toolsShrinkWindow.onActivate = [&] { utility->resizeMainWindow(true); };
   toolsCheatEditor.onActivate = [&] { cheatEditor->setVisible(); };
   toolsStateManager.onActivate = [&] { stateManager->setVisible(); };

@@ -111,6 +111,8 @@ namespace nall {
 
   struct lstring : vector<string> {
     inline optional<unsigned> find(const char*) const;
+    inline string concatenate(const char*) const;
+
     template<unsigned Limit = 0> inline lstring& split(const char*, const char*);
     template<unsigned Limit = 0> inline lstring& isplit(const char*, const char*);
     template<unsigned Limit = 0> inline lstring& qsplit(const char*, const char*);

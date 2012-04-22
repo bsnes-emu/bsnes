@@ -47,6 +47,7 @@ void Utility::setMode(Interface::Mode mode) {
   interface->updateDSP();
   mainWindow->synchronize();
   resizeMainWindow();
+  informationWindow->update();
 }
 
 void Utility::resizeMainWindow(bool shrink) {

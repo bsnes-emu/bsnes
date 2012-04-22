@@ -1,5 +1,8 @@
 struct InterfaceNES : InterfaceCore, NES::Interface {
   void initialize();
+
+  string markup();
+
   void setController(bool port, unsigned device);
 
   bool cartridgeLoaded();

@@ -5,6 +5,10 @@ void InterfaceSNES::initialize() {
   SNES::system.init();
 }
 
+string InterfaceSNES::markup() {
+  return SNES::cartridge.information.markup;
+}
+
 void InterfaceSNES::setController(bool port, unsigned device) {
   if(port == 0) config->snes.controllerPort1Device = device;
   if(port == 1) config->snes.controllerPort2Device = device;
@@ -63,7 +67,7 @@ bool InterfaceSNES::loadCartridge(string basename) {
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SnesCartridge(data, size).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data, size).markup;
 
   SNES::cartridge.rom.copy(data, size);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
@@ -91,7 +95,7 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(string basename, string slot
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
@@ -121,7 +125,7 @@ bool InterfaceSNES::loadSatellaviewCartridge(string basename, string slotname) {
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
@@ -156,7 +160,7 @@ bool InterfaceSNES::loadSufamiTurboCartridge(string basename, string slotAname, 
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
 
   SNES::cartridge.rom.copy(data[0], size[0]);
   if(data[1]) SNES::sufamiturbo.slotA.rom.copy(data[1], size[1]);
@@ -188,7 +192,7 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) 
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SnesCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
 
   string gbMarkup;
   gbMarkup.readfile(interface->slot[0].filename("manifest.xml", ".xml"));

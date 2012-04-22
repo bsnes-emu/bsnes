@@ -21,7 +21,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   };
 
   struct Information {
-    string xml;
+    string markup;
 
     Mapper mapper;
     bool ram;
@@ -31,7 +31,7 @@ struct Cartridge : MMIO, property<Cartridge> {
 
     unsigned romsize;
     unsigned ramsize;
-  } info;
+  } information;
 
   readonly<bool> loaded;
   readonly<string> sha256;

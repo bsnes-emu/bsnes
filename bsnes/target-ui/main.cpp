@@ -54,9 +54,11 @@ Application::Application(int argc, char **argv) {
   utility = new Utility;
 
   string fontFamily = Intrinsics::platform() == Intrinsics::Platform::Windows ? "Tahoma, " : "Sans, ";
+  string monoFamily = Intrinsics::platform() == Intrinsics::Platform::Windows ? "Lucida Console, " : "Liberation Mono, ";
   normalFont = {fontFamily, "8"};
   boldFont = {fontFamily, "8, Bold"};
   titleFont = {fontFamily, "16, Bold"};
+  monospaceFont = {monoFamily, "8"};
 
   compositionEnable = compositor::enabled();
   if(config->video.compositionMode == 2) compositor::enable(false);
@@ -65,6 +67,7 @@ Application::Application(int argc, char **argv) {
   mainWindow = new MainWindow;
   fileBrowser = new FileBrowser;
   dipSwitches = new DipSwitches;
+  informationWindow = new InformationWindow;
   settingsWindow = new SettingsWindow;
   cheatDatabase = new CheatDatabase;
   cheatEditor = new CheatEditor;
@@ -133,6 +136,7 @@ Application::~Application() {
   delete cheatEditor;
   delete cheatDatabase;
   delete settingsWindow;
+  delete informationWindow;
   delete dipSwitches;
   delete fileBrowser;
   delete mainWindow;

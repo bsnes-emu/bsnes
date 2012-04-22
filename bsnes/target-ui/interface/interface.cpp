@@ -38,7 +38,7 @@ string CartridgePath::title() const {
     title = notdir(nall::basename(title));
     return title;
   }
-  return notdir(nall::basename(name));
+  return notdir(name);
 }
 
 void Interface::bindControllers() {
@@ -80,13 +80,17 @@ void Interface::updateDSP() {
   }
 }
 
+string Interface::markup() {
+  if(core) return core->markup();
+  return "";
+}
+
 bool Interface::cartridgeLoaded() {
   if(core) return core->cartridgeLoaded();
   return false;
 }
 
 void Interface::loadCartridge(Mode mode) {
-  utility->setMode(this->mode = mode);
   switch(mode) {
   case Mode::NES:  core = &nes; break;
   case Mode::SNES: core = &snes; break;
@@ -94,6 +98,7 @@ void Interface::loadCartridge(Mode mode) {
   case Mode::GBA:  core = &gba; break;
   default:         core = nullptr; break;
   }
+  utility->setMode(this->mode = mode);
 
   bindControllers();
   cheatEditor->load(game.filename("cheats.xml", ".cht"));
@@ -122,6 +127,7 @@ void Interface::unloadCartridge() {
   setCheatCodes();
 
   if(core) core->unloadCartridge();
+  core = nullptr;
   cartridgeTitle = "";
   utility->setMode(mode = Mode::None);
 }

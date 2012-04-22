@@ -8,6 +8,7 @@ namespace GBA {
 Cartridge cartridge;
 
 bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
+  information.markup = markup;
   XML::Document document(markup);
 
   for(unsigned addr = 0; addr < rom.size; addr++) {
@@ -31,6 +32,8 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
     if(info["type"].data == "EEPROM") {
       has_eeprom = true;
       eeprom.size = numeral(info["size"].data);
+      eeprom.bits = eeprom.size <= 512 ? 6 : 14;
+      if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
       eeprom.mask = size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
       eeprom.test = size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
       for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0xff;
@@ -51,7 +54,7 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
 }
 
 void Cartridge::unload() {
-  if(loaded) return;
+  if(loaded == false) return;
   loaded = false;
 }
 
@@ -120,6 +123,7 @@ Cartridge::Cartridge() {
 Cartridge::~Cartridge() {
   delete[] rom.data;
   delete[] ram.data;
+  delete[] eeprom.data;
   delete[] flashrom.data;
 }
 

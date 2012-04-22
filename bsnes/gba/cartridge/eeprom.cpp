@@ -10,6 +10,16 @@ void Cartridge::EEPROM::write(unsigned addr, bool bit) {
 bool Cartridge::EEPROM::read() {
   bool bit = 1;
 
+  //EEPROM size auto-detection
+  if(bits == 0 && mode == Mode::ReadAddress) {
+    print("EEPROM address bits: ", --addressbits, "\n");
+    bits = addressbits == 6 ? 6 : 14;
+    size = 8192;
+    mode = Mode::ReadData;
+    offset = 0;
+    //fallthrough
+  }
+
   if(mode == Mode::ReadData) {
     if(offset >= 4) bit = read(address * 64 + (offset - 4));
     if(++offset == 68) mode = Mode::Wait;
@@ -28,10 +38,12 @@ void Cartridge::EEPROM::write(bool bit) {
     if(bit == 1) mode = Mode::ReadAddress;
     offset = 0;
     address = 0;
+    addressbits = 0;
   }
 
   else if(mode == Mode::ReadAddress) {
     address = (address << 1) | bit;
+    addressbits++;
     if(++offset == bits) {
       mode = Mode::ReadValidate;
       offset = 0;
@@ -65,8 +77,6 @@ void Cartridge::EEPROM::write(bool bit) {
 }
 
 void Cartridge::EEPROM::power() {
-  bits = (size <= 512 ? 6 : 14);
-
   mode = Mode::Wait;
   offset = 0;
   address = 0;

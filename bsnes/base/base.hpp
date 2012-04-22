@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-static const char Version[] = "087.29";
+static const char Version[] = "087.30";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -56,15 +56,15 @@ template<typename R, typename... P> struct hook<R (P...)> {
   #define privileged private
 #endif
 
-typedef  int1_t int1;
-typedef  int2_t int2;
-typedef  int3_t int3;
-typedef  int4_t int4;
-typedef  int5_t int5;
-typedef  int6_t int6;
-typedef  int7_t int7;
-typedef  int8_t int8;
-typedef  int9_t int9;
+typedef  int1_t  int1;
+typedef  int2_t  int2;
+typedef  int3_t  int3;
+typedef  int4_t  int4;
+typedef  int5_t  int5;
+typedef  int6_t  int6;
+typedef  int7_t  int7;
+typedef  int8_t  int8;
+typedef  int9_t  int9;
 typedef int10_t int10;
 typedef int11_t int11;
 typedef int12_t int12;
@@ -90,15 +90,15 @@ typedef int31_t int31;
 typedef int32_t int32;
 typedef int64_t int64;
 
-typedef  uint1_t uint1;
-typedef  uint2_t uint2;
-typedef  uint3_t uint3;
-typedef  uint4_t uint4;
-typedef  uint5_t uint5;
-typedef  uint6_t uint6;
-typedef  uint7_t uint7;
-typedef  uint8_t uint8;
-typedef  uint9_t uint9;
+typedef  uint1_t  uint1;
+typedef  uint2_t  uint2;
+typedef  uint3_t  uint3;
+typedef  uint4_t  uint4;
+typedef  uint5_t  uint5;
+typedef  uint6_t  uint6;
+typedef  uint7_t  uint7;
+typedef  uint8_t  uint8;
+typedef  uint9_t  uint9;
 typedef uint10_t uint10;
 typedef uint11_t uint11;
 typedef uint12_t uint12;
@@ -125,6 +125,6 @@ typedef uint32_t uint32;
 typedef uint_t<33> uint33;
 typedef uint64_t uint64;
 
-typedef varuint_t varuint;
+typedef varuint_t<unsigned> varuint;
 
 #endif

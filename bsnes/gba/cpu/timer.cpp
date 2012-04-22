@@ -21,11 +21,24 @@ void CPU::timer_increment(unsigned n) {
 
     if(timer.control.irq) regs.irq.flag.timer[n] = 1;
 
-    if(apu.fifo[0].timer == n) apu.fifo[0].read();
-    if(apu.fifo[1].timer == n) apu.fifo[1].read();
+    if(apu.fifo[0].timer == n) timer_fifo_run(0);
+    if(apu.fifo[1].timer == n) timer_fifo_run(1);
 
     if(n < 3 && regs.timer[n + 1].control.enable && regs.timer[n + 1].control.cascade) {
       timer_increment(n + 1);
     }
+  }
+}
+
+void CPU::timer_fifo_run(unsigned n) {
+  apu.fifo[n].read();
+  if(apu.fifo[n].size > 16) return;
+
+  auto &dma = regs.dma[1 + n];
+  if(dma.control.enable && dma.control.timingmode == 3) {
+    dma.pending = true;
+    dma.control.targetmode = 2;
+    dma.control.size = 1;
+    dma.run.length = 4;
   }
 }

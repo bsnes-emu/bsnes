@@ -14,14 +14,15 @@ void PPU::render_object(Object &obj) {
 
   auto &output = layer[OBJ];
   unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
-  unsigned baseaddr = 0x10000 + obj.character * 32;
+  unsigned baseaddr = obj.character * 32;
 
   if(obj.vflip && obj.affine == 0) {
     py ^= obj.height - 1;
   }
 
   if(obj.mosaic && regs.mosaic.objvsize) {
-    py = (py / (1 + regs.mosaic.objvsize)) * (1 + regs.mosaic.objvsize);
+    signed mosaicy = (regs.vcounter / (1 + regs.mosaic.objvsize)) * (1 + regs.mosaic.objvsize);
+    py = obj.y >= 160 || mosaicy - obj.y >= 0 ? mosaicy - obj.y : 0;
   }
 
   int16 pa = objectparam[obj.affineparam].pa;
@@ -57,7 +58,7 @@ void PPU::render_object(Object &obj) {
       unsigned offset = (y / 8) * rowsize + (x / 8);
       offset = offset * 64 + (y & 7) * 8 + (x & 7);
 
-      uint8 color = vram[baseaddr + (offset >> !obj.colors)];
+      uint8 color = object_vram_read(baseaddr + (offset >> !obj.colors));
       if(obj.colors == 0) color = (x & 1) ? color >> 4 : color & 15;
       if(color) {
         if(obj.mode & 2) {
@@ -72,4 +73,11 @@ void PPU::render_object(Object &obj) {
     fx += pa;
     fy += pc;
   }
+}
+
+uint8 PPU::object_vram_read(unsigned addr) const {
+  if(regs.control.bgmode == 3 || regs.control.bgmode == 4 || regs.control.bgmode == 5) {
+    if(addr <= 0x3fff) return 0u;
+  }
+  return vram[0x10000 + (addr & 0x7fff)];
 }

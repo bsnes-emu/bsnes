@@ -1,6 +1,8 @@
 struct InterfaceGB : InterfaceCore, GB::Interface {
   void initialize();
 
+  string markup();
+
   bool cartridgeLoaded();
   bool loadCartridge(GB::System::Revision revision, const string &filename);
   void unloadCartridge();

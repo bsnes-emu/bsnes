@@ -3,6 +3,10 @@ void InterfaceNES::initialize() {
   NES::system.init();
 }
 
+string InterfaceNES::markup() {
+  return NES::cartridge.information.markup;
+}
+
 void InterfaceNES::setController(bool port, unsigned device) {
   if(port == 0) config->nes.controllerPort1Device = device;
   if(port == 1) config->nes.controllerPort2Device = device;
@@ -42,6 +46,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
+  if(markup.empty()) markup = FamicomCartridge(data, size).markup;
 
   NES::cartridge.load(markup, data, size);
   NES::system.power();

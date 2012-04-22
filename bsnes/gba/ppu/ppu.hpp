@@ -33,6 +33,7 @@ struct PPU : Thread, MMIO {
 
   void render_objects();
   void render_object(Object&);
+  uint8 object_vram_read(unsigned addr) const;
 
   void render_mosaic_background(unsigned id);
   void render_mosaic_object();

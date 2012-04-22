@@ -8,6 +8,10 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_eeprom;
   readonly<bool> has_flashrom;
 
+  struct Information {
+    string markup;
+  } information;
+
   bool load(const string &markup, const uint8_t *data, unsigned size);
   void unload();
   void power();

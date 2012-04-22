@@ -11,8 +11,10 @@
 #include <nall/filemap.hpp>
 #include <nall/input.hpp>
 #include <nall/bps/patch.hpp>
+#include <nall/nes/cartridge.hpp>
 #include <nall/snes/cartridge.hpp>
-#include <nall/gameboy/cartridge.hpp>
+#include <nall/gb/cartridge.hpp>
+#include <nall/gba/cartridge.hpp>
 using namespace nall;
 
 #include <phoenix/phoenix.hpp>
@@ -45,6 +47,7 @@ struct Application {
   string normalFont;
   string boldFont;
   string titleFont;
+  string monospaceFont;
 
   void run();
   Application(int argc, char **argv);

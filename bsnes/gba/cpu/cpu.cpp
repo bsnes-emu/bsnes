@@ -110,6 +110,10 @@ void CPU::power() {
     dma.target = 0;
     dma.length = 0;
     dma.control = 0;
+    dma.pending = 0;
+    dma.run.target = 0;
+    dma.run.source = 0;
+    dma.run.length = 0;
   }
   for(auto &timer : regs.timer) {
     timer.period = 0;
@@ -143,6 +147,22 @@ void CPU::power() {
 CPU::CPU() {
   iwram = new uint8[ 32 * 1024];
   ewram = new uint8[256 * 1024];
+
+  regs.dma[0].source.bits(27); regs.dma[0].run.source.bits(27);
+  regs.dma[0].target.bits(27); regs.dma[0].run.target.bits(27);
+  regs.dma[0].length.bits(14); regs.dma[0].run.length.bits(14);
+
+  regs.dma[1].source.bits(28); regs.dma[1].run.source.bits(28);
+  regs.dma[1].target.bits(27); regs.dma[1].run.target.bits(27);
+  regs.dma[1].length.bits(14); regs.dma[1].run.length.bits(14);
+
+  regs.dma[2].source.bits(28); regs.dma[2].run.source.bits(28);
+  regs.dma[2].target.bits(27); regs.dma[2].run.target.bits(27);
+  regs.dma[2].length.bits(14); regs.dma[2].run.length.bits(14);
+
+  regs.dma[3].source.bits(28); regs.dma[3].run.source.bits(28);
+  regs.dma[3].target.bits(28); regs.dma[3].run.target.bits(28);
+  regs.dma[3].length.bits(16); regs.dma[3].run.length.bits(16);
 }
 
 CPU::~CPU() {
