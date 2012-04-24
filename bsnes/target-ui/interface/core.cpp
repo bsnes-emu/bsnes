@@ -1,4 +1,6 @@
 bool InterfaceCore::loadFirmware(string filename, string keyname, uint8_t *targetdata, unsigned targetsize) {
+  bool result = false;
+
   filename = application->path(filename);
   string markup;
   markup.readfile(filename);
@@ -15,12 +17,13 @@ bool InterfaceCore::loadFirmware(string filename, string keyname, uint8_t *targe
     if(file::read({dir(filename),firmware}, data, size) == true) {
       if(nall::sha256(data, size) == hash) {
         memcpy(targetdata, data, min(targetsize, size));
-        return true;
+        result = true;
       } else {
         MessageWindow::information(Window::None, {"Warning: Firmware SHA256 sum is incorrect:\n\n", dir(filename), firmware});
       }
+      delete[] data;
     }
   }
 
-  return false;
+  return result;
 }

@@ -1,0 +1,3 @@
+purify/*.o
+purify/purify
+purify/analyze-gba

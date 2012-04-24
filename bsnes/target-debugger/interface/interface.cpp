@@ -17,7 +17,7 @@ bool Interface::loadCartridge(const string &foldername) {
 
   string markup;
   markup.readfile({ pathName, "manifest.xml" });
-  if(markup.empty()) markup = SnesCartridge(data, size).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(data, size).markup;
 
   SNES::cartridge.rom.copy(data, size);
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
@@ -156,4 +156,11 @@ void Interface::message(const string &text) {
 Interface::Interface() {
   SNES::interface = this;
   SNES::system.init();
+
+  uint8_t *data;
+  unsigned size;
+  if(file::read({application->userpath, "Super Famicom.sys/spc700.rom"}, data, size)) {
+    memcpy(SNES::smp.iplrom, data, min(64u, size));
+    delete[] data;
+  }
 }

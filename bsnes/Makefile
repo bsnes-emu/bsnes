@@ -13,7 +13,7 @@ target  := ui
 # compiler
 c       := $(compiler) -std=gnu99
 cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
-flags   := -I. -march=native -O3 -fomit-frame-pointer
+flags   := -I. -O3 -fomit-frame-pointer
 link    := -s
 objects := libco
 
@@ -30,6 +30,7 @@ endif
 
 # platform
 ifeq ($(platform),x)
+  flags += -march=native
   link += -ldl -lX11 -lXext
 else ifeq ($(platform),osx)
 else ifeq ($(platform),win)

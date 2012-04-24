@@ -16,10 +16,6 @@ void PPU::render_object(Object &obj) {
   unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
   unsigned baseaddr = obj.character * 32;
 
-  if(obj.vflip && obj.affine == 0) {
-    py ^= obj.height - 1;
-  }
-
   if(obj.mosaic && regs.mosaic.objvsize) {
     signed mosaicy = (regs.vcounter / (1 + regs.mosaic.objvsize)) * (1 + regs.mosaic.objvsize);
     py = obj.y >= 160 || mosaicy - obj.y >= 0 ? mosaicy - obj.y : 0;
@@ -47,7 +43,8 @@ void PPU::render_object(Object &obj) {
     if(obj.affine == 0) {
       x = px;
       y = py;
-      if(obj.hflip) x ^= obj.width - 1;
+      if(obj.hflip) x ^= obj.width  - 1;
+      if(obj.vflip) y ^= obj.height - 1;
     } else {
       x = (fx >> 8) + centerx;
       y = (fy >> 8) + centery;

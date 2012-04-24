@@ -42,14 +42,14 @@ FileBrowser::FileBrowser() {
   fileList.onChange = { &FileBrowser::synchronize, this };
   fileList.onActivate = openButton.onActivate = { &FileBrowser::fileListActivate, this };
 
-  filterModes.append({ "Default",        "", { "*" } });
-  filterModes.append({ "NES",            "", { "*.fc", "*.nes" } });
-  filterModes.append({ "SNES",           "", { "*.sfc" } });
-  filterModes.append({ "GameBoy",        "", { "*.gb", "*.gbc" } });
-  filterModes.append({ "GameBoyColor",   "", { "*.gbc" } });
-  filterModes.append({ "GameBoyAdvance", "", { "*.gba" } });
-  filterModes.append({ "Satellaview",    "", { "*.bs" } });
-  filterModes.append({ "SufamiTurbo",    "", { "*.st" } });
+  filterModes.append({ "Default",        "", { "*"              } });
+  filterModes.append({ "Famicom",        "", { "*.fc",  "*.nes" } });
+  filterModes.append({ "SuperFamicom",   "", { "*.sfc"          } });
+  filterModes.append({ "GameBoy",        "", { "*.gb",  "*.gbb" } });
+  filterModes.append({ "GameBoyColor",   "", { "*.gbc", "*.gbb" } });
+  filterModes.append({ "GameBoyAdvance", "", { "*.gba"          } });
+  filterModes.append({ "Satellaview",    "", { "*.bs"           } });
+  filterModes.append({ "SufamiTurbo",    "", { "*.st"           } });
   mode = &filterModes[Mode::Default];
 
   for(auto &mode : filterModes) config.attach(mode.path, mode.name);
@@ -133,21 +133,6 @@ bool FileBrowser::loadFolder(const string &requestedPath) {
   if(accept == false) return false;
   loadFile(requestedPath);
   return true;
-
-//  lstring contentsList = directory::contents(requestedPath);
-//  lstring fileNameList;
-//  for(auto &fileName : contentsList) {
-//    for(auto &filter : mode->filter) {
-//      if(fileName.wildcard(filter)) {
-//        fileNameList.append(fileName);
-//        break;
-//      }
-//    }
-//  }
-
-//  if(fileNameList.size() != 1) return false;
-//  loadFile({ requestedPath, fileNameList[0] });
-//  return true;
 }
 
 void FileBrowser::loadFile(const string &filename) {

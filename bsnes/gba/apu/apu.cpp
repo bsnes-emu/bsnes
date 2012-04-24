@@ -70,7 +70,7 @@ void APU::main() {
   if(regs.bias.amplitude == 3) lsample &= ~15, rsample &= ~15;
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
-  interface->audioSample(lsample << 5, rsample << 5);
+  interface->audioSample(sclamp<16>(lsample << 7), sclamp<16>(rsample << 7));  //should be <<5, use <<7 for added volume
   step(512);
 }
 

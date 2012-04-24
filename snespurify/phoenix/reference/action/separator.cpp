@@ -1,2 +1,0 @@
-void pSeparator::constructor() {
-}
