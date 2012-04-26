@@ -19,10 +19,14 @@ void CPU::op_write(uint16 addr, uint8 data) {
 }
 
 void CPU::cycle_edge() {
-  if(status.ei) {
-    status.ei = false;
-    status.ime = 1;
+  if(r.ei) {
+    r.ei = false;
+    r.ime = 1;
   }
+}
+
+uint8 CPU::debugger_read(uint16 addr) {
+  return bus.read(addr);
 }
 
 #endif

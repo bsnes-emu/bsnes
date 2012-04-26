@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define SYSTEM_CPP
-namespace GB {
+namespace GameBoy {
 
 #include "serialization.cpp"
 System system;
@@ -11,6 +11,7 @@ void System::run() {
 
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+    interface->videoRefresh(ppu.screen);
   }
 }
 
@@ -19,7 +20,7 @@ void System::runtosave() {
   runthreadtosave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.active_thread = lcd.thread;
+  scheduler.active_thread = ppu.thread;
   runthreadtosave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
@@ -34,16 +35,12 @@ void System::runthreadtosave() {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+      interface->videoRefresh(ppu.screen);
     }
   }
 }
 
 void System::init() {
-  file fp;
-  fp.open("/home/byuu/Desktop/boot.rom", file::mode::write);
-  fp.write(bootROM.sgb, 256);
-  fp.close();
-
   assert(interface != 0);
 }
 
@@ -56,8 +53,8 @@ void System::power() {
   bus.power();
   cartridge.power();
   cpu.power();
+  ppu.power();
   apu.power();
-  lcd.power();
   scheduler.init();
 
   clocks_executed = 0;

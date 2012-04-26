@@ -3,6 +3,11 @@
 #include <gb/gb.hpp>
 #include <gba/gba.hpp>
 
+namespace NES  = Famicom;
+namespace SNES = SuperFamicom;
+namespace GB   = GameBoy;
+namespace GBA  = GameBoyAdvance;
+
 #include <nall/compositor.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>

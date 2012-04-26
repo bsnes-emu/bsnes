@@ -3,7 +3,7 @@
 
 #include <base/base.hpp>
 
-namespace NES {
+namespace Famicom {
   namespace Info {
     static const char Name[] = "bnes";
     static const unsigned SerializerVersion = 1;
@@ -11,7 +11,7 @@ namespace NES {
 }
 
 /*
-  bnes - NES emulator
+  bnes - Famicom emulator
   authors: byuu, Ryphecha
   license: GPLv3
   project started: 2011-09-05
@@ -19,7 +19,7 @@ namespace NES {
 
 #include <libco/libco.h>
 
-namespace NES {
+namespace Famicom {
   struct Thread {
     cothread_t thread;
     unsigned frequency;

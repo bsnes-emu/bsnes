@@ -1,6 +1,6 @@
 #include <nes/nes.hpp>
 
-namespace NES {
+namespace Famicom {
 
 #include "core/core.cpp"
 #include "memory/memory.cpp"

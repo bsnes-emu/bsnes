@@ -1,30 +1,13 @@
 #ifdef CPU_CPP
 
 void CPU::serialize(serializer &s) {
+  LR35902::serialize(s);
   Thread::serialize(s);
 
   s.array(wram);
   s.array(hram);
 
-  s.integer(r.a.data);
-  s.integer(r.f.z);
-  s.integer(r.f.n);
-  s.integer(r.f.h);
-  s.integer(r.f.c);
-  s.integer(r.b.data);
-  s.integer(r.c.data);
-  s.integer(r.d.data);
-  s.integer(r.e.data);
-  s.integer(r.h.data);
-  s.integer(r.l.data);
-  s.integer(r.sp.data);
-  s.integer(r.pc.data);
-
   s.integer(status.clock);
-  s.integer(status.halt);
-  s.integer(status.stop);
-  s.integer(status.ei);
-  s.integer(status.ime);
 
   s.integer(status.p15);
   s.integer(status.p14);

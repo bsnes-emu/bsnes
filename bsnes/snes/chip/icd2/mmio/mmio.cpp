@@ -19,7 +19,7 @@ uint8 ICD2::read(unsigned addr) {
 
   //LY counter
   if(addr == 0x6000) {
-    r6000_ly = GB::lcd.status.ly;
+    r6000_ly = GameBoy::ppu.status.ly;
     r6000_row = lcd.row;
     return r6000_ly;
   }

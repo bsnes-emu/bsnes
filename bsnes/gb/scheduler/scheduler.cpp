@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define SCHEDULER_CPP
-namespace GB {
+namespace GameBoy {
 
 Scheduler scheduler;
 

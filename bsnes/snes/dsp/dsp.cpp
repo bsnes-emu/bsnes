@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define DSP_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 DSP dsp;
 

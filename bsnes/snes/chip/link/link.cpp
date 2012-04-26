@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define LINK_HPP
-namespace SNES {
+namespace SuperFamicom {
 
 Link link;
 

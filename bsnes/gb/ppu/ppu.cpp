@@ -6,20 +6,20 @@
 
 //LX     =   0-455
 
-#define LCD_CPP
-namespace GB {
+#define PPU_CPP
+namespace GameBoy {
 
+#include "mmio.cpp"
 #include "dmg.cpp"
 #include "cgb.cpp"
-#include "mmio/mmio.cpp"
 #include "serialization.cpp"
-LCD lcd;
+PPU ppu;
 
-void LCD::Main() {
-  lcd.main();
+void PPU::Main() {
+  ppu.main();
 }
 
-void LCD::main() {
+void PPU::main() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -40,14 +40,14 @@ void LCD::main() {
   }
 }
 
-void LCD::add_clocks(unsigned clocks) {
-  clock += clocks * cpu.frequency;
+void PPU::add_clocks(unsigned clocks) {
+  clock += clocks;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
     co_switch(scheduler.active_thread = cpu.thread);
   }
 }
 
-void LCD::scanline() {
+void PPU::scanline() {
   status.lx -= 456;
   if(++status.ly == 154) frame();
 
@@ -65,8 +65,7 @@ void LCD::scanline() {
   }
 }
 
-void LCD::frame() {
-  interface->videoRefresh(screen);
+void PPU::frame() {
   cpu.mmio_joyp_poll();
 
   status.ly = 0;
@@ -74,14 +73,14 @@ void LCD::frame() {
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
-unsigned LCD::hflip(unsigned data) const {
+unsigned PPU::hflip(unsigned data) const {
   return ((data & 0x8080) >> 7) | ((data & 0x4040) >> 5)
        | ((data & 0x2020) >> 3) | ((data & 0x1010) >> 1)
        | ((data & 0x0808) << 1) | ((data & 0x0404) << 3)
        | ((data & 0x0202) << 5) | ((data & 0x0101) << 7);
 }
 
-void LCD::power() {
+void PPU::power() {
   create(Main, 4 * 1024 * 1024);
 
   for(unsigned n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
@@ -152,7 +151,7 @@ void LCD::power() {
   status.obpi = 0;
 }
 
-LCD::LCD() {
+PPU::PPU() {
 }
 
 }

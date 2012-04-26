@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define CHEAT_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 Cheat cheat;
 

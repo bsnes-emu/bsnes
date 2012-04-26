@@ -42,8 +42,8 @@ void System::serialize_all(serializer &s) {
   cartridge.serialize(s);
   system.serialize(s);
   cpu.serialize(s);
+  ppu.serialize(s);
   apu.serialize(s);
-  lcd.serialize(s);
 }
 
 void System::serialize_init() {

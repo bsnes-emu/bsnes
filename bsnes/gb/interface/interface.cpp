@@ -1,6 +1,6 @@
 #include <gb/gb.hpp>
 
-namespace GB {
+namespace GameBoy {
 
 Interface *interface = nullptr;
 

@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define SPC7110_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 SPC7110 spc7110;
 

@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define APU_CPP
-namespace GB {
+namespace GameBoy {
 
 #include "square1/square1.cpp"
 #include "square2/square2.cpp"
@@ -48,7 +48,7 @@ void APU::main() {
 
     interface->audioSample(master.center, master.left, master.right);
 
-    clock += 1 * cpu.frequency;
+    clock++;
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(scheduler.active_thread = cpu.thread);
   }
 }

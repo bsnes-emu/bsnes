@@ -3,7 +3,7 @@
 #include <snes/snes.hpp>
 
 #define ICD2_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "interface/interface.cpp"
 #include "mmio/mmio.cpp"
@@ -15,14 +15,14 @@ void ICD2::Enter() { icd2.enter(); }
 void ICD2::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      GB::system.runtosave();
+      GameBoy::system.runtosave();
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
     if(r6003 & 0x80) {
-      GB::system.run();
-      step(GB::system.clocks_executed);
-      GB::system.clocks_executed = 0;
+      GameBoy::system.run();
+      step(GameBoy::system.clocks_executed);
+      GameBoy::system.clocks_executed = 0;
     } else {  //DMG halted
       audio.coprocessor_sample(0x0000, 0x0000);
       step(1);
@@ -69,9 +69,9 @@ void ICD2::reset() {
   joyp14lock = 0;
   pulselock = true;
 
-  GB::interface = this;
-  GB::system.init();
-  GB::system.power();
+  GameBoy::interface = this;
+  GameBoy::system.init();
+  GameBoy::system.power();
 }
 
 }

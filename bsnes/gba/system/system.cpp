@@ -1,6 +1,6 @@
 #include <gba/gba.hpp>
 
-namespace GBA {
+namespace GameBoyAdvance {
 
 #include "bios.cpp"
 #include "serialization.cpp"

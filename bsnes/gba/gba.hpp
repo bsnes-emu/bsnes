@@ -4,7 +4,7 @@
 #include <base/base.hpp>
 #include <processor/arm/arm.hpp>
 
-namespace GBA {
+namespace GameBoyAdvance {
   namespace Info {
     static const char Name[] = "bgba";
     static const unsigned SerializerVersion = 1;
@@ -20,7 +20,7 @@ namespace GBA {
 
 #include <libco/libco.h>
 
-namespace GBA {
+namespace GameBoyAdvance {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
 
   struct Thread {

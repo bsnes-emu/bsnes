@@ -1,11 +1,11 @@
 #include <gb/gb.hpp>
 
 #define CPU_CPP
-namespace GB {
+namespace GameBoy {
 
-#include "core/core.cpp"
-#include "mmio/mmio.cpp"
-#include "timing/timing.cpp"
+#include "mmio.cpp"
+#include "memory.cpp"
+#include "timing.cpp"
 #include "serialization.cpp"
 CPU cpu;
 
@@ -20,42 +20,40 @@ void CPU::main() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(trace) print(disassemble(r[PC]), "\n");
     interrupt_test();
-    uint8 opcode = op_read(r[PC]++);
-    (this->*opcode_table[opcode])();
+    exec();
   }
 }
 
 void CPU::interrupt_raise(CPU::Interrupt id) {
   if(id == Interrupt::Vblank) {
     status.interrupt_request_vblank = 1;
-    if(status.interrupt_enable_vblank) status.halt = false;
+    if(status.interrupt_enable_vblank) r.halt = false;
   }
 
   if(id == Interrupt::Stat) {
     status.interrupt_request_stat = 1;
-    if(status.interrupt_enable_stat) status.halt = false;
+    if(status.interrupt_enable_stat) r.halt = false;
   }
 
   if(id == Interrupt::Timer) {
     status.interrupt_request_timer = 1;
-    if(status.interrupt_enable_timer) status.halt = false;
+    if(status.interrupt_enable_timer) r.halt = false;
   }
 
   if(id == Interrupt::Serial) {
     status.interrupt_request_serial = 1;
-    if(status.interrupt_enable_serial) status.halt = false;
+    if(status.interrupt_enable_serial) r.halt = false;
   }
 
   if(id == Interrupt::Joypad) {
     status.interrupt_request_joypad = 1;
-    if(status.interrupt_enable_joypad) status.halt = status.stop = false;
+    if(status.interrupt_enable_joypad) r.halt = r.stop = false;
   }
 }
 
 void CPU::interrupt_test() {
-  if(status.ime) {
+  if(r.ime) {
     if(status.interrupt_request_vblank && status.interrupt_enable_vblank) {
       status.interrupt_request_vblank = 0;
       return interrupt_exec(0x0040);
@@ -84,7 +82,7 @@ void CPU::interrupt_test() {
 }
 
 void CPU::interrupt_exec(uint16 pc) {
-  status.ime = 0;
+  r.ime = 0;
   op_write(--r[SP], r[PC] >> 8);
   op_write(--r[SP], r[PC] >> 0);
   r[PC] = pc;
@@ -93,8 +91,19 @@ void CPU::interrupt_exec(uint16 pc) {
   op_io();
 }
 
+void CPU::stop() {
+  if(status.speed_switch) {
+    r.stop = false;
+    status.speed_switch = 0;
+    status.speed_double ^= 1;
+    if(status.speed_double == 0) frequency = 4 * 1024 * 1024;
+    if(status.speed_double == 1) frequency = 8 * 1024 * 1024;
+  }
+}
+
 void CPU::power() {
   create(Main, 4 * 1024 * 1024);
+  LR35902::power();
 
   for(unsigned n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
   for(unsigned n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)
@@ -140,10 +149,6 @@ void CPU::power() {
   r[HL] = 0x0000;
 
   status.clock = 0;
-  status.halt = false;
-  status.stop = false;
-  status.ei = false;
-  status.ime = 0;
 
   status.p15 = 0;
   status.p14 = 0;
@@ -193,10 +198,6 @@ void CPU::power() {
   status.interrupt_enable_timer = 0;
   status.interrupt_enable_stat = 0;
   status.interrupt_enable_vblank = 0;
-}
-
-CPU::CPU() : trace(false) {
-  initialize_opcode_table();
 }
 
 }

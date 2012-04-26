@@ -1,17 +1,18 @@
-#ifndef GB_HPP
-#define GB_HPP
+#ifndef GAMEBOY_HPP
+#define GAMEBOY_HPP
 
 #include <base/base.hpp>
+#include <processor/lr35902/lr35902.hpp>
 
-namespace GB {
+namespace GameBoy {
   namespace Info {
-    static const char Name[] = "bgbc";
-    static const unsigned SerializerVersion = 3;
+    static const char Name[] = "bgb";
+    static const unsigned SerializerVersion = 4;
   }
 }
 
 /*
-  bgbc - Game Boy, Super Game Boy, and Game Boy Color emulator
+  bgb - Game Boy, Super Game Boy, and Game Boy Color emulator
   author: byuu
   license: GPLv3
   project started: 2010-12-27
@@ -19,11 +20,11 @@ namespace GB {
 
 #include <libco/libco.h>
 
-namespace GB {
+namespace GameBoy {
   struct Thread {
     cothread_t thread;
     unsigned frequency;
-    int64 clock;
+    signed clock;
 
     inline void create(void (*entrypoint)(), unsigned frequency) {
       if(thread) co_delete(thread);
@@ -50,8 +51,8 @@ namespace GB {
   #include <gb/scheduler/scheduler.hpp>
   #include <gb/cartridge/cartridge.hpp>
   #include <gb/cpu/cpu.hpp>
+  #include <gb/ppu/ppu.hpp>
   #include <gb/apu/apu.hpp>
-  #include <gb/lcd/lcd.hpp>
   #include <gb/cheat/cheat.hpp>
   #include <gb/video/video.hpp>
 };

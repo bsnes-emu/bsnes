@@ -1,6 +1,6 @@
 #include <nes/nes.hpp>
 
-namespace NES {
+namespace Famicom {
 
 #include "serialization.cpp"
 System system;

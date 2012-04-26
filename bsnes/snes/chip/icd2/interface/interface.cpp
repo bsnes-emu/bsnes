@@ -2,12 +2,12 @@
 
 //called on rendered lines 0-143 (not on Vblank lines 144-153)
 void ICD2::lcdScanline() {
-  if((GB::lcd.status.ly & 7) == 0) {
+  if((GameBoy::ppu.status.ly & 7) == 0) {
     lcd.row = (lcd.row + 1) & 3;
   }
 
-  unsigned offset = (lcd.row * 160 * 8) + ((GB::lcd.status.ly & 7) * 160);
-  memcpy(lcd.buffer + offset, GB::lcd.screen + GB::lcd.status.ly * 160, 160 * sizeof(uint16));
+  unsigned offset = (lcd.row * 160 * 8) + ((GameBoy::ppu.status.ly & 7) * 160);
+  memcpy(lcd.buffer + offset, GameBoy::ppu.screen + GameBoy::ppu.status.ly * 160, 160 * sizeof(uint16));
 }
 
 void ICD2::joypWrite(bool p15, bool p14) {
@@ -88,7 +88,7 @@ void ICD2::audioSample(int16_t center, int16_t left, int16_t right) {
 }
 
 bool ICD2::inputPoll(unsigned id) {
-  GB::cpu.status.mlt_req = joyp_id & mlt_req;
+  GameBoy::cpu.status.mlt_req = joyp_id & mlt_req;
 
   unsigned data = 0x00;
   switch(joyp_id & mlt_req) {
@@ -98,15 +98,15 @@ bool ICD2::inputPoll(unsigned id) {
     case 3: data = ~r6007; break;
   }
 
-  switch((GB::Input)id) {
-    case GB::Input::Start:  return data & 0x80;
-    case GB::Input::Select: return data & 0x40;
-    case GB::Input::B:      return data & 0x20;
-    case GB::Input::A:      return data & 0x10;
-    case GB::Input::Down:   return data & 0x08;
-    case GB::Input::Up:     return data & 0x04;
-    case GB::Input::Left:   return data & 0x02;
-    case GB::Input::Right:  return data & 0x01;
+  switch((GameBoy::Input)id) {
+    case GameBoy::Input::Start:  return data & 0x80;
+    case GameBoy::Input::Select: return data & 0x40;
+    case GameBoy::Input::B:      return data & 0x20;
+    case GameBoy::Input::A:      return data & 0x10;
+    case GameBoy::Input::Down:   return data & 0x08;
+    case GameBoy::Input::Up:     return data & 0x04;
+    case GameBoy::Input::Left:   return data & 0x02;
+    case GameBoy::Input::Right:  return data & 0x01;
   }
 
   return 0;

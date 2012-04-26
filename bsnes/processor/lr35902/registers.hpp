@@ -92,6 +92,11 @@ struct Registers {
   Register16 sp;
   Register16 pc;
 
+  bool halt;
+  bool stop;
+  bool ei;
+  bool ime;
+
   Register& operator[](unsigned r) {
     static Register* table[] = { &a, &f, &af, &b, &c, &bc, &d, &e, &de, &h, &l, &hl, &sp, &pc };
     return *table[r];

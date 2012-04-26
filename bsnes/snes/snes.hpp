@@ -6,7 +6,7 @@
 #include <processor/hg51b/hg51b.hpp>
 #include <processor/upd96050/upd96050.hpp>
 
-namespace SNES {
+namespace SuperFamicom {
   namespace Info {
     static const char Name[] = "bsnes";
     static const unsigned SerializerVersion = 24;
@@ -14,7 +14,7 @@ namespace SNES {
 }
 
 /*
-  bsnes - SNES emulator
+  bsnes - Super Famicom emulator
   author: byuu
   license: GPLv3
   project started: 2004-10-14
@@ -26,7 +26,7 @@ namespace SNES {
   #include <gb/gb.hpp>
 #endif
 
-namespace SNES {
+namespace SuperFamicom {
   struct Thread {
     cothread_t thread;
     unsigned frequency;

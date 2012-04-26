@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define OBC1_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "serialization.cpp"
 OBC1 obc1;

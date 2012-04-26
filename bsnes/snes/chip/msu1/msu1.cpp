@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define MSU1_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 MSU1 msu1;
 

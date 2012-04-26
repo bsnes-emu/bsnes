@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define SDD1_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 SDD1 sdd1;
 

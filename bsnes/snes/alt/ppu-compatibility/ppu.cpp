@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define PPU_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 PPU ppu;
 

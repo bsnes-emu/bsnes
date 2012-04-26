@@ -1,6 +1,6 @@
 #include <gba/gba.hpp>
 
-namespace GBA {
+namespace GameBoyAdvance {
 
 #include "registers.cpp"
 #include "mmio.cpp"

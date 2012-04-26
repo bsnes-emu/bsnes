@@ -4,7 +4,7 @@
 #include <nall/sha256.hpp>
 
 #define CARTRIDGE_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "markup.cpp"
 #include "serialization.cpp"
@@ -61,7 +61,7 @@ void Cartridge::load(Mode cartridge_mode, const string &markup) {
     break;
   case Mode::SuperGameBoy:
     #if defined(GAMEBOY)
-    sha256 = GB::cartridge.sha256();
+    sha256 = GameBoy::cartridge.sha256();
     #else
     throw "Game Boy support not present";
     #endif

@@ -1,6 +1,6 @@
 #include <nes/nes.hpp>
 
-namespace NES {
+namespace Famicom {
 
 #include "chip/chip.cpp"
 #include "board/board.cpp"

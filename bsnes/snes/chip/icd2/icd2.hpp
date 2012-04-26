@@ -1,4 +1,4 @@
-class ICD2 : GB::Interface, public Coprocessor {
+class ICD2 : GameBoy::Interface, public Coprocessor {
 public:
   unsigned revision;
 

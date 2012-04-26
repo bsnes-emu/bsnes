@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define NECDSP_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "serialization.cpp"
 NECDSP necdsp;

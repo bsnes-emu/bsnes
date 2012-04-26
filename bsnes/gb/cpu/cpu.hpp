@@ -1,10 +1,4 @@
-struct CPU : Thread, MMIO {
-  #include "core/core.hpp"
-  #include "mmio/mmio.hpp"
-  #include "timing/timing.hpp"
-
-  bool trace;
-
+struct CPU : Processor::LR35902, Thread, MMIO {
   enum class Interrupt : unsigned {
     Vblank,
     Stat,
@@ -15,10 +9,6 @@ struct CPU : Thread, MMIO {
 
   struct Status {
     unsigned clock;
-    bool halt;
-    bool stop;
-    bool ei;
-    bool ime;
 
     //$ff00  JOYP
     bool p15;
@@ -96,10 +86,32 @@ struct CPU : Thread, MMIO {
   void interrupt_raise(Interrupt id);
   void interrupt_test();
   void interrupt_exec(uint16 pc);
+  void stop();
   void power();
 
   void serialize(serializer&);
-  CPU();
+
+  //mmio.cpp
+  unsigned wram_addr(uint16 addr) const;
+  void mmio_joyp_poll();
+  uint8 mmio_read(uint16 addr);
+  void mmio_write(uint16 addr, uint8 data);
+
+  //memory.cpp
+  void op_io();
+  uint8 op_read(uint16 addr);
+  void op_write(uint16 addr, uint8 data);
+  void cycle_edge();
+  uint8 debugger_read(uint16 addr);
+
+  //timing.cpp
+  void add_clocks(unsigned clocks);
+  void timer_262144hz();
+  void timer_65536hz();
+  void timer_16384hz();
+  void timer_8192hz();
+  void timer_4096hz();
+  void hblank();
 };
 
 extern CPU cpu;

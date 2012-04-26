@@ -1,6 +1,6 @@
-#ifdef LCD_CPP
+#ifdef PPU_CPP
 
-void LCD::dmg_render() {
+void PPU::dmg_render() {
   for(unsigned n = 0; n < 160; n++) {
     line[n] = 0x00;
     origin[n] = Origin::None;
@@ -17,7 +17,7 @@ void LCD::dmg_render() {
   interface->lcdScanline();
 }
 
-uint16 LCD::dmg_read_tile(bool select, unsigned x, unsigned y) {
+uint16 PPU::dmg_read_tile(bool select, unsigned x, unsigned y) {
   unsigned tmaddr = 0x1800 + (select << 10), tdaddr;
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
   if(status.bg_tiledata_select == 0) {
@@ -29,7 +29,7 @@ uint16 LCD::dmg_read_tile(bool select, unsigned x, unsigned y) {
   return (vram[tdaddr + 0] << 0) | (vram[tdaddr + 1] << 8);
 }
 
-void LCD::dmg_render_bg() {
+void PPU::dmg_render_bg() {
   unsigned iy = (status.ly + status.scy) & 255;
   unsigned ix = status.scx, tx = ix & 7;
   unsigned data = dmg_read_tile(status.bg_tilemap_select, ix, iy);
@@ -48,7 +48,7 @@ void LCD::dmg_render_bg() {
   }
 }
 
-void LCD::dmg_render_window() {
+void PPU::dmg_render_window() {
   if(status.ly - status.wy >= 144u) return;
   if(status.wx >= 167u) return;
   unsigned iy = status.wyc++;
@@ -75,7 +75,7 @@ void LCD::dmg_render_window() {
 //0x40: vertical flip
 //0x20: horizontal flip
 //0x10: palette#
-void LCD::dmg_render_ob() {
+void PPU::dmg_render_ob() {
   const unsigned Height = (status.ob_size == 0 ? 8 : 16);
   unsigned sprite[10], sprites = 0;
 

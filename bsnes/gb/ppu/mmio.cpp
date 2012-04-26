@@ -1,10 +1,10 @@
-#ifdef LCD_CPP
+#ifdef PPU_CPP
 
-unsigned LCD::vram_addr(uint16 addr) const {
+unsigned PPU::vram_addr(uint16 addr) const {
   return (status.vram_bank * 0x2000) + (addr & 0x1fff);
 }
 
-uint8 LCD::mmio_read(uint16 addr) {
+uint8 PPU::mmio_read(uint16 addr) {
   if(addr >= 0x8000 && addr <= 0x9fff) return vram[vram_addr(addr)];
   if(addr >= 0xfe00 && addr <= 0xfe9f) return oam[addr & 0xff];
 
@@ -90,7 +90,7 @@ uint8 LCD::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void LCD::mmio_write(uint16 addr, uint8 data) {
+void PPU::mmio_write(uint16 addr, uint8 data) {
   if(addr >= 0x8000 && addr <= 0x9fff) { vram[vram_addr(addr)] = data; return; }
   if(addr >= 0xfe00 && addr <= 0xfe9f) { oam[addr & 0xff] = data; return; }
 

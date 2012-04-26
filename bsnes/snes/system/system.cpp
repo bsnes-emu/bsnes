@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define SYSTEM_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 System system;
 

@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define CPU_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 CPU cpu;
 

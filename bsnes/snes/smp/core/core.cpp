@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define SMPCORE_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "algorithms.cpp"
 #include "opcodes.cpp"

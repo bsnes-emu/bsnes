@@ -1,7 +1,7 @@
 #include <nes/nes.hpp>
 
 #define VIDEO_CPP
-namespace NES {
+namespace Famicom {
 
 Video video;
 

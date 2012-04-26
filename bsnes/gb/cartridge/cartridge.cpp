@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define CARTRIDGE_CPP
-namespace GB {
+namespace GameBoy {
 
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"

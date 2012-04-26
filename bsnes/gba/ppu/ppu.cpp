@@ -10,7 +10,7 @@
 //vblank:    68 scanlines ( 83776 cycles)
 //frame:    228 scanlines (280896 cycles)
 
-namespace GBA {
+namespace GameBoyAdvance {
 
 #include "registers.cpp"
 #include "background.cpp"

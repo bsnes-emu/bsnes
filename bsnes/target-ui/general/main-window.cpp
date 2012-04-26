@@ -375,13 +375,10 @@ MainWindow::MainWindow() {
 }
 
 void MainWindow::synchronize() {
-  if(interface->cartridgeLoaded()) {
-    toolsStateSave.setEnabled(true);
-    toolsStateLoad.setEnabled(true);
-  } else {
-    toolsStateSave.setEnabled(false);
-    toolsStateLoad.setEnabled(false);
-  }
+  bool enable = interface->cartridgeLoaded();
+  toolsStateSave.setEnabled(enable);
+  toolsStateLoad.setEnabled(enable);
+  toolsInformationWindow.setEnabled(enable);
 }
 
 void MainWindow::setupVideoFilters() {

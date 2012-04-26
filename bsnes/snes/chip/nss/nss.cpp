@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define NSS_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 NSS nss;
 

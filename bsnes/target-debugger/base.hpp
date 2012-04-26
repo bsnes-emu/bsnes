@@ -3,6 +3,7 @@
 #endif
 
 #include <snes/snes.hpp>
+namespace SNES = SuperFamicom;
 
 #include <nall/config.hpp>
 #include <nall/directory.hpp>

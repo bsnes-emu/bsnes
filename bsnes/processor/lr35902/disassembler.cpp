@@ -1,6 +1,4 @@
-#ifdef CPU_CPP
-
-string CPU::disassemble(uint16 pc) {
+string LR35902::disassemble(uint16 pc) {
   char output[80];
   memset(output, ' ', sizeof output);
   output[79] = 0;
@@ -21,11 +19,11 @@ string CPU::disassemble(uint16 pc) {
   return output;
 }
 
-string CPU::disassemble_opcode(uint16 pc) {
-  uint8 opcode = bus.read(pc);
-  uint8 p0 = bus.read(pc + 1);
-  uint8 p1 = bus.read(pc + 2);
-  uint8 p2 = bus.read(pc + 3);
+string LR35902::disassemble_opcode(uint16 pc) {
+  uint8 opcode = debugger_read(pc);
+  uint8 p0 = debugger_read(pc + 1);
+  uint8 p1 = debugger_read(pc + 2);
+  uint8 p2 = debugger_read(pc + 3);
 
   switch(opcode) {
     case 0x00: return { "nop" };
@@ -289,11 +287,11 @@ string CPU::disassemble_opcode(uint16 pc) {
   return "";
 }
 
-string CPU::disassemble_opcode_cb(uint16 pc) {
-  uint8 opcode = bus.read(pc);
-  uint8 p0 = bus.read(pc + 1);
-  uint8 p1 = bus.read(pc + 2);
-  uint8 p2 = bus.read(pc + 3);
+string LR35902::disassemble_opcode_cb(uint16 pc) {
+  uint8 opcode = debugger_read(pc);
+  uint8 p0 = debugger_read(pc + 1);
+  uint8 p1 = debugger_read(pc + 2);
+  uint8 p2 = debugger_read(pc + 3);
 
   switch(opcode) {
     case 0x00: return { "rlc  b" };
@@ -556,5 +554,3 @@ string CPU::disassemble_opcode_cb(uint16 pc) {
 
   return "";
 }
-
-#endif

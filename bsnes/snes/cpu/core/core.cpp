@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define CPUCORE_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "serialization.cpp"
 #include "algorithms.cpp"

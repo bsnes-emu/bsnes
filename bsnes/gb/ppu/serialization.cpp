@@ -1,6 +1,6 @@
-#ifdef LCD_CPP
+#ifdef PPU_CPP
 
-void LCD::serialize(serializer &s) {
+void PPU::serialize(serializer &s) {
   Thread::serialize(s);
 
   s.array(screen);

@@ -1,6 +1,6 @@
-#ifdef LCD_CPP
+#ifdef PPU_CPP
 
-void LCD::cgb_render() {
+void PPU::cgb_render() {
   for(unsigned n = 0; n < 160; n++) {
     line[n] = 0x7fff;
     origin[n] = Origin::None;
@@ -23,7 +23,7 @@ void LCD::cgb_render() {
 //0x20: horizontal flip
 //0x08: VRAM bank#
 //0x07: palette#
-void LCD::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, unsigned &attr, unsigned &data) {
+void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, unsigned &attr, unsigned &data) {
   unsigned tmaddr = 0x1800 + (select << 10);
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
 
@@ -46,7 +46,7 @@ void LCD::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, uns
   if(attr & 0x20) data = hflip(data);
 }
 
-void LCD::cgb_render_bg() {
+void PPU::cgb_render_bg() {
   unsigned iy = (status.ly + status.scy) & 255;
   unsigned ix = status.scx, tx = ix & 7;
 
@@ -71,7 +71,7 @@ void LCD::cgb_render_bg() {
   }
 }
 
-void LCD::cgb_render_window() {
+void PPU::cgb_render_window() {
   if(status.ly - status.wy >= 144u) return;
   if(status.wx >= 167u) return;
   unsigned iy = status.wyc++;
@@ -106,7 +106,7 @@ void LCD::cgb_render_window() {
 //0x20: horizontal flip
 //0x08: VRAM bank#
 //0x07: palette#
-void LCD::cgb_render_ob() {
+void PPU::cgb_render_ob() {
   const unsigned Height = (status.ob_size == 0 ? 8 : 16);
   unsigned sprite[10], sprites = 0;
 

@@ -37,11 +37,11 @@ Config::Config() {
   append(input.driver = "", "Input::Driver");
   append(input.focusPolicy = 1, "Input::FocusPolicy");
 
-  append(nes.controllerPort1Device = 1, "NES::Controller::Port1");
-  append(nes.controllerPort2Device = 0, "NES::Controller::Port2");
+  append(nes.controllerPort1Device = 1, "Famicom::Controller::Port1");
+  append(nes.controllerPort2Device = 0, "Famicom::Controller::Port2");
 
-  append(snes.controllerPort1Device = 1, "SNES::Controller::Port1");
-  append(snes.controllerPort2Device = 0, "SNES::Controller::Port2");
+  append(snes.controllerPort1Device = 1, "SuperFamciom::Controller::Port1");
+  append(snes.controllerPort2Device = 0, "SuperFamicom::Controller::Port2");
 
   load(application->path("settings.cfg"));
   save(application->path("settings.cfg"));

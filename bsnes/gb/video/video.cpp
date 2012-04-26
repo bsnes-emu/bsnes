@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define VIDEO_CPP
-namespace GB {
+namespace GameBoy {
 
 Video video;
 

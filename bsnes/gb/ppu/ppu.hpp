@@ -1,6 +1,4 @@
-struct LCD : Thread, MMIO {
-  #include "mmio/mmio.hpp"
-
+struct PPU : Thread, MMIO {
   struct Status {
     unsigned lx;
     unsigned wyc;
@@ -71,6 +69,11 @@ struct LCD : Thread, MMIO {
 
   unsigned hflip(unsigned data) const;
 
+  //mmio.cpp
+  unsigned vram_addr(uint16 addr) const;
+  uint8 mmio_read(uint16 addr);
+  void mmio_write(uint16 addr, uint8 data);
+
   //dmg.cpp
   void dmg_render();
   uint16 dmg_read_tile(bool select, unsigned x, unsigned y);
@@ -88,7 +91,7 @@ struct LCD : Thread, MMIO {
   void power();
 
   void serialize(serializer&);
-  LCD();
+  PPU();
 };
 
-extern LCD lcd;
+extern PPU ppu;

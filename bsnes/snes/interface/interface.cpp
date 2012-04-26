@@ -1,6 +1,6 @@
 #include <snes/snes.hpp>
 
-namespace SNES {
+namespace SuperFamicom {
 
 Interface *interface = nullptr;
 

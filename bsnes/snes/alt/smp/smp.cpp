@@ -3,7 +3,7 @@
 #include <snes/snes.hpp>
 
 #define SMP_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 SMP smp;
 

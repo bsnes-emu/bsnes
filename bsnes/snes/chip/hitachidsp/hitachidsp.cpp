@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define HITACHIDSP_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "memory.cpp"
 #include "serialization.cpp"

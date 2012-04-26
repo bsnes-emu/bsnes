@@ -1,7 +1,7 @@
 #include <snes/snes.hpp>
 
 #define CONTROLLER_CPP
-namespace SNES {
+namespace SuperFamicom {
 
 #include "gamepad/gamepad.cpp"
 #include "multitap/multitap.cpp"

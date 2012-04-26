@@ -1,7 +1,7 @@
 #include <gb/gb.hpp>
 
 #define MEMORY_CPP
-namespace GB {
+namespace GameBoy {
 
 Unmapped unmapped;
 Bus bus;
