@@ -15,6 +15,8 @@ struct DSP : Thread {
   ~DSP();
 
 privileged:
+  #include "moduloarray.hpp"
+
   //global registers
   enum global_reg_t {
     r_mvoll = 0x0c, r_mvolr = 0x1c,
@@ -48,7 +50,7 @@ privileged:
   struct state_t {
     uint8 regs[128];
 
-    modulo_array<int, echo_hist_size> echo_hist[2];  //echo history keeps most recent 8 samples
+    moduloarray<int, echo_hist_size> echo_hist[2];  //echo history keeps most recent 8 samples
     int echo_hist_pos;
 
     bool every_other_sample;  //toggles every sample
@@ -97,7 +99,7 @@ privileged:
 
   //voice state
   struct voice_t {
-    modulo_array<int, brr_buf_size> buffer;  //decoded samples
+    moduloarray<int, brr_buf_size> buffer;  //decoded samples
     int buf_pos;     //place in buffer where next samples will be decoded
     int interp_pos;  //relative fractional position in sample (0x1000 = 1.0)
     int brr_addr;    //address of current BRR block

@@ -21,6 +21,7 @@ namespace nall {
     unsigned objectsize;
 
   public:
+    T* data() { return pool; }
     unsigned size() const { return objectsize; }
     unsigned capacity() const { return poolsize; }
 
@@ -43,6 +44,13 @@ namespace nall {
       pool = copy;
       poolsize = size;
       objectsize = min(size, objectsize);
+    }
+
+    //requires trivial constructor
+    void resize(unsigned size) {
+      if(size == objectsize) return;
+      if(size < objectsize) return reserve(size);
+      while(size > objectsize) append(T());
     }
 
     template<typename... Args>

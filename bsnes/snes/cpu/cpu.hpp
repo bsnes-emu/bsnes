@@ -2,7 +2,7 @@ struct CPU : Thread, public CPUcore, public PPUcounter {
   uint8 wram[128 * 1024];
 
   enum : bool { Threaded = true };
-  array<Thread*> coprocessors;
+  vector<Thread*> coprocessors;
   alwaysinline void step(unsigned clocks);
   alwaysinline void synchronize_smp();
   void synchronize_ppu();

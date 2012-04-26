@@ -14,8 +14,8 @@ struct Window::State {
   bool fullScreen;
   Geometry geometry;
   bool ignore;
-  array<Layout&> layout;
-  array<Menu&> menu;
+  set<Layout&> layout;
+  set<Menu&> menu;
   string menuFont;
   bool menuVisible;
   bool resizable;
@@ -24,7 +24,7 @@ struct Window::State {
   bool statusVisible;
   string title;
   bool visible;
-  array<Widget&> widget;
+  set<Widget&> widget;
   string widgetFont;
 
   State() {
@@ -55,7 +55,7 @@ struct Action::State {
 };
 
 struct Menu::State {
-  array<Action&> action;
+  set<Action&> action;
   nall::image image;
   string text;
 
@@ -82,7 +82,7 @@ struct CheckItem::State {
 
 struct RadioItem::State {
   bool checked;
-  array<RadioItem&> group;
+  set<RadioItem&> group;
   string text;
 
   State() {
@@ -208,7 +208,7 @@ struct LineEdit::State {
 
 struct ListView::State {
   bool checkable;
-  array<bool> checked;
+  vector<bool> checked;
   lstring headerText;
   bool headerVisible;
   bool selected;
@@ -233,7 +233,7 @@ struct ProgressBar::State {
 
 struct RadioBox::State {
   bool checked;
-  array<RadioBox&> group;
+  set<RadioBox&> group;
   string text;
 
   State() {

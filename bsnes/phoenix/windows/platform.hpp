@@ -188,7 +188,7 @@ struct pRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioItem&> &group);
+  void setGroup(const set<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -403,7 +403,7 @@ struct pRadioBox : public pWidget {
   bool checked();
   Geometry minimumGeometry();
   void setChecked();
-  void setGroup(const array<RadioBox&> &group);
+  void setGroup(const set<RadioBox&> &group);
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}

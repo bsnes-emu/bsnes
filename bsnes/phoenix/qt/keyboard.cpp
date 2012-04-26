@@ -125,8 +125,8 @@ bool pKeyboard::pressed(Keyboard::Scancode scancode) {
   return state[id >> 3] & (1 << (id & 7));
 }
 
-array<bool> pKeyboard::state() {
-  array<bool> output;
+vector<bool> pKeyboard::state() {
+  vector<bool> output;
   output.resize((unsigned)Keyboard::Scancode::Limit);
   for(auto &n : output) n = false;
 

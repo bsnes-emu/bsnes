@@ -27,7 +27,7 @@ struct TurboInput : DigitalInput {
   TurboInput();
 };
 
-struct TertiaryInput : array<AbstractInput&> {
+struct TertiaryInput : set<AbstractInput&> {
   string name;
 
   virtual void attach(const string &primaryName, const string &secondaryName);
@@ -35,14 +35,14 @@ struct TertiaryInput : array<AbstractInput&> {
   virtual int16_t poll(unsigned n);
 };
 
-struct SecondaryInput : array<TertiaryInput&> {
+struct SecondaryInput : set<TertiaryInput&> {
   string name;
 
   virtual void attach(const string &primaryName);
   virtual void bind();
 };
 
-struct PrimaryInput : array<SecondaryInput&> {
+struct PrimaryInput : set<SecondaryInput&> {
   string name;
 
   virtual void attach();
@@ -60,7 +60,7 @@ struct InputManager {
   int16_t scancode[2][Scancode::Limit];
   bool activeScancode;
 
-  array<PrimaryInput&> inputList;
+  set<PrimaryInput&> inputList;
   NesInput nes;
   SnesInput snes;
   GbInput gb;

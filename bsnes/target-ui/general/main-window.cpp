@@ -388,7 +388,7 @@ void MainWindow::setupVideoFilters() {
     path = { application->userpath, "filters/" };
     files = directory::files(path, "*.filter");
   }
-  array<RadioItem&> group;
+  set<RadioItem&> group;
 
   settingsVideoFilterList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {
@@ -419,7 +419,7 @@ void MainWindow::setupVideoShaders() {
     path = { application->userpath, "shaders/" };
     files = directory::files(path, { "*.", config->video.driver, ".shader" });
   }
-  array<RadioItem&> group;
+  set<RadioItem&> group;
 
   settingsVideoShaderList = new RadioItem[files.size()];
   for(unsigned n = 0; n < files.size(); n++) {

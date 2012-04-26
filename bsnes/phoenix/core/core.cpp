@@ -83,7 +83,7 @@ bool Keyboard::released(Keyboard::Scancode scancode) {
   return !pressed(scancode);
 }
 
-array<bool> Keyboard::state() {
+vector<bool> Keyboard::state() {
   return pKeyboard::state();
 }
 
@@ -423,7 +423,7 @@ Action::~Action() {
 //Menu
 //====
 
-void Menu::append(const array<Action&> &list) {
+void Menu::append(const set<Action&> &list) {
   for(auto &action : list) {
     if(state.action.append(action)) {
       action.state.menu = this;
@@ -432,7 +432,7 @@ void Menu::append(const array<Action&> &list) {
   }
 }
 
-void Menu::remove(const array<Action&> &list) {
+void Menu::remove(const set<Action&> &list) {
   for(auto &action : list) {
     if(state.action.remove(action)) {
       action.state.menu = 0;
@@ -537,7 +537,7 @@ CheckItem::~CheckItem() {
 //RadioItem
 //=========
 
-void RadioItem::group(const array<RadioItem&> &list) {
+void RadioItem::group(const set<RadioItem&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
@@ -1121,7 +1121,7 @@ ProgressBar::~ProgressBar() {
 //RadioBox
 //========
 
-void RadioBox::group(const array<RadioBox&> &list) {
+void RadioBox::group(const set<RadioBox&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
