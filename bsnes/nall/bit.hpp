@@ -1,6 +1,8 @@
 #ifndef NALL_BIT_HPP
 #define NALL_BIT_HPP
 
+#include <nall/stdint.hpp>
+
 namespace nall {
   template<unsigned bits>
   inline uintmax_t uclamp(const uintmax_t x) {

@@ -153,7 +153,7 @@ void PPU::frame() {
 }
 
 PPU::PPU() {
-  output = new uint16[240 * 160];
+  output = new uint32[240 * 160];
   blur = new uint16[240 * 160];
 
   regs.bg[0].id = BG0;

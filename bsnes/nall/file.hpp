@@ -6,6 +6,7 @@
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 #include <nall/windows/utf8.hpp>
+#include <nall/stream/memory.hpp>
 
 namespace nall {
   inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
@@ -16,25 +17,19 @@ namespace nall {
     #endif
   }
 
-  class file {
-  public:
+  struct file {
     enum class mode : unsigned { read, write, readwrite, writeread };
     enum class index : unsigned { absolute, relative };
     enum class time : unsigned { create, modify, access };
 
-    static bool read(const string &filename, uint8_t *&data, unsigned &size) {
-      data = 0;
+    static vector<uint8_t> read(const string &filename) {
+      vector<uint8_t> memory;
       file fp;
-      if(fp.open(filename, mode::read) == false) return false;
-      size = fp.size();
-      data = new uint8_t[size];
-      fp.read(data, size);
-      fp.close();
-      return true;
-    }
-
-    static bool read(const string &filename, const uint8_t *&data, unsigned &size) {
-      return file::read(filename, (uint8_t*&)data, size);
+      if(fp.open(filename, mode::read)) {
+        memory.resize(fp.size());
+        fp.read(memory.data(), memory.size());
+      }
+      return memory;
     }
 
     static bool write(const string &filename, const uint8_t *data, unsigned size) {

@@ -103,5 +103,5 @@ void VideoSettings::synchronize() {
   overscanHorizontal.value.setText({ config->video.maskOverscanHorizontal, "px" });
   overscanVertical.value.setText({ config->video.maskOverscanVertical, "px" });
 
-  palette.update();
+  interface->updatePalette();
 }

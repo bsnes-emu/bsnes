@@ -1,7 +1,6 @@
-#include "palette.hpp"
-
 struct InterfaceCore {
   bool loadFirmware(string filename, string keyname, uint8_t *targetdata, unsigned targetsize);
+  uint32_t color(uint16_t red, uint16_t green, uint16_t blue);
 
   virtual string markup() = 0;
   virtual bool cartridgeLoaded() = 0;
@@ -69,11 +68,12 @@ struct Interface : property<Interface> {
   bool saveState(unsigned slot);
   bool loadState(unsigned slot);
   void setCheatCodes(const lstring &list = lstring{});
+  void updatePalette();
   string sha256();
 
   Interface();
 
-  bool applyPatch(CartridgePath &filepath, uint8_t *&data, unsigned &size);
+  bool applyPatch(CartridgePath &filepath, vector<uint8_t> &memory);
   void videoRefresh(const uint32_t *input, unsigned inputPitch, unsigned width, unsigned height);
 
   CartridgePath base;     //base cartridge connected to emulated system

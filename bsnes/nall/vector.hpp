@@ -21,7 +21,10 @@ namespace nall {
     unsigned objectsize;
 
   public:
+    operator bool() const { return pool; }
     T* data() { return pool; }
+
+    bool empty() const { return pool == nullptr; }
     unsigned size() const { return objectsize; }
     unsigned capacity() const { return poolsize; }
 

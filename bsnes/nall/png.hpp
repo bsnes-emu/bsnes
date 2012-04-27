@@ -58,12 +58,10 @@ protected:
 };
 
 bool png::decode(const string &filename) {
-  uint8_t *data;
-  unsigned size;
-  if(file::read(filename, data, size) == false) return false;
-  bool result = decode(data, size);
-  delete[] data;
-  return result;
+  if(auto memory = file::read(filename)) {
+    return decode(memory.data(), memory.size());
+  }
+  return false;
 }
 
 bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {

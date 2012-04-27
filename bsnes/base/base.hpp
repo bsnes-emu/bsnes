@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-static const char Version[] = "088.02";
+static const char Version[] = "088.03";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -19,6 +19,7 @@ static const char Version[] = "088.02";
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
+#include <nall/stream/memory.hpp>
 using namespace nall;
 
 //debugging function hook:
@@ -39,8 +40,8 @@ template<typename R, typename... P> struct hook<R (P...)> {
   hook(const hook &hook) { callback = hook.callback; }
   hook(void *function) { callback = function; }
   hook(R (*function)(P...)) { callback = function; }
-  template<typename C> hook(R (C::*function)(P...), C *object) { callback = { function, object }; }
-  template<typename C> hook(R (C::*function)(P...) const, C *object) { callback = { function, object }; }
+  template<typename C> hook(R (C::*function)(P...), C *object) { callback = {function, object}; }
+  template<typename C> hook(R (C::*function)(P...) const, C *object) { callback = {function, object}; }
   template<typename L> hook(const L& function) { callback = function; }
 
   hook& operator=(const hook& hook) { callback = hook.callback; return *this; }

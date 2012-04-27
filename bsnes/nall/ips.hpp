@@ -11,8 +11,6 @@ struct ips {
   inline bool apply();
   inline void source(const uint8_t *data, unsigned size);
   inline void modify(const uint8_t *data, unsigned size);
-  inline bool source(const string &filename);
-  inline bool modify(const string &filename);
   inline ips();
   inline ~ips();
 
@@ -86,14 +84,6 @@ void ips::source(const uint8_t *data, unsigned size) {
 
 void ips::modify(const uint8_t *data, unsigned size) {
   modifyData = data, modifySize = size;
-}
-
-bool ips::source(const string &filename) {
-  return file::read(filename, sourceData, sourceSize);
-}
-
-bool ips::modify(const string &filename) {
-  return file::read(filename, modifyData, modifySize);
 }
 
 ips::ips() : data(nullptr), sourceData(nullptr), modifyData(nullptr) {

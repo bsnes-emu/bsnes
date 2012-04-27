@@ -282,7 +282,7 @@ void PPU::scrolly_increment() {
 //
 
 void PPU::raster_pixel() {
-  uint16 *output = buffer + status.ly * 256;
+  uint32 *output = buffer + status.ly * 256;
 
   unsigned mask = 0x8000 >> (status.xaddr + (status.lx & 7));
   unsigned palette = 0, object_palette = 0;
@@ -325,7 +325,7 @@ void PPU::raster_pixel() {
   }
 
   if(raster_enable() == false) palette = 0;
-  output[status.lx] = (status.emphasis << 6) | cgram_read(palette);
+  output[status.lx] = video.palette[(status.emphasis << 6) | cgram_read(palette)];
 }
 
 void PPU::raster_sprite() {

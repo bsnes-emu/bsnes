@@ -1,9 +1,12 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_GZIP_HPP
+#define NALL_STREAM_GZIP_HPP
+
+#include <nall/gzip.hpp>
 
 namespace nall {
 
 struct gzipstream : memorystream {
-  inline gzipstream(const stream &stream) {
+  gzipstream(const stream &stream) {
     unsigned size = stream.size();
     uint8_t *data = new uint8_t[size];
     stream.read(data, size);
@@ -18,7 +21,7 @@ struct gzipstream : memorystream {
     memcpy(pdata, archive.data, psize);
   }
 
-  inline ~gzipstream() {
+  ~gzipstream() {
     if(pdata) delete[] pdata;
   }
 };

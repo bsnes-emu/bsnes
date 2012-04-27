@@ -98,7 +98,7 @@ struct PPU : Thread {
     } oam[8], soam[8];
   } raster;
 
-  uint16 buffer[256 * 262];
+  uint32 buffer[256 * 262];
   uint8 ciram[2048];
   uint8 cgram[32];
   uint8 oam[256];

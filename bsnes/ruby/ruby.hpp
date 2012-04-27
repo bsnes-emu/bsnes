@@ -7,9 +7,9 @@
 #ifndef RUBY_H
 #define RUBY_H
 
+#include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
-#include <nall/array.hpp>
 #include <nall/bit.hpp>
 #include <nall/input.hpp>
 #include <nall/intrinsics.hpp>

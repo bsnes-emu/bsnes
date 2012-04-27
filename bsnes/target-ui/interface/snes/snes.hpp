@@ -6,7 +6,7 @@ struct InterfaceSNES : InterfaceCore, SNES::Interface {
   void setController(bool port, unsigned device);
 
   bool cartridgeLoaded();
-  bool loadCartridge(const string &filename, CartridgePath &cartridge, uint8_t *&data, unsigned &size);
+  vector<uint8_t> loadCartridge(const string &filename, CartridgePath &cartridge);
   bool loadCartridge(string basename);
   bool loadSatellaviewSlottedCartridge(string basename, string slotname);
   bool loadSatellaviewCartridge(string basename, string slotname);
@@ -27,6 +27,7 @@ struct InterfaceSNES : InterfaceCore, SNES::Interface {
 
   void setCheats(const lstring &list = lstring{});
 
+  uint32_t videoColor(uint19_t source, uint16_t red, uint16_t green, uint16_t blue);
   void videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan);
   void audioSample(int16_t lsample, int16_t rsample);
   int16_t inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id);

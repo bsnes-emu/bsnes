@@ -49,7 +49,7 @@ struct PPU : Thread, MMIO {
     uint8 obpi;
   } status;
 
-  uint16 screen[160 * 144];
+  uint32 screen[160 * 144];
   uint16 line[160];
   struct Origin { enum : unsigned { None, BG, BGP, OB }; };
   uint8 origin[160];

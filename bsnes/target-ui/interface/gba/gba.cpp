@@ -16,28 +16,26 @@ bool InterfaceGBA::cartridgeLoaded() {
 bool InterfaceGBA::loadCartridge(const string &filename) {
   interface->unloadCartridge();
 
-  uint8_t *data;
-  unsigned size;
-
+  vector<uint8_t> memory;
   if(filename.endswith("/")) {
-    if(file::read({filename, "program.rom"}, data, size) == false) return false;
+    memory = file::read({filename, "program.rom"});
     interface->base = {true, filename};
   } else {
-    if(file::read(filename, data, size) == false) return false;
+    memory = file::read(filename);
     interface->base = {false, nall::basename(filename)};
   }
+  if(memory.empty()) return false;
 
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
-  interface->applyPatch(interface->base, data, size);
+  interface->applyPatch(interface->base, memory);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = GameBoyAdvanceCartridge(data, size).markup;
+  if(markup.empty()) markup = GameBoyAdvanceCartridge(memory.data(), memory.size()).markup;
 
-  GBA::cartridge.load(markup, data, size);
+  GBA::cartridge.load(markup, memory.data(), memory.size());
   GBA::system.power();
-  delete[] data;
 
   if(GBA::cartridge.ram_size()) {
     filemap fp;
@@ -46,7 +44,7 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
     }
   }
 
-  GBA::video.generate(GBA::Video::Format::RGB30);
+  GBA::video.generate_palette();
   interface->loadCartridge(::Interface::Mode::GBA);
   return true;
 }
@@ -86,19 +84,12 @@ void InterfaceGBA::setCheats(const lstring &list) {
 
 //
 
-void InterfaceGBA::videoRefresh(const uint16_t *data) {
-  static uint32_t output[240 * 160];
+uint32_t InterfaceGBA::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+  return color(red, green, blue);
+}
 
-  for(unsigned y = 0; y < 160; y++) {
-    const uint16_t *sp = data + y * 240;
-    uint32_t *dp = output + y * 240;
-    for(unsigned x = 0; x < 240; x++) {
-      uint16_t color = *sp++;
-      *dp++ = GBA::video.palette[color];
-    }
-  }
-
-  interface->videoRefresh(output, 240 * sizeof(uint32_t), 240, 160);
+void InterfaceGBA::videoRefresh(const uint32_t *data) {
+  interface->videoRefresh(data, 240 * sizeof(uint32_t), 240, 160);
 }
 
 void InterfaceGBA::audioSample(int16_t lsample, int16_t rsample) {

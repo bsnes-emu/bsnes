@@ -1,21 +1,24 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_FILE_HPP
+#define NALL_STREAM_FILE_HPP
+
+#include <nall/file.hpp>
 
 namespace nall {
 
 struct filestream : stream {
-  inline bool seekable() const { return true; }
-  inline bool readable() const { return true; }
-  inline bool writable() const { return pwritable; }
-  inline bool randomaccess() const { return false; }
+  bool seekable() const { return true; }
+  bool readable() const { return true; }
+  bool writable() const { return pwritable; }
+  bool randomaccess() const { return false; }
 
-  inline unsigned size() const { return pfile.size(); }
-  inline unsigned offset() const { return pfile.offset(); }
-  inline void seek(unsigned offset) const { pfile.seek(offset); }
+  unsigned size() const { return pfile.size(); }
+  unsigned offset() const { return pfile.offset(); }
+  void seek(unsigned offset) const { pfile.seek(offset); }
 
-  inline uint8_t read() const { return pfile.read(); }
-  inline void write(uint8_t data) const { pfile.write(data); }
+  uint8_t read() const { return pfile.read(); }
+  void write(uint8_t data) const { pfile.write(data); }
 
-  inline filestream(const string &filename) {
+  filestream(const string &filename) {
     pfile.open(filename, file::mode::readwrite);
     pwritable = pfile.open();
     if(!pwritable) pfile.open(filename, file::mode::read);

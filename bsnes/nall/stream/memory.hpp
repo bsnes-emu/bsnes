@@ -1,31 +1,35 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_MEMORY_HPP
+#define NALL_STREAM_MEMORY_HPP
+
+#include <nall/stream/stream.hpp>
 
 namespace nall {
 
 struct memorystream : stream {
-  inline bool seekable() const { return true; }
-  inline bool readable() const { return true; }
-  inline bool writable() const { return pwritable; }
-  inline bool randomaccess() const { return true; }
+  bool seekable() const { return true; }
+  bool readable() const { return true; }
+  bool writable() const { return pwritable; }
+  bool randomaccess() const { return true; }
 
-  inline unsigned size() const { return psize; }
-  inline unsigned offset() const { return poffset; }
-  inline void seek(unsigned offset) const { poffset = offset; }
+  uint8_t *data() const { return pdata; }
+  unsigned size() const { return psize; }
+  unsigned offset() const { return poffset; }
+  void seek(unsigned offset) const { poffset = offset; }
 
-  inline uint8_t read() const { return pdata[poffset++]; }
-  inline void write(uint8_t data) const { pdata[poffset++] = data; }
+  uint8_t read() const { return pdata[poffset++]; }
+  void write(uint8_t data) const { pdata[poffset++] = data; }
 
-  inline uint8_t read(unsigned offset) const { return pdata[offset]; }
-  inline void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
+  uint8_t read(unsigned offset) const { return pdata[offset]; }
+  void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
 
-  inline memorystream() : pdata(nullptr), psize(0), poffset(0), pwritable(true) {}
+  memorystream() : pdata(nullptr), psize(0), poffset(0), pwritable(true) {}
 
-  inline memorystream(uint8_t *data, unsigned size) {
+  memorystream(uint8_t *data, unsigned size) {
     pdata = data, psize = size, poffset = 0;
     pwritable = true;
   }
 
-  inline memorystream(const uint8_t *data, unsigned size) {
+  memorystream(const uint8_t *data, unsigned size) {
     pdata = (uint8_t*)data, psize = size, poffset = 0;
     pwritable = false;
   }

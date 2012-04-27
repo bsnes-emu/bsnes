@@ -3,7 +3,7 @@ struct PPU : Thread, MMIO {
   uint16 pram[512];
   #include "registers.hpp"
   #include "state.hpp"
-  uint16 *output;
+  uint32 *output;
   uint16 *blur;
 
   static void Enter();

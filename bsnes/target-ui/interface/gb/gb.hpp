@@ -16,7 +16,8 @@ struct InterfaceGB : InterfaceCore, GB::Interface {
 
   void setCheats(const lstring &list = lstring{});
 
-  void videoRefresh(const uint16_t *data);
+  uint32_t videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue);
+  void videoRefresh(const uint32_t *data);
   void audioSample(int16_t csample, int16_t lsample, int16_t rsample);
   bool inputPoll(unsigned id);
 };

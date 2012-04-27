@@ -4,40 +4,17 @@ namespace GameBoyAdvance {
 
 Video video;
 
-unsigned Video::color(unsigned color) const {
-  uint5 b = color >> 10;
-  uint5 g = color >>  5;
-  uint5 r = color >>  0;
+void Video::generate_palette() {
+  for(unsigned color = 0; color < (1 << 15); color++) {
+    uint5 b = color >> 10;
+    uint5 g = color >>  5;
+    uint5 r = color >>  0;
 
-  uint10 R = (r << 5) | (r << 0);
-  uint10 G = (g << 5) | (g << 0);
-  uint10 B = (b << 5) | (b << 0);
+    uint16 R = r << 11 | r << 6 | r << 1 | r >> 4;
+    uint16 G = g << 11 | g << 6 | g << 1 | g >> 4;
+    uint16 B = b << 11 | b << 6 | b << 1 | b >> 4;
 
-  return (R << 20) | (G << 10) | (B << 0);
-}
-
-void Video::generate(Format format) {
-  for(unsigned n = 0; n < (1 << 15); n++) palette[n] = color(n);
-
-  if(format == Format::RGB24) {
-    for(unsigned n = 0; n < (1 << 15); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 6) & 0xff0000) + ((color >> 4) & 0x00ff00) + ((color >> 2) & 0x0000ff);
-    }
-  }
-
-  if(format == Format::RGB16) {
-    for(unsigned n = 0; n < (1 << 15); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 14) & 0xf800) + ((color >> 9) & 0x07e0) + ((color >> 5) & 0x001f);
-    }
-  }
-
-  if(format == Format::RGB15) {
-    for(unsigned n = 0; n < (1 << 15); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 15) & 0x7c00) + ((color >> 10) & 0x03e0) + ((color >> 5) & 0x001f);
-    }
+    palette[color] = interface->videoColor(color, R, G, B);
   }
 }
 

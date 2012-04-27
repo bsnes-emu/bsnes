@@ -88,7 +88,6 @@ Application::Application(int argc, char **argv) {
     video.driver("None");
     video.init();
   }
-  palette.update();
   utility->bindVideoFilter();
   utility->bindVideoShader();
 

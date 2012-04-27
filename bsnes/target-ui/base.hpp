@@ -16,6 +16,8 @@ namespace GBA  = GameBoyAdvance;
 #include <nall/filemap.hpp>
 #include <nall/input.hpp>
 #include <nall/bps/patch.hpp>
+#include <nall/stream/memory.hpp>
+#include <nall/stream/vector.hpp>
 #include <nall/nes/cartridge.hpp>
 #include <nall/snes/cartridge.hpp>
 #include <nall/gb/cartridge.hpp>

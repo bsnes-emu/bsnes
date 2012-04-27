@@ -14,10 +14,10 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(System::Revision revision, const string &markup, const uint8_t *data, unsigned size) {
-  if(size == 0) size = 32768;
-  romdata = allocate<uint8>(romsize = size, 0xff);
-  if(data) memcpy(romdata, data, size);
+void Cartridge::load(System::Revision revision, const string &markup, const stream &memory) {
+  romsize = memory.size() ? memory.size() : 32768u;
+  romdata = allocate<uint8>(romsize, 0xff);
+  memory.read(romdata, memory.size());
 
   information.markup = markup;
   information.mapper = Mapper::Unknown;
@@ -49,14 +49,14 @@ void Cartridge::load(System::Revision revision, const string &markup, const uint
   information.battery = document["cartridge"]["ram"]["nonvolatile"].data == "true";
 
   switch(information.mapper) { default:
-    case Mapper::MBC0:  mapper = &mbc0;  break;
-    case Mapper::MBC1:  mapper = &mbc1;  break;
-    case Mapper::MBC2:  mapper = &mbc2;  break;
-    case Mapper::MBC3:  mapper = &mbc3;  break;
-    case Mapper::MBC5:  mapper = &mbc5;  break;
-    case Mapper::MMM01: mapper = &mmm01; break;
-    case Mapper::HuC1:  mapper = &huc1;  break;
-    case Mapper::HuC3:  mapper = &huc3;  break;
+  case Mapper::MBC0:  mapper = &mbc0;  break;
+  case Mapper::MBC1:  mapper = &mbc1;  break;
+  case Mapper::MBC2:  mapper = &mbc2;  break;
+  case Mapper::MBC3:  mapper = &mbc3;  break;
+  case Mapper::MBC5:  mapper = &mbc5;  break;
+  case Mapper::MMM01: mapper = &mmm01; break;
+  case Mapper::HuC1:  mapper = &huc1;  break;
+  case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
   ramdata = new uint8_t[ramsize = information.ramsize]();

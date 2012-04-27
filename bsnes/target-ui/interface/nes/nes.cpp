@@ -29,28 +29,26 @@ bool InterfaceNES::cartridgeLoaded() {
 bool InterfaceNES::loadCartridge(const string &filename) {
   interface->unloadCartridge();
 
-  uint8_t *data;
-  unsigned size;
-
+  vector<uint8_t> memory;
   if(filename.endswith("/")) {
-    if(file::read({filename, "program.rom"}, data, size) == false) return false;
+    memory = file::read({filename, "program.rom"});
     interface->base = {true, filename};
   } else {
-    file::read(filename, data, size);
+    memory = file::read(filename);
     interface->base = {false, nall::basename(filename)};
   }
+  if(memory.empty()) return false;
 
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
-  interface->applyPatch(interface->base, data, size);
+  interface->applyPatch(interface->base, memory);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = FamicomCartridge(data, size).markup;
+  if(markup.empty()) markup = FamicomCartridge(memory.data(), memory.size()).markup;
 
-  NES::cartridge.load(markup, data, size);
+  NES::cartridge.load(markup, memory.data(), memory.size());
   NES::system.power();
-  delete[] data;
 
   if(NES::cartridge.ram_size()) {
     filemap fp;
@@ -60,7 +58,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   }
 
   interface->loadCartridge(::Interface::Mode::NES);
-  NES::video.generate(NES::Video::Format::RGB30);
+  NES::video.generate_palette();
   return true;
 }
 
@@ -116,34 +114,12 @@ void InterfaceNES::setCheats(const lstring &list) {
 
 //
 
-void InterfaceNES::videoRefresh(const uint16_t *data) {
-  static uint32_t output[256 * 240];
+uint32_t InterfaceNES::videoColor(uint9_t source, uint16_t red, uint16_t green, uint16_t blue) {
+  return color(red, green, blue);
+}
 
-  for(unsigned y = 0; y < 240; y++) {
-    const uint16_t *sp = data + y * 256;
-    uint32_t *dp = output + y * 256;
-    for(unsigned x = 0; x < 256; x++) {
-      uint32_t color = *sp++;
-      *dp++ = NES::video.palette[color];
-    }
-  }
-
-  if(config->video.maskOverscan) {
-    unsigned osw = config->video.maskOverscanHorizontal;
-    unsigned osh = config->video.maskOverscanVertical;
-
-    for(unsigned y = 0; y < 240; y++) {
-      uint32_t *dp = output + y * 256;
-      if(y < osh || y >= 240 - osh) {
-        memset(dp, 0, 256 * sizeof(uint32_t));
-      } else {
-        memset(dp + 0, 0, osw * sizeof(uint32_t));
-        memset(dp + 256 - osw, 0, osw * sizeof(uint32_t));
-      }
-    }
-  }
-
-  interface->videoRefresh(output, 256 * sizeof(uint32_t), 256, 240);
+void InterfaceNES::videoRefresh(const uint32_t *data) {
+  interface->videoRefresh(data, 256 * sizeof(uint32_t), 256, 240);
 }
 
 void InterfaceNES::audioSample(int16_t sample) {

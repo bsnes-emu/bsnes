@@ -7,7 +7,7 @@ void ICD2::lcdScanline() {
   }
 
   unsigned offset = (lcd.row * 160 * 8) + ((GameBoy::ppu.status.ly & 7) * 160);
-  memcpy(lcd.buffer + offset, GameBoy::ppu.screen + GameBoy::ppu.status.ly * 160, 160 * sizeof(uint16));
+  memcpy(lcd.buffer + offset, GameBoy::ppu.screen + GameBoy::ppu.status.ly * 160, 160 * sizeof(uint32));
 }
 
 void ICD2::joypWrite(bool p15, bool p14) {
@@ -80,7 +80,11 @@ void ICD2::joypWrite(bool p15, bool p14) {
   packetlock = true;
 }
 
-void ICD2::videoRefresh(const uint16_t *data) {
+uint32_t ICD2::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+  return source;
+}
+
+void ICD2::videoRefresh(const uint32_t *data) {
 }
 
 void ICD2::audioSample(int16_t center, int16_t left, int16_t right) {

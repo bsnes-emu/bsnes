@@ -1,7 +1,7 @@
 #ifdef ICD2_CPP
 
-//convert linear pixel data { 0x00, 0x55, 0xaa, 0xff } to 2bpp planar tiledata
-void ICD2::render(const uint16 *source) {
+//convert linear pixel data to 2bpp planar tiledata
+void ICD2::render(const uint32 *source) {
   memset(lcd.output, 0x00, 320 * sizeof(uint16));
 
   for(unsigned y = 0; y < 8; y++) {

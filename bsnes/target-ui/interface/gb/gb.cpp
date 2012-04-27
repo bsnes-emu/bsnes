@@ -18,28 +18,26 @@ bool InterfaceGB::cartridgeLoaded() {
 bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &filename) {
   interface->unloadCartridge();
 
-  uint8_t *data;
-  unsigned size;
-
+  vector<uint8_t> memory;
   if(filename.endswith("/")) {
-    if(file::read({ filename, "program.rom" }, data, size) == false) return false;
-    interface->base = { true, filename };
+    memory = file::read({filename, "program.rom"});
+    interface->base = {true, filename};
   } else {
-    if(file::read(filename, data, size) == false) return false;
-    interface->base = { false, nall::basename(filename) };
+    memory = file::read(filename);
+    interface->base = {false, nall::basename(filename)};
   }
+  if(memory.empty()) return false;
 
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
-  interface->applyPatch(interface->base, data, size);
+  interface->applyPatch(interface->base, memory);
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = GameBoyCartridge(data, size).markup;
+  if(markup.empty()) markup = GameBoyCartridge(memory.data(), memory.size()).markup;
 
-  GB::cartridge.load(revision, markup, data, size);
+  GB::cartridge.load(revision, markup, vectorstream{memory});
   GB::system.power();
-  delete[] data;
 
   if(GB::cartridge.ramsize) {
     filemap fp;
@@ -49,7 +47,7 @@ bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &fil
   }
 
   GB::interface = this;
-  GB::video.generate(GB::Video::Format::RGB30);
+  GB::video.generate_palette();
   interface->loadCartridge(::Interface::Mode::GB);
   return true;
 }
@@ -103,19 +101,12 @@ void InterfaceGB::setCheats(const lstring &list) {
 
 //
 
-void InterfaceGB::videoRefresh(const uint16_t *data) {
-  static uint32_t output[160 * 144];
+uint32_t InterfaceGB::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+  return color(red, green, blue);
+}
 
-  for(unsigned y = 0; y < 144; y++) {
-    const uint16_t *sp = data + y * 160;
-    uint32_t *dp = output + y * 160;
-    for(unsigned x = 0; x < 160; x++) {
-      uint16_t color = *sp++;
-      *dp++ = GB::video.palette[color];
-    }
-  }
-
-  interface->videoRefresh(output, 160 * sizeof(uint32_t), 160, 144);
+void InterfaceGB::videoRefresh(const uint32_t *data) {
+  interface->videoRefresh(data, 160 * sizeof(uint32_t), 160, 144);
 }
 
 void InterfaceGB::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {

@@ -37,178 +37,156 @@ bool InterfaceSNES::cartridgeLoaded() {
   return SNES::cartridge.loaded();
 }
 
-bool InterfaceSNES::loadCartridge(const string &filename, CartridgePath &cartridge, uint8_t *&data, unsigned &size) {
-  data = nullptr, size = 0u;
+vector<uint8_t> InterfaceSNES::loadCartridge(const string &filename, CartridgePath &cartridge) {
+  vector<uint8_t> memory;
   auto backup = cartridge;
   string suffix;
   if(filename.endswith("/")) {
-    cartridge = { true, filename };
+    cartridge = {true, filename};
   } else {
-    suffix = { ".", extension(filename) };
-    cartridge = { false, nall::basename(filename) };
+    suffix = {".", extension(filename)};
+    cartridge = {false, nall::basename(filename)};
   }
-  if(file::read(cartridge.filename("program.rom", suffix), data, size) == false) {
-    cartridge = backup;
-    return false;
-  }
-  interface->applyPatch(cartridge, data, size);
-  return true;
+  memory = file::read(cartridge.filename("program.rom", suffix));
+  interface->applyPatch(cartridge, memory);
+  if(memory.empty()) cartridge = backup;
+  return memory;
 }
 
 bool InterfaceSNES::loadCartridge(string basename) {
   interface->unloadCartridge();
 
-  uint8_t *data;
-  unsigned size;
-  if(loadCartridge(basename, interface->base, data, size) == false) return false;
+  auto memory = loadCartridge(basename, interface->base);
+  if(memory.empty()) return false;
 
   interface->game = interface->base;
   interface->cartridgeTitle = interface->base.title();
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SuperFamicomCartridge(data, size).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(data, size);
+  SNES::cartridge.rom.copy(memory.data(), memory.size());
   SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
   SNES::system.power();
 
-  delete[] data;
-
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB30);
+  SNES::video.generate_palette();
   return true;
 }
 
 bool InterfaceSNES::loadSatellaviewSlottedCartridge(string basename, string slotname) {
   interface->unloadCartridge();
 
-  uint8_t *data[2];
-  unsigned size[2];
-  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
-  loadCartridge(slotname, interface->slot[0], data[1], size[1]);
+  auto memory = loadCartridge(basename, interface->base);
+  if(memory.empty()) return false;
+  auto memoryBS = loadCartridge(slotname, interface->slot[0]);
 
-  interface->game = !data[1] ? interface->base : interface->slot[0];  //TODO: subfolder for folders; concatenation for files
+  interface->game = memoryBS.empty() ? interface->base : interface->slot[0];  //TODO: subfolder for folders; concatenation for files
   interface->cartridgeTitle = interface->base.title();
-  if(data[1]) interface->cartridgeTitle.append(" + ", interface->slot[0].title());
+  if(memoryBS) interface->cartridgeTitle.append(" + ", interface->slot[0].title());
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(data[0], size[0]);
-  if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
+  SNES::cartridge.rom.copy(memory.data(), memory.size());
+  if(memoryBS) SNES::bsxflash.memory.copy(memoryBS.data(), memoryBS.size());
   SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, markup);
   SNES::system.power();
 
-  delete[] data[0];
-  if(data[1]) delete[] data[1];
-
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB30);
+  SNES::video.generate_palette();
   return true;
 }
 
 bool InterfaceSNES::loadSatellaviewCartridge(string basename, string slotname) {
   interface->unloadCartridge();
 
-  uint8_t *data[2];
-  unsigned size[2];
-  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
-  loadCartridge(slotname, interface->slot[0], data[1], size[1]);
+  auto memory = loadCartridge(basename, interface->base);
+  if(memory.empty()) return false;
+  auto memoryBS = loadCartridge(slotname, interface->slot[0]);
 
-  interface->game = !data[1] ? interface->base : interface->slot[0];
+  interface->game = memoryBS.empty() ? interface->base : interface->slot[0];
   interface->cartridgeTitle = interface->base.title();
-  if(data[1]) interface->cartridgeTitle = interface->slot[0].title();
+  if(memoryBS) interface->cartridgeTitle = interface->slot[0].title();
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(data[0], size[0]);
-  if(data[1]) SNES::bsxflash.memory.copy(data[1], size[1]);
+  SNES::cartridge.rom.copy(memory.data(), memory.size());
+  if(memoryBS) SNES::bsxflash.memory.copy(memoryBS.data(), memoryBS.size());
   SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, markup);
   SNES::system.power();
 
-  delete[] data[0];
-  if(data[1]) delete[] data[1];
-
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB30);
+  SNES::video.generate_palette();
   return true;
 }
 
 bool InterfaceSNES::loadSufamiTurboCartridge(string basename, string slotAname, string slotBname) {
   interface->unloadCartridge();
 
-  uint8_t *data[3];
-  unsigned size[3];
-  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
-  loadCartridge(slotAname, interface->slot[0], data[1], size[1]);
-  loadCartridge(slotBname, interface->slot[1], data[2], size[2]);
+  auto memory = loadCartridge(basename, interface->base);
+  if(memory.empty()) return false;
+  auto memorySTA = loadCartridge(slotAname, interface->slot[0]);
+  auto memorySTB = loadCartridge(slotBname, interface->slot[1]);
 
-  interface->game = !data[1] ? interface->base : interface->slot[0];  //TODO: subfolder for folders; concatenation for files
+  interface->game = memorySTA.empty() ? interface->base : interface->slot[0];  //TODO: subfolder for folders; concatenation for files
   interface->cartridgeTitle = interface->base.title();
-  if( data[1] && !data[2]) interface->cartridgeTitle = interface->slot[0].title();
-  if(!data[1] &&  data[2]) interface->cartridgeTitle = interface->slot[1].title();
-  if( data[1] &&  data[2]) interface->cartridgeTitle = {
+  if( memorySTA && !memorySTB) interface->cartridgeTitle = interface->slot[0].title();
+  if(!memorySTA &&  memorySTB) interface->cartridgeTitle = interface->slot[1].title();
+  if( memorySTA &&  memorySTB) interface->cartridgeTitle = {
     interface->slot[0].title(), " + ", interface->slot[1].title()
   };
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(data[0], size[0]);
-  if(data[1]) SNES::sufamiturbo.slotA.rom.copy(data[1], size[1]);
-  if(data[2]) SNES::sufamiturbo.slotB.rom.copy(data[1], size[1]);
+  SNES::cartridge.rom.copy(memory.data(), memory.size());
+  if(memorySTA) SNES::sufamiturbo.slotA.rom.copy(memory.data(), memory.size());
+  if(memorySTB) SNES::sufamiturbo.slotB.rom.copy(memory.data(), memory.size());
   SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, markup);
   SNES::system.power();
 
-  delete[] data[0];
-  if(data[1]) delete[] data[1];
-  if(data[2]) delete[] data[2];
-
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB30);
+  SNES::video.generate_palette();
   return true;
 }
 
 bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) {
   interface->unloadCartridge();
 
-  uint8_t *data[2];
-  unsigned size[2];
-  if(loadCartridge(basename, interface->base, data[0], size[0]) == false) return false;
-  loadCartridge(slotname, interface->slot[0], data[1], size[1]);
+  auto memory = loadCartridge(basename, interface->base);
+  if(memory.empty()) return false;
+  auto memoryGB = loadCartridge(slotname, interface->slot[0]);
 
-  interface->game = !data[1] ? interface->base : interface->slot[0];
+  interface->game = memoryGB.empty() ? interface->base : interface->slot[0];
   interface->cartridgeTitle = interface->base.title();
-  if(data[1]) interface->cartridgeTitle = interface->slot[0].title();
+  if(memoryGB) interface->cartridgeTitle = interface->slot[0].title();
 
   string markup;
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
-  if(markup.empty()) markup = SuperFamicomCartridge(data[0], size[0]).markup;
+  if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
   string gbMarkup;
   gbMarkup.readfile(interface->slot[0].filename("manifest.xml", ".xml"));
-  if(gbMarkup.empty()) gbMarkup = GameBoyCartridge(data[1], size[1]).markup;
+  if(gbMarkup.empty()) gbMarkup = GameBoyCartridge(memoryGB.data(), memoryGB.size()).markup;
 
-  SNES::cartridge.rom.copy(data[0], size[0]);
-  GB::cartridge.load(GB::System::Revision::SuperGameBoy, gbMarkup, data[1], size[1]);
+  SNES::cartridge.rom.copy(memory.data(), memory.size());
+  GB::cartridge.load(GB::System::Revision::SuperGameBoy, gbMarkup, vectorstream{memoryGB});
   SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, markup);
   SNES::system.power();
 
-  delete[] data[0];
-  if(data[1]) delete[] data[1];
-
   loadMemory();
   interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate(SNES::Video::Format::RGB30);
+  SNES::video.generate_palette();
   return true;
 }
 
@@ -253,21 +231,15 @@ void InterfaceSNES::loadMemory() {
     string filename = memoryName(memory);
     if(filename.empty()) continue;
 
-    uint8_t *data;
-    unsigned size;
-    if(file::read(filename, data, size)) {
-      memcpy(memory.data, data, min(memory.size, size));
-      delete[] data;
+    if(auto read = file::read(filename)) {
+      memcpy(memory.data, read.data(), min(memory.size, read.size()));
     }
   }
 
   if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
     if(GB::cartridge.ramsize) {
-      uint8_t *data;
-      unsigned size;
-      if(file::read(interface->slot[0].filename("save.ram", ".sav"), data, size)) {
-        memcpy(GB::cartridge.ramdata, data, min(GB::cartridge.ramsize, size));
-        delete[] data;
+      if(auto read = file::read(interface->slot[0].filename("save.ram", ".sav"))) {
+        memcpy(GB::cartridge.ramdata, read.data(), min(GB::cartridge.ramsize, read.size()));
       }
     }
   }
@@ -334,41 +306,20 @@ void InterfaceSNES::setCheats(const lstring &list) {
 
 //
 
-void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
-  static uint32_t output[512 * 480];
+uint32_t InterfaceSNES::videoColor(uint19_t source, uint16_t red, uint16_t green, uint16_t blue) {
+  return color(red, green, blue);
+}
 
-  unsigned width = 256 << hires;
-  unsigned height = 240 << interlace;
-  unsigned pitch = 1024 >> interlace;
+void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
+  unsigned width  =  256 << hires;
+  unsigned height =  240 << interlace;
+  unsigned pitch  = 1024 >> interlace;
 
   //skip first line; as it is always blank (by SNES design)
-  if(overscan == false) data +=  1 * 1024;  // 8 + 224 +  8
-  if(overscan == true ) data +=  9 * 1024;  // 0 + 240 +  0
+  if(overscan == false) data += 1 * 1024;  // 8 + 224 +  8
+  if(overscan == true ) data += 9 * 1024;  // 0 + 240 +  0
 
-  for(unsigned y = 0; y < height; y++) {
-    const uint32_t *sp = data + y * pitch;
-    uint32_t *dp = output + y * 512;
-    for(unsigned x = 0; x < width; x++) {
-      *dp++ = SNES::video.palette[*sp++];
-    }
-  }
-
-  if(config->video.maskOverscan) {
-    unsigned osw = config->video.maskOverscanHorizontal << hires;
-    unsigned osh = config->video.maskOverscanVertical << interlace;
-
-    for(unsigned y = 0; y < height; y++) {
-      uint32_t *dp = output + y * 512;
-      if(y < osh || y >= height - osh) {
-        memset(dp, 0, width * sizeof(uint32_t));
-      } else {
-        memset(dp + 0, 0, osw * sizeof(uint32_t));
-        memset(dp + width - osw, 0, osw * sizeof(uint32_t));
-      }
-    }
-  }
-
-  interface->videoRefresh(output, 512 * sizeof(uint32_t), width, height);
+  interface->videoRefresh(data, pitch * sizeof(uint32_t), width, height);
 }
 
 void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {

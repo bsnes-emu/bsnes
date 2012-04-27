@@ -70,6 +70,7 @@ void ICD2::reset() {
   pulselock = true;
 
   GameBoy::interface = this;
+  GameBoy::video.generate_palette();
   GameBoy::system.init();
   GameBoy::system.power();
 }

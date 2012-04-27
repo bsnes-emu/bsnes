@@ -5,7 +5,19 @@ namespace Famicom {
 
 Video video;
 
-unsigned Video::palette30(
+void Video::generate_palette() {
+  for(unsigned n = 0; n < (1 << 9); n++) palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, 1.8);
+}
+
+Video::Video() {
+  palette = new unsigned[1 << 9];
+}
+
+Video::~Video() {
+  delete[] palette;
+}
+
+uint32_t Video::generate_color(
   unsigned n, double saturation, double hue,
   double contrast, double brightness, double gamma
 ) {
@@ -46,43 +58,11 @@ unsigned Video::palette30(
   q *= saturation;
 
   auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : std::pow(f, 2.2 / gamma); };
-  unsigned r = 1023.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
-  unsigned g = 1023.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
-  unsigned b = 1023.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
-  return (uclamp<10>(r) << 20) + (uclamp<10>(g) << 10) + (uclamp<10>(b) << 0);
-}
+  unsigned r = 65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
+  unsigned g = 65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
+  unsigned b = 65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
 
-void Video::generate(Format format) {
-  for(unsigned n = 0; n < (1 << 9); n++) palette[n] = palette30(n, 2.0, 0.0, 1.0, 1.0, 1.8);
-
-  if(format == Format::RGB24) {
-    for(unsigned n = 0; n < (1 << 9); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 6) & 0xff0000) + ((color >> 4) & 0x00ff00) + ((color >> 2) & 0x0000ff);
-    }
-  }
-
-  if(format == Format::RGB16) {
-    for(unsigned n = 0; n < (1 << 9); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 14) & 0xf800) + ((color >> 9) & 0x07e0) + ((color >> 5) & 0x001f);
-    }
-  }
-
-  if(format == Format::RGB15) {
-    for(unsigned n = 0; n < (1 << 9); n++) {
-      unsigned color = palette[n];
-      palette[n] = ((color >> 15) & 0x7c00) + ((color >> 10) & 0x03e0) + ((color >> 5) & 0x001f);
-    }
-  }
-}
-
-Video::Video() {
-  palette = new unsigned[1 << 9];
-}
-
-Video::~Video() {
-  delete[] palette;
+  return interface->videoColor(n, uclamp<16>(r), uclamp<16>(g), uclamp<16>(b));
 }
 
 }

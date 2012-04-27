@@ -12,8 +12,8 @@ void PPU::cgb_render() {
     if(status.ob_enable) cgb_render_ob();
   }
 
-  uint16 *output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) output[n] = line[n];
+  uint32 *output = screen + status.ly * 160;
+  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[line[n]];
   interface->lcdScanline();
 }
 

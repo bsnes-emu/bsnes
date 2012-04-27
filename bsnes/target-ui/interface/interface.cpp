@@ -1,6 +1,5 @@
 #include "../base.hpp"
 #include "core.cpp"
-#include "palette.cpp"
 #include "nes/nes.cpp"
 #include "snes/snes.cpp"
 #include "gb/gb.cpp"
@@ -169,13 +168,12 @@ bool Interface::saveState(unsigned slot) {
 
 bool Interface::loadState(unsigned slot) {
   string filename = game.filename({ "state-", slot, ".bst" }, { "-", slot, ".bst" });
-  uint8_t *data;
-  unsigned size;
-  if(file::read(filename, data, size) == false) {
+  auto memory = file::read(filename);
+  if(memory.empty()) {
     utility->showMessage(string{ "Slot ", slot, " save file not found" });
     return false;
   }
-  serializer s(data, size);
+  serializer s(memory.data(), memory.size());
   bool result = unserialize(s);
   utility->showMessage(result == true ? string{ "Loaded state ", slot } : "Failed to load state");
   return result;
@@ -183,6 +181,15 @@ bool Interface::loadState(unsigned slot) {
 
 void Interface::setCheatCodes(const lstring &list) {
   if(core) return core->setCheats(list);
+}
+
+void Interface::updatePalette() {
+  switch(mode()) {
+  case Mode::NES:  return NES::video.generate_palette();
+  case Mode::SNES: return SNES::video.generate_palette();
+  case Mode::GB:   return GB::video.generate_palette();
+  case Mode::GBA:  return GBA::video.generate_palette();
+  }
 }
 
 string Interface::sha256() {
@@ -205,13 +212,13 @@ Interface::Interface() : core(nullptr) {
 
 //internal
 
-bool Interface::applyPatch(CartridgePath &filepath, uint8_t *&data, unsigned &size) {
+bool Interface::applyPatch(CartridgePath &filepath, vector<uint8_t> &memory) {
   string patchname = filepath.filename("patch.bps", ".bps");
   if(file::exists(patchname) == false) return false;
 
   bpspatch bps;
   bps.modify(patchname);
-  bps.source(data, size);
+  bps.source(memory.data(), memory.size());
   unsigned targetSize = bps.size();
   uint8_t *targetData = new uint8_t[targetSize];
   bps.target(targetData, targetSize);
@@ -220,9 +227,9 @@ bool Interface::applyPatch(CartridgePath &filepath, uint8_t *&data, unsigned &si
     return false;
   }
 
-  delete[] data;
-  data = targetData;
-  size = targetSize;
+  memory.resize(targetSize);
+  memcpy(memory.data(), targetData, targetSize);
+  delete[] targetData;
   return true;
 }
 
@@ -230,7 +237,7 @@ void Interface::videoRefresh(const uint32_t *input, unsigned inputPitch, unsigne
   uint32_t *output;
   unsigned outputPitch;
 
-  if(filter.opened()) {
+  if(application->depth == 30 && filter.opened()) {
     filter.render(input, inputPitch, width, height);
     input = filter.data;
     inputPitch = filter.pitch;
@@ -242,11 +249,21 @@ void Interface::videoRefresh(const uint32_t *input, unsigned inputPitch, unsigne
     inputPitch >>= 2, outputPitch >>= 2;
 
     for(unsigned y = 0; y < height; y++) {
-      const uint32_t *sp = input + y * inputPitch;
-      uint32_t *dp = output + y * outputPitch;
-      for(unsigned x = 0; x < width; x++) {
-        uint32_t color = *sp++;
-        *dp++ = palette((color >> 20) & 1023, (color >> 10) & 1023, (color >> 0) & 1023);
+      memcpy(output + y * outputPitch, input + y * inputPitch, width * sizeof(uint32_t));
+    }
+
+    if(config->video.maskOverscan && (mode() == Mode::NES || mode() == Mode::SNES)) {
+      unsigned h = config->video.maskOverscanHorizontal;
+      unsigned v = config->video.maskOverscanVertical;
+
+      if(h) for(unsigned y = 0; y < height; y++) {
+        memset(output + y * outputPitch, 0, h * sizeof(uint32_t));
+        memset(output + y * outputPitch + (width - h), 0, h * sizeof(uint32_t));
+      }
+
+      if(v) for(unsigned y = 0; y < v; y++) {
+        memset(output + y * outputPitch, 0, width * sizeof(uint32_t));
+        memset(output + (height - 1 - y) * outputPitch, 0, width * sizeof(uint32_t));
       }
     }
 

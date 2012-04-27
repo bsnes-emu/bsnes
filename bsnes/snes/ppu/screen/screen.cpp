@@ -150,7 +150,7 @@ uint32 PPU::Screen::get_pixel(bool swap) {
   //========
 
   if(self.regs.display_disable) return 0;
-  return (self.regs.display_brightness << 15) | output;
+  return video.palette[self.regs.display_brightness << 15 | output];
 }
 
 uint16 PPU::Screen::addsub(unsigned x, unsigned y, bool halve) {
