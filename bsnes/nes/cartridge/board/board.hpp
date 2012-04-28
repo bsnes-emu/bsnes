@@ -31,10 +31,10 @@ struct Board {
   virtual void reset();
 
   virtual void serialize(serializer&);
-  Board(XML::Document &document, const uint8_t *data, unsigned size);
+  Board(XML::Document &document, const stream &memory);
   virtual ~Board();
 
-  static Board* load(const string &markup, const uint8_t *data, unsigned size);
+  static Board* load(const string &markup, const stream &memory);
 
   struct Information {
     string type;

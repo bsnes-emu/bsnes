@@ -23,8 +23,4 @@ void Interface::message(const string &text) {
   print(text, "\n");
 }
 
-void Interface::loadCartridge(const string &markup, const stream &memory) {
-  cartridge.load(markup, memory.data(), memory.size());
-}
-
 }

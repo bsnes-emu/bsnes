@@ -44,7 +44,7 @@ struct stream {
     return data;
   }
 
-  void read(uint8_t *data, unsigned length) const {
+  virtual void read(uint8_t *data, unsigned length) const {
     while(length--) *data++ = read();
   }
 

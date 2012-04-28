@@ -2,37 +2,27 @@
 
 namespace Famicom {
 
-#include "core/core.cpp"
-#include "memory/memory.cpp"
+#include "timing.cpp"
 #include "serialization.cpp"
 CPU cpu;
 
-void CPU::Main() {
-  cpu.main();
-}
-
-void CPU::main() {
-//trace = true;
-//FILE *fp = fopen("/home/byuu/Desktop/log.txt", "wb");
-
-  unsigned lpc = 0xffff;
+void CPU::Enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(status.interrupt_pending) {
-      interrupt();
-      continue;
-    }
-
-    if(trace) {
-      if(lpc != regs.pc) { print(disassemble(), "\n"); } lpc = regs.pc;
-    //if(lpc != regs.pc) { fprintf(fp, "%s\n", (const char*)disassemble()); fflush(fp); } lpc = regs.pc;
-    }
-
-    op_exec();
+    cpu.main();
   }
+}
+
+void CPU::main() {
+  if(status.interrupt_pending) {
+    interrupt();
+    return;
+  }
+
+  exec();
 }
 
 void CPU::add_clocks(unsigned clocks) {
@@ -47,11 +37,7 @@ void CPU::add_clocks(unsigned clocks) {
 }
 
 void CPU::power() {
-  regs.a = 0x00;
-  regs.x = 0x00;
-  regs.y = 0x00;
-  regs.s = 0x00;
-  regs.p = 0x04;
+  RP2A03::power();
 
   for(unsigned addr = 0; addr < 0x0800; addr++) ram[addr] = 0xff;
   ram[0x0008] = 0xf7;
@@ -61,11 +47,8 @@ void CPU::power() {
 }
 
 void CPU::reset() {
-  create(CPU::Main, 21477272);
-
-  regs.mdr = 0x00;
-  regs.s -= 3;
-  regs.p.i = 1;
+  RP2A03::reset();
+  create(CPU::Enter, 21477272);
 
   regs.pc  = bus.read(0xfffc) << 0;
   regs.pc |= bus.read(0xfffd) << 8;
@@ -87,16 +70,8 @@ void CPU::reset() {
   status.controller_port1 = 0;
 }
 
-uint8 CPU::mdr() const {
-  return regs.mdr;
-}
-
-void CPU::set_rdy_line(bool line) {
-  status.rdy_line = line;
-}
-
-void CPU::set_rdy_addr(optional<uint16> addr) {
-  status.rdy_addr = addr;
+uint8 CPU::debugger_read(uint16 addr) {
+  return bus.read(addr);
 }
 
 uint8 CPU::ram_read(uint16 addr) {
@@ -130,13 +105,6 @@ void CPU::write(uint16 addr, uint8 data) {
   }
 
   return apu.write(addr, data);
-}
-
-void CPU::oam_dma() {
-  for(unsigned n = 0; n < 256; n++) {
-    uint8 data = op_read((status.oam_dma_page << 8) + n);
-    op_write(0x2004, data);
-  }
 }
 
 }

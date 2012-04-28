@@ -3,9 +3,8 @@ struct Interface {
   virtual void videoRefresh(const uint32_t *data);
   virtual void audioSample(int16_t sample);
   virtual int16_t inputPoll(bool port, unsigned device, unsigned id);
-  virtual void message(const string &text);
 
-  void loadCartridge(const string &markup, const stream &memory);
+  virtual void message(const string &text);
 };
 
 extern Interface *interface;

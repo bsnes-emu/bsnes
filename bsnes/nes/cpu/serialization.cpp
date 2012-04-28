@@ -1,26 +1,8 @@
 void CPU::serialize(serializer &s) {
+  RP2A03::serialize(s);
   Thread::serialize(s);
 
   s.array(ram);
-
-  s.integer(regs.mdr);
-  s.integer(regs.pc);
-  s.integer(regs.a);
-  s.integer(regs.x);
-  s.integer(regs.y);
-  s.integer(regs.s);
-  s.integer(regs.p.n);
-  s.integer(regs.p.v);
-  s.integer(regs.p.d);
-  s.integer(regs.p.i);
-  s.integer(regs.p.z);
-  s.integer(regs.p.c);
-
-  s.integer(abs.w);
-  s.integer(iabs.w);
-  s.integer(rd);
-  s.integer(zp);
-  s.integer(aa);
 
   s.integer(status.interrupt_pending);
   s.integer(status.nmi_pending);

@@ -48,7 +48,7 @@ void serialize(serializer &s) {
   s.integer(prg_bank);
 }
 
-NES_UxROM(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
+NES_UxROM(XML::Document &document, const stream &memory) : Board(document, memory) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

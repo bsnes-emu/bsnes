@@ -86,7 +86,7 @@ void Board::serialize(serializer &s) {
   if(chrram.size) s.array(chrram.data, chrram.size);
 }
 
-Board::Board(XML::Document &document, const uint8_t *data, unsigned size) {
+Board::Board(XML::Document &document, const stream &memory) {
   auto &cartridge = document["cartridge"];
 
   information.type = cartridge["board"]["type"].data;
@@ -102,8 +102,8 @@ Board::Board(XML::Document &document, const uint8_t *data, unsigned size) {
   if(chrrom.size) chrrom.data = new uint8[chrrom.size]();
   if(chrram.size) chrram.data = new uint8[chrram.size]();
 
-  if(prgrom.size) memcpy(prgrom.data, data, prgrom.size);
-  if(chrrom.size) memcpy(chrrom.data, data + prgrom.size, chrrom.size);
+  if(prgrom.size) memory.read(prgrom.data, prgrom.size);
+  if(chrrom.size) memory.read(chrrom.data, chrrom.size);
 
   prgram.writable = true;
   chrram.writable = true;
@@ -112,56 +112,56 @@ Board::Board(XML::Document &document, const uint8_t *data, unsigned size) {
 Board::~Board() {
 }
 
-Board* Board::load(const string &markup, const uint8_t *data, unsigned size) {
+Board* Board::load(const string &markup, const stream &memory) {
   XML::Document document(markup);
   string type = document["cartridge"]["board"]["type"].data;
 
-  if(type == "BANDAI-FCG") return new BandaiFCG(document, data, size);
+  if(type == "BANDAI-FCG") return new BandaiFCG(document, memory);
 
-  if(type == "KONAMI-VRC-1") return new KonamiVRC1(document, data, size);
-  if(type == "KONAMI-VRC-2") return new KonamiVRC2(document, data, size);
-  if(type == "KONAMI-VRC-3") return new KonamiVRC3(document, data, size);
-  if(type == "KONAMI-VRC-4") return new KonamiVRC4(document, data, size);
-  if(type == "KONAMI-VRC-6") return new KonamiVRC6(document, data, size);
-  if(type == "KONAMI-VRC-7") return new KonamiVRC7(document, data, size);
+  if(type == "KONAMI-VRC-1") return new KonamiVRC1(document, memory);
+  if(type == "KONAMI-VRC-2") return new KonamiVRC2(document, memory);
+  if(type == "KONAMI-VRC-3") return new KonamiVRC3(document, memory);
+  if(type == "KONAMI-VRC-4") return new KonamiVRC4(document, memory);
+  if(type == "KONAMI-VRC-6") return new KonamiVRC6(document, memory);
+  if(type == "KONAMI-VRC-7") return new KonamiVRC7(document, memory);
 
-  if(type == "NES-AMROM"   ) return new NES_AxROM(document, data, size);
-  if(type == "NES-ANROM"   ) return new NES_AxROM(document, data, size);
-  if(type == "NES-AN1ROM"  ) return new NES_AxROM(document, data, size);
-  if(type == "NES-AOROM"   ) return new NES_AxROM(document, data, size);
+  if(type == "NES-AMROM"   ) return new NES_AxROM(document, memory);
+  if(type == "NES-ANROM"   ) return new NES_AxROM(document, memory);
+  if(type == "NES-AN1ROM"  ) return new NES_AxROM(document, memory);
+  if(type == "NES-AOROM"   ) return new NES_AxROM(document, memory);
 
-  if(type == "NES-BNROM"   ) return new NES_BNROM(document, data, size);
+  if(type == "NES-BNROM"   ) return new NES_BNROM(document, memory);
 
-  if(type == "NES-CNROM"   ) return new NES_CNROM(document, data, size);
+  if(type == "NES-CNROM"   ) return new NES_CNROM(document, memory);
 
-  if(type == "NES-EKROM"   ) return new NES_ExROM(document, data, size);
-  if(type == "NES-ELROM"   ) return new NES_ExROM(document, data, size);
-  if(type == "NES-ETROM"   ) return new NES_ExROM(document, data, size);
-  if(type == "NES-EWROM"   ) return new NES_ExROM(document, data, size);
+  if(type == "NES-EKROM"   ) return new NES_ExROM(document, memory);
+  if(type == "NES-ELROM"   ) return new NES_ExROM(document, memory);
+  if(type == "NES-ETROM"   ) return new NES_ExROM(document, memory);
+  if(type == "NES-EWROM"   ) return new NES_ExROM(document, memory);
 
-  if(type == "NES-FJROM"   ) return new NES_FxROM(document, data, size);
-  if(type == "NES-FKROM"   ) return new NES_FxROM(document, data, size);
+  if(type == "NES-FJROM"   ) return new NES_FxROM(document, memory);
+  if(type == "NES-FKROM"   ) return new NES_FxROM(document, memory);
 
-  if(type == "NES-GNROM"   ) return new NES_GxROM(document, data, size);
-  if(type == "NES-MHROM"   ) return new NES_GxROM(document, data, size);
+  if(type == "NES-GNROM"   ) return new NES_GxROM(document, memory);
+  if(type == "NES-MHROM"   ) return new NES_GxROM(document, memory);
 
-  if(type == "NES-HKROM"   ) return new NES_HKROM(document, data, size);
+  if(type == "NES-HKROM"   ) return new NES_HKROM(document, memory);
 
-  if(type == "NES-NROM-128") return new NES_NROM(document, data, size);
-  if(type == "NES-NROM-256") return new NES_NROM(document, data, size);
+  if(type == "NES-NROM-128") return new NES_NROM(document, memory);
+  if(type == "NES-NROM-256") return new NES_NROM(document, memory);
 
-  if(type == "NES-PEEOROM" ) return new NES_PxROM(document, data, size);
-  if(type == "NES-PNROM"   ) return new NES_PxROM(document, data, size);
+  if(type == "NES-PEEOROM" ) return new NES_PxROM(document, memory);
+  if(type == "NES-PNROM"   ) return new NES_PxROM(document, memory);
 
-  if(type == "NES-SNROM"   ) return new NES_SxROM(document, data, size);
-  if(type == "NES-SXROM"   ) return new NES_SxROM(document, data, size);
+  if(type == "NES-SNROM"   ) return new NES_SxROM(document, memory);
+  if(type == "NES-SXROM"   ) return new NES_SxROM(document, memory);
 
-  if(type == "NES-TLROM"   ) return new NES_TxROM(document, data, size);
+  if(type == "NES-TLROM"   ) return new NES_TxROM(document, memory);
 
-  if(type == "NES-UNROM"   ) return new NES_UxROM(document, data, size);
-  if(type == "NES-UOROM"   ) return new NES_UxROM(document, data, size);
+  if(type == "NES-UNROM"   ) return new NES_UxROM(document, memory);
+  if(type == "NES-UOROM"   ) return new NES_UxROM(document, memory);
 
-  if(type == "SUNSOFT-5B"  ) return new Sunsoft5B(document, data, size);
+  if(type == "SUNSOFT-5B"  ) return new Sunsoft5B(document, memory);
 
   return nullptr;
 }

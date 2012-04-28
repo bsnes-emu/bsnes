@@ -5,7 +5,7 @@ struct Cartridge : Thread, property<Cartridge> {
   static void Main();
   void main();
 
-  void load(const string &markup, const uint8_t *data, unsigned size);
+  void load(const string &markup, const stream &memory);
   void unload();
 
   unsigned ram_size();

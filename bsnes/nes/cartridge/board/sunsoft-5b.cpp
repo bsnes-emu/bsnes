@@ -220,7 +220,7 @@ void serialize(serializer &s) {
   pulse[2].serialize(s);
 }
 
-Sunsoft5B(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size) {
+Sunsoft5B(XML::Document &document, const stream &memory) : Board(document, memory) {
 }
 
 };

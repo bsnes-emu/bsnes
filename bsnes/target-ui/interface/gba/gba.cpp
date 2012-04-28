@@ -34,7 +34,7 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = GameBoyAdvanceCartridge(memory.data(), memory.size()).markup;
 
-  GBA::cartridge.load(markup, memory.data(), memory.size());
+  GBA::cartridge.load(markup, vectorstream{memory});
   GBA::system.power();
 
   if(GBA::cartridge.ram_size()) {

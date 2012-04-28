@@ -2,6 +2,7 @@
 #define NES_HPP
 
 #include <base/base.hpp>
+#include <processor/rp2a03/rp2a03.hpp>
 
 namespace Famicom {
   namespace Info {

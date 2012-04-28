@@ -49,7 +49,7 @@ void serialize(serializer &s) {
   vrc2.serialize(s);
 }
 
-KonamiVRC2(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), vrc2(*this) {
+KonamiVRC2(XML::Document &document, const stream &memory) : Board(document, memory), vrc2(*this) {
   settings.pinout.a0 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a0"].data);
   settings.pinout.a1 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a1"].data);
 }

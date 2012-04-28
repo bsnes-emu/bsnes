@@ -47,7 +47,7 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = FamicomCartridge(memory.data(), memory.size()).markup;
 
-  NES::cartridge.load(markup, memory.data(), memory.size());
+  NES::cartridge.load(markup, vectorstream{memory});
   NES::system.power();
 
   if(NES::cartridge.ram_size()) {

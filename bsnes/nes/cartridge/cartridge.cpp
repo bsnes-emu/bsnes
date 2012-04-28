@@ -14,17 +14,22 @@ void Cartridge::main() {
   board->main();
 }
 
-void Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
+void Cartridge::load(const string &markup, const stream &memory) {
   information.markup = markup;
 
-  if((size & 0xff) == 0) {
-    sha256 = nall::sha256(data, size);
-    board = Board::load(markup, data, size);
-  } else {
-    sha256 = nall::sha256(data + 16, size - 16);
-    board = Board::load(markup, data + 16, size - 16);
-  }
+  board = Board::load(markup, memory);
   if(board == nullptr) return;
+
+  sha256_ctx sha;
+  uint8_t hash[32];
+  sha256_init(&sha);
+  sha256_chunk(&sha, board->prgrom.data, board->prgrom.size);
+  sha256_chunk(&sha, board->chrrom.data, board->chrrom.size);
+  sha256_final(&sha);
+  sha256_hash(&sha, hash);
+  string result;
+  for(auto &byte : hash) result.append(hex<2>(byte));
+  sha256 = result;
 
   system.load();
   loaded = true;

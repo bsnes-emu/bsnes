@@ -7,12 +7,14 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
+bool Cartridge::load(const string &markup, const stream &memory) {
   information.markup = markup;
   XML::Document document(markup);
 
-  for(unsigned addr = 0; addr < rom.size; addr++) {
-    rom.data[addr] = data[Bus::mirror(addr, size)];
+  unsigned size = memory.size();
+  memory.read(rom.data, min(rom.size, size));
+  for(unsigned addr = size; addr < rom.size; addr++) {
+    rom.data[addr] = rom.data[Bus::mirror(addr, size)];
   }
 
   has_sram     = false;
@@ -47,7 +49,7 @@ bool Cartridge::load(const string &markup, const uint8_t *data, unsigned size) {
     }
   }
 
-  sha256 = nall::sha256(rom.data, rom.size);
+  sha256 = nall::sha256(rom.data, size);
 
   system.load();
   return loaded = true;

@@ -1,4 +1,4 @@
-processors := arm hg51b lr35902 upd96050
+processors := arm hg51b lr35902 rp2a03 upd96050
 include processor/Makefile
 
 include $(nes)/Makefile

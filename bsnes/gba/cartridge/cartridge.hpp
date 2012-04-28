@@ -12,7 +12,7 @@ struct Cartridge : property<Cartridge> {
     string markup;
   } information;
 
-  bool load(const string &markup, const uint8_t *data, unsigned size);
+  bool load(const string &markup, const stream &memory);
   void unload();
   void power();
 

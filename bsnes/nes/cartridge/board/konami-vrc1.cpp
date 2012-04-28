@@ -34,7 +34,7 @@ void serialize(serializer &s) {
   vrc1.serialize(s);
 }
 
-KonamiVRC1(XML::Document &document, const uint8_t *data, unsigned size) : Board(document, data, size), vrc1(*this) {
+KonamiVRC1(XML::Document &document, const stream &memory) : Board(document, memory), vrc1(*this) {
 }
 
 };

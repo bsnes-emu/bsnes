@@ -1,24 +1,24 @@
-string CPU::disassemble() {
+string RP2A03::disassemble() {
   string output = { hex<4>(regs.pc), "  " };
 
-  auto abs = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 2)), hex<2>(bus.read(regs.pc + 1)) }; };
-  auto abx = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 2)), hex<2>(bus.read(regs.pc + 1)), ",x" }; };
-  auto aby = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 2)), hex<2>(bus.read(regs.pc + 1)), ",y" }; };
-  auto iab = [&]() -> string { return { "($", hex<2>(bus.read(regs.pc + 2)), hex<2>(bus.read(regs.pc + 1)), ")" }; };
-  auto imm = [&]() -> string { return { "#$", hex<2>(bus.read(regs.pc + 1)) }; };
+  auto abs = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 2)), hex<2>(debugger_read(regs.pc + 1)) }; };
+  auto abx = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 2)), hex<2>(debugger_read(regs.pc + 1)), ",x" }; };
+  auto aby = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 2)), hex<2>(debugger_read(regs.pc + 1)), ",y" }; };
+  auto iab = [&]() -> string { return { "($", hex<2>(debugger_read(regs.pc + 2)), hex<2>(debugger_read(regs.pc + 1)), ")" }; };
+  auto imm = [&]() -> string { return { "#$", hex<2>(debugger_read(regs.pc + 1)) }; };
   auto imp = [&]() -> string { return ""; };
-  auto izx = [&]() -> string { return { "($", hex<2>(bus.read(regs.pc + 1)), ",x)" }; };
-  auto izy = [&]() -> string { return { "($", hex<2>(bus.read(regs.pc + 1)), "),y" }; };
-  auto rel = [&]() -> string { return { "$", hex<4>((regs.pc + 2) + (int8)bus.read(regs.pc + 1)) }; };
-  auto zpg = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 1)) }; };
-  auto zpx = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 1)), ",x" }; };
-  auto zpy = [&]() -> string { return { "$", hex<2>(bus.read(regs.pc + 1)), ",y" }; };
+  auto izx = [&]() -> string { return { "($", hex<2>(debugger_read(regs.pc + 1)), ",x)" }; };
+  auto izy = [&]() -> string { return { "($", hex<2>(debugger_read(regs.pc + 1)), "),y" }; };
+  auto rel = [&]() -> string { return { "$", hex<4>((regs.pc + 2) + (int8)debugger_read(regs.pc + 1)) }; };
+  auto zpg = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 1)) }; };
+  auto zpx = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 1)), ",x" }; };
+  auto zpy = [&]() -> string { return { "$", hex<2>(debugger_read(regs.pc + 1)), ",y" }; };
 
   #define op(byte, prefix, mode) \
     case byte: output.append(#prefix, " ", mode()); \
     break
 
-  uint8 opcode = bus.read(regs.pc);
+  uint8 opcode = debugger_read(regs.pc);
   switch(opcode) {
     op(0x00, brk, imm);
     op(0x01, ora, izx);
