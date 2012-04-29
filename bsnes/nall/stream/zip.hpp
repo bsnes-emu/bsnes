@@ -6,6 +6,9 @@
 namespace nall {
 
 struct zipstream : memorystream {
+  using stream::read;
+  using stream::write;
+
   zipstream(const stream &stream, const string &filter = "*") {
     unsigned size = stream.size();
     uint8_t *data = new uint8_t[size];

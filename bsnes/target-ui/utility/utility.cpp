@@ -17,13 +17,13 @@ void Utility::setMode(Interface::Mode mode) {
     stateManager->reset();
   }
 
-  else if(mode == Interface::Mode::NES) {
+  else if(mode == Interface::Mode::FC) {
     mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->nesMenu.setVisible(true);
     dspaudio.setChannels(1);
   }
 
-  else if(mode == Interface::Mode::SNES) {
+  else if(mode == Interface::Mode::SFC) {
     mainWindow->setTitle(interface->cartridgeTitle);
     mainWindow->snesMenu.setVisible(true);
     dspaudio.setChannels(2);
@@ -56,15 +56,15 @@ void Utility::resizeMainWindow(bool shrink) {
 
   switch(interface->mode()) {
   case Interface::Mode::None: return mainWindow->viewport.setGeometry({ 0, 0, 1, 1 });
-  case Interface::Mode::NES:  width = 256, height = 240; break;
-  case Interface::Mode::SNES: width = 256, height = 240; break;
+  case Interface::Mode::FC:   width = 256, height = 240; break;
+  case Interface::Mode::SFC:  width = 256, height = 240; break;
   case Interface::Mode::GB:   width = 160, height = 144; break;
   case Interface::Mode::GBA:  width = 240, height = 160; break;
   }
 
   if(config->video.correctAspectRatio) {
-    if(interface->mode() == Interface::Mode::NES
-    || interface->mode() == Interface::Mode::SNES
+    if(interface->mode() == Interface::Mode::FC
+    || interface->mode() == Interface::Mode::SFC
     ) width = (double)width * 8.0 / 7.0;
   }
 

@@ -2,14 +2,16 @@
   #error "debugger is only compatible with accuracy profile"
 #endif
 
-#include <snes/snes.hpp>
-namespace SNES = SuperFamicom;
+#include <sfc/sfc.hpp>
+namespace SFC = SuperFamicom;
 
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dsp.hpp>
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
+#include <nall/stream/file.hpp>
+#include <nall/stream/vector.hpp>
 #include <nall/snes/cartridge.hpp>
 using namespace nall;
 

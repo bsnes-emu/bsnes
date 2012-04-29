@@ -44,7 +44,7 @@ struct Filter : public library {
 extern Filter filter;
 
 struct Interface : property<Interface> {
-  enum class Mode : unsigned { None, SNES, NES, GB, GBA };
+  enum class Mode : unsigned { None, FC, SFC, GB, GBA };
   readonly<Mode> mode;
 
   void bindControllers();

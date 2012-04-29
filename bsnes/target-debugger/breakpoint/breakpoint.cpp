@@ -174,7 +174,7 @@ bool BreakpointEditor::testExecSMP(uint16 addr) {
 bool BreakpointEditor::testReadVRAM(uint16 addr) {
   for(auto &bp : breakpointReadVRAM) {
     if(bp.addr == addr) {
-      if(bp.compare && bp.data != SNES::ppu.vram[addr]) continue;
+      if(bp.compare && bp.data != SFC::ppu.vram[addr]) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
       return true;
     }
@@ -196,7 +196,7 @@ bool BreakpointEditor::testWriteVRAM(uint16 addr, uint8 data) {
 bool BreakpointEditor::testReadOAM(uint16 addr) {
   for(auto &bp : breakpointReadOAM) {
     if(bp.addr == addr) {
-      if(bp.compare && bp.data != SNES::ppu.oam[addr]) continue;
+      if(bp.compare && bp.data != SFC::ppu.oam[addr]) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
       return true;
     }
@@ -218,7 +218,7 @@ bool BreakpointEditor::testWriteOAM(uint16 addr, uint8 data) {
 bool BreakpointEditor::testReadCGRAM(uint16 addr) {
   for(auto &bp : breakpointReadCGRAM) {
     if(bp.addr == addr) {
-      if(bp.compare && bp.data != SNES::ppu.cgram[addr]) continue;
+      if(bp.compare && bp.data != SFC::ppu.cgram[addr]) continue;
       debugger->print("Breakpoint #", bp.id, " hit\n");
       return true;
     }

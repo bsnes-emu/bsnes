@@ -51,7 +51,7 @@ void VRAMViewer::updateTiles() {
     }
   }
   dp = canvas.data();
-  const uint8_t *sp = SNES::ppu.vram;
+  const uint8_t *sp = SFC::ppu.vram;
 
   if(modeSelection.selection() == 0) {
     for(unsigned tileY = 0; tileY < 64; tileY++) {

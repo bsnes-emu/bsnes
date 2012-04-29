@@ -1,8 +1,8 @@
-processors := arm hg51b lr35902 rp2a03 upd96050
+processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050
 include processor/Makefile
 
-include $(nes)/Makefile
-include $(snes)/Makefile
+include $(fc)/Makefile
+include $(sfc)/Makefile
 include $(gb)/Makefile
 include $(gba)/Makefile
 name := bsnes

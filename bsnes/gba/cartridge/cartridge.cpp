@@ -100,18 +100,42 @@ void Cartridge::write(uint8 *data, uint32 addr, uint32 size, uint32 word) {
   }
 }
 
+#define RAM_ANALYZE
+
 uint32 Cartridge::read(uint32 addr, uint32 size) {
+  #ifdef RAM_ANALYZE
+  if((addr & 0x0e000000) == 0x0e000000) {
+    static bool once = true;
+    if(once) once = false, print("* SRAM/FlashROM read detected\n");
+  }
+  #endif
+
   if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return read(ram.data, addr & ram.mask, size);
   if(has_eeprom   && (addr & eeprom.mask) == eeprom.test) return eeprom.read();
-  if(has_flashrom && (addr & 0x0f000000 ) == 0x0e000000 ) return flashrom.read(addr);
+  if(has_flashrom && (addr & 0x0e000000 ) == 0x0e000000 ) return flashrom.read(addr);
   if(addr < 0x0e000000) return read(rom.data, addr & 0x01ffffff, size);
   return cpu.pipeline.fetch.instruction;
 }
 
 void Cartridge::write(uint32 addr, uint32 size, uint32 word) {
+  #ifdef RAM_ANALYZE
+  if((addr & 0x0e000000) == 0x0e000000) {
+    static bool once = true;
+    if(once) once = false, print("* SRAM/FlashROM write detected\n");
+  }
+  if((addr & 0x0f000000) == 0x0d000000) {
+    static bool once = true;
+    if(once) once = false, print("* EEPROM write detected\n");
+  }
+  if((addr & 0x0e00ffff) == 0x0e005555 && (word & 0xff) == 0xaa) {
+    static bool once = true;
+    if(once) once = false, print("* FlashROM write detected\n");
+  }
+  #endif
+
   if(has_sram     && (addr & 0x0e000000 ) == 0x0e000000 ) return write(ram.data, addr & ram.mask, size, word);
   if(has_eeprom   && (addr & eeprom.mask) == eeprom.test) return eeprom.write(word & 1);
-  if(has_flashrom && (addr & 0x0f000000 ) == 0x0e000000 ) return flashrom.write(addr, word);
+  if(has_flashrom && (addr & 0x0e000000 ) == 0x0e000000 ) return flashrom.write(addr, word);
 }
 
 Cartridge::Cartridge() {

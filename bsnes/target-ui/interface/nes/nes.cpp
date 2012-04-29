@@ -1,10 +1,10 @@
 void InterfaceNES::initialize() {
-  NES::interface = this;
-  NES::system.init();
+  FC::interface = this;
+  FC::system.init();
 }
 
 string InterfaceNES::markup() {
-  return NES::cartridge.information.markup;
+  return FC::cartridge.information.markup;
 }
 
 void InterfaceNES::setController(bool port, unsigned device) {
@@ -12,18 +12,18 @@ void InterfaceNES::setController(bool port, unsigned device) {
   if(port == 1) config->nes.controllerPort2Device = device;
 
   if(port == 0) switch(device) {
-  case 0: return NES::input.connect(0, NES::Input::Device::None);
-  case 1: return NES::input.connect(0, NES::Input::Device::Joypad);
+  case 0: return FC::input.connect(0, FC::Input::Device::None);
+  case 1: return FC::input.connect(0, FC::Input::Device::Joypad);
   }
 
   if(port == 1) switch(device) {
-  case 0: return NES::input.connect(1, NES::Input::Device::None);
-  case 1: return NES::input.connect(1, NES::Input::Device::Joypad);
+  case 0: return FC::input.connect(1, FC::Input::Device::None);
+  case 1: return FC::input.connect(1, FC::Input::Device::Joypad);
   }
 }
 
 bool InterfaceNES::cartridgeLoaded() {
-  return NES::cartridge.loaded();
+  return FC::cartridge.loaded();
 }
 
 bool InterfaceNES::loadCartridge(const string &filename) {
@@ -47,69 +47,67 @@ bool InterfaceNES::loadCartridge(const string &filename) {
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = FamicomCartridge(memory.data(), memory.size()).markup;
 
-  NES::cartridge.load(markup, vectorstream{memory});
-  NES::system.power();
+  FC::cartridge.load(markup, vectorstream{memory});
+  FC::system.power();
 
-  if(NES::cartridge.ram_size()) {
-    filemap fp;
-    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
-      memcpy(NES::cartridge.ram_data(), fp.data(), min(NES::cartridge.ram_size(), fp.size()));
-    }
+  if(FC::cartridge.ram_size()) {
+    filestream fs{interface->base.filename("save.ram", ".sav")};
+    fs.read(FC::cartridge.ram_data(), min(FC::cartridge.ram_size(), fs.size()));
   }
 
-  interface->loadCartridge(::Interface::Mode::NES);
-  NES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::FC);
+  FC::video.generate_palette();
   return true;
 }
 
 void InterfaceNES::unloadCartridge() {
-  if(NES::cartridge.ram_size()) {
-    file::write(interface->base.filename("save.ram", ".sav"), NES::cartridge.ram_data(), NES::cartridge.ram_size());
+  if(FC::cartridge.ram_size()) {
+    file::write(interface->base.filename("save.ram", ".sav"), FC::cartridge.ram_data(), FC::cartridge.ram_size());
   }
-  NES::cartridge.unload();
+  FC::cartridge.unload();
   interface->base.name = "";
 }
 
 //
 
 void InterfaceNES::power() {
-  NES::system.power();
+  FC::system.power();
 }
 
 void InterfaceNES::reset() {
-  NES::system.reset();
+  FC::system.reset();
 }
 
 void InterfaceNES::run() {
-  NES::system.run();
+  FC::system.run();
 }
 
 //
 
 serializer InterfaceNES::serialize() {
-  NES::system.runtosave();
-  return NES::system.serialize();
+  FC::system.runtosave();
+  return FC::system.serialize();
 }
 
 bool InterfaceNES::unserialize(serializer &s) {
-  return NES::system.unserialize(s);
+  return FC::system.unserialize(s);
 }
 
 //
 
 void InterfaceNES::setCheats(const lstring &list) {
-  NES::cheat.reset();
+  FC::cheat.reset();
   for(auto &code : list) {
     lstring codelist;
     codelist.split("+", code);
     for(auto &part : codelist) {
       unsigned addr, data, comp;
-      if(NES::Cheat::decode(part, addr, data, comp)) {
-        NES::cheat.append({ addr, data, comp });
+      if(FC::Cheat::decode(part, addr, data, comp)) {
+        FC::cheat.append({ addr, data, comp });
       }
     }
   }
-  NES::cheat.synchronize();
+  FC::cheat.synchronize();
 }
 
 //

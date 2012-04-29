@@ -6,6 +6,9 @@
 namespace nall {
 
 struct httpstream : stream {
+  using stream::read;
+  using stream::write;
+
   bool seekable() const { return true; }
   bool readable() const { return true; }
   bool writable() const { return true; }

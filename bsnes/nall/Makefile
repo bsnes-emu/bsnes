@@ -35,9 +35,9 @@ ifeq ($(compiler),)
   ifeq ($(platform),win)
     compiler := gcc
   else ifeq ($(platform),osx)
-    compiler := gcc-mp-4.6
+    compiler := gcc-mp-4.7
   else
-    compiler := gcc-4.6
+    compiler := gcc-4.7
   endif
 endif
 

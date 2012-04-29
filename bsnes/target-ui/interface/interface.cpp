@@ -42,12 +42,12 @@ string CartridgePath::title() const {
 
 void Interface::bindControllers() {
   switch(mode()) {
-  case Mode::NES:
+  case Mode::FC:
     nes.setController(0, config->nes.controllerPort1Device);
     nes.setController(1, config->nes.controllerPort2Device);
     break;
 
-  case Mode::SNES:
+  case Mode::SFC:
     snes.setController(0, config->snes.controllerPort1Device);
     snes.setController(1, config->snes.controllerPort2Device);
     break;
@@ -56,8 +56,8 @@ void Interface::bindControllers() {
 
 void Interface::setController(unsigned port, unsigned device) {
   switch(mode()) {
-  case Mode::NES: return nes.setController(port, device);
-  case Mode::SNES: return snes.setController(port, device);
+  case Mode::FC:  return nes.setController(port, device);
+  case Mode::SFC: return snes.setController(port, device);
   }
 }
 
@@ -72,10 +72,10 @@ void Interface::updateDSP() {
   dspaudio.setVolume(config->audio.mute == false ? (double)config->audio.volume / 100.0 : 0.0);
 
   switch(mode()) {
-  case Mode::NES:  return dspaudio.setFrequency(config->audio.frequencyNES);
-  case Mode::SNES: return dspaudio.setFrequency(config->audio.frequencySNES);
-  case Mode::GB:   return dspaudio.setFrequency(config->audio.frequencyGB);
-  case Mode::GBA:  return dspaudio.setFrequency(config->audio.frequencyGBA);
+  case Mode::FC:  return dspaudio.setFrequency(config->audio.frequencyNES);
+  case Mode::SFC: return dspaudio.setFrequency(config->audio.frequencySNES);
+  case Mode::GB:  return dspaudio.setFrequency(config->audio.frequencyGB);
+  case Mode::GBA: return dspaudio.setFrequency(config->audio.frequencyGBA);
   }
 }
 
@@ -91,11 +91,11 @@ bool Interface::cartridgeLoaded() {
 
 void Interface::loadCartridge(Mode mode) {
   switch(mode) {
-  case Mode::NES:  core = &nes; break;
-  case Mode::SNES: core = &snes; break;
-  case Mode::GB:   core = &gb; break;
-  case Mode::GBA:  core = &gba; break;
-  default:         core = nullptr; break;
+  case Mode::FC:  core = &nes; break;
+  case Mode::SFC: core = &snes; break;
+  case Mode::GB:  core = &gb; break;
+  case Mode::GBA: core = &gba; break;
+  default:        core = nullptr; break;
   }
   utility->setMode(this->mode = mode);
 
@@ -185,19 +185,19 @@ void Interface::setCheatCodes(const lstring &list) {
 
 void Interface::updatePalette() {
   switch(mode()) {
-  case Mode::NES:  return NES::video.generate_palette();
-  case Mode::SNES: return SNES::video.generate_palette();
-  case Mode::GB:   return GB::video.generate_palette();
-  case Mode::GBA:  return GBA::video.generate_palette();
+  case Mode::FC:  return FC::video.generate_palette();
+  case Mode::SFC: return SFC::video.generate_palette();
+  case Mode::GB:  return GB::video.generate_palette();
+  case Mode::GBA: return GBA::video.generate_palette();
   }
 }
 
 string Interface::sha256() {
   switch(mode()) {
-  case Mode::NES:  return NES::cartridge.sha256();
-  case Mode::SNES: return SNES::cartridge.sha256();
-  case Mode::GB:   return GB::cartridge.sha256();
-  case Mode::GBA:  return GBA::cartridge.sha256();
+  case Mode::FC:  return FC::cartridge.sha256();
+  case Mode::SFC: return SFC::cartridge.sha256();
+  case Mode::GB:  return GB::cartridge.sha256();
+  case Mode::GBA: return GBA::cartridge.sha256();
   }
   return "{None}";
 }
@@ -252,7 +252,7 @@ void Interface::videoRefresh(const uint32_t *input, unsigned inputPitch, unsigne
       memcpy(output + y * outputPitch, input + y * inputPitch, width * sizeof(uint32_t));
     }
 
-    if(config->video.maskOverscan && (mode() == Mode::NES || mode() == Mode::SNES)) {
+    if(config->video.maskOverscan && (mode() == Mode::FC || mode() == Mode::SFC)) {
       unsigned h = config->video.maskOverscanHorizontal;
       unsigned v = config->video.maskOverscanVertical;
 

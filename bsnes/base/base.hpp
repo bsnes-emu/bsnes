@@ -1,7 +1,7 @@
 #ifndef BASE_HPP
 #define BASE_HPP
 
-static const char Version[] = "088.04";
+static const char Version[] = "088.07";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -14,6 +14,7 @@ static const char Version[] = "088.04";
 #include <nall/property.hpp>
 #include <nall/random.hpp>
 #include <nall/serializer.hpp>
+#include <nall/sha256.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>

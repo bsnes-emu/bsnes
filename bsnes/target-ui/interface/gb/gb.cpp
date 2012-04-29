@@ -40,10 +40,8 @@ bool InterfaceGB::loadCartridge(GB::System::Revision revision, const string &fil
   GB::system.power();
 
   if(GB::cartridge.ramsize) {
-    filemap fp;
-    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
-      memcpy(GB::cartridge.ramdata, fp.data(), min(GB::cartridge.ramsize, fp.size()));
-    }
+    filestream fs{interface->base.filename("save.ram", ".sav")};
+    fs.read(GB::cartridge.ramdata, min(GB::cartridge.ramsize, fs.size()));
   }
 
   GB::interface = this;

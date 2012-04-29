@@ -38,10 +38,8 @@ bool InterfaceGBA::loadCartridge(const string &filename) {
   GBA::system.power();
 
   if(GBA::cartridge.ram_size()) {
-    filemap fp;
-    if(fp.open(interface->base.filename("save.ram", ".sav"), filemap::mode::read)) {
-      memcpy(GBA::cartridge.ram_data(), fp.data(), min(GBA::cartridge.ram_size(), fp.size()));
-    }
+    filestream fs{interface->base.filename("save.ram", ".sav")};
+    fs.read(GBA::cartridge.ram_data(), min(GBA::cartridge.ram_size(), fs.size()));
   }
 
   GBA::video.generate_palette();

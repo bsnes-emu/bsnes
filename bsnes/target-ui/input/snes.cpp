@@ -1,17 +1,17 @@
 int16_t SnesGamepad::poll(unsigned n) {
-  switch((SNES::Input::JoypadID)n) {
-  case SNES::Input::JoypadID::Up: return up.poll() & !down.poll();
-  case SNES::Input::JoypadID::Down: return down.poll() & !up.poll();
-  case SNES::Input::JoypadID::Left: return left.poll() & !right.poll();
-  case SNES::Input::JoypadID::Right: return right.poll() & !left.poll();
-  case SNES::Input::JoypadID::B: return b.poll() | bTurbo.poll();
-  case SNES::Input::JoypadID::A: return a.poll() | aTurbo.poll();
-  case SNES::Input::JoypadID::Y: return y.poll() | yTurbo.poll();
-  case SNES::Input::JoypadID::X: return x.poll() | xTurbo.poll();
-  case SNES::Input::JoypadID::L: return l.poll() | lTurbo.poll();
-  case SNES::Input::JoypadID::R: return r.poll() | rTurbo.poll();
-  case SNES::Input::JoypadID::Select: return select.poll();
-  case SNES::Input::JoypadID::Start: return start.poll();
+  switch((SFC::Input::JoypadID)n) {
+  case SFC::Input::JoypadID::Up: return up.poll() & !down.poll();
+  case SFC::Input::JoypadID::Down: return down.poll() & !up.poll();
+  case SFC::Input::JoypadID::Left: return left.poll() & !right.poll();
+  case SFC::Input::JoypadID::Right: return right.poll() & !left.poll();
+  case SFC::Input::JoypadID::B: return b.poll() | bTurbo.poll();
+  case SFC::Input::JoypadID::A: return a.poll() | aTurbo.poll();
+  case SFC::Input::JoypadID::Y: return y.poll() | yTurbo.poll();
+  case SFC::Input::JoypadID::X: return x.poll() | xTurbo.poll();
+  case SFC::Input::JoypadID::L: return l.poll() | lTurbo.poll();
+  case SFC::Input::JoypadID::R: return r.poll() | rTurbo.poll();
+  case SFC::Input::JoypadID::Select: return select.poll();
+  case SFC::Input::JoypadID::Start: return start.poll();
   }
   return 0;
 }
@@ -47,11 +47,11 @@ SnesGamepad::SnesGamepad(const string &name, bool defaultBindings) {
 //
 
 int16_t SnesMouse::poll(unsigned n) {
-  switch((SNES::Input::MouseID)n) {
-  case SNES::Input::MouseID::X: return xaxis.poll();
-  case SNES::Input::MouseID::Y: return yaxis.poll();
-  case SNES::Input::MouseID::Left: return left.poll();
-  case SNES::Input::MouseID::Right: return right.poll();
+  switch((SFC::Input::MouseID)n) {
+  case SFC::Input::MouseID::X: return xaxis.poll();
+  case SFC::Input::MouseID::Y: return yaxis.poll();
+  case SFC::Input::MouseID::Left: return left.poll();
+  case SFC::Input::MouseID::Right: return right.poll();
   }
   return 0;
 }
@@ -75,13 +75,13 @@ SnesMouse::SnesMouse(const string &name, bool defaultBindings) {
 //
 
 int16_t SnesSuperScope::poll(unsigned n) {
-  switch((SNES::Input::SuperScopeID)n) {
-  case SNES::Input::SuperScopeID::X: return xaxis.poll();
-  case SNES::Input::SuperScopeID::Y: return yaxis.poll();
-  case SNES::Input::SuperScopeID::Trigger: return trigger.poll();
-  case SNES::Input::SuperScopeID::Cursor: return cursor.poll();
-  case SNES::Input::SuperScopeID::Turbo: return turbo.poll();
-  case SNES::Input::SuperScopeID::Pause: return pause.poll();
+  switch((SFC::Input::SuperScopeID)n) {
+  case SFC::Input::SuperScopeID::X: return xaxis.poll();
+  case SFC::Input::SuperScopeID::Y: return yaxis.poll();
+  case SFC::Input::SuperScopeID::Trigger: return trigger.poll();
+  case SFC::Input::SuperScopeID::Cursor: return cursor.poll();
+  case SFC::Input::SuperScopeID::Turbo: return turbo.poll();
+  case SFC::Input::SuperScopeID::Pause: return pause.poll();
   }
   return 0;
 }
@@ -107,11 +107,11 @@ SnesSuperScope::SnesSuperScope(const string &name, bool defaultBindings) {
 //
 
 int16_t SnesJustifier::poll(unsigned n) {
-  switch((SNES::Input::JustifierID)n) {
-  case SNES::Input::JustifierID::X: return xaxis.poll();
-  case SNES::Input::JustifierID::Y: return yaxis.poll();
-  case SNES::Input::JustifierID::Trigger: return trigger.poll();
-  case SNES::Input::JustifierID::Start: return start.poll();
+  switch((SFC::Input::JustifierID)n) {
+  case SFC::Input::JustifierID::X: return xaxis.poll();
+  case SFC::Input::JustifierID::Y: return yaxis.poll();
+  case SFC::Input::JustifierID::Trigger: return trigger.poll();
+  case SFC::Input::JustifierID::Start: return start.poll();
   }
   return 0;
 }

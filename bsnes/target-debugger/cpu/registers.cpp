@@ -68,38 +68,38 @@ CPURegisterEditor::CPURegisterEditor() {
 }
 
 void CPURegisterEditor::loadRegisters() {
-  regAValue.setText(hex<4>(SNES::cpu.regs.a));
-  regXValue.setText(hex<4>(SNES::cpu.regs.x));
-  regYValue.setText(hex<4>(SNES::cpu.regs.y));
-  regSValue.setText(hex<4>(SNES::cpu.regs.s));
-  regDValue.setText(hex<4>(SNES::cpu.regs.d));
-  regDBValue.setText(hex<2>(SNES::cpu.regs.db));
-  flagN.setChecked(SNES::cpu.regs.p.n);
-  flagV.setChecked(SNES::cpu.regs.p.v);
-  flagM.setChecked(SNES::cpu.regs.p.m);
-  flagX.setChecked(SNES::cpu.regs.p.x);
-  flagD.setChecked(SNES::cpu.regs.p.d);
-  flagI.setChecked(SNES::cpu.regs.p.i);
-  flagZ.setChecked(SNES::cpu.regs.p.z);
-  flagC.setChecked(SNES::cpu.regs.p.c);
-  flagE.setChecked(SNES::cpu.regs.e);
+  regAValue.setText(hex<4>(SFC::cpu.regs.a));
+  regXValue.setText(hex<4>(SFC::cpu.regs.x));
+  regYValue.setText(hex<4>(SFC::cpu.regs.y));
+  regSValue.setText(hex<4>(SFC::cpu.regs.s));
+  regDValue.setText(hex<4>(SFC::cpu.regs.d));
+  regDBValue.setText(hex<2>(SFC::cpu.regs.db));
+  flagN.setChecked(SFC::cpu.regs.p.n);
+  flagV.setChecked(SFC::cpu.regs.p.v);
+  flagM.setChecked(SFC::cpu.regs.p.m);
+  flagX.setChecked(SFC::cpu.regs.p.x);
+  flagD.setChecked(SFC::cpu.regs.p.d);
+  flagI.setChecked(SFC::cpu.regs.p.i);
+  flagZ.setChecked(SFC::cpu.regs.p.z);
+  flagC.setChecked(SFC::cpu.regs.p.c);
+  flagE.setChecked(SFC::cpu.regs.e);
 }
 
 void CPURegisterEditor::saveRegisters() {
-  SNES::cpu.regs.a = hex(regAValue.text());
-  SNES::cpu.regs.x = hex(regXValue.text());
-  SNES::cpu.regs.y = hex(regYValue.text());
-  SNES::cpu.regs.s = hex(regSValue.text());
-  SNES::cpu.regs.d = hex(regDValue.text());
-  SNES::cpu.regs.db = hex(regDBValue.text());
-  SNES::cpu.regs.p.n = flagN.checked();
-  SNES::cpu.regs.p.v = flagV.checked();
-  SNES::cpu.regs.p.m = flagM.checked();
-  SNES::cpu.regs.p.x = flagX.checked();
-  SNES::cpu.regs.p.d = flagD.checked();
-  SNES::cpu.regs.p.i = flagI.checked();
-  SNES::cpu.regs.p.z = flagZ.checked();
-  SNES::cpu.regs.p.c = flagC.checked();
-  SNES::cpu.regs.e = flagE.checked();
-  SNES::cpu.update_table();  //cache E/M/X flags
+  SFC::cpu.regs.a = hex(regAValue.text());
+  SFC::cpu.regs.x = hex(regXValue.text());
+  SFC::cpu.regs.y = hex(regYValue.text());
+  SFC::cpu.regs.s = hex(regSValue.text());
+  SFC::cpu.regs.d = hex(regDValue.text());
+  SFC::cpu.regs.db = hex(regDBValue.text());
+  SFC::cpu.regs.p.n = flagN.checked();
+  SFC::cpu.regs.p.v = flagV.checked();
+  SFC::cpu.regs.p.m = flagM.checked();
+  SFC::cpu.regs.p.x = flagX.checked();
+  SFC::cpu.regs.p.d = flagD.checked();
+  SFC::cpu.regs.p.i = flagI.checked();
+  SFC::cpu.regs.p.z = flagZ.checked();
+  SFC::cpu.regs.p.c = flagC.checked();
+  SFC::cpu.regs.e = flagE.checked();
+  SFC::cpu.update_table();  //cache E/M/X flags
 }

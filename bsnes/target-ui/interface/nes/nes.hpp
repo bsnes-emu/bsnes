@@ -1,4 +1,4 @@
-struct InterfaceNES : InterfaceCore, NES::Interface {
+struct InterfaceNES : InterfaceCore, FC::Interface {
   void initialize();
 
   string markup();

@@ -1,8 +1,8 @@
 DipSwitches *dipSwitches = nullptr;
 
 DipSwitch::DipSwitch() {
-  append(name,  { ~0, 0 }, 5);
-  append(value, { ~0, 0 }, 0);
+  append(name,  {~0, 0}, 5);
+  append(value, {~0, 0}, 0);
 }
 
 DipSwitches::DipSwitches() {
@@ -13,22 +13,22 @@ DipSwitches::DipSwitches() {
 
   append(layout);
   for(unsigned n = 0; n < 8; n++)
-  layout.append(dip[n],                { ~0, 0 }, 5);
-  layout.append(controlLayout,         { ~0, 0 }, 5);
-    controlLayout.append(spacer,       { ~0, 0 }, 0);
-    controlLayout.append(acceptButton, {  0, 0 }, 0);
+  layout.append(dip[n],                {~0, 0}, 5);
+  layout.append(controlLayout,         {~0, 0}, 5);
+    controlLayout.append(spacer,       {~0, 0}, 0);
+    controlLayout.append(acceptButton, { 0, 0}, 0);
 
-  setGeometry({ 128, 128, 400, layout.minimumGeometry().height });
+  setGeometry({128, 128, 400, layout.minimumGeometry().height});
   windowManager->append(this, "DipSwitches");
 
   acceptButton.onActivate = { &DipSwitches::accept, this };
 }
 
 void DipSwitches::load() {
-  if(interface->mode() != Interface::Mode::SNES || SNES::cartridge.has_nss_dip() == false) return;
+  if(interface->mode() != Interface::Mode::SFC || SFC::cartridge.has_nss_dip() == false) return;
   application->pause = true;
 
-  auto info = SNES::cartridge.information.nss;
+  auto info = SFC::cartridge.information.nss;
   unsigned count = info.setting.size();
 
   for(unsigned n = 0; n < min(8, count); n++) {
@@ -55,7 +55,7 @@ void DipSwitches::load() {
 }
 
 void DipSwitches::accept() {
-  auto info = SNES::cartridge.information.nss;
+  auto info = SFC::cartridge.information.nss;
   unsigned count = info.setting.size();
 
   unsigned result = 0x0000;
@@ -64,6 +64,6 @@ void DipSwitches::accept() {
   }
 
   setVisible(false);
-  SNES::nss.set_dip(result);
+  SFC::nss.set_dip(result);
   application->pause = false;
 }

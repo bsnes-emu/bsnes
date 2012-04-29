@@ -1,12 +1,12 @@
 void InterfaceSNES::initialize() {
-  loadFirmware("Super Famicom.sys/manifest.xml", "system.smp", SNES::smp.iplrom, 64u);
+  loadFirmware("Super Famicom.sys/manifest.xml", "system.smp", SFC::smp.iplrom, 64u);
 
-  SNES::interface = this;
-  SNES::system.init();
+  SFC::interface = this;
+  SFC::system.init();
 }
 
 string InterfaceSNES::markup() {
-  return SNES::cartridge.information.markup;
+  return SFC::cartridge.information.markup;
 }
 
 void InterfaceSNES::setController(bool port, unsigned device) {
@@ -14,27 +14,27 @@ void InterfaceSNES::setController(bool port, unsigned device) {
   if(port == 1) config->snes.controllerPort2Device = device;
 
   if(port == 0) switch(device) { default:
-  case 0: return SNES::input.connect(0, SNES::Input::Device::None);
-  case 1: return SNES::input.connect(0, SNES::Input::Device::Joypad);
-  case 2: return SNES::input.connect(0, SNES::Input::Device::Multitap);
-  case 3: return SNES::input.connect(0, SNES::Input::Device::Mouse);
-  case 4: return SNES::input.connect(0, SNES::Input::Device::USART);
+  case 0: return SFC::input.connect(0, SFC::Input::Device::None);
+  case 1: return SFC::input.connect(0, SFC::Input::Device::Joypad);
+  case 2: return SFC::input.connect(0, SFC::Input::Device::Multitap);
+  case 3: return SFC::input.connect(0, SFC::Input::Device::Mouse);
+  case 4: return SFC::input.connect(0, SFC::Input::Device::USART);
   }
 
   if(port == 1) switch(device) { default:
-  case 0: return SNES::input.connect(1, SNES::Input::Device::None);
-  case 1: return SNES::input.connect(1, SNES::Input::Device::Joypad);
-  case 2: return SNES::input.connect(1, SNES::Input::Device::Multitap);
-  case 3: return SNES::input.connect(1, SNES::Input::Device::Mouse);
-  case 4: return SNES::input.connect(1, SNES::Input::Device::SuperScope);
-  case 5: return SNES::input.connect(1, SNES::Input::Device::Justifier);
-  case 6: return SNES::input.connect(1, SNES::Input::Device::Justifiers);
-  case 7: return SNES::input.connect(1, SNES::Input::Device::USART);
+  case 0: return SFC::input.connect(1, SFC::Input::Device::None);
+  case 1: return SFC::input.connect(1, SFC::Input::Device::Joypad);
+  case 2: return SFC::input.connect(1, SFC::Input::Device::Multitap);
+  case 3: return SFC::input.connect(1, SFC::Input::Device::Mouse);
+  case 4: return SFC::input.connect(1, SFC::Input::Device::SuperScope);
+  case 5: return SFC::input.connect(1, SFC::Input::Device::Justifier);
+  case 6: return SFC::input.connect(1, SFC::Input::Device::Justifiers);
+  case 7: return SFC::input.connect(1, SFC::Input::Device::USART);
   }
 }
 
 bool InterfaceSNES::cartridgeLoaded() {
-  return SNES::cartridge.loaded();
+  return SFC::cartridge.loaded();
 }
 
 vector<uint8_t> InterfaceSNES::loadCartridge(const string &filename, CartridgePath &cartridge) {
@@ -66,13 +66,13 @@ bool InterfaceSNES::loadCartridge(string basename) {
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(memory.data(), memory.size());
-  SNES::cartridge.load(SNES::Cartridge::Mode::Normal, markup);
-  SNES::system.power();
+  SFC::cartridge.rom.copy(vectorstream{memory});
+  SFC::cartridge.load(SFC::Cartridge::Mode::Normal, markup);
+  SFC::system.power();
 
   loadMemory();
-  interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::SFC);
+  SFC::video.generate_palette();
   return true;
 }
 
@@ -91,14 +91,14 @@ bool InterfaceSNES::loadSatellaviewSlottedCartridge(string basename, string slot
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(memory.data(), memory.size());
-  if(memoryBS) SNES::bsxflash.memory.copy(memoryBS.data(), memoryBS.size());
-  SNES::cartridge.load(SNES::Cartridge::Mode::BsxSlotted, markup);
-  SNES::system.power();
+  SFC::cartridge.rom.copy(vectorstream{memory});
+  if(memoryBS) SFC::bsxflash.memory.copy(vectorstream{memoryBS});
+  SFC::cartridge.load(SFC::Cartridge::Mode::BsxSlotted, markup);
+  SFC::system.power();
 
   loadMemory();
-  interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::SFC);
+  SFC::video.generate_palette();
   return true;
 }
 
@@ -117,14 +117,14 @@ bool InterfaceSNES::loadSatellaviewCartridge(string basename, string slotname) {
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(memory.data(), memory.size());
-  if(memoryBS) SNES::bsxflash.memory.copy(memoryBS.data(), memoryBS.size());
-  SNES::cartridge.load(SNES::Cartridge::Mode::Bsx, markup);
-  SNES::system.power();
+  SFC::cartridge.rom.copy(vectorstream{memory});
+  if(memoryBS) SFC::bsxflash.memory.copy(vectorstream{memoryBS});
+  SFC::cartridge.load(SFC::Cartridge::Mode::Bsx, markup);
+  SFC::system.power();
 
   loadMemory();
-  interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::SFC);
+  SFC::video.generate_palette();
   return true;
 }
 
@@ -148,15 +148,15 @@ bool InterfaceSNES::loadSufamiTurboCartridge(string basename, string slotAname, 
   markup.readfile(interface->base.filename("manifest.xml", ".xml"));
   if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SNES::cartridge.rom.copy(memory.data(), memory.size());
-  if(memorySTA) SNES::sufamiturbo.slotA.rom.copy(memory.data(), memory.size());
-  if(memorySTB) SNES::sufamiturbo.slotB.rom.copy(memory.data(), memory.size());
-  SNES::cartridge.load(SNES::Cartridge::Mode::SufamiTurbo, markup);
-  SNES::system.power();
+  SFC::cartridge.rom.copy(vectorstream{memory});
+  if(memorySTA) SFC::sufamiturbo.slotA.rom.copy(vectorstream{memory});
+  if(memorySTB) SFC::sufamiturbo.slotB.rom.copy(vectorstream{memory});
+  SFC::cartridge.load(SFC::Cartridge::Mode::SufamiTurbo, markup);
+  SFC::system.power();
 
   loadMemory();
-  interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::SFC);
+  SFC::video.generate_palette();
   return true;
 }
 
@@ -179,53 +179,53 @@ bool InterfaceSNES::loadSuperGameBoyCartridge(string basename, string slotname) 
   gbMarkup.readfile(interface->slot[0].filename("manifest.xml", ".xml"));
   if(gbMarkup.empty()) gbMarkup = GameBoyCartridge(memoryGB.data(), memoryGB.size()).markup;
 
-  SNES::cartridge.rom.copy(memory.data(), memory.size());
+  SFC::cartridge.rom.copy(vectorstream{memory});
   GB::cartridge.load(GB::System::Revision::SuperGameBoy, gbMarkup, vectorstream{memoryGB});
-  SNES::cartridge.load(SNES::Cartridge::Mode::SuperGameBoy, markup);
-  SNES::system.power();
+  SFC::cartridge.load(SFC::Cartridge::Mode::SuperGameBoy, markup);
+  SFC::system.power();
 
   loadMemory();
-  interface->loadCartridge(::Interface::Mode::SNES);
-  SNES::video.generate_palette();
+  interface->loadCartridge(::Interface::Mode::SFC);
+  SFC::video.generate_palette();
   return true;
 }
 
 void InterfaceSNES::unloadCartridge() {
   saveMemory();
-  SNES::cartridge.unload();
+  SFC::cartridge.unload();
 }
 
 void InterfaceSNES::power() {
-  SNES::system.power();
+  SFC::system.power();
 }
 
 void InterfaceSNES::reset() {
-  SNES::system.reset();
+  SFC::system.reset();
 }
 
 void InterfaceSNES::run() {
-  SNES::system.run();
+  SFC::system.run();
 }
 
-string InterfaceSNES::memoryName(SNES::Cartridge::NonVolatileRAM &memory) {
-  if(memory.slot == SNES::Cartridge::Slot::Base) {
+string InterfaceSNES::memoryName(SFC::Cartridge::NonVolatileRAM &memory) {
+  if(memory.slot == SFC::Cartridge::Slot::Base) {
     if(memory.id == "save.ram") return interface->base.filename("save.ram", ".srm");
     if(memory.id == "rtc.ram") return interface->base.filename("rtc.ram", ".rtc");
     if(memory.id == "upd96050.ram") return interface->base.filename("upd96050.ram", ".nec");
     if(memory.id == "bsx.ram") return interface->base.filename("bsx.ram", ".bss");
     if(memory.id == "bsx.psram") return interface->base.filename("bsx.psram", ".bsp");
   }
-  if(memory.slot == SNES::Cartridge::Slot::SufamiTurboA) {
+  if(memory.slot == SFC::Cartridge::Slot::SufamiTurboA) {
     if(memory.id == "save.ram") return interface->slot[0].filename("save.ram", ".sts");
   }
-  if(memory.slot == SNES::Cartridge::Slot::SufamiTurboB) {
+  if(memory.slot == SFC::Cartridge::Slot::SufamiTurboB) {
     if(memory.id == "save.ram") return interface->slot[1].filename("save.ram", ".sts");
   }
   return "";
 }
 
 void InterfaceSNES::loadMemory() {
-  for(auto &memory : SNES::cartridge.nvram) {
+  for(auto &memory : SFC::cartridge.nvram) {
     if(memory.size == 0) continue;
 
     string filename = memoryName(memory);
@@ -236,17 +236,16 @@ void InterfaceSNES::loadMemory() {
     }
   }
 
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
+  if(SFC::cartridge.mode() == SFC::Cartridge::Mode::SuperGameBoy) {
     if(GB::cartridge.ramsize) {
-      if(auto read = file::read(interface->slot[0].filename("save.ram", ".sav"))) {
-        memcpy(GB::cartridge.ramdata, read.data(), min(GB::cartridge.ramsize, read.size()));
-      }
+      filestream fs{interface->slot[0].filename("save.ram", ".sav")};
+      fs.read(GB::cartridge.ramdata, min(GB::cartridge.ramsize, fs.size()));
     }
   }
 }
 
 void InterfaceSNES::saveMemory() {
-  for(auto &memory : SNES::cartridge.nvram) {
+  for(auto &memory : SFC::cartridge.nvram) {
     if(memory.size == 0) continue;
 
     string filename = memoryName(memory);
@@ -255,7 +254,7 @@ void InterfaceSNES::saveMemory() {
     file::write(filename, memory.data, memory.size);
   }
 
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
+  if(SFC::cartridge.mode() == SFC::Cartridge::Mode::SuperGameBoy) {
     if(GB::cartridge.ramsize) {
       file::write(interface->slot[0].filename("save.ram", ".sav"),
         GB::cartridge.ramdata, GB::cartridge.ramsize
@@ -265,16 +264,16 @@ void InterfaceSNES::saveMemory() {
 }
 
 serializer InterfaceSNES::serialize() {
-  SNES::system.runtosave();
-  return SNES::system.serialize();
+  SFC::system.runtosave();
+  return SFC::system.serialize();
 }
 
 bool InterfaceSNES::unserialize(serializer &s) {
-  return SNES::system.unserialize(s);
+  return SFC::system.unserialize(s);
 }
 
 void InterfaceSNES::setCheats(const lstring &list) {
-  if(SNES::cartridge.mode() == SNES::Cartridge::Mode::SuperGameBoy) {
+  if(SFC::cartridge.mode() == SFC::Cartridge::Mode::SuperGameBoy) {
     GB::cheat.reset();
     for(auto &code : list) {
       lstring codelist;
@@ -290,18 +289,18 @@ void InterfaceSNES::setCheats(const lstring &list) {
     return;
   }
 
-  SNES::cheat.reset();
+  SFC::cheat.reset();
   for(auto &code : list) {
     lstring codelist;
     codelist.split("+", code);
     for(auto &part : codelist) {
       unsigned addr, data;
-      if(SNES::Cheat::decode(part, addr, data)) {
-        SNES::cheat.append({ addr, data });
+      if(SFC::Cheat::decode(part, addr, data)) {
+        SFC::cheat.append({ addr, data });
       }
     }
   }
-  SNES::cheat.synchronize();
+  SFC::cheat.synchronize();
 }
 
 //
@@ -331,30 +330,30 @@ void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
   }
 }
 
-int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned index, unsigned id) {
+int16_t InterfaceSNES::inputPoll(bool port, SFC::Input::Device device, unsigned index, unsigned id) {
   if(port == 0) {
-    if(device == SNES::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
-    if(device == SNES::Input::Device::Multitap) {
+    if(device == SFC::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
+    if(device == SFC::Input::Device::Multitap) {
       if(index == 0) return inputManager->snes.port1.multitap1.poll(id);
       if(index == 1) return inputManager->snes.port1.multitap2.poll(id);
       if(index == 2) return inputManager->snes.port1.multitap3.poll(id);
       if(index == 3) return inputManager->snes.port1.multitap4.poll(id);
     }
-    if(device == SNES::Input::Device::Mouse) return inputManager->snes.port1.mouse.poll(id);
+    if(device == SFC::Input::Device::Mouse) return inputManager->snes.port1.mouse.poll(id);
   }
 
   if(port == 1) {
-    if(device == SNES::Input::Device::Joypad) return inputManager->snes.port2.gamepad.poll(id);
-    if(device == SNES::Input::Device::Multitap) {
+    if(device == SFC::Input::Device::Joypad) return inputManager->snes.port2.gamepad.poll(id);
+    if(device == SFC::Input::Device::Multitap) {
       if(index == 0) return inputManager->snes.port2.multitap1.poll(id);
       if(index == 1) return inputManager->snes.port2.multitap2.poll(id);
       if(index == 2) return inputManager->snes.port2.multitap3.poll(id);
       if(index == 3) return inputManager->snes.port2.multitap4.poll(id);
     }
-    if(device == SNES::Input::Device::Mouse) return inputManager->snes.port2.mouse.poll(id);
-    if(device == SNES::Input::Device::SuperScope) return inputManager->snes.port2.superScope.poll(id);
-    if(device == SNES::Input::Device::Justifier) return inputManager->snes.port2.justifier1.poll(id);
-    if(device == SNES::Input::Device::Justifiers) {
+    if(device == SFC::Input::Device::Mouse) return inputManager->snes.port2.mouse.poll(id);
+    if(device == SFC::Input::Device::SuperScope) return inputManager->snes.port2.superScope.poll(id);
+    if(device == SFC::Input::Device::Justifier) return inputManager->snes.port2.justifier1.poll(id);
+    if(device == SFC::Input::Device::Justifiers) {
       if(index == 0) return inputManager->snes.port2.justifier1.poll(id);
       if(index == 1) return inputManager->snes.port2.justifier2.poll(id);
     }
@@ -363,8 +362,8 @@ int16_t InterfaceSNES::inputPoll(bool port, SNES::Input::Device device, unsigned
   return 0;
 }
 
-string InterfaceSNES::path(SNES::Cartridge::Slot slot, const string &hint) {
-  if(slot == SNES::Cartridge::Slot::Base) {
+string InterfaceSNES::path(SFC::Cartridge::Slot slot, const string &hint) {
+  if(slot == SFC::Cartridge::Slot::Base) {
     if(hint == "msu1.rom") return interface->base.filename("msu1.rom", ".msu");
     if(hint.wildcard("track-*.pcm")) {
       string track = hint;

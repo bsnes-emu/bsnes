@@ -3,13 +3,14 @@
 serializer System::serialize() {
   serializer s(serialize_size);
 
-  unsigned signature = 0x31545342, version = Info::SerializerVersion, crc32 = 0;
-  char description[512];
+  unsigned signature = 0x31545342, version = Info::SerializerVersion;
+  char hash[64], description[512];
+  memcpy(&hash, (const char*)cartridge.sha256(), 64);
   memset(&description, 0, sizeof description);
 
   s.integer(signature);
   s.integer(version);
-  s.integer(crc32);
+  s.array(hash);
   s.array(description);
 
   serialize_all(s);
@@ -17,17 +18,16 @@ serializer System::serialize() {
 }
 
 bool System::unserialize(serializer &s) {
-  unsigned signature, version, crc32;
-  char description[512];
+  unsigned signature, version;
+  char hash[64], description[512];
 
   s.integer(signature);
   s.integer(version);
-  s.integer(crc32);
+  s.array(hash);
   s.array(description);
 
   if(signature != 0x31545342) return false;
   if(version != Info::SerializerVersion) return false;
-//if(crc32 != 0) return false;
 
   power();
   serialize_all(s);
@@ -50,11 +50,11 @@ void System::serialize_init() {
   serializer s;
 
   unsigned signature = 0, version = 0, crc32 = 0;
-  char description[512];
+  char hash[64], description[512];
 
   s.integer(signature);
   s.integer(version);
-  s.integer(crc32);
+  s.array(hash);
   s.array(description);
 
   serialize_all(s);

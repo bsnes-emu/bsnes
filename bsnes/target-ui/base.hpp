@@ -1,12 +1,12 @@
-#include <nes/nes.hpp>
-#include <snes/snes.hpp>
+#include <fc/fc.hpp>
+#include <sfc/sfc.hpp>
 #include <gb/gb.hpp>
 #include <gba/gba.hpp>
 
-namespace NES  = Famicom;
-namespace SNES = SuperFamicom;
-namespace GB   = GameBoy;
-namespace GBA  = GameBoyAdvance;
+namespace FC  = Famicom;
+namespace SFC = SuperFamicom;
+namespace GB  = GameBoy;
+namespace GBA = GameBoyAdvance;
 
 #include <nall/compositor.hpp>
 #include <nall/config.hpp>

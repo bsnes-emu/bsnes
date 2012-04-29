@@ -11,14 +11,14 @@ uint24 CPUDebugger::mirror(uint24 addr) {
 uint8 CPUDebugger::read(uint24 addr) {
   if((addr & 0x40e000) == 0x2000) return ~0;  //$00-3f|80-bf:2000-3fff  MMIO
   if((addr & 0x40e000) == 0x4000) return ~0;  //$00-3f|80-bf:4000-5fff  MMIO
-  return SNES::bus.read(mirror(addr));
+  return SFC::bus.read(mirror(addr));
 }
 
 void CPUDebugger::write(uint24 addr, uint8 data) {
   if((addr & 0x40e000) == 0x2000) return;  //$00-3f|80-bf:2000-3fff  MMIO
   if((addr & 0x40e000) == 0x4000) return;  //$00-3f|80-bf:4000-5fff  MMIO
   if((addr & 0x40e000) == 0x0000) addr = 0x7e0000 | (addr & 0x1fff);  //$00-3f:80-bf:0000-1fff WRAM
-  return SNES::bus.write(mirror(addr), data);
+  return SFC::bus.write(mirror(addr), data);
 }
 
 unsigned CPUDebugger::opcodeLength(uint24 addr) {
@@ -46,9 +46,9 @@ unsigned CPUDebugger::opcodeLength(uint24 addr) {
     2, 2, 2, 2,  3, 2, 2, 2,  1, 3, 1, 1,  3, 3, 3, 4,
   };
 
-  unsigned length = lengthTable[SNES::bus.read(addr)];
-  if(length == M) return 3 - (SNES::cpu.regs.e | SNES::cpu.regs.p.m);
-  if(length == X) return 3 - (SNES::cpu.regs.e | SNES::cpu.regs.p.x);
+  unsigned length = lengthTable[SFC::bus.read(addr)];
+  if(length == M) return 3 - (SFC::cpu.regs.e | SFC::cpu.regs.p.m);
+  if(length == X) return 3 - (SFC::cpu.regs.e | SFC::cpu.regs.p.x);
   return length;
   #undef M
   #undef X
@@ -58,7 +58,7 @@ void CPUDebugger::updateDisassembly() {
   string line[15];
   char text[512];
 
-  SNES::cpu.disassemble_opcode(text, opcodePC);
+  SFC::cpu.disassemble_opcode(text, opcodePC);
   text[29] = 0;
   line[7] = { "> ", text };
 
@@ -67,7 +67,7 @@ void CPUDebugger::updateDisassembly() {
     for(signed b = 1; b <= 4; b++) {
       if(addr - b >= 0 && (debugger->cpuUsage.data[addr - b] & Usage::Exec)) {
         addr -= b;
-        SNES::cpu.disassemble_opcode(text, addr);
+        SFC::cpu.disassemble_opcode(text, addr);
         text[29] = 0;
         line[o] = { "  ", text };
         break;
@@ -80,7 +80,7 @@ void CPUDebugger::updateDisassembly() {
     for(signed b = 1; b <= 4; b++) {
       if(addr + b <= 0xffffff && (debugger->cpuUsage.data[addr + b] & Usage::Exec)) {
         addr += b;
-        SNES::cpu.disassemble_opcode(text, addr);
+        SFC::cpu.disassemble_opcode(text, addr);
         text[29] = 0;
         line[o] = { "  ", text };
         break;
@@ -97,13 +97,13 @@ void CPUDebugger::updateDisassembly() {
 
   disassembly.setText(output);
   registers.setText({
-     "A:", hex<4>(SNES::cpu.regs.a), " X:", hex<4>(SNES::cpu.regs.x), " Y:", hex<4>(SNES::cpu.regs.y),
-    " S:", hex<4>(SNES::cpu.regs.s), " D:", hex<4>(SNES::cpu.regs.d), " DB:", hex<2>(SNES::cpu.regs.db), " ",
-    SNES::cpu.regs.p.n ? "N" : "n", SNES::cpu.regs.p.v ? "V" : "v",
-    SNES::cpu.regs.e ? (SNES::cpu.regs.p.m ? "1" : "0") : (SNES::cpu.regs.p.m ? "M" : "m"),
-    SNES::cpu.regs.e ? (SNES::cpu.regs.p.x ? "B" : "b") : (SNES::cpu.regs.p.x ? "X" : "x"),
-    SNES::cpu.regs.p.d ? "D" : "d", SNES::cpu.regs.p.i ? "I" : "i",
-    SNES::cpu.regs.p.z ? "Z" : "z", SNES::cpu.regs.p.c ? "C" : "c",
+     "A:", hex<4>(SFC::cpu.regs.a), " X:", hex<4>(SFC::cpu.regs.x), " Y:", hex<4>(SFC::cpu.regs.y),
+    " S:", hex<4>(SFC::cpu.regs.s), " D:", hex<4>(SFC::cpu.regs.d), " DB:", hex<2>(SFC::cpu.regs.db), " ",
+    SFC::cpu.regs.p.n ? "N" : "n", SFC::cpu.regs.p.v ? "V" : "v",
+    SFC::cpu.regs.e ? (SFC::cpu.regs.p.m ? "1" : "0") : (SFC::cpu.regs.p.m ? "M" : "m"),
+    SFC::cpu.regs.e ? (SFC::cpu.regs.p.x ? "B" : "b") : (SFC::cpu.regs.p.x ? "X" : "x"),
+    SFC::cpu.regs.p.d ? "D" : "d", SFC::cpu.regs.p.i ? "I" : "i",
+    SFC::cpu.regs.p.z ? "Z" : "z", SFC::cpu.regs.p.c ? "C" : "c",
   });
 }
 

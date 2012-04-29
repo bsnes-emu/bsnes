@@ -1,9 +1,9 @@
 options += debugger
 
-processors := arm hg51b upd96050
+processors := arm gsu hg51b r65816 spc700 upd96050
 include processor/Makefile
 
-include $(snes)/Makefile
+include $(sfc)/Makefile
 name := laevateinn
 
 ui_objects := ui-main ui-settings ui-interface ui-debugger ui-tracer ui-window

@@ -7,7 +7,7 @@
 namespace GameBoyAdvance {
   namespace Info {
     static const char Name[] = "bgba";
-    static const unsigned SerializerVersion = 1;
+    static const unsigned SerializerVersion = 2;
   }
 }
 

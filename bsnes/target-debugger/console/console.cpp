@@ -90,12 +90,12 @@ ConsoleWindow::ConsoleWindow() {
   };
 
   menuEmulationPowerCycle.onActivate = [&] {
-    SNES::system.power();
+    SFC::system.power();
     print("System power cycled\n");
   };
 
   menuEmulationReset.onActivate = [&] {
-    SNES::system.reset();
+    SFC::system.reset();
     print("System reset\n");
   };
 
