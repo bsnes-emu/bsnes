@@ -86,7 +86,7 @@ struct CPU : Processor::LR35902, Thread, MMIO {
   void interrupt_raise(Interrupt id);
   void interrupt_test();
   void interrupt_exec(uint16 pc);
-  void stop();
+  bool stop();
   void power();
 
   void serialize(serializer&);

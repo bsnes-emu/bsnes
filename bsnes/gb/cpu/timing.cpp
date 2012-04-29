@@ -21,10 +21,10 @@ void CPU::add_clocks(unsigned clocks) {
   if((status.clock &  511) == 0)   timer_8192hz();
   if((status.clock & 1023) == 0)   timer_4096hz();
 
-  ppu.clock -= clocks;
+  ppu.clock -= clocks * ppu.frequency;
   if(ppu.clock < 0) co_switch(scheduler.active_thread = ppu.thread);
 
-  apu.clock -= clocks;
+  apu.clock -= clocks * apu.frequency;
   if(apu.clock < 0) co_switch(scheduler.active_thread = apu.thread);
 }
 

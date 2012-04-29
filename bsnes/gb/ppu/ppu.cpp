@@ -41,7 +41,7 @@ void PPU::main() {
 }
 
 void PPU::add_clocks(unsigned clocks) {
-  clock += clocks;
+  clock += clocks * cpu.frequency;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
     co_switch(scheduler.active_thread = cpu.thread);
   }

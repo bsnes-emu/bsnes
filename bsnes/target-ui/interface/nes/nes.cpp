@@ -112,24 +112,25 @@ void InterfaceNES::setCheats(const lstring &list) {
 
 //
 
-uint32_t InterfaceNES::videoColor(uint9_t source, uint16_t red, uint16_t green, uint16_t blue) {
+uint32_t InterfaceNES::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
   return color(red, green, blue);
 }
 
-void InterfaceNES::videoRefresh(const uint32_t *data) {
-  interface->videoRefresh(data, 256 * sizeof(uint32_t), 256, 240);
+void InterfaceNES::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+  interface->videoRefresh(data, pitch, width, height);
 }
 
-void InterfaceNES::audioSample(int16_t sample) {
-  signed samples[] = { sample };
+void InterfaceNES::audioSample(int16_t lsample, int16_t rsample) {
+  //NES audio output is monaural; ruby only takes stereo audio
+  signed samples[] = {lsample};
   dspaudio.sample(samples);
   while(dspaudio.pending()) {
     dspaudio.read(samples);
-    audio.sample(samples[0], samples[0]);  //NES audio output is monaural; ruby only takes stereo audio
+    audio.sample(samples[0], samples[0]);
   }
 }
 
-int16_t InterfaceNES::inputPoll(bool port, unsigned device, unsigned id) {
+int16_t InterfaceNES::inputPoll(unsigned port, unsigned device, unsigned id) {
   if(port == 0 && device == 0) return inputManager->nes.port1.gamepad.poll(id);
   return 0;
 }

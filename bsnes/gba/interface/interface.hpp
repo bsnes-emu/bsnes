@@ -1,10 +1,23 @@
-struct Interface {
-  virtual uint32_t videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue);
-  virtual void videoRefresh(const uint32_t *data);
-  virtual void audioSample(int16_t lsample, int16_t rsample);
-  virtual bool inputPoll(unsigned id);
+#ifndef GBA_HPP
+namespace GameBoyAdvance {
+#endif
 
-  virtual void message(const string &text);
+struct Interface : Emulator::Interface {
+  bool loaded();
+  void load(unsigned id, const stream &memory, const string &markup = "");
+  void unload();
+
+  void power();
+  void reset();
+  void run();
+
+  void updatePalette();
+
+  Interface();
 };
 
 extern Interface *interface;
+
+#ifndef GBA_HPP
+}
+#endif

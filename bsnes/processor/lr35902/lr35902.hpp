@@ -11,7 +11,7 @@ struct LR35902 {
   virtual void op_io() = 0;
   virtual uint8 op_read(uint16 addr) = 0;
   virtual void op_write(uint16 addr, uint8 data) = 0;
-  virtual void stop() = 0;
+  virtual bool stop() = 0;
   virtual uint8 debugger_read(uint16 addr) { return 0u; }
 
   void power();

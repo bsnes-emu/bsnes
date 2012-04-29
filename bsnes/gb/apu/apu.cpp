@@ -46,9 +46,9 @@ void APU::main() {
     noise.run();
     master.run();
 
-    interface->audioSample(master.center, master.left, master.right);
+    interface->audioSample(master.left, master.right);
 
-    clock++;
+    clock += cpu.frequency;
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(scheduler.active_thread = cpu.thread);
   }
 }

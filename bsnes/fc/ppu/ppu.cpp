@@ -47,7 +47,6 @@ void PPU::scanline() {
 
 void PPU::frame() {
   status.field ^= 1;
-  interface->videoRefresh(buffer);
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 

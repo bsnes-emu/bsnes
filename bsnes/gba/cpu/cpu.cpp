@@ -91,7 +91,7 @@ void CPU::keypad_run() {
   bool test = regs.keypad.control.condition;  //0 = OR, 1 = AND
   for(unsigned n = 0; n < 10; n++) {
     if(regs.keypad.control.flag[n] == false) continue;
-    bool input = interface->inputPoll(n);
+    bool input = interface->inputPoll(0, 0, n);
     if(regs.keypad.control.condition == 0) test |= input;
     if(regs.keypad.control.condition == 1) test &= input;
   }

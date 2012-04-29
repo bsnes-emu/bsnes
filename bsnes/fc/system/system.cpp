@@ -7,6 +7,9 @@ System system;
 
 void System::run() {
   scheduler.enter();
+  if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+    interface->videoRefresh(ppu.buffer, 4 * 256, 256, 240);
+  }
 }
 
 void System::runtosave() {
@@ -32,7 +35,9 @@ void System::runthreadtosave() {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent);
+    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+      interface->videoRefresh(ppu.buffer, 4 * 256, 256, 240);
+    }
   }
 }
 

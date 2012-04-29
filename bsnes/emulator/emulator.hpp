@@ -1,7 +1,7 @@
-#ifndef BASE_HPP
-#define BASE_HPP
+#ifndef EMULATOR_HPP
+#define EMULATOR_HPP
 
-static const char Version[] = "088.07";
+static const char Version[] = "088.08";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
@@ -22,6 +22,8 @@ static const char Version[] = "088.07";
 #include <nall/vector.hpp>
 #include <nall/stream/memory.hpp>
 using namespace nall;
+
+#include "interface.hpp"
 
 //debugging function hook:
 //no overhead (and no debugger invocation) if not compiled with -DDEBUGGER

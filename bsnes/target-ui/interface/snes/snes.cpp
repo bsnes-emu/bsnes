@@ -305,24 +305,26 @@ void InterfaceSNES::setCheats(const lstring &list) {
 
 //
 
-uint32_t InterfaceSNES::videoColor(uint19_t source, uint16_t red, uint16_t green, uint16_t blue) {
+uint32_t InterfaceSNES::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
   return color(red, green, blue);
 }
 
-void InterfaceSNES::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
-  unsigned width  =  256 << hires;
-  unsigned height =  240 << interlace;
-  unsigned pitch  = 1024 >> interlace;
+void InterfaceSNES::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+//unsigned width  =  256 << hires;
+//unsigned height =  240 << interlace;
+//unsigned pitch  = 1024 >> interlace;
+
+  bool overscan = false;
 
   //skip first line; as it is always blank (by SNES design)
   if(overscan == false) data += 1 * 1024;  // 8 + 224 +  8
   if(overscan == true ) data += 9 * 1024;  // 0 + 240 +  0
 
-  interface->videoRefresh(data, pitch * sizeof(uint32_t), width, height);
+  interface->videoRefresh(data, pitch, width, height);
 }
 
 void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
-  signed samples[] = { lsample, rsample };
+  signed samples[] = {lsample, rsample};
   dspaudio.sample(samples);
   while(dspaudio.pending()) {
     dspaudio.read(samples);
@@ -330,30 +332,36 @@ void InterfaceSNES::audioSample(int16_t lsample, int16_t rsample) {
   }
 }
 
-int16_t InterfaceSNES::inputPoll(bool port, SFC::Input::Device device, unsigned index, unsigned id) {
+int16_t InterfaceSNES::inputPoll(unsigned port, unsigned device, unsigned id) {
   if(port == 0) {
-    if(device == SFC::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
-    if(device == SFC::Input::Device::Multitap) {
+    if(device == (unsigned)SFC::Input::Device::Joypad) return inputManager->snes.port1.gamepad.poll(id);
+    if(device == (unsigned)SFC::Input::Device::Multitap) {
+      unsigned index = id >> 16;
+      id &= 65535;
       if(index == 0) return inputManager->snes.port1.multitap1.poll(id);
       if(index == 1) return inputManager->snes.port1.multitap2.poll(id);
       if(index == 2) return inputManager->snes.port1.multitap3.poll(id);
       if(index == 3) return inputManager->snes.port1.multitap4.poll(id);
     }
-    if(device == SFC::Input::Device::Mouse) return inputManager->snes.port1.mouse.poll(id);
+    if(device == (unsigned)SFC::Input::Device::Mouse) return inputManager->snes.port1.mouse.poll(id);
   }
 
   if(port == 1) {
-    if(device == SFC::Input::Device::Joypad) return inputManager->snes.port2.gamepad.poll(id);
-    if(device == SFC::Input::Device::Multitap) {
+    if(device == (unsigned)SFC::Input::Device::Joypad) return inputManager->snes.port2.gamepad.poll(id);
+    if(device == (unsigned)SFC::Input::Device::Multitap) {
+      unsigned index = id >> 16;
+      id &= 65535;
       if(index == 0) return inputManager->snes.port2.multitap1.poll(id);
       if(index == 1) return inputManager->snes.port2.multitap2.poll(id);
       if(index == 2) return inputManager->snes.port2.multitap3.poll(id);
       if(index == 3) return inputManager->snes.port2.multitap4.poll(id);
     }
-    if(device == SFC::Input::Device::Mouse) return inputManager->snes.port2.mouse.poll(id);
-    if(device == SFC::Input::Device::SuperScope) return inputManager->snes.port2.superScope.poll(id);
-    if(device == SFC::Input::Device::Justifier) return inputManager->snes.port2.justifier1.poll(id);
-    if(device == SFC::Input::Device::Justifiers) {
+    if(device == (unsigned)SFC::Input::Device::Mouse) return inputManager->snes.port2.mouse.poll(id);
+    if(device == (unsigned)SFC::Input::Device::SuperScope) return inputManager->snes.port2.superScope.poll(id);
+    if(device == (unsigned)SFC::Input::Device::Justifier) return inputManager->snes.port2.justifier1.poll(id);
+    if(device == (unsigned)SFC::Input::Device::Justifiers) {
+      unsigned index = id >> 16;
+      id &= 65535;
       if(index == 0) return inputManager->snes.port2.justifier1.poll(id);
       if(index == 1) return inputManager->snes.port2.justifier2.poll(id);
     }

@@ -565,8 +565,8 @@ void LR35902::op_halt() {
 }
 
 void LR35902::op_stop() {
+  if(stop()) return;
   r.stop = true;
-  stop();
   while(r.stop == true) op_io();
 }
 

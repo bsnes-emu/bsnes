@@ -60,7 +60,7 @@ void APU::main() {
   //output  = filter.run_lopass(output);
     output  = sclamp<16>(output);
 
-    interface->audioSample(output);
+    interface->audioSample(output, output);
 
     tick();
   }

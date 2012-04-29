@@ -91,14 +91,15 @@ void CPU::interrupt_exec(uint16 pc) {
   op_io();
 }
 
-void CPU::stop() {
+bool CPU::stop() {
   if(status.speed_switch) {
-    r.stop = false;
     status.speed_switch = 0;
     status.speed_double ^= 1;
     if(status.speed_double == 0) frequency = 4 * 1024 * 1024;
     if(status.speed_double == 1) frequency = 8 * 1024 * 1024;
+    return true;
   }
+  return false;
 }
 
 void CPU::power() {

@@ -18,8 +18,8 @@ struct InterfaceNES : InterfaceCore, FC::Interface {
 
   void setCheats(const lstring &list = lstring{});
 
-  uint32_t videoColor(uint9_t source, uint16_t red, uint16_t green, uint16_t blue);
-  void videoRefresh(const uint32_t *data);
-  void audioSample(int16_t sample);
-  int16_t inputPoll(bool port, unsigned device, unsigned id);
+  uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue);
+  void videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height);
+  void audioSample(int16_t lsample, int16_t rsample);
+  int16_t inputPoll(unsigned port, unsigned device, unsigned id);
 };

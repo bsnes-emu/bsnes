@@ -80,18 +80,18 @@ void ICD2::joypWrite(bool p15, bool p14) {
   packetlock = true;
 }
 
-uint32_t ICD2::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+uint32_t ICD2::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
   return source;
 }
 
-void ICD2::videoRefresh(const uint32_t *data) {
+void ICD2::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
 }
 
-void ICD2::audioSample(int16_t center, int16_t left, int16_t right) {
+void ICD2::audioSample(int16_t left, int16_t right) {
   audio.coprocessor_sample(left, right);
 }
 
-bool ICD2::inputPoll(unsigned id) {
+int16_t ICD2::inputPoll(unsigned port, unsigned device, unsigned id) {
   GameBoy::cpu.status.mlt_req = joyp_id & mlt_req;
 
   unsigned data = 0x00;

@@ -11,7 +11,7 @@ void System::run() {
 
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-    interface->videoRefresh(ppu.screen);
+    interface->videoRefresh(ppu.screen, 4 * 160, 160, 144);
   }
 }
 
@@ -35,7 +35,7 @@ void System::runthreadtosave() {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      interface->videoRefresh(ppu.screen);
+      interface->videoRefresh(ppu.screen, 4 * 160, 160, 144);
     }
   }
 }

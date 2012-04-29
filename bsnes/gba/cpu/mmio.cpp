@@ -62,13 +62,13 @@ uint8 CPU::read(uint32 addr) {
 
   //KEYINPUT
   case 0x04000130:
-    for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(n) << n;
+    for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(0, 0, n) << n;
     if((result & 0xc0) == 0xc0) result &= ~0xc0;  //up+down cannot be pressed simultaneously
     if((result & 0x30) == 0x30) result &= ~0x30;  //left+right cannot be pressed simultaneously
     return result ^ 0xff;
   case 0x04000131:
-    result |= interface->inputPoll(8) << 0;
-    result |= interface->inputPoll(9) << 1;
+    result |= interface->inputPoll(0, 0, 8) << 0;
+    result |= interface->inputPoll(0, 0, 9) << 1;
     return result ^ 0x03;
 
   //KEYCNT

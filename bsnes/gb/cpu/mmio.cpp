@@ -10,15 +10,15 @@ unsigned CPU::wram_addr(uint16 addr) const {
 void CPU::mmio_joyp_poll() {
   unsigned button = 0, dpad = 0;
 
-  button |= interface->inputPoll((unsigned)Input::Start) << 3;
-  button |= interface->inputPoll((unsigned)Input::Select) << 2;
-  button |= interface->inputPoll((unsigned)Input::B) << 1;
-  button |= interface->inputPoll((unsigned)Input::A) << 0;
+  button |= interface->inputPoll(0, 0, (unsigned)Input::Start) << 3;
+  button |= interface->inputPoll(0, 0, (unsigned)Input::Select) << 2;
+  button |= interface->inputPoll(0, 0, (unsigned)Input::B) << 1;
+  button |= interface->inputPoll(0, 0, (unsigned)Input::A) << 0;
 
-  dpad |= interface->inputPoll((unsigned)Input::Down) << 3;
-  dpad |= interface->inputPoll((unsigned)Input::Up) << 2;
-  dpad |= interface->inputPoll((unsigned)Input::Left) << 1;
-  dpad |= interface->inputPoll((unsigned)Input::Right) << 0;
+  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Down) << 3;
+  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Up) << 2;
+  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Left) << 1;
+  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Right) << 0;
 
   status.joyp = 0x0f;
   if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;

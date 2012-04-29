@@ -1,7 +1,7 @@
 #ifndef GAMEBOY_HPP
 #define GAMEBOY_HPP
 
-#include <base/base.hpp>
+#include <emulator/emulator.hpp>
 #include <processor/lr35902/lr35902.hpp>
 
 namespace GameBoy {
@@ -24,7 +24,7 @@ namespace GameBoy {
   struct Thread {
     cothread_t thread;
     unsigned frequency;
-    signed clock;
+    int64_t clock;
 
     inline void create(void (*entrypoint)(), unsigned frequency) {
       if(thread) co_delete(thread);

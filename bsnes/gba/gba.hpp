@@ -1,7 +1,7 @@
 #ifndef GBA_HPP
 #define GBA_HPP
 
-#include <base/base.hpp>
+#include <emulator/emulator.hpp>
 #include <processor/arm/arm.hpp>
 
 namespace GameBoyAdvance {

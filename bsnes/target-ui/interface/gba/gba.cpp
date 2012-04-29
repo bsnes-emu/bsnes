@@ -82,12 +82,12 @@ void InterfaceGBA::setCheats(const lstring &list) {
 
 //
 
-uint32_t InterfaceGBA::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+uint32_t InterfaceGBA::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
   return color(red, green, blue);
 }
 
-void InterfaceGBA::videoRefresh(const uint32_t *data) {
-  interface->videoRefresh(data, 240 * sizeof(uint32_t), 240, 160);
+void InterfaceGBA::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+  interface->videoRefresh(data, pitch, width, height);
 }
 
 void InterfaceGBA::audioSample(int16_t lsample, int16_t rsample) {
@@ -99,6 +99,6 @@ void InterfaceGBA::audioSample(int16_t lsample, int16_t rsample) {
   }
 }
 
-bool InterfaceGBA::inputPoll(unsigned id) {
+int16_t InterfaceGBA::inputPoll(unsigned port, unsigned device, unsigned id) {
   return inputManager->gba.device.controller.poll(id);
 }

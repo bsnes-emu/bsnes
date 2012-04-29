@@ -106,7 +106,7 @@ void Video::update() {
     }
   }
 
-  interface->videoRefresh(ppu.surface, hires, ppu.interlace(), ppu.overscan());
+  interface->videoRefresh(ppu.surface, 4 * (1024 >> ppu.interlace()), 256 << hires, 240 << ppu.interlace());
 
   hires = false;
 }

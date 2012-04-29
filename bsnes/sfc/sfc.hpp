@@ -1,7 +1,7 @@
 #ifndef SFC_HPP
 #define SFC_HPP
 
-#include <base/base.hpp>
+#include <emulator/emulator.hpp>
 #include <processor/arm/arm.hpp>
 #include <processor/gsu/gsu.hpp>
 #include <processor/hg51b/hg51b.hpp>

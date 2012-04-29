@@ -99,16 +99,16 @@ void InterfaceGB::setCheats(const lstring &list) {
 
 //
 
-uint32_t InterfaceGB::videoColor(uint15_t source, uint16_t red, uint16_t green, uint16_t blue) {
+uint32_t InterfaceGB::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
   return color(red, green, blue);
 }
 
-void InterfaceGB::videoRefresh(const uint32_t *data) {
-  interface->videoRefresh(data, 160 * sizeof(uint32_t), 160, 144);
+void InterfaceGB::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+  interface->videoRefresh(data, pitch, width, height);
 }
 
-void InterfaceGB::audioSample(int16_t csample, int16_t lsample, int16_t rsample) {
-  signed samples[] = { lsample, rsample };
+void InterfaceGB::audioSample(int16_t lsample, int16_t rsample) {
+  signed samples[] = {lsample, rsample};
   dspaudio.sample(samples);
   while(dspaudio.pending()) {
     dspaudio.read(samples);
@@ -116,6 +116,6 @@ void InterfaceGB::audioSample(int16_t csample, int16_t lsample, int16_t rsample)
   }
 }
 
-bool InterfaceGB::inputPoll(unsigned id) {
+int16_t InterfaceGB::inputPoll(unsigned port, unsigned device, unsigned id) {
   return inputManager->gb.device.controller.poll(id);
 }

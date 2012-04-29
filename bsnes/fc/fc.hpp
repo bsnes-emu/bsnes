@@ -1,7 +1,7 @@
 #ifndef FC_HPP
 #define FC_HPP
 
-#include <base/base.hpp>
+#include <emulator/emulator.hpp>
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
