@@ -8,9 +8,24 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
-void Interface::load(unsigned id, const stream &memory, const string &markup) {
-  if(id == 0) cartridge.load(markup, memory);
-  if(id == 1) memory.read(bios.data, min(bios.size, memory.size()));
+void Interface::load(unsigned id, const stream &stream, const string &markup) {
+  if(id == 0) {
+    memory.reset();
+    cartridge.load(markup, stream);
+    system.power();
+  }
+  if(id == 1) {
+    stream.read(bios.data, min(bios.size, stream.size()));
+  }
+  if(id == 2) {
+    stream.read(cartridge.ram.data, min(cartridge.ram.size, stream.size()));
+  }
+  if(id == 3) {
+    stream.read(cartridge.eeprom.data, min(cartridge.eeprom.size, stream.size()));
+  }
+  if(id == 4) {
+    stream.read(cartridge.flashrom.data, min(cartridge.flashrom.size, stream.size()));
+  }
 }
 
 void Interface::unload() {
@@ -36,36 +51,51 @@ void Interface::updatePalette() {
 Interface::Interface() {
   interface = this;
 
-  information.name      = "Game Boy Advance";
-  information.width     = 240;
-  information.height    = 160;
-  information.frequency = 32768;
-  information.ports     = 1;
+  information.name       = "Game Boy Advance";
+  information.width      = 240;
+  information.height     = 160;
+  information.frequency  = 32768;
+  information.ports      = 1;
+  information.resettable = false;
 
   {
-  Media medium;
-  medium.name   = "Game Boy Advance";
-  medium.filter = "*.sfc";
-  medium.id     = 0;
-  media.append(medium);
+  Firmware firmware;
+  firmware.name = "BIOS";
+  firmware.id = 1;
+  this->firmware.append(firmware);
   }
 
   {
-  Controller controller;
-  controller.name   = "Controller";
-  controller.port   = 0;
-  controller.device = 0;
-  controller.inputs.append({"Up",     6});
-  controller.inputs.append({"Down",   7});
-  controller.inputs.append({"Left",   5});
-  controller.inputs.append({"Right",  4});
-  controller.inputs.append({"B",      1});
-  controller.inputs.append({"A",      0});
-  controller.inputs.append({"L",      9});
-  controller.inputs.append({"R",      8});
-  controller.inputs.append({"Select", 2});
-  controller.inputs.append({"Start",  3});
-  controllers.append(controller);
+  Media media;
+  media.displayname = "Game Boy Advance";
+  media.name        = "program.rom";
+  media.filter      = "*.gba";
+  media.id          = 0;
+  this->media.append(media);
+  }
+
+  {
+  Port port;
+  port.name = "Device";
+  port.id   = 0;
+    {
+    Port::Device device;
+    device.name = "Controller";
+    device.id   = 0;
+    device.input.append({"A",      0});
+    device.input.append({"B",      1});
+    device.input.append({"Select", 2});
+    device.input.append({"Start",  3});
+    device.input.append({"Right",  4});
+    device.input.append({"Left",   5});
+    device.input.append({"Up",     6});
+    device.input.append({"Down",   7});
+    device.input.append({"R",      8});
+    device.input.append({"L",      9});
+    device.displayinput = { 6, 7, 5, 4, 1, 0, 9, 8, 2, 3 };
+    port.device.append(device);
+    }
+  this->port.append(port);
   }
 }
 

@@ -1,2 +1,3 @@
 #include "../ethos.hpp"
-#include "video-window.cpp"
+#include "browser.cpp"
+#include "presentation.cpp"

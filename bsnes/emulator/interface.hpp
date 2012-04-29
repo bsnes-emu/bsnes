@@ -10,26 +10,52 @@ struct Interface {
     unsigned height;
     unsigned frequency;
     unsigned ports;
+    bool resettable;
   } information;
 
-  struct Media {
+  struct Firmware {
+    string name;
+    unsigned id;
+  };
+  vector<Firmware> firmware;
+
+  struct MediaObject {
+    string displayname;
     string name;
     string filter;
     unsigned id;
   };
+
+  struct Media : MediaObject {
+    vector<MediaObject> slot;
+  };
   vector<Media> media;
 
-  struct Controller {
+  struct Memory {
     string name;
-    string port;
-    string device;
-    struct Input {
+    unsigned id;
+    uint8_t *data;
+    unsigned size;
+  };
+  vector<Memory> memory;
+
+  struct Port {
+    string name;
+    unsigned id;
+    struct Device {
       string name;
       unsigned id;
+      struct Input {
+        string name;
+        unsigned id;
+        unsigned guid;
+      };
+      vector<Input> input;
+      vector<unsigned> displayinput;
     };
-    vector<Input> inputs;
+    vector<Device> device;
   };
-  vector<Controller> controllers;
+  vector<Port> port;
 
   struct Callback {
     function<uint32_t (unsigned, uint16_t, uint16_t, uint16_t)> videoColor;
@@ -52,8 +78,8 @@ struct Interface {
     if(callback.audioSample) return callback.audioSample(lsample, rsample);
   }
 
-  virtual int16_t inputPoll(unsigned port, unsigned device, unsigned id) {
-    if(callback.inputPoll) return callback.inputPoll(port, device, id);
+  virtual int16_t inputPoll(unsigned port, unsigned device, unsigned input) {
+    if(callback.inputPoll) return callback.inputPoll(port, device, input);
     return 0;
   }
 

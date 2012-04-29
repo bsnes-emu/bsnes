@@ -1,7 +1,7 @@
 #ifndef EMULATOR_HPP
 #define EMULATOR_HPP
 
-static const char Version[] = "088.08";
+static const char Version[] = "088.09";
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>

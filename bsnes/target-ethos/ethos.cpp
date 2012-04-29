@@ -1,14 +1,30 @@
 #include "ethos.hpp"
+#include "bootstrap.cpp"
 
 Application *application = nullptr;
+
+Emulator::Interface& system() {
+  struct application_interface_null{};
+  if(application->active == nullptr) throw application_interface_null();
+  return *application->active;
+}
 
 string Application::path(const string &filename) {
   string path = {basepath, filename};
   if(file::exists(path)) return path;
+  if(directory::exists(path)) return path;
   return {userpath, filename};
 }
 
 void Application::run() {
+  inputManager->poll();
+
+  if(active == nullptr || system().loaded() == false) {
+    usleep(20 * 1000);
+    return;
+  }
+
+  system().run();
 }
 
 Application::Application(int argc, char **argv) {
@@ -23,21 +39,14 @@ Application::Application(int argc, char **argv) {
   unused = ::userpath(path);
   userpath = path;
   if(Intrinsics::platform() == Intrinsics::Platform::Windows) {
-    userpath.append("bsnes/");
+    userpath.append("ethos/");
   } else {
-    userpath.append(".config/bsnes/");
+    userpath.append(".config/ethos/");
   }
   mkdir(userpath, 0755);
 
-  interface = new Interface;
-
-  auto gba = new GameBoyAdvance::Interface;
-  gba->callback.videoColor = {&Interface::videoColor, interface};
-  gba->callback.videoRefresh = {&Interface::videoRefresh, interface};
-  gba->callback.audioSample = {&Interface::audioSample, interface};
-  gba->callback.inputPoll = {&Interface::inputPoll, interface};
-  gba->updatePalette();
-  emulators.append(gba);
+  bootstrap();
+  active = nullptr;
 
   if(Intrinsics::platform() == Intrinsics::Platform::Windows) {
     normalFont = "Tahoma, 8";
@@ -51,39 +60,37 @@ Application::Application(int argc, char **argv) {
     monospaceFont = "Liberation Mono, 8";
   }
 
-  filestream bios{"/home/byuu/.config/bsnes/Game Boy Advance.sys/bios.rom"};
-  gba->load(1, bios);
+  utility = new Utility;
+  inputManager = new InputManager;
+  browser = new Browser;
+  presentation = new Presentation;
+  videoSettings = new VideoSettings;
+  audioSettings = new AudioSettings;
+  inputSettings = new InputSettings;
+  settings = new Settings;
 
-  string manifest;
-  manifest.readfile("/media/sdb1/root/cartridges/Game Boy Advance/Super Mario Advance (US).gba/manifest.xml");
-  filestream fs{"/media/sdb1/root/cartridges/Game Boy Advance/Super Mario Advance (US).gba/program.rom"};
-  gba->load(0, fs, manifest);
-  gba->power();
-
-  videoWindow = new VideoWindow;
-
-  videoWindow->setVisible();
+  presentation->setVisible();
 
   video.driver("OpenGL");
-  video.set(Video::Handle, videoWindow->viewport.handle());
+  video.set(Video::Handle, presentation->viewport.handle());
   video.set(Video::Synchronize, false);
   video.set(Video::Depth, 24u);
   video.init();
 
   audio.driver("ALSA");
-  audio.set(Audio::Handle, videoWindow->viewport.handle());
-  audio.set(Audio::Synchronize, true);
+  audio.set(Audio::Handle, presentation->viewport.handle());
+  audio.set(Audio::Synchronize, false);
   audio.set(Audio::Latency, 80u);
   audio.set(Audio::Frequency, 32768u);
   audio.init();
 
   input.driver("SDL");
-  input.set(Input::Handle, videoWindow->viewport.handle());
+  input.set(Input::Handle, presentation->viewport.handle());
   input.init();
 
   while(quit == false) {
     OS::processEvents();
-    gba->run();
+    run();
   }
 }
 

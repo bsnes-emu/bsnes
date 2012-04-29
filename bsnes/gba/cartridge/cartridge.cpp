@@ -29,6 +29,8 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       ram.size = numeral(info["size"].data);
       ram.mask = ram.size - 1;
       for(unsigned n = 0; n < ram.size; n++) ram.data[n] = 0xff;
+
+      interface->memory.append({"save.ram", 2, ram.data, ram.size});
     }
 
     if(info["type"].data == "EEPROM") {
@@ -39,6 +41,8 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       eeprom.mask = size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
       eeprom.test = size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
       for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0xff;
+
+      interface->memory.append({"save.ram", 3, eeprom.data, eeprom.size});
     }
 
     if(info["type"].data == "FlashROM") {
@@ -46,6 +50,8 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       flashrom.id = numeral(info["id"].data);
       flashrom.size = numeral(info["size"].data);
       for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0xff;
+
+      interface->memory.append({"save.ram", 4, flashrom.data, flashrom.size});
     }
   }
 

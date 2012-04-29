@@ -20,29 +20,24 @@ void Interface::videoRefresh(const uint32_t *data, unsigned pitch, unsigned widt
     video.unlock();
     video.refresh();
   }
+
+  static unsigned frameCounter = 0;
+  static time_t previous, current;
+  frameCounter++;
+
+  time(&current);
+  if(current != previous) {
+    previous = current;
+    utility->setStatusText({"FPS: ", frameCounter});
+    frameCounter = 0;
+  }
 }
 
 void Interface::audioSample(int16_t lsample, int16_t rsample) {
   audio.sample(lsample, rsample);
 }
 
-int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned id) {
-  using nall::Keyboard;
-  static int16_t table[Scancode::Limit];
-  if(id == 0) input.poll(table);
-
-  switch(id) {
-  case 0: return table[keyboard(0)[Keyboard::X]];           //A
-  case 1: return table[keyboard(0)[Keyboard::Z]];           //B
-  case 2: return table[keyboard(0)[Keyboard::Apostrophe]];  //Select
-  case 3: return table[keyboard(0)[Keyboard::Return]];      //Start
-  case 4: return table[keyboard(0)[Keyboard::Right]];       //Right
-  case 5: return table[keyboard(0)[Keyboard::Left]];        //Left
-  case 6: return table[keyboard(0)[Keyboard::Up]];          //Up
-  case 7: return table[keyboard(0)[Keyboard::Down]];        //Down
-  case 8: return table[keyboard(0)[Keyboard::R]];           //R
-  case 9: return table[keyboard(0)[Keyboard::L]];           //L
-  }
-
-  return 0;
+int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
+  unsigned guid = system().port[port].device[device].input[input].guid;
+  return inputManager->poll(guid);
 }

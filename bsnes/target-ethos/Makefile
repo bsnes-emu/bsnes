@@ -7,7 +7,7 @@ include gb/Makefile
 include gba/Makefile
 name := ethos
 
-ui_objects := ui-ethos ui-interface ui-general
+ui_objects := ui-ethos ui-interface ui-utility ui-input ui-general ui-settings
 ui_objects += phoenix ruby
 ui_objects += $(if $(call streq,$(platform),win),resource)
 
@@ -40,7 +40,10 @@ objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-ethos.o: $(ui)/ethos.cpp $(call rwildcard,$(ui)/)
 obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
+obj/ui-utility.o: $(ui)/utility/utility.cpp $(call rwildcard,$(ui)/)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/)
+obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
 	$(call compile,$(rubyflags))

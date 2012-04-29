@@ -1,8 +1,9 @@
 #include <emulator/emulator.hpp>
-#include <gba/interface/interface.hpp>
 
 #include <nall/platform.hpp>
 #include <nall/config.hpp>
+#include <nall/directory.hpp>
+#include <nall/map.hpp>
 #include <nall/stream/file.hpp>
 #include <nall/stream/memory.hpp>
 #include <nall/stream/vector.hpp>
@@ -15,10 +16,17 @@ using namespace phoenix;
 using namespace ruby;
 
 #include "interface/interface.hpp"
+#include "utility/utility.hpp"
+#include "input/input.hpp"
 #include "general/general.hpp"
+#include "settings/settings.hpp"
+
+Emulator::Interface& system();
 
 struct Application {
-  vector<Emulator::Interface*> emulators;
+  vector<Emulator::Interface*> emulator;
+  Emulator::Interface *active;
+
   bool quit;
   bool pause;
   bool autopause;
@@ -34,6 +42,7 @@ struct Application {
 
   string path(const string &filename);
   void run();
+  void bootstrap();
   Application(int argc, char **argv);
   ~Application();
 };
