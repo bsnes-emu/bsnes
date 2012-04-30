@@ -34,10 +34,15 @@ void Interface::videoRefresh(const uint32_t *data, unsigned pitch, unsigned widt
 }
 
 void Interface::audioSample(int16_t lsample, int16_t rsample) {
-  audio.sample(lsample, rsample);
+  signed samples[] = {lsample, rsample};
+  dspaudio.sample(samples);
+  while(dspaudio.pending()) {
+    dspaudio.read(samples);
+    audio.sample(samples[0], samples[1]);
+  }
 }
 
 int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
   unsigned guid = system().port[port].device[device].input[input].guid;
-  return inputManager->poll(guid);
+  return inputManager->inputMap[guid]->poll();
 }

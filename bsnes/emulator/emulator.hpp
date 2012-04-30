@@ -1,7 +1,12 @@
 #ifndef EMULATOR_HPP
 #define EMULATOR_HPP
 
-static const char Version[] = "088.09";
+namespace Emulator {
+  static const char Name[] = "bsnes";
+  static const char Version[] = "088.10";
+  static const char Author[] = "byuu";
+  static const char License[] = "GPLv3";
+}
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>

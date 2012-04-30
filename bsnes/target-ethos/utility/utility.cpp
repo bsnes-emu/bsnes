@@ -21,6 +21,14 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
     filestream fs({pathname, memory.name});
     system().load(memory.id, fs);
   }
+
+  system().updatePalette();
+  dspaudio.setFrequency(emulator->information.frequency);
+
+  string displayname = pathname;
+  displayname.rtrim<1>("/");
+  presentation->setTitle(notdir(nall::basename(displayname)));
+  presentation->setSystemName(media.displayname);
 }
 
 void Utility::saveMedia() {
@@ -30,10 +38,12 @@ void Utility::saveMedia() {
 }
 
 void Utility::power() {
+  if(application->active == nullptr) return;
   system().power();
 }
 
 void Utility::reset() {
+  if(application->active == nullptr) return;
   system().reset();
 }
 
@@ -43,6 +53,7 @@ void Utility::unload() {
     system().unload();
     setInterface(nullptr);
   }
+  presentation->setTitle({Emulator::Name, " v", Emulator::Version});
   video.clear();
 }
 

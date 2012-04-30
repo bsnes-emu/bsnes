@@ -10,19 +10,27 @@ struct Browser : Window {
   Button openButton;
 
   void open(Emulator::Interface::Media &media, function<void (string)> callback);
+  void saveConfiguration();
+  void synchronize();
+  void bootstrap();
   Browser();
 
-public:
+private:
+  configuration config;
+  struct Folder {
+    string filter;
+    string path;
+    unsigned selection;
+  };
+  vector<Folder> folderList;
+
   Emulator::Interface::Media media;
   function<void (string)> callback;
   string path;
   lstring filenameList;
 
-  void synchronize();
-  void setPath(const string &path);
+  void setPath(const string &path, unsigned selection = 0);
   void fileListActivate();
-  bool loadFolder(const string &path);
-  void loadFile(const string &filename);
 };
 
 extern Browser *browser;

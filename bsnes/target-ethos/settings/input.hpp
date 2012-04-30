@@ -19,7 +19,14 @@ struct InputSettings : SettingsLayout {
   void systemChanged();
   void portChanged();
   void deviceChanged();
+  void clearInput();
+  void assignInput();
+  void assignMouseInput(unsigned n);
+  void inputEvent(unsigned scancode, int16_t value, bool allowMouseInput = false);
   InputSettings();
+
+private:
+  AbstractInput *activeInput;
 };
 
 extern InputSettings *inputSettings;

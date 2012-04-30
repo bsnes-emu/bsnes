@@ -2,6 +2,7 @@
 #include "bootstrap.cpp"
 
 Application *application = nullptr;
+DSP dspaudio;
 
 Emulator::Interface& system() {
   struct application_interface_null{};
@@ -67,6 +68,7 @@ Application::Application(int argc, char **argv) {
   videoSettings = new VideoSettings;
   audioSettings = new AudioSettings;
   inputSettings = new InputSettings;
+  hotkeySettings = new HotkeySettings;
   settings = new Settings;
 
   presentation->setVisible();
@@ -79,19 +81,28 @@ Application::Application(int argc, char **argv) {
 
   audio.driver("ALSA");
   audio.set(Audio::Handle, presentation->viewport.handle());
-  audio.set(Audio::Synchronize, false);
+  audio.set(Audio::Synchronize, true);
   audio.set(Audio::Latency, 80u);
-  audio.set(Audio::Frequency, 32768u);
+  audio.set(Audio::Frequency, 48000u);
   audio.init();
 
   input.driver("SDL");
   input.set(Input::Handle, presentation->viewport.handle());
   input.init();
 
+  dspaudio.setPrecision(16);
+  dspaudio.setVolume(2.0);
+  dspaudio.setBalance(0.0);
+  dspaudio.setResampler(DSP::ResampleEngine::Linear);
+  dspaudio.setResamplerFrequency(48000u);
+
   while(quit == false) {
     OS::processEvents();
     run();
   }
+
+  browser->saveConfiguration();
+  inputManager->saveConfiguration();
 }
 
 Application::~Application() {

@@ -59,43 +59,44 @@ Interface::Interface() {
   information.resettable = false;
 
   {
-  Firmware firmware;
-  firmware.name = "BIOS";
-  firmware.id = 1;
-  this->firmware.append(firmware);
+    Firmware firmware;
+    firmware.displayname = "Game Boy Advance";
+    firmware.name        = "Game Boy Advance.sys/bios.rom";
+    firmware.id          = 1;
+    this->firmware.append(firmware);
   }
 
   {
-  Media media;
-  media.displayname = "Game Boy Advance";
-  media.name        = "program.rom";
-  media.filter      = "*.gba";
-  media.id          = 0;
-  this->media.append(media);
+    Media media;
+    media.displayname = "Game Boy Advance";
+    media.name        = "program.rom";
+    media.filter      = "*.gba";
+    media.id          = 0;
+    this->media.append(media);
   }
 
   {
-  Port port;
-  port.name = "Device";
-  port.id   = 0;
+    Port port;
+    port.name = "Device";
+    port.id   = 0;
     {
-    Port::Device device;
-    device.name = "Controller";
-    device.id   = 0;
-    device.input.append({"A",      0});
-    device.input.append({"B",      1});
-    device.input.append({"Select", 2});
-    device.input.append({"Start",  3});
-    device.input.append({"Right",  4});
-    device.input.append({"Left",   5});
-    device.input.append({"Up",     6});
-    device.input.append({"Down",   7});
-    device.input.append({"R",      8});
-    device.input.append({"L",      9});
-    device.displayinput = { 6, 7, 5, 4, 1, 0, 9, 8, 2, 3 };
-    port.device.append(device);
+      Port::Device device;
+      device.name = "Controller";
+      device.id   = 0;
+      device.input.append({"A",      0, 0});
+      device.input.append({"B",      0, 1});
+      device.input.append({"Select", 0, 2});
+      device.input.append({"Start",  0, 3});
+      device.input.append({"Right",  0, 4});
+      device.input.append({"Left",   0, 5});
+      device.input.append({"Up",     0, 6});
+      device.input.append({"Down",   0, 7});
+      device.input.append({"R",      0, 8});
+      device.input.append({"L",      0, 9});
+      device.displayinput = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3};
+      port.device.append(device);
     }
-  this->port.append(port);
+    this->port.append(port);
   }
 }
 

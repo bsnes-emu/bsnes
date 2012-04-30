@@ -1,15 +1,24 @@
 Presentation *presentation = nullptr;
 
 void Presentation::synchronize() {
+  for(auto &system : emulatorList) system->menu.setVisible(false);
   for(auto &system : emulatorList) {
-    system->menu.setVisible(system->interface == application->active);
+    if(system->interface == application->active) {
+      activeSystem = system;
+      system->menu.setVisible(true);
+      return;
+    }
   }
 }
 
-Presentation::Presentation() {
+void Presentation::setSystemName(const string &name) {
+  if(activeSystem) activeSystem->menu.setText(name);
+}
+
+Presentation::Presentation() : activeSystem(nullptr) {
   bootstrap();
 
-  setTitle("ethos");
+  setTitle({Emulator::Name, " v", Emulator::Version});
   setGeometry({1024, 600, 720, 480});
   setBackgroundColor({0, 0, 0});
   setMenuFont(application->normalFont);
@@ -22,13 +31,9 @@ Presentation::Presentation() {
     configurationSettings.setText("Configuration ...");
   toolsMenu.setText("Tools");
 
-  for(auto &system : emulatorList) {
-    loadMenu.append(system->load);
-  }
   append(loadMenu);
-  for(auto &system : emulatorList) {
-    append(system->menu);
-  }
+  for(auto &item : loadList) loadMenu.append(*item);
+  for(auto &system : emulatorList) append(system->menu);
   append(settingsMenu);
     settingsMenu.append(configurationSettings);
   append(toolsMenu);
@@ -48,17 +53,18 @@ void Presentation::bootstrap() {
     System *system = new System;
     system->interface = emulator;
 
-    system->name = emulator->information.name;
-    system->filter = "*.gba";
+    for(auto &media : emulator->media) {
+      Item *item = new Item;
+      item->setText({media.displayname, " ..."});
+      item->onActivate = [=, &media] {
+        browser->open(media, [=, &media](string filename) {
+          utility->loadMedia(system->interface, media, filename);
+        });
+      };
+      loadList.append(item);
+    }
 
-    system->load.setText(system->name);
-    system->load.onActivate = [=] {
-      browser->open(system->interface->media[0], [=](string filename) {
-        utility->loadMedia(system->interface, system->interface->media[0], filename);
-      });
-    };
-
-    system->menu.setText(system->name);
+    system->menu.setText(emulator->information.name);
     system->power.setText("Power");
     system->reset.setText("Reset");
     system->unload.setText("Unload");

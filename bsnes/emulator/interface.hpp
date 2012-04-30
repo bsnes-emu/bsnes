@@ -14,6 +14,7 @@ struct Interface {
   } information;
 
   struct Firmware {
+    string displayname;
     string name;
     unsigned id;
   };
@@ -47,6 +48,7 @@ struct Interface {
       unsigned id;
       struct Input {
         string name;
+        unsigned type;  //0 = digital, 1 = analog
         unsigned id;
         unsigned guid;
       };

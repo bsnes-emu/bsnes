@@ -104,6 +104,13 @@ void pListView::setSelection(unsigned row) {
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(model, &iter, string(row)) == false) return;
   gtk_tree_selection_select_iter(selection, &iter);
+
+  //scroll window to selected item
+  char *path = gtk_tree_model_get_string_from_iter(model, &iter);
+  GtkTreePath *treePath = gtk_tree_path_new_from_string(path);
+  gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(subWidget), treePath, nullptr, true, 0.5, 0.0);
+  gtk_tree_path_free(treePath);
+  g_free(path);
 }
 
 void pListView::constructor() {

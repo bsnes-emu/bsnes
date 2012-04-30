@@ -5,9 +5,6 @@ struct Presentation : Window {
   struct System {
     Emulator::Interface *interface;
 
-    string name;
-    string filter;
-    Item load;
     Menu menu;
       Item power;
       Item reset;
@@ -18,13 +15,18 @@ struct Presentation : Window {
   vector<System*> emulatorList;
 
   Menu loadMenu;
+    vector<Item*> loadList;
   Menu settingsMenu;
     Item configurationSettings;
   Menu toolsMenu;
 
   void synchronize();
+  void setSystemName(const string &name);
   void bootstrap();
   Presentation();
+
+private:
+  System *activeSystem;
 };
 
 extern Presentation *presentation;

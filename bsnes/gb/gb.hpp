@@ -1,5 +1,5 @@
-#ifndef GAMEBOY_HPP
-#define GAMEBOY_HPP
+#ifndef GB_HPP
+#define GB_HPP
 
 #include <emulator/emulator.hpp>
 #include <processor/lr35902/lr35902.hpp>

@@ -3,6 +3,7 @@
 #include <nall/platform.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
+#include <nall/dsp.hpp>
 #include <nall/map.hpp>
 #include <nall/stream/file.hpp>
 #include <nall/stream/memory.hpp>
@@ -48,3 +49,4 @@ struct Application {
 };
 
 extern Application *application;
+extern DSP dspaudio;
