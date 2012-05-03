@@ -119,6 +119,7 @@ struct pWindow : public pObject {
   void setGeometry(const Geometry &geometry);
   void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
+  void setModal(bool modal);
   void setResizable(bool resizable);
   void setStatusFont(const string &font);
   void setStatusText(const string &text);

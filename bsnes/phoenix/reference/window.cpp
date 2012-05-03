@@ -8,7 +8,7 @@ void pWindow::append(Widget &widget) {
 }
 
 Color pWindow::backgroundColor() {
-  return { 0, 0, 0, 255 };
+  return {0, 0, 0, 255};
 }
 
 bool pWindow::focused() {
@@ -16,11 +16,11 @@ bool pWindow::focused() {
 }
 
 Geometry pWindow::frameMargin() {
-  return { 0, 0, 0, 0 };
+  return {0, 0, 0, 0};
 }
 
 Geometry pWindow::geometry() {
-  return { 0, 0, 0, 0 };
+  return {0, 0, 0, 0};
 }
 
 void pWindow::remove(Layout &layout) {
@@ -48,6 +48,9 @@ void pWindow::setMenuFont(const string &font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
+}
+
+void pWindow::setModal(bool modal) {
 }
 
 void pWindow::setResizable(bool resizable) {

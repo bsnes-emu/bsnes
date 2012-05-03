@@ -41,6 +41,7 @@ Browser::Browser() {
 
   fileList.onChange = {&Browser::synchronize, this};
   fileList.onActivate = openButton.onActivate = {&Browser::fileListActivate, this};
+  onClose = [&] { dialogActive = false; };
 
   synchronize();
 }
@@ -49,7 +50,7 @@ void Browser::synchronize() {
   openButton.setEnabled(fileList.selected());
   if(fileList.selected()) {
     for(auto &folder : folderList) {
-      if(folder.filter == media.filter) {
+      if(folder.filter == filter) {
         folder.selection = fileList.selection();
       }
     }
@@ -62,10 +63,10 @@ void Browser::saveConfiguration() {
 
 void Browser::bootstrap() {
   for(auto &emulator : application->emulator) {
-    for(auto &media : emulator->media) {
+    for(auto &media : emulator->information.media) {
       bool found = false;
       for(auto &folder : folderList) {
-        if(folder.filter == media.filter) {
+        if(folder.filter == filter) {
           found = true;
           break;
         }
@@ -89,16 +90,13 @@ void Browser::bootstrap() {
   config.save(application->path("paths.cfg"));
 }
 
-void Browser::open(Emulator::Interface::Media &media, function<void (string)> callback) {
-  this->media = media;
-  this->callback = callback;
-
-  setTitle({"Load ", media.displayname});
+string Browser::select(const string &title, const string &filter) {
+  this->filter = filter;
 
   string path;
   unsigned selection = 0;
   for(auto &folder : folderList) {
-    if(folder.filter == media.filter) {
+    if(folder.filter == filter) {
       path = folder.path;
       selection = folder.selection;
       break;
@@ -107,15 +105,25 @@ void Browser::open(Emulator::Interface::Media &media, function<void (string)> ca
   if(path.empty()) path = application->basepath;
   setPath(path, selection);
 
-  filterLabel.setText({"Files of type: ", media.filter});
+  filterLabel.setText({"Files of type: ", filter});
 
+  setTitle(title);
+  setModal();
   setVisible();
   fileList.setFocused();
+  dialogActive = true;
+  outputFilename = "";
+  while(dialogActive == true) {
+    OS::processEvents();
+  }
+
+  return outputFilename;
 }
 
 void Browser::setPath(const string &path, unsigned selection) {
+  //save path for next browser selection
   for(auto &folder : folderList) {
-    if(folder.filter == media.filter) folder.path = path;
+    if(folder.filter == filter) folder.path = path;
   }
 
   this->path = path;
@@ -127,7 +135,7 @@ void Browser::setPath(const string &path, unsigned selection) {
   lstring contents = directory::folders(path);
 
   for(auto &filename : contents) {
-    string filter = {media.filter, "/"};
+    string filter = {this->filter, "/"};
     if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)")) {
       string name = filename;
       name.rtrim<1>("/");
@@ -138,7 +146,7 @@ void Browser::setPath(const string &path, unsigned selection) {
   }
 
   for(auto &filename : contents) {
-    string filter = {media.filter, "/"};
+    string filter = {this->filter, "/"};
     if(filename.wildcard(R"(*.??/)") || filename.wildcard(R"(*.???/)")) {
       if(filename.wildcard(filter)) {
         string name = filename;
@@ -158,8 +166,10 @@ void Browser::setPath(const string &path, unsigned selection) {
 void Browser::fileListActivate() {
   unsigned selection = fileList.selection();
   string filename = filenameList[selection];
-  string filter = {media.filter, "/"};
+  string filter = {this->filter, "/"};
   if(filename.wildcard(filter) == false) return setPath({path, filename});
+
   setVisible(false);
-  if(callback) callback({path, filename});
+  dialogActive = false;
+  outputFilename = {path, filename};
 }

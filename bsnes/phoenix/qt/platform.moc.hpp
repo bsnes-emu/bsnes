@@ -1,4 +1,4 @@
-static QApplication *qtApplication = 0;
+static QApplication *qtApplication = nullptr;
 
 struct Settings : public configuration {
   bidirectional_map<Keyboard::Scancode, unsigned> keymap;
@@ -133,6 +133,7 @@ public:
   void setGeometry(const Geometry &geometry);
   void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
+  void setModal(bool modal);
   void setResizable(bool resizable);
   void setStatusFont(const string &font);
   void setStatusText(const string &text);

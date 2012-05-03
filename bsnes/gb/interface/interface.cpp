@@ -9,20 +9,36 @@ bool Interface::loaded() {
 }
 
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
-  if(id == 0) stream.read(system.bootROM.dmg, min( 256u, stream.size()));
-  if(id == 1) stream.read(system.bootROM.sgb, min( 256u, stream.size()));
-  if(id == 2) stream.read(system.bootROM.cgb, min(2048u, stream.size()));
-  if(id == 3) {
+  if(id == ID::GameBoyBootROM) {
+    stream.read(system.bootROM.dmg, min( 256u, stream.size()));
+  }
+
+  if(id == ID::SuperGameBoyBootROM) {
+    stream.read(system.bootROM.sgb, min( 256u, stream.size()));
+  }
+
+  if(id == ID::GameBoyColorBootROM) {
+    stream.read(system.bootROM.cgb, min(2048u, stream.size()));
+  }
+
+  if(id == ID::GameBoyROM) {
     cartridge.load(System::Revision::GameBoy, markup, stream);
     system.power();
   }
-  if(id == 4) {
-    cartridge.load(System::Revision::SuperGameBoy, markup, stream);
-    system.power();
-  }
-  if(id == 5) {
+
+  if(id == ID::GameBoyColorROM) {
     cartridge.load(System::Revision::GameBoyColor, markup, stream);
     system.power();
+  }
+
+  if(id == ID::RAM) {
+    stream.read(cartridge.ramdata, min(stream.size(), cartridge.ramsize));
+  }
+}
+
+void Interface::save(unsigned id, const stream &stream) {
+  if(id == ID::RAM) {
+    stream.write(cartridge.ramdata, cartridge.ramsize);
   }
 }
 
@@ -49,18 +65,21 @@ void Interface::updatePalette() {
 Interface::Interface() {
   interface = this;
 
-  information.name       = "Game Boy";
-  information.width      = 160;
-  information.height     = 144;
-  information.frequency  = 4194304;
-  information.ports      = 1;
-  information.resettable = false;
+  information.name        = "Game Boy";
+  information.width       = 160;
+  information.height      = 144;
+  information.aspectRatio = 1.0;
+  information.frequency   = 4194304;
+  information.resettable  = false;
+
+  information.media.append({"Game Boy", "*.gb"});
+  information.media.append({"Game Boy Color", "*.gbc"});
 
   {
     Firmware firmware;
     firmware.displayname = "Game Boy";
     firmware.name        = "Game Boy.sys/boot.rom";
-    firmware.id          = 0;
+    firmware.id          = ID::GameBoyBootROM;
     this->firmware.append(firmware);
   }
 
@@ -68,7 +87,7 @@ Interface::Interface() {
     Firmware firmware;
     firmware.displayname = "Super Game Boy";
     firmware.name        = "Super Game Boy.sfc/boot.rom";
-    firmware.id          = 1;
+    firmware.id          = ID::SuperGameBoyBootROM;
     this->firmware.append(firmware);
   }
 
@@ -76,26 +95,26 @@ Interface::Interface() {
     Firmware firmware;
     firmware.displayname = "Game Boy Color";
     firmware.name        = "Game Boy Color.sys/boot.rom";
-    firmware.id          = 2;
+    firmware.id          = ID::GameBoyColorBootROM;
     this->firmware.append(firmware);
   }
 
   {
-    Media media;
-    media.displayname = "Game Boy";
-    media.name        = "program.rom";
-    media.filter      = "*.gb";
-    media.id          = 3;
-    this->media.append(media);
+    Schema schema;
+    schema.displayname = "Game Boy";
+    schema.name        = "program.rom";
+    schema.filter      = "*.gb";
+    schema.id          = ID::GameBoyROM;
+    this->schema.append(schema);
   }
 
   {
-    Media media;
-    media.displayname = "Game Boy Color";
-    media.name        = "program.rom";
-    media.filter      = "*.gbc";
-    media.id          = 5;
-    this->media.append(media);
+    Schema schema;
+    schema.displayname = "Game Boy Color";
+    schema.name        = "program.rom";
+    schema.filter      = "*.gbc";
+    schema.id          = ID::GameBoyColorROM;
+    this->schema.append(schema);
   }
 
   {

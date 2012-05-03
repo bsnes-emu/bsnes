@@ -16,6 +16,7 @@ void Application::bootstrap() {
     system->callback.videoRefresh = {&Interface::videoRefresh, interface};
     system->callback.audioSample = {&Interface::audioSample, interface};
     system->callback.inputPoll = {&Interface::inputPoll, interface};
+    system->callback.mediaRequest = {&Interface::mediaRequest, interface};
     system->updatePalette();
 
     for(auto &firmware : system->firmware) {

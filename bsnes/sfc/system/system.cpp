@@ -103,13 +103,12 @@ void System::load() {
   ppu.enable();
 
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.load();
-  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.load();
-  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.load();
   #if defined(GAMEBOY)
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.load();
+  if(cartridge.has_gb_slot()) icd2.load();
   #endif
-
-  if(cartridge.has_bsx_slot()) bsxflash.load();
+  if(cartridge.has_bs_cart()) bsxcartridge.load();
+  if(cartridge.has_bs_slot()) bsxflash.load();
+  if(cartridge.has_st_slot()) sufamiturbo.load();
   if(cartridge.has_nss_dip()) nss.load();
   if(cartridge.has_superfx()) superfx.load();
   if(cartridge.has_sa1()) sa1.load();
@@ -129,13 +128,12 @@ void System::load() {
 
 void System::unload() {
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.unload();
-  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.unload();
-  if(cartridge.mode() == Cartridge::Mode::SufamiTurbo) sufamiturbo.unload();
   #if defined(GAMEBOY)
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.unload();
+  if(cartridge.has_gb_slot()) icd2.unload();
   #endif
-
-  if(cartridge.has_bsx_slot()) bsxflash.unload();
+  if(cartridge.has_bs_cart()) bsxcartridge.unload();
+  if(cartridge.has_bs_slot()) bsxflash.unload();
+  if(cartridge.has_st_slot()) sufamiturbo.unload();
   if(cartridge.has_nss_dip()) nss.unload();
   if(cartridge.has_superfx()) superfx.unload();
   if(cartridge.has_sa1()) sa1.unload();
@@ -168,12 +166,11 @@ void System::power() {
   ppu.power();
 
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.power();
-  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.power();
   #if defined(GAMEBOY)
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.power();
+  if(cartridge.has_gb_slot()) icd2.power();
   #endif
-
-  if(cartridge.has_bsx_slot()) bsxflash.power();
+  if(cartridge.has_bs_cart()) bsxcartridge.power();
+  if(cartridge.has_bs_slot()) bsxflash.power();
   if(cartridge.has_nss_dip()) nss.power();
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_sa1()) sa1.power();
@@ -197,13 +194,11 @@ void System::reset() {
   ppu.reset();
 
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.reset();
-
-  if(cartridge.mode() == Cartridge::Mode::Bsx) bsxcartridge.reset();
   #if defined(GAMEBOY)
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) icd2.reset();
+  if(cartridge.has_gb_slot()) icd2.reset();
   #endif
-
-  if(cartridge.has_bsx_slot()) bsxflash.reset();
+  if(cartridge.has_bs_cart()) bsxcartridge.reset();
+  if(cartridge.has_bs_slot()) bsxflash.reset();
   if(cartridge.has_nss_dip()) nss.reset();
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_sa1()) sa1.reset();
@@ -218,7 +213,7 @@ void System::reset() {
   if(cartridge.has_link()) link.reset();
 
   #if defined(GAMEBOY)
-  if(cartridge.mode() == Cartridge::Mode::SuperGameBoy) cpu.coprocessors.append(&icd2);
+  if(cartridge.has_gb_slot()) cpu.coprocessors.append(&icd2);
   #endif
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);

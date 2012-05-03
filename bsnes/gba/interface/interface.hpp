@@ -2,9 +2,20 @@
 namespace GameBoyAdvance {
 #endif
 
+struct ID {
+  enum : unsigned {
+    BIOS,
+    ROM,
+    RAM,
+    EEPROM,
+    FlashROM,
+  };
+};
+
 struct Interface : Emulator::Interface {
   bool loaded();
-  void load(unsigned id, const stream &memory, const string &markup = "");
+  void load(unsigned id, const stream &stream, const string &markup = "");
+  void save(unsigned id, const stream &stream);
   void unload();
 
   void power();

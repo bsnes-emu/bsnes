@@ -9,7 +9,7 @@ struct Browser : Window {
   Label filterLabel;
   Button openButton;
 
-  void open(Emulator::Interface::Media &media, function<void (string)> callback);
+  string select(const string &title, const string &filter);
   void saveConfiguration();
   void synchronize();
   void bootstrap();
@@ -24,8 +24,10 @@ private:
   };
   vector<Folder> folderList;
 
-  Emulator::Interface::Media media;
-  function<void (string)> callback;
+  bool dialogActive;
+  string outputFilename;
+
+  string filter;
   string path;
   lstring filenameList;
 

@@ -1,12 +1,4 @@
 struct Cartridge : property<Cartridge> {
-  enum class Mode : unsigned {
-    Normal,
-    BsxSlotted,
-    Bsx,
-    SufamiTurbo,
-    SuperGameBoy,
-  };
-
   enum class Region : unsigned {
     NTSC,
     PAL,
@@ -27,11 +19,13 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> loaded;
   readonly<string> sha256;
 
-  readonly<Mode> mode;
   readonly<Region> region;
   readonly<unsigned> ram_size;
 
-  readonly<bool> has_bsx_slot;
+  readonly<bool> has_gb_slot;
+  readonly<bool> has_bs_cart;
+  readonly<bool> has_bs_slot;
+  readonly<bool> has_st_slot;
   readonly<bool> has_nss_dip;
   readonly<bool> has_superfx;
   readonly<bool> has_sa1;
@@ -82,7 +76,7 @@ struct Cartridge : property<Cartridge> {
     } nss;
   } information;
 
-  void load(Mode, const string&);
+  void load(const string &markup, const stream &stream);
   void unload();
 
   void serialize(serializer&);

@@ -16,7 +16,6 @@ struct Settings : Window {
   ListView panelList;
 
   void panelChanged();
-
   Settings();
 };
 

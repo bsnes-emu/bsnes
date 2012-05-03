@@ -8,14 +8,18 @@ namespace SuperFamicom {
 
 Cartridge cartridge;
 
-void Cartridge::load(Mode cartridge_mode, const string &markup) {
-  mode = cartridge_mode;
+void Cartridge::load(const string &markup, const stream &stream) {
   information.markup = markup;
+  rom.copy(stream);
+  sha256 = nall::sha256(rom.data(), rom.size());  //TODO: special case SGB, BSX, ST mode SHA256 sums
 
   region = Region::NTSC;
   ram_size = 0;
 
-  has_bsx_slot   = false;
+  has_gb_slot    = false;
+  has_bs_cart    = false;
+  has_bs_slot    = false;
+  has_st_slot    = false;
   has_nss_dip    = false;
   has_superfx    = false;
   has_sa1        = false;
@@ -37,31 +41,11 @@ void Cartridge::load(Mode cartridge_mode, const string &markup) {
 
   if(ram_size > 0) {
     ram.map(allocate<uint8>(ram_size, 0xff), ram_size);
-    nvram.append({ "save.ram", ram.data(), ram.size() });
+    interface->memory.append({ID::RAM, "save.ram"});
   }
 
   rom.write_protect(true);
   ram.write_protect(false);
-
-  switch((Mode)mode) {
-  case Mode::Normal:
-  case Mode::BsxSlotted:
-    sha256 = nall::sha256(rom.data(), rom.size());
-    break;
-  case Mode::Bsx:
-    sha256 = nall::sha256(bsxflash.memory.data(), bsxflash.memory.size());
-    break;
-  case Mode::SufamiTurbo:
-    sha256 = nall::sha256(sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
-    break;
-  case Mode::SuperGameBoy:
-    #if defined(GAMEBOY)
-    sha256 = GameBoy::cartridge.sha256();
-    #else
-    throw "Game Boy support not present";
-    #endif
-    break;
-  }
 
   system.load();
   loaded = true;

@@ -8,14 +8,14 @@ SPC7110 spc7110;
 #include "serialization.cpp"
 #include "decomp.cpp"
 
-const unsigned SPC7110::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+const unsigned SPC7110::months[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 void SPC7110::init() {
 }
 
 void SPC7110::load() {
   for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
-  if(cartridge.has_spc7110rtc()) cartridge.nvram.append({ "rtc.ram", rtc, 20 });
+  if(cartridge.has_spc7110rtc()) interface->memory.append({ID::SPC7110RTC, "rtc.ram"});
 }
 
 void SPC7110::unload() {

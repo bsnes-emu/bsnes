@@ -3,6 +3,7 @@ struct Settings {
 };
 
 struct pFont;
+struct pObject;
 struct pWindow;
 struct pMenu;
 struct pLayout;
@@ -25,7 +26,7 @@ struct pDesktop {
 
 struct pKeyboard {
   static bool pressed(Keyboard::Scancode scancode);
-  static array<bool> state();
+  static vector<bool> state();
 
   static void initialize();
 };
@@ -49,10 +50,11 @@ struct pMessageWindow {
 };
 
 struct pObject {
+  static vector<pObject*> objects;
+
   Object &object;
   uintptr_t id;
   bool locked;
-  static array<pObject*> objects;
 
   pObject(Object &object);
   static pObject* find(unsigned id);
@@ -83,6 +85,9 @@ struct pTimer : public pObject {
 };
 
 struct pWindow : public pObject {
+  static vector<pWindow*> modal;
+  static void updateModality();
+
   Window &window;
   HWND hwnd;
   HMENU hmenu;
@@ -107,6 +112,7 @@ struct pWindow : public pObject {
   void setGeometry(const Geometry &geometry);
   void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
+  void setModal(bool modal);
   void setResizable(bool resizable);
   void setStatusFont(const string &font);
   void setStatusText(const string &text);

@@ -15,10 +15,16 @@ struct Presentation : Window {
   vector<System*> emulatorList;
 
   Menu loadMenu;
-    vector<Item*> loadList;
+    vector<Action*> loadList;
   Menu settingsMenu;
+    Menu videoMenu;
+      RadioItem centerVideo;
+      RadioItem scaleVideo;
+      RadioItem stretchVideo;
+      CheckItem aspectCorrection;
     Item configurationSettings;
   Menu toolsMenu;
+    Item resizeWindow;
 
   void synchronize();
   void setSystemName(const string &name);

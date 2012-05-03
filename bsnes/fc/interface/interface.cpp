@@ -8,12 +8,22 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
-void Interface::load(unsigned id, const stream &memory, const string &markup) {
-  if(id == 0) {
-    cartridge.load(markup, memory);
+void Interface::load(unsigned id, const stream &stream, const string &markup) {
+  if(id == ID::ROM) {
+    cartridge.load(markup, stream);
     system.power();
     input.connect(0, Input::Device::Joypad);
     input.connect(1, Input::Device::Joypad);
+  }
+
+  if(id == ID::RAM) {
+    stream.read(cartridge.ram_data(), min(stream.size(), cartridge.ram_size()));
+  }
+}
+
+void Interface::save(unsigned id, const stream &stream) {
+  if(id == ID::RAM) {
+    stream.write(cartridge.ram_data(), cartridge.ram_size());
   }
 }
 
@@ -40,20 +50,22 @@ void Interface::updatePalette() {
 Interface::Interface() {
   interface = this;
 
-  information.name       = "Famicom";
-  information.width      = 256;
-  information.height     = 240;
-  information.frequency  = 1789772;
-  information.ports      = 2;
-  information.resettable = true;
+  information.name        = "Famicom";
+  information.width       = 256;
+  information.height      = 240;
+  information.aspectRatio = 8.0 / 7.0;
+  information.frequency   = 1789772;
+  information.resettable  = true;
+
+  information.media.append({"Famicom", "*.fc"});
 
   {
-    Media media;
-    media.displayname = "Famicom";
-    media.name        = "program.rom";
-    media.filter      = "*.fc";
-    media.id          = 0;
-    this->media.append(media);
+    Schema schema;
+    schema.displayname = "Famicom";
+    schema.name        = "program.rom";
+    schema.filter      = "*.fc";
+    schema.id          = ID::ROM;
+    this->schema.append(schema);
   }
 
   {

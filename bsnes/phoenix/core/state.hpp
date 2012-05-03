@@ -18,6 +18,7 @@ struct Window::State {
   set<Menu&> menu;
   string menuFont;
   bool menuVisible;
+  bool modal;
   bool resizable;
   string statusFont;
   string statusText;
@@ -29,11 +30,12 @@ struct Window::State {
 
   State() {
     backgroundColorOverride = false;
-    backgroundColor = { 0, 0, 0, 255 };
+    backgroundColor = {0, 0, 0, 255};
     fullScreen = false;
-    geometry = { 128, 128, 256, 256 };
+    geometry = {128, 128, 256, 256};
     ignore = false;
     menuVisible = false;
+    modal = false;
     resizable = true;
     statusVisible = false;
     visible = false;
@@ -115,7 +117,7 @@ struct Widget::State {
   State() {
     abstract = false;
     enabled = true;
-    geometry = { 0, 0, 0, 0 };
+    geometry = {0, 0, 0, 0};
     visible = true;
   }
 };

@@ -20,6 +20,8 @@ void Cartridge::load(const string &markup, const stream &memory) {
   board = Board::load(markup, memory);
   if(board == nullptr) return;
 
+  interface->memory.append({ID::RAM, "save.ram"});
+
   sha256_ctx sha;
   uint8_t hash[32];
   sha256_init(&sha);

@@ -12,7 +12,7 @@ struct mmapstream : stream {
   bool seekable() const { return true; }
   bool readable() const { return true; }
   bool writable() const { return pwritable; }
-  bool randomaccess() const { return false; }
+  bool randomaccess() const { return true; }
 
   unsigned size() const { return pmmap.size(); }
   unsigned offset() const { return poffset; }

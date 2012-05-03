@@ -1,4 +1,4 @@
-array<pObject*> pObject::objects;
+vector<pObject*> pObject::objects;
 
 pObject::pObject(Object &object) : object(object) {
   static unsigned uniqueId = 100;

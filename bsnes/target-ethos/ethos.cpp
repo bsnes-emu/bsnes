@@ -61,6 +61,7 @@ Application::Application(int argc, char **argv) {
     monospaceFont = "Liberation Mono, 8";
   }
 
+  config = new Configuration;
   utility = new Utility;
   inputManager = new InputManager;
   browser = new Browser;
@@ -93,7 +94,7 @@ Application::Application(int argc, char **argv) {
   dspaudio.setPrecision(16);
   dspaudio.setVolume(2.0);
   dspaudio.setBalance(0.0);
-  dspaudio.setResampler(DSP::ResampleEngine::Linear);
+  dspaudio.setResampler(DSP::ResampleEngine::Sinc);
   dspaudio.setResamplerFrequency(48000u);
 
   while(quit == false) {
@@ -101,6 +102,8 @@ Application::Application(int argc, char **argv) {
     run();
   }
 
+  if(active && system().loaded()) utility->unload();
+  config->save();
   browser->saveConfiguration();
   inputManager->saveConfiguration();
 }

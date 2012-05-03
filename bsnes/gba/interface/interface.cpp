@@ -9,22 +9,40 @@ bool Interface::loaded() {
 }
 
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
-  if(id == 0) {
+  if(id == ID::BIOS) {
+    stream.read(bios.data, min(bios.size, stream.size()));
+  }
+
+  if(id == ID::ROM) {
     memory.reset();
     cartridge.load(markup, stream);
     system.power();
   }
-  if(id == 1) {
-    stream.read(bios.data, min(bios.size, stream.size()));
-  }
-  if(id == 2) {
+
+  if(id == ID::RAM) {
     stream.read(cartridge.ram.data, min(cartridge.ram.size, stream.size()));
   }
-  if(id == 3) {
+
+  if(id == ID::EEPROM) {
     stream.read(cartridge.eeprom.data, min(cartridge.eeprom.size, stream.size()));
   }
-  if(id == 4) {
+
+  if(id == ID::FlashROM) {
     stream.read(cartridge.flashrom.data, min(cartridge.flashrom.size, stream.size()));
+  }
+}
+
+void Interface::save(unsigned id, const stream &stream) {
+  if(id == ID::RAM) {
+    stream.write(cartridge.ram.data, cartridge.ram.size);
+  }
+
+  if(id == ID::EEPROM) {
+    stream.write(cartridge.eeprom.data, cartridge.eeprom.size);
+  }
+
+  if(id == ID::FlashROM) {
+    stream.write(cartridge.flashrom.data, cartridge.flashrom.size);
   }
 }
 
@@ -51,28 +69,30 @@ void Interface::updatePalette() {
 Interface::Interface() {
   interface = this;
 
-  information.name       = "Game Boy Advance";
-  information.width      = 240;
-  information.height     = 160;
-  information.frequency  = 32768;
-  information.ports      = 1;
-  information.resettable = false;
+  information.name        = "Game Boy Advance";
+  information.width       = 240;
+  information.height      = 160;
+  information.aspectRatio = 1.0;
+  information.frequency   = 32768;
+  information.resettable  = false;
+
+  information.media.append({"Game Boy Advance", "*.gba"});
 
   {
     Firmware firmware;
     firmware.displayname = "Game Boy Advance";
     firmware.name        = "Game Boy Advance.sys/bios.rom";
-    firmware.id          = 1;
+    firmware.id          = ID::BIOS;
     this->firmware.append(firmware);
   }
 
   {
-    Media media;
-    media.displayname = "Game Boy Advance";
-    media.name        = "program.rom";
-    media.filter      = "*.gba";
-    media.id          = 0;
-    this->media.append(media);
+    Schema schema;
+    schema.displayname = "Game Boy Advance";
+    schema.name        = "program.rom";
+    schema.filter      = "*.gba";
+    schema.id          = ID::ROM;
+    this->schema.append(schema);
   }
 
   {

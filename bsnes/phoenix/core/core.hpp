@@ -199,6 +199,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void setGeometry(const Geometry &geometry);
   void setMenuFont(const nall::string &font);
   void setMenuVisible(bool visible = true);
+  void setModal(bool modal = true);
   void setResizable(bool resizable = true);
   void setStatusFont(const nall::string &font);
   void setStatusText(const nall::string &text);

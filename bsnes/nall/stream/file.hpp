@@ -27,6 +27,11 @@ struct filestream : stream {
     if(!pwritable) pfile.open(filename, file::mode::read);
   }
 
+  filestream(const string &filename, file::mode mode) {
+    pfile.open(filename, mode);
+    pwritable = mode == file::mode::write || mode == file::mode::readwrite;
+  }
+
 private:
   mutable file pfile;
   bool pwritable;

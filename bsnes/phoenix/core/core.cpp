@@ -326,6 +326,11 @@ void Window::setMenuVisible(bool visible) {
   return p.setMenuVisible(visible);
 }
 
+void Window::setModal(bool modal) {
+  state.modal = modal;
+  return p.setModal(modal);
+}
+
 void Window::setResizable(bool resizable) {
   state.resizable = resizable;
   return p.setResizable(resizable);

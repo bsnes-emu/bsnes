@@ -233,6 +233,10 @@ void pWindow::setMenuVisible(bool visible) {
   gtk_widget_set_visible(menu, visible);
 }
 
+void pWindow::setModal(bool modal) {
+  gtk_window_set_modal(GTK_WINDOW(widget), modal);
+}
+
 void pWindow::setResizable(bool resizable) {
   gtk_window_set_resizable(GTK_WINDOW(widget), resizable);
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(status), resizable);

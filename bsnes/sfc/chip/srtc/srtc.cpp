@@ -7,14 +7,14 @@ SRTC srtc;
 
 #include "serialization.cpp"
 
-const unsigned SRTC::months[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+const unsigned SRTC::months[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
 void SRTC::init() {
 }
 
 void SRTC::load() {
   for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
-  cartridge.nvram.append({ "rtc.ram", rtc, 20 });
+  interface->memory.append({ID::RTC, "rtc.ram"});
 }
 
 void SRTC::unload() {

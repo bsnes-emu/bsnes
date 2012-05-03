@@ -64,6 +64,7 @@ void Cartridge::load(System::Revision revision, const string &markup, const stre
 
   loaded = true;
   sha256 = nall::sha256(romdata, romsize);
+  if(ramsize) interface->memory.append({ID::RAM, "save.ram"});
 }
 
 void Cartridge::unload() {

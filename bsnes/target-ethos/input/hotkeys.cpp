@@ -1,6 +1,18 @@
 void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
+    hotkey->name    = "Toggle Fullscreen Mode";
+    hotkey->mapping = "KB0::Alt,KB0::Return";
+    hotkey->logic   = 1;
+    hotkeyMap.append(hotkey);
+
+    hotkey->press = [] {
+      utility->toggleFullScreen();
+    };
+  }
+
+  {
+    auto hotkey = new HotkeyInput;
     hotkey->name    = "Fast Forward";
     hotkey->mapping = "KB0::Tilde";
     hotkey->logic   = 1;

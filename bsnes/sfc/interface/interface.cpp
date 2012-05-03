@@ -9,16 +9,73 @@ bool Interface::loaded() {
 }
 
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
-  if(id == 0) {
+  if(id == ID::IPLROM) {
     stream.read(smp.iplrom, min(64u, stream.size()));
   }
 
-  if(id == 1) {
-    cartridge.rom.copy(stream);
-    cartridge.load(Cartridge::Mode::Normal, markup);
+  if(id == ID::ROM) {
+    cartridge.load(markup, stream);
     system.power();
     input.connect(0, Input::Device::Joypad);
     input.connect(1, Input::Device::Joypad);
+  }
+
+  if(id == ID::SuperGameBoyROM) {
+    GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, markup, stream);
+  }
+
+  if(id == ID::BsxFlashROM) {
+    bsxflash.memory.copy(stream);
+  }
+
+  if(id == ID::SufamiTurboSlotAROM) {
+    sufamiturbo.slotA.rom.copy(stream);
+  }
+
+  if(id == ID::SufamiTurboSlotBROM) {
+    sufamiturbo.slotB.rom.copy(stream);
+  }
+
+  if(id == ID::RAM) {
+    stream.read(cartridge.ram.data(), min(cartridge.ram.size(), stream.size()));
+  }
+
+  if(id == ID::RTC) {
+    stream.read(srtc.rtc, min(stream.size(), sizeof srtc.rtc));
+  }
+
+  if(id == ID::SPC7110RTC) {
+    stream.read(spc7110.rtc, min(stream.size(), sizeof srtc.rtc));
+  }
+
+  if(id == ID::BsxRAM) {
+    stream.read(bsxcartridge.sram.data(), min(stream.size(), bsxcartridge.sram.size()));
+  }
+
+  if(id == ID::BsxPSRAM) {
+    stream.read(bsxcartridge.psram.data(), min(stream.size(), bsxcartridge.psram.size()));
+  }
+}
+
+void Interface::save(unsigned id, const stream &stream) {
+  if(id == ID::RAM) {
+    stream.write(cartridge.ram.data(), cartridge.ram.size());
+  }
+
+  if(id == ID::RTC) {
+    stream.write(srtc.rtc, sizeof srtc.rtc);
+  }
+
+  if(id == ID::SPC7110RTC) {
+    stream.write(spc7110.rtc, sizeof srtc.rtc);
+  }
+
+  if(id == ID::BsxRAM) {
+    stream.write(bsxcartridge.sram.data(), bsxcartridge.sram.size());
+  }
+
+  if(id == ID::BsxPSRAM) {
+    stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
   }
 }
 
@@ -45,28 +102,95 @@ void Interface::updatePalette() {
 Interface::Interface() {
   interface = this;
 
-  information.name       = "Super Famicom";
-  information.width      = 256;
-  information.height     = 240;
-  information.frequency  = 32040;
-  information.ports      = 2;
-  information.resettable = true;
+  information.name        = "Super Famicom";
+  information.width       = 256;
+  information.height      = 240;
+  information.aspectRatio = 8.0 / 7.0;
+  information.frequency   = 32040;
+  information.resettable  = true;
+
+  information.media.append({"Super Famicom", "*.sfc"});
+  information.media.append({"BS-X Satellaview", "*.bs"});
+  information.media.append({"Sufami Turbo", "*.st"});
+  information.media.append({"Super Game Boy", "*.gb"});
 
   {
     Firmware firmware;
     firmware.displayname = "Super Famicom";
     firmware.name        = "Super Famicom.sys/spc700.rom";
-    firmware.id          = 0;
+    firmware.id          = ID::IPLROM;
     this->firmware.append(firmware);
   }
 
   {
-    Media media;
-    media.displayname = "Super Famicom";
-    media.name        = "program.rom";
-    media.filter      = "*.sfc";
-    media.id          = 1;
-    this->media.append(media);
+    Schema schema;
+    schema.displayname = "Super Famicom";
+    schema.name        = "program.rom";
+    schema.filter      = "*.sfc";
+    schema.id          = ID::ROM;
+    this->schema.append(schema);
+  }
+
+  {
+    Schema schema;
+    schema.displayname = "Super Game Boy";
+    schema.path        = "Super Game Boy.sfc/";
+    schema.name        = "program.rom";
+    schema.filter      = "*.sfc";
+    schema.id          = ID::ROM;
+    {
+      Media slot;
+      slot.displayname = "Game Boy";
+      slot.name        = "program.rom";
+      slot.filter      = "*.gb";
+      slot.id          = ID::SuperGameBoyROM;
+      schema.slot.append(schema);
+    }
+    this->schema.append(schema);
+  }
+
+  {
+    Schema schema;
+    schema.displayname = "BS-X Satellaview";
+    schema.path        = "BS-X Satellaview.sfc/";
+    schema.name        = "program.rom";
+    schema.filter      = "*.sfc";
+    schema.id          = ID::ROM;
+    {
+      Media slot;
+      slot.displayname = "BS-X Satellaview";
+      slot.name        = "program.rom";
+      slot.filter      = "*.bs";
+      slot.id          = ID::BsxFlashROM;
+      schema.slot.append(slot);
+    }
+    this->schema.append(schema);
+  }
+
+  {
+    Schema schema;
+    schema.displayname = "Sufami Turbo";
+    schema.path        = "Sufami Turbo.sfc/";
+    schema.name        = "program.rom";
+    schema.filter      = "*.sfc";
+    schema.id          = ID::ROM;
+    {
+      Media slot;
+      slot.displayname = "Sufami Turbo - Slot A";
+      slot.name        = "program.rom";
+      slot.filter      = "*.st";
+      slot.id          = ID::SufamiTurboSlotAROM;
+      schema.slot.append(slot);
+    }
+    {
+      Media slot;
+      slot.displayname = "Sufami Turbo - Slot B";
+      slot.name        = "program.rom";
+      slot.filter      = "*.st";
+      slot.id          = ID::SufamiTurboSlotBROM;
+      schema.slot.append(slot);
+    }
+    this->schema.append(schema);
   }
 
   {

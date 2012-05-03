@@ -46,3 +46,13 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
   unsigned guid = system().port[port].device[device].input[input].guid;
   return inputManager->inputMap[guid]->poll();
 }
+
+void Interface::mediaRequest(Emulator::Interface::Media media) {
+  string pathname = browser->select({"Load ", media.displayname}, media.filter);
+  if(pathname.empty()) return;
+
+  string markup;
+  markup.readfile({pathname, "manifest.xml"});
+  mmapstream stream({pathname, media.name});
+  system().load(media.id, stream, markup);
+}

@@ -152,6 +152,7 @@ static bool OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
   if(dynamic_cast<Window*>(object)) {
     Window &window = (Window&)*object;
+    if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) return false;
     Keyboard::Keycode keysym = Keysym(wparam, lparam);
     if(keysym != Keyboard::Keycode::None) {
       if((msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) && window.onKeyPress) window.onKeyPress(keysym);
@@ -220,11 +221,18 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
   if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
   Window &window = (Window&)*object;
 
-  if(!osQuit) switch(msg) {
+  bool process = true;
+  if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) process = false;
+  if(osQuit) process = false;
+
+  if(process) switch(msg) {
     case WM_CLOSE: {
       window.state.ignore = false;
       if(window.onClose) window.onClose();
-      if(window.state.ignore == false) window.setVisible(false);
+      if(window.state.ignore == false) {
+        window.setVisible(false);
+        window.setModal(false);
+      }
       return TRUE;
     }
 
