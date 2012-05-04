@@ -68,7 +68,8 @@ uint2 USART::data() {
   //Joypad
   if(iobit()) {
     if(counter >= 16) return 1;
-    uint2 result = interface->inputPoll(port, (unsigned)Input::Device::Joypad, counter);
+    uint2 result = 0;
+    if(counter < 12) result = interface->inputPoll(port, (unsigned)Input::Device::Joypad, counter);
     if(latched == 0) counter++;
     return result;
   }

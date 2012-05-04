@@ -9,7 +9,7 @@ struct Browser : Window {
   Label filterLabel;
   Button openButton;
 
-  string select(const string &title, const string &filter);
+  string select(const string &title, const string &extension);
   void saveConfiguration();
   void synchronize();
   void bootstrap();
@@ -18,7 +18,7 @@ struct Browser : Window {
 private:
   configuration config;
   struct Folder {
-    string filter;
+    string extension;
     string path;
     unsigned selection;
   };
@@ -27,7 +27,7 @@ private:
   bool dialogActive;
   string outputFilename;
 
-  string filter;
+  string extension;
   string path;
   lstring filenameList;
 

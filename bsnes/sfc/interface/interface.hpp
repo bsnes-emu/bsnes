@@ -27,13 +27,27 @@ struct Interface : Emulator::Interface {
   void save(unsigned id, const stream &stream);
   void unload();
 
+  void connect(unsigned port, unsigned device);
   void power();
   void reset();
   void run();
 
+  serializer serialize();
+  bool unserialize(serializer&);
+
   void updatePalette();
 
   Interface();
+
+private:
+  Port::Device none();
+  Port::Device controller();
+  Port::Device multitap();
+  Port::Device mouse();
+  Port::Device superScope();
+  Port::Device justifier();
+  Port::Device justifiers();
+  Port::Device usart();
 };
 
 extern Interface *interface;

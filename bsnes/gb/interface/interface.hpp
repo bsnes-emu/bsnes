@@ -27,6 +27,9 @@ struct Interface : Emulator::Interface {
   void reset();
   void run();
 
+  serializer serialize();
+  bool unserialize(serializer&);
+
   void updatePalette();
 
   Interface();

@@ -144,6 +144,13 @@ int16_t AnalogInput::poll() {
 
 //
 
+HotkeyInput::HotkeyInput() {
+  logic = 1;  //AND
+  inputManager->hotkeyMap.append(this);
+}
+
+//
+
 void InputManager::bind() {
   for(auto &input : inputMap) input->bind();
   for(auto &input : hotkeyMap) input->bind();
@@ -174,6 +181,7 @@ void InputManager::saveConfiguration() {
 }
 
 InputManager::InputManager() {
+  inputManager = this;
   bootstrap();
 }
 
@@ -182,7 +190,7 @@ void InputManager::bootstrap() {
   for(auto &emulator : application->emulator) {
     for(auto &port : emulator->port) {
       for(auto &device : port.device) {
-        for(auto &number : device.displayinput) {
+        for(auto &number : device.order) {
           auto &input = device.input[number];
 
           AbstractInput *abstract = nullptr;

@@ -3,6 +3,7 @@ Browser *browser = nullptr;
 Browser::Browser() {
   bootstrap();
   setGeometry({128, 128, 640, 400});
+  windowManager->append(this, "Browser");
 
   layout.setMargin(5);
   pathBrowse.setText("Browse ...");
@@ -50,7 +51,7 @@ void Browser::synchronize() {
   openButton.setEnabled(fileList.selected());
   if(fileList.selected()) {
     for(auto &folder : folderList) {
-      if(folder.filter == filter) {
+      if(folder.extension == extension) {
         folder.selection = fileList.selection();
       }
     }
@@ -66,7 +67,7 @@ void Browser::bootstrap() {
     for(auto &media : emulator->information.media) {
       bool found = false;
       for(auto &folder : folderList) {
-        if(folder.filter == filter) {
+        if(folder.extension == media.extension) {
           found = true;
           break;
         }
@@ -74,7 +75,7 @@ void Browser::bootstrap() {
       if(found == true) continue;
 
       Folder folder;
-      folder.filter = media.filter;
+      folder.extension = media.extension;
       folder.path = application->basepath;
       folder.selection = 0;
       folderList.append(folder);
@@ -82,21 +83,21 @@ void Browser::bootstrap() {
   }
 
   for(auto &folder : folderList) {
-    config.append(folder.path, folder.filter);
-    config.append(folder.selection, string{folder.filter, "::selection"});
+    config.append(folder.path, folder.extension);
+    config.append(folder.selection, string{folder.extension, "::selection"});
   }
 
   config.load(application->path("paths.cfg"));
   config.save(application->path("paths.cfg"));
 }
 
-string Browser::select(const string &title, const string &filter) {
-  this->filter = filter;
+string Browser::select(const string &title, const string &extension) {
+  this->extension = extension;
 
   string path;
   unsigned selection = 0;
   for(auto &folder : folderList) {
-    if(folder.filter == filter) {
+    if(folder.extension == extension) {
       path = folder.path;
       selection = folder.selection;
       break;
@@ -105,8 +106,9 @@ string Browser::select(const string &title, const string &filter) {
   if(path.empty()) path = application->basepath;
   setPath(path, selection);
 
-  filterLabel.setText({"Files of type: ", filter});
+  filterLabel.setText({"Files of type: *.", extension});
 
+  audio.clear();
   setTitle(title);
   setModal();
   setVisible();
@@ -123,7 +125,7 @@ string Browser::select(const string &title, const string &filter) {
 void Browser::setPath(const string &path, unsigned selection) {
   //save path for next browser selection
   for(auto &folder : folderList) {
-    if(folder.filter == filter) folder.path = path;
+    if(folder.extension == extension) folder.path = path;
   }
 
   this->path = path;
@@ -135,7 +137,6 @@ void Browser::setPath(const string &path, unsigned selection) {
   lstring contents = directory::folders(path);
 
   for(auto &filename : contents) {
-    string filter = {this->filter, "/"};
     if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)")) {
       string name = filename;
       name.rtrim<1>("/");
@@ -146,12 +147,11 @@ void Browser::setPath(const string &path, unsigned selection) {
   }
 
   for(auto &filename : contents) {
-    string filter = {this->filter, "/"};
+    string suffix = {".", this->extension, "/"};
     if(filename.wildcard(R"(*.??/)") || filename.wildcard(R"(*.???/)")) {
-      if(filename.wildcard(filter)) {
+      if(filename.endswith(suffix)) {
         string name = filename;
-        filter.ltrim<1>("*");
-        name.rtrim<1>(filter);
+        name.rtrim<1>(suffix);
         filenameList.append(filename);
         fileList.append(name);
       }
@@ -166,8 +166,8 @@ void Browser::setPath(const string &path, unsigned selection) {
 void Browser::fileListActivate() {
   unsigned selection = fileList.selection();
   string filename = filenameList[selection];
-  string filter = {this->filter, "/"};
-  if(filename.wildcard(filter) == false) return setPath({path, filename});
+  string suffix = {this->extension, "/"};
+  if(filename.endswith(suffix) == false) return setPath({path, filename});
 
   setVisible(false);
   dialogActive = false;

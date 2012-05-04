@@ -19,8 +19,11 @@ string Application::path(const string &filename) {
 
 void Application::run() {
   inputManager->poll();
+  utility->updateStatus();
+  autopause = config->input.focusPause && presentation->focused() == false;
 
-  if(active == nullptr || system().loaded() == false) {
+  if(active == nullptr || system().loaded() == false || pause || autopause) {
+    audio.clear();
     usleep(20 * 1000);
     return;
   }
@@ -61,9 +64,14 @@ Application::Application(int argc, char **argv) {
     monospaceFont = "Liberation Mono, 8";
   }
 
+  video.driver("OpenGL");
+  audio.driver("ALSA");
+  input.driver("SDL");
+
   config = new Configuration;
   utility = new Utility;
   inputManager = new InputManager;
+  windowManager = new WindowManager;
   browser = new Browser;
   presentation = new Presentation;
   videoSettings = new VideoSettings;
@@ -71,31 +79,26 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   settings = new Settings;
-
+  windowManager->loadGeometry();
   presentation->setVisible();
 
-  video.driver("OpenGL");
   video.set(Video::Handle, presentation->viewport.handle());
-  video.set(Video::Synchronize, false);
-  video.set(Video::Depth, 24u);
+  if(!video.cap(Video::Depth) || !video.set(Video::Depth, depth = 30u)) {
+    video.set(Video::Depth, depth = 24u);
+  }
   video.init();
 
-  audio.driver("ALSA");
   audio.set(Audio::Handle, presentation->viewport.handle());
-  audio.set(Audio::Synchronize, true);
-  audio.set(Audio::Latency, 80u);
-  audio.set(Audio::Frequency, 48000u);
   audio.init();
 
-  input.driver("SDL");
   input.set(Input::Handle, presentation->viewport.handle());
   input.init();
 
   dspaudio.setPrecision(16);
-  dspaudio.setVolume(2.0);
   dspaudio.setBalance(0.0);
-  dspaudio.setResampler(DSP::ResampleEngine::Sinc);
-  dspaudio.setResamplerFrequency(48000u);
+  dspaudio.setFrequency(96000);
+
+  utility->synchronizeRuby();
 
   while(quit == false) {
     OS::processEvents();
@@ -106,6 +109,7 @@ Application::Application(int argc, char **argv) {
   config->save();
   browser->saveConfiguration();
   inputManager->saveConfiguration();
+  windowManager->saveGeometry();
 }
 
 Application::~Application() {

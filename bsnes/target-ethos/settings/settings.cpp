@@ -16,9 +16,10 @@ SettingsLayout::SettingsLayout() {
 }
 
 Settings::Settings() {
-  setTitle("Configuration Settings");
   setGeometry({128, 128, 640, 360});
-  setStatusFont(application->boldFont);
+  windowManager->append(this, "Settings");
+
+  setTitle("Configuration Settings");
   setStatusVisible();
 
   layout.setMargin(5);

@@ -58,6 +58,15 @@ void Interface::run() {
   system.run();
 }
 
+serializer Interface::serialize() {
+  system.runtosave();
+  return system.serialize();
+}
+
+bool Interface::unserialize(serializer &s) {
+  return system.unserialize(s);
+}
+
 void Interface::updatePalette() {
   video.generate_palette();
 }
@@ -68,72 +77,34 @@ Interface::Interface() {
   information.name        = "Game Boy";
   information.width       = 160;
   information.height      = 144;
+  information.overscan    = false;
   information.aspectRatio = 1.0;
   information.frequency   = 4194304;
   information.resettable  = false;
 
-  information.media.append({"Game Boy", "*.gb"});
-  information.media.append({"Game Boy Color", "*.gbc"});
+  information.media.append({"Game Boy",       "gb" });
+  information.media.append({"Game Boy Color", "gbc"});
+
+  firmware.append({ID::GameBoyBootROM,      "Game Boy",       "sys", "boot.rom"});
+  firmware.append({ID::SuperGameBoyBootROM, "Super Game Boy", "sfc", "boot.rom"});
+  firmware.append({ID::GameBoyColorBootROM, "Game Boy Color", "sys", "boot.rom"});
+
+  schema.append(Media{ID::GameBoyROM,      "Game Boy",       "gb",  "program.rom"});
+  schema.append(Media{ID::GameBoyColorROM, "Game Boy Color", "gbc", "program.rom"});
 
   {
-    Firmware firmware;
-    firmware.displayname = "Game Boy";
-    firmware.name        = "Game Boy.sys/boot.rom";
-    firmware.id          = ID::GameBoyBootROM;
-    this->firmware.append(firmware);
-  }
-
-  {
-    Firmware firmware;
-    firmware.displayname = "Super Game Boy";
-    firmware.name        = "Super Game Boy.sfc/boot.rom";
-    firmware.id          = ID::SuperGameBoyBootROM;
-    this->firmware.append(firmware);
-  }
-
-  {
-    Firmware firmware;
-    firmware.displayname = "Game Boy Color";
-    firmware.name        = "Game Boy Color.sys/boot.rom";
-    firmware.id          = ID::GameBoyColorBootROM;
-    this->firmware.append(firmware);
-  }
-
-  {
-    Schema schema;
-    schema.displayname = "Game Boy";
-    schema.name        = "program.rom";
-    schema.filter      = "*.gb";
-    schema.id          = ID::GameBoyROM;
-    this->schema.append(schema);
-  }
-
-  {
-    Schema schema;
-    schema.displayname = "Game Boy Color";
-    schema.name        = "program.rom";
-    schema.filter      = "*.gbc";
-    schema.id          = ID::GameBoyColorROM;
-    this->schema.append(schema);
-  }
-
-  {
-    Port port;
-    port.name = "Device";
-    port.id   = 0;
+    Port port{0, "Device"};
     {
-      Port::Device device;
-      device.name = "Controller";
-      device.id   = 0;
-      device.input.append({"Up",     0, 0});
-      device.input.append({"Down",   0, 1});
-      device.input.append({"Left",   0, 2});
-      device.input.append({"Right",  0, 3});
-      device.input.append({"B",      0, 4});
-      device.input.append({"A",      0, 5});
-      device.input.append({"Select", 0, 6});
-      device.input.append({"Start",  0, 7});
-      device.displayinput = {0, 1, 2, 3, 4, 5, 6, 7};
+      Port::Device device{0, "Controller"};
+      device.input.append({0, 0, "Up"    });
+      device.input.append({1, 0, "Down"  });
+      device.input.append({2, 0, "Left"  });
+      device.input.append({3, 0, "Right" });
+      device.input.append({4, 0, "B"     });
+      device.input.append({5, 0, "A"     });
+      device.input.append({6, 0, "Select"});
+      device.input.append({7, 0, "Start" });
+      device.order = {0, 1, 2, 3, 4, 5, 6, 7};
       port.device.append(device);
     }
     this->port.append(port);

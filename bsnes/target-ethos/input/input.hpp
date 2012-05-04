@@ -32,6 +32,7 @@ struct AnalogInput : AbstractInput {
 struct HotkeyInput : DigitalInput {
   function<void ()> press;
   function<void ()> release;
+  HotkeyInput();
 };
 
 struct InputManager {

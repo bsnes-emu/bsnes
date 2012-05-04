@@ -17,10 +17,9 @@ void Application::bootstrap() {
     system->callback.audioSample = {&Interface::audioSample, interface};
     system->callback.inputPoll = {&Interface::inputPoll, interface};
     system->callback.mediaRequest = {&Interface::mediaRequest, interface};
-    system->updatePalette();
 
     for(auto &firmware : system->firmware) {
-      filestream fs{application->path(firmware.name)};
+      filestream fs{application->path({firmware.name, ".", firmware.extension, "/", firmware.path})};
       system->load(firmware.id, fs);
     }
   }

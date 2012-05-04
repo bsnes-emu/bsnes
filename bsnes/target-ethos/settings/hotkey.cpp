@@ -29,6 +29,8 @@ void HotkeySettings::refresh() {
   inputList.reset();
   for(auto &hotkey : inputManager->hotkeyMap) {
     string mapping = hotkey->mapping;
+    mapping.replace("KB0::", "");
+    mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " and ");
     inputList.append(hotkey->name, mapping);
   }
@@ -44,23 +46,22 @@ void HotkeySettings::assignInput() {
   activeInput = inputManager->hotkeyMap[inputList.selection()];
 
   settings->setStatusText({"Set assignment for [", activeInput->name, "] ..."});
-  settings->panelList.setEnabled(false);
-  inputList.setEnabled(false);
-  clearButton.setEnabled(false);
+  settings->layout.setEnabled(false);
+  setEnabled(false);
 }
 
 void HotkeySettings::inputEvent(unsigned scancode, int16_t value) {
   using nall::Mouse;
 
   if(activeInput == nullptr) return;
+  if(value != 1) return;
   if(Mouse::isAnyButton(scancode) || Mouse::isAnyAxis(scancode)) return;
   if(Joypad::isAnyAxis(scancode)) return;
   if(activeInput->bind(scancode, value) == false) return;
 
   activeInput = nullptr;
   settings->setStatusText("");
-  settings->panelList.setEnabled(true);
-  inputList.setEnabled(true);
-  clearButton.setEnabled(true);
+  settings->layout.setEnabled(true);
+  setEnabled(true);
   refresh();
 }

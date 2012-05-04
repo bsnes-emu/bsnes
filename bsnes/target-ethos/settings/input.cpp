@@ -3,11 +3,18 @@ InputSettings *inputSettings = nullptr;
 InputSettings::InputSettings() : activeInput(nullptr) {
   title.setFont(application->titleFont);
   title.setText("Input Settings");
+  focusLabel.setText("When Focus is Lost:");
+  focusPause.setText("Pause Emulation");
+  focusAllow.setText("Allow Input");
   inputList.setHeaderText("Name", "Mapping");
   inputList.setHeaderVisible();
   clearButton.setText("Clear");
 
   append(title, {~0, 0}, 5);
+  append(focusLayout, {~0, 0}, 5);
+    focusLayout.append(focusLabel, {0, 0}, 5);
+    focusLayout.append(focusPause, {0, 0}, 5);
+    focusLayout.append(focusAllow, {0, 0});
   append(selectionLayout, {~0, 0}, 5);
     selectionLayout.append(systemList, {~0, 0}, 5);
     selectionLayout.append(portList, {~0, 0}, 5);
@@ -24,6 +31,12 @@ InputSettings::InputSettings() : activeInput(nullptr) {
     systemList.append(emulator->information.name);
   }
 
+  focusPause.setChecked(config->input.focusPause);
+  focusAllow.setChecked(config->input.focusAllow);
+  focusAllow.setEnabled(!config->input.focusPause);
+
+  focusPause.onToggle = [&] { config->input.focusPause = focusPause.checked(); focusAllow.setEnabled(!focusPause.checked()); };
+  focusAllow.onToggle = [&] { config->input.focusAllow = focusAllow.checked(); };
   systemList.onChange = {&InputSettings::systemChanged, this};
   portList.onChange = {&InputSettings::portChanged, this};
   deviceList.onChange = {&InputSettings::deviceChanged, this};
@@ -43,11 +56,11 @@ void InputSettings::synchronize() {
     assign[1].setVisible(false);
     assign[2].setVisible(false);
   } else {
-    unsigned number = activeDevice().displayinput[inputList.selection()];
+    unsigned number = activeDevice().order[inputList.selection()];
     auto &input = activeDevice().input[number];
-    activeInput = inputManager->inputMap[input.guid];
+    auto selectedInput = inputManager->inputMap[input.guid];
 
-    if(dynamic_cast<DigitalInput*>(activeInput)) {
+    if(dynamic_cast<DigitalInput*>(selectedInput)) {
       assign[0].setText("Mouse Left");
       assign[1].setText("Mouse Middle");
       assign[2].setText("Mouse Right");
@@ -56,7 +69,7 @@ void InputSettings::synchronize() {
       assign[2].setVisible(true);
     }
 
-    if(dynamic_cast<AnalogInput*>(activeInput)) {
+    if(dynamic_cast<AnalogInput*>(selectedInput)) {
       assign[0].setText("Mouse X-axis");
       assign[1].setText("Mouse Y-axis");
       assign[0].setVisible(true);
@@ -98,10 +111,12 @@ void InputSettings::portChanged() {
 
 void InputSettings::deviceChanged() {
   inputList.reset();
-  for(unsigned number : activeDevice().displayinput) {
+  for(unsigned number : activeDevice().order) {
     auto &input = activeDevice().input[number];
     auto abstract = inputManager->inputMap(input.guid);
     string mapping = abstract->mapping;
+    mapping.replace("KB0::", "");
+    mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " or ");
     inputList.append(input.name, mapping);
   }
@@ -109,31 +124,24 @@ void InputSettings::deviceChanged() {
 }
 
 void InputSettings::clearInput() {
-  unsigned number = activeDevice().displayinput[inputList.selection()];
+  unsigned number = activeDevice().order[inputList.selection()];
   auto &input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
   inputEvent(Scancode::None, 1);
 }
 
 void InputSettings::assignInput() {
-  unsigned number = activeDevice().displayinput[inputList.selection()];
+  unsigned number = activeDevice().order[inputList.selection()];
   auto &input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
 
   settings->setStatusText({"Set assignment for [", activeDevice().name, "::", input.name, "] ..."});
-  settings->panelList.setEnabled(false);
-  systemList.setEnabled(false);
-  portList.setEnabled(false);
-  deviceList.setEnabled(false);
-  inputList.setEnabled(false);
-  assign[0].setEnabled(false);
-  assign[1].setEnabled(false);
-  assign[2].setEnabled(false);
-  clearButton.setEnabled(false);
+  settings->layout.setEnabled(false);
+  setEnabled(false);
 }
 
 void InputSettings::assignMouseInput(unsigned n) {
-  unsigned number = activeDevice().displayinput[inputList.selection()];
+  unsigned number = activeDevice().order[inputList.selection()];
   auto &input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
 
@@ -155,14 +163,7 @@ void InputSettings::inputEvent(unsigned scancode, int16_t value, bool allowMouse
   activeInput = nullptr;
   deviceChanged();
   settings->setStatusText("");
-  settings->panelList.setEnabled(true);
-  systemList.setEnabled(true);
-  portList.setEnabled(true);
-  deviceList.setEnabled(true);
-  inputList.setEnabled(true);
-  assign[0].setEnabled(true);
-  assign[1].setEnabled(true);
-  assign[2].setEnabled(true);
-  clearButton.setEnabled(true);
+  settings->layout.setEnabled(true);
+  setEnabled(true);
   synchronize();
 }

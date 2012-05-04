@@ -21,6 +21,7 @@ using namespace ruby;
 #include "interface/interface.hpp"
 #include "utility/utility.hpp"
 #include "input/input.hpp"
+#include "window/window.hpp"
 #include "general/general.hpp"
 #include "settings/settings.hpp"
 

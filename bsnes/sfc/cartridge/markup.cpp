@@ -110,7 +110,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
 
-  interface->mediaRequest({"Game Boy", "", "program.rom", "*.gb", 5});
+  interface->mediaRequest({ID::SuperGameBoyROM, "Game Boy", "gb", "program.rom"});
 
   icd2.revision = max(1, numeral(root["revision"].data));
 
@@ -372,7 +372,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   has_bs_cart = root["mmio"].exists();
   has_bs_slot = true;
 
-  interface->mediaRequest({"BS-X Satellaview", "", "program.rom", "*.bs", 2});
+  interface->mediaRequest({ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom"});
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
@@ -400,7 +400,7 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   if(root.exists() == false) return;
   has_st_slot = true;
 
-  interface->mediaRequest({"Sufami Turbo", "", "program.rom", "*.st", 3});
+  interface->mediaRequest({ID::SufamiTurboSlotAROM, "Sufami Turbo", "st", "program.rom"});
 
   for(auto &slot : root) {
     if(slot.name != "slot") continue;

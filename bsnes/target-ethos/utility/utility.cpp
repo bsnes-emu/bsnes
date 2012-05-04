@@ -8,9 +8,8 @@ void Utility::setInterface(Emulator::Interface *emulator) {
 }
 
 void Utility::loadSchema(Emulator::Interface *emulator, Emulator::Interface::Schema &schema) {
-  string pathname;
-  if(!schema.path.empty()) pathname = application->path(schema.path);
-  if(!directory::exists(pathname)) pathname = browser->select(schema.displayname, schema.filter);
+  string pathname = application->path({schema.name, ".", schema.extension, "/"});
+  if(!directory::exists(pathname)) pathname = browser->select({"Load ", schema.name}, schema.extension);
   if(!directory::exists(pathname)) return;
 
   loadMedia(emulator, schema, pathname);
@@ -23,7 +22,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 
   string manifest;
   manifest.readfile({pathname, "manifest.xml"});
-  auto memory = file::read({pathname, media.name});
+  auto memory = file::read({pathname, media.path});
   system().load(media.id, vectorstream{memory}, manifest);
 
   for(auto &memory : system().memory) {
@@ -37,7 +36,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   string displayname = pathname;
   displayname.rtrim<1>("/");
   presentation->setTitle(notdir(nall::basename(displayname)));
-  presentation->setSystemName(media.displayname);
+  presentation->setSystemName(media.name);
   resize();
 }
 
@@ -46,6 +45,11 @@ void Utility::saveMedia() {
     filestream fs({pathname, memory.name}, file::mode::write);
     system().save(memory.id, fs);
   }
+}
+
+void Utility::connect(unsigned port, unsigned device) {
+  if(application->active == nullptr) return;
+  system().connect(port, device);
 }
 
 void Utility::power() {
@@ -66,6 +70,39 @@ void Utility::unload() {
   }
   presentation->setTitle({Emulator::Name, " v", Emulator::Version});
   video.clear();
+}
+
+void Utility::saveState(unsigned slot) {
+  if(application->active == nullptr) return;
+  serializer s = system().serialize();
+  if(s.size() == 0) return;
+  mkdir(string{pathname, "bsnes/"}, 0755);
+  if(file::write({pathname, "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
+  showMessage({"Save to slot ", slot});
+}
+
+void Utility::loadState(unsigned slot) {
+  if(application->active == nullptr) return;
+  auto memory = file::read({pathname, "bsnes/state-", slot, ".bsa"});
+  if(memory.size() == 0) return;
+  serializer s(memory.data(), memory.size());
+  if(system().unserialize(s) == false) return;
+  showMessage({"Loaded from slot ", slot});
+}
+
+void Utility::synchronizeRuby() {
+  video.set(Video::Synchronize, config->video.synchronize);
+  audio.set(Audio::Synchronize, config->audio.synchronize);
+  audio.set(Audio::Frequency, config->audio.frequency);
+  audio.set(Audio::Latency, config->audio.latency);
+
+  switch(config->audio.resampler) {
+  case 0: dspaudio.setResampler(DSP::ResampleEngine::Linear);  break;
+  case 1: dspaudio.setResampler(DSP::ResampleEngine::Hermite); break;
+  case 2: dspaudio.setResampler(DSP::ResampleEngine::Sinc);    break;
+  }
+  dspaudio.setResamplerFrequency(config->audio.frequency);
+  dspaudio.setVolume(config->audio.mute ? 0.0 : config->audio.volume * 0.01);
 }
 
 void Utility::resize(bool resizeWindow) {
@@ -132,6 +169,32 @@ void Utility::toggleFullScreen() {
   resize();
 }
 
+void Utility::updateStatus() {
+  time_t currentTime = time(0);
+  string text;
+  if((currentTime - statusTime) <= 2) {
+    text = statusMessage;
+  } else if(application->active == nullptr) {
+    text = "No cartridge loaded";
+  } else if(application->pause || application->autopause) {
+    text = "Paused";
+  } else {
+    text = statusText;
+  }
+  if(text != presentation->statusText()) {
+    presentation->setStatusText(text);
+  }
+}
+
 void Utility::setStatusText(const string &text) {
-  presentation->setStatusText(text);
+  statusText = text;
+}
+
+void Utility::showMessage(const string &message) {
+  statusTime = time(0);
+  statusMessage = message;
+}
+
+Utility::Utility() {
+  statusTime = 0;
 }

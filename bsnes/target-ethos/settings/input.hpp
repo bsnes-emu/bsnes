@@ -1,5 +1,9 @@
 struct InputSettings : SettingsLayout {
   Label title;
+  HorizontalLayout focusLayout;
+    Label focusLabel;
+    CheckBox focusPause;
+    CheckBox focusAllow;
   HorizontalLayout selectionLayout;
     ComboBox systemList;
     ComboBox portList;

@@ -43,6 +43,15 @@ void Interface::run() {
   system.run();
 }
 
+serializer Interface::serialize() {
+  system.runtosave();
+  return system.serialize();
+}
+
+bool Interface::unserialize(serializer &s) {
+  return system.unserialize(s);
+}
+
 void Interface::updatePalette() {
   video.generate_palette();
 }
@@ -53,64 +62,40 @@ Interface::Interface() {
   information.name        = "Famicom";
   information.width       = 256;
   information.height      = 240;
+  information.overscan    = true;
   information.aspectRatio = 8.0 / 7.0;
   information.frequency   = 1789772;
   information.resettable  = true;
 
-  information.media.append({"Famicom", "*.fc"});
+  information.media.append({"Famicom", "fc"});
+
+  schema.append(Media{ID::ROM, "Famicom", "fc", "program.rom"});
 
   {
-    Schema schema;
-    schema.displayname = "Famicom";
-    schema.name        = "program.rom";
-    schema.filter      = "*.fc";
-    schema.id          = ID::ROM;
-    this->schema.append(schema);
-  }
-
-  {
-    Port port;
-    port.name = "Port 1";
-    port.id   = 0;
-    {
-      Port::Device device;
-      device.name = "Controller";
-      device.id   = 0;
-      device.input.append({"A",      0, 0});
-      device.input.append({"B",      0, 1});
-      device.input.append({"Select", 0, 2});
-      device.input.append({"Start",  0, 3});
-      device.input.append({"Up",     0, 4});
-      device.input.append({"Down",   0, 5});
-      device.input.append({"Left",   0, 6});
-      device.input.append({"Right",  0, 7});
-      device.displayinput = {4, 5, 6, 7, 1, 0, 2, 3};
-      port.device.append(device);
-    }
+    Port port{0, "Port 1"};
+    port.device.append(controller());
     this->port.append(port);
   }
 
   {
-    Port port;
-    port.name = "Port 2";
-    port.id   = 1;
-    {
-      Port::Device device;
-      device.name = "Controller";
-      device.id   = 0;
-      device.input.append({"A",      0, 0});
-      device.input.append({"B",      0, 1});
-      device.input.append({"Select", 0, 2});
-      device.input.append({"Start",  0, 3});
-      device.input.append({"Up",     0, 4});
-      device.input.append({"Down",   0, 5});
-      device.input.append({"Left",   0, 6});
-      device.input.append({"Right",  0, 7});
-      device.displayinput = {4, 5, 6, 7, 1, 0, 2, 3};
-      port.device.append(device);
-    }
+    Port port{1, "Port 2"};
+    port.device.append(controller());
     this->port.append(port);
   }
+}
+
+Emulator::Interface::Port::Device Interface::controller() {
+  Port::Device device{0, "Controller"};
+  device.input.append({0, 0, "A"     });
+  device.input.append({1, 0, "B"     });
+  device.input.append({2, 0, "Select"});
+  device.input.append({3, 0, "Start" });
+  device.input.append({4, 0, "Up"    });
+  device.input.append({5, 0, "Down"  });
+  device.input.append({6, 0, "Left"  });
+  device.input.append({7, 0, "Right" });
+  device.order = {4, 5, 6, 7, 1, 0, 2, 3};
+  return device;
 }
 
 }

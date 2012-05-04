@@ -8,34 +8,31 @@ struct Interface {
     string name;
     unsigned width;
     unsigned height;
+    bool overscan;
     double aspectRatio;
     unsigned frequency;
     bool resettable;
 
     struct Media {
       string name;
-      string filter;
+      string extension;
     };
     vector<Media> media;
   } information;
 
-  struct Firmware {
-    string displayname;
-    string name;
-    unsigned id;
-  };
-  vector<Firmware> firmware;
-
   struct Media {
-    string displayname;
-    string path;
-    string name;
-    string filter;
     unsigned id;
+    string name;
+    string extension;
+    string path;
   };
+  vector<Media> firmware;
 
   struct Schema : Media {
     vector<Media> slot;
+    Schema(const Media &media) {
+      id = media.id, name = media.name, extension = media.extension, path = media.path;
+    }
   };
   vector<Schema> schema;
 
@@ -46,19 +43,19 @@ struct Interface {
   vector<Memory> memory;
 
   struct Port {
-    string name;
     unsigned id;
+    string name;
     struct Device {
-      string name;
       unsigned id;
+      string name;
       struct Input {
-        string name;
-        unsigned type;  //0 = digital, 1 = analog
         unsigned id;
+        unsigned type;  //0 = digital, 1 = analog
+        string name;
         unsigned guid;
       };
       vector<Input> input;
-      vector<unsigned> displayinput;
+      vector<unsigned> order;
     };
     vector<Device> device;
   };
@@ -72,7 +69,7 @@ struct Interface {
     function<void (Media)> mediaRequest;
   } callback;
 
-  //audio/visual bindings (provided by user interface)
+  //callback bindings (provided by user interface)
   virtual uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
     if(callback.videoColor) return callback.videoColor(source, red, green, blue);
     return (red >> 8) << 16 | (green >> 8) << 8 | (blue >> 8) << 0;
@@ -102,9 +99,14 @@ struct Interface {
   virtual void unload() {}
 
   //system interface
+  virtual void connect(unsigned port, unsigned device) {}
   virtual void power() {}
   virtual void reset() {}
   virtual void run() {}
+
+  //state functions
+  virtual serializer serialize() = 0;
+  virtual bool unserialize(serializer&) = 0;
 
   //utility functions
   virtual void updatePalette() {}
