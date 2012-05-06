@@ -8,6 +8,10 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
+string Interface::sha256() {
+  return cartridge.sha256();
+}
+
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
   if(id == ID::GameBoyBootROM) {
     stream.read(system.bootROM.dmg, min( 256u, stream.size()));
@@ -67,6 +71,18 @@ bool Interface::unserialize(serializer &s) {
   return system.unserialize(s);
 }
 
+void Interface::cheatSet(const lstring &list) {
+  cheat.reset();
+  for(auto &code : list) {
+    lstring codelist = code.split("+");
+    for(auto &part : codelist) {
+      unsigned addr, data, comp;
+      if(Cheat::decode(part, addr, data, comp)) cheat.append({addr, data, comp});
+    }
+  }
+  cheat.synchronize();
+}
+
 void Interface::updatePalette() {
   video.generate_palette();
 }
@@ -82,33 +98,28 @@ Interface::Interface() {
   information.frequency   = 4194304;
   information.resettable  = false;
 
-  information.media.append({"Game Boy",       "gb" });
-  information.media.append({"Game Boy Color", "gbc"});
-
   firmware.append({ID::GameBoyBootROM,      "Game Boy",       "sys", "boot.rom"});
   firmware.append({ID::SuperGameBoyBootROM, "Super Game Boy", "sfc", "boot.rom"});
   firmware.append({ID::GameBoyColorBootROM, "Game Boy Color", "sys", "boot.rom"});
 
-  schema.append(Media{ID::GameBoyROM,      "Game Boy",       "gb",  "program.rom"});
-  schema.append(Media{ID::GameBoyColorROM, "Game Boy Color", "gbc", "program.rom"});
+  media.append({ID::GameBoyROM,      "Game Boy",       "sys", "program.rom", "gb" });
+  media.append({ID::GameBoyColorROM, "Game Boy Color", "sys", "program.rom", "gbc"});
 
   {
-    Port port{0, "Device"};
-    {
-      Port::Device device{0, "Controller"};
-      device.input.append({0, 0, "Up"    });
-      device.input.append({1, 0, "Down"  });
-      device.input.append({2, 0, "Left"  });
-      device.input.append({3, 0, "Right" });
-      device.input.append({4, 0, "B"     });
-      device.input.append({5, 0, "A"     });
-      device.input.append({6, 0, "Select"});
-      device.input.append({7, 0, "Start" });
-      device.order = {0, 1, 2, 3, 4, 5, 6, 7};
-      port.device.append(device);
-    }
-    this->port.append(port);
+    Device device{0, ID::Device, "Controller"};
+    device.input.append({0, 0, "Up"    });
+    device.input.append({1, 0, "Down"  });
+    device.input.append({2, 0, "Left"  });
+    device.input.append({3, 0, "Right" });
+    device.input.append({4, 0, "B"     });
+    device.input.append({5, 0, "A"     });
+    device.input.append({6, 0, "Select"});
+    device.input.append({7, 0, "Start" });
+    device.order = {0, 1, 2, 3, 4, 5, 6, 7};
+    this->device.append(device);
   }
+
+  port.append({ID::Device, "Device", {device[0]}});
 }
 
 }

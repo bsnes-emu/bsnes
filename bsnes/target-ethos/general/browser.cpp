@@ -64,7 +64,7 @@ void Browser::saveConfiguration() {
 
 void Browser::bootstrap() {
   for(auto &emulator : application->emulator) {
-    for(auto &media : emulator->information.media) {
+    for(auto &media : emulator->media) {
       bool found = false;
       for(auto &folder : folderList) {
         if(folder.extension == media.extension) {

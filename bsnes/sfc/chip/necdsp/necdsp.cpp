@@ -34,7 +34,7 @@ void NECDSP::init() {
 
 void NECDSP::load() {
   if(revision == Revision::uPD96050) {
-    cartridge.nvram.append({ "upd96050.ram", (uint8_t*)dataRAM, 4096 });
+    interface->memory.append({ID::NecDSPRAM, "upd96050.ram"});
   }
 }
 

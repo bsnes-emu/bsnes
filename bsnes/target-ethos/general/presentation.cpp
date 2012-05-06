@@ -56,12 +56,14 @@ Presentation::Presentation() : active(nullptr) {
     loadStateMenu.setText("Load State");
       for(unsigned n = 0; n < 5; n++) loadStateItem[n].setText({"Slot ", 1 + n});
     resizeWindow.setText("Resize Window");
+    cheatEditor.setText("Cheat Editor");
+    stateManager.setText("State Manager");
 
   append(loadMenu);
-  for(auto &item : loadListDirect) loadMenu.append(*item);
-  if(loadListSlotted.size() > 0) {
+  for(auto &item : loadListSystem) loadMenu.append(*item);
+  if(loadListSubsystem.size() > 0) {
     loadMenu.append(*new Separator);
-    for(auto &item : loadListSlotted) loadMenu.append(*item);
+    for(auto &item : loadListSubsystem) loadMenu.append(*item);
   }
   for(auto &system : emulatorList) append(system->menu);
   append(settingsMenu);
@@ -77,7 +79,7 @@ Presentation::Presentation() : active(nullptr) {
     toolsMenu.append(loadStateMenu);
       for(unsigned n = 0; n < 5; n++) loadStateMenu.append(loadStateItem[n]);
     toolsMenu.append(stateMenuSeparator);
-    toolsMenu.append(resizeWindow);
+    toolsMenu.append(resizeWindow, cheatEditor, stateManager);
 
   append(layout);
   layout.append(viewport, {0, 0, 720, 480});
@@ -97,6 +99,8 @@ Presentation::Presentation() : active(nullptr) {
   for(unsigned n = 0; n < 5; n++) saveStateItem[n].onActivate = [=] { utility->saveState(1 + n); };
   for(unsigned n = 0; n < 5; n++) loadStateItem[n].onActivate = [=] { utility->loadState(1 + n); };
   resizeWindow.onActivate = [&] { utility->resize(true); };
+  cheatEditor.onActivate = [&] { ::cheatEditor->setVisible(); };
+  stateManager.onActivate = [&] { ::stateManager->setVisible(); };
 
   synchronize();
 }
@@ -106,14 +110,14 @@ void Presentation::bootstrap() {
     auto iEmulator = new Emulator;
     iEmulator->interface = emulator;
 
-    for(auto &schema : emulator->schema) {
+    for(auto &media : emulator->media) {
       Item *item = new Item;
-      item->setText({schema.name, " ..."});
-      item->onActivate = [=, &schema] {
-        utility->loadSchema(iEmulator->interface, schema);
+      item->setText({media.name, " ..."});
+      item->onActivate = [=, &media] {
+        utility->loadMedia(iEmulator->interface, media);
       };
-      if(schema.slot.size() == 0) loadListDirect.append(item);
-      if(schema.slot.size() >= 1) loadListSlotted.append(item);
+      if(media.type == "sys") loadListSystem.append(item);
+      if(media.type != "sys") loadListSubsystem.append(item);
     }
 
     iEmulator->menu.setText(emulator->information.name);

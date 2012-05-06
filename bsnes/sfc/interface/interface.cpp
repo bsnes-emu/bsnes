@@ -8,9 +8,61 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
+string Interface::sha256() {
+  return cartridge.sha256();
+}
+
+unsigned Interface::group(unsigned id) {
+  switch(id) {
+  case ID::Nec7725DSP:
+  case ID::Nec96050DSP:
+  case ID::HitachiDSP:
+  case ID::ArmDSP:
+  case ID::ROM:
+  case ID::RAM:
+  case ID::NecDSPRAM:
+  case ID::RTC:
+  case ID::SPC7110RTC:
+  case ID::BsxRAM:
+  case ID::BsxPSRAM:
+    return 0;
+  case ID::SuperGameBoyROM:
+  case ID::SuperGameBoyRAM:
+  case ID::SuperGameBoyRTC:
+    return 1;
+  case ID::BsxFlashROM:
+    return 2;
+  case ID::SufamiTurboSlotAROM:
+  case ID::SufamiTurboSlotARAM:
+    return 3;
+  case ID::SufamiTurboSlotBROM:
+  case ID::SufamiTurboSlotBRAM:
+    return 4;
+  }
+  return 0;
+}
+
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
   if(id == ID::IPLROM) {
     stream.read(smp.iplrom, min(64u, stream.size()));
+  }
+
+  if(id == ID::Nec7725DSP) {
+    for(unsigned n = 0; n <  2048; n++) necdsp.programROM[n] = stream.readl(3);
+    for(unsigned n = 0; n <  1024; n++) necdsp.dataROM[n]    = stream.readl(2);
+  }
+
+  if(id == ID::Nec96050DSP) {
+    for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = stream.readl(3);
+    for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n]    = stream.readl(2);
+  }
+
+  if(id == ID::HitachiDSP) {
+    for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = stream.readl(3);
+  }
+
+  if(id == ID::ArmDSP) {
+    stream.read(armdsp.firmware, stream.size());
   }
 
   if(id == ID::ROM) {
@@ -40,6 +92,10 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
     stream.read(cartridge.ram.data(), min(cartridge.ram.size(), stream.size()));
   }
 
+  if(id == ID::NecDSPRAM) {
+    for(unsigned n = 0; n < 2048; n++) necdsp.dataRAM[n] = stream.readl(2);
+  }
+
   if(id == ID::RTC) {
     stream.read(srtc.rtc, min(stream.size(), sizeof srtc.rtc));
   }
@@ -55,11 +111,23 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
   if(id == ID::BsxPSRAM) {
     stream.read(bsxcartridge.psram.data(), min(stream.size(), bsxcartridge.psram.size()));
   }
+
+  if(id == ID::SufamiTurboSlotARAM) {
+    sufamiturbo.slotA.ram.copy(stream);
+  }
+
+  if(id == ID::SufamiTurboSlotBRAM) {
+    sufamiturbo.slotB.ram.copy(stream);
+  }
 }
 
 void Interface::save(unsigned id, const stream &stream) {
   if(id == ID::RAM) {
     stream.write(cartridge.ram.data(), cartridge.ram.size());
+  }
+
+  if(id == ID::NecDSPRAM) {
+    for(unsigned n = 0; n < 2048; n++) stream.writel(necdsp.dataRAM[n], 2);
   }
 
   if(id == ID::RTC) {
@@ -76,6 +144,14 @@ void Interface::save(unsigned id, const stream &stream) {
 
   if(id == ID::BsxPSRAM) {
     stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
+  }
+
+  if(id == ID::SufamiTurboSlotARAM) {
+    stream.write(sufamiturbo.slotA.ram.data(), sufamiturbo.slotA.ram.size());
+  }
+
+  if(id == ID::SufamiTurboSlotBRAM) {
+    stream.write(sufamiturbo.slotB.ram.data(), sufamiturbo.slotB.ram.size());
   }
 }
 
@@ -108,6 +184,35 @@ bool Interface::unserialize(serializer &s) {
   return system.unserialize(s);
 }
 
+void Interface::cheatSet(const lstring &list) {
+  //Super Game Boy
+  if(cartridge.has_gb_slot()) {
+    GameBoy::cheat.reset();
+    for(auto &code : list) {
+      lstring codelist = code.split("+");
+      for(auto &part : codelist) {
+        unsigned addr, data, comp;
+        part.trim();
+        if(GameBoy::Cheat::decode(part, addr, data, comp)) GameBoy::cheat.append({addr, data, comp});
+      }
+    }
+    GameBoy::cheat.synchronize();
+    return;
+  }
+
+  //Super Famicom, Broadcast Satellaview, Sufami Turbo
+  cheat.reset();
+  for(auto &code : list) {
+    lstring codelist = code.split("+");
+    for(auto &part : codelist) {
+      unsigned addr, data;
+      part.trim();
+      if(Cheat::decode(part, addr, data)) cheat.append({addr, data});
+    }
+  }
+  cheat.synchronize();
+}
+
 void Interface::updatePalette() {
   video.generate_palette();
 }
@@ -123,154 +228,119 @@ Interface::Interface() {
   information.frequency   = 32040;
   information.resettable  = true;
 
-  information.media.append({"Super Famicom",    "sfc"});
-  information.media.append({"BS-X Satellaview", "bs" });
-  information.media.append({"Sufami Turbo",     "st" });
-  information.media.append({"Super Game Boy",   "gb" });
-
   firmware.append({ID::IPLROM, "Super Famicom", "sys", "spc700.rom"});
 
-  {
-    Schema schema(Media{ID::ROM, "Super Famicom", "sfc", "program.rom"});
-    this->schema.append(schema);
-  }
+  media.append({ID::ROM, "Super Famicom",    "sys", "program.rom", "sfc"});
+  media.append({ID::ROM, "Super Game Boy",   "sfc", "program.rom", "gb" });
+  media.append({ID::ROM, "BS-X Satellaview", "sfc", "program.rom", "bs" });
+  media.append({ID::ROM, "Sufami Turbo",     "sfc", "program.rom", "st" });
 
   {
-    Schema schema(Media{ID::ROM, "Super Game Boy", "sfc", "program.rom"});
-    schema.slot.append({ID::SuperGameBoyROM, "Game Boy", "gb", "program.rom"});
-    this->schema.append(schema);
-  }
-
-  {
-    Schema schema(Media{ID::ROM, "BS-X Satellaview", "sfc", "program.rom"});
-    schema.slot.append({ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom"});
-    this->schema.append(schema);
+    Device device{0, ID::Port1 | ID::Port2, "None"};
+    this->device.append(device);
   }
 
   {
-    Schema schema(Media{ID::ROM, "Sufami Turbo", "sfc", "program.rom"});
-    schema.slot.append({ID::SufamiTurboSlotAROM, "Sufami Turbo - Slot A", "st", "program.rom"});
-    schema.slot.append({ID::SufamiTurboSlotBROM, "Sufami Turbo - Slot B", "st", "program.rom"});
-    this->schema.append(schema);
+    Device device{1, ID::Port1 | ID::Port2, "Controller"};
+    device.input.append({ 0, 0, "B"     });
+    device.input.append({ 1, 0, "Y"     });
+    device.input.append({ 2, 0, "Select"});
+    device.input.append({ 3, 0, "Start" });
+    device.input.append({ 4, 0, "Up"    });
+    device.input.append({ 5, 0, "Down"  });
+    device.input.append({ 6, 0, "Left"  });
+    device.input.append({ 7, 0, "Right" });
+    device.input.append({ 8, 0, "A"     });
+    device.input.append({ 9, 0, "X"     });
+    device.input.append({10, 0, "L"     });
+    device.input.append({11, 0, "R"     });
+    device.order = {4, 5, 6, 7, 0, 8, 1, 9, 10, 11, 2, 3};
+    this->device.append(device);
   }
 
   {
-    Port port{0, "Port 1"};
-    port.device.append(none());
-    port.device.append(controller());
-    port.device.append(multitap());
-    port.device.append(mouse());
-    port.device.append(usart());
-    this->port.append(port);
+    Device device{2, ID::Port1 | ID::Port2, "Multitap"};
+    for(unsigned p = 1, n = 0; p <= 4; p++, n += 12) {
+      device.input.append({n +  0, 0, {"Port ", p, " - ", "B"     }});
+      device.input.append({n +  1, 0, {"Port ", p, " - ", "Y"     }});
+      device.input.append({n +  2, 0, {"Port ", p, " - ", "Select"}});
+      device.input.append({n +  3, 0, {"Port ", p, " - ", "Start" }});
+      device.input.append({n +  4, 0, {"Port ", p, " - ", "Up"    }});
+      device.input.append({n +  5, 0, {"Port ", p, " - ", "Down"  }});
+      device.input.append({n +  6, 0, {"Port ", p, " - ", "Left"  }});
+      device.input.append({n +  7, 0, {"Port ", p, " - ", "Right" }});
+      device.input.append({n +  8, 0, {"Port ", p, " - ", "A"     }});
+      device.input.append({n +  9, 0, {"Port ", p, " - ", "X"     }});
+      device.input.append({n + 10, 0, {"Port ", p, " - ", "L"     }});
+      device.input.append({n + 11, 0, {"Port ", p, " - ", "R"     }});
+      device.order.append(n + 4, n + 5, n +  6, n +  7, n + 0, n + 8);
+      device.order.append(n + 1, n + 9, n + 10, n + 11, n + 2, n + 3);
+    }
+    this->device.append(device);
   }
 
   {
-    Port port{1, "Port 2"};
-    port.device.append(none());
-    port.device.append(controller());
-    port.device.append(multitap());
-    port.device.append(mouse());
-    port.device.append(superScope());
-    port.device.append(justifier());
-    port.device.append(justifiers());
-    this->port.append(port);
+    Device device{3, ID::Port1 | ID::Port2, "Mouse"};
+    device.input.append({0, 1, "X-axis"});
+    device.input.append({1, 1, "Y-axis"});
+    device.input.append({2, 0, "Left"  });
+    device.input.append({3, 0, "Right" });
+    device.order = {0, 1, 2, 3};
+    this->device.append(device);
   }
-}
 
-Emulator::Interface::Port::Device Interface::none() {
-  Port::Device device{0, "None"};
-  return device;
-}
-
-Emulator::Interface::Port::Device Interface::controller() {
-  Port::Device device{1, "Controller"};
-  device.input.append({ 0, 0, "B"     });
-  device.input.append({ 1, 0, "Y"     });
-  device.input.append({ 2, 0, "Select"});
-  device.input.append({ 3, 0, "Start" });
-  device.input.append({ 4, 0, "Up"    });
-  device.input.append({ 5, 0, "Down"  });
-  device.input.append({ 6, 0, "Left"  });
-  device.input.append({ 7, 0, "Right" });
-  device.input.append({ 8, 0, "A"     });
-  device.input.append({ 9, 0, "X"     });
-  device.input.append({10, 0, "L"     });
-  device.input.append({11, 0, "R"     });
-  device.order = {4, 5, 6, 7, 0, 8, 1, 9, 10, 11, 2, 3};
-  return device;
-}
-
-Emulator::Interface::Port::Device Interface::multitap() {
-  Port::Device device{2, "Multitap"};
-  for(unsigned p = 1, n = 0; p <= 4; p++, n += 12) {
-    device.input.append({n +  0, 0, {"Port ", p, " - ", "B"     }});
-    device.input.append({n +  1, 0, {"Port ", p, " - ", "Y"     }});
-    device.input.append({n +  2, 0, {"Port ", p, " - ", "Select"}});
-    device.input.append({n +  3, 0, {"Port ", p, " - ", "Start" }});
-    device.input.append({n +  4, 0, {"Port ", p, " - ", "Up"    }});
-    device.input.append({n +  5, 0, {"Port ", p, " - ", "Down"  }});
-    device.input.append({n +  6, 0, {"Port ", p, " - ", "Left"  }});
-    device.input.append({n +  7, 0, {"Port ", p, " - ", "Right" }});
-    device.input.append({n +  8, 0, {"Port ", p, " - ", "A"     }});
-    device.input.append({n +  9, 0, {"Port ", p, " - ", "X"     }});
-    device.input.append({n + 10, 0, {"Port ", p, " - ", "L"     }});
-    device.input.append({n + 11, 0, {"Port ", p, " - ", "R"     }});
-    device.order.append(n + 4, n + 5, n +  6, n +  7, n + 0, n + 8);
-    device.order.append(n + 1, n + 9, n + 10, n + 11, n + 2, n + 3);
+  {
+    Device device{4, ID::Port2, "Super Scope"};
+    device.input.append({0, 1, "X-axis" });
+    device.input.append({1, 1, "Y-axis" });
+    device.input.append({2, 0, "Trigger"});
+    device.input.append({3, 0, "Cursor" });
+    device.input.append({4, 0, "Turbo"  });
+    device.input.append({5, 0, "Pause"  });
+    device.order = {0, 1, 2, 3, 4, 5};
+    this->device.append(device);
   }
-  return device;
-}
 
-Emulator::Interface::Port::Device Interface::mouse() {
-  Port::Device device{3, "Mouse"};
-  device.input.append({0, 1, "X-axis"});
-  device.input.append({1, 1, "Y-axis"});
-  device.input.append({2, 0, "Left"  });
-  device.input.append({3, 0, "Right" });
-  device.order = {0, 1, 2, 3};
-  return device;
-}
+  {
+    Device device{5, ID::Port2, "Justifier"};
+    device.input.append({0, 1, "X-axis" });
+    device.input.append({1, 1, "Y-axis" });
+    device.input.append({2, 0, "Trigger"});
+    device.input.append({3, 0, "Start"  });
+    device.order = {0, 1, 2, 3};
+    this->device.append(device);
+  }
 
-Emulator::Interface::Port::Device Interface::superScope() {
-  Port::Device device{4, "Super Scope"};
-  device.input.append({0, 1, "X-axis" });
-  device.input.append({1, 1, "Y-axis" });
-  device.input.append({2, 0, "Trigger"});
-  device.input.append({3, 0, "Cursor" });
-  device.input.append({4, 0, "Turbo"  });
-  device.input.append({5, 0, "Pause"  });
-  device.order = {0, 1, 2, 3, 4, 5};
-  return device;
-}
+  {
+    Device device{6, ID::Port2, "Justifiers"};
+    device.input.append({0, 1, "Port 1 - X-axis" });
+    device.input.append({1, 1, "Port 1 - Y-axis" });
+    device.input.append({2, 0, "Port 1 - Trigger"});
+    device.input.append({3, 0, "Port 1 - Start"  });
+    device.order.append(0, 1, 2, 3);
+    device.input.append({4, 1, "Port 2 - X-axis" });
+    device.input.append({5, 1, "Port 2 - Y-axis" });
+    device.input.append({6, 0, "Port 2 - Trigger"});
+    device.input.append({7, 0, "Port 2 - Start"  });
+    device.order.append(4, 5, 6, 7);
+    this->device.append(device);
+  }
 
-Emulator::Interface::Port::Device Interface::justifier() {
-  Port::Device device{5, "Justifier"};
-  device.input.append({0, 1, "X-axis" });
-  device.input.append({1, 1, "Y-axis" });
-  device.input.append({2, 0, "Trigger"});
-  device.input.append({3, 0, "Start"  });
-  device.order = {0, 1, 2, 3};
-  return device;
-}
+  {
+    Device device{7, ID::Port1, "Serial USART"};
+    this->device.append(device);
+  }
 
-Emulator::Interface::Port::Device Interface::justifiers() {
-  Port::Device device{6, "Justifiers"};
-  device.input.append({0, 1, "Port 1 - X-axis" });
-  device.input.append({1, 1, "Port 1 - Y-axis" });
-  device.input.append({2, 0, "Port 1 - Trigger"});
-  device.input.append({3, 0, "Port 1 - Start"  });
-  device.order.append(0, 1, 2, 3);
-  device.input.append({4, 1, "Port 2 - X-axis" });
-  device.input.append({5, 1, "Port 2 - Y-axis" });
-  device.input.append({6, 0, "Port 2 - Trigger"});
-  device.input.append({7, 0, "Port 2 - Start"  });
-  device.order.append(4, 5, 6, 7);
-  return device;
-}
+  port.append({ID::Port1, "Port 1"});
+  port.append({ID::Port2, "Port 2"});
 
-Emulator::Interface::Port::Device Interface::usart() {
-  Port::Device device{7, "Serial USART"};
-  return device;
+  for(auto &device : this->device) {
+    for(auto &port : this->port) {
+      if(device.portmask & port.id) {
+        port.device.append(device);
+      }
+    }
+  }
 }
 
 }

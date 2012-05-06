@@ -8,7 +8,8 @@ InputSettings::InputSettings() : activeInput(nullptr) {
   focusAllow.setText("Allow Input");
   inputList.setHeaderText("Name", "Mapping");
   inputList.setHeaderVisible();
-  clearButton.setText("Clear");
+  resetButton.setText("Reset");
+  eraseButton.setText("Erase");
 
   append(title, {~0, 0}, 5);
   append(focusLayout, {~0, 0}, 5);
@@ -25,7 +26,8 @@ InputSettings::InputSettings() : activeInput(nullptr) {
     controlLayout.append(assign[1], {100, 0}, 5);
     controlLayout.append(assign[2], {100, 0}, 5);
     controlLayout.append(spacer, {~0, 0});
-    controlLayout.append(clearButton, {80, 0});
+    controlLayout.append(resetButton, {80, 0}, 5);
+    controlLayout.append(eraseButton, {80, 0});
 
   for(auto &emulator : application->emulator) {
     systemList.append(emulator->information.name);
@@ -45,7 +47,8 @@ InputSettings::InputSettings() : activeInput(nullptr) {
   assign[0].onActivate = [&] { assignMouseInput(0); };
   assign[1].onActivate = [&] { assignMouseInput(1); };
   assign[2].onActivate = [&] { assignMouseInput(2); };
-  clearButton.onActivate = {&InputSettings::clearInput, this};
+  resetButton.onActivate = {&InputSettings::resetInput, this};
+  eraseButton.onActivate = {&InputSettings::eraseInput, this};
 
   systemChanged();
 }
@@ -78,7 +81,7 @@ void InputSettings::synchronize() {
     }
   }
 
-  clearButton.setEnabled(inputList.selected());
+  eraseButton.setEnabled(inputList.selected());
 }
 
 Emulator::Interface& InputSettings::activeSystem() {
@@ -89,7 +92,7 @@ Emulator::Interface::Port& InputSettings::activePort() {
   return activeSystem().port[portList.selection()];
 }
 
-Emulator::Interface::Port::Device& InputSettings::activeDevice() {
+Emulator::Interface::Device& InputSettings::activeDevice() {
   return activePort().device[deviceList.selection()];
 }
 
@@ -123,7 +126,19 @@ void InputSettings::deviceChanged() {
   synchronize();
 }
 
-void InputSettings::clearInput() {
+void InputSettings::resetInput() {
+  if(MessageWindow::question(*settings, "All inputs will be erased. Are you sure you want to do this?")
+  == MessageWindow::Response::No) return;
+
+  auto &device = activeDevice();
+  unsigned length = device.input.size();
+  for(unsigned n = 0; n < length; n++) {
+    activeInput = inputManager->inputMap[device.input[n].guid];
+    inputEvent(Scancode::None, 1);
+  }
+}
+
+void InputSettings::eraseInput() {
   unsigned number = activeDevice().order[inputList.selection()];
   auto &input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];

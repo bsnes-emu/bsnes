@@ -108,7 +108,7 @@ void System::load() {
   #endif
   if(cartridge.has_bs_cart()) bsxcartridge.load();
   if(cartridge.has_bs_slot()) bsxflash.load();
-  if(cartridge.has_st_slot()) sufamiturbo.load();
+  if(cartridge.has_st_slots()) sufamiturbo.load();
   if(cartridge.has_nss_dip()) nss.load();
   if(cartridge.has_superfx()) superfx.load();
   if(cartridge.has_sa1()) sa1.load();
@@ -133,7 +133,7 @@ void System::unload() {
   #endif
   if(cartridge.has_bs_cart()) bsxcartridge.unload();
   if(cartridge.has_bs_slot()) bsxflash.unload();
-  if(cartridge.has_st_slot()) sufamiturbo.unload();
+  if(cartridge.has_st_slots()) sufamiturbo.unload();
   if(cartridge.has_nss_dip()) nss.unload();
   if(cartridge.has_superfx()) superfx.unload();
   if(cartridge.has_sa1()) sa1.unload();

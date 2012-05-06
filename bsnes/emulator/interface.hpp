@@ -12,29 +12,18 @@ struct Interface {
     double aspectRatio;
     unsigned frequency;
     bool resettable;
-
-    struct Media {
-      string name;
-      string extension;
-    };
-    vector<Media> media;
   } information;
 
   struct Media {
     unsigned id;
     string name;
-    string extension;
+    string type;
     string path;
+    string extension;
   };
-  vector<Media> firmware;
 
-  struct Schema : Media {
-    vector<Media> slot;
-    Schema(const Media &media) {
-      id = media.id, name = media.name, extension = media.extension, path = media.path;
-    }
-  };
-  vector<Schema> schema;
+  vector<Media> firmware;
+  vector<Media> media;
 
   struct Memory {
     unsigned id;
@@ -42,21 +31,24 @@ struct Interface {
   };
   vector<Memory> memory;
 
+  struct Device {
+    unsigned id;
+    unsigned portmask;
+    string name;
+    struct Input {
+      unsigned id;
+      unsigned type;  //0 = digital, 1 = analog
+      string name;
+      unsigned guid;
+    };
+    vector<Input> input;
+    vector<unsigned> order;
+  };
+  vector<Device> device;
+
   struct Port {
     unsigned id;
     string name;
-    struct Device {
-      unsigned id;
-      string name;
-      struct Input {
-        unsigned id;
-        unsigned type;  //0 = digital, 1 = analog
-        string name;
-        unsigned guid;
-      };
-      vector<Input> input;
-      vector<unsigned> order;
-    };
     vector<Device> device;
   };
   vector<Port> port;
@@ -94,6 +86,8 @@ struct Interface {
 
   //media interface
   virtual bool loaded() { return false; }
+  virtual string sha256() { return ""; }
+  virtual unsigned group(unsigned id) { return 0u; }
   virtual void load(unsigned id, const stream &memory, const string &markup = "") {}
   virtual void save(unsigned id, const stream &memory) {}
   virtual void unload() {}
@@ -107,6 +101,9 @@ struct Interface {
   //state functions
   virtual serializer serialize() = 0;
   virtual bool unserialize(serializer&) = 0;
+
+  //cheat functions
+  virtual void cheatSet(const lstring& = lstring{}) {}
 
   //utility functions
   virtual void updatePalette() {}

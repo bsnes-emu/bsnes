@@ -79,6 +79,9 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   settings = new Settings;
+  cheatDatabase = new CheatDatabase;
+  cheatEditor = new CheatEditor;
+  stateManager = new StateManager;
   windowManager->loadGeometry();
   presentation->setVisible();
 
@@ -105,7 +108,7 @@ Application::Application(int argc, char **argv) {
     run();
   }
 
-  if(active && system().loaded()) utility->unload();
+  utility->unload();
   config->save();
   browser->saveConfiguration();
   inputManager->saveConfiguration();

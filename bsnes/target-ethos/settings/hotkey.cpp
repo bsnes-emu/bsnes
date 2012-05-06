@@ -6,23 +6,23 @@ HotkeySettings::HotkeySettings() : activeInput(nullptr) {
 
   inputList.setHeaderText("Name", "Mapping");
   inputList.setHeaderVisible();
-  clearButton.setText("Clear");
+  eraseButton.setText("Erase");
 
   append(title, {~0, 0}, 5);
   append(inputList, {~0, ~0}, 5);
   append(controlLayout, {~0, 0});
     controlLayout.append(spacer, {~0, 0});
-    controlLayout.append(clearButton, {80, 0});
+    controlLayout.append(eraseButton, {80, 0});
 
   inputList.onChange = {&HotkeySettings::synchronize, this};
   inputList.onActivate = {&HotkeySettings::assignInput, this};
-  clearButton.onActivate = {&HotkeySettings::clearInput, this};
+  eraseButton.onActivate = {&HotkeySettings::eraseInput, this};
 
   refresh();
 }
 
 void HotkeySettings::synchronize() {
-  clearButton.setEnabled(inputList.selected());
+  eraseButton.setEnabled(inputList.selected());
 }
 
 void HotkeySettings::refresh() {
@@ -37,7 +37,7 @@ void HotkeySettings::refresh() {
   synchronize();
 }
 
-void HotkeySettings::clearInput() {
+void HotkeySettings::eraseInput() {
   activeInput = inputManager->hotkeyMap[inputList.selection()];
   inputEvent(Scancode::None, 1);
 }

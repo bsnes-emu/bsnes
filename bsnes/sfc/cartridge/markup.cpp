@@ -110,7 +110,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
 
-  interface->mediaRequest({ID::SuperGameBoyROM, "Game Boy", "gb", "program.rom"});
+  interface->mediaRequest({ID::SuperGameBoyROM, "Game Boy", "", "program.rom", "gb"});
 
   icd2.revision = max(1, numeral(root["revision"].data));
 
@@ -225,33 +225,12 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  string path = interface->path((unsigned)Slot::Base, firmware);
-  unsigned promsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 2048 : 16384);
-  unsigned dromsize = (necdsp.revision == NECDSP::Revision::uPD7725 ? 1024 :  2048);
-  unsigned filesize = promsize * 3 + dromsize * 2;
+  if(necdsp.revision == NECDSP::Revision::uPD7725) {
+    interface->mediaRequest({ID::Nec7725DSP, "", "", firmware});
+  }
 
-  file fp;
-  if(fp.open(path, file::mode::read) == false) {
-    interface->message({ "Warning: NEC DSP firmware ", firmware, " is missing." });
-  } else if(fp.size() != filesize) {
-    interface->message({ "Warning: NEC DSP firmware ", firmware, " is of the wrong file size." });
-    fp.close();
-  } else {
-    for(unsigned n = 0; n < promsize; n++) necdsp.programROM[n] = fp.readl(3);
-    for(unsigned n = 0; n < dromsize; n++) necdsp.dataROM[n] = fp.readl(2);
-
-    if(!sha256.empty()) {
-      //XML file specified SHA256 sum for program. Verify file matches the hash.
-      fp.seek(0);
-      uint8_t data[filesize];
-      fp.read(data, filesize);
-
-      if(sha256 != nall::sha256(data, filesize)) {
-        interface->message({ "Warning: NEC DSP firmware ", firmware, " SHA256 sum is incorrect." });
-      }
-    }
-
-    fp.close();
+  if(necdsp.revision == NECDSP::Revision::uPD96050) {
+    interface->mediaRequest({ID::Nec96050DSP, "", "", firmware});
   }
 
   for(auto &node : root) {
@@ -290,29 +269,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  string path = interface->path((unsigned)Slot::Base, firmware);
-  file fp;
-  if(fp.open(path, file::mode::read) == false) {
-    interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is missing." });
-  } else if(fp.size() != 1024 * 3) {
-    interface->message({ "Warning: Hitachi DSP firmware ", firmware, " is of the wrong file size." });
-    fp.close();
-  } else {
-    for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = fp.readl(3);
-
-    if(!sha256.empty()) {
-      //XML file specified SHA256 sum for program. Verify file matches the hash.
-      fp.seek(0);
-      uint8 data[3072];
-      fp.read(data, 3072);
-
-      if(sha256 != nall::sha256(data, 3072)) {
-        interface->message({ "Warning: Hitachi DSP firmware ", firmware, " SHA256 sum is incorrect." });
-      }
-    }
-
-    fp.close();
-  }
+  interface->mediaRequest({ID::HitachiDSP, "", "", firmware});
 
   for(auto &node : root) {
     if(node.name == "rom") {
@@ -340,24 +297,7 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  string path = interface->path((unsigned)Slot::Base, firmware);
-  file fp;
-  if(fp.open(path, file::mode::read) == false) {
-    interface->message({ "Warning: ARM DSP firmware ", firmware, " is missing." });
-  } else if(fp.size() != 160 * 1024) {
-    interface->message({ "Warning: ARM DSP firmware ", firmware, " is of the wrong file size." });
-    fp.close();
-  } else {
-    fp.read(armdsp.firmware, fp.size());
-
-    if(!sha256.empty()) {
-      if(sha256 != nall::sha256(armdsp.firmware, fp.size())) {
-        interface->message({ "Warning: ARM DSP firmware ", firmware, " SHA256 sum is incorrect." });
-      }
-    }
-
-    fp.close();
-  }
+  interface->mediaRequest({ID::ArmDSP, "", "", firmware});
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -372,7 +312,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   has_bs_cart = root["mmio"].exists();
   has_bs_slot = true;
 
-  interface->mediaRequest({ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom"});
+  interface->mediaRequest({ID::BsxFlashROM, "BS-X Satellaview", "", "program.rom", "bs"});
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
@@ -398,9 +338,10 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
 
 void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   if(root.exists() == false) return;
-  has_st_slot = true;
+  has_st_slots = true;
 
-  interface->mediaRequest({ID::SufamiTurboSlotAROM, "Sufami Turbo", "st", "program.rom"});
+  interface->mediaRequest({ID::SufamiTurboSlotAROM, "Sufami Turbo - Slot A", "", "program.rom", "st"});
+  interface->mediaRequest({ID::SufamiTurboSlotBROM, "Sufami Turbo - Slot B", "", "program.rom", "st"});
 
   for(auto &slot : root) {
     if(slot.name != "slot") continue;

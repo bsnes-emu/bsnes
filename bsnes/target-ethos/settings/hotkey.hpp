@@ -3,11 +3,11 @@ struct HotkeySettings : SettingsLayout {
   ListView inputList;
   HorizontalLayout controlLayout;
     Widget spacer;
-    Button clearButton;
+    Button eraseButton;
 
   void synchronize();
   void refresh();
-  void clearInput();
+  void eraseInput();
   void assignInput();
   void inputEvent(unsigned scancode, int16_t value);
   HotkeySettings();

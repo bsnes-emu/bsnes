@@ -10,6 +10,10 @@ struct ID {
     EEPROM,
     FlashROM,
   };
+
+  enum : unsigned {
+    Device = 1,
+  };
 };
 
 struct Interface : Emulator::Interface {

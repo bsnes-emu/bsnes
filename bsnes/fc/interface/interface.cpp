@@ -8,6 +8,10 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
+string Interface::sha256() {
+  return cartridge.sha256();
+}
+
 void Interface::load(unsigned id, const stream &stream, const string &markup) {
   if(id == ID::ROM) {
     cartridge.load(markup, stream);
@@ -52,6 +56,18 @@ bool Interface::unserialize(serializer &s) {
   return system.unserialize(s);
 }
 
+void Interface::cheatSet(const lstring &list) {
+  cheat.reset();
+  for(auto &code : list) {
+    lstring codelist = code.split("+");
+    for(auto &part : codelist) {
+      unsigned addr, data, comp;
+      if(Cheat::decode(part, addr, data, comp)) cheat.append({addr, data, comp});
+    }
+  }
+  cheat.synchronize();
+}
+
 void Interface::updatePalette() {
   video.generate_palette();
 }
@@ -67,35 +83,32 @@ Interface::Interface() {
   information.frequency   = 1789772;
   information.resettable  = true;
 
-  information.media.append({"Famicom", "fc"});
-
-  schema.append(Media{ID::ROM, "Famicom", "fc", "program.rom"});
+  media.append({ID::ROM, "Famicom", "sys", "program.rom", "fc"});
 
   {
-    Port port{0, "Port 1"};
-    port.device.append(controller());
-    this->port.append(port);
+    Device device{0, ID::Port1 | ID::Port2, "Controller"};
+    device.input.append({0, 0, "A"     });
+    device.input.append({1, 0, "B"     });
+    device.input.append({2, 0, "Select"});
+    device.input.append({3, 0, "Start" });
+    device.input.append({4, 0, "Up"    });
+    device.input.append({5, 0, "Down"  });
+    device.input.append({6, 0, "Left"  });
+    device.input.append({7, 0, "Right" });
+    device.order = {4, 5, 6, 7, 1, 0, 2, 3};
+    this->device.append(device);
   }
 
-  {
-    Port port{1, "Port 2"};
-    port.device.append(controller());
-    this->port.append(port);
-  }
-}
+  port.append({ID::Port1, "Port 1"});
+  port.append({ID::Port2, "Port 2"});
 
-Emulator::Interface::Port::Device Interface::controller() {
-  Port::Device device{0, "Controller"};
-  device.input.append({0, 0, "A"     });
-  device.input.append({1, 0, "B"     });
-  device.input.append({2, 0, "Select"});
-  device.input.append({3, 0, "Start" });
-  device.input.append({4, 0, "Up"    });
-  device.input.append({5, 0, "Down"  });
-  device.input.append({6, 0, "Left"  });
-  device.input.append({7, 0, "Right" });
-  device.order = {4, 5, 6, 7, 1, 0, 2, 3};
-  return device;
+  for(auto &device : this->device) {
+    for(auto &port : this->port) {
+      if(device.portmask & port.id) {
+        port.device.append(device);
+      }
+    }
+  }
 }
 
 }

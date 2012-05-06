@@ -21,8 +21,8 @@ struct Presentation : Window {
   vector<Emulator*> emulatorList;
 
   Menu loadMenu;
-    vector<Item*> loadListDirect;
-    vector<Item*> loadListSlotted;
+    vector<Item*> loadListSystem;
+    vector<Item*> loadListSubsystem;
   Menu settingsMenu;
     Menu videoMenu;
       RadioItem centerVideo;
@@ -41,6 +41,8 @@ struct Presentation : Window {
       Item loadStateItem[5];
     Separator stateMenuSeparator;
     Item resizeWindow;
+    Item cheatEditor;
+    Item stateManager;
 
   void synchronize();
   void setSystemName(const string &name);

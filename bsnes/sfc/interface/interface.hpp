@@ -5,16 +5,30 @@ namespace SuperFamicom {
 struct ID {
   enum : unsigned {
     IPLROM,
+    Nec7725DSP,
+    Nec96050DSP,
+    HitachiDSP,
+    ArmDSP,
     ROM,
     SuperGameBoyROM,
     BsxFlashROM,
     SufamiTurboSlotAROM,
     SufamiTurboSlotBROM,
     RAM,
+    NecDSPRAM,
     RTC,
     SPC7110RTC,
     BsxRAM,
     BsxPSRAM,
+    SuperGameBoyRAM,
+    SuperGameBoyRTC,
+    SufamiTurboSlotARAM,
+    SufamiTurboSlotBRAM,
+  };
+
+  enum : unsigned {
+    Port1 = 1,
+    Port2 = 2,
   };
 };
 
@@ -23,6 +37,8 @@ struct Interface : Emulator::Interface {
   virtual void message(const string &text) {}
 
   bool loaded();
+  string sha256();
+  unsigned group(unsigned id);
   void load(unsigned id, const stream &stream, const string &markup = "");
   void save(unsigned id, const stream &stream);
   void unload();
@@ -35,19 +51,11 @@ struct Interface : Emulator::Interface {
   serializer serialize();
   bool unserialize(serializer&);
 
+  void cheatSet(const lstring&);
+
   void updatePalette();
 
   Interface();
-
-private:
-  Port::Device none();
-  Port::Device controller();
-  Port::Device multitap();
-  Port::Device mouse();
-  Port::Device superScope();
-  Port::Device justifier();
-  Port::Device justifiers();
-  Port::Device usart();
 };
 
 extern Interface *interface;

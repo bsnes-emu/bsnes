@@ -1,14 +1,15 @@
 struct Utility {
-  string pathname;
-
   void setInterface(Emulator::Interface *emulator);
-  void loadSchema(Emulator::Interface *emulator, Emulator::Interface::Schema &schema);
+  void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname);
-  void saveMedia();
+  void loadMedia(Emulator::Interface::Media &media);
+  void loadMemory();
+  void saveMemory();
 
   void connect(unsigned port, unsigned device);
   void power();
   void reset();
+  void load();
   void unload();
 
   void saveState(unsigned slot);
@@ -23,6 +24,9 @@ struct Utility {
   void showMessage(const string &message);
 
   Utility();
+
+  lstring path;
+  lstring pathname;
 
 private:
   string statusText;

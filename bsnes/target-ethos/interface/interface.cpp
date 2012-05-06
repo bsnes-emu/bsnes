@@ -97,11 +97,5 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
 }
 
 void Interface::mediaRequest(Emulator::Interface::Media media) {
-  string pathname = browser->select({"Load ", media.name}, media.extension);
-  if(pathname.empty()) return;
-
-  string markup;
-  markup.readfile({pathname, "manifest.xml"});
-  mmapstream stream({pathname, media.path});
-  system().load(media.id, stream, markup);
+  utility->loadMedia(media);
 }

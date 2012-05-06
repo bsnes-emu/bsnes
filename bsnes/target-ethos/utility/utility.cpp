@@ -7,44 +7,69 @@ void Utility::setInterface(Emulator::Interface *emulator) {
   presentation->synchronize();
 }
 
-void Utility::loadSchema(Emulator::Interface *emulator, Emulator::Interface::Schema &schema) {
-  string pathname = application->path({schema.name, ".", schema.extension, "/"});
-  if(!directory::exists(pathname)) pathname = browser->select({"Load ", schema.name}, schema.extension);
-  if(!directory::exists(pathname)) return;
-
-  loadMedia(emulator, schema, pathname);
+void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
+  string pathname = application->path({media.name, ".", media.type, "/"});
+  if(!file::exists({pathname, media.path})) pathname = browser->select({"Load ", media.name}, media.extension);
+  if(!file::exists({pathname, media.path})) return;
+  loadMedia(emulator, media, pathname);
 }
 
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
   unload();
   setInterface(emulator);
-  this->pathname = pathname;
+  path(system().group(media.id)) = pathname;
+  if(media.type == "sys") this->pathname.append(pathname);
 
   string manifest;
   manifest.readfile({pathname, "manifest.xml"});
   auto memory = file::read({pathname, media.path});
   system().load(media.id, vectorstream{memory}, manifest);
 
+  if(this->pathname.size() == 0) this->pathname.append(pathname);
+  presentation->setSystemName(media.name);
+  load();
+}
+
+void Utility::loadMedia(Emulator::Interface::Media &media) {
+  string pathname = {path(system().group(media.id)), media.path};
+  if(file::exists(pathname)) {
+    mmapstream stream(pathname);
+    return system().load(media.id, stream);
+  }
+  if(media.name.empty()) return;
+
+  pathname = browser->select({"Load ", media.name}, media.extension);
+  if(pathname.empty()) return;
+  path(system().group(media.id)) = pathname;
+  this->pathname.append(pathname);
+
+  string markup;
+  markup.readfile({pathname, "manifest.xml"});
+  mmapstream stream({pathname, media.path});
+  system().load(media.id, stream, markup);
+}
+
+void Utility::loadMemory() {
   for(auto &memory : system().memory) {
+    string pathname = path(system().group(memory.id));
     filestream fs({pathname, memory.name});
     system().load(memory.id, fs);
   }
 
-  system().updatePalette();
-  dspaudio.setFrequency(emulator->information.frequency);
-
-  string displayname = pathname;
-  displayname.rtrim<1>("/");
-  presentation->setTitle(notdir(nall::basename(displayname)));
-  presentation->setSystemName(media.name);
-  resize();
+  cheatEditor->load({pathname[0], "cheats.xml"});
+  stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
 }
 
-void Utility::saveMedia() {
+void Utility::saveMemory() {
   for(auto &memory : system().memory) {
+    string pathname = path(system().group(memory.id));
     filestream fs({pathname, memory.name}, file::mode::write);
     system().save(memory.id, fs);
   }
+
+  mkdir(string{pathname[0], "bsnes/"}, 0755);
+  cheatEditor->save({pathname[0], "cheats.xml"});
+  stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);
 }
 
 void Utility::connect(unsigned port, unsigned device) {
@@ -62,12 +87,37 @@ void Utility::reset() {
   system().reset();
 }
 
-void Utility::unload() {
-  if(application->active) {
-    saveMedia();
-    system().unload();
-    setInterface(nullptr);
+void Utility::load() {
+  string title;
+  for(auto &path : pathname) {
+    string name = path;
+    name.rtrim<1>("/");
+    title.append(notdir(nall::basename(name)), " + ");
   }
+  title.rtrim<1>(" + ");
+  presentation->setTitle(title);
+
+  loadMemory();
+
+  system().updatePalette();
+  dspaudio.setFrequency(system().information.frequency);
+
+  resize();
+  cheatEditor->synchronize();
+  cheatEditor->refresh();
+}
+
+void Utility::unload() {
+  if(application->active == nullptr) return;
+
+  saveMemory();
+  system().unload();
+  path.reset();
+  pathname.reset();
+  cheatEditor->reset();
+  stateManager->reset();
+  setInterface(nullptr);
+
   presentation->setTitle({Emulator::Name, " v", Emulator::Version});
   video.clear();
 }
@@ -76,14 +126,14 @@ void Utility::saveState(unsigned slot) {
   if(application->active == nullptr) return;
   serializer s = system().serialize();
   if(s.size() == 0) return;
-  mkdir(string{pathname, "bsnes/"}, 0755);
-  if(file::write({pathname, "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
+  mkdir(string{pathname[0], "bsnes/"}, 0755);
+  if(file::write({pathname[0], "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
   showMessage({"Save to slot ", slot});
 }
 
 void Utility::loadState(unsigned slot) {
   if(application->active == nullptr) return;
-  auto memory = file::read({pathname, "bsnes/state-", slot, ".bsa"});
+  auto memory = file::read({pathname[0], "bsnes/state-", slot, ".bsa"});
   if(memory.size() == 0) return;
   serializer s(memory.data(), memory.size());
   if(system().unserialize(s) == false) return;

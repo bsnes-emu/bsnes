@@ -7,10 +7,16 @@ struct ID {
     ROM,
     RAM,
   };
+
+  enum : unsigned {
+    Port1 = 1,
+    Port2 = 2,
+  };
 };
 
 struct Interface : Emulator::Interface {
   bool loaded();
+  string sha256();
   void load(unsigned id, const stream &stream, const string &markup = "");
   void save(unsigned id, const stream &stream);
   void unload();
@@ -22,12 +28,11 @@ struct Interface : Emulator::Interface {
   serializer serialize();
   bool unserialize(serializer&);
 
+  void cheatSet(const lstring&);
+
   void updatePalette();
 
   Interface();
-
-private:
-  Port::Device controller();
 };
 
 extern Interface *interface;

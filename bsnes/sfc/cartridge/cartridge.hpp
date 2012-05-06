@@ -25,7 +25,7 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_gb_slot;
   readonly<bool> has_bs_cart;
   readonly<bool> has_bs_slot;
-  readonly<bool> has_st_slot;
+  readonly<bool> has_st_slots;
   readonly<bool> has_nss_dip;
   readonly<bool> has_superfx;
   readonly<bool> has_sa1;

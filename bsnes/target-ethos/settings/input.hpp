@@ -12,18 +12,20 @@ struct InputSettings : SettingsLayout {
   HorizontalLayout controlLayout;
     Button assign[3];
     Widget spacer;
-    Button clearButton;
+    Button resetButton;
+    Button eraseButton;
 
   void synchronize();
 
   Emulator::Interface& activeSystem();
   Emulator::Interface::Port& activePort();
-  Emulator::Interface::Port::Device& activeDevice();
+  Emulator::Interface::Device& activeDevice();
 
   void systemChanged();
   void portChanged();
   void deviceChanged();
-  void clearInput();
+  void resetInput();
+  void eraseInput();
   void assignInput();
   void assignMouseInput(unsigned n);
   void inputEvent(unsigned scancode, int16_t value, bool allowMouseInput = false);

@@ -11,6 +11,10 @@ struct ID {
     GameBoyColorROM,
     RAM,
   };
+
+  enum : unsigned {
+    Device = 1,
+  };
 };
 
 struct Interface : Emulator::Interface {
@@ -19,6 +23,7 @@ struct Interface : Emulator::Interface {
   virtual void joypWrite(bool p15, bool p14) {}
 
   bool loaded();
+  string sha256();
   void load(unsigned id, const stream &stream, const string &markup = "");
   void save(unsigned id, const stream &stream);
   void unload();
@@ -29,6 +34,8 @@ struct Interface : Emulator::Interface {
 
   serializer serialize();
   bool unserialize(serializer&);
+
+  void cheatSet(const lstring&);
 
   void updatePalette();
 

@@ -60,7 +60,7 @@ void System::serialize_all(serializer &s) {
   #if defined(GAMEBOY)
   if(cartridge.has_gb_slot()) icd2.serialize(s);
   #endif
-  if(cartridge.has_st_slot()) sufamiturbo.serialize(s);
+  if(cartridge.has_st_slots()) sufamiturbo.serialize(s);
   if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);
   if(cartridge.has_necdsp()) necdsp.serialize(s);

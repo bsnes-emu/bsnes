@@ -19,7 +19,7 @@ void Application::bootstrap() {
     system->callback.mediaRequest = {&Interface::mediaRequest, interface};
 
     for(auto &firmware : system->firmware) {
-      filestream fs{application->path({firmware.name, ".", firmware.extension, "/", firmware.path})};
+      filestream fs{application->path({firmware.name, ".", firmware.type, "/", firmware.path})};
       system->load(firmware.id, fs);
     }
   }

@@ -86,31 +86,27 @@ Interface::Interface() {
   information.frequency   = 32768;
   information.resettable  = false;
 
-  information.media.append({"Game Boy Advance", "gba"});
-
   firmware.append({ID::BIOS, "Game Boy Advance", "sys", "bios.rom"});
 
-  schema.append(Media{ID::ROM, "Game Boy Advance", "gba", "program.rom"});
+  media.append({ID::ROM, "Game Boy Advance", "sys", "program.rom", "gba"});
 
   {
-    Port port{0, "Device"};
-    {
-      Port::Device device{0, "Controller"};
-      device.input.append({0, 0, "A"     });
-      device.input.append({1, 0, "B"     });
-      device.input.append({2, 0, "Select"});
-      device.input.append({3, 0, "Start" });
-      device.input.append({4, 0, "Right" });
-      device.input.append({5, 0, "Left"  });
-      device.input.append({6, 0, "Up"    });
-      device.input.append({7, 0, "Down"  });
-      device.input.append({8, 0, "R"     });
-      device.input.append({9, 0, "L"     });
-      device.order = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3};
-      port.device.append(device);
-    }
-    this->port.append(port);
+    Device device{0, ID::Device, "Controller"};
+    device.input.append({0, 0, "A"     });
+    device.input.append({1, 0, "B"     });
+    device.input.append({2, 0, "Select"});
+    device.input.append({3, 0, "Start" });
+    device.input.append({4, 0, "Right" });
+    device.input.append({5, 0, "Left"  });
+    device.input.append({6, 0, "Up"    });
+    device.input.append({7, 0, "Down"  });
+    device.input.append({8, 0, "R"     });
+    device.input.append({9, 0, "L"     });
+    device.order = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3};
+    this->device.append(device);
   }
+
+  port.append({ID::Device, "Device", {device[0]}});
 }
 
 }
