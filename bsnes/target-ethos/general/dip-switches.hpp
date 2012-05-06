@@ -1,23 +1,25 @@
 struct DipSwitch : HorizontalLayout {
   Label name;
   ComboBox value;
+  vector<unsigned> values;
 
   DipSwitch();
 };
 
 struct DipSwitches : Window {
-  VerticalLayout layout;
-  DipSwitch dip[8];
-  HorizontalLayout controlLayout;
-  Widget spacer;
-  Button acceptButton;
+  enum : unsigned { Slots = 8 };
 
-  void load();
-  void accept();
+  VerticalLayout layout;
+  DipSwitch dip[Slots];
+  HorizontalLayout controlLayout;
+    Widget spacer;
+    Button accept;
+
+  unsigned run(const XML::Node &node);
   DipSwitches();
 
 private:
-  unsigned values[8][16];
+  bool quit;
 };
 
 extern DipSwitches *dipSwitches;

@@ -562,6 +562,10 @@ void RadioItem::setText(const string &text) {
   return p.setText(text);
 }
 
+string RadioItem::text() {
+  return state.text;
+}
+
 RadioItem::RadioItem():
 state(*new State),
 base_from_member<pRadioItem&>(*new pRadioItem(*this)),
@@ -848,6 +852,14 @@ unsigned ComboBox::selection() {
 void ComboBox::setSelection(unsigned row) {
   state.selection = row;
   return p.setSelection(row);
+}
+
+string ComboBox::text() {
+  return state.text(selection());
+}
+
+string ComboBox::text(unsigned row) {
+  return state.text(row);
 }
 
 ComboBox::ComboBox():

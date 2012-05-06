@@ -30,6 +30,10 @@ struct Presentation : Window {
       RadioItem stretchVideo;
       CheckItem aspectCorrection;
       CheckItem maskOverscan;
+    Menu shaderMenu;
+      RadioItem shaderNone;
+      RadioItem shaderBlur;
+      vector<RadioItem*> shaderList;
     CheckItem synchronizeVideo;
     CheckItem synchronizeAudio;
     CheckItem muteAudio;
@@ -46,6 +50,7 @@ struct Presentation : Window {
 
   void synchronize();
   void setSystemName(const string &name);
+  void loadShaders();
   void bootstrap();
   Presentation();
 

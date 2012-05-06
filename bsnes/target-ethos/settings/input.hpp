@@ -24,6 +24,7 @@ struct InputSettings : SettingsLayout {
   void systemChanged();
   void portChanged();
   void deviceChanged();
+  void inputChanged();
   void resetInput();
   void eraseInput();
   void assignInput();

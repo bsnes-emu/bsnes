@@ -22,10 +22,7 @@ void Link::init() {
 
 void Link::load() {
   if(opened()) close();
-  string basename = interface->path((unsigned)Cartridge::Slot::Base, "");
-  string name = program != "" ? program : notdir(basename);
-  string path = dir(basename);
-  if(open(name, path)) {
+  if(open("link.so", interface->path(0))) {
     link_power = sym("link_power");
     link_reset = sym("link_reset");
     link_run   = sym("link_run"  );

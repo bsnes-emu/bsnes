@@ -59,6 +59,8 @@ struct Interface {
     function<void (int16_t, int16_t)> audioSample;
     function<int16_t (unsigned, unsigned, unsigned)> inputPoll;
     function<void (Media)> mediaRequest;
+    function<unsigned (const XML::Node&)> dipSettings;
+    function<string (unsigned)> path;
   } callback;
 
   //callback bindings (provided by user interface)
@@ -83,6 +85,20 @@ struct Interface {
   virtual void mediaRequest(Media media) {
     if(callback.mediaRequest) return callback.mediaRequest(media);
   }
+
+  virtual unsigned dipSettings(const XML::Node &node) {
+    if(callback.dipSettings) return callback.dipSettings(node);
+    return 0u;
+  }
+
+  virtual string path(unsigned group) {
+    if(callback.path) return callback.path(group);
+    return "";
+  }
+
+  //information
+  virtual double videoFrequency() = 0;
+  virtual double audioFrequency() = 0;
 
   //media interface
   virtual bool loaded() { return false; }

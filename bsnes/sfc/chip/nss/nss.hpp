@@ -1,5 +1,6 @@
-class NSS {
-public:
+struct NSS {
+  uint16 dip;
+
   void init();
   void load();
   void unload();
@@ -9,9 +10,6 @@ public:
   void set_dip(uint16 dip);
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
-
-private:
-  uint16 dip;
 };
 
 extern NSS nss;

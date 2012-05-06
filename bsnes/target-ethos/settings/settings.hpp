@@ -10,6 +10,8 @@ struct SettingsLayout : HorizontalLayout {
 #include "audio.hpp"
 #include "input.hpp"
 #include "hotkey.hpp"
+#include "timing.hpp"
+#include "driver.hpp"
 
 struct Settings : Window {
   HorizontalLayout layout;

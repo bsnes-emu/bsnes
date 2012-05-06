@@ -1,6 +1,5 @@
 struct Input {
   enum class Device : unsigned {
-    None,
     Joypad,
     Multitap,
     Mouse,
@@ -8,6 +7,7 @@ struct Input {
     Justifier,
     Justifiers,
     USART,
+    None,
   };
 
   enum class JoypadID : unsigned {

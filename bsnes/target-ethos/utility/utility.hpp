@@ -15,7 +15,9 @@ struct Utility {
   void saveState(unsigned slot);
   void loadState(unsigned slot);
 
+  void synchronizeDSP();
   void synchronizeRuby();
+  void updateShader();
   void resize(bool resizeWindow = false);
   void toggleFullScreen();
 

@@ -4,6 +4,14 @@ namespace Famicom {
 
 Interface *interface = nullptr;
 
+double Interface::videoFrequency() {
+  return 21477272.0 / (262.0 * 1364.0 - 4.0);
+}
+
+double Interface::audioFrequency() {
+  return 21477272.0 / 12.0;
+}
+
 bool Interface::loaded() {
   return cartridge.loaded();
 }

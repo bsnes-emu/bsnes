@@ -60,10 +60,7 @@
 
 #if defined(_WIN32)
   #define getcwd      _getcwd
-  #define ftruncate   _chsize
-  #define mkdir(n, m) _wmkdir(nall::utf16_t(n))
   #define putenv      _putenv
-  #define rmdir       _rmdir
   #define vsnprintf   _vsnprintf
   inline void usleep(unsigned milliseconds) { Sleep(milliseconds / 1000); }
 #endif

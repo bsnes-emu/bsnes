@@ -33,8 +33,8 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  virtual string path(unsigned slot, const string &hint) { return ""; }
-  virtual void message(const string &text) {}
+  double videoFrequency();
+  double audioFrequency();
 
   bool loaded();
   string sha256();

@@ -2,7 +2,6 @@
 
 void Cartridge::parse_markup(const char *markup) {
   mapping.reset();
-  information.nss.setting.reset();
 
   XML::Document document(markup);
   auto &cartridge = document["cartridge"];
@@ -89,20 +88,8 @@ void Cartridge::parse_markup_ram(XML::Node &root) {
 void Cartridge::parse_markup_nss(XML::Node &root) {
   if(root.exists() == false) return;
   has_nss_dip = true;
-  for(auto &node : root) {
-    if(node.name != "setting") continue;
-    unsigned number = information.nss.setting.size();
-    if(number >= 16) break;  //more than 16 DIP switches is not physically possible
 
-    information.nss.option[number].reset();
-    information.nss.setting.append(node["name"].data);
-    for(auto &leaf : node) {
-      if(leaf.name != "option") continue;
-      string name = leaf["name"].data;
-      unsigned value = numeral(leaf["value"].data);
-      information.nss.option[number].append({ hex<4>(value), ":", name });
-    }
-  }
+  nss.dip = interface->dipSettings(root);
 }
 
 void Cartridge::parse_markup_icd2(XML::Node &root) {
@@ -467,7 +454,7 @@ void Cartridge::parse_markup_obc1(XML::Node &root) {
 
 void Cartridge::parse_markup_msu1(XML::Node &root) {
   if(root.exists() == false) {
-    has_msu1 = file::exists(interface->path((unsigned)Cartridge::Slot::Base, "msu1.rom"));
+    has_msu1 = file::exists({interface->path(0), "msu1.rom"});
     if(has_msu1) {
       Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
       m.banklo = 0x00, m.bankhi = 0x3f, m.addrlo = 0x2000, m.addrhi = 0x2007;

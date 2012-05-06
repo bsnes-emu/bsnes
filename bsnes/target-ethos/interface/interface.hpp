@@ -4,6 +4,8 @@ struct Interface {
   void audioSample(int16_t lsample, int16_t rsample);
   int16_t inputPoll(unsigned port, unsigned device, unsigned input);
   void mediaRequest(Emulator::Interface::Media media);
+  unsigned dipSettings(const XML::Node &node);
+  string path(unsigned group);
 };
 
 extern Interface *interface;

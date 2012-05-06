@@ -22,6 +22,9 @@ struct Interface : Emulator::Interface {
   virtual void lcdScanline() {}
   virtual void joypWrite(bool p15, bool p14) {}
 
+  double videoFrequency();
+  double audioFrequency();
+
   bool loaded();
   string sha256();
   void load(unsigned id, const stream &stream, const string &markup = "");

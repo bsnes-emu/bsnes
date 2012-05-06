@@ -22,6 +22,24 @@ namespace nall {
     enum class index : unsigned { absolute, relative };
     enum class time : unsigned { create, modify, access };
 
+    static bool remove(const string &filename) {
+      return unlink(filename) == 0;
+    }
+
+    static bool truncate(const string &filename, unsigned size) {
+      #if !defined(_WIN32)
+      return truncate(filename, size) == 0;
+      #else
+      bool result = false;
+      FILE *fp = fopen(filename, "rb+");
+      if(fp) {
+        result = _chsize(fileno(fp), size) == 0;
+        fclose(fp);
+      }
+      return result;
+      #endif
+    }
+
     static vector<uint8_t> read(const string &filename) {
       vector<uint8_t> memory;
       file fp;

@@ -1,6 +1,8 @@
 struct Configuration : configuration {
   struct Video {
+    string driver;
     bool synchronize;
+    string shader;
     unsigned scaleMode;
     bool aspectCorrection;
     bool maskOverscan;
@@ -12,6 +14,7 @@ struct Configuration : configuration {
   } video;
 
   struct Audio {
+    string driver;
     bool synchronize;
     unsigned frequency;
     unsigned latency;
@@ -21,9 +24,15 @@ struct Configuration : configuration {
   } audio;
 
   struct Input {
+    string driver;
     bool focusPause;
     bool focusAllow;
   } input;
+
+  struct Timing {
+    double video;
+    double audio;
+  } timing;
 
   void load();
   void save();

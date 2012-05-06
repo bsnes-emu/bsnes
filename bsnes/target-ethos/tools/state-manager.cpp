@@ -97,7 +97,7 @@ bool StateManager::save(const string &filename, unsigned revision) {
   bool hasSave = false;
   for(auto &slot : this->slot) hasSave |= slot.capacity() > 0;
   if(hasSave == false) {
-    unlink(filename);
+    file::remove(filename);
     return true;
   }
 

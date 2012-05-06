@@ -3,6 +3,8 @@
 #include "audio.cpp"
 #include "input.cpp"
 #include "hotkey.cpp"
+#include "timing.cpp"
+#include "driver.cpp"
 Settings *settings = nullptr;
 
 void SettingsLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
@@ -28,6 +30,8 @@ Settings::Settings() {
   panelList.append("Audio");
   panelList.append("Input");
   panelList.append("Hotkeys");
+  panelList.append("Timing");
+  panelList.append("Driver");
 
   append(layout);
   layout.append(panelList, {120, ~0}, 5);
@@ -35,6 +39,8 @@ Settings::Settings() {
   append(*audioSettings);
   append(*inputSettings);
   append(*hotkeySettings);
+  append(*timingSettings);
+  append(*driverSettings);
 
   panelList.onChange = {&Settings::panelChanged, this};
 
@@ -43,10 +49,13 @@ Settings::Settings() {
 }
 
 void Settings::panelChanged() {
+  setStatusText("");
   videoSettings->setVisible(false);
   audioSettings->setVisible(false);
   inputSettings->setVisible(false);
   hotkeySettings->setVisible(false);
+  timingSettings->setVisible(false);
+  driverSettings->setVisible(false);
   if(panelList.selected() == false) return;
 
   switch(panelList.selection()) {
@@ -54,5 +63,7 @@ void Settings::panelChanged() {
   case 1: return audioSettings->setVisible();
   case 2: return inputSettings->setVisible();
   case 3: return hotkeySettings->setVisible();
+  case 4: return timingSettings->setVisible();
+  case 5: return driverSettings->setVisible();
   }
 }

@@ -289,6 +289,7 @@ struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   bool checked();
   void setChecked();
   void setText(const nall::string &text);
+  nall::string text();
 
   RadioItem();
   ~RadioItem();
@@ -403,6 +404,8 @@ struct ComboBox : private nall::base_from_member<pComboBox&>, Widget {
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
+  nall::string text();
+  nall::string text(unsigned row);
 
   ComboBox();
   ~ComboBox();

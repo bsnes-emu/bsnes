@@ -4,6 +4,14 @@ namespace GameBoyAdvance {
 
 Interface *interface = nullptr;
 
+double Interface::videoFrequency() {
+  return 16777216.0 / (228.0 * 1232.0);
+}
+
+double Interface::audioFrequency() {
+  return 16777216.0 / 512.0;
+}
+
 bool Interface::loaded() {
   return cartridge.loaded();
 }

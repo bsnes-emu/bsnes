@@ -68,14 +68,6 @@ struct Cartridge : property<Cartridge> {
   };
   linear_vector<Mapping> mapping;
 
-  struct Information {
-    string markup;
-    struct NSS {
-      lstring setting;
-      lstring option[16];
-    } nss;
-  } information;
-
   void load(const string &markup, const stream &stream);
   void unload();
 

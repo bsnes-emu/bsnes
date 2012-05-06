@@ -99,3 +99,11 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
 void Interface::mediaRequest(Emulator::Interface::Media media) {
   utility->loadMedia(media);
 }
+
+unsigned Interface::dipSettings(const XML::Node &node) {
+  return dipSwitches->run(node);
+}
+
+string Interface::path(unsigned group) {
+  return utility->path(group);
+}

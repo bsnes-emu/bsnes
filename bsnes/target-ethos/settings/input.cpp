@@ -114,6 +114,13 @@ void InputSettings::portChanged() {
 
 void InputSettings::deviceChanged() {
   inputList.reset();
+  for(unsigned number : activeDevice().order) inputList.append("", "");
+  inputChanged();
+  synchronize();
+}
+
+void InputSettings::inputChanged() {
+  unsigned index = 0;
   for(unsigned number : activeDevice().order) {
     auto &input = activeDevice().input[number];
     auto abstract = inputManager->inputMap(input.guid);
@@ -121,9 +128,8 @@ void InputSettings::deviceChanged() {
     mapping.replace("KB0::", "");
     mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " or ");
-    inputList.append(input.name, mapping);
+    inputList.modify(index++, input.name, mapping);
   }
-  synchronize();
 }
 
 void InputSettings::resetInput() {
@@ -176,7 +182,7 @@ void InputSettings::inputEvent(unsigned scancode, int16_t value, bool allowMouse
   if(activeInput->bind(scancode, value) == false) return;
 
   activeInput = nullptr;
-  deviceChanged();
+  inputChanged();
   settings->setStatusText("");
   settings->layout.setEnabled(true);
   setEnabled(true);

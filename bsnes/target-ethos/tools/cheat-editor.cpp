@@ -153,7 +153,7 @@ bool CheatEditor::save(const string &filename) {
   }
 
   if(lastSave == -1) {
-    unlink(filename);
+    file::remove(filename);
     return true;
   }
 

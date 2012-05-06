@@ -94,6 +94,15 @@ void System::term() {
 }
 
 void System::load() {
+  region = config.region;
+  expansion = config.expansion_port;
+  if(region == Region::Autodetect) {
+    region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
+  }
+
+  cpu_frequency = region() == Region::NTSC ? config.cpu.ntsc_frequency : config.cpu.pal_frequency;
+  apu_frequency = region() == Region::NTSC ? config.smp.ntsc_frequency : config.smp.pal_frequency;
+
   audio.coprocessor_enable(false);
 
   bus.map_reset();
@@ -150,15 +159,6 @@ void System::unload() {
 
 void System::power() {
   random.seed((unsigned)time(0));
-
-  region = config.region;
-  expansion = config.expansion_port;
-  if(region == Region::Autodetect) {
-    region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
-  }
-
-  cpu_frequency = region() == Region::NTSC ? config.cpu.ntsc_frequency : config.cpu.pal_frequency;
-  apu_frequency = region() == Region::NTSC ? config.smp.ntsc_frequency : config.smp.pal_frequency;
 
   cpu.power();
   smp.power();

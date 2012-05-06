@@ -18,6 +18,7 @@ HotkeySettings::HotkeySettings() : activeInput(nullptr) {
   inputList.onActivate = {&HotkeySettings::assignInput, this};
   eraseButton.onActivate = {&HotkeySettings::eraseInput, this};
 
+  for(auto &hotkey : inputManager->hotkeyMap) inputList.append("", "");
   refresh();
 }
 
@@ -26,13 +27,13 @@ void HotkeySettings::synchronize() {
 }
 
 void HotkeySettings::refresh() {
-  inputList.reset();
+  unsigned index = 0;
   for(auto &hotkey : inputManager->hotkeyMap) {
     string mapping = hotkey->mapping;
     mapping.replace("KB0::", "");
     mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " and ");
-    inputList.append(hotkey->name, mapping);
+    inputList.modify(index++, hotkey->name, mapping);
   }
   synchronize();
 }

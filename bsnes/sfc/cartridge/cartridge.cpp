@@ -9,7 +9,6 @@ namespace SuperFamicom {
 Cartridge cartridge;
 
 void Cartridge::load(const string &markup, const stream &stream) {
-  information.markup = markup;
   rom.copy(stream);
 
   region = Region::NTSC;

@@ -5,8 +5,7 @@ Application *application = nullptr;
 DSP dspaudio;
 
 Emulator::Interface& system() {
-  struct application_interface_null{};
-  if(application->active == nullptr) throw application_interface_null();
+  if(application->active == nullptr) throw;
   return *application->active;
 }
 
@@ -47,7 +46,7 @@ Application::Application(int argc, char **argv) {
   } else {
     userpath.append(".config/ethos/");
   }
-  mkdir(userpath, 0755);
+  directory::create(userpath);
 
   bootstrap();
   active = nullptr;
@@ -64,20 +63,23 @@ Application::Application(int argc, char **argv) {
     monospaceFont = "Liberation Mono, 8";
   }
 
-  video.driver("OpenGL");
-  audio.driver("ALSA");
-  input.driver("SDL");
-
   config = new Configuration;
+  video.driver(config->video.driver);
+  audio.driver(config->audio.driver);
+  input.driver(config->input.driver);
+
   utility = new Utility;
   inputManager = new InputManager;
   windowManager = new WindowManager;
   browser = new Browser;
   presentation = new Presentation;
+  dipSwitches = new DipSwitches;
   videoSettings = new VideoSettings;
   audioSettings = new AudioSettings;
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
+  timingSettings = new TimingSettings;
+  driverSettings = new DriverSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;
   cheatEditor = new CheatEditor;
@@ -89,19 +91,20 @@ Application::Application(int argc, char **argv) {
   if(!video.cap(Video::Depth) || !video.set(Video::Depth, depth = 30u)) {
     video.set(Video::Depth, depth = 24u);
   }
-  video.init();
+  if(video.init() == false) { video.driver("None"); video.init(); }
 
   audio.set(Audio::Handle, presentation->viewport.handle());
-  audio.init();
+  if(audio.init() == false) { audio.driver("None"); audio.init(); }
 
   input.set(Input::Handle, presentation->viewport.handle());
-  input.init();
+  if(input.init() == false) { input.driver("None"); input.init(); }
 
   dspaudio.setPrecision(16);
   dspaudio.setBalance(0.0);
   dspaudio.setFrequency(96000);
 
   utility->synchronizeRuby();
+  utility->updateShader();
 
   while(quit == false) {
     OS::processEvents();

@@ -15,6 +15,9 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
+  double videoFrequency();
+  double audioFrequency();
+
   bool loaded();
   string sha256();
   void load(unsigned id, const stream &stream, const string &markup = "");

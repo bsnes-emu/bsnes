@@ -67,7 +67,7 @@ void Utility::saveMemory() {
     system().save(memory.id, fs);
   }
 
-  mkdir(string{pathname[0], "bsnes/"}, 0755);
+  directory::create({pathname[0], "bsnes/"});
   cheatEditor->save({pathname[0], "cheats.xml"});
   stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);
 }
@@ -100,7 +100,7 @@ void Utility::load() {
   loadMemory();
 
   system().updatePalette();
-  dspaudio.setFrequency(system().information.frequency);
+  synchronizeDSP();
 
   resize();
   cheatEditor->synchronize();
@@ -118,15 +118,18 @@ void Utility::unload() {
   stateManager->reset();
   setInterface(nullptr);
 
-  presentation->setTitle({Emulator::Name, " v", Emulator::Version});
   video.clear();
+  audio.clear();
+  presentation->setTitle({Emulator::Name, " v", Emulator::Version});
+  cheatEditor->synchronize();
+  stateManager->synchronize();
 }
 
 void Utility::saveState(unsigned slot) {
   if(application->active == nullptr) return;
   serializer s = system().serialize();
   if(s.size() == 0) return;
-  mkdir(string{pathname[0], "bsnes/"}, 0755);
+  directory::create({pathname[0], "bsnes/"});
   if(file::write({pathname[0], "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
   showMessage({"Save to slot ", slot});
 }
@@ -138,6 +141,20 @@ void Utility::loadState(unsigned slot) {
   serializer s(memory.data(), memory.size());
   if(system().unserialize(s) == false) return;
   showMessage({"Loaded from slot ", slot});
+}
+
+void Utility::synchronizeDSP() {
+  if(application->active == nullptr) return;
+
+  if(config->video.synchronize == false) {
+    return dspaudio.setFrequency(system().audioFrequency());
+  }
+
+  double inputRatio = system().audioFrequency() / system().videoFrequency();
+  double outputRatio = config->timing.audio / config->timing.video;
+  double frequency = inputRatio / outputRatio * config->audio.frequency;
+
+  dspaudio.setFrequency(frequency);
 }
 
 void Utility::synchronizeRuby() {
@@ -153,6 +170,22 @@ void Utility::synchronizeRuby() {
   }
   dspaudio.setResamplerFrequency(config->audio.frequency);
   dspaudio.setVolume(config->audio.mute ? 0.0 : config->audio.volume * 0.01);
+}
+
+void Utility::updateShader() {
+  if(config->video.shader == "None") {
+    video.set(Video::Shader, (const char*)"");
+    video.set(Video::Filter, 0u);
+    return;
+  }
+  if(config->video.shader == "Blur") {
+    video.set(Video::Shader, (const char*)"");
+    video.set(Video::Filter, 1u);
+    return;
+  }
+  string data;
+  data.readfile(config->video.shader);
+  video.set(Video::Shader, (const char*)data);
 }
 
 void Utility::resize(bool resizeWindow) {

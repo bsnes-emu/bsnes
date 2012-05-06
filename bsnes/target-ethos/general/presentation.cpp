@@ -9,6 +9,15 @@ void Presentation::synchronize() {
     }
   }
 
+  shaderNone.setChecked();
+  if(config->video.shader == "None") shaderNone.setChecked();
+  if(config->video.shader == "Blur") shaderBlur.setChecked();
+  for(auto &shader : shaderList) {
+    string name = notdir(nall::basename(config->video.shader));
+    if(auto position = name.position(".")) name[position()] = 0;
+    if(name == shader->text()) shader->setChecked();
+  }
+
   switch(config->video.scaleMode) {
   case 0: centerVideo.setChecked(); break;
   case 1: scaleVideo.setChecked(); break;
@@ -29,6 +38,7 @@ void Presentation::setSystemName(const string &name) {
 
 Presentation::Presentation() : active(nullptr) {
   bootstrap();
+  loadShaders();
   setGeometry({1024, 600, 720, 480});
   windowManager->append(this, "Presentation");
 
@@ -46,6 +56,9 @@ Presentation::Presentation() : active(nullptr) {
       RadioItem::group(centerVideo, scaleVideo, stretchVideo);
       aspectCorrection.setText("Aspect Correction");
       maskOverscan.setText("Mask Overscan");
+    shaderMenu.setText("Shader");
+      shaderNone.setText("None");
+      shaderBlur.setText("Blur");
     synchronizeVideo.setText("Synchronize Video");
     synchronizeAudio.setText("Synchronize Audio");
     muteAudio.setText("Mute Audio");
@@ -69,6 +82,10 @@ Presentation::Presentation() : active(nullptr) {
   append(settingsMenu);
     settingsMenu.append(videoMenu);
       videoMenu.append(centerVideo, scaleVideo, stretchVideo, *new Separator, aspectCorrection, maskOverscan);
+    settingsMenu.append(shaderMenu);
+      shaderMenu.append(shaderNone, shaderBlur);
+      if(shaderList.size() > 0) shaderMenu.append(*new Separator);
+      for(auto &shader : shaderList) shaderMenu.append(*shader);
     settingsMenu.append(*new Separator);
     settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
     settingsMenu.append(*new Separator);
@@ -87,6 +104,8 @@ Presentation::Presentation() : active(nullptr) {
   onSize = [&] { utility->resize(); };
   onClose = [&] { application->quit = true; };
 
+  shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
+  shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
   centerVideo.onActivate  = [&] { config->video.scaleMode = 0; utility->resize(); };
   scaleVideo.onActivate   = [&] { config->video.scaleMode = 1; utility->resize(); };
   stretchVideo.onActivate = [&] { config->video.scaleMode = 2; utility->resize(); };
@@ -135,7 +154,7 @@ void Presentation::bootstrap() {
       for(auto &device : port.device) {
         auto iDevice = new RadioItem;
         iDevice->setText(device.name);
-        iDevice->onActivate = [=] { utility->connect(portNumber, deviceNumber); };
+        iDevice->onActivate = [=] { utility->connect(portNumber, device.id); };
         iPort->group.append(*iDevice);
         iPort->device.append(iDevice);
         deviceNumber++;
@@ -168,4 +187,26 @@ void Presentation::bootstrap() {
 
     emulatorList.append(iEmulator);
   }
+}
+
+void Presentation::loadShaders() {
+  string pathname = application->path("Video Shaders/");
+  lstring files = directory::files(pathname);
+  for(auto &filename : files) {
+    auto shader = new RadioItem;
+    string name = filename;
+    if(auto position = name.position(".")) name[position()] = 0;
+    shader->setText(name);
+    shader->onActivate = [=] {
+      config->video.shader = {pathname, filename};
+      utility->updateShader();
+    };
+    shaderList.append(shader);
+  }
+
+  set<RadioItem&> group;
+  group.append(shaderNone);
+  group.append(shaderBlur);
+  for(auto &shader : shaderList) group.append(*shader);
+  RadioItem::group(group);
 }

@@ -17,6 +17,8 @@
 namespace nall {
 
 struct directory {
+  static bool create(const string &pathname, unsigned permissions = 0755);
+  static bool remove(const string &pathname);
   static bool exists(const string &pathname);
   static lstring folders(const string &pathname, const string &pattern = "*");
   static lstring files(const string &pathname, const string &pattern = "*");
@@ -24,6 +26,14 @@ struct directory {
 };
 
 #if defined(PLATFORM_WINDOWS)
+  inline bool directory::create(const string &pathname, unsigned permissions) {
+    return _wmkdir(utf16_t(pathname)) == 0;
+  }
+
+  inline bool directory::remove(const string &pathname) {
+    return _wrmdir(utf16_t(pathname)) == 0;
+  }
+
   inline bool directory::exists(const string &pathname) {
     DWORD result = GetFileAttributes(utf16_t(pathname));
     if(result == INVALID_FILE_ATTRIBUTES) return false;
@@ -94,6 +104,14 @@ struct directory {
     return folders;
   }
 #else
+  inline bool directory::create(const string &pathname, unsigned permissions) {
+    return mkdir(pathname, permissions) == 0;
+  }
+
+  inline bool directory::remove(const string &pathname) {
+    return rmdir(pathname) == 0;
+  }
+
   inline bool directory::exists(const string &pathname) {
     DIR *dp = opendir(pathname);
     if(!dp) return false;

@@ -6,10 +6,10 @@ namespace SuperFamicom {
 NSS nss;
 
 void NSS::init() {
+  dip = 0x0000;
 }
 
 void NSS::load() {
-  dip = 0x0000;
   bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4100, 0x4101, { &NSS::read, this }, { &NSS::write, this });
   bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4100, 0x4101, { &NSS::read, this }, { &NSS::write, this });
 }
