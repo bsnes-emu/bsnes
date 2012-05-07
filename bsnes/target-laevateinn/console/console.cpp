@@ -4,7 +4,7 @@ ConsoleWindow *consoleWindow = nullptr;
 #include "about.cpp"
 
 ConsoleWindow::ConsoleWindow() {
-  setTitle({"Console - Laevateinn v", Version});
+  setTitle({"Console - Laevateinn v", Emulator::Version});
   setGeometry({64, 640, 640, 400});
   setMenuVisible();
 

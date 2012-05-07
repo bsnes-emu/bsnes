@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "bsnes";
-  static const char Version[] = "088.14";
+  static const char Version[] = "088.15";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
 }
@@ -26,6 +26,7 @@ namespace Emulator {
 #include <nall/varint.hpp>
 #include <nall/vector.hpp>
 #include <nall/stream/memory.hpp>
+#include <nall/stream/vector.hpp>
 using namespace nall;
 
 #include "interface.hpp"

@@ -24,10 +24,7 @@ namespace SuperFamicom {
 */
 
 #include <libco/libco.h>
-
-#if defined(GAMEBOY)
-  #include <gb/gb.hpp>
-#endif
+#include <gb/gb.hpp>
 
 namespace SuperFamicom {
   struct Thread {

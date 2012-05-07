@@ -3,10 +3,7 @@ struct Coprocessor : Thread {
   alwaysinline void synchronize_cpu();
 };
 
-#if defined(GAMEBOY)
 #include <sfc/chip/icd2/icd2.hpp>
-#endif
-
 #include <sfc/chip/nss/nss.hpp>
 #include <sfc/chip/superfx/superfx.hpp>
 #include <sfc/chip/sa1/sa1.hpp>

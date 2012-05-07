@@ -10,6 +10,7 @@ struct Browser : Window {
   Button openButton;
 
   string select(const string &title, const string &extension);
+  void inputEvent(unsigned scancode, int16_t value);
   void saveConfiguration();
   void synchronize();
   void bootstrap();

@@ -91,6 +91,24 @@ void Browser::bootstrap() {
   config.save(application->path("paths.cfg"));
 }
 
+void Browser::inputEvent(unsigned scancode, int16_t value) {
+  if(scancode == keyboard(0)[nall::Keyboard::Escape] && value == 0) onClose();
+
+  //proof of concept only, not very useful:
+  //joypad up/down moves around in the file list, any joypad button loads selected game
+  if(fileList.selected() == false) return;
+  unsigned selection = fileList.selection();
+
+  if(Joypad::isAnyHat(scancode)) {
+    if(value & Joypad::HatUp  ) fileList.setSelection(selection - 1);
+    if(value & Joypad::HatDown) fileList.setSelection(selection + 1);
+  }
+
+  if(Joypad::isAnyButton(scancode) && value == 1) {
+    fileList.onActivate();
+  }
+}
+
 string Browser::select(const string &title, const string &extension) {
   this->extension = extension;
 
@@ -110,15 +128,20 @@ string Browser::select(const string &title, const string &extension) {
 
   audio.clear();
   setTitle(title);
-  setModal();
-  setVisible();
+  setModal(true);
+  setVisible(true);
   fileList.setFocused();
-  dialogActive = true;
   outputFilename = "";
+
+  dialogActive = true;
   while(dialogActive == true) {
     OS::processEvents();
+    inputManager->poll();
+    usleep(20 * 1000);
   }
 
+  setModal(false);
+  setVisible(false);
   return outputFilename;
 }
 
@@ -169,7 +192,6 @@ void Browser::fileListActivate() {
   string suffix = {this->extension, "/"};
   if(filename.endswith(suffix) == false) return setPath({path, filename});
 
-  setVisible(false);
   dialogActive = false;
   outputFilename = {path, filename};
 }

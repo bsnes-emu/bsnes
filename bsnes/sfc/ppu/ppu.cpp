@@ -33,7 +33,7 @@ void PPU::enter() {
     }
 
     scanline();
-    add_clocks(68);
+    add_clocks(28);
     bg1.begin();
     bg2.begin();
     bg3.begin();
@@ -65,7 +65,7 @@ void PPU::enter() {
       add_clocks(1052 + 14 + 136);
     }
 
-    add_clocks(lineclocks() - 68 - 1052 - 14 - 136);
+    add_clocks(lineclocks() - 28 - 1052 - 14 - 136);
   }
 }
 

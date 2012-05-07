@@ -23,7 +23,6 @@ struct TimingSettings : SettingsLayout {
 
   TimingSettings();
 
-private:
   struct Analysis {
     bool stop;
     unsigned seconds;

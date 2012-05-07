@@ -39,7 +39,7 @@ void Presentation::setSystemName(const string &name) {
 Presentation::Presentation() : active(nullptr) {
   bootstrap();
   loadShaders();
-  setGeometry({1024, 600, 720, 480});
+  setGeometry({256, 256, 720, 480});
   windowManager->append(this, "Presentation");
 
   setTitle({::Emulator::Name, " v", ::Emulator::Version});
@@ -144,24 +144,20 @@ void Presentation::bootstrap() {
     iEmulator->reset.setText("Reset");
     iEmulator->unload.setText("Unload");
 
-    unsigned portNumber = 0;
     for(auto &port : emulator->port) {
       auto iPort = new Emulator::Port;
       iPort->menu.setText(port.name);
       iEmulator->port.append(iPort);
 
-      unsigned deviceNumber = 0;
       for(auto &device : port.device) {
         auto iDevice = new RadioItem;
         iDevice->setText(device.name);
-        iDevice->onActivate = [=] { utility->connect(portNumber, device.id); };
+        iDevice->onActivate = [=] { utility->connect(port.id, device.id); };
         iPort->group.append(*iDevice);
         iPort->device.append(iDevice);
-        deviceNumber++;
       }
 
       RadioItem::group(iPort->group);
-      portNumber++;
     }
 
     iEmulator->menu.append(iEmulator->power);

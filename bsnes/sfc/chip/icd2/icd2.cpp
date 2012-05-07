@@ -1,5 +1,3 @@
-#if defined(GAMEBOY)
-
 #include <sfc/sfc.hpp>
 
 #define ICD2_CPP
@@ -35,9 +33,12 @@ void ICD2::init() {
 }
 
 void ICD2::load() {
+  interface = GameBoy::interface->bind;
+  GameBoy::interface->bind = this;
 }
 
 void ICD2::unload() {
+  GameBoy::interface->bind = interface;
 }
 
 void ICD2::power() {
@@ -69,12 +70,9 @@ void ICD2::reset() {
   joyp14lock = 0;
   pulselock = true;
 
-  GameBoy::interface = this;
   GameBoy::video.generate_palette();
   GameBoy::system.init();
   GameBoy::system.power();
 }
 
 }
-
-#endif

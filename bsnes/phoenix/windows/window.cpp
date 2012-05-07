@@ -176,6 +176,7 @@ void pWindow::setTitle(const string &text) {
 
 void pWindow::setVisible(bool visible) {
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
+  if(visible == false) setModal(false);
 }
 
 void pWindow::setWidgetFont(const string &font) {

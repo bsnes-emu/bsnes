@@ -142,8 +142,8 @@ void Cartridge::power() {
 
 Cartridge::Cartridge() {
   loaded = false;
-  romdata = 0;
-  ramdata = 0;
+  romdata = nullptr;
+  ramdata = nullptr;
 }
 
 Cartridge::~Cartridge() {

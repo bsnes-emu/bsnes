@@ -114,7 +114,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  port.append({ID::Device, "Device", {device[0]}});
+  port.append({0, "Device", {device[0]}});
 }
 
 }

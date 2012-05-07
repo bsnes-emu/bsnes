@@ -319,8 +319,14 @@ public:
     }
 
     if(settings.synchronize) {
+      D3DRASTER_STATUS status;
+      //wait for a previous vblank to finish, if necessary
       while(true) {
-        D3DRASTER_STATUS status;
+        device->GetRasterStatus(0, &status);
+        if(status.InVBlank == false) break;
+      }
+      //wait for next vblank to begin
+      while(true) {
         device->GetRasterStatus(0, &status);
         if(status.InVBlank == true) break;
       }

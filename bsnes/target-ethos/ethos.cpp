@@ -41,11 +41,8 @@ Application::Application(int argc, char **argv) {
   basepath = dir(path);
   unused = ::userpath(path);
   userpath = path;
-  if(Intrinsics::platform() == Intrinsics::Platform::Windows) {
-    userpath.append("ethos/");
-  } else {
-    userpath.append(".config/ethos/");
-  }
+  if(Intrinsics::platform() != Intrinsics::Platform::Windows) userpath.append(".config/");
+  userpath.append("bsnes/");
   directory::create(userpath);
 
   bootstrap();

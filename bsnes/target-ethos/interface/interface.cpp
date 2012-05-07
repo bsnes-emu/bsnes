@@ -1,6 +1,15 @@
 #include "../ethos.hpp"
 Interface *interface = nullptr;
 
+void Interface::loadRequest(unsigned id, const string &path) {
+  return utility->loadMedia(id, path);
+}
+
+void Interface::loadRequest(unsigned id, const string &name, const string &type, const string &path) {
+  if(name.empty() && type.empty()) return utility->loadMedia(id, path);
+  return utility->loadMedia(id, name, type, path);
+}
+
 uint32_t Interface::videoColor(unsigned source, uint16_t r, uint16_t g, uint16_t b) {
   if(config->video.saturation != 100) {
     uint16_t grayscale = uclamp<16>((r + g + b) / 3);
@@ -94,10 +103,6 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
   if(config->input.focusAllow == false && presentation->focused() == false) return 0;
   unsigned guid = system().port[port].device[device].input[input].guid;
   return inputManager->inputMap[guid]->poll();
-}
-
-void Interface::mediaRequest(Emulator::Interface::Media media) {
-  utility->loadMedia(media);
 }
 
 unsigned Interface::dipSettings(const XML::Node &node) {

@@ -12,13 +12,7 @@ void Application::bootstrap() {
   emulator.append(new GameBoyAdvance::Interface);
 
   for(auto &system : emulator) {
-    system->callback.videoColor = {&Interface::videoColor, interface};
-    system->callback.videoRefresh = {&Interface::videoRefresh, interface};
-    system->callback.audioSample = {&Interface::audioSample, interface};
-    system->callback.inputPoll = {&Interface::inputPoll, interface};
-    system->callback.mediaRequest = {&Interface::mediaRequest, interface};
-    system->callback.dipSettings = {&Interface::dipSettings, interface};
-    system->callback.path = {&Interface::path, interface};
+    system->bind = interface;
 
     for(auto &firmware : system->firmware) {
       filestream fs{application->path({firmware.name, ".", firmware.type, "/", firmware.path})};

@@ -1,5 +1,3 @@
-options += gameboy
-
 gb_objects := gb-interface gb-system gb-scheduler
 gb_objects += gb-memory gb-cartridge
 gb_objects += gb-cpu gb-ppu gb-apu

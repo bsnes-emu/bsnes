@@ -44,7 +44,6 @@ struct Interface {
     vector<Input> input;
     vector<unsigned> order;
   };
-  vector<Device> device;
 
   struct Port {
     unsigned id;
@@ -53,48 +52,26 @@ struct Interface {
   };
   vector<Port> port;
 
-  struct Callback {
-    function<uint32_t (unsigned, uint16_t, uint16_t, uint16_t)> videoColor;
-    function<void (const uint32_t*, unsigned, unsigned, unsigned)> videoRefresh;
-    function<void (int16_t, int16_t)> audioSample;
-    function<int16_t (unsigned, unsigned, unsigned)> inputPoll;
-    function<void (Media)> mediaRequest;
-    function<unsigned (const XML::Node&)> dipSettings;
-    function<string (unsigned)> path;
-  } callback;
+  struct Bind {
+    virtual void loadRequest(unsigned, const string&) {}
+    virtual void loadRequest(unsigned, const string&, const string&, const string&) {}
+    virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t) { return 0u; }
+    virtual void videoRefresh(const uint32_t*, unsigned, unsigned, unsigned) {}
+    virtual void audioSample(int16_t, int16_t) {}
+    virtual int16_t inputPoll(unsigned, unsigned, unsigned) { return 0; }
+    virtual unsigned dipSettings(const XML::Node&) { return 0; }
+    virtual string path(unsigned) { return ""; }
+  } *bind;
 
   //callback bindings (provided by user interface)
-  virtual uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
-    if(callback.videoColor) return callback.videoColor(source, red, green, blue);
-    return (red >> 8) << 16 | (green >> 8) << 8 | (blue >> 8) << 0;
-  }
-
-  virtual void videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
-    if(callback.videoRefresh) return callback.videoRefresh(data, pitch, width, height);
-  }
-
-  virtual void audioSample(int16_t lsample, int16_t rsample) {
-    if(callback.audioSample) return callback.audioSample(lsample, rsample);
-  }
-
-  virtual int16_t inputPoll(unsigned port, unsigned device, unsigned input) {
-    if(callback.inputPoll) return callback.inputPoll(port, device, input);
-    return 0;
-  }
-
-  virtual void mediaRequest(Media media) {
-    if(callback.mediaRequest) return callback.mediaRequest(media);
-  }
-
-  virtual unsigned dipSettings(const XML::Node &node) {
-    if(callback.dipSettings) return callback.dipSettings(node);
-    return 0u;
-  }
-
-  virtual string path(unsigned group) {
-    if(callback.path) return callback.path(group);
-    return "";
-  }
+  void loadRequest(unsigned id, const string &path) { return bind->loadRequest(id, path); }
+  void loadRequest(unsigned id, const string &name, const string &type, const string &path) { return bind->loadRequest(id, name, type, path); }
+  uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, red, green, blue); }
+  void videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) { return bind->videoRefresh(data, pitch, width, height); }
+  void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }
+  int16_t inputPoll(unsigned port, unsigned device, unsigned input) { return bind->inputPoll(port, device, input); }
+  unsigned dipSettings(const XML::Node &node) { return bind->dipSettings(node); }
+  string path(unsigned group) { return bind->path(group); }
 
   //information
   virtual double videoFrequency() = 0;
@@ -123,6 +100,8 @@ struct Interface {
 
   //utility functions
   virtual void updatePalette() {}
+
+  Interface() : bind(nullptr) {}
 };
 
 }

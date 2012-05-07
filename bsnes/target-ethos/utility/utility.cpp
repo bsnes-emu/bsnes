@@ -30,23 +30,24 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   load();
 }
 
-void Utility::loadMedia(Emulator::Interface::Media &media) {
-  string pathname = {path(system().group(media.id)), media.path};
+void Utility::loadMedia(unsigned id, const string &path) {
+  string pathname = {this->path(system().group(id)), path};
   if(file::exists(pathname)) {
     mmapstream stream(pathname);
-    return system().load(media.id, stream);
+    return system().load(id, stream);
   }
-  if(media.name.empty()) return;
+}
 
-  pathname = browser->select({"Load ", media.name}, media.extension);
+void Utility::loadMedia(unsigned id, const string &name, const string &type, const string &path) {
+  string pathname = browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
-  path(system().group(media.id)) = pathname;
+  this->path(system().group(id)) = pathname;
   this->pathname.append(pathname);
 
   string markup;
   markup.readfile({pathname, "manifest.xml"});
-  mmapstream stream({pathname, media.path});
-  system().load(media.id, stream, markup);
+  mmapstream stream({pathname, path});
+  system().load(id, stream, markup);
 }
 
 void Utility::loadMemory() {
@@ -170,6 +171,7 @@ void Utility::synchronizeRuby() {
   }
   dspaudio.setResamplerFrequency(config->audio.frequency);
   dspaudio.setVolume(config->audio.mute ? 0.0 : config->audio.volume * 0.01);
+  synchronizeDSP();
 }
 
 void Utility::updateShader() {

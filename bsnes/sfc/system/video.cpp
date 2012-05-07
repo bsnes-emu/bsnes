@@ -64,10 +64,10 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
       uint32_t pixelcolor = (15 << 15) | ((pixel == 1) ? 0 : color);
 
       if(hires == false) {
-        *((uint32_t*)data + vy * 1024 + vx) = pixelcolor;
+        *((uint32_t*)data + vy * 1024 + vx) = palette[pixelcolor];
       } else {
-        *((uint32_t*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
-        *((uint32_t*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
+        *((uint32_t*)data + vy * 1024 + vx * 2 + 0) = palette[pixelcolor];
+        *((uint32_t*)data + vy * 1024 + vx * 2 + 1) = palette[pixelcolor];
       }
     }
   }
@@ -106,7 +106,14 @@ void Video::update() {
     }
   }
 
-  interface->videoRefresh(ppu.surface, 4 * (1024 >> ppu.interlace()), 256 << hires, 240 << ppu.interlace());
+  //overscan: when disabled, shift image down (by scrolling video buffer up) to center image onscreen
+  //(memory before ppu.output is filled with black scanlines)
+  interface->videoRefresh(
+    ppu.output - (ppu.overscan() ? 0 : 7 * 1024),
+    4 * (1024 >> ppu.interlace()),
+    256 << hires,
+    240 << ppu.interlace()
+  );
 
   hires = false;
 }

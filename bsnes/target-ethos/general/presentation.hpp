@@ -54,7 +54,6 @@ struct Presentation : Window {
   void bootstrap();
   Presentation();
 
-private:
   Emulator *active;
 };
 

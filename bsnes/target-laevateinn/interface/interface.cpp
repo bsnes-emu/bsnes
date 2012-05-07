@@ -12,14 +12,13 @@ bool Interface::loadCartridge(const string &foldername) {
   }
 
   pathName = foldername;
-  mkdir(string(pathName, "debug/"), 0755);
+  directory::create({pathName, "debug/"});
 
   string markup;
   markup.readfile({pathName, "manifest.xml"});
   if(markup.empty()) markup = SuperFamicomCartridge(memory.data(), memory.size()).markup;
 
-  SFC::cartridge.rom.copy(vectorstream{memory});
-  SFC::cartridge.load(SFC::Cartridge::Mode::Normal, markup);
+  SFC::cartridge.load(markup, vectorstream{memory});
   SFC::system.power();
 
   string name = pathName;
@@ -36,25 +35,22 @@ bool Interface::loadCartridge(const string &foldername) {
 }
 
 void Interface::loadMemory() {
-  for(auto &memory : SFC::cartridge.nvram) {
-    if(memory.size == 0) continue;
-    string filename = {pathName, memory.id};
-    if(auto content = file::read(filename)) {
-      debugger->print("Loaded ", filename, "\n");
-      memcpy(memory.data, content.data(), min(memory.size, content.size()));
-    }
+  for(auto &memory : SFC::interface->memory) {
+    string filename{pathName, memory.name};
+    filestream fs(filename, file::mode::read);
+    instance->load(memory.id, fs);
+    if(file::exists(filename)) debugger->print("Loaded ", filename, "\n");
   }
 
   debugger->loadUsage();
 }
 
 void Interface::saveMemory() {
-  for(auto &memory : SFC::cartridge.nvram) {
-    if(memory.size == 0) continue;
-    string filename = { pathName, memory.id };
-    if(file::write(filename, memory.data, memory.size)) {
-      debugger->print("Saved ", filename, "\n");
-    }
+  for(auto &memory : SFC::interface->memory) {
+    string filename{pathName, memory.name};
+    filestream fs(filename, file::mode::write);
+    instance->save(memory.id, fs);
+    debugger->print("Saved ", filename, "\n");
   }
 
   debugger->saveUsage();
@@ -79,19 +75,24 @@ bool Interface::saveState(unsigned slot) {
   return result;
 }
 
+uint32_t Interface::videoColor(unsigned source, uint16_t r, uint16_t g, uint16_t b) {
+  return (r >> 8) << 16 | (g >> 8) << 8 | (b >> 8) << 0;
+}
+
 //hires is always true for accuracy core
 //overscan is ignored for the debugger port
-void Interface::videoRefresh(const uint32_t *data, bool hires, bool interlace, bool overscan) {
+void Interface::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
   data += 8 * 1024;  //skip NTSC overscan compensation
   uint32_t *output = videoWindow->canvas.data();
 
+  bool interlace = height >= 448;
   if(interlace == false) {
     for(unsigned y = 0; y < 240; y++) {
       const uint32_t *sp = data + y * 1024;
       uint32_t *dp0 = output + y * 1024, *dp1 = dp0 + 512;
       for(unsigned x = 0; x < 512; x++) {
-        *dp0++ = SFC::video.palette[*sp];
-        *dp1++ = SFC::video.palette[*sp++];
+        *dp0++ = *sp;
+        *dp1++ = *sp++;
       }
     }
   } else {
@@ -99,7 +100,7 @@ void Interface::videoRefresh(const uint32_t *data, bool hires, bool interlace, b
       const uint32_t *sp = data + y * 512;
       uint32_t *dp = output + y * 512;
       for(unsigned x = 0; x < 512; x++) {
-        *dp++ = SFC::video.palette[*sp++];
+        *dp++ = *sp++;
       }
     }
   }
@@ -112,13 +113,13 @@ void Interface::audioSample(int16_t lsample, int16_t rsample) {
   audio.sample(lsample, rsample);
 }
 
-int16_t Interface::inputPoll(bool port, SFC::Input::Device device, unsigned index, unsigned id) {
+int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned index) {
   if(videoWindow->focused() == false) return 0;
   auto keyboardState = phoenix::Keyboard::state();
 
   if(port == 0) {
-    if(device == SFC::Input::Device::Joypad) {
-      switch((SFC::Input::JoypadID)id) {
+    if(device == (unsigned)SFC::Input::Device::Joypad) {
+      switch((SFC::Input::JoypadID)index) {
       case SFC::Input::JoypadID::Up:     return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Up];
       case SFC::Input::JoypadID::Down:   return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Down];
       case SFC::Input::JoypadID::Left:   return keyboardState[(unsigned)phoenix::Keyboard::Scancode::Left];
@@ -147,7 +148,10 @@ void Interface::message(const string &text) {
 }
 
 Interface::Interface() {
-  SFC::interface = this;
+  instance = new SFC::Interface;
+  instance->bind = this;
+
+  SFC::video.generate_palette();
   SFC::system.init();
 
   filestream fs{{application->userpath, "Super Famicom.sys/spc700.rom"}};

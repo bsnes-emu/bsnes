@@ -93,11 +93,17 @@ void Cartridge::parse_markup_nss(XML::Node &root) {
 }
 
 void Cartridge::parse_markup_icd2(XML::Node &root) {
-  #if defined(GAMEBOY)
   if(root.exists() == false) return;
   has_gb_slot = true;
 
-  interface->mediaRequest({ID::SuperGameBoyROM, "Game Boy", "", "program.rom", "gb"});
+  //Game Boy requires a cartridge to be loaded ...
+  //load "empty" cartridge, in case loadRequest() does not load one
+  vector<uint8> stream;
+  stream.resize(32768);
+  for(auto &byte : stream) byte = 0xff;
+  interface->load(ID::SuperGameBoyROM, vectorstream{stream}, "");
+
+  interface->loadRequest(ID::SuperGameBoyROM, "Game Boy", "gb", "program.rom");
 
   icd2.revision = max(1, numeral(root["revision"].data));
 
@@ -107,7 +113,6 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
     parse_markup_map(m, node);
     mapping.append(m);
   }
-  #endif
 }
 
 void Cartridge::parse_markup_superfx(XML::Node &root) {
@@ -213,11 +218,11 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   string sha256 = root["sha256"].data;
 
   if(necdsp.revision == NECDSP::Revision::uPD7725) {
-    interface->mediaRequest({ID::Nec7725DSP, "", "", firmware});
+    interface->loadRequest(ID::Nec7725DSP, firmware);
   }
 
   if(necdsp.revision == NECDSP::Revision::uPD96050) {
-    interface->mediaRequest({ID::Nec96050DSP, "", "", firmware});
+    interface->loadRequest(ID::Nec96050DSP, firmware);
   }
 
   for(auto &node : root) {
@@ -256,7 +261,7 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  interface->mediaRequest({ID::HitachiDSP, "", "", firmware});
+  interface->loadRequest(ID::HitachiDSP, firmware);
 
   for(auto &node : root) {
     if(node.name == "rom") {
@@ -284,7 +289,7 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   string firmware = root["firmware"].data;
   string sha256 = root["sha256"].data;
 
-  interface->mediaRequest({ID::ArmDSP, "", "", firmware});
+  interface->loadRequest(ID::ArmDSP, firmware);
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -299,7 +304,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   has_bs_cart = root["mmio"].exists();
   has_bs_slot = true;
 
-  interface->mediaRequest({ID::BsxFlashROM, "BS-X Satellaview", "", "program.rom", "bs"});
+  interface->loadRequest(ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom");
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
@@ -327,8 +332,8 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   if(root.exists() == false) return;
   has_st_slots = true;
 
-  interface->mediaRequest({ID::SufamiTurboSlotAROM, "Sufami Turbo - Slot A", "", "program.rom", "st"});
-  interface->mediaRequest({ID::SufamiTurboSlotBROM, "Sufami Turbo - Slot B", "", "program.rom", "st"});
+  interface->loadRequest(ID::SufamiTurboSlotAROM, "Sufami Turbo - Slot A", "st", "program.rom");
+  interface->loadRequest(ID::SufamiTurboSlotBROM, "Sufami Turbo - Slot B", "st", "program.rom");
 
   for(auto &slot : root) {
     if(slot.name != "slot") continue;

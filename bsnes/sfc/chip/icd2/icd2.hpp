@@ -1,5 +1,4 @@
-class ICD2 : GameBoy::Interface, public Coprocessor {
-public:
+struct ICD2 : Emulator::Interface::Bind, Coprocessor {
   unsigned revision;
 
   static void Enter();
@@ -17,6 +16,7 @@ public:
   void serialize(serializer&);
 
 private:
+  Emulator::Interface::Bind *interface;
   #include "interface/interface.hpp"
   #include "mmio/mmio.hpp"
 };

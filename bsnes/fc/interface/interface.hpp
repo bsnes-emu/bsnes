@@ -36,6 +36,9 @@ struct Interface : Emulator::Interface {
   void updatePalette();
 
   Interface();
+
+private:
+  vector<Device> device;
 };
 
 extern Interface *interface;

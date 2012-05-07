@@ -2,7 +2,8 @@ struct Utility {
   void setInterface(Emulator::Interface *emulator);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname);
-  void loadMedia(Emulator::Interface::Media &media);
+  void loadMedia(unsigned id, const string &path);
+  void loadMedia(unsigned id, const string &name, const string &type, const string &path);
   void loadMemory();
   void saveMemory();
 

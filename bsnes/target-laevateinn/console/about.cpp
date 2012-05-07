@@ -11,7 +11,7 @@ AboutWindow::AboutWindow() {
   title.setFont("Sans, 16, Bold");
   title.setText("Laevateinn");
   version.setFont("Sans, 8, Bold");
-  version.setText({"bsnes/debugger v", Version});
+  version.setText({"bsnes/debugger v", Emulator::Version});
   website.setFont("Sans, 8, Bold");
   website.setText("http://byuu.org/");
 

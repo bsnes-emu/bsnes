@@ -107,12 +107,12 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  port.append({ID::Port1, "Port 1"});
-  port.append({ID::Port2, "Port 2"});
+  port.append({0, "Port 1"});
+  port.append({1, "Port 2"});
 
   for(auto &device : this->device) {
     for(auto &port : this->port) {
-      if(device.portmask & port.id) {
+      if(device.portmask & (1 << port.id)) {
         port.device.append(device);
       }
     }

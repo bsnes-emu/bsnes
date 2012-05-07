@@ -42,6 +42,10 @@ Settings::Settings() {
   append(*timingSettings);
   append(*driverSettings);
 
+  onClose = [&] {
+    timingSettings->analysis.stop = true;
+  };
+
   panelList.onChange = {&Settings::panelChanged, this};
 
   panelList.setSelection(2);
