@@ -1,5 +1,4 @@
-class SRTC {
-public:
+struct SRTC {
   uint8 rtc[20];
 
   void init();

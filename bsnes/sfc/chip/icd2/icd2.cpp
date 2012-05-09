@@ -33,12 +33,15 @@ void ICD2::init() {
 }
 
 void ICD2::load() {
-  interface = GameBoy::interface->bind;
+  bind = GameBoy::interface->bind;
+  hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
+  GameBoy::interface->hook = this;
 }
 
 void ICD2::unload() {
-  GameBoy::interface->bind = interface;
+  GameBoy::interface->bind = bind;
+  GameBoy::interface->hook = hook;
 }
 
 void ICD2::power() {
@@ -56,7 +59,7 @@ void ICD2::reset() {
   r6005 = 0xff;
   r6006 = 0xff;
   r6007 = 0xff;
-  for(unsigned n = 0; n < 16; n++) r7000[n] = 0x00;
+  for(auto &r : r7000) r = 0x00;
   r7800 = 0x0000;
   mlt_req = 0;
 

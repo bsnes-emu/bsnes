@@ -1,4 +1,4 @@
-struct ICD2 : Emulator::Interface::Bind, Coprocessor {
+struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
   unsigned revision;
 
   static void Enter();
@@ -16,7 +16,8 @@ struct ICD2 : Emulator::Interface::Bind, Coprocessor {
   void serialize(serializer&);
 
 private:
-  Emulator::Interface::Bind *interface;
+  Emulator::Interface::Bind *bind;
+  GameBoy::Interface::Hook *hook;
   #include "interface/interface.hpp"
   #include "mmio/mmio.hpp"
 };

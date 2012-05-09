@@ -1,8 +1,7 @@
 //SPC7110 emulator - version 0.05 (2011-06-27)
 //Copyright (c) 2008-2011, byuu and neviksti
 
-class SPC7110 {
-public:
+struct SPC7110 {
   uint8 rtc[20];
   unsigned data_rom_offset;
 

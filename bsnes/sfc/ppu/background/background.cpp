@@ -2,6 +2,16 @@
 
 #include "mode7.cpp"
 
+unsigned PPU::Background::voffset() const {
+  if(regs.mosaic) return cache.voffset;
+  return regs.voffset;
+}
+
+unsigned PPU::Background::hoffset() const {
+  if(regs.mosaic) return cache.hoffset;
+  return regs.hoffset;
+}
+
 //V = 0, H = 0
 void PPU::Background::frame() {
 }
@@ -10,7 +20,7 @@ void PPU::Background::frame() {
 void PPU::Background::scanline() {
 }
 
-//H = 60
+//H = 28
 void PPU::Background::begin() {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
   x = -7;
@@ -65,8 +75,8 @@ void PPU::Background::get_tile() {
   unsigned px = x << hires;
   unsigned py = (regs.mosaic == 0 ? y : mosaic.voffset);
 
-  unsigned hscroll = cache.hoffset;
-  unsigned vscroll = cache.voffset;
+  unsigned hscroll = hoffset();
+  unsigned vscroll = voffset();
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) py = (py << 1) + self.field();
@@ -79,8 +89,8 @@ void PPU::Background::get_tile() {
     uint16 offset_x = (x + (hscroll & 7));
 
     if(offset_x >= 8) {
-      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.cache.hoffset & ~7), self.bg3.cache.voffset + 0);
-      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.cache.hoffset & ~7), self.bg3.cache.voffset + 8);
+      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.hoffset() & ~7), self.bg3.voffset() + 0);
+      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.hoffset() & ~7), self.bg3.voffset() + 8);
       unsigned valid_mask = (id == ID::BG1 ? 0x2000 : 0x4000);
 
       if(self.regs.bgmode == 4) {

@@ -1,5 +1,4 @@
-class BSXFlash : public Memory {
-public:
+struct BSXFlash : Memory {
   MappedRAM memory;
 
   void init();

@@ -1,5 +1,4 @@
-class BSXCartridge {
-public:
+struct BSXCartridge {
   MappedRAM sram;
   MappedRAM psram;
 

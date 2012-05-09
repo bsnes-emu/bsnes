@@ -39,8 +39,8 @@ void SuperFX::enter() {
 
 void SuperFX::init() {
   initialize_opcode_table();
-  regs.r[14].modify = { &SuperFX::r14_modify, this };
-  regs.r[15].modify = { &SuperFX::r15_modify, this };
+  regs.r[14].modify = {&SuperFX::r14_modify, this};
+  regs.r[15].modify = {&SuperFX::r15_modify, this};
 }
 
 void SuperFX::load() {

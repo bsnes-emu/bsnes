@@ -1,5 +1,4 @@
-class OBC1 {
-public:
+struct OBC1 {
   void init();
   void load();
   void unload();

@@ -1,5 +1,4 @@
-class BSXSatellaview {
-public:
+struct BSXSatellaview {
   void init();
   void load();
   void unload();

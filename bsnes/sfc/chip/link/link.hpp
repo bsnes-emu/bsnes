@@ -1,5 +1,4 @@
-class Link : public Coprocessor, public library {
-public:
+struct Link : Coprocessor, library {
   string program;
 
   static void Enter();

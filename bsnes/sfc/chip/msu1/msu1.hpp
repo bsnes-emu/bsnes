@@ -1,5 +1,4 @@
-class MSU1 : public Coprocessor {
-public:
+struct MSU1 : Coprocessor {
   static void Enter();
   void enter();
   void init();

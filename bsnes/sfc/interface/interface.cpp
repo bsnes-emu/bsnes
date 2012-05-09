@@ -228,6 +228,7 @@ void Interface::updatePalette() {
 
 Interface::Interface() {
   interface = this;
+  system.init();
 
   information.name        = "Super Famicom";
   information.width       = 256;

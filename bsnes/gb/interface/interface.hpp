@@ -19,8 +19,13 @@ struct ID {
 
 struct Interface : Emulator::Interface {
   //Super Game Boy bindings
-  virtual void lcdScanline() {}
-  virtual void joypWrite(bool p15, bool p14) {}
+  struct Hook {
+    virtual void lcdScanline() {}
+    virtual void joypWrite(bool p15, bool p14) {}
+  } *hook;
+
+  void lcdScanline();
+  void joypWrite(bool p15, bool p14);
 
   double videoFrequency();
   double audioFrequency();

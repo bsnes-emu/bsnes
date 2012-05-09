@@ -1,5 +1,4 @@
-class SufamiTurbo {
-public:
+struct SufamiTurbo {
   struct Slot {
     MappedRAM rom;
     MappedRAM ram;

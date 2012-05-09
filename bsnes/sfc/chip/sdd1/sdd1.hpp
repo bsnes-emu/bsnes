@@ -1,5 +1,4 @@
-class SDD1 {
-public:
+struct SDD1 {
   void init();
   void load();
   void unload();

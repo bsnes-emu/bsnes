@@ -101,6 +101,8 @@ bool StateManager::save(const string &filename, unsigned revision) {
     return true;
   }
 
+  directory::create(dir(filename));
+
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 

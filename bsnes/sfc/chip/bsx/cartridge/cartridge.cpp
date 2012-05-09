@@ -8,11 +8,11 @@ void BSXCartridge::init() {
 void BSXCartridge::load() {
   sram.map(allocate<uint8>(32 * 1024, 0xff), 32 * 1024);
   sram.write_protect(false);
-  interface->memory.append({ID::BsxRAM, "bsx.ram"});
+  interface->memory.append({ID::BsxRAM, "save.ram"});
 
   psram.map(allocate<uint8>(512 * 1024, 0xff), 512 * 1024);
   psram.write_protect(false);
-  interface->memory.append({ID::BsxPSRAM, "bsx.psram"});
+  interface->memory.append({ID::BsxPSRAM, "bsx.ram"});
 }
 
 void BSXCartridge::unload() {

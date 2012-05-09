@@ -4,6 +4,14 @@ namespace GameBoy {
 
 Interface *interface = nullptr;
 
+void Interface::lcdScanline() {
+  if(hook) hook->lcdScanline();
+}
+
+void Interface::joypWrite(bool p15, bool p14) {
+  if(hook) hook->joypWrite(p15, p14);
+}
+
 double Interface::videoFrequency() {
   return 4194304.0 / (154.0 * 456.0);
 }
@@ -97,6 +105,7 @@ void Interface::updatePalette() {
 
 Interface::Interface() {
   interface = this;
+  hook = nullptr;
 
   information.name        = "Game Boy";
   information.width       = 160;

@@ -68,7 +68,6 @@ void Utility::saveMemory() {
     system().save(memory.id, fs);
   }
 
-  directory::create({pathname[0], "bsnes/"});
   cheatEditor->save({pathname[0], "cheats.xml"});
   stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);
 }
@@ -138,9 +137,9 @@ void Utility::saveState(unsigned slot) {
 void Utility::loadState(unsigned slot) {
   if(application->active == nullptr) return;
   auto memory = file::read({pathname[0], "bsnes/state-", slot, ".bsa"});
-  if(memory.size() == 0) return;
+  if(memory.size() == 0) return showMessage({"Unable to locate slot ", slot, " state"});
   serializer s(memory.data(), memory.size());
-  if(system().unserialize(s) == false) return;
+  if(system().unserialize(s) == false) return showMessage({"Slot ", slot, " state incompatible"});
   showMessage({"Loaded from slot ", slot});
 }
 

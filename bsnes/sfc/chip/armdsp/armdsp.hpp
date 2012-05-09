@@ -1,6 +1,6 @@
 //ARMv3 (ARM6)
 
-struct ArmDSP : Processor::ARM, public Coprocessor {
+struct ArmDSP : Processor::ARM, Coprocessor {
   uint8 *firmware;
   uint8 *programROM;
   uint8 *dataROM;

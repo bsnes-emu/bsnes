@@ -5,7 +5,7 @@ signed PPU::Background::clip(signed n) {
   return n & 0x2000 ? (n | ~1023) : (n & 1023);
 }
 
-//H = 60
+//H = 28
 void PPU::Background::begin_mode7() {
   cache.hoffset = self.regs.mode7_hoffset;
   cache.voffset = self.regs.mode7_voffset;

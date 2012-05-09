@@ -124,7 +124,7 @@ string Browser::select(const string &title, const string &extension) {
   if(path.empty()) path = application->basepath;
   setPath(path, selection);
 
-  filterLabel.setText({"Files of type: *.", extension});
+  filterLabel.setText({"Filter: *.", extension});
 
   audio.clear();
   setTitle(title);

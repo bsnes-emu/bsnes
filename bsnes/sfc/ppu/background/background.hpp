@@ -30,6 +30,9 @@ struct Background {
     uint16 voffset;
   } cache;
 
+  unsigned voffset() const;
+  unsigned hoffset() const;
+
   struct Output {
     struct Pixel {
       unsigned priority;  //0 = none (transparent)
