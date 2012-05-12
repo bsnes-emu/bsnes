@@ -10,7 +10,6 @@ struct Interface {
     unsigned height;
     bool overscan;
     double aspectRatio;
-    unsigned frequency;
     bool resettable;
   } information;
 

@@ -46,6 +46,7 @@ struct Application {
   string monospaceFont;
 
   string path(const string &filename);
+  void commandLineLoad(string pathname);
   void run();
   void bootstrap();
   Application(int argc, char **argv);

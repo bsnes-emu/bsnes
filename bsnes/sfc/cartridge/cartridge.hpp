@@ -40,17 +40,6 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_msu1;
   readonly<bool> has_link;
 
-  struct NonVolatileRAM {
-    const string id;
-    uint8_t *data;
-    unsigned size;
-    Slot slot;
-    NonVolatileRAM() : id(""), data(nullptr), size(0), slot(Slot::Base) {}
-    NonVolatileRAM(const string id, uint8_t *data, unsigned size, Slot slot = Slot::Base)
-    : id(id), data(data), size(size), slot(slot) {}
-  };
-  linear_vector<NonVolatileRAM> nvram;
-
   struct Mapping {
     function<uint8 (unsigned)> read;
     function<void (unsigned, uint8)> write;

@@ -16,6 +16,23 @@ string Application::path(const string &filename) {
   return {userpath, filename};
 }
 
+void Application::commandLineLoad(string pathname) {
+  pathname.transform("\\", "/");
+  pathname.rtrim<1>("/");
+  if(directory::exists(pathname) == false) return;
+
+  string type = extension(pathname);
+  pathname.append("/");
+
+  for(auto &emulator : this->emulator) {
+    for(auto &media : emulator->media) {
+      if(media.type != "sys") continue;
+      if(type != media.extension) continue;
+      return utility->loadMedia(emulator, media, pathname);
+    }
+  }
+}
+
 void Application::run() {
   inputManager->poll();
   utility->updateStatus();
@@ -102,6 +119,8 @@ Application::Application(int argc, char **argv) {
 
   utility->synchronizeRuby();
   utility->updateShader();
+
+  if(argc >= 2) commandLineLoad(argv[1]);
 
   while(quit == false) {
     OS::processEvents();

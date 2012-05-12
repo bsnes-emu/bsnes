@@ -20,6 +20,8 @@ struct BSXCartridge {
   void mmio_write(unsigned addr, uint8 data);
   void mmio_commit();
 
+  void serialize(serializer&);
+
 private:
   uint8 r[16];
   bool r00, r01, r02, r03;

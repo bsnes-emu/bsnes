@@ -45,15 +45,7 @@ void CheatDatabase::findCodes() {
     for(auto &cheat : node) {
       if(cheat.name != "cheat") continue;
       cheatList.append(cheat["description"].data);
-
-      string codeList;
-      for(auto &code : cheat) {
-        if(code.name != "code") continue;
-        codeList.append(code.data, "+");
-      }
-      codeList.rtrim<1>("+");
-
-      this->cheat.append({codeList, cheat["description"].data});
+      this->cheat.append({cheat["code"].data, cheat["description"].data});
     }
 
     setVisible();

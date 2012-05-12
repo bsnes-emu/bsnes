@@ -91,7 +91,6 @@ Interface::Interface() {
   information.height      = 160;
   information.overscan    = false;
   information.aspectRatio = 1.0;
-  information.frequency   = 32768;
   information.resettable  = false;
 
   firmware.append({ID::BIOS, "Game Boy Advance", "sys", "bios.rom"});

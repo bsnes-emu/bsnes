@@ -221,15 +221,15 @@ void SA1::reset() {
   mmio.vcnt = 0x0000;
 
   //$2220-2223 CXB, DXB, EXB, FXB
-  mmio.cbmode = 1;
-  mmio.dbmode = 1;
-  mmio.ebmode = 1;
-  mmio.fbmode = 1;
+  mmio.cbmode = 0;
+  mmio.dbmode = 0;
+  mmio.ebmode = 0;
+  mmio.fbmode = 0;
 
   mmio.cb = 0x00;
   mmio.db = 0x01;
-  mmio.eb = 0x00;
-  mmio.fb = 0x01;
+  mmio.eb = 0x02;
+  mmio.fb = 0x03;
 
   //$2224 BMAPS
   mmio.sbm = 0x00;

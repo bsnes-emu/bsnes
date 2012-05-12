@@ -121,6 +121,10 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
     stream.read(bsxcartridge.psram.data(), min(stream.size(), bsxcartridge.psram.size()));
   }
 
+  if(id == ID::SuperGameBoyRAM) {
+    stream.read(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
+  }
+
   if(id == ID::SufamiTurboSlotARAM) {
     sufamiturbo.slotA.ram.copy(stream);
   }
@@ -153,6 +157,10 @@ void Interface::save(unsigned id, const stream &stream) {
 
   if(id == ID::BsxPSRAM) {
     stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
+  }
+
+  if(id == ID::SuperGameBoyRAM) {
+    stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
   }
 
   if(id == ID::SufamiTurboSlotARAM) {
@@ -235,7 +243,6 @@ Interface::Interface() {
   information.height      = 240;
   information.overscan    = true;
   information.aspectRatio = 8.0 / 7.0;
-  information.frequency   = 32040;
   information.resettable  = true;
 
   firmware.append({ID::IPLROM, "Super Famicom", "sys", "spc700.rom"});

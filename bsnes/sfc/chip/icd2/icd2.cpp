@@ -37,6 +37,8 @@ void ICD2::load() {
   hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
   GameBoy::interface->hook = this;
+
+  interface->memory.append({ID::SuperGameBoyRAM, "save.ram"});
 }
 
 void ICD2::unload() {

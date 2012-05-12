@@ -112,7 +112,6 @@ Interface::Interface() {
   information.height      = 144;
   information.overscan    = false;
   information.aspectRatio = 1.0;
-  information.frequency   = 4194304;
   information.resettable  = false;
 
   firmware.append({ID::GameBoyBootROM,      "Game Boy",       "sys", "boot.rom"});

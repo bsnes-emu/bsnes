@@ -32,8 +32,6 @@ void Cartridge::load(const string &markup, const stream &stream) {
   has_msu1       = false;
   has_link       = false;
 
-  nvram.reset();
-
   parse_markup(markup);
 //print(markup, "\n\n");
 

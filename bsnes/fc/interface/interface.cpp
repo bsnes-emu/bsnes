@@ -88,7 +88,6 @@ Interface::Interface() {
   information.height      = 240;
   information.overscan    = true;
   information.aspectRatio = 8.0 / 7.0;
-  information.frequency   = 1789772;
   information.resettable  = true;
 
   media.append({ID::ROM, "Famicom", "sys", "program.rom", "fc"});

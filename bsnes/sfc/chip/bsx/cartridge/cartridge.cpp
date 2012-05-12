@@ -1,5 +1,6 @@
 #ifdef BSX_CPP
 
+#include "serialization.cpp"
 BSXCartridge bsxcartridge;
 
 void BSXCartridge::init() {
