@@ -74,6 +74,8 @@ ifeq ($(USER),root)
 	@echo The installer needs to know your home directory to install important files.
 else ifeq ($(platform),x)
 	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
+	sudo install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
+	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 
 	mkdir -p ~/.config/$(name)
 	cp -R profile/* ~/.config/$(name)

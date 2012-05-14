@@ -16,6 +16,8 @@ struct Utility {
   void saveState(unsigned slot);
   void loadState(unsigned slot);
 
+  void tracerToggle();
+
   void synchronizeDSP();
   void synchronizeRuby();
   void updateShader();
@@ -32,6 +34,7 @@ struct Utility {
   lstring pathname;
 
 private:
+  bool tracerEnable;
   string statusText;
   string statusMessage;
   time_t statusTime;

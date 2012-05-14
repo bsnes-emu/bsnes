@@ -24,9 +24,8 @@ void SPC7110::Decomp::write(uint8 data) {
 }
 
 uint8 SPC7110::Decomp::dataread() {
-  unsigned size = cartridge.rom.size() - spc7110.data_rom_offset;
-  while(decomp_offset >= size) decomp_offset -= size;
-  return cartridge.rom.read(spc7110.data_rom_offset + decomp_offset++);
+  unsigned addr = Bus::mirror(decomp_offset++, spc7110.drom_size);
+  return cartridge.rom.read(spc7110.drom_base + addr);
 }
 
 void SPC7110::Decomp::init(unsigned mode, unsigned offset, unsigned index) {

@@ -53,11 +53,13 @@ struct Interface : Emulator::Interface {
 
   void cheatSet(const lstring&);
 
-  void updatePalette();
+  void paletteUpdate();
+
+  bool tracerEnable(bool);
 
   Interface();
 
-private:
+  file tracer;
   vector<Device> device;
 };
 

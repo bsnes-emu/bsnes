@@ -79,7 +79,7 @@ bool Interface::unserialize(serializer &s) {
   return system.unserialize(s);
 }
 
-void Interface::updatePalette() {
+void Interface::paletteUpdate() {
   video.generate_palette();
 }
 

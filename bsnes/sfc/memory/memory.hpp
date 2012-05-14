@@ -42,7 +42,7 @@ private:
 };
 
 struct Bus {
-  unsigned mirror(unsigned addr, unsigned size);
+  alwaysinline static unsigned mirror(unsigned addr, unsigned size);
 
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);

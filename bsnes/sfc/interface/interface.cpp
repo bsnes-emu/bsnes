@@ -174,6 +174,7 @@ void Interface::save(unsigned id, const stream &stream) {
 
 void Interface::unload() {
   cartridge.unload();
+  tracerEnable(false);
 }
 
 void Interface::connect(unsigned port, unsigned device) {
@@ -230,8 +231,28 @@ void Interface::cheatSet(const lstring &list) {
   cheat.synchronize();
 }
 
-void Interface::updatePalette() {
+void Interface::paletteUpdate() {
   video.generate_palette();
+}
+
+bool Interface::tracerEnable(bool trace) {
+  string pathname = path(group(ID::ROM));
+
+  if(trace == true && !tracer.open()) {
+    for(unsigned n = 0; n <= 999; n++) {
+      string filename = {pathname, "trace-", decimal<3, '0'>(n), ".log"};
+      if(file::exists(filename)) continue;
+      tracer.open(filename, file::mode::write);
+      return true;
+    }
+  }
+
+  if(trace == false && tracer.open()) {
+    tracer.close();
+    return true;
+  }
+
+  return false;
 }
 
 Interface::Interface() {

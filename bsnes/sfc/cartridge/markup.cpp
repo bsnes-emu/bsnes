@@ -400,46 +400,51 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   has_spc7110 = true;
   has_spc7110rtc = root["rtc"].exists();
 
-  auto &ram = root["ram"];
   auto &mmio = root["mmio"];
-  auto &mcu = root["mcu"];
-  auto &dcu = root["dcu"];
   auto &rtc = root["rtc"];
+  auto &dcu = root["dcu"];
+  auto &mcurom = root["mcu"]["rom"];
+  auto &mcuram = root["mcu"]["ram"];
 
-  ram_size = numeral(ram["size"].data);
-  for(auto &node : ram) {
-    if(node.name != "map") continue;
-    Mapping m({ &SPC7110::ram_read, &spc7110 }, { &SPC7110::ram_write, &spc7110 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
+  spc7110.prom_base = numeral(mcurom["program"]["offset"].data);
+  spc7110.prom_size = numeral(mcurom["program"]["size"].data);
+
+  spc7110.drom_base = numeral(mcurom["data"]["offset"].data);
+  spc7110.drom_size = numeral(mcurom["data"]["size"].data);
+
+  ram_size = numeral(mcuram["size"].data);
 
   for(auto &node : mmio) {
     if(node.name != "map") continue;
-    Mapping m({ &SPC7110::mmio_read, &spc7110 }, { &SPC7110::mmio_write, &spc7110 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  spc7110.data_rom_offset = numeral(mcu["offset"].data);
-  if(spc7110.data_rom_offset == 0) spc7110.data_rom_offset = 0x100000;
-  for(auto &node : mcu) {
-    if(node.name != "map") continue;
-    Mapping m({ &SPC7110::mcu_read, &spc7110 }, { &SPC7110::mcu_write, &spc7110 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : dcu) {
-    if(node.name != "map") continue;
-    Mapping m({ &SPC7110::dcu_read, &spc7110 }, { &SPC7110::dcu_write, &spc7110 });
+    Mapping m({&SPC7110::mmio_read, &spc7110}, {&SPC7110::mmio_write, &spc7110});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
   for(auto &node : rtc) {
     if(node.name != "map") continue;
-    Mapping m({ &SPC7110::mmio_read, &spc7110 }, { &SPC7110::mmio_write, &spc7110 });
+    Mapping m({&SPC7110::mmio_read, &spc7110}, {&SPC7110::mmio_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : dcu) {
+    if(node.name != "map") continue;
+    Mapping m({&SPC7110::dcu_read, &spc7110}, {&SPC7110::dcu_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : mcurom) {
+    if(node.name != "map") continue;
+    Mapping m({&SPC7110::mcurom_read, &spc7110}, {&SPC7110::mcurom_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : mcuram) {
+    if(node.name != "map") continue;
+    Mapping m({&SPC7110::mcuram_read, &spc7110}, {&SPC7110::mcuram_write, &spc7110});
     parse_markup_map(m, node);
     mapping.append(m);
   }

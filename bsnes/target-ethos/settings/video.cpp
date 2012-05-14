@@ -59,5 +59,5 @@ void VideoSettings::synchronize() {
   overscanHorizontal.value.setText({config->video.maskOverscanHorizontal, "px"});
   overscanVertical.value.setText({config->video.maskOverscanVertical, "px"});
 
-  if(application->active) system().updatePalette();
+  if(application->active) system().paletteUpdate();
 }

@@ -98,7 +98,10 @@ struct Interface {
   virtual void cheatSet(const lstring& = lstring{}) {}
 
   //utility functions
-  virtual void updatePalette() {}
+  virtual void paletteUpdate() {}
+
+  //debugger functions
+  virtual bool tracerEnable(bool) { return false; }
 
   Interface() : bind(nullptr) {}
 };

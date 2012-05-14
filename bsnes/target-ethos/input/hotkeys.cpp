@@ -119,6 +119,16 @@ void InputManager::appendHotkeys() {
     };
   }
 
+  {
+    auto hotkey = new HotkeyInput;
+    hotkey->name    = "Toggle Tracer";
+    hotkey->mapping = "None";
+
+    hotkey->press = [&] {
+      utility->tracerToggle();
+    };
+  }
+
   for(auto &hotkey : hotkeyMap) {
     string name = {"Hotkey::", hotkey->name};
     name.replace(" ", "");

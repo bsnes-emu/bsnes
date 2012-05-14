@@ -158,26 +158,11 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(has_spc7110) {
     markup.append(
-      "  <rom>\n"
-      "    <map mode='shadow' address='00-0f:8000-ffff'/>\n"
-      "    <map mode='shadow' address='80-bf:8000-ffff'/>\n"
-      "    <map mode='linear' address='c0-cf:0000-ffff'/>\n"
-      "  </rom>\n"
       "  <spc7110>\n"
-      "    <ram size='0x", hex(ram_size), "'>\n"
-      "      <map mode='linear' address='00:6000-7fff'/>\n"
-      "      <map mode='linear' address='30:6000-7fff'/>\n"
-      "    </ram>\n"
       "    <mmio>\n"
       "      <map address='00-3f:4800-483f'/>\n"
       "      <map address='80-bf:4800-483f'/>\n"
       "    </mmio>\n"
-      "    <mcu>\n"
-      "      <map address='d0-ff:0000-ffff' offset='0x100000' size='0x", hex(size - 0x100000), "'/>\n"
-      "    </mcu>\n"
-      "    <dcu>\n"
-      "      <map address='50:0000-ffff'/>\n"
-      "    </dcu>\n"
     );
     if(has_spc7110rtc) markup.append(
       "    <rtc>\n"
@@ -186,6 +171,22 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "    </rtc>\n"
     );
     markup.append(
+      "    <dcu>\n"
+      "      <map address='50:0000-ffff'/>\n"
+      "    </dcu>\n"
+      "    <mcu>\n"
+      "      <rom>\n"
+      "        <program offset='0x000000' size='0x100000'/>\n"
+      "        <data offset='0x100000' size='", hex(rom_size - 0x100000), "'/>\n"
+      "        <map address='00-0f:8000-ffff'/>\n"
+      "        <map address='80-bf:8000-ffff'/>\n"
+      "        <map address='c0-cf:0000-ffff'/>\n"
+      "      </rom>\n"
+      "      <ram size='0x", hex(ram_size), "'>\n"
+      "        <map address='00-3f:6000-7fff'/>\n"
+      "        <map address='80-bf:6000-7fff'/>\n"
+      "      </ram>\n"
+      "    </mcu>\n"
       "  </spc7110>\n"
     );
   }

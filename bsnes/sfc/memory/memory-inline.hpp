@@ -51,6 +51,24 @@ MappedRAM::MappedRAM() : data_(nullptr), size_(0), write_protect_(false) {}
 
 //Bus
 
+unsigned Bus::mirror(unsigned addr, unsigned size) {
+  unsigned base = 0;
+  if(size) {
+    unsigned mask = 1 << 23;
+    while(addr >= size) {
+      while(!(addr & mask)) mask >>= 1;
+      addr -= mask;
+      if(size > mask) {
+        size -= mask;
+        base += mask;
+      }
+      mask >>= 1;
+    }
+    base += addr;
+  }
+  return base;
+}
+
 uint8 Bus::read(unsigned addr) {
   if(cheat.override[addr]) return cheat.read(addr);
   return reader[lookup[addr]](target[addr]);

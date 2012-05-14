@@ -71,9 +71,9 @@ void SPC7110::reset() {
   r482f = 0x00;
 
   r4830 = 0x00;
-  mmio_write(0x4831, 0);
-  mmio_write(0x4832, 1);
-  mmio_write(0x4833, 2);
+  r4831 = 0x00;
+  r4832 = 0x01;
+  r4833 = 0x02;
   r4834 = 0x00;
 
   r4840 = 0x00;
@@ -88,9 +88,8 @@ void SPC7110::reset() {
 }
 
 unsigned SPC7110::datarom_addr(unsigned addr) {
-  unsigned size = cartridge.rom.size() - data_rom_offset;
-  while(addr >= size) addr -= size;
-  return data_rom_offset + addr;
+  addr = Bus::mirror(addr, drom_size);
+  return drom_base + addr;
 }
 
 unsigned SPC7110::data_pointer()   { return r4811 + (r4812 << 8) + (r4813 << 16); }
@@ -194,145 +193,147 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   addr &= 0xffff;
 
   switch(addr) {
-    //==================
-    //decompression unit
-    //==================
 
-    case 0x4800: {
-      uint16 counter = (r4809 + (r480a << 8));
-      counter--;
-      r4809 = counter;
-      r480a = counter >> 8;
-      return decomp.read();
+  //==================
+  //decompression unit
+  //==================
+
+  case 0x4800: {
+    uint16 counter = (r4809 + (r480a << 8));
+    counter--;
+    r4809 = counter;
+    r480a = counter >> 8;
+    return decomp.read();
+  }
+  case 0x4801: return r4801;
+  case 0x4802: return r4802;
+  case 0x4803: return r4803;
+  case 0x4804: return r4804;
+  case 0x4805: return r4805;
+  case 0x4806: return r4806;
+  case 0x4807: return r4807;
+  case 0x4808: return r4808;
+  case 0x4809: return r4809;
+  case 0x480a: return r480a;
+  case 0x480b: return r480b;
+  case 0x480c: {
+    uint8 status = r480c;
+    r480c &= 0x7f;
+    return status;
+  }
+
+  //==============
+  //data port unit
+  //==============
+
+  case 0x4810: {
+    if(r481x != 0x07) return 0x00;
+
+    unsigned addr = data_pointer();
+    unsigned adjust = data_adjust();
+    if(r4818 & 8) adjust = (int16)adjust;  //16-bit sign extend
+
+    unsigned adjustaddr = addr;
+    if(r4818 & 2) {
+      adjustaddr += adjust;
+      set_data_adjust(adjust + 1);
     }
-    case 0x4801: return r4801;
-    case 0x4802: return r4802;
-    case 0x4803: return r4803;
-    case 0x4804: return r4804;
-    case 0x4805: return r4805;
-    case 0x4806: return r4806;
-    case 0x4807: return r4807;
-    case 0x4808: return r4808;
-    case 0x4809: return r4809;
-    case 0x480a: return r480a;
-    case 0x480b: return r480b;
-    case 0x480c: {
-      uint8 status = r480c;
-      r480c &= 0x7f;
-      return status;
-    }
 
-    //==============
-    //data port unit
-    //==============
+    uint8 data = cartridge.rom.read(datarom_addr(adjustaddr));
+    if(!(r4818 & 2)) {
+      unsigned increment = (r4818 & 1) ? data_increment() : 1;
+      if(r4818 & 4) increment = (int16)increment;  //16-bit sign extend
 
-    case 0x4810: {
-      if(r481x != 0x07) return 0x00;
-
-      unsigned addr = data_pointer();
-      unsigned adjust = data_adjust();
-      if(r4818 & 8) adjust = (int16)adjust;  //16-bit sign extend
-
-      unsigned adjustaddr = addr;
-      if(r4818 & 2) {
-        adjustaddr += adjust;
-        set_data_adjust(adjust + 1);
+      if((r4818 & 16) == 0) {
+        set_data_pointer(addr + increment);
+      } else {
+        set_data_adjust(adjust + increment);
       }
+    }
 
-      uint8 data = cartridge.rom.read(datarom_addr(adjustaddr));
-      if(!(r4818 & 2)) {
-        unsigned increment = (r4818 & 1) ? data_increment() : 1;
-        if(r4818 & 4) increment = (int16)increment;  //16-bit sign extend
+    return data;
+  }
+  case 0x4811: return r4811;
+  case 0x4812: return r4812;
+  case 0x4813: return r4813;
+  case 0x4814: return r4814;
+  case 0x4815: return r4815;
+  case 0x4816: return r4816;
+  case 0x4817: return r4817;
+  case 0x4818: return r4818;
+  case 0x481a: {
+    if(r481x != 0x07) return 0x00;
 
-        if((r4818 & 16) == 0) {
-          set_data_pointer(addr + increment);
-        } else {
-          set_data_adjust(adjust + increment);
-        }
+    unsigned addr = data_pointer();
+    unsigned adjust = data_adjust();
+    if(r4818 & 8) adjust = (int16)adjust;  //16-bit sign extend
+
+    uint8 data = cartridge.rom.read(datarom_addr(addr + adjust));
+    if((r4818 & 0x60) == 0x60) {
+      if((r4818 & 16) == 0) {
+        set_data_pointer(addr + adjust);
+      } else {
+        set_data_adjust(adjust + adjust);
       }
-
-      return data;
-    }
-    case 0x4811: return r4811;
-    case 0x4812: return r4812;
-    case 0x4813: return r4813;
-    case 0x4814: return r4814;
-    case 0x4815: return r4815;
-    case 0x4816: return r4816;
-    case 0x4817: return r4817;
-    case 0x4818: return r4818;
-    case 0x481a: {
-      if(r481x != 0x07) return 0x00;
-
-      unsigned addr = data_pointer();
-      unsigned adjust = data_adjust();
-      if(r4818 & 8) adjust = (int16)adjust;  //16-bit sign extend
-
-      uint8 data = cartridge.rom.read(datarom_addr(addr + adjust));
-      if((r4818 & 0x60) == 0x60) {
-        if((r4818 & 16) == 0) {
-          set_data_pointer(addr + adjust);
-        } else {
-          set_data_adjust(adjust + adjust);
-        }
-      }
-
-      return data;
     }
 
-    //=========
-    //math unit
-    //=========
+    return data;
+  }
 
-    case 0x4820: return r4820;
-    case 0x4821: return r4821;
-    case 0x4822: return r4822;
-    case 0x4823: return r4823;
-    case 0x4824: return r4824;
-    case 0x4825: return r4825;
-    case 0x4826: return r4826;
-    case 0x4827: return r4827;
-    case 0x4828: return r4828;
-    case 0x4829: return r4829;
-    case 0x482a: return r482a;
-    case 0x482b: return r482b;
-    case 0x482c: return r482c;
-    case 0x482d: return r482d;
-    case 0x482e: return r482e;
-    case 0x482f: {
-      uint8 status = r482f;
-      r482f &= 0x7f;
-      return status;
-    }
+  //=========
+  //math unit
+  //=========
 
-    //===================
-    //memory mapping unit
-    //===================
+  case 0x4820: return r4820;
+  case 0x4821: return r4821;
+  case 0x4822: return r4822;
+  case 0x4823: return r4823;
+  case 0x4824: return r4824;
+  case 0x4825: return r4825;
+  case 0x4826: return r4826;
+  case 0x4827: return r4827;
+  case 0x4828: return r4828;
+  case 0x4829: return r4829;
+  case 0x482a: return r482a;
+  case 0x482b: return r482b;
+  case 0x482c: return r482c;
+  case 0x482d: return r482d;
+  case 0x482e: return r482e;
+  case 0x482f: {
+    uint8 status = r482f;
+    r482f &= 0x7f;
+    return status;
+  }
 
-    case 0x4830: return r4830;
-    case 0x4831: return r4831;
-    case 0x4832: return r4832;
-    case 0x4833: return r4833;
-    case 0x4834: return r4834;
+  //===================
+  //memory mapping unit
+  //===================
 
-    //====================
-    //real-time clock unit
-    //====================
+  case 0x4830: return r4830;
+  case 0x4831: return r4831;
+  case 0x4832: return r4832;
+  case 0x4833: return r4833;
+  case 0x4834: return r4834;
 
-    case 0x4840: return r4840;
-    case 0x4841: {
-      if(rtc_state == RTCS_Inactive || rtc_state == RTCS_ModeSelect) return 0x00;
+  //====================
+  //real-time clock unit
+  //====================
 
-      r4842 = 0x80;
-      uint8 data = rtc[rtc_index];
-      rtc_index = (rtc_index + 1) & 15;
-      return data;
-    }
-    case 0x4842: {
-      uint8 status = r4842;
-      r4842 &= 0x7f;
-      return status;
-    }
+  case 0x4840: return r4840;
+  case 0x4841: {
+    if(rtc_state == RTCS_Inactive || rtc_state == RTCS_ModeSelect) return 0x00;
+
+    r4842 = 0x80;
+    uint8 data = rtc[rtc_index];
+    rtc_index = (rtc_index + 1) & 15;
+    return data;
+  }
+  case 0x4842: {
+    uint8 status = r4842;
+    r4842 &= 0x7f;
+    return status;
+  }
+
   }
 
   return cpu.regs.mdr;
@@ -342,310 +343,285 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   switch(addr) {
-    //==================
-    //decompression unit
-    //==================
 
-    case 0x4801: r4801 = data; break;
-    case 0x4802: r4802 = data; break;
-    case 0x4803: r4803 = data; break;
-    case 0x4804: r4804 = data; break;
-    case 0x4805: r4805 = data; break;
-    case 0x4806: {
-      r4806 = data;
+  //==================
+  //decompression unit
+  //==================
 
-      unsigned table   = (r4801 + (r4802 << 8) + (r4803 << 16));
-      unsigned index   = (r4804 << 2);
-      unsigned length  = (r4809 + (r480a << 8));
-      unsigned addr    = datarom_addr(table + index);
-      unsigned mode    = (cartridge.rom.read(addr + 0));
-      unsigned offset  = (cartridge.rom.read(addr + 1) << 16)
-                       + (cartridge.rom.read(addr + 2) <<  8)
-                       + (cartridge.rom.read(addr + 3) <<  0);
+  case 0x4801: r4801 = data; break;
+  case 0x4802: r4802 = data; break;
+  case 0x4803: r4803 = data; break;
+  case 0x4804: r4804 = data; break;
+  case 0x4805: r4805 = data; break;
+  case 0x4806: {
+    r4806 = data;
 
-      decomp.init(mode, offset, (r4805 + (r4806 << 8)) << mode);
-      r480c = 0x80;
-    } break;
+    unsigned table   = (r4801 + (r4802 << 8) + (r4803 << 16));
+    unsigned index   = (r4804 << 2);
+    unsigned length  = (r4809 + (r480a << 8));
+    unsigned addr    = datarom_addr(table + index);
+    unsigned mode    = (cartridge.rom.read(addr + 0));
+    unsigned offset  = (cartridge.rom.read(addr + 1) << 16)
+                     + (cartridge.rom.read(addr + 2) <<  8)
+                     + (cartridge.rom.read(addr + 3) <<  0);
 
-    case 0x4807: r4807 = data; break;
-    case 0x4808: r4808 = data; break;
-    case 0x4809: r4809 = data; break;
-    case 0x480a: r480a = data; break;
-    case 0x480b: r480b = data; break;
+    decomp.init(mode, offset, (r4805 + (r4806 << 8)) << mode);
+    r480c = 0x80;
+  } break;
 
-    //==============
-    //data port unit
-    //==============
+  case 0x4807: r4807 = data; break;
+  case 0x4808: r4808 = data; break;
+  case 0x4809: r4809 = data; break;
+  case 0x480a: r480a = data; break;
+  case 0x480b: r480b = data; break;
 
-    case 0x4811: r4811 = data; r481x |= 0x01; break;
-    case 0x4812: r4812 = data; r481x |= 0x02; break;
-    case 0x4813: r4813 = data; r481x |= 0x04; break;
-    case 0x4814: {
-      r4814 = data;
-      r4814_latch = true;
-      if(!r4815_latch) break;
-      if(!(r4818 & 2)) break;
-      if(r4818 & 0x10) break;
+  //==============
+  //data port unit
+  //==============
 
-      if((r4818 & 0x60) == 0x20) {
-        unsigned increment = data_adjust() & 0xff;
-        if(r4818 & 8) increment = (int8)increment;  //8-bit sign extend
-        set_data_pointer(data_pointer() + increment);
-      } else if((r4818 & 0x60) == 0x40) {
-        unsigned increment = data_adjust();
-        if(r4818 & 8) increment = (int16)increment;  //16-bit sign extend
-        set_data_pointer(data_pointer() + increment);
-      }
-    } break;
-    case 0x4815: {
-      r4815 = data;
-      r4815_latch = true;
-      if(!r4814_latch) break;
-      if(!(r4818 & 2)) break;
-      if(r4818 & 0x10) break;
+  case 0x4811: r4811 = data; r481x |= 0x01; break;
+  case 0x4812: r4812 = data; r481x |= 0x02; break;
+  case 0x4813: r4813 = data; r481x |= 0x04; break;
+  case 0x4814: {
+    r4814 = data;
+    r4814_latch = true;
+    if(!r4815_latch) break;
+    if(!(r4818 & 2)) break;
+    if(r4818 & 0x10) break;
 
-      if((r4818 & 0x60) == 0x20) {
-        unsigned increment = data_adjust() & 0xff;
-        if(r4818 & 8) increment = (int8)increment;  //8-bit sign extend
-        set_data_pointer(data_pointer() + increment);
-      } else if((r4818 & 0x60) == 0x40) {
-        unsigned increment = data_adjust();
-        if(r4818 & 8) increment = (int16)increment;  //16-bit sign extend
-        set_data_pointer(data_pointer() + increment);
-      }
-    } break;
-    case 0x4816: r4816 = data; break;
-    case 0x4817: r4817 = data; break;
-    case 0x4818: {
-      if(r481x != 0x07) break;
+    if((r4818 & 0x60) == 0x20) {
+      unsigned increment = data_adjust() & 0xff;
+      if(r4818 & 8) increment = (int8)increment;  //8-bit sign extend
+      set_data_pointer(data_pointer() + increment);
+    } else if((r4818 & 0x60) == 0x40) {
+      unsigned increment = data_adjust();
+      if(r4818 & 8) increment = (int16)increment;  //16-bit sign extend
+      set_data_pointer(data_pointer() + increment);
+    }
+  } break;
+  case 0x4815: {
+    r4815 = data;
+    r4815_latch = true;
+    if(!r4814_latch) break;
+    if(!(r4818 & 2)) break;
+    if(r4818 & 0x10) break;
 
-      r4818 = data;
-      r4814_latch = r4815_latch = false;
-    } break;
+    if((r4818 & 0x60) == 0x20) {
+      unsigned increment = data_adjust() & 0xff;
+      if(r4818 & 8) increment = (int8)increment;  //8-bit sign extend
+      set_data_pointer(data_pointer() + increment);
+    } else if((r4818 & 0x60) == 0x40) {
+      unsigned increment = data_adjust();
+      if(r4818 & 8) increment = (int16)increment;  //16-bit sign extend
+      set_data_pointer(data_pointer() + increment);
+    }
+  } break;
+  case 0x4816: r4816 = data; break;
+  case 0x4817: r4817 = data; break;
+  case 0x4818: {
+    if(r481x != 0x07) break;
 
-    //=========
-    //math unit
-    //=========
+    r4818 = data;
+    r4814_latch = r4815_latch = false;
+  } break;
 
-    case 0x4820: r4820 = data; break;
-    case 0x4821: r4821 = data; break;
-    case 0x4822: r4822 = data; break;
-    case 0x4823: r4823 = data; break;
-    case 0x4824: r4824 = data; break;
-    case 0x4825: {
-      r4825 = data;
+  //=========
+  //math unit
+  //=========
 
-      if(r482e & 1) {
-        //signed 16-bit x 16-bit multiplication
-        int16 r0 = (int16)(r4824 + (r4825 << 8));
-        int16 r1 = (int16)(r4820 + (r4821 << 8));
+  case 0x4820: r4820 = data; break;
+  case 0x4821: r4821 = data; break;
+  case 0x4822: r4822 = data; break;
+  case 0x4823: r4823 = data; break;
+  case 0x4824: r4824 = data; break;
+  case 0x4825: {
+    r4825 = data;
 
-        signed result = r0 * r1;
-        r4828 = result;
-        r4829 = result >> 8;
-        r482a = result >> 16;
-        r482b = result >> 24;
+    if(r482e & 1) {
+      //signed 16-bit x 16-bit multiplication
+      int16 r0 = (int16)(r4824 + (r4825 << 8));
+      int16 r1 = (int16)(r4820 + (r4821 << 8));
+
+      signed result = r0 * r1;
+      r4828 = result;
+      r4829 = result >> 8;
+      r482a = result >> 16;
+      r482b = result >> 24;
+    } else {
+      //unsigned 16-bit x 16-bit multiplication
+      uint16 r0 = (uint16)(r4824 + (r4825 << 8));
+      uint16 r1 = (uint16)(r4820 + (r4821 << 8));
+
+      unsigned result = r0 * r1;
+      r4828 = result;
+      r4829 = result >> 8;
+      r482a = result >> 16;
+      r482b = result >> 24;
+    }
+
+    r482f = 0x80;
+  } break;
+  case 0x4826: r4826 = data; break;
+  case 0x4827: {
+    r4827 = data;
+
+    if(r482e & 1) {
+      //signed 32-bit x 16-bit division
+      int32 dividend = (int32)(r4820 + (r4821 << 8) + (r4822 << 16) + (r4823 << 24));
+      int16 divisor  = (int16)(r4826 + (r4827 << 8));
+
+      int32 quotient;
+      int16 remainder;
+
+      if(divisor) {
+        quotient  = (int32)(dividend / divisor);
+        remainder = (int32)(dividend % divisor);
       } else {
-        //unsigned 16-bit x 16-bit multiplication
-        uint16 r0 = (uint16)(r4824 + (r4825 << 8));
-        uint16 r1 = (uint16)(r4820 + (r4821 << 8));
-
-        unsigned result = r0 * r1;
-        r4828 = result;
-        r4829 = result >> 8;
-        r482a = result >> 16;
-        r482b = result >> 24;
+        //illegal division by zero
+        quotient  = 0;
+        remainder = dividend & 0xffff;
       }
 
-      r482f = 0x80;
-    } break;
-    case 0x4826: r4826 = data; break;
-    case 0x4827: {
-      r4827 = data;
+      r4828 = quotient;
+      r4829 = quotient >> 8;
+      r482a = quotient >> 16;
+      r482b = quotient >> 24;
 
-      if(r482e & 1) {
-        //signed 32-bit x 16-bit division
-        int32 dividend = (int32)(r4820 + (r4821 << 8) + (r4822 << 16) + (r4823 << 24));
-        int16 divisor  = (int16)(r4826 + (r4827 << 8));
+      r482c = remainder;
+      r482d = remainder >> 8;
+    } else {
+      //unsigned 32-bit x 16-bit division
+      uint32 dividend = (uint32)(r4820 + (r4821 << 8) + (r4822 << 16) + (r4823 << 24));
+      uint16 divisor  = (uint16)(r4826 + (r4827 << 8));
 
-        int32 quotient;
-        int16 remainder;
+      uint32 quotient;
+      uint16 remainder;
 
-        if(divisor) {
-          quotient  = (int32)(dividend / divisor);
-          remainder = (int32)(dividend % divisor);
-        } else {
-          //illegal division by zero
-          quotient  = 0;
-          remainder = dividend & 0xffff;
+      if(divisor) {
+        quotient  = (uint32)(dividend / divisor);
+        remainder = (uint16)(dividend % divisor);
+      } else {
+        //illegal division by zero
+        quotient  = 0;
+        remainder = dividend & 0xffff;
+      }
+
+      r4828 = quotient;
+      r4829 = quotient >> 8;
+      r482a = quotient >> 16;
+      r482b = quotient >> 24;
+
+      r482c = remainder;
+      r482d = remainder >> 8;
+    }
+
+    r482f = 0x80;
+  } break;
+
+  case 0x482e: {
+    //reset math unit
+    r4820 = r4821 = r4822 = r4823 = 0;
+    r4824 = r4825 = r4826 = r4827 = 0;
+    r4828 = r4829 = r482a = r482b = 0;
+    r482c = r482d = 0;
+
+    r482e = data;
+  } break;
+
+  //===================
+  //memory mapping unit
+  //===================
+
+  case 0x4830: r4830 = data & 0x87; break;
+  case 0x4831: r4831 = data & 0x07; break;
+  case 0x4832: r4832 = data & 0x07; break;
+  case 0x4833: r4833 = data & 0x07; break;
+  case 0x4834: r4834 = data & 0x07; break;
+
+  //====================
+  //real-time clock unit
+  //====================
+
+  case 0x4840: {
+    r4840 = data;
+    if(!(r4840 & 1)) {
+      //disable RTC
+      rtc_state = RTCS_Inactive;
+      update_time();
+    } else {
+      //enable RTC
+      r4842 = 0x80;
+      rtc_state = RTCS_ModeSelect;
+    }
+  } break;
+
+  case 0x4841: {
+    r4841 = data;
+
+    switch(rtc_state) {
+      case RTCS_ModeSelect: {
+        if(data == RTCM_Linear || data == RTCM_Indexed) {
+          r4842 = 0x80;
+          rtc_state = RTCS_IndexSelect;
+          rtc_mode  = (RTC_Mode)data;
+          rtc_index = 0;
         }
+      } break;
 
-        r4828 = quotient;
-        r4829 = quotient >> 8;
-        r482a = quotient >> 16;
-        r482b = quotient >> 24;
-
-        r482c = remainder;
-        r482d = remainder >> 8;
-      } else {
-        //unsigned 32-bit x 16-bit division
-        uint32 dividend = (uint32)(r4820 + (r4821 << 8) + (r4822 << 16) + (r4823 << 24));
-        uint16 divisor  = (uint16)(r4826 + (r4827 << 8));
-
-        uint32 quotient;
-        uint16 remainder;
-
-        if(divisor) {
-          quotient  = (uint32)(dividend / divisor);
-          remainder = (uint16)(dividend % divisor);
-        } else {
-          //illegal division by zero
-          quotient  = 0;
-          remainder = dividend & 0xffff;
-        }
-
-        r4828 = quotient;
-        r4829 = quotient >> 8;
-        r482a = quotient >> 16;
-        r482b = quotient >> 24;
-
-        r482c = remainder;
-        r482d = remainder >> 8;
-      }
-
-      r482f = 0x80;
-    } break;
-
-    case 0x482e: {
-      //reset math unit
-      r4820 = r4821 = r4822 = r4823 = 0;
-      r4824 = r4825 = r4826 = r4827 = 0;
-      r4828 = r4829 = r482a = r482b = 0;
-      r482c = r482d = 0;
-
-      r482e = data;
-    } break;
-
-    //===================
-    //memory mapping unit
-    //===================
-
-    case 0x4830: r4830 = data; break;
-
-    case 0x4831: {
-      r4831 = data;
-      dx_offset = datarom_addr(data * 0x100000);
-    } break;
-
-    case 0x4832: {
-      r4832 = data;
-      ex_offset = datarom_addr(data * 0x100000);
-    } break;
-
-    case 0x4833: {
-      r4833 = data;
-      fx_offset = datarom_addr(data * 0x100000);
-    } break;
-
-    case 0x4834: r4834 = data; break;
-
-    //====================
-    //real-time clock unit
-    //====================
-
-    case 0x4840: {
-      r4840 = data;
-      if(!(r4840 & 1)) {
-        //disable RTC
-        rtc_state = RTCS_Inactive;
-        update_time();
-      } else {
-        //enable RTC
+      case RTCS_IndexSelect: {
         r4842 = 0x80;
-        rtc_state = RTCS_ModeSelect;
-      }
-    } break;
+        rtc_index = data & 15;
+        if(rtc_mode == RTCM_Linear) rtc_state = RTCS_Write;
+      } break;
 
-    case 0x4841: {
-      r4841 = data;
+      case RTCS_Write: {
+        r4842 = 0x80;
 
-      switch(rtc_state) {
-        case RTCS_ModeSelect: {
-          if(data == RTCM_Linear || data == RTCM_Indexed) {
-            r4842 = 0x80;
-            rtc_state = RTCS_IndexSelect;
-            rtc_mode  = (RTC_Mode)data;
-            rtc_index = 0;
+        //control register 0
+        if(rtc_index == 13) {
+          //increment second counter
+          if(data & 2) update_time(+1);
+
+          //round minute counter
+          if(data & 8) {
+            update_time();
+
+            unsigned second = rtc[ 0] + rtc[ 1] * 10;
+            //clear seconds
+            rtc[0] = 0;
+            rtc[1] = 0;
+
+            if(second >= 30) update_time(+60);
           }
-        } break;
+        }
 
-        case RTCS_IndexSelect: {
-          r4842 = 0x80;
-          rtc_index = data & 15;
-          if(rtc_mode == RTCM_Linear) rtc_state = RTCS_Write;
-        } break;
+        //control register 2
+        if(rtc_index == 15) {
+          //disable timer and clear second counter
+          if((data & 1) && !(rtc[15] & 1)) {
+            update_time();
 
-        case RTCS_Write: {
-          r4842 = 0x80;
-
-          //control register 0
-          if(rtc_index == 13) {
-            //increment second counter
-            if(data & 2) update_time(+1);
-
-            //round minute counter
-            if(data & 8) {
-              update_time();
-
-              unsigned second = rtc[ 0] + rtc[ 1] * 10;
-              //clear seconds
-              rtc[0] = 0;
-              rtc[1] = 0;
-
-              if(second >= 30) update_time(+60);
-            }
+            //clear seconds
+            rtc[0] = 0;
+            rtc[1] = 0;
           }
 
-          //control register 2
-          if(rtc_index == 15) {
-            //disable timer and clear second counter
-            if((data & 1) && !(rtc[15] & 1)) {
-              update_time();
-
-              //clear seconds
-              rtc[0] = 0;
-              rtc[1] = 0;
-            }
-
-            //disable timer
-            if((data & 2) && !(rtc[15] & 2)) {
-              update_time();
-            }
+          //disable timer
+          if((data & 2) && !(rtc[15] & 2)) {
+            update_time();
           }
+        }
 
-          rtc[rtc_index] = data & 15;
-          rtc_index = (rtc_index + 1) & 15;
-        } break;
-      } //switch(rtc_state)
-    } break;
+        rtc[rtc_index] = data & 15;
+        rtc_index = (rtc_index + 1) & 15;
+      } break;
+    } //switch(rtc_state)
+  } break;
+
   }
 }
 
 SPC7110::SPC7110() {
-}
-
-//============
-//SPC7110::MCU
-//============
-
-uint8 SPC7110::mcu_read(unsigned addr) {
-  if(addr <= 0xdfffff) return cartridge.rom.read(dx_offset + (addr & 0x0fffff));
-  if(addr <= 0xefffff) return cartridge.rom.read(ex_offset + (addr & 0x0fffff));
-  if(addr <= 0xffffff) return cartridge.rom.read(fx_offset + (addr & 0x0fffff));
-  return cpu.regs.mdr;
-}
-
-void SPC7110::mcu_write(unsigned addr, uint8 data) {
 }
 
 //============
@@ -659,16 +635,86 @@ uint8 SPC7110::dcu_read(unsigned) {
 void SPC7110::dcu_write(unsigned, uint8) {
 }
 
-//============
-//SPC7110::RAM
-//============
+//===============
+//SPC7110::MCUROM
+//===============
 
-uint8 SPC7110::ram_read(unsigned addr) {
-  return cartridge.ram.read(addr & 0x1fff);
+uint8 SPC7110::mcurom_read(unsigned addr) {
+  unsigned bank = 0;
+
+  if((addr & 0x708000) == 0x008000  //$00-0f|80-8f:8000-ffff
+  || (addr & 0xf00000) == 0xc00000  //      $c0-cf:0000-ffff
+  ) {
+    addr &= 0x0fffff;
+    if(true) {  //8mbit PROM
+      return cartridge.rom.read(prom_base + bus.mirror(0x000000 + addr, prom_size));
+    }
+    return mcurom_read_data(r4830 & 7, addr);
+  }
+
+  if((addr & 0x708000) == 0x108000  //$10-1f|90-9f:8000-ffff
+  || (addr & 0xf00000) == 0xd00000  //      $d0-df:0000-ffff
+  ) {
+    addr &= 0x0fffff;
+    if(r4834 & 4) {  //16mbit PROM
+      return cartridge.rom.read(prom_base + bus.mirror(0x100000 + addr, prom_size));
+    }
+    return mcurom_read_data(r4831 & 7, addr);
+  }
+
+  if((addr & 0x708000) == 0x208000  //$20-2f|a0-af:8000-ffff
+  || (addr & 0xf00000) == 0xe00000  //      $e0-ef:0000-ffff
+  ) {
+    addr &= 0x0fffff;
+    return mcurom_read_data(r4832 & 7, addr);
+  }
+
+  if((addr & 0x708000) == 0x308000  //$30-3f|b0-bf:8000-ffff
+  || (addr & 0xf00000) == 0xf00000  //      $f0-ff:0000-ffff
+  ) {
+    addr &= 0x0fffff;
+    return mcurom_read_data(r4833 & 7, addr);
+  }
+
+  return cpu.regs.mdr;
 }
 
-void SPC7110::ram_write(unsigned addr, uint8 data) {
-  if(r4830 & 0x80) cartridge.ram.write(addr & 0x1fff, data);
+uint8 SPC7110::mcurom_read_data(unsigned bank, unsigned addr) {
+  unsigned mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
+  unsigned range = 0x100000 * (1 + mask);
+  unsigned offset = 0x100000 * (bank & mask);
+
+  //mirroring behavior is non-sensical. assuming a 32mbit data ROM:
+  //banks 4-7 with mask 0-2 returns 0x00; banks 4-7 with mask 3 mirrors banks 0-3
+  if(range <= drom_size && offset >= drom_size) return 0x00;
+
+  return cartridge.rom.read(drom_base + bus.mirror(offset + addr, drom_size));
+}
+
+void SPC7110::mcurom_write(unsigned addr, uint8 data) {
+}
+
+//===============
+//SPC7110::MCURAM
+//===============
+
+uint8 SPC7110::mcuram_read(unsigned addr) {
+  //$00-3f|80-bf:6000-7fff
+  if(r4830 & 0x80) {
+    unsigned bank = (addr >> 16) & 0x3f;
+    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
+    return cartridge.ram.read(addr);
+  }
+  return 0x00;
+}
+
+void SPC7110::mcuram_write(unsigned addr, uint8 data) {
+  //$00-3f|80-bf:6000-7fff
+  if(r4830 & 0x80) {
+    unsigned bank = (addr >> 16) & 0x3f;
+    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
+    cartridge.ram.write(addr, data);
+  }
 }
 
 }

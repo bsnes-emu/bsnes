@@ -99,7 +99,7 @@ void Utility::load() {
 
   loadMemory();
 
-  system().updatePalette();
+  system().paletteUpdate();
   synchronizeDSP();
 
   resize();
@@ -109,6 +109,7 @@ void Utility::load() {
 
 void Utility::unload() {
   if(application->active == nullptr) return;
+  if(tracerEnable) tracerToggle();
 
   saveMemory();
   system().unload();
@@ -141,6 +142,16 @@ void Utility::loadState(unsigned slot) {
   serializer s(memory.data(), memory.size());
   if(system().unserialize(s) == false) return showMessage({"Slot ", slot, " state incompatible"});
   showMessage({"Loaded from slot ", slot});
+}
+
+void Utility::tracerToggle() {
+  if(application->active == nullptr) return;
+  tracerEnable = !tracerEnable;
+  bool result = system().tracerEnable(tracerEnable);
+  if( tracerEnable &&  result) return utility->showMessage("Tracer activated");
+  if( tracerEnable && !result) return tracerEnable = false, utility->showMessage("Unable to activate tracer");
+  if(!tracerEnable &&  result) return utility->showMessage("Tracer deactivated");
+  if(!tracerEnable && !result) return utility->showMessage("Unable to deactivate tracer");
 }
 
 void Utility::synchronizeDSP() {
@@ -280,5 +291,6 @@ void Utility::showMessage(const string &message) {
 }
 
 Utility::Utility() {
+  tracerEnable = false;
   statusTime = 0;
 }

@@ -99,7 +99,7 @@ void Interface::cheatSet(const lstring &list) {
   cheat.synchronize();
 }
 
-void Interface::updatePalette() {
+void Interface::paletteUpdate() {
   video.generate_palette();
 }
 

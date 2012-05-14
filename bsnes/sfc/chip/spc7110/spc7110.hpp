@@ -3,7 +3,8 @@
 
 struct SPC7110 {
   uint8 rtc[20];
-  unsigned data_rom_offset;
+  unsigned prom_base, prom_size;  //program ROM
+  unsigned drom_base, drom_size;  //data ROM
 
   void init();
   void load();
@@ -25,14 +26,15 @@ struct SPC7110 {
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
 
-  uint8 mcu_read(unsigned addr);
-  void mcu_write(unsigned addr, uint8 data);
-
   uint8 dcu_read(unsigned);
   void dcu_write(unsigned, uint8);
 
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
+  uint8 mcurom_read(unsigned addr);
+  uint8 mcurom_read_data(unsigned bank, unsigned addr);
+  void mcurom_write(unsigned addr, uint8 data);
+
+  uint8 mcuram_read(unsigned addr);
+  void mcuram_write(unsigned addr, uint8 data);
 
   //spc7110decomp
   void decomp_init();
@@ -101,15 +103,11 @@ private:
   //===================
   //memory mapping unit
   //===================
-  uint8 r4830;  //SRAM write enable
-  uint8 r4831;  //$[d0-df]:[0000-ffff] mapping
-  uint8 r4832;  //$[e0-ef]:[0000-ffff] mapping
-  uint8 r4833;  //$[f0-ff]:[0000-ffff] mapping
-  uint8 r4834;  //???
-
-  unsigned dx_offset;
-  unsigned ex_offset;
-  unsigned fx_offset;
+  uint8 r4830;  //bank 0 mapping + SRAM write enable
+  uint8 r4831;  //bank 1 mapping
+  uint8 r4832;  //bank 2 mapping
+  uint8 r4833;  //bank 3 mapping
+  uint8 r4834;  //bank mapping control
 
   //====================
   //real-time clock unit

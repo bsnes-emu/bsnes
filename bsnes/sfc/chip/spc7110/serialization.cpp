@@ -65,10 +65,6 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4833);
   s.integer(r4834);
 
-  s.integer(dx_offset);
-  s.integer(ex_offset);
-  s.integer(fx_offset);
-
   s.integer(r4840);
   s.integer(r4841);
   s.integer(r4842);

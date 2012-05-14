@@ -5,24 +5,6 @@ namespace SuperFamicom {
 
 Bus bus;
 
-unsigned Bus::mirror(unsigned addr, unsigned size) {
-  unsigned base = 0;
-  if(size) {
-    unsigned mask = 1 << 23;
-    while(addr >= size) {
-      while(!(addr & mask)) mask >>= 1;
-      addr -= mask;
-      if(size > mask) {
-        size -= mask;
-        base += mask;
-      }
-      mask >>= 1;
-    }
-    base += addr;
-  }
-  return base;
-}
-
 void Bus::map(
   MapMode mode,
   unsigned bank_lo, unsigned bank_hi,

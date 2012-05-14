@@ -33,7 +33,7 @@ struct Interface : Emulator::Interface {
 
   void cheatSet(const lstring&);
 
-  void updatePalette();
+  void paletteUpdate();
 
   Interface();
 
