@@ -1,5 +1,4 @@
-class Decomp {
-public:
+struct Decomp {
   uint8 read();
   void init(unsigned mode, unsigned offset, unsigned index);
   void reset();

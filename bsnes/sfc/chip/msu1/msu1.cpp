@@ -78,6 +78,8 @@ void MSU1::reset() {
 }
 
 uint8 MSU1::mmio_read(unsigned addr) {
+  cpu.synchronize_coprocessors();
+
   switch(addr & 7) {
   case 0:
     return (mmio.data_busy    << 7)
@@ -101,6 +103,8 @@ uint8 MSU1::mmio_read(unsigned addr) {
 }
 
 void MSU1::mmio_write(unsigned addr, uint8 data) {
+  cpu.synchronize_coprocessors();
+
   switch(addr & 7) {
   case 0: mmio.data_offset = (mmio.data_offset & 0xffffff00) | (data <<  0); break;
   case 1: mmio.data_offset = (mmio.data_offset & 0xffff00ff) | (data <<  8); break;

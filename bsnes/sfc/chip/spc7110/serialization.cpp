@@ -16,6 +16,8 @@ void SPC7110::Decomp::serialize(serializer &s) {
 }
 
 void SPC7110::serialize(serializer &s) {
+  for(auto &byte : rtcram) s.integer(byte);
+
   s.integer(r4801);
   s.integer(r4802);
   s.integer(r4803);
@@ -28,8 +30,10 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r480a);
   s.integer(r480b);
   s.integer(r480c);
+
   decomp.serialize(s);
 
+  s.integer(r4810);
   s.integer(r4811);
   s.integer(r4812);
   s.integer(r4813);
@@ -38,7 +42,8 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4816);
   s.integer(r4817);
   s.integer(r4818);
-  s.integer(r481x);
+  s.integer(r481a);
+
   s.integer(r4814_latch);
   s.integer(r4815_latch);
 
@@ -59,6 +64,9 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r482e);
   s.integer(r482f);
 
+  s.integer(mul_wait);
+  s.integer(div_wait);
+
   s.integer(r4830);
   s.integer(r4831);
   s.integer(r4832);
@@ -69,10 +77,11 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4841);
   s.integer(r4842);
 
-  s.array(rtc);
-  s.integer(rtc_state);
+  s.integer(rtc_clocks);
+  s.integer(rtc_seconds);
   s.integer(rtc_mode);
-  s.integer(rtc_index);
+  s.integer(rtc_addr);
+  s.integer(rtc_wait);
 }
 
 #endif

@@ -110,7 +110,9 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
   }
 
   if(id == ID::SPC7110RTC) {
-    stream.read(spc7110.rtc, min(stream.size(), sizeof srtc.rtc));
+    uint8 data[16] = {0};
+    stream.read(data, min(stream.size(), sizeof data));
+    spc7110.rtcram_load(data);
   }
 
   if(id == ID::BsxRAM) {
@@ -148,7 +150,9 @@ void Interface::save(unsigned id, const stream &stream) {
   }
 
   if(id == ID::SPC7110RTC) {
-    stream.write(spc7110.rtc, sizeof srtc.rtc);
+    uint8 data[16];
+    spc7110.rtcram_save(data);
+    stream.write(data, sizeof data);
   }
 
   if(id == ID::BsxRAM) {
