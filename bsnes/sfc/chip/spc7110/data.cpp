@@ -18,24 +18,12 @@ unsigned SPC7110::data_increment() { return r4816 | r4817 << 8; }
 void SPC7110::set_data_offset(unsigned addr) { r4811 = addr; r4812 = addr >> 8; r4813 = addr >> 16; }
 void SPC7110::set_data_adjust(unsigned addr) { r4814 = addr; r4815 = addr >> 8; }
 
-void SPC7110::data_port_read_a() {
+void SPC7110::data_port_read() {
   unsigned offset = data_offset();
   unsigned adjust = data_adjust();
   if(r4818 & 8) adjust = (int16)adjust;
   if(r4818 & 2) offset += adjust;
   r4810 = datarom_read(offset);
-}
-
-void SPC7110::data_port_read_b() {
-  unsigned offset = data_offset();
-  unsigned adjust = data_adjust();
-  if(r4818 & 8) adjust = (int16)adjust;
-  r481a = datarom_read(offset + adjust);
-}
-
-void SPC7110::data_port_read() {
-  data_port_read_a();
-  data_port_read_b();
 }
 
 void SPC7110::data_port_increment_a() {
@@ -61,7 +49,7 @@ void SPC7110::data_port_increment_b() {
   if((r4818 & 16) != 0) set_data_adjust(adjust + adjust);
 }
 
-void SPC7110::data_port_increment() {
+void SPC7110::data_port_increment_c() {
   if((r4818 & 2) == 0) return;
   if(r4818 & 16) return;
 

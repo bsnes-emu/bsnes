@@ -1,72 +1,72 @@
-#ifdef SPC7110_CPP
+void SPC7110::dcu_load_address() {
+  unsigned table = r4801 | r4802 << 8 | r4803 << 16;
+  unsigned index = r4804 << 2;
 
-uint8 SPC7110::Decomp::read() {
-  if(decomp_buffer_length == 0) {
-    //decompress at least (decomp_buffer_size / 2) bytes to the buffer
-    switch(decomp_mode) {
-    case 0: mode0(false); break;
-    case 1: mode1(false); break;
-    case 2: mode2(false); break;
-    default: return 0x00;
+  unsigned addr = table + index;
+  dcu_mode  = datarom_read(addr + 0);
+  dcu_addr  = datarom_read(addr + 1) << 16;
+  dcu_addr |= datarom_read(addr + 2) <<  8;
+  dcu_addr |= datarom_read(addr + 3) <<  0;
+}
+
+void SPC7110::dcu_begin_transfer() {
+  switch(dcu_mode) {
+  case 0: decompress_1bpp(true); break;
+  case 1: decompress_2bpp(true); break;
+  case 2: decompress_4bpp(true); break;
+  case 3: return;
+  }
+
+  r480c |= 0x80;
+  dcu_sp = 0;
+
+  //reset context states
+  for(auto &ctx : context) {
+    ctx.index  = 0;
+    ctx.invert = 0;
+  }
+
+  unsigned seek = (r4805 | r4806 << 8) << dcu_mode;
+  while(seek--) dcu_read();
+}
+
+uint8 SPC7110::dcu_read() {
+  unsigned tilesize = 8 << dcu_mode;
+
+  if(dcu_sp == 0) {
+    unsigned tiles = r480b & 1 ? r4807 : 1;
+    for(unsigned tile = 0; tile < tiles; tile++) {
+      dcu_dp = tile * tilesize;
+      switch(dcu_mode) {
+      case 0: decompress_1bpp(); deinterleave_1bpp(tiles); break;
+      case 1: decompress_2bpp(); deinterleave_2bpp(tiles); break;
+      case 2: decompress_4bpp(); deinterleave_4bpp(tiles); break;
+      case 3: return 0x00;
+      }
     }
   }
 
-  uint8 data = decomp_buffer[decomp_buffer_rdoffset++];
-  decomp_buffer_rdoffset &= decomp_buffer_size - 1;
-  decomp_buffer_length--;
+  uint8 data = dcu_output[dcu_sp++];
+  dcu_sp &= tilesize - 1;
   return data;
-}
-
-void SPC7110::Decomp::write(uint8 data) {
-  decomp_buffer[decomp_buffer_wroffset++] = data;
-  decomp_buffer_wroffset &= decomp_buffer_size - 1;
-  decomp_buffer_length++;
-}
-
-uint8 SPC7110::Decomp::dataread() {
-  return spc7110.datarom_read(decomp_offset++);
-}
-
-void SPC7110::Decomp::init(unsigned mode, unsigned offset, unsigned index) {
-  decomp_mode = mode;
-  decomp_offset = offset;
-
-  decomp_buffer_rdoffset = 0;
-  decomp_buffer_wroffset = 0;
-  decomp_buffer_length   = 0;
-
-  //reset context states
-  for(unsigned i = 0; i < 32; i++) {
-    context[i].index  = 0;
-    context[i].invert = 0;
-  }
-
-  switch(decomp_mode) {
-  case 0: mode0(true); break;
-  case 1: mode1(true); break;
-  case 2: mode2(true); break;
-  }
-
-  //decompress up to requested output data index
-  while(index--) read();
 }
 
 //
 
-void SPC7110::Decomp::mode0(bool init) {
+void SPC7110::decompress_1bpp(bool init) {
   static uint8 val, in, span;
   static int out, inverts, lps, in_count;
 
   if(init == true) {
     out = inverts = lps = 0;
     span = 0xff;
-    val = dataread();
-    in = dataread();
+    val = datarom_read(dcu_addr++);
+    in = datarom_read(dcu_addr++);
     in_count = 8;
     return;
   }
 
-  while(decomp_buffer_length < (decomp_buffer_size >> 1)) {
+  for(unsigned row = 0; row < 8; row++) {
     for(unsigned bit = 0; bit < 8; bit++) {
       //get context
       uint8 mask = (1 << (bit & 3)) - 1;
@@ -100,7 +100,7 @@ void SPC7110::Decomp::mode0(bool init) {
 
         in <<= 1;
         if(--in_count == 0) {
-          in = dataread();
+          in = datarom_read(dcu_addr++);
           in_count = 8;
         }
       }
@@ -116,11 +116,11 @@ void SPC7110::Decomp::mode0(bool init) {
     }
 
     //save byte
-    write(out);
+    dcu_tiledata[dcu_dp + row] = out;
   }
 }
 
-void SPC7110::Decomp::mode1(bool init) {
+void SPC7110::decompress_2bpp(bool init) {
   static int pixelorder[4], realorder[4];
   static uint8 in, val, span;
   static int out, inverts, lps, in_count;
@@ -129,13 +129,13 @@ void SPC7110::Decomp::mode1(bool init) {
     for(unsigned i = 0; i < 4; i++) pixelorder[i] = i;
     out = inverts = lps = 0;
     span = 0xff;
-    val = dataread();
-    in = dataread();
+    val = datarom_read(dcu_addr++);
+    in = datarom_read(dcu_addr++);
     in_count = 8;
     return;
   }
 
-  while(decomp_buffer_length < (decomp_buffer_size >> 1)) {
+  for(unsigned row = 0; row < 8; row++) {
     for(unsigned pixel = 0; pixel < 8; pixel++) {
       //get first symbol context
       unsigned a = ((out >> (1 * 2)) & 3);
@@ -193,7 +193,7 @@ void SPC7110::Decomp::mode1(bool init) {
 
           in <<= 1;
           if(--in_count == 0) {
-            in = dataread();
+            in = datarom_read(dcu_addr++);
             in_count = 8;
           }
         }
@@ -218,29 +218,27 @@ void SPC7110::Decomp::mode1(bool init) {
 
     //turn pixel data into bitplanes
     unsigned data = deinterleave_2x8(out);
-    write(data >> 8);
-    write(data >> 0);
+    dcu_tiledata[dcu_dp + row * 2 + 0] = data >> 8;
+    dcu_tiledata[dcu_dp + row * 2 + 1] = data >> 0;
   }
 }
 
-void SPC7110::Decomp::mode2(bool init) {
+void SPC7110::decompress_4bpp(bool init) {
   static int pixelorder[16], realorder[16];
-  static uint8 bitplanebuffer[16], buffer_index;
   static uint8 in, val, span;
   static int out0, out1, inverts, lps, in_count;
 
   if(init == true) {
     for(unsigned i = 0; i < 16; i++) pixelorder[i] = i;
-    buffer_index = 0;
     out0 = out1 = inverts = lps = 0;
     span = 0xff;
-    val = dataread();
-    in = dataread();
+    val = datarom_read(dcu_addr++);
+    in = datarom_read(dcu_addr++);
     in_count = 8;
     return;
   }
 
-  while(decomp_buffer_length < (decomp_buffer_size >> 1)) {
+  for(unsigned row = 0; row < 8; row++) {
     for(unsigned pixel = 0; pixel < 8; pixel++) {
       //get first symbol context
       unsigned a = ((out0 >> (0 * 4)) & 15);
@@ -299,7 +297,7 @@ void SPC7110::Decomp::mode2(bool init) {
 
           in <<= 1;
           if(--in_count == 0) {
-            in = dataread();
+            in = datarom_read(dcu_addr++);
             in_count = 8;
           }
         }
@@ -315,7 +313,7 @@ void SPC7110::Decomp::mode2(bool init) {
         else if(shift) context[con].index = next_mps(con);
 
         //get next context
-        con = mode2_context_table[con][flag_lps ^ invertbit] + (con == 1 ? refcon : 0);
+        con = context_table[con][flag_lps ^ invertbit] + (con == 1 ? refcon : 0);
       }
 
       //get pixel
@@ -326,21 +324,75 @@ void SPC7110::Decomp::mode2(bool init) {
 
     //convert pixel data into bitplanes
     unsigned data = deinterleave_4x8(out0);
-    write(data >> 24);
-    write(data >> 16);
-    bitplanebuffer[buffer_index++] = data >> 8;
-    bitplanebuffer[buffer_index++] = data >> 0;
-
-    if(buffer_index == 16) {
-      for(unsigned i = 0; i < 16; i++) write(bitplanebuffer[i]);
-      buffer_index = 0;
-    }
+    dcu_tiledata[dcu_dp + row * 2 +  0] = data >> 24;
+    dcu_tiledata[dcu_dp + row * 2 +  1] = data >> 16;
+    dcu_tiledata[dcu_dp + row * 2 + 16] = data >>  8;
+    dcu_tiledata[dcu_dp + row * 2 + 17] = data >>  0;
   }
 }
 
 //
 
-const uint8 SPC7110::Decomp::evolution_table[53][4] = {
+void SPC7110::deinterleave_1bpp(unsigned length) {
+  uint8 *target = dcu_output, *source = dcu_tiledata;
+  for(unsigned row = 0, sp = 0; row < 8; row++) {
+    target[row] = source[sp];
+    sp += length;
+  }
+}
+
+void SPC7110::deinterleave_2bpp(unsigned length) {
+  uint8 *target = dcu_output, *source = dcu_tiledata;
+  for(unsigned row = 0, sp = 0; row < 8; row++) {
+    target[row * 2 + 0] = source[sp + 0];
+    target[row * 2 + 1] = source[sp + 1];
+    sp += 2 * length;
+  }
+}
+
+void SPC7110::deinterleave_4bpp(unsigned length) {
+  uint8 *target = dcu_output, *source = dcu_tiledata;
+  for(unsigned row = 0, sp = 0; row < 8; row++) {
+    target[row * 2 +  0] = source[sp +  0];
+    target[row * 2 +  1] = source[sp +  1];
+    target[row * 2 + 16] = source[sp + 16];
+    target[row * 2 + 17] = source[sp + 17];
+    sp = sp + 2 * length + 16 * ((sp + 2 * length) / 16 - sp / 16);
+  }
+}
+
+//
+
+uint8 SPC7110::probability  (unsigned n) { return evolution_table[context[n].index][0]; }
+uint8 SPC7110::next_lps     (unsigned n) { return evolution_table[context[n].index][1]; }
+uint8 SPC7110::next_mps     (unsigned n) { return evolution_table[context[n].index][2]; }
+bool  SPC7110::toggle_invert(unsigned n) { return evolution_table[context[n].index][3]; }
+
+unsigned SPC7110::deinterleave_2x8(unsigned data) {
+  //reverse morton lookup: de-interleave two 8-bit values
+  //15, 13, 11,  9,  7,  5,  3,  1 -> 15- 8
+  //14, 12, 10,  8,  6,  4,  2,  0 ->  7- 0
+  unsigned result = 0;
+  for(unsigned mask = 1u << 15; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 14; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
+  return result;
+}
+
+unsigned SPC7110::deinterleave_4x8(unsigned data) {
+  //reverse morton lookup: de-interleave four 8-bit values
+  //31, 27, 23, 19, 15, 11,  7,  3 -> 31-24
+  //30, 26, 22, 18, 14, 10,  6,  2 -> 23-16
+  //29, 25, 21, 17, 13,  9,  5,  1 -> 15- 8
+  //28, 24, 20, 16, 12,  8,  4,  0 ->  7- 0
+  unsigned result = 0;
+  for(unsigned mask = 1u << 31; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 30; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 29; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  for(unsigned mask = 1u << 28; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
+  return result;
+}
+
+const uint8 SPC7110::evolution_table[53][4] = {
 //{prob, nextlps, nextmps, toggle invert},
 
   {0x5a,  1,  1, 1},
@@ -402,7 +454,7 @@ const uint8 SPC7110::Decomp::evolution_table[53][4] = {
   {0x37, 51, 43, 0},
 };
 
-const uint8 SPC7110::Decomp::mode2_context_table[32][2] = {
+const uint8 SPC7110::context_table[32][2] = {
 //{next 0, next 1},
 
   { 1,  2},
@@ -442,55 +494,3 @@ const uint8 SPC7110::Decomp::mode2_context_table[32][2] = {
 
   {31, 31},
 };
-
-uint8 SPC7110::Decomp::probability  (unsigned n) { return evolution_table[context[n].index][0]; }
-uint8 SPC7110::Decomp::next_lps     (unsigned n) { return evolution_table[context[n].index][1]; }
-uint8 SPC7110::Decomp::next_mps     (unsigned n) { return evolution_table[context[n].index][2]; }
-bool  SPC7110::Decomp::toggle_invert(unsigned n) { return evolution_table[context[n].index][3]; }
-
-unsigned SPC7110::Decomp::deinterleave_2x8(unsigned data) {
-  //reverse morton lookup: de-interleave two 8-bit values
-  //15, 13, 11,  9,  7,  5,  3,  1 -> 15- 8
-  //14, 12, 10,  8,  6,  4,  2,  0 ->  7- 0
-  unsigned result = 0;
-  for(unsigned mask = 1u << 15; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
-  for(unsigned mask = 1u << 14; mask; mask >>= 2) result = (result << 1) | (bool)(data & mask);
-  return result;
-}
-
-unsigned SPC7110::Decomp::deinterleave_4x8(unsigned data) {
-  //reverse morton lookup: de-interleave four 8-bit values
-  //31, 27, 23, 19, 15, 11,  7,  3 -> 31-24
-  //30, 26, 22, 18, 14, 10,  6,  2 -> 23-16
-  //29, 25, 21, 17, 13,  9,  5,  1 -> 15- 8
-  //28, 24, 20, 16, 12,  8,  4,  0 ->  7- 0
-  unsigned result = 0;
-  for(unsigned mask = 1u << 31; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
-  for(unsigned mask = 1u << 30; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
-  for(unsigned mask = 1u << 29; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
-  for(unsigned mask = 1u << 28; mask; mask >>= 4) result = (result << 1) | (bool)(data & mask);
-  return result;
-}
-
-//
-
-void SPC7110::Decomp::reset() {
-  //mode 3 is invalid; this is treated as a special case to always return 0x00
-  //set to mode 3 so that reading decomp port before starting first decomp will return 0x00
-  decomp_mode = 3;
-
-  decomp_buffer_rdoffset = 0;
-  decomp_buffer_wroffset = 0;
-  decomp_buffer_length   = 0;
-}
-
-SPC7110::Decomp::Decomp() {
-  decomp_buffer = new uint8_t[decomp_buffer_size];
-  reset();
-}
-
-SPC7110::Decomp::~Decomp() {
-  delete[] decomp_buffer;
-}
-
-#endif

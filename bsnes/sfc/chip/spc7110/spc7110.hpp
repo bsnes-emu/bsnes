@@ -6,7 +6,7 @@ struct SPC7110 : Coprocessor {
   enum : unsigned {
     mul_delay =  6,
     div_delay =  8,
-    rtc_delay = 24,
+    rtc_delay = 20,
   };
 
   static void Enter();
@@ -32,6 +32,27 @@ struct SPC7110 : Coprocessor {
   void serialize(serializer&);
   SPC7110();
 
+  //dcu.cpp
+  void dcu_load_address();
+  void dcu_begin_transfer();
+  uint8 dcu_read();
+
+  void decompress_1bpp(bool init = false);
+  void decompress_2bpp(bool init = false);
+  void decompress_4bpp(bool init = false);
+
+  void deinterleave_1bpp(unsigned length);
+  void deinterleave_2bpp(unsigned length);
+  void deinterleave_4bpp(unsigned length);
+
+  uint8 probability(unsigned n);
+  uint8 next_lps(unsigned n);
+  uint8 next_mps(unsigned n);
+  bool toggle_invert(unsigned n);
+
+  unsigned deinterleave_2x8(unsigned data);
+  unsigned deinterleave_4x8(unsigned data);
+
   //data.cpp
   uint8 datarom_read(unsigned addr);
 
@@ -42,13 +63,11 @@ struct SPC7110 : Coprocessor {
   void set_data_offset(unsigned addr);
   void set_data_adjust(unsigned addr);
 
-  void data_port_read_a();
-  void data_port_read_b();
   void data_port_read();
 
   void data_port_increment_a();
   void data_port_increment_b();
-  void data_port_increment();
+  void data_port_increment_c();
 
   //alu.cpp
   void alu_multiply();
@@ -82,15 +101,27 @@ private:
   uint8 r4804;  //compression table index
   uint8 r4805;  //decompression buffer index low
   uint8 r4806;  //decompression buffer index high
-  uint8 r4807;  //??? (used when $480b.d0 = 1)
-  uint8 r4808;  //???
+  uint8 r4807;  //deinterleave length
   uint8 r4809;  //compression length low
   uint8 r480a;  //compression length high
-  uint8 r480b;  //decompression control register
+  uint8 r480b;  //deinterleave enable
   uint8 r480c;  //decompression status
 
-  #include "decomp.hpp"
-  Decomp decomp;
+  uint2 dcu_mode;
+  uint23 dcu_addr;
+  unsigned dcu_sp;
+  unsigned dcu_dp;
+
+  uint8 dcu_output[32];
+  uint8 dcu_tiledata[256 * 32];
+
+  struct ContextState {
+    uint8 index;
+    uint8 invert;
+  } context[32];
+
+  static const uint8 evolution_table[53][4];
+  static const uint8 context_table[32][2];
 
   //==============
   //data port unit
@@ -146,13 +177,14 @@ private:
   //====================
   uint8 r4840;  //RTC enable
   uint8 r4841;  //RTC data port
-  uint8 r4842;  //RTC status
+  uint8 r4842;  //RTC status (d7 = ready)
 
   uint22 rtc_clocks;
   unsigned rtc_seconds;
-  uint2 rtc_mode;  //0 = idle, 1 = seek, 2 = read, 3 = write
+  unsigned rtc_mode;  //0 = command, 1 = index, 2 = read or write
   uint4 rtc_addr;
   unsigned rtc_wait;
+  uint4 rtc_mdr;
 };
 
 extern SPC7110 spc7110;

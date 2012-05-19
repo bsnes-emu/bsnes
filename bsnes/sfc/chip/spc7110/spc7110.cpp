@@ -3,7 +3,7 @@
 #define SPC7110_CPP
 namespace SuperFamicom {
 
-#include "decomp.cpp"
+#include "dcu.cpp"
 #include "data.cpp"
 #include "alu.cpp"
 #include "rtc.cpp"
@@ -20,7 +20,7 @@ void SPC7110::enter() {
 
     if(mul_wait) { if(--mul_wait == 0) alu_multiply(); }
     if(div_wait) { if(--div_wait == 0) alu_divide(); }
-    if(rtc_wait) { if(--rtc_wait == 0) r4842 &= 0x7f; }
+    if(rtc_wait) { if(--rtc_wait == 0) r4842 |= 0x80; }
 
     rtc_clocks++;
     if((rtc_clocks & 0x7fff) == 0) rtc_duty();  //1/128th second
@@ -65,13 +65,15 @@ void SPC7110::reset() {
   r4805 = 0x00;
   r4806 = 0x00;
   r4807 = 0x00;
-  r4808 = 0x00;
   r4809 = 0x00;
   r480a = 0x00;
   r480b = 0x00;
   r480c = 0x00;
 
-  decomp.reset();
+  dcu_mode = 0;
+  dcu_addr = 0;
+  dcu_sp = 0;
+  dcu_dp = 0;
 
   r4810 = 0x00;
   r4811 = 0x00;
@@ -122,6 +124,7 @@ void SPC7110::reset() {
   rtc_mode = 0;
   rtc_addr = 0;
   rtc_wait = 0;
+  rtc_mdr = 0;
 }
 
 uint8 SPC7110::mmio_read(unsigned addr) {
@@ -137,9 +140,9 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4800: {
     uint16 counter = r4809 | r480a << 8;
     counter--;
-    r4809 = counter;
+    r4809 = counter >> 0;
     r480a = counter >> 8;
-    return decomp.read();
+    return dcu_read();
   }
   case 0x4801: return r4801;
   case 0x4802: return r4802;
@@ -165,7 +168,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4810: {
     uint8 data = r4810;
     data_port_increment_a();
-    data_port_read_a();
+    data_port_read();
     return data;
   }
   case 0x4811: return r4811;
@@ -177,10 +180,8 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4817: return r4817;
   case 0x4818: return r4818;
   case 0x481a: {
-    uint8 data = r481a;
     data_port_increment_b();
-    data_port_read_b();
-    return data;
+    return 0x00;
   }
 
   //=========
@@ -220,8 +221,11 @@ uint8 SPC7110::mmio_read(unsigned addr) {
 
   case 0x4840: return r4840;
   case 0x4841: {
-    if((r4840 & 1) == 0) return 0x00;  //RTC disabled?
-    if(rtc_mode != 2) return 0x00;
+    if(r4840 != 1) return 0x00;        //RTC disabled?
+    if(r4842 == 0) return 0x00;        //RTC busy?
+    if(rtc_mode != 2) return 0x00;     //waiting for command or address?
+    if(r4841 == 0x03) return rtc_mdr;  //in write mode?
+    if(r4841 != 0x0c) return 0x00;     //not in read mode?
     r4842 |= 0x80;
     rtc_wait = rtc_delay;
     return rtc_read(rtc_addr++);
@@ -246,22 +250,9 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4801: r4801 = data; break;
   case 0x4802: r4802 = data; break;
   case 0x4803: r4803 = data & 0x7f; break;
-  case 0x4804: r4804 = data; break;
+  case 0x4804: r4804 = data; dcu_load_address(); break;
   case 0x4805: r4805 = data; break;
-  case 0x4806: r4806 = data; {
-    unsigned table   = r4801 | r4802 << 8 | r4803 << 16;
-    unsigned index   = r4804 << 2;
-    unsigned addr    = table + index;
-    unsigned length  = r4809 | r480a << 8;
-    unsigned mode    = datarom_read(addr + 0);
-    unsigned offset  = datarom_read(addr + 1) << 16
-                     | datarom_read(addr + 2) <<  8
-                     | datarom_read(addr + 3) <<  0;
-
-    decomp.init(mode, offset, (r4805 | r4806 << 8) << mode);
-    r480c = 0x80;
-  } break;
-
+  case 0x4806: r4806 = data; dcu_begin_transfer(); break;
   case 0x4807: r4807 = data; break;
   case 0x4808: break;
   case 0x4809: r4809 = data; break;
@@ -279,7 +270,7 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4815: {
     if((addr & 1) == 0) r4814 = data, r4814_latch = true;
     if((addr & 1) == 1) r4815 = data, r4815_latch = true;
-    if(r4814_latch && r4815_latch) data_port_increment();
+    if(r4814_latch && r4815_latch) data_port_increment_c();
   } break;
   case 0x4816: r4816 = data; break;
   case 0x4817: r4817 = data; break;
@@ -317,32 +308,33 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   //====================
 
   case 0x4840: r4840 = data & 0x03; {
-    if((r4840 & 1) == 0) rtc_reset();
+    if(r4840 != 1) rtc_reset();
     r4842 |= 0x80;
-    rtc_wait = rtc_delay;
   } break;
 
   case 0x4841: {
-    if((r4840 & 1) == 0) break;  //RTC disabled?
+    if(r4840 != 1) break;  //RTC disabled?
+    if(r4842 == 0) break;  //RTC busy?
 
     r4842 |= 0x80;
     rtc_wait = rtc_delay;
+    rtc_mdr = data;
 
     if(rtc_mode == 0) {
-      r4841 = data & 0xf;
       rtc_mode = 1;
       rtc_addr = 0;
+      r4841 = rtc_mdr;
       break;
     }
 
     if(rtc_mode == 1) {
-      rtc_mode = r4841 == 0x0c ? 2 : r4841 == 0x3 ? 3 : 0;
-      rtc_addr = data & 0xf;
+      rtc_mode = 2;
+      rtc_addr = rtc_mdr;
       break;
     }
 
-    if(rtc_mode == 3) {
-      rtc_write(rtc_addr++, data);
+    if(r4841 == 0x03) {
+      rtc_write(rtc_addr++, rtc_mdr);
       break;
     }
   }

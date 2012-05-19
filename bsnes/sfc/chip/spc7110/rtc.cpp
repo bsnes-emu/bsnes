@@ -78,7 +78,10 @@ void SPC7110::rtc_write(uint4 addr, uint4 data) {
   case 0x2: rtcram[0x2] = data; break;
   case 0x3: rtcram[0x3] = data; break;
   case 0x4: rtcram[0x4] = data; break;
-  case 0x5: rtcram[0x5] = data; break;
+  case 0x5:
+    if((rtcram[0xf] & 4) == 0) rtcram[0x5] = data & ~2;  //12-hour mode cannot set D5
+    if((rtcram[0xf] & 4) != 0) rtcram[0x5] = data & ~4;  //24-hour mode cannot set AM/PM
+    break;
   case 0x6: rtcram[0x6] = data; break;
   case 0x7: rtcram[0x7] = data; break;
   case 0x8: rtcram[0x8] = data; break;

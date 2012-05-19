@@ -1,20 +1,5 @@
 #ifdef SPC7110_CPP
 
-void SPC7110::Decomp::serialize(serializer &s) {
-  s.integer(decomp_mode);
-  s.integer(decomp_offset);
-
-  s.array(decomp_buffer, decomp_buffer_size);
-  s.integer(decomp_buffer_rdoffset);
-  s.integer(decomp_buffer_wroffset);
-  s.integer(decomp_buffer_length);
-
-  for(unsigned n = 0; n < 32; n++) {
-    s.integer(context[n].index);
-    s.integer(context[n].invert);
-  }
-}
-
 void SPC7110::serialize(serializer &s) {
   for(auto &byte : rtcram) s.integer(byte);
 
@@ -25,13 +10,22 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4805);
   s.integer(r4806);
   s.integer(r4807);
-  s.integer(r4808);
   s.integer(r4809);
   s.integer(r480a);
   s.integer(r480b);
   s.integer(r480c);
 
-  decomp.serialize(s);
+  s.integer(dcu_mode);
+  s.integer(dcu_addr);
+  s.integer(dcu_sp);
+  s.integer(dcu_dp);
+
+  s.array(dcu_output);
+
+  for(auto &ctx : context) {
+    s.integer(ctx.index);
+    s.integer(ctx.invert);
+  }
 
   s.integer(r4810);
   s.integer(r4811);
@@ -82,6 +76,7 @@ void SPC7110::serialize(serializer &s) {
   s.integer(rtc_mode);
   s.integer(rtc_addr);
   s.integer(rtc_wait);
+  s.integer(rtc_mdr);
 }
 
 #endif
