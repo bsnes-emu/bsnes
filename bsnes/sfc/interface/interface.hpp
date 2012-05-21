@@ -17,7 +17,7 @@ struct ID {
     RAM,
     NecDSPRAM,
     RTC,
-    SPC7110RTC,
+    RTC4513,
     BsxRAM,
     BsxPSRAM,
     SuperGameBoyRAM,

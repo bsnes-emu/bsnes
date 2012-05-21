@@ -27,7 +27,7 @@ void Cartridge::load(const string &markup, const stream &stream) {
   has_srtc       = false;
   has_sdd1       = false;
   has_spc7110    = false;
-  has_spc7110rtc = false;
+  has_rtc4513    = false;
   has_obc1       = false;
   has_msu1       = false;
   has_link       = false;

@@ -14,6 +14,7 @@ struct Coprocessor : Thread {
 #include <sfc/chip/srtc/srtc.hpp>
 #include <sfc/chip/sdd1/sdd1.hpp>
 #include <sfc/chip/spc7110/spc7110.hpp>
+#include <sfc/chip/rtc4513/rtc4513.hpp>
 #include <sfc/chip/obc1/obc1.hpp>
 #include <sfc/chip/sufamiturbo/sufamiturbo.hpp>
 #include <sfc/chip/msu1/msu1.hpp>

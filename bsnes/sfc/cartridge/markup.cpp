@@ -21,6 +21,7 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_srtc(cartridge["srtc"]);
   parse_markup_sdd1(cartridge["sdd1"]);
   parse_markup_spc7110(cartridge["spc7110"]);
+  parse_markup_rtc4513(cartridge["rtc4513"]);
   parse_markup_obc1(cartridge["obc1"]);
   parse_markup_msu1(cartridge["msu1"]);
   parse_markup_link(cartridge["link"]);
@@ -398,10 +399,8 @@ void Cartridge::parse_markup_sdd1(XML::Node &root) {
 void Cartridge::parse_markup_spc7110(XML::Node &root) {
   if(root.exists() == false) return;
   has_spc7110 = true;
-  has_spc7110rtc = root["rtc"].exists();
 
   auto &mmio = root["mmio"];
-  auto &rtc = root["rtc"];
   auto &dcu = root["dcu"];
   auto &mcurom = root["mcu"]["rom"];
   auto &mcuram = root["mcu"]["ram"];
@@ -415,13 +414,6 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   ram_size = numeral(mcuram["size"].data);
 
   for(auto &node : mmio) {
-    if(node.name != "map") continue;
-    Mapping m({&SPC7110::mmio_read, &spc7110}, {&SPC7110::mmio_write, &spc7110});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : rtc) {
     if(node.name != "map") continue;
     Mapping m({&SPC7110::mmio_read, &spc7110}, {&SPC7110::mmio_write, &spc7110});
     parse_markup_map(m, node);
@@ -445,6 +437,18 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   for(auto &node : mcuram) {
     if(node.name != "map") continue;
     Mapping m({&SPC7110::mcuram_read, &spc7110}, {&SPC7110::mcuram_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+}
+
+void Cartridge::parse_markup_rtc4513(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_rtc4513 = true;
+
+  for(auto &node : root) {
+    if(node.name != "map") continue;
+    Mapping m({&RTC4513::read, &rtc4513}, {&RTC4513::write, &rtc4513});
     parse_markup_map(m, node);
     mapping.append(m);
   }

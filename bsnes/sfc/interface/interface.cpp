@@ -33,7 +33,7 @@ unsigned Interface::group(unsigned id) {
   case ID::RAM:
   case ID::NecDSPRAM:
   case ID::RTC:
-  case ID::SPC7110RTC:
+  case ID::RTC4513:
   case ID::BsxRAM:
   case ID::BsxPSRAM:
     return 0;
@@ -109,10 +109,10 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
     stream.read(srtc.rtc, min(stream.size(), sizeof srtc.rtc));
   }
 
-  if(id == ID::SPC7110RTC) {
+  if(id == ID::RTC4513) {
     uint8 data[16] = {0};
     stream.read(data, min(stream.size(), sizeof data));
-    spc7110.rtcram_load(data);
+    rtc4513.load(data);
   }
 
   if(id == ID::BsxRAM) {
@@ -149,9 +149,9 @@ void Interface::save(unsigned id, const stream &stream) {
     stream.write(srtc.rtc, sizeof srtc.rtc);
   }
 
-  if(id == ID::SPC7110RTC) {
+  if(id == ID::RTC4513) {
     uint8 data[16];
-    spc7110.rtcram_save(data);
+    rtc4513.save(data);
     stream.write(data, sizeof data);
   }
 

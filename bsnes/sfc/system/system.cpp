@@ -77,6 +77,7 @@ void System::init() {
   srtc.init();
   sdd1.init();
   spc7110.init();
+  rtc4513.init();
   obc1.init();
   msu1.init();
   link.init();
@@ -123,6 +124,7 @@ void System::load() {
   if(cartridge.has_srtc()) srtc.load();
   if(cartridge.has_sdd1()) sdd1.load();
   if(cartridge.has_spc7110()) spc7110.load();
+  if(cartridge.has_rtc4513()) rtc4513.load();
   if(cartridge.has_obc1()) obc1.load();
   if(cartridge.has_msu1()) msu1.load();
   if(cartridge.has_link()) link.load();
@@ -146,6 +148,7 @@ void System::unload() {
   if(cartridge.has_srtc()) srtc.unload();
   if(cartridge.has_sdd1()) sdd1.unload();
   if(cartridge.has_spc7110()) spc7110.unload();
+  if(cartridge.has_rtc4513()) rtc4513.unload();
   if(cartridge.has_obc1()) obc1.unload();
   if(cartridge.has_msu1()) msu1.unload();
   if(cartridge.has_link()) link.unload();
@@ -172,6 +175,7 @@ void System::power() {
   if(cartridge.has_srtc()) srtc.power();
   if(cartridge.has_sdd1()) sdd1.power();
   if(cartridge.has_spc7110()) spc7110.power();
+  if(cartridge.has_rtc4513()) rtc4513.power();
   if(cartridge.has_obc1()) obc1.power();
   if(cartridge.has_msu1()) msu1.power();
   if(cartridge.has_link()) link.power();
@@ -198,6 +202,7 @@ void System::reset() {
   if(cartridge.has_srtc()) srtc.reset();
   if(cartridge.has_sdd1()) sdd1.reset();
   if(cartridge.has_spc7110()) spc7110.reset();
+  if(cartridge.has_rtc4513()) rtc4513.reset();
   if(cartridge.has_obc1()) obc1.reset();
   if(cartridge.has_msu1()) msu1.reset();
   if(cartridge.has_link()) link.reset();
@@ -209,6 +214,7 @@ void System::reset() {
   if(cartridge.has_hitachidsp()) cpu.coprocessors.append(&hitachidsp);
   if(cartridge.has_armdsp()) cpu.coprocessors.append(&armdsp);
   if(cartridge.has_spc7110()) cpu.coprocessors.append(&spc7110);
+  if(cartridge.has_rtc4513()) cpu.coprocessors.append(&rtc4513);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_link()) cpu.coprocessors.append(&link);
 

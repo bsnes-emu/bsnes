@@ -1,8 +1,6 @@
 #ifdef SPC7110_CPP
 
 void SPC7110::serialize(serializer &s) {
-  for(auto &byte : rtcram) s.integer(byte);
-
   s.integer(r4801);
   s.integer(r4802);
   s.integer(r4803);
@@ -66,17 +64,6 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4832);
   s.integer(r4833);
   s.integer(r4834);
-
-  s.integer(r4840);
-  s.integer(r4841);
-  s.integer(r4842);
-
-  s.integer(rtc_clocks);
-  s.integer(rtc_seconds);
-  s.integer(rtc_mode);
-  s.integer(rtc_addr);
-  s.integer(rtc_wait);
-  s.integer(rtc_mdr);
 }
 
 #endif

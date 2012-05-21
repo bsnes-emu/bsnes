@@ -6,7 +6,6 @@ namespace SuperFamicom {
 #include "dcu.cpp"
 #include "data.cpp"
 #include "alu.cpp"
-#include "rtc.cpp"
 #include "serialization.cpp"
 SPC7110 spc7110;
 
@@ -20,19 +19,6 @@ void SPC7110::enter() {
 
     if(mul_wait) { if(--mul_wait == 0) alu_multiply(); }
     if(div_wait) { if(--div_wait == 0) alu_divide(); }
-    if(rtc_wait) { if(--rtc_wait == 0) r4842 |= 0x80; }
-
-    rtc_clocks++;
-    if((rtc_clocks & 0x7fff) == 0) rtc_duty();  //1/128th second
-    if((rtc_clocks & 0xffff) == 0) rtc_irq(0);  //1/ 64th second
-    if(rtc_clocks == 0) {  //1 second
-      rtc_irq(1);
-      rtc_seconds++;
-      if(rtc_seconds %   60 == 0) rtc_irq(2);  //1 minute
-      if(rtc_seconds % 1440 == 0) rtc_irq(3);  //1 hour
-      if(rtc_seconds == 1440) rtc_seconds = 0;
-      rtc_pulse();
-    }
 
     step(1);
     synchronize_cpu();
@@ -43,10 +29,6 @@ void SPC7110::init() {
 }
 
 void SPC7110::load() {
-  if(cartridge.has_spc7110rtc()) interface->memory.append({ID::SPC7110RTC, "rtc.ram"});
-
-  for(auto &byte : rtcram) byte = 0x00;
-  rtcram[0x1] |= 8;  //set lost flag (battery back-up failure)
 }
 
 void SPC7110::unload() {
@@ -114,17 +96,6 @@ void SPC7110::reset() {
   r4832 = 0x01;
   r4833 = 0x02;
   r4834 = 0x00;
-
-  r4840 = 0x00;
-  r4841 = 0x00;
-  r4842 = 0x00;
-
-  rtc_clocks = 0;
-  rtc_seconds = 0;
-  rtc_mode = 0;
-  rtc_addr = 0;
-  rtc_wait = 0;
-  rtc_mdr = 0;
 }
 
 uint8 SPC7110::mmio_read(unsigned addr) {
@@ -215,23 +186,6 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4833: return r4833;
   case 0x4834: return r4834;
 
-  //====================
-  //real-time clock unit
-  //====================
-
-  case 0x4840: return r4840;
-  case 0x4841: {
-    if(r4840 != 1) return 0x00;        //RTC disabled?
-    if(r4842 == 0) return 0x00;        //RTC busy?
-    if(rtc_mode != 2) return 0x00;     //waiting for command or address?
-    if(r4841 == 0x03) return rtc_mdr;  //in write mode?
-    if(r4841 != 0x0c) return 0x00;     //not in read mode?
-    r4842 |= 0x80;
-    rtc_wait = rtc_delay;
-    return rtc_read(rtc_addr++);
-  }
-  case 0x4842: return r4842;
-
   }
 
   return cpu.regs.mdr;
@@ -302,42 +256,6 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4832: r4832 = data & 0x07; break;
   case 0x4833: r4833 = data & 0x07; break;
   case 0x4834: r4834 = data & 0x07; break;
-
-  //====================
-  //real-time clock unit
-  //====================
-
-  case 0x4840: r4840 = data & 0x03; {
-    if(r4840 != 1) rtc_reset();
-    r4842 |= 0x80;
-  } break;
-
-  case 0x4841: {
-    if(r4840 != 1) break;  //RTC disabled?
-    if(r4842 == 0) break;  //RTC busy?
-
-    r4842 |= 0x80;
-    rtc_wait = rtc_delay;
-    rtc_mdr = data;
-
-    if(rtc_mode == 0) {
-      rtc_mode = 1;
-      rtc_addr = 0;
-      r4841 = rtc_mdr;
-      break;
-    }
-
-    if(rtc_mode == 1) {
-      rtc_mode = 2;
-      rtc_addr = rtc_mdr;
-      break;
-    }
-
-    if(r4841 == 0x03) {
-      rtc_write(rtc_addr++, rtc_mdr);
-      break;
-    }
-  }
 
   }
 }

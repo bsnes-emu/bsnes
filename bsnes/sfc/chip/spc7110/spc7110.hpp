@@ -1,6 +1,7 @@
 struct SPC7110 : Coprocessor {
   unsigned prom_base, prom_size;  //program ROM
   unsigned drom_base, drom_size;  //data ROM
+
   uint4 rtcram[16];
 
   enum : unsigned {
@@ -72,24 +73,6 @@ struct SPC7110 : Coprocessor {
   //alu.cpp
   void alu_multiply();
   void alu_divide();
-
-  //rtc.cpp
-  void rtc_reset();
-  void rtc_duty();
-  void rtc_irq(uint2 frequency);
-  uint4 rtc_read(uint4 addr);
-  void rtc_write(uint4 addr, uint4 data);
-
-  void rtc_pulse();
-  void rtc_second();
-  void rtc_minute();
-  void rtc_hour();
-  void rtc_day();
-  void rtc_month();
-  void rtc_year();
-
-  void rtcram_load(const uint8 *data);
-  void rtcram_save(uint8 *data);
 
 private:
   //==================
@@ -171,20 +154,6 @@ private:
   uint8 r4832;  //bank 2 mapping
   uint8 r4833;  //bank 3 mapping
   uint8 r4834;  //bank mapping control
-
-  //====================
-  //real-time clock unit
-  //====================
-  uint8 r4840;  //RTC enable
-  uint8 r4841;  //RTC data port
-  uint8 r4842;  //RTC status (d7 = ready)
-
-  uint22 rtc_clocks;
-  unsigned rtc_seconds;
-  unsigned rtc_mode;  //0 = command, 1 = index, 2 = read or write
-  uint4 rtc_addr;
-  unsigned rtc_wait;
-  uint4 rtc_mdr;
 };
 
 extern SPC7110 spc7110;

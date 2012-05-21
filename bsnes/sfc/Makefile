@@ -3,7 +3,7 @@ sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
 sfc_objects += sfc-icd2 sfc-nss sfc-superfx sfc-sa1
 sfc_objects += sfc-necdsp sfc-hitachidsp sfc-armdsp
-sfc_objects += sfc-bsx sfc-srtc sfc-sdd1 sfc-spc7110
+sfc_objects += sfc-bsx sfc-srtc sfc-sdd1 sfc-spc7110 sfc-rtc4513
 sfc_objects += sfc-obc1 sfc-sufamiturbo
 sfc_objects += sfc-msu1 sfc-link
 objects += $(sfc_objects)
@@ -50,6 +50,7 @@ obj/sfc-bsx.o        : $(sfc)/chip/bsx/bsx.cpp $(call rwildcard,$(sfc)/chip/bsx/
 obj/sfc-srtc.o       : $(sfc)/chip/srtc/srtc.cpp $(sfc)/chip/srtc/*
 obj/sfc-sdd1.o       : $(sfc)/chip/sdd1/sdd1.cpp $(sfc)/chip/sdd1/*
 obj/sfc-spc7110.o    : $(sfc)/chip/spc7110/spc7110.cpp $(sfc)/chip/spc7110/*
+obj/sfc-rtc4513.o    : $(sfc)/chip/rtc4513/rtc4513.cpp $(sfc)/chip/rtc4513/*
 obj/sfc-obc1.o       : $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
 obj/sfc-sufamiturbo.o: $(sfc)/chip/sufamiturbo/sufamiturbo.cpp $(sfc)/chip/sufamiturbo/*
 obj/sfc-msu1.o       : $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*
