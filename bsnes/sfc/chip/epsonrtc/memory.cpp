@@ -1,20 +1,6 @@
-#ifdef RTC4513_CPP
+#ifdef EPSONRTC_CPP
 
-unsigned RTC4513::second() { return secondlo + secondhi * 10; }
-unsigned RTC4513::minute() { return minutelo + minutehi * 10; }
-unsigned RTC4513::hour  () { return hourlo   + hourhi   * 10; }
-unsigned RTC4513::day   () { return daylo    + dayhi    * 10; }
-unsigned RTC4513::month () { return monthlo  + monthhi  * 10; }
-unsigned RTC4513::year  () { return yearlo   + yearhi   * 10; }
-
-void RTC4513::second(unsigned data) { secondlo = data % 10; secondhi = (data / 10) % 10; }
-void RTC4513::minute(unsigned data) { minutelo = data % 10; minutehi = (data / 10) % 10; }
-void RTC4513::hour  (unsigned data) { hourlo   = data % 10; hourhi   = (data / 10) % 10; }
-void RTC4513::day   (unsigned data) { daylo    = data % 10; dayhi    = (data / 10) % 10; }
-void RTC4513::month (unsigned data) { monthlo  = data % 10; monthhi  = (data / 10) % 10; }
-void RTC4513::year  (unsigned data) { yearlo   = data % 10; yearhi   = (data / 10) % 10; }
-
-void RTC4513::rtc_reset() {
+void EpsonRTC::rtc_reset() {
   state = State::Mode;
   offset = 0;
 
@@ -23,7 +9,7 @@ void RTC4513::rtc_reset() {
   minutecarry = 0;
 }
 
-uint4 RTC4513::rtc_read(uint4 addr) {
+uint4 EpsonRTC::rtc_read(uint4 addr) {
   switch(addr) {
   case  0: return secondlo;
   case  1: return secondhi | batteryfailure << 3;
@@ -39,7 +25,7 @@ uint4 RTC4513::rtc_read(uint4 addr) {
   case 11: return yearhi;
   case 12: return weekday | weekdaycarry << 3;
   case 13: {
-    uint1 readflag = irqflag & irqmask;
+    uint1 readflag = irqflag & !irqmask;
     irqflag = 0;
     return hold | calendar << 1 | readflag << 2 | roundseconds << 3;
   }
@@ -48,7 +34,7 @@ uint4 RTC4513::rtc_read(uint4 addr) {
   }
 }
 
-void RTC4513::rtc_write(uint4 addr, uint4 data) {
+void EpsonRTC::rtc_write(uint4 addr, uint4 data) {
   switch(addr) {
   case 0:
     secondlo = data;
@@ -107,8 +93,9 @@ void RTC4513::rtc_write(uint4 addr, uint4 data) {
     roundseconds = data >> 3;
     if(roundseconds) {
       roundseconds = 0;
-      if(second() >= 30) tick_minute();
-      second(0);
+      if(secondhi >= 3) tick_minute();
+      secondlo = 0;
+      secondhi = 0;
     }
     break;
   case 14:
@@ -123,12 +110,15 @@ void RTC4513::rtc_write(uint4 addr, uint4 data) {
     test = data >> 3;
     if(atime == 1) meridian = 0;
     if(atime == 0) hourhi &= 1;
-    if(pause) second(0);
+    if(pause) {
+      secondlo = 0;
+      secondhi = 0;
+    }
     break;
   }
 }
 
-void RTC4513::load(const uint8 *data) {
+void EpsonRTC::load(const uint8 *data) {
   for(unsigned byte = 0; byte < 8; byte++) {
     rtc_write(byte * 2 + 0, data[byte] >> 0);
     rtc_write(byte * 2 + 1, data[byte] >> 4);
@@ -146,7 +136,7 @@ void RTC4513::load(const uint8 *data) {
   while(diff--) tick_second();
 }
 
-void RTC4513::save(uint8 *data) {
+void EpsonRTC::save(uint8 *data) {
   for(unsigned byte = 0; byte < 8; byte++) {
     data[byte]  = rtc_read(byte * 2 + 0) << 0;
     data[byte] |= rtc_read(byte * 2 + 1) << 4;

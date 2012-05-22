@@ -32,8 +32,8 @@ unsigned Interface::group(unsigned id) {
   case ID::ROM:
   case ID::RAM:
   case ID::NecDSPRAM:
-  case ID::RTC:
-  case ID::RTC4513:
+  case ID::EpsonRTC:
+  case ID::SharpRTC:
   case ID::BsxRAM:
   case ID::BsxPSRAM:
     return 0;
@@ -105,14 +105,14 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
     for(unsigned n = 0; n < 2048; n++) necdsp.dataRAM[n] = stream.readl(2);
   }
 
-  if(id == ID::RTC) {
-    stream.read(srtc.rtc, min(stream.size(), sizeof srtc.rtc));
-  }
-
-  if(id == ID::RTC4513) {
+  if(id == ID::EpsonRTC) {
     uint8 data[16] = {0};
     stream.read(data, min(stream.size(), sizeof data));
-    rtc4513.load(data);
+    epsonrtc.load(data);
+  }
+
+  if(id == ID::SharpRTC) {
+    stream.read(sharprtc.rtc, min(stream.size(), sizeof sharprtc.rtc));
   }
 
   if(id == ID::BsxRAM) {
@@ -145,14 +145,14 @@ void Interface::save(unsigned id, const stream &stream) {
     for(unsigned n = 0; n < 2048; n++) stream.writel(necdsp.dataRAM[n], 2);
   }
 
-  if(id == ID::RTC) {
-    stream.write(srtc.rtc, sizeof srtc.rtc);
+  if(id == ID::EpsonRTC) {
+    uint8 data[16];
+    epsonrtc.save(data);
+    stream.write(data, sizeof data);
   }
 
-  if(id == ID::RTC4513) {
-    uint8 data[16];
-    rtc4513.save(data);
-    stream.write(data, sizeof data);
+  if(id == ID::SharpRTC) {
+    stream.write(sharprtc.rtc, sizeof sharprtc.rtc);
   }
 
   if(id == ID::BsxRAM) {

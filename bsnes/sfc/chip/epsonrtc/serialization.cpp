@@ -1,6 +1,6 @@
-#ifdef RTC4513_CPP
+#ifdef EPSONRTC_CPP
 
-void RTC4513::serialize(serializer &s) {
+void EpsonRTC::serialize(serializer &s) {
   Thread::serialize(s);
 
   s.integer(clocks);

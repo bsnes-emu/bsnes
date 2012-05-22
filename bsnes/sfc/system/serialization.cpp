@@ -60,15 +60,15 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_gb_slot()) icd2.serialize(s);
   if(cartridge.has_bs_cart()) bsxcartridge.serialize(s);
   if(cartridge.has_st_slots()) sufamiturbo.serialize(s);
-  if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);
-  if(cartridge.has_necdsp()) necdsp.serialize(s);
-  if(cartridge.has_hitachidsp()) hitachidsp.serialize(s);
+  if(cartridge.has_superfx()) superfx.serialize(s);
   if(cartridge.has_armdsp()) armdsp.serialize(s);
-  if(cartridge.has_srtc()) srtc.serialize(s);
-  if(cartridge.has_sdd1()) sdd1.serialize(s);
+  if(cartridge.has_hitachidsp()) hitachidsp.serialize(s);
+  if(cartridge.has_necdsp()) necdsp.serialize(s);
+  if(cartridge.has_epsonrtc()) epsonrtc.serialize(s);
+  if(cartridge.has_sharprtc()) sharprtc.serialize(s);
   if(cartridge.has_spc7110()) spc7110.serialize(s);
-  if(cartridge.has_rtc4513()) rtc4513.serialize(s);
+  if(cartridge.has_sdd1()) sdd1.serialize(s);
   if(cartridge.has_obc1()) obc1.serialize(s);
   if(cartridge.has_msu1()) msu1.serialize(s);
 }

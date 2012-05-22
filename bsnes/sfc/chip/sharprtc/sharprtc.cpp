@@ -1,35 +1,35 @@
 #include <sfc/sfc.hpp>
 
-#define SRTC_CPP
+#define SHARPRTC_CPP
 namespace SuperFamicom {
 
-SRTC srtc;
+SharpRTC sharprtc;
 
 #include "serialization.cpp"
 
-const unsigned SRTC::months[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const unsigned SharpRTC::months[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-void SRTC::init() {
+void SharpRTC::init() {
 }
 
-void SRTC::load() {
+void SharpRTC::load() {
   for(unsigned n = 0; n < 20; n++) rtc[n] = 0xff;
-  interface->memory.append({ID::RTC, "rtc.ram"});
+  interface->memory.append({ID::SharpRTC, "rtc.ram"});
 }
 
-void SRTC::unload() {
+void SharpRTC::unload() {
 }
 
-void SRTC::power() {
+void SharpRTC::power() {
 }
 
-void SRTC::reset() {
+void SharpRTC::reset() {
   rtc_mode = RtcRead;
   rtc_index = -1;
   update_time();
 }
 
-void SRTC::update_time() {
+void SharpRTC::update_time() {
   time_t rtc_time = (rtc[16] << 0) | (rtc[17] << 8) | (rtc[18] << 16) | (rtc[19] << 24);
   time_t current_time = time(0);
 
@@ -119,7 +119,7 @@ void SRTC::update_time() {
 //returns day of week for specified date
 //eg 0 = Sunday, 1 = Monday, ... 6 = Saturday
 //usage: weekday(2008, 1, 1) returns weekday of January 1st, 2008
-unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
+unsigned SharpRTC::weekday(unsigned year, unsigned month, unsigned day) {
   unsigned y = 1900, m = 1;  //epoch is 1900-01-01
   unsigned sum = 0;          //number of days passed since epoch
 
@@ -155,7 +155,7 @@ unsigned SRTC::weekday(unsigned year, unsigned month, unsigned day) {
   return (sum + 1) % 7;  //1900-01-01 was a Monday
 }
 
-uint8 SRTC::read(unsigned addr) {
+uint8 SharpRTC::read(unsigned addr) {
   addr &= 0xffff;
 
   if(addr == 0x2800) {
@@ -176,7 +176,7 @@ uint8 SRTC::read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SRTC::write(unsigned addr, uint8 data) {
+void SharpRTC::write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   if(addr == 0x2801) {
@@ -223,9 +223,6 @@ void SRTC::write(unsigned addr, uint8 data) {
       }
     }
   }
-}
-
-SRTC::SRTC() {
 }
 
 }

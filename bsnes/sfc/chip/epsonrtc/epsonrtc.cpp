@@ -1,18 +1,18 @@
 #include <sfc/sfc.hpp>
 
-#define RTC4513_CPP
+#define EPSONRTC_CPP
 namespace SuperFamicom {
 
 #include "memory.cpp"
 #include "time.cpp"
 #include "serialization.cpp"
-RTC4513 rtc4513;
+EpsonRTC epsonrtc;
 
-void RTC4513::Enter() {
-  rtc4513.enter();
+void EpsonRTC::Enter() {
+  epsonrtc.enter();
 }
 
-void RTC4513::enter() {
+void EpsonRTC::enter() {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -37,22 +37,22 @@ void RTC4513::enter() {
   }
 }
 
-void RTC4513::init() {
+void EpsonRTC::init() {
 }
 
-void RTC4513::load() {
-  if(cartridge.has_rtc4513()) interface->memory.append({ID::RTC4513, "rtc.ram"});
+void EpsonRTC::load() {
+  if(cartridge.has_epsonrtc()) interface->memory.append({ID::EpsonRTC, "rtc.ram"});
   batteryfailure = 1;
 }
 
-void RTC4513::unload() {
+void EpsonRTC::unload() {
 }
 
-void RTC4513::power() {
+void EpsonRTC::power() {
 }
 
-void RTC4513::reset() {
-  create(RTC4513::Enter, 32768);
+void EpsonRTC::reset() {
+  create(EpsonRTC::Enter, 32768);
 
   clocks = 0;
   seconds = 0;
@@ -64,7 +64,7 @@ void RTC4513::reset() {
   ready = false;
 }
 
-uint8 RTC4513::read(unsigned addr) {
+uint8 EpsonRTC::read(unsigned addr) {
   cpu.synchronize_coprocessors();
   addr &= 3;
 
@@ -87,7 +87,7 @@ uint8 RTC4513::read(unsigned addr) {
   }
 }
 
-void RTC4513::write(unsigned addr, uint8 data) {
+void EpsonRTC::write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessors();
   addr &= 3, data &= 15;
 

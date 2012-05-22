@@ -9,19 +9,19 @@ void Cartridge::parse_markup(const char *markup) {
 
   parse_markup_rom(cartridge["rom"]);
   parse_markup_ram(cartridge["ram"]);
-  parse_markup_nss(cartridge["nss"]);
   parse_markup_icd2(cartridge["icd2"]);
-  parse_markup_sa1(cartridge["sa1"]);
-  parse_markup_superfx(cartridge["superfx"]);
-  parse_markup_necdsp(cartridge["necdsp"]);
-  parse_markup_hitachidsp(cartridge["hitachidsp"]);
-  parse_markup_armdsp(cartridge["armdsp"]);
   parse_markup_bsx(cartridge["bsx"]);
   parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
-  parse_markup_srtc(cartridge["srtc"]);
-  parse_markup_sdd1(cartridge["sdd1"]);
+  parse_markup_nss(cartridge["nss"]);
+  parse_markup_sa1(cartridge["sa1"]);
+  parse_markup_superfx(cartridge["superfx"]);
+  parse_markup_armdsp(cartridge["armdsp"]);
+  parse_markup_hitachidsp(cartridge["hitachidsp"]);
+  parse_markup_necdsp(cartridge["necdsp"]);
+  parse_markup_epsonrtc(cartridge["epsonrtc"]);
+  parse_markup_sharprtc(cartridge["sharprtc"]);
   parse_markup_spc7110(cartridge["spc7110"]);
-  parse_markup_rtc4513(cartridge["rtc4513"]);
+  parse_markup_sdd1(cartridge["sdd1"]);
   parse_markup_obc1(cartridge["obc1"]);
   parse_markup_msu1(cartridge["msu1"]);
   parse_markup_link(cartridge["link"]);
@@ -86,13 +86,6 @@ void Cartridge::parse_markup_ram(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_nss(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_nss_dip = true;
-
-  nss.dip = interface->dipSettings(root);
-}
-
 void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
@@ -111,190 +104,6 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({ &ICD2::read, &icd2 }, { &ICD2::write, &icd2 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-}
-
-void Cartridge::parse_markup_superfx(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_superfx = true;
-
-  for(auto &node : root) {
-    if(node.name == "rom") {
-      for(auto &leaf : node) {
-        if(leaf.name != "map") continue;
-        Mapping m(superfx.rom);
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-    if(node.name == "ram") {
-      for(auto &leaf : node) {
-        if(leaf.name == "size") {
-          ram_size = numeral(leaf.data);
-          continue;
-        }
-        if(leaf.name != "map") continue;
-        Mapping m(superfx.ram);
-        parse_markup_map(m, leaf);
-        if(m.size == 0) m.size = ram_size;
-        mapping.append(m);
-      }
-    }
-    if(node.name == "mmio") {
-      for(auto &leaf : node) {
-        if(leaf.name != "map") continue;
-        Mapping m({ &SuperFX::mmio_read, &superfx }, { &SuperFX::mmio_write, &superfx });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-  }
-}
-
-void Cartridge::parse_markup_sa1(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_sa1 = true;
-
-  auto &mcurom = root["mcu"]["rom"];
-  auto &mcuram = root["mcu"]["ram"];
-  auto &iram = root["iram"];
-  auto &bwram = root["bwram"];
-  auto &mmio = root["mmio"];
-
-  for(auto &node : mcurom) {
-    if(node.name != "map") continue;
-    Mapping m({ &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : mcuram) {
-    if(node.name != "map") continue;
-    Mapping m({ &SA1::mmc_cpu_read, &sa1 }, { &SA1::mmc_cpu_write, &sa1 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : iram) {
-    if(node.name != "map") continue;
-    Mapping m(sa1.cpuiram);
-    parse_markup_map(m, node);
-    if(m.size == 0) m.size = 2048;
-    mapping.append(m);
-  }
-
-  ram_size = numeral(bwram["size"].data);
-  for(auto &node : bwram) {
-    if(node.name != "map") continue;
-    Mapping m(sa1.cpubwram);
-    parse_markup_map(m, node);
-    if(m.size == 0) m.size = ram_size;
-    mapping.append(m);
-  }
-
-  for(auto &node : mmio) {
-    if(node.name != "map") continue;
-    Mapping m({ &SA1::mmio_read, &sa1 }, { &SA1::mmio_write, &sa1 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-}
-
-void Cartridge::parse_markup_necdsp(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_necdsp = true;
-
-  for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = 0x000000;
-  for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n] = 0x0000;
-
-  necdsp.frequency = numeral(root["frequency"].data);
-  if(necdsp.frequency == 0) necdsp.frequency = 8000000;
-  necdsp.revision
-  = root["model"].data == "uPD7725"  ? NECDSP::Revision::uPD7725
-  : root["model"].data == "uPD96050" ? NECDSP::Revision::uPD96050
-  : NECDSP::Revision::uPD7725;
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
-
-  if(necdsp.revision == NECDSP::Revision::uPD7725) {
-    interface->loadRequest(ID::Nec7725DSP, firmware);
-  }
-
-  if(necdsp.revision == NECDSP::Revision::uPD96050) {
-    interface->loadRequest(ID::Nec96050DSP, firmware);
-  }
-
-  for(auto &node : root) {
-    if(node.name == "dr") {
-      for(auto &leaf : node) {
-        Mapping m({ &NECDSP::dr_read, &necdsp }, { &NECDSP::dr_write, &necdsp });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-    if(node.name == "sr") {
-      for(auto &leaf : node) {
-        Mapping m({ &NECDSP::sr_read, &necdsp }, { &NECDSP::sr_write, &necdsp });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-    if(node.name == "dp") {
-      for(auto &leaf : node) {
-        Mapping m({ &NECDSP::dp_read, &necdsp }, { &NECDSP::dp_write, &necdsp });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-  }
-}
-
-void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_hitachidsp = true;
-
-  for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = 0x000000;
-
-  hitachidsp.frequency = numeral(root["frequency"].data);
-  if(hitachidsp.frequency == 0) hitachidsp.frequency = 20000000;
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
-
-  interface->loadRequest(ID::HitachiDSP, firmware);
-
-  for(auto &node : root) {
-    if(node.name == "rom") {
-      for(auto &leaf : node) {
-        if(leaf.name != "map") continue;
-        Mapping m({ &HitachiDSP::rom_read, &hitachidsp }, { &HitachiDSP::rom_write, &hitachidsp });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-    if(node.name == "mmio") {
-      for(auto &leaf : node) {
-        Mapping m({ &HitachiDSP::dsp_read, &hitachidsp }, { &HitachiDSP::dsp_write, &hitachidsp });
-        parse_markup_map(m, leaf);
-        mapping.append(m);
-      }
-    }
-  }
-}
-
-void Cartridge::parse_markup_armdsp(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_armdsp = true;
-
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
-
-  interface->loadRequest(ID::ArmDSP, firmware);
-
-  for(auto &node : root) {
-    if(node.name != "map") continue;
-    Mapping m({ &ArmDSP::mmio_read, &armdsp }, { &ArmDSP::mmio_write, &armdsp });
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -365,32 +174,216 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_srtc(XML::Node &root) {
+void Cartridge::parse_markup_nss(XML::Node &root) {
   if(root.exists() == false) return;
-  has_srtc = true;
+  has_nss_dip = true;
 
-  for(auto &node : root) {
+  nss.dip = interface->dipSettings(root);
+}
+
+void Cartridge::parse_markup_sa1(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_sa1 = true;
+
+  auto &mcurom = root["mcu"]["rom"];
+  auto &mcuram = root["mcu"]["ram"];
+  auto &iram = root["iram"];
+  auto &bwram = root["bwram"];
+  auto &mmio = root["mmio"];
+
+  for(auto &node : mcurom) {
     if(node.name != "map") continue;
-    Mapping m({ &SRTC::read, &srtc }, { &SRTC::write, &srtc });
+    Mapping m({ &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : mcuram) {
+    if(node.name != "map") continue;
+    Mapping m({ &SA1::mmc_cpu_read, &sa1 }, { &SA1::mmc_cpu_write, &sa1 });
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : iram) {
+    if(node.name != "map") continue;
+    Mapping m(sa1.cpuiram);
+    parse_markup_map(m, node);
+    if(m.size == 0) m.size = 2048;
+    mapping.append(m);
+  }
+
+  ram_size = numeral(bwram["size"].data);
+  for(auto &node : bwram) {
+    if(node.name != "map") continue;
+    Mapping m(sa1.cpubwram);
+    parse_markup_map(m, node);
+    if(m.size == 0) m.size = ram_size;
+    mapping.append(m);
+  }
+
+  for(auto &node : mmio) {
+    if(node.name != "map") continue;
+    Mapping m({ &SA1::mmio_read, &sa1 }, { &SA1::mmio_write, &sa1 });
     parse_markup_map(m, node);
     mapping.append(m);
   }
 }
 
-void Cartridge::parse_markup_sdd1(XML::Node &root) {
+void Cartridge::parse_markup_superfx(XML::Node &root) {
   if(root.exists() == false) return;
-  has_sdd1 = true;
+  has_superfx = true;
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
+    if(node.name == "rom") {
+      for(auto &leaf : node) {
+        if(leaf.name != "map") continue;
+        Mapping m(superfx.rom);
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+    if(node.name == "ram") {
+      for(auto &leaf : node) {
+        if(leaf.name == "size") {
+          ram_size = numeral(leaf.data);
+          continue;
+        }
+        if(leaf.name != "map") continue;
+        Mapping m(superfx.ram);
+        parse_markup_map(m, leaf);
+        if(m.size == 0) m.size = ram_size;
+        mapping.append(m);
+      }
+    }
+    if(node.name == "mmio") {
+      for(auto &leaf : node) {
+        if(leaf.name != "map") continue;
+        Mapping m({ &SuperFX::mmio_read, &superfx }, { &SuperFX::mmio_write, &superfx });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+  }
+}
+
+void Cartridge::parse_markup_armdsp(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_armdsp = true;
+
+  string firmware = root["firmware"].data;
+  string sha256 = root["sha256"].data;
+
+  interface->loadRequest(ID::ArmDSP, firmware);
+
+  for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+    Mapping m({ &ArmDSP::mmio_read, &armdsp }, { &ArmDSP::mmio_write, &armdsp });
     parse_markup_map(m, node);
     mapping.append(m);
   }
+}
 
-  for(auto &node : root["mcu"]) {
+void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_hitachidsp = true;
+
+  for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = 0x000000;
+
+  hitachidsp.frequency = numeral(root["frequency"].data);
+  if(hitachidsp.frequency == 0) hitachidsp.frequency = 20000000;
+  string firmware = root["firmware"].data;
+  string sha256 = root["sha256"].data;
+
+  interface->loadRequest(ID::HitachiDSP, firmware);
+
+  for(auto &node : root) {
+    if(node.name == "rom") {
+      for(auto &leaf : node) {
+        if(leaf.name != "map") continue;
+        Mapping m({ &HitachiDSP::rom_read, &hitachidsp }, { &HitachiDSP::rom_write, &hitachidsp });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+    if(node.name == "mmio") {
+      for(auto &leaf : node) {
+        Mapping m({ &HitachiDSP::dsp_read, &hitachidsp }, { &HitachiDSP::dsp_write, &hitachidsp });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+  }
+}
+
+void Cartridge::parse_markup_necdsp(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_necdsp = true;
+
+  for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = 0x000000;
+  for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n] = 0x0000;
+
+  necdsp.frequency = numeral(root["frequency"].data);
+  if(necdsp.frequency == 0) necdsp.frequency = 8000000;
+  necdsp.revision
+  = root["model"].data == "uPD7725"  ? NECDSP::Revision::uPD7725
+  : root["model"].data == "uPD96050" ? NECDSP::Revision::uPD96050
+  : NECDSP::Revision::uPD7725;
+  string firmware = root["firmware"].data;
+  string sha256 = root["sha256"].data;
+
+  if(necdsp.revision == NECDSP::Revision::uPD7725) {
+    interface->loadRequest(ID::Nec7725DSP, firmware);
+  }
+
+  if(necdsp.revision == NECDSP::Revision::uPD96050) {
+    interface->loadRequest(ID::Nec96050DSP, firmware);
+  }
+
+  for(auto &node : root) {
+    if(node.name == "dr") {
+      for(auto &leaf : node) {
+        Mapping m({ &NECDSP::dr_read, &necdsp }, { &NECDSP::dr_write, &necdsp });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+    if(node.name == "sr") {
+      for(auto &leaf : node) {
+        Mapping m({ &NECDSP::sr_read, &necdsp }, { &NECDSP::sr_write, &necdsp });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+    if(node.name == "dp") {
+      for(auto &leaf : node) {
+        Mapping m({ &NECDSP::dp_read, &necdsp }, { &NECDSP::dp_write, &necdsp });
+        parse_markup_map(m, leaf);
+        mapping.append(m);
+      }
+    }
+  }
+}
+
+void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_epsonrtc = true;
+
+  for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &SDD1::mcu_read, &sdd1 }, { &SDD1::mcu_write, &sdd1 });
+    Mapping m({&EpsonRTC::read, &epsonrtc}, {&EpsonRTC::write, &epsonrtc});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+}
+
+void Cartridge::parse_markup_sharprtc(XML::Node &root) {
+  if(root.exists() == false) return;
+  has_sharprtc = true;
+
+  for(auto &node : root) {
+    if(node.name != "map") continue;
+    Mapping m({&SharpRTC::read, &sharprtc}, {&SharpRTC::write, &sharprtc});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -442,13 +435,20 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_rtc4513(XML::Node &root) {
+void Cartridge::parse_markup_sdd1(XML::Node &root) {
   if(root.exists() == false) return;
-  has_rtc4513 = true;
+  has_sdd1 = true;
 
-  for(auto &node : root) {
+  for(auto &node : root["mmio"]) {
     if(node.name != "map") continue;
-    Mapping m({&RTC4513::read, &rtc4513}, {&RTC4513::write, &rtc4513});
+    Mapping m({ &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : root["mcu"]) {
+    if(node.name != "map") continue;
+    Mapping m({ &SDD1::mcu_read, &sdd1 }, { &SDD1::mcu_write, &sdd1 });
     parse_markup_map(m, node);
     mapping.append(m);
   }

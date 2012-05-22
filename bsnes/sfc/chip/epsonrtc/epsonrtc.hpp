@@ -1,6 +1,6 @@
 //Epson RTC-4513 Real-Time Clock
 
-struct RTC4513 : Coprocessor {
+struct EpsonRTC : Coprocessor {
   static void Enter();
   void enter();
 
@@ -69,20 +69,6 @@ struct RTC4513 : Coprocessor {
   uint1 test;
 
   //memory.cpp
-  unsigned second();
-  unsigned minute();
-  unsigned hour();
-  unsigned day();
-  unsigned month();
-  unsigned year();
-
-  void second(unsigned);
-  void minute(unsigned);
-  void hour(unsigned);
-  void day(unsigned);
-  void month(unsigned);
-  void year(unsigned);
-
   void rtc_reset();
   uint4 rtc_read(uint4 addr);
   void rtc_write(uint4 addr, uint4 data);
@@ -102,4 +88,4 @@ struct RTC4513 : Coprocessor {
   void tick_year();
 };
 
-extern RTC4513 rtc4513;
+extern EpsonRTC epsonrtc;

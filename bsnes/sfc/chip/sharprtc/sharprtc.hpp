@@ -1,4 +1,4 @@
-struct SRTC {
+struct SharpRTC {
   uint8 rtc[20];
 
   void init();
@@ -11,7 +11,6 @@ struct SRTC {
   void write(unsigned addr, uint8 data);
 
   void serialize(serializer&);
-  SRTC();
 
 private:
   static const unsigned months[12];
@@ -23,4 +22,4 @@ private:
   unsigned weekday(unsigned year, unsigned month, unsigned day);
 };
 
-extern SRTC srtc;
+extern SharpRTC sharprtc;
