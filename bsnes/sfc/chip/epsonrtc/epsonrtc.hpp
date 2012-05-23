@@ -9,13 +9,14 @@ struct EpsonRTC : Coprocessor {
   void unload();
   void power();
   void reset();
+  void sync();
 
   uint8 read(unsigned addr);
   void write(unsigned addr, uint8 data);
 
   void serialize(serializer&);
 
-  uint15 clocks;
+  uint21 clocks;
   unsigned seconds;
 
   uint2 chipselect;
@@ -24,6 +25,7 @@ struct EpsonRTC : Coprocessor {
   uint4 offset;
   unsigned wait;
   bool ready;
+  uint1 holdtick;
 
   uint4 secondlo;
   uint3 secondhi;
@@ -31,28 +33,24 @@ struct EpsonRTC : Coprocessor {
 
   uint4 minutelo;
   uint3 minutehi;
-  uint1 minutecarry;
+  uint1 resync;
 
   uint4 hourlo;
   uint2 hourhi;
   uint1 meridian;
-  uint1 hourcarry;
 
   uint4 daylo;
   uint2 dayhi;
   uint1 dayram;
-  uint1 daycarry;
 
   uint4 monthlo;
   uint1 monthhi;
   uint2 monthram;
-  uint1 monthcarry;
 
   uint4 yearlo;
   uint4 yearhi;
 
   uint3 weekday;
-  uint1 weekdaycarry;
 
   uint1 hold;
   uint1 calendar;

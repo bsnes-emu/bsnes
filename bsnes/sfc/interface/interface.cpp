@@ -112,7 +112,9 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
   }
 
   if(id == ID::SharpRTC) {
-    stream.read(sharprtc.rtc, min(stream.size(), sizeof sharprtc.rtc));
+    uint8 data[16] = {0};
+    stream.read(data, min(stream.size(), sizeof data));
+    sharprtc.load(data);
   }
 
   if(id == ID::BsxRAM) {
@@ -146,13 +148,15 @@ void Interface::save(unsigned id, const stream &stream) {
   }
 
   if(id == ID::EpsonRTC) {
-    uint8 data[16];
+    uint8 data[16] = {0};
     epsonrtc.save(data);
     stream.write(data, sizeof data);
   }
 
   if(id == ID::SharpRTC) {
-    stream.write(sharprtc.rtc, sizeof sharprtc.rtc);
+    uint8 data[16] = {0};
+    sharprtc.save(data);
+    stream.write(data, sizeof data);
   }
 
   if(id == ID::BsxRAM) {
@@ -195,6 +199,17 @@ void Interface::reset() {
 
 void Interface::run() {
   system.run();
+}
+
+bool Interface::rtc() {
+  if(cartridge.has_epsonrtc()) return true;
+  if(cartridge.has_sharprtc()) return true;
+  return false;
+}
+
+void Interface::rtcsync() {
+  if(cartridge.has_epsonrtc()) epsonrtc.sync();
+  if(cartridge.has_sharprtc()) sharprtc.sync();
 }
 
 serializer Interface::serialize() {

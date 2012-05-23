@@ -48,6 +48,9 @@ struct Interface : Emulator::Interface {
   void reset();
   void run();
 
+  bool rtc();
+  void rtcsync();
+
   serializer serialize();
   bool unserialize(serializer&);
 

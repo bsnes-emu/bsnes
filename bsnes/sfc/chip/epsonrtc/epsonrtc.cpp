@@ -21,8 +21,9 @@ void EpsonRTC::enter() {
     if(wait) { if(--wait == 0) ready = true; }
 
     clocks++;
-    if((clocks & ~255) == 0) duty();  //1/128th second
-    if((clocks & ~511) == 0) irq(0);  //1/ 64th second
+    if((clocks & ~0x03fff) == 0) duty();            //1/128th second (frequency / 128 - 1)
+    if((clocks & ~0x07fff) == 0) irq(0);            //1/ 64th second (frequency /  64 - 1)
+    if((clocks & ~0x3ffff) == 0) roundseconds = 0;  //1/  8th second (frequency /   8 - 1)
     if(clocks == 0) {  //1 second
       seconds++;
       irq(1);
@@ -42,7 +43,45 @@ void EpsonRTC::init() {
 
 void EpsonRTC::load() {
   if(cartridge.has_epsonrtc()) interface->memory.append({ID::EpsonRTC, "rtc.ram"});
+
+  secondlo = 0;
+  secondhi = 0;
   batteryfailure = 1;
+
+  minutelo = 0;
+  minutehi = 0;
+  resync = 0;
+
+  hourlo = 0;
+  hourhi = 0;
+  meridian = 0;
+
+  daylo = 0;
+  dayhi = 0;
+  dayram = 0;
+
+  monthlo = 0;
+  monthhi = 0;
+  monthram = 0;
+
+  yearlo = 0;
+  yearhi = 0;
+
+  weekday = 0;
+
+  hold = 0;
+  calendar = 0;
+  irqflag = 0;
+  roundseconds = 0;
+
+  irqmask = 0;
+  irqduty = 0;
+  irqperiod = 0;
+
+  pause = 0;
+  stop = 0;
+  atime = 0;
+  test = 0;
 }
 
 void EpsonRTC::unload() {
@@ -52,7 +91,7 @@ void EpsonRTC::power() {
 }
 
 void EpsonRTC::reset() {
-  create(EpsonRTC::Enter, 32768);
+  create(EpsonRTC::Enter, 32768 * 64);
 
   clocks = 0;
   seconds = 0;
@@ -62,6 +101,52 @@ void EpsonRTC::reset() {
   offset = 0;
   wait = 0;
   ready = false;
+  holdtick = false;
+}
+
+void EpsonRTC::sync() {
+  time_t systime = time(0);
+  tm *timeinfo = localtime(&systime);
+
+  unsigned second = min(59, timeinfo->tm_sec);  //round down leap second
+  secondlo = second % 10;
+  secondhi = second / 10;
+
+  unsigned minute = timeinfo->tm_min;
+  minutelo = minute % 10;
+  minutehi = minute / 10;
+
+  unsigned hour = timeinfo->tm_hour;
+  if(atime) {
+    hourlo = hour % 10;
+    hourhi = hour / 10;
+  } else {
+    meridian = hour >= 12;
+    hour %= 12;
+    if(hour == 0) {
+      hourlo = 2;
+      hourhi = 1;
+    } else {
+      hourlo = hour % 10;
+      hourhi = hour / 10;
+    }
+  }
+
+  unsigned day = timeinfo->tm_mday;
+  daylo = day % 10;
+  dayhi = day / 10;
+
+  unsigned month = 1 + timeinfo->tm_mon;
+  monthlo = month % 10;
+  monthhi = month / 10;
+
+  unsigned year = timeinfo->tm_year % 100;
+  yearlo = year % 10;
+  yearhi = year / 10;
+
+  weekday = timeinfo->tm_wday;
+
+  resync = true;  //alert RTC that time has changed
 }
 
 uint8 EpsonRTC::read(unsigned addr) {
@@ -78,7 +163,7 @@ uint8 EpsonRTC::read(unsigned addr) {
     if(state == State::Write) return mdr;
     if(state != State::Read) return 0;
     ready = false;
-    wait = 1;
+    wait = 8;
     return rtc_read(offset++);
   }
 
@@ -105,7 +190,7 @@ void EpsonRTC::write(unsigned addr, uint8 data) {
       if(data != 0x03 && data != 0x0c) return;
       state = State::Seek;
       ready = false;
-      wait = 1;
+      wait = 8;
       mdr = data;
     }
 
@@ -115,14 +200,14 @@ void EpsonRTC::write(unsigned addr, uint8 data) {
 
       offset = data;
       ready = false;
-      wait = 1;
+      wait = 8;
       mdr = data;
     }
 
     else if(state == State::Write) {
       rtc_write(offset++, data);
       ready = false;
-      wait = 1;
+      wait = 8;
       mdr = data;
     }
   }

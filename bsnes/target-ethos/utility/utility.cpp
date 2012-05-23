@@ -53,6 +53,7 @@ void Utility::loadMedia(unsigned id, const string &name, const string &type, con
 void Utility::loadMemory() {
   for(auto &memory : system().memory) {
     string pathname = path(system().group(memory.id));
+    if(file::exists({pathname, memory.name}) == false) continue;
     filestream fs({pathname, memory.name});
     system().load(memory.id, fs);
   }

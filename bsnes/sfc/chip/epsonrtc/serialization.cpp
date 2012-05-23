@@ -12,6 +12,7 @@ void EpsonRTC::serialize(serializer &s) {
   s.integer(offset);
   s.integer(wait);
   s.integer(ready);
+  s.integer(holdtick);
 
   s.integer(secondlo);
   s.integer(secondhi);
@@ -19,28 +20,24 @@ void EpsonRTC::serialize(serializer &s) {
 
   s.integer(minutelo);
   s.integer(minutehi);
-  s.integer(minutecarry);
+  s.integer(resync);
 
   s.integer(hourlo);
   s.integer(hourhi);
   s.integer(meridian);
-  s.integer(hourcarry);
 
   s.integer(daylo);
   s.integer(dayhi);
   s.integer(dayram);
-  s.integer(daycarry);
 
   s.integer(monthlo);
   s.integer(monthhi);
   s.integer(monthram);
-  s.integer(monthcarry);
 
   s.integer(yearlo);
   s.integer(yearhi);
 
   s.integer(weekday);
-  s.integer(weekdaycarry);
 
   s.integer(hold);
   s.integer(calendar);

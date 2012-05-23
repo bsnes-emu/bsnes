@@ -1,6 +1,9 @@
 #ifdef EPSONRTC_CPP
 
 void EpsonRTC::irq(uint2 period) {
+  if(stop) return;
+  if(pause) return;
+
   if(period == irqperiod) irqflag = 1;
 }
 
@@ -9,13 +12,19 @@ void EpsonRTC::duty() {
 }
 
 void EpsonRTC::tick() {
-  if(hold) return;
-  if(pause) return;
   if(stop) return;
+  if(pause) return;
 
-  minutecarry = true;
+  if(hold) {
+    holdtick = true;
+    return;
+  }
+
+  resync = true;
   tick_second();
 }
+
+//below code provides bit-perfect emulation of invalid BCD values on the RTC-4513
 
 void EpsonRTC::tick_second() {
   if(secondlo <= 8 || secondlo == 12) {

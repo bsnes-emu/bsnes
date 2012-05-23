@@ -90,6 +90,10 @@ struct Interface {
   virtual void reset() {}
   virtual void run() {}
 
+  //time functions
+  virtual bool rtc() { return false; }
+  virtual void rtcsync() {}
+
   //state functions
   virtual serializer serialize() = 0;
   virtual bool unserialize(serializer&) = 0;

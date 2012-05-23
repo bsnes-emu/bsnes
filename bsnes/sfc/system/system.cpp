@@ -214,6 +214,7 @@ void System::reset() {
   if(cartridge.has_hitachidsp()) cpu.coprocessors.append(&hitachidsp);
   if(cartridge.has_necdsp()) cpu.coprocessors.append(&necdsp);
   if(cartridge.has_epsonrtc()) cpu.coprocessors.append(&epsonrtc);
+  if(cartridge.has_sharprtc()) cpu.coprocessors.append(&sharprtc);
   if(cartridge.has_spc7110()) cpu.coprocessors.append(&spc7110);
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
   if(cartridge.has_link()) cpu.coprocessors.append(&link);

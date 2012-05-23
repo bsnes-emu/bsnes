@@ -163,14 +163,6 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "      <map address='00-3f:4800-483f'/>\n"
       "      <map address='80-bf:4800-483f'/>\n"
       "    </mmio>\n"
-    );
-    if(has_spc7110rtc) markup.append(
-      "    <rtc>\n"
-      "      <map address='00-3f:4840-4842'/>\n"
-      "      <map address='80-bf:4840-4842'/>\n"
-      "    </rtc>\n"
-    );
-    markup.append(
       "    <dcu>\n"
       "      <map address='50:0000-ffff'/>\n"
       "    </dcu>\n"
@@ -188,6 +180,12 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "      </ram>\n"
       "    </mcu>\n"
       "  </spc7110>\n"
+    );
+    if(has_spc7110rtc) markup.append(
+      "  <epsonrtc>\n"
+      "    <map address='00-3f:4840-4842'/>\n"
+      "    <map address='80-bf:4840-4842'/>\n"
+      "  </epsonrtc>\n"
     );
   }
 
@@ -394,10 +392,10 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   if(has_srtc) markup.append(
-    "  <srtc>\n"
+    "  <sharprtc>\n"
     "    <map address='00-3f:2800-2801'/>\n"
     "    <map address='80-bf:2800-2801'/>\n"
-    "  </srtc>\n"
+    "  </sharprtc>\n"
   );
 
   if(has_sdd1) markup.append(
