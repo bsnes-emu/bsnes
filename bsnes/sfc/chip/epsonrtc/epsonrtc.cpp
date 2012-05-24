@@ -18,18 +18,17 @@ void EpsonRTC::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(wait) { if(--wait == 0) ready = true; }
+    if(wait) { if(--wait == 0) ready = 1; }
 
     clocks++;
-    if((clocks & ~0x03fff) == 0) duty();            //1/128th second (frequency / 128 - 1)
-    if((clocks & ~0x07fff) == 0) irq(0);            //1/ 64th second (frequency /  64 - 1)
-    if((clocks & ~0x3ffff) == 0) roundseconds = 0;  //1/  8th second (frequency /   8 - 1)
+    if((clocks & ~0x00ff) == 0) round_seconds();  //125 microseconds
+    if((clocks & ~0x3fff) == 0) duty();  //1/128th second
+    if((clocks & ~0x7fff) == 0) irq(0);  //1/64th second
     if(clocks == 0) {  //1 second
       seconds++;
       irq(1);
       if(seconds %   60 == 0) irq(2);  //1 minute
-      if(seconds % 1440 == 0) irq(3);  //1 hour
-      if(seconds == 1440) seconds = 0;
+      if(seconds % 1440 == 0) irq(3), seconds = 0;  //1 hour
       tick();
     }
 
@@ -42,7 +41,7 @@ void EpsonRTC::init() {
 }
 
 void EpsonRTC::load() {
-  if(cartridge.has_epsonrtc()) interface->memory.append({ID::EpsonRTC, "rtc.ram"});
+  interface->memory.append({ID::EpsonRTC, "rtc.ram"});
 
   secondlo = 0;
   secondhi = 0;
@@ -100,15 +99,15 @@ void EpsonRTC::reset() {
   state = State::Mode;
   offset = 0;
   wait = 0;
-  ready = false;
-  holdtick = false;
+  ready = 0;
+  holdtick = 0;
 }
 
 void EpsonRTC::sync() {
   time_t systime = time(0);
   tm *timeinfo = localtime(&systime);
 
-  unsigned second = min(59, timeinfo->tm_sec);  //round down leap second
+  unsigned second = min(59, timeinfo->tm_sec);
   secondlo = second % 10;
   secondhi = second / 10;
 
@@ -123,13 +122,9 @@ void EpsonRTC::sync() {
   } else {
     meridian = hour >= 12;
     hour %= 12;
-    if(hour == 0) {
-      hourlo = 2;
-      hourhi = 1;
-    } else {
-      hourlo = hour % 10;
-      hourhi = hour / 10;
-    }
+    if(hour == 0) hour = 12;
+    hourlo = hour % 10;
+    hourhi = hour / 10;
   }
 
   unsigned day = timeinfo->tm_mday;
@@ -146,7 +141,7 @@ void EpsonRTC::sync() {
 
   weekday = timeinfo->tm_wday;
 
-  resync = true;  //alert RTC that time has changed
+  resync = true;  //alert program that time has changed
 }
 
 uint8 EpsonRTC::read(unsigned addr) {
@@ -159,10 +154,10 @@ uint8 EpsonRTC::read(unsigned addr) {
 
   if(addr == 1) {
     if(chipselect != 1) return 0;
-    if(ready == false) return 0;
+    if(ready == 0) return 0;
     if(state == State::Write) return mdr;
     if(state != State::Read) return 0;
-    ready = false;
+    ready = 0;
     wait = 8;
     return rtc_read(offset++);
   }
@@ -179,17 +174,17 @@ void EpsonRTC::write(unsigned addr, uint8 data) {
   if(addr == 0) {
     chipselect = data;
     if(chipselect != 1) rtc_reset();
-    ready = true;
+    ready = 1;
   }
 
   if(addr == 1) {
     if(chipselect != 1) return;
-    if(ready == false) return;
+    if(ready == 0) return;
 
     if(state == State::Mode) {
       if(data != 0x03 && data != 0x0c) return;
       state = State::Seek;
-      ready = false;
+      ready = 0;
       wait = 8;
       mdr = data;
     }
@@ -197,16 +192,15 @@ void EpsonRTC::write(unsigned addr, uint8 data) {
     else if(state == State::Seek) {
       if(mdr == 0x03) state = State::Write;
       if(mdr == 0x0c) state = State::Read;
-
       offset = data;
-      ready = false;
+      ready = 0;
       wait = 8;
       mdr = data;
     }
 
     else if(state == State::Write) {
       rtc_write(offset++, data);
-      ready = false;
+      ready = 0;
       wait = 8;
       mdr = data;
     }

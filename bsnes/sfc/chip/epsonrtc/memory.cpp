@@ -10,7 +10,7 @@ void EpsonRTC::rtc_reset() {
 }
 
 uint4 EpsonRTC::rtc_read(uint4 addr) {
-  switch(addr) {
+  switch(addr) { default:
   case  0: return secondlo;
   case  1: return secondhi | batteryfailure << 3;
   case  2: return minutelo;
@@ -85,18 +85,11 @@ void EpsonRTC::rtc_write(uint4 addr, uint4 data) {
     bool held = hold;
     hold = data;
     calendar = data >> 1;
-  //irqflag cannot be set manually
     roundseconds = data >> 3;
-    if(held == 1 && hold == 0 && holdtick) {
-      //if a second has passed during hold; increment one second upon resuming
-      holdtick = false;
+    if(held == 1 && hold == 0 && holdtick == 1) {
+      //if a second has passed during hold, increment one second upon resuming
+      holdtick = 0;
       tick_second();
-    }
-    if(roundseconds) {
-      roundseconds = 0;
-      if(secondhi >= 3) tick_minute();
-      secondlo = 0;
-      secondhi = 0;
     }
   } break;
   case 14:

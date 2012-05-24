@@ -24,7 +24,7 @@ struct EpsonRTC : Coprocessor {
   uint4 mdr;
   uint4 offset;
   unsigned wait;
-  bool ready;
+  uint1 ready;
   uint1 holdtick;
 
   uint4 secondlo;
@@ -77,7 +77,9 @@ struct EpsonRTC : Coprocessor {
   //time.cpp
   void irq(uint2 period);
   void duty();
+  void round_seconds();
   void tick();
+
   void tick_second();
   void tick_minute();
   void tick_hour();

@@ -14,8 +14,7 @@ struct SharpRTC : Coprocessor {
 
   void serialize(serializer&);
 
-  enum RtcMode { RtcReady, RtcCommand, RtcRead, RtcWrite };
-  unsigned rtc_mode;
+  enum class State : unsigned { Ready, Command, Read, Write } rtc_state;
   signed rtc_index;
 
   unsigned second;

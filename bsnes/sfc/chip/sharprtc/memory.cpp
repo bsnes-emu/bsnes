@@ -13,8 +13,8 @@ uint4 SharpRTC::rtc_read(uint4 addr) {
   case 10: return year / 10 % 10;
   case 11: return year / 100;
   case 12: return weekday;
+  default: return 0;
   }
-  return 0;
 }
 
 void SharpRTC::rtc_write(uint4 addr, uint4 data) {

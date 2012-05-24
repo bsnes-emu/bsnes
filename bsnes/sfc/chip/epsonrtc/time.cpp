@@ -1,8 +1,7 @@
 #ifdef EPSONRTC_CPP
 
 void EpsonRTC::irq(uint2 period) {
-  if(stop) return;
-  if(pause) return;
+  if(stop || pause) return;
 
   if(period == irqperiod) irqflag = 1;
 }
@@ -11,20 +10,29 @@ void EpsonRTC::duty() {
   if(irqduty) irqflag = 0;
 }
 
+void EpsonRTC::round_seconds() {
+  if(roundseconds == 0) return;
+  roundseconds = 0;
+
+  if(secondhi >= 3) tick_minute();
+  secondlo = 0;
+  secondhi = 0;
+}
+
 void EpsonRTC::tick() {
-  if(stop) return;
-  if(pause) return;
+  if(stop || pause) return;
 
   if(hold) {
-    holdtick = true;
+    holdtick = 1;
     return;
   }
 
-  resync = true;
+  resync = 1;
   tick_second();
 }
 
 //below code provides bit-perfect emulation of invalid BCD values on the RTC-4513
+//code makes extensive use of variable-length integers (see epsonrtc.hpp for sizes)
 
 void EpsonRTC::tick_second() {
   if(secondlo <= 8 || secondlo == 12) {
@@ -99,7 +107,7 @@ void EpsonRTC::tick_hour() {
 }
 
 void EpsonRTC::tick_day() {
-  if(calendar == false) return;
+  if(calendar == 0) return;
   weekday = (weekday + 1) + (weekday == 6);
 
   //January - December = 0x01 - 0x09; 0x10 - 0x12
@@ -128,6 +136,12 @@ void EpsonRTC::tick_day() {
   }
 
   if(days == 30 && (dayhi == 3 || (dayhi == 2 && (daylo == 10 || daylo == 14)))) {
+    daylo = 1;
+    dayhi = 0;
+    return tick_month();
+  }
+
+  if(days == 31 && (dayhi == 3 && (daylo & 3))) {
     daylo = 1;
     dayhi = 0;
     return tick_month();

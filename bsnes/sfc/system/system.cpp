@@ -62,7 +62,7 @@ void System::runthreadtosave() {
 }
 
 void System::init() {
-  assert(interface != nullptr);
+  assert(interface != 0);
 
   bsxsatellaview.init();
   icd2.init();
@@ -172,8 +172,8 @@ void System::power() {
   if(cartridge.has_armdsp()) armdsp.power();
   if(cartridge.has_hitachidsp()) hitachidsp.power();
   if(cartridge.has_necdsp()) necdsp.power();
-  if(cartridge.has_sharprtc()) sharprtc.power();
   if(cartridge.has_epsonrtc()) epsonrtc.power();
+  if(cartridge.has_sharprtc()) sharprtc.power();
   if(cartridge.has_spc7110()) spc7110.power();
   if(cartridge.has_sdd1()) sdd1.power();
   if(cartridge.has_obc1()) obc1.power();

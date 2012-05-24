@@ -5,23 +5,28 @@ namespace SuperFamicom {
 struct ID {
   enum : unsigned {
     IPLROM,
+
+    ROM,
+    RAM,
+
+    ArmDSP,
+    HitachiDSP,
     Nec7725DSP,
     Nec96050DSP,
-    HitachiDSP,
-    ArmDSP,
-    ROM,
-    SuperGameBoyROM,
-    BsxFlashROM,
-    SufamiTurboSlotAROM,
-    SufamiTurboSlotBROM,
-    RAM,
     NecDSPRAM,
+
     EpsonRTC,
     SharpRTC,
+
+    SuperGameBoyROM,
+    SuperGameBoyRAM,
+
+    BsxFlashROM,
     BsxRAM,
     BsxPSRAM,
-    SuperGameBoyRAM,
-    SuperGameBoyRTC,
+
+    SufamiTurboSlotAROM,
+    SufamiTurboSlotBROM,
     SufamiTurboSlotARAM,
     SufamiTurboSlotBRAM,
   };

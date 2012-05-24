@@ -120,7 +120,7 @@ Presentation::Presentation() : active(nullptr) {
   configurationSettings.onActivate = [&] { settings->setVisible(); settings->panelList.setFocused(); };
   for(unsigned n = 0; n < 5; n++) saveStateItem[n].onActivate = [=] { utility->saveState(1 + n); };
   for(unsigned n = 0; n < 5; n++) loadStateItem[n].onActivate = [=] { utility->loadState(1 + n); };
-  synchronizeTime.onActivate = [&] { if(application->active) system().rtcsync(); };
+  synchronizeTime.onActivate = [&] { system().rtcsync(); };
   resizeWindow.onActivate = [&] { utility->resize(true); };
   cheatEditor.onActivate = [&] { ::cheatEditor->setVisible(); };
   stateManager.onActivate = [&] { ::stateManager->setVisible(); };

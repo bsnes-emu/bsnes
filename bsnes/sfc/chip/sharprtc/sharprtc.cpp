@@ -37,7 +37,6 @@ void SharpRTC::load() {
   day = 0;
   month = 0;
   year = 0;
-  weekday = 0;
 }
 
 void SharpRTC::unload() {
@@ -49,7 +48,7 @@ void SharpRTC::power() {
 void SharpRTC::reset() {
   create(SharpRTC::Enter, 1);
 
-  rtc_mode = RtcRead;
+  rtc_state = State::Read;
   rtc_index = -1;
 }
 
@@ -57,7 +56,7 @@ void SharpRTC::sync() {
   time_t systime = time(0);
   tm *timeinfo = localtime(&systime);
 
-  second = min(59, timeinfo->tm_sec);  //round leap second down
+  second = min(59, timeinfo->tm_sec);
   minute = timeinfo->tm_min;
   hour = timeinfo->tm_hour;
   day = timeinfo->tm_mday;
@@ -67,17 +66,17 @@ void SharpRTC::sync() {
 }
 
 uint8 SharpRTC::read(unsigned addr) {
-  addr &= 0xffff;
+  addr &= 1;
 
-  if(addr == 0x2800) {
-    if(rtc_mode != RtcRead) return 0x00;
+  if(addr == 0) {
+    if(rtc_state != State::Read) return 0;
 
     if(rtc_index < 0) {
       rtc_index++;
-      return 0x0f;
+      return 15;
     } else if(rtc_index > 12) {
       rtc_index = -1;
-      return 0x0f;
+      return 15;
     } else {
       return rtc_read(rtc_index++);
     }
@@ -87,41 +86,29 @@ uint8 SharpRTC::read(unsigned addr) {
 }
 
 void SharpRTC::write(unsigned addr, uint8 data) {
-  addr &= 0xffff;
+  addr &= 1, data &= 15;
 
-  if(addr == 0x2801) {
-    data &= 0x0f;  //only the low four bits are used
-
+  if(addr == 1) {
     if(data == 0x0d) {
-      rtc_mode = RtcRead;
+      rtc_state = State::Read;
       rtc_index = -1;
       return;
     }
 
     if(data == 0x0e) {
-      rtc_mode = RtcCommand;
+      rtc_state = State::Command;
       return;
     }
 
     if(data == 0x0f) return;  //unknown behavior
 
-    if(rtc_mode == RtcWrite) {
-      if(rtc_index >= 0 && rtc_index < 12) {
-        rtc_write(rtc_index++, data);
-
-        if(rtc_index == 12) {
-          //day of week is automatically calculated and written
-          weekday = calculate_weekday(1000 + year, month, day);
-        }
-      }
-    } else if(rtc_mode == RtcCommand) {
+    if(rtc_state == State::Command) {
       if(data == 0) {
-        rtc_mode = RtcWrite;
+        rtc_state = State::Write;
         rtc_index = 0;
       } else if(data == 4) {
-        rtc_mode = RtcReady;
+        rtc_state = State::Ready;
         rtc_index = -1;
-
         //reset time
         second = 0;
         minute = 0;
@@ -132,8 +119,20 @@ void SharpRTC::write(unsigned addr, uint8 data) {
         weekday = 0;
       } else {
         //unknown behavior
-        rtc_mode = RtcReady;
+        rtc_state = State::Ready;
       }
+      return;
+    }
+
+    if(rtc_state == State::Write) {
+      if(rtc_index >= 0 && rtc_index < 12) {
+        rtc_write(rtc_index++, data);
+        if(rtc_index == 12) {
+          //day of week is automatically calculated and written
+          weekday = calculate_weekday(1000 + year, month, day);
+        }
+      }
+      return;
     }
   }
 }

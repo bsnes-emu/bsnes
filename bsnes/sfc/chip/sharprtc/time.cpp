@@ -20,14 +20,20 @@ void SharpRTC::tick_hour() {
 
 void SharpRTC::tick_day() {
   unsigned days = daysinmonth[month % 12];
+
+  //add one day for leap years
+       if(year % 400 == 0) days++;
+  else if(year % 100 == 0);
+  else if(year %   4 == 0) days++;
+
   if(day++ < days) return;
-  day = 0;
+  day = 1;
   tick_month();
 }
 
 void SharpRTC::tick_month() {
   if(month++ < 12) return;
-  month = 0;
+  month = 1;
   tick_year();
 }
 
@@ -38,39 +44,38 @@ void SharpRTC::tick_year() {
 
 //returns day of week for specified date
 //eg 0 = Sunday, 1 = Monday, ... 6 = Saturday
-//usage: weekday(2008, 1, 1) returns weekday of January 1st, 2008
+//usage: calculate_weekday(2008, 1, 1) returns weekday of January 1st, 2008
 unsigned SharpRTC::calculate_weekday(unsigned year, unsigned month, unsigned day) {
-  unsigned y = 1900, m = 1;  //epoch is 1900-01-01
+  unsigned y = 1000, m = 1;  //SharpRTC epoch is 1000-01-01
   unsigned sum = 0;          //number of days passed since epoch
 
-  year = max(1900, year);
+  year = max(1000, year);
   month = max(1, min(12, month));
   day = max(1, min(31, day));
 
   while(y < year) {
     bool leapyear = false;
-    if((y % 4) == 0) {
+    if(y % 4 == 0) {
       leapyear = true;
-      if((y % 100) == 0 && (y % 400) != 0) leapyear = false;
+      if(y % 100 == 0 && y % 400 != 0) leapyear = false;
     }
-    sum += leapyear ? 366 : 365;
+    sum += 365 + leapyear;
     y++;
   }
 
   while(m < month) {
     unsigned days = daysinmonth[m - 1];
+    bool leapyearmonth = false;
     if(days == 28) {
-      bool leapyear = false;
-      if((y % 4) == 0) {
-        leapyear = true;
-        if((y % 100) == 0 && (y % 400) != 0) leapyear = false;
+      if(y % 4 == 0) {
+        leapyearmonth = true;
+        if(y % 100 == 0 && y % 400 != 0) leapyearmonth = false;
       }
-      if(leapyear) days++;
     }
-    sum += days;
+    sum += days + leapyearmonth;
     m++;
   }
 
   sum += day - 1;
-  return (sum + 1) % 7;  //1900-01-01 was a Monday
+  return (sum + 3) % 7;  //1000-01-01 was a Wednesday
 }
