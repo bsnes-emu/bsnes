@@ -29,7 +29,7 @@ void SharpRTC::init() {
 }
 
 void SharpRTC::load() {
-  interface->memory.append({ID::SharpRTC, "rtc.ram"});
+  return;
 
   second = 0;
   minute = 0;
@@ -37,6 +37,7 @@ void SharpRTC::load() {
   day = 0;
   month = 0;
   year = 0;
+  weekday = 0;
 }
 
 void SharpRTC::unload() {

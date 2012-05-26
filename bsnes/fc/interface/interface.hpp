@@ -4,8 +4,14 @@ namespace Famicom {
 
 struct ID {
   enum : unsigned {
-    ROM,
-    RAM,
+    Famicom,
+  };
+
+  enum : unsigned {
+    ProgramROM,
+    ProgramRAM,
+    CharacterROM,
+    CharacterRAM,
   };
 
   enum : unsigned {
@@ -20,7 +26,9 @@ struct Interface : Emulator::Interface {
 
   bool loaded();
   string sha256();
-  void load(unsigned id, const stream &stream, const string &markup = "");
+  void load(unsigned id, const string &manifest);
+  void save();
+  void load(unsigned id, const stream &stream, const string &manifest = "");
   void save(unsigned id, const stream &stream);
   void unload();
 

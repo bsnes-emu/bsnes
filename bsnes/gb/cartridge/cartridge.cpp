@@ -14,12 +14,8 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(System::Revision revision, const string &markup, const stream &memory) {
-  romsize = memory.size() ? memory.size() : 32768u;
-  romdata = allocate<uint8>(romsize, 0xff);
-  memory.read(romdata, memory.size());
-
-  information.markup = markup;
+void Cartridge::load(System::Revision revision, const string &manifest, bool preloaded) {
+  information.markup = manifest;
   information.mapper = Mapper::Unknown;
   information.ram = false;
   information.battery = false;
@@ -29,7 +25,7 @@ void Cartridge::load(System::Revision revision, const string &markup, const stre
   information.romsize = 0;
   information.ramsize = 0;
 
-  XML::Document document(markup);
+  XML::Document document(manifest);
 
   auto &mapperid = document["cartridge"]["mapper"].data;
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
@@ -44,9 +40,24 @@ void Cartridge::load(System::Revision revision, const string &markup, const stre
   information.rtc = document["cartridge"]["rtc"].data == "true";
   information.rumble = document["cartridge"]["rumble"].data == "true";
 
+  auto &rom = document["cartridge"]["rom"];
+  auto &ram = document["cartridge"]["ram"];
+
+  romsize = numeral(rom["size"].data);
+  romdata = allocate<uint8>(romsize, 0xff);
+
+  ramsize = numeral(ram["size"].data);
+  ramdata = allocate<uint8>(ramsize, 0xff);
+
+  if(preloaded == false) {
+    if(rom["name"].exists()) interface->loadRequest(ID::ROM, rom["name"].data);
+    if(ram["name"].exists()) interface->loadRequest(ID::RAM, ram["name"].data);
+    if(ram["name"].exists()) memory.append({ID::RAM, ram["name"].data});
+  }
+
   information.romsize = numeral(document["cartridge"]["rom"]["size"].data);
   information.ramsize = numeral(document["cartridge"]["ram"]["size"].data);
-  information.battery = document["cartridge"]["ram"]["nonvolatile"].data == "true";
+  information.battery = ram["name"].exists();
 
   switch(information.mapper) { default:
   case Mapper::MBC0:  mapper = &mbc0;  break;
@@ -59,19 +70,17 @@ void Cartridge::load(System::Revision revision, const string &markup, const stre
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  ramdata = new uint8_t[ramsize = information.ramsize]();
   system.load(revision);
 
   loaded = true;
   sha256 = nall::sha256(romdata, romsize);
-  if(ramsize) interface->memory.append({ID::RAM, "save.ram"});
 }
 
 void Cartridge::unload() {
   if(loaded == false) return;
 
-  if(romdata) { delete[] romdata; romdata = 0; }
-  if(ramdata) { delete[] ramdata; ramdata = 0; }
+  if(romdata) { delete[] romdata; romdata = nullptr; }
+  if(ramdata) { delete[] ramdata; ramdata = nullptr; }
   loaded = false;
 }
 

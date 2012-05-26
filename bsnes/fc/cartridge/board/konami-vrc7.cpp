@@ -41,7 +41,7 @@ void serialize(serializer &s) {
   vrc7.serialize(s);
 }
 
-KonamiVRC7(XML::Document &document, const stream &memory) : Board(document, memory), vrc7(*this) {
+KonamiVRC7(XML::Document &document) : Board(document), vrc7(*this) {
 }
 
 };

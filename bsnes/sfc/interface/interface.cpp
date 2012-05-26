@@ -32,7 +32,6 @@ unsigned Interface::group(unsigned id) {
   case ID::Nec7725DSP:
   case ID::Nec96050DSP:
   case ID::NecDSPRAM:
-  case ID::BsxRAM:
   case ID::BsxPSRAM:
     return 0;
   case ID::SuperGameBoyROM:
@@ -50,14 +49,23 @@ unsigned Interface::group(unsigned id) {
   return 0;
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &markup) {
+void Interface::load(unsigned id, const string &manifest) {
+  cartridge.load(manifest);
+}
+
+void Interface::save() {
+  for(auto &memory : cartridge.memory) {
+    saveRequest(memory.id, memory.name);
+  }
+}
+
+void Interface::load(unsigned id, const stream &stream, const string &manifest) {
   if(id == ID::IPLROM) {
     stream.read(smp.iplrom, min(64u, stream.size()));
   }
 
   if(id == ID::ROM) {
-    cartridge.load(markup, stream);
-    system.power();
+    stream.read(cartridge.rom.data(), min(cartridge.rom.size(), stream.size()));
   }
 
   if(id == ID::RAM) {
@@ -99,7 +107,8 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
   }
 
   if(id == ID::SuperGameBoyROM) {
-    GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, markup, stream);
+    GameBoy::interface->load(GameBoy::ID::ROM, stream);
+    GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, manifest, true);
   }
 
   if(id == ID::SuperGameBoyRAM) {
@@ -108,10 +117,6 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
 
   if(id == ID::BsxFlashROM) {
     bsxflash.memory.copy(stream);
-  }
-
-  if(id == ID::BsxRAM) {
-    stream.read(bsxcartridge.sram.data(), min(stream.size(), bsxcartridge.sram.size()));
   }
 
   if(id == ID::BsxPSRAM) {
@@ -160,10 +165,6 @@ void Interface::save(unsigned id, const stream &stream) {
     stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
   }
 
-  if(id == ID::BsxRAM) {
-    stream.write(bsxcartridge.sram.data(), bsxcartridge.sram.size());
-  }
-
   if(id == ID::BsxPSRAM) {
     stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
   }
@@ -179,6 +180,7 @@ void Interface::save(unsigned id, const stream &stream) {
 }
 
 void Interface::unload() {
+  save();
   cartridge.unload();
   tracerEnable(false);
 }
@@ -285,10 +287,10 @@ Interface::Interface() {
 
   firmware.append({ID::IPLROM, "Super Famicom", "sys", "spc700.rom"});
 
-  media.append({ID::ROM, "Super Famicom",    "sys", "program.rom", "sfc"});
-  media.append({ID::ROM, "Super Game Boy",   "sfc", "program.rom", "gb" });
-  media.append({ID::ROM, "BS-X Satellaview", "sfc", "program.rom", "bs" });
-  media.append({ID::ROM, "Sufami Turbo",     "sfc", "program.rom", "st" });
+  media.append({ID::SuperFamicom, "Super Famicom",    "sys", "program.rom", "sfc"});
+  media.append({ID::SuperFamicom, "Super Game Boy",   "sfc", "program.rom", "gb" });
+  media.append({ID::SuperFamicom, "BS-X Satellaview", "sfc", "program.rom", "bs" });
+  media.append({ID::SuperFamicom, "Sufami Turbo",     "sfc", "program.rom", "st" });
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

@@ -36,7 +36,7 @@ void main() { vrc6.main(); }
 void power() { vrc6.power(); }
 void reset() { vrc6.reset(); }
 
-KonamiVRC6(XML::Document &document, const stream &memory) : Board(document, memory), vrc6(*this) {
+KonamiVRC6(XML::Document &document) : Board(document), vrc6(*this) {
 }
 
 };

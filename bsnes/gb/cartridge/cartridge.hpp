@@ -33,6 +33,12 @@ struct Cartridge : MMIO, property<Cartridge> {
     unsigned ramsize;
   } information;
 
+  struct Memory {
+    unsigned id;
+    string name;
+  };
+  vector<Memory> memory;
+
   readonly<bool> loaded;
   readonly<string> sha256;
 
@@ -45,7 +51,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   MMIO *mapper;
   bool bootrom_enable;
 
-  void load(System::Revision revision, const string &markup, const stream &memory);
+  void load(System::Revision revision, const string &manifest, bool preloaded = false);
   void unload();
 
   uint8 rom_read(unsigned addr);

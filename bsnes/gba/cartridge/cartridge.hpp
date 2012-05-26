@@ -12,7 +12,13 @@ struct Cartridge : property<Cartridge> {
     string markup;
   } information;
 
-  bool load(const string &markup, const stream &memory);
+  struct Media {
+    unsigned id;
+    string name;
+  };
+  vector<Media> memory;
+
+  void load(const string &manifest);
   void unload();
   void power();
 

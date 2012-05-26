@@ -41,7 +41,7 @@ void EpsonRTC::init() {
 }
 
 void EpsonRTC::load() {
-  interface->memory.append({ID::EpsonRTC, "rtc.ram"});
+  return;
 
   secondlo = 0;
   secondhi = 0;

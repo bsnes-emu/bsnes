@@ -90,7 +90,7 @@ void serialize(serializer &s) {
   s.array(latch);
 }
 
-NES_PxROM(XML::Document &document, const stream &memory) : Board(document, memory) {
+NES_PxROM(XML::Document &document) : Board(document) {
   revision = Revision::PNROM;
 }
 

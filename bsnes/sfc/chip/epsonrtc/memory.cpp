@@ -167,11 +167,11 @@ void EpsonRTC::load(const uint8 *data) {
 void EpsonRTC::save(uint8 *data) {
   data[0] = secondlo << 0 | secondhi << 4 | batteryfailure << 7;
   data[1] = minutelo << 0 | minutehi << 4 | resync << 7;
-  data[2] = hourlo << 0 | hourhi << 4 | meridian << 6;
-  data[3] = daylo << 0 | dayhi << 4 | dayram << 6;
-  data[4] = monthlo << 0 | monthhi << 4 | monthram << 5;
+  data[2] = hourlo << 0 | hourhi << 4 | meridian << 6 | resync << 7;
+  data[3] = daylo << 0 | dayhi << 4 | dayram << 6 | resync << 7;
+  data[4] = monthlo << 0 | monthhi << 4 | monthram << 5 | resync << 7;
   data[5] = yearlo << 0 | yearhi << 4;
-  data[6] = weekday << 0 | hold << 4 | calendar << 5 | irqflag << 6 | roundseconds << 7;
+  data[6] = weekday << 0 | resync << 3 | hold << 4 | calendar << 5 | irqflag << 6 | roundseconds << 7;
   data[7] = irqmask << 0 | irqduty << 1 | irqperiod << 2 | pause << 4 | stop << 5 | atime << 6 | test << 7;
 
   uint64 timestamp = (uint64)time(0);

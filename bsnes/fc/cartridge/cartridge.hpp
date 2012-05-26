@@ -5,11 +5,8 @@ struct Cartridge : Thread, property<Cartridge> {
   static void Main();
   void main();
 
-  void load(const string &markup, const stream &memory);
+  void load(const string &manifest);
   void unload();
-
-  unsigned ram_size();
-  uint8* ram_data();
 
   void power();
   void reset();
@@ -20,6 +17,12 @@ struct Cartridge : Thread, property<Cartridge> {
   struct Information {
     string markup;
   } information;
+
+  struct Memory {
+    unsigned id;
+    string name;
+  };
+  vector<Memory> memory;
 
   void serialize(serializer&);
   Cartridge();

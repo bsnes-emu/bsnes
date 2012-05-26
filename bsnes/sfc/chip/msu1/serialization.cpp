@@ -14,6 +14,7 @@ void MSU1::serialize(serializer &s) {
   s.integer(mmio.audio_busy);
   s.integer(mmio.audio_repeat);
   s.integer(mmio.audio_play);
+  s.integer(mmio.audio_error);
 
   if(datafile.open()) datafile.close();
   if(datafile.open({interface->path(0), "msu1.rom"}, file::mode::read)) {

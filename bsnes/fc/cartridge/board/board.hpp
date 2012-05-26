@@ -25,16 +25,14 @@ struct Board {
 
   virtual inline void scanline(unsigned y) {}
 
-  virtual Memory& memory();
-
   virtual void power();
   virtual void reset();
 
   virtual void serialize(serializer&);
-  Board(XML::Document &document, const stream &memory);
+  Board(XML::Document &document);
   virtual ~Board();
 
-  static Board* load(const string &markup, const stream &memory);
+  static Board* load(const string &manifest);
 
   struct Information {
     string type;

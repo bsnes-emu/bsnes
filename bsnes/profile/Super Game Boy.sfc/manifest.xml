@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cartridge region="NTSC">
   <boot firmware="boot.rom" sha256="0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360"/>
-  <rom>
+  <rom name="program.rom" size="0x80000">
     <map mode="linear" address="00-7f:8000-ffff"/>
     <map mode="linear" address="80-ff:8000-ffff"/>
   </rom>

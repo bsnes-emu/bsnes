@@ -187,6 +187,7 @@ void InputManager::saveConfiguration() {
 
 InputManager::InputManager() {
   inputManager = this;
+  activeScancode = 0;
   bootstrap();
 }
 

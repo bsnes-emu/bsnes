@@ -20,7 +20,6 @@ struct Cartridge : property<Cartridge> {
   readonly<string> sha256;
 
   readonly<Region> region;
-  readonly<unsigned> ram_size;
 
   readonly<bool> has_gb_slot;
   readonly<bool> has_bs_cart;
@@ -53,10 +52,17 @@ struct Cartridge : property<Cartridge> {
 
     Mapping();
     Mapping(const function<uint8 (unsigned)>&, const function<void (unsigned, uint8)>&);
-    Mapping(Memory&);
+    Mapping(SuperFamicom::Memory&);
   };
-  linear_vector<Mapping> mapping;
+  vector<Mapping> mapping;
 
+  struct Memory {
+    unsigned id;
+    string name;
+  };
+  vector<Memory> memory;
+
+  void load(const string &manifest);
   void load(const string &markup, const stream &stream);
   void unload();
 
@@ -67,6 +73,7 @@ struct Cartridge : property<Cartridge> {
 private:
   void parse_markup(const char*);
   void parse_markup_map(Mapping&, XML::Node&);
+  void parse_markup_memory(MappedRAM&, XML::Node&, unsigned id, bool writable);
 
   void parse_markup_rom(XML::Node&);
   void parse_markup_ram(XML::Node&);

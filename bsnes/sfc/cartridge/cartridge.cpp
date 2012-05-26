@@ -8,11 +8,62 @@ namespace SuperFamicom {
 
 Cartridge cartridge;
 
+void Cartridge::load(const string &manifest) {
+  region = Region::NTSC;
+
+  has_gb_slot    = false;
+  has_bs_cart    = false;
+  has_bs_slot    = false;
+  has_st_slots   = false;
+  has_nss_dip    = false;
+  has_sa1        = false;
+  has_superfx    = false;
+  has_armdsp     = false;
+  has_hitachidsp = false;
+  has_necdsp     = false;
+  has_epsonrtc   = false;
+  has_sharprtc   = false;
+  has_spc7110    = false;
+  has_sdd1       = false;
+  has_obc1       = false;
+  has_msu1       = false;
+  has_link       = false;
+
+  parse_markup(manifest);
+//print(manifest, "\n\n");
+
+  //Super Game Boy
+  if(cartridge.has_gb_slot()) {
+    sha256 = nall::sha256(GameBoy::cartridge.romdata, GameBoy::cartridge.romsize);
+  }
+
+  //Broadcast Satellaview
+  else if(cartridge.has_bs_cart() && cartridge.has_bs_slot()) {
+    sha256 = nall::sha256(bsxflash.memory.data(), bsxflash.memory.size());
+  }
+
+  //Sufami Turbo
+  else if(cartridge.has_st_slots()) {
+    sha256 = nall::sha256(sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
+  }
+
+  //Super Famicom
+  else {
+    sha256 = nall::sha256(rom.data(), rom.size());
+  }
+
+  rom.write_protect(true);
+  ram.write_protect(false);
+
+  system.load();
+  loaded = true;
+}
+
 void Cartridge::load(const string &markup, const stream &stream) {
   rom.copy(stream);
 
   region = Region::NTSC;
-  ram_size = 0;
+//ram_size = 0;
 
   has_gb_slot    = false;
   has_bs_cart    = false;
@@ -55,10 +106,10 @@ void Cartridge::load(const string &markup, const stream &stream) {
     sha256 = nall::sha256(rom.data(), rom.size());
   }
 
-  if(ram_size > 0) {
-    ram.map(allocate<uint8>(ram_size, 0xff), ram_size);
-    interface->memory.append({ID::RAM, "save.ram"});
-  }
+//  if(ram_size > 0) {
+//    ram.map(allocate<uint8>(ram_size, 0xff), ram_size);
+//    interface->memory.append({ID::RAM, "save.ram"});
+//  }
 
   rom.write_protect(true);
   ram.write_protect(false);
@@ -75,6 +126,7 @@ void Cartridge::unload() {
   ram.reset();
 
   loaded = false;
+  memory.reset();
 }
 
 Cartridge::Cartridge() {

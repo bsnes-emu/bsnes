@@ -84,7 +84,7 @@ void serialize(serializer &s) {
   s.array(latch);
 }
 
-NES_FxROM(XML::Document &document, const stream &memory) : Board(document, memory) {
+NES_FxROM(XML::Document &document) : Board(document) {
   revision = Revision::FKROM;
 }
 

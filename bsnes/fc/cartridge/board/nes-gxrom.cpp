@@ -54,7 +54,7 @@ void serialize(serializer &s) {
   s.integer(chr_bank);
 }
 
-NES_GxROM(XML::Document &document, const stream &memory) : Board(document, memory) {
+NES_GxROM(XML::Document &document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

@@ -33,9 +33,6 @@ void NECDSP::init() {
 }
 
 void NECDSP::load() {
-  if(revision == Revision::uPD96050) {
-    interface->memory.append({ID::NecDSPRAM, "upd96050.ram"});
-  }
 }
 
 void NECDSP::unload() {

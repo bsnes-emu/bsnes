@@ -10,6 +10,8 @@ MSU1 msu1;
 void MSU1::Enter() { msu1.enter(); }
 
 void MSU1::enter() {
+  for(unsigned addr = 0; addr <= 7; addr++) mmio_write(addr, 0x00);
+
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -75,6 +77,7 @@ void MSU1::reset() {
   mmio.audio_busy   = true;
   mmio.audio_repeat = false;
   mmio.audio_play   = false;
+  mmio.audio_error  = false;
 }
 
 uint8 MSU1::mmio_read(unsigned addr) {
@@ -86,6 +89,7 @@ uint8 MSU1::mmio_read(unsigned addr) {
          | (mmio.audio_busy   << 6)
          | (mmio.audio_repeat << 5)
          | (mmio.audio_play   << 4)
+         | (mmio.audio_error  << 3)
          | (Revision          << 0);
   case 1:
     if(mmio.data_busy) return 0x00;
@@ -97,9 +101,8 @@ uint8 MSU1::mmio_read(unsigned addr) {
   case 4: return 'M';
   case 5: return 'S';
   case 6: return 'U';
-  case 7: return '0' + Revision;
+  case 7: return '1';
   }
-  throw;
 }
 
 void MSU1::mmio_write(unsigned addr, uint8 data) {
@@ -128,6 +131,7 @@ void MSU1::mmio_write(unsigned addr, uint8 data) {
     mmio.audio_busy   = false;
     mmio.audio_repeat = false;
     mmio.audio_play   = false;
+    mmio.audio_error  = !audiofile.open();
     break;
   case 6:
     mmio.audio_volume = data;

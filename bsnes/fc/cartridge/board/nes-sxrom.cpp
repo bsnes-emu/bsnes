@@ -94,7 +94,7 @@ void serialize(serializer &s) {
   mmc1.serialize(s);
 }
 
-NES_SxROM(XML::Document &document, const stream &memory) : Board(document, memory), mmc1(*this) {
+NES_SxROM(XML::Document &document) : Board(document), mmc1(*this) {
   revision = Revision::SXROM;
 }
 

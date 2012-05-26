@@ -147,12 +147,6 @@ void EpsonRTC::tick_day() {
     return tick_month();
   }
 
-  if(days == 31 && (dayhi == 3 && (daylo & 3))) {
-    daylo = 1;
-    dayhi = 0;
-    return tick_month();
-  }
-
   if(daylo <= 8 || daylo == 12) {
     daylo++;
   } else {

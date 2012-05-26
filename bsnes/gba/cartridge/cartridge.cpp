@@ -7,14 +7,18 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-bool Cartridge::load(const string &markup, const stream &memory) {
-  information.markup = markup;
-  XML::Document document(markup);
+void Cartridge::load(const string &manifest) {
+  information.markup = manifest;
+  XML::Document document(manifest);
 
-  unsigned size = memory.size();
-  memory.read(rom.data, min(rom.size, size));
-  for(unsigned addr = size; addr < rom.size; addr++) {
-    rom.data[addr] = rom.data[Bus::mirror(addr, size)];
+  unsigned rom_size = 0;
+  if(document["cartridge"]["rom"].exists()) {
+    auto &info = document["cartridge"]["rom"];
+    interface->loadRequest(ID::ROM, info["name"].data);
+    rom_size = numeral(info["size"].data);
+    for(unsigned addr = rom_size; addr < rom.size; addr++) {
+      rom.data[addr] = rom.data[Bus::mirror(addr, rom_size)];
+    }
   }
 
   has_sram     = false;
@@ -30,7 +34,8 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       ram.mask = ram.size - 1;
       for(unsigned n = 0; n < ram.size; n++) ram.data[n] = 0xff;
 
-      interface->memory.append({2, "save.ram"});
+      interface->loadRequest(ID::RAM, info["name"].data);
+      memory.append({ID::RAM, info["name"].data});
     }
 
     if(info["type"].data == "EEPROM") {
@@ -38,11 +43,12 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       eeprom.size = numeral(info["size"].data);
       eeprom.bits = eeprom.size <= 512 ? 6 : 14;
       if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
-      eeprom.mask = size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
-      eeprom.test = size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
+      eeprom.mask = rom_size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
+      eeprom.test = rom_size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
       for(unsigned n = 0; n < eeprom.size; n++) eeprom.data[n] = 0xff;
 
-      interface->memory.append({3, "save.ram"});
+      interface->loadRequest(ID::EEPROM, info["name"].data);
+      memory.append({ID::EEPROM, info["name"].data});
     }
 
     if(info["type"].data == "FlashROM") {
@@ -51,19 +57,21 @@ bool Cartridge::load(const string &markup, const stream &memory) {
       flashrom.size = numeral(info["size"].data);
       for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0xff;
 
-      interface->memory.append({4, "save.ram"});
+      interface->loadRequest(ID::FlashROM, info["name"].data);
+      memory.append({ID::FlashROM, info["name"].data});
     }
   }
 
-  sha256 = nall::sha256(rom.data, size);
+  sha256 = nall::sha256(rom.data, rom_size);
 
   system.load();
-  return loaded = true;
+  loaded = true;
 }
 
 void Cartridge::unload() {
   if(loaded == false) return;
   loaded = false;
+  memory.reset();
 }
 
 void Cartridge::power() {

@@ -4,6 +4,10 @@ namespace SuperFamicom {
 
 struct ID {
   enum : unsigned {
+    SuperFamicom,
+  };
+
+  enum : unsigned {
     IPLROM,
 
     ROM,
@@ -22,7 +26,6 @@ struct ID {
     SuperGameBoyRAM,
 
     BsxFlashROM,
-    BsxRAM,
     BsxPSRAM,
 
     SufamiTurboSlotAROM,
@@ -44,6 +47,8 @@ struct Interface : Emulator::Interface {
   bool loaded();
   string sha256();
   unsigned group(unsigned id);
+  void load(unsigned id, const string &manifest);
+  void save();
   void load(unsigned id, const stream &stream, const string &markup = "");
   void save(unsigned id, const stream &stream);
   void unload();

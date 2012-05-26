@@ -4,6 +4,10 @@ namespace GameBoyAdvance {
 
 struct ID {
   enum : unsigned {
+    GameBoyAdvance,
+  };
+
+  enum : unsigned {
     BIOS,
     ROM,
     RAM,
@@ -21,7 +25,9 @@ struct Interface : Emulator::Interface {
   double audioFrequency();
 
   bool loaded();
-  void load(unsigned id, const stream &stream, const string &markup = "");
+  void load(unsigned id, const string &manifest);
+  void save();
+  void load(unsigned id, const stream &stream, const string &manifest = "");
   void save(unsigned id, const stream &stream);
   void unload();
 

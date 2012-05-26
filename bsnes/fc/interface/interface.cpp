@@ -20,26 +20,46 @@ string Interface::sha256() {
   return cartridge.sha256();
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &markup) {
-  if(id == ID::ROM) {
-    cartridge.load(markup, stream);
-    system.power();
-    input.connect(0, Input::Device::Joypad);
-    input.connect(1, Input::Device::Joypad);
+void Interface::load(unsigned id, const string &manifest) {
+  cartridge.load(manifest);
+}
+
+void Interface::save() {
+  for(auto &memory : cartridge.memory) {
+    saveRequest(memory.id, memory.name);
+  }
+}
+
+void Interface::load(unsigned id, const stream &stream, const string &manifest) {
+  if(id == ID::ProgramROM) {
+    stream.read(cartridge.board->prgrom.data, min(cartridge.board->prgrom.size, stream.size()));
   }
 
-  if(id == ID::RAM) {
-    stream.read(cartridge.ram_data(), min(stream.size(), cartridge.ram_size()));
+  if(id == ID::ProgramRAM) {
+    stream.read(cartridge.board->prgram.data, min(cartridge.board->prgram.size, stream.size()));
+  }
+
+  if(id == ID::CharacterROM) {
+    stream.read(cartridge.board->chrrom.data, min(cartridge.board->chrrom.size, stream.size()));
+  }
+
+  if(id == ID::CharacterRAM) {
+    stream.read(cartridge.board->chrram.data, min(cartridge.board->chrram.size, stream.size()));
   }
 }
 
 void Interface::save(unsigned id, const stream &stream) {
-  if(id == ID::RAM) {
-    stream.write(cartridge.ram_data(), cartridge.ram_size());
+  if(id == ID::ProgramRAM) {
+    stream.write(cartridge.board->prgram.data, cartridge.board->prgram.size);
+  }
+
+  if(id == ID::CharacterRAM) {
+    stream.write(cartridge.board->chrram.data, cartridge.board->chrram.size);
   }
 }
 
 void Interface::unload() {
+  save();
   cartridge.unload();
 }
 
@@ -90,7 +110,7 @@ Interface::Interface() {
   information.aspectRatio = 8.0 / 7.0;
   information.resettable  = true;
 
-  media.append({ID::ROM, "Famicom", "sys", "program.rom", "fc"});
+  media.append({ID::Famicom, "Famicom", "sys", "program.rom", "fc"});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

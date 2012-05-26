@@ -14,16 +14,14 @@ void Cartridge::main() {
   board->main();
 }
 
-void Cartridge::load(const string &markup, const stream &memory) {
-  information.markup = markup;
+void Cartridge::load(const string &manifest) {
+  information.markup = manifest;
 
-  board = Board::load(markup, memory);
+  Board::load(manifest);  //this call will set Cartridge::board if successful
   if(board == nullptr) return;
 
-  interface->memory.append({ID::RAM, "save.ram"});
-
   sha256_ctx sha;
-  uint8_t hash[32];
+  uint8 hash[32];
   sha256_init(&sha);
   sha256_chunk(&sha, board->prgrom.data, board->prgrom.size);
   sha256_chunk(&sha, board->chrrom.data, board->chrrom.size);
@@ -40,14 +38,7 @@ void Cartridge::load(const string &markup, const stream &memory) {
 void Cartridge::unload() {
   if(loaded == false) return;
   loaded = false;
-}
-
-unsigned Cartridge::ram_size() {
-  return board->memory().size;
-}
-
-uint8* Cartridge::ram_data() {
-  return board->memory().data;
+  memory.reset();
 }
 
 void Cartridge::power() {

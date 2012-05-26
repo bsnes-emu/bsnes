@@ -1,7 +1,7 @@
 struct Input {
   enum class Device : unsigned {
-    None,
     Joypad,
+    None,
   };
 
   void latch(bool data);

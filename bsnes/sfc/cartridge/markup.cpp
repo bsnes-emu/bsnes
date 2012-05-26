@@ -62,10 +62,22 @@ void Cartridge::parse_markup_map(Mapping &m, XML::Node &map) {
   }
 }
 
+void Cartridge::parse_markup_memory(MappedRAM &ram, XML::Node &node, unsigned id, bool writable) {
+  string name = node["name"].data;
+  unsigned size = numeral(node["size"].data);
+  ram.map(allocate<uint8>(size, 0xff), size);
+  if(name.empty() == false) {
+    interface->loadRequest(id, name);
+    if(writable) memory.append({id, name});
+  }
+}
+
 //
 
 void Cartridge::parse_markup_rom(XML::Node &root) {
   if(root.exists() == false) return;
+  parse_markup_memory(rom, root, ID::ROM, false);
+
   for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m(rom);
@@ -77,11 +89,12 @@ void Cartridge::parse_markup_rom(XML::Node &root) {
 
 void Cartridge::parse_markup_ram(XML::Node &root) {
   if(root.exists() == false) return;
-  ram_size = numeral(root["size"].data);
+  parse_markup_memory(ram, root, ID::RAM, true);
+
   for(auto &node : root) {
     Mapping m(ram);
     parse_markup_map(m, node);
-    if(m.size == 0) m.size = ram_size;
+    if(m.size == 0) m.size = ram.size();
     mapping.append(m);
   }
 }
@@ -103,7 +116,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
 
   for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &ICD2::read, &icd2 }, { &ICD2::write, &icd2 });
+    Mapping m({&ICD2::read, &icd2}, {&ICD2::write, &icd2});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -116,6 +129,10 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
 
   interface->loadRequest(ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom");
 
+  if(has_bs_cart) {
+    parse_markup_memory(bsxcartridge.psram, root["psram"], ID::BsxPSRAM, true);
+  }
+
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
     Mapping m(bsxflash.memory);
@@ -125,14 +142,14 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
 
   for(auto &node : root["mmio"]) {
     if(node.name != "map") continue;
-    Mapping m({ &BSXCartridge::mmio_read, &bsxcartridge }, { &BSXCartridge::mmio_write, &bsxcartridge });
+    Mapping m({&BSXCartridge::mmio_read, &bsxcartridge}, {&BSXCartridge::mmio_write, &bsxcartridge});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
   for(auto &node : root["mcu"]) {
     if(node.name != "map") continue;
-    Mapping m({ &BSXCartridge::mcu_read, &bsxcartridge }, { &BSXCartridge::mcu_write, &bsxcartridge });
+    Mapping m({&BSXCartridge::mcu_read, &bsxcartridge}, {&BSXCartridge::mcu_write, &bsxcartridge});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -152,7 +169,7 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
       if(node.name == "rom") {
         for(auto &leaf : node) {
           if(leaf.name != "map") continue;
-          Memory &memory = slotid == 0 ? sufamiturbo.slotA.rom : sufamiturbo.slotB.rom;
+          SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.rom : sufamiturbo.slotB.rom;
           Mapping m(memory);
           parse_markup_map(m, leaf);
           if(m.size == 0) m.size = memory.size();
@@ -163,7 +180,7 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
         unsigned ram_size = numeral(node["size"].data);
         for(auto &leaf : node) {
           if(leaf.name != "map") continue;
-          Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
+          SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
           Mapping m(memory);
           parse_markup_map(m, leaf);
           if(m.size == 0) m.size = ram_size;
@@ -193,14 +210,14 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
 
   for(auto &node : mcurom) {
     if(node.name != "map") continue;
-    Mapping m({ &SA1::mmc_read, &sa1 }, { &SA1::mmc_write, &sa1 });
+    Mapping m({&SA1::mmc_read, &sa1}, {&SA1::mmc_write, &sa1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
   for(auto &node : mcuram) {
     if(node.name != "map") continue;
-    Mapping m({ &SA1::mmc_cpu_read, &sa1 }, { &SA1::mmc_cpu_write, &sa1 });
+    Mapping m({&SA1::mmc_cpu_read, &sa1}, {&SA1::mmc_cpu_write, &sa1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -213,18 +230,18 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
     mapping.append(m);
   }
 
-  ram_size = numeral(bwram["size"].data);
+  parse_markup_memory(ram, bwram, ID::RAM, true);
   for(auto &node : bwram) {
     if(node.name != "map") continue;
     Mapping m(sa1.cpubwram);
     parse_markup_map(m, node);
-    if(m.size == 0) m.size = ram_size;
+    if(m.size == 0) m.size = ram.size();
     mapping.append(m);
   }
 
   for(auto &node : mmio) {
     if(node.name != "map") continue;
-    Mapping m({ &SA1::mmio_read, &sa1 }, { &SA1::mmio_write, &sa1 });
+    Mapping m({&SA1::mmio_read, &sa1}, {&SA1::mmio_write, &sa1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -236,6 +253,8 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
 
   for(auto &node : root) {
     if(node.name == "rom") {
+      parse_markup_memory(rom, node, ID::ROM, false);
+
       for(auto &leaf : node) {
         if(leaf.name != "map") continue;
         Mapping m(superfx.rom);
@@ -244,22 +263,20 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
       }
     }
     if(node.name == "ram") {
+      parse_markup_memory(ram, node, ID::RAM, false);
+
       for(auto &leaf : node) {
-        if(leaf.name == "size") {
-          ram_size = numeral(leaf.data);
-          continue;
-        }
         if(leaf.name != "map") continue;
         Mapping m(superfx.ram);
         parse_markup_map(m, leaf);
-        if(m.size == 0) m.size = ram_size;
+        if(m.size == 0) m.size = ram.size();
         mapping.append(m);
       }
     }
     if(node.name == "mmio") {
       for(auto &leaf : node) {
         if(leaf.name != "map") continue;
-        Mapping m({ &SuperFX::mmio_read, &superfx }, { &SuperFX::mmio_write, &superfx });
+        Mapping m({&SuperFX::mmio_read, &superfx}, {&SuperFX::mmio_write, &superfx});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
@@ -338,6 +355,9 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
 
   if(necdsp.revision == NECDSP::Revision::uPD96050) {
     interface->loadRequest(ID::Nec96050DSP, firmware);
+    string name = root["ram"]["name"].data;
+    interface->loadRequest(ID::NecDSPRAM, name);
+    memory.append({ID::NecDSPRAM, name});
   }
 
   for(auto &node : root) {
@@ -369,6 +389,10 @@ void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
   if(root.exists() == false) return;
   has_epsonrtc = true;
 
+  string name = root["name"].data;
+  interface->loadRequest(ID::EpsonRTC, name);
+  memory.append({ID::EpsonRTC, name});
+
   for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({&EpsonRTC::read, &epsonrtc}, {&EpsonRTC::write, &epsonrtc});
@@ -380,6 +404,10 @@ void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
 void Cartridge::parse_markup_sharprtc(XML::Node &root) {
   if(root.exists() == false) return;
   has_sharprtc = true;
+
+  string name = root["name"].data;
+  interface->loadRequest(ID::SharpRTC, name);
+  memory.append({ID::SharpRTC, name});
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -403,8 +431,6 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
 
   spc7110.drom_base = numeral(mcurom["data"]["offset"].data);
   spc7110.drom_size = numeral(mcurom["data"]["size"].data);
-
-  ram_size = numeral(mcuram["size"].data);
 
   for(auto &node : mmio) {
     if(node.name != "map") continue;
@@ -509,9 +535,9 @@ Cartridge::Mapping::Mapping() {
   banklo = bankhi = addrlo = addrhi = offset = size = 0;
 }
 
-Cartridge::Mapping::Mapping(Memory &memory) {
-  read = { &Memory::read, &memory };
-  write = { &Memory::write, &memory };
+Cartridge::Mapping::Mapping(SuperFamicom::Memory &memory) {
+  read = {&SuperFamicom::Memory::read, &memory};
+  write = {&SuperFamicom::Memory::write, &memory};
   mode = Bus::MapMode::Direct;
   banklo = bankhi = addrlo = addrhi = offset = size = 0;
 }

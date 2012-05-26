@@ -28,7 +28,19 @@ string Interface::sha256() {
   return cartridge.sha256();
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &markup) {
+void Interface::load(unsigned id, const string &manifest) {
+  if(id == ID::GameBoy) cartridge.load(System::Revision::GameBoy, manifest);
+  if(id == ID::SuperGameBoy) cartridge.load(System::Revision::SuperGameBoy, manifest);
+  if(id == ID::GameBoyColor) cartridge.load(System::Revision::GameBoyColor, manifest);
+}
+
+void Interface::save() {
+  for(auto &memory : cartridge.memory) {
+    interface->saveRequest(memory.id, memory.name);
+  }
+}
+
+void Interface::load(unsigned id, const stream &stream, const string &manifest) {
   if(id == ID::GameBoyBootROM) {
     stream.read(system.bootROM.dmg, min( 256u, stream.size()));
   }
@@ -41,14 +53,8 @@ void Interface::load(unsigned id, const stream &stream, const string &markup) {
     stream.read(system.bootROM.cgb, min(2048u, stream.size()));
   }
 
-  if(id == ID::GameBoyROM) {
-    cartridge.load(System::Revision::GameBoy, markup, stream);
-    system.power();
-  }
-
-  if(id == ID::GameBoyColorROM) {
-    cartridge.load(System::Revision::GameBoyColor, markup, stream);
-    system.power();
+  if(id == ID::ROM) {
+    stream.read(cartridge.romdata, min(cartridge.romsize, stream.size()));
   }
 
   if(id == ID::RAM) {
@@ -63,6 +69,7 @@ void Interface::save(unsigned id, const stream &stream) {
 }
 
 void Interface::unload() {
+  save();
   cartridge.unload();
 }
 
@@ -118,8 +125,8 @@ Interface::Interface() {
   firmware.append({ID::SuperGameBoyBootROM, "Super Game Boy", "sfc", "boot.rom"});
   firmware.append({ID::GameBoyColorBootROM, "Game Boy Color", "sys", "boot.rom"});
 
-  media.append({ID::GameBoyROM,      "Game Boy",       "sys", "program.rom", "gb" });
-  media.append({ID::GameBoyColorROM, "Game Boy Color", "sys", "program.rom", "gbc"});
+  media.append({ID::GameBoy,      "Game Boy",       "sys", "program.rom", "gb" });
+  media.append({ID::GameBoyColor, "Game Boy Color", "sys", "program.rom", "gbc"});
 
   {
     Device device{0, ID::Device, "Controller"};

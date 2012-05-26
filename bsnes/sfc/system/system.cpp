@@ -62,7 +62,7 @@ void System::runthreadtosave() {
 }
 
 void System::init() {
-  assert(interface != 0);
+  assert(interface != nullptr);
 
   bsxsatellaview.init();
   icd2.init();

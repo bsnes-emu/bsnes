@@ -7,13 +7,17 @@ void Utility::setInterface(Emulator::Interface *emulator) {
   presentation->synchronize();
 }
 
+//load menu option selected
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
-  string pathname = application->path({media.name, ".", media.type, "/"});
-  if(!file::exists({pathname, media.path})) pathname = browser->select({"Load ", media.name}, media.extension);
-  if(!file::exists({pathname, media.path})) return;
+  string pathname;
+  if(media.type != "sys") pathname = application->path({media.name, ".", media.type, "/"});
+  if(!directory::exists(pathname)) pathname = browser->select({"Load ", media.name}, media.extension);
+  if(!directory::exists(pathname)) return;
+  if(!file::exists({pathname, "manifest.xml"})) return;
   loadMedia(emulator, media, pathname);
 }
 
+//load menu cartridge selected or command-line load
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
   unload();
   setInterface(emulator);
@@ -22,52 +26,60 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 
   string manifest;
   manifest.readfile({pathname, "manifest.xml"});
-  auto memory = file::read({pathname, media.path});
-  system().load(media.id, vectorstream{memory}, manifest);
+  system().load(media.id, manifest);
+  system().power();
 
   if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
   load();
 }
 
-void Utility::loadMedia(unsigned id, const string &path) {
-  string pathname = {this->path(system().group(id)), path};
-  if(file::exists(pathname)) {
-    mmapstream stream(pathname);
-    return system().load(id, stream);
-  }
-}
-
-void Utility::loadMedia(unsigned id, const string &name, const string &type, const string &path) {
+//request from emulation core to load non-volatile media folder
+void Utility::loadRequest(unsigned id, const string &name, const string &type, const string &path) {
   string pathname = browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
   this->path(system().group(id)) = pathname;
   this->pathname.append(pathname);
 
-  string markup;
-  markup.readfile({pathname, "manifest.xml"});
+  string manifest;
+  manifest.readfile({pathname, "manifest.xml"});
   mmapstream stream({pathname, path});
-  system().load(id, stream, markup);
+  system().load(id, stream, manifest);
+}
+
+//request from emulation core to load non-volatile media file
+void Utility::loadRequest(unsigned id, const string &path) {
+  string pathname = {this->path(system().group(id)), path};
+  if(file::exists(pathname) == false) return;
+  mmapstream stream(pathname);
+  return system().load(id, stream);
+}
+
+//request from emulation core to save non-volatile media file
+void Utility::saveRequest(unsigned id, const string &path) {
+  string pathname = {this->path(system().group(id)), path};
+  filestream stream(pathname, file::mode::write);
+  return system().save(id, stream);
 }
 
 void Utility::loadMemory() {
-  for(auto &memory : system().memory) {
-    string pathname = path(system().group(memory.id));
-    if(file::exists({pathname, memory.name}) == false) continue;
-    filestream fs({pathname, memory.name});
-    system().load(memory.id, fs);
-  }
+//  for(auto &memory : system().memory) {
+//    string pathname = path(system().group(memory.id));
+//    if(file::exists({pathname, memory.name}) == false) continue;
+//    filestream fs({pathname, memory.name});
+//    system().load(memory.id, fs);
+//  }
 
   cheatEditor->load({pathname[0], "cheats.xml"});
   stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
 }
 
 void Utility::saveMemory() {
-  for(auto &memory : system().memory) {
-    string pathname = path(system().group(memory.id));
-    filestream fs({pathname, memory.name}, file::mode::write);
-    system().save(memory.id, fs);
-  }
+//  for(auto &memory : system().memory) {
+//    string pathname = path(system().group(memory.id));
+//    filestream fs({pathname, memory.name}, file::mode::write);
+//    system().save(memory.id, fs);
+//  }
 
   cheatEditor->save({pathname[0], "cheats.xml"});
   stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);

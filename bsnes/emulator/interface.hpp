@@ -24,12 +24,6 @@ struct Interface {
   vector<Media> firmware;
   vector<Media> media;
 
-  struct Memory {
-    unsigned id;
-    string name;
-  };
-  vector<Memory> memory;
-
   struct Device {
     unsigned id;
     unsigned portmask;
@@ -52,8 +46,9 @@ struct Interface {
   vector<Port> port;
 
   struct Bind {
-    virtual void loadRequest(unsigned, const string&) {}
     virtual void loadRequest(unsigned, const string&, const string&, const string&) {}
+    virtual void loadRequest(unsigned, const string&) {}
+    virtual void saveRequest(unsigned, const string&) {}
     virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t) { return 0u; }
     virtual void videoRefresh(const uint32_t*, unsigned, unsigned, unsigned) {}
     virtual void audioSample(int16_t, int16_t) {}
@@ -63,8 +58,9 @@ struct Interface {
   } *bind;
 
   //callback bindings (provided by user interface)
-  void loadRequest(unsigned id, const string &path) { return bind->loadRequest(id, path); }
   void loadRequest(unsigned id, const string &name, const string &type, const string &path) { return bind->loadRequest(id, name, type, path); }
+  void loadRequest(unsigned id, const string &path) { return bind->loadRequest(id, path); }
+  void saveRequest(unsigned id, const string &path) { return bind->saveRequest(id, path); }
   uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, red, green, blue); }
   void videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) { return bind->videoRefresh(data, pitch, width, height); }
   void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }
@@ -80,6 +76,8 @@ struct Interface {
   virtual bool loaded() { return false; }
   virtual string sha256() { return ""; }
   virtual unsigned group(unsigned id) { return 0u; }
+  virtual void load(unsigned id, const string &manifest) {}
+  virtual void save() {}
   virtual void load(unsigned id, const stream &memory, const string &markup = "") {}
   virtual void save(unsigned id, const stream &memory) {}
   virtual void unload() {}
