@@ -34,14 +34,18 @@ unsigned Interface::group(unsigned id) {
   case ID::NecDSPRAM:
   case ID::BsxPSRAM:
     return 0;
+  case ID::SuperGameBoy:
   case ID::SuperGameBoyROM:
   case ID::SuperGameBoyRAM:
     return 1;
+  case ID::Satellaview:
   case ID::BsxFlashROM:
     return 2;
+  case ID::SufamiTurboSlotA:
   case ID::SufamiTurboSlotAROM:
   case ID::SufamiTurboSlotARAM:
     return 3;
+  case ID::SufamiTurboSlotB:
   case ID::SufamiTurboSlotBROM:
   case ID::SufamiTurboSlotBRAM:
     return 4;
@@ -50,7 +54,11 @@ unsigned Interface::group(unsigned id) {
 }
 
 void Interface::load(unsigned id, const string &manifest) {
-  cartridge.load(manifest);
+  if(id == ID::SuperFamicom) cartridge.load(manifest);
+  if(id == ID::SuperGameBoy) cartridge.load_super_game_boy(manifest);
+  if(id == ID::Satellaview) cartridge.load_satellaview(manifest);
+  if(id == ID::SufamiTurboSlotA) cartridge.load_sufami_turbo_a(manifest);
+  if(id == ID::SufamiTurboSlotB) cartridge.load_sufami_turbo_b(manifest);
 }
 
 void Interface::save() {
@@ -107,12 +115,11 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   }
 
   if(id == ID::SuperGameBoyROM) {
-    GameBoy::interface->load(GameBoy::ID::ROM, stream);
-    GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, manifest, true);
+    stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
   }
 
   if(id == ID::SuperGameBoyRAM) {
-    stream.read(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
+    stream.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, stream.size()));
   }
 
   if(id == ID::BsxFlashROM) {
@@ -132,11 +139,11 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   }
 
   if(id == ID::SufamiTurboSlotARAM) {
-    sufamiturbo.slotA.ram.copy(stream);
+    stream.read(sufamiturbo.slotA.ram.data(), min(sufamiturbo.slotA.ram.size(), stream.size()));
   }
 
   if(id == ID::SufamiTurboSlotBRAM) {
-    sufamiturbo.slotB.ram.copy(stream);
+    stream.read(sufamiturbo.slotB.ram.data(), min(sufamiturbo.slotB.ram.size(), stream.size()));
   }
 }
 
@@ -284,13 +291,15 @@ Interface::Interface() {
   information.overscan    = true;
   information.aspectRatio = 8.0 / 7.0;
   information.resettable  = true;
+  information.capability.states = true;
+  information.capability.cheats = true;
 
   firmware.append({ID::IPLROM, "Super Famicom", "sys", "spc700.rom"});
 
-  media.append({ID::SuperFamicom, "Super Famicom",    "sys", "program.rom", "sfc"});
-  media.append({ID::SuperFamicom, "Super Game Boy",   "sfc", "program.rom", "gb" });
-  media.append({ID::SuperFamicom, "BS-X Satellaview", "sfc", "program.rom", "bs" });
-  media.append({ID::SuperFamicom, "Sufami Turbo",     "sfc", "program.rom", "st" });
+  media.append({ID::SuperFamicom, "Super Famicom",    "sys", "sfc"});
+  media.append({ID::SuperFamicom, "Super Game Boy",   "sfc", "gb" });
+  media.append({ID::SuperFamicom, "BS-X Satellaview", "sfc", "bs" });
+  media.append({ID::SuperFamicom, "Sufami Turbo",     "sfc", "st" });
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

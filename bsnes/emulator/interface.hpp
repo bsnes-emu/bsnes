@@ -11,6 +11,10 @@ struct Interface {
     bool overscan;
     double aspectRatio;
     bool resettable;
+    struct Capability {
+      bool states;
+      bool cheats;
+    } capability;
   } information;
 
   struct Media {
@@ -18,7 +22,6 @@ struct Interface {
     string name;
     string type;
     string path;
-    string extension;
   };
 
   vector<Media> firmware;
@@ -30,7 +33,7 @@ struct Interface {
     string name;
     struct Input {
       unsigned id;
-      unsigned type;  //0 = digital, 1 = analog
+      unsigned type;  //0 = digital, 1 = analog (relative), 2 = analog (absolute)
       string name;
       unsigned guid;
     };
@@ -46,7 +49,7 @@ struct Interface {
   vector<Port> port;
 
   struct Bind {
-    virtual void loadRequest(unsigned, const string&, const string&, const string&) {}
+    virtual void loadRequest(unsigned, const string&, const string&) {}
     virtual void loadRequest(unsigned, const string&) {}
     virtual void saveRequest(unsigned, const string&) {}
     virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t) { return 0u; }
@@ -58,7 +61,7 @@ struct Interface {
   } *bind;
 
   //callback bindings (provided by user interface)
-  void loadRequest(unsigned id, const string &name, const string &type, const string &path) { return bind->loadRequest(id, name, type, path); }
+  void loadRequest(unsigned id, const string &name, const string &type) { return bind->loadRequest(id, name, type); }
   void loadRequest(unsigned id, const string &path) { return bind->loadRequest(id, path); }
   void saveRequest(unsigned id, const string &path) { return bind->saveRequest(id, path); }
   uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, red, green, blue); }

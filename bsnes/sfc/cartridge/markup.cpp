@@ -103,14 +103,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
 
-  //Game Boy requires a cartridge to be loaded ...
-  //load "empty" cartridge, in case loadRequest() does not load one
-  vector<uint8> stream;
-  stream.resize(32768);
-  for(auto &byte : stream) byte = 0xff;
-  interface->load(ID::SuperGameBoyROM, vectorstream{stream}, "");
-
-  interface->loadRequest(ID::SuperGameBoyROM, "Game Boy", "gb", "program.rom");
+  interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb");
 
   icd2.revision = max(1, numeral(root["revision"].data));
 
@@ -127,7 +120,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   has_bs_cart = root["mmio"].exists();
   has_bs_slot = true;
 
-  interface->loadRequest(ID::BsxFlashROM, "BS-X Satellaview", "bs", "program.rom");
+  interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs");
 
   if(has_bs_cart) {
     parse_markup_memory(bsxcartridge.psram, root["psram"], ID::BsxPSRAM, true);
@@ -135,6 +128,8 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
+    if(bsxflash.memory.size() == 0) continue;
+
     Mapping m(bsxflash.memory);
     parse_markup_map(m, node);
     mapping.append(m);
@@ -159,8 +154,8 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   if(root.exists() == false) return;
   has_st_slots = true;
 
-  interface->loadRequest(ID::SufamiTurboSlotAROM, "Sufami Turbo - Slot A", "st", "program.rom");
-  interface->loadRequest(ID::SufamiTurboSlotBROM, "Sufami Turbo - Slot B", "st", "program.rom");
+  //load required slot A (will request slot B if slot A cartridge is linkable)
+  interface->loadRequest(ID::SufamiTurboSlotA, "Sufami Turbo - Slot A", "st");
 
   for(auto &slot : root) {
     if(slot.name != "slot") continue;
@@ -170,6 +165,8 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
         for(auto &leaf : node) {
           if(leaf.name != "map") continue;
           SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.rom : sufamiturbo.slotB.rom;
+          if(memory.size() == 0) continue;
+
           Mapping m(memory);
           parse_markup_map(m, leaf);
           if(m.size == 0) m.size = memory.size();
@@ -181,9 +178,11 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
         for(auto &leaf : node) {
           if(leaf.name != "map") continue;
           SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
+          if(memory.size() == 0) continue;
+
           Mapping m(memory);
           parse_markup_map(m, leaf);
-          if(m.size == 0) m.size = ram_size;
+          if(m.size == 0) m.size = memory.size();
           if(m.size) mapping.append(m);
         }
       }

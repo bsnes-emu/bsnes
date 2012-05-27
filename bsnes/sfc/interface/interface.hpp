@@ -4,10 +4,14 @@ namespace SuperFamicom {
 
 struct ID {
   enum : unsigned {
+    //cartridges
     SuperFamicom,
-  };
+    SuperGameBoy,
+    Satellaview,
+    SufamiTurboSlotA,
+    SufamiTurboSlotB,
 
-  enum : unsigned {
+    //memory
     IPLROM,
 
     ROM,
@@ -32,9 +36,8 @@ struct ID {
     SufamiTurboSlotBROM,
     SufamiTurboSlotARAM,
     SufamiTurboSlotBRAM,
-  };
 
-  enum : unsigned {
+    //controller ports
     Port1 = 1,
     Port2 = 2,
   };

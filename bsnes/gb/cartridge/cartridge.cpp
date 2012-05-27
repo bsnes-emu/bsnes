@@ -14,7 +14,7 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-void Cartridge::load(System::Revision revision, const string &manifest, bool preloaded) {
+void Cartridge::load(System::Revision revision, const string &manifest) {
   information.markup = manifest;
   information.mapper = Mapper::Unknown;
   information.ram = false;
@@ -49,7 +49,8 @@ void Cartridge::load(System::Revision revision, const string &manifest, bool pre
   ramsize = numeral(ram["size"].data);
   ramdata = allocate<uint8>(ramsize, 0xff);
 
-  if(preloaded == false) {
+  //Super Game Boy core loads memory from Super Famicom core
+  if(revision != System::Revision::SuperGameBoy) {
     if(rom["name"].exists()) interface->loadRequest(ID::ROM, rom["name"].data);
     if(ram["name"].exists()) interface->loadRequest(ID::RAM, ram["name"].data);
     if(ram["name"].exists()) memory.append({ID::RAM, ram["name"].data});

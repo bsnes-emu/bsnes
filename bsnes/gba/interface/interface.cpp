@@ -101,10 +101,12 @@ Interface::Interface() {
   information.overscan    = false;
   information.aspectRatio = 1.0;
   information.resettable  = false;
+  information.capability.states = true;
+  information.capability.cheats = false;
 
   firmware.append({ID::BIOS, "Game Boy Advance", "sys", "bios.rom"});
 
-  media.append({ID::GameBoyAdvance, "Game Boy Advance", "sys", "program.rom", "gba"});
+  media.append({ID::GameBoyAdvance, "Game Boy Advance", "sys", "gba"});
 
   {
     Device device{0, ID::Device, "Controller"};

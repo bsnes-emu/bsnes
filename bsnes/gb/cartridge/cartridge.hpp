@@ -51,7 +51,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   MMIO *mapper;
   bool bootrom_enable;
 
-  void load(System::Revision revision, const string &manifest, bool preloaded = false);
+  void load(System::Revision revision, const string &manifest);
   void unload();
 
   uint8 rom_read(unsigned addr);

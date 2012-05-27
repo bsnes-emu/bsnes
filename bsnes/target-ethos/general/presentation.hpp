@@ -43,11 +43,11 @@ struct Presentation : Window {
       Item saveStateItem[5];
     Menu loadStateMenu;
       Item loadStateItem[5];
-    Item synchronizeTime;
     Separator stateMenuSeparator;
     Item resizeWindow;
-    Item cheatEditor;
     Item stateManager;
+    Item cheatEditor;
+    Item synchronizeTime;
 
   void synchronize();
   void setSystemName(const string &name);

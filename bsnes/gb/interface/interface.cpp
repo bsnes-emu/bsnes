@@ -120,13 +120,15 @@ Interface::Interface() {
   information.overscan    = false;
   information.aspectRatio = 1.0;
   information.resettable  = false;
+  information.capability.states = true;
+  information.capability.cheats = true;
 
   firmware.append({ID::GameBoyBootROM,      "Game Boy",       "sys", "boot.rom"});
   firmware.append({ID::SuperGameBoyBootROM, "Super Game Boy", "sfc", "boot.rom"});
   firmware.append({ID::GameBoyColorBootROM, "Game Boy Color", "sys", "boot.rom"});
 
-  media.append({ID::GameBoy,      "Game Boy",       "sys", "program.rom", "gb" });
-  media.append({ID::GameBoyColor, "Game Boy Color", "sys", "program.rom", "gbc"});
+  media.append({ID::GameBoy,      "Game Boy",       "sys", "gb" });
+  media.append({ID::GameBoyColor, "Game Boy Color", "sys", "gbc"});
 
   {
     Device device{0, ID::Device, "Controller"};

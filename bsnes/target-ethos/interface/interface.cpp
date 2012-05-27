@@ -1,8 +1,8 @@
 #include "../ethos.hpp"
 Interface *interface = nullptr;
 
-void Interface::loadRequest(unsigned id, const string &name, const string &type, const string &path) {
-  return utility->loadRequest(id, name, type, path);
+void Interface::loadRequest(unsigned id, const string &name, const string &type) {
+  return utility->loadRequest(id, name, type);
 }
 
 void Interface::loadRequest(unsigned id, const string &path) {

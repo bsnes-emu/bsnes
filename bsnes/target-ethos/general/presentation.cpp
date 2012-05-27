@@ -28,9 +28,19 @@ void Presentation::synchronize() {
   synchronizeVideo.setChecked(config->video.synchronize);
   synchronizeAudio.setChecked(config->audio.synchronize);
   muteAudio.setChecked(config->audio.mute);
-  toolsMenu.setVisible(application->active);
-  synchronizeTime.setVisible(application->active && system().rtc());
-  resizeWindow.setVisible(config->video.scaleMode != 2);
+
+  if(application->active == nullptr) {
+    toolsMenu.setVisible(false);
+  } else {
+    toolsMenu.setVisible(true);
+    saveStateMenu.setVisible(system().information.capability.states);
+    loadStateMenu.setVisible(system().information.capability.states);
+    stateMenuSeparator.setVisible(system().information.capability.states);
+    resizeWindow.setVisible(config->video.scaleMode != 2);
+    stateManager.setVisible(system().information.capability.states);
+    cheatEditor.setVisible(system().information.capability.cheats);
+    synchronizeTime.setVisible(system().rtc());
+  }
 }
 
 void Presentation::setSystemName(const string &name) {
@@ -69,10 +79,10 @@ Presentation::Presentation() : active(nullptr) {
       for(unsigned n = 0; n < 5; n++) saveStateItem[n].setText({"Slot ", 1 + n});
     loadStateMenu.setText("Load State");
       for(unsigned n = 0; n < 5; n++) loadStateItem[n].setText({"Slot ", 1 + n});
-    synchronizeTime.setText("Synchronize Time");
     resizeWindow.setText("Resize Window");
-    cheatEditor.setText("Cheat Editor");
     stateManager.setText("State Manager");
+    cheatEditor.setText("Cheat Editor");
+    synchronizeTime.setText("Synchronize Time");
 
   append(loadMenu);
   for(auto &item : loadListSystem) loadMenu.append(*item);
@@ -97,9 +107,8 @@ Presentation::Presentation() : active(nullptr) {
       for(unsigned n = 0; n < 5; n++) saveStateMenu.append(saveStateItem[n]);
     toolsMenu.append(loadStateMenu);
       for(unsigned n = 0; n < 5; n++) loadStateMenu.append(loadStateItem[n]);
-    toolsMenu.append(synchronizeTime);
     toolsMenu.append(stateMenuSeparator);
-    toolsMenu.append(resizeWindow, cheatEditor, stateManager);
+    toolsMenu.append(resizeWindow, stateManager, cheatEditor, synchronizeTime);
 
   append(layout);
   layout.append(viewport, {0, 0, 720, 480});
@@ -120,10 +129,10 @@ Presentation::Presentation() : active(nullptr) {
   configurationSettings.onActivate = [&] { settings->setVisible(); settings->panelList.setFocused(); };
   for(unsigned n = 0; n < 5; n++) saveStateItem[n].onActivate = [=] { utility->saveState(1 + n); };
   for(unsigned n = 0; n < 5; n++) loadStateItem[n].onActivate = [=] { utility->loadState(1 + n); };
-  synchronizeTime.onActivate = [&] { system().rtcsync(); };
   resizeWindow.onActivate = [&] { utility->resize(true); };
-  cheatEditor.onActivate = [&] { ::cheatEditor->setVisible(); };
   stateManager.onActivate = [&] { ::stateManager->setVisible(); };
+  cheatEditor.onActivate = [&] { ::cheatEditor->setVisible(); };
+  synchronizeTime.onActivate = [&] { system().rtcsync(); };
 
   synchronize();
 }

@@ -102,7 +102,7 @@ int16_t DigitalInput::poll() {
 
 //
 
-bool AnalogInput::bind(unsigned scancode, int16_t value) {
+bool RelativeInput::bind(unsigned scancode, int16_t value) {
   using nall::Keyboard;
   using nall::Mouse;
 
@@ -118,16 +118,9 @@ bool AnalogInput::bind(unsigned scancode, int16_t value) {
   if(Joypad::isAnyAxis(scancode)) return append(encode);
 
   return false;
-
-append:
-  if(mapping.position(encode)) return false;  //mapping already bound
-  if(mapping.empty() || mapping == "None") mapping = encode;  //remove "None"
-  else mapping.append(",", encode);  //add to existing mapping list
-  AbstractInput::bind();
-  return true;
 }
 
-int16_t AnalogInput::poll() {
+int16_t RelativeInput::poll() {
   int16_t result = 0;
 
   for(auto &item : inputList) {
@@ -137,6 +130,76 @@ int16_t AnalogInput::poll() {
     case Input::Type::Axis:      value = value;                        break;
     }
     result += value;
+  }
+
+  return result;
+}
+
+//
+
+bool AbsoluteInput::bind(unsigned scancode, int16_t value) {
+  using nall::Keyboard;
+  using nall::Mouse;
+
+  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
+    inputList.reset();
+    mapping = "None";
+    return true;
+  }
+
+  string encode = Scancode::encode(scancode);
+
+  if(Mouse::isAnyAxis(scancode)) {
+    //only one input can be assigned for absolute positioning
+    inputList.reset();
+    mapping = encode;
+    return true;
+  }
+
+  return false;
+}
+
+int16_t AbsoluteInput::poll() {
+  int16_t result = -32768;  //offscreen value
+
+  using nall::Mouse;
+
+  Position position = phoenix::Mouse::position();
+  Geometry geometry = presentation->geometry();
+
+  if(position.x < geometry.x
+  || position.y < geometry.y
+  || position.x >= geometry.x + geometry.width
+  || position.y >= geometry.y + geometry.height) {
+    //cursor is offscreen
+    position.x = -32768;
+    position.y = -32768;
+  } else {
+    //convert from screen to viewport coordinates
+    double x = position.x - geometry.x;
+    double y = position.y - geometry.y;
+
+    //scale coordinate range to -0.5 to +0.5 (0.0 = center)
+    x = x * 1.0 / geometry.width  - 0.5;
+    y = y * 1.0 / geometry.height - 0.5;
+
+    //scale coordinates to -32767 to +32767
+    signed px = (signed)(x * 65535.0);
+    signed py = (signed)(y * 65535.0);
+
+    //clamp to valid range
+    position.x = max(-32767, min(+32767, px));
+    position.y = max(-32767, min(+32767, py));
+  }
+
+  for(auto &item : inputList) {
+    if(item.scancode == mouse(0)[Mouse::Xaxis]) {
+      result = position.x;
+    }
+
+    if(item.scancode == mouse(0)[Mouse::Yaxis]) {
+      result = position.y;
+    }
   }
 
   return result;
@@ -201,8 +264,9 @@ void InputManager::bootstrap() {
 
           AbstractInput *abstract = nullptr;
           if(input.type == 0) abstract = new DigitalInput;
-          if(input.type == 1) abstract = new AnalogInput;
-          if(input.type >= 2) continue;
+          if(input.type == 1) abstract = new RelativeInput;
+          if(input.type == 2) abstract = new AbsoluteInput;
+          if(input.type >= 3) continue;
 
           abstract->name = {emulator->information.name, "::", port.name, "::", device.name, "::", input.name};
           abstract->name.replace(" ", "");

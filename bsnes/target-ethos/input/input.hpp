@@ -23,7 +23,13 @@ struct DigitalInput : AbstractInput {
   int16_t poll();
 };
 
-struct AnalogInput : AbstractInput {
+struct RelativeInput : AbstractInput {
+  using AbstractInput::bind;
+  bool bind(unsigned scancode, int16_t value);
+  int16_t poll();
+};
+
+struct AbsoluteInput : AbstractInput {
   using AbstractInput::bind;
   bool bind(unsigned scancode, int16_t value);
   int16_t poll();

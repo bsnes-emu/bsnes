@@ -4,11 +4,9 @@ struct Utility {
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname);
 
-  void loadRequest(unsigned id, const string &name, const string &type, const string &path);
+  void loadRequest(unsigned id, const string &name, const string &type);
   void loadRequest(unsigned id, const string &path);
   void saveRequest(unsigned id, const string &path);
-  void loadMemory();
-  void saveMemory();
 
   void connect(unsigned port, unsigned device);
   void power();

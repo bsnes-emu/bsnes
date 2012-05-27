@@ -109,8 +109,10 @@ Interface::Interface() {
   information.overscan    = true;
   information.aspectRatio = 8.0 / 7.0;
   information.resettable  = true;
+  information.capability.states = true;
+  information.capability.cheats = true;
 
-  media.append({ID::Famicom, "Famicom", "sys", "program.rom", "fc"});
+  media.append({ID::Famicom, "Famicom", "sys", "fc"});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

@@ -27,7 +27,7 @@ void Application::commandLineLoad(string pathname) {
   for(auto &emulator : this->emulator) {
     for(auto &media : emulator->media) {
       if(media.type != "sys") continue;
-      if(type != media.extension) continue;
+      if(type != media.path) continue;
       return utility->loadMedia(emulator, media, pathname);
     }
   }

@@ -63,7 +63,10 @@ struct Cartridge : property<Cartridge> {
   vector<Memory> memory;
 
   void load(const string &manifest);
-  void load(const string &markup, const stream &stream);
+  void load_super_game_boy(const string &manifest);
+  void load_satellaview(const string &manifest);
+  void load_sufami_turbo_a(const string &manifest);
+  void load_sufami_turbo_b(const string &manifest);
   void unload();
 
   void serialize(serializer&);

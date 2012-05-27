@@ -72,7 +72,8 @@ void InputSettings::synchronize() {
       assign[2].setVisible(true);
     }
 
-    if(dynamic_cast<AnalogInput*>(selectedInput)) {
+    if(dynamic_cast<RelativeInput*>(selectedInput)
+    || dynamic_cast<AbsoluteInput*>(selectedInput)) {
       assign[0].setText("Mouse X-axis");
       assign[1].setText("Mouse Y-axis");
       assign[0].setVisible(true);
@@ -170,7 +171,8 @@ void InputSettings::assignMouseInput(unsigned n) {
     return inputEvent(mouse(0).button(n), 1, true);
   }
 
-  if(dynamic_cast<AnalogInput*>(activeInput)) {
+  if(dynamic_cast<RelativeInput*>(activeInput)
+  || dynamic_cast<AbsoluteInput*>(activeInput)) {
     return inputEvent(mouse(0).axis(n), 1, true);
   }
 }
