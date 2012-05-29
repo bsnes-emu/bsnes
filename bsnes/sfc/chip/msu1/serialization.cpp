@@ -3,6 +3,8 @@
 void MSU1::serialize(serializer &s) {
   Thread::serialize(s);
 
+  s.integer(boot);
+
   s.integer(mmio.data_offset);
   s.integer(mmio.audio_offset);
   s.integer(mmio.audio_loop_offset);
@@ -16,15 +18,8 @@ void MSU1::serialize(serializer &s) {
   s.integer(mmio.audio_play);
   s.integer(mmio.audio_error);
 
-  if(datafile.open()) datafile.close();
-  if(datafile.open({interface->path(0), "msu1.rom"}, file::mode::read)) {
-    datafile.seek(mmio.data_offset);
-  }
-
-  if(audiofile.open()) audiofile.close();
-  if(audiofile.open({interface->path(0), "track-", mmio.audio_track, ".pcm"}, file::mode::read)) {
-    audiofile.seek(mmio.audio_offset);
-  }
+  data_open();
+  audio_open();
 }
 
 #endif

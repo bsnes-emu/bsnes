@@ -31,6 +31,10 @@ void DSP::enter() {
   }
 }
 
+bool DSP::mute() {
+  return spc_dsp.mute();
+}
+
 uint8 DSP::read(uint8 addr) {
   return spc_dsp.read(addr);
 }

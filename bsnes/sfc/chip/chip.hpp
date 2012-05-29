@@ -23,7 +23,6 @@ struct Coprocessor : Thread {
 #include <sfc/chip/obc1/obc1.hpp>
 
 #include <sfc/chip/msu1/msu1.hpp>
-#include <sfc/chip/link/link.hpp>
 
 void Coprocessor::step(unsigned clocks) {
   clock += clocks * (uint64)cpu.frequency;

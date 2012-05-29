@@ -26,8 +26,8 @@ void Cartridge::load(const string &manifest) {
   has_sdd1       = false;
   has_obc1       = false;
   has_msu1       = false;
-  has_link       = false;
 
+  this->manifest = manifest;
   parse_markup(manifest);
 //print(manifest, "\n\n");
 

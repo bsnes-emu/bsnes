@@ -36,9 +36,6 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r4818);
   s.integer(r481a);
 
-  s.integer(r4814_latch);
-  s.integer(r4815_latch);
-
   s.integer(r4820);
   s.integer(r4821);
   s.integer(r4822);

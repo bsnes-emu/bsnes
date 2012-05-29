@@ -24,7 +24,6 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_sdd1(cartridge["sdd1"]);
   parse_markup_obc1(cartridge["obc1"]);
   parse_markup_msu1(cartridge["msu1"]);
-  parse_markup_link(cartridge["link"]);
 }
 
 //
@@ -294,7 +293,7 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
 
   for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &ArmDSP::mmio_read, &armdsp }, { &ArmDSP::mmio_write, &armdsp });
+    Mapping m({&ArmDSP::mmio_read, &armdsp}, {&ArmDSP::mmio_write, &armdsp});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -317,14 +316,14 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
     if(node.name == "rom") {
       for(auto &leaf : node) {
         if(leaf.name != "map") continue;
-        Mapping m({ &HitachiDSP::rom_read, &hitachidsp }, { &HitachiDSP::rom_write, &hitachidsp });
+        Mapping m({&HitachiDSP::rom_read, &hitachidsp}, {&HitachiDSP::rom_write, &hitachidsp});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
     }
     if(node.name == "mmio") {
       for(auto &leaf : node) {
-        Mapping m({ &HitachiDSP::dsp_read, &hitachidsp }, { &HitachiDSP::dsp_write, &hitachidsp });
+        Mapping m({&HitachiDSP::dsp_read, &hitachidsp}, {&HitachiDSP::dsp_write, &hitachidsp});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
@@ -362,21 +361,21 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   for(auto &node : root) {
     if(node.name == "dr") {
       for(auto &leaf : node) {
-        Mapping m({ &NECDSP::dr_read, &necdsp }, { &NECDSP::dr_write, &necdsp });
+        Mapping m({&NECDSP::dr_read, &necdsp}, {&NECDSP::dr_write, &necdsp});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
     }
     if(node.name == "sr") {
       for(auto &leaf : node) {
-        Mapping m({ &NECDSP::sr_read, &necdsp }, { &NECDSP::sr_write, &necdsp });
+        Mapping m({&NECDSP::sr_read, &necdsp}, {&NECDSP::sr_write, &necdsp});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
     }
     if(node.name == "dp") {
       for(auto &leaf : node) {
-        Mapping m({ &NECDSP::dp_read, &necdsp }, { &NECDSP::dp_write, &necdsp });
+        Mapping m({&NECDSP::dp_read, &necdsp}, {&NECDSP::dp_write, &necdsp});
         parse_markup_map(m, leaf);
         mapping.append(m);
       }
@@ -466,14 +465,14 @@ void Cartridge::parse_markup_sdd1(XML::Node &root) {
 
   for(auto &node : root["mmio"]) {
     if(node.name != "map") continue;
-    Mapping m({ &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+    Mapping m({&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
   for(auto &node : root["mcu"]) {
     if(node.name != "map") continue;
-    Mapping m({ &SDD1::mcu_read, &sdd1 }, { &SDD1::mcu_write, &sdd1 });
+    Mapping m({&SDD1::mcu_read, &sdd1}, {&SDD1::mcu_write, &sdd1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -485,45 +484,19 @@ void Cartridge::parse_markup_obc1(XML::Node &root) {
 
   for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &OBC1::read, &obc1 }, { &OBC1::write, &obc1 });
+    Mapping m({&OBC1::read, &obc1}, {&OBC1::write, &obc1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 }
 
 void Cartridge::parse_markup_msu1(XML::Node &root) {
-  if(root.exists() == false) {
-    has_msu1 = file::exists({interface->path(0), "msu1.rom"});
-    if(has_msu1) {
-      Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
-      m.banklo = 0x00, m.bankhi = 0x3f, m.addrlo = 0x2000, m.addrhi = 0x2007;
-      mapping.append(m);
-      m.banklo = 0x80, m.bankhi = 0xbf, m.addrlo = 0x2000, m.addrhi = 0x2007;
-      mapping.append(m);
-    }
-    return;
-  }
-
+  if(root.exists() == false) return;
   has_msu1 = true;
 
   for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({ &MSU1::mmio_read, &msu1 }, { &MSU1::mmio_write, &msu1 });
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-}
-
-void Cartridge::parse_markup_link(XML::Node &root) {
-  if(root.exists() == false) return;
-  has_link = true;
-
-  link.frequency = max(1, numeral(root["frequency"].data));
-  link.program = root["program"].data;
-
-  for(auto &node : root) {
-    if(node.name != "map") continue;
-    Mapping m({ &Link::read, &link }, { &Link::write, &link });
+    Mapping m({&MSU1::mmio_read, &msu1}, {&MSU1::mmio_write, &msu1});
     parse_markup_map(m, node);
     mapping.append(m);
   }

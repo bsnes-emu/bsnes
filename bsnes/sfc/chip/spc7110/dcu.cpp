@@ -26,8 +26,10 @@ void SPC7110::dcu_begin_transfer() {
     ctx.invert = 0;
   }
 
-  unsigned seek = (r4805 | r4806 << 8) << dcu_mode;
-  while(seek--) dcu_read();
+  if(r480b & 2) {
+    unsigned seek = (r4805 | r4806 << 8) << dcu_mode;
+    while(seek--) dcu_read();
+  }
 }
 
 uint8 SPC7110::dcu_read() {

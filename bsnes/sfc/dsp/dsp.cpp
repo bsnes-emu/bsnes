@@ -199,6 +199,10 @@ void DSP::tick() {
 
 /* register interface for S-SMP $00f2,$00f3 */
 
+bool DSP::mute() {
+  return state.regs[r_flg] & 0x40;
+}
+
 uint8 DSP::read(uint8 addr) {
   return state.regs[addr];
 }

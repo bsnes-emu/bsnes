@@ -68,9 +68,6 @@ void SPC7110::reset() {
   r4818 = 0x00;
   r481a = 0x00;
 
-  r4814_latch = false;
-  r4815_latch = false;
-
   r4820 = 0x00;
   r4821 = 0x00;
   r4822 = 0x00;
@@ -100,7 +97,7 @@ void SPC7110::reset() {
 
 uint8 SPC7110::mmio_read(unsigned addr) {
   cpu.synchronize_coprocessors();
-  addr &= 0xffff;
+  addr = 0x4800 | (addr & 0x3f);
 
   switch(addr) {
 
@@ -138,7 +135,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
 
   case 0x4810: {
     uint8 data = r4810;
-    data_port_increment_a();
+    data_port_increment_4810();
     data_port_read();
     return data;
   }
@@ -151,13 +148,13 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4817: return r4817;
   case 0x4818: return r4818;
   case 0x481a: {
-    data_port_increment_b();
+    data_port_increment_481a();
     return 0x00;
   }
 
-  //=========
-  //math unit
-  //=========
+  //=====================
+  //arithmetic logic unit
+  //=====================
 
   case 0x4820: return r4820;
   case 0x4821: return r4821;
@@ -177,7 +174,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x482f: return r482f;
 
   //===================
-  //memory mapping unit
+  //memory control unit
   //===================
 
   case 0x4830: return r4830;
@@ -193,7 +190,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
 
 void SPC7110::mmio_write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessors();
-  addr &= 0xffff;
+  addr = 0x4800 | (addr & 0x3f);
 
   switch(addr) {
 
@@ -220,22 +217,15 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4811: r4811 = data; break;
   case 0x4812: r4812 = data; break;
   case 0x4813: r4813 = data & 0x7f; data_port_read(); break;
-  case 0x4814:
-  case 0x4815: {
-    if((addr & 1) == 0) r4814 = data, r4814_latch = true;
-    if((addr & 1) == 1) r4815 = data, r4815_latch = true;
-    if(r4814_latch && r4815_latch) data_port_increment_c();
-  } break;
+  case 0x4814: r4814 = data; data_port_increment_4814(); break;
+  case 0x4815: r4815 = data; data_port_increment_4815(); break;
   case 0x4816: r4816 = data; break;
   case 0x4817: r4817 = data; break;
-  case 0x4818: r4818 = data & 0x7f; {
-    r4814_latch = r4815_latch = false;
-    data_port_read();
-  } break;
+  case 0x4818: r4818 = data & 0x7f; data_port_read(); break;
 
-  //=========
-  //math unit
-  //=========
+  //=====================
+  //arithmetic logic unit
+  //=====================
 
   case 0x4820: r4820 = data; break;
   case 0x4821: r4821 = data; break;
@@ -248,7 +238,7 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x482e: r482e = data & 0x01; break;
 
   //===================
-  //memory mapping unit
+  //memory control unit
   //===================
 
   case 0x4830: r4830 = data & 0x87; break;

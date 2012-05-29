@@ -18,6 +18,7 @@ struct Cartridge : property<Cartridge> {
 
   readonly<bool> loaded;
   readonly<string> sha256;
+  readonly<string> manifest;
 
   readonly<Region> region;
 
@@ -37,7 +38,6 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_sdd1;
   readonly<bool> has_obc1;
   readonly<bool> has_msu1;
-  readonly<bool> has_link;
 
   struct Mapping {
     function<uint8 (unsigned)> read;
@@ -95,7 +95,6 @@ private:
   void parse_markup_sdd1(XML::Node&);
   void parse_markup_obc1(XML::Node&);
   void parse_markup_msu1(XML::Node&);
-  void parse_markup_link(XML::Node&);
 };
 
 extern Cartridge cartridge;
