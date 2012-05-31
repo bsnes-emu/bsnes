@@ -103,7 +103,6 @@ void Interface::audioSample(int16_t lsample, int16_t rsample) {
 }
 
 int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
-  if(config->input.focusAllow == false && presentation->focused() == false) return 0;
   unsigned guid = system().port[port].device[device].input[input].guid;
   return inputManager->inputMap[guid]->poll();
 }

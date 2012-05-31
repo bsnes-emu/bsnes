@@ -13,17 +13,10 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r480b);
   s.integer(r480c);
 
+  s.integer(dcu_pending);
   s.integer(dcu_mode);
   s.integer(dcu_addr);
-  s.integer(dcu_sp);
-  s.integer(dcu_dp);
-
-  s.array(dcu_output);
-
-  for(auto &ctx : context) {
-    s.integer(ctx.index);
-    s.integer(ctx.invert);
-  }
+  decompressor->serialize(s);
 
   s.integer(r4810);
   s.integer(r4811);
@@ -53,8 +46,8 @@ void SPC7110::serialize(serializer &s) {
   s.integer(r482e);
   s.integer(r482f);
 
-  s.integer(mul_wait);
-  s.integer(div_wait);
+  s.integer(mul_pending);
+  s.integer(div_pending);
 
   s.integer(r4830);
   s.integer(r4831);

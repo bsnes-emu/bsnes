@@ -1,14 +1,10 @@
 #ifdef SPC7110_CPP
 
 uint8 SPC7110::datarom_read(unsigned addr) {
-  unsigned mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit
-  unsigned range = 0x100000 * (1 + mask);
-  unsigned offset = addr & 0x7fffff;
-
-  //mirroring behavior is non-sensical. assuming a 32mbit data ROM:
-  //banks 4-7 with mask 0-2 returns 0x00; banks 4-7 with mask 3 mirrors banks 0-3
-  if(range <= drom_size && offset >= drom_size) return 0x00;
-
+  unsigned size = 1 << (r4834 & 3);  //size in MB
+  unsigned mask = 0x100000 * size - 1;
+  unsigned offset = addr & mask;
+  if((r4834 & 3) != 3 && (addr & 0x400000)) return 0x00;
   return cartridge.rom.read(drom_base + Bus::mirror(offset, drom_size));
 }
 
@@ -33,6 +29,7 @@ void SPC7110::data_port_increment_4810() {
   if(r4818 & 8) adjust = (int16)adjust;
   if((r4818 & 16) == 0) set_data_offset(offset + stride);
   if((r4818 & 16) != 0) set_data_adjust(adjust + stride);
+  data_port_read();
 }
 
 void SPC7110::data_port_increment_4814() {
@@ -41,6 +38,7 @@ void SPC7110::data_port_increment_4814() {
   unsigned adjust = data_adjust();
   if(r4818 & 8) adjust = (int16)adjust;
   set_data_offset(offset + adjust);
+  data_port_read();
 }
 
 void SPC7110::data_port_increment_4815() {
@@ -49,6 +47,7 @@ void SPC7110::data_port_increment_4815() {
   unsigned adjust = data_adjust();
   if(r4818 & 8) adjust = (int16)adjust;
   set_data_offset(offset + adjust);
+  data_port_read();
 }
 
 void SPC7110::data_port_increment_481a() {
@@ -57,6 +56,7 @@ void SPC7110::data_port_increment_481a() {
   unsigned adjust = data_adjust();
   if(r4818 & 8) adjust = (int16)adjust;
   set_data_offset(offset + adjust);
+  data_port_read();
 }
 
 #endif

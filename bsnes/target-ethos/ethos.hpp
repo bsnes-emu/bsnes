@@ -45,6 +45,7 @@ struct Application {
   string titleFont;
   string monospaceFont;
 
+  bool focused();
   string path(const string &filename);
   void commandLineLoad(string pathname);
   void run();

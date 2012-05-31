@@ -9,6 +9,10 @@ Emulator::Interface& system() {
   return *application->active;
 }
 
+bool Application::focused() {
+  return config->input.focusAllow || presentation->focused();
+}
+
 string Application::path(const string &filename) {
   string path = {basepath, filename};
   if(file::exists(path)) return path;

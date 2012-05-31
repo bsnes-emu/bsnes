@@ -1,14 +1,8 @@
+struct Decompressor;
+
 struct SPC7110 : Coprocessor {
   unsigned prom_base, prom_size;  //program ROM
   unsigned drom_base, drom_size;  //data ROM
-
-  uint4 rtcram[16];
-
-  enum : unsigned {
-    mul_delay =  6,
-    div_delay =  8,
-    rtc_delay = 20,
-  };
 
   static void Enter();
   void enter();
@@ -17,6 +11,8 @@ struct SPC7110 : Coprocessor {
   void unload();
   void power();
   void reset();
+
+  void add_clocks(unsigned clocks);
 
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
@@ -32,27 +28,16 @@ struct SPC7110 : Coprocessor {
 
   void serialize(serializer&);
   SPC7110();
+  ~SPC7110();
 
   //dcu.cpp
   void dcu_load_address();
   void dcu_begin_transfer();
   uint8 dcu_read();
 
-  void decompress_1bpp(bool init = false);
-  void decompress_2bpp(bool init = false);
-  void decompress_4bpp(bool init = false);
-
   void deinterleave_1bpp(unsigned length);
   void deinterleave_2bpp(unsigned length);
   void deinterleave_4bpp(unsigned length);
-
-  uint8 probability(unsigned n);
-  uint8 next_lps(unsigned n);
-  uint8 next_mps(unsigned n);
-  bool toggle_invert(unsigned n);
-
-  unsigned deinterleave_2x8(unsigned data);
-  unsigned deinterleave_4x8(unsigned data);
 
   //data.cpp
   uint8 datarom_read(unsigned addr);
@@ -81,7 +66,7 @@ private:
   //==================
   uint8 r4801;  //compression table B0
   uint8 r4802;  //compression table B1
-  uint8 r4803;  //compression table B2
+  uint7 r4803;  //compression table B2
   uint8 r4804;  //compression table index
   uint8 r4805;  //decompression buffer index B0
   uint8 r4806;  //decompression buffer index B1
@@ -91,21 +76,10 @@ private:
   uint8 r480b;  //decompression settings
   uint8 r480c;  //decompression status
 
+  bool dcu_pending;
   uint2 dcu_mode;
   uint23 dcu_addr;
-  unsigned dcu_sp;
-  unsigned dcu_dp;
-
-  uint8 dcu_output[32];
-  uint8 dcu_tiledata[256 * 32];
-
-  struct ContextState {
-    uint8 index;
-    uint8 invert;
-  } context[32];
-
-  static const uint8 evolution_table[53][4];
-  static const uint8 context_table[32][2];
+  Decompressor *decompressor;
 
   //==============
   //data port unit
@@ -113,7 +87,7 @@ private:
   uint8 r4810;  //data port read + seek
   uint8 r4811;  //data offset B0
   uint8 r4812;  //data offset B1
-  uint8 r4813;  //data offset B2
+  uint7 r4813;  //data offset B2
   uint8 r4814;  //data adjust B0
   uint8 r4815;  //data adjust B1
   uint8 r4816;  //data stride B0
@@ -141,8 +115,8 @@ private:
   uint8 r482e;  //math settings
   uint8 r482f;  //math status
 
-  unsigned mul_wait;
-  unsigned div_wait;
+  bool mul_pending;
+  bool div_pending;
 
   //===================
   //memory control unit

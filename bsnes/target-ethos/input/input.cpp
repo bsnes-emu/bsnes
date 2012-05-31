@@ -78,6 +78,7 @@ bool DigitalInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t DigitalInput::poll() {
+  if(application->focused() == false) return 0;
   bool result = logic;
 
   for(auto &item : inputList) {
@@ -121,6 +122,7 @@ bool RelativeInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t RelativeInput::poll() {
+  if(application->focused() == false) return 0;
   int16_t result = 0;
 
   for(auto &item : inputList) {
@@ -160,6 +162,7 @@ bool AbsoluteInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t AbsoluteInput::poll() {
+  if(application->focused() == false) return -32768;
   int16_t result = -32768;  //offscreen value
 
   using nall::Mouse;

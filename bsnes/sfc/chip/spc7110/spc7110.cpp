@@ -9,6 +9,14 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 SPC7110 spc7110;
 
+SPC7110::SPC7110() {
+  decompressor = new Decompressor(*this);
+}
+
+SPC7110::~SPC7110() {
+  delete decompressor;
+}
+
 void SPC7110::Enter() { spc7110.enter(); }
 
 void SPC7110::enter() {
@@ -17,12 +25,17 @@ void SPC7110::enter() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(mul_wait) { if(--mul_wait == 0) alu_multiply(); }
-    if(div_wait) { if(--div_wait == 0) alu_divide(); }
+    if(dcu_pending) { dcu_pending = 0; dcu_begin_transfer(); }
+    if(mul_pending) { mul_pending = 0; alu_multiply(); }
+    if(div_pending) { div_pending = 0; alu_divide(); }
 
-    step(1);
-    synchronize_cpu();
+    add_clocks(1);
   }
+}
+
+void SPC7110::add_clocks(unsigned clocks) {
+  step(clocks);
+  synchronize_cpu();
 }
 
 void SPC7110::init() {
@@ -38,7 +51,7 @@ void SPC7110::power() {
 }
 
 void SPC7110::reset() {
-  create(SPC7110::Enter, 32768 * 128);
+  create(SPC7110::Enter, 21477272);
 
   r4801 = 0x00;
   r4802 = 0x00;
@@ -52,10 +65,9 @@ void SPC7110::reset() {
   r480b = 0x00;
   r480c = 0x00;
 
+  dcu_pending = 0;
   dcu_mode = 0;
   dcu_addr = 0;
-  dcu_sp = 0;
-  dcu_dp = 0;
 
   r4810 = 0x00;
   r4811 = 0x00;
@@ -85,8 +97,8 @@ void SPC7110::reset() {
   r482e = 0x00;
   r482f = 0x00;
 
-  mul_wait = 0;
-  div_wait = 0;
+  mul_pending = 0;
+  div_pending = 0;
 
   r4830 = 0x00;
   r4831 = 0x00;
@@ -123,11 +135,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4809: return r4809;
   case 0x480a: return r480a;
   case 0x480b: return r480b;
-  case 0x480c: {
-    uint8 status = r480c;
-    r480c &= 0x7f;
-    return status;
-  }
+  case 0x480c: return r480c;
 
   //==============
   //data port unit
@@ -136,7 +144,6 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   case 0x4810: {
     uint8 data = r4810;
     data_port_increment_4810();
-    data_port_read();
     return data;
   }
   case 0x4811: return r4811;
@@ -200,10 +207,10 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
 
   case 0x4801: r4801 = data; break;
   case 0x4802: r4802 = data; break;
-  case 0x4803: r4803 = data & 0x7f; break;
+  case 0x4803: r4803 = data; break;
   case 0x4804: r4804 = data; dcu_load_address(); break;
   case 0x4805: r4805 = data; break;
-  case 0x4806: r4806 = data; dcu_begin_transfer(); break;
+  case 0x4806: r4806 = data; r480c &= 0x7f; dcu_pending = 1; break;
   case 0x4807: r4807 = data; break;
   case 0x4808: break;
   case 0x4809: r4809 = data; break;
@@ -216,9 +223,9 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
 
   case 0x4811: r4811 = data; break;
   case 0x4812: r4812 = data; break;
-  case 0x4813: r4813 = data & 0x7f; data_port_read(); break;
+  case 0x4813: r4813 = data; data_port_read(); break;
   case 0x4814: r4814 = data; data_port_increment_4814(); break;
-  case 0x4815: r4815 = data; data_port_increment_4815(); break;
+  case 0x4815: r4815 = data; if(r4818 & 2) data_port_read(); data_port_increment_4815(); break;
   case 0x4816: r4816 = data; break;
   case 0x4817: r4817 = data; break;
   case 0x4818: r4818 = data & 0x7f; data_port_read(); break;
@@ -232,9 +239,9 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4822: r4822 = data; break;
   case 0x4823: r4823 = data; break;
   case 0x4824: r4824 = data; break;
-  case 0x4825: r4825 = data; r482f |= 0x81; mul_wait = mul_delay; break;
+  case 0x4825: r4825 = data; r482f |= 0x81; mul_pending = 1; break;
   case 0x4826: r4826 = data; break;
-  case 0x4827: r4827 = data; r482f |= 0x80; div_wait = div_delay; break;
+  case 0x4827: r4827 = data; r482f |= 0x80; div_pending = 1; break;
   case 0x482e: r482e = data & 0x01; break;
 
   //===================
@@ -248,9 +255,6 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4834: r4834 = data & 0x07; break;
 
   }
-}
-
-SPC7110::SPC7110() {
 }
 
 //============

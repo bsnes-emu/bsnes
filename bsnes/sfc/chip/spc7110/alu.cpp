@@ -1,6 +1,8 @@
 #ifdef SPC7110_CPP
 
 void SPC7110::alu_multiply() {
+  add_clocks(30);
+
   if(r482e & 1) {
     //signed 16-bit x 16-bit multiplication
     int16 r0 = (int16)(r4824 | r4825 << 8);
@@ -27,6 +29,8 @@ void SPC7110::alu_multiply() {
 }
 
 void SPC7110::alu_divide() {
+  add_clocks(40);
+
   if(r482e & 1) {
     //signed 32-bit x 16-bit division
     int32 dividend = (int32)(r4820 | r4821 << 8 | r4822 << 16 | r4823 << 24);
