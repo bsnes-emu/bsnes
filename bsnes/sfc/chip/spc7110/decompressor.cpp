@@ -7,17 +7,12 @@ struct Decompressor {
 
   Decompressor(SPC7110 &spc7110) : spc7110(spc7110) {}
 
-  uint8 input() {
+  uint8 read() {
     return spc7110.datarom_read(offset++);
   }
 
-  uint8 output() {
-    if(cursor == 0) decompress();
-    uint8 data = tile[cursor++];
-    cursor &= 8 * bpp - 1;
-    return data;
-  }
-
+  //inverse morton code transform: unpack big-endian packed pixels
+  //returns odd bits in lower half; even bits in upper half
   uint32 deinterleave(uint64 data, unsigned bits) {
     data = data & (1ull << bits) - 1;
     data = 0x5555555555555555ull & (data << bits | data >> 1);
@@ -28,6 +23,7 @@ struct Decompressor {
     return data | data >> 16;
   }
 
+  //extract a nibble and move it to the low four bits
   uint64 moveToFront(uint64 list, unsigned nibble) {
     for(uint64 n = 0, mask = ~15; n < 64; n += 4, mask <<= 4) {
       if((list >> n & 15) != nibble) continue;
@@ -38,109 +34,89 @@ struct Decompressor {
 
   void initialize(unsigned mode, unsigned origin) {
     for(auto &root : context) for(auto &node : root) node = {0, 0};
-    base = 0;
-    range = Max + 1;
     bpp = 1 << mode;
     offset = origin;
-    cursor = 0;
     bits = 8;
-    read = input();
-    read = read << 8 | input();
-    write = 0;
+    range = Max + 1;
+    input = read();
+    input = input << 8 | read();
+    output = 0;
     pixels = 0;
     colormap = 0xfedcba9876543210ull;
   }
 
-  void decompress() {
-    for(unsigned row = 0; row < 8; row++) {
-      for(unsigned pixel = 0; pixel < 8; pixel++) {
-        uint64 map = colormap;
-        unsigned diff = 0;
+  void decode() {
+    for(unsigned pixel = 0; pixel < 8; pixel++) {
+      uint64 map = colormap;
+      unsigned diff = 0;
 
-        if(bpp > 1) {
-          unsigned pa = (bpp == 2 ? pixels >>  2 & 3 : pixels >>  0 & 15);
-          unsigned pb = (bpp == 2 ? pixels >> 14 & 3 : pixels >> 28 & 15);
-          unsigned pc = (bpp == 2 ? pixels >> 16 & 3 : pixels >> 32 & 15);
+      if(bpp > 1) {
+        unsigned pa = (bpp == 2 ? pixels >>  2 & 3 : pixels >>  0 & 15);
+        unsigned pb = (bpp == 2 ? pixels >> 14 & 3 : pixels >> 28 & 15);
+        unsigned pc = (bpp == 2 ? pixels >> 16 & 3 : pixels >> 32 & 15);
 
-          if(pa != pb || pb != pc) {
-            unsigned match = pa ^ pb ^ pc;
-            diff = 4;
-            if((match ^ pc) == 0) diff = 3;
-            if((match ^ pb) == 0) diff = 2;
-            if((match ^ pa) == 0) diff = 1;
-          }
-
-          colormap = moveToFront(colormap, pa);
-
-          map = moveToFront(map, pc);
-          map = moveToFront(map, pb);
-          map = moveToFront(map, pa);
+        if(pa != pb || pb != pc) {
+          unsigned match = pa ^ pb ^ pc;
+          diff = 4;                        //no match; all pixels differ
+          if((match ^ pc) == 0) diff = 3;  //a == b; pixel c differs
+          if((match ^ pb) == 0) diff = 2;  //c == a; pixel b differs
+          if((match ^ pa) == 0) diff = 1;  //b == c; pixel a differs
         }
 
-        for(unsigned plane = 0; plane < bpp; plane++) {
-          unsigned bit = bpp > 1 ? 1 << plane : 1 << (pixel & 3);
-          unsigned history = bit - 1 & write;
-          unsigned set = 0;
+        colormap = moveToFront(colormap, pa);
 
-          if(bpp == 1) set = pixel >= 4;
-          if(bpp == 2) set = diff;
-          if(plane >= 2 && history <= 1) set = diff;
+        map = moveToFront(map, pc);
+        map = moveToFront(map, pb);
+        map = moveToFront(map, pa);
+      }
 
-          auto &ctx = context[set][bit + history - 1];
-          auto &model = evolution[ctx.prediction];
-          uint8 lps_offset = range - model.probability;
-          bool symbol = read >= (lps_offset << 8);
+      for(unsigned plane = 0; plane < bpp; plane++) {
+        unsigned bit = bpp > 1 ? 1 << plane : 1 << (pixel & 3);
+        unsigned history = bit - 1 & output;
+        unsigned set = 0;
 
-          write = write << 1 | (symbol ^ ctx.swap);
+        if(bpp == 1) set = pixel >= 4;
+        if(bpp == 2) set = diff;
+        if(plane >= 2 && history <= 1) set = diff;
 
-          if(symbol == MPS) {
-            range = lps_offset;
-          } else {
-            range -= lps_offset;
-            read -= lps_offset << 8;
-            base += lps_offset;
-          }
+        auto &ctx = context[set][bit + history - 1];
+        auto &model = evolution[ctx.prediction];
+        uint8 lps_offset = range - model.probability;
+        bool symbol = input >= (lps_offset << 8);  //test only the MSB
 
-          while(range <= Max / 2) {
-            ctx.prediction = model.next[symbol];
+        output = output << 1 | (symbol ^ ctx.swap);
 
-            range <<= 1;
-            read <<= 1;
-            base <<= 1;
-
-            if(--bits == 0) {
-              bits = 8;
-              read += input();
-            }
-          }
-
-          if(symbol == LPS && model.probability > Half) ctx.swap ^= 1;
+        if(symbol == MPS) {          //[0 ... range-p]
+          range = lps_offset;        //range = range-p
+        } else {                     //[range-p+1 ... range]
+          range -= lps_offset;       //range = p-1, with p < 0.75
+          input -= lps_offset << 8;  //therefore, always rescale
         }
 
-        unsigned index = write & (1 << bpp) - 1;
-        if(bpp == 1) index ^= pixels >> 15 & 1;
+        while(range <= Max / 2) {    //scale back into [0.75 ... 1.5]
+          ctx.prediction = model.next[symbol];
 
-        pixels = pixels << bpp | (map >> 4 * index & 15);
+          range <<= 1;
+          input <<= 1;
+
+          if(--bits == 0) {
+            bits = 8;
+            input += read();
+          }
+        }
+
+        if(symbol == LPS && model.probability > Half) ctx.swap ^= 1;
       }
 
-      if(bpp == 1) {
-        tile[row] = pixels;
-      }
+      unsigned index = output & (1 << bpp) - 1;
+      if(bpp == 1) index ^= pixels >> 15 & 1;
 
-      if(bpp == 2) {
-        uint32 slice = deinterleave(pixels, 16);
-        tile[row * 2 + 0] = slice >> 0;
-        tile[row * 2 + 1] = slice >> 8;
-      }
-
-      if(bpp == 4) {
-        uint32 slice = deinterleave(deinterleave(pixels, 32), 32);
-        tile[row * 2 + 0x00] = slice >>  0;
-        tile[row * 2 + 0x01] = slice >>  8;
-        tile[row * 2 + 0x10] = slice >> 16;
-        tile[row * 2 + 0x11] = slice >> 24;
-      }
+      pixels = pixels << bpp | (map >> 4 * index & 15);
     }
+
+    if(bpp == 1) result = pixels;
+    if(bpp == 2) result = deinterleave(pixels, 16);
+    if(bpp == 4) result = deinterleave(deinterleave(pixels, 32), 32);
   }
 
   void serialize(serializer &s) {
@@ -151,44 +127,40 @@ struct Decompressor {
       }
     }
 
-    s.integer(base);
-    s.integer(range);
     s.integer(bpp);
     s.integer(offset);
-    s.integer(cursor);
     s.integer(bits);
-    s.integer(read);
-    s.integer(write);
+    s.integer(range);
+    s.integer(input);
+    s.integer(output);
     s.integer(pixels);
     s.integer(colormap);
-    s.array(tile);
+    s.integer(result);
   }
 
   enum : unsigned { MPS = 0, LPS = 1 };
   enum : unsigned { One = 0xaa, Half = 0x55, Max = 0xff };
 
   struct ModelState {
-    uint8 probability;
-    uint8 next[2];
+    uint8 probability;  //of the more probable symbol (MPS)
+    uint8 next[2];      //next state after output {MPS, LPS}
   };
   static ModelState evolution[53];
 
   struct Context {
-    uint8 prediction;
-    uint8 swap;
-  } context[5][15];
+    uint8 prediction;   //current model state
+    uint8 swap;         //if 1, exchange the role of MPS and LPS
+  } context[5][15];     //not all 75 contexts exists; this simplifies the code
 
-  uint8 base;
-  uint16 range;
-  unsigned bpp;
-  unsigned offset;
-  unsigned cursor;
-  unsigned bits;
-  uint16 read;
-  uint8 write;
+  unsigned bpp;         //bits per pixel (1bpp = 1; 2bpp = 2; 4bpp = 4)
+  unsigned offset;      //SPC7110 data ROM read offset
+  unsigned bits;        //bits remaining in input
+  uint16 range;         //arithmetic range: technically 8-bits, but Max+1 = 256
+  uint16 input;         //input data from SPC7110 data ROM
+  uint8 output;
   uint64 pixels;
-  uint64 colormap;
-  uint8 tile[32];
+  uint64 colormap;      //most recently used list
+  uint32 result;        //decompressed word after calling decode()
 };
 
 Decompressor::ModelState Decompressor::evolution[53] = {

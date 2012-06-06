@@ -16,68 +16,42 @@ void SPC7110::dcu_begin_transfer() {
 
   add_clocks(20);
   decompressor->initialize(dcu_mode, dcu_addr);
+  decompressor->decode();
 
-  if(r480b & 2) {
-    unsigned seek = (r4805 | r4806 << 8) << dcu_mode;
-    add_clocks(seek);
-    while(seek--) decompressor->output();
-  }
+  unsigned seek = r480b & 2 ? r4805 | r4806 << 8 : 0;
+  while(seek--) decompressor->decode();
 
   r480c |= 0x80;
+  dcu_offset = 0;
 }
 
 uint8 SPC7110::dcu_read() {
   if((r480c & 0x80) == 0) return 0x00;
-  return decompressor->output();
-}
 
-/*
-  unsigned tilesize = 8 << dcu_mode;
-
-  if(dcu_sp == 0) {
-    unsigned tiles = r480b & 1 ? r4807 : 1;
-    for(unsigned tile = 0; tile < tiles; tile++) {
-      dcu_dp = tile * tilesize;
-      switch(dcu_mode) {
-      case 0: decompress_1bpp(); deinterleave_1bpp(tiles); break;
-      case 1: decompress_2bpp(); deinterleave_2bpp(tiles); break;
-      case 2: decompress_4bpp(); deinterleave_4bpp(tiles); break;
-      case 3: return 0x00;
+  if(dcu_offset == 0) {
+    for(unsigned row = 0; row < 8; row++) {
+      switch(decompressor->bpp) {
+      case 1:
+        dcu_tile[row] = decompressor->result;
+        break;
+      case 2:
+        dcu_tile[row * 2 + 0] = decompressor->result >> 0;
+        dcu_tile[row * 2 + 1] = decompressor->result >> 8;
+        break;
+      case 4:
+        dcu_tile[row * 2 +  0] = decompressor->result >>  0;
+        dcu_tile[row * 2 +  1] = decompressor->result >>  8;
+        dcu_tile[row * 2 + 16] = decompressor->result >> 16;
+        dcu_tile[row * 2 + 17] = decompressor->result >> 24;
+        break;
       }
+
+      unsigned seek = r480b & 1 ? r4807 : 1;
+      while(seek--) decompressor->decode();
     }
   }
 
-  uint8 data = dcu_output[dcu_sp++];
-  dcu_sp &= tilesize - 1;
+  uint8 data = dcu_tile[dcu_offset++];
+  dcu_offset &= 8 * decompressor->bpp - 1;
   return data;
-*/
-
-/*
-void SPC7110::deinterleave_1bpp(unsigned length) {
-  uint8 *target = dcu_output, *source = dcu_tiledata;
-  for(unsigned row = 0, sp = 0; row < 8; row++) {
-    target[row] = source[sp];
-    sp += length;
-  }
 }
-
-void SPC7110::deinterleave_2bpp(unsigned length) {
-  uint8 *target = dcu_output, *source = dcu_tiledata;
-  for(unsigned row = 0, sp = 0; row < 8; row++) {
-    target[row * 2 + 0] = source[sp + 0];
-    target[row * 2 + 1] = source[sp + 1];
-    sp += 2 * length;
-  }
-}
-
-void SPC7110::deinterleave_4bpp(unsigned length) {
-  uint8 *target = dcu_output, *source = dcu_tiledata;
-  for(unsigned row = 0, sp = 0; row < 8; row++) {
-    target[row * 2 +  0] = source[sp +  0];
-    target[row * 2 +  1] = source[sp +  1];
-    target[row * 2 + 16] = source[sp + 16];
-    target[row * 2 + 17] = source[sp + 17];
-    sp = sp + 2 * length + 16 * ((sp + 2 * length) / 16 - sp / 16);
-  }
-}
-*/

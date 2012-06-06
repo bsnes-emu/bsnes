@@ -16,6 +16,8 @@ void SPC7110::serialize(serializer &s) {
   s.integer(dcu_pending);
   s.integer(dcu_mode);
   s.integer(dcu_addr);
+  s.integer(dcu_offset);
+  s.array(dcu_tile);
   decompressor->serialize(s);
 
   s.integer(r4810);

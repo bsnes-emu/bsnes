@@ -68,9 +68,9 @@ private:
   uint8 r4802;  //compression table B1
   uint7 r4803;  //compression table B2
   uint8 r4804;  //compression table index
-  uint8 r4805;  //decompression buffer index B0
-  uint8 r4806;  //decompression buffer index B1
-  uint8 r4807;  //deinterleave length
+  uint8 r4805;  //adjust length B0
+  uint8 r4806;  //adjust length B1
+  uint8 r4807;  //stride length
   uint8 r4809;  //compression counter B0
   uint8 r480a;  //compression counter B1
   uint8 r480b;  //decompression settings
@@ -79,6 +79,8 @@ private:
   bool dcu_pending;
   uint2 dcu_mode;
   uint23 dcu_addr;
+  unsigned dcu_offset;
+  uint8 dcu_tile[32];
   Decompressor *decompressor;
 
   //==============
