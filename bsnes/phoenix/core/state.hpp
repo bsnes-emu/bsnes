@@ -213,6 +213,7 @@ struct ListView::State {
   vector<bool> checked;
   lstring headerText;
   bool headerVisible;
+  vector<vector<nall::image>> image;
   bool selected;
   unsigned selection;
   vector<lstring> text;

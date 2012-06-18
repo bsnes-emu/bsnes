@@ -1,3 +1,11 @@
+static QIcon CreateIcon(const nall::image &image, bool scale = false) {
+  nall::image qtBuffer = image;
+  qtBuffer.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  if(scale) qtBuffer.scale(16, 16, Interpolation::Linear);
+  QImage qtImage(qtBuffer.data, qtBuffer.width, qtBuffer.height, QImage::Format_ARGB32);
+  return QIcon(QPixmap::fromImage(qtImage));
+}
+
 static Keyboard::Keycode Keysym(int keysym) {
   switch(keysym) {
   case XK_Escape: return Keyboard::Keycode::Escape;

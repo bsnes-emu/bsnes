@@ -2,9 +2,10 @@ void pListView::append(const lstring &list) {
   wchar_t empty[] = L"";
   unsigned row = ListView_GetItemCount(hwnd);
   LVITEM item;
-  item.mask = LVIF_TEXT;
+  item.mask = LVIF_TEXT | LVIF_IMAGE;
   item.iItem = row;
   item.iSubItem = 0;
+  item.iImage = row;
   item.pszText = empty;
   locked = true;
   ListView_InsertItem(hwnd, &item);
@@ -88,6 +89,11 @@ void pListView::setHeaderVisible(bool visible) {
   );
 }
 
+void pListView::setImage(unsigned row, unsigned column, const image &image) {
+  if(column != 0) return;  //ListView can only set icons on first column
+  setImageList();
+}
+
 void pListView::setSelected(bool selected) {
   locked = true;
   lostFocus = false;
@@ -118,6 +124,7 @@ void pListView::constructor() {
   setHeaderText(listView.state.headerText);
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
+  setImageList();
   for(auto &text : listView.state.text) append(text);
   for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
   if(listView.state.selected) setSelection(listView.state.selection);
@@ -137,4 +144,34 @@ void pListView::orphan() {
 void pListView::setGeometry(const Geometry &geometry) {
   pWidget::setGeometry(geometry);
   autoSizeColumns();
+}
+
+void pListView::setImageList() {
+  if(imageList) {
+    ImageList_Destroy(imageList);
+    imageList = nullptr;
+  }
+
+  unsigned images = 0;
+  for(auto &image : listView.state.image) {
+    if(image.empty() == false) images++;
+  }
+  if(images == 0) return;
+
+  imageList = ImageList_Create(16, 16, ILC_COLOR32, listView.state.text.size(), 0);
+
+  for(unsigned rowID = 0; rowID < listView.state.image.size(); rowID++) {
+    auto &row = listView.state.image(rowID);
+    nall::image image = row(0);
+    if(image.empty()) {
+      image.allocate(16, 16);
+      image.clear(~0);
+    }
+    image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+    image.scale(16, 16, Interpolation::Linear);
+    HBITMAP hbitmap = CreateBitmap(image);
+    ImageList_Add(imageList, hbitmap, NULL);
+  }
+
+  ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
 }

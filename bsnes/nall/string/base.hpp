@@ -112,6 +112,8 @@ namespace nall {
   struct lstring : vector<string> {
     inline optional<unsigned> find(const char*) const;
     inline string concatenate(const char*) const;
+    inline void append() {}
+    template<typename... Args> inline void append(const string&, Args&&...);
 
     template<unsigned Limit = 0> inline lstring& split(const char*, const char*);
     template<unsigned Limit = 0> inline lstring& isplit(const char*, const char*);
@@ -121,8 +123,14 @@ namespace nall {
     inline bool operator==(const lstring&) const;
     inline bool operator!=(const lstring&) const;
 
-    inline lstring();
-    inline lstring(std::initializer_list<string>);
+    inline lstring& operator=(const lstring&);
+    inline lstring& operator=(lstring&);
+    inline lstring& operator=(lstring&&);
+
+    template<typename... Args> inline lstring(Args&&... args);
+    inline lstring(const lstring&);
+    inline lstring(lstring&);
+    inline lstring(lstring&&);
 
   protected:
     template<unsigned Limit, bool Insensitive, bool Quoted> inline lstring& usplit(const char*, const char*);
@@ -149,9 +157,10 @@ namespace nall {
   inline bool strmath(const char *str, int &result);
 
   //platform.hpp
-  inline string realpath(const char *name);
+  inline string activepath();
+  inline string realpath(const string &name);
   inline string userpath();
-  inline string currentpath();
+  inline string configpath();
 
   //strm.hpp
   inline unsigned strmcpy(char *target, const char *source, unsigned length);

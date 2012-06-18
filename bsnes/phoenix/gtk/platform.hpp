@@ -383,11 +383,11 @@ struct pListView : public pWidget {
   GtkWidget *subWidget;
   GtkListStore *store;
   struct GtkColumn {
-    GtkCellRenderer *renderer;
     GtkTreeViewColumn *column;
+    GtkCellRenderer *checkbox, *icon, *text;
     GtkWidget *label;
   };
-  linear_vector<GtkColumn> column;
+  vector<GtkColumn> column;
 
   void append(const lstring &text);
   void autoSizeColumns();
@@ -400,6 +400,7 @@ struct pListView : public pWidget {
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setImage(unsigned row, unsigned column, const nall::image &image);
   void setSelected(bool selected);
   void setSelection(unsigned row);
 

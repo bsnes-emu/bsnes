@@ -2,7 +2,7 @@
 #define NALL_ANY_HPP
 
 #include <typeinfo>
-#include <nall/type_traits.hpp>
+#include <nall/traits.hpp>
 
 namespace nall {
   struct any {

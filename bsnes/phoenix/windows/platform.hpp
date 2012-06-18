@@ -368,6 +368,7 @@ struct pLineEdit : public pWidget {
 
 struct pListView : public pWidget {
   ListView &listView;
+  HIMAGELIST imageList;
   bool lostFocus;
 
   void append(const lstring &text);
@@ -381,14 +382,16 @@ struct pListView : public pWidget {
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setImage(unsigned row, unsigned column, const image &image);
   void setSelected(bool selected);
   void setSelection(unsigned row);
 
-  pListView(ListView &listView) : pWidget(listView), listView(listView) {}
+  pListView(ListView &listView) : pWidget(listView), listView(listView), imageList(nullptr) {}
   void constructor();
   void destructor();
   void orphan();
   void setGeometry(const Geometry &geometry);
+  void setImageList();
 };
 
 struct pProgressBar : public pWidget {

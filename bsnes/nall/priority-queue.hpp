@@ -1,5 +1,5 @@
-#ifndef NALL_PRIORITYQUEUE_HPP
-#define NALL_PRIORITYQUEUE_HPP
+#ifndef NALL_PRIORITY_QUEUE_HPP
+#define NALL_PRIORITY_QUEUE_HPP
 
 #include <limits>
 #include <nall/function.hpp>

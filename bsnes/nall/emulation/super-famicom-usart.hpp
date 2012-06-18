@@ -1,5 +1,5 @@
-#ifndef NALL_SNES_USART_HPP
-#define NALL_SNES_USART_HPP
+#ifndef NALL_EMULATION_SUPER_FAMICOM_USART_HPP
+#define NALL_EMULATION_SUPER_FAMICOM_USART_HPP
 
 #include <nall/platform.hpp>
 #include <nall/function.hpp>

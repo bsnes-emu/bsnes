@@ -163,9 +163,9 @@ void Browser::setPath(const string &path, unsigned selection) {
     if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)")) {
       string name = filename;
       name.rtrim<1>("/");
-      name = {"[ ", name, " ]"};
-      filenameList.append(filename);
       fileList.append(name);
+      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
+      filenameList.append(filename);
     }
   }
 
@@ -175,8 +175,9 @@ void Browser::setPath(const string &path, unsigned selection) {
       if(filename.endswith(suffix)) {
         string name = filename;
         name.rtrim<1>(suffix);
-        filenameList.append(filename);
         fileList.append(name);
+        fileList.setImage(filenameList.size(), 0, image(resource::game, sizeof resource::game));
+        filenameList.append(filename);
       }
     }
   }

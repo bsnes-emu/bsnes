@@ -1,5 +1,5 @@
-#ifndef NALL_STATIC_HPP
-#define NALL_STATIC_HPP
+#ifndef NALL_TRAITS_HPP
+#define NALL_TRAITS_HPP
 
 #include <type_traits>
 

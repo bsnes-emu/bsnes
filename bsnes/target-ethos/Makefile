@@ -68,6 +68,9 @@ else
 	$(strip $(cpp) -o out/$(name) $(objects) $(link))
 endif
 
+resource:
+	sourcery $(ui)/resource/resource.xml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
+
 install:
 ifeq ($(USER),root)
 	@echo Please do not run make install as root.

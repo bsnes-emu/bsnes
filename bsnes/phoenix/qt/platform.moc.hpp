@@ -493,6 +493,7 @@ public:
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setImage(unsigned row, unsigned column, const nall::image &image);
   void setSelected(bool selected);
   void setSelection(unsigned row);
 

@@ -146,6 +146,11 @@ string lstring::concatenate(const char *separator) const {
   return output;
 }
 
+template<typename... Args> void lstring::append(const string &data, Args&&... args) {
+  vector::append(data);
+  append(std::forward<Args>(args)...);
+}
+
 bool lstring::operator==(const lstring &source) const {
   if(this == &source) return true;
   if(size() != source.size()) return false;
@@ -159,11 +164,35 @@ bool lstring::operator!=(const lstring &source) const {
   return !operator==(source);
 }
 
-inline lstring::lstring() {
+lstring& lstring::operator=(const lstring &source) {
+  vector::operator=(source);
+  return *this;
 }
 
-inline lstring::lstring(std::initializer_list<string> list) {
-  for(auto &data : list) append(data);
+lstring& lstring::operator=(lstring &source) {
+  vector::operator=(source);
+  return *this;
+}
+
+lstring& lstring::operator=(lstring &&source) {
+  vector::operator=(std::move(source));
+  return *this;
+}
+
+template<typename... Args> lstring::lstring(Args&&... args) {
+  append(std::forward<Args>(args)...);
+}
+
+lstring::lstring(const lstring &source) {
+  vector::operator=(source);
+}
+
+lstring::lstring(lstring &source) {
+  vector::operator=(source);
+}
+
+lstring::lstring(lstring &&source) {
+  vector::operator=(std::move(source));
 }
 
 }

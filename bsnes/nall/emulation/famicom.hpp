@@ -1,13 +1,22 @@
-#ifndef NALL_NES_CARTRIDGE_HPP
-#define NALL_NES_CARTRIDGE_HPP
+#ifndef NALL_EMULATION_FAMICOM_HPP
+#define NALL_EMULATION_FAMICOM_HPP
 
 #include <nall/sha256.hpp>
+#include <nall/string.hpp>
 
 namespace nall {
 
 struct FamicomCartridge {
   string markup;
   inline FamicomCartridge(const uint8_t *data, unsigned size);
+
+//private:
+  unsigned mapper;
+  unsigned mirror;
+  unsigned prgrom;
+  unsigned prgram;
+  unsigned chrrom;
+  unsigned chrram;
 };
 
 FamicomCartridge::FamicomCartridge(const uint8_t *data, unsigned size) {
@@ -18,12 +27,12 @@ FamicomCartridge::FamicomCartridge(const uint8_t *data, unsigned size) {
   if(data[2] != 'S') return;
   if(data[3] !=  26) return;
 
-  unsigned mapper = ((data[7] >> 4) << 4) | (data[6] >> 4);
-  unsigned mirror = ((data[6] & 0x08) >> 2) | (data[6] & 0x01);
-  unsigned prgrom = data[4] * 0x4000;
-  unsigned chrrom = data[5] * 0x2000;
-  unsigned prgram = 0u;
-  unsigned chrram = chrrom == 0u ? 8192u : 0u;
+  mapper = ((data[7] >> 4) << 4) | (data[6] >> 4);
+  mirror = ((data[6] & 0x08) >> 2) | (data[6] & 0x01);
+  prgrom = data[4] * 0x4000;
+  chrrom = data[5] * 0x2000;
+  prgram = 0u;
+  chrram = chrrom == 0u ? 8192u : 0u;
 
   markup.append("<cartridge sha256='", sha256(data, size), "'>\n");
 
@@ -153,13 +162,13 @@ FamicomCartridge::FamicomCartridge(const uint8_t *data, unsigned size) {
   }
 
   markup.append("  <prg>\n");
-  if(prgrom) markup.append("    <rom size='", prgrom, "'/>\n");
-  if(prgram) markup.append("    <ram size='", prgram, "' nonvolatile='true'/>\n");
+  if(prgrom) markup.append("    <rom name='program.rom' size='0x", hex(prgrom), "'/>\n");
+  if(prgram) markup.append("    <ram name='save.ram' size='0x", hex(prgram), "'/>\n");
   markup.append("  </prg>\n");
 
   markup.append("  <chr>\n");
-  if(chrrom) markup.append("    <rom size='", chrrom, "'/>\n");
-  if(chrram) markup.append("    <ram size='", chrram, "'/>\n");
+  if(chrrom) markup.append("    <rom name='character.rom' size='0x", hex(chrrom), "'/>\n");
+  if(chrram) markup.append("    <ram size='0x", hex(chrram), "'/>\n");
   markup.append("  </chr>\n");
 
   markup.append("</cartridge>\n");

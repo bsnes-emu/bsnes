@@ -2,6 +2,7 @@ void pListView::append(const lstring &text) {
   locked = true;
   auto items = qtListView->findItems("", Qt::MatchContains);
   QTreeWidgetItem *item = new QTreeWidgetItem(qtListView);
+
   item->setData(0, Qt::UserRole, (unsigned)items.size());
   if(listView.state.checkable) item->setCheckState(0, Qt::Unchecked);
   for(unsigned n = 0; n < text.size(); n++) {
@@ -71,6 +72,14 @@ void pListView::setHeaderText(const lstring &text) {
 void pListView::setHeaderVisible(bool visible) {
   qtListView->setHeaderHidden(!visible);
   autoSizeColumns();
+}
+
+void pListView::setImage(unsigned row, unsigned column, const nall::image &image) {
+  QTreeWidgetItem *item = qtListView->topLevelItem(row);
+  if(item) {
+    if(image.empty() == 0) item->setIcon(column, CreateIcon(image));
+    if(image.empty() == 1) item->setIcon(column, QIcon());
+  }
 }
 
 void pListView::setSelected(bool selected) {

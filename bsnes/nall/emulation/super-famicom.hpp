@@ -1,5 +1,8 @@
-#ifndef NALL_SNES_CARTRIDGE_HPP
-#define NALL_SNES_CARTRIDGE_HPP
+#ifndef NALL_EMULATION_SUPER_FAMICOM_HPP
+#define NALL_EMULATION_SUPER_FAMICOM_HPP
+
+#include <nall/sha256.hpp>
+#include <nall/string.hpp>
 
 namespace nall {
 
@@ -11,8 +14,6 @@ struct SuperFamicomCartridge {
   inline void read_header(const uint8_t *data, unsigned size);
   inline unsigned find_header(const uint8_t *data, unsigned size);
   inline unsigned score_header(const uint8_t *data, unsigned size, unsigned addr);
-  inline unsigned gameboy_ram_size(const uint8_t *data, unsigned size);
-  inline bool gameboy_has_rtc(const uint8_t *data, unsigned size);
 
   enum HeaderField {
     CartName    = 0x00,
@@ -121,11 +122,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   }
 
   if(type == TypeGameBoy) {
-    markup.append("<cartridge rtc='", gameboy_has_rtc(data, size), "'\n");
-    if(gameboy_ram_size(data, size) > 0) {
-      markup.append("  <ram size='0x", hex(gameboy_ram_size(data, size)), "'>\n");
-    }
-    markup.append("</cartridge>\n");
+    markup.append("<cartridge/>\n");
     return;
   }
 
@@ -133,7 +130,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   markup.append("<cartridge region='", region == NTSC ? "NTSC" : "PAL", "'>\n");
 
   if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) markup.append(
-    "  <rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
     "    <map mode='linear' address='00-7f:8000-ffff'/>\n"
     "    <map mode='linear' address='80-ff:8000-ffff'/>\n"
     "  </rom>\n"
@@ -144,6 +141,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   else if(has_cx4) markup.append(
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
     "  <hitachidsp model='HG51B169' frequency='20000000' firmware='cx4.rom' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n"
     "    <rom>\n"
     "      <map mode='linear' address='00-7f:8000-ffff'/>\n"
@@ -158,6 +156,8 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(has_spc7110) {
     markup.append(
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+      "  <ram name='save.ram' size='", hex(ram_size), "'/>\n"
       "  <spc7110>\n"
       "    <mmio>\n"
       "      <map address='00-3f:4800-483f'/>\n"
@@ -174,7 +174,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "        <map address='80-bf:8000-ffff'/>\n"
       "        <map address='c0-cf:0000-ffff'/>\n"
       "      </rom>\n"
-      "      <ram size='0x", hex(ram_size), "'>\n"
+      "      <ram>\n"
       "        <map address='00-3f:6000-7fff'/>\n"
       "        <map address='80-bf:6000-7fff'/>\n"
       "      </ram>\n"
@@ -182,7 +182,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  </spc7110>\n"
     );
     if(has_spc7110rtc) markup.append(
-      "  <epsonrtc>\n"
+      "  <epsonrtc name='rtc.ram' size='0x10'>\n"
       "    <map address='00-3f:4840-4842'/>\n"
       "    <map address='80-bf:4840-4842'/>\n"
       "  </epsonrtc>\n"
@@ -191,13 +191,13 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(mapper == LoROM) {
     markup.append(
-      "  <rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
       "    <map mode='linear' address='00-7f:8000-ffff'/>\n"
       "    <map mode='linear' address='80-ff:8000-ffff'/>\n"
       "  </rom>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram size='0x", hex(ram_size), "'>\n"
+      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
       "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
       "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
       "    <map mode='linear' address='70-7f:", range, "'/>\n"
@@ -208,7 +208,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(mapper == HiROM) {
     markup.append(
-      "  <rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
       "    <map mode='shadow' address='00-3f:8000-ffff'/>\n"
       "    <map mode='linear' address='40-7f:0000-ffff'/>\n"
       "    <map mode='shadow' address='80-bf:8000-ffff'/>\n"
@@ -216,7 +216,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  </rom>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram size='0x", hex(ram_size), "'>\n"
+      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
       "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
       "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
       "    <map mode='linear' address='70-7f:", range, "'/>\n"
@@ -226,14 +226,14 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(mapper == ExLoROM) {
     markup.append(
-      "  <rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
       "    <map mode='linear' address='00-3f:8000-ffff'/>\n"
       "    <map mode='linear' address='40-7f:0000-ffff'/>\n"
       "    <map mode='linear' address='80-bf:8000-ffff'/>\n"
       "  </rom>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram size='0x", hex(ram_size), "'>\n"
+      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
       "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
       "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
       "    <map mode='linear' address='70-7f:0000-7fff'/>\n"
@@ -243,7 +243,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
 
   else if(mapper == ExHiROM) {
     markup.append(
-      "  <rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
       "    <map mode='shadow' address='00-3f:8000-ffff' offset='0x400000'/>\n"
       "    <map mode='linear' address='40-7f:0000-ffff' offset='0x400000'/>\n"
       "    <map mode='shadow' address='80-bf:8000-ffff' offset='0x000000'/>\n"
@@ -251,7 +251,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  </rom>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram size='0x", hex(ram_size), "'>\n"
+      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
       "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
       "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
       "    <map mode='linear' address='70-7f:", range, "'/>\n"
@@ -259,62 +259,72 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     );
   }
 
-  else if(mapper == SuperFXROM) markup.append(
-    "  <superfx revision='2'>\n"
-    "    <rom>\n"
-    "      <map mode='linear' address='00-3f:8000-ffff'/>\n"
-    "      <map mode='linear' address='40-5f:0000-ffff'/>\n"
-    "      <map mode='linear' address='80-bf:8000-ffff'/>\n"
-    "      <map mode='linear' address='c0-df:0000-ffff'/>\n"
-    "    </rom>\n"
-    "    <ram size='0x", hex(ram_size), "'>\n"
-    "      <map mode='linear' address='00-3f:6000-7fff' size='0x2000'/>\n"
-    "      <map mode='linear' address='60-7f:0000-ffff'/>\n"
-    "      <map mode='linear' address='80-bf:6000-7fff' size='0x2000'/>\n"
-    "      <map mode='linear' address='e0-ff:0000-ffff'/>\n"
-    "    </ram>\n"
-    "    <mmio>\n"
-    "      <map address='00-3f:3000-32ff'/>\n"
-    "      <map address='80-bf:3000-32ff'/>\n"
-    "    </mmio>\n"
-    "  </superfx>\n"
-  );
+  else if(mapper == SuperFXROM) {
+    markup.append("  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n");
+    if(ram_size > 0)
+    markup.append("  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n");
+    markup.append(
+      "  <superfx revision='2'>\n"
+      "    <rom>\n"
+      "      <map mode='linear' address='00-3f:8000-ffff'/>\n"
+      "      <map mode='linear' address='40-5f:0000-ffff'/>\n"
+      "      <map mode='linear' address='80-bf:8000-ffff'/>\n"
+      "      <map mode='linear' address='c0-df:0000-ffff'/>\n"
+      "    </rom>\n"
+      "    <ram>\n"
+      "      <map mode='linear' address='00-3f:6000-7fff' size='0x2000'/>\n"
+      "      <map mode='linear' address='60-7f:0000-ffff'/>\n"
+      "      <map mode='linear' address='80-bf:6000-7fff' size='0x2000'/>\n"
+      "      <map mode='linear' address='e0-ff:0000-ffff'/>\n"
+      "    </ram>\n"
+      "    <mmio>\n"
+      "      <map address='00-3f:3000-32ff'/>\n"
+      "      <map address='80-bf:3000-32ff'/>\n"
+      "    </mmio>\n"
+      "  </superfx>\n"
+    );
+  }
 
-  else if(mapper == SA1ROM) markup.append(
-    "  <sa1>\n"
-    "    <mcu>\n"
-    "      <rom>\n"
-    "        <map mode='direct' address='00-3f:8000-ffff'/>\n"
-    "        <map mode='direct' address='80-bf:8000-ffff'/>\n"
-    "        <map mode='direct' address='c0-ff:0000-ffff'/>\n"
-    "      </rom>\n"
-    "      <ram>\n"
-    "        <map mode='direct' address='00-3f:6000-7fff'/>\n"
-    "        <map mode='direct' address='80-bf:6000-7fff'/>\n"
-    "      </ram>\n"
-    "    </mcu>\n"
-    "    <iram size='0x800'>\n"
-    "      <map mode='linear' address='00-3f:3000-37ff'/>\n"
-    "      <map mode='linear' address='80-bf:3000-37ff'/>\n"
-    "    </iram>\n"
-    "    <bwram size='0x", hex(ram_size), "'>\n"
-    "      <map mode='linear' address='40-4f:0000-ffff'/>\n"
-    "    </bwram>\n"
-    "    <mmio>\n"
-    "      <map address='00-3f:2200-23ff'/>\n"
-    "      <map address='80-bf:2200-23ff'/>\n"
-    "    </mmio>\n"
-    "  </sa1>\n"
-  );
+  else if(mapper == SA1ROM) {
+    markup.append("  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n");
+    if(ram_size > 0)
+    markup.append("  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n");
+    markup.append(
+      "  <sa1>\n"
+      "    <mcu>\n"
+      "      <rom>\n"
+      "        <map mode='direct' address='00-3f:8000-ffff'/>\n"
+      "        <map mode='direct' address='80-bf:8000-ffff'/>\n"
+      "        <map mode='direct' address='c0-ff:0000-ffff'/>\n"
+      "      </rom>\n"
+      "      <ram>\n"
+      "        <map mode='direct' address='00-3f:6000-7fff'/>\n"
+      "        <map mode='direct' address='80-bf:6000-7fff'/>\n"
+      "      </ram>\n"
+      "    </mcu>\n"
+      "    <iram >\n"
+      "      <map mode='linear' address='00-3f:3000-37ff'/>\n"
+      "      <map mode='linear' address='80-bf:3000-37ff'/>\n"
+      "    </iram>\n"
+      "    <bwram>\n"
+      "      <map mode='linear' address='40-4f:0000-ffff'/>\n"
+      "    </bwram>\n"
+      "    <mmio>\n"
+      "      <map address='00-3f:2200-23ff'/>\n"
+      "      <map address='80-bf:2200-23ff'/>\n"
+      "    </mmio>\n"
+      "  </sa1>\n"
+    );
+  }
 
   else if(mapper == BSCLoROM) markup.append(
-    "  <rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
     "    <map mode='linear' address='00-1f:8000-ffff' offset='0x000000'/>\n"
     "    <map mode='linear' address='20-3f:8000-ffff' offset='0x100000'/>\n"
     "    <map mode='linear' address='80-9f:8000-ffff' offset='0x200000'/>\n"
     "    <map mode='linear' address='a0-bf:8000-ffff' offset='0x100000'/>\n"
     "  </rom>\n"
-    "  <ram size='0x", hex(ram_size), "'>\n"
+    "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
     "    <map mode='linear' address='70-7f:0000-7fff'/>\n"
     "    <map mode='linear' address='f0-ff:0000-7fff'/>\n"
     "  </ram>\n"
@@ -326,13 +336,13 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   else if(mapper == BSCHiROM) markup.append(
-    "  <rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
     "    <map mode='shadow' address='00-1f:8000-ffff'/>\n"
     "    <map mode='linear' address='40-5f:0000-ffff'/>\n"
     "    <map mode='shadow' address='80-9f:8000-ffff'/>\n"
     "    <map mode='linear' address='c0-df:0000-ffff'/>\n"
     "  </rom>\n"
-    "  <ram size='0x", hex(ram_size), "'>\n"
+    "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
     "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
     "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
     "  </ram>\n"
@@ -347,6 +357,9 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   else if(mapper == BSXROM) markup.append(
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n"
+    "  <psram name='bsx.ram' size='0x40000'/>\n"
     "  <bsx>\n"
     "    <mcu>\n"
     "      <map address='00-3f:8000-ffff'/>\n"
@@ -363,7 +376,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   else if(mapper == STROM) markup.append(
-    "  <rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
     "    <map mode='linear' address='00-1f:8000-ffff'/>\n"
     "    <map mode='linear' address='80-9f:8000-ffff'/>\n"
     "  </rom>\n"
@@ -373,7 +386,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     "        <map mode='linear' address='20-3f:8000-ffff'/>\n"
     "        <map mode='linear' address='a0-bf:8000-ffff'/>\n"
     "      </rom>\n"
-    "      <ram size='0x20000'>\n"
+    "      <ram>\n"
     "        <map mode='linear' address='60-63:8000-ffff'/>\n"
     "        <map mode='linear' address='e0-e3:8000-ffff'/>\n"
     "      </ram>\n"
@@ -383,7 +396,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     "        <map mode='linear' address='40-5f:8000-ffff'/>\n"
     "        <map mode='linear' address='c0-df:8000-ffff'/>\n"
     "      </rom>\n"
-    "      <ram size='0x20000'>\n"
+    "      <ram>\n"
     "        <map mode='linear' address='70-73:8000-ffff'/>\n"
     "        <map mode='linear' address='f0-f3:8000-ffff'/>\n"
     "      </ram>\n"
@@ -392,7 +405,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   if(has_srtc) markup.append(
-    "  <sharprtc>\n"
+    "  <sharprtc name='rtc.ram' size='0x10'>\n"
     "    <map address='00-3f:2800-2801'/>\n"
     "    <map address='80-bf:2800-2801'/>\n"
     "  </sharprtc>\n"
@@ -534,6 +547,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   );
 
   markup.append("</cartridge>\n");
+  markup.transform("'", "\"");
 }
 
 void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
@@ -858,25 +872,6 @@ unsigned SuperFamicomCartridge::score_header(const uint8_t *data, unsigned size,
 
   if(score < 0) score = 0;
   return score;
-}
-
-unsigned SuperFamicomCartridge::gameboy_ram_size(const uint8_t *data, unsigned size) {
-  if(size < 512) return 0;
-  switch(data[0x0149]) {
-    case 0x00: return   0 * 1024;
-    case 0x01: return   8 * 1024;
-    case 0x02: return   8 * 1024;
-    case 0x03: return  32 * 1024;
-    case 0x04: return 128 * 1024;
-    case 0x05: return 128 * 1024;
-    default:   return 128 * 1024;
-  }
-}
-
-bool SuperFamicomCartridge::gameboy_has_rtc(const uint8_t *data, unsigned size) {
-  if(size < 512) return false;
-  if(data[0x0147] == 0x0f ||data[0x0147] == 0x10) return true;
-  return false;
 }
 
 }

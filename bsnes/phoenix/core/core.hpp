@@ -232,12 +232,12 @@ struct Action : Object {
 };
 
 struct Menu : private nall::base_from_member<pMenu&>, Action {
-  template<typename... Args> void append(Args&... args) { append({ args... }); }
-  template<typename... Args> void remove(Args&... args) { remove({ args... }); }
+  template<typename... Args> void append(Args&... args) { append({args...}); }
+  template<typename... Args> void remove(Args&... args) { remove({args...}); }
 
   void append(const nall::set<Action&> &list);
   void remove(const nall::set<Action&> &list);
-  void setImage(const nall::image &image);
+  void setImage(const nall::image &image = nall::image{});
   void setText(const nall::string &text);
 
   Menu();
@@ -256,7 +256,7 @@ struct Separator : private nall::base_from_member<pSeparator&>, Action {
 struct Item : private nall::base_from_member<pItem&>, Action {
   nall::function<void ()> onActivate;
 
-  void setImage(const nall::image &image);
+  void setImage(const nall::image &image = nall::image{});
   void setText(const nall::string &text);
 
   Item();
@@ -281,7 +281,7 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
 };
 
 struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
-  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({args...}); }
   static void group(const nall::set<RadioItem&> &list);
 
   nall::function<void ()> onActivate;
@@ -352,7 +352,7 @@ struct Widget : private nall::base_from_member<pWidget&>, Sizable {
 struct Button : private nall::base_from_member<pButton&>, Widget {
   nall::function<void ()> onActivate;
 
-  void setImage(const nall::image &image, Orientation = Orientation::Horizontal);
+  void setImage(const nall::image &image = nall::image{}, Orientation = Orientation::Horizontal);
   void setText(const nall::string &text);
 
   Button();
@@ -398,7 +398,7 @@ struct CheckBox : private nall::base_from_member<pCheckBox&>, Widget {
 struct ComboBox : private nall::base_from_member<pComboBox&>, Widget {
   nall::function<void ()> onChange;
 
-  template<typename... Args> void append(const Args&... args) { append_({ args... }); }
+  template<typename... Args> void append(const Args&... args) { append_({args...}); }
 
   void append_(const nall::lstring &list);
   void reset();
@@ -491,9 +491,9 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   nall::function<void ()> onChange;
   nall::function<void (unsigned)> onToggle;
 
-  template<typename... Args> void append(const Args&... args) { append_({ args... }); }
-  template<typename... Args> void modify(unsigned row, const Args&... args) { modify_(row, { args... }); }
-  template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_({ args... }); }
+  template<typename... Args> void append(const Args&... args) { append_({args...}); }
+  template<typename... Args> void modify(unsigned row, const Args&... args) { modify_(row, {args...}); }
+  template<typename... Args> void setHeaderText(const Args&... args) { setHeaderText_({args...}); }
 
   void append_(const nall::lstring &list);
   void autoSizeColumns();
@@ -506,6 +506,7 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   void setChecked(unsigned row, bool checked = true);
   void setHeaderText_(const nall::lstring &list);
   void setHeaderVisible(bool visible = true);
+  void setImage(unsigned row, unsigned column, const nall::image &image = nall::image{});
   void setSelected(bool selected = true);
   void setSelection(unsigned row);
 
@@ -527,7 +528,7 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 };
 
 struct RadioBox : private nall::base_from_member<pRadioBox&>, Widget {
-  template<typename... Args> static void group(Args&... args) { group({ args... }); }
+  template<typename... Args> static void group(Args&... args) { group({args...}); }
   static void group(const nall::set<RadioBox&> &list);
 
   nall::function<void ()> onActivate;

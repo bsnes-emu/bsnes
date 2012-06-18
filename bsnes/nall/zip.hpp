@@ -80,28 +80,22 @@ struct zip {
     return true;
   }
 
-  inline bool extract(File &file, uint8_t *&data, unsigned &size) {
-    data = 0, size = 0;
+  inline vector<uint8_t> extract(File &file) {
+    vector<uint8_t> buffer;
 
     if(file.cmode == 0) {
-      size = file.size;
-      data = new uint8_t[size];
-      memcpy(data, file.data, size);
-      return true;
+      buffer.resize(file.size);
+      memcpy(buffer.data(), file.data, file.size);
     }
 
     if(file.cmode == 8) {
-      size = file.size;
-      data = new uint8_t[size];
-      if(inflate(data, size, file.data, file.csize) == false) {
-        delete[] data;
-        size = 0;
-        return false;
+      buffer.resize(file.size);
+      if(inflate(buffer.data(), buffer.size(), file.data, file.csize) == false) {
+        buffer.reset();
       }
-      return true;
     }
 
-    return false;
+    return buffer;
   }
 
   inline void close() {

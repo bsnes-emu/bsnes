@@ -27,7 +27,7 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
 
   XML::Document document(manifest);
 
-  auto &mapperid = document["cartridge"]["mapper"].data;
+  auto &mapperid = document["cartridge"]["board"]["type"].data;
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
   if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
   if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
@@ -37,8 +37,8 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   if(mapperid == "HuC1" ) information.mapper = Mapper::HuC1;
   if(mapperid == "HuC3" ) information.mapper = Mapper::HuC3;
 
-  information.rtc = document["cartridge"]["rtc"].data == "true";
-  information.rumble = document["cartridge"]["rumble"].data == "true";
+  information.rtc = false;
+  information.rumble = false;
 
   auto &rom = document["cartridge"]["rom"];
   auto &ram = document["cartridge"]["ram"];

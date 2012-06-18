@@ -14,7 +14,7 @@
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
 #include <nall/sort.hpp>
-#include <nall/type_traits.hpp>
+#include <nall/traits.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {

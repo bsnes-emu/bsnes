@@ -2,7 +2,7 @@
 #define NALL_VARINT_HPP
 
 #include <nall/bit.hpp>
-#include <nall/type_traits.hpp>
+#include <nall/traits.hpp>
 
 namespace nall {
   template<unsigned bits> struct uint_t {

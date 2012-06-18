@@ -4,6 +4,7 @@
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dsp.hpp>
+#include <nall/invoke.hpp>
 #include <nall/map.hpp>
 #include <nall/stream/file.hpp>
 #include <nall/stream/memory.hpp>
@@ -25,6 +26,7 @@ using namespace ruby;
 #include "general/general.hpp"
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"
+#include "resource/resource.hpp"
 
 Emulator::Interface& system();
 

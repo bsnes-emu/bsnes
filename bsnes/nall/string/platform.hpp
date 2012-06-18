@@ -2,36 +2,60 @@
 
 namespace nall {
 
-string currentpath() {
-  char path[PATH_MAX];
-  if(::getcwd(path)) {
-    string result(path);
-    result.transform("\\", "/");
-    if(result.endswith("/") == false) result.append("/");
-    return result;
-  }
-  return "./";
+string activepath() {
+  string result;
+  #ifdef _WIN32
+  wchar_t path[PATH_MAX] = L"";
+  _wgetcwd(path, PATH_MAX);
+  result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  #else
+  char path[PATH_MAX] = "";
+  getcwd(path, PATH_MAX);
+  result = path;
+  #endif
+  if(result.empty()) result = ".";
+  if(result.endswith("/") == false) result.append("/");
+  return result;
+}
+
+string realpath(const string &name) {
+  string result;
+  #ifdef _WIN32
+  wchar_t path[PATH_MAX] = L"";
+  if(_wfullpath(path, utf16_t(name), PATH_MAX)) result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  #else
+  char path[PATH_MAX] = "";
+  if(::realpath(name, path)) result = path;
+  #endif
+  return result;
 }
 
 string userpath() {
-  char path[PATH_MAX];
-  if(::userpath(path)) {
-    string result(path);
-    result.transform("\\", "/");
-    if(result.endswith("/") == false) result.append("/");
-    return result;
-  }
-  return currentpath();
+  string result;
+  #ifdef _WIN32
+  wchar_t path[PATH_MAX] = L"";
+  SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path);
+  result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  #else
+  char path[PATH_MAX] = "";
+  struct passwd *userinfo = getpwuid(getuid());
+  if(userinfo) strcpy(path, userinfo->pw_dir);
+  result = path;
+  #endif
+  if(result.empty()) result = ".";
+  if(result.endswith("/") == false) result.append("/");
+  return result;
 }
 
-string realpath(const char *name) {
-  char path[PATH_MAX];
-  if(::realpath(name, path)) {
-    string result(path);
-    result.transform("\\", "/");
-    return result;
-  }
+string configpath() {
+  #ifdef _WIN32
   return userpath();
+  #else
+  return {userpath(), ".config/"};
+  #endif
 }
 
 }

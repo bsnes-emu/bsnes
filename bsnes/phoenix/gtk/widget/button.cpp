@@ -19,8 +19,12 @@ Geometry pButton::minimumGeometry() {
 }
 
 void pButton::setImage(const image &image, Orientation orientation) {
-  GtkImage *gtkImage = CreateImage(image);
-  gtk_button_set_image(GTK_BUTTON(gtkWidget), (GtkWidget*)gtkImage);
+  if(image.empty() == false) {
+    GtkImage *gtkImage = CreateImage(image);
+    gtk_button_set_image(GTK_BUTTON(gtkWidget), (GtkWidget*)gtkImage);
+  } else {
+    gtk_button_set_image(GTK_BUTTON(gtkWidget), nullptr);
+  }
   switch(orientation) {
   case Orientation::Horizontal: gtk_button_set_image_position(GTK_BUTTON(gtkWidget), GTK_POS_LEFT); break;
   case Orientation::Vertical:   gtk_button_set_image_position(GTK_BUTTON(gtkWidget), GTK_POS_TOP);  break;

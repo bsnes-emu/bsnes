@@ -1058,6 +1058,7 @@ void ListView::modify_(unsigned row, const lstring &text) {
 
 void ListView::reset() {
   state.checked.reset();
+  state.image.reset();
   state.text.reset();
   return p.reset();
 }
@@ -1088,6 +1089,11 @@ void ListView::setHeaderText_(const lstring &text) {
 void ListView::setHeaderVisible(bool visible) {
   state.headerVisible = visible;
   return p.setHeaderVisible(visible);
+}
+
+void ListView::setImage(unsigned row, unsigned column, const nall::image &image) {
+  state.image(row)(column) = image;
+  return p.setImage(row, column, image);
 }
 
 void ListView::setSelected(bool selected) {

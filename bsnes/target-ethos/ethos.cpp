@@ -1,5 +1,6 @@
 #include "ethos.hpp"
 #include "bootstrap.cpp"
+#include "resource/resource.cpp"
 
 Application *application = nullptr;
 DSP dspaudio;
@@ -57,13 +58,8 @@ Application::Application(int argc, char **argv) {
   pause = false;
   autopause = false;
 
-  char path[PATH_MAX];
-  auto unused = ::realpath(argv[0], path);
-  basepath = dir(path);
-  unused = ::userpath(path);
-  userpath = path;
-  if(Intrinsics::platform() != Intrinsics::Platform::Windows) userpath.append(".config/");
-  userpath.append("bsnes/");
+  basepath = realpath(argv[0]);
+  userpath = {nall::configpath(), "bsnes/"};
   directory::create(userpath);
 
   bootstrap();
@@ -145,6 +141,13 @@ int main(int argc, char **argv) {
   #if defined(PLATFORM_WINDOWS)
   utf8_args(argc, argv);
   #endif
+
+  //convert file to game folder; purify will then invoke bsnes with game folder
+  if(argc == 2 && !directory::exists(argv[1]) && file::exists(argv[1])) {
+    invoke("purify", argv[1]);
+    return 0;
+  }
+
   new Application(argc, argv);
   delete application;
   return 0;

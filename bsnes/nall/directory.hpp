@@ -17,7 +17,7 @@
 namespace nall {
 
 struct directory {
-  static bool create(const string &pathname, unsigned permissions = 0755);
+  static bool create(const string &pathname, unsigned permissions = 0755);  //recursive
   static bool remove(const string &pathname);
   static bool exists(const string &pathname);
   static lstring folders(const string &pathname, const string &pattern = "*");
@@ -27,7 +27,16 @@ struct directory {
 
 #if defined(PLATFORM_WINDOWS)
   inline bool directory::create(const string &pathname, unsigned permissions) {
-    return _wmkdir(utf16_t(pathname)) == 0;
+    string fullpath = pathname, path;
+    fullpath.transform("/", "\\");
+    fullpath.rtrim<1>("\\");
+    lstring pathpart = fullpath.split("\\");
+    bool result = false;
+    for(auto &part : pathpart) {
+      path.append(part, "\\");
+      result = _wmkdir(utf16_t(path)) == 0;
+    }
+    return result;
   }
 
   inline bool directory::remove(const string &pathname) {
@@ -105,7 +114,14 @@ struct directory {
   }
 #else
   inline bool directory::create(const string &pathname, unsigned permissions) {
-    return mkdir(pathname, permissions) == 0;
+    string fullpath = pathname, path = "/";
+    fullpath.trim<1>("/");
+    lstring pathpart = fullpath.split("/");
+    for(auto &part : pathpart) {
+      if(!directory::exists(path)) mkdir(path, permissions);
+      path.append(part, "/");
+    }
+    return mkdir(path, permissions) == 0;
   }
 
   inline bool directory::remove(const string &pathname) {

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource name="resource">
+  <binary id="folder" name="folder.png"/>
+  <binary id="game" name="game.png"/>
+  <binary id="home" name="home.png"/>
+  <binary id="up" name="up.png"/>
+</resource>

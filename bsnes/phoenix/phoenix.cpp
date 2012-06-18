@@ -9,6 +9,7 @@
   #define __MSVCRT_VERSION__ 0x0601
   #define NOMINMAX
 
+  #include <winsock2.h>
   #include <windows.h>
   #include <windowsx.h>
   #include <commctrl.h>

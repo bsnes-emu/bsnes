@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "bsnes";
-  static const char Version[] = "089.11";
+  static const char Version[] = "089.12";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
 }
@@ -15,7 +15,7 @@ namespace Emulator {
 #include <nall/endian.hpp>
 #include <nall/file.hpp>
 #include <nall/function.hpp>
-#include <nall/priorityqueue.hpp>
+#include <nall/priority-queue.hpp>
 #include <nall/property.hpp>
 #include <nall/random.hpp>
 #include <nall/serializer.hpp>
