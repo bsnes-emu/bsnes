@@ -1,34 +1,40 @@
 include nall/Makefile
+include phoenix/Makefile
 
 application := purify
+resource :=
 flags := -std=gnu++0x -I. -O3 -fomit-frame-pointer
 link := -s
 
 ifeq ($(platform),win)
-  flags += -DPHOENIX_WINDOWS
-  link += -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32
-else ifeq ($(phoenix),qt)
-  flags += -DPHOENIX_QT `pkg-config --cflags QtCore QtGui`
-  link += `pkg-config --libs QtCore QtGui`
-else
-  flags += -DPHOENIX_GTK `pkg-config --cflags gtk+-2.0`
-  link += `pkg-config --libs gtk+-2.0`
+  resource := resource.o
+  flags := -m32 -mwindows $(flags)
+  link := -m32 -mwindows $(flags)
 endif
 
 all: phoenix.o $(application).o
-	$(cpp) -o $(application) phoenix.o $(application).o $(link)
+ifeq ($(platform),win)
+	windres --target=pe-i386 phoenix/windows/phoenix.rc $(resource)
+endif
+	$(cpp) -o $(application) phoenix.o $(application).o $(resource) $(link) $(phoenixlink)
 
-phoenix.o: phoenix/phoenix.cpp
-	$(cpp) -c -o phoenix.o phoenix/phoenix.cpp $(flags)
+phoenix.o:
+	$(cpp) -c -o phoenix.o phoenix/phoenix.cpp $(flags) $(phoenixflags)
 
 $(application).o: $(application).cpp
 	$(cpp) -c -o $(application).o $(application).cpp $(flags)
 
+resource: force
+	sourcery resource/resource.xml resource/resource.cpp resource/resource.hpp
+
 install:
 	sudo cp $(application) /usr/local/bin/$(application)
 
+uninstall:
+	sudo rm /usr/local/bin/$(application)
+
 clean:
-	$(delete) *.o
+	-@$(call delete,*.o)
 
 sync:
 	if [ -d ./nall ]; then rm -r ./nall; fi
@@ -36,4 +42,7 @@ sync:
 	cp -r ../nall ./nall
 	cp -r ../phoenix ./phoenix
 	rm -r nall/test
+	rm -r phoenix/nall
 	rm -r phoenix/test
+
+force:

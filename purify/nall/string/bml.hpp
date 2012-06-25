@@ -7,12 +7,12 @@ namespace nall {
 namespace BML {
 
 inline static string indent(const char *s, unsigned depth) {
-  array<char> output;
+  vector<char> output;
   do {
     for(unsigned n = 0; n < depth; n++) output.append('\t');
     do output.append(*s); while(*s && *s++ != '\n');
   } while(*s);
-  return output.get();
+  return output.data();
 }
 
 struct Node {

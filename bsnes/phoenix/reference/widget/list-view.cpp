@@ -10,6 +10,9 @@ bool pListView::checked(unsigned row) {
 void pListView::modify(unsigned row, const lstring &text) {
 }
 
+void pListView::remove(unsigned row) {
+}
+
 void pListView::reset() {
 }
 
@@ -31,6 +34,9 @@ void pListView::setHeaderText(const lstring &text) {
 }
 
 void pListView::setHeaderVisible(bool visible) {
+}
+
+void pListView::setImage(unsigned row, unsigned column, const image &image) {
 }
 
 void pListView::setSelected(bool selected) {

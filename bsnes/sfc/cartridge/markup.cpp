@@ -9,6 +9,7 @@ void Cartridge::parse_markup(const char *markup) {
 
   parse_markup_rom(cartridge["rom"]);
   parse_markup_ram(cartridge["ram"]);
+  parse_markup_psram(cartridge["psram"]);
   parse_markup_icd2(cartridge["icd2"]);
   parse_markup_bsx(cartridge["bsx"]);
   parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
@@ -98,6 +99,11 @@ void Cartridge::parse_markup_ram(XML::Node &root) {
   }
 }
 
+void Cartridge::parse_markup_psram(XML::Node &root) {
+  if(root.exists() == false) return;
+  parse_markup_memory(bsxcartridge.psram, root, ID::BsxPSRAM, true);
+}
+
 void Cartridge::parse_markup_icd2(XML::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
@@ -120,10 +126,6 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   has_bs_slot = true;
 
   interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs");
-
-  if(has_bs_cart) {
-    parse_markup_memory(bsxcartridge.psram, root["psram"], ID::BsxPSRAM, true);
-  }
 
   for(auto &node : root["slot"]) {
     if(node.name != "map") continue;
@@ -228,7 +230,6 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
     mapping.append(m);
   }
 
-  parse_markup_memory(ram, bwram, ID::RAM, true);
   for(auto &node : bwram) {
     if(node.name != "map") continue;
     Mapping m(sa1.cpubwram);

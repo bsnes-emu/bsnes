@@ -384,6 +384,20 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           }
         } else if(nmhdr->code == LVN_ITEMACTIVATE) {
           if(listView.onActivate) listView.onActivate();
+        } else if(nmhdr->code == NM_CUSTOMDRAW) {
+          LPNMLVCUSTOMDRAW lvcd = (LPNMLVCUSTOMDRAW)nmhdr;
+          switch(lvcd->nmcd.dwDrawStage) {
+          case CDDS_PREPAINT:
+            return CDRF_NOTIFYITEMDRAW;
+          case CDDS_ITEMPREPAINT:
+            if(listView.state.headerText.size() >= 2) {
+              //draw alternating row colors of there are two or more columns
+              if(lvcd->nmcd.dwItemSpec % 2) lvcd->clrTextBk = GetSysColor(COLOR_WINDOW) ^ 0x070707;
+            }
+            return CDRF_DODEFAULT;
+          default:
+            return CDRF_DODEFAULT;
+          }
         }
       }
       break;

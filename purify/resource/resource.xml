@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource name="resource">
+  <binary id="play" name="input-gaming.png"/>
+  <binary id="convert" name="drive-harddisk.png"/>
+  <binary id="emulator" name="applications-system.png"/>
+  <binary id="path" name="folder.png"/>
+</resource>

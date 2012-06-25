@@ -80,6 +80,7 @@ private:
 
   void parse_markup_rom(XML::Node&);
   void parse_markup_ram(XML::Node&);
+  void parse_markup_psram(XML::Node&);
   void parse_markup_icd2(XML::Node&);
   void parse_markup_bsx(XML::Node&);
   void parse_markup_sufamiturbo(XML::Node&);

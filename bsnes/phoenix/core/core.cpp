@@ -839,6 +839,16 @@ void ComboBox::append_(const lstring &list) {
   }
 }
 
+void ComboBox::modify(unsigned row, const string &text) {
+  state.text(row) = text;
+  p.modify(row, text);
+}
+
+void ComboBox::remove(unsigned row) {
+  state.text.remove(row);
+  p.remove(row);
+}
+
 void ComboBox::reset() {
   state.selection = 0;
   state.text.reset();
@@ -1054,6 +1064,12 @@ bool ListView::checked(unsigned row) {
 void ListView::modify_(unsigned row, const lstring &text) {
   state.text[row] = text;
   return p.modify(row, text);
+}
+
+void ListView::remove(unsigned row) {
+  state.text.remove(row);
+  state.image.remove(row);
+  return p.remove(row);
 }
 
 void ListView::reset() {

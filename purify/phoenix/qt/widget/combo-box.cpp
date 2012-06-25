@@ -11,6 +11,18 @@ Geometry pComboBox::minimumGeometry() {
   return { 0, 0, maximumWidth + 32, geometry.height + 12 };
 }
 
+void pComboBox::modify(unsigned row, const string &text) {
+  qtComboBox->setItemText(row, text);
+}
+
+void pComboBox::remove(unsigned row) {
+  locked = true;
+  unsigned position = selection();
+  qtComboBox->removeItem(row);
+  if(position == row) qtComboBox->setCurrentIndex(0);
+  locked = false;
+}
+
 void pComboBox::reset() {
   locked = true;
   while(qtComboBox->count()) qtComboBox->removeItem(0);

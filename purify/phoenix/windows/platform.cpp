@@ -152,6 +152,7 @@ static bool OS_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 
   if(dynamic_cast<Window*>(object)) {
     Window &window = (Window&)*object;
+    if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) return false;
     Keyboard::Keycode keysym = Keysym(wparam, lparam);
     if(keysym != Keyboard::Keycode::None) {
       if((msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) && window.onKeyPress) window.onKeyPress(keysym);
@@ -220,11 +221,18 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
   if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
   Window &window = (Window&)*object;
 
-  if(!osQuit) switch(msg) {
+  bool process = true;
+  if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) process = false;
+  if(osQuit) process = false;
+
+  if(process) switch(msg) {
     case WM_CLOSE: {
       window.state.ignore = false;
       if(window.onClose) window.onClose();
-      if(window.state.ignore == false) window.setVisible(false);
+      if(window.state.ignore == false) {
+        window.setVisible(false);
+        window.setModal(false);
+      }
       return TRUE;
     }
 
@@ -376,6 +384,20 @@ static LRESULT CALLBACK OS_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
           }
         } else if(nmhdr->code == LVN_ITEMACTIVATE) {
           if(listView.onActivate) listView.onActivate();
+        } else if(nmhdr->code == NM_CUSTOMDRAW) {
+          LPNMLVCUSTOMDRAW lvcd = (LPNMLVCUSTOMDRAW)nmhdr;
+          switch(lvcd->nmcd.dwDrawStage) {
+          case CDDS_PREPAINT:
+            return CDRF_NOTIFYITEMDRAW;
+          case CDDS_ITEMPREPAINT:
+            if(listView.state.headerText.size() >= 2) {
+              //draw alternating row colors of there are two or more columns
+              if(lvcd->nmcd.dwItemSpec % 2) lvcd->clrTextBk = GetSysColor(COLOR_WINDOW) ^ 0x070707;
+            }
+            return CDRF_DODEFAULT;
+          default:
+            return CDRF_DODEFAULT;
+          }
         }
       }
       break;

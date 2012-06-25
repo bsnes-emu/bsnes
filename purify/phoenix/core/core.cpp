@@ -83,7 +83,7 @@ bool Keyboard::released(Keyboard::Scancode scancode) {
   return !pressed(scancode);
 }
 
-array<bool> Keyboard::state() {
+vector<bool> Keyboard::state() {
   return pKeyboard::state();
 }
 
@@ -326,6 +326,11 @@ void Window::setMenuVisible(bool visible) {
   return p.setMenuVisible(visible);
 }
 
+void Window::setModal(bool modal) {
+  state.modal = modal;
+  return p.setModal(modal);
+}
+
 void Window::setResizable(bool resizable) {
   state.resizable = resizable;
   return p.setResizable(resizable);
@@ -423,7 +428,7 @@ Action::~Action() {
 //Menu
 //====
 
-void Menu::append(const array<Action&> &list) {
+void Menu::append(const set<Action&> &list) {
   for(auto &action : list) {
     if(state.action.append(action)) {
       action.state.menu = this;
@@ -432,7 +437,7 @@ void Menu::append(const array<Action&> &list) {
   }
 }
 
-void Menu::remove(const array<Action&> &list) {
+void Menu::remove(const set<Action&> &list) {
   for(auto &action : list) {
     if(state.action.remove(action)) {
       action.state.menu = 0;
@@ -537,7 +542,7 @@ CheckItem::~CheckItem() {
 //RadioItem
 //=========
 
-void RadioItem::group(const array<RadioItem&> &list) {
+void RadioItem::group(const set<RadioItem&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }
@@ -555,6 +560,10 @@ void RadioItem::setChecked() {
 void RadioItem::setText(const string &text) {
   state.text = text;
   return p.setText(text);
+}
+
+string RadioItem::text() {
+  return state.text;
 }
 
 RadioItem::RadioItem():
@@ -830,6 +839,16 @@ void ComboBox::append_(const lstring &list) {
   }
 }
 
+void ComboBox::modify(unsigned row, const string &text) {
+  state.text(row) = text;
+  p.modify(row, text);
+}
+
+void ComboBox::remove(unsigned row) {
+  state.text.remove(row);
+  p.remove(row);
+}
+
 void ComboBox::reset() {
   state.selection = 0;
   state.text.reset();
@@ -843,6 +862,14 @@ unsigned ComboBox::selection() {
 void ComboBox::setSelection(unsigned row) {
   state.selection = row;
   return p.setSelection(row);
+}
+
+string ComboBox::text() {
+  return state.text(selection());
+}
+
+string ComboBox::text(unsigned row) {
+  return state.text(row);
 }
 
 ComboBox::ComboBox():
@@ -1039,8 +1066,15 @@ void ListView::modify_(unsigned row, const lstring &text) {
   return p.modify(row, text);
 }
 
+void ListView::remove(unsigned row) {
+  state.text.remove(row);
+  state.image.remove(row);
+  return p.remove(row);
+}
+
 void ListView::reset() {
   state.checked.reset();
+  state.image.reset();
   state.text.reset();
   return p.reset();
 }
@@ -1071,6 +1105,11 @@ void ListView::setHeaderText_(const lstring &text) {
 void ListView::setHeaderVisible(bool visible) {
   state.headerVisible = visible;
   return p.setHeaderVisible(visible);
+}
+
+void ListView::setImage(unsigned row, unsigned column, const nall::image &image) {
+  state.image(row)(column) = image;
+  return p.setImage(row, column, image);
 }
 
 void ListView::setSelected(bool selected) {
@@ -1121,7 +1160,7 @@ ProgressBar::~ProgressBar() {
 //RadioBox
 //========
 
-void RadioBox::group(const array<RadioBox&> &list) {
+void RadioBox::group(const set<RadioBox&> &list) {
   for(auto &item : list) item.p.setGroup(item.state.group = list);
   if(list.size()) list[0].setChecked();
 }

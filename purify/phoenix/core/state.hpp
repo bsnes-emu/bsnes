@@ -14,26 +14,28 @@ struct Window::State {
   bool fullScreen;
   Geometry geometry;
   bool ignore;
-  array<Layout&> layout;
-  array<Menu&> menu;
+  set<Layout&> layout;
+  set<Menu&> menu;
   string menuFont;
   bool menuVisible;
+  bool modal;
   bool resizable;
   string statusFont;
   string statusText;
   bool statusVisible;
   string title;
   bool visible;
-  array<Widget&> widget;
+  set<Widget&> widget;
   string widgetFont;
 
   State() {
     backgroundColorOverride = false;
-    backgroundColor = { 0, 0, 0, 255 };
+    backgroundColor = {0, 0, 0, 255};
     fullScreen = false;
-    geometry = { 128, 128, 256, 256 };
+    geometry = {128, 128, 256, 256};
     ignore = false;
     menuVisible = false;
+    modal = false;
     resizable = true;
     statusVisible = false;
     visible = false;
@@ -55,7 +57,7 @@ struct Action::State {
 };
 
 struct Menu::State {
-  array<Action&> action;
+  set<Action&> action;
   nall::image image;
   string text;
 
@@ -82,7 +84,7 @@ struct CheckItem::State {
 
 struct RadioItem::State {
   bool checked;
-  array<RadioItem&> group;
+  set<RadioItem&> group;
   string text;
 
   State() {
@@ -115,7 +117,7 @@ struct Widget::State {
   State() {
     abstract = false;
     enabled = true;
-    geometry = { 0, 0, 0, 0 };
+    geometry = {0, 0, 0, 0};
     visible = true;
   }
 };
@@ -208,9 +210,10 @@ struct LineEdit::State {
 
 struct ListView::State {
   bool checkable;
-  array<bool> checked;
+  vector<bool> checked;
   lstring headerText;
   bool headerVisible;
+  vector<vector<nall::image>> image;
   bool selected;
   unsigned selection;
   vector<lstring> text;
@@ -233,7 +236,7 @@ struct ProgressBar::State {
 
 struct RadioBox::State {
   bool checked;
-  array<RadioBox&> group;
+  set<RadioBox&> group;
   string text;
 
   State() {

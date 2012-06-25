@@ -6,6 +6,7 @@
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 #include <nall/windows/utf8.hpp>
+#include <nall/stream/memory.hpp>
 
 namespace nall {
   inline FILE* fopen_utf8(const string &utf8_filename, const char *mode) {
@@ -16,25 +17,53 @@ namespace nall {
     #endif
   }
 
-  class file {
-  public:
-    enum class mode : unsigned { read, write, readwrite, writeread };
+  struct file {
+    enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
     enum class index : unsigned { absolute, relative };
     enum class time : unsigned { create, modify, access };
 
-    static bool read(const string &filename, uint8_t *&data, unsigned &size) {
-      data = 0;
-      file fp;
-      if(fp.open(filename, mode::read) == false) return false;
-      size = fp.size();
-      data = new uint8_t[size];
-      fp.read(data, size);
-      fp.close();
+    static bool copy(const string &sourcename, const string &targetname) {
+      file rd, wr;
+      if(rd.open(sourcename, mode::read) == false) return false;
+      if(wr.open(targetname, mode::write) == false) return false;
+      for(unsigned n = 0; n < rd.size(); n++) wr.write(rd.read());
       return true;
     }
 
-    static bool read(const string &filename, const uint8_t *&data, unsigned &size) {
-      return file::read(filename, (uint8_t*&)data, size);
+    static bool move(const string &sourcename, const string &targetname) {
+      #if !defined(_WIN32)
+      return rename(sourcename, targetname) == 0;
+      #else
+      return _wrename(utf16_t(sourcename), utf16_t(targetname)) == 0;
+      #endif
+    }
+
+    static bool remove(const string &filename) {
+      return unlink(filename) == 0;
+    }
+
+    static bool truncate(const string &filename, unsigned size) {
+      #if !defined(_WIN32)
+      return truncate(filename, size) == 0;
+      #else
+      bool result = false;
+      FILE *fp = fopen(filename, "rb+");
+      if(fp) {
+        result = _chsize(fileno(fp), size) == 0;
+        fclose(fp);
+      }
+      return result;
+      #endif
+    }
+
+    static vector<uint8_t> read(const string &filename) {
+      vector<uint8_t> memory;
+      file fp;
+      if(fp.open(filename, mode::read)) {
+        memory.resize(fp.size());
+        fp.read(memory.data(), memory.size());
+      }
+      return memory;
     }
 
     static bool write(const string &filename, const uint8_t *data, unsigned size) {
@@ -134,13 +163,13 @@ namespace nall {
       file_offset = req_offset;
     }
 
-    int offset() const {
-      if(!fp) return -1;  //file not open
+    unsigned offset() const {
+      if(!fp) return 0;  //file not open
       return file_offset;
     }
 
-    int size() const {
-      if(!fp) return -1;  //file not open
+    unsigned size() const {
+      if(!fp) return 0;  //file not open
       return file_size;
     }
 
@@ -232,7 +261,7 @@ namespace nall {
 
     file() {
       memset(buffer, 0, sizeof buffer);
-      buffer_offset = -1;
+      buffer_offset = -1;  //invalidate buffer
       buffer_dirty = false;
       fp = 0;
       file_offset = 0;

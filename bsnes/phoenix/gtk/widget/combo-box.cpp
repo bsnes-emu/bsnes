@@ -18,6 +18,23 @@ Geometry pComboBox::minimumGeometry() {
   return { 0, 0, maximumWidth + 44, geometry.height + 12 };
 }
 
+void pComboBox::modify(unsigned row, const string &text) {
+  locked = true;
+  unsigned position = selection();
+  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), row);
+  gtk_combo_box_insert_text(GTK_COMBO_BOX(gtkWidget), row, text);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), position);
+  locked = false;
+}
+
+void pComboBox::remove(unsigned row) {
+  locked = true;
+  unsigned position = selection();
+  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), row);
+  if(position == row) gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), 0);
+  locked = false;
+}
+
 void pComboBox::reset() {
   locked = true;
   gtk_list_store_clear(GTK_LIST_STORE(gtk_combo_box_get_model(GTK_COMBO_BOX(gtkWidget))));

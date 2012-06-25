@@ -1,4 +1,5 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_AUTO_HPP
+#define NALL_STREAM_AUTO_HPP
 
 namespace nall {
 

@@ -18,9 +18,25 @@ namespace nall {
   }
 
   struct file {
-    enum class mode : unsigned { read, write, readwrite, writeread };
+    enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
     enum class index : unsigned { absolute, relative };
     enum class time : unsigned { create, modify, access };
+
+    static bool copy(const string &sourcename, const string &targetname) {
+      file rd, wr;
+      if(rd.open(sourcename, mode::read) == false) return false;
+      if(wr.open(targetname, mode::write) == false) return false;
+      for(unsigned n = 0; n < rd.size(); n++) wr.write(rd.read());
+      return true;
+    }
+
+    static bool move(const string &sourcename, const string &targetname) {
+      #if !defined(_WIN32)
+      return rename(sourcename, targetname) == 0;
+      #else
+      return _wrename(utf16_t(sourcename), utf16_t(targetname)) == 0;
+      #endif
+    }
 
     static bool remove(const string &filename) {
       return unlink(filename) == 0;

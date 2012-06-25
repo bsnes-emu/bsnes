@@ -15,7 +15,7 @@ struct pDesktop {
 
 struct pKeyboard {
   static bool pressed(Keyboard::Scancode scancode);
-  static array<bool> state();
+  static vector<bool> state();
 };
 
 struct pMouse {
@@ -157,7 +157,7 @@ struct pRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioItem&> &group);
+  void setGroup(const set<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -227,6 +227,8 @@ struct pComboBox : public pWidget {
   ComboBox &comboBox;
 
   void append(const string &text);
+  void modify(unsigned row, const string &text);
+  void remove(unsigned row);
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
@@ -297,6 +299,7 @@ struct pListView : public pWidget {
   void autoSizeColumns();
   bool checked(unsigned row);
   void modify(unsigned row, const lstring &text);
+  void remove(unsigned row);
   void reset();
   bool selected();
   unsigned selection();
@@ -304,6 +307,7 @@ struct pListView : public pWidget {
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setImage(unsigned row, unsigned column, const image &image);
   void setSelected(bool selected);
   void setSelection(unsigned row);
 
@@ -325,7 +329,7 @@ struct pRadioBox : public pWidget {
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioBox&> &group);
+  void setGroup(const set<RadioBox&> &group);
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}

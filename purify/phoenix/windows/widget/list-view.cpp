@@ -1,3 +1,11 @@
+unsigned ListView_GetColumnCount(HWND hwnd) {
+  unsigned count = 0;
+  LVCOLUMN column;
+  column.mask = LVCF_WIDTH;
+  while(ListView_GetColumn(hwnd, count++, &column));
+  return --count;
+}
+
 void pListView::append(const lstring &list) {
   wchar_t empty[] = L"";
   unsigned row = ListView_GetItemCount(hwnd);
@@ -9,14 +17,15 @@ void pListView::append(const lstring &list) {
   locked = true;
   ListView_InsertItem(hwnd, &item);
   locked = false;
-  for(unsigned n = 0; n < list.size(); n++) {
-    utf16_t wtext(list[n]);
-    ListView_SetItemText(hwnd, row, n, wtext);
+  for(unsigned column = 0; column < list.size(); column++) {
+    utf16_t wtext(list(column, ""));
+    ListView_SetItemText(hwnd, row, column, wtext);
   }
 }
 
 void pListView::autoSizeColumns() {
-  for(unsigned n = 0; n < max(1, listView.state.headerText.size()); n++) {
+  unsigned columns = ListView_GetColumnCount(hwnd);
+  for(unsigned n = 0; n < columns; n++) {
     ListView_SetColumnWidth(hwnd, n, LVSCW_AUTOSIZE_USEHEADER);
   }
 }
@@ -27,9 +36,14 @@ bool pListView::checked(unsigned row) {
 
 void pListView::modify(unsigned row, const lstring &list) {
   for(unsigned n = 0; n < list.size(); n++) {
-    utf16_t wtext(list[n]);
+    utf16_t wtext(list(n, ""));
     ListView_SetItemText(hwnd, row, n, wtext);
   }
+}
+
+void pListView::remove(unsigned row) {
+  ListView_DeleteItem(hwnd, row);
+  setImageList();
 }
 
 void pListView::reset() {
@@ -53,7 +67,7 @@ unsigned pListView::selection() {
 }
 
 void pListView::setCheckable(bool checkable) {
-  ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | (checkable ? LVS_EX_CHECKBOXES : 0));
+  ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES | (checkable ? LVS_EX_CHECKBOXES : 0));
 }
 
 void pListView::setChecked(unsigned row, bool checked) {
@@ -88,6 +102,10 @@ void pListView::setHeaderVisible(bool visible) {
   );
 }
 
+void pListView::setImage(unsigned row, unsigned column, const image &image) {
+  setImageList();
+}
+
 void pListView::setSelected(bool selected) {
   locked = true;
   lostFocus = false;
@@ -120,6 +138,7 @@ void pListView::constructor() {
   setCheckable(listView.state.checkable);
   for(auto &text : listView.state.text) append(text);
   for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
+  setImageList();
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
   synchronize();
@@ -137,4 +156,55 @@ void pListView::orphan() {
 void pListView::setGeometry(const Geometry &geometry) {
   pWidget::setGeometry(geometry);
   autoSizeColumns();
+}
+
+void pListView::setImageList() {
+  auto &list = listView.state.image;
+
+  if(imageList) {
+    ImageList_Destroy(imageList);
+    imageList = nullptr;
+  }
+
+  bool found = false;
+  for(auto &row : listView.state.image) {
+    for(auto &column : row) {
+      if(column.empty() == false) {
+        found = true;
+        break;
+      }
+    }
+  }
+  if(found == false) return;
+
+  imageList = ImageList_Create(15, 15, ILC_COLOR32, 1, 0);
+  nall::image image;
+  image.allocate(15, 15);
+  image.clear(GetSysColor(COLOR_WINDOW));
+  ImageList_Add(imageList, CreateBitmap(image), NULL);
+
+  for(unsigned row = 0; row < list.size(); row++) {
+    for(unsigned column = 0; column < list(row).size(); column++) {
+      nall::image image = list(row)(column);
+      if(image.empty()) continue;
+      image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+      image.scale(15, 15, Interpolation::Linear);
+      ImageList_Add(imageList, CreateBitmap(image), NULL);
+    }
+  }
+
+  ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
+
+  unsigned ID = 1;
+  for(unsigned row = 0; row < list.size(); row++) {
+    for(unsigned column = 0; column < list(row).size(); column++) {
+      if(list(row)(column).empty()) continue;  //I_IMAGENONE does not work properly
+      LVITEM item;
+      item.mask = LVIF_IMAGE;
+      item.iItem = row;
+      item.iSubItem = column;
+      item.iImage = ID++;
+      ListView_SetItem(hwnd, &item);
+    }
+  }
 }

@@ -10,8 +10,8 @@ static void ListView_change(ListView *self) {
   }
 }
 
-static void ListView_toggle(GtkCellRendererToggle *cell, gchar *path_string, ListView *self) {
-  unsigned row = decimal(path_string);
+static void ListView_toggle(GtkCellRendererToggle *cell, gchar *path, ListView *self) {
+  unsigned row = decimal(path);
   self->setChecked(row, !self->checked(row));
   if(self->onToggle) self->onToggle(row);
 }
@@ -19,7 +19,7 @@ static void ListView_toggle(GtkCellRendererToggle *cell, gchar *path_string, Lis
 void pListView::append(const lstring &text) {
   GtkTreeIter iter;
   gtk_list_store_append(store, &iter);
-  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n * 2 + 1, (const char*)text[n], -1);
 }
 
 void pListView::autoSizeColumns() {
@@ -39,7 +39,14 @@ void pListView::modify(unsigned row, const lstring &text) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   GtkTreeIter iter;
   gtk_tree_model_get_iter_from_string(model, &iter, string(row));
-  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n, (const char*)text[n], -1);
+  for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n * 2 + 1, (const char*)text[n], -1);
+}
+
+void pListView::remove(unsigned row) {
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
+  GtkTreeIter iter;
+  gtk_tree_model_get_iter_from_string(model, &iter, string(row));
+  gtk_list_store_remove(store, &iter);
 }
 
 void pListView::reset() {
@@ -69,7 +76,7 @@ unsigned pListView::selection() {
 }
 
 void pListView::setCheckable(bool checkable) {
-  gtk_tree_view_column_set_visible(column[0].column, checkable);
+  gtk_cell_renderer_set_visible(column(0).checkbox, checkable);
 }
 
 void pListView::setChecked(unsigned row, bool checked) {
@@ -88,6 +95,18 @@ void pListView::setHeaderVisible(bool visible) {
   gtk_tree_view_set_headers_visible(GTK_TREE_VIEW(subWidget), visible);
 }
 
+void pListView::setImage(unsigned row, unsigned column, const nall::image &image) {
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
+  GtkTreeIter iter;
+  gtk_tree_model_get_iter_from_string(model, &iter, string(row));
+  if(image.empty() == false) {
+    GdkPixbuf *pixbuf = CreatePixbuf(image, true);
+    gtk_list_store_set(store, &iter, 1 + column * 2, pixbuf, -1);
+  } else {
+    gtk_list_store_set(store, &iter, 1 + column * 2, nullptr, -1);
+  }
+}
+
 void pListView::setSelected(bool selected) {
   if(selected == false) {
     GtkTreeSelection *selection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subWidget));
@@ -104,50 +123,66 @@ void pListView::setSelection(unsigned row) {
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(model, &iter, string(row)) == false) return;
   gtk_tree_selection_select_iter(selection, &iter);
+
+  //scroll window to selected item
+  char *path = gtk_tree_model_get_string_from_iter(model, &iter);
+  GtkTreePath *treePath = gtk_tree_path_new_from_string(path);
+  gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(subWidget), treePath, nullptr, true, 0.5, 0.0);
+  gtk_tree_path_free(treePath);
+  g_free(path);
 }
 
 void pListView::constructor() {
-  gtkWidget = 0;
-  subWidget = 0;
-
   gtkWidget = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gtkWidget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(gtkWidget), GTK_SHADOW_ETCHED_IN);
 
-  lstring headerText;
-  headerText.append("");  //checkbox column
-  for(auto &headerItem : listView.state.headerText) headerText.append(headerItem);
-  if(headerText.size() == 1) headerText.append("");
+  lstring headerText = listView.state.headerText;
+  if(headerText.size() == 0) headerText.append("");  //ListView must have at least one column
 
-  GType *v = (GType*)malloc(headerText.size() * sizeof(GType));
-  for(unsigned n = 0; n < headerText.size(); n++) v[n] = (n == 0 ? G_TYPE_BOOLEAN : G_TYPE_STRING);
-  store = gtk_list_store_newv(headerText.size(), v);
-  free(v);
+  column.reset();
+  vector<GType> gtype;
+  for(auto &text : headerText) {
+    GtkColumn cell;
+    cell.label = gtk_label_new(text);
+    cell.column = gtk_tree_view_column_new();
+    gtk_tree_view_column_set_resizable(cell.column, true);
+    gtk_tree_view_column_set_title(cell.column, "");
 
+    if(column.size() == 0) {  //first column checkbox
+      cell.checkbox = gtk_cell_renderer_toggle_new();
+      gtk_tree_view_column_pack_start(cell.column, cell.checkbox, false);
+      gtk_tree_view_column_set_attributes(cell.column, cell.checkbox, "active", gtype.size(), nullptr);
+      gtype.append(G_TYPE_BOOLEAN);
+      g_signal_connect(cell.checkbox, "toggled", G_CALLBACK(ListView_toggle), (gpointer)&listView);
+    }
+
+    cell.icon = gtk_cell_renderer_pixbuf_new();
+    gtk_tree_view_column_pack_start(cell.column, cell.icon, false);
+    gtk_tree_view_column_set_attributes(cell.column, cell.icon, "pixbuf", gtype.size(), nullptr);
+    gtype.append(GDK_TYPE_PIXBUF);
+
+    cell.text = gtk_cell_renderer_text_new();
+    gtk_tree_view_column_pack_start(cell.column, cell.text, false);
+    gtk_tree_view_column_set_attributes(cell.column, cell.text, "text", gtype.size(), nullptr);
+    gtype.append(G_TYPE_STRING);
+
+    column.append(cell);
+  }
+
+  store = gtk_list_store_newv(gtype.size(), gtype.data());
   subWidget = gtk_tree_view_new_with_model(GTK_TREE_MODEL(store));
   gtk_container_add(GTK_CONTAINER(gtkWidget), subWidget);
   g_object_unref(G_OBJECT(store));
 
-  for(unsigned n = 0; n < headerText.size(); n++) {
-    if(n == 0) {
-      column[n].renderer = gtk_cell_renderer_toggle_new();
-      column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "active", n, (void*)0);
-      gtk_tree_view_column_set_resizable(column[n].column, false);
-      gtk_tree_view_column_set_visible(column[n].column, false);
-      g_signal_connect(column[n].renderer, "toggled", G_CALLBACK(ListView_toggle), (gpointer)&listView);
-    } else {
-      column[n].renderer = gtk_cell_renderer_text_new();
-      column[n].column = gtk_tree_view_column_new_with_attributes("", column[n].renderer, "text", n, (void*)0);
-      gtk_tree_view_column_set_resizable(column[n].column, true);
-    }
-    column[n].label = gtk_label_new(headerText[n]);
-    gtk_tree_view_column_set_widget(GTK_TREE_VIEW_COLUMN(column[n].column), column[n].label);
-    gtk_tree_view_append_column(GTK_TREE_VIEW(subWidget), column[n].column);
-    gtk_widget_show(column[n].label);
+  for(auto &cell : column) {
+    gtk_tree_view_column_set_widget(GTK_TREE_VIEW_COLUMN(cell.column), cell.label);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(subWidget), cell.column);
+    gtk_widget_show(cell.label);
   }
 
-  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(subWidget), headerText.size() >= 3);  //two or more columns + checkbox column
-  gtk_tree_view_set_search_column(GTK_TREE_VIEW(subWidget), 1);
+  gtk_tree_view_set_rules_hint(GTK_TREE_VIEW(subWidget), headerText.size() >= 2);  //two or more columns + checkbox column
+  gtk_tree_view_set_search_column(GTK_TREE_VIEW(subWidget), 2);
 
   g_signal_connect_swapped(G_OBJECT(subWidget), "cursor-changed", G_CALLBACK(ListView_change), (gpointer)&listView);
   g_signal_connect_swapped(G_OBJECT(subWidget), "row-activated", G_CALLBACK(ListView_activate), (gpointer)&listView);
@@ -178,7 +213,5 @@ void pListView::setFocused() {
 
 void pListView::setFont(const string &font) {
   pFont::setFont(gtkWidget, font);
-  for(unsigned n = 0; n < 1 + listView.state.headerText.size(); n++) {
-    pFont::setFont(column[n].label, font);
-  }
+  for(auto &cell : column) pFont::setFont(cell.label, font);
 }

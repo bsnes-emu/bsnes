@@ -17,24 +17,24 @@ struct context {
   unsigned blockHeight;
   unsigned blockStride;
   unsigned blockOffset;
-  array<unsigned> block;
+  vector<unsigned> block;
 
   unsigned tileWidth;
   unsigned tileHeight;
   unsigned tileStride;
   unsigned tileOffset;
-  array<unsigned> tile;
+  vector<unsigned> tile;
 
   unsigned mosaicWidth;
   unsigned mosaicHeight;
   unsigned mosaicStride;
   unsigned mosaicOffset;
-  array<unsigned> mosaic;
+  vector<unsigned> mosaic;
 
   unsigned paddingWidth;
   unsigned paddingHeight;
   unsigned paddingColor;
-  array<unsigned> palette;
+  vector<unsigned> palette;
 
   inline unsigned objectWidth() const { return blockWidth * tileWidth * mosaicWidth + paddingWidth; }
   inline unsigned objectHeight() const { return blockHeight * tileHeight * mosaicHeight + paddingHeight; }
@@ -52,7 +52,7 @@ struct context {
     return result;
   }
 
-  inline void eval(array<unsigned> &buffer, const string &expression_) {
+  inline void eval(vector<unsigned> &buffer, const string &expression_) {
     string expression = expression_;
     bool function = false;
     for(auto &c : expression) {

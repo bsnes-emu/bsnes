@@ -401,6 +401,8 @@ struct ComboBox : private nall::base_from_member<pComboBox&>, Widget {
   template<typename... Args> void append(const Args&... args) { append_({args...}); }
 
   void append_(const nall::lstring &list);
+  void modify(unsigned row, const nall::string &text);
+  void remove(unsigned row);
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
@@ -499,6 +501,7 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   void autoSizeColumns();
   bool checked(unsigned row);
   void modify_(unsigned row, const nall::lstring &list);
+  void remove(unsigned row);
   void reset();
   bool selected();
   unsigned selection();

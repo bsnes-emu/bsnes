@@ -15,13 +15,8 @@ Geometry pButton::minimumGeometry() {
 }
 
 void pButton::setImage(const image &image, Orientation orientation) {
-  nall::image qtBuffer = image;
-  qtBuffer.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-
-  QImage qtImage(qtBuffer.data, qtBuffer.width, qtBuffer.height, QImage::Format_ARGB32);
-  QIcon qtIcon(QPixmap::fromImage(qtImage));
-  qtButton->setIconSize(QSize(qtBuffer.width, qtBuffer.height));
-  qtButton->setIcon(qtIcon);
+  qtButton->setIconSize(QSize(image.width, image.height));
+  qtButton->setIcon(CreateIcon(image));
   qtButton->setStyleSheet("text-align: top;");
   switch(orientation) {
   case Orientation::Horizontal: qtButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;

@@ -106,25 +106,17 @@ struct SuperFamicomCartridge {
 };
 
 SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size) {
+  markup = "";
+  if(size < 0x8000) return;
+
   read_header(data, size);
 
-  string xml;
-  markup = "<?xml version='1.0' encoding='UTF-8'?>\n";
+  markup = "";
+  if(type == TypeGameBoy) return;
+  if(type == TypeBsx) return;
+  if(type == TypeSufamiTurbo) return;
 
-  if(type == TypeBsx) {
-    markup.append("<cartridge/>\n");
-    return;
-  }
-
-  if(type == TypeSufamiTurbo) {
-    markup.append("<cartridge/>\n");
-    return;
-  }
-
-  if(type == TypeGameBoy) {
-    markup.append("<cartridge/>\n");
-    return;
-  }
+  markup.append("<?xml version='1.0' encoding='UTF-8'?>\n");
 
   const char *range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
   markup.append("<cartridge region='", region == NTSC ? "NTSC" : "PAL", "'>\n");
@@ -302,7 +294,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "        <map mode='direct' address='80-bf:6000-7fff'/>\n"
       "      </ram>\n"
       "    </mcu>\n"
-      "    <iram >\n"
+      "    <iram>\n"
       "      <map mode='linear' address='00-3f:3000-37ff'/>\n"
       "      <map mode='linear' address='80-bf:3000-37ff'/>\n"
       "    </iram>\n"

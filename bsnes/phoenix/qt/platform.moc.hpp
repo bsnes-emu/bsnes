@@ -354,6 +354,8 @@ public:
   QComboBox *qtComboBox;
 
   void append(const string &text);
+  void modify(unsigned row, const string &text);
+  void remove(unsigned row);
   Geometry minimumGeometry();
   void reset();
   unsigned selection();
@@ -486,6 +488,7 @@ public:
   void autoSizeColumns();
   bool checked(unsigned row);
   void modify(unsigned row, const lstring &text);
+  void remove(unsigned row);
   void reset();
   bool selected();
   unsigned selection();

@@ -15,6 +15,8 @@
   #include <commctrl.h>
   #include <io.h>
   #include <shlobj.h>
+  #include <nall/windows/registry.hpp>
+  #include <nall/windows/utf8.hpp>
 #elif defined(PHOENIX_QT)
   #include <QApplication>
   #include <QtGui>

@@ -9,6 +9,23 @@ Geometry pComboBox::minimumGeometry() {
   return { 0, 0, maximumWidth + 24, pFont::geometry(hfont, " ").height + 10 };
 }
 
+void pComboBox::modify(unsigned row, const string &text) {
+  locked = true;
+  unsigned position = selection();
+  SendMessage(hwnd, CB_DELETESTRING, row, 0);
+  SendMessage(hwnd, CB_INSERTSTRING, row, (LPARAM)(wchar_t*)utf16_t(text));
+  setSelection(position);
+  locked = false;
+}
+
+void pComboBox::remove(unsigned row) {
+  locked = true;
+  unsigned position = selection();
+  SendMessage(hwnd, CB_DELETESTRING, row, 0);
+  if(position == row) setSelection(0);
+  locked = false;
+}
+
 void pComboBox::reset() {
   SendMessage(hwnd, CB_RESETCONTENT, 0, 0);
 }

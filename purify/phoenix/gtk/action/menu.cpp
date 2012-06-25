@@ -14,8 +14,12 @@ void pMenu::remove(Action &action) {
 }
 
 void pMenu::setImage(const image &image) {
-  GtkImage *gtkImage = CreateImage(image, /* menuIcon = */ true);
-  gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
+  if(image.empty() == false) {
+    GtkImage *gtkImage = CreateImage(image, true);
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
+  } else {
+    gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), nullptr);
+  }
 }
 
 void pMenu::setText(const string &text) {

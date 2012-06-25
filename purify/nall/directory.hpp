@@ -17,6 +17,8 @@
 namespace nall {
 
 struct directory {
+  static bool create(const string &pathname, unsigned permissions = 0755);  //recursive
+  static bool remove(const string &pathname);
   static bool exists(const string &pathname);
   static lstring folders(const string &pathname, const string &pattern = "*");
   static lstring files(const string &pathname, const string &pattern = "*");
@@ -24,8 +26,27 @@ struct directory {
 };
 
 #if defined(PLATFORM_WINDOWS)
+  inline bool directory::create(const string &pathname, unsigned permissions) {
+    string fullpath = pathname, path;
+    fullpath.transform("/", "\\");
+    fullpath.rtrim<1>("\\");
+    lstring pathpart = fullpath.split("\\");
+    bool result = false;
+    for(auto &part : pathpart) {
+      path.append(part, "\\");
+      result = _wmkdir(utf16_t(path)) == 0;
+    }
+    return result;
+  }
+
+  inline bool directory::remove(const string &pathname) {
+    return _wrmdir(utf16_t(pathname)) == 0;
+  }
+
   inline bool directory::exists(const string &pathname) {
-    DWORD result = GetFileAttributes(utf16_t(pathname));
+    string name = pathname;
+    name.trim<1>("\"");
+    DWORD result = GetFileAttributes(utf16_t(name));
     if(result == INVALID_FILE_ATTRIBUTES) return false;
     return (result & FILE_ATTRIBUTE_DIRECTORY);
   }
@@ -94,6 +115,21 @@ struct directory {
     return folders;
   }
 #else
+  inline bool directory::create(const string &pathname, unsigned permissions) {
+    string fullpath = pathname, path = "/";
+    fullpath.trim<1>("/");
+    lstring pathpart = fullpath.split("/");
+    for(auto &part : pathpart) {
+      if(!directory::exists(path)) mkdir(path, permissions);
+      path.append(part, "/");
+    }
+    return mkdir(path, permissions) == 0;
+  }
+
+  inline bool directory::remove(const string &pathname) {
+    return rmdir(pathname) == 0;
+  }
+
   inline bool directory::exists(const string &pathname) {
     DIR *dp = opendir(pathname);
     if(!dp) return false;

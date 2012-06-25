@@ -68,6 +68,7 @@ struct map {
   }
 
   inline RHS& operator()(const LHS &name) {
+    if(auto position = find(name)) return list[position()].data;
     return insert(name, RHS());
   }
 

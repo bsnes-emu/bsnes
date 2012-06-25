@@ -1,24 +1,35 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_FILE_HPP
+#define NALL_STREAM_FILE_HPP
+
+#include <nall/file.hpp>
 
 namespace nall {
 
 struct filestream : stream {
-  inline bool seekable() const { return true; }
-  inline bool readable() const { return true; }
-  inline bool writable() const { return pwritable; }
-  inline bool randomaccess() const { return false; }
+  using stream::read;
+  using stream::write;
 
-  inline unsigned size() const { return pfile.size(); }
-  inline unsigned offset() const { return pfile.offset(); }
-  inline void seek(unsigned offset) const { pfile.seek(offset); }
+  bool seekable() const { return true; }
+  bool readable() const { return true; }
+  bool writable() const { return pwritable; }
+  bool randomaccess() const { return false; }
 
-  inline uint8_t read() const { return pfile.read(); }
-  inline void write(uint8_t data) const { pfile.write(data); }
+  unsigned size() const { return pfile.size(); }
+  unsigned offset() const { return pfile.offset(); }
+  void seek(unsigned offset) const { pfile.seek(offset); }
 
-  inline filestream(const string &filename) {
+  uint8_t read() const { return pfile.read(); }
+  void write(uint8_t data) const { pfile.write(data); }
+
+  filestream(const string &filename) {
     pfile.open(filename, file::mode::readwrite);
     pwritable = pfile.open();
     if(!pwritable) pfile.open(filename, file::mode::read);
+  }
+
+  filestream(const string &filename, file::mode mode) {
+    pfile.open(filename, mode);
+    pwritable = mode == file::mode::write || mode == file::mode::readwrite;
   }
 
 private:

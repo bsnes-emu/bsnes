@@ -10,7 +10,7 @@ struct Node {
   string name;
   string data;
   bool attribute;
-  array<Node*> children;
+  vector<Node*> children;
 
   inline bool exists() const {
     return !name.empty();

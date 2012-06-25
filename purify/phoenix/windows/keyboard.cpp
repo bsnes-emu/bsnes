@@ -122,8 +122,8 @@ bool pKeyboard::pressed(Keyboard::Scancode scancode) {
   return GetAsyncKeyState(settings->keymap.lhs[scancode]) & 0x8000;
 }
 
-array<bool> pKeyboard::state() {
-  array<bool> output;
+vector<bool> pKeyboard::state() {
+  vector<bool> output;
   output.resize((unsigned)Keyboard::Scancode::Limit);
   for(auto &n : output) n = false;
 

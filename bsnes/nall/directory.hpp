@@ -44,7 +44,9 @@ struct directory {
   }
 
   inline bool directory::exists(const string &pathname) {
-    DWORD result = GetFileAttributes(utf16_t(pathname));
+    string name = pathname;
+    name.trim<1>("\"");
+    DWORD result = GetFileAttributes(utf16_t(name));
     if(result == INVALID_FILE_ATTRIBUTES) return false;
     return (result & FILE_ATTRIBUTE_DIRECTORY);
   }

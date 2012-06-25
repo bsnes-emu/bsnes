@@ -42,6 +42,13 @@ void pListView::modify(unsigned row, const lstring &text) {
   for(unsigned n = 0; n < text.size(); n++) gtk_list_store_set(store, &iter, 1 + n * 2 + 1, (const char*)text[n], -1);
 }
 
+void pListView::remove(unsigned row) {
+  GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
+  GtkTreeIter iter;
+  gtk_tree_model_get_iter_from_string(model, &iter, string(row));
+  gtk_list_store_remove(store, &iter);
+}
+
 void pListView::reset() {
   listView.state.selected = false;
   listView.state.selection = 0;

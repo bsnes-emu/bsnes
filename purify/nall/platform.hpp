@@ -59,12 +59,9 @@
 #endif
 
 #if defined(_WIN32)
-  #define getcwd      _getcwd
-  #define ftruncate   _chsize
-  #define mkdir(n, m) _wmkdir(nall::utf16_t(n))
-  #define putenv      _putenv
-  #define rmdir       _rmdir
-  #define vsnprintf   _vsnprintf
+  #define getcwd     _getcwd
+  #define putenv     _putenv
+  #define vsnprintf  _vsnprintf
   inline void usleep(unsigned milliseconds) { Sleep(milliseconds / 1000); }
 #endif
 
@@ -86,57 +83,4 @@
   #define alwaysinline  inline
 #endif
 
-//=========================
-//file system functionality
-//=========================
-
-#if defined(_WIN32)
-  inline char* realpath(const char *filename, char *resolvedname) {
-    wchar_t fn[_MAX_PATH] = L"";
-    _wfullpath(fn, nall::utf16_t(filename), _MAX_PATH);
-    strcpy(resolvedname, nall::utf8_t(fn));
-    for(unsigned n = 0; resolvedname[n]; n++) if(resolvedname[n] == '\\') resolvedname[n] = '/';
-    return resolvedname;
-  }
-
-  inline char* userpath(char *path) {
-    wchar_t fp[_MAX_PATH] = L"";
-    SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, fp);
-    strcpy(path, nall::utf8_t(fp));
-    for(unsigned n = 0; path[n]; n++) if(path[n] == '\\') path[n] = '/';
-    unsigned length = strlen(path);
-    if(path[length] != '/') strcpy(path + length, "/");
-    return path;
-  }
-
-  inline char* getcwd(char *path) {
-    wchar_t fp[_MAX_PATH] = L"";
-    _wgetcwd(fp, _MAX_PATH);
-    strcpy(path, nall::utf8_t(fp));
-    for(unsigned n = 0; path[n]; n++) if(path[n] == '\\') path[n] = '/';
-    unsigned length = strlen(path);
-    if(path[length] != '/') strcpy(path + length, "/");
-    return path;
-  }
-#else
-  //realpath() already exists
-
-  inline char* userpath(char *path) {
-    *path = 0;
-    struct passwd *userinfo = getpwuid(getuid());
-    if(userinfo) strcpy(path, userinfo->pw_dir);
-    unsigned length = strlen(path);
-    if(path[length] != '/') strcpy(path + length, "/");
-    return path;
-  }
-
-  inline char *getcwd(char *path) {
-    auto unused = getcwd(path, PATH_MAX);
-    unsigned length = strlen(path);
-    if(path[length] != '/') strcpy(path + length, "/");
-    return path;
-  }
 #endif
-
-#endif
-

@@ -23,10 +23,18 @@ bool pListView::checked(unsigned row) {
 void pListView::modify(unsigned row, const lstring &text) {
   locked = true;
   QTreeWidgetItem *item = qtListView->topLevelItem(row);
-  if(!item) return;
+  if(item == nullptr) return;
   for(unsigned n = 0; n < text.size(); n++) {
     item->setText(n, QString::fromUtf8(text[n]));
   }
+  locked = false;
+}
+
+void pListView::remove(unsigned row) {
+  locked = true;
+  QTreeWidgetItem *item = qtListView->topLevelItem(row);
+  if(item == nullptr) return;
+  delete item;
   locked = false;
 }
 

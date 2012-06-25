@@ -1,24 +1,30 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_HTTP_HPP
+#define NALL_STREAM_HTTP_HPP
+
+#include <nall/http.hpp>
 
 namespace nall {
 
 struct httpstream : stream {
-  inline bool seekable() const { return true; }
-  inline bool readable() const { return true; }
-  inline bool writable() const { return true; }
-  inline bool randomaccess() const { return true; }
+  using stream::read;
+  using stream::write;
 
-  inline unsigned size() const { return psize; }
-  inline unsigned offset() const { return poffset; }
-  inline void seek(unsigned offset) const { poffset = offset; }
+  bool seekable() const { return true; }
+  bool readable() const { return true; }
+  bool writable() const { return true; }
+  bool randomaccess() const { return true; }
 
-  inline uint8_t read() const { return pdata[poffset++]; }
-  inline void write(uint8_t data) const { pdata[poffset++] = data; }
+  unsigned size() const { return psize; }
+  unsigned offset() const { return poffset; }
+  void seek(unsigned offset) const { poffset = offset; }
 
-  inline uint8_t read(unsigned offset) const { return pdata[offset]; }
-  inline void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
+  uint8_t read() const { return pdata[poffset++]; }
+  void write(uint8_t data) const { pdata[poffset++] = data; }
 
-  inline httpstream(const string &url, unsigned port) : pdata(nullptr), psize(0), poffset(0) {
+  uint8_t read(unsigned offset) const { return pdata[offset]; }
+  void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
+
+  httpstream(const string &url, unsigned port) : pdata(nullptr), psize(0), poffset(0) {
     string uri = url;
     uri.ltrim<1>("http://");
     lstring part = uri.split<1>("/");
@@ -29,7 +35,7 @@ struct httpstream : stream {
     connection.download(part[1], pdata, psize);
   }
 
-  inline ~httpstream() {
+  ~httpstream() {
     if(pdata) delete[] pdata;
   }
 

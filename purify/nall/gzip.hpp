@@ -19,12 +19,10 @@ struct gzip {
 };
 
 bool gzip::decompress(const string &filename) {
-  uint8_t *data;
-  unsigned size;
-  if(file::read(filename, data, size) == false) return false;
-  bool result = decompress(data, size);
-  delete[] data;
-  return result;
+  if(auto memory = file::read(filename)) {
+    return decompress(memory.data(), memory.size());
+  }
+  return false;
 }
 
 bool gzip::decompress(const uint8_t *data, unsigned size) {

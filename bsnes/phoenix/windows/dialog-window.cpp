@@ -23,6 +23,13 @@ static string FileDialog(bool save, Window &parent, const string &path, const ls
     p++;
   }
 
+  if(path.empty() == false) {
+    //clear COMDLG32 MRU (most recently used) file list
+    //this is required in order for lpstrInitialDir to be honored in Windows 7 and above
+    registry::remove("HKCU/Software/Microsoft/Windows/CurrentVersion/Explorer/ComDlg32/LastVisitedPidlMRU/");
+    registry::remove("HKCU/Software/Microsoft/Windows/CurrentVersion/Explorer/ComDlg32/OpenSavePidlMRU/");
+  }
+
   OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(OPENFILENAME));
   ofn.lStructSize = sizeof(OPENFILENAME);

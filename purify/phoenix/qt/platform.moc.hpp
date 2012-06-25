@@ -1,4 +1,4 @@
-static QApplication *qtApplication = 0;
+static QApplication *qtApplication = nullptr;
 
 struct Settings : public configuration {
   bidirectional_map<Keyboard::Scancode, unsigned> keymap;
@@ -34,7 +34,7 @@ struct pDesktop {
 
 struct pKeyboard {
   static bool pressed(Keyboard::Scancode scancode);
-  static array<bool> state();
+  static vector<bool> state();
 
   static void initialize();
 };
@@ -133,6 +133,7 @@ public:
   void setGeometry(const Geometry &geometry);
   void setMenuFont(const string &font);
   void setMenuVisible(bool visible);
+  void setModal(bool modal);
   void setResizable(bool resizable);
   void setStatusFont(const string &font);
   void setStatusText(const string &text);
@@ -230,7 +231,7 @@ public:
 
   bool checked();
   void setChecked();
-  void setGroup(const array<RadioItem&> &group);
+  void setGroup(const set<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -353,6 +354,8 @@ public:
   QComboBox *qtComboBox;
 
   void append(const string &text);
+  void modify(unsigned row, const string &text);
+  void remove(unsigned row);
   Geometry minimumGeometry();
   void reset();
   unsigned selection();
@@ -485,6 +488,7 @@ public:
   void autoSizeColumns();
   bool checked(unsigned row);
   void modify(unsigned row, const lstring &text);
+  void remove(unsigned row);
   void reset();
   bool selected();
   unsigned selection();
@@ -492,6 +496,7 @@ public:
   void setChecked(unsigned row, bool checked);
   void setHeaderText(const lstring &text);
   void setHeaderVisible(bool visible);
+  void setImage(unsigned row, unsigned column, const nall::image &image);
   void setSelected(bool selected);
   void setSelection(unsigned row);
 
@@ -530,7 +535,7 @@ public:
   bool checked();
   Geometry minimumGeometry();
   void setChecked();
-  void setGroup(const array<RadioBox&> &group);
+  void setGroup(const set<RadioBox&> &group);
   void setText(const string &text);
 
   pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}

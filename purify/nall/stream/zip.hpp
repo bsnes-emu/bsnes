@@ -1,9 +1,15 @@
-#ifdef NALL_STREAM_INTERNAL_HPP
+#ifndef NALL_STREAM_ZIP_HPP
+#define NALL_STREAM_ZIP_HPP
+
+#include <nall/zip.hpp>
 
 namespace nall {
 
 struct zipstream : memorystream {
-  inline zipstream(const stream &stream, const string &filter = "*") {
+  using stream::read;
+  using stream::write;
+
+  zipstream(const stream &stream, const string &filter = "*") {
     unsigned size = stream.size();
     uint8_t *data = new uint8_t[size];
     stream.read(data, size);
@@ -20,7 +26,7 @@ struct zipstream : memorystream {
     }
   }
 
-  inline ~zipstream() {
+  ~zipstream() {
     if(pdata) delete[] pdata;
   }
 };

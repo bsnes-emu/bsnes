@@ -121,6 +121,10 @@ void pWindow::setMenuVisible(bool visible) {
   setGeometry(window.state.geometry);
 }
 
+void pWindow::setModal(bool modal) {
+  qtWindow->setWindowModality(modal ? Qt::ApplicationModal : Qt::NonModal);
+}
+
 void pWindow::setResizable(bool resizable) {
   if(resizable) {
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
