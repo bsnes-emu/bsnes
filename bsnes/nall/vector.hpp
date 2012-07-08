@@ -97,6 +97,13 @@ namespace nall {
       return item;
     }
 
+    void reverse() {
+      unsigned pivot = size() / 2;
+      for(unsigned l = 0, r = size() - 1; l < pivot; l++, r--) {
+        std::swap(pool[l], pool[r]);
+      }
+    }
+
     void sort() {
       nall::sort(pool, objectsize);
     }

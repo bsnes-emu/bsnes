@@ -27,11 +27,18 @@ unsigned Interface::group(unsigned id) {
   switch(id) {
   case ID::ROM:
   case ID::RAM:
+  case ID::SA1ROM:
+  case ID::SA1IRAM:
+  case ID::SA1BWRAM:
   case ID::ArmDSP:
   case ID::HitachiDSP:
   case ID::Nec7725DSP:
   case ID::Nec96050DSP:
   case ID::NecDSPRAM:
+  case ID::EpsonRTC:
+  case ID::SharpRTC:
+  case ID::SDD1ROM:
+  case ID::SDD1RAM:
   case ID::BsxPSRAM:
     return 0;
   case ID::SuperGameBoy:
@@ -72,13 +79,12 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
     stream.read(smp.iplrom, min(64u, stream.size()));
   }
 
-  if(id == ID::ROM) {
-    stream.read(cartridge.rom.data(), min(cartridge.rom.size(), stream.size()));
-  }
+  if(id == ID::ROM) cartridge.rom.read(stream);
+  if(id == ID::RAM) cartridge.ram.read(stream);
 
-  if(id == ID::RAM) {
-    stream.read(cartridge.ram.data(), min(cartridge.ram.size(), stream.size()));
-  }
+  if(id == ID::SA1ROM) sa1.rom.read(stream);
+  if(id == ID::SA1IRAM) sa1.iram.read(stream);
+  if(id == ID::SA1BWRAM) sa1.bwram.read(stream);
 
   if(id == ID::ArmDSP) {
     stream.read(armdsp.firmware, stream.size());
@@ -114,6 +120,9 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
     sharprtc.load(data);
   }
 
+  if(id == ID::SDD1ROM) sdd1.rom.read(stream);
+  if(id == ID::SDD1RAM) sdd1.ram.read(stream);
+
   if(id == ID::SuperGameBoyROM) {
     stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
   }
@@ -123,20 +132,15 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   }
 
   if(id == ID::BsxFlashROM) {
-    bsxflash.memory.copy(stream);
+    bsxflash.memory.read(stream);
   }
 
   if(id == ID::BsxPSRAM) {
     stream.read(bsxcartridge.psram.data(), min(stream.size(), bsxcartridge.psram.size()));
   }
 
-  if(id == ID::SufamiTurboSlotAROM) {
-    sufamiturbo.slotA.rom.copy(stream);
-  }
-
-  if(id == ID::SufamiTurboSlotBROM) {
-    sufamiturbo.slotB.rom.copy(stream);
-  }
+  if(id == ID::SufamiTurboSlotAROM) sufamiturbo.slotA.rom.read(stream);
+  if(id == ID::SufamiTurboSlotBROM) sufamiturbo.slotB.rom.read(stream);
 
   if(id == ID::SufamiTurboSlotARAM) {
     stream.read(sufamiturbo.slotA.ram.data(), min(sufamiturbo.slotA.ram.size(), stream.size()));
@@ -148,9 +152,9 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
 }
 
 void Interface::save(unsigned id, const stream &stream) {
-  if(id == ID::RAM) {
-    stream.write(cartridge.ram.data(), cartridge.ram.size());
-  }
+  if(id == ID::RAM) stream.write(cartridge.ram.data(), cartridge.ram.size());
+  if(id == ID::SA1IRAM) stream.write(sa1.iram.data(), sa1.iram.size());
+  if(id == ID::SA1BWRAM) stream.write(sa1.bwram.data(), sa1.bwram.size());
 
   if(id == ID::NecDSPRAM) {
     for(unsigned n = 0; n < 2048; n++) stream.writel(necdsp.dataRAM[n], 2);
@@ -167,6 +171,8 @@ void Interface::save(unsigned id, const stream &stream) {
     sharprtc.save(data);
     stream.write(data, sizeof data);
   }
+
+  if(id == ID::SDD1RAM) stream.write(sdd1.ram.data(), sdd1.ram.size());
 
   if(id == ID::SuperGameBoyRAM) {
     stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);

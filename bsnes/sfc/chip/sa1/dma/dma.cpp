@@ -75,7 +75,7 @@ uint8 SA1::dma_cc1_read(unsigned addr) {
     //buffer next character to I-RAM
     unsigned bpp = 2 << (2 - mmio.dmacb);
     unsigned bpl = (8 << mmio.dmasize) >> mmio.dmacb;
-    unsigned bwmask = cartridge.ram.size() - 1;
+    unsigned bwmask = bwram.size() - 1;
     unsigned tile = ((addr - mmio.dsa) & bwmask) >> (6 - mmio.dmacb);
     unsigned ty = (tile >> mmio.dmasize);
     unsigned tx = tile & ((1 << mmio.dmasize) - 1);
@@ -84,7 +84,7 @@ uint8 SA1::dma_cc1_read(unsigned addr) {
     for(unsigned y = 0; y < 8; y++) {
       uint64 data = 0;
       for(unsigned byte = 0; byte < bpp; byte++) {
-        data |= (uint64)cartridge.ram.read((bwaddr + byte) & bwmask) << (byte << 3);
+        data |= (uint64)bwram.read((bwaddr + byte) & bwmask) << (byte << 3);
       }
       bwaddr += bpl;
 

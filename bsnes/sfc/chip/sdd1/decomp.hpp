@@ -70,7 +70,6 @@ struct Decomp {
 
   void init(unsigned offset);
   uint8 read();
-  uint8 rom_read(unsigned offset);
   Decomp();
 
   IM  im;

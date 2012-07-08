@@ -194,47 +194,46 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
 void Cartridge::parse_markup_nss(XML::Node &root) {
   if(root.exists() == false) return;
   has_nss_dip = true;
-
   nss.dip = interface->dipSettings(root);
+
+  for(auto &node : root) {
+    if(node.name != "map") continue;
+    Mapping m({&NSS::read, &nss}, {&NSS::write, &nss});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
 }
 
 void Cartridge::parse_markup_sa1(XML::Node &root) {
   if(root.exists() == false) return;
   has_sa1 = true;
 
-  auto &mcurom = root["mcu"]["rom"];
-  auto &mcuram = root["mcu"]["ram"];
+  auto &rom = root["rom"];
   auto &iram = root["iram"];
   auto &bwram = root["bwram"];
   auto &mmio = root["mmio"];
 
-  for(auto &node : mcurom) {
+  parse_markup_memory(sa1.rom, rom, ID::SA1ROM, false);
+  for(auto &node : rom) {
     if(node.name != "map") continue;
     Mapping m({&SA1::mmc_read, &sa1}, {&SA1::mmc_write, &sa1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
-  for(auto &node : mcuram) {
-    if(node.name != "map") continue;
-    Mapping m({&SA1::mmc_cpu_read, &sa1}, {&SA1::mmc_cpu_write, &sa1});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
+  parse_markup_memory(sa1.iram, iram, ID::SA1IRAM, true);
   for(auto &node : iram) {
     if(node.name != "map") continue;
-    Mapping m(sa1.cpuiram);
+    Mapping m({&SA1::mmc_read, &sa1}, {&SA1::mmc_write, &sa1});
     parse_markup_map(m, node);
-    if(m.size == 0) m.size = 2048;
     mapping.append(m);
   }
 
+  parse_markup_memory(sa1.bwram, bwram, ID::SA1BWRAM, true);
   for(auto &node : bwram) {
     if(node.name != "map") continue;
-    Mapping m(sa1.cpubwram);
+    Mapping m({&SA1::mmc_read, &sa1}, {&SA1::mmc_write, &sa1});
     parse_markup_map(m, node);
-    if(m.size == 0) m.size = ram.size();
     mapping.append(m);
   }
 
@@ -420,16 +419,32 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   if(root.exists() == false) return;
   has_spc7110 = true;
 
+  auto &rom = root["rom"];
+  auto &ram = root["ram"];
   auto &mmio = root["mmio"];
   auto &dcu = root["dcu"];
-  auto &mcurom = root["mcu"]["rom"];
-  auto &mcuram = root["mcu"]["ram"];
 
-  spc7110.prom_base = numeral(mcurom["program"]["offset"].data);
-  spc7110.prom_size = numeral(mcurom["program"]["size"].data);
+  spc7110.prom_base = numeral(rom["program"]["offset"].data);
+  spc7110.prom_size = numeral(rom["program"]["size"].data);
 
-  spc7110.drom_base = numeral(mcurom["data"]["offset"].data);
-  spc7110.drom_size = numeral(mcurom["data"]["size"].data);
+  spc7110.drom_base = numeral(rom["data"]["offset"].data);
+  spc7110.drom_size = numeral(rom["data"]["size"].data);
+
+  parse_markup_memory(cartridge.rom, rom, ID::ROM, false);
+  for(auto &node : rom) {
+    if(node.name != "map") continue;
+    Mapping m({&SPC7110::mcurom_read, &spc7110}, {&SPC7110::mcurom_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  parse_markup_memory(cartridge.ram, ram, ID::RAM, true);
+  for(auto &node : ram) {
+    if(node.name != "map") continue;
+    Mapping m({&SPC7110::mcuram_read, &spc7110}, {&SPC7110::mcuram_write, &spc7110});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
 
   for(auto &node : mmio) {
     if(node.name != "map") continue;
@@ -444,36 +459,31 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
     parse_markup_map(m, node);
     mapping.append(m);
   }
-
-  for(auto &node : mcurom) {
-    if(node.name != "map") continue;
-    Mapping m({&SPC7110::mcurom_read, &spc7110}, {&SPC7110::mcurom_write, &spc7110});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : mcuram) {
-    if(node.name != "map") continue;
-    Mapping m({&SPC7110::mcuram_read, &spc7110}, {&SPC7110::mcuram_write, &spc7110});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
 }
 
 void Cartridge::parse_markup_sdd1(XML::Node &root) {
   if(root.exists() == false) return;
   has_sdd1 = true;
 
-  for(auto &node : root["mmio"]) {
+  parse_markup_memory(sdd1.rom, root["rom"], ID::SDD1ROM, false);
+  for(auto &node : root["rom"]) {
     if(node.name != "map") continue;
-    Mapping m({&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
+    Mapping m({&SDD1::mcu_read, &sdd1}, {&SDD1::mcu_write, &sdd1});
     parse_markup_map(m, node);
     mapping.append(m);
   }
 
-  for(auto &node : root["mcu"]) {
+  parse_markup_memory(sdd1.ram, root["ram"], ID::SDD1RAM, true);
+  for(auto &node : root["ram"]) {
     if(node.name != "map") continue;
     Mapping m({&SDD1::mcu_read, &sdd1}, {&SDD1::mcu_write, &sdd1});
+    parse_markup_map(m, node);
+    mapping.append(m);
+  }
+
+  for(auto &node : root["mmio"]) {
+    if(node.name != "map") continue;
+    Mapping m({&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
     parse_markup_map(m, node);
     mapping.append(m);
   }

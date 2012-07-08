@@ -2,59 +2,71 @@
 
 namespace nall {
 
-// "foo/bar.c" -> "foo/"
-// "foo/" -> "foo/"
+// "/foo/bar.c" -> "/foo/"
+// "/foo/" -> "/foo/"
 // "bar.c" -> "./"
-inline string dir(char const *name) {
-  string result = name;
-  for(signed i = strlen(result); i >= 0; i--) {
-    if(result[i] == '/' || result[i] == '\\') {
-      result[i + 1] = 0;
-      break;
-    }
-    if(i == 0) result = "./";
-  }
-  return result;
-}
-
-// "foo/bar.c" -> "bar.c"
-inline string notdir(char const *name) {
-  for(signed i = strlen(name); i >= 0; i--) {
+inline string dir(string name) {
+  for(signed i = name.length(); i >= 0; i--) {
     if(name[i] == '/' || name[i] == '\\') {
-      name += i + 1;
+      name[i + 1] = 0;
       break;
     }
+    if(i == 0) name = "./";
   }
-  string result = name;
-  return result;
+  return name;
 }
 
-// "foo/bar.c" -> "foo/bar"
-inline string basename(char const *name) {
-  string result = name;
-  for(signed i = strlen(result); i >= 0; i--) {
-    if(result[i] == '/' || result[i] == '\\') {
-      //file has no extension
-      break;
-    }
-    if(result[i] == '.') {
-      result[i] = 0;
-      break;
+// "/foo/bar.c" -> "bar.c"
+// "/foo/" -> ""
+// "bar.c" -> "bar.c"
+inline string notdir(string name) {
+  for(signed i = name.length(); i >= 0; i--) {
+    if(name[i] == '/' || name[i] == '\\') {
+      return (const char*)name + i + 1;
     }
   }
-  return result;
+  return name;
 }
 
-// "foo/bar.c" -> "c"
-inline string extension(char const *name) {
-  for(signed i = strlen(name); i >= 0; i--) {
+// "/foo/bar/baz" -> "/foo/bar/"
+// "/foo/bar/" -> "/foo/"
+// "/foo/bar" -> "/foo/"
+inline string parentdir(string name) {
+  unsigned length = name.length(), paths = 0, prev, last;
+  for(unsigned i = 0; i < length; i++) {
+    if(name[i] == '/' || name[i] == '\\') {
+      paths++;
+      prev = last;
+      last = i;
+    }
+  }
+  if(last + 1 == length) last = prev;  //if name ends in slash; use previous slash
+  if(paths > 1) name[last + 1] = 0;
+  return name;
+}
+
+// "/foo/bar.c" -> "/foo/bar"
+inline string basename(string name) {
+  for(signed i = name.length(); i >= 0; i--) {
+    if(name[i] == '/' || name[i] == '\\') break;  //file has no extension
     if(name[i] == '.') {
-      name += i + 1;
+      name[i] = 0;
       break;
     }
   }
-  string result = name;
-  return result;
+  return name;
+}
+
+// "/foo/bar.c" -> "c"
+// "/foo/bar" -> ""
+inline string extension(string name) {
+  for(signed i = name.length(); i >= 0; i--) {
+    if(name[i] == '/' || name[i] == '\\') return "";  //file has no extension
+    if(name[i] == '.') {
+      return (const char*)name + i + 1;
+    }
+  }
+  return name;
 }
 
 }

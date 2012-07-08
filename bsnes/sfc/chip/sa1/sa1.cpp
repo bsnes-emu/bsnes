@@ -123,6 +123,9 @@ void SA1::load() {
 }
 
 void SA1::unload() {
+  rom.reset();
+  iram.reset();
+  bwram.reset();
 }
 
 void SA1::power() {
@@ -322,9 +325,6 @@ void SA1::reset() {
 
   //$230b
   mmio.overflow = false;
-}
-
-SA1::SA1() : iram(2048) {
 }
 
 }

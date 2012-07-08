@@ -1,5 +1,3 @@
-StaticRAM iram;
-
 struct CPUIRAM : Memory {
   unsigned size() const;
   alwaysinline uint8 read(unsigned);

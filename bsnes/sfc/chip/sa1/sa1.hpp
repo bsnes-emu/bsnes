@@ -1,4 +1,8 @@
 struct SA1 : Processor::R65816, public Coprocessor {
+  MappedRAM rom;
+  MappedRAM iram;
+  MappedRAM bwram;
+
   #include "bus/bus.hpp"
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
@@ -30,7 +34,6 @@ struct SA1 : Processor::R65816, public Coprocessor {
   void reset();
 
   void serialize(serializer&);
-  SA1();
 };
 
 extern SA1 sa1;

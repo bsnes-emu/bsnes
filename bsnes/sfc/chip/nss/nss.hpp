@@ -1,5 +1,5 @@
 struct NSS {
-  uint16 dip;
+  uint8 dip;
 
   void init();
   void load();

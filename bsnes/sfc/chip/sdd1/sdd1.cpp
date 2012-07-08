@@ -14,11 +14,13 @@ void SDD1::init() {
 void SDD1::load() {
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, { &SDD1::mmio_read, &sdd1 }, { &SDD1::mmio_write, &sdd1 });
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, {&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, {&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
 }
 
 void SDD1::unload() {
+  rom.reset();
+  ram.reset();
 }
 
 void SDD1::power() {
@@ -84,8 +86,8 @@ void SDD1::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 SDD1::rom_read(unsigned addr) {
-  return cartridge.rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
+uint8 SDD1::mmc_read(unsigned addr) {
+  return rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
 }
 
 //SDD1::mcu_read() is mapped to $c0-ff:0000-ffff
@@ -107,6 +109,20 @@ uint8 SDD1::rom_read(unsigned addr) {
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
 uint8 SDD1::mcu_read(unsigned addr) {
+  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return ram.read(addr & 0x1fff);
+  }
+
+  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
+    return ram.read(addr & 0x1fff);
+  }
+
+  if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
+    addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
+    return rom.read(addr);
+  }
+
+  //$40-7f|c0-ff:0000-ffff (MMC)
   if(sdd1_enable & xfer_enable) {
     //at least one channel has S-DD1 decompression enabled ...
     for(unsigned i = 0; i < 8; i++) {
@@ -133,16 +149,17 @@ uint8 SDD1::mcu_read(unsigned addr) {
   }  //S-DD1 decompressor enabled
 
   //S-DD1 decompression mode inactive; return ROM data
-  return cartridge.rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
+  return mmc_read(addr);
 }
 
 void SDD1::mcu_write(unsigned addr, uint8 data) {
-}
+  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return ram.write(addr & 0x1fff, data);
+  }
 
-SDD1::SDD1() {
-}
-
-SDD1::~SDD1() {
+  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
+    return ram.write(addr & 0x1fff, data);
+  }
 }
 
 }

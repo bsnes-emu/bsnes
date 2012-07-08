@@ -17,6 +17,10 @@ struct ID {
     ROM,
     RAM,
 
+    SA1ROM,
+    SA1IRAM,
+    SA1BWRAM,
+
     ArmDSP,
     HitachiDSP,
     Nec7725DSP,
@@ -25,6 +29,9 @@ struct ID {
 
     EpsonRTC,
     SharpRTC,
+
+    SDD1ROM,
+    SDD1RAM,
 
     SuperGameBoyROM,
     SuperGameBoyRAM,

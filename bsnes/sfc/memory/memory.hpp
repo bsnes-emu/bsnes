@@ -25,6 +25,7 @@ struct MappedRAM : Memory {
   inline void reset();
   inline void map(uint8*, unsigned);
   inline void copy(const stream &memory);
+  inline void read(const stream &memory);
 
   inline void write_protect(bool status);
   inline uint8* data();

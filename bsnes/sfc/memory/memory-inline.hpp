@@ -40,6 +40,10 @@ void MappedRAM::copy(const stream &memory) {
   memory.read(data_, memory.size());
 }
 
+void MappedRAM::read(const stream &memory) {
+  memory.read(data_, min(memory.size(), size_));
+}
+
 void MappedRAM::write_protect(bool status) { write_protect_ = status; }
 uint8* MappedRAM::data() { return data_; }
 unsigned MappedRAM::size() const { return size_; }

@@ -4,6 +4,9 @@ void SA1::serialize(serializer &s) {
   R65816::serialize(s);
   Thread::serialize(s);
 
+  s.array(iram.data(), iram.size());
+  s.array(bwram.data(), bwram.size());
+
   //sa1.hpp
   s.integer(status.tick_counter);
 

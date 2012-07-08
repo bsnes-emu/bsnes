@@ -17,11 +17,11 @@ uint8 SDD1::Decomp::IM::get_codeword(uint8 code_length) {
   uint8 codeword;
   uint8 comp_count;
 
-  codeword = self.rom_read(offset) << bit_count;
+  codeword = sdd1.mmc_read(offset) << bit_count;
   bit_count++;
 
   if(codeword & 0x80) {
-    codeword |= self.rom_read(offset + 1) >> (9 - bit_count);
+    codeword |= sdd1.mmc_read(offset + 1) >> (9 - bit_count);
     bit_count += code_length;
   }
 
@@ -183,8 +183,8 @@ uint8 SDD1::Decomp::PEM::get_bit(uint8 context) {
 //context model
 
 void SDD1::Decomp::CM::init(unsigned offset) {
-  bitplanes_info = self.rom_read(offset) & 0xc0;
-  context_bits_info = self.rom_read(offset) & 0x30;
+  bitplanes_info = sdd1.mmc_read(offset) & 0xc0;
+  context_bits_info = sdd1.mmc_read(offset) & 0x30;
   bit_number = 0;
   for(unsigned i = 0; i < 8; i++) previous_bitplane_bits[i] = 0;
   switch(bitplanes_info) {
@@ -231,7 +231,7 @@ uint8 SDD1::Decomp::CM::get_bit() {
 //output logic
 
 void SDD1::Decomp::OL::init(unsigned offset) {
-  bitplanes_info = self.rom_read(offset) & 0xc0;
+  bitplanes_info = sdd1.mmc_read(offset) & 0xc0;
   r0 = 0x01;
 }
 
@@ -274,10 +274,6 @@ void SDD1::Decomp::init(unsigned offset) {
 
 uint8 SDD1::Decomp::read() {
   return ol.decompress();
-}
-
-uint8 SDD1::Decomp::rom_read(unsigned offset) {
-  return sdd1.rom_read(offset);
 }
 
 SDD1::Decomp::Decomp() : im(*this), gcd(*this),

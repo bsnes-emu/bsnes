@@ -29,7 +29,7 @@ uint8 SA1::bus_read(unsigned addr) {
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
     synchronize_cpu();
-    return cartridge.ram.read(addr & (cartridge.ram.size() - 1));
+    return bwram.read(addr & (bwram.size() - 1));
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
@@ -59,7 +59,7 @@ void SA1::bus_write(unsigned addr, uint8 data) {
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
     synchronize_cpu();
-    return cartridge.ram.write(addr & (cartridge.ram.size() - 1), data);
+    return bwram.write(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
@@ -82,11 +82,11 @@ uint8 SA1::vbr_read(unsigned addr) {
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return cartridge.ram.read(addr & (cartridge.ram.size() - 1));
+    return bwram.read(addr & (bwram.size() - 1));
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    return cartridge.ram.read(addr & (cartridge.ram.size() - 1));
+    return bwram.read(addr & (bwram.size() - 1));
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
@@ -120,6 +120,20 @@ void SA1::op_write(unsigned addr, uint8 data) {
 }
 
 uint8 SA1::mmc_read(unsigned addr) {
+  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
+    return cpuiram.read(addr & 0x07ff);
+  }
+
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    cpu.synchronize_coprocessors();
+    addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
+    return cpubwram.read(addr);
+  }
+
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return cpubwram.read(addr & 0x0fffff);
+  }
+
   if((addr & 0xffffe0) == 0x00ffe0) {
     if(addr == 0xffea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
     if(addr == 0xffeb && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 8;
@@ -128,7 +142,7 @@ uint8 SA1::mmc_read(unsigned addr) {
   }
 
   static auto read = [](unsigned addr) {
-    return cartridge.rom.read(bus.mirror(addr, cartridge.rom.size()));
+    return sa1.rom.read(bus.mirror(addr, sa1.rom.size()));
   };
 
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
@@ -175,26 +189,27 @@ uint8 SA1::mmc_read(unsigned addr) {
 }
 
 void SA1::mmc_write(unsigned addr, uint8 data) {
-}
+  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
+    return cpuiram.write(addr & 0x07ff, data);
+  }
 
-uint8 SA1::mmc_cpu_read(unsigned addr) {
-  cpu.synchronize_coprocessors();
-  addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
-  return cpubwram.read(addr);
-}
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    cpu.synchronize_coprocessors();
+    addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
+    return cpubwram.write(addr, data);
+  }
 
-void SA1::mmc_cpu_write(unsigned addr, uint8 data) {
-  cpu.synchronize_coprocessors();
-  addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
-  cpubwram.write(addr, data);
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return cpubwram.write(addr & 0x0fffff, data);
+  }
 }
 
 uint8 SA1::mmc_sa1_read(unsigned addr) {
   synchronize_cpu();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
-    addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
-    return cartridge.ram.read(addr);
+    addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());
+    return bwram.read(addr);
   } else {
     //$60-6f:0000-ffff x 128 projection
     addr = bus.mirror(mmio.cbm * 0x2000 + (addr & 0x1fff), 0x100000);
@@ -206,8 +221,8 @@ void SA1::mmc_sa1_write(unsigned addr, uint8 data) {
   synchronize_cpu();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
-    addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
-    cartridge.ram.write(addr, data);
+    addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());
+    bwram.write(addr, data);
   } else {
     //$60-6f:0000-ffff x 128 projection
     addr = bus.mirror(mmio.cbm * 0x2000 + (addr & 0x1fff), 0x100000);
@@ -219,20 +234,20 @@ uint8 SA1::bitmap_read(unsigned addr) {
   if(mmio.bbf == 0) {
     //4bpp
     unsigned shift = addr & 1;
-    addr = (addr >> 1) & (cartridge.ram.size() - 1);
+    addr = (addr >> 1) & (bwram.size() - 1);
     switch(shift) { default:
-      case 0: return (cartridge.ram.read(addr) >> 0) & 15;
-      case 1: return (cartridge.ram.read(addr) >> 4) & 15;
+      case 0: return (bwram.read(addr) >> 0) & 15;
+      case 1: return (bwram.read(addr) >> 4) & 15;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
-    addr = (addr >> 2) & (cartridge.ram.size() - 1);
+    addr = (addr >> 2) & (bwram.size() - 1);
     switch(shift) { default:
-      case 0: return (cartridge.ram.read(addr) >> 0) & 3;
-      case 1: return (cartridge.ram.read(addr) >> 2) & 3;
-      case 2: return (cartridge.ram.read(addr) >> 4) & 3;
-      case 3: return (cartridge.ram.read(addr) >> 6) & 3;
+      case 0: return (bwram.read(addr) >> 0) & 3;
+      case 1: return (bwram.read(addr) >> 2) & 3;
+      case 2: return (bwram.read(addr) >> 4) & 3;
+      case 3: return (bwram.read(addr) >> 6) & 3;
     }
   }
 }
@@ -241,24 +256,24 @@ void SA1::bitmap_write(unsigned addr, uint8 data) {
   if(mmio.bbf == 0) {
     //4bpp
     unsigned shift = addr & 1;
-    addr = (addr >> 1) & (cartridge.ram.size() - 1);
+    addr = (addr >> 1) & (bwram.size() - 1);
     switch(shift) { default:
-      case 0: data = (cartridge.ram.read(addr) & 0xf0) | ((data & 15) << 0); break;
-      case 1: data = (cartridge.ram.read(addr) & 0x0f) | ((data & 15) << 4); break;
+      case 0: data = (bwram.read(addr) & 0xf0) | ((data & 15) << 0); break;
+      case 1: data = (bwram.read(addr) & 0x0f) | ((data & 15) << 4); break;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
-    addr = (addr >> 2) & (cartridge.ram.size() - 1);
+    addr = (addr >> 2) & (bwram.size() - 1);
     switch(shift) { default:
-      case 0: data = (cartridge.ram.read(addr) & 0xfc) | ((data &  3) << 0); break;
-      case 1: data = (cartridge.ram.read(addr) & 0xf3) | ((data &  3) << 2); break;
-      case 2: data = (cartridge.ram.read(addr) & 0xcf) | ((data &  3) << 4); break;
-      case 3: data = (cartridge.ram.read(addr) & 0x3f) | ((data &  3) << 6); break;
+      case 0: data = (bwram.read(addr) & 0xfc) | ((data &  3) << 0); break;
+      case 1: data = (bwram.read(addr) & 0xf3) | ((data &  3) << 2); break;
+      case 2: data = (bwram.read(addr) & 0xcf) | ((data &  3) << 4); break;
+      case 3: data = (bwram.read(addr) & 0x3f) | ((data &  3) << 6); break;
     }
   }
 
-  cartridge.ram.write(addr, data);
+  bwram.write(addr, data);
 }
 
 #endif
