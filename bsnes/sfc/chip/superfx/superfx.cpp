@@ -47,6 +47,8 @@ void SuperFX::load() {
 }
 
 void SuperFX::unload() {
+  rom.reset();
+  ram.reset();
 }
 
 void SuperFX::power() {

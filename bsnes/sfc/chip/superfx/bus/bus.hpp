@@ -1,11 +1,11 @@
-struct ROM : Memory {
+struct CPUROM : Memory {
   unsigned size() const;
   uint8 read(unsigned);
   void write(unsigned, uint8);
-} rom;
+} cpurom;
 
-struct RAM : Memory {
+struct CPURAM : Memory {
   unsigned size() const;
   uint8 read(unsigned);
   void write(unsigned, uint8);
-} ram;
+} cpuram;

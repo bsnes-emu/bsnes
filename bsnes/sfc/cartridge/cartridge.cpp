@@ -48,7 +48,23 @@ void Cartridge::load(const string &manifest) {
 
   //Super Famicom
   else {
-    sha256 = nall::sha256(rom.data(), rom.size());
+    sha256_ctx sha;
+    uint8_t hash[32];
+    sha256_init(&sha);
+    //hash each ROM image that exists; any with size() == 0 is ignored by sha256_chunk()
+    sha256_chunk(&sha, rom.data(), rom.size());
+    sha256_chunk(&sha, bsxcartridge.rom.data(), bsxcartridge.rom.size());
+    sha256_chunk(&sha, sa1.rom.data(), sa1.rom.size());
+    sha256_chunk(&sha, superfx.rom.data(), superfx.rom.size());
+    sha256_chunk(&sha, hitachidsp.rom.data(), hitachidsp.rom.size());
+    sha256_chunk(&sha, spc7110.prom.data(), spc7110.prom.size());
+    sha256_chunk(&sha, spc7110.drom.data(), spc7110.drom.size());
+    sha256_chunk(&sha, sdd1.rom.data(), sdd1.rom.size());
+    sha256_final(&sha);
+    sha256_hash(&sha, hash);
+    string result;
+    for(auto &byte : hash) result.append(hex<2>(byte));
+    sha256 = result;
   }
 
   rom.write_protect(true);

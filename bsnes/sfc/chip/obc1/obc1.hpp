@@ -1,4 +1,6 @@
 struct OBC1 {
+  MappedRAM ram;
+
   void init();
   void load();
   void unload();

@@ -11,12 +11,12 @@ void HitachiDSP::bus_write(uint24 addr, uint8 data) {
 
 uint8 HitachiDSP::rom_read(unsigned addr) {
   if(co_active() == cpu.thread) {
-    if(regs.halt) return cartridge.rom.read(addr);
+    if(regs.halt) return rom.read(addr);
     if((addr & 0x40ffe0) == 0x00ffe0) return mmio.vector[addr & 0x1f];
     return cpu.regs.mdr;
   }
   if(co_active() == hitachidsp.thread) {
-    return cartridge.rom.read(addr);
+    return rom.read(addr);
   }
   return cpu.regs.mdr;
 }

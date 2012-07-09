@@ -45,6 +45,9 @@ void SPC7110::load() {
 }
 
 void SPC7110::unload() {
+  prom.reset();
+  drom.reset();
+  ram.reset();
 }
 
 void SPC7110::power() {
@@ -279,8 +282,8 @@ uint8 SPC7110::mcurom_read(unsigned addr) {
   || (addr & 0xf00000) == 0xc00000  //      $c0-cf:0000-ffff
   ) {
     addr &= 0x0fffff;
-    if(prom_size) {  //8mbit PROM
-      return cartridge.rom.read(prom_base + bus.mirror(0x000000 + addr, prom_size));
+    if(prom.size()) {  //8mbit PROM
+      return prom.read(bus.mirror(0x000000 + addr, prom.size()));
     }
     addr |= 0x100000 * (r4830 & 7);
     return datarom_read(addr);
@@ -291,7 +294,7 @@ uint8 SPC7110::mcurom_read(unsigned addr) {
   ) {
     addr &= 0x0fffff;
     if(r4834 & 4) {  //16mbit PROM
-      return cartridge.rom.read(prom_base + bus.mirror(0x100000 + addr, prom_size));
+      return prom.read(bus.mirror(0x100000 + addr, prom.size()));
     }
     addr |= 0x100000 * (r4831 & 7);
     return datarom_read(addr);
@@ -327,8 +330,8 @@ uint8 SPC7110::mcuram_read(unsigned addr) {
   //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
     unsigned bank = (addr >> 16) & 0x3f;
-    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
-    return cartridge.ram.read(addr);
+    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
+    return ram.read(addr);
   }
   return 0x00;
 }
@@ -337,8 +340,8 @@ void SPC7110::mcuram_write(unsigned addr, uint8 data) {
   //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
     unsigned bank = (addr >> 16) & 0x3f;
-    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), cartridge.ram.size());
-    cartridge.ram.write(addr, data);
+    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
+    ram.write(addr, data);
   }
 }
 

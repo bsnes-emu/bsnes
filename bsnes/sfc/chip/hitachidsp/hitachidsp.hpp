@@ -1,4 +1,6 @@
 struct HitachiDSP : Processor::HG51B, Coprocessor {
+  MappedRAM rom;
+
   unsigned frequency;
   #include "mmio.hpp"
 

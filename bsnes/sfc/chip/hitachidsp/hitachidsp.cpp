@@ -37,6 +37,7 @@ void HitachiDSP::load() {
 }
 
 void HitachiDSP::unload() {
+  rom.reset();
 }
 
 void HitachiDSP::power() {

@@ -13,6 +13,7 @@ void OBC1::load() {
 }
 
 void OBC1::unload() {
+  ram.reset();
 }
 
 void OBC1::power() {
@@ -69,11 +70,11 @@ void OBC1::write(unsigned addr, uint8 data) {
 }
 
 uint8 OBC1::ram_read(unsigned addr) {
-  return cartridge.ram.read(addr & 0x1fff);
+  return ram.read(addr & 0x1fff);
 }
 
 void OBC1::ram_write(unsigned addr, uint8 data) {
-  cartridge.ram.write(addr & 0x1fff, data);
+  ram.write(addr & 0x1fff, data);
 }
 
 }

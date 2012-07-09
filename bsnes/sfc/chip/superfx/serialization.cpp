@@ -4,6 +4,8 @@ void SuperFX::serialize(serializer &s) {
   GSU::serialize(s);
   Thread::serialize(s);
 
+  s.array(ram.data(), ram.size());
+
   s.integer(clockmode);
   s.integer(instruction_counter);
 

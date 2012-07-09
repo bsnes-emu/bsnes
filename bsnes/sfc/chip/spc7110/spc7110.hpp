@@ -1,8 +1,9 @@
 struct Decompressor;
 
 struct SPC7110 : Coprocessor {
-  unsigned prom_base, prom_size;  //program ROM
-  unsigned drom_base, drom_size;  //data ROM
+  MappedRAM prom;  //program ROM
+  MappedRAM drom;  //data ROM
+  MappedRAM ram;
 
   static void Enter();
   void enter();

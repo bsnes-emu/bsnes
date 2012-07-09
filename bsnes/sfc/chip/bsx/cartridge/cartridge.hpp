@@ -1,4 +1,6 @@
 struct BSXCartridge {
+  MappedRAM rom;
+  MappedRAM ram;
   MappedRAM psram;
 
   void init();

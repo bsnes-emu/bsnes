@@ -5,7 +5,7 @@ uint8 SPC7110::datarom_read(unsigned addr) {
   unsigned mask = 0x100000 * size - 1;
   unsigned offset = addr & mask;
   if((r4834 & 3) != 3 && (addr & 0x400000)) return 0x00;
-  return cartridge.rom.read(drom_base + Bus::mirror(offset, drom_size));
+  return drom.read(Bus::mirror(offset, drom.size()));
 }
 
 unsigned SPC7110::data_offset() { return r4811 | r4812 << 8 | r4813 << 16; }

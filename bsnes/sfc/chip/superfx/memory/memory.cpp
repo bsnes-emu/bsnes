@@ -6,7 +6,7 @@ uint8 SuperFX::bus_read(unsigned addr) {
       step(6);
       synchronize_cpu();
     }
-    return cartridge.rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & rom_mask);
+    return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & rom_mask);
   }
 
   if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
@@ -14,7 +14,7 @@ uint8 SuperFX::bus_read(unsigned addr) {
       step(6);
       synchronize_cpu();
     }
-    return cartridge.rom.read(addr & rom_mask);
+    return rom.read(addr & rom_mask);
   }
 
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
@@ -22,7 +22,7 @@ uint8 SuperFX::bus_read(unsigned addr) {
       step(6);
       synchronize_cpu();
     }
-    return cartridge.ram.read(addr & ram_mask);
+    return ram.read(addr & ram_mask);
   }
 }
 
@@ -32,7 +32,7 @@ void SuperFX::bus_write(unsigned addr, uint8 data) {
       step(6);
       synchronize_cpu();
     }
-    return cartridge.ram.write(addr & ram_mask, data);
+    return ram.write(addr & ram_mask, data);
   }
 }
 
@@ -96,8 +96,8 @@ void SuperFX::cache_mmio_write(uint16 addr, uint8 data) {
 }
 
 void SuperFX::memory_reset() {
-  rom_mask = cartridge.rom.size() - 1;
-  ram_mask = cartridge.ram.size() - 1;
+  rom_mask = rom.size() - 1;
+  ram_mask = ram.size() - 1;
 
   for(unsigned n = 0; n < 512; n++) cache.buffer[n] = 0x00;
   for(unsigned n = 0; n < 32; n++) cache.valid[n] = false;

@@ -10,6 +10,9 @@ void BSXCartridge::load() {
 }
 
 void BSXCartridge::unload() {
+  rom.reset();
+  ram.reset();
+  psram.reset();
 }
 
 void BSXCartridge::power() {
@@ -42,14 +45,14 @@ uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memory_access(write, cartridge.rom, addr, data);
+      return memory_access(write, rom, addr, data);
     }
   }
 
   if((addr & 0xe08000) == 0x808000) {  //$80-9f:8000-ffff
     if(r08 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memory_access(write, cartridge.rom, addr, data);
+      return memory_access(write, rom, addr, data);
     }
   }
 
@@ -99,7 +102,7 @@ uint8 BSXCartridge::mmio_read(unsigned addr) {
   }
 
   if((addr & 0xf8f000) == 0x105000) { //$10-17:5000-5fff
-    return memory_read(cartridge.ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
+    return memory_read(ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
   }
 
   return 0x00;
@@ -114,7 +117,7 @@ void BSXCartridge::mmio_write(unsigned addr, uint8 data) {
   }
 
   if((addr & 0xf8f000) == 0x105000) {  //$10-17:5000-5fff
-    return memory_write(cartridge.ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
+    return memory_write(ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
   }
 }
 

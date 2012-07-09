@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "bsnes";
-  static const char Version[] = "089.14";
+  static const char Version[] = "089.15";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
 }

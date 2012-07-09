@@ -1,4 +1,7 @@
 struct SuperFX : Processor::GSU, Coprocessor {
+  MappedRAM rom;
+  MappedRAM ram;
+
   #include "bus/bus.hpp"
   #include "core/core.hpp"
   #include "memory/memory.hpp"

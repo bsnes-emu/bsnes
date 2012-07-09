@@ -21,8 +21,12 @@ struct ID {
     SA1IRAM,
     SA1BWRAM,
 
+    SuperFXROM,
+    SuperFXRAM,
+
     ArmDSP,
     HitachiDSP,
+    HitachiDSPROM,
     Nec7725DSP,
     Nec96050DSP,
     NecDSPRAM,
@@ -30,13 +34,21 @@ struct ID {
     EpsonRTC,
     SharpRTC,
 
+    SPC7110PROM,
+    SPC7110DROM,
+    SPC7110RAM,
+
     SDD1ROM,
     SDD1RAM,
+
+    OBC1RAM,
 
     SuperGameBoyROM,
     SuperGameBoyRAM,
 
     BsxFlashROM,
+    BsxROM,
+    BsxRAM,
     BsxPSRAM,
 
     SufamiTurboSlotAROM,
