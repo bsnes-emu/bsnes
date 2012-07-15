@@ -16,6 +16,20 @@ bool Interface::loaded() {
   return cartridge.loaded();
 }
 
+unsigned Interface::group(unsigned id) {
+  switch(id) {
+  case ID::BIOS:
+    return ID::System;
+  case ID::ROM:
+  case ID::RAM:
+  case ID::EEPROM:
+  case ID::FlashROM:
+    return ID::GameBoyAdvance;
+  }
+
+  throw;
+}
+
 void Interface::load(unsigned id, const string &manifest) {
   cartridge.load(manifest);
 }
@@ -104,9 +118,7 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = false;
 
-  firmware.append({ID::BIOS, "Game Boy Advance", "sys", "bios.rom"});
-
-  media.append({ID::GameBoyAdvance, "Game Boy Advance", "sys", "gba"});
+  media.append({ID::GameBoyAdvance, "Game Boy Advance", "gba"});
 
   {
     Device device{0, ID::Device, "Controller"};

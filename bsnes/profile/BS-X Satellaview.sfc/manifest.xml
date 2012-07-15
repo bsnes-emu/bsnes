@@ -4,16 +4,12 @@
     <rom name="program.rom" size="0x100000"/>
     <ram name="save.rwm" size="0x8000"/>
     <psram name="flash.rwm" size="0x40000"/>
-    <mcu>
-      <map address="00-3f:8000-ffff"/>
-      <map address="80-bf:8000-ffff"/>
-      <map address="40-7f:0000-ffff"/>
-      <map address="c0-ff:0000-ffff"/>
-      <map address="20-3f:6000-7fff"/>
-    </mcu>
-    <mmio>
-      <map address="00-3f:5000-5fff"/>
-      <map address="80-bf:5000-5fff"/>
-    </mmio>
+    <map address="00-3f:8000-ffff"/>
+    <map address="80-bf:8000-ffff"/>
+    <map address="40-7f:0000-ffff"/>
+    <map address="c0-ff:0000-ffff"/>
+    <map address="20-3f:6000-7fff"/>
+    <map address="00-3f:5000-5fff"/>
+    <map address="80-bf:5000-5fff"/>
   </bsx>
 </cartridge>

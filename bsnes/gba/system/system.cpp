@@ -23,6 +23,15 @@ void System::power() {
 }
 
 void System::load() {
+  string manifest;
+  manifest.readfile({interface->path(ID::System), "manifest.xml"});
+  XML::Document document(manifest);
+  string firmware = document["system"]["cpu"]["firmware"]["name"].data;
+  interface->loadRequest(ID::BIOS, firmware);
+  if(!file::exists({interface->path(ID::System), firmware})) {
+    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  }
+
   serialize_init();
 }
 

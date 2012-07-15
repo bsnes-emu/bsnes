@@ -4,6 +4,7 @@ namespace Famicom {
 
 struct ID {
   enum : unsigned {
+    System,
     Famicom,
   };
 
@@ -26,6 +27,7 @@ struct Interface : Emulator::Interface {
 
   bool loaded();
   string sha256();
+  unsigned group(unsigned id);
   void load(unsigned id, const string &manifest);
   void save();
   void load(unsigned id, const stream &stream, const string &manifest = "");

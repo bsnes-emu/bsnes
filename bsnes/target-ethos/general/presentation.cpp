@@ -144,12 +144,16 @@ void Presentation::bootstrap() {
 
     for(auto &media : emulator->media) {
       Item *item = new Item;
-      item->setText({media.name, " ..."});
       item->onActivate = [=, &media] {
         utility->loadMedia(iEmulator->interface, media);
       };
-      if(media.type == "sys") loadListSystem.append(item);
-      if(media.type != "sys") loadListSubsystem.append(item);
+      if(media.load.empty()) {
+        item->setText({media.name, " ..."});
+        loadListSystem.append(item);
+      } else {
+        item->setText({nall::basename(media.load), " ..."});
+        loadListSubsystem.append(item);
+      }
     }
 
     iEmulator->menu.setText(emulator->information.name);

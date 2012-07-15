@@ -4,14 +4,15 @@ namespace SuperFamicom {
 
 struct ID {
   enum : unsigned {
-    //cartridges
+    //cartridges (folders)
+    System,
     SuperFamicom,
     SuperGameBoy,
     Satellaview,
     SufamiTurboSlotA,
     SufamiTurboSlotB,
 
-    //memory
+    //memory (files)
     IPLROM,
 
     ROM,
@@ -43,6 +44,7 @@ struct ID {
 
     OBC1RAM,
 
+    SuperGameBoyBootROM,
     SuperGameBoyROM,
     SuperGameBoyRAM,
 

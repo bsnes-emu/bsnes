@@ -10,8 +10,8 @@ void Utility::setInterface(Emulator::Interface *emulator) {
 //load menu option selected
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
   string pathname;
-  if(media.type != "sys") pathname = application->path({media.name, ".", media.type, "/"});
-  if(!directory::exists(pathname)) pathname = browser->select({"Load ", media.name}, media.path);
+  if(!media.load.empty()) pathname = application->path({media.load, "/"});
+  if(!directory::exists(pathname)) pathname = browser->select("Load Media", media.type);
   if(!directory::exists(pathname)) return;
   if(!file::exists({pathname, "manifest.xml"})) return;
   loadMedia(emulator, media, pathname);
@@ -21,8 +21,9 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
   unload();
   setInterface(emulator);
-  path(system().group(media.id)) = pathname;
-  if(media.type == "sys") this->pathname.append(pathname);
+  path(0) = application->path({media.name, ".sys/"});
+  path(media.id) = pathname;
+  if(media.load.empty()) this->pathname.append(pathname);
 
   string manifest;
   manifest.readfile({pathname, "manifest.xml"});
@@ -38,7 +39,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 void Utility::loadRequest(unsigned id, const string &name, const string &type) {
   string pathname = browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
-  this->path(system().group(id)) = pathname;
+  path(id) = pathname;
   this->pathname.append(pathname);
 
   string manifest;

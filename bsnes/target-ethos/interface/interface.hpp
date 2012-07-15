@@ -8,6 +8,7 @@ struct Interface : Emulator::Interface::Bind {
   int16_t inputPoll(unsigned port, unsigned device, unsigned input);
   unsigned dipSettings(const XML::Node &node);
   string path(unsigned group);
+  void notify(const string &text);
 };
 
 extern Interface *interface;

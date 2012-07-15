@@ -42,6 +42,11 @@ void BSXCartridge::memory_write(Memory &memory, unsigned addr, uint8 data) {
 
 //mcu_access() allows mcu_read() and mcu_write() to share decoding logic
 uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
+  if((addr & 0x40f000) == 0x005000) {  //$00-3f|80-bf:5000-5fff
+    if(write == 0) return mmio_read(addr);
+    if(write == 1) return mmio_write(addr, data), 0;
+  }
+
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
@@ -101,7 +106,7 @@ uint8 BSXCartridge::mmio_read(unsigned addr) {
     return r[n];
   }
 
-  if((addr & 0xf8f000) == 0x105000) { //$10-17:5000-5fff
+  if((addr & 0xf8f000) == 0x105000) {  //$10-17:5000-5fff
     return memory_read(ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
   }
 

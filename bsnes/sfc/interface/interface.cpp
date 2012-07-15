@@ -25,6 +25,8 @@ string Interface::sha256() {
 
 unsigned Interface::group(unsigned id) {
   switch(id) {
+  case ID::IPLROM:
+    return 0;
   case ID::ROM:
   case ID::RAM:
   case ID::SA1ROM:
@@ -46,27 +48,31 @@ unsigned Interface::group(unsigned id) {
   case ID::SDD1ROM:
   case ID::SDD1RAM:
   case ID::OBC1RAM:
+  case ID::SuperGameBoyBootROM:
   case ID::BsxROM:
   case ID::BsxRAM:
   case ID::BsxPSRAM:
-    return 0;
+    return 1;
   case ID::SuperGameBoy:
   case ID::SuperGameBoyROM:
   case ID::SuperGameBoyRAM:
-    return 1;
+    return 2;
   case ID::Satellaview:
   case ID::BsxFlashROM:
-    return 2;
+    return 3;
   case ID::SufamiTurboSlotA:
   case ID::SufamiTurboSlotAROM:
   case ID::SufamiTurboSlotARAM:
-    return 3;
+    return 4;
   case ID::SufamiTurboSlotB:
   case ID::SufamiTurboSlotBROM:
   case ID::SufamiTurboSlotBRAM:
-    return 4;
+    return 5;
   }
-  return 0;
+
+  print(id, "\n");
+  return 1;
+  throw;
 }
 
 void Interface::load(unsigned id, const string &manifest) {
@@ -142,6 +148,10 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   if(id == ID::SDD1RAM) sdd1.ram.read(stream);
 
   if(id == ID::OBC1RAM) obc1.ram.read(stream);
+
+  if(id == ID::SuperGameBoyBootROM) {
+    stream.read(GameBoy::system.bootROM.sgb, min(stream.size(), 256u));
+  }
 
   if(id == ID::SuperGameBoyROM) {
     stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
@@ -306,12 +316,10 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  firmware.append({ID::IPLROM, "Super Famicom", "sys", "spc700.rom"});
-
-  media.append({ID::SuperFamicom, "Super Famicom",    "sys", "sfc"});
-  media.append({ID::SuperFamicom, "Super Game Boy",   "sfc", "gb" });
-  media.append({ID::SuperFamicom, "BS-X Satellaview", "sfc", "bs" });
-  media.append({ID::SuperFamicom, "Sufami Turbo",     "sfc", "st" });
+  media.append({ID::SuperFamicom, "Super Famicom", "sfc"});
+  media.append({ID::SuperFamicom, "Super Famicom", "gb", "Super Game Boy.sfc"});
+  media.append({ID::SuperFamicom, "Super Famicom", "bs", "BS-X Satellaview.sfc"});
+  media.append({ID::SuperFamicom, "Super Famicom", "st", "Sufami Turbo.sfc"});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

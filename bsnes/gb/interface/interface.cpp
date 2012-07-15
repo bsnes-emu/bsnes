@@ -28,6 +28,23 @@ string Interface::sha256() {
   return cartridge.sha256();
 }
 
+unsigned Interface::group(unsigned id) {
+  switch(id) {
+  case ID::GameBoyBootROM:
+  case ID::SuperGameBoyBootROM:
+  case ID::GameBoyColorBootROM:
+    return 0;
+  case ID::ROM:
+  case ID::RAM:
+    if(system.revision() == System::Revision::GameBoy) return ID::GameBoy;
+    if(system.revision() == System::Revision::SuperGameBoy) return ID::SuperGameBoy;
+    if(system.revision() == System::Revision::GameBoyColor) return ID::GameBoyColor;
+    throw;
+  }
+
+  throw;
+}
+
 void Interface::load(unsigned id, const string &manifest) {
   if(id == ID::GameBoy) cartridge.load(System::Revision::GameBoy, manifest);
   if(id == ID::SuperGameBoy) cartridge.load(System::Revision::SuperGameBoy, manifest);
@@ -123,12 +140,8 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  firmware.append({ID::GameBoyBootROM,      "Game Boy",       "sys", "boot.rom"});
-  firmware.append({ID::SuperGameBoyBootROM, "Super Game Boy", "sfc", "boot.rom"});
-  firmware.append({ID::GameBoyColorBootROM, "Game Boy Color", "sys", "boot.rom"});
-
-  media.append({ID::GameBoy,      "Game Boy",       "sys", "gb" });
-  media.append({ID::GameBoyColor, "Game Boy Color", "sys", "gbc"});
+  media.append({ID::GameBoy,      "Game Boy",       "gb" });
+  media.append({ID::GameBoyColor, "Game Boy Color", "gbc"});
 
   {
     Device device{0, ID::Device, "Controller"};

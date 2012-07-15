@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cartridge region="NTSC">
-  <boot firmware="boot.rom" sha256="0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360"/>
   <rom name="program.rom" size="0x80000">
     <map mode="linear" address="00-7f:8000-ffff"/>
     <map mode="linear" address="80-ff:8000-ffff"/>
   </rom>
   <icd2 revision="1">
+    <firmware name="boot.rom" size="256" sha256="0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360"/>
     <map address="00-3f:6000-7fff"/>
     <map address="80-bf:6000-7fff"/>
   </icd2>

@@ -20,6 +20,18 @@ string Interface::sha256() {
   return cartridge.sha256();
 }
 
+unsigned Interface::group(unsigned id) {
+  switch(id) {
+  case ID::ProgramROM:
+  case ID::ProgramRAM:
+  case ID::CharacterROM:
+  case ID::CharacterRAM:
+    return 1;
+  }
+
+  throw;
+}
+
 void Interface::load(unsigned id, const string &manifest) {
   cartridge.load(manifest);
 }
@@ -112,7 +124,7 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::Famicom, "Famicom", "sys", "fc"});
+  media.append({ID::Famicom, "Famicom", "fc"});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

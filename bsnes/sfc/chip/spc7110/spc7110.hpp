@@ -15,11 +15,8 @@ struct SPC7110 : Coprocessor {
 
   void add_clocks(unsigned clocks);
 
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
-
-  uint8 dcu_read(unsigned);
-  void dcu_write(unsigned, uint8);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
   uint8 mcurom_read(unsigned addr);
   void mcurom_write(unsigned addr, uint8 data);

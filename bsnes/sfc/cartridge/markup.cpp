@@ -110,6 +110,12 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
 
   interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb");
 
+  string firmware = root["firmware"]["name"].data;
+  interface->loadRequest(ID::SuperGameBoyBootROM, firmware);
+  if(!file::exists({interface->path(ID::SuperFamicom), firmware})) {
+    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  }
+
   icd2.revision = max(1, numeral(root["revision"].data));
 
   for(auto &node : root) {
@@ -122,7 +128,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
 
 void Cartridge::parse_markup_bsx(XML::Node &root) {
   if(root.exists() == false) return;
-  has_bs_cart = root["mmio"].exists();
+  has_bs_cart = root["map"].exists();
   has_bs_slot = true;
 
   interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs");
@@ -142,14 +148,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
-    if(node.name != "map") continue;
-    Mapping m({&BSXCartridge::mmio_read, &bsxcartridge}, {&BSXCartridge::mmio_write, &bsxcartridge});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : root["mcu"]) {
+  for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({&BSXCartridge::mcu_read, &bsxcartridge}, {&BSXCartridge::mcu_write, &bsxcartridge});
     parse_markup_map(m, node);
@@ -238,7 +237,7 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({&SA1::mmio_read, &sa1}, {&SA1::mmio_write, &sa1});
     parse_markup_map(m, node);
@@ -267,7 +266,7 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
     if(node.name != "map") continue;
     Mapping m({&SuperFX::mmio_read, &superfx}, {&SuperFX::mmio_write, &superfx});
     parse_markup_map(m, node);
@@ -279,8 +278,8 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   if(root.exists() == false) return;
   has_armdsp = true;
 
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
+  string firmware = root["firmware"]["name"].data;
+  string sha256 = root["firmware"]["sha256"].data;
 
   interface->loadRequest(ID::ArmDSP, firmware);
 
@@ -300,8 +299,8 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
 
   hitachidsp.frequency = numeral(root["frequency"].data);
   if(hitachidsp.frequency == 0) hitachidsp.frequency = 20000000;
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
+  string firmware = root["firmware"]["name"].data;
+  string sha256 = root["firmware"]["sha256"].data;
 
   interface->loadRequest(ID::HitachiDSP, firmware);
 
@@ -313,7 +312,8 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
+    if(node.name != "map") continue;
     Mapping m({&HitachiDSP::dsp_read, &hitachidsp}, {&HitachiDSP::dsp_write, &hitachidsp});
     parse_markup_map(m, node);
     mapping.append(m);
@@ -333,8 +333,8 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   = root["model"].data == "uPD7725"  ? NECDSP::Revision::uPD7725
   : root["model"].data == "uPD96050" ? NECDSP::Revision::uPD96050
   : NECDSP::Revision::uPD7725;
-  string firmware = root["firmware"].data;
-  string sha256 = root["sha256"].data;
+  string firmware = root["firmware"]["name"].data;
+  string sha256 = root["firmware"]["sha256"].data;
 
   if(necdsp.revision == NECDSP::Revision::uPD7725) {
     interface->loadRequest(ID::Nec7725DSP, firmware);
@@ -373,7 +373,7 @@ void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
   if(root.exists() == false) return;
   has_epsonrtc = true;
 
-  string name = root["name"].data;
+  string name = root["ram"]["name"].data;
   interface->loadRequest(ID::EpsonRTC, name);
   memory.append({ID::EpsonRTC, name});
 
@@ -389,7 +389,7 @@ void Cartridge::parse_markup_sharprtc(XML::Node &root) {
   if(root.exists() == false) return;
   has_sharprtc = true;
 
-  string name = root["name"].data;
+  string name = root["ram"]["name"].data;
   interface->loadRequest(ID::SharpRTC, name);
   memory.append({ID::SharpRTC, name});
 
@@ -422,16 +422,9 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({&SPC7110::mmio_read, &spc7110}, {&SPC7110::mmio_write, &spc7110});
-    parse_markup_map(m, node);
-    mapping.append(m);
-  }
-
-  for(auto &node : root["dcu"]) {
-    if(node.name != "map") continue;
-    Mapping m({&SPC7110::dcu_read, &spc7110}, {&SPC7110::dcu_write, &spc7110});
+    Mapping m({&SPC7110::read, &spc7110}, {&SPC7110::write, &spc7110});
     parse_markup_map(m, node);
     mapping.append(m);
   }
@@ -457,9 +450,9 @@ void Cartridge::parse_markup_sdd1(XML::Node &root) {
     mapping.append(m);
   }
 
-  for(auto &node : root["mmio"]) {
+  for(auto &node : root) {
     if(node.name != "map") continue;
-    Mapping m({&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
+    Mapping m({&SDD1::read, &sdd1}, {&SDD1::write, &sdd1});
     parse_markup_map(m, node);
     mapping.append(m);
   }

@@ -110,8 +110,9 @@ void SPC7110::reset() {
   r4834 = 0x00;
 }
 
-uint8 SPC7110::mmio_read(unsigned addr) {
+uint8 SPC7110::read(unsigned addr) {
   cpu.synchronize_coprocessors();
+  if((addr & 0xff0000) == 0x500000) addr = 0x4800;
   addr = 0x4800 | (addr & 0x3f);
 
   switch(addr) {
@@ -198,7 +199,7 @@ uint8 SPC7110::mmio_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SPC7110::mmio_write(unsigned addr, uint8 data) {
+void SPC7110::write(unsigned addr, uint8 data) {
   cpu.synchronize_coprocessors();
   addr = 0x4800 | (addr & 0x3f);
 
@@ -258,17 +259,6 @@ void SPC7110::mmio_write(unsigned addr, uint8 data) {
   case 0x4834: r4834 = data & 0x07; break;
 
   }
-}
-
-//============
-//SPC7110::DCU
-//============
-
-uint8 SPC7110::dcu_read(unsigned) {
-  return mmio_read(0x4800);
-}
-
-void SPC7110::dcu_write(unsigned, uint8) {
 }
 
 //===============

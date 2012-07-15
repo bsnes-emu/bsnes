@@ -49,6 +49,8 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   ramsize = numeral(ram["size"].data);
   ramdata = allocate<uint8>(ramsize, 0xff);
 
+  system.load(revision);
+
   //Super Game Boy core loads memory from Super Famicom core
   if(revision != System::Revision::SuperGameBoy) {
     if(rom["name"].exists()) interface->loadRequest(ID::ROM, rom["name"].data);
@@ -70,8 +72,6 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   case Mapper::HuC1:  mapper = &huc1;  break;
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
-
-  system.load(revision);
 
   loaded = true;
   sha256 = nall::sha256(romdata, romsize);

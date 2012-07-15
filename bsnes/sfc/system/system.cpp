@@ -92,6 +92,17 @@ void System::term() {
 }
 
 void System::load() {
+  string path = interface->path(ID::System), manifest;
+  manifest.readfile({path, "manifest.xml"});
+  XML::Document document(manifest);
+  string firmware = document["system"]["smp"]["firmware"]["name"].data;
+  interface->loadRequest(ID::IPLROM, document["system"]["smp"]["firmware"]["name"].data);
+  if(!file::exists({interface->path(ID::System), firmware})) {
+    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  }
+
+  file::read({path, "wram.rwm"}, cpu.wram, 128 * 1024);
+
   region = config.region;
   expansion = config.expansion_port;
   if(region == Region::Autodetect) {
@@ -132,6 +143,9 @@ void System::load() {
 }
 
 void System::unload() {
+  string path = interface->path(ID::System);
+  file::write({path, "wram.rwm"}, cpu.wram, 128 * 1024);
+
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.unload();
   if(cartridge.has_gb_slot()) icd2.unload();
   if(cartridge.has_bs_cart()) bsxcartridge.unload();

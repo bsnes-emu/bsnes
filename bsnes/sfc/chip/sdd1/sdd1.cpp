@@ -14,8 +14,8 @@ void SDD1::init() {
 void SDD1::load() {
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, {&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, {&SDD1::mmio_read, &sdd1}, {&SDD1::mmio_write, &sdd1});
+  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x4300, 0x437f, {&SDD1::read, &sdd1}, {&SDD1::write, &sdd1});
+  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x4300, 0x437f, {&SDD1::read, &sdd1}, {&SDD1::write, &sdd1});
 }
 
 void SDD1::unload() {
@@ -42,7 +42,7 @@ void SDD1::reset() {
   }
 }
 
-uint8 SDD1::mmio_read(unsigned addr) {
+uint8 SDD1::read(unsigned addr) {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {
@@ -59,7 +59,7 @@ uint8 SDD1::mmio_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SDD1::mmio_write(unsigned addr, uint8 data) {
+void SDD1::write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {

@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <system name="Super Famicom">
-  <smp firmware="spc700.rom" sha256="c95f88b299030d5afa55b1031e2b5ef2dff650c4b4e6bb6f8b1359436521278f"/>
+  <smp>
+    <firmware name="spc700.rom" size="64" sha256="c95f88b299030d5afa55b1031e2b5ef2dff650c4b4e6bb6f8b1359436521278f"/>
+  </smp>
 </system>

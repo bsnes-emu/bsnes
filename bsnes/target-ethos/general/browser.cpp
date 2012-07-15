@@ -67,7 +67,7 @@ void Browser::bootstrap() {
     for(auto &media : emulator->media) {
       bool found = false;
       for(auto &folder : folderList) {
-        if(folder.extension == media.path) {
+        if(folder.extension == media.type) {
           found = true;
           break;
         }
@@ -75,7 +75,7 @@ void Browser::bootstrap() {
       if(found == true) continue;
 
       Folder folder;
-      folder.extension = media.path;
+      folder.extension = media.type;
       folder.path = application->basepath;
       folder.selection = 0;
       folderList.append(folder);

@@ -21,10 +21,9 @@ struct Interface {
     unsigned id;
     string name;
     string type;
-    string path;
+    string load;
   };
 
-  vector<Media> firmware;
   vector<Media> media;
 
   struct Device {
@@ -58,6 +57,7 @@ struct Interface {
     virtual int16_t inputPoll(unsigned, unsigned, unsigned) { return 0; }
     virtual unsigned dipSettings(const XML::Node&) { return 0; }
     virtual string path(unsigned) { return ""; }
+    virtual void notify(const string &text) { print(text, "\n"); }
   } *bind;
 
   //callback bindings (provided by user interface)
@@ -70,6 +70,7 @@ struct Interface {
   int16_t inputPoll(unsigned port, unsigned device, unsigned input) { return bind->inputPoll(port, device, input); }
   unsigned dipSettings(const XML::Node &node) { return bind->dipSettings(node); }
   string path(unsigned group) { return bind->path(group); }
+  template<typename... Args> void notify(Args&... args) { return bind->notify({std::forward<Args>(args)...}); }
 
   //information
   virtual double videoFrequency() = 0;
@@ -78,7 +79,7 @@ struct Interface {
   //media interface
   virtual bool loaded() { return false; }
   virtual string sha256() { return ""; }
-  virtual unsigned group(unsigned id) { return 0u; }
+  virtual unsigned group(unsigned id) = 0;
   virtual void load(unsigned id, const string &manifest) {}
   virtual void save() {}
   virtual void load(unsigned id, const stream &memory, const string &markup = "") {}

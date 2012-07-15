@@ -1,4 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <system name="Game Boy Color">
-  <boot firmware="boot.rom" sha256="4bf5021be357ce523a59ac5f4efff5d6371ae50112a6db0adf4a75916ad760a9"/>
+  <cpu>
+    <firmware name="boot.rom" size="2048" sha256="4bf5021be357ce523a59ac5f4efff5d6371ae50112a6db0adf4a75916ad760a9"/>
+  </cpu>
 </system>

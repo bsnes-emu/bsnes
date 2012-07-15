@@ -8,8 +8,8 @@ struct SDD1 {
   void power();
   void reset();
 
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
   uint8 mmc_read(unsigned addr);
   uint8 mcu_read(unsigned addr);

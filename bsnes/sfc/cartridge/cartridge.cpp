@@ -91,6 +91,8 @@ void Cartridge::load_satellaview(const string &manifest) {
   auto &rom = document["cartridge"]["rom"];
 
   if(rom["name"].exists()) {
+    unsigned size = numeral(rom["size"].data);
+    bsxflash.memory.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::BsxFlashROM, rom["name"].data);
   }
 }
@@ -101,6 +103,8 @@ void Cartridge::load_sufami_turbo_a(const string &manifest) {
   auto &ram = document["cartridge"]["ram"];
 
   if(rom["name"].exists()) {
+    unsigned size = numeral(rom["size"].data);
+    sufamiturbo.slotA.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotAROM, rom["name"].data);
   }
 
@@ -122,6 +126,8 @@ void Cartridge::load_sufami_turbo_b(const string &manifest) {
   auto &ram = document["cartridge"]["ram"];
 
   if(rom["name"].exists()) {
+    unsigned size = numeral(rom["size"].data);
+    sufamiturbo.slotB.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotBROM, rom["name"].data);
   }
 

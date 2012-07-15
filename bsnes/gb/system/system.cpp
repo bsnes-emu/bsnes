@@ -41,12 +41,24 @@ void System::runthreadtosave() {
 }
 
 void System::init() {
-  assert(interface != 0);
+  assert(interface != nullptr);
 }
 
 void System::load(Revision revision) {
   this->revision = revision;
   serialize_init();
+  if(revision == Revision::SuperGameBoy) return;  //Super Famicom core loads boot ROM for SGB
+
+  string manifest, firmware;
+  manifest.readfile({interface->path(ID::System), "manifest.xml"});
+  XML::Document document(manifest);
+  interface->loadRequest(
+    revision == Revision::GameBoy ? ID::GameBoyBootROM : ID::GameBoyColorBootROM,
+    document["system"]["cpu"]["firmware"]["name"].data
+  );
+  if(!file::exists({interface->path(ID::System), document["system"]["cpu"]["firmware"]["name"].data})) {
+    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  }
 }
 
 void System::power() {

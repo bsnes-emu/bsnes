@@ -4,6 +4,7 @@ namespace GameBoy {
 
 struct ID {
   enum : unsigned {
+    System,
     GameBoy,
     SuperGameBoy,
     GameBoyColor,
@@ -39,6 +40,7 @@ struct Interface : Emulator::Interface {
 
   bool loaded();
   string sha256();
+  unsigned group(unsigned id);
   void load(unsigned id, const string &manifest);
   void save();
   void load(unsigned id, const stream &stream, const string &manifest = "");

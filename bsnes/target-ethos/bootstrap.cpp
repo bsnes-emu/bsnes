@@ -11,12 +11,5 @@ void Application::bootstrap() {
   emulator.append(new GameBoy::Interface);
   emulator.append(new GameBoyAdvance::Interface);
 
-  for(auto &system : emulator) {
-    system->bind = interface;
-
-    for(auto &firmware : system->firmware) {
-      filestream fs{application->path({firmware.name, ".", firmware.type, "/", firmware.path})};
-      system->load(firmware.id, fs);
-    }
-  }
+  for(auto &system : emulator) system->bind = interface;
 }

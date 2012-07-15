@@ -114,3 +114,7 @@ unsigned Interface::dipSettings(const XML::Node &node) {
 string Interface::path(unsigned group) {
   return utility->path(group);
 }
+
+void Interface::notify(const string &text) {
+  MessageWindow::information(*presentation, text);
+}
