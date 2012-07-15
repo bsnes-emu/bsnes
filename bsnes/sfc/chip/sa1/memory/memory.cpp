@@ -6,11 +6,11 @@ uint8 SA1::bus_read(unsigned addr) {
   }
 
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
-    return mmc_read(addr);
+    return mmcrom_read(addr);
   }
 
   if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
-    return mmc_read(addr);
+    return mmcrom_read(addr);
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
@@ -74,11 +74,11 @@ void SA1::bus_write(unsigned addr, uint8 data) {
 //these ports.
 uint8 SA1::vbr_read(unsigned addr) {
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
-    return mmc_read(addr);
+    return mmcrom_read(addr);
   }
 
   if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
-    return mmc_read(addr);
+    return mmcrom_read(addr);
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
@@ -119,21 +119,7 @@ void SA1::op_write(unsigned addr, uint8 data) {
   bus_write(addr, data);
 }
 
-uint8 SA1::mmc_read(unsigned addr) {
-  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
-    return cpuiram.read(addr & 0x07ff);
-  }
-
-  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    cpu.synchronize_coprocessors();
-    addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
-    return cpubwram.read(addr);
-  }
-
-  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    return cpubwram.read(addr & 0x0fffff);
-  }
-
+uint8 SA1::mmcrom_read(unsigned addr) {
   if((addr & 0xffffe0) == 0x00ffe0) {
     if(addr == 0xffea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
     if(addr == 0xffeb && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 8;
@@ -188,11 +174,24 @@ uint8 SA1::mmc_read(unsigned addr) {
   return 0x00;
 }
 
-void SA1::mmc_write(unsigned addr, uint8 data) {
-  if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
-    return cpuiram.write(addr & 0x07ff, data);
+void SA1::mmcrom_write(unsigned addr, uint8 data) {
+}
+
+uint8 SA1::mmcbwram_read(unsigned addr) {
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    cpu.synchronize_coprocessors();
+    addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
+    return cpubwram.read(addr);
   }
 
+  if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
+    return cpubwram.read(addr & 0x0fffff);
+  }
+
+  return cpu.regs.mdr;
+}
+
+void SA1::mmcbwram_write(unsigned addr, uint8 data) {
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     cpu.synchronize_coprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());

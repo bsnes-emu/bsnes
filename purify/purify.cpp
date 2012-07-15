@@ -19,7 +19,8 @@ using namespace phoenix;
 #include "resource/resource.cpp"
 
 struct Settings : configuration {
-  bool play;
+  bool ui;    //true if in user-interface mode (windows visible); false if in command-line mode
+  bool play;  //true if emulator should be launched after game conversion
   lstring extensions;
 
   string emulator;
@@ -27,6 +28,7 @@ struct Settings : configuration {
   string recent;
 
   Settings() {
+    ui = false;
     play = false;
     extensions = {".fc", ".nes", ".sfc", ".smc", ".swc", ".fig", ".bs", ".st", ".gb", ".gbc", ".sgb", ".gba"};
 
@@ -71,7 +73,7 @@ void create_famicom(const string &filename, uint8_t *data, unsigned size) {
   file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
   if(information.prgrom > 0) file::write({path, "program.rom"}, data, information.prgrom);
   if(information.chrrom > 0) file::write({path, "character.rom"}, data + information.prgrom, information.chrrom);
-  if(!file::exists({path, "save.ram"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.ram"});
+  if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.rwm"});
   if(settings.play) play(path);
 }
 
@@ -88,8 +90,13 @@ void create_super_famicom(const string &filename, uint8_t *data, unsigned size) 
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
   file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
-  file::write({path, "program.rom"}, data, size);
-  if(!file::exists({path, "save.ram"})) file::copy({nall::basename(filename), ".srm"}, {path, "save.ram"});
+  if(information.markup.position("<spc7110>") && size >= 0x100000) {
+    file::write({path, "program.rom"}, data, 0x100000);
+    file::write({path, "data.rom"}, data + 0x100000, size - 0x100000);
+  } else {
+    file::write({path, "program.rom"}, data, size);
+  }
+  if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".srm"}, {path, "save.rwm"});
 
   //firmware
   if(auto position = information.markup.position("firmware=")) {
@@ -130,7 +137,7 @@ void create_sufami_turbo(const string &filename, uint8_t *data, unsigned size) {
 
   file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
   file::write({path, "program.rom"}, data, size);
-  if(!file::exists({path, "save.ram"})) file::copy({nall::basename(filename), ".srm"}, {path, "save.ram"});
+  if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".srm"}, {path, "save.rwm"});
 }
 
 void create_game_boy(const string &filename, uint8_t *data, unsigned size) {
@@ -146,7 +153,7 @@ void create_game_boy(const string &filename, uint8_t *data, unsigned size) {
 
   file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
   file::write({path, "program.rom"}, data, size);
-  if(!file::exists({path, "save.ram"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.ram"});
+  if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.rwm"});
   if(settings.play) play(path);
 }
 
@@ -161,7 +168,7 @@ void create_game_boy_advance(const string &filename, uint8_t *data, unsigned siz
 
   file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
   file::write({path, "program.rom"}, data, size);
-  if(!file::exists({path, "save.ram"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.ram"});
+  if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".sav"}, {path, "save.rwm"});
   if(settings.play) play(path);
 }
 
@@ -261,6 +268,14 @@ void create_manifest(const string &path) {
 void create_folder(string pathname) {
   pathname.transform("\\", "/");
   if(pathname.endswith("/") == false) pathname.append("/");
+
+  if(pathname == settings.path) {
+    print(
+      "You cannot use the same path for both the source and destination directories.\n"
+      "Please choose a different output path in settings.cfg.\n"
+    );
+    return;
+  }
 
   lstring files = directory::contents(pathname);
   for(auto &name : files) {
@@ -368,7 +383,7 @@ struct Application : Window {
     Label pathValue;
 
   Application() {
-    setTitle("purify v00.04");
+    setTitle("purify v00.06");
     setGeometry({128, 128, 440, 180});
     layout.setMargin(5);
     title.setFont("Sans, 16, Bold");
@@ -435,10 +450,18 @@ struct Application : Window {
 
   void convertAction() {
     string pathname = DialogWindow::folderSelect(*this, settings.recent);
-    if(!pathname.empty()) {
-      settings.recent = pathname;
-      progress->convert(pathname);
+    if(pathname.empty()) return;
+
+    if(pathname == settings.path) {
+      MessageWindow::critical(*this,
+        "You cannot use the same path for both the source and destination directories.\n\n"
+        "Please choose a different output path."
+      );
+      return;
     }
+
+    settings.recent = pathname;
+    progress->convert(pathname);
   }
 
   void emulatorAction() {
@@ -492,6 +515,7 @@ int main(int argc, char **argv) {
     return 0;
   }
 
+  settings.ui = true;
   progress = new Progress;
   application = new Application;
   OS::main();

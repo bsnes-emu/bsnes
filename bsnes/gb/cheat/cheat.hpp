@@ -4,7 +4,7 @@ struct CheatCode {
   unsigned comp;
 };
 
-struct Cheat : public linear_vector<CheatCode> {
+struct Cheat : public vector<CheatCode> {
   static bool decode(const string &code, unsigned &addr, unsigned &data, unsigned &comp);
 
   void synchronize();

@@ -12,8 +12,12 @@ struct SDD1 {
   void write(unsigned addr, uint8 data);
 
   uint8 mmc_read(unsigned addr);
-  uint8 mcu_read(unsigned addr);
-  void mcu_write(unsigned addr, uint8 data);
+
+  uint8 mcurom_read(unsigned addr);
+  void mcurom_write(unsigned addr, uint8 data);
+
+  uint8 mcuram_read(unsigned addr);
+  void mcuram_write(unsigned addr, uint8 data);
 
   void serialize(serializer&);
 

@@ -6,8 +6,11 @@ alwaysinline void op_io();
 alwaysinline uint8 op_read(unsigned addr);
 alwaysinline void op_write(unsigned addr, uint8 data);
 
-uint8 mmc_read(unsigned addr);
-void mmc_write(unsigned addr, uint8 data);
+uint8 mmcrom_read(unsigned addr);
+void mmcrom_write(unsigned addr, uint8 data);
+
+uint8 mmcbwram_read(unsigned addr);
+void mmcbwram_write(unsigned addr, uint8 data);
 
 uint8 mmc_sa1_read(unsigned addr);
 void mmc_sa1_write(unsigned addr, uint8 data);

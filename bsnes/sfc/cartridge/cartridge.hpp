@@ -78,11 +78,10 @@ private:
   void parse_markup_map(Mapping&, XML::Node&);
   void parse_markup_memory(MappedRAM&, XML::Node&, unsigned id, bool writable);
 
-  void parse_markup_rom(XML::Node&);
-  void parse_markup_ram(XML::Node&);
-  void parse_markup_psram(XML::Node&);
+  void parse_markup_cartridge(XML::Node&);
   void parse_markup_icd2(XML::Node&);
   void parse_markup_bsx(XML::Node&);
+  void parse_markup_bsxslot(XML::Node&);
   void parse_markup_sufamiturbo(XML::Node&);
   void parse_markup_nss(XML::Node&);
   void parse_markup_sa1(XML::Node&);

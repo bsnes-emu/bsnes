@@ -20,7 +20,9 @@ struct zipstream : memorystream {
 
     for(auto &file : archive.file) {
       if(file.name.wildcard(filter)) {
-        archive.extract(file, pdata, psize);
+        auto buffer = archive.extract(file);
+        psize = buffer.size();
+        pdata = buffer.move();
         return;
       }
     }

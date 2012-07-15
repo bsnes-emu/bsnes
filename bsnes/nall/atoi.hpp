@@ -1,6 +1,8 @@
 #ifndef NALL_ATOI_HPP
 #define NALL_ATOI_HPP
 
+#include <nall/stdint.hpp>
+
 namespace nall {
 
 //note: this header is intended to form the base for user-defined literals;

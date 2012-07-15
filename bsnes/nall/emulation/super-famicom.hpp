@@ -122,419 +122,348 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   markup.append("<cartridge region='", region == NTSC ? "NTSC" : "PAL", "'>\n");
 
   if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-    "    <map mode='linear' address='00-7f:8000-ffff'/>\n"
-    "    <map mode='linear' address='80-ff:8000-ffff'/>\n"
-    "  </rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "  <map address='00-7f:8000-ffff' id='rom' mode='linear'/>\n"
+    "  <map address='80-ff:8000-ffff' id='rom' mode='linear'/>\n"
     "  <icd2 revision='1'>\n"
-    "    <map address='00-3f:6000-7fff'/>\n"
-    "    <map address='80-bf:6000-7fff'/>\n"
+    "    <firmware name='boot.rom' size='256' sha256='0e4ddff32fc9d1eeaae812a157dd246459b00c9e14f2f61751f661f32361e360'/>\n"
+    "    <map address='00-3f:6000-7fff' id='io'/>\n"
+    "    <map address='80-bf:6000-7fff' id='io'/>\n"
     "  </icd2>\n"
   );
 
   else if(has_cx4) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
-    "  <hitachidsp model='HG51B169' frequency='20000000' firmware='cx4.rom' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'>\n"
-    "    <rom>\n"
-    "      <map mode='linear' address='00-7f:8000-ffff'/>\n"
-    "      <map mode='linear' address='80-ff:8000-ffff'/>\n"
-    "    </rom>\n"
-    "    <mmio>\n"
-    "      <map address='00-3f:6000-7fff'/>\n"
-    "      <map address='80-bf:6000-7fff'/>\n"
-    "    </mmio>\n"
+    "  <hitachidsp model='HG51B169' frequency='20000000'>\n"
+    "    <firmware name='cx4.rom' size='3072' sha256='ae8d4d1961b93421ff00b3caa1d0f0ce7783e749772a3369c36b3dbf0d37ef18'/>\n"
+    "    <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "    <map address='00-3f:6000-7fff' id='io'/>\n"
+    "    <map address='80-bf:6000-7fff' id='io'/>\n"
+    "    <map address='00-7f:8000-ffff' id='rom' mode='linear'/>\n"
+    "    <map address='80-ff:8000-ffff' id='rom' mode='linear'/>\n"
     "  </hitachidsp>\n"
   );
 
-  else if(has_spc7110) {
-    markup.append(
-      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
-      "  <ram name='save.ram' size='", hex(ram_size), "'/>\n"
-      "  <spc7110>\n"
-      "    <mmio>\n"
-      "      <map address='00-3f:4800-483f'/>\n"
-      "      <map address='80-bf:4800-483f'/>\n"
-      "    </mmio>\n"
-      "    <dcu>\n"
-      "      <map address='50:0000-ffff'/>\n"
-      "    </dcu>\n"
-      "    <mcu>\n"
-      "      <rom>\n"
-      "        <program offset='0x000000' size='0x100000'/>\n"
-      "        <data offset='0x100000' size='", hex(rom_size - 0x100000), "'/>\n"
-      "        <map address='00-0f:8000-ffff'/>\n"
-      "        <map address='80-bf:8000-ffff'/>\n"
-      "        <map address='c0-cf:0000-ffff'/>\n"
-      "      </rom>\n"
-      "      <ram>\n"
-      "        <map address='00-3f:6000-7fff'/>\n"
-      "        <map address='80-bf:6000-7fff'/>\n"
-      "      </ram>\n"
-      "    </mcu>\n"
-      "  </spc7110>\n"
-    );
-    if(has_spc7110rtc) markup.append(
-      "  <epsonrtc name='rtc.ram' size='0x10'>\n"
-      "    <map address='00-3f:4840-4842'/>\n"
-      "    <map address='80-bf:4840-4842'/>\n"
-      "  </epsonrtc>\n"
-    );
-  }
+  else if(has_spc7110) markup.append(
+    "  <spc7110>\n"
+    "    <prom name='program.rom' size='0x100000'/>\n"
+    "    <drom name='data.rom' size='0x", hex(rom_size - 0x100000), "'/>\n"
+    "    <ram name='save.rwm' size='0x2000'/>\n"
+    "    <map address='00-3f:4800-483f' id='io'/>\n"
+    "    <map address='80-bf:4800-483f' id='io'/>\n"
+    "    <map address='50:0000-ffff' id='io'/>\n"
+    "    <map address='00-3f:8000-ffff' id='rom'/>\n"
+    "    <map address='80-bf:8000-ffff' id='rom'/>\n"
+    "    <map address='c0-ff:0000-ffff' id='rom'/>\n"
+    "    <map address='00-3f:6000-7fff' id='ram'/>\n"
+    "    <map address='80-bf:6000-7fff' id='ram'/>\n"
+    "  </spc7110>\n"
+  );
+
+  else if(has_sdd1) markup.append(
+    "  <sdd1>\n"
+    "    <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "    <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+    "    <map address='00-3f:4800-4807' id='io'/>\n"
+    "    <map address='80-bf:4800-4807' id='io'/>\n"
+    "    <map address='00-3f:8000-ffff' id='rom'/>\n"
+    "    <map address='80-bf:8000-ffff' id='rom'/>\n"
+    "    <map address='40-7f:0000-ffff' id='rom'/>\n"
+    "    <map address='c0-ff:0000-ffff' id='rom'/>\n"
+    "    <map address='20-3f:6000-7fff' id='ram'/>\n"
+    "    <map address='a0-bf:6000-7fff' id='ram'/>\n"
+    "    <map address='70-7f:0000-7fff' id='ram'/>\n"
+    "  </sdd1>\n"
+  );
 
   else if(mapper == LoROM) {
     markup.append(
-      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-      "    <map mode='linear' address='00-7f:8000-ffff'/>\n"
-      "    <map mode='linear' address='80-ff:8000-ffff'/>\n"
-      "  </rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+      "  <map address='00-7f:8000-ffff' id='rom' mode='linear'/>\n"
+      "  <map address='80-ff:8000-ffff' id='rom' mode='linear'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-      "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
-      "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
-      "    <map mode='linear' address='70-7f:", range, "'/>\n"
-      "    <map mode='linear' address='f0-ff:", range, "'/>\n"
-      "  </ram>\n"
+      "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+      "  <map address='20-3f:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='a0-bf:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='70-7f:", range, "' id='ram' mode='linear'/>\n"
+      "  <map address='f0-ff:", range, "' id='ram' mode='linear'/>\n"
     );
   }
 
   else if(mapper == HiROM) {
     markup.append(
-      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-      "    <map mode='shadow' address='00-3f:8000-ffff'/>\n"
-      "    <map mode='linear' address='40-7f:0000-ffff'/>\n"
-      "    <map mode='shadow' address='80-bf:8000-ffff'/>\n"
-      "    <map mode='linear' address='c0-ff:0000-ffff'/>\n"
-      "  </rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+      "  <map address='00-3f:8000-ffff' id='rom' mode='shadow'/>\n"
+      "  <map address='80-bf:8000-ffff' id='rom' mode='shadow'/>\n"
+      "  <map address='40-7f:0000-ffff' id='rom' mode='linear'/>\n"
+      "  <map address='c0-ff:0000-ffff' id='rom' mode='linear'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-      "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
-      "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
-      "    <map mode='linear' address='70-7f:", range, "'/>\n"
-      "  </ram>\n"
+      "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+      "  <map address='20-3f:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='a0-bf:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='70-7f:", range, "' id='ram' mode='linear'/>\n"
     );
   }
 
   else if(mapper == ExLoROM) {
     markup.append(
-      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-      "    <map mode='linear' address='00-3f:8000-ffff'/>\n"
-      "    <map mode='linear' address='40-7f:0000-ffff'/>\n"
-      "    <map mode='linear' address='80-bf:8000-ffff'/>\n"
-      "  </rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+      "  <map address='00-3f:8000-ffff' id='rom' mode='linear'/>\n"
+      "  <map address='80-bf:8000-ffff' id='rom' mode='linear'/>\n"
+      "  <map address='40-7f:0000-ffff' id='rom' mode='linear'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-      "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
-      "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
-      "    <map mode='linear' address='70-7f:0000-7fff'/>\n"
-      "  </ram>\n"
+      "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+      "  <map address='20-3f:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='a0-bf:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='70-7f:0000-7fff' id='ram' mode='linear'/>\n"
     );
   }
 
   else if(mapper == ExHiROM) {
     markup.append(
-      "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-      "    <map mode='shadow' address='00-3f:8000-ffff' offset='0x400000'/>\n"
-      "    <map mode='linear' address='40-7f:0000-ffff' offset='0x400000'/>\n"
-      "    <map mode='shadow' address='80-bf:8000-ffff' offset='0x000000'/>\n"
-      "    <map mode='linear' address='c0-ff:0000-ffff' offset='0x000000'/>\n"
-      "  </rom>\n"
+      "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+      "  <map address='00-3f:8000-ffff' id='rom' mode='shadow' offset='0x400000'/>\n"
+      "  <map address='80-bf:8000-ffff' id='rom' mode='shadow' offset='0x000000'/>\n"
+      "  <map address='40-7f:0000-ffff' id='rom' mode='linear' offset='0x400000'/>\n"
+      "  <map address='c0-ff:0000-ffff' id='rom' mode='linear' offset='0x000000'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-      "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
-      "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
-      "    <map mode='linear' address='70-7f:", range, "'/>\n"
-      "  </ram>\n"
+      "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+      "  <map address='20-3f:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='a0-bf:6000-7fff' id='ram' mode='linear'/>\n"
+      "  <map address='70-7f:", range, "' id='ram' mode='linear'/>\n"
     );
   }
 
   else if(mapper == SuperFXROM) {
-    markup.append("  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n");
-    if(ram_size > 0)
-    markup.append("  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n");
     markup.append(
       "  <superfx revision='2'>\n"
-      "    <rom>\n"
-      "      <map mode='linear' address='00-3f:8000-ffff'/>\n"
-      "      <map mode='linear' address='40-5f:0000-ffff'/>\n"
-      "      <map mode='linear' address='80-bf:8000-ffff'/>\n"
-      "      <map mode='linear' address='c0-df:0000-ffff'/>\n"
-      "    </rom>\n"
-      "    <ram>\n"
-      "      <map mode='linear' address='00-3f:6000-7fff' size='0x2000'/>\n"
-      "      <map mode='linear' address='60-7f:0000-ffff'/>\n"
-      "      <map mode='linear' address='80-bf:6000-7fff' size='0x2000'/>\n"
-      "      <map mode='linear' address='e0-ff:0000-ffff'/>\n"
-      "    </ram>\n"
-      "    <mmio>\n"
-      "      <map address='00-3f:3000-32ff'/>\n"
-      "      <map address='80-bf:3000-32ff'/>\n"
-      "    </mmio>\n"
+      "    <map address='00-3f:3000-32ff' id='io'/>\n"
+      "    <map address='80-bf:3000-32ff' id='io'/>\n"
+      "    <rom name='program.rom' size='", hex(rom_size), "'/>\n"
+      "    <map address='00-3f:8000-ffff' id='rom' mode='linear'/>\n"
+      "    <map address='80-bf:8000-ffff' id='rom' mode='linear'/>\n"
+      "    <map address='40-5f:0000-ffff' id='rom' mode='linear'/>\n"
+      "    <map address='c0-df:0000-ffff' id='rom' mode='linear'/>\n"
+    );
+    if(ram_size > 0) markup.append(
+      "    <ram name='save.rwm' size='", hex(ram_size), "'/>\n"
+      "    <map address='00-3f:6000-7fff' id='ram' mode='linear' size='0x2000'/>\n"
+      "    <map address='80-bf:6000-7fff' id='ram' mode='linear' size='0x2000'/>\n"
+      "    <map address='60-7f:0000-ffff' id='ram' mode='linear'/>\n"
+      "    <map address='e0-ff:0000-ffff' id='ram' mode='linear'/>\n"
+    );
+    markup.append(
       "  </superfx>\n"
     );
   }
 
   else if(mapper == SA1ROM) {
-    markup.append("  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n");
-    if(ram_size > 0)
-    markup.append("  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n");
     markup.append(
       "  <sa1>\n"
-      "    <mcu>\n"
-      "      <rom>\n"
-      "        <map mode='direct' address='00-3f:8000-ffff'/>\n"
-      "        <map mode='direct' address='80-bf:8000-ffff'/>\n"
-      "        <map mode='direct' address='c0-ff:0000-ffff'/>\n"
-      "      </rom>\n"
-      "      <ram>\n"
-      "        <map mode='direct' address='00-3f:6000-7fff'/>\n"
-      "        <map mode='direct' address='80-bf:6000-7fff'/>\n"
-      "      </ram>\n"
-      "    </mcu>\n"
-      "    <iram>\n"
-      "      <map mode='linear' address='00-3f:3000-37ff'/>\n"
-      "      <map mode='linear' address='80-bf:3000-37ff'/>\n"
-      "    </iram>\n"
-      "    <bwram>\n"
-      "      <map mode='linear' address='40-4f:0000-ffff'/>\n"
-      "    </bwram>\n"
-      "    <mmio>\n"
-      "      <map address='00-3f:2200-23ff'/>\n"
-      "      <map address='80-bf:2200-23ff'/>\n"
-      "    </mmio>\n"
+      "    <map address='00-3f:2200-23ff' id='io'/>\n"
+      "    <map address='80-bf:2200-23ff' id='io'/>\n"
+      "    <rom name='program.rom' size='", hex(rom_size), "'/>\n"
+      "    <map address='00-3f:8000-ffff' id='rom'/>\n"
+      "    <map address='80-bf:8000-ffff' id='rom'/>\n"
+      "    <map address='c0-ff:0000-ffff' id='rom'/>\n"
+      "    <iram size='0x800'/>\n"
+      "    <map address='00-3f:3000-37ff' id='iram'/>\n"
+      "    <map address='80-bf:3000-37ff' id='iram'/>\n"
+    );
+    if(ram_size > 0) markup.append(
+      "    <bwram name='save.rwm' size='", hex(ram_size), "'/>\n"
+      "    <map address='00-3f:6000-7fff' id='bwram'/>\n"
+      "    <map address='80-bf:6000-7fff' id='bwram'/>\n"
+      "    <map address='40-4f:0000-ffff' id='bwram'/>\n"
+    );
+    markup.append(
       "  </sa1>\n"
     );
   }
 
   else if(mapper == BSCLoROM) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-    "    <map mode='linear' address='00-1f:8000-ffff' offset='0x000000'/>\n"
-    "    <map mode='linear' address='20-3f:8000-ffff' offset='0x100000'/>\n"
-    "    <map mode='linear' address='80-9f:8000-ffff' offset='0x200000'/>\n"
-    "    <map mode='linear' address='a0-bf:8000-ffff' offset='0x100000'/>\n"
-    "  </rom>\n"
-    "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-    "    <map mode='linear' address='70-7f:0000-7fff'/>\n"
-    "    <map mode='linear' address='f0-ff:0000-7fff'/>\n"
-    "  </ram>\n"
-    "  <bsx>\n"
-    "    <slot>\n"
-    "      <map mode='linear' address='c0-ef:0000-ffff'/>\n"
-    "    </slot>\n"
-    "  </bsx>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+    "  <map address='00-1f:8000-ffff' id='rom' mode='linear' offset='0x000000'/>\n"
+    "  <map address='20-3f:8000-ffff' id='rom' mode='linear' offset='0x100000'/>\n"
+    "  <map address='80-9f:8000-ffff' id='rom' mode='linear' offset='0x200000'/>\n"
+    "  <map address='a0-bf:8000-ffff' id='rom' mode='linear' offset='0x100000'/>\n"
+    "  <map address='70-7f:0000-7fff' id='ram' mode='linear'/>\n"
+    "  <map address='f0-ff:0000-7fff' id='ram' mode='linear'/>\n"
+    "  <bsxslot>\n"
+    "    <map address='c0-ef:0000-ffff' id='rom' mode='linear'/>\n"
+    "  </bsxslot>\n"
   );
 
   else if(mapper == BSCHiROM) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-    "    <map mode='shadow' address='00-1f:8000-ffff'/>\n"
-    "    <map mode='linear' address='40-5f:0000-ffff'/>\n"
-    "    <map mode='shadow' address='80-9f:8000-ffff'/>\n"
-    "    <map mode='linear' address='c0-df:0000-ffff'/>\n"
-    "  </rom>\n"
-    "  <ram name='save.ram' size='0x", hex(ram_size), "'>\n"
-    "    <map mode='linear' address='20-3f:6000-7fff'/>\n"
-    "    <map mode='linear' address='a0-bf:6000-7fff'/>\n"
-    "  </ram>\n"
-    "  <bsx>\n"
-    "    <slot>\n"
-    "      <map mode='shadow' address='20-3f:8000-ffff'/>\n"
-    "      <map mode='linear' address='60-7f:0000-ffff'/>\n"
-    "      <map mode='shadow' address='a0-bf:8000-ffff'/>\n"
-    "      <map mode='linear' address='e0-ff:0000-ffff'/>\n"
-    "    </slot>\n"
-    "  </bsx>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "  <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+    "  <map address='00-1f:8000-ffff' id='rom' mode='shadow'/>\n"
+    "  <map address='80-9f:8000-ffff' id='rom' mode='shadow'/>\n"
+    "  <map address='40-5f:0000-ffff' id='rom' mode='linear'/>\n"
+    "  <map address='c0-df:0000-ffff' id='rom' mode='linear'/>\n"
+    "  <map address='20-3f:6000-7fff' id='ram' mode='linear'/>\n"
+    "  <map address='a0-bf:6000-7fff' id='ram' mode='linear'/>\n"
+    "  <bsxslot>\n"
+    "    <map address='20-3f:8000-ffff' id='rom' mode='shadow'/>\n"
+    "    <map address='a0-bf:8000-ffff' id='rom' mode='shadow'/>\n"
+    "    <map address='60-7f:0000-ffff' id='rom' mode='linear'/>\n"
+    "    <map address='e0-ff:0000-ffff' id='rom' mode='linear'/>\n"
+    "  </bsxslot>\n"
   );
 
   else if(mapper == BSXROM) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
-    "  <ram name='save.ram' size='0x", hex(ram_size), "'/>\n"
-    "  <psram name='bsx.ram' size='0x40000'/>\n"
     "  <bsx>\n"
-    "    <mcu>\n"
-    "      <map address='00-3f:8000-ffff'/>\n"
-    "      <map address='80-bf:8000-ffff'/>\n"
-    "      <map address='40-7f:0000-ffff'/>\n"
-    "      <map address='c0-ff:0000-ffff'/>\n"
-    "      <map address='20-3f:6000-7fff'/>\n"
-    "    </mcu>\n"
-    "    <mmio>\n"
-    "      <map address='00-3f:5000-5fff'/>\n"
-    "      <map address='80-bf:5000-5fff'/>\n"
-    "    </mmio>\n"
+    "    <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "    <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
+    "    <psram name='bsx.rwm' size='0x40000'/>\n"
+    "    <map address='00-3f:5000-5fff' id='io'/>\n"
+    "    <map address='80-bf:5000-5fff' id='io'/>\n"
+    "    <map address='20-3f:6000-7fff' id='ram'/>\n"
+    "    <map address='00-3f:8000-ffff' id='rom'/>\n"
+    "    <map address='80-bf:8000-ffff' id='rom'/>\n"
+    "    <map address='40-7f:0000-ffff' id='rom'/>\n"
+    "    <map address='c0-ff:0000-ffff' id='rom'/>\n"
     "  </bsx>\n"
   );
 
   else if(mapper == STROM) markup.append(
-    "  <rom name='program.rom' size='0x", hex(rom_size), "'>\n"
-    "    <map mode='linear' address='00-1f:8000-ffff'/>\n"
-    "    <map mode='linear' address='80-9f:8000-ffff'/>\n"
-    "  </rom>\n"
+    "  <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
+    "  <map address='00-1f:8000-ffff' id='rom' mode='linear'/>\n"
+    "  <map address='80-9f:8000-ffff' id='rom' mode='linear'/>\n"
     "  <sufamiturbo>\n"
     "    <slot id='A'>\n"
-    "      <rom>\n"
-    "        <map mode='linear' address='20-3f:8000-ffff'/>\n"
-    "        <map mode='linear' address='a0-bf:8000-ffff'/>\n"
-    "      </rom>\n"
-    "      <ram>\n"
-    "        <map mode='linear' address='60-63:8000-ffff'/>\n"
-    "        <map mode='linear' address='e0-e3:8000-ffff'/>\n"
-    "      </ram>\n"
+    "      <map address='20-3f:8000-ffff' id='rom' mode='linear'/>\n"
+    "      <map address='a0-bf:8000-ffff' id='rom' mode='linear'/>\n"
+    "      <map address='60-63:8000-ffff' id='ram' mode='linear'/>\n"
+    "      <map address='e0-e3:8000-ffff' id='ram' mode='linear'/>\n"
     "    </slot>\n"
     "    <slot id='B'>\n"
-    "      <rom>\n"
-    "        <map mode='linear' address='40-5f:8000-ffff'/>\n"
-    "        <map mode='linear' address='c0-df:8000-ffff'/>\n"
-    "      </rom>\n"
-    "      <ram>\n"
-    "        <map mode='linear' address='70-73:8000-ffff'/>\n"
-    "        <map mode='linear' address='f0-f3:8000-ffff'/>\n"
-    "      </ram>\n"
+    "      <map address='40-5f:8000-ffff' id='rom' mode='linear'/>\n"
+    "      <map address='c0-df:8000-ffff' id='rom' mode='linear'/>\n"
+    "      <map address='70-73:8000-ffff' id='ram' mode='linear'/>\n"
+    "      <map address='f0-f3:8000-ffff' id='ram' mode='linear'/>\n"
     "    </slot>\n"
     "  </sufamiturbo>\n"
   );
 
-  if(has_srtc) markup.append(
-    "  <sharprtc name='rtc.ram' size='0x10'>\n"
-    "    <map address='00-3f:2800-2801'/>\n"
-    "    <map address='80-bf:2800-2801'/>\n"
-    "  </sharprtc>\n"
+  if(has_spc7110rtc) markup.append(
+    "  <epsonrtc>\n"
+    "    <ram name='rtc.rwm' size='0x10'/>\n"
+    "    <map address='00-3f:4840-4842' id='io'/>\n"
+    "    <map address='80-bf:4840-4842' id='io'/>\n"
+    "  </epsonrtc>\n"
   );
 
-  if(has_sdd1) markup.append(
-    "  <sdd1>\n"
-    "    <mcu>\n"
-    "      <map address='c0-ff:0000-ffff'/>\n"
-    "    </mcu>\n"
-    "    <mmio>\n"
-    "      <map address='00-3f:4800-4807'/>\n"
-    "      <map address='80-bf:4800-4807'/>\n"
-    "    </mmio>\n"
-    "  </sdd1>\n"
+  if(has_srtc) markup.append(
+    "  <sharprtc>\n"
+    "    <ram name='rtc.rwm' size='0x10'/>\n"
+    "    <map address='00-3f:2800-2801' id='io'/>\n"
+    "    <map address='80-bf:2800-2801' id='io'/>\n"
+    "  </sharprtc>\n"
   );
 
   if(has_obc1) markup.append(
     "  <obc1>\n"
-    "    <map address='00-3f:6000-7fff'/>\n"
-    "    <map address='80-bf:6000-7fff'/>\n"
+    "    <ram name='save.rwm' size='0x2000'/>\n"
+    "    <map address='00-3f:6000-7fff' id='io'/>\n"
+    "    <map address='80-bf:6000-7fff' id='io'/>\n"
     "  </obc1>\n"
   );
 
   if(has_dsp1) {
     //91e87d11e1c30d172556bed2211cce2efa94ba595f58c5d264809ef4d363a97b  dsp1.rom
-    markup.append("  <necdsp model='uPD7725' frequency='8000000' firmware='dsp1b.rom' sha256='d789cb3c36b05c0b23b6c6f23be7aa37c6e78b6ee9ceac8d2d2aa9d8c4d35fa9'>\n");
+    markup.append(
+      "  <necdsp model='uPD7725' frequency='8000000'>\n"
+      "    <firmware name='dsp1b.rom' size='8192' sha256='d789cb3c36b05c0b23b6c6f23be7aa37c6e78b6ee9ceac8d2d2aa9d8c4d35fa9'/>\n"
+    );
     if(dsp1_mapper == DSP1LoROM1MB) markup.append(
-      "    <dr>\n"
-      "      <map address='20-3f:8000-bfff'/>\n"
-      "      <map address='a0-bf:8000-bfff'/>\n"
-      "    </dr>\n"
-      "    <sr>\n"
-      "      <map address='20-3f:c000-ffff'/>\n"
-      "      <map address='a0-bf:c000-ffff'/>\n"
-      "    </sr>\n"
+      "    <map address='20-3f:8000-bfff' id='dr'/>\n"
+      "    <map address='a0-bf:8000-bfff' id='dr'/>\n"
+      "    <map address='20-3f:c000-ffff' id='sr'/>\n"
+      "    <map address='a0-bf:c000-ffff' id='sr'/>\n"
     );
     if(dsp1_mapper == DSP1LoROM2MB) markup.append(
-      "    <dr>\n"
-      "      <map address='60-6f:0000-3fff'/>\n"
-      "      <map address='e0-ef:0000-3fff'/>\n"
-      "    </dr>\n"
-      "    <sr>\n"
-      "      <map address='60-6f:4000-7fff'/>\n"
-      "      <map address='e0-ef:4000-7fff'/>\n"
-      "    </sr>\n"
+      "    <map address='60-6f:0000-3fff' id='dr'/>\n"
+      "    <map address='e0-ef:0000-3fff' id='dr'/>\n"
+      "    <map address='60-6f:4000-7fff' id='sr'/>\n"
+      "    <map address='e0-ef:4000-7fff' id='sr'/>\n"
     );
     if(dsp1_mapper == DSP1HiROM) markup.append(
-      "    <dr>\n"
-      "      <map address='00-1f:6000-6fff'/>\n"
-      "      <map address='80-9f:6000-6fff'/>\n"
-      "    </dr>\n"
-      "    <sr>\n"
-      "      <map address='00-1f:7000-7fff'/>\n"
-      "      <map address='80-9f:7000-7fff'/>\n"
-      "    </sr>\n"
+      "    <map address='00-1f:6000-6fff' id='dr'/>\n"
+      "    <map address='80-9f:6000-6fff' id='dr'/>\n"
+      "    <map address='00-1f:7000-7fff' id='sr'/>\n"
+      "    <map address='80-9f:7000-7fff' id='sr'/>\n"
     );
-    markup.append("  </necdsp>\n");
+    markup.append(
+      "  </necdsp>\n"
+    );
   }
 
   if(has_dsp2) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp2.rom' sha256='03ef4ef26c9f701346708cb5d07847b5203cf1b0818bf2930acd34510ffdd717'>\n"
-    "    <dr>\n"
-    "      <map address='20-3f:8000-bfff'/>\n"
-    "      <map address='a0-bf:8000-bfff'/>\n"
-    "    </dr>\n"
-    "    <sr>\n"
-    "      <map address='20-3f:c000-ffff'/>\n"
-    "      <map address='a0-bf:c000-ffff'/>\n"
-    "    </sr>\n"
+    "  <necdsp model='uPD7725' frequency='8000000'>\n"
+    "    <firmware name='dsp2.rom' size='8192' sha256='03ef4ef26c9f701346708cb5d07847b5203cf1b0818bf2930acd34510ffdd717'/>\n"
+    "    <map address='20-3f:8000-bfff' id='dr'/>\n"
+    "    <map address='a0-bf:8000-bfff' id='dr'/>\n"
+    "    <map address='20-3f:c000-ffff' id='sr'/>\n"
+    "    <map address='a0-bf:c000-ffff' id='sr'/>\n"
     "  </necdsp>\n"
   );
 
   if(has_dsp3) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp3.rom' sha256='0971b08f396c32e61989d1067dddf8e4b14649d548b2188f7c541b03d7c69e4e'>\n"
-    "    <dr>\n"
-    "      <map address='20-3f:8000-bfff'/>\n"
-    "      <map address='a0-bf:8000-bfff'/>\n"
-    "    </dr>\n"
-    "    <sr>\n"
-    "      <map address='20-3f:c000-ffff'/>\n"
-    "      <map address='a0-bf:c000-ffff'/>\n"
-    "    </sr>\n"
+    "  <necdsp model='uPD7725' frequency='8000000'>\n"
+    "    <firmware name='dsp3.rom' size='8192' sha256='0971b08f396c32e61989d1067dddf8e4b14649d548b2188f7c541b03d7c69e4e'/>\n"
+    "    <map address='20-3f:8000-bfff' id='dr'/>\n"
+    "    <map address='a0-bf:8000-bfff' id='dr'/>\n"
+    "    <map address='20-3f:c000-ffff' id='sr'/>\n"
+    "    <map address='a0-bf:c000-ffff' id='sr'/>\n"
     "  </necdsp>\n"
   );
 
   if(has_dsp4) markup.append(
-    "  <necdsp model='uPD7725' frequency='8000000' firmware='dsp4.rom' sha256='752d03b2d74441e430b7f713001fa241f8bbcfc1a0d890ed4143f174dbe031da'>\n"
-    "    <dr>\n"
-    "      <map address='30-3f:8000-bfff'/>\n"
-    "      <map address='b0-bf:8000-bfff'/>\n"
-    "    </dr>\n"
-    "    <sr>\n"
-    "      <map address='30-3f:c000-ffff'/>\n"
-    "      <map address='b0-bf:c000-ffff'/>\n"
-    "    </sr>\n"
+    "  <necdsp model='uPD7725' frequency='8000000'>\n"
+    "    <firmware name='dsp4.rom' size='8192' sha256='752d03b2d74441e430b7f713001fa241f8bbcfc1a0d890ed4143f174dbe031da'/>\n"
+    "    <map address='30-3f:8000-bfff' id='dr'/>\n"
+    "    <map address='b0-bf:8000-bfff' id='dr'/>\n"
+    "    <map address='30-3f:c000-ffff' id='sr'/>\n"
+    "    <map address='b0-bf:c000-ffff' id='sr'/>\n"
     "  </necdsp>\n"
   );
 
   if(has_st010) markup.append(
-    "  <necdsp model='uPD96050' frequency='10000000' firmware='st010.rom' sha256='fa9bced838fedea11c6f6ace33d1878024bdd0d02cc9485899d0bdd4015ec24c'>\n"
-    "    <dr>\n"
-    "      <map address='60:0000'/>\n"
-    "      <map address='e0:0000'/>\n"
-    "    </dr>\n"
-    "    <sr>\n"
-    "      <map address='60:0001'/>\n"
-    "      <map address='e0:0001'/>\n"
-    "    </sr>\n"
-    "    <dp>\n"
-    "      <map address='68-6f:0000-0fff'/>\n"
-    "      <map address='e8-ef:0000-0fff'/>\n"
-    "    </dp>\n"
+    "  <necdsp model='uPD96050' frequency='10000000'>\n"
+    "    <firmware name='st010.rom' size='53248' sha256='fa9bced838fedea11c6f6ace33d1878024bdd0d02cc9485899d0bdd4015ec24c'/>\n"
+    "    <ram name='save.rwm' size='0x1000'/>\n"
+    "    <map address='60:0000' id='dr'/>\n"
+    "    <map address='e0:0000' id='dr'/>\n"
+    "    <map address='60:0001' id='sr'/>\n"
+    "    <map address='e0:0001' id='sr'/>\n"
+    "    <map address='68-6f:0000-0fff' id='ram'/>\n"
+    "    <map address='e8-ef:0000-0fff' id='ram'/>\n"
     "  </necdsp>\n"
   );
 
   if(has_st011) markup.append(
-    "  <necdsp model='uPD96050' frequency='15000000' firmware='st011.rom' sha256='8b2b3f3f3e6e29f4d21d8bc736b400bc988b7d2214ebee15643f01c1fee2f364'>\n"
-    "    <dr>\n"
-    "      <map address='60:0000'/>\n"
-    "      <map address='e0:0000'/>\n"
-    "    </dr>\n"
-    "    <sr>\n"
-    "      <map address='60:0001'/>\n"
-    "      <map address='e0:0001'/>\n"
-    "    </sr>\n"
-    "    <dp>\n"
-    "      <map address='68-6f:0000-0fff'/>\n"
-    "      <map address='e8-ef:0000-0fff'/>\n"
-    "    </dp>\n"
+    "  <necdsp model='uPD96050' frequency='15000000'>\n"
+    "    <firmware name='st011.rom' size='53248' sha256='8b2b3f3f3e6e29f4d21d8bc736b400bc988b7d2214ebee15643f01c1fee2f364'/>\n"
+    "    <ram name='save.rwm' size='0x1000'/>\n"
+    "    <map address='60:0000' id='dr'/>\n"
+    "    <map address='e0:0000' id='dr'/>\n"
+    "    <map address='60:0001' id='sr'/>\n"
+    "    <map address='e0:0001' id='sr'/>\n"
+    "    <map address='68-6f:0000-0fff' id='ram'/>\n"
+    "    <map address='e8-ef:0000-0fff' id='ram'/>\n"
     "  </necdsp>\n"
   );
 
   if(has_st018) markup.append(
-    "  <armdsp firmware='st018.rom' frequency='21477272' sha256='6df209ab5d2524d1839c038be400ae5eb20dafc14a3771a3239cd9e8acd53806'>\n"
-    "    <map address='00-3f:3800-38ff'/>\n"
-    "    <map address='80-bf:3800-38ff'/>\n"
+    "  <armdsp frequency='21477272'>\n"
+    "    <firmware name='st018.rom' size='163840' sha256='6df209ab5d2524d1839c038be400ae5eb20dafc14a3771a3239cd9e8acd53806'/>\n"
+    "    <map address='00-3f:3800-38ff' id='io'/>\n"
+    "    <map address='80-bf:3800-38ff' id='io'/>\n"
     "  </armdsp>\n"
   );
 

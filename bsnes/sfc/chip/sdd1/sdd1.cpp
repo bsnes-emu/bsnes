@@ -108,15 +108,7 @@ uint8 SDD1::mmc_read(unsigned addr) {
 //
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-uint8 SDD1::mcu_read(unsigned addr) {
-  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return ram.read(addr & 0x1fff);
-  }
-
-  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
-    return ram.read(addr & 0x1fff);
-  }
-
+uint8 SDD1::mcurom_read(unsigned addr) {
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
     return rom.read(addr);
@@ -152,7 +144,22 @@ uint8 SDD1::mcu_read(unsigned addr) {
   return mmc_read(addr);
 }
 
-void SDD1::mcu_write(unsigned addr, uint8 data) {
+void SDD1::mcurom_write(unsigned addr, uint8 data) {
+}
+
+uint8 SDD1::mcuram_read(unsigned addr) {
+  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+    return ram.read(addr & 0x1fff);
+  }
+
+  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
+    return ram.read(addr & 0x1fff);
+  }
+
+  return cpu.regs.mdr;
+}
+
+void SDD1::mcuram_write(unsigned addr, uint8 data) {
   if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     return ram.write(addr & 0x1fff, data);
   }
