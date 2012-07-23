@@ -20,28 +20,28 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
 
 MessageWindow::Response pMessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::information(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
+    buttons, QMessageBox::information(&parent != &Window::none() ? parent.p.qtWindow : nullptr, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
 MessageWindow::Response pMessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::question(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
+    buttons, QMessageBox::question(&parent != &Window::none() ? parent.p.qtWindow : nullptr, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
 MessageWindow::Response pMessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::warning(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
+    buttons, QMessageBox::warning(&parent != &Window::none() ? parent.p.qtWindow : nullptr, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }
 
 MessageWindow::Response pMessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
   return MessageWindow_response(
-    buttons, QMessageBox::critical(&parent != &Window::None ? parent.p.qtWindow : 0, " ",
+    buttons, QMessageBox::critical(&parent != &Window::none() ? parent.p.qtWindow : nullptr, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
 }

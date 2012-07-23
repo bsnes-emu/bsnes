@@ -29,7 +29,7 @@ namespace nall {
     unsigned capacity() const { return poolsize; }
 
     T* move() {
-      T *result = data;
+      T *result = pool;
       pool = nullptr;
       poolsize = 0;
       objectsize = 0;

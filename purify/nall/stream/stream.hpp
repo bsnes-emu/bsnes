@@ -69,7 +69,7 @@ struct stream {
 
   struct byte {
     operator uint8_t() const { return s.read(offset); }
-    byte& operator=(uint8_t data) { s.write(offset, data); }
+    byte& operator=(uint8_t data) { s.write(offset, data); return *this; }
     byte(const stream &s, unsigned offset) : s(s), offset(offset) {}
 
   private:

@@ -33,7 +33,7 @@ static string FileDialog(bool save, Window &parent, const string &path, const ls
   OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(OPENFILENAME));
   ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
+  ofn.hwndOwner = &parent != &Window::none() ? parent.p.hwnd : 0;
   ofn.lpstrFilter = wfilter;
   ofn.lpstrInitialDir = wdir;
   ofn.lpstrFile = wfilename;
@@ -59,7 +59,7 @@ string pDialogWindow::fileSave(Window &parent, const string &path, const lstring
 string pDialogWindow::folderSelect(Window &parent, const string &path) {
   wchar_t wfilename[PATH_MAX + 1] = L"";
   BROWSEINFO bi;
-  bi.hwndOwner = &parent != &Window::None ? parent.p.hwnd : 0;
+  bi.hwndOwner = &parent != &Window::none() ? parent.p.hwnd : 0;
   bi.pidlRoot = NULL;
   bi.pszDisplayName = wfilename;
   bi.lpszTitle = L"";

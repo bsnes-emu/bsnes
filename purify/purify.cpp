@@ -99,8 +99,9 @@ void create_super_famicom(const string &filename, uint8_t *data, unsigned size) 
   if(!file::exists({path, "save.rwm"})) file::copy({nall::basename(filename), ".srm"}, {path, "save.rwm"});
 
   //firmware
-  if(auto position = information.markup.position("firmware=")) {
-    string firmware = substr(information.markup, position() + 10);
+  string firmwareID = "<firmware name=\"";
+  if(auto position = information.markup.position(firmwareID)) {
+    string firmware = substr(information.markup, position() + firmwareID.length());
     if(auto position = firmware.position("\"")) {
       firmware[position()] = 0;
       if(file::copy({dir(filename), firmware}, {path, firmware}) == false) {
@@ -232,6 +233,12 @@ void create_manifest(const string &path) {
   if(path.iendswith(".sfc/") && file::exists({path, "program.rom"})) {
     print(name, "\n");
     auto buffer = file::read({path, "program.rom"});
+    if(file::exists({path, "data.rom"})) {  //SPC7110 ROMs consist of program.rom + data.rom
+      auto prom = buffer;
+      auto drom = file::read({path, "data.rom"});
+      buffer.resize(prom.size() + drom.size());
+      memcpy(buffer.data() + prom.size(), drom.data(), drom.size());
+    }
     SuperFamicomCartridge information(buffer.data(), buffer.size());
     file::write({path, "manifest.xml"}, (const uint8_t*)information.markup(), information.markup.length());
   }
@@ -265,6 +272,22 @@ void create_manifest(const string &path) {
   }
 }
 
+//$ purify synchronize
+//this function recursively scans directories; as purify uses nested folders for different systems
+void synchronize_manifests(string pathname) {
+  pathname.transform("\\", "/");
+  if(pathname.endswith("/") == false) pathname.append("/");
+
+  lstring folders = directory::folders(pathname);
+  for(auto &folder : folders) {
+    if(valid_extension(folder)) {
+      create_manifest({pathname, folder});
+    } else {
+      synchronize_manifests({pathname, folder});
+    }
+  }
+}
+
 void create_folder(string pathname) {
   pathname.transform("\\", "/");
   if(pathname.endswith("/") == false) pathname.append("/");
@@ -279,9 +302,7 @@ void create_folder(string pathname) {
 
   lstring files = directory::contents(pathname);
   for(auto &name : files) {
-    if(directory::exists({pathname, name}) && valid_extension(name)) {
-      create_manifest({pathname, name});
-    } else if(name.iendswith(".zip")) {
+    if(name.iendswith(".zip")) {
       create_zip({pathname, name});
     } else {
       create_file({pathname, name});
@@ -322,9 +343,7 @@ struct Progress : Window {
       name.rtrim<1>("/");
       fileName.setText(notdir(name));
 
-      if(directory::exists({pathname, filename}) && valid_extension(name)) {
-        create_manifest({pathname, filename});
-      } else if(filename.iendswith(".zip")) {
+      if(filename.iendswith(".zip")) {
         create_zip({pathname, filename});
       } else {
         create_file({pathname, filename});
@@ -375,16 +394,20 @@ struct Application : Window {
   HorizontalLayout configLayout;
   Button emulatorButton;
   Button pathButton;
-  HorizontalLayout emulatorLayout;
-    Label emulatorName;
-    Label emulatorValue;
-  HorizontalLayout pathLayout;
-    Label pathName;
-    Label pathValue;
+  HorizontalLayout gridLayout;
+    VerticalLayout labelLayout;
+      HorizontalLayout emulatorLayout;
+        Label emulatorName;
+        Label emulatorValue;
+      HorizontalLayout pathLayout;
+        Label pathName;
+        Label pathValue;
+    VerticalLayout synchronizeLayout;
+      Button synchronizeButton;
 
   Application() {
-    setTitle("purify v00.06");
-    setGeometry({128, 128, 440, 180});
+    setTitle("purify v00.07");
+    setGeometry({128, 128, 600, 200});
     layout.setMargin(5);
     title.setFont("Sans, 16, Bold");
     title.setText("Choose Action");
@@ -402,6 +425,8 @@ struct Application : Window {
     pathName.setFont("Sans, 8, Bold");
     pathName.setText("Output Path:");
     pathValue.setText(settings.path);
+    synchronizeButton.setImage({resource::synchronize, sizeof resource::synchronize});
+    synchronizeButton.setText("Update Manifests");
 
     Font font("Sans, 8, Bold");
     unsigned width = max(font.geometry("Emulator:").width, font.geometry("Output Path:").width);
@@ -414,18 +439,36 @@ struct Application : Window {
     layout.append(configLayout, {~0, ~0}, 5);
       configLayout.append(emulatorButton, {~0, ~0}, 5);
       configLayout.append(pathButton, {~0, ~0});
-    layout.append(emulatorLayout, {~0, 0}, 5);
-      emulatorLayout.append(emulatorName, {width, 0}, 5);
-      emulatorLayout.append(emulatorValue, {~0, 0});
-    layout.append(pathLayout, {~0, 0});
-      pathLayout.append(pathName, {width, 0}, 5);
-      pathLayout.append(pathValue, {~0, 0});
+    layout.append(gridLayout, {~0, 0});
+      gridLayout.append(labelLayout, {~0, 0}, 5);
+        labelLayout.append(emulatorLayout, {~0, 0}, 5);
+          emulatorLayout.append(emulatorName, {width, 0}, 5);
+          emulatorLayout.append(emulatorValue, {~0, 0});
+        labelLayout.append(pathLayout, {~0, 0});
+          pathLayout.append(pathName, {width, 0}, 5);
+          pathLayout.append(pathValue, {~0, 0});
+      gridLayout.append(synchronizeLayout, {0, 0});
+        synchronizeLayout.append(synchronizeButton, {0, 0});
 
     onClose = &OS::quit;
     playButton.onActivate = {&Application::playAction, this};
     convertButton.onActivate = {&Application::convertAction, this};
     emulatorButton.onActivate = {&Application::emulatorAction, this};
     pathButton.onActivate = {&Application::pathAction, this};
+    synchronizeButton.onActivate = [&] {
+      if(MessageWindow::question(*this,
+        "This will update all manifest.xml files located in your output path.\n"
+        "This process may take a few minutes to complete.\n"
+        "The user interface will not be responsive during this time.\n\n"
+        "Would you like to proceed?"
+      ) == MessageWindow::Response::No) return;
+
+      layout.setEnabled(false);
+      OS::processEvents();
+      synchronize_manifests(settings.path);
+      layout.setEnabled(true);
+      MessageWindow::information(*this, "Process completed. All identified manifests have been updated.");
+    };
 
     setVisible();
   }
@@ -496,6 +539,11 @@ int main(int argc, char **argv) {
     string argument = argv[n];
     argument.replace("~/", userpath());
     args.append(argument);
+  }
+
+  if(args.size() == 1 && args[0] == "synchronize") {
+    synchronize_manifests(settings.path);
+    return 0;
   }
 
   if(args.size() == 1 && directory::exists(args[0])) {

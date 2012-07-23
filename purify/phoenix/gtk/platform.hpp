@@ -103,6 +103,8 @@ struct pWindow : public pObject {
   GtkAllocation lastAllocation;
   bool onSizePending;
 
+  static Window& none();
+
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);

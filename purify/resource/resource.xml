@@ -4,4 +4,5 @@
   <binary id="convert" name="drive-harddisk.png"/>
   <binary id="emulator" name="applications-system.png"/>
   <binary id="path" name="folder.png"/>
+  <binary id="synchronize" name="view-refresh.png"/>
 </resource>

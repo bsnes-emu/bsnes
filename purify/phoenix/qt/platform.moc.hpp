@@ -117,6 +117,8 @@ public:
   QStatusBar *qtStatus;
   QWidget *qtContainer;
 
+  static Window& none();
+
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);

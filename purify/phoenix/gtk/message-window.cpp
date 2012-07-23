@@ -13,7 +13,7 @@ MessageWindow::Response pMessageWindow::information(Window &parent, const string
   if(buttons == MessageWindow::Buttons::OkCancel) buttonsType = GTK_BUTTONS_OK_CANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) buttonsType = GTK_BUTTONS_YES_NO;
   GtkWidget *dialog = gtk_message_dialog_new(
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, buttonsType, "%s", (const char*)text
   );
   gint response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -26,7 +26,7 @@ MessageWindow::Response pMessageWindow::question(Window &parent, const string &t
   if(buttons == MessageWindow::Buttons::OkCancel) buttonsType = GTK_BUTTONS_OK_CANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) buttonsType = GTK_BUTTONS_YES_NO;
   GtkWidget *dialog = gtk_message_dialog_new(
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     GTK_DIALOG_MODAL, GTK_MESSAGE_QUESTION, buttonsType, "%s", (const char*)text
   );
   gint response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -39,7 +39,7 @@ MessageWindow::Response pMessageWindow::warning(Window &parent, const string &te
   if(buttons == MessageWindow::Buttons::OkCancel) buttonsType = GTK_BUTTONS_OK_CANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) buttonsType = GTK_BUTTONS_YES_NO;
   GtkWidget *dialog = gtk_message_dialog_new(
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, buttonsType, "%s", (const char*)text
   );
   gint response = gtk_dialog_run(GTK_DIALOG(dialog));
@@ -52,7 +52,7 @@ MessageWindow::Response pMessageWindow::critical(Window &parent, const string &t
   if(buttons == MessageWindow::Buttons::OkCancel) buttonsType = GTK_BUTTONS_OK_CANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) buttonsType = GTK_BUTTONS_YES_NO;
   GtkWidget *dialog = gtk_message_dialog_new(
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, buttonsType, "%s", (const char*)text
   );
   gint response = gtk_dialog_run(GTK_DIALOG(dialog));
