@@ -121,6 +121,7 @@ void CPU::enable() {
 
 void CPU::power() {
   cpu_version = config.cpu.version;
+  for(auto &byte : wram) byte = random(config.cpu.wram_init_value);
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
@@ -156,7 +157,6 @@ void CPU::reset() {
 
 CPU::CPU() {
   PPUcounter::scanline = {&CPU::scanline, this};
-  for(auto &n : wram) n = random(config.cpu.wram_init_value);
 }
 
 CPU::~CPU() {

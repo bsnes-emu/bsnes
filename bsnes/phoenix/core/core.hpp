@@ -167,12 +167,13 @@ struct Timer : private nall::base_from_member<pTimer&>, Object {
 };
 
 struct Window : private nall::base_from_member<pWindow&>, Object {
-  static Window None;
   nall::function<void ()> onClose;
   nall::function<void (Keyboard::Keycode)> onKeyPress;
   nall::function<void (Keyboard::Keycode)> onKeyRelease;
   nall::function<void ()> onMove;
   nall::function<void ()> onSize;
+
+  static Window& none();
 
   inline void append() {}
   inline void remove() {}

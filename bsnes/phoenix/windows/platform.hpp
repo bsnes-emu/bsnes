@@ -96,6 +96,8 @@ struct pWindow : public pObject {
   HBRUSH brush;
   COLORREF brushColor;
 
+  static Window& none();
+
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);
@@ -228,7 +230,7 @@ struct pWidget : public pSizable {
   virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
-  pWidget(Widget &widget) : pSizable(widget), widget(widget) { parentWindow = &Window::None; }
+  pWidget(Widget &widget) : pSizable(widget), widget(widget) { parentWindow = &Window::none(); }
   void constructor();
   void destructor();
   virtual void orphan();

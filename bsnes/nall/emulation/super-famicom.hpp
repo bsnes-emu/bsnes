@@ -242,14 +242,14 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  <superfx revision='2'>\n"
       "    <map address='00-3f:3000-32ff' id='io'/>\n"
       "    <map address='80-bf:3000-32ff' id='io'/>\n"
-      "    <rom name='program.rom' size='", hex(rom_size), "'/>\n"
+      "    <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
       "    <map address='00-3f:8000-ffff' id='rom' mode='linear'/>\n"
       "    <map address='80-bf:8000-ffff' id='rom' mode='linear'/>\n"
       "    <map address='40-5f:0000-ffff' id='rom' mode='linear'/>\n"
       "    <map address='c0-df:0000-ffff' id='rom' mode='linear'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "    <ram name='save.rwm' size='", hex(ram_size), "'/>\n"
+      "    <ram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
       "    <map address='00-3f:6000-7fff' id='ram' mode='linear' size='0x2000'/>\n"
       "    <map address='80-bf:6000-7fff' id='ram' mode='linear' size='0x2000'/>\n"
       "    <map address='60-7f:0000-ffff' id='ram' mode='linear'/>\n"
@@ -265,7 +265,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  <sa1>\n"
       "    <map address='00-3f:2200-23ff' id='io'/>\n"
       "    <map address='80-bf:2200-23ff' id='io'/>\n"
-      "    <rom name='program.rom' size='", hex(rom_size), "'/>\n"
+      "    <rom name='program.rom' size='0x", hex(rom_size), "'/>\n"
       "    <map address='00-3f:8000-ffff' id='rom'/>\n"
       "    <map address='80-bf:8000-ffff' id='rom'/>\n"
       "    <map address='c0-ff:0000-ffff' id='rom'/>\n"
@@ -274,7 +274,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "    <map address='80-bf:3000-37ff' id='iram'/>\n"
     );
     if(ram_size > 0) markup.append(
-      "    <bwram name='save.rwm' size='", hex(ram_size), "'/>\n"
+      "    <bwram name='save.rwm' size='0x", hex(ram_size), "'/>\n"
       "    <map address='00-3f:6000-7fff' id='bwram'/>\n"
       "    <map address='80-bf:6000-7fff' id='bwram'/>\n"
       "    <map address='40-4f:0000-ffff' id='bwram'/>\n"

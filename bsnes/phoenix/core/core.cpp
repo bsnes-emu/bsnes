@@ -14,7 +14,6 @@
 #endif
 
 static bool OS_quit = false;
-Window Window::None;
 
 //Color
 //=====
@@ -210,6 +209,10 @@ Timer::~Timer() {
 
 //Window
 //======
+
+Window& Window::none() {
+  return pWindow::none();
+}
 
 void Window::append_(Layout &layout) {
   if(state.layout.append(layout)) {

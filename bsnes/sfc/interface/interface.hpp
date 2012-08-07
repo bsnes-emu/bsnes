@@ -92,7 +92,9 @@ struct Interface : Emulator::Interface {
 
   void paletteUpdate();
 
+  //debugger functions
   bool tracerEnable(bool);
+  void exportMemory();
 
   Interface();
 

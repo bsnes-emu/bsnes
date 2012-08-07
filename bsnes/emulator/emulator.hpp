@@ -3,13 +3,14 @@
 
 namespace Emulator {
   static const char Name[] = "bsnes";
-  static const char Version[] = "089.17";
+  static const char Version[] = "089.18";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
 }
 
 #include <nall/platform.hpp>
 #include <nall/algorithm.hpp>
+#include <nall/directory.hpp>
 #include <nall/dl.hpp>
 #include <nall/dsp.hpp>
 #include <nall/endian.hpp>

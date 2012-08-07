@@ -38,6 +38,7 @@
 #include <nall/string/trim.hpp>
 #include <nall/string/replace.hpp>
 #include <nall/string/split.hpp>
+#include <nall/string/static.hpp>
 #include <nall/string/utf8.hpp>
 #include <nall/string/utility.hpp>
 #include <nall/string/variadic.hpp>

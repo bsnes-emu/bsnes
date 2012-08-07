@@ -284,7 +284,8 @@ void Interface::paletteUpdate() {
 }
 
 bool Interface::tracerEnable(bool trace) {
-  string pathname = path(group(ID::ROM));
+  string pathname = {path(group(ID::ROM)), "debug/"};
+  directory::create(pathname);
 
   if(trace == true && !tracer.open()) {
     for(unsigned n = 0; n <= 999; n++) {
@@ -301,6 +302,17 @@ bool Interface::tracerEnable(bool trace) {
   }
 
   return false;
+}
+
+void Interface::exportMemory() {
+  string pathname = {path(group(ID::ROM)), "debug/"};
+  directory::create(pathname);
+
+  file::write({pathname, "wram.rwm"}, cpu.wram, 128 * 1024);
+  file::write({pathname, "vram.rwm"}, ppu.vram, 64 * 1024);
+  file::write({pathname, "oam.rwm"}, ppu.oam, 544);
+  file::write({pathname, "cgram.rwm"}, ppu.cgram, 512);
+  file::write({pathname, "apuram.rwm"}, smp.apuram, 64 * 1024);
 }
 
 Interface::Interface() {

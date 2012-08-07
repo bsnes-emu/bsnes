@@ -90,7 +90,7 @@ Presentation::Presentation() : active(nullptr) {
     loadMenu.append(*new Separator);
     for(auto &item : loadListSubsystem) loadMenu.append(*item);
   }
-  for(auto &system : emulatorList) append(system->menu);
+  for(auto &systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
       videoMenu.append(centerVideo, scaleVideo, stretchVideo, *new Separator, aspectCorrection, maskOverscan);

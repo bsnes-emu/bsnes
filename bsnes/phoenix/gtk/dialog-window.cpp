@@ -3,11 +3,11 @@ static string FileDialog(bool save, Window &parent, const string &path, const ls
 
   GtkWidget *dialog = gtk_file_chooser_dialog_new(
     save == 0 ? "Load File" : "Save File",
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     save == 0 ? GTK_FILE_CHOOSER_ACTION_OPEN : GTK_FILE_CHOOSER_ACTION_SAVE,
     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-    (const gchar*)0
+    (const gchar*)nullptr
   );
 
   if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);
@@ -47,11 +47,11 @@ string pDialogWindow::folderSelect(Window &parent, const string &path) {
 
   GtkWidget *dialog = gtk_file_chooser_dialog_new(
     "Select Folder",
-    &parent != &Window::None ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)0,
+    &parent != &Window::none() ? GTK_WINDOW(parent.p.widget) : (GtkWindow*)nullptr,
     GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
     GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
     GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT,
-    (const gchar*)0
+    (const gchar*)nullptr
   );
 
   if(path) gtk_file_chooser_set_current_folder(GTK_FILE_CHOOSER(dialog), path);

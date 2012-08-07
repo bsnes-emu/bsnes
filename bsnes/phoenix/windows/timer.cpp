@@ -1,4 +1,4 @@
-static linear_vector<pTimer*> timers;
+static vector<pTimer*> timers;
 
 static void CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) {
   for(auto &timer : timers) {

@@ -101,8 +101,6 @@ void System::load() {
     interface->notify("Error: required firmware ", firmware, " not found.\n");
   }
 
-  file::read({path, "wram.rwm"}, cpu.wram, 128 * 1024);
-
   region = config.region;
   expansion = config.expansion_port;
   if(region == Region::Autodetect) {
@@ -143,9 +141,6 @@ void System::load() {
 }
 
 void System::unload() {
-  string path = interface->path(ID::System);
-  file::write({path, "wram.rwm"}, cpu.wram, 128 * 1024);
-
   if(expansion() == ExpansionPortDevice::BSX) bsxsatellaview.unload();
   if(cartridge.has_gb_slot()) icd2.unload();
   if(cartridge.has_bs_cart()) bsxcartridge.unload();

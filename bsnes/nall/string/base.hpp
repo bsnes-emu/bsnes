@@ -22,6 +22,8 @@ namespace nall {
   };
 
   struct string {
+    inline static string read(const string &filename);
+
     inline void reserve(unsigned);
     inline bool empty() const;
 

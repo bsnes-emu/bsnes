@@ -236,9 +236,9 @@ public:
     uint16_t productId;
   };
 
-  linear_vector<Keyboard> lkeyboard;
-  linear_vector<Mouse>    lmouse;
-  linear_vector<Gamepad>  lgamepad;
+  vector<Keyboard> lkeyboard;
+  vector<Mouse>    lmouse;
+  vector<Gamepad>  lgamepad;
 
   LRESULT window_proc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
     if(msg == WM_INPUT) {
@@ -250,15 +250,15 @@ public:
 
       if(input->header.dwType == RIM_TYPEKEYBOARD) {
         for(unsigned i = 0; i < lkeyboard.size(); i++) {
-          if(input->header.hDevice == lkeyboard[i].handle) {
-            lkeyboard[i].update(input);
+          if(input->header.hDevice == lkeyboard(i).handle) {
+            lkeyboard(i).update(input);
             break;
           }
         }
       } else if(input->header.dwType == RIM_TYPEMOUSE) {
         for(unsigned i = 0; i < lmouse.size(); i++) {
-          if(input->header.hDevice == lmouse[i].handle) {
-            lmouse[i].update(input);
+          if(input->header.hDevice == lmouse(i).handle) {
+            lmouse(i).update(input);
             break;
           }
         }
@@ -327,26 +327,26 @@ public:
 
       if(info.dwType == RIM_TYPEKEYBOARD) {
         unsigned n = lkeyboard.size();
-        lkeyboard[n].handle = pool[i].handle;
+        lkeyboard(n).handle = pool[i].handle;
       } else if(info.dwType == RIM_TYPEMOUSE) {
         unsigned n = lmouse.size();
-        lmouse[n].handle = pool[i].handle;
+        lmouse(n).handle = pool[i].handle;
       } else if(info.dwType == RIM_TYPEHID) {
         //if this is a gamepad or joystick device ...
         if(info.hid.usUsagePage == 1 && (info.hid.usUsage == 4 || info.hid.usUsage == 5)) {
           //... then cache device information for later use
           unsigned n = lgamepad.size();
-          lgamepad[n].handle = pool[i].handle;
-          lgamepad[n].vendorId = (uint16_t)info.hid.dwVendorId;
-          lgamepad[n].productId = (uint16_t)info.hid.dwProductId;
+          lgamepad(n).handle = pool[i].handle;
+          lgamepad(n).vendorId = (uint16_t)info.hid.dwVendorId;
+          lgamepad(n).productId = (uint16_t)info.hid.dwProductId;
 
           //per MSDN: XInput devices have "IG_" in their device strings,
           //which is how they should be identified.
           string p = (const char*)utf8_t(pool[i].name);
           if(auto position = strpos(p, "IG_")) {
-            lgamepad[n].isXInputDevice = true;
+            lgamepad(n).isXInputDevice = true;
           } else {
-            lgamepad[n].isXInputDevice = false;
+            lgamepad(n).isXInputDevice = false;
           }
         }
       }
@@ -448,15 +448,15 @@ public:
     }
   };
 
-  linear_vector<Gamepad> lgamepad;
+  vector<Gamepad> lgamepad;
 
   void poll() {
     if(!pXInputGetState) return;
 
     for(unsigned i = 0; i < lgamepad.size(); i++) {
       XINPUT_STATE state;
-      DWORD result = pXInputGetState(lgamepad[i].id, &state);
-      if(result == ERROR_SUCCESS) lgamepad[i].poll(state);
+      DWORD result = pXInputGetState(lgamepad(i).id, &state);
+      if(result == ERROR_SUCCESS) lgamepad(i).poll(state);
     }
   }
 
@@ -470,7 +470,7 @@ public:
       if(result == ERROR_SUCCESS) {
         //valid controller detected, add to gamepad list
         unsigned n = lgamepad.size();
-        lgamepad[n].id = i;
+        lgamepad(n).id = i;
       }
     }
   }
@@ -542,18 +542,18 @@ public:
       for(unsigned n = 0; n < 128; n++) button[n] = false;
     }
   };
-  linear_vector<Gamepad> lgamepad;
+  vector<Gamepad> lgamepad;
 
   void poll() {
     for(unsigned i = 0; i < lgamepad.size(); i++) {
-      if(FAILED(lgamepad[i].handle->Poll())) {
-        lgamepad[i].handle->Acquire();
+      if(FAILED(lgamepad(i).handle->Poll())) {
+        lgamepad(i).handle->Acquire();
         continue;
       }
 
       DIJOYSTATE2 state;
-      lgamepad[i].handle->GetDeviceState(sizeof(DIJOYSTATE2), &state);
-      lgamepad[i].poll(state);
+      lgamepad(i).handle->GetDeviceState(sizeof(DIJOYSTATE2), &state);
+      lgamepad(i).poll(state);
     }
   }
 
@@ -561,9 +561,9 @@ public:
     //if this is an XInput device, do not acquire it via DirectInput ...
     //the XInput driver above will handle said device.
     for(unsigned i = 0; i < rawinput.lgamepad.size(); i++) {
-      uint32_t guid = MAKELONG(rawinput.lgamepad[i].vendorId, rawinput.lgamepad[i].productId);
+      uint32_t guid = MAKELONG(rawinput.lgamepad(i).vendorId, rawinput.lgamepad(i).productId);
       if(guid == instance->guidProduct.Data1) {
-        if(rawinput.lgamepad[i].isXInputDevice == true) {
+        if(rawinput.lgamepad(i).isXInputDevice == true) {
           return DIENUM_CONTINUE;
         }
       }
@@ -577,7 +577,7 @@ public:
     device->SetCooperativeLevel(handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
     device->EnumObjects(DirectInput_EnumJoypadAxesCallback, (void*)this, DIDFT_ABSAXIS);
     unsigned n = lgamepad.size();
-    lgamepad[n].handle = device;
+    lgamepad(n).handle = device;
     return DIENUM_CONTINUE;
   }
 
@@ -601,8 +601,8 @@ public:
 
   void term() {
     for(unsigned i = 0; i < lgamepad.size(); i++) {
-      lgamepad[i].handle->Unacquire();
-      lgamepad[i].handle->Release();
+      lgamepad(i).handle->Unacquire();
+      lgamepad(i).handle->Release();
     }
     lgamepad.reset();
 
@@ -699,7 +699,7 @@ public:
       for(unsigned n = 0; n < nall::Keyboard::Size; n++) {
         //using keyboard(0)|= instead of keyboard(i)= merges all keyboards to KB0
         //this is done to favor ease of mapping over flexibility (eg share laptop+USB keyboard mapping)
-        table[keyboard(0).key(n)] |= rawinput.lkeyboard[i].state[n];
+        table[keyboard(0).key(n)] |= rawinput.lkeyboard(i).state[n];
       }
     }
 
@@ -707,15 +707,15 @@ public:
     //Mice
     //====
     for(unsigned i = 0; i < min(rawinput.lmouse.size(), (unsigned)Mouse::Count); i++) {
-      table[mouse(i).axis(0)] = rawinput.lmouse[i].xDistance;
-      table[mouse(i).axis(1)] = rawinput.lmouse[i].yDistance;
-      table[mouse(i).axis(2)] = rawinput.lmouse[i].zDistance;
+      table[mouse(i).axis(0)] = rawinput.lmouse(i).xDistance;
+      table[mouse(i).axis(1)] = rawinput.lmouse(i).yDistance;
+      table[mouse(i).axis(2)] = rawinput.lmouse(i).zDistance;
 
       for(unsigned n = 0; n < min(5U, (unsigned)Mouse::Buttons); n++) {
-        table[mouse(i).button(n)] = (bool)(rawinput.lmouse[i].buttonState & (1 << n));
+        table[mouse(i).button(n)] = (bool)(rawinput.lmouse(i).buttonState & (1 << n));
       }
 
-      rawinput.lmouse[i].sync();
+      rawinput.lmouse(i).sync();
     }
 
     ReleaseMutex(rawinput.mutex);
@@ -729,14 +729,14 @@ public:
     for(unsigned i = 0; i < xinput.lgamepad.size(); i++) {
       if(joy >= Joypad::Count) break;
 
-      table[joypad(joy).hat(0)] = xinput.lgamepad[i].hat;
+      table[joypad(joy).hat(0)] = xinput.lgamepad(i).hat;
 
       for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
-        table[joypad(joy).axis(axis)] = xinput.lgamepad[i].axis[axis];
+        table[joypad(joy).axis(axis)] = xinput.lgamepad(i).axis[axis];
       }
 
       for(unsigned button = 0; button < min(10U, (unsigned)Joypad::Buttons); button++) {
-        table[joypad(joy).button(button)] = xinput.lgamepad[i].button[button];
+        table[joypad(joy).button(button)] = xinput.lgamepad(i).button[button];
       }
 
       joy++;
@@ -750,15 +750,15 @@ public:
       if(joy >= Joypad::Count) break;
 
       for(unsigned hat = 0; hat < min(4U, (unsigned)Joypad::Hats); hat++) {
-        table[joypad(joy).hat(hat)] = dinput.lgamepad[i].hat[hat];
+        table[joypad(joy).hat(hat)] = dinput.lgamepad(i).hat[hat];
       }
 
       for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
-        table[joypad(joy).axis(axis)] = dinput.lgamepad[i].axis[axis];
+        table[joypad(joy).axis(axis)] = dinput.lgamepad(i).axis[axis];
       }
 
       for(unsigned button = 0; button < min(128U, (unsigned)Joypad::Buttons); button++) {
-        table[joypad(joy).button(button)] = dinput.lgamepad[i].button[button];
+        table[joypad(joy).button(button)] = dinput.lgamepad(i).button[button];
       }
 
       joy++;

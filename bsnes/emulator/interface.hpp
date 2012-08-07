@@ -108,6 +108,7 @@ struct Interface {
 
   //debugger functions
   virtual bool tracerEnable(bool) { return false; }
+  virtual void exportMemory() {}
 
   Interface() : bind(nullptr) {}
 };

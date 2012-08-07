@@ -35,7 +35,7 @@ extern "C" usartproc void usart_init(
   usart_write = write;
 }
 
-extern "C" usartproc void usart_main();
+extern "C" usartproc void usart_main(int, char**);
 
 //
 
@@ -84,21 +84,19 @@ static void sigint(int) {
 }
 
 int main(int argc, char **argv) {
-  //requires superuser privileges; otherwise priority = +0
-  setpriority(PRIO_PROCESS, 0, -20);
+  setpriority(PRIO_PROCESS, 0, -20);  //requires superuser privileges; otherwise priority = +0
   signal(SIGINT, sigint);
 
-  bool result = false;
-  if(argc == 1) result = usart.open("/dev/ttyACM0", 57600, true);
-  if(argc == 2) result = usart.open(argv[1], 57600, true);
-  if(result == false) {
+  if(usart.open("/dev/ttyACM0", 57600, true) == false) {
     printf("error: unable to open USART hardware device\n");
     return 0;
   }
+
   usart_is_virtual = false;
   usart_init(usarthw_quit, usarthw_usleep, usarthw_readable, usarthw_read, usarthw_writable, usarthw_write);
-  usart_main();
+  usart_main(argc, argv);
   usart.close();
+
   return 0;
 }
 

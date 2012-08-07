@@ -58,7 +58,7 @@ Application::Application(int argc, char **argv) {
   pause = false;
   autopause = false;
 
-  basepath = realpath(argv[0]);
+  basepath = dir(realpath(argv[0]));
   userpath = {nall::configpath(), "bsnes/"};
   directory::create(userpath);
 

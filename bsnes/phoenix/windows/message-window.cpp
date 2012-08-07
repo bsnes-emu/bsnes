@@ -13,7 +13,7 @@ MessageWindow::Response pMessageWindow::information(Window &parent, const string
   if(buttons == MessageWindow::Buttons::Ok) flags |= MB_OK;
   if(buttons == MessageWindow::Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::none() ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response pMessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -21,7 +21,7 @@ MessageWindow::Response pMessageWindow::question(Window &parent, const string &t
   if(buttons == MessageWindow::Buttons::Ok) flags |= MB_OK;
   if(buttons == MessageWindow::Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::none() ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response pMessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -29,7 +29,7 @@ MessageWindow::Response pMessageWindow::warning(Window &parent, const string &te
   if(buttons == MessageWindow::Buttons::Ok) flags |= MB_OK;
   if(buttons == MessageWindow::Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::none() ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
 }
 
 MessageWindow::Response pMessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
@@ -37,5 +37,5 @@ MessageWindow::Response pMessageWindow::critical(Window &parent, const string &t
   if(buttons == MessageWindow::Buttons::Ok) flags |= MB_OK;
   if(buttons == MessageWindow::Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) flags |= MB_YESNO;
-  return MessageWindow_response(buttons, MessageBox(&parent != &Window::None ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
+  return MessageWindow_response(buttons, MessageBox(&parent != &Window::none() ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
 }
