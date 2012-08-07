@@ -19,6 +19,9 @@ ifeq ($(platform),)
   ifeq ($(uname),)
     platform := win
     delete = del $(subst /,\,$1)
+  else ifneq ($(findstring Windows,$(uname)),)
+    platform := win
+    delete = del $(subst /,\,$1)
   else ifneq ($(findstring CYGWIN,$(uname)),)
     platform := win
     delete = del $(subst /,\,$1)

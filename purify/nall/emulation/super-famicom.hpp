@@ -106,6 +106,9 @@ struct SuperFamicomCartridge {
 };
 
 SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size) {
+  //skip copier header
+  if((size & 0x7fff) == 512) data += 512, size -= 512;
+
   markup = "";
   if(size < 0x8000) return;
 

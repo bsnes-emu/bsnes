@@ -1,6 +1,11 @@
 #ifdef CONTROLLER_CPP
 
 uint2 Mouse::data() {
+  if(latched == 1) {
+    speed = (speed + 1) % 3;
+    return 0;
+  }
+
   if(counter >= 32) return 1;
 
   switch(counter++) { default:
@@ -13,33 +18,33 @@ uint2 Mouse::data() {
   case  6: return 0;
   case  7: return 0;
 
-  case  8: return input.r;
-  case  9: return input.l;
-  case 10: return 0;  //speed (0 = slow, 1 = normal, 2 = fast, 3 = unused)
-  case 11: return 0;  // ||
+  case  8: return r;
+  case  9: return l;
+  case 10: return (speed >> 1) & 1;
+  case 11: return (speed >> 0) & 1;
 
   case 12: return 0;  //signature
   case 13: return 0;  // ||
   case 14: return 0;  // ||
   case 15: return 1;  // ||
 
-  case 16: return input.dy;
-  case 17: return (input.y >> 6) & 1;
-  case 18: return (input.y >> 5) & 1;
-  case 19: return (input.y >> 4) & 1;
-  case 20: return (input.y >> 3) & 1;
-  case 21: return (input.y >> 2) & 1;
-  case 22: return (input.y >> 1) & 1;
-  case 23: return (input.y >> 0) & 1;
+  case 16: return dy;
+  case 17: return (y >> 6) & 1;
+  case 18: return (y >> 5) & 1;
+  case 19: return (y >> 4) & 1;
+  case 20: return (y >> 3) & 1;
+  case 21: return (y >> 2) & 1;
+  case 22: return (y >> 1) & 1;
+  case 23: return (y >> 0) & 1;
 
-  case 24: return input.dx;
-  case 25: return (input.x >> 6) & 1;
-  case 26: return (input.x >> 5) & 1;
-  case 27: return (input.x >> 4) & 1;
-  case 28: return (input.x >> 3) & 1;
-  case 29: return (input.x >> 2) & 1;
-  case 30: return (input.x >> 1) & 1;
-  case 31: return (input.x >> 0) & 1;
+  case 24: return dx;
+  case 25: return (x >> 6) & 1;
+  case 26: return (x >> 5) & 1;
+  case 27: return (x >> 4) & 1;
+  case 28: return (x >> 3) & 1;
+  case 29: return (x >> 2) & 1;
+  case 30: return (x >> 1) & 1;
+  case 31: return (x >> 0) & 1;
   }
 }
 
@@ -48,31 +53,38 @@ void Mouse::latch(bool data) {
   latched = data;
   counter = 0;
 
-  input.x = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::X);  //-n = left, 0 = center, +n = right
-  input.y = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Y);  //-n = up,   0 = center, +n = down
-  input.l = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Left );
-  input.r = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Right);
+  x = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::X);  //-n = left, 0 = center, +n = right
+  y = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Y);  //-n = up,   0 = center, +n = down
+  l = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Left );
+  r = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Right);
 
-  input.dx = input.x < 0;  //0 = right, 1 = left
-  input.dy = input.y < 0;  //0 = down,  1 = up
+  dx = x < 0;  //0 = right, 1 = left
+  dy = y < 0;  //0 = down,  1 = up
 
-  if(input.x < 0) input.x = -input.x;  //abs(position_x)
-  if(input.y < 0) input.y = -input.y;  //abs(position_y)
+  if(x < 0) x = -x;  //abs(position_x)
+  if(y < 0) y = -y;  //abs(position_y)
 
-  input.x = min(127, input.x);
-  input.y = min(127, input.y);
+  double multiplier = 1.0;
+  if(speed == 1) multiplier = 1.5;
+  if(speed == 2) multiplier = 2.0;
+  x = (double)x * multiplier;
+  y = (double)y * multiplier;
+
+  x = min(127, x);
+  y = min(127, y);
 }
 
 Mouse::Mouse(bool port) : Controller(port) {
   latched = 0;
   counter = 0;
 
-  input.x = 0;
-  input.y = 0;
-  input.dx = 0;
-  input.dy = 0;
-  input.l = 0;
-  input.r = 0;
+  speed = 0;
+  x = 0;
+  y = 0;
+  dx = 0;
+  dy = 0;
+  l = 0;
+  r = 0;
 }
 
 #endif

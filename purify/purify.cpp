@@ -406,7 +406,7 @@ struct Application : Window {
       Button synchronizeButton;
 
   Application() {
-    setTitle("purify v00.07");
+    setTitle("purify v01");
     setGeometry({128, 128, 600, 200});
     layout.setMargin(5);
     title.setFont("Sans, 16, Bold");

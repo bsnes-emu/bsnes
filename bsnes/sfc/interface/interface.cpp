@@ -285,7 +285,7 @@ void Interface::paletteUpdate() {
 
 bool Interface::tracerEnable(bool trace) {
   string pathname = {path(group(ID::ROM)), "debug/"};
-  directory::create(pathname);
+  if(trace == true) directory::create(pathname);
 
   if(trace == true && !tracer.open()) {
     for(unsigned n = 0; n <= 999; n++) {

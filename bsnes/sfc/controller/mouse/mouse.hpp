@@ -7,12 +7,11 @@ private:
   bool latched;
   unsigned counter;
 
-  struct MouseInput {
-    signed x;  //x-coordinate
-    signed y;  //y-coordinate
-    bool dx;   //x-direction
-    bool dy;   //y-direction
-    bool l;    //left button
-    bool r;    //right button
-  } input;
+  unsigned speed;  //0 = slow, 1 = normal, 2 = fast
+  signed x;        //x-coordinate
+  signed y;        //y-coordinate
+  bool dx;         //x-direction
+  bool dy;         //y-direction
+  bool l;          //left button
+  bool r;          //right button
 };

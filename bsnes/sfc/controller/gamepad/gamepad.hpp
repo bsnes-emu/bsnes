@@ -6,4 +6,8 @@ struct Gamepad : Controller {
 private:
   bool latched;
   unsigned counter;
+
+  bool b, y, select, start;
+  bool up, down, left, right;
+  bool a, x, l, r;
 };

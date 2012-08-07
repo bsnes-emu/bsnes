@@ -5,6 +5,7 @@ include fc/Makefile
 include sfc/Makefile
 include gb/Makefile
 include gba/Makefile
+include nds/Makefile
 name := bsnes
 
 ui_objects := ui-ethos ui-configuration ui-interface ui-utility
@@ -56,8 +57,11 @@ obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
 	$(call compile,$(phoenixflags))
 
 obj/resource.o: $(ui)/resource.rc
-#	windres --target=pe-i386 $(ui)/resource.rc obj/resource.o
+ifeq ($(arch),win32)
+	windres --target=pe-i386 $(ui)/resource.rc obj/resource.o
+else
 	windres $(ui)/resource.rc obj/resource.o
+endif
 
 # targets
 build: $(objects)

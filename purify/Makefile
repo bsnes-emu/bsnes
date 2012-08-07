@@ -8,13 +8,13 @@ link := -s
 
 ifeq ($(platform),win)
   resource := resource.o
-  flags := -m32 -mwindows $(flags)
-  link := -m32 -mwindows $(flags)
+  flags := -mwindows $(flags)
+  link := -mwindows $(flags)
 endif
 
 all: phoenix.o $(application).o
 ifeq ($(platform),win)
-	windres --target=pe-i386 phoenix/windows/phoenix.rc $(resource)
+	windres phoenix/windows/phoenix.rc $(resource)
 endif
 	$(cpp) -o $(application) phoenix.o $(application).o $(resource) $(link) $(phoenixlink)
 
