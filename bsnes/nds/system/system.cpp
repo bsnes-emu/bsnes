@@ -8,13 +8,23 @@
   #include <sys/time.h>
   #include <nds/nds.hpp>
 
-  struct timeval {
-    int64_t tv_sec, tv_usec;
-  };
-  #define timegm(tm)          _mkgmtime64(tm)
-  #define gmtime(tv)          _gmtime64(tv)
+  #if defined(__amd64__) || defined(_M_AMD64)
+    struct timeval {
+      int64_t tv_sec, tv_usec;
+    };
+    #define timegm(tm) _mkgmtime64(tm)
+    #define gmtime(tv) _gmtime64(tv)
+  #else
+    //Windows 32-bit run-time doesn't have 64-bit time functions
+    struct timeval {
+      time_t tv_sec, tv_usec;
+    };
+    #define timegm(tm) mktime(tm)
+    #define gmtime(tv) localtime(tv)
+  #endif
+
   #define gettimeofday(tv,tz) gettimeofday64(tv,tz)
-  
+
   int gettimeofday64(struct timeval *tv, struct timezone *tz) {
     FILETIME ft;
     GetSystemTimeAsFileTime(&ft);  // UTC in 100ns units

@@ -69,6 +69,8 @@ struct pTimer : public pObject {
 struct pWindow : public pObject {
   Window &window;
 
+  static Window& none();
+
   void append(Layout &layout);
   void append(Menu &menu);
   void append(Widget &widget);

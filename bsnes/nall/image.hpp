@@ -24,12 +24,23 @@ struct image {
     uint64_t mask;
     unsigned depth;
     unsigned shift;
+
+    inline bool operator==(const Channel &source) {
+      return mask == source.mask && depth == source.depth && shift == source.shift;
+    }
+
+    inline bool operator!=(const Channel &source) {
+      return !operator==(source);
+    }
   } alpha, red, green, blue;
 
   typedef double (*interpolation)(double, double, double, double, double);
   static inline unsigned bitDepth(uint64_t color);
   static inline unsigned bitShift(uint64_t color);
   static inline uint64_t normalize(uint64_t color, unsigned sourceDepth, unsigned targetDepth);
+
+  inline bool operator==(const image &source);
+  inline bool operator!=(const image &source);
 
   inline image& operator=(const image &source);
   inline image& operator=(image &&source);
@@ -89,6 +100,26 @@ uint64_t image::normalize(uint64_t color, unsigned sourceDepth, unsigned targetD
 
 //public
 
+bool image::operator==(const image &source) {
+  if(width != source.width) return false;
+  if(height != source.height) return false;
+  if(pitch != source.pitch) return false;
+
+  if(endian != source.endian) return false;
+  if(stride != source.stride) return false;
+
+  if(alpha != source.alpha) return false;
+  if(red != source.red) return false;
+  if(green != source.green) return false;
+  if(blue != source.blue) return false;
+
+  return memcmp(data, source.data, width * height * stride) == 0;
+}
+
+bool image::operator!=(const image &source) {
+  return !operator==(source);
+}
+
 image& image::operator=(const image &source) {
   free();
 
@@ -110,6 +141,8 @@ image& image::operator=(const image &source) {
 }
 
 image& image::operator=(image &&source) {
+  free();
+
   width = source.width;
   height = source.height;
   pitch = source.pitch;

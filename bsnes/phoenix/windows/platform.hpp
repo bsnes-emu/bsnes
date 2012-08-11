@@ -373,6 +373,8 @@ struct pLineEdit : public pWidget {
 struct pListView : public pWidget {
   ListView &listView;
   HIMAGELIST imageList;
+  vector<vector<unsigned>> imageMap;
+  vector<image> images;
   bool lostFocus;
 
   void append(const lstring &text);
@@ -396,7 +398,7 @@ struct pListView : public pWidget {
   void destructor();
   void orphan();
   void setGeometry(const Geometry &geometry);
-  void setImageList();
+  void buildImageList();
 };
 
 struct pProgressBar : public pWidget {

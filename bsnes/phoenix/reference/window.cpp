@@ -1,3 +1,9 @@
+Window& pWindow::none() {
+  static Window *window = nullptr;
+  if(window == nullptr) window = new Window;
+  return *window;
+}
+
 void pWindow::append(Layout &layout) {
 }
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<database revision="2012-08-06">
+<database revision="2012-05-11">
   <cartridge sha256="e868400409c70876b98dad2cca87b8e9ee31877b0cccbbd8405be5c54922722a">
     <name>1942 (Japan, USA)</name>
     <cheat>
@@ -422,14 +422,6 @@
     <cheat>
       <description>Invincibility</description>
       <code>AVISVG</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>EIKVVIEY</code>
-    </cheat>
-    <cheat>
-      <description>No enemies</description>
-      <code>GXUIZIAI</code>
     </cheat>
   </cartridge>
   <cartridge sha256="005c48a5984e3b75e069ef78d736266b12f7f6b102d88d90172ba9ae480b378b">
@@ -3854,10 +3846,6 @@
       <code>AEUZITPA</code>
     </cheat>
     <cheat>
-      <description>Force 2-player mode</description>
-      <code>AENTAIPL</code>
-    </cheat>
-    <cheat>
       <description>Start with 1 life</description>
       <code>PENVZILA</code>
     </cheat>
@@ -4395,13 +4383,6 @@
       <code>ZAXAYGAA</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="92c481350b63c57385834dfa0ab02aeb527df7e80cec14a3e1a1a77118cd38d1">
-    <name>Bio Miracle Bokutte Upa (Japan).nes</name>
-    <cheat>
-      <description>Hit anywhere - normal enemies</description>
-      <code>AAKTZTIG+AEOLVGTZ</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="aeb61fd5cf5a5ed73344c46a43f8a8d539f601ff57e8f56c49bc1caea4ab3d9e">
     <name>Bionic Commando (USA)</name>
     <cheat>
@@ -4437,28 +4418,8 @@
       <code>XYXUUOEN</code>
     </cheat>
     <cheat>
-      <description>Longer grapple line - sidescrolling levels</description>
-      <code>AINPTZAL+TSEOGZAG+YIVPAXZU</code>
-    </cheat>
-    <cheat>
-      <description>Longest grapple line - sidescrolling levels</description>
-      <code>EINPYZEP+EIVPPZEP+ESEOIZEP</code>
-    </cheat>
-    <cheat>
-      <description>Longer range for normal 3-way gun - sidescrolling levels</description>
-      <code>YOVUESPA</code>
-    </cheat>
-    <cheat>
-      <description>Longer range for fireball 3-way gun - sidescrolling levels</description>
-      <code>IPKLKVGA</code>
-    </cheat>
-    <cheat>
       <description>Use with BIO Code 11 for improved autofire with normal gun</description>
       <code>AAKUOOZA</code>
-    </cheat>
-    <cheat>
-      <description>Have all items (using the hidden gun will crash the game)</description>
-      <code>ELKLZAEY+EIXLTPEY</code>
     </cheat>
     <cheat>
       <description>Start with 3 life energy capsules</description>
@@ -9686,13 +9647,6 @@
       <code>PAUIEZIA</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="07dd16464d769429c651bd203ac2e74c7aa5852824482ca8877959d643bc8689">
-    <name>Donkey Kong Jr. Math (USA, Europe).nes</name>
-    <cheat>
-      <description>Always get the correct answer</description>
-      <code>AAKILSZA+AAUILSZP</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="234c2f62cbc3c72eb7519425a1893229e19a3fd1b1630fb75f3e951960a300e5">
     <name>Donkey Kong Classics (USA, Europe)</name>
     <cheat>
@@ -11318,10 +11272,6 @@
     <cheat>
       <description>Infinite lives (alt)</description>
       <code>SGXGZGVG</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>ENVVIPNP+PXVVPOVP+XOVVTPXT+ZKVVGOGK</code>
     </cheat>
     <cheat>
       <description>Take more damage</description>
@@ -13684,14 +13634,6 @@
       <description>Infinite credits</description>
       <code>SXXGSVVK</code>
     </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>AIUPKZEL+APUPSZGX+ASEOEPEL+EUEZTGGN+GKEZIKOS+KXEZYGIA+ZUEOOOAI</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>AINPXZEL+YPNPUXPX</code>
-    </cheat>
   </cartridge>
   <cartridge sha256="a636a947acf1ef0b50e66d31699b64aa4f3b4865e2f2031385780974fb6d8c91">
     <name>Galactic Crusader (USA) (Unl)</name>
@@ -15199,18 +15141,6 @@
       <code>SXVZTXSE</code>
     </cheat>
     <cheat>
-      <description>One hit kills</description>
-      <code>EIEIYYEP</code>
-    </cheat>
-    <cheat>
-      <description>Enemies die automatically</description>
-      <code>AAUZLOAP+AUSSANAO+SAUZTOVK</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>AUVSINKU+AVVSTNAP</code>
-    </cheat>
-    <cheat>
       <description>Invincibility (alt)</description>
       <code>0400:02</code>
     </cheat>
@@ -15614,13 +15544,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>SLONNKSO</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="72fa562dfb319bfe982a68053128126e2ed5d579ff1a36f7345bd3fe624e8e92">
-    <name>Heracles no Eikou - Toujin Makyou Den (Japan)</name>
-    <cheat>
-      <description>No random battles</description>
-      <code>AVSVTZAZ</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8e4a04076b6a728a7e65a09737776dcb9defed7922bf0437d9a89bbe8c724b55">
@@ -17335,14 +17258,6 @@
       <code>PTYSEK</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>GKKEAZSK+OVKEPXPA+XEKEZZEP</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>AEOTTIGA</code>
-    </cheat>
-    <cheat>
       <description>9 Tornado Attacks on pick-up</description>
       <code>PESIKYYE</code>
     </cheat>
@@ -18729,14 +18644,6 @@
       <code>GEXGUALU+LEXGSALU+OXXGXAIK</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere - throwing</description>
-      <code>ELXKKESZ+TIXKSAYA</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump when falling</description>
-      <code>ESXPZZEY+KOXPLZKS+OKOOYZOX+PEXPPXSG+PXXPAZES</code>
-    </cheat>
-    <cheat>
       <description>One life after continue</description>
       <code>PASKOILA</code>
     </cheat>
@@ -18983,14 +18890,6 @@
       <code>SXKTPKVG</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere (spitting)</description>
-      <code>AOOEIOOV+AOOETPYE+EANEZAAT+GGNEAESN+GXKEIPEL+VGNEPAGY</code>
-    </cheat>
-    <cheat>
-      <description>Inhale from anywhere</description>
-      <code>AASELZZG+AINEYZEP+SZNEGXSV</code>
-    </cheat>
-    <cheat>
       <description>Less health from 'pep drinks'</description>
       <code>ZAKLLXAA</code>
     </cheat>
@@ -19048,14 +18947,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>SXKTPKVG</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere (spitting)</description>
-      <code>AEKAIEIA+AEXAIPTL+AOOAGEOV+AOOAIAYE+GXKEIPEL</code>
-    </cheat>
-    <cheat>
-      <description>Inhale from anywhere</description>
-      <code>AASELZZG+GXEAGZEL</code>
     </cheat>
     <cheat>
       <description>Less health from 'pep drinks'</description>
@@ -21452,10 +21343,6 @@
   <cartridge sha256="527faba646cd9e959a4df5d015cd14ac3fae461b06655be99d47c1a754384097">
     <name>Magic of Scheherazade, The (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>OXUYZKPX</code>
-    </cheat>
-    <cheat>
       <description>Infinite HP</description>
       <code>OTSXLGSV</code>
     </cheat>
@@ -21464,24 +21351,16 @@
       <code>SXEVPLVG</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>AEEYYGLA+ALNNIGEP+SZNNLGSG+TZNNTKPA+UGNNGKPE</code>
-    </cheat>
-    <cheat>
-      <description>Never lose Mashroobs</description>
-      <code>SZEAEKVK</code>
-    </cheat>
-    <cheat>
-      <description>Get coins from anywhere</description>
-      <code>TEXAXLLA</code>
-    </cheat>
-    <cheat>
       <description>Less energy gained from Bread</description>
       <code>POKAOZZU</code>
     </cheat>
     <cheat>
       <description>Less magic gained from Mashroobs</description>
       <code>ZAEEXGIA</code>
+    </cheat>
+    <cheat>
+      <description>Never lose Mashroobs</description>
+      <code>SZEAEKVK</code>
     </cheat>
     <cheat>
       <description>Start with only 20 Gold Coins</description>
@@ -26078,13 +25957,6 @@
       <code>03E2:1D</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="6d310d9f2249932c7187130ebd696c42ff05f678c3086ac727ee6a27fdad4f43">
-    <name>Otaku no Seiza - An Adventure in the Otaku Galaxy (Japan)</name>
-    <cheat>
-      <description>No random battles</description>
-      <code>AVEIXKOZ</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="d50327afa539f4a5ccfd6e10f685326eb0f01915ccf305f752deae2bf17385a6">
     <name>Over Horizon (Europe)</name>
     <cheat>
@@ -27129,7 +27001,7 @@
     </cheat>
   </cartridge>
   <cartridge sha256="99f3ca1657ad48f9a4f128dce3e0e4efd2c4fee413a120a462055801c9581ebd">
-    <name>Princess Tomato in the Salad Kingdom (USA)</name>
+    <name>Princess Tomato in Salad Kingdom (USA)</name>
     <cheat>
       <description>Infinite gold coins</description>
       <code>03CB:09</code>
@@ -29970,10 +29842,6 @@
       <code>SZEVYZVG</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>AKSZANEL+ATUILYEI+OXSZPNEX</code>
-    </cheat>
-    <cheat>
       <description>200 Machine Gun bullets on pick-up</description>
       <code>EKSTEAGV</code>
     </cheat>
@@ -30708,13 +30576,6 @@
     <cheat>
       <description>Start with 9 lives</description>
       <code>AANOLAZE</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="0df6a7a16af6cffc9a54a3de1ab14225f2ce5d5a269a691f16a22d3fd42b942b">
-    <name>Shinsenden (Japan)</name>
-    <cheat>
-      <description>No random battles</description>
-      <code>ATXUPAAL</code>
     </cheat>
   </cartridge>
   <cartridge sha256="6c705f7980a08b7a7a5d74ddfd175155492168248f65c7d9e3cef1a6b14a2886">
@@ -34131,10 +33992,6 @@
       <code>SXUASXOU</code>
     </cheat>
     <cheat>
-      <description>Twice as much time in sub-space</description>
-      <code>NNXPZIAV</code>
-    </cheat>
-    <cheat>
       <description>Infinite magic carpet time</description>
       <code>SLNZZLVI</code>
     </cheat>
@@ -34336,10 +34193,6 @@
     <cheat>
       <description>Quick pick-up</description>
       <code>SXUASXOU</code>
-    </cheat>
-    <cheat>
-      <description>Twice as much time in sub-space</description>
-      <code>NNXPZIAV</code>
     </cheat>
     <cheat>
       <description>Jump as high as a squat jump</description>
@@ -38532,10 +38385,6 @@
   <cartridge sha256="433f6bcbd59a9d5916d2209ddeacd39d24810c1ed21a33366171b4991fc7e844">
     <name>Vice - Project Doom (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>AANSEIYP</code>
-    </cheat>
-    <cheat>
       <description>Infinite lives</description>
       <code>SZSKIOVK</code>
     </cheat>
@@ -38554,14 +38403,6 @@
     <cheat>
       <description>Infinite power</description>
       <code>SXVYVKSE</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>AEEYXEET</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>XVVKISZK</code>
     </cheat>
     <cheat>
       <description>10 coins for an extra life</description>
@@ -39261,20 +39102,8 @@
   <cartridge sha256="e9539f088b4463e36c2a0d324d6a184fc1ecc3aa26ca4c5675ad9dc948bba5e5">
     <name>Wing of Madoola, The (Japan) (Sample)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>SXKGXTSA</code>
-    </cheat>
-    <cheat>
       <description>Infinite hits and magic</description>
       <code>SLUUVYSP</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>AAOGEVPA+AAOGSVZI+PZOGKTSN</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>APXKETSV+APXKOVEE</code>
     </cheat>
     <cheat>
       <description>Start with 9999 hits</description>
@@ -40661,17 +40490,6 @@
       <code>YYKSKIPE</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="ec1d85479d72847d3adbd76e2e79221143e6c9324d5647be2c4a11aa87123f75">
-    <name>Ys III - Wanderers from Ys (Japan).nes</name>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>XTKXSAAV+XTNXUAAV+XTVZKAAV+XVOZXAAV</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>AAEZYYGA</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="91d281ee84a71483cd9b8e8021222ef509a8c0ea4be0a4fa675140a91b65c2da">
     <name>Yume Koujou Doki Doki Panic (Japan) [b] (FDS)</name>
     <cheat>
@@ -40749,10 +40567,6 @@
   </cartridge>
   <cartridge sha256="bdc9dfed1b03db470a1453da0252b3e9fcd0869d02a48622476ddaa350e53374">
     <name>Zanac (USA)</name>
-    <cheat>
-      <description>Invincibility + Hit anywhere</description>
-      <code>ALSEGZEU+ATSEIZPL+SZOELXOO</code>
-    </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>OXEENYVK</code>
@@ -42309,14 +42123,9 @@
       <description>Infinite lives</description>
       <code>DD67-4468</code>
     </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>40B5-17A4+40B6-14A4+40BB-17D4+40BC-1DA4</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>DDB3-C764</code>
-    </cheat>
+  </cartridge>
+  <cartridge sha256="One hit kills">
+    <name>DDB3-C764</name>
     <cheat>
       <description>Small magic power-up adds 3 instead of 1</description>
       <code>D7C0-37A7</code>
@@ -43113,14 +42922,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>C282-34A1</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>DDA0-476A+DDA9-4F6A</code>
-    </cheat>
-    <cheat>
-      <description>Moon jump</description>
-      <code>5C88-1D09+7D88-1DA9+DD83-17A9</code>
     </cheat>
   </cartridge>
   <cartridge sha256="b70099186d3774355ac5db370240e370c73f9ce5341f6c805cf9f771374b43ae">
@@ -44667,25 +44468,6 @@
       <code>6D14-7DD4</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="59f217912f4dbfb3dd0844f46128e71d6ddd522d7e246eb687000adeaa38d13d">
-    <name>Ashita no Joe (Japan)</name>
-    <cheat>
-      <description>Hit anywhere - P1</description>
-      <code>DD81-64AF</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - P2</description>
-      <code>DD8A-A46D</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility - P1</description>
-      <code>6D8A-6DDD</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility - P2</description>
-      <code>6D81-0FDF</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="d54d2703e474d7f469766d2d095ffcbbcab893e3fe58bbbcc57e24082a44bb40">
     <name>Asterix (Europe) (En,Fr,De,Es)</name>
     <cheat>
@@ -44992,10 +44774,6 @@
     <cheat>
       <description>Infinite weapons (except for Flame)</description>
       <code>3C37-A7D4</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>DDE2-6D04+DDEF-AD04</code>
     </cheat>
     <cheat>
       <description>Max weapons on pick-up</description>
@@ -46330,10 +46108,6 @@
       <code>C2C3-DF67</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>1D85-AD0F+1D8B-ADAF+C28A-D7A4+7685-ADDF+768B-AD6F</code>
-    </cheat>
-    <cheat>
       <description>Start with 1 ship</description>
       <code>DD6E-6707</code>
     </cheat>
@@ -46404,10 +46178,6 @@
       <description>Infinite Discs</description>
       <code>8289-CFDF</code>
     </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>6D21-CFAF+6D29-CD6F</code>
-    </cheat>
   </cartridge>
   <cartridge sha256="d50ef11383d78544dbad4d350cfd1486fb28e459e208d1553acdecbd84a808b8">
     <name>Bobby's World (USA) (Proto)</name>
@@ -46416,24 +46186,12 @@
       <code>2DB7-1DD8</code>
     </cheat>
     <cheat>
-      <description>Infinite health</description>
+      <description>Infinite energy</description>
       <code>82BC-1468</code>
-    </cheat>
-    <cheat>
-      <description>Infinite health (alt)</description>
-      <code>7E139B03</code>
     </cheat>
     <cheat>
       <description>Infinite lives</description>
       <code>822D-17AF</code>
-    </cheat>
-    <cheat>
-      <description>Infinite lives (alt)</description>
-      <code>7E139509</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>DDB3-17AC</code>
     </cheat>
   </cartridge>
   <cartridge sha256="854d2492d1cb059749bb0904ca5f92a5eeec09167abf84f7cca4023b1819e4f0">
@@ -46457,10 +46215,6 @@
     <cheat>
       <description>Infinite dash</description>
       <code>C98C-CD0F</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>6DE1-1F04+9DE1-1F64</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8f131182b286bd87f12cf4f00453336538ce690d0e1f0972ac0be98df4d48987">
@@ -46533,14 +46287,6 @@
   <cartridge sha256="e67940a2106c1507f3a8d38790f263bbbf814578ebf3dbc4e3eb6007d310793c">
     <name>Boxing Legends of the Ring (USA)</name>
     <cheat>
-      <description>Invincibility - P1</description>
-      <code>6D6A-C4A9</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility - P2</description>
-      <code>6D66-3D05</code>
-    </cheat>
-    <cheat>
       <description>Infinite super punches - P1</description>
       <code>C26D-3F05</code>
     </cheat>
@@ -46555,22 +46301,6 @@
     <cheat>
       <description>Infinite time per round</description>
       <code>C2BA-A7A7</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - P1</description>
-      <code>1DBD-4460+F6BD-4400</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - P2</description>
-      <code>1D69-3FD9+F669-3DA9</code>
-    </cheat>
-    <cheat>
-      <description>Blocking disabled - P1</description>
-      <code>DD62-CD09</code>
-    </cheat>
-    <cheat>
-      <description>Blocking disabled - P2</description>
-      <code>DD66-3FA5</code>
     </cheat>
     <cheat>
       <description>Each round is 1 minute</description>
@@ -48676,13 +48406,6 @@
       <code>D460-CD0D</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="ba4f31353e0e1233b574391ad97a80901d7de212e2c55d7be2af11a9a57c8225">
-    <name>Bulls vs Blazers and the NBA Playoffs (USA)</name>
-    <cheat>
-      <description>Never miss a shot</description>
-      <code>DD66-C4BD</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="d6f6c30732dae8d00cd83628c3156acbdf26f99df701f779522e21de74dae5fe">
     <name>Bust-A-Move (USA)</name>
     <cheat>
@@ -49847,14 +49570,6 @@
       <code>DDEC-CF6D</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>DD6B-ADA4</code>
-    </cheat>
-    <cheat>
-      <description>Multi-jump</description>
-      <code>DDA2-DDDF</code>
-    </cheat>
-    <cheat>
       <description>Stay as Super Congo (you may change if you walk on spikes)</description>
       <code>CB69-34D7</code>
     </cheat>
@@ -50391,22 +50106,6 @@
     <cheat>
       <description>Infinite Nutty attacks</description>
       <code>C287-34AD</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>DD33-1DDF</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>DD20-C7A4+DD26-1FD4+DD27-CFA7+DD3C-1D6D</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>6D86-17DF</code>
-    </cheat>
-    <cheat>
-      <description>Disable recoil</description>
-      <code>DD89-CFAD</code>
     </cheat>
     <cheat>
       <description>Juice cans set health to 1/2</description>
@@ -51074,14 +50773,6 @@
     <cheat>
       <description>Invincibility after one hit</description>
       <code>C92A-44A7</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>DD66-47DC+DD6C-4D6C+6D6D-3DDC+6D64-3DAC</code>
-    </cheat>
-    <cheat>
-      <description>Get GP from anywhere</description>
-      <code>DDA5-176C</code>
     </cheat>
     <cheat>
       <description>Large health refills full health</description>
@@ -51798,10 +51489,6 @@
     <cheat>
       <description>Infinite credits - both players</description>
       <code>C260-67F7</code>
-    </cheat>
-    <cheat>
-      <description>Hit and stomp anywhere</description>
-      <code>6DAE-6469+F9AE-64A9</code>
     </cheat>
     <cheat>
       <description>Clock runs faster</description>
@@ -53961,16 +53648,8 @@
       <code>EE2E-54A1</code>
     </cheat>
     <cheat>
-      <description>Fast money (buy a bread with the code disabled, enable and sell it for $32,646)</description>
+      <description>Fast money (buy a bread w/the code off, turn code on and sell it for $32,646)</description>
       <code>EE9A-E5F5</code>
-    </cheat>
-    <cheat>
-      <description>Dad never calls</description>
-      <code>E395-87DD</code>
-    </cheat>
-    <cheat>
-      <description>Massive numbers of enemies (piracy check)</description>
-      <code>6D4F-7704</code>
     </cheat>
     <cheat>
       <description>Start with a level 9 character</description>
@@ -54003,6 +53682,10 @@
     <cheat>
       <description>Start with a lot of PSI</description>
       <code>BB2F-54A1</code>
+    </cheat>
+    <cheat>
+      <description>Dad never calls</description>
+      <code>E395-87DD</code>
     </cheat>
     <cheat>
       <description>Infinite health</description>
@@ -60820,16 +60503,8 @@
   <cartridge sha256="4dc2b5de98e9109583d9b61b38d26a8216af4dba246ef71350122213630562d0">
     <name>Imperium (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>6DCC-DD27+DD38-AFA9</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>6D31-DDA1+C236-DD01</code>
-    </cheat>
-    <cheat>
-      <description>Infinite bombs</description>
-      <code>C2A9-D46F</code>
+      <description>Invincibility against lesser robots, weapons and lasers</description>
+      <code>1D34-D4A1+1DC3-DDF7</code>
     </cheat>
     <cheat>
       <description>Start with 1 life point</description>
@@ -61007,18 +60682,6 @@
     <cheat>
       <description>Health doesn't decrease when Hulked-out</description>
       <code>C260-4746</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>0AB3-4D00+2DB3-4DD0+3DB2-4700+DDB2-4760+DDB2-47A0</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>DDBF-47D0</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>6DBF-17CB</code>
     </cheat>
     <cheat>
       <description>Get 4 shots from gun</description>
@@ -61710,13 +61373,6 @@
       <code>7E0269:03</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="85e5f6fedc420925557092d728e1dc6b4e2042368fb78bf93c0df447f8c9c0c0">
-    <name>Jeopardy! (USA)</name>
-    <cheat>
-      <description>Always get the correct answer</description>
-      <code>6DC8-6D67+6DCE-64A7</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="ee7a29eb9c302ea2bb235ef990fd8344a6beb9817499941c40a8a94ad5f7c964">
     <name>Jetsons, The - Invasion of the Planet Pirates (USA)</name>
     <cheat>
@@ -61842,10 +61498,6 @@
     <cheat>
       <description>Hit anywhere</description>
       <code>6DC3-0DAD+C9E5-DDDD+DDC4-076D</code>
-    </cheat>
-    <cheat>
-      <description>One hit kills</description>
-      <code>40CC-07DD</code>
     </cheat>
     <cheat>
       <description>Start with 2 lives</description>
@@ -64864,9 +64516,10 @@
       <description>Pit death disabled</description>
       <code>1DA9-04D1</code>
     </cheat>
-  </cartridge>
-  <cartridge sha256="Get 1 gold for each creature killed">
-    <name>1BB5-D769+DFB5-D7A9+3CB6-DDD9</name>
+    <cheat>
+      <description>Get 1 gold for each creature killed</description>
+      <code>1BB5-D769+DFB5-D7A9+3CB6-DDD9</code>
+    </cheat>
     <cheat>
       <description>Get 100 gold for each creature killed</description>
       <code>1BB5-D769+10B5-D7A9+3CB6-DDD9</code>
@@ -65452,10 +65105,6 @@
     <cheat>
       <description>Dash without having the Pegasus Boots</description>
       <code>EEE5-2356</code>
-    </cheat>
-    <cheat>
-      <description>Dash without charge up</description>
-      <code>45B8-D49A</code>
     </cheat>
     <cheat>
       <description>Use the Magic Mirror to warp between the Light and Dark Worlds freely</description>
@@ -70560,10 +70209,6 @@
       <code>8250-5700</code>
     </cheat>
     <cheat>
-      <description>Cannot be tackled (hold X)</description>
-      <code>6D59-7FD7+7D59-7F67+C959-7DA7+DC59-7F07+E959-7FA7</code>
-    </cheat>
-    <cheat>
       <description>Field goals worth 0 points</description>
       <code>DD6F-8404</code>
     </cheat>
@@ -70639,10 +70284,6 @@
       <code>8297-7F09</code>
     </cheat>
     <cheat>
-      <description>Cannot be tackled (hold X)</description>
-      <code>6D6C-EFDF+7D6C-EF6F+C96C-EDAF+DC6C-EF0F+E96C-EFAF</code>
-    </cheat>
-    <cheat>
       <description>Safeties are worth 0 points</description>
       <code>DD62-EFA7</code>
     </cheat>
@@ -70705,20 +70346,6 @@
     <cheat>
       <description>Start with 1 down each possession</description>
       <code>DF65-E7A7</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="6874568d985f65dd817d4b03998e71c8cbacc8d8707411fde7bffee350605a88">
-    <name>Madden NFL 97 (USA)</name>
-    <cheat>
-      <description>Cannot be tackled (hold X)</description>
-      <code>6D66-7767+7D6B-7DD7+C966-7707+DC66-77A7+E96B-7D07</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="e3c62c9fe55d2311aa6a264f41b45d6cbc7b1b069ed3aa82ee57d381c062547d">
-    <name>Madden NFL 98 (USA)</name>
-    <cheat>
-      <description>Cannot be tackled (hold X)</description>
-      <code>6D6F-5407+7D6F-54A7+C96F-54D7+DC6F-5467+E96F-57D7</code>
     </cheat>
   </cartridge>
   <cartridge sha256="c01fb8989d391d3e343003934937f02bd8ef9aacdad68c32c3d3f56feb72f5b0">
@@ -71627,7 +71254,7 @@
     </cheat>
     <cheat>
       <description>Infinite weapon energy</description>
-      <code>FE42-E405</code>
+      <code>FEC2-E405</code>
     </cheat>
     <cheat>
       <description>One hit kills</description>
@@ -71640,50 +71267,6 @@
     <cheat>
       <description>Multi-jump</description>
       <code>DC51-ED65+BD51-EDA5+D751-EFD5+4D51-EF05+8551-EF65+7451-EFA5+4D51-E4D5+BC51-E405+FF51-E465+1D51-E4A5+1DFC-E400+5EFC-E460+C951-EDD5+0951-ED05</code>
-    </cheat>
-    <cheat>
-      <description>Always Shoot Shots</description>
-      <code>FF40-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Freeze Cracker</description>
-      <code>4040-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Scorch Wheel</description>
-      <code>4140-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Danger Wrap Bombs</description>
-      <code>4340-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Noise Crush</description>
-      <code>1140-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Fully Charged Mega Buster Blasts</description>
-      <code>5240-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Slash Claw</description>
-      <code>BA40-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Thunder Bolt</description>
-      <code>8940-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Wild Coil</description>
-      <code>E740-E405</code>
-    </cheat>
-    <cheat>
-      <description>Always shoot Charged Wild Coils</description>
-      <code>EE40-E405</code>
-    </cheat>
-    <cheat>
-      <description>White Shots/Special Weapons</description>
-      <code>EE02-E465</code>
     </cheat>
     <cheat>
       <description>Infinite E-Tanks (alt)</description>
@@ -71797,14 +71380,6 @@
       <code>4065-17A9+EA66-1409+B966-1469</code>
     </cheat>
     <cheat>
-      <description>Enemies always drop large energy</description>
-      <code>C4CB-3DBD+D4CB-3D2D</code>
-    </cheat>
-    <cheat>
-      <description>Enemies always drop large weapon energy</description>
-      <code>C4CB-3DBD+D0CB-3D2D</code>
-    </cheat>
-    <cheat>
       <description>Bogus jump (may go back to normal jumps)</description>
       <code>D08A-1FBC</code>
     </cheat>
@@ -71908,14 +71483,6 @@
       <code>4065-1F09+E465-17A9+B966-1DD9</code>
     </cheat>
     <cheat>
-      <description>Enemies always drop large energy</description>
-      <code>C4C6-379D+D4C6-37BD</code>
-    </cheat>
-    <cheat>
-      <description>Enemies always drop large weapon energy</description>
-      <code>C4C6-379D+D0C6-37BD</code>
-    </cheat>
-    <cheat>
       <description>Bogus jump (may go back to normal jumps)</description>
       <code>D08A-1FBC</code>
     </cheat>
@@ -71987,10 +71554,6 @@
   <cartridge sha256="f3246755f608a1e1dc9c848b61da3b824c7853b29b3be40df6fc7f2793a887ed">
     <name>Mega Man X2 (USA)</name>
     <cheat>
-      <description>Invincibility</description>
-      <code>D6B0-DD4F</code>
-    </cheat>
-    <cheat>
       <description>Infinite health</description>
       <code>C223-0414</code>
     </cheat>
@@ -72009,6 +71572,10 @@
     <cheat>
       <description>Multi-jump</description>
       <code>40BE-DD44+26BE-D4C4+8BBE-D434</code>
+    </cheat>
+    <cheat>
+      <description>Invincibility</description>
+      <code>8944008</code>
     </cheat>
     <cheat>
       <description>Infinite health (alt 2)</description>
@@ -72114,14 +71681,6 @@
       <code>4064-042F+D367-0F9F+C567-0FBF</code>
     </cheat>
     <cheat>
-      <description>Enemies always drop large energy</description>
-      <code>C42E-0D2F+D42E-0FFF</code>
-    </cheat>
-    <cheat>
-      <description>Enemies always drop large weapon energy</description>
-      <code>C42E-0D2F+D02E-0FFF</code>
-    </cheat>
-    <cheat>
       <description>Super-jump</description>
       <code>D586-6F26</code>
     </cheat>
@@ -72191,14 +71750,6 @@
     <cheat>
       <description>View ending (select Capcom Championship)</description>
       <code>81829B:EE+81829C:E0</code>
-    </cheat>
-    <cheat>
-      <description>Unlock Capcom Championship mode ending</description>
-      <code>82D1F0:EA+82D1F1:EA+82D1F2:EA+82D1F3:EA</code>
-    </cheat>
-    <cheat>
-      <description>Unlock Tournament mode ending</description>
-      <code>82D29C:EA+82D29D:EA+82D29E:EA+82D29F:EA</code>
     </cheat>
   </cartridge>
   <cartridge sha256="d4f2cb6b209db29f7aec62e5a23846681c14665fb007e94d7bcfc7b5611e938b">
@@ -72545,10 +72096,6 @@
     <cheat>
       <description>Infinite bombs on pick-up</description>
       <code>C2B7-0FF7</code>
-    </cheat>
-    <cheat>
-      <description>Collect items from anywhere</description>
-      <code>4084-D794+6D8A-0724+F282-0DF4</code>
     </cheat>
     <cheat>
       <description>Mega-jump</description>
@@ -77108,10 +76655,6 @@
   <cartridge sha256="5c0b5266a191852ca593235f07180e673cb79e3f0b0dd31f65808eef83bf6e90">
     <name>PGA Tour Golf (USA)</name>
     <cheat>
-      <description>Ball goes in from anywhere</description>
-      <code>6D85-67AD+6DCC-ADD7</code>
-    </cheat>
-    <cheat>
       <description>Allow 14 clubs for full set instead of 13</description>
       <code>D235-6D07+D22A-D40F</code>
     </cheat>
@@ -79265,10 +78808,6 @@
       <code>3CB5-0467</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>44E8-6446+6DE8-6F36+C9E3-6446</code>
-    </cheat>
-    <cheat>
       <description>Replacement planes carry 0 bombs - P1</description>
       <code>CEB7-DFD7+62B7-DF07</code>
     </cheat>
@@ -79892,14 +79431,9 @@
       <description>No score lost when special attack is used</description>
       <code>DD62-A7A6</code>
     </cheat>
-    <cheat>
-      <description>Hit anywhere (might make some enemies invisible)</description>
-      <code>6DB6-69EA+F9B6-617A</code>
-    </cheat>
-    <cheat>
-      <description>Start with more health</description>
-      <code>EEC4-OD6F+EE64-646C+EE63-04A7+EE68-A7A1</code>
-    </cheat>
+  </cartridge>
+  <cartridge sha256="Start with more health">
+    <name>EEC4-OD6F+EE64-646C+EE63-04A7+EE68-A7A1</name>
     <cheat>
       <description>Start with less health</description>
       <code>FEC4-0D6F+FE64-646C+FE63-04A7+FE68-A7A1</code>
@@ -83546,14 +83080,9 @@
       <description>Infinite health</description>
       <code>C208-87D1</code>
     </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>40F8-84B0</code>
-    </cheat>
-    <cheat>
-      <description>Don't blink after getting hit</description>
-      <code>FDDB-5FB9</code>
-    </cheat>
+  </cartridge>
+  <cartridge sha256="Don't blink after getting hit">
+    <name>FDDB-5FB9</name>
     <cheat>
       <description>Falling doesn't use life points</description>
       <code>C2F4-7FD1</code>
@@ -88455,10 +87984,6 @@
       <code>F53F-6767+DD3F-67A7</code>
     </cheat>
     <cheat>
-      <description>Press R to scroll through items in the items box</description>
-      <code>D2AF-6407+D2AF-6DD7+DFAF-6F67+17AF-6FD7+1DAF-6467+62AF-6FA7+A4AD-67A7+A4AD-67D7+A4AF-64D7+CBAF-6F07+D1AF-6D67+D2AD-6707</code>
-    </cheat>
-    <cheat>
       <description>Low jump</description>
       <code>D02C-AF6F</code>
     </cheat>
@@ -88974,10 +88499,6 @@
     <cheat>
       <description>Infinite Power Bombs (alt)</description>
       <code>17DA-9E8C</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>40C8-18DD+6DB1-3C6F+6DC2-1BDD</code>
     </cheat>
     <cheat>
       <description>Super-jumps don't drain energy</description>
@@ -90194,28 +89715,6 @@
     <cheat>
       <description>Faster France strikers</description>
       <code>D4E9-6DEF</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="5985cdad45958a5b8c5967ad39efe51569f560bf237a4e9864f21111082a8500">
-    <name>Super Solitaire (USA) (En,Fr,De,Es,It)</name>
-    <cheat>
-      <description>Move cards to any pile - Klondike</description>
-      <code>6D8C-476F+DD8A-34AD+DD88-3D0D</code>
-    </cheat>
-    <cheat>
-      <description>Move cards to any pile - Free Cell</description>
-      <code>6D8F-44A4</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="5670ad514d086359e28f41d79a05ae93309b382d6d56d42a6a0e493e6107111b">
-    <name>Super Soukoban (Japan)</name>
-    <cheat>
-      <description>Infinite steps</description>
-      <code>C2CC-64AB</code>
-    </cheat>
-    <cheat>
-      <description>Walk through walls</description>
-      <code>DD88-D4A6+DD88-D706</code>
     </cheat>
   </cartridge>
   <cartridge sha256="298b643fec4208f33d02a7afbb05c6f757b0086be533f8ca739466cbe96ae918">
@@ -91859,14 +91358,6 @@
       <code>C2AA-0FAF</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>DD8D-DD0D+DDAB-D4DF</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>6D8A-AF67</code>
-    </cheat>
-    <cheat>
       <description>Heart worth more</description>
       <code>F684-0F0D</code>
     </cheat>
@@ -92667,13 +92158,6 @@
       <code>3C38-C25D</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="14bce564f976d1431127259edbcb23c52c79361fed9814d307d627c4650e800e">
-    <name>Tecmo Super NBA Basketball (USA)</name>
-    <cheat>
-      <description>Never miss a shot (hold Y and press the shot button)</description>
-      <code>7D69-CDE7+C269-CD77+D869-CD57+DC69-CD87+FF69-CF77</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="5b82cdd6f2da56f43680d6a5021faebe2e06036d30602c1a7917aa414cf8b5f4">
     <name>Teenage Mutant Ninja Turtles IV - Turtles in Time (USA)</name>
     <cheat>
@@ -92886,26 +92370,6 @@
     <cheat>
       <description>Start with 7 continues</description>
       <code>D6B1-CF60</code>
-    </cheat>
-    <cheat>
-      <description>Infinite health</description>
-      <code>7E0EE460</code>
-    </cheat>
-    <cheat>
-      <description>Full power bar</description>
-      <code>7E1AC060</code>
-    </cheat>
-    <cheat>
-      <description>Empty power bar - opponent</description>
-      <code>7E1B1000</code>
-    </cheat>
-    <cheat>
-      <description>Opponent dizzy after every knockdown</description>
-      <code>7E0FC210</code>
-    </cheat>
-    <cheat>
-      <description>Win one round to win match</description>
-      <code>7E195002</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8620203da71d32d017bb21f542864c1d90705b87eb67815d06b43f09120318aa">
@@ -93733,18 +93197,6 @@
     <cheat>
       <description>Race in any country</description>
       <code>6DB7-AFEA</code>
-    </cheat>
-    <cheat>
-      <description>Don't slow down offroad</description>
-      <code>C229-D4F1</code>
-    </cheat>
-    <cheat>
-      <description>Don't slow down against obstacles</description>
-      <code>DD23-6499</code>
-    </cheat>
-    <cheat>
-      <description>Don't slow down against cars</description>
-      <code>DD38-D7F9+DD38-DF29</code>
     </cheat>
     <cheat>
       <description>Start with 1/2 fuel</description>
@@ -97667,10 +97119,6 @@
   <cartridge sha256="7d414b7f5941f1eddc35259a22accbbbd7b47c517dfcf8bad86c4dcfa9e50b1e">
     <name>Zero the Kamikaze Squirrel (USA)</name>
     <cheat>
-      <description>Jump higher</description>
-      <code>E060-1D62+E060-CF03</code>
-    </cheat>
-    <cheat>
       <description>Invincibility</description>
       <code>7E0E2C:02</code>
     </cheat>
@@ -99499,25 +98947,6 @@
       <code>FA1-21E-4C1</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="c5ddbb08e8509633853346c5f35850cc3abe5afaabb0d0ee294b40e804253b7f">
-    <name>Bubble Bobble (USA, Europe)</name>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>00D-22E-C4A+18D-29E-08A</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - Bosses (except final boss)</description>
-      <code>00C-05B-A29+00B-FCB-A29</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>00C-02D-A29+00C-0BD-A29+00D-56D-A29+375-8FB-6EE+37D-5FD-A29+C95-90B-91E</code>
-    </cheat>
-    <cheat>
-      <description>One hit kill - final boss</description>
-      <code>AF8-B7B-19E</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="29f17b604be580c0132a6d0bd7a966c82930069ca82f83798c955d532c6b4694">
     <name>Bubble Bobble Part 2 (USA, Europe)</name>
     <cheat>
@@ -99570,17 +98999,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>BE6-00E-19E</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="e5abce2a219fe38e53d1a572d371008f3b6d70be4607c1722139a9ea95fa7422">
-    <name>Bug's Life, A (USA) (SGB Enhanced)</name>
-    <cheat>
-      <description>Infinite lives</description>
-      <code>006-2FD-3BE</code>
-    </cheat>
-    <cheat>
-      <description>Invincibility (can still drown)</description>
-      <code>000-EEE-081</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2f4254faaa4bda89486c4820c601917cd034c7965eae075ba81acef4295fa8bd">
@@ -100282,13 +99700,6 @@
     <cheat>
       <description>Start on stage 10</description>
       <code>0AB-0C8-E6E</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="a089bea1d6eec0e99f03276744aea293fe3fe3a2889791ab8f3a00b83e2cf58b">
-    <name>Deer Hunter (USA)</name>
-    <cheat>
-      <description>Infinite time</description>
-      <code>004-1FF-19A</code>
     </cheat>
   </cartridge>
   <cartridge sha256="2d8fb80ece07198260fb47b6a2e8d0097e2d6ca27fb21bc3c439f90d7880317d">
@@ -101551,14 +100962,6 @@
   <cartridge sha256="92c1fbf422abb8f09ca7fdbb563d1284108cc042e60e1222422986d9a59f9d97">
     <name>Kid Icarus - Of Myths and Monsters (USA, Europe)</name>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>008-B8B-5D4</code>
-    </cheat>
-    <cheat>
-      <description>Run into enemies to get Hearts</description>
-      <code>185-67B-4CA</code>
-    </cheat>
-    <cheat>
       <description>Collected hammers seem to count towards your enemy kill number</description>
       <code>C9A-D18-08F+7AA-B48-E69</code>
     </cheat>
@@ -101665,14 +101068,6 @@
       <code>FA4-63B-4C1</code>
     </cheat>
     <cheat>
-      <description>Hit anywhere</description>
-      <code>003-E1B-F7E</code>
-    </cheat>
-    <cheat>
-      <description>Inhale from anywhere</description>
-      <code>008-53B-08E+008-67B-7FE</code>
-    </cheat>
-    <cheat>
       <description>Start with 2 lives</description>
       <code>021-BBF-F7E</code>
     </cheat>
@@ -101718,18 +101113,6 @@
     <cheat>
       <description>Infinite lives</description>
       <code>FA1-C4B-4C1</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere</description>
-      <code>006-E5D-6EA+187-04D-2AA</code>
-    </cheat>
-    <cheat>
-      <description>Inhale from anywhere</description>
-      <code>005-BED-19E+005-DFD-91A</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>18B-898-08A</code>
     </cheat>
     <cheat>
       <description>One hit and you die</description>
@@ -102736,17 +102119,6 @@
       <code>095-B2E-E66</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="21db857936d7eff3d57d576f0a01a52e012d0dcf5dc8f2a6cdb0e92a131a72b6">
-    <name>Ms. Pac-Man (USA)</name>
-    <cheat>
-      <description>Invincibility</description>
-      <code>009-06E-E62</code>
-    </cheat>
-    <cheat>
-      <description>Get fruit from anywhere</description>
-      <code>00B-21E-D56</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="ba1afcea3239c1acc9af228cebe6872f5547ad04480e71652e2e56dcd4e2f08e">
     <name>Mysterium (USA)</name>
     <cheat>
@@ -102789,44 +102161,6 @@
       <code>084-B5F-F7A</code>
     </cheat>
   </cartridge>
-  <cartridge sha256="e807eef2018cb12c73a5395a47936ce0b24b1e8876c10e3dff6b2d30873e52f3">
-    <name>Nemesis (Europe)</name>
-    <cheat>
-      <description>Hit anywhere - Default weapon</description>
-      <code>008-A7D-A29+008-B8D-A29</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - Laser</description>
-      <code>009-5FD-A29+009-70D-A29</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - Missiles</description>
-      <code>009-CBD-A29+009-DCD-A29</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>007-68D-A29</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="58c4da647070388c9e77ddf1a0fce6777c63ff96efcd804d0917f555c3e02369">
-    <name>Nemesis (USA)</name>
-    <cheat>
-      <description>Hit anywhere - normal weapon</description>
-      <code>008-A5D-A29+008-94D-A29</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - Laser</description>
-      <code>009-5DD-A29+009-4CD-A29</code>
-    </cheat>
-    <cheat>
-      <description>Hit anywhere - Missiles</description>
-      <code>009-C9D-A29+009-B8D-A29</code>
-    </cheat>
-    <cheat>
-      <description>Get items from anywhere</description>
-      <code>007-55D-A29</code>
-    </cheat>
-  </cartridge>
   <cartridge sha256="e8b4326469231ba798657cfa8032bc6c2000c0a61e11fbad8406711642a184eb">
     <name>NFL Football (USA)</name>
     <cheat>
@@ -102848,13 +102182,6 @@
     <cheat>
       <description>Touchdown worth 8 points</description>
       <code>08F-59F-F72</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="f513d07ace08618cb2d8a39471b617982f23e0b4f7814a62809b9969ff41635b">
-    <name>Ninja Boy (USA, Europe)</name>
-    <cheat>
-      <description>Hit anywhere (can get items from anywhere by punching)</description>
-      <code>00E-279-C43</code>
     </cheat>
   </cartridge>
   <cartridge sha256="ea284fad45e612ab2fcd721152ab815fe8e58062155ab6e182195f637d7b6da4">
@@ -102987,17 +102314,6 @@
     <cheat>
       <description>Start with 8 lives</description>
       <code>081-ACF-E66</code>
-    </cheat>
-  </cartridge>
-  <cartridge sha256="d07986785d76db33e96ccbbe840ac962542f1c359e5b896e6478afd5cf9586b3">
-    <name>Pac-Man (USA)</name>
-    <cheat>
-      <description>Invincibility</description>
-      <code>C97-7DE-A29</code>
-    </cheat>
-    <cheat>
-      <description>Get fruit from anywhere</description>
-      <code>009-22E-E69+009-28E-E69</code>
     </cheat>
   </cartridge>
   <cartridge sha256="8b81c75dd11e24ba5e1d2f439a6fabf7313024829df397409a20dd37995122cb">
