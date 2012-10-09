@@ -7,6 +7,7 @@ struct Coprocessor : Thread {
 #include <sfc/chip/bsx/bsx.hpp>
 #include <sfc/chip/sufamiturbo/sufamiturbo.hpp>
 #include <sfc/chip/nss/nss.hpp>
+#include <sfc/chip/event/event.hpp>
 
 #include <sfc/chip/sa1/sa1.hpp>
 #include <sfc/chip/superfx/superfx.hpp>

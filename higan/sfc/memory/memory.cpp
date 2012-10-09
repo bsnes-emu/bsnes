@@ -6,30 +6,26 @@ namespace SuperFamicom {
 Bus bus;
 
 void Bus::map(
-  MapMode mode,
-  unsigned bank_lo, unsigned bank_hi,
-  unsigned addr_lo, unsigned addr_hi,
-  const function<uint8 (unsigned)> &rd,
-  const function<void (unsigned, uint8)> &wr,
-  unsigned base, unsigned length
+  const function<uint8 (unsigned)> &reader,
+  const function<void (unsigned, uint8)> &writer,
+  unsigned banklo, unsigned bankhi,
+  unsigned addrlo, unsigned addrhi,
+  unsigned size, unsigned base, unsigned mask
 ) {
-  assert(bank_lo <= bank_hi && bank_lo <= 0xff);
-  assert(addr_lo <= addr_hi && addr_lo <= 0xffff);
+  assert(banklo <= bankhi && banklo <= 0xff);
+  assert(addrlo <= addrhi && addrlo <= 0xffff);
+  assert(idcount < 255);
+
   unsigned id = idcount++;
-  assert(id < 255);
-  reader[id] = rd;
-  writer[id] = wr;
+  this->reader[id] = reader;
+  this->writer[id] = writer;
 
-  if(length == 0) length = (bank_hi - bank_lo + 1) * (addr_hi - addr_lo + 1);
-
-  unsigned offset = 0;
-  for(unsigned bank = bank_lo; bank <= bank_hi; bank++) {
-    for(unsigned addr = addr_lo; addr <= addr_hi; addr++) {
-      unsigned destaddr = (bank << 16) | addr;
-      if(mode == MapMode::Linear) destaddr = mirror(base + offset++, length);
-      if(mode == MapMode::Shadow) destaddr = mirror(base + destaddr, length);
-      lookup[(bank << 16) | addr] = id;
-      target[(bank << 16) | addr] = destaddr;
+  for(unsigned bank = banklo; bank <= bankhi; bank++) {
+    for(unsigned addr = addrlo; addr <= addrhi; addr++) {
+      unsigned offset = recode(bank << 16 | addr, mask);
+      if(size) offset = base + mirror(offset, size - base);
+      lookup[bank << 16 | addr] = id;
+      target[bank << 16 | addr] = offset;
     }
   }
 }
@@ -39,12 +35,25 @@ void Bus::map_reset() {
   function<void (unsigned, uint8)> writer = [](unsigned, uint8) {};
 
   idcount = 0;
-  map(MapMode::Direct, 0x00, 0xff, 0x0000, 0xffff, reader, writer);
+  map(reader, writer, 0x00, 0xff, 0x0000, 0xffff);
 }
 
 void Bus::map_xml() {
   for(auto &m : cartridge.mapping) {
-    map(m.mode, m.banklo, m.bankhi, m.addrlo, m.addrhi, m.read, m.write, m.offset, m.size);
+    lstring part = m.addr.split<1>(":");
+    lstring banks = part(0).split(",");
+    lstring addrs = part(1).split(",");
+    for(auto &bank : banks) {
+      for(auto &addr : addrs) {
+        lstring bankpart = bank.split<1>("-");
+        lstring addrpart = addr.split<1>("-");
+        unsigned banklo = hex(bankpart(0));
+        unsigned bankhi = hex(bankpart(1, bankpart(0)));
+        unsigned addrlo = hex(addrpart(0));
+        unsigned addrhi = hex(addrpart(1, addrpart(0)));
+        map(m.reader, m.writer, banklo, bankhi, addrlo, addrhi, m.size, m.base, m.mask);
+      }
+    }
   }
 }
 

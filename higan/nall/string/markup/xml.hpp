@@ -1,19 +1,22 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
 //XML v1.0 subset parser
-//revision 0.01
+//revision 0.03
 
 namespace nall {
 namespace XML {
 
-struct Node {
-  string name;
-  string data;
-  bool attribute;
-  vector<Node*> children;
-
-  inline bool exists() const {
-    return !name.empty();
+struct Node : Markup::Node {
+protected:
+  inline string escape() const {
+    string result = data;
+    result.replace("&", "&amp;");
+    result.replace("<", "&lt;");
+    result.replace(">", "&gt;");
+    if(attribute == false) return result;
+    result.replace("\'", "&apos;");
+    result.replace("\"", "&quot;");
+    return result;
   }
 
   inline bool isName(char c) const {
@@ -124,15 +127,14 @@ struct Node {
       if(*p == '?' || *p == '/' || *p == '>') break;
 
       //parse attribute name
-      Node *attribute = new Node;
-      children.append(attribute);
-      attribute->attribute = true;
+      Node attribute;
+      attribute.attribute = true;
 
       const char *nameStart = p;
       while(isName(*p)) p++;
       const char *nameEnd = p;
-      copy(attribute->name, nameStart, nameEnd - nameStart);
-      if(attribute->name.empty()) throw "missing attribute name";
+      copy(attribute.name, nameStart, nameEnd - nameStart);
+      if(attribute.name.empty()) throw "missing attribute name";
 
       //parse attribute data
       if(*p++ != '=') throw "missing attribute value";
@@ -143,7 +145,8 @@ struct Node {
       if(!*p) throw "missing attribute data terminal";
       const char *dataEnd = p++;  //skip closing terminal
 
-      copy(attribute->data, dataStart, dataEnd - dataStart);
+      copy(attribute.data, dataStart, dataEnd - dataStart);
+      children.append(attribute);
     }
 
     //parse closure
@@ -155,10 +158,9 @@ struct Node {
 
   //parse element and all of its child elements
   inline void parseElement(const char *&p) {
-    Node *node = new Node;
+    Node node;
+    if(node.parseHead(p) == false) node.parse(p);
     children.append(node);
-    if(node->parseHead(p) == true) return;
-    node->parse(p);
   }
 
   //return true if </tag> matches this node's name
@@ -188,40 +190,6 @@ struct Node {
 
     copy(data, dataStart, dataEnd - dataStart);
   }
-
-  inline void reset() {
-    for(auto &child : children) delete child;
-    children.reset();
-  }
-
-  struct iterator {
-    inline bool operator!=(const iterator &source) const { return index != source.index; }
-    inline Node& operator*() { return *node.children[index]; }
-    inline iterator& operator++() { index++; return *this; }
-    inline iterator(const Node &node, unsigned index) : node(node), index(index) {}
-  private:
-    const Node &node;
-    unsigned index;
-  };
-
-  inline iterator begin() { return iterator(*this, 0); }
-  inline iterator end() { return iterator(*this, children.size()); }
-  inline const iterator begin() const { return iterator(*this, 0); }
-  inline const iterator end() const { return iterator(*this, children.size()); }
-
-  inline Node& operator[](const char *name) {
-    for(auto &node : *this) {
-      if(node.name == name) return node;
-    }
-    static Node node;
-    return node;
-  }
-
-  inline Node() : attribute(false) {}
-  inline ~Node() { reset(); }
-
-  Node(const Node&) = delete;
-  Node& operator=(const Node&) = delete;
 };
 
 struct Document : Node {

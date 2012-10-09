@@ -22,7 +22,6 @@
 
 #define NALL_STRING_INTERNAL_HPP
 #include <nall/string/base.hpp>
-#include <nall/string/bml.hpp>
 #include <nall/string/bsv.hpp>
 #include <nall/string/cast.hpp>
 #include <nall/string/compare.hpp>
@@ -44,7 +43,10 @@
 #include <nall/string/variadic.hpp>
 #include <nall/string/wildcard.hpp>
 #include <nall/string/wrapper.hpp>
-#include <nall/string/xml.hpp>
+#include <nall/string/markup/node.hpp>
+#include <nall/string/markup/bml.hpp>
+#include <nall/string/markup/xml.hpp>
+#include <nall/string/markup/document.hpp>
 #undef NALL_STRING_INTERNAL_HPP
 
 #endif

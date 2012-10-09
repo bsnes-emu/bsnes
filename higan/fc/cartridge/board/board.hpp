@@ -29,7 +29,7 @@ struct Board {
   virtual void reset();
 
   virtual void serialize(serializer&);
-  Board(XML::Document &document);
+  Board(Markup::Node &document);
   virtual ~Board();
 
   static Board* load(const string &manifest);

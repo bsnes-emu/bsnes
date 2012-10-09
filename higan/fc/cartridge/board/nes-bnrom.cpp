@@ -45,7 +45,7 @@ void serialize(serializer &s) {
   s.integer(prg_bank);
 }
 
-NES_BNROM(XML::Document &document) : Board(document) {
+NES_BNROM(Markup::Node &document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

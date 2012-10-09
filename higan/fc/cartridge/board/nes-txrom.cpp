@@ -60,7 +60,7 @@ void serialize(serializer &s) {
   mmc3.serialize(s);
 }
 
-NES_TxROM(XML::Document &document) : Board(document), mmc3(*this) {
+NES_TxROM(Markup::Node &document) : Board(document), mmc3(*this) {
   revision = Revision::TLROM;
 }
 

@@ -6,8 +6,8 @@ void BSXSatellaview::init() {
 }
 
 void BSXSatellaview::load() {
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2188, 0x219f, {&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview});
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2188, 0x219f, {&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview});
+  bus.map({&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview}, 0x00, 0x3f, 0x2188, 0x219f);
+  bus.map({&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview}, 0x80, 0xbf, 0x2188, 0x219f);
 }
 
 void BSXSatellaview::unload() {

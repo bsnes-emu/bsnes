@@ -36,7 +36,7 @@ void serialize(serializer &s) {
   Board::serialize(s);
 }
 
-NES_NROM(XML::Document &document) : Board(document) {
+NES_NROM(Markup::Node &document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

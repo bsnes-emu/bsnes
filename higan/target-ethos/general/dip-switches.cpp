@@ -21,7 +21,7 @@ DipSwitches::DipSwitches() {
   onClose = accept.onActivate = [&] { quit = true; };
 }
 
-unsigned DipSwitches::run(const XML::Node &node) {
+unsigned DipSwitches::run(const Markup::Node &node) {
   audio.clear();
   setModal(true);
   quit = false;

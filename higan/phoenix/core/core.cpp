@@ -339,6 +339,14 @@ void Window::setResizable(bool resizable) {
   return p.setResizable(resizable);
 }
 
+void Window::setSmartGeometry(const Geometry &geometry) {
+  Geometry margin = p.frameMargin();
+  return setGeometry({
+    geometry.x + margin.x, geometry.y + margin.y,
+    geometry.width, geometry.height
+  });
+}
+
 void Window::setStatusFont(const string &font) {
   state.statusFont = font;
   return p.setStatusFont(font);

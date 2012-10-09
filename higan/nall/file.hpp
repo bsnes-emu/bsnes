@@ -74,6 +74,14 @@ namespace nall {
       return true;
     }
 
+    static bool write(const string &filename, const vector<uint8_t> &buffer) {
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.write(buffer.data(), buffer.size());
+      fp.close();
+      return true;
+    }
+
     static bool write(const string &filename, const uint8_t *data, unsigned size) {
       file fp;
       if(fp.open(filename, mode::write) == false) return false;

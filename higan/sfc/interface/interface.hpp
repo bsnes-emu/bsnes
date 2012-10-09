@@ -18,6 +18,12 @@ struct ID {
     ROM,
     RAM,
 
+    EventROM0,
+    EventROM1,
+    EventROM2,
+    EventROM3,
+    EventRAM,
+
     SA1ROM,
     SA1IRAM,
     SA1BWRAM,

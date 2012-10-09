@@ -3,7 +3,7 @@
 void Cartridge::parse_markup(const char *markup) {
   mapping.reset();
 
-  XML::Document document(markup);
+  auto document = Markup::Document(markup);
   auto &cartridge = document["cartridge"];
   region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
 
@@ -13,6 +13,7 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_bsxslot(cartridge["bsxslot"]);
   parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
   parse_markup_nss(cartridge["nss"]);
+  parse_markup_event(cartridge["event"]);
   parse_markup_sa1(cartridge["sa1"]);
   parse_markup_superfx(cartridge["superfx"]);
   parse_markup_armdsp(cartridge["armdsp"]);
@@ -28,40 +29,14 @@ void Cartridge::parse_markup(const char *markup) {
 
 //
 
-void Cartridge::parse_markup_map(Mapping &m, XML::Node &map) {
-  m.offset = numeral(map["offset"].data);
+void Cartridge::parse_markup_map(Mapping &m, Markup::Node &map) {
+  m.addr = map["address"].data;
   m.size = numeral(map["size"].data);
-
-  string data = map["mode"].data;
-  if(data == "direct") m.mode = Bus::MapMode::Direct;
-  if(data == "linear") m.mode = Bus::MapMode::Linear;
-  if(data == "shadow") m.mode = Bus::MapMode::Shadow;
-
-  lstring part;
-  part.split(":", map["address"].data);
-  if(part.size() != 2) return;
-
-  lstring subpart;
-  subpart.split("-", part[0]);
-  if(subpart.size() == 1) {
-    m.banklo = hex(subpart[0]);
-    m.bankhi = m.banklo;
-  } else if(subpart.size() == 2) {
-    m.banklo = hex(subpart[0]);
-    m.bankhi = hex(subpart[1]);
-  }
-
-  subpart.split("-", part[1]);
-  if(subpart.size() == 1) {
-    m.addrlo = hex(subpart[0]);
-    m.addrhi = m.addrlo;
-  } else if(subpart.size() == 2) {
-    m.addrlo = hex(subpart[0]);
-    m.addrhi = hex(subpart[1]);
-  }
+  m.base = numeral(map["base"].data);
+  m.mask = numeral(map["mask"].data);
 }
 
-void Cartridge::parse_markup_memory(MappedRAM &ram, XML::Node &node, unsigned id, bool writable) {
+void Cartridge::parse_markup_memory(MappedRAM &ram, Markup::Node &node, unsigned id, bool writable) {
   string name = node["name"].data;
   unsigned size = numeral(node["size"].data);
   ram.map(allocate<uint8>(size, 0xff), size);
@@ -73,7 +48,7 @@ void Cartridge::parse_markup_memory(MappedRAM &ram, XML::Node &node, unsigned id
 
 //
 
-void Cartridge::parse_markup_cartridge(XML::Node &root) {
+void Cartridge::parse_markup_cartridge(Markup::Node &root) {
   if(root.exists() == false) return;
 
   parse_markup_memory(rom, root["rom"], ID::ROM, false);
@@ -98,7 +73,7 @@ void Cartridge::parse_markup_cartridge(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_icd2(XML::Node &root) {
+void Cartridge::parse_markup_icd2(Markup::Node &root) {
   if(root.exists() == false) return;
   has_gb_slot = true;
   icd2.revision = max(1, numeral(root["revision"].data));
@@ -122,7 +97,7 @@ void Cartridge::parse_markup_icd2(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_bsx(XML::Node &root) {
+void Cartridge::parse_markup_bsx(Markup::Node &root) {
   if(root.exists() == false) return;
   has_bs_cart = true;
   has_bs_slot = true;
@@ -136,7 +111,8 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   for(auto &node : root) {
     if(node.name != "map") continue;
 
-    if(node["id"].data == "rom" || node["id"].data == "ram") {
+    if(node["id"].data == "rom"
+    || node["id"].data == "ram") {
       Mapping m({&BSXCartridge::mcu_read, &bsxcartridge}, {&BSXCartridge::mcu_write, &bsxcartridge});
       parse_markup_map(m, node);
       mapping.append(m);
@@ -150,7 +126,7 @@ void Cartridge::parse_markup_bsx(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_bsxslot(XML::Node &root) {
+void Cartridge::parse_markup_bsxslot(Markup::Node &root) {
   if(root.exists() == false) return;
   has_bs_slot = true;
 
@@ -169,7 +145,7 @@ void Cartridge::parse_markup_bsxslot(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
+void Cartridge::parse_markup_sufamiturbo(Markup::Node &root) {
   if(root.exists() == false) return;
   has_st_slots = true;
 
@@ -206,7 +182,7 @@ void Cartridge::parse_markup_sufamiturbo(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_nss(XML::Node &root) {
+void Cartridge::parse_markup_nss(Markup::Node &root) {
   if(root.exists() == false) return;
   has_nss_dip = true;
   nss.dip = interface->dipSettings(root);
@@ -222,7 +198,65 @@ void Cartridge::parse_markup_nss(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_sa1(XML::Node &root) {
+void Cartridge::parse_markup_event(Markup::Node &root) {
+  if(root.exists() == false) return;
+  has_event = true;
+
+  for(auto &node : root) {
+    if(node.name != "rom") continue;
+    unsigned id = numeral(node["id"].data);
+    if(id > 3) continue;
+    parse_markup_memory(event.rom[id], node, ID::EventROM0 + id, false);
+  }
+  parse_markup_memory(event.ram, root["ram"], ID::EventRAM, true);
+
+  event.board = Event::Board::CampusChallenge92;
+  if(root["name"].data == "Campus Challenge '92") event.board = Event::Board::CampusChallenge92;
+  if(root["name"].data == "Powerfest '94") event.board = Event::Board::Powerfest94;
+
+  event.revision = root["revision"].data == "B" ? 2 : 1;
+  lstring part = root["timer"].data.split<1>(":");
+  if(part.size() == 1) event.timer = decimal(part(0));
+  if(part.size() == 2) event.timer = decimal(part(0)) * 60 + decimal(part(1));
+
+  part = string{root["server"]["address"].data}.ltrim<1>("http://").split<1>("/");
+  event.path = {"/", part(1)};
+  part = part(0).split<1>(":");
+  event.host = part(0);
+  event.port = decimal(part(1)) ? decimal(part(1)) : 80;
+  event.username = root["server"]["username"].data;
+  event.password = root["server"]["password"].data;
+
+  for(auto &node : root) {
+    if(node.name != "map") continue;
+
+    if(node["id"].data == "rom") {
+      Mapping m({&Event::rom_read, &event}, [](unsigned, uint8) {});
+      parse_markup_map(m, node);
+      mapping.append(m);
+    }
+
+    if(node["id"].data == "ram") {
+      Mapping m({&Event::ram_read, &event}, {&Event::ram_write, &event});
+      parse_markup_map(m, node);
+      mapping.append(m);
+    }
+
+    if(node["id"].data == "dr") {
+      Mapping m([](unsigned) -> uint8 { return cpu.regs.mdr; }, {&Event::dr, &event});
+      parse_markup_map(m, node);
+      mapping.append(m);
+    }
+
+    if(node["id"].data == "sr") {
+      Mapping m({&Event::sr, &event}, [](unsigned, uint8) {});
+      parse_markup_map(m, node);
+      mapping.append(m);
+    }
+  }
+}
+
+void Cartridge::parse_markup_sa1(Markup::Node &root) {
   if(root.exists() == false) return;
   has_sa1 = true;
 
@@ -260,7 +294,7 @@ void Cartridge::parse_markup_sa1(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_superfx(XML::Node &root) {
+void Cartridge::parse_markup_superfx(Markup::Node &root) {
   if(root.exists() == false) return;
   has_superfx = true;
 
@@ -279,6 +313,7 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
     if(node["id"].data == "rom") {
       Mapping m(superfx.cpurom);
       parse_markup_map(m, node);
+      if(m.size == 0) m.size = superfx.rom.size();
       mapping.append(m);
     }
 
@@ -291,7 +326,7 @@ void Cartridge::parse_markup_superfx(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_armdsp(XML::Node &root) {
+void Cartridge::parse_markup_armdsp(Markup::Node &root) {
   if(root.exists() == false) return;
   has_armdsp = true;
 
@@ -311,7 +346,7 @@ void Cartridge::parse_markup_armdsp(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
+void Cartridge::parse_markup_hitachidsp(Markup::Node &root) {
   if(root.exists() == false) return;
   has_hitachidsp = true;
 
@@ -338,12 +373,13 @@ void Cartridge::parse_markup_hitachidsp(XML::Node &root) {
     if(node["id"].data == "rom") {
       Mapping m({&HitachiDSP::rom_read, &hitachidsp}, {&HitachiDSP::rom_write, &hitachidsp});
       parse_markup_map(m, node);
+      if(m.size == 0) m.size = hitachidsp.rom.size();
       mapping.append(m);
     }
   }
 }
 
-void Cartridge::parse_markup_necdsp(XML::Node &root) {
+void Cartridge::parse_markup_necdsp(Markup::Node &root) {
   if(root.exists() == false) return;
   has_necdsp = true;
 
@@ -393,7 +429,7 @@ void Cartridge::parse_markup_necdsp(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
+void Cartridge::parse_markup_epsonrtc(Markup::Node &root) {
   if(root.exists() == false) return;
   has_epsonrtc = true;
 
@@ -412,7 +448,7 @@ void Cartridge::parse_markup_epsonrtc(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_sharprtc(XML::Node &root) {
+void Cartridge::parse_markup_sharprtc(Markup::Node &root) {
   if(root.exists() == false) return;
   has_sharprtc = true;
 
@@ -431,7 +467,7 @@ void Cartridge::parse_markup_sharprtc(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_spc7110(XML::Node &root) {
+void Cartridge::parse_markup_spc7110(Markup::Node &root) {
   if(root.exists() == false) return;
   has_spc7110 = true;
 
@@ -462,7 +498,7 @@ void Cartridge::parse_markup_spc7110(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_sdd1(XML::Node &root) {
+void Cartridge::parse_markup_sdd1(Markup::Node &root) {
   if(root.exists() == false) return;
   has_sdd1 = true;
 
@@ -492,7 +528,7 @@ void Cartridge::parse_markup_sdd1(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_obc1(XML::Node &root) {
+void Cartridge::parse_markup_obc1(Markup::Node &root) {
   if(root.exists() == false) return;
   has_obc1 = true;
 
@@ -509,7 +545,7 @@ void Cartridge::parse_markup_obc1(XML::Node &root) {
   }
 }
 
-void Cartridge::parse_markup_msu1(XML::Node &root) {
+void Cartridge::parse_markup_msu1(Markup::Node &root) {
   if(root.exists() == false) return;
   has_msu1 = true;
 
@@ -525,22 +561,19 @@ void Cartridge::parse_markup_msu1(XML::Node &root) {
 }
 
 Cartridge::Mapping::Mapping() {
-  mode = Bus::MapMode::Direct;
-  banklo = bankhi = addrlo = addrhi = offset = size = 0;
+  size = base = mask = 0;
 }
 
 Cartridge::Mapping::Mapping(SuperFamicom::Memory &memory) {
-  read = {&SuperFamicom::Memory::read, &memory};
-  write = {&SuperFamicom::Memory::write, &memory};
-  mode = Bus::MapMode::Direct;
-  banklo = bankhi = addrlo = addrhi = offset = size = 0;
+  reader = {&SuperFamicom::Memory::read,  &memory};
+  writer = {&SuperFamicom::Memory::write, &memory};
+  size = base = mask = 0;
 }
 
-Cartridge::Mapping::Mapping(const function<uint8 (unsigned)> &read_, const function<void (unsigned, uint8)> &write_) {
-  read = read_;
-  write = write_;
-  mode = Bus::MapMode::Direct;
-  banklo = bankhi = addrlo = addrhi = offset = size = 0;
+Cartridge::Mapping::Mapping(const function<uint8 (unsigned)> &reader, const function<void (unsigned, uint8)> &writer) {
+  this->reader = reader;
+  this->writer = writer;
+  size = base = mask = 0;
 }
 
 #endif

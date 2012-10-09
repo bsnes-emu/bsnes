@@ -1,7 +1,7 @@
 sfc_objects := sfc-interface sfc-system sfc-controller
 sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
-sfc_objects += sfc-icd2 sfc-bsx sfc-sufamiturbo sfc-nss
+sfc_objects += sfc-icd2 sfc-bsx sfc-sufamiturbo sfc-nss sfc-event
 sfc_objects += sfc-sa1 sfc-superfx
 sfc_objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 sfc_objects += sfc-epsonrtc sfc-sharprtc
@@ -44,6 +44,7 @@ obj/sfc-icd2.o       : $(sfc)/chip/icd2/icd2.cpp $(call rwildcard,$(sfc)/chip/ic
 obj/sfc-bsx.o        : $(sfc)/chip/bsx/bsx.cpp $(call rwildcard,$(sfc)/chip/bsx/)
 obj/sfc-sufamiturbo.o: $(sfc)/chip/sufamiturbo/sufamiturbo.cpp $(sfc)/chip/sufamiturbo/*
 obj/sfc-nss.o        : $(sfc)/chip/nss/nss.cpp $(call rwildcard,$(sfc)/chip/nss/)
+obj/sfc-event.o      : $(sfc)/chip/event/event.cpp $(call rwildcard,$(sfc)/chip/event/)
 
 obj/sfc-sa1.o        : $(sfc)/chip/sa1/sa1.cpp $(call rwildcard,$(sfc)/chip/sa1/)
 obj/sfc-superfx.o    : $(sfc)/chip/superfx/superfx.cpp $(call rwildcard,$(sfc)/chip/superfx/)

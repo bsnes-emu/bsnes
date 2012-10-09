@@ -15,7 +15,7 @@ struct DipSwitches : Window {
     Widget spacer;
     Button accept;
 
-  unsigned run(const XML::Node &node);
+  unsigned run(const Markup::Node &node);
   DipSwitches();
 
 private:

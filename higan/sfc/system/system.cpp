@@ -69,6 +69,7 @@ void System::init() {
   bsxcartridge.init();
   bsxflash.init();
   nss.init();
+  event.init();
   sa1.init();
   superfx.init();
   armdsp.init();
@@ -124,6 +125,7 @@ void System::load() {
   if(cartridge.has_bs_slot()) bsxflash.load();
   if(cartridge.has_st_slots()) sufamiturbo.load();
   if(cartridge.has_nss_dip()) nss.load();
+  if(cartridge.has_event()) event.load();
   if(cartridge.has_sa1()) sa1.load();
   if(cartridge.has_superfx()) superfx.load();
   if(cartridge.has_armdsp()) armdsp.load();
@@ -147,6 +149,7 @@ void System::unload() {
   if(cartridge.has_bs_slot()) bsxflash.unload();
   if(cartridge.has_st_slots()) sufamiturbo.unload();
   if(cartridge.has_nss_dip()) nss.unload();
+  if(cartridge.has_event()) event.unload();
   if(cartridge.has_sa1()) sa1.unload();
   if(cartridge.has_superfx()) superfx.unload();
   if(cartridge.has_armdsp()) armdsp.unload();
@@ -173,6 +176,7 @@ void System::power() {
   if(cartridge.has_bs_cart()) bsxcartridge.power();
   if(cartridge.has_bs_slot()) bsxflash.power();
   if(cartridge.has_nss_dip()) nss.power();
+  if(cartridge.has_event()) event.power();
   if(cartridge.has_sa1()) sa1.power();
   if(cartridge.has_superfx()) superfx.power();
   if(cartridge.has_armdsp()) armdsp.power();
@@ -199,6 +203,7 @@ void System::reset() {
   if(cartridge.has_bs_cart()) bsxcartridge.reset();
   if(cartridge.has_bs_slot()) bsxflash.reset();
   if(cartridge.has_nss_dip()) nss.reset();
+  if(cartridge.has_event()) event.reset();
   if(cartridge.has_sa1()) sa1.reset();
   if(cartridge.has_superfx()) superfx.reset();
   if(cartridge.has_armdsp()) armdsp.reset();
@@ -212,6 +217,7 @@ void System::reset() {
   if(cartridge.has_msu1()) msu1.reset();
 
   if(cartridge.has_gb_slot()) cpu.coprocessors.append(&icd2);
+  if(cartridge.has_event()) cpu.coprocessors.append(&event);
   if(cartridge.has_sa1()) cpu.coprocessors.append(&sa1);
   if(cartridge.has_superfx()) cpu.coprocessors.append(&superfx);
   if(cartridge.has_armdsp()) cpu.coprocessors.append(&armdsp);

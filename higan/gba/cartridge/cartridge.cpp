@@ -9,7 +9,7 @@ Cartridge cartridge;
 
 void Cartridge::load(const string &manifest) {
   information.markup = manifest;
-  XML::Document document(manifest);
+  auto document = Markup::Document(manifest);
 
   unsigned rom_size = 0;
   if(document["cartridge"]["rom"].exists()) {

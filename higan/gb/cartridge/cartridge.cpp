@@ -25,7 +25,7 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   information.romsize = 0;
   information.ramsize = 0;
 
-  XML::Document document(manifest);
+  auto document = Markup::Document(manifest);
 
   auto &mapperid = document["cartridge"]["board"]["type"].data;
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;

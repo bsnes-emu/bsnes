@@ -29,6 +29,11 @@ unsigned Interface::group(unsigned id) {
     return 0;
   case ID::ROM:
   case ID::RAM:
+  case ID::EventROM0:
+  case ID::EventROM1:
+  case ID::EventROM2:
+  case ID::EventROM3:
+  case ID::EventRAM:
   case ID::SA1ROM:
   case ID::SA1IRAM:
   case ID::SA1BWRAM:
@@ -96,6 +101,12 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
 
   if(id == ID::ROM) cartridge.rom.read(stream);
   if(id == ID::RAM) cartridge.ram.read(stream);
+
+  if(id == ID::EventROM0) event.rom[0].read(stream);
+  if(id == ID::EventROM1) event.rom[1].read(stream);
+  if(id == ID::EventROM2) event.rom[2].read(stream);
+  if(id == ID::EventROM3) event.rom[3].read(stream);
+  if(id == ID::EventRAM) event.ram.read(stream);
 
   if(id == ID::SA1ROM) sa1.rom.read(stream);
   if(id == ID::SA1IRAM) sa1.iram.read(stream);
@@ -175,6 +186,7 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
 
 void Interface::save(unsigned id, const stream &stream) {
   if(id == ID::RAM) stream.write(cartridge.ram.data(), cartridge.ram.size());
+  if(id == ID::EventRAM) stream.write(event.ram.data(), event.ram.size());
   if(id == ID::SA1IRAM) stream.write(sa1.iram.data(), sa1.iram.size());
   if(id == ID::SA1BWRAM) stream.write(sa1.bwram.data(), sa1.bwram.size());
   if(id == ID::SuperFXRAM) stream.write(superfx.ram.data(), superfx.ram.size());

@@ -82,7 +82,7 @@ void Board::serialize(serializer &s) {
   if(chrram.size) s.array(chrram.data, chrram.size);
 }
 
-Board::Board(XML::Document &document) {
+Board::Board(Markup::Node &document) {
   cartridge.board = this;
   auto &cartridge = document["cartridge"];
 
@@ -120,7 +120,7 @@ Board::~Board() {
 }
 
 Board* Board::load(const string &manifest) {
-  XML::Document document(manifest);
+  auto document = Markup::Document(manifest);
   string type = document["cartridge"]["board"]["type"].data;
 
   if(type == "BANDAI-FCG"  ) return new BandaiFCG(document);
@@ -154,16 +154,52 @@ Board* Board::load(const string &manifest) {
 
   if(type == "NES-HKROM"   ) return new NES_HKROM(document);
 
+  if(type == "NES-NROM"    ) return new NES_NROM(document);
   if(type == "NES-NROM-128") return new NES_NROM(document);
   if(type == "NES-NROM-256") return new NES_NROM(document);
 
   if(type == "NES-PEEOROM" ) return new NES_PxROM(document);
   if(type == "NES-PNROM"   ) return new NES_PxROM(document);
 
+  if(type == "NES-SAROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SBROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SCROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SC1ROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SEROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SFROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SFEXPROM") return new NES_SxROM(document);
+  if(type == "NES-SGROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SHROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SH1ROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SIROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SJROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SKROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SLROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SL1ROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SL2ROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SL3ROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SLRROM"  ) return new NES_SxROM(document);
+  if(type == "NES-SMROM"   ) return new NES_SxROM(document);
   if(type == "NES-SNROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SOROM"   ) return new NES_SxROM(document);
+  if(type == "NES-SUROM"   ) return new NES_SxROM(document);
   if(type == "NES-SXROM"   ) return new NES_SxROM(document);
 
+  if(type == "NES-TBROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TEROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TFROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TGROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TKROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TKSROM"  ) return new NES_TxROM(document);
   if(type == "NES-TLROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TL1ROM"  ) return new NES_TxROM(document);
+  if(type == "NES-TL2ROM"  ) return new NES_TxROM(document);
+  if(type == "NES-TLSROM"  ) return new NES_TxROM(document);
+  if(type == "NES-TNROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TQROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TR1ROM"  ) return new NES_TxROM(document);
+  if(type == "NES-TSROM"   ) return new NES_TxROM(document);
+  if(type == "NES-TVROM"   ) return new NES_TxROM(document);
 
   if(type == "NES-UNROM"   ) return new NES_UxROM(document);
   if(type == "NES-UOROM"   ) return new NES_UxROM(document);

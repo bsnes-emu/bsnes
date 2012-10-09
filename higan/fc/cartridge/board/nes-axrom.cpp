@@ -45,7 +45,7 @@ void serialize(serializer &s) {
   s.integer(mirror_select);
 }
 
-NES_AxROM(XML::Document &document) : Board(document) {
+NES_AxROM(Markup::Node &document) : Board(document) {
 }
 
 };

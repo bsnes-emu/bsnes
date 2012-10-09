@@ -63,7 +63,7 @@ string temppath() {
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
   GetTempPathW(PATH_MAX, path);
-  path.transform("\\", "/");
+//path.transform("\\", "/");
   return (const char*)utf8_t(path);
   #else
   return "/tmp/";

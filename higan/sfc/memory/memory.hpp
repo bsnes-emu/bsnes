@@ -44,6 +44,7 @@ private:
 
 struct Bus {
   alwaysinline static unsigned mirror(unsigned addr, unsigned size);
+  alwaysinline static unsigned recode(unsigned addr, unsigned mask);
 
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);
@@ -55,14 +56,12 @@ struct Bus {
   function<uint8 (unsigned)> reader[256];
   function<void (unsigned, uint8)> writer[256];
 
-  enum class MapMode : unsigned { Direct, Linear, Shadow };
   void map(
-    MapMode mode,
-    unsigned bank_lo, unsigned bank_hi,
-    unsigned addr_lo, unsigned addr_hi,
-    const function<uint8 (unsigned)> &read,
-    const function<void (unsigned, uint8)> &write,
-    unsigned base = 0, unsigned length = 0
+    const function<uint8 (unsigned)> &reader,
+    const function<void (unsigned, uint8)> &writer,
+    unsigned banklo, unsigned bankhi,
+    unsigned addrlo, unsigned addrhi,
+    unsigned size = 0, unsigned base = 0, unsigned mask = 0
   );
 
   void map_reset();

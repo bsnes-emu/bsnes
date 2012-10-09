@@ -15,6 +15,11 @@ struct bpsmulti {
     MirrorFile = 3,
   };
 
+  enum : unsigned {
+    OriginSource = 0,
+    OriginTarget = 1,
+  };
+
   bool create(const string &patchName, const string &sourcePath, const string &targetPath, bool delta = false, const string &metadata = "") {
     if(fp.open()) fp.close();
     fp.open(patchName, file::mode::write);
@@ -30,9 +35,10 @@ struct bpsmulti {
 
     for(auto &targetName : targetList) {
       if(targetName.endswith("/")) {
+        targetName.rtrim<1>("/");
         writeNumber(CreatePath | ((targetName.length() - 1) << 2));
         writeString(targetName);
-      } else if(auto position = sourceList.find(targetName)) {  //note: sourceName == targetName
+      } else if(auto position = sourceList.find(targetName)) {  //if sourceName == targetName
         file sp, dp;
         sp.open({sourcePath, targetName}, file::mode::read);
         dp.open({targetPath, targetName}, file::mode::read);
@@ -46,30 +52,32 @@ struct bpsmulti {
           cksum = crc32_adjust(cksum, byte);
         }
 
-        writeNumber((identical ? MirrorFile : ModifyFile) | ((targetName.length() - 1) << 2));
-        writeString(targetName);
-        writeNumber(targetName.length() - 1);
-        writeString(targetName);
         if(identical) {
+          writeNumber(MirrorFile | ((targetName.length() - 1) << 2));
+          writeString(targetName);
+          writeNumber(OriginSource);
           writeChecksum(~cksum);
-          continue;
-        }
-
-        if(delta == false) {
-          bpslinear patch;
-          patch.source({sourcePath, targetName});
-          patch.target({targetPath, targetName});
-          patch.create({temppath(), "temp.bps"});
         } else {
-          bpsdelta patch;
-          patch.source({sourcePath, targetName});
-          patch.target({targetPath, targetName});
-          patch.create({temppath(), "temp.bps"});
-        }
+          writeNumber(ModifyFile | ((targetName.length() - 1) << 2));
+          writeString(targetName);
+          writeNumber(OriginSource);
 
-        auto buffer = file::read({temppath(), "temp.bps"});
-        writeNumber(buffer.size());
-        for(auto &byte : buffer) write(byte);
+          if(delta == false) {
+            bpslinear patch;
+            patch.source({sourcePath, targetName});
+            patch.target({targetPath, targetName});
+            patch.create({temppath(), "temp.bps"});
+          } else {
+            bpsdelta patch;
+            patch.source({sourcePath, targetName});
+            patch.target({targetPath, targetName});
+            patch.create({temppath(), "temp.bps"});
+          }
+
+          auto buffer = file::read({temppath(), "temp.bps"});
+          writeNumber(buffer.size());
+          for(auto &byte : buffer) write(byte);
+        }
       } else {
         writeNumber(CreateFile | ((targetName.length() - 1) << 2));
         writeString(targetName);
@@ -105,7 +113,7 @@ struct bpsmulti {
       string targetName = readString(targetLength);
 
       if(action == CreatePath) {
-        directory::create({targetPath, targetName});
+        directory::create({targetPath, targetName, "/"});
       } else if(action == CreateFile) {
         file fp;
         fp.open({targetPath, targetName}, file::mode::write);
@@ -113,21 +121,23 @@ struct bpsmulti {
         while(fileSize--) fp.write(read());
         uint32_t cksum = readChecksum();
       } else if(action == ModifyFile) {
-        auto sourceLength = readNumber() + 1;
-        string sourceName = readString(sourceLength);
+        auto encoding = readNumber();
+        string originPath = encoding & 1 ? targetPath : sourcePath;
+        string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
         auto patchSize = readNumber();
         vector<uint8_t> buffer;
         buffer.resize(patchSize);
         for(unsigned n = 0; n < patchSize; n++) buffer[n] = read();
         bpspatch patch;
         patch.modify(buffer.data(), buffer.size());
-        patch.source({sourcePath, sourceName});
+        patch.source({originPath, sourceName});
         patch.target({targetPath, targetName});
         if(patch.apply() != bpspatch::result::success) return false;
       } else if(action == MirrorFile) {
-        auto sourceLength = readNumber() + 1;
-        string sourceName = readString(sourceLength);
-        file::copy({sourcePath, sourceName}, {targetPath, targetName});
+        auto encoding = readNumber();
+        string originPath = encoding & 1 ? targetPath : sourcePath;
+        string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
+        file::copy({originPath, sourceName}, {targetPath, targetName});
         uint32_t cksum = readChecksum();
       }
     }

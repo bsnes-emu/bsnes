@@ -15,6 +15,7 @@ void Cartridge::load(const string &manifest) {
   has_bs_slot    = false;
   has_st_slots   = false;
   has_nss_dip    = false;
+  has_event      = false;
   has_sa1        = false;
   has_superfx    = false;
   has_armdsp     = false;

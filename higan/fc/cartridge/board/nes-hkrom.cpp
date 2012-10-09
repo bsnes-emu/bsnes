@@ -42,7 +42,7 @@ void serialize(serializer &s) {
   mmc6.serialize(s);
 }
 
-NES_HKROM(XML::Document &document) : Board(document), mmc6(*this) {
+NES_HKROM(Markup::Node &document) : Board(document), mmc6(*this) {
 }
 
 };

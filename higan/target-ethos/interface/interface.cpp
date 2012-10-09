@@ -107,7 +107,7 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
   return inputManager->inputMap[guid]->poll();
 }
 
-unsigned Interface::dipSettings(const XML::Node &node) {
+unsigned Interface::dipSettings(const Markup::Node &node) {
   return dipSwitches->run(node);
 }
 

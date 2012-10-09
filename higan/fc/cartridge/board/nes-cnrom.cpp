@@ -47,7 +47,7 @@ void serialize(serializer &s) {
   s.integer(chr_bank);
 }
 
-NES_CNROM(XML::Document &document) : Board(document) {
+NES_CNROM(Markup::Node &document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

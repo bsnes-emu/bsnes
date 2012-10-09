@@ -220,7 +220,7 @@ void serialize(serializer &s) {
   pulse[2].serialize(s);
 }
 
-Sunsoft5B(XML::Document &document) : Board(document) {
+Sunsoft5B(Markup::Node &document) : Board(document) {
 }
 
 };

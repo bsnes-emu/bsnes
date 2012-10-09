@@ -118,11 +118,11 @@ void PPU::frame() {
 }
 
 void PPU::enable() {
-  function<uint8 (unsigned)> read = { &PPU::mmio_read, (PPU*)&ppu };
-  function<void (unsigned, uint8)> write = { &PPU::mmio_write, (PPU*)&ppu };
+  function<uint8 (unsigned)> reader = { &PPU::mmio_read, (PPU*)&ppu };
+  function<void (unsigned, uint8)> writer = { &PPU::mmio_write, (PPU*)&ppu };
 
-  bus.map(Bus::MapMode::Direct, 0x00, 0x3f, 0x2100, 0x213f, read, write);
-  bus.map(Bus::MapMode::Direct, 0x80, 0xbf, 0x2100, 0x213f, read, write);
+  bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
+  bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
 }
 
 void PPU::power() {
