@@ -25,6 +25,7 @@ Configuration::Configuration() {
   append(input.focusAllow = false, "Input::Focus::AllowInput");
   append(timing.video = 60.0, "Timing::Video");
   append(timing.audio = 48000.0, "Timing::Audio");
+  append(path.game = {userpath(), "Emulation/"}, "Path::Game");
   load();
 }
 

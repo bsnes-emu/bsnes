@@ -93,6 +93,7 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   timingSettings = new TimingSettings;
+  pathSettings = new PathSettings;
   driverSettings = new DriverSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;

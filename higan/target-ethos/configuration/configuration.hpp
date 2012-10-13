@@ -34,6 +34,10 @@ struct Configuration : configuration {
     double audio;
   } timing;
 
+  struct Path {
+    string game;
+  } path;
+
   void load();
   void save();
   Configuration();

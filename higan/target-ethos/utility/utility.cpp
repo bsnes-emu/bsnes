@@ -1,4 +1,5 @@
 #include "../ethos.hpp"
+#include "database.cpp"
 
 Utility *utility = nullptr;
 
@@ -12,9 +13,12 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   string pathname;
   if(!media.load.empty()) pathname = application->path({media.load, "/"});
   if(!directory::exists(pathname)) pathname = browser->select("Load Media", media.type);
-  if(!directory::exists(pathname)) return;
-  if(!file::exists({pathname, "manifest.xml"})) return;
-  loadMedia(emulator, media, pathname);
+  if(directory::exists(pathname) && file::exists({pathname, "manifest.bml"})) {
+    return loadMedia(emulator, media, pathname);
+  }
+  if(file::exists(pathname)) {
+    return loadMediaFromDatabase(emulator, media, pathname);
+  }
 }
 
 //load menu cartridge selected or command-line load
@@ -26,7 +30,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   if(media.load.empty()) this->pathname.append(pathname);
 
   string manifest;
-  manifest.readfile({pathname, "manifest.xml"});
+  manifest.readfile({pathname, "manifest.bml"});
   system().load(media.id, manifest);
   system().power();
 
@@ -43,7 +47,7 @@ void Utility::loadRequest(unsigned id, const string &name, const string &type) {
   this->pathname.append(pathname);
 
   string manifest;
-  manifest.readfile({pathname, "manifest.xml"});
+  manifest.readfile({pathname, "manifest.bml"});
   system().load(id, manifest);
 }
 

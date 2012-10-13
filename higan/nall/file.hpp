@@ -90,6 +90,11 @@ namespace nall {
       return true;
     }
 
+    static string sha256(const string &filename) {
+      auto buffer = read(filename);
+      return nall::sha256(buffer.data(), buffer.size());
+    }
+
     uint8_t read() {
       if(!fp) return 0xff;                       //file not open
       if(file_mode == mode::write) return 0xff;  //reads not permitted

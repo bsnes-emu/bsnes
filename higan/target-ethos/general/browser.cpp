@@ -157,14 +157,14 @@ void Browser::setPath(const string &path, unsigned selection) {
   fileList.reset();
   filenameList.reset();
 
-  lstring contents = directory::folders(path);
+  lstring contents = directory::contents(path);
 
   for(auto &filename : contents) {
-    if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)")) {
+    if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)") && filename.endswith("/")) {
       string name = filename;
       name.rtrim<1>("/");
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
+      fileList.setImage(filenameList.size(), 0, image(resource::systemFolder, sizeof resource::systemFolder));
       filenameList.append(filename);
     }
   }
@@ -176,7 +176,19 @@ void Browser::setPath(const string &path, unsigned selection) {
         string name = filename;
         name.rtrim<1>(suffix);
         fileList.append(name);
-        fileList.setImage(filenameList.size(), 0, image(resource::game, sizeof resource::game));
+        fileList.setImage(filenameList.size(), 0, image(resource::gameFolder, sizeof resource::gameFolder));
+        filenameList.append(filename);
+      }
+    }
+  }
+
+  for(auto &filename : contents) {
+    string suffix = {".", this->extension};
+    if(filename.wildcard(R"(*.??)") || filename.wildcard(R"(*.???)")) {
+      if(filename.endswith(suffix)) {
+        string name = filename;
+        fileList.append(name);
+        fileList.setImage(filenameList.size(), 0, image(resource::gameFile, sizeof resource::gameFile));
         filenameList.append(filename);
       }
     }
@@ -190,8 +202,7 @@ void Browser::setPath(const string &path, unsigned selection) {
 void Browser::fileListActivate() {
   unsigned selection = fileList.selection();
   string filename = filenameList[selection];
-  string suffix = {this->extension, "/"};
-  if(filename.endswith(suffix) == false) return setPath({path, filename});
+  if(string{filename}.rtrim<1>("/").endswith(this->extension) == false) return setPath({path, filename});
 
   dialogActive = false;
   outputFilename = {path, filename};

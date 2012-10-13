@@ -13,6 +13,7 @@
 #include <nall/bit.hpp>
 #include <nall/bmp.hpp>
 #include <nall/config.hpp>
+#include <nall/crc16.hpp>
 #include <nall/crc32.hpp>
 #include <nall/directory.hpp>
 #include <nall/dl.hpp>

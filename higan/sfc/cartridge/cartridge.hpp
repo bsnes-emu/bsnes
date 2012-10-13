@@ -76,7 +76,7 @@ private:
   void parse_markup_map(Mapping&, Markup::Node&);
   void parse_markup_memory(MappedRAM&, Markup::Node&, unsigned id, bool writable);
 
-  void parse_markup_cartridge(Markup::Node&);
+  void parse_markup_board(Markup::Node&);
   void parse_markup_icd2(Markup::Node&);
   void parse_markup_bsx(Markup::Node&);
   void parse_markup_bsxslot(Markup::Node&);

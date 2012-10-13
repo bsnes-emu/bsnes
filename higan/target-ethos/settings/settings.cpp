@@ -4,6 +4,7 @@
 #include "input.cpp"
 #include "hotkey.cpp"
 #include "timing.cpp"
+#include "path.cpp"
 #include "driver.cpp"
 Settings *settings = nullptr;
 
@@ -31,6 +32,7 @@ Settings::Settings() {
   panelList.append("Input");
   panelList.append("Hotkeys");
   panelList.append("Timing");
+  panelList.append("Paths");
   panelList.append("Driver");
 
   append(layout);
@@ -40,6 +42,7 @@ Settings::Settings() {
   append(*inputSettings);
   append(*hotkeySettings);
   append(*timingSettings);
+  append(*pathSettings);
   append(*driverSettings);
 
   onClose = [&] {
@@ -59,6 +62,7 @@ void Settings::panelChanged() {
   inputSettings->setVisible(false);
   hotkeySettings->setVisible(false);
   timingSettings->setVisible(false);
+  pathSettings->setVisible(false);
   driverSettings->setVisible(false);
   if(panelList.selected() == false) return;
 
@@ -68,6 +72,7 @@ void Settings::panelChanged() {
   case 2: return inputSettings->setVisible();
   case 3: return hotkeySettings->setVisible();
   case 4: return timingSettings->setVisible();
-  case 5: return driverSettings->setVisible();
+  case 5: return pathSettings->setVisible();
+  case 6: return driverSettings->setVisible();
   }
 }
