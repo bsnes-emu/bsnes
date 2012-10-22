@@ -120,15 +120,14 @@ void ArmDSP::arm_reset() {
 }
 
 ArmDSP::ArmDSP() {
-  firmware = new uint8[160 * 1024]();
-  programRAM = new uint8[16 * 1024]();
-
-  programROM = &firmware[0];
-  dataROM = &firmware[128 * 1024];
+  programROM = new uint8[128 * 1024];
+  dataROM = new uint8[32 * 1024];
+  programRAM = new uint8[16 * 1024];
 }
 
 ArmDSP::~ArmDSP() {
-  delete[] firmware;
+  delete[] programROM;
+  delete[] dataROM;
   delete[] programRAM;
 }
 

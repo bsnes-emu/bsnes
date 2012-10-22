@@ -160,37 +160,35 @@ void Browser::setPath(const string &path, unsigned selection) {
   lstring contents = directory::contents(path);
 
   for(auto &filename : contents) {
-    if(!filename.wildcard(R"(*.??/)") && !filename.wildcard(R"(*.???/)") && filename.endswith("/")) {
+    string suffix = {".", this->extension, "/"};
+    if(filename.endswith("/") && !filename.endswith(suffix)) {
       string name = filename;
       name.rtrim<1>("/");
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::systemFolder, sizeof resource::systemFolder));
+      fileList.setImage(filenameList.size(), 0, image(resource::cabinet, sizeof resource::cabinet));
       filenameList.append(filename);
     }
   }
 
   for(auto &filename : contents) {
     string suffix = {".", this->extension, "/"};
-    if(filename.wildcard(R"(*.??/)") || filename.wildcard(R"(*.???/)")) {
-      if(filename.endswith(suffix)) {
-        string name = filename;
-        name.rtrim<1>(suffix);
-        fileList.append(name);
-        fileList.setImage(filenameList.size(), 0, image(resource::gameFolder, sizeof resource::gameFolder));
-        filenameList.append(filename);
-      }
+    if(filename.endswith(suffix)) {
+      string name = filename;
+      name.rtrim<1>(suffix);
+      fileList.append(name);
+      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
+      filenameList.append(filename);
     }
   }
 
   for(auto &filename : contents) {
     string suffix = {".", this->extension};
-    if(filename.wildcard(R"(*.??)") || filename.wildcard(R"(*.???)")) {
-      if(filename.endswith(suffix)) {
-        string name = filename;
-        fileList.append(name);
-        fileList.setImage(filenameList.size(), 0, image(resource::gameFile, sizeof resource::gameFile));
-        filenameList.append(filename);
-      }
+    if(filename.endswith(suffix)) {
+      string name = filename;
+      name.rtrim<1>(suffix);
+      fileList.append(name);
+      fileList.setImage(filenameList.size(), 0, image(resource::file, sizeof resource::file));
+      filenameList.append(filename);
     }
   }
 

@@ -3,31 +3,46 @@ void Utility::loadMediaFromDatabase(Emulator::Interface *emulator, Emulator::Int
   string systemPath = {configpath(), "higan/", emulator->information.name, ".sys/"};
   string outputPath = {config->path.game, emulator->information.name, "/"};
 
-  string databaseText = string::read({systemPath, "database.bml"}).rtrim("\n");
+  string databaseText = string::read({systemPath(), "database.bml"}).rtrim("\n");
   lstring databaseItem = databaseText.split("\n\n");
 
   for(auto &item : databaseItem) {
     item.append("\n");
     auto document = Markup::Document(item);
-    if(document["cartridge"]["information"]["sha256"].content() == sha256) {
-      string name = {document["cartridge"]["information"]["name"].content(), ".", extension(filename), "/"};
-      directory::create({outputPath, name});
-      file::write({outputPath, name, "manifest.bml"}, (const uint8_t*)(const char*)item, item.length());
+
+    if(document["cartridge"]["information"]["sha256"].text() == sha256) {
+      string folderPath = {
+        outputPath,
+        document["cartridge"]["information"]["name"].text(),
+        " (", document["cartridge"]["information"]["region"].text(), ")",
+        " (", document["cartridge"]["information"]["revision"].text(), ")",
+        ".", extension(filename), "/"
+      };
+      directory::create(folderPath);
+      file::write({folderPath, "sha256"}, (const uint8_t*)(const char*)sha256, sha256.length());
+      file::write({folderPath, "manifest.bml"}, (const uint8_t*)(const char*)item, item.length());
+
       auto buffer = file::read(filename);
       unsigned offset = 0;
-      for(auto &node : document["cartridge"]["layout"]) {
-        if(node.name != "file") continue;
-        string filename = node["name"].content();
-        unsigned filesize = numeral(node["size"].content());
-        file::write({outputPath, name, filename}, buffer.data() + offset, filesize);
-        offset += filesize;
+
+      for(auto &node : document["cartridge"]["information"]["configuration"]) {
+        if(node.name != "rom") continue;
+        string name = node["name"].text();
+        unsigned size = node["size"].decimal();
+
+        if(file::exists({folderPath, name}) == false) {
+          file::write({folderPath, name}, buffer.data() + offset, size);
+        }
+
+        offset += size;
       }
-      return loadMedia(emulator, media, {outputPath, name});
+
+      return loadMedia(emulator, media, folderPath);
     }
   }
 
   MessageWindow::warning(*presentation,
-    "Game not found in database. Mapping information unavailable.\n\n"
-    "As such, emulation cannot proceed."
+    "Game not found in database; mapping information not available.\n\n"
+    "Unable to proceed with emulation."
   );
 }

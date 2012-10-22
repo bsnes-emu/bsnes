@@ -31,12 +31,21 @@ struct ID {
     SuperFXROM,
     SuperFXRAM,
 
-    ArmDSP,
-    HitachiDSP,
+    ArmDSPPROM,
+    ArmDSPDROM,
+    ArmDSPRAM,
+
     HitachiDSPROM,
-    Nec7725DSP,
-    Nec96050DSP,
-    NecDSPRAM,
+    HitachiDSPDROM,
+    HitachiDSPRAM,
+
+    Nec7725DSPPROM,
+    Nec7725DSPDROM,
+    Nec7725DSPRAM,
+
+    Nec96050DSPPROM,
+    Nec96050DSPDROM,
+    Nec96050DSPRAM,
 
     EpsonRTC,
     SharpRTC,

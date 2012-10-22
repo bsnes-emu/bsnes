@@ -31,6 +31,7 @@ string& string::transform(const char *before, const char *after) { nall::strtr(d
 template<unsigned limit> string& string::ltrim(const char *key) { nall::ltrim<limit>(data, key); return *this; }
 template<unsigned limit> string& string::rtrim(const char *key) { nall::rtrim<limit>(data, key); return *this; }
 template<unsigned limit> string& string::trim(const char *key, const char *rkey) { nall::trim <limit>(data, key, rkey); return *this; }
+string& string::strip() { nall::strip(data); return *this; }
 
 optional<unsigned> string::position(const char *key) const { return strpos(data, key); }
 optional<unsigned> string::iposition(const char *key) const { return istrpos(data, key); }

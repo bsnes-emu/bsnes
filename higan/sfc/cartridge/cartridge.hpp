@@ -73,27 +73,27 @@ struct Cartridge : property<Cartridge> {
 
 private:
   void parse_markup(const char*);
-  void parse_markup_map(Mapping&, Markup::Node&);
-  void parse_markup_memory(MappedRAM&, Markup::Node&, unsigned id, bool writable);
+  void parse_markup_map(Mapping&, Markup::Node);
+  void parse_markup_memory(MappedRAM&, Markup::Node, unsigned id, bool writable);
 
-  void parse_markup_board(Markup::Node&);
-  void parse_markup_icd2(Markup::Node&);
-  void parse_markup_bsx(Markup::Node&);
-  void parse_markup_bsxslot(Markup::Node&);
-  void parse_markup_sufamiturbo(Markup::Node&);
-  void parse_markup_nss(Markup::Node&);
-  void parse_markup_event(Markup::Node&);
-  void parse_markup_sa1(Markup::Node&);
-  void parse_markup_superfx(Markup::Node&);
-  void parse_markup_armdsp(Markup::Node&);
-  void parse_markup_hitachidsp(Markup::Node&);
-  void parse_markup_necdsp(Markup::Node&);
-  void parse_markup_epsonrtc(Markup::Node&);
-  void parse_markup_sharprtc(Markup::Node&);
-  void parse_markup_spc7110(Markup::Node&);
-  void parse_markup_sdd1(Markup::Node&);
-  void parse_markup_obc1(Markup::Node&);
-  void parse_markup_msu1(Markup::Node&);
+  void parse_markup_board(Markup::Node);
+  void parse_markup_icd2(Markup::Node);
+  void parse_markup_bsx(Markup::Node);
+  void parse_markup_bsxslot(Markup::Node);
+  void parse_markup_sufamiturbo(Markup::Node);
+  void parse_markup_nss(Markup::Node);
+  void parse_markup_event(Markup::Node);
+  void parse_markup_sa1(Markup::Node);
+  void parse_markup_superfx(Markup::Node);
+  void parse_markup_armdsp(Markup::Node);
+  void parse_markup_hitachidsp(Markup::Node);
+  void parse_markup_necdsp(Markup::Node);
+  void parse_markup_epsonrtc(Markup::Node);
+  void parse_markup_sharprtc(Markup::Node);
+  void parse_markup_spc7110(Markup::Node);
+  void parse_markup_sdd1(Markup::Node);
+  void parse_markup_obc1(Markup::Node);
+  void parse_markup_msu1(Markup::Node);
 };
 
 extern Cartridge cartridge;

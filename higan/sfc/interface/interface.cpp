@@ -39,12 +39,18 @@ unsigned Interface::group(unsigned id) {
   case ID::SA1BWRAM:
   case ID::SuperFXROM:
   case ID::SuperFXRAM:
-  case ID::ArmDSP:
-  case ID::HitachiDSP:
+  case ID::ArmDSPPROM:
+  case ID::ArmDSPDROM:
+  case ID::ArmDSPRAM:
   case ID::HitachiDSPROM:
-  case ID::Nec7725DSP:
-  case ID::Nec96050DSP:
-  case ID::NecDSPRAM:
+  case ID::HitachiDSPDROM:
+  case ID::HitachiDSPRAM:
+  case ID::Nec7725DSPPROM:
+  case ID::Nec7725DSPDROM:
+  case ID::Nec7725DSPRAM:
+  case ID::Nec96050DSPPROM:
+  case ID::Nec96050DSPDROM:
+  case ID::Nec96050DSPRAM:
   case ID::EpsonRTC:
   case ID::SharpRTC:
   case ID::SPC7110PROM:
@@ -76,7 +82,6 @@ unsigned Interface::group(unsigned id) {
   }
 
   print(id, "\n");
-  return 1;
   throw;
 }
 
@@ -115,28 +120,43 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   if(id == ID::SuperFXROM) superfx.rom.read(stream);
   if(id == ID::SuperFXRAM) superfx.ram.read(stream);
 
-  if(id == ID::ArmDSP) {
-    stream.read(armdsp.firmware, stream.size());
+  if(id == ID::ArmDSPPROM) {
+    for(unsigned n = 0; n < 128 * 1024; n++) armdsp.programROM[n] = stream.read();
+  }
+  if(id == ID::ArmDSPDROM) {
+    for(unsigned n = 0; n <  32 * 1024; n++) armdsp.dataROM[n] = stream.read();
+  }
+  if(id == ID::ArmDSPRAM) {
+    for(unsigned n = 0; n <  16 * 1024; n++) armdsp.programRAM[n] = stream.read();
   }
 
-  if(id == ID::HitachiDSP) {
+  if(id == ID::HitachiDSPROM) {
+    hitachidsp.rom.read(stream);
+  }
+  if(id == ID::HitachiDSPDROM) {
     for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = stream.readl(3);
   }
+  if(id == ID::HitachiDSPRAM) {
+    for(unsigned n = 0; n < 3072; n++) hitachidsp.dataRAM[n] = stream.readl(1);
+  }
 
-  if(id == ID::HitachiDSPROM) hitachidsp.rom.read(stream);
-
-  if(id == ID::Nec7725DSP) {
+  if(id == ID::Nec7725DSPPROM) {
     for(unsigned n = 0; n <  2048; n++) necdsp.programROM[n] = stream.readl(3);
+  }
+  if(id == ID::Nec7725DSPDROM) {
     for(unsigned n = 0; n <  1024; n++) necdsp.dataROM[n]    = stream.readl(2);
   }
-
-  if(id == ID::Nec96050DSP) {
+  if(id == ID::Nec7725DSPRAM) {
+    for(unsigned n = 0; n <   256; n++) necdsp.dataRAM[n]    = stream.readl(2);
+  }
+  if(id == ID::Nec96050DSPPROM) {
     for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = stream.readl(3);
+  }
+  if(id == ID::Nec96050DSPDROM) {
     for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n]    = stream.readl(2);
   }
-
-  if(id == ID::NecDSPRAM) {
-    for(unsigned n = 0; n < 2048; n++) necdsp.dataRAM[n] = stream.readl(2);
+  if(id == ID::Nec96050DSPRAM) {
+    for(unsigned n = 0; n <  2048; n++) necdsp.dataRAM[n]    = stream.readl(2);
   }
 
   if(id == ID::EpsonRTC) {
@@ -191,7 +211,18 @@ void Interface::save(unsigned id, const stream &stream) {
   if(id == ID::SA1BWRAM) stream.write(sa1.bwram.data(), sa1.bwram.size());
   if(id == ID::SuperFXRAM) stream.write(superfx.ram.data(), superfx.ram.size());
 
-  if(id == ID::NecDSPRAM) {
+  if(id == ID::ArmDSPRAM) {
+    for(unsigned n = 0; n < 16 * 1024; n++) stream.write(armdsp.programRAM[n]);
+  }
+
+  if(id == ID::HitachiDSPRAM) {
+    for(unsigned n = 0; n < 3072; n++) stream.writel(hitachidsp.dataRAM[n], 1);
+  }
+
+  if(id == ID::Nec96050DSPRAM) {
+    for(unsigned n = 0; n <  256; n++) stream.writel(necdsp.dataRAM[n], 2);
+  }
+  if(id == ID::Nec96050DSPRAM) {
     for(unsigned n = 0; n < 2048; n++) stream.writel(necdsp.dataRAM[n], 2);
   }
 

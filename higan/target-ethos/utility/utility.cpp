@@ -13,9 +13,11 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   string pathname;
   if(!media.load.empty()) pathname = application->path({media.load, "/"});
   if(!directory::exists(pathname)) pathname = browser->select("Load Media", media.type);
+
   if(directory::exists(pathname) && file::exists({pathname, "manifest.bml"})) {
     return loadMedia(emulator, media, pathname);
   }
+
   if(file::exists(pathname)) {
     return loadMediaFromDatabase(emulator, media, pathname);
   }
@@ -36,7 +38,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 
   if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
-  load();
+  load(Markup::Document(manifest)["cartridge"]["information"]["title"].text());
 }
 
 //request from emulation core to load non-volatile media folder
@@ -81,14 +83,15 @@ void Utility::reset() {
   system().reset();
 }
 
-void Utility::load() {
-  string title;
-  for(auto &path : pathname) {
-    string name = path;
-    name.rtrim<1>("/");
-    title.append(notdir(nall::basename(name)), " + ");
+void Utility::load(string title) {
+  if(title.empty()) {
+    for(auto &path : pathname) {
+      string name = path;
+      name.rtrim<1>("/");
+      title.append(notdir(nall::basename(name)), " + ");
+    }
+    title.rtrim<1>(" + ");
   }
-  title.rtrim<1>(" + ");
   presentation->setTitle(title);
 
   cheatEditor->load({pathname[0], "cheats.xml"});

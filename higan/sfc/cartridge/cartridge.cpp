@@ -77,8 +77,8 @@ void Cartridge::load(const string &manifest) {
 
 void Cartridge::load_super_game_boy(const string &manifest) {
   XML::Document document(manifest);
-  auto &rom = document["cartridge"]["rom"];
-  auto &ram = document["cartridge"]["ram"];
+  auto rom = document["cartridge"]["rom"];
+  auto ram = document["cartridge"]["ram"];
 
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, manifest);
 
@@ -89,7 +89,7 @@ void Cartridge::load_super_game_boy(const string &manifest) {
 
 void Cartridge::load_satellaview(const string &manifest) {
   XML::Document document(manifest);
-  auto &rom = document["cartridge"]["rom"];
+  auto rom = document["cartridge"]["rom"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -100,8 +100,8 @@ void Cartridge::load_satellaview(const string &manifest) {
 
 void Cartridge::load_sufami_turbo_a(const string &manifest) {
   XML::Document document(manifest);
-  auto &rom = document["cartridge"]["rom"];
-  auto &ram = document["cartridge"]["ram"];
+  auto rom = document["cartridge"]["rom"];
+  auto ram = document["cartridge"]["ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -123,8 +123,8 @@ void Cartridge::load_sufami_turbo_a(const string &manifest) {
 
 void Cartridge::load_sufami_turbo_b(const string &manifest) {
   XML::Document document(manifest);
-  auto &rom = document["cartridge"]["rom"];
-  auto &ram = document["cartridge"]["ram"];
+  auto rom = document["cartridge"]["rom"];
+  auto ram = document["cartridge"]["ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);

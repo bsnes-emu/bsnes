@@ -1,0 +1,10 @@
+cartridge region=NTSC
+  rom name=program.rom size=0x40000
+  map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+  sufamiturbo
+    slot id=A
+      map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000
+      map id=ram address=60-63,e0-e3:8000-ffff
+    slot id=B
+      map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000
+      map id=ram address=70-73,f0-f3:8000-ffff

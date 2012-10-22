@@ -27,7 +27,7 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
 
   auto document = Markup::Document(manifest);
 
-  auto &mapperid = document["cartridge"]["board"]["type"].data;
+  auto mapperid = document["cartridge"]["board"]["type"].data;
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
   if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
   if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
@@ -40,8 +40,8 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   information.rtc = false;
   information.rumble = false;
 
-  auto &rom = document["cartridge"]["rom"];
-  auto &ram = document["cartridge"]["ram"];
+  auto rom = document["cartridge"]["rom"];
+  auto ram = document["cartridge"]["ram"];
 
   romsize = numeral(rom["size"].data);
   romdata = allocate<uint8>(romsize, 0xff);

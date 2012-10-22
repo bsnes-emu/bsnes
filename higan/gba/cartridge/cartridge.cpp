@@ -13,7 +13,7 @@ void Cartridge::load(const string &manifest) {
 
   unsigned rom_size = 0;
   if(document["cartridge"]["rom"].exists()) {
-    auto &info = document["cartridge"]["rom"];
+    auto info = document["cartridge"]["rom"];
     interface->loadRequest(ID::ROM, info["name"].data);
     rom_size = numeral(info["size"].data);
     for(unsigned addr = rom_size; addr < rom.size; addr++) {
@@ -26,7 +26,7 @@ void Cartridge::load(const string &manifest) {
   has_flashrom = false;
 
   if(document["cartridge"]["ram"].exists()) {
-    auto &info = document["cartridge"]["ram"];
+    auto info = document["cartridge"]["ram"];
 
     if(info["type"].data == "SRAM" || info["type"].data == "FRAM") {
       has_sram = true;

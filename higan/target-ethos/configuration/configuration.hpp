@@ -11,6 +11,7 @@ struct Configuration : configuration {
     unsigned saturation;
     unsigned gamma;
     unsigned luminance;
+    bool startFullScreen;
   } video;
 
   struct Audio {

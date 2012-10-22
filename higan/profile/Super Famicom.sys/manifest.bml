@@ -1,0 +1,3 @@
+system name:Super Famicom
+  smp
+    rom name=spc700.rom size=64

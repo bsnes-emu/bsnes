@@ -13,6 +13,7 @@ Configuration::Configuration() {
   append(video.saturation = 100, "Video::Saturation");
   append(video.gamma = 150, "Video::Gamma");
   append(video.luminance = 100, "Video::Luminance");
+  append(video.startFullScreen = false, "Video::StartFullScreen");
   append(audio.driver = ruby::audio.default_driver(), "Audio::Driver");
   append(audio.synchronize = true, "Audio::Synchronize");
   append(audio.frequency = 48000, "Audio::Frequency");

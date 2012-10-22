@@ -109,9 +109,10 @@ uint8 SDD1::mmc_read(unsigned addr) {
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
 uint8 SDD1::mcurom_read(unsigned addr) {
-  if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
-    addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
+  if(addr < 0x400000) {  //(addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     return rom.read(addr);
+  //addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
+  //return rom.read(addr);
   }
 
   //$40-7f|c0-ff:0000-ffff (MMC)

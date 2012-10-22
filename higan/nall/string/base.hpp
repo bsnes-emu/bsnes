@@ -23,6 +23,9 @@ namespace nall {
 
   struct string {
     inline static string read(const string &filename);
+    inline static string date();
+    inline static string time();
+    inline static string datetime();
 
     inline void reserve(unsigned);
     inline bool empty() const;
@@ -65,6 +68,7 @@ namespace nall {
     template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
     template<unsigned limit = 0> inline string& rtrim(const char *key = " ");
     template<unsigned limit = 0> inline string& trim(const char *key = " ", const char *rkey = 0);
+    inline string& strip();
 
     inline optional<unsigned> position(const char *key) const;
     inline optional<unsigned> iposition(const char *key) const;
@@ -183,6 +187,7 @@ namespace nall {
   template<unsigned limit = 0> inline char* ltrim(char *str, const char *key = " ");
   template<unsigned limit = 0> inline char* rtrim(char *str, const char *key = " ");
   template<unsigned limit = 0> inline char* trim(char *str, const char *key = " ", const char *rkey = 0);
+  inline char* strip(char *s);
 
   //utility.hpp
   template<bool Insensitive> alwaysinline bool chrequal(char x, char y);

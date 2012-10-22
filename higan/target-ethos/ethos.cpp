@@ -23,17 +23,21 @@ string Application::path(const string &filename) {
 
 void Application::commandLineLoad(string pathname) {
   pathname.transform("\\", "/");
-  pathname.rtrim<1>("/");
-  if(directory::exists(pathname) == false) return;
-
-  string type = extension(pathname);
-  pathname.append("/");
+  string type = extension(string{pathname}.rtrim<1>("/"));
+  if(!directory::exists(pathname) && !file::exists(pathname)) return;
 
   for(auto &emulator : this->emulator) {
     for(auto &media : emulator->media) {
       if(!media.load.empty()) continue;
       if(type != media.type) continue;
-      return utility->loadMedia(emulator, media, pathname);
+
+      if(directory::exists(pathname)) {
+        return utility->loadMedia(emulator, media, pathname);
+      }
+
+      if(file::exists(pathname)) {
+        return utility->loadMediaFromDatabase(emulator, media, pathname);
+      }
     }
   }
 }
@@ -93,7 +97,6 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   timingSettings = new TimingSettings;
-  pathSettings = new PathSettings;
   driverSettings = new DriverSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;
@@ -120,6 +123,9 @@ Application::Application(int argc, char **argv) {
 
   utility->synchronizeRuby();
   utility->updateShader();
+
+  if(config->video.startFullScreen) utility->toggleFullScreen();
+  OS::processEvents();
 
   if(argc >= 2) commandLineLoad(argv[1]);
 

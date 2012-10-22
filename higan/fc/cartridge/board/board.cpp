@@ -84,15 +84,15 @@ void Board::serialize(serializer &s) {
 
 Board::Board(Markup::Node &document) {
   cartridge.board = this;
-  auto &cartridge = document["cartridge"];
+  auto cartridge = document["cartridge"];
 
   information.type = cartridge["board"]["type"].data;
   information.battery = cartridge["prg"]["ram"]["nonvolatile"].data == "true";
 
-  auto &prom = cartridge["prg"]["rom"];
-  auto &pram = cartridge["prg"]["ram"];
-  auto &crom = cartridge["chr"]["rom"];
-  auto &cram = cartridge["chr"]["ram"];
+  auto prom = cartridge["prg"]["rom"];
+  auto pram = cartridge["prg"]["ram"];
+  auto crom = cartridge["chr"]["rom"];
+  auto cram = cartridge["chr"]["ram"];
 
   prgrom.size = numeral(prom["size"].data);
   prgram.size = numeral(pram["size"].data);

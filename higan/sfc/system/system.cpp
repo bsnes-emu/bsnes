@@ -94,12 +94,12 @@ void System::term() {
 
 void System::load() {
   string path = interface->path(ID::System), manifest;
-  manifest.readfile({path, "manifest.xml"});
-  XML::Document document(manifest);
-  string firmware = document["system"]["smp"]["firmware"]["name"].data;
-  interface->loadRequest(ID::IPLROM, document["system"]["smp"]["firmware"]["name"].data);
-  if(!file::exists({interface->path(ID::System), firmware})) {
-    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  manifest.readfile({path, "manifest.bml"});
+  auto document = Markup::Document(manifest);
+  string iplrom = document["system"]["smp"]["rom"]["name"].data;
+  interface->loadRequest(ID::IPLROM, iplrom);
+  if(!file::exists({interface->path(ID::System), iplrom})) {
+    interface->notify("Error: required firmware ", iplrom, " not found.\n");
   }
 
   region = config.region;
