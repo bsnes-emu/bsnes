@@ -80,6 +80,7 @@ void System::init() {
   spc7110.init();
   sdd1.init();
   obc1.init();
+  hsu1.init();
   msu1.init();
 
   video.init();
@@ -136,6 +137,7 @@ void System::load() {
   if(cartridge.has_spc7110()) spc7110.load();
   if(cartridge.has_sdd1()) sdd1.load();
   if(cartridge.has_obc1()) obc1.load();
+  if(cartridge.has_hsu1()) hsu1.load();
   if(cartridge.has_msu1()) msu1.load();
 
   serialize_init();
@@ -160,6 +162,7 @@ void System::unload() {
   if(cartridge.has_spc7110()) spc7110.unload();
   if(cartridge.has_sdd1()) sdd1.unload();
   if(cartridge.has_obc1()) obc1.unload();
+  if(cartridge.has_hsu1()) hsu1.unload();
   if(cartridge.has_msu1()) msu1.unload();
 }
 
@@ -187,6 +190,7 @@ void System::power() {
   if(cartridge.has_spc7110()) spc7110.power();
   if(cartridge.has_sdd1()) sdd1.power();
   if(cartridge.has_obc1()) obc1.power();
+  if(cartridge.has_hsu1()) hsu1.power();
   if(cartridge.has_msu1()) msu1.power();
 
   reset();
@@ -214,6 +218,7 @@ void System::reset() {
   if(cartridge.has_spc7110()) spc7110.reset();
   if(cartridge.has_sdd1()) sdd1.reset();
   if(cartridge.has_obc1()) obc1.reset();
+  if(cartridge.has_hsu1()) hsu1.reset();
   if(cartridge.has_msu1()) msu1.reset();
 
   if(cartridge.has_gb_slot()) cpu.coprocessors.append(&icd2);

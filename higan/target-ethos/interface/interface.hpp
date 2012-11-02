@@ -7,6 +7,7 @@ struct Interface : Emulator::Interface::Bind {
   void audioSample(int16_t lsample, int16_t rsample);
   int16_t inputPoll(unsigned port, unsigned device, unsigned input);
   unsigned dipSettings(const Markup::Node &node);
+  string scoreServer();
   string path(unsigned group);
   void notify(const string &text);
 };

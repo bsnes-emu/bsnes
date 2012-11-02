@@ -26,6 +26,7 @@ void Cartridge::load(const string &manifest) {
   has_spc7110    = false;
   has_sdd1       = false;
   has_obc1       = false;
+  has_hsu1       = false;
   has_msu1       = false;
 
   this->manifest = manifest;

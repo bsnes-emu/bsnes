@@ -35,6 +35,12 @@ struct Configuration : configuration {
     double audio;
   } timing;
 
+  struct HighScores {
+    string hostname;
+    string username;
+    string password;
+  } highScores;
+
   struct Path {
     string game;
   } path;

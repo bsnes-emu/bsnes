@@ -56,6 +56,7 @@ struct Interface {
     virtual void audioSample(int16_t, int16_t) {}
     virtual int16_t inputPoll(unsigned, unsigned, unsigned) { return 0; }
     virtual unsigned dipSettings(const Markup::Node&) { return 0; }
+    virtual string scoreServer() { return ""; }
     virtual string path(unsigned) { return ""; }
     virtual void notify(const string &text) { print(text, "\n"); }
   } *bind;
@@ -69,6 +70,7 @@ struct Interface {
   void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }
   int16_t inputPoll(unsigned port, unsigned device, unsigned input) { return bind->inputPoll(port, device, input); }
   unsigned dipSettings(const Markup::Node &node) { return bind->dipSettings(node); }
+  string scoreServer() { return bind->scoreServer(); }
   string path(unsigned group) { return bind->path(group); }
   template<typename... Args> void notify(Args&... args) { return bind->notify({std::forward<Args>(args)...}); }
 

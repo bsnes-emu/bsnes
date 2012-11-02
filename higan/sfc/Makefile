@@ -6,7 +6,7 @@ sfc_objects += sfc-sa1 sfc-superfx
 sfc_objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 sfc_objects += sfc-epsonrtc sfc-sharprtc
 sfc_objects += sfc-spc7110 sfc-sdd1 sfc-obc1
-sfc_objects += sfc-msu1
+sfc_objects += sfc-hsu1 sfc-msu1
 objects += $(sfc_objects)
 
 ifeq ($(profile),accuracy)
@@ -60,4 +60,5 @@ obj/sfc-spc7110.o    : $(sfc)/chip/spc7110/spc7110.cpp $(sfc)/chip/spc7110/*
 obj/sfc-sdd1.o       : $(sfc)/chip/sdd1/sdd1.cpp $(sfc)/chip/sdd1/*
 obj/sfc-obc1.o       : $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
 
+obj/sfc-hsu1.o       : $(sfc)/chip/hsu1/hsu1.cpp $(sfc)/chip/hsu1/*
 obj/sfc-msu1.o       : $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*

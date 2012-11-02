@@ -44,7 +44,7 @@ private:
 
 struct Bus {
   alwaysinline static unsigned mirror(unsigned addr, unsigned size);
-  alwaysinline static unsigned recode(unsigned addr, unsigned mask);
+  alwaysinline static unsigned reduce(unsigned addr, unsigned mask);
 
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);

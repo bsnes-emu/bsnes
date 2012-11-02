@@ -73,12 +73,14 @@ unsigned Bus::mirror(unsigned addr, unsigned size) {
   return base;
 }
 
-unsigned Bus::recode(unsigned addr, unsigned mask) {
+unsigned Bus::reduce(unsigned addr, unsigned mask) {
+  unsigned result = 0, length = 0;
   for(unsigned n = 0; n < 24; n++) {
     unsigned bit = 1 << n;
-    if(mask & bit) addr = ((addr >> (n + 1)) << n) | (addr & (bit - 1));
+    if(mask & bit) continue;
+    result |= (bool)(addr & bit) << length++;
   }
-  return addr;
+  return result;
 }
 
 uint8 Bus::read(unsigned addr) {

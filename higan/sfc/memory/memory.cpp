@@ -22,7 +22,7 @@ void Bus::map(
 
   for(unsigned bank = banklo; bank <= bankhi; bank++) {
     for(unsigned addr = addrlo; addr <= addrhi; addr++) {
-      unsigned offset = recode(bank << 16 | addr, mask);
+      unsigned offset = reduce(bank << 16 | addr, mask);
       if(size) offset = base + mirror(offset, size - base);
       lookup[bank << 16 | addr] = id;
       target[bank << 16 | addr] = offset;

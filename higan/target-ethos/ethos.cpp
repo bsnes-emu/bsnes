@@ -97,6 +97,7 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   timingSettings = new TimingSettings;
+  scoreSettings = new ScoreSettings;
   driverSettings = new DriverSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;

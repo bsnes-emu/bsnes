@@ -38,6 +38,7 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> has_spc7110;
   readonly<bool> has_sdd1;
   readonly<bool> has_obc1;
+  readonly<bool> has_hsu1;
   readonly<bool> has_msu1;
 
   struct Mapping {
@@ -93,6 +94,7 @@ private:
   void parse_markup_spc7110(Markup::Node);
   void parse_markup_sdd1(Markup::Node);
   void parse_markup_obc1(Markup::Node);
+  void parse_markup_hsu1(Markup::Node);
   void parse_markup_msu1(Markup::Node);
 };
 

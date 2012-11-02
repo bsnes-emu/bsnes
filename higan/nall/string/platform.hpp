@@ -6,12 +6,12 @@ string activepath() {
   string result;
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
-  _wgetcwd(path, PATH_MAX);
+  auto unused = _wgetcwd(path, PATH_MAX);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #else
   char path[PATH_MAX] = "";
-  getcwd(path, PATH_MAX);
+  auto unused = getcwd(path, PATH_MAX);
   result = path;
   #endif
   if(result.empty()) result = ".";
