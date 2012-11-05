@@ -165,7 +165,7 @@ void Browser::setPath(const string &path, unsigned selection) {
       string name = filename;
       name.rtrim<1>("/");
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::cabinet, sizeof resource::cabinet));
+      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
       filenameList.append(filename);
     }
   }
@@ -176,11 +176,12 @@ void Browser::setPath(const string &path, unsigned selection) {
       string name = filename;
       name.rtrim<1>(suffix);
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
+      fileList.setImage(filenameList.size(), 0, image(resource::file, sizeof resource::file));
       filenameList.append(filename);
     }
   }
 
+  /* file loading: deprecated for ananke
   for(auto &filename : contents) {
     string suffix = {".", this->extension};
     if(filename.endswith(suffix)) {
@@ -190,7 +191,7 @@ void Browser::setPath(const string &path, unsigned selection) {
       fileList.setImage(filenameList.size(), 0, image(resource::file, sizeof resource::file));
       filenameList.append(filename);
     }
-  }
+  }*/
 
   fileList.setSelection(selection);
   fileList.setFocused();

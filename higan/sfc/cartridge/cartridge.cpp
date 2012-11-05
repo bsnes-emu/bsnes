@@ -52,6 +52,7 @@ void Cartridge::load(const string &manifest) {
   else {
     sha256_ctx sha;
     uint8_t hash[32];
+    vector<uint8_t> buffer;
     sha256_init(&sha);
     //hash each ROM image that exists; any with size() == 0 is ignored by sha256_chunk()
     sha256_chunk(&sha, rom.data(), rom.size());
@@ -62,6 +63,14 @@ void Cartridge::load(const string &manifest) {
     sha256_chunk(&sha, spc7110.prom.data(), spc7110.prom.size());
     sha256_chunk(&sha, spc7110.drom.data(), spc7110.drom.size());
     sha256_chunk(&sha, sdd1.rom.data(), sdd1.rom.size());
+    //hash all firmware that exists
+    buffer = armdsp.firmware();
+    sha256_chunk(&sha, buffer.data(), buffer.size());
+    buffer = hitachidsp.firmware();
+    sha256_chunk(&sha, buffer.data(), buffer.size());
+    buffer = necdsp.firmware();
+    sha256_chunk(&sha, buffer.data(), buffer.size());
+    //finalize hash
     sha256_final(&sha);
     sha256_hash(&sha, hash);
     string result;
@@ -78,8 +87,8 @@ void Cartridge::load(const string &manifest) {
 
 void Cartridge::load_super_game_boy(const string &manifest) {
   XML::Document document(manifest);
-  auto rom = document["cartridge"]["rom"];
-  auto ram = document["cartridge"]["ram"];
+  auto rom = document["release/cartridge/rom"];
+  auto ram = document["release/cartridge/ram"];
 
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, manifest);
 
@@ -90,7 +99,7 @@ void Cartridge::load_super_game_boy(const string &manifest) {
 
 void Cartridge::load_satellaview(const string &manifest) {
   XML::Document document(manifest);
-  auto rom = document["cartridge"]["rom"];
+  auto rom = document["release/cartridge/rom"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -101,8 +110,8 @@ void Cartridge::load_satellaview(const string &manifest) {
 
 void Cartridge::load_sufami_turbo_a(const string &manifest) {
   XML::Document document(manifest);
-  auto rom = document["cartridge"]["rom"];
-  auto ram = document["cartridge"]["ram"];
+  auto rom = document["release/cartridge/rom"];
+  auto ram = document["release/cartridge/ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -124,8 +133,8 @@ void Cartridge::load_sufami_turbo_a(const string &manifest) {
 
 void Cartridge::load_sufami_turbo_b(const string &manifest) {
   XML::Document document(manifest);
-  auto rom = document["cartridge"]["rom"];
-  auto ram = document["cartridge"]["ram"];
+  auto rom = document["release/cartridge/rom"];
+  auto ram = document["release/cartridge/ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);

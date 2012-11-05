@@ -46,19 +46,19 @@ obj/sfc-sufamiturbo.o: $(sfc)/chip/sufamiturbo/sufamiturbo.cpp $(sfc)/chip/sufam
 obj/sfc-nss.o        : $(sfc)/chip/nss/nss.cpp $(call rwildcard,$(sfc)/chip/nss/)
 obj/sfc-event.o      : $(sfc)/chip/event/event.cpp $(call rwildcard,$(sfc)/chip/event/)
 
-obj/sfc-sa1.o        : $(sfc)/chip/sa1/sa1.cpp $(call rwildcard,$(sfc)/chip/sa1/)
-obj/sfc-superfx.o    : $(sfc)/chip/superfx/superfx.cpp $(call rwildcard,$(sfc)/chip/superfx/)
+obj/sfc-sa1.o    : $(sfc)/chip/sa1/sa1.cpp $(call rwildcard,$(sfc)/chip/sa1/)
+obj/sfc-superfx.o: $(sfc)/chip/superfx/superfx.cpp $(call rwildcard,$(sfc)/chip/superfx/)
 
-obj/sfc-armdsp.o     : $(sfc)/chip/armdsp/armdsp.cpp $(call rwildcard,$(sfc)/chip/armdsp/)
-obj/sfc-hitachidsp.o : $(sfc)/chip/hitachidsp/hitachidsp.cpp $(call rwildcard,$(sfc)/chip/hitachidsp/)
-obj/sfc-necdsp.o     : $(sfc)/chip/necdsp/necdsp.cpp $(call rwildcard,$(sfc)/chip/necdsp/)
+obj/sfc-armdsp.o    : $(sfc)/chip/armdsp/armdsp.cpp $(call rwildcard,$(sfc)/chip/armdsp/)
+obj/sfc-hitachidsp.o: $(sfc)/chip/hitachidsp/hitachidsp.cpp $(call rwildcard,$(sfc)/chip/hitachidsp/)
+obj/sfc-necdsp.o    : $(sfc)/chip/necdsp/necdsp.cpp $(call rwildcard,$(sfc)/chip/necdsp/)
 
-obj/sfc-epsonrtc.o   : $(sfc)/chip/epsonrtc/epsonrtc.cpp $(call rwildcard,$(sfc)/chip/epsonrtc/)
-obj/sfc-sharprtc.o   : $(sfc)/chip/sharprtc/sharprtc.cpp $(call rwildcard,$(sfc)/chip/sharprtc/)
+obj/sfc-epsonrtc.o: $(sfc)/chip/epsonrtc/epsonrtc.cpp $(call rwildcard,$(sfc)/chip/epsonrtc/)
+obj/sfc-sharprtc.o: $(sfc)/chip/sharprtc/sharprtc.cpp $(call rwildcard,$(sfc)/chip/sharprtc/)
 
-obj/sfc-spc7110.o    : $(sfc)/chip/spc7110/spc7110.cpp $(sfc)/chip/spc7110/*
-obj/sfc-sdd1.o       : $(sfc)/chip/sdd1/sdd1.cpp $(sfc)/chip/sdd1/*
-obj/sfc-obc1.o       : $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
+obj/sfc-spc7110.o: $(sfc)/chip/spc7110/spc7110.cpp $(sfc)/chip/spc7110/*
+obj/sfc-sdd1.o   : $(sfc)/chip/sdd1/sdd1.cpp $(sfc)/chip/sdd1/*
+obj/sfc-obc1.o   : $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
 
-obj/sfc-hsu1.o       : $(sfc)/chip/hsu1/hsu1.cpp $(sfc)/chip/hsu1/*
-obj/sfc-msu1.o       : $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*
+obj/sfc-hsu1.o: $(sfc)/chip/hsu1/hsu1.cpp $(sfc)/chip/hsu1/*
+obj/sfc-msu1.o: $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*

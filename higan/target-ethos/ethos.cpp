@@ -21,27 +21,6 @@ string Application::path(const string &filename) {
   return {userpath, filename};
 }
 
-void Application::commandLineLoad(string pathname) {
-  pathname.transform("\\", "/");
-  string type = extension(string{pathname}.rtrim<1>("/"));
-  if(!directory::exists(pathname) && !file::exists(pathname)) return;
-
-  for(auto &emulator : this->emulator) {
-    for(auto &media : emulator->media) {
-      if(!media.load.empty()) continue;
-      if(type != media.type) continue;
-
-      if(directory::exists(pathname)) {
-        return utility->loadMedia(emulator, media, pathname);
-      }
-
-      if(file::exists(pathname)) {
-        return utility->loadMediaFromDatabase(emulator, media, pathname);
-      }
-    }
-  }
-}
-
 void Application::run() {
   inputManager->poll();
   utility->updateStatus();
@@ -57,6 +36,8 @@ void Application::run() {
 }
 
 Application::Application(int argc, char **argv) {
+  ananke.open("ananke");
+
   application = this;
   quit = false;
   pause = false;
@@ -97,7 +78,7 @@ Application::Application(int argc, char **argv) {
   inputSettings = new InputSettings;
   hotkeySettings = new HotkeySettings;
   timingSettings = new TimingSettings;
-  scoreSettings = new ScoreSettings;
+  serverSettings = new ServerSettings;
   driverSettings = new DriverSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;
@@ -128,7 +109,7 @@ Application::Application(int argc, char **argv) {
   if(config->video.startFullScreen) utility->toggleFullScreen();
   OS::processEvents();
 
-  if(argc >= 2) commandLineLoad(argv[1]);
+  if(argc >= 2) utility->loadMedia(argv[1]);
 
   while(quit == false) {
     OS::processEvents();
@@ -140,6 +121,8 @@ Application::Application(int argc, char **argv) {
   browser->saveConfiguration();
   inputManager->saveConfiguration();
   windowManager->saveGeometry();
+
+  ananke.close();
 }
 
 Application::~Application() {

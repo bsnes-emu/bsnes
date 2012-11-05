@@ -25,6 +25,7 @@ struct HitachiDSP : Processor::HG51B, Coprocessor {
   uint8 dsp_read(unsigned addr);
   void dsp_write(unsigned addr, uint8 data);
 
+  vector<uint8> firmware();
   void serialize(serializer&);
 };
 

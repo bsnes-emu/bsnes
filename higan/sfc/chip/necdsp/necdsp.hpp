@@ -17,6 +17,7 @@ struct NECDSP : Processor::uPD96050, Coprocessor {
   void power();
   void reset();
 
+  vector<uint8> firmware();
   void serialize(serializer&);
 };
 

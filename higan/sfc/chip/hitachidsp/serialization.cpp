@@ -1,5 +1,17 @@
 #ifdef HITACHIDSP_CPP
 
+vector<uint8> HitachiDSP::firmware() {
+  vector<uint8> buffer;
+  if(cartridge.has_hitachidsp() == false) return buffer;
+  buffer.reserve(1024 * 3);
+  for(unsigned n = 0; n < 1024; n++) {
+    buffer.append(dataROM[n] >>  0);
+    buffer.append(dataROM[n] >>  8);
+    buffer.append(dataROM[n] >> 16);
+  }
+  return buffer;
+}
+
 void HitachiDSP::serialize(serializer &s) {
   HG51B::serialize(s);
   Thread::serialize(s);

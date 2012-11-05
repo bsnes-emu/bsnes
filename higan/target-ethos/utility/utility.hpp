@@ -1,9 +1,9 @@
 struct Utility {
   void setInterface(Emulator::Interface *emulator);
 
+  void loadMedia(string pathname);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media);
   void loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname);
-  void loadMediaFromDatabase(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &filename);
 
   void loadRequest(unsigned id, const string &name, const string &type);
   void loadRequest(unsigned id, const string &path);

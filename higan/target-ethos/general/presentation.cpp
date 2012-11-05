@@ -58,7 +58,9 @@ Presentation::Presentation() : active(nullptr) {
   setMenuVisible();
   setStatusVisible();
 
-  loadMenu.setText("Load");
+  fileMenu.setText("File");
+    fileLoad.setText("Load Game ...");
+  loadMenu.setText("Library");
   settingsMenu.setText("Settings");
     videoMenu.setText("Video");
       centerVideo.setText("Center");
@@ -84,6 +86,8 @@ Presentation::Presentation() : active(nullptr) {
     cheatEditor.setText("Cheat Editor");
     synchronizeTime.setText("Synchronize Time");
 
+  if(application->ananke.opened()) append(fileMenu);
+    fileMenu.append(fileLoad);
   append(loadMenu);
   for(auto &item : loadListSystem) loadMenu.append(*item);
   if(loadListSubsystem.size() > 0) {
@@ -115,6 +119,15 @@ Presentation::Presentation() : active(nullptr) {
 
   onSize = [&] { utility->resize(); };
   onClose = [&] { application->quit = true; };
+
+  fileLoad.onActivate = [&] {
+    if(application->ananke.opened() == false) return;
+    function<string ()> browse = application->ananke.sym("ananke_browse");
+    if(browse == false) return;
+    string pathname = browse();
+    if(pathname.empty()) return;
+    utility->loadMedia(pathname);
+  };
 
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };

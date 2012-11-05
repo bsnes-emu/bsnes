@@ -11,8 +11,11 @@ struct HSU1 {
   void serialize(serializer&);
 
 private:
-  uint8 packet[512];
-  unsigned packetlength;
+  bool txbusy;
+  bool rxbusy;
+  bool txlatch;
+  vector<uint8> txbuffer;
+  vector<uint8> rxbuffer;
 };
 
 extern HSU1 hsu1;

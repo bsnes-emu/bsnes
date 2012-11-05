@@ -33,6 +33,7 @@ Emulator::Interface& system();
 struct Application {
   vector<Emulator::Interface*> emulator;
   Emulator::Interface *active;
+  library ananke;
 
   bool quit;
   bool pause;
@@ -49,7 +50,6 @@ struct Application {
 
   bool focused();
   string path(const string &filename);
-  void commandLineLoad(string pathname);
   void run();
   void bootstrap();
   Application(int argc, char **argv);

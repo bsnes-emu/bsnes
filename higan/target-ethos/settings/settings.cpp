@@ -4,7 +4,7 @@
 #include "input.cpp"
 #include "hotkey.cpp"
 #include "timing.cpp"
-#include "scores.cpp"
+#include "server.cpp"
 #include "driver.cpp"
 Settings *settings = nullptr;
 
@@ -32,7 +32,7 @@ Settings::Settings() {
   panelList.append("Input");
   panelList.append("Hotkeys");
   panelList.append("Timing");
-  panelList.append("Scores");
+  panelList.append("Server");
   panelList.append("Driver");
 
   append(layout);
@@ -42,7 +42,7 @@ Settings::Settings() {
   append(*inputSettings);
   append(*hotkeySettings);
   append(*timingSettings);
-  append(*scoreSettings);
+  append(*serverSettings);
   append(*driverSettings);
 
   onClose = [&] {
@@ -62,7 +62,7 @@ void Settings::panelChanged() {
   inputSettings->setVisible(false);
   hotkeySettings->setVisible(false);
   timingSettings->setVisible(false);
-  scoreSettings->setVisible(false);
+  serverSettings->setVisible(false);
   driverSettings->setVisible(false);
   if(panelList.selected() == false) return;
 
@@ -72,7 +72,7 @@ void Settings::panelChanged() {
   case 2: return inputSettings->setVisible();
   case 3: return hotkeySettings->setVisible();
   case 4: return timingSettings->setVisible();
-  case 5: return scoreSettings->setVisible();
+  case 5: return serverSettings->setVisible();
   case 6: return driverSettings->setVisible();
   }
 }

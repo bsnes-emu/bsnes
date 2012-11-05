@@ -26,10 +26,9 @@ Configuration::Configuration() {
   append(input.focusAllow = false, "Input::Focus::AllowInput");
   append(timing.video = 60.0, "Timing::Video");
   append(timing.audio = 48000.0, "Timing::Audio");
-  append(highScores.hostname = "", "HighScores::Hostname");
-  append(highScores.username = "", "HighScores::Username");
-  append(highScores.password = "", "HighScores::Password");
-  append(path.game = {userpath(), "Emulation/"}, "Path::Game");
+  append(server.hostname = "", "Server::Hostname");
+  append(server.username = "", "Server::Username");
+  append(server.password = "", "Server::Password");
   load();
 }
 

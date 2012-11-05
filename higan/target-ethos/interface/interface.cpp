@@ -111,16 +111,16 @@ unsigned Interface::dipSettings(const Markup::Node &node) {
   return dipSwitches->run(node);
 }
 
-string Interface::scoreServer() {
-  return string {
-    config->highScores.username, ":",
-    config->highScores.password, "@",
-    config->highScores.hostname
-  };
-}
-
 string Interface::path(unsigned group) {
   return utility->path(group);
+}
+
+string Interface::server() {
+  return {
+    config->server.username, ":",
+    config->server.password, "@",
+    config->server.hostname
+  };
 }
 
 void Interface::notify(const string &text) {

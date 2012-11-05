@@ -20,6 +20,8 @@ struct Presentation : Window {
   };
   vector<Emulator*> emulatorList;
 
+  Menu fileMenu;
+    Item fileLoad;
   Menu loadMenu;
     vector<Item*> loadListSystem;
     vector<Item*> loadListSubsystem;

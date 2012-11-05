@@ -34,8 +34,7 @@ endif
 # platform
 ifeq ($(platform),x)
   flags += -march=native
-  link += -ldl -lX11 -lXext
-else ifeq ($(platform),osx)
+  link += -Wl,-export-dynamic -ldl -lX11 -lXext
 else ifeq ($(platform),win)
   ifeq ($(arch),win32)
     flags += -m32
@@ -82,13 +81,14 @@ clean:
 	-@$(call delete,obj/*.dylib)
 	-@$(call delete,obj/*.dll)
 	-@$(call delete,*.res)
-	-@$(call delete,*.pgd)
-	-@$(call delete,*.pgc)
-	-@$(call delete,*.ilk)
-	-@$(call delete,*.pdb)
 	-@$(call delete,*.manifest)
 
+archive:
+	if [ -f higan.tar.xz ]; then rm higan.tar.xz; fi
+	tar -cJf higan.tar.xz `ls`
+
 sync:
+ifeq ($(shell id -un),byuu)
 	if [ -d ./libco ]; then rm -r ./libco; fi
 	if [ -d ./nall ]; then rm -r ./nall; fi
 	if [ -d ./ruby ]; then rm -r ./ruby; fi
@@ -103,9 +103,6 @@ sync:
 	rm -r ruby/_test
 	rm -r phoenix/nall
 	rm -r phoenix/test
-
-archive:
-	if [ -f higan.tar.xz ]; then rm higan.tar.xz; fi
-	tar -cJf higan.tar.xz `ls`
+endif
 
 help:;

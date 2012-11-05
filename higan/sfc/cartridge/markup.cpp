@@ -1,32 +1,29 @@
 #ifdef CARTRIDGE_CPP
 
 void Cartridge::parse_markup(const char *markup) {
-  mapping.reset();
-
-  auto document = Markup::Document(markup);
-  auto cartridge = document["cartridge"];
-  auto board = cartridge["board"];
+  auto cartridge = Markup::Document(markup)["release/cartridge"];
   region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
 
-  parse_markup_board(board);
-  parse_markup_icd2(board["icd2"]);
-  parse_markup_bsx(board["bsx"]);
-  parse_markup_bsxslot(board["bsxslot"]);
-  parse_markup_sufamiturbo(board["sufamiturbo"]);
-  parse_markup_nss(board["nss"]);
-  parse_markup_event(board["event"]);
-  parse_markup_sa1(board["sa1"]);
-  parse_markup_superfx(board["superfx"]);
-  parse_markup_armdsp(board["armdsp"]);
-  parse_markup_hitachidsp(board["hitachidsp"]);
-  parse_markup_necdsp(board["necdsp"]);
-  parse_markup_epsonrtc(board["epsonrtc"]);
-  parse_markup_sharprtc(board["sharprtc"]);
-  parse_markup_spc7110(board["spc7110"]);
-  parse_markup_sdd1(board["sdd1"]);
-  parse_markup_obc1(board["obc1"]);
-  parse_markup_hsu1(board["hsu1"]);
-  parse_markup_msu1(board["msu1"]);
+  mapping.reset();
+  parse_markup_cartridge(cartridge);
+  parse_markup_icd2(cartridge["icd2"]);
+  parse_markup_bsx(cartridge["bsx"]);
+  parse_markup_bsxslot(cartridge["bsxslot"]);
+  parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
+  parse_markup_nss(cartridge["nss"]);
+  parse_markup_event(cartridge["event"]);
+  parse_markup_sa1(cartridge["sa1"]);
+  parse_markup_superfx(cartridge["superfx"]);
+  parse_markup_armdsp(cartridge["armdsp"]);
+  parse_markup_hitachidsp(cartridge["hitachidsp"]);
+  parse_markup_necdsp(cartridge["necdsp"]);
+  parse_markup_epsonrtc(cartridge["epsonrtc"]);
+  parse_markup_sharprtc(cartridge["sharprtc"]);
+  parse_markup_spc7110(cartridge["spc7110"]);
+  parse_markup_sdd1(cartridge["sdd1"]);
+  parse_markup_obc1(cartridge["obc1"]);
+  parse_markup_hsu1(cartridge["hsu1"]);
+  parse_markup_msu1(cartridge["msu1"]);
 }
 
 //
@@ -50,7 +47,7 @@ void Cartridge::parse_markup_memory(MappedRAM &ram, Markup::Node node, unsigned 
 
 //
 
-void Cartridge::parse_markup_board(Markup::Node root) {
+void Cartridge::parse_markup_cartridge(Markup::Node root) {
   if(root.exists() == false) return;
 
   parse_markup_memory(rom, root["rom"], ID::ROM, false);
@@ -217,14 +214,6 @@ void Cartridge::parse_markup_event(Markup::Node root) {
   lstring part = root["timer"].data.split<1>(":");
   if(part.size() == 1) event.timer = decimal(part(0));
   if(part.size() == 2) event.timer = decimal(part(0)) * 60 + decimal(part(1));
-
-  part = string{root["server"]["address"].data}.ltrim<1>("http://").split<1>("/");
-  event.path = {"/", part(1)};
-  part = part(0).split<1>(":");
-  event.host = part(0);
-  event.port = decimal(part(1)) ? decimal(part(1)) : 80;
-  event.username = root["server"]["username"].data;
-  event.password = root["server"]["password"].data;
 
   for(auto &node : root) {
     if(node.name != "map") continue;

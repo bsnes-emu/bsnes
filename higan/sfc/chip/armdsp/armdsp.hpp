@@ -25,7 +25,9 @@ struct ArmDSP : Processor::ARM, Coprocessor {
   void reset();
   void arm_reset();
 
+  nall::vector<uint8> firmware();
   void serialize(serializer&);
+
   ArmDSP();
   ~ArmDSP();
 };

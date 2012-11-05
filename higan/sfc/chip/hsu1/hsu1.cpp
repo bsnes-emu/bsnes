@@ -19,47 +19,93 @@ void HSU1::power() {
 }
 
 void HSU1::reset() {
-  packetlength = 0;
+  txbusy = 0;
+  rxbusy = 1;
+  txlatch = 0;
+  txbuffer.reset();
+  rxbuffer.reset();
 }
 
 uint8 HSU1::read(unsigned addr) {
+  addr &= 1;
+
+  if(addr == 0) {
+    return (txbusy << 7) | (rxbusy << 6) | (1 << 0);
+  }
+
+  if(addr == 1) {
+    if(rxbusy) return 0x00;
+    uint8 data = rxbuffer.take(0);
+    if(rxbuffer.size() == 0) rxbusy = 1;
+    return data;
+  }
+
+  //unreachable
   return cpu.regs.mdr;
 }
 
 void HSU1::write(unsigned addr, uint8 data) {
-  packet[packetlength] = data;
-  if(packetlength < sizeof(packet)) packetlength++;
-  if(data) return;
+  addr &= 1;
 
-  lstring side = interface->scoreServer().split<1>("@");
-  string username = side(0).split<1>(":")(0);
-  string password = side(0).split<1>(":")(1);
-  string servername = side(1).ltrim<1>("http://");
-  side = servername.split<1>("/");
-  string host = side(0).split<1>(":")(0);
-  string port = side(0).split<1>(":")(1);
-  string path = side(1);
-  if(port.empty()) port = "80";
+  if(addr == 0) {
+    if(txbusy) return;
+    bool latch = data & 0x01;
+    if(txlatch == 1 && latch == 0) {
+      //username:password@http://server:port/path
+      lstring side = interface->server().split<1>("@");
+      string username = side(0).split<1>(":")(0);
+      string password = side(0).split<1>(":")(1);
+      side(1).ltrim<1>("http://");
+      string hostname = side(1).split<1>("/")(0);
+      string hostpath = side(1).split<1>("/")(1);
+      side = hostname.split<1>(":");
+      hostname = side(0);
+      string hostport = side(1);
+      if(hostport.empty()) hostport = "80";
 
-  http server;
-  if(server.connect(host, decimal(port))) {
-    string content = {
-      "username:", username, "\r\n",
-      "password:", password, "\r\n",
-      "sha256:", interface->sha256(), "\r\n",
-      "data:", (const char*)packet, "\r\n",
-      "emulator:bsnes\r\n"
-    };
-    string packet = {
-      "POST ", path, " HTTP/1.0\r\n",
-      "Host: ", host, "\r\n",
-      "Connection: close\r\n",
-      "Content-Type: text/plain; charset=utf-8\r\n",
-      "Content-Length: ", content.length(), "\r\n",
-      "\r\n",
-      content
-    };
-    server.send(packet);
+      http server;
+      if(server.connect(hostname, decimal(hostport))) {
+        string header {
+          "username:", username, "\n",
+          "password:", password, "\n",
+          "emulator:bsnes\n",
+          "sha256:", interface->sha256(), "\n",
+          "\n"
+        };
+
+        string packet {
+          "POST /", hostpath, " HTTP/1.0\r\n",
+          "Host: ", hostname, "\r\n",
+          "Connection: close\r\n",
+          "Content-Type: application/octet-stream\r\n",
+          "Content-Length: ", header.length() + txbuffer.size(), "\r\n",
+          "\r\n",
+        };
+
+        server.send(packet);
+        server.send(header);
+        server.send(txbuffer.data(), txbuffer.size());
+        txbuffer.reset();
+
+        server.header = server.downloadHeader();
+        uint8_t *data = nullptr;
+        unsigned size = 0;
+        server.downloadContent(data, size);
+        rxbuffer.resize(size);
+        memcpy(rxbuffer.data(), data, size);
+        rxbusy = rxbuffer.size() == 0;
+        free(data);
+
+        server.disconnect();
+      }
+    }
+    txlatch = latch;
+  }
+
+  if(addr == 1) {
+    if(txbusy) return;
+    if(txlatch == 0) return;
+    txbuffer.append(data);
   }
 }
 

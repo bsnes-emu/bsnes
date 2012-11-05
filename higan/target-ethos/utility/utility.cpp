@@ -1,5 +1,4 @@
 #include "../ethos.hpp"
-#include "database.cpp"
 
 Utility *utility = nullptr;
 
@@ -8,19 +7,44 @@ void Utility::setInterface(Emulator::Interface *emulator) {
   presentation->synchronize();
 }
 
+//load from command-line, etc
+void Utility::loadMedia(string pathname) {
+  pathname.transform("\\", "/");
+  if(pathname.endswith("/")) pathname.rtrim("/");
+
+  //if a filename was provided: convert to game folder and then load
+  if(!directory::exists(pathname) && file::exists(pathname)) {
+    if(application->ananke.opened() == false) return;
+    function<string (string)> open = application->ananke.sym("ananke_open");
+    if(open == false) return;
+    string name = open(pathname);
+    if(name.empty()) return;
+    return loadMedia(name);
+  }
+
+  if(!directory::exists(pathname)) return;
+  string type = extension(pathname);
+
+  //determine type by comparing extension against all emulation cores
+  for(auto &emulator : application->emulator) {
+    for(auto &media : emulator->media) {
+      if(!media.load.empty()) continue;
+      if(type != media.type) continue;
+      return utility->loadMedia(emulator, media, {pathname, "/"});
+    }
+  }
+
+  MessageWindow::warning(Window::none(), "Unable to determine media type.");
+}
+
 //load menu option selected
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
   string pathname;
   if(!media.load.empty()) pathname = application->path({media.load, "/"});
   if(!directory::exists(pathname)) pathname = browser->select("Load Media", media.type);
-
-  if(directory::exists(pathname) && file::exists({pathname, "manifest.bml"})) {
-    return loadMedia(emulator, media, pathname);
-  }
-
-  if(file::exists(pathname)) {
-    return loadMediaFromDatabase(emulator, media, pathname);
-  }
+  if(!directory::exists(pathname)) return;
+  if(!file::exists({pathname, "manifest.bml"})) return;
+  return loadMedia(emulator, media, pathname);
 }
 
 //load menu cartridge selected or command-line load
@@ -38,7 +62,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 
   if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
-  load(Markup::Document(manifest)["cartridge"]["information"]["title"].text());
+  load(Markup::Document(manifest)["release/information/title"].text());
 }
 
 //request from emulation core to load non-volatile media folder
