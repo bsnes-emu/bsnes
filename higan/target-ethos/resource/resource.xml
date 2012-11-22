@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<resource name="resource">
-  <binary id="cabinet" name="cabinet.png"/>
-  <binary id="folder" name="folder.png"/>
-  <binary id="file" name="file.png"/>
-  <binary id="home" name="home.png"/>
-  <binary id="up" name="up.png"/>
-</resource>

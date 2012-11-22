@@ -34,18 +34,16 @@ void CheatDatabase::findCodes() {
   cheatList.reset();
   cheat.reset();
 
-  string data;
-  data.readfile(application->path("cheats.xml"));
-  XML::Document document(data);
-  for(auto &node : document["database"]) {
+  auto document = Markup::Document(string::read(application->path("cheats.bml")));
+  for(auto &node : document) {
     if(node.name != "cartridge") continue;
-    if(node["sha256"].data != sha256) continue;
+    if(node["sha256"].text() != sha256) continue;
 
-    setTitle(node["name"].data);
+    setTitle(node["name"].text());
     for(auto &cheat : node) {
       if(cheat.name != "cheat") continue;
-      cheatList.append(cheat["description"].data);
-      this->cheat.append({cheat["code"].data, cheat["description"].data});
+      cheatList.append(cheat["description"].text());
+      this->cheat.append({cheat["code"].text(), cheat["description"].text()});
     }
 
     setVisible();

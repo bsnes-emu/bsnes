@@ -36,8 +36,9 @@ struct ID {
     ArmDSPRAM,
 
     HitachiDSPROM,
-    HitachiDSPDROM,
     HitachiDSPRAM,
+    HitachiDSPDROM,
+    HitachiDSPDRAM,
 
     Nec7725DSPPROM,
     Nec7725DSPDROM,

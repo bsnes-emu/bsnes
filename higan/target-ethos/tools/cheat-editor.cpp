@@ -125,16 +125,16 @@ void CheatEditor::updateDesc() {
 }
 
 bool CheatEditor::load(const string &filename) {
-  string data;
-  if(data.readfile(filename) == false) return false;
+  string data = string::read(filename);
+  if(data.empty()) return false;
 
   unsigned n = 0;
-  XML::Document document(data);
+  auto document = Markup::Document(data);
   for(auto &node : document["cartridge"]) {
     if(node.name != "cheat") continue;
-    cheatList.setChecked(n, node["enable"].data == "true");
-    cheat[n].code = node["code"].data;
-    cheat[n].desc = node["description"].data;
+    cheatList.setChecked(n, node["enabled"].exists());
+    cheat[n].code = node["code"].text();
+    cheat[n].desc = node["description"].text();
     if(++n >= Codes) break;
   }
 
@@ -160,15 +160,12 @@ bool CheatEditor::save(const string &filename) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 
-  fp.print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-  fp.print("<cartridge sha256=\"", system().sha256(), "\">\n");
+  fp.print("cartridge sha256:", system().sha256(), "\n");
   for(unsigned n = 0; n <= lastSave; n++) {
-    fp.print("  <cheat enable=\"", cheatList.checked(n) ? "true" : "false", "\">\n");
-    fp.print("    <description><![CDATA[", cheat[n].desc, "]]></description>\n");
-    fp.print("    <code><![CDATA[", cheat[n].code, "]]></code>\n");
-    fp.print("  </cheat>\n");
+    fp.print("  cheat", cheatList.checked(n) ? " enabled\n" : "\n");
+    fp.print("    description:", cheat[n].desc, "\n");
+    fp.print("    code:", cheat[n].code, "\n");
   }
-  fp.print("</cartridge>\n");
   fp.close();
 
   return true;

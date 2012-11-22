@@ -20,14 +20,33 @@ void NECDSP::enter() {
   }
 }
 
-uint8 NECDSP::sr_read(unsigned) { cpu.synchronize_coprocessors(); return uPD96050::sr_read(); }
-void NECDSP::sr_write(unsigned, uint8 data) { cpu.synchronize_coprocessors(); return uPD96050::sr_write(data); }
+uint8 NECDSP::read(unsigned addr) {
+  cpu.synchronize_coprocessors();
+  if(addr & Select) {
+    return uPD96050::sr_read();
+  } else {
+    return uPD96050::dr_read();
+  }
+}
 
-uint8 NECDSP::dr_read(unsigned) { cpu.synchronize_coprocessors(); return uPD96050::dr_read(); }
-void NECDSP::dr_write(unsigned, uint8 data) { cpu.synchronize_coprocessors(); return uPD96050::dr_write(data); }
+void NECDSP::write(unsigned addr, uint8 data) {
+  cpu.synchronize_coprocessors();
+  if(addr & Select) {
+    return uPD96050::sr_write(data);
+  } else {
+    return uPD96050::dr_write(data);
+  }
+}
 
-uint8 NECDSP::dp_read(unsigned addr) { cpu.synchronize_coprocessors(); return uPD96050::dp_read(addr); }
-void NECDSP::dp_write(unsigned addr, uint8 data) { cpu.synchronize_coprocessors(); return uPD96050::dp_write(addr, data); }
+uint8 NECDSP::ram_read(unsigned addr) {
+  cpu.synchronize_coprocessors();
+  return uPD96050::dp_read(addr);
+}
+
+void NECDSP::ram_write(unsigned addr, uint8 data) {
+  cpu.synchronize_coprocessors();
+  return uPD96050::dp_write(addr, data);
+}
 
 void NECDSP::init() {
 }

@@ -1,7 +1,10 @@
 struct HitachiDSP : Processor::HG51B, Coprocessor {
-  MappedRAM rom;
+  unsigned Frequency;
+  unsigned Roms;
 
-  unsigned frequency;
+  MappedRAM rom;
+  MappedRAM ram;
+
   #include "mmio.hpp"
 
   static void Enter();
@@ -20,6 +23,10 @@ struct HitachiDSP : Processor::HG51B, Coprocessor {
   //CPU ROM read/write
   uint8 rom_read(unsigned addr);
   void rom_write(unsigned addr, uint8 data);
+
+  //CPU RAM read/write
+  uint8 ram_read(unsigned addr);
+  void ram_write(unsigned addr, uint8 data);
 
   //CPU MMIO read/write
   uint8 dsp_read(unsigned addr);

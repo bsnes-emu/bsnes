@@ -1,15 +1,14 @@
 struct NECDSP : Processor::uPD96050, Coprocessor {
+  unsigned Select;
+
   static void Enter();
   void enter();
 
-  uint8 sr_read(unsigned);
-  void sr_write(unsigned, uint8 data);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
-  uint8 dr_read(unsigned);
-  void dr_write(unsigned, uint8 data);
-
-  uint8 dp_read(unsigned addr);
-  void dp_write(unsigned addr, uint8 data);
+  uint8 ram_read(unsigned addr);
+  void ram_write(unsigned addr, uint8 data);
 
   void init();
   void load();

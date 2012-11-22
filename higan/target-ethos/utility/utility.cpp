@@ -62,7 +62,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 
   if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
-  load(Markup::Document(manifest)["release/information/title"].text());
+  load(Markup::Document(manifest)["information/title"].text());
 }
 
 //request from emulation core to load non-volatile media folder
@@ -118,7 +118,7 @@ void Utility::load(string title) {
   }
   presentation->setTitle(title);
 
-  cheatEditor->load({pathname[0], "cheats.xml"});
+  cheatEditor->load({pathname[0], "cheats.bml"});
   stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
 
   system().paletteUpdate();
@@ -133,7 +133,7 @@ void Utility::unload() {
   if(application->active == nullptr) return;
   if(tracerEnable) tracerToggle();
 
-  cheatEditor->save({pathname[0], "cheats.xml"});
+  cheatEditor->save({pathname[0], "cheats.bml"});
   stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);
 
   system().unload();

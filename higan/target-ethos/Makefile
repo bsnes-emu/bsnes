@@ -1,3 +1,5 @@
+name := higan
+
 processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050
 include processor/Makefile
 
@@ -6,7 +8,6 @@ include sfc/Makefile
 include gb/Makefile
 include gba/Makefile
 # include nds/Makefile
-name := higan
 
 ui_objects := ui-ethos ui-configuration ui-interface ui-utility
 ui_objects += ui-input ui-window ui-general ui-settings ui-tools
@@ -73,7 +74,7 @@ else
 endif
 
 resource:
-	sourcery $(ui)/resource/resource.xml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
+	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
 ifeq ($(USER),root)
@@ -86,7 +87,7 @@ else ifeq ($(platform),x)
 
 	mkdir -p ~/.config/$(name)
 	cp -R profile/* ~/.config/$(name)
-	cp data/cheats.xml ~/.config/$(name)/cheats.xml
+	cp data/cheats.bml ~/.config/$(name)/cheats.bml
 	chmod -R 777 ~/.config/$(name)
 endif
 

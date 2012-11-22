@@ -1,4 +1,72 @@
-database revision=2012-11-03
+database revision=2012-11-21
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    3 Ninjas Kick Back
+    name:     3 Ninjas Kick Back
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Aaahh!!! Real Monsters
+    name:     Aaahh!!! Real Monsters
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   ce164872c4f5814bce04cf0565edcdb5b7969ae95a3b5cd515cfb626b5cde7b3
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    ABC Monday Night Football
+    name:     ABC Monday Night Football
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-10
+    sha256:   bb83f982961c33b81fefc1f545e18ab572d1c43cf6c241948544f05a1a71f2ba
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A5M revision=11,20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    ACME Animation Factory
+    name:     ACME Animation Factory
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A5M-11
+    sha256:   d07e8802a6d9c777247874e05ec08fce7e0fa1bf122cc1ab9913f7d828e4072b
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
 
 release
   cartridge region=NTSC
@@ -26,13 +94,113 @@ release
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Addams Family
-    name:     Addams Family, The
+    name:     Addams Family 1, The
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-01
     sha256:   e645310d2406ace85523ed91070ee7ff6aa245217267dacb158ae9fc75109692
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Addams Family 2: Pugsley's Scavenger Hunt
+    name:     Addams Family 2 - Pugsley's Scavenger Hunt, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   b6957bae7fd97ba681afbf8962fe2138e209649fd88ed9add2d5233178680aaa
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Adventures of Dr. Franken
+    name:     Adventures of Dr. Franken, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   ecd964ae44e61203bc8759cfc6441365bf0c6e7bae6ad2a0fd553d4c7efab71e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Adventures of Rocky and Bullwinkle and Friends
+    name:     Adventures of Rocky and Bullwinkle and Friends, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   b70099186d3774355ac5db370240e370c73f9ce5341f6c805cf9f771374b43ae
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Aero the Acro-Bat 2
+    name:     Aero the Acro-Bat 2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   fc5df5db0a96d39d3df651f63993adf0f5cb5a6b92a36211f3a05d460d92c72d
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Aerobiz
+    name:     Aerobiz
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   d5f0fbeed3774bbccbd769698fc4051487a0a5eb699790a8a094451595600f60
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Aerobiz Supersonic
+    name:     Aerobiz Supersonic
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-21
+    sha256:   6b6921d7aba9ba353e96e39c8d79d24eef1b84eb5c7fa54edaa83d2447dcd954
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
 
 release
   cartridge region=NTSC
@@ -52,6 +220,22 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Andre Agassi Tennis
+    name:     Andre Agassi Tennis
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   9abb426bac62e03e4437f5a9a8455c3000042f339125cc60ae29382ae89d8493
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
     board type=1A3B revision=11,12,13
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
@@ -67,6 +251,38 @@ release
     configuration
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Ardy Light Foot
+    name:     Ardy Light Foot
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   0f474dafe5a26f3dea491d18073dd490d2f1f91313a7e91086565510d38d9a09
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Arkanoid: Doh It Again!
+    name:     Arkanoid - Doh It Again!
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   14d3ece30898587eda20c661a4a55ec595ba6352ca1f0bfc177542aa0eef0039
+    configuration
+      rom name=program.rom size=0x80000
 
 release
   cartridge region=NTSC
@@ -93,9 +309,8 @@ release
     necdsp model=uPD7725 frequency=8000000
       rom id=program name=dsp1b.program.rom size=0x1800
       rom id=data name=dsp1b.data.rom size=0x800
-      ram size=0x200
-      map id=dr address=00-1f,80-9f:6000-6fff
-      map id=sr address=00-1f,80-9f:7000-7fff
+      ram id=data size=0x200
+      map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Ballz 3D
     name:     Ballz 3D
@@ -111,7 +326,39 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=YA0N revision=01
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Barbie Super Star
+    name:     Barbie Super Star
+    region:   NA
+    revision: 1.0
+    board:    SHVC-YA0N-01
+    sha256:   865919b25a9d241c907bcda18b380e3c704f33f4997ad44559046f0f08c4968b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Barkley Shut Up and Jam!
+    name:     Barkley Shut Up and Jam!
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   fe1ad128313b2b9a47f89cf0d95d4c0cc2cb35a817ac5d915ee6c4d98d47d675
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -143,7 +390,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A3M revision=10,20,21
+    board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -198,6 +445,120 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Beauty and the Beast
+    name:     Beauty and the Beast
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   d7271ca08400bbf5ae165b0aaa6e8a8a1b266f72e6e0ae10aae529732a472f7c
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Best of the Best: Championship Karate
+    name:     Best of the Best - Championship Karate
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   e4e9beaeeb3e968af772d1c4c9e4c1b4dfdba4e47c0205b458e1ab3a62a96060
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Big Sky Trooper
+    name:     Big Sky Trooper
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1M-20
+    sha256:   4cb601168c91fa0608c16a8cf2f292d991c6a5615d51861dee2f9b91c8d6bb19
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x100000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Bill Walsh: College Football
+    name:     Bill Walsh - College Football
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-10
+    sha256:   ec2d91e238c26a5ddf7067d104b3b3e2eaee89255377e1eb6c4df8f301300e64
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Bio Metal
+    name:     Bio Metal
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   de1de85ad549a6aaf0431cceb47cbd07e1f6e81f9e16fd62575305e2c1f06240
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    BlaZeon: The Bio-Cyborg Challenge
+    name:     BlaZeon - The Bio-Cyborg Challenge
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   0d4e0d134396bd1c7254cdc1da356eb944ca14910b6690f484a75a9c3a8106e7
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    B.O.B.
+    name:     BOB
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   9e6ebebcf14609c2a38a5f4409d0c8c859949cded70c5b6fd16fd15d9983d9d3
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Bonkers
     name:     Bonkers
     region:   NA
@@ -206,6 +567,126 @@ release
     sha256:   854d2492d1cb059749bb0904ca5f92a5eeec09167abf84f7cca4023b1819e4f0
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2J3M revision=11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
+    map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
+  information
+    title:    Brain Lord
+    name:     Brain Lord
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J3M-11
+    sha256:   f4666355e7fea434843dc6d5119673bd6c23e69b884aac0b382ff036997e52b5
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Brainies
+    name:     Brainies, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   9885ca148d32c4df6230642bcfa153f7e51b9559415042a831db14d07b3e6c3d
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2J5M revision=01
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=10-1f,90-9f:6000-7fff mask=0xe000
+    map id=ram address=30-3f,b0-bf:6000-7fff mask=0xe000
+  information
+    title:    Brandish
+    name:     Brandish
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J5M-01
+    sha256:   130a74e76369b0ec4d6378a014550921433f1ae1ac1dddffb51f77c9f21a818f
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Brawl Brothers
+    name:     Brawl Brothers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-10
+    sha256:   044b61613ed66eae08abd5fa5dcd13b24aab11a942e3309cdff624d198c47440
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Brett Hull Hockey '95
+    name:     Brett Hull Hockey '95
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   a427db4860cb5140935f263ba872fe14949c3548db644fed46b2edf3dff3d4a8
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Brutal: Paws of Fury
+    name:     Brutal - Paws of Fury
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   9e3ad5e521e759a2e2260ea8072eb3314b6fcf67a3b7247357a5de9bcb24eeaa
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Bugs Bunny: Rabbit Rampage
+    name:     Bugs Bunny - Rabbit Rampage
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   49020695a017acc3dfadea97a60e28609e583571f69c5abeb3c6b1c2db8113fa
+    configuration
+      rom name=program.rom size=0x180000
 
 release
   cartridge region=NTSC
@@ -220,6 +701,22 @@ release
     revision: 1.0
     board:    SHVC-1A0N-30
     sha256:   d6f6c30732dae8d00cd83628c3156acbdf26f99df701f779522e21de74dae5fe
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Cacoma Knight in Bizyland
+    name:     Cacoma Knight in Bizyland
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   a8294d449bbb8370816efe0374704e8af20dbbde9c19afe969d898528bc293d0
     configuration
       rom name=program.rom size=0x80000
 
@@ -257,6 +754,22 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Captain America and The Avengers
+    name:     Captain America and The Avengers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   2a117951adcfbc4298763673a834d502c3f7a3964db1e59650f113c07bb831fb
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
@@ -273,6 +786,136 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Carrier Aces
+    name:     Carrier Aces
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   ee5fc27dd19a2ecb3c3c7c73d558a18ffd5ff365710c18b88150e277f08d587e
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Champions World Class Soccer
+    name:     Champions World Class Soccer
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   32008c429eafe7eb59aff7a89f77e1a267f02f9061ff8830ade7b99081e27f7c
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Chavez
+    name:     Chavez
+    region:   MX
+    revision: 1.0
+    board:    SHVC-1A1M-01
+    sha256:   aa69d4e19c2eb206fe88eba65994c830256c220e5506f59824aefa0a75dd44d5
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Chavez II
+    name:     Chavez II
+    region:   MX
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   39de64101cf7f25863ce55e03a27d13422ea572ee996746578b5936fea80228b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Chessmaster
+    name:     Chessmaster, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   ee0e51d922d1cf8abe3dfc6b0d84a988a6635dc96b2a96962007c41aaa542774
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Chester Cheetah: Too Cool to Fool
+    name:     Chester Cheetah - Too Cool to Fool
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   c7e7df8932bf0056aa530f3dc3c913c1171a359af4c197094c2b972946dc6051
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Chuck Rock
+    name:     Chuck Rock
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   63ab79e86ea13e2cf9bb67aec971febb68450db9865b00b5f412610653822393
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Clay Fighter 2: Judgment Clay
+    name:     Clay Fighter 2 - Judgment Clay
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-20
+    sha256:   2d40c86bc19d85555bf2672acf515b04dbf56a6a59b29ad503e672310b0fae3b
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
@@ -286,6 +929,263 @@ release
     sha256:   6d9cd7f0cda3c0a82ed3f6a92cbbba4fe8365438e0a7867ad1cae2044d1738eb
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Clue
+    name:     Clue
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   03f6c69aef92d36b5ea25a6023368da0e1da9fa160e8316ebd533d4f358ffacf
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    College Slam
+    name:     College Slam
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-30
+    sha256:   b0be35a0d5e500f4fffca5f2940e0ec52c81ce99dacd773c3ca9cf92f592d943
+    configuration
+      rom name=program.rom size=0x300000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Congo's Caper
+    name:     Congo's Caper
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   26e09f5bc2bde28d57aeca0bf5be7f7fb8e3b3887af975bcbf2e6f29b07df56f
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Cool Spot
+    name:     Cool Spot
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   c7d622391f7699fb0dc6367e141c894e700cc9bd8abca69f36785e7bc2f42a49
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Cool World
+    name:     Cool World
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   9674cc269d89a52d1719a487b44acf004fb777cbd58d76b19a2cd25749728215
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    CutThroat Island
+    name:     CutThroat Island
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   7c722f9941957630467c1784d0eb3f92fbfc0a2a1da3c8f5c27f593eca2a5a04
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Daffy Duck: The Marvin Missions
+    name:     Daffy Duck - The Marvin Missions
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   4068add412571bd85adac32dff9835e4a4886077d752adb104fee3908e42b7ef
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Darius Twin
+    name:     Darius Twin
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   ceb470157576eac3b8b8c16e8ab6b59672409681ffb4232e4ec39dd0cb37ef91
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    David Crane's Amazing Tennis
+    name:     David Crane's Amazing Tennis
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   e6efb6361af04963f22c772f879a466543f56b3b6a084204fef2dcb4659d82d9
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Desert Strike: Return to the Gulf
+    name:     Desert Strike - Return to the Gulf
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   606abf536440173ae36466db360c7db6b474beb7a105c8a62bc74a54cbe1c38b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    D-Force
+    name:     D-Force
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   337e643d3e63915de06429992f306e8d2b73aed6849b795f9c855c2d03c18180
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    DinoCity
+    name:     DinoCity
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   7dbfc44d28a46e6d399628e43086aa9fd0b2abeda4c108751a5ad91c102c3aaf
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1CA0N6S revision=01
+    superfx revision=2
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x10000
+      map id=io address=00-3f,80-bf:3000-32ff
+      map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+      map id=rom address=40-5f,c0-df:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
+      map id=ram address=70-71,f0-f1:0000-ffff
+  information
+    title:    Dirt Trax FX
+    name:     Dirt Trax FX
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1CA0N6S-01
+    sha256:   c5474de3592e2a99aac0e5511516658f9f0b50167c754a018409842ec35bcd45
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x10000
+
+release
+  cartridge region=NTSC
+    board type=1J1M revision=20
+    rom name=program.rom size=0x400000
+    ram name=save.ram size=0x800
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Donkey Kong Country
+    name:     Donkey Kong Country
+    region:   NA
+    revision: 1.2
+    board:    SHVC-1J1M-20
+    sha256:   628147468c3539283197f58f03b94df49758a332831857481ea9cc31645f0527
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1CB0N7S revision=01
+    superfx revision=3
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x10000
+      map id=io address=00-3f,80-bf:3000-32ff
+      map id=rom address=00-3f:8000-ffff mask=0x8000
+      map id=rom address=40-5f:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
+      map id=ram address=70-71:0000-ffff
+  information
+    title:    Doom
+    name:     Doom
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1CB0N7S-01
+    sha256:   d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x10000
 
 release
   cartridge region=NTSC
@@ -337,6 +1237,24 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Dragon View
+    name:     Dragon View
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-21
+    sha256:   a3b1cae3fe55fe52c035ab122e7f850640b0935524496d45b1915ca3c8a934f4
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -368,6 +1286,64 @@ release
     configuration
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1B5B revision=02
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+    necdsp model=uPD7725 frequency=8000000
+      rom id=program name=dsp2.program.rom size=0x1800
+      rom id=data name=dsp2.data.rom size=0x800
+      ram id=data size=0x200
+      map id=io address=20-3f,a0-bf:8000-ffff select=0x4000
+  information
+    title:    Dungeon Master
+    name:     Dungeon Master
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1B5B-02
+    sha256:   03d25227fb88899d0f3234c4a3f76f1dbe8d582cb6429454fd6f1c4cf14d5c6e
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
+      rom name=dsp2.program.rom size=0x1800
+      rom name=dsp2.data.rom size=0x800
+      ram name=dsp2.data.ram size=0x200
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Earth Defense Force
+    name:     Earth Defense Force
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   0408e3d9f2259044344a3bfbd7a7ca3c3427f82108fbecd6e5c4c41e80cd303b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Eek! The Cat
+    name:     Eek! The Cat
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   5d658b63d35e2e0baf48ae3bb04ea5e1553855b34bb39fc2c7ca41fbd3894d52
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -403,7 +1379,25 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A3M revision=10,20,21
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    ESPN National Hockey Night
+    name:     ESPN National Hockey Night
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-21
+    sha256:   3326061160ad12c7aef5176544ec1c8ef2f534a51960ca882dbc7fcb9b1a7384
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -421,11 +1415,30 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A1M revision=11
+    board type=2A3M revision=01 mapper=MAD-R
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    E.V.O.: Search for Eden
+    name:     EVO - Search for Eden
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A3M-01
+    mapper:   MAD-R
+    sha256:   8481e47381bd98c27b9782b5727a5d5f0976fbb3aa3df25c2c42aa37e0586815
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x800
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7f,f0-ff:0000-7fff
   information
     title:    Exertainment Mountain Bike Rally
     name:     Exertainment Mountain Bike Rally
@@ -436,6 +1449,64 @@ release
     configuration
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    F1-ROC: Race of Champions
+    name:     F1-ROC - Race of Champions
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   1d38e3af9e3a6409e93f4705b68c42558f558c68f3e83ef2a40e46cf560b26cc
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1DS0B revision=20
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    necdsp model=uPD96050 frequency=11000000
+      rom id=program name=st010.program.rom size=0xc000
+      rom id=data name=st010.data.rom size=0x1000
+      ram id=data name=save.ram size=0x1000
+      map id=io address=60-67,e0-e7:0000-3fff select=0x0001
+      map id=ram address=68-6f,e8-ef:0000-7fff
+  information
+    title:    F1-ROC II: Race of Champions
+    name:     F1-ROC II - Race of Champions
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1DS0B-20
+    sha256:   3ae7bfd38a3dc273f4d387af3b15621beefebf5056731af06e3822f5e57db5c5
+    configuration
+      rom name=program.rom size=0x100000
+      rom name=st010.program.rom size=0xc000
+      rom name=st010.data.rom size=0x1000
+      ram name=save.ram size=0x1000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    FaceBall 2000
+    name:     FaceBall 2000
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   d689392884df91c2bb84b1411a96f3919b6c9cc8a583dff901a98f0d86d31c30
+    configuration
+      rom name=program.rom size=0x80000
 
 release
   cartridge region=NTSC
@@ -455,7 +1526,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -468,6 +1539,58 @@ release
     sha256:   c92f389d25870aada3002775838ec9f69a988120c0238af885fd08d46bd94930
     configuration
       rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    FIFA Soccer '96
+    name:     FIFA Soccer '96
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-30
+    sha256:   26ff143c2f1a4a16ca838cc4b5555e39bbe7208515dca8f1c4b1a00dec61cf09
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x280000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Fighter's History
+    name:     Fighter's History
+    region:   NA
+    revision: 1.1
+    board:    SHVC-BJ0N-01
+    sha256:   b9594d588816ae570ea5fea14577ed47de4db9ac9a40a116c84e0ad7a2ce58f8
+    configuration
+      rom name=program.rom size=0x280000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Final Fantasy: Mystic Quest
+    name:     Final Fantasy - Mystic Quest
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   6151389f33ce2e53db3cd99592440c0020f5f4668f581ce3bd615bc92077f255
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x2000
 
 release
   cartridge region=NTSC
@@ -487,7 +1610,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -500,6 +1623,38 @@ release
     sha256:   744d1a16c3f99970283597ae8f43b7c3621c5f995c4566ef24b8d70b0692007b
     configuration
       rom name=program.rom size=0x140000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Final Fight Guy
+    name:     Final Fight Guy
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   8c47f9dc79748c0ae6c648f8480614d22eaefade065612ad1fe749fc3db4d1bc
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Firepower 2000
+    name:     Firepower 2000
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   003dba0193acc5336840307194643ca3b1f848dcfc77580b4e17c605105b27f5
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -556,6 +1711,205 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Football Fury
+    name:     Football Fury
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   40b55ee44bc6f1c83daac3e1806dcf7ecd5b35280cdb6a63c7a5e52fbd2115e6
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x300000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Foreman For Real
+    name:     Foreman For Real
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   bc6b0344a434644c391ac69a53c7720c51e2d3c5c082b8d78598ae4df100c464
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Frank Thomas' Big Hurt Baseball
+    name:     Frank Thomas' Big Hurt Baseball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-30
+    sha256:   ba93721bdb0f19506e722bc580d0b4dad6e8648dddbc52e3ce45dd75ea165f72
+    configuration
+      rom name=program.rom size=0x300000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Frogger
+    name:     Frogger
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   1ce72767795f41049a1f4d2829e837a8885eb91e1c14faf1ca62d05839ebe3c9
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    fun 'n games
+    name:     Fun & Games
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   dcceb5be536c9b91bf34f65e7fcec4b55a78af0192323cf86f3b9555072037ee
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1J3B revision=01
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Genghis Khan II: Clan of the Gray Wolf
+    name:     Genghis Khan II - Clan of the Gray Wolf
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3B-01
+    sha256:   05e9404bfe0689e484a34991f22712c9da718cf000b0f748378af5758b654a3d
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    George Foreman's KO Boxing
+    name:     George Foreman's KO Boxing
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   fc993c122079b94ebc9b9452b46a55d5ddcd3715a4b97af795222b264827e90f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Goal!
+    name:     Goal!
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   feff03cfa195512ad87dc876012d70520cf192e2874c518b6dbdf3d876ea60c4
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Gods
+    name:     Gods
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   8796ca4de3aeffd3a494fe28e7d7e2aeb220ca652b43684f29e2cc94f02c20c4
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    GP-1
+    name:     GP-1
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   342ddf438aec3f0696de8f2cd74bb7f48a956f488f1246eeccaff5ef246ca50b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Gradius III
+    name:     Gradius III
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   93da752a0c76167d0907efa832367e5d14aab8e835b864f345c386071a9af718
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2J0N revision=01,10,11
+    rom name=program.rom size=0x180000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    The Great Circus Mystery: Starring Micky & Minnie
+    name:     Great Circus Mystery - Starring Micky & Minnie, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J0N-11
+    sha256:   b5492aea296ee4bfcd2c677fbec5153fd4c4db758c835b372ef750cf2399649b
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Hal's Hole in One Golf
     name:     Hal's Hole in One Golf
     region:   NA
@@ -567,7 +1921,89 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Harley's Humongous Adventure
+    name:     Harley's Humongous Adventure
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   6e2a02a8944c19db3da76d2646f232fbe3ed039bc7d44cc03910814fa77a7acf
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Harvest Moon
+    name:     Harvest Moon
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-30
+    sha256:   73a3aa87ddd5ce5df5ba51292316f42b6e128280179b0a1b11b4dcddc17d4163
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Hit the Ice
+    name:     Hit the Ice
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   fa418618787145291201b3d9247048b2d7dfba37f6556dcb1d40db499124dd60
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Home Alone
+    name:     Home Alone
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   7c34908526db2a634216fab0276c42a8e4e22d59c728cd586200142a12dd2c2c
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Home Alone 2: Lost in New York
+    name:     Home Alone 2 - Lost in New York
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   27eaccb4eea93832639565a664bf3561ed5a11ac025d377a3f33262d851c1b2b
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -588,6 +2024,70 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Hook
+    name:     Hook
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   acad4c594f156e0f30dec2532b35fcb3bab800e08263377634e2d96dfd055f3e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Hunt for Red October
+    name:     Hunt for Red October, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   a03528344d40bf800cdbde2dd240b30442cec7aea6026fbbe312a7c36bf0f74a
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Hyper Zone
+    name:     Hyper Zone
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   f57c49cc3e4c5e34929e12658db0de8794265c517e42f3c518bb1466ba46f14a
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Incantation
+    name:     Incantation
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   c41150c0e84055801377fb7cb273cc51ca442b269ca6287cadf514f553e34750
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    The Incredible Crash Dummies
     name:     Incredible Crash Dummies, The
     region:   NA
@@ -596,6 +2096,22 @@ release
     sha256:   0415adfe80977485f84cdffaaa79f18c91c004c7dba202b4cf9a94eb11adeada
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Indiana Jones' Greatest Adventures
+    name:     Indiana Jones' Greatest Adventures
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   cf611b40f9570e8fcfdc21db623965da62561e8ca82ded59e432ba6fb0bfb562
+    configuration
+      rom name=program.rom size=0x200000
 
 release
   cartridge region=NTSC
@@ -622,12 +2138,287 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    International Superstar Soccer
+    name:     International Superstar Soccer
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   6443fecebcdc2ff7061a40432f3ad1db6dfd354909a5f306972cf6afa122752c
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Itchy & Scratchy Game
+    name:     Itchy & Scratchy Game, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   39bfe828571cdb23e7c85c23cf5b175979dcc2042c5841add58f5ae6492168a9
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Izzy's Quest for the Olympic Rings
+    name:     Izzy's Quest for the Olympic Rings
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   183af7d642b55d52cd594786ec2f031d033cc6c8c1a2a84a834e4ada04301b26
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jammit
+    name:     Jammit
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   8b7b33f3d2edb844f1d43cfdd595b8c2cb6fc005d59acb899a1afda999e47638
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jeopardy! Deluxe Edition
+    name:     Jeopardy! Deluxe Edition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   76d760da59aa7fc2fd4426c1d1aec57412703ab901b9df60ac2be16ede80b0e7
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jeopardy! Sports Edition
+    name:     Jeopardy! Sports Edition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   d7110ddc0b34aa4ecd5e55f7b846657edb982db82cf0ba340fe0464daf0ca9be
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Jetsons: Invasion of the Planet Pirates
+    name:     Jetsons - Invasion of the Planet Pirates, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   ee7a29eb9c302ea2bb235ef990fd8344a6beb9817499941c40a8a94ad5f7c964
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jim Power: The Lost Dimension in 3D
+    name:     Jim Power - The Lost Dimension in 3D
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   6f0bec87ece503b0fbe108cd159ed6f5fa7711b1c4fe31e982af41ad5c638093
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    John Madden Football
+    name:     John Madden Football
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   5a76347672ea7d27bb334b1e30bbc73e06f92373883bed499245377327a8f0cf
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    John Madden Football '93
+    name:     John Madden Football '93
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3e62872bf69ea90dd7093608268f8defa2c6016adb1011745dab3c2af45d69b7
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Judge Dredd: The Movie
+    name:     Judge Dredd - The Movie
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   67fa7115eb6bf292c024c3a8b06ce9bd457c4d46de182a06a573afff968cc0f1
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jurassic Park
+    name:     Jurassic Park
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   fe91d45201753ae9655d5ce38838e352f478b26b2d933c1bcb5bd8330121f9ff
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Ka-Blooey
+    name:     Ka-Blooey
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   05152bcf9bf086e7bcdbfa7dd8edfe2085f1339c4d7e193e0071c49a10471ef4
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Kawasaki Caribbean Challenge
+    name:     Kawasaki Caribbean Challenge
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-10
+    sha256:   7cc3693cc5e1e834d57795f04b048fab27864a898a9507e7ca383771e2035414
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Kawasaki Superbike Challenge
     name:     Kawasaki Superbike Challenge
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-30
     sha256:   fec6dd097e378e795dd164be658b10b1c60672b2351a7f4a7722d1fe5736410e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x400000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Ken Griffey Jr.'s Winning Run
+    name:     Ken Griffey Jr's Winning Run
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-20
+    sha256:   18b5276be764c06531219c1757d40214aeec06fae68f4ce3ec78b58ee750a43e
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Kendo Rage
+    name:     Kendo Rage
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   b16661d5151d73cea5ac46d7c899531c7b2cdee2558092c23a5460c8092b80b8
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Kid Klown in Crazy Chase
+    name:     Kid Klown in Crazy Chase
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   914652f72d6ceb83b8b43414d6c42581ec12e9b3f45259b8b2768d26b8d4f073
     configuration
       rom name=program.rom size=0x100000
 
@@ -665,7 +2456,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=1L3B revision=11
+    board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x400000
       ram id=bitmap name=save.ram size=0x2000
@@ -690,6 +2481,96 @@ release
 
 release
   cartridge region=NTSC
+    board type=1L5B revision=11,20
+    sa1
+      rom name=program.rom size=0x400000
+      ram id=bitmap name=save.ram size=0x8000
+      ram id=internal size=0x800
+      map id=io address=00-3f,80-bf:2200-23ff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=bwram address=00-3f,80-bf:6000-7fff
+      map id=bwram address=40-4f:0000-ffff
+      map id=iram address=00-3f,80-bf:3000-37ff
+  information
+    title:    Kirby's Dream Land 3
+    name:     Kirby's Dream Land 3
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1L5B-20
+    sha256:   b50bf9d95485e8aeb7a6730e9f9f9c9c4ec23a85b336a4fb2e3b63034531e36f
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x8000
+      ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Lagoon
+    name:     Lagoon
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-12
+    sha256:   46c811f0cacffe8f20e1d63072d25d7c47e9bb3fd5124851fd05aca9884d21fb
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Last Action Hero
+    name:     Last Action Hero
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   314d53f409b66ba3f4426a6f1bb7c69f6779aeed277ce2e19535f94d7c8ca586
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Legend
+    name:     Legend
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   c7814cee0fc95d6422cf19a3dc8c9a65b60f6f56da75f09cebea02cc5f99261b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Legend of the Mystical Ninja
+    name:     Legend of the Mystical Ninja, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   c865fb17e8c59a21d32b9a605319241fa74ec732e3f0ee58f5d7fcbd8ee57c6b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1A3B revision=11,12,13
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
@@ -708,6 +2589,54 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Lemmings
+    name:     Lemmings
+    region:   NA
+    revision: 1.1
+    board:    SHVC-1A0N-10
+    sha256:   cd016c41c7ef9f4f243d57c2b1564b4ceb3b4c38cc165cd02ab6c8e35c93aa2e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Lethal Enforcers
+    name:     Lethal Enforcers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3bc5f296c3dbee012e93a5cf25568f9288ce87b34d74085401a560350eaca03f
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Lethal Weapon
+    name:     Lethal Weapon
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   80c22cc92d51a54de9cd9fd00db5ff58a35fff35e822169c94e445d50834fba3
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1K0N revision=01
     rom name=program.rom size=0x80000
     map id=rom address=00-3f,80-bf:8000-ffff
@@ -715,9 +2644,8 @@ release
     necdsp model=uPD7725 frequency=8000000
       rom id=program name=dsp1.program.rom size=0x1800
       rom id=data name=dsp1.data.rom size=0x800
-      ram size=0x200
-      map id=dr address=00-1f,80-9f:6000-6fff
-      map id=sr address=00-1f,80-9f:7000-7fff
+      ram id=data size=0x200
+      map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Lock On
     name:     Lock On
@@ -733,7 +2661,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A3M revision=10,20,21
+    board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -767,7 +2695,45 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A5M revision=20
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Madden NFL '95
+    name:     Madden NFL '95
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-11
+    sha256:   0ad77ae7af231313e1369a52d1622b88e3751aa5ec774628df7071f9e4244abc
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Madden NFL '97
+    name:     Madden NFL '97
+    region:   NA
+    revision: 1.0
+    board:    EA-1J3M-20/P10018
+    sha256:   6874568d985f65dd817d4b03998e71c8cbacc8d8707411fde7bffee350605a88
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A5M revision=11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -782,6 +2748,40 @@ release
     configuration
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x300000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Maui Mallard in Cold Shadow
+    name:     Maui Mallard in Cold Shadow
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   a203a13870eaec92095daef1196a0c9fe8416e600504d55dd0dc724d4f5f5cb0
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Mecarobot Golf
+    name:     Mecarobot Golf
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   c3c4afdeb67136619c643bd9a9f3fe90337541a40745503b5d4eb9b9e6e64b67
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
 
 release
   cartridge region=NTSC
@@ -803,7 +2803,103 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x140000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mega Man Soccer
+    name:     Mega Man Soccer
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   cf4d603dc0a3759da571224c671a9bfd29f9e52ca8dbb61bcc8ac8be5481e9b2
+    configuration
+      rom name=program.rom size=0x140000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mega Man X
+    name:     Mega Man X
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-01
+    sha256:   3e1209f473bff8cd4bcbf71d071e7f8df17a2d564e9a5c4c427ee8198cebb615
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=2DC0N revision=01
+    hitachidsp model=HG51B169 frequency=20000000
+      rom id=program name=program.rom size=0x180000
+      rom id=data name=cx4.data.rom size=0xc00
+      ram id=data size=0xc00
+      map id=io address=00-3f,80-bf:6000-7fff
+      map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+      map id=ram address=70-77:0000-7fff
+  information
+    title:    Mega Man X2
+    name:     Mega Man X2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2DC0N-01
+    sha256:   da484f2a636b8d692840f40e5468e992c5f2af26d365c69fbc12ef2923588d23
+    configuration
+      rom name=program.rom size=0x180000
+      rom name=cx4.data.rom size=0xc00
+      ram name=cx4.data.ram size=0xc00
+
+release
+  cartridge region=NTSC
+    board type=1DC0N revision=01
+    hitachidsp model=HG51B169 frequency=20000000
+      rom id=program name=program.rom size=0x200000
+      rom id=data name=cx4.data.rom size=0xc00
+      ram id=data size=0xc00
+      map id=io address=00-3f,80-bf:6000-7fff
+      map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+      map id=ram address=70-77:0000-7fff
+  information
+    title:    Mega Man X3
+    name:     Mega Man X3
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1DC0N-01
+    sha256:   b2aa2c0a621dfbed3b528de93282fc91abb16325d358680d34753d43629263cf
+    configuration
+      rom name=program.rom size=0x200000
+      rom name=cx4.data.rom size=0xc00
+      ram name=cx4.data.ram size=0xc00
+
+release
+  cartridge region=NTSC
+    board type=2E3M revision=01
+    rom name=program.rom size=0x200000
+    map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+    obc1
+      ram name=save.ram size=0x2000
+      map id=io address=00-3f,80-bf:6000-7fff
+      map id=io address=70-71,f0-f1:6000-7fff,e000-ffff
+  information
+    title:    Metal Combat: Falcon's Revenge
+    name:     Metal Combat - Falcon's Revenge
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2E3M-01
+    sha256:   d4f2cb6b209db29f7aec62e5a23846681c14665fb007e94d7bcfc7b5611e938b
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -835,7 +2931,232 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A3M revision=20
+    board type=1K0N revision=01
+    rom name=program.rom size=0x100000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    necdsp model=uPD7725 frequency=8000000
+      rom id=program name=dsp1.program.rom size=0x1800
+      rom id=data name=dsp1.data.rom size=0x800
+      ram id=data size=0x200
+      map id=io address=00-1f,80-9f:6000-7fff select=0x1000
+  information
+    title:    Michael Andretti's Indy Car Challenge
+    name:     Michael Andretti's Indy Car Challenge
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1K0N-01
+    sha256:   88545d24c60c18c695cc3fce8c4074f46ad1bac905e8a39a61d8a6ae6b608621
+    configuration
+      rom name=program.rom size=0x100000
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram name=dsp1.data.ram size=0x200
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Might & Magic III: Isles of Terra
+    name:     Might & Magic III - Isles of Terra
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A3M-20
+    sha256:   835ded9479f0e7babae00405d85233d767e82fa247aa1a9cdc14fd1f147b62ef
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mighty Morphin Power Rangers
+    name:     Mighty Morphin Power Rangers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   624a66607caef2ca34920ea15b84b28cdd1916ee089d496cec4f1d43621fdbb3
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mohawk & Headphone Jack
+    name:     Mohawk & Headphone Jack
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   8715a641f2e4dd8b6066be7f2683d9129fff3fcccaf0a09cc8bdd2aa56460764
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x40000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mr. Do!
+    name:     Mr. Do!
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   340293c06536d7b6981ad7c681e404f4390ff6c62340f844a4558877c1b82af0
+    configuration
+      rom name=program.rom size=0x40000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mr. Nutz
+    name:     Mr. Nutz
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3472dd574b50aed2fa998f464398db4fbb00f5a300a672c3737ee9336a008a16
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Musya: The Classic Japanese Tale of Horror
+    name:     Musya - The Classic Japanese Tale of Horror
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   f292598ac462fdfcd32ad9b6b35ac01d4bab020391dff92bfe94780ec604289a
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Mutant Chronicles: Doom Troopers
+    name:     Mutant Chronicles - Doom Troopers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   8d4ada4f98464d176ae7f0fb8a20032056680f3241637a0f903f23f31f41ff36
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x200000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Natsume Championship Wrestling
+    name:     Natsume Championship Wrestling
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-10
+    sha256:   22d2260de02552b1205aac2ff5a202a4c80532ac28045ef5a058d88279ab758e
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    NBA Give 'n Go
+    name:     NBA Give & Go
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   5874b942f974bb906d8cbc33b601a1faf8f14aee8d0995124c8dc84bb4973808
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    NBA Hang Time
+    name:     NBA Hang Time
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-20
+    sha256:   af2fe0627de2bb2672f4f65dcbdaaee22b211275f679f123d5fa5d37fd699363
+    configuration
+      rom name=program.rom size=0x300000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=BA1M revision=01
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    NBA Jam: Tournament Edition
+    name:     NBA Jam - Tournament Edition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BA1M-01
+    sha256:   b257cffb3484e6be051a56268cb99ee888bd6d3e9c0e8d6d0779ff66c411f6ba
+    configuration
+      rom name=program.rom size=0x300000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    NBA Live '95
+    name:     NBA Live '95
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A3M-20
+    sha256:   2115c39f0580ce19885b5459ad708eaa80cc80fabfe5a9325ec2280a5bcd7870
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -853,6 +3174,151 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    NBA Showdown
+    name:     NBA Showdown
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-10
+    sha256:   6a7324734004d99206439430243b51a05fa8c25ffa314dafc7f127235d1a730f
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A1B revision=05,06
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    NCAA Basketball
+    name:     NCAA Basketball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1B-06
+    sha256:   351587366eca8aeb38236e4ad6cbd4a1b6e37b8cc592725a79249c3a054fa3a7
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    NCAA Football
+    name:     NCAA Football
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1M-11
+    sha256:   8c43b7c2f2ef1fca9237c64c2f4c9e98d1a48940dae500ce8eac71278d34efb3
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    NFL Quarterback Club
+    name:     NFL Quarterback Club
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1M-11
+    sha256:   6a59115a9958d4a9fa167095505a2ddf222ca6291209d07618319e39a2be8b61
+    configuration
+      rom name=program.rom size=0x300000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    NHL '94
+    name:     NHL '94
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   5132e1c0d466963e6adc09e8a608ebd90619ab94f7fc908d626bbaf6a99dfa19
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    NHL '96
+    name:     NHL '96
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-20
+    sha256:   d24c0175ee4eafed88e277691c5f5dafd4e197723097e2eb68aa6b40f449fff2
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    NHL '97
+    name:     NHL '97
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-20
+    sha256:   2a2dc2ef84efd9a773d1e8231b7e3e57f0de7e4528968670963f2f1f358eef39
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J5M revision=11,20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    NHL '98
+    name:     NHL '98
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J5M-20
+    sha256:   8113c2cedafc8fd5a56c8638ae340fb275f263ff5c5e18d04dc6c3ebc5cfffee
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -866,6 +3332,22 @@ release
     sha256:   55f3432a130085c112d65aa6443c41eb7a8aeec59aad2c2b4b2ac536b604b449
     configuration
       rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Nickelodeon GUTS
+    name:     Nickelodeon GUTS
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   d7ad6f67860da78fe25d9e79dd13af7ac7efaa0c8e0103898a4849ab4af9e438
+    configuration
+      rom name=program.rom size=0x180000
 
 release
   cartridge region=NTSC
@@ -901,7 +3383,124 @@ release
 
 release
   cartridge region=NTSC
-    board type=1L3B revision=11
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Ninja Warriors
+    name:     Ninja Warriors
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   3c109e50b91ec6df3bb8509778ae544c99433fb40dda9b801178dfe513053618
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    No Escape
+    name:     No Escape
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   f099937ac4c8afb38c517c5d85475224985fb8f345dacb44994a617ea05bf4e5
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Nobunga's Ambition
+    name:     Nobunga's Ambition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-01
+    sha256:   437ea48711d54c2275286170a17948cb57ba9d961ba475715c0dba5fbd61a2db
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Nosferatu
+    name:     Nosferatu
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   9712829b38f23229d4e3d65da78237659c790235f425c6b12487e4d9e9a37ae9
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    On the Ball
+    name:     On the Ball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   e153195de7b59dd5b9854952cccca6bb93164e5fdff8292124bee6bbe5dbf16f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Out to Lunch
+    name:     Out to Lunch
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   54b2f03393109ac7fd36d8c7752f15a44d9607ab0187a371b853191db3592c01
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Paladin's Quest
+    name:     Paladin's Quest
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A3M-01
+    sha256:   46286d0839a4397fc4c067b39783f98d2aefeca870a468bae601a1434f1dde90
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x100000
       ram id=bitmap name=save.ram size=0x2000
@@ -926,6 +3525,97 @@ release
 
 release
   cartridge region=NTSC
+    board type=1L3B revision=02,11
+    sa1
+      rom name=program.rom size=0x200000
+      ram id=bitmap name=save.ram size=0x2000
+      ram id=internal size=0x800
+      map id=io address=00-3f,80-bf:2200-23ff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=bwram address=00-3f,80-bf:6000-7fff
+      map id=bwram address=40-4f:0000-ffff
+      map id=iram address=00-3f,80-bf:3000-37ff
+  information
+    title:    PGA Tour '96
+    name:     PGA Tour '96
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1L3B-02
+    sha256:   571d3129350bfb7cca2285499cf31dda48d1047cf9eaef122c8c33dffa9ad296
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+      ram name=internal.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    PGA Tour Golf
+    name:     PGA Tour Golf
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-12
+    sha256:   5c0b5266a191852ca593235f07180e673cb79e3f0b0dd31f65808eef83bf6e90
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x100000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Pieces
+    name:     Pieces
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-10
+    sha256:   a0b39d7fd7c39c5b0f41f3542fb8d2887530ded1c111b4ffb2a863845e704ecc
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Pinball Dreams
+    name:     Pinball Dreams
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3a52bf09850aa054dca443f7ea74d43f201dffecc40326924ecba9b0f1450e43
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Pink Goes to Hollywood
+    name:     Pink Goes to Hollywood
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   d0f4a5040ecf96dc49aa0084160e291a38f2ee75319750db4d6687ab36828da9
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -947,6 +3637,54 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Pocky & Rocky
+    name:     Pocky & Rocky
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   72b2b3bead3fcd27a1610ad5d4d8be3235efeaff96df2e7858911992a5892d21
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Pocky & Rocky 2
+    name:     Pocky & Rocky 2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   cc33ae02114ea18a86592de327b2b4bcc80728b11a5e4c61666dca71480d4169
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Populous
+    name:     Populous
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   5e580f220ed16281df8ee9a5f450b553f39f8c4078d3f3048d66bda15f98e19f
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Power Piggs of the Dark Age
     name:     Power Piggs of the Dark Age
     region:   NA
@@ -955,6 +3693,113 @@ release
     sha256:   0288ec049723cd0c7f1148cdc1aef0b6922b8a756affe373c99d5690e0dfceaa
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1L3B revision=02,11
+    sa1
+      rom name=program.rom size=0x100000
+      ram id=bitmap name=save.ram size=0x2000
+      ram id=internal size=0x800
+      map id=io address=00-3f,80-bf:2200-23ff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=bwram address=00-3f,80-bf:6000-7fff
+      map id=bwram address=40-4f:0000-ffff
+      map id=iram address=00-3f,80-bf:3000-37ff
+  information
+    title:    Power Rangers Zeo: Battle Racers
+    name:     Power Rangers Zero - Battle Racers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1L3B-11
+    sha256:   2e2a8c0da7f6def617077a25b222062f6988ef14b36b2edfe10d47c6a942d023
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+      ram name=internal.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Prehistorik Man
+    name:     Prehistorik Man
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   8f387d083de1399bb79e5312c31a6f1757f2a536bfa25cecf1aea77bfd77058b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Primal Rage
+    name:     Primal Rage
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-20
+    sha256:   55376715f243b1bacd9aeecf1092bbc7837fe512592a2c1703d24b0829fc1934
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Prince of Persia
+    name:     Prince of Persia
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   494190cd6d7fd68882cbe255a6e237d9c4bdaf3988615ede0297a5e285ad5dd9
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Prince of Persia 2: The Shadow and the Flame
+    name:     Prince of Persia 2 - The Shadow and the Flame
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   04ca1a481093c4a7e12f18b33697d6e05e50e30e0f5b1655aa265abd14719bba
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=2A5M revision=01
+    rom name=program.rom size=0x140000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    P.T.O.: Pacific Theater of Operations
+    name:     PTO - Pacific Theater of Operations
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A5M-01
+    sha256:   83727f6954bce024edac7f3fd18a6fbf63d05b580f692d96faa37e60893c91cd
+    configuration
+      rom name=program.rom size=0x140000
+      ram name=save.ram size=0x8000
 
 release
   cartridge region=NTSC
@@ -979,6 +3824,70 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Raiden Trad
+    name:     Raiden Trad
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   5fd7666e509f9d3cf1fd6b209dc22f2f3848f74eae7b83239d1090e031fc6df2
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Rampart
+    name:     Rampart
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   e19f7d8d5c3e4cefeff5889380d8780495e01f0553d13be4182a15a5d4b615bb
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Rap Jam: Volume One
+    name:     Rap Jam - Volume One
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   920bbaaf6a32cab5feabb5bc8b2b427dccd53bfd31d0da8acb7ea4e819139e4f
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Realm
+    name:     Realm
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   097cbe9720903bc14599158b80e0cc314ef2fe8a585d6d0a8962eb1626031492
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    The Ren & Stimpy Show: Buckeroo$!
     name:     Ren & Stimpy Show - Buckeroo$!, The
     region:   NA
@@ -987,6 +3896,54 @@ release
     sha256:   d322ce440076be0e3678277596acee8089098f4397b35ac8b3df88be5ce5e02f
     configuration
       rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x140000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Ren & Stimpy Show: Time Warp
+    name:     Ren & Stimpy Show - Time Warp, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-11
+    sha256:   ad7dd4efb8836d4009f6c76bd21865d8f5dcf9c3cbd8fa7bb32d686488847120
+    configuration
+      rom name=program.rom size=0x140000
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Revolution X: Music is the Weapon
+    name:     Revolution X - Music is the Weapon
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-20
+    sha256:   5fb072c3c2e9d8e7f84bea9c4bf2253e6868eb2b1f13e35a7d75fdf05896d873
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Rex Ronan: Experimental Surgeon
+    name:     Rex Ronan - Experimental Surgeon
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   f44482e2cccd9fcfd5875d84ff700f6e783f3bd8abd1ac4d939074cd6ad3fe65
+    configuration
+      rom name=program.rom size=0x80000
 
 release
   cartridge region=NTSC
@@ -1023,6 +3980,38 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Road Riot 4WD
+    name:     Road Riot 4WD
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   864aa9068fb23cd20022a9ac36fb9082299278ea0cb07a20deec2b6a1c6cbc70
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Road Runner's Death Valley Rally
+    name:     Road Runner's Death Valley Rally
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   2e8203e421f97cf165f03a5d4f69dadf0bcca18c42c6a1dfe79c8705c522cc54
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1033,6 +4022,22 @@ release
     revision: 1.0
     board:    SHVC-1A0N-20
     sha256:   a2115e7576dec06e0de613efb89de861815a78ef72e78a3784be09fb7541928f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Rock & Roll Racing
+    name:     Rock & Roll Racing
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   9d721753301278325c851f1843d669a697aed757dcf6495a31fc31ddf664b182
     configuration
       rom name=program.rom size=0x100000
 
@@ -1054,7 +4059,7 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1067,6 +4072,22 @@ release
     sha256:   cde8876b99c337ff932322506ceef05519e5882b853c54bb8c650d9500cd5957
     configuration
       rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Roger Clemens' MVP Baseball
+    name:     Roger Clemens' MVP Baseball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   e21300c8c4170e084fd83ce4c842dd73f939fbd10ddfe47c9a49b6e291dcd52d
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -1086,6 +4107,25 @@ release
     sha256:   88fa0a78ca98c6386e086c7fa9e81a2625bdecc55115dde6c6f4770b0670aa40
     configuration
       rom name=program.rom size=0x180000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1J5M revision=11,20
+    rom name=program.rom size=0x300000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Romance of the Three Kingdoms IV: Wall of Fire
+    name:     Romance of the Three Kingdoms IV - Wall of Fire
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J5M-20
+    sha256:   9670c67eeeb5581fa5345025a2e2ee875179e0da9f5be4bf78641e477d785f17
+    configuration
+      rom name=program.rom size=0x300000
       ram name=save.ram size=0x8000
 
 release
@@ -1138,6 +4178,22 @@ release
 
 release
   cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x400000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Saturday Night Slam Masters
+    name:     Saturday Night Slam Masters
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-01
+    sha256:   34e1af0642c85148c5a3dc3c7ab4bcbda13a9fea190934b5526c555fff035651
+    configuration
+      rom name=program.rom size=0x400000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -1149,6 +4205,96 @@ release
     revision: 1.0
     board:    SHVC-1A0N-20
     sha256:   a4ab8cfad2f236675b1c0124f8484688e149f38e8628a3b38e9ec14d491ec07e
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Secret of Mana
+    name:     Secret of Mana
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-01
+    sha256:   4c15013131351e694e05f22e38bb1b3e4031dedac77ec75abecebe8520d82d5f
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Shadowrun
+    name:     Shadowrun
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-10
+    sha256:   e6bc0a595d5c7c4bc0bbb61ffe35a70288a77eb78544ed74682d489a9e6f07f4
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J5M revision=11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Sid Meier's Civilization
+    name:     Sid Meier's Civilization
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J5M-20
+    sha256:   de2d5a952096c5f50368b9270d342aa6e7a39007ffbec27117e182e30ef4cf32
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    SimEarth: The Living Planet
+    name:     SimEarth - The Living Planet
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-20
+    sha256:   446a1036d036986fdea7906c83832d3ba79ef63a6ed8c4e88b89ab9cb25daded
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Simpsons: Virtual Bart
+    name:     Simpsons - Virtual Bart, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   29c28188234ddbb0b72fc84253dcd3514e23034779c773db8097b073b73390c8
     configuration
       rom name=program.rom size=0x200000
 
@@ -1170,7 +4316,39 @@ release
 
 release
   cartridge region=NTSC
-    board type=2J0N revision=11
+    board type=2J0N revision=01,10,11
+    rom name=program.rom size=0x180000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Soldiers of Fortune
+    name:     Soldiers of Fortune
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J0N-01
+    sha256:   6fe7c8d39fcfab7f0a18e837a7ee0dd162e0557d6989c6e0d10c81616d3a0b8b
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Sonic Blast Man
+    name:     Sonic Blast Man
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   75a7b5b8ad0329dc828d3201089e125fd55fdfc99d4cec704ffcd7e3036c2410
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
     map id=rom address=40-7f,c0-ff:0000-ffff
@@ -1221,6 +4399,102 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Space Football: One on One
+    name:     Space Football - One on One
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   24f3f22949f36ebf8ab4beaa8cba22db107efe7a7585f749343f2860bf041fe1
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x40000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Space Invaders
+    name:     Space Invaders
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   dc5353ddc350816619230f25f8c51bddabf7438e6dfba21662eb1c4794856735
+    configuration
+      rom name=program.rom size=0x40000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Space Megaforce
+    name:     Space Megaforce
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   f5b7418c00ccac44615cfc57c7e17d57533837056886f6d733e6b714c36dec1f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Spanky's Quest
+    name:     Spanky's Quest
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   14dc44687c8da35aec63b9edadbaac21bf7293f5171646f614139192e82ab071
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Spawn
+    name:     Spawn
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-20
+    sha256:   32d0f1ca5b91fd9b2caf81422fb9e8fb30bc091f0b2a429b9269dd307fcba4fd
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Speedy Gonzales: Los Gatos Bandidos
+    name:     Speedy Gonzales - Los Gatos Bandidos
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   df02d0f4f40e2732138309d38e91b48aef482490979007ecb63359a35115dfd4
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1241,12 +4515,112 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Spider-Man & Venom: Maximum Carnage
+    name:     Spider-Man & Venom - Maximum Carnage
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   964d21996e385e032b5d18baf716692ba1db780245cd71956c212045c1b8eb9a
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x300000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Spider-Man & Venom: Separation Anxiety
+    name:     Spider-Man & Venom - Separation Anxiety
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   b72fbbfe737eff49f59dcef9f13b963e50c5bc322d7eb0e7b4c25f3a71aa0815
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Spindizzy Worlds
+    name:     Spindizzy Worlds
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   fe10238ae42ed9eb4d906a81dd50ebe585140982cdfe266308ce1f16e78e6903
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Sports Illustrated: Championship Football & Baseball
     name:     Sports Illustrated - Championship Football & Baseball
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-20
     sha256:   254d17a82a32d8bd231ca3a87d356b65e65cb0229902a69a57c21a4c99bbba1f
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1C0N5S revision=01
+    superfx revision=1
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
+      map id=io address=00-3f,80-bf:3000-32ff
+      map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+      map id=ram address=60-7f,e0-ff:0000-ffff
+  information
+    title:    Star Fox
+    name:     Star Fox
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1C0N5S-01
+    sha256:   3857b5294ea8f7468849437bb2d8271564e8a0ff30774622e9c872bcbd53a84d
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Star Trek: The Next Generation
+    name:     Star Trek - The Next Generation
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   22c907b56ac6f414365801ed375c3fbf75696ce7f34ec89e1724628dc5622957
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Stargate
+    name:     Stargate
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   9ffd95486904804aca1f7068c99f1c9e91c2c0e5474ec758df1a913393571cc7
     configuration
       rom name=program.rom size=0x200000
 
@@ -1279,6 +4653,38 @@ release
     revision: 1.0
     board:    SHVC-1A0N-30
     sha256:   e3b07a59f969ced91c4579bb459f2c747a6c3f12c45ae4776483ef4830f5f00f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Stone Protectors
+    name:     Stone Protectors
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   dad9c116283322d5a13fd659874c681582abdff3df182cc4c90511d33fb7110a
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Street Combat
+    name:     Street Combat
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   b4626cf0c876a124b50f9421c48a7d762e9ed808ad336c799d543d60b484897c
     configuration
       rom name=program.rom size=0x100000
 
@@ -1318,6 +4724,160 @@ release
 
 release
   cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Street Hockey '95
+    name:     Street Hockey '95
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-01
+    sha256:   6756f92fe8e066be4b204cfdc94c1615ba6ece7e78fb5d2c77c81a9d298aa744
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Street Racer
+    name:     Street Racer
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   d1f61b6bb4bb6879a4fbd2c82d77390c546ee7f821edddc884fb9cc7463ad79b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Strike Gunner: STG
+    name:     Strike Gunner - STG
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   05f14e6ed3394d9273e2397769a8acf1a9db646be6066e82269521e8eec53562
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1CA6B revision=01
+    superfx revision=2
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x10000
+      map id=io address=00-3f,80-bf:3000-32ff
+      map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+      map id=rom address=40-5f,c0-df:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
+      map id=ram address=70-71,f0-f1:0000-ffff
+  information
+    title:    Stunt Race FX
+    name:     Stunt Race FX
+    region:   NA
+    revision: 1.1
+    board:    SHVC-1CA6B-01
+    sha256:   c04d80b84514202ff319384ca20641eb0189e975eed5612915bd9c224b2ab30a
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x10000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Sunset Riders
+    name:     Sunset Riders
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   e9c406d4f773697b9b671e7ddf2207c9d0ab242d7f23e502cdd453fbb264d392
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Super Aquatic Games Starring The Aquabats
+    name:     Super Aquatic Games Starring The Aquabats, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   b64f9f95fb244feddb3ff50bf0972af88f5d006e9b09050b930374fef8b37862
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Adventure Island
+    name:     Super Adventure Island
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   190999122aacc2cff20c5677b3f60ed938d8a36b696d16cc1bf416705efe151e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2J3M revision=11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
+    map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
+  information
+    title:    Super Adventure Island II
+    name:     Super Adventure Island II
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J3M-11
+    sha256:   eaf1b83e95d8a04f9a84d4960cf87cc182fc60ef07be35eb8929c4033d6fef67
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Alfred Chicken
+    name:     Super Alfred Chicken
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   0deb7a91fbe5848f1733ce668daaa49b0dad3d821bacc0791837c1ba15e60d7c
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1A3B revision=11,12,13
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x200
@@ -1333,6 +4893,70 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x200
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Batter Up
+    name:     Super Batter Up
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   165938810948f3226f7446978fa36ae8bc781616d95b39cd126d5c8afbf6e2ee
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Battleship
+    name:     Super Battleship
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   1d6573e3db2efab0c98d1940b4171d569348d27a1cc20e80a83094e6c0e66e35
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Battletank: War in the Gulf
+    name:     Super Battletank 1 - War in the Gulf
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   94496e73fc7fdf2f72f16bf2becb0c3935db2ebd97555eac73b63400acbceec6
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Black Bass
+    name:     Super Black Bass
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   f0913358cb0870c3dcc7f0c0d2d69704874c31a113150eda668c95024c0d6fd9
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -1357,6 +4981,22 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Super Buster Brothers
+    name:     Super Buster Brothers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   5965bde449ff775c1a0d9fd3cf2fb8c51a86b44ad1942dfb5c14a91f103be030
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Super Caesers Palace
     name:     Super Caesers Palace
     region:   NA
@@ -1365,6 +5005,56 @@ release
     sha256:   d42f8c7969b4c434f9ca04ce0080d897877a5e71c2926d309ef5dae93ba25548
     configuration
       rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Chase H.Q.
+    name:     Super Chase HQ
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   b839253b878821ff00847491d11452e933baaf303f49dd39d22e3a524ea1ff81
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A1B revision=05,06
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Super Conflict
+    name:     Super Conflict
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1B-06
+    sha256:   6cbc4db85cb8420020f9edbfd290c0f435b313a59577aca65314d31f8b816620
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Copa
+    name:     Super Copa
+    region:   MX
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   db7d727de86a1ac886ce3c243bf5941910154eaef3be50209187b9711592830d
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -1384,18 +5074,67 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super High Impact
+    name:     Super High Impact
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   d78ff42efdbb0e180777d17b5f7a96e08530ab77f15a99237f60714f7cfe2b74
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super James Pond
+    name:     Super James Pond
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3f8efb19eae68f24feb42c018b7dc7a819bfd8d993ab36899681caa7ee94b06e
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=BA3M revision=01
+    rom name=program.rom size=0x280000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Super Mario All-Stars + Super Mario World
+    name:     Super Mario All-Stars + Super Mario World
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BA3M-01
+    sha256:   a8806bfe07cd3c9945d9fd3fcea932ae1cd671cab5cae12bb7a2ae726cbf9175
+    configuration
+      rom name=program.rom size=0x280000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
     board type=1K1B revision=01
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-3f,80-bf:8000-ffff
     map id=rom address=40-7f,c0-ff:0000-ffff
-    map id=ram address=20-3f,a0-bf:6000-7fff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
     necdsp model=uPD7725 frequency=8000000
       rom id=program name=dsp1.program.rom size=0x1800
       rom id=data name=dsp1.data.rom size=0x800
-      ram size=0x200
-      map id=dr address=00-1f,80-9f:6000-6fff
-      map id=sr address=00-1f,80-9f:7000-7fff
+      ram id=data size=0x200
+      map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Super Mario Kart
     name:     Super Mario Kart
@@ -1409,6 +5148,31 @@ release
       rom name=dsp1.program.rom size=0x1800
       rom name=dsp1.data.rom size=0x800
       ram name=dsp1.data.ram size=0x200
+
+release
+  cartridge region=NTSC
+    board type=1L5B revision=11,20
+    sa1
+      rom name=program.rom size=0x400000
+      ram id=bitmap name=save.ram size=0x8000
+      ram id=internal size=0x800
+      map id=io address=00-3f,80-bf:2200-23ff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=bwram address=00-3f,80-bf:6000-7fff
+      map id=bwram address=40-4f:0000-ffff
+      map id=iram address=00-3f,80-bf:3000-37ff
+  information
+    title:    Super Mario RPG: Legend of the Seven Stars
+    name:     Super Mario RPG - Legend of the Seven Stars
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1L5B-11
+    sha256:   740646f3535bfb365ca44e70d46ab433467b142bd84010393070bd0b141af853
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x8000
+      ram name=internal.ram size=0x800
 
 release
   cartridge region=NTSC
@@ -1435,6 +5199,22 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Ninja Boy
+    name:     Super Ninja Boy
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   40b46bb29785fb431b325f22377faa8b099be4d77aecc1f03000b8a4cb589b63
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1455,12 +5235,60 @@ release
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
   information
+    title:    Super Off Road: The Baja
+    name:     Super Off Road - The Baja
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   16f9c90d75bd23d0620be00ecf818fcb25c5935d4ee26b1fe17b926f8987aa65
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Putty
+    name:     Super Putty
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   3dff3513ae6acb85a02b00b9f5adb4757ab97661993bded4f329127a792cef87
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
     title:    Super R-Type
     name:     Super R-Type
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-01
     sha256:   05c7f6461209020785fba33007e1830820aa44ada4b1a6f991d936bf2335b15b
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super R.B.I Baseball
+    name:     Super RBI Baseball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   607bfa0f74e57298f59ebe237c2e7b59364024d844534f3befb9ad1301bbedf8
     configuration
       rom name=program.rom size=0x100000
 
@@ -1499,6 +5327,134 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Smash TV
+    name:     Super Smash TV
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   8b75ab4bb1b63c45a56e7a4c5a37c0864f14375ab3131edc33489764426ad888
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Soccer Champ
+    name:     Super Soccer Champ
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   5eb9736d66b3ac730ebbfdd19ef2397282b5f1a62dc0048093e041e23b807741
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Solitaire
+    name:     Super Solitaire
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   5985cdad45958a5b8c5967ad39efe51569f560bf237a4e9864f21111082a8500
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x180000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Star Wars II: The Empire Strikes Back
+    name:     Super Star Wars II - The Empire Strikes Back
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-2
+    sha256:   46370b3bd6ff9ee04c425eef0f482f521f3b61bd4b058f2f4e9d322253d7b5de
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x400000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Super Street Fighter II: The New Challengers
+    name:     Super Street Fighter II - The New Challengers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-01
+    sha256:   d17cb5c73174060fcbd9cba6c705643f19c3b8be24d0f7ee43aee674ff1ea38e
+    configuration
+      rom name=program.rom size=0x400000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Tennis
+    name:     Super Tennis
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   6e45a80ea148654514cb4e8604a0ffcbc726946e70f9e0b9860e36c0f3fa4877
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Troll Islands
+    name:     Super Troll Islands
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   02cb7f1ed21ed6bfb9eaa0e91df2adb063a9bf4cbd6feb6cd024d676829e227e
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Turrican
+    name:     Super Turrican
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   056ac8160363d577e3ffc2f593801b8bb3d024fe4f3a3331b711dc556204949d
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1511,6 +5467,58 @@ release
     sha256:   96da3512a1aa05a40f1e5d61c48932b0d55d9f136d6418b848153a9fecab06de
     configuration
       rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Taz-Mania
+    name:     Taz-Mania
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-2
+    sha256:   1711fe9010232b41ec406900e5b4ef528dd2beaa97b27d94ed7eef57d63904a0
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A5M revision=11,20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Tecmo Super Bowl II: Special Edition
+    name:     Tecmo Super Bowl II - Special Edition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A5M-11
+    sha256:   2972057a0087f8239d2523eaa995405f06e5d5ba3a3203b6b50d401379c8ebde
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A5M revision=11,20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Tecmo Super Bowl III: Final Edition
+    name:     Tecmo Super Bowl III - Final Edition
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A5M-20
+    sha256:   8cfd4c5525f4bd4bba5af7e2323f1e61f27ce97c6d5617cfa685c9276fbf6407
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x8000
 
 release
   cartridge region=NTSC
@@ -1533,6 +5541,54 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Teenage Mutant Ninja Turtles V: Tournament Fighters
+    name:     Teenage Mutant Ninja Turtles V - Tournament Fighters
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   849141370f164d6db3e5709da670726f958ce13ffef69319564db3fb0b12c69d
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Thunder Spirits
+    name:     Thunder Spirits
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   d50aaa41e153ca356eee16a9deccb1a763ee56ebbe6c80cd28c5ad1db66a5316
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Time Cop
+    name:     Time Cop
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   16fb965130e57f37dda2466f23820f091f8b96758aa7e30ba4fd63cb618e5ddb
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1548,11 +5604,27 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A1M revision=11
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x180000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Timon & Pumbaa's Jungle Games
+    name:     Timon & Pumbaa's Jungle Games
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-20
+    sha256:   271a67b32b3bb00ceb0f4e7d81494888d0d821635f0f936d481dfbe671567c08
+    configuration
+      rom name=program.rom size=0x180000
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x800
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7f,f0-ff:0000-7fff
   information
     title:    Tin Star
     name:     Tin Star
@@ -1563,6 +5635,42 @@ release
     configuration
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Tiny Toon Adventures: Wacky Sports Challenge
+    name:     Tiny Toon Adventures - Wacky Sports Challenge
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   f753de4a38bd83f7d937fc7bf5565a3c351a794c113dead8fdee6d86c85633e8
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2J3M revision=11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
+    map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
+  information
+    title:    TNN Bass Tournament of Champions
+    name:     TNN Bass Tournament of Champions
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J3M-20
+    sha256:   ced8c0bc2791ffe47cb9eec03db67567945af8c58b5330326722f1cfca41bf51
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
 
 release
   cartridge region=NTSC
@@ -1582,7 +5690,128 @@ release
 
 release
   cartridge region=NTSC
-    board type=1A3M revision=10,20,21
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Top Gear
+    name:     Top Gear
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    sha256:   ca9889f17f184b3d99a2eaaa82af73e366f03ed00313fdd369e5e023b208e788
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Top Gear 2
+    name:     Top Gear 2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   76b2702c4be8b668c1017f2817c280283c275eaa41535bf6ffa2b8d2220b68c6
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1B0N revision=03
+    rom name=program.rom size=0x100000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    necdsp model=uPD7725 frequency=8000000
+      rom id=program name=dsp4.program.rom size=0x1800
+      rom id=data name=dsp4.data.rom size=0x800
+      ram id=data size=0x200
+      map id=io address=30-3f,b0-bf:8000-ffff select=0x4000
+  information
+    title:    Top Gear 3000
+    name:     Top Gear 3000
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1B0N-03
+    sha256:   ede60f0d283b6ea3a45308981d99e7c422a0296e5fadde51c6bafd4dcc789ca2
+    configuration
+      rom name=program.rom size=0x100000
+      rom name=dsp4.program.rom size=0x1800
+      rom name=dsp4.data.rom size=0x800
+      ram name=dsp4.data.ram size=0x200
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Total Carnage
+    name:     Total Carnage
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   9bf884be5627d38f060ad7f3a61ea1fea1474d416e1d037d33014ca9d5205c1d
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Toys: Let the Toy Wars Begin!
+    name:     Toys - Let the Toy Wars Begin!
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   7a6e5da46b026900fba4584a32ad40d940b9ecf9fccfb11f96a205a914014784
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Troddlers
+    name:     Troddlers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   4070a7702dc506a1ceb6f65b5c330b3a162df6f01735c8f206934fd47b810ed4
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Troy Aikman Football
+    name:     Troy Aikman Football
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A3M-11
+    sha256:   46fcca4ce29f472afa8519958d256eec347c2dc2da154c95f263a051c5c02dbb
+    configuration
+      rom name=program.rom size=0x180000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -1600,7 +5829,57 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,11,20
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    True Lies
+    name:     True Lies
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   47dd8ea2d12a6bb2a9774de1d492259fc4fb9f8ec7976383bbfd922532671f6b
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Turn and Burn: No-Fly Zone
+    name:     Turn and Burn - No-Fly Zone
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   e4343c0fadc00ffdc3dc31345068d751eea5d639f826731f08cb81673d508c40
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A1M revision=01,11,20
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Ultima: Runes of Virtue II
+    name:     Ultima - Runes of Virtue II
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1M-11
+    sha256:   094555d5720158ee60c9d5ab9a13110192db5ebf0f6cf69abbb59a00bc470345
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
     map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
@@ -1616,7 +5895,200 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A3M revision=20
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x400000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Ultimate Mortal Kombat 3
+    name:     Ultimate Mortal Kombat 3
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-20
+    sha256:   cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261e
+    configuration
+      rom name=program.rom size=0x400000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Ultraman: Towards the Future
+    name:     Ultraman - Towards the Future
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    sha256:   e9fae4c2e171a1fc4f2bd800abd9e42750aaf7a4db9e40c5b9142e15029500bd
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A3B revision=11,12,13
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Uncharted Waters
+    name:     Uncharted Waters
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-13
+    sha256:   794152fc6f55cb15a0b203fa645ac9fa314a293da999d8ec8b3dda080434d175
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J5M revision=11,20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x8000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Uncharted Waters: New Horizons
+    name:     Uncharted Waters - New Horizons
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J5M-11
+    sha256:   64bc4707f422661a66618088887e2363a5f896ea683c58984fffd96dd21ab5f0
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Uniracers
+    name:     Uniracers
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-21
+    sha256:   859ec99fdc25dd9b239d9085bf656e4f49c93a32faa5bb248da83efd68ebd478
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    The Untouchables
+    name:     Untouchables, The
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   ecefb4117a6aae117e033c8cc07f0db2797d6be93dd5cdcefc23692a21fae02e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Urban Strike
+    name:     Urban Strike
+    region:   NA
+    revision: 1.0
+    board:    MJSC-1A0N-30-2
+    sha256:   dcb33a89fcb8d8ca8f3a467034728ad6375273d8eb51a60418ca51ef745e9b38
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-7fff
+  information
+    title:    Utopia: The Creation of a Nation
+    name:     Utopia - The Creation of a Nation
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-10
+    sha256:   2500d6c846c78bcb729f15535bf2b852a120411891cabaaaa6fc407906d0214e
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A1B revision=05,06
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x800
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    Vegas Stakes
+    name:     Vegas Stakes
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A1B-06
+    sha256:   78bf9d79fb2ff3f9d03ecc1176d070e53ddaca2c6b0cda69e74c19a4e50b195b
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1CA0N5S revision=01
+    superfx revision=2
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x8000
+      map id=io address=00-3f,80-bf:3000-32ff
+      map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
+      map id=rom address=40-5f,c0-df:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff
+      map id=ram address=70-71,f0-f1:0000-ffff
+  information
+    title:    Vortex
+    name:     Vortex
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1CA0N5S-01
+    sha256:   41b5561de9e4984276e52987ea46c5f4fa8526d8141c70c738875a9eb9fe9d70
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x8000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    War 3010: The Revolution
+    name:     War 3010 - The Revolution
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   8b12e5e4553fc921c23739d1aec2ed517535ec239daef800f39f602d8473847f
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -1631,6 +6103,86 @@ release
     configuration
       rom name=program.rom size=0x180000
       ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    We're Back!: A Dinosaur's Story
+    name:     We're Back! - A Dinosaur's Story
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   e931c3c08f20f78e3a43ad92d16eb472be619abaa17c2d8e2b0fcd5d05dbd74d
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Wheel of Fortune
+    name:     Wheel of Fortune
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   12abf1ba063c120c1a98495a1c85e67a0007aff771ef92adcb94b4a0a2fd5adb
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Wild Guns
+    name:     Wild Guns
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-30
+    sha256:   c8f159e2625ac8078535c06857ea28475706da45df494de8e46f50888272cf71
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Williams Arcade's Greatest Hits
+    name:     Williams Arcade's Greatest Hits
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   60d01a3f499463156546ecdee18ee3e946b95302ee0b1569decb97f52372d2eb
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=YA0N revision=01
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Wing Commander: The Secret Missions
+    name:     Wing Commander - The Secret Missions
+    region:   NA
+    revision: 1.0
+    board:    SHVC-YA0N-01
+    sha256:   132ca0b6a4888edf7de785d48f4417fac28522646e6c7514f80c5e9ff1438d5f
+    configuration
+      rom name=program.rom size=0x100000
 
 release
   cartridge region=NTSC
@@ -1650,6 +6202,54 @@ release
 
 release
   cartridge region=NTSC
+    board type=1J0N revision=01,10,20
+    rom name=program.rom size=0x200000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    Winter Olympic Games: Lillehammer '94
+    name:     Winter Olympic Games - Lillehammer '94
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J0N-10
+    sha256:   0e834647669783c2b79cc1120c057c870c541079a7abd1eee3f787d59dc3c3eb
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Wordtris
+    name:     Wordtris
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   82e2b636e66c4edbae27a5be91a61194ef2881ec93f40d1de93a6153617b12f2
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=2J0N revision=01,10,11
+    rom name=program.rom size=0x200000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    World Heroes
+    name:     World Heroes
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2J0N-10
+    sha256:   ea76cfdbb2a555a7b6eff8b466a879f9a9189639416e8c2fb45bf074e695105f
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
     board type=1A1B revision=05,06
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
@@ -1665,6 +6265,86 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+  information
+    title:    WWF Raw
+    name:     WWF Raw
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-01
+    sha256:   0af7b0d3022acd24a1fb15865a076519f7f56e7a4b33f12b6d851b3a91e5388c
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    WWF Royal Rumble
+    name:     WWF Royal Rumble
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   51c53e36ed0b959b0695fc6ef036fa7302d1c995eca35c28261d6f3cb77df0ca
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    WWF Super Wrestlemania
+    name:     WWF Super Wrestlemania
+    region:   NA
+    revision: 1.0
+    board:    MAXI-1A0N-30-2
+    sha256:   0b9abf2fc25a5f07c71f9d8efbb0d0e616c1494060138fbb63f7398e9c26198e
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    X-Kaliber 2097
+    name:     X-Kaliber 2097
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    sha256:   dc3792e9fe7ef7aaea4ac675a48ad06129dd3ebdd4b96a513bc8241549cbd579
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    X-Zone
+    name:     X-Zone
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    sha256:   93272180090e8418582f69b79c5cee6b28638b9a93192cc4bcd96291a4fca02d
+    configuration
+      rom name=program.rom size=0x80000
 
 release
   cartridge region=NTSC

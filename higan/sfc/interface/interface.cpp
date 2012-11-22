@@ -43,8 +43,9 @@ unsigned Interface::group(unsigned id) {
   case ID::ArmDSPDROM:
   case ID::ArmDSPRAM:
   case ID::HitachiDSPROM:
-  case ID::HitachiDSPDROM:
   case ID::HitachiDSPRAM:
+  case ID::HitachiDSPDROM:
+  case ID::HitachiDSPDRAM:
   case ID::Nec7725DSPPROM:
   case ID::Nec7725DSPDROM:
   case ID::Nec7725DSPRAM:
@@ -130,13 +131,12 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
     for(unsigned n = 0; n <  16 * 1024; n++) armdsp.programRAM[n] = stream.read();
   }
 
-  if(id == ID::HitachiDSPROM) {
-    hitachidsp.rom.read(stream);
-  }
+  if(id == ID::HitachiDSPROM) hitachidsp.rom.read(stream);
+  if(id == ID::HitachiDSPRAM) hitachidsp.ram.read(stream);
   if(id == ID::HitachiDSPDROM) {
     for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = stream.readl(3);
   }
-  if(id == ID::HitachiDSPRAM) {
+  if(id == ID::HitachiDSPDRAM) {
     for(unsigned n = 0; n < 3072; n++) hitachidsp.dataRAM[n] = stream.readl(1);
   }
 
@@ -215,11 +215,12 @@ void Interface::save(unsigned id, const stream &stream) {
     for(unsigned n = 0; n < 16 * 1024; n++) stream.write(armdsp.programRAM[n]);
   }
 
-  if(id == ID::HitachiDSPRAM) {
+  if(id == ID::HitachiDSPRAM) stream.write(hitachidsp.ram.data(), hitachidsp.ram.size());
+  if(id == ID::HitachiDSPDRAM) {
     for(unsigned n = 0; n < 3072; n++) stream.writel(hitachidsp.dataRAM[n], 1);
   }
 
-  if(id == ID::Nec96050DSPRAM) {
+  if(id == ID::Nec7725DSPRAM) {
     for(unsigned n = 0; n <  256; n++) stream.writel(necdsp.dataRAM[n], 2);
   }
   if(id == ID::Nec96050DSPRAM) {
@@ -351,11 +352,11 @@ void Interface::exportMemory() {
   string pathname = {path(group(ID::ROM)), "debug/"};
   directory::create(pathname);
 
-  file::write({pathname, "wram.rwm"}, cpu.wram, 128 * 1024);
-  file::write({pathname, "vram.rwm"}, ppu.vram, 64 * 1024);
-  file::write({pathname, "oam.rwm"}, ppu.oam, 544);
-  file::write({pathname, "cgram.rwm"}, ppu.cgram, 512);
-  file::write({pathname, "apuram.rwm"}, smp.apuram, 64 * 1024);
+  file::write({pathname, "work.ram"}, cpu.wram, 128 * 1024);
+  file::write({pathname, "video.ram"}, ppu.vram, 64 * 1024);
+  file::write({pathname, "sprite.ram"}, ppu.oam, 544);
+  file::write({pathname, "palette.ram"}, ppu.cgram, 512);
+  file::write({pathname, "apu.ram"}, smp.apuram, 64 * 1024);
 }
 
 Interface::Interface() {

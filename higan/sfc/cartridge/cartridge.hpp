@@ -87,7 +87,7 @@ private:
   void parse_markup_sa1(Markup::Node);
   void parse_markup_superfx(Markup::Node);
   void parse_markup_armdsp(Markup::Node);
-  void parse_markup_hitachidsp(Markup::Node);
+  void parse_markup_hitachidsp(Markup::Node, unsigned roms);
   void parse_markup_necdsp(Markup::Node);
   void parse_markup_epsonrtc(Markup::Node);
   void parse_markup_sharprtc(Markup::Node);

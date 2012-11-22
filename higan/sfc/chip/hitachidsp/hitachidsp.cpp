@@ -38,6 +38,7 @@ void HitachiDSP::load() {
 
 void HitachiDSP::unload() {
   rom.reset();
+  ram.reset();
 }
 
 void HitachiDSP::power() {
@@ -57,7 +58,7 @@ void HitachiDSP::power() {
 }
 
 void HitachiDSP::reset() {
-  create(HitachiDSP::Enter, frequency);
+  create(HitachiDSP::Enter, Frequency);
   HG51B::power();
 }
 

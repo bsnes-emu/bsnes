@@ -1,7 +1,7 @@
 #ifdef CARTRIDGE_CPP
 
 void Cartridge::parse_markup(const char *markup) {
-  auto cartridge = Markup::Document(markup)["release/cartridge"];
+  auto cartridge = Markup::Document(markup)["cartridge"];
   region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
 
   mapping.reset();
@@ -15,7 +15,7 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_sa1(cartridge["sa1"]);
   parse_markup_superfx(cartridge["superfx"]);
   parse_markup_armdsp(cartridge["armdsp"]);
-  parse_markup_hitachidsp(cartridge["hitachidsp"]);
+  parse_markup_hitachidsp(cartridge["hitachidsp"], cartridge["board/type"].data.wildcard("2DC*") ? 2 : 1);
   parse_markup_necdsp(cartridge["necdsp"]);
   parse_markup_epsonrtc(cartridge["epsonrtc"]);
   parse_markup_sharprtc(cartridge["sharprtc"]);
@@ -320,7 +320,7 @@ void Cartridge::parse_markup_armdsp(Markup::Node root) {
 
   string programROMName = root["rom(id=program)/name"].data;
   string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram/name"].data;
+  string dataRAMName = root["ram(id=data)/name"].data;
 
   interface->loadRequest(ID::ArmDSPPROM, programROMName);
   interface->loadRequest(ID::ArmDSPDROM, dataROMName);
@@ -340,25 +340,27 @@ void Cartridge::parse_markup_armdsp(Markup::Node root) {
   }
 }
 
-void Cartridge::parse_markup_hitachidsp(Markup::Node root) {
+void Cartridge::parse_markup_hitachidsp(Markup::Node root, unsigned roms) {
   if(root.exists() == false) return;
   has_hitachidsp = true;
 
   for(auto &n : hitachidsp.dataROM) hitachidsp.dataROM[n] = 0x000000;
   for(auto &n : hitachidsp.dataRAM) hitachidsp.dataRAM[n] = 0x00;
 
-  hitachidsp.frequency = numeral(root["frequency"].data);
-  if(hitachidsp.frequency == 0) hitachidsp.frequency = 20000000;
+  hitachidsp.Frequency = numeral(root["frequency"].data);
+  if(hitachidsp.Frequency == 0) hitachidsp.frequency = 20000000;
+  hitachidsp.Roms = roms;
 
   string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram/name"].data;
+  string dataRAMName = root["ram(id=data)/name"].data;
 
   interface->loadRequest(ID::HitachiDSPDROM, dataROMName);
   if(dataRAMName.empty() == false) {
-    interface->loadRequest(ID::HitachiDSPRAM, dataRAMName);
+    interface->loadRequest(ID::HitachiDSPDRAM, dataRAMName);
   }
 
-  parse_markup_memory(hitachidsp.rom, root["rom(id!=data)"], ID::HitachiDSPROM, false);
+  parse_markup_memory(hitachidsp.rom, root["rom(id=program)"], ID::HitachiDSPROM, false);
+  parse_markup_memory(hitachidsp.ram, root["ram(id=program)"], ID::HitachiDSPRAM, true);
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -373,6 +375,13 @@ void Cartridge::parse_markup_hitachidsp(Markup::Node root) {
       Mapping m({&HitachiDSP::rom_read, &hitachidsp}, {&HitachiDSP::rom_write, &hitachidsp});
       parse_markup_map(m, node);
       if(m.size == 0) m.size = hitachidsp.rom.size();
+      mapping.append(m);
+    }
+
+    if(node["id"].data == "ram") {
+      Mapping m({&HitachiDSP::ram_read, &hitachidsp}, {&HitachiDSP::ram_write, &hitachidsp});
+      parse_markup_map(m, node);
+      if(m.size == 0) m.size = hitachidsp.ram.size();
       mapping.append(m);
     }
   }
@@ -395,7 +404,7 @@ void Cartridge::parse_markup_necdsp(Markup::Node root) {
 
   string programROMName = root["rom(id=program)/name"].data;
   string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram/name"].data;
+  string dataRAMName = root["ram(id=data)/name"].data;
 
   if(necdsp.revision == NECDSP::Revision::uPD7725) {
     interface->loadRequest(ID::Nec7725DSPPROM, programROMName);
@@ -418,20 +427,15 @@ void Cartridge::parse_markup_necdsp(Markup::Node root) {
   for(auto &node : root) {
     if(node.name != "map") continue;
 
-    if(node["id"].data == "dr") {
-      Mapping m({&NECDSP::dr_read, &necdsp}, {&NECDSP::dr_write, &necdsp});
+    if(node["id"].data == "io") {
+      Mapping m({&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
       parse_markup_map(m, node);
       mapping.append(m);
-    }
-
-    if(node["id"].data == "sr") {
-      Mapping m({&NECDSP::sr_read, &necdsp}, {&NECDSP::sr_write, &necdsp});
-      parse_markup_map(m, node);
-      mapping.append(m);
+      necdsp.Select = numeral(node["select"].data);
     }
 
     if(node["id"].data == "ram") {
-      Mapping m({&NECDSP::dp_read, &necdsp}, {&NECDSP::dp_write, &necdsp});
+      Mapping m({&NECDSP::ram_read, &necdsp}, {&NECDSP::ram_write, &necdsp});
       parse_markup_map(m, node);
       mapping.append(m);
     }

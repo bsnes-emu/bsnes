@@ -1,27 +1,37 @@
 #ifdef HITACHIDSP_CPP
 
 uint8 HitachiDSP::bus_read(uint24 addr) {
-  if((addr & 0x408000) == 0x008000) return bus.read(addr);
+  if((addr & 0x408000) == 0x008000) return bus.read(addr);  //$00-3f,80-bf:6000-7fff
+  if((addr & 0xf88000) == 0x700000) return bus.read(addr);  //$70-77:0000-7fff
   return 0x00;
 }
 
 void HitachiDSP::bus_write(uint24 addr, uint8 data) {
-  if((addr & 0x40e000) == 0x006000) return bus.write(addr, data);
+  if((addr & 0x40e000) == 0x006000) return bus.write(addr, data);  //$00-3f,80-bf:6000-7fff
+  if((addr & 0xf88000) == 0x700000) return bus.write(addr, data);  //$70-77:0000-7fff
 }
 
 uint8 HitachiDSP::rom_read(unsigned addr) {
-  if(co_active() == cpu.thread) {
-    if(regs.halt) return rom.read(addr);
-    if((addr & 0x40ffe0) == 0x00ffe0) return mmio.vector[addr & 0x1f];
-    return cpu.regs.mdr;
-  }
-  if(co_active() == hitachidsp.thread) {
+  if(co_active() == hitachidsp.thread || regs.halt) {
+    addr = bus.mirror(addr, rom.size());
+  //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
     return rom.read(addr);
   }
+  if((addr & 0x40ffe0) == 0x00ffe0) return mmio.vector[addr & 0x1f];
   return cpu.regs.mdr;
 }
 
 void HitachiDSP::rom_write(unsigned addr, uint8 data) {
+}
+
+uint8 HitachiDSP::ram_read(unsigned addr) {
+  if(ram.size() == 0) return 0x00;  //not open bus
+  return ram.read(bus.mirror(addr, ram.size()));
+}
+
+void HitachiDSP::ram_write(unsigned addr, uint8 data) {
+  if(ram.size() == 0) return;
+  return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
 uint8 HitachiDSP::dsp_read(unsigned addr) {
