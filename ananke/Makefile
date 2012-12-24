@@ -8,14 +8,15 @@ all:
 	$(cpp) $(flags) -fPIC -o ananke.o -c ananke.cpp
 	$(cpp) $(flags) -shared -Wl,-soname,libananke.so.1 -o libananke.so ananke.o
 
+resource: force
+	sourcery resource/resource.bml resource/resource.cpp resource/resource.hpp
+
 clean:
 	-@$(call delete,*.o)
 	-@$(call delete,*.so)
 
 install: uninstall
 	if [ ! -d ~/.config/ananke ]; then mkdir ~/.config/ananke; fi
-	if [ -d ~/.config/ananke/database ]; then rm -r ~/.config/ananke/database; fi
-	cp -r database ~/.config/ananke/database
 	sudo cp libananke.so $(path)/libananke.so.1
 	sudo ln -s $(path)/libananke.so.1 $(path)/libananke.so
 

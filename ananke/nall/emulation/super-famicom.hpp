@@ -76,10 +76,11 @@ struct SuperFamicomCartridge {
     DSP1HiROM,
   };
 
-  bool loaded;        //is a base cartridge inserted?
-  unsigned crc32;     //crc32 of all cartridges (base+slot(s))
+  bool loaded;             //is a base cartridge inserted?
+  unsigned crc32;          //crc32 of all cartridges (base+slot(s))
   unsigned rom_size;
   unsigned ram_size;
+  bool firmware_appended;  //true if firmware is appended to end of ROM data
 
   Mode mode;
   Type type;
@@ -106,6 +107,8 @@ struct SuperFamicomCartridge {
 };
 
 SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size) {
+  firmware_appended = false;
+
   //skip copier header
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
@@ -122,35 +125,49 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   const char *range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
   markup.append("cartridge region=", region == NTSC ? "NTSC" : "PAL", "\n");
 
-  if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) markup.append(
-    "  rom name=program.rom size=0x", hex(rom_size), "\n"
-    "  map id=rom address=00-7f,80-ff:8000-ffff\n"
-    "  icd2 revision=1\n"
-    "    rom name=boot.rom size=0x100\n"
-    "    map id=io address=00-3f,80-bf:6000-7fff\n"
-  );
+  if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "  map id=rom address=00-7f,80-ff:8000-ffff\n"
+      "  icd2 revision=1\n"
+      "    rom name=boot.rom size=0x100\n"
+      "    map id=io address=00-3f,80-bf:6000-7fff\n"
+    );
+    if((rom_size & 0x7fff) == 0x100) {
+      firmware_appended = true;
+      rom_size -= 0x100;
+    }
+  }
 
-  else if(has_cx4) markup.append(
-    "  hitachidsp model=HG51B169 frequency=20000000\n"
-    "    rom id=program name=program.rom size=0x", hex(rom_size), "\n"
-    "    rom id=data name=cx4.data.rom size=0xc00\n"
-    "    ram id=data size=0xc00\n"
-    "    map id=io address=00-3f,80-bf:6000-7fff\n"
-    "    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
-    "    map id=ram address=70-77:0000-7fff\n"
-  );
+  else if(has_cx4) {
+    markup.append(
+      "  hitachidsp model=HG51B169 frequency=20000000\n"
+      "    rom id=program name=program.rom size=0x", hex(rom_size), "\n"
+      "    rom id=data name=cx4.data.rom size=0xc00\n"
+      "    ram id=data size=0xc00\n"
+      "    map id=io address=00-3f,80-bf:6000-7fff\n"
+      "    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
+      "    map id=ram address=70-77:0000-7fff\n"
+    );
+    if((rom_size & 0x7fff) == 0xc00) {
+      firmware_appended = true;
+      rom_size -= 0xc00;
+    }
+  }
 
-  else if(has_spc7110) markup.append(
-    "  spc7110\n"
-    "    rom id=program name=program.rom size=0x100000\n"
-    "    rom id=data name=data.rom size=0x", hex(rom_size - 0x100000), "\n"
-    "    ram name=save.ram size=0x", hex(ram_size), "\n"
-    "    map id=io address=00-3f,80-bf:4800-483f\n"
-    "    map id=io address=50:0000-ffff\n"
-    "    map id=rom address=00-3f,80-bf:8000-ffff\n"
-    "    map id=rom address=c0-ff:0000-ffff\n"
-    "    map id=ram address=00-3f,80-bf:6000-7fff mask=0xe000\n"
-  );
+  else if(has_spc7110) {
+    markup.append(
+      "  spc7110\n"
+      "    rom id=program name=program.rom size=0x100000\n"
+      "    rom id=data name=data.rom size=0x", hex(rom_size - 0x100000), "\n"
+      "    ram name=save.ram size=0x", hex(ram_size), "\n"
+      "    map id=io address=00-3f,80-bf:4800-483f\n"
+      "    map id=io address=50:0000-ffff\n"
+      "    map id=rom address=00-3f,80-bf:8000-ffff\n"
+      "    map id=rom address=c0-ff:0000-ffff\n"
+      "    map id=ram address=00-3f,80-bf:6000-7fff mask=0xe000\n"
+    );
+  }
 
   else if(has_sdd1) {
     markup.append(
@@ -280,69 +297,83 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     );
   }
 
-  else if(mapper == BSCLoROM) markup.append(
-    "  rom name=program.rom size=0x", hex(rom_size), "\n"
-    "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    "  map id=rom address=00-1f:8000-ffff offset=0x000000 mask=0x8000\n"
-    "  map id=rom address=20-3f:8000-ffff offset=0x100000 mask=0x8000\n"
-    "  map id=rom address=80-9f:8000-ffff offset=0x200000 mask=0x8000\n"
-    "  map id=rom address=a0-bf:8000-ffff offset=0x100000 mask=0x8000\n"
-    "  map id=ram address=70-7f,f0-ff:0000-7fff\n"
-    "  bsxslot\n"
-    "    map id=rom address=c0-ef:0000-ffff\n"
-  );
+  else if(mapper == BSCLoROM) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "  ram name=save.ram size=0x", hex(ram_size), "\n"
+      "  map id=rom address=00-1f:8000-ffff offset=0x000000 mask=0x8000\n"
+      "  map id=rom address=20-3f:8000-ffff offset=0x100000 mask=0x8000\n"
+      "  map id=rom address=80-9f:8000-ffff offset=0x200000 mask=0x8000\n"
+      "  map id=rom address=a0-bf:8000-ffff offset=0x100000 mask=0x8000\n"
+      "  map id=ram address=70-7f,f0-ff:0000-7fff\n"
+      "  bsxslot\n"
+      "    map id=rom address=c0-ef:0000-ffff\n"
+    );
+  }
 
-  else if(mapper == BSCHiROM) markup.append(
-    "  rom name=program.rom size=0x", hex(rom_size), "\n"
-    "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    "  map id=rom address=00-1f,80-9f:8000-ffff\n"
-    "  map id=rom address=40-5f,c0-df:0000-ffff\n"
-    "  map id=ram address=20-3f,a0-bf:6000-7fff\n"
-    "  bsxslot\n"
-    "    map id=rom address=20-3f,a0-bf:8000-ffff\n"
-    "    map id=rom address=60-7f,e0-ff:0000-ffff\n"
-  );
+  else if(mapper == BSCHiROM) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "  ram name=save.ram size=0x", hex(ram_size), "\n"
+      "  map id=rom address=00-1f,80-9f:8000-ffff\n"
+      "  map id=rom address=40-5f,c0-df:0000-ffff\n"
+      "  map id=ram address=20-3f,a0-bf:6000-7fff\n"
+      "  bsxslot\n"
+      "    map id=rom address=20-3f,a0-bf:8000-ffff\n"
+      "    map id=rom address=60-7f,e0-ff:0000-ffff\n"
+    );
+  }
 
-  else if(mapper == BSXROM) markup.append(
-    "  bsx\n"
-    "    rom name=program.rom size=0x", hex(rom_size), "\n"
-    "    ram id=save name=save.ram size=0x", hex(ram_size), "\n"
-    "    ram id=download name=bsx.ram size=0x40000\n"
-    "    map id=io address=00-3f,80-bf:5000-5fff\n"
-    "    map id=rom address=00-3f,80-bf:8000-ffff\n"
-    "    map id=rom address=40-7f,c0-ff:0000-ffff\n"
-    "    map id=ram address=20-3f:6000-7fff\n"
-  );
+  else if(mapper == BSXROM) {
+    markup.append(
+      "  bsx\n"
+      "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    ram id=save name=save.ram size=0x", hex(ram_size), "\n"
+      "    ram id=download name=bsx.ram size=0x40000\n"
+      "    map id=io address=00-3f,80-bf:5000-5fff\n"
+      "    map id=rom address=00-3f,80-bf:8000-ffff\n"
+      "    map id=rom address=40-7f,c0-ff:0000-ffff\n"
+      "    map id=ram address=20-3f:6000-7fff\n"
+    );
+  }
 
-  else if(mapper == STROM) markup.append(
-    "  rom name=program.rom size=0x", hex(rom_size), "\n"
-    "  map id=rom address='00-1f,80-9f:8000-ffff mask=0x8000\n"
-    "  sufamiturbo\n"
-    "    slot id=A\n"
-    "      map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
-    "      map id=ram address=60-63,e0-e3:8000-ffff\n"
-    "    slot id=B\n"
-    "      map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000\n"
-    "      map id=ram address=70-73,f0-f3:8000-ffff\n"
-  );
+  else if(mapper == STROM) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "  map id=rom address='00-1f,80-9f:8000-ffff mask=0x8000\n"
+      "  sufamiturbo\n"
+      "    slot id=A\n"
+      "      map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
+      "      map id=ram address=60-63,e0-e3:8000-ffff\n"
+      "    slot id=B\n"
+      "      map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000\n"
+      "      map id=ram address=70-73,f0-f3:8000-ffff\n"
+    );
+  }
 
-  if(has_spc7110rtc) markup.append(
-    "  epsonrtc\n"
-    "    ram name=rtc.ram size=0x10\n"
-    "    map id=io address=00-3f,80-bf:4840-4842\n"
-  );
+  if(has_spc7110rtc) {
+    markup.append(
+      "  epsonrtc\n"
+      "    ram name=rtc.ram size=0x10\n"
+      "    map id=io address=00-3f,80-bf:4840-4842\n"
+    );
+  }
 
-  if(has_srtc) markup.append(
-    "  sharprtc\n"
-    "    ram name=rtc.ram size=0x10\n"
-    "    map id=io address=00-3f,80-bf:2800-2801\n"
-  );
+  if(has_srtc) {
+    markup.append(
+      "  sharprtc\n"
+      "    ram name=rtc.ram size=0x10\n"
+      "    map id=io address=00-3f,80-bf:2800-2801\n"
+    );
+  }
 
-  if(has_obc1) markup.append(
-    "  obc1\n"
-    "    ram name=save.ram size=0x2000\n"
-    "    map id=io address=00-3f,80-bf:6000-7fff\n"
-  );
+  if(has_obc1) {
+    markup.append(
+      "  obc1\n"
+      "    ram name=save.ram size=0x2000\n"
+      "    map id=io address=00-3f,80-bf:6000-7fff\n"
+    );
+  }
 
   if(has_dsp1) {
     markup.append(
@@ -360,57 +391,97 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     if(dsp1_mapper == DSP1HiROM) markup.append(
       "    map id=io address=00-1f,80-9f:6000-7fff select=0x1000\n"
     );
+    if((size & 0x7fff) == 0x2000) {
+      firmware_appended = true;
+      rom_size -= 0x2000;
+    }
   }
 
-  if(has_dsp2) markup.append(
-    "  necdsp model=uPD7725 frequency=8000000\n"
-    "    rom id=program name=dsp2.program.rom size=0x1800\n"
-    "    rom id=data name=dsp2.data.rom size=0x800\n"
-    "    ram id=data size=0x200\n"
-    "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
-  );
+  if(has_dsp2) {
+    markup.append(
+      "  necdsp model=uPD7725 frequency=8000000\n"
+      "    rom id=program name=dsp2.program.rom size=0x1800\n"
+      "    rom id=data name=dsp2.data.rom size=0x800\n"
+      "    ram id=data size=0x200\n"
+      "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
+    );
+    if((size & 0x7fff) == 0x2000) {
+      firmware_appended = true;
+      rom_size -= 0x2000;
+    }
+  }
 
-  if(has_dsp3) markup.append(
-    "  necdsp model=uPD7725 frequency=8000000\n"
-    "    rom id=program name=dsp3.program.rom size=0x1800\n"
-    "    rom id=data name=dsp3.data.rom size=0x800\n"
-    "    ram id=data size=0x200\n"
-    "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
-  );
+  if(has_dsp3) {
+    markup.append(
+      "  necdsp model=uPD7725 frequency=8000000\n"
+      "    rom id=program name=dsp3.program.rom size=0x1800\n"
+      "    rom id=data name=dsp3.data.rom size=0x800\n"
+      "    ram id=data size=0x200\n"
+      "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
+    );
+    if((size & 0x7fff) == 0x2000) {
+      firmware_appended = true;
+      rom_size -= 0x2000;
+    }
+  }
 
-  if(has_dsp4) markup.append(
-    "  necdsp model=uPD7725 frequency=8000000\n"
-    "    rom id=program name=dsp4.program.rom size=0x1800\n"
-    "    rom id=data name=dsp4.data.rom size=0x800\n"
-    "    ram id=data size=0x200\n"
-    "    map address=30-3f,b0-bf:8000-ffff select=0x4000\n"
-  );
+  if(has_dsp4) {
+    markup.append(
+      "  necdsp model=uPD7725 frequency=8000000\n"
+      "    rom id=program name=dsp4.program.rom size=0x1800\n"
+      "    rom id=data name=dsp4.data.rom size=0x800\n"
+      "    ram id=data size=0x200\n"
+      "    map address=30-3f,b0-bf:8000-ffff select=0x4000\n"
+    );
+    if((size & 0x7fff) == 0x2000) {
+      firmware_appended = true;
+      rom_size -= 0x2000;
+    }
+  }
 
-  if(has_st010) markup.append(
-    "  necdsp model=uPD96050 frequency=11000000\n"
-    "    rom id=program name=st010.program.rom size=0xc000\n"
-    "    rom id=data name=st010.data.rom size=0x1000\n"
-    "    ram id=data name=save.ram size=0x1000\n"
-    "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
-    "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
-  );
+  if(has_st010) {
+    markup.append(
+      "  necdsp model=uPD96050 frequency=11000000\n"
+      "    rom id=program name=st010.program.rom size=0xc000\n"
+      "    rom id=data name=st010.data.rom size=0x1000\n"
+      "    ram id=data name=save.ram size=0x1000\n"
+      "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
+      "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
+    );
+    if((size & 0xffff) == 0xd000) {
+      firmware_appended = true;
+      rom_size -= 0xd000;
+    }
+  }
 
-  if(has_st011) markup.append(
-    "  necdsp model=uPD96050 frequency=15000000\n"
-    "    rom id=program name=st011.program.rom size=0xc000\n"
-    "    rom id=data name=st011.data.rom size=0x1000\n"
-    "    ram id=data name=save.ram size=0x1000\n"
-    "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
-    "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
-  );
+  if(has_st011) {
+    markup.append(
+      "  necdsp model=uPD96050 frequency=15000000\n"
+      "    rom id=program name=st011.program.rom size=0xc000\n"
+      "    rom id=data name=st011.data.rom size=0x1000\n"
+      "    ram id=data name=save.ram size=0x1000\n"
+      "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
+      "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
+    );
+    if((size & 0xffff) == 0xd000) {
+      firmware_appended = true;
+      rom_size -= 0xd000;
+    }
+  }
 
-  if(has_st018) markup.append(
-    "  armdsp frequency=21477272\n"
-    "    rom id=program name=st018.program.rom size=0x20000\n"
-    "    rom id=data name=st018.data.rom size=0x8000\n"
-    "    ram name=save.ram size=0x4000\n"
-    "    map id=io address=00-3f,80-bf:3800-38ff\n"
-  );
+  if(has_st018) {
+    markup.append(
+      "  armdsp frequency=21477272\n"
+      "    rom id=program name=st018.program.rom size=0x20000\n"
+      "    rom id=data name=st018.data.rom size=0x8000\n"
+      "    ram name=save.ram size=0x4000\n"
+      "    map id=io address=00-3f,80-bf:3800-38ff\n"
+    );
+    if((size & 0x3ffff) == 0x28000) {
+      firmware_appended = true;
+      rom_size -= 0x28000;
+    }
+  }
 }
 
 void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
@@ -464,6 +535,7 @@ void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
 
   ram_size = 1024 << (data[index + RamSize] & 7);
   if(ram_size == 1024) ram_size = 0;  //no RAM present
+  if(rom_size == 0 && ram_size) ram_size = 0;  //fix for Bazooka Blitzkrieg's malformed header (swapped ROM and RAM sizes)
 
   //0, 1, 13 = NTSC; 2 - 12 = PAL
   region = (regionid <= 1 || regionid >= 13) ? NTSC : PAL;

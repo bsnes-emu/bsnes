@@ -119,6 +119,7 @@ namespace nall {
     inline optional<unsigned> find(const char*) const;
     inline string concatenate(const char*) const;
     inline void append() {}
+    inline void isort();
     template<typename... Args> inline void append(const string&, Args&&...);
 
     template<unsigned Limit = 0> inline lstring& split(const char*, const char*);

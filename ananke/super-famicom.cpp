@@ -1,3 +1,17 @@
+void Ananke::copySuperFamicomSaves(const string &pathname) {
+  if(!file::exists({pathname, "save.ram"})) {
+    if(file::exists({information.path, nall::basename(information.name), ".srm"})) {
+      file::copy({information.path, nall::basename(information.name), ".srm"}, {pathname, "save.ram"});
+    }
+  }
+
+  if(!file::exists({pathname, "rtc.ram"})) {
+    if(file::exists({information.path, nall::basename(information.name), ".rtc"})) {
+      file::copy({information.path, nall::basename(information.name), ".rtc"}, {pathname, "rtc.ram"});
+    }
+  }
+}
+
 string Ananke::createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest) {
   string pathname = {
     userpath(), "Emulation/Super Famicom/",
@@ -8,7 +22,7 @@ string Ananke::createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node 
   };
   directory::create(pathname);
 
-  //strip "release" root node from database entry
+  //strip "release" root node from database entry (since a single game manifest isn't part of a database)
   string markup = manifest;
   markup.replace("\n  ", "\n");
   markup.replace("information", "\ninformation");
@@ -25,6 +39,7 @@ string Ananke::createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node 
     offset += size;
   }
 
+  copySuperFamicomSaves(pathname);
   return pathname;
 }
 
@@ -32,7 +47,7 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
   string pathname = {
     userpath(), "Emulation/Super Famicom/",
     nall::basename(information.name),
-    " (unverified).sfc/"
+    " (!).sfc/"
   };
   directory::create(pathname);
 
@@ -41,17 +56,36 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
   SuperFamicomCartridge info(buffer.data(), buffer.size());
   string markup = info.markup;
   if(!information.manifest.empty()) markup = information.manifest;  //override with embedded beat manifest, if one exists
+  information.manifest = markup;  //save for use with firmware routine below
 
   file::write({pathname, "manifest.bml"}, markup);
 
   if(!markup.position("spc7110")) {
-    file::write({pathname, "program.rom"}, buffer);
+    file::write({pathname, "program.rom"}, buffer.data(), info.rom_size);
   } else {
     file::write({pathname, "program.rom"}, buffer.data(), 0x100000);
-    file::write({pathname, "data.rom"}, buffer.data() + 0x100000, buffer.size() - 0x100000);
+    file::write({pathname, "data.rom"}, buffer.data() + 0x100000, info.rom_size - 0x100000);
   }
 
-  auto copyFirmware = [&](const string &name, unsigned programSize, unsigned dataSize) {
+  createSuperFamicomHeuristicFirmware(buffer, pathname, info.firmware_appended);
+  copySuperFamicomSaves(pathname);
+
+  return pathname;
+}
+
+void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const string &pathname, bool firmware_appended) {
+  auto copyFirmwareInternal = [&](const string &name, unsigned programSize, unsigned dataSize) {
+    //firmware appended directly onto .sfc file
+    unsigned programOffset = buffer.size() - programSize - dataSize;
+    unsigned dataOffset = buffer.size() - dataSize;
+
+    string basename = nall::basename(name);
+    if(programSize) file::write({pathname, basename, ".program.rom"}, buffer.data() + programOffset, programSize);
+    if(dataSize) file::write({pathname, basename, ".data.rom"}, buffer.data() + dataOffset, dataSize);
+  };
+
+  auto copyFirmwareExternal = [&](const string &name, unsigned programSize, unsigned dataSize) {
+    //firmware stored in external file
     auto buffer = file::read({information.path, name});  //try and read from the containing directory
     if(buffer.size() == 0) buffer = extractFile(name);  //try and read from the containing archive, if one exists
     if(buffer.size() == 0) {
@@ -67,6 +101,12 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
     if(dataSize) file::write({pathname, basename, ".data.rom"}, buffer.data() + programSize, dataSize);
   };
 
+  auto copyFirmware = [&](const string &name, unsigned programSize, unsigned dataSize) {
+    if(firmware_appended == 1) copyFirmwareInternal(name, programSize, dataSize);
+    if(firmware_appended == 0) copyFirmwareExternal(name, programSize, dataSize);
+  };
+
+  string markup = information.manifest;
   if(markup.position("dsp1.program.rom" )) copyFirmware("dsp1.rom",  0x001800, 0x000800);
   if(markup.position("dsp1b.program.rom")) copyFirmware("dsp1b.rom", 0x001800, 0x000800);
   if(markup.position("dsp2.program.rom" )) copyFirmware("dsp2.rom",  0x001800, 0x000800);
@@ -76,14 +116,13 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
   if(markup.position("st011.program.rom")) copyFirmware("st011.rom", 0x00c000, 0x001000);
   if(markup.position("st018.program.rom")) copyFirmware("st018.rom", 0x020000, 0x008000);
   if(markup.position("cx4.data.rom"     )) copyFirmware("cx4.rom",   0x000000, 0x000c00);
-
-  return pathname;
 }
 
 string Ananke::openSuperFamicom(vector<uint8_t> &buffer) {
   string sha256 = nall::sha256(buffer.data(), buffer.size());
 
   string databaseText = string::read({configpath(), "ananke/database/Super Famicom.bml"}).rtrim("\n");
+  if(databaseText.empty()) databaseText = string{Database::SuperFamicom}.strip();
   lstring databaseItem = databaseText.split("\n\n");
 
   for(auto &item : databaseItem) {

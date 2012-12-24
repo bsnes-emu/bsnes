@@ -1,10 +1,17 @@
 #include <nall/nall.hpp>
 #include <nall/beat/patch.hpp>
+#include <nall/emulation/famicom.hpp>
 #include <nall/emulation/super-famicom.hpp>
+#include <nall/emulation/game-boy.hpp>
+#include <nall/emulation/game-boy-advance.hpp>
 using namespace nall;
 
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
+
+namespace Database {
+  #include "database/super-famicom.hpp"
+};
 
 struct Ananke {
   #include "configuration.cpp"
@@ -23,40 +30,72 @@ struct Ananke {
   //patch.cpp
   void applyBeatPatch(vector<uint8_t> &buffer);
 
+  //famicom.cpp
+  void copyFamicomSaves(const string &pathname);
+  string createFamicomHeuristic(vector<uint8_t> &buffer);
+  string openFamicom(vector<uint8_t> &buffer);
+
   //super-famicom.cpp
+  void copySuperFamicomSaves(const string &pathname);
   string createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest);
   string createSuperFamicomHeuristic(vector<uint8_t> &buffer);
+  void createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const string &pathname, bool firmware_appended);
   string openSuperFamicom(vector<uint8_t> &buffer);
 
-  string open(string filename = "") {
-    if(filename.empty()) filename = DialogWindow::fileOpen(Window::none(), config.path);
-    if(filename.empty()) return "";
+  //game-boy.cpp
+  void copyGameBoySaves(const string &pathname);
+  string createGameBoyHeuristic(vector<uint8_t> &buffer);
+  string openGameBoy(vector<uint8_t> &buffer);
 
-    information.path = dir(filename);
-    information.name = notdir(filename);
-    config.path = information.path;  //remember last used directory
+  //game-boy-advance.cpp
+  void copyGameBoyAdvanceSaves(const string &pathname);
+  string createGameBoyAdvanceHeuristic(vector<uint8_t> &buffer);
+  string openGameBoyAdvance(vector<uint8_t> &buffer);
 
-    vector<uint8_t> buffer;
-    if(filename.endswith(".zip")) {
-      information.archive = filename;
-      buffer = extractROM();
-    } else {
-      buffer = file::read(filename);
-    }
-    if(buffer.size() == 0) return "";  //failed to read file
-
-    applyBeatPatch(buffer);
-
-    if(information.name.endswith(".sfc")) return openSuperFamicom(buffer);
-    return "";
-  }
-
-
+  string open(string filename = "");
 };
 
+#include "resource/resource.cpp"
+#include "file-dialog.cpp"
 #include "archive.cpp"
 #include "patch.cpp"
+#include "famicom.cpp"
 #include "super-famicom.cpp"
+#include "game-boy.cpp"
+#include "game-boy-advance.cpp"
+
+FileDialog *fileDialog = nullptr;
+
+string Ananke::open(string filename) {
+  if(filename.empty()) {
+    if(!fileDialog) fileDialog = new FileDialog;
+    fileDialog->setPath(config.path);
+    filename = fileDialog->open();
+  }
+
+  if(filename.empty()) return "";
+
+  information.path = dir(filename);
+  information.name = notdir(filename);
+  config.path = information.path;  //remember last used directory
+
+  vector<uint8_t> buffer;
+  if(filename.endswith(".zip")) {
+    information.archive = filename;
+    buffer = extractROM();
+  } else {
+    buffer = file::read(filename);
+  }
+  if(buffer.size() == 0) return "";  //failed to read file
+
+  applyBeatPatch(buffer);
+
+  if(information.name.endswith(".fc") || information.name.endswith(".nes")) return openFamicom(buffer);
+  if(information.name.endswith(".sfc") || information.name.endswith(".smc")) return openSuperFamicom(buffer);
+  if(information.name.endswith(".gb") || information.name.endswith(".gbc")) return openGameBoy(buffer);
+  if(information.name.endswith(".gba")) return openGameBoyAdvance(buffer);
+  return "";
+}
 
 extern "C" string ananke_browse(const string &filename) {
   Ananke ananke;

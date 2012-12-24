@@ -2,7 +2,12 @@ vector<uint8_t> Ananke::extractROM() {
   unzip archive;
   if(archive.open(information.archive)) {
     for(auto &file : archive.file) {
-      if(file.name.endswith(".sfc")) {
+      if(
+         file.name.endswith(".fc") || file.name.endswith(".nes")
+      || file.name.endswith(".sfc") || file.name.endswith(".smc")
+      || file.name.endswith(".gb") || file.name.endswith(".gbc")
+      || file.name.endswith(".gba")
+      ) {
         information.name = notdir(file.name);
         return archive.extract(file);
       }
