@@ -46,21 +46,16 @@ GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t *data, unsigned s
   identifiers = list.concatenate(",");
 
   markup = "";
-
-  markup.append("<?xml version='1.0' encoding='UTF-8'?>\n");
-  markup.append("<cartridge sha256='", sha256(data, size), "'>\n");
-  markup.append("  <rom name='program.rom' size='0x", hex(size), "'/>\n");
+  markup.append("cartridge\n");
+  markup.append("  rom name=program.rom size=0x", hex(size), "\n");
   if(0);
-  else if(identifiers.beginswith("SRAM_V"    )) markup.append("  <ram name='save.ram' type='SRAM' size='0x8000'/>\n");
-  else if(identifiers.beginswith("SRAM_F_V"  )) markup.append("  <ram name='save.ram' type='FRAM' size='0x8000'/>\n");
-  else if(identifiers.beginswith("EEPROM_V"  )) markup.append("  <ram name='save.ram' type='EEPROM' size='0x0'/>\n");
-  else if(identifiers.beginswith("FLASH_V"   )) markup.append("  <ram name='save.ram' type='FlashROM' size='0x10000'/>\n");
-  else if(identifiers.beginswith("FLASH512_V")) markup.append("  <ram name='save.ram' type='FlashROM' size='0x10000'/>\n");
-  else if(identifiers.beginswith("FLASH1M_V" )) markup.append("  <ram name='save.ram' type='FlashROM' size='0x20000'/>\n");
-  if(identifiers.empty() == false) markup.append("  <!-- detected: ", identifiers, " -->\n");
-
-  markup.append("</cartridge>\n");
-  markup.transform("'", "\"");
+  else if(identifiers.beginswith("SRAM_V"    )) markup.append("  ram name=save.ram type=SRAM size=0x8000\n");
+  else if(identifiers.beginswith("SRAM_F_V"  )) markup.append("  ram name=save.ram type=FRAM size=0x8000\n");
+  else if(identifiers.beginswith("EEPROM_V"  )) markup.append("  ram name=save.ram type=EEPROM size=0x0\n");
+  else if(identifiers.beginswith("FLASH_V"   )) markup.append("  ram name=save.ram type=FlashROM size=0x10000\n");
+  else if(identifiers.beginswith("FLASH512_V")) markup.append("  ram name=save.ram type=FlashROM size=0x10000\n");
+  else if(identifiers.beginswith("FLASH1M_V" )) markup.append("  ram name=save.ram type=FlashROM size=0x20000\n");
+//if(identifiers.empty() == false) markup.append("  #detected: ", identifiers, "\n");
 }
 
 }

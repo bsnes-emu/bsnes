@@ -4,6 +4,10 @@ namespace SuperFamicom {
 
 Interface *interface = nullptr;
 
+string Interface::title() {
+  return cartridge.title();
+}
+
 double Interface::videoFrequency() {
   switch(system.region()) { default:
   case System::Region::NTSC: return system.cpu_frequency() / (262.0 * 1364.0 - 4.0);
@@ -372,10 +376,10 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::SuperFamicom, "Super Famicom", "sfc"});
-  media.append({ID::SuperFamicom, "Super Famicom", "gb", "Super Game Boy.sfc"});
-  media.append({ID::SuperFamicom, "Super Famicom", "bs", "BS-X Satellaview.sfc"});
-  media.append({ID::SuperFamicom, "Super Famicom", "st", "Sufami Turbo.sfc"});
+  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true});
+  media.append({ID::SuperFamicom, "Super Game Boy", "gb", false});
+  media.append({ID::SuperFamicom, "BS-X Satellaview", "bs", false});
+  media.append({ID::SuperFamicom, "Sufami Turbo", "st", false});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

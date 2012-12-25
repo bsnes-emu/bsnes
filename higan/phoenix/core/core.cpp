@@ -674,6 +674,10 @@ bool Widget::enabled() {
   return state.enabled;
 }
 
+bool Widget::focused() {
+  return p.focused();
+}
+
 string Widget::font() {
   return state.font;
 }

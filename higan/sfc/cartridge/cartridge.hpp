@@ -61,6 +61,17 @@ struct Cartridge : property<Cartridge> {
   };
   vector<Memory> memory;
 
+  struct Information {
+    struct Title {
+      string cartridge;
+      string gameBoy;
+      string satellaview;
+      string sufamiTurboA;
+      string sufamiTurboB;
+    } title;
+  } information;
+  string title();
+
   void load(const string &manifest);
   void load_super_game_boy(const string &manifest);
   void load_satellaview(const string &manifest);

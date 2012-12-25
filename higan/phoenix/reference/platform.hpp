@@ -183,6 +183,7 @@ struct pWidget : public pSizable {
   Widget &widget;
 
   bool enabled();
+  bool focused();
   Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();

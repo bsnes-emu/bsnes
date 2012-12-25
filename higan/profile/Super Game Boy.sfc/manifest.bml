@@ -1,6 +1,0 @@
-cartridge region=NTSC
-  rom name=program.rom size=0x80000
-  map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-  icd2 revision=1
-    rom name=boot.rom size=0x100
-    map id=io address=00-3f,80-bf:6000-7fff

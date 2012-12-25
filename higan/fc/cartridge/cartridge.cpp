@@ -6,6 +6,10 @@ namespace Famicom {
 #include "board/board.cpp"
 Cartridge cartridge;
 
+string Cartridge::title() {
+  return information.title;
+}
+
 void Cartridge::Main() {
   cartridge.main();
 }

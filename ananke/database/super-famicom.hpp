@@ -1,6 +1,30 @@
 string SuperFamicom = R"(
 
-database revision=2012-12-18
+database revision=2012-12-24
+
+release
+  cartridge region=NTSC
+    board id:Sufami Turbo
+    rom name=program.rom size=0x40000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    sufamiturbo
+      slot id=A
+        map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000
+        map id=ram address=60-6f,e0-ef:0000-ffff
+      slot id=B
+        map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000
+        map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000
+        map id=ram address=70-7f,f0-ff:0000-ffff
+  information
+    title:    スーファミターボ
+    name:     Sufami Turbo
+    region:   JP
+    revision: 1.0
+    board:    Sufami Turbo
+    serial:   SFT-0100-JPN
+    sha256:   edacb453da14f825f05d1134d6035f4bf034e55f7cfb97c70c4ee107eabc7342
+    configuration
+      rom name=program.rom size=0x40000
 
 release
   cartridge region=NTSC
@@ -2394,10 +2418,10 @@ release
 release
   cartridge region=NTSC
     board type=1CA0N6S revision=01
-    superfx revision=2
+    superfx revision=4
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x10000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
       map id=rom address=40-5f,c0-df:0000-ffff
       map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
@@ -2413,6 +2437,7 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x10000
+      superfx revision=4
 
 release
   cartridge region=NTSC
@@ -2477,10 +2502,10 @@ release
 release
   cartridge region=NTSC
     board type=1CB0N7S revision=01
-    superfx revision=3
+    superfx revision=4
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x10000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-3f:8000-ffff mask=0x8000
       map id=rom address=40-5f:0000-ffff
       map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
@@ -2496,6 +2521,7 @@ release
     configuration
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x10000
+      superfx revision=4
 
 release
   cartridge region=NTSC
@@ -5481,6 +5507,26 @@ release
     sha256:   0ad77ae7af231313e1369a52d1622b88e3751aa5ec774628df7071f9e4244abc
     configuration
       rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1J3M revision=01,11,20
+    rom name=program.rom size=0x180000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Madden NFL '96
+    name:     Madden NFL '96
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1J3M-20
+    serial:   M/SNS-A6FE-USA
+    sha256:   3059d86cdc383985c564a7a891fe18e08f5222ead7ede9fa309159d60cde13a1
+    configuration
+      rom name=program.rom size=0x180000
       ram name=save.ram size=0x2000
 
 release
@@ -9366,7 +9412,7 @@ release
     superfx revision=1
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x8000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
       map id=ram address=60-7f,e0-ff:0000-ffff
   information
@@ -9380,6 +9426,7 @@ release
     configuration
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x8000
+      superfx revision=1
 
 release
   cartridge region=NTSC
@@ -9624,10 +9671,10 @@ release
 release
   cartridge region=NTSC
     board type=1CA6B revision=01
-    superfx revision=2
+    superfx revision=4
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x10000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
       map id=rom address=40-5f,c0-df:0000-ffff
       map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
@@ -9643,6 +9690,7 @@ release
     configuration
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x10000
+      superfx revision=4
 
 release
   cartridge region=NTSC
@@ -10108,6 +10156,28 @@ release
 
 release
   cartridge region=NTSC
+    board id:Super Game Boy
+    rom name=program.rom size=0x40000
+    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    icd2 revision=1
+      rom name=sgb.boot.rom size=0x100
+      map id=io address=00-3f,80-bf:6000-67ff
+      map id=io address=00-3f,80-bf:7000-7fff
+  information
+    title:    Super Game Boy
+    name:     Super Game Boy
+    region:   NA
+    revision: 1.2
+    board:    Super Game Boy
+    serial:   N/A
+    sha256:   4d7fc331a811b8dc630b469262fd6f45e289243cef83101f32038158967d1b28
+    configuration
+      rom name=program.rom size=0x40000
+      rom name=sgb.boot.rom size=0x100
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
     map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
@@ -10305,10 +10375,10 @@ release
 release
   cartridge region=NTSC
     board type=1CB5B revision=20
-    superfx revision=3
+    superfx revision=4
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x8000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-3f:8000-ffff mask=0x8000
       map id=rom address=40-5f:0000-ffff
       map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
@@ -10324,6 +10394,7 @@ release
     configuration
       rom name=program.rom size=0x200000
       ram name=save.ram size=0x8000
+      superfx revision=4
 
 release
   cartridge region=NTSC
@@ -11958,10 +12029,10 @@ release
 release
   cartridge region=NTSC
     board type=1CA0N5S revision=01
-    superfx revision=2
+    superfx revision=4
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x8000
-      map id=io address=00-3f,80-bf:3000-32ff
+      map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
       map id=rom address=40-5f,c0-df:0000-ffff
       map id=ram address=00-3f,80-bf:6000-7fff size=0x2000
@@ -11977,6 +12048,7 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x8000
+      superfx revision=4
 
 release
   cartridge region=NTSC

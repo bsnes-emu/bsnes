@@ -7,6 +7,30 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 Cartridge cartridge;
 
+string Cartridge::title() {
+  if(information.title.gameBoy.empty() == false) {
+    return information.title.gameBoy;
+  }
+
+  if(information.title.satellaview.empty() == false) {
+    if(has_bs_cart()) {
+      return information.title.satellaview;
+    } else {
+      return {information.title.cartridge, " + ", information.title.satellaview};
+    }
+  }
+
+  if(information.title.sufamiTurboA.empty() == false) {
+    if(information.title.sufamiTurboB.empty() == true) {
+      return information.title.sufamiTurboA;
+    } else {
+      return {information.title.sufamiTurboA, " + ", information.title.sufamiTurboB};
+    }
+  }
+
+  return information.title.cartridge;
+}
+
 void Cartridge::load(const string &manifest) {
   region = Region::NTSC;
 
@@ -29,6 +53,12 @@ void Cartridge::load(const string &manifest) {
   has_hsu1       = false;
   has_msu1       = false;
 
+  information.title.cartridge = "";
+  information.title.gameBoy = "";
+  information.title.satellaview = "";
+  information.title.sufamiTurboA = "";
+  information.title.sufamiTurboB = "";
+
   this->manifest = manifest;
   parse_markup(manifest);
 //print(manifest, "\n\n");
@@ -45,7 +75,15 @@ void Cartridge::load(const string &manifest) {
 
   //Sufami Turbo
   else if(cartridge.has_st_slots()) {
-    sha256 = nall::sha256(sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
+    sha256_ctx sha;
+    uint8_t hash[32];
+    sha256_init(&sha);
+    sha256_chunk(&sha, sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
+    sha256_chunk(&sha, sufamiturbo.slotB.rom.data(), sufamiturbo.slotB.rom.size());
+    sha256_final(&sha);
+    string result;
+    for(auto &byte : hash) result.append(hex<2>(byte));
+    sha256 = result;
   }
 
   //Super Famicom
@@ -86,9 +124,10 @@ void Cartridge::load(const string &manifest) {
 }
 
 void Cartridge::load_super_game_boy(const string &manifest) {
-  XML::Document document(manifest);
-  auto rom = document["release/cartridge/rom"];
-  auto ram = document["release/cartridge/ram"];
+  auto document = Markup::Document(manifest);
+  information.title.gameBoy = document["information/title"].text();
+  auto rom = document["cartridge/rom"];
+  auto ram = document["cartridge/ram"];
 
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy, manifest);
 
@@ -98,8 +137,9 @@ void Cartridge::load_super_game_boy(const string &manifest) {
 }
 
 void Cartridge::load_satellaview(const string &manifest) {
-  XML::Document document(manifest);
-  auto rom = document["release/cartridge/rom"];
+  auto document = Markup::Document(manifest);
+  information.title.satellaview = document["information/title"].text();
+  auto rom = document["cartridge/rom"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -109,9 +149,10 @@ void Cartridge::load_satellaview(const string &manifest) {
 }
 
 void Cartridge::load_sufami_turbo_a(const string &manifest) {
-  XML::Document document(manifest);
-  auto rom = document["release/cartridge/rom"];
-  auto ram = document["release/cartridge/ram"];
+  auto document = Markup::Document(manifest);
+  information.title.sufamiTurboA = document["information/title"].text();
+  auto rom = document["cartridge/rom"];
+  auto ram = document["cartridge/ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);
@@ -126,15 +167,16 @@ void Cartridge::load_sufami_turbo_a(const string &manifest) {
     memory.append({ID::SufamiTurboSlotARAM, ram["name"].data});
   }
 
-  if(document["cartridge"]["linkable"].data == "true") {
+  if(document["cartridge/linkable"].exists()) {
     interface->loadRequest(ID::SufamiTurboSlotB, "Sufami Turbo - Slot B", "st");
   }
 }
 
 void Cartridge::load_sufami_turbo_b(const string &manifest) {
-  XML::Document document(manifest);
-  auto rom = document["release/cartridge/rom"];
-  auto ram = document["release/cartridge/ram"];
+  auto document = Markup::Document(manifest);
+  information.title.sufamiTurboB = document["information/title"].text();
+  auto rom = document["cartridge/rom"];
+  auto ram = document["cartridge/ram"];
 
   if(rom["name"].exists()) {
     unsigned size = numeral(rom["size"].data);

@@ -1,6 +1,5 @@
 resource name=resource
-  binary id=cabinet name=cabinet.png
-  binary id=folder name=folder.png
-  binary id=file name=file.png
   binary id=home name=home.png
   binary id=up name=up.png
+  binary id=folder name=folder.png
+  binary id=game name=game.png

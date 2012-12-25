@@ -1,4 +1,4 @@
-//SNES-EVENT board emulation:
+//SNES-EVENT board emulation (skeleton):
 //* Campus Challenge '92
 //* Powerfest '94
 
@@ -14,8 +14,6 @@ struct Event : Coprocessor {
   void power();
   void reset();
 
-  void submitScore();
-
   uint8 sr(unsigned);
   void dr(unsigned, uint8 data);
   uint8 rom_read(unsigned addr);
@@ -29,16 +27,11 @@ struct Event : Coprocessor {
   unsigned revision;
   unsigned timer;
 
-  uint8 status;
-  uint8 select;
-
-  bool timerActive;
-  bool scoreActive;
-
-  unsigned timerSecondsRemaining;
-  unsigned scoreSecondsRemaining;
-
-  bool usedSaveState;
+  string host;
+  unsigned port;
+  string path;
+  string username;
+  string password;
 };
 
 extern Event event;

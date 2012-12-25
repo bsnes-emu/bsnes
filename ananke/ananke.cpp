@@ -11,6 +11,7 @@ using namespace phoenix;
 
 namespace Database {
   #include "database/super-famicom.hpp"
+  #include "database/sufami-turbo.hpp"
 };
 
 struct Ananke {
@@ -42,6 +43,12 @@ struct Ananke {
   void createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const string &pathname, bool firmware_appended);
   string openSuperFamicom(vector<uint8_t> &buffer);
 
+  //sufami-turbo.cpp
+  void copySufamiTurboSaves(const string &pathname);
+  string createSufamiTurboDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest);
+  string createSufamiTurboHeuristic(vector<uint8_t> &buffer);
+  string openSufamiTurbo(vector<uint8_t> &buffer);
+
   //game-boy.cpp
   void copyGameBoySaves(const string &pathname);
   string createGameBoyHeuristic(vector<uint8_t> &buffer);
@@ -52,6 +59,7 @@ struct Ananke {
   string createGameBoyAdvanceHeuristic(vector<uint8_t> &buffer);
   string openGameBoyAdvance(vector<uint8_t> &buffer);
 
+  static bool supported(const string &filename);
   string open(string filename = "");
 };
 
@@ -61,10 +69,28 @@ struct Ananke {
 #include "patch.cpp"
 #include "famicom.cpp"
 #include "super-famicom.cpp"
+#include "sufami-turbo.cpp"
 #include "game-boy.cpp"
 #include "game-boy-advance.cpp"
 
 FileDialog *fileDialog = nullptr;
+
+bool Ananke::supported(const string &filename) {
+  string extension = nall::extension(filename);
+
+  if(extension == "fc" ) return true;
+  if(extension == "nes") return true;
+  if(extension == "sfc") return true;
+  if(extension == "smc") return true;
+  if(extension == "bs" ) return true;
+  if(extension == "st" ) return true;
+  if(extension == "gb" ) return true;
+  if(extension == "gbc") return true;
+  if(extension == "gba") return true;
+  if(extension == "zip") return true;
+
+  return false;
+}
 
 string Ananke::open(string filename) {
   if(filename.empty()) {
@@ -92,6 +118,7 @@ string Ananke::open(string filename) {
 
   if(information.name.endswith(".fc") || information.name.endswith(".nes")) return openFamicom(buffer);
   if(information.name.endswith(".sfc") || information.name.endswith(".smc")) return openSuperFamicom(buffer);
+  if(information.name.endswith(".st")) return openSufamiTurbo(buffer);
   if(information.name.endswith(".gb") || information.name.endswith(".gbc")) return openGameBoy(buffer);
   if(information.name.endswith(".gba")) return openGameBoyAdvance(buffer);
   return "";

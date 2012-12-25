@@ -7,13 +7,18 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 Cartridge cartridge;
 
+string Cartridge::title() {
+  return information.title;
+}
+
 void Cartridge::load(const string &manifest) {
   information.markup = manifest;
   auto document = Markup::Document(manifest);
+  information.title = document["information/title"].text();
 
   unsigned rom_size = 0;
-  if(document["cartridge"]["rom"].exists()) {
-    auto info = document["cartridge"]["rom"];
+  if(document["cartridge/rom"].exists()) {
+    auto info = document["cartridge/rom"];
     interface->loadRequest(ID::ROM, info["name"].data);
     rom_size = numeral(info["size"].data);
     for(unsigned addr = rom_size; addr < rom.size; addr++) {
@@ -25,8 +30,8 @@ void Cartridge::load(const string &manifest) {
   has_eeprom   = false;
   has_flashrom = false;
 
-  if(document["cartridge"]["ram"].exists()) {
-    auto info = document["cartridge"]["ram"];
+  if(document["cartridge/ram"].exists()) {
+    auto info = document["cartridge/ram"];
 
     if(info["type"].data == "SRAM" || info["type"].data == "FRAM") {
       has_sram = true;

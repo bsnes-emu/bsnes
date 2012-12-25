@@ -55,6 +55,7 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
 
   SuperFamicomCartridge info(buffer.data(), buffer.size());
   string markup = info.markup;
+  markup.append("\ninformation\n  title: ", nall::basename(information.name), "\n");
   if(!information.manifest.empty()) markup = information.manifest;  //override with embedded beat manifest, if one exists
   information.manifest = markup;  //save for use with firmware routine below
 
@@ -121,7 +122,7 @@ void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const 
 string Ananke::openSuperFamicom(vector<uint8_t> &buffer) {
   string sha256 = nall::sha256(buffer.data(), buffer.size());
 
-  string databaseText = string::read({configpath(), "ananke/database/Super Famicom.bml"}).rtrim("\n");
+  string databaseText = string::read({configpath(), "ananke/database/Super Famicom.bml"}).strip();
   if(databaseText.empty()) databaseText = string{Database::SuperFamicom}.strip();
   lstring databaseItem = databaseText.split("\n\n");
 

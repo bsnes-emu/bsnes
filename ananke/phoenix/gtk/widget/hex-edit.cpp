@@ -7,6 +7,10 @@ static bool HexEdit_scroll(GtkRange *range, GtkScrollType scroll, gdouble value,
   return false;
 }
 
+bool pHexEdit::focused() {
+  return GTK_WIDGET_HAS_FOCUS(subWidget);
+}
+
 void pHexEdit::setColumns(unsigned columns) {
   setScroll();
   update();

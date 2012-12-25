@@ -4,6 +4,10 @@ namespace Famicom {
 
 Interface *interface = nullptr;
 
+string Interface::title() {
+  return cartridge.title();
+}
+
 double Interface::videoFrequency() {
   return 21477272.0 / (262.0 * 1364.0 - 4.0);
 }
@@ -124,7 +128,7 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::Famicom, "Famicom", "fc"});
+  media.append({ID::Famicom, "Famicom", "fc", true});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

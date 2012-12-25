@@ -333,6 +333,7 @@ struct Layout : private nall::base_from_member<pLayout&>, Sizable {
 
 struct Widget : private nall::base_from_member<pWidget&>, Sizable {
   bool enabled();
+  bool focused();
   nall::string font();
   Geometry geometry();
   Geometry minimumGeometry();

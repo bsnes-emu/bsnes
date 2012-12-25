@@ -35,6 +35,7 @@ struct Interface : Emulator::Interface {
   void lcdScanline();
   void joypWrite(bool p15, bool p14);
 
+  string title();
   double videoFrequency();
   double audioFrequency();
 

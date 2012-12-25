@@ -6,7 +6,7 @@ struct FileDialog : Window {
       Button upButton;
     ListView fileList;
     HorizontalLayout controlLayout;
-      Widget spacer;
+      Label filterLabel;
       Button openButton;
 
   string open() {
@@ -14,11 +14,21 @@ struct FileDialog : Window {
     setVisible();
     fileList.setFocused();
     filename = "";
+    bool backspace = false;
 
     dialogActive = true;
     while(dialogActive) {
       OS::processEvents();
       if(Keyboard::pressed(Keyboard::Scancode::Escape)) onClose();
+      if(Keyboard::pressed(Keyboard::Scancode::Backspace)) {
+        if(backspace == false) {
+          backspace = true;
+          if(fileList.focused()) upButton.onActivate();
+        }
+      } else {
+        backspace = false;
+      }
+      usleep(20 * 1000);
     }
 
     return filename;
@@ -42,8 +52,13 @@ struct FileDialog : Window {
 
     lstring files = directory::ifiles(pathname);
     for(auto &file : files) {
+      if(Ananke::supported(file) == false) continue;  //ignore unsupported extensions
       fileList.append(file);
-      fileList.setImage(filenameList.size(), 0, {resource::file, sizeof resource::file});
+      if(extension(file) == "zip") {
+        fileList.setImage(filenameList.size(), 0, {resource::archive, sizeof resource::archive});
+      } else {
+        fileList.setImage(filenameList.size(), 0, {resource::file, sizeof resource::file});
+      }
       filenameList.append({pathname, file});
     }
 
@@ -53,12 +68,13 @@ struct FileDialog : Window {
   }
 
   FileDialog() {
-    setGeometry({64, 64, 480, 600});
+    setFrameGeometry({64, 64, 480, 600});
     setTitle("Load Image");
 
     layout.setMargin(5);
     homeButton.setImage({resource::home, sizeof resource::home});
     upButton.setImage({resource::up, sizeof resource::up});
+    filterLabel.setText("Filter: *.fc, *.sfc, *.bs, *.st, *.gb, *.gbc, *.gba, *.nes, *.smc, *.zip");
     openButton.setText("Open");
 
     append(layout);
@@ -68,7 +84,7 @@ struct FileDialog : Window {
       pathLayout.append(upButton, {28, 28});
     layout.append(fileList, {~0, ~0}, 5);
     layout.append(controlLayout, {~0, 0});
-      controlLayout.append(spacer, {~0, 0});
+      controlLayout.append(filterLabel, {~0, 0}, 5);
       controlLayout.append(openButton, {80, 0});
 
     pathEdit.onActivate = [&] {

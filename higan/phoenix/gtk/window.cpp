@@ -30,6 +30,7 @@ static gboolean Window_expose(GtkWidget *widget, GdkEvent *event, Window *window
 
 static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *window) {
   if(gtk_widget_get_realized(window->p.widget) == false) return false;
+  if(window->visible() == false) return false;
   GdkWindow *gdkWindow = gtk_widget_get_window(widget);
 
   GdkRectangle border, client;

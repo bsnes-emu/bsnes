@@ -22,6 +22,7 @@ string Ananke::createGameBoyAdvanceHeuristic(vector<uint8_t> &buffer) {
 
   GameBoyAdvanceCartridge info(buffer.data(), buffer.size());
   string markup = info.markup;
+  markup.append("\ninformation\n  title: ", nall::basename(information.name), "\n");
   if(!information.manifest.empty()) markup = information.manifest;  //override with embedded beat manifest, if one exists
 
   file::write({pathname, "manifest.bml"}, markup);

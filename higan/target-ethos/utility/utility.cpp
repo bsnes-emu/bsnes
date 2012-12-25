@@ -28,7 +28,6 @@ void Utility::loadMedia(string pathname) {
   //determine type by comparing extension against all emulation cores
   for(auto &emulator : application->emulator) {
     for(auto &media : emulator->media) {
-      if(!media.load.empty()) continue;
       if(type != media.type) continue;
       return utility->loadMedia(emulator, media, {pathname, "/"});
     }
@@ -39,30 +38,26 @@ void Utility::loadMedia(string pathname) {
 
 //load menu option selected
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
-  string pathname;
-  if(!media.load.empty()) pathname = application->path({media.load, "/"});
-  if(!directory::exists(pathname)) pathname = browser->select("Load Media", media.type);
+  string pathname = browser->select({"Load ", media.name}, media.type);
   if(!directory::exists(pathname)) return;
   if(!file::exists({pathname, "manifest.bml"})) return;
   return loadMedia(emulator, media, pathname);
 }
 
-//load menu cartridge selected or command-line load
+//load base cartridge
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
   unload();
   setInterface(emulator);
   path(0) = application->path({media.name, ".sys/"});
   path(media.id) = pathname;
-  if(media.load.empty()) this->pathname.append(pathname);
+  this->pathname.append(pathname);
 
-  string manifest;
-  manifest.readfile({pathname, "manifest.bml"});
-  system().load(media.id, manifest);
+  system().load(media.id, string::read({pathname, "manifest.bml"}));
   system().power();
 
   if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
-  load(Markup::Document(manifest)["information/title"].text());
+  load();
 }
 
 //request from emulation core to load non-volatile media folder
@@ -72,9 +67,7 @@ void Utility::loadRequest(unsigned id, const string &name, const string &type) {
   path(id) = pathname;
   this->pathname.append(pathname);
 
-  string manifest;
-  manifest.readfile({pathname, "manifest.bml"});
-  system().load(id, manifest);
+  system().load(id, string::read({pathname, "manifest.bml"}));
 }
 
 //request from emulation core to load non-volatile media file
@@ -107,16 +100,8 @@ void Utility::reset() {
   system().reset();
 }
 
-void Utility::load(string title) {
-  if(title.empty()) {
-    for(auto &path : pathname) {
-      string name = path;
-      name.rtrim<1>("/");
-      title.append(notdir(nall::basename(name)), " + ");
-    }
-    title.rtrim<1>(" + ");
-  }
-  presentation->setTitle(title);
+void Utility::load() {
+  presentation->setTitle(system().title());
 
   cheatEditor->load({pathname[0], "cheats.bml"});
   stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);

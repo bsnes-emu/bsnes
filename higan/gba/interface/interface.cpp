@@ -4,6 +4,10 @@ namespace GameBoyAdvance {
 
 Interface *interface = nullptr;
 
+string Interface::title() {
+  return cartridge.title();
+}
+
 double Interface::videoFrequency() {
   return 16777216.0 / (228.0 * 1232.0);
 }
@@ -118,7 +122,7 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = false;
 
-  media.append({ID::GameBoyAdvance, "Game Boy Advance", "gba"});
+  media.append({ID::GameBoyAdvance, "Game Boy Advance", "gba", true});
 
   {
     Device device{0, ID::Device, "Controller"};

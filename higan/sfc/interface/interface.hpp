@@ -81,6 +81,7 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
+  string title();
   double videoFrequency();
   double audioFrequency();
 

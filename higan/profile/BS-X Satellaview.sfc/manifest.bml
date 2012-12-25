@@ -1,9 +1,0 @@
-cartridge region=NTSC
-  bsx
-    rom name=program.rom size=0x100000
-    ram id=save name=save.ram size=0x8000
-    ram id=download name=bsx.ram size=0x40000
-    map id=io address=00-3f,80-bf:5000-5fff
-    map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-7fff
-    map id=ram address=20-3f:6000-7fff

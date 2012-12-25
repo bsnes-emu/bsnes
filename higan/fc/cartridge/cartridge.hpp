@@ -16,7 +16,10 @@ struct Cartridge : Thread, property<Cartridge> {
 
   struct Information {
     string markup;
+    string title;
   } information;
+
+  string title();
 
   struct Memory {
     unsigned id;

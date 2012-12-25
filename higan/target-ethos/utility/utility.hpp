@@ -12,7 +12,7 @@ struct Utility {
   void connect(unsigned port, unsigned device);
   void power();
   void reset();
-  void load(string title = "");
+  void load();
   void unload();
 
   void saveState(unsigned slot);

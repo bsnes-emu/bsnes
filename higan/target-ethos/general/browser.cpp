@@ -6,15 +6,15 @@ Browser::Browser() {
   windowManager->append(this, "Browser");
 
   layout.setMargin(5);
-  pathBrowse.setText("Browse ...");
-  pathUp.setText("..");
+  homeButton.setImage({resource::home, sizeof resource::home});
+  upButton.setImage({resource::up, sizeof resource::up});
   openButton.setText("Open");
 
   append(layout);
   layout.append(pathLayout, {~0, 0}, 5);
     pathLayout.append(pathEdit, {~0, 0}, 5);
-    pathLayout.append(pathBrowse, {0, 0}, 5);
-    pathLayout.append(pathUp, {0, 0});
+    pathLayout.append(homeButton, {28, 28}, 5);
+    pathLayout.append(upButton, {28, 28});
   layout.append(fileList, {~0, ~0}, 5);
   layout.append(controlLayout, {~0, 0});
     controlLayout.append(filterLabel, {~0, 0}, 5);
@@ -27,17 +27,14 @@ Browser::Browser() {
     setPath(path);
   };
 
-  pathBrowse.onActivate = [&] {
-    string path = DialogWindow::folderSelect(*this, this->path);
-    if(!path.empty()) setPath(path);
+  homeButton.onActivate = [&] {
+    string pathname = {userpath(), "Emulation/"};
+    directory::create(pathname);
+    setPath(pathname);
   };
 
-  pathUp.onActivate = [&] {
-    if(this->path == "/") return;
-    string path = this->path;
-    path.rtrim<1>("/");
-    path = dir(path);
-    setPath(path);
+  upButton.onActivate = [&] {
+    setPath(parentdir(path));
   };
 
   fileList.onChange = {&Browser::synchronize, this};
@@ -91,24 +88,6 @@ void Browser::bootstrap() {
   config.save(application->path("paths.cfg"));
 }
 
-void Browser::inputEvent(unsigned scancode, int16_t value) {
-  if(scancode == keyboard(0)[nall::Keyboard::Escape] && value == 0) onClose();
-
-  //proof of concept only, not very useful:
-  //joypad up/down moves around in the file list, any joypad button loads selected game
-  if(fileList.selected() == false) return;
-  unsigned selection = fileList.selection();
-
-  if(Joypad::isAnyHat(scancode)) {
-    if(value & Joypad::HatUp  ) fileList.setSelection(selection - 1);
-    if(value & Joypad::HatDown) fileList.setSelection(selection + 1);
-  }
-
-  if(Joypad::isAnyButton(scancode) && value == 1) {
-    fileList.onActivate();
-  }
-}
-
 string Browser::select(const string &title, const string &extension) {
   this->extension = extension;
 
@@ -134,9 +113,20 @@ string Browser::select(const string &title, const string &extension) {
   outputFilename = "";
 
   dialogActive = true;
-  while(dialogActive == true) {
+  bool backspace = false;
+  using phoenix::Keyboard;
+
+  while(dialogActive) {
     OS::processEvents();
-    inputManager->poll();
+    if(Keyboard::pressed(Keyboard::Scancode::Escape)) onClose();
+    if(Keyboard::pressed(Keyboard::Scancode::Backspace)) {
+      if(backspace == false) {
+        backspace = true;
+        if(fileList.focused()) upButton.onActivate();
+      }
+    } else {
+      backspace = false;
+    }
     usleep(20 * 1000);
   }
 
@@ -165,7 +155,7 @@ void Browser::setPath(const string &path, unsigned selection) {
       string name = filename;
       name.rtrim<1>("/");
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::folder, sizeof resource::folder));
+      fileList.setImage(filenameList.size(), 0, {resource::folder, sizeof resource::folder});
       filenameList.append(filename);
     }
   }
@@ -176,22 +166,10 @@ void Browser::setPath(const string &path, unsigned selection) {
       string name = filename;
       name.rtrim<1>(suffix);
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::file, sizeof resource::file));
+      fileList.setImage(filenameList.size(), 0, {resource::game, sizeof resource::game});
       filenameList.append(filename);
     }
   }
-
-  /* file loading: deprecated for ananke
-  for(auto &filename : contents) {
-    string suffix = {".", this->extension};
-    if(filename.endswith(suffix)) {
-      string name = filename;
-      name.rtrim<1>(suffix);
-      fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, image(resource::file, sizeof resource::file));
-      filenameList.append(filename);
-    }
-  }*/
 
   fileList.setSelection(selection);
   fileList.setFocused();

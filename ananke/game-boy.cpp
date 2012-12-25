@@ -17,16 +17,17 @@ string Ananke::createGameBoyHeuristic(vector<uint8_t> &buffer) {
 
   string pathname = {
     userpath(),
-    "Emulation/Game Boy/",
+    "Emulation/Game Boy", (info.info.cgb ? " Color" : ""), "/",
     nall::basename(information.name),
     " (!).", (info.info.cgb ? "gbc" : "gb"), "/"
   };
   directory::create(pathname);
 
   string markup = info.markup;
+  markup.append("\ninformation\n  title: ", nall::basename(information.name), "\n");
   if(!information.manifest.empty()) markup = information.manifest;  //override with embedded beat manifest, if one exists
 
-  file::write({pathname, "manifest.bml"}, info.markup);
+  file::write({pathname, "manifest.bml"}, markup);
   file::write({pathname, "program.rom"}, buffer);
 
   copyGameBoySaves(pathname);

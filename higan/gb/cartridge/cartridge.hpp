@@ -22,6 +22,7 @@ struct Cartridge : MMIO, property<Cartridge> {
 
   struct Information {
     string markup;
+    string title;
 
     Mapper mapper;
     bool ram;
@@ -32,6 +33,8 @@ struct Cartridge : MMIO, property<Cartridge> {
     unsigned romsize;
     unsigned ramsize;
   } information;
+
+  string title();
 
   struct Memory {
     unsigned id;

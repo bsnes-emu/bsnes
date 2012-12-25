@@ -86,8 +86,8 @@ Board::Board(Markup::Node &document) {
   cartridge.board = this;
   auto cartridge = document["cartridge"];
 
-  information.type = cartridge["board"]["type"].data;
-  information.battery = cartridge["prg"]["ram"]["nonvolatile"].data == "true";
+  information.type = cartridge["board/type"].data;
+  information.battery = cartridge["prg/ram/nonvolatile"].exists();
 
   auto prom = cartridge["prg"]["rom"];
   auto pram = cartridge["prg"]["ram"];
@@ -121,7 +121,8 @@ Board::~Board() {
 
 Board* Board::load(const string &manifest) {
   auto document = Markup::Document(manifest);
-  string type = document["cartridge"]["board"]["type"].data;
+  cartridge.information.title = document["information/title"].text();
+  string type = document["cartridge/board/type"].text();
 
   if(type == "BANDAI-FCG"  ) return new BandaiFCG(document);
 

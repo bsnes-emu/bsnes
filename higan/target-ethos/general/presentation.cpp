@@ -58,9 +58,8 @@ Presentation::Presentation() : active(nullptr) {
   setMenuVisible();
   setStatusVisible();
 
-  fileMenu.setText("File");
-    fileLoad.setText("Load Game ...");
   loadMenu.setText("Library");
+  loadImport.setText("Import Game ...");
   settingsMenu.setText("Settings");
     videoMenu.setText("Video");
       centerVideo.setText("Center");
@@ -86,13 +85,11 @@ Presentation::Presentation() : active(nullptr) {
     cheatEditor.setText("Cheat Editor");
     synchronizeTime.setText("Synchronize Time");
 
-  if(application->ananke.opened()) append(fileMenu);
-    fileMenu.append(fileLoad);
   append(loadMenu);
   for(auto &item : loadListSystem) loadMenu.append(*item);
-  if(loadListSubsystem.size() > 0) {
-    loadMenu.append(*new Separator);
-    for(auto &item : loadListSubsystem) loadMenu.append(*item);
+  if(application->ananke.opened()) {
+    loadMenu.append(loadSeparator);
+    loadMenu.append(loadImport);
   }
   for(auto &systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
@@ -120,7 +117,7 @@ Presentation::Presentation() : active(nullptr) {
   onSize = [&] { utility->resize(); };
   onClose = [&] { application->quit = true; };
 
-  fileLoad.onActivate = [&] {
+  loadImport.onActivate = [&] {
     if(application->ananke.opened() == false) return;
     function<string ()> browse = application->ananke.sym("ananke_browse");
     if(browse == false) return;
@@ -156,17 +153,13 @@ void Presentation::bootstrap() {
     iEmulator->interface = emulator;
 
     for(auto &media : emulator->media) {
+      if(media.bootable == false) continue;  //do not add sub-cartridge slot entries to menu
       Item *item = new Item;
       item->onActivate = [=, &media] {
         utility->loadMedia(iEmulator->interface, media);
       };
-      if(media.load.empty()) {
-        item->setText({media.name, " ..."});
-        loadListSystem.append(item);
-      } else {
-        item->setText({nall::basename(media.load), " ..."});
-        loadListSubsystem.append(item);
-      }
+      item->setText({media.name, " ..."});
+      loadListSystem.append(item);
     }
 
     iEmulator->menu.setText(emulator->information.name);

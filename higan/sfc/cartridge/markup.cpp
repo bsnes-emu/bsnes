@@ -1,8 +1,12 @@
 #ifdef CARTRIDGE_CPP
 
 void Cartridge::parse_markup(const char *markup) {
-  auto cartridge = Markup::Document(markup)["cartridge"];
+  auto document = Markup::Document(markup);
+  auto cartridge = document["cartridge"];
+  auto information = document["information"];
   region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
+
+  this->information.title.cartridge = information["title"].text();
 
   mapping.reset();
   parse_markup_cartridge(cartridge);

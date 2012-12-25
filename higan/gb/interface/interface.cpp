@@ -12,6 +12,10 @@ void Interface::joypWrite(bool p15, bool p14) {
   if(hook) hook->joypWrite(p15, p14);
 }
 
+string Interface::title() {
+  return cartridge.title();
+}
+
 double Interface::videoFrequency() {
   return 4194304.0 / (154.0 * 456.0);
 }
@@ -140,8 +144,8 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::GameBoy,      "Game Boy",       "gb" });
-  media.append({ID::GameBoyColor, "Game Boy Color", "gbc"});
+  media.append({ID::GameBoy,      "Game Boy",       "gb" , true});
+  media.append({ID::GameBoyColor, "Game Boy Color", "gbc", true});
 
   {
     Device device{0, ID::Device, "Controller"};

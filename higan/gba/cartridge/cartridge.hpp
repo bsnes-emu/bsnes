@@ -10,7 +10,10 @@ struct Cartridge : property<Cartridge> {
 
   struct Information {
     string markup;
+    string title;
   } information;
+
+  string title();
 
   struct Media {
     unsigned id;

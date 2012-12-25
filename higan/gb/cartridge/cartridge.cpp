@@ -14,6 +14,10 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
+string Cartridge::title() {
+  return information.title;
+}
+
 void Cartridge::load(System::Revision revision, const string &manifest) {
   information.markup = manifest;
   information.mapper = Mapper::Unknown;
@@ -26,8 +30,9 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   information.ramsize = 0;
 
   auto document = Markup::Document(manifest);
+  information.title = document["information/title"].text();
 
-  auto mapperid = document["cartridge"]["board"]["type"].data;
+  auto mapperid = document["cartridge/board/type"].text();
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
   if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
   if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;

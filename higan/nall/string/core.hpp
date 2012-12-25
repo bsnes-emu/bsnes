@@ -151,6 +151,12 @@ template<typename... Args> void lstring::append(const string &data, Args&&... ar
   append(std::forward<Args>(args)...);
 }
 
+void lstring::isort() {
+  nall::sort(pool, objectsize, [](const string &x, const string &y) {
+    return istrcmp(x, y) < 0;
+  });
+}
+
 bool lstring::operator==(const lstring &source) const {
   if(this == &source) return true;
   if(size() != source.size()) return false;
