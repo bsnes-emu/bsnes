@@ -38,15 +38,15 @@ void Event::submitScore() {
   if(usedSaveState) return;
 
   string data;
-  data.append("timer=", timer, ";");
+  data.append("timer:", timer, "\n");
   if(board == Board::CampusChallenge92) {
     unsigned mw = 0, fz = 0, pw = 0;
     for(unsigned n = 0x0408; n <= 0x040e; n++) mw = mw * 10 + ram.read(n);
     for(unsigned n = 0x0413; n >= 0x0410; n--) fz = fz * 10 + ram.read(n);
     for(unsigned n = 0x0418; n >= 0x0415; n--) pw = pw * 10 + ram.read(n);
-    data.append("mw=", mw, ";");
-    data.append("fz=", fz, ";");
-    data.append("pw=", pw);
+    data.append("mw:", mw, "\n");
+    data.append("fz:", fz, "\n");
+    data.append("pw:", pw, "\n");
   }
   if(board == Board::Powerfest94) {
     unsigned ml = 0, mk[2] = {0}, ba[2] = {0};
@@ -55,9 +55,9 @@ void Event::submitScore() {
     for(unsigned n = 0x0411; n >= 0x0410; n--) mk[1] = mk[1] * 10 + ram.read(n);
     for(unsigned n = 0x0418; n >= 0x0415; n--) ba[0] = ba[0] * 10 + ram.read(n);
     for(unsigned n = 0x041a; n >= 0x0419; n--) ba[1] = ba[1] * 10 + ram.read(n);
-    data.append("ml=", ml, ";");
-    data.append("mk=", mk[0], ",", mk[1], ";");
-    data.append("ba=", ba[0], ",", ba[1]);
+    data.append("ml:", ml, "\n");
+    data.append("mk:", mk[0], ",", mk[1], "\n");
+    data.append("ba:", ba[0], ",", ba[1], "\n");
   }
 
   lstring side = interface->server().split<1>("@");

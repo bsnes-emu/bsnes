@@ -29,6 +29,7 @@ void Utility::loadMedia(string pathname) {
   for(auto &emulator : application->emulator) {
     for(auto &media : emulator->media) {
       if(type != media.type) continue;
+      if(media.bootable == false) continue;
       return utility->loadMedia(emulator, media, {pathname, "/"});
     }
   }

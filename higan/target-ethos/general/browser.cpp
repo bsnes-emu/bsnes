@@ -73,7 +73,7 @@ void Browser::bootstrap() {
 
       Folder folder;
       folder.extension = media.type;
-      folder.path = application->basepath;
+      folder.path = {userpath(), "Emulation/", media.name, "/"};
       folder.selection = 0;
       folderList.append(folder);
     }

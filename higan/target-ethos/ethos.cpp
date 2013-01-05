@@ -133,6 +133,7 @@ int main(int argc, char **argv) {
   utf8_args(argc, argv);
   #endif
 
+  OS::setName("higan");
   new Application(argc, argv);
   delete application;
   return 0;

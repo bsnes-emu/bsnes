@@ -66,11 +66,14 @@ endif
 
 # targets
 build: $(objects)
-ifeq ($(platform),osx)
+ifeq ($(platform),x)
+	$(strip $(cpp) -o out/$(name) $(objects) $(link))
+else ifeq ($(platform),win)
+	$(strip $(cpp) -shared -o out/phoenix.dll obj/phoenix.o $(phoenixlink))
+	$(strip $(cpp) -o out/$(name) $(subst obj/phoenix.o,,$(objects)) $(link) -Lout -lphoenix)
+else ifeq ($(platform),osx)
 	test -d ../$(name).app || mkdir -p ../$(name).app/Contents/MacOS
 	$(strip $(cpp) -o ../$(name).app/Contents/MacOS/$(name) $(objects) $(link))
-else
-	$(strip $(cpp) -o out/$(name) $(objects) $(link))
 endif
 
 resource:

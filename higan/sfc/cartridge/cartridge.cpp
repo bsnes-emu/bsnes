@@ -9,22 +9,18 @@ Cartridge cartridge;
 
 string Cartridge::title() {
   if(information.title.gameBoy.empty() == false) {
-    return information.title.gameBoy;
+    return {information.title.cartridge, " + ", information.title.gameBoy};
   }
 
   if(information.title.satellaview.empty() == false) {
-    if(has_bs_cart()) {
-      return information.title.satellaview;
-    } else {
-      return {information.title.cartridge, " + ", information.title.satellaview};
-    }
+    return {information.title.cartridge, " + ", information.title.satellaview};
   }
 
   if(information.title.sufamiTurboA.empty() == false) {
     if(information.title.sufamiTurboB.empty() == true) {
-      return information.title.sufamiTurboA;
+      return {information.title.cartridge, " + ", information.title.sufamiTurboA};
     } else {
-      return {information.title.sufamiTurboA, " + ", information.title.sufamiTurboB};
+      return {information.title.cartridge, " + ", information.title.sufamiTurboA, " + ", information.title.sufamiTurboB};
     }
   }
 

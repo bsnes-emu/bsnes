@@ -1,3 +1,10 @@
+struct OS::State {
+  string name;
+
+  State() {
+  }
+} osState;
+
 struct Timer::State {
   bool enabled;
   unsigned milliseconds;
