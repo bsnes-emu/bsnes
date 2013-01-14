@@ -74,7 +74,7 @@ struct FileDialog : Window {
     layout.setMargin(5);
     homeButton.setImage({resource::home, sizeof resource::home});
     upButton.setImage({resource::up, sizeof resource::up});
-    filterLabel.setText("Filter: *.fc, *.sfc, *.bs, *.st, *.gb, *.gbc, *.gba, *.nes, *.smc, *.zip");
+    filterLabel.setText("Filter: *.fc, *.sfc, *.st, *.bs, *.gb, *.gbc, *.gba, *.nes, *.smc, *.zip");
     openButton.setText("Open");
 
     append(layout);

@@ -2,11 +2,20 @@ include nall/Makefile
 include phoenix/Makefile
 
 path := /usr/local/lib
-flags := -std=gnu++11 -I. -O3 -fomit-frame-pointer
+flags := -I. -O3 -fomit-frame-pointer
+ifeq ($(arch),win32)
+  flags := -m32 $(flags)
+endif
 
 all:
 	$(cpp) $(flags) -fPIC -o ananke.o -c ananke.cpp
+ifeq ($(platform),x)
 	$(cpp) $(flags) -shared -Wl,-soname,libananke.so.1 -o libananke.so ananke.o
+else ifeq ($(platform),win)
+	$(cpp) $(flags) -fPIC -o phoenix.o -c phoenix/phoenix.cpp $(phoenixflags)
+	$(cpp) $(flags) -shared -o phoenix.dll phoenix.o $(phoenixlink)
+	$(cpp) $(flags) -shared -o ananke.dll ananke.o -L. -lphoenix
+endif
 
 resource: force
 	sourcery resource/resource.bml resource/resource.cpp resource/resource.hpp
@@ -16,13 +25,17 @@ clean:
 	-@$(call delete,*.so)
 
 install: uninstall
+ifeq ($(platform),x)
 	if [ ! -d ~/.config/ananke ]; then mkdir ~/.config/ananke; fi
 	sudo cp libananke.so $(path)/libananke.so.1
 	sudo ln -s $(path)/libananke.so.1 $(path)/libananke.so
+endif
 
 uninstall:
+ifeq ($(platform),x)
 	if [ -f $(path)/libananke.so ]; then sudo rm $(path)/libananke.so; fi
 	if [ -f $(path)/libananke.so.1 ]; then sudo rm $(path)/libananke.so.1; fi
+endif
 
 sync:
 ifeq ($(shell id -un),byuu)

@@ -49,15 +49,13 @@ void Cartridge::load(const string &manifest) {
   has_hsu1       = false;
   has_msu1       = false;
 
-  information.title.cartridge = "";
-  information.title.gameBoy = "";
-  information.title.satellaview = "";
+  information.title.cartridge    = "";
+  information.title.gameBoy      = "";
+  information.title.satellaview  = "";
   information.title.sufamiTurboA = "";
   information.title.sufamiTurboB = "";
 
-  this->manifest = manifest;
-  parse_markup(manifest);
-//print(manifest, "\n\n");
+  parse_markup(information.markup = manifest);
 
   //Super Game Boy
   if(cartridge.has_gb_slot()) {
@@ -77,6 +75,7 @@ void Cartridge::load(const string &manifest) {
     sha256_chunk(&sha, sufamiturbo.slotA.rom.data(), sufamiturbo.slotA.rom.size());
     sha256_chunk(&sha, sufamiturbo.slotB.rom.data(), sufamiturbo.slotB.rom.size());
     sha256_final(&sha);
+    sha256_hash(&sha, hash);
     string result;
     for(auto &byte : hash) result.append(hex<2>(byte));
     sha256 = result;
@@ -122,6 +121,7 @@ void Cartridge::load(const string &manifest) {
 void Cartridge::load_super_game_boy(const string &manifest) {
   auto document = Markup::Document(manifest);
   information.title.gameBoy = document["information/title"].text();
+
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 
@@ -135,6 +135,7 @@ void Cartridge::load_super_game_boy(const string &manifest) {
 void Cartridge::load_satellaview(const string &manifest) {
   auto document = Markup::Document(manifest);
   information.title.satellaview = document["information/title"].text();
+
   auto rom = document["cartridge/rom"];
 
   if(rom["name"].exists()) {
@@ -147,6 +148,7 @@ void Cartridge::load_satellaview(const string &manifest) {
 void Cartridge::load_sufami_turbo_a(const string &manifest) {
   auto document = Markup::Document(manifest);
   information.title.sufamiTurboA = document["information/title"].text();
+
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 
@@ -171,6 +173,7 @@ void Cartridge::load_sufami_turbo_a(const string &manifest) {
 void Cartridge::load_sufami_turbo_b(const string &manifest) {
   auto document = Markup::Document(manifest);
   information.title.sufamiTurboB = document["information/title"].text();
+
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 

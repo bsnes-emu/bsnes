@@ -49,15 +49,15 @@ void System::load(Revision revision) {
   serialize_init();
   if(revision == Revision::SuperGameBoy) return;  //Super Famicom core loads boot ROM for SGB
 
-  string manifest, firmware;
-  manifest.readfile({interface->path(ID::System), "manifest.xml"});
-  XML::Document document(manifest);
+  string manifest = string::read({interface->path(ID::System), "manifest.bml"});
+  auto document = Markup::Document(manifest);
+
   interface->loadRequest(
     revision == Revision::GameBoy ? ID::GameBoyBootROM : ID::GameBoyColorBootROM,
-    document["system"]["cpu"]["firmware"]["name"].data
+    document["system/cpu/rom/name"].data
   );
-  if(!file::exists({interface->path(ID::System), document["system"]["cpu"]["firmware"]["name"].data})) {
-    interface->notify("Error: required firmware ", firmware, " not found.\n");
+  if(!file::exists({interface->path(ID::System), document["system/cpu/rom/name"].data})) {
+    interface->notify("Error: required Game Boy firmware boot.rom not found.\n");
   }
 }
 

@@ -223,6 +223,7 @@ struct pWidget : public pSizable {
   HFONT hfont;
 
   bool enabled();
+  bool focused();
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();

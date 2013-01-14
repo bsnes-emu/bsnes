@@ -59,7 +59,7 @@ Presentation::Presentation() : active(nullptr) {
   setStatusVisible();
 
   loadMenu.setText("Library");
-  loadImport.setText("Import Game ...");
+    loadImport.setText("Import Game ...");
   settingsMenu.setText("Settings");
     videoMenu.setText("Video");
       centerVideo.setText("Center");
@@ -86,11 +86,8 @@ Presentation::Presentation() : active(nullptr) {
     synchronizeTime.setText("Synchronize Time");
 
   append(loadMenu);
-  for(auto &item : loadListSystem) loadMenu.append(*item);
-  if(application->ananke.opened()) {
-    loadMenu.append(loadSeparator);
-    loadMenu.append(loadImport);
-  }
+    for(auto &item : loadListSystem) loadMenu.append(*item);
+    if(application->ananke.opened()) loadMenu.append(loadSeparator, loadImport);
   for(auto &systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
@@ -153,7 +150,7 @@ void Presentation::bootstrap() {
     iEmulator->interface = emulator;
 
     for(auto &media : emulator->media) {
-      if(media.bootable == false) continue;  //do not add sub-cartridge slot entries to menu
+      if(media.bootable == false) continue;
       Item *item = new Item;
       item->onActivate = [=, &media] {
         utility->loadMedia(iEmulator->interface, media);

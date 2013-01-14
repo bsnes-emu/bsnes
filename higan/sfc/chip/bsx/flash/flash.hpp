@@ -1,5 +1,6 @@
 struct BSXFlash : Memory {
   MappedRAM memory;
+  bool readonly;
 
   void init();
   void load();

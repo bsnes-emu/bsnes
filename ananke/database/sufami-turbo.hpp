@@ -1,9 +1,9 @@
 string SufamiTurbo = R"(
 
-database revision=2012-12-24
+database revision=2013-01-12
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
   information
@@ -16,9 +16,10 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x800
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
   information
@@ -31,9 +32,10 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x800
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
   information
@@ -46,13 +48,14 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x800
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
   information
-    title:    SDガンダムジェネレーション 一年戦争機
+    title:    SDガンダムジェネレーション 一年戦争記
     name:     SD Gundam Generation - Ichinen Sensouki
     region:   JP
     revision: 1.0
@@ -61,9 +64,10 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x2000
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
   information
@@ -76,13 +80,14 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x2000
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge
     rom name=program.rom size=0x80000
   information
-    title:    ゲゲゲの鬼太郎 妖怪ドンジャン
-    name:     Gegege no Kitarou - Youkai Dungeon
+    title:    ゲゲゲの鬼太郎 妖怪ドンジャラ
+    name:     Gegege no Kitarou - Youkai Donjara
     region:   JP
     revision: 1.0
     serial:   SFT-0106-JPN
@@ -91,7 +96,7 @@ release
       rom name=program.rom size=0x80000
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
   information
@@ -104,9 +109,10 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x2000
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
   information
@@ -119,9 +125,10 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x2000
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
   information
@@ -134,20 +141,22 @@ release
     configuration
       rom name=program.rom size=0x80000
       ram name=save.ram size=0x2000
+      linkable
 
 release
-  cartridge region=NTSC
+  cartridge linkable
     rom name=program.rom size=0x80000
-    ram name=save.ram size=0x2000
+    ram name=save.ram size=0x800
   information
-    title:    SDガンダムジェネレーション コロニア格闘記
-    name:     SD Gundam Generation - Colonia Kakotouki
+    title:    SDガンダムジェネレーション コロニー格闘記
+    name:     SD Gundam Generation - Colony Kakutouki
     region:   JP
     revision: 1.0
     serial:   SFT-0111-JPN
     sha256:   e639b5d5d722432b6809ccc6801dc584e1a3016379f34b335ed2dfa73b1ebf69
     configuration
       rom name=program.rom size=0x80000
-      ram name=save.ram size=0x2000
+      ram name=save.ram size=0x800
+      linkable
 
 )";

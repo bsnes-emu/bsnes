@@ -86,7 +86,6 @@ unsigned Interface::group(unsigned id) {
     return 5;
   }
 
-  print(id, "\n");
   throw;
 }
 
@@ -376,10 +375,10 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true});
-  media.append({ID::SuperFamicom, "Super Game Boy", "gb", false});
-  media.append({ID::SuperFamicom, "BS-X Satellaview", "bs", false});
-  media.append({ID::SuperFamicom, "Sufami Turbo", "st", false});
+  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true });
+  media.append({ID::SuperFamicom, "Super Famicom", "gb",  false});
+  media.append({ID::SuperFamicom, "Super Famicom", "bs",  false});
+  media.append({ID::SuperFamicom, "Super Famicom", "st",  false});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

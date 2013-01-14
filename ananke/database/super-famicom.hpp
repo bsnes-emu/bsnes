@@ -1,6 +1,183 @@
 string SuperFamicom = R"(
 
-database revision=2012-12-24
+database revision=2013-01-12
+
+release
+  cartridge region=NTSC
+    board id:BSC-1A5B9P-01
+    bsx
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
+      ram name=download.ram size=0x40000
+      map id=io address=00-3f,80-bf:5000-5fff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=40-5f,c0-ff:0000-ffff
+      map id=rom address=78-7d:0000-ffff
+      map id=ram address=20-3f:6000-7fff mask=0xe000
+      map id=ram address=70-77:0000-ffff
+  information
+    title:    BS-X それは名前を盗まれた待の物語
+    name:     BS-X - Sore wa Namae o Nusumareta Machi no Monogatari
+    region:   JP
+    revision: 1.1
+    board:    BSC-1A5B9P-01
+    serial:   SHVC-ZBSJ-JPN
+    sha256:   3ce321496edc5d77038de2034eb3fb354d7724afd0bc7fd0319f3eb5d57b984d
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x8000
+      ram name=download.ram size=0x40000
+
+release
+  cartridge region=NTSC
+    board type=LDH3C revision=01
+    spc7110
+      rom name=program.rom size=0x100000
+      rom name=data.rom size=0x400000
+      ram name=save.ram size=0x2000
+      map id=io address=00-3f,80-bf:4800-483f
+      map id=io address=50,58:0000-ffff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff mask=0xe000
+    epsonrtc
+      ram name=rtc.ram size=0x10
+      map id=io address=00-3f,80-bf:4840-4842
+  information
+    title:    Far East of Eden 天外魔境 Zero
+    name:     Far East of Eden - Tengai Makyou Zero
+    region:   JP
+    revision: 1.0
+    board:    SHVC-LDH3C-01
+    serial:   SHVC-AZRJ-JPN
+    sha256:   8620203da71d32d017bb21f542864c1d90705b87eb67815d06b43f09120318aa
+    configuration
+      rom name=program.rom size=0x100000
+      rom name=data.rom size=0x400000
+      ram name=save.ram size=0x2000
+      ram name=rtc.ram size=0x10
+
+release
+  cartridge region=NTSC
+    board type=LDH3C revision=01
+    spc7110
+      rom name=program.rom size=0x100000
+      rom name=data.rom size=0x400000
+      ram name=save.ram size=0x2000
+      map id=io address=00-3f,80-bf:4800-483f
+      map id=io address=50,58:0000-ffff
+      map id=rom address=00-3f,80-bf:8000-ffff
+      map id=rom address=c0-ff:0000-ffff
+      map id=ram address=00-3f,80-bf:6000-7fff mask=0xe000
+    epsonrtc
+      ram name=rtc.ram size=0x10
+      map id=io address=00-3f,80-bf:4840-4842
+  information
+    title:    Far East of Eden 天外魔境 Zero 少年ジャンプの章
+    name:     Far East of Eden - Tengai Makyou Zero - Shounen Jump no Shou
+    region:   JP
+    revision: 1.0
+    board:    SHVC-LDH3C-01
+    serial:   SHVC-AZQJ-JPN
+    sha256:   69d06a3f3a4f3ba769541fe94e92b42142e423e9f0924eab97865b2d826ec82d
+    configuration
+      rom name=program.rom size=0x100000
+      rom name=data.rom size=0x400000
+      ram name=save.ram size=0x2000
+      ram name=rtc.ram size=0x10
+
+release
+  cartridge region=NTSC
+    board type=1DS0B revision=10,20
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    necdsp model=uPD96050 frequency=11000000
+      rom name=st011.program.rom size=0xc000
+      rom name=st011.data.rom size=0x1000
+      ram name=save.ram size=0x1000
+      map id=io address=60-67,e0-e7:0000-3fff select=0x0001
+      map id=ram address=68-6f,e8-ef:0000-7fff
+  information
+    title:    早指し二段森田将棋
+    name:     Hayazashi Nidan Morita Shougi
+    region:   JP
+    revision: 1.0
+    board:    SHVC-1DS0B-10
+    serial:   SHVC-2M
+    sha256:   5b1a90c70df7537743900ad159e92ba3f72e4560934a64a46d62faba2ca83a70
+    configuration
+      rom name=program.rom size=0x80000
+      rom name=st011.program.rom size=0xc000
+      rom name=st011.data.rom size=0x1000
+      ram name=save.ram size=0x1000
+
+release
+  cartridge region=NTSC
+    board type=1DE3B revision=01
+    rom name=program.rom size=0x80000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
+    map id=rom address=40-5f,c0-df:0000-ffff mask=0x8000
+    map id=ram address=60-7d,e0-ff:0000-ffff
+    armdsp frequency=21477272
+      rom name=st018.program.rom size=0x20000
+      rom name=st018.data.rom size=0x8000
+      ram size=0x4000
+      map id=io address=00-3f,80-bf:3800-38ff
+  information
+    title:    早指し二段森田将棋2
+    name:     Hayazashi Nidan Morita Shougi 2
+    region:   JP
+    revision: 1.0
+    board:    SHVC-1DE3B-01
+    serial:   SHVC-A2MJ-JPN
+    sha256:   3dd659d048aba8fc7d07b6ab726c9f711c948141e99e393685ae6cc311a83dc5
+    configuration
+      rom name=program.rom size=0x80000
+      ram name=save.ram size=0x2000
+      rom name=st018.program.rom size=0x20000
+      rom name=st018.data.rom size=0x8000
+      ram name=st018.program.ram size=0x4000
+
+release
+  cartridge region=NTSC
+    board type=2P3B revision=01
+    rom name=program.rom size=0x80000
+    map id=rom address=00-0f,80-8f:8000-ffff
+    map id=rom address=40-4f,c0-cf:0000-ffff
+  information
+    title:    くにおくんのドッジボールだよ 全員集合! トーナメント スペシャル
+    name:     Kunio-kun no Dodge Ball da yo - Zen'in Shuugou! Tournament Special
+    region:   JP
+    revision: 1.0
+    board:    SHVC-2P3B-01
+    serial:   N/A
+    sha256:   bcba4ca39f0279f7a52657bccbffa84564eaea455e2565597b93942ec245fdb1
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board id:BSC-1J3M-01
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-1f,80-9f:8000-ffff
+    map id=rom address=40-5f,c0-df:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+    bsxslot
+      map id=rom address=20-3f,a0-bf:8000-ffff
+      map id=rom address=60-7d,e0-ff:0000-ffff
+  information
+    title:    鮫亀
+    name:     Same Game
+    region:   JP
+    revision: 1.0
+    board:    BSC-1J3M-01
+    serial:   SHVC-ZS5J-JPN
+    sha256:   3a709383208d8258dceb20a5e566903326515ba42931bf97fd389a415a13a72d
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
 
 release
   cartridge region=NTSC
@@ -14,7 +191,7 @@ release
       slot id=B
         map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000
         map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000
-        map id=ram address=70-7f,f0-ff:0000-ffff
+        map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    スーファミターボ
     name:     Sufami Turbo
@@ -28,10 +205,49 @@ release
 
 release
   cartridge region=NTSC
+    board type=LJ3M revision=01
+    rom name=program.rom size=0x600000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-3f:8000-ffff offset=0x400000
+    map id=rom address=40-7d:0000-ffff offset=0x400000
+    map id=rom address=80-bf:8000-ffff offset=0x000000
+    map id=rom address=c0-ff:0000-ffff offset=0x000000
+    map id=ram address=80-bf:6000-7fff mask=0xe000
+  information
+    title:    テイルズ オブ ファンタジア
+    name:     Tales of Phantasia
+    region:   JP
+    revision: 1.0
+    board:    SHVC-LJ3M-01
+    serial:   SHVC-ATVJ-JPN
+    sha256:   77b2d5450ce3c87185f913c2584673530c13dfbe8cc433b1e9fe5e9a653bf7d5
+    configuration
+      rom name=program.rom size=0x600000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    ヨッシーのクッキー クルッポンオーブンでクッキー
+    name:     Yoshi no Cookie - Kuruppon Oven de Cookie
+    region:   JP
+    revision: 1.0
+    board:    SHVC-1A0N-10
+    serial:   SHVC-YO
+    sha256:   2b2fe61ac7a79c3cfaa0bc16f1b1f4da544fcc37cfdf3c18879d31b8b9f87941
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    3 Ninjas Kick Back
     name:     3 Ninjas Kick Back
@@ -49,7 +265,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -68,8 +284,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Aaahh!!! Real Monsters
     name:     Aaahh!!! Real Monsters
@@ -86,8 +302,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    ABC Monday Night Football
     name:     ABC Monday Night Football
@@ -105,8 +321,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    ACME Animation Factory
     name:     ACME Animation Factory
@@ -125,7 +341,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    ActRaiser
     name:     ActRaiser
@@ -143,7 +359,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    ActRaiser 2
     name:     ActRaiser 2
@@ -159,8 +375,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Addams Family
     name:     Addams Family
@@ -176,8 +392,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Addams Family 2: Pugsley's Scavenger Hunt
     name:     Addams Family 2 - Pugsley's Scavenger Hunt
@@ -193,8 +409,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Addams Family Values
     name:     Addams Family Values
@@ -210,8 +426,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Adventures of Batman & Robin
     name:     Adventures of Batman & Robin, The
@@ -227,8 +443,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Adventures of Dr. Franken
     name:     Adventures of Dr. Franken, The
@@ -244,8 +460,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Adventures of Kid Kleets
     name:     Adventure of Kid Kleets, The
@@ -261,8 +477,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Adventures of Mighty Max
     name:     Adventures of Mighty Max, The
@@ -278,8 +494,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Adventures of Rocky and Bullwinkle and Friends
     name:     Adventures of Rocky and Bullwinkle and Friends, The
@@ -295,8 +511,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Adventures of Yogi Bear
     name:     Adventures of Yogi Bear
@@ -312,8 +528,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Aero Fighters
     name:     Aero Fighters
@@ -329,8 +545,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Aero the Acro-Bat
     name:     Aero the Acro-Bat
@@ -346,8 +562,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Aero the Acro-Bat 2
     name:     Aero the Acro-Bat 2
@@ -365,7 +581,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Aerobiz
     name:     Aerobiz
@@ -383,8 +599,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Aerobiz Supersonic
     name:     Aerobiz Supersonic
@@ -401,8 +617,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Air Cavalry
     name:     Air Cavalry
@@ -419,8 +635,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Air Strike Patrol
     name:     Air Strike Patrol
@@ -437,8 +653,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Al Unser Jr.'s Road to the Top
     name:     Al Unser Jr.'s Road to the Top
@@ -454,8 +670,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Aladdin
     name:     Aladdin
@@ -471,8 +687,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Alien 3
     name:     Alien 3
@@ -488,8 +704,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Alien vs. Predator
     name:     Alien vs. Predator
@@ -505,8 +721,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    American Gladiators
     name:     American Gladiators
@@ -523,7 +739,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    An American Tail: Fievel Goes West
     name:     American Tail - Fievel Goes West, An
@@ -539,8 +755,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Andre Agassi Tennis
     name:     Andre Agassi Tennis
@@ -556,8 +772,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Animaniacs
     name:     Animaniacs
@@ -573,8 +789,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Arcade's Greatest Hits: The Atari Collection 1
     name:     Arcade's Greatest Hits - The Atari Collection 1
@@ -592,7 +808,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Arcana
     name:     Arcana
@@ -609,8 +825,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ardy Light Foot
     name:     Ardy Light Foot
@@ -626,8 +842,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Arkanoid: Doh It Again!
     name:     Arkanoid - Doh It Again!
@@ -644,7 +860,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Art of Fighting
     name:     Art of Fighting
@@ -660,8 +876,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Axelay
     name:     Axelay
@@ -678,11 +894,11 @@ release
     board type=1K0N revision=01
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1b.program.rom size=0x1800
-      rom id=data name=dsp1b.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1b.program.rom size=0x1800
+      rom name=dsp1b.data.rom size=0x800
+      ram size=0x200
       map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Ballz 3D
@@ -702,8 +918,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Barbie Super Star
     name:     Barbie Super Star
@@ -719,8 +935,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Barkley Shut Up and Jam!
     name:     Barkley Shut Up and Jam!
@@ -736,8 +952,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bass Masters Classic
     name:     Bass Masters Classic
@@ -753,8 +969,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bass Masters Classic: Pro Edition
     name:     Bass Masters Classic - Pro Edition
@@ -771,8 +987,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Bassin's Black Bass
     name:     Bassin's Black Bass
@@ -790,7 +1006,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Batman Forever
     name:     Batman Forever
@@ -806,8 +1022,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Batman Returns
     name:     Batman Returns
@@ -823,8 +1039,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battle Blaze
     name:     Battle Blaze
@@ -840,8 +1056,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battle Cars
     name:     Battle Cars
@@ -857,8 +1073,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battle Clash
     name:     Battle Clash
@@ -874,8 +1090,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battle Grand Prix
     name:     Battle Grand Prix
@@ -891,8 +1107,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battletoads & Double Dragon
     name:     Battletoads & Double Dragon
@@ -908,8 +1124,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Battletoads in Battlemaniacs
     name:     Battletoads in Battlemaniacs
@@ -925,8 +1141,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bazooka Blitzkrieg
     name:     Bazooka Blitzkrieg
@@ -942,8 +1158,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Beauty and the Beast
     name:     Beauty and the Beast
@@ -959,8 +1175,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Beavis and Butt-Head
     name:     Beavis and Butt-Head
@@ -976,8 +1192,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bebe's Kids
     name:     Bebe's Kids
@@ -993,8 +1209,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Beethoven: The Ultimate Canine Caper!
     name:     Beethoven - The Ultimate Canine Caper!
@@ -1010,8 +1226,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Best of the Best: Championship Karate
     name:     Best of the Best - Championship Karate
@@ -1028,8 +1244,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Big Sky Trooper
     name:     Big Sky Trooper
@@ -1046,8 +1262,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Biker Mice from Mars
     name:     Biker Mice from Mars
@@ -1065,7 +1281,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Bill Laimbeer's Combat Basketball
     name:     Bill Laimbeer's Combat Basketball
@@ -1083,10 +1299,10 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
-    title:    Bill Walsh: College Football
-    name:     Bill Walsh - College Football
+    title:    Bill Walsh College Football
+    name:     Bill Walsh College Football
     region:   NA
     revision: 1.0
     board:    SHVC-1J0N-10
@@ -1099,8 +1315,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bio Metal
     name:     Bio Metal
@@ -1116,8 +1332,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Blackthorne
     name:     Blackthorne
@@ -1133,8 +1349,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    BlaZeon: The Bio-Cyborg Challenge
     name:     BlaZeon - The Bio-Cyborg Challenge
@@ -1150,8 +1366,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Blues Brothers
     name:     Blues Brothers, The
@@ -1167,8 +1383,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    B.O.B.
     name:     BOB
@@ -1184,8 +1400,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bonkers
     name:     Bonkers
@@ -1202,7 +1418,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Boogerman: A Pick and Flick Adventure
     name:     Boogerman - A Pick and Flick Adventure
@@ -1218,8 +1434,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Boxing Legends of the Ring
     name:     Boxing Legends of the Ring
@@ -1237,7 +1453,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -1256,8 +1472,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Brainies
     name:     Brainies, The
@@ -1273,8 +1489,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bram Stoker's Dracula
     name:     Bram Stoker's Dracula
@@ -1292,7 +1508,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,90-9f:6000-7fff mask=0xe000
     map id=ram address=30-3f,b0-bf:6000-7fff mask=0xe000
   information
@@ -1311,8 +1527,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Brawl Brothers
     name:     Brawl Brothers
@@ -1328,8 +1544,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    BreakThru!
     name:     BreakThru!
@@ -1346,8 +1562,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Breath of Fire
     name:     Breath of Fire
@@ -1366,7 +1582,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Breath of Fire II
@@ -1384,8 +1600,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Brett Hull Hockey
     name:     Brett Hull Hockey '94
@@ -1401,8 +1617,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Brett Hull Hockey '95
     name:     Brett Hull Hockey '95
@@ -1418,8 +1634,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bronkie the Bronchiasaurus
     name:     Bronkie the Bronchiasaurus
@@ -1436,7 +1652,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Brunswick World Tournament of Champions
     name:     Brunswick World Tournament of Champions
@@ -1452,8 +1668,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Brutal: Paws of Fury
     name:     Brutal - Paws of Fury
@@ -1469,8 +1685,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bubsy in Claws Encounters of the Furred Kind
     name:     Bubsy I - Claws Encounters of the Furred Kind
@@ -1487,7 +1703,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Bubsy II
     name:     Bubsy II
@@ -1503,8 +1719,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bugs Bunny: Rabbit Rampage
     name:     Bugs Bunny - Rabbit Rampage
@@ -1520,8 +1736,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Bulls vs. Blazers and the NBA Playoffs
+    name:     Bulls vs. Blazers and the NBA Playoffs
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    serial:   SNS-BU-USA
+    sha256:   ba4f31353e0e1233b574391ad97a80901d7de212e2c55d7be2af11a9a57c8225
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bulls vs. Blazers and the NBA Playoffs
     name:     Bulls vs. Blazers and the NBA Playoffs
@@ -1537,8 +1770,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Bust-a-Move
     name:     Bust-a-Move
@@ -1554,8 +1787,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cacoma Knight in Bizyland
     name:     Cacoma Knight in Bizyland
@@ -1571,8 +1804,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cal Ripken Jr. Baseball
     name:     Cal Ripken Jr. Baseball
@@ -1588,8 +1821,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    California Games II
     name:     California Games II
@@ -1606,8 +1839,8 @@ release
     board type=2A1M revision=01
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Cannondale Cup
     name:     Cannondale Cup
@@ -1624,8 +1857,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Capcom's MVP Football
     name:     Capcom's MVP Football
@@ -1641,8 +1874,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Capcom's Soccer Shootout
     name:     Capcom's Soccer Shootout
@@ -1658,8 +1891,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Captain America and The Avengers
     name:     Captain America and The Avengers
@@ -1676,7 +1909,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Captain Commando
     name:     Captain Commando
@@ -1692,8 +1925,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Captain Novolin
     name:     Captain Novolin
@@ -1709,8 +1942,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Carrier Aces
     name:     Carrier Aces
@@ -1726,8 +1959,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Casper
     name:     Casper
@@ -1743,8 +1976,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Castlevania: Dracula X
     name:     Castlevania - Dracula X
@@ -1760,8 +1993,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Champions World Class Soccer
     name:     Champions World Class Soccer
@@ -1777,8 +2010,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Championship Pool
     name:     Championship Pool
@@ -1795,8 +2028,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Championship Soccer '94
     name:     Championship Soccer '94
@@ -1814,8 +2047,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Chavez
     name:     Chavez
@@ -1832,8 +2065,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Chavez II
     name:     Chavez II
@@ -1849,8 +2082,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Chessmaster
     name:     Chessmaster, The
@@ -1866,8 +2099,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Chester Cheetah: Too Cool to Fool
     name:     Chester Cheetah - Too Cool to Fool
@@ -1883,8 +2116,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Chester Cheetah: Wild, Wild Quest
     name:     Chester Cheetah - Wild, Wild Quest
@@ -1900,8 +2133,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Choplifter III
     name:     Choplifter III
@@ -1919,7 +2152,7 @@ release
     rom name=program.rom size=0x400000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Chrono Trigger
@@ -1937,8 +2170,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Chuck Rock
     name:     Chuck Rock
@@ -1955,7 +2188,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Clay Fighter
     name:     Clay Fighter
@@ -1972,7 +2205,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Clay Fighter: Tournament Edition
     name:     Clay Fighter - Tournament Edition
@@ -1989,7 +2222,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Clay Fighter 2: Judgment Clay
     name:     Clay Fighter 2 - Judgment Clay
@@ -2006,7 +2239,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Claymates
     name:     Claymates
@@ -2022,8 +2255,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cliffhanger
     name:     Cliffhanger
@@ -2039,8 +2272,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Clue
     name:     Clue
@@ -2057,8 +2290,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    College Football USA '97: The Road to New Orleans
     name:     College Football USA '97 - The Road to New Orleans
@@ -2076,8 +2309,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    College Slam
     name:     College Slam
@@ -2094,8 +2327,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Combatribes
     name:     Combatribes, The
@@ -2111,8 +2344,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Congo's Caper
     name:     Congo's Caper
@@ -2128,8 +2361,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Contra III: The Alien Wars
     name:     Contra III - The Alien Wars
@@ -2145,8 +2378,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cool Spot
     name:     Cool Spot
@@ -2162,8 +2395,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cool World
     name:     Cool World
@@ -2179,8 +2412,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    CutThroat Island
     name:     CutThroat Island
@@ -2196,8 +2429,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cyber Spin
     name:     Cyber Spin
@@ -2213,8 +2446,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Cybernator
     name:     Cybernator
@@ -2230,8 +2463,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    D-Force
     name:     D-Force
@@ -2247,8 +2480,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Daffy Duck: The Marvin Missions
     name:     Daffy Duck - The Marvin Missions
@@ -2264,8 +2497,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Darius Twin
     name:     Darius Twin
@@ -2281,8 +2514,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    David Crane's Amazing Tennis
     name:     David Crane's Amazing Tennis
@@ -2298,8 +2531,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Death and Return of Superman
     name:     Death and Return of Superman, The
@@ -2315,8 +2548,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Demolition Man
     name:     Demolition Man
@@ -2332,8 +2565,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Demon's Crest
     name:     Demon's Crest
@@ -2349,8 +2582,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Dennis the Menace
     name:     Dennis the Menace
@@ -2366,8 +2599,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Desert Strike: Return to the Gulf
     name:     Desert Strike - Return to the Gulf
@@ -2384,8 +2617,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Dig & Spike Volleyball
     name:     Dig & Spike Volleyball
@@ -2402,8 +2635,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    DinoCity
     name:     DinoCity
@@ -2441,11 +2674,31 @@ release
 
 release
   cartridge region=NTSC
-    board type=1J1M revision=20
+    board type=1J1M revision=11,20
     rom name=program.rom size=0x400000
     ram name=save.ram size=0x800
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
+    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
+  information
+    title:    Donkey Kong Country
+    name:     Donkey Kong Country
+    region:   NA
+    revision: 1.1
+    board:    SHVC-1J1M-11
+    serial:   SNS-8X-USA
+    sha256:   df2644d435330192a13768cc1f79c5aa3084a64217a5250c6dd4ffdbe2175be4
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x800
+
+release
+  cartridge region=NTSC
+    board type=1J1M revision=11,20
+    rom name=program.rom size=0x400000
+    ram name=save.ram size=0x800
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Donkey Kong Country
@@ -2461,11 +2714,11 @@ release
 
 release
   cartridge region=NTSC
-    board type=1J1M revision=20
+    board type=1J1M revision=11,20
     rom name=program.rom size=0x400000
     ram name=save.ram size=0x800
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Donkey Kong Country 2: Diddy's Kong Quest
@@ -2481,11 +2734,11 @@ release
 
 release
   cartridge region=NTSC
-    board type=1J1M revision=20
+    board type=1J1M revision=11,20
     rom name=program.rom size=0x400000
     ram name=save.ram size=0x800
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Donkey Kong Country 3: Dixie Kong's Double Trouble
@@ -2527,8 +2780,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Doomsday Warrior
     name:     Doomsday Warrior
@@ -2545,7 +2798,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Double Dragon V: The Shadow Falls
     name:     Double Dragon V - The Shadow Falls
@@ -2562,7 +2815,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Dragon: The Bruce Lee Story
     name:     Dragon - The Bruce Lee Story
@@ -2579,8 +2832,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Dragon View
     name:     Dragon View
@@ -2597,8 +2850,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Dragon's Lair
     name:     Dragon's Lair
@@ -2616,7 +2869,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Drakkhen
     name:     Drakkhen
@@ -2633,8 +2886,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Dream T.V.
     name:     Dream TV
@@ -2652,11 +2905,11 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp2.program.rom size=0x1800
-      rom id=data name=dsp2.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp2.program.rom size=0x1800
+      rom name=dsp2.data.rom size=0x800
+      ram size=0x200
       map id=io address=20-3f,a0-bf:8000-ffff select=0x4000
   information
     title:    Dungeon Master
@@ -2677,8 +2930,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Earth Defense Force
     name:     Earth Defense Force
@@ -2696,7 +2949,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    EarthBound
@@ -2715,7 +2968,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Earthworm Jim
     name:     Earthworm Jim
@@ -2732,7 +2985,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Earthworm Jim 2
     name:     Earthworm Jim 2
@@ -2748,8 +3001,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Eek! The Cat
     name:     Eek! The Cat
@@ -2766,7 +3019,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Elite Soccer
     name:     Elite Soccer
@@ -2783,8 +3036,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Emmitt Smith Football
     name:     Emmitt Smith Football
@@ -2802,8 +3055,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Equinox
     name:     Equinox
@@ -2820,8 +3073,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    ESPN Baseball Tonight
     name:     ESPN Baseball Tonight
@@ -2838,8 +3091,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    ESPN National Hockey Night
     name:     ESPN National Hockey Night
@@ -2857,8 +3110,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    ESPN Speed World
     name:     ESPN Speed World
@@ -2876,8 +3129,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    ESPN Sunday Night NFL
     name:     ESPN Sunday Night NFL
@@ -2896,7 +3149,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    E.V.O.: Search for Eden
     name:     EVO - Search for Eden
@@ -2915,8 +3168,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Exertainment Mountain Bike Rally
     name:     Exertainment Mountain Bike Rally
@@ -2931,11 +3184,30 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x400000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
+  information
+    title:    Exertainment Mountain Bike Rally + Speed Racer
+    name:     Exertainment Mountain Bike Rally + Speed Racer
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-30
+    serial:   SNS-ALFE-USA
+    sha256:   a0521f50b0d0bff6666bfb712498476eb8d5974ef38caf157e2f67cbce5475bb
+    configuration
+      rom name=program.rom size=0x400000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
     board type=1A3B revision=11,12,13
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Extra Innings
     name:     Extra Innings
@@ -2953,8 +3225,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Eye of the Beholder
     name:     Eye of the Beholder
@@ -2973,7 +3245,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    F-Zero
     name:     F-Zero
@@ -2991,8 +3263,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    F1 Pole Position
     name:     F1 Pole Position
@@ -3011,7 +3283,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    F1 Race of Champions
     name:     F1 Race of Champions
@@ -3026,13 +3298,13 @@ release
 
 release
   cartridge region=NTSC
-    board type=1DS0B revision=20
+    board type=1DS0B revision=10,20
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
     necdsp model=uPD96050 frequency=11000000
-      rom id=program name=st010.program.rom size=0xc000
-      rom id=data name=st010.data.rom size=0x1000
-      ram id=data name=save.ram size=0x1000
+      rom name=st010.program.rom size=0xc000
+      rom name=st010.data.rom size=0x1000
+      ram name=save.ram size=0x1000
       map id=io address=60-67,e0-e7:0000-3fff select=0x0001
       map id=ram address=68-6f,e8-ef:0000-7fff
   information
@@ -3053,11 +3325,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    FaceBall 2000
-    name:     FaceBall 2000
+    title:    Faceball 2000
+    name:     Faceball 2000
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-02
@@ -3070,8 +3342,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Family Dog
     name:     Family Dog
@@ -3087,8 +3359,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Family Feud
+    name:     Family Feud
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    serial:   SNS-FN-USA
+    sha256:   4f43ce12e1d8cd195468d7048494ad2930721e5bf9e69bfd86eeee707ffc634b
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Family Feud
     name:     Family Feud
@@ -3104,8 +3393,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Fatal Fury
     name:     Fatal Fury
@@ -3122,7 +3411,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x280000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Fatal Fury 2
     name:     Fatal Fury 2
@@ -3139,7 +3428,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Fatal Fury Special
     name:     Fatal Fury Special
@@ -3155,8 +3444,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    FIFA International Soccer
     name:     FIFA International Soccer
@@ -3173,8 +3462,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    FIFA Soccer '96
     name:     FIFA Soccer '96
@@ -3192,8 +3481,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x1e0000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    FIFA Soccer '97
     name:     FIFA Soccer '97
@@ -3211,7 +3500,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x280000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Fighter's History
     name:     Fighter's History
@@ -3229,7 +3518,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Final Fantasy: Mystic Quest
     name:     Final Fantasy - Mystic Quest
@@ -3248,7 +3537,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Final Fantasy II
     name:     Final Fantasy II
@@ -3267,7 +3556,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Final Fantasy III
@@ -3285,8 +3574,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Final Fight
     name:     Final Fight
@@ -3302,8 +3591,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Final Fight 2
     name:     Final Fight 2
@@ -3320,7 +3609,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Final Fight 3
     name:     Final Fight 3
@@ -3336,8 +3625,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Final Fight Guy
     name:     Final Fight Guy
@@ -3353,8 +3642,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Firepower 2000
     name:     Firepower 2000
@@ -3370,8 +3659,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Firestriker
     name:     Firestriker
@@ -3387,8 +3676,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    First Samurai
     name:     First Samurai
@@ -3405,7 +3694,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Flashback: The Quest for Identity
     name:     Flashback - The Quest for Identity
@@ -3421,8 +3710,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Flintstones: The Movie
     name:     Flintstones - The Movie, The
@@ -3438,8 +3727,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Flintstones: The Treasure of Sierra Madrock
     name:     Flintstones - The Treasure of Sierra Madrock, The
@@ -3455,8 +3744,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Football Fury
     name:     Football Fury
@@ -3472,11 +3761,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x300000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Foreman for Real
-    name:     Foreman for Real
+    title:    Foreman For Real
+    name:     Foreman For Real
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-30
@@ -3490,8 +3779,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Frank Thomas' Big Hurt Baseball
     name:     Frank Thomas' Big Hurt Baseball
@@ -3508,8 +3797,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Frantic Flea
     name:     Frantic Flea
@@ -3525,8 +3814,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Frogger
     name:     Frogger
@@ -3542,8 +3831,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Full Throttle: All-American Racing
     name:     Full Throttle - All-American Racing
@@ -3559,8 +3848,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    fun 'n games
     name:     Fun & Games
@@ -3578,7 +3867,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Gemfire
     name:     Gemfire
@@ -3597,7 +3886,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Genghis Khan II: Clan of the Gray Wolf
@@ -3615,8 +3904,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    George Foreman's KO Boxing
     name:     George Foreman's KO Boxing
@@ -3632,8 +3921,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ghoul Patrol
     name:     Ghoul Patrol
@@ -3651,7 +3940,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Goal!
     name:     Goal!
@@ -3668,8 +3957,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Gods
     name:     Gods
@@ -3685,8 +3974,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Goof Troop
     name:     Goof Troop
@@ -3702,8 +3991,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    GP-1
     name:     GP-1
@@ -3720,7 +4009,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    GP-1: Part II
     name:     GP-1 - Part II
@@ -3736,8 +4025,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Gradius III
     name:     Gradius III
@@ -3754,7 +4043,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    The Great Circus Mystery: Starring Micky & Minnie
     name:     Great Circus Mystery - Starring Micky & Minnie, The
@@ -3770,8 +4059,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Great Waldo Search
     name:     Great Waldo Search, The
@@ -3787,8 +4076,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    GunForce
     name:     GunForce
@@ -3805,7 +4094,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Hagane
     name:     Hagane
@@ -3821,8 +4110,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hal's Hole in One Golf
     name:     Hal's Hole in One Golf
@@ -3838,8 +4127,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hammer Lock Wrestling
     name:     Hammer Lock Wrestling
@@ -3856,7 +4145,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Hard Ball III
     name:     Hard Ball III
@@ -3872,8 +4161,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Harley's Humongous Adventure
     name:     Harley's Humongous Adventure
@@ -3890,8 +4179,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Harvest Moon
     name:     Harvest Moon
@@ -3908,11 +4197,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Head-on Soccer
-    name:     Head-on Soccer
+    title:    Head-On Soccer
+    name:     Head-On Soccer
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-30
@@ -3923,27 +4212,10 @@ release
 
 release
   cartridge region=NTSC
-    board type=2A0N revision=01,10,11,20
-    rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
-  information
-    title:    Hey Punk! Are You Tuff E Nuff?
-    name:     Hey Punk! Are You Tuff E Nuff
-    region:   NA
-    revision: 1.0
-    board:    SHVC-2A0N-10
-    serial:   SNS-TE-USA
-    sha256:   8f62d014f513a7dcbca5aa76cbe476c3e4526100f34913af831bc05dab029bd1
-    configuration
-      rom name=program.rom size=0x200000
-
-release
-  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hit the Ice
     name:     Hit the Ice
@@ -3959,8 +4231,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Home Alone
     name:     Home Alone
@@ -3976,8 +4248,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Home Alone 2: Lost in New York
     name:     Home Alone 2 - Lost in New York
@@ -3993,8 +4265,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Home Improvement
     name:     Home Improvement
@@ -4010,8 +4282,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hook
     name:     Hook
@@ -4027,8 +4299,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Hunt for Red October
     name:     Hunt for Red October, The
@@ -4044,8 +4316,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hurricanes
     name:     Hurricanes
@@ -4061,8 +4333,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hyper V-Ball
     name:     Hyper V-Ball
@@ -4078,8 +4350,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Hyper Zone
     name:     Hyper Zone
@@ -4096,7 +4368,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    The Ignition Factor
     name:     Ignition Factor, The
@@ -4114,7 +4386,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Illusion of Gaia
@@ -4132,8 +4404,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Imperium
     name:     Imperium
@@ -4149,8 +4421,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Incantation
     name:     Incantation
@@ -4166,8 +4438,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Incredible Crash Dummies
     name:     Incredible Crash Dummies, The
@@ -4183,8 +4455,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Incredible Hulk
     name:     Incredible Hulk, The
@@ -4200,8 +4472,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Indiana Jones' Greatest Adventures
     name:     Indiana Jones' Greatest Adventures
@@ -4219,7 +4491,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Inindo: Way of the Ninja
     name:     Inindo - Way of the Ninja
@@ -4237,7 +4509,7 @@ release
     board type=YJ0N revision=01
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Inspector Gadget
     name:     Inspector Gadget
@@ -4253,8 +4525,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    International Superstar Soccer
     name:     International Superstar Soccer
@@ -4270,8 +4542,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    International Superstar Soccer Deluxe
     name:     International Superstar Soccer Deluxe
@@ -4287,8 +4559,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    International Tennis Tour
     name:     International Tennis Tour
@@ -4304,8 +4576,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Irem Skins Game
     name:     Irem Skins Game, The
@@ -4321,8 +4593,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Itchy & Scratchy Game
     name:     Itchy & Scratchy Game, The
@@ -4338,8 +4610,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Izzy's Quest for the Olympic Rings
     name:     Izzy's Quest for the Olympic Rings
@@ -4355,8 +4627,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jack Nicklaus Golf
     name:     Jack Nicklaus Golf
@@ -4372,8 +4644,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    James Bond Jr.
     name:     James Bond Jr.
@@ -4389,8 +4661,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jammit
     name:     Jammit
@@ -4406,8 +4678,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jeopardy!
     name:     Jeopardy!
@@ -4423,8 +4695,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jeopardy! Deluxe Edition
     name:     Jeopardy! Deluxe Edition
@@ -4440,8 +4712,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jeopardy! Sports Edition
     name:     Jeopardy! Sports Edition
@@ -4457,8 +4729,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Jetsons: Invasion of the Planet Pirates
     name:     Jetsons - Invasion of the Planet Pirates, The
@@ -4474,8 +4746,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jim Lee's Wild Covert Action Teams
     name:     Jim Lee's Wild Covert Action Teams
@@ -4491,8 +4763,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jim Power: The Lost Dimension in 3D
     name:     Jim Power - The Lost Dimension in 3D
@@ -4508,11 +4780,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Jimmy Connors: Pro Tennis Tour
-    name:     Jimmy Connors - Pro Tennis Tour
+    title:    Jimmy Connors' Pro Tennis Tour
+    name:     Jimmy Connors' Pro Tennis Tour
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-20
@@ -4526,8 +4798,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Jimmy Houston's Bass Tournament, U.S.A.
     name:     Jimmy Houston's Bass Tournament, USA
@@ -4544,11 +4816,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Joe & Mac: Caveman Ninjas
-    name:     Joe & Mac - Caveman Ninjas
+    title:    Joe & Mac
+    name:     Joe & Mac
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-01
@@ -4561,8 +4833,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Joe & Mac 2: Lost in the Tropics
     name:     Joe & Mac 2 - Lost in the Tropics
@@ -4578,8 +4850,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Judge Dredd: The Movie
     name:     Judge Dredd - The Movie
@@ -4595,8 +4867,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Jungle Book
     name:     Jungle Book, The
@@ -4612,8 +4884,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jungle Strike
     name:     Jungle Strike
@@ -4629,8 +4901,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jurassic Park
     name:     Jurassic Park
@@ -4646,8 +4918,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Jurassic Park
+    name:     Jurassic Park
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-1
+    serial:   SNS-J8-USA
+    sha256:   0a4e9d6fa2ac16aa51da5538d93280734de480e44c430173ed14826c84553c7d
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Jurassic Park 2: The Chaos Continues
     name:     Jurassic Park 2 - The Chaos Continues
@@ -4663,8 +4952,8 @@ release
   cartridge region=NTSC
     board type=BA0N revision=01,10
     rom name=program.rom size=0x280000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Justice League Task Force
     name:     Justice League Task Force
@@ -4680,8 +4969,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ka-Blooey
     name:     Ka-Blooey
@@ -4697,8 +4986,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Kawasaki Caribbean Challenge
     name:     Kawasaki Caribbean Challenge
@@ -4714,8 +5003,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Kawasaki Superbike Challenge
     name:     Kawasaki Superbike Challenge
@@ -4729,14 +5018,33 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A3B revision=20
+    rom name=program.rom size=0x200000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
+  information
+    title:    Ken Griffey Jr. Presents Major League Baseball
+    name:     Ken Griffey Jr. Presents Major League Baseball
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3B-20
+    serial:   SNS-JR-USA
+    sha256:   3104d6c06c8909c56f6adb2faecf1b4382f2490370798b605631da926c5306d8
+    configuration
+      rom name=program.rom size=0x200000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
-    title:    Ken Griffey Jr. Presents: Major League Baseball
-    name:     Ken Griffey Jr. Presents - Major League Baseball
+    title:    Ken Griffey Jr. Presents Major League Baseball
+    name:     Ken Griffey Jr. Presents Major League Baseball
     region:   NA
     revision: 1.1
     board:    SHVC-1A3M-21
@@ -4752,7 +5060,7 @@ release
     rom name=program.rom size=0x400000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Ken Griffey Jr.'s Winning Run
@@ -4770,8 +5078,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Kendo Rage
     name:     Kendo Rage
@@ -4787,8 +5095,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Kid Klown in Crazy Chase
     name:     Kid Klown in Crazy Chase
@@ -4805,7 +5113,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Killer Instinct
     name:     Killer Instinct
@@ -4822,7 +5130,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x280000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    King Arthur & The Knights of Justice
     name:     King Arthur & The Knights of Justice
@@ -4838,8 +5146,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    King Arthur's World
     name:     King Arthur's World
@@ -4856,7 +5164,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    King of Dragons
     name:     King of Dragons
@@ -4872,8 +5180,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    King of the Monsters
     name:     King of the Monsters
@@ -4890,7 +5198,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    King of the Monsters 2
     name:     King of the Monsters 2
@@ -4907,8 +5215,8 @@ release
     board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x400000
-      ram id=bitmap name=save.ram size=0x2000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x2000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -4932,8 +5240,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Kirby's Avalanche
     name:     Kirby's Avalanche
@@ -4950,8 +5258,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Kirby's Dream Course
     name:     Kirby's Dream Course
@@ -4969,8 +5277,8 @@ release
     board type=1L5B revision=11,20
     sa1
       rom name=program.rom size=0x400000
-      ram id=bitmap name=save.ram size=0x8000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x8000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -4994,8 +5302,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Knights of the Round
     name:     Knights of the Round
@@ -5011,8 +5319,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Krusty's Super Fun House
+    name:     Krusty's Super Fun House
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-02
+    serial:   SNS-FH-USA
+    sha256:   bed18c968aee0eb0c866c1964c28135364cd6d65fff7bcb5873342c04e63750d
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Krusty's Super Fun House
     name:     Krusty's Super Fun House
@@ -5029,7 +5354,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Kyle Petty's No Fear Racing
     name:     Kyle Petty's No Fear Racing
@@ -5047,7 +5372,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Lagoon
     name:     Lagoon
@@ -5064,8 +5389,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Lamborghini American Challenge
     name:     Lamborghini American Challenge
@@ -5081,8 +5406,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Last Action Hero
     name:     Last Action Hero
@@ -5097,8 +5422,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Lawnmower Man
     name:     Lawnmower Man, The
@@ -5114,8 +5439,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Legend
     name:     Legend
@@ -5131,8 +5456,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Legend of the Mystical Ninja
     name:     Legend of the Mystical Ninja, The
@@ -5150,7 +5475,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    The Legend of Zelda: A Link to the Past
     name:     Legend of Zelda - A Link to the Past, The
@@ -5169,7 +5494,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    La Legende de Zelda: La Triforce des Dieux
     name:     Legende de Zelda - La Triforce des Dieux, La
@@ -5186,8 +5511,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Lemmings
+    name:     Lemmings
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-01
+    serial:   SNS-LE-USA
+    sha256:   4b28d2ddab405976bb56e41a40ec1ea11d7362a8f398d5f8c117d715a15719ca
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Lemmings
     name:     Lemmings
@@ -5204,8 +5546,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Lemmings 2: The Tribes
     name:     Lemmings 2 - The Tribes
@@ -5223,7 +5565,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Lester the Unlikely
     name:     Lester the Unlikely
@@ -5239,8 +5581,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Lethal Enforcers
     name:     Lethal Enforcers
@@ -5256,8 +5598,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Lethal Weapon
     name:     Lethal Weapon
@@ -5275,7 +5617,7 @@ release
     rom name=program.rom size=0x140000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -5295,7 +5637,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    The Lion King
     name:     Lion King, The
@@ -5312,11 +5654,11 @@ release
     board type=1K0N revision=01
     rom name=program.rom size=0x80000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Lock On
@@ -5336,8 +5678,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Looney Tunes B-Ball
     name:     Looney Tunes B-Ball
@@ -5353,8 +5695,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Lord of the Rings: Volume 1
     name:     Lord of the Rings - Volume 1, The
@@ -5370,8 +5712,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Lost Vikings
     name:     Lost Vikings
@@ -5387,8 +5729,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Lost Vikings 2
     name:     Lost Vikings 2
@@ -5405,8 +5747,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Lufia & The Fortress of Doom
     name:     Lufia & The Fortress of Doom
@@ -5424,8 +5766,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x280000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Lufia II: Rise of the Sinistrals
     name:     Lufia II - Rise of the Sinistrals
@@ -5442,8 +5784,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    John Madden Football
     name:     Madden NFL '92
@@ -5459,8 +5801,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    John Madden Football '93
     name:     Madden NFL '93
@@ -5477,7 +5819,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Madden NFL '94
     name:     Madden NFL '94
@@ -5495,7 +5837,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Madden NFL '95
@@ -5515,7 +5857,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Madden NFL '96
@@ -5535,7 +5877,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Madden NFL '97
@@ -5555,7 +5897,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Madden NFL '98
@@ -5573,8 +5915,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Magic Boy
     name:     Magic Boy
@@ -5590,8 +5932,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Magic Sword
     name:     Magic Sword
@@ -5607,8 +5949,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Magical Quest Starring Mickey Mouse
     name:     Magical Quest Starring Mickey Mouse, The
@@ -5624,8 +5966,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mario is Missing!
     name:     Mario is Missing!
@@ -5642,8 +5984,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Mario Paint
     name:     Mario Paint
@@ -5661,7 +6003,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mario's Early Years: Fun with Letters
     name:     Mario's Early Years - Fun with Letters
@@ -5678,7 +6020,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mario's Early Years: Fun with Numbers
     name:     Mario's Early Years - Fun with Numbers
@@ -5695,7 +6037,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mario's Early Years: Preschool Fun
     name:     Mario's Early Years - Preschool Fun
@@ -5711,8 +6053,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mario's Time Machine
     name:     Mario's Time Machine
@@ -5730,7 +6072,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Mark Davis' The Fishing Master
@@ -5749,7 +6091,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Marvel Super Heroes in War of the Gems
     name:     Marvel Super Heroes in War of the Gems
@@ -5765,8 +6107,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mary Shelley's Frankenstein
     name:     Mary Shelley's Frankenstein
@@ -5782,8 +6124,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Mask
     name:     Mask, The
@@ -5799,8 +6141,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Math Blaster: Episode One
     name:     Math Blaster - Episode One
@@ -5816,8 +6158,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x300000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Maui Mallard in Cold Shadow
     name:     Maui Mallard in Cold Shadow
@@ -5835,7 +6177,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Mecarobot Golf
     name:     Mecarobot Golf
@@ -5854,7 +6196,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    MechWarrior
     name:     MechWarrior
@@ -5872,7 +6214,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    MechWarrior 3050
     name:     MechWarrior 3050
@@ -5889,7 +6231,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mega Man 7
     name:     Mega Man 7
@@ -5905,8 +6247,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mega Man Soccer
     name:     Mega Man Soccer
@@ -5922,8 +6264,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mega Man X
     name:     Mega Man X
@@ -5939,9 +6281,10 @@ release
   cartridge region=NTSC
     board type=2DC0N revision=01
     hitachidsp model=HG51B169 frequency=20000000
-      rom id=program name=program.rom size=0x180000
-      rom id=data name=cx4.data.rom size=0xc00
-      ram id=data size=0xc00
+      rom name=program.rom size=0x180000
+      ram size=0
+      rom name=cx4.data.rom size=0xc00
+      ram size=0xc00
       map id=io address=00-3f,80-bf:6000-7fff
       map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
       map id=ram address=70-77:0000-7fff
@@ -5962,9 +6305,10 @@ release
   cartridge region=NTSC
     board type=1DC0N revision=01
     hitachidsp model=HG51B169 frequency=20000000
-      rom id=program name=program.rom size=0x200000
-      rom id=data name=cx4.data.rom size=0xc00
-      ram id=data size=0xc00
+      rom name=program.rom size=0x200000
+      ram size=0
+      rom name=cx4.data.rom size=0xc00
+      ram size=0xc00
       map id=io address=00-3f,80-bf:6000-7fff
       map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
       map id=ram address=70-77:0000-7fff
@@ -6006,8 +6350,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Metal Marines
     name:     Metal Marines
@@ -6023,8 +6367,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Metal Morph
     name:     Metal Morph
@@ -6040,8 +6384,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Metal Warriors
     name:     Metal Warriors
@@ -6058,11 +6402,11 @@ release
     board type=1K0N revision=01
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Michael Andretti's Indy Car Challenge
@@ -6083,7 +6427,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x140000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Michael Jordan: Chaos in the Windy City
     name:     Michael Jordan - Chaos in the Windy City
@@ -6099,8 +6443,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mickey Mania: The Timeless Adventures of Mickey Mouse
     name:     Mickey Mania - The Timeless Adventures of Mickey Mouse
@@ -6116,8 +6460,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mickey's Ultimate Challenge
     name:     Mickey's Ultimate Challenge
@@ -6133,8 +6477,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Micro Machines
     name:     Micro Machines
@@ -6151,8 +6495,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Might & Magic III: Isles of Terra
     name:     Might & Magic III - Isles of Terra
@@ -6169,8 +6513,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mighty Morphin Power Rangers
     name:     Mighty Morphin Power Rangers
@@ -6186,8 +6530,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mighty Morphin Power Rangers: The Fighting Edition
     name:     Mighty Morphin Power Rangers - The Fighting Edition
@@ -6203,8 +6547,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mighty Morphin Power Rangers: The Movie
     name:     Mighty Morphin Power Rangers - The Movie
@@ -6220,8 +6564,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Miracle Piano Teaching System
     name:     Miracle Piano Teaching System, The
@@ -6237,8 +6581,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    MLBPA Baseball
     name:     MLBPA Baseball
@@ -6254,8 +6598,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mohawk & Headphone Jack
     name:     Mohawk & Headphone Jack
@@ -6271,8 +6615,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Monopoly
     name:     Monopoly
@@ -6286,10 +6630,27 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x80000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Monopoly
+    name:     Monopoly
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-2
+    serial:   SNS-ML-USA
+    sha256:   6b0ac4d52d24536cdb7d9d0dc7d19ee30d08ac34363983290c5912ccc850fa0d
+    configuration
+      rom name=program.rom size=0x80000
+
+release
+  cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mortal Kombat
     name:     Mortal Kombat
@@ -6306,7 +6667,24 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
+  information
+    title:    Mortal Kombat II
+    name:     Mortal Kombat 2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-BJ0N-01
+    serial:   SNS-28-USA
+    sha256:   43e36a74fb73a7efc46b380599e269b1fff8f55ecf80f5cf50c34d02ceda041a
+    configuration
+      rom name=program.rom size=0x300000
+
+release
+  cartridge region=NTSC
+    board type=BJ0N revision=01,20
+    rom name=program.rom size=0x300000
+    map id=rom address=00-3f,80-bf:8000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mortal Kombat II
     name:     Mortal Kombat 2
@@ -6323,7 +6701,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Mortal Kombat 3
     name:     Mortal Kombat 3
@@ -6339,8 +6717,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x40000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mr. Do!
     name:     Mr. Do!
@@ -6356,8 +6734,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mr. Nutz
     name:     Mr. Nutz
@@ -6373,8 +6751,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x40000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ms. Pac-Man
     name:     Ms. Pac-Man
@@ -6390,8 +6768,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Musya: The Classic Japanese Tale of Horror
     name:     Musya - The Classic Japanese Tale of Horror
@@ -6407,8 +6785,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Mutant Chronicles: Doom Troopers
     name:     Mutant Chronicles - Doom Troopers
@@ -6425,7 +6803,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Natsume Championship Wrestling
     name:     Natsume Championship Wrestling
@@ -6441,8 +6819,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NBA All-Star Challenge
     name:     NBA All-Star Challenge
@@ -6458,8 +6836,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NBA Give 'n Go
     name:     NBA Give & Go
@@ -6477,7 +6855,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    NBA Hang Time
@@ -6495,8 +6873,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NBA Jam
     name:     NBA Jam
@@ -6513,8 +6891,8 @@ release
     board type=BA1M revision=01
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Jam: Tournament Edition
     name:     NBA Jam - Tournament Edition
@@ -6532,8 +6910,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Live '95
     name:     NBA Live '95
@@ -6551,8 +6929,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Live '96
     name:     NBA Live '96
@@ -6570,8 +6948,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Live '97
     name:     NBA Live '97
@@ -6589,8 +6967,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Live '98
     name:     NBA Live '98
@@ -6608,8 +6986,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NBA Showdown
     name:     NBA Showdown
@@ -6628,7 +7006,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    NCAA Basketball
     name:     NCAA Basketball
@@ -6647,7 +7025,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    NCAA Basketball
     name:     NCAA Basketball
@@ -6665,8 +7043,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NCAA Final Four Basketball
     name:     NCAA Final Four Basketball
@@ -6684,8 +7062,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NCAA Football
     name:     NCAA Football
@@ -6702,11 +7080,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Newman Haas Indycar Featuring Nigel Mansell
-    name:     Newman Haas Indycar Featuring Nigel Mansell
+    title:    Newman-Haas IndyCar featuring Nigel Mansell
+    name:     Newman-Haas IndyCar featuring Nigel Mansell
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-20
@@ -6719,8 +7097,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NFL Football
     name:     NFL Football
@@ -6737,8 +7115,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NFL Quarterback Club
     name:     NFL Quarterback Club '95
@@ -6756,8 +7134,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NFL Quarterback Club '96
     name:     NFL Quarterback Club '96
@@ -6774,8 +7152,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NHL '94
     name:     NHL '94
@@ -6793,7 +7171,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    NHL '95
@@ -6813,7 +7191,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    NHL '96
@@ -6833,7 +7211,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    NHL '97
@@ -6853,7 +7231,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    NHL '98
@@ -6872,8 +7250,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    NHL Stanley Cup
     name:     NHL Stanley Cup
@@ -6890,8 +7268,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    NHLPA Hockey '93
     name:     NHLPA Hockey '93
@@ -6907,8 +7285,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Nickelodeon GUTS
     name:     Nickelodeon GUTS
@@ -6924,8 +7302,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Nigel Mansell's World Championship Racing
     name:     Nigel Mansell's World Championship Racing
@@ -6941,8 +7319,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ninja Gaiden Trilogy
     name:     Ninja Gaiden Trilogy
@@ -6958,8 +7336,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ninja Warriors
     name:     Ninja Warriors
@@ -6975,8 +7353,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    No Escape
     name:     No Escape
@@ -6994,7 +7372,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Nobunga's Ambition
@@ -7013,8 +7391,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Nobunga's Ambition: Lord of Darkness
     name:     Nobunga's Ambition - Lord of Darkness
@@ -7033,7 +7411,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Nolan Ryan's Baseball
     name:     Nolan Ryan's Baseball
@@ -7050,8 +7428,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Nosferatu
     name:     Nosferatu
@@ -7068,8 +7446,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Obitus
     name:     Obitus
@@ -7087,8 +7465,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Ogre Battle: The March of the Black Queen
     name:     Ogre Battle - The March of the Black Queen
@@ -7106,7 +7484,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Olympic Summer Games
     name:     Olympic Summer Games
@@ -7122,8 +7500,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    On the Ball
     name:     On the Ball
@@ -7141,7 +7519,7 @@ release
     rom name=program.rom size=0x140000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,90-9f:6000-7fff mask=0xe000
     map id=ram address=30-3f,b0-bf:6000-7fff mask=0xe000
   information
@@ -7160,8 +7538,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Operation Logic Bomb
     name:     Operation Logic Bomb
@@ -7178,7 +7556,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x140000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Operation Thunderbolt
     name:     Operation Thunderbolt
@@ -7194,8 +7572,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Oscar
     name:     Oscar
@@ -7211,8 +7589,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Out of This World
     name:     Out of This World
@@ -7228,8 +7606,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Out to Lunch
     name:     Out to Lunch
@@ -7245,8 +7623,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Outlander
     name:     Outlander
@@ -7262,8 +7640,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pac-Attack
     name:     Pac-Attack
@@ -7279,8 +7657,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pac-in-Time
     name:     Pac-in-Time
@@ -7296,8 +7674,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pac-Man 2: The New Adventures
     name:     Pac-Man 2 - The New Adventures
@@ -7314,8 +7692,8 @@ release
     board type=2A5M revision=01
     rom name=program.rom size=0x140000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    P.T.O.: Pacific Theater of Operations
     name:     Pacific Theater of Operations
@@ -7334,7 +7712,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    P.T.O. II: Pacific Theater of Operations
@@ -7352,8 +7730,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Packy & Marlon
     name:     Packy & Marlon
@@ -7369,8 +7747,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Pagemaster
     name:     Pagemaster, The
@@ -7387,8 +7765,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Paladin's Quest
     name:     Paladin's Quest
@@ -7405,8 +7783,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Paperboy 2
     name:     Paperboy 2
@@ -7423,7 +7801,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    The Peace Keepers
     name:     Peace Keepers, The
@@ -7440,8 +7818,8 @@ release
     board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x100000
-      ram id=bitmap name=save.ram size=0x2000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x2000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -7466,8 +7844,8 @@ release
     board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x200000
-      ram id=bitmap name=save.ram size=0x2000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x2000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -7493,7 +7871,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    PGA Tour Golf
     name:     PGA Tour Golf
@@ -7510,8 +7888,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Phalanx: The Enforce Fighter A-144
     name:     Phalanx - The Enforce Fighter A-144
@@ -7527,8 +7905,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Phantom 2040
     name:     Phantom 2040
@@ -7545,7 +7923,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Pieces
     name:     Pieces
@@ -7563,9 +7941,9 @@ release
     rom name=program.rom size=0x80000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=30-3f,b0-bf:8000-ffff select=0x4000
   information
     title:    Pilotwings
@@ -7585,8 +7963,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pinball Dreams
     name:     Pinball Dreams
@@ -7602,8 +7980,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pinball Fantasies
     name:     Pinball Fantasies
@@ -7619,8 +7997,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pink Goes to Hollywood
     name:     Pink Goes to Hollywood
@@ -7637,7 +8015,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Pinocchio
     name:     Pinocchio
@@ -7653,8 +8031,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Pirates of Dark Water
     name:     Pirates of Dark Water, The
@@ -7670,8 +8048,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pit-Fighter
     name:     Pit-Fighter
@@ -7687,8 +8065,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pitfall: The Mayan Adventure
     name:     Pitfall - The Mayan Adventure
@@ -7704,8 +8082,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Plok
     name:     Plok
@@ -7721,8 +8099,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pocky & Rocky
     name:     Pocky & Rocky
@@ -7738,8 +8116,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pocky & Rocky 2
     name:     Pocky & Rocky 2
@@ -7755,8 +8133,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Populous
     name:     Populous
@@ -7772,8 +8150,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Porky Pig's Haunted Holiday
     name:     Porky Pig's Haunted Holiday
@@ -7790,7 +8168,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x280000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Power Instinct
     name:     Power Instinct
@@ -7806,8 +8184,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Power Moves
     name:     Power Moves
@@ -7823,8 +8201,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Power Piggs of the Dark Age
     name:     Power Piggs of the Dark Age
@@ -7841,8 +8219,8 @@ release
     board type=1L3B revision=02,11
     sa1
       rom name=program.rom size=0x100000
-      ram id=bitmap name=save.ram size=0x2000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x2000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -7866,8 +8244,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Prehistorik Man
     name:     Prehistorik Man
@@ -7884,7 +8262,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Primal Rage
     name:     Primal Rage
@@ -7900,8 +8278,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Prince of Persia
     name:     Prince of Persia
@@ -7917,8 +8295,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Prince of Persia 2: The Shadow and the Flame
     name:     Prince of Persia 2 - The Shadow and the Flame
@@ -7934,8 +8312,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Pro Quarterback
     name:     Pro Quarterback
@@ -7952,8 +8330,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Pro Sport Hockey
     name:     Pro Sport Hockey
@@ -7970,11 +8348,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Push-over
-    name:     Push-over
+    title:    Push-Over
+    name:     Push-Over
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-10
@@ -7987,8 +8365,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Q*bert 3
     name:     Q-bert 3
@@ -8004,8 +8382,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Race Drivin'
     name:     Race Drivin'
@@ -8023,7 +8401,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Radical Psycho Machine Racing
     name:     Radical Psycho Machine Racing
@@ -8040,8 +8418,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Radical Rex
     name:     Radical Rex
@@ -8057,8 +8435,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Raiden Trad
     name:     Raiden Trad
@@ -8074,8 +8452,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rampart
     name:     Rampart
@@ -8092,7 +8470,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Ranma 1/2: Hard Battle
     name:     Ranma Half - Hard Battle
@@ -8108,8 +8486,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rap Jam: Volume One
     name:     Rap Jam - Volume One
@@ -8125,8 +8503,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Realm
     name:     Realm
@@ -8142,8 +8520,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Red Line: F-1 Racer
     name:     Red Line - F1 Racer
@@ -8159,8 +8537,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Relief Pitcher
     name:     Relief Pitcher
@@ -8176,8 +8554,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Ren & Stimpy Show: Buckeroo$!
     name:     Ren & Stimpy Show - Buckeroo$!, The
@@ -8193,8 +8571,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Ren & Stimpy Show: Fire Dogs
     name:     Ren & Stimpy Show - Fire Dogs, The
@@ -8210,8 +8588,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x140000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Ren & Stimpy Show: Time Warp
     name:     Ren & Stimpy Show - Time Warp, The
@@ -8227,8 +8605,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Ren & Stimpy Show: Veediots!
     name:     Ren & Stimpy Show - Veediots!, The
@@ -8244,8 +8622,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Revolution X: Music is the Weapon
     name:     Revolution X - Music is the Weapon
@@ -8261,8 +8639,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rex Ronan: Experimental Surgeon
     name:     Rex Ronan - Experimental Surgeon
@@ -8279,8 +8657,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Riddick Bowe Boxing
     name:     Riddick Bowe Boxing
@@ -8299,7 +8677,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -8319,7 +8697,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Rise of the Robots
     name:     Rise of the Robots
@@ -8335,8 +8713,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rival Turf!
     name:     Rival Turf!
@@ -8352,8 +8730,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Road Riot 4WD
     name:     Road Riot 4WD
@@ -8369,8 +8747,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Road Runner's Death Valley Rally
     name:     Road Runner's Death Valley Rally
@@ -8386,8 +8764,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    RoboCop 3
     name:     RoboCop 3
@@ -8403,8 +8781,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    RoboCop versus The Terminator
     name:     RoboCop vs. The Terminator
@@ -8422,7 +8800,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -8441,8 +8819,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rock n' Roll Racing
     name:     Rock & Roll Racing
@@ -8458,8 +8836,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Rocketeer
     name:     Rocketeer, The
@@ -8475,8 +8853,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rocko's Modern Life: Spunky's Dangerous Day
     name:     Rocko's Modern Life - Spunky's Dangerous Day
@@ -8492,8 +8870,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Rocky Rodent
     name:     Rocky Rodent
@@ -8509,8 +8887,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Roger Clemens' MVP Baseball
     name:     Roger Clemens' MVP Baseball
@@ -8524,11 +8902,28 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Roger Clemens' MVP Baseball
+    name:     Roger Clemens' MVP Baseball
+    region:   NA
+    revision: 1.1
+    board:    SHVC-1A0N-20
+    serial:   SNS-VP-USA
+    sha256:   f7e3c3012af2dbad350646b6ef3470f0b4c42e4a2873109f7aa6c81d7157c887
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
     board type=1A5B revision=02,04
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Romance of the Three Kingdoms II
     name:     Romance of the Three Kingdoms II
@@ -8547,7 +8942,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,90-9f:6000-7fff mask=0xe000
     map id=ram address=30-3f,b0-bf:6000-7fff mask=0xe000
   information
@@ -8568,7 +8963,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Romance of the Three Kingdoms IV: Wall of Fire
@@ -8586,8 +8981,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    R-Type III: The Third Lightning
     name:     R-Type III - The Third Lightning
@@ -8603,8 +8998,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Run Saber
     name:     Run Saber
@@ -8621,7 +9016,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Samurai Shodown
     name:     Samurai Shodown
@@ -8638,7 +9033,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Saturday Night Slam Masters
     name:     Saturday Night Slam Masters
@@ -8654,8 +9049,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Scooby-Doo Mystery
     name:     Scooby-Doo Mystery
@@ -8671,8 +9066,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    SeaQuest DSV
     name:     SeaQuest DSV
@@ -8690,7 +9085,7 @@ release
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Secret of Evermore
@@ -8710,7 +9105,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Secret of Mana
@@ -8729,8 +9124,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Shadowrun
     name:     Shadowrun
@@ -8747,8 +9142,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Shanghai II: Dragon's Eye
     name:     Shanghai II - Dragon's Eye
@@ -8765,7 +9160,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Shaq-Fu
     name:     Shaq-Fu
@@ -8781,8 +9176,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Shien's Revenge
     name:     Shien's Revenge
@@ -8800,7 +9195,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Sid Meier's Civilization
@@ -8818,8 +9213,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Side Pocket
     name:     Side Pocket
@@ -8836,8 +9231,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    SimAnt: The Electronic Ant Colony
     name:     SimAnt - The Electronic Ant Colony
@@ -8856,7 +9251,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x8000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    SimCity
     name:     SimCity
@@ -8875,7 +9270,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    SimCity 2000
@@ -8894,8 +9289,8 @@ release
     board type=1A3B revision=20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    SimEarth: The Living Planet
     name:     SimEarth - The Living Planet
@@ -8912,8 +9307,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Simpsons: Bart's Nightmare
     name:     Simpsons - Bart's Nightmare, The
@@ -8929,8 +9324,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Simpsons: Virtual Bart
     name:     Simpsons - Virtual Bart, The
@@ -8946,8 +9341,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    S.O.S.: Sink or Swim
     name:     Sink or Swim
@@ -8963,8 +9358,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Skuljagger: Revolt of the Westicans
     name:     Skuljagger - Revolt of the Westicans
@@ -8980,8 +9375,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Skyblazer
     name:     Skyblazer
@@ -8997,11 +9392,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    SmartBall
-    name:     SmartBall
+    title:    Smart Ball
+    name:     Smart Ball
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-01
@@ -9014,8 +9409,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Snow White in Happily Ever After
     name:     Snow White in Happily Ever After
@@ -9032,7 +9427,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Soldiers of Fortune
     name:     Soldiers of Fortune
@@ -9048,8 +9443,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Sonic Blast Man
     name:     Sonic Blast Man
@@ -9066,7 +9461,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Sonic Blast Man II
     name:     Sonic Blast Man II
@@ -9082,8 +9477,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    SOS
     name:     SOS
@@ -9101,7 +9496,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Soul Blazer
     name:     Soul Blazer
@@ -9118,8 +9513,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Space Ace
     name:     Space Ace
@@ -9135,8 +9530,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Space Football: One on One
     name:     Space Football - One on One
@@ -9152,8 +9547,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x40000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Space Invaders
     name:     Space Invaders
@@ -9169,8 +9564,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Space Megaforce
     name:     Space Megaforce
@@ -9186,8 +9581,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spanky's Quest
     name:     Spanky's Quest
@@ -9203,8 +9598,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Sparkster
     name:     Sparkster
@@ -9221,7 +9616,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Spawn
     name:     Spawn
@@ -9237,8 +9632,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0xe0000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spectre
     name:     Spectre
@@ -9254,8 +9649,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Speed Racer in My Most Dangerous Adventures
     name:     Speed Racer in My Most Dangerous Adventures
@@ -9271,8 +9666,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Speedy Gonzales: Los Gatos Bandidos
     name:     Speedy Gonzales - Los Gatos Bandidos
@@ -9287,9 +9682,26 @@ release
 release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Speedy Gonzales: Los Gatos Bandidos
+    name:     Speedy Gonzales - Los Gatos Bandidos
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-2
+    serial:   SNS-ASEE-USA
+    sha256:   68a51b7a06b6a9e7100a89521e52b5c467c46c828c0f6504bee677beac2aa6fd
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spider-Man: The Animated Series
     name:     Spider-Man - The Animated Series
@@ -9305,8 +9717,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spider-Man & Venom: Maximum Carnage
     name:     Spider-Man & Venom - Maximum Carnage
@@ -9322,8 +9734,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x300000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spider-Man & Venom: Separation Anxiety
     name:     Spider-Man & Venom - Separation Anxiety
@@ -9339,8 +9751,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spider-Man & X-Men: Arcade's Revenge
     name:     Spider-Man & X-Men - Arcade's Revenge
@@ -9356,8 +9768,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Spindizzy Worlds
     name:     Spindizzy Worlds
@@ -9375,7 +9787,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    The Sporting News Baseball
@@ -9393,8 +9805,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Sports Illustrated: Championship Football & Baseball
     name:     Sports Illustrated - Championship Football & Baseball
@@ -9414,7 +9826,7 @@ release
       ram name=save.ram size=0x8000
       map id=io address=00-3f,80-bf:3000-34ff
       map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-      map id=ram address=60-7f,e0-ff:0000-ffff
+      map id=ram address=60-7d,e0-ff:0000-ffff
   information
     title:    Star Fox
     name:     Star Fox
@@ -9432,8 +9844,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Star Trek: Deep Space Nine - Crossroads of Time
     name:     Star Trek - Deep Space Nine - Crossroads of Time
@@ -9449,8 +9861,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Star Trek: Starfleet Academy - Starship Bridge Simulator
     name:     Star Trek - Starfleet Academy - Starship Bridge Simulator
@@ -9466,8 +9878,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Star Trek: The Next Generation - Future's Past
     name:     Star Trek - The Next Generation - Future's Past
@@ -9483,8 +9895,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Stargate
     name:     Stargate
@@ -9500,8 +9912,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Steel Talons
     name:     Steel Talons
@@ -9517,8 +9929,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Sterling Sharpe: End 2 End
     name:     Sterling Sharpe - End 2 End
@@ -9534,8 +9946,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Stone Protectors
     name:     Stone Protectors
@@ -9551,8 +9963,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Street Combat
     name:     Street Combat
@@ -9587,8 +9999,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Street Fighter II: The World Warrior
     name:     Street Fighter II - The World Warrior
@@ -9622,7 +10034,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Street Hockey '95
     name:     Street Hockey '95
@@ -9638,8 +10050,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Street Racer
     name:     Street Racer
@@ -9655,11 +10067,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Strike Gunner: STG
-    name:     Strike Gunner - STG
+    title:    Strike Gunner S.T.G.
+    name:     Strike Gunner STG
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-02
@@ -9696,8 +10108,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Sunset Riders
     name:     Sunset Riders
@@ -9713,8 +10125,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Adventure Island
     name:     Super Adventure Island
@@ -9732,7 +10144,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -9751,8 +10163,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Alfred Chicken
     name:     Super Alfred Chicken
@@ -9768,11 +10180,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    The Super Aquatic Games Starring The Aquabats
-    name:     Super Aquatic Games Starring The Aquabats, The
+    title:    The Super Aquatic Games starring the Aquabats
+    name:     Super Aquatic Games starring the Aquabats, The
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-10
@@ -9786,7 +10198,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Baseball 2020
     name:     Super Baseball 2020
@@ -9804,7 +10216,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x200
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Super Baseball Simulator 1.000
     name:     Super Baseball Simulator 1.000
@@ -9821,8 +10233,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Bases Loaded
     name:     Super Bases Loaded
@@ -9840,11 +10252,11 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7d,f0-ff:0000-7fff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=60-6f,e0-ef:0000-7fff select=0x4000
   information
     title:    Super Bases Loaded 2
@@ -9866,8 +10278,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Super Bases Loaded 3: License to Steal
     name:     Super Bases Loaded 3 - License to Steal
@@ -9884,8 +10296,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Batter Up
     name:     Super Batter Up
@@ -9901,8 +10313,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Battleship
     name:     Super Battleship
@@ -9918,8 +10330,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Battletank: War in the Gulf
     name:     Super Battletank - War in the Gulf
@@ -9935,8 +10347,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Battletank 2
     name:     Super Battletank 2
@@ -9952,8 +10364,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Black Bass
     name:     Super Black Bass
@@ -9970,7 +10382,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x80000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Bomberman
     name:     Super Bomberman
@@ -9987,7 +10399,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Bomberman 2
     name:     Super Bomberman 2
@@ -10004,7 +10416,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Bonk
     name:     Super Bonk
@@ -10020,8 +10432,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Bowling
     name:     Super Bowling
@@ -10037,8 +10449,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Buster Brothers
     name:     Super Buster Brothers
@@ -10054,8 +10466,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Caesers Palace
     name:     Super Caesers Palace
@@ -10071,8 +10483,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Castlevania IV
     name:     Super Castlevania IV
@@ -10088,8 +10500,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Chase H.Q.
     name:     Super Chase HQ
@@ -10107,7 +10519,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Super Conflict
     name:     Super Conflict
@@ -10124,8 +10536,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Copa
     name:     Super Copa
@@ -10141,8 +10553,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Double Dragon
     name:     Super Double Dragon
@@ -10158,8 +10570,8 @@ release
   cartridge region=NTSC
     board id:Super Game Boy
     rom name=program.rom size=0x40000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
     icd2 revision=1
       rom name=sgb.boot.rom size=0x100
       map id=io address=00-3f,80-bf:6000-67ff
@@ -10180,8 +10592,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Ghouls 'n Ghosts
     name:     Super Ghouls & Ghosts
@@ -10197,8 +10609,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Goal! 2
     name:     Super Goal! 2
@@ -10214,8 +10626,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Godzilla
     name:     Super Godzilla
@@ -10231,8 +10643,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super High Impact
     name:     Super High Impact
@@ -10248,8 +10660,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super James Pond
     name:     Super James Pond
@@ -10267,7 +10679,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Super Mario All-Stars
     name:     Super Mario All-Stars
@@ -10285,8 +10697,8 @@ release
     board type=BA3M revision=01
     rom name=program.rom size=0x280000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Super Mario All-Stars + Super Mario World
     name:     Super Mario All-Stars + Super Mario World
@@ -10305,12 +10717,12 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Super Mario Kart
@@ -10332,8 +10744,8 @@ release
     board type=1L5B revision=11,20
     sa1
       rom name=program.rom size=0x400000
-      ram id=bitmap name=save.ram size=0x8000
-      ram id=internal size=0x800
+      ram name=save.ram size=0x8000
+      ram size=0x800
       map id=io address=00-3f,80-bf:2200-23ff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=c0-ff:0000-ffff
@@ -10359,7 +10771,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Super Mario World
     name:     Super Mario World
@@ -10401,8 +10813,8 @@ release
     board type=BA3M revision=01
     rom name=program.rom size=0x300000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Super Metroid
     name:     Super Metroid
@@ -10419,8 +10831,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Ninja Boy
     name:     Super Ninja Boy
@@ -10437,7 +10849,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Nova
     name:     Super Nova
@@ -10453,8 +10865,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Off Road
     name:     Super Off Road
@@ -10470,8 +10882,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Off Road: The Baja
     name:     Super Off Road - The Baja
@@ -10487,8 +10899,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Pinball: Behind the Mask
+    name:     Super Pinball - Behind the Mask
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    serial:   SNS-XP-USA
+    sha256:   6bf0e7a7b95613b9d0e5c8cc98eee5d0ac200e88b5d4444ad5cf93d3e8265118
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Pinball: Behind the Mask
     name:     Super Pinball - Behind the Mask
@@ -10506,7 +10935,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Super Play Action Football
     name:     Super Play Action Football
@@ -10524,11 +10953,11 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
-    title:    Super Punch-out!!
-    name:     Super Punch-out!!
+    title:    Super Punch-Out!!
+    name:     Super Punch-Out!!
     region:   NA
     revision: 1.0
     board:    SHVC-1A3M-21
@@ -10542,8 +10971,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Putty
     name:     Super Putty
@@ -10559,8 +10988,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super R-Type
     name:     Super R-Type
@@ -10576,8 +11005,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super R.B.I Baseball
     name:     Super RBI Baseball
@@ -10593,8 +11022,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Scope 6
     name:     Super Scope 6
@@ -10610,8 +11039,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Slam Dunk
     name:     Super Slam Dunk
@@ -10627,8 +11056,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Slap Shot
     name:     Super Slap Shot
@@ -10644,8 +11073,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Smash T.V.
     name:     Super Smash TV
@@ -10661,8 +11090,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Soccer
     name:     Super Soccer
@@ -10678,8 +11107,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Soccer Champ
     name:     Super Soccer Champ
@@ -10695,8 +11124,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Solitaire
     name:     Super Solitaire
@@ -10712,8 +11141,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Star Wars: A New Hope
     name:     Super Star Wars - A New Hope
@@ -10729,8 +11158,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Star Wars II: The Empire Strikes Back
     name:     Super Star Wars II - The Empire Strikes Back
@@ -10746,8 +11175,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Star Wars II: The Empire Strikes Back
     name:     Super Star Wars II - The Empire Strikes Back
@@ -10763,8 +11192,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Star Wars III: Return of the Jedi
     name:     Super Star Wars III - Return of the Jedi
@@ -10778,10 +11207,27 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Super Star Wars III: Return of the Jedi
+    name:     Super Star Wars III - Return of the Jedi
+    region:   NA
+    revision: 1.1
+    board:    MAXI-1A0N-30-2
+    serial:   SNS-ARJE-USA
+    sha256:   f7df5cd16ce6624567d1a24e9b9c0b9050ea9b6a9fe5a7973484589637756596
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Super Street Fighter II: The New Challengers
     name:     Super Street Fighter II - The New Challengers
@@ -10797,8 +11243,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Strike Eagle
     name:     Super Strike Eagle
@@ -10814,8 +11260,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Tennis
     name:     Super Tennis
@@ -10831,8 +11277,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Troll Islands
     name:     Super Troll Islands
@@ -10848,8 +11294,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Turrican
     name:     Super Turrican
@@ -10865,8 +11311,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Turrican 2
     name:     Super Turrican 2
@@ -10882,8 +11328,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Valis IV
     name:     Super Valis IV
@@ -10899,8 +11345,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Super Widget
     name:     Super Widget
@@ -10917,11 +11363,11 @@ release
     board type=1K0N revision=01
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp1.program.rom size=0x1800
-      rom id=data name=dsp1.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp1.program.rom size=0x1800
+      rom name=dsp1.data.rom size=0x800
+      ram size=0x200
       map id=io address=00-1f,80-9f:6000-7fff select=0x1000
   information
     title:    Suzuka 8 Hours
@@ -10942,7 +11388,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    SWAT Kats: The Radical Squadron
     name:     SWAT Kats - The Radical Squadron
@@ -10958,8 +11404,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Syndicate
     name:     Syndicate
@@ -10975,8 +11421,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Taz-Mania
     name:     Taz-Mania
@@ -10993,8 +11439,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tecmo Secret of the Stars
     name:     Tecmo Secret of the Stars
@@ -11012,8 +11458,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tecmo Super Baseball
     name:     Tecmo Super Baseball
@@ -11032,7 +11478,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tecmo Super Bowl
     name:     Tecmo Super Bowl
@@ -11050,8 +11496,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tecmo Super Bowl II: Special Edition
     name:     Tecmo Super Bowl II - Special Edition
@@ -11069,8 +11515,8 @@ release
     board type=1A5M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x8000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tecmo Super Bowl III: Final Edition
     name:     Tecmo Super Bowl III - Final Edition
@@ -11089,7 +11535,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Tecmo Super NBA Basketball
     name:     Tecmo Super NBA Basketball
@@ -11106,8 +11552,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Teenage Mutant Ninja Turtles IV: Turtles in Time
     name:     Teenage Mutant Ninja Turtles IV - Turtles in Time
@@ -11123,8 +11569,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Teenage Mutant Ninja Turtles V: Tournament Fighters
     name:     Teenage Mutant Ninja Turtles V - Tournament Fighters
@@ -11140,8 +11586,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Terminator
     name:     Terminator
@@ -11157,8 +11603,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Terminator 2: Judgment Day
     name:     Terminator 2 - Judgment Day
@@ -11174,8 +11620,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Terminator 2: The Arcade Game
     name:     Terminator 2 - The Arcade Game
@@ -11191,8 +11637,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Test Drive II: The Duel
     name:     Test Drive II - The Duel
@@ -11208,8 +11654,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tetris & Dr. Mario
     name:     Tetris & Dr. Mario
@@ -11225,8 +11671,25 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Tetris 2
+    name:     Tetris 2
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A0N-20
+    serial:   SNS-27-USA
+    sha256:   accc836c3adabadc810fbe35702c6a64d50a09f4c672d2734fa58b251d7a20aa
+    configuration
+      rom name=program.rom size=0x100000
+
+release
+  cartridge region=NTSC
+    board type=1A0N revision=01,02,10,20,30
+    rom name=program.rom size=0x100000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tetris 2
     name:     Tetris 2
@@ -11242,8 +11705,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tetris Attack
     name:     Tetris Attack
@@ -11259,8 +11722,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Thomas the Tank Engine & Friends
     name:     Thomas the Tank Engine & Friends
@@ -11276,8 +11739,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Thunder Spirits
     name:     Thunder Spirits
@@ -11293,8 +11756,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Tick
     name:     Tick, The
@@ -11310,8 +11773,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Time Cop
     name:     Time Cop
@@ -11327,8 +11790,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Time Slip
     name:     Time Slip
@@ -11344,8 +11807,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Time Trax
     name:     Time Trax
@@ -11362,7 +11825,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x180000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Timon & Pumbaa's Jungle Games
     name:     Timon & Pumbaa's Jungle Games
@@ -11379,8 +11842,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Tin Star
     name:     Tin Star
@@ -11397,8 +11860,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tiny Toon Adventures: Buster Busts Loose!
     name:     Tiny Toon Adventures - Buster Busts Loose!
@@ -11414,8 +11877,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tiny Toon Adventures: Wacky Sports Challenge
     name:     Tiny Toon Adventures - Wacky Sports Challenge
@@ -11431,8 +11894,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    TKO Super Championship Boxing
     name:     TKO Super Championship Boxing
@@ -11450,7 +11913,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -11469,8 +11932,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tom and Jerry
     name:     Tom and Jerry
@@ -11486,8 +11949,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tommy Moe's Winter Extreme: Skiing and Snowboarding
     name:     Tommy Moe's Winter Extreme - Skiing and Snowboarding
@@ -11503,8 +11966,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Tony Meola's Sidekicks Soccer
     name:     Tony Meola's Sidekicks Soccer
@@ -11520,8 +11983,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Top Gear
     name:     Top Gear
@@ -11537,8 +12000,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Top Gear 2
     name:     Top Gear 2
@@ -11556,9 +12019,9 @@ release
     rom name=program.rom size=0x100000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
     necdsp model=uPD7725 frequency=8000000
-      rom id=program name=dsp4.program.rom size=0x1800
-      rom id=data name=dsp4.data.rom size=0x800
-      ram id=data size=0x200
+      rom name=dsp4.program.rom size=0x1800
+      rom name=dsp4.data.rom size=0x800
+      ram size=0x200
       map id=io address=30-3f,b0-bf:8000-ffff select=0x4000
   information
     title:    Top Gear 3000
@@ -11578,8 +12041,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Total Carnage
     name:     Total Carnage
@@ -11596,7 +12059,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Toy Story
     name:     Toy Story
@@ -11612,8 +12075,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Toys: Let the Toy Wars Begin!
     name:     Toys - Let the Toy Wars Begin!
@@ -11629,8 +12092,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Troddlers
     name:     Troddlers
@@ -11647,8 +12110,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Troy Aikman Football
     name:     Troy Aikman Football
@@ -11666,8 +12129,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    True Golf: Wicked 18
     name:     True Golf - Wicked 18
@@ -11686,7 +12149,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    True Golf Classics: Pebble Beach Golf Links
     name:     True Golf Classics - Pebble Beach Golf Links
@@ -11705,7 +12168,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    True Golf Classics: Waialae Country Club
     name:     True Golf Classics - Waialae Country Club
@@ -11722,8 +12185,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    True Lies
     name:     True Lies
@@ -11737,10 +12200,27 @@ release
 
 release
   cartridge region=NTSC
+    board type=2A0N revision=01,10,11,20
+    rom name=program.rom size=0x200000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
+  information
+    title:    Tuff E Nuff
+    name:     Tuff E Nuff
+    region:   NA
+    revision: 1.0
+    board:    SHVC-2A0N-10
+    serial:   SNS-TE-USA
+    sha256:   8f62d014f513a7dcbca5aa76cbe476c3e4526100f34913af831bc05dab029bd1
+    configuration
+      rom name=program.rom size=0x200000
+
+release
+  cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Turn and Burn: No-Fly Zone
     name:     Turn and Burn - No-Fly Zone
@@ -11757,8 +12237,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    The Twisted Tales of Spike McFang
     name:     Twisted Tales of Spike McFang, The
@@ -11776,8 +12256,8 @@ release
     board type=1A1M revision=01,11,20
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Ultima: Runes of Virtue II
     name:     Ultima - Runes of Virtue II
@@ -11795,30 +12275,11 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
-    title:    Ultima: The Black Gate
-    name:     Ultima - The Black Gate
-    region:   NA
-    revision: 1.0
-    board:    SHVC-1A3M-21
-    serial:   SNS-7I-USA
-    sha256:   a31af0e39afb55bbc92a5543b504327fbe7e8cd0a5e08626976bed7b65376737
-    configuration
-      rom name=program.rom size=0x100000
-      ram name=save.ram size=0x2000
-
-release
-  cartridge region=NTSC
-    board type=1A3M revision=10,20,21,30
-    rom name=program.rom size=0x100000
-    ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
-  information
-    title:    Ultima: The False Prophet
-    name:     Ultima - The False Prophet
+    title:    Ultima VI: The False Prophet
+    name:     Ultima VI - The False Prophet
     region:   NA
     revision: 1.0
     board:    SHVC-1A3M-20
@@ -11830,10 +12291,29 @@ release
 
 release
   cartridge region=NTSC
+    board type=1A3M revision=10,20,21,30
+    rom name=program.rom size=0x100000
+    ram name=save.ram size=0x2000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
+  information
+    title:    Ultima VII: The Black Gate
+    name:     Ultima VII - The Black Gate
+    region:   NA
+    revision: 1.0
+    board:    SHVC-1A3M-21
+    serial:   SNS-7I-USA
+    sha256:   a31af0e39afb55bbc92a5543b504327fbe7e8cd0a5e08626976bed7b65376737
+    configuration
+      rom name=program.rom size=0x100000
+      ram name=save.ram size=0x2000
+
+release
+  cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ultimate Fighter
     name:     Ultimate Fighter
@@ -11850,7 +12330,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x400000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Ultimate Mortal Kombat 3
     name:     Ultimate Mortal Kombat 3
@@ -11866,8 +12346,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Ultraman: Towards the Future
     name:     Ultraman - Towards the Future
@@ -11883,8 +12363,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    U.N. Squadron
     name:     UN Squadron
@@ -11902,7 +12382,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Uncharted Waters
     name:     Uncharted Waters
@@ -11921,7 +12401,7 @@ release
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x8000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
   information
     title:    Uncharted Waters: New Horizons
@@ -11940,8 +12420,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x200000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Uniracers
     name:     Uniracers
@@ -11958,8 +12438,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Untouchables
     name:     Untouchables, The
@@ -11975,8 +12455,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Urban Strike
     name:     Urban Strike
@@ -11993,8 +12473,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Utopia: The Creation of a Nation
     name:     Utopia - The Creation of a Nation
@@ -12013,7 +12493,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Vegas Stakes
     name:     Vegas Stakes
@@ -12056,7 +12536,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Wanderers from Ys III
     name:     Wanderers from Ys III
@@ -12073,8 +12553,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    War 2410
     name:     War 2410
@@ -12090,8 +12570,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    War 3010: The Revolution
     name:     War 3010 - The Revolution
@@ -12108,8 +12588,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Wario's Woods
     name:     Wario's Woods
@@ -12126,8 +12606,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Warlock
     name:     Warlock
@@ -12143,8 +12623,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Warp Speed
     name:     Warp Speed
@@ -12161,8 +12641,8 @@ release
     board type=2A3M revision=01,11,20
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Wayne Gretzky and the NHLPA All-Stars
     name:     Wayne Gretzky and the NHLPA All-Stars
@@ -12179,8 +12659,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wayne's World
     name:     Wayne's World
@@ -12196,8 +12676,8 @@ release
   cartridge region=NTSC
     board type=2A0N revision=01,10,11,20
     rom name=program.rom size=0x180000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    WCW Super Brawl Wrestling
     name:     WCW Super Brawl Wrestling
@@ -12214,7 +12694,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    WeaponLord
     name:     WeaponLord
@@ -12230,8 +12710,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    We're Back!: A Dinosaur's Story
     name:     We're Back! - A Dinosaur's Story
@@ -12247,8 +12727,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wheel of Fortune
     name:     Wheel of Fortune
@@ -12264,8 +12744,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wheel of Fortune: Deluxe Edition
     name:     Wheel of Fortune - Deluxe Edition
@@ -12281,8 +12761,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Where in the World is Carmen Sandiego?
     name:     Where in the World is Carmen Sandiego
@@ -12298,8 +12778,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Where in Time is Carmen Sandiego?
     name:     Where in Time is Carmen Sandiego
@@ -12315,8 +12795,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Whizz
     name:     Whizz
@@ -12332,8 +12812,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wild Guns
     name:     Wild Guns
@@ -12349,8 +12829,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wild Snake
     name:     Wild Snake
@@ -12366,8 +12846,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Williams Arcade's Greatest Hits
     name:     Williams Arcade's Greatest Hits
@@ -12383,8 +12863,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wing Commander
     name:     Wing Commander
@@ -12400,8 +12880,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wing Commander: The Secret Missions
     name:     Wing Commander - The Secret Missions
@@ -12417,8 +12897,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wings 2: Aces High
     name:     Wings 2 - Aces High
@@ -12435,7 +12915,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Winter Olympic Games: Lillehammer '94
     name:     Winter Olympic Games - Lillehammer '94
@@ -12451,8 +12931,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    The Wizard of Oz
     name:     Wizard of Oz, The
@@ -12469,8 +12949,8 @@ release
     board type=1A3M revision=10,20,21,30
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-7fff
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=ram address=70-7d,f0-ff:0000-7fff
   information
     title:    Wizardry V: Heart of the Maelstrom
     name:     Wizardry V - Heart of the Maelstrom
@@ -12487,8 +12967,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wolf Child
     name:     Wolf Child
@@ -12505,7 +12985,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x100000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Wolfenstein 3D
     name:     Wolfenstein 3D
@@ -12521,8 +13001,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wolverine: Adamantium Rage
     name:     Wolverine - Adamantium Rage
@@ -12538,8 +13018,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Wordtris
     name:     Wordtris
@@ -12557,7 +13037,7 @@ release
     rom name=program.rom size=0x180000
     ram name=save.ram size=0x2000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
     map id=ram address=10-1f,30-3f:6000-7fff mask=0xe000
     map id=ram address=90-9f,b0-bf:6000-7fff mask=0xe000
   information
@@ -12577,7 +13057,7 @@ release
     board type=2J0N revision=01,10,11
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    World Heroes
     name:     World Heroes
@@ -12593,8 +13073,8 @@ release
   cartridge region=NTSC
     board type=BA0N revision=01,10
     rom name=program.rom size=0x300000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    World Heroes 2
     name:     World Heroes 2
@@ -12612,7 +13092,7 @@ release
     rom name=program.rom size=0x80000
     ram name=save.ram size=0x800
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    World League Soccer
     name:     World League Soccer
@@ -12629,8 +13109,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    World Soccer '94: Road to Glory
     name:     World Soccer '94 - Road to Glory
@@ -12647,7 +13127,7 @@ release
     board type=BJ0N revision=01,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    WWF Raw
     name:     WWF Raw
@@ -12663,8 +13143,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    WWF Royal Rumble
     name:     WWF Royal Rumble
@@ -12680,8 +13160,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    WWF Super Wrestlemania
     name:     WWF Super Wrestlemania
@@ -12698,7 +13178,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    WWF Wrestlemania: The Arcade Game
     name:     WWF Wrestlemania - The Arcade Game
@@ -12714,8 +13194,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    X-Kaliber 2097
     name:     X-Kaliber 2097
@@ -12732,7 +13212,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x200000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    X-Men: Mutant Apocalypse
     name:     X-Men - Mutant Apocalypse
@@ -12748,8 +13228,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    X-Zone
     name:     X-Zone
@@ -12767,7 +13247,7 @@ release
     rom name=program.rom size=0x100000
     ram name=save.ram size=0x2000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
-    map id=ram address=70-7f,f0-ff:0000-ffff
+    map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    Xardion
     name:     Xardion
@@ -12784,8 +13264,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x80000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Yoshi's Cookie
     name:     Yoshi's Cookie
@@ -12801,8 +13281,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Yoshi's Safari
     name:     Yoshi's Safari
@@ -12818,8 +13298,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Young Merlin
     name:     Young Merlin
@@ -12835,11 +13315,11 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x200000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
-    title:    Zero: The Kamikaze Squirrel
-    name:     Zero - The Kamikaze Squirrel
+    title:    Zero the Kamikaze Squirrel
+    name:     Zero the Kamikaze Squirrel
     region:   NA
     revision: 1.0
     board:    SHVC-1A0N-20
@@ -12852,8 +13332,8 @@ release
   cartridge region=NTSC
     board type=YA0N revision=01
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Zombies Ate My Neighbors
     name:     Zombies Ate My Neighbors
@@ -12869,8 +13349,8 @@ release
   cartridge region=NTSC
     board type=1A0N revision=01,02,10,20,30
     rom name=program.rom size=0x100000
-    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000
-    map id=rom address=40-7f,c0-ff:0000-7fff mask=0x8000
+    map id=rom address=00-7d,80-ff:8000-ffff mask=0x8000
+    map id=rom address=40-7d,c0-ff:0000-7fff mask=0x8000
   information
     title:    Zool: Ninja of the "Nth" Dimension
     name:     Zool - Ninja of the 'Nth' Dimension
@@ -12887,7 +13367,7 @@ release
     board type=1J0N revision=01,10,20
     rom name=program.rom size=0x80000
     map id=rom address=00-3f,80-bf:8000-ffff
-    map id=rom address=40-7f,c0-ff:0000-ffff
+    map id=rom address=40-7d,c0-ff:0000-ffff
   information
     title:    Zoop
     name:     Zoop

@@ -173,6 +173,10 @@ void OS::quit() {
   return pOS::quit();
 }
 
+void OS::setName(const string &name) {
+  osState.name = name;
+}
+
 void OS::initialize() {
   static bool initialized = false;
   if(initialized == false) {

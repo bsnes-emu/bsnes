@@ -87,25 +87,24 @@ void MSU1::reset() {
 
 void MSU1::data_open() {
   if(datafile.open()) datafile.close();
-  XML::Document document(cartridge.manifest());
-  string name = document["cartridge"]["msu1"]["rom"]["name"].data;
+  auto document = Markup::Document(cartridge.information.markup);
+  string name = document["cartridge/msu1/rom/name"].data;
   if(name.empty()) name = "msu1.rom";
-  if(datafile.open({interface->path(0), name}, file::mode::read)) {
+  if(datafile.open({interface->path(ID::SuperFamicom), name}, file::mode::read)) {
     datafile.seek(mmio.data_offset);
   }
 }
 
 void MSU1::audio_open() {
   if(audiofile.open()) audiofile.close();
-  XML::Document document(cartridge.manifest());
+  auto document = Markup::Document(cartridge.information.markup);
   string name = {"track-", mmio.audio_track, ".pcm"};
-  for(auto &track : document["cartridge"]["msu1"]) {
-    if(track.name != "track") continue;
+  for(auto &track : document.find("cartridge/msu1/track")) {
     if(numeral(track["number"].data) != mmio.audio_track) continue;
     name = track["name"].data;
     break;
   }
-  if(audiofile.open({interface->path(0), name}, file::mode::read)) {
+  if(audiofile.open({interface->path(ID::SuperFamicom), name}, file::mode::read)) {
     audiofile.seek(mmio.audio_offset);
   }
 }

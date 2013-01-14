@@ -226,7 +226,7 @@ void InputManager::poll() {
   using nall::Keyboard;
 
   activeScancode = !activeScancode;
-  input.poll(scancode[activeScancode]);
+  if(input.poll(scancode[activeScancode]) == false) return;
 
   for(unsigned n = 0; n < Scancode::Limit; n++) {
     if(scancode[0][n] != scancode[1][n]) {

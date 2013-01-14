@@ -1,5 +1,9 @@
+bool pWidget::focused() {
+  return qtWidget->hasFocus();
+}
+
 Geometry pWidget::minimumGeometry() {
-  return { 0, 0, 0, 0 };
+  return {0, 0, 0, 0};
 }
 
 void pWidget::setEnabled(bool enabled) {

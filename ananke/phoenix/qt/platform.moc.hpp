@@ -266,6 +266,7 @@ struct pWidget : public pSizable {
   Widget &widget;
   QWidget *qtWidget;
 
+  bool focused();
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   void setFocused();

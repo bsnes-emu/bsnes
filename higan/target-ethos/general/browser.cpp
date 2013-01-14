@@ -28,9 +28,7 @@ Browser::Browser() {
   };
 
   homeButton.onActivate = [&] {
-    string pathname = {userpath(), "Emulation/"};
-    directory::create(pathname);
-    setPath(pathname);
+    setPath({userpath(), "Emulation/"});
   };
 
   upButton.onActivate = [&] {
@@ -147,7 +145,7 @@ void Browser::setPath(const string &path, unsigned selection) {
   fileList.reset();
   filenameList.reset();
 
-  lstring contents = directory::contents(path);
+  lstring contents = directory::ifolders(path);
 
   for(auto &filename : contents) {
     string suffix = {".", this->extension, "/"};

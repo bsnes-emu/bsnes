@@ -1,0 +1,3 @@
+system name:Game Boy Advance
+  cpu
+    rom name=bios.rom size=16384

@@ -1,13 +1,13 @@
-Geometry pWidget::minimumGeometry() {
-  return {0, 0, 0, 0};
-}
-
 bool pWidget::enabled() {
   return gtk_widget_get_sensitive(gtkWidget);
 }
 
 bool pWidget::focused() {
   return GTK_WIDGET_HAS_FOCUS(gtkWidget);
+}
+
+Geometry pWidget::minimumGeometry() {
+  return {0, 0, 0, 0};
 }
 
 void pWidget::setEnabled(bool enabled) {

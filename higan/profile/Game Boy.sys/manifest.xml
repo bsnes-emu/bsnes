@@ -1,6 +1,0 @@
-<?xml version='1.0' encoding='UTF-8'?>
-<system name="Game Boy">
-  <cpu>
-    <firmware name="boot.rom" size="256" sha256="cf053eccb4ccafff9e67339d4e78e98dce7d1ed59be819d2a1ba2232c6fce1c7"/>
-  </cpu>
-</system>

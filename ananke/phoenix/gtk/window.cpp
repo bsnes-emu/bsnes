@@ -296,6 +296,15 @@ void pWindow::constructor() {
 
   widget = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 
+  //if program was given a name, try and set the window taskbar icon from one of the pixmaps folders
+  if(osState.name.empty() == false) {
+    if(file::exists({"/usr/share/pixmaps/", osState.name, ".png"})) {
+      gtk_window_set_icon_from_file(GTK_WINDOW(widget), string{"/usr/share/pixmaps/", osState.name, ".png"}, nullptr);
+    } else if(file::exists({"/usr/local/share/pixmaps/", osState.name, ".png"})) {
+      gtk_window_set_icon_from_file(GTK_WINDOW(widget), string{"/usr/local/share/pixmaps/", osState.name, ".png"}, nullptr);
+    }
+  }
+
   if(gdk_screen_is_composited(gdk_screen_get_default())) {
     gtk_widget_set_colormap(widget, gdk_screen_get_rgba_colormap(gdk_screen_get_default()));
   } else {

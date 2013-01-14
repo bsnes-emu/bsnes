@@ -143,13 +143,14 @@ struct Object {
   pObject &p;
 };
 
-struct OS : Object {
+struct OS {
   static void main();
   static bool pendingEvents();
   static void processEvents();
   static void quit();
+  static void setName(const nall::string &name);
 
-  OS();
+  struct State;
   static void initialize();
 };
 

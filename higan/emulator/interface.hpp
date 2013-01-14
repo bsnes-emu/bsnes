@@ -21,7 +21,7 @@ struct Interface {
     unsigned id;
     string name;
     string type;
-    bool bootable;  //false for slotted sub-cartridges (Super Game Boy et al)
+    bool bootable;  //false for cartridge slots (eg Sufami Turbo cartridges)
   };
 
   vector<Media> media;
@@ -75,7 +75,7 @@ struct Interface {
   template<typename... Args> void notify(Args&... args) { return bind->notify({std::forward<Args>(args)...}); }
 
   //information
-  virtual string title() { return ""; }
+  virtual string title() = 0;
   virtual double videoFrequency() = 0;
   virtual double audioFrequency() = 0;
 

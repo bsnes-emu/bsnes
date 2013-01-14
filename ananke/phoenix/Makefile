@@ -15,6 +15,11 @@ ifeq ($(platform),x)
 else ifeq ($(platform),win)
   phoenixflags := -DPHOENIX_WINDOWS
   phoenixlink := -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -lshlwapi
+
+  ifeq ($(arch),win32)
+    phoenixflags := -m32 $(phoenixflags)
+    phoenixlink := -m32 $(phoenixlink)
+  endif
 else
   phoenixflags := -DPHOENIX_REFERENCE
   phoenixlink :=

@@ -2,11 +2,10 @@
 
 void Cartridge::parse_markup(const char *markup) {
   auto document = Markup::Document(markup);
-  auto cartridge = document["cartridge"];
-  auto information = document["information"];
-  region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
+  information.title.cartridge = document["information/title"].text();
 
-  this->information.title.cartridge = information["title"].text();
+  auto cartridge = document["cartridge"];
+  region = cartridge["region"].data != "PAL" ? Region::NTSC : Region::PAL;
 
   mapping.reset();
   parse_markup_cartridge(cartridge);
@@ -138,11 +137,13 @@ void Cartridge::parse_markup_bsxslot(Markup::Node root) {
     if(node["id"].data == "rom") {
       if(bsxflash.memory.size() == 0) continue;
 
-      Mapping m(bsxflash.memory);
+      Mapping m(bsxflash);
       parse_markup_map(m, node);
       mapping.append(m);
     }
   }
+
+  bsxflash.readonly = (root["rom/type"].text() == "MaskROM");
 }
 
 void Cartridge::parse_markup_sufamiturbo(Markup::Node root) {
@@ -253,8 +254,8 @@ void Cartridge::parse_markup_sa1(Markup::Node root) {
   has_sa1 = true;
 
   parse_markup_memory(sa1.rom, root["rom"], ID::SA1ROM, false);
-  parse_markup_memory(sa1.bwram, root["ram(id=bitmap)"], ID::SA1BWRAM, true);
-  parse_markup_memory(sa1.iram, root["ram(id=internal)"], ID::SA1IRAM, true);
+  parse_markup_memory(sa1.bwram, root["ram[0]"], ID::SA1BWRAM, true);
+  parse_markup_memory(sa1.iram, root["ram[1]"], ID::SA1IRAM, true);
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -322,9 +323,9 @@ void Cartridge::parse_markup_armdsp(Markup::Node root) {
   if(root.exists() == false) return;
   has_armdsp = true;
 
-  string programROMName = root["rom(id=program)/name"].data;
-  string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram(id=data)/name"].data;
+  string programROMName = root["rom[0]/name"].data;
+  string dataROMName = root["rom[1]/name"].data;
+  string dataRAMName = root["ram/name"].data;
 
   interface->loadRequest(ID::ArmDSPPROM, programROMName);
   interface->loadRequest(ID::ArmDSPDROM, dataROMName);
@@ -348,6 +349,9 @@ void Cartridge::parse_markup_hitachidsp(Markup::Node root, unsigned roms) {
   if(root.exists() == false) return;
   has_hitachidsp = true;
 
+  parse_markup_memory(hitachidsp.rom, root["rom[0]"], ID::HitachiDSPROM, false);
+  parse_markup_memory(hitachidsp.ram, root["ram[0]"], ID::HitachiDSPRAM, true);
+
   for(auto &n : hitachidsp.dataROM) hitachidsp.dataROM[n] = 0x000000;
   for(auto &n : hitachidsp.dataRAM) hitachidsp.dataRAM[n] = 0x00;
 
@@ -355,16 +359,13 @@ void Cartridge::parse_markup_hitachidsp(Markup::Node root, unsigned roms) {
   if(hitachidsp.Frequency == 0) hitachidsp.frequency = 20000000;
   hitachidsp.Roms = roms;
 
-  string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram(id=data)/name"].data;
+  string dataROMName = root["rom[1]/name"].data;
+  string dataRAMName = root["ram[1]/name"].data;
 
   interface->loadRequest(ID::HitachiDSPDROM, dataROMName);
   if(dataRAMName.empty() == false) {
     interface->loadRequest(ID::HitachiDSPDRAM, dataRAMName);
   }
-
-  parse_markup_memory(hitachidsp.rom, root["rom(id=program)"], ID::HitachiDSPROM, false);
-  parse_markup_memory(hitachidsp.ram, root["ram(id=program)"], ID::HitachiDSPRAM, true);
 
   for(auto &node : root) {
     if(node.name != "map") continue;
@@ -406,9 +407,9 @@ void Cartridge::parse_markup_necdsp(Markup::Node root) {
   : root["model"].data == "uPD96050" ? NECDSP::Revision::uPD96050
   : NECDSP::Revision::uPD7725;
 
-  string programROMName = root["rom(id=program)/name"].data;
-  string dataROMName = root["rom(id=data)/name"].data;
-  string dataRAMName = root["ram(id=data)/name"].data;
+  string programROMName = root["rom[0]/name"].data;
+  string dataROMName = root["rom[1]/name"].data;
+  string dataRAMName = root["ram/name"].data;
 
   if(necdsp.revision == NECDSP::Revision::uPD7725) {
     interface->loadRequest(ID::Nec7725DSPPROM, programROMName);
@@ -488,8 +489,8 @@ void Cartridge::parse_markup_spc7110(Markup::Node root) {
   if(root.exists() == false) return;
   has_spc7110 = true;
 
-  parse_markup_memory(spc7110.prom, root["rom(id=program)"], ID::SPC7110PROM, false);
-  parse_markup_memory(spc7110.drom, root["rom(id=data)"], ID::SPC7110DROM, false);
+  parse_markup_memory(spc7110.prom, root["rom[0]"], ID::SPC7110PROM, false);
+  parse_markup_memory(spc7110.drom, root["rom[1]"], ID::SPC7110DROM, false);
   parse_markup_memory(spc7110.ram, root["ram"], ID::SPC7110RAM, true);
 
   for(auto &node : root) {

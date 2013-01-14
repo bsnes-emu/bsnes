@@ -1,9 +1,9 @@
 #include <nall/nall.hpp>
 #include <nall/beat/patch.hpp>
-#include <nall/emulation/famicom.hpp>
-#include <nall/emulation/super-famicom.hpp>
-#include <nall/emulation/game-boy.hpp>
-#include <nall/emulation/game-boy-advance.hpp>
+#include "heuristics/famicom.hpp"
+#include "heuristics/super-famicom.hpp"
+#include "heuristics/game-boy.hpp"
+#include "heuristics/game-boy-advance.hpp"
 using namespace nall;
 
 #include <phoenix/phoenix.hpp>
@@ -12,6 +12,7 @@ using namespace phoenix;
 namespace Database {
   #include "database/super-famicom.hpp"
   #include "database/sufami-turbo.hpp"
+  #include "database/bsx-satellaview.hpp"
 };
 
 struct Ananke {
@@ -49,6 +50,11 @@ struct Ananke {
   string createSufamiTurboHeuristic(vector<uint8_t> &buffer);
   string openSufamiTurbo(vector<uint8_t> &buffer);
 
+  //bsx-satellaview.cpp
+  string createBsxSatellaviewDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest);
+  string createBsxSatellaviewHeuristic(vector<uint8_t> &buffer);
+  string openBsxSatellaview(vector<uint8_t> &buffer);
+
   //game-boy.cpp
   void copyGameBoySaves(const string &pathname);
   string createGameBoyHeuristic(vector<uint8_t> &buffer);
@@ -70,6 +76,7 @@ struct Ananke {
 #include "famicom.cpp"
 #include "super-famicom.cpp"
 #include "sufami-turbo.cpp"
+#include "bsx-satellaview.cpp"
 #include "game-boy.cpp"
 #include "game-boy-advance.cpp"
 
@@ -82,8 +89,8 @@ bool Ananke::supported(const string &filename) {
   if(extension == "nes") return true;
   if(extension == "sfc") return true;
   if(extension == "smc") return true;
-  if(extension == "bs" ) return true;
   if(extension == "st" ) return true;
+  if(extension == "bs" ) return true;
   if(extension == "gb" ) return true;
   if(extension == "gbc") return true;
   if(extension == "gba") return true;
@@ -119,6 +126,7 @@ string Ananke::open(string filename) {
   if(information.name.endswith(".fc") || information.name.endswith(".nes")) return openFamicom(buffer);
   if(information.name.endswith(".sfc") || information.name.endswith(".smc")) return openSuperFamicom(buffer);
   if(information.name.endswith(".st")) return openSufamiTurbo(buffer);
+  if(information.name.endswith(".bs")) return openBsxSatellaview(buffer);
   if(information.name.endswith(".gb") || information.name.endswith(".gbc")) return openGameBoy(buffer);
   if(information.name.endswith(".gba")) return openGameBoyAdvance(buffer);
   return "";

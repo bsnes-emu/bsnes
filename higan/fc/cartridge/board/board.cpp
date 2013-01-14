@@ -87,12 +87,12 @@ Board::Board(Markup::Node &document) {
   auto cartridge = document["cartridge"];
 
   information.type = cartridge["board/type"].data;
-  information.battery = cartridge["prg/ram/nonvolatile"].exists();
+  information.battery = cartridge["prg/ram/name"].exists();
 
-  auto prom = cartridge["prg"]["rom"];
-  auto pram = cartridge["prg"]["ram"];
-  auto crom = cartridge["chr"]["rom"];
-  auto cram = cartridge["chr"]["ram"];
+  auto prom = cartridge["prg/rom"];
+  auto pram = cartridge["prg/ram"];
+  auto crom = cartridge["chr/rom"];
+  auto cram = cartridge["chr/ram"];
 
   prgrom.size = numeral(prom["size"].data);
   prgram.size = numeral(pram["size"].data);
@@ -122,6 +122,7 @@ Board::~Board() {
 Board* Board::load(const string &manifest) {
   auto document = Markup::Document(manifest);
   cartridge.information.title = document["information/title"].text();
+
   string type = document["cartridge/board/type"].text();
 
   if(type == "BANDAI-FCG"  ) return new BandaiFCG(document);

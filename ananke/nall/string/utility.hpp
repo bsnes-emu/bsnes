@@ -74,7 +74,8 @@ char* integer(char *result, intmax_t value) {
     buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
-  buffer[size++] = negative ? '-' : '+';
+  if(negative) buffer[size++] = '-';
+//buffer[size++] = negative ? '-' : '+';
 
   for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
   result[size] = 0;
@@ -110,7 +111,8 @@ template<unsigned length_, char padding> string integer(intmax_t value) {
     buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
-  buffer[size++] = negative ? '-' : '+';
+  if(negative) buffer[size++] = '-';
+//buffer[size++] = negative ? '-' : '+';
   buffer[size] = 0;
 
   unsigned length = (length_ == 0 ? size : length_);
@@ -137,7 +139,8 @@ template<unsigned length_, char padding> string linteger(intmax_t value) {
     buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
-  buffer[size++] = negative ? '-' : '+';
+  if(negative) buffer[size++] = '-';
+//buffer[size++] = negative ? '-' : '+';
   buffer[size] = 0;
 
   unsigned length = (length_ == 0 ? size : length_);

@@ -18,7 +18,6 @@ struct Cartridge : property<Cartridge> {
 
   readonly<bool> loaded;
   readonly<string> sha256;
-  readonly<string> manifest;
 
   readonly<Region> region;
 
@@ -62,6 +61,7 @@ struct Cartridge : property<Cartridge> {
   vector<Memory> memory;
 
   struct Information {
+    string markup;
     struct Title {
       string cartridge;
       string gameBoy;
@@ -70,6 +70,7 @@ struct Cartridge : property<Cartridge> {
       string sufamiTurboB;
     } title;
   } information;
+
   string title();
 
   void load(const string &manifest);

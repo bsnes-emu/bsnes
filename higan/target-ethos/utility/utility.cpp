@@ -28,8 +28,8 @@ void Utility::loadMedia(string pathname) {
   //determine type by comparing extension against all emulation cores
   for(auto &emulator : application->emulator) {
     for(auto &media : emulator->media) {
-      if(type != media.type) continue;
       if(media.bootable == false) continue;
+      if(type != media.type) continue;
       return utility->loadMedia(emulator, media, {pathname, "/"});
     }
   }
@@ -56,7 +56,6 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   system().load(media.id, string::read({pathname, "manifest.bml"}));
   system().power();
 
-  if(this->pathname.size() == 0) this->pathname.append(pathname);
   presentation->setSystemName(media.name);
   load();
 }

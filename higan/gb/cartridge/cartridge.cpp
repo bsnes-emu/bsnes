@@ -45,8 +45,8 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   information.rtc = false;
   information.rumble = false;
 
-  auto rom = document["cartridge"]["rom"];
-  auto ram = document["cartridge"]["ram"];
+  auto rom = document["cartridge/rom"];
+  auto ram = document["cartridge/ram"];
 
   romsize = numeral(rom["size"].data);
   romdata = allocate<uint8>(romsize, 0xff);
@@ -63,8 +63,8 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
     if(ram["name"].exists()) memory.append({ID::RAM, ram["name"].data});
   }
 
-  information.romsize = numeral(document["cartridge"]["rom"]["size"].data);
-  information.ramsize = numeral(document["cartridge"]["ram"]["size"].data);
+  information.romsize = numeral(rom["size"].data);
+  information.ramsize = numeral(ram["size"].data);
   information.battery = ram["name"].exists();
 
   switch(information.mapper) { default:
