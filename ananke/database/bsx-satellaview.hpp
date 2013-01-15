@@ -1,6 +1,6 @@
 string BsxSatellaview = R"(
 
-database revision=2013-01-12
+database revision=2013-01-14
 
 release
   cartridge

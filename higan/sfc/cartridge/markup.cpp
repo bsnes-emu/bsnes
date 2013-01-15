@@ -142,8 +142,6 @@ void Cartridge::parse_markup_bsxslot(Markup::Node root) {
       mapping.append(m);
     }
   }
-
-  bsxflash.readonly = (root["rom/type"].text() == "MaskROM");
 }
 
 void Cartridge::parse_markup_sufamiturbo(Markup::Node root) {
@@ -352,8 +350,8 @@ void Cartridge::parse_markup_hitachidsp(Markup::Node root, unsigned roms) {
   parse_markup_memory(hitachidsp.rom, root["rom[0]"], ID::HitachiDSPROM, false);
   parse_markup_memory(hitachidsp.ram, root["ram[0]"], ID::HitachiDSPRAM, true);
 
-  for(auto &n : hitachidsp.dataROM) hitachidsp.dataROM[n] = 0x000000;
-  for(auto &n : hitachidsp.dataRAM) hitachidsp.dataRAM[n] = 0x00;
+  for(auto &word : hitachidsp.dataROM) word = 0x000000;
+  for(auto &word : hitachidsp.dataRAM) word = 0x00;
 
   hitachidsp.Frequency = numeral(root["frequency"].data);
   if(hitachidsp.Frequency == 0) hitachidsp.frequency = 20000000;
@@ -396,9 +394,9 @@ void Cartridge::parse_markup_necdsp(Markup::Node root) {
   if(root.exists() == false) return;
   has_necdsp = true;
 
-  for(auto &n : necdsp.programROM) n = 0x000000;
-  for(auto &n : necdsp.dataROM) n = 0x0000;
-  for(auto &n : necdsp.dataRAM) n = 0x0000;
+  for(auto &word : necdsp.programROM) word = 0x000000;
+  for(auto &word : necdsp.dataROM) word = 0x0000;
+  for(auto &word : necdsp.dataRAM) word = 0x0000;
 
   necdsp.frequency = numeral(root["frequency"].data);
   if(necdsp.frequency == 0) necdsp.frequency = 8000000;

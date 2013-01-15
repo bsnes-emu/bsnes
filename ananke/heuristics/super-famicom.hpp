@@ -130,7 +130,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "  map id=rom address=00-7f,80-ff:8000-ffff\n"
       "  icd2 revision=1\n"
-      "    rom name=boot.rom size=0x100\n"
+      "    rom name=sgb.boot.rom size=0x100\n"
       "    map id=io address=00-3f,80-bf:6000-7fff\n"
     );
     if((rom_size & 0x7fff) == 0x100) {
@@ -246,8 +246,8 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     markup.append(
       "  map id=rom address=00-3f:8000-ffff offset=0x400000\n"
       "  map id=rom address=40-7f:0000-ffff offset=0x400000\n"
-      "  map id=rom address=80-bf:8000-ffff offset=0x000000\n"
-      "  map id=rom address=c0-ff:0000-ffff offset=0x000000\n"
+      "  map id=rom address=80-bf:8000-ffff offset=0x000000 mask=0xc00000\n"
+      "  map id=rom address=c0-ff:0000-ffff offset=0x000000 mask=0xc00000\n"
     );
     if(ram_size > 0) markup.append(
       "  map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000\n"

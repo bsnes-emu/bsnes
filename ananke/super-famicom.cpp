@@ -75,17 +75,15 @@ string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
 }
 
 void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const string &pathname, bool firmware_appended) {
-  auto copyFirmwareInternal = [&](const string &name, unsigned programSize, unsigned dataSize) {
+  auto copyFirmwareInternal = [&](const string &name, unsigned programSize, unsigned dataSize, unsigned bootSize) {
     //firmware appended directly onto .sfc file
-    unsigned programOffset = buffer.size() - programSize - dataSize;
-    unsigned dataOffset = buffer.size() - dataSize;
-
     string basename = nall::basename(name);
-    if(programSize) file::write({pathname, basename, ".program.rom"}, buffer.data() + programOffset, programSize);
-    if(dataSize) file::write({pathname, basename, ".data.rom"}, buffer.data() + dataOffset, dataSize);
+    if(programSize) file::write({pathname, basename, ".program.rom"}, buffer.data() + buffer.size() - programSize - dataSize - bootSize, programSize);
+    if(dataSize) file::write({pathname, basename, ".data.rom"}, buffer.data() + buffer.size() - dataSize - bootSize, dataSize);
+    if(bootSize) file::write({pathname, basename, ".boot.rom"}, buffer.data() + buffer.size() - bootSize, bootSize);
   };
 
-  auto copyFirmwareExternal = [&](const string &name, unsigned programSize, unsigned dataSize) {
+  auto copyFirmwareExternal = [&](const string &name, unsigned programSize, unsigned dataSize, unsigned bootSize) {
     //firmware stored in external file
     auto buffer = file::read({information.path, name});  //try and read from the containing directory
     if(buffer.size() == 0) buffer = extractFile(name);  //try and read from the containing archive, if one exists
@@ -100,11 +98,12 @@ void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const 
     string basename = nall::basename(name);
     if(programSize) file::write({pathname, basename, ".program.rom"}, buffer.data(), programSize);
     if(dataSize) file::write({pathname, basename, ".data.rom"}, buffer.data() + programSize, dataSize);
+    if(bootSize) file::write({pathname, basename, ".boot.rom"}, buffer.data() + programSize + dataSize, bootSize);
   };
 
-  auto copyFirmware = [&](const string &name, unsigned programSize, unsigned dataSize) {
-    if(firmware_appended == 1) copyFirmwareInternal(name, programSize, dataSize);
-    if(firmware_appended == 0) copyFirmwareExternal(name, programSize, dataSize);
+  auto copyFirmware = [&](const string &name, unsigned programSize, unsigned dataSize, unsigned bootSize = 0) {
+    if(firmware_appended == 1) copyFirmwareInternal(name, programSize, dataSize, bootSize);
+    if(firmware_appended == 0) copyFirmwareExternal(name, programSize, dataSize, bootSize);
   };
 
   string markup = information.manifest;
@@ -117,6 +116,7 @@ void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const 
   if(markup.position("st011.program.rom")) copyFirmware("st011.rom", 0x00c000, 0x001000);
   if(markup.position("st018.program.rom")) copyFirmware("st018.rom", 0x020000, 0x008000);
   if(markup.position("cx4.data.rom"     )) copyFirmware("cx4.rom",   0x000000, 0x000c00);
+  if(markup.position("sgb.boot.rom"     )) copyFirmware("sgb.rom",   0x000000, 0x000000, 0x000100);
 }
 
 string Ananke::openSuperFamicom(vector<uint8_t> &buffer) {

@@ -209,10 +209,12 @@ void Presentation::loadShaders() {
   string pathname = application->path("Video Shaders/");
   lstring files = directory::files(pathname);
   for(auto &filename : files) {
+    lstring name = string{filename}.split(".");
+    //only add shaders that work with current video driver
+    if(name(1) != config->video.driver) continue;
+
     auto shader = new RadioItem;
-    string name = filename;
-    if(auto position = name.position(".")) name[position()] = 0;
-    shader->setText(name);
+    shader->setText(name(0));
     shader->onActivate = [=] {
       config->video.shader = {pathname, filename};
       utility->updateShader();

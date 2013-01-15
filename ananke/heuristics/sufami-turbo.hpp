@@ -20,12 +20,10 @@ SufamiTurboCartridge::SufamiTurboCartridge(const uint8_t *data, unsigned size) {
   unsigned ramsize = data[0x37] *   0x800;    //2KB
   bool linkable = data[0x35] != 0x00;  //TODO: unconfirmed
 
-  markup.append("<?xml version='1.0' encoding='UTF-8'?>\n");
-  markup.append("<cartridge linkable='", linkable, "' sha256='", sha256(data, size) ,"'>\n");
-  markup.append("  <rom name='program.rom' size='0x", hex(romsize), "'/>\n");
-  markup.append("  <ram name='save.ram' size='0x", hex(ramsize), "'/>\n");
-  markup.append("</cartridge>\n");
-  markup.transform("'", "\"");
+  markup.append("cartridge", linkable ? " linkable" : "", "\n");
+  markup.append("  rom name=program.rom size=0x", hex(romsize), "\n");
+  if(ramsize)
+  markup.append("  ram name=save.ram size=0x", hex(ramsize), "\n");
 }
 
 }

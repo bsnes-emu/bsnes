@@ -142,6 +142,8 @@ void Cartridge::load_satellaview(const string &manifest) {
     unsigned size = numeral(rom["size"].data);
     bsxflash.memory.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::BsxFlashROM, rom["name"].data);
+
+    bsxflash.readonly = (rom["type"].text() == "MaskROM");
   }
 }
 
