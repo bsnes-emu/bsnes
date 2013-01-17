@@ -1,7 +1,7 @@
 #ifndef NALL_STREAM_ZIP_HPP
 #define NALL_STREAM_ZIP_HPP
 
-#include <nall/zip.hpp>
+#include <nall/unzip.hpp>
 
 namespace nall {
 
@@ -14,7 +14,7 @@ struct zipstream : memorystream {
     uint8_t *data = new uint8_t[size];
     stream.read(data, size);
 
-    zip archive;
+    unzip archive;
     if(archive.open(data, size) == false) return;
     delete[] data;
 

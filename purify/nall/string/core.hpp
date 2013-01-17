@@ -12,11 +12,18 @@ static void istring(string &output, const T &value, Args&&... args) {
 }
 
 void string::reserve(unsigned size_) {
-  if(size_ > size) {
-    size = size_;
-    data = (char*)realloc(data, size + 1);
-    data[size] = 0;
-  }
+  if(size_ > size) resize(size_);
+}
+
+void string::resize(unsigned size_) {
+  size = size_;
+  data = (char*)realloc(data, size + 1);
+  data[size] = 0;
+}
+
+void string::clear(char c) {
+  for(unsigned n = 0; n < size; n++) data[n] = c;
+  data[size] = 0;
 }
 
 bool string::empty() const {
@@ -149,6 +156,12 @@ string lstring::concatenate(const char *separator) const {
 template<typename... Args> void lstring::append(const string &data, Args&&... args) {
   vector::append(data);
   append(std::forward<Args>(args)...);
+}
+
+void lstring::isort() {
+  nall::sort(pool, objectsize, [](const string &x, const string &y) {
+    return istrcmp(x, y) < 0;
+  });
 }
 
 bool lstring::operator==(const lstring &source) const {

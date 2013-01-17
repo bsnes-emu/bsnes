@@ -1,42 +1,49 @@
 include nall/Makefile
 include phoenix/Makefile
 
-application := purify
-resource :=
-flags := -std=gnu++0x -I. -O3 -fomit-frame-pointer
+path := /usr/local/bin
+flags := -I. -O3 -fomit-frame-pointer
 link := -s
+objects := obj/phoenix.o obj/purify.o
 
-ifeq ($(platform),win)
-  resource := resource.o
-  flags := -mwindows $(flags)
-  link := -mwindows $(flags)
+ifeq ($(platform),x)
+  link += -Wl,-export-dynamic
 endif
 
-all: phoenix.o $(application).o
-ifeq ($(platform),win)
-	windres phoenix/windows/phoenix.rc $(resource)
+all: build;
+
+obj/phoenix.o: phoenix/phoenix.cpp
+	$(cpp) $(flags) -o obj/phoenix.o -c phoenix/phoenix.cpp $(phoenixflags)
+
+obj/purify.o: purify.cpp
+	$(cpp) $(flags) -o obj/purify.o -c purify.cpp
+
+build: $(objects)
+ifeq ($(platform),x)
+	$(cpp) $(link) -o purify $(objects) $(phoenixlink)
+else ifeq ($(platform),win)
+	$(cpp) -shared -o phoenix.dll obj/phoenix.o $(phoenixlink)
+	$(cpp) -o purify obj/purify.o $(link) -L. -lphoenix
 endif
-	$(cpp) -o $(application) phoenix.o $(application).o $(resource) $(link) $(phoenixlink)
-
-phoenix.o:
-	$(cpp) -c -o phoenix.o phoenix/phoenix.cpp $(flags) $(phoenixflags)
-
-$(application).o: $(application).cpp
-	$(cpp) -c -o $(application).o $(application).cpp $(flags)
 
 resource: force
-	sourcery resource/resource.xml resource/resource.cpp resource/resource.hpp
-
-install:
-	sudo cp $(application) /usr/local/bin/$(application)
-
-uninstall:
-	sudo rm /usr/local/bin/$(application)
+	sourcery resource/resource.bml resource/resource.cpp resource/resource.hpp
 
 clean:
-	-@$(call delete,*.o)
+	-@$(call delete,obj/*.o)
+
+install: uninstall
+ifeq ($(platform),x)
+	sudo cp ./purify $(path)/purify
+endif
+
+uninstall:
+ifeq ($(platform),x)
+	if [ -f $(path)/purify ]; then sudo rm $(path)/purify; fi
+endif
 
 sync:
+ifeq ($(shell id -un),byuu)
 	if [ -d ./nall ]; then rm -r ./nall; fi
 	if [ -d ./phoenix ]; then rm -r ./phoenix; fi
 	cp -r ../nall ./nall
@@ -44,5 +51,6 @@ sync:
 	rm -r nall/test
 	rm -r phoenix/nall
 	rm -r phoenix/test
+endif
 
 force:

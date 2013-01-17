@@ -2,8 +2,12 @@ bool pWidget::enabled() {
   return IsWindowEnabled(hwnd);
 }
 
+bool pWidget::focused() {
+  return GetFocus() == hwnd;
+}
+
 Geometry pWidget::minimumGeometry() {
-  return { 0, 0, 0, 0 };
+  return {0, 0, 0, 0};
 }
 
 void pWidget::setEnabled(bool enabled) {

@@ -29,7 +29,7 @@ namespace nall {
       for(signed i = 1, j; i < size; i++) {
         T copy = std::move(list[i]);
         for(j = i - 1; j >= 0; j--) {
-          if(lessthan(list[j], copy)) break;
+          if(!lessthan(copy, list[j])) break;
           list[j + 1] = std::move(list[j]);
         }
         list[j + 1] = std::move(copy);
@@ -55,7 +55,7 @@ namespace nall {
     T *buffer = new T[size];
     unsigned offset = 0, left = 0, right = middle;
     while(left < middle && right < size) {
-      if(lessthan(list[left], list[right])) {
+      if(!lessthan(list[right], list[left])) {
         buffer[offset++] = std::move(list[left++]);
       } else {
         buffer[offset++] = std::move(list[right++]);

@@ -74,12 +74,33 @@ namespace nall {
       return true;
     }
 
+    static bool write(const string &filename, const string &text) {
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.print(text);
+      fp.close();
+      return true;
+    }
+
+    static bool write(const string &filename, const vector<uint8_t> &buffer) {
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.write(buffer.data(), buffer.size());
+      fp.close();
+      return true;
+    }
+
     static bool write(const string &filename, const uint8_t *data, unsigned size) {
       file fp;
       if(fp.open(filename, mode::write) == false) return false;
       fp.write(data, size);
       fp.close();
       return true;
+    }
+
+    static string sha256(const string &filename) {
+      auto buffer = read(filename);
+      return nall::sha256(buffer.data(), buffer.size());
     }
 
     uint8_t read() {

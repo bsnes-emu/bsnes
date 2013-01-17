@@ -179,6 +179,15 @@ void pWindow::constructor() {
   qtWindow = new QtWindow(*this);
   qtWindow->setWindowTitle(" ");
 
+  //if program was given a name, try and set the window taskbar icon to a matching pixmap image
+  if(osState.name.empty() == false) {
+    if(file::exists({"/usr/share/pixmaps/", osState.name, ".png"})) {
+      qtWindow->setWindowIcon(QIcon(string{"/usr/share/pixmaps/", osState.name, ".png"}));
+    } else if(file::exists({"/usr/local/share/pixmaps/", osState.name, ".png"})) {
+      qtWindow->setWindowIcon(QIcon(string{"/usr/local/share/pixmaps/", osState.name, ".png"}));
+    }
+  }
+
   qtLayout = new QVBoxLayout(qtWindow);
   qtLayout->setMargin(0);
   qtLayout->setSpacing(0);

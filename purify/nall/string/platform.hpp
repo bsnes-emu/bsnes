@@ -6,12 +6,12 @@ string activepath() {
   string result;
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
-  _wgetcwd(path, PATH_MAX);
+  auto unused = _wgetcwd(path, PATH_MAX);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #else
   char path[PATH_MAX] = "";
-  getcwd(path, PATH_MAX);
+  auto unused = getcwd(path, PATH_MAX);
   result = path;
   #endif
   if(result.empty()) result = ".";
@@ -29,6 +29,7 @@ string realpath(const string &name) {
   char path[PATH_MAX] = "";
   if(::realpath(name, path)) result = path;
   #endif
+  if(result.empty()) result = {activepath(), name};
   return result;
 }
 
@@ -55,6 +56,17 @@ string configpath() {
   return userpath();
   #else
   return {userpath(), ".config/"};
+  #endif
+}
+
+string temppath() {
+  #ifdef _WIN32
+  wchar_t path[PATH_MAX] = L"";
+  GetTempPathW(PATH_MAX, path);
+//path.transform("\\", "/");
+  return (const char*)utf8_t(path);
+  #else
+  return "/tmp/";
   #endif
 }
 

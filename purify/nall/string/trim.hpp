@@ -33,6 +33,23 @@ template<unsigned limit> char* trim(char *str, const char *key, const char *rkey
   return ltrim<limit>(rtrim<limit>(str, key), key);
 }
 
+//remove whitespace characters from both left and right sides of string
+char* strip(char *s) {
+  signed n = 0, p = 0;
+  while(s[n]) {
+    if(s[n] != ' ' && s[n] != '\t' && s[n] != '\r' && s[n] != '\n') break;
+    n++;
+  }
+  while(s[n]) s[p++] = s[n++];
+  s[p--] = 0;
+  while(p >= 0) {
+    if(s[p] != ' ' && s[p] != '\t' && s[p] != '\r' && s[p] != '\n') break;
+    p--;
+  }
+  s[++p] = 0;
+  return s;
+}
+
 }
 
 #endif

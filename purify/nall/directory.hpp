@@ -1,6 +1,7 @@
 #ifndef NALL_DIRECTORY_HPP
 #define NALL_DIRECTORY_HPP
 
+#include <nall/file.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
 #include <nall/string.hpp>
@@ -18,28 +19,75 @@ namespace nall {
 
 struct directory {
   static bool create(const string &pathname, unsigned permissions = 0755);  //recursive
-  static bool remove(const string &pathname);
+  static bool remove(const string &pathname);  //recursive
   static bool exists(const string &pathname);
-  static lstring folders(const string &pathname, const string &pattern = "*");
-  static lstring files(const string &pathname, const string &pattern = "*");
-  static lstring contents(const string &pathname, const string &pattern = "*");
+
+  static lstring folders(const string &pathname, const string &pattern = "*") {
+    lstring folders = directory::ufolders(pathname, pattern);
+    folders.sort();
+    return folders;
+  }
+
+  static lstring files(const string &pathname, const string &pattern = "*") {
+    lstring files = directory::ufiles(pathname, pattern);
+    files.sort();
+    return files;
+  }
+
+  static lstring contents(const string &pathname, const string &pattern = "*") {
+    lstring folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
+    lstring files = directory::ufiles(pathname, pattern);
+    folders.sort();
+    files.sort();
+    for(auto &file : files) folders.append(file);
+    return folders;
+  }
+
+  static lstring ifolders(const string &pathname, const string &pattern = "*") {
+    lstring folders = ufolders(pathname, pattern);
+    folders.isort();
+    return folders;
+  }
+
+  static lstring ifiles(const string &pathname, const string &pattern = "*") {
+    lstring files = ufiles(pathname, pattern);
+    files.isort();
+    return files;
+  }
+
+  static lstring icontents(const string &pathname, const string &pattern = "*") {
+    lstring folders = directory::ufolders(pathname);  //pattern search of contents should only filter files
+    lstring files = directory::ufiles(pathname, pattern);
+    folders.isort();
+    files.isort();
+    for(auto &file : files) folders.append(file);
+    return folders;
+  }
+
+private:
+  //internal functions; these return unsorted lists
+  static lstring ufolders(const string &pathname, const string &pattern = "*");
+  static lstring ufiles(const string &pathname, const string &pattern = "*");
 };
 
 #if defined(PLATFORM_WINDOWS)
   inline bool directory::create(const string &pathname, unsigned permissions) {
-    string fullpath = pathname, path;
-    fullpath.transform("/", "\\");
-    fullpath.rtrim<1>("\\");
-    lstring pathpart = fullpath.split("\\");
-    bool result = false;
-    for(auto &part : pathpart) {
-      path.append(part, "\\");
-      result = _wmkdir(utf16_t(path)) == 0;
+    string path;
+    lstring list = string{pathname}.transform("\\", "/").rtrim<1>("/").split("/");
+    bool result = true;
+    for(auto &part : list) {
+      path.append(part, "/");
+      result &= (_wmkdir(utf16_t(path)) == 0);
     }
     return result;
   }
 
   inline bool directory::remove(const string &pathname) {
+    lstring list = directory::contents(pathname);
+    for(auto &name : list) {
+      if(name.endswith("/")) directory::remove({pathname, name});
+      else file::remove({pathname, name});
+    }
     return _wrmdir(utf16_t(pathname)) == 0;
   }
 
@@ -51,7 +99,7 @@ struct directory {
     return (result & FILE_ATTRIBUTE_DIRECTORY);
   }
 
-  inline lstring directory::folders(const string &pathname, const string &pattern) {
+  inline lstring directory::ufolders(const string &pathname, const string &pattern) {
     lstring list;
     string path = pathname;
     path.transform("/", "\\");
@@ -77,12 +125,11 @@ struct directory {
       }
       FindClose(handle);
     }
-    if(list.size() > 0) list.sort();
     for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
 
-  inline lstring directory::files(const string &pathname, const string &pattern) {
+  inline lstring directory::ufiles(const string &pathname, const string &pattern) {
     lstring list;
     string path = pathname;
     path.transform("/", "\\");
@@ -104,29 +151,26 @@ struct directory {
       }
       FindClose(handle);
     }
-    if(list.size() > 0) list.sort();
     return list;
-  }
-
-  inline lstring directory::contents(const string &pathname, const string &pattern) {
-    lstring folders = directory::folders(pathname);  //pattern search of contents() should only filter files
-    lstring files = directory::files(pathname, pattern);
-    for(auto &file : files) folders.append(file);
-    return folders;
   }
 #else
   inline bool directory::create(const string &pathname, unsigned permissions) {
-    string fullpath = pathname, path = "/";
-    fullpath.trim<1>("/");
-    lstring pathpart = fullpath.split("/");
-    for(auto &part : pathpart) {
-      if(!directory::exists(path)) mkdir(path, permissions);
+    string path;
+    lstring list = string{pathname}.rtrim<1>("/").split("/");
+    bool result = true;
+    for(auto &part : list) {
       path.append(part, "/");
+      result &= (mkdir(path, permissions) == 0);
     }
-    return mkdir(path, permissions) == 0;
+    return result;
   }
 
   inline bool directory::remove(const string &pathname) {
+    lstring list = directory::contents(pathname);
+    for(auto &name : list) {
+      if(name.endswith("/")) directory::remove({pathname, name});
+      else file::remove({pathname, name});
+    }
     return rmdir(pathname) == 0;
   }
 
@@ -137,7 +181,7 @@ struct directory {
     return true;
   }
 
-  inline lstring directory::folders(const string &pathname, const string &pattern) {
+  inline lstring directory::ufolders(const string &pathname, const string &pattern) {
     lstring list;
     DIR *dp;
     struct dirent *ep;
@@ -152,12 +196,11 @@ struct directory {
       }
       closedir(dp);
     }
-    if(list.size() > 0) list.sort();
     for(auto &name : list) name.append("/");  //must append after sorting
     return list;
   }
 
-  inline lstring directory::files(const string &pathname, const string &pattern) {
+  inline lstring directory::ufiles(const string &pathname, const string &pattern) {
     lstring list;
     DIR *dp;
     struct dirent *ep;
@@ -172,15 +215,7 @@ struct directory {
       }
       closedir(dp);
     }
-    if(list.size() > 0) list.sort();
     return list;
-  }
-
-  inline lstring directory::contents(const string &pathname, const string &pattern) {
-    lstring folders = directory::folders(pathname);  //pattern search of contents() should only filter files
-    lstring files = directory::files(pathname, pattern);
-    for(auto &file : files) folders.append(file);
-    return folders;
   }
 #endif
 

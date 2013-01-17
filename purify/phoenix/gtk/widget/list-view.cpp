@@ -35,6 +35,10 @@ bool pListView::checked(unsigned row) {
   return state;
 }
 
+bool pListView::focused() {
+  return GTK_WIDGET_HAS_FOCUS(subWidget);
+}
+
 void pListView::modify(unsigned row, const lstring &text) {
   GtkTreeModel *model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   GtkTreeIter iter;

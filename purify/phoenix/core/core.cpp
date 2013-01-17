@@ -173,6 +173,10 @@ void OS::quit() {
   return pOS::quit();
 }
 
+void OS::setName(const string &name) {
+  osState.name = name;
+}
+
 void OS::initialize() {
   static bool initialized = false;
   if(initialized == false) {
@@ -337,6 +341,14 @@ void Window::setModal(bool modal) {
 void Window::setResizable(bool resizable) {
   state.resizable = resizable;
   return p.setResizable(resizable);
+}
+
+void Window::setSmartGeometry(const Geometry &geometry) {
+  Geometry margin = p.frameMargin();
+  return setGeometry({
+    geometry.x + margin.x, geometry.y + margin.y,
+    geometry.width, geometry.height
+  });
 }
 
 void Window::setStatusFont(const string &font) {
@@ -664,6 +676,10 @@ Layout::~Layout() {
 
 bool Widget::enabled() {
   return state.enabled;
+}
+
+bool Widget::focused() {
+  return p.focused();
 }
 
 string Widget::font() {

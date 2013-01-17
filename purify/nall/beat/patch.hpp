@@ -1,5 +1,5 @@
-#ifndef NALL_BPS_PATCH_HPP
-#define NALL_BPS_PATCH_HPP
+#ifndef NALL_BEAT_PATCH_HPP
+#define NALL_BEAT_PATCH_HPP
 
 #include <nall/crc32.hpp>
 #include <nall/file.hpp>

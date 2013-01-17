@@ -3,6 +3,10 @@ static void TextEdit_change(TextEdit *self) {
   if(self->p.locked == false && self->onChange) self->onChange();
 }
 
+bool pTextEdit::focused() {
+  return GTK_WIDGET_HAS_FOCUS(subWidget);
+}
+
 void pTextEdit::setCursorPosition(unsigned position) {
   GtkTextMark *mark = gtk_text_buffer_get_mark(textBuffer, "insert");
   GtkTextIter iter;

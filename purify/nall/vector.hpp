@@ -23,6 +23,7 @@ namespace nall {
   public:
     operator bool() const { return pool; }
     T* data() { return pool; }
+    const T* data() const { return pool; }
 
     bool empty() const { return objectsize == 0; }
     unsigned size() const { return objectsize; }
@@ -47,14 +48,15 @@ namespace nall {
     }
 
     void reserve(unsigned size) {
+      unsigned outputsize = min(size, objectsize);
       size = bit::round(size);  //amortize growth
       T *copy = (T*)calloc(size, sizeof(T));
-      for(unsigned n = 0; n < min(size, objectsize); n++) new(copy + n) T(pool[n]);
+      for(unsigned n = 0; n < outputsize; n++) new(copy + n) T(pool[n]);
       for(unsigned n = 0; n < objectsize; n++) pool[n].~T();
       free(pool);
       pool = copy;
       poolsize = size;
-      objectsize = min(size, objectsize);
+      objectsize = outputsize;
     }
 
     //requires trivial constructor
@@ -121,8 +123,8 @@ namespace nall {
     }
 
     optional<unsigned> find(const T& data) {
-      for(unsigned n = 0; n < size(); n++) if(pool[n] == data) return { true, n };
-      return { false, 0u };
+      for(unsigned n = 0; n < size(); n++) if(pool[n] == data) return {true, n};
+      return {false, 0u};
     }
 
     T& first() {

@@ -143,13 +143,14 @@ struct Object {
   pObject &p;
 };
 
-struct OS : Object {
+struct OS {
   static void main();
   static bool pendingEvents();
   static void processEvents();
   static void quit();
+  static void setName(const nall::string &name);
 
-  OS();
+  struct State;
   static void initialize();
 };
 
@@ -202,6 +203,7 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void setMenuVisible(bool visible = true);
   void setModal(bool modal = true);
   void setResizable(bool resizable = true);
+  void setSmartGeometry(const Geometry &geometry);
   void setStatusFont(const nall::string &font);
   void setStatusText(const nall::string &text);
   void setStatusVisible(bool visible = true);
@@ -332,6 +334,7 @@ struct Layout : private nall::base_from_member<pLayout&>, Sizable {
 
 struct Widget : private nall::base_from_member<pWidget&>, Sizable {
   bool enabled();
+  bool focused();
   nall::string font();
   Geometry geometry();
   Geometry minimumGeometry();

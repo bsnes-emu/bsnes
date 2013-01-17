@@ -1,124 +1,93 @@
-#ifndef NALL_UNZIP_HPP
-#define NALL_UNZIP_HPP
+#ifndef NALL_ZIP_HPP
+#define NALL_ZIP_HPP
 
-#include <nall/filemap.hpp>
-#include <nall/inflate.hpp>
+//creates uncompressed ZIP archives
+
+#include <nall/crc32.hpp>
 #include <nall/string.hpp>
-#include <nall/vector.hpp>
 
 namespace nall {
 
 struct zip {
-  struct File {
-    string name;
-    const uint8_t *data;
-    unsigned size;
-    unsigned csize;
-    unsigned cmode;  //0 = uncompressed, 8 = deflate
-    unsigned crc32;
-  };
-
-  inline bool open(const string &filename) {
-    close();
-    if(fm.open(filename, filemap::mode::read) == false) return false;
-    if(open(fm.data(), fm.size()) == false) {
-      fm.close();
-      return false;
-    }
-    return true;
+  zip(const string &filename) {
+    fp.open(filename, file::mode::write);
+    time_t currentTime = time(0);
+    tm *info = localtime(&currentTime);
+    dosTime = (info->tm_hour << 11) | (info->tm_min << 5) | (info->tm_sec >> 1);
+    dosDate = ((info->tm_year - 80) << 9) | ((1 + info->tm_mon) << 5) + (info->tm_mday);
   }
 
-  inline bool open(const uint8_t *data, unsigned size) {
-    if(size < 22) return false;
+  //append path: append("path/");
+  //append file: append("path/file", data, size);
+  void append(string filename, const uint8_t *data = nullptr, unsigned size = 0u) {
+    filename.transform("\\", "/");
+    uint32_t checksum = crc32_calculate(data, size);
+    directory.append({filename, checksum, size, fp.offset()});
 
-    filedata = data;
-    filesize = size;
+    fp.writel(0x04034b50, 4);         //signature
+    fp.writel(0x0014, 2);             //minimum version (2.0)
+    fp.writel(0x0000, 2);             //general purpose bit flags
+    fp.writel(0x0000, 2);             //compression method (0 = uncompressed)
+    fp.writel(dosTime, 2);
+    fp.writel(dosDate, 2);
+    fp.writel(checksum, 4);
+    fp.writel(size, 4);               //compressed size
+    fp.writel(size, 4);               //uncompressed size
+    fp.writel(filename.length(), 2);  //file name length
+    fp.writel(0x0000, 2);             //extra field length
+    fp.print(filename);               //file name
 
-    file.reset();
-
-    const uint8_t *footer = data + size - 22;
-    while(true) {
-      if(footer <= data + 22) return false;
-      if(read(footer, 4) == 0x06054b50) {
-        unsigned commentlength = read(footer + 20, 2);
-        if(footer + 22 + commentlength == data + size) break;
-      }
-      footer--;
-    }
-    const uint8_t *directory = data + read(footer + 16, 4);
-
-    while(true) {
-      unsigned signature = read(directory + 0, 4);
-      if(signature != 0x02014b50) break;
-
-      File file;
-      file.cmode = read(directory + 10, 2);
-      file.crc32 = read(directory + 16, 4);
-      file.csize = read(directory + 20, 4);
-      file.size  = read(directory + 24, 4);
-
-      unsigned namelength = read(directory + 28, 2);
-      unsigned extralength = read(directory + 30, 2);
-      unsigned commentlength = read(directory + 32, 2);
-
-      char *filename = new char[namelength + 1];
-      memcpy(filename, directory + 46, namelength);
-      filename[namelength] = 0;
-      file.name = filename;
-      delete[] filename;
-
-      unsigned offset = read(directory + 42, 4);
-      unsigned offsetNL = read(data + offset + 26, 2);
-      unsigned offsetEL = read(data + offset + 28, 2);
-      file.data = data + offset + 30 + offsetNL + offsetEL;
-
-      directory += 46 + namelength + extralength + commentlength;
-
-      this->file.append(file);
-    }
-
-    return true;
-  }
-
-  inline vector<uint8_t> extract(File &file) {
-    vector<uint8_t> buffer;
-
-    if(file.cmode == 0) {
-      buffer.resize(file.size);
-      memcpy(buffer.data(), file.data, file.size);
-    }
-
-    if(file.cmode == 8) {
-      buffer.resize(file.size);
-      if(inflate(buffer.data(), buffer.size(), file.data, file.csize) == false) {
-        buffer.reset();
-      }
-    }
-
-    return buffer;
-  }
-
-  inline void close() {
-    if(fm.open()) fm.close();
+    fp.write(data, size);             //file data
   }
 
   ~zip() {
-    close();
+    //central directory
+    unsigned baseOffset = fp.offset();
+    for(auto &entry : directory) {
+      fp.writel(0x02014b50, 4);               //signature
+      fp.writel(0x0014, 2);                   //version made by (2.0)
+      fp.writel(0x0014, 2);                   //version needed to extract (2.0)
+      fp.writel(0x0000, 2);                   //general purpose bit flags
+      fp.writel(0x0000, 2);                   //compression method (0 = uncompressed)
+      fp.writel(dosTime, 2);
+      fp.writel(dosDate, 2);
+      fp.writel(entry.checksum, 4);
+      fp.writel(entry.size, 4);               //compressed size
+      fp.writel(entry.size, 4);               //uncompressed size
+      fp.writel(entry.filename.length(), 2);  //file name length
+      fp.writel(0x0000, 2);                   //extra field length
+      fp.writel(0x0000, 2);                   //file comment length
+      fp.writel(0x0000, 2);                   //disk number start
+      fp.writel(0x0000, 2);                   //internal file attributes
+      fp.writel(0x00000000, 4);               //external file attributes
+      fp.writel(entry.offset, 4);             //relative offset of file header
+      fp.print(entry.filename);
+    }
+    unsigned finishOffset = fp.offset();
+
+    //end of central directory
+    fp.writel(0x06054b50, 4);                 //signature
+    fp.writel(0x0000, 2);                     //number of this disk
+    fp.writel(0x0000, 2);                     //disk where central directory starts
+    fp.writel(directory.size(), 2);           //number of central directory records on this disk
+    fp.writel(directory.size(), 2);           //total number of central directory records
+    fp.writel(finishOffset - baseOffset, 4);  //size of central directory
+    fp.writel(baseOffset, 4);                 //offset of central directory
+    fp.writel(0x0000, 2);                     //comment length
+
+    fp.close();
   }
 
 protected:
-  filemap fm;
-  const uint8_t *filedata;
-  unsigned filesize;
-
-  unsigned read(const uint8_t *data, unsigned size) {
-    unsigned result = 0, shift = 0;
-    while(size--) { result |= *data++ << shift; shift += 8; }
-    return result;
-  }
-
-public:
-  vector<File> file;
+  file fp;
+  uint16_t dosTime, dosDate;
+  struct entry_t {
+    string filename;
+    uint32_t checksum;
+    uint32_t size;
+    uint32_t offset;
+  };
+  vector<entry_t> directory;
 };
 
 }

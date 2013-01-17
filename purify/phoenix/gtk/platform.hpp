@@ -231,6 +231,7 @@ struct pWidget : public pSizable {
   GtkWidget *gtkWidget;
 
   bool enabled();
+  virtual bool focused();
   virtual Geometry minimumGeometry();
   void setEnabled(bool enabled);
   virtual void setFocused();
@@ -310,6 +311,7 @@ struct pHexEdit : public pWidget {
   GtkTextBuffer *textBuffer;
   GtkTextMark *textCursor;
 
+  bool focused();
   void setColumns(unsigned columns);
   void setLength(unsigned length);
   void setOffset(unsigned offset);
@@ -396,6 +398,7 @@ struct pListView : public pWidget {
   void append(const lstring &text);
   void autoSizeColumns();
   bool checked(unsigned row);
+  bool focused();
   void modify(unsigned row, const lstring &text);
   void remove(unsigned row);
   void reset();
@@ -449,6 +452,7 @@ struct pTextEdit : public pWidget {
   GtkWidget *subWidget;
   GtkTextBuffer *textBuffer;
 
+  bool focused();
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
   void setText(const string &text);

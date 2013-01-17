@@ -6,6 +6,34 @@ unsigned ListView_GetColumnCount(HWND hwnd) {
   return --count;
 }
 
+void ListView_SetImage(HWND hwnd, HIMAGELIST imageList, unsigned row, unsigned column, unsigned imageID) {
+  //if this is the first image assigned, set image list now
+  //do not set sooner, or image blocks will appear in a list with no images
+  if(ListView_GetImageList(hwnd, LVSIL_SMALL) != imageList) {
+    ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
+  }
+
+  LVITEM item;
+  item.mask = LVIF_IMAGE;
+  item.iItem = row;
+  item.iSubItem = column;
+  item.iImage = imageID;
+  ListView_SetItem(hwnd, &item);
+}
+
+void ImageList_Append(HIMAGELIST imageList, const nall::image &source) {
+  auto image = source;
+  if(image.empty()) {
+    image.allocate(15, 15);
+    image.clear(GetSysColor(COLOR_WINDOW));
+  }
+  image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  image.scale(15, 15, Interpolation::Linear);
+  HBITMAP bitmap = CreateBitmap(image);
+  ImageList_Add(imageList, bitmap, NULL);
+  DeleteObject(bitmap);
+}
+
 void pListView::append(const lstring &list) {
   wchar_t empty[] = L"";
   unsigned row = ListView_GetItemCount(hwnd);
@@ -43,11 +71,11 @@ void pListView::modify(unsigned row, const lstring &list) {
 
 void pListView::remove(unsigned row) {
   ListView_DeleteItem(hwnd, row);
-  setImageList();
 }
 
 void pListView::reset() {
   ListView_DeleteAllItems(hwnd);
+  buildImageList();  //free previously allocated images
 }
 
 bool pListView::selected() {
@@ -103,7 +131,19 @@ void pListView::setHeaderVisible(bool visible) {
 }
 
 void pListView::setImage(unsigned row, unsigned column, const image &image) {
-  setImageList();
+  //assign existing image
+  for(unsigned n = 0; n < images.size(); n++) {
+    if(images[n] == image) {
+      imageMap(row)(column) = n;
+      return ListView_SetImage(hwnd, imageList, row, column, n);
+    }
+  }
+
+  //append and assign new image
+  imageMap(row)(column) = images.size();
+  images.append(image);
+  ImageList_Append(imageList, image);
+  ListView_SetImage(hwnd, imageList, row, column, imageMap(row)(column));
 }
 
 void pListView::setSelected(bool selected) {
@@ -138,7 +178,7 @@ void pListView::constructor() {
   setCheckable(listView.state.checkable);
   for(auto &text : listView.state.text) append(text);
   for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
-  setImageList();
+  buildImageList();
   if(listView.state.selected) setSelection(listView.state.selection);
   autoSizeColumns();
   synchronize();
@@ -158,53 +198,46 @@ void pListView::setGeometry(const Geometry &geometry) {
   autoSizeColumns();
 }
 
-void pListView::setImageList() {
+void pListView::buildImageList() {
   auto &list = listView.state.image;
+  unsigned columns = listView.state.text.size();
+  unsigned rows = max(1u, listView.state.headerText.size());
 
-  if(imageList) {
-    ImageList_Destroy(imageList);
-    imageList = nullptr;
-  }
+  ListView_SetImageList(hwnd, NULL, LVSIL_SMALL);
+  if(imageList) ImageList_Destroy(imageList);
+  imageList = ImageList_Create(15, 15, ILC_COLOR32, 1, 0);
 
-  bool found = false;
-  for(auto &row : listView.state.image) {
-    for(auto &column : row) {
-      if(column.empty() == false) {
-        found = true;
-        break;
+  imageMap.reset();
+  images.reset();
+  images.append(nall::image());  //empty icon for cells without an image assigned (I_IMAGENONE does not work)
+
+  //create a vector of unique images from all images used (many cells may use the same image)
+  for(unsigned y = 0; y < list.size(); y++) {
+    for(unsigned x = 0; x < list[y].size(); x++) {
+      bool found = false;
+      for(unsigned z = 0; z < images.size(); z++) {
+        if(list[y][x] == images[z]) {
+          found = true;
+          imageMap(y)(x) = z;
+          break;
+        }
+      }
+
+      if(found == false) {
+        imageMap(y)(x) = images.size();
+        images.append(list[y][x]);
       }
     }
   }
-  if(found == false) return;
 
-  imageList = ImageList_Create(15, 15, ILC_COLOR32, 1, 0);
-  nall::image image;
-  image.allocate(15, 15);
-  image.clear(GetSysColor(COLOR_WINDOW));
-  ImageList_Add(imageList, CreateBitmap(image), NULL);
+  //build image list
+  for(auto &imageItem : images) ImageList_Append(imageList, imageItem);
+  if(images.size() <= 1) return;
 
-  for(unsigned row = 0; row < list.size(); row++) {
-    for(unsigned column = 0; column < list(row).size(); column++) {
-      nall::image image = list(row)(column);
-      if(image.empty()) continue;
-      image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-      image.scale(15, 15, Interpolation::Linear);
-      ImageList_Add(imageList, CreateBitmap(image), NULL);
-    }
-  }
-
-  ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
-
-  unsigned ID = 1;
-  for(unsigned row = 0; row < list.size(); row++) {
-    for(unsigned column = 0; column < list(row).size(); column++) {
-      if(list(row)(column).empty()) continue;  //I_IMAGENONE does not work properly
-      LVITEM item;
-      item.mask = LVIF_IMAGE;
-      item.iItem = row;
-      item.iSubItem = column;
-      item.iImage = ID++;
-      ListView_SetItem(hwnd, &item);
+  //set images for all cells
+  for(unsigned y = 0; y < columns; y++) {
+    for(unsigned x = 0; x < rows; x++) {
+      ListView_SetImage(hwnd, imageList, y, x, imageMap(y)(x));
     }
   }
 }

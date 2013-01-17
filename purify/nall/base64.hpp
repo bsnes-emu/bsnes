@@ -1,33 +1,38 @@
 #ifndef NALL_BASE64_HPP
 #define NALL_BASE64_HPP
 
-#include <string.h>
 #include <nall/stdint.hpp>
+#include <nall/string.hpp>
 
 namespace nall {
   struct base64 {
     static bool encode(char *&output, const uint8_t* input, unsigned inlength) {
-      output = new char[inlength * 8 / 6 + 6]();
+      output = new char[inlength * 8 / 6 + 8]();
 
       unsigned i = 0, o = 0;
       while(i < inlength) {
         switch(i % 3) {
-          case 0: {
-            output[o++] = enc(input[i] >> 2);
-            output[o] = enc((input[i] & 3) << 4);
-          } break;
 
-          case 1: {
-            uint8_t prev = dec(output[o]);
-            output[o++] = enc(prev + (input[i] >> 4));
-            output[o] = enc((input[i] & 15) << 2);
-          } break;
+        case 0: {
+          output[o++] = enc(input[i] >> 2);
+          output[o] = enc((input[i] & 3) << 4);
+          break;
+        }
 
-          case 2: {
-            uint8_t prev = dec(output[o]);
-            output[o++] = enc(prev + (input[i] >> 6));
-            output[o++] = enc(input[i] & 63);
-          } break;
+        case 1: {
+          uint8_t prev = dec(output[o]);
+          output[o++] = enc(prev + (input[i] >> 4));
+          output[o] = enc((input[i] & 15) << 2);
+          break;
+        }
+
+        case 2: {
+          uint8_t prev = dec(output[o]);
+          output[o++] = enc(prev + (input[i] >> 6));
+          output[o++] = enc(input[i] & 63);
+          break;
+        }
+
         }
 
         i++;
@@ -36,32 +41,46 @@ namespace nall {
       return true;
     }
 
+    static string encode(const string &data) {
+      char *buffer = nullptr;
+      encode(buffer, (const uint8_t*)(const char*)data, data.length());
+      string result = buffer;
+      delete[] buffer;
+      return result;
+    }
+
     static bool decode(uint8_t *&output, unsigned &outlength, const char *input) {
       unsigned inlength = strlen(input), infix = 0;
-      output = new uint8_t[inlength]();
+      output = new uint8_t[inlength + 1]();
 
       unsigned i = 0, o = 0;
       while(i < inlength) {
         uint8_t x = dec(input[i]);
 
         switch(i++ & 3) {
-          case 0: {
-            output[o] = x << 2;
-          } break;
 
-          case 1: {
-            output[o++] |= x >> 4;
-            output[o] = (x & 15) << 4;
-          } break;
+        case 0: {
+          output[o] = x << 2;
+          break;
+        }
 
-          case 2: {
-            output[o++] |= x >> 2;
-            output[o] = (x & 3) << 6;
-          } break;
+        case 1: {
+          output[o++] |= x >> 4;
+          output[o] = (x & 15) << 4;
+          break;
+        }
 
-          case 3: {
-            output[o++] |= x;
-          } break;
+        case 2: {
+          output[o++] |= x >> 2;
+          output[o] = (x & 3) << 6;
+          break;
+        }
+
+        case 3: {
+          output[o++] |= x;
+          break;
+        }
+
         }
       }
 
@@ -69,9 +88,18 @@ namespace nall {
       return true;
     }
 
+    static string decode(const string &data) {
+      uint8_t *buffer = nullptr;
+      unsigned size = 0;
+      decode(buffer, size, (const char*)data);
+      string result = (const char*)buffer;
+      delete[] buffer;
+      return result;
+    }
+
   private:
     static char enc(uint8_t n) {
-      //base64 for URL encodings
+      //base64 for URL encodings (URL = -_, MIME = +/)
       static char lookup_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
       return lookup_table[n & 63];
     }

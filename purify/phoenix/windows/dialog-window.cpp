@@ -56,16 +56,26 @@ string pDialogWindow::fileSave(Window &parent, const string &path, const lstring
   return FileDialog(true, parent, path, filter);
 }
 
+static int CALLBACK BrowseCallbackProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpdata) {
+  if(msg == BFFM_INITIALIZED) {
+    if(lpdata) SendMessage(hwnd, BFFM_SETSELECTION, TRUE, lpdata);
+  }
+
+  return 0;
+}
+
 string pDialogWindow::folderSelect(Window &parent, const string &path) {
   wchar_t wfilename[PATH_MAX + 1] = L"";
+  utf16_t wpath(string{path}.transform("/", "\\"));
+
   BROWSEINFO bi;
   bi.hwndOwner = &parent != &Window::none() ? parent.p.hwnd : 0;
   bi.pidlRoot = NULL;
   bi.pszDisplayName = wfilename;
   bi.lpszTitle = L"";
   bi.ulFlags = BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS;
-  bi.lpfn = NULL;
-  bi.lParam = 0;
+  bi.lpfn = BrowseCallbackProc;
+  bi.lParam = (LPARAM)(wchar_t*)wpath;
   bi.iImage = 0;
   bool result = false;
   LPITEMIDLIST pidl = SHBrowseForFolder(&bi);
