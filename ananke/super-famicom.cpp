@@ -137,3 +137,74 @@ string Ananke::openSuperFamicom(vector<uint8_t> &buffer) {
 
   return createSuperFamicomHeuristic(buffer);
 }
+
+string Ananke::syncSuperFamicom(const string &pathname) {
+  vector<uint8_t> buffer;
+
+  auto append = [&](string filename) {
+    filename = {pathname, filename};
+    auto data = file::read(filename);
+    if(data.size() == 0) return;  //file does not exist
+
+    unsigned position = buffer.size();
+    buffer.resize(buffer.size() + data.size());
+    memcpy(buffer.data() + position, data.data(), data.size());
+  };
+
+  append("program.rom");
+  append("data.rom");
+
+  append("dsp1.rom");
+  append("dsp1.program.rom");
+  append("dsp1.data.rom");
+
+  append("dsp1b.rom");
+  append("dsp1b.program.rom");
+  append("dsp1b.data.rom");
+
+  append("dsp2.rom");
+  append("dsp2.program.rom");
+  append("dsp2.data.rom");
+
+  append("dsp3.rom");
+  append("dsp3.program.rom");
+  append("dsp3.data.rom");
+
+  append("dsp4.rom");
+  append("dsp4.program.rom");
+  append("dsp4.data.rom");
+
+  append("st010.rom");
+  append("st010.program.rom");
+  append("st010.data.rom");
+
+  append("st011.rom");
+  append("st011.program.rom");
+  append("st011.data.rom");
+
+  append("st018.rom");
+  append("st018.program.rom");
+  append("st018.data.rom");
+
+  append("cx4.rom");
+  append("cx4.data.rom");
+
+  append("sgb.rom");
+  append("sgb.boot.rom");
+
+  if(buffer.size() == 0) return "";
+
+  auto save = file::read({pathname, "save.ram"});
+  if(save.size() == 0) save = file::read({pathname, "save.rwm"});
+
+  auto rtc = file::read({pathname, "rtc.ram"});
+  if(rtc.size() == 0) rtc= file::read({pathname, "rtc.rwm"});
+
+  directory::remove(pathname);
+  string outputPath = openSuperFamicom(buffer);
+
+  if(save.size()) file::write({outputPath, "save.ram"}, save);
+  if(rtc.size()) file::write({outputPath, "rtc.ram"}, save);
+
+  return outputPath;
+}

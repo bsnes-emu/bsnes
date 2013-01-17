@@ -1,5 +1,2 @@
-purify/*.o
 purify/purify
-purify/analyze-gba
-ananke/ananke.o
 ananke/libananke.so

@@ -1,6 +1,6 @@
 string SuperFamicom = R"(
 
-database revision=2013-01-14
+database revision=2013-01-16
 
 release
   cartridge region=NTSC
@@ -208,10 +208,10 @@ release
     board type=LJ3M revision=01
     rom name=program.rom size=0x600000
     ram name=save.ram size=0x2000
-    map id=rom address=00-3f:8000-ffff offset=0x400000
-    map id=rom address=40-7d:0000-ffff offset=0x400000
-    map id=rom address=80-bf:8000-ffff offset=0x000000 mask=0xc00000
-    map id=rom address=c0-ff:0000-ffff offset=0x000000 mask=0xc00000
+    map id=rom address=00-3f:8000-ffff base=0x400000
+    map id=rom address=40-7d:0000-ffff base=0x400000
+    map id=rom address=80-bf:8000-ffff mask=0xc00000
+    map id=rom address=c0-ff:0000-ffff mask=0xc00000
     map id=ram address=80-bf:6000-7fff mask=0xe000
   information
     title:    テイルズ オブ ファンタジア

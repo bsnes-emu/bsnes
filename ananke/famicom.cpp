@@ -30,3 +30,10 @@ string Ananke::createFamicomHeuristic(vector<uint8_t> &buffer) {
 string Ananke::openFamicom(vector<uint8_t> &buffer) {
   return createFamicomHeuristic(buffer);
 }
+
+//this currently cannot work:
+//game folders discard iNES header required for heuristic detection
+//a games database of all commercial Famicom software will be required
+string Ananke::syncFamicom(const string &pathname) {
+  return "";
+}

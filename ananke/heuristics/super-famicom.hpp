@@ -91,10 +91,10 @@ struct SuperFamicomCartridge {
   bool has_bsx_slot;
   bool has_superfx;
   bool has_sa1;
-  bool has_srtc;
+  bool has_sharprtc;
+  bool has_epsonrtc;
   bool has_sdd1;
   bool has_spc7110;
-  bool has_spc7110rtc;
   bool has_cx4;
   bool has_dsp1;
   bool has_dsp2;
@@ -128,7 +128,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
-      "  map id=rom address=00-7f,80-ff:8000-ffff\n"
+      "  map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
       "  icd2 revision=1\n"
       "    rom name=sgb.boot.rom size=0x100\n"
       "    map id=io address=00-3f,80-bf:6000-7fff\n"
@@ -244,10 +244,10 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
     );
     markup.append(
-      "  map id=rom address=00-3f:8000-ffff offset=0x400000\n"
-      "  map id=rom address=40-7f:0000-ffff offset=0x400000\n"
-      "  map id=rom address=80-bf:8000-ffff offset=0x000000 mask=0xc00000\n"
-      "  map id=rom address=c0-ff:0000-ffff offset=0x000000 mask=0xc00000\n"
+      "  map id=rom address=00-3f:8000-ffff base=0x400000\n"
+      "  map id=rom address=40-7f:0000-ffff base=0x400000\n"
+      "  map id=rom address=80-bf:8000-ffff mask=0xc00000\n"
+      "  map id=rom address=c0-ff:0000-ffff mask=0xc00000\n"
     );
     if(ram_size > 0) markup.append(
       "  map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
@@ -301,10 +301,10 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-      "  map id=rom address=00-1f:8000-ffff offset=0x000000 mask=0x8000\n"
-      "  map id=rom address=20-3f:8000-ffff offset=0x100000 mask=0x8000\n"
-      "  map id=rom address=80-9f:8000-ffff offset=0x200000 mask=0x8000\n"
-      "  map id=rom address=a0-bf:8000-ffff offset=0x100000 mask=0x8000\n"
+      "  map id=rom address=00-1f:8000-ffff base=0x000000 mask=0x8000\n"
+      "  map id=rom address=20-3f:8000-ffff base=0x100000 mask=0x8000\n"
+      "  map id=rom address=80-9f:8000-ffff base=0x200000 mask=0x8000\n"
+      "  map id=rom address=a0-bf:8000-ffff base=0x100000 mask=0x8000\n"
       "  map id=ram address=70-7f,f0-ff:0000-7fff\n"
       "  bsxslot\n"
       "    map id=rom address=c0-ef:0000-ffff\n"
@@ -351,19 +351,19 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
     );
   }
 
-  if(has_spc7110rtc) {
-    markup.append(
-      "  epsonrtc\n"
-      "    ram name=rtc.ram size=0x10\n"
-      "    map id=io address=00-3f,80-bf:4840-4842\n"
-    );
-  }
-
-  if(has_srtc) {
+  if(has_sharprtc) {
     markup.append(
       "  sharprtc\n"
       "    ram name=rtc.ram size=0x10\n"
       "    map id=io address=00-3f,80-bf:2800-2801\n"
+    );
+  }
+
+  if(has_epsonrtc) {
+    markup.append(
+      "  epsonrtc\n"
+      "    ram name=rtc.ram size=0x10\n"
+      "    map id=io address=00-3f,80-bf:4840-4842\n"
     );
   }
 
@@ -431,7 +431,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "    rom id=program name=dsp4.program.rom size=0x1800\n"
       "    rom id=data name=dsp4.data.rom size=0x800\n"
       "    ram id=data size=0x200\n"
-      "    map address=30-3f,b0-bf:8000-ffff select=0x4000\n"
+      "    map id=io address=30-3f,b0-bf:8000-ffff select=0x4000\n"
     );
     if((size & 0x7fff) == 0x2000) {
       firmware_appended = true;
@@ -495,10 +495,10 @@ void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
   has_bsx_slot   = false;
   has_superfx    = false;
   has_sa1        = false;
-  has_srtc       = false;
+  has_sharprtc   = false;
+  has_epsonrtc   = false;
   has_sdd1       = false;
   has_spc7110    = false;
-  has_spc7110rtc = false;
   has_cx4        = false;
   has_dsp1       = false;
   has_dsp2       = false;
@@ -645,7 +645,7 @@ void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
   }
 
   if(mapperid == 0x35 && rom_type == 0x55) {
-    has_srtc = true;
+    has_sharprtc = true;
   }
 
   if(mapperid == 0x32 && (rom_type == 0x43 || rom_type == 0x45)) {
@@ -654,7 +654,7 @@ void SuperFamicomCartridge::read_header(const uint8_t *data, unsigned size) {
 
   if(mapperid == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
     has_spc7110 = true;
-    has_spc7110rtc = (rom_type == 0xf9);
+    has_epsonrtc = (rom_type == 0xf9);
     mapper = SPC7110ROM;
   }
 

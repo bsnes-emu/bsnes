@@ -30,6 +30,7 @@
 #include <nall/string/cstring.hpp>
 #include <nall/string/datetime.hpp>
 #include <nall/string/filename.hpp>
+#include <nall/string/format.hpp>
 #include <nall/string/math-fixed-point.hpp>
 #include <nall/string/math-floating-point.hpp>
 #include <nall/string/platform.hpp>

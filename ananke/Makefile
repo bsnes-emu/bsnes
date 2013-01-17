@@ -3,25 +3,22 @@ include phoenix/Makefile
 
 path := /usr/local/lib
 flags := -I. -O3 -fomit-frame-pointer
-ifeq ($(arch),win32)
-  flags := -m32 $(flags)
-endif
 
 all:
-	$(cpp) $(flags) -fPIC -o ananke.o -c ananke.cpp
+	$(cpp) $(flags) -fPIC -o obj/ananke.o -c ananke.cpp
 ifeq ($(platform),x)
-	$(cpp) $(flags) -shared -Wl,-soname,libananke.so.1 -o libananke.so ananke.o
+	$(cpp) $(flags) -shared -Wl,-soname,libananke.so.1 -o libananke.so obj/ananke.o
 else ifeq ($(platform),win)
-	$(cpp) $(flags) -fPIC -o phoenix.o -c phoenix/phoenix.cpp $(phoenixflags)
-	$(cpp) $(flags) -shared -o phoenix.dll phoenix.o $(phoenixlink)
-	$(cpp) $(flags) -shared -o ananke.dll ananke.o -L. -lphoenix
+	$(cpp) $(flags) -fPIC -o obj/phoenix.o -c phoenix/phoenix.cpp $(phoenixflags)
+	$(cpp) $(flags) -shared -o phoenix.dll obj/phoenix.o $(phoenixlink)
+	$(cpp) $(flags) -shared -o ananke.dll obj/ananke.o -L. -lphoenix
 endif
 
 resource: force
 	sourcery resource/resource.bml resource/resource.cpp resource/resource.hpp
 
 clean:
-	-@$(call delete,*.o)
+	-@$(call delete,obj/*.o)
 	-@$(call delete,*.so)
 
 install: uninstall

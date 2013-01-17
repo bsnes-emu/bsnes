@@ -17,7 +17,7 @@ string Ananke::createBsxSatellaviewDatabase(vector<uint8_t> &buffer, Markup::Nod
   file::write({pathname, "manifest.bml"}, markup);
   file::write({pathname, "program.rom"}, buffer);
 
-  return "";
+  return pathname;
 }
 
 string Ananke::createBsxSatellaviewHeuristic(vector<uint8_t> &buffer) {
@@ -37,7 +37,7 @@ string Ananke::createBsxSatellaviewHeuristic(vector<uint8_t> &buffer) {
   });
   file::write({pathname, "program.rom"}, buffer);
 
-  return "";
+  return pathname;
 }
 
 string Ananke::openBsxSatellaview(vector<uint8_t> &buffer) {
@@ -57,4 +57,12 @@ string Ananke::openBsxSatellaview(vector<uint8_t> &buffer) {
   }
 
   return createBsxSatellaviewHeuristic(buffer);
+}
+
+string Ananke::syncBsxSatellaview(const string &pathname) {
+  auto buffer = file::read({pathname, "program.rom"});
+  if(buffer.size() == 0) return "";
+
+  directory::remove(pathname);
+  return openBsxSatellaview(buffer);
 }

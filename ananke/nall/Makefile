@@ -45,7 +45,12 @@ ifeq ($(compiler),)
 endif
 
 c := $(compiler) -std=gnu99
-cpp := $(subst cc,++,$(compiler)) -std=gnu++0x
+cpp := $(subst cc,++,$(compiler)) -std=gnu++11
+
+ifeq ($(arch),x86)
+  c := $(c) -m32
+  cpp := $(cpp) -m32
+endif
 
 ifeq ($(prefix),)
   prefix := /usr/local

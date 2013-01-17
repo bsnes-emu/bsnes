@@ -35,3 +35,22 @@ string Ananke::createGameBoyAdvanceHeuristic(vector<uint8_t> &buffer) {
 string Ananke::openGameBoyAdvance(vector<uint8_t> &buffer) {
   return createGameBoyAdvanceHeuristic(buffer);
 }
+
+string Ananke::syncGameBoyAdvance(const string &pathname) {
+  auto buffer = file::read({pathname, "program.rom"});
+  if(buffer.size() == 0) return "";
+
+  auto save = file::read({pathname, "save.ram"});
+  if(save.size() == 0) save = file::read({pathname, "save.rwm"});
+
+  auto rtc = file::read({pathname, "rtc.ram"});
+  if(rtc.size() == 0) rtc = file::read({pathname, "rtc.rwm"});
+
+  directory::remove(pathname);
+  string outputPath = openGameBoyAdvance(buffer);
+
+  if(save.size()) file::write({outputPath, "save.ram"}, save);
+  if(rtc.size()) file::write({outputPath, "rtc.ram"}, rtc);
+
+  return outputPath;
+}
