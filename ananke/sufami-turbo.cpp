@@ -78,6 +78,8 @@ string Ananke::syncSufamiTurbo(const string &pathname) {
   if(save.size() == 0) save = file::read({pathname, "save.rwm"});
 
   directory::remove(pathname);
+  information.path = pathname;
+  information.name = notdir(string{pathname}.rtrim<1>("/"));
   string outputPath = openSufamiTurbo(buffer);
 
   if(save.size()) file::write({outputPath, "save.ram"}, save);

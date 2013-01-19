@@ -39,6 +39,7 @@
 #include <nall/stdint.hpp>
 #include <nall/stream.hpp>
 #include <nall/string.hpp>
+#include <nall/thread.hpp>
 #include <nall/traits.hpp>
 #include <nall/unzip.hpp>
 #include <nall/utility.hpp>

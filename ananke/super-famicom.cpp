@@ -201,6 +201,8 @@ string Ananke::syncSuperFamicom(const string &pathname) {
   if(rtc.size() == 0) rtc= file::read({pathname, "rtc.rwm"});
 
   directory::remove(pathname);
+  information.path = pathname;
+  information.name = notdir(string{pathname}.rtrim<1>("/"));
   string outputPath = openSuperFamicom(buffer);
 
   if(save.size()) file::write({outputPath, "save.ram"}, save);

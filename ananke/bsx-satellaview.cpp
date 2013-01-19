@@ -64,5 +64,7 @@ string Ananke::syncBsxSatellaview(const string &pathname) {
   if(buffer.size() == 0) return "";
 
   directory::remove(pathname);
+  information.path = pathname;
+  information.name = notdir(string{pathname}.rtrim<1>("/"));
   return openBsxSatellaview(buffer);
 }
