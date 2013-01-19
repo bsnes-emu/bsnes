@@ -8,6 +8,8 @@ objects := obj/phoenix.o obj/purify.o
 
 ifeq ($(platform),x)
   link += -Wl,-export-dynamic
+else ifeq ($(platform),win)
+  link += -mwindows
 endif
 
 all: build;
@@ -22,8 +24,9 @@ build: $(objects)
 ifeq ($(platform),x)
 	$(cpp) $(link) -o purify $(objects) $(phoenixlink)
 else ifeq ($(platform),win)
+	windres phoenix/windows/phoenix.rc obj/phoenix-resource.o
 	$(cpp) -shared -o phoenix.dll obj/phoenix.o $(phoenixlink)
-	$(cpp) -o purify obj/purify.o $(link) -L. -lphoenix
+	$(cpp) -o purify obj/purify.o obj/phoenix-resource.o $(link) -L. -lphoenix
 endif
 
 resource: force

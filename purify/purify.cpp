@@ -4,8 +4,6 @@ using namespace nall;
 #include <phoenix/phoenix.hpp>
 using namespace phoenix;
 
-#include <thread>
-
 #include "resource/resource.cpp"
 
 struct Application : Window {
@@ -44,7 +42,7 @@ Application::Application() {
   }
 
   setFrameGeometry({64, 64, 720, 480});
-  setTitle("purify v02");
+  setTitle("purify v02.01");
 
   layout.setMargin(5);
   pathLabel.setText("Path:");
