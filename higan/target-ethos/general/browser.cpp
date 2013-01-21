@@ -28,7 +28,10 @@ Browser::Browser() {
   };
 
   homeButton.onActivate = [&] {
-    setPath({userpath(), "Emulation/"});
+    string libraryPath = string::read({configpath(), "higan/library.cfg"}).strip();
+    if(libraryPath.empty()) libraryPath = {userpath(), "Emulation/"};
+    if(libraryPath.endswith("/") == false) libraryPath.append("/");
+    setPath(libraryPath);
   };
 
   upButton.onActivate = [&] {
@@ -164,7 +167,12 @@ void Browser::setPath(const string &path, unsigned selection) {
       string name = filename;
       name.rtrim<1>(suffix);
       fileList.append(name);
-      fileList.setImage(filenameList.size(), 0, {resource::game, sizeof resource::game});
+      if(1 || file::exists({path, filename, "unverified"}) == false) {
+        fileList.setImage(filenameList.size(), 0, {resource::game, sizeof resource::game});
+      } else {
+        //disabled for now due to performance penalty
+        fileList.setImage(filenameList.size(), 0, {resource::unverified, sizeof resource::unverified});
+      }
       filenameList.append(filename);
     }
   }

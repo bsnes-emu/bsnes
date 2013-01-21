@@ -98,6 +98,14 @@ namespace nall {
       return true;
     }
 
+    static bool create(const string &filename) {
+      //create an empty file (will replace existing files)
+      file fp;
+      if(fp.open(filename, mode::write) == false) return false;
+      fp.close();
+      return true;
+    }
+
     static string sha256(const string &filename) {
       auto buffer = read(filename);
       return nall::sha256(buffer.data(), buffer.size());

@@ -14,8 +14,8 @@ struct ID {
     GameBoyBootROM,
     SuperGameBoyBootROM,
     GameBoyColorBootROM,
-    GameBoyROM,
-    GameBoyColorROM,
+
+    Manifest,
     ROM,
     RAM,
   };
@@ -42,9 +42,9 @@ struct Interface : Emulator::Interface {
   bool loaded();
   string sha256();
   unsigned group(unsigned id);
-  void load(unsigned id, const string &manifest);
+  void load(unsigned id);
   void save();
-  void load(unsigned id, const stream &stream, const string &manifest = "");
+  void load(unsigned id, const stream &stream);
   void save(unsigned id, const stream &stream);
   void unload();
 

@@ -3,3 +3,4 @@ resource name=resource
   binary id=up name=up.png
   binary id=folder name=folder.png
   binary id=game name=game.png
+  binary id=unverified name=unverified.png

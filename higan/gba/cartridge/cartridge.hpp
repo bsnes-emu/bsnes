@@ -21,7 +21,7 @@ struct Cartridge : property<Cartridge> {
   };
   vector<Media> memory;
 
-  void load(const string &manifest);
+  void load();
   void unload();
   void power();
 

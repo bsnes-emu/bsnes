@@ -61,7 +61,14 @@ struct Cartridge : property<Cartridge> {
   vector<Memory> memory;
 
   struct Information {
-    string markup;
+    struct Markup {
+      string cartridge;
+      string gameBoy;
+      string satellaview;
+      string sufamiTurboA;
+      string sufamiTurboB;
+    } markup;
+
     struct Title {
       string cartridge;
       string gameBoy;
@@ -73,11 +80,7 @@ struct Cartridge : property<Cartridge> {
 
   string title();
 
-  void load(const string &manifest);
-  void load_super_game_boy(const string &manifest);
-  void load_satellaview(const string &manifest);
-  void load_sufami_turbo_a(const string &manifest);
-  void load_sufami_turbo_b(const string &manifest);
+  void load();
   void unload();
 
   void serialize(serializer&);
@@ -85,6 +88,11 @@ struct Cartridge : property<Cartridge> {
   ~Cartridge();
 
 private:
+  void load_super_game_boy();
+  void load_satellaview();
+  void load_sufami_turbo_a();
+  void load_sufami_turbo_b();
+
   void parse_markup(const char*);
   void parse_markup_map(Mapping&, Markup::Node);
   void parse_markup_memory(MappedRAM&, Markup::Node, unsigned id, bool writable);
@@ -108,6 +116,8 @@ private:
   void parse_markup_obc1(Markup::Node);
   void parse_markup_hsu1(Markup::Node);
   void parse_markup_msu1(Markup::Node);
+
+  friend class Interface;
 };
 
 extern Cartridge cartridge;

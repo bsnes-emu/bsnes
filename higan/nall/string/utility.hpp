@@ -201,50 +201,6 @@ template<unsigned length_, char padding> string ldecimal(uintmax_t value) {
   return (const char*)result;
 }
 
-template<unsigned length_, char padding> string hex(uintmax_t value) {
-  char buffer[64];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value & 15;
-    buffer[size++] = n < 10 ? '0' + n : 'a' + n - 10;
-    value >>= 4;
-  } while(value);
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
-template<unsigned length_, char padding> string binary(uintmax_t value) {
-  char buffer[256];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value & 1;
-    buffer[size++] = '0' + n;
-    value >>= 1;
-  } while(value);
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.

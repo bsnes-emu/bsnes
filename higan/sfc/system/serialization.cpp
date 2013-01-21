@@ -59,7 +59,6 @@ void System::serialize_all(serializer &s) {
 
   if(cartridge.has_gb_slot()) icd2.serialize(s);
   if(cartridge.has_bs_cart()) bsxcartridge.serialize(s);
-  if(cartridge.has_st_slots()) sufamiturbo.serialize(s);
   if(cartridge.has_event()) event.serialize(s);
   if(cartridge.has_sa1()) sa1.serialize(s);
   if(cartridge.has_superfx()) superfx.serialize(s);
@@ -73,6 +72,7 @@ void System::serialize_all(serializer &s) {
   if(cartridge.has_obc1()) obc1.serialize(s);
   if(cartridge.has_hsu1()) hsu1.serialize(s);
   if(cartridge.has_msu1()) msu1.serialize(s);
+  if(cartridge.has_st_slots()) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
 }
 
 //perform dry-run state save:

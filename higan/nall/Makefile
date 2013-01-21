@@ -36,16 +36,21 @@ endif
 
 ifeq ($(compiler),)
   ifeq ($(platform),win)
-    compiler := gcc
+    compiler := g++
   else ifeq ($(platform),osx)
-    compiler := gcc-mp-4.7
+    compiler := g++-mp-4.7
   else
-    compiler := gcc-4.7
+    compiler := g++-4.7
   endif
 endif
 
-c := $(compiler) -std=gnu99
-cpp := $(subst cc,++,$(compiler)) -std=gnu++0x
+c := $(compiler) -x c -std=gnu99
+cpp := $(compiler) -std=gnu++11
+
+ifeq ($(arch),x86)
+  c := $(c) -m32
+  cpp := $(cpp) -m32
+endif
 
 ifeq ($(prefix),)
   prefix := /usr/local

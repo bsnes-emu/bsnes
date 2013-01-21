@@ -26,6 +26,7 @@ string Interface::sha256() {
 
 unsigned Interface::group(unsigned id) {
   switch(id) {
+  case ID::Manifest:
   case ID::ProgramROM:
   case ID::ProgramRAM:
   case ID::CharacterROM:
@@ -36,8 +37,8 @@ unsigned Interface::group(unsigned id) {
   throw;
 }
 
-void Interface::load(unsigned id, const string &manifest) {
-  cartridge.load(manifest);
+void Interface::load(unsigned id) {
+  cartridge.load();
 }
 
 void Interface::save() {
@@ -46,7 +47,9 @@ void Interface::save() {
   }
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &manifest) {
+void Interface::load(unsigned id, const stream &stream) {
+  if(id == ID::Manifest) cartridge.information.markup = stream.text();
+
   if(id == ID::ProgramROM) {
     stream.read(cartridge.board->prgrom.data, min(cartridge.board->prgrom.size, stream.size()));
   }

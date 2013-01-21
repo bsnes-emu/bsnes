@@ -18,10 +18,10 @@ void Cartridge::main() {
   board->main();
 }
 
-void Cartridge::load(const string &manifest) {
-  information.markup = manifest;
+void Cartridge::load() {
+  interface->loadRequest(ID::Manifest, "manifest.bml");
 
-  Board::load(manifest);  //this call will set Cartridge::board if successful
+  Board::load(information.markup);  //this call will set Cartridge::board if successful
   if(board == nullptr) return;
 
   sha256_ctx sha;

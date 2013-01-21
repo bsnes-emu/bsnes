@@ -16,12 +16,12 @@ string Ananke::createGameBoyHeuristic(vector<uint8_t> &buffer) {
   GameBoyCartridge info(buffer.data(), buffer.size());
 
   string pathname = {
-    userpath(),
-    "Emulation/Game Boy", (info.info.cgb ? " Color" : ""), "/",
+    libraryPath, "Game Boy", (info.info.cgb ? " Color" : ""), "/",
     nall::basename(information.name),
-    " (!).", (info.info.cgb ? "gbc" : "gb"), "/"
+    ".", (info.info.cgb ? "gbc" : "gb"), "/"
   };
   directory::create(pathname);
+  file::create({pathname, "unverified"});
 
   string markup = info.markup;
   markup.append("\ninformation\n  title: ", nall::basename(information.name), "\n");

@@ -1,4 +1,4 @@
-struct BSXFlash : Memory {
+struct SatellaviewCartridge : Memory {
   MappedRAM memory;
   bool readonly;
 
@@ -24,4 +24,4 @@ private:
   } regs;
 };
 
-extern BSXFlash bsxflash;
+extern SatellaviewCartridge satellaviewcartridge;

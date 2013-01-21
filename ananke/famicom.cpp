@@ -8,11 +8,12 @@ void Ananke::copyFamicomSaves(const string &pathname) {
 
 string Ananke::createFamicomHeuristic(vector<uint8_t> &buffer) {
   string pathname = {
-    userpath(), "Emulation/Famicom/",
+    libraryPath, "Famicom/",
     nall::basename(information.name),
-    " (!).fc/"
+    ".fc/"
   };
   directory::create(pathname);
+  file::create({pathname, "unverified"});
 
   FamicomCartridge info(buffer.data(), buffer.size());
   string markup = info.markup();

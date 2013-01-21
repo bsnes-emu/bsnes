@@ -41,7 +41,6 @@ void Utility::loadMedia(string pathname) {
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
   string pathname = browser->select({"Load ", media.name}, media.type);
   if(!directory::exists(pathname)) return;
-  if(!file::exists({pathname, "manifest.bml"})) return;
   return loadMedia(emulator, media, pathname);
 }
 
@@ -53,7 +52,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   path(media.id) = pathname;
   this->pathname.append(pathname);
 
-  system().load(media.id, string::read({pathname, "manifest.bml"}));
+  system().load(media.id);
   system().power();
 
   presentation->setSystemName(media.name);
@@ -67,7 +66,7 @@ void Utility::loadRequest(unsigned id, const string &name, const string &type) {
   path(id) = pathname;
   this->pathname.append(pathname);
 
-  system().load(id, string::read({pathname, "manifest.bml"}));
+  system().load(id);
 }
 
 //request from emulation core to load non-volatile media file

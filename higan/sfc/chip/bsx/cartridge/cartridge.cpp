@@ -80,7 +80,7 @@ uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
   || ((addr & 0x400000) == 0x400000)  //$40-7f|c0-ff:0000-ffff
   ) {
     if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-    Memory &memory = (r01 == 0 ? (Memory&)bsxflash : (Memory&)psram);
+    Memory &memory = (r01 == 0 ? (Memory&)satellaviewcartridge : (Memory&)psram);
     return memory_access(write, memory, addr & 0x7fffff, data);
   }
 

@@ -13,6 +13,7 @@ namespace nall {
 
   struct thread {
     thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
+      initialize();
       pthread_create(&pthread, NULL, thread_entry_point, (void*)this);
     }
 
@@ -30,11 +31,28 @@ namespace nall {
       pthread_join(pthread, NULL);
     }
 
+    static bool primary() {
+      initialize();
+      return pthread_equal(primaryThread(), pthread_self());
+    }
+
   private:
     pthread_t pthread;
     function<void ()> entryPoint;
     volatile bool completed, dead;
     friend void* thread_entry_point(void*);
+
+    static void initialize() {
+      static bool initialized = false;
+      if(initialized) return;
+      initialized = true;
+      primaryThread() = pthread_self();
+    }
+
+    static pthread_t& primaryThread() {
+      static pthread_t thread;
+      return thread;
+    }
   };
 
   void* thread_entry_point(void *parameter) {
@@ -50,6 +68,7 @@ namespace nall {
 
   struct thread {
     thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
+      initialize();
       hthread = CreateThread(NULL, 0, thread_entry_point, (void*)this, 0, NULL);
     }
 
@@ -68,11 +87,28 @@ namespace nall {
       CloseHandle(hthread);
     }
 
+    static bool primary() {
+      initialize();
+      return primaryThread() == GetCurrentThreadId();
+    }
+
   private:
     HANDLE hthread;
     function<void ()> entryPoint;
     volatile bool completed, dead;
     friend DWORD WINAPI thread_entry_point(LPVOID);
+
+    static void initialize() {
+      static bool initialized = false;
+      if(initialized) return;
+      initialized = true;
+      primaryThread() = GetCurrentThreadId();
+    }
+
+    static DWORD& primaryThread() {
+      static DWORD thread;
+      return thread;
+    }
   };
 
   inline DWORD WINAPI thread_entry_point(LPVOID parameter) {

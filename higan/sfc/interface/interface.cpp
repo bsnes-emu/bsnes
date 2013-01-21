@@ -31,6 +31,7 @@ unsigned Interface::group(unsigned id) {
   switch(id) {
   case ID::IPLROM:
     return 0;
+  case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
   case ID::EventROM0:
@@ -70,17 +71,21 @@ unsigned Interface::group(unsigned id) {
   case ID::BsxPSRAM:
     return 1;
   case ID::SuperGameBoy:
+  case ID::SuperGameBoyManifest:
   case ID::SuperGameBoyROM:
   case ID::SuperGameBoyRAM:
     return 2;
   case ID::Satellaview:
-  case ID::BsxFlashROM:
+  case ID::SatellaviewManifest:
+  case ID::SatellaviewROM:
     return 3;
   case ID::SufamiTurboSlotA:
+  case ID::SufamiTurboSlotAManifest:
   case ID::SufamiTurboSlotAROM:
   case ID::SufamiTurboSlotARAM:
     return 4;
   case ID::SufamiTurboSlotB:
+  case ID::SufamiTurboSlotBManifest:
   case ID::SufamiTurboSlotBROM:
   case ID::SufamiTurboSlotBRAM:
     return 5;
@@ -89,12 +94,12 @@ unsigned Interface::group(unsigned id) {
   throw;
 }
 
-void Interface::load(unsigned id, const string &manifest) {
-  if(id == ID::SuperFamicom) cartridge.load(manifest);
-  if(id == ID::SuperGameBoy) cartridge.load_super_game_boy(manifest);
-  if(id == ID::Satellaview) cartridge.load_satellaview(manifest);
-  if(id == ID::SufamiTurboSlotA) cartridge.load_sufami_turbo_a(manifest);
-  if(id == ID::SufamiTurboSlotB) cartridge.load_sufami_turbo_b(manifest);
+void Interface::load(unsigned id) {
+  if(id == ID::SuperFamicom) cartridge.load();
+  if(id == ID::SuperGameBoy) cartridge.load_super_game_boy();
+  if(id == ID::Satellaview) cartridge.load_satellaview();
+  if(id == ID::SufamiTurboSlotA) cartridge.load_sufami_turbo_a();
+  if(id == ID::SufamiTurboSlotB) cartridge.load_sufami_turbo_b();
 }
 
 void Interface::save() {
@@ -103,11 +108,12 @@ void Interface::save() {
   }
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &manifest) {
+void Interface::load(unsigned id, const stream &stream) {
   if(id == ID::IPLROM) {
     stream.read(smp.iplrom, min(64u, stream.size()));
   }
 
+  if(id == ID::Manifest) cartridge.information.markup.cartridge = stream.text();
   if(id == ID::ROM) cartridge.rom.read(stream);
   if(id == ID::RAM) cartridge.ram.read(stream);
 
@@ -187,6 +193,12 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
     stream.read(GameBoy::system.bootROM.sgb, min(stream.size(), 256u));
   }
 
+  if(id == ID::BsxROM) bsxcartridge.rom.read(stream);
+  if(id == ID::BsxRAM) bsxcartridge.ram.read(stream);
+  if(id == ID::BsxPSRAM) bsxcartridge.psram.read(stream);
+
+  if(id == ID::SuperGameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
+
   if(id == ID::SuperGameBoyROM) {
     stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
   }
@@ -195,16 +207,16 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
     stream.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, stream.size()));
   }
 
-  if(id == ID::BsxFlashROM) bsxflash.memory.read(stream);
-  if(id == ID::BsxROM) bsxcartridge.rom.read(stream);
-  if(id == ID::BsxRAM) bsxcartridge.ram.read(stream);
-  if(id == ID::BsxPSRAM) bsxcartridge.psram.read(stream);
+  if(id == ID::SatellaviewManifest) cartridge.information.markup.satellaview = stream.text();
+  if(id == ID::SatellaviewROM) satellaviewcartridge.memory.read(stream);
 
-  if(id == ID::SufamiTurboSlotAROM) sufamiturbo.slotA.rom.read(stream);
-  if(id == ID::SufamiTurboSlotBROM) sufamiturbo.slotB.rom.read(stream);
+  if(id == ID::SufamiTurboSlotAManifest) cartridge.information.markup.sufamiTurboA = stream.text();
+  if(id == ID::SufamiTurboSlotAROM) sufamiturboA.rom.read(stream);
+  if(id == ID::SufamiTurboSlotBROM) sufamiturboB.rom.read(stream);
 
-  if(id == ID::SufamiTurboSlotARAM) sufamiturbo.slotA.ram.read(stream);
-  if(id == ID::SufamiTurboSlotBRAM) sufamiturbo.slotB.ram.read(stream);
+  if(id == ID::SufamiTurboSlotBManifest) cartridge.information.markup.sufamiTurboB = stream.text();
+  if(id == ID::SufamiTurboSlotARAM) sufamiturboA.ram.read(stream);
+  if(id == ID::SufamiTurboSlotBRAM) sufamiturboB.ram.read(stream);
 }
 
 void Interface::save(unsigned id, const stream &stream) {
@@ -251,8 +263,8 @@ void Interface::save(unsigned id, const stream &stream) {
   if(id == ID::BsxRAM) stream.write(bsxcartridge.ram.data(), bsxcartridge.ram.size());
   if(id == ID::BsxPSRAM) stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
 
-  if(id == ID::SufamiTurboSlotARAM) stream.write(sufamiturbo.slotA.ram.data(), sufamiturbo.slotA.ram.size());
-  if(id == ID::SufamiTurboSlotBRAM) stream.write(sufamiturbo.slotB.ram.data(), sufamiturbo.slotB.ram.size());
+  if(id == ID::SufamiTurboSlotARAM) stream.write(sufamiturboA.ram.data(), sufamiturboA.ram.size());
+  if(id == ID::SufamiTurboSlotBRAM) stream.write(sufamiturboB.ram.data(), sufamiturboB.ram.size());
 }
 
 void Interface::unload() {
@@ -375,10 +387,10 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true });
-  media.append({ID::SuperFamicom, "Super Famicom", "gb",  false});
-  media.append({ID::SuperFamicom, "Super Famicom", "bs",  false});
-  media.append({ID::SuperFamicom, "Super Famicom", "st",  false});
+  media.append({ID::SuperFamicom, "Super Famicom",    "sfc", true });
+  media.append({ID::SuperFamicom, "Game Boy",         "gb",  false});
+  media.append({ID::SuperFamicom, "BS-X Satellaview", "bs",  false});
+  media.append({ID::SuperFamicom, "Sufami Turbo",     "st",  false});
 
   {
     Device device{0, ID::Port1 | ID::Port2, "Controller"};

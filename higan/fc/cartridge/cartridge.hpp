@@ -5,7 +5,7 @@ struct Cartridge : Thread, property<Cartridge> {
   static void Main();
   void main();
 
-  void load(const string &manifest);
+  void load();
   void unload();
 
   void power();

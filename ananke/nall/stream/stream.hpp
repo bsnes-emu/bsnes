@@ -48,6 +48,15 @@ struct stream {
     while(length--) *data++ = read();
   }
 
+  string text() const {
+    string buffer;
+    buffer.resize(size() + 1);
+    buffer[size()] = 0;
+    seek(0);
+    read((uint8_t*)buffer(), size());
+    return buffer;
+  }
+
   void writel(uintmax_t data, unsigned length = 1) const {
     while(length--) {
       write(data);

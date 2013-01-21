@@ -16,10 +16,12 @@ struct Application : Window {
       Button browseButton;
     ListView fileList;
     ProgressBar progressBar;
+    Label libraryPath;
     HorizontalLayout controlLayout;
       Button selectAllButton;
       Button unselectAllButton;
       Widget spacer;
+      Button setPathButton;
       Button purifyButton;
 
   lstring filenameList;
@@ -41,15 +43,20 @@ Application::Application() {
     exit(0);
   }
 
+  string path = string::read({configpath(), "higan/library.cfg"}).strip();
+  if(path.empty()) path = {userpath(), "Emulation/"};
+
   setFrameGeometry({64, 64, 720, 480});
-  setTitle("purify v03");
+  setTitle("purify v03.01");
 
   layout.setMargin(5);
   pathLabel.setText("Path:");
   browseButton.setText("Browse ...");
   fileList.setCheckable(true);
+  libraryPath.setText({"Library Path: ", path});
   selectAllButton.setText("Select All");
   unselectAllButton.setText("Unselect All");
+  setPathButton.setText("Set Path ...");
   purifyButton.setText("Purify");
 
   append(layout);
@@ -59,11 +66,13 @@ Application::Application() {
     pathLayout.append(browseButton, {80, 0});
   layout.append(fileList, {~0, ~0}, 5);
   layout.append(progressBar, {~0, 0}, 5);
+  layout.append(libraryPath, {~0, 0}, 5);
   layout.append(controlLayout, {~0, 0});
     controlLayout.append(selectAllButton, {100, 0}, 5);
     controlLayout.append(unselectAllButton, {100, 0}, 5);
     controlLayout.append(spacer, {~0, 0});
-    controlLayout.append(purifyButton, {80, 0});
+    controlLayout.append(setPathButton, {100, 0}, 5);
+    controlLayout.append(purifyButton, {100, 0});
 
   setVisible();
 
@@ -87,11 +96,24 @@ Application::Application() {
     for(unsigned n = 0; n < filenameList.size(); n++) fileList.setChecked(n, false);
   };
 
+  setPathButton.onActivate = [&] {
+    string path = DialogWindow::folderSelect(*this, userpath());
+    if(path.empty()) return;
+
+    directory::create({configpath(), "higan/"});
+    file::write({configpath(), "higan/library.cfg"}, path);
+    libraryPath.setText({"Library Path: ", path});
+  };
+
   purifyButton.onActivate = {&Application::purify, this};
 }
 
 void Application::scanPath() {
   string path = pathEdit.text();
+  path.transform("\\", "/");
+  if(path.endswith("/") == false) path.append("/");
+  pathEdit.setText(path);
+
   fileList.reset();
   filenameList.reset();
   scanPath(path, path);
@@ -117,7 +139,11 @@ void Application::scanPath(const string &path, const string &basepath) {
     ) {
       fileList.append(string{path, file}.ltrim<1>(basepath).rtrim<1>("/"));
       filenameList.append({path, file});
-      fileList.setImage(filenameList.size() - 1, 0, {resource::game, sizeof resource::game});
+      if(file::exists({path, file, "unverified"}) == false) {
+        fileList.setImage(filenameList.size() - 1, 0, {resource::game, sizeof resource::game});
+      } else {
+        fileList.setImage(filenameList.size() - 1, 0, {resource::unverified, sizeof resource::unverified});
+      }
     } else if(
        file.endswith(".fc") || file.endswith(".nes")
     || file.endswith(".sfc") || file.endswith(".smc")
@@ -125,14 +151,14 @@ void Application::scanPath(const string &path, const string &basepath) {
     || file.endswith(".gb")
     || file.endswith(".gbc")
     || file.endswith(".gba")
-    || file.endswith(".bpa") || file.endswith(".zip")
+    || file.endswith(".zip")
     ) {
       fileList.append(string{path, file}.ltrim<1>(basepath));
       filenameList.append({path, file});
-      if(file.endswith(".bpa") || file.endswith(".zip")) {
-        fileList.setImage(filenameList.size() - 1, 0, {resource::archive, sizeof resource::archive});
-      } else {
+      if(file.endswith(".zip") == false) {
         fileList.setImage(filenameList.size() - 1, 0, {resource::file, sizeof resource::file});
+      } else {
+        fileList.setImage(filenameList.size() - 1, 0, {resource::archive, sizeof resource::archive});
       }
     }
   }

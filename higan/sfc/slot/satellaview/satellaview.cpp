@@ -1,24 +1,27 @@
-#ifdef BSX_CPP
+#include <sfc/sfc.hpp>
 
-BSXFlash bsxflash;
+#define SATELLAVIEW_CARTRIDGE_CPP
+namespace SuperFamicom {
 
-void BSXFlash::init() {
+SatellaviewCartridge satellaviewcartridge;
+
+void SatellaviewCartridge::init() {
 }
 
-void BSXFlash::load() {
+void SatellaviewCartridge::load() {
   if(memory.size() == 0) {
     memory.map(allocate<uint8>(1024 * 1024, 0xff), 1024 * 1024);
   }
 }
 
-void BSXFlash::unload() {
+void SatellaviewCartridge::unload() {
   memory.reset();
 }
 
-void BSXFlash::power() {
+void SatellaviewCartridge::power() {
 }
 
-void BSXFlash::reset() {
+void SatellaviewCartridge::reset() {
   regs.command   = 0;
   regs.write_old = 0x00;
   regs.write_new = 0x00;
@@ -29,11 +32,11 @@ void BSXFlash::reset() {
   memory.write_protect(!regs.write_enable);
 }
 
-unsigned BSXFlash::size() const {
+unsigned SatellaviewCartridge::size() const {
   return memory.size();
 }
 
-uint8 BSXFlash::read(unsigned addr) {
+uint8 SatellaviewCartridge::read(unsigned addr) {
   if(readonly) return memory.read(bus.mirror(addr, memory.size()));
 
   if(addr == 0x0002) {
@@ -62,7 +65,7 @@ uint8 BSXFlash::read(unsigned addr) {
   return memory.read(addr);
 }
 
-void BSXFlash::write(unsigned addr, uint8 data) {
+void SatellaviewCartridge::write(unsigned addr, uint8 data) {
   if(readonly) return;
 
   if((addr & 0xff0000) == 0) {
@@ -118,4 +121,4 @@ void BSXFlash::write(unsigned addr, uint8 data) {
   }
 }
 
-#endif
+}

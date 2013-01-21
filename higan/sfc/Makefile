@@ -1,12 +1,13 @@
 sfc_objects := sfc-interface sfc-system sfc-controller
 sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
-sfc_objects += sfc-icd2 sfc-bsx sfc-sufamiturbo sfc-nss sfc-event
+sfc_objects += sfc-icd2 sfc-bsx sfc-nss sfc-event
 sfc_objects += sfc-sa1 sfc-superfx
 sfc_objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 sfc_objects += sfc-epsonrtc sfc-sharprtc
 sfc_objects += sfc-spc7110 sfc-sdd1 sfc-obc1
 sfc_objects += sfc-hsu1 sfc-msu1
+sfc_objects += sfc-satellaview sfc-sufamiturbo
 objects += $(sfc_objects)
 
 ifeq ($(profile),accuracy)
@@ -27,6 +28,8 @@ else ifeq ($(profile),performance)
   sfcsmp := $(sfc)/alt/smp
   sfcdsp := $(sfc)/alt/dsp
   sfcppu := $(sfc)/alt/ppu-performance
+else
+  $(error unknown profile.)
 endif
 
 obj/sfc-interface.o:   $(sfc)/interface/interface.cpp $(call rwildcard,$(sfc)/interface)
@@ -42,7 +45,6 @@ obj/sfc-ppu.o:         $(sfcppu)/ppu.cpp $(call rwildcard,$(sfcppu)/)
 
 obj/sfc-icd2.o:        $(sfc)/chip/icd2/icd2.cpp $(call rwildcard,$(sfc)/chip/icd2/)
 obj/sfc-bsx.o:         $(sfc)/chip/bsx/bsx.cpp $(call rwildcard,$(sfc)/chip/bsx/)
-obj/sfc-sufamiturbo.o: $(sfc)/chip/sufamiturbo/sufamiturbo.cpp $(sfc)/chip/sufamiturbo/*
 obj/sfc-nss.o:         $(sfc)/chip/nss/nss.cpp $(call rwildcard,$(sfc)/chip/nss/)
 obj/sfc-event.o:       $(sfc)/chip/event/event.cpp $(call rwildcard,$(sfc)/chip/event/)
 
@@ -62,3 +64,6 @@ obj/sfc-obc1.o:        $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
 
 obj/sfc-hsu1.o:        $(sfc)/chip/hsu1/hsu1.cpp $(sfc)/chip/hsu1/*
 obj/sfc-msu1.o:        $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*
+
+obj/sfc-satellaview.o: $(sfc)/slot/satellaview/satellaview.cpp $(call rwildcard,$(sfc)/slot/satellaview/)
+obj/sfc-sufamiturbo.o: $(sfc)/slot/sufamiturbo/sufamiturbo.cpp $(call rwildcard,$(sfc)/slot/sufamiturbo/)

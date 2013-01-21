@@ -135,9 +135,9 @@ void Cartridge::parse_markup_bsxslot(Markup::Node root) {
     if(node.name != "map") continue;
 
     if(node["id"].data == "rom") {
-      if(bsxflash.memory.size() == 0) continue;
+      if(satellaviewcartridge.memory.size() == 0) continue;
 
-      Mapping m(bsxflash);
+      Mapping m(satellaviewcartridge);
       parse_markup_map(m, node);
       mapping.append(m);
     }
@@ -159,7 +159,7 @@ void Cartridge::parse_markup_sufamiturbo(Markup::Node root) {
       if(node.name != "map") continue;
 
       if(node["id"].data == "rom") {
-        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.rom : sufamiturbo.slotB.rom;
+        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturboA.rom : sufamiturboB.rom;
         if(memory.size() == 0) continue;
 
         Mapping m(memory);
@@ -169,7 +169,7 @@ void Cartridge::parse_markup_sufamiturbo(Markup::Node root) {
       }
 
       if(node["id"].data == "ram") {
-        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturbo.slotA.ram : sufamiturbo.slotB.ram;
+        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturboA.ram : sufamiturboB.ram;
         if(memory.size() == 0) continue;
 
         Mapping m(memory);

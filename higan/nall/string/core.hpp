@@ -12,11 +12,18 @@ static void istring(string &output, const T &value, Args&&... args) {
 }
 
 void string::reserve(unsigned size_) {
-  if(size_ > size) {
-    size = size_;
-    data = (char*)realloc(data, size + 1);
-    data[size] = 0;
-  }
+  if(size_ > size) resize(size_);
+}
+
+void string::resize(unsigned size_) {
+  size = size_;
+  data = (char*)realloc(data, size + 1);
+  data[size] = 0;
+}
+
+void string::clear(char c) {
+  for(unsigned n = 0; n < size; n++) data[n] = c;
+  data[size] = 0;
 }
 
 bool string::empty() const {

@@ -17,6 +17,9 @@ namespace Database {
 
 struct Ananke {
   #include "configuration.cpp"
+  string libraryPath;
+
+  Ananke();
 
   struct Information {
     string path;      //path to selected file
@@ -88,6 +91,12 @@ struct Ananke {
 #include "game-boy-advance.cpp"
 
 FileDialog *fileDialog = nullptr;
+
+Ananke::Ananke() {
+  libraryPath = string::read({configpath(), "higan/library.cfg"}).strip();
+  if(libraryPath.empty()) libraryPath = {userpath(), "Emulation/"};
+  if(libraryPath.endswith("/") == false) libraryPath.append("/");
+}
 
 bool Ananke::supported(const string &filename) {
   string extension = nall::extension(filename);

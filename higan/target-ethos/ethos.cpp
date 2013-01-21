@@ -79,7 +79,7 @@ Application::Application(int argc, char **argv) {
   hotkeySettings = new HotkeySettings;
   timingSettings = new TimingSettings;
   serverSettings = new ServerSettings;
-  driverSettings = new DriverSettings;
+  advancedSettings = new AdvancedSettings;
   settings = new Settings;
   cheatDatabase = new CheatDatabase;
   cheatEditor = new CheatEditor;
@@ -106,7 +106,7 @@ Application::Application(int argc, char **argv) {
   utility->synchronizeRuby();
   utility->updateShader();
 
-  if(config->video.startFullScreen) utility->toggleFullScreen();
+  if(config->video.startFullScreen && argc >= 2) utility->toggleFullScreen();
   OS::processEvents();
 
   if(argc >= 2) utility->loadMedia(argv[1]);

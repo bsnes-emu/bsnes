@@ -14,7 +14,7 @@ void Ananke::copySuperFamicomSaves(const string &pathname) {
 
 string Ananke::createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest) {
   string pathname = {
-    userpath(), "Emulation/Super Famicom/",
+    libraryPath, "Super Famicom/",
     document["release/information/name"].text(),
     " (", document["release/information/region"].text(), ")",
     " (", document["release/information/revision"].text(), ")",
@@ -45,11 +45,12 @@ string Ananke::createSuperFamicomDatabase(vector<uint8_t> &buffer, Markup::Node 
 
 string Ananke::createSuperFamicomHeuristic(vector<uint8_t> &buffer) {
   string pathname = {
-    userpath(), "Emulation/Super Famicom/",
+    libraryPath, "Super Famicom/",
     nall::basename(information.name),
-    " (!).sfc/"
+    ".sfc/"
   };
   directory::create(pathname);
+  file::create({pathname, "unverified"});
 
   if((buffer.size() & 0x7fff) == 512) buffer.remove(0, 512);  //strip copier header, if present
 
@@ -88,8 +89,9 @@ void Ananke::createSuperFamicomHeuristicFirmware(vector<uint8_t> &buffer, const 
     auto buffer = file::read({information.path, name});  //try and read from the containing directory
     if(buffer.size() == 0) buffer = extractFile(name);  //try and read from the containing archive, if one exists
     if(buffer.size() == 0) {
-      MessageWindow::critical(Window::none(), {
-        "Error: required firmware ", name, " not found. Game will not be playable!\n\n",
+      if(thread::primary()) MessageWindow::critical(Window::none(), {
+        "Error: ", information.name, "\n\n",
+        "Required firmware ", name, " not found. Game will not be playable!\n\n",
         "You must obtain this file, and place it in the same folder as this game."
       });
       return;

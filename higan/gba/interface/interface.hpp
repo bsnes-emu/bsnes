@@ -10,6 +10,8 @@ struct ID {
 
   enum : unsigned {
     BIOS,
+
+    Manifest,
     ROM,
     RAM,
     EEPROM,
@@ -28,9 +30,9 @@ struct Interface : Emulator::Interface {
 
   bool loaded();
   unsigned group(unsigned id);
-  void load(unsigned id, const string &manifest);
+  void load(unsigned id);
   void save();
-  void load(unsigned id, const stream &stream, const string &manifest = "");
+  void load(unsigned id, const stream &stream);
   void save(unsigned id, const stream &stream);
   void unload();
 

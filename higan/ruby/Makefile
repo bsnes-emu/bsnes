@@ -23,9 +23,4 @@ else ifeq ($(platform),osx)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
 else ifeq ($(platform),win)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
-
-  ifeq ($(arch),win32)
-    rubyflags := -m32 $(rubyflags)
-    rubylink  := -m32 $(rubylink)
-  endif
 endif

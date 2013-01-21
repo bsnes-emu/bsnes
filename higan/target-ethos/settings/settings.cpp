@@ -5,7 +5,7 @@
 #include "hotkey.cpp"
 #include "timing.cpp"
 #include "server.cpp"
-#include "driver.cpp"
+#include "advanced.cpp"
 Settings *settings = nullptr;
 
 void SettingsLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
@@ -33,7 +33,7 @@ Settings::Settings() {
   panelList.append("Hotkeys");
   panelList.append("Timing");
   panelList.append("Server");
-  panelList.append("Driver");
+  panelList.append("Advanced");
 
   append(layout);
   layout.append(panelList, {120, ~0}, 5);
@@ -43,7 +43,7 @@ Settings::Settings() {
   append(*hotkeySettings);
   append(*timingSettings);
   append(*serverSettings);
-  append(*driverSettings);
+  append(*advancedSettings);
 
   onClose = [&] {
     timingSettings->analysis.stop = true;
@@ -63,7 +63,7 @@ void Settings::panelChanged() {
   hotkeySettings->setVisible(false);
   timingSettings->setVisible(false);
   serverSettings->setVisible(false);
-  driverSettings->setVisible(false);
+  advancedSettings->setVisible(false);
   if(panelList.selected() == false) return;
 
   switch(panelList.selection()) {
@@ -73,6 +73,6 @@ void Settings::panelChanged() {
   case 3: return hotkeySettings->setVisible();
   case 4: return timingSettings->setVisible();
   case 5: return serverSettings->setVisible();
-  case 6: return driverSettings->setVisible();
+  case 6: return advancedSettings->setVisible();
   }
 }

@@ -27,6 +27,11 @@ string& string::upper() { nall::strupper(data); return *this; }
 string& string::qlower() { nall::qstrlower(data); return *this; }
 string& string::qupper() { nall::qstrupper(data); return *this; }
 string& string::transform(const char *before, const char *after) { nall::strtr(data, before, after); return *this; }
+string& string::reverse() {
+  unsigned length = strlen(data), pivot = length >> 1;
+  for(signed x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(data[x], data[y]);
+  return *this;
+}
 
 template<unsigned limit> string& string::ltrim(const char *key) { nall::ltrim<limit>(data, key); return *this; }
 template<unsigned limit> string& string::rtrim(const char *key) { nall::rtrim<limit>(data, key); return *this; }

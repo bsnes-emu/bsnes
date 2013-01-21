@@ -11,9 +11,10 @@ string Cartridge::title() {
   return information.title;
 }
 
-void Cartridge::load(const string &manifest) {
-  information.markup = manifest;
-  auto document = Markup::Document(manifest);
+void Cartridge::load() {
+  interface->loadRequest(ID::Manifest, "manifest.bml");
+
+  auto document = Markup::Document(information.markup);
   information.title = document["information/title"].text();
 
   unsigned rom_size = 0;

@@ -33,11 +33,13 @@ string realpath(const string &name) {
   return result;
 }
 
+// /home/username/
+// c:/users/username/
 string userpath() {
   string result;
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
-  SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path);
+  SHGetFolderPathW(0, CSIDL_PROFILE | CSIDL_FLAG_CREATE, 0, 0, path);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #else
@@ -51,20 +53,30 @@ string userpath() {
   return result;
 }
 
+// /home/username/.config/
+// c:/users/username/appdata/roaming/
 string configpath() {
+  string result;
   #ifdef _WIN32
-  return userpath();
+  wchar_t path[PATH_MAX] = L"";
+  SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path);
+  result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
   #else
-  return {userpath(), ".config/"};
+  result = {userpath(), ".config/"};
   #endif
+  if(result.empty()) result = ".";
+  if(result.endswith("/") == false) result.append("/");
+  return result;
 }
 
 string temppath() {
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
   GetTempPathW(PATH_MAX, path);
-//path.transform("\\", "/");
-  return (const char*)utf8_t(path);
+  string result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  return result;
   #else
   return "/tmp/";
   #endif

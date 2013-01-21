@@ -24,6 +24,7 @@ unsigned Interface::group(unsigned id) {
   switch(id) {
   case ID::BIOS:
     return ID::System;
+  case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
   case ID::EEPROM:
@@ -34,8 +35,8 @@ unsigned Interface::group(unsigned id) {
   throw;
 }
 
-void Interface::load(unsigned id, const string &manifest) {
-  cartridge.load(manifest);
+void Interface::load(unsigned id) {
+  cartridge.load();
 }
 
 void Interface::save() {
@@ -44,10 +45,12 @@ void Interface::save() {
   }
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &manifest) {
+void Interface::load(unsigned id, const stream &stream) {
   if(id == ID::BIOS) {
     stream.read(bios.data, min(bios.size, stream.size()));
   }
+
+  if(id == ID::Manifest) cartridge.information.markup = stream.text();
 
   if(id == ID::ROM) {
     stream.read(cartridge.rom.data, min(cartridge.rom.size, stream.size()));

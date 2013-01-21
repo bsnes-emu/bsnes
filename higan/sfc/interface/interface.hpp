@@ -15,6 +15,7 @@ struct ID {
     //memory (files)
     IPLROM,
 
+    Manifest,
     ROM,
     RAM,
 
@@ -61,17 +62,24 @@ struct ID {
     OBC1RAM,
 
     SuperGameBoyBootROM,
-    SuperGameBoyROM,
-    SuperGameBoyRAM,
 
-    BsxFlashROM,
     BsxROM,
     BsxRAM,
     BsxPSRAM,
 
+    SuperGameBoyManifest,
+    SuperGameBoyROM,
+    SuperGameBoyRAM,
+
+    SatellaviewManifest,
+    SatellaviewROM,
+
+    SufamiTurboSlotAManifest,
     SufamiTurboSlotAROM,
-    SufamiTurboSlotBROM,
     SufamiTurboSlotARAM,
+
+    SufamiTurboSlotBManifest,
+    SufamiTurboSlotBROM,
     SufamiTurboSlotBRAM,
 
     //controller ports
@@ -88,9 +96,9 @@ struct Interface : Emulator::Interface {
   bool loaded();
   string sha256();
   unsigned group(unsigned id);
-  void load(unsigned id, const string &manifest);
+  void load(unsigned id);
   void save();
-  void load(unsigned id, const stream &stream, const string &markup = "");
+  void load(unsigned id, const stream &stream);
   void save(unsigned id, const stream &stream);
   void unload();
 

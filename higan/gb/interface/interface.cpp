@@ -38,6 +38,7 @@ unsigned Interface::group(unsigned id) {
   case ID::SuperGameBoyBootROM:
   case ID::GameBoyColorBootROM:
     return 0;
+  case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
     if(system.revision() == System::Revision::GameBoy) return ID::GameBoy;
@@ -49,10 +50,10 @@ unsigned Interface::group(unsigned id) {
   throw;
 }
 
-void Interface::load(unsigned id, const string &manifest) {
-  if(id == ID::GameBoy) cartridge.load(System::Revision::GameBoy, manifest);
-  if(id == ID::SuperGameBoy) cartridge.load(System::Revision::SuperGameBoy, manifest);
-  if(id == ID::GameBoyColor) cartridge.load(System::Revision::GameBoyColor, manifest);
+void Interface::load(unsigned id) {
+  if(id == ID::GameBoy) cartridge.load(System::Revision::GameBoy);
+  if(id == ID::SuperGameBoy) cartridge.load(System::Revision::SuperGameBoy);
+  if(id == ID::GameBoyColor) cartridge.load(System::Revision::GameBoyColor);
 }
 
 void Interface::save() {
@@ -61,7 +62,7 @@ void Interface::save() {
   }
 }
 
-void Interface::load(unsigned id, const stream &stream, const string &manifest) {
+void Interface::load(unsigned id, const stream &stream) {
   if(id == ID::GameBoyBootROM) {
     stream.read(system.bootROM.dmg, min( 256u, stream.size()));
   }
@@ -73,6 +74,8 @@ void Interface::load(unsigned id, const stream &stream, const string &manifest) 
   if(id == ID::GameBoyColorBootROM) {
     stream.read(system.bootROM.cgb, min(2048u, stream.size()));
   }
+
+  if(id == ID::Manifest) cartridge.information.markup = stream.text();
 
   if(id == ID::ROM) {
     stream.read(cartridge.romdata, min(cartridge.romsize, stream.size()));

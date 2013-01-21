@@ -1,6 +1,6 @@
 string Ananke::createBsxSatellaviewDatabase(vector<uint8_t> &buffer, Markup::Node &document, const string &manifest) {
   string pathname = {
-    userpath(), "Emulation/BS-X Satellaview/",
+    libraryPath, "BS-X Satellaview/",
     document["release/information/name"].text(),
     " (", document["release/information/region"].text(), ")",
     " (", document["release/information/revision"].text(), ")",
@@ -22,11 +22,12 @@ string Ananke::createBsxSatellaviewDatabase(vector<uint8_t> &buffer, Markup::Nod
 
 string Ananke::createBsxSatellaviewHeuristic(vector<uint8_t> &buffer) {
   string pathname = {
-    userpath(), "Emulation/BS-X Satellaview/",
+    libraryPath, "BS-X Satellaview/",
     nall::basename(information.name),
-    " (!).bs/"
+    ".bs/"
   };
   directory::create(pathname);
+  file::create({pathname, "unverified"});
 
   file::write({pathname, "manifest.bml"}, {
     "cartridge\n"

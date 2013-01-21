@@ -10,12 +10,10 @@ profile := accuracy
 target  := ethos
 
 # options += debugger
-# arch := win32
+# arch := x86
 # console := true
 
 # compiler
-c       := $(compiler) -std=gnu99
-cpp     := $(subst cc,++,$(compiler)) -std=gnu++0x
 flags   := -I. -O3 -fomit-frame-pointer
 link    := -s
 objects := libco
@@ -48,7 +46,7 @@ else ifeq ($(platform),win)
   link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -lws2_32
   link += -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else
-  unknown_platform: help;
+  $(error unsupported platform.)
 endif
 
 ui := target-$(target)

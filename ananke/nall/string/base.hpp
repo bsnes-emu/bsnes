@@ -23,6 +23,7 @@ namespace nall {
 
   struct string {
     inline static string read(const string &filename);
+
     inline static string date();
     inline static string time();
     inline static string datetime();

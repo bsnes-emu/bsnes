@@ -18,8 +18,12 @@ string Cartridge::title() {
   return information.title;
 }
 
-void Cartridge::load(System::Revision revision, const string &manifest) {
-  information.markup = manifest;
+void Cartridge::load(System::Revision revision) {
+  system.load(revision);
+  if(revision != System::Revision::SuperGameBoy) {
+    interface->loadRequest(ID::Manifest, "manifest.bml");
+  }
+
   information.mapper = Mapper::Unknown;
   information.ram = false;
   information.battery = false;
@@ -29,7 +33,7 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
   information.romsize = 0;
   information.ramsize = 0;
 
-  auto document = Markup::Document(manifest);
+  auto document = Markup::Document(information.markup);
   information.title = document["information/title"].text();
 
   auto mapperid = document["cartridge/board/type"].text();
@@ -53,8 +57,6 @@ void Cartridge::load(System::Revision revision, const string &manifest) {
 
   ramsize = numeral(ram["size"].data);
   ramdata = allocate<uint8>(ramsize, 0xff);
-
-  system.load(revision);
 
   //Super Game Boy core loads memory from Super Famicom core
   if(revision != System::Revision::SuperGameBoy) {
