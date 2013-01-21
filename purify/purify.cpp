@@ -42,7 +42,7 @@ Application::Application() {
   }
 
   setFrameGeometry({64, 64, 720, 480});
-  setTitle("purify v02.01");
+  setTitle("purify v03");
 
   layout.setMargin(5);
   pathLabel.setText("Path:");
@@ -181,8 +181,8 @@ void Application::purify() {
   OS::processEvents();
 
   PurifyContext purifyContext(purifyList);
-  std::thread purifyThread([&] { purifyContext.run(); });
-  while(purifyContext.position < purifyContext.size) {
+  nall::thread purifyThread([&] { purifyContext.run(); });
+  while(purifyThread.active()) {
     OS::processEvents();
     unsigned position = ((unsigned)(double)purifyContext.position / (double)purifyContext.size * 100.0 + 0.5);
     progressBar.setPosition(position);

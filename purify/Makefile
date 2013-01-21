@@ -22,7 +22,7 @@ obj/purify.o: purify.cpp
 
 build: $(objects)
 ifeq ($(platform),x)
-	$(cpp) $(link) -o purify $(objects) $(phoenixlink)
+	$(cpp) -pthread $(link) -o purify $(objects) $(phoenixlink)
 else ifeq ($(platform),win)
 	windres phoenix/windows/phoenix.rc obj/phoenix-resource.o
 	$(cpp) -shared -o phoenix.dll obj/phoenix.o $(phoenixlink)

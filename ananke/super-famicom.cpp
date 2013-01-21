@@ -139,6 +139,8 @@ string Ananke::openSuperFamicom(vector<uint8_t> &buffer) {
 }
 
 string Ananke::syncSuperFamicom(const string &pathname) {
+  if(file::exists({pathname, "msu1.rom"})) return "";  //cannot update MSU1 games
+
   vector<uint8_t> buffer;
 
   auto append = [&](string filename) {
