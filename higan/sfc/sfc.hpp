@@ -12,7 +12,7 @@
 namespace SuperFamicom {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const unsigned SerializerVersion = 25;
+    static const unsigned SerializerVersion = 26;
   }
 }
 
@@ -65,6 +65,7 @@ namespace SuperFamicom {
 
   #include <sfc/controller/controller.hpp>
   #include <sfc/system/system.hpp>
+  #include <sfc/base/base.hpp>
   #include <sfc/chip/chip.hpp>
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>

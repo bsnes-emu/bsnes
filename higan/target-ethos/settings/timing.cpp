@@ -81,7 +81,7 @@ void TimingSettings::analyzeStart() {
   settings->panelList.setEnabled(false);
   videoAdjust.analyze.setEnabled(false);
   audioAdjust.analyze.setEnabled(false);
-  settings->setStatusText("Initiailizing ...");
+  settings->setStatusText("Initializing ...");
   OS::processEvents();
 
   analysis.stop = false;

@@ -100,8 +100,8 @@ private:
   void parse_markup_cartridge(Markup::Node);
   void parse_markup_icd2(Markup::Node);
   void parse_markup_bsx(Markup::Node);
-  void parse_markup_bsxslot(Markup::Node);
-  void parse_markup_sufamiturbo(Markup::Node);
+  void parse_markup_satellaview(Markup::Node);
+  void parse_markup_sufamiturbo(Markup::Node, bool slot);
   void parse_markup_nss(Markup::Node);
   void parse_markup_event(Markup::Node);
   void parse_markup_sa1(Markup::Node);

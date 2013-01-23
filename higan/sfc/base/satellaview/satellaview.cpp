@@ -1,26 +1,37 @@
-#ifdef BSX_CPP
+#include <sfc/sfc.hpp>
 
-BSXSatellaview bsxsatellaview;
+#define SATELLAVIEW_BASE_UNIT_CPP
+namespace SuperFamicom {
 
-void BSXSatellaview::init() {
+SatellaviewBaseUnit satellaviewbaseunit;
+
+void SatellaviewBaseUnit::init() {
 }
 
-void BSXSatellaview::load() {
-  bus.map({&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview}, 0x00, 0x3f, 0x2188, 0x219f);
-  bus.map({&BSXSatellaview::mmio_read, &bsxsatellaview}, {&BSXSatellaview::mmio_write, &bsxsatellaview}, 0x80, 0xbf, 0x2188, 0x219f);
+void SatellaviewBaseUnit::load() {
+  bus.map(
+    {&SatellaviewBaseUnit::read, &satellaviewbaseunit},
+    {&SatellaviewBaseUnit::write, &satellaviewbaseunit},
+    0x00, 0x3f, 0x2188, 0x219f
+  );
+  bus.map(
+    {&SatellaviewBaseUnit::read, &satellaviewbaseunit},
+    {&SatellaviewBaseUnit::write, &satellaviewbaseunit},
+    0x80, 0xbf, 0x2188, 0x219f
+  );
 }
 
-void BSXSatellaview::unload() {
+void SatellaviewBaseUnit::unload() {
 }
 
-void BSXSatellaview::power() {
+void SatellaviewBaseUnit::power() {
 }
 
-void BSXSatellaview::reset() {
+void SatellaviewBaseUnit::reset() {
   memset(&regs, 0x00, sizeof regs);
 }
 
-uint8 BSXSatellaview::mmio_read(unsigned addr) {
+uint8 SatellaviewBaseUnit::read(unsigned addr) {
   addr &= 0xffff;
 
   switch(addr) {
@@ -78,7 +89,7 @@ uint8 BSXSatellaview::mmio_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void BSXSatellaview::mmio_write(unsigned addr, uint8 data) {
+void SatellaviewBaseUnit::write(unsigned addr, uint8 data) {
   addr &= 0xffff;
 
   switch(addr) {
@@ -139,4 +150,4 @@ void BSXSatellaview::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-#endif
+}

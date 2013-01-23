@@ -5,7 +5,7 @@ Configuration config;
 Configuration::Configuration() {
   controller_port1 = Input::Device::Joypad;
   controller_port2 = Input::Device::Joypad;
-  expansion_port   = System::ExpansionPortDevice::BSX;
+  expansion_port   = System::ExpansionPortDevice::Satellaview;
   region           = System::Region::Autodetect;
   random           = true;
 

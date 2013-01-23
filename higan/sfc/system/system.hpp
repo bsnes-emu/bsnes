@@ -2,7 +2,7 @@ struct Interface;
 
 struct System : property<System> {
   enum class Region : unsigned { NTSC = 0, PAL = 1, Autodetect = 2 };
-  enum class ExpansionPortDevice : unsigned { None = 0, BSX = 1 };
+  enum class ExpansionPortDevice : unsigned { None = 0, Satellaview = 1 };
 
   void run();
   void runtosave();

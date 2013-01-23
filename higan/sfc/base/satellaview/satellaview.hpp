@@ -1,12 +1,12 @@
-struct BSXSatellaview {
+struct SatellaviewBaseUnit : Memory {
   void init();
   void load();
   void unload();
   void power();
   void reset();
 
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
+  uint8 read(unsigned addr);
+  void write(unsigned addr, uint8 data);
 
 private:
   struct {
@@ -22,4 +22,4 @@ private:
   } regs;
 };
 
-extern BSXSatellaview bsxsatellaview;
+extern SatellaviewBaseUnit satellaviewbaseunit;

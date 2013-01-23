@@ -11,8 +11,9 @@ void Cartridge::parse_markup(const char *markup) {
   parse_markup_cartridge(cartridge);
   parse_markup_icd2(cartridge["icd2"]);
   parse_markup_bsx(cartridge["bsx"]);
-  parse_markup_bsxslot(cartridge["bsxslot"]);
-  parse_markup_sufamiturbo(cartridge["sufamiturbo"]);
+  parse_markup_satellaview(cartridge["satellaview"]);
+  parse_markup_sufamiturbo(cartridge["sufamiturbo[0]"], 0);
+  parse_markup_sufamiturbo(cartridge["sufamiturbo[1]"], 1);
   parse_markup_nss(cartridge["nss"]);
   parse_markup_event(cartridge["event"]);
   parse_markup_sa1(cartridge["sa1"]);
@@ -125,15 +126,13 @@ void Cartridge::parse_markup_bsx(Markup::Node root) {
   }
 }
 
-void Cartridge::parse_markup_bsxslot(Markup::Node root) {
+void Cartridge::parse_markup_satellaview(Markup::Node root) {
   if(root.exists() == false) return;
   has_bs_slot = true;
 
   interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs");
 
-  for(auto &node : root) {
-    if(node.name != "map") continue;
-
+  for(auto &node : root.find("map")) {
     if(node["id"].data == "rom") {
       if(satellaviewcartridge.memory.size() == 0) continue;
 
@@ -144,39 +143,34 @@ void Cartridge::parse_markup_bsxslot(Markup::Node root) {
   }
 }
 
-void Cartridge::parse_markup_sufamiturbo(Markup::Node root) {
+void Cartridge::parse_markup_sufamiturbo(Markup::Node root, bool slot) {
   if(root.exists() == false) return;
   has_st_slots = true;
 
-  //load required slot A (will request slot B if slot A cartridge is linkable)
-  interface->loadRequest(ID::SufamiTurboSlotA, "Sufami Turbo - Slot A", "st");
+  if(slot == 0) {
+    //load required slot A (will request slot B if slot A cartridge is linkable)
+    interface->loadRequest(ID::SufamiTurboSlotA, "Sufami Turbo - Slot A", "st");
+  }
 
-  for(auto &slot : root) {
-    if(slot.name != "slot") continue;
-    bool slotid = slot["id"].data == "A" ? 0 : slot["id"].data == "B" ? 1 : 0;
+  for(auto &node : root.find("map")) {
+    SufamiTurboCartridge &cart = (slot == 0 ? sufamiturboA : sufamiturboB);
 
-    for(auto &node : slot) {
-      if(node.name != "map") continue;
+    if(node["id"].data == "rom") {
+      if(cart.rom.size() == 0) continue;
 
-      if(node["id"].data == "rom") {
-        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturboA.rom : sufamiturboB.rom;
-        if(memory.size() == 0) continue;
+      Mapping m(cart.rom);
+      parse_markup_map(m, node);
+      if(m.size == 0) m.size = cart.rom.size();
+      if(m.size) mapping.append(m);
+    }
 
-        Mapping m(memory);
-        parse_markup_map(m, node);
-        if(m.size == 0) m.size = memory.size();
-        if(m.size) mapping.append(m);
-      }
+    if(node["id"].data == "ram") {
+      if(cart.ram.size() == 0) continue;
 
-      if(node["id"].data == "ram") {
-        SuperFamicom::Memory &memory = slotid == 0 ? sufamiturboA.ram : sufamiturboB.ram;
-        if(memory.size() == 0) continue;
-
-        Mapping m(memory);
-        parse_markup_map(m, node);
-        if(m.size == 0) m.size = memory.size();
-        if(m.size) mapping.append(m);
-      }
+      Mapping m(cart.ram);
+      parse_markup_map(m, node);
+      if(m.size == 0) m.size = cart.ram.size();
+      if(m.size) mapping.append(m);
     }
   }
 }
