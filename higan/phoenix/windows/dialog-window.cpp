@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static string FileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
   string dir = path;
   dir.replace("/", "\\");
@@ -95,4 +97,6 @@ string pDialogWindow::folderSelect(Window &parent, const string &path) {
   name.transform("\\", "/");
   if(name.endswith("/") == false) name.append("/");
   return name;
+}
+
 }

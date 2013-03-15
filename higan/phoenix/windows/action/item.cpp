@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pItem::setImage(const image &image) {
   createBitmap();
   if(parentWindow) parentWindow->p.updateMenu();
@@ -26,4 +28,6 @@ void pItem::createBitmap() {
     nallImage.scale(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), Interpolation::Linear);
     hbitmap = CreateBitmap(nallImage);
   }
+}
+
 }

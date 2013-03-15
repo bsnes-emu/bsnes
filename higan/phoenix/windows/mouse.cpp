@@ -1,7 +1,9 @@
+namespace phoenix {
+
 Position pMouse::position() {
-  POINT point = { 0 };
+  POINT point = {0};
   GetCursorPos(&point);
-  return { point.x, point.y };
+  return {point.x, point.y};
 }
 
 bool pMouse::pressed(Mouse::Button button) {
@@ -11,4 +13,6 @@ bool pMouse::pressed(Mouse::Button button) {
   case Mouse::Button::Right: return GetAsyncKeyState(VK_RBUTTON) & 0x8000;
   }
   return false;
+}
+
 }

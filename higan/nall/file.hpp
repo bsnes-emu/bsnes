@@ -264,6 +264,10 @@ namespace nall {
       return fp;
     }
 
+    explicit operator bool() const {
+      return open();
+    }
+
     bool open(const string &filename, mode mode_) {
       if(fp) return false;
 
@@ -293,17 +297,14 @@ namespace nall {
       if(!fp) return;
       buffer_flush();
       fclose(fp);
-      fp = 0;
+      fp = nullptr;
     }
 
     file() {
-      memset(buffer, 0, sizeof buffer);
-      buffer_offset = -1;  //invalidate buffer
-      buffer_dirty = false;
-      fp = 0;
-      file_offset = 0;
-      file_size = 0;
-      file_mode = mode::read;
+    }
+
+    file(const string &filename, mode mode_) {
+      open(filename, mode_);
     }
 
     ~file() {
@@ -315,13 +316,13 @@ namespace nall {
 
   private:
     enum { buffer_size = 1 << 12, buffer_mask = buffer_size - 1 };
-    char buffer[buffer_size];
-    int buffer_offset;
-    bool buffer_dirty;
-    FILE *fp;
-    unsigned file_offset;
-    unsigned file_size;
-    mode file_mode;
+    char buffer[buffer_size] = {0};
+    int buffer_offset = -1;  //invalidate buffer
+    bool buffer_dirty = false;
+    FILE *fp = nullptr;
+    unsigned file_offset = 0;
+    unsigned file_size = 0;
+    mode file_mode = mode::read;
 
     void buffer_sync() {
       if(!fp) return;  //file not open

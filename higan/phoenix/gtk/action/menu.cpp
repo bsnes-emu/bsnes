@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pMenu::append(Action &action) {
   action.state.window = this->action.state.window;
 
@@ -10,7 +12,7 @@ void pMenu::append(Action &action) {
 
 void pMenu::remove(Action &action) {
   action.p.orphan();
-  action.state.window = 0;
+  action.state.window = nullptr;
 }
 
 void pMenu::setImage(const image &image) {
@@ -48,4 +50,6 @@ void pMenu::orphan() {
 void pMenu::setFont(const string &font) {
   pAction::setFont(font);
   for(auto &item : menu.state.action) item.p.setFont(font);
+}
+
 }

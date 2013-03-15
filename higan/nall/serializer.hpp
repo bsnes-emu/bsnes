@@ -86,7 +86,7 @@ namespace nall {
       return *this;
     }
 
-    serializer(const serializer &s) : idata(0) {
+    serializer(const serializer &s) : idata(nullptr) {
       operator=(s);
     }
 
@@ -99,7 +99,7 @@ namespace nall {
       isize = s.isize;
       icapacity = s.icapacity;
 
-      s.idata = 0;
+      s.idata = nullptr;
       return *this;
     }
 
@@ -110,7 +110,7 @@ namespace nall {
     //construction
     serializer() {
       imode = Size;
-      idata = 0;
+      idata = nullptr;
       isize = 0;
       icapacity = 0;
     }

@@ -7,9 +7,9 @@ VideoSlider::VideoSlider() {
 }
 
 VideoSettings::VideoSettings() {
-  title.setFont(application->titleFont);
+  title.setFont(program->titleFont);
   title.setText("Video Settings");
-  colorAdjustment.setFont(application->boldFont);
+  colorAdjustment.setFont(program->boldFont);
   colorAdjustment.setText("Color adjustment:");
   saturation.name.setText("Saturation:");
   saturation.slider.setLength(201);
@@ -17,7 +17,7 @@ VideoSettings::VideoSettings() {
   gamma.slider.setLength(101);
   luminance.name.setText("Luminance:");
   luminance.slider.setLength(101);
-  overscanAdjustment.setFont(application->boldFont);
+  overscanAdjustment.setFont(program->boldFont);
   overscanAdjustment.setText("Overscan mask:");
   overscanHorizontal.name.setText("Horizontal:");
   overscanHorizontal.slider.setLength(17);
@@ -59,5 +59,5 @@ void VideoSettings::synchronize() {
   overscanHorizontal.value.setText({config->video.maskOverscanHorizontal, "px"});
   overscanVertical.value.setText({config->video.maskOverscanVertical, "px"});
 
-  if(application->active) system().paletteUpdate();
+  if(program->active) system().paletteUpdate();
 }

@@ -55,6 +55,10 @@ string& string::append_(const char *s) {
   return *this;
 }
 
+string::operator bool() const {
+  return !empty();
+}
+
 string::operator const char*() const {
   return data;
 }

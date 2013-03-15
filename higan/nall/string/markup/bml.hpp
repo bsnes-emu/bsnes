@@ -80,7 +80,7 @@ protected:
     parseName(p);
     parseData(p);
     parseAttributes(p);
-    if(*p++ != '\n') throw "Missing line feed";
+    if(*p && *p++ != '\n') throw "Missing line feed";
 
     while(*p) {
       if(*p == '\n') { p++; continue; }

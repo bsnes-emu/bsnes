@@ -1,3 +1,5 @@
+namespace phoenix {
+
 bool pCheckItem::checked() {
   return checkItem.state.checked;
 }
@@ -15,4 +17,6 @@ void pCheckItem::constructor() {
 
 void pCheckItem::destructor() {
   if(parentMenu) parentMenu->remove(checkItem);
+}
+
 }

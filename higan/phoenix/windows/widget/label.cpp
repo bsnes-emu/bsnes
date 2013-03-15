@@ -1,6 +1,8 @@
-Geometry pLabel::minimumGeometry() {
-  Geometry geometry = pFont::geometry(hfont, label.state.text);
-  return { 0, 0, geometry.width, geometry.height };
+namespace phoenix {
+
+Size pLabel::minimumSize() {
+  Size size = pFont::size(hfont, label.state.text);
+  return {size.width, size.height};
 }
 
 void pLabel::setText(const string &text) {
@@ -61,4 +63,6 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
   }
 
   return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
 }

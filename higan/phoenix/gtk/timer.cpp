@@ -1,7 +1,9 @@
+namespace phoenix {
+
 static guint Timer_trigger(pTimer *self) {
   //timer may have been disabled prior to triggering, so check state
   if(self->timer.state.enabled) {
-    if(self->timer.onTimeout) self->timer.onTimeout();
+    if(self->timer.onActivate) self->timer.onActivate();
   }
   //callback may have disabled timer, so check state again
   if(self->timer.state.enabled) {
@@ -21,4 +23,6 @@ void pTimer::setInterval(unsigned milliseconds) {
 }
 
 void pTimer::constructor() {
+}
+
 }

@@ -1,5 +1,7 @@
-Geometry pVerticalSlider::minimumGeometry() {
-  return { 0, 0, 0, 25 };
+namespace phoenix {
+
+Size pVerticalSlider::minimumSize() {
+  return {0, 25};
 }
 
 unsigned pVerticalSlider::position() {
@@ -36,4 +38,6 @@ void pVerticalSlider::destructor() {
 void pVerticalSlider::orphan() {
   destructor();
   constructor();
+}
+
 }

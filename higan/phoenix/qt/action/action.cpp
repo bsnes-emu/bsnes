@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pAction::setEnabled(bool enabled) {
   if(dynamic_cast<Menu*>(&action)) {
     ((Menu&)action).p.qtMenu->setEnabled(enabled);
@@ -46,4 +48,6 @@ void pAction::constructor() {
 }
 
 void pAction::destructor() {
+}
+
 }

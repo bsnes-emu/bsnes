@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pItem::setImage(const image &image) {
   qtAction->setIcon(CreateIcon(image));
 }
@@ -18,4 +20,6 @@ void pItem::destructor() {
 
 void pItem::onActivate() {
   if(item.onActivate) item.onActivate();
+}
+
 }

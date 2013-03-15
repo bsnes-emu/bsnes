@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static void RadioItem_activate(RadioItem *self) {
   for(auto &item : self->state.group) item.state.checked = (&item == self);
   if(self->p.locked == false && self->checked() && self->onActivate) self->onActivate();
@@ -45,4 +47,6 @@ void pRadioItem::destructor() {
 void pRadioItem::orphan() {
   destructor();
   constructor();
+}
+
 }

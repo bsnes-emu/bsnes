@@ -1,6 +1,6 @@
 void HorizontalLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
   for(auto &child : children) if(child.sizable == &sizable) return;
-  children.append({ &sizable, size.width, size.height, spacing });
+  children.append({&sizable, size.width, size.height, spacing});
   synchronizeLayout();
   if(window()) window()->synchronizeLayout();
 }
@@ -16,13 +16,13 @@ bool HorizontalLayout::enabled() {
   return state.enabled;
 }
 
-Geometry HorizontalLayout::minimumGeometry() {
+Size HorizontalLayout::minimumSize() {
   unsigned width = 0, height = 0;
 
   for(auto &child : children) {
     width += child.spacing;
     if(child.width == MinimumSize || child.width == MaximumSize) {
-      width += child.sizable->minimumGeometry().width;
+      width += child.sizable->minimumSize().width;
       continue;
     }
     width += child.width;
@@ -30,13 +30,13 @@ Geometry HorizontalLayout::minimumGeometry() {
 
   for(auto &child : children) {
     if(child.height == MinimumSize || child.height == MaximumSize) {
-      height = max(height, child.sizable->minimumGeometry().height);
+      height = max(height, child.sizable->minimumSize().height);
       continue;
     }
     height = max(height, child.height);
   }
 
-  return { 0, 0, state.margin * 2 + width, state.margin * 2 + height };
+  return {state.margin * 2 + width, state.margin * 2 + height};
 }
 
 void HorizontalLayout::remove(Sizable &sizable) {
@@ -75,8 +75,8 @@ void HorizontalLayout::setEnabled(bool enabled) {
 void HorizontalLayout::setGeometry(const Geometry &containerGeometry) {
   auto children = this->children;
   for(auto &child : children) {
-    if(child.width  == MinimumSize) child.width  = child.sizable->minimumGeometry().width;
-    if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
+    if(child.width  == MinimumSize) child.width  = child.sizable->minimumSize().width;
+    if(child.height == MinimumSize) child.height = child.sizable->minimumSize().height;
   }
 
   Geometry geometry = containerGeometry;
@@ -102,7 +102,7 @@ void HorizontalLayout::setGeometry(const Geometry &containerGeometry) {
 
   for(auto &child : children) {
     unsigned pivot = (maximumHeight - child.height) * state.alignment;
-    Geometry childGeometry = { geometry.x, geometry.y + pivot, child.width, child.height };
+    Geometry childGeometry = {geometry.x, geometry.y + pivot, child.width, child.height};
     child.sizable->setGeometry(childGeometry);
 
     geometry.x += child.width + child.spacing;

@@ -1,3 +1,5 @@
+namespace phoenix {
+
 vector<pWindow*> pWindow::modal;
 
 void pWindow::updateModality() {
@@ -32,9 +34,10 @@ void pWindow::append(Menu &menu) {
 void pWindow::append(Widget &widget) {
   widget.p.parentWindow = &window;
   widget.p.orphan();
-  if(widget.state.font != "") widget.p.setFont(widget.state.font);
-  else if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
-  else widget.p.setFont("Tahoma, 8");
+
+  if(widget.font().empty() && !window.state.widgetFont.empty()) {
+    widget.setFont(window.state.widgetFont);
+  }
 }
 
 Color pWindow::backgroundColor() {
@@ -146,12 +149,16 @@ void pWindow::setMenuVisible(bool visible) {
 }
 
 void pWindow::setModal(bool modality) {
-  if(modality == false) {
-    if(auto position = modal.find(this)) modal.remove(position());
-  } else {
+  if(modality == true) {
     modal.appendonce(this);
+    updateModality();
+    while(window.state.modal) {
+      Application::processEvents();
+      usleep(20 * 1000);
+    }
+    if(auto position = modal.find(this)) modal.remove(position());
+    updateModality();
   }
-  updateModality();
 }
 
 void pWindow::setResizable(bool resizable) {
@@ -186,9 +193,6 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  for(auto &widget : window.state.widget) {
-    if(widget.state.font == "") widget.setFont(font);
-  }
 }
 
 void pWindow::constructor() {
@@ -226,4 +230,6 @@ void pWindow::updateMenu() {
   }
 
   SetMenu(hwnd, window.state.menuVisible ? hmenu : 0);
+}
+
 }

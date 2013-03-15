@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pKeyboard::initialize() {
   auto append = [](Keyboard::Scancode scancode, unsigned keysym) {
     settings->keymap.insert(scancode, keysym);
@@ -134,4 +136,6 @@ vector<bool> pKeyboard::state() {
   }
 
   return output;
+}
+
 }

@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   Object *object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -89,4 +91,6 @@ void pCanvas::paint() {
   BeginPaint(hwnd, &ps);
   SetDIBitsToDevice(ps.hdc, 0, 0, width, height, 0, 0, 0, height, (void*)data, &bmi, DIB_RGB_COLORS);
   EndPaint(hwnd, &ps);
+}
+
 }

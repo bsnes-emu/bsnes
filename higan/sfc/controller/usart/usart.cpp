@@ -131,7 +131,7 @@ USART::USART(bool port) : Controller(port) {
 }
 
 USART::~USART() {
-  if(opened()) close();
+  if(open()) close();
 }
 
 #endif

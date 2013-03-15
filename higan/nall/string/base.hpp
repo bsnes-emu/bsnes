@@ -22,6 +22,7 @@ namespace nall {
   };
 
   struct string {
+    //deprecated: use string text = file::read(filename);
     inline static string read(const string &filename);
 
     inline static string date();
@@ -71,7 +72,7 @@ namespace nall {
 
     template<unsigned limit = 0> inline string& ltrim(const char *key = " ");
     template<unsigned limit = 0> inline string& rtrim(const char *key = " ");
-    template<unsigned limit = 0> inline string& trim(const char *key = " ", const char *rkey = 0);
+    template<unsigned limit = 0> inline string& trim(const char *key = " ", const char *rkey = nullptr);
     inline string& strip();
 
     inline optional<unsigned> position(const char *key) const;
@@ -79,6 +80,7 @@ namespace nall {
     inline optional<unsigned> qposition(const char *key) const;
     inline optional<unsigned> iqposition(const char *key) const;
 
+    inline explicit operator bool() const;
     inline operator const char*() const;
     inline char* operator()();
     inline char& operator[](int);
@@ -197,7 +199,7 @@ namespace nall {
   //trim.hpp
   template<unsigned limit = 0> inline char* ltrim(char *str, const char *key = " ");
   template<unsigned limit = 0> inline char* rtrim(char *str, const char *key = " ");
-  template<unsigned limit = 0> inline char* trim(char *str, const char *key = " ", const char *rkey = 0);
+  template<unsigned limit = 0> inline char* trim(char *str, const char *key = " ", const char *rkey = nullptr);
   inline char* strip(char *s);
 
   //utility.hpp

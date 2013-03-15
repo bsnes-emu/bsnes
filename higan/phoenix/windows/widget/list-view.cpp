@@ -1,3 +1,5 @@
+namespace phoenix {
+
 unsigned ListView_GetColumnCount(HWND hwnd) {
   unsigned count = 0;
   LVCOLUMN column;
@@ -240,4 +242,6 @@ void pListView::buildImageList() {
       ListView_SetImage(hwnd, imageList, y, x, imageMap(y)(x));
     }
   }
+}
+
 }

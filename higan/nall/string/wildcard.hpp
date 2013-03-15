@@ -3,7 +3,7 @@
 namespace nall {
 
 bool wildcard(const char *s, const char *p) {
-  const char *cp = 0, *mp = 0;
+  const char *cp = nullptr, *mp = nullptr;
   while(*s && *p != '*') {
     if(*p != '?' && *s != *p) return false;
     p++, s++;
@@ -23,7 +23,7 @@ bool wildcard(const char *s, const char *p) {
 }
 
 bool iwildcard(const char *s, const char *p) {
-  const char *cp = 0, *mp = 0;
+  const char *cp = nullptr, *mp = nullptr;
   while(*s && *p != '*') {
     if(*p != '?' && chrlower(*s) != chrlower(*p)) return false;
     p++, s++;

@@ -2,7 +2,7 @@ struct HorizontalLayout : public Layout {
   void append(Sizable &sizable, const Size &size, unsigned spacing = 0);
   void append(Sizable &sizable);
   bool enabled();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void remove(Sizable &sizable);
   void reset();
   void setAlignment(double alignment);

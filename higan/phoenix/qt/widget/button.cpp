@@ -1,17 +1,19 @@
-Geometry pButton::minimumGeometry() {
-  Geometry geometry = pFont::geometry(qtWidget->font(), button.state.text);
+namespace phoenix {
+
+Size pButton::minimumSize() {
+  Size size = pFont::size(qtWidget->font(), button.state.text);
 
   if(button.state.orientation == Orientation::Horizontal) {
-    geometry.width += button.state.image.width;
-    geometry.height = max(button.state.image.height, geometry.height);
+    size.width += button.state.image.width;
+    size.height = max(button.state.image.height, size.height);
   }
 
   if(button.state.orientation == Orientation::Vertical) {
-    geometry.width = max(button.state.image.width, geometry.width);
-    geometry.height += button.state.image.height;
+    size.width = max(button.state.image.width, size.width);
+    size.height += button.state.image.height;
   }
 
-  return { 0, 0, geometry.width + 20, geometry.height + 12 };
+  return {size.width + 20, size.height + 12};
 }
 
 void pButton::setImage(const image &image, Orientation orientation) {
@@ -49,4 +51,6 @@ void pButton::orphan() {
 
 void pButton::onActivate() {
   if(button.onActivate) button.onActivate();
+}
+
 }

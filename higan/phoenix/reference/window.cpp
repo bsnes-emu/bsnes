@@ -1,3 +1,5 @@
+namespace phoenix {
+
 Window& pWindow::none() {
   static Window *window = nullptr;
   if(window == nullptr) window = new Window;
@@ -81,4 +83,6 @@ void pWindow::setWidgetFont(const string &font) {
 }
 
 void pWindow::constructor() {
+}
+
 }

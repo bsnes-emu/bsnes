@@ -27,10 +27,10 @@ struct compositor {
 
 bool compositor::enabled_metacity() {
   FILE *fp = popen("gconftool-2 --get /apps/metacity/general/compositing_manager", "r");
-  if(fp == 0) return false;
+  if(!fp) return false;
 
   char buffer[512];
-  if(fgets(buffer, sizeof buffer, fp) == 0) return false;
+  if(!fgets(buffer, sizeof buffer, fp)) return false;
 
   if(!memcmp(buffer, "true", 4)) return true;
   return false;
@@ -43,7 +43,7 @@ bool compositor::enable_metacity(bool status) {
   } else {
     fp = popen("gconftool-2 --set --type bool /apps/metacity/general/compositing_manager false", "r");
   }
-  if(fp == 0) return false;
+  if(!fp) return false;
   pclose(fp);
   return true;
 }
@@ -52,10 +52,10 @@ bool compositor::enable_metacity(bool status) {
 
 bool compositor::enabled_xfwm4() {
   FILE *fp = popen("xfconf-query -c xfwm4 -p '/general/use_compositing'", "r");
-  if(fp == 0) return false;
+  if(!fp) return false;
 
   char buffer[512];
-  if(fgets(buffer, sizeof buffer, fp) == 0) return false;
+  if(!fgets(buffer, sizeof buffer, fp)) return false;
 
   if(!memcmp(buffer, "true", 4)) return true;
   return false;
@@ -68,7 +68,7 @@ bool compositor::enable_xfwm4(bool status) {
   } else {
     fp = popen("xfconf-query -c xfwm4 -p '/general/use_compositing' -t 'bool' -s 'false'", "r");
   }
-  if(fp == 0) return false;
+  if(!fp) return false;
   pclose(fp);
   return true;
 }
@@ -112,11 +112,11 @@ bool compositor::enable(bool status) {
 
 bool compositor::enabled() {
   HMODULE module = GetModuleHandleW(L"dwmapi");
-  if(module == 0) module = LoadLibraryW(L"dwmapi");
-  if(module == 0) return false;
+  if(module == nullptr) module = LoadLibraryW(L"dwmapi");
+  if(module == nullptr) return false;
 
   auto pDwmIsCompositionEnabled = (HRESULT (WINAPI*)(BOOL*))GetProcAddress(module, "DwmIsCompositionEnabled");
-  if(pDwmIsCompositionEnabled == 0) return false;
+  if(pDwmIsCompositionEnabled == nullptr) return false;
 
   BOOL result;
   if(pDwmIsCompositionEnabled(&result) != S_OK) return false;
@@ -125,11 +125,11 @@ bool compositor::enabled() {
 
 bool compositor::enable(bool status) {
   HMODULE module = GetModuleHandleW(L"dwmapi");
-  if(module == 0) module = LoadLibraryW(L"dwmapi");
-  if(module == 0) return false;
+  if(module == nullptr) module = LoadLibraryW(L"dwmapi");
+  if(module == nullptr) return false;
 
   auto pDwmEnableComposition = (HRESULT (WINAPI*)(UINT))GetProcAddress(module, "DwmEnableComposition");
-  if(pDwmEnableComposition == 0) return false;
+  if(pDwmEnableComposition == nullptr) return false;
 
   if(pDwmEnableComposition(status) != S_OK) return false;
   return true;

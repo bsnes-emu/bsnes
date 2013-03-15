@@ -1,9 +1,11 @@
+namespace phoenix {
+
 bool pWidget::focused() {
   return qtWidget->hasFocus();
 }
 
-Geometry pWidget::minimumGeometry() {
-  return {0, 0, 0, 0};
+Size pWidget::minimumSize() {
+  return {0, 0};
 }
 
 void pWidget::setEnabled(bool enabled) {
@@ -53,4 +55,6 @@ void pWidget::destructor() {
 void pWidget::orphan() {
   destructor();
   constructor();
+}
+
 }

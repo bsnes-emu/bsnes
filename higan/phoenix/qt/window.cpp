@@ -1,3 +1,5 @@
+namespace phoenix {
+
 Window& pWindow::none() {
   static Window *window = nullptr;
   if(window == nullptr) window = new Window;
@@ -17,10 +19,10 @@ void pWindow::append(Menu &menu) {
 }
 
 void pWindow::append(Widget &widget) {
-  if(widget.state.font == "") {
-    if(window.state.widgetFont != "") widget.p.setFont(window.state.widgetFont);
-    else widget.p.setFont("Sans, 8");
+  if(widget.font().empty() && !window.state.widgetFont.empty()) {
+    widget.setFont(window.state.widgetFont);
   }
+  if(widget.font().empty()) widget.p.setFont("Sans, 8");
   widget.p.qtWidget->setParent(qtContainer);
   widget.setVisible(widget.visible());
 }
@@ -28,7 +30,7 @@ void pWindow::append(Widget &widget) {
 Color pWindow::backgroundColor() {
   if(window.state.backgroundColorOverride) return window.state.backgroundColor;
   QColor color = qtWindow->palette().color(QPalette::ColorRole::Window);
-  return { (uint8_t)color.red(), (uint8_t)color.green(), (uint8_t)color.blue(), (uint8_t)color.alpha() };
+  return {(uint8_t)color.red(), (uint8_t)color.green(), (uint8_t)color.blue(), (uint8_t)color.alpha()};
 }
 
 Geometry pWindow::frameMargin() {
@@ -66,7 +68,7 @@ void pWindow::remove(Menu &menu) {
 }
 
 void pWindow::remove(Widget &widget) {
-  //bugfix: orphan() destroys and recreates widgets (to disassociate them from their parent);
+  //orphan() destroys and recreates widgets (to disassociate them from their parent);
   //attempting to create widget again after QApplication::quit() crashes libQtGui
   if(qtApplication) widget.p.orphan();
 }
@@ -98,7 +100,7 @@ void pWindow::setFullScreen(bool fullScreen) {
 
 void pWindow::setGeometry(const Geometry &geometry_) {
   locked = true;
-  OS::processEvents();
+  Application::processEvents();
   QApplication::syncX();
   Geometry geometry = geometry_, margin = frameMargin();
 
@@ -106,8 +108,11 @@ void pWindow::setGeometry(const Geometry &geometry_) {
   qtWindow->move(geometry.x - frameMargin().x, geometry.y - frameMargin().y);
   //qtWindow->adjustSize() fails if larger than 2/3rds screen size
   qtWindow->resize(qtWindow->sizeHint());
-  qtWindow->setMinimumSize(1, 1);
-  qtContainer->setMinimumSize(1, 1);
+  if(window.state.resizable) {
+    //required to allow shrinking window from default size
+    qtWindow->setMinimumSize(1, 1);
+    qtContainer->setMinimumSize(1, 1);
+  }
 
   for(auto &layout : window.state.layout) {
     geometry = geometry_;
@@ -128,7 +133,17 @@ void pWindow::setMenuVisible(bool visible) {
 }
 
 void pWindow::setModal(bool modal) {
-  qtWindow->setWindowModality(modal ? Qt::ApplicationModal : Qt::NonModal);
+  if(modal == true) {
+    //windowModality can only be enabled while window is invisible
+    setVisible(false);
+    qtWindow->setWindowModality(Qt::ApplicationModal);
+    setVisible(true);
+    while(window.state.modal) {
+      Application::processEvents();
+      usleep(20 * 1000);
+    }
+    qtWindow->setWindowModality(Qt::NonModal);
+  }
 }
 
 void pWindow::setResizable(bool resizable) {
@@ -170,9 +185,6 @@ void pWindow::setVisible(bool visible) {
 }
 
 void pWindow::setWidgetFont(const string &font) {
-  for(auto &item : window.state.widget) {
-    if(!item.state.font) item.setFont(font);
-  }
 }
 
 void pWindow::constructor() {
@@ -180,11 +192,11 @@ void pWindow::constructor() {
   qtWindow->setWindowTitle(" ");
 
   //if program was given a name, try and set the window taskbar icon to a matching pixmap image
-  if(osState.name.empty() == false) {
-    if(file::exists({"/usr/share/pixmaps/", osState.name, ".png"})) {
-      qtWindow->setWindowIcon(QIcon(string{"/usr/share/pixmaps/", osState.name, ".png"}));
-    } else if(file::exists({"/usr/local/share/pixmaps/", osState.name, ".png"})) {
-      qtWindow->setWindowIcon(QIcon(string{"/usr/local/share/pixmaps/", osState.name, ".png"}));
+  if(applicationState.name.empty() == false) {
+    if(file::exists({"/usr/share/pixmaps/", applicationState.name, ".png"})) {
+      qtWindow->setWindowIcon(QIcon(string{"/usr/share/pixmaps/", applicationState.name, ".png"}));
+    } else if(file::exists({"/usr/local/share/pixmaps/", applicationState.name, ".png"})) {
+      qtWindow->setWindowIcon(QIcon(string{"/usr/local/share/pixmaps/", applicationState.name, ".png"}));
     }
   }
 
@@ -221,7 +233,7 @@ void pWindow::destructor() {
 }
 
 void pWindow::updateFrameGeometry() {
-  pOS::syncX();
+  pApplication::syncX();
   QRect border = qtWindow->frameGeometry();
   QRect client = qtWindow->geometry();
 
@@ -231,12 +243,12 @@ void pWindow::updateFrameGeometry() {
   settings->frameGeometryHeight = border.height() - client.height();
 
   if(window.state.menuVisible) {
-    pOS::syncX();
+    pApplication::syncX();
     settings->menuGeometryHeight = qtMenu->height();
   }
 
   if(window.state.statusVisible) {
-    pOS::syncX();
+    pApplication::syncX();
     settings->statusGeometryHeight = qtStatus->height();
   }
 
@@ -244,10 +256,10 @@ void pWindow::updateFrameGeometry() {
 }
 
 void pWindow::QtWindow::closeEvent(QCloseEvent *event) {
-  self.window.state.ignore = false;
   event->ignore();
   if(self.window.onClose) self.window.onClose();
-  if(self.window.state.ignore == false) hide();
+  else self.window.setVisible(false);
+  if(self.window.state.modal && !self.window.visible()) self.window.setModal(false);
 }
 
 void pWindow::QtWindow::moveEvent(QMoveEvent *event) {
@@ -294,4 +306,6 @@ QSize pWindow::QtWindow::sizeHint() const {
   if(self.window.state.menuVisible) height += settings->menuGeometryHeight;
   if(self.window.state.statusVisible) height += settings->statusGeometryHeight;
   return QSize(width, height);
+}
+
 }

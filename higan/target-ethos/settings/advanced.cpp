@@ -1,12 +1,12 @@
 AdvancedSettings *advancedSettings = nullptr;
 
 AdvancedSettings::AdvancedSettings() {
-  driverTitle.setFont(application->titleFont);
+  driverTitle.setFont(program->titleFont);
   driverTitle.setText("Driver Selection");
   videoLabel.setText("Video:");
   audioLabel.setText("Audio:");
   inputLabel.setText("Input:");
-  libraryTitle.setFont(application->titleFont);
+  libraryTitle.setFont(program->titleFont);
   libraryTitle.setText("Game Library Path");
   libraryLabel.setText("Path:");
   libraryPath.setEditable(false);
@@ -15,7 +15,7 @@ AdvancedSettings::AdvancedSettings() {
   if(path.endswith("/") == false) path.append("/");
   libraryPath.setText(path);
   libraryBrowse.setText("Browse ...");
-  infoLabel.setFont(application->boldFont);
+  infoLabel.setFont(program->boldFont);
   string profile;
   #if defined(PROFILE_ACCURACY)
   profile = "Accuracy";

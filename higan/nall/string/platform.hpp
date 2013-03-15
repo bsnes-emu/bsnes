@@ -39,7 +39,7 @@ string userpath() {
   string result;
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
-  SHGetFolderPathW(0, CSIDL_PROFILE | CSIDL_FLAG_CREATE, 0, 0, path);
+  SHGetFolderPathW(nullptr, CSIDL_PROFILE | CSIDL_FLAG_CREATE, nullptr, 0, path);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #else
@@ -59,7 +59,7 @@ string configpath() {
   string result;
   #ifdef _WIN32
   wchar_t path[PATH_MAX] = L"";
-  SHGetFolderPathW(0, CSIDL_APPDATA | CSIDL_FLAG_CREATE, 0, 0, path);
+  SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #else

@@ -1,6 +1,6 @@
 void VerticalLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
   for(auto &child : children) if(child.sizable == &sizable) return;
-  children.append({ &sizable, size.width, size.height, spacing });
+  children.append({&sizable, size.width, size.height, spacing});
   synchronizeLayout();
   if(window()) window()->synchronizeLayout();
 }
@@ -16,12 +16,12 @@ bool VerticalLayout::enabled() {
   return state.enabled;
 }
 
-Geometry VerticalLayout::minimumGeometry() {
+Size VerticalLayout::minimumSize() {
   unsigned width = 0, height = 0;
 
   for(auto &child : children) {
     if(child.width == MinimumSize || child.width == MaximumSize) {
-      width = max(width, child.sizable->minimumGeometry().width);
+      width = max(width, child.sizable->minimumSize().width);
       continue;
     }
     width = max(width, child.width);
@@ -30,13 +30,13 @@ Geometry VerticalLayout::minimumGeometry() {
   for(auto &child : children) {
     height += child.spacing;
     if(child.height == MinimumSize || child.height == MaximumSize) {
-      height += child.sizable->minimumGeometry().height;
+      height += child.sizable->minimumSize().height;
       continue;
     }
     height += child.height;
   }
 
-  return { 0, 0, state.margin * 2 + width, state.margin * 2 + height };
+  return {state.margin * 2 + width, state.margin * 2 + height};
 }
 
 void VerticalLayout::remove(Sizable &sizable) {
@@ -75,8 +75,8 @@ void VerticalLayout::setEnabled(bool enabled) {
 void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
   auto children = this->children;
   for(auto &child : children) {
-    if(child.width  == MinimumSize) child.width  = child.sizable->minimumGeometry().width;
-    if(child.height == MinimumSize) child.height = child.sizable->minimumGeometry().height;
+    if(child.width  == MinimumSize) child.width  = child.sizable->minimumSize().width;
+    if(child.height == MinimumSize) child.height = child.sizable->minimumSize().height;
   }
 
   Geometry geometry = containerGeometry;
@@ -102,7 +102,7 @@ void VerticalLayout::setGeometry(const Geometry &containerGeometry) {
 
   for(auto &child : children) {
     unsigned pivot = (maximumWidth - child.width) * state.alignment;
-    Geometry childGeometry = { geometry.x + pivot, geometry.y, child.width, child.height };
+    Geometry childGeometry = {geometry.x + pivot, geometry.y, child.width, child.height};
     child.sizable->setGeometry(childGeometry);
 
     geometry.y += child.height + child.spacing;

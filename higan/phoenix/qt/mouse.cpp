@@ -1,6 +1,8 @@
+namespace phoenix {
+
 Position pMouse::position() {
   QPoint point = QCursor::pos();
-  return { point.x(), point.y() };
+  return {point.x(), point.y()};
 }
 
 bool pMouse::pressed(Mouse::Button button) {
@@ -11,4 +13,6 @@ bool pMouse::pressed(Mouse::Button button) {
   case Mouse::Button::Right: return buttons & Qt::RightButton;
   }
   return false;
+}
+
 }

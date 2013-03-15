@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pCanvas::setSize(const Size &size) {
   delete qtImage;
   qtImage = new QImage(size.width, size.height, QImage::Format_ARGB32);
@@ -22,8 +24,8 @@ void pCanvas::constructor() {
 void pCanvas::destructor() {
   delete qtCanvas;
   delete qtImage;
-  qtWidget = qtCanvas = 0;
-  qtImage = 0;
+  qtWidget = qtCanvas = nullptr;
+  qtImage = nullptr;
 }
 
 void pCanvas::orphan() {
@@ -36,11 +38,11 @@ void pCanvas::QtCanvas::leaveEvent(QEvent *event) {
 }
 
 void pCanvas::QtCanvas::mouseMoveEvent(QMouseEvent *event) {
-  if(self.canvas.onMouseMove) self.canvas.onMouseMove({ event->pos().x(), event->pos().y() });
+  if(self.canvas.onMouseMove) self.canvas.onMouseMove({event->pos().x(), event->pos().y()});
 }
 
 void pCanvas::QtCanvas::mousePressEvent(QMouseEvent *event) {
-  if(self.canvas.onMousePress == false) return;
+  if(!self.canvas.onMousePress) return;
   switch(event->button()) {
   case Qt::LeftButton: self.canvas.onMousePress(Mouse::Button::Left); break;
   case Qt::MidButton: self.canvas.onMousePress(Mouse::Button::Middle); break;
@@ -49,7 +51,7 @@ void pCanvas::QtCanvas::mousePressEvent(QMouseEvent *event) {
 }
 
 void pCanvas::QtCanvas::mouseReleaseEvent(QMouseEvent *event) {
-  if(self.canvas.onMouseRelease == false) return;
+  if(!self.canvas.onMouseRelease) return;
   switch(event->button()) {
   case Qt::LeftButton: self.canvas.onMouseRelease(Mouse::Button::Left); break;
   case Qt::MidButton: self.canvas.onMouseRelease(Mouse::Button::Middle); break;
@@ -70,4 +72,6 @@ void pCanvas::QtCanvas::paintEvent(QPaintEvent *event) {
 }
 
 pCanvas::QtCanvas::QtCanvas(pCanvas &self) : self(self) {
+}
+
 }

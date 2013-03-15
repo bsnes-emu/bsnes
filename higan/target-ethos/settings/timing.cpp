@@ -16,7 +16,7 @@ TimingAdjustment::TimingAdjustment() {
 }
 
 TimingSettings::TimingSettings() {
-  title.setFont(application->titleFont);
+  title.setFont(program->titleFont);
   title.setText("Audiovisual Synchronization");
   videoAdjust.name.setText("Video:");
   videoAdjust.value.setText({config->timing.video});
@@ -77,12 +77,12 @@ void TimingSettings::analyzeAudioFrequency() {
 
 void TimingSettings::analyzeStart() {
   audio.clear();
-  settings->setModal(true);
+
   settings->panelList.setEnabled(false);
   videoAdjust.analyze.setEnabled(false);
   audioAdjust.analyze.setEnabled(false);
   settings->setStatusText("Initializing ...");
-  OS::processEvents();
+  Application::processEvents();
 
   analysis.stop = false;
   analysis.seconds = 0;
@@ -97,7 +97,7 @@ bool TimingSettings::analyzeTick(const string &type) {
   time_t systemTime = time(0);
   if(systemTime > analysis.systemTime) {
     analysis.systemTime = systemTime;
-    OS::processEvents();
+    Application::processEvents();
 
     if(analysis.seconds < 3) {
       analysis.seconds++;
@@ -126,5 +126,4 @@ void TimingSettings::analyzeStop() {
   audioAdjust.analyze.setEnabled(true);
   videoAdjust.stop.setEnabled(false);
   audioAdjust.stop.setEnabled(false);
-  settings->setModal(false);
 }

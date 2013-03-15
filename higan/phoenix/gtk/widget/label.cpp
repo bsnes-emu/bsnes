@@ -1,6 +1,8 @@
-Geometry pLabel::minimumGeometry() {
-  Geometry geometry = pFont::geometry(widget.state.font, label.state.text);
-  return { 0, 0, geometry.width, geometry.height };
+namespace phoenix {
+
+Size pLabel::minimumSize() {
+  Size size = pFont::size(widget.state.font, label.state.text);
+  return {size.width, size.height};
 }
 
 void pLabel::setText(const string &text) {
@@ -21,4 +23,6 @@ void pLabel::destructor() {
 void pLabel::orphan() {
   destructor();
   constructor();
+}
+
 }

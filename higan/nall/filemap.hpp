@@ -22,14 +22,15 @@ namespace nall {
   public:
     enum class mode : unsigned { read, write, readwrite, writeread };
 
+    explicit operator bool() const { return open(); }
     bool open() const { return p_open(); }
     bool open(const char *filename, mode mode_) { return p_open(filename, mode_); }
     void close() { return p_close(); }
     unsigned size() const { return p_size; }
     uint8_t* data() { return p_handle; }
     const uint8_t* data() const { return p_handle; }
-    filemap() : p_size(0), p_handle(0) { p_ctor(); }
-    filemap(const char *filename, mode mode_) : p_size(0), p_handle(0) { p_ctor(); p_open(filename, mode_); }
+    filemap() : p_size(0), p_handle(nullptr) { p_ctor(); }
+    filemap(const char *filename, mode mode_) : p_size(0), p_handle(nullptr) { p_ctor(); p_open(filename, mode_); }
     ~filemap() { p_dtor(); }
 
   private:
@@ -49,7 +50,7 @@ namespace nall {
 
     bool p_open(const char *filename, mode mode_) {
       if(file::exists(filename) && file::size(filename) == 0) {
-        p_handle = 0;
+        p_handle = nullptr;
         p_size = 0;
         return true;
       }
@@ -85,13 +86,13 @@ namespace nall {
           break;
       }
 
-      p_filehandle = CreateFileW(utf16_t(filename), desired_access, FILE_SHARE_READ, NULL,
-        creation_disposition, FILE_ATTRIBUTE_NORMAL, NULL);
+      p_filehandle = CreateFileW(utf16_t(filename), desired_access, FILE_SHARE_READ, nullptr,
+        creation_disposition, FILE_ATTRIBUTE_NORMAL, nullptr);
       if(p_filehandle == INVALID_HANDLE_VALUE) return false;
 
-      p_size = GetFileSize(p_filehandle, NULL);
+      p_size = GetFileSize(p_filehandle, nullptr);
 
-      p_maphandle = CreateFileMapping(p_filehandle, NULL, flprotect, 0, p_size, NULL);
+      p_maphandle = CreateFileMapping(p_filehandle, nullptr, flprotect, 0, p_size, nullptr);
       if(p_maphandle == INVALID_HANDLE_VALUE) {
         CloseHandle(p_filehandle);
         p_filehandle = INVALID_HANDLE_VALUE;
@@ -105,7 +106,7 @@ namespace nall {
     void p_close() {
       if(p_handle) {
         UnmapViewOfFile(p_handle);
-        p_handle = 0;
+        p_handle = nullptr;
       }
 
       if(p_maphandle != INVALID_HANDLE_VALUE) {
@@ -141,7 +142,7 @@ namespace nall {
 
     bool p_open(const char *filename, mode mode_) {
       if(file::exists(filename) && file::size(filename) == 0) {
-        p_handle = 0;
+        p_handle = nullptr;
         p_size = 0;
         return true;
       }
@@ -175,9 +176,9 @@ namespace nall {
       fstat(p_fd, &p_stat);
       p_size = p_stat.st_size;
 
-      p_handle = (uint8_t*)mmap(0, p_size, mmap_flags, MAP_SHARED, p_fd, 0);
+      p_handle = (uint8_t*)mmap(nullptr, p_size, mmap_flags, MAP_SHARED, p_fd, 0);
       if(p_handle == MAP_FAILED) {
-        p_handle = 0;
+        p_handle = nullptr;
         ::close(p_fd);
         p_fd = -1;
         return false;
@@ -189,7 +190,7 @@ namespace nall {
     void p_close() {
       if(p_handle) {
         munmap(p_handle, p_size);
-        p_handle = 0;
+        p_handle = nullptr;
       }
 
       if(p_fd >= 0) {

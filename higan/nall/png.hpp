@@ -69,7 +69,7 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
   if(read(sourceData + 0, 4) != 0x89504e47) return false;
   if(read(sourceData + 4, 4) != 0x0d0a1a0a) return false;
 
-  uint8_t *compressedData = 0;
+  uint8_t *compressedData = nullptr;
   unsigned compressedSize = 0;
 
   unsigned offset = 8;
@@ -150,7 +150,7 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
     if(filter(data, interlacedData, info.width, info.height) == false) {
       delete[] interlacedData;
       delete[] data;
-      data = 0;
+      data = nullptr;
       return false;
     }
   } else {
@@ -159,7 +159,7 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
       if(deinterlace(passData, pass) == false) {
         delete[] interlacedData;
         delete[] data;
-        data = 0;
+        data = nullptr;
         return false;
       }
     }
@@ -172,13 +172,13 @@ bool png::decode(const uint8_t *sourceData, unsigned sourceSize) {
 unsigned png::interlace(unsigned pass, unsigned index) {
   static const unsigned data[7][4] = {
     //x-distance, y-distance, x-origin, y-origin
-    { 8, 8, 0, 0 },
-    { 8, 8, 4, 0 },
-    { 4, 8, 0, 4 },
-    { 4, 4, 2, 0 },
-    { 2, 4, 0, 2 },
-    { 2, 2, 1, 0 },
-    { 1, 2, 0, 1 },
+    {8, 8, 0, 0},
+    {8, 8, 4, 0},
+    {4, 8, 0, 4},
+    {4, 4, 2, 0},
+    {2, 4, 0, 2},
+    {2, 2, 1, 0},
+    {1, 2, 0, 1},
   };
   return data[pass][index];
 }

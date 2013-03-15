@@ -1,3 +1,5 @@
+namespace phoenix {
+
 bool pRadioItem::checked() {
   return false;
 }
@@ -15,4 +17,6 @@ void pRadioItem::constructor() {
 }
 
 void pRadioItem::destructor() {
+}
+
 }

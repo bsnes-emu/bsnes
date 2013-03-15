@@ -31,7 +31,7 @@ struct registry {
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
       DWORD size = NWR_SIZE * sizeof(wchar_t);
-      LONG result = RegQueryValueExW(handle, utf16_t(node), NULL, NULL, (LPBYTE)&data, (LPDWORD)&size);
+      LONG result = RegQueryValueExW(handle, utf16_t(node), nullptr, nullptr, (LPBYTE)&data, (LPDWORD)&size);
       RegCloseKey(handle);
       if(result == ERROR_SUCCESS) return true;
     }
@@ -46,7 +46,7 @@ struct registry {
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
       DWORD size = NWR_SIZE * sizeof(wchar_t);
-      LONG result = RegQueryValueExW(handle, utf16_t(node), NULL, NULL, (LPBYTE)&data, (LPDWORD)&size);
+      LONG result = RegQueryValueExW(handle, utf16_t(node), nullptr, nullptr, (LPBYTE)&data, (LPDWORD)&size);
       RegCloseKey(handle);
       if(result == ERROR_SUCCESS) return (const char*)utf8_t(data);
     }
@@ -60,7 +60,7 @@ struct registry {
     DWORD disposition;
     for(unsigned n = 0; n < part.size(); n++) {
       path.append(part[n]);
-      if(RegCreateKeyExW(rootKey, utf16_t(path), 0, NULL, 0, NWR_FLAGS | KEY_ALL_ACCESS, NULL, &handle, &disposition) == ERROR_SUCCESS) {
+      if(RegCreateKeyExW(rootKey, utf16_t(path), 0, nullptr, 0, NWR_FLAGS | KEY_ALL_ACCESS, nullptr, &handle, &disposition) == ERROR_SUCCESS) {
         if(n == part.size() - 1) {
           RegSetValueExW(handle, utf16_t(node), 0, REG_SZ, (BYTE*)(wchar_t*)utf16_t(data), (data.length() + 1) * sizeof(wchar_t));
         }
@@ -86,17 +86,17 @@ struct registry {
     string path = part.concatenate("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       DWORD folders, nodes;
-      RegQueryInfoKey(handle, NULL, NULL, NULL, &folders, NULL, NULL, &nodes, NULL, NULL, NULL, NULL);
+      RegQueryInfoKey(handle, nullptr, nullptr, nullptr, &folders, nullptr, nullptr, &nodes, nullptr, nullptr, nullptr, nullptr);
       for(unsigned n = 0; n < folders; n++) {
         wchar_t name[NWR_SIZE] = L"";
         DWORD size = NWR_SIZE * sizeof(wchar_t);
-        RegEnumKeyEx(handle, n, (wchar_t*)&name, &size, NULL, NULL, NULL, NULL);
+        RegEnumKeyEx(handle, n, (wchar_t*)&name, &size, nullptr, nullptr, nullptr, nullptr);
         result.append({(const char*)utf8_t(name), "/"});
       }
       for(unsigned n = 0; n < nodes; n++) {
         wchar_t name[NWR_SIZE] = L"";
         DWORD size = NWR_SIZE * sizeof(wchar_t);
-        RegEnumValueW(handle, n, (wchar_t*)&name, &size, NULL, NULL, NULL, NULL);
+        RegEnumValueW(handle, n, (wchar_t*)&name, &size, nullptr, nullptr, nullptr, nullptr);
         result.append((const char*)utf8_t(name));
       }
       RegCloseKey(handle);
@@ -111,7 +111,7 @@ private:
     if(name == "HKCU") return HKEY_CURRENT_USER;
     if(name == "HKLM") return HKEY_LOCAL_MACHINE;
     if(name == "HKU" ) return HKEY_USERS;
-    return NULL;
+    return nullptr;
   }
 };
 

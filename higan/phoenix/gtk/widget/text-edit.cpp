@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static void TextEdit_change(TextEdit *self) {
   self->state.text = self->text();
   if(self->p.locked == false && self->onChange) self->onChange();
@@ -67,4 +69,6 @@ void pTextEdit::destructor() {
 void pTextEdit::orphan() {
   destructor();
   constructor();
+}
+
 }

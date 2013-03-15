@@ -1,16 +1,18 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct Buffer {
-  double **sample;
-  uint16_t rdoffset;
-  uint16_t wroffset;
-  unsigned channels;
+  double **sample = nullptr;
+  uint16_t rdoffset = 0;
+  uint16_t wroffset = 0;
+  unsigned channels = 0;
 
   void setChannels(unsigned channels) {
-    for(unsigned c = 0; c < this->channels; c++) {
-      if(sample[c]) delete[] sample[c];
+    if(sample) {
+      for(unsigned c = 0; c < this->channels; c++) {
+        if(sample[c]) delete[] sample[c];
+      }
+      delete[] sample;
     }
-    if(sample) delete[] sample;
 
     this->channels = channels;
     if(channels == 0) return;
@@ -40,7 +42,6 @@ struct Buffer {
   }
 
   Buffer() {
-    channels = 0;
   }
 
   ~Buffer() {

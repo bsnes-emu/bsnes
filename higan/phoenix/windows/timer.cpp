@@ -1,9 +1,11 @@
+namespace phoenix {
+
 static vector<pTimer*> timers;
 
 static void CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) {
   for(auto &timer : timers) {
     if(timer->htimer == timerID) {
-      if(timer->timer.onTimeout) timer->timer.onTimeout();
+      if(timer->timer.onActivate) timer->timer.onActivate();
       return;
     }
   }
@@ -28,4 +30,6 @@ void pTimer::setInterval(unsigned milliseconds) {
 void pTimer::constructor() {
   timers.append(this);
   htimer = 0;
+}
+
 }

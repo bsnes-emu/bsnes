@@ -2,11 +2,11 @@ struct AdvancedSettings : SettingsLayout {
   Label driverTitle;
   HorizontalLayout driverLayout;
     Label videoLabel;
-    ComboBox videoDriver;
+    ComboButton videoDriver;
     Label audioLabel;
-    ComboBox audioDriver;
+    ComboButton audioDriver;
     Label inputLabel;
-    ComboBox inputDriver;
+    ComboButton inputDriver;
 
   Label libraryTitle;
   HorizontalLayout libraryLayout;

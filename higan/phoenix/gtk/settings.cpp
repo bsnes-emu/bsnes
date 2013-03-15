@@ -1,7 +1,9 @@
+namespace phoenix {
+
 static Settings *settings = nullptr;
 
 void Settings::load() {
-  string path = { userpath(), ".config/phoenix/gtk.cfg" };
+  string path = {userpath(), ".config/phoenix/gtk.cfg"};
   configuration::load(path);
 }
 
@@ -22,4 +24,6 @@ Settings::Settings() {
   append(menuGeometryHeight = 20, "menuGeometryHeight");
   append(statusGeometryHeight = 20, "statusGeometryHeight");
   append(windowBackgroundColor = 0xedeceb, "windowBackgroundColor");
+}
+
 }

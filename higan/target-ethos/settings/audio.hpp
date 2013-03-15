@@ -10,11 +10,11 @@ struct AudioSettings : SettingsLayout {
   Label title;
   HorizontalLayout controlLayout;
     Label frequencyLabel;
-    ComboBox frequency;
+    ComboButton frequency;
     Label latencyLabel;
-    ComboBox latency;
+    ComboButton latency;
     Label resamplerLabel;
-    ComboBox resampler;
+    ComboButton resampler;
   AudioSlider volume;
 
   void synchronize();

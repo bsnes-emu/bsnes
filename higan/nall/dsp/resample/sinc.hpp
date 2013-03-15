@@ -39,7 +39,7 @@ void ResampleSinc::sample() {
 }
 
 ResampleSinc::ResampleSinc(DSP &dsp) : Resampler(dsp) {
-  for(unsigned n = 0; n < 8; n++) sinc_resampler[n] = 0;
+  for(unsigned n = 0; n < 8; n++) sinc_resampler[n] = nullptr;
 }
 
 void ResampleSinc::remakeSinc() {

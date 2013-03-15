@@ -3,7 +3,7 @@ Presentation *presentation = nullptr;
 void Presentation::synchronize() {
   for(auto &emulator : emulatorList) emulator->menu.setVisible(false);
   for(auto &emulator : emulatorList) {
-    if(emulator->interface == application->active) {
+    if(emulator->interface == program->active) {
       active = emulator;
       emulator->menu.setVisible(true);
     }
@@ -29,7 +29,7 @@ void Presentation::synchronize() {
   synchronizeAudio.setChecked(config->audio.synchronize);
   muteAudio.setChecked(config->audio.mute);
 
-  if(application->active == nullptr) {
+  if(program->active == nullptr) {
     toolsMenu.setVisible(false);
   } else {
     toolsMenu.setVisible(true);
@@ -87,7 +87,7 @@ Presentation::Presentation() : active(nullptr) {
 
   append(loadMenu);
     for(auto &item : loadListSystem) loadMenu.append(*item);
-    if(application->ananke.opened()) loadMenu.append(loadSeparator, loadImport);
+    if(program->ananke.open()) loadMenu.append(loadSeparator, loadImport);
   for(auto &systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
@@ -111,13 +111,19 @@ Presentation::Presentation() : active(nullptr) {
   append(layout);
   layout.append(viewport, {0, 0, 720, 480});
 
-  onSize = [&] { utility->resize(); };
-  onClose = [&] { application->quit = true; };
+  onSize = [&] {
+    utility->resize();
+  };
+
+  onClose = [&] {
+    setVisible(false);
+    Application::quit();
+  };
 
   loadImport.onActivate = [&] {
-    if(application->ananke.opened() == false) return;
-    function<string ()> browse = application->ananke.sym("ananke_browse");
-    if(browse == false) return;
+    if(program->ananke.open() == false) return;
+    function<string ()> browse = program->ananke.sym("ananke_browse");
+    if(!browse) return;
     string pathname = browse();
     if(pathname.empty()) return;
     utility->loadMedia(pathname);
@@ -145,7 +151,7 @@ Presentation::Presentation() : active(nullptr) {
 }
 
 void Presentation::bootstrap() {
-  for(auto &emulator : application->emulator) {
+  for(auto &emulator : program->emulator) {
     auto iEmulator = new Emulator;
     iEmulator->interface = emulator;
 
@@ -206,7 +212,7 @@ void Presentation::bootstrap() {
 }
 
 void Presentation::loadShaders() {
-  string pathname = application->path("Video Shaders/");
+  string pathname = program->path("Video Shaders/");
   lstring files = directory::files(pathname);
   for(auto &filename : files) {
     lstring name = string{filename}.split(".");

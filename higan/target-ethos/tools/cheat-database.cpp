@@ -34,7 +34,7 @@ void CheatDatabase::findCodes() {
   cheatList.reset();
   cheat.reset();
 
-  auto document = Markup::Document(string::read(application->path("cheats.bml")));
+  auto document = Markup::Document(string::read(program->path("cheats.bml")));
   for(auto &node : document) {
     if(node.name != "cartridge") continue;
     if(node["sha256"].text() != sha256) continue;

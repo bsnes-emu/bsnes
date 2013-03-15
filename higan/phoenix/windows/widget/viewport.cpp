@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static LRESULT CALLBACK Viewport_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   Object *object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -54,4 +56,6 @@ void pViewport::destructor() {
 void pViewport::orphan() {
   destructor();
   constructor();
+}
+
 }

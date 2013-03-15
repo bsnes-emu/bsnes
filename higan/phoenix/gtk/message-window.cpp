@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons buttons, gint response) {
   if(response == GTK_RESPONSE_OK) return MessageWindow::Response::Ok;
   if(response == GTK_RESPONSE_CANCEL) return MessageWindow::Response::Cancel;
@@ -58,4 +60,6 @@ MessageWindow::Response pMessageWindow::critical(Window &parent, const string &t
   gint response = gtk_dialog_run(GTK_DIALOG(dialog));
   gtk_widget_destroy(dialog);
   return MessageWindow_response(buttons, response);
+}
+
 }

@@ -1,3 +1,5 @@
+namespace phoenix {
+
 bool pRadioItem::checked() {
   return radioItem.state.checked;
 }
@@ -23,4 +25,6 @@ void pRadioItem::constructor() {
 
 void pRadioItem::destructor() {
   if(parentMenu) parentMenu->remove(radioItem);
+}
+
 }

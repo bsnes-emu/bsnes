@@ -1,6 +1,8 @@
+namespace phoenix {
+
 void pKeyboard::initialize() {
   auto append = [](Keyboard::Scancode scancode, unsigned keysym) {
-    settings->keymap.insert(scancode, XKeysymToKeycode(pOS::display, keysym));
+    settings->keymap.insert(scancode, XKeysymToKeycode(pApplication::display, keysym));
   };
 
   append(Keyboard::Scancode::Escape, XK_Escape);
@@ -120,7 +122,7 @@ void pKeyboard::initialize() {
 
 bool pKeyboard::pressed(Keyboard::Scancode scancode) {
   char state[256];
-  XQueryKeymap(pOS::display, state);
+  XQueryKeymap(pApplication::display, state);
   unsigned id = settings->keymap.lhs[scancode];
   return state[id >> 3] & (1 << (id & 7));
 }
@@ -131,7 +133,7 @@ vector<bool> pKeyboard::state() {
   for(auto &n : output) n = false;
 
   char state[256];
-  XQueryKeymap(pOS::display, state);
+  XQueryKeymap(pApplication::display, state);
   for(auto &n : settings->keymap.rhs) {
     if(state[n.name >> 3] & (1 << (n.name & 7))) {
       output[(unsigned)n.data] = true;
@@ -139,4 +141,6 @@ vector<bool> pKeyboard::state() {
   }
 
   return output;
+}
+
 }

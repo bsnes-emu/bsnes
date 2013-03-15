@@ -2,12 +2,12 @@ struct InputSettings : SettingsLayout {
   Label title;
   HorizontalLayout focusLayout;
     Label focusLabel;
-    CheckBox focusPause;
-    CheckBox focusAllow;
+    CheckButton focusPause;
+    CheckButton focusAllow;
   HorizontalLayout selectionLayout;
-    ComboBox systemList;
-    ComboBox portList;
-    ComboBox deviceList;
+    ComboButton systemList;
+    ComboButton portList;
+    ComboButton deviceList;
   ListView inputList;
   HorizontalLayout controlLayout;
     Button assign[3];

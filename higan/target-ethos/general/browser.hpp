@@ -24,7 +24,6 @@ private:
   };
   vector<Folder> folderList;
 
-  bool dialogActive;
   string outputFilename;
 
   string extension;

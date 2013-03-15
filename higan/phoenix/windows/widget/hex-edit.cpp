@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static LRESULT CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   HexEdit &hexEdit = *(HexEdit*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(msg == WM_CHAR) {
@@ -133,4 +135,6 @@ bool pHexEdit::keyPress(unsigned scancode) {
   }
 
   return true;
+}
+
 }

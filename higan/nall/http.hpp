@@ -24,7 +24,7 @@ struct http {
   string header;
 
   inline void download(const string &path, uint8_t *&data, unsigned &size) {
-    data = 0;
+    data = nullptr;
     size = 0;
 
     send({
@@ -147,7 +147,7 @@ struct http {
   inline void disconnect() {
     close(serversocket);
     freeaddrinfo(serverinfo);
-    serverinfo = 0;
+    serverinfo = nullptr;
     serversocket = -1;
   }
 

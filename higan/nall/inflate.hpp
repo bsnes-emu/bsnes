@@ -89,7 +89,7 @@ inline int stored(state *s) {
   ) return 2;
 
   if(s->incnt + len > s->inlen) return 2;
-  if(s->out != 0) {
+  if(s->out != nullptr) {
     if(s->outcnt + len > s->outlen) return 1;
     while(len--) s->out[s->outcnt++] = s->in[s->incnt++];
   } else {
@@ -186,7 +186,7 @@ inline int codes(state *s, huffman *lencode, huffman *distcode) {
     symbol = decode(s, lencode);
     if(symbol < 0) return symbol;
     if(symbol < 256) {
-      if(s->out != 0) {
+      if(s->out != nullptr) {
         if(s->outcnt == s->outlen) return 1;
         s->out[s->outcnt] = symbol;
       }
@@ -203,7 +203,7 @@ inline int codes(state *s, huffman *lencode, huffman *distcode) {
       if(dist > s->outcnt) return -11;
       #endif
 
-      if(s->out != 0) {
+      if(s->out != nullptr) {
         if(s->outcnt + len > s->outlen) return 1;
         while(len--) {
           s->out[s->outcnt] =

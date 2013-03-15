@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static void Item_activate(Item *self) {
   if(self->onActivate) self->onActivate();
 }
@@ -28,4 +30,6 @@ void pItem::destructor() {
 void pItem::orphan() {
   destructor();
   constructor();
+}
+
 }

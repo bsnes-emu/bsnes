@@ -1,6 +1,6 @@
 struct DipSwitch : HorizontalLayout {
   Label name;
-  ComboBox value;
+  ComboButton value;
   vector<unsigned> values;
 
   DipSwitch();
@@ -17,9 +17,6 @@ struct DipSwitches : Window {
 
   unsigned run(const Markup::Node &node);
   DipSwitches();
-
-private:
-  bool quit;
 };
 
 extern DipSwitches *dipSwitches;

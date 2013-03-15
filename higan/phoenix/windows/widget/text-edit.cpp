@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pTextEdit::setCursorPosition(unsigned position) {
   if(position == ~0) position >>= 1;  //Edit_SetSel takes signed type
   Edit_SetSel(hwnd, position, position);
@@ -55,4 +57,6 @@ void pTextEdit::destructor() {
 void pTextEdit::orphan() {
   destructor();
   constructor();
+}
+
 }

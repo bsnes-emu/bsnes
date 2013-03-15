@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pMenu::append(Action &action) {
   if(dynamic_cast<Menu*>(&action)) {
     qtMenu->addMenu(((Menu&)action).p.qtMenu);
@@ -48,4 +50,6 @@ void pMenu::constructor() {
 void pMenu::destructor() {
   if(action.state.menu) action.state.menu->remove(menu);
   delete qtMenu;
+}
+
 }

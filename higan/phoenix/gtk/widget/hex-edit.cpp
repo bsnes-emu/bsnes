@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static bool HexEdit_keyPress(GtkWidget *widget, GdkEventKey *event, HexEdit *self) {
   return self->p.keyPress(event->keyval);
 }
@@ -265,4 +267,6 @@ void pHexEdit::setScroll() {
 void pHexEdit::updateScroll() {
   unsigned row = hexEdit.state.offset / hexEdit.state.columns;
   gtk_range_set_value(GTK_RANGE(scrollBar), row);
+}
+
 }

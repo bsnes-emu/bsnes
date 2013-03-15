@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static QMessageBox::StandardButtons MessageWindow_buttons(MessageWindow::Buttons buttons) {
   QMessageBox::StandardButtons standardButtons = QMessageBox::NoButton;
   if(buttons == MessageWindow::Buttons::Ok) standardButtons = QMessageBox::Ok;
@@ -44,4 +46,6 @@ MessageWindow::Response pMessageWindow::critical(Window &parent, const string &t
     buttons, QMessageBox::critical(&parent != &Window::none() ? parent.p.qtWindow : nullptr, " ",
     QString::fromUtf8(text), MessageWindow_buttons(buttons))
   );
+}
+
 }

@@ -1,7 +1,7 @@
 HotkeySettings *hotkeySettings = nullptr;
 
 HotkeySettings::HotkeySettings() : activeInput(nullptr) {
-  title.setFont(application->titleFont);
+  title.setFont(program->titleFont);
   title.setText("Hotkey Bindings");
 
   inputList.setHeaderText("Name", "Mapping");

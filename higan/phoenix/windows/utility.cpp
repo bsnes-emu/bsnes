@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static const unsigned Windows2000  = 0x0500;
 static const unsigned WindowsXP    = 0x0501;
 static const unsigned WindowsVista = 0x0600;
@@ -147,4 +149,6 @@ static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
   #undef enabled
   #undef shifted
   #undef extended
+}
+
 }

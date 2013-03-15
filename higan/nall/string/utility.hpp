@@ -232,7 +232,7 @@ unsigned fp(char *str, long double value) {
 
 string fp(long double value) {
   string temp;
-  temp.reserve(fp(0, value));
+  temp.reserve(fp(nullptr, value));
   fp(temp(), value);
   return temp;
 }

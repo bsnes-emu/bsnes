@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pHexEdit::setColumns(unsigned columns) {
   update();
 }
@@ -188,4 +190,6 @@ void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent *event) {
 
 void pHexEdit::QtHexEdit::keyPressEventAcknowledge(QKeyEvent *event) {
   QTextEdit::keyPressEvent(event);
+}
+
 }

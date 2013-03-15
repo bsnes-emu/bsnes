@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pLineEdit::setEditable(bool editable) {
 }
 
@@ -8,4 +10,6 @@ string pLineEdit::text() {
 }
 
 void pLineEdit::constructor() {
+}
+
 }

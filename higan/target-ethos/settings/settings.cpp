@@ -26,7 +26,7 @@ Settings::Settings() {
   setStatusVisible();
 
   layout.setMargin(5);
-  panelList.setFont(application->boldFont);
+  panelList.setFont(program->boldFont);
   panelList.append("Video");
   panelList.append("Audio");
   panelList.append("Input");
@@ -47,6 +47,7 @@ Settings::Settings() {
 
   onClose = [&] {
     timingSettings->analysis.stop = true;
+    setVisible(false);
   };
 
   panelList.onChange = {&Settings::panelChanged, this};

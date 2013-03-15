@@ -9,7 +9,7 @@ namespace nall {
 //generate unique GUID
 inline string guid() {
   random_lfsr lfsr;
-  lfsr.seed(time(0));
+  lfsr.seed(time(nullptr));
   for(unsigned n = 0; n < 256; n++) lfsr();
 
   string output;

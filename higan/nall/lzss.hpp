@@ -61,7 +61,7 @@ bool lzss::compress(const string &filename) {
   if(targetFile.open(filename, file::mode::write) == false) return false;
 
   for(unsigned n = 0; n < 32; n += 8) targetFile.write(sourceSize >> n);
-  for(unsigned n = 0; n < 65536; n++) tree[n] = 0;
+  for(unsigned n = 0; n < 65536; n++) tree[n] = nullptr;
 
   uint8_t buffer[25];
   unsigned sourceOffset = 0;
@@ -81,7 +81,7 @@ bool lzss::compress(const string &filename) {
       while(node) {
         if(node->offset < sourceOffset - 0x80000) {
           //out-of-range: all subsequent nodes will also be, so free up their memory
-          if(node->next) { delete node->next; node->next = 0; }
+          if(node->next) { delete node->next; node->next = nullptr; }
           break;
         }
 

@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static string FileDialog(bool save, Window &parent, const string &path, const lstring &filter) {
   string name;
 
@@ -66,4 +68,6 @@ string pDialogWindow::folderSelect(Window &parent, const string &path) {
   if(name == "") return "";
   if(name.endswith("/") == false) name.append("/");
   return name;
+}
+
 }

@@ -116,6 +116,32 @@ template<> struct stringify<long double> {
   stringify(long double value) { fp(data, value); }
 };
 
+// arrays
+
+template<> struct stringify<vector<uint8_t>> {
+  char *text;
+  operator const char*() const { return text; }
+  stringify(vector<uint8_t> value) {
+    text = new char[value.size() + 1]();
+    memcpy(text, value.data(), value.size());
+  }
+  ~stringify() {
+    delete[] text;
+  }
+};
+
+template<> struct stringify<const vector<uint8_t>&> {
+  char *text;
+  operator const char*() const { return text; }
+  stringify(const vector<uint8_t> &value) {
+    text = new char[value.size() + 1]();
+    memcpy(text, value.data(), value.size());
+  }
+  ~stringify() {
+    delete[] text;
+  }
+};
+
 // strings
 
 template<> struct stringify<char*> {

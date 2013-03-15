@@ -7,7 +7,7 @@ AudioSlider::AudioSlider() {
 }
 
 AudioSettings::AudioSettings() {
-  title.setFont(application->titleFont);
+  title.setFont(program->titleFont);
   title.setText("Audio Settings");
   frequencyLabel.setText("Frequency:");
   frequency.append("32000hz", "44100hz", "48000hz", "96000hz");

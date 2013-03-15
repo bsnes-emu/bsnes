@@ -1,3 +1,17 @@
+namespace phoenix {
+
+struct pApplication {
+  static XlibDisplay *display;
+
+  static void run();
+  static bool pendingEvents();
+  static void processEvents();
+  static void quit();
+
+  static void initialize();
+  static void syncX();
+};
+
 static QApplication *qtApplication = nullptr;
 
 struct Settings : public configuration {
@@ -21,10 +35,13 @@ struct pLayout;
 struct pWidget;
 
 struct pFont {
-  static Geometry geometry(const string &description, const string &text);
+  static string serif(unsigned size, string style);
+  static string sans(unsigned size, string style);
+  static string monospace(unsigned size, string style);
+  static Size size(const string &font, const string &text);
 
   static QFont create(const string &description);
-  static Geometry geometry(const QFont &qtFont, const string &text);
+  static Size size(const QFont &qtFont, const string &text);
 };
 
 struct pDesktop {
@@ -67,18 +84,6 @@ struct pObject {
   void destructor() {}
 };
 
-struct pOS : public pObject {
-  static XlibDisplay *display;
-
-  static void main();
-  static bool pendingEvents();
-  static void processEvents();
-  static void quit();
-
-  static void initialize();
-  static void syncX();
-};
-
 struct pTimer : public QObject, public pObject {
   Q_OBJECT
 
@@ -94,7 +99,7 @@ public:
   void destructor();
 
 public slots:
-  void onTimeout();
+  void onActivate();
 };
 
 struct pWindow : public QObject, public pObject {
@@ -267,7 +272,7 @@ struct pWidget : public pSizable {
   QWidget *qtWidget;
 
   bool focused();
-  virtual Geometry minimumGeometry();
+  virtual Size minimumSize();
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(const string &font);
@@ -288,7 +293,7 @@ public:
   Button &button;
   QToolButton *qtButton;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setImage(const image &image, Orientation orientation);
   void setText(const string &text);
 
@@ -328,19 +333,19 @@ public:
 public slots:
 };
 
-struct pCheckBox : public QObject, public pWidget {
+struct pCheckButton : public QObject, public pWidget {
   Q_OBJECT
 
 public:
-  CheckBox &checkBox;
-  QCheckBox *qtCheckBox;
+  CheckButton &checkButton;
+  QCheckBox *qtCheckButton;
 
   bool checked();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  pCheckButton(CheckButton &checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
   void destructor();
   void orphan();
@@ -349,22 +354,22 @@ public slots:
   void onToggle();
 };
 
-struct pComboBox : public QObject, public pWidget {
+struct pComboButton : public QObject, public pWidget {
   Q_OBJECT
 
 public:
-  ComboBox &comboBox;
-  QComboBox *qtComboBox;
+  ComboButton &comboButton;
+  QComboBox *qtComboButton;
 
   void append(const string &text);
   void modify(unsigned row, const string &text);
   void remove(unsigned row);
-  Geometry minimumGeometry();
+  Size minimumSize();
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
 
-  pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
+  pComboButton(ComboButton &comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();
   void destructor();
   void orphan();
@@ -403,19 +408,19 @@ public slots:
   void onScroll();
 };
 
-struct pHorizontalScrollBar : public QObject, public pWidget {
+struct pHorizontalScroller : public QObject, public pWidget {
   Q_OBJECT
 
 public:
-  HorizontalScrollBar &horizontalScrollBar;
-  QScrollBar *qtScrollBar;
+  HorizontalScroller &horizontalScroller;
+  QScrollBar *qtScroller;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
+  pHorizontalScroller(HorizontalScroller &horizontalScroller) : pWidget(horizontalScroller), horizontalScroller(horizontalScroller) {}
   void constructor();
   void destructor();
   void orphan();
@@ -431,7 +436,7 @@ public:
   HorizontalSlider &horizontalSlider;
   QSlider *qtSlider;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -449,7 +454,7 @@ struct pLabel : public pWidget {
   Label &label;
   QLabel *qtLabel;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}
@@ -465,7 +470,7 @@ public:
   LineEdit &lineEdit;
   QLineEdit *qtLineEdit;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setEditable(bool editable);
   void setText(const string &text);
   string text();
@@ -518,7 +523,7 @@ struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
   QProgressBar *qtProgressBar;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
@@ -527,21 +532,21 @@ struct pProgressBar : public pWidget {
   void orphan();
 };
 
-struct pRadioBox : public QObject, public pWidget {
+struct pRadioButton : public QObject, public pWidget {
   Q_OBJECT
 
 public:
-  RadioBox &radioBox;
-  QRadioButton *qtRadioBox;
-  QButtonGroup *qtGroup;
+  RadioButton &radioButton;
+  QRadioButton *qtRadioButton;
 
   bool checked();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setChecked();
-  void setGroup(const set<RadioBox&> &group);
+  void setGroup(const set<RadioButton&> &group);
   void setText(const string &text);
 
-  pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
+  pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}
+  pRadioButton& parent();
   void constructor();
   void destructor();
   void orphan();
@@ -572,19 +577,19 @@ public slots:
   void onChange();
 };
 
-struct pVerticalScrollBar : public QObject, public pWidget {
+struct pVerticalScroller : public QObject, public pWidget {
   Q_OBJECT
 
 public:
-  VerticalScrollBar &verticalScrollBar;
-  QScrollBar *qtScrollBar;
+  VerticalScroller &verticalScroller;
+  QScrollBar *qtScroller;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
+  pVerticalScroller(VerticalScroller &verticalScroller) : pWidget(verticalScroller), verticalScroller(verticalScroller) {}
   void constructor();
   void destructor();
   void orphan();
@@ -600,7 +605,7 @@ public:
   VerticalSlider &verticalSlider;
   QSlider *qtSlider;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -632,3 +637,5 @@ struct pViewport : public pWidget {
   void destructor();
   void orphan();
 };
+
+}

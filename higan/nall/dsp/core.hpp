@@ -69,7 +69,7 @@ protected:
     real intensityInverse;
   } settings;
 
-  Resampler *resampler;
+  Resampler *resampler = nullptr;
   inline void write(real channel[]);
 
   #include "buffer.hpp"

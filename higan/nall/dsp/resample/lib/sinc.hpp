@@ -584,7 +584,7 @@ void ResampleUtility::normalize(double* io, int size, double gain)
 
 void* ResampleUtility::make_aligned(void* ptr, unsigned boundary)
 {
- unsigned char* null_ptr = (unsigned char *)NULL;
+ unsigned char* null_ptr = (unsigned char *)nullptr;
  unsigned char* uc_ptr = (unsigned char *)ptr;
 
  uc_ptr += (boundary - ((uc_ptr - null_ptr) & (boundary - 1))) & (boundary - 1);

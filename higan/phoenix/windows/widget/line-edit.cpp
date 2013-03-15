@@ -1,6 +1,8 @@
-Geometry pLineEdit::minimumGeometry() {
-  Geometry geometry = pFont::geometry(hfont, lineEdit.state.text);
-  return { 0, 0, geometry.width + 12, geometry.height + 10 };
+namespace phoenix {
+
+Size pLineEdit::minimumSize() {
+  Size size = pFont::size(hfont, lineEdit.state.text);
+  return {size.width + 12, size.height + 10};
 }
 
 void pLineEdit::setEditable(bool editable) {
@@ -42,4 +44,6 @@ void pLineEdit::destructor() {
 void pLineEdit::orphan() {
   destructor();
   constructor();
+}
+
 }

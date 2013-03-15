@@ -33,10 +33,10 @@ Configuration::Configuration() {
 }
 
 void Configuration::load() {
-  configuration::load(application->path("settings.cfg"));
+  configuration::load(program->path("settings.cfg"));
   save();  //creates file if it does not exist
 }
 
 void Configuration::save() {
-  configuration::save(application->path("settings.cfg"));
+  configuration::save(program->path("settings.cfg"));
 }

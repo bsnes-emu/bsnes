@@ -1,3 +1,5 @@
+namespace phoenix {
+
 string pDialogWindow::fileOpen(Window &parent, const string &path, const lstring &filter) {
   string filterList;
   for(auto &item : filter) {
@@ -54,4 +56,6 @@ string pDialogWindow::folderSelect(Window &parent, const string &path) {
   string name = directory.toUtf8().constData();
   if(name != "" && name.endswith("/") == false) name.append("/");
   return name;
+}
+
 }

@@ -1,10 +1,30 @@
-Geometry pFont::geometry(const string &description, const string &text) {
-  return pFont::geometry(pFont::create(description), text);
+namespace phoenix {
+
+string pFont::serif(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Serif, ", size, ", ", style};
+}
+
+string pFont::sans(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Sans, ", size, ", ", style};
+}
+
+string pFont::monospace(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Liberation Mono, ", size, ", ", style};
+}
+
+Size pFont::size(const string &font, const string &text) {
+  return pFont::size(pFont::create(font), text);
 }
 
 QFont pFont::create(const string &description) {
   lstring part;
-  part.split(",", description);
+  part.split<2>(",", description);
   for(auto &item : part) item.trim(" ");
 
   string family = "Sans";
@@ -25,7 +45,7 @@ QFont pFont::create(const string &description) {
   return qtFont;
 }
 
-Geometry pFont::geometry(const QFont &qtFont, const string &text) {
+Size pFont::size(const QFont &qtFont, const string &text) {
   QFontMetrics metrics(qtFont);
 
   lstring lines;
@@ -36,5 +56,7 @@ Geometry pFont::geometry(const QFont &qtFont, const string &text) {
     maxWidth = max(maxWidth, metrics.width(line));
   }
 
-  return { 0, 0, maxWidth, metrics.height() * lines.size() };
+  return {maxWidth, metrics.height() * lines.size()};
+}
+
 }

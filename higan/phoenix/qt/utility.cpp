@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static QIcon CreateIcon(const nall::image &image, bool scale = false) {
   nall::image qtBuffer = image;
   qtBuffer.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
@@ -187,4 +189,6 @@ static Keyboard::Keycode Keysym(int keysym) {
   case XK_KP_Delete: return Keyboard::Keycode::KeypadDelete;
   }
   return Keyboard::Keycode::None;
+}
+
 }

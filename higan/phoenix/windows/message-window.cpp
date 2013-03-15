@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons buttons, UINT response) {
   if(response == IDOK) return MessageWindow::Response::Ok;
   if(response == IDCANCEL) return MessageWindow::Response::Cancel;
@@ -38,4 +40,6 @@ MessageWindow::Response pMessageWindow::critical(Window &parent, const string &t
   if(buttons == MessageWindow::Buttons::OkCancel) flags |= MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) flags |= MB_YESNO;
   return MessageWindow_response(buttons, MessageBox(&parent != &Window::none() ? parent.p.hwnd : 0, utf16_t(text), L"", flags));
+}
+
 }

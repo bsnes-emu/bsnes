@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static void CheckItem_toggle(CheckItem *self) {
   if(self->p.locked == false && self->onToggle) self->onToggle();
 }
@@ -30,4 +32,6 @@ void pCheckItem::destructor() {
 void pCheckItem::orphan() {
   destructor();
   constructor();
+}
+
 }

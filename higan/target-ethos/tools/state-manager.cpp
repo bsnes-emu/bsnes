@@ -44,7 +44,7 @@ StateManager::StateManager() {
 }
 
 void StateManager::synchronize() {
-  layout.setEnabled(application->active);
+  layout.setEnabled(program->active);
 
   descEdit.setText("");
   descEdit.setEnabled(false);

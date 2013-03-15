@@ -1,15 +1,15 @@
 ServerSettings *serverSettings = nullptr;
 
 ServerSettings::ServerSettings() {
-  title.setFont(application->titleFont);
+  title.setFont(program->titleFont);
   title.setText("Server Settings");
   hostLabel.setText("Hostname:");
   userLabel.setText("Username:");
   passLabel.setText("Password:");
 
   unsigned width = min(
-    Font(application->normalFont).geometry("Hostname:").width,
-    Font(application->normalFont).geometry("Username:").width
+    Font::size(program->normalFont, "Hostname:").width,
+    Font::size(program->normalFont, "Username:").width
   );
 
   append(title, {~0, 0}, 5);

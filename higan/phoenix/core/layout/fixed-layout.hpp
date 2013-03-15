@@ -2,7 +2,7 @@ struct FixedLayout : Layout {
   void append(Sizable &sizable, const Geometry &geometry);
   void append(Sizable &sizable);
   bool enabled();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void remove(Sizable &sizable);
   void reset();
   void setEnabled(bool enabled = true);

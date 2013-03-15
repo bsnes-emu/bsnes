@@ -1,11 +1,13 @@
+namespace phoenix {
+
 static void VerticalSlider_change(VerticalSlider *self) {
   if(self->state.position == self->position()) return;
   self->state.position = self->position();
   if(self->onChange) self->onChange();
 }
 
-Geometry pVerticalSlider::minimumGeometry() {
-  return { 0, 0, 20, 0 };
+Size pVerticalSlider::minimumSize() {
+  return {20, 0};
 }
 
 unsigned pVerticalSlider::position() {
@@ -38,4 +40,6 @@ void pVerticalSlider::destructor() {
 void pVerticalSlider::orphan() {
   destructor();
   constructor();
+}
+
 }

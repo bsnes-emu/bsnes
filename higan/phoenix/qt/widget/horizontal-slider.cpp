@@ -1,5 +1,7 @@
-Geometry pHorizontalSlider::minimumGeometry() {
-  return { 0, 0, 0, 20 };
+namespace phoenix {
+
+Size pHorizontalSlider::minimumSize() {
+  return {0, 20};
 }
 
 unsigned pHorizontalSlider::position() {
@@ -40,4 +42,6 @@ void pHorizontalSlider::orphan() {
 void pHorizontalSlider::onChange() {
   horizontalSlider.state.position = position();
   if(horizontalSlider.onChange) horizontalSlider.onChange();
+}
+
 }

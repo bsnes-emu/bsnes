@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pSeparator::constructor() {
   widget = gtk_separator_menu_item_new();
 }
@@ -9,4 +11,6 @@ void pSeparator::destructor() {
 void pSeparator::orphan() {
   destructor();
   constructor();
+}
+
 }

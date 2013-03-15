@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pMenu::append(Action &action) {
 }
 
@@ -14,4 +16,6 @@ void pMenu::constructor() {
 }
 
 void pMenu::destructor() {
+}
+
 }

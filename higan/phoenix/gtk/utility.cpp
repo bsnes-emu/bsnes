@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static GdkPixbuf* CreatePixbuf(const nall::image &image, bool scale = false) {
   nall::image gdkImage = image;
   gdkImage.transform(0, 32, 255u << 24, 255u << 0, 255u << 8, 255u << 16);
@@ -197,4 +199,6 @@ static Keyboard::Keycode Keysym(unsigned keysym) {
   case GDK_KP_Delete: return Keyboard::Keycode::KeypadDelete;
   }
   return Keyboard::Keycode::None;
+}
+
 }

@@ -11,7 +11,7 @@ namespace nall {
 struct zip {
   zip(const string &filename) {
     fp.open(filename, file::mode::write);
-    time_t currentTime = time(0);
+    time_t currentTime = time(nullptr);
     tm *info = localtime(&currentTime);
     dosTime = (info->tm_hour << 11) | (info->tm_min << 5) | (info->tm_sec >> 1);
     dosDate = ((info->tm_year - 80) << 9) | ((1 + info->tm_mon) << 5) + (info->tm_mday);

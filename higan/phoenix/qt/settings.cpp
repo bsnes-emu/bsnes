@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static Settings *settings = nullptr;
 
 void Settings::load() {
@@ -21,4 +23,6 @@ Settings::Settings() {
   append(frameGeometryHeight = 28, "frameGeometryHeight");
   append(menuGeometryHeight = 20, "menuGeometryHeight");
   append(statusGeometryHeight = 20, "statusGeometryHeight");
+}
+
 }

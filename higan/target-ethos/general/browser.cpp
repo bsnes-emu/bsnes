@@ -40,7 +40,11 @@ Browser::Browser() {
 
   fileList.onChange = {&Browser::synchronize, this};
   fileList.onActivate = openButton.onActivate = {&Browser::fileListActivate, this};
-  onClose = [&] { dialogActive = false; };
+
+  onClose = [&] {
+    setModal(false);
+    setVisible(false);
+  };
 
   synchronize();
 }
@@ -57,11 +61,11 @@ void Browser::synchronize() {
 }
 
 void Browser::saveConfiguration() {
-  config.save(application->path("paths.cfg"));
+  config.save(program->path("paths.cfg"));
 }
 
 void Browser::bootstrap() {
-  for(auto &emulator : application->emulator) {
+  for(auto &emulator : program->emulator) {
     for(auto &media : emulator->media) {
       bool found = false;
       for(auto &folder : folderList) {
@@ -85,8 +89,8 @@ void Browser::bootstrap() {
     config.append(folder.selection, string{folder.extension, "::selection"});
   }
 
-  config.load(application->path("paths.cfg"));
-  config.save(application->path("paths.cfg"));
+  config.load(program->path("paths.cfg"));
+  config.save(program->path("paths.cfg"));
 }
 
 string Browser::select(const string &title, const string &extension) {
@@ -101,38 +105,18 @@ string Browser::select(const string &title, const string &extension) {
       break;
     }
   }
-  if(path.empty()) path = application->basepath;
+  if(path.empty()) path = program->basepath;
   setPath(path, selection);
 
   filterLabel.setText({"Filter: *.", extension});
 
   audio.clear();
   setTitle(title);
-  setModal(true);
   setVisible(true);
   fileList.setFocused();
   outputFilename = "";
 
-  dialogActive = true;
-  bool backspace = false;
-  using phoenix::Keyboard;
-
-  while(dialogActive) {
-    OS::processEvents();
-    if(Keyboard::pressed(Keyboard::Scancode::Escape)) onClose();
-    if(Keyboard::pressed(Keyboard::Scancode::Backspace)) {
-      if(backspace == false) {
-        backspace = true;
-        if(fileList.focused()) upButton.onActivate();
-      }
-    } else {
-      backspace = false;
-    }
-    usleep(20 * 1000);
-  }
-
-  setModal(false);
-  setVisible(false);
+  setModal();
   return outputFilename;
 }
 
@@ -187,6 +171,6 @@ void Browser::fileListActivate() {
   string filename = filenameList[selection];
   if(string{filename}.rtrim<1>("/").endswith(this->extension) == false) return setPath({path, filename});
 
-  dialogActive = false;
   outputFilename = {path, filename};
+  onClose();
 }

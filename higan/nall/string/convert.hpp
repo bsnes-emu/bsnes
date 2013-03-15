@@ -3,7 +3,7 @@
 namespace nall {
 
 char* strlower(char *str) {
-  if(!str) return 0;
+  if(!str) return nullptr;
   int i = 0;
   while(str[i]) {
     str[i] = chrlower(str[i]);
@@ -13,7 +13,7 @@ char* strlower(char *str) {
 }
 
 char* strupper(char *str) {
-  if(!str) return 0;
+  if(!str) return nullptr;
   int i = 0;
   while(str[i]) {
     str[i] = chrupper(str[i]);
@@ -23,7 +23,7 @@ char* strupper(char *str) {
 }
 
 char* qstrlower(char *s) {
-  if(!s) return 0;
+  if(!s) return nullptr;
   bool quoted = false;
   while(*s) {
     if(*s == '\"' || *s == '\'') quoted ^= 1;
@@ -33,7 +33,7 @@ char* qstrlower(char *s) {
 }
 
 char* qstrupper(char *s) {
-  if(!s) return 0;
+  if(!s) return nullptr;
   bool quoted = false;
   while(*s) {
     if(*s == '\"' || *s == '\'') quoted ^= 1;

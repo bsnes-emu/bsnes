@@ -38,7 +38,7 @@ ifeq ($(compiler),)
   ifeq ($(platform),win)
     compiler := g++
   else ifeq ($(platform),osx)
-    compiler := g++-mp-4.7
+    compiler := clang
   else
     compiler := g++-4.7
   endif

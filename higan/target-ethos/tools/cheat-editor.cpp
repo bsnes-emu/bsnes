@@ -16,8 +16,8 @@ CheatEditor::CheatEditor() {
   resetButton.setText("Reset");
   eraseButton.setText("Erase");
   unsigned width = max(
-    Font(application->normalFont).geometry("Codes(s)"    ).width,
-    Font(application->normalFont).geometry("Description:").width
+    Font::size(program->normalFont, "Codes(s)"    ).width,
+    Font::size(program->normalFont, "Description:").width
   );
 
   append(layout);
@@ -50,7 +50,7 @@ CheatEditor::CheatEditor() {
 }
 
 void CheatEditor::synchronize() {
-  layout.setEnabled(application->active);
+  layout.setEnabled(program->active);
 
   if(cheatList.selected()) {
     unsigned n = cheatList.selection();

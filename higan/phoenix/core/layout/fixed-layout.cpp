@@ -15,13 +15,13 @@ bool FixedLayout::enabled() {
   return state.enabled;
 }
 
-Geometry FixedLayout::minimumGeometry() {
+Size FixedLayout::minimumSize() {
   unsigned width = MinimumSize, height = MinimumSize;
   for(auto &child : children) {
-    width  = max(width,  child.sizable->minimumGeometry().width);
-    height = max(height, child.sizable->minimumGeometry().height);
+    width  = max(width,  child.sizable->minimumSize().width);
+    height = max(height, child.sizable->minimumSize().height);
   }
-  return { 0, 0, width, height };
+  return {width, height};
 }
 
 void FixedLayout::remove(Sizable &sizable) {

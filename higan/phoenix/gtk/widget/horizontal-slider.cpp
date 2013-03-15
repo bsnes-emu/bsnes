@@ -1,11 +1,13 @@
+namespace phoenix {
+
 static void HorizontalSlider_change(HorizontalSlider *self) {
   if(self->state.position == self->position()) return;
   self->state.position = self->position();
   if(self->onChange) self->onChange();
 }
 
-Geometry pHorizontalSlider::minimumGeometry() {
-  return { 0, 0, 0, 20 };
+Size pHorizontalSlider::minimumSize() {
+  return {0, 20};
 }
 
 unsigned pHorizontalSlider::position() {
@@ -38,4 +40,6 @@ void pHorizontalSlider::destructor() {
 void pHorizontalSlider::orphan() {
   destructor();
   constructor();
+}
+
 }

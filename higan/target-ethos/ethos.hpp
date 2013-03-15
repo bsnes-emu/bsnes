@@ -30,15 +30,14 @@ using namespace ruby;
 
 Emulator::Interface& system();
 
-struct Application {
+struct Program {
   vector<Emulator::Interface*> emulator;
-  Emulator::Interface *active;
+  Emulator::Interface *active = nullptr;
   library ananke;
 
-  bool quit;
   bool pause;
   bool autopause;
-  unsigned depth;
+  unsigned depth;  //color depth; 24(bpp) or 30(bpp)
 
   string basepath;
   string userpath;
@@ -50,11 +49,10 @@ struct Application {
 
   bool focused();
   string path(const string &filename);
-  void run();
+  void main();
   void bootstrap();
-  Application(int argc, char **argv);
-  ~Application();
+  Program(int argc, char **argv);
 };
 
-extern Application *application;
+extern Program *program;
 extern DSP dspaudio;

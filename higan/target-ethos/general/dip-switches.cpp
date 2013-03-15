@@ -16,16 +16,15 @@ DipSwitches::DipSwitches() {
     controlLayout.append(spacer, {~0, 0});
     controlLayout.append(accept, {80, 0});
 
-  setGeometry({128, 128, 250, layout.minimumGeometry().height});
+  setGeometry({128, 128, 250, layout.minimumSize().height});
 
-  onClose = accept.onActivate = [&] { quit = true; };
+  onClose = accept.onActivate = [&] {
+    setModal(false);
+    setVisible(false);
+  };
 }
 
 unsigned DipSwitches::run(const Markup::Node &node) {
-  audio.clear();
-  setModal(true);
-  quit = false;
-
   for(auto &dipItem : dip) {
     dipItem.name.setEnabled(false);
     dipItem.name.setText("(empty)");
@@ -52,12 +51,8 @@ unsigned DipSwitches::run(const Markup::Node &node) {
   setVisible();
   accept.setFocused();
 
-  while(quit == false) {
-    OS::processEvents();
-  }
-
-  setModal(false);
-  setVisible(false);
+  audio.clear();
+  setModal();
 
   unsigned result = 0;
   for(auto &dipItem : dip) {

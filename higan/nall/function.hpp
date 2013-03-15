@@ -34,7 +34,7 @@ namespace nall {
     };
 
   public:
-    operator bool() const { return callback; }
+    explicit operator bool() const { return callback; }
     R operator()(P... p) const { return (*callback)(std::forward<P>(p)...); }
     void reset() { if(callback) { delete callback; callback = nullptr; } }
 

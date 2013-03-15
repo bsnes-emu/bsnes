@@ -1,3 +1,5 @@
+namespace phoenix {
+
 bool pCheckItem::checked() {
   return false;
 }
@@ -12,4 +14,6 @@ void pCheckItem::constructor() {
 }
 
 void pCheckItem::destructor() {
+}
+
 }

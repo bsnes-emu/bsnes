@@ -2,26 +2,28 @@
 #include "bootstrap.cpp"
 #include "resource/resource.cpp"
 
-Application *application = nullptr;
+Program *program = nullptr;
 DSP dspaudio;
 
 Emulator::Interface& system() {
-  if(application->active == nullptr) throw;
-  return *application->active;
+  if(program->active == nullptr) throw;
+  return *program->active;
 }
 
-bool Application::focused() {
+bool Program::focused() {
   return config->input.focusAllow || presentation->focused();
 }
 
-string Application::path(const string &filename) {
+//look for file in executable path; if not found, use user path instead
+//this allows configuration files to be placed in either location
+string Program::path(const string &filename) {
   string path = {basepath, filename};
   if(file::exists(path)) return path;
   if(directory::exists(path)) return path;
   return {userpath, filename};
 }
 
-void Application::run() {
+void Program::main() {
   inputManager->poll();
   utility->updateStatus();
   autopause = config->input.focusPause && presentation->focused() == false;
@@ -35,11 +37,10 @@ void Application::run() {
   system().run();
 }
 
-Application::Application(int argc, char **argv) {
+Program::Program(int argc, char **argv) {
   ananke.open("ananke");
 
-  application = this;
-  quit = false;
+  program = this;
   pause = false;
   autopause = false;
 
@@ -50,16 +51,16 @@ Application::Application(int argc, char **argv) {
   bootstrap();
   active = nullptr;
 
-  if(Intrinsics::platform() == Intrinsics::Platform::Windows) {
-    normalFont = "Tahoma, 8";
-    boldFont = "Tahoma, 8, Bold";
-    titleFont = "Tahoma, 16, Bold";
-    monospaceFont = "Lucida Console, 8";
+  if(Intrinsics::platform() == Intrinsics::Platform::OSX) {
+    normalFont = Font::sans(12);
+    boldFont = Font::sans(12, "Bold");
+    titleFont = Font::sans(24, "Bold");
+    monospaceFont = Font::monospace(8);
   } else {
-    normalFont = "Sans, 8";
-    boldFont = "Sans, 8, Bold";
-    titleFont = "Sans, 16, Bold";
-    monospaceFont = "Liberation Mono, 8";
+    normalFont = Font::sans(8);
+    boldFont = Font::sans(8, "Bold");
+    titleFont = Font::sans(16, "Bold");
+    monospaceFont = Font::monospace(8);
   }
 
   config = new Configuration;
@@ -107,14 +108,12 @@ Application::Application(int argc, char **argv) {
   utility->updateShader();
 
   if(config->video.startFullScreen && argc >= 2) utility->toggleFullScreen();
-  OS::processEvents();
+  Application::processEvents();
 
   if(argc >= 2) utility->loadMedia(argv[1]);
 
-  while(quit == false) {
-    OS::processEvents();
-    run();
-  }
+  Application::main = {&Program::main, this};
+  Application::run();
 
   utility->unload();
   config->save();
@@ -125,16 +124,14 @@ Application::Application(int argc, char **argv) {
   ananke.close();
 }
 
-Application::~Application() {
-}
-
 int main(int argc, char **argv) {
   #if defined(PLATFORM_WINDOWS)
   utf8_args(argc, argv);
   #endif
 
-  OS::setName("higan");
-  new Application(argc, argv);
-  delete application;
+  Application::setName("higan");
+  Application::Cocoa::onQuit = &Application::quit;
+  new Program(argc, argv);
+  delete program;
   return 0;
 }

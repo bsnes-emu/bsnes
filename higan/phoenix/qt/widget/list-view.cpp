@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pListView::append(const lstring &text) {
   locked = true;
   auto items = qtListView->findItems("", Qt::MatchContains);
@@ -161,4 +163,6 @@ void pListView::onToggle(QTreeWidgetItem *item) {
   bool checkState = checked(row);
   listView.state.checked[row] = checkState;
   if(locked == false && listView.onToggle) listView.onToggle(row);
+}
+
 }

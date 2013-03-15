@@ -1,3 +1,5 @@
+namespace phoenix {
+
 bool pRadioItem::checked() {
   return qtAction->isChecked();
 }
@@ -38,4 +40,6 @@ void pRadioItem::onActivate() {
     setChecked();
     if(locked == false && radioItem.onActivate) radioItem.onActivate();
   }
+}
+
 }

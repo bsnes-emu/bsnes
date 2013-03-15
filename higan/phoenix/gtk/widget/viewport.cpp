@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static gboolean Viewport_mouseLeave(GtkWidget *widget, GdkEventButton *event, pViewport *self) {
   if(self->viewport.onMouseLeave) self->viewport.onMouseLeave();
   return true;
@@ -55,4 +57,6 @@ void pViewport::destructor() {
 void pViewport::orphan() {
   destructor();
   constructor();
+}
+
 }

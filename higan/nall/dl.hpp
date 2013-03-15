@@ -17,7 +17,8 @@
 
 namespace nall {
   struct library {
-    bool opened() const { return handle; }
+    explicit operator bool() const { return open(); }
+    bool open() const { return handle; }
     bool open(const char*, const char* = "");
     bool open_absolute(const char*);
     void* sym(const char*);
@@ -48,7 +49,7 @@ namespace nall {
   }
 
   inline void* library::sym(const char *name) {
-    if(!handle) return 0;
+    if(!handle) return nullptr;
     return dlsym((void*)handle, name);
   }
 
@@ -72,7 +73,7 @@ namespace nall {
   }
 
   inline void* library::sym(const char *name) {
-    if(!handle) return 0;
+    if(!handle) return nullptr;
     return dlsym((void*)handle, name);
   }
 
@@ -96,7 +97,7 @@ namespace nall {
   }
 
   inline void* library::sym(const char *name) {
-    if(!handle) return 0;
+    if(!handle) return nullptr;
     return (void*)GetProcAddress((HMODULE)handle, name);
   }
 
@@ -107,7 +108,8 @@ namespace nall {
   }
   #else
   inline bool library::open(const char*, const char*) { return false; }
-  inline void* library::sym(const char*) { return 0; }
+  inline bool library::open_absolute(const char*) { return false; }
+  inline void* library::sym(const char*) { return nullptr; }
   inline void library::close() {}
   #endif
 };

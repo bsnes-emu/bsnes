@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pTextEdit::setCursorPosition(unsigned position) {
   QTextCursor cursor = qtTextEdit->textCursor();
   unsigned lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
@@ -47,4 +49,6 @@ void pTextEdit::orphan() {
 void pTextEdit::onChange() {
   textEdit.state.text = text();
   if(textEdit.onChange) textEdit.onChange();
+}
+
 }

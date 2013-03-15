@@ -25,7 +25,7 @@ void InputManager::appendHotkeys() {
     hotkey->mapping = "KB0::P";
 
     hotkey->press = [] {
-      application->pause = !application->pause;
+      program->pause = !program->pause;
     };
   }
 
@@ -115,7 +115,7 @@ void InputManager::appendHotkeys() {
     hotkey->mapping = "None";
 
     hotkey->press = [] {
-      application->quit = true;
+      Application::quit();
     };
   }
 
@@ -135,7 +135,7 @@ void InputManager::appendHotkeys() {
     hotkey->mapping = "None";
 
     hotkey->press = [&] {
-      if(application->active == nullptr) return;
+      if(program->active == nullptr) return;
       system().exportMemory();
       utility->showMessage("Memory exported");
     };

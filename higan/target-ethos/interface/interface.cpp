@@ -38,12 +38,12 @@ uint32_t Interface::videoColor(unsigned source, uint16_t r, uint16_t g, uint16_t
     b = b * luminance;
   }
 
-  if(application->depth == 30) {
+  if(program->depth == 30) {
     r >>= 6, g >>= 6, b >>= 6;
     return r << 20 | g << 10 | b << 0;
   }
 
-  if(application->depth == 24) {
+  if(program->depth == 24) {
     r >>= 8, g >>= 8, b >>= 8;
     return r << 16 | g << 8 | b << 0;
   }

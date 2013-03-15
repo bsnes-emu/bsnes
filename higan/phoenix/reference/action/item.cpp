@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pItem::setImage(const image &image) {
 }
 
@@ -8,4 +10,6 @@ void pItem::constructor() {
 }
 
 void pItem::destructor() {
+}
+
 }

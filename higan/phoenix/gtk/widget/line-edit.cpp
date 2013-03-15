@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static void LineEdit_activate(LineEdit *self) {
   if(self->onActivate) self->onActivate();
 }
@@ -7,9 +9,9 @@ static void LineEdit_change(LineEdit *self) {
   if(self->p.locked == false && self->onChange) self->onChange();
 }
 
-Geometry pLineEdit::minimumGeometry() {
-  Geometry geometry = pFont::geometry(widget.state.font, lineEdit.state.text);
-  return { 0, 0, geometry.width + 10, geometry.height + 10 };
+Size pLineEdit::minimumSize() {
+  Size size = pFont::size(widget.state.font, lineEdit.state.text);
+  return {size.width + 10, size.height + 10};
 }
 
 void pLineEdit::setEditable(bool editable) {
@@ -42,4 +44,6 @@ void pLineEdit::destructor() {
 void pLineEdit::orphan() {
   destructor();
   constructor();
+}
+
 }

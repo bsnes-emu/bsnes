@@ -78,7 +78,7 @@ bool DigitalInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t DigitalInput::poll() {
-  if(application->focused() == false) return 0;
+  if(program->focused() == false) return 0;
   bool result = logic;
 
   for(auto &item : inputList) {
@@ -122,7 +122,7 @@ bool RelativeInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t RelativeInput::poll() {
-  if(application->focused() == false) return 0;
+  if(program->focused() == false) return 0;
   int16_t result = 0;
 
   for(auto &item : inputList) {
@@ -162,7 +162,7 @@ bool AbsoluteInput::bind(unsigned scancode, int16_t value) {
 }
 
 int16_t AbsoluteInput::poll() {
-  if(application->focused() == false) return -32768;
+  if(program->focused() == false) return -32768;
   int16_t result = -32768;  //offscreen value
 
   using nall::Mouse;
@@ -245,7 +245,7 @@ int16_t InputManager::poll(unsigned scancode) {
 }
 
 void InputManager::saveConfiguration() {
-  config.save(application->path("input.cfg"));
+  config.save(program->path("input.cfg"));
 }
 
 InputManager::InputManager() {
@@ -256,7 +256,7 @@ InputManager::InputManager() {
 
 void InputManager::bootstrap() {
   unsigned guid = 0;
-  for(auto &emulator : application->emulator) {
+  for(auto &emulator : program->emulator) {
     for(auto &port : emulator->port) {
       for(auto &device : port.device) {
         for(auto &number : device.order) {
@@ -286,8 +286,8 @@ void InputManager::bootstrap() {
 
   appendHotkeys();
 
-  config.load(application->path("input.cfg"));
-  config.save(application->path("input.cfg"));
+  config.load(program->path("input.cfg"));
+  config.save(program->path("input.cfg"));
 
   bind();
 }

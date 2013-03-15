@@ -1,3 +1,5 @@
+namespace phoenix {
+
 static gboolean Canvas_expose(GtkWidget *widget, GdkEvent *event, pCanvas *self) {
   cairo_t *context = gdk_cairo_create(gtk_widget_get_window(widget));
   cairo_set_source_surface(context, self->surface, 0, 0);
@@ -42,7 +44,7 @@ void pCanvas::setSize(const Size &size) {
 void pCanvas::update() {
   memcpy(cairo_image_surface_get_data(surface), canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
   if(gtk_widget_get_realized(gtkWidget) == false) return;
-  gdk_window_invalidate_rect(gtk_widget_get_window(gtkWidget), 0, true);
+  gdk_window_invalidate_rect(gtk_widget_get_window(gtkWidget), nullptr, true);
 }
 
 void pCanvas::constructor() {
@@ -67,4 +69,6 @@ void pCanvas::destructor() {
 void pCanvas::orphan() {
   destructor();
   constructor();
+}
+
 }

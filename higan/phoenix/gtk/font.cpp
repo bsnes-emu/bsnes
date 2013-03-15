@@ -1,13 +1,32 @@
-Geometry pFont::geometry(const string &description, const string &text) {
-  PangoFontDescription *font = create(description);
-  Geometry geometry = pFont::geometry(font, text);
-  free(font);
-  return geometry;
+namespace phoenix {
+
+string pFont::serif(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Serif, ", size, ", ", style};
+}
+
+string pFont::sans(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Sans, ", size, ", ", style};
+}
+
+string pFont::monospace(unsigned size, string style) {
+  if(size == 0) size = 8;
+  return {"Liberation Mono, ", size, ", ", style};
+}
+
+Size pFont::size(const string &font, const string &text) {
+  PangoFontDescription *description = create(font);
+  Size size = pFont::size(description, text);
+  free(description);
+  return size;
 }
 
 PangoFontDescription* pFont::create(const string &description) {
   lstring part;
-  part.split(",", description);
+  part.split<2>(",", description);
   for(auto &item : part) item.trim(" ");
 
   string family = "Sans";
@@ -32,7 +51,7 @@ void pFont::free(PangoFontDescription *font) {
   pango_font_description_free(font);
 }
 
-Geometry pFont::geometry(PangoFontDescription *font, const string &text) {
+Size pFont::size(PangoFontDescription *font, const string &text) {
   PangoContext *context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
   PangoLayout *layout = pango_layout_new(context);
   pango_layout_set_font_description(layout, font);
@@ -40,7 +59,7 @@ Geometry pFont::geometry(PangoFontDescription *font, const string &text) {
   int width = 0, height = 0;
   pango_layout_get_pixel_size(layout, &width, &height);
   g_object_unref((gpointer)layout);
-  return { 0, 0, width, height };
+  return {width, height};
 }
 
 void pFont::setFont(GtkWidget *widget, const string &font) {
@@ -50,9 +69,11 @@ void pFont::setFont(GtkWidget *widget, const string &font) {
 }
 
 void pFont::setFont(GtkWidget *widget, gpointer font) {
-  if(font == 0) return;
+  if(font == nullptr) return;
   gtk_widget_modify_font(widget, (PangoFontDescription*)font);
   if(GTK_IS_CONTAINER(widget)) {
     gtk_container_foreach(GTK_CONTAINER(widget), (GtkCallback)pFont::setFont, font);
   }
+}
+
 }

@@ -14,7 +14,7 @@ namespace nall {
   struct thread {
     thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
       initialize();
-      pthread_create(&pthread, NULL, thread_entry_point, (void*)this);
+      pthread_create(&pthread, nullptr, thread_entry_point, (void*)this);
     }
 
     ~thread() {
@@ -28,7 +28,7 @@ namespace nall {
     void join() {
       if(dead) return;
       dead = true;
-      pthread_join(pthread, NULL);
+      pthread_join(pthread, nullptr);
     }
 
     static bool primary() {
@@ -59,7 +59,7 @@ namespace nall {
     thread *context = (thread*)parameter;
     context->entryPoint();
     context->completed = true;
-    pthread_exit(0);
+    pthread_exit(nullptr);
   }
 }
 #elif defined(PLATFORM_WIN)
@@ -69,7 +69,7 @@ namespace nall {
   struct thread {
     thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
       initialize();
-      hthread = CreateThread(NULL, 0, thread_entry_point, (void*)this, 0, NULL);
+      hthread = CreateThread(nullptr, 0, thread_entry_point, (void*)this, 0, nullptr);
     }
 
     ~thread() {

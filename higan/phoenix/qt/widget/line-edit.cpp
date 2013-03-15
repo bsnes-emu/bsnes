@@ -1,6 +1,8 @@
-Geometry pLineEdit::minimumGeometry() {
-  Geometry geometry = pFont::geometry(qtWidget->font(), lineEdit.state.text);
-  return { 0, 0, geometry.width + 12, geometry.height + 12 };
+namespace phoenix {
+
+Size pLineEdit::minimumSize() {
+  Size size = pFont::size(qtWidget->font(), lineEdit.state.text);
+  return {size.width + 12, size.height + 12};
 }
 
 void pLineEdit::setEditable(bool editable) {
@@ -42,4 +44,6 @@ void pLineEdit::onActivate() {
 void pLineEdit::onChange() {
   lineEdit.state.text = text();
   if(lineEdit.onChange) lineEdit.onChange();
+}
+
 }

@@ -1,3 +1,14 @@
+namespace phoenix {
+
+struct pApplication {
+  static void run();
+  static bool pendingEvents();
+  static void processEvents();
+  static void quit();
+
+  static void initialize();
+};
+
 struct Settings {
   bidirectional_map<Keyboard::Scancode, unsigned> keymap;
 };
@@ -9,14 +20,15 @@ struct pMenu;
 struct pLayout;
 struct pWidget;
 
-static bool osQuit = false;
-
 struct pFont {
-  static Geometry geometry(const string &description, const string &text);
+  static string serif(unsigned size, string style);
+  static string sans(unsigned size, string style);
+  static string monospace(unsigned size, string style);
+  static Size size(const string &font, const string &text);
 
   static HFONT create(const string &description);
   static void free(HFONT hfont);
-  static Geometry geometry(HFONT hfont, const string &text);
+  static Size size(HFONT hfont, const string &text);
 };
 
 struct pDesktop {
@@ -62,15 +74,6 @@ struct pObject {
 
   void constructor() {}
   void destructor() {}
-};
-
-struct pOS : public pObject {
-  static void main();
-  static bool pendingEvents();
-  static void processEvents();
-  static void quit();
-
-  static void initialize();
 };
 
 struct pTimer : public pObject {
@@ -224,7 +227,7 @@ struct pWidget : public pSizable {
 
   bool enabled();
   bool focused();
-  virtual Geometry minimumGeometry();
+  virtual Size minimumSize();
   void setEnabled(bool enabled);
   void setFocused();
   void setFont(const string &font);
@@ -244,7 +247,7 @@ struct pButton : public pWidget {
   HBITMAP hbitmap;
   HIMAGELIST himagelist;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setImage(const image &image, Orientation orientation);
   void setText(const string &text);
 
@@ -268,32 +271,32 @@ struct pCanvas : public pWidget {
   void paint();
 };
 
-struct pCheckBox : public pWidget {
-  CheckBox &checkBox;
+struct pCheckButton : public pWidget {
+  CheckButton &checkButton;
 
   bool checked();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setChecked(bool checked);
   void setText(const string &text);
 
-  pCheckBox(CheckBox &checkBox) : pWidget(checkBox), checkBox(checkBox) {}
+  pCheckButton(CheckButton &checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
   void destructor();
   void orphan();
 };
 
-struct pComboBox : public pWidget {
-  ComboBox &comboBox;
+struct pComboButton : public pWidget {
+  ComboButton &comboButton;
 
   void append(const string &text);
   void modify(unsigned row, const string &text);
   void remove(unsigned row);
-  Geometry minimumGeometry();
+  Size minimumSize();
   void reset();
   unsigned selection();
   void setSelection(unsigned row);
 
-  pComboBox(ComboBox &comboBox) : pWidget(comboBox), comboBox(comboBox) {}
+  pComboButton(ComboButton &comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();
   void destructor();
   void orphan();
@@ -317,15 +320,15 @@ struct pHexEdit : public pWidget {
   bool keyPress(unsigned key);
 };
 
-struct pHorizontalScrollBar : public pWidget {
-  HorizontalScrollBar &horizontalScrollBar;
+struct pHorizontalScroller : public pWidget {
+  HorizontalScroller &horizontalScroller;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pHorizontalScrollBar(HorizontalScrollBar &horizontalScrollBar) : pWidget(horizontalScrollBar), horizontalScrollBar(horizontalScrollBar) {}
+  pHorizontalScroller(HorizontalScroller &horizontalScroller) : pWidget(horizontalScroller), horizontalScroller(horizontalScroller) {}
   void constructor();
   void destructor();
   void orphan();
@@ -334,7 +337,7 @@ struct pHorizontalScrollBar : public pWidget {
 struct pHorizontalSlider : public pWidget {
   HorizontalSlider &horizontalSlider;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -348,7 +351,7 @@ struct pHorizontalSlider : public pWidget {
 struct pLabel : public pWidget {
   Label &label;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}
@@ -360,7 +363,7 @@ struct pLabel : public pWidget {
 struct pLineEdit : public pWidget {
   LineEdit &lineEdit;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setEditable(bool editable);
   void setText(const string &text);
   string text();
@@ -405,7 +408,7 @@ struct pListView : public pWidget {
 struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setPosition(unsigned position);
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
@@ -414,16 +417,16 @@ struct pProgressBar : public pWidget {
   void orphan();
 };
 
-struct pRadioBox : public pWidget {
-  RadioBox &radioBox;
+struct pRadioButton : public pWidget {
+  RadioButton &radioButton;
 
   bool checked();
-  Geometry minimumGeometry();
+  Size minimumSize();
   void setChecked();
-  void setGroup(const set<RadioBox&> &group);
+  void setGroup(const set<RadioButton&> &group);
   void setText(const string &text);
 
-  pRadioBox(RadioBox &radioBox) : pWidget(radioBox), radioBox(radioBox) {}
+  pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}
   void constructor();
   void destructor();
   void orphan();
@@ -444,15 +447,15 @@ struct pTextEdit : public pWidget {
   void orphan();
 };
 
-struct pVerticalScrollBar : public pWidget {
-  VerticalScrollBar &verticalScrollBar;
+struct pVerticalScroller : public pWidget {
+  VerticalScroller &verticalScroller;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pVerticalScrollBar(VerticalScrollBar &verticalScrollBar) : pWidget(verticalScrollBar), verticalScrollBar(verticalScrollBar) {}
+  pVerticalScroller(VerticalScroller &verticalScroller) : pWidget(verticalScroller), verticalScroller(verticalScroller) {}
   void constructor();
   void destructor();
   void orphan();
@@ -461,7 +464,7 @@ struct pVerticalScrollBar : public pWidget {
 struct pVerticalSlider : public pWidget {
   VerticalSlider &verticalSlider;
 
-  Geometry minimumGeometry();
+  Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
@@ -482,3 +485,5 @@ struct pViewport : public pWidget {
   void destructor();
   void orphan();
 };
+
+}

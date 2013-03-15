@@ -3,7 +3,7 @@
 Utility *utility = nullptr;
 
 void Utility::setInterface(Emulator::Interface *emulator) {
-  application->active = emulator;
+  program->active = emulator;
   presentation->synchronize();
 }
 
@@ -14,9 +14,9 @@ void Utility::loadMedia(string pathname) {
 
   //if a filename was provided: convert to game folder and then load
   if(!directory::exists(pathname) && file::exists(pathname)) {
-    if(application->ananke.opened() == false) return;
-    function<string (string)> open = application->ananke.sym("ananke_open");
-    if(open == false) return;
+    if(program->ananke.open() == false) return;
+    function<string (string)> open = program->ananke.sym("ananke_open");
+    if(!open) return;
     string name = open(pathname);
     if(name.empty()) return;
     return loadMedia(name);
@@ -26,7 +26,7 @@ void Utility::loadMedia(string pathname) {
   string type = extension(pathname);
 
   //determine type by comparing extension against all emulation cores
-  for(auto &emulator : application->emulator) {
+  for(auto &emulator : program->emulator) {
     for(auto &media : emulator->media) {
       if(media.bootable == false) continue;
       if(type != media.type) continue;
@@ -48,7 +48,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
   unload();
   setInterface(emulator);
-  path(0) = application->path({media.name, ".sys/"});
+  path(0) = program->path({media.name, ".sys/"});
   path(media.id) = pathname;
   this->pathname.append(pathname);
 
@@ -85,17 +85,17 @@ void Utility::saveRequest(unsigned id, const string &path) {
 }
 
 void Utility::connect(unsigned port, unsigned device) {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   system().connect(port, device);
 }
 
 void Utility::power() {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   system().power();
 }
 
 void Utility::reset() {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   system().reset();
 }
 
@@ -114,7 +114,7 @@ void Utility::load() {
 }
 
 void Utility::unload() {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   if(tracerEnable) tracerToggle();
 
   cheatEditor->save({pathname[0], "cheats.bml"});
@@ -136,7 +136,7 @@ void Utility::unload() {
 }
 
 void Utility::saveState(unsigned slot) {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   serializer s = system().serialize();
   if(s.size() == 0) return;
   directory::create({pathname[0], "bsnes/"});
@@ -145,7 +145,7 @@ void Utility::saveState(unsigned slot) {
 }
 
 void Utility::loadState(unsigned slot) {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   auto memory = file::read({pathname[0], "bsnes/state-", slot, ".bsa"});
   if(memory.size() == 0) return showMessage({"Unable to locate slot ", slot, " state"});
   serializer s(memory.data(), memory.size());
@@ -154,7 +154,7 @@ void Utility::loadState(unsigned slot) {
 }
 
 void Utility::tracerToggle() {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   tracerEnable = !tracerEnable;
   bool result = system().tracerEnable(tracerEnable);
   if( tracerEnable &&  result) return utility->showMessage("Tracer activated");
@@ -164,7 +164,7 @@ void Utility::tracerToggle() {
 }
 
 void Utility::synchronizeDSP() {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
 
   if(config->video.synchronize == false) {
     return dspaudio.setFrequency(system().audioFrequency());
@@ -210,7 +210,7 @@ void Utility::updateShader() {
 }
 
 void Utility::resize(bool resizeWindow) {
-  if(application->active == nullptr) return;
+  if(program->active == nullptr) return;
   Geometry geometry = presentation->geometry();
   unsigned width  = system().information.width;
   unsigned height = system().information.height;
@@ -278,9 +278,9 @@ void Utility::updateStatus() {
   string text;
   if((currentTime - statusTime) <= 2) {
     text = statusMessage;
-  } else if(application->active == nullptr) {
+  } else if(program->active == nullptr) {
     text = "No cartridge loaded";
-  } else if(application->pause || application->autopause) {
+  } else if(program->pause || program->autopause) {
     text = "Paused";
   } else {
     text = statusText;

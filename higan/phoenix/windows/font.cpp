@@ -1,8 +1,28 @@
-Geometry pFont::geometry(const string &description, const string &text) {
-  HFONT hfont = pFont::create(description);
-  Geometry geometry = pFont::geometry(hfont, text);
+namespace phoenix {
+
+string pFont::serif(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Georgia, ", size, ", ", style};
+}
+
+string pFont::sans(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Tahoma, ", size, ", ", style};
+}
+
+string pFont::monospace(unsigned size, string style) {
+  if(size == 0) size = 8;
+  if(style == "") style = "Normal";
+  return {"Lucida Console, ", size, ", ", style};
+}
+
+Size pFont::size(const string &font, const string &text) {
+  HFONT hfont = pFont::create(font);
+  Size size = pFont::size(hfont, text);
   pFont::free(hfont);
-  return geometry;
+  return size;
 }
 
 HFONT pFont::create(const string &description) {
@@ -31,14 +51,16 @@ void pFont::free(HFONT hfont) {
   DeleteObject(hfont);
 }
 
-Geometry pFont::geometry(HFONT hfont, const string &text_) {
+Size pFont::size(HFONT hfont, const string &text_) {
   //temporary fix: empty text string returns height of zero; bad for eg Button height
   string text = (text_ == "" ? " " : text_);
 
   HDC hdc = GetDC(0);
   SelectObject(hdc, hfont);
-  RECT rc = { 0, 0, 0, 0 };
+  RECT rc = {0, 0, 0, 0};
   DrawText(hdc, utf16_t(text), -1, &rc, DT_CALCRECT);
   ReleaseDC(0, hdc);
-  return { 0, 0, rc.right, rc.bottom };
+  return {rc.right, rc.bottom};
+}
+
 }

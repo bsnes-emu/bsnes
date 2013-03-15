@@ -1,3 +1,5 @@
+namespace phoenix {
+
 void pMenu::append(Action &action) {
   action.p.parentMenu = &menu;
   if(parentWindow) parentWindow->p.updateMenu();
@@ -106,4 +108,6 @@ void pMenu::update(Window &parentWindow, Menu *parentMenu) {
       if(item.state.checked) item.setChecked();
     }
   }
+}
+
 }

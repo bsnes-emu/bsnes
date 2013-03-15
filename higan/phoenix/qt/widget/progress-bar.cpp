@@ -1,5 +1,7 @@
-Geometry pProgressBar::minimumGeometry() {
-  return { 0, 0, 0, 25 };
+namespace phoenix {
+
+Size pProgressBar::minimumSize() {
+  return {0, 25};
 }
 
 void pProgressBar::setPosition(unsigned position) {
@@ -23,4 +25,6 @@ void pProgressBar::destructor() {
 void pProgressBar::orphan() {
   destructor();
   constructor();
+}
+
 }
