@@ -1,27 +1,14 @@
 namespace phoenix {
 
-MessageWindow::Response pMessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return message(parent, text, buttons, Type::Information);
-}
+enum class MessageWindowType : unsigned { Error, Information, Question, Warning };
 
-MessageWindow::Response pMessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return message(parent, text, buttons, Type::Question);
-}
-
-MessageWindow::Response pMessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return message(parent, text, buttons, Type::Warning);
-}
-
-MessageWindow::Response pMessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return message(parent, text, buttons, Type::Critical);
-}
-
-MessageWindow::Response pMessageWindow::message(Window &parent, const string &text, MessageWindow::Buttons buttons, Type type) {
+MessageWindow::Response MessageWindow_dialog(MessageWindow::State &state, MessageWindowType type) {
   @autoreleasepool {
     NSAlert *alert = [[[NSAlert alloc] init] autorelease];
-    [alert setMessageText:[NSString stringWithUTF8String:text]];
+    if(state.title) [alert setMessageText:[NSString stringWithUTF8String:state.title]];
+    [alert setInformativeText:[NSString stringWithUTF8String:state.text]];
 
-    switch(buttons) {
+    switch(state.buttons) {
     case MessageWindow::Buttons::Ok:
       [alert addButtonWithTitle:@"Ok"];
       break;
@@ -41,16 +28,16 @@ MessageWindow::Response pMessageWindow::message(Window &parent, const string &te
     }
 
     switch(type) {
-    case Type::Information: [alert setAlertStyle:NSInformationalAlertStyle]; break;
-    case Type::Question: [alert setAlertStyle:NSInformationalAlertStyle]; break;
-    case Type::Warning: [alert setAlertStyle:NSWarningAlertStyle]; break;
-    case Type::Critical: [alert setAlertStyle:NSCriticalAlertStyle]; break;
+    case MessageWindowType::Error: [alert setAlertStyle:NSCriticalAlertStyle]; break;
+    case MessageWindowType::Information: [alert setAlertStyle:NSInformationalAlertStyle]; break;
+    case MessageWindowType::Question: [alert setAlertStyle:NSInformationalAlertStyle]; break;
+    case MessageWindowType::Warning: [alert setAlertStyle:NSWarningAlertStyle]; break;
     }
 
     NSInteger response = [alert runModal];
   //[alert beginSheetModalForWindow:parent.p.cocoaWindow modalDelegate:self didEndSelector:@selector(...) contextInfo:nil];
 
-    switch(buttons) {
+    switch(state.buttons) {
     case MessageWindow::Buttons::Ok:
       if(response == NSAlertFirstButtonReturn) return MessageWindow::Response::Ok;
       break;
@@ -70,7 +57,23 @@ MessageWindow::Response pMessageWindow::message(Window &parent, const string &te
     }
   }
 
-  return MessageWindow::Response::Ok;
+  throw;
+}
+
+MessageWindow::Response pMessageWindow::error(MessageWindow::State &state) {
+  return MessageWindow_dialog(state, MessageWindowType::Error);
+}
+
+MessageWindow::Response pMessageWindow::information(MessageWindow::State &state) {
+  return MessageWindow_dialog(state, MessageWindowType::Information);
+}
+
+MessageWindow::Response pMessageWindow::question(MessageWindow::State &state) {
+  return MessageWindow_dialog(state, MessageWindowType::Question);
+}
+
+MessageWindow::Response pMessageWindow::warning(MessageWindow::State &state) {
+  return MessageWindow_dialog(state, MessageWindowType::Warning);
 }
 
 }

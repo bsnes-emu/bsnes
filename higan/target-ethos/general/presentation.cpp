@@ -98,8 +98,10 @@ Presentation::Presentation() : active(nullptr) {
       for(auto &shader : shaderList) shaderMenu.append(*shader);
     settingsMenu.append(*new Separator);
     settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
-    settingsMenu.append(*new Separator);
-    settingsMenu.append(configurationSettings);
+    if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
+      settingsMenu.append(*new Separator);
+      settingsMenu.append(configurationSettings);
+    }
   append(toolsMenu);
     toolsMenu.append(saveStateMenu);
       for(unsigned n = 0; n < 5; n++) saveStateMenu.append(saveStateItem[n]);

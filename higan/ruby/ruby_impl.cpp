@@ -18,6 +18,7 @@
   #include <X11/Xatom.h>
 #elif defined(PLATFORM_OSX)
   #define __INTEL_COMPILER
+  #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
 #elif defined(PLATFORM_WINDOWS)
   #define _WIN32_WINNT 0x0501
@@ -49,6 +50,10 @@ using namespace nall;
   private: \
     pVideo##Name &p; \
   };
+
+#ifdef VIDEO_CGL
+  #include <ruby/video/cgl.cpp>
+#endif
 
 #ifdef VIDEO_DIRECT3D
   #include <ruby/video/direct3d.cpp>
@@ -175,14 +180,14 @@ using namespace nall;
   #include <ruby/input/rawinput.cpp>
 #endif
 
+#ifdef INPUT_CARBON
+  #include <ruby/input/carbon.cpp>
+#endif
+
 #ifdef INPUT_SDL
   #include <ruby/input/sdl.cpp>
 #endif
 
 #ifdef INPUT_X
   #include <ruby/input/x.cpp>
-#endif
-
-#ifdef INPUT_CARBON
-  #include <ruby/input/carbon.cpp>
 #endif

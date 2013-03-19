@@ -1,7 +1,15 @@
+@interface CocoaHexEdit : NSScrollView {
+@public
+  phoenix::HexEdit *hexEdit;
+}
+-(id) initWith :(phoenix::HexEdit&)hexEdit;
+@end
+
 namespace phoenix {
 
 struct pHexEdit : public pWidget {
   HexEdit &hexEdit;
+  CocoaHexEdit *cocoaHexEdit;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -11,6 +19,7 @@ struct pHexEdit : public pWidget {
 
   pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
+  void destructor();
 };
 
 }

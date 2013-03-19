@@ -124,5 +124,5 @@ string Interface::server() {
 }
 
 void Interface::notify(const string &text) {
-  MessageWindow::information(*presentation, text);
+  MessageWindow().setParent(*presentation).setText(text).information();
 }

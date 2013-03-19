@@ -166,42 +166,94 @@ bool Mouse::released(Mouse::Button button) {
   return !pressed(button);
 }
 
-//DialogWindow
-//============
+//BrowserWindow
+//=============
 
-string DialogWindow::fileOpen_(Window &parent, const string &path, const lstring &filter_) {
-  auto filter = filter_;
-  if(filter.size() == 0) filter.append("All files (*)");
-  return pDialogWindow::fileOpen(parent, path, filter);
+string BrowserWindow::directory() {
+  return pBrowserWindow::directory(state);
 }
 
-string DialogWindow::fileSave_(Window &parent, const string &path, const lstring &filter_) {
-  auto filter = filter_;
-  if(filter.size() == 0) filter.append("All files (*)");
-  return pDialogWindow::fileSave(parent, path, filter);
+string BrowserWindow::open() {
+  return pBrowserWindow::open(state);
 }
 
-string DialogWindow::folderSelect(Window &parent, const string &path) {
-  return pDialogWindow::folderSelect(parent, path);
+string BrowserWindow::save() {
+  return pBrowserWindow::save(state);
+}
+
+BrowserWindow& BrowserWindow::setFilters_(const lstring &filters) {
+  state.filters = filters;
+  return *this;
+}
+
+BrowserWindow& BrowserWindow::setParent(Window &parent) {
+  state.parent = &parent;
+  return *this;
+}
+
+BrowserWindow& BrowserWindow::setPath(const string &path) {
+  state.path = path;
+  return *this;
+}
+
+BrowserWindow& BrowserWindow::setTitle(const string &title) {
+  state.title = title;
+  return *this;
+}
+
+BrowserWindow::BrowserWindow():
+state(*new State) {
+}
+
+BrowserWindow::~BrowserWindow() {
+  delete &state;
 }
 
 //MessageWindow
 //=============
 
-MessageWindow::Response MessageWindow::information(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::information(parent, text, buttons);
+MessageWindow::Response MessageWindow::error(MessageWindow::Buttons buttons) {
+  state.buttons = buttons;
+  return pMessageWindow::error(state);
 }
 
-MessageWindow::Response MessageWindow::question(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::question(parent, text, buttons);
+MessageWindow::Response MessageWindow::information(MessageWindow::Buttons buttons) {
+  state.buttons = buttons;
+  return pMessageWindow::information(state);
 }
 
-MessageWindow::Response MessageWindow::warning(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::warning(parent, text, buttons);
+MessageWindow::Response MessageWindow::question(MessageWindow::Buttons buttons) {
+  state.buttons = buttons;
+  return pMessageWindow::question(state);
 }
 
-MessageWindow::Response MessageWindow::critical(Window &parent, const string &text, MessageWindow::Buttons buttons) {
-  return pMessageWindow::critical(parent, text, buttons);
+MessageWindow& MessageWindow::setParent(Window &parent) {
+  state.parent = &parent;
+  return *this;
+}
+
+MessageWindow& MessageWindow::setText(const string &text) {
+  state.text = text;
+  return *this;
+}
+
+MessageWindow& MessageWindow::setTitle(const string &title) {
+  state.title = title;
+  return *this;
+}
+
+MessageWindow::Response MessageWindow::warning(MessageWindow::Buttons buttons) {
+  state.buttons = buttons;
+  return pMessageWindow::warning(state);
+}
+
+MessageWindow::MessageWindow(const string &text):
+state(*new State) {
+  state.text = text;
+}
+
+MessageWindow::~MessageWindow() {
+  delete &state;
 }
 
 //Object

@@ -141,15 +141,21 @@ struct Mouse {
   Mouse() = delete;
 };
 
-struct DialogWindow {
-  template<typename... Args> static nall::string fileOpen(Window &parent, const nall::string &path, const Args&... args) { return fileOpen_(parent, path, { args... }); }
-  template<typename... Args> static nall::string fileSave(Window &parent, const nall::string &path, const Args&... args) { return fileSave_(parent, path, { args... }); }
-  static nall::string folderSelect(Window &parent, const nall::string &path);
-  DialogWindow() = delete;
+struct BrowserWindow {
+  template<typename... Args> BrowserWindow& setFilters(const Args&... args) { return setFilters_({args...}); }
 
-private:
-  static nall::string fileOpen_(Window &parent, const nall::string &path, const nall::lstring& filter);
-  static nall::string fileSave_(Window &parent, const nall::string &path, const nall::lstring& filter);
+  nall::string directory();
+  nall::string open();
+  nall::string save();
+  BrowserWindow& setFilters_(const nall::lstring& filters);
+  BrowserWindow& setParent(Window &parent);
+  BrowserWindow& setPath(const nall::string &path);
+  BrowserWindow& setTitle(const nall::string &title);
+
+  BrowserWindow();
+  ~BrowserWindow();
+  struct State;
+  State &state;
 };
 
 struct MessageWindow {
@@ -167,11 +173,18 @@ struct MessageWindow {
     No,
   };
 
-  static Response information(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-  static Response question(Window &parent, const nall::string &text, Buttons = Buttons::YesNo);
-  static Response warning(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-  static Response critical(Window &parent, const nall::string &text, Buttons = Buttons::Ok);
-  MessageWindow() = delete;
+  Response error(Buttons = Buttons::Ok);
+  Response information(Buttons = Buttons::Ok);
+  Response question(Buttons = Buttons::YesNo);
+  MessageWindow& setParent(Window &parent);
+  MessageWindow& setText(const nall::string &text);
+  MessageWindow& setTitle(const nall::string &title);
+  Response warning(Buttons = Buttons::Ok);
+
+  MessageWindow(const nall::string &text = "");
+  ~MessageWindow();
+  struct State;
+  State &state;
 };
 
 struct Object {

@@ -8,6 +8,20 @@ struct Timer::State {
   unsigned milliseconds = 0;
 };
 
+struct BrowserWindow::State {
+  lstring filters;
+  Window *parent = nullptr;
+  string path;
+  string title;
+};
+
+struct MessageWindow::State {
+  MessageWindow::Buttons buttons = MessageWindow::Buttons::Ok;
+  Window *parent = nullptr;
+  string text;
+  string title;
+};
+
 struct Window::State {
   bool backgroundColorOverride = false;
   Color backgroundColor = {0, 0, 0, 255};

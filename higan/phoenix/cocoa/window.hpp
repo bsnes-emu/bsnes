@@ -1,7 +1,7 @@
 @interface CocoaWindow : NSWindow <NSWindowDelegate> {
 @public
   phoenix::Window *window;
-  NSMenu *menu;
+  NSMenu *menuBar;
   NSMenu *rootMenu;
 }
 -(id) initWith :(phoenix::Window&)window;
@@ -11,7 +11,7 @@
 -(void) windowDidMove :(NSNotification*)notification;
 -(void) windowDidResize :(NSNotification*)notification;
 -(BOOL) windowShouldClose :(id)sender;
--(NSMenu*) menu;
+-(NSMenu*) menuBar;
 -(void) menuAbout;
 -(void) menuPreferences;
 -(void) menuQuit;

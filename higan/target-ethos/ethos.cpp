@@ -54,7 +54,7 @@ Program::Program(int argc, char **argv) {
   if(Intrinsics::platform() == Intrinsics::Platform::OSX) {
     normalFont = Font::sans(12);
     boldFont = Font::sans(12, "Bold");
-    titleFont = Font::sans(24, "Bold");
+    titleFont = Font::sans(20, "Bold");
     monospaceFont = Font::monospace(8);
   } else {
     normalFont = Font::sans(8);
@@ -130,7 +130,24 @@ int main(int argc, char **argv) {
   #endif
 
   Application::setName("higan");
+
   Application::Cocoa::onQuit = &Application::quit;
+  Application::Cocoa::onPreferences = [&] {
+    settings->setVisible();
+    settings->panelList.setFocused();
+  };
+  Application::Cocoa::onAbout = [&] {
+    MessageWindow()
+    .setTitle({"About ", Emulator::Name})
+    .setText({
+      Emulator::Name, " v", Emulator::Version, "\n",
+      "Author: ", Emulator::Author, "\n",
+      "License: ", Emulator::License, "\n",
+      "Website: ", Emulator::Website
+    })
+    .information();
+  };
+
   new Program(argc, argv);
   delete program;
   return 0;

@@ -1,28 +1,32 @@
-#include <GL/gl.h>
-
 #if defined(PLATFORM_X)
+  #include <GL/gl.h>
   #include <GL/glx.h>
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
+#elif defined(PLATFORM_OSX)
+  #include <OpenGL/gl.h>
 #elif defined(PLATFORM_WIN)
+  #include <GL/gl.h>
   #include <GL/glext.h>
   #define glGetProcAddress(name) wglGetProcAddress(name)
 #else
   #error "ruby::OpenGL: unsupported platform"
 #endif
 
-PFNGLCREATEPROGRAMPROC glCreateProgram = 0;
-PFNGLUSEPROGRAMPROC glUseProgram = 0;
-PFNGLCREATESHADERPROC glCreateShader = 0;
-PFNGLDELETESHADERPROC glDeleteShader = 0;
-PFNGLSHADERSOURCEPROC glShaderSource = 0;
-PFNGLCOMPILESHADERPROC glCompileShader = 0;
-PFNGLATTACHSHADERPROC glAttachShader = 0;
-PFNGLDETACHSHADERPROC glDetachShader = 0;
-PFNGLLINKPROGRAMPROC glLinkProgram = 0;
-PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = 0;
-PFNGLUNIFORM1IPROC glUniform1i = 0;
-PFNGLUNIFORM2FVPROC glUniform2fv = 0;
-PFNGLUNIFORM4FVPROC glUniform4fv = 0;
+#if !defined(PLATFORM_OSX)
+  PFNGLCREATEPROGRAMPROC glCreateProgram = nullptr;
+  PFNGLUSEPROGRAMPROC glUseProgram = nullptr;
+  PFNGLCREATESHADERPROC glCreateShader = nullptr;
+  PFNGLDELETESHADERPROC glDeleteShader = nullptr;
+  PFNGLSHADERSOURCEPROC glShaderSource = nullptr;
+  PFNGLCOMPILESHADERPROC glCompileShader = nullptr;
+  PFNGLATTACHSHADERPROC glAttachShader = nullptr;
+  PFNGLDETACHSHADERPROC glDetachShader = nullptr;
+  PFNGLLINKPROGRAMPROC glLinkProgram = nullptr;
+  PFNGLGETUNIFORMLOCATIONPROC glGetUniformLocation = nullptr;
+  PFNGLUNIFORM1IPROC glUniform1i = nullptr;
+  PFNGLUNIFORM2FVPROC glUniform2fv = nullptr;
+  PFNGLUNIFORM4FVPROC glUniform4fv = nullptr;
+#endif
 
 class OpenGL {
 public:
@@ -177,6 +181,9 @@ public:
     glEnable(GL_DITHER);
     glEnable(GL_TEXTURE_2D);
 
+    #if defined(PLATFORM_OSX)
+    shader_support = true;
+    #else
     //bind shader functions
     glCreateProgram = (PFNGLCREATEPROGRAMPROC)glGetProcAddress("glCreateProgram");
     glUseProgram = (PFNGLUSEPROGRAMPROC)glGetProcAddress("glUseProgram");
@@ -196,6 +203,7 @@ public:
     && glDeleteShader && glShaderSource && glCompileShader && glAttachShader
     && glDetachShader && glLinkProgram && glGetUniformLocation
     && glUniform1i && glUniform2fv && glUniform4fv;
+    #endif
 
     if(shader_support) glprogram = glCreateProgram();
 
@@ -211,7 +219,7 @@ public:
 
     if(buffer) {
       delete[] buffer;
-      buffer = 0;
+      buffer = nullptr;
       iwidth = 0;
       iheight = 0;
     }
@@ -224,7 +232,7 @@ public:
     fragmentfilter = 0;
     vertexshader = 0;
 
-    buffer = 0;
+    buffer = nullptr;
     iwidth = 0;
     iheight = 0;
   }

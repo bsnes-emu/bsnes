@@ -40,8 +40,8 @@ CheatEditor::CheatEditor() {
   descEdit.onChange = {&CheatEditor::updateDesc, this};
   findButton.onActivate = {&CheatDatabase::findCodes, cheatDatabase};
   resetButton.onActivate = [&] {
-    if(MessageWindow::question(*this, "All codes will be erased. Are you sure you want to do this?")
-    == MessageWindow::Response::Yes) reset();
+    if(MessageWindow().setParent(*this).setText("All codes will be erased. Are you sure you want to do this?")
+    .question() == MessageWindow::Response::Yes) reset();
   };
   eraseButton.onActivate = {&CheatEditor::erase, this};
 

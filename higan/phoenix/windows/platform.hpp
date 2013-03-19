@@ -48,17 +48,17 @@ struct pMouse {
   static bool pressed(Mouse::Button button);
 };
 
-struct pDialogWindow {
-  static string fileOpen(Window &parent, const string &path, const lstring &filter);
-  static string fileSave(Window &parent, const string &path, const lstring &filter);
-  static string folderSelect(Window &parent, const string &path);
+struct pBrowserWindow {
+  static string directory(BrowserWindow::State &state);
+  static string open(BrowserWindow::State &state);
+  static string save(BrowserWindow::State &state);
 };
 
 struct pMessageWindow {
-  static MessageWindow::Response information(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response question(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response warning(Window &parent, const string &text, MessageWindow::Buttons buttons);
-  static MessageWindow::Response critical(Window &parent, const string &text, MessageWindow::Buttons buttons);
+  static MessageWindow::Response error(MessageWindow::State &state);
+  static MessageWindow::Response information(MessageWindow::State &state);
+  static MessageWindow::Response question(MessageWindow::State &state);
+  static MessageWindow::Response warning(MessageWindow::State &state);
 };
 
 struct pObject {

@@ -1,6 +1,7 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 #include <math.h>
+#include <vector>
 #include <nall/stdint.hpp>
 
 namespace nall {

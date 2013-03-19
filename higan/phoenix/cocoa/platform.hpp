@@ -10,7 +10,7 @@ namespace phoenix {
 #include "desktop.hpp"
 #include "keyboard.hpp"
 #include "mouse.hpp"
-#include "dialog-window.hpp"
+#include "browser-window.hpp"
 #include "message-window.hpp"
 #include "object.hpp"
 #include "timer.hpp"

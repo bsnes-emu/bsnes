@@ -134,8 +134,8 @@ void InputSettings::inputChanged() {
 }
 
 void InputSettings::resetInput() {
-  if(MessageWindow::question(*settings, "All inputs will be erased. Are you sure you want to do this?")
-  == MessageWindow::Response::No) return;
+  if(MessageWindow().setParent(*settings).setText("All inputs will be erased. Are you sure you want to do this?")
+  .question() == MessageWindow::Response::No) return;
 
   auto &device = activeDevice();
   unsigned length = device.input.size();

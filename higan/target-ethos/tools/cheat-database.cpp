@@ -50,14 +50,14 @@ void CheatDatabase::findCodes() {
     return;
   }
 
-  MessageWindow::information(*cheatEditor, "Sorry, no cheat codes were found.");
+  MessageWindow().setParent(*cheatEditor).setText("Sorry, no cheat codes were found.").information();
 }
 
 void CheatDatabase::addCodes() {
   for(unsigned n = 0; n < cheat.size(); n++) {
     if(cheatList.checked(n) == false) continue;
     if(cheatEditor->import(cheat[n].code, cheat[n].desc) == false) {
-      MessageWindow::warning(*this, "Ran out of empty slots for cheat codes.\nNot all cheat codes were added.");
+      MessageWindow().setParent(*this).setText("Ran out of empty slots for cheat codes.\nNot all cheat codes were added.").warning();
       break;
     }
   }

@@ -20,7 +20,7 @@ ifeq ($(platform),x)
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
   ruby += input.sdl input.x
 else ifeq ($(platform),osx)
-  ruby :=
+  ruby := video.cgl
   ruby += audio.openal
   ruby += input.carbon
 else ifeq ($(platform),win)
@@ -52,10 +52,10 @@ obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 
 obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
-	$(call compile,$(rubyflags))
+	$(compiler) $(rubyflags) -c $< -o $@
 
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
-	$(call compile,$(phoenixflags))
+	$(compiler) $(phoenixflags) -c $< -o $@
 
 obj/resource.o: $(ui)/resource.rc
 ifeq ($(arch),win32)
@@ -67,13 +67,19 @@ endif
 # targets
 build: $(objects)
 ifeq ($(platform),x)
-	$(strip $(cpp) -o out/$(name) $(objects) $(link))
-else ifeq ($(platform),win)
-	$(strip $(cpp) -shared -o out/phoenix.dll obj/phoenix.o $(phoenixlink))
-	$(strip $(cpp) -o out/$(name) $(subst obj/phoenix.o,,$(objects)) $(link) -Lout -lphoenix)
+	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 else ifeq ($(platform),osx)
-	test -d ../$(name).app || mkdir -p ../$(name).app/Contents/MacOS
-	$(strip $(cpp) -o ../$(name).app/Contents/MacOS/$(name) $(objects) $(link))
+	if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
+	mkdir out/$(name).app
+	mkdir out/$(name).app/Contents
+	mkdir out/$(name).app/Contents/MacOS
+	mkdir out/$(name).app/Contents/Resources
+	cp data/Info.plist out/$(name).app/Contents/Info.plist
+	sips -s format icns data/higan512.png --out out/$(name).app/Contents/Resources/higan.icns
+	$(strip $(compiler) -o out/$(name).app/Contents/MacOS/$(name) $(objects) $(link))
+else ifeq ($(platform),win)
+	$(strip $(compiler) -shared -o out/phoenix.dll obj/phoenix.o $(phoenixlink))
+	$(strip $(compiler) -o out/$(name) $(subst obj/phoenix.o,,$(objects)) $(link) -Lout -lphoenix)
 endif
 
 resource:

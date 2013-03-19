@@ -6,7 +6,7 @@
 #include "desktop.cpp"
 #include "keyboard.cpp"
 #include "mouse.cpp"
-#include "dialog-window.cpp"
+#include "browser-window.cpp"
 #include "message-window.cpp"
 #include "object.cpp"
 #include "font.cpp"

@@ -34,7 +34,7 @@ void Utility::loadMedia(string pathname) {
     }
   }
 
-  MessageWindow::warning(Window::none(), "Unable to determine media type.");
+  MessageWindow().setText("Unable to determine media type.").warning();
 }
 
 //load menu option selected

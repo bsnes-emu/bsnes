@@ -13,8 +13,7 @@
     [self setLevel:NSFloatingWindowLevel];  //when launched from a terminal, this places the window above it
     [self setTitle:@""];
 
-    menu = [[NSMenu alloc] init];
-    [menu retain];
+    menuBar = [[NSMenu alloc] init];
 
     NSMenuItem *item;
     string text;
@@ -22,9 +21,9 @@
     rootMenu = [[NSMenu alloc] init];
     item = [[[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""] autorelease];
     [item setSubmenu:rootMenu];
-    [menu addItem:item];
+    [menuBar addItem:item];
 
-    text = {"About ", phoenix::applicationState.name, "..."};
+    text = {"About ", phoenix::applicationState.name, " ..."};
     item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:text] action:@selector(menuAbout) keyEquivalent:@""] autorelease];
     [rootMenu addItem:item];
     [rootMenu addItem:[NSMenuItem separatorItem]];
@@ -51,7 +50,7 @@
 
 -(void) windowDidBecomeMain :(NSNotification*)notification {
   if(window->state.menu.size() > 0) {
-    [NSApp setMainMenu:menu];
+    [NSApp setMainMenu:menuBar];
   }
 }
 
@@ -70,8 +69,8 @@
   return NO;
 }
 
--(NSMenu*) menu {
-  return menu;
+-(NSMenu*) menuBar {
+  return menuBar;
 }
 
 -(void) menuAbout {
@@ -107,7 +106,7 @@ void pWindow::append(Layout &layout) {
 
 void pWindow::append(Menu &menu) {
   @autoreleasepool {
-    [[cocoaWindow menu] addItem:menu.p.cocoaAction];
+    [[cocoaWindow menuBar] addItem:menu.p.cocoaAction];
   }
 }
 
@@ -164,7 +163,7 @@ void pWindow::remove(Layout &layout) {
 
 void pWindow::remove(Menu &menu) {
   @autoreleasepool {
-    [[cocoaWindow menu] removeItem:menu.p.cocoaAction];
+    [[cocoaWindow menuBar] removeItem:menu.p.cocoaAction];
   }
 }
 
@@ -196,7 +195,6 @@ void pWindow::setFocused() {
 
 void pWindow::setFullScreen(bool fullScreen) {
   @autoreleasepool {
-    [cocoaWindow setLevel:NSNormalWindowLevel];
     if(fullScreen == true) {
       [NSApp setPresentationOptions:NSApplicationPresentationFullScreen];
       [cocoaWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
@@ -273,8 +271,12 @@ void pWindow::setTitle(const string &text) {
 
 void pWindow::setVisible(bool visible) {
   @autoreleasepool {
-    if(visible) [cocoaWindow makeKeyAndOrderFront:nil];
-    else [cocoaWindow orderOut:nil];
+    if(visible) {
+      [cocoaWindow makeKeyAndOrderFront:nil];
+      [cocoaWindow setLevel:NSNormalWindowLevel];
+    } else {
+      [cocoaWindow orderOut:nil];
+    }
   }
 }
 

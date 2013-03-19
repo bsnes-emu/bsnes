@@ -27,6 +27,10 @@ void VideoInterface::driver(const char *driver) {
 
   if(0);
 
+  #ifdef VIDEO_CGL
+  else if(!strcmp(driver, "OpenGL")) p = new VideoCGL();
+  #endif
+
   #ifdef VIDEO_DIRECT3D
   else if(!strcmp(driver, "Direct3D")) p = new VideoD3D();
   #endif
@@ -80,6 +84,8 @@ const char* VideoInterface::default_driver() {
   return "DirectDraw";
   #elif defined(VIDEO_GDI)
   return "GDI";
+  #elif defined(VIDEO_CGL)
+  return "OpenGL";
   #elif defined(VIDEO_XSHM)
   return "XShm";
   #elif defined(VIDEO_QTOPENGL)
@@ -117,6 +123,12 @@ const char* VideoInterface::driver_list() {
 
   #if defined(VIDEO_GDI)
   "GDI;"
+  #endif
+
+  //OS X
+
+  #if defined(VIDEO_CGL)
+  "OpenGL;"
   #endif
 
   //Linux
@@ -327,16 +339,16 @@ void InputInterface::driver(const char *driver) {
   else if(!strcmp(driver, "RawInput")) p = new InputRaw();
   #endif
 
+  #ifdef INPUT_CARBON
+  else if(!strcmp(driver, "Carbon")) p = new InputCarbon();
+  #endif
+
   #ifdef INPUT_SDL
   else if(!strcmp(driver, "SDL")) p = new InputSDL();
   #endif
 
   #ifdef INPUT_X
   else if(!strcmp(driver, "X-Windows")) p = new InputX();
-  #endif
-
-  #ifdef INPUT_CARBON
-  else if(!strcmp(driver, "Carbon")) p = new InputCarbon();
   #endif
 
   else p = new Input();
@@ -348,12 +360,12 @@ const char* InputInterface::default_driver() {
   return "RawInput";
   #elif defined(INPUT_DIRECTINPUT)
   return "DirectInput";
+  #elif defined(INPUT_CARBON)
+  return "Carbon";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)
   return "X-Windows";
-  #elif defined(INPUT_CARBON)
-  return "Carbon";
   #else
   return "none";
   #endif
@@ -372,6 +384,12 @@ const char* InputInterface::driver_list() {
   "DirectInput;"
   #endif
 
+  //OS X
+
+  #if defined(INPUT_CARBON)
+  "Carbon;"
+  #endif
+
   //Linux
 
   #if defined(INPUT_SDL)
@@ -380,12 +398,6 @@ const char* InputInterface::driver_list() {
 
   #if defined(INPUT_X)
   "X-Windows;"
-  #endif
-
-  //OS X
-
-  #if defined(INPUT_CARBON)
-  "Carbon;"
   #endif
 
   "None";

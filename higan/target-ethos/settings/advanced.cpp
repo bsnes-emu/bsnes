@@ -27,9 +27,9 @@ AdvancedSettings::AdvancedSettings() {
   infoLabel.setText({
     Emulator::Name, " v", Emulator::Version, "\n",
     "  ", profile, " Profile\n",
-    "  Author: byuu\n",
-    "  Website: http://byuu.org/\n",
-    "  License: GPLv3"
+    "  Author: ", Emulator::Author, "\n",
+    "  License: ", Emulator::License, "\n",
+    "  Website: ", Emulator::Website
   });
 
   lstring list;
@@ -65,15 +65,17 @@ AdvancedSettings::AdvancedSettings() {
     libraryLayout.append(libraryLabel, {0, 0}, 5);
     libraryLayout.append(libraryPath, {~0, 0}, 5);
     libraryLayout.append(libraryBrowse, {80, 0});
-  append(spacer, {~0, ~0});
-  append(infoLabel, {~0, 0});
+  if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
+    append(spacer, {~0, ~0});
+    append(infoLabel, {~0, 0});
+  }
 
   videoDriver.onChange = [&] { config->video.driver = videoDriver.text(); };
   audioDriver.onChange = [&] { config->audio.driver = audioDriver.text(); };
   inputDriver.onChange = [&] { config->input.driver = inputDriver.text(); };
 
   libraryBrowse.onActivate = [&] {
-    string path = DialogWindow::folderSelect(Window::none(), userpath());
+    string path = BrowserWindow().setParent(*settings).setPath(userpath()).directory();
     if(path.empty()) return;
     file::write({configpath(), "higan/library.cfg"}, path);
     libraryPath.setText(path);
