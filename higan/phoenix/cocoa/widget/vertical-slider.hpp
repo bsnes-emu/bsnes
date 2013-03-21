@@ -2,15 +2,15 @@
 @public
   phoenix::VerticalSlider *verticalSlider;
 }
--(id) initWith :(phoenix::VerticalSlider&)verticalSlider;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::VerticalSlider&)verticalSlider;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pVerticalSlider : public pWidget {
   VerticalSlider &verticalSlider;
-  CocoaVerticalSlider *cocoaVerticalSlider;
+  CocoaVerticalSlider *cocoaVerticalSlider = nullptr;
 
   Size minimumSize();
   unsigned position();

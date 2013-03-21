@@ -8,6 +8,7 @@ struct pCanvas : public pWidget {
 
   pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
+  void destructor();
 };
 
 }

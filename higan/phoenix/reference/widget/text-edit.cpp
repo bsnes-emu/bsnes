@@ -18,4 +18,7 @@ string pTextEdit::text() {
 void pTextEdit::constructor() {
 }
 
+void pTextEdit::destructor() {
+}
+
 }

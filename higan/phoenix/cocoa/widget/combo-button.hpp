@@ -2,15 +2,15 @@
 @public
   phoenix::ComboButton *comboButton;
 }
--(id) initWith :(phoenix::ComboButton&)comboButton;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::ComboButton&)comboButton;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pComboButton : public pWidget {
   ComboButton &comboButton;
-  CocoaComboButton *cocoaComboButton;
+  CocoaComboButton *cocoaComboButton = nullptr;
 
   void append(const string &text);
   Size minimumSize();

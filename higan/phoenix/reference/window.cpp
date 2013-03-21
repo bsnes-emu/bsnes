@@ -85,4 +85,7 @@ void pWindow::setWidgetFont(const string &font) {
 void pWindow::constructor() {
 }
 
+void pWindow::destructor() {
+}
+
 }

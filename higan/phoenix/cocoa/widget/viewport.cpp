@@ -1,16 +1,25 @@
 @implementation CocoaViewport : NSView
 
--(id) initWith :(phoenix::Viewport&)viewportReference {
+-(id) initWith:(phoenix::Viewport&)viewportReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     viewport = &viewportReference;
   }
   return self;
 }
 
--(void) drawRect :(NSRect)rect {
-  NSColor *background = [NSColor blackColor];
-  [background set];
-  NSRectFill([self bounds]);
+-(void) drawRect:(NSRect)rect {
+  [[NSColor blackColor] setFill];
+  NSRectFillUsingOperation(rect, NSCompositeSourceOver);
+}
+
+-(BOOL) acceptsFirstResponder {
+  return YES;
+}
+
+-(void) keyDown:(NSEvent*)event {
+}
+
+-(void) keyUp:(NSEvent*)event {
 }
 
 @end

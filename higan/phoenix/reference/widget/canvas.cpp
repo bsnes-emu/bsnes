@@ -9,4 +9,7 @@ void pCanvas::update() {
 void pCanvas::constructor() {
 }
 
+void pCanvas::destructor() {
+}
+
 }

@@ -9,6 +9,7 @@ struct pHorizontalScroller : public pWidget {
 
   pHorizontalScroller(HorizontalScroller &horizontalScroller) : pWidget(horizontalScroller), horizontalScroller(horizontalScroller) {}
   void constructor();
+  void destructor();
 };
 
 }

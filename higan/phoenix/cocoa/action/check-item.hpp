@@ -2,7 +2,7 @@
 @public
   phoenix::CheckItem *checkItem;
 }
--(id) initWith :(phoenix::CheckItem&)checkItem;
+-(id) initWith:(phoenix::CheckItem&)checkItem;
 -(void) activate;
 @end
 
@@ -10,7 +10,7 @@ namespace phoenix {
 
 struct pCheckItem : public pAction {
   CheckItem &checkItem;
-  CocoaCheckItem *cocoaCheckItem;
+  CocoaCheckItem *cocoaCheckItem = nullptr;
 
   bool checked();
   void setChecked(bool checked);

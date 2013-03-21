@@ -1,6 +1,6 @@
 @implementation CocoaTimer : NSObject
 
--(id) initWith :(phoenix::Timer&)timerReference {
+-(id) initWith:(phoenix::Timer&)timerReference {
   if(self = [super init]) {
     timer = &timerReference;
     instance = nil;
@@ -24,7 +24,7 @@
   ];
 }
 
--(void) run :(NSTimer*)instance {
+-(void) run:(NSTimer*)instance {
   if(timer->onActivate) timer->onActivate();
 }
 

@@ -2,7 +2,7 @@
 @public
   phoenix::RadioItem *radioItem;
 }
--(id) initWith :(phoenix::RadioItem&)radioItem;
+-(id) initWith:(phoenix::RadioItem&)radioItem;
 -(void) activate;
 @end
 
@@ -10,7 +10,7 @@ namespace phoenix {
 
 struct pRadioItem : public pAction {
   RadioItem &radioItem;
-  CocoaRadioItem *cocoaRadioItem;
+  CocoaRadioItem *cocoaRadioItem = nullptr;
 
   bool checked();
   void setChecked();

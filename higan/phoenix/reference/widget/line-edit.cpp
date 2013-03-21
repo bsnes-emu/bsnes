@@ -12,4 +12,7 @@ string pLineEdit::text() {
 void pLineEdit::constructor() {
 }
 
+void pLineEdit::destructor() {
+}
+
 }

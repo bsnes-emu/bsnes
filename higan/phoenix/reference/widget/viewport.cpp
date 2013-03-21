@@ -7,4 +7,7 @@ uintptr_t pViewport::handle() {
 void pViewport::constructor() {
 }
 
+void pViewport::destructor() {
+}
+
 }

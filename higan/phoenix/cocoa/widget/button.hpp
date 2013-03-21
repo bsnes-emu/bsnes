@@ -2,15 +2,15 @@
 @public
   phoenix::Button *button;
 }
--(id) initWith :(phoenix::Button&)button;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::Button&)button;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pButton : public pWidget {
   Button &button;
-  CocoaButton *cocoaButton;
+  CocoaButton *cocoaButton = nullptr;
 
   Size minimumSize();
   void setImage(const image &image, Orientation orientation);

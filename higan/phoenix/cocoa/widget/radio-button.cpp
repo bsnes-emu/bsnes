@@ -1,6 +1,6 @@
 @implementation CocoaRadioButton : NSButton
 
--(id) initWith :(phoenix::RadioButton&)radioButtonReference {
+-(id) initWith:(phoenix::RadioButton&)radioButtonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     radioButton = &radioButtonReference;
 
@@ -11,7 +11,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   radioButton->setChecked();
   if(radioButton->onActivate) radioButton->onActivate();
 }

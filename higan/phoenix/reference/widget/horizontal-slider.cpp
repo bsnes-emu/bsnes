@@ -13,4 +13,7 @@ void pHorizontalSlider::setPosition(unsigned position) {
 void pHorizontalSlider::constructor() {
 }
 
+void pHorizontalSlider::destructor() {
+}
+
 }

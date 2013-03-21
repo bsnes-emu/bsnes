@@ -2,16 +2,16 @@
 @public
   phoenix::HorizontalScroller *horizontalScroller;
 }
--(id) initWith :(phoenix::HorizontalScroller&)horizontalScroller;
+-(id) initWith:(phoenix::HorizontalScroller&)horizontalScroller;
 -(void) update;
--(IBAction) scroll :(id)sender;
+-(IBAction) scroll:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pHorizontalScroller : public pWidget {
   HorizontalScroller &horizontalScroller;
-  CocoaHorizontalScroller *cocoaHorizontalScroller;
+  CocoaHorizontalScroller *cocoaHorizontalScroller = nullptr;
 
   Size minimumSize();
   unsigned position();

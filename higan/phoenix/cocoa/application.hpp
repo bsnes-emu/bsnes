@@ -1,7 +1,8 @@
 @interface CocoaDelegate : NSObject <NSApplicationDelegate> {
 }
--(NSApplicationTerminateReply) applicationShouldTerminate :(NSApplication*)sender;
--(void) run :(NSTimer*)timer;
+-(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender;
+-(BOOL) applicationShouldHandleReopen:(NSApplication*)application hasVisibleWindows:(BOOL)flag;
+-(void) run:(NSTimer*)timer;
 @end
 
 namespace phoenix {

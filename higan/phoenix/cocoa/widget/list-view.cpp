@@ -1,6 +1,6 @@
 @implementation CocoaListView : NSScrollView
 
--(id) initWith :(phoenix::ListView&)listViewReference {
+-(id) initWith:(phoenix::ListView&)listViewReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     listView = &listViewReference;
     content = [[CocoaListViewContent alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
@@ -12,14 +12,14 @@
     [content setDataSource:self];
     [content setDelegate:self];
     [content setTarget:self];
-    [content setDoubleAction:@selector(activate:)];
+    [content setDoubleAction:@selector(doubleAction:)];
 
     [content setAllowsColumnReordering:NO];
     [content setAllowsColumnResizing:YES];
     [content setAllowsColumnSelection:NO];
     [content setAllowsEmptySelection:YES];
     [content setAllowsMultipleSelection:NO];
-    [content setColumnAutoresizingStyle:NSTableViewNoColumnAutoresizing];
+    [content setColumnAutoresizingStyle:NSTableViewLastColumnOnlyAutoresizingStyle];
 
     font = nil;
     [self setFont:nil];
@@ -41,7 +41,7 @@
   return font;
 }
 
--(void) setFont :(NSFont*)fontPointer {
+-(void) setFont:(NSFont*)fontPointer {
   if(!fontPointer) fontPointer = [NSFont systemFontOfSize:12];
   [fontPointer retain];
   if(font) [font release];
@@ -94,11 +94,11 @@
   }
 }
 
--(NSInteger) numberOfRowsInTableView :(NSTableView*)table {
+-(NSInteger) numberOfRowsInTableView:(NSTableView*)table {
   return listView->state.text.size();
 }
 
--(id) tableView :(NSTableView*)table objectValueForTableColumn :(NSTableColumn*)tableColumn row:(NSInteger)row {
+-(id) tableView:(NSTableView*)table objectValueForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
   if([[tableColumn identifier] isEqualToString:@"check"]) {
     auto checked = listView->state.checked(row) ? NSOnState : NSOffState;
     return [NSNumber numberWithInteger:checked];
@@ -114,37 +114,53 @@
   return @{ @"text":text };
 }
 
--(void) tableView :(NSTableView*)table setObjectValue:(id)object forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
+-(BOOL) tableView:(NSTableView*)table shouldShowCellExpansionForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
+  return NO;
+}
+
+-(NSString*) tableView:(NSTableView*)table toolTipForCell:(NSCell*)cell rect:(NSRectPointer)rect tableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row mouseLocation:(NSPoint)mouseLocation {
+  return nil;
+}
+
+-(void) tableView:(NSTableView*)table setObjectValue:(id)object forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
   if([[tableColumn identifier] isEqualToString:@"check"]) {
     listView->state.checked(row) = [object integerValue] != NSOffState;
     if(listView->onToggle) listView->onToggle(row);
   }
 }
 
--(void) tableView :(NSTableView*)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
+-(void) tableView:(NSTableView*)tableView willDisplayCell:(id)cell forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
   [cell setFont:[self font]];
 }
 
--(void) tableViewSelectionDidChange :(NSNotification*)notification {
+-(void) tableViewSelectionDidChange:(NSNotification*)notification {
   if(listView->onChange) listView->onChange();
 }
 
--(IBAction) activate :(id)sender {
-  if([content clickedRow] < 0) return;
+-(IBAction) activate:(id)sender {
   if(listView->onActivate) listView->onActivate();
+}
+
+-(IBAction) doubleAction:(id)sender {
+  if([content clickedRow] >= 0) {
+    [self activate:self];
+  }
 }
 
 @end
 
 @implementation CocoaListViewContent : NSTableView
 
--(void) keyDown :(NSEvent*)event {
-  [super keyDown:event];
-
+-(void) keyDown:(NSEvent*)event {
   auto character = [[event characters] characterAtIndex:0];
   if(character == NSEnterCharacter || character == NSCarriageReturnCharacter) {
-    [[self delegate] activate:self];
+    if([self selectedRow] >= 0) {
+      [[self delegate] activate:self];
+      return;
+    }
   }
+
+  [super keyDown:event];
 }
 
 @end
@@ -156,7 +172,7 @@
   return [[self objectValue] objectForKey:@"text"];
 }
 
--(void) drawWithFrame :(NSRect)frame inView:(NSView*)view {
+-(void) drawWithFrame:(NSRect)frame inView:(NSView*)view {
   NSString *text = [[self objectValue] objectForKey:@"text"];
   NSImage *image = [[self objectValue] objectForKey:@"image"];
   unsigned textDisplacement = 0;
@@ -206,7 +222,7 @@ void pListView::autoSizeColumns() {
     }
 
     unsigned height = [[cocoaView content] rowHeight];
-    for(unsigned column = 0; column < listView.state.headerText.size(); column++) {
+    for(unsigned column = 0; column < max(1u, listView.state.headerText.size()); column++) {
       NSTableColumn *tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
       unsigned minimumWidth = pFont::size([[tableColumn headerCell] font], listView.state.headerText(column)).width + 4;
       for(unsigned row = 0; row < listView.state.text.size(); row++) {
@@ -216,6 +232,8 @@ void pListView::autoSizeColumns() {
       }
       [tableColumn setWidth:minimumWidth];
     }
+
+    [[cocoaView content] sizeLastColumnToFit];
   }
 }
 

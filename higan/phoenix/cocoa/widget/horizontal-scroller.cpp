@@ -1,6 +1,6 @@
 @implementation CocoaHorizontalScroller : NSScroller
 
--(id) initWith :(phoenix::HorizontalScroller&)horizontalScrollerReference {
+-(id) initWith:(phoenix::HorizontalScroller&)horizontalScrollerReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 1, 0)]) {
     horizontalScroller = &horizontalScrollerReference;
 
@@ -24,7 +24,7 @@
   [self setKnobProportion:d];
 }
 
--(IBAction) scroll :(id)sender {
+-(IBAction) scroll:(id)sender {
   auto &state = horizontalScroller->state;
 
   switch([self hitPart]) {

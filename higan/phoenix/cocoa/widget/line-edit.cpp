@@ -1,6 +1,6 @@
 @implementation CocoaLineEdit : NSTextField
 
--(id) initWith :(phoenix::LineEdit&)lineEditReference {
+-(id) initWith:(phoenix::LineEdit&)lineEditReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     lineEdit = &lineEditReference;
 
@@ -14,11 +14,11 @@
   return self;
 }
 
--(void) textDidChange :(NSNotification*)n {
+-(void) textDidChange:(NSNotification*)n {
   if(lineEdit->onChange) lineEdit->onChange();
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   if(lineEdit->onActivate) lineEdit->onActivate();
 }
 

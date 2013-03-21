@@ -2,7 +2,7 @@
 @public
   phoenix::Item *item;
 }
--(id) initWith :(phoenix::Item&)item;
+-(id) initWith:(phoenix::Item&)item;
 -(void) activate;
 @end
 
@@ -10,7 +10,7 @@ namespace phoenix {
 
 struct pItem : public pAction {
   Item &item;
-  CocoaItem *cocoaItem;
+  CocoaItem *cocoaItem = nullptr;
 
   void setImage(const image &image);
   void setText(const string &text);

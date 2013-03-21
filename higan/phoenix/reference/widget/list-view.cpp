@@ -50,4 +50,7 @@ void pListView::setSelection(unsigned row) {
 void pListView::constructor() {
 }
 
+void pListView::destructor() {
+}
+
 }

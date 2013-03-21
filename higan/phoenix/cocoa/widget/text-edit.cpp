@@ -1,6 +1,6 @@
 @implementation CocoaTextEdit : NSScrollView
 
--(id) initWith :(phoenix::TextEdit&)textEditReference {
+-(id) initWith:(phoenix::TextEdit&)textEditReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     textEdit = &textEditReference;
 
@@ -34,7 +34,7 @@
   [self setHasVerticalScroller:YES];
 }
 
--(void) textDidChange :(NSNotification*)notification {
+-(void) textDidChange:(NSNotification*)notification {
   textEdit->state.text = [[content string] UTF8String];
   if(textEdit->onChange) textEdit->onChange();
 }

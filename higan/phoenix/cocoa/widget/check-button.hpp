@@ -2,15 +2,15 @@
 @public
   phoenix::CheckButton *checkButton;
 }
--(id) initWith :(phoenix::CheckButton&)checkButton;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::CheckButton&)checkButton;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pCheckButton : public pWidget {
   CheckButton &checkButton;
-  CocoaCheckButton *cocoaCheckButton;
+  CocoaCheckButton *cocoaCheckButton = nullptr;
 
   bool checked();
   Size minimumSize();

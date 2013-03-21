@@ -2,15 +2,15 @@
 @public
   phoenix::HorizontalSlider *horizontalSlider;
 }
--(id) initWith :(phoenix::HorizontalSlider&)horizontalSlider;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::HorizontalSlider&)horizontalSlider;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pHorizontalSlider : public pWidget {
   HorizontalSlider &horizontalSlider;
-  CocoaHorizontalSlider *cocoaHorizontalSlider;
+  CocoaHorizontalSlider *cocoaHorizontalSlider = nullptr;
 
   Size minimumSize();
   unsigned position();

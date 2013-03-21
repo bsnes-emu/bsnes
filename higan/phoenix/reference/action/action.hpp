@@ -8,6 +8,7 @@ struct pAction : public pObject {
 
   pAction(Action &action) : pObject(action), action(action) {}
   void constructor();
+  void destructor();
 };
 
 }

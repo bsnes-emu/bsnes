@@ -1,6 +1,6 @@
 @implementation CocoaCheckItem : NSMenuItem
 
--(id) initWith :(phoenix::CheckItem&)checkItemReference {
+-(id) initWith:(phoenix::CheckItem&)checkItemReference {
   if(self = [super initWithTitle:@"" action:@selector(activate) keyEquivalent:@""]) {
     checkItem = &checkItemReference;
 

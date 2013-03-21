@@ -9,4 +9,7 @@ void pAction::setVisible(bool visible) {
 void pAction::constructor() {
 }
 
+void pAction::destructor() {
+}
+
 }

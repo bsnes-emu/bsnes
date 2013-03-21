@@ -2,16 +2,16 @@
 @public
   phoenix::LineEdit *lineEdit;
 }
--(id) initWith :(phoenix::LineEdit&)lineEdit;
--(void) textDidChange :(NSNotification*)n;
--(IBAction) activate :(id)sender;
+-(id) initWith:(phoenix::LineEdit&)lineEdit;
+-(void) textDidChange:(NSNotification*)n;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pLineEdit : public pWidget {
   LineEdit &lineEdit;
-  CocoaLineEdit *cocoaLineEdit;
+  CocoaLineEdit *cocoaLineEdit = nullptr;
 
   Size minimumSize();
   void setEditable(bool editable);

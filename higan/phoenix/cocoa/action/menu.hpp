@@ -3,7 +3,7 @@
   phoenix::Menu *menu;
   NSMenu *cocoaMenu;
 }
--(id) initWith :(phoenix::Menu&)menu;
+-(id) initWith:(phoenix::Menu&)menu;
 -(NSMenu*) cocoaMenu;
 @end
 
@@ -11,7 +11,7 @@ namespace phoenix {
 
 struct pMenu : public pAction {
   Menu &menu;
-  CocoaMenu *cocoaMenu;
+  CocoaMenu *cocoaMenu = nullptr;
 
   void append(Action &action);
   void remove(Action &action);

@@ -1,6 +1,6 @@
 @implementation CocoaMenu : NSMenuItem
 
--(id) initWith :(phoenix::Menu&)menuReference {
+-(id) initWith:(phoenix::Menu&)menuReference {
   if(self = [super initWithTitle:@"" action:nil keyEquivalent:@""]) {
     menu = &menuReference;
 

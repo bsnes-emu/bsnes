@@ -1,6 +1,6 @@
 @implementation CocoaRadioItem : NSMenuItem
 
--(id) initWith :(phoenix::RadioItem&)radioItemReference {
+-(id) initWith:(phoenix::RadioItem&)radioItemReference {
   if(self = [super initWithTitle:@"" action:@selector(activate) keyEquivalent:@""]) {
     radioItem = &radioItemReference;
 

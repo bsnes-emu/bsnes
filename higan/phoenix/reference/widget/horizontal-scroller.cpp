@@ -13,4 +13,7 @@ void pHorizontalScroller::setPosition(unsigned position) {
 void pHorizontalScroller::constructor() {
 }
 
+void pHorizontalScroller::destructor() {
+}
+
 }

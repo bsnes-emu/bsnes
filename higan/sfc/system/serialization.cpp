@@ -8,7 +8,7 @@ serializer System::serialize() {
   memcpy(&hash, (const char*)cartridge.sha256(), 64);
   memset(&description, 0, sizeof description);
   memset(&profile, 0, sizeof profile);
-  strmcpy(profile, Info::Profile, sizeof profile);
+  strmcpy(profile, Emulator::Profile, sizeof profile);
 
   s.integer(signature);
   s.integer(version);
@@ -32,7 +32,7 @@ bool System::unserialize(serializer &s) {
 
   if(signature != 0x31545342) return false;
   if(version != Info::SerializerVersion) return false;
-  if(strcmp(profile, Info::Profile)) return false;
+  if(strcmp(profile, Emulator::Profile)) return false;
 
   power();
   serialize_all(s);

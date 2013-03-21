@@ -65,6 +65,7 @@ struct Application {
 
   struct Cocoa {
     static nall::function<void ()> onAbout;
+    static nall::function<void ()> onActivate;
     static nall::function<void ()> onPreferences;
     static nall::function<void ()> onQuit;
   };

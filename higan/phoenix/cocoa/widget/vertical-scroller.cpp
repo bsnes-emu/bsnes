@@ -1,6 +1,6 @@
 @implementation CocoaVerticalScroller : NSScroller
 
--(id) initWith :(phoenix::VerticalScroller&)verticalScrollerReference {
+-(id) initWith:(phoenix::VerticalScroller&)verticalScrollerReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 1)]) {
     verticalScroller = &verticalScrollerReference;
 
@@ -24,7 +24,7 @@
   [self setKnobProportion:d];
 }
 
--(IBAction) scroll :(id)sender {
+-(IBAction) scroll:(id)sender {
   auto &state = verticalScroller->state;
 
   switch([self hitPart]) {

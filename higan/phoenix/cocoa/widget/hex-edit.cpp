@@ -1,6 +1,6 @@
 @implementation CocoaHexEdit : NSScrollView
 
--(id) initWith :(phoenix::HexEdit&)hexEditReference {
+-(id) initWith:(phoenix::HexEdit&)hexEditReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     hexEdit = &hexEditReference;
   }

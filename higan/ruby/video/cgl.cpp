@@ -1,10 +1,22 @@
 #include "opengl.hpp"
 
 namespace ruby {
+  class pVideoCGL;
+}
+
+@interface RubyVideoCGL : NSOpenGLView {
+@public
+  ruby::pVideoCGL *video;
+}
+-(id) initWith:(ruby::pVideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
+-(void) reshape;
+@end
+
+namespace ruby {
 
 class pVideoCGL : public OpenGL {
 public:
-  NSOpenGLView *view;
+  RubyVideoCGL *view;
 
   struct {
     NSView *handle;
@@ -121,8 +133,8 @@ public:
 
       auto size = [settings.handle frame].size;
       auto format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes] autorelease];
-      view = [[NSOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:format];
 
+      view = [[RubyVideoCGL alloc] initWith:this pixelFormat:format];
       [view setFrame:NSMakeRect(0, 0, size.width, size.height)];
       [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
       [settings.handle addSubview:view];
@@ -140,6 +152,7 @@ public:
       [view unlockFocus];
     }
 
+    clear();
     return true;
   }
 
@@ -172,3 +185,18 @@ public:
 DeclareVideo(CGL)
 
 }
+
+@implementation RubyVideoCGL : NSOpenGLView
+
+-(id) initWith:(ruby::pVideoCGL*)videoPointer pixelFormat:(NSOpenGLPixelFormat*)pixelFormat {
+  if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:pixelFormat]) {
+    video = videoPointer;
+  }
+  return self;
+}
+
+-(void) reshape {
+  video->refresh();
+}
+
+@end

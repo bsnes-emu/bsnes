@@ -7,8 +7,8 @@ struct pObject {
   pObject(Object &object) : object(object), locked(false) {}
   virtual ~pObject() {}
 
-  void constructor() {}
-  void destructor() {}
+  void constructor();
+  void destructor();
 };
 
 }

@@ -12,6 +12,7 @@ struct pComboButton : public pWidget {
 
   pComboButton(ComboButton &comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();
+  void destructor();
 };
 
 }

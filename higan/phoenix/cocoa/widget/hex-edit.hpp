@@ -2,14 +2,14 @@
 @public
   phoenix::HexEdit *hexEdit;
 }
--(id) initWith :(phoenix::HexEdit&)hexEdit;
+-(id) initWith:(phoenix::HexEdit&)hexEdit;
 @end
 
 namespace phoenix {
 
 struct pHexEdit : public pWidget {
   HexEdit &hexEdit;
-  CocoaHexEdit *cocoaHexEdit;
+  CocoaHexEdit *cocoaHexEdit = nullptr;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);

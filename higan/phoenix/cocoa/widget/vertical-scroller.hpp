@@ -2,14 +2,16 @@
 @public
   phoenix::VerticalScroller *verticalScroller;
 }
--(id) initWith :(phoenix::VerticalScroller&)verticalScroller;
+-(id) initWith:(phoenix::VerticalScroller&)verticalScroller;
+-(void) update;
+-(IBAction) scroll:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pVerticalScroller : public pWidget {
   VerticalScroller &verticalScroller;
-  CocoaVerticalScroller *cocoaVerticalScroller;
+  CocoaVerticalScroller *cocoaVerticalScroller = nullptr;
 
   Size minimumSize();
   unsigned position();

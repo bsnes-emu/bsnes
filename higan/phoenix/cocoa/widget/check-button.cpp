@@ -1,6 +1,6 @@
 @implementation CocoaCheckButton : NSButton
 
--(id) initWith :(phoenix::CheckButton&)checkButtonReference {
+-(id) initWith:(phoenix::CheckButton&)checkButtonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     checkButton = &checkButtonReference;
 
@@ -11,7 +11,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   checkButton->state.checked = [self state] != NSOffState;
   if(checkButton->onToggle) checkButton->onToggle();
 }

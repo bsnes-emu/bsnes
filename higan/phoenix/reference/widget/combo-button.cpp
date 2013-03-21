@@ -22,4 +22,7 @@ void pComboButton::setSelection(unsigned row) {
 void pComboButton::constructor() {
 }
 
+void pComboButton::destructor() {
+}
+
 }

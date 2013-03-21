@@ -1,6 +1,6 @@
 @implementation CocoaWindow : NSWindow
 
--(id) initWith :(phoenix::Window&)windowReference {
+-(id) initWith:(phoenix::Window&)windowReference {
   window = &windowReference;
 
   NSUInteger style = NSTitledWindowMask | NSClosableWindowMask | NSMiniaturizableWindowMask;
@@ -10,7 +10,6 @@
     [self setDelegate:self];
     [self setReleasedWhenClosed:NO];
     [self setAcceptsMouseMovedEvents:YES];
-    [self setLevel:NSFloatingWindowLevel];  //when launched from a terminal, this places the window above it
     [self setTitle:@""];
 
     menuBar = [[NSMenu alloc] init];
@@ -35,6 +34,16 @@
     text = {"Quit ", phoenix::applicationState.name};
     item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:text] action:@selector(menuQuit) keyEquivalent:@""] autorelease];
     [rootMenu addItem:item];
+
+    statusBar = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
+    [statusBar setAlignment:NSLeftTextAlignment];
+    [statusBar setBordered:YES];
+    [statusBar setBezeled:YES];
+    [statusBar setBezelStyle:NSTextFieldSquareBezel];
+    [statusBar setEditable:NO];
+    [statusBar setHidden:YES];
+
+    [[self contentView] addSubview:statusBar positioned:NSWindowBelow relativeTo:nil];
   }
 
   return self;
@@ -48,21 +57,21 @@
   return YES;
 }
 
--(void) windowDidBecomeMain :(NSNotification*)notification {
+-(void) windowDidBecomeMain:(NSNotification*)notification {
   if(window->state.menu.size() > 0) {
     [NSApp setMainMenu:menuBar];
   }
 }
 
--(void) windowDidMove :(NSNotification*)notification {
+-(void) windowDidMove:(NSNotification*)notification {
   window->p.moveEvent();
 }
 
--(void) windowDidResize :(NSNotification*)notification {
+-(void) windowDidResize:(NSNotification*)notification {
   window->p.sizeEvent();
 }
 
--(BOOL) windowShouldClose :(id)sender {
+-(BOOL) windowShouldClose:(id)sender {
   if(window->onClose) window->onClose();
   else window->setVisible(false);
   if(window->state.modal && !window->visible()) window->setModal(false);
@@ -88,6 +97,10 @@
   if(Application::Cocoa::onQuit) Application::Cocoa::onQuit();
 }
 
+-(NSTextField*) statusBar {
+  return statusBar;
+}
+
 @end
 
 namespace phoenix {
@@ -102,6 +115,8 @@ void pWindow::append(Layout &layout) {
   Geometry geometry = window.state.geometry;
   geometry.x = geometry.y = 0;
   layout.setGeometry(geometry);
+
+  statusBarReposition();
 }
 
 void pWindow::append(Menu &menu) {
@@ -117,7 +132,7 @@ void pWindow::append(Widget &widget) {
 
   @autoreleasepool {
     [widget.p.cocoaView removeFromSuperview];
-    [[cocoaWindow contentView] addSubview:widget.p.cocoaView positioned:NSWindowAbove relativeTo:nil];
+    [[cocoaWindow contentView] addSubview:widget.p.cocoaView positioned:NSWindowBelow relativeTo:nil];
     widget.p.setGeometry(widget.geometry());
     [[cocoaWindow contentView] setNeedsDisplay:YES];
   }
@@ -151,6 +166,7 @@ Geometry pWindow::frameMargin() {
 Geometry pWindow::geometry() {
   @autoreleasepool {
     NSRect area = [cocoaWindow contentRectForFrameRect:[cocoaWindow frame]];
+    area.size.height -= statusBarHeight();
     return {area.origin.x, Desktop::size().height - area.origin.y - area.size.height, area.size.width, area.size.height};
   }
 }
@@ -213,7 +229,10 @@ void pWindow::setGeometry(const Geometry &geometry) {
   @autoreleasepool {
     [cocoaWindow
       setFrame:[cocoaWindow
-        frameRectForContentRect:NSMakeRect(geometry.x, Desktop::size().height - geometry.y - geometry.height, geometry.width, geometry.height)
+        frameRectForContentRect:NSMakeRect(
+          geometry.x, Desktop::size().height - geometry.y - geometry.height,
+          geometry.width, geometry.height + statusBarHeight()
+        )
       ]
       display:YES
     ];
@@ -223,6 +242,8 @@ void pWindow::setGeometry(const Geometry &geometry) {
       geometry.x = geometry.y = 0;
       layout.setGeometry(geometry);
     }
+
+    statusBarReposition();
   }
 
   locked = false;
@@ -255,12 +276,23 @@ void pWindow::setResizable(bool resizable) {
 }
 
 void pWindow::setStatusFont(const string &font) {
+  @autoreleasepool {
+    [[cocoaWindow statusBar] setFont:pFont::cocoaFont(font)];
+  }
+  statusBarReposition();
 }
 
 void pWindow::setStatusText(const string &text) {
+  @autoreleasepool {
+    [[cocoaWindow statusBar] setStringValue:[NSString stringWithUTF8String:text]];
+  }
 }
 
 void pWindow::setStatusVisible(bool visible) {
+  @autoreleasepool {
+    [[cocoaWindow statusBar] setHidden:!visible];
+    setGeometry(geometry());
+  }
 }
 
 void pWindow::setTitle(const string &text) {
@@ -271,12 +303,8 @@ void pWindow::setTitle(const string &text) {
 
 void pWindow::setVisible(bool visible) {
   @autoreleasepool {
-    if(visible) {
-      [cocoaWindow makeKeyAndOrderFront:nil];
-      [cocoaWindow setLevel:NSNormalWindowLevel];
-    } else {
-      [cocoaWindow orderOut:nil];
-    }
+    if(visible) [cocoaWindow makeKeyAndOrderFront:nil];
+    else [cocoaWindow orderOut:nil];
   }
 }
 
@@ -320,8 +348,23 @@ void pWindow::sizeEvent() {
     layout.setGeometry(geometry);
   }
 
+  statusBarReposition();
+
   if(locked == false) {
     if(window.onSize) window.onSize();
+  }
+}
+
+unsigned pWindow::statusBarHeight() {
+  if(!window.state.statusVisible) return 0;
+  return Font::size(window.state.statusFont, " ").height + 6;
+}
+
+void pWindow::statusBarReposition() {
+  @autoreleasepool {
+    NSRect area = [cocoaWindow contentRectForFrameRect:[cocoaWindow frame]];
+    [[cocoaWindow statusBar] setFrame:NSMakeRect(0, 0, area.size.width, statusBarHeight())];
+    [[cocoaWindow contentView] setNeedsDisplay:YES];
   }
 }
 

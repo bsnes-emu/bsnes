@@ -1,6 +1,6 @@
 @implementation CocoaVerticalSlider : NSSlider
 
--(id) initWith :(phoenix::VerticalSlider&)verticalSliderReference {
+-(id) initWith:(phoenix::VerticalSlider&)verticalSliderReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 1)]) {
     verticalSlider = &verticalSliderReference;
 
@@ -11,7 +11,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   verticalSlider->state.position = [self doubleValue];
   if(verticalSlider->onChange) verticalSlider->onChange();
 }

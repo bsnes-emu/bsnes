@@ -2,7 +2,7 @@ namespace phoenix {
 
 struct pWidget : public pSizable {
   Widget &widget;
-  NSView *cocoaView;
+  NSView *cocoaView = nullptr;
 
   bool enabled();
   bool focused();

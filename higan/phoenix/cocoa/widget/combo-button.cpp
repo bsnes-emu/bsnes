@@ -1,6 +1,6 @@
 @implementation CocoaComboButton : NSPopUpButton
 
--(id) initWith :(phoenix::ComboButton&)comboButtonReference {
+-(id) initWith:(phoenix::ComboButton&)comboButtonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0) pullsDown:NO]) {
     comboButton = &comboButtonReference;
 
@@ -10,7 +10,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   if(comboButton->onChange) comboButton->onChange();
 }
 

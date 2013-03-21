@@ -2,14 +2,14 @@
 @public
   phoenix::Label *label;
 }
--(id) initWith :(phoenix::Label&)label;
+-(id) initWith:(phoenix::Label&)label;
 @end
 
 namespace phoenix {
 
 struct pLabel : public pWidget {
   Label &label;
-  CocoaLabel *cocoaLabel;
+  CocoaLabel *cocoaLabel = nullptr;
 
   Size minimumSize();
   void setText(const string &text);

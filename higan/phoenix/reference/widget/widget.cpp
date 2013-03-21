@@ -30,4 +30,7 @@ void pWidget::setVisible(bool visible) {
 void pWidget::constructor() {
 }
 
+void pWidget::destructor() {
+}
+
 }

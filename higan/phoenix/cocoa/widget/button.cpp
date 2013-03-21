@@ -1,6 +1,6 @@
 @implementation CocoaButton : NSButton
 
--(id) initWith :(phoenix::Button&)buttonReference {
+-(id) initWith:(phoenix::Button&)buttonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     button = &buttonReference;
     [self setTarget:self];
@@ -11,7 +11,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   if(button->onActivate) button->onActivate();
 }
 

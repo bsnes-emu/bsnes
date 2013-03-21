@@ -7,6 +7,7 @@ struct pProgressBar : public pWidget {
 
   pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
+  void destructor();
 };
 
 }

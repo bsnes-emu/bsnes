@@ -8,6 +8,7 @@ struct pButton : public pWidget {
 
   pButton(Button &button) : pWidget(button), button(button) {}
   void constructor();
+  void destructor();
 };
 
 }

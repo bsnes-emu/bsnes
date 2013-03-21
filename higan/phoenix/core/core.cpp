@@ -37,11 +37,12 @@ namespace phoenix {
 //Application
 //===========
 
-nall::function<void ()> Application::main;
+function<void ()> Application::main;
 
-nall::function<void ()> Application::Cocoa::onAbout;
-nall::function<void ()> Application::Cocoa::onPreferences;
-nall::function<void ()> Application::Cocoa::onQuit;
+function<void ()> Application::Cocoa::onAbout;
+function<void ()> Application::Cocoa::onActivate;
+function<void ()> Application::Cocoa::onPreferences;
+function<void ()> Application::Cocoa::onQuit;
 
 void Application::run() {
   return pApplication::run();

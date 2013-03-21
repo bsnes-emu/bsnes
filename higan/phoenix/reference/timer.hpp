@@ -8,6 +8,7 @@ struct pTimer : public pObject {
 
   pTimer(Timer &timer) : pObject(timer), timer(timer) {}
   void constructor();
+  void destructor();
 };
 
 }

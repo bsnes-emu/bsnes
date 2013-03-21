@@ -13,4 +13,7 @@ void pCheckButton::setText(const string &text) {
 void pCheckButton::constructor() {
 }
 
+void pCheckButton::destructor() {
+}
+
 }

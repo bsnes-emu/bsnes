@@ -9,4 +9,7 @@ void pButton::setText(const string &text) {
 void pButton::constructor() {
 }
 
+void pButton::destructor() {
+}
+
 }

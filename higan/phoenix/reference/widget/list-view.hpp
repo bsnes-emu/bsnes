@@ -21,6 +21,7 @@ struct pListView : public pWidget {
 
   pListView(ListView &listView) : pWidget(listView), listView(listView) {}
   void constructor();
+  void destructor();
 };
 
 }

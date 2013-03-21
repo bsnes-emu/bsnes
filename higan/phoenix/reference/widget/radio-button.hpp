@@ -10,6 +10,7 @@ struct pRadioButton : public pWidget {
 
   pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}
   void constructor();
+  void destructor();
 };
 
 }

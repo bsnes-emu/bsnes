@@ -1,6 +1,6 @@
 @implementation CocoaLabel : NSTextField
 
--(id) initWith :(phoenix::Label&)labelReference {
+-(id) initWith:(phoenix::Label&)labelReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     label = &labelReference;
 
@@ -18,7 +18,7 @@ namespace phoenix {
 
 Size pLabel::minimumSize() {
   Size size = Font::size(label.font(), label.state.text);
-  return {size.width, size.height};
+  return {size.width + 6, size.height};
 }
 
 void pLabel::setText(const string &text) {

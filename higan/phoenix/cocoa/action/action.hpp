@@ -2,7 +2,7 @@ namespace phoenix {
 
 struct pAction : public pObject {
   Action &action;
-  NSMenuItem *cocoaAction;
+  NSMenuItem *cocoaAction = nullptr;
 
   void setEnabled(bool enabled);
   void setVisible(bool visible);

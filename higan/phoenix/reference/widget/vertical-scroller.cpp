@@ -13,4 +13,7 @@ void pVerticalScroller::setPosition(unsigned position) {
 void pVerticalScroller::constructor() {
 }
 
+void pVerticalScroller::destructor() {
+}
+
 }

@@ -2,14 +2,14 @@
 @public
   phoenix::ProgressBar *progressBar;
 }
--(id) initWith :(phoenix::ProgressBar&)progressBar;
+-(id) initWith:(phoenix::ProgressBar&)progressBar;
 @end
 
 namespace phoenix {
 
 struct pProgressBar : public pWidget {
   ProgressBar &progressBar;
-  CocoaProgressBar *cocoaProgressBar;
+  CocoaProgressBar *cocoaProgressBar = nullptr;
 
   void setPosition(unsigned position);
 

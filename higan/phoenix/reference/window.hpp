@@ -32,6 +32,7 @@ struct pWindow : public pObject {
 
   pWindow(Window &window) : pObject(window), window(window) {}
   void constructor();
+  void destructor();
 };
 
 }

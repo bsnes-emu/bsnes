@@ -111,7 +111,7 @@ Presentation::Presentation() : active(nullptr) {
     toolsMenu.append(resizeWindow, stateManager, cheatEditor, synchronizeTime);
 
   append(layout);
-  layout.append(viewport, {0, 0, 720, 480});
+  layout.append(viewport, {0, 0, 1, 1});
 
   onSize = [&] {
     utility->resize();
@@ -119,7 +119,11 @@ Presentation::Presentation() : active(nullptr) {
 
   onClose = [&] {
     setVisible(false);
-    Application::quit();
+    if(Intrinsics::platform() == Intrinsics::Platform::OSX) {
+      utility->unload();
+    } else {
+      Application::quit();
+    }
   };
 
   loadImport.onActivate = [&] {

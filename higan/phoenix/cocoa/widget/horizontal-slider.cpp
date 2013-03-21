@@ -1,6 +1,6 @@
 @implementation CocoaHorizontalSlider : NSSlider
 
--(id) initWith :(phoenix::HorizontalSlider&)horizontalSliderReference {
+-(id) initWith:(phoenix::HorizontalSlider&)horizontalSliderReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 1, 0)]) {
     horizontalSlider = &horizontalSliderReference;
 
@@ -11,7 +11,7 @@
   return self;
 }
 
--(IBAction) activate :(id)sender {
+-(IBAction) activate:(id)sender {
   horizontalSlider->state.position = [self doubleValue];
   if(horizontalSlider->onChange) horizontalSlider->onChange();
 }

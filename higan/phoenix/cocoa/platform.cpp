@@ -1,12 +1,13 @@
 #include "platform.hpp"
 #include "utility.cpp"
 
+#include "font.cpp"
 #include "desktop.cpp"
 #include "keyboard.cpp"
 #include "mouse.cpp"
 #include "browser-window.cpp"
 #include "message-window.cpp"
-#include "font.cpp"
+#include "object.cpp"
 #include "timer.cpp"
 #include "window.cpp"
 

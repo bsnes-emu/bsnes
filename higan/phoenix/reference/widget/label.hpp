@@ -7,6 +7,7 @@ struct pLabel : public pWidget {
 
   pLabel(Label &label) : pWidget(label), label(label) {}
   void constructor();
+  void destructor();
 };
 
 }

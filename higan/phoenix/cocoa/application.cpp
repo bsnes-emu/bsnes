@@ -1,13 +1,19 @@
 @implementation CocoaDelegate : NSObject
 
--(NSApplicationTerminateReply) applicationShouldTerminate :(NSApplication*)sender {
+-(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender {
   using phoenix::Application;
   if(Application::Cocoa::onQuit) Application::Cocoa::onQuit();
   else Application::quit();
   return NSTerminateCancel;
 }
 
--(void) run :(NSTimer*)timer {
+-(BOOL) applicationShouldHandleReopen:(NSApplication*)application hasVisibleWindows:(BOOL)flag {
+  using phoenix::Application;
+  if(Application::Cocoa::onActivate) Application::Cocoa::onActivate();
+  return NO;
+}
+
+-(void) run:(NSTimer*)timer {
   using phoenix::Application;
   if(Application::main) Application::main();
 }
@@ -21,6 +27,9 @@ namespace phoenix {
 void pApplication::run() {
   if(Application::main) {
     NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.0 target:cocoaDelegate selector:@selector(run:) userInfo:nil repeats:YES];
+
+    //below line is needed to run application during window resize; however it has a large performance penalty on the resize smoothness
+    //[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
   }
   @autoreleasepool {
     [NSApp run];

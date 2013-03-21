@@ -2,7 +2,7 @@ namespace phoenix {
 
 struct pSeparator : public pAction {
   Separator &separator;
-  NSMenuItem *cocoaSeparator;
+  NSMenuItem *cocoaSeparator = nullptr;
 
   pSeparator(Separator &separator) : pAction(separator), separator(separator) {}
   void constructor();

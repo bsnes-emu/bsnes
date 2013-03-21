@@ -7,6 +7,7 @@ struct pViewport : public pWidget {
 
   pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
+  void destructor();
 };
 
 }

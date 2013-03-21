@@ -87,6 +87,7 @@ Program::Program(int argc, char **argv) {
   stateManager = new StateManager;
   windowManager->loadGeometry();
   presentation->setVisible();
+  utility->resize();
 
   video.set(Video::Handle, presentation->viewport.handle());
   if(!video.cap(Video::Depth) || !video.set(Video::Depth, depth = 30u)) {
@@ -131,21 +132,30 @@ int main(int argc, char **argv) {
 
   Application::setName("higan");
 
-  Application::Cocoa::onQuit = &Application::quit;
-  Application::Cocoa::onPreferences = [&] {
-    settings->setVisible();
-    settings->panelList.setFocused();
+  Application::Cocoa::onActivate = [&] {
+    presentation->setVisible();
   };
+
   Application::Cocoa::onAbout = [&] {
     MessageWindow()
     .setTitle({"About ", Emulator::Name})
     .setText({
       Emulator::Name, " v", Emulator::Version, "\n",
+      Emulator::Profile, " Profile\n",
       "Author: ", Emulator::Author, "\n",
       "License: ", Emulator::License, "\n",
       "Website: ", Emulator::Website
     })
     .information();
+  };
+
+  Application::Cocoa::onPreferences = [&] {
+    settings->setVisible();
+    settings->panelList.setFocused();
+  };
+
+  Application::Cocoa::onQuit = [&] {
+    Application::quit();
   };
 
   new Program(argc, argv);

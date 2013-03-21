@@ -3,25 +3,27 @@
   phoenix::Window *window;
   NSMenu *menuBar;
   NSMenu *rootMenu;
+  NSTextField *statusBar;
 }
--(id) initWith :(phoenix::Window&)window;
+-(id) initWith:(phoenix::Window&)window;
 -(BOOL) canBecomeKeyWindow;
 -(BOOL) canBecomeMainWindow;
--(void) windowDidBecomeMain :(NSNotification*)notification;
--(void) windowDidMove :(NSNotification*)notification;
--(void) windowDidResize :(NSNotification*)notification;
--(BOOL) windowShouldClose :(id)sender;
+-(void) windowDidBecomeMain:(NSNotification*)notification;
+-(void) windowDidMove:(NSNotification*)notification;
+-(void) windowDidResize:(NSNotification*)notification;
+-(BOOL) windowShouldClose:(id)sender;
 -(NSMenu*) menuBar;
 -(void) menuAbout;
 -(void) menuPreferences;
 -(void) menuQuit;
+-(NSTextField*) statusBar;
 @end
 
 namespace phoenix {
 
 struct pWindow : public pObject {
   Window &window;
-  CocoaWindow *cocoaWindow;
+  CocoaWindow *cocoaWindow = nullptr;
 
   static Window& none();
 
@@ -55,6 +57,8 @@ struct pWindow : public pObject {
   void destructor();
   void moveEvent();
   void sizeEvent();
+  unsigned statusBarHeight();
+  void statusBarReposition();
 };
 
 }

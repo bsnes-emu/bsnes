@@ -9,4 +9,7 @@ void pTimer::setInterval(unsigned milliseconds) {
 void pTimer::constructor() {
 }
 
+void pTimer::destructor() {
+}
+
 }

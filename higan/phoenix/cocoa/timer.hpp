@@ -3,17 +3,17 @@
   phoenix::Timer *timer;
   NSTimer *instance;
 }
--(id) initWith :(phoenix::Timer&)timer;
+-(id) initWith:(phoenix::Timer&)timer;
 -(NSTimer*) instance;
 -(void) update;
--(void) run :(NSTimer*)instance;
+-(void) run:(NSTimer*)instance;
 @end
 
 namespace phoenix {
 
 struct pTimer : public pObject {
   Timer &timer;
-  CocoaTimer *cocoaTimer;
+  CocoaTimer *cocoaTimer = nullptr;
 
   void setEnabled(bool enabled);
   void setInterval(unsigned milliseconds);

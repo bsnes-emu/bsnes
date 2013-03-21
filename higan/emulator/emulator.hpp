@@ -3,10 +3,18 @@
 
 namespace Emulator {
   static const char Name[] = "higan";
-  static const char Version[] = "092.04";
+  static const char Version[] = "092.05";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
   static const char Website[] = "http://byuu.org/";
+
+  #if defined(PROFILE_ACCURACY)
+  static const char Profile[] = "Accuracy";
+  #elif defined(PROFILE_BALANCED)
+  static const char Profile[] = "Balanced";
+  #elif defined(PROFILE_PERFORMANCE)
+  static const char Profile[] = "Performance";
+  #endif
 }
 
 #include <nall/platform.hpp>

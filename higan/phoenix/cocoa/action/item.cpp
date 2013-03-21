@@ -1,6 +1,6 @@
 @implementation CocoaItem : NSMenuItem
 
--(id) initWith :(phoenix::Item&)itemReference {
+-(id) initWith:(phoenix::Item&)itemReference {
   if(self = [super initWithTitle:@"" action:@selector(activate) keyEquivalent:@""]) {
     item = &itemReference;
 

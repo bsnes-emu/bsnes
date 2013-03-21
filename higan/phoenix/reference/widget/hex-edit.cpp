@@ -18,4 +18,7 @@ void pHexEdit::update() {
 void pHexEdit::constructor() {
 }
 
+void pHexEdit::destructor() {
+}
+
 }

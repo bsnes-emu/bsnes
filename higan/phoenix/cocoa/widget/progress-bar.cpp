@@ -1,6 +1,6 @@
 @implementation CocoaProgressBar : NSProgressIndicator
 
--(id) initWith :(phoenix::ProgressBar&)progressBarReference {
+-(id) initWith:(phoenix::ProgressBar&)progressBarReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     progressBar = &progressBarReference;
 

@@ -2,14 +2,15 @@
 @public
   phoenix::RadioButton *radioButton;
 }
--(id) initWith :(phoenix::RadioButton&)radioButton;
+-(id) initWith:(phoenix::RadioButton&)radioButton;
+-(IBAction) activate:(id)sender;
 @end
 
 namespace phoenix {
 
 struct pRadioButton : public pWidget {
   RadioButton &radioButton;
-  CocoaRadioButton *cocoaRadioButton;
+  CocoaRadioButton *cocoaRadioButton = nullptr;
 
   bool checked();
   Size minimumSize();

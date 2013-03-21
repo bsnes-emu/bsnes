@@ -16,17 +16,9 @@ AdvancedSettings::AdvancedSettings() {
   libraryPath.setText(path);
   libraryBrowse.setText("Browse ...");
   infoLabel.setFont(program->boldFont);
-  string profile;
-  #if defined(PROFILE_ACCURACY)
-  profile = "Accuracy";
-  #elif defined(PROFILE_BALANCED)
-  profile = "Balanced";
-  #elif defined(PROFILE_PERFORMANCE)
-  profile = "Performance";
-  #endif
   infoLabel.setText({
     Emulator::Name, " v", Emulator::Version, "\n",
-    "  ", profile, " Profile\n",
+    "  ", Emulator::Profile, " Profile\n",
     "  Author: ", Emulator::Author, "\n",
     "  License: ", Emulator::License, "\n",
     "  Website: ", Emulator::Website

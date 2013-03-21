@@ -9,6 +9,7 @@ struct pCheckButton : public pWidget {
 
   pCheckButton(CheckButton &checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
+  void destructor();
 };
 
 }

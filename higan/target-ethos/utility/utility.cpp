@@ -30,7 +30,7 @@ void Utility::loadMedia(string pathname) {
     for(auto &media : emulator->media) {
       if(media.bootable == false) continue;
       if(type != media.type) continue;
-      return utility->loadMedia(emulator, media, {pathname, "/"});
+      return loadMedia(emulator, media, {pathname, "/"});
     }
   }
 
@@ -56,6 +56,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
   system().power();
 
   presentation->setSystemName(media.name);
+  presentation->setVisible();
   load();
 }
 
@@ -210,7 +211,12 @@ void Utility::updateShader() {
 }
 
 void Utility::resize(bool resizeWindow) {
-  if(program->active == nullptr) return;
+  if(program->active == nullptr) {
+    auto geometry = presentation->geometry();
+    presentation->viewport.setGeometry({0, 0, geometry.width, geometry.height});
+    return;
+  }
+
   Geometry geometry = presentation->geometry();
   unsigned width  = system().information.width;
   unsigned height = system().information.height;
