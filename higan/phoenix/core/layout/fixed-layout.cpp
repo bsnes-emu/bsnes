@@ -1,5 +1,5 @@
 void FixedLayout::append(Sizable &sizable, const Geometry &geometry) {
-  children.append({ &sizable, geometry });
+  children.append({&sizable, geometry});
   synchronizeLayout();
   if(window()) window()->synchronizeLayout();
 }

@@ -18,6 +18,7 @@ struct pComboButton : public pWidget {
   void remove(unsigned row);
   void reset();
   unsigned selection();
+  void setGeometry(const Geometry &geometry);
   void setSelection(unsigned row);
 
   pComboButton(ComboButton &comboButton) : pWidget(comboButton), comboButton(comboButton) {}

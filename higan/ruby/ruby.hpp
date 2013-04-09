@@ -1,22 +1,14 @@
 /*
   ruby
-  version: 0.08 (2011-11-25)
+  version: 0.09 (2013-04-06)
   license: public domain
 */
 
 #ifndef RUBY_H
 #define RUBY_H
 
-#include <nall/platform.hpp>
-#include <nall/algorithm.hpp>
-#include <nall/any.hpp>
-#include <nall/bit.hpp>
+#include <nall/nall.hpp>
 #include <nall/input.hpp>
-#include <nall/intrinsics.hpp>
-#include <nall/sort.hpp>
-#include <nall/stdint.hpp>
-#include <nall/string.hpp>
-#include <nall/vector.hpp>
 
 namespace ruby {
 

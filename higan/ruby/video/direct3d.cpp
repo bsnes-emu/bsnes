@@ -64,7 +64,7 @@ public:
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
-    if(name == Video::Shader) return true;
+    if(name == Video::Shader) return false;
     return false;
   }
 
@@ -93,6 +93,7 @@ public:
     }
 
     if(name == Video::Shader) {
+      return false;
       set_shader(any_cast<const char*>(value));
       return true;
     }

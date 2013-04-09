@@ -1,9 +1,4 @@
-/*
-  video.wgl
-  authors: byuu, krom
-*/
-
-#include "opengl.hpp"
+#include "opengl/opengl.hpp"
 
 namespace ruby {
 
@@ -21,9 +16,6 @@ public:
     bool synchronize;
     unsigned filter;
     string shader;
-
-    unsigned width;
-    unsigned height;
   } settings;
 
   bool cap(const string& name) {
@@ -52,20 +44,22 @@ public:
         settings.synchronize = any_cast<bool>(value);
         if(wglcontext) {
           init();
-          OpenGL::set_shader(settings.shader);
+          OpenGL::shader(settings.shader);
+          if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
         }
       }
     }
 
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
     if(name == Video::Shader) {
       settings.shader = any_cast<const char*>(value);
-      OpenGL::set_shader(settings.shader);
-      settings.filter = OpenGL::fragmentfilter;
+      OpenGL::shader(settings.shader);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
@@ -73,9 +67,7 @@ public:
   }
 
   bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
-    resize(width, height);
-    settings.width  = width;
-    settings.height = height;
+    OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
@@ -90,11 +82,8 @@ public:
   void refresh() {
     RECT rc;
     GetClientRect(settings.handle, &rc);
-
-    OpenGL::refresh(settings.filter == Video::FilterLinear,
-      settings.width, settings.height,
-      rc.right - rc.left, rc.bottom - rc.top);
-
+    outputWidth = rc.right - rc.left, outputHeight = rc.bottom - rc.top;
+    OpenGL::refresh();
     SwapBuffers(display);
   }
 
@@ -117,8 +106,6 @@ public:
     wglMakeCurrent(display, wglcontext);
 
     OpenGL::init();
-    settings.width  = 256;
-    settings.height = 256;
 
     //vertical synchronization
     if(!glSwapInterval) glSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
@@ -141,8 +128,6 @@ public:
     settings.synchronize = false;
     settings.filter = 0;
 
-    iformat = GL_UNSIGNED_INT_8_8_8_8_REV;
-    ibpp = 4;
     window = 0;
     wglcontext = 0;
     glwindow = 0;

@@ -12,6 +12,11 @@
     [self setAcceptsMouseMovedEvents:YES];
     [self setTitle:@""];
 
+    NSBundle *bundle = [NSBundle mainBundle];
+    NSDictionary *dictionary = [bundle infoDictionary];
+    NSString *applicationName = [dictionary objectForKey:@"CFBundleDisplayName"];
+    if(applicationName == nil) applicationName = [NSString stringWithUTF8String:phoenix::applicationState.name];
+
     menuBar = [[NSMenu alloc] init];
 
     NSMenuItem *item;
@@ -22,17 +27,39 @@
     [item setSubmenu:rootMenu];
     [menuBar addItem:item];
 
-    text = {"About ", phoenix::applicationState.name, " ..."};
-    item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:text] action:@selector(menuAbout) keyEquivalent:@""] autorelease];
+    item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"About %@ ...", applicationName] action:@selector(menuAbout) keyEquivalent:@""] autorelease];
+    [item setTarget:self];
     [rootMenu addItem:item];
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
     item = [[[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(menuPreferences) keyEquivalent:@""] autorelease];
+    [item setTarget:self];
     [rootMenu addItem:item];
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
-    text = {"Quit ", phoenix::applicationState.name};
-    item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithUTF8String:text] action:@selector(menuQuit) keyEquivalent:@""] autorelease];
+    NSMenu *servicesMenu = [[[NSMenu alloc] initWithTitle:@"Services"] autorelease];
+    item = [[[NSMenuItem alloc] initWithTitle:@"Services" action:nil keyEquivalent:@""] autorelease];
+    [item setTarget:self];
+    [item setSubmenu:servicesMenu];
+    [rootMenu addItem:item];
+    [rootMenu addItem:[NSMenuItem separatorItem]];
+    [NSApp setServicesMenu:servicesMenu];
+
+    item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Hide %@", applicationName] action:@selector(hide:) keyEquivalent:@""] autorelease];
+    [item setTarget:NSApp];
+    [rootMenu addItem:item];
+
+    item = [[[NSMenuItem alloc] initWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@""] autorelease];
+    [item setTarget:NSApp];
+    [rootMenu addItem:item];
+
+    item = [[[NSMenuItem alloc] initWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""] autorelease];
+    [item setTarget:NSApp];
+    [rootMenu addItem:item];
+    [rootMenu addItem:[NSMenuItem separatorItem]];
+
+    item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Quit %@", applicationName] action:@selector(menuQuit) keyEquivalent:@""] autorelease];
+    [item setTarget:self];
     [rootMenu addItem:item];
 
     statusBar = [[NSTextField alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];

@@ -32,7 +32,14 @@ Size pButton::minimumSize() {
     size.height += button.state.image.height;
   }
 
-  return {size.width + 24, size.height + 8};
+  return {size.width + 20, size.height + 4};
+}
+
+void pButton::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry({
+    geometry.x - 2, geometry.y - 2,
+    geometry.width + 4, geometry.height + 4
+  });
 }
 
 void pButton::setImage(const image &image, Orientation orientation) {

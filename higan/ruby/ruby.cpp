@@ -17,8 +17,6 @@ const char *Video::Synchronize = "Synchronize";
 const char *Video::Depth = "Depth";
 const char *Video::Filter = "Filter";
 const char *Video::Shader = "Shader";
-const char *Video::FragmentShader = "FragmentShader";
-const char *Video::VertexShader = "VertexShader";
 
 void VideoInterface::driver(const char *driver) {
   if(p) term();

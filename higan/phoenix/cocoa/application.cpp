@@ -18,6 +18,16 @@
   if(Application::main) Application::main();
 }
 
+-(void) updateInDock:(NSTimer*)timer {
+  NSArray *windows = [NSApp windows];
+  for(unsigned n = 0; n < [windows count]; n++) {
+    NSWindow *window = [windows objectAtIndex:n];
+    if([window isMiniaturized]) {
+      [window updateInDock];
+    }
+  }
+}
+
 @end
 
 CocoaDelegate *cocoaDelegate = nullptr;
@@ -25,12 +35,15 @@ CocoaDelegate *cocoaDelegate = nullptr;
 namespace phoenix {
 
 void pApplication::run() {
+//NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.1667 target:cocoaDelegate selector:@selector(updateInDock:) userInfo:nil repeats:YES];
+
   if(Application::main) {
     NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:0.0 target:cocoaDelegate selector:@selector(run:) userInfo:nil repeats:YES];
 
     //below line is needed to run application during window resize; however it has a large performance penalty on the resize smoothness
     //[[NSRunLoop currentRunLoop] addTimer:timer forMode:NSEventTrackingRunLoopMode];
   }
+
   @autoreleasepool {
     [NSApp run];
   }

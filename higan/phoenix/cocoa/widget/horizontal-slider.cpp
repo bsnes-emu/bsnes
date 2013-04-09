@@ -21,13 +21,20 @@
 namespace phoenix {
 
 Size pHorizontalSlider::minimumSize() {
-  return {64, 24};
+  return {48, 20};
 }
 
 unsigned pHorizontalSlider::position() {
   @autoreleasepool {
     return [cocoaView doubleValue];
   }
+}
+
+void pHorizontalSlider::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry({
+    geometry.x - 2, geometry.y,
+    geometry.width + 4, geometry.height
+  });
 }
 
 void pHorizontalSlider::setLength(unsigned length) {

@@ -9,9 +9,10 @@
 #include <algorithm>
 #include <initializer_list>
 
+#include <nall/platform.hpp>
 #include <nall/atoi.hpp>
 #include <nall/function.hpp>
-#include <nall/platform.hpp>
+#include <nall/intrinsics.hpp>
 #include <nall/sha256.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utility.hpp>

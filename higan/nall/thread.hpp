@@ -9,7 +9,7 @@
   #include <pthread.h>
 
 namespace nall {
-  void* thread_entry_point(void*);
+  inline void* thread_entry_point(void*);
 
   struct thread {
     thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {

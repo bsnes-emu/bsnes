@@ -21,13 +21,20 @@
 namespace phoenix {
 
 Size pVerticalSlider::minimumSize() {
-  return {24, 64};
+  return {20, 48};
 }
 
 unsigned pVerticalSlider::position() {
   @autoreleasepool {
     return [cocoaView doubleValue];
   }
+}
+
+void pVerticalSlider::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry({
+    geometry.x, geometry.y - 2,
+    geometry.width, geometry.height + 4
+  });
 }
 
 void pVerticalSlider::setLength(unsigned length) {

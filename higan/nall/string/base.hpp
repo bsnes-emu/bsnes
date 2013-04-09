@@ -180,6 +180,7 @@ namespace nall {
   inline string realpath(const string &name);
   inline string userpath();
   inline string configpath();
+  inline string sharedpath();
   inline string temppath();
 
   //strm.hpp

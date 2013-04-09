@@ -227,11 +227,13 @@ namespace nall {
     static bool exists(const string &filename) {
       #if !defined(_WIN32)
       struct stat64 data;
-      return stat64(filename, &data) == 0;
+      if(stat64(filename, &data) != 0) return false;
       #else
       struct __stat64 data;
-      return _wstat64(utf16_t(filename), &data) == 0;
+      if(_wstat64(utf16_t(filename), &data) != 0) return false;
       #endif
+      //return true if this is a file, and false if this is a directory
+      return !(data.st_mode & S_IFDIR);
     }
 
     static uintmax_t size(const string &filename) {

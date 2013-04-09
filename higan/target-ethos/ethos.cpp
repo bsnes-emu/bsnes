@@ -14,13 +14,14 @@ bool Program::focused() {
   return config->input.focusAllow || presentation->focused();
 }
 
-//look for file in executable path; if not found, use user path instead
-//this allows configuration files to be placed in either location
-string Program::path(const string &filename) {
-  string path = {basepath, filename};
-  if(file::exists(path)) return path;
-  if(directory::exists(path)) return path;
-  return {userpath, filename};
+string Program::path(const string &name) {
+  string path = {basepath, name};
+  if(file::exists(path) || directory::exists(path)) return path;
+  path = {userpath, name};
+  if(file::exists(path) || directory::exists(path)) return path;
+  path = {sharedpath, name};
+  if(file::exists(path) || directory::exists(path)) return path;
+  return {userpath, name};
 }
 
 void Program::main() {
@@ -46,6 +47,7 @@ Program::Program(int argc, char **argv) {
 
   basepath = dir(realpath(argv[0]));
   userpath = {nall::configpath(), "higan/"};
+  sharedpath = {nall::sharedpath(), "higan/"};
   directory::create(userpath);
 
   bootstrap();

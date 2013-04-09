@@ -4,10 +4,8 @@ struct Video {
   static const char *Depth;
   static const char *Filter;
   static const char *Shader;
-  static const char *FragmentShader;
-  static const char *VertexShader;
 
-  enum Filter {
+  enum Filter : unsigned {
     FilterPoint,
     FilterLinear,
   };

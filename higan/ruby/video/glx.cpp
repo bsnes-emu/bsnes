@@ -1,34 +1,8 @@
-/*
-  video.glx
-  author: byuu
-  license: public domain
-  last updated: 2012-03-09
-
-  Design notes:
-  SGI's GLX is the X11/Xlib interface to OpenGL.
-  At the time of this writing, there are three relevant versions of the API: versions 1.2, 1.3 and 1.4.
-
-  Version 1.2 was released on March 4th, 1997.
-  Version 1.3 was released on October 19th, 1998.
-  Version 1.4 was released on December 16th, 2005.
-
-  Despite version 1.3 being roughly ten years old at this time, there are still many modern X11 GLX drivers
-  that lack full support for the specification. Most notable would be the official video drivers from ATI.
-  Given this, 1.4 support is pretty much hopeless to target.
-
-  Luckily, each version has been designed to be backwards compatible with the previous version. As well,
-  version 1.2 is wholly sufficient, albeit less convenient, to implement this video module.
-
-  Therefore, for the purpose of compatibility, this driver only uses GLX 1.2 or earlier API commands.
-  As well, it only uses raw Xlib API commands, so that it is compatible with any toolkit.
-*/
-
-#include "opengl.hpp"
+#include "opengl/opengl.hpp"
 
 namespace ruby {
 
-class pVideoGLX : public OpenGL {
-public:
+struct pVideoGLX : OpenGL {
   int (*glSwapInterval)(int);
 
   Display *display;
@@ -49,10 +23,7 @@ public:
     bool synchronize;
     unsigned depth;
     unsigned filter;
-
-    unsigned width;
-    unsigned height;
-    unsigned format;
+    string shader;
   } settings;
 
   bool cap(const string& name) {
@@ -61,8 +32,6 @@ public:
     if(name == Video::Depth) return true;
     if(name == Video::Filter) return true;
     if(name == Video::Shader) return true;
-    if(name == Video::FragmentShader) return true;
-    if(name == Video::VertexShader) return true;
     return false;
   }
 
@@ -89,15 +58,12 @@ public:
     }
 
     if(name == Video::Depth) {
-      //using a depth higher than the current display depth will perform very poorly, if at all
       unsigned depth = any_cast<unsigned>(value);
       if(depth > DefaultDepth(display, screen)) return false;
 
       switch(depth) {
-      case 15u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_1_5_5_5_REV; break;
-      case 16u: ibpp = 2; iformat = GL_UNSIGNED_SHORT_5_6_5_REV; break;
-      case 24u: ibpp = 4; iformat = GL_UNSIGNED_INT_8_8_8_8_REV; break;
-      case 30u: ibpp = 4; iformat = GL_UNSIGNED_INT_2_10_10_10_REV; break;
+      case 24: format = GL_RGBA8; inputFormat = GL_UNSIGNED_INT_8_8_8_8_REV; break;
+      case 30: format = GL_RGB10_A2; inputFormat = GL_UNSIGNED_INT_2_10_10_10_REV; break;
       default: return false;
       }
 
@@ -107,22 +73,14 @@ public:
 
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
     if(name == Video::Shader) {
-      OpenGL::set_shader(any_cast<const char*>(value));
-      settings.filter = OpenGL::fragmentfilter;
-      return true;
-    }
-
-    if(name == Video::FragmentShader) {
-      OpenGL::set_fragment_shader(any_cast<const char*>(value));
-      return true;
-    }
-
-    if(name == Video::VertexShader) {
-      OpenGL::set_vertex_shader(any_cast<const char*>(value));
+      settings.shader = any_cast<const char*>(value);
+      OpenGL::shader(settings.shader);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
@@ -130,9 +88,7 @@ public:
   }
 
   bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
-    resize(width, height);
-    settings.width  = width;
-    settings.height = height;
+    OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
@@ -156,8 +112,8 @@ public:
       XResizeWindow(display, xwindow, parent.width, parent.height);
     }
 
-    OpenGL::refresh(settings.filter == Video::FilterLinear,
-      settings.width, settings.height, parent.width, parent.height);
+    outputWidth = parent.width, outputHeight = parent.height;
+    OpenGL::refresh();
     if(glx.double_buffer) glXSwapBuffers(display, glxwindow);
   }
 
@@ -221,8 +177,6 @@ public:
     glx.is_direct = glXIsDirect(display, glxcontext);
 
     OpenGL::init();
-    settings.width  = 256;
-    settings.height = 256;
 
     //vertical synchronization
     if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
@@ -257,10 +211,9 @@ public:
 
     settings.handle = 0;
     settings.synchronize = false;
-    settings.depth = 24u;
+    settings.depth = 24;
+    settings.filter = 1;  //linear
 
-    iformat = GL_UNSIGNED_INT_8_8_8_8_REV;
-    ibpp = 4;
     xwindow = 0;
     colormap = 0;
     glxcontext = 0;

@@ -29,6 +29,7 @@
 #include <nall/intrinsics.hpp>
 #include <nall/invoke.hpp>
 #include <nall/map.hpp>
+#include <nall/matrix.hpp>
 #include <nall/png.hpp>
 #include <nall/property.hpp>
 #include <nall/random.hpp>

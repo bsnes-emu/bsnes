@@ -10,7 +10,7 @@ struct pWidget : public pSizable {
   void setEnabled(bool enabled);
   void setFocused();
   virtual void setFont(const string &font);
-  void setGeometry(const Geometry &geometry);
+  virtual void setGeometry(const Geometry &geometry);
   void setVisible(bool visible);
 
   pWidget(Widget &widget) : pSizable(widget), widget(widget) {}

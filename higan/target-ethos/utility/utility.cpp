@@ -197,17 +197,15 @@ void Utility::synchronizeRuby() {
 void Utility::updateShader() {
   if(config->video.shader == "None") {
     video.set(Video::Shader, (const char*)"");
-    video.set(Video::Filter, 0u);
+    video.set(Video::Filter, (unsigned)Video::FilterPoint);
     return;
   }
   if(config->video.shader == "Blur") {
     video.set(Video::Shader, (const char*)"");
-    video.set(Video::Filter, 1u);
+    video.set(Video::Filter, (unsigned)Video::FilterLinear);
     return;
   }
-  string data;
-  data.readfile(config->video.shader);
-  video.set(Video::Shader, (const char*)data);
+  video.set(Video::Shader, (const char*)config->video.shader);
 }
 
 void Utility::resize(bool resizeWindow) {

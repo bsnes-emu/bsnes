@@ -28,13 +28,20 @@ bool pCheckButton::checked() {
 
 Size pCheckButton::minimumSize() {
   Size size = Font::size(checkButton.font(), checkButton.state.text);
-  return {size.width + 24, size.height + 8};
+  return {size.width + 20, size.height};
 }
 
 void pCheckButton::setChecked(bool checked) {
   @autoreleasepool {
     [cocoaView setState:checked ? NSOnState : NSOffState];
   }
+}
+
+void pCheckButton::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry({
+    geometry.x - 2, geometry.y,
+    geometry.width + 4, geometry.height
+  });
 }
 
 void pCheckButton::setText(const string &text) {

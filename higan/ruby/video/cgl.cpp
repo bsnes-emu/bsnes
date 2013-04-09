@@ -1,4 +1,4 @@
-#include "opengl.hpp"
+#include "opengl/opengl.hpp"
 
 namespace ruby {
   class pVideoCGL;
@@ -24,9 +24,6 @@ public:
     bool synchronize;
     unsigned filter;
     string shader;
-
-    unsigned width;
-    unsigned height;
   } settings;
 
   bool cap(const string &name) {
@@ -58,7 +55,8 @@ public:
           @autoreleasepool {
             [[view openGLContext] makeCurrentContext];
             init();
-            OpenGL::set_shader(settings.shader);
+            OpenGL::shader(settings.shader);
+            if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
           }
         }
       }
@@ -67,18 +65,17 @@ public:
 
     if(name == Video::Filter) {
       settings.filter = any_cast<unsigned>(value);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
     if(name == Video::Shader) {
       settings.shader = any_cast<const char*>(value);
-
       @autoreleasepool {
         [[view openGLContext] makeCurrentContext];
-        OpenGL::set_shader(settings.shader);
-        settings.filter = OpenGL::fragmentfilter;
       }
-
+      OpenGL::shader(settings.shader);
+      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
@@ -86,9 +83,7 @@ public:
   }
 
   bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
-    resize(width, height);
-    settings.width = width;
-    settings.height = height;
+    OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
@@ -108,11 +103,8 @@ public:
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
         auto area = [view frame];
-        OpenGL::refresh(
-          settings.filter == Video::FilterLinear,
-          settings.width, settings.height,
-          area.size.width, area.size.height
-        );
+        outputWidth = area.size.width, outputHeight = area.size.height;
+        OpenGL::refresh();
         [[view openGLContext] flushBuffer];
         [view unlockFocus];
       }
@@ -142,8 +134,6 @@ public:
       [view lockFocus];
 
       OpenGL::init();
-      settings.width = 256;
-      settings.height = 256;
 
       auto context = (CGLContextObj)[[view openGLContext] CGLContextObj];
       int synchronize = settings.synchronize;
@@ -172,9 +162,6 @@ public:
     settings.handle = nil;
     settings.synchronize = false;
     settings.filter = 0;
-
-    iformat = GL_UNSIGNED_INT_8_8_8_8_REV;
-    ibpp = 4;
   }
 
   ~pVideoCGL() {

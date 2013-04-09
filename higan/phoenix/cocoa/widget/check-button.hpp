@@ -15,6 +15,7 @@ struct pCheckButton : public pWidget {
   bool checked();
   Size minimumSize();
   void setChecked(bool checked);
+  void setGeometry(const Geometry &geometry);
   void setText(const string &text);
 
   pCheckButton(CheckButton &checkButton) : pWidget(checkButton), checkButton(checkButton) {}

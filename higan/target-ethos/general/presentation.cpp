@@ -13,8 +13,7 @@ void Presentation::synchronize() {
   if(config->video.shader == "None") shaderNone.setChecked();
   if(config->video.shader == "Blur") shaderBlur.setChecked();
   for(auto &shader : shaderList) {
-    string name = notdir(nall::basename(config->video.shader));
-    if(auto position = name.position(".")) name[position()] = 0;
+    string name = notdir(config->video.shader.split<1>(".shader/")(0));
     if(name == shader->text()) shader->setChecked();
   }
 
@@ -218,17 +217,15 @@ void Presentation::bootstrap() {
 }
 
 void Presentation::loadShaders() {
-  string pathname = program->path("Video Shaders/");
-  lstring files = directory::files(pathname);
-  for(auto &filename : files) {
-    lstring name = string{filename}.split(".");
-    //only add shaders that work with current video driver
-    if(name(1) != config->video.driver) continue;
+  if(config->video.driver != "OpenGL") return;  //only the OpenGL driver has shader support
 
+  string pathname = program->path("Video Shaders/");
+  lstring shaders = directory::folders(pathname, "*.shader");
+  for(auto &name : shaders) {
     auto shader = new RadioItem;
-    shader->setText(name(0));
+    shader->setText(name.split<1>(".shader/")(0));
     shader->onActivate = [=] {
-      config->video.shader = {pathname, filename};
+      config->video.shader = {pathname, name};
       utility->updateShader();
     };
     shaderList.append(shader);

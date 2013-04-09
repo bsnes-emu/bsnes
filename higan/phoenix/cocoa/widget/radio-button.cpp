@@ -28,7 +28,7 @@ bool pRadioButton::checked() {
 
 Size pRadioButton::minimumSize() {
   Size size = Font::size(radioButton.font(), radioButton.state.text);
-  return {size.width + 24, size.height + 8};
+  return {size.width + 22, size.height};
 }
 
 void pRadioButton::setChecked() {
@@ -38,6 +38,13 @@ void pRadioButton::setChecked() {
       [button.p.cocoaView setState:state];
     }
   }
+}
+
+void pRadioButton::setGeometry(const Geometry &geometry) {
+  pWidget::setGeometry({
+    geometry.x - 1, geometry.y,
+    geometry.width + 2, geometry.height
+  });
 }
 
 void pRadioButton::setGroup(const set<RadioButton&> &group) {

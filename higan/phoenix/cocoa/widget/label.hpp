@@ -12,6 +12,7 @@ struct pLabel : public pWidget {
   CocoaLabel *cocoaLabel = nullptr;
 
   Size minimumSize();
+  void setGeometry(const Geometry &geometry);
   void setText(const string &text);
 
   pLabel(Label &label) : pWidget(label), label(label) {}

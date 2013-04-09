@@ -98,11 +98,10 @@ ifeq ($(shell id -un),byuu)
 	cp -r ../ruby ./ruby
 	cp -r ../phoenix ./phoenix
 	rm -r libco/doc
-	rm -r libco/test
-	rm -r nall/test
-	rm -r ruby/_test
-	rm -r phoenix/nall
-	rm -r phoenix/test
+	rm -r libco/.test
+	rm -r nall/.test
+	rm -r ruby/.test
+	rm -r phoenix/.test
 endif
 
 help:;
