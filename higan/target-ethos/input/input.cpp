@@ -245,7 +245,7 @@ int16_t InputManager::poll(unsigned scancode) {
 }
 
 void InputManager::saveConfiguration() {
-  config.save(program->path("input.cfg"));
+  config.save(program->path("input.bml"));
 }
 
 InputManager::InputManager() {
@@ -257,8 +257,14 @@ InputManager::InputManager() {
 void InputManager::bootstrap() {
   unsigned guid = 0;
   for(auto &emulator : program->emulator) {
+    Configuration::Node emulatorNode;
+
     for(auto &port : emulator->port) {
+      Configuration::Node portNode;
+
       for(auto &device : port.device) {
+        Configuration::Node deviceNode;
+
         for(auto &number : device.order) {
           auto &input = device.input[number];
 
@@ -268,26 +274,29 @@ void InputManager::bootstrap() {
           if(input.type == 2) abstract = new AbsoluteInput;
           if(input.type >= 3) continue;
 
-          abstract->name = {emulator->information.name, "::", port.name, "::", device.name, "::", input.name};
-          abstract->name.replace(" ", "");
+          abstract->name = string{input.name}.replace(" ", "");
           abstract->mapping = "None";
           abstract->logic = 0;  //OR
 
           input.guid = guid++;
           inputMap.append(abstract);
-        }
-      }
-    }
-  }
 
-  for(auto &input : inputMap) {
-    config.append(input->mapping, input->name);
+          deviceNode.append(abstract->mapping, abstract->name);
+        }
+
+        portNode.append(deviceNode, string{device.name}.replace(" ", ""));
+      }
+
+      emulatorNode.append(portNode, string{port.name}.replace(" ", ""));
+    }
+
+    config.append(emulatorNode, string{emulator->information.name}.replace(" ", ""));
   }
 
   appendHotkeys();
 
-  config.load(program->path("input.cfg"));
-  config.save(program->path("input.cfg"));
+  config.load(program->path("input.bml"));
+  config.save(program->path("input.bml"));
 
   bind();
 }

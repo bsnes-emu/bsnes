@@ -199,7 +199,7 @@ struct pRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const set<RadioItem&> &group);
+  void setGroup(const group<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -423,7 +423,7 @@ struct pRadioButton : public pWidget {
   bool checked();
   Size minimumSize();
   void setChecked();
-  void setGroup(const set<RadioButton&> &group);
+  void setGroup(const group<RadioButton&> &group);
   void setText(const string &text);
 
   pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}

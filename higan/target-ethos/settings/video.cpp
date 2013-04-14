@@ -36,8 +36,8 @@ VideoSettings::VideoSettings() {
   saturation.slider.setPosition(config->video.saturation);
   gamma.slider.setPosition(config->video.gamma - 100);
   luminance.slider.setPosition(config->video.luminance);
-  overscanHorizontal.slider.setPosition(config->video.maskOverscanHorizontal);
-  overscanVertical.slider.setPosition(config->video.maskOverscanVertical);
+  overscanHorizontal.slider.setPosition(config->video.maskOverscan.horizontal);
+  overscanVertical.slider.setPosition(config->video.maskOverscan.vertical);
 
   synchronize();
 
@@ -50,14 +50,14 @@ void VideoSettings::synchronize() {
   config->video.saturation = saturation.slider.position();
   config->video.gamma = 100 + gamma.slider.position();
   config->video.luminance = luminance.slider.position();
-  config->video.maskOverscanHorizontal = overscanHorizontal.slider.position();
-  config->video.maskOverscanVertical = overscanVertical.slider.position();
+  config->video.maskOverscan.horizontal = overscanHorizontal.slider.position();
+  config->video.maskOverscan.vertical = overscanVertical.slider.position();
 
   saturation.value.setText({config->video.saturation, "%"});
   gamma.value.setText({config->video.gamma, "%"});
   luminance.value.setText({config->video.luminance, "%"});
-  overscanHorizontal.value.setText({config->video.maskOverscanHorizontal, "px"});
-  overscanVertical.value.setText({config->video.maskOverscanVertical, "px"});
+  overscanHorizontal.value.setText({config->video.maskOverscan.horizontal, "px"});
+  overscanVertical.value.setText({config->video.maskOverscan.vertical, "px"});
 
   if(program->active) system().paletteUpdate();
 }

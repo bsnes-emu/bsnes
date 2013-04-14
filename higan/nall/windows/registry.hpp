@@ -5,6 +5,7 @@
 #include <nall/string.hpp>
 
 #include <shlwapi.h>
+#undef interface
 #ifndef KEY_WOW64_64KEY
   #define KEY_WOW64_64KEY 0x0100
 #endif

@@ -61,7 +61,7 @@ void Browser::synchronize() {
 }
 
 void Browser::saveConfiguration() {
-  config.save(program->path("paths.cfg"));
+  config.save(program->path("paths.bml"));
 }
 
 void Browser::bootstrap() {
@@ -85,12 +85,14 @@ void Browser::bootstrap() {
   }
 
   for(auto &folder : folderList) {
-    config.append(folder.path, folder.extension);
-    config.append(folder.selection, string{folder.extension, "::selection"});
+    Configuration::Node node;
+    node.append(folder.path, "Path");
+    node.append(folder.selection, "Selection");
+    config.append(node, folder.extension);
   }
 
-  config.load(program->path("paths.cfg"));
-  config.save(program->path("paths.cfg"));
+  config.load(program->path("paths.bml"));
+  config.save(program->path("paths.bml"));
 }
 
 string Browser::select(const string &title, const string &extension) {

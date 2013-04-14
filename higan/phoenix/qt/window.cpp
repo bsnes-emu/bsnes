@@ -34,14 +34,14 @@ Color pWindow::backgroundColor() {
 }
 
 Geometry pWindow::frameMargin() {
-  unsigned menuHeight = window.state.menuVisible ? settings->menuGeometryHeight : 0;
-  unsigned statusHeight = window.state.statusVisible ? settings->statusGeometryHeight : 0;
-  if(window.state.fullScreen) return { 0, menuHeight, 0, menuHeight + statusHeight };
+  unsigned menuHeight = window.state.menuVisible ? settings->geometry.menuHeight : 0;
+  unsigned statusHeight = window.state.statusVisible ? settings->geometry.statusHeight : 0;
+  if(window.state.fullScreen) return {0, menuHeight, 0, menuHeight + statusHeight};
   return {
-    settings->frameGeometryX,
-    settings->frameGeometryY + menuHeight,
-    settings->frameGeometryWidth,
-    settings->frameGeometryHeight + menuHeight + statusHeight
+    settings->geometry.frameX,
+    settings->geometry.frameY + menuHeight,
+    settings->geometry.frameWidth,
+    settings->geometry.frameHeight + menuHeight + statusHeight
   };
 }
 
@@ -237,19 +237,19 @@ void pWindow::updateFrameGeometry() {
   QRect border = qtWindow->frameGeometry();
   QRect client = qtWindow->geometry();
 
-  settings->frameGeometryX = client.x() - border.x();
-  settings->frameGeometryY = client.y() - border.y();
-  settings->frameGeometryWidth = border.width() - client.width();
-  settings->frameGeometryHeight = border.height() - client.height();
+  settings->geometry.frameX = client.x() - border.x();
+  settings->geometry.frameY = client.y() - border.y();
+  settings->geometry.frameWidth = border.width() - client.width();
+  settings->geometry.frameHeight = border.height() - client.height();
 
   if(window.state.menuVisible) {
     pApplication::syncX();
-    settings->menuGeometryHeight = qtMenu->height();
+    settings->geometry.menuHeight = qtMenu->height();
   }
 
   if(window.state.statusVisible) {
     pApplication::syncX();
-    settings->statusGeometryHeight = qtStatus->height();
+    settings->geometry.statusHeight = qtStatus->height();
   }
 
   settings->save();
@@ -303,8 +303,8 @@ void pWindow::QtWindow::resizeEvent(QResizeEvent*) {
 QSize pWindow::QtWindow::sizeHint() const {
   unsigned width = self.window.state.geometry.width;
   unsigned height = self.window.state.geometry.height;
-  if(self.window.state.menuVisible) height += settings->menuGeometryHeight;
-  if(self.window.state.statusVisible) height += settings->statusGeometryHeight;
+  if(self.window.state.menuVisible) height += settings->geometry.menuHeight;
+  if(self.window.state.statusVisible) height += settings->geometry.statusHeight;
   return QSize(width, height);
 }
 

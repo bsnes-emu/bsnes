@@ -7,7 +7,7 @@ bool pRadioItem::checked() {
 void pRadioItem::setChecked() {
 }
 
-void pRadioItem::setGroup(const set<RadioItem&> &group) {
+void pRadioItem::setGroup(const group<RadioItem&> &group) {
 }
 
 void pRadioItem::setText(const string &text) {

@@ -86,18 +86,20 @@ resource:
 	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
-ifeq ($(USER),root)
-	@echo Please do not run make install as root.
-	@echo The installer needs to know your home directory to install important files.
-else ifeq ($(platform),x)
+ifeq ($(platform),x)
 	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
 	sudo install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
 	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
 
-	mkdir -p ~/.config/$(name)
-	cp -R profile/* ~/.config/$(name)
-	cp data/cheats.bml ~/.config/$(name)/cheats.bml
-	chmod -R 777 ~/.config/$(name)
+	sudo mkdir -p /usr/share/$(name)
+	sudo cp -R profile/* /usr/share/$(name)
+	sudo cp data/cheats.bml /usr/share/$(name)/cheats.bml
+	sudo chmod -R 777 /usr/share/$(name)
+else ifeq ($(platform),osx)
+	sudo mkdir -p /Library/Application\ Support/$(name)
+	sudo cp -R profile/* /Library/Application\ Support/$(name)
+	sudo cp data/cheats.bml /Library/Application\ Support/$(name)/cheats.bml
+	sudo chmod -R 777 /Library/Application\ Support/$(name)
 endif
 
 uninstall:

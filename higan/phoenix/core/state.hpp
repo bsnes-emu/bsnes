@@ -27,8 +27,8 @@ struct Window::State {
   Color backgroundColor = {0, 0, 0, 255};
   bool fullScreen = false;
   Geometry geometry = {128, 128, 256, 256};
-  set<Layout&> layout;
-  set<Menu&> menu;
+  group<Layout&> layout;
+  group<Menu&> menu;
   string menuFont;
   bool menuVisible = false;
   bool modal = false;
@@ -38,7 +38,7 @@ struct Window::State {
   bool statusVisible = false;
   string title;
   bool visible = false;
-  set<Widget&> widget;
+  group<Widget&> widget;
   string widgetFont;
 };
 
@@ -50,7 +50,7 @@ struct Action::State {
 };
 
 struct Menu::State {
-  set<Action&> action;
+  group<Action&> action;
   nall::image image = {0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0};
   string text;
 };
@@ -67,7 +67,7 @@ struct CheckItem::State {
 
 struct RadioItem::State {
   bool checked = true;
-  set<RadioItem&> group;
+  nall::group<RadioItem&> group;
   string text;
 };
 
@@ -152,7 +152,7 @@ struct ProgressBar::State {
 
 struct RadioButton::State {
   bool checked = true;
-  set<RadioButton&> group;
+  nall::group<RadioButton&> group;
   string text;
 };
 

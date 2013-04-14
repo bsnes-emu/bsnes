@@ -30,6 +30,12 @@ static HBITMAP CreateBitmap(const image &image) {
   return hbitmap;
 }
 
+static unsigned GetWindowZOrder(HWND hwnd) {
+  unsigned z = 0;
+  for(HWND next = hwnd; next != NULL; next = GetWindow(next, GW_HWNDPREV)) z++;
+  return z;
+}
+
 static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
   #define pressed(keysym) (GetAsyncKeyState(keysym) & 0x8000)
   #define enabled(keysym) (GetKeyState(keysym))

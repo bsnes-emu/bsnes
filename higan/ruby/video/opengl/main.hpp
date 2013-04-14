@@ -1,20 +1,20 @@
 void OpenGL::shader(const char *pathname) {
   for(auto &program : programs) program.release();
   programs.reset();
-  settings = "";
 
+  format = GL_RGBA8;
+  filter = GL_LINEAR;
+  wrap = GL_CLAMP_TO_BORDER;
   absoluteWidth = 0, absoluteHeight = 0;
   relativeWidth = 0, relativeHeight = 0;
 
   if(pathname) {
     auto document = Markup::Document(file::read({pathname, "manifest.bml"}));
-    for(auto &node : document["settings"]) {
-      settings.append("#define ", node.name, " ", node.text(), "\n");
-    }
     for(auto &node : document.find("program")) {
       unsigned n = programs.size();
       programs(n).bind(this, node, pathname);
     }
+
     bind(this, document["output"], pathname);
   }
 }
@@ -66,35 +66,35 @@ void OpenGL::refresh() {
 
     glrUniform1i("phase", p.phase);
     glrUniform1i("sourceLength", history.size());
-    glrUniform1i("textureLength", p.textures.size());
+    glrUniform1i("pixmapLength", p.pixmaps.size());
     glrUniform4f("targetSize", targetWidth, targetHeight, 1.0 / targetWidth, 1.0 / targetHeight);
     glrUniform4f("outputSize", outputWidth, outputHeight, 1.0 / outputWidth, 1.0 / outputHeight);
   //glrUniform4f("targetActualSize", glrSize(targetWidth), glrSize(targetHeight), 1.0 / glrSize(targetWidth), 1.0 / glrSize(targetHeight));
   //glrUniform4f("outputActualSize", glrSize(outputWidth), glrSize(outputHeight), 1.0 / glrSize(outputWidth), 1.0 / glrSize(outputHeight));
 
     unsigned aid = 0;
-    for(auto &texture : history) {
+    for(auto &pixmap : history) {
       glrUniform1i({"source[", aid, "]"}, aid);
-      glrUniform4f({"sourceSize[", aid, "]"}, texture.width, texture.height, 1.0 / texture.width, 1.0 / texture.height);
-    //glrUniform4f({"sourceActualSize[", aid, "]"}, glrSize(texture.width), glrSize(texture.height), 1.0 / glrSize(texture.width), 1.0 / glrSize(texture.height));
+      glrUniform4f({"sourceSize[", aid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
+    //glrUniform4f({"sourceActualSize[", aid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));
       glActiveTexture(GL_TEXTURE0 + (aid++));
-      glBindTexture(GL_TEXTURE_2D, texture.texture);
-      glrParameters(texture.filter, texture.wrap);
+      glBindTexture(GL_TEXTURE_2D, pixmap.texture);
+      glrParameters(pixmap.filter, pixmap.wrap);
     }
 
     unsigned bid = 0;
-    for(auto &texture : p.textures) {
-      glrUniform1i({"texture[", bid, "]"}, aid + bid);
-      glrUniform4f({"textureSize[", bid, "]"}, texture.width, texture.height, 1.0 / texture.width, 1.0 / texture.height);
-    //glrUniform4f({"textureActualSize[", bid, "]"}, glrSize(texture.width), glrSize(texture.height), 1.0 / glrSize(texture.width), 1.0 / glrSize(texture.height));
+    for(auto &pixmap : p.pixmaps) {
+      glrUniform1i({"pixmap[", bid, "]"}, aid + bid);
+      glrUniform4f({"pixmapSize[", bid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
+    //glrUniform4f({"pixmapActualSize[", bid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));
       glActiveTexture(GL_TEXTURE0 + aid + (bid++));
-      glBindTexture(GL_TEXTURE_2D, texture.texture);
-      glrParameters(texture.filter, texture.wrap);
+      glBindTexture(GL_TEXTURE_2D, pixmap.texture);
+      glrParameters(pixmap.filter, pixmap.wrap);
     }
 
     glActiveTexture(GL_TEXTURE0);
     glrParameters(p.filter, p.wrap);
-    glrRender(sourceWidth, sourceHeight, targetWidth, targetHeight);
+    p.render(sourceWidth, sourceHeight, targetWidth, targetHeight);
     glBindTexture(GL_TEXTURE_2D, p.texture);
 
     p.phase = (p.phase + 1) % p.modulo;
@@ -115,7 +115,7 @@ void OpenGL::refresh() {
   glrUniform4f("outputSize", outputWidth, outputHeight, 1.0 / outputWidth, 1.0 / outputHeight);
 
   glrParameters(filter, wrap);
-  glrRender(sourceWidth, sourceHeight, outputWidth, outputHeight);
+  render(sourceWidth, sourceHeight, outputWidth, outputHeight);
 }
 
 bool OpenGL::init() {
@@ -134,6 +134,7 @@ bool OpenGL::init() {
   vertex = glrCreateShader(program, GL_VERTEX_SHADER, OpenGLOutputVertexShader);
 //geometry = glrCreateShader(program, GL_GEOMETRY_SHADER, OpenGLGeometryShader);
   fragment = glrCreateShader(program, GL_FRAGMENT_SHADER, OpenGLFragmentShader);
+  OpenGLSurface::allocate();
   glrLinkProgram(program);
 
   shader(nullptr);

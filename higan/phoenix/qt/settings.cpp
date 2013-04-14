@@ -3,26 +3,25 @@ namespace phoenix {
 static Settings *settings = nullptr;
 
 void Settings::load() {
-  string path = { userpath(), ".config/phoenix/qt.cfg" };
-  configuration::load(path);
+  string path = {userpath(), ".config/phoenix/qt.bml"};
+  Configuration::Document::load(path);
 }
 
 void Settings::save() {
-  string path = { userpath(), ".config/" };
-  mkdir(path, 0755);
-  path.append("phoenix/");
-  mkdir(path, 0755);
-  path.append("qt.cfg");
-  configuration::save(path);
+  string path = {userpath(), ".config/phoenix/"};
+  directory::create(path, 0755);
+  path.append("qt.bml");
+  Configuration::Document::save(path);
 }
 
 Settings::Settings() {
-  append(frameGeometryX = 4, "frameGeometryX");
-  append(frameGeometryY = 24, "frameGeometryY");
-  append(frameGeometryWidth = 8, "frameGeometryWidth");
-  append(frameGeometryHeight = 28, "frameGeometryHeight");
-  append(menuGeometryHeight = 20, "menuGeometryHeight");
-  append(statusGeometryHeight = 20, "statusGeometryHeight");
+  geometry.append(geometry.frameX = 4, "FrameX");
+  geometry.append(geometry.frameY = 24, "FrameY");
+  geometry.append(geometry.frameWidth = 8, "FrameWidth");
+  geometry.append(geometry.frameHeight = 28, "FrameHeight");
+  geometry.append(geometry.menuHeight = 20, "MenuHeight");
+  geometry.append(geometry.statusHeight = 20, "StatusHeight");
+  append(geometry, "Geometry");
 }
 
 }

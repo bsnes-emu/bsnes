@@ -14,7 +14,7 @@ void pRadioItem::setChecked() {
   locked = false;
 }
 
-void pRadioItem::setGroup(const set<RadioItem&> &group) {
+void pRadioItem::setGroup(const group<RadioItem&> &group) {
 }
 
 void pRadioItem::setText(const string &text) {

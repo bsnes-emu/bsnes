@@ -5,10 +5,8 @@ struct Video {
   static const char *Filter;
   static const char *Shader;
 
-  enum Filter : unsigned {
-    FilterPoint,
-    FilterLinear,
-  };
+  static const unsigned FilterNearest;
+  static const unsigned FilterLinear;
 
   virtual bool cap(const nall::string& name) { return false; }
   virtual nall::any get(const nall::string& name) { return false; }

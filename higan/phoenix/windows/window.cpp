@@ -2,13 +2,40 @@ namespace phoenix {
 
 vector<pWindow*> pWindow::modal;
 
+//EnableWindow(hwnd, false) sends WM_KILLFOCUS; deactivating said window
+//EnableWindow(hwnd, true) does not restore lost focus
+//when a modal loop finishes, and the dialog is dismissed, the application loses focus entirely
+//due to anti-focus-stealing code in Windows, SetForegroundWindow() cannot restore lost focus
+//further, GetActiveWindow() returns nothing when all windows have lost focus
+//thus, we must use a focus-stealing hack to reclaim the focus we never intended to dismiss;
+//and we must replicate GetActiveWindow() by scanning the Z-order of windows for this process
+
 void pWindow::updateModality() {
+  //bind thread input to process that currently has input focus
+  auto threadId = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
+  AttachThreadInput(threadId, GetCurrentThreadId(), TRUE);
+
+  pWindow *topMost = nullptr;
   for(auto &object : pObject::objects) {
     if(dynamic_cast<pWindow*>(object) == nullptr) continue;
     pWindow *p = (pWindow*)object;
-    if(modal.size() == 0) EnableWindow(p->hwnd, true);
-    else EnableWindow(p->hwnd, modal.find(p));
+    bool enable = modal.size() == 0 || modal.find(p);
+    EnableWindow(p->hwnd, enable);
+    if(enable && p->window.visible()) {
+      if(topMost == nullptr) topMost = p;
+      else if(GetWindowZOrder(p->hwnd) < GetWindowZOrder(topMost->hwnd)) topMost = p;
+    }
   }
+
+  //set input focus on top-most window
+  if(topMost) {
+    SetForegroundWindow(topMost->hwnd);
+    SetActiveWindow(topMost->hwnd);
+    SetFocus(topMost->hwnd);
+  }
+
+  //unbind thread input hook
+  AttachThreadInput(threadId, GetCurrentThreadId(), FALSE);
 }
 
 static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;

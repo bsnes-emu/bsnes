@@ -5,7 +5,7 @@ struct pRadioButton : public pWidget {
 
   bool checked();
   void setChecked();
-  void setGroup(const set<RadioButton&> &group);
+  void setGroup(const group<RadioButton&> &group);
   void setText(const string &text);
 
   pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}

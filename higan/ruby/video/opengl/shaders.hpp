@@ -87,6 +87,6 @@ static string OpenGLFragmentShader = R"(
   out vec4 fragColor;
 
   void main() {
-    fragColor = texture2D(source[0], texCoord);
+    fragColor = texture(source[0], texCoord);
   }
 )";

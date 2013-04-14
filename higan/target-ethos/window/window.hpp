@@ -12,7 +12,7 @@ struct WindowManager {
   void hideAll();
 
 private:
-  configuration config;
+  Configuration::Document config;
 };
 
 extern WindowManager *windowManager;

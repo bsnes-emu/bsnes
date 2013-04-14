@@ -4,6 +4,7 @@
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
 #elif defined(PLATFORM_OSX)
   #include <OpenGL/gl.h>
+  #include <OpenGL/gl3.h>
 #elif defined(PLATFORM_WIN)
   #include <GL/gl.h>
   #include <GL/glext.h>
@@ -32,13 +33,17 @@ struct OpenGLTexture {
 struct OpenGLSurface : OpenGLTexture {
   GLuint program = 0;
   GLuint framebuffer = 0;
+  GLuint vao = 0;
+  GLuint vbo[3] = {0, 0, 0};
   GLuint vertex = 0;
   GLuint geometry = 0;
   GLuint fragment = 0;
   uint32_t *buffer = nullptr;
 
+  void allocate();
   void size(unsigned width, unsigned height);
   void release();
+  void render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight);
 };
 
 struct OpenGLProgram : OpenGLSurface {
@@ -49,7 +54,7 @@ struct OpenGLProgram : OpenGLSurface {
   unsigned absoluteHeight = 0;
   double relativeWidth = 0;
   double relativeHeight = 0;
-  vector<OpenGLTexture> textures;
+  vector<OpenGLTexture> pixmaps;
 
   void bind(OpenGL *instance, const Markup::Node &node, const string &pathname);
   void release();
@@ -57,7 +62,6 @@ struct OpenGLProgram : OpenGLSurface {
 
 struct OpenGL : OpenGLProgram {
   vector<OpenGLProgram> programs;
-  string settings;
 
   GLuint inputFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
   unsigned outputWidth = 0;

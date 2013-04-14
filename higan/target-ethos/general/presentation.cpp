@@ -23,7 +23,7 @@ void Presentation::synchronize() {
   case 2: stretchVideo.setChecked(); break;
   }
   aspectCorrection.setChecked(config->video.aspectCorrection);
-  maskOverscan.setChecked(config->video.maskOverscan);
+  maskOverscan.setChecked(config->video.maskOverscan.enable);
   synchronizeVideo.setChecked(config->video.synchronize);
   synchronizeAudio.setChecked(config->audio.synchronize);
   muteAudio.setChecked(config->audio.mute);
@@ -140,7 +140,7 @@ Presentation::Presentation() : active(nullptr) {
   scaleVideo.onActivate   = [&] { config->video.scaleMode = 1; utility->resize(); };
   stretchVideo.onActivate = [&] { config->video.scaleMode = 2; utility->resize(); };
   aspectCorrection.onToggle = [&] { config->video.aspectCorrection = aspectCorrection.checked(); utility->resize(); };
-  maskOverscan.onToggle = [&] { config->video.maskOverscan = maskOverscan.checked(); };
+  maskOverscan.onToggle = [&] { config->video.maskOverscan.enable = maskOverscan.checked(); };
   synchronizeVideo.onToggle = [&] { config->video.synchronize = synchronizeVideo.checked(); utility->synchronizeRuby(); };
   synchronizeAudio.onToggle = [&] { config->audio.synchronize = synchronizeAudio.checked(); utility->synchronizeRuby(); };
   muteAudio.onToggle = [&] { config->audio.mute = muteAudio.checked(); utility->synchronizeRuby(); };
@@ -217,21 +217,22 @@ void Presentation::bootstrap() {
 }
 
 void Presentation::loadShaders() {
-  if(config->video.driver != "OpenGL") return;  //only the OpenGL driver has shader support
-
-  string pathname = program->path("Video Shaders/");
-  lstring shaders = directory::folders(pathname, "*.shader");
-  for(auto &name : shaders) {
-    auto shader = new RadioItem;
-    shader->setText(name.split<1>(".shader/")(0));
-    shader->onActivate = [=] {
-      config->video.shader = {pathname, name};
-      utility->updateShader();
-    };
-    shaderList.append(shader);
+  //only the OpenGL driver has video shader support
+  if(config->video.driver == "OpenGL") {
+    string pathname = program->path("Video Shaders/");
+    lstring shaders = directory::folders(pathname, "*.shader");
+    for(auto &name : shaders) {
+      auto shader = new RadioItem;
+      shader->setText(name.split<1>(".shader/")(0));
+      shader->onActivate = [=] {
+        config->video.shader = {pathname, name};
+        utility->updateShader();
+      };
+      shaderList.append(shader);
+    }
   }
 
-  set<RadioItem&> group;
+  nall::group<RadioItem&> group;
   group.append(shaderNone);
   group.append(shaderBlur);
   for(auto &shader : shaderList) group.append(*shader);

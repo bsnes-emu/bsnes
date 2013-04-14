@@ -80,7 +80,7 @@ string sharedpath() {
   #elif defined(PLATFORM_OSX)
   result = "/Library/Application Support/";
   #else
-  result = "/etc/";
+  result = "/usr/share/";
   #endif
   if(result.empty()) result = ".";
   if(result.endswith("/") == false) result.append("/");

@@ -10,7 +10,7 @@ AdvancedSettings::AdvancedSettings() {
   libraryTitle.setText("Game Library Path");
   libraryLabel.setText("Path:");
   libraryPath.setEditable(false);
-  string path = string::read({configpath(), "higan/library.cfg"}).strip().transform("\\", "/");
+  string path = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").transform("\\", "/");
   if(path.empty()) path = {userpath(), "Emulation/"};
   if(path.endswith("/") == false) path.append("/");
   libraryPath.setText(path);
@@ -69,7 +69,7 @@ AdvancedSettings::AdvancedSettings() {
   libraryBrowse.onActivate = [&] {
     string path = BrowserWindow().setParent(*settings).setPath(userpath()).directory();
     if(path.empty()) return;
-    file::write({configpath(), "higan/library.cfg"}, path);
+    file::write({configpath(), "higan/library.bml"}, {"Path: ", path, "\n"});
     libraryPath.setText(path);
   };
 }

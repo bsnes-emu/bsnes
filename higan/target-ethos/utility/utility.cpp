@@ -197,12 +197,12 @@ void Utility::synchronizeRuby() {
 void Utility::updateShader() {
   if(config->video.shader == "None") {
     video.set(Video::Shader, (const char*)"");
-    video.set(Video::Filter, (unsigned)Video::FilterPoint);
+    video.set(Video::Filter, Video::FilterNearest);
     return;
   }
   if(config->video.shader == "Blur") {
     video.set(Video::Shader, (const char*)"");
-    video.set(Video::Filter, (unsigned)Video::FilterLinear);
+    video.set(Video::Filter, Video::FilterLinear);
     return;
   }
   video.set(Video::Shader, (const char*)config->video.shader);

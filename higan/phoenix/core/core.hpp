@@ -1,9 +1,10 @@
 #include <nall/platform.hpp>
 #include <nall/config.hpp>
+#include <nall/directory.hpp>
 #include <nall/function.hpp>
+#include <nall/group.hpp>
 #include <nall/image.hpp>
 #include <nall/map.hpp>
-#include <nall/set.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
@@ -279,8 +280,8 @@ struct Menu : private nall::base_from_member<pMenu&>, Action {
   template<typename... Args> void append(Args&... args) { append({args...}); }
   template<typename... Args> void remove(Args&... args) { remove({args...}); }
 
-  void append(const nall::set<Action&> &list);
-  void remove(const nall::set<Action&> &list);
+  void append(const nall::group<Action&> &list);
+  void remove(const nall::group<Action&> &list);
   void setImage(const nall::image &image = nall::image{});
   void setText(const nall::string &text);
 
@@ -326,7 +327,7 @@ struct CheckItem : private nall::base_from_member<pCheckItem&>, Action {
 
 struct RadioItem : private nall::base_from_member<pRadioItem&>, Action {
   template<typename... Args> static void group(Args&... args) { group({args...}); }
-  static void group(const nall::set<RadioItem&> &list);
+  static void group(const nall::group<RadioItem&> &list);
 
   nall::function<void ()> onActivate;
 
@@ -577,7 +578,7 @@ struct ProgressBar : private nall::base_from_member<pProgressBar&>, Widget {
 
 struct RadioButton : private nall::base_from_member<pRadioButton&>, Widget {
   template<typename... Args> static void group(Args&... args) { group({args...}); }
-  static void group(const nall::set<RadioButton&> &list);
+  static void group(const nall::group<RadioButton&> &list);
 
   nall::function<void ()> onActivate;
 

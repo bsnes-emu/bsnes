@@ -4,6 +4,7 @@
 #define None
 #undef XlibNone
 #define XlibNone 0L
+#define Bool XlibBool
 #define Button1 XlibButton1
 #define Button2 XlibButton2
 #define Button3 XlibButton3
@@ -17,6 +18,7 @@
 #undef NALL_XORG_GUARD_HPP
 
 #undef None
+#undef Bool
 #undef Button1
 #undef Button2
 #undef Button3

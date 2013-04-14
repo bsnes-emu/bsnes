@@ -11,16 +11,21 @@ struct pApplication {
   static void initialize();
 };
 
-struct Settings : public configuration {
+struct Settings : Configuration::Document {
   bidirectional_map<Keyboard::Scancode, unsigned> keymap;
 
-  unsigned frameGeometryX;
-  unsigned frameGeometryY;
-  unsigned frameGeometryWidth;
-  unsigned frameGeometryHeight;
-  unsigned menuGeometryHeight;
-  unsigned statusGeometryHeight;
-  unsigned windowBackgroundColor;
+  struct Geometry : Configuration::Node {
+    unsigned frameX;
+    unsigned frameY;
+    unsigned frameWidth;
+    unsigned frameHeight;
+    unsigned menuHeight;
+    unsigned statusHeight;
+  } geometry;
+
+  struct Window : Configuration::Node {
+    unsigned backgroundColor;
+  } window;
 
   void load();
   void save();
@@ -209,7 +214,7 @@ struct pRadioItem : public pAction {
 
   bool checked();
   void setChecked();
-  void setGroup(const set<RadioItem&> &group);
+  void setGroup(const group<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -442,7 +447,7 @@ struct pRadioButton : public pWidget {
   bool checked();
   Size minimumSize();
   void setChecked();
-  void setGroup(const set<RadioButton&> &group);
+  void setGroup(const group<RadioButton&> &group);
   void setText(const string &text);
 
   pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}

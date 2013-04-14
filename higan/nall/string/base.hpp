@@ -29,6 +29,7 @@ namespace nall {
     inline static string time();
     inline static string datetime();
 
+    inline void reset();
     inline void reserve(unsigned);
     inline void resize(unsigned);
     inline void clear(char);

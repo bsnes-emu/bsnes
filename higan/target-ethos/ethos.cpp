@@ -11,7 +11,7 @@ Emulator::Interface& system() {
 }
 
 bool Program::focused() {
-  return config->input.focusAllow || presentation->focused();
+  return config->input.focus.allow || presentation->focused();
 }
 
 string Program::path(const string &name) {
@@ -27,7 +27,7 @@ string Program::path(const string &name) {
 void Program::main() {
   inputManager->poll();
   utility->updateStatus();
-  autopause = config->input.focusPause && presentation->focused() == false;
+  autopause = config->input.focus.pause && presentation->focused() == false;
 
   if(active == nullptr || system().loaded() == false || pause || autopause) {
     audio.clear();
@@ -65,7 +65,7 @@ Program::Program(int argc, char **argv) {
     monospaceFont = Font::monospace(8);
   }
 
-  config = new Configuration;
+  config = new ConfigurationSettings;
   video.driver(config->video.driver);
   audio.driver(config->audio.driver);
   input.driver(config->input.driver);

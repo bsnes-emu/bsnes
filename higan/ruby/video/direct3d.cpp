@@ -171,8 +171,8 @@ public:
     if(lost && !recover()) return;
 
     switch(settings.filter) { default:
-      case Video::FilterPoint:  flags.filter = D3DTEXF_POINT;  break;
-      case Video::FilterLinear: flags.filter = D3DTEXF_LINEAR; break;
+      case Video::FilterNearest: flags.filter = D3DTEXF_POINT;  break;
+      case Video::FilterLinear:  flags.filter = D3DTEXF_LINEAR; break;
     }
 
     device->SetSamplerState(0, D3DSAMP_MINFILTER, flags.filter);

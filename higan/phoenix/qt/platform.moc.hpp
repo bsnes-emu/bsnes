@@ -14,15 +14,17 @@ struct pApplication {
 
 static QApplication *qtApplication = nullptr;
 
-struct Settings : public configuration {
+struct Settings : Configuration::Document {
   bidirectional_map<Keyboard::Scancode, unsigned> keymap;
 
-  unsigned frameGeometryX;
-  unsigned frameGeometryY;
-  unsigned frameGeometryWidth;
-  unsigned frameGeometryHeight;
-  unsigned menuGeometryHeight;
-  unsigned statusGeometryHeight;
+  struct Geometry : Configuration::Node {
+    unsigned frameX;
+    unsigned frameY;
+    unsigned frameWidth;
+    unsigned frameHeight;
+    unsigned menuHeight;
+    unsigned statusHeight;
+  } geometry;
 
   void load();
   void save();
@@ -238,7 +240,7 @@ public:
 
   bool checked();
   void setChecked();
-  void setGroup(const set<RadioItem&> &group);
+  void setGroup(const group<RadioItem&> &group);
   void setText(const string &text);
 
   pRadioItem(RadioItem &radioItem) : pAction(radioItem), radioItem(radioItem) {}
@@ -542,7 +544,7 @@ public:
   bool checked();
   Size minimumSize();
   void setChecked();
-  void setGroup(const set<RadioButton&> &group);
+  void setGroup(const group<RadioButton&> &group);
   void setText(const string &text);
 
   pRadioButton(RadioButton &radioButton) : pWidget(radioButton), radioButton(radioButton) {}

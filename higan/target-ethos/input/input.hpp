@@ -59,7 +59,7 @@ struct InputManager {
   void pollHotkeys();
 
 private:
-  configuration config;
+  Configuration::Document config;
 };
 
 extern InputManager *inputManager;

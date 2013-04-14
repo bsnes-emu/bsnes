@@ -1,126 +1,103 @@
 #ifndef NALL_CONFIG_HPP
 #define NALL_CONFIG_HPP
 
+#include <nall/platform.hpp>
 #include <nall/file.hpp>
 #include <nall/string.hpp>
-#include <nall/vector.hpp>
 
 namespace nall {
-  namespace configuration_traits {
-    template<typename T> struct is_boolean { enum { value = false }; };
-    template<> struct is_boolean<bool> { enum { value = true }; };
+namespace Configuration {
 
-    template<typename T> struct is_signed { enum { value = false }; };
-    template<> struct is_signed<signed> { enum { value = true }; };
+struct Node {
+  string name;
+  string desc;
+  enum class Type : unsigned { Null, Bool, Signed, Unsigned, Double, String } type = Type::Null;
+  void* data = nullptr;
+  vector<Node> children;
 
-    template<typename T> struct is_unsigned { enum { value = false }; };
-    template<> struct is_unsigned<unsigned> { enum { value = true }; };
-
-    template<typename T> struct is_double { enum { value = false }; };
-    template<> struct is_double<double> { enum { value = true }; };
-
-    template<typename T> struct is_string { enum { value = false }; };
-    template<> struct is_string<string> { enum { value = true }; };
+  bool empty() const {
+    return data == nullptr;
   }
 
-  class configuration {
-  public:
-    enum type_t { boolean_t, signed_t, unsigned_t, double_t, string_t, unknown_t };
-    struct item_t {
-      uintptr_t data;
-      string name;
-      string desc;
-      type_t type;
-
-      inline string get() const {
-        switch(type) {
-          case boolean_t:  return { *(bool*)data };
-          case signed_t:   return { *(signed*)data };
-          case unsigned_t: return { *(unsigned*)data };
-          case double_t:   return { *(double*)data };
-          case string_t:   return { "\"", *(string*)data, "\"" };
-        }
-        return "???";
-      }
-
-      inline void set(string s) {
-        switch(type) {
-          case boolean_t:  *(bool*)data = (s == "true");     break;
-          case signed_t:   *(signed*)data = integer(s);      break;
-          case unsigned_t: *(unsigned*)data = decimal(s);    break;
-          case double_t:   *(double*)data = fp(s);           break;
-          case string_t:   s.trim("\""); *(string*)data = s; break;
-        }
-      }
-    };
-    vector<item_t> list;
-
-    template<typename T>
-    inline void append(T &data, const char *name, const char *desc = "") {
-      item_t item = { (uintptr_t)&data, name, desc };
-      if(configuration_traits::is_boolean<T>::value) item.type = boolean_t;
-      else if(configuration_traits::is_signed<T>::value) item.type = signed_t;
-      else if(configuration_traits::is_unsigned<T>::value) item.type = unsigned_t;
-      else if(configuration_traits::is_double<T>::value) item.type = double_t;
-      else if(configuration_traits::is_string<T>::value) item.type = string_t;
-      else item.type = unknown_t;
-      list.append(item);
+  string get() const {
+    switch(type) {
+    case Type::Bool: return {*(bool*)data};
+    case Type::Signed: return {*(signed*)data};
+    case Type::Unsigned: return {*(unsigned*)data};
+    case Type::Double: return {*(double*)data};
+    case Type::String: return {*(string*)data};
     }
+    return "";
+  }
 
-    //deprecated
-    template<typename T>
-    inline void attach(T &data, const char *name, const char *desc = "") {
-      append(data, name, desc);
+  void set(const string& value) {
+    switch(type) {
+    case Type::Bool: *(bool*)data = (value == "true"); break;
+    case Type::Signed: *(signed*)data = integer(value); break;
+    case Type::Unsigned: *(unsigned*)data = decimal(value); break;
+    case Type::Double: *(double*)data = fp(value); break;
+    case Type::String: *(string*)data = value; break;
     }
+  }
 
-    inline virtual bool load(const string &filename) {
-      string data;
-      if(data.readfile(filename) == true) {
-        data.replace("\r", "");
-        lstring line;
-        line.split("\n", data);
+  void assign() { type = Type::Null; data = nullptr; }
+  void assign(bool& bind) { type = Type::Bool; data = (void*)&bind; }
+  void assign(signed& bind) { type = Type::Signed; data = (void*)&bind; }
+  void assign(unsigned& bind) { type = Type::Unsigned; data = (void*)&bind; }
+  void assign(double& bind) { type = Type::Double; data = (void*)&bind; }
+  void assign(string& bind) { type = Type::String; data = (void*)&bind; }
+  void assign(const Node& node) { operator=(node); }
 
-        for(unsigned i = 0; i < line.size(); i++) {
-          if(auto position = qstrpos(line[i], "#")) line[i][position()] = 0;
-          if(!qstrpos(line[i], " = ")) continue;
+  template<typename T> void append(T& data, const string& name, const string& desc = "") {
+    Node node;
+    node.assign(data);
+    node.name = name;
+    node.desc = desc;
+    children.append(node);
+  }
 
-          lstring part;
-          part.qsplit(" = ", line[i]);
-          part[0].trim();
-          part[1].trim();
+  void load(Markup::Node path) {
+    for(auto& child : children) {
+      auto leaf = path[child.name];
+      if(!leaf.exists()) continue;
+      if(!child.empty()) child.set(leaf.data.trim<1>(" ", "\r"));
+      child.load(leaf);
+    }
+  }
 
-          for(unsigned n = 0; n < list.size(); n++) {
-            if(part[0] == list[n].name) {
-              list[n].set(part[1]);
-              break;
-            }
-          }
-        }
-
-        return true;
-      } else {
-        return false;
+  void save(file& fp, unsigned depth = 0) {
+    for(auto& child : children) {
+      if(child.desc) {
+        for(unsigned n = 0; n < depth; n++) fp.print("  ");
+        fp.print("//", child.desc, "\n");
       }
+      for(unsigned n = 0; n < depth; n++) fp.print("  ");
+      fp.print(child.name);
+      if(!child.empty()) fp.print(": ", child.get());
+      fp.print("\n");
+      child.save(fp, depth + 1);
+      if(depth == 0) fp.print("\n");
     }
+  }
+};
 
-    inline virtual bool save(const string &filename) const {
-      file fp;
-      if(fp.open(filename, file::mode::write)) {
-        for(unsigned i = 0; i < list.size(); i++) {
-          string output;
-          output.append(list[i].name, " = ", list[i].get());
-          if(list[i].desc != "") output.append(" # ", list[i].desc);
-          output.append("\r\n");
-          fp.print(output);
-        }
+struct Document : Node {
+  bool load(const string& filename) {
+    if(!file::exists(filename)) return false;
+    auto document = Markup::Document(string::read(filename));
+    Node::load(document);
+    return true;
+  }
 
-        fp.close();
-        return true;
-      } else {
-        return false;
-      }
-    }
-  };
+  bool save(const string& filename) {
+    file fp(filename, file::mode::write);
+    if(!fp.open()) return false;
+    Node::save(fp);
+    return true;
+  }
+};
+
+}
 }
 
 #endif

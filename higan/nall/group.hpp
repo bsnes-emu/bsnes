@@ -1,46 +1,25 @@
-#ifndef NALL_SET_HPP
-#define NALL_SET_HPP
+#ifndef NALL_GROUP_HPP
+#define NALL_GROUP_HPP
 
-//set
-//* unordered
-//* intended for unique items
-//* dynamic growth
-//* reference-based variant
+//group: a vector of unique references
 
 #include <stdlib.h>
 #include <algorithm>
 #include <initializer_list>
 #include <utility>
-#include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
-#include <nall/sort.hpp>
 #include <nall/traits.hpp>
-#include <nall/utility.hpp>
 
 namespace nall {
 
-template<typename T, typename Enable = void> struct set;
-
-template<typename T> struct set<T, typename std::enable_if<!std::is_reference<T>::value>::type> {
+template<typename TR> struct group {
   struct exception_out_of_bounds{};
-
-protected:
-  T *pool;
-  unsigned poolsize, objectsize;
-
-public:
-  unsigned size() const { return objectsize; }
-  unsigned capacity() const { return poolsize; }
-};
-
-//reference set
-template<typename TR> struct set<TR, typename std::enable_if<std::is_reference<TR>::value>::type> {
-  struct exception_out_of_bounds{};
-
-protected:
   typedef typename std::remove_reference<TR>::type T;
-  T **pool;
-  unsigned poolsize, objectsize;
+
+protected:
+  T** pool = nullptr;
+  unsigned poolsize = 0;
+  unsigned objectsize = 0;
 
 public:
   unsigned size() const { return objectsize; }
@@ -94,27 +73,26 @@ public:
     return {false, 0u};
   }
 
-  template<typename... Args> set(Args&&... args) : pool(nullptr), poolsize(0), objectsize(0) {
+  template<typename... Args> group(Args&&... args) {
     construct(std::forward<Args>(args)...);
   }
 
-  ~set() {
+  ~group() {
     reset();
   }
 
-  set& operator=(const set &source) {
+  group& operator=(const group& source) {
     if(&source == this) return *this;
-    if(pool) free(pool);
-    objectsize = source.objectsize;
-    poolsize = source.poolsize;
-    pool = (T**)malloc(sizeof(T*) * poolsize);
+    reset();
+    reserve(source.poolsize);
+    resize(source.objectsize);
     memcpy(pool, source.pool, sizeof(T*) * objectsize);
     return *this;
   }
 
-  set& operator=(const set &&source) {
+  group& operator=(const group&& source) {
     if(&source == this) return *this;
-    if(pool) free(pool);
+    reset();
     pool = source.pool;
     poolsize = source.poolsize;
     objectsize = source.objectsize;
@@ -129,12 +107,12 @@ public:
   }
 
   struct iterator {
-    bool operator!=(const iterator &source) const { return position != source.position; }
+    bool operator!=(const iterator& source) const { return position != source.position; }
     T& operator*() { return source.operator[](position); }
     iterator& operator++() { position++; return *this; }
-    iterator(const set &source, unsigned position) : source(source), position(position) {}
+    iterator(const group& source, unsigned position) : source(source), position(position) {}
   private:
-    const set &source;
+    const group& source;
     unsigned position;
   };
 
@@ -145,8 +123,8 @@ public:
 
 private:
   void construct() {}
-  void construct(const set &source) { operator=(source); }
-  void construct(const set &&source) { operator=(std::move(source)); }
+  void construct(const group& source) { operator=(source); }
+  void construct(const group&& source) { operator=(std::move(source)); }
   template<typename... Args> void construct(T& data, Args&&... args) {
     append(data);
     construct(std::forward<Args>(args)...);

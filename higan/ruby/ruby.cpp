@@ -2,7 +2,7 @@
 
 #undef mkdir
 #undef usleep
-#include <ruby/ruby_impl.cpp>
+#include <ruby/implementation.cpp>
 
 namespace ruby {
 
@@ -17,6 +17,9 @@ const char *Video::Synchronize = "Synchronize";
 const char *Video::Depth = "Depth";
 const char *Video::Filter = "Filter";
 const char *Video::Shader = "Shader";
+
+const unsigned Video::FilterNearest = 0;
+const unsigned Video::FilterLinear  = 1;
 
 void VideoInterface::driver(const char *driver) {
   if(p) term();

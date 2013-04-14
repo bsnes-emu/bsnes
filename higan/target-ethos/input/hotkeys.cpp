@@ -141,11 +141,11 @@ void InputManager::appendHotkeys() {
     };
   }
 
+  Configuration::Node node;
   for(auto &hotkey : hotkeyMap) {
-    string name = {"Hotkey::", hotkey->name};
-    name.replace(" ", "");
-    config.append(hotkey->mapping, name);
+    node.append(hotkey->mapping, string{hotkey->name}.replace(" ", ""));
   }
+  config.append(node, "Hotkey");
 }
 
 void InputManager::pollHotkeys() {

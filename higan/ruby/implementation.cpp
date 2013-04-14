@@ -17,9 +17,10 @@
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
 #elif defined(PLATFORM_OSX)
-  #define __INTEL_COMPILER
+  #define decimal CocoaDecimal
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
+  #undef decimal
 #elif defined(PLATFORM_WINDOWS)
   #define _WIN32_WINNT 0x0501
   #include <windows.h>

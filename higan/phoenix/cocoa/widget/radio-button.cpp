@@ -47,7 +47,7 @@ void pRadioButton::setGeometry(const Geometry &geometry) {
   });
 }
 
-void pRadioButton::setGroup(const set<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton&> &group) {
 }
 
 void pRadioButton::setText(const string &text) {

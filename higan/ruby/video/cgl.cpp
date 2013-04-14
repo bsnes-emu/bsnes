@@ -54,9 +54,8 @@ public:
         if(view) {
           @autoreleasepool {
             [[view openGLContext] makeCurrentContext];
-            init();
-            OpenGL::shader(settings.shader);
-            if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+            int synchronize = settings.synchronize;
+            [[view openGLContext] setValues:&synchronize forParameter:NSOpenGLCPSwapInterval];
           }
         }
       }
@@ -116,28 +115,31 @@ public:
 
     @autoreleasepool {
       NSOpenGLPixelFormatAttribute attributes[] = {
+        NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
         NSOpenGLPFAColorSize, 24,
-        NSOpenGLPFAAccelerated,
+        NSOpenGLPFAAlphaSize, 8,
         NSOpenGLPFADoubleBuffer,
-        NSOpenGLPFAWindow,
         0
       };
 
       auto size = [settings.handle frame].size;
       auto format = [[[NSOpenGLPixelFormat alloc] initWithAttributes:attributes] autorelease];
+      auto context = [[[NSOpenGLContext alloc] initWithFormat:format shareContext:nil] autorelease];
 
       view = [[RubyVideoCGL alloc] initWith:this pixelFormat:format];
+      [view setOpenGLContext:context];
       [view setFrame:NSMakeRect(0, 0, size.width, size.height)];
       [view setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
       [settings.handle addSubview:view];
+      [context setView:view];
 
       [view lockFocus];
 
       OpenGL::init();
+    //print((const char*)glGetString(GL_VERSION), "\n");
 
-      auto context = (CGLContextObj)[[view openGLContext] CGLContextObj];
       int synchronize = settings.synchronize;
-      CGLSetParameter(context, kCGLCPSwapInterval, &synchronize);
+      [[view openGLContext] setValues:&synchronize forParameter:NSOpenGLCPSwapInterval];
 
       [view unlockFocus];
     }

@@ -20,7 +20,7 @@ void pRadioButton::setChecked() {
   parent().locked = false;
 }
 
-void pRadioButton::setGroup(const set<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton&> &group) {
   parent().locked = true;
   if(radioButton.state.group.size() == 0 || &radioButton.state.group[0].p == this) return;
   gtk_radio_button_set_group(

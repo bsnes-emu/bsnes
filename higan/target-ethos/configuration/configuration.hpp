@@ -1,20 +1,22 @@
-struct Configuration : configuration {
-  struct Video {
+struct ConfigurationSettings : Configuration::Document {
+  struct Video : Configuration::Node {
     string driver;
     bool synchronize;
     string shader;
     unsigned scaleMode;
     bool aspectCorrection;
-    bool maskOverscan;
-    unsigned maskOverscanHorizontal;
-    unsigned maskOverscanVertical;
+    struct MaskOverscan : Configuration::Node {
+      bool enable;
+      unsigned horizontal;
+      unsigned vertical;
+    } maskOverscan;
     unsigned saturation;
     unsigned gamma;
     unsigned luminance;
     bool startFullScreen;
   } video;
 
-  struct Audio {
+  struct Audio : Configuration::Node {
     string driver;
     bool synchronize;
     unsigned frequency;
@@ -24,18 +26,20 @@ struct Configuration : configuration {
     bool mute;
   } audio;
 
-  struct Input {
+  struct Input : Configuration::Node {
     string driver;
-    bool focusPause;
-    bool focusAllow;
+    struct Focus : Configuration::Node {
+      bool pause;
+      bool allow;
+    } focus;
   } input;
 
-  struct Timing {
+  struct Timing : Configuration::Node {
     double video;
     double audio;
   } timing;
 
-  struct Server {
+  struct Server : Configuration::Node {
     string hostname;
     string username;
     string password;
@@ -43,7 +47,7 @@ struct Configuration : configuration {
 
   void load();
   void save();
-  Configuration();
+  ConfigurationSettings();
 };
 
-extern Configuration *config;
+extern ConfigurationSettings *config;

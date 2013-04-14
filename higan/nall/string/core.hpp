@@ -11,6 +11,11 @@ static void istring(string &output, const T &value, Args&&... args) {
   istring(output, std::forward<Args>(args)...);
 }
 
+void string::reset() {
+  resize(64);
+  *data = 0;
+}
+
 void string::reserve(unsigned size_) {
   if(size_ > size) resize(size_);
 }

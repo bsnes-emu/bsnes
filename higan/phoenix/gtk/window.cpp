@@ -42,13 +42,13 @@ static gboolean Window_configure(GtkWidget *widget, GdkEvent *event, Window *win
 
   if(window->state.fullScreen == false) {
     //update geometry settings
-    settings->frameGeometryX = client.x - border.x;
-    settings->frameGeometryY = client.y - border.y;
-    settings->frameGeometryWidth = border.width - client.width;
-    settings->frameGeometryHeight = border.height - client.height;
+    settings->geometry.frameX = client.x - border.x;
+    settings->geometry.frameY = client.y - border.y;
+    settings->geometry.frameWidth = border.width - client.width;
+    settings->geometry.frameHeight = border.height - client.height;
     if(window->state.backgroundColorOverride == false) {
       GdkColor color = widget->style->bg[GTK_STATE_NORMAL];
-      settings->windowBackgroundColor
+      settings->window.backgroundColor
       = ((uint8_t)(color.red   >> 8) << 16)
       + ((uint8_t)(color.green >> 8) <<  8)
       + ((uint8_t)(color.blue  >> 8) <<  0);
@@ -154,9 +154,9 @@ void pWindow::append(Widget &widget) {
 Color pWindow::backgroundColor() {
   if(window.state.backgroundColorOverride) return window.state.backgroundColor;
   return {
-    (uint8_t)(settings->windowBackgroundColor >> 16),
-    (uint8_t)(settings->windowBackgroundColor >>  8),
-    (uint8_t)(settings->windowBackgroundColor >>  0),
+    (uint8_t)(settings->window.backgroundColor >> 16),
+    (uint8_t)(settings->window.backgroundColor >>  8),
+    (uint8_t)(settings->window.backgroundColor >>  0),
     255
   };
 }
@@ -170,10 +170,10 @@ Geometry pWindow::frameMargin() {
   };
 
   return {
-    settings->frameGeometryX,
-    settings->frameGeometryY + menuHeight(),
-    settings->frameGeometryWidth,
-    settings->frameGeometryHeight + menuHeight() + statusHeight()
+    settings->geometry.frameX,
+    settings->geometry.frameY + menuHeight(),
+    settings->geometry.frameWidth,
+    settings->geometry.frameHeight + menuHeight() + statusHeight()
   };
 }
 
@@ -291,13 +291,13 @@ void pWindow::setVisible(bool visible) {
     if(gtk_widget_get_visible(menu)) {
       GtkAllocation allocation;
       gtk_widget_get_allocation(menu, &allocation);
-      settings->menuGeometryHeight = allocation.height;
+      settings->geometry.menuHeight = allocation.height;
     }
 
     if(gtk_widget_get_visible(status)) {
       GtkAllocation allocation;
       gtk_widget_get_allocation(status, &allocation);
-      settings->statusGeometryHeight = allocation.height;
+      settings->geometry.statusHeight = allocation.height;
     }
   }
 }
@@ -370,11 +370,11 @@ void pWindow::constructor() {
 }
 
 unsigned pWindow::menuHeight() {
-  return window.state.menuVisible ? settings->menuGeometryHeight : 0;
+  return window.state.menuVisible ? settings->geometry.menuHeight : 0;
 }
 
 unsigned pWindow::statusHeight() {
-  return window.state.statusVisible ? settings->statusGeometryHeight : 0;
+  return window.state.statusVisible ? settings->geometry.statusHeight : 0;
 }
 
 }

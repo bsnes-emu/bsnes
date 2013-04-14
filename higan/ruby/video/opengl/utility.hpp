@@ -59,77 +59,6 @@ static void glrParameters(GLuint filter, GLuint wrap) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 }
 
-static void glrRender(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight) {
-  glViewport(0, 0, targetWidth, targetHeight);
-
-  float w = (float)sourceWidth / (float)glrSize(sourceWidth);
-  float h = (float)sourceHeight / (float)glrSize(sourceHeight);
-  float u = (float)targetWidth, v = (float)targetHeight;
-  GLint location;
-
-  GLfloat modelView[] = {
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-  };
-
-  GLfloat projection[] = {
-     2.0f/u,  0.0f,    0.0f, 0.0f,
-     0.0f,    2.0f/v,  0.0f, 0.0f,
-     0.0f,    0.0f,   -1.0f, 0.0f,
-    -1.0f,   -1.0f,    0.0f, 1.0f,
-  };
-
-  GLfloat modelViewProjection[4 * 4];
-  Matrix::Multiply(modelViewProjection, modelView, 4, 4, projection, 4, 4);
-
-  GLfloat vertices[] = {
-    0, 0, 0, 1,
-    u, 0, 0, 1,
-    0, v, 0, 1,
-    u, v, 0, 1,
-  };
-
-  GLfloat positions[4 * 4];
-  for(unsigned n = 0; n < 16; n += 4) {
-    Matrix::Multiply(&positions[n], &vertices[n], 1, 4, modelViewProjection, 4, 4);
-  }
-
-  GLfloat texCoords[] = {
-    0, 0,
-    w, 0,
-    0, h,
-    w, h,
-  };
-
-  glrUniformMatrix4fv("modelView", modelView);
-  glrUniformMatrix4fv("projection", projection);
-  glrUniformMatrix4fv("modelViewProjection", modelViewProjection);
-
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  GLint locationVertex = glGetAttribLocation(glrProgram(), "vertex");
-  glEnableVertexAttribArray(locationVertex);
-  glVertexAttribPointer(locationVertex, 4, GL_FLOAT, GL_FALSE, 0, vertices);
-
-  GLint locationPosition = glGetAttribLocation(glrProgram(), "position");
-  glEnableVertexAttribArray(locationPosition);
-  glVertexAttribPointer(locationPosition, 4, GL_FLOAT, GL_FALSE, 0, positions);
-
-  GLint locationTexCoord = glGetAttribLocation(glrProgram(), "texCoord");
-  glEnableVertexAttribArray(locationTexCoord);
-  glVertexAttribPointer(locationTexCoord, 2, GL_FLOAT, GL_FALSE, 0, texCoords);
-
-  glBindFragDataLocation(glrProgram(), 0, "fragColor");
-
-  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-
-  glDisableVertexAttribArray(locationVertex);
-  glDisableVertexAttribArray(locationPosition);
-  glDisableVertexAttribArray(locationTexCoord);
-}
-
 static GLuint glrCreateShader(GLuint program, GLuint type, const char *source) {
   GLuint shader = glCreateShader(type);
   glShaderSource(shader, 1, &source, 0);
@@ -149,7 +78,7 @@ static GLuint glrCreateShader(GLuint program, GLuint type, const char *source) {
   return shader;
 }
 
-static GLint glrLinkProgram(GLuint program) {
+static void glrLinkProgram(GLuint program) {
   glLinkProgram(program);
   GLint result = GL_FALSE;
   glGetProgramiv(program, GL_LINK_STATUS, &result);
@@ -160,5 +89,16 @@ static GLint glrLinkProgram(GLuint program) {
     glGetProgramInfoLog(program, length, &length, text);
     text[length] = 0;
     print("[ruby::OpenGL: shader linker error]\n", (const char*)text, "\n\n");
+  }
+  glValidateProgram(program);
+  result = GL_FALSE;
+  glGetProgramiv(program, GL_VALIDATE_STATUS, &result);
+  if(result == GL_FALSE) {
+    GLint length = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+    char text[length + 1];
+    glGetProgramInfoLog(program, length, &length, text);
+    text[length] = 0;
+    print("[ruby::OpenGL: shader validation error]\n", (const char*)text, "\n\n");
   }
 }
