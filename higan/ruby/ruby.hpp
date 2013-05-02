@@ -17,7 +17,7 @@ namespace ruby {
 #include <ruby/input.hpp>
 
 struct VideoInterface {
-  void driver(const char *driver = "");
+  void driver(const char* driver = "");
   const char* default_driver();
   const char* driver_list();
   bool init();
@@ -27,7 +27,7 @@ struct VideoInterface {
   nall::any get(const nall::string& name);
   bool set(const nall::string& name, const nall::any& value);
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height);
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height);
   void unlock();
   void clear();
   void refresh();
@@ -35,11 +35,11 @@ struct VideoInterface {
   ~VideoInterface();
 
 private:
-  Video *p;
+  Video* p = nullptr;
 };
 
 struct AudioInterface {
-  void driver(const char *driver = "");
+  void driver(const char* driver = "");
   const char* default_driver();
   const char* driver_list();
   bool init();
@@ -55,11 +55,11 @@ struct AudioInterface {
   ~AudioInterface();
 
 private:
-  Audio *p;
+  Audio* p = nullptr;
 };
 
 struct InputInterface {
-  void driver(const char *driver = "");
+  void driver(const char* driver = "");
   const char* default_driver();
   const char* driver_list();
   bool init();
@@ -73,12 +73,12 @@ struct InputInterface {
   bool unacquire();
   bool acquired();
 
-  bool poll(int16_t *table);
+  bool poll(int16_t* table);
   InputInterface();
   ~InputInterface();
 
 private:
-  Input *p;
+  Input* p = nullptr;
 };
 
 extern VideoInterface video;

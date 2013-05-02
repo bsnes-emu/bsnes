@@ -9,12 +9,12 @@ namespace ruby {
 class pAudioPulseAudioSimple {
 public:
   struct {
-    pa_simple *handle;
+    pa_simple* handle;
     pa_sample_spec spec;
   } device;
 
   struct {
-    uint32_t *data;
+    uint32_t* data;
     unsigned offset;
   } buffer;
 
@@ -90,18 +90,18 @@ public:
       int error;
       pa_simple_flush(device.handle, &error);
       pa_simple_free(device.handle);
-      device.handle = 0;
+      device.handle = nullptr;
     }
 
     if(buffer.data) {
       delete[] buffer.data;
-      buffer.data = 0;
+      buffer.data = nullptr;
     }
   }
 
   pAudioPulseAudioSimple() {
-    device.handle = 0;
-    buffer.data = 0;
+    device.handle = nullptr;
+    buffer.data = nullptr;
     settings.frequency = 22050;
   }
 

@@ -1,6 +1,6 @@
-HotkeySettings *hotkeySettings = nullptr;
+HotkeySettings* hotkeySettings = nullptr;
 
-HotkeySettings::HotkeySettings() : activeInput(nullptr) {
+HotkeySettings::HotkeySettings() {
   title.setFont(program->titleFont);
   title.setText("Hotkey Bindings");
 
@@ -18,7 +18,7 @@ HotkeySettings::HotkeySettings() : activeInput(nullptr) {
   inputList.onActivate = {&HotkeySettings::assignInput, this};
   eraseButton.onActivate = {&HotkeySettings::eraseInput, this};
 
-  for(auto &hotkey : inputManager->hotkeyMap) inputList.append("", "");
+  for(auto& hotkey : inputManager->hotkeyMap) inputList.append("", "");
   refresh();
 }
 
@@ -28,7 +28,7 @@ void HotkeySettings::synchronize() {
 
 void HotkeySettings::refresh() {
   unsigned index = 0;
-  for(auto &hotkey : inputManager->hotkeyMap) {
+  for(auto& hotkey : inputManager->hotkeyMap) {
     string mapping = hotkey->mapping;
     mapping.replace("KB0::", "");
     mapping.replace("MS0::", "Mouse::");

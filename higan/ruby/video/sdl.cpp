@@ -7,10 +7,10 @@
 
 namespace ruby {
 
-class pVideoSDL {
-public:
-  Display *display;
-  SDL_Surface *screen, *buffer;
+struct pVideoSDL {
+  Display* display;
+  SDL_Surface* screen;
+  SDL_Surface* buffer;
   unsigned iwidth, iheight;
 
   struct {
@@ -52,7 +52,7 @@ public:
     );
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -69,7 +69,7 @@ public:
   void clear() {
     if(SDL_MUSTLOCK(buffer)) SDL_LockSurface(buffer);
     for(unsigned y = 0; y < iheight; y++) {
-      uint32_t *data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
+      uint32_t* data = (uint32_t*)buffer->pixels + y * (buffer->pitch >> 2);
       for(unsigned x = 0; x < iwidth; x++) *data++ = 0xff000000;
     }
     if(SDL_MUSTLOCK(buffer)) SDL_UnlockSurface(buffer);

@@ -1,6 +1,6 @@
 @interface CocoaCanvas : NSImageView {
 @public
-  phoenix::Canvas *canvas;
+  phoenix::Canvas* canvas;
 }
 -(id) initWith:(phoenix::Canvas&)canvas;
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown;
@@ -20,13 +20,13 @@
 namespace phoenix {
 
 struct pCanvas : public pWidget {
-  Canvas &canvas;
-  CocoaCanvas *cocoaCanvas = nullptr;
+  Canvas& canvas;
+  CocoaCanvas* cocoaCanvas = nullptr;
 
-  void setSize(const Size &size);
+  void setSize(const Size& size);
   void update();
 
-  pCanvas(Canvas &canvas) : pWidget(canvas), canvas(canvas) {}
+  pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
   void destructor();
 };

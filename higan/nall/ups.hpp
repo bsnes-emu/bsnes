@@ -25,9 +25,9 @@ struct ups {
   function<void (unsigned offset, unsigned length)> progress;
 
   result create(
-    const uint8_t *sourcedata, unsigned sourcelength,
-    const uint8_t *targetdata, unsigned targetlength,
-    const char *patchfilename
+    const uint8_t* sourcedata, unsigned sourcelength,
+    const uint8_t* targetdata, unsigned targetlength,
+    const char* patchfilename
   ) {
     source_data = (uint8_t*)sourcedata, target_data = (uint8_t*)targetdata;
     source_length = sourcelength, target_length = targetlength;
@@ -85,9 +85,9 @@ struct ups {
   }
 
   result apply(
-    const uint8_t *patchdata, unsigned patchlength,
-    const uint8_t *sourcedata, unsigned sourcelength,
-    uint8_t *targetdata, unsigned &targetlength
+    const uint8_t* patchdata, unsigned patchlength,
+    const uint8_t* sourcedata, unsigned sourcelength,
+    uint8_t* targetdata, unsigned& targetlength
   ) {
     patch_data = (uint8_t*)patchdata, source_data = (uint8_t*)sourcedata, target_data = targetdata;
     patch_length = patchlength, source_length = sourcelength, target_length = targetlength;
@@ -141,7 +141,9 @@ struct ups {
   }
 
 private:
-  uint8_t *patch_data, *source_data, *target_data;
+  uint8_t* patch_data = nullptr;
+  uint8_t* source_data = nullptr;
+  uint8_t* target_data = nullptr;
   unsigned patch_length, source_length, target_length;
   unsigned patch_offset, source_offset, target_offset;
   unsigned patch_checksum, source_checksum, target_checksum;

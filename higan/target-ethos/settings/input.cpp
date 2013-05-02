@@ -1,6 +1,6 @@
-InputSettings *inputSettings = nullptr;
+InputSettings* inputSettings = nullptr;
 
-InputSettings::InputSettings() : activeInput(nullptr) {
+InputSettings::InputSettings() {
   title.setFont(program->titleFont);
   title.setText("Input Settings");
   focusLabel.setText("When Focus is Lost:");
@@ -29,7 +29,7 @@ InputSettings::InputSettings() : activeInput(nullptr) {
     controlLayout.append(resetButton, {80, 0}, 5);
     controlLayout.append(eraseButton, {80, 0});
 
-  for(auto &emulator : program->emulator) {
+  for(auto& emulator : program->emulator) {
     systemList.append(emulator->information.name);
   }
 
@@ -60,7 +60,7 @@ void InputSettings::synchronize() {
     assign[2].setVisible(false);
   } else {
     unsigned number = activeDevice().order[inputList.selection()];
-    auto &input = activeDevice().input[number];
+    auto& input = activeDevice().input[number];
     auto selectedInput = inputManager->inputMap[input.guid];
 
     if(dynamic_cast<DigitalInput*>(selectedInput)) {
@@ -99,7 +99,7 @@ Emulator::Interface::Device& InputSettings::activeDevice() {
 
 void InputSettings::systemChanged() {
   portList.reset();
-  for(auto &port : activeSystem().port) {
+  for(auto& port : activeSystem().port) {
     portList.append(port.name);
   }
   portChanged();
@@ -107,7 +107,7 @@ void InputSettings::systemChanged() {
 
 void InputSettings::portChanged() {
   deviceList.reset();
-  for(auto &device : activePort().device) {
+  for(auto& device : activePort().device) {
     deviceList.append(device.name);
   }
   deviceChanged();
@@ -123,7 +123,7 @@ void InputSettings::deviceChanged() {
 void InputSettings::inputChanged() {
   unsigned index = 0;
   for(unsigned number : activeDevice().order) {
-    auto &input = activeDevice().input[number];
+    auto& input = activeDevice().input[number];
     auto abstract = inputManager->inputMap(input.guid);
     string mapping = abstract->mapping;
     mapping.replace("KB0::", "");
@@ -137,7 +137,7 @@ void InputSettings::resetInput() {
   if(MessageWindow().setParent(*settings).setText("All inputs will be erased. Are you sure you want to do this?")
   .question() == MessageWindow::Response::No) return;
 
-  auto &device = activeDevice();
+  auto& device = activeDevice();
   unsigned length = device.input.size();
   for(unsigned n = 0; n < length; n++) {
     activeInput = inputManager->inputMap[device.input[n].guid];
@@ -147,14 +147,14 @@ void InputSettings::resetInput() {
 
 void InputSettings::eraseInput() {
   unsigned number = activeDevice().order[inputList.selection()];
-  auto &input = activeDevice().input[number];
+  auto& input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
   inputEvent(Scancode::None, 1);
 }
 
 void InputSettings::assignInput() {
   unsigned number = activeDevice().order[inputList.selection()];
-  auto &input = activeDevice().input[number];
+  auto& input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
 
   settings->setStatusText({"Set assignment for [", activeDevice().name, "::", input.name, "] ..."});
@@ -164,7 +164,7 @@ void InputSettings::assignInput() {
 
 void InputSettings::assignMouseInput(unsigned n) {
   unsigned number = activeDevice().order[inputList.selection()];
-  auto &input = activeDevice().input[number];
+  auto& input = activeDevice().input[number];
   activeInput = inputManager->inputMap[input.guid];
 
   if(dynamic_cast<DigitalInput*>(activeInput)) {

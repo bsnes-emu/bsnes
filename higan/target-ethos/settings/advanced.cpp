@@ -1,4 +1,4 @@
-AdvancedSettings *advancedSettings = nullptr;
+AdvancedSettings* advancedSettings = nullptr;
 
 AdvancedSettings::AdvancedSettings() {
   driverTitle.setFont(program->titleFont);

@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void VerticalSlider_change(VerticalSlider *self) {
+static void VerticalSlider_change(VerticalSlider* self) {
   if(self->state.position == self->position()) return;
   self->state.position = self->position();
   if(self->onChange) self->onChange();

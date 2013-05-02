@@ -1,4 +1,4 @@
-TimingSettings *timingSettings = nullptr;
+TimingSettings* timingSettings = nullptr;
 
 TimingAdjustment::TimingAdjustment() {
   assign.setEnabled(false);
@@ -52,7 +52,7 @@ void TimingSettings::analyzeVideoFrequency() {
   videoAdjust.stop.setEnabled(true);
   analyzeStart();
   do {
-    uint32_t *output;
+    uint32_t* output;
     unsigned pitch;
     if(video.lock(output, pitch, 16, 16)) {
       pitch >>= 2;
@@ -91,7 +91,7 @@ void TimingSettings::analyzeStart() {
   analysis.systemTime = time(0);
 }
 
-bool TimingSettings::analyzeTick(const string &type) {
+bool TimingSettings::analyzeTick(const string& type) {
   analysis.counter++;
 
   time_t systemTime = time(0);
@@ -104,7 +104,7 @@ bool TimingSettings::analyzeTick(const string &type) {
     } else {
       analysis.sample.append(analysis.counter);
       uintmax_t sum = 0;
-      for(auto &point : analysis.sample) sum += point;
+      for(auto& point : analysis.sample) sum += point;
       settings->setStatusText({
         type, " sample rate: ", (double)sum / analysis.sample.size(), "hz",
         " (", analysis.sample.size(), " sample points)"

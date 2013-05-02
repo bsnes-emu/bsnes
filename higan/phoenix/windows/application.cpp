@@ -33,7 +33,7 @@ void pApplication::processEvents() {
   }
 }
 
-void Application_processDialogMessage(MSG &msg) {
+void Application_processDialogMessage(MSG& msg) {
   if(msg.message == WM_KEYDOWN || msg.message == WM_KEYUP
   || msg.message == WM_SYSKEYDOWN || msg.message == WM_SYSKEYUP) {
     if(Application_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam)) {
@@ -116,11 +116,11 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
   memset(&info, 0, sizeof(GUITHREADINFO));
   info.cbSize = sizeof(GUITHREADINFO);
   GetGUIThreadInfo(GetCurrentThreadId(), &info);
-  Object *object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
+  Object* object = (Object*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
   if(object == nullptr) return false;
 
   if(dynamic_cast<Window*>(object)) {
-    Window &window = (Window&)*object;
+    Window& window = (Window&)*object;
     if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) return false;
     Keyboard::Keycode keysym = Keysym(wparam, lparam);
     if(keysym != Keyboard::Keycode::None) {
@@ -132,17 +132,17 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 
   if(msg == WM_KEYDOWN) {
     if(dynamic_cast<ListView*>(object)) {
-      ListView &listView = (ListView&)*object;
+      ListView& listView = (ListView&)*object;
       if(wparam == VK_RETURN) {
         if(listView.onActivate) listView.onActivate();
       }
     } else if(dynamic_cast<LineEdit*>(object)) {
-      LineEdit &lineEdit = (LineEdit&)*object;
+      LineEdit& lineEdit = (LineEdit&)*object;
       if(wparam == VK_RETURN) {
         if(lineEdit.onActivate) lineEdit.onActivate();
       }
     } else if(dynamic_cast<TextEdit*>(object)) {
-      TextEdit &textEdit = (TextEdit&)*object;
+      TextEdit& textEdit = (TextEdit&)*object;
       if(wparam == 'A' && GetKeyState(VK_CONTROL) < 0) {
         //Ctrl+A = select all text
         //note: this is not a standard accelerator on Windows
@@ -155,7 +155,7 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
         OpenClipboard(hwnd);
         HANDLE handle = GetClipboardData(CF_UNICODETEXT);
         if(handle) {
-          wchar_t *text = (wchar_t*)GlobalLock(handle);
+          wchar_t* text = (wchar_t*)GlobalLock(handle);
           if(text) {
             string data = (const char*)utf8_t(text);
             data.replace("\r\n", "\n");
@@ -165,7 +165,7 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
             utf16_t output(data);
             HGLOBAL resource = GlobalAlloc(GMEM_MOVEABLE, (wcslen(output) + 1) * sizeof(wchar_t));
             if(resource) {
-              wchar_t *write = (wchar_t*)GlobalLock(resource);
+              wchar_t* write = (wchar_t*)GlobalLock(resource);
               if(write) {
                 wcscpy(write, output);
                 GlobalUnlock(write);
@@ -186,9 +186,9 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 }
 
 static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Object *object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Window &window = (Window&)*object;
+  Window& window = (Window&)*object;
 
   bool process = true;
   if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) process = false;
@@ -221,7 +221,7 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
       window.state.geometry.width = geometry.width;
       window.state.geometry.height = geometry.height;
 
-      for(auto &layout : window.state.layout) {
+      for(auto& layout : window.state.layout) {
         Geometry geom = window.geometry();
         geom.x = geom.y = 0;
         layout.setGeometry(geom);
@@ -232,7 +232,7 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
     }
 
     case WM_GETMINMAXINFO: {
-      MINMAXINFO *mmi = (MINMAXINFO*)lparam;
+      MINMAXINFO* mmi = (MINMAXINFO*)lparam;
     //mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
     //mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
     //return TRUE;
@@ -252,7 +252,7 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
 
     case WM_CTLCOLORBTN:
     case WM_CTLCOLORSTATIC: {
-      Object *object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+      Object* object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
       if(object && window.p.brush) {
         HDC hdc = (HDC)wparam;
         SetBkColor((HDC)wparam, window.p.brushColor);
@@ -265,34 +265,34 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
       unsigned id = LOWORD(wparam);
       HWND control = GetDlgItem(window.p.hwnd, id);
       if(control == 0) {
-        pObject *object = (pObject*)pObject::find(id);
+        pObject* object = (pObject*)pObject::find(id);
         if(!object) break;
         if(dynamic_cast<pItem*>(object)) {
-          Item &item = ((pItem*)object)->item;
+          Item& item = ((pItem*)object)->item;
           if(item.onActivate) item.onActivate();
         } else if(dynamic_cast<pCheckItem*>(object)) {
-          CheckItem &checkItem = ((pCheckItem*)object)->checkItem;
+          CheckItem& checkItem = ((pCheckItem*)object)->checkItem;
           checkItem.setChecked(!checkItem.state.checked);
           if(checkItem.onToggle) checkItem.onToggle();
         } else if(dynamic_cast<pRadioItem*>(object)) {
-          RadioItem &radioItem = ((pRadioItem*)object)->radioItem;
+          RadioItem& radioItem = ((pRadioItem*)object)->radioItem;
           if(radioItem.state.checked == false) {
             radioItem.setChecked();
             if(radioItem.onActivate) radioItem.onActivate();
           }
         }
       } else {
-        Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+        Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
         if(!object) break;
         if(dynamic_cast<Button*>(object)) {
-          Button &button = (Button&)*object;
+          Button& button = (Button&)*object;
           if(button.onActivate) button.onActivate();
         } else if(dynamic_cast<CheckButton*>(object)) {
-          CheckButton &checkButton = (CheckButton&)*object;
+          CheckButton& checkButton = (CheckButton&)*object;
           checkButton.setChecked(!checkButton.state.checked);
           if(checkButton.onToggle) checkButton.onToggle();
         } else if(dynamic_cast<ComboButton*>(object)) {
-          ComboButton &comboButton = (ComboButton&)*object;
+          ComboButton& comboButton = (ComboButton&)*object;
           if(HIWORD(wparam) == CBN_SELCHANGE) {
             if(comboButton.state.selection != comboButton.selection()) {
               comboButton.state.selection = comboButton.selection();
@@ -300,18 +300,18 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
             }
           }
         } else if(dynamic_cast<LineEdit*>(object)) {
-          LineEdit &lineEdit = (LineEdit&)*object;
+          LineEdit& lineEdit = (LineEdit&)*object;
           if(HIWORD(wparam) == EN_CHANGE) {
             if(lineEdit.p.locked == false && lineEdit.onChange) lineEdit.onChange();
           }
         } else if(dynamic_cast<RadioButton*>(object)) {
-          RadioButton &radioButton = (RadioButton&)*object;
+          RadioButton& radioButton = (RadioButton&)*object;
           if(radioButton.state.checked == false) {
             radioButton.setChecked();
             if(radioButton.onActivate) radioButton.onActivate();
           }
         } else if(dynamic_cast<TextEdit*>(object)) {
-          TextEdit &textEdit = (TextEdit&)*object;
+          TextEdit& textEdit = (TextEdit&)*object;
           if(HIWORD(wparam) == EN_CHANGE) {
             if(textEdit.p.locked == false && textEdit.onChange) textEdit.onChange();
           }
@@ -324,10 +324,10 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
       unsigned id = LOWORD(wparam);
       HWND control = GetDlgItem(window.p.hwnd, id);
       if(control == 0) break;
-      Object *object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-      if(object == 0) break;
+      Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+      if(object == nullptr) break;
       if(dynamic_cast<ListView*>(object)) {
-        ListView &listView = (ListView&)*object;
+        ListView& listView = (ListView&)*object;
         LPNMHDR nmhdr = (LPNMHDR)lparam;
         LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
 
@@ -371,7 +371,7 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
 
     case WM_HSCROLL:
     case WM_VSCROLL: {
-      Object *object = 0;
+      Object* object = nullptr;
       if(lparam) {
         object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
       } else {
@@ -380,7 +380,7 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
         if(control == 0) break;
         object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
       }
-      if(object == 0) break;
+      if(object == nullptr) break;
 
       if(dynamic_cast<HorizontalScroller*>(object)
       || dynamic_cast<VerticalScroller*>(object)) {
@@ -407,13 +407,13 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
         GetScrollInfo((HWND)lparam, SB_CTL, &info);
 
         if(dynamic_cast<HorizontalScroller*>(object)) {
-          HorizontalScroller &horizontalScroller = (HorizontalScroller&)*object;
+          HorizontalScroller& horizontalScroller = (HorizontalScroller&)*object;
           if(horizontalScroller.state.position != info.nPos) {
             horizontalScroller.state.position = info.nPos;
             if(horizontalScroller.onChange) horizontalScroller.onChange();
           }
         } else {
-          VerticalScroller &verticalScroller = (VerticalScroller&)*object;
+          VerticalScroller& verticalScroller = (VerticalScroller&)*object;
           if(verticalScroller.state.position != info.nPos) {
             verticalScroller.state.position = info.nPos;
             if(verticalScroller.onChange) verticalScroller.onChange();
@@ -424,13 +424,13 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
       }
 
       if(dynamic_cast<HorizontalSlider*>(object)) {
-        HorizontalSlider &horizontalSlider = (HorizontalSlider&)*object;
+        HorizontalSlider& horizontalSlider = (HorizontalSlider&)*object;
         if(horizontalSlider.state.position != horizontalSlider.position()) {
           horizontalSlider.state.position = horizontalSlider.position();
           if(horizontalSlider.onChange) horizontalSlider.onChange();
         }
       } else if(dynamic_cast<VerticalSlider*>(object)) {
-        VerticalSlider &verticalSlider = (VerticalSlider&)*object;
+        VerticalSlider& verticalSlider = (VerticalSlider&)*object;
         if(verticalSlider.state.position != verticalSlider.position()) {
           verticalSlider.state.position = verticalSlider.position();
           if(verticalSlider.onChange) verticalSlider.onChange();

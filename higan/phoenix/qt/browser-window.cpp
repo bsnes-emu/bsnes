@@ -1,6 +1,6 @@
 namespace phoenix {
 
-string pBrowserWindow::directory(BrowserWindow::State &state) {
+string pBrowserWindow::directory(BrowserWindow::State& state) {
   QString directory = QFileDialog::getExistingDirectory(
     state.parent ? state.parent->p.qtWindow : nullptr,
     state.title ? state.title : "Select Directory",
@@ -11,13 +11,13 @@ string pBrowserWindow::directory(BrowserWindow::State &state) {
   return name;
 }
 
-string pBrowserWindow::open(BrowserWindow::State &state) {
+string pBrowserWindow::open(BrowserWindow::State& state) {
   string filters = state.filters.concatenate(";;");
 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
   signed parentheses = 0;
-  for(auto &n : filters) {
+  for(auto& n : filters) {
     if(n == '(') parentheses++;
     if(n == ')') parentheses--;
     if(n == ',' && parentheses) n = ' ';
@@ -31,13 +31,13 @@ string pBrowserWindow::open(BrowserWindow::State &state) {
   return filename.toUtf8().constData();
 }
 
-string pBrowserWindow::save(BrowserWindow::State &state) {
+string pBrowserWindow::save(BrowserWindow::State& state) {
   string filters = state.filters.concatenate(";;");
 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
   signed parentheses = 0;
-  for(auto &n : filters) {
+  for(auto& n : filters) {
     if(n == '(') parentheses++;
     if(n == ')') parentheses--;
     if(n == ',' && parentheses) n = ' ';

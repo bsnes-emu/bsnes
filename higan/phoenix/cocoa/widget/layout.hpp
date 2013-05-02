@@ -1,9 +1,9 @@
 namespace phoenix {
 
 struct pLayout : public pSizable {
-  Layout &layout;
+  Layout& layout;
 
-  pLayout(Layout &layout) : pSizable(layout), layout(layout) {}
+  pLayout(Layout& layout) : pSizable(layout), layout(layout) {}
 };
 
 }

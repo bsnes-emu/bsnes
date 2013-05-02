@@ -3,11 +3,11 @@
 namespace nall {
 
 template<unsigned Limit, bool Insensitive, bool Quoted>
-string& string::ureplace(const char *key, const char *token) {
+string& string::ureplace(const char* key, const char* token) {
   if(!key || !*key) return *this;
   enum : unsigned { limit = Limit ? Limit : ~0u };
 
-  const char *p = data;
+  const char* p = data;
   unsigned counter = 0, keyLength = 0;
 
   while(*p) {
@@ -20,13 +20,14 @@ string& string::ureplace(const char *key, const char *token) {
   if(counter == 0) return *this;
   if(Limit) counter = min(counter, Limit);
 
-  char *t = data, *base;
+  char* t = data;
+  char* base;
   unsigned tokenLength = strlen(token);
   if(tokenLength > keyLength) {
     t = base = strdup(data);
     reserve((unsigned)(p - data) + ((tokenLength - keyLength) * counter));
   }
-  char *o = data;
+  char* o = data;
 
   while(*t && counter) {
     if(quotecopy<Quoted>(o, t)) continue;
@@ -41,10 +42,10 @@ string& string::ureplace(const char *key, const char *token) {
   return *this;
 }
 
-template<unsigned Limit> string &string::replace(const char *key, const char *token) { return ureplace<Limit, false, false>(key, token); }
-template<unsigned Limit> string &string::ireplace(const char *key, const char *token) { return ureplace<Limit, true, false>(key, token); }
-template<unsigned Limit> string &string::qreplace(const char *key, const char *token) { return ureplace<Limit, false, true>(key, token); }
-template<unsigned Limit> string &string::iqreplace(const char *key, const char *token) { return ureplace<Limit, true, true>(key, token); }
+template<unsigned Limit> string& string::replace(const char* key, const char* token) { return ureplace<Limit, false, false>(key, token); }
+template<unsigned Limit> string& string::ireplace(const char* key, const char* token) { return ureplace<Limit, true, false>(key, token); }
+template<unsigned Limit> string& string::qreplace(const char* key, const char* token) { return ureplace<Limit, false, true>(key, token); }
+template<unsigned Limit> string& string::iqreplace(const char* key, const char* token) { return ureplace<Limit, true, true>(key, token); }
 
 };
 

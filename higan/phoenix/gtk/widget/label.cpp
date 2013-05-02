@@ -5,7 +5,7 @@ Size pLabel::minimumSize() {
   return {size.width, size.height};
 }
 
-void pLabel::setText(const string &text) {
+void pLabel::setText(const string& text) {
   gtk_label_set_text(GTK_LABEL(gtkWidget), text);
 }
 

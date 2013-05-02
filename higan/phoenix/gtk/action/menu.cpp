@@ -1,6 +1,6 @@
 namespace phoenix {
 
-void pMenu::append(Action &action) {
+void pMenu::append(Action& action) {
   action.state.window = this->action.state.window;
 
   gtk_menu_shell_append(GTK_MENU_SHELL(gtkMenu), action.p.widget);
@@ -10,21 +10,21 @@ void pMenu::append(Action &action) {
   gtk_widget_show(action.p.widget);
 }
 
-void pMenu::remove(Action &action) {
+void pMenu::remove(Action& action) {
   action.p.orphan();
   action.state.window = nullptr;
 }
 
-void pMenu::setImage(const image &image) {
+void pMenu::setImage(const image& image) {
   if(image.empty() == false) {
-    GtkImage *gtkImage = CreateImage(image, true);
+    GtkImage* gtkImage = CreateImage(image, true);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
   } else {
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), nullptr);
   }
 }
 
-void pMenu::setText(const string &text) {
+void pMenu::setText(const string& text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 
@@ -41,15 +41,15 @@ void pMenu::destructor() {
 }
 
 void pMenu::orphan() {
-  for(auto &action : menu.state.action) action.p.orphan();
+  for(auto& action : menu.state.action) action.p.orphan();
   destructor();
   constructor();
-  for(auto &action : menu.state.action) append(action);
+  for(auto& action : menu.state.action) append(action);
 }
 
-void pMenu::setFont(const string &font) {
+void pMenu::setFont(const string& font) {
   pAction::setFont(font);
-  for(auto &item : menu.state.action) item.p.setFont(font);
+  for(auto& item : menu.state.action) item.p.setFont(font);
 }
 
 }

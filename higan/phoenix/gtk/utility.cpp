@@ -1,19 +1,19 @@
 namespace phoenix {
 
-static GdkPixbuf* CreatePixbuf(const nall::image &image, bool scale = false) {
+static GdkPixbuf* CreatePixbuf(const nall::image& image, bool scale = false) {
   nall::image gdkImage = image;
   gdkImage.transform(0, 32, 255u << 24, 255u << 0, 255u << 8, 255u << 16);
   if(scale) gdkImage.scale(15, 15, Interpolation::Linear);
 
-  GdkPixbuf *pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, gdkImage.width, gdkImage.height);
+  GdkPixbuf* pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, gdkImage.width, gdkImage.height);
   memcpy(gdk_pixbuf_get_pixels(pixbuf), gdkImage.data, gdkImage.width * gdkImage.height * 4);
 
   return pixbuf;
 }
 
-static GtkImage* CreateImage(const nall::image &image, bool scale = false) {
-  GdkPixbuf *pixbuf = CreatePixbuf(image, scale);
-  GtkImage *gtkImage = (GtkImage*)gtk_image_new_from_pixbuf(pixbuf);
+static GtkImage* CreateImage(const nall::image& image, bool scale = false) {
+  GdkPixbuf* pixbuf = CreatePixbuf(image, scale);
+  GtkImage* gtkImage = (GtkImage*)gtk_image_new_from_pixbuf(pixbuf);
   g_object_unref(pixbuf);
   return gtkImage;
 }

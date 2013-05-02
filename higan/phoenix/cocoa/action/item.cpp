@@ -17,14 +17,14 @@
 
 namespace phoenix {
 
-void pItem::setImage(const image &image) {
+void pItem::setImage(const image& image) {
   @autoreleasepool {
     unsigned size = 15;  //there is no API to retrieve the optimal size
     [cocoaAction setImage:NSMakeImage(image, size, size)];
   }
 }
 
-void pItem::setText(const string &text) {
+void pItem::setText(const string& text) {
   @autoreleasepool {
     [cocoaAction setTitle:[NSString stringWithUTF8String:text]];
   }

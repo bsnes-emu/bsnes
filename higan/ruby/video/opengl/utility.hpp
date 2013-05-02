@@ -3,7 +3,7 @@ static unsigned glrSize(unsigned size) {
 //return bit::round(size);  //return nearest power of two
 }
 
-static GLuint glrFormat(const string &format) {
+static GLuint glrFormat(const string& format) {
   if(format == "rgba8"  ) return GL_RGBA8;
   if(format == "rgb10a2") return GL_RGB10_A2;
   if(format == "rgba12" ) return GL_RGBA12;
@@ -13,13 +13,13 @@ static GLuint glrFormat(const string &format) {
   return GL_RGBA8;
 }
 
-static GLuint glrFilter(const string &filter) {
+static GLuint glrFilter(const string& filter) {
   if(filter == "nearest") return GL_NEAREST;
   if(filter == "linear" ) return GL_LINEAR;
   return GL_LINEAR;
 }
 
-static GLuint glrWrap(const string &wrap) {
+static GLuint glrWrap(const string& wrap) {
   if(wrap == "border") return GL_CLAMP_TO_BORDER;
   if(wrap == "edge"  ) return GL_CLAMP_TO_EDGE;
   if(wrap == "repeat") return GL_REPEAT;
@@ -37,17 +37,17 @@ static GLuint glrProgram() {
   return program;
 }
 
-static void glrUniform1i(const string &name, GLint value) {
+static void glrUniform1i(const string& name, GLint value) {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniform1i(location, value);
 }
 
-static void glrUniform4f(const string &name, GLfloat value0, GLfloat value1, GLfloat value2, GLfloat value3) {
+static void glrUniform4f(const string& name, GLfloat value0, GLfloat value1, GLfloat value2, GLfloat value3) {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniform4f(location, value0, value1, value2, value3);
 }
 
-static void glrUniformMatrix4fv(const string &name, GLfloat *values) {
+static void glrUniformMatrix4fv(const string& name, GLfloat *values) {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniformMatrix4fv(location, 1, GL_FALSE, values);
 }
@@ -59,7 +59,7 @@ static void glrParameters(GLuint filter, GLuint wrap) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 }
 
-static GLuint glrCreateShader(GLuint program, GLuint type, const char *source) {
+static GLuint glrCreateShader(GLuint program, GLuint type, const char* source) {
   GLuint shader = glCreateShader(type);
   glShaderSource(shader, 1, &source, 0);
   glCompileShader(shader);

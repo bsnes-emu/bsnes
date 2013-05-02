@@ -3,7 +3,7 @@
 namespace nall {
 namespace Markup {
 
-inline Node Document(const string &markup) {
+inline Node Document(const string& markup) {
   if(markup.beginswith("<")) return XML::Document(markup);
   return BML::Document(markup);
 }

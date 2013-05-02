@@ -6,7 +6,7 @@ namespace ruby {
 
 @interface RubyVideoCGL : NSOpenGLView {
 @public
-  ruby::pVideoCGL *video;
+  ruby::pVideoCGL* video;
 }
 -(id) initWith:(ruby::pVideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
 -(void) reshape;
@@ -14,19 +14,18 @@ namespace ruby {
 
 namespace ruby {
 
-class pVideoCGL : public OpenGL {
-public:
-  RubyVideoCGL *view;
+struct pVideoCGL : OpenGL {
+  RubyVideoCGL* view;
 
   struct {
-    NSView *handle;
+    NSView* handle;
 
     bool synchronize;
     unsigned filter;
     string shader;
   } settings;
 
-  bool cap(const string &name) {
+  bool cap(const string& name) {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
@@ -34,14 +33,14 @@ public:
     return false;
   }
 
-  any get(const string &name) {
+  any get(const string& name) {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
     return false;
   }
 
-  bool set(const string &name, const any &value) {
+  bool set(const string& name, const any& value) {
     if(name == Video::Handle) {
       settings.handle = (NSView*)any_cast<uintptr_t>(value);
       return true;
@@ -81,7 +80,7 @@ public:
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }

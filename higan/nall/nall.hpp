@@ -35,6 +35,7 @@
 #include <nall/property.hpp>
 #include <nall/random.hpp>
 #include <nall/serializer.hpp>
+#include <nall/set.hpp>
 #include <nall/sha256.hpp>
 #include <nall/sort.hpp>
 #include <nall/stdint.hpp>

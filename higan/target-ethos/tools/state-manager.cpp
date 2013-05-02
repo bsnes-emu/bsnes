@@ -1,4 +1,4 @@
-StateManager *stateManager = nullptr;
+StateManager* stateManager = nullptr;
 
 StateManager::StateManager() {
   setGeometry({128, 128, 600, 360});
@@ -65,13 +65,13 @@ void StateManager::refresh() {
 }
 
 void StateManager::reset() {
-  for(auto &slot : this->slot) slot = serializer();
+  for(auto& slot : this->slot) slot = serializer();
   synchronize();
   refresh();
 }
 
-bool StateManager::load(const string &filename, unsigned revision) {
-  for(auto &slot : this->slot) slot = serializer();
+bool StateManager::load(const string& filename, unsigned revision) {
+  for(auto& slot : this->slot) slot = serializer();
   synchronize();
 
   file fp;
@@ -81,7 +81,7 @@ bool StateManager::load(const string &filename, unsigned revision) {
     for(auto &slot : this->slot) {
       if(fp.read() == false) continue;  //slot is empty
       unsigned size = fp.readl(4);
-      uint8_t *data = new uint8_t[size];
+      uint8_t* data = new uint8_t[size];
       fp.read(data, size);
       slot = serializer(data, size);
       delete[] data;
@@ -93,9 +93,9 @@ bool StateManager::load(const string &filename, unsigned revision) {
   return true;
 }
 
-bool StateManager::save(const string &filename, unsigned revision) {
+bool StateManager::save(const string& filename, unsigned revision) {
   bool hasSave = false;
-  for(auto &slot : this->slot) hasSave |= slot.capacity() > 0;
+  for(auto& slot : this->slot) hasSave |= slot.capacity() > 0;
   if(hasSave == false) {
     file::remove(filename);
     return true;
@@ -108,7 +108,7 @@ bool StateManager::save(const string &filename, unsigned revision) {
 
   fp.writel(0x31415342, 4);  //'BSA1'
   fp.writel(revision, 4);
-  for(auto &slot : this->slot) {
+  for(auto& slot : this->slot) {
     fp.write(slot.capacity() > 0);
     if(slot.capacity()) {
       fp.writel(slot.capacity(), 4);

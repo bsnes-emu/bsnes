@@ -3,7 +3,7 @@ struct Presentation : Window {
   Viewport viewport;
 
   struct Emulator {
-    ::Emulator::Interface *interface;
+    ::Emulator::Interface* interface;
 
     Menu menu;
       Item power;
@@ -12,13 +12,14 @@ struct Presentation : Window {
       Separator controllerSeparator;
       struct Port {
         Menu menu;
-        nall::group<RadioItem&> group;
+        nall::group<RadioItem> group;
         vector<RadioItem*> device;
       };
       vector<Port*> port;
     function<void (string)> callback;
   };
   vector<Emulator*> emulatorList;
+  Emulator* active = nullptr;
 
   Menu loadMenu;
     vector<Item*> loadListSystem;
@@ -51,12 +52,10 @@ struct Presentation : Window {
     Item synchronizeTime;
 
   void synchronize();
-  void setSystemName(const string &name);
+  void setSystemName(const string& name);
   void loadShaders();
   void bootstrap();
   Presentation();
-
-  Emulator *active;
 };
 
-extern Presentation *presentation;
+extern Presentation* presentation;

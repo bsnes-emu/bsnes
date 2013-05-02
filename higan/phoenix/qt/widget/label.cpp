@@ -5,7 +5,7 @@ Size pLabel::minimumSize() {
   return {size.width, size.height};
 }
 
-void pLabel::setText(const string &text) {
+void pLabel::setText(const string& text) {
   qtLabel->setText(QString::fromUtf8(text));
 }
 
@@ -18,7 +18,7 @@ void pLabel::constructor() {
 
 void pLabel::destructor() {
   delete qtLabel;
-  qtWidget = qtLabel = 0;
+  qtWidget = qtLabel = nullptr;
 }
 
 void pLabel::orphan() {

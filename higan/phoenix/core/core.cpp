@@ -61,7 +61,7 @@ void Application::quit() {
   return pApplication::quit();
 }
 
-void Application::setName(const string &name) {
+void Application::setName(const string& name) {
   applicationState.name = name;
 }
 
@@ -99,7 +99,7 @@ string Geometry::text() const {
   return {x, ",", y, ",", width, ",", height};
 }
 
-Geometry::Geometry(const string &text) {
+Geometry::Geometry(const string& text) {
   lstring part = text.split(",");
   x = integer(part(0, "256"));
   y = integer(part(1, "256"));
@@ -110,19 +110,19 @@ Geometry::Geometry(const string &text) {
 //Font
 //====
 
-string Font::serif(unsigned size, const string &style) {
+string Font::serif(unsigned size, const string& style) {
   return pFont::serif(size, style);
 }
 
-string Font::sans(unsigned size, const string &style) {
+string Font::sans(unsigned size, const string& style) {
   return pFont::sans(size, style);
 }
 
-string Font::monospace(unsigned size, const string &style) {
+string Font::monospace(unsigned size, const string& style) {
   return pFont::monospace(size, style);
 }
 
-Size Font::size(const string &font, const string &text) {
+Size Font::size(const string &font, const string& text) {
   return pFont::size(font, text);
 }
 
@@ -182,22 +182,22 @@ string BrowserWindow::save() {
   return pBrowserWindow::save(state);
 }
 
-BrowserWindow& BrowserWindow::setFilters_(const lstring &filters) {
+BrowserWindow& BrowserWindow::setFilters_(const lstring& filters) {
   state.filters = filters;
   return *this;
 }
 
-BrowserWindow& BrowserWindow::setParent(Window &parent) {
+BrowserWindow& BrowserWindow::setParent(Window& parent) {
   state.parent = &parent;
   return *this;
 }
 
-BrowserWindow& BrowserWindow::setPath(const string &path) {
+BrowserWindow& BrowserWindow::setPath(const string& path) {
   state.path = path;
   return *this;
 }
 
-BrowserWindow& BrowserWindow::setTitle(const string &title) {
+BrowserWindow& BrowserWindow::setTitle(const string& title) {
   state.title = title;
   return *this;
 }
@@ -228,17 +228,17 @@ MessageWindow::Response MessageWindow::question(MessageWindow::Buttons buttons) 
   return pMessageWindow::question(state);
 }
 
-MessageWindow& MessageWindow::setParent(Window &parent) {
+MessageWindow& MessageWindow::setParent(Window& parent) {
   state.parent = &parent;
   return *this;
 }
 
-MessageWindow& MessageWindow::setText(const string &text) {
+MessageWindow& MessageWindow::setText(const string& text) {
   state.text = text;
   return *this;
 }
 
-MessageWindow& MessageWindow::setTitle(const string &title) {
+MessageWindow& MessageWindow::setTitle(const string& title) {
   state.title = title;
   return *this;
 }
@@ -248,7 +248,7 @@ MessageWindow::Response MessageWindow::warning(MessageWindow::Buttons buttons) {
   return pMessageWindow::warning(state);
 }
 
-MessageWindow::MessageWindow(const string &text):
+MessageWindow::MessageWindow(const string& text):
 state(*new State) {
   state.text = text;
 }
@@ -260,7 +260,7 @@ MessageWindow::~MessageWindow() {
 //Object
 //======
 
-Object::Object(pObject &p):
+Object::Object(pObject& p):
 p(p) {
   Application::initialize();
   p.constructor();
@@ -304,7 +304,7 @@ Window& Window::none() {
   return pWindow::none();
 }
 
-void Window::append_(Layout &layout) {
+void Window::append_(Layout& layout) {
   if(state.layout.append(layout)) {
     ((Sizable&)layout).state.window = this;
     ((Sizable&)layout).state.layout = nullptr;
@@ -313,14 +313,14 @@ void Window::append_(Layout &layout) {
   }
 }
 
-void Window::append_(Menu &menu) {
+void Window::append_(Menu& menu) {
   if(state.menu.append(menu)) {
     ((Action&)menu).state.window = this;
     p.append(menu);
   }
 }
 
-void Window::append_(Widget &widget) {
+void Window::append_(Widget& widget) {
   if(state.widget.append(widget)) {
     ((Sizable&)widget).state.window = this;
     p.append(widget);
@@ -356,34 +356,34 @@ Geometry Window::geometry() {
   return p.geometry();
 }
 
-void Window::remove_(Layout &layout) {
+void Window::remove_(Layout& layout) {
   if(state.layout.remove(layout)) {
     p.remove(layout);
     ((Sizable&)layout).state.window = nullptr;
   }
 }
 
-void Window::remove_(Menu &menu) {
+void Window::remove_(Menu& menu) {
   if(state.menu.remove(menu)) {
     p.remove(menu);
     ((Action&)menu).state.window = nullptr;
   }
 }
 
-void Window::remove_(Widget &widget) {
+void Window::remove_(Widget& widget) {
   if(state.widget.remove(widget)) {
     p.remove(widget);
     ((Sizable&)widget).state.window = nullptr;
   }
 }
 
-void Window::setBackgroundColor(const Color &color) {
+void Window::setBackgroundColor(const Color& color) {
   state.backgroundColorOverride = true;
   state.backgroundColor = color;
   return p.setBackgroundColor(color);
 }
 
-void Window::setFrameGeometry(const Geometry &geometry) {
+void Window::setFrameGeometry(const Geometry& geometry) {
   Geometry margin = p.frameMargin();
   return setGeometry({
     geometry.x + margin.x, geometry.y + margin.y,
@@ -400,12 +400,12 @@ void Window::setFullScreen(bool fullScreen) {
   return p.setFullScreen(fullScreen);
 }
 
-void Window::setGeometry(const Geometry &geometry) {
+void Window::setGeometry(const Geometry& geometry) {
   state.geometry = geometry;
   return p.setGeometry(geometry);
 }
 
-void Window::setMenuFont(const string &font) {
+void Window::setMenuFont(const string& font) {
   state.menuFont = font;
   return p.setMenuFont(font);
 }
@@ -425,7 +425,7 @@ void Window::setResizable(bool resizable) {
   return p.setResizable(resizable);
 }
 
-void Window::setSmartGeometry(const Geometry &geometry) {
+void Window::setSmartGeometry(const Geometry& geometry) {
   Geometry margin = p.frameMargin();
   return setGeometry({
     geometry.x + margin.x, geometry.y + margin.y,
@@ -433,12 +433,12 @@ void Window::setSmartGeometry(const Geometry &geometry) {
   });
 }
 
-void Window::setStatusFont(const string &font) {
+void Window::setStatusFont(const string& font) {
   state.statusFont = font;
   return p.setStatusFont(font);
 }
 
-void Window::setStatusText(const string &text) {
+void Window::setStatusText(const string& text) {
   state.statusText = text;
   return p.setStatusText(text);
 }
@@ -448,7 +448,7 @@ void Window::setStatusVisible(bool visible) {
   return p.setStatusVisible(visible);
 }
 
-void Window::setTitle(const string &text) {
+void Window::setTitle(const string& text) {
   state.title = text;
   return p.setTitle(text);
 }
@@ -459,7 +459,7 @@ void Window::setVisible(bool visible) {
   return p.setVisible(visible);
 }
 
-void Window::setWidgetFont(const string &font) {
+void Window::setWidgetFont(const string& font) {
   state.widgetFont = font;
   return p.setWidgetFont(font);
 }
@@ -510,7 +510,7 @@ bool Action::visible() {
   return state.visible;
 }
 
-Action::Action(pAction &p):
+Action::Action(pAction& p):
 state(*new State),
 Object(p),
 p(p) {
@@ -525,8 +525,8 @@ Action::~Action() {
 //Menu
 //====
 
-void Menu::append(const group<Action&> &list) {
-  for(auto &action : list) {
+void Menu::append(const group<Action>& list) {
+  for(auto& action : list) {
     if(state.action.append(action)) {
       action.state.menu = this;
       p.append(action);
@@ -534,8 +534,8 @@ void Menu::append(const group<Action&> &list) {
   }
 }
 
-void Menu::remove(const group<Action&> &list) {
-  for(auto &action : list) {
+void Menu::remove(const group<Action>& list) {
+  for(auto& action : list) {
     if(state.action.remove(action)) {
       action.state.menu = nullptr;
       return p.remove(action);
@@ -543,12 +543,12 @@ void Menu::remove(const group<Action&> &list) {
   }
 }
 
-void Menu::setImage(const image &image) {
+void Menu::setImage(const image& image) {
   state.image = image;
   return p.setImage(image);
 }
 
-void Menu::setText(const string &text) {
+void Menu::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -583,12 +583,12 @@ Separator::~Separator() {
 //Item
 //====
 
-void Item::setImage(const image &image) {
+void Item::setImage(const image& image) {
   state.image = image;
   return p.setImage(image);
 }
 
-void Item::setText(const string &text) {
+void Item::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -618,7 +618,7 @@ void CheckItem::setChecked(bool checked) {
   return p.setChecked(checked);
 }
 
-void CheckItem::setText(const string &text) {
+void CheckItem::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -639,9 +639,9 @@ CheckItem::~CheckItem() {
 //RadioItem
 //=========
 
-void RadioItem::group(const nall::group<RadioItem&> &list) {
-  for(auto &item : list) item.p.setGroup(item.state.group = list);
-  if(list.size()) list[0].setChecked();
+void RadioItem::group(const nall::group<RadioItem>& list) {
+  for(auto& item : list) item.p.setGroup(item.state.group = list);
+  if(list.size()) list.first().setChecked();
 }
 
 bool RadioItem::checked() {
@@ -649,12 +649,12 @@ bool RadioItem::checked() {
 }
 
 void RadioItem::setChecked() {
-  for(auto &item : state.group) item.state.checked = false;
+  for(auto& item : state.group) item.state.checked = false;
   state.checked = true;
   return p.setChecked();
 }
 
-void RadioItem::setText(const string &text) {
+void RadioItem::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -672,7 +672,7 @@ p(base_from_member<pRadioItem&>::value) {
 }
 
 RadioItem::~RadioItem() {
-  for(auto &item : state.group) {
+  for(auto& item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();
@@ -691,7 +691,7 @@ Window* Sizable::window() {
   return state.window;
 }
 
-Sizable::Sizable(pSizable &p):
+Sizable::Sizable(pSizable& p):
 state(*new State),
 Object(p),
 p(p) {
@@ -707,7 +707,7 @@ Sizable::~Sizable() {
 //Layout
 //======
 
-void Layout::append(Sizable &sizable) {
+void Layout::append(Sizable& sizable) {
   sizable.state.layout = this;
   sizable.state.window = nullptr;
 
@@ -722,7 +722,7 @@ void Layout::append(Sizable &sizable) {
   }
 }
 
-void Layout::remove(Sizable &sizable) {
+void Layout::remove(Sizable& sizable) {
   if(dynamic_cast<Widget*>(&sizable)) {
     Widget &widget = (Widget&)sizable;
     if(sizable.window()) sizable.window()->remove(widget);
@@ -739,7 +739,7 @@ Sizable(base_from_member<pLayout&>::value),
 p(base_from_member<pLayout&>::value) {
 }
 
-Layout::Layout(pLayout &p):
+Layout::Layout(pLayout& p):
 state(*new State),
 base_from_member<pLayout&>(p),
 Sizable(p),
@@ -785,12 +785,12 @@ void Widget::setFocused() {
   return p.setFocused();
 }
 
-void Widget::setFont(const string &font) {
+void Widget::setFont(const string& font) {
   state.font = font;
   return p.setFont(font);
 }
 
-void Widget::setGeometry(const Geometry &geometry) {
+void Widget::setGeometry(const Geometry& geometry) {
   state.geometry = geometry;
   return p.setGeometry(geometry);
 }
@@ -813,7 +813,7 @@ p(base_from_member<pWidget&>::value) {
   p.constructor();
 }
 
-Widget::Widget(pWidget &p):
+Widget::Widget(pWidget& p):
 state(*new State),
 base_from_member<pWidget&>(p),
 Sizable(base_from_member<pWidget&>::value),
@@ -829,13 +829,13 @@ Widget::~Widget() {
 //Button
 //======
 
-void Button::setImage(const image &image, Orientation orientation) {
+void Button::setImage(const image& image, Orientation orientation) {
   state.image = image;
   state.orientation = orientation;
   return p.setImage(image, orientation);
 }
 
-void Button::setText(const string &text) {
+void Button::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -860,16 +860,16 @@ uint32_t* Canvas::data() {
   return state.data;
 }
 
-bool Canvas::setImage(const nall::image &image) {
+bool Canvas::setImage(const nall::image& image) {
   if(image.data == nullptr || image.width == 0 || image.height == 0) return false;
   state.width = image.width;
   state.height = image.height;
-  setSize({ state.width, state.height });
+  setSize({state.width, state.height});
   memcpy(state.data, image.data, state.width * state.height * sizeof(uint32_t));
   return true;
 }
 
-void Canvas::setSize(const Size &size) {
+void Canvas::setSize(const Size& size) {
   state.width = size.width;
   state.height = size.height;
   delete[] state.data;
@@ -878,7 +878,7 @@ void Canvas::setSize(const Size &size) {
 }
 
 Size Canvas::size() {
-  return { state.width, state.height };
+  return {state.width, state.height};
 }
 
 void Canvas::update() {
@@ -912,7 +912,7 @@ void CheckButton::setChecked(bool checked) {
   return p.setChecked(checked);
 }
 
-void CheckButton::setText(const string &text) {
+void CheckButton::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -933,14 +933,14 @@ CheckButton::~CheckButton() {
 //ComboButton
 //===========
 
-void ComboButton::append_(const lstring &list) {
-  for(auto &text : list) {
+void ComboButton::append_(const lstring& list) {
+  for(auto& text : list) {
     state.text.append(text);
     p.append(text);
   }
 }
 
-void ComboButton::modify(unsigned row, const string &text) {
+void ComboButton::modify(unsigned row, const string& text) {
   state.text(row) = text;
   p.modify(row, text);
 }
@@ -1097,7 +1097,7 @@ HorizontalSlider::~HorizontalSlider() {
 //Label
 //=====
 
-void Label::setText(const string &text) {
+void Label::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1123,7 +1123,7 @@ void LineEdit::setEditable(bool editable) {
   return p.setEditable(editable);
 }
 
-void LineEdit::setText(const string &text) {
+void LineEdit::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1148,7 +1148,7 @@ LineEdit::~LineEdit() {
 //ListView
 //========
 
-void ListView::append_(const lstring &text) {
+void ListView::append_(const lstring& text) {
   state.checked.append(false);
   state.text.append(text);
   return p.append(text);
@@ -1162,7 +1162,7 @@ bool ListView::checked(unsigned row) {
   return p.checked(row);
 }
 
-void ListView::modify_(unsigned row, const lstring &text) {
+void ListView::modify_(unsigned row, const lstring& text) {
   state.text[row] = text;
   return p.modify(row, text);
 }
@@ -1198,7 +1198,7 @@ void ListView::setChecked(unsigned row, bool checked) {
   return p.setChecked(row, checked);
 }
 
-void ListView::setHeaderText_(const lstring &text) {
+void ListView::setHeaderText_(const lstring& text) {
   state.headerText = text;
   return p.setHeaderText(text);
 }
@@ -1208,7 +1208,7 @@ void ListView::setHeaderVisible(bool visible) {
   return p.setHeaderVisible(visible);
 }
 
-void ListView::setImage(unsigned row, unsigned column, const nall::image &image) {
+void ListView::setImage(unsigned row, unsigned column, const nall::image& image) {
   state.image(row)(column) = image;
   return p.setImage(row, column, image);
 }
@@ -1261,9 +1261,9 @@ ProgressBar::~ProgressBar() {
 //RadioButton
 //===========
 
-void RadioButton::group(const nall::group<RadioButton&> &list) {
-  for(auto &item : list) item.p.setGroup(item.state.group = list);
-  if(list.size()) list[0].setChecked();
+void RadioButton::group(const nall::group<RadioButton>& list) {
+  for(auto& item : list) item.p.setGroup(item.state.group = list);
+  if(list.size()) list.first().setChecked();
 }
 
 bool RadioButton::checked() {
@@ -1276,7 +1276,7 @@ void RadioButton::setChecked() {
   return p.setChecked();
 }
 
-void RadioButton::setText(const string &text) {
+void RadioButton::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1290,7 +1290,7 @@ p(base_from_member<pRadioButton&>::value) {
 }
 
 RadioButton::~RadioButton() {
-  for(auto &item : state.group) {
+  for(auto& item : state.group) {
     if(&item != this) item.state.group.remove(*this);
   }
   p.destructor();
@@ -1310,7 +1310,7 @@ void TextEdit::setEditable(bool editable) {
   return p.setEditable(editable);
 }
 
-void TextEdit::setText(const string &text) {
+void TextEdit::setText(const string& text) {
   state.text = text;
   return p.setText(text);
 }

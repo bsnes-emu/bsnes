@@ -3,11 +3,12 @@
 namespace nall {
 
 //limit defaults to zero, which will underflow on first compare; equivalent to no limit
-template<unsigned Limit> char* ltrim(char *str, const char *key) {
+template<unsigned Limit> char* ltrim(char* str, const char* key) {
   unsigned limit = Limit;
   if(!key || !*key) return str;
   while(strbegin(str, key)) {
-    char *dest = str, *src = str + strlen(key);
+    char* dest = str;
+    char* src = str + strlen(key);
     while(true) {
       *dest = *src++;
       if(!*dest) break;
@@ -18,7 +19,7 @@ template<unsigned Limit> char* ltrim(char *str, const char *key) {
   return str;
 }
 
-template<unsigned Limit> char* rtrim(char *str, const char *key) {
+template<unsigned Limit> char* rtrim(char* str, const char* key) {
   unsigned limit = Limit;
   if(!key || !*key) return str;
   while(strend(str, key)) {
@@ -28,13 +29,13 @@ template<unsigned Limit> char* rtrim(char *str, const char *key) {
   return str;
 }
 
-template<unsigned limit> char* trim(char *str, const char *key, const char *rkey) {
+template<unsigned limit> char* trim(char* str, const char* key, const char* rkey) {
   if(rkey) return ltrim<limit>(rtrim<limit>(str, rkey), key);
   return ltrim<limit>(rtrim<limit>(str, key), key);
 }
 
 //remove whitespace characters from both left and right sides of string
-char* strip(char *s) {
+char* strip(char* s) {
   signed n = 0, p = 0;
   while(s[n]) {
     if(s[n] != ' ' && s[n] != '\t' && s[n] != '\r' && s[n] != '\n') break;

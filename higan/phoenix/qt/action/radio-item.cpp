@@ -6,7 +6,7 @@ bool pRadioItem::checked() {
 
 void pRadioItem::setChecked() {
   locked = true;
-  for(auto &item : radioItem.state.group) {
+  for(auto& item : radioItem.state.group) {
     bool checkState = item.p.qtAction == qtAction;
     item.state.checked = checkState;
     item.p.qtAction->setChecked(checkState);
@@ -14,10 +14,10 @@ void pRadioItem::setChecked() {
   locked = false;
 }
 
-void pRadioItem::setGroup(const group<RadioItem&> &group) {
+void pRadioItem::setGroup(const group<RadioItem>& group) {
 }
 
-void pRadioItem::setText(const string &text) {
+void pRadioItem::setText(const string& text) {
   qtAction->setText(QString::fromUtf8(text));
 }
 
@@ -33,6 +33,7 @@ void pRadioItem::constructor() {
 void pRadioItem::destructor() {
   if(action.state.menu) action.state.menu->remove(radioItem);
   delete qtAction;
+  qtAction = nullptr;
 }
 
 void pRadioItem::onActivate() {

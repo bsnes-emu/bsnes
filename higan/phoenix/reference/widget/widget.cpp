@@ -18,10 +18,10 @@ void pWidget::setEnabled(bool enabled) {
 void pWidget::setFocused() {
 }
 
-void pWidget::setFont(const string &font) {
+void pWidget::setFont(const string& font) {
 }
 
-void pWidget::setGeometry(const Geometry &geometry) {
+void pWidget::setGeometry(const Geometry& geometry) {
 }
 
 void pWidget::setVisible(bool visible) {

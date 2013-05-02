@@ -27,17 +27,17 @@ bool pRadioItem::checked() {
 
 void pRadioItem::setChecked() {
   @autoreleasepool {
-    for(auto &item : radioItem.state.group) {
+    for(auto& item : radioItem.state.group) {
       auto state = (&item == &radioItem) ? NSOnState : NSOffState;
       [item.p.cocoaAction setState:state];
     }
   }
 }
 
-void pRadioItem::setGroup(const group<RadioItem&> &group) {
+void pRadioItem::setGroup(const group<RadioItem>& group) {
 }
 
-void pRadioItem::setText(const string &text) {
+void pRadioItem::setText(const string& text) {
   @autoreleasepool {
     [cocoaAction setTitle:[NSString stringWithUTF8String:text]];
   }

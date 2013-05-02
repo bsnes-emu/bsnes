@@ -1,11 +1,11 @@
 namespace phoenix {
 
-void pItem::setImage(const image &image) {
+void pItem::setImage(const image& image) {
   createBitmap();
   if(parentWindow) parentWindow->p.updateMenu();
 }
 
-void pItem::setText(const string &text) {
+void pItem::setText(const string& text) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 

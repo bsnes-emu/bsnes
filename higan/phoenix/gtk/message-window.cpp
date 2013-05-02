@@ -1,7 +1,7 @@
 namespace phoenix {
 
-static MessageWindow::Response Message(MessageWindow::State &state, GtkMessageType messageStyle) {
-  GtkWidget *dialog = gtk_message_dialog_new(
+static MessageWindow::Response Message(MessageWindow::State& state, GtkMessageType messageStyle) {
+  GtkWidget* dialog = gtk_message_dialog_new(
     state.parent ? GTK_WINDOW(state.parent->p.widget) : (GtkWindow*)nullptr,
     GTK_DIALOG_MODAL, messageStyle, GTK_BUTTONS_NONE, "%s", (const char*)state.text
   );
@@ -41,19 +41,19 @@ static MessageWindow::Response Message(MessageWindow::State &state, GtkMessageTy
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
   return Message(state, GTK_MESSAGE_ERROR);
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
   return Message(state, GTK_MESSAGE_INFO);
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
   return Message(state, GTK_MESSAGE_QUESTION);
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
   return Message(state, GTK_MESSAGE_WARNING);
 }
 

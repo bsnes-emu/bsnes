@@ -18,7 +18,7 @@ public:
     unsigned rings;
     unsigned latency;
 
-    uint32_t *buffer;
+    uint32_t* buffer;
     unsigned bufferoffset;
 
     unsigned readring;
@@ -82,7 +82,7 @@ public:
     device.bufferoffset = 0;
 
     DWORD pos, size;
-    void *output;
+    void* output;
 
     if(settings.synchronize == true) {
       //wait until playback buffer has an empty ring to write new audio data to
@@ -129,7 +129,7 @@ public:
     dsb_b->SetCurrentPosition(0);
 
     DWORD size;
-    void *output;
+    void* output;
     dsb_b->Lock(0, device.latency * device.rings * 4, &output, &size, 0, 0, 0);
     memset(output, 0, size);
     dsb_b->Unlock(output, size, 0, 0);

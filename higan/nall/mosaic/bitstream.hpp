@@ -5,25 +5,25 @@ namespace mosaic {
 
 struct bitstream {
   filemap fp;
-  uint8_t *data;
-  unsigned size;
-  bool readonly;
-  bool endian;
+  uint8_t* data = nullptr;
+  unsigned size = 0;
+  bool readonly = false;
+  bool endian = 1;
 
-  inline bool read(uint64_t addr) const {
+  bool read(uint64_t addr) const {
     if(data == nullptr || (addr >> 3) >= size) return 0;
     unsigned mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     return data[addr >> 3] & mask;
   }
 
-  inline void write(uint64_t addr, bool value) {
+  void write(uint64_t addr, bool value) {
     if(data == nullptr || readonly == true || (addr >> 3) >= size) return;
     unsigned mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     if(value == 0) data[addr >> 3] &= ~mask;
     if(value == 1) data[addr >> 3] |=  mask;
   }
 
-  inline bool open(const string &filename) {
+  bool open(const string& filename) {
     readonly = false;
     if(fp.open(filename, filemap::mode::readwrite) == false) {
       readonly = true;
@@ -36,15 +36,15 @@ struct bitstream {
     return true;
   }
 
-  inline void close() {
+  void close() {
     fp.close();
     data = nullptr;
   }
 
-  inline bitstream() : data(nullptr), endian(1) {
+  bitstream() {
   }
 
-  inline ~bitstream() {
+  ~bitstream() {
     close();
   }
 };

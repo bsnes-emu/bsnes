@@ -25,7 +25,7 @@
 }
 
 -(IBAction) scroll:(id)sender {
-  auto &state = horizontalScroller->state;
+  auto& state = horizontalScroller->state;
 
   switch([self hitPart]) {
   case NSScrollerIncrementLine:

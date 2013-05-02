@@ -1,5 +1,5 @@
 #include "../ethos.hpp"
-ConfigurationSettings *config = nullptr;
+ConfigurationSettings* config = nullptr;
 
 ConfigurationSettings::ConfigurationSettings() {
   video.append(video.driver = ruby::video.default_driver(), "Driver");

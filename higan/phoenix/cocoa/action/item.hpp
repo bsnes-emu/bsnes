@@ -1,6 +1,6 @@
 @interface CocoaItem : NSMenuItem {
 @public
-  phoenix::Item *item;
+  phoenix::Item* item;
 }
 -(id) initWith:(phoenix::Item&)item;
 -(void) activate;
@@ -9,13 +9,13 @@
 namespace phoenix {
 
 struct pItem : public pAction {
-  Item &item;
-  CocoaItem *cocoaItem = nullptr;
+  Item& item;
+  CocoaItem* cocoaItem = nullptr;
 
-  void setImage(const image &image);
-  void setText(const string &text);
+  void setImage(const image& image);
+  void setText(const string& text);
 
-  pItem(Item &item) : pAction(item), item(item) {}
+  pItem(Item& item) : pAction(item), item(item) {}
   void constructor();
   void destructor();
 };

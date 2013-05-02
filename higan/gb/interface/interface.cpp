@@ -2,7 +2,7 @@
 
 namespace GameBoy {
 
-Interface *interface = nullptr;
+Interface* interface = nullptr;
 
 void Interface::lcdScanline() {
   if(hook) hook->lcdScanline();
@@ -62,7 +62,7 @@ void Interface::save() {
   }
 }
 
-void Interface::load(unsigned id, const stream &stream) {
+void Interface::load(unsigned id, const stream& stream) {
   if(id == ID::GameBoyBootROM) {
     stream.read(system.bootROM.dmg, min( 256u, stream.size()));
   }
@@ -86,7 +86,7 @@ void Interface::load(unsigned id, const stream &stream) {
   }
 }
 
-void Interface::save(unsigned id, const stream &stream) {
+void Interface::save(unsigned id, const stream& stream) {
   if(id == ID::RAM) {
     stream.write(cartridge.ramdata, cartridge.ramsize);
   }
@@ -114,15 +114,15 @@ serializer Interface::serialize() {
   return system.serialize();
 }
 
-bool Interface::unserialize(serializer &s) {
+bool Interface::unserialize(serializer& s) {
   return system.unserialize(s);
 }
 
-void Interface::cheatSet(const lstring &list) {
+void Interface::cheatSet(const lstring& list) {
   cheat.reset();
-  for(auto &code : list) {
+  for(auto& code : list) {
     lstring codelist = code.split("+");
-    for(auto &part : codelist) {
+    for(auto& part : codelist) {
       unsigned addr, data, comp;
       if(Cheat::decode(part, addr, data, comp)) cheat.append({addr, data, comp});
     }

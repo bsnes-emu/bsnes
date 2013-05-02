@@ -5,7 +5,7 @@ namespace ruby {
 struct pVideoGLX : OpenGL {
   int (*glSwapInterval)(int);
 
-  Display *display;
+  Display* display;
   int screen;
   Window xwindow;
   Colormap colormap;
@@ -87,7 +87,7 @@ struct pVideoGLX : OpenGL {
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
@@ -140,10 +140,10 @@ struct pVideoGLX : OpenGL {
     };
 
     int fbCount;
-    GLXFBConfig *fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
+    GLXFBConfig* fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
     if(fbCount == 0) return false;
 
-    XVisualInfo *vi = glXGetVisualFromFBConfig(display, fbConfig[0]);
+    XVisualInfo* vi = glXGetVisualFromFBConfig(display, fbConfig[0]);
 
     //Window settings.handle has already been realized, most likely with DefaultVisual.
     //GLX requires that the GL output window has the same Visual as the GLX context.

@@ -9,7 +9,7 @@ bool chrequal(char x, char y) {
 }
 
 template<bool Quoted, typename T>
-bool quoteskip(T *&p) {
+bool quoteskip(T*& p) {
   if(Quoted == false) return false;
   if(*p != '\'' && *p != '\"') return false;
 
@@ -21,7 +21,7 @@ bool quoteskip(T *&p) {
 }
 
 template<bool Quoted, typename T>
-bool quotecopy(char *&t, T *&p) {
+bool quotecopy(char*& t, T*& p) {
   if(Quoted == false) return false;
   if(*p != '\'' && *p != '\"') return false;
 
@@ -34,7 +34,7 @@ bool quotecopy(char *&t, T *&p) {
   return true;
 }
 
-string substr(const char *src, unsigned start, unsigned length) {
+string substr(const char* src, unsigned start, unsigned length) {
   string dest;
   if(length == ~0u) {
     //copy entire string
@@ -48,7 +48,7 @@ string substr(const char *src, unsigned start, unsigned length) {
   return dest;
 }
 
-string sha256(const uint8_t *data, unsigned size) {
+string sha256(const uint8_t* data, unsigned size) {
   sha256_ctx sha;
   uint8_t hash[32];
   sha256_init(&sha);
@@ -62,7 +62,7 @@ string sha256(const uint8_t *data, unsigned size) {
 
 /* cast.hpp arithmetic -> string */
 
-char* integer(char *result, intmax_t value) {
+char* integer(char* result, intmax_t value) {
   bool negative = value < 0;
   if(negative) value = -value;
 
@@ -82,7 +82,7 @@ char* integer(char *result, intmax_t value) {
   return result;
 }
 
-char* decimal(char *result, uintmax_t value) {
+char* decimal(char* result, uintmax_t value) {
   char buffer[64];
   unsigned size = 0;
 
@@ -204,7 +204,7 @@ template<unsigned length_, char padding> string ldecimal(uintmax_t value) {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-unsigned fp(char *str, long double value) {
+unsigned fp(char* str, long double value) {
   char buffer[256];
   #ifdef _WIN32
   //Windows C-runtime does not support long double via sprintf()
@@ -214,9 +214,9 @@ unsigned fp(char *str, long double value) {
   #endif
 
   //remove excess 0's in fraction (2.500000 -> 2.5)
-  for(char *p = buffer; *p; p++) {
+  for(char* p = buffer; *p; p++) {
     if(*p == '.') {
-      char *p = buffer + strlen(buffer) - 1;
+      char* p = buffer + strlen(buffer) - 1;
       while(*p == '0') {
         if(*(p - 1) != '.') *p = 0;  //... but not for eg 1.0 -> 1.
         p--;

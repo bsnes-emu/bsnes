@@ -1,19 +1,19 @@
 namespace phoenix {
 
-static void Item_activate(Item *self) {
+static void Item_activate(Item* self) {
   if(self->onActivate) self->onActivate();
 }
 
-void pItem::setImage(const image &image) {
+void pItem::setImage(const image& image) {
   if(image.empty() == false) {
-    GtkImage *gtkImage = CreateImage(image, true);
+    GtkImage* gtkImage = CreateImage(image, true);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
   } else {
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), nullptr);
   }
 }
 
-void pItem::setText(const string &text) {
+void pItem::setText(const string& text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 

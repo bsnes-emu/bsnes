@@ -1,6 +1,6 @@
 namespace phoenix {
 
-void pComboButton::append(const string &text) {
+void pComboButton::append(const string& text) {
   locked = true;
   qtComboButton->addItem(QString::fromUtf8(text));
   locked = false;
@@ -8,12 +8,12 @@ void pComboButton::append(const string &text) {
 
 Size pComboButton::minimumSize() {
   unsigned maximumWidth = 0;
-  for(auto &text : comboButton.state.text) maximumWidth = max(maximumWidth, pFont::size(qtWidget->font(), text).width);
+  for(auto& text : comboButton.state.text) maximumWidth = max(maximumWidth, pFont::size(qtWidget->font(), text).width);
   Size size = pFont::size(qtWidget->font(), " ");
   return {maximumWidth + 32, size.height + 12};
 }
 
-void pComboButton::modify(unsigned row, const string &text) {
+void pComboButton::modify(unsigned row, const string& text) {
   qtComboButton->setItemText(row, text);
 }
 
@@ -49,7 +49,7 @@ void pComboButton::constructor() {
   pWidget::synchronizeState();
   unsigned selection = comboButton.state.selection;
   locked = true;
-  for(auto &text : comboButton.state.text) append(text);
+  for(auto& text : comboButton.state.text) append(text);
   locked = false;
   setSelection(selection);
 }

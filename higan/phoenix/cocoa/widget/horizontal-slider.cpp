@@ -30,7 +30,7 @@ unsigned pHorizontalSlider::position() {
   }
 }
 
-void pHorizontalSlider::setGeometry(const Geometry &geometry) {
+void pHorizontalSlider::setGeometry(const Geometry& geometry) {
   pWidget::setGeometry({
     geometry.x - 2, geometry.y,
     geometry.width + 4, geometry.height

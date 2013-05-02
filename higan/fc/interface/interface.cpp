@@ -2,7 +2,7 @@
 
 namespace Famicom {
 
-Interface *interface = nullptr;
+Interface* interface = nullptr;
 
 string Interface::title() {
   return cartridge.title();
@@ -42,12 +42,12 @@ void Interface::load(unsigned id) {
 }
 
 void Interface::save() {
-  for(auto &memory : cartridge.memory) {
+  for(auto& memory : cartridge.memory) {
     saveRequest(memory.id, memory.name);
   }
 }
 
-void Interface::load(unsigned id, const stream &stream) {
+void Interface::load(unsigned id, const stream& stream) {
   if(id == ID::Manifest) cartridge.information.markup = stream.text();
 
   if(id == ID::ProgramROM) {
@@ -67,7 +67,7 @@ void Interface::load(unsigned id, const stream &stream) {
   }
 }
 
-void Interface::save(unsigned id, const stream &stream) {
+void Interface::save(unsigned id, const stream& stream) {
   if(id == ID::ProgramRAM) {
     stream.write(cartridge.board->prgram.data, cartridge.board->prgram.size);
   }
@@ -99,15 +99,15 @@ serializer Interface::serialize() {
   return system.serialize();
 }
 
-bool Interface::unserialize(serializer &s) {
+bool Interface::unserialize(serializer& s) {
   return system.unserialize(s);
 }
 
-void Interface::cheatSet(const lstring &list) {
+void Interface::cheatSet(const lstring& list) {
   cheat.reset();
-  for(auto &code : list) {
+  for(auto& code : list) {
     lstring codelist = code.split("+");
-    for(auto &part : codelist) {
+    for(auto& part : codelist) {
       unsigned addr, data, comp;
       if(Cheat::decode(part, addr, data, comp)) cheat.append({addr, data, comp});
     }
@@ -150,8 +150,8 @@ Interface::Interface() {
   port.append({0, "Port 1"});
   port.append({1, "Port 2"});
 
-  for(auto &device : this->device) {
-    for(auto &port : this->port) {
+  for(auto& device : this->device) {
+    for(auto& port : this->port) {
       if(device.portmask & (1 << port.id)) {
         port.device.append(device);
       }

@@ -95,9 +95,9 @@ void pHexEdit::destructor() {
   delete qtScroll;
   delete qtLayout;
   delete qtHexEdit;
-  qtWidget = qtHexEdit = 0;
-  qtLayout = 0;
-  qtScroll = 0;
+  qtWidget = qtHexEdit = nullptr;
+  qtLayout = nullptr;
+  qtScroll = nullptr;
 }
 
 void pHexEdit::orphan() {
@@ -105,7 +105,7 @@ void pHexEdit::orphan() {
   constructor();
 }
 
-void pHexEdit::keyPressEvent(QKeyEvent *event) {
+void pHexEdit::keyPressEvent(QKeyEvent* event) {
   if(!hexEdit.onRead) return;
 
   QTextCursor cursor = qtHexEdit->textCursor();
@@ -184,11 +184,11 @@ void pHexEdit::onScroll() {
   update();
 }
 
-void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent *event) {
+void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent* event) {
   self.keyPressEvent(event);
 }
 
-void pHexEdit::QtHexEdit::keyPressEventAcknowledge(QKeyEvent *event) {
+void pHexEdit::QtHexEdit::keyPressEventAcknowledge(QKeyEvent* event) {
   QTextEdit::keyPressEvent(event);
 }
 

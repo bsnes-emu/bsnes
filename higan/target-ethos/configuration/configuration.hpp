@@ -50,4 +50,4 @@ struct ConfigurationSettings : Configuration::Document {
   ConfigurationSettings();
 };
 
-extern ConfigurationSettings *config;
+extern ConfigurationSettings* config;

@@ -11,14 +11,14 @@ namespace nall {
 struct unzip {
   struct File {
     string name;
-    const uint8_t *data;
+    const uint8_t* data;
     unsigned size;
     unsigned csize;
     unsigned cmode;  //0 = uncompressed, 8 = deflate
     unsigned crc32;
   };
 
-  inline bool open(const string &filename) {
+  inline bool open(const string& filename) {
     close();
     if(fm.open(filename, filemap::mode::read) == false) return false;
     if(open(fm.data(), fm.size()) == false) {
@@ -28,7 +28,7 @@ struct unzip {
     return true;
   }
 
-  inline bool open(const uint8_t *data, unsigned size) {
+  inline bool open(const uint8_t* data, unsigned size) {
     if(size < 22) return false;
 
     filedata = data;
@@ -36,7 +36,7 @@ struct unzip {
 
     file.reset();
 
-    const uint8_t *footer = data + size - 22;
+    const uint8_t* footer = data + size - 22;
     while(true) {
       if(footer <= data + 22) return false;
       if(read(footer, 4) == 0x06054b50) {
@@ -45,7 +45,7 @@ struct unzip {
       }
       footer--;
     }
-    const uint8_t *directory = data + read(footer + 16, 4);
+    const uint8_t* directory = data + read(footer + 16, 4);
 
     while(true) {
       unsigned signature = read(directory + 0, 4);
@@ -61,7 +61,7 @@ struct unzip {
       unsigned extralength = read(directory + 30, 2);
       unsigned commentlength = read(directory + 32, 2);
 
-      char *filename = new char[namelength + 1];
+      char* filename = new char[namelength + 1];
       memcpy(filename, directory + 46, namelength);
       filename[namelength] = 0;
       file.name = filename;
@@ -80,7 +80,7 @@ struct unzip {
     return true;
   }
 
-  inline vector<uint8_t> extract(File &file) {
+  inline vector<uint8_t> extract(File& file) {
     vector<uint8_t> buffer;
 
     if(file.cmode == 0) {
@@ -108,10 +108,10 @@ struct unzip {
 
 protected:
   filemap fm;
-  const uint8_t *filedata;
+  const uint8_t* filedata;
   unsigned filesize;
 
-  unsigned read(const uint8_t *data, unsigned size) {
+  unsigned read(const uint8_t* data, unsigned size) {
     unsigned result = 0, shift = 0;
     while(size--) { result |= *data++ << shift; shift += 8; }
     return result;

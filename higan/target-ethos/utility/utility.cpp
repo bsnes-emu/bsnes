@@ -1,8 +1,8 @@
 #include "../ethos.hpp"
 
-Utility *utility = nullptr;
+Utility* utility = nullptr;
 
-void Utility::setInterface(Emulator::Interface *emulator) {
+void Utility::setInterface(Emulator::Interface* emulator) {
   program->active = emulator;
   presentation->synchronize();
 }
@@ -26,8 +26,8 @@ void Utility::loadMedia(string pathname) {
   string type = extension(pathname);
 
   //determine type by comparing extension against all emulation cores
-  for(auto &emulator : program->emulator) {
-    for(auto &media : emulator->media) {
+  for(auto& emulator : program->emulator) {
+    for(auto& media : emulator->media) {
       if(media.bootable == false) continue;
       if(type != media.type) continue;
       return loadMedia(emulator, media, {pathname, "/"});
@@ -38,14 +38,14 @@ void Utility::loadMedia(string pathname) {
 }
 
 //load menu option selected
-void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media) {
+void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media) {
   string pathname = browser->select({"Load ", media.name}, media.type);
   if(!directory::exists(pathname)) return;
   return loadMedia(emulator, media, pathname);
 }
 
 //load base cartridge
-void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Media &media, const string &pathname) {
+void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, const string& pathname) {
   unload();
   setInterface(emulator);
   path(0) = program->path({media.name, ".sys/"});
@@ -61,7 +61,7 @@ void Utility::loadMedia(Emulator::Interface *emulator, Emulator::Interface::Medi
 }
 
 //request from emulation core to load non-volatile media folder
-void Utility::loadRequest(unsigned id, const string &name, const string &type) {
+void Utility::loadRequest(unsigned id, const string& name, const string& type) {
   string pathname = browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
   path(id) = pathname;
@@ -71,7 +71,7 @@ void Utility::loadRequest(unsigned id, const string &name, const string &type) {
 }
 
 //request from emulation core to load non-volatile media file
-void Utility::loadRequest(unsigned id, const string &path) {
+void Utility::loadRequest(unsigned id, const string& path) {
   string pathname = {this->path(system().group(id)), path};
   if(file::exists(pathname) == false) return;
   mmapstream stream(pathname);
@@ -79,7 +79,7 @@ void Utility::loadRequest(unsigned id, const string &path) {
 }
 
 //request from emulation core to save non-volatile media file
-void Utility::saveRequest(unsigned id, const string &path) {
+void Utility::saveRequest(unsigned id, const string& path) {
   string pathname = {this->path(system().group(id)), path};
   filestream stream(pathname, file::mode::write);
   return system().save(id, stream);
@@ -294,11 +294,11 @@ void Utility::updateStatus() {
   }
 }
 
-void Utility::setStatusText(const string &text) {
+void Utility::setStatusText(const string& text) {
   statusText = text;
 }
 
-void Utility::showMessage(const string &message) {
+void Utility::showMessage(const string& message) {
   statusTime = time(0);
   statusMessage = message;
 }

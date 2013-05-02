@@ -1,16 +1,16 @@
 namespace phoenix {
 
-static gboolean Viewport_mouseLeave(GtkWidget *widget, GdkEventButton *event, pViewport *self) {
+static gboolean Viewport_mouseLeave(GtkWidget* widget, GdkEventButton* event, pViewport* self) {
   if(self->viewport.onMouseLeave) self->viewport.onMouseLeave();
   return true;
 }
 
-static gboolean Viewport_mouseMove(GtkWidget *widget, GdkEventButton *event, pViewport *self) {
-  if(self->viewport.onMouseMove) self->viewport.onMouseMove({ (signed)event->x, (signed)event->y });
+static gboolean Viewport_mouseMove(GtkWidget* widget, GdkEventButton* event, pViewport* self) {
+  if(self->viewport.onMouseMove) self->viewport.onMouseMove({(signed)event->x, (signed)event->y});
   return true;
 }
 
-static gboolean Viewport_mousePress(GtkWidget *widget, GdkEventButton *event, pViewport *self) {
+static gboolean Viewport_mousePress(GtkWidget* widget, GdkEventButton* event, pViewport* self) {
   if(self->viewport.onMousePress) switch(event->button) {
   case 1: self->viewport.onMousePress(Mouse::Button::Left); break;
   case 2: self->viewport.onMousePress(Mouse::Button::Middle); break;
@@ -19,7 +19,7 @@ static gboolean Viewport_mousePress(GtkWidget *widget, GdkEventButton *event, pV
   return true;
 }
 
-static gboolean Viewport_mouseRelease(GtkWidget *widget, GdkEventButton *event, pViewport *self) {
+static gboolean Viewport_mouseRelease(GtkWidget* widget, GdkEventButton* event, pViewport* self) {
   if(self->viewport.onMouseRelease) switch(event->button) {
   case 1: self->viewport.onMouseRelease(Mouse::Button::Left); break;
   case 2: self->viewport.onMouseRelease(Mouse::Button::Middle); break;

@@ -2,9 +2,9 @@
 
 namespace fixedpoint {
 
-static nall::function<intmax_t (const char *&)> eval_fallback;
+static nall::function<intmax_t (const char*&)> eval_fallback;
 
-static intmax_t eval_integer(const char *& s) {
+static intmax_t eval_integer(const char*& s) {
   if(!*s) throw "unrecognized integer";
   intmax_t value = 0, x = *s, y = *(s + 1);
 
@@ -58,7 +58,7 @@ static intmax_t eval_integer(const char *& s) {
   throw "unrecognized integer";
 }
 
-static intmax_t eval(const char *&s, int depth = 0) {
+static intmax_t eval(const char*& s, int depth = 0) {
   while(*s == ' ' || *s == '\t') s++;  //trim whitespace
   if(!*s) throw "unrecognized token";
   intmax_t value = 0, x = *s, y = *(s + 1);
@@ -142,7 +142,7 @@ static intmax_t eval(const char *&s, int depth = 0) {
   return value;
 }
 
-static bool eval(const char *s, intmax_t &result) {
+static bool eval(const char* s, intmax_t &result) {
   try {
     result = eval(s);
     return true;
@@ -152,11 +152,11 @@ static bool eval(const char *s, intmax_t &result) {
   }
 }
 
-static intmax_t parse(const char *s) {
+static intmax_t parse(const char* s) {
   try {
     intmax_t result = eval(s);
     return result;
-  } catch(const char *) {
+  } catch(const char*) {
     return 0;
   }
 }

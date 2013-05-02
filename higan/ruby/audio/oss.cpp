@@ -31,7 +31,7 @@ public:
     int fd;
     int format;
     int channels;
-    const char *name;
+    const char* name;
   } device;
 
   struct {

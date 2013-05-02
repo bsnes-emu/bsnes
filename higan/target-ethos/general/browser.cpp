@@ -1,4 +1,4 @@
-Browser *browser = nullptr;
+Browser* browser = nullptr;
 
 Browser::Browser() {
   bootstrap();
@@ -52,7 +52,7 @@ Browser::Browser() {
 void Browser::synchronize() {
   openButton.setEnabled(fileList.selected());
   if(fileList.selected()) {
-    for(auto &folder : folderList) {
+    for(auto& folder : folderList) {
       if(folder.extension == extension) {
         folder.selection = fileList.selection();
       }
@@ -65,10 +65,10 @@ void Browser::saveConfiguration() {
 }
 
 void Browser::bootstrap() {
-  for(auto &emulator : program->emulator) {
-    for(auto &media : emulator->media) {
+  for(auto& emulator : program->emulator) {
+    for(auto& media : emulator->media) {
       bool found = false;
-      for(auto &folder : folderList) {
+      for(auto& folder : folderList) {
         if(folder.extension == media.type) {
           found = true;
           break;
@@ -84,7 +84,7 @@ void Browser::bootstrap() {
     }
   }
 
-  for(auto &folder : folderList) {
+  for(auto& folder : folderList) {
     Configuration::Node node;
     node.append(folder.path, "Path");
     node.append(folder.selection, "Selection");
@@ -95,12 +95,12 @@ void Browser::bootstrap() {
   config.save(program->path("paths.bml"));
 }
 
-string Browser::select(const string &title, const string &extension) {
+string Browser::select(const string& title, const string& extension) {
   this->extension = extension;
 
   string path;
   unsigned selection = 0;
-  for(auto &folder : folderList) {
+  for(auto& folder : folderList) {
     if(folder.extension == extension) {
       path = folder.path;
       selection = folder.selection;
@@ -122,9 +122,9 @@ string Browser::select(const string &title, const string &extension) {
   return outputFilename;
 }
 
-void Browser::setPath(const string &path, unsigned selection) {
+void Browser::setPath(const string& path, unsigned selection) {
   //save path for next browser selection
-  for(auto &folder : folderList) {
+  for(auto& folder : folderList) {
     if(folder.extension == extension) folder.path = path;
   }
 
@@ -136,7 +136,7 @@ void Browser::setPath(const string &path, unsigned selection) {
 
   lstring contents = directory::ifolders(path);
 
-  for(auto &filename : contents) {
+  for(auto& filename : contents) {
     string suffix = {".", this->extension, "/"};
     if(filename.endswith("/") && !filename.endswith(suffix)) {
       string name = filename;
@@ -147,7 +147,7 @@ void Browser::setPath(const string &path, unsigned selection) {
     }
   }
 
-  for(auto &filename : contents) {
+  for(auto& filename : contents) {
     string suffix = {".", this->extension, "/"};
     if(filename.endswith(suffix)) {
       string name = filename;

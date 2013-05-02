@@ -13,5 +13,5 @@ void Program::bootstrap() {
   emulator.append(new GameBoyAdvance::Interface);
 //emulator.append(new NintendoDS::Interface);
 
-  for(auto &system : emulator) system->bind = interface;
+  for(auto& system : emulator) system->bind = interface;
 }

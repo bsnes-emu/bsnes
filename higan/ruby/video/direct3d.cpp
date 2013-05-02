@@ -6,25 +6,26 @@
 
 #define D3DVERTEX (D3DFVF_XYZRHW | D3DFVF_TEX1)
 
-typedef HRESULT (__stdcall *EffectProc)(LPDIRECT3DDEVICE9, LPCVOID, UINT, D3DXMACRO const*, LPD3DXINCLUDE, DWORD, LPD3DXEFFECTPOOL, LPD3DXEFFECT*, LPD3DXBUFFER*);
-typedef HRESULT (__stdcall *TextureProc)(LPDIRECT3DDEVICE9, LPCTSTR, LPDIRECT3DTEXTURE9*);
+typedef HRESULT (__stdcall* EffectProc)(LPDIRECT3DDEVICE9, LPCVOID, UINT, D3DXMACRO const*, LPD3DXINCLUDE, DWORD, LPD3DXEFFECTPOOL, LPD3DXEFFECT*, LPD3DXBUFFER*);
+typedef HRESULT (__stdcall* TextureProc)(LPDIRECT3DDEVICE9, LPCTSTR, LPDIRECT3DTEXTURE9*);
 
 namespace ruby {
 
 class pVideoD3D {
 public:
-  LPDIRECT3D9             lpd3d;
-  LPDIRECT3DDEVICE9       device;
-  LPDIRECT3DVERTEXBUFFER9 vertex_buffer, *vertex_ptr;
-  D3DPRESENT_PARAMETERS   presentation;
-  D3DSURFACE_DESC         d3dsd;
-  D3DLOCKED_RECT          d3dlr;
-  D3DRASTER_STATUS        d3drs;
-  D3DCAPS9                d3dcaps;
-  LPDIRECT3DTEXTURE9      texture;
-  LPDIRECT3DSURFACE9      surface;
-  LPD3DXEFFECT            effect;
-  string                  shader_source_markup;
+  LPDIRECT3D9              lpd3d;
+  LPDIRECT3DDEVICE9        device;
+  LPDIRECT3DVERTEXBUFFER9  vertex_buffer;
+  LPDIRECT3DVERTEXBUFFER9* vertex_ptr;
+  D3DPRESENT_PARAMETERS    presentation;
+  D3DSURFACE_DESC          d3dsd;
+  D3DLOCKED_RECT           d3dlr;
+  D3DRASTER_STATUS         d3drs;
+  D3DCAPS9                 d3dcaps;
+  LPDIRECT3DTEXTURE9       texture;
+  LPDIRECT3DSURFACE9       surface;
+  LPD3DXEFFECT             effect;
+  string                   shader_source_markup;
 
   bool lost;
   unsigned iwidth, iheight;
@@ -170,11 +171,7 @@ public:
     if(!device) return;
     if(lost && !recover()) return;
 
-    switch(settings.filter) { default:
-      case Video::FilterNearest: flags.filter = D3DTEXF_POINT;  break;
-      case Video::FilterLinear:  flags.filter = D3DTEXF_LINEAR; break;
-    }
-
+    flags.filter = (settings.filter == Video::FilterNearest ? D3DTEXF_POINT : D3DTEXF_LINEAR);
     device->SetSamplerState(0, D3DSAMP_MINFILTER, flags.filter);
     device->SetSamplerState(0, D3DSAMP_MAGFILTER, flags.filter);
   }
@@ -239,7 +236,7 @@ public:
     }
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     if(lost && !recover()) return false;
 
     if(width != settings.width || height != settings.height) {
@@ -336,7 +333,7 @@ public:
     if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
   }
 
-  void set_shader(const char *source) {
+  void set_shader(const char* source) {
     if(!caps.shader) return;
 
     if(effect) {

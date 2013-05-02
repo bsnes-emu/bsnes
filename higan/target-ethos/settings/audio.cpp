@@ -1,4 +1,4 @@
-AudioSettings *audioSettings = nullptr;
+AudioSettings* audioSettings = nullptr;
 
 AudioSlider::AudioSlider() {
   append(name, {75, 0});

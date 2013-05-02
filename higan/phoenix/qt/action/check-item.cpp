@@ -8,7 +8,7 @@ void pCheckItem::setChecked(bool checked) {
   qtAction->setChecked(checked);
 }
 
-void pCheckItem::setText(const string &text) {
+void pCheckItem::setText(const string& text) {
   qtAction->setText(QString::fromUtf8(text));
 }
 
@@ -21,6 +21,7 @@ void pCheckItem::constructor() {
 void pCheckItem::destructor() {
   if(action.state.menu) action.state.menu->remove(checkItem);
   delete qtAction;
+  qtAction = nullptr;
 }
 
 void pCheckItem::onToggle() {

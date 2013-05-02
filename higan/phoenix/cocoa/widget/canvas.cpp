@@ -73,10 +73,10 @@
 
 namespace phoenix {
 
-void pCanvas::setSize(const Size &size) {
+void pCanvas::setSize(const Size& size) {
   @autoreleasepool {
-    NSImage *image = [[[NSImage alloc] initWithSize:NSMakeSize(size.width, size.height)] autorelease];
-    NSBitmapImageRep *bitmap = [[[NSBitmapImageRep alloc]
+    NSImage* image = [[[NSImage alloc] initWithSize:NSMakeSize(size.width, size.height)] autorelease];
+    NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc]
       initWithBitmapDataPlanes:nil
       pixelsWide:size.width pixelsHigh:size.height
       bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES
@@ -92,9 +92,9 @@ void pCanvas::setSize(const Size &size) {
 
 void pCanvas::update() {
   @autoreleasepool {
-    if(NSBitmapImageRep *bitmap = [[[cocoaView image] representations] objectAtIndex:0]) {
-      uint8_t *target = [bitmap bitmapData];
-      uint32_t *source = canvas.state.data;
+    if(NSBitmapImageRep* bitmap = [[[cocoaView image] representations] objectAtIndex:0]) {
+      uint8_t* target = [bitmap bitmapData];
+      uint32_t* source = canvas.state.data;
 
       for(unsigned n = 0; n < canvas.state.width * canvas.state.height; n++) {
         *target++ = *source >> 16;

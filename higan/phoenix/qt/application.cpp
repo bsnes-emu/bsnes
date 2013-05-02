@@ -42,11 +42,9 @@ void pApplication::initialize() {
   settings->load();
 
   static int argc = 1;
-  static char *argv[2];
-  argv[0] = new char[8];
-  argv[1] = 0;
+  static char* argv[] = {new char[8], nullptr};
   strcpy(argv[0], "phoenix");
-  char **argvp = argv;
+  char** argvp = argv;
 
   qtApplication = new QApplication(argc, argvp);
 

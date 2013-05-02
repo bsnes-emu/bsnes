@@ -6,7 +6,7 @@ static void istring(string &output) {
 }
 
 template<typename T, typename... Args>
-static void istring(string &output, const T &value, Args&&... args) {
+static void istring(string& output, const T& value, Args&&... args) {
   output.append_(make_string(value));
   istring(output, std::forward<Args>(args)...);
 }
@@ -46,14 +46,14 @@ template<typename... Args> string& string::append(Args&&... args) {
   return *this;
 }
 
-string& string::assign_(const char *s) {
+string& string::assign_(const char* s) {
   unsigned length = strlen(s);
   reserve(length);
   strcpy(data, s);
   return *this;
 }
 
-string& string::append_(const char *s) {
+string& string::append_(const char* s) {
   unsigned length = strlen(data) + strlen(s);
   reserve(length);
   strcat(data, s);
@@ -77,20 +77,20 @@ char& string::operator[](int index) {
   return data[index];
 }
 
-bool string::operator==(const char *str) const { return strcmp(data, str) == 0; }
-bool string::operator!=(const char *str) const { return strcmp(data, str) != 0; }
-bool string::operator< (const char *str) const { return strcmp(data, str)  < 0; }
-bool string::operator<=(const char *str) const { return strcmp(data, str) <= 0; }
-bool string::operator> (const char *str) const { return strcmp(data, str)  > 0; }
-bool string::operator>=(const char *str) const { return strcmp(data, str) >= 0; }
+bool string::operator==(const char* str) const { return strcmp(data, str) == 0; }
+bool string::operator!=(const char* str) const { return strcmp(data, str) != 0; }
+bool string::operator< (const char* str) const { return strcmp(data, str)  < 0; }
+bool string::operator<=(const char* str) const { return strcmp(data, str) <= 0; }
+bool string::operator> (const char* str) const { return strcmp(data, str)  > 0; }
+bool string::operator>=(const char* str) const { return strcmp(data, str) >= 0; }
 
-string& string::operator=(const string &value) {
+string& string::operator=(const string& value) {
   if(&value == this) return *this;
   assign(value);
   return *this;
 }
 
-string& string::operator=(string &&source) {
+string& string::operator=(string&& source) {
   if(&source == this) return *this;
   if(data) free(data);
   size = source.size;
@@ -107,13 +107,13 @@ template<typename... Args> string::string(Args&&... args) {
   istring(*this, std::forward<Args>(args)...);
 }
 
-string::string(const string &value) {
+string::string(const string& value) {
   if(&value == this) return;
   size = strlen(value);
   data = strdup(value);
 }
 
-string::string(string &&source) {
+string::string(string&& source) {
   if(&source == this) return;
   size = source.size;
   data = source.data;
@@ -124,7 +124,7 @@ string::~string() {
   if(data) free(data);
 }
 
-bool string::readfile(const string &filename) {
+bool string::readfile(const string& filename) {
   assign("");
 
   #if !defined(_WIN32)
@@ -147,14 +147,14 @@ bool string::readfile(const string &filename) {
   return true;
 }
 
-optional<unsigned> lstring::find(const char *key) const {
+optional<unsigned> lstring::find(const char* key) const {
   for(unsigned i = 0; i < size(); i++) {
     if(operator[](i) == key) return { true, i };
   }
   return { false, 0 };
 }
 
-string lstring::concatenate(const char *separator) const {
+string lstring::concatenate(const char* separator) const {
   string output;
   for(unsigned i = 0; i < size(); i++) {
     output.append(operator[](i), i < size() - 1 ? separator : "");
@@ -162,18 +162,26 @@ string lstring::concatenate(const char *separator) const {
   return output;
 }
 
-template<typename... Args> void lstring::append(const string &data, Args&&... args) {
+lstring& lstring::isort() {
+  nall::sort(pool, objectsize, [](const string& x, const string& y) {
+    return istrcmp(x, y) < 0;
+  });
+  return *this;
+}
+
+lstring& lstring::strip() {
+  for(unsigned n = 0; n < size(); n++) {
+    operator[](n).strip();
+  }
+  return *this;
+}
+
+template<typename... Args> void lstring::append(const string& data, Args&&... args) {
   vector::append(data);
   append(std::forward<Args>(args)...);
 }
 
-void lstring::isort() {
-  nall::sort(pool, objectsize, [](const string &x, const string &y) {
-    return istrcmp(x, y) < 0;
-  });
-}
-
-bool lstring::operator==(const lstring &source) const {
+bool lstring::operator==(const lstring& source) const {
   if(this == &source) return true;
   if(size() != source.size()) return false;
   for(unsigned n = 0; n < size(); n++) {
@@ -182,21 +190,21 @@ bool lstring::operator==(const lstring &source) const {
   return true;
 }
 
-bool lstring::operator!=(const lstring &source) const {
+bool lstring::operator!=(const lstring& source) const {
   return !operator==(source);
 }
 
-lstring& lstring::operator=(const lstring &source) {
+lstring& lstring::operator=(const lstring& source) {
   vector::operator=(source);
   return *this;
 }
 
-lstring& lstring::operator=(lstring &source) {
+lstring& lstring::operator=(lstring& source) {
   vector::operator=(source);
   return *this;
 }
 
-lstring& lstring::operator=(lstring &&source) {
+lstring& lstring::operator=(lstring&& source) {
   vector::operator=(std::move(source));
   return *this;
 }
@@ -205,15 +213,15 @@ template<typename... Args> lstring::lstring(Args&&... args) {
   append(std::forward<Args>(args)...);
 }
 
-lstring::lstring(const lstring &source) {
+lstring::lstring(const lstring& source) {
   vector::operator=(source);
 }
 
-lstring::lstring(lstring &source) {
+lstring::lstring(lstring& source) {
   vector::operator=(source);
 }
 
-lstring::lstring(lstring &&source) {
+lstring::lstring(lstring&& source) {
   vector::operator=(std::move(source));
 }
 

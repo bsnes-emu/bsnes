@@ -1,10 +1,10 @@
 namespace phoenix {
 
-static void LineEdit_activate(LineEdit *self) {
+static void LineEdit_activate(LineEdit* self) {
   if(self->onActivate) self->onActivate();
 }
 
-static void LineEdit_change(LineEdit *self) {
+static void LineEdit_change(LineEdit* self) {
   self->state.text = self->text();
   if(self->p.locked == false && self->onChange) self->onChange();
 }
@@ -18,7 +18,7 @@ void pLineEdit::setEditable(bool editable) {
   gtk_editable_set_editable(GTK_EDITABLE(gtkWidget), editable);
 }
 
-void pLineEdit::setText(const string &text) {
+void pLineEdit::setText(const string& text) {
   locked = true;
   gtk_entry_set_text(GTK_ENTRY(gtkWidget), text);
   locked = false;

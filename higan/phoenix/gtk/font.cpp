@@ -17,17 +17,17 @@ string pFont::monospace(unsigned size, string style) {
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(const string &font, const string &text) {
-  PangoFontDescription *description = create(font);
+Size pFont::size(const string& font, const string& text) {
+  PangoFontDescription* description = create(font);
   Size size = pFont::size(description, text);
   free(description);
   return size;
 }
 
-PangoFontDescription* pFont::create(const string &description) {
+PangoFontDescription* pFont::create(const string& description) {
   lstring part;
   part.split<2>(",", description);
-  for(auto &item : part) item.trim(" ");
+  for(auto& item : part) item.trim(" ");
 
   string family = "Sans";
   unsigned size = 8u;
@@ -39,7 +39,7 @@ PangoFontDescription* pFont::create(const string &description) {
   if(part.size() >= 3) bold = part[2].position("Bold");
   if(part.size() >= 3) italic = part[2].position("Italic");
 
-  PangoFontDescription *font = pango_font_description_new();
+  PangoFontDescription* font = pango_font_description_new();
   pango_font_description_set_family(font, family);
   pango_font_description_set_size(font, size * PANGO_SCALE);
   pango_font_description_set_weight(font, !bold ? PANGO_WEIGHT_NORMAL : PANGO_WEIGHT_BOLD);
@@ -47,13 +47,13 @@ PangoFontDescription* pFont::create(const string &description) {
   return font;
 }
 
-void pFont::free(PangoFontDescription *font) {
+void pFont::free(PangoFontDescription* font) {
   pango_font_description_free(font);
 }
 
-Size pFont::size(PangoFontDescription *font, const string &text) {
-  PangoContext *context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
-  PangoLayout *layout = pango_layout_new(context);
+Size pFont::size(PangoFontDescription* font, const string& text) {
+  PangoContext* context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
+  PangoLayout* layout = pango_layout_new(context);
   pango_layout_set_font_description(layout, font);
   pango_layout_set_text(layout, text, -1);
   int width = 0, height = 0;
@@ -62,13 +62,13 @@ Size pFont::size(PangoFontDescription *font, const string &text) {
   return {width, height};
 }
 
-void pFont::setFont(GtkWidget *widget, const string &font) {
+void pFont::setFont(GtkWidget* widget, const string& font) {
   auto gtkFont = pFont::create(font);
   pFont::setFont(widget, (gpointer)gtkFont);
   pFont::free(gtkFont);
 }
 
-void pFont::setFont(GtkWidget *widget, gpointer font) {
+void pFont::setFont(GtkWidget* widget, gpointer font) {
   if(font == nullptr) return;
   gtk_widget_modify_font(widget, (PangoFontDescription*)font);
   if(GTK_IS_CONTAINER(widget)) {

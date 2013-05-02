@@ -18,20 +18,20 @@ void pRadioButton::setChecked() {
   parent().locked = false;
 }
 
-void pRadioButton::setGroup(const group<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton>& group) {
   parent().locked = true;
-  for(auto &item : radioButton.state.group) {
+  for(auto& item : radioButton.state.group) {
     item.p.qtRadioButton->setChecked(item.state.checked);
   }
   parent().locked = false;
 }
 
-void pRadioButton::setText(const string &text) {
+void pRadioButton::setText(const string& text) {
   qtRadioButton->setText(QString::fromUtf8(text));
 }
 
 pRadioButton& pRadioButton::parent() {
-  if(radioButton.state.group.size()) return radioButton.state.group[0].p;
+  if(radioButton.state.group.size()) return radioButton.state.group.first().p;
   return *this;
 }
 

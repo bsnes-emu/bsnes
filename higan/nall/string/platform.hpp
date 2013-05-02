@@ -19,7 +19,7 @@ string activepath() {
   return result;
 }
 
-string realpath(const string &name) {
+string realpath(const string& name) {
   string result;
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";

@@ -13,7 +13,7 @@ struct HotkeySettings : SettingsLayout {
   HotkeySettings();
 
 private:
-  HotkeyInput *activeInput;
+  HotkeyInput* activeInput = nullptr;
 };
 
-extern HotkeySettings *hotkeySettings;
+extern HotkeySettings* hotkeySettings;

@@ -18,7 +18,7 @@
 
 namespace phoenix {
 
-void pComboButton::append(const string &text) {
+void pComboButton::append(const string& text) {
   @autoreleasepool {
     [cocoaView addItemWithTitle:[NSString stringWithUTF8String:text]];
   }
@@ -26,12 +26,12 @@ void pComboButton::append(const string &text) {
 
 Size pComboButton::minimumSize() {
   unsigned maximumWidth = 0;
-  for(auto &text : comboButton.state.text) maximumWidth = max(maximumWidth, Font::size(comboButton.font(), text).width);
+  for(auto& text : comboButton.state.text) maximumWidth = max(maximumWidth, Font::size(comboButton.font(), text).width);
   Size size = Font::size(comboButton.font(), " ");
   return {maximumWidth + 36, size.height + 6};
 }
 
-void pComboButton::modify(unsigned row, const string &text) {
+void pComboButton::modify(unsigned row, const string& text) {
   @autoreleasepool {
     [[cocoaView itemAtIndex:row] setTitle:[NSString stringWithUTF8String:text]];
   }
@@ -55,7 +55,7 @@ unsigned pComboButton::selection() {
   }
 }
 
-void pComboButton::setGeometry(const Geometry &geometry) {
+void pComboButton::setGeometry(const Geometry& geometry) {
   pWidget::setGeometry({
     geometry.x - 2, geometry.y,
     geometry.width + 4, geometry.height

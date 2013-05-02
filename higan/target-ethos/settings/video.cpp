@@ -1,4 +1,4 @@
-VideoSettings *videoSettings = nullptr;
+VideoSettings* videoSettings = nullptr;
 
 VideoSlider::VideoSlider() {
   append(name, {75, 0});

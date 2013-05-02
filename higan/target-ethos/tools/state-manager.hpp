@@ -12,8 +12,8 @@ struct StateManager : Window {
     Button eraseButton;
 
   void reset();
-  bool load(const string &filename, unsigned revision);
-  bool save(const string &filename, unsigned revision);
+  bool load(const string& filename, unsigned revision);
+  bool save(const string& filename, unsigned revision);
 
   void slotLoad();
   void slotSave();
@@ -34,4 +34,4 @@ private:
   serializer slot[Slots];
 };
 
-extern StateManager *stateManager;
+extern StateManager* stateManager;

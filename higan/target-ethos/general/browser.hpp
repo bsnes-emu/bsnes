@@ -9,7 +9,7 @@ struct Browser : Window {
   Label filterLabel;
   Button openButton;
 
-  string select(const string &title, const string &extension);
+  string select(const string& title, const string& extension);
   void saveConfiguration();
   void synchronize();
   void bootstrap();
@@ -30,8 +30,8 @@ private:
   string path;
   lstring filenameList;
 
-  void setPath(const string &path, unsigned selection = 0);
+  void setPath(const string& path, unsigned selection = 0);
   void fileListActivate();
 };
 
-extern Browser *browser;
+extern Browser* browser;

@@ -33,7 +33,7 @@ Emulator::Interface& system();
 
 struct Program {
   vector<Emulator::Interface*> emulator;
-  Emulator::Interface *active = nullptr;
+  Emulator::Interface* active = nullptr;
   library ananke;
 
   bool pause;
@@ -53,8 +53,8 @@ struct Program {
   string path(const string &filename);
   void main();
   void bootstrap();
-  Program(int argc, char **argv);
+  Program(int argc, char** argv);
 };
 
-extern Program *program;
+extern Program* program;
 extern DSP dspaudio;

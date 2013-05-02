@@ -19,7 +19,7 @@ void pProgressBar::constructor() {
 
 void pProgressBar::destructor() {
   delete qtProgressBar;
-  qtWidget = qtProgressBar = 0;
+  qtWidget = qtProgressBar = nullptr;
 }
 
 void pProgressBar::orphan() {

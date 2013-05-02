@@ -5,26 +5,26 @@ namespace ruby {
 
 struct pVideoXShm {
   struct {
-    Display *display;
+    Display* display;
     int screen;
     Visual *visual;
     int depth;
     Window window;
 
     XShmSegmentInfo shmInfo;
-    XImage *image;
-    uint32_t *buffer;
+    XImage* image;
+    uint32_t* buffer;
     unsigned width, height;
   } device;
 
   struct {
     uintptr_t handle;
 
-    uint32_t *buffer;
+    uint32_t* buffer;
     unsigned width, height;
   } settings;
 
-  bool cap(const string &name) {
+  bool cap(const string& name) {
     if(name == Video::Handle) return true;
     return false;
   }
@@ -41,7 +41,7 @@ struct pVideoXShm {
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     if(settings.buffer == nullptr || settings.width != width || settings.height != height) {
       if(settings.buffer) delete[] settings.buffer;
       settings.width = width, settings.height = height;
@@ -70,8 +70,8 @@ struct pVideoXShm {
     float yRatio = (float)settings.height / (float)device.height;
     float yStep = 0;
     for(unsigned y = 0; y < device.height; y++) {
-      uint32_t *sp = settings.buffer + (unsigned)yStep * settings.width;
-      uint32_t *dp = device.buffer + y * device.width;
+      uint32_t* sp = settings.buffer + (unsigned)yStep * settings.width;
+      uint32_t* dp = device.buffer + y * device.width;
       yStep += yRatio;
       float xStep = 0;
       for(unsigned x = 0; x < device.width; x++) {

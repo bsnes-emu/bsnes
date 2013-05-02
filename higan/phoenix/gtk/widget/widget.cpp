@@ -22,11 +22,11 @@ void pWidget::setFocused() {
   gtk_widget_grab_focus(gtkWidget);
 }
 
-void pWidget::setFont(const string &font) {
+void pWidget::setFont(const string& font) {
   pFont::setFont(gtkWidget, font);
 }
 
-void pWidget::setGeometry(const Geometry &geometry) {
+void pWidget::setGeometry(const Geometry& geometry) {
   if(sizable.window() && sizable.window()->visible()) gtk_fixed_move(GTK_FIXED(sizable.window()->p.formContainer), gtkWidget, geometry.x, geometry.y);
   unsigned width = (signed)geometry.width <= 0 ? 1U : geometry.width;
   unsigned height = (signed)geometry.height <= 0 ? 1U : geometry.height;

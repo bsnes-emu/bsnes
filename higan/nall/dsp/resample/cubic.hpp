@@ -4,7 +4,7 @@ struct ResampleCubic : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  ResampleCubic(DSP &dsp) : Resampler(dsp) {}
+  ResampleCubic(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

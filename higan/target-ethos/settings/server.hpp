@@ -12,4 +12,4 @@ struct ServerSettings : SettingsLayout {
   ServerSettings();
 };
 
-extern ServerSettings *serverSettings;
+extern ServerSettings* serverSettings;

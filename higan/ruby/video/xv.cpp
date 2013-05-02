@@ -8,10 +8,11 @@ extern "C" XvImage* XvShmCreateImage(Display*, XvPortID, int, char*, int, int, X
 
 namespace ruby {
 
-class pVideoXv {
-public:
-  uint32_t *buffer;
-  uint8_t  *ytable, *utable, *vtable;
+struct pVideoXv {
+  uint32_t* buffer;
+  uint8_t* ytable;
+  uint8_t* utable;
+  uint8_t* vtable;
 
   enum XvFormat {
     XvFormatRGB32,
@@ -24,7 +25,7 @@ public:
   };
 
   struct {
-    Display *display;
+    Display* display;
     GC gc;
     Window window;
     Colormap colormap;
@@ -34,7 +35,7 @@ public:
     int depth;
     int visualid;
 
-    XvImage *image;
+    XvImage* image;
     XvFormat format;
     uint32_t fourcc;
 
@@ -71,7 +72,7 @@ public:
     }
 
     if(name == Video::Synchronize) {
-      Display *display = XOpenDisplay(0);
+      Display* display = XOpenDisplay(0);
       Atom atom = XInternAtom(display, "XV_SYNC_TO_VBLANK", true);
       if(atom != None && device.port >= 0) {
         settings.synchronize = any_cast<bool>(value);
@@ -105,7 +106,7 @@ public:
     buffer = new uint32_t[device.width * device.height];
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -169,7 +170,7 @@ public:
 
     //find an appropriate Xv port
     device.port = -1;
-    XvAdaptorInfo *adaptor_info;
+    XvAdaptorInfo* adaptor_info;
     unsigned adaptor_count;
     XvQueryAdaptors(device.display, DefaultRootWindow(device.display), &adaptor_count, &adaptor_info);
     for(unsigned i = 0; i < adaptor_count; i++) {
@@ -230,7 +231,7 @@ public:
     //find optimal rendering format
     device.format = XvFormatUnknown;
     signed format_count;
-    XvImageFormatValues *format = XvListImageFormats(device.display, device.port, &format_count);
+    XvImageFormatValues* format = XvListImageFormats(device.display, device.port, &format_count);
 
     if(device.format == XvFormatUnknown) for(signed i = 0; i < format_count; i++) {
       if(format[i].type == XvRGB && format[i].bits_per_pixel == 32) {
@@ -342,8 +343,8 @@ public:
   }
 
   void render_rgb32(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint32_t *output = (uint32_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint32_t* output = (uint32_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       memcpy(output, input, width * 4);
@@ -353,8 +354,8 @@ public:
   }
 
   void render_rgb24(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint8_t  *output = (uint8_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint8_t* output = (uint8_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       for(unsigned x = 0; x < width; x++) {
@@ -370,8 +371,8 @@ public:
   }
 
   void render_rgb16(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint16_t *output = (uint16_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint16_t* output = (uint16_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       for(unsigned x = 0; x < width; x++) {
@@ -385,8 +386,8 @@ public:
   }
 
   void render_rgb15(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint16_t *output = (uint16_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint16_t* output = (uint16_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       for(unsigned x = 0; x < width; x++) {
@@ -400,8 +401,8 @@ public:
   }
 
   void render_yuy2(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint16_t *output = (uint16_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint16_t* output = (uint16_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       for(unsigned x = 0; x < width >> 1; x++) {
@@ -423,8 +424,8 @@ public:
   }
 
   void render_uyvy(unsigned width, unsigned height) {
-    uint32_t *input  = (uint32_t*)buffer;
-    uint16_t *output = (uint16_t*)device.image->data;
+    uint32_t* input  = (uint32_t*)buffer;
+    uint16_t* output = (uint16_t*)device.image->data;
 
     for(unsigned y = 0; y < height; y++) {
       for(unsigned x = 0; x < width >> 1; x++) {

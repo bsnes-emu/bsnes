@@ -1,4 +1,4 @@
-void OpenGLProgram::bind(OpenGL *instance, const Markup::Node &node, const string &pathname) {
+void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const string& pathname) {
   filter = glrFilter(node["filter"].text());
   wrap = glrWrap(node["wrap"].text());
   modulo = glrModulo(node["modulo"].integer());
@@ -37,7 +37,7 @@ void OpenGLProgram::bind(OpenGL *instance, const Markup::Node &node, const strin
     fragment = glrCreateShader(program, GL_FRAGMENT_SHADER, OpenGLFragmentShader);
   }
 
-  for(auto &leaf : node.find("pixmap")) {
+  for(auto& leaf : node.find("pixmap")) {
     nall::image image({pathname, leaf.text()});
     image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
     if(image.empty()) continue;
@@ -57,7 +57,7 @@ void OpenGLProgram::bind(OpenGL *instance, const Markup::Node &node, const strin
     if(leaf["wrap"].exists()) pixmaps(n).wrap = glrWrap(leaf["wrap"].text());
 
     unsigned w = glrSize(image.width), h = glrSize(image.height);
-    uint32_t *buffer = new uint32_t[w * h]();
+    uint32_t* buffer = new uint32_t[w * h]();
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, pixmaps(n).format, w, h, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image.data);
@@ -70,7 +70,7 @@ void OpenGLProgram::bind(OpenGL *instance, const Markup::Node &node, const strin
 
 void OpenGLProgram::release() {
   OpenGLSurface::release();
-  for(auto &pixmap : pixmaps) glDeleteTextures(1, &pixmap.texture);
+  for(auto& pixmap : pixmaps) glDeleteTextures(1, &pixmap.texture);
   pixmaps.reset();
 
   width = 0;

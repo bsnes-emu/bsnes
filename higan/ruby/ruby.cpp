@@ -12,16 +12,16 @@ InputInterface input;
 
 /* VideoInterface */
 
-const char *Video::Handle = "Handle";
-const char *Video::Synchronize = "Synchronize";
-const char *Video::Depth = "Depth";
-const char *Video::Filter = "Filter";
-const char *Video::Shader = "Shader";
+const char* Video::Handle = "Handle";
+const char* Video::Synchronize = "Synchronize";
+const char* Video::Depth = "Depth";
+const char* Video::Filter = "Filter";
+const char* Video::Shader = "Shader";
 
 const unsigned Video::FilterNearest = 0;
 const unsigned Video::FilterLinear  = 1;
 
-void VideoInterface::driver(const char *driver) {
+void VideoInterface::driver(const char* driver) {
   if(p) term();
 
   if(!driver || !*driver) driver = default_driver();
@@ -176,7 +176,7 @@ void VideoInterface::term() {
 bool VideoInterface::cap(const string& name) { return p ? p->cap(name) : false; }
 any VideoInterface::get(const string& name) { return p ? p->get(name) : false; }
 bool VideoInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
-bool VideoInterface::lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) { return p ? p->lock(data, pitch, width, height) : false; }
+bool VideoInterface::lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) { return p ? p->lock(data, pitch, width, height) : false; }
 void VideoInterface::unlock() { if(p) p->unlock(); }
 void VideoInterface::clear() { if(p) p->clear(); }
 void VideoInterface::refresh() { if(p) p->refresh(); }
@@ -185,12 +185,12 @@ VideoInterface::~VideoInterface() { term(); }
 
 /* AudioInterface */
 
-const char *Audio::Handle = "Handle";
-const char *Audio::Synchronize = "Synchronize";
-const char *Audio::Frequency = "Frequency";
-const char *Audio::Latency = "Latency";
+const char* Audio::Handle = "Handle";
+const char* Audio::Synchronize = "Synchronize";
+const char* Audio::Frequency = "Frequency";
+const char* Audio::Latency = "Latency";
 
-void AudioInterface::driver(const char *driver) {
+void AudioInterface::driver(const char* driver) {
   if(p) term();
 
   if(!driver || !*driver) driver = default_driver();
@@ -320,12 +320,12 @@ AudioInterface::~AudioInterface() { term(); }
 
 /* InputInterface */
 
-const char *Input::Handle = "Handle";
-const char *Input::KeyboardSupport = "KeyboardSupport";
-const char *Input::MouseSupport = "MouseSupport";
-const char *Input::JoypadSupport = "JoypadSupport";
+const char* Input::Handle = "Handle";
+const char* Input::KeyboardSupport = "KeyboardSupport";
+const char* Input::MouseSupport = "MouseSupport";
+const char* Input::JoypadSupport = "JoypadSupport";
 
-void InputInterface::driver(const char *driver) {
+void InputInterface::driver(const char* driver) {
   if(p) term();
 
   if(!driver || !*driver) driver = default_driver();
@@ -422,7 +422,7 @@ bool InputInterface::set(const string& name, const any& value) { return p ? p->s
 bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
-bool InputInterface::poll(int16_t *table) { return p ? p->poll(table) : false; }
+bool InputInterface::poll(int16_t* table) { return p ? p->poll(table) : false; }
 InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
 

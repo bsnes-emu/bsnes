@@ -11,7 +11,7 @@ void pTextEdit::setEditable(bool editable) {
   qtTextEdit->setReadOnly(!editable);
 }
 
-void pTextEdit::setText(const string &text) {
+void pTextEdit::setText(const string& text) {
   qtTextEdit->setPlainText(QString::fromUtf8(text));
 }
 
@@ -38,7 +38,7 @@ void pTextEdit::constructor() {
 void pTextEdit::destructor() {
   if(sizable.state.layout) sizable.state.layout->remove(textEdit);
   delete qtTextEdit;
-  qtWidget = qtTextEdit = 0;
+  qtWidget = qtTextEdit = nullptr;
 }
 
 void pTextEdit::orphan() {

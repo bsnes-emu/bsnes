@@ -7,14 +7,14 @@ struct parser {
   image canvas;
 
   //export from bitstream to canvas
-  inline void load(bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
+  void load(bitstream& stream, uint64_t offset, context& ctx, unsigned width, unsigned height) {
     canvas.allocate(width, height);
     canvas.clear(ctx.paddingColor);
     parse(1, stream, offset, ctx, width, height);
   }
 
   //import from canvas to bitstream
-  inline bool save(bitstream &stream, uint64_t offset, context &ctx) {
+  bool save(bitstream& stream, uint64_t offset, context& ctx) {
     if(stream.readonly) return false;
     parse(0, stream, offset, ctx, canvas.width, canvas.height);
     return true;
@@ -24,21 +24,21 @@ struct parser {
   }
 
 private:
-  inline uint32_t read(unsigned x, unsigned y) const {
+  uint32_t read(unsigned x, unsigned y) const {
     unsigned addr = y * canvas.width + x;
     if(addr >= canvas.width * canvas.height) return 0u;
     uint32_t *buffer = (uint32_t*)canvas.data;
     return buffer[addr];
   }
 
-  inline void write(unsigned x, unsigned y, uint32_t data) {
+  void write(unsigned x, unsigned y, uint32_t data) {
     unsigned addr = y * canvas.width + x;
     if(addr >= canvas.width * canvas.height) return;
     uint32_t *buffer = (uint32_t*)canvas.data;
     buffer[addr] = data;
   }
 
-  inline void parse(bool load, bitstream &stream, uint64_t offset, context &ctx, unsigned width, unsigned height) {
+  void parse(bool load, bitstream& stream, uint64_t offset, context& ctx, unsigned width, unsigned height) {
     stream.endian = ctx.endian;
     unsigned canvasWidth = width / (ctx.mosaicWidth * ctx.tileWidth * ctx.blockWidth + ctx.paddingWidth);
     unsigned canvasHeight = height / (ctx.mosaicHeight * ctx.tileHeight * ctx.blockHeight + ctx.paddingHeight);

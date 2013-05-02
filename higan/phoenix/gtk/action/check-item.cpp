@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void CheckItem_toggle(CheckItem *self) {
+static void CheckItem_toggle(CheckItem* self) {
   if(self->p.locked == false && self->onToggle) self->onToggle();
 }
 
@@ -14,7 +14,7 @@ void pCheckItem::setChecked(bool checked) {
   locked = false;
 }
 
-void pCheckItem::setText(const string &text) {
+void pCheckItem::setText(const string& text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 

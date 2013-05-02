@@ -2,7 +2,7 @@
 #include "bootstrap.cpp"
 #include "resource/resource.cpp"
 
-Program *program = nullptr;
+Program* program = nullptr;
 DSP dspaudio;
 
 Emulator::Interface& system() {
@@ -14,7 +14,7 @@ bool Program::focused() {
   return config->input.focus.allow || presentation->focused();
 }
 
-string Program::path(const string &name) {
+string Program::path(const string& name) {
   string path = {basepath, name};
   if(file::exists(path) || directory::exists(path)) return path;
   path = {userpath, name};
@@ -38,7 +38,7 @@ void Program::main() {
   system().run();
 }
 
-Program::Program(int argc, char **argv) {
+Program::Program(int argc, char** argv) {
   ananke.open("ananke");
 
   program = this;
@@ -127,7 +127,7 @@ Program::Program(int argc, char **argv) {
   ananke.close();
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   #if defined(PLATFORM_WINDOWS)
   utf8_args(argc, argv);
   #endif

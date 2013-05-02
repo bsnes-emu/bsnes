@@ -35,7 +35,7 @@ protected:
   }
 
   //copy part of string from source document into target string; decode markup while copying
-  inline void copy(string &target, const char *source, unsigned length) {
+  inline void copy(string& target, const char* source, unsigned length) {
     target.reserve(length + 1);
 
     #if defined(NALL_XML_LITERAL)
@@ -44,7 +44,7 @@ protected:
     return;
     #endif
 
-    char *output = target();
+    char* output = target();
     while(length) {
       if(*source == '&') {
         if(!memcmp(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }
@@ -77,7 +77,7 @@ protected:
     *output = 0;
   }
 
-  inline bool parseExpression(const char *&p) {
+  inline bool parseExpression(const char*& p) {
     if(*(p + 1) != '!') return false;
 
     //comment
@@ -112,11 +112,11 @@ protected:
   }
 
   //returns true if tag closes itself (<tag/>); false if not (<tag>)
-  inline bool parseHead(const char *&p) {
+  inline bool parseHead(const char*& p) {
     //parse name
-    const char *nameStart = ++p;  //skip '<'
+    const char* nameStart = ++p;  //skip '<'
     while(isName(*p)) p++;
-    const char *nameEnd = p;
+    const char* nameEnd = p;
     copy(name, nameStart, nameEnd - nameStart);
     if(name.empty()) throw "missing element name";
 
@@ -130,9 +130,9 @@ protected:
       Node attribute;
       attribute.attribute = true;
 
-      const char *nameStart = p;
+      const char* nameStart = p;
       while(isName(*p)) p++;
-      const char *nameEnd = p;
+      const char* nameEnd = p;
       copy(attribute.name, nameStart, nameEnd - nameStart);
       if(attribute.name.empty()) throw "missing attribute name";
 
@@ -140,10 +140,10 @@ protected:
       if(*p++ != '=') throw "missing attribute value";
       char terminal = *p++;
       if(terminal != '\'' && terminal != '\"') throw "attribute value not quoted";
-      const char *dataStart = p;
+      const char* dataStart = p;
       while(*p && *p != terminal) p++;
       if(!*p) throw "missing attribute data terminal";
-      const char *dataEnd = p++;  //skip closing terminal
+      const char* dataEnd = p++;  //skip closing terminal
 
       copy(attribute.data, dataStart, dataEnd - dataStart);
       children.append(attribute);
@@ -157,27 +157,28 @@ protected:
   }
 
   //parse element and all of its child elements
-  inline void parseElement(const char *&p) {
+  inline void parseElement(const char*& p) {
     Node node;
     if(node.parseHead(p) == false) node.parse(p);
     children.append(node);
   }
 
   //return true if </tag> matches this node's name
-  inline bool parseClosureElement(const char *&p) {
+  inline bool parseClosureElement(const char*& p) {
     if(p[0] != '<' || p[1] != '/') return false;
     p += 2;
-    const char *nameStart = p;
+    const char* nameStart = p;
     while(*p && *p != '>') p++;
     if(*p != '>') throw "unclosed closure element";
-    const char *nameEnd = p++;
+    const char* nameEnd = p++;
     if(memcmp(name, nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
     return true;
   }
 
   //parse contents of an element
-  inline void parse(const char *&p) {
-    const char *dataStart = p, *dataEnd = p;
+  inline void parse(const char*& p) {
+    const char* dataStart = p;
+    const char* dataEnd = p;
 
     while(*p) {
       while(*p && *p != '<') p++;
@@ -195,12 +196,12 @@ protected:
 struct Document : Node {
   string error;
 
-  inline bool load(const char *document) {
+  inline bool load(const char* document) {
     if(document == nullptr) return false;
     reset();
     try {
       parse(document);
-    } catch(const char *error) {
+    } catch(const char* error) {
       reset();
       this->error = error;
       return false;
@@ -209,7 +210,7 @@ struct Document : Node {
   }
 
   inline Document() {}
-  inline Document(const char *document) { load(document); }
+  inline Document(const char* document) { load(document); }
 };
 
 }

@@ -121,17 +121,20 @@ void pKeyboard::initialize() {
 }
 
 bool pKeyboard::pressed(Keyboard::Scancode scancode) {
-  return GetAsyncKeyState(settings->keymap.lhs[scancode]) & 0x8000;
+  if(auto result = settings->keymap.find(scancode)) {
+    return GetAsyncKeyState(result()) & 0x8000;
+  }
+  return false;
 }
 
 vector<bool> pKeyboard::state() {
   vector<bool> output;
   output.resize((unsigned)Keyboard::Scancode::Limit);
-  for(auto &n : output) n = false;
+  for(auto& n : output) n = false;
 
-  for(auto &n : settings->keymap.rhs) {
-    if(GetAsyncKeyState(n.name) & 0x8000) {
-      output[(unsigned)n.data] = true;
+  for(auto node : settings->keymap) {
+    if(GetAsyncKeyState(node.value) & 0x8000) {
+      output[(unsigned)node.key] = true;
     }
   }
 

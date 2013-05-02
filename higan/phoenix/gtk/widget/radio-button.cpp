@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void RadioButton_activate(RadioButton *self) {
+static void RadioButton_activate(RadioButton* self) {
   self->p.onActivate();
 }
 
@@ -15,19 +15,19 @@ Size pRadioButton::minimumSize() {
 
 void pRadioButton::setChecked() {
   parent().locked = true;
-  for(auto &item : radioButton.state.group) item.state.checked = false;
+  for(auto& item : radioButton.state.group) item.state.checked = false;
   gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtkWidget), radioButton.state.checked = true);
   parent().locked = false;
 }
 
-void pRadioButton::setGroup(const group<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton>& group) {
+  if(&parent() == this) return;
   parent().locked = true;
-  if(radioButton.state.group.size() == 0 || &radioButton.state.group[0].p == this) return;
   gtk_radio_button_set_group(
     GTK_RADIO_BUTTON(gtkWidget),
-    gtk_radio_button_get_group(GTK_RADIO_BUTTON(radioButton.state.group[0].p.gtkWidget))
+    gtk_radio_button_get_group(GTK_RADIO_BUTTON(parent().gtkWidget))
   );
-  for(auto &item : radioButton.state.group) {
+  for(auto& item : radioButton.state.group) {
     if(item.state.checked) {
       gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item.p.gtkWidget), true);
       break;
@@ -36,7 +36,7 @@ void pRadioButton::setGroup(const group<RadioButton&> &group) {
   parent().locked = false;
 }
 
-void pRadioButton::setText(const string &text) {
+void pRadioButton::setText(const string& text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
 }
 
@@ -51,7 +51,7 @@ void pRadioButton::onActivate() {
 }
 
 pRadioButton& pRadioButton::parent() {
-  if(radioButton.state.group.size()) return radioButton.state.group[0].p;
+  if(radioButton.state.group.size()) return radioButton.state.group.first().p;
   return *this;
 }
 

@@ -31,7 +31,7 @@ void pHorizontalSlider::constructor() {
 
 void pHorizontalSlider::destructor() {
   delete qtSlider;
-  qtWidget = qtSlider = 0;
+  qtWidget = qtSlider = nullptr;
 }
 
 void pHorizontalSlider::orphan() {

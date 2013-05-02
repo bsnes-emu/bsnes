@@ -32,11 +32,11 @@ struct Node {
     children.reset();
   }
 
-  bool evaluate(const string &query) const {
+  bool evaluate(const string& query) const {
     if(query.empty()) return true;
     lstring rules = string{query}.replace(" ", "").split(",");
 
-    for(auto &rule : rules) {
+    for(auto& rule : rules) {
       enum class Comparator : unsigned { ID, EQ, NE, LT, LE, GT, GE };
       auto comparator = Comparator::ID;
            if(rule.wildcard("*!=*")) comparator = Comparator::NE;
@@ -83,7 +83,7 @@ struct Node {
     return true;
   }
 
-  vector<Node> find(const string &query) const {
+  vector<Node> find(const string& query) const {
     vector<Node> result;
 
     lstring path = query.split("/");
@@ -105,7 +105,7 @@ struct Node {
     }
 
     unsigned position = 0;
-    for(auto &node : children) {
+    for(auto& node : children) {
       if(node.name.wildcard(name) == false) continue;
       if(node.evaluate(rule) == false) continue;
 
@@ -116,22 +116,23 @@ struct Node {
       if(path.size() == 0) result.append(node);
       else {
         auto list = node.find(path.concatenate("/"));
-        for(auto &item : list) result.append(item);
+        for(auto& item : list) result.append(item);
       }
     }
 
     return result;
   }
 
-  Node operator[](const string &query) const {
+  Node operator[](const string& query) const {
     auto result = find(query);
     return result(0);
   }
 
-  Node* begin() { return children.begin(); }
-  Node* end() { return children.end(); }
-  const Node* begin() const { return children.begin(); }
-  const Node* end() const { return children.end(); }
+  vector<Node>::iterator begin() { return children.begin(); }
+  vector<Node>::iterator end() { return children.end(); }
+
+  const vector<Node>::const_iterator begin() const { return children.begin(); }
+  const vector<Node>::const_iterator end() const { return children.end(); }
 
   Node() : attribute(false), level(0) {}
 

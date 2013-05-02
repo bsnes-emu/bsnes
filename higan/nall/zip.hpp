@@ -9,17 +9,17 @@
 namespace nall {
 
 struct zip {
-  zip(const string &filename) {
+  zip(const string& filename) {
     fp.open(filename, file::mode::write);
     time_t currentTime = time(nullptr);
-    tm *info = localtime(&currentTime);
+    tm* info = localtime(&currentTime);
     dosTime = (info->tm_hour << 11) | (info->tm_min << 5) | (info->tm_sec >> 1);
     dosDate = ((info->tm_year - 80) << 9) | ((1 + info->tm_mon) << 5) + (info->tm_mday);
   }
 
   //append path: append("path/");
   //append file: append("path/file", data, size);
-  void append(string filename, const uint8_t *data = nullptr, unsigned size = 0u) {
+  void append(string filename, const uint8_t* data = nullptr, unsigned size = 0u) {
     filename.transform("\\", "/");
     uint32_t checksum = crc32_calculate(data, size);
     directory.append({filename, checksum, size, fp.offset()});
@@ -43,7 +43,7 @@ struct zip {
   ~zip() {
     //central directory
     unsigned baseOffset = fp.offset();
-    for(auto &entry : directory) {
+    for(auto& entry : directory) {
       fp.writel(0x02014b50, 4);               //signature
       fp.writel(0x0014, 2);                   //version made by (2.0)
       fp.writel(0x0014, 2);                   //version needed to extract (2.0)

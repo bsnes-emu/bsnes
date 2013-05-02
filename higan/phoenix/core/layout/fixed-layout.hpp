@@ -1,12 +1,12 @@
 struct FixedLayout : Layout {
-  void append(Sizable &sizable, const Geometry &geometry);
-  void append(Sizable &sizable);
+  void append(Sizable& sizable, const Geometry& geometry);
+  void append(Sizable& sizable);
   bool enabled();
   Size minimumSize();
-  void remove(Sizable &sizable);
+  void remove(Sizable& sizable);
   void reset();
   void setEnabled(bool enabled = true);
-  void setGeometry(const Geometry &geometry);
+  void setGeometry(const Geometry& geometry);
   void setVisible(bool visible = true);
   void synchronizeLayout();
   bool visible();
@@ -20,7 +20,7 @@ struct FixedLayout : Layout {
   } state;
 
   struct Children {
-    Sizable *sizable;
+    Sizable* sizable;
     Geometry geometry;
   };
   nall::vector<Children> children;

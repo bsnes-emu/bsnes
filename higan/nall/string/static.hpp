@@ -2,7 +2,7 @@
 
 namespace nall {
 
-string string::read(const string &filename) {
+string string::read(const string& filename) {
   string data;
   data.readfile(filename);
   return data;

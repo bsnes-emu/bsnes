@@ -1,9 +1,9 @@
 namespace phoenix {
 
-void pComboButton::append(const string &text) {
+void pComboButton::append(const string& text) {
 }
 
-void pComboButton::modify(unsigned row, const string &text) {
+void pComboButton::modify(unsigned row, const string& text) {
 }
 
 void pComboButton::remove(unsigned row) {

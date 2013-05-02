@@ -119,7 +119,7 @@ template<> struct stringify<long double> {
 // arrays
 
 template<> struct stringify<vector<uint8_t>> {
-  char *text;
+  char* text;
   operator const char*() const { return text; }
   stringify(vector<uint8_t> value) {
     text = new char[value.size() + 1]();
@@ -131,9 +131,9 @@ template<> struct stringify<vector<uint8_t>> {
 };
 
 template<> struct stringify<const vector<uint8_t>&> {
-  char *text;
+  char* text;
   operator const char*() const { return text; }
-  stringify(const vector<uint8_t> &value) {
+  stringify(const vector<uint8_t>& value) {
     text = new char[value.size() + 1]();
     memcpy(text, value.data(), value.size());
   }
@@ -145,53 +145,53 @@ template<> struct stringify<const vector<uint8_t>&> {
 // strings
 
 template<> struct stringify<char*> {
-  const char *value;
+  const char* value;
   operator const char*() const { return value; }
-  stringify(char *value) : value(value) {}
+  stringify(char* value) : value(value) {}
 };
 
 template<> struct stringify<const char*> {
-  const char *value;
+  const char* value;
   operator const char*() const { return value; }
-  stringify(const char *value) : value(value) {}
+  stringify(const char* value) : value(value) {}
 };
 
 template<> struct stringify<string> {
-  const string &value;
+  const string& value;
   operator const char*() const { return value; }
-  stringify(const string &value) : value(value) {}
+  stringify(const string& value) : value(value) {}
 };
 
 template<> struct stringify<const string&> {
-  const string &value;
+  const string& value;
   operator const char*() const { return value; }
-  stringify(const string &value) : value(value) {}
+  stringify(const string& value) : value(value) {}
 };
 
 template<> struct stringify<cstring> {
-  const char *value;
+  const char* value;
   operator const char*() const { return value; }
-  stringify(const cstring &value) : value(value) {}
+  stringify(const cstring& value) : value(value) {}
 };
 
 template<> struct stringify<const cstring&> {
-  const char *value;
+  const char* value;
   operator const char*() const { return value; }
-  stringify(const cstring &value) : value(value) {}
+  stringify(const cstring& value) : value(value) {}
 };
 
 #if defined(QSTRING_H)
 
 template<> struct stringify<QString> {
-  const QString &value;
+  const QString& value;
   operator const char*() const { return value.toUtf8().constData(); }
-  stringify(const QString &value) : value(value) {}
+  stringify(const QString& value) : value(value) {}
 };
 
 template<> struct stringify<const QString&> {
-  const QString &value;
+  const QString& value;
   operator const char*() const { return value.toUtf8().constData(); }
-  stringify(const QString &value) : value(value) {}
+  stringify(const QString& value) : value(value) {}
 };
 
 string::operator QString() const {

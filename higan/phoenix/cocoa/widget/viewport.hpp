@@ -1,6 +1,6 @@
 @interface CocoaViewport : NSView {
 @public
-  phoenix::Viewport *viewport;
+  phoenix::Viewport* viewport;
 }
 -(id) initWith:(phoenix::Viewport&)viewport;
 -(void) drawRect:(NSRect)rect;
@@ -12,12 +12,12 @@
 namespace phoenix {
 
 struct pViewport : public pWidget {
-  Viewport &viewport;
-  CocoaViewport *cocoaViewport = nullptr;
+  Viewport& viewport;
+  CocoaViewport* cocoaViewport = nullptr;
 
   uintptr_t handle();
 
-  pViewport(Viewport &viewport) : pWidget(viewport), viewport(viewport) {}
+  pViewport(Viewport& viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();
   void destructor();
 };

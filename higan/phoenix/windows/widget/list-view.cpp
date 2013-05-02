@@ -23,7 +23,7 @@ void ListView_SetImage(HWND hwnd, HIMAGELIST imageList, unsigned row, unsigned c
   ListView_SetItem(hwnd, &item);
 }
 
-void ImageList_Append(HIMAGELIST imageList, const nall::image &source) {
+void ImageList_Append(HIMAGELIST imageList, const nall::image& source) {
   auto image = source;
   if(image.empty()) {
     image.allocate(15, 15);
@@ -36,7 +36,7 @@ void ImageList_Append(HIMAGELIST imageList, const nall::image &source) {
   DeleteObject(bitmap);
 }
 
-void pListView::append(const lstring &list) {
+void pListView::append(const lstring& list) {
   wchar_t empty[] = L"";
   unsigned row = ListView_GetItemCount(hwnd);
   LVITEM item;
@@ -64,7 +64,7 @@ bool pListView::checked(unsigned row) {
   return ListView_GetCheckState(hwnd, row);
 }
 
-void pListView::modify(unsigned row, const lstring &list) {
+void pListView::modify(unsigned row, const lstring& list) {
   for(unsigned n = 0; n < list.size(); n++) {
     utf16_t wtext(list(n, ""));
     ListView_SetItemText(hwnd, row, n, wtext);
@@ -106,7 +106,7 @@ void pListView::setChecked(unsigned row, bool checked) {
   locked = false;
 }
 
-void pListView::setHeaderText(const lstring &list) {
+void pListView::setHeaderText(const lstring& list) {
   while(ListView_DeleteColumn(hwnd, 0));
 
   lstring headers = list;
@@ -132,7 +132,7 @@ void pListView::setHeaderVisible(bool visible) {
   );
 }
 
-void pListView::setImage(unsigned row, unsigned column, const image &image) {
+void pListView::setImage(unsigned row, unsigned column, const image& image) {
   //assign existing image
   for(unsigned n = 0; n < images.size(); n++) {
     if(images[n] == image) {
@@ -178,7 +178,7 @@ void pListView::constructor() {
   setHeaderText(listView.state.headerText);
   setHeaderVisible(listView.state.headerVisible);
   setCheckable(listView.state.checkable);
-  for(auto &text : listView.state.text) append(text);
+  for(auto& text : listView.state.text) append(text);
   for(unsigned n = 0; n < listView.state.checked.size(); n++) setChecked(n, listView.state.checked[n]);
   buildImageList();
   if(listView.state.selected) setSelection(listView.state.selection);
@@ -195,13 +195,13 @@ void pListView::orphan() {
   constructor();
 }
 
-void pListView::setGeometry(const Geometry &geometry) {
+void pListView::setGeometry(const Geometry& geometry) {
   pWidget::setGeometry(geometry);
   autoSizeColumns();
 }
 
 void pListView::buildImageList() {
-  auto &list = listView.state.image;
+  auto& list = listView.state.image;
   unsigned columns = listView.state.text.size();
   unsigned rows = max(1u, listView.state.headerText.size());
 
@@ -233,7 +233,7 @@ void pListView::buildImageList() {
   }
 
   //build image list
-  for(auto &imageItem : images) ImageList_Append(imageList, imageItem);
+  for(auto& imageItem : images) ImageList_Append(imageList, imageItem);
   if(images.size() <= 1) return;
 
   //set images for all cells

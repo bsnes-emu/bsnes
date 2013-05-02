@@ -12,7 +12,7 @@ string pFont::monospace(unsigned size, string style) {
   return "";
 }
 
-Size pFont::size(const string &font, const string &text) {
+Size pFont::size(const string& font, const string& text) {
   return {0, 0};
 }
 

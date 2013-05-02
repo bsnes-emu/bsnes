@@ -1,15 +1,15 @@
 #include "../ethos.hpp"
-Interface *interface = nullptr;
+Interface* interface = nullptr;
 
-void Interface::loadRequest(unsigned id, const string &name, const string &type) {
+void Interface::loadRequest(unsigned id, const string &name, const string& type) {
   return utility->loadRequest(id, name, type);
 }
 
-void Interface::loadRequest(unsigned id, const string &path) {
+void Interface::loadRequest(unsigned id, const string& path) {
   return utility->loadRequest(id, path);
 }
 
-void Interface::saveRequest(unsigned id, const string &path) {
+void Interface::saveRequest(unsigned id, const string& path) {
   return utility->saveRequest(id, path);
 }
 
@@ -51,8 +51,8 @@ uint32_t Interface::videoColor(unsigned source, uint16_t r, uint16_t g, uint16_t
   return 0u;
 }
 
-void Interface::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
-  uint32_t *output;
+void Interface::videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height) {
+  uint32_t* output;
   unsigned outputPitch;
 
   if(video.lock(output, outputPitch, width, height)) {
@@ -107,7 +107,7 @@ int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
   return inputManager->inputMap[guid]->poll();
 }
 
-unsigned Interface::dipSettings(const Markup::Node &node) {
+unsigned Interface::dipSettings(const Markup::Node& node) {
   return dipSwitches->run(node);
 }
 
@@ -123,6 +123,6 @@ string Interface::server() {
   };
 }
 
-void Interface::notify(const string &text) {
+void Interface::notify(const string& text) {
   MessageWindow().setParent(*presentation).setText(text).information();
 }

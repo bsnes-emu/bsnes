@@ -10,8 +10,8 @@
 namespace nall {
 
 struct bpsmetadata {
-  inline bool load(const string &filename);
-  inline bool save(const string &filename, const string &metadata);
+  inline bool load(const string& filename);
+  inline bool save(const string& filename, const string& metadata);
   inline string metadata() const;
 
 protected:
@@ -19,7 +19,7 @@ protected:
   string metadataString;
 };
 
-bool bpsmetadata::load(const string &filename) {
+bool bpsmetadata::load(const string& filename) {
   if(sourceFile.open(filename, file::mode::read) == false) return false;
 
   auto read = [&]() -> uint8_t {
@@ -53,7 +53,7 @@ bool bpsmetadata::load(const string &filename) {
   return true;
 }
 
-bool bpsmetadata::save(const string &filename, const string &metadata) {
+bool bpsmetadata::save(const string& filename, const string& metadata) {
   file targetFile;
   if(targetFile.open(filename, file::mode::write) == false) return false;
   if(sourceFile.open() == false) return false;

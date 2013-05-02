@@ -5,7 +5,7 @@ struct ResampleAverage : Resampler {
   inline void clear();
   inline void sample();
   inline void sampleLinear();
-  ResampleAverage(DSP &dsp) : Resampler(dsp) {}
+  ResampleAverage(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

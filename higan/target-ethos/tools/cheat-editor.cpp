@@ -1,4 +1,4 @@
-CheatEditor *cheatEditor = nullptr;
+CheatEditor* cheatEditor = nullptr;
 
 CheatEditor::CheatEditor() {
   setGeometry({128, 128, 600, 360});
@@ -124,13 +124,13 @@ void CheatEditor::updateDesc() {
   refresh();
 }
 
-bool CheatEditor::load(const string &filename) {
+bool CheatEditor::load(const string& filename) {
   string data = string::read(filename);
   if(data.empty()) return false;
 
   unsigned n = 0;
   auto document = Markup::Document(data);
-  for(auto &node : document["cartridge"]) {
+  for(auto& node : document["cartridge"]) {
     if(node.name != "cheat") continue;
     cheatList.setChecked(n, node["enabled"].exists());
     cheat[n].code = node["code"].text();
@@ -143,7 +143,7 @@ bool CheatEditor::load(const string &filename) {
   return true;
 }
 
-bool CheatEditor::save(const string &filename) {
+bool CheatEditor::save(const string& filename) {
   signed lastSave = -1;
   for(signed n = 127; n >= 0; n--) {
     if(!cheat[n].code.empty() || !cheat[n].desc.empty()) {
@@ -171,7 +171,7 @@ bool CheatEditor::save(const string &filename) {
   return true;
 }
 
-bool CheatEditor::import(const string &code, const string &desc) {
+bool CheatEditor::import(const string& code, const string& desc) {
   for(unsigned n = 0; n < Codes; n++) {
     if(cheat[n].code.empty() && cheat[n].desc.empty()) {
       cheatList.setChecked(n, false);

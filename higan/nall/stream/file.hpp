@@ -21,13 +21,13 @@ struct filestream : stream {
   uint8_t read() const { return pfile.read(); }
   void write(uint8_t data) const { pfile.write(data); }
 
-  filestream(const string &filename) {
+  filestream(const string& filename) {
     pfile.open(filename, file::mode::readwrite);
     pwritable = pfile.open();
     if(!pwritable) pfile.open(filename, file::mode::read);
   }
 
-  filestream(const string &filename, file::mode mode) {
+  filestream(const string& filename, file::mode mode) {
     pfile.open(filename, mode);
     pwritable = mode == file::mode::write || mode == file::mode::readwrite;
   }

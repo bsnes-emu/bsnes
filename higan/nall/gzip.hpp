@@ -8,24 +8,24 @@ namespace nall {
 
 struct gzip {
   string filename;
-  uint8_t *data;
-  unsigned size;
+  uint8_t* data = nullptr;
+  unsigned size = 0;
 
-  inline bool decompress(const string &filename);
-  inline bool decompress(const uint8_t *data, unsigned size);
+  inline bool decompress(const string& filename);
+  inline bool decompress(const uint8_t* data, unsigned size);
 
   inline gzip();
   inline ~gzip();
 };
 
-bool gzip::decompress(const string &filename) {
+bool gzip::decompress(const string& filename) {
   if(auto memory = file::read(filename)) {
     return decompress(memory.data(), memory.size());
   }
   return false;
 }
 
-bool gzip::decompress(const uint8_t *data, unsigned size) {
+bool gzip::decompress(const uint8_t* data, unsigned size) {
   if(size < 18) return false;
   if(data[0] != 0x1f) return false;
   if(data[1] != 0x8b) return false;
@@ -73,7 +73,7 @@ bool gzip::decompress(const uint8_t *data, unsigned size) {
   return inflate(this->data, this->size, data + p, size - p - 8);
 }
 
-gzip::gzip() : data(nullptr) {
+gzip::gzip() {
 }
 
 gzip::~gzip() {

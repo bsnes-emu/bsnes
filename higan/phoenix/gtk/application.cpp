@@ -33,14 +33,12 @@ void pApplication::initialize() {
   settings->load();
 
   int argc = 1;
-  char *argv[2];
-  argv[0] = new char[8];
-  argv[1] = nullptr;
+  char* argv[] = {new char[8], nullptr};
   strcpy(argv[0], "phoenix");
-  char **argvp = argv;
+  char** argvp = argv;
   gtk_init(&argc, &argvp);
 
-  GtkSettings *gtkSettings = gtk_settings_get_default();
+  GtkSettings* gtkSettings = gtk_settings_get_default();
   g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
 
   gtk_rc_parse_string(R"(

@@ -2,7 +2,7 @@
 
 namespace SuperFamicom {
 
-Interface *interface = nullptr;
+Interface* interface = nullptr;
 
 string Interface::title() {
   return cartridge.title();
@@ -103,12 +103,12 @@ void Interface::load(unsigned id) {
 }
 
 void Interface::save() {
-  for(auto &memory : cartridge.memory) {
+  for(auto& memory : cartridge.memory) {
     saveRequest(memory.id, memory.name);
   }
 }
 
-void Interface::load(unsigned id, const stream &stream) {
+void Interface::load(unsigned id, const stream& stream) {
   if(id == ID::IPLROM) {
     stream.read(smp.iplrom, min(64u, stream.size()));
   }
@@ -219,7 +219,7 @@ void Interface::load(unsigned id, const stream &stream) {
   if(id == ID::SufamiTurboSlotBRAM) sufamiturboB.ram.read(stream);
 }
 
-void Interface::save(unsigned id, const stream &stream) {
+void Interface::save(unsigned id, const stream& stream) {
   if(id == ID::RAM) stream.write(cartridge.ram.data(), cartridge.ram.size());
   if(id == ID::EventRAM) stream.write(event.ram.data(), event.ram.size());
   if(id == ID::SA1IRAM) stream.write(sa1.iram.data(), sa1.iram.size());
@@ -305,17 +305,17 @@ serializer Interface::serialize() {
   return system.serialize();
 }
 
-bool Interface::unserialize(serializer &s) {
+bool Interface::unserialize(serializer& s) {
   return system.unserialize(s);
 }
 
-void Interface::cheatSet(const lstring &list) {
+void Interface::cheatSet(const lstring& list) {
   //Super Game Boy
   if(cartridge.has_gb_slot()) {
     GameBoy::cheat.reset();
-    for(auto &code : list) {
+    for(auto& code : list) {
       lstring codelist = code.split("+");
-      for(auto &part : codelist) {
+      for(auto& part : codelist) {
         unsigned addr, data, comp;
         part.trim();
         if(GameBoy::Cheat::decode(part, addr, data, comp)) GameBoy::cheat.append({addr, data, comp});
@@ -327,9 +327,9 @@ void Interface::cheatSet(const lstring &list) {
 
   //Super Famicom, Broadcast Satellaview, Sufami Turbo
   cheat.reset();
-  for(auto &code : list) {
+  for(auto& code : list) {
     lstring codelist = code.split("+");
-    for(auto &part : codelist) {
+    for(auto& part : codelist) {
       unsigned addr, data;
       part.trim();
       if(Cheat::decode(part, addr, data)) cheat.append({addr, data});
@@ -491,8 +491,8 @@ Interface::Interface() {
   port.append({0, "Port 1"});
   port.append({1, "Port 2"});
 
-  for(auto &device : this->device) {
-    for(auto &port : this->port) {
+  for(auto& device : this->device) {
+    for(auto& port : this->port) {
       if(device.portmask & (1 << port.id)) {
         port.device.append(device);
       }

@@ -10,13 +10,13 @@
 namespace nall {
 
 struct bpspatch {
-  inline bool modify(const uint8_t *data, unsigned size);
-  inline void source(const uint8_t *data, unsigned size);
-  inline void target(uint8_t *data, unsigned size);
+  inline bool modify(const uint8_t* data, unsigned size);
+  inline void source(const uint8_t* data, unsigned size);
+  inline void target(uint8_t* data, unsigned size);
 
-  inline bool modify(const string &filename);
-  inline bool source(const string &filename);
-  inline bool target(const string &filename);
+  inline bool modify(const string& filename);
+  inline bool source(const string& filename);
+  inline bool target(const string& filename);
 
   inline string metadata() const;
   inline unsigned size() const;
@@ -39,15 +39,15 @@ protected:
   enum : unsigned { SourceRead, TargetRead, SourceCopy, TargetCopy };
 
   filemap modifyFile;
-  const uint8_t *modifyData;
+  const uint8_t* modifyData;
   unsigned modifySize;
 
   filemap sourceFile;
-  const uint8_t *sourceData;
+  const uint8_t* sourceData;
   unsigned sourceSize;
 
   filemap targetFile;
-  uint8_t *targetData;
+  uint8_t* targetData;
   unsigned targetSize;
 
   unsigned modifySourceSize;
@@ -56,7 +56,7 @@ protected:
   string metadataString;
 };
 
-bool bpspatch::modify(const uint8_t *data, unsigned size) {
+bool bpspatch::modify(const uint8_t* data, unsigned size) {
   if(size < 19) return false;
   modifyData = data;
   modifySize = size;
@@ -86,28 +86,28 @@ bool bpspatch::modify(const uint8_t *data, unsigned size) {
   return true;
 }
 
-void bpspatch::source(const uint8_t *data, unsigned size) {
+void bpspatch::source(const uint8_t* data, unsigned size) {
   sourceData = data;
   sourceSize = size;
 }
 
-void bpspatch::target(uint8_t *data, unsigned size) {
+void bpspatch::target(uint8_t* data, unsigned size) {
   targetData = data;
   targetSize = size;
 }
 
-bool bpspatch::modify(const string &filename) {
+bool bpspatch::modify(const string& filename) {
   if(modifyFile.open(filename, filemap::mode::read) == false) return false;
   return modify(modifyFile.data(), modifyFile.size());
 }
 
-bool bpspatch::source(const string &filename) {
+bool bpspatch::source(const string& filename) {
   if(sourceFile.open(filename, filemap::mode::read) == false) return false;
   source(sourceFile.data(), sourceFile.size());
   return true;
 }
 
-bool bpspatch::target(const string &filename) {
+bool bpspatch::target(const string& filename) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
   fp.truncate(modifyTargetSize);

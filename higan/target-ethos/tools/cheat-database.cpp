@@ -1,4 +1,4 @@
-CheatDatabase *cheatDatabase = nullptr;
+CheatDatabase* cheatDatabase = nullptr;
 
 CheatDatabase::CheatDatabase() {
   setGeometry({256, 256, 600, 360});
@@ -35,12 +35,12 @@ void CheatDatabase::findCodes() {
   cheat.reset();
 
   auto document = Markup::Document(string::read(program->path("cheats.bml")));
-  for(auto &node : document) {
+  for(auto& node : document) {
     if(node.name != "cartridge") continue;
     if(node["sha256"].text() != sha256) continue;
 
     setTitle(node["name"].text());
-    for(auto &cheat : node) {
+    for(auto& cheat : node) {
       if(cheat.name != "cheat") continue;
       cheatList.append(cheat["description"].text());
       this->cheat.append({cheat["code"].text(), cheat["description"].text()});

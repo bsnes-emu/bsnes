@@ -83,7 +83,7 @@ static void sigint(int) {
   usart_sigint = true;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   setpriority(PRIO_PROCESS, 0, -20);  //requires superuser privileges; otherwise priority = +0
   signal(SIGINT, sigint);
 

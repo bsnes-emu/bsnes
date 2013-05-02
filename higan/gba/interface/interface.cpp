@@ -2,7 +2,7 @@
 
 namespace GameBoyAdvance {
 
-Interface *interface = nullptr;
+Interface* interface = nullptr;
 
 string Interface::title() {
   return cartridge.title();
@@ -40,12 +40,12 @@ void Interface::load(unsigned id) {
 }
 
 void Interface::save() {
-  for(auto &memory : cartridge.memory) {
+  for(auto& memory : cartridge.memory) {
     interface->saveRequest(memory.id, memory.name);
   }
 }
 
-void Interface::load(unsigned id, const stream &stream) {
+void Interface::load(unsigned id, const stream& stream) {
   if(id == ID::BIOS) {
     stream.read(bios.data, min(bios.size, stream.size()));
   }
@@ -69,7 +69,7 @@ void Interface::load(unsigned id, const stream &stream) {
   }
 }
 
-void Interface::save(unsigned id, const stream &stream) {
+void Interface::save(unsigned id, const stream& stream) {
   if(id == ID::RAM) {
     stream.write(cartridge.ram.data, cartridge.ram.size);
   }
@@ -105,7 +105,7 @@ serializer Interface::serialize() {
   return system.serialize();
 }
 
-bool Interface::unserialize(serializer &s) {
+bool Interface::unserialize(serializer& s) {
   return system.unserialize(s);
 }
 

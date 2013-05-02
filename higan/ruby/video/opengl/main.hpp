@@ -1,5 +1,5 @@
-void OpenGL::shader(const char *pathname) {
-  for(auto &program : programs) program.release();
+void OpenGL::shader(const char* pathname) {
+  for(auto& program : programs) program.release();
   programs.reset();
 
   format = GL_RGBA8;
@@ -10,7 +10,7 @@ void OpenGL::shader(const char *pathname) {
 
   if(pathname) {
     auto document = Markup::Document(file::read({pathname, "manifest.bml"}));
-    for(auto &node : document.find("program")) {
+    for(auto& node : document.find("program")) {
       unsigned n = programs.size();
       programs(n).bind(this, node, pathname);
     }
@@ -19,13 +19,13 @@ void OpenGL::shader(const char *pathname) {
   }
 }
 
-bool OpenGL::lock(uint32_t *&data, unsigned &pitch) {
+bool OpenGL::lock(uint32_t*& data, unsigned& pitch) {
   pitch = width * sizeof(uint32_t);
   return data = buffer;
 }
 
 void OpenGL::clear() {
-  for(auto &p : programs) {
+  for(auto& p : programs) {
     glUseProgram(p.program);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, p.framebuffer);
     glClearColor(0, 0, 0, 1);
@@ -54,7 +54,7 @@ void OpenGL::refresh() {
   unsigned sourceWidth = width, sourceHeight = height;
   history.prepend({texture, sourceWidth, sourceHeight, filter, wrap});
 
-  for(auto &p : programs) {
+  for(auto& p : programs) {
     unsigned targetWidth = p.absoluteWidth ? p.absoluteWidth : outputWidth;
     unsigned targetHeight = p.absoluteHeight ? p.absoluteHeight : outputHeight;
     if(p.relativeWidth) targetWidth = sourceWidth * p.relativeWidth;
@@ -73,7 +73,7 @@ void OpenGL::refresh() {
   //glrUniform4f("outputActualSize", glrSize(outputWidth), glrSize(outputHeight), 1.0 / glrSize(outputWidth), 1.0 / glrSize(outputHeight));
 
     unsigned aid = 0;
-    for(auto &pixmap : history) {
+    for(auto& pixmap : history) {
       glrUniform1i({"source[", aid, "]"}, aid);
       glrUniform4f({"sourceSize[", aid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
     //glrUniform4f({"sourceActualSize[", aid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));
@@ -83,7 +83,7 @@ void OpenGL::refresh() {
     }
 
     unsigned bid = 0;
-    for(auto &pixmap : p.pixmaps) {
+    for(auto& pixmap : p.pixmaps) {
       glrUniform1i({"pixmap[", bid, "]"}, aid + bid);
       glrUniform4f({"pixmapSize[", bid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
     //glrUniform4f({"pixmapActualSize[", bid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));

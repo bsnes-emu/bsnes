@@ -4,7 +4,7 @@ struct ResampleNearest : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  ResampleNearest(DSP &dsp) : Resampler(dsp) {}
+  ResampleNearest(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

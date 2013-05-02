@@ -1,12 +1,12 @@
 namespace phoenix {
 
 struct pItem : public pAction {
-  Item &item;
+  Item& item;
 
-  void setImage(const image &image);
-  void setText(const string &text);
+  void setImage(const image& image);
+  void setText(const string& text);
 
-  pItem(Item &item) : pAction(item), item(item) {}
+  pItem(Item& item) : pAction(item), item(item) {}
   void constructor();
   void destructor();
 };

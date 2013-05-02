@@ -18,14 +18,14 @@ string pFont::monospace(unsigned size, string style) {
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(const string &font, const string &text) {
+Size pFont::size(const string& font, const string& text) {
   return pFont::size(pFont::create(font), text);
 }
 
-QFont pFont::create(const string &description) {
+QFont pFont::create(const string& description) {
   lstring part;
   part.split<2>(",", description);
-  for(auto &item : part) item.trim(" ");
+  for(auto& item : part) item.trim(" ");
 
   string family = "Sans";
   unsigned size = 8u;
@@ -45,14 +45,14 @@ QFont pFont::create(const string &description) {
   return qtFont;
 }
 
-Size pFont::size(const QFont &qtFont, const string &text) {
+Size pFont::size(const QFont& qtFont, const string& text) {
   QFontMetrics metrics(qtFont);
 
   lstring lines;
   lines.split("\n", text);
 
   unsigned maxWidth = 0;
-  for(auto &line : lines) {
+  for(auto& line : lines) {
     maxWidth = max(maxWidth, metrics.width(line));
   }
 

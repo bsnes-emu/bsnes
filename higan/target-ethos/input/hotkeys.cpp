@@ -142,14 +142,14 @@ void InputManager::appendHotkeys() {
   }
 
   Configuration::Node node;
-  for(auto &hotkey : hotkeyMap) {
+  for(auto& hotkey : hotkeyMap) {
     node.append(hotkey->mapping, string{hotkey->name}.replace(" ", ""));
   }
   config.append(node, "Hotkey");
 }
 
 void InputManager::pollHotkeys() {
-  for(auto &hotkey : hotkeyMap) {
+  for(auto& hotkey : hotkeyMap) {
     bool state = hotkey->poll();
     if(hotkey->state == 0 && state == 1) if(hotkey->press) hotkey->press();
     if(hotkey->state == 1 && state == 0) if(hotkey->release) hotkey->release();

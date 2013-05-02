@@ -1,4 +1,4 @@
-ServerSettings *serverSettings = nullptr;
+ServerSettings* serverSettings = nullptr;
 
 ServerSettings::ServerSettings() {
   title.setFont(program->titleFont);

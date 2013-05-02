@@ -1,6 +1,6 @@
 @interface CocoaHorizontalScroller : NSScroller {
 @public
-  phoenix::HorizontalScroller *horizontalScroller;
+  phoenix::HorizontalScroller* horizontalScroller;
 }
 -(id) initWith:(phoenix::HorizontalScroller&)horizontalScroller;
 -(void) update;
@@ -10,15 +10,15 @@
 namespace phoenix {
 
 struct pHorizontalScroller : public pWidget {
-  HorizontalScroller &horizontalScroller;
-  CocoaHorizontalScroller *cocoaHorizontalScroller = nullptr;
+  HorizontalScroller& horizontalScroller;
+  CocoaHorizontalScroller* cocoaHorizontalScroller = nullptr;
 
   Size minimumSize();
   unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pHorizontalScroller(HorizontalScroller &horizontalScroller) : pWidget(horizontalScroller), horizontalScroller(horizontalScroller) {}
+  pHorizontalScroller(HorizontalScroller& horizontalScroller) : pWidget(horizontalScroller), horizontalScroller(horizontalScroller) {}
   void constructor();
   void destructor();
 };

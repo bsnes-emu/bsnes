@@ -2,7 +2,7 @@
 
 namespace nall {
 
-char* strlower(char *str) {
+char* strlower(char* str) {
   if(!str) return nullptr;
   int i = 0;
   while(str[i]) {
@@ -12,7 +12,7 @@ char* strlower(char *str) {
   return str;
 }
 
-char* strupper(char *str) {
+char* strupper(char* str) {
   if(!str) return nullptr;
   int i = 0;
   while(str[i]) {
@@ -22,7 +22,7 @@ char* strupper(char *str) {
   return str;
 }
 
-char* qstrlower(char *s) {
+char* qstrlower(char* s) {
   if(!s) return nullptr;
   bool quoted = false;
   while(*s) {
@@ -32,7 +32,7 @@ char* qstrlower(char *s) {
   }
 }
 
-char* qstrupper(char *s) {
+char* qstrupper(char* s) {
   if(!s) return nullptr;
   bool quoted = false;
   while(*s) {
@@ -42,7 +42,7 @@ char* qstrupper(char *s) {
   }
 }
 
-char* strtr(char *dest, const char *before, const char *after) {
+char* strtr(char* dest, const char* before, const char* after) {
   if(!dest || !before || !after) return dest;
   int sl = strlen(dest), bsl = strlen(before), asl = strlen(after);
 

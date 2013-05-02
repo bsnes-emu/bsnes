@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void Button_activate(Button *self) {
+static void Button_activate(Button* self) {
   if(self->onActivate) self->onActivate();
 }
 
@@ -20,9 +20,9 @@ Size pButton::minimumSize() {
   return {size.width + 24, size.height + 12};
 }
 
-void pButton::setImage(const image &image, Orientation orientation) {
+void pButton::setImage(const image& image, Orientation orientation) {
   if(image.empty() == false) {
-    GtkImage *gtkImage = CreateImage(image);
+    GtkImage* gtkImage = CreateImage(image);
     gtk_button_set_image(GTK_BUTTON(gtkWidget), (GtkWidget*)gtkImage);
   } else {
     gtk_button_set_image(GTK_BUTTON(gtkWidget), nullptr);
@@ -33,7 +33,7 @@ void pButton::setImage(const image &image, Orientation orientation) {
   }
 }
 
-void pButton::setText(const string &text) {
+void pButton::setText(const string& text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
   setFont(widget.state.font);
 }

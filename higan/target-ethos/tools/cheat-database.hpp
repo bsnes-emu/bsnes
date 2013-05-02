@@ -19,4 +19,4 @@ private:
   vector<Cheat> cheat;
 };
 
-extern CheatDatabase *cheatDatabase;
+extern CheatDatabase* cheatDatabase;

@@ -23,15 +23,15 @@ void pViewport::orphan() {
   constructor();
 }
 
-void pViewport::QtViewport::leaveEvent(QEvent *event) {
+void pViewport::QtViewport::leaveEvent(QEvent* event) {
   if(self.viewport.onMouseLeave) self.viewport.onMouseLeave();
 }
 
-void pViewport::QtViewport::mouseMoveEvent(QMouseEvent *event) {
-  if(self.viewport.onMouseMove) self.viewport.onMouseMove({ event->pos().x(), event->pos().y() });
+void pViewport::QtViewport::mouseMoveEvent(QMouseEvent* event) {
+  if(self.viewport.onMouseMove) self.viewport.onMouseMove({event->pos().x(), event->pos().y()});
 }
 
-void pViewport::QtViewport::mousePressEvent(QMouseEvent *event) {
+void pViewport::QtViewport::mousePressEvent(QMouseEvent* event) {
   if(!self.viewport.onMousePress) return;
   switch(event->button()) {
   case Qt::LeftButton: self.viewport.onMousePress(Mouse::Button::Left); break;
@@ -40,7 +40,7 @@ void pViewport::QtViewport::mousePressEvent(QMouseEvent *event) {
   }
 }
 
-void pViewport::QtViewport::mouseReleaseEvent(QMouseEvent *event) {
+void pViewport::QtViewport::mouseReleaseEvent(QMouseEvent* event) {
   if(!self.viewport.onMouseRelease) return;
   switch(event->button()) {
   case Qt::LeftButton: self.viewport.onMouseRelease(Mouse::Button::Left); break;
@@ -49,7 +49,7 @@ void pViewport::QtViewport::mouseReleaseEvent(QMouseEvent *event) {
   }
 }
 
-pViewport::QtViewport::QtViewport(pViewport &self) : self(self) {
+pViewport::QtViewport::QtViewport(pViewport& self) : self(self) {
 }
 
 }

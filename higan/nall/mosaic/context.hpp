@@ -36,9 +36,9 @@ struct context {
   unsigned paddingColor;
   vector<unsigned> palette;
 
-  inline unsigned objectWidth() const { return blockWidth * tileWidth * mosaicWidth + paddingWidth; }
-  inline unsigned objectHeight() const { return blockHeight * tileHeight * mosaicHeight + paddingHeight; }
-  inline unsigned objectSize() const {
+  unsigned objectWidth() const { return blockWidth * tileWidth * mosaicWidth + paddingWidth; }
+  unsigned objectHeight() const { return blockHeight * tileHeight * mosaicHeight + paddingHeight; }
+  unsigned objectSize() const {
     unsigned size = blockStride * tileWidth * tileHeight * mosaicWidth * mosaicHeight
                   + blockOffset * tileHeight * mosaicWidth * mosaicHeight
                   + tileStride * mosaicWidth * mosaicHeight
@@ -46,23 +46,23 @@ struct context {
     return max(1u, size);
   }
 
-  inline unsigned eval(const string &expression) {
+  unsigned eval(const string& expression) {
     intmax_t result;
     if(fixedpoint::eval(expression, result) == false) return 0u;
     return result;
   }
 
-  inline void eval(vector<unsigned> &buffer, const string &expression_) {
+  void eval(vector<unsigned>& buffer, const string& expression_) {
     string expression = expression_;
     bool function = false;
-    for(auto &c : expression) {
+    for(auto& c : expression) {
       if(c == '(') function = true;
       if(c == ')') function = false;
       if(c == ',' && function == true) c = ';';
     }
 
     lstring list = expression.split(",");
-    for(auto &item : list) {
+    for(auto& item : list) {
       item.trim();
       if(item.wildcard("f(?*) ?*")) {
         item.ltrim<1>("f(");
@@ -95,7 +95,7 @@ struct context {
           item = part(1, "");
         }
         item.trim();
-        for(auto &c : item) {
+        for(auto& c : item) {
           if(c >= 'A' && c <= 'Z') buffer.append(offset + c - 'A' +  0);
           if(c >= 'a' && c <= 'z') buffer.append(offset + c - 'a' + 26);
           if(c >= '0' && c <= '9') buffer.append(offset + c - '0' + 52);
@@ -112,11 +112,11 @@ struct context {
     }
   }
 
-  inline void parse(const string &data) {
+  void parse(const string& data) {
     reset();
 
     lstring lines = data.split("\n");
-    for(auto &line : lines) {
+    for(auto& line : lines) {
       lstring part = line.split<1>(":");
       if(part.size() != 2) continue;
       part[0].trim();
@@ -158,14 +158,14 @@ struct context {
     sanitize();
   }
 
-  inline bool load(const string &filename) {
+  bool load(const string& filename) {
     string filedata;
     if(filedata.readfile(filename) == false) return false;
     parse(filedata);
     return true;
   }
 
-  inline void sanitize() {
+  void sanitize() {
     if(depth < 1) depth = 1;
     if(depth > 24) depth = 24;
 
@@ -179,7 +179,7 @@ struct context {
     if(mosaicHeight < 1) mosaicHeight = 1;
   }
 
-  inline void reset() {
+  void reset() {
     offset = 0;
     width = 0;
     height = 0;
@@ -213,7 +213,7 @@ struct context {
     palette.reset();
   }
 
-  inline context() {
+  context() {
     reset();
   }
 };

@@ -93,7 +93,7 @@ public:
     raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -123,7 +123,7 @@ public:
     RECT rd, rs;
     SetRect(&rs, 0, 0, settings.width, settings.height);
 
-    POINT p = { 0, 0 };
+    POINT p = {0, 0};
     ClientToScreen(settings.handle, &p);
     GetClientRect(settings.handle, &rd);
     OffsetRect(&rd, p.x, p.y);

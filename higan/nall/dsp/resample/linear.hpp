@@ -4,7 +4,7 @@ struct ResampleLinear : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  ResampleLinear(DSP &dsp) : Resampler(dsp) {}
+  ResampleLinear(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

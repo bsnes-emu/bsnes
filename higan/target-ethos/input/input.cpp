@@ -1,12 +1,12 @@
 #include "../ethos.hpp"
 #include "hotkeys.cpp"
-InputManager *inputManager = nullptr;
+InputManager* inputManager = nullptr;
 
 void AbstractInput::bind() {
   inputList.reset();
   lstring list = mapping.split(",");
 
-  for(auto &mapping : list) {
+  for(auto& mapping : list) {
     Input::Type type;
          if(mapping.endswith(".Up")) type = Input::Type::HatUp;
     else if(mapping.endswith(".Down")) type = Input::Type::HatDown;
@@ -27,7 +27,7 @@ void AbstractInput::bind() {
   }
 }
 
-bool AbstractInput::append(const string &encode) {
+bool AbstractInput::append(const string& encode) {
   if(mapping.position(encode)) return true;  //mapping already bound
   if(mapping.empty() || mapping == "None") mapping = encode;  //remove "None"
   else mapping.append(",", encode);  //add to existing mapping list
@@ -81,7 +81,7 @@ int16_t DigitalInput::poll() {
   if(program->focused() == false) return 0;
   bool result = logic;
 
-  for(auto &item : inputList) {
+  for(auto& item : inputList) {
     int16_t value = inputManager->poll(item.scancode);
     bool output = logic;
     switch(item.type) {
@@ -125,7 +125,7 @@ int16_t RelativeInput::poll() {
   if(program->focused() == false) return 0;
   int16_t result = 0;
 
-  for(auto &item : inputList) {
+  for(auto& item : inputList) {
     int16_t value = inputManager->poll(item.scancode);
     switch(item.type) {
     case Input::Type::MouseAxis: value = input.acquired() ? value : 0; break;
@@ -195,7 +195,7 @@ int16_t AbsoluteInput::poll() {
     position.y = max(-32767, min(+32767, py));
   }
 
-  for(auto &item : inputList) {
+  for(auto& item : inputList) {
     if(item.scancode == mouse(0)[Mouse::Xaxis]) {
       result = position.x;
     }
@@ -218,8 +218,8 @@ HotkeyInput::HotkeyInput() {
 //
 
 void InputManager::bind() {
-  for(auto &input : inputMap) input->bind();
-  for(auto &input : hotkeyMap) input->bind();
+  for(auto& input : inputMap) input->bind();
+  for(auto& input : hotkeyMap) input->bind();
 }
 
 void InputManager::poll() {
@@ -256,19 +256,19 @@ InputManager::InputManager() {
 
 void InputManager::bootstrap() {
   unsigned guid = 0;
-  for(auto &emulator : program->emulator) {
+  for(auto& emulator : program->emulator) {
     Configuration::Node emulatorNode;
 
-    for(auto &port : emulator->port) {
+    for(auto& port : emulator->port) {
       Configuration::Node portNode;
 
-      for(auto &device : port.device) {
+      for(auto& device : port.device) {
         Configuration::Node deviceNode;
 
-        for(auto &number : device.order) {
-          auto &input = device.input[number];
+        for(auto& number : device.order) {
+          auto& input = device.input[number];
 
-          AbstractInput *abstract = nullptr;
+          AbstractInput* abstract = nullptr;
           if(input.type == 0) abstract = new DigitalInput;
           if(input.type == 1) abstract = new RelativeInput;
           if(input.type == 2) abstract = new AbsoluteInput;

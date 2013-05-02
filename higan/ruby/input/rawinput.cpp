@@ -41,7 +41,7 @@ public:
   struct Keyboard : Device {
     bool state[nall::Keyboard::Size];
 
-    void update(RAWINPUT *input) {
+    void update(RAWINPUT* input) {
       unsigned code  = input->data.keyboard.MakeCode;
       unsigned flags = input->data.keyboard.Flags;
 
@@ -199,7 +199,7 @@ public:
       zDistance = 0;
     }
 
-    void update(RAWINPUT *input) {
+    void update(RAWINPUT* input) {
       if((input->data.mouse.usFlags & 1) == MOUSE_MOVE_RELATIVE) {
         xDistance += input->data.mouse.lLastX;
         yDistance += input->data.mouse.lLastY;
@@ -503,7 +503,7 @@ public:
     int16_t axis[6];
     bool button[128];
 
-    void poll(DIJOYSTATE2 &state) {
+    void poll(DIJOYSTATE2& state) {
       //POV hats
       for(unsigned n = 0; n < 4; n++) {
         hat[n] = Joypad::HatCenter;
@@ -557,7 +557,7 @@ public:
     }
   }
 
-  bool init_joypad(const DIDEVICEINSTANCE *instance) {
+  bool init_joypad(const DIDEVICEINSTANCE* instance) {
     //if this is an XInput device, do not acquire it via DirectInput ...
     //the XInput driver above will handle said device.
     for(unsigned i = 0; i < rawinput.lgamepad.size(); i++) {
@@ -581,7 +581,7 @@ public:
     return DIENUM_CONTINUE;
   }
 
-  bool init_axis(const DIDEVICEOBJECTINSTANCE *instance) {
+  bool init_axis(const DIDEVICEOBJECTINSTANCE* instance) {
     DIPROPRANGE range;
     range.diph.dwSize = sizeof(DIPROPRANGE);
     range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
@@ -616,11 +616,11 @@ private:
   LPDIRECTINPUTDEVICE8 device;
 };
 
-BOOL CALLBACK DirectInput_EnumJoypadsCallback(const DIDEVICEINSTANCE *instance, void *p) {
+BOOL CALLBACK DirectInput_EnumJoypadsCallback(const DIDEVICEINSTANCE* instance, void* p) {
   return ((DirectInput*)p)->init_joypad(instance);
 }
 
-BOOL CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE *instance, void *p) {
+BOOL CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) {
   return ((DirectInput*)p)->init_axis(instance);
 }
 
@@ -687,7 +687,7 @@ public:
     return GetCapture() == settings.handle;
   }
 
-  bool poll(int16_t *table) {
+  bool poll(int16_t* table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     WaitForSingleObject(rawinput.mutex, INFINITE);

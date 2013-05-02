@@ -30,7 +30,8 @@ struct Interface : Emulator::Interface {
   struct Hook {
     virtual void lcdScanline() {}
     virtual void joypWrite(bool p15, bool p14) {}
-  } *hook;
+  };
+  Hook* hook = nullptr;
 
   void lcdScanline();
   void joypWrite(bool p15, bool p14);
@@ -44,8 +45,8 @@ struct Interface : Emulator::Interface {
   unsigned group(unsigned id);
   void load(unsigned id);
   void save();
-  void load(unsigned id, const stream &stream);
-  void save(unsigned id, const stream &stream);
+  void load(unsigned id, const stream& stream);
+  void save(unsigned id, const stream& stream);
   void unload();
 
   void power();
@@ -65,7 +66,7 @@ private:
   vector<Device> device;
 };
 
-extern Interface *interface;
+extern Interface* interface;
 
 #ifndef GB_HPP
 }

@@ -4,21 +4,21 @@
 */
 
 #include "xaudio2.hpp"
-#include <Windows.h>
+#include <windows.h>
 
 namespace ruby {
 
 class pAudioXAudio2: public IXAudio2VoiceCallback {
 public:
-  IXAudio2 *pXAudio2;
+  IXAudio2* pXAudio2;
   IXAudio2MasteringVoice* pMasterVoice;
-  IXAudio2SourceVoice *pSourceVoice;
-  
-  // inherited from IXAudio2VoiceCallback
-  STDMETHODIMP_(void) OnBufferStart(void *pBufferContext){}
-  STDMETHODIMP_(void) OnLoopEnd(void *pBufferContext){}
+  IXAudio2SourceVoice* pSourceVoice;
+
+  //inherited from IXAudio2VoiceCallback
+  STDMETHODIMP_(void) OnBufferStart(void* pBufferContext){}
+  STDMETHODIMP_(void) OnLoopEnd(void* pBufferContext){}
   STDMETHODIMP_(void) OnStreamEnd() {}
-  STDMETHODIMP_(void) OnVoiceError(void *pBufferContext, HRESULT Error) {}
+  STDMETHODIMP_(void) OnVoiceError(void* pBufferContext, HRESULT Error) {}
   STDMETHODIMP_(void) OnVoiceProcessingPassEnd() {}
   STDMETHODIMP_(void) OnVoiceProcessingPassStart(UINT32 BytesRequired) {}
 
@@ -26,7 +26,7 @@ public:
     unsigned buffers;
     unsigned latency;
 
-    uint32_t *buffer;
+    uint32_t* buffer;
     unsigned bufferoffset;
 
     volatile long submitbuffers;
@@ -74,12 +74,12 @@ public:
 
     return false;
   }
-  
-  void pushbuffer(unsigned bytes,uint32_t *pAudioData) {
-    XAUDIO2_BUFFER xa2buffer={0};
-    xa2buffer.AudioBytes=bytes;
-    xa2buffer.pAudioData=reinterpret_cast<BYTE *>(pAudioData);
-    xa2buffer.pContext=0;
+
+  void pushbuffer(unsigned bytes, uint32_t* pAudioData) {
+    XAUDIO2_BUFFER xa2buffer = {0};
+    xa2buffer.AudioBytes = bytes;
+    xa2buffer.pAudioData = reinterpret_cast<BYTE*>(pAudioData);
+    xa2buffer.pContext = 0;
     InterlockedIncrement(&device.submitbuffers);
     pSourceVoice->SubmitSourceBuffer(&xa2buffer);
   }
@@ -95,11 +95,11 @@ public:
         while(device.submitbuffers == device.buffers - 1) {
           //Sleep(0);
         }
-      } else { //we need one free buffer for the next sample, so ignore the current contents
+      } else {  //we need one free buffer for the next sample, so ignore the current contents
         return;
       }
     }
-    
+
     pushbuffer(device.latency * 4,device.buffer + device.writebuffer * device.latency);
 
     device.writebuffer = (device.writebuffer + 1) % device.buffers;
@@ -108,22 +108,22 @@ public:
   void clear() {
     if(!pSourceVoice) return;
     pSourceVoice->Stop(0);
-    pSourceVoice->FlushSourceBuffers();     //calls OnBufferEnd for all currently submitted buffers
-    
+    pSourceVoice->FlushSourceBuffers();  //calls OnBufferEnd for all currently submitted buffers
+
     device.writebuffer = 0;
 
     device.bufferoffset = 0;
     if(device.buffer) memset(device.buffer, 0, device.latency * device.buffers * 4);
 
-     pSourceVoice->Start(0);
+    pSourceVoice->Start(0);
   }
 
   bool init() {
     term();
 
-    device.buffers   = 8;
+    device.buffers = 8;
     device.latency = settings.frequency * settings.latency / device.buffers / 1000.0 + 0.5;
-    device.buffer  = new uint32_t[device.latency * device.buffers];
+    device.buffer = new uint32_t[device.latency * device.buffers];
     device.bufferoffset = 0;
     device.submitbuffers = 0;
 
@@ -131,9 +131,8 @@ public:
     if(FAILED(hr = XAudio2Create(&pXAudio2, 0 , XAUDIO2_DEFAULT_PROCESSOR))) {
       return false;
     }
-    
-    if(FAILED(hr = pXAudio2->CreateMasteringVoice( &pMasterVoice, 2,
-        settings.frequency, 0, 0 , NULL))) {
+
+    if(FAILED(hr = pXAudio2->CreateMasteringVoice( &pMasterVoice, 2, settings.frequency, 0, 0 , NULL))) {
       return false;
     }
 
@@ -146,8 +145,7 @@ public:
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
     wfx.cbSize = 0;
 
-    if(FAILED(hr = pXAudio2->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx,
-        XAUDIO2_VOICE_NOSRC , XAUDIO2_DEFAULT_FREQ_RATIO, this, NULL, NULL))) {
+    if(FAILED(hr = pXAudio2->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx, XAUDIO2_VOICE_NOSRC , XAUDIO2_DEFAULT_FREQ_RATIO, this, NULL, NULL))) {
       return false;
     }
 
@@ -159,32 +157,32 @@ public:
     if(pSourceVoice) {
       pSourceVoice->Stop(0);
       pSourceVoice->DestroyVoice();
-      pSourceVoice = 0;
+      pSourceVoice = nullptr;
     }
     if(pMasterVoice) {
       pMasterVoice->DestroyVoice();
-      pMasterVoice = 0;
+      pMasterVoice = nullptr;
     }
     if(pXAudio2) {
       pXAudio2->Release();
-      pXAudio2 = NULL;
+      pXAudio2 = nullptr;
     }
     if(device.buffer) {
       delete[] device.buffer;
-      device.buffer = 0;
+      device.buffer = nullptr;
     }
   }
-  
-  STDMETHODIMP_(void) OnBufferEnd(void *pBufferContext) {
+
+  STDMETHODIMP_(void) OnBufferEnd(void* pBufferContext) {
     InterlockedDecrement(&device.submitbuffers);
   }
 
   pAudioXAudio2() {
-    pXAudio2 = 0;
-    pMasterVoice = 0;
-    pSourceVoice = 0;
+    pXAudio2 = nullptr;
+    pMasterVoice = nullptr;
+    pSourceVoice = nullptr;
 
-    device.buffer = 0;
+    device.buffer = nullptr;
     device.bufferoffset = 0;
     device.submitbuffers = 0;
     device.writebuffer = 0;

@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "higan";
-  static const char Version[] = "092.07";
+  static const char Version[] = "092.08";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
   static const char Website[] = "http://byuu.org/";
@@ -59,11 +59,11 @@ template<typename R, typename... P> struct hook<R (P...)> {
   }
 
   hook() {}
-  hook(const hook &hook) { callback = hook.callback; }
-  hook(void *function) { callback = function; }
+  hook(const hook& hook) { callback = hook.callback; }
+  hook(void* function) { callback = function; }
   hook(R (*function)(P...)) { callback = function; }
-  template<typename C> hook(R (C::*function)(P...), C *object) { callback = {function, object}; }
-  template<typename C> hook(R (C::*function)(P...) const, C *object) { callback = {function, object}; }
+  template<typename C> hook(R (C::*function)(P...), C* object) { callback = {function, object}; }
+  template<typename C> hook(R (C::*function)(P...) const, C* object) { callback = {function, object}; }
   template<typename L> hook(const L& function) { callback = function; }
 
   hook& operator=(const hook& hook) { callback = hook.callback; return *this; }

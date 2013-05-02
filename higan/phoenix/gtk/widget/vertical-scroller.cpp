@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void VerticalScroller_change(VerticalScroller *self) {
+static void VerticalScroller_change(VerticalScroller* self) {
   if(self->state.position == self->position()) return;
   self->state.position = self->position();
   if(self->p.locked == false && self->onChange) self->onChange();

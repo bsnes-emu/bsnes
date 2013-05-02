@@ -17,8 +17,8 @@ namespace ruby {
 class pAudioOpenAL {
 public:
   struct {
-    ALCdevice *handle;
-    ALCcontext *context;
+    ALCdevice* handle;
+    ALCcontext* context;
     ALuint source;
     ALenum format;
     unsigned latency;
@@ -26,7 +26,7 @@ public:
   } device;
 
   struct {
-    uint32_t *data;
+    uint32_t* data;
     unsigned length;
     unsigned size;
   } buffer;
@@ -132,7 +132,7 @@ public:
 
         alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
         alListener3f(AL_VELOCITY, 0.0, 0.0, 0.0);
-        ALfloat listener_orientation[] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        ALfloat listener_orientation[] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         alListenerfv(AL_ORIENTATION, listener_orientation);
 
         success = true;

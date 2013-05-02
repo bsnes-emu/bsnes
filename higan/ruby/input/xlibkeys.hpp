@@ -16,7 +16,7 @@ enum XScancode {
   LeftShift, RightShift, LeftControl, RightControl, LeftAlt, RightAlt, LeftSuper, RightSuper,
 };
 
-void x_poll(Display *display, int16_t *table) {
+void x_poll(Display* display, int16_t* table) {
   if(!display) return;
 
   char state[32];
@@ -139,7 +139,7 @@ void x_poll(Display *display, int16_t *table) {
   #undef pressed
 }
 
-void x_init(Display *display) {
+void x_init(Display* display) {
   if(!display) return;
 
   memset(&scancode, 0, sizeof scancode);

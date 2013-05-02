@@ -1,7 +1,7 @@
 namespace phoenix {
 
 struct pHexEdit : public pWidget {
-  HexEdit &hexEdit;
+  HexEdit& hexEdit;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -9,7 +9,7 @@ struct pHexEdit : public pWidget {
   void setRows(unsigned rows);
   void update();
 
-  pHexEdit(HexEdit &hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
+  pHexEdit(HexEdit& hexEdit) : pWidget(hexEdit), hexEdit(hexEdit) {}
   void constructor();
   void destructor();
 };

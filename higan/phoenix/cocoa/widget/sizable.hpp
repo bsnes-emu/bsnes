@@ -1,9 +1,9 @@
 namespace phoenix {
 
 struct pSizable : public pObject {
-  Sizable &sizable;
+  Sizable& sizable;
 
-  pSizable(Sizable &sizable) : pObject(sizable), sizable(sizable) {}
+  pSizable(Sizable& sizable) : pObject(sizable), sizable(sizable) {}
 };
 
 }

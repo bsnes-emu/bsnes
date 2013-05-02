@@ -1,7 +1,7 @@
 @interface CocoaTimer : NSObject {
 @public
-  phoenix::Timer *timer;
-  NSTimer *instance;
+  phoenix::Timer* timer;
+  NSTimer* instance;
 }
 -(id) initWith:(phoenix::Timer&)timer;
 -(NSTimer*) instance;
@@ -12,13 +12,13 @@
 namespace phoenix {
 
 struct pTimer : public pObject {
-  Timer &timer;
-  CocoaTimer *cocoaTimer = nullptr;
+  Timer& timer;
+  CocoaTimer* cocoaTimer = nullptr;
 
   void setEnabled(bool enabled);
   void setInterval(unsigned milliseconds);
 
-  pTimer(Timer &timer) : pObject(timer), timer(timer) {}
+  pTimer(Timer& timer) : pObject(timer), timer(timer) {}
   void constructor();
   void destructor();
 };

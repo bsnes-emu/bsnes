@@ -98,8 +98,8 @@ struct Interface : Emulator::Interface {
   unsigned group(unsigned id);
   void load(unsigned id);
   void save();
-  void load(unsigned id, const stream &stream);
-  void save(unsigned id, const stream &stream);
+  void load(unsigned id, const stream& stream);
+  void save(unsigned id, const stream& stream);
   void unload();
 
   void connect(unsigned port, unsigned device);
@@ -127,7 +127,7 @@ struct Interface : Emulator::Interface {
   vector<Device> device;
 };
 
-extern Interface *interface;
+extern Interface* interface;
 
 #ifndef SFC_HPP
 }

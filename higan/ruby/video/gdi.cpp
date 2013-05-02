@@ -4,7 +4,7 @@ namespace ruby {
 
 class pVideoGDI {
 public:
-  uint32_t *buffer;
+  uint32_t* buffer;
   HBITMAP bitmap;
   HDC bitmapdc;
   BITMAPINFO bmi;
@@ -35,7 +35,7 @@ public:
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     settings.width  = width;
     settings.height = height;
 

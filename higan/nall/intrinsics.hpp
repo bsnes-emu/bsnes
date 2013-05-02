@@ -1,6 +1,8 @@
 #ifndef NALL_INTRINSICS_HPP
 #define NALL_INTRINSICS_HPP
 
+namespace nall {
+
 struct Intrinsics {
   enum class Compiler : unsigned { Clang, GCC, VisualC, Unknown };
   enum class Platform : unsigned { X, OSX, Windows, Unknown };
@@ -62,5 +64,7 @@ struct Intrinsics {
   #define ARCH_UNKNOWN
   Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::Unknown; }
 #endif
+
+}
 
 #endif

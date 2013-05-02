@@ -7,14 +7,14 @@ namespace nall {
 
 namespace puff {
   inline int puff(
-    unsigned char *dest, unsigned long *destlen,
-    unsigned char *source, unsigned long *sourcelen
+    unsigned char* dest, unsigned long* destlen,
+    unsigned char* source, unsigned long* sourcelen
   );
 }
 
 inline bool inflate(
-  uint8_t *target, unsigned targetLength,
-  const uint8_t *source, unsigned sourceLength
+  uint8_t* target, unsigned targetLength,
+  const uint8_t* source, unsigned sourceLength
 ) {
   unsigned long tl = targetLength, sl = sourceLength;
   int result = puff::puff((unsigned char*)target, &tl, (unsigned char*)source, &sl);
@@ -22,15 +22,6 @@ inline bool inflate(
 }
 
 namespace puff {
-
-//zlib/contrib/puff.c
-//version 2.1*
-//author: Mark Adler
-//license: zlib
-//ported by: byuu
-
-//* I have corrected a bug in fixed(), where it was accessing uninitialized
-//  memory: calling construct() with lencode prior to initializing lencode.count
 
 enum {
   MAXBITS   =  15,
@@ -41,11 +32,11 @@ enum {
 };
 
 struct state {
-  unsigned char *out;
+  unsigned char* out;
   unsigned long outlen;
   unsigned long outcnt;
 
-  unsigned char *in;
+  unsigned char* in;
   unsigned long inlen;
   unsigned long incnt;
   int bitbuf;
@@ -55,11 +46,11 @@ struct state {
 };
 
 struct huffman {
-  short *count;
-  short *symbol;
+  short* count;
+  short* symbol;
 };
 
-inline int bits(state *s, int need) {
+inline int bits(state* s, int need) {
   long val;
 
   val = s->bitbuf;
@@ -75,7 +66,7 @@ inline int bits(state *s, int need) {
   return (int)(val & ((1L << need) - 1));
 }
 
-inline int stored(state *s) {
+inline int stored(state* s) {
   unsigned len;
 
   s->bitbuf = 0;
@@ -100,9 +91,9 @@ inline int stored(state *s) {
   return 0;
 }
 
-inline int decode(state *s, huffman *h) {
+inline int decode(state* s, huffman* h) {
   int len, code, first, count, index, bitbuf, left;
-  short *next;
+  short* next;
 
   bitbuf = s->bitbuf;
   left = s->bitcnt;
@@ -135,7 +126,7 @@ inline int decode(state *s, huffman *h) {
   return -10;
 }
 
-inline int construct(huffman *h, short *length, int n) {
+inline int construct(huffman* h, short* length, int n) {
   int symbol, len, left;
   short offs[MAXBITS + 1];
 
@@ -160,7 +151,7 @@ inline int construct(huffman *h, short *length, int n) {
   return left;
 }
 
-inline int codes(state *s, huffman *lencode, huffman *distcode) {
+inline int codes(state* s, huffman* lencode, huffman* distcode) {
   int symbol, len;
   unsigned dist;
   static const short lens[29] = {
@@ -222,7 +213,7 @@ inline int codes(state *s, huffman *lencode, huffman *distcode) {
   return 0;
 }
 
-inline int fixed(state *s) {
+inline int fixed(state* s) {
   static int virgin = 1;
   static short lencnt[MAXBITS + 1], lensym[FIXLCODES];
   static short distcnt[MAXBITS + 1], distsym[MAXDCODES];
@@ -252,7 +243,7 @@ inline int fixed(state *s) {
   return codes(s, &lencode, &distcode);
 }
 
-inline int dynamic(state *s) {
+inline int dynamic(state* s) {
   int nlen, ndist, ncode, index, err;
   short lengths[MAXCODES];
   short lencnt[MAXBITS + 1], lensym[MAXLCODES];
@@ -313,8 +304,8 @@ inline int dynamic(state *s) {
 }
 
 inline int puff(
-  unsigned char *dest, unsigned long *destlen,
-  unsigned char *source, unsigned long *sourcelen
+  unsigned char* dest, unsigned long* destlen,
+  unsigned char* source, unsigned long* sourcelen
 ) {
   state s;
   int last, type, err;

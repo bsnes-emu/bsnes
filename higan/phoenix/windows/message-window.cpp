@@ -23,28 +23,28 @@ static UINT MessageWindow_buttons(MessageWindow::Buttons buttons) {
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
   UINT flags = MB_ICONERROR | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
     state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
   UINT flags = MB_ICONINFORMATION | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
     state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
   UINT flags = MB_ICONQUESTION | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
     state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
   UINT flags = MB_ICONWARNING | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
     state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags

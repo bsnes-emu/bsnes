@@ -38,7 +38,7 @@ struct OpenGLSurface : OpenGLTexture {
   GLuint vertex = 0;
   GLuint geometry = 0;
   GLuint fragment = 0;
-  uint32_t *buffer = nullptr;
+  uint32_t* buffer = nullptr;
 
   void allocate();
   void size(unsigned width, unsigned height);
@@ -56,7 +56,7 @@ struct OpenGLProgram : OpenGLSurface {
   double relativeHeight = 0;
   vector<OpenGLTexture> pixmaps;
 
-  void bind(OpenGL *instance, const Markup::Node &node, const string &pathname);
+  void bind(OpenGL* instance, const Markup::Node& node, const string& pathname);
   void release();
 };
 
@@ -67,8 +67,8 @@ struct OpenGL : OpenGLProgram {
   unsigned outputWidth = 0;
   unsigned outputHeight = 0;
 
-  void shader(const char *pathname);
-  bool lock(uint32_t *&data, unsigned &pitch);
+  void shader(const char* pathname);
+  bool lock(uint32_t*& data, unsigned& pitch);
   void clear();
   void refresh();
   bool init();

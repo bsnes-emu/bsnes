@@ -1,6 +1,6 @@
 @interface CocoaProgressBar : NSProgressIndicator {
 @public
-  phoenix::ProgressBar *progressBar;
+  phoenix::ProgressBar* progressBar;
 }
 -(id) initWith:(phoenix::ProgressBar&)progressBar;
 @end
@@ -8,12 +8,12 @@
 namespace phoenix {
 
 struct pProgressBar : public pWidget {
-  ProgressBar &progressBar;
-  CocoaProgressBar *cocoaProgressBar = nullptr;
+  ProgressBar& progressBar;
+  CocoaProgressBar* cocoaProgressBar = nullptr;
 
   void setPosition(unsigned position);
 
-  pProgressBar(ProgressBar &progressBar) : pWidget(progressBar), progressBar(progressBar) {}
+  pProgressBar(ProgressBar& progressBar) : pWidget(progressBar), progressBar(progressBar) {}
   void constructor();
   void destructor();
 };

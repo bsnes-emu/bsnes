@@ -1,6 +1,6 @@
 namespace phoenix {
 
-void pMenu::append(Action &action) {
+void pMenu::append(Action& action) {
   if(dynamic_cast<Menu*>(&action)) {
     qtMenu->addMenu(((Menu&)action).p.qtMenu);
   } else if(dynamic_cast<Separator*>(&action)) {
@@ -14,7 +14,7 @@ void pMenu::append(Action &action) {
   }
 }
 
-void pMenu::remove(Action &action) {
+void pMenu::remove(Action& action) {
   if(dynamic_cast<Menu*>(&action)) {
     //QMenu::removeMenu() does not exist
     qtMenu->clear();
@@ -30,16 +30,16 @@ void pMenu::remove(Action &action) {
   }
 }
 
-void pMenu::setFont(const string &font) {
+void pMenu::setFont(const string& font) {
   qtMenu->setFont(pFont::create(font));
   for(auto &item : menu.state.action) item.p.setFont(font);
 }
 
-void pMenu::setImage(const image &image) {
+void pMenu::setImage(const image& image) {
   qtMenu->setIcon(CreateIcon(image));
 }
 
-void pMenu::setText(const string &text) {
+void pMenu::setText(const string& text) {
   qtMenu->setTitle(QString::fromUtf8(text));
 }
 
@@ -50,6 +50,7 @@ void pMenu::constructor() {
 void pMenu::destructor() {
   if(action.state.menu) action.state.menu->remove(menu);
   delete qtMenu;
+  qtMenu = nullptr;
 }
 
 }

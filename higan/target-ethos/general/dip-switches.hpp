@@ -15,8 +15,8 @@ struct DipSwitches : Window {
     Widget spacer;
     Button accept;
 
-  unsigned run(const Markup::Node &node);
+  unsigned run(const Markup::Node& node);
   DipSwitches();
 };
 
-extern DipSwitches *dipSwitches;
+extern DipSwitches* dipSwitches;

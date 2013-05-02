@@ -8,7 +8,7 @@
 #include "advanced.cpp"
 Settings *settings = nullptr;
 
-void SettingsLayout::append(Sizable &sizable, const Size &size, unsigned spacing) {
+void SettingsLayout::append(Sizable& sizable, const Size& size, unsigned spacing) {
   layout.append(sizable, size, spacing);
 }
 

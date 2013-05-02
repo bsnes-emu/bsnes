@@ -33,7 +33,7 @@ void pWidget::setFocused() {
   }
 }
 
-void pWidget::setFont(const string &font) {
+void pWidget::setFont(const string& font) {
   @autoreleasepool {
     if([cocoaView respondsToSelector:@selector(setFont:)]) {
       [cocoaView setFont:pFont::cocoaFont(font)];
@@ -41,7 +41,7 @@ void pWidget::setFont(const string &font) {
   }
 }
 
-void pWidget::setGeometry(const Geometry &geometry) {
+void pWidget::setGeometry(const Geometry& geometry) {
   @autoreleasepool {
     CGFloat windowHeight = [[cocoaView superview] frame].size.height;
     [cocoaView setFrame:NSMakeRect(geometry.x, windowHeight - geometry.y - geometry.height, geometry.width, geometry.height)];

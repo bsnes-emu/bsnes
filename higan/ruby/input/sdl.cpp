@@ -15,10 +15,10 @@ struct pInputSDL {
   #include "xlibkeys.hpp"
 
   struct {
-    Display *display;
+    Display* display;
     Window rootwindow;
     Cursor InvisibleCursor;
-    SDL_Joystick *gamepad[Joypad::Count];
+    SDL_Joystick* gamepad[Joypad::Count];
 
     unsigned screenwidth, screenheight;
     unsigned relativex, relativey;
@@ -90,7 +90,7 @@ struct pInputSDL {
     return device.mouseacquired;
   }
 
-  bool poll(int16_t *table) {
+  bool poll(int16_t* table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     //========

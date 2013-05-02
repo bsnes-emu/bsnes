@@ -21,4 +21,4 @@ struct AudioSettings : SettingsLayout {
   AudioSettings();
 };
 
-extern AudioSettings *audioSettings;
+extern AudioSettings* audioSettings;

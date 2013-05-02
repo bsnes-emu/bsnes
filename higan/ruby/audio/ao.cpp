@@ -11,7 +11,7 @@ class pAudioAO {
 public:
   int driver_id;
   ao_sample_format driver_format;
-  ao_device *audio_device;
+  ao_device* audio_device;
 
   struct {
     unsigned frequency;
@@ -56,7 +56,7 @@ public:
     driver_format.rate = settings.frequency;
     driver_format.byte_format = AO_FMT_LITTLE;
 
-    ao_option *options = 0;
+    ao_option* options = nullptr;
     ao_info *di = ao_driver_info(driver_id);
     if(!di) return false;
     if(!strcmp(di->short_name, "alsa")) {

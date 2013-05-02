@@ -33,7 +33,7 @@ struct InputSettings : SettingsLayout {
   InputSettings();
 
 private:
-  AbstractInput *activeInput;
+  AbstractInput* activeInput = nullptr;
 };
 
-extern InputSettings *inputSettings;
+extern InputSettings* inputSettings;

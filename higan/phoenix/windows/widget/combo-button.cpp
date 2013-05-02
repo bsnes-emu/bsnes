@@ -1,17 +1,17 @@
 namespace phoenix {
 
-void pComboButton::append(const string &text) {
+void pComboButton::append(const string& text) {
   SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16_t(text));
   if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) setSelection(0);
 }
 
 Size pComboButton::minimumSize() {
   unsigned maximumWidth = 0;
-  for(auto &text : comboButton.state.text) maximumWidth = max(maximumWidth, pFont::size(hfont, text).width);
+  for(auto& text : comboButton.state.text) maximumWidth = max(maximumWidth, pFont::size(hfont, text).width);
   return {maximumWidth + 24, pFont::size(hfont, " ").height + 10};
 }
 
-void pComboButton::modify(unsigned row, const string &text) {
+void pComboButton::modify(unsigned row, const string& text) {
   locked = true;
   unsigned position = selection();
   SendMessage(hwnd, CB_DELETESTRING, row, 0);
@@ -49,7 +49,7 @@ void pComboButton::constructor() {
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboButton);
   setDefaultFont();
-  for(auto &text : comboButton.state.text) append(text);
+  for(auto& text : comboButton.state.text) append(text);
   setSelection(comboButton.state.selection);
   synchronize();
 }
@@ -63,7 +63,7 @@ void pComboButton::orphan() {
   constructor();
 }
 
-void pComboButton::setGeometry(const Geometry &geometry) {
+void pComboButton::setGeometry(const Geometry& geometry) {
   SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 1, SWP_NOZORDER);
   RECT rc;
   GetWindowRect(hwnd, &rc);

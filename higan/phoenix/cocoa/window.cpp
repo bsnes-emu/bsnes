@@ -12,14 +12,14 @@
     [self setAcceptsMouseMovedEvents:YES];
     [self setTitle:@""];
 
-    NSBundle *bundle = [NSBundle mainBundle];
-    NSDictionary *dictionary = [bundle infoDictionary];
-    NSString *applicationName = [dictionary objectForKey:@"CFBundleDisplayName"];
+    NSBundle* bundle = [NSBundle mainBundle];
+    NSDictionary* dictionary = [bundle infoDictionary];
+    NSString* applicationName = [dictionary objectForKey:@"CFBundleDisplayName"];
     if(applicationName == nil) applicationName = [NSString stringWithUTF8String:phoenix::applicationState.name];
 
     menuBar = [[NSMenu alloc] init];
 
-    NSMenuItem *item;
+    NSMenuItem* item;
     string text;
 
     rootMenu = [[NSMenu alloc] init];
@@ -37,7 +37,7 @@
     [rootMenu addItem:item];
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
-    NSMenu *servicesMenu = [[[NSMenu alloc] initWithTitle:@"Services"] autorelease];
+    NSMenu* servicesMenu = [[[NSMenu alloc] initWithTitle:@"Services"] autorelease];
     item = [[[NSMenuItem alloc] initWithTitle:@"Services" action:nil keyEquivalent:@""] autorelease];
     [item setTarget:self];
     [item setSubmenu:servicesMenu];
@@ -133,12 +133,12 @@
 namespace phoenix {
 
 Window& pWindow::none() {
-  static Window *window = nullptr;
+  static Window* window = nullptr;
   if(window == nullptr) window = new Window;
   return *window;
 }
 
-void pWindow::append(Layout &layout) {
+void pWindow::append(Layout& layout) {
   Geometry geometry = window.state.geometry;
   geometry.x = geometry.y = 0;
   layout.setGeometry(geometry);
@@ -146,13 +146,13 @@ void pWindow::append(Layout &layout) {
   statusBarReposition();
 }
 
-void pWindow::append(Menu &menu) {
+void pWindow::append(Menu& menu) {
   @autoreleasepool {
     [[cocoaWindow menuBar] addItem:menu.p.cocoaAction];
   }
 }
 
-void pWindow::append(Widget &widget) {
+void pWindow::append(Widget& widget) {
   if(widget.font().empty() && !window.state.widgetFont.empty()) {
     widget.setFont(window.state.widgetFont);
   }
@@ -167,7 +167,7 @@ void pWindow::append(Widget &widget) {
 
 Color pWindow::backgroundColor() {
   @autoreleasepool {
-    NSColor *color = [[cocoaWindow backgroundColor] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    NSColor* color = [[cocoaWindow backgroundColor] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
     return {
       uint8_t(255 * [color redComponent]),
       uint8_t(255 * [color greenComponent]),
@@ -198,26 +198,26 @@ Geometry pWindow::geometry() {
   }
 }
 
-void pWindow::remove(Layout &layout) {
+void pWindow::remove(Layout& layout) {
   @autoreleasepool {
     [[cocoaWindow contentView] setNeedsDisplay:YES];
   }
 }
 
-void pWindow::remove(Menu &menu) {
+void pWindow::remove(Menu& menu) {
   @autoreleasepool {
     [[cocoaWindow menuBar] removeItem:menu.p.cocoaAction];
   }
 }
 
-void pWindow::remove(Widget &widget) {
+void pWindow::remove(Widget& widget) {
   @autoreleasepool {
     [widget.p.cocoaView removeFromSuperview];
     [[cocoaWindow contentView] setNeedsDisplay:YES];
   }
 }
 
-void pWindow::setBackgroundColor(const Color &color) {
+void pWindow::setBackgroundColor(const Color& color) {
   @autoreleasepool {
     [cocoaWindow
       setBackgroundColor:[NSColor
@@ -250,7 +250,7 @@ void pWindow::setFullScreen(bool fullScreen) {
   }
 }
 
-void pWindow::setGeometry(const Geometry &geometry) {
+void pWindow::setGeometry(const Geometry& geometry) {
   locked = true;
 
   @autoreleasepool {
@@ -264,7 +264,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
       display:YES
     ];
 
-    for(auto &layout : window.state.layout) {
+    for(auto& layout : window.state.layout) {
       Geometry geometry = this->geometry();
       geometry.x = geometry.y = 0;
       layout.setGeometry(geometry);
@@ -276,7 +276,7 @@ void pWindow::setGeometry(const Geometry &geometry) {
   locked = false;
 }
 
-void pWindow::setMenuFont(const string &font) {
+void pWindow::setMenuFont(const string& font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -288,7 +288,7 @@ void pWindow::setModal(bool modal) {
       [NSApp runModalForWindow:cocoaWindow];
     } else {
       [NSApp stopModal];
-      NSEvent *event = [NSEvent otherEventWithType:NSApplicationDefined location:NSMakePoint(0, 0) modifierFlags:0 timestamp:0.0 windowNumber:0 context:nil subtype:0 data1:0 data2:0];
+      NSEvent* event = [NSEvent otherEventWithType:NSApplicationDefined location:NSMakePoint(0, 0) modifierFlags:0 timestamp:0.0 windowNumber:0 context:nil subtype:0 data1:0 data2:0];
       [NSApp postEvent:event atStart:true];
     }
   }
@@ -302,14 +302,14 @@ void pWindow::setResizable(bool resizable) {
   }
 }
 
-void pWindow::setStatusFont(const string &font) {
+void pWindow::setStatusFont(const string& font) {
   @autoreleasepool {
     [[cocoaWindow statusBar] setFont:pFont::cocoaFont(font)];
   }
   statusBarReposition();
 }
 
-void pWindow::setStatusText(const string &text) {
+void pWindow::setStatusText(const string& text) {
   @autoreleasepool {
     [[cocoaWindow statusBar] setStringValue:[NSString stringWithUTF8String:text]];
   }
@@ -322,7 +322,7 @@ void pWindow::setStatusVisible(bool visible) {
   }
 }
 
-void pWindow::setTitle(const string &text) {
+void pWindow::setTitle(const string& text) {
   @autoreleasepool {
     [cocoaWindow setTitle:[NSString stringWithUTF8String:text]];
   }
@@ -335,7 +335,7 @@ void pWindow::setVisible(bool visible) {
   }
 }
 
-void pWindow::setWidgetFont(const string &font) {
+void pWindow::setWidgetFont(const string& font) {
 }
 
 void pWindow::constructor() {
@@ -369,7 +369,7 @@ void pWindow::sizeEvent() {
     window.state.geometry.height = geometry.height;
   }
 
-  for(auto &layout : window.state.layout) {
+  for(auto& layout : window.state.layout) {
     Geometry geometry = this->geometry();
     geometry.x = geometry.y = 0;
     layout.setGeometry(geometry);

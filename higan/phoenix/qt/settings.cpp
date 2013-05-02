@@ -3,15 +3,14 @@ namespace phoenix {
 static Settings *settings = nullptr;
 
 void Settings::load() {
-  string path = {userpath(), ".config/phoenix/qt.bml"};
-  Configuration::Document::load(path);
+  string path = {userpath(), ".config/phoenix/"};
+  Configuration::Document::load({path, "qt.bml"});
 }
 
 void Settings::save() {
   string path = {userpath(), ".config/phoenix/"};
   directory::create(path, 0755);
-  path.append("qt.bml");
-  Configuration::Document::save(path);
+  Configuration::Document::save({path, "qt.bml"});
 }
 
 Settings::Settings() {

@@ -8,16 +8,16 @@ namespace ruby {
 class pAudioPulseAudio {
 public:
   struct {
-    pa_mainloop *mainloop;
-    pa_context *context;
-    pa_stream *stream;
+    pa_mainloop* mainloop;
+    pa_context* context;
+    pa_stream* stream;
     pa_sample_spec spec;
     pa_buffer_attr buffer_attr;
     bool first;
   } device;
 
   struct {
-    uint32_t *data;
+    uint32_t* data;
     size_t size;
     unsigned offset;
   } buffer;

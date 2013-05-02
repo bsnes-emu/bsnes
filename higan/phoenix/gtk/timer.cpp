@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static guint Timer_trigger(pTimer *self) {
+static guint Timer_trigger(pTimer* self) {
   //timer may have been disabled prior to triggering, so check state
   if(self->timer.state.enabled) {
     if(self->timer.onActivate) self->timer.onActivate();

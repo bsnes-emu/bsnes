@@ -8,15 +8,15 @@ protected:
   file fp;
   uint32_t checksum;
 
-  void ls(lstring &list, const string &path, const string &basepath) {
+  void ls(lstring& list, const string& path, const string& basepath) {
     lstring paths = directory::folders(path);
-    for(auto &pathname : paths) {
+    for(auto& pathname : paths) {
       list.append(string{path, pathname}.ltrim<1>(basepath));
       ls(list, {path, pathname}, basepath);
     }
 
     lstring files = directory::files(path);
-    for(auto &filename : files) {
+    for(auto& filename : files) {
       list.append(string{path, filename}.ltrim<1>(basepath));
     }
   }
@@ -36,7 +36,7 @@ protected:
     }
   }
 
-  void writeString(const string &text) {
+  void writeString(const string& text) {
     unsigned length = text.length();
     for(unsigned n = 0; n < length; n++) write(text[n]);
   }

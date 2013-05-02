@@ -8,6 +8,7 @@ void pSeparator::constructor() {
 void pSeparator::destructor() {
   if(action.state.menu) action.state.menu->remove(separator);
   delete qtAction;
+  qtAction = nullptr;
 }
 
 }

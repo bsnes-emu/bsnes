@@ -8,14 +8,14 @@ Size pDesktop::size() {
 }
 
 Geometry pDesktop::workspace() {
-  XlibDisplay *display = XOpenDisplay(nullptr);
+  XlibDisplay* display = XOpenDisplay(nullptr);
   int screen = DefaultScreen(display);
 
   static Atom atom = XlibNone;
   if(atom == XlibNone) atom = XInternAtom(display, "_NET_WORKAREA", True);
 
   int format;
-  unsigned char *data = nullptr;
+  unsigned char* data = nullptr;
   unsigned long items, after;
   Atom returnAtom;
 
@@ -27,7 +27,7 @@ Geometry pDesktop::workspace() {
 
   if(result == Success && returnAtom == XA_CARDINAL && format == 32 && items == 4) {
     unsigned long *workarea = (unsigned long*)data;
-    return { (signed)workarea[0], (signed)workarea[1], (unsigned)workarea[2], (unsigned)workarea[3] };
+    return {(signed)workarea[0], (signed)workarea[1], (unsigned)workarea[2], (unsigned)workarea[3]};
   }
 
   return {

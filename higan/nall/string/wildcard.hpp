@@ -2,8 +2,9 @@
 
 namespace nall {
 
-bool wildcard(const char *s, const char *p) {
-  const char *cp = nullptr, *mp = nullptr;
+bool wildcard(const char* s, const char* p) {
+  const char* cp = nullptr;
+  const char* mp = nullptr;
   while(*s && *p != '*') {
     if(*p != '?' && *s != *p) return false;
     p++, s++;
@@ -22,8 +23,9 @@ bool wildcard(const char *s, const char *p) {
   return !*p;
 }
 
-bool iwildcard(const char *s, const char *p) {
-  const char *cp = nullptr, *mp = nullptr;
+bool iwildcard(const char* s, const char* p) {
+  const char* cp = nullptr;
+  const char* mp = nullptr;
   while(*s && *p != '*') {
     if(*p != '?' && chrlower(*s) != chrlower(*p)) return false;
     p++, s++;
@@ -42,7 +44,7 @@ bool iwildcard(const char *s, const char *p) {
   return !*p;
 }
 
-inline bool tokenize(const char *s, const char *p) {
+inline bool tokenize(const char* s, const char* p) {
   while(*s) {
     if(*p == '*') {
       while(*s) if(tokenize(s++, p + 1)) return true;
@@ -54,10 +56,10 @@ inline bool tokenize(const char *s, const char *p) {
   return !*p;
 }
 
-inline bool tokenize(lstring &list, const char *s, const char *p) {
+inline bool tokenize(lstring &list, const char* s, const char* p) {
   while(*s) {
     if(*p == '*') {
-      const char *b = s;
+      const char* b = s;
       while(*s) {
         if(tokenize(list, s++, p + 1)) {
           list.prepend(substr(b, 0, --s - b));

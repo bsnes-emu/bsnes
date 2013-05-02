@@ -6,7 +6,7 @@
 namespace nall {
 
 struct beatArchive : beatBase {
-  bool create(const string &beatname, string pathname, const string &metadata = "") {
+  bool create(const string& beatname, string pathname, const string& metadata = "") {
     if(fp.open(beatname, file::mode::write) == false) return false;
     if(pathname.endswith("/") == false) pathname.append("/");
 
@@ -44,7 +44,7 @@ struct beatArchive : beatBase {
     return true;
   }
 
-  bool unpack(const string &beatname, string pathname) {
+  bool unpack(const string& beatname, string pathname) {
     if(fp.open(beatname, file::mode::read) == false) return false;
     if(pathname.endswith("/") == false) pathname.append("/");
 

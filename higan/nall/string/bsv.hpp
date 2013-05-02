@@ -6,7 +6,7 @@
 namespace nall {
 
 struct BSV {
-  static inline string decode(const char *input) {
+  static inline string decode(const char* input) {
     string output;
     unsigned offset = 0;
     while(*input) {
@@ -30,7 +30,7 @@ struct BSV {
     return output;
   }
 
-  static inline string encode(const char *input) {
+  static inline string encode(const char* input) {
     string output;
     unsigned offset = 0;
     while(*input) {

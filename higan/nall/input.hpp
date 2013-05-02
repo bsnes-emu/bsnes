@@ -88,7 +88,7 @@ struct Keyboard {
     return false;
   }
 
-  static uint16_t decode(const char *name) {
+  static uint16_t decode(const char* name) {
     string s(name);
     if(!strbegin(name, "KB")) return 0;
     s.ltrim("KB");
@@ -110,7 +110,7 @@ struct Keyboard {
         break;
       }
     }
-    return { "KB", ID, "::", KeyboardScancodeName[index] };
+    return {"KB", ID, "::", KeyboardScancodeName[index]};
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }
@@ -185,7 +185,7 @@ struct Mouse {
     return false;
   }
 
-  static uint16_t decode(const char *name) {
+  static uint16_t decode(const char* name) {
     string s(name);
     if(!strbegin(name, "MS")) return 0;
     s.ltrim("MS");
@@ -207,7 +207,7 @@ struct Mouse {
         break;
       }
     }
-    return { "MS", ID, "::", MouseScancodeName[index] };
+    return {"MS", ID, "::", MouseScancodeName[index]};
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }
@@ -309,7 +309,7 @@ struct Joypad {
     return false;
   }
 
-  static uint16_t decode(const char *name) {
+  static uint16_t decode(const char* name) {
     string s(name);
     if(!strbegin(name, "JP")) return 0;
     s.ltrim("JP");
@@ -330,7 +330,7 @@ struct Joypad {
         index = code - (Base + Size * i);
       }
     }
-    return { "JP", ID, "::", JoypadScancodeName[index] };
+    return {"JP", ID, "::", JoypadScancodeName[index]};
   }
 
   uint16_t operator[](Scancode code) const { return Base + ID * Size + code; }
@@ -356,7 +356,7 @@ inline Joypad& joypad(unsigned id) {
 struct Scancode {
   enum { None = 0, Limit = Joypad::Base + Joypad::Size * Joypad::Count };
 
-  static uint16_t decode(const char *name) {
+  static uint16_t decode(const char* name) {
     uint16_t code;
     code = Keyboard::decode(name);
     if(code) return code;

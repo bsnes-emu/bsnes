@@ -33,24 +33,24 @@ Size pRadioButton::minimumSize() {
 
 void pRadioButton::setChecked() {
   @autoreleasepool {
-    for(auto &button : radioButton.state.group) {
+    for(auto& button : radioButton.state.group) {
       auto state = (&button == &radioButton) ? NSOnState : NSOffState;
       [button.p.cocoaView setState:state];
     }
   }
 }
 
-void pRadioButton::setGeometry(const Geometry &geometry) {
+void pRadioButton::setGeometry(const Geometry& geometry) {
   pWidget::setGeometry({
     geometry.x - 1, geometry.y,
     geometry.width + 2, geometry.height
   });
 }
 
-void pRadioButton::setGroup(const group<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton>& group) {
 }
 
-void pRadioButton::setText(const string &text) {
+void pRadioButton::setText(const string& text) {
   @autoreleasepool {
     [cocoaView setTitle:[NSString stringWithUTF8String:text]];
   }

@@ -20,7 +20,7 @@ struct bpsmulti {
     OriginTarget = 1,
   };
 
-  bool create(const string &patchName, const string &sourcePath, const string &targetPath, bool delta = false, const string &metadata = "") {
+  bool create(const string& patchName, const string& sourcePath, const string& targetPath, bool delta = false, const string& metadata = "") {
     if(fp.open()) fp.close();
     fp.open(patchName, file::mode::write);
     checksum = ~0;
@@ -33,7 +33,7 @@ struct bpsmulti {
     ls(sourceList, sourcePath, sourcePath);
     ls(targetList, targetPath, targetPath);
 
-    for(auto &targetName : targetList) {
+    for(auto& targetName : targetList) {
       if(targetName.endswith("/")) {
         targetName.rtrim<1>("/");
         writeNumber(CreatePath | ((targetName.length() - 1) << 2));
@@ -94,7 +94,7 @@ struct bpsmulti {
     return true;
   }
 
-  bool apply(const string &patchName, const string &sourcePath, const string &targetPath) {
+  bool apply(const string& patchName, const string& sourcePath, const string& targetPath) {
     directory::remove(targetPath);  //start with a clean directory
     directory::create(targetPath);
 
@@ -157,15 +157,15 @@ protected:
   uint32_t checksum;
 
   //create() functions
-  void ls(lstring &list, const string &path, const string &basepath) {
+  void ls(lstring& list, const string& path, const string& basepath) {
     lstring paths = directory::folders(path);
-    for(auto &pathname : paths) {
+    for(auto& pathname : paths) {
       list.append(string{path, pathname}.ltrim<1>(basepath));
       ls(list, {path, pathname}, basepath);
     }
 
     lstring files = directory::files(path);
-    for(auto &filename : files) {
+    for(auto& filename : files) {
       list.append(string{path, filename}.ltrim<1>(basepath));
     }
   }
@@ -188,7 +188,7 @@ protected:
     }
   }
 
-  void writeString(const string &text) {
+  void writeString(const string& text) {
     unsigned length = text.length();
     for(unsigned n = 0; n < length; n++) write(text[n]);
   }

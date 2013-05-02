@@ -10,15 +10,15 @@ Size pRadioButton::minimumSize() {
 }
 
 void pRadioButton::setChecked() {
-  for(auto &item : radioButton.state.group) {
+  for(auto& item : radioButton.state.group) {
     SendMessage(item.p.hwnd, BM_SETCHECK, (WPARAM)(&item == &radioButton), 0);
   }
 }
 
-void pRadioButton::setGroup(const group<RadioButton&> &group) {
+void pRadioButton::setGroup(const group<RadioButton>& group) {
 }
 
-void pRadioButton::setText(const string &text) {
+void pRadioButton::setText(const string& text) {
   SetWindowText(hwnd, utf16_t(text));
 }
 

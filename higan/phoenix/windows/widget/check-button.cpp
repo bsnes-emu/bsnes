@@ -13,7 +13,7 @@ void pCheckButton::setChecked(bool checked) {
   SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
 }
 
-void pCheckButton::setText(const string &text) {
+void pCheckButton::setText(const string& text) {
   SetWindowText(hwnd, utf16_t(text));
 }
 

@@ -1,6 +1,6 @@
 @interface CocoaComboButton : NSPopUpButton {
 @public
-  phoenix::ComboButton *comboButton;
+  phoenix::ComboButton* comboButton;
 }
 -(id) initWith:(phoenix::ComboButton&)comboButton;
 -(IBAction) activate:(id)sender;
@@ -9,19 +9,19 @@
 namespace phoenix {
 
 struct pComboButton : public pWidget {
-  ComboButton &comboButton;
-  CocoaComboButton *cocoaComboButton = nullptr;
+  ComboButton& comboButton;
+  CocoaComboButton* cocoaComboButton = nullptr;
 
-  void append(const string &text);
+  void append(const string& text);
   Size minimumSize();
-  void modify(unsigned row, const string &text);
+  void modify(unsigned row, const string& text);
   void remove(unsigned row);
   void reset();
   unsigned selection();
-  void setGeometry(const Geometry &geometry);
+  void setGeometry(const Geometry& geometry);
   void setSelection(unsigned row);
 
-  pComboButton(ComboButton &comboButton) : pWidget(comboButton), comboButton(comboButton) {}
+  pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();
   void destructor();
 };

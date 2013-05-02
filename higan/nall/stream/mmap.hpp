@@ -24,7 +24,7 @@ struct mmapstream : stream {
   uint8_t read(unsigned offset) const { return pdata[offset]; }
   void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
 
-  mmapstream(const string &filename) {
+  mmapstream(const string& filename) {
     pmmap.open(filename, filemap::mode::readwrite);
     pwritable = pmmap.open();
     if(!pwritable) pmmap.open(filename, filemap::mode::read);
@@ -33,7 +33,7 @@ struct mmapstream : stream {
 
 private:
   mutable filemap pmmap;
-  mutable uint8_t *pdata;
+  mutable uint8_t* pdata;
   mutable unsigned pwritable, poffset;
 };
 

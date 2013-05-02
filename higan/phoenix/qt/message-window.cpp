@@ -24,28 +24,28 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
   return MessageWindow_response(
     state.buttons, QMessageBox::critical(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
     QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
   );
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
   return MessageWindow_response(
     state.buttons, QMessageBox::information(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
     QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
   );
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
   return MessageWindow_response(
     state.buttons, QMessageBox::question(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
     QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
   );
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State &state) {
+MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
   return MessageWindow_response(
     state.buttons, QMessageBox::warning(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
     QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))

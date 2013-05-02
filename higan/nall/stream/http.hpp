@@ -24,7 +24,7 @@ struct httpstream : stream {
   uint8_t read(unsigned offset) const { return pdata[offset]; }
   void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
 
-  httpstream(const string &url, unsigned port) : pdata(nullptr), psize(0), poffset(0) {
+  httpstream(const string& url, unsigned port) : pdata(nullptr), psize(0), poffset(0) {
     string uri = url;
     uri.ltrim<1>("http://");
     lstring part = uri.split<1>("/");
@@ -40,7 +40,7 @@ struct httpstream : stream {
   }
 
 private:
-  mutable uint8_t *pdata;
+  mutable uint8_t* pdata;
   mutable unsigned psize, poffset;
 };
 

@@ -1,6 +1,6 @@
 @interface CocoaVerticalSlider : NSSlider {
 @public
-  phoenix::VerticalSlider *verticalSlider;
+  phoenix::VerticalSlider* verticalSlider;
 }
 -(id) initWith:(phoenix::VerticalSlider&)verticalSlider;
 -(IBAction) activate:(id)sender;
@@ -9,16 +9,16 @@
 namespace phoenix {
 
 struct pVerticalSlider : public pWidget {
-  VerticalSlider &verticalSlider;
-  CocoaVerticalSlider *cocoaVerticalSlider = nullptr;
+  VerticalSlider& verticalSlider;
+  CocoaVerticalSlider* cocoaVerticalSlider = nullptr;
 
   Size minimumSize();
   unsigned position();
-  void setGeometry(const Geometry &geometry);
+  void setGeometry(const Geometry& geometry);
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
-  pVerticalSlider(VerticalSlider &verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
+  pVerticalSlider(VerticalSlider& verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
   void constructor();
   void destructor();
 };

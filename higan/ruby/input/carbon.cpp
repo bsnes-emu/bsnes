@@ -1,7 +1,6 @@
 namespace ruby {
 
-class pInputCarbon {
-public:
+struct pInputCarbon {
   bool cap(const string& name) {
     return false;
   }
@@ -18,12 +17,12 @@ public:
   bool unacquire() { return false; }
   bool acquired() { return false; }
 
-  bool poll(int16_t *table) {
+  bool poll(int16_t* table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     KeyMap keys;
     GetKeys(keys);
-    uint8_t *keymap = (uint8_t*)keys;
+    uint8_t* keymap = (uint8_t*)keys;
 
     #define map(id, name) table[keyboard(0)[name]] = (bool)(keymap[id >> 3] & (1 << (id & 7)))
     map(0x35, Keyboard::Escape);

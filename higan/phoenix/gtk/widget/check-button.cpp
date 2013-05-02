@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void CheckButton_toggle(CheckButton *self) {
+static void CheckButton_toggle(CheckButton* self) {
   self->state.checked = self->checked();
   if(self->p.locked == false && self->onToggle) self->onToggle();
 }
@@ -20,7 +20,7 @@ void pCheckButton::setChecked(bool checked) {
   locked = false;
 }
 
-void pCheckButton::setText(const string &text) {
+void pCheckButton::setText(const string& text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
 }
 

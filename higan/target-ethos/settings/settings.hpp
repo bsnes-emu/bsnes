@@ -2,7 +2,7 @@ struct SettingsLayout : HorizontalLayout {
   Widget spacer;
   VerticalLayout layout;
 
-  void append(Sizable &widget, const Size &size, unsigned spacing = 0);
+  void append(Sizable& widget, const Size &size, unsigned spacing = 0);
   SettingsLayout();
 };
 
@@ -22,4 +22,4 @@ struct Settings : Window {
   Settings();
 };
 
-extern Settings *settings;
+extern Settings* settings;

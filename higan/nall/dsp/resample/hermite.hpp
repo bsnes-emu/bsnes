@@ -4,7 +4,7 @@ struct ResampleHermite : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  ResampleHermite(DSP &dsp) : Resampler(dsp) {}
+  ResampleHermite(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

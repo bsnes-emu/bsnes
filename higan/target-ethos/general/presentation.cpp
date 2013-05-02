@@ -1,8 +1,8 @@
-Presentation *presentation = nullptr;
+Presentation* presentation = nullptr;
 
 void Presentation::synchronize() {
-  for(auto &emulator : emulatorList) emulator->menu.setVisible(false);
-  for(auto &emulator : emulatorList) {
+  for(auto& emulator : emulatorList) emulator->menu.setVisible(false);
+  for(auto& emulator : emulatorList) {
     if(emulator->interface == program->active) {
       active = emulator;
       emulator->menu.setVisible(true);
@@ -12,7 +12,7 @@ void Presentation::synchronize() {
   shaderNone.setChecked();
   if(config->video.shader == "None") shaderNone.setChecked();
   if(config->video.shader == "Blur") shaderBlur.setChecked();
-  for(auto &shader : shaderList) {
+  for(auto& shader : shaderList) {
     string name = notdir(config->video.shader.split<1>(".shader/")(0));
     if(name == shader->text()) shader->setChecked();
   }
@@ -42,11 +42,11 @@ void Presentation::synchronize() {
   }
 }
 
-void Presentation::setSystemName(const string &name) {
+void Presentation::setSystemName(const string& name) {
   if(active) active->menu.setText(name);
 }
 
-Presentation::Presentation() : active(nullptr) {
+Presentation::Presentation() {
   bootstrap();
   loadShaders();
   setGeometry({256, 256, 720, 480});
@@ -85,16 +85,16 @@ Presentation::Presentation() : active(nullptr) {
     synchronizeTime.setText("Synchronize Time");
 
   append(loadMenu);
-    for(auto &item : loadListSystem) loadMenu.append(*item);
+    for(auto& item : loadListSystem) loadMenu.append(*item);
     if(program->ananke.open()) loadMenu.append(loadSeparator, loadImport);
-  for(auto &systemItem : emulatorList) append(systemItem->menu);
+  for(auto& systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
       videoMenu.append(centerVideo, scaleVideo, stretchVideo, *new Separator, aspectCorrection, maskOverscan);
     settingsMenu.append(shaderMenu);
       shaderMenu.append(shaderNone, shaderBlur);
       if(shaderList.size() > 0) shaderMenu.append(*new Separator);
-      for(auto &shader : shaderList) shaderMenu.append(*shader);
+      for(auto& shader : shaderList) shaderMenu.append(*shader);
     settingsMenu.append(*new Separator);
     settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
     if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
@@ -156,13 +156,13 @@ Presentation::Presentation() : active(nullptr) {
 }
 
 void Presentation::bootstrap() {
-  for(auto &emulator : program->emulator) {
+  for(auto& emulator : program->emulator) {
     auto iEmulator = new Emulator;
     iEmulator->interface = emulator;
 
-    for(auto &media : emulator->media) {
+    for(auto& media : emulator->media) {
       if(media.bootable == false) continue;
-      Item *item = new Item;
+      auto item = new Item;
       item->onActivate = [=, &media] {
         utility->loadMedia(iEmulator->interface, media);
       };
@@ -175,12 +175,12 @@ void Presentation::bootstrap() {
     iEmulator->reset.setText("Reset");
     iEmulator->unload.setText("Unload");
 
-    for(auto &port : emulator->port) {
+    for(auto& port : emulator->port) {
       auto iPort = new Emulator::Port;
       iPort->menu.setText(port.name);
       iEmulator->port.append(iPort);
 
-      for(auto &device : port.device) {
+      for(auto& device : port.device) {
         auto iDevice = new RadioItem;
         iDevice->setText(device.name);
         iDevice->onActivate = [=] { utility->connect(port.id, device.id); };
@@ -196,11 +196,11 @@ void Presentation::bootstrap() {
     iEmulator->menu.append(iEmulator->reset);
     iEmulator->menu.append(*new Separator);
     unsigned visiblePorts = 0;
-    for(auto &iPort : iEmulator->port) {
+    for(auto& iPort : iEmulator->port) {
       iEmulator->menu.append(iPort->menu);
       if(iPort->device.size() <= 1) iPort->menu.setVisible(false);
       else visiblePorts++;
-      for(auto &iDevice : iPort->device) {
+      for(auto& iDevice : iPort->device) {
         iPort->menu.append(*iDevice);
       }
     }
@@ -221,7 +221,7 @@ void Presentation::loadShaders() {
   if(config->video.driver == "OpenGL") {
     string pathname = program->path("Video Shaders/");
     lstring shaders = directory::folders(pathname, "*.shader");
-    for(auto &name : shaders) {
+    for(auto& name : shaders) {
       auto shader = new RadioItem;
       shader->setText(name.split<1>(".shader/")(0));
       shader->onActivate = [=] {
@@ -232,9 +232,9 @@ void Presentation::loadShaders() {
     }
   }
 
-  nall::group<RadioItem&> group;
+  nall::group<RadioItem> group;
   group.append(shaderNone);
   group.append(shaderBlur);
-  for(auto &shader : shaderList) group.append(*shader);
+  for(auto& shader : shaderList) group.append(*shader);
   RadioItem::group(group);
 }

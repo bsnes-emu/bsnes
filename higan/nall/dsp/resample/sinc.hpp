@@ -6,11 +6,11 @@ struct ResampleSinc : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  inline ResampleSinc(DSP &dsp);
+  inline ResampleSinc(DSP& dsp);
 
 private:
   inline void remakeSinc();
-  SincResample *sinc_resampler[8];
+  SincResample* sinc_resampler[8];
 };
 
 void ResampleSinc::setFrequency() {
@@ -38,7 +38,7 @@ void ResampleSinc::sample() {
   dsp.buffer.rdoffset++;
 }
 
-ResampleSinc::ResampleSinc(DSP &dsp) : Resampler(dsp) {
+ResampleSinc::ResampleSinc(DSP& dsp) : Resampler(dsp) {
   for(unsigned n = 0; n < 8; n++) sinc_resampler[n] = nullptr;
 }
 

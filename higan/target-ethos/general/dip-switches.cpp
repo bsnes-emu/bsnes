@@ -1,4 +1,4 @@
-DipSwitches *dipSwitches = nullptr;
+DipSwitches* dipSwitches = nullptr;
 
 DipSwitch::DipSwitch() {
   append(name, {100, 0}, 5);
@@ -11,7 +11,7 @@ DipSwitches::DipSwitches() {
   accept.setText("Accept");
 
   append(layout);
-  for(auto &dipItem : dip) layout.append(dipItem, {~0, 0}, 5);
+  for(auto& dipItem : dip) layout.append(dipItem, {~0, 0}, 5);
   layout.append(controlLayout, {~0, 0});
     controlLayout.append(spacer, {~0, 0});
     controlLayout.append(accept, {80, 0});
@@ -24,8 +24,8 @@ DipSwitches::DipSwitches() {
   };
 }
 
-unsigned DipSwitches::run(const Markup::Node &node) {
-  for(auto &dipItem : dip) {
+unsigned DipSwitches::run(const Markup::Node& node) {
+  for(auto& dipItem : dip) {
     dipItem.name.setEnabled(false);
     dipItem.name.setText("(empty)");
     dipItem.value.setEnabled(false);
@@ -34,12 +34,12 @@ unsigned DipSwitches::run(const Markup::Node &node) {
   }
 
   unsigned index = 0;
-  for(auto &setting : node) {
+  for(auto& setting : node) {
     if(setting.name != "setting") continue;
     dip[index].name.setEnabled();
     dip[index].name.setText(setting["name"].data);
     dip[index].value.setEnabled();
-    for(auto &option : setting) {
+    for(auto& option : setting) {
       if(option.name != "option") continue;
       dip[index].value.append(option["name"].data);
       dip[index].values.append(fixedpoint::parse(option["value"].data));
@@ -55,7 +55,7 @@ unsigned DipSwitches::run(const Markup::Node &node) {
   setModal();
 
   unsigned result = 0;
-  for(auto &dipItem : dip) {
+  for(auto& dipItem : dip) {
     if(dipItem.value.enabled() == false) continue;
     result |= dipItem.values[dipItem.value.selection()];
   }

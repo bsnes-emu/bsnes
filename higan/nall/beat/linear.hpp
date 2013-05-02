@@ -10,49 +10,49 @@
 namespace nall {
 
 struct bpslinear {
-  inline void source(const uint8_t *data, unsigned size);
-  inline void target(const uint8_t *data, unsigned size);
+  inline void source(const uint8_t* data, unsigned size);
+  inline void target(const uint8_t* data, unsigned size);
 
-  inline bool source(const string &filename);
-  inline bool target(const string &filename);
-  inline bool create(const string &filename, const string &metadata = "");
+  inline bool source(const string& filename);
+  inline bool target(const string& filename);
+  inline bool create(const string& filename, const string& metadata = "");
 
 protected:
   enum : unsigned { SourceRead, TargetRead, SourceCopy, TargetCopy };
   enum : unsigned { Granularity = 1 };
 
   filemap sourceFile;
-  const uint8_t *sourceData;
+  const uint8_t* sourceData;
   unsigned sourceSize;
 
   filemap targetFile;
-  const uint8_t *targetData;
+  const uint8_t* targetData;
   unsigned targetSize;
 };
 
-void bpslinear::source(const uint8_t *data, unsigned size) {
+void bpslinear::source(const uint8_t* data, unsigned size) {
   sourceData = data;
   sourceSize = size;
 }
 
-void bpslinear::target(const uint8_t *data, unsigned size) {
+void bpslinear::target(const uint8_t* data, unsigned size) {
   targetData = data;
   targetSize = size;
 }
 
-bool bpslinear::source(const string &filename) {
+bool bpslinear::source(const string& filename) {
   if(sourceFile.open(filename, filemap::mode::read) == false) return false;
   source(sourceFile.data(), sourceFile.size());
   return true;
 }
 
-bool bpslinear::target(const string &filename) {
+bool bpslinear::target(const string& filename) {
   if(targetFile.open(filename, filemap::mode::read) == false) return false;
   target(targetFile.data(), targetFile.size());
   return true;
 }
 
-bool bpslinear::create(const string &filename, const string &metadata) {
+bool bpslinear::create(const string& filename, const string& metadata) {
   file modifyFile;
   if(modifyFile.open(filename, file::mode::write) == false) return false;
 

@@ -13,12 +13,12 @@ namespace nall {
 #define RelNear 1
 
 struct detour {
-  static bool insert(const string &moduleName, const string &functionName, void *&source, void *target);
-  static bool remove(const string &moduleName, const string &functionName, void *&source);
+  static bool insert(const string& moduleName, const string& functionName, void*& source, void* target);
+  static bool remove(const string& moduleName, const string& functionName, void*& source);
 
 protected:
-  static unsigned length(const uint8_t *function);
-  static unsigned mirror(uint8_t *target, const uint8_t *source);
+  static unsigned length(const uint8_t* function);
+  static unsigned mirror(uint8_t* target, const uint8_t* source);
 
   struct opcode {
     uint16_t prefix;
@@ -62,11 +62,11 @@ detour::opcode detour::opcodes[] = {
   { 0xeb, 2, RelNear,   0xe9 },  //jmp near     -> jmp far
 };
 
-bool detour::insert(const string &moduleName, const string &functionName, void *&source, void *target) {
+bool detour::insert(const string& moduleName, const string& functionName, void*& source, void* target) {
   HMODULE module = GetModuleHandleW(utf16_t(moduleName));
   if(!module) return false;
 
-  uint8_t *sourceData = (uint8_t*)GetProcAddress(module, functionName);
+  uint8_t* sourceData = (uint8_t*)GetProcAddress(module, functionName);
   if(!sourceData) return false;
 
   unsigned sourceLength = detour::length(sourceData);
@@ -81,7 +81,7 @@ bool detour::insert(const string &moduleName, const string &functionName, void *
     return false;
   }
 
-  uint8_t *mirrorData = new uint8_t[512]();
+  uint8_t* mirrorData = new uint8_t[512]();
   detour::mirror(mirrorData, sourceData);
 
   DWORD privileges;
@@ -99,14 +99,14 @@ bool detour::insert(const string &moduleName, const string &functionName, void *
   return true;
 }
 
-bool detour::remove(const string &moduleName, const string &functionName, void *&source) {
+bool detour::remove(const string& moduleName, const string& functionName, void*& source) {
   HMODULE module = GetModuleHandleW(utf16_t(moduleName));
   if(!module) return false;
 
-  uint8_t *sourceData = (uint8_t*)GetProcAddress(module, functionName);
+  uint8_t* sourceData = (uint8_t*)GetProcAddress(module, functionName);
   if(!sourceData) return false;
 
-  uint8_t *mirrorData = (uint8_t*)source;
+  uint8_t* mirrorData = (uint8_t*)source;
   if(mirrorData == sourceData) return false;  //hook was never installed
 
   unsigned length = detour::length(256 + mirrorData);
@@ -122,7 +122,7 @@ bool detour::remove(const string &moduleName, const string &functionName, void *
   return true;
 }
 
-unsigned detour::length(const uint8_t *function) {
+unsigned detour::length(const uint8_t* function) {
   unsigned length = 0;
   while(length < 5) {
     detour::opcode *opcode = 0;
@@ -138,7 +138,7 @@ unsigned detour::length(const uint8_t *function) {
   return length;
 }
 
-unsigned detour::mirror(uint8_t *target, const uint8_t *source) {
+unsigned detour::mirror(uint8_t* target, const uint8_t* source) {
   const uint8_t *entryPoint = source;
   for(unsigned n = 0; n < 256; n++) target[256 + n] = source[n];
 

@@ -18,20 +18,20 @@ string pFont::monospace(unsigned size, string style) {
   return {"Menlo, ", size, ", ", style};
 }
 
-Size pFont::size(const string &font, const string &text) {
+Size pFont::size(const string& font, const string& text) {
   @autoreleasepool {
-    if(NSFont *nsFont = cocoaFont(font)) {
+    if(NSFont* nsFont = cocoaFont(font)) {
       return size(nsFont, text);
     }
   }
   return {0, 0};
 }
 
-NSFont* pFont::cocoaFont(const string &description) {
+NSFont* pFont::cocoaFont(const string& description) {
   lstring part = description.split<2>(",");
-  for(auto &item : part) item.strip();
+  for(auto& item : part) item.strip();
 
-  NSString *family = @"Lucida Grande";
+  NSString* family = @"Lucida Grande";
   NSFontTraitMask traits = 0;
   CGFloat size = 12;
 
@@ -47,10 +47,10 @@ NSFont* pFont::cocoaFont(const string &description) {
   return [[NSFontManager sharedFontManager] fontWithFamily:family traits:traits weight:5 size:size];
 }
 
-Size pFont::size(NSFont *font, const string &text) {
+Size pFont::size(NSFont* font, const string& text) {
   @autoreleasepool {
-    NSString *cocoaText = [NSString stringWithUTF8String:text];
-    NSDictionary *fontAttributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
+    NSString* cocoaText = [NSString stringWithUTF8String:text];
+    NSDictionary* fontAttributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];
     NSSize size = [cocoaText sizeWithAttributes:fontAttributes];
     return {size.width, size.height};
   }

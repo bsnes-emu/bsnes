@@ -8,16 +8,16 @@ namespace ruby {
 class pAudioALSA {
 public:
   struct {
-    snd_pcm_t *handle;
+    snd_pcm_t* handle;
     snd_pcm_format_t format;
     snd_pcm_uframes_t buffer_size;
     snd_pcm_uframes_t period_size;
     int channels;
-    const char *name;
+    const char* name;
   } device;
 
   struct {
-    uint32_t *data;
+    uint32_t* data;
     unsigned length;
   } buffer;
 
@@ -100,7 +100,7 @@ public:
     }
     #endif
 
-    uint32_t *buffer_ptr = buffer.data;
+    uint32_t* buffer_ptr = buffer.data;
     int i = 4;
 
     while((buffer.length > 0) && i--) {
@@ -148,8 +148,8 @@ public:
     }
     #endif
 
-    snd_pcm_hw_params_t *hwparams;
-    snd_pcm_sw_params_t *swparams;
+    snd_pcm_hw_params_t* hwparams;
+    snd_pcm_sw_params_t* swparams;
     unsigned rate = settings.frequency;
     unsigned buffer_time = settings.latency * 1000;
     unsigned period_time = settings.latency * 1000 / 4;

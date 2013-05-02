@@ -10,7 +10,7 @@ void pTextEdit::setEditable(bool editable) {
   SendMessage(hwnd, EM_SETREADONLY, editable == false, (LPARAM)0);
 }
 
-void pTextEdit::setText(const string &text) {
+void pTextEdit::setText(const string& text) {
   locked = true;
   string output = text;
   output.replace("\r", "");

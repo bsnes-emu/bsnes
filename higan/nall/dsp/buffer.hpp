@@ -1,7 +1,7 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct Buffer {
-  double **sample = nullptr;
+  double** sample = nullptr;
   uint16_t rdoffset = 0;
   uint16_t wroffset = 0;
   unsigned channels = 0;

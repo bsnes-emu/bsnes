@@ -4,7 +4,7 @@ struct ResampleCosine : Resampler {
   inline void setFrequency();
   inline void clear();
   inline void sample();
-  ResampleCosine(DSP &dsp) : Resampler(dsp) {}
+  ResampleCosine(DSP& dsp) : Resampler(dsp) {}
 
   real fraction;
   real step;

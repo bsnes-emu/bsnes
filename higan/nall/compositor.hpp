@@ -26,7 +26,7 @@ struct compositor {
 //Metacity
 
 bool compositor::enabled_metacity() {
-  FILE *fp = popen("gconftool-2 --get /apps/metacity/general/compositing_manager", "r");
+  FILE* fp = popen("gconftool-2 --get /apps/metacity/general/compositing_manager", "r");
   if(!fp) return false;
 
   char buffer[512];
@@ -37,7 +37,7 @@ bool compositor::enabled_metacity() {
 }
 
 bool compositor::enable_metacity(bool status) {
-  FILE *fp;
+  FILE* fp;
   if(status) {
     fp = popen("gconftool-2 --set --type bool /apps/metacity/general/compositing_manager true", "r");
   } else {
@@ -51,7 +51,7 @@ bool compositor::enable_metacity(bool status) {
 //Xfwm4
 
 bool compositor::enabled_xfwm4() {
-  FILE *fp = popen("xfconf-query -c xfwm4 -p '/general/use_compositing'", "r");
+  FILE* fp = popen("xfconf-query -c xfwm4 -p '/general/use_compositing'", "r");
   if(!fp) return false;
 
   char buffer[512];
@@ -62,7 +62,7 @@ bool compositor::enabled_xfwm4() {
 }
 
 bool compositor::enable_xfwm4(bool status) {
-  FILE *fp;
+  FILE* fp;
   if(status) {
     fp = popen("xfconf-query -c xfwm4 -p '/general/use_compositing' -t 'bool' -s 'true'", "r");
   } else {
@@ -78,7 +78,7 @@ bool compositor::enable_xfwm4(bool status) {
 compositor::Compositor compositor::detect() {
   Compositor result = Compositor::Unknown;
 
-  FILE *fp;
+  FILE* fp;
   char buffer[512];
 
   fp = popen("pidof metacity", "r");

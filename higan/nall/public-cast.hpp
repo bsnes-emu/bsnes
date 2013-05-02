@@ -14,19 +14,21 @@
 //Class::Reference may be a function, object or variable
 
 namespace nall {
-  template<typename T, typename T::type... P> struct public_cast;
 
-  template<typename T> struct public_cast<T> {
-    static typename T::type value;
-  };
+template<typename T, typename T::type... P> struct public_cast;
 
-  template<typename T> typename T::type public_cast<T>::value;
+template<typename T> struct public_cast<T> {
+  static typename T::type value;
+};
 
-  template<typename T, typename T::type P> struct public_cast<T, P> {
-    static typename T::type value;
-  };
+template<typename T> typename T::type public_cast<T>::value;
 
-  template<typename T, typename T::type P> typename T::type public_cast<T, P>::value = public_cast<T>::value = P;
+template<typename T, typename T::type P> struct public_cast<T, P> {
+  static typename T::type value;
+};
+
+template<typename T, typename T::type P> typename T::type public_cast<T, P>::value = public_cast<T>::value = P;
+
 }
 
 #endif

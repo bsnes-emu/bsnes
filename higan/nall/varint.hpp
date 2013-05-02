@@ -5,93 +5,95 @@
 #include <nall/traits.hpp>
 
 namespace nall {
-  template<unsigned bits> struct uint_t {
-  private:
-    typedef typename type_if<bits <= 8 * sizeof(unsigned), unsigned, uintmax_t>::type type_t;
-    type_t data;
 
-  public:
-    inline operator type_t() const { return data; }
-    inline type_t operator ++(int) { type_t r = data; data = uclip<bits>(data + 1); return r; }
-    inline type_t operator --(int) { type_t r = data; data = uclip<bits>(data - 1); return r; }
-    inline type_t operator ++() { return data = uclip<bits>(data + 1); }
-    inline type_t operator --() { return data = uclip<bits>(data - 1); }
-    inline type_t operator  =(const type_t i) { return data = uclip<bits>(i); }
-    inline type_t operator |=(const type_t i) { return data = uclip<bits>(data  | i); }
-    inline type_t operator ^=(const type_t i) { return data = uclip<bits>(data  ^ i); }
-    inline type_t operator &=(const type_t i) { return data = uclip<bits>(data  & i); }
-    inline type_t operator<<=(const type_t i) { return data = uclip<bits>(data << i); }
-    inline type_t operator>>=(const type_t i) { return data = uclip<bits>(data >> i); }
-    inline type_t operator +=(const type_t i) { return data = uclip<bits>(data  + i); }
-    inline type_t operator -=(const type_t i) { return data = uclip<bits>(data  - i); }
-    inline type_t operator *=(const type_t i) { return data = uclip<bits>(data  * i); }
-    inline type_t operator /=(const type_t i) { return data = uclip<bits>(data  / i); }
-    inline type_t operator %=(const type_t i) { return data = uclip<bits>(data  % i); }
+template<unsigned bits> struct uint_t {
+private:
+  typedef typename type_if<bits <= 8 * sizeof(unsigned), unsigned, uintmax_t>::type type_t;
+  type_t data;
 
-    inline uint_t() : data(0) {}
-    inline uint_t(const type_t i) : data(uclip<bits>(i)) {}
+public:
+  inline operator type_t() const { return data; }
+  inline type_t operator ++(int) { type_t r = data; data = uclip<bits>(data + 1); return r; }
+  inline type_t operator --(int) { type_t r = data; data = uclip<bits>(data - 1); return r; }
+  inline type_t operator ++() { return data = uclip<bits>(data + 1); }
+  inline type_t operator --() { return data = uclip<bits>(data - 1); }
+  inline type_t operator  =(const type_t i) { return data = uclip<bits>(i); }
+  inline type_t operator |=(const type_t i) { return data = uclip<bits>(data  | i); }
+  inline type_t operator ^=(const type_t i) { return data = uclip<bits>(data  ^ i); }
+  inline type_t operator &=(const type_t i) { return data = uclip<bits>(data  & i); }
+  inline type_t operator<<=(const type_t i) { return data = uclip<bits>(data << i); }
+  inline type_t operator>>=(const type_t i) { return data = uclip<bits>(data >> i); }
+  inline type_t operator +=(const type_t i) { return data = uclip<bits>(data  + i); }
+  inline type_t operator -=(const type_t i) { return data = uclip<bits>(data  - i); }
+  inline type_t operator *=(const type_t i) { return data = uclip<bits>(data  * i); }
+  inline type_t operator /=(const type_t i) { return data = uclip<bits>(data  / i); }
+  inline type_t operator %=(const type_t i) { return data = uclip<bits>(data  % i); }
 
-    template<unsigned s> inline type_t operator=(const uint_t<s> &i) { return data = uclip<bits>((type_t)i); }
-    template<unsigned s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
-  };
+  inline uint_t() : data(0) {}
+  inline uint_t(const type_t i) : data(uclip<bits>(i)) {}
 
-  template<unsigned bits> struct int_t {
-  private:
-    typedef typename type_if<bits <= 8 * sizeof(signed), signed, intmax_t>::type type_t;
-    type_t data;
+  template<unsigned s> inline type_t operator=(const uint_t<s> &i) { return data = uclip<bits>((type_t)i); }
+  template<unsigned s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
+};
 
-  public:
-    inline operator type_t() const { return data; }
-    inline type_t operator ++(int) { type_t r = data; data = sclip<bits>(data + 1); return r; }
-    inline type_t operator --(int) { type_t r = data; data = sclip<bits>(data - 1); return r; }
-    inline type_t operator ++() { return data = sclip<bits>(data + 1); }
-    inline type_t operator --() { return data = sclip<bits>(data - 1); }
-    inline type_t operator  =(const type_t i) { return data = sclip<bits>(i); }
-    inline type_t operator |=(const type_t i) { return data = sclip<bits>(data  | i); }
-    inline type_t operator ^=(const type_t i) { return data = sclip<bits>(data  ^ i); }
-    inline type_t operator &=(const type_t i) { return data = sclip<bits>(data  & i); }
-    inline type_t operator<<=(const type_t i) { return data = sclip<bits>(data << i); }
-    inline type_t operator>>=(const type_t i) { return data = sclip<bits>(data >> i); }
-    inline type_t operator +=(const type_t i) { return data = sclip<bits>(data  + i); }
-    inline type_t operator -=(const type_t i) { return data = sclip<bits>(data  - i); }
-    inline type_t operator *=(const type_t i) { return data = sclip<bits>(data  * i); }
-    inline type_t operator /=(const type_t i) { return data = sclip<bits>(data  / i); }
-    inline type_t operator %=(const type_t i) { return data = sclip<bits>(data  % i); }
+template<unsigned bits> struct int_t {
+private:
+  typedef typename type_if<bits <= 8 * sizeof(signed), signed, intmax_t>::type type_t;
+  type_t data;
 
-    inline int_t() : data(0) {}
-    inline int_t(const type_t i) : data(sclip<bits>(i)) {}
+public:
+  inline operator type_t() const { return data; }
+  inline type_t operator ++(int) { type_t r = data; data = sclip<bits>(data + 1); return r; }
+  inline type_t operator --(int) { type_t r = data; data = sclip<bits>(data - 1); return r; }
+  inline type_t operator ++() { return data = sclip<bits>(data + 1); }
+  inline type_t operator --() { return data = sclip<bits>(data - 1); }
+  inline type_t operator  =(const type_t i) { return data = sclip<bits>(i); }
+  inline type_t operator |=(const type_t i) { return data = sclip<bits>(data  | i); }
+  inline type_t operator ^=(const type_t i) { return data = sclip<bits>(data  ^ i); }
+  inline type_t operator &=(const type_t i) { return data = sclip<bits>(data  & i); }
+  inline type_t operator<<=(const type_t i) { return data = sclip<bits>(data << i); }
+  inline type_t operator>>=(const type_t i) { return data = sclip<bits>(data >> i); }
+  inline type_t operator +=(const type_t i) { return data = sclip<bits>(data  + i); }
+  inline type_t operator -=(const type_t i) { return data = sclip<bits>(data  - i); }
+  inline type_t operator *=(const type_t i) { return data = sclip<bits>(data  * i); }
+  inline type_t operator /=(const type_t i) { return data = sclip<bits>(data  / i); }
+  inline type_t operator %=(const type_t i) { return data = sclip<bits>(data  % i); }
 
-    template<unsigned s> inline type_t operator=(const int_t<s> &i) { return data = sclip<bits>((type_t)i); }
-    template<unsigned s> inline int_t(const int_t<s> &i) : data(sclip<bits>(i)) {}
-  };
+  inline int_t() : data(0) {}
+  inline int_t(const type_t i) : data(sclip<bits>(i)) {}
 
-  template<typename type_t> struct varuint_t {
-  private:
-    type_t data;
-    type_t mask;
+  template<unsigned s> inline type_t operator=(const int_t<s> &i) { return data = sclip<bits>((type_t)i); }
+  template<unsigned s> inline int_t(const int_t<s> &i) : data(sclip<bits>(i)) {}
+};
 
-  public:
-    inline operator type_t() const { return data; }
-    inline type_t operator ++(int) { type_t r = data; data = (data + 1) & mask; return r; }
-    inline type_t operator --(int) { type_t r = data; data = (data - 1) & mask; return r; }
-    inline type_t operator ++() { return data = (data + 1) & mask; }
-    inline type_t operator --() { return data = (data - 1) & mask; }
-    inline type_t operator  =(const type_t i) { return data = (i) & mask; }
-    inline type_t operator |=(const type_t i) { return data = (data  | i) & mask; }
-    inline type_t operator ^=(const type_t i) { return data = (data  ^ i) & mask; }
-    inline type_t operator &=(const type_t i) { return data = (data  & i) & mask; }
-    inline type_t operator<<=(const type_t i) { return data = (data << i) & mask; }
-    inline type_t operator>>=(const type_t i) { return data = (data >> i) & mask; }
-    inline type_t operator +=(const type_t i) { return data = (data  + i) & mask; }
-    inline type_t operator -=(const type_t i) { return data = (data  - i) & mask; }
-    inline type_t operator *=(const type_t i) { return data = (data  * i) & mask; }
-    inline type_t operator /=(const type_t i) { return data = (data  / i) & mask; }
-    inline type_t operator %=(const type_t i) { return data = (data  % i) & mask; }
+template<typename type_t> struct varuint_t {
+private:
+  type_t data;
+  type_t mask;
 
-    inline void bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
-    inline varuint_t() : data(0ull), mask((type_t)~0ull) {}
-    inline varuint_t(const type_t i) : data(i), mask((type_t)~0ull) {}
-  };
+public:
+  inline operator type_t() const { return data; }
+  inline type_t operator ++(int) { type_t r = data; data = (data + 1) & mask; return r; }
+  inline type_t operator --(int) { type_t r = data; data = (data - 1) & mask; return r; }
+  inline type_t operator ++() { return data = (data + 1) & mask; }
+  inline type_t operator --() { return data = (data - 1) & mask; }
+  inline type_t operator  =(const type_t i) { return data = (i) & mask; }
+  inline type_t operator |=(const type_t i) { return data = (data  | i) & mask; }
+  inline type_t operator ^=(const type_t i) { return data = (data  ^ i) & mask; }
+  inline type_t operator &=(const type_t i) { return data = (data  & i) & mask; }
+  inline type_t operator<<=(const type_t i) { return data = (data << i) & mask; }
+  inline type_t operator>>=(const type_t i) { return data = (data >> i) & mask; }
+  inline type_t operator +=(const type_t i) { return data = (data  + i) & mask; }
+  inline type_t operator -=(const type_t i) { return data = (data  - i) & mask; }
+  inline type_t operator *=(const type_t i) { return data = (data  * i) & mask; }
+  inline type_t operator /=(const type_t i) { return data = (data  / i) & mask; }
+  inline type_t operator %=(const type_t i) { return data = (data  % i) & mask; }
+
+  inline void bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
+  inline varuint_t() : data(0ull), mask((type_t)~0ull) {}
+  inline varuint_t(const type_t i) : data(i), mask((type_t)~0ull) {}
+};
+
 }
 
 //typedefs

@@ -18,17 +18,17 @@ string pFont::monospace(unsigned size, string style) {
   return {"Lucida Console, ", size, ", ", style};
 }
 
-Size pFont::size(const string &font, const string &text) {
+Size pFont::size(const string& font, const string& text) {
   HFONT hfont = pFont::create(font);
   Size size = pFont::size(hfont, text);
   pFont::free(hfont);
   return size;
 }
 
-HFONT pFont::create(const string &description) {
+HFONT pFont::create(const string& description) {
   lstring part;
   part.split(",", description);
-  for(auto &item : part) item.trim(" ");
+  for(auto& item : part) item.trim(" ");
 
   string family = "Sans";
   unsigned size = 8u;
@@ -51,7 +51,7 @@ void pFont::free(HFONT hfont) {
   DeleteObject(hfont);
 }
 
-Size pFont::size(HFONT hfont, const string &text_) {
+Size pFont::size(HFONT hfont, const string& text_) {
   //temporary fix: empty text string returns height of zero; bad for eg Button height
   string text = (text_ == "" ? " " : text_);
 

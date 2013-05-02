@@ -35,7 +35,7 @@ Size pButton::minimumSize() {
   return {size.width + 20, size.height + 10};
 }
 
-void pButton::setImage(const image &image, Orientation orientation) {
+void pButton::setImage(const image& image, Orientation orientation) {
   nall::image nallImage = image;
   nallImage.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
 
@@ -69,7 +69,7 @@ void pButton::setImage(const image &image, Orientation orientation) {
   setText(button.state.text);  //update text to display nicely with image (or lack thereof)
 }
 
-void pButton::setText(const string &text) {
+void pButton::setText(const string& text) {
   if(text.empty()) {
     //bitmaps will not show up if text is empty
     SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) |  BS_BITMAP);

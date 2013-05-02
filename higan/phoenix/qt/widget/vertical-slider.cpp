@@ -31,7 +31,7 @@ void pVerticalSlider::constructor() {
 
 void pVerticalSlider::destructor() {
   delete qtSlider;
-  qtWidget = qtSlider = 0;
+  qtWidget = qtSlider = nullptr;
 }
 
 void pVerticalSlider::orphan() {

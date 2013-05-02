@@ -1,19 +1,19 @@
 namespace phoenix {
 
 static LRESULT CALLBACK Viewport_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Object *object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
   if(!dynamic_cast<Viewport*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Viewport &viewport = (Viewport&)*object;
+  Viewport& viewport = (Viewport&)*object;
 
   if(msg == WM_GETDLGCODE) {
     return DLGC_STATIC | DLGC_WANTCHARS;
   }
 
   if(msg == WM_MOUSEMOVE) {
-    TRACKMOUSEEVENT tracker = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd };
+    TRACKMOUSEEVENT tracker = {sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd};
     TrackMouseEvent(&tracker);
-    if(viewport.onMouseMove) viewport.onMouseMove({ (int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam) });
+    if(viewport.onMouseMove) viewport.onMouseMove({(int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam)});
   }
 
   if(msg == WM_MOUSELEAVE) {

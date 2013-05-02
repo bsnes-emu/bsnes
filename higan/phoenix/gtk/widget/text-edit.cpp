@@ -1,6 +1,6 @@
 namespace phoenix {
 
-static void TextEdit_change(TextEdit *self) {
+static void TextEdit_change(TextEdit* self) {
   self->state.text = self->text();
   if(self->p.locked == false && self->onChange) self->onChange();
 }
@@ -10,7 +10,7 @@ bool pTextEdit::focused() {
 }
 
 void pTextEdit::setCursorPosition(unsigned position) {
-  GtkTextMark *mark = gtk_text_buffer_get_mark(textBuffer, "insert");
+  GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
   GtkTextIter iter;
   gtk_text_buffer_get_end_iter(textBuffer, &iter);
   gtk_text_iter_set_offset(&iter, min(position, gtk_text_iter_get_offset(&iter)));
@@ -22,7 +22,7 @@ void pTextEdit::setEditable(bool editable) {
   gtk_text_view_set_editable(GTK_TEXT_VIEW(subWidget), editable);
 }
 
-void pTextEdit::setText(const string &text) {
+void pTextEdit::setText(const string& text) {
   locked = true;
   gtk_text_buffer_set_text(textBuffer, text, -1);
   locked = false;
@@ -39,7 +39,7 @@ string pTextEdit::text() {
   GtkTextIter start, end;
   gtk_text_buffer_get_start_iter(textBuffer, &start);
   gtk_text_buffer_get_end_iter(textBuffer, &end);
-  char *temp = gtk_text_buffer_get_text(textBuffer, &start, &end, true);
+  char* temp = gtk_text_buffer_get_text(textBuffer, &start, &end, true);
   string text = temp;
   g_free(temp);
   return text;

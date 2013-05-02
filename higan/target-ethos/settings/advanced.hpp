@@ -20,4 +20,4 @@ struct AdvancedSettings : SettingsLayout {
   AdvancedSettings();
 };
 
-extern AdvancedSettings *advancedSettings;
+extern AdvancedSettings* advancedSettings;

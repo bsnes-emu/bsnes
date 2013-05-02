@@ -28,7 +28,7 @@ public:
   bool unacquire() { return false; }
   bool acquired() { return false; }
 
-  bool poll(int16_t *table) {
+  bool poll(int16_t* table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
     x_poll(display, table);
     return true;

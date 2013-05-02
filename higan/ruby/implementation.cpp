@@ -37,7 +37,7 @@ using namespace nall;
     any get(const string& name) { return p.get(name); } \
     bool set(const string& name, const any& value) { return p.set(name, value); } \
     \
-    bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) { return p.lock(data, pitch, width, height); } \
+    bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) { return p.lock(data, pitch, width, height); } \
     void unlock() { p.unlock(); } \
     \
     void clear() { p.clear(); } \
@@ -49,7 +49,7 @@ using namespace nall;
     ~Video##Name() { delete &p; } \
   \
   private: \
-    pVideo##Name &p; \
+    pVideo##Name& p; \
   };
 
 #ifdef VIDEO_CGL
@@ -114,7 +114,7 @@ using namespace nall;
     ~Audio##Name() { delete &p; } \
   \
   private: \
-    pAudio##Name &p; \
+    pAudio##Name& p; \
   };
 
 #ifdef AUDIO_ALSA
@@ -162,7 +162,7 @@ using namespace nall;
     bool unacquire() { return p.unacquire(); } \
     bool acquired() { return p.acquired(); } \
     \
-    bool poll(int16_t *table) { return p.poll(table); } \
+    bool poll(int16_t* table) { return p.poll(table); } \
     bool init() { return p.init(); } \
     void term() { p.term(); } \
     \
@@ -170,7 +170,7 @@ using namespace nall;
     ~Input##Name() { delete &p; } \
   \
   private: \
-    pInput##Name &p; \
+    pInput##Name& p; \
   };
 
 #ifdef INPUT_DIRECTINPUT

@@ -2,7 +2,7 @@
 
 namespace nall {
 
-template<signed precision, char padchar> string format(const string &value) {
+template<signed precision, char padchar> string format(const string& value) {
   if(precision == 0) return value;
 
   bool padright = precision >= 0;

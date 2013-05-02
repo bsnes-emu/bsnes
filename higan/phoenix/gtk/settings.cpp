@@ -1,17 +1,16 @@
 namespace phoenix {
 
-static Settings *settings = nullptr;
+static Settings* settings = nullptr;
 
 void Settings::load() {
-  string path = {userpath(), ".config/phoenix/gtk.bml"};
-  Configuration::Document::load(path);
+  string path = {userpath(), ".config/phoenix/"};
+  Configuration::Document::load({path, "gtk.bml"});
 }
 
 void Settings::save() {
   string path = {userpath(), ".config/phoenix/"};
   directory::create(path, 0755);
-  path.append("gtk.bml");
-  Configuration::Document::save(path);
+  Configuration::Document::save({path, "gtk.bml"});
 }
 
 Settings::Settings() {

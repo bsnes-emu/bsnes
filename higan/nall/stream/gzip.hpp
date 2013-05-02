@@ -9,7 +9,7 @@ struct gzipstream : memorystream {
   using stream::read;
   using stream::write;
 
-  gzipstream(const stream &stream) {
+  gzipstream(const stream& stream) {
     unsigned size = stream.size();
     uint8_t *data = new uint8_t[size];
     stream.read(data, size);

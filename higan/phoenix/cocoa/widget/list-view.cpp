@@ -80,9 +80,9 @@
   [content setUsesAlternatingRowBackgroundColors:headers.size() >= 2];
 
   for(unsigned column = 0; column < headers.size(); column++) {
-    NSTableColumn *tableColumn = [[NSTableColumn alloc] initWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
-    NSTableHeaderCell *headerCell = [[NSTableHeaderCell alloc] initTextCell:[NSString stringWithUTF8String:headers(column)]];
-    CocoaListViewCell *dataCell = [[CocoaListViewCell alloc] initTextCell:@""];
+    NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
+    NSTableHeaderCell* headerCell = [[NSTableHeaderCell alloc] initTextCell:[NSString stringWithUTF8String:headers(column)]];
+    CocoaListViewCell* dataCell = [[CocoaListViewCell alloc] initTextCell:@""];
 
     [dataCell setEditable:NO];
 
@@ -107,8 +107,8 @@
   NSInteger column = [[tableColumn identifier] integerValue];
   unsigned height = [table rowHeight];
 
-  NSString *text = [NSString stringWithUTF8String:listView->state.text(row)(column)];
-  NSImage *image = NSMakeImage(listView->state.image(row)(column), height, height);
+  NSString* text = [NSString stringWithUTF8String:listView->state.text(row)(column)];
+  NSImage* image = NSMakeImage(listView->state.image(row)(column), height, height);
 
   if(image) return @{ @"text":text, @"image":image };
   return @{ @"text":text };
@@ -173,12 +173,12 @@
 }
 
 -(void) drawWithFrame:(NSRect)frame inView:(NSView*)view {
-  NSString *text = [[self objectValue] objectForKey:@"text"];
-  NSImage *image = [[self objectValue] objectForKey:@"image"];
+  NSString* text = [[self objectValue] objectForKey:@"text"];
+  NSImage* image = [[self objectValue] objectForKey:@"image"];
   unsigned textDisplacement = 0;
 
   if(image) {
-    NSGraphicsContext *context = [NSGraphicsContext currentContext];
+    NSGraphicsContext* context = [NSGraphicsContext currentContext];
     [context saveGraphicsState];
 
     NSRect targetRect = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.height, frame.size.height);
@@ -194,7 +194,7 @@
     frame.size.width - textDisplacement, frame.size.height
   );
 
-  NSColor *textColor = [self isHighlighted]
+  NSColor* textColor = [self isHighlighted]
   ? [NSColor alternateSelectedControlTextColor]
   : [NSColor textColor];
 
@@ -208,7 +208,7 @@
 
 namespace phoenix {
 
-void pListView::append(const lstring &text) {
+void pListView::append(const lstring& text) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
@@ -217,13 +217,13 @@ void pListView::append(const lstring &text) {
 void pListView::autoSizeColumns() {
   @autoreleasepool {
     if(listView.state.checkable) {
-      NSTableColumn *tableColumn = [[cocoaView content] tableColumnWithIdentifier:@"check"];
+      NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:@"check"];
       [tableColumn setWidth:20.0];
     }
 
     unsigned height = [[cocoaView content] rowHeight];
     for(unsigned column = 0; column < max(1u, listView.state.headerText.size()); column++) {
-      NSTableColumn *tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
+      NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
       unsigned minimumWidth = pFont::size([[tableColumn headerCell] font], listView.state.headerText(column)).width + 4;
       for(unsigned row = 0; row < listView.state.text.size(); row++) {
         unsigned width = pFont::size([cocoaView font], listView.state.text(row)(column)).width + 2;
@@ -241,7 +241,7 @@ bool pListView::checked(unsigned row) {
   return listView.state.checked(row);
 }
 
-void pListView::modify(unsigned row, const lstring &text) {
+void pListView::modify(unsigned row, const lstring& text) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
@@ -285,13 +285,13 @@ void pListView::setChecked(unsigned row, bool checked) {
   }
 }
 
-void pListView::setFont(const string &font) {
+void pListView::setFont(const string& font) {
   @autoreleasepool {
     [cocoaView setFont:pFont::cocoaFont(font)];
   }
 }
 
-void pListView::setHeaderText(const lstring &text) {
+void pListView::setHeaderText(const lstring& text) {
   @autoreleasepool {
     [cocoaView reloadColumns];
   }
@@ -307,7 +307,7 @@ void pListView::setHeaderVisible(bool visible) {
   }
 }
 
-void pListView::setImage(unsigned row, unsigned column, const image &image) {
+void pListView::setImage(unsigned row, unsigned column, const image& image) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }

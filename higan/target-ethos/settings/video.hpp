@@ -20,4 +20,4 @@ struct VideoSettings : SettingsLayout {
   VideoSettings();
 };
 
-extern VideoSettings *videoSettings;
+extern VideoSettings* videoSettings;

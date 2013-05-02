@@ -2,9 +2,8 @@
 
 namespace ruby {
 
-class pVideoWGL : public OpenGL {
-public:
-  BOOL (APIENTRY *glSwapInterval)(int);
+struct pVideoWGL : OpenGL {
+  BOOL (APIENTRY* glSwapInterval)(int);
 
   HDC display;
   HGLRC wglcontext;
@@ -66,7 +65,7 @@ public:
     return false;
   }
 
-  bool lock(uint32_t *&data, unsigned &pitch, unsigned width, unsigned height) {
+  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }

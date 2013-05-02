@@ -9,11 +9,11 @@
 namespace nall {
 
 struct bmp {
-  inline static bool read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height);
-  inline static bool write(const string &filename, const uint32_t *data, unsigned width, unsigned height, unsigned pitch, bool alpha = false);
+  inline static bool read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height);
+  inline static bool write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha = false);
 };
 
-bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigned &height) {
+bool bmp::read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height) {
   file fp;
   if(fp.open(filename, file::mode::read) == false) return false;
   if(fp.size() < 0x36) return false;
@@ -43,7 +43,7 @@ bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigne
   while(alignedWidth % 4) alignedWidth++, paddingLength++;
 
   for(unsigned y = 0; y < height; y++) {
-    uint32_t *p = noFlip ? data + y * width : data + (height - 1 - y) * width;
+    uint32_t* p = noFlip ? data + y * width : data + (height - 1 - y) * width;
     for(unsigned x = 0; x < width; x++, p++) {
       *p = fp.readl(bytesPerPixel);
       if(bytesPerPixel == 3) *p |= 255 << 24;
@@ -55,7 +55,7 @@ bool bmp::read(const string &filename, uint32_t *&data, unsigned &width, unsigne
   return true;
 }
 
-bool bmp::write(const string &filename, const uint32_t *data, unsigned width, unsigned height, unsigned pitch, bool alpha) {
+bool bmp::write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha) {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 
@@ -86,7 +86,7 @@ bool bmp::write(const string &filename, const uint32_t *data, unsigned width, un
   fp.writel(0, 4);             //important color count
 
   for(unsigned y = 0; y < height; y++) {
-    const uint32_t *p = (const uint32_t*)((const uint8_t*)data + y * pitch);
+    const uint32_t* p = (const uint32_t*)((const uint8_t*)data + y * pitch);
     for(unsigned x = 0; x < width; x++) fp.writel(*p++, bytesPerPixel);
     if(paddingLength) fp.writel(0, paddingLength);
   }

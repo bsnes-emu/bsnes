@@ -1,7 +1,7 @@
 @interface CocoaTextEdit : NSScrollView <NSTextViewDelegate> {
 @public
-  phoenix::TextEdit *textEdit;
-  NSTextView *content;
+  phoenix::TextEdit* textEdit;
+  NSTextView* content;
 }
 -(id) initWith:(phoenix::TextEdit&)textEdit;
 -(NSTextView*) content;
@@ -12,17 +12,17 @@
 namespace phoenix {
 
 struct pTextEdit : public pWidget {
-  TextEdit &textEdit;
-  CocoaTextEdit *cocoaTextEdit = nullptr;
+  TextEdit& textEdit;
+  CocoaTextEdit* cocoaTextEdit = nullptr;
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
-  void setFont(const string &font);
-  void setText(const string &text);
+  void setFont(const string& font);
+  void setText(const string& text);
   void setWordWrap(bool wordWrap);
   string text();
 
-  pTextEdit(TextEdit &textEdit) : pWidget(textEdit), textEdit(textEdit) {}
+  pTextEdit(TextEdit& textEdit) : pWidget(textEdit), textEdit(textEdit) {}
   void constructor();
   void destructor();
 };

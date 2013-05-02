@@ -18,9 +18,9 @@ struct CheatEditor : Window {
   void updateCode();
   void updateDesc();
 
-  bool load(const string &filename);
-  bool save(const string &filename);
-  bool import(const string &code, const string &desc);
+  bool load(const string& filename);
+  bool save(const string& filename);
+  bool import(const string& code, const string& desc);
 
   void update();
   void refresh();
@@ -36,4 +36,4 @@ private:
   Cheat cheat[Codes];
 };
 
-extern CheatEditor *cheatEditor;
+extern CheatEditor* cheatEditor;

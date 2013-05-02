@@ -1,13 +1,13 @@
 namespace phoenix {
 
 struct pCheckItem : public pAction {
-  CheckItem &checkItem;
+  CheckItem& checkItem;
 
   bool checked();
   void setChecked(bool checked);
-  void setText(const string &text);
+  void setText(const string& text);
 
-  pCheckItem(CheckItem &checkItem) : pAction(checkItem), checkItem(checkItem) {}
+  pCheckItem(CheckItem& checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
   void destructor();
 };

@@ -9,17 +9,17 @@ namespace nall {
 
 struct ips {
   inline bool apply();
-  inline void source(const uint8_t *data, unsigned size);
-  inline void modify(const uint8_t *data, unsigned size);
+  inline void source(const uint8_t* data, unsigned size);
+  inline void modify(const uint8_t* data, unsigned size);
   inline ips();
   inline ~ips();
 
-  uint8_t *data;
-  unsigned size;
-  const uint8_t *sourceData;
-  unsigned sourceSize;
-  const uint8_t *modifyData;
-  unsigned modifySize;
+  uint8_t* data = nullptr;
+  unsigned size = 0;
+  const uint8_t* sourceData = nullptr;
+  unsigned sourceSize = 0;
+  const uint8_t* modifyData = nullptr;
+  unsigned modifySize = 0;
 };
 
 bool ips::apply() {
@@ -78,15 +78,15 @@ bool ips::apply() {
   return false;
 }
 
-void ips::source(const uint8_t *data, unsigned size) {
+void ips::source(const uint8_t* data, unsigned size) {
   sourceData = data, sourceSize = size;
 }
 
-void ips::modify(const uint8_t *data, unsigned size) {
+void ips::modify(const uint8_t* data, unsigned size) {
   modifyData = data, modifySize = size;
 }
 
-ips::ips() : data(nullptr), sourceData(nullptr), modifyData(nullptr) {
+ips::ips() {
 }
 
 ips::~ips() {

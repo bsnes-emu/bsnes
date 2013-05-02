@@ -12,11 +12,11 @@ static int CALLBACK BrowserWindowCallbackProc(HWND hwnd, UINT msg, LPARAM lparam
   return 0;
 }
 
-static string BrowserWindow_fileDialog(bool save, BrowserWindow::State &state) {
+static string BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) {
   string path = string{path}.replace("/", "\\");
 
   string filters;
-  for(auto &filter : state.filters) {
+  for(auto& filter : state.filters) {
     lstring part = filter.split("(");
     if(part.size() != 2) continue;
     part[1].rtrim<1>(")");
@@ -30,7 +30,7 @@ static string BrowserWindow_fileDialog(bool save, BrowserWindow::State &state) {
   utf16_t wpath(path);
   utf16_t wtitle(state.title);
 
-  wchar_t *p = wfilters;
+  wchar_t* p = wfilters;
   while(*p != L'\0') {
     if(*p == L'\t') *p = L'\0';
     p++;
@@ -62,7 +62,7 @@ static string BrowserWindow_fileDialog(bool save, BrowserWindow::State &state) {
   return name;
 }
 
-string pBrowserWindow::directory(BrowserWindow::State &state) {
+string pBrowserWindow::directory(BrowserWindow::State& state) {
   wchar_t wname[PATH_MAX + 1] = L"";
 
   BROWSEINFO bi;
@@ -94,11 +94,11 @@ string pBrowserWindow::directory(BrowserWindow::State &state) {
   return name;
 }
 
-string pBrowserWindow::open(BrowserWindow::State &state) {
+string pBrowserWindow::open(BrowserWindow::State& state) {
   return BrowserWindow_fileDialog(0, state);
 }
 
-string pBrowserWindow::save(BrowserWindow::State &state) {
+string pBrowserWindow::save(BrowserWindow::State& state) {
   return BrowserWindow_fileDialog(1, state);
 }
 

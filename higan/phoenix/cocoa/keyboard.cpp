@@ -7,7 +7,7 @@ bool pKeyboard::pressed(Keyboard::Scancode scancode) {
 vector<bool> pKeyboard::state() {
   vector<bool> output;
   output.resize((unsigned)Keyboard::Scancode::Limit);
-  for(auto &n : output) n = false;
+  for(auto& n : output) n = false;
   return output;
 }
 

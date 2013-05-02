@@ -44,7 +44,7 @@ public:
     return false;
   }
 
-  bool poll(int16_t *table) {
+  bool poll(int16_t* table) {
     memset(table, 0, Scancode::Limit * sizeof(int16_t));
 
     //========
@@ -251,7 +251,7 @@ public:
     return true;
   }
 
-  bool init_joypad(const DIDEVICEINSTANCE *instance) {
+  bool init_joypad(const DIDEVICEINSTANCE* instance) {
     unsigned n;
     for(n = 0; n < Joypad::Count; n++) { if(!device.gamepad[n]) break; }
     if(n >= Joypad::Count) return DIENUM_STOP;
@@ -267,7 +267,7 @@ public:
     return DIENUM_CONTINUE;
   }
 
-  bool init_axis(const DIDEVICEOBJECTINSTANCE *instance) {
+  bool init_axis(const DIDEVICEOBJECTINSTANCE* instance) {
     signed n;
     for(n = Joypad::Count - 1; n >= 0; n--) { if(device.gamepad[n]) break; }
     if(n < 0) return DIENUM_STOP;
@@ -374,11 +374,11 @@ public:
   ~pInputDI() { term(); }
 };
 
-BOOL CALLBACK DI_EnumJoypadsCallback(const DIDEVICEINSTANCE *instance, void *p) {
+BOOL CALLBACK DI_EnumJoypadsCallback(const DIDEVICEINSTANCE* instance, void* p) {
   return ((pInputDI*)p)->init_joypad(instance);
 }
 
-BOOL CALLBACK DI_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE *instance, void *p) {
+BOOL CALLBACK DI_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) {
   return ((pInputDI*)p)->init_axis(instance);
 }
 
