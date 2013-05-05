@@ -37,12 +37,12 @@ void reset() {
   mmc6.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   mmc6.serialize(s);
 }
 
-NES_HKROM(Markup::Node &document) : Board(document), mmc6(*this) {
+NES_HKROM(Markup::Node& document) : Board(document), mmc6(*this) {
 }
 
 };

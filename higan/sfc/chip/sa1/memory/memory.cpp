@@ -234,19 +234,19 @@ uint8 SA1::bitmap_read(unsigned addr) {
     //4bpp
     unsigned shift = addr & 1;
     addr = (addr >> 1) & (bwram.size() - 1);
-    switch(shift) { default:
-      case 0: return (bwram.read(addr) >> 0) & 15;
-      case 1: return (bwram.read(addr) >> 4) & 15;
+    switch(shift) {
+    case 0: return (bwram.read(addr) >> 0) & 15;
+    case 1: return (bwram.read(addr) >> 4) & 15;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
     addr = (addr >> 2) & (bwram.size() - 1);
-    switch(shift) { default:
-      case 0: return (bwram.read(addr) >> 0) & 3;
-      case 1: return (bwram.read(addr) >> 2) & 3;
-      case 2: return (bwram.read(addr) >> 4) & 3;
-      case 3: return (bwram.read(addr) >> 6) & 3;
+    switch(shift) {
+    case 0: return (bwram.read(addr) >> 0) & 3;
+    case 1: return (bwram.read(addr) >> 2) & 3;
+    case 2: return (bwram.read(addr) >> 4) & 3;
+    case 3: return (bwram.read(addr) >> 6) & 3;
     }
   }
 }
@@ -256,19 +256,19 @@ void SA1::bitmap_write(unsigned addr, uint8 data) {
     //4bpp
     unsigned shift = addr & 1;
     addr = (addr >> 1) & (bwram.size() - 1);
-    switch(shift) { default:
-      case 0: data = (bwram.read(addr) & 0xf0) | ((data & 15) << 0); break;
-      case 1: data = (bwram.read(addr) & 0x0f) | ((data & 15) << 4); break;
+    switch(shift) {
+    case 0: data = (bwram.read(addr) & 0xf0) | ((data & 15) << 0); break;
+    case 1: data = (bwram.read(addr) & 0x0f) | ((data & 15) << 4); break;
     }
   } else {
     //2bpp
     unsigned shift = addr & 3;
     addr = (addr >> 2) & (bwram.size() - 1);
-    switch(shift) { default:
-      case 0: data = (bwram.read(addr) & 0xfc) | ((data &  3) << 0); break;
-      case 1: data = (bwram.read(addr) & 0xf3) | ((data &  3) << 2); break;
-      case 2: data = (bwram.read(addr) & 0xcf) | ((data &  3) << 4); break;
-      case 3: data = (bwram.read(addr) & 0x3f) | ((data &  3) << 6); break;
+    switch(shift) {
+    case 0: data = (bwram.read(addr) & 0xfc) | ((data &  3) << 0); break;
+    case 1: data = (bwram.read(addr) & 0xf3) | ((data &  3) << 2); break;
+    case 2: data = (bwram.read(addr) & 0xcf) | ((data &  3) << 4); break;
+    case 3: data = (bwram.read(addr) & 0x3f) | ((data &  3) << 6); break;
     }
   }
 

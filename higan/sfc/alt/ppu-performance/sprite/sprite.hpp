@@ -64,8 +64,8 @@ class Sprite {
   void render();
 
   void serialize(serializer&);
-  Sprite(PPU &self);
+  Sprite(PPU& self);
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

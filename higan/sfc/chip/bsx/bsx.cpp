@@ -28,17 +28,17 @@ void BSXCartridge::reset() {
   mmio_commit();
 }
 
-uint8 BSXCartridge::memory_access(bool write, Memory &memory, unsigned addr, uint8 data) {
+uint8 BSXCartridge::memory_access(bool write, Memory& memory, unsigned addr, uint8 data) {
   if(write == 0) return memory_read(memory, addr);
   memory_write(memory, addr, data);
 }
 
-uint8 BSXCartridge::memory_read(Memory &memory, unsigned addr) {
+uint8 BSXCartridge::memory_read(Memory& memory, unsigned addr) {
   addr = bus.mirror(addr, memory.size());
   return memory.read(addr);
 }
 
-void BSXCartridge::memory_write(Memory &memory, unsigned addr, uint8 data) {
+void BSXCartridge::memory_write(Memory& memory, unsigned addr, uint8 data) {
   addr = bus.mirror(addr, memory.size());
   return memory.write(addr, data);
 }
@@ -83,7 +83,7 @@ uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
   || ((addr & 0x400000) == 0x400000)  //$40-7f|c0-ff:0000-ffff
   ) {
     if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-    Memory &memory = (r01 == 0 ? (Memory&)satellaviewcartridge : (Memory&)psram);
+    Memory& memory = (r01 == 0 ? (Memory&)satellaviewcartridge : (Memory&)psram);
     return memory_access(write, memory, addr & 0x7fffff, data);
   }
 

@@ -29,8 +29,8 @@ struct SharpRTC : Coprocessor {
   uint4 rtc_read(uint4 addr);
   void rtc_write(uint4 addr, uint4 data);
 
-  void load(const uint8 *data);
-  void save(uint8 *data);
+  void load(const uint8* data);
+  void save(uint8* data);
 
   //time.cpp
   static const unsigned daysinmonth[12];

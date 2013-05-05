@@ -80,7 +80,7 @@ void SMP::reset() {
   timer0.stage3_ticks = timer1.stage3_ticks = timer2.stage3_ticks = 0;
 }
 
-void SMP::serialize(serializer &s) {
+void SMP::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(apuram, 64 * 1024);
@@ -139,7 +139,7 @@ void SMP::serialize(serializer &s) {
 
 SMP::SMP() {
   apuram = new uint8[64 * 1024];
-  for(auto &byte : iplrom) byte = 0;
+  for(auto& byte : iplrom) byte = 0;
 }
 
 SMP::~SMP() {

@@ -9,10 +9,10 @@ void APU::Square1::run() {
     period = 4 * (2048 - frequency);
     phase++;
     switch(duty) {
-      case 0: duty_output = (phase == 6); break;  //______-_
-      case 1: duty_output = (phase >= 6); break;  //______--
-      case 2: duty_output = (phase >= 4); break;  //____----
-      case 3: duty_output = (phase <= 5); break;  //------__
+    case 0: duty_output = (phase == 6); break;  //______-_
+    case 1: duty_output = (phase >= 6); break;  //______--
+    case 2: duty_output = (phase >= 4); break;  //____----
+    case 3: duty_output = (phase <= 5); break;  //------__
     }
   }
 
@@ -39,10 +39,6 @@ void APU::Square1::sweep(bool update) {
 }
 
 void APU::Square1::clock_length() {
-//if(counter && length) {
-//  if(--length == 0) enable = false;
-//}
-
   if(counter && enable) {
     if(++length == 0) enable = false;
   }
@@ -74,7 +70,6 @@ void APU::Square1::write(unsigned r, uint8 data) {
 
   if(r == 1) {  //$ff11  NR11
     duty = data >> 6;
-  //length = 64 - (data & 0x3f);
     length = data & 0x3f;
   }
 
@@ -104,7 +99,6 @@ void APU::Square1::write(unsigned r, uint8 data) {
       sweep_enable = sweep_period || sweep_shift;
       sweep_negate = false;
       if(sweep_shift) sweep(0);
-    //if(length == 0) length = 64;
     }
   }
 }
@@ -135,7 +129,7 @@ void APU::Square1::power() {
   volume = 0;
 }
 
-void APU::Square1::serialize(serializer &s) {
+void APU::Square1::serialize(serializer& s) {
   s.integer(enable);
 
   s.integer(sweep_frequency);

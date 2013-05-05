@@ -50,7 +50,7 @@ struct Program {
   string monospaceFont;
 
   bool focused();
-  string path(const string &filename);
+  string path(string filename);
   void main();
   void bootstrap();
   Program(int argc, char** argv);

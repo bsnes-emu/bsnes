@@ -4,8 +4,8 @@ namespace nall {
 
 //limit defaults to zero, which will underflow on first compare; equivalent to no limit
 template<unsigned Limit> char* ltrim(char* str, const char* key) {
+  if(!str || !key || !*key) return str;
   unsigned limit = Limit;
-  if(!key || !*key) return str;
   while(strbegin(str, key)) {
     char* dest = str;
     char* src = str + strlen(key);
@@ -20,8 +20,8 @@ template<unsigned Limit> char* ltrim(char* str, const char* key) {
 }
 
 template<unsigned Limit> char* rtrim(char* str, const char* key) {
+  if(!str || !key || !*key) return str;
   unsigned limit = Limit;
-  if(!key || !*key) return str;
   while(strend(str, key)) {
     str[strlen(str) - strlen(key)] = 0;
     if(--limit == 0) break;
@@ -36,6 +36,8 @@ template<unsigned limit> char* trim(char* str, const char* key, const char* rkey
 
 //remove whitespace characters from both left and right sides of string
 char* strip(char* s) {
+  if(!s) return nullptr;
+
   signed n = 0, p = 0;
   while(s[n]) {
     if(s[n] != ' ' && s[n] != '\t' && s[n] != '\r' && s[n] != '\n') break;
@@ -48,6 +50,7 @@ char* strip(char* s) {
     p--;
   }
   s[++p] = 0;
+
   return s;
 }
 

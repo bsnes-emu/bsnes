@@ -1,5 +1,5 @@
 struct Video {
-  unsigned *palette;
+  unsigned* palette = nullptr;
   void generate_palette();
 
   Video();

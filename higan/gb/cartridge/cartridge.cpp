@@ -118,7 +118,7 @@ uint8 Cartridge::mmio_read(uint16 addr) {
   if(addr == 0xff50) return 0x00;
 
   if(bootrom_enable) {
-    const uint8 *data = nullptr;
+    const uint8* data = nullptr;
     switch(system.revision()) { default:
     case System::Revision::GameBoy: data = system.bootROM.dmg; break;
     case System::Revision::SuperGameBoy: data = system.bootROM.sgb; break;

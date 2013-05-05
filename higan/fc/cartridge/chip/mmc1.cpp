@@ -115,7 +115,7 @@ void reset() {
   prg_bank = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.integer(writedelay);
   s.integer(shiftaddr);
   s.integer(shiftdata);
@@ -129,7 +129,7 @@ void serialize(serializer &s) {
   s.integer(prg_bank);
 }
 
-MMC1(Board &board) : Chip(board) {
+MMC1(Board& board) : Chip(board) {
   revision = Revision::MMC1B2;
 }
 

@@ -74,8 +74,8 @@ struct Background {
   void run_mode7();
 
   void serialize(serializer&);
-  Background(PPU &self, unsigned id);
+  Background(PPU& self, unsigned id);
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

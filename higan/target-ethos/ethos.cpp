@@ -14,7 +14,7 @@ bool Program::focused() {
   return config->input.focus.allow || presentation->focused();
 }
 
-string Program::path(const string& name) {
+string Program::path(string name) {
   string path = {basepath, name};
   if(file::exists(path) || directory::exists(path)) return path;
   path = {userpath, name};

@@ -27,7 +27,7 @@ void chr_write(unsigned addr, uint8 data) {
   return Board::chr_write(vrc6.chr_addr(addr), data);
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   vrc6.serialize(s);
 }
@@ -36,7 +36,7 @@ void main() { vrc6.main(); }
 void power() { vrc6.power(); }
 void reset() { vrc6.reset(); }
 
-KonamiVRC6(Markup::Node &document) : Board(document), vrc6(*this) {
+KonamiVRC6(Markup::Node& document) : Board(document), vrc6(*this) {
 }
 
 };

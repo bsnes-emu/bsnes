@@ -4,7 +4,7 @@ struct CheatCode {
 };
 
 struct Cheat : public vector<CheatCode> {
-  uint8 *override;
+  uint8* override;
 
   bool enabled() const;
   void enable(bool);
@@ -15,7 +15,7 @@ struct Cheat : public vector<CheatCode> {
   Cheat();
   ~Cheat();
 
-  static bool decode(const string&, unsigned&, unsigned&);
+  static bool decode(string, unsigned&, unsigned&);
 
 private:
   bool system_enabled;

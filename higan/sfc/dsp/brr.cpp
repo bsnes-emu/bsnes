@@ -1,6 +1,6 @@
 #ifdef DSP_CPP
 
-void DSP::brr_decode(voice_t &v) {
+void DSP::brr_decode(voice_t& v) {
   //state.t_brr_byte = ram[v.brr_addr + v.brr_offset] cached from previous clock cycle
   int nybbles = (state.t_brr_byte << 8) + smp.apuram[(uint16)(v.brr_addr + v.brr_offset + 1)];
 
@@ -26,29 +26,30 @@ void DSP::brr_decode(voice_t &v) {
     const int p2 = v.buffer[v.buf_pos - 2] >> 1;
 
     switch(filter) {
-      case 0: break; //no filter
+    case 0:
+      break;
 
-      case 1: {
-        //s += p1 * 0.46875
-        s += p1 >> 1;
-        s += (-p1) >> 5;
-      } break;
+    case 1:
+      //s += p1 * 0.46875
+      s += p1 >> 1;
+      s += (-p1) >> 5;
+      break;
 
-      case 2: {
-        //s += p1 * 0.953125 - p2 * 0.46875
-        s += p1;
-        s -= p2;
-        s += p2 >> 4;
-        s += (p1 * -3) >> 6;
-      } break;
+    case 2:
+      //s += p1 * 0.953125 - p2 * 0.46875
+      s += p1;
+      s -= p2;
+      s += p2 >> 4;
+      s += (p1 * -3) >> 6;
+      break;
 
-      case 3: {
-        //s += p1 * 0.8984375 - p2 * 0.40625
-        s += p1;
-        s -= p2;
-        s += (p1 * -13) >> 7;
-        s += (p2 * 3) >> 4;
-      } break;
+    case 3:
+      //s += p1 * 0.8984375 - p2 * 0.40625
+      s += p1;
+      s -= p2;
+      s += (p1 * -13) >> 7;
+      s += (p2 * 3) >> 4;
+      break;
     }
 
     //adjust and write sample

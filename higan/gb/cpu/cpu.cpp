@@ -139,8 +139,8 @@ void CPU::power() {
   bus.mmio[0xff77] = this;  //???
   }
 
-  for(auto &n : wram) n = 0x00;
-  for(auto &n : hram) n = 0x00;
+  for(auto& n : wram) n = 0x00;
+  for(auto& n : hram) n = 0x00;
 
   r[PC] = 0x0000;
   r[SP] = 0x0000;

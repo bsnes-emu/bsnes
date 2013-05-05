@@ -1,6 +1,6 @@
 #ifdef SUPERFX_CPP
 
-void SuperFX::serialize(serializer &s) {
+void SuperFX::serialize(serializer& s) {
   GSU::serialize(s);
   Thread::serialize(s);
 

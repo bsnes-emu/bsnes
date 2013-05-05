@@ -1,6 +1,6 @@
 #ifdef APU_CPP
 
-void APU::serialize(serializer &s) {
+void APU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(mmio_data);

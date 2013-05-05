@@ -29,12 +29,12 @@ void reset() {
   vrc1.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   vrc1.serialize(s);
 }
 
-KonamiVRC1(Markup::Node &document) : Board(document), vrc1(*this) {
+KonamiVRC1(Markup::Node& document) : Board(document), vrc1(*this) {
 }
 
 };

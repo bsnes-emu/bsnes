@@ -168,18 +168,6 @@ template<> struct stringify<const string&> {
   stringify(const string& value) : value(value) {}
 };
 
-template<> struct stringify<cstring> {
-  const char* value;
-  operator const char*() const { return value; }
-  stringify(const cstring& value) : value(value) {}
-};
-
-template<> struct stringify<const cstring&> {
-  const char* value;
-  operator const char*() const { return value; }
-  stringify(const cstring& value) : value(value) {}
-};
-
 #if defined(QSTRING_H)
 
 template<> struct stringify<QString> {

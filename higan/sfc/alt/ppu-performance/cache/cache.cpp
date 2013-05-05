@@ -3,7 +3,7 @@
 uint8* PPU::Cache::tile_2bpp(unsigned tile) {
   if(tilevalid[0][tile] == 0) {
     tilevalid[0][tile] = 1;
-    uint8 *output = (uint8*)tiledata[0] + (tile << 6);
+    uint8* output = (uint8*)tiledata[0] + (tile << 6);
     unsigned offset = tile << 4;
     unsigned y = 8;
     unsigned color, d0, d1;
@@ -32,7 +32,7 @@ uint8* PPU::Cache::tile_2bpp(unsigned tile) {
 uint8* PPU::Cache::tile_4bpp(unsigned tile) {
   if(tilevalid[1][tile] == 0) {
     tilevalid[1][tile] = 1;
-    uint8 *output = (uint8*)tiledata[1] + (tile << 6);
+    uint8* output = (uint8*)tiledata[1] + (tile << 6);
     unsigned offset = tile << 5;
     unsigned y = 8;
     unsigned color, d0, d1, d2, d3;
@@ -65,7 +65,7 @@ uint8* PPU::Cache::tile_4bpp(unsigned tile) {
 uint8* PPU::Cache::tile_8bpp(unsigned tile) {
   if(tilevalid[2][tile] == 0) {
     tilevalid[2][tile] = 1;
-    uint8 *output = (uint8*)tiledata[2] + (tile << 6);
+    uint8* output = (uint8*)tiledata[2] + (tile << 6);
     unsigned offset = tile << 6;
     unsigned y = 8;
     unsigned color, d0, d1, d2, d3, d4, d5, d6, d7;
@@ -111,7 +111,7 @@ uint8* PPU::Cache::tile(unsigned bpp, unsigned tile) {
   }
 }
 
-PPU::Cache::Cache(PPU &self) : self(self) {
+PPU::Cache::Cache(PPU& self) : self(self) {
   tiledata[0] = new uint8[262144]();
   tiledata[1] = new uint8[131072]();
   tiledata[2] = new uint8[ 65536]();

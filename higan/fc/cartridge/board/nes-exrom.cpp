@@ -41,12 +41,12 @@ void reset() {
   mmc5.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   mmc5.serialize(s);
 }
 
-NES_ExROM(Markup::Node &document) : Board(document), mmc5(*this) {
+NES_ExROM(Markup::Node& document) : Board(document), mmc5(*this) {
   revision = Revision::ELROM;
 }
 

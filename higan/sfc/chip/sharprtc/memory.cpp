@@ -35,7 +35,7 @@ void SharpRTC::rtc_write(uint4 addr, uint4 data) {
   }
 }
 
-void SharpRTC::load(const uint8 *data) {
+void SharpRTC::load(const uint8* data) {
   for(unsigned byte = 0; byte < 8; byte++) {
     rtc_write(byte * 2 + 0, data[byte] >> 0);
     rtc_write(byte * 2 + 1, data[byte] >> 4);
@@ -53,7 +53,7 @@ void SharpRTC::load(const uint8 *data) {
   while(diff--) tick_second();
 }
 
-void SharpRTC::save(uint8 *data) {
+void SharpRTC::save(uint8* data) {
   for(unsigned byte = 0; byte < 8; byte++) {
     data[byte]  = rtc_read(byte * 2 + 0) << 0;
     data[byte] |= rtc_read(byte * 2 + 1) << 4;

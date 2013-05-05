@@ -1,6 +1,6 @@
 #ifdef SMP_CPP
 
-void SMP::serialize(serializer &s) {
+void SMP::serialize(serializer& s) {
   SPC700::serialize(s);
   Thread::serialize(s);
 

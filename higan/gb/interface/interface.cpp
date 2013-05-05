@@ -57,7 +57,7 @@ void Interface::load(unsigned id) {
 }
 
 void Interface::save() {
-  for(auto &memory : cartridge.memory) {
+  for(auto& memory : cartridge.memory) {
     interface->saveRequest(memory.id, memory.name);
   }
 }

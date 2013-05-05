@@ -60,7 +60,8 @@ void CPU::reset() {
   status.irq_apu_line = 0;
 
   status.rdy_line = 1;
-  status.rdy_addr = { false, 0x0000 };
+  status.rdy_addr_valid = false;
+  status.rdy_addr_value = 0x0000;
 
   status.oam_dma_pending = false;
   status.oam_dma_page = 0x00;

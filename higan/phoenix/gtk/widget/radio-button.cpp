@@ -36,7 +36,7 @@ void pRadioButton::setGroup(const group<RadioButton>& group) {
   parent().locked = false;
 }
 
-void pRadioButton::setText(const string& text) {
+void pRadioButton::setText(string text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
 }
 

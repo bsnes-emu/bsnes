@@ -55,7 +55,7 @@ void SharpRTC::reset() {
 
 void SharpRTC::sync() {
   time_t systime = time(0);
-  tm *timeinfo = localtime(&systime);
+  tm* timeinfo = localtime(&systime);
 
   second = min(59, timeinfo->tm_sec);
   minute = timeinfo->tm_min;

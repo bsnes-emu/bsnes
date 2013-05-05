@@ -1,26 +1,26 @@
 struct Decomp {
   struct IM {  //input manager
-    Decomp &self;
+    Decomp& self;
     void init(unsigned offset);
     uint8 get_codeword(uint8 code_length);
-    IM(SDD1::Decomp &self) : self(self) {}
+    IM(SDD1::Decomp& self) : self(self) {}
   private:
     unsigned offset;
     unsigned bit_count;
   };
 
   struct GCD {  //golomb-code decoder
-    Decomp &self;
+    Decomp& self;
     static const uint8 run_count[256];
-    void get_run_count(uint8 code_number, uint8 &mps_count, bool &lps_index);
-    GCD(SDD1::Decomp &self) : self(self) {}
+    void get_run_count(uint8 code_number, uint8& mps_count, bool& lps_index);
+    GCD(SDD1::Decomp& self) : self(self) {}
   };
 
   struct BG {  //bits generator
-    Decomp &self;
+    Decomp& self;
     void init();
-    uint8 get_bit(bool &end_of_run);
-    BG(SDD1::Decomp &self, uint8 code_number) : self(self), code_number(code_number) {}
+    uint8 get_bit(bool& end_of_run);
+    BG(SDD1::Decomp& self, uint8 code_number) : self(self), code_number(code_number) {}
   private:
     const uint8 code_number;
     uint8 mps_count;
@@ -28,10 +28,10 @@ struct Decomp {
   };
 
   struct PEM {  //probability estimation module
-    Decomp &self;
+    Decomp& self;
     void init();
     uint8 get_bit(uint8 context);
-    PEM(SDD1::Decomp &self) : self(self) {}
+    PEM(SDD1::Decomp& self) : self(self) {}
   private:
     struct State {
       uint8 code_number;
@@ -46,10 +46,10 @@ struct Decomp {
   };
 
   struct CM {  //context model
-    Decomp &self;
+    Decomp& self;
     void init(unsigned offset);
     uint8 get_bit();
-    CM(SDD1::Decomp &self) : self(self) {}
+    CM(SDD1::Decomp& self) : self(self) {}
   private:
     uint8 bitplanes_info;
     uint8 context_bits_info;
@@ -59,10 +59,10 @@ struct Decomp {
   };
 
   struct OL {  //output logic
-    Decomp &self;
+    Decomp& self;
     void init(unsigned offset);
     uint8 decompress();
-    OL(SDD1::Decomp &self) : self(self) {}
+    OL(SDD1::Decomp& self) : self(self) {}
   private:
     uint8 bitplanes_info;
     uint8 r0, r1, r2;

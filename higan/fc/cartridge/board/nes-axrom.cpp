@@ -38,14 +38,14 @@ void reset() {
   mirror_select = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 
   s.integer(prg_bank);
   s.integer(mirror_select);
 }
 
-NES_AxROM(Markup::Node &document) : Board(document) {
+NES_AxROM(Markup::Node& document) : Board(document) {
 }
 
 };

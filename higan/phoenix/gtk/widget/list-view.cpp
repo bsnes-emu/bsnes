@@ -217,7 +217,7 @@ void pListView::setFocused() {
   gtk_widget_grab_focus(subWidget);
 }
 
-void pListView::setFont(const string& font) {
+void pListView::setFont(string font) {
   pFont::setFont(gtkWidget, font);
   for(auto& cell : column) pFont::setFont(cell.label, font);
 }

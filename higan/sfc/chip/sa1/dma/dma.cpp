@@ -15,33 +15,33 @@ void SA1::dma_normal() {
     if(mmio.sd == DMA::SourceIRAM  && mmio.dd == DMA::DestIRAM ) continue;
 
     switch(mmio.sd) {
-      case DMA::SourceROM: {
-        if((dsa & 0x408000) == 0x008000 || (dsa & 0xc00000) == 0xc00000) {
-          data = bus_read(dsa);
-        }
-      } break;
+    case DMA::SourceROM:
+      if((dsa & 0x408000) == 0x008000 || (dsa & 0xc00000) == 0xc00000) {
+        data = bus_read(dsa);
+      }
+      break;
 
-      case DMA::SourceBWRAM: {
-        if((dsa & 0x40e000) == 0x006000 || (dsa & 0xf00000) == 0x400000) {
-          data = bus_read(dsa);
-        }
-      } break;
+    case DMA::SourceBWRAM:
+      if((dsa & 0x40e000) == 0x006000 || (dsa & 0xf00000) == 0x400000) {
+        data = bus_read(dsa);
+      }
+      break;
 
-      case DMA::SourceIRAM: {
-        data = iram.read(dsa & 0x07ff);
-      } break;
+    case DMA::SourceIRAM:
+      data = iram.read(dsa & 0x07ff);
+      break;
     }
 
     switch(mmio.dd) {
-      case DMA::DestBWRAM: {
-        if((dda & 0x40e000) == 0x006000 || (dda & 0xf00000) == 0x400000) {
-          bus_write(dda, data);
-        }
-      } break;
+    case DMA::DestBWRAM:
+      if((dda & 0x40e000) == 0x006000 || (dda & 0xf00000) == 0x400000) {
+        bus_write(dda, data);
+      }
+      break;
 
-      case DMA::DestIRAM: {
-        iram.write(dda & 0x07ff, data);
-      } break;
+    case DMA::DestIRAM:
+      iram.write(dda & 0x07ff, data);
+      break;
     }
   }
 

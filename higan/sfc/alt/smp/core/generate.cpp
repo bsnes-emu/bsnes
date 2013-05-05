@@ -11,7 +11,7 @@ struct opcode_t {
   unsigned opcode;
 };
 
-void generate(const char *sourceFilename, const char *targetFilename) {
+void generate(const char* sourceFilename, const char* targetFilename) {
   file fp;
   fp.open(targetFilename, file::mode::write);
 

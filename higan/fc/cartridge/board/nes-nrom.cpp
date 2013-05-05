@@ -32,11 +32,11 @@ void chr_write(unsigned addr, uint8 data) {
   if(chrram.size) return chrram.write(addr, data);
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 }
 
-NES_NROM(Markup::Node &document) : Board(document) {
+NES_NROM(Markup::Node& document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

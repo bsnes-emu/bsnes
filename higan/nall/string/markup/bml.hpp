@@ -107,10 +107,9 @@ protected:
 
     //remove empty lines and comment lines
     for(unsigned y = 0; y < text.size();) {
-      text[y].rtrim<1>("\n");
       unsigned x = 0;
       bool empty = true;
-      while(text[y][x]) {
+      while(x < text[y].size()) {
         if(text[y][x] == ' ' || text[y][x] == '\t') { x++; continue; }
         empty = (text[y][x + 0] == '/' && text[y][x + 1] == '/');
         break;

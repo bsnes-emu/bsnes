@@ -1,9 +1,9 @@
 //ARMv3 (ARM6)
 
 struct ArmDSP : Processor::ARM, Coprocessor {
-  uint8 *programROM;
-  uint8 *dataROM;
-  uint8 *programRAM;
+  uint8* programROM;
+  uint8* dataROM;
+  uint8* programRAM;
 
   #include "registers.hpp"
 

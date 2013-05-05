@@ -28,8 +28,8 @@ struct Input {
     X = 0, Y = 1, Trigger = 2, Start = 3,
   };
 
-  Controller *port1;
-  Controller *port2;
+  Controller* port1 = nullptr;
+  Controller* port2 = nullptr;
 
   void connect(bool port, Input::Device id);
   Input();

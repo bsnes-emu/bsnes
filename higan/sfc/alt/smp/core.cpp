@@ -46,22 +46,22 @@ void SMP::op_step() {
     opcode_number = op_readpc();
     opcode_cycle++;
   } else switch(opcode_number) {
-    #include "core/opcycle_misc.cpp"
-    #include "core/opcycle_mov.cpp"
-    #include "core/opcycle_pc.cpp"
-    #include "core/opcycle_read.cpp"
-    #include "core/opcycle_rmw.cpp"
+  #include "core/opcycle_misc.cpp"
+  #include "core/opcycle_mov.cpp"
+  #include "core/opcycle_pc.cpp"
+  #include "core/opcycle_read.cpp"
+  #include "core/opcycle_rmw.cpp"
   }
 
   #else
 
   unsigned opcode = op_readpc();
   switch(opcode) {
-    #include "core/op_misc.cpp"
-    #include "core/op_mov.cpp"
-    #include "core/op_pc.cpp"
-    #include "core/op_read.cpp"
-    #include "core/op_rmw.cpp"
+  #include "core/op_misc.cpp"
+  #include "core/op_mov.cpp"
+  #include "core/op_pc.cpp"
+  #include "core/op_read.cpp"
+  #include "core/op_rmw.cpp"
   }
 
   //TODO: untaken branches should consume less cycles

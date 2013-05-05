@@ -33,7 +33,7 @@ struct Pulse {
     if(enable == false) output = 0;
   }
 
-  void serialize(serializer &s) {
+  void serialize(serializer& s) {
     s.integer(mode);
     s.integer(duty);
     s.integer(volume);
@@ -73,7 +73,7 @@ struct Sawtooth {
     if(enable == false) output = 0;
   }
 
-  void serialize(serializer &s) {
+  void serialize(serializer& s) {
     s.integer(rate);
     s.integer(enable);
     s.integer(frequency);
@@ -297,7 +297,7 @@ void reset() {
   sawtooth.output = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   pulse1.serialize(s);
   pulse2.serialize(s);
   sawtooth.serialize(s);
@@ -315,7 +315,7 @@ void serialize(serializer &s) {
   s.integer(irq_line);
 }
 
-VRC6(Board &board) : Chip(board) {
+VRC6(Board& board) : Chip(board) {
 }
 
 };

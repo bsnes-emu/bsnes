@@ -24,8 +24,8 @@ void Scheduler::init() {
 }
 
 Scheduler::Scheduler() {
-  host_thread = 0;
-  thread = 0;
+  host_thread = nullptr;
+  thread = nullptr;
   exit_reason = ExitReason::UnknownEvent;
 }
 

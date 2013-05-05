@@ -3,8 +3,8 @@ namespace phoenix {
 struct pComboButton : public pWidget {
   ComboButton& comboButton;
 
-  void append(const string& text);
-  void modify(unsigned row, const string& text);
+  void append(string text);
+  void modify(unsigned row, string text);
   void remove(unsigned row);
   void reset();
   unsigned selection();

@@ -1,5 +1,5 @@
 void APU::runsequencer() {
-  auto &r = sequencer;
+  auto& r = sequencer;
 
   if(r.base == 0) {  //512hz
     if(r.step == 0 || r.step == 2 || r.step == 4 || r.step == 6) {  //256hz
@@ -80,9 +80,9 @@ void APU::Sequencer::write(unsigned addr, uint8 byte) {
 void APU::Sequencer::power() {
   lvolume = 0;
   rvolume = 0;
-  for(auto &n : lenable) n = 0;
-  for(auto &n : renable) n = 0;
-  for(auto &n : enable) n = 0;
+  for(auto& n : lenable) n = 0;
+  for(auto& n : renable) n = 0;
+  for(auto& n : enable) n = 0;
   masterenable = 0;
   base = 0;
   step = 0;

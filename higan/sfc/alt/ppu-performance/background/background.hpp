@@ -52,15 +52,15 @@ class Background {
   LayerWindow window;
 
   alwaysinline unsigned get_tile(unsigned hoffset, unsigned voffset);
-  void offset_per_tile(unsigned x, unsigned y, unsigned &hoffset, unsigned &voffset);
+  void offset_per_tile(unsigned x, unsigned y, unsigned& hoffset, unsigned& voffset);
   void scanline();
   void render();
   void render_mode7();
 
   void serialize(serializer&);
-  Background(PPU &self, unsigned id);
+  Background(PPU& self, unsigned id);
   ~Background();
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

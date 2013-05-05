@@ -1,15 +1,15 @@
 #include "../ethos.hpp"
 Interface* interface = nullptr;
 
-void Interface::loadRequest(unsigned id, const string &name, const string& type) {
+void Interface::loadRequest(unsigned id, string name, string type) {
   return utility->loadRequest(id, name, type);
 }
 
-void Interface::loadRequest(unsigned id, const string& path) {
+void Interface::loadRequest(unsigned id, string path) {
   return utility->loadRequest(id, path);
 }
 
-void Interface::saveRequest(unsigned id, const string& path) {
+void Interface::saveRequest(unsigned id, string path) {
   return utility->saveRequest(id, path);
 }
 
@@ -123,6 +123,6 @@ string Interface::server() {
   };
 }
 
-void Interface::notify(const string& text) {
+void Interface::notify(string text) {
   MessageWindow().setParent(*presentation).setText(text).information();
 }

@@ -1,6 +1,6 @@
 #ifdef CARTRIDGE_CPP
 
-void Cartridge::serialize(serializer &s) {
+void Cartridge::serialize(serializer& s) {
   if(information.battery) s.array(ramdata, ramsize);
   s.integer(bootrom_enable);
 

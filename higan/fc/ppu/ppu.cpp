@@ -92,10 +92,10 @@ void PPU::reset() {
   //$2003
   status.oam_addr = 0x00;
 
-  for(auto &n : buffer) n = 0;
-  for(auto &n : ciram ) n = 0;
-  for(auto &n : cgram ) n = 0;
-  for(auto &n : oam   ) n = 0;
+  for(auto& n : buffer) n = 0;
+  for(auto& n : ciram ) n = 0;
+  for(auto& n : cgram ) n = 0;
+  for(auto& n : oam   ) n = 0;
 }
 
 uint8 PPU::read(uint16 addr) {
@@ -281,7 +281,7 @@ void PPU::scrolly_increment() {
 //
 
 void PPU::raster_pixel() {
-  uint32 *output = buffer + status.ly * 256;
+  uint32* output = buffer + status.ly * 256;
 
   unsigned mask = 0x8000 >> (status.xaddr + (status.lx & 7));
   unsigned palette = 0, object_palette = 0;

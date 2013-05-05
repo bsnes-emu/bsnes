@@ -36,9 +36,9 @@ class Screen {
   void render();
 
   void serialize(serializer&);
-  Screen(PPU &self);
+  Screen(PPU& self);
   ~Screen();
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

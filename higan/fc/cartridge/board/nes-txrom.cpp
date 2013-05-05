@@ -55,12 +55,12 @@ void reset() {
   mmc3.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   mmc3.serialize(s);
 }
 
-NES_TxROM(Markup::Node &document) : Board(document), mmc3(*this) {
+NES_TxROM(Markup::Node& document) : Board(document), mmc3(*this) {
   revision = Revision::TLROM;
 }
 

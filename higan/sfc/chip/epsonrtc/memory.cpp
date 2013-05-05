@@ -112,7 +112,7 @@ void EpsonRTC::rtc_write(uint4 addr, uint4 data) {
   }
 }
 
-void EpsonRTC::load(const uint8 *data) {
+void EpsonRTC::load(const uint8* data) {
   secondlo = data[0] >> 0;
   secondhi = data[0] >> 4;
   batteryfailure = data[0] >> 7;
@@ -164,7 +164,7 @@ void EpsonRTC::load(const uint8 *data) {
   while(diff--) tick_second();
 }
 
-void EpsonRTC::save(uint8 *data) {
+void EpsonRTC::save(uint8* data) {
   data[0] = secondlo << 0 | secondhi << 4 | batteryfailure << 7;
   data[1] = minutelo << 0 | minutehi << 4 | resync << 7;
   data[2] = hourlo << 0 | hourhi << 4 | meridian << 6 | resync << 7;

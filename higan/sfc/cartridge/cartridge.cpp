@@ -84,7 +84,7 @@ void Cartridge::load() {
     sha256_final(&sha);
     sha256_hash(&sha, hash);
     string result;
-    for(auto &byte : hash) result.append(hex<2>(byte));
+    for(auto& byte : hash) result.append(hex<2>(byte));
     sha256 = result;
   }
 
@@ -114,7 +114,7 @@ void Cartridge::load() {
     sha256_final(&sha);
     sha256_hash(&sha, hash);
     string result;
-    for(auto &byte : hash) result.append(hex<2>(byte));
+    for(auto& byte : hash) result.append(hex<2>(byte));
     sha256 = result;
   }
 

@@ -1,7 +1,7 @@
 #ifdef DSP_CPP
 
 void DSP::misc_27() {
-  state.t_pmon = REG(pmon) & ~1; //voice 0 doesn't support PMON
+  state.t_pmon = REG(pmon) & ~1;  //voice 0 doesn't support PMON
 }
 
 void DSP::misc_28() {
@@ -13,7 +13,7 @@ void DSP::misc_28() {
 void DSP::misc_29() {
   state.every_other_sample ^= 1;
   if(state.every_other_sample) {
-    state.new_kon &= ~state.kon; //clears KON 63 clocks after it was last read
+    state.new_kon &= ~state.kon;  //clears KON 63 clocks after it was last read
   }
 }
 

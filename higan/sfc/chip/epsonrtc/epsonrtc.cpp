@@ -105,7 +105,7 @@ void EpsonRTC::reset() {
 
 void EpsonRTC::sync() {
   time_t systime = time(0);
-  tm *timeinfo = localtime(&systime);
+  tm* timeinfo = localtime(&systime);
 
   unsigned second = min(59, timeinfo->tm_sec);
   secondlo = second % 10;

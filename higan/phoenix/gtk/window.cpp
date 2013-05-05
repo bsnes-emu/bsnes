@@ -244,7 +244,7 @@ void pWindow::setGeometry(const Geometry& geometry) {
   }
 }
 
-void pWindow::setMenuFont(const string& font) {
+void pWindow::setMenuFont(string font) {
   for(auto& item : window.state.menu) item.p.setFont(font);
 }
 
@@ -268,11 +268,11 @@ void pWindow::setResizable(bool resizable) {
   gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(status), resizable);
 }
 
-void pWindow::setStatusFont(const string& font) {
+void pWindow::setStatusFont(string font) {
   pFont::setFont(status, font);
 }
 
-void pWindow::setStatusText(const string& text) {
+void pWindow::setStatusText(string text) {
   gtk_statusbar_pop(GTK_STATUSBAR(status), 1);
   gtk_statusbar_push(GTK_STATUSBAR(status), 1, text);
 }
@@ -281,7 +281,7 @@ void pWindow::setStatusVisible(bool visible) {
   gtk_widget_set_visible(status, visible);
 }
 
-void pWindow::setTitle(const string& text) {
+void pWindow::setTitle(string text) {
   gtk_window_set_title(GTK_WINDOW(widget), text);
 }
 
@@ -302,7 +302,7 @@ void pWindow::setVisible(bool visible) {
   }
 }
 
-void pWindow::setWidgetFont(const string& font) {
+void pWindow::setWidgetFont(string font) {
 }
 
 void pWindow::constructor() {

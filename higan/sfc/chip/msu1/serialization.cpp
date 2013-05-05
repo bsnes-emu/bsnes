@@ -1,6 +1,6 @@
 #ifdef MSU1_CPP
 
-void MSU1::serialize(serializer &s) {
+void MSU1::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.integer(boot);

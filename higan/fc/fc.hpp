@@ -33,7 +33,7 @@ namespace Famicom {
       clock = 0;
     }
 
-    inline void serialize(serializer &s) {
+    inline void serialize(serializer& s) {
       s.integer(frequency);
       s.integer(clock);
     }

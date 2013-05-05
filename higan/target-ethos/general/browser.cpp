@@ -95,7 +95,7 @@ void Browser::bootstrap() {
   config.save(program->path("paths.bml"));
 }
 
-string Browser::select(const string& title, const string& extension) {
+string Browser::select(string title, string extension) {
   this->extension = extension;
 
   string path;
@@ -122,7 +122,7 @@ string Browser::select(const string& title, const string& extension) {
   return outputFilename;
 }
 
-void Browser::setPath(const string& path, unsigned selection) {
+void Browser::setPath(string path, unsigned selection) {
   //save path for next browser selection
   for(auto& folder : folderList) {
     if(folder.extension == extension) folder.path = path;

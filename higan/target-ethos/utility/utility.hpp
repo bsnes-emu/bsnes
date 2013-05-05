@@ -3,11 +3,11 @@ struct Utility {
 
   void loadMedia(string pathname);
   void loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media);
-  void loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, const string& pathname);
+  void loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, string pathname);
 
-  void loadRequest(unsigned id, const string& name, const string& type);
-  void loadRequest(unsigned id, const string& path);
-  void saveRequest(unsigned id, const string& path);
+  void loadRequest(unsigned id, string name, string type);
+  void loadRequest(unsigned id, string path);
+  void saveRequest(unsigned id, string path);
 
   void connect(unsigned port, unsigned device);
   void power();
@@ -27,8 +27,8 @@ struct Utility {
   void toggleFullScreen();
 
   void updateStatus();
-  void setStatusText(const string& text);
-  void showMessage(const string& message);
+  void setStatusText(string text);
+  void showMessage(string message);
 
   Utility();
 

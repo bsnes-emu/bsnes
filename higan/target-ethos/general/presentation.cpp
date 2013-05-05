@@ -42,7 +42,7 @@ void Presentation::synchronize() {
   }
 }
 
-void Presentation::setSystemName(const string& name) {
+void Presentation::setSystemName(string name) {
   if(active) active->menu.setText(name);
 }
 

@@ -1,6 +1,6 @@
 #ifdef SDD1_CPP
 
-void SDD1::serialize(serializer &s) {
+void SDD1::serialize(serializer& s) {
   s.array(ram.data(), ram.size());
 
   s.integer(sdd1_enable);

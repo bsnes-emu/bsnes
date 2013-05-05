@@ -1,8 +1,8 @@
 public:
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);
-privileged:
 
+privileged:
 struct {
   uint8 ppu1_mdr;
   uint8 ppu2_mdr;

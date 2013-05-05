@@ -79,8 +79,8 @@ void PPU::add_clocks(unsigned clocks) {
 }
 
 void PPU::enable() {
-  function<uint8 (unsigned)> reader = { &PPU::mmio_read, (PPU*)&ppu };
-  function<void (unsigned, uint8)> writer = { &PPU::mmio_write, (PPU*)&ppu };
+  function<uint8 (unsigned)> reader = {&PPU::mmio_read, (PPU*)&ppu};
+  function<void (unsigned, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
   bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
@@ -90,9 +90,9 @@ void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  for(auto &n : vram) n = random(0x00);
-  for(auto &n : oam) n = random(0x00);
-  for(auto &n : cgram) n = random(0x00);
+  for(auto& n : vram) n = random(0x00);
+  for(auto& n : oam) n = random(0x00);
+  for(auto& n : cgram) n = random(0x00);
 }
 
 void PPU::reset() {

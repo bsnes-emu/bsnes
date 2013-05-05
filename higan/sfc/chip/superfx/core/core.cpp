@@ -54,10 +54,10 @@ uint8 SuperFX::rpix(uint8 x, uint8 y) {
 
   unsigned cn;  //character number
   switch(regs.por.obj ? 3 : regs.scmr.ht) {
-    case 0: cn = ((x & 0xf8) << 1) + ((y & 0xf8) >> 3); break;
-    case 1: cn = ((x & 0xf8) << 1) + ((x & 0xf8) >> 1) + ((y & 0xf8) >> 3); break;
-    case 2: cn = ((x & 0xf8) << 1) + ((x & 0xf8) << 0) + ((y & 0xf8) >> 3); break;
-    case 3: cn = ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3); break;
+  case 0: cn = ((x & 0xf8) << 1) + ((y & 0xf8) >> 3); break;
+  case 1: cn = ((x & 0xf8) << 1) + ((x & 0xf8) >> 1) + ((y & 0xf8) >> 3); break;
+  case 2: cn = ((x & 0xf8) << 1) + ((x & 0xf8) << 0) + ((y & 0xf8) >> 3); break;
+  case 3: cn = ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3); break;
   }
   unsigned bpp = 2 << (regs.scmr.md - (regs.scmr.md >> 1));  // = [regs.scmr.md]{ 2, 4, 4, 8 };
   unsigned addr = 0x700000 + (cn * (bpp << 3)) + (regs.scbr << 10) + ((y & 0x07) * 2);
@@ -73,7 +73,7 @@ uint8 SuperFX::rpix(uint8 x, uint8 y) {
   return data;
 }
 
-void SuperFX::pixelcache_flush(pixelcache_t &cache) {
+void SuperFX::pixelcache_flush(pixelcache_t& cache) {
   if(cache.bitpend == 0x00) return;
 
   uint8 x = cache.offset << 3;
@@ -81,10 +81,10 @@ void SuperFX::pixelcache_flush(pixelcache_t &cache) {
 
   unsigned cn;  //character number
   switch(regs.por.obj ? 3 : regs.scmr.ht) {
-    case 0: cn = ((x & 0xf8) << 1) + ((y & 0xf8) >> 3); break;
-    case 1: cn = ((x & 0xf8) << 1) + ((x & 0xf8) >> 1) + ((y & 0xf8) >> 3); break;
-    case 2: cn = ((x & 0xf8) << 1) + ((x & 0xf8) << 0) + ((y & 0xf8) >> 3); break;
-    case 3: cn = ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3); break;
+  case 0: cn = ((x & 0xf8) << 1) + ((y & 0xf8) >> 3); break;
+  case 1: cn = ((x & 0xf8) << 1) + ((x & 0xf8) >> 1) + ((y & 0xf8) >> 3); break;
+  case 2: cn = ((x & 0xf8) << 1) + ((x & 0xf8) << 0) + ((y & 0xf8) >> 3); break;
+  case 3: cn = ((y & 0x80) << 2) + ((x & 0x80) << 1) + ((y & 0x78) << 1) + ((x & 0x78) >> 3); break;
   }
   unsigned bpp = 2 << (regs.scmr.md - (regs.scmr.md >> 1));  // = [regs.scmr.md]{ 2, 4, 4, 8 };
   unsigned addr = 0x700000 + (cn * (bpp << 3)) + (regs.scbr << 10) + ((y & 0x07) * 2);

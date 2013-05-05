@@ -1,6 +1,6 @@
 #ifdef OBC1_CPP
 
-void OBC1::serialize(serializer &s) {
+void OBC1::serialize(serializer& s) {
   s.array(ram.data(), ram.size());
 
   s.integer(status.address);

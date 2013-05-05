@@ -100,7 +100,7 @@ void reset() {
   irq_latch = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 
   s.array(chr_bank);
@@ -111,7 +111,7 @@ void serialize(serializer &s) {
   s.integer(irq_latch);
 }
 
-BandaiFCG(Markup::Node &document) : Board(document) {
+BandaiFCG(Markup::Node& document) : Board(document) {
 }
 
 };

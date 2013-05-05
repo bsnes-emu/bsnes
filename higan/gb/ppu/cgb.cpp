@@ -12,7 +12,7 @@ void PPU::cgb_render() {
     if(status.ob_enable) cgb_render_ob();
   }
 
-  uint32 *output = screen + status.ly * 160;
+  uint32* output = screen + status.ly * 160;
   for(unsigned n = 0; n < 160; n++) output[n] = video.palette[line[n]];
   interface->lcdScanline();
 }
@@ -23,7 +23,7 @@ void PPU::cgb_render() {
 //0x20: horizontal flip
 //0x08: VRAM bank#
 //0x07: palette#
-void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, unsigned &attr, unsigned &data) {
+void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& tile, unsigned& attr, unsigned& data) {
   unsigned tmaddr = 0x1800 + (select << 10);
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
 

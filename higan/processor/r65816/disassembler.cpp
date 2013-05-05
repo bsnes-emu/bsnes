@@ -102,10 +102,10 @@ uint32 R65816::decode(uint8 offset_type, uint32 addr) {
   return(r & 0xffffff);
 }
 
-void R65816::disassemble_opcode(char *output, uint32 addr) {
+void R65816::disassemble_opcode(char* output, uint32 addr) {
   static reg24_t pc;
   char t[256];
-  char *s = output;
+  char* s = output;
 
   if(false /* in_opcode() == true */) {
     strcpy(s, "?????? <CPU within opcode>");

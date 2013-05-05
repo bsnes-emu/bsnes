@@ -42,13 +42,13 @@ void reset() {
   prg_bank = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 
   s.integer(prg_bank);
 }
 
-NES_UxROM(Markup::Node &document) : Board(document) {
+NES_UxROM(Markup::Node& document) : Board(document) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

@@ -6,7 +6,7 @@ struct pMenu : public pAction {
   void append(Action& action);
   void remove(Action& action);
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pMenu(Menu& menu) : pAction(menu), menu(menu) {}
   void constructor();

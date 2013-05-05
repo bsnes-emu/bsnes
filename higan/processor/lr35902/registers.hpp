@@ -18,7 +18,7 @@ enum {
 struct Register {
   virtual operator unsigned() const = 0;
   virtual unsigned operator=(unsigned x) = 0;
-  Register& operator=(const Register &x) { operator=((unsigned)x); return *this; }
+  Register& operator=(const Register& x) { operator=((unsigned)x); return *this; }
 
   unsigned operator++(int) { unsigned r = *this; operator=(*this + 1); return r; }
   unsigned operator--(int) { unsigned r = *this; operator=(*this - 1); return r; }
@@ -50,7 +50,7 @@ struct RegisterF : Register {
   operator unsigned() const { return (z << 7) | (n << 6) | (h << 5) | (c << 4); }
   unsigned operator=(unsigned x) { z = x & 0x80; n = x & 0x40; h = x & 0x20; c = x & 0x10; return *this; }
   bool& operator[](unsigned r) {
-    static bool* table[] = { &z, &n, &h, &c };
+    static bool* table[] = {&z, &n, &h, &c};
     return *table[r];
   }
 };
@@ -62,18 +62,19 @@ struct Register16 : Register {
 };
 
 struct RegisterAF : Register {
-  Register8 &hi;
-  RegisterF &lo;
+  Register8& hi;
+  RegisterF& lo;
   operator unsigned() const { return (hi << 8) | (lo << 0); }
   unsigned operator=(unsigned x) { hi = x >> 8; lo = x >> 0; return *this; }
-  RegisterAF(Register8 &hi, RegisterF &lo) : hi(hi), lo(lo) {}
+  RegisterAF(Register8& hi, RegisterF& lo) : hi(hi), lo(lo) {}
 };
 
 struct RegisterW : Register {
-  Register8 &hi, &lo;
+  Register8& hi;
+  Register8& lo;
   operator unsigned() const { return (hi << 8) | (lo << 0); }
   unsigned operator=(unsigned x) { hi = x >> 8; lo = x >> 0; return *this; }
-  RegisterW(Register8 &hi, Register8 &lo) : hi(hi), lo(lo) {}
+  RegisterW(Register8& hi, Register8& lo) : hi(hi), lo(lo) {}
 };
 
 struct Registers {
@@ -98,7 +99,7 @@ struct Registers {
   bool ime;
 
   Register& operator[](unsigned r) {
-    static Register* table[] = { &a, &f, &af, &b, &c, &bc, &d, &e, &de, &h, &l, &hl, &sp, &pc };
+    static Register* table[] = {&a, &f, &af, &b, &c, &bc, &d, &e, &de, &h, &l, &hl, &sp, &pc};
     return *table[r];
   }
 

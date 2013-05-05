@@ -13,7 +13,7 @@ template<typename T, unsigned size> struct moduloarray {
     buffer[index + size + size] = value;
   }
 
-  void serialize(serializer &s) {
+  void serialize(serializer& s) {
     s.array(buffer, size * 3);
   }
 
@@ -26,5 +26,5 @@ template<typename T, unsigned size> struct moduloarray {
   }
 
 private:
-  T *buffer;
+  T* buffer;
 };

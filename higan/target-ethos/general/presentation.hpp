@@ -52,7 +52,7 @@ struct Presentation : Window {
     Item synchronizeTime;
 
   void synchronize();
-  void setSystemName(const string& name);
+  void setSystemName(string name);
   void loadShaders();
   void bootstrap();
   Presentation();

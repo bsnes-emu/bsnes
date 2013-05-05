@@ -18,7 +18,8 @@ void PPU::Background::render_mode7() {
 
   signed y = (self.regs.mode7_vflip == false ? self.vcounter() : 255 - self.vcounter());
 
-  uint16 *mosaic_x, *mosaic_y;
+  uint16* mosaic_x;
+  uint16* mosaic_y;
   if(id == ID::BG1) {
     mosaic_x = mosaic_table[self.bg1.regs.mosaic];
     mosaic_y = mosaic_table[self.bg1.regs.mosaic];
@@ -38,43 +39,43 @@ void PPU::Background::render_mode7() {
     py = (psy + (c * mosaic_x[x])) >> 8;
 
     switch(self.regs.mode7_repeat) {
-      case 0: case 1: {
+    case 0: case 1: {
+      px &= 1023;
+      py &= 1023;
+      tx = ((px >> 3) & 127);
+      ty = ((py >> 3) & 127);
+      tile = ppu.vram[(ty * 128 + tx) << 1];
+      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      break;
+    }
+
+    case 2: {
+      if((px | py) & ~1023) {
+        palette = 0;
+      } else {
         px &= 1023;
         py &= 1023;
         tx = ((px >> 3) & 127);
         ty = ((py >> 3) & 127);
         tile = ppu.vram[(ty * 128 + tx) << 1];
         palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-        break;
       }
+      break;
+    }
 
-      case 2: {
-        if((px | py) & ~1023) {
-          palette = 0;
-        } else {
-          px &= 1023;
-          py &= 1023;
-          tx = ((px >> 3) & 127);
-          ty = ((py >> 3) & 127);
-          tile = ppu.vram[(ty * 128 + tx) << 1];
-          palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-        }
-        break;
+    case 3: {
+      if((px | py) & ~1023) {
+        tile = 0;
+      } else {
+        px &= 1023;
+        py &= 1023;
+        tx = ((px >> 3) & 127);
+        ty = ((py >> 3) & 127);
+        tile = ppu.vram[(ty * 128 + tx) << 1];
       }
-
-      case 3: {
-        if((px | py) & ~1023) {
-          tile = 0;
-        } else {
-          px &= 1023;
-          py &= 1023;
-          tx = ((px >> 3) & 127);
-          ty = ((py >> 3) & 127);
-          tile = ppu.vram[(ty * 128 + tx) << 1];
-        }
-        palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-        break;
-      }
+      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      break;
+    }
     }
 
     unsigned priority;

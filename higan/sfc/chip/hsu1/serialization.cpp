@@ -1,6 +1,6 @@
 #ifdef HSU1_CPP
 
-void HSU1::serialize(serializer &s) {
+void HSU1::serialize(serializer& s) {
   s.integer(txbusy);
   s.integer(rxbusy);
   s.integer(txlatch);

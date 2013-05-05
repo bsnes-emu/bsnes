@@ -1,7 +1,7 @@
 #ifdef ICD2_CPP
 
 //convert linear pixel data to 2bpp planar tiledata
-void ICD2::render(const uint32 *source) {
+void ICD2::render(const uint32* source) {
   memset(lcd.output, 0x00, 320 * sizeof(uint16));
 
   for(unsigned y = 0; y < 8; y++) {
@@ -78,10 +78,10 @@ void ICD2::write(unsigned addr, uint8 data) {
       reset();
     }
     switch(data & 3) {
-      case 0: frequency = cpu.frequency / 4; break;  //fast (glitchy, even on real hardware)
-      case 1: frequency = cpu.frequency / 5; break;  //normal
-      case 2: frequency = cpu.frequency / 7; break;  //slow
-      case 3: frequency = cpu.frequency / 9; break;  //very slow
+    case 0: frequency = cpu.frequency / 4; break;  //fast (glitchy, even on real hardware)
+    case 1: frequency = cpu.frequency / 5; break;  //normal
+    case 2: frequency = cpu.frequency / 7; break;  //slow
+    case 3: frequency = cpu.frequency / 9; break;  //very slow
     }
     r6003 = data;
     return;

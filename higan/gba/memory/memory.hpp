@@ -11,7 +11,7 @@ struct MMIO : Memory {
 };
 
 struct Bus : Memory {
-  Memory *mmio[0x400];
+  Memory* mmio[0x400];
   bool idleflag;
   static uint32 mirror(uint32 addr, uint32 size);
 

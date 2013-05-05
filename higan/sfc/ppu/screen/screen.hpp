@@ -1,5 +1,5 @@
 struct Screen {
-  uint32 *output;
+  uint32* output;
 
   struct Regs {
     bool addsub_mode;
@@ -41,8 +41,8 @@ struct Screen {
   uint16 fixed_color() const;
 
   void serialize(serializer&);
-  Screen(PPU &self);
+  Screen(PPU& self);
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

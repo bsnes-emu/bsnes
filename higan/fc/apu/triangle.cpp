@@ -43,7 +43,7 @@ void APU::Triangle::reset() {
   reload_linear = 0;
 }
 
-void APU::Triangle::serialize(serializer &s) {
+void APU::Triangle::serialize(serializer& s) {
   s.integer(length_counter);
 
   s.integer(linear_length);

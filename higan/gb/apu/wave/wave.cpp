@@ -13,9 +13,6 @@ void APU::Wave::run() {
 }
 
 void APU::Wave::clock_length() {
-//if(counter && length) {
-//  if(--length == 0) enable = false;
-//}
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
@@ -28,7 +25,6 @@ void APU::Wave::write(unsigned r, uint8 data) {
   }
 
   if(r == 1) {  //$ff1b  NR31
-  //length = 256 - data;
     length = data;
   }
 
@@ -54,7 +50,6 @@ void APU::Wave::write(unsigned r, uint8 data) {
       enable = dac_enable;
       period = 2 * (2048 - frequency);
       pattern_offset = 0;
-    //if(length == 0) length = 256;
     }
   }
 }
@@ -74,7 +69,7 @@ void APU::Wave::power() {
   counter = 0;
 
   random_lfsr r;
-  for(auto &n : pattern) n = r() & 15;
+  for(auto& n : pattern) n = r() & 15;
 
   output = 0;
   length = 0;
@@ -83,7 +78,7 @@ void APU::Wave::power() {
   pattern_sample = 0;
 }
 
-void APU::Wave::serialize(serializer &s) {
+void APU::Wave::serialize(serializer& s) {
   s.integer(enable);
 
   s.integer(dac_enable);

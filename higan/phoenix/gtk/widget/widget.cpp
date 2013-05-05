@@ -22,7 +22,7 @@ void pWidget::setFocused() {
   gtk_widget_grab_focus(gtkWidget);
 }
 
-void pWidget::setFont(const string& font) {
+void pWidget::setFont(string font) {
   pFont::setFont(gtkWidget, font);
 }
 

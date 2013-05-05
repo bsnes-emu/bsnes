@@ -12,8 +12,8 @@ struct StateManager : Window {
     Button eraseButton;
 
   void reset();
-  bool load(const string& filename, unsigned revision);
-  bool save(const string& filename, unsigned revision);
+  bool load(string filename, unsigned revision);
+  bool save(string filename, unsigned revision);
 
   void slotLoad();
   void slotSave();

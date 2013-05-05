@@ -6,7 +6,7 @@ uint8 CPU::op_read(uint16 addr) {
   }
 
   while(status.rdy_line == 0) {
-    regs.mdr = bus.read(status.rdy_addr ? status.rdy_addr() : addr);
+    regs.mdr = bus.read(status.rdy_addr_valid ? status.rdy_addr_value : addr);
     add_clocks(12);
   }
 
@@ -58,6 +58,7 @@ void CPU::set_rdy_line(bool line) {
   status.rdy_line = line;
 }
 
-void CPU::set_rdy_addr(optional<uint16> addr) {
-  status.rdy_addr = addr;
+void CPU::set_rdy_addr(bool valid, uint16 value) {
+  status.rdy_addr_valid = valid;
+  status.rdy_addr_value = value;
 }

@@ -9,7 +9,7 @@ unsigned Random::operator()(unsigned result) {
   return iter = (iter >> 1) ^ (((iter & 1) - 1) & 0xedb88320);
 }
 
-void Random::serialize(serializer &s) {
+void Random::serialize(serializer& s) {
   s.integer(iter);
 }
 

@@ -17,15 +17,15 @@ struct StaticRAM : Memory {
   inline ~StaticRAM();
 
 private:
-  uint8 *data_;
+  uint8* data_;
   unsigned size_;
 };
 
 struct MappedRAM : Memory {
   inline void reset();
   inline void map(uint8*, unsigned);
-  inline void copy(const stream &memory);
-  inline void read(const stream &memory);
+  inline void copy(const stream& memory);
+  inline void read(const stream& memory);
 
   inline void write_protect(bool status);
   inline uint8* data();
@@ -37,7 +37,7 @@ struct MappedRAM : Memory {
   inline MappedRAM();
 
 private:
-  uint8 *data_;
+  uint8* data_;
   unsigned size_;
   bool write_protect_;
 };
@@ -49,16 +49,16 @@ struct Bus {
   alwaysinline uint8 read(unsigned addr);
   alwaysinline void write(unsigned addr, uint8 data);
 
-  uint8 *lookup;
-  uint32 *target;
+  uint8* lookup;
+  uint32* target;
 
   unsigned idcount;
   function<uint8 (unsigned)> reader[256];
   function<void (unsigned, uint8)> writer[256];
 
   void map(
-    const function<uint8 (unsigned)> &reader,
-    const function<void (unsigned, uint8)> &writer,
+    const function<uint8 (unsigned)>& reader,
+    const function<void (unsigned, uint8)>& writer,
     unsigned banklo, unsigned bankhi,
     unsigned addrlo, unsigned addrhi,
     unsigned size = 0, unsigned base = 0, unsigned mask = 0

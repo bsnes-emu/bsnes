@@ -27,8 +27,8 @@ struct PPU : Thread, public PPUcounter {
   ~PPU();
 
 private:
-  uint32 *surface;
-  uint32 *output;
+  uint32* surface;
+  uint32* output;
 
   #include "mmio/mmio.hpp"
   #include "window/window.hpp"

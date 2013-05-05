@@ -1,4 +1,4 @@
-void CPU::serialize(serializer &s) {
+void CPU::serialize(serializer& s) {
   R6502::serialize(s);
   Thread::serialize(s);
 
@@ -11,12 +11,8 @@ void CPU::serialize(serializer &s) {
   s.integer(status.irq_apu_line);
 
   s.integer(status.rdy_line);
-  bool rdy_addr_valid = status.rdy_addr;
-  unsigned rdy_addr_value = 0;
-  if(rdy_addr_valid) rdy_addr_value = status.rdy_addr();
-  s.integer(rdy_addr_valid);
-  s.integer(rdy_addr_value);
-  if(rdy_addr_valid) status.rdy_addr = rdy_addr_value;
+  s.integer(status.rdy_addr_valid);
+  s.integer(status.rdy_addr_value);
 
   s.integer(status.oam_dma_pending);
   s.integer(status.oam_dma_page);

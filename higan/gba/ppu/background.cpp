@@ -21,9 +21,9 @@ void PPU::render_backgrounds() {
   }
 }
 
-void PPU::render_background_linear(Registers::Background &bg) {
+void PPU::render_background_linear(Registers::Background& bg) {
   if(regs.control.enable[bg.id] == false) return;
-  auto &output = layer[bg.id];
+  auto& output = layer[bg.id];
 
   if(bg.control.mosaic == false || (regs.vcounter % (1 + regs.mosaic.bgvsize)) == 0) {
     bg.vmosaic = regs.vcounter;
@@ -78,9 +78,9 @@ void PPU::render_background_linear(Registers::Background &bg) {
   }
 }
 
-void PPU::render_background_affine(Registers::Background &bg) {
+void PPU::render_background_affine(Registers::Background& bg) {
   if(regs.control.enable[bg.id] == false) return;
-  auto &output = layer[bg.id];
+  auto& output = layer[bg.id];
 
   unsigned basemap = bg.control.screenbaseblock    << 11;
   unsigned basechr = bg.control.characterbaseblock << 14;
@@ -113,9 +113,9 @@ void PPU::render_background_affine(Registers::Background &bg) {
   bg.ly += bg.pd;
 }
 
-void PPU::render_background_bitmap(Registers::Background &bg) {
+void PPU::render_background_bitmap(Registers::Background& bg) {
   if(regs.control.enable[bg.id] == false) return;
-  auto &output = layer[bg.id];
+  auto& output = layer[bg.id];
 
   uint1 depth = regs.control.bgmode != 4;  //0 = 8-bit (Mode 4), 1 = 15-bit (Mode 3, Mode 5)
   unsigned basemap = regs.control.bgmode == 3 ? 0 : 0xa000 * regs.control.frame;

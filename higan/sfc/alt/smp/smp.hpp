@@ -1,6 +1,6 @@
 struct SMP : Thread {
   uint8 iplrom[64];
-  uint8 *apuram;
+  uint8* apuram;
 
   enum : bool { Threaded = false };
   alwaysinline void synchronize_cpu();

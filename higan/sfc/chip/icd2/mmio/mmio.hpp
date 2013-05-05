@@ -1,4 +1,4 @@
-void render(const uint32 *source);
+void render(const uint32* source);
 
 uint8 r6000_ly;   //SGB BIOS' cache of LY
 uint8 r6000_row;  //SGB BIOS' cache of ROW

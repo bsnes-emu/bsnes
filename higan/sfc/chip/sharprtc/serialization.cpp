@@ -1,6 +1,6 @@
 #ifdef SHARPRTC_CPP
 
-void SharpRTC::serialize(serializer &s) {
+void SharpRTC::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.integer((unsigned&)rtc_state);

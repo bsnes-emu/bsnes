@@ -399,13 +399,13 @@ void power() {
 }
 
 void reset() {
-  for(auto &n : exram) n = 0xff;
+  for(auto& n : exram) n = 0xff;
 
   prg_mode = 3;
   chr_mode = 0;
-  for(auto &n : prgram_write_protect) n = 0;
+  for(auto& n : prgram_write_protect) n = 0;
   exram_mode = 0;
-  for(auto &n : nametable_mode) n = 0;
+  for(auto& n : nametable_mode) n = 0;
   fillmode_tile = 0;
   fillmode_color = 0;
   ram_select = 0;
@@ -414,8 +414,8 @@ void reset() {
   prg_bank[1] = 0x00;
   prg_bank[2] = 0x00;
   prg_bank[3] = 0xff;
-  for(auto &n : chr_sprite_bank) n = 0;
-  for(auto &n : chr_bg_bank) n = 0;
+  for(auto& n : chr_sprite_bank) n = 0;
+  for(auto& n : chr_bg_bank) n = 0;
   chr_bank_hi = 0;
   vs_enable = 0;
   vs_side = 0;
@@ -433,7 +433,7 @@ void reset() {
   in_frame = 0;
   vcounter = 0;
   hcounter = 0;
-  for(auto &n : chr_access) n = 0;
+  for(auto& n : chr_access) n = 0;
   chr_active = 0;
   sprite_8x16 = 0;
 
@@ -445,21 +445,21 @@ void reset() {
   vs_hpos = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.array(exram);
 
   s.integer(prg_mode);
   s.integer(chr_mode);
-  for(auto &n : prgram_write_protect) s.integer(n);
+  for(auto& n : prgram_write_protect) s.integer(n);
   s.integer(exram_mode);
-  for(auto &n : nametable_mode) s.integer(n);
+  for(auto& n : nametable_mode) s.integer(n);
   s.integer(fillmode_tile);
   s.integer(fillmode_color);
   s.integer(ram_select);
   s.integer(ram_bank);
-  for(auto &n : prg_bank) s.integer(n);
-  for(auto &n : chr_sprite_bank) s.integer(n);
-  for(auto &n : chr_bg_bank) s.integer(n);
+  for(auto& n : prg_bank) s.integer(n);
+  for(auto& n : chr_sprite_bank) s.integer(n);
+  for(auto& n : chr_bg_bank) s.integer(n);
   s.integer(chr_bank_hi);
   s.integer(vs_enable);
   s.integer(vs_side);
@@ -478,7 +478,7 @@ void serialize(serializer &s) {
 
   s.integer(vcounter);
   s.integer(hcounter);
-  for(auto &n : chr_access) s.integer(n);
+  for(auto& n : chr_access) s.integer(n);
   s.integer(chr_active);
   s.integer(sprite_8x16);
 
@@ -490,7 +490,7 @@ void serialize(serializer &s) {
   s.integer(vs_hpos);
 }
 
-MMC5(Board &board) : Chip(board) {
+MMC5(Board& board) : Chip(board) {
   revision = Revision::MMC5;
 }
 

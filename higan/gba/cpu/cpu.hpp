@@ -1,6 +1,6 @@
 struct CPU : Processor::ARM, Thread, MMIO {
-  uint8 *iwram;
-  uint8 *ewram;
+  uint8* iwram;
+  uint8* ewram;
   #include "registers.hpp"
   #include "state.hpp"
 

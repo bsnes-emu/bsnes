@@ -15,7 +15,7 @@ void CPU::step(unsigned clocks) {
   smp.clock -= clocks * (uint64)smp.frequency;
   ppu.clock -= clocks;
   for(unsigned i = 0; i < coprocessors.size(); i++) {
-    auto &chip = *coprocessors[i];
+    auto& chip = *coprocessors[i];
     chip.clock -= clocks * (uint64)chip.frequency;
   }
   input.port1->clock -= clocks * (uint64)input.port1->frequency;
@@ -41,7 +41,7 @@ void CPU::synchronize_ppu() {
 
 void CPU::synchronize_coprocessors() {
   for(unsigned i = 0; i < coprocessors.size(); i++) {
-    auto &chip = *coprocessors[i];
+    auto& chip = *coprocessors[i];
     if(chip.clock < 0) co_switch(chip.thread);
   }
 }
@@ -81,8 +81,8 @@ alwaysinline void CPU::op_step() {
 }
 
 void CPU::enable() {
-  function<uint8 (unsigned)> reader = { &CPU::mmio_read, (CPU*)&cpu };
-  function<void (unsigned, uint8)> writer = { &CPU::mmio_write, (CPU*)&cpu };
+  function<uint8 (unsigned)> reader = {&CPU::mmio_read, (CPU*)&cpu};
+  function<void (unsigned, uint8)> writer = {&CPU::mmio_write, (CPU*)&cpu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2140, 0x2183);
   bus.map(reader, writer, 0x80, 0xbf, 0x2140, 0x2183);
@@ -171,8 +171,8 @@ void CPU::reset() {
   dma_reset();
 }
 
-CPU::CPU() : queue(512, { &CPU::queue_event, this }) {
-  PPUcounter::scanline = { &CPU::scanline, this };
+CPU::CPU() : queue(512, {&CPU::queue_event, this}) {
+  PPUcounter::scanline = {&CPU::scanline, this};
 }
 
 CPU::~CPU() {

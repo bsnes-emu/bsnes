@@ -11,7 +11,7 @@ void GSU::power() {
 }
 
 void GSU::reset() {
-  for(auto &r : regs.r) r = 0x0000;
+  for(auto& r : regs.r) r = 0x0000;
   regs.sfr   = 0x0000;
   regs.pbr   = 0x00;
   regs.rombr = 0x00;

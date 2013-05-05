@@ -3,7 +3,7 @@
 //screen: 0 = main, 1 = sub
 void PPU::build_window_table(uint8 bg, bool screen) {
   bool set = 1, clr = 0;
-  uint8 *table = (screen == 0 ? window[bg].main : window[bg].sub);
+  uint8* table = (screen == 0 ? window[bg].main : window[bg].sub);
 
   if(bg != COL) {
     if(screen == 0 && regs.window_enabled[bg] == false) {
@@ -16,10 +16,10 @@ void PPU::build_window_table(uint8 bg, bool screen) {
     }
   } else {
     switch(screen == 0 ? regs.color_mask : regs.colorsub_mask) {
-      case 0: memset(table, 1, 256); return;  //always
-      case 3: memset(table, 0, 256); return;  //never
-      case 1: set = 1, clr = 0; break;        //inside window only
-      case 2: set = 0, clr = 1; break;        //outside window only
+    case 0: memset(table, 1, 256); return;  //always
+    case 3: memset(table, 0, 256); return;  //never
+    case 1: set = 1, clr = 0; break;        //inside window only
+    case 2: set = 0, clr = 1; break;        //outside window only
     }
   }
 
@@ -54,10 +54,10 @@ void PPU::build_window_table(uint8 bg, bool screen) {
     bool w2_mask = (x >= window2_left && x <= window2_right) ^ regs.window2_invert[bg];
 
     switch(regs.window_mask[bg]) {
-      case 0: table[x] = (w1_mask | w2_mask) == 1 ? set : clr; break;  //or
-      case 1: table[x] = (w1_mask & w2_mask) == 1 ? set : clr; break;  //and
-      case 2: table[x] = (w1_mask ^ w2_mask) == 1 ? set : clr; break;  //xor
-      case 3: table[x] = (w1_mask ^ w2_mask) == 0 ? set : clr; break;  //xnor
+    case 0: table[x] = (w1_mask | w2_mask) == 1 ? set : clr; break;  //or
+    case 1: table[x] = (w1_mask & w2_mask) == 1 ? set : clr; break;  //and
+    case 2: table[x] = (w1_mask ^ w2_mask) == 1 ? set : clr; break;  //xor
+    case 3: table[x] = (w1_mask ^ w2_mask) == 0 ? set : clr; break;  //xnor
     }
   }
 }

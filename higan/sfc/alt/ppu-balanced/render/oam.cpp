@@ -34,33 +34,33 @@ void PPU::build_sprite_list() {
     const bool size = sprite_list[i].size;
 
     switch(cache.oam_basesize) {
-      case 0: sprite_list[i].width  = (!size) ?  8 : 16;
-              sprite_list[i].height = (!size) ?  8 : 16;
-              break;
-      case 1: sprite_list[i].width  = (!size) ?  8 : 32;
-              sprite_list[i].height = (!size) ?  8 : 32;
-              break;
-      case 2: sprite_list[i].width  = (!size) ?  8 : 64;
-              sprite_list[i].height = (!size) ?  8 : 64;
-              break;
-      case 3: sprite_list[i].width  = (!size) ? 16 : 32;
-              sprite_list[i].height = (!size) ? 16 : 32;
-              break;
-      case 4: sprite_list[i].width  = (!size) ? 16 : 64;
-              sprite_list[i].height = (!size) ? 16 : 64;
-              break;
-      case 5: sprite_list[i].width  = (!size) ? 32 : 64;
-              sprite_list[i].height = (!size) ? 32 : 64;
-              break;
-      case 6: sprite_list[i].width  = (!size) ? 16 : 32;
-              sprite_list[i].height = (!size) ? 32 : 64;
-              if(regs.oam_interlace && !size) sprite_list[i].height = 16;
-              //32x64 height is not affected by oam_interlace setting
-              break;
-      case 7: sprite_list[i].width  = (!size) ? 16 : 32;
-              sprite_list[i].height = (!size) ? 32 : 32;
-              if(regs.oam_interlace && !size) sprite_list[i].height = 16;
-              break;
+    case 0: sprite_list[i].width  = (!size) ?  8 : 16;
+            sprite_list[i].height = (!size) ?  8 : 16;
+            break;
+    case 1: sprite_list[i].width  = (!size) ?  8 : 32;
+            sprite_list[i].height = (!size) ?  8 : 32;
+            break;
+    case 2: sprite_list[i].width  = (!size) ?  8 : 64;
+            sprite_list[i].height = (!size) ?  8 : 64;
+            break;
+    case 3: sprite_list[i].width  = (!size) ? 16 : 32;
+            sprite_list[i].height = (!size) ? 16 : 32;
+            break;
+    case 4: sprite_list[i].width  = (!size) ? 16 : 64;
+            sprite_list[i].height = (!size) ? 16 : 64;
+            break;
+    case 5: sprite_list[i].width  = (!size) ? 32 : 64;
+            sprite_list[i].height = (!size) ? 32 : 64;
+            break;
+    case 6: sprite_list[i].width  = (!size) ? 16 : 32;
+            sprite_list[i].height = (!size) ? 32 : 64;
+            if(regs.oam_interlace && !size) sprite_list[i].height = 16;
+            //32x64 height is not affected by oam_interlace setting
+            break;
+    case 7: sprite_list[i].width  = (!size) ? 16 : 32;
+            sprite_list[i].height = (!size) ? 32 : 32;
+            if(regs.oam_interlace && !size) sprite_list[i].height = 16;
+            break;
     }
   }
 }
@@ -68,7 +68,7 @@ void PPU::build_sprite_list() {
 bool PPU::is_sprite_on_scanline() {
   //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
   //then it is not counted. this *should* be 256, and not 255, even though dot 256 is offscreen.
-  sprite_item *spr = &sprite_list[active_sprite];
+  sprite_item* spr = &sprite_list[active_sprite];
   if(spr->x > 256 && (spr->x + spr->width - 1) < 512) return false;
 
   int spr_height = (regs.oam_interlace == false) ? (spr->height) : (spr->height >> 1);
@@ -78,7 +78,7 @@ bool PPU::is_sprite_on_scanline() {
 }
 
 void PPU::load_oam_tiles() {
-  sprite_item *spr = &sprite_list[active_sprite];
+  sprite_item* spr = &sprite_list[active_sprite];
   uint16 tile_width = spr->width >> 3;
   int x = spr->x;
   int y = (line - spr->y) & 0xff;
@@ -131,16 +131,16 @@ void PPU::load_oam_tiles() {
 }
 
 void PPU::render_oam_tile(int tile_num) {
-  oam_tileitem *t     = &oam_tilelist[tile_num];
-  uint8 *oam_td       = (uint8*)bg_tiledata[COLORDEPTH_16];
-  uint8 *oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
+  oam_tileitem* t     = &oam_tilelist[tile_num];
+  uint8* oam_td       = (uint8*)bg_tiledata[COLORDEPTH_16];
+  uint8* oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
 
   if(oam_td_state[t->tile] == 1) {
     render_bg_tile<COLORDEPTH_16>(t->tile);
   }
 
   unsigned sx = t->x;
-  uint8 *tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
+  uint8* tile_ptr = (uint8*)oam_td + (t->tile << 6) + ((t->y & 7) << 3);
   for(unsigned x = 0; x < 8; x++) {
     sx &= 511;
     if(sx < 256) {
@@ -218,8 +218,8 @@ void PPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 
   bool bgsub_enabled = regs.bgsub_enabled[OAM];
 
   build_window_tables(OAM);
-  uint8 *wt_main = window[OAM].main;
-  uint8 *wt_sub  = window[OAM].sub;
+  uint8* wt_main = window[OAM].main;
+  uint8* wt_sub  = window[OAM].sub;
 
   unsigned pri_tbl[4] = { pri0_pos, pri1_pos, pri2_pos, pri3_pos };
   for(int x = 0; x < 256; x++) {

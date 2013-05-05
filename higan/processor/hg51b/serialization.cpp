@@ -1,8 +1,8 @@
 #ifdef PROCESSOR_HG51B_HPP
 
-void HG51B::serialize(serializer &s) {
+void HG51B::serialize(serializer& s) {
   s.array(dataRAM);
-  for(auto &n : stack) s.integer(n);
+  for(auto& n : stack) s.integer(n);
   s.integer(opcode);
 
   s.integer(regs.halt);
@@ -21,7 +21,7 @@ void HG51B::serialize(serializer &s) {
   s.integer(regs.ramdata);
   s.integer(regs.busaddr);
   s.integer(regs.ramaddr);
-  for(auto &n : regs.gpr) s.integer(n);
+  for(auto& n : regs.gpr) s.integer(n);
 }
 
 #endif

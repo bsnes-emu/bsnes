@@ -11,7 +11,7 @@ void APU::FIFO::write(int8 byte) {
 }
 
 void APU::FIFO::reset() {
-  for(auto &byte : sample) byte = 0;
+  for(auto& byte : sample) byte = 0;
   output = 0;
 
   rdoffset = 0;

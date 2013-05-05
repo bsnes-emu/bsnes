@@ -1,4 +1,4 @@
-void PPU::serialize(serializer &s) {
+void PPU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.integer(status.mdr);

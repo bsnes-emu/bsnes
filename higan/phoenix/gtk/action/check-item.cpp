@@ -14,7 +14,7 @@ void pCheckItem::setChecked(bool checked) {
   locked = false;
 }
 
-void pCheckItem::setText(const string& text) {
+void pCheckItem::setText(string text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 

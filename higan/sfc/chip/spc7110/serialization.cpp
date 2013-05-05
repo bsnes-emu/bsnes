@@ -1,6 +1,6 @@
 #ifdef SPC7110_CPP
 
-void SPC7110::serialize(serializer &s) {
+void SPC7110::serialize(serializer& s) {
   s.array(ram.data(), ram.size());
 
   s.integer(r4801);

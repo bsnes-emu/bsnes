@@ -79,7 +79,7 @@ private:
   uint23 dcu_addr;
   unsigned dcu_offset;
   uint8 dcu_tile[32];
-  Decompressor *decompressor;
+  Decompressor* decompressor;
 
   //==============
   //data port unit

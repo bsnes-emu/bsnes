@@ -59,12 +59,12 @@ void ICD2::reset() {
   r6005 = 0xff;
   r6006 = 0xff;
   r6007 = 0xff;
-  for(auto &r : r7000) r = 0x00;
+  for(auto& r : r7000) r = 0x00;
   r7800 = 0x0000;
   mlt_req = 0;
 
-  for(auto &n : lcd.buffer) n = 0;
-  for(auto &n : lcd.output) n = 0;
+  for(auto& n : lcd.buffer) n = 0;
+  for(auto& n : lcd.output) n = 0;
   lcd.row = 0;
 
   packetsize = 0;

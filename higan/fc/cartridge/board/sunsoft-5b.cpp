@@ -42,7 +42,7 @@ struct Pulse {
     output = 0;
   }
 
-  void serialize(serializer &s) {
+  void serialize(serializer& s) {
     s.integer(disable);
     s.integer(frequency);
     s.integer(volume);
@@ -190,8 +190,8 @@ void reset() {
   mmu_port = 0;
   apu_port = 0;
 
-  for(auto &n : prg_bank) n = 0;
-  for(auto &n : chr_bank) n = 0;
+  for(auto& n : prg_bank) n = 0;
+  for(auto& n : chr_bank) n = 0;
   mirror = 0;
   irq_enable = 0;
   irq_counter_enable = 0;
@@ -202,7 +202,7 @@ void reset() {
   pulse[2].reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 
   s.integer(mmu_port);
@@ -220,7 +220,7 @@ void serialize(serializer &s) {
   pulse[2].serialize(s);
 }
 
-Sunsoft5B(Markup::Node &document) : Board(document) {
+Sunsoft5B(Markup::Node& document) : Board(document) {
 }
 
 };

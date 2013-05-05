@@ -22,7 +22,7 @@ void pTextEdit::setEditable(bool editable) {
   gtk_text_view_set_editable(GTK_TEXT_VIEW(subWidget), editable);
 }
 
-void pTextEdit::setText(const string& text) {
+void pTextEdit::setText(string text) {
   locked = true;
   gtk_text_buffer_set_text(textBuffer, text, -1);
   locked = false;

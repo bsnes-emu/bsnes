@@ -63,17 +63,17 @@ void PPU::Window::run() {
   );
 
   switch(regs.col_main_mask) {
-    case 0: main = true; break;
-    case 1: break;
-    case 2: main = !main; break;
-    case 3: main = false; break;
+  case 0: main = true; break;
+  case 1: break;
+  case 2: main = !main; break;
+  case 3: main = false; break;
   }
 
   switch(regs.col_sub_mask) {
-    case 0: sub = true; break;
-    case 1: break;
-    case 2: sub = !sub; break;
-    case 3: sub = false; break;
+  case 0: sub = true; break;
+  case 1: break;
+  case 2: sub = !sub; break;
+  case 3: sub = false; break;
   }
 
   output.main.color_enable = main;
@@ -81,7 +81,7 @@ void PPU::Window::run() {
 }
 
 void PPU::Window::test(
-  bool &main, bool &sub,
+  bool& main, bool& sub,
   bool one_enable, bool one_invert,
   bool two_enable, bool two_invert,
   uint8 mask, bool main_enable, bool sub_enable
@@ -96,11 +96,13 @@ void PPU::Window::test(
     output = one;
   } else if(one_enable == false && two_enable == true) {
     output = two;
-  } else switch(mask) {
+  } else {
+    switch(mask) {
     case 0: output = (one | two) == 1; break;
     case 1: output = (one & two) == 1; break;
     case 2: output = (one ^ two) == 1; break;
     case 3: output = (one ^ two) == 0; break;
+    }
   }
 
   main = main_enable ? output : false;
@@ -163,7 +165,7 @@ void PPU::Window::reset() {
   two = 0;
 }
 
-PPU::Window::Window(PPU &self) : self(self) {
+PPU::Window::Window(PPU& self) : self(self) {
 }
 
 #endif

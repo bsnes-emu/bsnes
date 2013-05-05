@@ -1,4 +1,4 @@
-void R65816::serialize(serializer &s) {
+void R65816::serialize(serializer& s) {
   s.integer(regs.pc.d);
 
   s.integer(regs.a.w);

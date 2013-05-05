@@ -60,7 +60,7 @@ void SMP::reset() {
   regs.s = 0xef;
   regs.p = 0x02;
 
-  for(auto &n : apuram) n = random(0x00);
+  for(auto& n : apuram) n = random(0x00);
   apuram[0x00f4] = 0x00;
   apuram[0x00f5] = 0x00;
   apuram[0x00f6] = 0x00;
@@ -114,7 +114,7 @@ void SMP::reset() {
 }
 
 SMP::SMP() {
-  for(auto &byte : iplrom) byte = 0;
+  for(auto& byte : iplrom) byte = 0;
 }
 
 SMP::~SMP() {

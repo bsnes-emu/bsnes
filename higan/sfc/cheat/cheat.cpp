@@ -43,7 +43,7 @@ uint8 Cheat::read(unsigned addr) const {
   addr = mirror(addr);
 
   for(unsigned i = 0; i < size(); i++) {
-    const CheatCode &code = operator[](i);
+    const CheatCode& code = operator[](i);
     if(addr == mirror(code.addr)) {
       return code.data;
     }
@@ -65,7 +65,7 @@ Cheat::~Cheat() {
   delete[] override;
 }
 
-bool Cheat::decode(const string &code, unsigned &addr, unsigned &data) {
+bool Cheat::decode(string code, unsigned& addr, unsigned& data) {
   string t = code;
   t.lower();
 
@@ -73,7 +73,7 @@ bool Cheat::decode(const string &code, unsigned &addr, unsigned &data) {
 
   if(t.wildcard("??????:??")) {
     //Direct
-    t = { substr(t, 0, 6), substr(t, 7, 2) };
+    t = {substr(t, 0, 6), substr(t, 7, 2)};
     for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
     unsigned r = hex(t);
 
@@ -84,11 +84,11 @@ bool Cheat::decode(const string &code, unsigned &addr, unsigned &data) {
 
   if(t.wildcard("????" "-" "????")) {
     //Game Genie
-    t = { substr(t, 0, 4), substr(t, 5, 4) };
+    t = {substr(t, 0, 4), substr(t, 5, 4)};
     for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
     t.transform("df4709156bc8a23e", "0123456789abcdef");
     unsigned r = hex(t);
-    static unsigned bits[] = { 13, 12, 11, 10, 5, 4, 3, 2, 23, 22, 21, 20, 1, 0, 15, 14, 19, 18, 17, 16, 9, 8, 7, 6 };
+    static unsigned bits[] = {13, 12, 11, 10, 5, 4, 3, 2, 23, 22, 21, 20, 1, 0, 15, 14, 19, 18, 17, 16, 9, 8, 7, 6};
 
     addr = 0;
     for(unsigned n = 0; n < 24; n++) addr |= r & (1 << bits[n]) ? 0x800000 >> n : 0;

@@ -3,9 +3,9 @@
 //optimized implementation: cydrak
 
 struct Decompressor {
-  SPC7110 &spc7110;
+  SPC7110& spc7110;
 
-  Decompressor(SPC7110 &spc7110) : spc7110(spc7110) {}
+  Decompressor(SPC7110& spc7110) : spc7110(spc7110) {}
 
   uint8 read() {
     return spc7110.datarom_read(offset++);
@@ -79,8 +79,8 @@ struct Decompressor {
         if(bpp == 2) set = diff;
         if(plane >= 2 && history <= 1) set = diff;
 
-        auto &ctx = context[set][bit + history - 1];
-        auto &model = evolution[ctx.prediction];
+        auto& ctx = context[set][bit + history - 1];
+        auto& model = evolution[ctx.prediction];
         uint8 lps_offset = range - model.probability;
         bool symbol = input >= (lps_offset << 8);  //test only the MSB
 
@@ -119,9 +119,9 @@ struct Decompressor {
     if(bpp == 4) result = deinterleave(deinterleave(pixels, 32), 32);
   }
 
-  void serialize(serializer &s) {
-    for(auto &root : context) {
-      for(auto &node : root) {
+  void serialize(serializer& s) {
+    for(auto& root : context) {
+      for(auto& node : root) {
         s.integer(node.prediction);
         s.integer(node.swap);
       }

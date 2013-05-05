@@ -1,6 +1,6 @@
 #ifdef CPU_CPP
 
-void CPU::serialize(serializer &s) {
+void CPU::serialize(serializer& s) {
   LR35902::serialize(s);
   Thread::serialize(s);
 

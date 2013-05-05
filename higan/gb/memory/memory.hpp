@@ -1,10 +1,10 @@
 struct Memory {
-  uint8_t *data;
+  uint8_t* data;
   unsigned size;
 
   uint8_t& operator[](unsigned addr);
   void allocate(unsigned size);
-  void copy(const uint8_t *data, unsigned size);
+  void copy(const uint8_t* data, unsigned size);
   void free();
   Memory();
   ~Memory();
@@ -21,7 +21,7 @@ struct Unmapped : MMIO {
 };
 
 struct Bus {
-  MMIO *mmio[65536];
+  MMIO* mmio[65536];
   uint8 read(uint16 addr);
   void write(uint16 addr, uint8 data);
 

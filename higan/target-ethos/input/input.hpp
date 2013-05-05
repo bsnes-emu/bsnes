@@ -11,7 +11,7 @@ struct AbstractInput {
   vector<Input> inputList;
 
   void bind();
-  bool append(const string& mapping);
+  bool append(string mapping);
   virtual bool bind(unsigned scancode, int16_t value) = 0;
   virtual int16_t poll() = 0;
   AbstractInput();

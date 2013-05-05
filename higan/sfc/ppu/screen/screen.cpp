@@ -179,7 +179,7 @@ void PPU::Screen::reset() {
   regs.color_b = random(0);
 }
 
-PPU::Screen::Screen(PPU &self) : self(self) {
+PPU::Screen::Screen(PPU& self) : self(self) {
 }
 
 #endif

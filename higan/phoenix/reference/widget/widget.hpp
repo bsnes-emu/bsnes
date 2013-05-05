@@ -8,7 +8,7 @@ struct pWidget : public pSizable {
   Size minimumSize();
   void setEnabled(bool enabled);
   void setFocused();
-  void setFont(const string& font);
+  void setFont(string font);
   void setGeometry(const Geometry& geometry);
   void setVisible(bool visible);
 

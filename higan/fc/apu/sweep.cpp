@@ -42,7 +42,7 @@ void APU::Sweep::power() {
 void APU::Sweep::reset() {
 }
 
-void APU::Sweep::serialize(serializer &s) {
+void APU::Sweep::serialize(serializer& s) {
   s.integer(shift);
   s.integer(decrement);
   s.integer(period);

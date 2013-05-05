@@ -15,9 +15,10 @@ inline uint16 PPU::get_direct_color(uint8 p, uint8 t) {
 }
 
 inline uint16 PPU::get_pixel_normal(uint32 x) {
-  pixel_t &p = pixel_cache[x];
+  pixel_t& p = pixel_cache[x];
   uint16 src_main, src_sub;
-  uint8  bg_sub;
+  uint8 bg_sub;
+
   src_main = p.src_main;
 
   if(!regs.addsub_mode) {
@@ -50,9 +51,10 @@ inline uint16 PPU::get_pixel_normal(uint32 x) {
 }
 
 inline uint16 PPU::get_pixel_swap(uint32 x) {
-  pixel_t &p = pixel_cache[x];
+  pixel_t& p = pixel_cache[x];
   uint16 src_main, src_sub;
-  uint8  bg_sub;
+  uint8 bg_sub;
+
   src_main = p.src_sub;
 
   if(!regs.addsub_mode) {
@@ -85,7 +87,7 @@ inline uint16 PPU::get_pixel_swap(uint32 x) {
 }
 
 inline void PPU::render_line_output() {
-  uint32 *ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
+  uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
   uint32 curr, prev;
 
   if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
@@ -110,7 +112,7 @@ inline void PPU::render_line_output() {
 }
 
 inline void PPU::render_line_clear() {
-  uint32 *ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
+  uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
   unsigned width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
   memset(ptr, 0, width * 2 * sizeof(uint32));
 }

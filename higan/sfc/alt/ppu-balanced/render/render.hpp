@@ -25,8 +25,8 @@ struct pixel_t {
   uint8  pri_main, pri_sub;
 } pixel_cache[256];
 
-uint8 *bg_tiledata[3];
-uint8 *bg_tiledata_state[3];  //0 = valid, 1 = dirty
+uint8* bg_tiledata[3];
+uint8* bg_tiledata_state[3];  //0 = valid, 1 = dirty
 
 template<unsigned color_depth> void render_bg_tile(uint16 tile_num);
 inline void flush_pixel_cache();

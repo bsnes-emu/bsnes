@@ -9,7 +9,7 @@ void APU::DMC::stop() {
   length_counter = 0;
   dma_delay_counter = 0;
   cpu.set_rdy_line(1);
-  cpu.set_rdy_addr({ false, 0u });
+  cpu.set_rdy_addr(false);
 }
 
 uint8 APU::DMC::clock() {
@@ -19,10 +19,10 @@ uint8 APU::DMC::clock() {
     dma_delay_counter--;
 
     if(dma_delay_counter == 1) {
-      cpu.set_rdy_addr({ true, uint16(0x8000 | read_addr) });
+      cpu.set_rdy_addr(true, 0x8000 | read_addr);
     } else if(dma_delay_counter == 0) {
       cpu.set_rdy_line(1);
-      cpu.set_rdy_addr({ false, 0u });
+      cpu.set_rdy_addr(false);
 
       dma_buffer = cpu.mdr();
       have_dma_buffer = true;
@@ -91,7 +91,7 @@ void APU::DMC::reset() {
   sample = 0;
 }
 
-void APU::DMC::serialize(serializer &s) {
+void APU::DMC::serialize(serializer& s) {
   s.integer(length_counter);
   s.integer(irq_pending);
 

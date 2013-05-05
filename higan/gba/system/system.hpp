@@ -3,7 +3,7 @@ enum class Input : unsigned {
 };
 
 struct BIOS : Memory {
-  uint8 *data;
+  uint8* data;
   unsigned size;
   uint32 mdr;
 

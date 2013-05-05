@@ -12,7 +12,7 @@ vector<uint8> HitachiDSP::firmware() {
   return buffer;
 }
 
-void HitachiDSP::serialize(serializer &s) {
+void HitachiDSP::serialize(serializer& s) {
   HG51B::serialize(s);
   Thread::serialize(s);
 

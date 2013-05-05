@@ -61,7 +61,7 @@ void Application::quit() {
   return pApplication::quit();
 }
 
-void Application::setName(const string& name) {
+void Application::setName(string name) {
   applicationState.name = name;
 }
 
@@ -99,7 +99,7 @@ string Geometry::text() const {
   return {x, ",", y, ",", width, ",", height};
 }
 
-Geometry::Geometry(const string& text) {
+Geometry::Geometry(string text) {
   lstring part = text.split(",");
   x = integer(part(0, "256"));
   y = integer(part(1, "256"));
@@ -110,19 +110,19 @@ Geometry::Geometry(const string& text) {
 //Font
 //====
 
-string Font::serif(unsigned size, const string& style) {
+string Font::serif(unsigned size, string style) {
   return pFont::serif(size, style);
 }
 
-string Font::sans(unsigned size, const string& style) {
+string Font::sans(unsigned size, string style) {
   return pFont::sans(size, style);
 }
 
-string Font::monospace(unsigned size, const string& style) {
+string Font::monospace(unsigned size, string style) {
   return pFont::monospace(size, style);
 }
 
-Size Font::size(const string &font, const string& text) {
+Size Font::size(string font, string text) {
   return pFont::size(font, text);
 }
 
@@ -192,12 +192,12 @@ BrowserWindow& BrowserWindow::setParent(Window& parent) {
   return *this;
 }
 
-BrowserWindow& BrowserWindow::setPath(const string& path) {
+BrowserWindow& BrowserWindow::setPath(string path) {
   state.path = path;
   return *this;
 }
 
-BrowserWindow& BrowserWindow::setTitle(const string& title) {
+BrowserWindow& BrowserWindow::setTitle(string title) {
   state.title = title;
   return *this;
 }
@@ -233,12 +233,12 @@ MessageWindow& MessageWindow::setParent(Window& parent) {
   return *this;
 }
 
-MessageWindow& MessageWindow::setText(const string& text) {
+MessageWindow& MessageWindow::setText(string text) {
   state.text = text;
   return *this;
 }
 
-MessageWindow& MessageWindow::setTitle(const string& title) {
+MessageWindow& MessageWindow::setTitle(string title) {
   state.title = title;
   return *this;
 }
@@ -248,7 +248,7 @@ MessageWindow::Response MessageWindow::warning(MessageWindow::Buttons buttons) {
   return pMessageWindow::warning(state);
 }
 
-MessageWindow::MessageWindow(const string& text):
+MessageWindow::MessageWindow(string text):
 state(*new State) {
   state.text = text;
 }
@@ -405,7 +405,7 @@ void Window::setGeometry(const Geometry& geometry) {
   return p.setGeometry(geometry);
 }
 
-void Window::setMenuFont(const string& font) {
+void Window::setMenuFont(string font) {
   state.menuFont = font;
   return p.setMenuFont(font);
 }
@@ -433,12 +433,12 @@ void Window::setSmartGeometry(const Geometry& geometry) {
   });
 }
 
-void Window::setStatusFont(const string& font) {
+void Window::setStatusFont(string font) {
   state.statusFont = font;
   return p.setStatusFont(font);
 }
 
-void Window::setStatusText(const string& text) {
+void Window::setStatusText(string text) {
   state.statusText = text;
   return p.setStatusText(text);
 }
@@ -448,7 +448,7 @@ void Window::setStatusVisible(bool visible) {
   return p.setStatusVisible(visible);
 }
 
-void Window::setTitle(const string& text) {
+void Window::setTitle(string text) {
   state.title = text;
   return p.setTitle(text);
 }
@@ -459,7 +459,7 @@ void Window::setVisible(bool visible) {
   return p.setVisible(visible);
 }
 
-void Window::setWidgetFont(const string& font) {
+void Window::setWidgetFont(string font) {
   state.widgetFont = font;
   return p.setWidgetFont(font);
 }
@@ -548,7 +548,7 @@ void Menu::setImage(const image& image) {
   return p.setImage(image);
 }
 
-void Menu::setText(const string& text) {
+void Menu::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -588,7 +588,7 @@ void Item::setImage(const image& image) {
   return p.setImage(image);
 }
 
-void Item::setText(const string& text) {
+void Item::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -618,7 +618,7 @@ void CheckItem::setChecked(bool checked) {
   return p.setChecked(checked);
 }
 
-void CheckItem::setText(const string& text) {
+void CheckItem::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -654,7 +654,7 @@ void RadioItem::setChecked() {
   return p.setChecked();
 }
 
-void RadioItem::setText(const string& text) {
+void RadioItem::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -785,7 +785,7 @@ void Widget::setFocused() {
   return p.setFocused();
 }
 
-void Widget::setFont(const string& font) {
+void Widget::setFont(string font) {
   state.font = font;
   return p.setFont(font);
 }
@@ -835,7 +835,7 @@ void Button::setImage(const image& image, Orientation orientation) {
   return p.setImage(image, orientation);
 }
 
-void Button::setText(const string& text) {
+void Button::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -912,7 +912,7 @@ void CheckButton::setChecked(bool checked) {
   return p.setChecked(checked);
 }
 
-void CheckButton::setText(const string& text) {
+void CheckButton::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -940,7 +940,7 @@ void ComboButton::append_(const lstring& list) {
   }
 }
 
-void ComboButton::modify(unsigned row, const string& text) {
+void ComboButton::modify(unsigned row, string text) {
   state.text(row) = text;
   p.modify(row, text);
 }
@@ -1097,7 +1097,7 @@ HorizontalSlider::~HorizontalSlider() {
 //Label
 //=====
 
-void Label::setText(const string& text) {
+void Label::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1123,7 +1123,7 @@ void LineEdit::setEditable(bool editable) {
   return p.setEditable(editable);
 }
 
-void LineEdit::setText(const string& text) {
+void LineEdit::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1276,7 +1276,7 @@ void RadioButton::setChecked() {
   return p.setChecked();
 }
 
-void RadioButton::setText(const string& text) {
+void RadioButton::setText(string text) {
   state.text = text;
   return p.setText(text);
 }
@@ -1310,7 +1310,7 @@ void TextEdit::setEditable(bool editable) {
   return p.setEditable(editable);
 }
 
-void TextEdit::setText(const string& text) {
+void TextEdit::setText(string text) {
   state.text = text;
   return p.setText(text);
 }

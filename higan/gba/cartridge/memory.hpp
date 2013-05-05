@@ -1,11 +1,11 @@
 struct Memory {
-  uint8 *data;
+  uint8* data;
   unsigned size;
   unsigned mask;
 } rom, ram;
 
 struct EEPROM {
-  uint8 *data;
+  uint8* data;
   unsigned size;
   unsigned mask;
   unsigned test;
@@ -26,7 +26,7 @@ struct EEPROM {
 } eeprom;
 
 struct FlashROM {
-  uint8 *data;
+  uint8* data;
   unsigned size;
   uint16 id;
 

@@ -41,12 +41,12 @@ struct pFont {
   static string serif(unsigned size, string style);
   static string sans(unsigned size, string style);
   static string monospace(unsigned size, string style);
-  static Size size(const string& font, const string& text);
+  static Size size(string font, string text);
 
-  static PangoFontDescription* create(const string& description);
+  static PangoFontDescription* create(string description);
   static void free(PangoFontDescription* font);
-  static Size size(PangoFontDescription* font, const string& text);
-  static void setFont(GtkWidget* widget, const string& font);
+  static Size size(PangoFontDescription* font, string text);
+  static void setFont(GtkWidget* widget, string font);
   static void setFont(GtkWidget* widget, gpointer font);
 };
 
@@ -128,16 +128,16 @@ struct pWindow : public pObject {
   void setFocused();
   void setFullScreen(bool fullScreen);
   void setGeometry(const Geometry& geometry);
-  void setMenuFont(const string& font);
+  void setMenuFont(string font);
   void setMenuVisible(bool visible);
   void setModal(bool modal);
   void setResizable(bool resizable);
-  void setStatusFont(const string& font);
-  void setStatusText(const string& text);
+  void setStatusFont(string font);
+  void setStatusText(string text);
   void setStatusVisible(bool visible);
-  void setTitle(const string& text);
+  void setTitle(string text);
   void setVisible(bool visible);
-  void setWidgetFont(const string& font);
+  void setWidgetFont(string font);
 
   pWindow(Window& window) : pObject(window), window(window) {}
   void constructor();
@@ -166,13 +166,13 @@ struct pMenu : public pAction {
   void append(Action& action);
   void remove(Action& action);
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pMenu(Menu &menu) : pAction(menu), menu(menu) {}
   void constructor();
   void destructor();
   void orphan();
-  void setFont(const string& font);
+  void setFont(string font);
 };
 
 struct pSeparator : public pAction {
@@ -188,7 +188,7 @@ struct pItem : public pAction {
   Item& item;
 
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pItem(Item& item) : pAction(item), item(item) {}
   void constructor();
@@ -201,7 +201,7 @@ struct pCheckItem : public pAction {
 
   bool checked();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckItem(CheckItem& checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
@@ -215,7 +215,7 @@ struct pRadioItem : public pAction {
   bool checked();
   void setChecked();
   void setGroup(const group<RadioItem>& group);
-  void setText(const string& text);
+  void setText(string text);
 
   pRadioItem(RadioItem& radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
@@ -244,7 +244,7 @@ struct pWidget : public pSizable {
   virtual Size minimumSize();
   void setEnabled(bool enabled);
   virtual void setFocused();
-  virtual void setFont(const string& font);
+  virtual void setFont(string font);
   virtual void setGeometry(const Geometry& geometry);
   void setVisible(bool visible);
 
@@ -259,7 +259,7 @@ struct pButton : public pWidget {
 
   Size minimumSize();
   void setImage(const image& image, Orientation orientation);
-  void setText(const string& text);
+  void setText(string text);
 
   pButton(Button& button) : pWidget(button), button(button) {}
   void constructor();
@@ -286,7 +286,7 @@ struct pCheckButton : public pWidget {
   bool checked();
   Size minimumSize();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
@@ -298,8 +298,8 @@ struct pComboButton : public pWidget {
   ComboButton& comboButton;
   unsigned itemCounter;
 
-  void append(const string& text);
-  void modify(unsigned row, const string& text);
+  void append(string text);
+  void modify(unsigned row, string text);
   void remove(unsigned row);
   Size minimumSize();
   void reset();
@@ -371,7 +371,7 @@ struct pLabel : public pWidget {
   Label& label;
 
   Size minimumSize();
-  void setText(const string& text);
+  void setText(string text);
 
   pLabel(Label& label) : pWidget(label), label(label) {}
   void constructor();
@@ -384,7 +384,7 @@ struct pLineEdit : public pWidget {
 
   Size minimumSize();
   void setEditable(bool editable);
-  void setText(const string& text);
+  void setText(string text);
   string text();
 
   pLineEdit(LineEdit& lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
@@ -428,7 +428,7 @@ struct pListView : public pWidget {
   void destructor();
   void orphan();
   void setFocused();
-  void setFont(const string& font);
+  void setFont(string font);
 };
 
 struct pProgressBar : public pWidget {
@@ -450,7 +450,7 @@ struct pRadioButton : public pWidget {
   Size minimumSize();
   void setChecked();
   void setGroup(const group<RadioButton>& group);
-  void setText(const string& text);
+  void setText(string text);
 
   pRadioButton(RadioButton& radioButton) : pWidget(radioButton), radioButton(radioButton) {}
   void onActivate();
@@ -468,7 +468,7 @@ struct pTextEdit : public pWidget {
   bool focused();
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
-  void setText(const string& text);
+  void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();
 

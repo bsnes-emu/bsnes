@@ -2,13 +2,7 @@
 
 namespace nall {
 
-struct UTF8 {
-  unsigned size;       //size of encoded codepoint
-  uint64_t data;       //encoded codepoint
-  unsigned codepoint;  //decoded codepoint
-};
-
-inline UTF8 utf8_read(const char* s) {
+UTF8 utf8_read(const char* s) {
   UTF8 utf8;
 
        if((*s & 0xfe) == 0xfc) utf8.size = 6;
@@ -32,7 +26,7 @@ inline UTF8 utf8_read(const char* s) {
   return utf8;
 }
 
-inline void utf8_write(char* s, const UTF8& utf8) {
+void utf8_write(char* s, const UTF8& utf8) {
   for(signed n = utf8.size - 1, shift = 0; n >= 0; n--, shift += 8) {
     s[n] = utf8.data >> shift;
   }

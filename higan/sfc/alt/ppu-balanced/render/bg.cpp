@@ -97,14 +97,14 @@ void PPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) {
   uint16 hoffset, voffset, opt_x, col;
   bool   mirror_x, mirror_y;
 
-  const uint8  *tile_ptr;
-  const uint16 *mtable = mosaic_table[regs.mosaic_enabled[bg] ? regs.mosaic_size : 0];
-  const bool   is_opt_mode = (mode == 2 || mode == 4 || mode == 6);
-  const bool   is_direct_color_mode = (regs.direct_color == true && bg == BG1 && (mode == 3 || mode == 4));
+  const uint8*  tile_ptr;
+  const uint16* mtable = mosaic_table[regs.mosaic_enabled[bg] ? regs.mosaic_size : 0];
+  const bool    is_opt_mode = (mode == 2 || mode == 4 || mode == 6);
+  const bool    is_direct_color_mode = (regs.direct_color == true && bg == BG1 && (mode == 3 || mode == 4));
 
   build_window_tables(bg);
-  const uint8 *wt_main = window[bg].main;
-  const uint8 *wt_sub  = window[bg].sub;
+  const uint8* wt_main = window[bg].main;
+  const uint8* wt_sub  = window[bg].sub;
 
   uint16 prev_x = 0xffff, prev_y = 0xffff, prev_optx = 0xffff;
   for(uint16 x = 0; x < width; x++) {

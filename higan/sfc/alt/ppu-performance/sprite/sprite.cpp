@@ -43,7 +43,7 @@ void PPU::Sprite::set_first() {
 }
 
 bool PPU::Sprite::on_scanline(unsigned sprite) {
-  auto &s = list[sprite];
+  auto& s = list[sprite];
   if(s.x > 256 && (s.x + s.width - 1) < 512) return false;
   signed height = (regs.interlace == false ? s.height : s.height >> 1);
   if(self.vcounter() >= s.y && self.vcounter() < (s.y + height)) return true;
@@ -85,7 +85,7 @@ void PPU::Sprite::render() {
 
   for(signed i = 31; i >= 0; i--) {
     if(itemlist[i] == 0xff) continue;
-    auto &s = list[itemlist[i]];
+    auto& s = list[itemlist[i]];
     unsigned tile_width = s.width >> 3;
     signed x = s.x;
     signed y = (self.vcounter() - s.y) & 0xff;
@@ -142,8 +142,8 @@ void PPU::Sprite::render() {
   for(unsigned i = 0; i < 34; i++) {
     if(tilelist[i].tile == 0xffff) continue;
 
-    auto &t = tilelist[i];
-    uint8 *tiledata = self.cache.tile_4bpp(t.tile);
+    auto& t = tilelist[i];
+    uint8* tiledata = self.cache.tile_4bpp(t.tile);
     tiledata += (t.y & 7) << 3;
     unsigned sx = t.x;
     for(unsigned x = 0; x < 8; x++) {
@@ -180,7 +180,7 @@ void PPU::Sprite::render() {
   }
 }
 
-PPU::Sprite::Sprite(PPU &self) : self(self) {
+PPU::Sprite::Sprite(PPU& self) : self(self) {
   priority0_enable = true;
   priority1_enable = true;
   priority2_enable = true;

@@ -53,7 +53,7 @@ void PPU::power() {
   regs.greenswap = 0;
   regs.status = 0;
   regs.vcounter = 0;
-  for(auto &bg : regs.bg) {
+  for(auto& bg : regs.bg) {
     bg.control = 0;
     bg.hoffset = 0;
     bg.voffset = 0;
@@ -66,13 +66,13 @@ void PPU::power() {
     bg.lx = 0;
     bg.ly = 0;
   }
-  for(auto &w : regs.window) {
+  for(auto& w : regs.window) {
     w.x1 = 0;
     w.x2 = 0;
     w.y1 = 0;
     w.y2 = 0;
   }
-  for(auto &f : regs.windowflags) {
+  for(auto& f : regs.windowflags) {
     f = 0;
   }
   regs.mosaic.bghsize = 0;

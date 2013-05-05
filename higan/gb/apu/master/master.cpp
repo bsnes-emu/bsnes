@@ -78,7 +78,7 @@ void APU::Master::power() {
   right  = 0;
 }
 
-void APU::Master::serialize(serializer &s) {
+void APU::Master::serialize(serializer& s) {
   s.integer(left_in_enable);
   s.integer(left_volume);
   s.integer(right_in_enable);

@@ -17,14 +17,14 @@ string pFont::monospace(unsigned size, string style) {
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(const string& font, const string& text) {
+Size pFont::size(string font, string text) {
   PangoFontDescription* description = create(font);
   Size size = pFont::size(description, text);
   free(description);
   return size;
 }
 
-PangoFontDescription* pFont::create(const string& description) {
+PangoFontDescription* pFont::create(string description) {
   lstring part;
   part.split<2>(",", description);
   for(auto& item : part) item.trim(" ");
@@ -51,7 +51,7 @@ void pFont::free(PangoFontDescription* font) {
   pango_font_description_free(font);
 }
 
-Size pFont::size(PangoFontDescription* font, const string& text) {
+Size pFont::size(PangoFontDescription* font, string text) {
   PangoContext* context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
   PangoLayout* layout = pango_layout_new(context);
   pango_layout_set_font_description(layout, font);
@@ -62,7 +62,7 @@ Size pFont::size(PangoFontDescription* font, const string& text) {
   return {width, height};
 }
 
-void pFont::setFont(GtkWidget* widget, const string& font) {
+void pFont::setFont(GtkWidget* widget, string font) {
   auto gtkFont = pFont::create(font);
   pFont::setFont(widget, (gpointer)gtkFont);
   pFont::free(gtkFont);

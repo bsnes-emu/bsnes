@@ -11,7 +11,7 @@ uint8 CPU::read(uint32 addr) {
   case 0x040000c6: case 0x040000c7:
   case 0x040000d2: case 0x040000d3:
   case 0x040000de: case 0x040000df: {
-    auto &dma = regs.dma[(addr - 0x040000ba) / 12];
+    auto& dma = regs.dma[(addr - 0x040000ba) / 12];
     unsigned shift = (addr & 1) * 8;
     return dma.control >> shift;
   }
@@ -24,7 +24,7 @@ uint8 CPU::read(uint32 addr) {
   case 0x04000104: case 0x04000105:
   case 0x04000108: case 0x04000109:
   case 0x0400010c: case 0x0400010d: {
-    auto &timer = regs.timer[(addr >> 2) & 3];
+    auto& timer = regs.timer[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
     return timer.period >> shift;
   }
@@ -34,7 +34,7 @@ uint8 CPU::read(uint32 addr) {
   case 0x04000106: case 0x04000107:
   case 0x0400010a: case 0x0400010b:
   case 0x0400010e: case 0x0400010f: {
-    auto &timer = regs.timer[(addr >> 2) & 3];
+    auto& timer = regs.timer[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
     return timer.control >> shift;
   }
@@ -47,7 +47,7 @@ uint8 CPU::read(uint32 addr) {
   case 0x04000122: case 0x04000123:
   case 0x04000124: case 0x04000125:
   case 0x04000126: case 0x04000127: {
-    auto &data = regs.serial.data[(addr >> 1) & 3];
+    auto& data = regs.serial.data[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
     return data >> shift;
   }
@@ -145,7 +145,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x040000bc: case 0x040000bd: case 0x040000be: case 0x040000bf:
   case 0x040000c8: case 0x040000c9: case 0x040000ca: case 0x040000cb:
   case 0x040000d4: case 0x040000d5: case 0x040000d6: case 0x040000d7: {
-    auto &dma = regs.dma[(addr - 0x040000b0) / 12];
+    auto& dma = regs.dma[(addr - 0x040000b0) / 12];
     unsigned shift = (addr & 3) * 8;
     dma.source = (dma.source & ~(255 << shift)) | (byte << shift);
     return;
@@ -159,7 +159,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x040000c0: case 0x040000c1: case 0x040000c2: case 0x040000c3:
   case 0x040000cc: case 0x040000cd: case 0x040000ce: case 0x040000cf:
   case 0x040000d8: case 0x040000d9: case 0x040000da: case 0x040000db: {
-    auto &dma = regs.dma[(addr - 0x040000b4) / 12];
+    auto& dma = regs.dma[(addr - 0x040000b4) / 12];
     unsigned shift = (addr & 3) * 8;
     dma.target = (dma.target & ~(255 << shift)) | (byte << shift);
     return;
@@ -173,7 +173,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x040000c4: case 0x040000c5:
   case 0x040000d0: case 0x040000d1:
   case 0x040000dc: case 0x040000dd: {
-    auto &dma = regs.dma[(addr - 0x040000b8) / 12];
+    auto& dma = regs.dma[(addr - 0x040000b8) / 12];
     unsigned shift = (addr & 1) * 8;
     dma.length = (dma.length & ~(255 << shift)) | (byte << shift);
     return;
@@ -187,7 +187,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x040000c6: case 0x040000c7:
   case 0x040000d2: case 0x040000d3:
   case 0x040000de: case 0x040000df: {
-    auto &dma = regs.dma[(addr - 0x040000ba) / 12];
+    auto& dma = regs.dma[(addr - 0x040000ba) / 12];
     unsigned shift = (addr & 1) * 8;
     bool enable = dma.control.enable;
     dma.control = (dma.control & ~(255 << shift)) | (byte << shift);
@@ -210,7 +210,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000104: case 0x04000105:
   case 0x04000108: case 0x04000109:
   case 0x0400010c: case 0x0400010d: {
-    auto &timer = regs.timer[(addr >> 2) & 3];
+    auto& timer = regs.timer[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
     timer.reload = (timer.reload & ~(255 << shift)) | (byte << shift);
     return;
@@ -224,7 +224,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000106:
   case 0x0400010a:
   case 0x0400010e: {
-    auto &timer = regs.timer[(addr >> 2) & 3];
+    auto& timer = regs.timer[(addr >> 2) & 3];
     bool enable = timer.control.enable;
     timer.control = byte;
     if(enable == 0 && timer.control.enable == 1) {
@@ -241,7 +241,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000122: case 0x04000123:
   case 0x04000124: case 0x04000125:
   case 0x04000126: case 0x04000127: {
-    auto &data = regs.serial.data[(addr >> 1) & 3];
+    auto& data = regs.serial.data[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
     data = (data & ~(255 << shift)) | (byte << shift);
     return;

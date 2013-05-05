@@ -1,6 +1,6 @@
 #ifdef PPU_CPP
 
-void PPUcounter::serialize(serializer &s) {
+void PPUcounter::serialize(serializer& s) {
   s.integer(status.interlace);
   s.integer(status.field);
   s.integer(status.vcounter);
@@ -12,7 +12,7 @@ void PPUcounter::serialize(serializer &s) {
   s.integer(history.index);
 }
 
-void PPU::serialize(serializer &s) {
+void PPU::serialize(serializer& s) {
   Thread::serialize(s);
   PPUcounter::serialize(s);
 
@@ -94,7 +94,7 @@ void PPU::serialize(serializer &s) {
   s.integer(regs.vcounter);
 }
 
-void PPU::Cache::serialize(serializer &s) {
+void PPU::Cache::serialize(serializer& s) {
   //rather than save ~512KB worth of cached tiledata, invalidate it all
   for(unsigned i = 0; i < 4096; i++) tilevalid[0][i] = false;
   for(unsigned i = 0; i < 2048; i++) tilevalid[1][i] = false;
@@ -140,7 +140,7 @@ void PPU::Background::serialize(serializer &s) {
   window.serialize(s);
 }
 
-void PPU::Sprite::serialize(serializer &s) {
+void PPU::Sprite::serialize(serializer& s) {
   s.integer(regs.priority0);
   s.integer(regs.priority1);
   s.integer(regs.priority2);
@@ -190,7 +190,7 @@ void PPU::Sprite::serialize(serializer &s) {
   window.serialize(s);
 }
 
-void PPU::Screen::serialize(serializer &s) {
+void PPU::Screen::serialize(serializer& s) {
   s.integer(regs.addsub_mode);
   s.integer(regs.direct_color);
 
@@ -216,7 +216,7 @@ void PPU::Screen::serialize(serializer &s) {
   window.serialize(s);
 }
 
-void PPU::LayerWindow::serialize(serializer &s) {
+void PPU::LayerWindow::serialize(serializer& s) {
   s.integer(one_enable);
   s.integer(one_invert);
   s.integer(two_enable);
@@ -231,7 +231,7 @@ void PPU::LayerWindow::serialize(serializer &s) {
   s.array(sub);
 }
 
-void PPU::ColorWindow::serialize(serializer &s) {
+void PPU::ColorWindow::serialize(serializer& s) {
   s.integer(one_enable);
   s.integer(one_invert);
   s.integer(two_enable);

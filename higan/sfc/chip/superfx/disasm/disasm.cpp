@@ -1,6 +1,8 @@
 #ifdef SUPERFX_CPP
 
-void SuperFX::disassemble_opcode(char *output) {
+//TODO: this belongs in processor/gsu
+
+void SuperFX::disassemble_opcode(char* output) {
   *output = 0;
 
   if(!regs.sfr.alt2) {
@@ -39,7 +41,7 @@ void SuperFX::disassemble_opcode(char *output) {
 #define op1 bus_read((regs.pbr << 16) + regs.r[15] + 0)
 #define op2 bus_read((regs.pbr << 16) + regs.r[15] + 1)
 
-void SuperFX::disassemble_alt0(char *output) {
+void SuperFX::disassemble_alt0(char* output) {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -96,7 +98,7 @@ void SuperFX::disassemble_alt0(char *output) {
   strcat(output, t);
 }
 
-void SuperFX::disassemble_alt1(char *output) {
+void SuperFX::disassemble_alt1(char* output) {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -153,7 +155,7 @@ void SuperFX::disassemble_alt1(char *output) {
   strcat(output, t);
 }
 
-void SuperFX::disassemble_alt2(char *output) {
+void SuperFX::disassemble_alt2(char* output) {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -210,7 +212,7 @@ void SuperFX::disassemble_alt2(char *output) {
   strcat(output, t);
 }
 
-void SuperFX::disassemble_alt3(char *output) {
+void SuperFX::disassemble_alt3(char* output) {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;

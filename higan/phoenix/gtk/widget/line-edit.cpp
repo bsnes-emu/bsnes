@@ -18,7 +18,7 @@ void pLineEdit::setEditable(bool editable) {
   gtk_editable_set_editable(GTK_EDITABLE(gtkWidget), editable);
 }
 
-void pLineEdit::setText(const string& text) {
+void pLineEdit::setText(string text) {
   locked = true;
   gtk_entry_set_text(GTK_ENTRY(gtkWidget), text);
   locked = false;

@@ -1,6 +1,6 @@
 void CPU::dma_run() {
   for(unsigned n = 0; n < 4; n++) {
-    auto &dma = regs.dma[n];
+    auto& dma = regs.dma[n];
     if(dma.pending) {
       dma.pending = false;
       dma_transfer(dma);
@@ -10,7 +10,7 @@ void CPU::dma_run() {
   }
 }
 
-void CPU::dma_transfer(Registers::DMA &dma) {
+void CPU::dma_transfer(Registers::DMA& dma) {
   unsigned size = dma.control.size ? Word : Half;
   unsigned seek = dma.control.size ? 4 : 2;
 
@@ -43,18 +43,18 @@ void CPU::dma_transfer(Registers::DMA &dma) {
 }
 
 void CPU::dma_vblank() {
-  for(auto &dma : regs.dma) {
+  for(auto& dma : regs.dma) {
     if(dma.control.enable && dma.control.timingmode == 1) dma.pending = true;
   }
 }
 
 void CPU::dma_hblank() {
-  for(auto &dma : regs.dma) {
+  for(auto& dma : regs.dma) {
     if(dma.control.enable && dma.control.timingmode == 2) dma.pending = true;
   }
 }
 
 void CPU::dma_hdma() {
-  auto &dma = regs.dma[3];
+  auto& dma = regs.dma[3];
   if(dma.control.enable && dma.control.timingmode == 3) dma.pending = true;
 }

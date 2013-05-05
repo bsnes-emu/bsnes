@@ -32,7 +32,7 @@ void Cartridge::load() {
   sha256_final(&sha);
   sha256_hash(&sha, hash);
   string result;
-  for(auto &byte : hash) result.append(hex<2>(byte));
+  for(auto& byte : hash) result.append(hex<2>(byte));
   sha256 = result;
 
   system.load();
@@ -78,7 +78,7 @@ void Cartridge::scanline(unsigned y) {
   return board->scanline(y);
 }
 
-void Cartridge::serialize(serializer &s) {
+void Cartridge::serialize(serializer& s) {
   Thread::serialize(s);
   return board->serialize(s);
 }

@@ -16,7 +16,7 @@ void Memory::allocate(unsigned size_) {
   data = new uint8_t[size]();
 }
 
-void Memory::copy(const uint8_t *data_, unsigned size_) {
+void Memory::copy(const uint8_t* data_, unsigned size_) {
   free();
   size = size_;
   data = new uint8_t[size];

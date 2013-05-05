@@ -27,7 +27,7 @@ void AbstractInput::bind() {
   }
 }
 
-bool AbstractInput::append(const string& encode) {
+bool AbstractInput::append(string encode) {
   if(mapping.position(encode)) return true;  //mapping already bound
   if(mapping.empty() || mapping == "None") mapping = encode;  //remove "None"
   else mapping.append(",", encode);  //add to existing mapping list

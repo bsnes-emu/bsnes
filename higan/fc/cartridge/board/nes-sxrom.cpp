@@ -89,12 +89,12 @@ void reset() {
   mmc1.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   mmc1.serialize(s);
 }
 
-NES_SxROM(Markup::Node &document) : Board(document), mmc1(*this) {
+NES_SxROM(Markup::Node& document) : Board(document), mmc1(*this) {
   revision = Revision::SXROM;
 }
 

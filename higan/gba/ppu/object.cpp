@@ -7,12 +7,12 @@ void PPU::render_objects() {
 //fx,fy = affine pixel coordinates
 //pa,pb,pc,pd = affine pixel adjustments
 //x,y = adjusted coordinates within sprite (linear = vflip/hflip, affine = rotation/zoom)
-void PPU::render_object(Object &obj) {
+void PPU::render_object(Object& obj) {
   uint8 py = regs.vcounter - obj.y;
   if(obj.affine == 0 && obj.affinesize == 1) return;  //hidden
   if(py >= obj.height << obj.affinesize) return;  //offscreen
 
-  auto &output = layer[OBJ];
+  auto& output = layer[OBJ];
   unsigned rowsize = regs.control.objmapping == 0 ? 32 >> obj.colors : obj.width / 8;
   unsigned baseaddr = obj.character * 32;
 

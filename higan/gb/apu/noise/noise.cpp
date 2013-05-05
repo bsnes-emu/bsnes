@@ -20,9 +20,6 @@ void APU::Noise::run() {
 }
 
 void APU::Noise::clock_length() {
-//if(counter && length) {
-//  if(--length == 0) enable = false;
-//}
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
@@ -38,7 +35,6 @@ void APU::Noise::clock_envelope() {
 
 void APU::Noise::write(unsigned r, uint8 data) {
   if(r == 1) {  //$ff20  NR41
-  //length = 64 - (data & 0x3f);
     length = data & 0x3f;
   }
 
@@ -66,7 +62,6 @@ void APU::Noise::write(unsigned r, uint8 data) {
       lfsr = ~0U;
       envelope_period = envelope_frequency;
       volume = envelope_volume;
-    //if(length == 0) length = 64;
     }
   }
 }
@@ -90,7 +85,7 @@ void APU::Noise::power() {
   lfsr = 0;
 }
 
-void APU::Noise::serialize(serializer &s) {
+void APU::Noise::serialize(serializer& s) {
   s.integer(enable);
 
   s.integer(envelope_volume);

@@ -7,7 +7,7 @@ bool pCheckButton::checked() {
 void pCheckButton::setChecked(bool checked) {
 }
 
-void pCheckButton::setText(const string& text) {
+void pCheckButton::setText(string text) {
 }
 
 void pCheckButton::constructor() {

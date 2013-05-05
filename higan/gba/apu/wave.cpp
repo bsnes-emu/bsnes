@@ -6,7 +6,7 @@ void APU::Wave::run() {
   }
 
   output = patternsample;
-  static unsigned multiplier[] = { 0, 4, 2, 1, 3, 3, 3, 3};
+  static unsigned multiplier[] = {0, 4, 2, 1, 3, 3, 3, 3};
   output = (output * multiplier[volume]) / 4;
   if(enable == false) output = 0;
 }
@@ -85,7 +85,7 @@ void APU::Wave::power() {
   frequency = 0;
   counter = 0;
   initialize = 0;
-  for(auto &sample : pattern) sample = 0;
+  for(auto& sample : pattern) sample = 0;
   enable = 0;
   output = 0;
   patternaddr = 0;

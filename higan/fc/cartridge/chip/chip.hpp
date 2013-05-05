@@ -1,7 +1,7 @@
 struct Board;
 
 struct Chip {
-  Board &board;
+  Board& board;
   void tick();
-  Chip(Board &board);
+  Chip(Board& board);
 };

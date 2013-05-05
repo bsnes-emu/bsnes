@@ -8,15 +8,16 @@ uint16 SMP::relb(int8 offset, int op_len) {
   return pc + offset;
 }
 
-void SMP::disassemble_opcode(char *output, uint16 addr) {
-  char *s, t[512];
-  uint8  op, op0, op1;
+void SMP::disassemble_opcode(char* output, uint16 addr) {
+  char* s;
+  char t[512];
+  uint8 op, op0, op1;
   uint16 opw, opdp0, opdp1;
   s = output;
 
   sprintf(s, "..%.4x ", addr);
 
-  op  = disassemble_read(addr + 0);
+  op = disassemble_read(addr + 0);
   op0 = disassemble_read(addr + 1);
   op1 = disassemble_read(addr + 2);
   opw = (op0) | (op1 << 8);

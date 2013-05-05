@@ -26,7 +26,7 @@ void pRadioItem::setGroup(const group<RadioItem>& group) {
   }
 }
 
-void pRadioItem::setText(const string& text) {
+void pRadioItem::setText(string text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 

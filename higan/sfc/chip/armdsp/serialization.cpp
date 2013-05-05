@@ -9,7 +9,7 @@ nall::vector<uint8> ArmDSP::firmware() {
   return buffer;
 }
 
-void ArmDSP::serialize(serializer &s) {
+void ArmDSP::serialize(serializer& s) {
   ARM::serialize(s);
   Thread::serialize(s);
 

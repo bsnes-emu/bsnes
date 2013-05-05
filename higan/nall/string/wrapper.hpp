@@ -2,46 +2,101 @@
 
 namespace nall {
 
-unsigned string::length() const { return strlen(data); }
-unsigned string::capacity() const { return size; }
+template<unsigned limit> lstring string::split(rstring key) const { lstring result; result.split<limit>(key, data()); return result; }
+template<unsigned limit> lstring string::isplit(rstring key) const { lstring result; result.isplit<limit>(key, data()); return result; }
+template<unsigned limit> lstring string::qsplit(rstring key) const { lstring result; result.qsplit<limit>(key, data()); return result; }
+template<unsigned limit> lstring string::iqsplit(rstring key) const { lstring result; result.iqsplit<limit>(key, data()); return result; }
 
-template<unsigned limit> lstring string::split(const char* key) const { lstring result; result.split<limit>(key, data); return result; }
-template<unsigned limit> lstring string::isplit(const char* key) const { lstring result; result.isplit<limit>(key, data); return result; }
-template<unsigned limit> lstring string::qsplit(const char* key) const { lstring result; result.qsplit<limit>(key, data); return result; }
-template<unsigned limit> lstring string::iqsplit(const char* key) const { lstring result; result.iqsplit<limit>(key, data); return result; }
+bool string::wildcard(rstring source) const { return nall::wildcard(data(), source); }
+bool string::iwildcard(rstring source) const { return nall::iwildcard(data(), source); }
 
-bool string::equals(const char* str) const { return !strcmp(data, str); }
-bool string::iequals(const char* str) const { return !istrcmp(data, str); }
+bool string::equals(rstring source) const {
+  if(size() != source.size()) return false;
+  return memcmp(data(), source.data(), source.size()) == 0;
+}
 
-bool string::wildcard(const char* str) const { return nall::wildcard(data, str); }
-bool string::iwildcard(const char* str) const { return nall::iwildcard(data, str); }
+bool string::iequals(rstring source) const {
+  if(size() != source.size()) return false;
+  return imemcmp(data(), source.data(), source.size()) == 0;
+}
 
-bool string::beginswith(const char* str) const { return strbegin(data, str); }
-bool string::ibeginswith(const char* str) const { return istrbegin(data, str); }
+bool string::beginswith(rstring source) const {
+  if(source.size() > size()) return false;
+  return memcmp(data(), source.data(), source.size()) == 0;
+}
 
-bool string::endswith(const char* str) const { return strend(data, str); }
-bool string::iendswith(const char* str) const { return istrend(data, str); }
+bool string::ibeginswith(rstring source) const {
+  if(source.size() > size()) return false;
+  return imemcmp(data(), source.data(), source.size()) == 0;
+}
 
-string& string::lower() { nall::strlower(data); return *this; }
-string& string::upper() { nall::strupper(data); return *this; }
-string& string::qlower() { nall::qstrlower(data); return *this; }
-string& string::qupper() { nall::qstrupper(data); return *this; }
-string& string::transform(const char* before, const char* after) { nall::strtr(data, before, after); return *this; }
+bool string::endswith(rstring source) const {
+  if(source.size() > size()) return false;
+  return memcmp(data() + size() - source.size(), source.data(), source.size()) == 0;
+}
+
+bool string::iendswith(rstring source) const {
+  if(source.size() > size()) return false;
+  return imemcmp(data() + size() - source.size(), source.data(), source.size()) == 0;
+}
+
+string& string::lower() { nall::strlower(data()); return *this; }
+string& string::upper() { nall::strupper(data()); return *this; }
+string& string::qlower() { nall::qstrlower(data()); return *this; }
+string& string::qupper() { nall::qstrupper(data()); return *this; }
+
+string& string::transform(rstring before, rstring after) { nall::strtr(data(), before, after); return *this; }
+
 string& string::reverse() {
-  unsigned length = strlen(data), pivot = length >> 1;
-  for(signed x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(data[x], data[y]);
+  unsigned length = size(), pivot = length >> 1;
+  for(signed x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(data()[x], data()[y]);
   return *this;
 }
 
-template<unsigned limit> string& string::ltrim(const char* key) { nall::ltrim<limit>(data, key); return *this; }
-template<unsigned limit> string& string::rtrim(const char* key) { nall::rtrim<limit>(data, key); return *this; }
-template<unsigned limit> string& string::trim(const char* key, const char* rkey) { nall::trim <limit>(data, key, rkey); return *this; }
-string& string::strip() { nall::strip(data); return *this; }
+template<unsigned Limit> string& string::ltrim(rstring key) {
+  if(key.size() == 0) return *this;
+  unsigned limit = Limit ? Limit : ~0u, offset = 0;
 
-optional<unsigned> string::position(const char* key) const { return strpos(data, key); }
-optional<unsigned> string::iposition(const char* key) const { return istrpos(data, key); }
-optional<unsigned> string::qposition(const char* key) const { return qstrpos(data, key); }
-optional<unsigned> string::iqposition(const char* key) const { return iqstrpos(data, key); }
+  while(limit && size() - offset >= key.size()) {
+    if(memcmp(data() + offset, key.data(), key.size())) break;
+    offset += key.size();
+    limit--;
+  }
+
+  if(offset) memmove(data(), data() + offset, size() - offset);
+  resize(size() - offset);
+  return *this;
+}
+
+template<unsigned Limit> string& string::rtrim(rstring key) {
+  if(key.size() == 0) return *this;
+  unsigned limit = Limit ? Limit : ~0u, offset = 0;
+
+  while(limit && size() - offset >= key.size()) {
+    if(memcmp(data() + size() - key.size() - offset, key.data(), key.size())) break;
+    offset += key.size();
+    limit--;
+  }
+
+  resize(size() - offset);
+  return *this;
+}
+
+template<unsigned limit> string& string::trim(rstring key, rstring rkey) {
+  rtrim(rkey.size() ? rkey : key);
+  return ltrim(key);
+}
+
+string& string::strip() {
+  nall::strip(data());
+  resize(length());
+  return *this;
+}
+
+optional<unsigned> string::position(rstring key) const { return strpos(data(), key); }
+optional<unsigned> string::iposition(rstring key) const { return istrpos(data(), key); }
+optional<unsigned> string::qposition(rstring key) const { return qstrpos(data(), key); }
+optional<unsigned> string::iqposition(rstring key) const { return iqstrpos(data(), key); }
 
 }
 

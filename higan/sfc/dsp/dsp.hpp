@@ -116,7 +116,7 @@ privileged:
 
   //gaussian
   static const int16 gaussian_table[512];
-  int gaussian_interpolate(const voice_t &v);
+  int gaussian_interpolate(const voice_t& v);
 
   //counter
   enum { counter_range = 2048 * 5 * 3 };  //30720 (0x7800)
@@ -126,10 +126,10 @@ privileged:
   bool counter_poll(unsigned rate);
 
   //envelope
-  void envelope_run(voice_t &v);
+  void envelope_run(voice_t& v);
 
   //brr
-  void brr_decode(voice_t &v);
+  void brr_decode(voice_t& v);
 
   //misc
   void misc_27();
@@ -138,7 +138,7 @@ privileged:
   void misc_30();
 
   //voice
-  void voice_output(voice_t &v, bool channel);
+  void voice_output(voice_t& v, bool channel);
   void voice_1 (voice_t &v);
   void voice_2 (voice_t &v);
   void voice_3 (voice_t &v);

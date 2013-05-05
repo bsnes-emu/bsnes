@@ -15,7 +15,7 @@ void CPU::step(unsigned clocks) {
   smp.clock -= clocks * (uint64)smp.frequency;
   ppu.clock -= clocks;
   for(unsigned i = 0; i < coprocessors.size(); i++) {
-    auto &chip = *coprocessors[i];
+    auto& chip = *coprocessors[i];
     chip.clock -= clocks * (uint64)chip.frequency;
   }
   input.port1->clock -= clocks * (uint64)input.port1->frequency;
@@ -41,7 +41,7 @@ void CPU::synchronize_ppu() {
 
 void CPU::synchronize_coprocessors() {
   for(unsigned i = 0; i < coprocessors.size(); i++) {
-    auto &chip = *coprocessors[i];
+    auto& chip = *coprocessors[i];
     if(chip.clock < 0) co_switch(chip.thread);
   }
 }
@@ -121,7 +121,7 @@ void CPU::enable() {
 
 void CPU::power() {
   cpu_version = config.cpu.version;
-  for(auto &byte : wram) byte = random(config.cpu.wram_init_value);
+  for(auto& byte : wram) byte = random(config.cpu.wram_init_value);
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;

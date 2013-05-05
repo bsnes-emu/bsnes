@@ -83,7 +83,7 @@ struct PPU : Thread, MMIO {
 
   //cgb.cpp
   void cgb_render();
-  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned &tile, unsigned &attr, unsigned &data);
+  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& tile, unsigned& attr, unsigned& data);
   void cgb_render_bg();
   void cgb_render_window();
   void cgb_render_ob();

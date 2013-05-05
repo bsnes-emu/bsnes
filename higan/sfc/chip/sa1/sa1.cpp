@@ -104,10 +104,10 @@ void SA1::tick() {
 
   //test counters for timer IRQ
   switch((mmio.ven << 1) + (mmio.hen << 0)) {
-    case 0: break;
-    case 1: if(status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
-    case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) trigger_irq(); break;
-    case 3: if(status.vcounter == mmio.hcnt && status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
+  case 0: break;
+  case 1: if(status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
+  case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) trigger_irq(); break;
+  case 3: if(status.vcounter == mmio.hcnt && status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
   }
 }
 

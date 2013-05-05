@@ -20,7 +20,7 @@ void pCheckButton::setChecked(bool checked) {
   locked = false;
 }
 
-void pCheckButton::setText(const string& text) {
+void pCheckButton::setText(string text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
 }
 

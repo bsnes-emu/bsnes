@@ -33,7 +33,7 @@ void pButton::setImage(const image& image, Orientation orientation) {
   }
 }
 
-void pButton::setText(const string& text) {
+void pButton::setText(string text) {
   gtk_button_set_label(GTK_BUTTON(gtkWidget), text);
   setFont(widget.state.font);
 }

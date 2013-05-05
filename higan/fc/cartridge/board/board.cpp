@@ -77,12 +77,12 @@ void Board::power() {
 void Board::reset() {
 }
 
-void Board::serialize(serializer &s) {
+void Board::serialize(serializer& s) {
   if(prgram.size) s.array(prgram.data, prgram.size);
   if(chrram.size) s.array(chrram.data, chrram.size);
 }
 
-Board::Board(Markup::Node &document) {
+Board::Board(Markup::Node& document) {
   cartridge.board = this;
   auto cartridge = document["cartridge"];
 
@@ -119,7 +119,7 @@ Board::Board(Markup::Node &document) {
 Board::~Board() {
 }
 
-Board* Board::load(const string &manifest) {
+Board* Board::load(string manifest) {
   auto document = Markup::Document(manifest);
   cartridge.information.title = document["information/title"].text();
 

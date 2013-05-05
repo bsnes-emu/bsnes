@@ -6,8 +6,8 @@ namespace SuperFamicom {
 Bus bus;
 
 void Bus::map(
-  const function<uint8 (unsigned)> &reader,
-  const function<void (unsigned, uint8)> &writer,
+  const function<uint8 (unsigned)>& reader,
+  const function<void (unsigned, uint8)>& writer,
   unsigned banklo, unsigned bankhi,
   unsigned addrlo, unsigned addrhi,
   unsigned size, unsigned base, unsigned mask
@@ -39,12 +39,12 @@ void Bus::map_reset() {
 }
 
 void Bus::map_xml() {
-  for(auto &m : cartridge.mapping) {
+  for(auto& m : cartridge.mapping) {
     lstring part = m.addr.split<1>(":");
     lstring banks = part(0).split(",");
     lstring addrs = part(1).split(",");
-    for(auto &bank : banks) {
-      for(auto &addr : addrs) {
+    for(auto& bank : banks) {
+      for(auto& addr : addrs) {
         lstring bankpart = bank.split<1>("-");
         lstring addrpart = addr.split<1>("-");
         unsigned banklo = hex(bankpart(0));

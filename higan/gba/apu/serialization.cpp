@@ -1,4 +1,4 @@
-void APU::serialize(serializer &s) {
+void APU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.integer(regs.bias.level);
@@ -56,7 +56,7 @@ void APU::serialize(serializer &s) {
   s.integer(wave.frequency);
   s.integer(wave.counter);
   s.integer(wave.initialize);
-  for(auto &value : wave.pattern) s.integer(value);
+  for(auto& value : wave.pattern) s.integer(value);
   s.integer(wave.enable);
   s.integer(wave.output);
   s.integer(wave.patternaddr);
@@ -84,17 +84,17 @@ void APU::serialize(serializer &s) {
   s.integer(sequencer.volume);
   s.integer(sequencer.lvolume);
   s.integer(sequencer.rvolume);
-  for(auto &flag : sequencer.lenable) s.integer(flag);
-  for(auto &flag : sequencer.renable) s.integer(flag);
-  for(auto &flag : sequencer.enable) s.integer(flag);
+  for(auto& flag : sequencer.lenable) s.integer(flag);
+  for(auto& flag : sequencer.renable) s.integer(flag);
+  for(auto& flag : sequencer.enable) s.integer(flag);
   s.integer(sequencer.masterenable);
   s.integer(sequencer.base);
   s.integer(sequencer.step);
   s.integer(sequencer.lsample);
   s.integer(sequencer.rsample);
 
-  for(auto &f : fifo) {
-    for(auto &value : f.sample) s.integer(value);
+  for(auto& f : fifo) {
+    for(auto& value : f.sample) s.integer(value);
     s.integer(f.output);
     s.integer(f.rdoffset);
     s.integer(f.wroffset);

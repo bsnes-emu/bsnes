@@ -61,14 +61,14 @@ void CPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) {
 
 uint8 CPU::dma_bbus(unsigned i, unsigned index) {
   switch(channel[i].transfer_mode) { default:
-    case 0: return (channel[i].dest_addr);                       //0
-    case 1: return (channel[i].dest_addr + (index & 1));         //0,1
-    case 2: return (channel[i].dest_addr);                       //0,0
-    case 3: return (channel[i].dest_addr + ((index >> 1) & 1));  //0,0,1,1
-    case 4: return (channel[i].dest_addr + (index & 3));         //0,1,2,3
-    case 5: return (channel[i].dest_addr + (index & 1));         //0,1,0,1
-    case 6: return (channel[i].dest_addr);                       //0,0     [2]
-    case 7: return (channel[i].dest_addr + ((index >> 1) & 1));  //0,0,1,1 [3]
+  case 0: return (channel[i].dest_addr);                       //0
+  case 1: return (channel[i].dest_addr + (index & 1));         //0,1
+  case 2: return (channel[i].dest_addr);                       //0,0
+  case 3: return (channel[i].dest_addr + ((index >> 1) & 1));  //0,0,1,1
+  case 4: return (channel[i].dest_addr + (index & 3));         //0,1,2,3
+  case 5: return (channel[i].dest_addr + (index & 1));         //0,1,0,1
+  case 6: return (channel[i].dest_addr);                       //0,0     [2]
+  case 7: return (channel[i].dest_addr + ((index >> 1) & 1));  //0,0,1,1 [3]
   }
 }
 

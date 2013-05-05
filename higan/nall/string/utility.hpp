@@ -2,50 +2,12 @@
 
 namespace nall {
 
-template<bool Insensitive>
-bool chrequal(char x, char y) {
-  if(Insensitive) return chrlower(x) == chrlower(y);
-  return x == y;
-}
-
-template<bool Quoted, typename T>
-bool quoteskip(T*& p) {
-  if(Quoted == false) return false;
-  if(*p != '\'' && *p != '\"') return false;
-
-  while(*p == '\'' || *p == '\"') {
-    char x = *p++;
-    while(*p && *p++ != x);
-  }
-  return true;
-}
-
-template<bool Quoted, typename T>
-bool quotecopy(char*& t, T*& p) {
-  if(Quoted == false) return false;
-  if(*p != '\'' && *p != '\"') return false;
-
-  while(*p == '\'' || *p == '\"') {
-    char x = *p++;
-    *t++ = x;
-    while(*p && *p != x) *t++ = *p++;
-    *t++ = *p++;
-  }
-  return true;
-}
-
-string substr(const char* src, unsigned start, unsigned length) {
-  string dest;
-  if(length == ~0u) {
-    //copy entire string
-    dest.reserve(strlen(src + start) + 1);
-    strcpy(dest(), src + start);
-  } else {
-    //copy partial string
-    dest.reserve(length + 1);
-    strmcpy(dest(), src + start, length + 1);
-  }
-  return dest;
+string substr(rstring source, unsigned offset, unsigned length) {
+  string result;
+  if(length == ~0u) length = source.size() - offset;
+  result.resize(length);
+  memcpy(result.data(), source.data() + offset, length);
+  return result;
 }
 
 string sha256(const uint8_t* data, unsigned size) {
@@ -56,11 +18,28 @@ string sha256(const uint8_t* data, unsigned size) {
   sha256_final(&sha);
   sha256_hash(&sha, hash);
   string result;
-  for(auto &byte : hash) result.append(hex<2>(byte));
+  for(auto& byte : hash) result.append(hex<2>(byte));
   return result;
 }
 
-/* cast.hpp arithmetic -> string */
+bool tokenize(lstring& list, const char* s, const char* p) {
+  while(*s) {
+    if(*p == '*') {
+      const char* b = s;
+      while(*s) {
+        if(tokenize(list, s++, p + 1)) {
+          list.prepend(substr(b, 0, --s - b));
+          return true;
+        }
+      }
+      list.prepend(b);
+      return !*++p;
+    }
+    if(*s++ != *p++) return false;
+  }
+  while(*p == '*') { list.prepend(s); p++; }
+  return !*p;
+}
 
 char* integer(char* result, intmax_t value) {
   bool negative = value < 0;
@@ -97,110 +76,6 @@ char* decimal(char* result, uintmax_t value) {
   return result;
 }
 
-/* general-purpose arithmetic -> string */
-
-template<unsigned length_, char padding> string integer(intmax_t value) {
-  bool negative = value < 0;
-  if(negative) value = -value;
-
-  char buffer[64];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value % 10;
-    buffer[size++] = '0' + n;
-    value /= 10;
-  } while(value);
-  if(negative) buffer[size++] = '-';
-//buffer[size++] = negative ? '-' : '+';
-  buffer[size] = 0;
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
-template<unsigned length_, char padding> string linteger(intmax_t value) {
-  bool negative = value < 0;
-  if(negative) value = -value;
-
-  char buffer[64];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value % 10;
-    buffer[size++] = '0' + n;
-    value /= 10;
-  } while(value);
-  if(negative) buffer[size++] = '-';
-//buffer[size++] = negative ? '-' : '+';
-  buffer[size] = 0;
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
-template<unsigned length_, char padding> string decimal(uintmax_t value) {
-  char buffer[64];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value % 10;
-    buffer[size++] = '0' + n;
-    value /= 10;
-  } while(value);
-  buffer[size] = 0;
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = length - 1, y = 0; x >= 0 && y < size; x--, y++) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
-template<unsigned length_, char padding> string ldecimal(uintmax_t value) {
-  char buffer[64];
-  unsigned size = 0;
-
-  do {
-    unsigned n = value % 10;
-    buffer[size++] = '0' + n;
-    value /= 10;
-  } while(value);
-  buffer[size] = 0;
-
-  unsigned length = (length_ == 0 ? size : length_);
-  char result[length + 1];
-  memset(result, padding, length);
-  result[length] = 0;
-
-  for(signed x = 0, y = size - 1; x < length && y >= 0; x++, y--) {
-    result[x] = buffer[y];
-  }
-
-  return (const char*)result;
-}
-
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
@@ -233,7 +108,7 @@ unsigned fp(char* str, long double value) {
 string fp(long double value) {
   string temp;
   temp.reserve(fp(nullptr, value));
-  fp(temp(), value);
+  fp(temp.data(), value);
   return temp;
 }
 

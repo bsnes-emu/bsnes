@@ -13,7 +13,7 @@ void pItem::setImage(const image& image) {
   }
 }
 
-void pItem::setText(const string& text) {
+void pItem::setText(string text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 

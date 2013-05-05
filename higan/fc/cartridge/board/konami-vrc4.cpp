@@ -48,12 +48,12 @@ void reset() {
   vrc4.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   vrc4.serialize(s);
 }
 
-KonamiVRC4(Markup::Node &document) : Board(document), vrc4(*this) {
+KonamiVRC4(Markup::Node& document) : Board(document), vrc4(*this) {
   settings.pinout.a0 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a0"].data);
   settings.pinout.a1 = 1 << decimal(document["cartridge"]["chip"]["pinout"]["a1"].data);
 }

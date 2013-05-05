@@ -15,7 +15,7 @@ serializer System::serialize() {
   return s;
 }
 
-bool System::unserialize(serializer &s) {
+bool System::unserialize(serializer& s) {
   unsigned signature, version;
   char hash[64], description[512];
 
@@ -32,10 +32,10 @@ bool System::unserialize(serializer &s) {
   return true;
 }
 
-void System::serialize(serializer &s) {
+void System::serialize(serializer& s) {
 }
 
-void System::serialize_all(serializer &s) {
+void System::serialize_all(serializer& s) {
   system.serialize(s);
   input.serialize(s);
   cartridge.serialize(s);

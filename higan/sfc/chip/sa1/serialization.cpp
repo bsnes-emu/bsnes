@@ -1,6 +1,6 @@
 #ifdef SA1_CPP
 
-void SA1::serialize(serializer &s) {
+void SA1::serialize(serializer& s) {
   R65816::serialize(s);
   Thread::serialize(s);
 

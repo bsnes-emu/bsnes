@@ -181,7 +181,7 @@ void Event::ram_write(unsigned addr, uint8 data) {
   return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
-void Event::serialize(serializer &s) {
+void Event::serialize(serializer& s) {
   Thread::serialize(s);
   s.array(ram.data(), ram.size());
   s.integer(status);

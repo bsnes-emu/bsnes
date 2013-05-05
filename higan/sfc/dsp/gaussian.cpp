@@ -35,11 +35,11 @@ const int16 DSP::gaussian_table[512] = {
   1299, 1300, 1300, 1301, 1302, 1302, 1303, 1303, 1303, 1304, 1304, 1304, 1304, 1304, 1305, 1305,
 };
 
-int DSP::gaussian_interpolate(const voice_t &v) {
+int DSP::gaussian_interpolate(const voice_t& v) {
   //make pointers into gaussian table based on fractional position between samples
   int offset = (v.interp_pos >> 4) & 0xff;
-  const int16 *fwd = gaussian_table + 255 - offset;
-  const int16 *rev = gaussian_table       + offset; //mirror left half of gaussian table
+  const int16* fwd = gaussian_table + 255 - offset;
+  const int16* rev = gaussian_table       + offset;  //mirror left half of gaussian table
 
   offset = v.buf_pos + (v.interp_pos >> 12);
   int output;

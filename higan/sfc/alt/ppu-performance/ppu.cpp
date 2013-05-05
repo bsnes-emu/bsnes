@@ -82,17 +82,17 @@ void PPU::frame() {
 }
 
 void PPU::enable() {
-  function<uint8 (unsigned)> reader = { &PPU::mmio_read, (PPU*)&ppu };
-  function<void (unsigned, uint8)> writer = { &PPU::mmio_write, (PPU*)&ppu };
+  function<uint8 (unsigned)> reader = {&PPU::mmio_read, (PPU*)&ppu};
+  function<void (unsigned, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
   bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
 }
 
 void PPU::power() {
-  for(auto &n : vram) n = 0;
-  for(auto &n : oam) n = 0;
-  for(auto &n : cgram) n = 0;
+  for(auto& n : vram) n = 0;
+  for(auto& n : oam) n = 0;
+  for(auto& n : cgram) n = 0;
   reset();
 }
 
@@ -107,18 +107,18 @@ void PPU::reset() {
 
 void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
   switch(layer * 4 + priority) {
-    case  0: bg1.priority0_enable = enable; break;
-    case  1: bg1.priority1_enable = enable; break;
-    case  4: bg2.priority0_enable = enable; break;
-    case  5: bg2.priority1_enable = enable; break;
-    case  8: bg3.priority0_enable = enable; break;
-    case  9: bg3.priority1_enable = enable; break;
-    case 12: bg4.priority0_enable = enable; break;
-    case 13: bg4.priority1_enable = enable; break;
-    case 16: sprite.priority0_enable = enable; break;
-    case 17: sprite.priority1_enable = enable; break;
-    case 18: sprite.priority2_enable = enable; break;
-    case 19: sprite.priority3_enable = enable; break;
+  case  0: bg1.priority0_enable = enable; break;
+  case  1: bg1.priority1_enable = enable; break;
+  case  4: bg2.priority0_enable = enable; break;
+  case  5: bg2.priority1_enable = enable; break;
+  case  8: bg3.priority0_enable = enable; break;
+  case  9: bg3.priority1_enable = enable; break;
+  case 12: bg4.priority0_enable = enable; break;
+  case 13: bg4.priority1_enable = enable; break;
+  case 16: sprite.priority0_enable = enable; break;
+  case 17: sprite.priority1_enable = enable; break;
+  case 18: sprite.priority2_enable = enable; break;
+  case 19: sprite.priority3_enable = enable; break;
   }
 }
 

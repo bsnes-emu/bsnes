@@ -9,9 +9,9 @@ struct BSXCartridge {
   void power();
   void reset();
 
-  uint8 memory_access(bool write, Memory &memory, unsigned addr, uint8 data);
-  uint8 memory_read(Memory &memory, unsigned addr);
-  void memory_write(Memory &memory, unsigned addr, uint8 data);
+  uint8 memory_access(bool write, Memory& memory, unsigned addr, uint8 data);
+  uint8 memory_read(Memory& memory, unsigned addr);
+  void memory_write(Memory& memory, unsigned addr, uint8 data);
 
   uint8 mcu_access(bool write, unsigned addr, uint8 data = 0x00);
   uint8 mcu_read(unsigned addr);

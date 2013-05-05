@@ -74,7 +74,7 @@ void CheatEditor::refresh() {
     string desc = cheat[n].code.empty() && cheat[n].desc.empty() ? "(empty)" : cheat[n].desc;
     lstring codes = code.split("+");
     if(codes.size() > 1) code = {codes[0], "+..."};
-    cheatList.modify(n, decimal<3>(1 + n), code, desc);
+    cheatList.modify(n, format<3>(1 + n), code, desc);
   }
   cheatList.autoSizeColumns();
 }
@@ -124,7 +124,7 @@ void CheatEditor::updateDesc() {
   refresh();
 }
 
-bool CheatEditor::load(const string& filename) {
+bool CheatEditor::load(string filename) {
   string data = string::read(filename);
   if(data.empty()) return false;
 
@@ -143,7 +143,7 @@ bool CheatEditor::load(const string& filename) {
   return true;
 }
 
-bool CheatEditor::save(const string& filename) {
+bool CheatEditor::save(string filename) {
   signed lastSave = -1;
   for(signed n = 127; n >= 0; n--) {
     if(!cheat[n].code.empty() || !cheat[n].desc.empty()) {
@@ -171,7 +171,7 @@ bool CheatEditor::save(const string& filename) {
   return true;
 }
 
-bool CheatEditor::import(const string& code, const string& desc) {
+bool CheatEditor::import(string code, string desc) {
   for(unsigned n = 0; n < Codes; n++) {
     if(cheat[n].code.empty() && cheat[n].desc.empty()) {
       cheatList.setChecked(n, false);

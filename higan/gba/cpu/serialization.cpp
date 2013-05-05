@@ -1,11 +1,11 @@
-void CPU::serialize(serializer &s) {
+void CPU::serialize(serializer& s) {
   ARM::serialize(s);
   Thread::serialize(s);
 
   s.array(iwram,  32 * 1024);
   s.array(ewram, 256 * 1024);
 
-  for(auto &dma : regs.dma) {
+  for(auto& dma : regs.dma) {
     s.integer(dma.source);
     s.integer(dma.target);
     s.integer(dma.length);
@@ -22,7 +22,7 @@ void CPU::serialize(serializer &s) {
     s.integer(dma.run.length);
   }
 
-  for(auto &timer : regs.timer) {
+  for(auto& timer : regs.timer) {
     s.integer(timer.period);
     s.integer(timer.reload);
     s.integer(timer.control.frequency);
@@ -31,7 +31,7 @@ void CPU::serialize(serializer &s) {
     s.integer(timer.control.enable);
   }
 
-  for(auto &value : regs.serial.data) s.integer(value);
+  for(auto& value : regs.serial.data) s.integer(value);
   s.integer(regs.serial.control.shiftclockselect);
   s.integer(regs.serial.control.shiftclockfrequency);
   s.integer(regs.serial.control.transferenablereceive);
@@ -41,7 +41,7 @@ void CPU::serialize(serializer &s) {
   s.integer(regs.serial.control.irqenable);
   s.integer(regs.serial.data8);
 
-  for(auto &flag : regs.keypad.control.flag) s.integer(flag);
+  for(auto& flag : regs.keypad.control.flag) s.integer(flag);
   s.integer(regs.keypad.control.enable);
   s.integer(regs.keypad.control.condition);
 
@@ -73,23 +73,23 @@ void CPU::serialize(serializer &s) {
   s.integer(regs.irq.enable.vblank);
   s.integer(regs.irq.enable.hblank);
   s.integer(regs.irq.enable.vcoincidence);
-  for(auto &flag : regs.irq.enable.timer) s.integer(flag);
+  for(auto& flag : regs.irq.enable.timer) s.integer(flag);
   s.integer(regs.irq.enable.serial);
-  for(auto &flag : regs.irq.enable.dma) s.integer(flag);
+  for(auto& flag : regs.irq.enable.dma) s.integer(flag);
   s.integer(regs.irq.enable.keypad);
   s.integer(regs.irq.enable.cartridge);
 
   s.integer(regs.irq.flag.vblank);
   s.integer(regs.irq.flag.hblank);
   s.integer(regs.irq.flag.vcoincidence);
-  for(auto &flag : regs.irq.flag.timer) s.integer(flag);
+  for(auto& flag : regs.irq.flag.timer) s.integer(flag);
   s.integer(regs.irq.flag.serial);
-  for(auto &flag : regs.irq.flag.dma) s.integer(flag);
+  for(auto& flag : regs.irq.flag.dma) s.integer(flag);
   s.integer(regs.irq.flag.keypad);
   s.integer(regs.irq.flag.cartridge);
 
-  for(auto &flag : regs.wait.control.nwait) s.integer(flag);
-  for(auto &flag : regs.wait.control.swait) s.integer(flag);
+  for(auto& flag : regs.wait.control.nwait) s.integer(flag);
+  for(auto& flag : regs.wait.control.swait) s.integer(flag);
   s.integer(regs.wait.control.phi);
   s.integer(regs.wait.control.prefetch);
   s.integer(regs.wait.control.gametype);

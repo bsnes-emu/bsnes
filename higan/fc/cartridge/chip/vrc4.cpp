@@ -148,9 +148,9 @@ void power() {
 
 void reset() {
   prg_mode = 0;
-  for(auto &n : prg_bank) n = 0;
+  for(auto& n : prg_bank) n = 0;
   mirror = 0;
-  for(auto &n : chr_bank) n = 0;
+  for(auto& n : chr_bank) n = 0;
 
   irq_latch = 0;
   irq_mode = 0;
@@ -162,11 +162,11 @@ void reset() {
   irq_line = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.integer(prg_mode);
-  for(auto &n : prg_bank) s.integer(n);
+  for(auto& n : prg_bank) s.integer(n);
   s.integer(mirror);
-  for(auto &n : chr_bank) s.integer(n);
+  for(auto& n : chr_bank) s.integer(n);
 
   s.integer(irq_latch);
   s.integer(irq_mode);
@@ -178,7 +178,7 @@ void serialize(serializer &s) {
   s.integer(irq_line);
 }
 
-VRC4(Board &board) : Chip(board) {
+VRC4(Board& board) : Chip(board) {
 }
 
 };

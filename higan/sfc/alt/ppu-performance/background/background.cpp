@@ -14,7 +14,7 @@ unsigned PPU::Background::get_tile(unsigned hoffset, unsigned voffset) {
   return (ppu.vram[tiledata_addr + 0] << 0) + (ppu.vram[tiledata_addr + 1] << 8);
 }
 
-void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned &hoffset, unsigned &voffset) {
+void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned& hoffset, unsigned& voffset) {
   unsigned opt_x = (x + (hscroll & 7)), hval, vval;
   if(opt_x >= 8) {
     hval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
@@ -129,7 +129,7 @@ void PPU::Background::render() {
     if(mirror_y) voffset ^= 7;
     unsigned mirror_xmask = !mirror_x ? 0 : 7;
 
-    uint8 *tiledata = self.cache.tile(regs.mode, tile_num);
+    uint8* tiledata = self.cache.tile(regs.mode, tile_num);
     tiledata += ((voffset & 7) * 8);
 
     for(unsigned n = 0; n < 8; n++, x++) {
@@ -161,7 +161,7 @@ void PPU::Background::render() {
   }
 }
 
-PPU::Background::Background(PPU &self, unsigned id) : self(self), id(id) {
+PPU::Background::Background(PPU& self, unsigned id) : self(self), id(id) {
   priority0_enable = true;
   priority1_enable = true;
 

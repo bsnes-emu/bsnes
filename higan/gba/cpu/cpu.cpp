@@ -105,7 +105,7 @@ void CPU::power() {
   for(unsigned n = 0; n <  32 * 1024; n++) iwram[n] = 0;
   for(unsigned n = 0; n < 256 * 1024; n++) ewram[n] = 0;
 
-  for(auto &dma : regs.dma) {
+  for(auto& dma : regs.dma) {
     dma.source = 0;
     dma.target = 0;
     dma.length = 0;
@@ -115,7 +115,7 @@ void CPU::power() {
     dma.run.source = 0;
     dma.run.length = 0;
   }
-  for(auto &timer : regs.timer) {
+  for(auto& timer : regs.timer) {
     timer.period = 0;
     timer.reload = 0;
     timer.control = 0;

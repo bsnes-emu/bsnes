@@ -12,7 +12,7 @@ void PPU::dmg_render() {
     if(status.ob_enable) dmg_render_ob();
   }
 
-  uint32 *output = screen + status.ly * 160;
+  uint32* output = screen + status.ly * 160;
   for(unsigned n = 0; n < 160; n++) output[n] = video.palette[line[n]];
   interface->lcdScanline();
 }

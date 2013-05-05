@@ -99,7 +99,7 @@ void MSU1::audio_open() {
   if(audiofile.open()) audiofile.close();
   auto document = Markup::Document(cartridge.information.markup.cartridge);
   string name = {"track-", mmio.audio_track, ".pcm"};
-  for(auto &track : document.find("cartridge/msu1/track")) {
+  for(auto track : document.find("cartridge/msu1/track")) {
     if(numeral(track["number"].data) != mmio.audio_track) continue;
     name = track["name"].data;
     break;

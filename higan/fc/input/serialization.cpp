@@ -1,4 +1,4 @@
-void Input::serialize(serializer &s) {
+void Input::serialize(serializer& s) {
   s.integer((unsigned&)port1);
   s.integer((unsigned&)port2);
 

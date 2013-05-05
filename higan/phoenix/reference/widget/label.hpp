@@ -3,7 +3,7 @@ namespace phoenix {
 struct pLabel : public pWidget {
   Label& label;
 
-  void setText(const string& text);
+  void setText(string text);
 
   pLabel(Label& label) : pWidget(label), label(label) {}
   void constructor();

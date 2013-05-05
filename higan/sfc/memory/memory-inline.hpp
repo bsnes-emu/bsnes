@@ -26,13 +26,13 @@ void MappedRAM::reset() {
   write_protect_ = false;
 }
 
-void MappedRAM::map(uint8 *source, unsigned length) {
+void MappedRAM::map(uint8* source, unsigned length) {
   reset();
   data_ = source;
   size_ = data_ ? length : 0;
 }
 
-void MappedRAM::copy(const stream &memory) {
+void MappedRAM::copy(const stream& memory) {
   if(data_) delete[] data_;
   //round size up to multiple of 256-bytes
   size_ = (memory.size() & ~255) + ((bool)(memory.size() & 255) << 8);
@@ -40,7 +40,7 @@ void MappedRAM::copy(const stream &memory) {
   memory.read(data_, memory.size());
 }
 
-void MappedRAM::read(const stream &memory) {
+void MappedRAM::read(const stream& memory) {
   memory.read(data_, min(memory.size(), size_));
 }
 

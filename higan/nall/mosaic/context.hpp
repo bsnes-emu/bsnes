@@ -78,9 +78,9 @@ struct context {
 
         for(unsigned n = 0; n < length; n++) {
           string fn = part[1];
-          fn.replace("n", decimal(n));
-          fn.replace("o", decimal(offset));
-          fn.replace("p", decimal(buffer.size()));
+          fn.replace("n", string{n});
+          fn.replace("o", string{offset});
+          fn.replace("p", string{buffer.size()});
           buffer.resize(offset + 1);
           buffer[offset] = eval(fn);
           offset += stride;

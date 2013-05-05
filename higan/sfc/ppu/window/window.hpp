@@ -74,15 +74,15 @@ struct Window {
   void reset();
 
   void test(
-    bool &main, bool &sub,
+    bool& main, bool& sub,
     bool one_enable, bool one_invert,
     bool two_enable, bool two_invert,
     uint8 mask, bool main_enable, bool sub_enable
   );
 
   void serialize(serializer&);
-  Window(PPU &self);
+  Window(PPU& self);
 
-  PPU &self;
+  PPU& self;
   friend class PPU;
 };

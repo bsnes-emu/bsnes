@@ -84,7 +84,7 @@ void reset() {
   irq_line = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.integer(prg_bank);
   s.integer(irq_mode);
   s.integer(irq_enable);
@@ -94,7 +94,7 @@ void serialize(serializer &s) {
   s.integer(irq_line);
 }
 
-VRC3(Board &board) : Chip(board) {
+VRC3(Board& board) : Chip(board) {
 }
 
 };

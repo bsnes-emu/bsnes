@@ -33,7 +33,7 @@ uint32 Bus::mirror(uint32 addr, uint32 size) {
 
 uint32 Bus::speed(uint32 addr, uint32 size) {
   if(addr & 0x08000000) {
-    static unsigned timing[] = { 5, 4, 3, 9 };
+    static unsigned timing[] = {5, 4, 3, 9};
     unsigned n = cpu.regs.wait.control.nwait[addr >> 25 & 3];
     unsigned s = cpu.regs.wait.control.swait[addr >> 25 & 3];
     n = timing[n];

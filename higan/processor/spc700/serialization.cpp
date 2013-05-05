@@ -1,4 +1,4 @@
-void SPC700::serialize(serializer &s) {
+void SPC700::serialize(serializer& s) {
   s.integer(regs.pc);
   s.integer(regs.a);
   s.integer(regs.x);

@@ -73,9 +73,9 @@ void System::power() {
 }
 
 System::System() {
-  for(auto &byte : bootROM.dmg) byte = 0;
-  for(auto &byte : bootROM.sgb) byte = 0;
-  for(auto &byte : bootROM.cgb) byte = 0;
+  for(auto& byte : bootROM.dmg) byte = 0;
+  for(auto& byte : bootROM.sgb) byte = 0;
+  for(auto& byte : bootROM.cgb) byte = 0;
 }
 
 }

@@ -9,7 +9,8 @@ struct CPU : Processor::R6502, Thread {
     bool irq_apu_line;
 
     bool rdy_line;
-    optional<uint16> rdy_addr;
+    bool rdy_addr_valid;
+    uint16 rdy_addr_value;
 
     bool oam_dma_pending;
     uint8 oam_dma_page;
@@ -49,7 +50,7 @@ struct CPU : Processor::R6502, Thread {
   void set_irq_apu_line(bool);
 
   void set_rdy_line(bool);
-  void set_rdy_addr(optional<uint16>);
+  void set_rdy_addr(bool valid, uint16 value = 0);
 };
 
 extern CPU cpu;

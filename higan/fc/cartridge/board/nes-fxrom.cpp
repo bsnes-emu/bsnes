@@ -72,7 +72,7 @@ void reset() {
   latch[1] = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
 
   s.integer(prg_bank);
@@ -84,7 +84,7 @@ void serialize(serializer &s) {
   s.array(latch);
 }
 
-NES_FxROM(Markup::Node &document) : Board(document) {
+NES_FxROM(Markup::Node& document) : Board(document) {
   revision = Revision::FKROM;
 }
 

@@ -20,7 +20,7 @@ serializer System::serialize() {
   return s;
 }
 
-bool System::unserialize(serializer &s) {
+bool System::unserialize(serializer& s) {
   unsigned signature, version;
   char hash[64], description[512], profile[16];
 
@@ -43,12 +43,12 @@ bool System::unserialize(serializer &s) {
 //internal
 //========
 
-void System::serialize(serializer &s) {
+void System::serialize(serializer& s) {
   s.integer((unsigned&)region);
   s.integer((unsigned&)expansion);
 }
 
-void System::serialize_all(serializer &s) {
+void System::serialize_all(serializer& s) {
   cartridge.serialize(s);
   system.serialize(s);
   random.serialize(s);

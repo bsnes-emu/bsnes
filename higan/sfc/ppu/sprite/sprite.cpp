@@ -45,7 +45,7 @@ void PPU::Sprite::scanline() {
   }
 }
 
-bool PPU::Sprite::on_scanline(SpriteItem &sprite) {
+bool PPU::Sprite::on_scanline(SpriteItem& sprite) {
   if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
   signed height = (regs.interlace == false ? sprite.height() : (sprite.height() >> 1));
   if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
@@ -217,7 +217,7 @@ void PPU::Sprite::reset() {
   output.sub.priority = 0;
 }
 
-PPU::Sprite::Sprite(PPU &self) : self(self) {
+PPU::Sprite::Sprite(PPU& self) : self(self) {
 }
 
 #endif

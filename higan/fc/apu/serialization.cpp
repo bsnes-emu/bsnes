@@ -1,4 +1,4 @@
-void APU::serialize(serializer &s) {
+void APU::serialize(serializer& s) {
   Thread::serialize(s);
 
   filter.serialize(s);
@@ -13,13 +13,13 @@ void APU::serialize(serializer &s) {
   s.integer(cartridge_sample);
 }
 
-void APU::Filter::serialize(serializer &s) {
+void APU::Filter::serialize(serializer& s) {
   s.integer(hipass_strong);
   s.integer(hipass_weak);
   s.integer(lopass);
 }
 
-void APU::FrameCounter::serialize(serializer &s) {
+void APU::FrameCounter::serialize(serializer& s) {
   s.integer(irq_pending);
 
   s.integer(mode);

@@ -47,41 +47,38 @@ void PPU::Background::run_mode7() {
   unsigned tile;
   unsigned palette;
   switch(self.regs.mode7_repeat) {
-    //screen repetition outside of screen area
-    case 0:
-    case 1: {
+  //screen repetition outside of screen area
+  case 0:
+  case 1:
+    px &= 1023;
+    py &= 1023;
+    tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    break;
+
+  //palette color 0 outside of screen area
+  case 2:
+    if((px | py) & ~1023) {
+      palette = 0;
+    } else {
       px &= 1023;
       py &= 1023;
       tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
       palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-      break;
     }
+    break;
 
-    //palette color 0 outside of screen area
-    case 2: {
-      if((px | py) & ~1023) {
-        palette = 0;
-      } else {
-        px &= 1023;
-        py &= 1023;
-        tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-        palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-      }
-      break;
+  //character 0 repetition outside of screen area
+  case 3:
+    if((px | py) & ~1023) {
+      tile = 0;
+    } else {
+      px &= 1023;
+      py &= 1023;
+      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
     }
-
-    //character 0 repetition outside of screen area
-    case 3: {
-      if((px | py) & ~1023) {
-        tile = 0;
-      } else {
-        px &= 1023;
-        py &= 1023;
-        tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-      }
-      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-      break;
-    }
+    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    break;
   }
 
   unsigned priority;

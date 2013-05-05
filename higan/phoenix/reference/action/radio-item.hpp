@@ -6,7 +6,7 @@ struct pRadioItem : public pAction {
   bool checked();
   void setChecked();
   void setGroup(const group<RadioItem>& group);
-  void setText(const string& text);
+  void setText(string text);
 
   pRadioItem(RadioItem& radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();

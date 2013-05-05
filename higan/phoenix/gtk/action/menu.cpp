@@ -24,7 +24,7 @@ void pMenu::setImage(const image& image) {
   }
 }
 
-void pMenu::setText(const string& text) {
+void pMenu::setText(string text) {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), mnemonic(text));
 }
 
@@ -47,7 +47,7 @@ void pMenu::orphan() {
   for(auto& action : menu.state.action) append(action);
 }
 
-void pMenu::setFont(const string& font) {
+void pMenu::setFont(string font) {
   pAction::setFont(font);
   for(auto& item : menu.state.action) item.p.setFont(font);
 }

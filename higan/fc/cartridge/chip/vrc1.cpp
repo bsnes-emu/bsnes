@@ -61,20 +61,20 @@ void power() {
 }
 
 void reset() {
-  for(auto &n : prg_bank) n = 0;
-  for(auto &n : chr_banklo) n = 0;
-  for(auto &n : chr_bankhi) n = 0;
+  for(auto& n : prg_bank) n = 0;
+  for(auto& n : chr_banklo) n = 0;
+  for(auto& n : chr_bankhi) n = 0;
   mirror = 0;
 }
 
-void serialize(serializer &s) {
-  for(auto &n : prg_bank) s.integer(n);
-  for(auto &n : chr_banklo) s.integer(n);
-  for(auto &n : chr_bankhi) s.integer(n);
+void serialize(serializer& s) {
+  for(auto& n : prg_bank) s.integer(n);
+  for(auto& n : chr_banklo) s.integer(n);
+  for(auto& n : chr_bankhi) s.integer(n);
   s.integer(mirror);
 }
 
-VRC1(Board &board) : Chip(board) {
+VRC1(Board& board) : Chip(board) {
 }
 
 };

@@ -13,7 +13,7 @@ struct R6502 {
   virtual uint8 op_read(uint16 addr) = 0;
   virtual void op_write(uint16 addr, uint8 data) = 0;
   virtual void last_cycle() = 0;
-  virtual void nmi(uint16 &vector) = 0;
+  virtual void nmi(uint16& vector) = 0;
   virtual uint8 debugger_read(uint16 addr) { return 0u; }
 
   uint8 mdr() const;
@@ -61,11 +61,11 @@ struct R6502 {
   void opf_sra();
 
   void opi_branch(bool condition);
-  void opi_clear_flag(bool &flag);
-  void opi_decrement(uint8 &r);
-  void opi_increment(uint8 &r);
-  void opi_pull(uint8 &r);
-  void opi_push(uint8 &r);
+  void opi_clear_flag(bool& flag);
+  void opi_decrement(uint8& r);
+  void opi_increment(uint8& r);
+  void opi_pull(uint8& r);
+  void opi_push(uint8& r);
   template<void (R6502::*op)()> void opi_read_absolute();
   template<void (R6502::*op)()> void opi_read_absolute_x();
   template<void (R6502::*op)()> void opi_read_absolute_y();
@@ -79,17 +79,17 @@ struct R6502 {
   template<void (R6502::*op)()> void opi_rmw_absolute_x();
   template<void (R6502::*op)()> void opi_rmw_zero_page();
   template<void (R6502::*op)()> void opi_rmw_zero_page_x();
-  void opi_set_flag(bool &flag);
+  void opi_set_flag(bool& flag);
   template<void (R6502::*op)()> void opi_shift();
-  void opi_store_absolute(uint8 &r);
-  void opi_store_absolute_x(uint8 &r);
-  void opi_store_absolute_y(uint8 &r);
-  void opi_store_indirect_zero_page_x(uint8 &r);
-  void opi_store_indirect_zero_page_y(uint8 &r);
-  void opi_store_zero_page(uint8 &r);
-  void opi_store_zero_page_x(uint8 &r);
-  void opi_store_zero_page_y(uint8 &r);
-  void opi_transfer(uint8 &s, uint8 &d, bool flag);
+  void opi_store_absolute(uint8& r);
+  void opi_store_absolute_x(uint8& r);
+  void opi_store_absolute_y(uint8& r);
+  void opi_store_indirect_zero_page_x(uint8& r);
+  void opi_store_indirect_zero_page_y(uint8& r);
+  void opi_store_zero_page(uint8& r);
+  void opi_store_zero_page_x(uint8& r);
+  void opi_store_zero_page_y(uint8& r);
+  void opi_transfer(uint8& s, uint8& d, bool flag);
 
   void op_brk();
   void op_jmp_absolute();

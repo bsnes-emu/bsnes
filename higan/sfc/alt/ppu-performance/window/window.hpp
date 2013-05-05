@@ -1,5 +1,4 @@
-class LayerWindow {
-public:
+struct LayerWindow {
   bool one_enable;
   bool one_invert;
   bool two_enable;
@@ -17,8 +16,7 @@ public:
   void serialize(serializer&);
 };
 
-class ColorWindow {
-public:
+struct ColorWindow {
   bool one_enable;
   bool one_invert;
   bool two_enable;

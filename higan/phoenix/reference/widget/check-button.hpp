@@ -5,7 +5,7 @@ struct pCheckButton : public pWidget {
 
   bool checked();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();

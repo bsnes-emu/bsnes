@@ -61,8 +61,8 @@ uint32 PPU::oam_read(uint32 addr, uint32 size) {
   if(size == Word) return oam_read(addr & ~2, Half) << 0 | oam_read(addr | 2, Half) << 16;
   if(size == Byte) return oam_read(addr, Half) >> ((addr & 1) * 8);
 
-  auto &obj = object[addr >> 3 & 127];
-  auto &par = objectparam[addr >> 5 & 31];
+  auto& obj = object[addr >> 3 & 127];
+  auto& par = objectparam[addr >> 5 & 31];
 
   switch(addr & 6) {
 
@@ -112,8 +112,8 @@ void PPU::oam_write(uint32 addr, uint32 size, uint32 word) {
     return oam_write(addr, Half, word << 8 | word << 0);
   }
 
-  auto &obj = object[addr >> 3 & 127];
-  auto &par = objectparam[addr >> 5 & 31];
+  auto& obj = object[addr >> 3 & 127];
+  auto& par = objectparam[addr >> 5 & 31];
   switch(addr & 6) {
 
   case 0:

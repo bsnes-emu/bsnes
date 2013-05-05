@@ -45,7 +45,7 @@ void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Medi
 }
 
 //load base cartridge
-void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, const string& pathname) {
+void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, string pathname) {
   unload();
   setInterface(emulator);
   path(0) = program->path({media.name, ".sys/"});
@@ -61,7 +61,7 @@ void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Medi
 }
 
 //request from emulation core to load non-volatile media folder
-void Utility::loadRequest(unsigned id, const string& name, const string& type) {
+void Utility::loadRequest(unsigned id, string name, string type) {
   string pathname = browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
   path(id) = pathname;
@@ -71,7 +71,7 @@ void Utility::loadRequest(unsigned id, const string& name, const string& type) {
 }
 
 //request from emulation core to load non-volatile media file
-void Utility::loadRequest(unsigned id, const string& path) {
+void Utility::loadRequest(unsigned id, string path) {
   string pathname = {this->path(system().group(id)), path};
   if(file::exists(pathname) == false) return;
   mmapstream stream(pathname);
@@ -79,7 +79,7 @@ void Utility::loadRequest(unsigned id, const string& path) {
 }
 
 //request from emulation core to save non-volatile media file
-void Utility::saveRequest(unsigned id, const string& path) {
+void Utility::saveRequest(unsigned id, string path) {
   string pathname = {this->path(system().group(id)), path};
   filestream stream(pathname, file::mode::write);
   return system().save(id, stream);
@@ -294,11 +294,11 @@ void Utility::updateStatus() {
   }
 }
 
-void Utility::setStatusText(const string& text) {
+void Utility::setStatusText(string text) {
   statusText = text;
 }
 
-void Utility::showMessage(const string& message) {
+void Utility::showMessage(string message) {
   statusTime = time(0);
   statusMessage = message;
 }

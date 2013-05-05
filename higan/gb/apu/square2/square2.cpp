@@ -9,10 +9,10 @@ void APU::Square2::run() {
     period = 4 * (2048 - frequency);
     phase++;
     switch(duty) {
-      case 0: duty_output = (phase == 6); break;  //______-_
-      case 1: duty_output = (phase >= 6); break;  //______--
-      case 2: duty_output = (phase >= 4); break;  //____----
-      case 3: duty_output = (phase <= 5); break;  //------__
+    case 0: duty_output = (phase == 6); break;  //______-_
+    case 1: duty_output = (phase >= 6); break;  //______--
+    case 2: duty_output = (phase >= 4); break;  //____----
+    case 3: duty_output = (phase <= 5); break;  //------__
     }
   }
 
@@ -23,10 +23,6 @@ void APU::Square2::run() {
 }
 
 void APU::Square2::clock_length() {
-//if(counter && length) {
-//  if(--length == 0) enable = false;
-//}
-
   if(counter && enable) {
     if(++length == 0) enable = false;
   }
@@ -43,7 +39,6 @@ void APU::Square2::clock_envelope() {
 void APU::Square2::write(unsigned r, uint8 data) {
   if(r == 1) {  //$ff16  NR21
     duty = data >> 6;
-  //length = 64 - (data & 0x3f);
     length = (data & 0x3f);
   }
 
@@ -68,7 +63,6 @@ void APU::Square2::write(unsigned r, uint8 data) {
       period = 4 * (2048 - frequency);
       envelope_period = envelope_frequency;
       volume = envelope_volume;
-    //if(length == 0) length = 64;
     }
   }
 }
@@ -92,7 +86,7 @@ void APU::Square2::power() {
   volume = 0;
 }
 
-void APU::Square2::serialize(serializer &s) {
+void APU::Square2::serialize(serializer& s) {
   s.integer(enable);
 
   s.integer(duty);

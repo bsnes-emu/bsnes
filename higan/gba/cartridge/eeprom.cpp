@@ -82,7 +82,7 @@ void Cartridge::EEPROM::power() {
   address = 0;
 }
 
-void Cartridge::EEPROM::serialize(serializer &s) {
+void Cartridge::EEPROM::serialize(serializer& s) {
   s.array(data, size);
   s.integer(size);
   s.integer(mask);

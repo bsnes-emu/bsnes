@@ -18,9 +18,9 @@ struct CheatEditor : Window {
   void updateCode();
   void updateDesc();
 
-  bool load(const string& filename);
-  bool save(const string& filename);
-  bool import(const string& code, const string& desc);
+  bool load(string filename);
+  bool save(string filename);
+  bool import(string code, string desc);
 
   void update();
   void refresh();

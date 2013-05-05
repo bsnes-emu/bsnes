@@ -27,7 +27,7 @@ void Audio::sample(int16 lsample, int16 rsample) {
 }
 
 void Audio::coprocessor_sample(int16 lsample, int16 rsample) {
-  signed samples[] = { lsample, rsample };
+  signed samples[] = {lsample, rsample};
   dspaudio.sample(samples);
   while(dspaudio.pending()) {
     dspaudio.read(samples);

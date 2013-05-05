@@ -8,7 +8,7 @@ StateManager::StateManager() {
   layout.setMargin(5);
   stateList.setHeaderText("Slot", "Description");
   stateList.setHeaderVisible();
-  for(unsigned n = 0; n < Slots; n++) stateList.append(decimal<2>(1 + n), "(empty)");
+  for(unsigned n = 0; n < Slots; n++) stateList.append(format<2>(1 + n), "(empty)");
   stateList.autoSizeColumns();
   descLabel.setText("Description:");
   saveButton.setText("Save");
@@ -59,7 +59,7 @@ void StateManager::synchronize() {
 
 void StateManager::refresh() {
   for(unsigned n = 0; n < Slots; n++) {
-    stateList.modify(n, decimal<2>(1 + n), slotLoadDescription(n));
+    stateList.modify(n, format<2>(1 + n), slotLoadDescription(n));
   }
   stateList.autoSizeColumns();
 }
@@ -70,7 +70,7 @@ void StateManager::reset() {
   refresh();
 }
 
-bool StateManager::load(const string& filename, unsigned revision) {
+bool StateManager::load(string filename, unsigned revision) {
   for(auto& slot : this->slot) slot = serializer();
   synchronize();
 
@@ -93,7 +93,7 @@ bool StateManager::load(const string& filename, unsigned revision) {
   return true;
 }
 
-bool StateManager::save(const string& filename, unsigned revision) {
+bool StateManager::save(string filename, unsigned revision) {
   bool hasSave = false;
   for(auto& slot : this->slot) hasSave |= slot.capacity() > 0;
   if(hasSave == false) {

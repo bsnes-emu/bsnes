@@ -161,11 +161,11 @@ void reset() {
   prg_mode = 0;
   ram_enable = 0;
   bank_select = 0;
-  for(auto &n : prg_bank) n = 0;
-  for(auto &n : chr_bank) n = 0;
+  for(auto& n : prg_bank) n = 0;
+  for(auto& n : chr_bank) n = 0;
   mirror = 0;
-  for(auto &n : ram_readable) n = 0;
-  for(auto &n : ram_writable) n = 0;
+  for(auto& n : ram_readable) n = 0;
+  for(auto& n : ram_writable) n = 0;
   irq_latch = 0;
   irq_counter = 0;
   irq_enable = 0;
@@ -175,16 +175,16 @@ void reset() {
   chr_abus = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.integer(chr_mode);
   s.integer(prg_mode);
   s.integer(ram_enable);
   s.integer(bank_select);
-  for(auto &n : prg_bank) s.integer(n);
-  for(auto &n : chr_bank) s.integer(n);
+  for(auto& n : prg_bank) s.integer(n);
+  for(auto& n : chr_bank) s.integer(n);
   s.integer(mirror);
-  for(auto &n : ram_readable) s.integer(n);
-  for(auto &n : ram_writable) s.integer(n);
+  for(auto& n : ram_readable) s.integer(n);
+  for(auto& n : ram_writable) s.integer(n);
   s.integer(irq_latch);
   s.integer(irq_counter);
   s.integer(irq_enable);
@@ -194,7 +194,7 @@ void serialize(serializer &s) {
   s.integer(chr_abus);
 }
 
-MMC6(Board &board) : Chip(board) {
+MMC6(Board& board) : Chip(board) {
 }
 
 };

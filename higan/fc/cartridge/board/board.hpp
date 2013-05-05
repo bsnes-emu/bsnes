@@ -1,13 +1,13 @@
 struct Board {
   struct Memory {
-    uint8_t *data;
+    uint8_t* data;
     unsigned size;
     bool writable;
 
     inline uint8 read(unsigned addr) const;
     inline void write(unsigned addr, uint8 data);
 
-    inline Memory(uint8_t *data, unsigned size) : data(data), size(size) {}
+    inline Memory(uint8_t* data, unsigned size) : data(data), size(size) {}
     inline Memory() : data(nullptr), size(0u), writable(false) {}
     inline ~Memory() { if(data) delete[] data; }
   };
@@ -29,10 +29,10 @@ struct Board {
   virtual void reset();
 
   virtual void serialize(serializer&);
-  Board(Markup::Node &document);
+  Board(Markup::Node& document);
   virtual ~Board();
 
-  static Board* load(const string &manifest);
+  static Board* load(string manifest);
 
   struct Information {
     string type;

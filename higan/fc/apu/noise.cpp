@@ -44,7 +44,7 @@ void APU::Noise::reset() {
   lfsr = 1;
 }
 
-void APU::Noise::serialize(serializer &s) {
+void APU::Noise::serialize(serializer& s) {
   s.integer(length_counter);
 
   envelope.serialize(s);

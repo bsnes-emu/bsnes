@@ -50,10 +50,10 @@ uint8 SDD1::read(unsigned addr) {
   }
 
   switch(addr) {
-    case 0x4804: return mmc[0] >> 20;
-    case 0x4805: return mmc[1] >> 20;
-    case 0x4806: return mmc[2] >> 20;
-    case 0x4807: return mmc[3] >> 20;
+  case 0x4804: return mmc[0] >> 20;
+  case 0x4805: return mmc[1] >> 20;
+  case 0x4806: return mmc[2] >> 20;
+  case 0x4807: return mmc[3] >> 20;
   }
 
   return cpu.regs.mdr;
@@ -65,24 +65,24 @@ void SDD1::write(unsigned addr, uint8 data) {
   if((addr & 0x4380) == 0x4300) {
     unsigned channel = (addr >> 4) & 7;
     switch(addr & 15) {
-      case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
-      case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
-      case 4: dma[channel].addr = (dma[channel].addr & 0x00ffff) + (data << 16); break;
+    case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
+    case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
+    case 4: dma[channel].addr = (dma[channel].addr & 0x00ffff) + (data << 16); break;
 
-      case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
-      case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
+    case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
+    case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
     }
     return cpu.mmio_write(addr, data);
   }
 
   switch(addr) {
-    case 0x4800: sdd1_enable = data; break;
-    case 0x4801: xfer_enable = data; break;
+  case 0x4800: sdd1_enable = data; break;
+  case 0x4801: xfer_enable = data; break;
 
-    case 0x4804: mmc[0] = data << 20; break;
-    case 0x4805: mmc[1] = data << 20; break;
-    case 0x4806: mmc[2] = data << 20; break;
-    case 0x4807: mmc[3] = data << 20; break;
+  case 0x4804: mmc[0] = data << 20; break;
+  case 0x4805: mmc[1] = data << 20; break;
+  case 0x4806: mmc[2] = data << 20; break;
+  case 0x4807: mmc[3] = data << 20; break;
   }
 }
 

@@ -106,17 +106,17 @@ void PPU::power() {
   bus.mmio[0xff6b] = this;  //OBPD
   }
 
-  for(auto &n : screen) n = 0x0000;
-  for(auto &n : line) n = 0x0000;
-  for(auto &n : origin) n = Origin::None;
+  for(auto& n : screen) n = 0x0000;
+  for(auto& n : line) n = 0x0000;
+  for(auto& n : origin) n = Origin::None;
 
-  for(auto &n : vram) n = 0x00;
-  for(auto &n : oam) n = 0x00;
-  for(auto &n : bgp) n = 0x00;
-  for(auto &n : obp[0]) n = 0x00;
-  for(auto &n : obp[1]) n = 0x00;
-  for(auto &n : bgpd) n = 0x0000;
-  for(auto &n : obpd) n = 0x0000;
+  for(auto& n : vram) n = 0x00;
+  for(auto& n : oam) n = 0x00;
+  for(auto& n : bgp) n = 0x00;
+  for(auto& n : obp[0]) n = 0x00;
+  for(auto& n : obp[1]) n = 0x00;
+  for(auto& n : bgpd) n = 0x0000;
+  for(auto& n : obpd) n = 0x0000;
 
   status.lx = 0;
   status.wyc = 0;

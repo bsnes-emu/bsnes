@@ -70,7 +70,7 @@ const uint8 SDD1::Decomp::GCD::run_count[] = {
   0x70, 0x30, 0x50, 0x10, 0x60, 0x20, 0x40, 0x00,
 };
 
-void SDD1::Decomp::GCD::get_run_count(uint8 code_number, uint8 &mps_count, bool &lps_index) {
+void SDD1::Decomp::GCD::get_run_count(uint8 code_number, uint8& mps_count, bool& lps_index) {
   uint8 codeword = self.im.get_codeword(code_number);
 
   if(codeword & 0x80) {
@@ -88,7 +88,7 @@ void SDD1::Decomp::BG::init() {
   lps_index = 0;
 }
 
-uint8 SDD1::Decomp::BG::get_bit(bool &end_of_run) {
+uint8 SDD1::Decomp::BG::get_bit(bool& end_of_run) {
   if(!(mps_count || lps_index)) self.gcd.get_run_count(code_number, mps_count, lps_index);
 
   uint8 bit;
@@ -107,39 +107,39 @@ uint8 SDD1::Decomp::BG::get_bit(bool &end_of_run) {
 //probability estimation module
 
 const SDD1::Decomp::PEM::State SDD1::Decomp::PEM::evolution_table[33] = {
-  { 0, 25, 25 },
-  { 0,  2,  1 },
-  { 0,  3,  1 },
-  { 0,  4,  2 },
-  { 0,  5,  3 },
-  { 1,  6,  4 },
-  { 1,  7,  5 },
-  { 1,  8,  6 },
-  { 1,  9,  7 },
-  { 2, 10,  8 },
-  { 2, 11,  9 },
-  { 2, 12, 10 },
-  { 2, 13, 11 },
-  { 3, 14, 12 },
-  { 3, 15, 13 },
-  { 3, 16, 14 },
-  { 3, 17, 15 },
-  { 4, 18, 16 },
-  { 4, 19, 17 },
-  { 5, 20, 18 },
-  { 5, 21, 19 },
-  { 6, 22, 20 },
-  { 6, 23, 21 },
-  { 7, 24, 22 },
-  { 7, 24, 23 },
-  { 0, 26,  1 },
-  { 1, 27,  2 },
-  { 2, 28,  4 },
-  { 3, 29,  8 },
-  { 4, 30, 12 },
-  { 5, 31, 16 },
-  { 6, 32, 18 },
-  { 7, 24, 22 },
+  {0, 25, 25},
+  {0,  2,  1},
+  {0,  3,  1},
+  {0,  4,  2},
+  {0,  5,  3},
+  {1,  6,  4},
+  {1,  7,  5},
+  {1,  8,  6},
+  {1,  9,  7},
+  {2, 10,  8},
+  {2, 11,  9},
+  {2, 12, 10},
+  {2, 13, 11},
+  {3, 14, 12},
+  {3, 15, 13},
+  {3, 16, 14},
+  {3, 17, 15},
+  {4, 18, 16},
+  {4, 19, 17},
+  {5, 20, 18},
+  {5, 21, 19},
+  {6, 22, 20},
+  {6, 23, 21},
+  {7, 24, 22},
+  {7, 24, 23},
+  {0, 26,  1},
+  {1, 27,  2},
+  {2, 28,  4},
+  {3, 29,  8},
+  {4, 30, 12},
+  {5, 31, 16},
+  {6, 32, 18},
+  {7, 24, 22},
 };
 
 void SDD1::Decomp::PEM::init() {
@@ -150,10 +150,10 @@ void SDD1::Decomp::PEM::init() {
 }
 
 uint8 SDD1::Decomp::PEM::get_bit(uint8 context) {
-  ContextInfo &info = context_info[context];
+  ContextInfo& info = context_info[context];
   uint8 current_status = info.status;
   uint8 current_mps = info.mps;
-  const State &s = SDD1::Decomp::PEM::evolution_table[current_status];
+  const State& s = SDD1::Decomp::PEM::evolution_table[current_status];
 
   uint8 bit;
   bool end_of_run;
@@ -212,7 +212,7 @@ uint8 SDD1::Decomp::CM::get_bit() {
     break;
   }
 
-  uint16 &context_bits = previous_bitplane_bits[current_bitplane];
+  uint16& context_bits = previous_bitplane_bits[current_bitplane];
   uint8 current_context = (current_bitplane & 0x01) << 4;
   switch(context_bits_info) {
   case 0x00: current_context |= ((context_bits & 0x01c0) >> 5) | (context_bits & 0x0001); break;
@@ -276,8 +276,9 @@ uint8 SDD1::Decomp::read() {
   return ol.decompress();
 }
 
-SDD1::Decomp::Decomp() : im(*this), gcd(*this),
-  bg0(*this, 0), bg1(*this, 1), bg2(*this, 2), bg3(*this, 3),
-  bg4(*this, 4), bg5(*this, 5), bg6(*this, 6), bg7(*this, 7),
-  pem(*this), cm(*this), ol(*this) {
+SDD1::Decomp::Decomp():
+im(*this), gcd(*this),
+bg0(*this, 0), bg1(*this, 1), bg2(*this, 2), bg3(*this, 3),
+bg4(*this, 4), bg5(*this, 5), bg6(*this, 6), bg7(*this, 7),
+pem(*this), cm(*this), ol(*this) {
 }

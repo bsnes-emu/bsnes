@@ -1,6 +1,6 @@
 #ifdef DSP_CPP
 
-void DSP::serialize(serializer &s) {
+void DSP::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(state.regs, 128);

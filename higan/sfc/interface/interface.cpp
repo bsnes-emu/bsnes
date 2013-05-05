@@ -348,7 +348,7 @@ bool Interface::tracerEnable(bool trace) {
 
   if(trace == true && !tracer.open()) {
     for(unsigned n = 0; n <= 999; n++) {
-      string filename = {pathname, "trace-", decimal<3, '0'>(n), ".log"};
+      string filename = {pathname, "trace-", format<3, '0'>(n), ".log"};
       if(file::exists(filename)) continue;
       tracer.open(filename, file::mode::write);
       return true;

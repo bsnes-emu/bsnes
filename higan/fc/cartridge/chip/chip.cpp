@@ -13,5 +13,5 @@ void Chip::tick() {
   board.tick();
 }
 
-Chip::Chip(Board &board) : board(board) {
+Chip::Chip(Board& board) : board(board) {
 }

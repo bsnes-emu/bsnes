@@ -45,12 +45,12 @@ void reset() {
   vrc3.reset();
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   Board::serialize(s);
   vrc3.serialize(s);
 }
 
-KonamiVRC3(Markup::Node &document) : Board(document), vrc3(*this) {
+KonamiVRC3(Markup::Node& document) : Board(document), vrc3(*this) {
   settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
 }
 

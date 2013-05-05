@@ -165,7 +165,7 @@ void reset() {
   chr_abus = 0;
 }
 
-void serialize(serializer &s) {
+void serialize(serializer& s) {
   s.integer(chr_mode);
   s.integer(prg_mode);
   s.integer(bank_select);
@@ -183,7 +183,7 @@ void serialize(serializer &s) {
   s.integer(chr_abus);
 }
 
-MMC3(Board &board) : Chip(board) {
+MMC3(Board& board) : Chip(board) {
 }
 
 };

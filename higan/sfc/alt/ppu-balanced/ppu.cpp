@@ -118,8 +118,8 @@ void PPU::frame() {
 }
 
 void PPU::enable() {
-  function<uint8 (unsigned)> reader = { &PPU::mmio_read, (PPU*)&ppu };
-  function<void (unsigned, uint8)> writer = { &PPU::mmio_write, (PPU*)&ppu };
+  function<uint8 (unsigned)> reader = {&PPU::mmio_read, (PPU*)&ppu};
+  function<void (unsigned, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
   bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
@@ -129,9 +129,9 @@ void PPU::power() {
   ppu1_version = config.ppu1.version;
   ppu2_version = config.ppu2.version;
 
-  for(auto &n : vram) n = 0x00;
-  for(auto &n : oam) n = 0x00;
-  for(auto &n : cgram) n = 0x00;
+  for(auto& n : vram) n = 0x00;
+  for(auto& n : oam) n = 0x00;
+  for(auto& n : cgram) n = 0x00;
   flush_tiledata_cache();
 
   region = (system.region() == System::Region::NTSC ? 0 : 1);  //0 = NTSC, 1 = PAL
@@ -373,18 +373,18 @@ void PPU::reset() {
 
 void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
   switch(layer * 4 + priority) {
-    case  0: layer_enabled[BG1][0] = enable; break;
-    case  1: layer_enabled[BG1][1] = enable; break;
-    case  4: layer_enabled[BG2][0] = enable; break;
-    case  5: layer_enabled[BG2][1] = enable; break;
-    case  8: layer_enabled[BG3][0] = enable; break;
-    case  9: layer_enabled[BG3][1] = enable; break;
-    case 12: layer_enabled[BG4][0] = enable; break;
-    case 13: layer_enabled[BG4][1] = enable; break;
-    case 16: layer_enabled[OAM][0] = enable; break;
-    case 17: layer_enabled[OAM][1] = enable; break;
-    case 18: layer_enabled[OAM][2] = enable; break;
-    case 19: layer_enabled[OAM][3] = enable; break;
+  case  0: layer_enabled[BG1][0] = enable; break;
+  case  1: layer_enabled[BG1][1] = enable; break;
+  case  4: layer_enabled[BG2][0] = enable; break;
+  case  5: layer_enabled[BG2][1] = enable; break;
+  case  8: layer_enabled[BG3][0] = enable; break;
+  case  9: layer_enabled[BG3][1] = enable; break;
+  case 12: layer_enabled[BG4][0] = enable; break;
+  case 13: layer_enabled[BG4][1] = enable; break;
+  case 16: layer_enabled[OAM][0] = enable; break;
+  case 17: layer_enabled[OAM][1] = enable; break;
+  case 18: layer_enabled[OAM][2] = enable; break;
+  case 19: layer_enabled[OAM][3] = enable; break;
   }
 }
 

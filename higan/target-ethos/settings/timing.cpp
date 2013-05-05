@@ -91,7 +91,7 @@ void TimingSettings::analyzeStart() {
   analysis.systemTime = time(0);
 }
 
-bool TimingSettings::analyzeTick(const string& type) {
+bool TimingSettings::analyzeTick(string type) {
   analysis.counter++;
 
   time_t systemTime = time(0);

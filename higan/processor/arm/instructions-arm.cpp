@@ -493,7 +493,7 @@ void ARM::arm_op_move_immediate_offset() {
   uint12 rm = instruction();
 
   uint32 rn = r(n);
-  auto &rd = r(d);
+  auto& rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   if(l == 1) rd = load(rn, byte ? Byte : Word);
@@ -530,7 +530,7 @@ void ARM::arm_op_move_register_offset() {
   uint4 m = instruction();
 
   uint32 rn = r(n);
-  auto &rd = r(d);
+  auto& rd = r(d);
   uint32 rs = immediate;
   uint32 rm = r(m);
   bool c = cpsr().c;

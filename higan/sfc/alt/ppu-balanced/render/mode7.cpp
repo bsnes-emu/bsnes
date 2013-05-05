@@ -38,12 +38,13 @@ void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
   bool _bgsub_enabled = regs.bgsub_enabled[bg];
 
   build_window_tables(bg);
-  uint8 *wt_main = window[bg].main;
-  uint8 *wt_sub  = window[bg].sub;
+  uint8* wt_main = window[bg].main;
+  uint8* wt_sub  = window[bg].sub;
 
   int32 y = (regs.mode7_vflip == false ? line : 255 - line);
 
-  uint16 *mtable_x, *mtable_y;
+  uint16* mtable_x;
+  uint16* mtable_y;
   if(bg == BG1) {
     mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
     mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
@@ -65,39 +66,39 @@ void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
     py >>= 8;
 
     switch(regs.mode7_repeat) {
-      case 0:    //screen repetition outside of screen area
-      case 1: {  //same as case 0
+    case 0:    //screen repetition outside of screen area
+    case 1: {  //same as case 0
+      px &= 1023;
+      py &= 1023;
+      tx = ((px >> 3) & 127);
+      ty = ((py >> 3) & 127);
+      tile    = vram[(ty * 128 + tx) << 1];
+      palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    } break;
+    case 2: {  //palette color 0 outside of screen area
+      if((px | py) & ~1023) {
+        palette = 0;
+      } else {
         px &= 1023;
         py &= 1023;
         tx = ((px >> 3) & 127);
         ty = ((py >> 3) & 127);
         tile    = vram[(ty * 128 + tx) << 1];
         palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-      } break;
-      case 2: {  //palette color 0 outside of screen area
-        if((px | py) & ~1023) {
-          palette = 0;
-        } else {
-          px &= 1023;
-          py &= 1023;
-          tx = ((px >> 3) & 127);
-          ty = ((py >> 3) & 127);
-          tile    = vram[(ty * 128 + tx) << 1];
-          palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-        }
-      } break;
-      case 3: {  //character 0 repetition outside of screen area
-        if((px | py) & ~1023) {
-          tile = 0;
-        } else {
-          px &= 1023;
-          py &= 1023;
-          tx = ((px >> 3) & 127);
-          ty = ((py >> 3) & 127);
-          tile = vram[(ty * 128 + tx) << 1];
-        }
-        palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
-      } break;
+      }
+    } break;
+    case 3: {  //character 0 repetition outside of screen area
+      if((px | py) & ~1023) {
+        tile = 0;
+      } else {
+        px &= 1023;
+        py &= 1023;
+        tx = ((px >> 3) & 127);
+        ty = ((py >> 3) & 127);
+        tile = vram[(ty * 128 + tx) << 1];
+      }
+      palette = vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    } break;
     }
 
     if(bg == BG1) {

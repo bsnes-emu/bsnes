@@ -1,5 +1,5 @@
 struct Video {
-  uint32_t *palette;
+  uint32_t* palette;
   void generate_palette();
 
   Video();

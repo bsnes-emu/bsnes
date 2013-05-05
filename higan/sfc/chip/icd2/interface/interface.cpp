@@ -84,7 +84,7 @@ uint32_t ICD2::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_
   return source;
 }
 
-void ICD2::videoRefresh(const uint32_t *data, unsigned pitch, unsigned width, unsigned height) {
+void ICD2::videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height) {
 }
 
 void ICD2::audioSample(int16_t left, int16_t right) {

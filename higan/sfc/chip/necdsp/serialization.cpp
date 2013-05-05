@@ -21,7 +21,7 @@ vector<uint8> NECDSP::firmware() {
   return buffer;
 }
 
-void NECDSP::serialize(serializer &s) {
+void NECDSP::serialize(serializer& s) {
   uPD96050::serialize(s);
   Thread::serialize(s);
 }

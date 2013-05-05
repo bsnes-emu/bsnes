@@ -91,20 +91,20 @@ void power() {
 }
 
 void reset() {
-  for(auto &n : prg_bank) n = 0;
-  for(auto &n : chr_bank) n = 0;
+  for(auto& n : prg_bank) n = 0;
+  for(auto& n : chr_bank) n = 0;
   mirror = 0;
   latch = 0;
 }
 
-void serialize(serializer &s) {
-  for(auto &n : prg_bank) s.integer(n);
-  for(auto &n : chr_bank) s.integer(n);
+void serialize(serializer& s) {
+  for(auto& n : prg_bank) s.integer(n);
+  for(auto& n : chr_bank) s.integer(n);
   s.integer(mirror);
   s.integer(latch);
 }
 
-VRC2(Board &board) : Chip(board) {
+VRC2(Board& board) : Chip(board) {
 }
 
 };

@@ -22,7 +22,7 @@ uint8 PPU::read(uint32 addr) {
   case 0x0400000a: case 0x0400000b:
   case 0x0400000c: case 0x0400000d:
   case 0x0400000e: case 0x0400000f: {
-    auto &bg = regs.bg[(addr >> 1) & 3];
+    auto& bg = regs.bg[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
     return bg.control >> shift;
   }
@@ -68,7 +68,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x0400000a: case 0x0400000b:
   case 0x0400000c: case 0x0400000d:
   case 0x0400000e: case 0x0400000f: {
-    auto &bg = regs.bg[(addr >> 1) & 3];
+    auto& bg = regs.bg[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.control = (bg.control & ~(255 << shift)) | (byte << shift);
     return;
@@ -79,7 +79,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000014: case 0x04000015:
   case 0x04000018: case 0x04000019:
   case 0x0400001c: case 0x0400001d: {
-    auto &bg = regs.bg[(addr >> 2) & 3];
+    auto& bg = regs.bg[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.hoffset = (bg.hoffset & ~(255 << shift)) | (byte << shift);
     return;
@@ -90,7 +90,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000016: case 0x04000017:
   case 0x0400001a: case 0x0400001b:
   case 0x0400001e: case 0x0400001f: {
-    auto &bg = regs.bg[(addr >> 2) & 3];
+    auto& bg = regs.bg[(addr >> 2) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.voffset = (bg.voffset & ~(255 << shift)) | (byte << shift);
     return;
@@ -99,7 +99,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2PA,BG3PA
   case 0x04000020: case 0x04000021:
   case 0x04000030: case 0x04000031: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.pa = (bg.pa & ~(255 << shift)) | (byte << shift);
     return;
@@ -108,7 +108,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2PB,BG3PB
   case 0x04000022: case 0x04000023:
   case 0x04000032: case 0x04000033: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.pb = (bg.pb & ~(255 << shift)) | (byte << shift);
     return;
@@ -117,7 +117,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2PC,BG3PC
   case 0x04000024: case 0x04000025:
   case 0x04000034: case 0x04000035: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.pc = (bg.pc & ~(255 << shift)) | (byte << shift);
     return;
@@ -126,7 +126,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2PD,BG3PD
   case 0x04000026: case 0x04000027:
   case 0x04000036: case 0x04000037: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 1) * 8;
     bg.pd = (bg.pd & ~(255 << shift)) | (byte << shift);
     return;
@@ -135,7 +135,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2X_L,BG2X_H,BG3X_L,BG3X_H
   case 0x04000028: case 0x04000029: case 0x0400002a: case 0x0400002b:
   case 0x04000038: case 0x04000039: case 0x0400003a: case 0x0400003b: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 3) * 8;
     bg.lx = bg.x = (bg.x & ~(255 << shift)) | (byte << shift);
     return;
@@ -144,7 +144,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   //BG2Y_L,BG2Y_H,BG3Y_L,BG3Y_H
   case 0x0400002c: case 0x0400002d: case 0x0400002e: case 0x0400002f:
   case 0x0400003c: case 0x0400003d: case 0x0400003e: case 0x0400003f: {
-    auto &bg = regs.bg[(addr >> 4) & 3];
+    auto& bg = regs.bg[(addr >> 4) & 3];
     unsigned shift = (addr & 3) * 8;
     bg.ly = bg.y = (bg.y & ~(255 << shift)) | (byte << shift);
     return;

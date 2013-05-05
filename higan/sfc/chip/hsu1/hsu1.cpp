@@ -88,7 +88,7 @@ void HSU1::write(unsigned addr, uint8 data) {
         txbuffer.reset();
 
         server.header = server.downloadHeader();
-        uint8_t *data = nullptr;
+        uint8_t* data = nullptr;
         unsigned size = 0;
         server.downloadContent(data, size);
         rxbuffer.resize(size);

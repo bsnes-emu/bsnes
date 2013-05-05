@@ -352,7 +352,7 @@ void CPU::mmio_power() {
 
 void CPU::mmio_reset() {
   //$2140-217f
-  for(auto &port : status.port) port = 0x00;
+  for(auto& port : status.port) port = 0x00;
 
   //$2181-$2183
   status.wram_addr = 0x000000;
@@ -415,45 +415,45 @@ uint8 CPU::mmio_read(unsigned addr) {
   if((addr & 0xff80) == 0x4300) {  //$4300-$437f
     unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-      case 0x0: return mmio_r43x0(i);
-      case 0x1: return mmio_r43x1(i);
-      case 0x2: return mmio_r43x2(i);
-      case 0x3: return mmio_r43x3(i);
-      case 0x4: return mmio_r43x4(i);
-      case 0x5: return mmio_r43x5(i);
-      case 0x6: return mmio_r43x6(i);
-      case 0x7: return mmio_r43x7(i);
-      case 0x8: return mmio_r43x8(i);
-      case 0x9: return mmio_r43x9(i);
-      case 0xa: return mmio_r43xa(i);
-      case 0xb: return mmio_r43xb(i);
-      case 0xc: return regs.mdr;  //unmapped
-      case 0xd: return regs.mdr;  //unmapped
-      case 0xe: return regs.mdr;  //unmapped
-      case 0xf: return mmio_r43xb(i);  //mirror of $43xb
+    case 0x0: return mmio_r43x0(i);
+    case 0x1: return mmio_r43x1(i);
+    case 0x2: return mmio_r43x2(i);
+    case 0x3: return mmio_r43x3(i);
+    case 0x4: return mmio_r43x4(i);
+    case 0x5: return mmio_r43x5(i);
+    case 0x6: return mmio_r43x6(i);
+    case 0x7: return mmio_r43x7(i);
+    case 0x8: return mmio_r43x8(i);
+    case 0x9: return mmio_r43x9(i);
+    case 0xa: return mmio_r43xa(i);
+    case 0xb: return mmio_r43xb(i);
+    case 0xc: return regs.mdr;  //unmapped
+    case 0xd: return regs.mdr;  //unmapped
+    case 0xe: return regs.mdr;  //unmapped
+    case 0xf: return mmio_r43xb(i);  //mirror of $43xb
     }
   }
 
   switch(addr) {
-    case 0x2180: return mmio_r2180();
-    case 0x4016: return mmio_r4016();
-    case 0x4017: return mmio_r4017();
-    case 0x4210: return mmio_r4210();
-    case 0x4211: return mmio_r4211();
-    case 0x4212: return mmio_r4212();
-    case 0x4213: return mmio_r4213();
-    case 0x4214: return mmio_r4214();
-    case 0x4215: return mmio_r4215();
-    case 0x4216: return mmio_r4216();
-    case 0x4217: return mmio_r4217();
-    case 0x4218: return mmio_r4218();
-    case 0x4219: return mmio_r4219();
-    case 0x421a: return mmio_r421a();
-    case 0x421b: return mmio_r421b();
-    case 0x421c: return mmio_r421c();
-    case 0x421d: return mmio_r421d();
-    case 0x421e: return mmio_r421e();
-    case 0x421f: return mmio_r421f();
+  case 0x2180: return mmio_r2180();
+  case 0x4016: return mmio_r4016();
+  case 0x4017: return mmio_r4017();
+  case 0x4210: return mmio_r4210();
+  case 0x4211: return mmio_r4211();
+  case 0x4212: return mmio_r4212();
+  case 0x4213: return mmio_r4213();
+  case 0x4214: return mmio_r4214();
+  case 0x4215: return mmio_r4215();
+  case 0x4216: return mmio_r4216();
+  case 0x4217: return mmio_r4217();
+  case 0x4218: return mmio_r4218();
+  case 0x4219: return mmio_r4219();
+  case 0x421a: return mmio_r421a();
+  case 0x421b: return mmio_r421b();
+  case 0x421c: return mmio_r421c();
+  case 0x421d: return mmio_r421d();
+  case 0x421e: return mmio_r421e();
+  case 0x421f: return mmio_r421f();
   }
 
   return regs.mdr;
@@ -473,46 +473,46 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
   if((addr & 0xff80) == 0x4300) {  //$4300-$437f
     unsigned i = (addr >> 4) & 7;
     switch(addr & 0xf) {
-      case 0x0: mmio_w43x0(i, data); return;
-      case 0x1: mmio_w43x1(i, data); return;
-      case 0x2: mmio_w43x2(i, data); return;
-      case 0x3: mmio_w43x3(i, data); return;
-      case 0x4: mmio_w43x4(i, data); return;
-      case 0x5: mmio_w43x5(i, data); return;
-      case 0x6: mmio_w43x6(i, data); return;
-      case 0x7: mmio_w43x7(i, data); return;
-      case 0x8: mmio_w43x8(i, data); return;
-      case 0x9: mmio_w43x9(i, data); return;
-      case 0xa: mmio_w43xa(i, data); return;
-      case 0xb: mmio_w43xb(i, data); return;
-      case 0xc: return;  //unmapped
-      case 0xd: return;  //unmapped
-      case 0xe: return;  //unmapped
-      case 0xf: mmio_w43xb(i, data); return;  //mirror of $43xb
+    case 0x0: mmio_w43x0(i, data); return;
+    case 0x1: mmio_w43x1(i, data); return;
+    case 0x2: mmio_w43x2(i, data); return;
+    case 0x3: mmio_w43x3(i, data); return;
+    case 0x4: mmio_w43x4(i, data); return;
+    case 0x5: mmio_w43x5(i, data); return;
+    case 0x6: mmio_w43x6(i, data); return;
+    case 0x7: mmio_w43x7(i, data); return;
+    case 0x8: mmio_w43x8(i, data); return;
+    case 0x9: mmio_w43x9(i, data); return;
+    case 0xa: mmio_w43xa(i, data); return;
+    case 0xb: mmio_w43xb(i, data); return;
+    case 0xc: return;  //unmapped
+    case 0xd: return;  //unmapped
+    case 0xe: return;  //unmapped
+    case 0xf: mmio_w43xb(i, data); return;  //mirror of $43xb
     }
   }
 
   switch(addr) {
-    case 0x2180: mmio_w2180(data); return;
-    case 0x2181: mmio_w2181(data); return;
-    case 0x2182: mmio_w2182(data); return;
-    case 0x2183: mmio_w2183(data); return;
-    case 0x4016: mmio_w4016(data); return;
-    case 0x4017: return;  //unmapped
-    case 0x4200: mmio_w4200(data); return;
-    case 0x4201: mmio_w4201(data); return;
-    case 0x4202: mmio_w4202(data); return;
-    case 0x4203: mmio_w4203(data); return;
-    case 0x4204: mmio_w4204(data); return;
-    case 0x4205: mmio_w4205(data); return;
-    case 0x4206: mmio_w4206(data); return;
-    case 0x4207: mmio_w4207(data); return;
-    case 0x4208: mmio_w4208(data); return;
-    case 0x4209: mmio_w4209(data); return;
-    case 0x420a: mmio_w420a(data); return;
-    case 0x420b: mmio_w420b(data); return;
-    case 0x420c: mmio_w420c(data); return;
-    case 0x420d: mmio_w420d(data); return;
+  case 0x2180: mmio_w2180(data); return;
+  case 0x2181: mmio_w2181(data); return;
+  case 0x2182: mmio_w2182(data); return;
+  case 0x2183: mmio_w2183(data); return;
+  case 0x4016: mmio_w4016(data); return;
+  case 0x4017: return;  //unmapped
+  case 0x4200: mmio_w4200(data); return;
+  case 0x4201: mmio_w4201(data); return;
+  case 0x4202: mmio_w4202(data); return;
+  case 0x4203: mmio_w4203(data); return;
+  case 0x4204: mmio_w4204(data); return;
+  case 0x4205: mmio_w4205(data); return;
+  case 0x4206: mmio_w4206(data); return;
+  case 0x4207: mmio_w4207(data); return;
+  case 0x4208: mmio_w4208(data); return;
+  case 0x4209: mmio_w4209(data); return;
+  case 0x420a: mmio_w420a(data); return;
+  case 0x420b: mmio_w420b(data); return;
+  case 0x420c: mmio_w420c(data); return;
+  case 0x420d: mmio_w420d(data); return;
   }
 }
 

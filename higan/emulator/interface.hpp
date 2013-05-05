@@ -47,9 +47,9 @@ struct Interface {
   vector<Port> port;
 
   struct Bind {
-    virtual void loadRequest(unsigned, const string&, const string&) {}
-    virtual void loadRequest(unsigned, const string&) {}
-    virtual void saveRequest(unsigned, const string&) {}
+    virtual void loadRequest(unsigned, string, string) {}
+    virtual void loadRequest(unsigned, string) {}
+    virtual void saveRequest(unsigned, string) {}
     virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t) { return 0u; }
     virtual void videoRefresh(const uint32_t*, unsigned, unsigned, unsigned) {}
     virtual void audioSample(int16_t, int16_t) {}
@@ -57,14 +57,14 @@ struct Interface {
     virtual unsigned dipSettings(const Markup::Node&) { return 0; }
     virtual string path(unsigned) { return ""; }
     virtual string server() { return ""; }
-    virtual void notify(const string& text) { print(text, "\n"); }
+    virtual void notify(string text) { print(text, "\n"); }
   };
   Bind* bind = nullptr;
 
   //callback bindings (provided by user interface)
-  void loadRequest(unsigned id, const string& name, const string& type) { return bind->loadRequest(id, name, type); }
-  void loadRequest(unsigned id, const string& path) { return bind->loadRequest(id, path); }
-  void saveRequest(unsigned id, const string& path) { return bind->saveRequest(id, path); }
+  void loadRequest(unsigned id, string name, string type) { return bind->loadRequest(id, name, type); }
+  void loadRequest(unsigned id, string path) { return bind->loadRequest(id, path); }
+  void saveRequest(unsigned id, string path) { return bind->saveRequest(id, path); }
   uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, red, green, blue); }
   void videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height) { return bind->videoRefresh(data, pitch, width, height); }
   void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }

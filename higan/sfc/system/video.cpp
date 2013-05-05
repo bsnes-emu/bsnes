@@ -48,7 +48,7 @@ const uint8_t Video::cursor[15 * 15] = {
 };
 
 void Video::draw_cursor(uint16_t color, int x, int y) {
-  uint32_t *data = (uint32_t*)ppu.output;
+  uint32_t* data = (uint32_t*)ppu.output;
   if(ppu.interlace() && ppu.field()) data += 512;
 
   for(int cy = 0; cy < 15; cy++) {
@@ -92,7 +92,7 @@ void Video::update() {
     break;
   }
 
-  uint32_t *data = (uint32_t*)ppu.output;
+  uint32_t* data = (uint32_t*)ppu.output;
   if(ppu.interlace() && ppu.field()) data += 512;
 
   if(hires) {
@@ -129,7 +129,7 @@ void Video::scanline() {
 
 void Video::init() {
   hires = false;
-  for(auto &n : line_width) n = 256;
+  for(auto& n : line_width) n = 256;
 }
 
 #endif

@@ -1,6 +1,6 @@
 #ifdef ICD2_CPP
 
-void ICD2::serialize(serializer &s) {
+void ICD2::serialize(serializer& s) {
   Thread::serialize(s);
   GameBoy::system.serialize_all(s);
 

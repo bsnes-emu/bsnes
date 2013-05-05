@@ -3,7 +3,7 @@
 Input input;
 
 void Input::connect(bool port, Input::Device id) {
-  Controller *&controller = (port == Controller::Port1 ? port1 : port2);
+  Controller*& controller = (port == Controller::Port1 ? port1 : port2);
   if(controller) {
     delete controller;
     controller = nullptr;
@@ -26,7 +26,7 @@ void Input::connect(bool port, Input::Device id) {
   }
 }
 
-Input::Input() : port1(nullptr), port2(nullptr) {
+Input::Input() {
   connect(Controller::Port1, Input::Device::Joypad);
   connect(Controller::Port2, Input::Device::Joypad);
 }

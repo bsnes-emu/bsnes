@@ -1,7 +1,7 @@
 #define call (this->*op)
 
 template<uint8 (SPC700::*op)(uint8)>
-void SPC700::op_adjust(uint8 &r) {
+void SPC700::op_adjust(uint8& r) {
   op_io();
   r = call(r);
 }
@@ -61,7 +61,7 @@ void SPC700::op_branch_bit() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_pull(uint8 &r) {
+void SPC700::op_pull(uint8& r) {
   op_io();
   op_io();
   r = op_readsp();
@@ -74,7 +74,7 @@ void SPC700::op_push(uint8 r) {
 }
 
 template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_addr(uint8 &r) {
+void SPC700::op_read_addr(uint8& r) {
   dp.l = op_readpc();
   dp.h = op_readpc();
   rd = op_read(dp);
@@ -82,7 +82,7 @@ void SPC700::op_read_addr(uint8 &r) {
 }
 
 template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_addri(uint8 &r) {
+void SPC700::op_read_addri(uint8& r) {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_io();
@@ -91,20 +91,20 @@ void SPC700::op_read_addri(uint8 &r) {
 }
 
 template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_const(uint8 &r) {
+void SPC700::op_read_const(uint8& r) {
   rd = op_readpc();
   r = call(r, rd);
 }
 
 template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_dp(uint8 &r) {
+void SPC700::op_read_dp(uint8& r) {
   dp = op_readpc();
   rd = op_readdp(dp);
   r = call(r, rd);
 }
 
 template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_dpi(uint8 &r, uint8 &i) {
+void SPC700::op_read_dpi(uint8& r, uint8& i) {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + i);
@@ -188,7 +188,7 @@ void SPC700::op_set_bit() {
   op_writedp(dp, rd | (!(opcode & 0x10) << (opcode >> 5)));
 }
 
-void SPC700::op_set_flag(bool &flag, bool data) {
+void SPC700::op_set_flag(bool& flag, bool data) {
   op_io();
   if(&flag == &regs.p.i) op_io();
   flag = data;
@@ -204,7 +204,7 @@ void SPC700::op_test_addr(bool set) {
   op_write(dp, set ? rd | regs.a : rd & ~regs.a);
 }
 
-void SPC700::op_transfer(uint8 &from, uint8 &to) {
+void SPC700::op_transfer(uint8& from, uint8& to) {
   op_io();
   to = from;
   if(&to == &regs.s) return;
@@ -212,14 +212,14 @@ void SPC700::op_transfer(uint8 &from, uint8 &to) {
   regs.p.z = (to == 0);
 }
 
-void SPC700::op_write_addr(uint8 &r) {
+void SPC700::op_write_addr(uint8& r) {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_read(dp);
   op_write(dp, r);
 }
 
-void SPC700::op_write_addri(uint8 &i) {
+void SPC700::op_write_addri(uint8& i) {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_io();
@@ -228,13 +228,13 @@ void SPC700::op_write_addri(uint8 &i) {
   op_write(dp, regs.a);
 }
 
-void SPC700::op_write_dp(uint8 &r) {
+void SPC700::op_write_dp(uint8& r) {
   dp = op_readpc();
   op_readdp(dp);
   op_writedp(dp, r);
 }
 
-void SPC700::op_write_dpi(uint8 &r, uint8 &i) {
+void SPC700::op_write_dpi(uint8& r, uint8& i) {
   dp = op_readpc() + i;
   op_io();
   op_readdp(dp);

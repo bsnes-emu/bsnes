@@ -28,7 +28,7 @@ void PPU::render_bg_tile(uint16 tile_num) {
   uint8 col, d0, d1, d2, d3, d4, d5, d6, d7;
 
   if(color_depth == COLORDEPTH_4) {
-    uint8 *dest = (uint8*)bg_tiledata[TILE_2BIT] + tile_num * 64;
+    uint8* dest = (uint8*)bg_tiledata[TILE_2BIT] + tile_num * 64;
     unsigned pos = tile_num * 16;
     unsigned y = 8;
     while(y--) {
@@ -48,7 +48,7 @@ void PPU::render_bg_tile(uint16 tile_num) {
   }
 
   if(color_depth == COLORDEPTH_16) {
-    uint8 *dest = (uint8*)bg_tiledata[TILE_4BIT] + tile_num * 64;
+    uint8* dest = (uint8*)bg_tiledata[TILE_4BIT] + tile_num * 64;
     unsigned pos = tile_num * 32;
     unsigned y = 8;
     while(y--) {
@@ -70,7 +70,7 @@ void PPU::render_bg_tile(uint16 tile_num) {
   }
 
   if(color_depth == COLORDEPTH_256) {
-    uint8 *dest = (uint8*)bg_tiledata[TILE_8BIT] + tile_num * 64;
+    uint8* dest = (uint8*)bg_tiledata[TILE_8BIT] + tile_num * 64;
     unsigned pos = tile_num * 64;
     unsigned y = 8;
     while(y--) {

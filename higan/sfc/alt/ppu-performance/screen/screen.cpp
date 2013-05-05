@@ -55,7 +55,7 @@ void PPU::Screen::scanline() {
 }
 
 void PPU::Screen::render_black() {
-  uint32 *data = self.output + self.vcounter() * 1024;
+  uint32* data = self.output + self.vcounter() * 1024;
   if(self.interlace() && self.field()) data += 512;
   memset(data, 0, self.display.width << 2);
 }
@@ -115,7 +115,7 @@ uint16 PPU::Screen::get_pixel_sub(unsigned x) {
 }
 
 void PPU::Screen::render() {
-  uint32 *data = self.output + self.vcounter() * 1024;
+  uint32* data = self.output + self.vcounter() * 1024;
   if(self.interlace() && self.field()) data += 512;
 
   if(!self.regs.pseudo_hires && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
@@ -130,7 +130,7 @@ void PPU::Screen::render() {
   }
 }
 
-PPU::Screen::Screen(PPU &self) : self(self) {
+PPU::Screen::Screen(PPU& self) : self(self) {
 }
 
 PPU::Screen::~Screen() {

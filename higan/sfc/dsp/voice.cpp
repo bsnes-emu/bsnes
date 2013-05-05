@@ -1,6 +1,6 @@
 #ifdef DSP_CPP
 
-inline void DSP::voice_output(voice_t &v, bool channel) {
+inline void DSP::voice_output(voice_t& v, bool channel) {
   //apply left/right volume
   int amp = (state.t_output * (int8)VREG(voll + channel)) >> 7;
 
@@ -15,12 +15,12 @@ inline void DSP::voice_output(voice_t &v, bool channel) {
   }
 }
 
-void DSP::voice_1(voice_t &v) {
+void DSP::voice_1(voice_t& v) {
   state.t_dir_addr = (state.t_dir << 8) + (state.t_srcn << 2);
   state.t_srcn = VREG(srcn);
 }
 
-void DSP::voice_2(voice_t &v) {
+void DSP::voice_2(voice_t& v) {
   //read sample pointer (ignored if not needed)
   uint16 addr = state.t_dir_addr;
   if(!v.kon_delay) addr += 2;
@@ -34,22 +34,22 @@ void DSP::voice_2(voice_t &v) {
   state.t_pitch = VREG(pitchl);
 }
 
-void DSP::voice_3(voice_t &v) {
+void DSP::voice_3(voice_t& v) {
   voice_3a(v);
   voice_3b(v);
   voice_3c(v);
 }
 
-void DSP::voice_3a(voice_t &v) {
+void DSP::voice_3a(voice_t& v) {
   state.t_pitch += (VREG(pitchh) & 0x3f) << 8;
 }
 
-void DSP::voice_3b(voice_t &v) {
+void DSP::voice_3b(voice_t& v) {
   state.t_brr_byte   = smp.apuram[(uint16)(v.brr_addr + v.brr_offset)];
   state.t_brr_header = smp.apuram[(uint16)(v.brr_addr)];
 }
 
-void DSP::voice_3c(voice_t &v) {
+void DSP::voice_3c(voice_t& v) {
   //pitch modulation using previous voice's output
 
   if(state.t_pmon & v.vbit) {
@@ -62,7 +62,7 @@ void DSP::voice_3c(voice_t &v) {
       v.brr_addr   = state.t_brr_next_addr;
       v.brr_offset = 1;
       v.buf_pos    = 0;
-      state.t_brr_header = 0; //header is ignored on this sample
+      state.t_brr_header = 0;  //header is ignored on this sample
     }
 
     //envelope is never run during KON
@@ -113,7 +113,7 @@ void DSP::voice_3c(voice_t &v) {
   if(!v.kon_delay) envelope_run(v);
 }
 
-void DSP::voice_4(voice_t &v) {
+void DSP::voice_4(voice_t& v) {
   //decode BRR
   state.t_looped = 0;
   if(v.interp_pos >= 0x4000) {
@@ -140,7 +140,7 @@ void DSP::voice_4(voice_t &v) {
   voice_output(v, 0);
 }
 
-void DSP::voice_5(voice_t &v) {
+void DSP::voice_5(voice_t& v) {
   //output right
   voice_output(v, 1);
 
@@ -151,22 +151,22 @@ void DSP::voice_5(voice_t &v) {
   if(v.kon_delay == 5) state.endx_buf &= ~v.vbit;
 }
 
-void DSP::voice_6(voice_t &v) {
+void DSP::voice_6(voice_t& v) {
   state.outx_buf = state.t_output >> 8;
 }
 
-void DSP::voice_7(voice_t &v) {
+void DSP::voice_7(voice_t& v) {
   //update ENDX
   REG(endx) = (uint8)state.endx_buf;
   state.envx_buf = v.t_envx_out;
 }
 
-void DSP::voice_8(voice_t &v) {
+void DSP::voice_8(voice_t& v) {
   //update OUTX
   VREG(outx) = (uint8)state.outx_buf;
 }
 
-void DSP::voice_9(voice_t &v) {
+void DSP::voice_9(voice_t& v) {
   //update ENVX
   VREG(envx) = (uint8)state.envx_buf;
 }

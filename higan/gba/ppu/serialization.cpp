@@ -1,4 +1,4 @@
-void PPU::serialize(serializer &s) {
+void PPU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(vram, 96 * 1024);
@@ -10,8 +10,8 @@ void PPU::serialize(serializer &s) {
   s.integer(regs.control.hblank);
   s.integer(regs.control.objmapping);
   s.integer(regs.control.forceblank);
-  for(auto &flag : regs.control.enable) s.integer(flag);
-  for(auto &flag : regs.control.enablewindow) s.integer(flag);
+  for(auto& flag : regs.control.enable) s.integer(flag);
+  for(auto& flag : regs.control.enablewindow) s.integer(flag);
 
   s.integer(regs.greenswap);
 
@@ -25,7 +25,7 @@ void PPU::serialize(serializer &s) {
 
   s.integer(regs.vcounter);
 
-  for(auto &bg : regs.bg) {
+  for(auto& bg : regs.bg) {
     s.integer(bg.control.priority);
     s.integer(bg.control.characterbaseblock);
     s.integer(bg.control.mosaic);
@@ -48,15 +48,15 @@ void PPU::serialize(serializer &s) {
     s.integer(bg.id);
   }
 
-  for(auto &window : regs.window) {
+  for(auto& window : regs.window) {
     s.integer(window.x1);
     s.integer(window.x2);
     s.integer(window.y1);
     s.integer(window.y2);
   }
 
-  for(auto &windowflags : regs.windowflags) {
-    for(auto &flag : windowflags.enable) s.integer(flag);
+  for(auto& windowflags : regs.windowflags) {
+    for(auto& flag : windowflags.enable) s.integer(flag);
   }
 
   s.integer(regs.mosaic.bghsize);
@@ -64,8 +64,8 @@ void PPU::serialize(serializer &s) {
   s.integer(regs.mosaic.objhsize);
   s.integer(regs.mosaic.objvsize);
 
-  for(auto &flag : regs.blend.control.above) s.integer(flag);
-  for(auto &flag : regs.blend.control.below) s.integer(flag);
+  for(auto& flag : regs.blend.control.above) s.integer(flag);
+  for(auto& flag : regs.blend.control.below) s.integer(flag);
   s.integer(regs.blend.control.mode);
   s.integer(regs.blend.eva);
   s.integer(regs.blend.evb);
@@ -73,7 +73,7 @@ void PPU::serialize(serializer &s) {
 
   for(unsigned l = 0; l < 6; l++) {
     for(unsigned p = 0; p < 240; p++) {
-      auto &pixel = layer[l][p];
+      auto& pixel = layer[l][p];
       s.integer(pixel.enable);
       s.integer(pixel.priority);
       s.integer(pixel.color);
@@ -88,10 +88,10 @@ void PPU::serialize(serializer &s) {
     }
   }
 
-  for(auto &value : vmosaic) s.integer(value);
-  for(auto &value : hmosaic) s.integer(value);
+  for(auto& value : vmosaic) s.integer(value);
+  for(auto& value : hmosaic) s.integer(value);
 
-  for(auto &obj : object) {
+  for(auto& obj : object) {
     s.integer(obj.y);
     s.integer(obj.affine);
     s.integer(obj.affinesize);
@@ -114,7 +114,7 @@ void PPU::serialize(serializer &s) {
     s.integer(obj.height);
   }
 
-  for(auto &par : objectparam) {
+  for(auto& par : objectparam) {
     s.integer(par.pa);
     s.integer(par.pb);
     s.integer(par.pc);

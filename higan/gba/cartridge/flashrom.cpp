@@ -86,7 +86,7 @@ void Cartridge::FlashROM::power() {
   bank = 0;
 }
 
-void Cartridge::FlashROM::serialize(serializer &s) {
+void Cartridge::FlashROM::serialize(serializer& s) {
   s.array(data, size);
   s.integer(size);
   s.integer(id);

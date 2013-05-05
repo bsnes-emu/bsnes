@@ -113,14 +113,14 @@ void PPU::render_line() {
   update_bg_info();
 
   switch(regs.bg_mode) {
-    case 0: render_line_mode0(); break;
-    case 1: render_line_mode1(); break;
-    case 2: render_line_mode2(); break;
-    case 3: render_line_mode3(); break;
-    case 4: render_line_mode4(); break;
-    case 5: render_line_mode5(); break;
-    case 6: render_line_mode6(); break;
-    case 7: render_line_mode7(); break;
+  case 0: render_line_mode0(); break;
+  case 1: render_line_mode1(); break;
+  case 2: render_line_mode2(); break;
+  case 3: render_line_mode3(); break;
+  case 4: render_line_mode4(); break;
+  case 5: render_line_mode5(); break;
+  case 6: render_line_mode6(); break;
+  case 7: render_line_mode7(); break;
   }
 
   render_line_output();

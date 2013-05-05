@@ -1,6 +1,6 @@
 #ifdef PPU_CPP
 
-void PPU::serialize(serializer &s) {
+void PPU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(screen);

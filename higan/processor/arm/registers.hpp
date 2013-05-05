@@ -109,8 +109,8 @@ struct Processor {
   bool sequential;
   bool irqline;
 
-  GPR *r[16];
-  PSR *spsr;
+  GPR* r[16];
+  PSR* spsr;
 
   void power();
   void setMode(Mode);

@@ -11,8 +11,8 @@ struct PPU : Thread, public PPUcounter {
   #include "mmio/mmio.hpp"
   #include "render/render.hpp"
 
-  uint32 *surface;
-  uint32 *output;
+  uint32* surface;
+  uint32* output;
 
   uint8 ppu1_version;
   uint8 ppu2_version;

@@ -18,7 +18,7 @@ struct TimingSettings : SettingsLayout {
   void analyzeAudioFrequency();
 
   void analyzeStart();
-  bool analyzeTick(const string& type);
+  bool analyzeTick(string type);
   void analyzeStop();
 
   TimingSettings();

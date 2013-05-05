@@ -22,8 +22,8 @@ struct PPU : Thread, public PPUcounter {
   ~PPU();
 
 privileged:
-  uint32 *surface;
-  uint32 *output;
+  uint32* surface;
+  uint32* output;
 
   uint8 ppu1_version;
   uint8 ppu2_version;

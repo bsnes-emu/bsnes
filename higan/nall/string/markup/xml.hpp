@@ -44,7 +44,7 @@ protected:
     return;
     #endif
 
-    char* output = target();
+    char* output = target.data();
     while(length) {
       if(*source == '&') {
         if(!memcmp(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }

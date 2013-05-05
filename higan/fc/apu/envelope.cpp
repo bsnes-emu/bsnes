@@ -28,7 +28,7 @@ void APU::Envelope::reset() {
   decay_volume = 0;
 }
 
-void APU::Envelope::serialize(serializer &s) {
+void APU::Envelope::serialize(serializer& s) {
   s.integer(speed);
   s.integer(use_speed_as_volume);
   s.integer(loop_mode);

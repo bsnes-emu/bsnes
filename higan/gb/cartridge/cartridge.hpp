@@ -45,13 +45,13 @@ struct Cartridge : MMIO, property<Cartridge> {
   readonly<bool> loaded;
   readonly<string> sha256;
 
-  uint8_t *romdata;
+  uint8_t* romdata;
   unsigned romsize;
 
-  uint8_t *ramdata;
+  uint8_t* ramdata;
   unsigned ramsize;
 
-  MMIO *mapper;
+  MMIO* mapper;
   bool bootrom_enable;
 
   void load(System::Revision revision);
