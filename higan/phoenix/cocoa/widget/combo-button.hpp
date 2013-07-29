@@ -12,13 +12,13 @@ struct pComboButton : public pWidget {
   ComboButton& comboButton;
   CocoaComboButton* cocoaComboButton = nullptr;
 
-  void append(const string& text);
+  void append(string text);
   Size minimumSize();
-  void modify(unsigned row, const string& text);
+  void modify(unsigned row, string text);
   void remove(unsigned row);
   void reset();
   unsigned selection();
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setSelection(unsigned row);
 
   pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}

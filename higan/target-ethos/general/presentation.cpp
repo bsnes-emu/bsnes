@@ -57,6 +57,9 @@ Presentation::Presentation() {
   setMenuVisible();
   setStatusVisible();
 
+  setDroppable();
+  viewport.setDroppable();
+
   loadMenu.setText("Library");
     loadImport.setText("Import Game ...");
   settingsMenu.setText("Settings");
@@ -111,6 +114,13 @@ Presentation::Presentation() {
 
   append(layout);
   layout.append(viewport, {0, 0, 1, 1});
+
+  onDrop = viewport.onDrop = [&](lstring paths) {
+    if(paths.size() && directory::exists(paths[0])) {
+      utility->loadMedia(paths[0]);
+      setFocused();
+    }
+  };
 
   onSize = [&] {
     utility->resize();

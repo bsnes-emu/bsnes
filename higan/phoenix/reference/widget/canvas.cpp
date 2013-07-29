@@ -1,6 +1,9 @@
 namespace phoenix {
 
-void pCanvas::setSize(const Size& size) {
+void pCanvas::setDroppable(bool droppable) {
+}
+
+void pCanvas::setSize(Size size) {
 }
 
 void pCanvas::update() {

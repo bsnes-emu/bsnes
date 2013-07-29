@@ -105,6 +105,17 @@
   return NO;
 }
 
+-(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
+  return DropPathsOperation(sender);
+}
+
+-(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
+  lstring paths = DropPaths(sender);
+  if(paths.empty()) return NO;
+  if(window->onDrop) window->onDrop(paths);
+  return YES;
+}
+
 -(NSMenu*) menuBar {
   return menuBar;
 }
@@ -217,7 +228,7 @@ void pWindow::remove(Widget& widget) {
   }
 }
 
-void pWindow::setBackgroundColor(const Color& color) {
+void pWindow::setBackgroundColor(Color color) {
   @autoreleasepool {
     [cocoaWindow
       setBackgroundColor:[NSColor
@@ -227,6 +238,16 @@ void pWindow::setBackgroundColor(const Color& color) {
         alpha:color.alpha / 255.0
       ]
     ];
+  }
+}
+
+void pWindow::setDroppable(bool droppable) {
+  @autoreleasepool {
+    if(droppable) {
+      [cocoaWindow registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    } else {
+      [cocoaWindow unregisterDraggedTypes];
+    }
   }
 }
 
@@ -250,7 +271,7 @@ void pWindow::setFullScreen(bool fullScreen) {
   }
 }
 
-void pWindow::setGeometry(const Geometry& geometry) {
+void pWindow::setGeometry(Geometry geometry) {
   locked = true;
 
   @autoreleasepool {
@@ -276,7 +297,7 @@ void pWindow::setGeometry(const Geometry& geometry) {
   locked = false;
 }
 
-void pWindow::setMenuFont(const string& font) {
+void pWindow::setMenuFont(string font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -302,14 +323,14 @@ void pWindow::setResizable(bool resizable) {
   }
 }
 
-void pWindow::setStatusFont(const string& font) {
+void pWindow::setStatusFont(string font) {
   @autoreleasepool {
     [[cocoaWindow statusBar] setFont:pFont::cocoaFont(font)];
   }
   statusBarReposition();
 }
 
-void pWindow::setStatusText(const string& text) {
+void pWindow::setStatusText(string text) {
   @autoreleasepool {
     [[cocoaWindow statusBar] setStringValue:[NSString stringWithUTF8String:text]];
   }
@@ -322,7 +343,7 @@ void pWindow::setStatusVisible(bool visible) {
   }
 }
 
-void pWindow::setTitle(const string& text) {
+void pWindow::setTitle(string text) {
   @autoreleasepool {
     [cocoaWindow setTitle:[NSString stringWithUTF8String:text]];
   }
@@ -335,7 +356,7 @@ void pWindow::setVisible(bool visible) {
   }
 }
 
-void pWindow::setWidgetFont(const string& font) {
+void pWindow::setWidgetFont(string font) {
 }
 
 void pWindow::constructor() {

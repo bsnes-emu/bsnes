@@ -4,6 +4,10 @@ uintptr_t pViewport::handle() {
   return (uintptr_t)qtViewport->winId();
 }
 
+void pViewport::setDroppable(bool droppable) {
+  qtViewport->setAcceptDrops(droppable);
+}
+
 void pViewport::constructor() {
   qtWidget = qtViewport = new QtViewport(*this);
   qtViewport->setMouseTracking(true);
@@ -21,6 +25,18 @@ void pViewport::destructor() {
 void pViewport::orphan() {
   destructor();
   constructor();
+}
+
+void pViewport::QtViewport::dragEnterEvent(QDragEnterEvent* event) {
+  if(event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+
+void pViewport::QtViewport::dropEvent(QDropEvent* event) {
+  lstring paths = DropPaths(event);
+  if(paths.empty()) return;
+  if(self.viewport.onDrop) self.viewport.onDrop(paths);
 }
 
 void pViewport::QtViewport::leaveEvent(QEvent* event) {

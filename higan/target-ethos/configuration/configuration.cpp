@@ -2,7 +2,7 @@
 ConfigurationSettings* config = nullptr;
 
 ConfigurationSettings::ConfigurationSettings() {
-  video.append(video.driver = ruby::video.default_driver(), "Driver");
+  video.append(video.driver = ruby::video.optimalDriver(), "Driver");
   video.append(video.synchronize = false, "Synchronize");
   video.append(video.shader = "Blur", "Shader");
   video.append(video.scaleMode = 0, "ScaleMode");
@@ -17,7 +17,7 @@ ConfigurationSettings::ConfigurationSettings() {
   video.append(video.startFullScreen = false, "StartFullScreen");
   append(video, "Video");
 
-  audio.append(audio.driver = ruby::audio.default_driver(), "Driver");
+  audio.append(audio.driver = ruby::audio.optimalDriver(), "Driver");
   audio.append(audio.synchronize = true, "Synchronize");
   audio.append(audio.frequency = 48000, "Frequency");
   audio.append(audio.latency = 60, "Latency");
@@ -26,7 +26,7 @@ ConfigurationSettings::ConfigurationSettings() {
   audio.append(audio.mute = false, "Mute");
   append(audio, "Audio");
 
-  input.append(input.driver = ruby::input.default_driver(), "Driver");
+  input.append(input.driver = ruby::input.optimalDriver(), "Driver");
   input.focus.append(input.focus.pause = false, "Pause");
   input.focus.append(input.focus.allow = false, "AllowInput");
   input.append(input.focus, "Focus");

@@ -13,6 +13,17 @@
   return self;
 }
 
+-(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
+  return DropPathsOperation(sender);
+}
+
+-(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
+  lstring paths = DropPaths(sender);
+  if(paths.empty()) return NO;
+  if(canvas->onDrop) canvas->onDrop(paths);
+  return YES;
+}
+
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown {
   if(auto &callback = isDown ? canvas->onMousePress : canvas->onMouseRelease) {
     switch([event buttonNumber]) {
@@ -73,7 +84,17 @@
 
 namespace phoenix {
 
-void pCanvas::setSize(const Size& size) {
+void pCanvas::setDroppable(bool droppable) {
+  @autoreleasepool {
+    if(droppable) {
+      [cocoaCanvas registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    } else {
+      [cocoaCanvas unregisterDraggedTypes];
+    }
+  }
+}
+
+void pCanvas::setSize(Size size) {
   @autoreleasepool {
     NSImage* image = [[[NSImage alloc] initWithSize:NSMakeSize(size.width, size.height)] autorelease];
     NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc]

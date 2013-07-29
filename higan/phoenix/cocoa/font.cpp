@@ -18,7 +18,7 @@ string pFont::monospace(unsigned size, string style) {
   return {"Menlo, ", size, ", ", style};
 }
 
-Size pFont::size(const string& font, const string& text) {
+Size pFont::size(string font, string text) {
   @autoreleasepool {
     if(NSFont* nsFont = cocoaFont(font)) {
       return size(nsFont, text);
@@ -27,27 +27,26 @@ Size pFont::size(const string& font, const string& text) {
   return {0, 0};
 }
 
-NSFont* pFont::cocoaFont(const string& description) {
-  lstring part = description.split<2>(",");
-  for(auto& item : part) item.strip();
+NSFont* pFont::cocoaFont(string description) {
+  lstring part = description.split<2>(",").strip();
 
   NSString* family = @"Lucida Grande";
   NSFontTraitMask traits = 0;
   CGFloat size = 12;
 
   if(!part(0).empty()) family = [NSString stringWithUTF8String:part(0)];
-  if(!part(1).empty()) size = fp(part(1));
-  if(part(2).iposition("bold")) traits |= NSBoldFontMask;
-  if(part(2).iposition("italic")) traits |= NSItalicFontMask;
-  if(part(2).iposition("narrow")) traits |= NSNarrowFontMask;
-  if(part(2).iposition("expanded")) traits |= NSExpandedFontMask;
-  if(part(2).iposition("condensed")) traits |= NSCondensedFontMask;
-  if(part(2).iposition("smallcaps")) traits |= NSSmallCapsFontMask;
+  if(!part(1).empty()) size = real(part(1));
+  if(part(2).ifind("bold")) traits |= NSBoldFontMask;
+  if(part(2).ifind("italic")) traits |= NSItalicFontMask;
+  if(part(2).ifind("narrow")) traits |= NSNarrowFontMask;
+  if(part(2).ifind("expanded")) traits |= NSExpandedFontMask;
+  if(part(2).ifind("condensed")) traits |= NSCondensedFontMask;
+  if(part(2).ifind("smallcaps")) traits |= NSSmallCapsFontMask;
 
   return [[NSFontManager sharedFontManager] fontWithFamily:family traits:traits weight:5 size:size];
 }
 
-Size pFont::size(NSFont* font, const string& text) {
+Size pFont::size(NSFont* font, string text) {
   @autoreleasepool {
     NSString* cocoaText = [NSString stringWithUTF8String:text];
     NSDictionary* fontAttributes = [NSDictionary dictionaryWithObjectsAndKeys:font, NSFontAttributeName, nil];

@@ -7,9 +7,29 @@ struct stringref;
 struct lstring;
 typedef const stringref& rstring;
 
+//#define NALL_STRING_ALLOCATOR_COPY_ON_WRITE
+#define NALL_STRING_ALLOCATOR_SMALL_STRING_OPTIMIZATION
+//#define NALL_STRING_ALLOCATOR_VECTOR
+
 struct string {
 protected:
+  #if defined(NALL_STRING_ALLOCATOR_COPY_ON_WRITE)
+  inline void _copy();
   std::shared_ptr<char> _data;
+  #endif
+
+  #if defined(NALL_STRING_ALLOCATOR_SMALL_STRING_OPTIMIZATION)
+  enum : unsigned { SSO = 24 };
+  union {
+    char* _data;
+    char _text[SSO];
+  };
+  #endif
+
+  #if defined(NALL_STRING_ALLOCATOR_VECTOR)
+  char* _data;
+  #endif
+
   unsigned _capacity;
   unsigned _size;
 
@@ -27,12 +47,13 @@ public:
   inline void resize(unsigned);
   inline void clear(char);
 
+  inline unsigned hash() const;
+
   template<typename... Args> inline string& assign(Args&&... args);
   template<typename... Args> inline string& append(Args&&... args);
 
   //file.hpp
-  inline static string read(rstring filename);
-  inline bool readfile(rstring);
+  inline static string read(const string& filename);
 
   //datetime.hpp
   inline static string date();
@@ -51,16 +72,21 @@ public:
   template<unsigned Limit = 0> inline lstring qsplit(rstring) const;
   template<unsigned Limit = 0> inline lstring iqsplit(rstring) const;
 
+  inline signed compare(rstring) const;
+  inline signed icompare(rstring) const;
+
   inline bool equals(rstring) const;
   inline bool iequals(rstring) const;
 
-  inline bool wildcard(rstring) const;
-  inline bool iwildcard(rstring) const;
+  inline bool match(rstring) const;
+  inline bool imatch(rstring) const;
 
   inline bool beginswith(rstring) const;
   inline bool ibeginswith(rstring) const;
   inline bool endswith(rstring) const;
   inline bool iendswith(rstring) const;
+
+  inline string slice(unsigned offset, unsigned length = ~0u) const;
 
   inline string& lower();
   inline string& upper();
@@ -69,21 +95,28 @@ public:
   inline string& transform(rstring before, rstring after);
   inline string& reverse();
 
-  template<unsigned limit = 0> inline string& ltrim(rstring key = " ");
-  template<unsigned limit = 0> inline string& rtrim(rstring key = " ");
-  template<unsigned limit = 0> inline string& trim(rstring key = " ", rstring rkey = "");
+  template<unsigned limit = 0> inline string& ltrim() { return ltrim<limit>(" "); }
+  template<unsigned limit = 0> inline string& ltrim(rstring key);
+
+  template<unsigned limit = 0> inline string& rtrim() { return rtrim<limit>(" "); }
+  template<unsigned limit = 0> inline string& rtrim(rstring key);
+
+  template<unsigned limit = 0> inline string& trim() { return trim<limit>(" "); }
+  template<unsigned limit = 0> inline string& trim(rstring key);
+  template<unsigned limit = 0> inline string& trim(rstring key, rstring rkey);
+
   inline string& strip();
 
-  inline optional<unsigned> position(rstring key) const;
-  inline optional<unsigned> iposition(rstring key) const;
-  inline optional<unsigned> qposition(rstring key) const;
-  inline optional<unsigned> iqposition(rstring key) const;
+  inline optional<unsigned> find(rstring key) const;
+  inline optional<unsigned> ifind(rstring key) const;
+  inline optional<unsigned> qfind(rstring key) const;
+  inline optional<unsigned> iqfind(rstring key) const;
 
   //core.hpp
   inline explicit operator bool() const;
   inline operator const char*() const;
-  inline char& operator[](unsigned);
-  inline const char& operator[](unsigned) const;
+  inline char& operator[](signed);
+  inline const char& operator[](signed) const;
 
   inline bool operator==(const char*) const;
   inline bool operator!=(const char*) const;
@@ -109,8 +142,6 @@ public:
 //protected:
   struct exception_out_of_bounds{};
   template<unsigned Limit, bool Insensitive, bool Quoted> inline string& ureplace(rstring, rstring);
-  inline void _unique();
-  inline void _copy();
   inline string& _append(const char*);
 
 #if defined(QSTRING_H)
@@ -179,8 +210,8 @@ inline bool tokenize(lstring& list, const char* s, const char* p);
 inline char* integer(char* result, intmax_t value);
 inline char* decimal(char* result, uintmax_t value);
 
-inline unsigned fp(char* str, long double value);
-inline string fp(long double value);
+inline unsigned real(char* str, long double value);
+inline string real(long double value);
 
 //variadic.hpp
 inline void sprint(string& output);

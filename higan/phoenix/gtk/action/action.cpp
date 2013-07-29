@@ -24,7 +24,7 @@ string pAction::mnemonic(string text) {
   return text;
 }
 
-void pAction::setFont(const string& font) {
+void pAction::setFont(string font) {
   pFont::setFont(widget, font);
 }
 

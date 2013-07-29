@@ -8,7 +8,11 @@ namespace nall {
 
 struct any {
   bool empty() const { return container; }
-  const std::type_info& type() const { return container ? container->type() : typeid(void); }
+  void reset() { if(container) { delete container; container = nullptr; } }
+
+  const std::type_info& type() const {
+    return container ? container->type() : typeid(void);
+  }
 
   template<typename T> any& operator=(const T& value) {
     typedef typename type_if<
@@ -27,20 +31,37 @@ struct any {
     return *this;
   }
 
+  any& operator=(const any& source) {
+    if(container) { delete container; container = nullptr; }
+    if(source.container) container = source.container->copy();
+    return *this;
+  }
+
+  any& operator=(any&& source) {
+    if(container) delete container;
+    container = source.container;
+    source.container = nullptr;
+    return *this;
+  }
+
   any() = default;
+  any(const any& source) { operator=(source); }
+  any(any&& source) { operator=(std::move(source)); }
   template<typename T> any(const T& value) { operator=(value); }
-  ~any() { if(container) delete container; }
+  ~any() { reset(); }
 
 private:
   struct placeholder {
     virtual const std::type_info& type() const = 0;
+    virtual placeholder* copy() const = 0;
+    virtual ~placeholder() {}
   };
-
   placeholder* container = nullptr;
 
   template<typename T> struct holder : placeholder {
     T value;
     const std::type_info& type() const { return typeid(T); }
+    placeholder* copy() const { return new holder(value); }
     holder(const T& value) : value(value) {}
   };
 

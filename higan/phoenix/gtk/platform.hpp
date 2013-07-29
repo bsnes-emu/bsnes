@@ -124,10 +124,11 @@ struct pWindow : public pObject {
   void remove(Layout& layout);
   void remove(Menu& menu);
   void remove(Widget& widget);
-  void setBackgroundColor(const Color& color);
+  void setBackgroundColor(Color color);
+  void setDroppable(bool droppable);
   void setFocused();
   void setFullScreen(bool fullScreen);
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setMenuFont(string font);
   void setMenuVisible(bool visible);
   void setModal(bool modal);
@@ -156,7 +157,7 @@ struct pAction : public pObject {
   void constructor();
   virtual void orphan();
   string mnemonic(string text);
-  virtual void setFont(const string &font);
+  virtual void setFont(string font);
 };
 
 struct pMenu : public pAction {
@@ -245,7 +246,7 @@ struct pWidget : public pSizable {
   void setEnabled(bool enabled);
   virtual void setFocused();
   virtual void setFont(string font);
-  virtual void setGeometry(const Geometry& geometry);
+  virtual void setGeometry(Geometry geometry);
   void setVisible(bool visible);
 
   pWidget(Widget& widget) : pSizable(widget), widget(widget) {}
@@ -271,7 +272,8 @@ struct pCanvas : public pWidget {
   Canvas& canvas;
   cairo_surface_t* surface;
 
-  void setSize(const Size& size);
+  void setDroppable(bool droppable);
+  void setSize(Size size);
   void update();
 
   pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
@@ -510,6 +512,7 @@ struct pViewport : public pWidget {
   Viewport& viewport;
 
   uintptr_t handle();
+  void setDroppable(bool droppable);
 
   pViewport(Viewport& viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();

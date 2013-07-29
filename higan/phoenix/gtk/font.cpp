@@ -36,8 +36,8 @@ PangoFontDescription* pFont::create(string description) {
 
   if(part[0] != "") family = part[0];
   if(part.size() >= 2) size = decimal(part[1]);
-  if(part.size() >= 3) bold = part[2].position("Bold");
-  if(part.size() >= 3) italic = part[2].position("Italic");
+  if(part.size() >= 3) bold = part[2].find("Bold");
+  if(part.size() >= 3) italic = part[2].find("Italic");
 
   PangoFontDescription* font = pango_font_description_new();
   pango_font_description_set_family(font, family);

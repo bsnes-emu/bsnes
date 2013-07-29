@@ -15,10 +15,11 @@ struct pWindow : public pObject {
   void remove(Layout& layout);
   void remove(Menu& menu);
   void remove(Widget& widget);
-  void setBackgroundColor(const Color& color);
+  void setBackgroundColor(Color color);
+  void setDroppable(bool droppable);
   void setFocused();
   void setFullScreen(bool fullScreen);
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setMenuFont(string font);
   void setMenuVisible(bool visible);
   void setModal(bool modal);

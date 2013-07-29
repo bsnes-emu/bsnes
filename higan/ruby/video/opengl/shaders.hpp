@@ -29,6 +29,7 @@ static string OpenGLOutputVertexShader = R"(
     //align image to even pixel boundary to prevent aliasing
     vec2 align = fract((outputSize.xy + targetSize.xy) / 2.0) * 2.0;
     gl_Position.xy -= align / outputSize.xy;
+    gl_Position.zw = vec2(0.0, 1.0);
 
     vertexOut.texCoord = texCoord;
   }

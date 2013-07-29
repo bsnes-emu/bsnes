@@ -2,7 +2,7 @@
 
 namespace nall {
 
-bool wildcard(const char* s, const char* p) {
+bool strmatch(const char* s, const char* p) {
   const char* cp = nullptr;
   const char* mp = nullptr;
   while(*s && *p != '*') {
@@ -23,7 +23,7 @@ bool wildcard(const char* s, const char* p) {
   return !*p;
 }
 
-bool iwildcard(const char* s, const char* p) {
+bool istrmatch(const char* s, const char* p) {
   const char* cp = nullptr;
   const char* mp = nullptr;
   while(*s && *p != '*') {

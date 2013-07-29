@@ -73,12 +73,16 @@ void pWindow::remove(Widget& widget) {
   if(qtApplication) widget.p.orphan();
 }
 
-void pWindow::setBackgroundColor(const Color& color) {
+void pWindow::setBackgroundColor(Color color) {
   QPalette palette;
   palette.setColor(QPalette::Window, QColor(color.red, color.green, color.blue, color.alpha));
   qtContainer->setPalette(palette);
   qtContainer->setAutoFillBackground(true);
   qtWindow->setAttribute(Qt::WA_TranslucentBackground, color.alpha != 255);
+}
+
+void pWindow::setDroppable(bool droppable) {
+  qtWindow->setAcceptDrops(droppable);
 }
 
 void pWindow::setFocused() {
@@ -98,11 +102,11 @@ void pWindow::setFullScreen(bool fullScreen) {
   }
 }
 
-void pWindow::setGeometry(const Geometry& geometry_) {
+void pWindow::setGeometry(Geometry geometry) {
   locked = true;
   Application::processEvents();
   QApplication::syncX();
-  Geometry geometry = geometry_, margin = frameMargin();
+  Geometry margin = frameMargin();
 
   setResizable(window.state.resizable);
   qtWindow->move(geometry.x - frameMargin().x, geometry.y - frameMargin().y);
@@ -115,14 +119,13 @@ void pWindow::setGeometry(const Geometry& geometry_) {
   }
 
   for(auto& layout : window.state.layout) {
-    geometry = geometry_;
     geometry.x = geometry.y = 0;
     layout.setGeometry(geometry);
   }
   locked = false;
 }
 
-void pWindow::setMenuFont(const string& font) {
+void pWindow::setMenuFont(string font) {
   qtMenu->setFont(pFont::create(font));
   for(auto& item : window.state.menu) item.p.setFont(font);
 }
@@ -157,11 +160,11 @@ void pWindow::setResizable(bool resizable) {
   qtStatus->setSizeGripEnabled(resizable);
 }
 
-void pWindow::setStatusFont(const string& font) {
+void pWindow::setStatusFont(string font) {
   qtStatus->setFont(pFont::create(font));
 }
 
-void pWindow::setStatusText(const string& text) {
+void pWindow::setStatusText(string text) {
   qtStatus->showMessage(QString::fromUtf8(text), 0);
 }
 
@@ -170,7 +173,7 @@ void pWindow::setStatusVisible(bool visible) {
   setGeometry(window.state.geometry);
 }
 
-void pWindow::setTitle(const string& text) {
+void pWindow::setTitle(string text) {
   qtWindow->setWindowTitle(QString::fromUtf8(text));
 }
 
@@ -184,7 +187,7 @@ void pWindow::setVisible(bool visible) {
   locked = false;
 }
 
-void pWindow::setWidgetFont(const string& font) {
+void pWindow::setWidgetFont(string font) {
 }
 
 void pWindow::constructor() {
@@ -271,6 +274,18 @@ void pWindow::QtWindow::moveEvent(QMoveEvent* event) {
   if(self.locked == false) {
     if(self.window.onMove) self.window.onMove();
   }
+}
+
+void pWindow::QtWindow::dragEnterEvent(QDragEnterEvent* event) {
+  if(event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+
+void pWindow::QtWindow::dropEvent(QDropEvent* event) {
+  lstring paths = DropPaths(event);
+  if(paths.empty()) return;
+  if(self.window.onDrop) self.window.onDrop(paths);
 }
 
 void pWindow::QtWindow::keyPressEvent(QKeyEvent* event) {

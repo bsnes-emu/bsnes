@@ -23,6 +23,7 @@
 #include <nall/function.hpp>
 #include <nall/group.hpp>
 #include <nall/gzip.hpp>
+#include <nall/hashset.hpp>
 #include <nall/http.hpp>
 #include <nall/image.hpp>
 #include <nall/inflate.hpp>

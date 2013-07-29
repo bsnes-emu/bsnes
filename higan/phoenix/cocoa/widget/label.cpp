@@ -21,7 +21,7 @@ Size pLabel::minimumSize() {
   return {size.width, size.height};
 }
 
-void pLabel::setGeometry(const Geometry& geometry) {
+void pLabel::setGeometry(Geometry geometry) {
   //NSTextField does not support vertical text centering:
   //simulate this by adjusting the geometry placement (reduce height, move view down)
   unsigned height = Font::size(label.font(), " ").height;
@@ -40,7 +40,7 @@ void pLabel::setGeometry(const Geometry& geometry) {
   });
 }
 
-void pLabel::setText(const string& text) {
+void pLabel::setText(string text) {
   @autoreleasepool {
     [cocoaView setStringValue:[NSString stringWithUTF8String:text]];
   }

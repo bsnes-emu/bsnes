@@ -9,7 +9,7 @@ void pLineEdit::setEditable(bool editable) {
   qtLineEdit->setReadOnly(!editable);
 }
 
-void pLineEdit::setText(const string& text) {
+void pLineEdit::setText(string text) {
   qtLineEdit->setText(QString::fromUtf8(text));
 }
 

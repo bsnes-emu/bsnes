@@ -195,7 +195,7 @@ void pListView::orphan() {
   constructor();
 }
 
-void pListView::setGeometry(const Geometry& geometry) {
+void pListView::setGeometry(Geometry geometry) {
   pWidget::setGeometry(geometry);
   autoSizeColumns();
 }

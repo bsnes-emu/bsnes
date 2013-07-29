@@ -31,7 +31,7 @@ template<signed precision, char padchar> string hex(uintmax_t value) {
     buffer[size++] = n < 10 ? '0' + n : 'a' + n - 10;
     value >>= 4;
   } while(value);
-  buffer[size] = 0;
+  buffer.resize(size);
   buffer.reverse();
 
   return format<precision, padchar>(buffer);
@@ -46,7 +46,7 @@ template<signed precision, char padchar> string octal(uintmax_t value) {
     buffer[size++] = '0' + (value & 7);
     value >>= 3;
   } while(value);
-  buffer[size] = 0;
+  buffer.resize(size);
   buffer.reverse();
 
   return format<precision, padchar>(buffer);
@@ -61,7 +61,7 @@ template<signed precision, char padchar> string binary(uintmax_t value) {
     buffer[size++] = '0' + (value & 1);
     value >>= 1;
   } while(value);
-  buffer[size] = 0;
+  buffer.resize(size);
   buffer.reverse();
 
   return format<precision, padchar>(buffer);

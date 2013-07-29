@@ -77,7 +77,7 @@ public:
     prepend(data);
   }
 
-  void prepend(const T& data) {
+  T& prepend(const T& data) {
     reserve(objectsize + 1);
     if(poolbase == 0) {
       unsigned available = poolsize - objectsize;
@@ -88,6 +88,7 @@ public:
     }
     new(pool + --poolbase) T(data);
     objectsize++;
+    return first();
   }
 
   template<typename... Args> void append(const T& data, Args&&... args) {
@@ -95,9 +96,10 @@ public:
     append(std::forward<Args>(args)...);
   }
 
-  void append(const T& data) {
+  T& append(const T& data) {
     reserve(poolbase + objectsize + 1);
     new(pool + poolbase + objectsize++) T(data);
+    return last();
   }
 
   bool appendonce(const T& data) {

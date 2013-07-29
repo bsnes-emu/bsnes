@@ -14,7 +14,7 @@ struct pCheckItem : public pAction {
 
   bool checked();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckItem(CheckItem& checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();

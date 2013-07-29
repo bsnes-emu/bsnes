@@ -25,6 +25,7 @@ struct MessageWindow::State {
 struct Window::State {
   bool backgroundColorOverride = false;
   Color backgroundColor = {0, 0, 0, 255};
+  bool droppable = false;
   bool fullScreen = false;
   Geometry geometry = {128, 128, 256, 256};
   group<Layout> layout;
@@ -95,6 +96,7 @@ struct Button::State {
 
 struct Canvas::State {
   uint32_t* data = nullptr;
+  bool droppable = false;
   unsigned width = 256;
   unsigned height = 256;
 };
@@ -171,4 +173,8 @@ struct VerticalScroller::State {
 struct VerticalSlider::State {
   unsigned length = 101;
   unsigned position = 0;
+};
+
+struct Viewport::State {
+  bool droppable = false;
 };

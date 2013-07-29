@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.09 (2013-04-06)
+  version: 0.10 (2013-07-27)
   license: public domain
 */
 
@@ -18,8 +18,9 @@ namespace ruby {
 
 struct VideoInterface {
   void driver(const char* driver = "");
-  const char* default_driver();
-  const char* driver_list();
+  const char* optimalDriver();
+  const char* safestDriver();
+  const char* availableDrivers();
   bool init();
   void term();
 
@@ -40,8 +41,9 @@ private:
 
 struct AudioInterface {
   void driver(const char* driver = "");
-  const char* default_driver();
-  const char* driver_list();
+  const char* optimalDriver();
+  const char* safestDriver();
+  const char* availableDrivers();
   bool init();
   void term();
 
@@ -60,8 +62,9 @@ private:
 
 struct InputInterface {
   void driver(const char* driver = "");
-  const char* default_driver();
-  const char* driver_list();
+  const char* optimalDriver();
+  const char* safestDriver();
+  const char* availableDrivers();
   bool init();
   void term();
 

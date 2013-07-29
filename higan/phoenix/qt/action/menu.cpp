@@ -30,7 +30,7 @@ void pMenu::remove(Action& action) {
   }
 }
 
-void pMenu::setFont(const string& font) {
+void pMenu::setFont(string font) {
   qtMenu->setFont(pFont::create(font));
   for(auto &item : menu.state.action) item.p.setFont(font);
 }
@@ -39,7 +39,7 @@ void pMenu::setImage(const image& image) {
   qtMenu->setIcon(CreateIcon(image));
 }
 
-void pMenu::setText(const string& text) {
+void pMenu::setText(string text) {
   qtMenu->setTitle(QString::fromUtf8(text));
 }
 

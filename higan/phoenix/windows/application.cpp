@@ -239,6 +239,18 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
       break;
     }
 
+    case WM_ENTERMENULOOP:
+    case WM_ENTERSIZEMOVE: {
+      if(Application::Windows::onModalBegin) Application::Windows::onModalBegin();
+      return 0;
+    }
+
+    case WM_EXITMENULOOP:
+    case WM_EXITSIZEMOVE: {
+      if(Application::Windows::onModalEnd) Application::Windows::onModalEnd();
+      return 0;
+    }
+
     case WM_ERASEBKGND: {
       if(window.p.brush == 0) break;
       RECT rc;
@@ -259,6 +271,14 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
         return (INT_PTR)window.p.brush;
       }
       break;
+    }
+
+    case WM_DROPFILES: {
+      lstring paths = DropPaths(wparam);
+      if(paths.empty() == false) {
+        if(window.onDrop) window.onDrop(paths);
+      }
+      return FALSE;
     }
 
     case WM_COMMAND: {

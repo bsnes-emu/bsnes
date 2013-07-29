@@ -28,7 +28,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
   code.upper();
   unsigned length = code.length(), bits = 0;
 
-  if(code.wildcard("????:??")) {
+  if(code.match("????:??")) {
     code = {substr(code, 0, 4), substr(code, 5, 2)};
     for(unsigned n = 0; n < 6; n++) if(mapProActionReplay[code[n]] > 15) return false;
     bits = hex(code);
@@ -38,7 +38,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
     return true;
   }
 
-  if(code.wildcard("????:??:??")) {
+  if(code.match("????:??:??")) {
     code = {substr(code, 0, 4), substr(code, 5, 2), substr(code, 8, 2)};
     for(unsigned n = 0; n < 8; n++) if(mapProActionReplay[code[n]] > 15) return false;
     bits = hex(code);

@@ -40,10 +40,10 @@ struct pFont {
   static string serif(unsigned size, string style);
   static string sans(unsigned size, string style);
   static string monospace(unsigned size, string style);
-  static Size size(const string& font, const string& text);
+  static Size size(string font, string text);
 
-  static QFont create(const string& description);
-  static Size size(const QFont& qtFont, const string& text);
+  static QFont create(string description);
+  static Size size(const QFont& qtFont, string text);
 };
 
 struct pDesktop {
@@ -112,6 +112,8 @@ public:
   struct QtWindow : public QWidget {
     pWindow& self;
     void closeEvent(QCloseEvent*);
+    void dragEnterEvent(QDragEnterEvent*);
+    void dropEvent(QDropEvent*);
     void keyPressEvent(QKeyEvent*);
     void keyReleaseEvent(QKeyEvent*);
     void moveEvent(QMoveEvent*);
@@ -137,20 +139,21 @@ public:
   void remove(Layout& layout);
   void remove(Menu& menu);
   void remove(Widget& widget);
-  void setBackgroundColor(const Color& color);
+  void setBackgroundColor(Color color);
+  void setDroppable(bool droppable);
   void setFocused();
   void setFullScreen(bool fullScreen);
-  void setGeometry(const Geometry& geometry);
-  void setMenuFont(const string& font);
+  void setGeometry(Geometry geometry);
+  void setMenuFont(string font);
   void setMenuVisible(bool visible);
   void setModal(bool modal);
   void setResizable(bool resizable);
-  void setStatusFont(const string& font);
-  void setStatusText(const string& text);
+  void setStatusFont(string font);
+  void setStatusText(string text);
   void setStatusVisible(bool visible);
-  void setTitle(const string& text);
+  void setTitle(string text);
   void setVisible(bool visible);
-  void setWidgetFont(const string& font);
+  void setWidgetFont(string font);
 
   pWindow(Window& window) : pObject(window), window(window) {}
   void constructor();
@@ -162,7 +165,7 @@ struct pAction : public pObject {
   Action& action;
 
   void setEnabled(bool enabled);
-  void setFont(const string& font);
+  void setFont(string font);
   void setVisible(bool visible);
 
   pAction(Action& action) : pObject(action), action(action) {}
@@ -176,9 +179,9 @@ struct pMenu : public pAction {
 
   void append(Action& action);
   void remove(Action& action);
-  void setFont(const string& font);
+  void setFont(string font);
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pMenu(Menu& menu) : pAction(menu), menu(menu) {}
   void constructor();
@@ -202,7 +205,7 @@ public:
   QAction* qtAction;
 
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pItem(Item& item) : pAction(item), item(item) {}
   void constructor();
@@ -221,7 +224,7 @@ public:
 
   bool checked();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckItem(CheckItem& checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
@@ -242,7 +245,7 @@ public:
   bool checked();
   void setChecked();
   void setGroup(const group<RadioItem>& group);
-  void setText(const string& text);
+  void setText(string text);
 
   pRadioItem(RadioItem& radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
@@ -278,8 +281,8 @@ struct pWidget : public pSizable {
   virtual Size minimumSize();
   void setEnabled(bool enabled);
   void setFocused();
-  void setFont(const string& font);
-  virtual void setGeometry(const Geometry& geometry);
+  void setFont(string font);
+  void setGeometry(Geometry geometry);
   void setVisible(bool visible);
 
   pWidget(Widget& widget) : pSizable(widget), widget(widget) {}
@@ -298,7 +301,7 @@ public:
 
   Size minimumSize();
   void setImage(const image& image, Orientation orientation);
-  void setText(const string& text);
+  void setText(string text);
 
   pButton(Button& button) : pWidget(button), button(button) {}
   void constructor();
@@ -317,6 +320,8 @@ public:
   QImage* qtImage;
   struct QtCanvas : public QWidget {
     pCanvas& self;
+    void dragEnterEvent(QDragEnterEvent*);
+    void dropEvent(QDropEvent*);
     void leaveEvent(QEvent*);
     void mouseMoveEvent(QMouseEvent*);
     void mousePressEvent(QMouseEvent*);
@@ -326,7 +331,8 @@ public:
   };
   QtCanvas* qtCanvas;
 
-  void setSize(const Size& size);
+  void setDroppable(bool droppable);
+  void setSize(Size size);
   void update();
 
   pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
@@ -347,7 +353,7 @@ public:
   bool checked();
   Size minimumSize();
   void setChecked(bool checked);
-  void setText(const string& text);
+  void setText(string text);
 
   pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
@@ -365,8 +371,8 @@ public:
   ComboButton& comboButton;
   QComboBox* qtComboButton;
 
-  void append(const string& text);
-  void modify(unsigned row, const string& text);
+  void append(string text);
+  void modify(unsigned row, string text);
   void remove(unsigned row);
   Size minimumSize();
   void reset();
@@ -460,7 +466,7 @@ struct pLabel : public pWidget {
   QLabel* qtLabel;
 
   Size minimumSize();
-  void setText(const string& text);
+  void setText(string text);
 
   pLabel(Label& label) : pWidget(label), label(label) {}
   void constructor();
@@ -477,7 +483,7 @@ public:
 
   Size minimumSize();
   void setEditable(bool editable);
-  void setText(const string& text);
+  void setText(string text);
   string text();
 
   pLineEdit(LineEdit& lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
@@ -548,7 +554,7 @@ public:
   Size minimumSize();
   void setChecked();
   void setGroup(const group<RadioButton>& group);
-  void setText(const string& text);
+  void setText(string text);
 
   pRadioButton(RadioButton& radioButton) : pWidget(radioButton), radioButton(radioButton) {}
   pRadioButton& parent();
@@ -569,7 +575,7 @@ public:
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
-  void setText(const string& text);
+  void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();
 
@@ -628,6 +634,8 @@ struct pViewport : public pWidget {
   Viewport& viewport;
   struct QtViewport : public QWidget {
     pViewport& self;
+    void dragEnterEvent(QDragEnterEvent*);
+    void dropEvent(QDropEvent*);
     void leaveEvent(QEvent*);
     void mouseMoveEvent(QMouseEvent*);
     void mousePressEvent(QMouseEvent*);
@@ -637,6 +645,7 @@ struct pViewport : public pWidget {
   QtViewport* qtViewport;
 
   uintptr_t handle();
+  void setDroppable(bool droppable);
 
   pViewport(Viewport& viewport) : pWidget(viewport), viewport(viewport) {}
   void constructor();

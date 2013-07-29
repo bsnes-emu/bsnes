@@ -57,13 +57,13 @@ void pTextEdit::setEditable(bool editable) {
   }
 }
 
-void pTextEdit::setFont(const string& font) {
+void pTextEdit::setFont(string font) {
   @autoreleasepool {
     [[cocoaView content] setFont:pFont::cocoaFont(font)];
   }
 }
 
-void pTextEdit::setText(const string& text) {
+void pTextEdit::setText(string text) {
   @autoreleasepool {
     [[cocoaView content] setString:[NSString stringWithUTF8String:text]];
   }

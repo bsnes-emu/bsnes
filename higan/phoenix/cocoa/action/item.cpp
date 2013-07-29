@@ -24,7 +24,7 @@ void pItem::setImage(const image& image) {
   }
 }
 
-void pItem::setText(const string& text) {
+void pItem::setText(string text) {
   @autoreleasepool {
     [cocoaAction setTitle:[NSString stringWithUTF8String:text]];
   }

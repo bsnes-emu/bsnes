@@ -122,10 +122,14 @@ void pWindow::remove(Widget& widget) {
   widget.p.orphan();
 }
 
-void pWindow::setBackgroundColor(const Color& color) {
+void pWindow::setBackgroundColor(Color color) {
   if(brush) DeleteObject(brush);
   brushColor = RGB(color.red, color.green, color.blue);
   brush = CreateSolidBrush(brushColor);
+}
+
+void pWindow::setDroppable(bool droppable) {
+  DragAcceptFiles(hwnd, droppable);
 }
 
 void pWindow::setFocused() {
@@ -146,7 +150,7 @@ void pWindow::setFullScreen(bool fullScreen) {
   locked = false;
 }
 
-void pWindow::setGeometry(const Geometry& geometry) {
+void pWindow::setGeometry(Geometry geometry) {
   locked = true;
   Geometry margin = frameMargin();
   SetWindowPos(
@@ -164,7 +168,7 @@ void pWindow::setGeometry(const Geometry& geometry) {
   locked = false;
 }
 
-void pWindow::setMenuFont(const string& font) {
+void pWindow::setMenuFont(string font) {
 }
 
 void pWindow::setMenuVisible(bool visible) {
@@ -192,13 +196,13 @@ void pWindow::setResizable(bool resizable) {
   setGeometry(window.state.geometry);
 }
 
-void pWindow::setStatusFont(const string& font) {
+void pWindow::setStatusFont(string font) {
   if(hstatusfont) DeleteObject(hstatusfont);
   hstatusfont = pFont::create(font);
   SendMessage(hstatus, WM_SETFONT, (WPARAM)hstatusfont, 0);
 }
 
-void pWindow::setStatusText(const string& text) {
+void pWindow::setStatusText(string text) {
   SendMessage(hstatus, SB_SETTEXT, 0, (LPARAM)(wchar_t*)utf16_t(text));
 }
 
@@ -209,7 +213,7 @@ void pWindow::setStatusVisible(bool visible) {
   locked = false;
 }
 
-void pWindow::setTitle(const string& text) {
+void pWindow::setTitle(string text) {
   SetWindowText(hwnd, utf16_t(text));
 }
 
@@ -218,7 +222,7 @@ void pWindow::setVisible(bool visible) {
   if(visible == false) setModal(false);
 }
 
-void pWindow::setWidgetFont(const string &font) {
+void pWindow::setWidgetFont(string font) {
 }
 
 void pWindow::constructor() {
@@ -234,6 +238,7 @@ void pWindow::constructor() {
   SetWindowLongPtr(hstatus, GWL_STYLE, GetWindowLong(hstatus, GWL_STYLE) | WS_DISABLED);
 
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&window);
+  setDroppable(window.state.droppable);
   setGeometry({128, 128, 256, 256});
 }
 

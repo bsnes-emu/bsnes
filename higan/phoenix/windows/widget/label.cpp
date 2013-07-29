@@ -5,7 +5,7 @@ Size pLabel::minimumSize() {
   return {size.width, size.height};
 }
 
-void pLabel::setText(const string& text) {
+void pLabel::setText(string text) {
   SetWindowText(hwnd, utf16_t(text));
   InvalidateRect(hwnd, 0, false);
 }

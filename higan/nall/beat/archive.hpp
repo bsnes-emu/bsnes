@@ -57,7 +57,7 @@ struct beatArchive : beatBase {
     while(fp.offset() < fp.size() - 4) {
       unsigned data = readNumber();
       string name = readString((data >> 1) + 1);
-      if(name.position("\\") || name.position("../")) return false;  //block path exploits
+      if(name.find("\\") || name.find("../")) return false;  //block path exploits
 
       if((data & 1) == 0) {
         directory::create({pathname, name});

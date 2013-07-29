@@ -1,4 +1,4 @@
-void VerticalLayout::append(Sizable& sizable, const Size& size, unsigned spacing) {
+void VerticalLayout::append(Sizable& sizable, Size size, unsigned spacing) {
   for(auto& child : children) if(child.sizable == &sizable) return;
   children.append({&sizable, size.width, size.height, spacing});
   synchronizeLayout();
@@ -72,7 +72,7 @@ void VerticalLayout::setEnabled(bool enabled) {
   }
 }
 
-void VerticalLayout::setGeometry(const Geometry& containerGeometry) {
+void VerticalLayout::setGeometry(Geometry containerGeometry) {
   auto children = this->children;
   for(auto& child : children) {
     if(child.width  == MinimumSize) child.width  = child.sizable->minimumSize().width;

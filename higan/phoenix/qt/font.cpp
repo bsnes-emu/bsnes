@@ -18,11 +18,11 @@ string pFont::monospace(unsigned size, string style) {
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(const string& font, const string& text) {
+Size pFont::size(string font, string text) {
   return pFont::size(pFont::create(font), text);
 }
 
-QFont pFont::create(const string& description) {
+QFont pFont::create(string description) {
   lstring part;
   part.split<2>(",", description);
   for(auto& item : part) item.trim(" ");
@@ -34,8 +34,8 @@ QFont pFont::create(const string& description) {
 
   if(part[0] != "") family = part[0];
   if(part.size() >= 2) size = decimal(part[1]);
-  if(part.size() >= 3) bold = part[2].position("Bold");
-  if(part.size() >= 3) italic = part[2].position("Italic");
+  if(part.size() >= 3) bold = part[2].find("Bold");
+  if(part.size() >= 3) italic = part[2].find("Italic");
 
   QFont qtFont;
   qtFont.setFamily(family);
@@ -45,7 +45,7 @@ QFont pFont::create(const string& description) {
   return qtFont;
 }
 
-Size pFont::size(const QFont& qtFont, const string& text) {
+Size pFont::size(const QFont& qtFont, string text) {
   QFontMetrics metrics(qtFont);
 
   lstring lines;

@@ -100,7 +100,7 @@ struct http {
   inline void downloadContent(uint8_t*& data, unsigned& size) {
     unsigned capacity = 0;
 
-    if(header.iposition("\r\nTransfer-Encoding: chunked\r\n")) {
+    if(header.ifind("\r\nTransfer-Encoding: chunked\r\n")) {
       while(true) {
         unsigned length = hex(downloadChunkLength());
         if(length == 0) break;
@@ -116,7 +116,7 @@ struct http {
           length -= packetlength;
         }
       }
-    } else if(auto position = header.iposition("\r\nContent-Length: ")) {
+    } else if(auto position = header.ifind("\r\nContent-Length: ")) {
       unsigned length = decimal((const char*)header + position() + 18);
       while(length) {
         char buffer[256];

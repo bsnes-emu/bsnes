@@ -35,7 +35,7 @@ Size pButton::minimumSize() {
   return {size.width + 20, size.height + 4};
 }
 
-void pButton::setGeometry(const Geometry& geometry) {
+void pButton::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x - 2, geometry.y - 2,
     geometry.width + 4, geometry.height + 4
@@ -56,7 +56,7 @@ void pButton::setImage(const image& image, Orientation orientation) {
   }
 }
 
-void pButton::setText(const string& text) {
+void pButton::setText(string text) {
   @autoreleasepool {
     [cocoaView setTitle:[NSString stringWithUTF8String:text]];
   }

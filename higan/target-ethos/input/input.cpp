@@ -14,13 +14,13 @@ void AbstractInput::bind() {
     else if(mapping.endswith(".Right")) type = Input::Type::HatRight;
     else if(mapping.endswith(".Lo")) type = Input::Type::AxisLo;
     else if(mapping.endswith(".Hi")) type = Input::Type::AxisHi;
-    else if(mapping.beginswith("JP") && mapping.position("Axis")) type = Input::Type::Axis;
+    else if(mapping.beginswith("JP") && mapping.find("Axis")) type = Input::Type::Axis;
     else if(mapping.beginswith("MS") && mapping.endswith("axis")) type = Input::Type::MouseAxis;
     else if(mapping.beginswith("MS")) type = Input::Type::MouseButton;
     else type = Input::Type::Button;
 
     string decode = mapping;
-    if(auto position = decode.position(".")) decode[position()] = 0;
+    if(auto position = decode.find(".")) decode.resize(position());
     unsigned scancode = Scancode::decode(decode);
 
     inputList.append({type, scancode});
@@ -28,7 +28,7 @@ void AbstractInput::bind() {
 }
 
 bool AbstractInput::append(string encode) {
-  if(mapping.position(encode)) return true;  //mapping already bound
+  if(mapping.find(encode)) return true;  //mapping already bound
   if(mapping.empty() || mapping == "None") mapping = encode;  //remove "None"
   else mapping.append(",", encode);  //add to existing mapping list
   bind();

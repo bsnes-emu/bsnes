@@ -11,7 +11,7 @@ void pTextEdit::setEditable(bool editable) {
   qtTextEdit->setReadOnly(!editable);
 }
 
-void pTextEdit::setText(const string& text) {
+void pTextEdit::setText(string text) {
   qtTextEdit->setPlainText(QString::fromUtf8(text));
 }
 

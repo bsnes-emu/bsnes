@@ -13,7 +13,7 @@ struct pItem : public pAction {
   CocoaItem* cocoaItem = nullptr;
 
   void setImage(const image& image);
-  void setText(const string& text);
+  void setText(string text);
 
   pItem(Item& item) : pAction(item), item(item) {}
   void constructor();

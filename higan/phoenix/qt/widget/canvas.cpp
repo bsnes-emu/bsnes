@@ -1,6 +1,10 @@
 namespace phoenix {
 
-void pCanvas::setSize(const Size& size) {
+void pCanvas::setDroppable(bool droppable) {
+  qtCanvas->setAcceptDrops(droppable);
+}
+
+void pCanvas::setSize(Size size) {
   delete qtImage;
   qtImage = new QImage(size.width, size.height, QImage::Format_ARGB32);
 }
@@ -31,6 +35,18 @@ void pCanvas::destructor() {
 void pCanvas::orphan() {
   destructor();
   constructor();
+}
+
+void pCanvas::QtCanvas::dragEnterEvent(QDragEnterEvent* event) {
+  if(event->mimeData()->hasUrls()) {
+    event->acceptProposedAction();
+  }
+}
+
+void pCanvas::QtCanvas::dropEvent(QDropEvent* event) {
+  lstring paths = DropPaths(event);
+  if(paths.empty()) return;
+  if(self.canvas.onDrop) self.canvas.onDrop(paths);
 }
 
 void pCanvas::QtCanvas::leaveEvent(QEvent* event) {

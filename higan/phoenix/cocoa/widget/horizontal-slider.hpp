@@ -14,7 +14,7 @@ struct pHorizontalSlider : public pWidget {
 
   Size minimumSize();
   unsigned position();
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setLength(unsigned length);
   void setPosition(unsigned position);
 

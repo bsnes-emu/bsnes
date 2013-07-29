@@ -50,7 +50,7 @@ struct pListView : public pWidget {
   unsigned selection();
   void setCheckable(bool checkable);
   void setChecked(unsigned row, bool checked);
-  void setFont(const string& font);
+  void setFont(string font);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
   void setImage(unsigned row, unsigned column, const image& image);

@@ -50,7 +50,7 @@ string pBrowserWindow::save(BrowserWindow::State& state) {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
     for(auto& rule : state.filters) {
       string pattern = rule.split<1>("(")(1).rtrim<1>(")");
-      if(!pattern.empty()) [filters addObjects:[NSString stringWithUTF8String:pattern]];
+      if(!pattern.empty()) [filters addObject:[NSString stringWithUTF8String:pattern]];
     }
     NSSavePanel* panel = [NSSavePanel savePanel];
     if(state.title) [panel setTitle:[NSString stringWithUTF8String:state.title]];

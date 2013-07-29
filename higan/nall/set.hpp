@@ -3,9 +3,14 @@
 
 //set
 //implementation: red-black tree
+//
 //search: O(log n) average; O(log n) worst
 //insert: O(log n) average; O(log n) worst
 //remove: O(log n) average; O(log n) worst
+//
+//requirements:
+//  bool T::operator==(const T&) const;
+//  bool T::operator< (const T&) const;
 
 #include <nall/utility.hpp>
 #include <nall/vector.hpp>
@@ -50,16 +55,18 @@ template<typename T> struct set {
     return false;
   }
 
-  bool insert(const T& value) {
+  optional<T&> insert(const T& value) {
     unsigned count = size();
-    insert(root, value);
+    node_t* v = insert(root, value);
     root->red = 0;
-    return size() > count;
+    if(size() == count) return false;
+    return {true, v->value};
   }
 
   template<typename... Args> bool insert(const T& value, Args&&... args) {
     bool result = insert(value);
-    return insert(std::forward<Args>(args)...) | result;
+    insert(std::forward<Args>(args)...) | result;
+    return result;
   }
 
   bool remove(const T& value) {
@@ -175,13 +182,13 @@ private:
     rotate(node, dir);
   }
 
-  void insert(node_t*& node, const T& value) {
-    if(!node) { nodes++; node = new node_t(value); return; }
-    if(node->value == value) { node->value = value; return; }  //prevent duplicate entries
+  node_t* insert(node_t*& node, const T& value) {
+    if(!node) { nodes++; node = new node_t(value); return node; }
+    if(node->value == value) { node->value = value; return node; }  //prevent duplicate entries
 
     bool dir = node->value < value;
-    insert(node->link[dir], value);
-    if(black(node->link[dir])) return;
+    node_t* v = insert(node->link[dir], value);
+    if(black(node->link[dir])) return v;
 
     if(red(node->link[!dir])) {
       node->red = 1;
@@ -192,6 +199,8 @@ private:
     } else if(red(node->link[dir]->link[!dir])) {
       rotateTwice(node, !dir);
     }
+
+    return v;
   }
 
   void balance(node_t*& node, bool dir, bool& done) {

@@ -9,7 +9,7 @@ void pLineEdit::setEditable(bool editable) {
   SendMessage(hwnd, EM_SETREADONLY, editable == false, 0);
 }
 
-void pLineEdit::setText(const string& text) {
+void pLineEdit::setText(string text) {
   locked = true;
   SetWindowText(hwnd, utf16_t(text));
   locked = false;

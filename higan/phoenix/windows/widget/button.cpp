@@ -69,7 +69,7 @@ void pButton::setImage(const image& image, Orientation orientation) {
   setText(button.state.text);  //update text to display nicely with image (or lack thereof)
 }
 
-void pButton::setText(const string& text) {
+void pButton::setText(string text) {
   if(text.empty()) {
     //bitmaps will not show up if text is empty
     SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) |  BS_BITMAP);

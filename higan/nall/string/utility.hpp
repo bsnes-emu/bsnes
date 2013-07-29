@@ -79,7 +79,7 @@ char* decimal(char* result, uintmax_t value) {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-unsigned fp(char* str, long double value) {
+unsigned real(char* str, long double value) {
   char buffer[256];
   #ifdef _WIN32
   //Windows C-runtime does not support long double via sprintf()
@@ -105,10 +105,10 @@ unsigned fp(char* str, long double value) {
   return length + 1;
 }
 
-string fp(long double value) {
+string real(long double value) {
   string temp;
-  temp.reserve(fp(nullptr, value));
-  fp(temp.data(), value);
+  temp.resize(real(nullptr, value));
+  real(temp.data(), value);
   return temp;
 }
 

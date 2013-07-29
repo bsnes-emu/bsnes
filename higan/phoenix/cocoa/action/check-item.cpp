@@ -33,7 +33,7 @@ void pCheckItem::setChecked(bool checked) {
   }
 }
 
-void pCheckItem::setText(const string& text) {
+void pCheckItem::setText(string text) {
   @autoreleasepool {
     [cocoaAction setTitle:[NSString stringWithUTF8String:text]];
   }

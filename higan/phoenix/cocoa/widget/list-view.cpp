@@ -285,7 +285,7 @@ void pListView::setChecked(unsigned row, bool checked) {
   }
 }
 
-void pListView::setFont(const string& font) {
+void pListView::setFont(string font) {
   @autoreleasepool {
     [cocoaView setFont:pFont::cocoaFont(font)];
   }

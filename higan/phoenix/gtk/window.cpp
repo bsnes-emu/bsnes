@@ -80,6 +80,14 @@ static gboolean Window_configure(GtkWidget* widget, GdkEvent* event, Window* win
   return false;
 }
 
+static void Window_dropEvent(GtkWidget* widget, GdkDragContext* context, gint x, gint y,
+GtkSelectionData* data, guint type, guint timestamp, Window* window) {
+  if(window->state.droppable == false) return;
+  lstring paths = DropPaths(data);
+  if(paths.empty()) return;
+  if(window->onDrop) window->onDrop(paths);
+}
+
 static gboolean Window_keyPressEvent(GtkWidget* widget, GdkEventKey* event, Window* window) {
   Keyboard::Keycode key = Keysym(event->keyval);
   if(key != Keyboard::Keycode::None && window->onKeyPress) window->onKeyPress(key);
@@ -203,13 +211,18 @@ void pWindow::remove(Widget& widget) {
   widget.p.orphan();
 }
 
-void pWindow::setBackgroundColor(const Color& color) {
+void pWindow::setBackgroundColor(Color color) {
   GdkColor gdkColor;
   gdkColor.pixel = (color.red   << 16) | (color.green << 8) | (color.blue << 0);
   gdkColor.red   = (color.red   <<  8) | (color.red   << 0);
   gdkColor.green = (color.green <<  8) | (color.green << 0);
   gdkColor.blue  = (color.blue  <<  8) | (color.blue  << 0);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &gdkColor);
+}
+
+void pWindow::setDroppable(bool droppable) {
+  gtk_drag_dest_set(widget, GTK_DEST_DEFAULT_ALL, nullptr, 0, GDK_ACTION_COPY);
+  if(droppable) gtk_drag_dest_add_uri_targets(widget);
 }
 
 void pWindow::setFocused() {
@@ -224,7 +237,7 @@ void pWindow::setFullScreen(bool fullScreen) {
   }
 }
 
-void pWindow::setGeometry(const Geometry& geometry) {
+void pWindow::setGeometry(Geometry geometry) {
   Geometry margin = frameMargin();
   gtk_window_move(GTK_WINDOW(widget), geometry.x - margin.x, geometry.y - margin.y);
 
@@ -362,6 +375,7 @@ void pWindow::constructor() {
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)&window);
+  g_signal_connect(G_OBJECT(widget), "drag-data-received", G_CALLBACK(Window_dropEvent), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
   g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyPressEvent), (gpointer)&window);
 

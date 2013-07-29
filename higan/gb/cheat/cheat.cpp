@@ -28,7 +28,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
   code.upper();
   unsigned length = code.length(), bits = 0;
 
-  if(code.wildcard("????:??")) {
+  if(code.match("????:??")) {
     code = {substr(code, 0, 4), substr(code, 5, 2)};
     for(unsigned n = 0; n < 6; n++) if(mapProActionReplay[code[n]] > 15) return false;
     bits = hex(code);
@@ -38,7 +38,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
     return true;
   }
 
-  if(code.wildcard("????:??:??")) {
+  if(code.match("????:??:??")) {
     code = {substr(code, 0, 4), substr(code, 5, 2), substr(code, 8, 2)};
     for(unsigned n = 0; n < 8; n++) if(mapProActionReplay[code[n]] > 15) return false;
     bits = hex(code);
@@ -48,7 +48,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
     return true;
   }
 
-  if(code.wildcard("???" "-" "???")) {
+  if(code.match("???" "-" "???")) {
     code = {substr(code, 0, 3), substr(code, 4, 3)};
     for(unsigned n = 0; n < 6; n++) if(mapGameGenie[code[n]] > 15) return false;
     for(unsigned n = 0; n < 6; n++) bits |= mapGameGenie[code[n]] << (20 - n * 4);
@@ -62,7 +62,7 @@ bool Cheat::decode(string code_, unsigned& addr, unsigned& data, unsigned& comp)
     return true;
   }
 
-  if(code.wildcard("???" "-" "???" "-" "???")) {
+  if(code.match("???" "-" "???" "-" "???")) {
     code = {substr(code, 0, 3), substr(code, 4, 3), substr(code, 8, 1), substr(code, 10, 1)};
     for(unsigned n = 0; n < 8; n++) if(mapGameGenie[code[n]] > 15) return false;
     for(unsigned n = 0; n < 8; n++) bits |= mapGameGenie[code[n]] << (28 - n * 4);

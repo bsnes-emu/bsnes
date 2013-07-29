@@ -39,12 +39,12 @@ struct Node {
     for(auto& rule : rules) {
       enum class Comparator : unsigned { ID, EQ, NE, LT, LE, GT, GE };
       auto comparator = Comparator::ID;
-           if(rule.wildcard("*!=*")) comparator = Comparator::NE;
-      else if(rule.wildcard("*<=*")) comparator = Comparator::LE;
-      else if(rule.wildcard("*>=*")) comparator = Comparator::GE;
-      else if(rule.wildcard ("*=*")) comparator = Comparator::EQ;
-      else if(rule.wildcard ("*<*")) comparator = Comparator::LT;
-      else if(rule.wildcard ("*>*")) comparator = Comparator::GT;
+           if(rule.match("*!=*")) comparator = Comparator::NE;
+      else if(rule.match("*<=*")) comparator = Comparator::LE;
+      else if(rule.match("*>=*")) comparator = Comparator::GE;
+      else if(rule.match ("*=*")) comparator = Comparator::EQ;
+      else if(rule.match ("*<*")) comparator = Comparator::LT;
+      else if(rule.match ("*>*")) comparator = Comparator::GT;
 
       if(comparator == Comparator::ID) {
         if(find(rule).size()) continue;
@@ -69,8 +69,8 @@ struct Node {
       }
 
       switch(comparator) {
-      case Comparator::EQ: if(data.wildcard(side(1)) ==  true)   continue; break;
-      case Comparator::NE: if(data.wildcard(side(1)) == false)   continue; break;
+      case Comparator::EQ: if(data.match(side(1)) ==  true)      continue; break;
+      case Comparator::NE: if(data.match(side(1)) == false)      continue; break;
       case Comparator::LT: if(numeral(data)  < numeral(side(1))) continue; break;
       case Comparator::LE: if(numeral(data) <= numeral(side(1))) continue; break;
       case Comparator::GT: if(numeral(data)  > numeral(side(1))) continue; break;
@@ -90,7 +90,7 @@ struct Node {
     string name = path.take(0), rule;
     unsigned lo = 0u, hi = ~0u;
 
-    if(name.wildcard("*[*]")) {
+    if(name.match("*[*]")) {
       lstring side = name.split<1>("[");
       name = side(0);
       side = side(1).rtrim<1>("]").split<1>("-");
@@ -98,7 +98,7 @@ struct Node {
       hi = side(1).empty() ? ~0u : numeral(side(1));
     }
 
-    if(name.wildcard("*(*)")) {
+    if(name.match("*(*)")) {
       lstring side = name.split<1>("(");
       name = side(0);
       rule = side(1).rtrim<1>(")");
@@ -106,7 +106,7 @@ struct Node {
 
     unsigned position = 0;
     for(auto& node : children) {
-      if(node.name.wildcard(name) == false) continue;
+      if(node.name.match(name) == false) continue;
       if(node.evaluate(rule) == false) continue;
 
       bool inrange = position >= lo && position <= hi;

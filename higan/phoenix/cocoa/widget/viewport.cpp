@@ -16,6 +16,17 @@
   return YES;
 }
 
+-(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender {
+  return DropPathsOperation(sender);
+}
+
+-(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
+  lstring paths = DropPaths(sender);
+  if(paths.empty()) return NO;
+  if(viewport->onDrop) viewport->onDrop(paths);
+  return YES;
+}
+
 -(void) keyDown:(NSEvent*)event {
 }
 
@@ -28,6 +39,16 @@ namespace phoenix {
 
 uintptr_t pViewport::handle() {
   return (uintptr_t)cocoaViewport;
+}
+
+void pViewport::setDroppable(bool droppable) {
+  @autoreleasepool {
+    if(droppable) {
+      [cocoaViewport registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
+    } else {
+      [cocoaViewport unregisterDraggedTypes];
+    }
+  }
 }
 
 void pViewport::constructor() {

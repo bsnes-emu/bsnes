@@ -26,7 +26,7 @@ void pRadioButton::setGroup(const group<RadioButton>& group) {
   parent().locked = false;
 }
 
-void pRadioButton::setText(const string& text) {
+void pRadioButton::setText(string text) {
   qtRadioButton->setText(QString::fromUtf8(text));
 }
 

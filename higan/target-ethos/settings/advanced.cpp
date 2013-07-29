@@ -26,19 +26,19 @@ AdvancedSettings::AdvancedSettings() {
 
   lstring list;
 
-  list.split(";", video.driver_list());
+  list.split(";", video.availableDrivers());
   for(unsigned n = 0; n < list.size(); n++) {
     videoDriver.append(list[n]);
     if(list[n] == config->video.driver) videoDriver.setSelection(n);
   }
 
-  list.split(";", audio.driver_list());
+  list.split(";", audio.availableDrivers());
   for(unsigned n = 0; n < list.size(); n++) {
     audioDriver.append(list[n]);
     if(list[n] == config->audio.driver) audioDriver.setSelection(n);
   }
 
-  list.split(";", input.driver_list());
+  list.split(";", input.availableDrivers());
   for(unsigned n = 0; n < list.size(); n++) {
     inputDriver.append(list[n]);
     if(list[n] == config->input.driver) inputDriver.setSelection(n);

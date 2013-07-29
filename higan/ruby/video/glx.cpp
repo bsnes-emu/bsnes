@@ -1,9 +1,13 @@
 #include "opengl/opengl.hpp"
 
+#define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
+
 namespace ruby {
 
 struct pVideoGLX : OpenGL {
-  int (*glSwapInterval)(int);
+  GLXContext (*glXCreateContextAttribs)(Display*, GLXFBConfig, GLXContext, int, const int*) = nullptr;
+  int (*glXSwapInterval)(int) = nullptr;
 
   Display* display;
   int screen;
@@ -52,7 +56,7 @@ struct pVideoGLX : OpenGL {
     if(name == Video::Synchronize) {
       if(settings.synchronize != any_cast<bool>(value)) {
         settings.synchronize = any_cast<bool>(value);
-        if(glSwapInterval) glSwapInterval(settings.synchronize);
+        if(glXSwapInterval) glXSwapInterval(settings.synchronize);
         return true;
       }
     }
@@ -136,7 +140,7 @@ struct pVideoGLX : OpenGL {
       GLX_RED_SIZE, (signed)(settings.depth / 3),
       GLX_GREEN_SIZE, (signed)(settings.depth / 3) + (signed)(settings.depth % 3),
       GLX_BLUE_SIZE, (signed)(settings.depth / 3),
-      None,
+      None
     };
 
     int fbCount;
@@ -170,6 +174,28 @@ struct pVideoGLX : OpenGL {
     glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
+    glXCreateContextAttribs = (GLXContext (*)(Display*, GLXFBConfig, GLXContext, int, const int*))glGetProcAddress("glXCreateContextAttribsARB");
+    glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
+    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+
+    if(glXCreateContextAttribs) {
+      int attributes[] = {
+        GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+        GLX_CONTEXT_MINOR_VERSION_ARB, 2,
+        None
+      };
+      GLXContext context = glXCreateContextAttribs(display, fbConfig[0], nullptr, true, attributes);
+      if(context) {
+        glXMakeCurrent(display, 0, nullptr);
+        glXDestroyContext(display, glxcontext);
+        glXMakeCurrent(display, glxwindow, glxcontext = context);
+      }
+    }
+
+    if(glXSwapInterval) {
+      glXSwapInterval(settings.synchronize);
+    }
+
     //read attributes of frame buffer for later use, as requested attributes from above are not always granted
     int value = 0;
     glXGetConfig(display, vi, GLX_DOUBLEBUFFER, &value);
@@ -177,12 +203,6 @@ struct pVideoGLX : OpenGL {
     glx.is_direct = glXIsDirect(display, glxcontext);
 
     OpenGL::init();
-
-    //vertical synchronization
-    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
-    if(!glSwapInterval) glSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
-    if( glSwapInterval) glSwapInterval(settings.synchronize);
-
     return true;
   }
 
@@ -191,7 +211,7 @@ struct pVideoGLX : OpenGL {
 
     if(glxcontext) {
       glXDestroyContext(display, glxcontext);
-      glxcontext = 0;
+      glxcontext = nullptr;
     }
 
     if(xwindow) {
@@ -205,7 +225,7 @@ struct pVideoGLX : OpenGL {
     }
   }
 
-  pVideoGLX() : glSwapInterval(0) {
+  pVideoGLX() {
     display = XOpenDisplay(0);
     screen = DefaultScreen(display);
 
@@ -216,7 +236,7 @@ struct pVideoGLX : OpenGL {
 
     xwindow = 0;
     colormap = 0;
-    glxcontext = 0;
+    glxcontext = nullptr;
     glxwindow = 0;
   }
 

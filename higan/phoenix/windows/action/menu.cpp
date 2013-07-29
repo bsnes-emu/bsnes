@@ -15,7 +15,7 @@ void pMenu::setImage(const image& image) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 
-void pMenu::setText(const string& text) {
+void pMenu::setText(string text) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 

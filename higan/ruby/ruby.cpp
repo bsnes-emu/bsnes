@@ -24,7 +24,7 @@ const unsigned Video::FilterLinear  = 1;
 void VideoInterface::driver(const char* driver) {
   if(p) term();
 
-  if(!driver || !*driver) driver = default_driver();
+  if(!driver || !*driver) driver = optimalDriver();
 
   if(0);
 
@@ -75,8 +75,34 @@ void VideoInterface::driver(const char* driver) {
   else p = new Video();
 }
 
-//select the *safest* available driver, not the fastest
-const char* VideoInterface::default_driver() {
+const char* VideoInterface::optimalDriver() {
+  #if defined(VIDEO_WGL)
+  return "OpenGL";
+  #elif defined(VIDEO_DIRECT3D)
+  return "Direct3D";
+  #elif defined(VIDEO_DIRECTDRAW)
+  return "DirectDraw";
+  #elif defined(VIDEO_GDI)
+  return "GDI";
+
+  #elif defined(VIDEO_CGL)
+  return "OpenGL";
+
+  #elif defined(VIDEO_GLX)
+  return "OpenGL";
+  #elif defined(VIDEO_XV)
+  return "X-Video";
+  #elif defined(VIDEO_XSHM)
+  return "XShm";
+  #elif defined(VIDEO_SDL)
+  return "SDL";
+
+  #else
+  return "None";
+  #endif
+}
+
+const char* VideoInterface::safestDriver() {
   #if defined(VIDEO_DIRECT3D)
   return "Direct3D";
   #elif defined(VIDEO_WGL)
@@ -85,37 +111,35 @@ const char* VideoInterface::default_driver() {
   return "DirectDraw";
   #elif defined(VIDEO_GDI)
   return "GDI";
+
   #elif defined(VIDEO_CGL)
   return "OpenGL";
+
   #elif defined(VIDEO_XSHM)
   return "XShm";
-  #elif defined(VIDEO_QTOPENGL)
-  return "Qt-OpenGL";
-  #elif defined(VIDEO_QTRASTER)
-  return "Qt-Raster";
   #elif defined(VIDEO_SDL)
   return "SDL";
   #elif defined(VIDEO_XV)
   return "X-Video";
   #elif defined(VIDEO_GLX)
   return "OpenGL";
+
   #else
   return "None";
   #endif
 }
 
-//returns list of available drivers, sorted from most to least optimal
-const char* VideoInterface::driver_list() {
+const char* VideoInterface::availableDrivers() {
   return
 
   //Windows
 
-  #if defined(VIDEO_DIRECT3D)
-  "Direct3D;"
-  #endif
-
   #if defined(VIDEO_WGL)
   "OpenGL;"
+  #endif
+
+  #if defined(VIDEO_DIRECT3D)
+  "Direct3D;"
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
@@ -138,20 +162,12 @@ const char* VideoInterface::driver_list() {
   "OpenGL;"
   #endif
 
-  #if defined(VIDEO_QTOPENGL)
-  "Qt-OpenGL;"
-  #endif
-
   #if defined(VIDEO_XV)
   "X-Video;"
   #endif
 
   #if defined(VIDEO_XSHM)
   "XShm;"
-  #endif
-
-  #if defined(VIDEO_QTRASTER)
-  "Qt-Raster;"
   #endif
 
   #if defined(VIDEO_SDL)
@@ -193,7 +209,7 @@ const char* Audio::Latency = "Latency";
 void AudioInterface::driver(const char* driver) {
   if(p) term();
 
-  if(!driver || !*driver) driver = default_driver();
+  if(!driver || !*driver) driver = optimalDriver();
 
   if(0);
 
@@ -232,12 +248,36 @@ void AudioInterface::driver(const char* driver) {
   else p = new Audio();
 }
 
-//select the *safest* available driver, not the fastest
-const char* AudioInterface::default_driver() {
+const char* AudioInterface::optimalDriver() {
+  #if defined(AUDIO_XAUDIO2)
+  return "XAudio2";
+  #elif defined(AUDIO_DIRECTSOUND)
+  return "DirectSound";
+
+  #elif defined(AUDIO_ALSA)
+  return "ALSA";
+  #elif defined(AUDIO_OPENAL)
+  return "OpenAL";
+  #elif defined(AUDIO_OSS)
+  return "OSS";
+  #elif defined(AUDIO_PULSEAUDIO)
+  return "PulseAudio";
+  #elif defined(AUDIO_PULSEAUDIOSIMPLE)
+  return "PulseAudioSimple";
+  #elif defined(AUDIO_AO)
+  return "libao";
+
+  #else
+  return "None";
+  #endif
+}
+
+const char* AudioInterface::safestDriver() {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
   #elif defined(AUDIO_XAUDIO2)
   return "XAudio2";
+
   #elif defined(AUDIO_ALSA)
   return "ALSA";
   #elif defined(AUDIO_OPENAL)
@@ -250,23 +290,23 @@ const char* AudioInterface::default_driver() {
   return "libao";
   #elif defined(AUDIO_OSS)
   return "OSS";
+
   #else
   return "None";
   #endif
 }
 
-//returns list of available drivers, sorted from most to least optimal
-const char* AudioInterface::driver_list() {
+const char* AudioInterface::availableDrivers() {
   return
 
   //Windows
 
-  #if defined(AUDIO_DIRECTSOUND)
-  "DirectSound;"
-  #endif
-
   #if defined(AUDIO_XAUDIO2)
   "XAudio2;"
+  #endif
+
+  #if defined(AUDIO_DIRECTSOUND)
+  "DirectSound;"
   #endif
 
   //Linux
@@ -328,7 +368,7 @@ const char* Input::JoypadSupport = "JoypadSupport";
 void InputInterface::driver(const char* driver) {
   if(p) term();
 
-  if(!driver || !*driver) driver = default_driver();
+  if(!driver || !*driver) driver = optimalDriver();
 
   if(0);
 
@@ -355,24 +395,45 @@ void InputInterface::driver(const char* driver) {
   else p = new Input();
 }
 
-//select the *safest* available driver, not the fastest
-const char* InputInterface::default_driver() {
+const char* InputInterface::optimalDriver() {
   #if defined(INPUT_RAWINPUT)
   return "RawInput";
   #elif defined(INPUT_DIRECTINPUT)
   return "DirectInput";
+
   #elif defined(INPUT_CARBON)
   return "Carbon";
+
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)
   return "X-Windows";
+
+  #else
+  return "None";
+  #endif
+}
+
+const char* InputInterface::safestDriver() {
+  #if defined(INPUT_RAWINPUT)
+  return "RawInput";
+  #elif defined(INPUT_DIRECTINPUT)
+  return "DirectInput";
+
+  #elif defined(INPUT_CARBON)
+  return "Carbon";
+
+  #elif defined(INPUT_SDL)
+  return "SDL";
+  #elif defined(INPUT_X)
+  return "X-Windows";
+
   #else
   return "none";
   #endif
 }
 
-const char* InputInterface::driver_list() {
+const char* InputInterface::availableDrivers() {
   return
 
   //Windows

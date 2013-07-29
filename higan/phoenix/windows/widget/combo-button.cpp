@@ -1,6 +1,6 @@
 namespace phoenix {
 
-void pComboButton::append(const string& text) {
+void pComboButton::append(string text) {
   SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16_t(text));
   if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) setSelection(0);
 }
@@ -11,7 +11,7 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 24, pFont::size(hfont, " ").height + 10};
 }
 
-void pComboButton::modify(unsigned row, const string& text) {
+void pComboButton::modify(unsigned row, string text) {
   locked = true;
   unsigned position = selection();
   SendMessage(hwnd, CB_DELETESTRING, row, 0);
@@ -63,7 +63,7 @@ void pComboButton::orphan() {
   constructor();
 }
 
-void pComboButton::setGeometry(const Geometry& geometry) {
+void pComboButton::setGeometry(Geometry geometry) {
   SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 1, SWP_NOZORDER);
   RECT rc;
   GetWindowRect(hwnd, &rc);

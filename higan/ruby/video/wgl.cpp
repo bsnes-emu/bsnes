@@ -1,9 +1,13 @@
 #include "opengl/opengl.hpp"
 
+#define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
+#define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
+
 namespace ruby {
 
 struct pVideoWGL : OpenGL {
-  BOOL (APIENTRY* glSwapInterval)(int);
+  HGLRC (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) = nullptr;
+  BOOL (APIENTRY* wglSwapInterval)(int) = nullptr;
 
   HDC display;
   HGLRC wglcontext;
@@ -104,12 +108,28 @@ struct pVideoWGL : OpenGL {
     wglcontext = wglCreateContext(display);
     wglMakeCurrent(display, wglcontext);
 
+    wglCreateContextAttribs = (HGLRC (APIENTRY*)(HDC, HGLRC, const int*))glGetProcAddress("wglCreateContextAttribsARB");
+    wglSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
+
+    if(wglCreateContextAttribs) {
+      int attributes[] = {
+        WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+        WGL_CONTEXT_MINOR_VERSION_ARB, 2,
+        0
+      };
+      HGLRC context = wglCreateContextAttribs(display, 0, attributes);
+      if(context) {
+        wglMakeCurrent(NULL, NULL);
+        wglDeleteContext(wglcontext);
+        wglMakeCurrent(display, wglcontext = context);
+      }
+    }
+
+    if(wglSwapInterval) {
+      wglSwapInterval(settings.synchronize);
+    }
+
     OpenGL::init();
-
-    //vertical synchronization
-    if(!glSwapInterval) glSwapInterval = (BOOL (APIENTRY*)(int))glGetProcAddress("wglSwapIntervalEXT");
-    if( glSwapInterval) glSwapInterval(settings.synchronize);
-
     return true;
   }
 
@@ -122,7 +142,7 @@ struct pVideoWGL : OpenGL {
     }
   }
 
-  pVideoWGL() : glSwapInterval(0) {
+  pVideoWGL() {
     settings.handle = 0;
     settings.synchronize = false;
     settings.filter = 0;

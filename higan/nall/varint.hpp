@@ -2,6 +2,7 @@
 #define NALL_VARINT_HPP
 
 #include <nall/bit.hpp>
+#include <nall/serializer.hpp>
 #include <nall/traits.hpp>
 
 namespace nall {
@@ -34,6 +35,8 @@ public:
 
   template<unsigned s> inline type_t operator=(const uint_t<s> &i) { return data = uclip<bits>((type_t)i); }
   template<unsigned s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
+
+  void serialize(serializer& s) { s(data); }
 };
 
 template<unsigned bits> struct int_t {
@@ -64,6 +67,8 @@ public:
 
   template<unsigned s> inline type_t operator=(const int_t<s> &i) { return data = sclip<bits>((type_t)i); }
   template<unsigned s> inline int_t(const int_t<s> &i) : data(sclip<bits>(i)) {}
+
+  void serialize(serializer& s) { s(data); }
 };
 
 template<typename type_t> struct varuint_t {
@@ -92,6 +97,8 @@ public:
   inline void bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
   inline varuint_t() : data(0ull), mask((type_t)~0ull) {}
   inline varuint_t(const type_t i) : data(i), mask((type_t)~0ull) {}
+
+  void serialize(serializer& s) { s(data); s(mask); }
 };
 
 }

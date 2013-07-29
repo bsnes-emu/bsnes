@@ -3,12 +3,29 @@
 
 #include <type_traits>
 #include <utility>
+#include <nall/any.hpp>
 
 namespace nall {
 
 template<typename T> struct base_from_member {
   T value;
   base_from_member(T value) : value(value) {}
+};
+
+template<typename T> struct ref {
+  T& operator*() {
+    if(type == Type::Reference) return *any_cast<T*>(value);
+    return any_cast<T&>(value);
+  }
+
+  operator T&() { return operator*(); }
+
+  ref(T& value) : type(Type::Reference), value(&value) {}
+  ref(T&& value) : type(Type::Temporary), value(value) {}
+
+protected:
+  enum class Type : unsigned { Reference, Temporary } type;
+  any value;
 };
 
 template<typename TT> struct optional {
@@ -31,7 +48,18 @@ template<typename TT> struct optional {
   }
 
   template<typename = typename std::enable_if<!isConst>::type>
+  T& operator*() {
+    if(!valid) throw optional_value_not_valid{};
+    return *value;
+  }
+
+  template<typename = typename std::enable_if<!isConst>::type>
   T& operator()() {
+    if(!valid) throw optional_value_not_valid{};
+    return *value;
+  }
+
+  const T& operator*() const {
     if(!valid) throw optional_value_not_valid{};
     return *value;
   }

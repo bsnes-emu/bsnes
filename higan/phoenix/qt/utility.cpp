@@ -8,6 +8,21 @@ static QIcon CreateIcon(const nall::image& image, bool scale = false) {
   return QIcon(QPixmap::fromImage(qtImage));
 }
 
+static lstring DropPaths(QDropEvent* event) {
+  QList<QUrl> urls = event->mimeData()->urls();
+  if(urls.size() == 0) return {};
+
+  lstring paths;
+  for(unsigned n = 0; n < urls.size(); n++) {
+    string path = urls[n].path().toUtf8().constData();
+    if(path.empty()) continue;
+    if(directory::exists(path) && !path.endswith("/")) path.append("/");
+    paths.append(path);
+  }
+
+  return paths;
+}
+
 static Keyboard::Keycode Keysym(int keysym) {
   switch(keysym) {
   case XK_Escape: return Keyboard::Keycode::Escape;

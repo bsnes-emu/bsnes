@@ -18,6 +18,25 @@ static GtkImage* CreateImage(const nall::image& image, bool scale = false) {
   return gtkImage;
 }
 
+static lstring DropPaths(GtkSelectionData* data) {
+  gchar** uris = gtk_selection_data_get_uris(data);
+  if(uris == nullptr) return {};
+
+  lstring paths;
+  for(unsigned n = 0; uris[n] != nullptr; n++) {
+    gchar* pathname = g_filename_from_uri(uris[n], nullptr, nullptr);
+    if(pathname == nullptr) continue;
+
+    string path = pathname;
+    g_free(pathname);
+    if(directory::exists(path) && !path.endswith("/")) path.append("/");
+    paths.append(path);
+  }
+
+  g_strfreev(uris);
+  return paths;
+}
+
 static Keyboard::Keycode Keysym(unsigned keysym) {
   switch(keysym) {
   case GDK_Escape: return Keyboard::Keycode::Escape;

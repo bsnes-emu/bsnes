@@ -19,7 +19,7 @@ void Cartridge::parse_markup(const char* markup) {
   parse_markup_sa1(cartridge["sa1"]);
   parse_markup_superfx(cartridge["superfx"]);
   parse_markup_armdsp(cartridge["armdsp"]);
-  parse_markup_hitachidsp(cartridge["hitachidsp"], cartridge["board/type"].data.wildcard("2DC*") ? 2 : 1);
+  parse_markup_hitachidsp(cartridge["hitachidsp"], cartridge["board/type"].data.match("2DC*") ? 2 : 1);
   parse_markup_necdsp(cartridge["necdsp"]);
   parse_markup_epsonrtc(cartridge["epsonrtc"]);
   parse_markup_sharprtc(cartridge["sharprtc"]);

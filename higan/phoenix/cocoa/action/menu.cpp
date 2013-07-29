@@ -37,7 +37,7 @@ void pMenu::setImage(const image& image) {
   }
 }
 
-void pMenu::setText(const string& text) {
+void pMenu::setText(string text) {
   @autoreleasepool {
     [[cocoaAction cocoaMenu] setTitle:[NSString stringWithUTF8String:text]];
     [cocoaAction setTitle:[NSString stringWithUTF8String:text]];

@@ -1,7 +1,7 @@
 namespace phoenix {
 
 Window& pWindow::none() {
-  static Window *window = nullptr;
+  static Window* window = nullptr;
   if(window == nullptr) window = new Window;
   return *window;
 }
@@ -40,7 +40,10 @@ void pWindow::remove(Menu& menu) {
 void pWindow::remove(Widget& widget) {
 }
 
-void pWindow::setBackgroundColor(const Color& color) {
+void pWindow::setBackgroundColor(Color color) {
+}
+
+void pWindow::setDroppable(bool droppable) {
 }
 
 void pWindow::setFocused() {
@@ -49,7 +52,7 @@ void pWindow::setFocused() {
 void pWindow::setFullScreen(bool fullScreen) {
 }
 
-void pWindow::setGeometry(const Geometry& geometry) {
+void pWindow::setGeometry(Geometry geometry) {
 }
 
 void pWindow::setMenuFont(string font) {

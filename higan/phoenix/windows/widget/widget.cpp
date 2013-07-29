@@ -22,13 +22,13 @@ void pWidget::setFocused() {
   SetFocus(hwnd);
 }
 
-void pWidget::setFont(const string& font) {
+void pWidget::setFont(string font) {
   if(hfont) DeleteObject(hfont);
   hfont = pFont::create(font);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
 }
 
-void pWidget::setGeometry(const Geometry& geometry) {
+void pWidget::setGeometry(Geometry geometry) {
   SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, geometry.height, SWP_NOZORDER);
 }
 

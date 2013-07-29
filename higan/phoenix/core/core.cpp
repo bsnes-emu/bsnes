@@ -39,6 +39,9 @@ namespace phoenix {
 
 function<void ()> Application::main;
 
+function<void ()> Application::Windows::onModalBegin;
+function<void ()> Application::Windows::onModalEnd;
+
 function<void ()> Application::Cocoa::onAbout;
 function<void ()> Application::Cocoa::onActivate;
 function<void ()> Application::Cocoa::onPreferences;
@@ -377,13 +380,18 @@ void Window::remove_(Widget& widget) {
   }
 }
 
-void Window::setBackgroundColor(const Color& color) {
+void Window::setBackgroundColor(Color color) {
   state.backgroundColorOverride = true;
   state.backgroundColor = color;
   return p.setBackgroundColor(color);
 }
 
-void Window::setFrameGeometry(const Geometry& geometry) {
+void Window::setDroppable(bool droppable) {
+  state.droppable = droppable;
+  return p.setDroppable(droppable);
+}
+
+void Window::setFrameGeometry(Geometry geometry) {
   Geometry margin = p.frameMargin();
   return setGeometry({
     geometry.x + margin.x, geometry.y + margin.y,
@@ -400,7 +408,7 @@ void Window::setFullScreen(bool fullScreen) {
   return p.setFullScreen(fullScreen);
 }
 
-void Window::setGeometry(const Geometry& geometry) {
+void Window::setGeometry(Geometry geometry) {
   state.geometry = geometry;
   return p.setGeometry(geometry);
 }
@@ -425,7 +433,7 @@ void Window::setResizable(bool resizable) {
   return p.setResizable(resizable);
 }
 
-void Window::setSmartGeometry(const Geometry& geometry) {
+void Window::setSmartGeometry(Geometry geometry) {
   Geometry margin = p.frameMargin();
   return setGeometry({
     geometry.x + margin.x, geometry.y + margin.y,
@@ -790,7 +798,7 @@ void Widget::setFont(string font) {
   return p.setFont(font);
 }
 
-void Widget::setGeometry(const Geometry& geometry) {
+void Widget::setGeometry(Geometry geometry) {
   state.geometry = geometry;
   return p.setGeometry(geometry);
 }
@@ -860,6 +868,11 @@ uint32_t* Canvas::data() {
   return state.data;
 }
 
+void Canvas::setDroppable(bool droppable) {
+  state.droppable = droppable;
+  return p.setDroppable(droppable);
+}
+
 bool Canvas::setImage(const nall::image& image) {
   if(image.data == nullptr || image.width == 0 || image.height == 0) return false;
   state.width = image.width;
@@ -869,7 +882,7 @@ bool Canvas::setImage(const nall::image& image) {
   return true;
 }
 
-void Canvas::setSize(const Size& size) {
+void Canvas::setSize(Size size) {
   state.width = size.width;
   state.height = size.height;
   delete[] state.data;
@@ -1416,7 +1429,13 @@ uintptr_t Viewport::handle() {
   return p.handle();
 }
 
+void Viewport::setDroppable(bool droppable) {
+  state.droppable = droppable;
+  return p.setDroppable(droppable);
+}
+
 Viewport::Viewport():
+state(*new State),
 base_from_member<pViewport&>(*new pViewport(*this)),
 Widget(base_from_member<pViewport&>::value),
 p(base_from_member<pViewport&>::value) {
@@ -1425,6 +1444,7 @@ p(base_from_member<pViewport&>::value) {
 
 Viewport::~Viewport() {
   p.destructor();
+  delete &state;
 }
 
 }

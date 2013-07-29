@@ -41,8 +41,10 @@ unsigned DipSwitches::run(const Markup::Node& node) {
     dip[index].value.setEnabled();
     for(auto& option : setting) {
       if(option.name != "option") continue;
-      dip[index].value.append(option["name"].data);
-      dip[index].values.append(fixedpoint::parse(option["value"].data));
+      if(auto result = Eval::integer(option["value"].data)) {
+        dip[index].value.append(option["name"].data);
+        dip[index].values.append(result());
+      }
     }
 
     if(++index >= Slots) break;

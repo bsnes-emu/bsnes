@@ -30,7 +30,7 @@ unsigned pVerticalSlider::position() {
   }
 }
 
-void pVerticalSlider::setGeometry(const Geometry& geometry) {
+void pVerticalSlider::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x, geometry.y - 2,
     geometry.width, geometry.height + 4

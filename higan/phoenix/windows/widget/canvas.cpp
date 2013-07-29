@@ -6,6 +6,14 @@ static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LP
   if(!dynamic_cast<Canvas*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
   Canvas& canvas = (Canvas&)*object;
 
+  if(msg == WM_DROPFILES) {
+    lstring paths = DropPaths(wparam);
+    if(paths.empty() == false) {
+      if(canvas.onDrop) canvas.onDrop(paths);
+    }
+    return FALSE;
+  }
+
   if(msg == WM_GETDLGCODE) {
     return DLGC_STATIC | DLGC_WANTCHARS;
   }
@@ -44,7 +52,11 @@ static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LP
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void pCanvas::setSize(const Size& size) {
+void pCanvas::setDroppable(bool droppable) {
+  DragAcceptFiles(hwnd, droppable);
+}
+
+void pCanvas::setSize(Size size) {
   delete[] data;
   data = new uint32_t[size.width * size.height];
 }
@@ -59,6 +71,7 @@ void pCanvas::constructor() {
   memcpy(data, canvas.state.data, canvas.state.width * canvas.state.height * sizeof(uint32_t));
   hwnd = CreateWindow(L"phoenix_canvas", L"", WS_CHILD, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&canvas);
+  setDroppable(canvas.state.droppable);
   synchronize();
 }
 

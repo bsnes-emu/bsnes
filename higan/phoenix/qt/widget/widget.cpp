@@ -18,11 +18,11 @@ void pWidget::setFocused() {
   qtWidget->setFocus(Qt::OtherFocusReason);
 }
 
-void pWidget::setFont(const string& font) {
+void pWidget::setFont(string font) {
   qtWidget->setFont(pFont::create(font));
 }
 
-void pWidget::setGeometry(const Geometry& geometry) {
+void pWidget::setGeometry(Geometry geometry) {
   qtWidget->setGeometry(geometry.x, geometry.y, geometry.width, geometry.height);
 }
 

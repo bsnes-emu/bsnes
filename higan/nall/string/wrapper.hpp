@@ -7,17 +7,25 @@ template<unsigned limit> lstring string::isplit(rstring key) const { lstring res
 template<unsigned limit> lstring string::qsplit(rstring key) const { lstring result; result.qsplit<limit>(key, data()); return result; }
 template<unsigned limit> lstring string::iqsplit(rstring key) const { lstring result; result.iqsplit<limit>(key, data()); return result; }
 
-bool string::wildcard(rstring source) const { return nall::wildcard(data(), source); }
-bool string::iwildcard(rstring source) const { return nall::iwildcard(data(), source); }
+bool string::match(rstring source) const { return nall::strmatch(data(), source); }
+bool string::imatch(rstring source) const { return nall::istrmatch(data(), source); }
+
+signed string::compare(rstring source) const {
+  return strcmp(data(), source.data());
+}
+
+signed string::icompare(rstring source) const {
+  return istrcmp(data(), source.data());
+}
 
 bool string::equals(rstring source) const {
   if(size() != source.size()) return false;
-  return memcmp(data(), source.data(), source.size()) == 0;
+  return compare(source) == 0;
 }
 
 bool string::iequals(rstring source) const {
   if(size() != source.size()) return false;
-  return imemcmp(data(), source.data(), source.size()) == 0;
+  return icompare(source) == 0;
 }
 
 bool string::beginswith(rstring source) const {
@@ -38,6 +46,12 @@ bool string::endswith(rstring source) const {
 bool string::iendswith(rstring source) const {
   if(source.size() > size()) return false;
   return imemcmp(data() + size() - source.size(), source.data(), source.size()) == 0;
+}
+
+string string::slice(unsigned offset, unsigned length) const {
+  if(offset >= size()) return "";
+  if(length == ~0u) length = size() - offset;
+  return substr(data(), offset, length);
 }
 
 string& string::lower() { nall::strlower(data()); return *this; }
@@ -82,9 +96,16 @@ template<unsigned Limit> string& string::rtrim(rstring key) {
   return *this;
 }
 
-template<unsigned limit> string& string::trim(rstring key, rstring rkey) {
-  rtrim(rkey.size() ? rkey : key);
-  return ltrim(key);
+template<unsigned Limit> string& string::trim(rstring key) {
+  rtrim<Limit>(key);
+  ltrim<Limit>(key);
+  return *this;
+}
+
+template<unsigned Limit> string& string::trim(rstring lkey, rstring rkey) {
+  rtrim<Limit>(rkey);
+  ltrim<Limit>(lkey);
+  return *this;
 }
 
 string& string::strip() {
@@ -93,10 +114,10 @@ string& string::strip() {
   return *this;
 }
 
-optional<unsigned> string::position(rstring key) const { return strpos(data(), key); }
-optional<unsigned> string::iposition(rstring key) const { return istrpos(data(), key); }
-optional<unsigned> string::qposition(rstring key) const { return qstrpos(data(), key); }
-optional<unsigned> string::iqposition(rstring key) const { return iqstrpos(data(), key); }
+optional<unsigned> string::find(rstring key) const { return strpos(data(), key); }
+optional<unsigned> string::ifind(rstring key) const { return istrpos(data(), key); }
+optional<unsigned> string::qfind(rstring key) const { return qstrpos(data(), key); }
+optional<unsigned> string::iqfind(rstring key) const { return iqstrpos(data(), key); }
 
 }
 

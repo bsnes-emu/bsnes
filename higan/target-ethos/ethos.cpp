@@ -134,6 +134,10 @@ int main(int argc, char** argv) {
 
   Application::setName("higan");
 
+  Application::Windows::onModalBegin = [&] {
+    audio.clear();
+  };
+
   Application::Cocoa::onActivate = [&] {
     presentation->setVisible();
   };

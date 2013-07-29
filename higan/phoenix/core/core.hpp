@@ -64,6 +64,11 @@ struct Application {
   struct State;
   static void initialize();
 
+  struct Windows {
+    static nall::function<void ()> onModalBegin;
+    static nall::function<void ()> onModalEnd;
+  };
+
   struct Cocoa {
     static nall::function<void ()> onAbout;
     static nall::function<void ()> onActivate;
@@ -71,8 +76,6 @@ struct Application {
     static nall::function<void ()> onQuit;
   };
 };
-
-typedef Application App;
 
 enum : unsigned {
   MaximumSize = ~0u,
@@ -106,7 +109,7 @@ struct Geometry {
   Size size() const;
   nall::string text() const;
   inline Geometry() : x(0), y(0), width(0), height(0) {}
-  inline Geometry(const Position& position, const Size& size) : x(position.x), y(position.y), width(size.width), height(size.height) {}
+  inline Geometry(Position position, Size size) : x(position.x), y(position.y), width(size.width), height(size.height) {}
   template<typename X, typename Y, typename W, typename H> inline Geometry(X x, Y y, W width, H height) : x(x), y(y), width(width), height(height) {}
   Geometry(nall::string text);
 };
@@ -212,6 +215,7 @@ struct Timer : private nall::base_from_member<pTimer&>, Object {
 
 struct Window : private nall::base_from_member<pWindow&>, Object {
   nall::function<void ()> onClose;
+  nall::function<void (nall::lstring)> onDrop;
   nall::function<void (Keyboard::Keycode)> onKeyPress;
   nall::function<void (Keyboard::Keycode)> onKeyRelease;
   nall::function<void ()> onMove;
@@ -236,16 +240,17 @@ struct Window : private nall::base_from_member<pWindow&>, Object {
   void remove_(Layout& layout);
   void remove_(Menu& menu);
   void remove_(Widget& widget);
-  void setBackgroundColor(const Color& color);
-  void setFrameGeometry(const Geometry& geometry);
+  void setBackgroundColor(Color color);
+  void setDroppable(bool droppable = true);
+  void setFrameGeometry(Geometry geometry);
   void setFocused();
   void setFullScreen(bool fullScreen = true);
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setMenuFont(nall::string font);
   void setMenuVisible(bool visible = true);
   void setModal(bool modal = true);
   void setResizable(bool resizable = true);
-  void setSmartGeometry(const Geometry& geometry);
+  void setSmartGeometry(Geometry geometry);
   void setStatusFont(nall::string font);
   void setStatusText(nall::string text);
   void setStatusVisible(bool visible = true);
@@ -348,7 +353,7 @@ struct Sizable : Object {
   Layout* layout();
   virtual Size minimumSize() = 0;
   virtual void setEnabled(bool enabled = true) = 0;
-  virtual void setGeometry(const Geometry& geometry) = 0;
+  virtual void setGeometry(Geometry geometry) = 0;
   virtual void setVisible(bool visible = true) = 0;
   virtual bool visible() = 0;
   Window* window();
@@ -383,7 +388,7 @@ struct Widget : private nall::base_from_member<pWidget&>, Sizable {
   void setEnabled(bool enabled = true);
   void setFocused();
   void setFont(nall::string font);
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setVisible(bool visible = true);
   bool visible();
 
@@ -409,14 +414,16 @@ struct Button : private nall::base_from_member<pButton&>, Widget {
 };
 
 struct Canvas : private nall::base_from_member<pCanvas&>, Widget {
+  nall::function<void (nall::lstring)> onDrop;
   nall::function<void ()> onMouseLeave;
   nall::function<void (Position)> onMouseMove;
   nall::function<void (Mouse::Button)> onMousePress;
   nall::function<void (Mouse::Button)> onMouseRelease;
 
   uint32_t* data();
+  void setDroppable(bool droppable = true);
   bool setImage(const nall::image& image);
-  void setSize(const Size& size);
+  void setSize(Size size);
   Size size();
   void update();
 
@@ -641,15 +648,19 @@ struct VerticalSlider : private nall::base_from_member<pVerticalSlider&>, Widget
 };
 
 struct Viewport : private nall::base_from_member<pViewport&>, Widget {
+  nall::function<void (nall::lstring)> onDrop;
   nall::function<void ()> onMouseLeave;
   nall::function<void (Position)> onMouseMove;
   nall::function<void (Mouse::Button)> onMousePress;
   nall::function<void (Mouse::Button)> onMouseRelease;
 
   uintptr_t handle();
+  void setDroppable(bool droppable = true);
 
   Viewport();
   ~Viewport();
+  struct State;
+  State& state;
   pViewport& p;
 };
 

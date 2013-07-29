@@ -1,6 +1,6 @@
 namespace phoenix {
 
-void pComboButton::append(const string& text) {
+void pComboButton::append(string text) {
   locked = true;
   qtComboButton->addItem(QString::fromUtf8(text));
   locked = false;
@@ -13,7 +13,7 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 32, size.height + 12};
 }
 
-void pComboButton::modify(unsigned row, const string& text) {
+void pComboButton::modify(unsigned row, string text) {
   qtComboButton->setItemText(row, text);
 }
 

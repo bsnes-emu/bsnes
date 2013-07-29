@@ -40,7 +40,7 @@ void pRadioButton::setChecked() {
   }
 }
 
-void pRadioButton::setGeometry(const Geometry& geometry) {
+void pRadioButton::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x - 1, geometry.y,
     geometry.width + 2, geometry.height
@@ -50,7 +50,7 @@ void pRadioButton::setGeometry(const Geometry& geometry) {
 void pRadioButton::setGroup(const group<RadioButton>& group) {
 }
 
-void pRadioButton::setText(const string& text) {
+void pRadioButton::setText(string text) {
   @autoreleasepool {
     [cocoaView setTitle:[NSString stringWithUTF8String:text]];
   }

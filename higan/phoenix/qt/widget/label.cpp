@@ -5,7 +5,7 @@ Size pLabel::minimumSize() {
   return {size.width, size.height};
 }
 
-void pLabel::setText(const string& text) {
+void pLabel::setText(string text) {
   qtLabel->setText(QString::fromUtf8(text));
 }
 

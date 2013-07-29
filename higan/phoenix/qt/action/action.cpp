@@ -14,7 +14,7 @@ void pAction::setEnabled(bool enabled) {
   }
 }
 
-void pAction::setFont(const string& font) {
+void pAction::setFont(string font) {
   QFont qtFont = pFont::create(font);
 
   if(dynamic_cast<Menu*>(&action)) {

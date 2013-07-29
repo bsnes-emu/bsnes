@@ -15,7 +15,7 @@ void pCheckButton::setChecked(bool checked) {
   locked = false;
 }
 
-void pCheckButton::setText(const string& text) {
+void pCheckButton::setText(string text) {
   qtCheckButton->setText(QString::fromUtf8(text));
 }
 

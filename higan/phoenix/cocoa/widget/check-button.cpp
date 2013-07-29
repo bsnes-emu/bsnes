@@ -37,14 +37,14 @@ void pCheckButton::setChecked(bool checked) {
   }
 }
 
-void pCheckButton::setGeometry(const Geometry& geometry) {
+void pCheckButton::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x - 2, geometry.y,
     geometry.width + 4, geometry.height
   });
 }
 
-void pCheckButton::setText(const string& text) {
+void pCheckButton::setText(string text) {
   @autoreleasepool {
     [cocoaView setTitle:[NSString stringWithUTF8String:text]];
   }

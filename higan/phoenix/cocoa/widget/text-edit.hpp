@@ -17,8 +17,8 @@ struct pTextEdit : public pWidget {
 
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
-  void setFont(const string& font);
-  void setText(const string& text);
+  void setFont(string font);
+  void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();
 

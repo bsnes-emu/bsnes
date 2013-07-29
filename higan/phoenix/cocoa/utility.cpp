@@ -15,3 +15,27 @@ NSImage* NSMakeImage(nall::image image, unsigned width = 0, unsigned height = 0)
   [cocoaImage addRepresentation:bitmap];
   return cocoaImage;
 }
+
+NSDragOperation DropPathsOperation(id<NSDraggingInfo> sender) {
+  NSPasteboard* pboard = [sender draggingPasteboard];
+  if([[pboard types] containsObject:NSFilenamesPboardType]) {
+    if([sender draggingSourceOperationMask] & NSDragOperationGeneric) {
+      return NSDragOperationGeneric;
+    }
+  }
+  return NSDragOperationNone;
+}
+
+lstring DropPaths(id<NSDraggingInfo> sender) {
+  lstring paths;
+  NSPasteboard* pboard = [sender draggingPasteboard];
+  if([[pboard types] containsObject:NSFilenamesPboardType]) {
+    NSArray* files = [pboard propertyListForType:NSFilenamesPboardType];
+    for(unsigned n = 0; n < [files count]; n++) {
+      string path = [[files objectAtIndex:n] UTF8String];
+      if(directory::exists(path) && !path.endswith("/")) path.append("/");
+      paths.append(path);
+    }
+  }
+  return paths;
+}

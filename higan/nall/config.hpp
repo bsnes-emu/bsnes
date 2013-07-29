@@ -35,7 +35,7 @@ struct Node {
     case Type::Bool: *(bool*)data = (value == "true"); break;
     case Type::Signed: *(signed*)data = integer(value); break;
     case Type::Unsigned: *(unsigned*)data = decimal(value); break;
-    case Type::Double: *(double*)data = fp(value); break;
+    case Type::Double: *(double*)data = real(value); break;
     case Type::String: *(string*)data = value; break;
     }
   }

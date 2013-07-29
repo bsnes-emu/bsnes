@@ -3,6 +3,8 @@
   phoenix::Canvas* canvas;
 }
 -(id) initWith:(phoenix::Canvas&)canvas;
+-(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender;
+-(BOOL) performDragOperation:(id<NSDraggingInfo>)sender;
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown;
 -(void) mouseExited:(NSEvent*)event;
 -(void) mouseMove:(NSEvent*)event;
@@ -23,7 +25,8 @@ struct pCanvas : public pWidget {
   Canvas& canvas;
   CocoaCanvas* cocoaCanvas = nullptr;
 
-  void setSize(const Size& size);
+  void setDroppable(bool droppable);
+  void setSize(Size size);
   void update();
 
   pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}

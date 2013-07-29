@@ -5,7 +5,7 @@ void pItem::setImage(const image& image) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 
-void pItem::setText(const string& text) {
+void pItem::setText(string text) {
   if(parentWindow) parentWindow->p.updateMenu();
 }
 

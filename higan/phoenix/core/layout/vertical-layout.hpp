@@ -1,5 +1,5 @@
 struct VerticalLayout : public Layout {
-  void append(Sizable& sizable, const Size& size, unsigned spacing = 0);
+  void append(Sizable& sizable, Size size, unsigned spacing = 0);
   void append(Sizable& sizable);
   bool enabled();
   Size minimumSize();
@@ -7,7 +7,7 @@ struct VerticalLayout : public Layout {
   void reset();
   void setAlignment(double alignment);
   void setEnabled(bool enabled = true);
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setMargin(unsigned margin);
   void setVisible(bool visible = true);
   void synchronizeLayout();

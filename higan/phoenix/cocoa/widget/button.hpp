@@ -13,9 +13,9 @@ struct pButton : public pWidget {
   CocoaButton* cocoaButton = nullptr;
 
   Size minimumSize();
-  void setGeometry(const Geometry& geometry);
+  void setGeometry(Geometry geometry);
   void setImage(const image& image, Orientation orientation);
-  void setText(const string& text);
+  void setText(string text);
 
   pButton(Button& button) : pWidget(button), button(button) {}
   void constructor();

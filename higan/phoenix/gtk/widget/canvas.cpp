@@ -8,6 +8,14 @@ static gboolean Canvas_expose(GtkWidget* widget, GdkEvent* event, pCanvas* self)
   return true;
 }
 
+static void Canvas_dropEvent(GtkWidget* widget, GdkDragContext* context, gint x, gint y,
+GtkSelectionData* data, guint type, guint timestamp, Canvas* canvas) {
+  if(canvas->state.droppable == false) return;
+  lstring paths = DropPaths(data);
+  if(paths.empty()) return;
+  if(canvas->onDrop) canvas->onDrop(paths);
+}
+
 static gboolean Canvas_mouseLeave(GtkWidget* widget, GdkEventButton* event, pCanvas* self) {
   if(self->canvas.onMouseLeave) self->canvas.onMouseLeave();
   return true;
@@ -36,7 +44,12 @@ static gboolean Canvas_mouseRelease(GtkWidget* widget, GdkEventButton* event, pC
   return true;
 }
 
-void pCanvas::setSize(const Size& size) {
+void pCanvas::setDroppable(bool droppable) {
+  gtk_drag_dest_set(gtkWidget, GTK_DEST_DEFAULT_ALL, nullptr, 0, GDK_ACTION_COPY);
+  if(droppable) gtk_drag_dest_add_uri_targets(gtkWidget);
+}
+
+void pCanvas::setSize(Size size) {
   cairo_surface_destroy(surface);
   surface = cairo_image_surface_create(CAIRO_FORMAT_RGB24, canvas.state.width, canvas.state.height);
 }
@@ -54,6 +67,7 @@ void pCanvas::constructor() {
   gtk_widget_set_double_buffered(gtkWidget, false);
   gtk_widget_add_events(gtkWidget,
     GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_EXPOSURE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
+  g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Canvas_dropEvent), (gpointer)&canvas);
   g_signal_connect(G_OBJECT(gtkWidget), "button_press_event", G_CALLBACK(Canvas_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button_release_event", G_CALLBACK(Canvas_mouseRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "expose_event", G_CALLBACK(Canvas_expose), (gpointer)this);

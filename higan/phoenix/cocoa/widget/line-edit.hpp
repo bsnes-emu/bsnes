@@ -15,7 +15,7 @@ struct pLineEdit : public pWidget {
 
   Size minimumSize();
   void setEditable(bool editable);
-  void setText(const string& text);
+  void setText(string text);
   string text();
 
   pLineEdit(LineEdit& lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}

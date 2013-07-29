@@ -21,7 +21,7 @@ void pWidget::setFocused() {
 void pWidget::setFont(string font) {
 }
 
-void pWidget::setGeometry(const Geometry& geometry) {
+void pWidget::setGeometry(Geometry geometry) {
 }
 
 void pWidget::setVisible(bool visible) {

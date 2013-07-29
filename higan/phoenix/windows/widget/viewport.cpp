@@ -6,6 +6,14 @@ static LRESULT CALLBACK Viewport_windowProc(HWND hwnd, UINT msg, WPARAM wparam, 
   if(!dynamic_cast<Viewport*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
   Viewport& viewport = (Viewport&)*object;
 
+  if(msg == WM_DROPFILES) {
+    lstring paths = DropPaths(wparam);
+    if(paths.empty() == false) {
+      if(viewport.onDrop) viewport.onDrop(paths);
+    }
+    return FALSE;
+  }
+
   if(msg == WM_GETDLGCODE) {
     return DLGC_STATIC | DLGC_WANTCHARS;
   }
@@ -43,9 +51,14 @@ uintptr_t pViewport::handle() {
   return (uintptr_t)hwnd;
 }
 
+void pViewport::setDroppable(bool droppable) {
+  DragAcceptFiles(hwnd, droppable);
+}
+
 void pViewport::constructor() {
   hwnd = CreateWindow(L"phoenix_viewport", L"", WS_CHILD | WS_DISABLED, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&viewport);
+  setDroppable(viewport.state.droppable);
   synchronize();
 }
 

@@ -36,6 +36,28 @@ static unsigned GetWindowZOrder(HWND hwnd) {
   return z;
 }
 
+static lstring DropPaths(WPARAM wparam) {
+  auto dropList = HDROP(wparam);
+  auto fileCount = DragQueryFile(dropList, ~0u, nullptr, 0);
+
+  lstring paths;
+  for(unsigned n = 0; n < fileCount; n++) {
+    auto length = DragQueryFile(dropList, n, nullptr, 0);
+    auto buffer = new wchar_t[length + 1];
+
+    if(DragQueryFile(dropList, n, buffer, length + 1)) {
+      string path = (const char*)utf8_t(buffer);
+      path.transform("\\", "/");
+      if(directory::exists(path) && !path.endswith("/")) path.append("/");
+      paths.append(path);
+    }
+
+    delete[] buffer;
+  }
+
+  return paths;
+}
+
 static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
   #define pressed(keysym) (GetAsyncKeyState(keysym) & 0x8000)
   #define enabled(keysym) (GetKeyState(keysym))

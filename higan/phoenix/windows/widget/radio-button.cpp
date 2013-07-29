@@ -18,7 +18,7 @@ void pRadioButton::setChecked() {
 void pRadioButton::setGroup(const group<RadioButton>& group) {
 }
 
-void pRadioButton::setText(const string& text) {
+void pRadioButton::setText(string text) {
   SetWindowText(hwnd, utf16_t(text));
 }
 

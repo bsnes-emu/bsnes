@@ -48,6 +48,8 @@ constexpr inline uintmax_t binary(const char* s) {
 
 constexpr inline uintmax_t octal(const char* s) {
   return (
+    *s == '0' && *(s + 1) == 'O' ? octal_(s + 2) :
+    *s == '0' && *(s + 1) == 'o' ? octal_(s + 2) :
     octal_(s)
   );
 }
@@ -88,7 +90,7 @@ constexpr inline intmax_t numeral(const char* s) {
   );
 }
 
-inline double fp(const char* s) {
+inline double real(const char* s) {
   return atof(s);
 }
 

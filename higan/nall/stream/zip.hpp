@@ -19,7 +19,7 @@ struct zipstream : memorystream {
     delete[] data;
 
     for(auto& file : archive.file) {
-      if(file.name.wildcard(filter)) {
+      if(file.name.match(filter)) {
         auto buffer = archive.extract(file);
         psize = buffer.size();
         pdata = buffer.move();

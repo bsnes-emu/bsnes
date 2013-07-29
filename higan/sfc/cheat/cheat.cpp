@@ -71,7 +71,7 @@ bool Cheat::decode(string code, unsigned& addr, unsigned& data) {
 
   #define ischr(n) ((n >= '0' && n <= '9') || (n >= 'a' && n <= 'f'))
 
-  if(t.wildcard("??????:??")) {
+  if(t.match("??????:??")) {
     //Direct
     t = {substr(t, 0, 6), substr(t, 7, 2)};
     for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input
@@ -82,7 +82,7 @@ bool Cheat::decode(string code, unsigned& addr, unsigned& data) {
     return true;
   }
 
-  if(t.wildcard("????" "-" "????")) {
+  if(t.match(R"(????-????)")) {
     //Game Genie
     t = {substr(t, 0, 4), substr(t, 5, 4)};
     for(unsigned n = 0; n < 8; n++) if(!ischr(t[n])) return false;  //validate input

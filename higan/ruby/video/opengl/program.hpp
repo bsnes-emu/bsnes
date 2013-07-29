@@ -4,9 +4,9 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
   modulo = glrModulo(node["modulo"].integer());
 
   string w = node["width"].text(), h = node["height"].text();
-  if(w.endswith("%")) relativeWidth = fp(w.rtrim<1>("%")) / 100.0;
+  if(w.endswith("%")) relativeWidth = real(w.rtrim<1>("%")) / 100.0;
   else absoluteWidth = decimal(w);
-  if(h.endswith("%")) relativeHeight = fp(h.rtrim<1>("%")) / 100.0;
+  if(h.endswith("%")) relativeHeight = real(h.rtrim<1>("%")) / 100.0;
   else absoluteHeight = decimal(h);
 
   if(node.name != "program") return;

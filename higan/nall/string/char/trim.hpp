@@ -29,9 +29,12 @@ template<unsigned Limit> char* rtrim(char* str, const char* key) {
   return str;
 }
 
-template<unsigned limit> char* trim(char* str, const char* key, const char* rkey) {
-  if(rkey) return ltrim<limit>(rtrim<limit>(str, rkey), key);
+template<unsigned limit> char* trim(char* str, const char* key) {
   return ltrim<limit>(rtrim<limit>(str, key), key);
+}
+
+template<unsigned limit> char* trim(char* str, const char* lkey, const char* rkey) {
+  return ltrim<limit>(rtrim<limit>(str, rkey), lkey);
 }
 
 //remove whitespace characters from both left and right sides of string

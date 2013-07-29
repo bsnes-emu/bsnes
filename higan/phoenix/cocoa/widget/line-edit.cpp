@@ -37,7 +37,7 @@ void pLineEdit::setEditable(bool editable) {
   }
 }
 
-void pLineEdit::setText(const string& text) {
+void pLineEdit::setText(string text) {
   @autoreleasepool {
     [cocoaView setStringValue:[NSString stringWithUTF8String:text]];
   }

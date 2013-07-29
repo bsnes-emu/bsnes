@@ -12,6 +12,7 @@
 
 #include <nall/platform.hpp>
 #include <nall/atoi.hpp>
+#include <nall/crc32.hpp>
 #include <nall/function.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/sha256.hpp>
@@ -39,6 +40,10 @@
 #include <nall/string/utility.hpp>
 #include <nall/string/variadic.hpp>
 #include <nall/string/wrapper.hpp>
+#include <nall/string/eval/node.hpp>
+#include <nall/string/eval/literal.hpp>
+#include <nall/string/eval/parser.hpp>
+#include <nall/string/eval/evaluator.hpp>
 #include <nall/string/markup/node.hpp>
 #include <nall/string/markup/bml.hpp>
 #include <nall/string/markup/xml.hpp>
