@@ -1,1 +1,0 @@
-static Settings *settings = nullptr;

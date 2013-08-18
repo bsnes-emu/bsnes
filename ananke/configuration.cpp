@@ -1,13 +1,17 @@
-struct Configuration : configuration {
+struct Settings : Configuration::Document {
   string path;
+  string geometry;
 
-  Configuration() {
-    append(path = userpath(), "Path");
+  Settings() {
+    Configuration::Node node;
+    node.append(path = userpath(), "Path");
+    node.append(geometry = "64,64,480,600", "Geometry");
+    append(node, "Settings");
     directory::create({configpath(), "ananke/"});
-    load({configpath(), "ananke/settings.cfg"});
+    load({configpath(), "ananke/settings.bml"});
   }
 
-  ~Configuration() {
-    save({configpath(), "ananke/settings.cfg"});
+  ~Settings() {
+    save({configpath(), "ananke/settings.bml"});
   }
 } config;

@@ -36,9 +36,10 @@ string Ananke::createSufamiTurboHeuristic(vector<uint8_t> &buffer) {
     ".st/"
   };
   directory::create(pathname);
-  file::create({pathname, "unverified"});
 
   file::write({pathname, "manifest.bml"}, {
+    "unverified\n",
+    "\n",
     "cartridge\n",
     "  rom name=program.rom size=0x", hex(buffer.size()), "\n",
     "  ram name=save.ram size=0x2000\n",

@@ -10,27 +10,11 @@ struct FileDialog : Window {
       Button openButton;
 
   string open() {
-    setModal();
     setVisible();
     fileList.setFocused();
     filename = "";
-    bool backspace = false;
 
-    dialogActive = true;
-    while(dialogActive) {
-      OS::processEvents();
-      if(Keyboard::pressed(Keyboard::Scancode::Escape)) onClose();
-      if(Keyboard::pressed(Keyboard::Scancode::Backspace)) {
-        if(backspace == false) {
-          backspace = true;
-          if(fileList.focused()) upButton.onActivate();
-        }
-      } else {
-        backspace = false;
-      }
-      usleep(20 * 1000);
-    }
-
+    setModal();
     return filename;
   }
 
@@ -68,7 +52,6 @@ struct FileDialog : Window {
   }
 
   FileDialog() {
-    setFrameGeometry({64, 64, 480, 600});
     setTitle("Load Image");
 
     layout.setMargin(5);
@@ -111,14 +94,12 @@ struct FileDialog : Window {
     };
 
     onClose = [&] {
-      dialogActive = false;
       setModal(false);
       setVisible(false);
     };
   }
 
 private:
-  bool dialogActive;
   string pathname;
   string filename;
   lstring filenameList;

@@ -93,7 +93,7 @@ struct Ananke {
 FileDialog *fileDialog = nullptr;
 
 Ananke::Ananke() {
-  libraryPath = string::read({configpath(), "higan/library.cfg"}).strip();
+  libraryPath = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").replace("\\", "/");
   if(libraryPath.empty()) libraryPath = {userpath(), "Emulation/"};
   if(libraryPath.endswith("/") == false) libraryPath.append("/");
 }
@@ -117,9 +117,13 @@ bool Ananke::supported(const string &filename) {
 
 string Ananke::open(string filename) {
   if(filename.empty()) {
-    if(!fileDialog) fileDialog = new FileDialog;
+    if(!fileDialog) {
+      fileDialog = new FileDialog;
+      fileDialog->setGeometry(config.geometry);
+    }
     fileDialog->setPath(config.path);
     filename = fileDialog->open();
+    config.geometry = fileDialog->geometry().text();
   }
 
   if(filename.empty()) return "";

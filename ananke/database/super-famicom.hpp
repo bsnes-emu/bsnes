@@ -1,6 +1,6 @@
 string SuperFamicom = R"(
 
-database revision=2013-01-16
+database revision=2013-01-22
 
 release
   cartridge region=NTSC
@@ -164,7 +164,7 @@ release
     map id=rom address=00-1f,80-9f:8000-ffff
     map id=rom address=40-5f,c0-df:0000-ffff
     map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000
-    bsxslot
+    satellaview
       map id=rom address=20-3f,a0-bf:8000-ffff
       map id=rom address=60-7d,e0-ff:0000-ffff
   information
@@ -185,13 +185,12 @@ release
     rom name=program.rom size=0x40000
     map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000
     sufamiturbo
-      slot id=A
-        map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000
-        map id=ram address=60-6f,e0-ef:0000-ffff
-      slot id=B
-        map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000
-        map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000
-        map id=ram address=70-7d,f0-ff:0000-ffff
+      map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000
+      map id=ram address=60-6f,e0-ef:0000-ffff
+    sufamiturbo
+      map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000
+      map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000
+      map id=ram address=70-7d,f0-ff:0000-ffff
   information
     title:    スーファミターボ
     name:     Sufami Turbo

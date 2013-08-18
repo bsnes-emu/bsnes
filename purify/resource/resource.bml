@@ -1,5 +1,0 @@
-resource name=resource
-  binary id=game name=game.png
-  binary id=unverified name=unverified.png
-  binary id=file name=file.png
-  binary id=archive name=archive.png

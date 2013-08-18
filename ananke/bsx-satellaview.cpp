@@ -27,10 +27,11 @@ string Ananke::createBsxSatellaviewHeuristic(vector<uint8_t> &buffer) {
     ".bs/"
   };
   directory::create(pathname);
-  file::create({pathname, "unverified"});
 
   file::write({pathname, "manifest.bml"}, {
-    "cartridge\n"
+    "unverified\n",
+    "\n",
+    "cartridge\n",
     "  rom name=program.rom size=0x", hex(buffer.size()), " type=FlashROM\n",
     "\n",
     "information\n",

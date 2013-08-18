@@ -19,10 +19,9 @@ string Ananke::createGameBoyAdvanceHeuristic(vector<uint8_t> &buffer) {
     ".gba/"
   };
   directory::create(pathname);
-  file::create({pathname, "unverified"});
 
   GameBoyAdvanceCartridge info(buffer.data(), buffer.size());
-  string markup = info.markup;
+  string markup = {"unverified\n\n", info.markup};
   markup.append("\ninformation\n  title: ", nall::basename(information.name), "\n");
   if(!information.manifest.empty()) markup = information.manifest;  //override with embedded beat manifest, if one exists
 
