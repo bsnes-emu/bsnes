@@ -2,6 +2,9 @@ void OpenGL::shader(const char* pathname) {
   for(auto& program : programs) program.release();
   programs.reset();
 
+  for(auto& frame : frames) glDeleteTextures(1, &frame.texture);
+  frames.reset();
+
   format = GL_RGBA8;
   filter = GL_LINEAR;
   wrap = GL_CLAMP_TO_BORDER;
@@ -15,8 +18,22 @@ void OpenGL::shader(const char* pathname) {
       programs(n).bind(this, node, pathname);
     }
 
-    bind(this, document["output"], pathname);
+    bind(document, pathname);
+    OpenGLProgram::bind(this, document["output"], pathname);
+  } else {
+    //no shader; assign default values
+    history.length = 0;
+    history.format = GL_RGBA8;
+    history.filter = GL_LINEAR;
+    history.wrap = GL_CLAMP_TO_BORDER;
   }
+}
+
+void OpenGL::bind(const Markup::Node& node, const string& pathname) {
+  history.length = node["history/frames"].decimal();
+  if(node["history/format"].exists()) history.format = glrFormat(node["history/format"].text());
+  if(node["history/filter"].exists()) history.filter = glrFilter(node["history/filter"].text());
+  if(node["history/wrap"].exists()) history.wrap = glrWrap(node["history/wrap"].text());
 }
 
 bool OpenGL::lock(uint32_t*& data, unsigned& pitch) {
@@ -40,19 +57,30 @@ void OpenGL::clear() {
 void OpenGL::refresh() {
   clear();
 
+  //frame[] must always contain max# of previous frames: allocate them now, so first few frames can use them
+  while(frames.size() < history.length) {
+    OpenGLTexture frame;
+    glGenTextures(1, &frame.texture);
+    glBindTexture(GL_TEXTURE_2D, frame.texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, frame.format = history.format, frame.width = width, frame.height = height, 0, GL_BGRA, inputFormat, buffer);
+    frame.filter = history.filter;
+    frame.wrap = history.wrap;
+    frames.append(frame);
+  }
+
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, texture);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, inputFormat, buffer);
 
-  struct History {
+  struct Source {
     GLuint texture;
     unsigned width, height;
     GLuint filter, wrap;
   };
-  vector<History> history;
+  vector<Source> sources;
 
   unsigned sourceWidth = width, sourceHeight = height;
-  history.prepend({texture, sourceWidth, sourceHeight, filter, wrap});
+  sources.prepend({texture, sourceWidth, sourceHeight, filter, wrap});
 
   for(auto& p : programs) {
     unsigned targetWidth = p.absoluteWidth ? p.absoluteWidth : outputWidth;
@@ -65,29 +93,35 @@ void OpenGL::refresh() {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, p.framebuffer);
 
     glrUniform1i("phase", p.phase);
-    glrUniform1i("sourceLength", history.size());
+    glrUniform1i("frameLength", frames.size());
+    glrUniform1i("sourceLength", sources.size());
     glrUniform1i("pixmapLength", p.pixmaps.size());
     glrUniform4f("targetSize", targetWidth, targetHeight, 1.0 / targetWidth, 1.0 / targetHeight);
     glrUniform4f("outputSize", outputWidth, outputHeight, 1.0 / outputWidth, 1.0 / outputHeight);
-  //glrUniform4f("targetActualSize", glrSize(targetWidth), glrSize(targetHeight), 1.0 / glrSize(targetWidth), 1.0 / glrSize(targetHeight));
-  //glrUniform4f("outputActualSize", glrSize(outputWidth), glrSize(outputHeight), 1.0 / glrSize(outputWidth), 1.0 / glrSize(outputHeight));
 
     unsigned aid = 0;
-    for(auto& pixmap : history) {
-      glrUniform1i({"source[", aid, "]"}, aid);
-      glrUniform4f({"sourceSize[", aid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
-    //glrUniform4f({"sourceActualSize[", aid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));
+    for(auto& frame : frames) {
+      glrUniform1i({"frame[", aid, "]"}, aid);
+      glrUniform4f({"frameSize[", aid, "]"}, frame.width, frame.height, 1.0 / frame.width, 1.0 / frame.height);
       glActiveTexture(GL_TEXTURE0 + (aid++));
-      glBindTexture(GL_TEXTURE_2D, pixmap.texture);
-      glrParameters(pixmap.filter, pixmap.wrap);
+      glBindTexture(GL_TEXTURE_2D, frame.texture);
+      glrParameters(frame.filter, frame.wrap);
     }
 
     unsigned bid = 0;
-    for(auto& pixmap : p.pixmaps) {
-      glrUniform1i({"pixmap[", bid, "]"}, aid + bid);
-      glrUniform4f({"pixmapSize[", bid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
-    //glrUniform4f({"pixmapActualSize[", bid, "]"}, glrSize(pixmap.width), glrSize(pixmap.height), 1.0 / glrSize(pixmap.width), 1.0 / glrSize(pixmap.height));
+    for(auto& source : sources) {
+      glrUniform1i({"source[", bid, "]"}, aid + bid);
+      glrUniform4f({"sourceSize[", bid, "]"}, source.width, source.height, 1.0 / source.width, 1.0 / source.height);
       glActiveTexture(GL_TEXTURE0 + aid + (bid++));
+      glBindTexture(GL_TEXTURE_2D, source.texture);
+      glrParameters(source.filter, source.wrap);
+    }
+
+    unsigned cid = 0;
+    for(auto& pixmap : p.pixmaps) {
+      glrUniform1i({"pixmap[", cid, "]"}, aid + bid + cid);
+      glrUniform4f({"pixmapSize[", bid, "]"}, pixmap.width, pixmap.height, 1.0 / pixmap.width, 1.0 / pixmap.height);
+      glActiveTexture(GL_TEXTURE0 + aid + bid + (cid++));
       glBindTexture(GL_TEXTURE_2D, pixmap.texture);
       glrParameters(pixmap.filter, pixmap.wrap);
     }
@@ -99,7 +133,7 @@ void OpenGL::refresh() {
 
     p.phase = (p.phase + 1) % p.modulo;
     sourceWidth = p.width, sourceHeight = p.height;
-    history.prepend({p.texture, sourceWidth, sourceHeight, p.filter, p.wrap});
+    sources.prepend({p.texture, sourceWidth, sourceHeight, p.filter, p.wrap});
   }
 
   unsigned targetWidth = absoluteWidth ? absoluteWidth : outputWidth;
@@ -116,6 +150,19 @@ void OpenGL::refresh() {
 
   glrParameters(filter, wrap);
   render(sourceWidth, sourceHeight, outputWidth, outputHeight);
+
+  if(frames.size() > 0) {
+    OpenGLTexture frame = frames.take();
+
+    glBindTexture(GL_TEXTURE_2D, frame.texture);
+    if(width == frame.width && height == frame.height) {
+      glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_BGRA, inputFormat, buffer);
+    } else {
+      glTexImage2D(GL_TEXTURE_2D, 0, frame.format, frame.width = width, frame.height = height, 0, GL_BGRA, inputFormat, buffer);
+    }
+
+    frames.prepend(frame);
+  }
 }
 
 bool OpenGL::init() {
@@ -142,6 +189,7 @@ bool OpenGL::init() {
 }
 
 void OpenGL::term() {
+  shader(nullptr);  //release shader resources (eg frame[] history)
   OpenGLSurface::release();
   if(buffer) { delete[] buffer; buffer = nullptr; }
 }

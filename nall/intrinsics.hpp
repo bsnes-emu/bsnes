@@ -32,7 +32,7 @@ struct Intrinsics {
 
 /* Platform detection */
 
-#if defined(linux) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(linux) || defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
   #define PLATFORM_X
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::X; }
 #elif defined(__APPLE__)

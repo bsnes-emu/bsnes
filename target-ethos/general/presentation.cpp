@@ -12,6 +12,7 @@ void Presentation::synchronize() {
   shaderNone.setChecked();
   if(config->video.shader == "None") shaderNone.setChecked();
   if(config->video.shader == "Blur") shaderBlur.setChecked();
+  if(config->video.shader == "Emulation") shaderEmulation.setChecked();
   for(auto& shader : shaderList) {
     string name = notdir(config->video.shader.split<1>(".shader/")(0));
     if(name == shader->text()) shader->setChecked();
@@ -43,7 +44,7 @@ void Presentation::synchronize() {
 }
 
 void Presentation::setSystemName(string name) {
-  if(active) active->menu.setText(name);
+  if(active) active->menu.setText(systemName = name);
 }
 
 Presentation::Presentation() {
@@ -73,6 +74,7 @@ Presentation::Presentation() {
     shaderMenu.setText("Shader");
       shaderNone.setText("None");
       shaderBlur.setText("Blur");
+      shaderEmulation.setText("Display Emulation");
     synchronizeVideo.setText("Synchronize Video");
     synchronizeAudio.setText("Synchronize Audio");
     muteAudio.setText("Mute Audio");
@@ -96,8 +98,11 @@ Presentation::Presentation() {
       videoMenu.append(centerVideo, scaleVideo, stretchVideo, *new Separator, aspectCorrection, maskOverscan);
     settingsMenu.append(shaderMenu);
       shaderMenu.append(shaderNone, shaderBlur);
-      if(shaderList.size() > 0) shaderMenu.append(*new Separator);
-      for(auto& shader : shaderList) shaderMenu.append(*shader);
+      if(config->video.driver == "OpenGL") shaderMenu.append(shaderEmulation);
+      if(shaderList.size() > 0) {
+        shaderMenu.append(*new Separator);
+        for(auto& shader : shaderList) shaderMenu.append(*shader);
+      }
     settingsMenu.append(*new Separator);
     settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
     if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
@@ -146,6 +151,7 @@ Presentation::Presentation() {
 
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
+  shaderEmulation.onActivate = [&] { config->video.shader = "Emulation"; utility->updateShader(); };
   centerVideo.onActivate  = [&] { config->video.scaleMode = 0; utility->resize(); };
   scaleVideo.onActivate   = [&] { config->video.scaleMode = 1; utility->resize(); };
   stretchVideo.onActivate = [&] { config->video.scaleMode = 2; utility->resize(); };
@@ -245,6 +251,7 @@ void Presentation::loadShaders() {
   nall::group<RadioItem> group;
   group.append(shaderNone);
   group.append(shaderBlur);
+  group.append(shaderEmulation);
   for(auto& shader : shaderList) group.append(*shader);
   RadioItem::group(group);
 }

@@ -22,7 +22,7 @@ protected:
   unsigned objectsize = 0;
 
 public:
-  explicit operator bool() const { return pool; }
+  explicit operator bool() const { return objectsize; }
   T* data() { return pool + poolbase; }
   const T* data() const { return pool + poolbase; }
 
@@ -136,12 +136,18 @@ public:
     objectsize -= length;
   }
 
+  void removefirst() { return remove(0); }
+  void removelast() { return remove(~0u); }
+
   T take(unsigned position = ~0u) {
     if(position == ~0u) position = objectsize - 1;
     T object = pool[poolbase + position];
     remove(position);
     return object;
   }
+
+  T takefirst() { return take(0); }
+  T takelast() { return take(~0u); }
 
   void reverse() {
     unsigned pivot = size() / 2;

@@ -7,7 +7,6 @@ static string OpenGLOutputVertexShader = R"(
   in vec2 texCoord;
 
   out Vertex {
-    vec4 position;
     vec2 texCoord;
   } vertexOut;
 
@@ -42,7 +41,6 @@ static string OpenGLVertexShader = R"(
   in vec2 texCoord;
 
   out Vertex {
-    vec4 position;
     vec2 texCoord;
   } vertexOut;
 

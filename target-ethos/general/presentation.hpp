@@ -35,6 +35,7 @@ struct Presentation : Window {
     Menu shaderMenu;
       RadioItem shaderNone;
       RadioItem shaderBlur;
+      RadioItem shaderEmulation;
       vector<RadioItem*> shaderList;
     CheckItem synchronizeVideo;
     CheckItem synchronizeAudio;
@@ -56,6 +57,9 @@ struct Presentation : Window {
   void loadShaders();
   void bootstrap();
   Presentation();
+
+//internal:
+  string systemName;
 };
 
 extern Presentation* presentation;

@@ -38,7 +38,14 @@ inline string evaluateExpression(Node* node) {
 }
 
 inline int64_t evaluateInteger(Node* node) {
-  if(node->type == Node::Type::Literal) return nall::integer(node->literal);
+  if(node->type == Node::Type::Literal) {
+    if(node->literal.beginswith("0b")) return nall::binary(node->literal);
+    if(node->literal.beginswith("0o")) return nall::octal(node->literal);
+    if(node->literal.beginswith("0x")) return nall::hex(node->literal);
+    if(node->literal.beginswith("%")) return nall::binary(node->literal);
+    if(node->literal.beginswith("$")) return nall::hex(node->literal);
+    return nall::integer(node->literal);
+  }
 
   #define p(n) evaluateInteger(node->link[n])
   switch(node->type) {

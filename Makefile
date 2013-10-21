@@ -29,13 +29,8 @@ else ifeq ($(pgo),optimize)
 endif
 
 # platform
-ifeq ($(platform),x)
-  flags += -march=native
-  link += -s -Wl,-export-dynamic -ldl -lX11 -lXext
-else ifeq ($(platform),osx)
-  flags += -march=native
-else ifeq ($(platform),win)
-  ifeq ($(arch),win32)
+ifeq ($(platform),windows)
+  ifeq ($(arch),x86)
     flags += -m32
     link += -m32
   endif
@@ -46,6 +41,14 @@ else ifeq ($(platform),win)
   endif
   link += -s -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -lws2_32
   link += -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
+else ifeq ($(platform),macosx)
+  flags += -march=native
+else ifeq ($(platform),linux)
+  flags += -march=native
+  link += -s -Wl,-export-dynamic -lX11 -lXext -ldl
+else ifeq ($(platform),bsd)
+  flags += -march=native
+  link += -s -Wl,-export-dynamic -lX11 -lXext
 else
   $(error unsupported platform.)
 endif

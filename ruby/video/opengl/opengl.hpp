@@ -62,12 +62,20 @@ struct OpenGLProgram : OpenGLSurface {
 
 struct OpenGL : OpenGLProgram {
   vector<OpenGLProgram> programs;
+  vector<OpenGLTexture> frames;
+  struct History {
+    unsigned length = 0;
+    GLuint format = GL_RGBA8;
+    GLuint filter = GL_LINEAR;
+    GLuint wrap = GL_CLAMP_TO_BORDER;
+  } history;
 
   GLuint inputFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
   unsigned outputWidth = 0;
   unsigned outputHeight = 0;
 
   void shader(const char* pathname);
+  void bind(const Markup::Node& node, const string& pathname);
   bool lock(uint32_t*& data, unsigned& pitch);
   void clear();
   void refresh();

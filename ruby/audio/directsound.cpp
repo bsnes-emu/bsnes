@@ -84,15 +84,12 @@ public:
     DWORD pos, size;
     void* output;
 
-    if(settings.synchronize == true) {
+    if(settings.synchronize) {
       //wait until playback buffer has an empty ring to write new audio data to
       while(device.distance >= device.rings - 1) {
         dsb_b->GetCurrentPosition(&pos, 0);
         unsigned activering = pos / (device.latency * 4);
-        if(activering == device.readring) {
-          if(settings.synchronize == false) Sleep(1);
-          continue;
-        }
+        if(activering == device.readring) continue;
 
         //subtract number of played rings from ring distance counter
         device.distance -= (device.rings + activering - device.readring) % device.rings;

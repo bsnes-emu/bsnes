@@ -134,7 +134,9 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
     if(dynamic_cast<ListView*>(object)) {
       ListView& listView = (ListView&)*object;
       if(wparam == VK_RETURN) {
-        if(listView.onActivate) listView.onActivate();
+        if(listView.state.text.size() && listView.selected()) {
+          if(listView.onActivate) listView.onActivate();
+        }
       }
     } else if(dynamic_cast<LineEdit*>(object)) {
       LineEdit& lineEdit = (LineEdit&)*object;
@@ -369,7 +371,9 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
             if(listView.p.locked == false && listView.onChange) listView.onChange();
           }
         } else if(nmhdr->code == LVN_ITEMACTIVATE) {
-          if(listView.onActivate) listView.onActivate();
+          if(listView.state.text.size() && listView.selected()) {
+            if(listView.onActivate) listView.onActivate();
+          }
         } else if(nmhdr->code == NM_CUSTOMDRAW) {
           LPNMLVCUSTOMDRAW lvcd = (LPNMLVCUSTOMDRAW)nmhdr;
           switch(lvcd->nmcd.dwDrawStage) {

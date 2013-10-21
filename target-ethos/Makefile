@@ -11,21 +11,25 @@ include gba/Makefile
 ui_objects := ui-ethos ui-configuration ui-interface ui-utility
 ui_objects += ui-input ui-window ui-general ui-settings ui-tools
 ui_objects += phoenix ruby
-ui_objects += $(if $(call streq,$(platform),win),resource)
+ui_objects += $(if $(call streq,$(platform),windows),resource)
 
 # platform
-ifeq ($(platform),x)
-  ruby := video.glx video.xv video.sdl
-  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
-  ruby += input.sdl input.x
-else ifeq ($(platform),osx)
-  ruby := video.cgl
-  ruby += audio.openal
-  ruby += input.carbon
-else ifeq ($(platform),win)
+ifeq ($(platform),windows)
   ruby := video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.directsound audio.xaudio2
   ruby += input.rawinput input.directinput
+else ifeq ($(platform),macosx)
+  ruby := video.cgl
+  ruby += audio.openal
+  ruby += input.carbon
+else ifeq ($(platform),linux)
+  ruby := video.glx video.xv video.sdl
+  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
+  ruby += input.sdl input.x
+else ifeq ($(platform),bsd)
+  ruby := video.glx
+  ruby += audio.openal audio.oss
+  ruby += input.x
 endif
 
 # phoenix
@@ -65,9 +69,10 @@ endif
 
 # targets
 build: $(objects)
-ifeq ($(platform),x)
-	$(strip $(compiler) -o out/$(name) $(objects) $(link))
-else ifeq ($(platform),osx)
+ifeq ($(platform),windows)
+	$(strip $(compiler) -shared -o out/phoenix.dll obj/phoenix.o $(phoenixlink))
+	$(strip $(compiler) -o out/$(name) $(subst obj/phoenix.o,,$(objects)) $(link) -Lout -lphoenix)
+else ifeq ($(platform),macosx)
 	if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
 	mkdir out/$(name).app
 	mkdir out/$(name).app/Contents
@@ -76,16 +81,21 @@ else ifeq ($(platform),osx)
 	cp data/Info.plist out/$(name).app/Contents/Info.plist
 	sips -s format icns data/higan512.png --out out/$(name).app/Contents/Resources/higan.icns
 	$(strip $(compiler) -o out/$(name).app/Contents/MacOS/$(name) $(objects) $(link))
-else ifeq ($(platform),win)
-	$(strip $(compiler) -shared -o out/phoenix.dll obj/phoenix.o $(phoenixlink))
-	$(strip $(compiler) -o out/$(name) $(subst obj/phoenix.o,,$(objects)) $(link) -Lout -lphoenix)
+else
+	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 endif
 
 resource:
 	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
-ifeq ($(platform),x)
+ifeq ($(platform),windows)
+else ifeq ($(platform),macosx)
+	sudo mkdir -p /Library/Application\ Support/$(name)
+	sudo cp -R profile/* /Library/Application\ Support/$(name)
+	sudo cp data/cheats.bml /Library/Application\ Support/$(name)/cheats.bml
+	sudo chmod -R 777 /Library/Application\ Support/$(name)
+else
 	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
 	sudo install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
 	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
@@ -94,14 +104,11 @@ ifeq ($(platform),x)
 	sudo cp -R profile/* /usr/share/$(name)
 	sudo cp data/cheats.bml /usr/share/$(name)/cheats.bml
 	sudo chmod -R 777 /usr/share/$(name)
-else ifeq ($(platform),osx)
-	sudo mkdir -p /Library/Application\ Support/$(name)
-	sudo cp -R profile/* /Library/Application\ Support/$(name)
-	sudo cp data/cheats.bml /Library/Application\ Support/$(name)/cheats.bml
-	sudo chmod -R 777 /Library/Application\ Support/$(name)
 endif
 
 uninstall:
-ifeq ($(platform),x)
+ifeq ($(platform),windows)
+else ifeq ($(platform),macosx)
+else
 	sudo rm $(DESTDIR)$(prefix)/bin/$(name)
 endif

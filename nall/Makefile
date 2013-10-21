@@ -15,34 +15,40 @@
 #####
 
 ifeq ($(platform),)
-  uname := $(shell uname -a)
+  uname := $(shell uname -s)
   ifeq ($(uname),)
-    platform := win
+    platform := windows
     delete = del $(subst /,\,$1)
   else ifneq ($(findstring Windows,$(uname)),)
-    platform := win
+    platform := windows
     delete = del $(subst /,\,$1)
   else ifneq ($(findstring CYGWIN,$(uname)),)
-    platform := win
+    platform := windows
     delete = del $(subst /,\,$1)
   else ifneq ($(findstring Darwin,$(uname)),)
-    platform := osx
+    platform := macosx
+    delete = rm -f $1
+  else ifneq ($(findstring BSD,$(uname)),)
+    platform := bsd
     delete = rm -f $1
   else
-    platform := x
+    platform := linux
     delete = rm -f $1
   endif
 endif
 
 ifeq ($(compiler),)
-  ifeq ($(platform),win)
+  ifeq ($(platform),windows)
     compiler := g++
     flags :=
     link :=
-  else ifeq ($(platform),osx)
+  else ifeq ($(platform),macosx)
     compiler := clang
     flags := -w -stdlib=libc++
     link := -lc++ -lobjc
+  else ifeq ($(platform),bsd)
+    compiler := clang++
+    flags := -w
   else
     compiler := g++-4.7
     flags :=

@@ -36,6 +36,9 @@ uint8 SA1::bus_read(unsigned addr) {
     synchronize_cpu();
     return bitmap_read(addr & 0x0fffff);
   }
+
+  //unmapped region
+  return regs.mdr;
 }
 
 void SA1::bus_write(unsigned addr, uint8 data) {
@@ -116,7 +119,7 @@ uint8 SA1::op_read(unsigned addr) {
 void SA1::op_write(unsigned addr, uint8 data) {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  bus_write(addr, data);
+  bus_write(addr, regs.mdr = data);
 }
 
 uint8 SA1::mmcrom_read(unsigned addr) {

@@ -110,6 +110,7 @@ void Utility::load() {
   synchronizeDSP();
 
   resize();
+  updateShader();
   cheatEditor->synchronize();
   cheatEditor->refresh();
 }
@@ -198,14 +199,28 @@ void Utility::updateShader() {
   if(config->video.shader == "None") {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterNearest);
-    return;
-  }
-  if(config->video.shader == "Blur") {
+  } else if(config->video.shader == "Blur") {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterLinear);
     return;
+  } else if(config->video.shader == "Emulation") {
+    if(program->active) {
+      string pathname = program->path("Video Shaders/");
+      pathname.append("Emulation/");
+      pathname.append(presentation->systemName, ".shader/");
+      if(directory::exists(pathname)) {
+        video.set(Video::Shader, (const char*)pathname);
+      } else {
+        video.set(Video::Shader, (const char*)"");
+        video.set(Video::Filter, Video::FilterLinear);
+      }
+    } else {
+      video.set(Video::Shader, (const char*)"");
+      video.set(Video::Filter, Video::FilterLinear);
+    }
+  } else {
+    video.set(Video::Shader, (const char*)config->video.shader);
   }
-  video.set(Video::Shader, (const char*)config->video.shader);
 }
 
 void Utility::resize(bool resizeWindow) {

@@ -153,7 +153,8 @@ public:
 //list.hpp
 struct lstring : vector<string> {
   inline optional<unsigned> find(rstring) const;
-  inline string concatenate(const string&) const;
+  inline string merge(const string&) const;
+  inline string concatenate(const string&) const;  //deprecated
   inline lstring& isort();
   inline lstring& strip();
   inline void append() {}

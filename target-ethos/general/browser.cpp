@@ -28,7 +28,7 @@ Browser::Browser() {
   };
 
   homeButton.onActivate = [&] {
-    string libraryPath = string::read({configpath(), "higan/library.cfg"}).strip();
+    string libraryPath = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").transform("\\", "/");
     if(libraryPath.empty()) libraryPath = {userpath(), "Emulation/"};
     if(libraryPath.endswith("/") == false) libraryPath.append("/");
     setPath(libraryPath);
