@@ -30,6 +30,7 @@ namespace phoenix {
 #include "widget/canvas.hpp"
 #include "widget/check-button.hpp"
 #include "widget/combo-button.hpp"
+#include "widget/console.hpp"
 #include "widget/hex-edit.hpp"
 #include "widget/horizontal-scroller.hpp"
 #include "widget/horizontal-slider.hpp"

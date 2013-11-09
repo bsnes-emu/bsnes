@@ -18,11 +18,6 @@ string lstring::merge(const string& separator) const {
   return output;
 }
 
-//deprecated: alias to merge()
-string lstring::concatenate(const string& separator) const {
-  return merge(separator);
-}
-
 lstring& lstring::isort() {
   nall::sort(pool, objectsize, [](const string& x, const string& y) {
     return istrcmp(x, y) < 0;

@@ -5,6 +5,8 @@ void OpenGL::shader(const char* pathname) {
   for(auto& frame : frames) glDeleteTextures(1, &frame.texture);
   frames.reset();
 
+  settings.reset();
+
   format = GL_RGBA8;
   filter = GL_LINEAR;
   wrap = GL_CLAMP_TO_BORDER;
@@ -13,6 +15,11 @@ void OpenGL::shader(const char* pathname) {
 
   if(pathname) {
     auto document = Markup::Document(file::read({pathname, "manifest.bml"}));
+
+    for(auto& node : document["settings"]) {
+      settings.insert({node.name, node.text()});
+    }
+
     for(auto& node : document.find("program")) {
       unsigned n = programs.size();
       programs(n).bind(this, node, pathname);

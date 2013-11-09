@@ -2,9 +2,52 @@ namespace phoenix {
 
 static LRESULT CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   HexEdit& hexEdit = *(HexEdit*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(msg == WM_CHAR) {
+
+  switch(msg) {
+
+  case WM_KEYDOWN:
     if(hexEdit.p.keyPress(wparam)) return 0;
+    break;
+
+  case WM_MOUSEWHEEL: {
+    signed offset = -((int16_t)HIWORD(wparam) / WHEEL_DELTA);
+    hexEdit.p.scrollTo(hexEdit.p.scrollPosition() + offset);
+    return true;
   }
+
+  case WM_SIZE: {
+    RECT rc;
+    GetClientRect(hexEdit.p.hwnd, &rc);
+    SetWindowPos(hexEdit.p.scrollBar, HWND_TOP, rc.right - 18, 0, 18, rc.bottom, SWP_SHOWWINDOW);
+    break;
+  }
+
+  case WM_VSCROLL: {
+    SCROLLINFO info;
+    memset(&info, 0, sizeof(SCROLLINFO));
+    info.cbSize = sizeof(SCROLLINFO);
+    info.fMask = SIF_ALL;
+    GetScrollInfo((HWND)lparam, SB_CTL, &info);
+    switch(LOWORD(wparam)) {
+    case SB_LEFT: info.nPos = info.nMin; break;
+    case SB_RIGHT: info.nPos = info.nMax; break;
+    case SB_LINELEFT: info.nPos--; break;
+    case SB_LINERIGHT: info.nPos++; break;
+    case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
+    case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
+    case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
+    }
+
+    info.fMask = SIF_POS;
+    SetScrollInfo((HWND)lparam, SB_CTL, &info, TRUE);
+    GetScrollInfo((HWND)lparam, SB_CTL, &info);  //get clamped position
+
+    hexEdit.p.scrollTo(info.nPos);
+    return TRUE;
+  }
+
+  }
+
   return hexEdit.p.windowProc(hwnd, msg, wparam, lparam);
 }
 
@@ -13,10 +56,13 @@ void pHexEdit::setColumns(unsigned columns) {
 }
 
 void pHexEdit::setLength(unsigned length) {
+  SetScrollRange(scrollBar, SB_CTL, 0, rowsScrollable(), TRUE);
+  EnableWindow(scrollBar, rowsScrollable() > 0);
   update();
 }
 
 void pHexEdit::setOffset(unsigned offset) {
+  SetScrollPos(scrollBar, SB_CTL, offset / hexEdit.state.columns, TRUE);
   update();
 }
 
@@ -45,8 +91,7 @@ void pHexEdit::update() {
         uint8_t data = hexEdit.onRead(offset++);
         hexdata.append(hex<2>(data));
         hexdata.append(" ");
-        char buffer[2] = {data >= 0x20 && data <= 0x7e ? (char)data : '.', 0};
-        ansidata.append(buffer);
+        ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
       } else {
         hexdata.append("   ");
         ansidata.append(" ");
@@ -66,15 +111,27 @@ void pHexEdit::update() {
 void pHexEdit::constructor() {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
+    WS_CHILD | WS_TABSTOP | ES_AUTOHSCROLL | ES_READONLY | ES_MULTILINE | ES_WANTRETURN,
     0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&hexEdit);
-  setDefaultFont();
-  update();
+
+  scrollBar = CreateWindowEx(
+    0, L"SCROLLBAR", L"",
+    WS_VISIBLE | WS_CHILD | SBS_VERT,
+    0, 0, 0, 0, hwnd, (HMENU)id, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(scrollBar, GWLP_USERDATA, (LONG_PTR)&hexEdit);
 
   windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
+
+  setDefaultFont();
+  setLength(hexEdit.state.length);
+  setOffset(hexEdit.state.offset);
+  update();
+  PostMessage(hwnd, EM_SETSEL, 10, 10);
+
   synchronize();
 }
 
@@ -90,10 +147,45 @@ void pHexEdit::orphan() {
 bool pHexEdit::keyPress(unsigned scancode) {
   if(!hexEdit.onRead) return false;
 
-  unsigned position = LOWORD(Edit_GetSel(hwnd));
-  unsigned lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 2;
-  unsigned cursorY = position / lineWidth;
-  unsigned cursorX = position % lineWidth;
+  signed position = LOWORD(Edit_GetSel(hwnd));
+  signed lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 2;
+  signed cursorY = position / lineWidth;
+  signed cursorX = position % lineWidth;
+
+  if(scancode == VK_HOME) {
+    signed offset = cursorY * lineWidth + 10;
+    Edit_SetSel(hwnd, offset, offset);
+    return true;
+  }
+
+  if(scancode == VK_END) {
+    signed offset = cursorY * lineWidth + 57;
+    Edit_SetSel(hwnd, offset, offset);
+    return true;
+  }
+
+  if(scancode == VK_UP) {
+    if(cursorY > 0) return false;
+    scrollTo(scrollPosition() - 1);
+    return true;
+  }
+
+  if(scancode == VK_DOWN) {
+    if(cursorY >= rows() - 1) return true;
+    if(cursorY < hexEdit.state.rows - 1) return false;
+    scrollTo(scrollPosition() + 1);
+    return true;
+  }
+
+  if(scancode == VK_PRIOR) {
+    scrollTo(scrollPosition() - hexEdit.state.rows);
+    return true;
+  }
+
+  if(scancode == VK_NEXT) {
+    scrollTo(scrollPosition() + hexEdit.state.rows);
+    return true;
+  }
 
   //convert scancode to hex nibble
        if(scancode >= '0' && scancode <= '9') scancode = scancode - '0';
@@ -135,6 +227,25 @@ bool pHexEdit::keyPress(unsigned scancode) {
   }
 
   return true;
+}
+
+signed pHexEdit::rows() {
+  return (max(1u, hexEdit.state.length) + hexEdit.state.columns - 1) / hexEdit.state.columns;
+}
+
+signed pHexEdit::rowsScrollable() {
+  return max(0u, rows() - hexEdit.state.rows);
+}
+
+signed pHexEdit::scrollPosition() {
+  return hexEdit.state.offset / hexEdit.state.columns;
+}
+
+void pHexEdit::scrollTo(signed position) {
+  if(position > rowsScrollable()) position = rowsScrollable();
+  if(position < 0) position = 0;
+  if(position == scrollPosition()) return;
+  hexEdit.setOffset(position * hexEdit.state.columns);
 }
 
 }

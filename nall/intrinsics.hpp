@@ -4,12 +4,14 @@
 namespace nall {
 
 struct Intrinsics {
-  enum class Compiler : unsigned { Clang, GCC, VisualC, Unknown };
-  enum class Platform : unsigned { X, OSX, Windows, Unknown };
+  enum class Compiler : unsigned { Clang, GCC, VisualCPP, Unknown };
+  enum class Platform : unsigned { Windows, MacOSX, X, Unknown };  //X = Linux, BSD, etc
+  enum class Architecture : unsigned { x86, amd64, Unknown };
   enum class Endian : unsigned { LSB, MSB, Unknown };
 
   static inline Compiler compiler();
   static inline Platform platform();
+  static inline Architecture architecture();
   static inline Endian endian();
 };
 
@@ -22,8 +24,8 @@ struct Intrinsics {
   #define COMPILER_GCC
   Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::GCC; }
 #elif defined(_MSC_VER)
-  #define COMPILER_VISUALC
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::VisualC; }
+  #define COMPILER_VISUALCPP
+  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::VisualCPP; }
 #else
   #warning "unable to detect compiler"
   #define COMPILER_UNKNOWN
@@ -32,36 +34,46 @@ struct Intrinsics {
 
 /* Platform detection */
 
-#if defined(linux) || defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(_WIN32)
+  #define PLATFORM_WINDOWS
+  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Windows; }
+#elif defined(__APPLE__)
+  #define PLATFORM_MACOSX
+  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::MacOSX; }
+#elif defined(linux) || defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__GNU__)
   #define PLATFORM_X
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::X; }
-#elif defined(__APPLE__)
-  #define PLATFORM_OSX
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::OSX; }
-#elif defined(_WIN32)
-  #define PLATFORM_WINDOWS
-  #define PLATFORM_WIN
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Windows; }
 #else
   #warning "unable to detect platform"
   #define PLATFORM_UNKNOWN
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Unknown; }
 #endif
 
+/* Architecture Detection */
+
+#if defined(__i386__) || defined(_M_IX86)
+  #define ARCH_X86
+  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::x86; }
+#elif defined(__amd64__) || defined(_M_AMD64)
+  #define ARCH_AMD64
+  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::amd64; }
+#else
+  #warning "unable to detect architecture"
+  #define ARCH_UNKNOWN
+  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::Unknown; }
+#endif
+
 /* Endian detection */
 
-#if defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
+#if (defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
   #define ENDIAN_LSB
-  #define ARCH_LSB
   Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::LSB; }
-#elif defined(__powerpc__) || defined(_M_PPC) || defined(__BIG_ENDIAN__)
+#elif (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || defined(__BIG_ENDIAN__) || defined(__powerpc__) || defined(_M_PPC)
   #define ENDIAN_MSB
-  #define ARCH_MSB
   Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::MSB; }
 #else
   #warning "unable to detect endian"
   #define ENDIAN_UNKNOWN
-  #define ARCH_UNKNOWN
   Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::Unknown; }
 #endif
 

@@ -75,10 +75,12 @@ bool string::operator> (const char* str) const { return strcmp(data(), str)  > 0
 bool string::operator>=(const char* str) const { return strcmp(data(), str) >= 0; }
 
 string::string(const string& source) {
+  construct();
   operator=(source);
 }
 
 string::string(string&& source) {
+  construct();
   operator=(std::move(source));
 }
 

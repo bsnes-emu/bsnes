@@ -1,6 +1,8 @@
 #ifndef NALL_DSP_HPP
 #define NALL_DSP_HPP
 
+#include <nall/bit.hpp>
+
 #include <algorithm>
 #ifdef __SSE__
   #include <xmmintrin.h>

@@ -137,7 +137,7 @@ bool png::decode(const uint8_t* sourceData, unsigned sourceSize) {
   uint8_t *interlacedData = new uint8_t[interlacedSize];
 
   bool result = inflate(interlacedData, interlacedSize, compressedData + 2, compressedSize - 6);
-  delete[] compressedData;
+  free(compressedData);
 
   if(result == false) {
     delete[] interlacedData;

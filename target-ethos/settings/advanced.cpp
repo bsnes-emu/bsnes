@@ -57,7 +57,7 @@ AdvancedSettings::AdvancedSettings() {
     libraryLayout.append(libraryLabel, {0, 0}, 5);
     libraryLayout.append(libraryPath, {~0, 0}, 5);
     libraryLayout.append(libraryBrowse, {80, 0});
-  if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
+  if(Intrinsics::platform() != Intrinsics::Platform::MacOSX) {
     append(spacer, {~0, ~0});
     append(infoLabel, {~0, 0});
   }

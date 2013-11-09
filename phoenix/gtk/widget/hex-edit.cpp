@@ -1,16 +1,30 @@
 namespace phoenix {
 
 static bool HexEdit_keyPress(GtkWidget* widget, GdkEventKey* event, HexEdit* self) {
-  return self->p.keyPress(event->keyval);
+  return self->p.keyPress(event->keyval, event->state);
 }
 
-static bool HexEdit_scroll(GtkRange* range, GtkScrollType scroll, gdouble value, HexEdit* self) {
-  self->p.scroll((unsigned)value);
-  return false;
+static bool HexEdit_mouseScroll(GtkWidget* widget, GdkEventScroll* event, HexEdit* self) {
+  double position = gtk_range_get_value(GTK_RANGE(self->p.scrollBar));
+
+  if(event->direction == GDK_SCROLL_UP) {
+    self->p.scroll(position - 1);
+  }
+
+  if(event->direction == GDK_SCROLL_DOWN) {
+    self->p.scroll(position + 1);
+  }
+
+  return true;  //do not propagate event further
+}
+
+static bool HexEdit_scroll(GtkRange* range, GtkScrollType scroll, double value, HexEdit* self) {
+  self->p.scroll((signed)value);
+  return true;  //do not propagate event further
 }
 
 bool pHexEdit::focused() {
-  return GTK_WIDGET_HAS_FOCUS(subWidget);
+  return GTK_WIDGET_HAS_FOCUS(subWidget) || GTK_WIDGET_HAS_FOCUS(scrollBar);
 }
 
 void pHexEdit::setColumns(unsigned columns) {
@@ -55,8 +69,7 @@ void pHexEdit::update() {
         uint8_t data = hexEdit.onRead(offset++);
         hexdata.append(hex<2>(data));
         hexdata.append(" ");
-        char buffer[2] = { data >= 0x20 && data <= 0x7e ? (char)data : '.', 0 };
-        ansidata.append(buffer);
+        ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
       } else {
         hexdata.append("   ");
         ansidata.append(" ");
@@ -78,7 +91,7 @@ void pHexEdit::constructor() {
   gtkWidget = gtk_hbox_new(false, 0);
 
   container = gtk_scrolled_window_new(0, 0);
-  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(container), GTK_POLICY_NEVER, GTK_POLICY_NEVER);
+  gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(container), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(container), GTK_SHADOW_ETCHED_IN);
 
   subWidget = gtk_text_view_new();
@@ -86,12 +99,14 @@ void pHexEdit::constructor() {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), GTK_WRAP_NONE);
   gtk_container_add(GTK_CONTAINER(container), subWidget);
   g_signal_connect(G_OBJECT(subWidget), "key-press-event", G_CALLBACK(HexEdit_keyPress), (gpointer)&hexEdit);
+  g_signal_connect(G_OBJECT(subWidget), "scroll-event", G_CALLBACK(HexEdit_mouseScroll), (gpointer)&hexEdit);
 
-  scrollBar = gtk_vscrollbar_new((GtkAdjustment*)0);
+  scrollBar = gtk_vscrollbar_new((GtkAdjustment*)nullptr);
   gtk_range_set_range(GTK_RANGE(scrollBar), 0, 255);
   gtk_range_set_increments(GTK_RANGE(scrollBar), 1, 16);
   gtk_widget_set_sensitive(scrollBar, false);
   g_signal_connect(G_OBJECT(scrollBar), "change-value", G_CALLBACK(HexEdit_scroll), (gpointer)&hexEdit);
+  g_signal_connect(G_OBJECT(scrollBar), "scroll-event", G_CALLBACK(HexEdit_mouseScroll), (gpointer)&hexEdit);
 
   gtk_box_pack_start(GTK_BOX(gtkWidget), container, true, true, 0);
   gtk_box_pack_start(GTK_BOX(gtkWidget), scrollBar, false, false, 1);
@@ -128,13 +143,15 @@ unsigned pHexEdit::cursorPosition() {
   return gtk_text_iter_get_offset(&iter);
 }
 
-bool pHexEdit::keyPress(unsigned scancode) {
+bool pHexEdit::keyPress(unsigned scancode, unsigned mask) {
   if(!hexEdit.onRead) return false;
 
-  unsigned position = cursorPosition();
-  unsigned lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 1;
-  unsigned cursorY = position / lineWidth;
-  unsigned cursorX = position % lineWidth;
+  if(mask & (GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK)) return false;  //allow actions such as Ctrl+C (copy)
+
+  signed position = cursorPosition();
+  signed lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 1;
+  signed cursorY = position / lineWidth;
+  signed cursorX = position % lineWidth;
 
   if(scancode == GDK_Home) {
     setCursorPosition(cursorY * lineWidth + 10);
@@ -158,6 +175,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
   }
 
   if(scancode == GDK_Down) {
+    if(cursorY >= rows() - 1) return true;
     if(cursorY != hexEdit.state.rows - 1) return false;
 
     signed newOffset = hexEdit.state.offset + hexEdit.state.columns;
@@ -234,9 +252,19 @@ bool pHexEdit::keyPress(unsigned scancode) {
   return true;
 }
 
-void pHexEdit::scroll(unsigned position) {
-  unsigned rows = hexEdit.state.length / hexEdit.state.columns;
-  if(position >= rows) position = rows - 1;
+//number of actual rows
+signed pHexEdit::rows() {
+  return (max(1u, hexEdit.state.length) + hexEdit.state.columns - 1) / hexEdit.state.columns;
+}
+
+//number of scrollable row positions
+signed pHexEdit::rowsScrollable() {
+  return max(0u, rows() - hexEdit.state.rows);
+}
+
+void pHexEdit::scroll(signed position) {
+  if(position > rowsScrollable()) position = rowsScrollable();
+  if(position < 0) position = 0;
   hexEdit.setOffset(position * hexEdit.state.columns);
 }
 
@@ -254,10 +282,8 @@ void pHexEdit::setCursorPosition(unsigned position) {
 }
 
 void pHexEdit::setScroll() {
-  unsigned rows = hexEdit.state.length / hexEdit.state.columns;
-  if(rows) rows--;
-  if(rows) {
-    gtk_range_set_range(GTK_RANGE(scrollBar), 0, rows);
+  if(rowsScrollable() > 0) {
+    gtk_range_set_range(GTK_RANGE(scrollBar), 0, rowsScrollable());
     gtk_widget_set_sensitive(scrollBar, true);
   } else {
     gtk_widget_set_sensitive(scrollBar, false);

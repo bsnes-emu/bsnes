@@ -2,10 +2,10 @@
   #include <GL/gl.h>
   #include <GL/glx.h>
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
-#elif defined(PLATFORM_OSX)
+#elif defined(PLATFORM_MACOSX)
   #include <OpenGL/gl.h>
   #include <OpenGL/gl3.h>
-#elif defined(PLATFORM_WIN)
+#elif defined(PLATFORM_WINDOWS)
   #include <GL/gl.h>
   #include <GL/glext.h>
   #define glGetProcAddress(name) wglGetProcAddress(name)
@@ -57,6 +57,7 @@ struct OpenGLProgram : OpenGLSurface {
   vector<OpenGLTexture> pixmaps;
 
   void bind(OpenGL* instance, const Markup::Node& node, const string& pathname);
+  void parse(OpenGL* instance, string& source);
   void release();
 };
 
@@ -73,6 +74,17 @@ struct OpenGL : OpenGLProgram {
   GLuint inputFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
   unsigned outputWidth = 0;
   unsigned outputHeight = 0;
+
+  struct Setting {
+    string name;
+    string value;
+    bool operator< (const Setting& source) { return name <  source.name; }
+    bool operator==(const Setting& source) { return name == source.name; }
+    Setting() {}
+    Setting(const string& name) : name(name) {}
+    Setting(const string& name, const string& value) : name(name), value(value) {}
+  };
+  set<Setting> settings;
 
   void shader(const char* pathname);
   void bind(const Markup::Node& node, const string& pathname);

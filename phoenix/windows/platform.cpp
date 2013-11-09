@@ -25,6 +25,7 @@
 #include "widget/canvas.cpp"
 #include "widget/check-button.cpp"
 #include "widget/combo-button.cpp"
+#include "widget/console.cpp"
 #include "widget/hex-edit.cpp"
 #include "widget/horizontal-scroller.cpp"
 #include "widget/horizontal-slider.cpp"

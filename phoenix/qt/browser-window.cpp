@@ -12,7 +12,7 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
 }
 
 string pBrowserWindow::open(BrowserWindow::State& state) {
-  string filters = state.filters.concatenate(";;");
+  string filters = state.filters.merge(";;");
 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"
@@ -32,7 +32,7 @@ string pBrowserWindow::open(BrowserWindow::State& state) {
 }
 
 string pBrowserWindow::save(BrowserWindow::State& state) {
-  string filters = state.filters.concatenate(";;");
+  string filters = state.filters.merge(";;");
 
   //convert filter list from phoenix to Qt format, example:
   //"Text, XML files (*.txt,*.xml)" -> "Text, XML files (*.txt *.xml)"

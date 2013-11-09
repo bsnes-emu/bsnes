@@ -203,10 +203,10 @@ void Utility::updateShader() {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterLinear);
     return;
-  } else if(config->video.shader == "Emulation") {
+  } else if(config->video.shader == "Display Emulation") {
     if(program->active) {
       string pathname = program->path("Video Shaders/");
-      pathname.append("Emulation/");
+      pathname.append("Display Emulation/");
       pathname.append(presentation->systemName, ".shader/");
       if(directory::exists(pathname)) {
         video.set(Video::Shader, (const char*)pathname);

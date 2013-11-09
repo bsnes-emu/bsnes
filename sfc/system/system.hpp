@@ -42,12 +42,40 @@ private:
   friend class Input;
 };
 
+extern System system;
+
 #include "video.hpp"
 #include "audio.hpp"
 #include "input.hpp"
 
-#include <sfc/config/config.hpp>
 #include <sfc/scheduler/scheduler.hpp>
-#include <sfc/random/random.hpp>
 
-extern System system;
+struct Configuration {
+  Input::Device controller_port1 = Input::Device::Joypad;
+  Input::Device controller_port2 = Input::Device::Joypad;
+  System::ExpansionPortDevice expansion_port = System::ExpansionPortDevice::Satellaview;
+  System::Region region = System::Region::Autodetect;
+  bool random = true;
+};
+
+extern Configuration configuration;
+
+struct Random {
+  void seed(unsigned seed) {
+    iter = seed;
+  }
+
+  unsigned operator()(unsigned result) {
+    if(configuration.random == false) return result;
+    return iter = (iter >> 1) ^ (((iter & 1) - 1) & 0xedb88320);
+  }
+
+  void serialize(serializer& s) {
+    s.integer(iter);
+  }
+
+private:
+  unsigned iter = 0;
+};
+
+extern Random random;

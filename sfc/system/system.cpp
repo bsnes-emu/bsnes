@@ -4,15 +4,15 @@
 namespace SuperFamicom {
 
 System system;
-
-#include <sfc/config/config.cpp>
-#include <sfc/scheduler/scheduler.cpp>
-#include <sfc/random/random.cpp>
+Configuration configuration;
+Random random;
 
 #include "video.cpp"
 #include "audio.cpp"
 #include "input.cpp"
 #include "serialization.cpp"
+
+#include <sfc/scheduler/scheduler.cpp>
 
 void System::run() {
   scheduler.sync = Scheduler::SynchronizeMode::None;
@@ -86,8 +86,8 @@ void System::init() {
   video.init();
   audio.init();
 
-  input.connect(0, config.controller_port1);
-  input.connect(1, config.controller_port2);
+  input.connect(0, configuration.controller_port1);
+  input.connect(1, configuration.controller_port2);
 }
 
 void System::term() {
@@ -102,14 +102,14 @@ void System::load() {
     interface->notify("Error: required Super Famicom firmware ipl.rom not found.\n");
   }
 
-  region = config.region;
-  expansion = config.expansion_port;
+  region = configuration.region;
+  expansion = configuration.expansion_port;
   if(region == Region::Autodetect) {
     region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
   }
 
-  cpu_frequency = region() == Region::NTSC ? config.cpu.ntsc_frequency : config.cpu.pal_frequency;
-  apu_frequency = region() == Region::NTSC ? config.smp.ntsc_frequency : config.smp.pal_frequency;
+  cpu_frequency = region() == Region::NTSC ? 21477272 : 21281370;
+  apu_frequency = 24607104;
 
   audio.coprocessor_enable(false);
 
@@ -233,8 +233,8 @@ void System::reset() {
   if(cartridge.has_msu1()) cpu.coprocessors.append(&msu1);
 
   scheduler.init();
-  input.connect(0, config.controller_port1);
-  input.connect(1, config.controller_port2);
+  input.connect(0, configuration.controller_port1);
+  input.connect(1, configuration.controller_port2);
 }
 
 void System::scanline() {

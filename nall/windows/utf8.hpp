@@ -16,6 +16,10 @@
 #include <windows.h>
 #undef interface
 
+#if !defined(PATH_MAX)
+  #define PATH_MAX 260
+#endif
+
 namespace nall {
   //UTF-8 to UTF-16
   struct utf16_t {
@@ -74,7 +78,7 @@ namespace nall {
     wchar_t** wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
     argv = new char*[argc];
     for(unsigned i = 0; i < argc; i++) {
-      argv[i] = new char[_MAX_PATH];
+      argv[i] = new char[PATH_MAX];
       strcpy(argv[i], nall::utf8_t(wargv[i]));
     }
   }

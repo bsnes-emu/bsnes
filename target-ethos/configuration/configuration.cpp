@@ -12,7 +12,7 @@ ConfigurationSettings::ConfigurationSettings() {
   video.maskOverscan.append(video.maskOverscan.vertical = 8, "Vertical");
   video.append(video.maskOverscan, "MaskOverscan");
   video.append(video.saturation = 100, "Saturation");
-  video.append(video.gamma = 150, "Gamma");
+  video.append(video.gamma = 100, "Gamma");
   video.append(video.luminance = 100, "Luminance");
   video.append(video.startFullScreen = false, "StartFullScreen");
   append(video, "Video");

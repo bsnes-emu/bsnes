@@ -1,5 +1,14 @@
 namespace phoenix {
 
+static GdkColor CreateColor(uint8_t r, uint8_t g, uint8_t b) {
+  GdkColor color;
+  color.pixel = (r << 16) | (g << 8) | (b << 0);
+  color.red = (r << 8) | (r << 0);
+  color.green = (g << 8) | (g << 0);
+  color.blue = (b << 8) | (b << 0);
+  return color;
+}
+
 static GdkPixbuf* CreatePixbuf(const nall::image& image, bool scale = false) {
   nall::image gdkImage = image;
   gdkImage.transform(0, 32, 255u << 24, 255u << 0, 255u << 8, 255u << 16);

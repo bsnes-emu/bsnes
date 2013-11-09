@@ -50,6 +50,7 @@ void string::reset() {
 
 string& string::operator=(const string& source) {
   if(&source == this) return *this;
+  reset();
   _data = (char*)malloc(source._size + 1);
   _capacity = source._size;
   _size = source._size;
@@ -59,6 +60,7 @@ string& string::operator=(const string& source) {
 
 string& string::operator=(string&& source) {
   if(&source == this) return *this;
+  reset();
   _data = source._data;
   _capacity = source._capacity;
   _size = source._size;
@@ -69,20 +71,22 @@ string& string::operator=(string&& source) {
 }
 
 template<typename T, typename... Args> string::string(T&& source, Args&&... args) {
-  _data = nullptr;
-  _capacity = 0;
-  _size = 0;
+  construct();
   sprint(*this, std::forward<T>(source), std::forward<Args>(args)...);
 }
 
 string::string() {
-  _data = nullptr;
-  _capacity = 0;
-  _size = 0;
+  construct();
 }
 
 string::~string() {
-  if(_data) free(_data);
+  reset();
+}
+
+void string::construct() {
+  _data = nullptr;
+  _capacity = 0;
+  _size = 0;
 }
 
 }

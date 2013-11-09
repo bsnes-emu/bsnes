@@ -26,7 +26,7 @@ string& string::ureplace(rstring key, rstring token) {
   signed displacementSize = displacement * counter;
 
   if(token.size() > key.size()) {
-    t = base = strdup(data());
+    t = base = strduplicate(data());
     reserve((unsigned)(p - data()) + displacementSize);
   }
   char* o = data();

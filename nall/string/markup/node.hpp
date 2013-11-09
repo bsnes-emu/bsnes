@@ -115,7 +115,7 @@ struct Node {
 
       if(path.size() == 0) result.append(node);
       else {
-        auto list = node.find(path.concatenate("/"));
+        auto list = node.find(path.merge("/"));
         for(auto& item : list) result.append(item);
       }
     }

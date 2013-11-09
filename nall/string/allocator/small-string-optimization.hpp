@@ -63,6 +63,7 @@ void string::reset() {
 
 string& string::operator=(const string& source) {
   if(&source == this) return *this;
+  reset();
   if(source._capacity >= SSO) {
     _data = (char*)malloc(source._capacity + 1);
     _capacity = source._capacity;
@@ -78,6 +79,7 @@ string& string::operator=(const string& source) {
 
 string& string::operator=(string&& source) {
   if(&source == this) return *this;
+  reset();
   memcpy(this, &source, sizeof(string));
   source._data = nullptr;
   source._capacity = SSO - 1;
@@ -86,20 +88,22 @@ string& string::operator=(string&& source) {
 }
 
 template<typename T, typename... Args> string::string(T&& source, Args&&... args) {
-  _data = nullptr;
-  _capacity = SSO - 1;
-  _size = 0;
+  construct();
   sprint(*this, std::forward<T>(source), std::forward<Args>(args)...);
 }
 
 string::string() {
-  _data = nullptr;
-  _capacity = SSO - 1;
-  _size = 0;
+  construct();
 }
 
 string::~string() {
-  if(_capacity >= SSO) free(_data);
+  reset();
+}
+
+void string::construct() {
+  _data = nullptr;
+  _capacity = SSO - 1;
+  _size = 0;
 }
 
 }

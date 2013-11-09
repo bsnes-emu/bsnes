@@ -105,7 +105,7 @@ Presentation::Presentation() {
       }
     settingsMenu.append(*new Separator);
     settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
-    if(Intrinsics::platform() != Intrinsics::Platform::OSX) {
+    if(Intrinsics::platform() != Intrinsics::Platform::MacOSX) {
       settingsMenu.append(*new Separator);
       settingsMenu.append(configurationSettings);
     }
@@ -133,7 +133,7 @@ Presentation::Presentation() {
 
   onClose = [&] {
     setVisible(false);
-    if(Intrinsics::platform() == Intrinsics::Platform::OSX) {
+    if(Intrinsics::platform() == Intrinsics::Platform::MacOSX) {
       utility->unload();
     } else {
       Application::quit();
@@ -151,7 +151,7 @@ Presentation::Presentation() {
 
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
-  shaderEmulation.onActivate = [&] { config->video.shader = "Emulation"; utility->updateShader(); };
+  shaderEmulation.onActivate = [&] { config->video.shader = "Display Emulation"; utility->updateShader(); };
   centerVideo.onActivate  = [&] { config->video.scaleMode = 0; utility->resize(); };
   scaleVideo.onActivate   = [&] { config->video.scaleMode = 1; utility->resize(); };
   stretchVideo.onActivate = [&] { config->video.scaleMode = 2; utility->resize(); };

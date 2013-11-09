@@ -388,6 +388,29 @@ public slots:
   void onChange();
 };
 
+struct pConsole : public QObject, public pWidget {
+  Q_OBJECT
+
+public:
+  Console& console;
+  struct QtConsole : public QTextEdit {
+    pConsole& self;
+    void keyPressEvent(QKeyEvent*);
+    void keyPressEventAcknowledge(QKeyEvent*);
+    QtConsole(pConsole& self) : self(self) {}
+  };
+  QtConsole* qtConsole;
+
+  void print(string text);
+  void reset();
+
+  pConsole(Console& console) : pWidget(console), console(console) {}
+  void constructor();
+  void destructor();
+  void orphan();
+  void keyPressEvent(QKeyEvent*);
+};
+
 struct pHexEdit : public QObject, public pWidget {
   Q_OBJECT
 
@@ -397,11 +420,17 @@ public:
     pHexEdit& self;
     void keyPressEvent(QKeyEvent*);
     void keyPressEventAcknowledge(QKeyEvent*);
+    void wheelEvent(QWheelEvent*);
     QtHexEdit(pHexEdit& self) : self(self) {}
+  };
+  struct QtHexEditScrollBar : public QScrollBar {
+    pHexEdit& self;
+    bool event(QEvent*);
+    QtHexEditScrollBar(pHexEdit& self) : QScrollBar(Qt::Vertical), self(self) {}
   };
   QtHexEdit* qtHexEdit;
   QHBoxLayout* qtLayout;
-  QScrollBar* qtScroll;
+  QtHexEditScrollBar* qtScroll;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);
@@ -414,6 +443,9 @@ public:
   void destructor();
   void orphan();
   void keyPressEvent(QKeyEvent*);
+  signed rows();
+  signed rowsScrollable();
+  void scrollTo(signed position);
 
 public slots:
   void onScroll();

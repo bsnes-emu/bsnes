@@ -38,6 +38,7 @@ struct pButton;
 struct pCanvas;
 struct pCheckButton;
 struct pComboButton;
+struct pConsole;
 struct pHexEdit;
 struct pHorizontalScroller;
 struct pHorizontalSlider;
@@ -467,6 +468,21 @@ struct ComboButton : private nall::base_from_member<pComboButton&>, Widget {
   struct State;
   State& state;
   pComboButton& p;
+};
+
+struct Console : private nall::base_from_member<pConsole&>, Widget {
+  nall::function<void (nall::string)> onActivate;
+
+  template<typename... Args> void print(Args&&... args) { print_({args...}); }
+
+  void print_(nall::string text);
+  void reset();
+
+  Console();
+  ~Console();
+  struct State;
+  State& state;
+  pConsole& p;
 };
 
 struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {

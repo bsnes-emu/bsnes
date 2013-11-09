@@ -79,7 +79,7 @@ else ifeq ($(platform),macosx)
 	mkdir out/$(name).app/Contents/MacOS
 	mkdir out/$(name).app/Contents/Resources
 	cp data/Info.plist out/$(name).app/Contents/Info.plist
-	sips -s format icns data/higan512.png --out out/$(name).app/Contents/Resources/higan.icns
+	sips -s format icns data/higan.png --out out/$(name).app/Contents/Resources/higan.icns
 	$(strip $(compiler) -o out/$(name).app/Contents/MacOS/$(name) $(objects) $(link))
 else
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))

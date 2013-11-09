@@ -8,7 +8,7 @@ void pTextEdit::setCursorPosition(unsigned position) {
 }
 
 void pTextEdit::setEditable(bool editable) {
-  qtTextEdit->setReadOnly(!editable);
+  qtTextEdit->setTextInteractionFlags(editable ? Qt::TextEditorInteraction : Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
 }
 
 void pTextEdit::setText(string text) {
@@ -36,7 +36,6 @@ void pTextEdit::constructor() {
 }
 
 void pTextEdit::destructor() {
-  if(sizable.state.layout) sizable.state.layout->remove(textEdit);
   delete qtTextEdit;
   qtWidget = qtTextEdit = nullptr;
 }

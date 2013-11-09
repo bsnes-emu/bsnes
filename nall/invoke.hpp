@@ -23,7 +23,7 @@ namespace nall {
 template<typename... Args> inline void invoke(const string& name, Args&&... args) {
   lstring argl(std::forward<Args>(args)...);
   for(auto& arg : argl) if(arg.find(" ")) arg = {"\"", arg, "\""};
-  string arguments = argl.concatenate(" ");
+  string arguments = argl.merge(" ");
   ShellExecuteW(NULL, NULL, utf16_t(name), utf16_t(arguments), NULL, SW_SHOWNORMAL);
 }
 

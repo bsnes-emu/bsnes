@@ -999,6 +999,30 @@ ComboButton::~ComboButton() {
   delete &state;
 }
 
+//Console
+//=======
+
+void Console::print_(string text) {
+  return p.print(text);
+}
+
+void Console::reset() {
+  return p.reset();
+}
+
+Console::Console():
+state(*new State),
+base_from_member<pConsole&>(*new pConsole(*this)),
+Widget(base_from_member<pConsole&>::value),
+p(base_from_member<pConsole&>::value) {
+  p.constructor();
+}
+
+Console::~Console() {
+  p.destructor();
+  delete &state;
+}
+
 //HexEdit
 //=======
 

@@ -5,6 +5,7 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
+#include <nall/varint.hpp>
 #include <nall/windows/utf8.hpp>
 #include <nall/stream/memory.hpp>
 
@@ -18,7 +19,7 @@ inline FILE* fopen_utf8(const string& filename, const string& mode) {
   #endif
 }
 
-struct file {
+struct file : varint {
   enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
   enum class index : unsigned { absolute, relative };
   enum class time : unsigned { create, modify, access };
@@ -32,11 +33,16 @@ struct file {
   }
 
   static bool move(const string& sourcename, const string& targetname) {
-    #if !defined(_WIN32)
-    return rename(sourcename, targetname) == 0;
-    #else
-    return _wrename(utf16_t(sourcename), utf16_t(targetname)) == 0;
-    #endif
+    auto result = rename(sourcename, targetname);
+    if(result == 0) return true;
+    if(errno == EXDEV) {
+      //cannot move files between file systems; copy file instead of failing
+      if(file::copy(sourcename, targetname)) {
+        file::remove(sourcename);
+        return true;
+      }
+    }
+    return false;
   }
 
   static bool remove(const string& filename) {

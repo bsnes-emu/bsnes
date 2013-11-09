@@ -74,7 +74,7 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
 }
 
 void Video::update() {
-  switch(config.controller_port2) {
+  switch(configuration.controller_port2) {
   case Input::Device::SuperScope:
     if(dynamic_cast<SuperScope*>(input.port2)) {
       SuperScope &device = (SuperScope&)*input.port2;

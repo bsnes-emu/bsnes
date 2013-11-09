@@ -26,12 +26,12 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
   ~CPU();
 
 privileged:
+  unsigned cpu_version = 2;  //allowed: 1, 2
+
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
-
-  uint8 cpu_version;
 
   struct Status {
     bool interrupt_pending;

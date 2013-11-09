@@ -28,7 +28,7 @@ struct registry {
     lstring part = name.split("/");
     HKEY handle, rootKey = root(part.take(0));
     string node = part.take();
-    string path = part.concatenate("\\");
+    string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
       DWORD size = NWR_SIZE * sizeof(wchar_t);
@@ -43,7 +43,7 @@ struct registry {
     lstring part = name.split("/");
     HKEY handle, rootKey = root(part.take(0));
     string node = part.take();
-    string path = part.concatenate("\\");
+    string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
       DWORD size = NWR_SIZE * sizeof(wchar_t);
@@ -75,7 +75,7 @@ struct registry {
     lstring part = name.split("/");
     HKEY rootKey = root(part.take(0));
     string node = part.take();
-    string path = part.concatenate("\\");
+    string path = part.merge("\\");
     if(node.empty()) return SHDeleteKeyW(rootKey, utf16_t(path)) == ERROR_SUCCESS;
     return SHDeleteValueW(rootKey, utf16_t(path), utf16_t(node)) == ERROR_SUCCESS;
   }
@@ -84,7 +84,7 @@ struct registry {
     lstring part = name.split("/"), result;
     HKEY handle, rootKey = root(part.take(0));
     part.remove();
-    string path = part.concatenate("\\");
+    string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       DWORD folders, nodes;
       RegQueryInfoKey(handle, nullptr, nullptr, nullptr, &folders, nullptr, nullptr, &nodes, nullptr, nullptr, nullptr, nullptr);

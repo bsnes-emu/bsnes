@@ -53,7 +53,7 @@ Program::Program(int argc, char** argv) {
   bootstrap();
   active = nullptr;
 
-  if(Intrinsics::platform() == Intrinsics::Platform::OSX) {
+  if(Intrinsics::platform() == Intrinsics::Platform::MacOSX) {
     normalFont = Font::sans(12);
     boldFont = Font::sans(12, "Bold");
     titleFont = Font::sans(20, "Bold");

@@ -267,7 +267,12 @@ static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wpara
     case WM_CTLCOLORBTN:
     case WM_CTLCOLORSTATIC: {
       Object* object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
-      if(object && window.p.brush) {
+      if(object == nullptr) break;
+      if(dynamic_cast<HexEdit*>(object) || dynamic_cast<LineEdit*>(object) || dynamic_cast<TextEdit*>(object)) {
+        //text edit controls, when disabled, use CTLCOLORSTATIC instead of CTLCOLOREDIT
+        //override this behavior: we do not want read-only edit controls to use the parent window background color
+        return DefWindowProc(hwnd, WM_CTLCOLOREDIT, wparam, lparam);
+      } else if(window.p.brush) {
         HDC hdc = (HDC)wparam;
         SetBkColor((HDC)wparam, window.p.brushColor);
         return (INT_PTR)window.p.brush;

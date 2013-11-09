@@ -63,6 +63,7 @@ void string::reset() {
 
 string& string::operator=(const string& source) {
   if(&source == this) return *this;
+  reset();
   _data = source._data;
   _capacity = source._capacity;
   _size = source._size;
@@ -71,6 +72,7 @@ string& string::operator=(const string& source) {
 
 string& string::operator=(string&& source) {
   if(&source == this) return *this;
+  reset();
   _data = std::move(source._data);
   _capacity = source._capacity;
   _size = source._size;
@@ -80,17 +82,21 @@ string& string::operator=(string&& source) {
 }
 
 template<typename T, typename... Args> string::string(T&& source, Args&&... args) {
-  _capacity = 0;
-  _size = 0;
+  construct();
   sprint(*this, std::forward<T>(source), std::forward<Args>(args)...);
 }
 
 string::string() {
-  _capacity = 0;
-  _size = 0;
+  construct();
 }
 
 string::~string() {
+  reset();
+}
+
+void string::construct() {
+  _capacity = 0;
+  _size = 0;
 }
 
 }

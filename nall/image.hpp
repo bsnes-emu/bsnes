@@ -496,9 +496,9 @@ bool image::loadPNG(const uint8_t* pngData, unsigned pngSize) {
 }
 
 bool image::loadPNG(const string& filename) {
-  filemap map;
-  if(map.open(filename, filemap::mode::read) == false) return false;
-  return loadPNG(map.data(), map.size());
+  if(!file::exists(filename)) return false;
+  auto buffer = file::read(filename);
+  return loadPNG(buffer.data(), buffer.size());
 }
 
 }

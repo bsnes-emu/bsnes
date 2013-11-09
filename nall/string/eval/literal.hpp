@@ -19,7 +19,7 @@ inline string literalNumber(const char*& s) {
   if(p[0] == '%' || (p[0] == '0' && p[1] == 'b')) {
     unsigned prefix = 1 + (p[0] == '0');
     p += prefix;
-    while(p[0] == '0' || p[0] == '1') p++;
+    while(p[0] == '\'' || p[0] == '0' || p[0] == '1') p++;
     if(p - s <= prefix) throw "invalid binary literal";
     string result = substr(s, 0, p - s);
     s = p;
@@ -30,7 +30,7 @@ inline string literalNumber(const char*& s) {
   if(p[0] == '0' && p[1] == 'o') {
     unsigned prefix = 1 + (p[0] == '0');
     p += prefix;
-    while(p[0] >= '0' && p[0] <= '7') p++;
+    while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '7')) p++;
     if(p - s <= prefix) throw "invalid octal literal";
     string result = substr(s, 0, p - s);
     s = p;
@@ -41,7 +41,7 @@ inline string literalNumber(const char*& s) {
   if(p[0] == '$' || (p[0] == '0' && p[1] == 'x')) {
     unsigned prefix = 1 + (p[0] == '0');
     p += prefix;
-    while((p[0] >= '0' && p[0] <= '9') || (p[0] >= 'A' && p[0] <= 'F') || (p[0] >= 'a' && p[0] <= 'f')) p++;
+    while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '9') || (p[0] >= 'A' && p[0] <= 'F') || (p[0] >= 'a' && p[0] <= 'f')) p++;
     if(p - s <= prefix) throw "invalid hex literal";
     string result = substr(s, 0, p - s);
     s = p;
@@ -49,7 +49,7 @@ inline string literalNumber(const char*& s) {
   }
 
   //decimal
-  while(p[0] >= '0' && p[0] <= '9') p++;
+  while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '9')) p++;
   if(p[0] != '.') {
     string result = substr(s, 0, p - s);
     s = p;
@@ -58,7 +58,7 @@ inline string literalNumber(const char*& s) {
 
   //floating-point
   p++;
-  while(p[0] >= '0' && p[0] <= '9') p++;
+  while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '9')) p++;
   string result = substr(s, 0, p - s);
   s = p;
   return result;

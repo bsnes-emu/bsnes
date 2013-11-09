@@ -535,7 +535,7 @@ void ResampleUtility::gen_sinc(double* out, int size, double cutoff, double kais
         // Generate right half of sinc
         for ( int i = 0; i < half_size; i++ )
         {
-                double angle = (i * 2 + 1) * (M_PI / 2);
+                double angle = (i * 2 + 1) * (Math::Pi / 2);
                 mid [i] = sin( angle * cutoff ) / angle;
         }
  
@@ -553,9 +553,9 @@ void ResampleUtility::gen_sinc_os(double* out, int size, double cutoff, double k
 	for(int i = 0; i < size; i++)
 	{
          if(i == (size / 2))
-          out[i] = 2 * M_PI * (cutoff / 2); //0.078478; //1.0; //sin(2 * M_PI * (cutoff / 2) * (i - size / 2)) / (i - (size / 2));
+          out[i] = 2 * Math::Pi * (cutoff / 2); //0.078478; //1.0; //sin(2 * M_PI * (cutoff / 2) * (i - size / 2)) / (i - (size / 2));
 	 else
- 	  out[i] = sin(2 * M_PI * (cutoff / 2) * (i - size / 2)) / (i - (size / 2));
+ 	  out[i] = sin(2 * Math::Pi * (cutoff / 2) * (i - size / 2)) / (i - (size / 2));
 
 //	 out[i] *= 0.3635819 - 0.4891775 * cos(2 * M_PI * i / (size - 1)) + 0.1365995 * cos(4 * M_PI * i / (size - 1)) - 0.0106411 * cos(6 * M_PI * i / (size - 1));
 //0.42 - 0.5 * cos(2 * M_PI * i / (size - 1)) + 0.08 * cos(4 * M_PI * i / (size - 1));

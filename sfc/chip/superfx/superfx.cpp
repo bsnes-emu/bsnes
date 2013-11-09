@@ -53,7 +53,6 @@ void SuperFX::unload() {
 
 void SuperFX::power() {
   GSU::power();
-  clockmode = config.superfx.speed;
 }
 
 void SuperFX::reset() {

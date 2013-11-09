@@ -314,6 +314,23 @@ struct pComboButton : public pWidget {
   void orphan();
 };
 
+struct pConsole : public pWidget {
+  Console& console;
+  GtkWidget* subWidget;
+  GtkTextBuffer* textBuffer;
+  string command;
+
+  void print(string text);
+  void reset();
+
+  pConsole(Console& console) : pWidget(console), console(console) {}
+  void constructor();
+  void destructor();
+  void orphan();
+  bool keyPress(unsigned scancode, unsigned mask);
+  void seekCursorToEnd();
+};
+
 struct pHexEdit : public pWidget {
   HexEdit& hexEdit;
   GtkWidget* container;
@@ -334,8 +351,10 @@ struct pHexEdit : public pWidget {
   void destructor();
   void orphan();
   unsigned cursorPosition();
-  bool keyPress(unsigned scancode);
-  void scroll(unsigned position);
+  bool keyPress(unsigned scancode, unsigned mask);
+  signed rows();
+  signed rowsScrollable();
+  void scroll(signed position);
   void setCursorPosition(unsigned position);
   void setScroll();
   void updateScroll();

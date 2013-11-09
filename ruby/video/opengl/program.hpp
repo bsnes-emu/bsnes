@@ -17,6 +17,7 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   if(file::exists({pathname, node["vertex"].text()})) {
     string source = file::read({pathname, node["vertex"].text()});
+    parse(instance, source);
     vertex = glrCreateShader(program, GL_VERTEX_SHADER, source);
   } else {
     vertex = glrCreateShader(program, GL_VERTEX_SHADER, OpenGLVertexShader);
@@ -24,6 +25,7 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   if(file::exists({pathname, node["geometry"].text()})) {
     string source = file::read({pathname, node["geometry"].text()});
+    parse(instance, source);
     geometry = glrCreateShader(program, GL_GEOMETRY_SHADER, source);
   } else {
   //geometry shaders, when attached, must pass all vertex output through to the fragment shaders
@@ -32,6 +34,7 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   if(file::exists({pathname, node["fragment"].text()})) {
     string source = file::read({pathname, node["fragment"].text()});
+    parse(instance, source);
     fragment = glrCreateShader(program, GL_FRAGMENT_SHADER, source);
   } else {
     fragment = glrCreateShader(program, GL_FRAGMENT_SHADER, OpenGLFragmentShader);
@@ -66,6 +69,25 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   OpenGLSurface::allocate();
   glrLinkProgram(program);
+}
+
+//apply manifest settings to shader source #in tags
+void OpenGLProgram::parse(OpenGL* instance, string& source) {
+  lstring lines = source.split("\n");
+  for(auto& line : lines) {
+    string s = line;
+    if(auto position = s.find("//")) s.resize(position());  //strip comments
+    s.strip();  //remove extraneous whitespace
+    if(s.match("#in ?*")) {
+      s.ltrim<1>("#in ").strip();
+      if(auto setting = instance->settings.find({s})) {
+        line = {"#define ", setting().name, " ", setting().value};
+      } else {
+        line.reset();  //undefined variable (test in source with #ifdef)
+      }
+    }
+  }
+  source = lines.merge("\n");
 }
 
 void OpenGLProgram::release() {

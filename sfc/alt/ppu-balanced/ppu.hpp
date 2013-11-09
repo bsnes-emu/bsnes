@@ -14,8 +14,8 @@ struct PPU : Thread, public PPUcounter {
   uint32* surface;
   uint32* output;
 
-  uint8 ppu1_version;
-  uint8 ppu2_version;
+  unsigned ppu1_version = 1;
+  unsigned ppu2_version = 3;
 
   static void Enter();
   void add_clocks(unsigned clocks);

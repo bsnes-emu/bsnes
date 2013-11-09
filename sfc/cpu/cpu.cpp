@@ -120,8 +120,7 @@ void CPU::enable() {
 }
 
 void CPU::power() {
-  cpu_version = config.cpu.version;
-  for(auto& byte : wram) byte = random(config.cpu.wram_init_value);
+  for(auto& byte : wram) byte = random(0x55);
 
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;

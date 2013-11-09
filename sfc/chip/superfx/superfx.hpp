@@ -19,7 +19,7 @@ struct SuperFX : Processor::GSU, Coprocessor {
   void serialize(serializer&);
 
 privileged:
-  unsigned clockmode;
+  unsigned clockmode = 0;  //0 = selectable, 1 = force 10.74mhz, 2 = force 21.48mhz
   unsigned instruction_counter;
 };
 

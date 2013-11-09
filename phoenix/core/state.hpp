@@ -111,6 +111,9 @@ struct ComboButton::State {
   vector<string> text;
 };
 
+struct Console::State {
+};
+
 struct HexEdit::State {
   unsigned columns = 16;
   unsigned length = 0;

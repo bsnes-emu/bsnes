@@ -62,6 +62,7 @@ inline void utf8_write(char* s, const UTF8& utf8);
 template<bool Insensitive> alwaysinline bool chrequal(char x, char y);
 template<bool Quoted, typename T> alwaysinline bool quoteskip(T*& p);
 template<bool Quoted, typename T> alwaysinline bool quotecopy(char*& t, T*& p);
+inline char* strduplicate(const char* s);
 
 }
 

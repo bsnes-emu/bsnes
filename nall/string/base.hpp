@@ -144,6 +144,9 @@ public:
   template<unsigned Limit, bool Insensitive, bool Quoted> inline string& ureplace(rstring, rstring);
   inline string& _append(const char*);
 
+private:
+  inline void construct();
+
 #if defined(QSTRING_H)
 public:
   inline operator QString() const;
@@ -154,7 +157,6 @@ public:
 struct lstring : vector<string> {
   inline optional<unsigned> find(rstring) const;
   inline string merge(const string&) const;
-  inline string concatenate(const string&) const;  //deprecated
   inline lstring& isort();
   inline lstring& strip();
   inline void append() {}
@@ -188,6 +190,7 @@ inline string notdir(string name);
 inline string parentdir(string name);
 inline string basename(string name);
 inline string extension(string name);
+inline string tempname();
 
 //format.hpp
 template<signed precision = 0, char padchar = ' '> inline string format(const string& value);

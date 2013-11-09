@@ -69,6 +69,16 @@ string extension(string name) {
   return name;
 }
 
+string tempname() {
+  string path = temppath();
+  srand(time(nullptr));
+  while(true) {
+    uint32_t seed = rand();
+    string filename = {path, ".temporary-", hex<8>(seed)};
+    if(access(filename, F_OK) != 0) return filename;
+  }
+}
+
 }
 
 #endif

@@ -45,8 +45,7 @@ void pHexEdit::update() {
         uint8_t data = hexEdit.onRead(offset++);
         hexdata.append(hex<2>(data));
         hexdata.append(" ");
-        char buffer[2] = { data >= 0x20 && data <= 0x7e ? (char)data : '.', 0 };
-        ansidata.append(buffer);
+        ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
       } else {
         hexdata.append("   ");
         ansidata.append(" ");
@@ -70,6 +69,7 @@ void pHexEdit::constructor() {
 
   qtHexEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   qtHexEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  qtHexEdit->setTextInteractionFlags(Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
 
   qtLayout = new QHBoxLayout;
   qtLayout->setAlignment(Qt::AlignRight);
@@ -77,7 +77,7 @@ void pHexEdit::constructor() {
   qtLayout->setSpacing(0);
   qtHexEdit->setLayout(qtLayout);
 
-  qtScroll = new QScrollBar(Qt::Vertical);
+  qtScroll = new QtHexEditScrollBar(*this);
   qtScroll->setSingleStep(1);
   qtLayout->addWidget(qtScroll);
 
@@ -108,38 +108,92 @@ void pHexEdit::orphan() {
 void pHexEdit::keyPressEvent(QKeyEvent* event) {
   if(!hexEdit.onRead) return;
 
-  QTextCursor cursor = qtHexEdit->textCursor();
-  unsigned lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 1;
-  unsigned cursorY = cursor.position() / lineWidth;
-  unsigned cursorX = cursor.position() % lineWidth;
+  //allow Ctrl+C (copy)
+  if(event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
+    qtHexEdit->keyPressEventAcknowledge(event);
+    return;
+  }
 
-  unsigned nibble;
+  //disallow other text operations (cut, paste, etc)
+  if(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier)) return;
+
+  QTextCursor cursor = qtHexEdit->textCursor();
+  signed lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 1;
+  signed cursorY = cursor.position() / lineWidth;
+  signed cursorX = cursor.position() % lineWidth;
+
+  unsigned nibble = 0;
   switch(event->key()) {
-    case Qt::Key_0: nibble =  0; break;
-    case Qt::Key_1: nibble =  1; break;
-    case Qt::Key_2: nibble =  2; break;
-    case Qt::Key_3: nibble =  3; break;
-    case Qt::Key_4: nibble =  4; break;
-    case Qt::Key_5: nibble =  5; break;
-    case Qt::Key_6: nibble =  6; break;
-    case Qt::Key_7: nibble =  7; break;
-    case Qt::Key_8: nibble =  8; break;
-    case Qt::Key_9: nibble =  9; break;
-    case Qt::Key_A: nibble = 10; break;
-    case Qt::Key_B: nibble = 11; break;
-    case Qt::Key_C: nibble = 12; break;
-    case Qt::Key_D: nibble = 13; break;
-    case Qt::Key_E: nibble = 14; break;
-    case Qt::Key_F: nibble = 15; break;
-    default: {
-      //allow navigation keys to move cursor, but block text input
-      qtHexEdit->setTextInteractionFlags(Qt::TextInteractionFlags(
-        Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse
-      ));
-      qtHexEdit->keyPressEventAcknowledge(event);
-      qtHexEdit->setTextInteractionFlags(Qt::TextEditorInteraction);
-      return;
+  default: return;
+
+  case Qt::Key_Left:
+    if(cursorX > 0) {
+      cursor.setPosition(cursor.position() - 1);
+      qtHexEdit->setTextCursor(cursor);
     }
+    return;
+
+  case Qt::Key_Right:
+    if(cursorX < lineWidth - 1) {
+      cursor.setPosition(cursor.position() + 1);
+      qtHexEdit->setTextCursor(cursor);
+    }
+    return;
+
+  case Qt::Key_Home:
+    cursor.setPosition(cursorY * lineWidth + 10);
+    qtHexEdit->setTextCursor(cursor);
+    return;
+
+  case Qt::Key_End:
+    cursor.setPosition(cursorY * lineWidth + 57);
+    qtHexEdit->setTextCursor(cursor);
+    return;
+
+  case Qt::Key_Up:
+    if(cursorY > 0) {
+      cursor.setPosition(cursor.position() - lineWidth);
+      qtHexEdit->setTextCursor(cursor);
+    } else {
+      scrollTo(qtScroll->sliderPosition() - 1);
+    }
+    return;
+
+  case Qt::Key_Down:
+    if(cursorY >= rows() - 1) {
+      //cannot scroll down further
+    } else if(cursorY < hexEdit.state.rows - 1) {
+      cursor.setPosition(cursor.position() + lineWidth);
+      qtHexEdit->setTextCursor(cursor);
+    } else {
+      scrollTo(qtScroll->sliderPosition() + 1);
+    }
+    return;
+
+  case Qt::Key_PageUp:
+    scrollTo(qtScroll->sliderPosition() - hexEdit.state.rows);
+    return;
+
+  case Qt::Key_PageDown:
+    scrollTo(qtScroll->sliderPosition() + hexEdit.state.rows);
+    return;
+
+  case Qt::Key_0: nibble =  0; break;
+  case Qt::Key_1: nibble =  1; break;
+  case Qt::Key_2: nibble =  2; break;
+  case Qt::Key_3: nibble =  3; break;
+  case Qt::Key_4: nibble =  4; break;
+  case Qt::Key_5: nibble =  5; break;
+  case Qt::Key_6: nibble =  6; break;
+  case Qt::Key_7: nibble =  7; break;
+  case Qt::Key_8: nibble =  8; break;
+  case Qt::Key_9: nibble =  9; break;
+  case Qt::Key_A: nibble = 10; break;
+  case Qt::Key_B: nibble = 11; break;
+  case Qt::Key_C: nibble = 12; break;
+  case Qt::Key_D: nibble = 13; break;
+  case Qt::Key_E: nibble = 14; break;
+  case Qt::Key_F: nibble = 15; break;
   }
 
   if(cursorX >= 10) {
@@ -177,6 +231,22 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
   }
 }
 
+//number of actual rows
+signed pHexEdit::rows() {
+  return (max(1u, hexEdit.state.length) + hexEdit.state.columns - 1) / hexEdit.state.columns;
+}
+
+//number of scrollable row positions
+signed pHexEdit::rowsScrollable() {
+  return max(0u, rows() - hexEdit.state.rows);
+}
+
+void pHexEdit::scrollTo(signed position) {
+  if(position > rowsScrollable()) position = rowsScrollable();
+  if(position < 0) position = 0;
+  qtScroll->setSliderPosition(position);
+}
+
 void pHexEdit::onScroll() {
   if(locked) return;
   unsigned offset = qtScroll->sliderPosition();
@@ -190,6 +260,26 @@ void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent* event) {
 
 void pHexEdit::QtHexEdit::keyPressEventAcknowledge(QKeyEvent* event) {
   QTextEdit::keyPressEvent(event);
+}
+
+void pHexEdit::QtHexEdit::wheelEvent(QWheelEvent* event) {
+  if(event->orientation() == Qt::Vertical) {
+    signed offset = event->delta() < 0 ? +1 : -1;
+    self.scrollTo(self.qtScroll->sliderPosition() + offset);
+    event->accept();
+  }
+}
+
+bool pHexEdit::QtHexEditScrollBar::event(QEvent* event) {
+  if(event->type() == QEvent::Wheel) {
+    QWheelEvent* wheelEvent = (QWheelEvent*)event;
+    if(wheelEvent->orientation() == Qt::Vertical) {
+      signed offset = wheelEvent->delta() < 0 ? +1 : -1;
+      self.scrollTo(sliderPosition() + offset);
+      return true;
+    }
+  }
+  return QScrollBar::event(event);
 }
 
 }

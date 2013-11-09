@@ -22,11 +22,11 @@ struct PPU : Thread, public PPUcounter {
   ~PPU();
 
 privileged:
+  unsigned ppu1_version = 1;  //allowed: 1
+  unsigned ppu2_version = 3;  //allowed: 1, 2, 3
+
   uint32* surface;
   uint32* output;
-
-  uint8 ppu1_version;
-  uint8 ppu2_version;
 
   struct {
     bool interlace;

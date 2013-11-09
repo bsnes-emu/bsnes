@@ -3,9 +3,52 @@
 
 #include <nall/bit.hpp>
 #include <nall/serializer.hpp>
+#include <nall/stdint.hpp>
 #include <nall/traits.hpp>
 
 namespace nall {
+
+struct varint {
+  virtual uint8_t read() = 0;
+  virtual void write(uint8_t) = 0;
+
+  uintmax_t readvu() {
+    uintmax_t data = 0, shift = 1;
+    while(true) {
+      uint8_t x = read();
+      data += (x & 0x7f) * shift;
+      if(x & 0x80) break;
+      shift <<= 7;
+      data += shift;
+    }
+    return data;
+  }
+
+  intmax_t readvs() {
+    uintmax_t data = readvu();
+    bool sign = data & 1;
+    data >>= 1;
+    if(sign) data = -data;
+    return data;
+  }
+
+  void writevu(uintmax_t data) {
+    while(true) {
+      uint8_t x = data & 0x7f;
+      data >>= 7;
+      if(data == 0) return write(0x80 | x);
+      write(x);
+      data--;
+    }
+  }
+
+  void writevs(intmax_t data) {
+    bool sign = data < 0;
+    if(sign) data = -data;
+    data = (data << 1) | sign;
+    writevu(data);
+  }
+};
 
 template<unsigned bits> struct uint_t {
 private:

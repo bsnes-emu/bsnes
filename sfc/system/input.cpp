@@ -21,8 +21,8 @@ void Input::connect(bool port, Input::Device id) {
   }
 
   switch(port) {
-  case Controller::Port1: config.controller_port1 = id; break;
-  case Controller::Port2: config.controller_port2 = id; break;
+  case Controller::Port1: configuration.controller_port1 = id; break;
+  case Controller::Port2: configuration.controller_port2 = id; break;
   }
 }
 

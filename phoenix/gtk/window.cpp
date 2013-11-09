@@ -212,11 +212,7 @@ void pWindow::remove(Widget& widget) {
 }
 
 void pWindow::setBackgroundColor(Color color) {
-  GdkColor gdkColor;
-  gdkColor.pixel = (color.red   << 16) | (color.green << 8) | (color.blue << 0);
-  gdkColor.red   = (color.red   <<  8) | (color.red   << 0);
-  gdkColor.green = (color.green <<  8) | (color.green << 0);
-  gdkColor.blue  = (color.blue  <<  8) | (color.blue  << 0);
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
   gtk_widget_modify_bg(widget, GTK_STATE_NORMAL, &gdkColor);
 }
 
@@ -327,10 +323,15 @@ void pWindow::constructor() {
 
   //if program was given a name, try and set the window taskbar icon from one of the pixmaps folders
   if(applicationState.name.empty() == false) {
-    if(file::exists({"/usr/share/pixmaps/", applicationState.name, ".png"})) {
-      gtk_window_set_icon_from_file(GTK_WINDOW(widget), string{"/usr/share/pixmaps/", applicationState.name, ".png"}, nullptr);
-    } else if(file::exists({"/usr/local/share/pixmaps/", applicationState.name, ".png"})) {
-      gtk_window_set_icon_from_file(GTK_WINDOW(widget), string{"/usr/local/share/pixmaps/", applicationState.name, ".png"}, nullptr);
+    string filename = {"/usr/share/pixmaps/", applicationState.name, ".png"};
+    if(!file::exists(filename)) filename = {"/usr/local/share/pixmaps/", applicationState.name, ".png"};
+    if(file::exists(filename)) {
+      //maximum image size supported by GTK+ is 256x256; so we must scale larger images ourselves
+      nall::image icon(filename);
+      icon.scale(min(256u, icon.width), min(256u, icon.height), Interpolation::Hermite);
+      GdkPixbuf* pixbuf = CreatePixbuf(icon);
+      gtk_window_set_icon(GTK_WINDOW(widget), pixbuf);
+      g_object_unref(G_OBJECT(pixbuf));
     }
   }
 

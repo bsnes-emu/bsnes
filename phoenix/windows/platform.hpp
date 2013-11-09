@@ -305,8 +305,23 @@ struct pComboButton : public pWidget {
   void setGeometry(Geometry geometry);
 };
 
+struct pConsole : public pWidget {
+  Console& console;
+  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+
+  void print(string text);
+  void reset();
+
+  pConsole(Console& console) : pWidget(console), console(console) {}
+  void constructor();
+  void destructor();
+  void orphan();
+  bool keyPress(unsigned key);
+};
+
 struct pHexEdit : public pWidget {
   HexEdit& hexEdit;
+  HWND scrollBar;
   LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
 
   void setColumns(unsigned columns);
@@ -320,6 +335,10 @@ struct pHexEdit : public pWidget {
   void destructor();
   void orphan();
   bool keyPress(unsigned key);
+  signed rows();
+  signed rowsScrollable();
+  signed scrollPosition();
+  void scrollTo(signed position);
 };
 
 struct pHorizontalScroller : public pWidget {

@@ -8,6 +8,7 @@ namespace nall {
 constexpr inline uintmax_t binary_(const char* s, uintmax_t sum = 0) {
   return (
     *s == '0' || *s == '1' ? binary_(s + 1, (sum << 1) | *s - '0') :
+    *s == '\'' ? binary_(s + 1, sum) :
     sum
   );
 }
@@ -15,6 +16,7 @@ constexpr inline uintmax_t binary_(const char* s, uintmax_t sum = 0) {
 constexpr inline uintmax_t octal_(const char* s, uintmax_t sum = 0) {
   return (
     *s >= '0' && *s <= '7' ? octal_(s + 1, (sum << 3) | *s - '0') :
+    *s == '\'' ? octal_(s + 1, sum) :
     sum
   );
 }
@@ -22,6 +24,7 @@ constexpr inline uintmax_t octal_(const char* s, uintmax_t sum = 0) {
 constexpr inline uintmax_t decimal_(const char* s, uintmax_t sum = 0) {
   return (
     *s >= '0' && *s <= '9' ? decimal_(s + 1, (sum * 10) + *s - '0') :
+    *s == '\'' ? decimal_(s + 1, sum) :
     sum
   );
 }
@@ -31,6 +34,7 @@ constexpr inline uintmax_t hex_(const char* s, uintmax_t sum = 0) {
     *s >= 'A' && *s <= 'F' ? hex_(s + 1, (sum << 4) | *s - 'A' + 10) :
     *s >= 'a' && *s <= 'f' ? hex_(s + 1, (sum << 4) | *s - 'a' + 10) :
     *s >= '0' && *s <= '9' ? hex_(s + 1, (sum << 4) | *s - '0') :
+    *s == '\'' ? hex_(s + 1, sum) :
     sum
   );
 }

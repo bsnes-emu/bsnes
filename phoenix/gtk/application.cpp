@@ -39,7 +39,7 @@ void pApplication::initialize() {
   gtk_init(&argc, &argvp);
 
   GtkSettings* gtkSettings = gtk_settings_get_default();
-  g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
+//g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
 
   gtk_rc_parse_string(R"(
     style "phoenix-gtk"

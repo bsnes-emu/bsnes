@@ -49,11 +49,15 @@ void pTextEdit::constructor() {
   gtkWidget = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(gtkWidget), GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
   gtk_scrolled_window_set_shadow_type(GTK_SCROLLED_WINDOW(gtkWidget), GTK_SHADOW_ETCHED_IN);
+
   subWidget = gtk_text_view_new();
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), GTK_WRAP_WORD_CHAR);
   gtk_container_add(GTK_CONTAINER(gtkWidget), subWidget);
+
   textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(subWidget));
+
   g_signal_connect_swapped(G_OBJECT(textBuffer), "changed", G_CALLBACK(TextEdit_change), (gpointer)&textEdit);
+
   gtk_widget_show(subWidget);
 
   setEditable(textEdit.state.editable);
