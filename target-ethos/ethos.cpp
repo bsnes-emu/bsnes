@@ -66,7 +66,7 @@ Program::Program(int argc, char** argv) {
   utility = new Utility;
   inputManager = new InputManager;
   windowManager = new WindowManager;
-  browser = new Browser;
+  libraryManager = new LibraryManager;
   presentation = new Presentation;
   dipSwitches = new DipSwitches;
   videoSettings = new VideoSettings;
@@ -84,6 +84,8 @@ Program::Program(int argc, char** argv) {
   windowManager->loadGeometry();
   presentation->setVisible();
   utility->resize();
+
+  if(config->library.showOnStartup) libraryManager->setVisible();
 
   video.set(Video::Handle, presentation->viewport.handle());
   if(!video.cap(Video::Depth) || !video.set(Video::Depth, depth = 30u)) {
@@ -114,7 +116,6 @@ Program::Program(int argc, char** argv) {
 
   utility->unload();
   config->save();
-  browser->saveConfiguration();
   inputManager->saveConfiguration();
   windowManager->saveGeometry();
 

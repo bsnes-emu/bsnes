@@ -73,10 +73,6 @@ static Widget* GetParentWidget(Sizable* sizable) {
   return nullptr;
 }
 
-static bool HasParentWidget(Sizable* sizable) {
-  return GetParentWidget(sizable) != nullptr;
-}
-
 static Keyboard::Keycode Keysym(unsigned keysym) {
   switch(keysym) {
   case GDK_Escape: return Keyboard::Keycode::Escape;

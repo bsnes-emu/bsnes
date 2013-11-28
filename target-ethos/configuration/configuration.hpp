@@ -45,6 +45,11 @@ struct ConfigurationSettings : Configuration::Document {
     string password;
   } server;
 
+  struct Library : Configuration::Node {
+    unsigned selection;
+    bool showOnStartup;
+  } library;
+
   void load();
   void save();
   ConfigurationSettings();

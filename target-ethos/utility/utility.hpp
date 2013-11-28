@@ -2,7 +2,6 @@ struct Utility {
   void setInterface(Emulator::Interface* emulator);
 
   void loadMedia(string pathname);
-  void loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media);
   void loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media, string pathname);
 
   void loadRequest(unsigned id, string name, string type);
@@ -29,6 +28,8 @@ struct Utility {
   void updateStatus();
   void setStatusText(string text);
   void showMessage(string message);
+
+  string libraryPath();
 
   Utility();
 

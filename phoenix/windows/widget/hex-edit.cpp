@@ -4,7 +4,6 @@ static LRESULT CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, L
   HexEdit& hexEdit = *(HexEdit*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
   switch(msg) {
-
   case WM_KEYDOWN:
     if(hexEdit.p.keyPress(wparam)) return 0;
     break;
@@ -45,7 +44,6 @@ static LRESULT CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, L
     hexEdit.p.scrollTo(info.nPos);
     return TRUE;
   }
-
   }
 
   return hexEdit.p.windowProc(hwnd, msg, wparam, lparam);
@@ -123,7 +121,7 @@ void pHexEdit::constructor() {
   );
   SetWindowLongPtr(scrollBar, GWLP_USERDATA, (LONG_PTR)&hexEdit);
 
-  windowProc = (LRESULT CALLBACK (*)(HWND, UINT, LPARAM, WPARAM))GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
 
   setDefaultFont();

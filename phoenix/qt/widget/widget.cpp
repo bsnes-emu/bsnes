@@ -1,5 +1,9 @@
 namespace phoenix {
 
+QWidget* pWidget::container(Widget& widget) {
+  return nullptr;
+}
+
 bool pWidget::focused() {
   return qtWidget->hasFocus();
 }
@@ -24,6 +28,10 @@ void pWidget::setFont(string font) {
 }
 
 void pWidget::setGeometry(Geometry geometry) {
+  Position displacement = GetDisplacement(&widget);
+  geometry.x -= displacement.x;
+  geometry.y -= displacement.y;
+
   qtWidget->setGeometry(geometry.x, geometry.y, geometry.width, geometry.height);
   if(widget.onSize) widget.onSize();
 }

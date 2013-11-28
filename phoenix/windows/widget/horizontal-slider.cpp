@@ -17,10 +17,11 @@ void pHorizontalSlider::setPosition(unsigned position) {
 
 void pHorizontalSlider::constructor() {
   hwnd = CreateWindow(
-    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH | TBS_HORZ,
+    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_TRANSPARENTBKGND | TBS_NOTICKS | TBS_BOTH | TBS_HORZ,
     0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalSlider);
+
   unsigned position = horizontalSlider.state.position;
   setLength(horizontalSlider.state.length);
   horizontalSlider.setPosition(position);

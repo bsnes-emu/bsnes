@@ -13,6 +13,9 @@ struct AdvancedSettings : SettingsLayout {
     Label libraryLabel;
     LineEdit libraryPath;
     Button libraryBrowse;
+  CheckLabel libraryShowOnStartup;
+
+  Label information;
 
   Widget spacer;
   Label infoLabel;

@@ -74,6 +74,19 @@ static unsigned GetWindowZOrder(HWND hwnd) {
   return z;
 }
 
+static void ImageList_Append(HIMAGELIST imageList, const nall::image& source, unsigned scale) {
+  auto image = source;
+  if(image.empty()) {
+    image.allocate(scale, scale);
+    image.fill(GetSysColor(COLOR_WINDOW));
+  }
+  image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  image.scale(scale, scale);
+  HBITMAP bitmap = CreateBitmap(image);
+  ImageList_Add(imageList, bitmap, NULL);
+  DeleteObject(bitmap);
+}
+
 static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
   #define pressed(keysym) (GetAsyncKeyState(keysym) & 0x8000)
   #define enabled(keysym) (GetKeyState(keysym))
@@ -231,12 +244,34 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
   if(process == false) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   switch(msg) {
+  case WM_CTLCOLORBTN:
+  case WM_CTLCOLORSTATIC: {
+    Object* object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+    if(object == nullptr) break;
+    if(dynamic_cast<HexEdit*>(object) || dynamic_cast<LineEdit*>(object) || dynamic_cast<TextEdit*>(object)) {
+      //text edit controls, when disabled, use CTLCOLORSTATIC instead of CTLCOLOREDIT
+      //override this behavior: we do not want read-only edit controls to use the parent window background color
+      return windowProc(hwnd, WM_CTLCOLOREDIT, wparam, lparam);
+    } else if(!GetParentWidget((Sizable*)object) && window.p.brush) {
+      SetBkColor((HDC)wparam, window.p.brushColor);
+      return (INT_PTR)window.p.brush;
+    }/* else {
+      //this will repaint the background properly, but the foreground isn't always rendered after ...
+      RECT rc;
+      GetClientRect((HWND)lparam, &rc);
+      DrawThemeParentBackground((HWND)lparam, (HDC)wparam, &rc);
+      SetBkMode((HDC)wparam, TRANSPARENT);
+      return (INT_PTR)GetStockBrush(HOLLOW_BRUSH);
+    }*/
+    break;
+  }
+
   case WM_DRAWITEM: {
     unsigned id = LOWORD(wparam);
     HWND control = GetDlgItem(hwnd, id);
     Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
     if(object == nullptr) break;
-    if(dynamic_cast<TabFrame*>(object)) { ((TabFrame*)object)->p.onDrawItem(lparam); break; }
+    if(dynamic_cast<TabFrame*>(object)) { ((TabFrame*)object)->p.onDrawItem(lparam); return TRUE; }
     break;
   }
 
@@ -245,16 +280,16 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
     HWND control = GetDlgItem(hwnd, id);
     Object* object = control ? (Object*)GetWindowLongPtr(control, GWLP_USERDATA) : (Object*)(&pObject::find(id)->object);
     if(object == nullptr) break;
-    if(dynamic_cast<Item*>(object)) { ((Item*)object)->p.onActivate(); break; }
-    if(dynamic_cast<CheckItem*>(object)) { ((CheckItem*)object)->p.onToggle(); break; }
-    if(dynamic_cast<Button*>(object)) { ((Button*)object)->p.onActivate(); break; }
-    if(dynamic_cast<CheckButton*>(object)) { ((CheckButton*)object)->p.onToggle(); break; }
-    if(dynamic_cast<CheckLabel*>(object)) { ((CheckLabel*)object)->p.onToggle(); break; }
-    if(dynamic_cast<ComboButton*>(object) && HIWORD(wparam) == CBN_SELCHANGE) { ((ComboButton*)object)->p.onChange(); break; }
-    if(dynamic_cast<LineEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((LineEdit*)object)->p.onChange(); break; }
-    if(dynamic_cast<RadioButton*>(object)) { ((RadioButton*)object)->p.onActivate(); break; }
-    if(dynamic_cast<RadioLabel*>(object)) { ((RadioLabel*)object)->p.onActivate(); break; }
-    if(dynamic_cast<TextEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((TextEdit*)object)->p.onChange(); break; }
+    if(dynamic_cast<Item*>(object)) { ((Item*)object)->p.onActivate(); return FALSE; }
+    if(dynamic_cast<CheckItem*>(object)) { ((CheckItem*)object)->p.onToggle(); return FALSE; }
+    if(dynamic_cast<Button*>(object)) { ((Button*)object)->p.onActivate(); return FALSE; }
+    if(dynamic_cast<CheckButton*>(object)) { ((CheckButton*)object)->p.onToggle(); return FALSE; }
+    if(dynamic_cast<CheckLabel*>(object)) { ((CheckLabel*)object)->p.onToggle(); return FALSE; }
+    if(dynamic_cast<ComboButton*>(object) && HIWORD(wparam) == CBN_SELCHANGE) { ((ComboButton*)object)->p.onChange(); return FALSE; }
+    if(dynamic_cast<LineEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((LineEdit*)object)->p.onChange(); return FALSE; }
+    if(dynamic_cast<RadioButton*>(object)) { ((RadioButton*)object)->p.onActivate(); return FALSE; }
+    if(dynamic_cast<RadioLabel*>(object)) { ((RadioLabel*)object)->p.onActivate(); return FALSE; }
+    if(dynamic_cast<TextEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((TextEdit*)object)->p.onChange(); return FALSE; }
     break;
   }
 
@@ -283,8 +318,8 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
     if(object == nullptr) break;
     if(dynamic_cast<HorizontalScroller*>(object)) { ((HorizontalScroller*)object)->p.onChange(wparam); return TRUE; }
     if(dynamic_cast<VerticalScroller*>(object)) { ((VerticalScroller*)object)->p.onChange(wparam); return TRUE; }
-    if(dynamic_cast<HorizontalSlider*>(object)) { ((HorizontalSlider*)object)->p.onChange(); break; }
-    if(dynamic_cast<VerticalSlider*>(object)) { ((VerticalSlider*)object)->p.onChange(); break; }
+    if(dynamic_cast<HorizontalSlider*>(object)) { ((HorizontalSlider*)object)->p.onChange(); return TRUE; }
+    if(dynamic_cast<VerticalSlider*>(object)) { ((VerticalSlider*)object)->p.onChange(); return TRUE; }
     break;
   }
   }

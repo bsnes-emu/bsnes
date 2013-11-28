@@ -24,7 +24,7 @@ void pComboButton::reset() {
 }
 
 void pComboButton::setGeometry(Geometry geometry) {
-  SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 1, SWP_NOZORDER);
+  pWidget::setGeometry(geometry);
   RECT rc;
   GetWindowRect(hwnd, &rc);
   unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));

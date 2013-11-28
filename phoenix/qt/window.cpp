@@ -1,11 +1,5 @@
 namespace phoenix {
 
-Window& pWindow::none() {
-  static Window* window = nullptr;
-  if(window == nullptr) window = new Window;
-  return *window;
-}
-
 void pWindow::append(Layout& layout) {
   Geometry geometry = window.state.geometry;
   geometry.x = geometry.y = 0;
@@ -14,7 +8,7 @@ void pWindow::append(Layout& layout) {
 
 void pWindow::append(Menu& menu) {
   if(window.state.menuFont != "") menu.p.setFont(window.state.menuFont);
-  else menu.p.setFont("Sans, 8");
+  else menu.p.setFont(Font::sans(8));
   qtMenu->addMenu(menu.p.qtMenu);
 }
 
@@ -22,8 +16,12 @@ void pWindow::append(Widget& widget) {
   if(widget.font().empty() && !window.state.widgetFont.empty()) {
     widget.setFont(window.state.widgetFont);
   }
-  if(widget.font().empty()) widget.p.setFont("Sans, 8");
-  widget.p.qtWidget->setParent(qtContainer);
+  if(widget.font().empty()) widget.p.setFont(Font::sans(8));
+  if(GetParentWidget(&widget)) {
+    widget.p.qtWidget->setParent(GetParentWidget(&widget)->p.container(widget));
+  } else {
+    widget.p.qtWidget->setParent(qtContainer);
+  }
   widget.setVisible(widget.visible());
 }
 
@@ -69,10 +67,11 @@ void pWindow::remove(Widget& widget) {
 
 void pWindow::setBackgroundColor(Color color) {
   QPalette palette;
-  palette.setColor(QPalette::Window, QColor(color.red, color.green, color.blue, color.alpha));
+  palette.setColor(QPalette::Background, QColor(color.red, color.green, color.blue /*, color.alpha */));
   qtContainer->setPalette(palette);
   qtContainer->setAutoFillBackground(true);
-  qtWindow->setAttribute(Qt::WA_TranslucentBackground, color.alpha != 255);
+  //translucency results are very unpleasant without a compositor; so disable for now
+  //qtWindow->setAttribute(Qt::WA_TranslucentBackground, color.alpha != 255);
 }
 
 void pWindow::setDroppable(bool droppable) {

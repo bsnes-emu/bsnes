@@ -153,7 +153,7 @@ void pWindow::append(Widget& widget) {
     widget.setFont(window.state.widgetFont);
   }
 
-  if(HasParentWidget(&widget)) {
+  if(GetParentWidget(&widget)) {
     widget.p.gtkParent = GetParentWidget(&widget)->p.container(widget);
   } else {
     widget.p.gtkParent = formContainer;

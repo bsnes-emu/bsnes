@@ -2,9 +2,22 @@ namespace phoenix {
 
 void pTabFrame::append(string text, const image& image) {
   unsigned selection = tabFrame.state.text.size() - 1;
-  QWidget* widget = new QWidget;  //addTab() requires a child widget, so give it an empty one
-  qtTabFrame->addTab(widget, QString::fromUtf8(text));
+  qtTabFrame->addTab(new QWidget, QString::fromUtf8(text));
   if(!image.empty()) setImage(selection, image);
+}
+
+QWidget* pTabFrame::container(Widget& widget) {
+  Layout* widgetLayout = GetParentWidgetLayout(&widget);
+  unsigned selection = 0;
+  for(auto& layout : tabFrame.state.layout) {
+    if(layout == widgetLayout) return qtTabFrame->widget(selection);
+    selection++;
+  }
+  return nullptr;
+}
+
+Position pTabFrame::displacement() {
+  return {5, 33};
 }
 
 void pTabFrame::remove(unsigned selection) {
@@ -20,11 +33,10 @@ void pTabFrame::setEnabled(bool enabled) {
 
 void pTabFrame::setGeometry(Geometry geometry) {
   pWidget::setGeometry(geometry);
-  geometry.x += 1, geometry.width -= 2;
-  geometry.y += 29, geometry.height -= 30;
+  geometry.x += 0, geometry.width -= 5;
+  geometry.y += 29, geometry.height -= 33;
   for(auto& layout : tabFrame.state.layout) {
-    if(layout == nullptr) continue;
-    layout->setGeometry(geometry);
+    if(layout) layout->setGeometry(geometry);
   }
   synchronizeLayout();
 }

@@ -41,6 +41,10 @@ ConfigurationSettings::ConfigurationSettings() {
   server.append(server.password = "", "Password");
   append(server, "Server");
 
+  library.append(library.selection = 0, "Selection");
+  library.append(library.showOnStartup = true, "ShowOnStartup");
+  append(library, "Library");
+
   load();
 }
 

@@ -127,8 +127,6 @@ public:
   QStatusBar* qtStatus;
   QWidget* qtContainer;
 
-  static Window& none();
-
   void append(Layout& layout);
   void append(Menu& menu);
   void append(Widget& widget);
@@ -255,6 +253,8 @@ public slots:
 struct pSizable : public pObject {
   Sizable& sizable;
 
+  virtual Position displacement() { return {0, 0}; }
+
   pSizable(Sizable& sizable) : pObject(sizable), sizable(sizable) {}
 
   void constructor() {}
@@ -274,6 +274,7 @@ struct pWidget : public pSizable {
   Widget& widget;
   QWidget* qtWidget;
 
+  virtual QWidget* container(Widget& widget);
   bool focused();
   virtual Size minimumSize();
   virtual void setEnabled(bool enabled);
@@ -664,6 +665,8 @@ public:
   QTabWidget* qtTabFrame;
 
   void append(string text, const image& image);
+  QWidget* container(Widget& widget);
+  Position displacement();
   void remove(unsigned selection);
   void setEnabled(bool enabled);
   void setGeometry(Geometry geometry);

@@ -15,7 +15,6 @@ using namespace nall;
 
 namespace phoenix {
   #include "state.hpp"
-  #include "utility.cpp"
   #include "layout/fixed-layout.cpp"
   #include "layout/horizontal-layout.cpp"
   #include "layout/vertical-layout.cpp"

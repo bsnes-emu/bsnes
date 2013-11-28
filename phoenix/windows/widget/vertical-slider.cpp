@@ -17,10 +17,11 @@ void pVerticalSlider::setPosition(unsigned position) {
 
 void pVerticalSlider::constructor() {
   hwnd = CreateWindow(
-    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_NOTICKS | TBS_BOTH | TBS_VERT,
+    TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_TRANSPARENTBKGND | TBS_NOTICKS | TBS_BOTH | TBS_VERT,
     0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalSlider);
+
   unsigned position = verticalSlider.state.position;
   setLength(verticalSlider.state.length);
   verticalSlider.setPosition(position);

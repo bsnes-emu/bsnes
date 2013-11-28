@@ -62,7 +62,7 @@ Presentation::Presentation() {
   viewport.setDroppable();
 
   loadMenu.setText("Library");
-    loadImport.setText("Import Game ...");
+    loadGame.setText("Load Game ...");
   settingsMenu.setText("Settings");
     videoMenu.setText("Video");
       centerVideo.setText("Center");
@@ -90,11 +90,7 @@ Presentation::Presentation() {
     synchronizeTime.setText("Synchronize Time");
 
   append(loadMenu);
-    for(auto& item : loadListSystem) loadMenu.append(*item);
-    if(program->ananke.open()) {
-      loadMenu.append(loadSeparator);
-      loadMenu.append(loadImport);
-    }
+    loadMenu.append(loadGame);
   for(auto& systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
@@ -154,15 +150,7 @@ Presentation::Presentation() {
     }
   };
 
-  loadImport.onActivate = [&] {
-    if(program->ananke.open() == false) return;
-    function<string ()> browse = program->ananke.sym("ananke_browse");
-    if(!browse) return;
-    string pathname = browse();
-    if(pathname.empty()) return;
-    utility->loadMedia(pathname);
-  };
-
+  loadGame.onActivate = [&] { libraryManager->setVisible(); };
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
   shaderEmulation.onActivate = [&] { config->video.shader = "Display Emulation"; utility->updateShader(); };
@@ -189,16 +177,6 @@ void Presentation::bootstrap() {
   for(auto& emulator : program->emulator) {
     auto iEmulator = new Emulator;
     iEmulator->interface = emulator;
-
-    for(auto& media : emulator->media) {
-      if(media.bootable == false) continue;
-      auto item = new Item;
-      item->onActivate = [=, &media] {
-        utility->loadMedia(iEmulator->interface, media);
-      };
-      item->setText({media.name, " ..."});
-      loadListSystem.append(item);
-    }
 
     iEmulator->menu.setText(emulator->information.name);
     iEmulator->power.setText("Power");

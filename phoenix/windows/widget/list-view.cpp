@@ -23,19 +23,6 @@ void ListView_SetImage(HWND hwnd, HIMAGELIST imageList, unsigned row, unsigned c
   ListView_SetItem(hwnd, &item);
 }
 
-void ImageList_Append(HIMAGELIST imageList, const nall::image& source) {
-  auto image = source;
-  if(image.empty()) {
-    image.allocate(15, 15);
-    image.fill(GetSysColor(COLOR_WINDOW));
-  }
-  image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-  image.scale(15, 15, Interpolation::Linear);
-  HBITMAP bitmap = CreateBitmap(image);
-  ImageList_Add(imageList, bitmap, NULL);
-  DeleteObject(bitmap);
-}
-
 void pListView::append(const lstring& list) {
   wchar_t empty[] = L"";
   unsigned row = ListView_GetItemCount(hwnd);
@@ -122,7 +109,7 @@ void pListView::setImage(unsigned selection, unsigned position, const image& ima
   //append and assign new image
   imageMap(selection)(position) = images.size();
   images.append(image);
-  ImageList_Append(imageList, image);
+  ImageList_Append(imageList, image, 15);
   ListView_SetImage(hwnd, imageList, selection, position, imageMap(selection)(position));
 }
 
@@ -211,7 +198,7 @@ void pListView::buildImageList() {
   }
 
   //build image list
-  for(auto& imageItem : images) ImageList_Append(imageList, imageItem);
+  for(auto& imageItem : images) ImageList_Append(imageList, imageItem, 15);
   if(images.size() <= 1) return;
 
   //set images for all cells

@@ -36,19 +36,13 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
   Window* window = (Window*)label->Sizable::state.window;
   if(window == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-  if(msg == WM_GETDLGCODE) {
-    return DLGC_STATIC | DLGC_WANTCHARS;
-  }
-
-  if(msg == WM_ERASEBKGND) {
-    //background is erased during WM_PAINT to prevent flickering
-    return TRUE;
-  }
-
-  if(msg == WM_PAINT) {
+  switch(msg) {
+  case WM_GETDLGCODE: return DLGC_STATIC | DLGC_WANTCHARS;
+  case WM_ERASEBKGND: return TRUE;
+  case WM_PAINT: {
     PAINTSTRUCT ps;
-    RECT rc;
     BeginPaint(hwnd, &ps);
+    RECT rc;
     GetClientRect(hwnd, &rc);
     DrawThemeParentBackground(hwnd, ps.hdc, &rc);
     SetBkMode(ps.hdc, TRANSPARENT);
@@ -64,6 +58,8 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
     rc.bottom = rc.top + height;
     DrawText(ps.hdc, text, -1, &rc, DT_LEFT | DT_END_ELLIPSIS);
     EndPaint(hwnd, &ps);
+    return FALSE;
+  }
   }
 
   return DefWindowProc(hwnd, msg, wparam, lparam);

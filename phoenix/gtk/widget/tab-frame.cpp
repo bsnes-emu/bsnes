@@ -38,10 +38,6 @@ GtkWidget* pTabFrame::container(Widget& widget) {
   return nullptr;
 }
 
-Position pTabFrame::containerOffset() {
-  return {widget.state.geometry.x + 3, widget.state.geometry.y + 28};
-}
-
 Position pTabFrame::displacement() {
   return {6, 31};
 }
@@ -63,8 +59,7 @@ void pTabFrame::setGeometry(Geometry geometry) {
   geometry.x += 1, geometry.width -= 5;
   geometry.y += 26, geometry.height -= 31;
   for(auto& layout : tabFrame.state.layout) {
-    if(layout == nullptr) continue;
-    layout->setGeometry(geometry);
+    if(layout) layout->setGeometry(geometry);
   }
   synchronizeLayout();
 }

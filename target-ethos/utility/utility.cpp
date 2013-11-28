@@ -12,16 +12,6 @@ void Utility::loadMedia(string pathname) {
   pathname.transform("\\", "/");
   if(pathname.endswith("/")) pathname.rtrim("/");
 
-  //if a filename was provided: convert to game folder and then load
-  if(!directory::exists(pathname) && file::exists(pathname)) {
-    if(program->ananke.open() == false) return;
-    function<string (string)> open = program->ananke.sym("ananke_open");
-    if(!open) return;
-    string name = open(pathname);
-    if(name.empty()) return;
-    return loadMedia(name);
-  }
-
   if(!directory::exists(pathname)) return;
   string type = extension(pathname);
 
@@ -30,18 +20,13 @@ void Utility::loadMedia(string pathname) {
     for(auto& media : emulator->media) {
       if(media.bootable == false) continue;
       if(type != media.type) continue;
-      return loadMedia(emulator, media, {pathname, "/"});
+      loadMedia(emulator, media, {pathname, "/"});
+      libraryManager->setVisible(false);
+      return;
     }
   }
 
   MessageWindow().setText("Unable to determine media type.").warning();
-}
-
-//load menu option selected
-void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Media& media) {
-  string pathname = browser->select({"Load ", media.name}, media.type);
-  if(!directory::exists(pathname)) return;
-  return loadMedia(emulator, media, pathname);
 }
 
 //load base cartridge
@@ -62,7 +47,7 @@ void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Medi
 
 //request from emulation core to load non-volatile media folder
 void Utility::loadRequest(unsigned id, string name, string type) {
-  string pathname = browser->select({"Load ", name}, type);
+  string pathname = libraryManager->load(type);  //browser->select({"Load ", name}, type);
   if(pathname.empty()) return;
   path(id) = pathname;
   this->pathname.append(pathname);
@@ -316,6 +301,13 @@ void Utility::setStatusText(string text) {
 void Utility::showMessage(string message) {
   statusTime = time(0);
   statusMessage = message;
+}
+
+string Utility::libraryPath() {
+  string path = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").transform("\\", "/");
+  if(path.empty()) path = {userpath(), "Emulation/"};
+  if(path.endswith("/") == false) path.append("/");
+  return path;
 }
 
 Utility::Utility() {

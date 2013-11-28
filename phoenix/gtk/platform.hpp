@@ -243,7 +243,6 @@ struct pWidget : public pSizable {
   GtkWidget* gtkParent = nullptr;
 
   virtual GtkWidget* container(Widget& widget);
-  virtual Position containerOffset();
   virtual bool focused();
   virtual Size minimumSize();
   virtual void setEnabled(bool enabled);
@@ -545,7 +544,6 @@ struct pTabFrame : public pWidget {
 
   void append(string text, const image& image);
   GtkWidget* container(Widget& widget);
-  Position containerOffset();
   Position displacement();
   void remove(unsigned selection);
   void setEnabled(bool enabled);

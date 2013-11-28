@@ -375,8 +375,8 @@ struct pFrame : public pWidget {
 
 struct pHexEdit : public pWidget {
   HexEdit& hexEdit;
-  HWND scrollBar;
-  LRESULT CALLBACK (*windowProc)(HWND, UINT, LPARAM, WPARAM);
+  WindowProc windowProc = nullptr;
+  HWND scrollBar = nullptr;
 
   void setColumns(unsigned columns);
   void setLength(unsigned length);

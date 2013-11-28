@@ -4,10 +4,6 @@ GtkWidget* pWidget::container(Widget& widget) {
   return nullptr;
 }
 
-Position pWidget::containerOffset() {
-  return {0, 0};
-}
-
 bool pWidget::focused() {
   return GTK_WIDGET_HAS_FOCUS(gtkWidget);
 }

@@ -94,7 +94,7 @@ void pTabFrame::buildImageList() {
   unsigned size = pFont::size(hfont, " ").height;
   imageList = ImageList_Create(size, size, ILC_COLOR32, 1, 0);
   for(auto& image : tabFrame.state.image) {
-    ImageList_Append(imageList, image);
+    ImageList_Append(imageList, image, size);
   }
   TabCtrl_SetImageList(hwnd, imageList);
   for(unsigned n = 0; n < tabFrame.state.image.size(); n++) {

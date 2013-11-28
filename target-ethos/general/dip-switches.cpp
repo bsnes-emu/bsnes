@@ -17,6 +17,7 @@ DipSwitches::DipSwitches() {
     controlLayout.append(accept, {80, 0});
 
   setGeometry({128, 128, 250, layout.minimumSize().height});
+  windowManager->append(this, "DipSwitches");
 
   onClose = accept.onActivate = [&] {
     setModal(false);
