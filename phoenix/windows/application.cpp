@@ -187,290 +187,51 @@ static bool Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
   return false;
 }
 
+/*case WM_GETMINMAXINFO: {
+    MINMAXINFO* mmi = (MINMAXINFO*)lparam;
+    mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
+    mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
+    return TRUE;
+    break;
+  }*/
+
 static LRESULT CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
   Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!object || !dynamic_cast<Window*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Window& window = (Window&)*object;
+  if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
+  Window& window = dynamic_cast<Window*>(object) ? (Window&)*object : *((Widget*)object)->Sizable::state.window;
 
   bool process = true;
-  if(pWindow::modal.size() > 0 && !pWindow::modal.find(&window.p)) process = false;
+  if(!pWindow::modal.empty() && !pWindow::modal.find(&window.p)) process = false;
   if(applicationState.quit) process = false;
+  if(process == false) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-  if(process) switch(msg) {
-    case WM_CLOSE: {
-      if(window.onClose) window.onClose();
-      else window.setVisible(false);
-      if(window.state.modal && !window.visible()) window.setModal(false);
-      return TRUE;
+  switch(msg) {
+  case WM_CLOSE: window.p.onClose(); return TRUE;
+  case WM_MOVE: window.p.onMove(); break;
+  case WM_SIZE: window.p.onSize(); break;
+  case WM_DROPFILES: window.p.onDrop(wparam); return FALSE;
+  case WM_ERASEBKGND: if(window.p.onEraseBackground()) return true; break;
+  case WM_ENTERMENULOOP: case WM_ENTERSIZEMOVE: window.p.onModalBegin(); return FALSE;
+  case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: window.p.onModalEnd(); return FALSE;
+
+  case WM_CTLCOLORBTN:
+  case WM_CTLCOLORSTATIC: {
+    Object* object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+    if(object == nullptr) break;
+    if(dynamic_cast<HexEdit*>(object) || dynamic_cast<LineEdit*>(object) || dynamic_cast<TextEdit*>(object)) {
+      //text edit controls, when disabled, use CTLCOLORSTATIC instead of CTLCOLOREDIT
+      //override this behavior: we do not want read-only edit controls to use the parent window background color
+      return DefWindowProc(hwnd, WM_CTLCOLOREDIT, wparam, lparam);
+    } else if(window.p.brush) {
+      HDC hdc = (HDC)wparam;
+      SetBkColor((HDC)wparam, window.p.brushColor);
+      return (INT_PTR)window.p.brush;
     }
-
-    case WM_MOVE: {
-      if(window.p.locked) break;
-
-      Geometry geometry = window.geometry();
-      window.state.geometry.x = geometry.x;
-      window.state.geometry.y = geometry.y;
-
-      if(window.onMove) window.onMove();
-      break;
-    }
-
-    case WM_SIZE: {
-      if(window.p.locked) break;
-      SetWindowPos(window.p.hstatus, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_FRAMECHANGED);
-
-      Geometry geometry = window.geometry();
-      window.state.geometry.width = geometry.width;
-      window.state.geometry.height = geometry.height;
-
-      for(auto& layout : window.state.layout) {
-        Geometry geom = window.geometry();
-        geom.x = geom.y = 0;
-        layout.setGeometry(geom);
-      }
-
-      if(window.onSize) window.onSize();
-      break;
-    }
-
-    case WM_GETMINMAXINFO: {
-      MINMAXINFO* mmi = (MINMAXINFO*)lparam;
-    //mmi->ptMinTrackSize.x = 256 + window.p.frameMargin().width;
-    //mmi->ptMinTrackSize.y = 256 + window.p.frameMargin().height;
-    //return TRUE;
-      break;
-    }
-
-    case WM_ENTERMENULOOP:
-    case WM_ENTERSIZEMOVE: {
-      if(Application::Windows::onModalBegin) Application::Windows::onModalBegin();
-      return 0;
-    }
-
-    case WM_EXITMENULOOP:
-    case WM_EXITSIZEMOVE: {
-      if(Application::Windows::onModalEnd) Application::Windows::onModalEnd();
-      return 0;
-    }
-
-    case WM_ERASEBKGND: {
-      if(window.p.brush == 0) break;
-      RECT rc;
-      GetClientRect(window.p.hwnd, &rc);
-      PAINTSTRUCT ps;
-      BeginPaint(window.p.hwnd, &ps);
-      FillRect(ps.hdc, &rc, window.p.brush);
-      EndPaint(window.p.hwnd, &ps);
-      return TRUE;
-    }
-
-    case WM_CTLCOLORBTN:
-    case WM_CTLCOLORSTATIC: {
-      Object* object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
-      if(object == nullptr) break;
-      if(dynamic_cast<HexEdit*>(object) || dynamic_cast<LineEdit*>(object) || dynamic_cast<TextEdit*>(object)) {
-        //text edit controls, when disabled, use CTLCOLORSTATIC instead of CTLCOLOREDIT
-        //override this behavior: we do not want read-only edit controls to use the parent window background color
-        return DefWindowProc(hwnd, WM_CTLCOLOREDIT, wparam, lparam);
-      } else if(window.p.brush) {
-        HDC hdc = (HDC)wparam;
-        SetBkColor((HDC)wparam, window.p.brushColor);
-        return (INT_PTR)window.p.brush;
-      }
-      break;
-    }
-
-    case WM_DROPFILES: {
-      lstring paths = DropPaths(wparam);
-      if(paths.empty() == false) {
-        if(window.onDrop) window.onDrop(paths);
-      }
-      return FALSE;
-    }
-
-    case WM_COMMAND: {
-      unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.p.hwnd, id);
-      if(control == 0) {
-        pObject* object = (pObject*)pObject::find(id);
-        if(!object) break;
-        if(dynamic_cast<pItem*>(object)) {
-          Item& item = ((pItem*)object)->item;
-          if(item.onActivate) item.onActivate();
-        } else if(dynamic_cast<pCheckItem*>(object)) {
-          CheckItem& checkItem = ((pCheckItem*)object)->checkItem;
-          checkItem.setChecked(!checkItem.state.checked);
-          if(checkItem.onToggle) checkItem.onToggle();
-        } else if(dynamic_cast<pRadioItem*>(object)) {
-          RadioItem& radioItem = ((pRadioItem*)object)->radioItem;
-          if(radioItem.state.checked == false) {
-            radioItem.setChecked();
-            if(radioItem.onActivate) radioItem.onActivate();
-          }
-        }
-      } else {
-        Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-        if(!object) break;
-        if(dynamic_cast<Button*>(object)) {
-          Button& button = (Button&)*object;
-          if(button.onActivate) button.onActivate();
-        } else if(dynamic_cast<CheckButton*>(object)) {
-          CheckButton& checkButton = (CheckButton&)*object;
-          checkButton.setChecked(!checkButton.state.checked);
-          if(checkButton.onToggle) checkButton.onToggle();
-        } else if(dynamic_cast<ComboButton*>(object)) {
-          ComboButton& comboButton = (ComboButton&)*object;
-          if(HIWORD(wparam) == CBN_SELCHANGE) {
-            if(comboButton.state.selection != comboButton.selection()) {
-              comboButton.state.selection = comboButton.selection();
-              if(comboButton.onChange) comboButton.onChange();
-            }
-          }
-        } else if(dynamic_cast<LineEdit*>(object)) {
-          LineEdit& lineEdit = (LineEdit&)*object;
-          if(HIWORD(wparam) == EN_CHANGE) {
-            if(lineEdit.p.locked == false && lineEdit.onChange) lineEdit.onChange();
-          }
-        } else if(dynamic_cast<RadioButton*>(object)) {
-          RadioButton& radioButton = (RadioButton&)*object;
-          if(radioButton.state.checked == false) {
-            radioButton.setChecked();
-            if(radioButton.onActivate) radioButton.onActivate();
-          }
-        } else if(dynamic_cast<TextEdit*>(object)) {
-          TextEdit& textEdit = (TextEdit&)*object;
-          if(HIWORD(wparam) == EN_CHANGE) {
-            if(textEdit.p.locked == false && textEdit.onChange) textEdit.onChange();
-          }
-        }
-      }
-      break;
-    }
-
-    case WM_NOTIFY: {
-      unsigned id = LOWORD(wparam);
-      HWND control = GetDlgItem(window.p.hwnd, id);
-      if(control == 0) break;
-      Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-      if(object == nullptr) break;
-      if(dynamic_cast<ListView*>(object)) {
-        ListView& listView = (ListView&)*object;
-        LPNMHDR nmhdr = (LPNMHDR)lparam;
-        LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
-
-        if(nmhdr->code == LVN_ITEMCHANGED && (nmlistview->uChanged & LVIF_STATE)) {
-          unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
-          if(imagemask == 0 || imagemask == 1) {
-            if(listView.p.locked == false && listView.onToggle) listView.onToggle(nmlistview->iItem);
-          } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
-            listView.p.lostFocus = true;
-          } else if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
-            listView.p.lostFocus = false;
-            listView.state.selected = true;
-            listView.state.selection = listView.selection();
-            if(listView.p.locked == false && listView.onChange) listView.onChange();
-          } else if(listView.p.lostFocus == false && listView.selected() == false) {
-            listView.p.lostFocus = false;
-            listView.state.selected = false;
-            listView.state.selection = 0;
-            if(listView.p.locked == false && listView.onChange) listView.onChange();
-          }
-        } else if(nmhdr->code == LVN_ITEMACTIVATE) {
-          if(listView.state.text.size() && listView.selected()) {
-            if(listView.onActivate) listView.onActivate();
-          }
-        } else if(nmhdr->code == NM_CUSTOMDRAW) {
-          LPNMLVCUSTOMDRAW lvcd = (LPNMLVCUSTOMDRAW)nmhdr;
-          switch(lvcd->nmcd.dwDrawStage) {
-          case CDDS_PREPAINT:
-            return CDRF_NOTIFYITEMDRAW;
-          case CDDS_ITEMPREPAINT:
-            if(listView.state.headerText.size() >= 2) {
-              //draw alternating row colors of there are two or more columns
-              if(lvcd->nmcd.dwItemSpec % 2) lvcd->clrTextBk = GetSysColor(COLOR_WINDOW) ^ 0x070707;
-            }
-            return CDRF_DODEFAULT;
-          default:
-            return CDRF_DODEFAULT;
-          }
-        }
-      }
-      break;
-    }
-
-    case WM_HSCROLL:
-    case WM_VSCROLL: {
-      Object* object = nullptr;
-      if(lparam) {
-        object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
-      } else {
-        unsigned id = LOWORD(wparam);
-        HWND control = GetDlgItem(window.p.hwnd, id);
-        if(control == 0) break;
-        object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
-      }
-      if(object == nullptr) break;
-
-      if(dynamic_cast<HorizontalScroller*>(object)
-      || dynamic_cast<VerticalScroller*>(object)) {
-        SCROLLINFO info;
-        memset(&info, 0, sizeof(SCROLLINFO));
-        info.cbSize = sizeof(SCROLLINFO);
-        info.fMask = SIF_ALL;
-        GetScrollInfo((HWND)lparam, SB_CTL, &info);
-
-        switch(LOWORD(wparam)) {
-        case SB_LEFT: info.nPos = info.nMin; break;
-        case SB_RIGHT: info.nPos = info.nMax; break;
-        case SB_LINELEFT: info.nPos--; break;
-        case SB_LINERIGHT: info.nPos++; break;
-        case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
-        case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
-        case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
-        }
-
-        info.fMask = SIF_POS;
-        SetScrollInfo((HWND)lparam, SB_CTL, &info, TRUE);
-
-        //Windows may clamp position to scroller range
-        GetScrollInfo((HWND)lparam, SB_CTL, &info);
-
-        if(dynamic_cast<HorizontalScroller*>(object)) {
-          HorizontalScroller& horizontalScroller = (HorizontalScroller&)*object;
-          if(horizontalScroller.state.position != info.nPos) {
-            horizontalScroller.state.position = info.nPos;
-            if(horizontalScroller.onChange) horizontalScroller.onChange();
-          }
-        } else {
-          VerticalScroller& verticalScroller = (VerticalScroller&)*object;
-          if(verticalScroller.state.position != info.nPos) {
-            verticalScroller.state.position = info.nPos;
-            if(verticalScroller.onChange) verticalScroller.onChange();
-          }
-        }
-
-        return TRUE;
-      }
-
-      if(dynamic_cast<HorizontalSlider*>(object)) {
-        HorizontalSlider& horizontalSlider = (HorizontalSlider&)*object;
-        if(horizontalSlider.state.position != horizontalSlider.position()) {
-          horizontalSlider.state.position = horizontalSlider.position();
-          if(horizontalSlider.onChange) horizontalSlider.onChange();
-        }
-      } else if(dynamic_cast<VerticalSlider*>(object)) {
-        VerticalSlider& verticalSlider = (VerticalSlider&)*object;
-        if(verticalSlider.state.position != verticalSlider.position()) {
-          verticalSlider.state.position = verticalSlider.position();
-          if(verticalSlider.onChange) verticalSlider.onChange();
-        }
-      }
-
-      break;
-    }
+    break;
+  }
   }
 
-  return DefWindowProc(hwnd, msg, wparam, lparam);
+  return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);
 }
 
 }

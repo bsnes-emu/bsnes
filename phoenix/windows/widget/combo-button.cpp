@@ -11,33 +11,36 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 24, pFont::size(hfont, " ").height + 10};
 }
 
-void pComboButton::modify(unsigned row, string text) {
+void pComboButton::remove(unsigned selection) {
   locked = true;
-  unsigned position = selection();
-  SendMessage(hwnd, CB_DELETESTRING, row, 0);
-  SendMessage(hwnd, CB_INSERTSTRING, row, (LPARAM)(wchar_t*)utf16_t(text));
-  setSelection(position);
+  SendMessage(hwnd, CB_DELETESTRING, selection, 0);
   locked = false;
-}
 
-void pComboButton::remove(unsigned row) {
-  locked = true;
-  unsigned position = selection();
-  SendMessage(hwnd, CB_DELETESTRING, row, 0);
-  if(position == row) setSelection(0);
-  locked = false;
+  if(selection == comboButton.state.selection) comboButton.setSelection(0);
 }
 
 void pComboButton::reset() {
   SendMessage(hwnd, CB_RESETCONTENT, 0, 0);
 }
 
-unsigned pComboButton::selection() {
-  return SendMessage(hwnd, CB_GETCURSEL, 0, 0);
+void pComboButton::setGeometry(Geometry geometry) {
+  SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 1, SWP_NOZORDER);
+  RECT rc;
+  GetWindowRect(hwnd, &rc);
+  unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
+  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
 }
 
-void pComboButton::setSelection(unsigned row) {
-  SendMessage(hwnd, CB_SETCURSEL, row, 0);
+void pComboButton::setSelection(unsigned selection) {
+  SendMessage(hwnd, CB_SETCURSEL, selection, 0);
+}
+
+void pComboButton::setText(unsigned selection, string text) {
+  locked = true;
+  SendMessage(hwnd, CB_DELETESTRING, selection, 0);
+  SendMessage(hwnd, CB_INSERTSTRING, selection, (LPARAM)(wchar_t*)utf16_t(text));
+  setSelection(comboButton.state.selection);
+  locked = false;
 }
 
 void pComboButton::constructor() {
@@ -45,7 +48,7 @@ void pComboButton::constructor() {
     L"COMBOBOX", L"",
     WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     0, 0, 0, 0,
-    parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboButton);
   setDefaultFont();
@@ -63,12 +66,11 @@ void pComboButton::orphan() {
   constructor();
 }
 
-void pComboButton::setGeometry(Geometry geometry) {
-  SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, 1, SWP_NOZORDER);
-  RECT rc;
-  GetWindowRect(hwnd, &rc);
-  unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
-  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
+void pComboButton::onChange() {
+  unsigned selection = SendMessage(hwnd, CB_GETCURSEL, 0, 0);
+  if(selection == comboButton.state.selection) return;
+  comboButton.state.selection = selection;
+  if(comboButton.onChange) comboButton.onChange();
 }
 
 }

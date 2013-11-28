@@ -4,7 +4,7 @@
   contributors: byuu, wertigon, _willow_
 */
 
-#if defined(PLATFORM_OSX)
+#if defined(PLATFORM_MACOSX)
   #include <OpenAL/al.h>
   #include <OpenAL/alc.h>
 #else

@@ -6,30 +6,16 @@ void pListView::append(const lstring& text) {
 void pListView::autoSizeColumns() {
 }
 
-bool pListView::checked(unsigned row) {
-}
-
-void pListView::modify(unsigned row, const lstring& text) {
-}
-
-void pListView::remove(unsigned row) {
+void pListView::remove(unsigned selection) {
 }
 
 void pListView::reset() {
 }
 
-bool pListView::selected() {
-  return false;
-}
-
-unsigned pListView::selection() {
-  return 0;
-}
-
 void pListView::setCheckable(bool checkable) {
 }
 
-void pListView::setChecked(unsigned row, bool checked) {
+void pListView::setChecked(unsigned selection, bool checked) {
 }
 
 void pListView::setHeaderText(const lstring& text) {
@@ -38,13 +24,16 @@ void pListView::setHeaderText(const lstring& text) {
 void pListView::setHeaderVisible(bool visible) {
 }
 
-void pListView::setImage(unsigned row, unsigned column, const image& image) {
+void pListView::setImage(unsigned selection, unsigned position, const image& image) {
 }
 
 void pListView::setSelected(bool selected) {
 }
 
-void pListView::setSelection(unsigned row) {
+void pListView::setSelection(unsigned selection) {
+}
+
+void pListView::setText(unsigned selection, unsigned position, string text) {
 }
 
 void pListView::constructor() {

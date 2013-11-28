@@ -91,20 +91,31 @@ Presentation::Presentation() {
 
   append(loadMenu);
     for(auto& item : loadListSystem) loadMenu.append(*item);
-    if(program->ananke.open()) loadMenu.append(loadSeparator, loadImport);
+    if(program->ananke.open()) {
+      loadMenu.append(loadSeparator);
+      loadMenu.append(loadImport);
+    }
   for(auto& systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
-      videoMenu.append(centerVideo, scaleVideo, stretchVideo, *new Separator, aspectCorrection, maskOverscan);
+      videoMenu.append(centerVideo);
+      videoMenu.append(scaleVideo);
+      videoMenu.append(stretchVideo);
+      videoMenu.append(*new Separator);
+      videoMenu.append(aspectCorrection);
+      videoMenu.append(maskOverscan);
     settingsMenu.append(shaderMenu);
-      shaderMenu.append(shaderNone, shaderBlur);
+      shaderMenu.append(shaderNone);
+      shaderMenu.append(shaderBlur);
       if(config->video.driver == "OpenGL") shaderMenu.append(shaderEmulation);
       if(shaderList.size() > 0) {
         shaderMenu.append(*new Separator);
         for(auto& shader : shaderList) shaderMenu.append(*shader);
       }
     settingsMenu.append(*new Separator);
-    settingsMenu.append(synchronizeVideo, synchronizeAudio, muteAudio);
+    settingsMenu.append(synchronizeVideo);
+    settingsMenu.append(synchronizeAudio);
+    settingsMenu.append(muteAudio);
     if(Intrinsics::platform() != Intrinsics::Platform::MacOSX) {
       settingsMenu.append(*new Separator);
       settingsMenu.append(configurationSettings);
@@ -115,7 +126,10 @@ Presentation::Presentation() {
     toolsMenu.append(loadStateMenu);
       for(unsigned n = 0; n < 5; n++) loadStateMenu.append(loadStateItem[n]);
     toolsMenu.append(stateMenuSeparator);
-    toolsMenu.append(resizeWindow, stateManager, cheatEditor, synchronizeTime);
+    toolsMenu.append(resizeWindow);
+    toolsMenu.append(stateManager);
+    toolsMenu.append(cheatEditor);
+    toolsMenu.append(synchronizeTime);
 
   append(layout);
   layout.append(viewport, {0, 0, 1, 1});
@@ -160,12 +174,12 @@ Presentation::Presentation() {
   synchronizeVideo.onToggle = [&] { config->video.synchronize = synchronizeVideo.checked(); utility->synchronizeRuby(); };
   synchronizeAudio.onToggle = [&] { config->audio.synchronize = synchronizeAudio.checked(); utility->synchronizeRuby(); };
   muteAudio.onToggle = [&] { config->audio.mute = muteAudio.checked(); utility->synchronizeRuby(); };
-  configurationSettings.onActivate = [&] { settings->setVisible(); settings->panelList.setFocused(); };
+  configurationSettings.onActivate = [&] { settings->setVisible(); };
   for(unsigned n = 0; n < 5; n++) saveStateItem[n].onActivate = [=] { utility->saveState(1 + n); };
   for(unsigned n = 0; n < 5; n++) loadStateItem[n].onActivate = [=] { utility->loadState(1 + n); };
   resizeWindow.onActivate = [&] { utility->resize(true); };
-  stateManager.onActivate = [&] { ::stateManager->setVisible(); };
-  cheatEditor.onActivate = [&] { ::cheatEditor->setVisible(); };
+  stateManager.onActivate = [&] { tools->panels.setSelection(1); tools->setVisible(); };
+  cheatEditor.onActivate = [&] { tools->panels.setSelection(0); tools->setVisible(); };
   synchronizeTime.onActivate = [&] { system().rtcsync(); };
 
   synchronize();

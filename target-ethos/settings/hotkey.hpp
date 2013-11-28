@@ -1,5 +1,4 @@
 struct HotkeySettings : SettingsLayout {
-  Label title;
   ListView inputList;
   HorizontalLayout controlLayout;
     Widget spacer;

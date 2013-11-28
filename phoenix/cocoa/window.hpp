@@ -32,7 +32,6 @@ struct pWindow : public pObject {
   void append(Layout& layout);
   void append(Menu& menu);
   void append(Widget& widget);
-  Color backgroundColor();
   bool focused();
   Geometry frameMargin();
   Geometry geometry();

@@ -1,5 +1,4 @@
-struct StateManager : Window {
-  VerticalLayout layout;
+struct StateManager : ToolsLayout {
   ListView stateList;
   HorizontalLayout descLayout;
     Label descLabel;

@@ -14,12 +14,11 @@ struct pComboButton : public pWidget {
 
   void append(string text);
   Size minimumSize();
-  void modify(unsigned row, string text);
-  void remove(unsigned row);
+  void remove(unsigned selection);
   void reset();
-  unsigned selection();
   void setGeometry(Geometry geometry);
-  void setSelection(unsigned row);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, string text);
 
   pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();

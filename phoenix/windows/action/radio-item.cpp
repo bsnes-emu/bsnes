@@ -1,9 +1,5 @@
 namespace phoenix {
 
-bool pRadioItem::checked() {
-  return radioItem.state.checked;
-}
-
 void pRadioItem::setChecked() {
   for(auto &item : radioItem.state.group) {
     //CheckMenuRadioItem takes: lo, hi, id; checking only id when lo <= id <= hi
@@ -25,6 +21,12 @@ void pRadioItem::constructor() {
 
 void pRadioItem::destructor() {
   if(parentMenu) parentMenu->remove(radioItem);
+}
+
+void pRadioItem::onActivate() {
+  if(radioItem.state.checked) return;
+  radioItem.setChecked();
+  if(radioItem.onActivate) radioItem.onActivate();
 }
 
 }

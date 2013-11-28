@@ -1,5 +1,4 @@
 struct ServerSettings : SettingsLayout {
-  Label title;
   HorizontalLayout hostLayout;
     Label hostLabel;
     LineEdit hostEdit;

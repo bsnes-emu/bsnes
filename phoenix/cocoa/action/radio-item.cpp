@@ -19,12 +19,6 @@
 
 namespace phoenix {
 
-bool pRadioItem::checked() {
-  @autoreleasepool {
-    return [cocoaAction state] != NSOffState;
-  }
-}
-
 void pRadioItem::setChecked() {
   @autoreleasepool {
     for(auto& item : radioItem.state.group) {

@@ -18,11 +18,11 @@ void pTimer::setEnabled(bool enabled) {
   }
 
   if(enabled == true) {
-    htimer = SetTimer(NULL, 0U, timer.state.milliseconds, Timer_timeoutProc);
+    htimer = SetTimer(NULL, 0u, timer.state.interval, Timer_timeoutProc);
   }
 }
 
-void pTimer::setInterval(unsigned milliseconds) {
+void pTimer::setInterval(unsigned interval) {
   //destroy and recreate timer if interval changed
   setEnabled(timer.state.enabled);
 }

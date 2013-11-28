@@ -41,7 +41,7 @@ ifeq ($(compiler),)
     flags :=
     link :=
   else ifeq ($(platform),macosx)
-    compiler := clang
+    compiler := clang++
     flags := -w -stdlib=libc++
     link := -lc++ -lobjc
   else ifeq ($(platform),bsd)

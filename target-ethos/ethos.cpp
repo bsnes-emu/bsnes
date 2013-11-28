@@ -53,17 +53,10 @@ Program::Program(int argc, char** argv) {
   bootstrap();
   active = nullptr;
 
-  if(Intrinsics::platform() == Intrinsics::Platform::MacOSX) {
-    normalFont = Font::sans(12);
-    boldFont = Font::sans(12, "Bold");
-    titleFont = Font::sans(20, "Bold");
-    monospaceFont = Font::monospace(8);
-  } else {
-    normalFont = Font::sans(8);
-    boldFont = Font::sans(8, "Bold");
-    titleFont = Font::sans(16, "Bold");
-    monospaceFont = Font::monospace(8);
-  }
+  normalFont = Font::sans(8);
+  boldFont = Font::sans(8, "Bold");
+  titleFont = Font::sans(16, "Bold");
+  monospaceFont = Font::monospace(8);
 
   config = new ConfigurationSettings;
   video.driver(config->video.driver);
@@ -87,6 +80,7 @@ Program::Program(int argc, char** argv) {
   cheatDatabase = new CheatDatabase;
   cheatEditor = new CheatEditor;
   stateManager = new StateManager;
+  tools = new Tools;
   windowManager->loadGeometry();
   presentation->setVisible();
   utility->resize();
@@ -157,7 +151,6 @@ int main(int argc, char** argv) {
 
   Application::Cocoa::onPreferences = [&] {
     settings->setVisible();
-    settings->panelList.setFocused();
   };
 
   Application::Cocoa::onQuit = [&] {

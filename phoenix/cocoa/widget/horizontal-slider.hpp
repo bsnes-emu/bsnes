@@ -13,7 +13,6 @@ struct pHorizontalSlider : public pWidget {
   CocoaHorizontalSlider* cocoaHorizontalSlider = nullptr;
 
   Size minimumSize();
-  unsigned position();
   void setGeometry(Geometry geometry);
   void setLength(unsigned length);
   void setPosition(unsigned position);

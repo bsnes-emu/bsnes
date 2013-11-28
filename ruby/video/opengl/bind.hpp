@@ -1,5 +1,8 @@
-#if !defined(PLATFORM_OSX)
-
+#if defined(PLATFORM_MACOSX)
+static bool OpenGLBind() {
+  return true;
+}
+#else
 PFNGLCREATEPROGRAMPROC glCreateProgram = nullptr;
 PFNGLDELETEPROGRAMPROC glDeleteProgram = nullptr;
 PFNGLUSEPROGRAMPROC glUseProgram = nullptr;
@@ -93,11 +96,4 @@ static bool OpenGLBind() {
 
   return true;
 }
-
-#else
-
-static bool OpenGLBind() {
-  return true;
-}
-
 #endif

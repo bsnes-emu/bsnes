@@ -4,10 +4,6 @@ Size pHorizontalScroller::minimumSize() {
   return {0, 18};
 }
 
-unsigned pHorizontalScroller::position() {
-  return GetScrollPos(hwnd, SB_CTL);
-}
-
 void pHorizontalScroller::setLength(unsigned length) {
   length += (length == 0);
   SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
@@ -21,7 +17,7 @@ void pHorizontalScroller::setPosition(unsigned position) {
 void pHorizontalScroller::constructor() {
   hwnd = CreateWindow(
     L"SCROLLBAR", L"", WS_CHILD | WS_TABSTOP | SBS_HORZ,
-    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalScroller);
   unsigned position = horizontalScroller.state.position;
@@ -37,6 +33,13 @@ void pHorizontalScroller::destructor() {
 void pHorizontalScroller::orphan() {
   destructor();
   constructor();
+}
+
+void pHorizontalScroller::onChange(WPARAM wparam) {
+  unsigned position = ScrollEvent(hwnd, wparam);
+  if(position == horizontalScroller.state.position) return;
+  horizontalScroller.state.position = position;
+  if(horizontalScroller.onChange) horizontalScroller.onChange();
 }
 
 }

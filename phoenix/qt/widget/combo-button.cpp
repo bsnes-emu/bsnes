@@ -13,16 +13,12 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 32, size.height + 12};
 }
 
-void pComboButton::modify(unsigned row, string text) {
-  qtComboButton->setItemText(row, text);
-}
-
-void pComboButton::remove(unsigned row) {
+void pComboButton::remove(unsigned selection) {
   locked = true;
-  unsigned position = selection();
-  qtComboButton->removeItem(row);
-  if(position == row) qtComboButton->setCurrentIndex(0);
+  qtComboButton->removeItem(selection);
   locked = false;
+
+  if(selection == comboButton.state.selection) comboButton.setSelection(0);
 }
 
 void pComboButton::reset() {
@@ -31,15 +27,14 @@ void pComboButton::reset() {
   locked = false;
 }
 
-unsigned pComboButton::selection() {
-  signed index = qtComboButton->currentIndex();
-  return index >= 0 ? index : 0;
+void pComboButton::setSelection(unsigned selection) {
+  locked = true;
+  qtComboButton->setCurrentIndex(selection);
+  locked = false;
 }
 
-void pComboButton::setSelection(unsigned row) {
-  locked = true;
-  qtComboButton->setCurrentIndex(row);
-  locked = false;
+void pComboButton::setText(unsigned selection, string text) {
+  qtComboButton->setItemText(selection, text);
 }
 
 void pComboButton::constructor() {
@@ -51,7 +46,7 @@ void pComboButton::constructor() {
   locked = true;
   for(auto& text : comboButton.state.text) append(text);
   locked = false;
-  setSelection(selection);
+  comboButton.setSelection(selection);
 }
 
 void pComboButton::destructor() {
@@ -65,8 +60,8 @@ void pComboButton::orphan() {
 }
 
 void pComboButton::onChange() {
-  comboButton.state.selection = selection();
-  if(locked == false && comboButton.onChange) comboButton.onChange();
+  comboButton.state.selection = qtComboButton->currentIndex();
+  if(!locked && comboButton.onChange) comboButton.onChange();
 }
 
 }

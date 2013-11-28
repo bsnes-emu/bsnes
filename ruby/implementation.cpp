@@ -4,7 +4,7 @@
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
-#elif defined(PLATFORM_OSX)
+#elif defined(PLATFORM_MACOSX)
   #define decimal CocoaDecimal
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>

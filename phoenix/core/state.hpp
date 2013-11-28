@@ -5,7 +5,7 @@ struct Application::State {
 
 struct Timer::State {
   bool enabled = false;
-  unsigned milliseconds = 0;
+  unsigned interval = 0;
 };
 
 struct BrowserWindow::State {
@@ -52,12 +52,12 @@ struct Action::State {
 
 struct Menu::State {
   group<Action> action;
-  nall::image image = {0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0};
+  nall::image image;
   string text;
 };
 
 struct Item::State {
-  nall::image image = {0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0};
+  nall::image image;
   string text;
 };
 
@@ -73,35 +73,48 @@ struct RadioItem::State {
 };
 
 struct Sizable::State {
-  Layout* layout = nullptr;
+  bool enabled = true;
+  Sizable* parent = nullptr;
+  bool visible = true;
   Window* window = nullptr;
 };
 
 struct Layout::State {
+  Widget* widget = nullptr;
+  unsigned widgetSelection = 0;
 };
 
 struct Widget::State {
   bool abstract = false;
-  bool enabled = true;
   string font;
   Geometry geometry = {0, 0, 0, 0};
-  bool visible = true;
 };
 
 struct Button::State {
-  nall::image image = {0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0};
+  nall::image image;
   Orientation orientation = Orientation::Horizontal;
   string text;
 };
 
 struct Canvas::State {
+  Color color;
   uint32_t* data = nullptr;
   bool droppable = false;
-  unsigned width = 256;
-  unsigned height = 256;
+  vector<Color> gradient = {{}, {}, {}, {}};
+  nall::image image;
+  Canvas::Mode mode = Canvas::Mode::Color;
+  unsigned width = 0;
+  unsigned height = 0;
 };
 
 struct CheckButton::State {
+  bool checked = false;
+  nall::image image;
+  Orientation orientation = Orientation::Horizontal;
+  string text;
+};
+
+struct CheckLabel::State {
   bool checked = false;
   string text;
 };
@@ -112,6 +125,11 @@ struct ComboButton::State {
 };
 
 struct Console::State {
+};
+
+struct Frame::State {
+  Layout* layout = nullptr;
+  string text;
 };
 
 struct HexEdit::State {
@@ -158,7 +176,22 @@ struct ProgressBar::State {
 struct RadioButton::State {
   bool checked = true;
   nall::group<RadioButton> group;
+  nall::image image;
+  Orientation orientation = Orientation::Horizontal;
   string text;
+};
+
+struct RadioLabel::State {
+  bool checked = true;
+  nall::group<RadioLabel> group;
+  string text;
+};
+
+struct TabFrame::State {
+  vector<nall::image> image;
+  vector<Layout*> layout;
+  unsigned selection = 0;
+  lstring text;
 };
 
 struct TextEdit::State {

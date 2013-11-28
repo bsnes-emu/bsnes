@@ -20,12 +20,6 @@
 
 namespace phoenix {
 
-bool pCheckItem::checked() {
-  @autoreleasepool {
-    return [cocoaAction state] != NSOffState;
-  }
-}
-
 void pCheckItem::setChecked(bool checked) {
   @autoreleasepool {
     auto state = checked ? NSOnState : NSOffState;

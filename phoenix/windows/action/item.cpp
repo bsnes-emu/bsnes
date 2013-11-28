@@ -30,4 +30,8 @@ void pItem::createBitmap() {
   }
 }
 
+void pItem::onActivate() {
+  if(item.onActivate) item.onActivate();
+}
+
 }

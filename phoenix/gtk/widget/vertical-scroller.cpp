@@ -1,17 +1,14 @@
 namespace phoenix {
 
-static void VerticalScroller_change(VerticalScroller* self) {
-  if(self->state.position == self->position()) return;
-  self->state.position = self->position();
-  if(self->p.locked == false && self->onChange) self->onChange();
+static void VerticalScroller_change(GtkRange* gtkRange, VerticalScroller* self) {
+  unsigned position = (unsigned)gtk_range_get_value(gtkRange);
+  if(self->state.position == position) return;
+  self->state.position = position;
+  if(!self->p.locked && self->onChange) self->onChange();
 }
 
 Size pVerticalScroller::minimumSize() {
   return {20, 0};
-}
-
-unsigned pVerticalScroller::position() {
-  return (unsigned)gtk_range_get_value(GTK_RANGE(gtkWidget));
 }
 
 void pVerticalScroller::setLength(unsigned length) {
@@ -28,7 +25,7 @@ void pVerticalScroller::setPosition(unsigned position) {
 
 void pVerticalScroller::constructor() {
   gtkWidget = gtk_vscrollbar_new(0);
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(VerticalScroller_change), (gpointer)&verticalScroller);
+  g_signal_connect(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(VerticalScroller_change), (gpointer)&verticalScroller);
 
   setLength(verticalScroller.state.length);
   setPosition(verticalScroller.state.position);

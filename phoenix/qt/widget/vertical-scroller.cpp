@@ -4,10 +4,6 @@ Size pVerticalScroller::minimumSize() {
   return {15, 0};
 }
 
-unsigned pVerticalScroller::position() {
-  return qtScroller->value();
-}
-
 void pVerticalScroller::setLength(unsigned length) {
   length += length == 0;
   qtScroller->setRange(0, length - 1);
@@ -40,7 +36,7 @@ void pVerticalScroller::orphan() {
 }
 
 void pVerticalScroller::onChange() {
-  verticalScroller.state.position = position();
+  verticalScroller.state.position = qtScroller->value();
   if(verticalScroller.onChange) verticalScroller.onChange();
 }
 

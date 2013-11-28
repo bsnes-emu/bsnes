@@ -30,12 +30,6 @@ static HBITMAP CreateBitmap(const image& image) {
   return hbitmap;
 }
 
-static unsigned GetWindowZOrder(HWND hwnd) {
-  unsigned z = 0;
-  for(HWND next = hwnd; next != NULL; next = GetWindow(next, GW_HWNDPREV)) z++;
-  return z;
-}
-
 static lstring DropPaths(WPARAM wparam) {
   auto dropList = HDROP(wparam);
   auto fileCount = DragQueryFile(dropList, ~0u, nullptr, 0);
@@ -56,6 +50,28 @@ static lstring DropPaths(WPARAM wparam) {
   }
 
   return paths;
+}
+
+static Layout* GetParentWidgetLayout(Sizable* sizable) {
+  while(sizable) {
+    if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Layout*)sizable;
+    sizable = sizable->state.parent;
+  }
+  return nullptr;
+}
+
+static Widget* GetParentWidget(Sizable* sizable) {
+  while(sizable) {
+    if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Widget*)sizable->state.parent;
+    sizable = sizable->state.parent;
+  }
+  return nullptr;
+}
+
+static unsigned GetWindowZOrder(HWND hwnd) {
+  unsigned z = 0;
+  for(HWND next = hwnd; next != NULL; next = GetWindow(next, GW_HWNDPREV)) z++;
+  return z;
 }
 
 static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
@@ -177,6 +193,103 @@ static Keyboard::Keycode Keysym(unsigned keysym, unsigned keyflags) {
   #undef enabled
   #undef shifted
   #undef extended
+}
+
+static unsigned ScrollEvent(HWND hwnd, WPARAM wparam) {
+  SCROLLINFO info;
+  memset(&info, 0, sizeof(SCROLLINFO));
+  info.cbSize = sizeof(SCROLLINFO);
+  info.fMask = SIF_ALL;
+  GetScrollInfo(hwnd, SB_CTL, &info);
+
+  switch(LOWORD(wparam)) {
+  case SB_LEFT: info.nPos = info.nMin; break;
+  case SB_RIGHT: info.nPos = info.nMax; break;
+  case SB_LINELEFT: info.nPos--; break;
+  case SB_LINERIGHT: info.nPos++; break;
+  case SB_PAGELEFT: info.nPos -= info.nMax >> 3; break;
+  case SB_PAGERIGHT: info.nPos += info.nMax >> 3; break;
+  case SB_THUMBTRACK: info.nPos = info.nTrackPos; break;
+  }
+
+  info.fMask = SIF_POS;
+  SetScrollInfo(hwnd, SB_CTL, &info, TRUE);
+
+  //Windows may clamp position to scroller range
+  GetScrollInfo(hwnd, SB_CTL, &info);
+  return info.nPos;
+}
+
+static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+  Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
+  Window& window = dynamic_cast<Window*>(object) ? *(Window*)object : *((Widget*)object)->Sizable::state.window;
+
+  bool process = true;
+  if(!pWindow::modal.empty() && !pWindow::modal.find(&window.p)) process = false;
+  if(applicationState.quit) process = false;
+  if(process == false) return DefWindowProc(hwnd, msg, wparam, lparam);
+
+  switch(msg) {
+  case WM_DRAWITEM: {
+    unsigned id = LOWORD(wparam);
+    HWND control = GetDlgItem(hwnd, id);
+    Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+    if(object == nullptr) break;
+    if(dynamic_cast<TabFrame*>(object)) { ((TabFrame*)object)->p.onDrawItem(lparam); break; }
+    break;
+  }
+
+  case WM_COMMAND: {
+    unsigned id = LOWORD(wparam);
+    HWND control = GetDlgItem(hwnd, id);
+    Object* object = control ? (Object*)GetWindowLongPtr(control, GWLP_USERDATA) : (Object*)(&pObject::find(id)->object);
+    if(object == nullptr) break;
+    if(dynamic_cast<Item*>(object)) { ((Item*)object)->p.onActivate(); break; }
+    if(dynamic_cast<CheckItem*>(object)) { ((CheckItem*)object)->p.onToggle(); break; }
+    if(dynamic_cast<Button*>(object)) { ((Button*)object)->p.onActivate(); break; }
+    if(dynamic_cast<CheckButton*>(object)) { ((CheckButton*)object)->p.onToggle(); break; }
+    if(dynamic_cast<CheckLabel*>(object)) { ((CheckLabel*)object)->p.onToggle(); break; }
+    if(dynamic_cast<ComboButton*>(object) && HIWORD(wparam) == CBN_SELCHANGE) { ((ComboButton*)object)->p.onChange(); break; }
+    if(dynamic_cast<LineEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((LineEdit*)object)->p.onChange(); break; }
+    if(dynamic_cast<RadioButton*>(object)) { ((RadioButton*)object)->p.onActivate(); break; }
+    if(dynamic_cast<RadioLabel*>(object)) { ((RadioLabel*)object)->p.onActivate(); break; }
+    if(dynamic_cast<TextEdit*>(object) && HIWORD(wparam) == EN_CHANGE) { ((TextEdit*)object)->p.onChange(); break; }
+    break;
+  }
+
+  case WM_NOTIFY: {
+    unsigned id = LOWORD(wparam);
+    HWND control = GetDlgItem(hwnd, id);
+    Object* object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+    if(object == nullptr) break;
+    if(dynamic_cast<ListView*>(object) && ((LPNMHDR)lparam)->code == LVN_ITEMACTIVATE) { ((ListView*)object)->p.onActivate(lparam); break; }
+    if(dynamic_cast<ListView*>(object) && ((LPNMHDR)lparam)->code == LVN_ITEMCHANGED) { ((ListView*)object)->p.onChange(lparam); break; }
+    if(dynamic_cast<ListView*>(object) && ((LPNMHDR)lparam)->code == NM_CUSTOMDRAW) { return ((ListView*)object)->p.onCustomDraw(lparam); }
+    if(dynamic_cast<TabFrame*>(object) && ((LPNMHDR)lparam)->code == TCN_SELCHANGE) { ((TabFrame*)object)->p.onChange(); break; }
+    break;
+  }
+
+  case WM_HSCROLL:
+  case WM_VSCROLL: {
+    Object* object = nullptr;
+    if(lparam) {
+      object = (Object*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
+    } else {
+      unsigned id = LOWORD(wparam);
+      HWND control = GetDlgItem(hwnd, id);
+      object = (Object*)GetWindowLongPtr(control, GWLP_USERDATA);
+    }
+    if(object == nullptr) break;
+    if(dynamic_cast<HorizontalScroller*>(object)) { ((HorizontalScroller*)object)->p.onChange(wparam); return TRUE; }
+    if(dynamic_cast<VerticalScroller*>(object)) { ((VerticalScroller*)object)->p.onChange(wparam); return TRUE; }
+    if(dynamic_cast<HorizontalSlider*>(object)) { ((HorizontalSlider*)object)->p.onChange(); break; }
+    if(dynamic_cast<VerticalSlider*>(object)) { ((VerticalSlider*)object)->p.onChange(); break; }
+    break;
+  }
+  }
+
+  return windowProc(hwnd, msg, wparam, lparam);
 }
 
 }

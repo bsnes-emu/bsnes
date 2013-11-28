@@ -27,7 +27,7 @@ void ImageList_Append(HIMAGELIST imageList, const nall::image& source) {
   auto image = source;
   if(image.empty()) {
     image.allocate(15, 15);
-    image.clear(GetSysColor(COLOR_WINDOW));
+    image.fill(GetSysColor(COLOR_WINDOW));
   }
   image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
   image.scale(15, 15, Interpolation::Linear);
@@ -60,19 +60,8 @@ void pListView::autoSizeColumns() {
   }
 }
 
-bool pListView::checked(unsigned row) {
-  return ListView_GetCheckState(hwnd, row);
-}
-
-void pListView::modify(unsigned row, const lstring& list) {
-  for(unsigned n = 0; n < list.size(); n++) {
-    utf16_t wtext(list(n, ""));
-    ListView_SetItemText(hwnd, row, n, wtext);
-  }
-}
-
-void pListView::remove(unsigned row) {
-  ListView_DeleteItem(hwnd, row);
+void pListView::remove(unsigned selection) {
+  ListView_DeleteItem(hwnd, selection);
 }
 
 void pListView::reset() {
@@ -80,30 +69,19 @@ void pListView::reset() {
   buildImageList();  //free previously allocated images
 }
 
-bool pListView::selected() {
-  unsigned count = ListView_GetItemCount(hwnd);
-  for(unsigned n = 0; n < count; n++) {
-    if(ListView_GetItemState(hwnd, n, LVIS_SELECTED)) return true;
-  }
-  return false;
-}
-
-unsigned pListView::selection() {
-  unsigned count = ListView_GetItemCount(hwnd);
-  for(unsigned n = 0; n < count; n++) {
-    if(ListView_GetItemState(hwnd, n, LVIS_SELECTED)) return n;
-  }
-  return listView.state.selection;
-}
-
 void pListView::setCheckable(bool checkable) {
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES | (checkable ? LVS_EX_CHECKBOXES : 0));
 }
 
-void pListView::setChecked(unsigned row, bool checked) {
+void pListView::setChecked(unsigned selection, bool checked) {
   locked = true;
-  ListView_SetCheckState(hwnd, row, checked);
+  ListView_SetCheckState(hwnd, selection, checked);
   locked = false;
+}
+
+void pListView::setGeometry(Geometry geometry) {
+  pWidget::setGeometry(geometry);
+  autoSizeColumns();
 }
 
 void pListView::setHeaderText(const lstring& list) {
@@ -132,20 +110,20 @@ void pListView::setHeaderVisible(bool visible) {
   );
 }
 
-void pListView::setImage(unsigned row, unsigned column, const image& image) {
+void pListView::setImage(unsigned selection, unsigned position, const image& image) {
   //assign existing image
   for(unsigned n = 0; n < images.size(); n++) {
     if(images[n] == image) {
-      imageMap(row)(column) = n;
-      return ListView_SetImage(hwnd, imageList, row, column, n);
+      imageMap(selection)(position) = n;
+      return ListView_SetImage(hwnd, imageList, selection, position, n);
     }
   }
 
   //append and assign new image
-  imageMap(row)(column) = images.size();
+  imageMap(selection)(position) = images.size();
   images.append(image);
   ImageList_Append(imageList, image);
-  ListView_SetImage(hwnd, imageList, row, column, imageMap(row)(column));
+  ListView_SetImage(hwnd, imageList, selection, position, imageMap(selection)(position));
 }
 
 void pListView::setSelected(bool selected) {
@@ -159,11 +137,16 @@ void pListView::setSelected(bool selected) {
   locked = false;
 }
 
-void pListView::setSelection(unsigned row) {
+void pListView::setSelection(unsigned selection) {
   locked = true;
   lostFocus = false;
-  ListView_SetItemState(hwnd, row, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
+  ListView_SetItemState(hwnd, selection, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);
   locked = false;
+}
+
+void pListView::setText(unsigned selection, unsigned position, string text) {
+  utf16_t wtext(text);
+  ListView_SetItemText(hwnd, selection, position, wtext);
 }
 
 void pListView::constructor() {
@@ -171,7 +154,7 @@ void pListView::constructor() {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
     WS_CHILD | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | LVS_NOCOLUMNHEADER,
-    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&listView);
   setDefaultFont();
@@ -193,11 +176,6 @@ void pListView::destructor() {
 void pListView::orphan() {
   destructor();
   constructor();
-}
-
-void pListView::setGeometry(Geometry geometry) {
-  pWidget::setGeometry(geometry);
-  autoSizeColumns();
 }
 
 void pListView::buildImageList() {
@@ -241,6 +219,55 @@ void pListView::buildImageList() {
     for(unsigned x = 0; x < rows; x++) {
       ListView_SetImage(hwnd, imageList, y, x, imageMap(y)(x));
     }
+  }
+}
+
+void pListView::onActivate(LPARAM lparam) {
+  LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
+  if(listView.state.text.empty() || !listView.state.selected) return;
+  if(listView.onActivate) listView.onActivate();
+}
+
+void pListView::onChange(LPARAM lparam) {
+  LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
+  if(!(nmlistview->uChanged & LVIF_STATE)) return;
+
+  unsigned selection = nmlistview->iItem;
+  unsigned imagemask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
+  if(imagemask == 0 || imagemask == 1) {
+    if(!locked) {
+      listView.state.checked[selection] = !listView.state.checked[selection];
+      if(listView.onToggle) listView.onToggle(selection);
+    }
+  } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
+    lostFocus = true;
+  } else if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
+    lostFocus = false;
+    listView.state.selected = true;
+    listView.state.selection = selection;
+    if(!locked && listView.onChange) listView.onChange();
+  } else if(!lostFocus && !listView.state.selected) {
+    lostFocus = false;
+    listView.state.selected = false;
+    listView.state.selection = 0;
+    if(!locked && listView.onChange) listView.onChange();
+  }
+}
+
+LRESULT pListView::onCustomDraw(LPARAM lparam) {
+  LPNMLVCUSTOMDRAW lvcd = (LPNMLVCUSTOMDRAW)lparam;
+
+  switch(lvcd->nmcd.dwDrawStage) {
+  case CDDS_PREPAINT:
+    return CDRF_NOTIFYITEMDRAW;
+  case CDDS_ITEMPREPAINT:
+    if(listView.state.headerText.size() >= 2) {
+      //draw alternating row colors of there are two or more columns
+      if(lvcd->nmcd.dwItemSpec % 2) lvcd->clrTextBk = GetSysColor(COLOR_WINDOW) ^ 0x070707;
+    }
+    return CDRF_DODEFAULT;
+  default:
+    return CDRF_DODEFAULT;
   }
 }
 

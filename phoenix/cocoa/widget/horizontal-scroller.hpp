@@ -14,7 +14,6 @@ struct pHorizontalScroller : public pWidget {
   CocoaHorizontalScroller* cocoaHorizontalScroller = nullptr;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 

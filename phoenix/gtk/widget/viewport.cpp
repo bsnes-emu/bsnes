@@ -51,10 +51,10 @@ void pViewport::constructor() {
   gtk_widget_add_events(gtkWidget,
     GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_POINTER_MOTION_MASK);
   g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Viewport_dropEvent), (gpointer)&viewport);
-  g_signal_connect(G_OBJECT(gtkWidget), "button_press_event", G_CALLBACK(Viewport_mousePress), (gpointer)this);
-  g_signal_connect(G_OBJECT(gtkWidget), "button_release_event", G_CALLBACK(Viewport_mouseRelease), (gpointer)this);
-  g_signal_connect(G_OBJECT(gtkWidget), "leave_notify_event", G_CALLBACK(Viewport_mouseLeave), (gpointer)this);
-  g_signal_connect(G_OBJECT(gtkWidget), "motion_notify_event", G_CALLBACK(Viewport_mouseMove), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Viewport_mousePress), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Viewport_mouseRelease), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Viewport_mouseLeave), (gpointer)this);
+  g_signal_connect(G_OBJECT(gtkWidget), "motion-notify-event", G_CALLBACK(Viewport_mouseMove), (gpointer)this);
 
   GdkColor color;
   color.pixel = 0;

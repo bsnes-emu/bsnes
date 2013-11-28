@@ -11,16 +11,11 @@ void VerticalLayout::append(Sizable& sizable) {
   if(window()) window()->synchronizeLayout();
 }
 
-bool VerticalLayout::enabled() {
-  if(layout()) return state.enabled && layout()->enabled();
-  return state.enabled;
-}
-
 Size VerticalLayout::minimumSize() {
   unsigned width = 0, height = 0;
 
   for(auto& child : children) {
-    if(child.width == MinimumSize || child.width == MaximumSize) {
+    if(child.width == Size::Minimum || child.width == Size::Maximum) {
       width = max(width, child.sizable->minimumSize().width);
       continue;
     }
@@ -29,7 +24,7 @@ Size VerticalLayout::minimumSize() {
 
   for(auto& child : children) {
     height += child.spacing;
-    if(child.height == MinimumSize || child.height == MaximumSize) {
+    if(child.height == Size::Minimum || child.height == Size::Maximum) {
       height += child.sizable->minimumSize().height;
       continue;
     }
@@ -43,7 +38,7 @@ void VerticalLayout::remove(Sizable& sizable) {
   for(unsigned n = 0; n < children.size(); n++) {
     if(children[n].sizable == &sizable) {
       if(dynamic_cast<Layout*>(children[n].sizable)) {
-        Layout *layout = (Layout*)children[n].sizable;
+        Layout* layout = (Layout*)children[n].sizable;
         layout->reset();
       }
       children.remove(n);
@@ -66,17 +61,17 @@ void VerticalLayout::setAlignment(double alignment) {
 }
 
 void VerticalLayout::setEnabled(bool enabled) {
-  state.enabled = enabled;
+  Sizable::state.enabled = enabled;
   for(auto& child : children) {
-    child.sizable->setEnabled(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : enabled);
+    child.sizable->setEnabled(child.sizable->enabled());
   }
 }
 
 void VerticalLayout::setGeometry(Geometry containerGeometry) {
   auto children = this->children;
   for(auto& child : children) {
-    if(child.width  == MinimumSize) child.width  = child.sizable->minimumSize().width;
-    if(child.height == MinimumSize) child.height = child.sizable->minimumSize().height;
+    if(child.width  == Size::Minimum) child.width  = child.sizable->minimumSize().width;
+    if(child.height == Size::Minimum) child.height = child.sizable->minimumSize().height;
   }
 
   Geometry geometry = containerGeometry;
@@ -87,14 +82,14 @@ void VerticalLayout::setGeometry(Geometry containerGeometry) {
 
   unsigned minimumHeight = 0, maximumHeightCounter = 0;
   for(auto& child : children) {
-    if(child.height == MaximumSize) maximumHeightCounter++;
-    if(child.height != MaximumSize) minimumHeight += child.height;
+    if(child.height == Size::Maximum) maximumHeightCounter++;
+    if(child.height != Size::Maximum) minimumHeight += child.height;
     minimumHeight += child.spacing;
   }
 
   for(auto& child : children) {
-    if(child.width  == MaximumSize) child.width  = geometry.width;
-    if(child.height == MaximumSize) child.height = (geometry.height - minimumHeight) / maximumHeightCounter;
+    if(child.width  == Size::Maximum) child.width  = geometry.width;
+    if(child.height == Size::Maximum) child.height = (geometry.height - minimumHeight) / maximumHeightCounter;
   }
 
   unsigned maximumWidth = 0;
@@ -103,6 +98,8 @@ void VerticalLayout::setGeometry(Geometry containerGeometry) {
   for(auto& child : children) {
     unsigned pivot = (maximumWidth - child.width) * state.alignment;
     Geometry childGeometry = {geometry.x + pivot, geometry.y, child.width, child.height};
+    if((signed)childGeometry.width < 1) childGeometry.width = 1;
+    if((signed)childGeometry.height < 1) childGeometry.height = 1;
     child.sizable->setGeometry(childGeometry);
 
     geometry.y += child.height + child.spacing;
@@ -115,26 +112,14 @@ void VerticalLayout::setMargin(unsigned margin) {
 }
 
 void VerticalLayout::setVisible(bool visible) {
-  state.visible = visible;
+  Sizable::state.visible = visible;
   for(auto& child : children) {
-    child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
+    child.sizable->setVisible(child.sizable->visible());
   }
 }
 
 void VerticalLayout::synchronizeLayout() {
   for(auto& child : children) Layout::append(*child.sizable);
-}
-
-bool VerticalLayout::visible() {
-  if(layout()) return state.visible && layout()->visible();
-  return state.visible;
-}
-
-VerticalLayout::VerticalLayout() {
-  state.alignment = 0.0;
-  state.enabled = true;
-  state.margin = 0;
-  state.visible = true;
 }
 
 VerticalLayout::~VerticalLayout() {

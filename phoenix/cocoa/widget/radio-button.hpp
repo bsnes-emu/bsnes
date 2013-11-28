@@ -12,11 +12,11 @@ struct pRadioButton : public pWidget {
   RadioButton& radioButton;
   CocoaRadioButton* cocoaRadioButton = nullptr;
 
-  bool checked();
   Size minimumSize();
   void setChecked();
   void setGeometry(Geometry geometry);
   void setGroup(const group<RadioButton>& group);
+  void setImage(const image& image, Orientation orientation);
   void setText(string text);
 
   pRadioButton(RadioButton& radioButton) : pWidget(radioButton), radioButton(radioButton) {}

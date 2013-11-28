@@ -58,12 +58,6 @@ Size pVerticalScroller::minimumSize() {
   }
 }
 
-unsigned pVerticalScroller::position() {
-  @autoreleasepool {
-    return [cocoaView doubleValue] * verticalScroller.state.length;
-  }
-}
-
 void pVerticalScroller::setLength(unsigned length) {
   @autoreleasepool {
     [cocoaView update];

@@ -1,12 +1,19 @@
 namespace phoenix {
 
-bool pCheckButton::checked() {
-  return qtCheckButton->isChecked();
-}
-
 Size pCheckButton::minimumSize() {
   Size size = pFont::size(qtWidget->font(), checkButton.state.text);
-  return {size.width + 26, size.height + 6};
+
+  if(checkButton.state.orientation == Orientation::Horizontal) {
+    size.width += checkButton.state.image.width;
+    size.height = max(checkButton.state.image.height, size.height);
+  }
+
+  if(checkButton.state.orientation == Orientation::Vertical) {
+    size.width = max(checkButton.state.image.width, size.width);
+    size.height += checkButton.state.image.height;
+  }
+
+  return {size.width + 20, size.height + 12};
 }
 
 void pCheckButton::setChecked(bool checked) {
@@ -15,13 +22,25 @@ void pCheckButton::setChecked(bool checked) {
   locked = false;
 }
 
+void pCheckButton::setImage(const image& image, Orientation orientation) {
+  qtCheckButton->setIconSize(QSize(image.width, image.height));
+  qtCheckButton->setIcon(CreateIcon(image));
+  qtCheckButton->setStyleSheet("text-align: top;");
+  switch(orientation) {
+  case Orientation::Horizontal: qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
+  case Orientation::Vertical:   qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon); break;
+  }
+}
+
 void pCheckButton::setText(string text) {
   qtCheckButton->setText(QString::fromUtf8(text));
 }
 
 void pCheckButton::constructor() {
-  qtWidget = qtCheckButton = new QCheckBox;
-  connect(qtCheckButton, SIGNAL(stateChanged(int)), SLOT(onToggle()));
+  qtWidget = qtCheckButton = new QToolButton;
+  qtCheckButton->setCheckable(true);
+  qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  connect(qtCheckButton, SIGNAL(toggled(bool)), SLOT(onToggle(bool)));
 
   pWidget::synchronizeState();
   setChecked(checkButton.state.checked);
@@ -29,8 +48,6 @@ void pCheckButton::constructor() {
 }
 
 void pCheckButton::destructor() {
-  delete qtCheckButton;
-  qtWidget = qtCheckButton = nullptr;
 }
 
 void pCheckButton::orphan() {
@@ -38,9 +55,9 @@ void pCheckButton::orphan() {
   constructor();
 }
 
-void pCheckButton::onToggle() {
-  checkButton.state.checked = checked();
-  if(locked == false && checkButton.onToggle) checkButton.onToggle();
+void pCheckButton::onToggle(bool checked) {
+  checkButton.state.checked = checked;
+  if(!locked && checkButton.onToggle) checkButton.onToggle();
 }
 
 }

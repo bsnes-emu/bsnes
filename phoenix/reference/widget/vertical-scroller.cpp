@@ -1,9 +1,5 @@
 namespace phoenix {
 
-unsigned pVerticalScroller::position() {
-  return 0;
-}
-
 void pVerticalScroller::setLength(unsigned length) {
 }
 

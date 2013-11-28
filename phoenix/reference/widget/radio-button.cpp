@@ -1,13 +1,12 @@
 namespace phoenix {
 
-bool pRadioButton::checked() {
-  return false;
-}
-
 void pRadioButton::setChecked() {
 }
 
 void pRadioButton::setGroup(const group<RadioButton>& group) {
+}
+
+void pRadioButton::setImage(const image& image, Orientation orientation) {
 }
 
 void pRadioButton::setText(string text) {

@@ -4,10 +4,6 @@ Size pVerticalSlider::minimumSize() {
   return {20, 0};
 }
 
-unsigned pVerticalSlider::position() {
-  return qtSlider->value();
-}
-
 void pVerticalSlider::setLength(unsigned length) {
   length += length == 0;
   qtSlider->setRange(0, length - 1);
@@ -40,7 +36,7 @@ void pVerticalSlider::orphan() {
 }
 
 void pVerticalSlider::onChange() {
-  verticalSlider.state.position = position();
+  verticalSlider.state.position = qtSlider->value();
   if(verticalSlider.onChange) verticalSlider.onChange();
 }
 

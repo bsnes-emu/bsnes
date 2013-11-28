@@ -1,12 +1,12 @@
 AdvancedSettings* advancedSettings = nullptr;
 
 AdvancedSettings::AdvancedSettings() {
-  driverTitle.setFont(program->titleFont);
+  driverTitle.setFont(program->boldFont);
   driverTitle.setText("Driver Selection");
   videoLabel.setText("Video:");
   audioLabel.setText("Audio:");
   inputLabel.setText("Input:");
-  libraryTitle.setFont(program->titleFont);
+  libraryTitle.setFont(program->boldFont);
   libraryTitle.setText("Game Library Path");
   libraryLabel.setText("Path:");
   libraryPath.setEditable(false);
@@ -44,7 +44,7 @@ AdvancedSettings::AdvancedSettings() {
     if(list[n] == config->input.driver) inputDriver.setSelection(n);
   }
 
-  append(driverTitle, {~0, 0}, 5);
+  append(driverTitle, {~0, 0});
   append(driverLayout, {~0, 0}, 15);
     driverLayout.append(videoLabel, {0, 0}, 5);
     driverLayout.append(videoDriver, {~0, 0}, 5);
@@ -52,7 +52,7 @@ AdvancedSettings::AdvancedSettings() {
     driverLayout.append(audioDriver, {~0, 0}, 5);
     driverLayout.append(inputLabel, {0, 0}, 5);
     driverLayout.append(inputDriver, {~0, 0});
-  append(libraryTitle, {~0, 0}, 5);
+  append(libraryTitle, {~0, 0});
   append(libraryLayout, {~0, 0}, 15);
     libraryLayout.append(libraryLabel, {0, 0}, 5);
     libraryLayout.append(libraryPath, {~0, 0}, 5);

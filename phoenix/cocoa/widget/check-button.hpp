@@ -12,10 +12,10 @@ struct pCheckButton : public pWidget {
   CheckButton& checkButton;
   CocoaCheckButton* cocoaCheckButton = nullptr;
 
-  bool checked();
   Size minimumSize();
   void setChecked(bool checked);
   void setGeometry(Geometry geometry);
+  void setImage(const image& image, Orientation orientation);
   void setText(string text);
 
   pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}

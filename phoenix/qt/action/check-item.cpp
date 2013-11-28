@@ -1,9 +1,5 @@
 namespace phoenix {
 
-bool pCheckItem::checked() {
-  return qtAction->isChecked();
-}
-
 void pCheckItem::setChecked(bool checked) {
   qtAction->setChecked(checked);
 }
@@ -25,7 +21,7 @@ void pCheckItem::destructor() {
 }
 
 void pCheckItem::onToggle() {
-  checkItem.state.checked = checked();
+  checkItem.state.checked = qtAction->isChecked();
   if(checkItem.onToggle) checkItem.onToggle();
 }
 

@@ -1,17 +1,14 @@
 InputSettings* inputSettings = nullptr;
 
 InputSettings::InputSettings() {
-  title.setFont(program->titleFont);
-  title.setText("Input Settings");
   focusLabel.setText("When Focus is Lost:");
   focusPause.setText("Pause Emulation");
   focusAllow.setText("Allow Input");
-  inputList.setHeaderText("Name", "Mapping");
+  inputList.setHeaderText({"Name", "Mapping"});
   inputList.setHeaderVisible();
   resetButton.setText("Reset");
   eraseButton.setText("Erase");
 
-  append(title, {~0, 0}, 5);
   append(focusLayout, {~0, 0}, 5);
     focusLayout.append(focusLabel, {0, 0}, 5);
     focusLayout.append(focusPause, {0, 0}, 5);
@@ -115,7 +112,7 @@ void InputSettings::portChanged() {
 
 void InputSettings::deviceChanged() {
   inputList.reset();
-  for(unsigned number : activeDevice().order) inputList.append("", "");
+  for(unsigned number : activeDevice().order) inputList.append({"", ""});
   inputChanged();
   synchronize();
 }
@@ -129,7 +126,7 @@ void InputSettings::inputChanged() {
     mapping.replace("KB0::", "");
     mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " or ");
-    inputList.modify(index++, input.name, mapping);
+    inputList.setText(index++, {input.name, mapping});
   }
 }
 

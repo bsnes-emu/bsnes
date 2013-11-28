@@ -56,7 +56,9 @@ void pViewport::setDroppable(bool droppable) {
 }
 
 void pViewport::constructor() {
-  hwnd = CreateWindow(L"phoenix_viewport", L"", WS_CHILD | WS_DISABLED, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"phoenix_viewport", L"",
+    WS_CHILD | WS_DISABLED,
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&viewport);
   setDroppable(viewport.state.droppable);
   synchronize();

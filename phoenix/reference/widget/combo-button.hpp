@@ -4,11 +4,10 @@ struct pComboButton : public pWidget {
   ComboButton& comboButton;
 
   void append(string text);
-  void modify(unsigned row, string text);
-  void remove(unsigned row);
+  void remove(unsigned selection);
   void reset();
-  unsigned selection();
-  void setSelection(unsigned row);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, string text);
 
   pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();

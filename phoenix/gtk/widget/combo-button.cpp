@@ -1,15 +1,15 @@
 namespace phoenix {
 
 static void ComboButton_change(ComboButton* self) {
-  if(self->p.locked == false) {
-    self->state.selection = self->selection();
+  if(!self->p.locked) {
+    self->state.selection = gtk_combo_box_get_active(GTK_COMBO_BOX(self->p.gtkWidget));
     if(self->onChange) self->onChange();
   }
 }
 
 void pComboButton::append(string text) {
   gtk_combo_box_append_text(GTK_COMBO_BOX(gtkWidget), text);
-  if(itemCounter++ == 0) setSelection(0);
+  if(itemCounter++ == 0) comboButton.setSelection(0);
 }
 
 Size pComboButton::minimumSize() {
@@ -20,21 +20,14 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 44, size.height + 12};
 }
 
-void pComboButton::modify(unsigned row, string text) {
+void pComboButton::remove(unsigned selection) {
   locked = true;
-  unsigned position = selection();
-  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), row);
-  gtk_combo_box_insert_text(GTK_COMBO_BOX(gtkWidget), row, text);
-  gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), position);
+  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), selection);
+  itemCounter--;
   locked = false;
-}
 
-void pComboButton::remove(unsigned row) {
-  locked = true;
-  unsigned position = selection();
-  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), row);
-  if(position == row) gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), 0);
-  locked = false;
+  //when removing the actively selected item, reset the selection to the first entry
+  if(selection == comboButton.state.selection) comboButton.setSelection(0);
 }
 
 void pComboButton::reset() {
@@ -44,13 +37,17 @@ void pComboButton::reset() {
   locked = false;
 }
 
-unsigned pComboButton::selection() {
-  return gtk_combo_box_get_active(GTK_COMBO_BOX(gtkWidget));
+void pComboButton::setSelection(unsigned selection) {
+  locked = true;
+  gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), selection);
+  locked = false;
 }
 
-void pComboButton::setSelection(unsigned row) {
+void pComboButton::setText(unsigned selection, string text) {
   locked = true;
-  gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), row);
+  gtk_combo_box_remove_text(GTK_COMBO_BOX(gtkWidget), selection);
+  gtk_combo_box_insert_text(GTK_COMBO_BOX(gtkWidget), selection, text);
+  gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), comboButton.state.selection);
   locked = false;
 }
 

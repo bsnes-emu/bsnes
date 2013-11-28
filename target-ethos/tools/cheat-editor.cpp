@@ -1,15 +1,10 @@
 CheatEditor* cheatEditor = nullptr;
 
 CheatEditor::CheatEditor() {
-  setGeometry({128, 128, 600, 360});
-  windowManager->append(this, "CheatEditor");
-
-  setTitle("Cheat Editor");
-  layout.setMargin(5);
-  cheatList.setHeaderText("Slot", "Code", "Description");
+  cheatList.setHeaderText({"Slot", "Code", "Description"});
   cheatList.setHeaderVisible();
   cheatList.setCheckable();
-  for(unsigned n = 0; n < Codes; n++) cheatList.append("", "", "");
+  for(unsigned n = 0; n < Codes; n++) cheatList.append({"", "", ""});
   codeLabel.setText("Code(s):");
   descLabel.setText("Description:");
   findButton.setText("Find Codes ...");
@@ -20,15 +15,14 @@ CheatEditor::CheatEditor() {
     Font::size(program->normalFont, "Description:").width
   );
 
-  append(layout);
-  layout.append(cheatList, {~0, ~0}, 5);
-  layout.append(codeLayout, {~0, 0}, 5);
+  append(cheatList, {~0, ~0}, 5);
+  append(codeLayout, {~0, 0}, 5);
     codeLayout.append(codeLabel, {width, 0}, 5);
     codeLayout.append(codeEdit, {~0, 0});
-  layout.append(descLayout, {~0, 0}, 5);
+  append(descLayout, {~0, 0}, 5);
     descLayout.append(descLabel, {width, 0}, 5);
     descLayout.append(descEdit, {~0, 0});
-  layout.append(controlLayout, {~0, 0});
+  append(controlLayout, {~0, 0});
     controlLayout.append(findButton, {0, 0}, 5);
     controlLayout.append(spacer, {~0, 0});
     controlLayout.append(resetButton, {80, 0}, 5);
@@ -40,7 +34,7 @@ CheatEditor::CheatEditor() {
   descEdit.onChange = {&CheatEditor::updateDesc, this};
   findButton.onActivate = {&CheatDatabase::findCodes, cheatDatabase};
   resetButton.onActivate = [&] {
-    if(MessageWindow().setParent(*this).setText("All codes will be erased. Are you sure you want to do this?")
+    if(MessageWindow().setParent(*tools).setText("All codes will be erased. Are you sure you want to do this?")
     .question() == MessageWindow::Response::Yes) reset();
   };
   eraseButton.onActivate = {&CheatEditor::erase, this};
@@ -50,7 +44,7 @@ CheatEditor::CheatEditor() {
 }
 
 void CheatEditor::synchronize() {
-  layout.setEnabled(program->active);
+  setEnabled(program->active);
 
   if(cheatList.selected()) {
     unsigned n = cheatList.selection();
@@ -74,7 +68,7 @@ void CheatEditor::refresh() {
     string desc = cheat[n].code.empty() && cheat[n].desc.empty() ? "(empty)" : cheat[n].desc;
     lstring codes = code.split("+");
     if(codes.size() > 1) code = {codes[0], "+..."};
-    cheatList.modify(n, format<3>(1 + n), code, desc);
+    cheatList.setText(n, {format<3>(1 + n), code, desc});
   }
   cheatList.autoSizeColumns();
 }

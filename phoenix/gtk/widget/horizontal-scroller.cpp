@@ -1,17 +1,14 @@
 namespace phoenix {
 
-static void HorizontalScroller_change(HorizontalScroller* self) {
-  if(self->state.position == self->position()) return;
-  self->state.position = self->position();
-  if(self->p.locked == false && self->onChange) self->onChange();
+static void HorizontalScroller_change(GtkRange* gtkRange, HorizontalScroller* self) {
+  unsigned position = (unsigned)gtk_range_get_value(gtkRange);
+  if(self->state.position == position) return;
+  self->state.position = position;
+  if(!self->p.locked && self->onChange) self->onChange();
 }
 
 Size pHorizontalScroller::minimumSize() {
   return {0, 20};
-}
-
-unsigned pHorizontalScroller::position() {
-  return (unsigned)gtk_range_get_value(GTK_RANGE(gtkWidget));
 }
 
 void pHorizontalScroller::setLength(unsigned length) {
@@ -28,7 +25,7 @@ void pHorizontalScroller::setPosition(unsigned position) {
 
 void pHorizontalScroller::constructor() {
   gtkWidget = gtk_hscrollbar_new(0);
-  g_signal_connect_swapped(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(HorizontalScroller_change), (gpointer)&horizontalScroller);
+  g_signal_connect(G_OBJECT(gtkWidget), "value-changed", G_CALLBACK(HorizontalScroller_change), (gpointer)&horizontalScroller);
 
   setLength(horizontalScroller.state.length);
   setPosition(horizontalScroller.state.position);

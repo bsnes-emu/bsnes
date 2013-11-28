@@ -24,14 +24,19 @@ namespace phoenix {
 struct pCanvas : public pWidget {
   Canvas& canvas;
   CocoaCanvas* cocoaCanvas = nullptr;
+  unsigned surfaceWidth = 0;
+  unsigned surfaceHeight = 0;
 
   void setDroppable(bool droppable);
+  void setGeometry(Geometry geometry);
+  void setMode(Canvas::Mode mode);
   void setSize(Size size);
-  void update();
 
   pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
   void destructor();
+  void rasterize();
+  void redraw();
 };
 
 }

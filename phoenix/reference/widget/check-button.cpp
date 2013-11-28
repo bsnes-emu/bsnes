@@ -1,10 +1,9 @@
 namespace phoenix {
 
-bool pCheckButton::checked() {
-  return false;
+void pCheckButton::setChecked(bool checked) {
 }
 
-void pCheckButton::setChecked(bool checked) {
+void pCheckButton::setImage(const image& image, Orientation orientation) {
 }
 
 void pCheckButton::setText(string text) {

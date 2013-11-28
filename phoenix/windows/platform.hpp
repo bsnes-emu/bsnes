@@ -1,5 +1,7 @@
 namespace phoenix {
 
+typedef LRESULT CALLBACK (*WindowProc)(HWND, UINT, WPARAM, LPARAM);
+
 struct pApplication {
   static void run();
   static bool pendingEvents();
@@ -81,7 +83,7 @@ struct pTimer : public pObject {
   UINT_PTR htimer;
 
   void setEnabled(bool enabled);
-  void setInterval(unsigned milliseconds);
+  void setInterval(unsigned interval);
 
   pTimer(Timer& timer) : pObject(timer), timer(timer) {}
   void constructor();
@@ -104,7 +106,6 @@ struct pWindow : public pObject {
   void append(Layout& layout);
   void append(Menu& menu);
   void append(Widget& widget);
-  Color backgroundColor();
   bool focused();
   Geometry frameMargin();
   Geometry geometry();
@@ -131,6 +132,14 @@ struct pWindow : public pObject {
   void constructor();
   void destructor();
   void updateMenu();
+
+  void onClose();
+  void onDrop(WPARAM wparam);
+  bool onEraseBackground();
+  void onModalBegin();
+  void onModalEnd();
+  void onMove();
+  void onSize();
 };
 
 struct pAction : public pObject {
@@ -181,24 +190,26 @@ struct pItem : public pAction {
   void constructor();
   void destructor();
   void createBitmap();
+
+  void onActivate();
 };
 
 struct pCheckItem : public pAction {
   CheckItem& checkItem;
 
-  bool checked();
   void setChecked(bool checked);
   void setText(string text);
 
   pCheckItem(CheckItem& checkItem) : pAction(checkItem), checkItem(checkItem) {}
   void constructor();
   void destructor();
+
+  void onToggle();
 };
 
 struct pRadioItem : public pAction {
   RadioItem& radioItem;
 
-  bool checked();
   void setChecked();
   void setGroup(const group<RadioItem>& group);
   void setText(string text);
@@ -206,6 +217,8 @@ struct pRadioItem : public pAction {
   pRadioItem(RadioItem& radioItem) : pAction(radioItem), radioItem(radioItem) {}
   void constructor();
   void destructor();
+
+  void onActivate();
 };
 
 struct pSizable : public pObject {
@@ -222,20 +235,19 @@ struct pLayout : public pSizable {
 
 struct pWidget : public pSizable {
   Widget& widget;
-  Window* parentWindow;
+  HWND parentHwnd;
   HWND hwnd;
   HFONT hfont;
 
-  bool enabled();
   bool focused();
   virtual Size minimumSize();
-  void setEnabled(bool enabled);
+  virtual void setEnabled(bool enabled);
   void setFocused();
   void setFont(string font);
   virtual void setGeometry(Geometry geometry);
-  void setVisible(bool visible);
+  virtual void setVisible(bool visible);
 
-  pWidget(Widget& widget) : pSizable(widget), widget(widget) { parentWindow = &Window::none(); }
+  pWidget(Widget& widget) : pSizable(widget), widget(widget) { parentHwnd = pWindow::none().p.hwnd; }
   void constructor();
   void destructor();
   virtual void orphan();
@@ -256,53 +268,81 @@ struct pButton : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onActivate();
 };
 
 struct pCanvas : public pWidget {
   Canvas& canvas;
-  uint32_t* data;
+  uint32_t* surface = nullptr;
+  unsigned surfaceWidth = 0;
+  unsigned surfaceHeight = 0;
 
   void setDroppable(bool droppable);
+  void setGeometry(Geometry geometry);
+  void setMode(Canvas::Mode mode);
   void setSize(Size size);
-  void update();
 
   pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
   void constructor();
   void destructor();
   void orphan();
   void paint();
+  void rasterize();
+  void redraw();
+  void release();
 };
 
 struct pCheckButton : public pWidget {
   CheckButton& checkButton;
+  HBITMAP hbitmap;
+  HIMAGELIST himagelist;
 
-  bool checked();
   Size minimumSize();
   void setChecked(bool checked);
+  void setImage(const image& image, Orientation orientation);
   void setText(string text);
 
   pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}
   void constructor();
   void destructor();
   void orphan();
+
+  void onToggle();
+};
+
+struct pCheckLabel : public pWidget {
+  CheckLabel& checkLabel;
+
+  Size minimumSize();
+  void setChecked(bool checked);
+  void setText(string text);
+
+  pCheckLabel(CheckLabel& checkLabel) : pWidget(checkLabel), checkLabel(checkLabel) {}
+  void constructor();
+  void destructor();
+  void orphan();
+
+  void onToggle();
 };
 
 struct pComboButton : public pWidget {
   ComboButton& comboButton;
 
   void append(string text);
-  void modify(unsigned row, string text);
-  void remove(unsigned row);
+  void remove(unsigned selection);
   Size minimumSize();
   void reset();
-  unsigned selection();
-  void setSelection(unsigned row);
+  void setGeometry(Geometry geometry);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, string text);
 
   pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}
   void constructor();
   void destructor();
   void orphan();
-  void setGeometry(Geometry geometry);
+
+  void onChange();
 };
 
 struct pConsole : public pWidget {
@@ -317,6 +357,20 @@ struct pConsole : public pWidget {
   void destructor();
   void orphan();
   bool keyPress(unsigned key);
+};
+
+struct pFrame : public pWidget {
+  Frame& frame;
+
+  void setEnabled(bool enabled);
+  void setGeometry(Geometry geometry);
+  void setText(string text);
+  void setVisible(bool visible);
+
+  pFrame(Frame& frame) : pWidget(frame), frame(frame) {}
+  void constructor();
+  void destructor();
+  void orphan();
 };
 
 struct pHexEdit : public pWidget {
@@ -345,7 +399,6 @@ struct pHorizontalScroller : public pWidget {
   HorizontalScroller& horizontalScroller;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
@@ -353,13 +406,14 @@ struct pHorizontalScroller : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange(WPARAM wparam);
 };
 
 struct pHorizontalSlider : public pWidget {
   HorizontalSlider& horizontalSlider;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
@@ -367,6 +421,8 @@ struct pHorizontalSlider : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange();
 };
 
 struct pLabel : public pWidget {
@@ -393,6 +449,8 @@ struct pLineEdit : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange();
 };
 
 struct pListView : public pWidget {
@@ -404,26 +462,27 @@ struct pListView : public pWidget {
 
   void append(const lstring& text);
   void autoSizeColumns();
-  bool checked(unsigned row);
-  void modify(unsigned row, const lstring& text);
-  void remove(unsigned row);
+  void remove(unsigned selection);
   void reset();
-  bool selected();
-  unsigned selection();
   void setCheckable(bool checkable);
-  void setChecked(unsigned row, bool checked);
+  void setChecked(unsigned selection, bool checked);
+  void setGeometry(Geometry geometry);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
-  void setImage(unsigned row, unsigned column, const image& image);
+  void setImage(unsigned selection, unsigned position, const image& image);
   void setSelected(bool selected);
-  void setSelection(unsigned row);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, unsigned position, string text);
 
   pListView(ListView& listView) : pWidget(listView), listView(listView), imageList(nullptr) {}
   void constructor();
   void destructor();
   void orphan();
-  void setGeometry(Geometry geometry);
   void buildImageList();
+
+  void onActivate(LPARAM lparam);
+  void onChange(LPARAM lparam);
+  LRESULT onCustomDraw(LPARAM lparam);
 };
 
 struct pProgressBar : public pWidget {
@@ -440,17 +499,62 @@ struct pProgressBar : public pWidget {
 
 struct pRadioButton : public pWidget {
   RadioButton& radioButton;
+  HBITMAP hbitmap;
+  HIMAGELIST himagelist;
 
-  bool checked();
   Size minimumSize();
   void setChecked();
   void setGroup(const group<RadioButton>& group);
+  void setImage(const image& image, Orientation orientation);
   void setText(string text);
 
   pRadioButton(RadioButton& radioButton) : pWidget(radioButton), radioButton(radioButton) {}
   void constructor();
   void destructor();
   void orphan();
+
+  void onActivate();
+};
+
+struct pRadioLabel : public pWidget {
+  RadioLabel& radioLabel;
+
+  Size minimumSize();
+  void setChecked();
+  void setGroup(const group<RadioLabel>& group);
+  void setText(string text);
+
+  pRadioLabel(RadioLabel& radioLabel) : pWidget(radioLabel), radioLabel(radioLabel) {}
+  void constructor();
+  void destructor();
+  void orphan();
+
+  void onActivate();
+};
+
+struct pTabFrame : public pWidget {
+  TabFrame& tabFrame;
+  WindowProc windowProc = nullptr;
+  HIMAGELIST imageList = nullptr;
+
+  void append(string text, const image& image);
+  void remove(unsigned selection);
+  void setEnabled(bool enabled);
+  void setGeometry(Geometry geometry);
+  void setImage(unsigned selection, const image& image);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, string text);
+  void setVisible(bool visible);
+
+  pTabFrame(TabFrame& tabFrame) : pWidget(tabFrame), tabFrame(tabFrame) {}
+  void constructor();
+  void destructor();
+  void orphan();
+  void buildImageList();
+  void synchronizeLayout();
+
+  void onChange();
+  void onDrawItem(LPARAM lparam);
 };
 
 struct pTextEdit : public pWidget {
@@ -466,13 +570,14 @@ struct pTextEdit : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange();
 };
 
 struct pVerticalScroller : public pWidget {
   VerticalScroller& verticalScroller;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
@@ -480,13 +585,14 @@ struct pVerticalScroller : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange(WPARAM wparam);
 };
 
 struct pVerticalSlider : public pWidget {
   VerticalSlider& verticalSlider;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 
@@ -494,6 +600,8 @@ struct pVerticalSlider : public pWidget {
   void constructor();
   void destructor();
   void orphan();
+
+  void onChange();
 };
 
 struct pViewport : public pWidget {

@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
+#include <uxtheme.h>
 #include <io.h>
 #include <shlobj.h>
 #include <nall/windows/registry.hpp>

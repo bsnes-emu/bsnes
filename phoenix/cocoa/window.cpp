@@ -170,21 +170,9 @@ void pWindow::append(Widget& widget) {
 
   @autoreleasepool {
     [widget.p.cocoaView removeFromSuperview];
-    [[cocoaWindow contentView] addSubview:widget.p.cocoaView positioned:NSWindowBelow relativeTo:nil];
+    [[cocoaWindow contentView] addSubview:widget.p.cocoaView positioned:NSWindowAbove relativeTo:nil];
     widget.p.setGeometry(widget.geometry());
     [[cocoaWindow contentView] setNeedsDisplay:YES];
-  }
-}
-
-Color pWindow::backgroundColor() {
-  @autoreleasepool {
-    NSColor* color = [[cocoaWindow backgroundColor] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
-    return {
-      uint8_t(255 * [color redComponent]),
-      uint8_t(255 * [color greenComponent]),
-      uint8_t(255 * [color blueComponent]),
-      uint8_t(255 * [color alphaComponent])
-    };
   }
 }
 
@@ -362,6 +350,14 @@ void pWindow::setWidgetFont(string font) {
 void pWindow::constructor() {
   @autoreleasepool {
     cocoaWindow = [[CocoaWindow alloc] initWith:window];
+
+    NSColor* color = [[cocoaWindow backgroundColor] colorUsingColorSpaceName:NSCalibratedRGBColorSpace];
+    window.state.backgroundColor = Color(
+      (uint8_t)(255 * [color redComponent]),
+      (uint8_t)(255 * [color greenComponent]),
+      (uint8_t)(255 * [color blueComponent]),
+      (uint8_t)(255 * [color alphaComponent])
+    );
   }
 }
 

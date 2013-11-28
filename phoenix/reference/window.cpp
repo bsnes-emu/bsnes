@@ -15,10 +15,6 @@ void pWindow::append(Menu& menu) {
 void pWindow::append(Widget& widget) {
 }
 
-Color pWindow::backgroundColor() {
-  return {0, 0, 0, 255};
-}
-
 bool pWindow::focused() {
   return false;
 }

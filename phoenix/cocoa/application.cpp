@@ -84,7 +84,7 @@ void pApplication::initialize() {
     cocoaDelegate = [[CocoaDelegate alloc] init];
     [NSApp setDelegate:cocoaDelegate];
     //every window has the default application menu; call this so it is displayed at startup
-    [NSApp setMainMenu:[Window::none().p.cocoaWindow menu]];
+    [NSApp setMainMenu:[pWindow::none().p.cocoaWindow menu]];
   }
 }
 

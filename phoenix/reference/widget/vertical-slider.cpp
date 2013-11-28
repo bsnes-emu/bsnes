@@ -1,9 +1,5 @@
 namespace phoenix {
 
-unsigned pVerticalSlider::position() {
-  return 0;
-}
-
 void pVerticalSlider::setLength(unsigned length) {
 }
 

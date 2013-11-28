@@ -3,10 +3,10 @@ namespace phoenix {
 void pCanvas::setDroppable(bool droppable) {
 }
 
-void pCanvas::setSize(Size size) {
+void pCanvas::setMode(Canvas::Mode mode) {
 }
 
-void pCanvas::update() {
+void pCanvas::setSize(Size size) {
 }
 
 void pCanvas::constructor() {

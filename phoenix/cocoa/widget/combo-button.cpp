@@ -11,6 +11,7 @@
 }
 
 -(IBAction) activate:(id)sender {
+  comboButton->state.selection = [self indexOfSelectedItem];
   if(comboButton->onChange) comboButton->onChange();
 }
 
@@ -31,27 +32,15 @@ Size pComboButton::minimumSize() {
   return {maximumWidth + 36, size.height + 6};
 }
 
-void pComboButton::modify(unsigned row, string text) {
+void pComboButton::remove(unsigned selection) {
   @autoreleasepool {
-    [[cocoaView itemAtIndex:row] setTitle:[NSString stringWithUTF8String:text]];
-  }
-}
-
-void pComboButton::remove(unsigned row) {
-  @autoreleasepool {
-    [cocoaView removeItemAtIndex:row];
+    [cocoaView removeItemAtIndex:selection];
   }
 }
 
 void pComboButton::reset() {
   @autoreleasepool {
     [cocoaView removeAllItems];
-  }
-}
-
-unsigned pComboButton::selection() {
-  @autoreleasepool {
-    return [cocoaView indexOfSelectedItem];
   }
 }
 
@@ -62,9 +51,15 @@ void pComboButton::setGeometry(Geometry geometry) {
   });
 }
 
-void pComboButton::setSelection(unsigned row) {
+void pComboButton::setSelection(unsigned selection) {
   @autoreleasepool {
-    [cocoaView selectItemAtIndex:row];
+    [cocoaView selectItemAtIndex:selection];
+  }
+}
+
+void pComboButton::setText(unsigned selection, string text) {
+  @autoreleasepool {
+    [[cocoaView itemAtIndex:selection] setTitle:[NSString stringWithUTF8String:text]];
   }
 }
 

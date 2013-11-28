@@ -1,19 +1,19 @@
 namespace phoenix {
 
 string pFont::serif(unsigned size, string style) {
-  if(size == 0) size = 12;
+  if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Georgia, ", size, ", ", style};
 }
 
 string pFont::sans(unsigned size, string style) {
-  if(size == 0) size = 12;
+  if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Lucida Grande, ", size, ", ", style};
 }
 
 string pFont::monospace(unsigned size, string style) {
-  if(size == 0) size = 12;
+  if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Menlo, ", size, ", ", style};
 }
@@ -32,10 +32,10 @@ NSFont* pFont::cocoaFont(string description) {
 
   NSString* family = @"Lucida Grande";
   NSFontTraitMask traits = 0;
-  CGFloat size = 12;
+  CGFloat size = 8.0;
 
   if(!part(0).empty()) family = [NSString stringWithUTF8String:part(0)];
-  if(!part(1).empty()) size = real(part(1));
+  if(!part(1).empty()) size = decimal(part(1));
   if(part(2).ifind("bold")) traits |= NSBoldFontMask;
   if(part(2).ifind("italic")) traits |= NSItalicFontMask;
   if(part(2).ifind("narrow")) traits |= NSNarrowFontMask;
@@ -43,6 +43,7 @@ NSFont* pFont::cocoaFont(string description) {
   if(part(2).ifind("condensed")) traits |= NSCondensedFontMask;
   if(part(2).ifind("smallcaps")) traits |= NSSmallCapsFontMask;
 
+  size *= 1.5;  //scale to point sizes (for consistency with other operating systems)
   return [[NSFontManager sharedFontManager] fontWithFamily:family traits:traits weight:5 size:size];
 }
 

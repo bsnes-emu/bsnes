@@ -3,7 +3,6 @@ namespace phoenix {
 struct pHorizontalSlider : public pWidget {
   HorizontalSlider& horizontalSlider;
 
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 

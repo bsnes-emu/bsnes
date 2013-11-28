@@ -1,9 +1,5 @@
 namespace phoenix {
 
-bool pRadioItem::checked() {
-  return false;
-}
-
 void pRadioItem::setChecked() {
 }
 

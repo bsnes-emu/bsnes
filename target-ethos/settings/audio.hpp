@@ -7,7 +7,6 @@ struct AudioSlider : HorizontalLayout {
 };
 
 struct AudioSettings : SettingsLayout {
-  Label title;
   HorizontalLayout controlLayout;
     Label frequencyLabel;
     ComboButton frequency;

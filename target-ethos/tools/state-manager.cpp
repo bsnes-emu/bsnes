@@ -1,14 +1,9 @@
 StateManager* stateManager = nullptr;
 
 StateManager::StateManager() {
-  setGeometry({128, 128, 600, 360});
-  windowManager->append(this, "StateManager");
-
-  setTitle("State Manager");
-  layout.setMargin(5);
-  stateList.setHeaderText("Slot", "Description");
+  stateList.setHeaderText({"Slot", "Description"});
   stateList.setHeaderVisible();
-  for(unsigned n = 0; n < Slots; n++) stateList.append(format<2>(1 + n), "(empty)");
+  for(unsigned n = 0; n < Slots; n++) stateList.append({format<2>(1 + n), "(empty)"});
   stateList.autoSizeColumns();
   descLabel.setText("Description:");
   saveButton.setText("Save");
@@ -16,12 +11,11 @@ StateManager::StateManager() {
   resetButton.setText("Reset");
   eraseButton.setText("Erase");
 
-  append(layout);
-  layout.append(stateList, {~0, ~0}, 5);
-  layout.append(descLayout, {~0, 0}, 5);
+  append(stateList, {~0, ~0}, 5);
+  append(descLayout, {~0, 0}, 5);
     descLayout.append(descLabel, {0, 0}, 5);
     descLayout.append(descEdit, {~0, 0});
-  layout.append(controlLayout, {~0, 0});
+  append(controlLayout, {~0, 0});
     controlLayout.append(saveButton, {80, 0}, 5);
     controlLayout.append(loadButton, {80, 0}, 5);
     controlLayout.append(spacer, {~0, 0});
@@ -34,7 +28,7 @@ StateManager::StateManager() {
   saveButton.onActivate = {&StateManager::slotSave, this};
   loadButton.onActivate = {&StateManager::slotLoad, this};
   resetButton.onActivate = [&] {
-    if(MessageWindow().setParent(*this).setText("All states will be erased. Are you sure you want to do this?")
+    if(MessageWindow().setParent(*tools).setText("All states will be erased. Are you sure you want to do this?")
     .question() == MessageWindow::Response::Yes) reset();
   };
   eraseButton.onActivate = {&StateManager::slotErase, this};
@@ -44,7 +38,7 @@ StateManager::StateManager() {
 }
 
 void StateManager::synchronize() {
-  layout.setEnabled(program->active);
+  setEnabled(program->active);
 
   descEdit.setText("");
   descEdit.setEnabled(false);
@@ -59,7 +53,7 @@ void StateManager::synchronize() {
 
 void StateManager::refresh() {
   for(unsigned n = 0; n < Slots; n++) {
-    stateList.modify(n, format<2>(1 + n), slotLoadDescription(n));
+    stateList.setText(n, {format<2>(1 + n), slotLoadDescription(n)});
   }
   stateList.autoSizeColumns();
 }

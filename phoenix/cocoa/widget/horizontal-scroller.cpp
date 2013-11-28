@@ -58,12 +58,6 @@ Size pHorizontalScroller::minimumSize() {
   }
 }
 
-unsigned pHorizontalScroller::position() {
-  @autoreleasepool {
-    return [cocoaView doubleValue] * horizontalScroller.state.length;
-  }
-}
-
 void pHorizontalScroller::setLength(unsigned length) {
   @autoreleasepool {
     [cocoaView update];

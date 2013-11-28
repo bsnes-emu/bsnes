@@ -1,5 +1,4 @@
-struct CheatEditor : Window {
-  VerticalLayout layout;
+struct CheatEditor : ToolsLayout {
   ListView cheatList;
   HorizontalLayout codeLayout;
     Label codeLabel;

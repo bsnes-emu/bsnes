@@ -11,7 +11,9 @@ void pLabel::setText(string text) {
 }
 
 void pLabel::constructor() {
-  hwnd = CreateWindow(L"phoenix_label", L"", WS_CHILD, 0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(L"phoenix_label", L"",
+    WS_CHILD,
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&label);
   setDefaultFont();
   setText(label.state.text);
@@ -28,9 +30,11 @@ void pLabel::orphan() {
 }
 
 static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Window *window = (Window*)GetWindowLongPtr(GetParent(hwnd), GWLP_USERDATA);
-  Label *label = (Label*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(!window || !label) return DefWindowProc(hwnd, msg, wparam, lparam);
+  HWND parentHwnd = GetParent(hwnd);
+  Label* label = (Label*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  if(label == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
+  Window* window = (Window*)label->Sizable::state.window;
+  if(window == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   if(msg == WM_GETDLGCODE) {
     return DLGC_STATIC | DLGC_WANTCHARS;
@@ -46,8 +50,8 @@ static LRESULT CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
     RECT rc;
     BeginPaint(hwnd, &ps);
     GetClientRect(hwnd, &rc);
-    FillRect(ps.hdc, &rc, window->p.brush ? window->p.brush : GetSysColorBrush(COLOR_3DFACE));
-    SetBkColor(ps.hdc, window->p.brush ? window->p.brushColor : GetSysColor(COLOR_3DFACE));
+    DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+    SetBkMode(ps.hdc, TRANSPARENT);
     SelectObject(ps.hdc, ((Widget*)label)->p.hfont);
     unsigned length = GetWindowTextLength(hwnd);
     wchar_t text[length + 1];

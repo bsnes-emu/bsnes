@@ -134,6 +134,8 @@
 }
 
 -(void) tableViewSelectionDidChange:(NSNotification*)notification {
+  listView->state.selected = true;
+  listView->state.selection = [content selectedRow];
   if(listView->onChange) listView->onChange();
 }
 
@@ -178,14 +180,13 @@
   unsigned textDisplacement = 0;
 
   if(image) {
-    NSGraphicsContext* context = [NSGraphicsContext currentContext];
-    [context saveGraphicsState];
+    [[NSGraphicsContext currentContext] saveGraphicsState];
 
     NSRect targetRect = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.height, frame.size.height);
     NSRect sourceRect = NSMakeRect(0, 0, [image size].width, [image size].height);
     [image drawInRect:targetRect fromRect:sourceRect operation:NSCompositeSourceOver fraction:1.0 respectFlipped:YES hints:nil];
 
-    [context restoreGraphicsState];
+    [[NSGraphicsContext currentContext] restoreGraphicsState];
     textDisplacement = frame.size.height + 2;
   }
 
@@ -237,17 +238,7 @@ void pListView::autoSizeColumns() {
   }
 }
 
-bool pListView::checked(unsigned row) {
-  return listView.state.checked(row);
-}
-
-void pListView::modify(unsigned row, const lstring& text) {
-  @autoreleasepool {
-    [[cocoaView content] reloadData];
-  }
-}
-
-void pListView::remove(unsigned row) {
+void pListView::remove(unsigned selection) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
@@ -259,27 +250,13 @@ void pListView::reset() {
   }
 }
 
-bool pListView::selected() {
-  @autoreleasepool {
-    return [[cocoaView content] selectedRow] >= 0;
-  }
-}
-
-unsigned pListView::selection() {
-  if(selected() == false) return 0;
-
-  @autoreleasepool {
-    return [[cocoaView content] selectedRow];
-  }
-}
-
 void pListView::setCheckable(bool checkable) {
   @autoreleasepool {
     [cocoaView reloadColumns];
   }
 }
 
-void pListView::setChecked(unsigned row, bool checked) {
+void pListView::setChecked(unsigned selection, bool checked) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
@@ -307,7 +284,7 @@ void pListView::setHeaderVisible(bool visible) {
   }
 }
 
-void pListView::setImage(unsigned row, unsigned column, const image& image) {
+void pListView::setImage(unsigned selection, unsigned position, const image& image) {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
@@ -321,9 +298,15 @@ void pListView::setSelected(bool selected) {
   }
 }
 
-void pListView::setSelection(unsigned row) {
+void pListView::setSelection(unsigned selection) {
   @autoreleasepool {
-    [[cocoaView content] selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(row, 1)] byExtendingSelection:NO];
+    [[cocoaView content] selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(selection, 1)] byExtendingSelection:NO];
+  }
+}
+
+void pListView::setText(unsigned selection, unsigned position, const string text) {
+  @autoreleasepool {
+    [[cocoaView content] reloadData];
   }
 }
 

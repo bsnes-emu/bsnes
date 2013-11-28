@@ -24,12 +24,6 @@ Size pVerticalSlider::minimumSize() {
   return {20, 48};
 }
 
-unsigned pVerticalSlider::position() {
-  @autoreleasepool {
-    return [cocoaView doubleValue];
-  }
-}
-
 void pVerticalSlider::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x, geometry.y - 2,

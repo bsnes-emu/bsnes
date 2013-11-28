@@ -3,7 +3,7 @@ ifeq ($(platform),)
   phoenixlink =
 else ifeq ($(platform),windows)
   phoenixflags = $(cppflags) $(flags) -DPHOENIX_WINDOWS
-  phoenixlink = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -lshlwapi
+  phoenixlink = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -luxtheme -lmsimg32 -lshlwapi
 else ifeq ($(platform),macosx)
   phoenixflags = $(objcppflags) $(flags) -DPHOENIX_COCOA
   phoenixlink = -framework Cocoa -framework Carbon

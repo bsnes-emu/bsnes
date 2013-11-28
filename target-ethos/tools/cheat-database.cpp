@@ -50,7 +50,7 @@ void CheatDatabase::findCodes() {
     return;
   }
 
-  MessageWindow().setParent(*cheatEditor).setText("Sorry, no cheat codes were found.").information();
+  MessageWindow().setParent(*tools).setText("Sorry, no cheat codes were found.").information();
 }
 
 void CheatDatabase::addCodes() {

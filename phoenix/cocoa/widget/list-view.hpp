@@ -42,20 +42,17 @@ struct pListView : public pWidget {
 
   void append(const lstring& text);
   void autoSizeColumns();
-  bool checked(unsigned row);
-  void modify(unsigned row, const lstring& text);
-  void remove(unsigned row);
+  void remove(unsigned selection);
   void reset();
-  bool selected();
-  unsigned selection();
   void setCheckable(bool checkable);
-  void setChecked(unsigned row, bool checked);
+  void setChecked(unsigned selection, bool checked);
   void setFont(string font);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
-  void setImage(unsigned row, unsigned column, const image& image);
+  void setImage(unsigned selection, unsigned position, const image& image);
   void setSelected(bool selected);
-  void setSelection(unsigned row);
+  void setSelection(unsigned selection);
+  void setText(unsigned selection, unsigned position, string text);
 
   pListView(ListView& listView) : pWidget(listView), listView(listView) {}
   void constructor();

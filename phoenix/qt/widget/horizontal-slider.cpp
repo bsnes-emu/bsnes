@@ -4,10 +4,6 @@ Size pHorizontalSlider::minimumSize() {
   return {0, 20};
 }
 
-unsigned pHorizontalSlider::position() {
-  return qtSlider->value();
-}
-
 void pHorizontalSlider::setLength(unsigned length) {
   length += length == 0;
   qtSlider->setRange(0, length - 1);
@@ -40,7 +36,7 @@ void pHorizontalSlider::orphan() {
 }
 
 void pHorizontalSlider::onChange() {
-  horizontalSlider.state.position = position();
+  horizontalSlider.state.position = qtSlider->value();
   if(horizontalSlider.onChange) horizontalSlider.onChange();
 }
 

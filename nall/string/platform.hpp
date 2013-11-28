@@ -49,7 +49,7 @@ string configpath() {
   SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  #elif defined(PLATFORM_OSX)
+  #elif defined(PLATFORM_MACOSX)
   result = {userpath(), "Library/Application Support/"};
   #else
   result = {userpath(), ".config/"};
@@ -66,7 +66,7 @@ string sharedpath() {
   SHGetFolderPathW(nullptr, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  #elif defined(PLATFORM_OSX)
+  #elif defined(PLATFORM_MACOSX)
   result = "/Library/Application Support/";
   #else
   result = "/usr/share/";

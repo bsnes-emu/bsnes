@@ -12,7 +12,6 @@ struct pRadioItem : public pAction {
   RadioItem& radioItem;
   CocoaRadioItem* cocoaRadioItem = nullptr;
 
-  bool checked();
   void setChecked();
   void setGroup(const group<RadioItem>& group);
   void setText(string text);

@@ -10,13 +10,8 @@ void FixedLayout::append(Sizable& sizable) {
   if(window()) window()->synchronizeLayout();
 }
 
-bool FixedLayout::enabled() {
-  if(layout()) return state.enabled && layout()->enabled();
-  return state.enabled;
-}
-
 Size FixedLayout::minimumSize() {
-  unsigned width = MinimumSize, height = MinimumSize;
+  unsigned width = Size::Minimum, height = Size::Minimum;
   for(auto& child : children) {
     width  = max(width,  child.sizable->minimumSize().width);
     height = max(height, child.sizable->minimumSize().height);
@@ -42,9 +37,9 @@ void FixedLayout::reset() {
 }
 
 void FixedLayout::setEnabled(bool enabled) {
-  state.enabled = enabled;
+  Sizable::state.enabled = enabled;
   for(auto& child : children) {
-    child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->enabled() : enabled);
+    child.sizable->setEnabled(child.sizable->enabled());
   }
 }
 
@@ -52,27 +47,20 @@ void FixedLayout::setGeometry(Geometry geometry) {
 }
 
 void FixedLayout::setVisible(bool visible) {
-  state.visible = visible;
+  Sizable::state.visible = visible;
   for(auto& child : children) {
-    child.sizable->setVisible(dynamic_cast<Widget*>(child.sizable) ? child.sizable->visible() : visible);
+    child.sizable->setVisible(child.sizable->visible());
   }
 }
 
 void FixedLayout::synchronizeLayout() {
   for(auto& child : children) {
     Layout::append(*child.sizable);
-    child.sizable->setGeometry(child.geometry);
+    Geometry childGeometry = child.geometry;
+    if((signed)childGeometry.width < 1) childGeometry.width = 1;
+    if((signed)childGeometry.height < 1) childGeometry.height = 1;
+    child.sizable->setGeometry(childGeometry);
   }
-}
-
-bool FixedLayout::visible() {
-  if(layout()) return state.visible && layout()->visible();
-  return state.visible;
-}
-
-FixedLayout::FixedLayout() {
-  state.enabled = true;
-  state.visible = true;
 }
 
 FixedLayout::~FixedLayout() {

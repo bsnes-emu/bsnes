@@ -16,7 +16,7 @@ struct pTimer : public pObject {
   CocoaTimer* cocoaTimer = nullptr;
 
   void setEnabled(bool enabled);
-  void setInterval(unsigned milliseconds);
+  void setInterval(unsigned interval);
 
   pTimer(Timer& timer) : pObject(timer), timer(timer) {}
   void constructor();

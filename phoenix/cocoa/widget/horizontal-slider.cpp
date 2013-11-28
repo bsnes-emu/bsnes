@@ -24,12 +24,6 @@ Size pHorizontalSlider::minimumSize() {
   return {48, 20};
 }
 
-unsigned pHorizontalSlider::position() {
-  @autoreleasepool {
-    return [cocoaView doubleValue];
-  }
-}
-
 void pHorizontalSlider::setGeometry(Geometry geometry) {
   pWidget::setGeometry({
     geometry.x - 2, geometry.y,

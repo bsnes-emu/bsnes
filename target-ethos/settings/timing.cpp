@@ -16,14 +16,11 @@ TimingAdjustment::TimingAdjustment() {
 }
 
 TimingSettings::TimingSettings() {
-  title.setFont(program->titleFont);
-  title.setText("Audiovisual Synchronization");
   videoAdjust.name.setText("Video:");
   videoAdjust.value.setText({config->timing.video});
   audioAdjust.name.setText("Audio:");
   audioAdjust.value.setText({config->timing.audio});
 
-  append(title, {~0, 0}, 5);
   append(videoAdjust, {~0, 0}, 5);
   append(audioAdjust, {~0, 0}, 5);
 
@@ -78,7 +75,7 @@ void TimingSettings::analyzeAudioFrequency() {
 void TimingSettings::analyzeStart() {
   audio.clear();
 
-  settings->panelList.setEnabled(false);
+//settings->panels.setEnabled(false);
   videoAdjust.analyze.setEnabled(false);
   audioAdjust.analyze.setEnabled(false);
   settings->setStatusText("Initializing ...");
@@ -121,7 +118,7 @@ void TimingSettings::analyzeStop() {
   video.set(Video::Synchronize, config->video.synchronize);
   audio.set(Audio::Synchronize, config->audio.synchronize);
 
-  settings->panelList.setEnabled(true);
+//settings->panels.setEnabled(true);
   videoAdjust.analyze.setEnabled(true);
   audioAdjust.analyze.setEnabled(true);
   videoAdjust.stop.setEnabled(false);

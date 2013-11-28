@@ -12,7 +12,7 @@ static GdkColor CreateColor(uint8_t r, uint8_t g, uint8_t b) {
 static GdkPixbuf* CreatePixbuf(const nall::image& image, bool scale = false) {
   nall::image gdkImage = image;
   gdkImage.transform(0, 32, 255u << 24, 255u << 0, 255u << 8, 255u << 16);
-  if(scale) gdkImage.scale(15, 15, Interpolation::Linear);
+  if(scale) gdkImage.scale(15, 15);
 
   GdkPixbuf* pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, gdkImage.width, gdkImage.height);
   memcpy(gdk_pixbuf_get_pixels(pixbuf), gdkImage.data, gdkImage.width * gdkImage.height * 4);
@@ -44,6 +44,37 @@ static lstring DropPaths(GtkSelectionData* data) {
 
   g_strfreev(uris);
   return paths;
+}
+
+static Position GetDisplacement(Sizable* sizable) {
+  Position position;
+  while(sizable->state.parent) {
+    Position displacement = sizable->state.parent->p.displacement();
+    position.x += displacement.x;
+    position.y += displacement.y;
+    sizable = sizable->state.parent;
+  }
+  return position;
+}
+
+static Layout* GetParentWidgetLayout(Sizable* sizable) {
+  while(sizable) {
+    if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Layout*)sizable;
+    sizable = sizable->state.parent;
+  }
+  return nullptr;
+}
+
+static Widget* GetParentWidget(Sizable* sizable) {
+  while(sizable) {
+    if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Widget*)sizable->state.parent;
+    sizable = sizable->state.parent;
+  }
+  return nullptr;
+}
+
+static bool HasParentWidget(Sizable* sizable) {
+  return GetParentWidget(sizable) != nullptr;
 }
 
 static Keyboard::Keycode Keysym(unsigned keysym) {

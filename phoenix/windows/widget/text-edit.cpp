@@ -39,7 +39,7 @@ void pTextEdit::constructor() {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",
     WS_CHILD | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? WS_HSCROLL | ES_AUTOHSCROLL : 0),
-    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);
   setDefaultFont();
@@ -57,6 +57,11 @@ void pTextEdit::destructor() {
 void pTextEdit::orphan() {
   destructor();
   constructor();
+}
+
+void pTextEdit::onChange() {
+  if(locked) return;
+  if(textEdit.onChange) textEdit.onChange();
 }
 
 }

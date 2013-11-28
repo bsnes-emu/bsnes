@@ -27,12 +27,6 @@ void pWindow::append(Widget& widget) {
   widget.setVisible(widget.visible());
 }
 
-Color pWindow::backgroundColor() {
-  if(window.state.backgroundColorOverride) return window.state.backgroundColor;
-  QColor color = qtWindow->palette().color(QPalette::ColorRole::Window);
-  return {(uint8_t)color.red(), (uint8_t)color.green(), (uint8_t)color.blue(), (uint8_t)color.alpha()};
-}
-
 Geometry pWindow::frameMargin() {
   unsigned menuHeight = window.state.menuVisible ? settings->geometry.menuHeight : 0;
   unsigned statusHeight = window.state.statusVisible ? settings->geometry.statusHeight : 0;
@@ -223,8 +217,11 @@ void pWindow::constructor() {
   qtLayout->addWidget(qtStatus);
 
   setGeometry(window.state.geometry);
-  setMenuFont("Sans, 8");
-  setStatusFont("Sans, 8");
+  setMenuFont(Font::sans(8));
+  setStatusFont(Font::sans(8));
+
+  QColor color = qtWindow->palette().color(QPalette::ColorRole::Window);
+  window.state.backgroundColor = Color((uint8_t)color.red(), (uint8_t)color.green(), (uint8_t)color.blue(), (uint8_t)color.alpha());
 }
 
 void pWindow::destructor() {

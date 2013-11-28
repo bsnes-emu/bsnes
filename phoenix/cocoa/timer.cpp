@@ -19,7 +19,7 @@
   }
   if(timer->state.enabled == false) return;
   instance = [NSTimer
-    scheduledTimerWithTimeInterval:timer->state.milliseconds / 1000.0
+    scheduledTimerWithTimeInterval:timer->state.interval / 1000.0
     target:self selector:@selector(run:) userInfo:nil repeats:YES
   ];
 }
@@ -38,7 +38,7 @@ void pTimer::setEnabled(bool enabled) {
   }
 }
 
-void pTimer::setInterval(unsigned milliseconds) {
+void pTimer::setInterval(unsigned interval) {
   @autoreleasepool {
     [cocoaTimer update];
   }

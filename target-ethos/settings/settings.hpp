@@ -1,8 +1,4 @@
-struct SettingsLayout : HorizontalLayout {
-  Widget spacer;
-  VerticalLayout layout;
-
-  void append(Sizable& widget, const Size &size, unsigned spacing = 0);
+struct SettingsLayout : VerticalLayout {
   SettingsLayout();
 };
 
@@ -15,10 +11,9 @@ struct SettingsLayout : HorizontalLayout {
 #include "advanced.hpp"
 
 struct Settings : Window {
-  HorizontalLayout layout;
-  ListView panelList;
+  VerticalLayout layout;
+  TabFrame panels;
 
-  void panelChanged();
   Settings();
 };
 

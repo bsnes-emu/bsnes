@@ -4,10 +4,6 @@ Size pVerticalScroller::minimumSize() {
   return {18, 0};
 }
 
-unsigned pVerticalScroller::position() {
-  return GetScrollPos(hwnd, SB_CTL);
-}
-
 void pVerticalScroller::setLength(unsigned length) {
   length += (length == 0);
   SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
@@ -21,7 +17,7 @@ void pVerticalScroller::setPosition(unsigned position) {
 void pVerticalScroller::constructor() {
   hwnd = CreateWindow(
     L"SCROLLBAR", L"", WS_CHILD | SBS_VERT,
-    0, 0, 0, 0, parentWindow->p.hwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalScroller);
   unsigned position = verticalScroller.state.position;
@@ -37,6 +33,13 @@ void pVerticalScroller::destructor() {
 void pVerticalScroller::orphan() {
   destructor();
   constructor();
+}
+
+void pVerticalScroller::onChange(WPARAM wparam) {
+  unsigned position = ScrollEvent(hwnd, wparam);
+  if(position == verticalScroller.state.position) return;
+  verticalScroller.state.position = position;
+  if(verticalScroller.onChange) verticalScroller.onChange();
 }
 
 }

@@ -1,11 +1,8 @@
 namespace phoenix {
 
-static void CheckItem_toggle(CheckItem* self) {
-  if(self->p.locked == false && self->onToggle) self->onToggle();
-}
-
-bool pCheckItem::checked() {
-  return gtk_check_menu_item_get_active(GTK_CHECK_MENU_ITEM(widget));
+static void CheckItem_toggle(GtkCheckMenuItem* gtkCheckMenuItem, CheckItem* self) {
+  self->state.checked = gtk_check_menu_item_get_active(gtkCheckMenuItem);
+  if(!self->p.locked && self->onToggle) self->onToggle();
 }
 
 void pCheckItem::setChecked(bool checked) {
@@ -22,7 +19,7 @@ void pCheckItem::constructor() {
   widget = gtk_check_menu_item_new_with_mnemonic("");
   setChecked(checkItem.state.checked);
   setText(checkItem.state.text);
-  g_signal_connect_swapped(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_toggle), (gpointer)&checkItem);
+  g_signal_connect(G_OBJECT(widget), "toggled", G_CALLBACK(CheckItem_toggle), (gpointer)&checkItem);
 }
 
 void pCheckItem::destructor() {

@@ -8,8 +8,8 @@ void pTimer::setEnabled(bool enabled) {
   }
 }
 
-void pTimer::setInterval(unsigned milliseconds) {
-  qtTimer->setInterval(milliseconds);
+void pTimer::setInterval(unsigned interval) {
+  qtTimer->setInterval(interval);
 }
 
 void pTimer::constructor() {

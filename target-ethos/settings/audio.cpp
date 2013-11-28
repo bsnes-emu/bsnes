@@ -7,18 +7,24 @@ AudioSlider::AudioSlider() {
 }
 
 AudioSettings::AudioSettings() {
-  title.setFont(program->titleFont);
-  title.setText("Audio Settings");
   frequencyLabel.setText("Frequency:");
-  frequency.append("32000hz", "44100hz", "48000hz", "96000hz");
+  frequency.append("32000hz");
+  frequency.append("44100hz");
+  frequency.append("48000hz");
+  frequency.append("96000hz");
   latencyLabel.setText("Latency:");
-  latency.append("20ms", "40ms", "60ms", "80ms", "100ms");
+  latency.append("20ms");
+  latency.append("40ms");
+  latency.append("60ms");
+  latency.append("80ms");
+  latency.append("100ms");
   resamplerLabel.setText("Resampler:");
-  resampler.append("Linear", "Hermite", "Sinc");
+  resampler.append("Linear");
+  resampler.append("Hermite");
+  resampler.append("Sinc");
   volume.name.setText("Volume:");
   volume.slider.setLength(201);
 
-  append(title, {~0, 0}, 5);
   append(controlLayout, {~0, 0}, 5);
     controlLayout.append(frequencyLabel, {0, 0}, 5);
     controlLayout.append(frequency, {~0, 0}, 5);

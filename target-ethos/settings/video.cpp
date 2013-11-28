@@ -7,8 +7,6 @@ VideoSlider::VideoSlider() {
 }
 
 VideoSettings::VideoSettings() {
-  title.setFont(program->titleFont);
-  title.setText("Video Settings");
   colorAdjustment.setFont(program->boldFont);
   colorAdjustment.setText("Color adjustment:");
   saturation.name.setText("Saturation:");
@@ -24,7 +22,6 @@ VideoSettings::VideoSettings() {
   overscanVertical.name.setText("Vertical:");
   overscanVertical.slider.setLength(17);
 
-  append(title, {~0, 0}, 5);
   append(colorAdjustment, {~0, 0});
   append(saturation, {~0, 0});
   append(gamma, {~0, 0});

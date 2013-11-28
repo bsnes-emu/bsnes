@@ -17,8 +17,9 @@ Size pWidget::minimumSize() {
 }
 
 void pWidget::setEnabled(bool enabled) {
+  if(!widget.parent()) enabled = false;
   if(widget.state.abstract) enabled = false;
-  if(sizable.state.layout && sizable.state.layout->enabled() == false) enabled = false;
+  if(!widget.enabledToAll()) enabled = false;
 
   @autoreleasepool {
     if([cocoaView respondsToSelector:@selector(setEnabled:)]) {
@@ -47,11 +48,13 @@ void pWidget::setGeometry(Geometry geometry) {
     [cocoaView setFrame:NSMakeRect(geometry.x, windowHeight - geometry.y - geometry.height, geometry.width, geometry.height)];
     [[cocoaView superview] setNeedsDisplay:YES];
   }
+  if(widget.onSize) widget.onSize();
 }
 
 void pWidget::setVisible(bool visible) {
+  if(!widget.parent()) visible = false;
   if(widget.state.abstract) visible = false;
-  if(sizable.state.layout && sizable.state.layout->visible() == false) visible = false;
+  if(!widget.visibleToAll()) visible = false;
 
   @autoreleasepool {
     [cocoaView setHidden:!visible];

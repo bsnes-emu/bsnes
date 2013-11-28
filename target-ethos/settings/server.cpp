@@ -1,8 +1,6 @@
 ServerSettings* serverSettings = nullptr;
 
 ServerSettings::ServerSettings() {
-  title.setFont(program->titleFont);
-  title.setText("Server Settings");
   hostLabel.setText("Hostname:");
   userLabel.setText("Username:");
   passLabel.setText("Password:");
@@ -12,7 +10,6 @@ ServerSettings::ServerSettings() {
     Font::size(program->normalFont, "Username:").width
   );
 
-  append(title, {~0, 0}, 5);
   append(hostLayout, {~0, 0}, 5);
     hostLayout.append(hostLabel, {width, 0}, 5);
     hostLayout.append(hostEdit, {~0, 0});

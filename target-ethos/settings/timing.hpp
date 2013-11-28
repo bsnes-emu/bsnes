@@ -10,7 +10,6 @@ struct TimingAdjustment : HorizontalLayout {
 };
 
 struct TimingSettings : SettingsLayout {
-  Label title;
   TimingAdjustment videoAdjust;
   TimingAdjustment audioAdjust;
 

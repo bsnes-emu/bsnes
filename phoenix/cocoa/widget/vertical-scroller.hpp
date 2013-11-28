@@ -14,7 +14,6 @@ struct pVerticalScroller : public pWidget {
   CocoaVerticalScroller* cocoaVerticalScroller = nullptr;
 
   Size minimumSize();
-  unsigned position();
   void setLength(unsigned length);
   void setPosition(unsigned position);
 

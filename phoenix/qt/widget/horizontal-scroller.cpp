@@ -4,10 +4,6 @@ Size pHorizontalScroller::minimumSize() {
   return {0, 15};
 }
 
-unsigned pHorizontalScroller::position() {
-  return qtScroller->value();
-}
-
 void pHorizontalScroller::setLength(unsigned length) {
   length += length == 0;
   qtScroller->setRange(0, length - 1);
@@ -40,7 +36,7 @@ void pHorizontalScroller::orphan() {
 }
 
 void pHorizontalScroller::onChange() {
-  horizontalScroller.state.position = position();
+  horizontalScroller.state.position = qtScroller->value();
   if(horizontalScroller.onChange) horizontalScroller.onChange();
 }
 
