@@ -81,7 +81,7 @@ struct http {
       if(length <= 0) return output;
       buffer[1] = 0;
       output.append(buffer);
-    } while(output.endswith("\r\n\r\n") == false);
+    } while(output.endsWith("\r\n\r\n") == false);
     return output;
   }
 
@@ -93,7 +93,7 @@ struct http {
       if(length <= 0) return output;
       buffer[1] = 0;
       output.append(buffer);
-    } while(output.endswith("\r\n") == false);
+    } while(output.endsWith("\r\n") == false);
     return output;
   }
 

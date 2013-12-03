@@ -34,7 +34,7 @@ struct bpsmulti {
     ls(targetList, targetPath, targetPath);
 
     for(auto& targetName : targetList) {
-      if(targetName.endswith("/")) {
+      if(targetName.endsWith("/")) {
         targetName.rtrim<1>("/");
         writeNumber(CreatePath | ((targetName.length() - 1) << 2));
         writeString(targetName);

@@ -150,7 +150,7 @@ Presentation::Presentation() {
     }
   };
 
-  loadGame.onActivate = [&] { libraryManager->setVisible(); };
+  loadGame.onActivate = [&] { libraryManager->show(); };
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
   shaderEmulation.onActivate = [&] { config->video.shader = "Display Emulation"; utility->updateShader(); };

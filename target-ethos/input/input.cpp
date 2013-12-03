@@ -8,15 +8,15 @@ void AbstractInput::bind() {
 
   for(auto& mapping : list) {
     Input::Type type;
-         if(mapping.endswith(".Up")) type = Input::Type::HatUp;
-    else if(mapping.endswith(".Down")) type = Input::Type::HatDown;
-    else if(mapping.endswith(".Left")) type = Input::Type::HatLeft;
-    else if(mapping.endswith(".Right")) type = Input::Type::HatRight;
-    else if(mapping.endswith(".Lo")) type = Input::Type::AxisLo;
-    else if(mapping.endswith(".Hi")) type = Input::Type::AxisHi;
-    else if(mapping.beginswith("JP") && mapping.find("Axis")) type = Input::Type::Axis;
-    else if(mapping.beginswith("MS") && mapping.endswith("axis")) type = Input::Type::MouseAxis;
-    else if(mapping.beginswith("MS")) type = Input::Type::MouseButton;
+         if(mapping.endsWith(".Up")) type = Input::Type::HatUp;
+    else if(mapping.endsWith(".Down")) type = Input::Type::HatDown;
+    else if(mapping.endsWith(".Left")) type = Input::Type::HatLeft;
+    else if(mapping.endsWith(".Right")) type = Input::Type::HatRight;
+    else if(mapping.endsWith(".Lo")) type = Input::Type::AxisLo;
+    else if(mapping.endsWith(".Hi")) type = Input::Type::AxisHi;
+    else if(mapping.beginsWith("JP") && mapping.find("Axis")) type = Input::Type::Axis;
+    else if(mapping.beginsWith("MS") && mapping.endsWith("axis")) type = Input::Type::MouseAxis;
+    else if(mapping.beginsWith("MS")) type = Input::Type::MouseButton;
     else type = Input::Type::Button;
 
     string decode = mapping;

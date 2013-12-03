@@ -7,7 +7,7 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
     QString::fromUtf8(state.path), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks
   );
   string name = directory.toUtf8().constData();
-  if(name && name.endswith("/") == false) name.append("/");
+  if(name && name.endsWith("/") == false) name.append("/");
   return name;
 }
 

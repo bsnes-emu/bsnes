@@ -10,7 +10,7 @@ void Utility::setInterface(Emulator::Interface* emulator) {
 //load from command-line, etc
 void Utility::loadMedia(string pathname) {
   pathname.transform("\\", "/");
-  if(pathname.endswith("/")) pathname.rtrim("/");
+  if(pathname.endsWith("/")) pathname.rtrim("/");
 
   if(!directory::exists(pathname)) return;
   string type = extension(pathname);
@@ -47,7 +47,7 @@ void Utility::loadMedia(Emulator::Interface* emulator, Emulator::Interface::Medi
 
 //request from emulation core to load non-volatile media folder
 void Utility::loadRequest(unsigned id, string name, string type) {
-  string pathname = libraryManager->load(type);  //browser->select({"Load ", name}, type);
+  string pathname = libraryManager->load(type);
   if(pathname.empty()) return;
   path(id) = pathname;
   this->pathname.append(pathname);
@@ -306,7 +306,7 @@ void Utility::showMessage(string message) {
 string Utility::libraryPath() {
   string path = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").transform("\\", "/");
   if(path.empty()) path = {userpath(), "Emulation/"};
-  if(path.endswith("/") == false) path.append("/");
+  if(path.endsWith("/") == false) path.append("/");
   return path;
 }
 

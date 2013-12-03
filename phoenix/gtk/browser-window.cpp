@@ -31,7 +31,7 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
   }
 
   gtk_widget_destroy(dialog);
-  if(name && !name.endswith("/")) name.append("/");
+  if(name && !name.endsWith("/")) name.append("/");
   return name;
 }
 

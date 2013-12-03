@@ -6,9 +6,9 @@ namespace nall {
 #define autostream(...) (*makestream(__VA_ARGS__))
 
 inline std::unique_ptr<stream> makestream(const string& path) {
-  if(path.ibeginswith("http://")) return std::unique_ptr<stream>(new httpstream(path, 80));
-  if(path.iendswith(".gz")) return std::unique_ptr<stream>(new gzipstream(filestream{path}));
-  if(path.iendswith(".zip")) return std::unique_ptr<stream>(new zipstream(filestream{path}));
+  if(path.ibeginsWith("http://")) return std::unique_ptr<stream>(new httpstream(path, 80));
+  if(path.iendsWith(".gz")) return std::unique_ptr<stream>(new gzipstream(filestream{path}));
+  if(path.iendsWith(".zip")) return std::unique_ptr<stream>(new zipstream(filestream{path}));
   return std::unique_ptr<stream>(new mmapstream(path));
 }
 

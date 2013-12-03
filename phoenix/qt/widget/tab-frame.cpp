@@ -46,8 +46,10 @@ void pTabFrame::setImage(unsigned selection, const image& image) {
 }
 
 void pTabFrame::setSelection(unsigned selection) {
+  locked = true;
   qtTabFrame->setCurrentIndex(selection);
   synchronizeLayout();
+  locked = false;
 }
 
 void pTabFrame::setText(unsigned selection, string text) {
@@ -89,7 +91,7 @@ void pTabFrame::synchronizeLayout() {
 void pTabFrame::onChange(int selection) {
   tabFrame.state.selection = selection;
   synchronizeLayout();
-  if(tabFrame.onChange) tabFrame.onChange();
+  if(!locked && tabFrame.onChange) tabFrame.onChange();
 }
 
 }

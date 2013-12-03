@@ -38,7 +38,7 @@ static lstring DropPaths(GtkSelectionData* data) {
 
     string path = pathname;
     g_free(pathname);
-    if(directory::exists(path) && !path.endswith("/")) path.append("/");
+    if(directory::exists(path) && !path.endsWith("/")) path.append("/");
     paths.append(path);
   }
 

@@ -3,33 +3,49 @@ struct LibraryBrowser : VerticalLayout {
   HorizontalLayout informationLayout;
     Label informationType;
     Label information;
+    ComboButton mediaMode;
 
-  LibraryBrowser();
+  LibraryBrowser(Emulator::Interface& emulator);
   void onActivate();
+  void onChange();
   void refresh();
-  void setFilter(const string& filter);
-  void setInformation();
-  void setPath(const string& pathname);
+  void setMode();
 
-  string filter;
-  string filterMask;
-  string filterSuffix;
+  Emulator::Interface& emulator;
   string pathname;
+  string type;
+  string typeMask;
+  string typeSuffix;
+};
+
+struct LibraryImport : VerticalLayout {
+  Label information;
+  Button importButton;
+
+  LibraryImport();
+  void onImportActivate();
 };
 
 struct LibraryManager : Window {
   VerticalLayout layout;
   TabFrame libraryFrame;
-    VerticalLayout importLayout;
-      Label importInformation;
-      Button importButton;
     vector<LibraryBrowser*> browsers;
+    LibraryImport libraryImport;
+  HorizontalLayout informationLayout;
+    Label information;
+    Button skipButton;
+    Button loadButton;
 
   LibraryManager();
   void bootstrap();
   string load(const string& type);
-  void setVisible(bool visible = true);
+  void onChange();
+  void setInformation(bool load);
+  void show();
+  void synchronize();
 
+  lstring loaded;
+  string requestedLoadType;
   bool slotLoad = false;
   string loadPathname;
 };

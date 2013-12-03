@@ -33,7 +33,7 @@ lstring DropPaths(id<NSDraggingInfo> sender) {
     NSArray* files = [pboard propertyListForType:NSFilenamesPboardType];
     for(unsigned n = 0; n < [files count]; n++) {
       string path = [[files objectAtIndex:n] UTF8String];
-      if(directory::exists(path) && !path.endswith("/")) path.append("/");
+      if(directory::exists(path) && !path.endsWith("/")) path.append("/");
       paths.append(path);
     }
   }

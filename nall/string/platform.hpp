@@ -8,7 +8,7 @@ string activepath() {
   string result = path;
   if(result.empty()) result = ".";
   result.transform("\\", "/");
-  if(result.endswith("/") == false) result.append("/");
+  if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 
@@ -18,7 +18,7 @@ string realpath(const string& name) {
   if(::realpath(name, path)) result = path;
   if(result.empty()) result = {activepath(), name};
   result.transform("\\", "/");
-  if(result.endswith("/") == false) result.append("/");
+  if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 
@@ -36,7 +36,7 @@ string userpath() {
   result = userinfo->pw_dir;
   #endif
   if(result.empty()) result = ".";
-  if(result.endswith("/") == false) result.append("/");
+  if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 
@@ -55,7 +55,7 @@ string configpath() {
   result = {userpath(), ".config/"};
   #endif
   if(result.empty()) result = ".";
-  if(result.endswith("/") == false) result.append("/");
+  if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 
@@ -72,7 +72,7 @@ string sharedpath() {
   result = "/usr/share/";
   #endif
   if(result.empty()) result = ".";
-  if(result.endswith("/") == false) result.append("/");
+  if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 

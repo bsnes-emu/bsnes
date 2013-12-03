@@ -9,7 +9,7 @@ struct parser {
   //export from bitstream to canvas
   void load(bitstream& stream, uint64_t offset, context& ctx, unsigned width, unsigned height) {
     canvas.allocate(width, height);
-    canvas.clear(ctx.paddingColor);
+    canvas.fill(ctx.paddingColor);
     parse(1, stream, offset, ctx, width, height);
   }
 
@@ -20,7 +20,7 @@ struct parser {
     return true;
   }
 
-  inline parser() : canvas(0, 32, 0u, 255u << 16, 255u << 8, 255u << 0) {
+  inline parser() : canvas(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0) {
   }
 
 private:

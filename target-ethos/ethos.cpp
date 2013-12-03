@@ -85,7 +85,7 @@ Program::Program(int argc, char** argv) {
   presentation->setVisible();
   utility->resize();
 
-  if(config->library.showOnStartup) libraryManager->setVisible();
+  if(argc == 1 && config->library.showOnStartup) libraryManager->show();
 
   video.set(Video::Handle, presentation->viewport.handle());
   if(!video.cap(Video::Depth) || !video.set(Video::Depth, depth = 30u)) {

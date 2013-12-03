@@ -42,7 +42,7 @@ static lstring DropPaths(WPARAM wparam) {
     if(DragQueryFile(dropList, n, buffer, length + 1)) {
       string path = (const char*)utf8_t(buffer);
       path.transform("\\", "/");
-      if(directory::exists(path) && !path.endswith("/")) path.append("/");
+      if(directory::exists(path) && !path.endsWith("/")) path.append("/");
       paths.append(path);
     }
 

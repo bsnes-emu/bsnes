@@ -176,6 +176,10 @@ struct context {
 
     if(mosaicWidth < 1) mosaicWidth = 1;
     if(mosaicHeight < 1) mosaicHeight = 1;
+
+    //set alpha to full opacity
+    paddingColor |= 255u << 24;
+    for(auto& color : palette) color |= 255u << 24;
   }
 
   void reset() {
@@ -208,7 +212,7 @@ struct context {
 
     paddingWidth = 0;
     paddingHeight = 0;
-    paddingColor = 0x000000;
+    paddingColor = 0;
     palette.reset();
   }
 

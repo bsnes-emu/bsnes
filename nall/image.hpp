@@ -113,6 +113,7 @@ unsigned image::bitShift(uint64_t color) {
 }
 
 uint64_t image::normalize(uint64_t color, unsigned sourceDepth, unsigned targetDepth) {
+  if(sourceDepth == 0 || targetDepth == 0) return 0;
   while(sourceDepth < targetDepth) {
     color = (color << sourceDepth) | color;
     sourceDepth += sourceDepth;

@@ -3,7 +3,7 @@ namespace phoenix {
 static void TabFrame_change(GtkNotebook* notebook, GtkWidget* page, unsigned selection, TabFrame* self) {
   self->state.selection = selection;
   self->p.synchronizeLayout();
-  if(self->onChange) self->onChange();
+  if(!self->p.locked && self->onChange) self->onChange();
 }
 
 void pTabFrame::append(string text, const image& image) {
@@ -73,7 +73,9 @@ void pTabFrame::setImage(unsigned selection, const image& image) {
 }
 
 void pTabFrame::setSelection(unsigned selection) {
+  locked = true;
   gtk_notebook_set_current_page(GTK_NOTEBOOK(gtkWidget), selection);
+  locked = false;
 }
 
 void pTabFrame::setText(unsigned selection, string text) {

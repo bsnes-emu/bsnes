@@ -90,7 +90,7 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
   string name = (const char*)utf8_t(wname);
   if(!name) return "";
   name.transform("\\", "/");
-  if(name.endswith("/") == false) name.append("/");
+  if(name.endsWith("/") == false) name.append("/");
   return name;
 }
 

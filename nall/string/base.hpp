@@ -81,10 +81,10 @@ public:
   inline bool match(rstring) const;
   inline bool imatch(rstring) const;
 
-  inline bool beginswith(rstring) const;
-  inline bool ibeginswith(rstring) const;
-  inline bool endswith(rstring) const;
-  inline bool iendswith(rstring) const;
+  inline bool beginsWith(rstring) const;
+  inline bool ibeginsWith(rstring) const;
+  inline bool endsWith(rstring) const;
+  inline bool iendsWith(rstring) const;
 
   inline string slice(unsigned offset, unsigned length = ~0u) const;
 

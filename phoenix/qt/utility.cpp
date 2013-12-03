@@ -16,7 +16,7 @@ static lstring DropPaths(QDropEvent* event) {
   for(unsigned n = 0; n < urls.size(); n++) {
     string path = urls[n].path().toUtf8().constData();
     if(path.empty()) continue;
-    if(directory::exists(path) && !path.endswith("/")) path.append("/");
+    if(directory::exists(path) && !path.endsWith("/")) path.append("/");
     paths.append(path);
   }
 

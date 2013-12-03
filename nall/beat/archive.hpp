@@ -8,7 +8,7 @@ namespace nall {
 struct beatArchive : beatBase {
   bool create(const string& beatname, string pathname, const string& metadata = "") {
     if(fp.open(beatname, file::mode::write) == false) return false;
-    if(pathname.endswith("/") == false) pathname.append("/");
+    if(pathname.endsWith("/") == false) pathname.append("/");
 
     checksum = ~0;
     writeString("BPA1");
@@ -18,7 +18,7 @@ struct beatArchive : beatBase {
     lstring list;
     ls(list, pathname, pathname);
     for(auto &name : list) {
-      if(name.endswith("/")) {
+      if(name.endsWith("/")) {
         name.rtrim<1>("/");
         writeNumber(0 | ((name.length() - 1) << 1));
         writeString(name);
@@ -46,7 +46,7 @@ struct beatArchive : beatBase {
 
   bool unpack(const string& beatname, string pathname) {
     if(fp.open(beatname, file::mode::read) == false) return false;
-    if(pathname.endswith("/") == false) pathname.append("/");
+    if(pathname.endsWith("/") == false) pathname.append("/");
 
     checksum = ~0;
     if(readString(4) != "BPA1") return false;

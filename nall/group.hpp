@@ -41,11 +41,11 @@ template<typename T> struct group : protected vector<T*> {
     return false;
   }
 
-  struct iterator : protected vector<T*>::const_iterator {
-    T& operator*() const { return *vector<T*>::const_iterator::operator*(); }
-    bool operator!=(const iterator& source) const { return vector<T*>::const_iterator::operator!=(source); }
-    iterator& operator++() { vector<T*>::const_iterator::operator++(); return *this; }
-    iterator(const group& source, unsigned position) : vector<T*>::const_iterator(source, position) {}
+  struct iterator : protected vector<T*>::constIterator {
+    T& operator*() const { return *vector<T*>::constIterator::operator*(); }
+    bool operator!=(const iterator& source) const { return vector<T*>::constIterator::operator!=(source); }
+    iterator& operator++() { vector<T*>::constIterator::operator++(); return *this; }
+    iterator(const group& source, unsigned position) : vector<T*>::constIterator(source, position) {}
   };
 
   const iterator begin() const { return iterator(*this, 0); }

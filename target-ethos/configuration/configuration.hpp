@@ -46,7 +46,7 @@ struct ConfigurationSettings : Configuration::Document {
   } server;
 
   struct Library : Configuration::Node {
-    unsigned selection;
+    signed selection;
     bool showOnStartup;
   } library;
 

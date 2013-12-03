@@ -131,8 +131,8 @@ struct Node {
   vector<Node>::iterator begin() { return children.begin(); }
   vector<Node>::iterator end() { return children.end(); }
 
-  const vector<Node>::const_iterator begin() const { return children.begin(); }
-  const vector<Node>::const_iterator end() const { return children.end(); }
+  const vector<Node>::constIterator begin() const { return children.begin(); }
+  const vector<Node>::constIterator end() const { return children.end(); }
 
   Node() : attribute(false), level(0) {}
 
