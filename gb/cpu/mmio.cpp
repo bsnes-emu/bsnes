@@ -20,6 +20,10 @@ void CPU::mmio_joyp_poll() {
   dpad |= interface->inputPoll(0, 0, (unsigned)Input::Left) << 1;
   dpad |= interface->inputPoll(0, 0, (unsigned)Input::Right) << 0;
 
+  //D-pad pivot makes it impossible to press opposing directions at the same time
+  if(dpad & 4) dpad &= ~8;  //disallow up+down
+  if(dpad & 2) dpad &= ~1;  //disallow left+right
+
   status.joyp = 0x0f;
   if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
@@ -32,6 +36,7 @@ uint8 CPU::mmio_read(uint16 addr) {
   if(addr >= 0xff80 && addr <= 0xfffe) return hram[addr & 0x7f];
 
   if(addr == 0xff00) {  //JOYP
+    mmio_joyp_poll();
     return (status.p15 << 5)
          | (status.p14 << 4)
          | (status.joyp << 0);
@@ -134,7 +139,6 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
     status.p15 = data & 0x20;
     status.p14 = data & 0x10;
     interface->joypWrite(status.p15, status.p14);
-    mmio_joyp_poll();
     return;
   }
 

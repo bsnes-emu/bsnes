@@ -95,7 +95,7 @@ FileDialog *fileDialog = nullptr;
 Ananke::Ananke() {
   libraryPath = string::read({configpath(), "higan/library.bml"}).strip().ltrim<1>("Path: ").replace("\\", "/");
   if(libraryPath.empty()) libraryPath = {userpath(), "Emulation/"};
-  if(libraryPath.endswith("/") == false) libraryPath.append("/");
+  if(libraryPath.endsWith("/") == false) libraryPath.append("/");
 }
 
 bool Ananke::supported(const string &filename) {
@@ -133,7 +133,7 @@ string Ananke::open(string filename) {
   config.path = information.path;  //remember last used directory
 
   vector<uint8_t> buffer;
-  if(filename.endswith(".zip")) {
+  if(filename.endsWith(".zip")) {
     information.archive = filename;
     buffer = extractROM();
   } else {
@@ -143,23 +143,23 @@ string Ananke::open(string filename) {
 
   applyBeatPatch(buffer);
 
-  if(information.name.endswith(".fc") || information.name.endswith(".nes")) return openFamicom(buffer);
-  if(information.name.endswith(".sfc") || information.name.endswith(".smc")) return openSuperFamicom(buffer);
-  if(information.name.endswith(".st")) return openSufamiTurbo(buffer);
-  if(information.name.endswith(".bs")) return openBsxSatellaview(buffer);
-  if(information.name.endswith(".gb") || information.name.endswith(".gbc")) return openGameBoy(buffer);
-  if(information.name.endswith(".gba")) return openGameBoyAdvance(buffer);
+  if(information.name.endsWith(".fc") || information.name.endsWith(".nes")) return openFamicom(buffer);
+  if(information.name.endsWith(".sfc") || information.name.endsWith(".smc")) return openSuperFamicom(buffer);
+  if(information.name.endsWith(".st")) return openSufamiTurbo(buffer);
+  if(information.name.endsWith(".bs")) return openBsxSatellaview(buffer);
+  if(information.name.endsWith(".gb") || information.name.endsWith(".gbc")) return openGameBoy(buffer);
+  if(information.name.endsWith(".gba")) return openGameBoyAdvance(buffer);
   return "";
 }
 
 string Ananke::sync(string pathname) {
-  if(pathname.endswith(".fc/")) return syncFamicom(pathname);
-  if(pathname.endswith(".sfc/")) return syncSuperFamicom(pathname);
-  if(pathname.endswith(".st/")) return syncSufamiTurbo(pathname);
-  if(pathname.endswith(".bs/")) return syncBsxSatellaview(pathname);
-  if(pathname.endswith(".gb/")) return syncGameBoy(pathname);
-  if(pathname.endswith(".gbc/")) return syncGameBoy(pathname);
-  if(pathname.endswith(".gba/")) return syncGameBoyAdvance(pathname);
+  if(pathname.endsWith(".fc/")) return syncFamicom(pathname);
+  if(pathname.endsWith(".sfc/")) return syncSuperFamicom(pathname);
+  if(pathname.endsWith(".st/")) return syncSufamiTurbo(pathname);
+  if(pathname.endsWith(".bs/")) return syncBsxSatellaview(pathname);
+  if(pathname.endsWith(".gb/")) return syncGameBoy(pathname);
+  if(pathname.endsWith(".gbc/")) return syncGameBoy(pathname);
+  if(pathname.endsWith(".gba/")) return syncGameBoyAdvance(pathname);
   return "";
 }
 

@@ -17,9 +17,9 @@ struct image {
   unsigned pitch  = 0;
   unsigned size   = 0;
 
-  bool endian     = 0;  //0 = lsb, 1 = msb
+  bool endian     =  0;  //0 = lsb, 1 = msb
   unsigned depth  = 32;
-  unsigned stride = 4;
+  unsigned stride =  4;
 
   struct Channel {
     uint64_t mask;
@@ -511,7 +511,7 @@ void image::scaleLinearWidth(unsigned outputWidth) {
     sp += stride;
 
     unsigned x = 0;
-    while(x < outputWidth) {
+    while(true) {
       while(xfraction < 0x100000000 && x++ < outputWidth) {
         uint64_t A = interpolate1D((a & alpha.mask) >> alpha.shift, (b & alpha.mask) >> alpha.shift, xfraction);
         uint64_t R = interpolate1D((a & red.mask  ) >> red.shift  , (b & red.mask  ) >> red.shift,   xfraction);
@@ -522,6 +522,7 @@ void image::scaleLinearWidth(unsigned outputWidth) {
         dp += stride;
         xfraction += xstride;
       }
+      if(x >= outputWidth) break;
 
       sp += stride;
       a = b;
@@ -553,7 +554,7 @@ void image::scaleLinearHeight(unsigned outputHeight) {
     sp += pitch;
 
     unsigned y = 0;
-    while(y < outputHeight) {
+    while(true) {
       while(yfraction < 0x100000000 && y++ < outputHeight) {
         uint64_t A = interpolate1D((a & alpha.mask) >> alpha.shift, (b & alpha.mask) >> alpha.shift, yfraction);
         uint64_t R = interpolate1D((a & red.mask  ) >> red.shift,   (b & red.mask  ) >> red.shift,   yfraction);
@@ -564,6 +565,7 @@ void image::scaleLinearHeight(unsigned outputHeight) {
         dp += pitch;
         yfraction += ystride;
       }
+      if(y >= outputHeight) break;
 
       sp += pitch;
       a = b;
@@ -600,7 +602,7 @@ void image::scaleLinear(unsigned outputWidth, unsigned outputHeight) {
     sp += stride;
 
     unsigned x = 0;
-    while(x < outputWidth) {
+    while(true) {
       while(xfraction < 0x100000000 && x++ < outputWidth) {
         uint64_t A = interpolate2D((a & alpha.mask) >> alpha.shift, (b & alpha.mask) >> alpha.shift, (c & alpha.mask) >> alpha.shift, (d & alpha.mask) >> alpha.shift, xfraction, yfraction);
         uint64_t R = interpolate2D((a & red.mask  ) >> red.shift,   (b & red.mask  ) >> red.shift,   (c & red.mask  ) >> red.shift,   (d & red.mask  ) >> red.shift,   xfraction, yfraction);
@@ -611,6 +613,7 @@ void image::scaleLinear(unsigned outputWidth, unsigned outputHeight) {
         dp += stride;
         xfraction += xstride;
       }
+      if(x >= outputWidth) break;
 
       sp += stride;
       a = b;
@@ -647,12 +650,13 @@ void image::scaleNearest(unsigned outputWidth, unsigned outputHeight) {
     uint64_t a = read(sp);
 
     unsigned x = 0;
-    while(x < outputWidth) {
+    while(true) {
       while(xfraction < 0x100000000 && x++ < outputWidth) {
         write(dp, a);
         dp += stride;
         xfraction += xstride;
       }
+      if(x >= outputWidth) break;
 
       sp += stride;
       a = read(sp);

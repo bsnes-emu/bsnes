@@ -41,12 +41,13 @@ unsigned Interface::group(unsigned id) {
   case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
-    if(system.revision() == System::Revision::GameBoy) return ID::GameBoy;
-    if(system.revision() == System::Revision::SuperGameBoy) return ID::SuperGameBoy;
-    if(system.revision() == System::Revision::GameBoyColor) return ID::GameBoyColor;
+    switch(system.revision) {
+    case System::Revision::GameBoy: return ID::GameBoy;
+    case System::Revision::SuperGameBoy: return ID::SuperGameBoy;
+    case System::Revision::GameBoyColor: return ID::GameBoyColor;
+    }
     throw;
   }
-
   throw;
 }
 
@@ -130,8 +131,8 @@ void Interface::cheatSet(const lstring& list) {
   cheat.synchronize();
 }
 
-void Interface::paletteUpdate() {
-  video.generate_palette();
+void Interface::paletteUpdate(bool colorEmulation) {
+  video.generate_palette(colorEmulation);
 }
 
 Interface::Interface() {

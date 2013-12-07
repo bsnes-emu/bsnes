@@ -7,6 +7,7 @@ ConfigurationSettings::ConfigurationSettings() {
   video.append(video.shader = "Blur", "Shader");
   video.append(video.scaleMode = 0, "ScaleMode");
   video.append(video.aspectCorrection = true, "AspectCorrection");
+  video.append(video.colorEmulation = true, "ColorEmulation");
   video.maskOverscan.assign(video.maskOverscan.enable = false);
   video.maskOverscan.append(video.maskOverscan.horizontal = 8, "Horizontal");
   video.maskOverscan.append(video.maskOverscan.vertical = 8, "Vertical");

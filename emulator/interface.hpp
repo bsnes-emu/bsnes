@@ -107,7 +107,7 @@ struct Interface {
   virtual void cheatSet(const lstring& = lstring{}) {}
 
   //utility functions
-  virtual void paletteUpdate() {}
+  virtual void paletteUpdate(bool colorEmulation) {}
 
   //debugger functions
   virtual bool tracerEnable(bool) { return false; }

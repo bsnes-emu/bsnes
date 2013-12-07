@@ -65,11 +65,15 @@ void pTabFrame::setGeometry(Geometry geometry) {
 }
 
 void pTabFrame::setImage(unsigned selection, const image& image) {
-  nall::image copy = image;
-  unsigned size = pFont::size(widget.state.font, " ").height;
-  copy.scale(size, size);
-  GdkPixbuf* pixbuf = CreatePixbuf(copy);
-  gtk_image_set_from_pixbuf(GTK_IMAGE(tabs[selection].image), pixbuf);
+  if(image.empty() == false) {
+    nall::image copy = image;
+    unsigned size = pFont::size(widget.state.font, " ").height;
+    copy.scale(size, size);
+    GdkPixbuf* pixbuf = CreatePixbuf(copy);
+    gtk_image_set_from_pixbuf(GTK_IMAGE(tabs[selection].image), pixbuf);
+  } else {
+    gtk_image_clear(GTK_IMAGE(tabs[selection].image));
+  }
 }
 
 void pTabFrame::setSelection(unsigned selection) {

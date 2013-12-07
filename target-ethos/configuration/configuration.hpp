@@ -5,6 +5,7 @@ struct ConfigurationSettings : Configuration::Document {
     string shader;
     unsigned scaleMode;
     bool aspectCorrection;
+    bool colorEmulation;
     struct MaskOverscan : Configuration::Node {
       bool enable;
       unsigned horizontal;

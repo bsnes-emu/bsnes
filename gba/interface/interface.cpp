@@ -109,8 +109,8 @@ bool Interface::unserialize(serializer& s) {
   return system.unserialize(s);
 }
 
-void Interface::paletteUpdate() {
-  video.generate_palette();
+void Interface::paletteUpdate(bool colorEmulation) {
+  video.generate_palette(colorEmulation);
 }
 
 Interface::Interface() {

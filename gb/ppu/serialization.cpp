@@ -4,8 +4,11 @@ void PPU::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(screen);
-  s.array(line);
-  s.array(origin);
+  for(auto& pixel : pixels) {
+    s.integer(pixel.color);
+    s.integer(pixel.palette);
+    s.integer((unsigned&)pixel.origin);
+  }
 
   s.array(vram);
   s.array(oam);

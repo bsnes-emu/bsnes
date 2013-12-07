@@ -4,13 +4,13 @@ enum class Input : unsigned {
   Up, Down, Left, Right, B, A, Select, Start,
 };
 
-struct System : property<System> {
+struct System {
   enum class Revision : unsigned {
     GameBoy,
     SuperGameBoy,
     GameBoyColor,
-  };
-  readonly<Revision> revision;
+  } revision;
+
   inline bool dmg() const { return revision == Revision::GameBoy; }
   inline bool sgb() const { return revision == Revision::SuperGameBoy; }
   inline bool cgb() const { return revision == Revision::GameBoyColor; }

@@ -1,9 +1,10 @@
 #ifdef PPU_CPP
 
 void PPU::dmg_render() {
-  for(unsigned n = 0; n < 160; n++) {
-    line[n] = 0x00;
-    origin[n] = Origin::None;
+  for(auto& pixel : pixels) {
+    pixel.color = 0;
+    pixel.palette = 0;
+    pixel.origin = Pixel::Origin::None;
   }
 
   if(status.display_enable) {
@@ -13,7 +14,7 @@ void PPU::dmg_render() {
   }
 
   uint32* output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[line[n]];
+  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[pixels[n].color];
   interface->lcdScanline();
 }
 
@@ -38,8 +39,9 @@ void PPU::dmg_render_bg() {
     uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
                   | ((data & (0x8000 >> tx)) ? 2 : 0);
 
-    line[ox] = bgp[palette];
-    origin[ox] = Origin::BG;
+    pixels[ox].color = bgp[palette];
+    pixels[ox].palette = palette;
+    pixels[ox].origin = Pixel::Origin::BG;
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
@@ -58,9 +60,11 @@ void PPU::dmg_render_window() {
   for(unsigned ox = 0; ox < 160; ox++) {
     uint8 palette = ((data & (0x0080 >> tx)) ? 1 : 0)
                   | ((data & (0x8000 >> tx)) ? 2 : 0);
+
     if(ox - (status.wx - 7) < 160u) {
-      line[ox] = bgp[palette];
-      origin[ox] = Origin::BG;
+      pixels[ox].color = bgp[palette];
+      pixels[ox].palette = palette;
+      pixels[ox].origin = Pixel::Origin::BG;
     }
 
     ix = (ix + 1) & 255;
@@ -126,17 +130,16 @@ void PPU::dmg_render_ob() {
                     | ((data & (0x8000 >> tx)) ? 2 : 0);
       if(palette == 0) continue;
 
-      palette = obp[(bool)(attr & 0x10)][palette];
       unsigned ox = sx + tx;
-
       if(ox < 160) {
         if(attr & 0x80) {
-          if(origin[ox] == Origin::BG) {
-            if(line[ox] > 0) continue;
+          if(pixels[ox].origin == Pixel::Origin::BG) {
+            if(pixels[ox].palette > 0) continue;
           }
         }
-        line[ox] = palette;
-        origin[ox] = Origin::OB;
+        pixels[ox].color = obp[(bool)(attr & 0x10)][palette];
+        pixels[ox].palette = palette;
+        pixels[ox].origin = Pixel::Origin::OB;
       }
     }
   }

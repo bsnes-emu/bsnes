@@ -250,8 +250,15 @@ void InputManager::saveConfiguration() {
 
 InputManager::InputManager() {
   inputManager = this;
+  scancode[0] = new int16_t[Scancode::Limit]();
+  scancode[1] = new int16_t[Scancode::Limit]();
   activeScancode = 0;
   bootstrap();
+}
+
+InputManager::~InputManager() {
+  delete[] scancode[0];
+  delete[] scancode[1];
 }
 
 void InputManager::bootstrap() {

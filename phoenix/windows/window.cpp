@@ -178,7 +178,7 @@ void pWindow::setMenuVisible(bool visible) {
 
 void pWindow::setModal(bool modality) {
   if(modality == true) {
-    modal.appendonce(this);
+    modal.appendOnce(this);
     updateModality();
     while(window.state.modal) {
       Application::processEvents();

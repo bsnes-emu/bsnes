@@ -21,7 +21,7 @@ struct FileDialog : Window {
   void setPath(const string &path) {
     pathname = string{path}.transform("\\", "/");
     if(pathname.empty()) pathname = userpath();
-    if(pathname.endswith("/") == false) pathname.append("/");
+    if(pathname.endsWith("/") == false) pathname.append("/");
     pathEdit.setText(pathname);
 
     fileList.reset();
@@ -88,7 +88,7 @@ struct FileDialog : Window {
       string name = filenameList(fileList.selection());
       if(name.empty()) return;
 
-      if(name.endswith("/")) return setPath(name);
+      if(name.endsWith("/")) return setPath(name);
       filename = name;
       onClose();
     };

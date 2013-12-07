@@ -40,8 +40,10 @@ struct LibraryManager : Window {
   void bootstrap();
   string load(const string& type);
   void onChange();
+  void onLoad();
   void setInformation(bool load);
   void show();
+  void show(const string& type);
   void synchronize();
 
   lstring loaded;

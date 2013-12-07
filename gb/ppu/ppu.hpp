@@ -50,9 +50,12 @@ struct PPU : Thread, MMIO {
   } status;
 
   uint32 screen[160 * 144];
-  uint16 line[160];
-  struct Origin { enum : unsigned { None, BG, BGP, OB }; };
-  uint8 origin[160];
+  struct Pixel {
+    enum class Origin : unsigned { None, BG, BGP, OB };
+    uint16 color;
+    uint8 palette;
+    Origin origin;
+  } pixels[160];
 
   uint8 vram[16384];  //GB = 8192, GBC = 16384
   uint8 oam[160];

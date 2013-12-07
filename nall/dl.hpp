@@ -86,7 +86,7 @@ inline void library::close() {
 #elif defined(PLATFORM_WINDOWS)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
-  string filepath(path, !path.empty() && !path.endswith("/") && !path.endsWith("\\") ? "/" : "", name, ".dll");
+  string filepath(path, !path.empty() && !path.endsWith("/") && !path.endsWith("\\") ? "/" : "", name, ".dll");
   handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
   return handle;
 }

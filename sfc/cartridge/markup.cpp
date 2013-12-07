@@ -81,6 +81,7 @@ void Cartridge::parse_markup_icd2(Markup::Node root) {
   has_gb_slot = true;
   icd2.revision = max(1, numeral(root["revision"].data));
 
+  GameBoy::cartridge.load_empty(GameBoy::System::Revision::SuperGameBoy);
   interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb");
 
   string bootROMName = root["rom"]["name"].data;

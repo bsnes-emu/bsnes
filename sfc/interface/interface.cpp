@@ -338,8 +338,8 @@ void Interface::cheatSet(const lstring& list) {
   cheat.synchronize();
 }
 
-void Interface::paletteUpdate() {
-  video.generate_palette();
+void Interface::paletteUpdate(bool colorEmulation) {
+  video.generate_palette(colorEmulation);
 }
 
 bool Interface::tracerEnable(bool trace) {

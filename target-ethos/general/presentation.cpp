@@ -12,7 +12,7 @@ void Presentation::synchronize() {
   shaderNone.setChecked();
   if(config->video.shader == "None") shaderNone.setChecked();
   if(config->video.shader == "Blur") shaderBlur.setChecked();
-  if(config->video.shader == "Emulation") shaderEmulation.setChecked();
+  if(config->video.shader == "Display Emulation") shaderEmulation.setChecked();
   for(auto& shader : shaderList) {
     string name = notdir(config->video.shader.split<1>(".shader/")(0));
     if(name == shader->text()) shader->setChecked();
@@ -62,7 +62,6 @@ Presentation::Presentation() {
   viewport.setDroppable();
 
   loadMenu.setText("Library");
-    loadGame.setText("Load Game ...");
   settingsMenu.setText("Settings");
     videoMenu.setText("Video");
       centerVideo.setText("Center");
@@ -90,7 +89,7 @@ Presentation::Presentation() {
     synchronizeTime.setText("Synchronize Time");
 
   append(loadMenu);
-    loadMenu.append(loadGame);
+    for(auto& item : loadBootableMedia) loadMenu.append(*item);
   for(auto& systemItem : emulatorList) append(systemItem->menu);
   append(settingsMenu);
     settingsMenu.append(videoMenu);
@@ -150,7 +149,6 @@ Presentation::Presentation() {
     }
   };
 
-  loadGame.onActivate = [&] { libraryManager->show(); };
   shaderNone.onActivate = [&] { config->video.shader = "None"; utility->updateShader(); };
   shaderBlur.onActivate = [&] { config->video.shader = "Blur"; utility->updateShader(); };
   shaderEmulation.onActivate = [&] { config->video.shader = "Display Emulation"; utility->updateShader(); };
@@ -174,6 +172,16 @@ Presentation::Presentation() {
 }
 
 void Presentation::bootstrap() {
+  for(auto& emulator : program->emulator) {
+    for(auto& media : emulator->media) {
+      if(media.bootable == false) continue;
+      Item* item = new Item;
+      item->setText({media.name, " ..."});
+      item->onActivate = [=] { libraryManager->show(media.type); };
+      loadBootableMedia.append(item);
+    }
+  }
+
   for(auto& emulator : program->emulator) {
     auto iEmulator = new Emulator;
     iEmulator->interface = emulator;

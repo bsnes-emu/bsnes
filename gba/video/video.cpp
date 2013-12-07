@@ -4,7 +4,8 @@ namespace GameBoyAdvance {
 
 Video video;
 
-void Video::generate_palette() {
+void Video::generate_palette(bool color_emulation) {
+  //todo: implement LCD color emulation
   for(unsigned color = 0; color < (1 << 15); color++) {
     uint5 b = color >> 10;
     uint5 g = color >>  5;

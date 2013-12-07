@@ -44,7 +44,7 @@ struct HotkeyInput : DigitalInput {
 struct InputManager {
   vector<AbstractInput*> inputMap;
   vector<HotkeyInput*> hotkeyMap;
-  int16_t scancode[2][Scancode::Limit];
+  int16_t* scancode[2];
   bool activeScancode;
 
   void bind();
@@ -53,6 +53,7 @@ struct InputManager {
   void saveConfiguration();
   void bootstrap();
   InputManager();
+  ~InputManager();
 
   //hotkeys.cpp
   void appendHotkeys();

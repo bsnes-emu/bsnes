@@ -18,8 +18,22 @@ string Cartridge::title() {
   return information.title;
 }
 
-void Cartridge::load(System::Revision revision) {
+//intended for use with Super Game Boy for when no Game Boy cartridge is inserted
+void Cartridge::load_empty(System::Revision revision) {
+  unload();
+  romsize = 32768;
+  romdata = allocate<uint8>(romsize, 0xff);
+  ramsize = 0;
+  mapper = &mbc0;
+  sha256 = nall::sha256(romdata, romsize);
+  loaded = true;
   system.load(revision);
+}
+
+void Cartridge::load(System::Revision revision) {
+  unload();
+
+  system.revision = revision;  //needed for ID::Manifest to return correct group ID
   if(revision != System::Revision::SuperGameBoy) {
     interface->loadRequest(ID::Manifest, "manifest.bml");
   }
@@ -80,15 +94,14 @@ void Cartridge::load(System::Revision revision) {
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  loaded = true;
   sha256 = nall::sha256(romdata, romsize);
+  loaded = true;
+  system.load(revision);
 }
 
 void Cartridge::unload() {
-  if(loaded == false) return;
-
-  if(romdata) { delete[] romdata; romdata = nullptr; }
-  if(ramdata) { delete[] ramdata; ramdata = nullptr; }
+  if(romdata) { delete[] romdata; romdata = nullptr; romsize = 0; }
+  if(ramdata) { delete[] ramdata; ramdata = nullptr; ramsize = 0; }
   loaded = false;
 }
 
@@ -119,7 +132,7 @@ uint8 Cartridge::mmio_read(uint16 addr) {
 
   if(bootrom_enable) {
     const uint8* data = nullptr;
-    switch(system.revision()) { default:
+    switch(system.revision) { default:
     case System::Revision::GameBoy: data = system.bootROM.dmg; break;
     case System::Revision::SuperGameBoy: data = system.bootROM.sgb; break;
     case System::Revision::GameBoyColor: data = system.bootROM.cgb; break;
@@ -159,8 +172,7 @@ void Cartridge::power() {
 
 Cartridge::Cartridge() {
   loaded = false;
-  romdata = nullptr;
-  ramdata = nullptr;
+  sha256 = "";
 }
 
 Cartridge::~Cartridge() {

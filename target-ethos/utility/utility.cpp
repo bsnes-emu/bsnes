@@ -91,7 +91,7 @@ void Utility::load() {
   cheatEditor->load({pathname[0], "cheats.bml"});
   stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
 
-  system().paletteUpdate();
+  system().paletteUpdate(config->video.colorEmulation);
   synchronizeDSP();
 
   resize();

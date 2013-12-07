@@ -5,7 +5,8 @@ namespace GameBoy {
 
 Video video;
 
-void Video::generate_palette() {
+void Video::generate_palette(bool color_emulation) {
+  this->color_emulation = color_emulation;
   if(system.dmg()) for(unsigned n = 0; n < 4; n++) palette[n] = palette_dmg(n);
   if(system.sgb()) for(unsigned n = 0; n < 4; n++) palette[n] = palette_sgb(n);
   if(system.cgb()) for(unsigned n = 0; n < (1 << 15); n++) palette[n] = palette_cgb(n);
@@ -20,6 +21,11 @@ Video::~Video() {
 }
 
 unsigned Video::palette_dmg(unsigned color) const {
+  if(color_emulation == false) {
+    unsigned L = (3 - color) * 21845;
+    return interface->videoColor(color, L, L, L);
+  }
+
   unsigned R = monochrome[color][0] * 65535.0;
   unsigned G = monochrome[color][1] * 65535.0;
   unsigned B = monochrome[color][2] * 65535.0;
@@ -39,6 +45,13 @@ unsigned Video::palette_cgb(unsigned color) const {
   unsigned r = (color >>  0) & 31;
   unsigned g = (color >>  5) & 31;
   unsigned b = (color >> 10) & 31;
+
+  if(color_emulation == false) {
+    unsigned R = (r << 11) | (r << 6) | (r << 1) | (r >> 4);
+    unsigned G = (g << 11) | (g << 6) | (g << 1) | (g >> 4);
+    unsigned B = (b << 11) | (b << 6) | (b << 1) | (b >> 4);
+    return interface->videoColor(color, R, G, B);
+  }
 
   unsigned R = (r * 26 + g *  4 + b *  2);
   unsigned G = (         g * 24 + b *  8);

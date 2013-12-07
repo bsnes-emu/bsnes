@@ -1,9 +1,10 @@
 #ifdef PPU_CPP
 
 void PPU::cgb_render() {
-  for(unsigned n = 0; n < 160; n++) {
-    line[n] = 0x7fff;
-    origin[n] = Origin::None;
+  for(auto& pixel : pixels) {
+    pixel.color = 0x7fff;
+    pixel.palette = 0;
+    pixel.origin = Pixel::Origin::None;
   }
 
   if(status.display_enable) {
@@ -13,7 +14,7 @@ void PPU::cgb_render() {
   }
 
   uint32* output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[line[n]];
+  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[pixels[n].color];
   interface->lcdScanline();
 }
 
@@ -56,14 +57,15 @@ void PPU::cgb_render_bg() {
   for(unsigned ox = 0; ox < 160; ox++) {
     unsigned index = ((data & (0x0080 >> tx)) ? 1 : 0)
                    | ((data & (0x8000 >> tx)) ? 2 : 0);
-    unsigned palette_index = ((attr & 0x07) << 3) + (index << 1);
-    unsigned palette = 0;
-    palette |= bgpd[palette_index++] << 0;
-    palette |= bgpd[palette_index++] << 8;
-    palette &= 0x7fff;
+    unsigned palette = ((attr & 0x07) << 2) + index;
+    unsigned color = 0;
+    color |= bgpd[(palette << 1) + 0] << 0;
+    color |= bgpd[(palette << 1) + 1] << 8;
+    color &= 0x7fff;
 
-    line[ox] = palette;
-    origin[ox] = (attr & 0x80 ? Origin::BGP : Origin::BG);
+    pixels[ox].color = color;
+    pixels[ox].palette = index;
+    pixels[ox].origin = (attr & 0x80 ? Pixel::Origin::BGP : Pixel::Origin::BG);
 
     ix = (ix + 1) & 255;
     tx = (tx + 1) & 7;
@@ -83,15 +85,16 @@ void PPU::cgb_render_window() {
   for(unsigned ox = 0; ox < 160; ox++) {
     unsigned index = ((data & (0x0080 >> tx)) ? 1 : 0)
                    | ((data & (0x8000 >> tx)) ? 2 : 0);
-    unsigned palette_index = ((attr & 0x07) << 3) + (index << 1);
-    unsigned palette = 0;
-    palette |= bgpd[palette_index++] << 0;
-    palette |= bgpd[palette_index++] << 8;
-    palette &= 0x7fff;
+    unsigned palette = ((attr & 0x07) << 2) + index;
+    unsigned color = 0;
+    color |= bgpd[(palette << 1) + 0] << 0;
+    color |= bgpd[(palette << 1) + 1] << 8;
+    color &= 0x7fff;
 
     if(ox - (status.wx - 7) < 160u) {
-      line[ox] = palette;
-      origin[ox] = (attr & 0x80 ? Origin::BGP : Origin::BG);
+      pixels[ox].color = color;
+      pixels[ox].palette = index;
+      pixels[ox].origin = (attr & 0x80 ? Pixel::Origin::BGP : Pixel::Origin::BG);
     }
 
     ix = (ix + 1) & 255;
@@ -157,26 +160,26 @@ void PPU::cgb_render_ob() {
                      | ((data & (0x8000 >> tx)) ? 2 : 0);
       if(index == 0) continue;
 
-      unsigned palette_index = ((attr & 0x07) << 3) + (index << 1);
-      unsigned palette = 0;
-      palette |= obpd[palette_index++] << 0;
-      palette |= obpd[palette_index++] << 8;
-      palette &= 0x7fff;
+      unsigned palette = ((attr & 0x07) << 2) + index;
+      unsigned color = 0;
+      color |= obpd[(palette << 1) + 0] << 0;
+      color |= obpd[(palette << 1) + 1] << 8;
+      color &= 0x7fff;
 
       unsigned ox = sx + tx;
-
       if(ox < 160) {
         //When LCDC.D0 (BG enable) is off, OB is always rendered above BG+Window
         if(status.bg_enable) {
-          if(origin[ox] == Origin::BGP) continue;
+          if(pixels[ox].origin == Pixel::Origin::BGP) continue;
           if(attr & 0x80) {
-            if(origin[ox] == Origin::BG || origin[ox] == Origin::BGP) {
-              if(line[ox] > 0) continue;
+            if(pixels[ox].origin == Pixel::Origin::BG) {
+              if(pixels[ox].palette > 0) continue;
             }
           }
         }
-        line[ox] = palette;
-        origin[ox] = Origin::OB;
+        pixels[ox].color = color;
+        pixels[ox].palette = index;
+        pixels[ox].origin = Pixel::Origin::OB;
       }
     }
   }

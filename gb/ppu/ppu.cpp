@@ -107,8 +107,11 @@ void PPU::power() {
   }
 
   for(auto& n : screen) n = 0x0000;
-  for(auto& n : line) n = 0x0000;
-  for(auto& n : origin) n = Origin::None;
+  for(auto& n : pixels) {
+    n.color = 0;
+    n.palette = 0;
+    n.origin = Pixel::Origin::None;
+  }
 
   for(auto& n : vram) n = 0x00;
   for(auto& n : oam) n = 0x00;

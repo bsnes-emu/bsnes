@@ -22,7 +22,7 @@ struct Presentation : Window {
   Emulator* active = nullptr;
 
   Menu loadMenu;
-    Item loadGame;
+    vector<Item*> loadBootableMedia;
   Menu settingsMenu;
     Menu videoMenu;
       RadioItem centerVideo;

@@ -21,6 +21,16 @@ void InputManager::appendHotkeys() {
 
   {
     auto hotkey = new HotkeyInput;
+    hotkey->name = "Show Library";
+    hotkey->mapping = "KB0::L";
+
+    hotkey->press = [] {
+      libraryManager->show();
+    };
+  }
+
+  {
+    auto hotkey = new HotkeyInput;
     hotkey->name = "Pause Emulation";
     hotkey->mapping = "KB0::P";
 

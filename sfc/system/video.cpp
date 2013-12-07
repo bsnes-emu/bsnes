@@ -2,18 +2,28 @@
 
 Video video;
 
-void Video::generate_palette() {
+void Video::generate_palette(bool color_emulation) {
   for(unsigned color = 0; color < (1 << 19); color++) {
     unsigned l = (color >> 15) & 15;
     unsigned b = (color >> 10) & 31;
     unsigned g = (color >>  5) & 31;
     unsigned r = (color >>  0) & 31;
 
+    if(color_emulation == true) {
+      r = gamma_ramp[r];
+      g = gamma_ramp[g];
+      b = gamma_ramp[b];
+    } else {
+      r = (r << 3) | (r >> 2);
+      g = (g << 3) | (g >> 2);
+      b = (b << 3) | (b >> 2);
+    }
+
     double L = (1.0 + l) / 16.0;
     if(l == 0) L *= 0.5;
-    unsigned R = L * (r << 11 | r << 6 | r << 1 | r >> 4);
-    unsigned G = L * (g << 11 | g << 6 | g << 1 | g >> 4);
-    unsigned B = L * (b << 11 | b << 6 | b << 1 | b >> 4);
+    unsigned R = L * (r << 8 | r << 0);
+    unsigned G = L * (g << 8 | g << 0);
+    unsigned B = L * (b << 8 | b << 0);
 
     palette[color] = interface->videoColor(color, R, G, B);
   }
@@ -28,6 +38,13 @@ Video::~Video() {
 }
 
 //internal
+
+const uint8_t Video::gamma_ramp[32] = {
+  0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
+  0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
+  0x88, 0x90, 0x98, 0xa0, 0xa8, 0xb0, 0xb8, 0xc0,
+  0xc8, 0xd0, 0xd8, 0xe0, 0xe8, 0xf0, 0xf8, 0xff,
+};
 
 const uint8_t Video::cursor[15 * 15] = {
   0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,

@@ -150,6 +150,7 @@ LibraryManager::LibraryManager() {
   };
 
   libraryFrame.onChange = {&LibraryManager::onChange, this};
+  loadButton.onActivate = {&LibraryManager::onLoad, this};
 
   //initial config value of -1 defaults to import tab on first launch of higan
   if(config->library.selection < 0) config->library.selection = browsers.size();
@@ -202,6 +203,11 @@ void LibraryManager::onChange() {
   }
 }
 
+void LibraryManager::onLoad() {
+  unsigned selection = libraryFrame.selection();
+  if(selection < browsers.size()) browsers[selection]->onActivate();
+}
+
 void LibraryManager::setInformation(bool load) {
   string text;
   if(loaded.size() == 0) {
@@ -233,6 +239,24 @@ void LibraryManager::show() {
   setVisible();
   setFocused();
   onChange();
+}
+
+//set library to show a specific media type, and then show the library
+void LibraryManager::show(const string& type) {
+  unsigned selection = 0;
+  for(auto& browser : browsers) {
+    unsigned mode = 0;
+    for(auto& media : browser->emulator.media) {
+      if(media.bootable && media.type == type) {
+        libraryFrame.setSelection(selection);
+        browser->mediaMode.setSelection(mode);
+        browser->setMode();
+        return show();
+      }
+      mode++;
+    }
+    selection++;
+  }
 }
 
 void LibraryManager::synchronize() {

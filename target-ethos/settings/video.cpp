@@ -15,6 +15,7 @@ VideoSettings::VideoSettings() {
   gamma.slider.setLength(101);
   luminance.name.setText("Luminance:");
   luminance.slider.setLength(101);
+  colorEmulation.setText("Color emulation");
   overscanAdjustment.setFont(program->boldFont);
   overscanAdjustment.setText("Overscan mask:");
   overscanHorizontal.name.setText("Horizontal:");
@@ -25,11 +26,13 @@ VideoSettings::VideoSettings() {
   append(colorAdjustment, {~0, 0});
   append(saturation, {~0, 0});
   append(gamma, {~0, 0});
-  append(luminance, {~0, 0}, 5);
+  append(luminance, {~0, 0});
+  append(colorEmulation, {~0, 0}, 5);
   append(overscanAdjustment, {~0, 0});
   append(overscanHorizontal, {~0, 0});
   append(overscanVertical, {~0, 0}, 5);
 
+  colorEmulation.setChecked(config->video.colorEmulation);
   saturation.slider.setPosition(config->video.saturation);
   gamma.slider.setPosition(config->video.gamma - 100);
   luminance.slider.setPosition(config->video.luminance);
@@ -38,7 +41,7 @@ VideoSettings::VideoSettings() {
 
   synchronize();
 
-  saturation.slider.onChange = gamma.slider.onChange = luminance.slider.onChange =
+  saturation.slider.onChange = gamma.slider.onChange = luminance.slider.onChange = colorEmulation.onToggle =
   overscanHorizontal.slider.onChange = overscanVertical.slider.onChange =
   {&VideoSettings::synchronize, this};
 }
@@ -47,6 +50,7 @@ void VideoSettings::synchronize() {
   config->video.saturation = saturation.slider.position();
   config->video.gamma = 100 + gamma.slider.position();
   config->video.luminance = luminance.slider.position();
+  config->video.colorEmulation = colorEmulation.checked();
   config->video.maskOverscan.horizontal = overscanHorizontal.slider.position();
   config->video.maskOverscan.vertical = overscanVertical.slider.position();
 
@@ -56,5 +60,5 @@ void VideoSettings::synchronize() {
   overscanHorizontal.value.setText({config->video.maskOverscan.horizontal, "px"});
   overscanVertical.value.setText({config->video.maskOverscan.vertical, "px"});
 
-  if(program->active) system().paletteUpdate();
+  if(program->active) system().paletteUpdate(config->video.colorEmulation);
 }

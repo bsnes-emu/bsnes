@@ -11,6 +11,7 @@ struct VideoSettings : SettingsLayout {
   VideoSlider saturation;
   VideoSlider gamma;
   VideoSlider luminance;
+  CheckLabel colorEmulation;
   Label overscanAdjustment;
   VideoSlider overscanHorizontal;
   VideoSlider overscanVertical;

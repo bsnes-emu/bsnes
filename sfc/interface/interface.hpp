@@ -115,7 +115,7 @@ struct Interface : Emulator::Interface {
 
   void cheatSet(const lstring&);
 
-  void paletteUpdate();
+  void paletteUpdate(bool colorEmulation);
 
   //debugger functions
   bool tracerEnable(bool);
