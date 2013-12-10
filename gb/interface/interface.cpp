@@ -21,7 +21,7 @@ double Interface::videoFrequency() {
 }
 
 double Interface::audioFrequency() {
-  return 4194304.0;
+  return 4194304.0 / 2.0;
 }
 
 bool Interface::loaded() {

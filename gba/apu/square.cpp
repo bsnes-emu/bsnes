@@ -1,6 +1,6 @@
 void APU::Square::run() {
   if(period && --period == 0) {
-    period = 4 * (2048 - frequency);
+    period = 2 * (2048 - frequency);
     phase++;
     switch(duty) {
     case 0: signal = (phase == 6); break;  //_____-_

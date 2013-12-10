@@ -48,8 +48,8 @@ void APU::Noise::write(unsigned r, uint8 data) {
   if(r == 3) {  //$ff22  NR43
     frequency = data >> 4;
     narrow_lfsr = data & 0x08;
-    divisor = (data & 0x07) << 4;
-    if(divisor == 0) divisor = 8;
+    divisor = (data & 0x07) << 3;
+    if(divisor == 0) divisor = 4;
     period = divisor << frequency;
   }
 

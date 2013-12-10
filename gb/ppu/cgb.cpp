@@ -125,19 +125,6 @@ void PPU::cgb_render_ob() {
     if(sprites == 10) break;
   }
 
-  //sort by X-coordinate, when equal, lower address comes first
-  for(unsigned x = 0; x < sprites; x++) {
-    for(unsigned y = x + 1; y < sprites; y++) {
-      signed sx = oam[(sprite[x] << 2) + 1] - 8;
-      signed sy = oam[(sprite[y] << 2) + 1] - 8;
-      if(sy < sx) {
-        sprite[x] ^= sprite[y];
-        sprite[y] ^= sprite[x];
-        sprite[x] ^= sprite[y];
-      }
-    }
-  }
-
   //render backwards, so that first sprite has highest priority
   for(signed s = sprites - 1; s >= 0; s--) {
     unsigned n = sprite[s] << 2;
@@ -170,9 +157,8 @@ void PPU::cgb_render_ob() {
       if(ox < 160) {
         //When LCDC.D0 (BG enable) is off, OB is always rendered above BG+Window
         if(status.bg_enable) {
-          if(pixels[ox].origin == Pixel::Origin::BGP) continue;
           if(attr & 0x80) {
-            if(pixels[ox].origin == Pixel::Origin::BG) {
+            if(pixels[ox].origin == Pixel::Origin::BG || pixels[ox].origin == Pixel::Origin::BGP) {
               if(pixels[ox].palette > 0) continue;
             }
           }

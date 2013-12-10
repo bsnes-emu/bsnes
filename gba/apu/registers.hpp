@@ -128,7 +128,7 @@ struct Sequencer {
   uint1 enable[4];
   uint1 masterenable;
 
-  uint13 base;
+  uint12 base;
   uint3 step;
   int16 lsample;
   int16 rsample;

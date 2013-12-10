@@ -21,8 +21,8 @@ void APU::Master::run() {
   if(channel3_left_enable) sample +=    apu.wave.output;
   if(channel4_left_enable) sample +=   apu.noise.output;
   sample = (sample * 512) - 16384;
-  sample = (sample * (left_volume  + 1)) / 8;
-  left  = sample;
+  sample = (sample * (left_volume + 1)) / 8;
+  left = sample;
 
   sample = 0;
   if(channel1_right_enable) sample += apu.square1.output;
@@ -32,6 +32,11 @@ void APU::Master::run() {
   sample = (sample * 512) - 16384;
   sample = (sample * (right_volume + 1)) / 8;
   right = sample;
+
+  //reduce audio volume
+  center >>= 1;
+  left   >>= 1;
+  right  >>= 1;
 }
 
 void APU::Master::write(unsigned r, uint8 data) {

@@ -71,7 +71,7 @@ struct pObject {
   bool locked;
 
   pObject(Object& object);
-  static pObject* find(unsigned id);
+  static Object* find(unsigned id);
   virtual ~pObject() {}
 
   void constructor() {}

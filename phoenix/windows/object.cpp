@@ -9,9 +9,9 @@ pObject::pObject(Object& object) : object(object) {
   locked = false;
 }
 
-pObject* pObject::find(unsigned id) {
-  for(auto& item : objects) if(item->id == id) return item;
-  return 0;
+Object* pObject::find(unsigned id) {
+  for(auto& item : objects) if(item->id == id) return &item->object;
+  return nullptr;
 }
 
 }

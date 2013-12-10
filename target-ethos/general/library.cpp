@@ -68,6 +68,7 @@ void LibraryBrowser::refresh() {
 }
 
 void LibraryBrowser::setMode() {
+  config->library.mediaMode = mediaMode.selection();
   auto& media = emulator.media[mediaMode.selection()];
 
   pathname = {utility->libraryPath(), media.name, "/"};
@@ -100,9 +101,10 @@ void LibraryImport::onImportActivate() {
   }
   function<string ()> browse = program->ananke.sym("ananke_browse");
   if(!browse) return;
+  audio.clear();  //ananke's browser is modal
   string pathname = browse();
+  pathname.rtrim<1>("/");
   if(pathname.empty()) return;
-  MessageWindow().setText({"Successfully imported ", notdir(pathname.rtrim<1>("/"))}).information();
 
   //after importing game, take user to the relevant game list to show the newly imported title
   string type = extension(pathname);
@@ -115,6 +117,17 @@ void LibraryImport::onImportActivate() {
           browser->mediaMode.setSelection(mode);
           libraryManager->libraryFrame.setSelection(selection);
           libraryManager->onChange();
+
+          //find game in list and select it
+          string name = notdir(nall::basename(pathname));
+          for(unsigned n = 0; n < browser->folders.rows(); n++) {
+            if(browser->folders.text(n, 0) == name) {
+              browser->folders.setSelection(n);
+              browser->onChange();
+              break;
+            }
+          }
+
           return;
         }
         mode++;
@@ -125,6 +138,8 @@ void LibraryImport::onImportActivate() {
 }
 
 LibraryManager::LibraryManager() {
+  libraryManager = this;
+
   setTitle("Game Library");
   setGeometry({128, 128, 640, 680});
   windowManager->append(this, "LibraryManager");
@@ -155,6 +170,11 @@ LibraryManager::LibraryManager() {
   //initial config value of -1 defaults to import tab on first launch of higan
   if(config->library.selection < 0) config->library.selection = browsers.size();
   libraryFrame.setSelection(config->library.selection);
+
+  if(libraryFrame.selection() < browsers.size()) {
+    browsers[libraryFrame.selection()]->mediaMode.setSelection(config->library.mediaMode);
+    browsers[libraryFrame.selection()]->setMode();
+  }
 }
 
 void LibraryManager::bootstrap() {

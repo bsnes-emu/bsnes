@@ -6,7 +6,7 @@ bool APU::Square2::dac_enable() {
 
 void APU::Square2::run() {
   if(period && --period == 0) {
-    period = 4 * (2048 - frequency);
+    period = 2 * (2048 - frequency);
     phase++;
     switch(duty) {
     case 0: duty_output = (phase == 6); break;  //______-_
@@ -60,7 +60,7 @@ void APU::Square2::write(unsigned r, uint8 data) {
 
     if(initialize) {
       enable = dac_enable();
-      period = 4 * (2048 - frequency);
+      period = 2 * (2048 - frequency);
       envelope_period = envelope_frequency;
       volume = envelope_volume;
     }

@@ -185,6 +185,7 @@ void CPU::power() {
 
   status.dma_mode = 0;
   status.dma_length = 0;
+  status.dma_completed = true;
 
   status.ff6c = 0;
   status.ff72 = 0;

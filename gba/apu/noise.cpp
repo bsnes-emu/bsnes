@@ -1,6 +1,6 @@
 unsigned APU::Noise::divider() const {
-  if(divisor == 0) return 8;
-  return divisor * 16;
+  if(divisor == 0) return 4;
+  return divisor * 8;
 }
 
 void APU::Noise::run() {

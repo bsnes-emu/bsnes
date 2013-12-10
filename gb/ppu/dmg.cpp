@@ -95,16 +95,12 @@ void PPU::dmg_render_ob() {
     if(sprites == 10) break;
   }
 
-  //sort by X-coordinate, when equal, lower address comes first
+  //sort by X-coordinate; when equal, lower address comes first
   for(unsigned x = 0; x < sprites; x++) {
     for(unsigned y = x + 1; y < sprites; y++) {
       signed sx = oam[(sprite[x] << 2) + 1] - 8;
       signed sy = oam[(sprite[y] << 2) + 1] - 8;
-      if(sy < sx) {
-        sprite[x] ^= sprite[y];
-        sprite[y] ^= sprite[x];
-        sprite[x] ^= sprite[y];
-      }
+      if(sy < sx) std::swap(sprite[x], sprite[y]);
     }
   }
 

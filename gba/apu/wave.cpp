@@ -1,6 +1,6 @@
 void APU::Wave::run() {
   if(period && --period == 0) {
-    period = 2 * (2048 - frequency);
+    period = 1 * (2048 - frequency);
     patternsample = pattern[patternbank * 16 + patternaddr++];
     if(patternaddr == 0) patternbank ^= mode;
   }
@@ -55,7 +55,7 @@ void APU::Wave::write(unsigned addr, uint8 byte) {
 
     if(initialize) {
       enable = dacenable;
-      period = 2 * (2048 - frequency);
+      period = 1 * (2048 - frequency);
       patternaddr = 0;
       patternbank = mode ? (uint1)0 : bank;
     }

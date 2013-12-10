@@ -43,6 +43,7 @@ ConfigurationSettings::ConfigurationSettings() {
   append(server, "Server");
 
   library.append(library.selection = -1, "Selection");
+  library.append(library.mediaMode = 0, "MediaMode");
   library.append(library.showOnStartup = true, "ShowOnStartup");
   append(library, "Library");
 

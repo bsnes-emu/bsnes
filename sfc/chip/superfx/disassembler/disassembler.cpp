@@ -87,7 +87,7 @@ void SuperFX::disassemble_alt0(char* output) {
     case  (0x9f): sprintf(t, "fmult"); break;
     case16(0xa0): sprintf(t, "ibt r%u,#$%.2x", op0 & 15, op1); break;
     case16(0xb0): sprintf(t, "from r%u", op0 & 15); break;
-    case  (0xc0): sprintf(t, "hib");
+    case  (0xc0): sprintf(t, "hib"); break;
     case15(0xc1): sprintf(t, "or r%u", op0 & 15); break;
     case15(0xd0): sprintf(t, "inc r%u", op0 & 15); break;
     case  (0xdf): sprintf(t, "getc"); break;

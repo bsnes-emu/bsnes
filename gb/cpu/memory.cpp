@@ -25,6 +25,20 @@ void CPU::cycle_edge() {
   }
 }
 
+//VRAM DMA source can only be ROM or RAM
+uint8 CPU::dma_read(uint16 addr) {
+  if(addr < 0x8000) return bus.read(addr);  //0000-7fff
+  if(addr < 0xa000) return 0x00;            //8000-9fff
+  if(addr < 0xe000) return bus.read(addr);  //a000-dfff
+  return 0x00;                              //e000-ffff
+}
+
+//VRAM DMA target is always VRAM
+void CPU::dma_write(uint16 addr, uint8 data) {
+  addr = 0x8000 | (addr & 0x1fff);  //8000-9fff
+  return bus.write(addr, data);
+}
+
 uint8 CPU::debugger_read(uint16 addr) {
   return bus.read(addr);
 }

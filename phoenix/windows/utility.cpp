@@ -278,10 +278,11 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
   case WM_COMMAND: {
     unsigned id = LOWORD(wparam);
     HWND control = GetDlgItem(hwnd, id);
-    Object* object = control ? (Object*)GetWindowLongPtr(control, GWLP_USERDATA) : (Object*)(&pObject::find(id)->object);
+    Object* object = control ? (Object*)GetWindowLongPtr(control, GWLP_USERDATA) : pObject::find(id);
     if(object == nullptr) break;
     if(dynamic_cast<Item*>(object)) { ((Item*)object)->p.onActivate(); return FALSE; }
     if(dynamic_cast<CheckItem*>(object)) { ((CheckItem*)object)->p.onToggle(); return FALSE; }
+    if(dynamic_cast<RadioItem*>(object)) { ((RadioItem*)object)->p.onActivate(); return FALSE; }
     if(dynamic_cast<Button*>(object)) { ((Button*)object)->p.onActivate(); return FALSE; }
     if(dynamic_cast<CheckButton*>(object)) { ((CheckButton*)object)->p.onToggle(); return FALSE; }
     if(dynamic_cast<CheckLabel*>(object)) { ((CheckLabel*)object)->p.onToggle(); return FALSE; }

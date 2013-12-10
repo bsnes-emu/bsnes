@@ -76,11 +76,11 @@ void CPU::timer_4096hz() {
 }
 
 void CPU::hblank() {
-  if(status.dma_mode == 1 && status.dma_length) {
+  if(status.dma_mode == 1 && status.dma_length && ppu.status.ly < 144) {
     for(unsigned n = 0; n < 16; n++) {
-      bus.write(status.dma_target++, bus.read(status.dma_source++));
-      add_clocks(4);
+      dma_write(status.dma_target++, dma_read(status.dma_source++));
     }
+    add_clocks(8 << status.speed_double);
     status.dma_length -= 16;
   }
 }

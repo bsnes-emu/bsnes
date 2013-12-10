@@ -39,6 +39,7 @@ void CPU::serialize(serializer& s) {
   s.integer(status.dma_target);
   s.integer(status.dma_mode);
   s.integer(status.dma_length);
+  s.integer(status.dma_completed);
 
   s.integer(status.ff6c);
 

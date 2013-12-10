@@ -48,6 +48,7 @@ struct ConfigurationSettings : Configuration::Document {
 
   struct Library : Configuration::Node {
     signed selection;
+    unsigned mediaMode;
     bool showOnStartup;
   } library;
 

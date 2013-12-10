@@ -2,7 +2,7 @@
 
 void APU::Wave::run() {
   if(period && --period == 0) {
-    period = 2 * (2048 - frequency);
+    period = 1 * (2048 - frequency);
     pattern_sample = pattern[++pattern_offset];
   }
 
@@ -48,7 +48,7 @@ void APU::Wave::write(unsigned r, uint8 data) {
 
     if(initialize) {
       enable = dac_enable;
-      period = 2 * (2048 - frequency);
+      period = 1 * (2048 - frequency);
       pattern_offset = 0;
     }
   }

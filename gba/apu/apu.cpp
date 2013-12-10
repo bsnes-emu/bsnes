@@ -25,7 +25,7 @@ void APU::Enter() {
 }
 
 void APU::main() {
-  for(unsigned n = 0; n < 128; n++) {
+  for(unsigned n = 0; n < 64; n++) {
     runsequencer();
   }
 
@@ -70,7 +70,7 @@ void APU::main() {
   if(regs.bias.amplitude == 3) lsample &= ~15, rsample &= ~15;
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
-  interface->audioSample(sclamp<16>(lsample << 7), sclamp<16>(rsample << 7));  //should be <<5, use <<7 for added volume
+  interface->audioSample(sclamp<16>(lsample << 6), sclamp<16>(rsample << 6));  //should be <<5, use <<6 for added volume
   step(512);
 }
 

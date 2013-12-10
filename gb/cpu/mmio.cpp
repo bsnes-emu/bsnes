@@ -81,7 +81,8 @@ uint8 CPU::mmio_read(uint16 addr) {
   }
 
   if(addr == 0xff55) {  //HDMA5
-    return (status.dma_length / 16) - 1;
+    return (status.dma_completed << 7)
+         | (((status.dma_length / 16) - 1) & 0x7f);
   }
 
   if(addr == 0xff56) {  //RP
@@ -203,7 +204,7 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff52) {  //HDMA2
-    status.dma_source = (status.dma_source & 0xff00) | (data << 0);
+    status.dma_source = (status.dma_source & 0xff00) | (data & 0xf0);
     return;
   }
 
@@ -213,18 +214,24 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff54) {  //HDMA4
-    status.dma_target = (status.dma_target & 0xff00) | (data << 0);
+    status.dma_target = (status.dma_target & 0xff00) | (data & 0xf0);
     return;
   }
 
   if(addr == 0xff55) {  //HDMA5
     status.dma_mode = data & 0x80;
     status.dma_length = ((data & 0x7f) + 1) * 16;
+    status.dma_completed = !status.dma_mode;
 
-    if(status.dma_mode == 0) do {
-      bus.write(status.dma_target++, bus.read(status.dma_source++));
-      add_clocks(4 << status.speed_double);
-    } while(--status.dma_length);
+    if(status.dma_mode == 0) {
+      do {
+        for(unsigned n = 0; n < 16; n++) {
+          dma_write(status.dma_target++, dma_read(status.dma_source++));
+        }
+        add_clocks(8 << status.speed_double);
+        status.dma_length -= 16;
+      } while(status.dma_length);
+    }
     return;
   }
 

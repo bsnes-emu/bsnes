@@ -7,7 +7,7 @@ struct SuperFX : Processor::GSU, Coprocessor {
   #include "memory/memory.hpp"
   #include "mmio/mmio.hpp"
   #include "timing/timing.hpp"
-  #include "disasm/disasm.hpp"
+  #include "disassembler/disassembler.hpp"
 
   static void Enter();
   void enter();

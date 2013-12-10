@@ -4,6 +4,9 @@ struct Video {
 
   Video();
   ~Video();
+
+private:
+  static const uint8 curve[32];
 };
 
 extern Video video;
