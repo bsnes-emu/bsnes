@@ -26,9 +26,9 @@ unsigned Video::palette_dmg(unsigned color) const {
     return interface->videoColor(color, L, L, L);
   }
 
-  unsigned R = monochrome[color][0] * 65535.0;
-  unsigned G = monochrome[color][1] * 65535.0;
-  unsigned B = monochrome[color][2] * 65535.0;
+  unsigned R = monochrome[color][0];
+  unsigned G = monochrome[color][1];
+  unsigned B = monochrome[color][2];
 
   return interface->videoColor(color, R, G, B);
 }
@@ -68,11 +68,27 @@ unsigned Video::palette_cgb(unsigned color) const {
   return interface->videoColor(color, R, G, B);
 }
 
-const double Video::monochrome[4][3] = {
-  {0.605, 0.734, 0.059},
-  {0.543, 0.672, 0.059},
-  {0.188, 0.383, 0.188},
-  {0.059, 0.219, 0.059},
+#define DMG_PALETTE_GREEN
+//#define DMG_PALETTE_YELLOW
+//#define DMG_PALETTE_WHITE
+
+const uint16 Video::monochrome[4][3] = {
+  #if defined(DMG_PALETTE_GREEN)
+  {0x9a9a, 0xbbbb, 0x0505},
+  {0x7878, 0x8484, 0x0505},
+  {0x1d1d, 0x5555, 0x1d1d},
+  {0x0505, 0x2525, 0x0505},
+  #elif defined(DMG_PALETTE_YELLOW)
+  {0xffff, 0xf7f7, 0x7b7b},
+  {0xb5b5, 0xaeae, 0x4a4a},
+  {0x6b6b, 0x6969, 0x3131},
+  {0x2121, 0x2020, 0x1010},
+  #else  //DMG_PALETTE_WHITE
+  {0xffff, 0xffff, 0xffff},
+  {0xaaaa, 0xaaaa, 0xaaaa},
+  {0x5555, 0x5555, 0x5555},
+  {0x0000, 0x0000, 0x0000},
+  #endif
 };
 
 }

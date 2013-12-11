@@ -128,7 +128,7 @@ void Utility::saveState(unsigned slot) {
   if(s.size() == 0) return;
   directory::create({pathname[0], "bsnes/"});
   if(file::write({pathname[0], "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
-  showMessage({"Save to slot ", slot});
+  showMessage({"Saved to slot ", slot});
 }
 
 void Utility::loadState(unsigned slot) {

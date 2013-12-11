@@ -5,6 +5,8 @@ void APU::Master::run() {
     center = 0;
     left   = 0;
     right  = 0;
+
+center_bias = left_bias = right_bias = 0;
     return;
   }
 
@@ -81,6 +83,10 @@ void APU::Master::power() {
   center = 0;
   left   = 0;
   right  = 0;
+
+  center_bias = 0;
+  left_bias = 0;
+  right_bias = 0;
 }
 
 void APU::Master::serialize(serializer& s) {
@@ -101,6 +107,10 @@ void APU::Master::serialize(serializer& s) {
   s.integer(center);
   s.integer(left);
   s.integer(right);
+
+  s.integer(center_bias);
+  s.integer(left_bias);
+  s.integer(right_bias);
 }
 
 #endif

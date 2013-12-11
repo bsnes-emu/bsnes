@@ -1,7 +1,13 @@
 struct PPU : Thread, MMIO {
+  uint8 vram[16384];  //GB = 8192, GBC = 16384
+  uint8 oam[160];
+  uint8 bgp[4];
+  uint8 obp[2][4];
+  uint8 bgpd[64];
+  uint8 obpd[64];
+
   struct Status {
     unsigned lx;
-    unsigned wyc;
 
     //$ff40  LCDC
     bool display_enable;
@@ -50,19 +56,33 @@ struct PPU : Thread, MMIO {
   } status;
 
   uint32 screen[160 * 144];
+
   struct Pixel {
-    enum class Origin : unsigned { None, BG, BGP, OB };
     uint16 color;
     uint8 palette;
-    Origin origin;
-  } pixels[160];
+    bool priority;
+  };
+  Pixel bg;
+  Pixel ob;
 
-  uint8 vram[16384];  //GB = 8192, GBC = 16384
-  uint8 oam[160];
-  uint8 bgp[4];
-  uint8 obp[2][4];
-  uint8 bgpd[64];
-  uint8 obpd[64];
+  struct Sprite {
+    unsigned x;
+    unsigned y;
+    unsigned tile;
+    unsigned attr;
+    unsigned data;
+  };
+  Sprite sprite[10];
+  unsigned sprites;
+
+  unsigned px;
+
+  struct Background {
+    unsigned attr;
+    unsigned data;
+  };
+  Background background;
+  Background window;
 
   static void Main();
   void main();
@@ -78,18 +98,20 @@ struct PPU : Thread, MMIO {
   void mmio_write(uint16 addr, uint8 data);
 
   //dmg.cpp
-  void dmg_render();
-  uint16 dmg_read_tile(bool select, unsigned x, unsigned y);
-  void dmg_render_bg();
-  void dmg_render_window();
-  void dmg_render_ob();
+  void dmg_read_tile(bool select, unsigned x, unsigned y, unsigned& data);
+  void dmg_scanline();
+  void dmg_run();
+  void dmg_run_bg();
+  void dmg_run_window();
+  void dmg_run_ob();
 
   //cgb.cpp
-  void cgb_render();
-  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& tile, unsigned& attr, unsigned& data);
-  void cgb_render_bg();
-  void cgb_render_window();
-  void cgb_render_ob();
+  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& attr, unsigned& data);
+  void cgb_scanline();
+  void cgb_run();
+  void cgb_run_bg();
+  void cgb_run_window();
+  void cgb_run_ob();
 
   void power();
 

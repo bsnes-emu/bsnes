@@ -17,6 +17,7 @@ struct APU : Thread, MMIO {
 
   static void Main();
   void main();
+  void hipass(int16& sample, int64& bias);
   void power();
 
   uint8 mmio_read(uint16 addr);

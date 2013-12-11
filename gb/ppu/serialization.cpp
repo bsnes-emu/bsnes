@@ -3,13 +3,6 @@
 void PPU::serialize(serializer& s) {
   Thread::serialize(s);
 
-  s.array(screen);
-  for(auto& pixel : pixels) {
-    s.integer(pixel.color);
-    s.integer(pixel.palette);
-    s.integer((unsigned&)pixel.origin);
-  }
-
   s.array(vram);
   s.array(oam);
   s.array(bgp);
@@ -19,7 +12,6 @@ void PPU::serialize(serializer& s) {
   s.array(obpd);
 
   s.integer(status.lx);
-  s.integer(status.wyc);
 
   s.integer(status.display_enable);
   s.integer(status.window_tilemap_select);
@@ -51,6 +43,30 @@ void PPU::serialize(serializer& s) {
 
   s.integer(status.obpi_increment);
   s.integer(status.obpi);
+
+  s.array(screen);
+
+  s.integer(bg.color);
+  s.integer(bg.palette);
+  s.integer(bg.priority);
+
+  s.integer(ob.color);
+  s.integer(ob.palette);
+  s.integer(ob.priority);
+
+  for(auto& o : sprite) {
+    s.integer(o.x);
+    s.integer(o.y);
+    s.integer(o.tile);
+    s.integer(o.attr);
+  }
+  s.integer(sprites);
+
+  s.integer(background.attr);
+  s.integer(background.data);
+
+  s.integer(window.attr);
+  s.integer(window.data);
 }
 
 #endif

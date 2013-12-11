@@ -17,6 +17,10 @@ struct Master {
   int16 left;
   int16 right;
 
+  int64 center_bias;
+  int64 left_bias;
+  int64 right_bias;
+
   void run();
   void write(unsigned r, uint8 data);
   void power();

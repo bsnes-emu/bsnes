@@ -104,18 +104,12 @@ void pListView::setSelected(bool selected) {
 
 void pListView::setSelection(unsigned selection) {
   GtkTreeSelection* treeSelection = gtk_tree_view_get_selection(GTK_TREE_VIEW(subWidget));
-  GtkTreeModel* model = gtk_tree_view_get_model(GTK_TREE_VIEW(subWidget));
   gtk_tree_selection_unselect_all(treeSelection);
-  GtkTreeIter iter;
-  if(gtk_tree_model_get_iter_from_string(model, &iter, string(selection)) == false) return;
-  gtk_tree_selection_select_iter(treeSelection, &iter);
-
-  //scroll window to selected item
-  char* path = gtk_tree_model_get_string_from_iter(model, &iter);
-  GtkTreePath* treePath = gtk_tree_path_new_from_string(path);
-  gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(subWidget), treePath, nullptr, true, 0.5, 0.0);
-  gtk_tree_path_free(treePath);
-  g_free(path);
+  GtkTreePath* path = gtk_tree_path_new_from_string(string{selection});
+  gtk_tree_selection_select_path(treeSelection, path);
+  gtk_tree_view_set_cursor(GTK_TREE_VIEW(subWidget), path, nullptr, false);
+  gtk_tree_view_scroll_to_cell(GTK_TREE_VIEW(subWidget), path, nullptr, true, 0.5, 0.0);
+  gtk_tree_path_free(path);
 }
 
 void pListView::setText(unsigned selection, unsigned position, string text) {

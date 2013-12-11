@@ -1,34 +1,24 @@
 #ifdef PPU_CPP
 
-void PPU::cgb_render() {
-  for(auto& pixel : pixels) {
-    pixel.color = 0x7fff;
-    pixel.palette = 0;
-    pixel.origin = Pixel::Origin::None;
-  }
-
-  if(status.display_enable) {
-    cgb_render_bg();
-    if(status.window_display_enable) cgb_render_window();
-    if(status.ob_enable) cgb_render_ob();
-  }
-
-  uint32* output = screen + status.ly * 160;
-  for(unsigned n = 0; n < 160; n++) output[n] = video.palette[pixels[n].color];
-  interface->lcdScanline();
-}
-
-//Attributes:
+//BG attributes:
 //0x80: 0 = OAM priority, 1 = BG priority
 //0x40: vertical flip
 //0x20: horizontal flip
 //0x08: VRAM bank#
 //0x07: palette#
-void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& tile, unsigned& attr, unsigned& data) {
+
+//OB attributes:
+//0x80: 0 = OBJ above BG, 1 = BG above OBJ
+//0x40: vertical flip
+//0x20: horizontal flip
+//0x08: VRAM bank#
+//0x07: palette#
+
+void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& attr, unsigned& data) {
   unsigned tmaddr = 0x1800 + (select << 10);
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
 
-  tile = vram[0x0000 + tmaddr];
+  unsigned tile = vram[0x0000 + tmaddr];
   attr = vram[0x2000 + tmaddr];
 
   unsigned tdaddr = attr & 0x08 ? 0x2000 : 0x0000;
@@ -47,127 +37,127 @@ void PPU::cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& tile, uns
   if(attr & 0x20) data = hflip(data);
 }
 
-void PPU::cgb_render_bg() {
-  unsigned iy = (status.ly + status.scy) & 255;
-  unsigned ix = status.scx, tx = ix & 7;
+void PPU::cgb_scanline() {
+  px = 0;
 
-  unsigned tile, attr, data;
-  cgb_read_tile(status.bg_tilemap_select, ix, iy, tile, attr, data);
-
-  for(unsigned ox = 0; ox < 160; ox++) {
-    unsigned index = ((data & (0x0080 >> tx)) ? 1 : 0)
-                   | ((data & (0x8000 >> tx)) ? 2 : 0);
-    unsigned palette = ((attr & 0x07) << 2) + index;
-    unsigned color = 0;
-    color |= bgpd[(palette << 1) + 0] << 0;
-    color |= bgpd[(palette << 1) + 1] << 8;
-    color &= 0x7fff;
-
-    pixels[ox].color = color;
-    pixels[ox].palette = index;
-    pixels[ox].origin = (attr & 0x80 ? Pixel::Origin::BGP : Pixel::Origin::BG);
-
-    ix = (ix + 1) & 255;
-    tx = (tx + 1) & 7;
-    if(tx == 0) cgb_read_tile(status.bg_tilemap_select, ix, iy, tile, attr, data);
-  }
-}
-
-void PPU::cgb_render_window() {
-  if(status.ly - status.wy >= 144u) return;
-  if(status.wx >= 167u) return;
-  unsigned iy = status.wyc++;
-  unsigned ix = (7 - status.wx) & 255, tx = ix & 7;
-
-  unsigned tile, attr, data;
-  cgb_read_tile(status.window_tilemap_select, ix, iy, tile, attr, data);
-
-  for(unsigned ox = 0; ox < 160; ox++) {
-    unsigned index = ((data & (0x0080 >> tx)) ? 1 : 0)
-                   | ((data & (0x8000 >> tx)) ? 2 : 0);
-    unsigned palette = ((attr & 0x07) << 2) + index;
-    unsigned color = 0;
-    color |= bgpd[(palette << 1) + 0] << 0;
-    color |= bgpd[(palette << 1) + 1] << 8;
-    color &= 0x7fff;
-
-    if(ox - (status.wx - 7) < 160u) {
-      pixels[ox].color = color;
-      pixels[ox].palette = index;
-      pixels[ox].origin = (attr & 0x80 ? Pixel::Origin::BGP : Pixel::Origin::BG);
-    }
-
-    ix = (ix + 1) & 255;
-    tx = (tx + 1) & 7;
-    if(tx == 0) cgb_read_tile(status.window_tilemap_select, ix, iy, tile, attr, data);
-  }
-}
-
-//Attributes:
-//0x80: 0 = OBJ above BG, 1 = BG above OBJ
-//0x40: vertical flip
-//0x20: horizontal flip
-//0x08: VRAM bank#
-//0x07: palette#
-void PPU::cgb_render_ob() {
   const unsigned Height = (status.ob_size == 0 ? 8 : 16);
-  unsigned sprite[10], sprites = 0;
+  sprites = 0;
 
   //find first ten sprites on this scanline
-  for(unsigned s = 0; s < 40; s++) {
-    unsigned sy = oam[(s << 2) + 0] - 16;
-    unsigned sx = oam[(s << 2) + 1] -  8;
+  for(unsigned n = 0; n < 40 * 4; n += 4) {
+    Sprite& s = sprite[sprites];
+    s.y = oam[n + 0] - 16;
+    s.x = oam[n + 1] -  8;
+    s.tile = oam[n + 2] & ~status.ob_size;
+    s.attr = oam[n + 3];
 
-    sy = status.ly - sy;
-    if(sy >= Height) continue;
+    s.y = status.ly - s.y;
+    if(s.y >= Height) continue;
 
-    sprite[sprites++] = s;
-    if(sprites == 10) break;
+    if(s.attr & 0x40) s.y ^= (Height - 1);
+    unsigned tdaddr = (s.attr & 0x08 ? 0x2000 : 0x0000) + (s.tile << 4) + (s.y << 1);
+    s.data  = vram[tdaddr + 0] << 0;
+    s.data |= vram[tdaddr + 1] << 8;
+    if(s.attr & 0x20) s.data = hflip(s.data);
+
+    if(++sprites == 10) break;
+  }
+}
+
+void PPU::cgb_run() {
+  ob.color = 0;
+  ob.palette = 0;
+  ob.priority = 0;
+
+  unsigned color = 0x7fff;
+  if(status.display_enable) {
+    cgb_run_bg();
+    if(status.window_display_enable) cgb_run_window();
+    if(status.ob_enable) cgb_run_ob();
+
+    if(ob.palette == 0) {
+      color = bg.color;
+    } else if(bg.palette == 0) {
+      color = ob.color;
+    } else if(status.bg_enable == 0) {
+      color = ob.color;
+    } else if(bg.priority) {
+      color = bg.color;
+    } else if(ob.priority) {
+      color = ob.color;
+    } else {
+      color = bg.color;
+    }
   }
 
-  //render backwards, so that first sprite has highest priority
-  for(signed s = sprites - 1; s >= 0; s--) {
-    unsigned n = sprite[s] << 2;
-    unsigned sy = oam[n + 0] - 16;
-    unsigned sx = oam[n + 1] -  8;
-    unsigned tile = oam[n + 2] & ~status.ob_size;
-    unsigned attr = oam[n + 3];
+  uint32* output = screen + status.ly * 160 + px++;
+  *output = video.palette[color];
+}
 
-    sy = status.ly - sy;
-    if(sy >= Height) continue;
-    if(attr & 0x40) sy ^= (Height - 1);
+void PPU::cgb_run_bg() {
+  unsigned scrolly = (status.ly + status.scy) & 255;
+  unsigned scrollx = (px + status.scx) & 255;
+  unsigned tx = scrollx & 7;
+  if(tx == 0 || px == 0) cgb_read_tile(status.bg_tilemap_select, scrollx, scrolly, background.attr, background.data);
 
-    unsigned tdaddr = (attr & 0x08 ? 0x2000 : 0x0000) + (tile << 4) + (sy << 1), data = 0;
-    data |= vram[tdaddr++] << 0;
-    data |= vram[tdaddr++] << 8;
-    if(attr & 0x20) data = hflip(data);
+  unsigned index = 0;
+  index |= (background.data & (0x0080 >> tx)) ? 1 : 0;
+  index |= (background.data & (0x8000 >> tx)) ? 2 : 0;
+  unsigned palette = ((background.attr & 0x07) << 2) + index;
+  unsigned color = 0;
+  color |= bgpd[(palette << 1) + 0] << 0;
+  color |= bgpd[(palette << 1) + 1] << 8;
+  color &= 0x7fff;
 
-    for(unsigned tx = 0; tx < 8; tx++) {
-      unsigned index = ((data & (0x0080 >> tx)) ? 1 : 0)
-                     | ((data & (0x8000 >> tx)) ? 2 : 0);
-      if(index == 0) continue;
+  bg.color = color;
+  bg.palette = index;
+  bg.priority = background.attr & 0x80;
+}
 
-      unsigned palette = ((attr & 0x07) << 2) + index;
-      unsigned color = 0;
-      color |= obpd[(palette << 1) + 0] << 0;
-      color |= obpd[(palette << 1) + 1] << 8;
-      color &= 0x7fff;
+void PPU::cgb_run_window() {
+  if(status.ly - status.wy >= 144u) return;
+  if(status.wx >= 167u) return;
+  unsigned scrolly = (status.ly - status.wy) & 255;
+  unsigned scrollx = (px + 7 - status.wx) & 255;
+  unsigned tx = scrollx & 7;
+  if(tx == 0 || px == 0) cgb_read_tile(status.window_tilemap_select, scrollx, scrolly, window.attr, window.data);
 
-      unsigned ox = sx + tx;
-      if(ox < 160) {
-        //When LCDC.D0 (BG enable) is off, OB is always rendered above BG+Window
-        if(status.bg_enable) {
-          if(attr & 0x80) {
-            if(pixels[ox].origin == Pixel::Origin::BG || pixels[ox].origin == Pixel::Origin::BGP) {
-              if(pixels[ox].palette > 0) continue;
-            }
-          }
-        }
-        pixels[ox].color = color;
-        pixels[ox].palette = index;
-        pixels[ox].origin = Pixel::Origin::OB;
-      }
-    }
+  unsigned index = 0;
+  index |= (window.data & (0x0080 >> tx)) ? 1 : 0;
+  index |= (window.data & (0x8000 >> tx)) ? 2 : 0;
+  unsigned palette = ((window.attr & 0x07) << 2) + index;
+  unsigned color = 0;
+  color |= bgpd[(palette << 1) + 0] << 0;
+  color |= bgpd[(palette << 1) + 1] << 8;
+  color &= 0x7fff;
+
+  bg.color = color;
+  bg.palette = index;
+  bg.priority = window.attr & 0x80;
+}
+
+void PPU::cgb_run_ob() {
+  //render backwards, so that first sprite has priority
+  for(signed n = sprites - 1; n >= 0; n--) {
+    Sprite& s = sprite[n];
+
+    signed tx = px - s.x;
+    if(tx < 0 || tx > 7) continue;
+
+    unsigned index = 0;
+    index |= (s.data & (0x0080 >> tx)) ? 1 : 0;
+    index |= (s.data & (0x8000 >> tx)) ? 2 : 0;
+    if(index == 0) continue;
+
+    unsigned palette = ((s.attr & 0x07) << 2) + index;
+    unsigned color = 0;
+    color |= obpd[(palette << 1) + 0] << 0;
+    color |= obpd[(palette << 1) + 1] << 8;
+    color &= 0x7fff;
+
+    ob.color = color;
+    ob.palette = index;
+    ob.priority = !(s.attr & 0x80);
   }
 }
 

@@ -46,11 +46,20 @@ void APU::main() {
     noise.run();
     master.run();
 
+    hipass(master.center, master.center_bias);
+    hipass(master.left, master.left_bias);
+    hipass(master.right, master.right_bias);
+
     interface->audioSample(master.left, master.right);
 
     clock += cpu.frequency;
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(scheduler.active_thread = cpu.thread);
   }
+}
+
+void APU::hipass(int16& sample, int64& bias) {
+  bias += ((((int64)sample << 16) - (bias >> 16)) * 57593) >> 16;
+  sample = sclamp<16>(sample - (bias >> 32));
 }
 
 void APU::power() {
