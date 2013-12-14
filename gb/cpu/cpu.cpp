@@ -200,6 +200,10 @@ void CPU::power() {
   status.interrupt_enable_timer = 0;
   status.interrupt_enable_stat = 0;
   status.interrupt_enable_vblank = 0;
+
+  oamdma.active = false;
+  oamdma.bank = 0;
+  oamdma.offset = 0;
 }
 
 }

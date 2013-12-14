@@ -1491,6 +1491,8 @@ void ListView::remove(unsigned selection) {
 void ListView::reset() {
   state.checked.reset();
   state.image.reset();
+  state.selected = false;
+  state.selection = 0;
   state.text.reset();
   return p.reset();
 }

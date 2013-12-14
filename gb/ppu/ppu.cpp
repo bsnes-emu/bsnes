@@ -66,6 +66,7 @@ void PPU::scanline() {
   if(++status.ly == 154) frame();
 
   if(status.ly < 144) {
+    interface->lcdScanline();  //Super Game Boy rendering notification
     system.cgb() ? cgb_scanline() : dmg_scanline();
   }
 
@@ -80,8 +81,6 @@ void PPU::scanline() {
 }
 
 void PPU::frame() {
-  cpu.mmio_joyp_poll();
-
   status.ly = 0;
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }

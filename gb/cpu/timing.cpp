@@ -5,6 +5,16 @@
 #ifdef CPU_CPP
 
 void CPU::add_clocks(unsigned clocks) {
+  if(oamdma.active) {
+    for(unsigned n = 0; n < clocks; n++) {
+      bus.write(0xfe00 + oamdma.offset, bus.read((oamdma.bank << 8) + oamdma.offset));
+      if(++oamdma.offset == 160) {
+        oamdma.active = false;
+        break;
+      }
+    }
+  }
+
   system.clocks_executed += clocks;
   if(system.sgb()) scheduler.exit(Scheduler::ExitReason::StepEvent);
 

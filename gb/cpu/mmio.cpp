@@ -186,10 +186,9 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
   }
 
   if(addr == 0xff46) {  //DMA
-    for(unsigned n = 0x00; n <= 0x9f; n++) {
-      bus.write(0xfe00 + n, bus.read((data << 8) + n));
-      add_clocks(4);
-    }
+    oamdma.active = true;
+    oamdma.bank = data;
+    oamdma.offset = 0;
     return;
   }
 

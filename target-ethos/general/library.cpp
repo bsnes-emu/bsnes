@@ -203,7 +203,7 @@ string LibraryManager::load(const string& type) {
         show();
         setModal();
         slotLoad = false;
-        browser->mediaMode.setSelection(0);
+        browser->mediaMode.setSelection(config->library.mediaMode = 0);
         return loadPathname;
       }
       mode++;
@@ -287,7 +287,10 @@ void LibraryManager::synchronize() {
     if(requestedLoadType.empty()) {
       loadButton.setEnabled(media.bootable);
     } else {
-      loadButton.setEnabled(requestedLoadType == media.type);
+      bool enabled = (requestedLoadType == media.type);
+      //allow Super Game Boy to load Game Boy Color games
+      if(requestedLoadType == "gb" && loaded.size() == 1 && media.type == "gbc") enabled = true;
+      loadButton.setEnabled(enabled);
     }
   } else {
     loadButton.setEnabled(false);

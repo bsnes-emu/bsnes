@@ -55,6 +55,10 @@ void CPU::serialize(serializer& s) {
   s.integer(status.interrupt_enable_timer);
   s.integer(status.interrupt_enable_stat);
   s.integer(status.interrupt_enable_vblank);
+
+  s.integer(oamdma.active);
+  s.integer(oamdma.bank);
+  s.integer(oamdma.offset);
 }
 
 #endif
