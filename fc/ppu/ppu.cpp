@@ -324,7 +324,7 @@ void PPU::raster_pixel() {
   }
 
   if(raster_enable() == false) palette = 0;
-  output[status.lx] = video.palette[(status.emphasis << 6) | cgram_read(palette)];
+  output[status.lx] = (status.emphasis << 6) | cgram_read(palette);
 }
 
 void PPU::raster_sprite() {

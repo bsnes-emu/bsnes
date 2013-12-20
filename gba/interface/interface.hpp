@@ -43,7 +43,7 @@ struct Interface : Emulator::Interface {
   serializer serialize();
   bool unserialize(serializer&);
 
-  void paletteUpdate(bool colorEmulation);
+  void paletteUpdate(PaletteMode mode);
 
   Interface();
 

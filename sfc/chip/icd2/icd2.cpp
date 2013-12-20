@@ -73,7 +73,7 @@ void ICD2::reset() {
   joyp14lock = 0;
   pulselock = true;
 
-  GameBoy::video.generate_palette(false);
+  GameBoy::video.generate_palette(Emulator::Interface::PaletteMode::None);
   GameBoy::system.init();
   GameBoy::system.power();
 }

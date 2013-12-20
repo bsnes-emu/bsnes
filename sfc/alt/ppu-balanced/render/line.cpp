@@ -93,7 +93,7 @@ inline void PPU::render_line_output() {
   if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
     for(unsigned x = 0; x < 256; x++) {
       curr = (regs.display_brightness << 15) | get_pixel_normal(x);
-      *ptr++ = video.palette[curr];
+      *ptr++ = curr;
     }
   } else {
     for(unsigned x = 0, prev = 0; x < 256; x++) {
@@ -101,11 +101,11 @@ inline void PPU::render_line_output() {
       //blending code is left for reference purposes
 
       curr = (regs.display_brightness << 15) | get_pixel_swap(x);
-      *ptr++ = video.palette[curr];  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      *ptr++ = curr;  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
       //prev = curr;
 
       curr = (regs.display_brightness << 15) | get_pixel_normal(x);
-      *ptr++ = video.palette[curr];  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
+      *ptr++ = curr;  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
       //prev = curr;
     }
   }

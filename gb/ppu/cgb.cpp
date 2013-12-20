@@ -91,7 +91,7 @@ void PPU::cgb_run() {
   }
 
   uint32* output = screen + status.ly * 160 + px++;
-  *output = video.palette[color];
+  *output = color;
 }
 
 void PPU::cgb_run_bg() {
@@ -115,10 +115,10 @@ void PPU::cgb_run_bg() {
 }
 
 void PPU::cgb_run_window() {
-  if(status.ly - status.wy >= 144u) return;
-  if(status.wx >= 167u) return;
-  unsigned scrolly = (status.ly - status.wy) & 255;
-  unsigned scrollx = (px + 7 - status.wx) & 255;
+  unsigned scrolly = status.ly - status.wy;
+  unsigned scrollx = px + 7 - status.wx;
+  if(scrolly >= 144u) return;  //also matches underflow (scrolly < 0)
+  if(scrollx >= 160u) return;  //also matches underflow (scrollx < 0)
   unsigned tx = scrollx & 7;
   if(tx == 0 || px == 0) cgb_read_tile(status.window_tilemap_select, scrollx, scrolly, window.attr, window.data);
 

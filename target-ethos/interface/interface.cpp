@@ -51,7 +51,7 @@ uint32_t Interface::videoColor(unsigned source, uint16_t r, uint16_t g, uint16_t
   return 0u;
 }
 
-void Interface::videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height) {
+void Interface::videoRefresh(const uint32_t* palette, const uint32_t* data, unsigned pitch, unsigned width, unsigned height) {
   uint32_t* output;
   unsigned outputPitch;
 
@@ -59,7 +59,11 @@ void Interface::videoRefresh(const uint32_t* data, unsigned pitch, unsigned widt
     pitch >>= 2, outputPitch >>= 2;
 
     for(unsigned y = 0; y < height; y++) {
-      memcpy(output + y * outputPitch, data + y * pitch, 4 * width);
+      const uint32_t* sp = data + y * pitch;
+      uint32_t* dp = output + y * outputPitch;
+      for(unsigned x = 0; x < width; x++) {
+        *dp++ = palette[*sp++];
+      }
     }
 
     if(system().information.overscan && config->video.maskOverscan.enable) {

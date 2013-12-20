@@ -60,5 +60,5 @@ void VideoSettings::synchronize() {
   overscanHorizontal.value.setText({config->video.maskOverscan.horizontal, "px"});
   overscanVertical.value.setText({config->video.maskOverscan.vertical, "px"});
 
-  if(program->active) system().paletteUpdate(config->video.colorEmulation);
+  utility->updatePalette();
 }

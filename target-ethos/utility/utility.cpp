@@ -91,7 +91,6 @@ void Utility::load() {
   cheatEditor->load({pathname[0], "cheats.bml"});
   stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
 
-  system().paletteUpdate(config->video.colorEmulation);
   synchronizeDSP();
 
   resize();
@@ -180,6 +179,18 @@ void Utility::synchronizeRuby() {
   synchronizeDSP();
 }
 
+void Utility::updatePalette() {
+  if(program->active == nullptr) return;
+
+  if(config->video.shader == "Display Emulation") {
+    system().paletteUpdate(Emulator::Interface::PaletteMode::None);
+  } else if(config->video.colorEmulation) {
+    system().paletteUpdate(Emulator::Interface::PaletteMode::Emulation);
+  } else {
+    system().paletteUpdate(Emulator::Interface::PaletteMode::Standard);
+  }
+}
+
 void Utility::updateShader() {
   if(config->video.shader == "None") {
     video.set(Video::Shader, (const char*)"");
@@ -187,7 +198,6 @@ void Utility::updateShader() {
   } else if(config->video.shader == "Blur") {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterLinear);
-    return;
   } else if(config->video.shader == "Display Emulation") {
     if(program->active) {
       string pathname = program->path("Video Shaders/");
@@ -206,6 +216,7 @@ void Utility::updateShader() {
   } else {
     video.set(Video::Shader, (const char*)config->video.shader);
   }
+  updatePalette();
 }
 
 void Utility::resize(bool resizeWindow) {

@@ -4,14 +4,22 @@ namespace GameBoyAdvance {
 
 Video video;
 
-void Video::generate_palette(bool color_emulation) {
-  //todo: implement LCD color emulation
+void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
   for(unsigned color = 0; color < (1 << 15); color++) {
+    if(mode == Emulator::Interface::PaletteMode::None) {
+      palette[color] = color;
+      continue;
+    }
+
     unsigned B = (color >> 10) & 31;
     unsigned G = (color >>  5) & 31;
     unsigned R = (color >>  0) & 31;
 
-    if(color_emulation) {
+    if(mode == Emulator::Interface::PaletteMode::Standard) {
+      R = R << 11 | R << 6 | R << 1 | R >> 4;
+      G = G << 11 | G << 6 | G << 1 | G >> 4;
+      B = B << 11 | B << 6 | B << 1 | B >> 4;
+    } else {
       R = curve[R];
       G = curve[G];
       B = curve[B];
@@ -47,10 +55,6 @@ void Video::generate_palette(bool color_emulation) {
       R = R << 8 | R;
       G = G << 8 | G;
       B = B << 8 | B;
-    } else {
-      R = R << 11 | R << 6 | R << 1 | R >> 4;
-      G = G << 11 | G << 6 | G << 1 | G >> 4;
-      B = B << 11 | B << 6 | B << 1 | B >> 4;
     }
 
     palette[color] = interface->videoColor(color, R, G, B);
@@ -58,7 +62,7 @@ void Video::generate_palette(bool color_emulation) {
 }
 
 Video::Video() {
-  palette = new uint32[1 << 15]();
+  palette = new uint32_t[1 << 15]();
 }
 
 Video::~Video() {

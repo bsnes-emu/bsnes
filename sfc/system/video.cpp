@@ -2,14 +2,19 @@
 
 Video video;
 
-void Video::generate_palette(bool color_emulation) {
+void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
   for(unsigned color = 0; color < (1 << 19); color++) {
+    if(mode == Emulator::Interface::PaletteMode::None) {
+      palette[color] = color;
+      continue;
+    }
+
     unsigned l = (color >> 15) & 15;
     unsigned b = (color >> 10) & 31;
     unsigned g = (color >>  5) & 31;
     unsigned r = (color >>  0) & 31;
 
-    if(color_emulation == true) {
+    if(mode == Emulator::Interface::PaletteMode::Emulation) {
       r = gamma_ramp[r];
       g = gamma_ramp[g];
       b = gamma_ramp[b];
@@ -30,7 +35,7 @@ void Video::generate_palette(bool color_emulation) {
 }
 
 Video::Video() {
-  palette = new unsigned[1 << 19]();
+  palette = new uint32_t[1 << 19]();
 }
 
 Video::~Video() {
@@ -126,6 +131,7 @@ void Video::update() {
   //overscan: when disabled, shift image down (by scrolling video buffer up) to center image onscreen
   //(memory before ppu.output is filled with black scanlines)
   interface->videoRefresh(
+    video.palette,
     ppu.output - (ppu.overscan() ? 0 : 7 * 1024),
     4 * (1024 >> ppu.interlace()),
     256 << hires,

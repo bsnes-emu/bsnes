@@ -120,12 +120,12 @@ void PPU::Screen::render() {
 
   if(!self.regs.pseudo_hires && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
     for(unsigned i = 0; i < 256; i++) {
-      data[i] = video.palette[self.regs.display_brightness << 15 | get_pixel_main(i)];
+      data[i] = self.regs.display_brightness << 15 | get_pixel_main(i);
     }
   } else {
     for(unsigned i = 0; i < 256; i++) {
-      *data++ = video.palette[self.regs.display_brightness << 15 | get_pixel_sub(i)];
-      *data++ = video.palette[self.regs.display_brightness << 15 | get_pixel_main(i)];
+      *data++ = self.regs.display_brightness << 15 | get_pixel_sub(i);
+      *data++ = self.regs.display_brightness << 15 | get_pixel_main(i);
     }
   }
 }

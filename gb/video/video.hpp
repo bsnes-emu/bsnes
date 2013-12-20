@@ -1,12 +1,12 @@
 struct Video {
-  uint32_t* palette;
-  void generate_palette(bool color_emulation);
+  uint32_t* palette = nullptr;
+  void generate_palette(Emulator::Interface::PaletteMode mode);
 
   Video();
   ~Video();
 
 private:
-  bool color_emulation;
+  Emulator::Interface::PaletteMode mode;
   static const uint16 monochrome[4][3];
   uint32_t palette_dmg(unsigned color) const;
   uint32_t palette_sgb(unsigned color) const;

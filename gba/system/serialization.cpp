@@ -44,6 +44,7 @@ void System::serialize_all(serializer& s) {
   ppu.serialize(s);
   apu.serialize(s);
   bus.serialize(s);
+  player.serialize(s);
 }
 
 void System::serialize_init() {

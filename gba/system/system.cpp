@@ -15,6 +15,7 @@ void System::term() {
 
 void System::power() {
   bus.power();
+  player.power();
   cpu.power();
   ppu.power();
   apu.power();
@@ -39,7 +40,7 @@ void System::run() {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) break;
   }
-  interface->videoRefresh(ppu.output, 4 * 240, 240, 160);
+  interface->videoRefresh(video.palette, ppu.output, 4 * 240, 240, 160);
 }
 
 void System::runtosave() {
@@ -62,7 +63,7 @@ void System::runthreadtosave() {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      interface->videoRefresh(ppu.output, 4 * 240, 240, 160);
+      interface->videoRefresh(video.palette, ppu.output, 4 * 240, 240, 160);
     }
   }
 }

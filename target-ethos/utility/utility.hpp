@@ -21,6 +21,7 @@ struct Utility {
 
   void synchronizeDSP();
   void synchronizeRuby();
+  void updatePalette();
   void updateShader();
   void resize(bool resizeWindow = false);
   void toggleFullScreen();

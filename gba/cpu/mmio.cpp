@@ -47,8 +47,9 @@ uint8 CPU::read(uint32 addr) {
   case 0x04000122: case 0x04000123:
   case 0x04000124: case 0x04000125:
   case 0x04000126: case 0x04000127: {
-    auto& data = regs.serial.data[(addr >> 1) & 3];
+    if(auto data = player.read()) return data() >> ((addr & 3) << 3);
     unsigned shift = (addr & 1) * 8;
+    auto& data = regs.serial.data[(addr >> 1) & 3];
     return data >> shift;
   }
 
@@ -62,11 +63,13 @@ uint8 CPU::read(uint32 addr) {
 
   //KEYINPUT
   case 0x04000130:
+    if(auto result = player.keyinput()) return result() >> 0;
     for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(0, 0, n) << n;
     if((result & 0xc0) == 0xc0) result &= ~0xc0;  //up+down cannot be pressed simultaneously
     if((result & 0x30) == 0x30) result &= ~0x30;  //left+right cannot be pressed simultaneously
     return result ^ 0xff;
   case 0x04000131:
+    if(auto result = player.keyinput()) return result() >> 8;
     result |= interface->inputPoll(0, 0, 8) << 0;
     result |= interface->inputPoll(0, 0, 9) << 1;
     return result ^ 0x03;
@@ -241,6 +244,7 @@ void CPU::write(uint32 addr, uint8 byte) {
   case 0x04000122: case 0x04000123:
   case 0x04000124: case 0x04000125:
   case 0x04000126: case 0x04000127: {
+    player.write(byte, addr & 3);
     auto& data = regs.serial.data[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
     data = (data & ~(255 << shift)) | (byte << shift);

@@ -6,12 +6,18 @@ namespace Famicom {
 
 Video video;
 
-void Video::generate_palette(bool color_emulation) {
-  for(unsigned n = 0; n < (1 << 9); n++) palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, color_emulation ? 1.8 : 2.2);
+void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
+  for(unsigned n = 0; n < (1 << 9); n++) {
+    switch(mode) {
+    case Emulator::Interface::PaletteMode::None:      palette[n] = n; break;
+    case Emulator::Interface::PaletteMode::Standard:  palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, 2.2); break;
+    case Emulator::Interface::PaletteMode::Emulation: palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, 1.8); break;
+    }
+  }
 }
 
 Video::Video() {
-  palette = new unsigned[1 << 9]();
+  palette = new uint32_t[1 << 9]();
 }
 
 Video::~Video() {

@@ -25,30 +25,20 @@ void PPU::main() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    //X = 0
-    if(status.display_enable) {
+    if(status.display_enable && status.ly < 144) {
       if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
-    }
-
-    add_clocks(92);
-
-    if(status.ly < 144) {
+      add_clocks(92);
       for(unsigned n = 0; n < 160; n++) {
         system.cgb() ? cgb_run() : dmg_run();
         add_clocks(1);
       }
-    } else {
-      //Vblank
-      add_clocks(160);
-    }
-
-    //X = 252
-    if(status.display_enable) {
       if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
       cpu.hblank();
+      add_clocks(204);
+    } else {
+      add_clocks(456);
     }
 
-    add_clocks(204);
     scanline();
   }
 }

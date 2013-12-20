@@ -44,7 +44,7 @@ void PPU::step(unsigned clocks) {
 void PPU::power() {
   create(PPU::Enter, 16777216);
 
-  for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0, blur[n] = 0;
+  for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0;
 
   for(unsigned n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
   for(unsigned n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
@@ -149,12 +149,12 @@ void PPU::scanline() {
 }
 
 void PPU::frame() {
+  player.frame();
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
 PPU::PPU() {
   output = new uint32[240 * 160];
-  blur = new uint16[240 * 160];
 
   regs.bg[0].id = BG0;
   regs.bg[1].id = BG1;
@@ -164,7 +164,6 @@ PPU::PPU() {
 
 PPU::~PPU() {
   delete[] output;
-  delete[] blur;
 }
 
 }

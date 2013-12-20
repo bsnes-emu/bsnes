@@ -53,6 +53,7 @@ namespace GameBoyAdvance {
   #include <gba/scheduler/scheduler.hpp>
   #include <gba/system/system.hpp>
   #include <gba/cartridge/cartridge.hpp>
+  #include <gba/player/player.hpp>
   #include <gba/cpu/cpu.hpp>
   #include <gba/ppu/ppu.hpp>
   #include <gba/apu/apu.hpp>

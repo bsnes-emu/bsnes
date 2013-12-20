@@ -20,13 +20,12 @@ void PPU::Screen::scanline() {
 void PPU::Screen::run() {
   if(ppu.vcounter() == 0) return;
 
-  auto palette = &video.palette[self.regs.display_brightness << 15];
   bool hires   = self.regs.pseudo_hires || self.regs.bgmode == 5 || self.regs.bgmode == 6;
   auto sscolor = get_pixel_sub(hires);
   auto mscolor = get_pixel_main();
 
-  *output++ = palette[hires ? sscolor : mscolor];
-  *output++ = palette[mscolor];
+  *output++ = (self.regs.display_brightness << 15) | (hires ? sscolor : mscolor);
+  *output++ = (self.regs.display_brightness << 15) | (mscolor);
 }
 
 uint16 PPU::Screen::get_pixel_sub(bool hires) {

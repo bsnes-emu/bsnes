@@ -1,15 +1,12 @@
 void PPU::render_forceblank() {
   uint32* line = output + regs.vcounter * 240;
-  uint16* last = blur + regs.vcounter * 240;
   for(unsigned x = 0; x < 240; x++) {
-    line[x] = video.palette[(0x7fff + last[x] - ((0x7fff ^ last[x]) & 0x0421)) >> 1];
-    last[x] = 0x7fff;
+    line[x] = 0x7fff;
   }
 }
 
 void PPU::render_screen() {
   uint32* line = output + regs.vcounter * 240;
-  uint16* last = blur + regs.vcounter * 240;
 
   if(regs.bg[0].control.mosaic) render_mosaic_background(BG0);
   if(regs.bg[1].control.mosaic) render_mosaic_background(BG1);
@@ -58,9 +55,8 @@ void PPU::render_screen() {
       color = blend(above[x].color, 16 - regs.blend.evy, 0x0000, regs.blend.evy);
     }
 
-    //output pixel; blend with previous pixel to simulate GBA LCD blur
-    line[x] = video.palette[(color + last[x] - ((color ^ last[x]) & 0x0421)) >> 1];
-    last[x] = color;
+    //output pixel
+    line[x] = color;
   }
 }
 

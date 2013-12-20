@@ -58,7 +58,7 @@ struct Interface : Emulator::Interface {
 
   void cheatSet(const lstring&);
 
-  void paletteUpdate(bool colorEmulation);
+  void paletteUpdate(PaletteMode mode);
 
   Interface();
 

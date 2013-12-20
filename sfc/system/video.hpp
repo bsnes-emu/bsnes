@@ -1,6 +1,6 @@
 struct Video {
-  unsigned* palette;
-  void generate_palette(bool color_emulation);
+  uint32_t* palette;
+  void generate_palette(Emulator::Interface::PaletteMode mode);
   Video();
   ~Video();
 

@@ -4,7 +4,6 @@ struct PPU : Thread, MMIO {
   #include "registers.hpp"
   #include "state.hpp"
   uint32* output;
-  uint16* blur;
 
   static void Enter();
   void main();
