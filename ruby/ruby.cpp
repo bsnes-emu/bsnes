@@ -366,6 +366,7 @@ const char* Input::Handle = "Handle";
 const char* Input::KeyboardSupport = "KeyboardSupport";
 const char* Input::MouseSupport = "MouseSupport";
 const char* Input::JoypadSupport = "JoypadSupport";
+const char* Input::JoypadRumbleSupport = "JoypadRumbleSupport";
 
 void InputInterface::driver(const char* driver) {
   if(p) term();
@@ -384,6 +385,10 @@ void InputInterface::driver(const char* driver) {
 
   #ifdef INPUT_CARBON
   else if(!strcmp(driver, "Carbon")) p = new InputCarbon();
+  #endif
+
+  #ifdef INPUT_UDEV
+  else if(!strcmp(driver, "udev")) p = new InputUdev();
   #endif
 
   #ifdef INPUT_SDL
@@ -406,6 +411,8 @@ const char* InputInterface::optimalDriver() {
   #elif defined(INPUT_CARBON)
   return "Carbon";
 
+  #elif defined(INPUT_UDEV)
+  return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)
@@ -425,6 +432,8 @@ const char* InputInterface::safestDriver() {
   #elif defined(INPUT_CARBON)
   return "Carbon";
 
+  #elif defined(INPUT_UDEV)
+  return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_X)
@@ -455,6 +464,10 @@ const char* InputInterface::availableDrivers() {
   #endif
 
   //Linux
+
+  #if defined(INPUT_UDEV)
+  "udev;"
+  #endif
 
   #if defined(INPUT_SDL)
   "SDL;"
@@ -487,6 +500,7 @@ bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
 bool InputInterface::poll(int16_t* table) { return p ? p->poll(table) : false; }
+void InputInterface::rumble(unsigned id, bool enable) { if(p) return p->rumble(id, enable); }
 InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
 

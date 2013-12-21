@@ -143,6 +143,9 @@ struct pInputCarbon {
     return true;
   }
 
+  void rumble(unsigned id, bool enable) {
+  }
+
   bool init() {
     return true;
   }

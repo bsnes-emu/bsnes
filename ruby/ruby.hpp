@@ -1,6 +1,6 @@
 /*
   ruby
-  version: 0.10 (2013-07-27)
+  version: 0.11 (2013-12-19)
   license: public domain
 */
 
@@ -32,6 +32,7 @@ struct VideoInterface {
   void unlock();
   void clear();
   void refresh();
+
   VideoInterface();
   ~VideoInterface();
 
@@ -53,6 +54,7 @@ struct AudioInterface {
 
   void sample(uint16_t left, uint16_t right);
   void clear();
+
   AudioInterface();
   ~AudioInterface();
 
@@ -77,6 +79,8 @@ struct InputInterface {
   bool acquired();
 
   bool poll(int16_t* table);
+  void rumble(unsigned id, bool enable);
+
   InputInterface();
   ~InputInterface();
 

@@ -7,11 +7,21 @@ namespace Famicom {
 Video video;
 
 void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
-  for(unsigned n = 0; n < (1 << 9); n++) {
-    switch(mode) {
-    case Emulator::Interface::PaletteMode::None:      palette[n] = n; break;
-    case Emulator::Interface::PaletteMode::Standard:  palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, 2.2); break;
-    case Emulator::Interface::PaletteMode::Emulation: palette[n] = generate_color(n, 2.0, 0.0, 1.0, 1.0, 1.8); break;
+  for(unsigned color = 0; color < (1 << 9); color++) {
+    if(mode == Emulator::Interface::PaletteMode::Literal) {
+      palette[color] = color;
+    } else if(mode == Emulator::Interface::PaletteMode::Channel) {
+      unsigned emphasis = (color >> 6) &  7;
+      unsigned luma     = (color >> 4) &  3;
+      unsigned chroma   = (color >> 0) & 15;
+      emphasis = image::normalize(emphasis, 3, 16);
+      luma     = image::normalize(luma,     2, 16);
+      chroma   = image::normalize(chroma,   4, 16);
+      palette[color] = interface->videoColor(color, 0, emphasis, luma, chroma);
+    } else if(mode == Emulator::Interface::PaletteMode::Standard) {
+      palette[color] = generate_color(color, 2.0, 0.0, 1.0, 1.0, 2.2);
+    } else if(mode == Emulator::Interface::PaletteMode::Emulation) {
+      palette[color] = generate_color(color, 2.0, 0.0, 1.0, 1.0, 1.8);
     }
   }
 }
@@ -69,7 +79,7 @@ uint32_t Video::generate_color(
   unsigned g = 65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
   unsigned b = 65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
 
-  return interface->videoColor(n, uclamp<16>(r), uclamp<16>(g), uclamp<16>(b));
+  return interface->videoColor(n, 0, uclamp<16>(r), uclamp<16>(g), uclamp<16>(b));
 }
 
 }

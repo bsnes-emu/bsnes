@@ -45,6 +45,13 @@ uint8 APU::read(uint32 addr) {
   case 0x04000080: return sequencer.read(0);
   case 0x04000081: return sequencer.read(1);
 
+  //SOUND_CNT_H
+  case 0x04000082:
+    return (fifo[1].volume << 3) | (fifo[0].volume << 2) | (sequencer.volume << 0);
+  case 0x04000083:
+    return (fifo[1].timer << 6) | (fifo[1].lenable << 5) | (fifo[1].renable << 4)
+         | (fifo[0].timer << 2) | (fifo[0].lenable << 1) | (fifo[0].renable << 0);
+
   //NR52
   case 0x04000084: return sequencer.read(2);
   case 0x04000085: return 0u;

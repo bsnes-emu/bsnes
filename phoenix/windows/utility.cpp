@@ -255,14 +255,7 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
     } else if(!GetParentWidget((Sizable*)object) && window.p.brush) {
       SetBkColor((HDC)wparam, window.p.brushColor);
       return (INT_PTR)window.p.brush;
-    }/* else {
-      //this will repaint the background properly, but the foreground isn't always rendered after ...
-      RECT rc;
-      GetClientRect((HWND)lparam, &rc);
-      DrawThemeParentBackground((HWND)lparam, (HDC)wparam, &rc);
-      SetBkMode((HDC)wparam, TRANSPARENT);
-      return (INT_PTR)GetStockBrush(HOLLOW_BRUSH);
-    }*/
+    }
     break;
   }
 

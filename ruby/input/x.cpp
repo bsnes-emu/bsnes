@@ -34,6 +34,9 @@ public:
     return true;
   }
 
+  void rumble(unsigned id, bool enable) {
+  }
+
   bool init() {
     display = XOpenDisplay(0);
     x_init(display);
@@ -47,4 +50,4 @@ public:
 
 DeclareInput(X)
 
-};
+}

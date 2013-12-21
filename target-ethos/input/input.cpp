@@ -15,15 +15,20 @@ void AbstractInput::bind() {
     else if(mapping.endsWith(".Lo")) type = Input::Type::AxisLo;
     else if(mapping.endsWith(".Hi")) type = Input::Type::AxisHi;
     else if(mapping.beginsWith("JP") && mapping.find("Axis")) type = Input::Type::Axis;
+    else if(mapping.beginsWith("JP") && mapping.endsWith("Rumble")) type = Input::Type::Rumble;
     else if(mapping.beginsWith("MS") && mapping.endsWith("axis")) type = Input::Type::MouseAxis;
     else if(mapping.beginsWith("MS")) type = Input::Type::MouseButton;
     else type = Input::Type::Button;
 
-    string decode = mapping;
-    if(auto position = decode.find(".")) decode.resize(position());
-    unsigned scancode = Scancode::decode(decode);
-
-    inputList.append({type, scancode});
+    if(type == Input::Type::Rumble) {
+      unsigned joypad = mapping[2] - '0';
+      inputList.append({type, joypad});
+    } else {
+      string decode = mapping;
+      if(auto position = decode.find(".")) decode.resize(position());
+      unsigned scancode = Scancode::decode(decode);
+      inputList.append({type, scancode});
+    }
   }
 }
 
@@ -208,6 +213,39 @@ int16_t AbsoluteInput::poll() {
   return result;
 }
 
+bool RumbleInput::bind(unsigned scancode, int16_t value) {
+  using nall::Keyboard;
+
+  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
+    inputList.reset();
+    mapping = "None";
+    return true;
+  }
+
+  string encode = Scancode::encode(scancode);
+
+  if(Joypad::isAnyButton(scancode)) {
+    if(value == 0) return false;
+    if(auto position = encode.find("::")) encode.resize(position());
+    encode.append("::Rumble");
+    return append(encode);
+  }
+
+  return false;
+}
+
+int16_t RumbleInput::poll() {
+  return false;
+}
+
+void RumbleInput::rumble(bool enable) {
+  if(program->focused() == false) return;
+
+  for(auto& item : inputList) {
+    input.rumble(item.scancode, enable);
+  }
+}
+
 //
 
 HotkeyInput::HotkeyInput() {
@@ -279,7 +317,8 @@ void InputManager::bootstrap() {
           if(input.type == 0) abstract = new DigitalInput;
           if(input.type == 1) abstract = new RelativeInput;
           if(input.type == 2) abstract = new AbsoluteInput;
-          if(input.type >= 3) continue;
+          if(input.type == 3) abstract = new RumbleInput;
+          if(abstract == nullptr) continue;
 
           abstract->name = string{input.name}.replace(" ", "");
           abstract->mapping = "None";

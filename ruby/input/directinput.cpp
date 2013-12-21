@@ -251,7 +251,10 @@ public:
     return true;
   }
 
-  bool init_joypad(const DIDEVICEINSTANCE* instance) {
+  void rumble(unsigned id, bool enable) {
+  }
+
+  bool initJoypad(const DIDEVICEINSTANCE* instance) {
     unsigned n;
     for(n = 0; n < Joypad::Count; n++) { if(!device.gamepad[n]) break; }
     if(n >= Joypad::Count) return DIENUM_STOP;
@@ -267,7 +270,7 @@ public:
     return DIENUM_CONTINUE;
   }
 
-  bool init_axis(const DIDEVICEOBJECTINSTANCE* instance) {
+  bool initAxis(const DIDEVICEOBJECTINSTANCE* instance) {
     signed n;
     for(n = Joypad::Count - 1; n >= 0; n--) { if(device.gamepad[n]) break; }
     if(n < 0) return DIENUM_STOP;
@@ -375,11 +378,11 @@ public:
 };
 
 BOOL CALLBACK DI_EnumJoypadsCallback(const DIDEVICEINSTANCE* instance, void* p) {
-  return ((pInputDI*)p)->init_joypad(instance);
+  return ((pInputDI*)p)->initJoypad(instance);
 }
 
 BOOL CALLBACK DI_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) {
-  return ((pInputDI*)p)->init_axis(instance);
+  return ((pInputDI*)p)->initAxis(instance);
 }
 
 DeclareInput(DI)

@@ -54,11 +54,6 @@ void Player::frame() {
     }
     cpu.regs.irq.flag.serial = true;
   }
-
-  if(status.rumble) {
-    //todo: support actual gamepad rumble; for now, color screen red during rumble
-    for(unsigned n = 0; n < 240 * 160; n++) ppu.output[n] &= 0x001f;
-  }
 }
 
 optional<uint16> Player::keyinput() {
@@ -87,6 +82,7 @@ void Player::write(uint8 byte, uint2 addr) {
 
   if(addr == 3 && status.packet == 15) {
     status.rumble = (status.recv & 0xff) == 0x26;  //on = 0x26, off = 0x04
+    interface->inputRumble(0, 0, 10, status.rumble);
   }
 }
 

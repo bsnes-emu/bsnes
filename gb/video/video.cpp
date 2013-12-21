@@ -21,18 +21,28 @@ Video::~Video() {
 }
 
 unsigned Video::palette_dmg(unsigned color) const {
-  if(mode == Emulator::Interface::PaletteMode::None) return color;
-
-  if(mode == Emulator::Interface::PaletteMode::Standard) {
-    unsigned L = (3 - color) * 21845;
-    return interface->videoColor(color, L, L, L);
+  if(mode == Emulator::Interface::PaletteMode::Literal) {
+    return color;
   }
 
-  unsigned R = monochrome[color][0];
-  unsigned G = monochrome[color][1];
-  unsigned B = monochrome[color][2];
+  if(mode == Emulator::Interface::PaletteMode::Channel) {
+    unsigned L = image::normalize(color, 2, 16);
+    return interface->videoColor(color, 0, 0, 0, L);
+  }
 
-  return interface->videoColor(color, R, G, B);
+  if(mode == Emulator::Interface::PaletteMode::Standard) {
+    unsigned L = image::normalize(3 - color, 2, 16);
+    return interface->videoColor(color, 0, L, L, L);
+  }
+
+  if(mode == Emulator::Interface::PaletteMode::Emulation) {
+    unsigned R = monochrome[color][0];
+    unsigned G = monochrome[color][1];
+    unsigned B = monochrome[color][2];
+    return interface->videoColor(color, 0, R, G, B);
+  }
+
+  return 0;
 }
 
 unsigned Video::palette_sgb(unsigned color) const {
@@ -40,32 +50,45 @@ unsigned Video::palette_sgb(unsigned color) const {
 }
 
 unsigned Video::palette_cgb(unsigned color) const {
-  if(mode == Emulator::Interface::PaletteMode::None) return color;
+  if(mode == Emulator::Interface::PaletteMode::Literal) {
+    return color;
+  }
 
   unsigned r = (color >>  0) & 31;
   unsigned g = (color >>  5) & 31;
   unsigned b = (color >> 10) & 31;
 
-  if(mode == Emulator::Interface::PaletteMode::Standard) {
-    unsigned R = (r << 11) | (r << 6) | (r << 1) | (r >> 4);
-    unsigned G = (g << 11) | (g << 6) | (g << 1) | (g >> 4);
-    unsigned B = (b << 11) | (b << 6) | (b << 1) | (b >> 4);
-    return interface->videoColor(color, R, G, B);
+  if(mode == Emulator::Interface::PaletteMode::Channel) {
+    r = image::normalize(r, 5, 16);
+    g = image::normalize(g, 5, 16);
+    b = image::normalize(b, 5, 16);
+    return interface->videoColor(color, 0, r, g, b);
   }
 
-  unsigned R = (r * 26 + g *  4 + b *  2);
-  unsigned G = (         g * 24 + b *  8);
-  unsigned B = (r *  6 + g *  4 + b * 22);
+  if(mode == Emulator::Interface::PaletteMode::Standard) {
+    r = image::normalize(r, 5, 16);
+    g = image::normalize(g, 5, 16);
+    b = image::normalize(b, 5, 16);
+    return interface->videoColor(color, 0, r, g, b);
+  }
 
-  R = min(960, R);
-  G = min(960, G);
-  B = min(960, B);
+  if(mode == Emulator::Interface::PaletteMode::Emulation) {
+    unsigned R = (r * 26 + g *  4 + b *  2);
+    unsigned G = (         g * 24 + b *  8);
+    unsigned B = (r *  6 + g *  4 + b * 22);
 
-  R = R << 6 | R >> 4;
-  G = G << 6 | G >> 4;
-  B = B << 6 | B >> 4;
+    R = min(960, R);
+    G = min(960, G);
+    B = min(960, B);
 
-  return interface->videoColor(color, R, G, B);
+    R = R << 6 | R >> 4;
+    G = G << 6 | G >> 4;
+    B = B << 6 | B >> 4;
+
+    return interface->videoColor(color, 0, R, G, B);
+  }
+
+  return 0;
 }
 
 #define DMG_PALETTE_GREEN

@@ -56,7 +56,7 @@ namespace Math {
 #endif
 
 #if defined(_WIN32)
-  extern "C" int _fileno(FILE*);
+  __declspec(dllimport) int _fileno(FILE*);
 
   inline int access(const char* path, int amode) { return _waccess(nall::utf16_t(path), amode); }
   inline int fileno(FILE* stream) { return _fileno(stream); }

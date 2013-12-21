@@ -171,6 +171,9 @@ struct pInputSDL {
     return true;
   }
 
+  void rumble(unsigned id, bool enable) {
+  }
+
   bool init() {
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
@@ -227,4 +230,4 @@ struct pInputSDL {
 
 DeclareInput(SDL)
 
-};
+}

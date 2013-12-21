@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "higan";
-  static const char Version[] = "093.10";
+  static const char Version[] = "093.11";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
   static const char Website[] = "http://byuu.org/";
@@ -27,6 +27,7 @@ namespace Emulator {
 #include <nall/file.hpp>
 #include <nall/function.hpp>
 #include <nall/http.hpp>
+#include <nall/image.hpp>
 #include <nall/invoke.hpp>
 #include <nall/priority-queue.hpp>
 #include <nall/property.hpp>

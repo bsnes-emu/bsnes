@@ -31,7 +31,7 @@ struct Interface {
     string name;
     struct Input {
       unsigned id;
-      unsigned type;  //0 = digital, 1 = analog (relative), 2 = analog (absolute)
+      unsigned type;  //0 = digital, 1 = analog (relative), 2 = analog (absolute), 3 = rumble
       string name;
       unsigned guid;
     };
@@ -50,10 +50,11 @@ struct Interface {
     virtual void loadRequest(unsigned, string, string) {}
     virtual void loadRequest(unsigned, string) {}
     virtual void saveRequest(unsigned, string) {}
-    virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t) { return 0u; }
+    virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t, uint16_t) { return 0u; }
     virtual void videoRefresh(const uint32_t*, const uint32_t*, unsigned, unsigned, unsigned) {}
     virtual void audioSample(int16_t, int16_t) {}
     virtual int16_t inputPoll(unsigned, unsigned, unsigned) { return 0; }
+    virtual void inputRumble(unsigned, unsigned, unsigned, bool) {}
     virtual unsigned dipSettings(const Markup::Node&) { return 0; }
     virtual string path(unsigned) { return ""; }
     virtual string server() { return ""; }
@@ -65,10 +66,11 @@ struct Interface {
   void loadRequest(unsigned id, string name, string type) { return bind->loadRequest(id, name, type); }
   void loadRequest(unsigned id, string path) { return bind->loadRequest(id, path); }
   void saveRequest(unsigned id, string path) { return bind->saveRequest(id, path); }
-  uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, red, green, blue); }
+  uint32_t videoColor(unsigned source, uint16_t alpha, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, alpha, red, green, blue); }
   void videoRefresh(const uint32_t* palette, const uint32_t* data, unsigned pitch, unsigned width, unsigned height) { return bind->videoRefresh(palette, data, pitch, width, height); }
   void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }
   int16_t inputPoll(unsigned port, unsigned device, unsigned input) { return bind->inputPoll(port, device, input); }
+  void inputRumble(unsigned port, unsigned device, unsigned input, bool enable) { return bind->inputRumble(port, device, input, enable); }
   unsigned dipSettings(const Markup::Node& node) { return bind->dipSettings(node); }
   string path(unsigned group) { return bind->path(group); }
   string server() { return bind->server(); }
@@ -107,7 +109,7 @@ struct Interface {
   virtual void cheatSet(const lstring& = lstring{}) {}
 
   //utility functions
-  enum class PaletteMode : unsigned { None, Standard, Emulation };
+  enum class PaletteMode : unsigned { Literal, Channel, Standard, Emulation };
   virtual void paletteUpdate(PaletteMode mode) {}
 
   //debugger functions

@@ -4,7 +4,7 @@ Video video;
 
 void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
   for(unsigned color = 0; color < (1 << 19); color++) {
-    if(mode == Emulator::Interface::PaletteMode::None) {
+    if(mode == Emulator::Interface::PaletteMode::Literal) {
       palette[color] = color;
       continue;
     }
@@ -14,23 +14,32 @@ void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
     unsigned g = (color >>  5) & 31;
     unsigned r = (color >>  0) & 31;
 
+    if(mode == Emulator::Interface::PaletteMode::Channel) {
+      l = image::normalize(l, 4, 16);
+      r = image::normalize(r, 5, 16);
+      g = image::normalize(g, 5, 16);
+      b = image::normalize(b, 5, 16);
+      palette[color] = interface->videoColor(color, l, r, g, b);
+      continue;
+    }
+
     if(mode == Emulator::Interface::PaletteMode::Emulation) {
       r = gamma_ramp[r];
       g = gamma_ramp[g];
       b = gamma_ramp[b];
     } else {
-      r = (r << 3) | (r >> 2);
-      g = (g << 3) | (g >> 2);
-      b = (b << 3) | (b >> 2);
+      r = image::normalize(r, 5, 8);
+      g = image::normalize(g, 5, 8);
+      b = image::normalize(b, 5, 8);
     }
 
     double L = (1.0 + l) / 16.0;
     if(l == 0) L *= 0.5;
-    unsigned R = L * (r << 8 | r << 0);
-    unsigned G = L * (g << 8 | g << 0);
-    unsigned B = L * (b << 8 | b << 0);
+    unsigned R = L * image::normalize(r, 8, 16);
+    unsigned G = L * image::normalize(g, 8, 16);
+    unsigned B = L * image::normalize(b, 8, 16);
 
-    palette[color] = interface->videoColor(color, R, G, B);
+    palette[color] = interface->videoColor(color, 0, R, G, B);
   }
 }
 

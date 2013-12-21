@@ -5,7 +5,7 @@ struct AbstractInput {
   bool state;
 
   struct Input {
-    enum class Type : unsigned { Button, MouseButton, MouseAxis, HatUp, HatDown, HatLeft, HatRight, Axis, AxisLo, AxisHi } type;
+    enum class Type : unsigned { Button, MouseButton, MouseAxis, HatUp, HatDown, HatLeft, HatRight, Axis, AxisLo, AxisHi, Rumble } type;
     unsigned scancode;
   };
   vector<Input> inputList;
@@ -14,6 +14,7 @@ struct AbstractInput {
   bool append(string mapping);
   virtual bool bind(unsigned scancode, int16_t value) = 0;
   virtual int16_t poll() = 0;
+  virtual void rumble(bool enable) {}
   AbstractInput();
 };
 
@@ -33,6 +34,13 @@ struct AbsoluteInput : AbstractInput {
   using AbstractInput::bind;
   bool bind(unsigned scancode, int16_t value);
   int16_t poll();
+};
+
+struct RumbleInput : AbstractInput {
+  using AbstractInput::bind;
+  bool bind(unsigned scancode, int16_t value);
+  int16_t poll();
+  void rumble(bool enable);
 };
 
 struct HotkeyInput : DigitalInput {

@@ -2,6 +2,16 @@ namespace phoenix {
 
 typedef LRESULT CALLBACK (*WindowProc)(HWND, UINT, WPARAM, LPARAM);
 
+struct Message {
+  enum class Type : unsigned {
+    ListView_OnActivate,
+  };
+  Type type;
+  Object* object;
+};
+
+static vector<Message> messageQueue;
+
 struct pApplication {
   static void run();
   static bool pendingEvents();

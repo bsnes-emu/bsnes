@@ -20,15 +20,15 @@
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
-#include <xinput.h>
+
+#include "joypad/xinput.cpp"
 
 namespace ruby {
 
 static DWORD WINAPI RawInputThreadProc(void*);
 static LRESULT CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM);
 
-class RawInput {
-public:
+struct RawInput {
   HANDLE mutex;
   HWND hwnd;
   bool initialized;
@@ -393,107 +393,11 @@ LRESULT CALLBACK RawInputWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
   return rawinput.window_proc(hwnd, msg, wparam, lparam);
 }
 
-class XInput {
-public:
-  HMODULE libxinput;
-  DWORD WINAPI (*pXInputGetState)(DWORD, XINPUT_STATE*);
-
-  struct Gamepad {
-    unsigned id;
-
-    int16_t hat;
-    int16_t axis[6];
-    bool button[10];
-
-    void poll(XINPUT_STATE &state) {
-      hat = Joypad::HatCenter;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP   ) hat |= Joypad::HatUp;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) hat |= Joypad::HatRight;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN ) hat |= Joypad::HatDown;
-      if(state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT ) hat |= Joypad::HatLeft;
-
-      axis[0] = (int16_t)state.Gamepad.sThumbLX;
-      axis[1] = (int16_t)state.Gamepad.sThumbLY;
-      axis[2] = (int16_t)state.Gamepad.sThumbRX;
-      axis[3] = (int16_t)state.Gamepad.sThumbRY;
-
-      //transform left and right trigger ranges:
-      //from: 0 (low, eg released) to 255 (high, eg pressed all the way down)
-      //to: +32767 (low) to -32768 (high)
-      uint16_t triggerX = state.Gamepad.bLeftTrigger;
-      uint16_t triggerY = state.Gamepad.bRightTrigger;
-
-      triggerX = (triggerX << 8) | triggerX;
-      triggerY = (triggerY << 8) | triggerY;
-
-      axis[4] = (~triggerX) - 32768;
-      axis[5] = (~triggerY) - 32768;
-
-      button[0] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_A);
-      button[1] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_B);
-      button[2] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_X);
-      button[3] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_Y);
-      button[4] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_BACK);
-      button[5] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_START);
-      button[6] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_SHOULDER);
-      button[7] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_SHOULDER);
-      button[8] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_LEFT_THUMB);
-      button[9] = (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB);
-    }
-
-    Gamepad() {
-      hat = Joypad::HatCenter;
-      for(unsigned n = 0; n < 6; n++) axis[n] = 0;
-      for(unsigned n = 0; n < 10; n++) button[n] = false;
-    }
-  };
-
-  vector<Gamepad> lgamepad;
-
-  void poll() {
-    if(!pXInputGetState) return;
-
-    for(unsigned i = 0; i < lgamepad.size(); i++) {
-      XINPUT_STATE state;
-      DWORD result = pXInputGetState(lgamepad(i).id, &state);
-      if(result == ERROR_SUCCESS) lgamepad(i).poll(state);
-    }
-  }
-
-  void init() {
-    if(!pXInputGetState) return;
-
-    //XInput only supports up to four controllers
-    for(unsigned i = 0; i <= 3; i++) {
-      XINPUT_STATE state;
-      DWORD result = pXInputGetState(i, &state);
-      if(result == ERROR_SUCCESS) {
-        //valid controller detected, add to gamepad list
-        unsigned n = lgamepad.size();
-        lgamepad(n).id = i;
-      }
-    }
-  }
-
-  XInput() : pXInputGetState(0) {
-    //bind xinput1 dynamically, as it does not ship with Windows Vista or below
-    libxinput = LoadLibraryA("xinput1_3.dll");
-    if(!libxinput) libxinput = LoadLibraryA("xinput1_2.dll");
-    if(!libxinput) libxinput = LoadLibraryA("xinput1_1.dll");
-    if(!libxinput) return;
-    pXInputGetState = (DWORD WINAPI (*)(DWORD, XINPUT_STATE*))GetProcAddress(libxinput, "XInputGetState");
-  }
-
-  ~XInput() {
-    if(libxinput) FreeLibrary(libxinput);
-  }
-};
-
 static BOOL CALLBACK DirectInput_EnumJoypadsCallback(const DIDEVICEINSTANCE*, void*);
 static BOOL CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE*, void*);
+static BOOL CALLBACK DirectInput_EnumJoypadFeedbacksCallback(const DIDEVICEOBJECTINSTANCE*, void*);
 
-class DirectInput {
-public:
+struct DirectInput {
   HWND handle;
   LPDIRECTINPUT8 context;
   struct Gamepad {
@@ -502,6 +406,7 @@ public:
     int16_t hat[4];
     int16_t axis[6];
     bool button[128];
+    LPDIRECTINPUTEFFECT effect = nullptr;
 
     void poll(DIJOYSTATE2& state) {
       //POV hats
@@ -557,7 +462,17 @@ public:
     }
   }
 
-  bool init_joypad(const DIDEVICEINSTANCE* instance) {
+  void rumble(unsigned id, bool enable) {
+    if(lgamepad(id).effect == nullptr) return;
+
+    if(enable) {
+      lgamepad(id).effect->Start(1, 0);
+    } else {
+      lgamepad(id).effect->Stop();
+    }
+  }
+
+  bool initJoypad(const DIDEVICEINSTANCE* instance) {
     //if this is an XInput device, do not acquire it via DirectInput ...
     //the XInput driver above will handle said device.
     for(unsigned i = 0; i < rawinput.lgamepad.size(); i++) {
@@ -573,15 +488,53 @@ public:
       return DIENUM_CONTINUE;
     }
 
-    device->SetDataFormat(&c_dfDIJoystick2);
-    device->SetCooperativeLevel(handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
-    device->EnumObjects(DirectInput_EnumJoypadAxesCallback, (void*)this, DIDFT_ABSAXIS);
     unsigned n = lgamepad.size();
     lgamepad(n).handle = device;
+
+    device->SetDataFormat(&c_dfDIJoystick2);
+    device->SetCooperativeLevel(handle, DISCL_NONEXCLUSIVE | DISCL_BACKGROUND);
+
+    forceFeedbackAxes = 0;
+    device->EnumObjects(DirectInput_EnumJoypadAxesCallback, (void*)this, DIDFT_ABSAXIS);
+    device->EnumObjects(DirectInput_EnumJoypadFeedbacksCallback, (void*)this, DIDFT_FFACTUATOR);
+    if(forceFeedbackAxes == 0) return DIENUM_CONTINUE;
+
+    //disable auto-centering spring for rumble support
+    DIPROPDWORD property;
+    memset(&property, 0, sizeof(DIPROPDWORD));
+    property.diph.dwSize = sizeof(DIPROPDWORD);
+    property.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+    property.diph.dwObj = 0;
+    property.diph.dwHow = DIPH_DEVICE;
+    property.dwData = false;
+    device->SetProperty(DIPROP_AUTOCENTER, &property.diph);
+
+    DWORD dwAxes[2] = {DIJOFS_X, DIJOFS_Y};
+    LONG lDirection[2] = {0, 0};
+    DICONSTANTFORCE force;
+    force.lMagnitude = DI_FFNOMINALMAX;  //full force
+    DIEFFECT effect;
+    memset(&effect, 0, sizeof(DIEFFECT));
+    effect.dwSize = sizeof(DIEFFECT);
+    effect.dwFlags = DIEFF_CARTESIAN | DIEFF_OBJECTOFFSETS;
+    effect.dwDuration = INFINITE;
+    effect.dwSamplePeriod = 0;
+    effect.dwGain = DI_FFNOMINALMAX;
+    effect.dwTriggerButton = DIEB_NOTRIGGER;
+    effect.dwTriggerRepeatInterval = 0;
+    effect.cAxes = 2;
+    effect.rgdwAxes = dwAxes;
+    effect.rglDirection = lDirection;
+    effect.lpEnvelope = 0;
+    effect.cbTypeSpecificParams = sizeof(DICONSTANTFORCE);
+    effect.lpvTypeSpecificParams = &force;
+    effect.dwStartDelay = 0;
+    device->CreateEffect(GUID_ConstantForce, &effect, &lgamepad(n).effect, NULL);
+
     return DIENUM_CONTINUE;
   }
 
-  bool init_axis(const DIDEVICEOBJECTINSTANCE* instance) {
+  bool initAxis(const DIDEVICEOBJECTINSTANCE* instance) {
     DIPROPRANGE range;
     range.diph.dwSize = sizeof(DIPROPRANGE);
     range.diph.dwHeaderSize = sizeof(DIPROPHEADER);
@@ -590,6 +543,11 @@ public:
     range.lMin = -32768;
     range.lMax = +32767;
     device->SetProperty(DIPROP_RANGE, &range.diph);
+    return DIENUM_CONTINUE;
+  }
+
+  bool initFeedback(const DIDEVICEOBJECTINSTANCE* instance) {
+    forceFeedbackAxes++;
     return DIENUM_CONTINUE;
   }
 
@@ -602,37 +560,42 @@ public:
   void term() {
     for(unsigned i = 0; i < lgamepad.size(); i++) {
       lgamepad(i).handle->Unacquire();
+      if(lgamepad(i).effect) lgamepad(i).effect->Release();
       lgamepad(i).handle->Release();
     }
     lgamepad.reset();
 
     if(context) {
       context->Release();
-      context = 0;
+      context = nullptr;
     }
   }
 
 private:
   LPDIRECTINPUTDEVICE8 device;
+  unsigned forceFeedbackAxes;
 };
 
 BOOL CALLBACK DirectInput_EnumJoypadsCallback(const DIDEVICEINSTANCE* instance, void* p) {
-  return ((DirectInput*)p)->init_joypad(instance);
+  return ((DirectInput*)p)->initJoypad(instance);
 }
 
 BOOL CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) {
-  return ((DirectInput*)p)->init_axis(instance);
+  return ((DirectInput*)p)->initAxis(instance);
 }
 
-class pInputRaw {
-public:
-  XInput xinput;
+BOOL CALLBACK DirectInput_EnumJoypadFeedbacksCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) {
+  return ((DirectInput*)p)->initFeedback(instance);
+}
+
+struct pInputRaw {
+  InputJoypadXInput xinput;
   DirectInput dinput;
 
   bool acquire_mouse;
   bool cursor_visible;
 
-  struct {
+  struct Settings {
     HWND handle;
   } settings;
 
@@ -641,6 +604,7 @@ public:
     if(name == Input::KeyboardSupport) return true;
     if(name == Input::MouseSupport) return true;
     if(name == Input::JoypadSupport) return true;
+    if(name == Input::JoypadRumbleSupport) return true;
     return false;
   }
 
@@ -720,31 +684,15 @@ public:
 
     ReleaseMutex(rawinput.mutex);
 
-    unsigned joy = 0;
-
     //==================
     //XInput controllers
     //==================
-    xinput.poll();
-    for(unsigned i = 0; i < xinput.lgamepad.size(); i++) {
-      if(joy >= Joypad::Count) break;
-
-      table[joypad(joy).hat(0)] = xinput.lgamepad(i).hat;
-
-      for(unsigned axis = 0; axis < min(6U, (unsigned)Joypad::Axes); axis++) {
-        table[joypad(joy).axis(axis)] = xinput.lgamepad(i).axis[axis];
-      }
-
-      for(unsigned button = 0; button < min(10U, (unsigned)Joypad::Buttons); button++) {
-        table[joypad(joy).button(button)] = xinput.lgamepad(i).button[button];
-      }
-
-      joy++;
-    }
+    xinput.poll(table);
 
     //=======================
     //DirectInput controllers
     //=======================
+    unsigned joy = xinput.joysticks.size();
     dinput.poll();
     for(unsigned i = 0; i < dinput.lgamepad.size(); i++) {
       if(joy >= Joypad::Count) break;
@@ -765,6 +713,15 @@ public:
     }
 
     return true;
+  }
+
+  void rumble(unsigned id, bool enable) {
+    //id is the nall joypad# to rumble; but we have two lists of joypads
+    //XInput joypads are enumerated first, and then DirectInput joypads
+    if(id < xinput.joysticks.size()) return xinput.rumble(id, enable);
+    id -= xinput.joysticks.size();
+    if(id < dinput.lgamepad.size()) return dinput.rumble(id, enable);
+    id -= dinput.lgamepad.size();
   }
 
   bool init() {
@@ -795,6 +752,7 @@ public:
 
   void term() {
     unacquire();
+    xinput.term();
     dinput.term();
   }
 

@@ -182,8 +182,8 @@ void Utility::synchronizeRuby() {
 void Utility::updatePalette() {
   if(program->active == nullptr) return;
 
-  if(config->video.shader == "Display Emulation") {
-    system().paletteUpdate(Emulator::Interface::PaletteMode::None);
+  if(config->video.shader == "Display Emulation" && config->video.driver == "OpenGL") {
+    system().paletteUpdate(Emulator::Interface::PaletteMode::Channel);
   } else if(config->video.colorEmulation) {
     system().paletteUpdate(Emulator::Interface::PaletteMode::Emulation);
   } else {
@@ -196,6 +196,9 @@ void Utility::updateShader() {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterNearest);
   } else if(config->video.shader == "Blur") {
+    video.set(Video::Shader, (const char*)"");
+    video.set(Video::Filter, Video::FilterLinear);
+  } else if(config->video.shader == "Display Emulation" && config->video.driver != "OpenGL") {
     video.set(Video::Shader, (const char*)"");
     video.set(Video::Filter, Video::FilterLinear);
   } else if(config->video.shader == "Display Emulation") {

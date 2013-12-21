@@ -143,6 +143,7 @@ using namespace nall;
     bool acquired() { return p.acquired(); } \
     \
     bool poll(int16_t* table) { return p.poll(table); } \
+    void rumble(unsigned id, bool enable) { return p.rumble(id, enable); } \
     bool init() { return p.init(); } \
     void term() { p.term(); } \
     \
@@ -153,6 +154,10 @@ using namespace nall;
     pInput##Name& p; \
   };
 
+#ifdef INPUT_CARBON
+  #include <ruby/input/carbon.cpp>
+#endif
+
 #ifdef INPUT_DIRECTINPUT
   #include <ruby/input/directinput.cpp>
 #endif
@@ -161,12 +166,12 @@ using namespace nall;
   #include <ruby/input/rawinput.cpp>
 #endif
 
-#ifdef INPUT_CARBON
-  #include <ruby/input/carbon.cpp>
-#endif
-
 #ifdef INPUT_SDL
   #include <ruby/input/sdl.cpp>
+#endif
+
+#ifdef INPUT_UDEV
+  #include <ruby/input/udev.cpp>
 #endif
 
 #ifdef INPUT_X

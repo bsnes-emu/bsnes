@@ -212,7 +212,9 @@ void pListView::buildImageList() {
 void pListView::onActivate(LPARAM lparam) {
   LPNMLISTVIEW nmlistview = (LPNMLISTVIEW)lparam;
   if(listView.state.text.empty() || !listView.state.selected) return;
-  if(listView.onActivate) listView.onActivate();
+//LVN_ITEMACTIVATE is not re-entrant until DispatchMessage() completes
+//if(listView.onActivate) listView.onActivate();
+  messageQueue.append({Message::Type::ListView_OnActivate, (Object*)&listView});
 }
 
 void pListView::onChange(LPARAM lparam) {
@@ -228,6 +230,8 @@ void pListView::onChange(LPARAM lparam) {
     }
   } else if((nmlistview->uOldState & LVIS_FOCUSED) && !(nmlistview->uNewState & LVIS_FOCUSED)) {
     lostFocus = true;
+    listView.state.selected = false;
+    listView.state.selection = 0;
   } else if(!(nmlistview->uOldState & LVIS_SELECTED) && (nmlistview->uNewState & LVIS_SELECTED)) {
     lostFocus = false;
     listView.state.selected = true;
@@ -235,6 +239,10 @@ void pListView::onChange(LPARAM lparam) {
     if(!locked && listView.onChange) listView.onChange();
   } else if(!lostFocus && !listView.state.selected) {
     lostFocus = false;
+    listView.state.selected = false;
+    listView.state.selection = 0;
+    if(!locked && listView.onChange) listView.onChange();
+  } else if(listView.selected() && ListView_GetSelectedCount(hwnd) == 0) {
     listView.state.selected = false;
     listView.state.selection = 0;
     if(!locked && listView.onChange) listView.onChange();

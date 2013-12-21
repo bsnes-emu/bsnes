@@ -129,17 +129,18 @@ Interface::Interface() {
 
   {
     Device device{0, ID::Device, "Controller"};
-    device.input.append({0, 0, "A"     });
-    device.input.append({1, 0, "B"     });
-    device.input.append({2, 0, "Select"});
-    device.input.append({3, 0, "Start" });
-    device.input.append({4, 0, "Right" });
-    device.input.append({5, 0, "Left"  });
-    device.input.append({6, 0, "Up"    });
-    device.input.append({7, 0, "Down"  });
-    device.input.append({8, 0, "R"     });
-    device.input.append({9, 0, "L"     });
-    device.order = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3};
+    device.input.append({ 0, 0, "A"     });
+    device.input.append({ 1, 0, "B"     });
+    device.input.append({ 2, 0, "Select"});
+    device.input.append({ 3, 0, "Start" });
+    device.input.append({ 4, 0, "Right" });
+    device.input.append({ 5, 0, "Left"  });
+    device.input.append({ 6, 0, "Up"    });
+    device.input.append({ 7, 0, "Down"  });
+    device.input.append({ 8, 0, "R"     });
+    device.input.append({ 9, 0, "L"     });
+    device.input.append({10, 3, "Rumble"});
+    device.order = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3, 10};
     this->device.append(device);
   }
 
