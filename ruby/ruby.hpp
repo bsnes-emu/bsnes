@@ -63,6 +63,8 @@ private:
 };
 
 struct InputInterface {
+  nall::function<void (nall::HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue)> onChange;
+
   void driver(const char* driver = "");
   const char* optimalDriver();
   const char* safestDriver();
@@ -78,8 +80,9 @@ struct InputInterface {
   bool unacquire();
   bool acquired();
 
+  nall::vector<nall::HID::Device*> poll();
   bool poll(int16_t* table);
-  void rumble(unsigned id, bool enable);
+  void rumble(uint64_t id, bool enable);
 
   InputInterface();
   ~InputInterface();

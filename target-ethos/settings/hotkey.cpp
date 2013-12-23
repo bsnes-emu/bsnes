@@ -26,8 +26,6 @@ void HotkeySettings::refresh() {
   unsigned index = 0;
   for(auto& hotkey : inputManager->hotkeyMap) {
     string mapping = hotkey->mapping;
-    mapping.replace("KB0::", "");
-    mapping.replace("MS0::", "Mouse::");
     mapping.replace(",", " and ");
     inputList.setText(index++, {hotkey->name, mapping});
   }
@@ -36,7 +34,7 @@ void HotkeySettings::refresh() {
 
 void HotkeySettings::eraseInput() {
   activeInput = inputManager->hotkeyMap[inputList.selection()];
-  inputEvent(Scancode::None, 1);
+  inputEvent(hidNull, 0, 0, 0, 1);
 }
 
 void HotkeySettings::assignInput() {
@@ -47,14 +45,11 @@ void HotkeySettings::assignInput() {
   setEnabled(false);
 }
 
-void HotkeySettings::inputEvent(unsigned scancode, int16_t value) {
-  using nall::Mouse;
-
+void HotkeySettings::inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
   if(activeInput == nullptr) return;
-  if(value != 1) return;
-  if(Mouse::isAnyButton(scancode) || Mouse::isAnyAxis(scancode)) return;
-  if(Joypad::isAnyAxis(scancode)) return;
-  if(activeInput->bind(scancode, value) == false) return;
+  if(device.isMouse()) return;
+  if(device.isJoypad() && group == HID::Joypad::GroupID::Axis) return;
+  if(activeInput->bind(device, group, input, oldValue, newValue) == false) return;
 
   activeInput = nullptr;
   settings->setStatusText("");

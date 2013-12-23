@@ -2,7 +2,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Toggle Fullscreen Mode";
-    hotkey->mapping = "KB0::F11";
+    hotkey->mapping = "1/Button/F11";
 
     hotkey->press = [] {
       utility->toggleFullScreen();

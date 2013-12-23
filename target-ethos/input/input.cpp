@@ -1,82 +1,82 @@
 #include "../ethos.hpp"
 #include "hotkeys.cpp"
 InputManager* inputManager = nullptr;
+HID::Null hidNull;
 
 void AbstractInput::bind() {
   inputList.reset();
   lstring list = mapping.split(",");
 
   for(auto& mapping : list) {
-    Input::Type type;
-         if(mapping.endsWith(".Up")) type = Input::Type::HatUp;
-    else if(mapping.endsWith(".Down")) type = Input::Type::HatDown;
-    else if(mapping.endsWith(".Left")) type = Input::Type::HatLeft;
-    else if(mapping.endsWith(".Right")) type = Input::Type::HatRight;
-    else if(mapping.endsWith(".Lo")) type = Input::Type::AxisLo;
-    else if(mapping.endsWith(".Hi")) type = Input::Type::AxisHi;
-    else if(mapping.beginsWith("JP") && mapping.find("Axis")) type = Input::Type::Axis;
-    else if(mapping.beginsWith("JP") && mapping.endsWith("Rumble")) type = Input::Type::Rumble;
-    else if(mapping.beginsWith("MS") && mapping.endsWith("axis")) type = Input::Type::MouseAxis;
-    else if(mapping.beginsWith("MS")) type = Input::Type::MouseButton;
-    else type = Input::Type::Button;
+    lstring values = mapping.split("/");
+    if(values.size() == 1) continue;  //skip "None" mapping
 
-    if(type == Input::Type::Rumble) {
-      unsigned joypad = mapping[2] - '0';
-      inputList.append({type, joypad});
-    } else {
-      string decode = mapping;
-      if(auto position = decode.find(".")) decode.resize(position());
-      unsigned scancode = Scancode::decode(decode);
-      inputList.append({type, scancode});
+    uint64_t id = hex(values[0]);
+    string group = values(1, "");
+    string input = values(2, "");
+    string qualifier = values(3, "");
+
+    Input item;
+    for(auto device : inputManager->devices) {
+      if(id != device->id) continue;
+      if(group == "Rumble") {
+        item.device = device;
+        item.id = id;
+        item.group = 0;
+        item.input = 0;
+        break;
+      }
+      if(auto groupID = device->find(group)) {
+        if(auto inputID = device->group[groupID()].find(input)) {
+          item.device = device;
+          item.id = id;
+          item.group = groupID();
+          item.input = inputID();
+          item.qualifier = Input::Qualifier::None;
+          if(qualifier == "Lo") item.qualifier = Input::Qualifier::Lo;
+          if(qualifier == "Hi") item.qualifier = Input::Qualifier::Hi;
+          break;
+        }
+      }
     }
+    if(item.device == nullptr) continue;
+
+    inputList.append(item);
   }
 }
 
 bool AbstractInput::append(string encode) {
-  if(mapping.find(encode)) return true;  //mapping already bound
+  lstring mappings = mapping.split(",");
+  if(mappings.find(encode)) return true;  //mapping already bound
   if(mapping.empty() || mapping == "None") mapping = encode;  //remove "None"
   else mapping.append(",", encode);  //add to existing mapping list
   bind();
   return true;
 }
 
-AbstractInput::AbstractInput() : state(false) {
-}
-
 //
 
-bool DigitalInput::bind(unsigned scancode, int16_t value) {
-  using nall::Keyboard;
-  using nall::Mouse;
-
-  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
+bool DigitalInput::bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
+  if(device.isNull() || (device.isKeyboard() && device.group[group].input[input].name == "Escape")) {
     inputList.reset();
     mapping = "None";
     return true;
   }
 
-  string encode = Scancode::encode(scancode);
+  string encode = {hex(device.id), "/", device.group[group].name, "/", device.group[group].input[input].name};
 
-  if(Keyboard::isAnyKey(scancode) || Keyboard::isAnyModifier(scancode) || Joypad::isAnyButton(scancode)) {
-    if(value == 0) return false;
-    return append(encode);
+  if((device.isKeyboard() && group == HID::Keyboard::GroupID::Button)
+  || (device.isMouse() && group == HID::Mouse::GroupID::Button)
+  || (device.isJoypad() && group == HID::Joypad::GroupID::Button)
+  ) {
+    if(newValue != 0) return append(encode);
   }
 
-  if(Mouse::isAnyButton(scancode)) {
-    if(value == 0) return false;
-    return append(encode);
-  }
-
-  if(Joypad::isAnyHat(scancode)) {
-    if(value & Joypad::HatUp   ) { encode.append(".Up"   ); return append(encode); }
-    if(value & Joypad::HatDown ) { encode.append(".Down" ); return append(encode); }
-    if(value & Joypad::HatLeft ) { encode.append(".Left" ); return append(encode); }
-    if(value & Joypad::HatRight) { encode.append(".Right"); return append(encode); }
-  }
-
-  if(Joypad::isAnyAxis(scancode)) {
-    if(value < -12288) { encode.append(".Lo"); return append(encode); }
-    if(value > +24576) { encode.append(".Hi"); return append(encode); }
+  if((device.isJoypad() && group == HID::Joypad::GroupID::Axis)
+  || (device.isJoypad() && group == HID::Joypad::GroupID::Hat)
+  ) {
+    if(newValue < -16384) return append({encode, "/Lo"});
+    if(newValue > +16384) return append({encode, "/Hi"});
   }
 
   return false;
@@ -84,20 +84,24 @@ bool DigitalInput::bind(unsigned scancode, int16_t value) {
 
 int16_t DigitalInput::poll() {
   if(program->focused() == false) return 0;
+  if(inputList.size() == 0) return 0;
   bool result = logic;
 
   for(auto& item : inputList) {
-    int16_t value = inputManager->poll(item.scancode);
+    HID::Device& device = *(item.device);
+    int16_t value = device.group[item.group].input[item.input].value;
     bool output = logic;
-    switch(item.type) {
-    case Input::Type::Button:      output = value;                    break;
-    case Input::Type::MouseButton: output = value & input.acquired(); break;
-    case Input::Type::HatUp:       output = value & Joypad::HatUp;    break;
-    case Input::Type::HatDown:     output = value & Joypad::HatDown;  break;
-    case Input::Type::HatLeft:     output = value & Joypad::HatLeft;  break;
-    case Input::Type::HatRight:    output = value & Joypad::HatRight; break;
-    case Input::Type::AxisLo:      output = value < -16384;           break;
-    case Input::Type::AxisHi:      output = value > +16384;           break;
+    if((device.isKeyboard() && item.group == HID::Keyboard::GroupID::Button)
+    || (device.isMouse() && item.group == HID::Mouse::GroupID::Button)
+    || (device.isJoypad() && item.group == HID::Joypad::GroupID::Button)
+    ) {
+      output = value;
+    }
+    if((device.isJoypad() && item.group == HID::Joypad::GroupID::Axis)
+    || (device.isJoypad() && item.group == HID::Joypad::GroupID::Hat)
+    ) {
+      if(item.qualifier == Input::Qualifier::Lo) output = value < -16384;
+      if(item.qualifier == Input::Qualifier::Hi) output = value > +16384;
     }
     if(logic == 0) result |= output;
     if(logic == 1) result &= output;
@@ -108,34 +112,37 @@ int16_t DigitalInput::poll() {
 
 //
 
-bool RelativeInput::bind(unsigned scancode, int16_t value) {
-  using nall::Keyboard;
-  using nall::Mouse;
-
-  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
+bool RelativeInput::bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
+  if(device.isNull() || (device.isKeyboard() && device.group[group].input[input].name == "Escape")) {
     inputList.reset();
     mapping = "None";
     return true;
   }
 
-  string encode = Scancode::encode(scancode);
+  string encode = {hex(device.id), "/", device.group[group].name, "/", device.group[group].input[input].name};
 
-  if(Mouse::isAnyAxis(scancode)) return append(encode);
-  if(Joypad::isAnyAxis(scancode)) return append(encode);
+  if((device.isMouse() && group == HID::Mouse::GroupID::Axis)
+  || (device.isJoypad() && group == HID::Joypad::GroupID::Axis)
+  || (device.isJoypad() && group == HID::Joypad::GroupID::Hat)
+  ) {
+    if(newValue < -16384) return append(encode);
+    if(newValue > +16384) return append(encode);
+  }
 
   return false;
 }
 
 int16_t RelativeInput::poll() {
   if(program->focused() == false) return 0;
+  if(inputList.size() == 0) return 0;
   int16_t result = 0;
 
   for(auto& item : inputList) {
-    int16_t value = inputManager->poll(item.scancode);
-    switch(item.type) {
-    case Input::Type::MouseAxis: value = input.acquired() ? value : 0; break;
-    case Input::Type::Axis:      value = value;                        break;
-    }
+    HID::Device& device = *(item.device);
+    int16_t value = device.group[item.group].input[item.input].value;
+    if(device.isJoypad() && item.group == HID::Joypad::GroupID::Axis) value >>= 8;
+    if(device.isJoypad() && item.group == HID::Joypad::GroupID::Hat) value = (value < 0 ? -1 : value > 0 ? + 1 : 0);
+    if(device.isMouse() && input.acquired() == false) value = 0;
     result += value;
   }
 
@@ -144,105 +151,28 @@ int16_t RelativeInput::poll() {
 
 //
 
-bool AbsoluteInput::bind(unsigned scancode, int16_t value) {
-  using nall::Keyboard;
-  using nall::Mouse;
-
-  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
+bool RumbleInput::bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
+  if(device.isNull() || (device.isKeyboard() && device.group[group].input[input].name == "Escape")) {
     inputList.reset();
     mapping = "None";
     return true;
   }
 
-  string encode = Scancode::encode(scancode);
+  string encode = {hex(device.id), "/Rumble"};
 
-  if(Mouse::isAnyAxis(scancode)) {
-    //only one input can be assigned for absolute positioning
-    inputList.reset();
-    mapping = encode;
-    return true;
+  if(device.isJoypad() && group == HID::Joypad::GroupID::Button) {
+    if(newValue != 0) return append(encode);
   }
 
-  return false;
-}
-
-int16_t AbsoluteInput::poll() {
-  if(program->focused() == false) return -32768;
-  int16_t result = -32768;  //offscreen value
-
-  using nall::Mouse;
-
-  Position position = phoenix::Mouse::position();
-  Geometry geometry = presentation->geometry();
-
-  if(position.x < geometry.x
-  || position.y < geometry.y
-  || position.x >= geometry.x + geometry.width
-  || position.y >= geometry.y + geometry.height) {
-    //cursor is offscreen
-    position.x = -32768;
-    position.y = -32768;
-  } else {
-    //convert from screen to viewport coordinates
-    double x = position.x - geometry.x;
-    double y = position.y - geometry.y;
-
-    //scale coordinate range to -0.5 to +0.5 (0.0 = center)
-    x = x * 1.0 / geometry.width  - 0.5;
-    y = y * 1.0 / geometry.height - 0.5;
-
-    //scale coordinates to -32767 to +32767
-    signed px = (signed)(x * 65535.0);
-    signed py = (signed)(y * 65535.0);
-
-    //clamp to valid range
-    position.x = max(-32767, min(+32767, px));
-    position.y = max(-32767, min(+32767, py));
-  }
-
-  for(auto& item : inputList) {
-    if(item.scancode == mouse(0)[Mouse::Xaxis]) {
-      result = position.x;
-    }
-
-    if(item.scancode == mouse(0)[Mouse::Yaxis]) {
-      result = position.y;
-    }
-  }
-
-  return result;
-}
-
-bool RumbleInput::bind(unsigned scancode, int16_t value) {
-  using nall::Keyboard;
-
-  if(scancode == Scancode::None || scancode == keyboard(0)[Keyboard::Escape]) {
-    inputList.reset();
-    mapping = "None";
-    return true;
-  }
-
-  string encode = Scancode::encode(scancode);
-
-  if(Joypad::isAnyButton(scancode)) {
-    if(value == 0) return false;
-    if(auto position = encode.find("::")) encode.resize(position());
-    encode.append("::Rumble");
-    return append(encode);
-  }
-
-  return false;
-}
-
-int16_t RumbleInput::poll() {
   return false;
 }
 
 void RumbleInput::rumble(bool enable) {
   if(program->focused() == false) return;
+  if(inputList.size() == 0) return;
 
   for(auto& item : inputList) {
-    input.rumble(item.scancode, enable);
+    input.rumble(item.id, enable);
   }
 }
 
@@ -255,31 +185,40 @@ HotkeyInput::HotkeyInput() {
 
 //
 
+void InputManager::onChange(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
+  if(settings->focused()) {
+    inputSettings->inputEvent(device, group, input, oldValue, newValue);
+    hotkeySettings->inputEvent(device, group, input, oldValue, newValue);
+  }
+}
+
+HID::Device* InputManager::findMouse() {
+  for(auto device : devices) {
+    if(device->isMouse()) return device;
+  }
+  return nullptr;
+}
+
 void InputManager::bind() {
   for(auto& input : inputMap) input->bind();
   for(auto& input : hotkeyMap) input->bind();
 }
 
 void InputManager::poll() {
-  using nall::Keyboard;
-
-  activeScancode = !activeScancode;
-  if(input.poll(scancode[activeScancode]) == false) return;
-
-  for(unsigned n = 0; n < Scancode::Limit; n++) {
-    if(scancode[0][n] != scancode[1][n]) {
-      if(settings->focused()) {
-        inputSettings->inputEvent(n, scancode[activeScancode][n]);
-        hotkeySettings->inputEvent(n, scancode[activeScancode][n]);
-      }
+  auto devices = input.poll();
+  bool changed = devices.size() != this->devices.size();
+  if(changed == false) {
+    for(unsigned n = 0; n < devices.size(); n++) {
+      changed = devices[n] != this->devices[n];
+      if(changed) break;
     }
+  }
+  if(changed == true) {
+    this->devices = devices;
+    bind();
   }
 
   if(presentation->focused()) pollHotkeys();
-}
-
-int16_t InputManager::poll(unsigned scancode) {
-  return this->scancode[activeScancode][scancode];
 }
 
 void InputManager::saveConfiguration() {
@@ -288,15 +227,9 @@ void InputManager::saveConfiguration() {
 
 InputManager::InputManager() {
   inputManager = this;
-  scancode[0] = new int16_t[Scancode::Limit]();
-  scancode[1] = new int16_t[Scancode::Limit]();
-  activeScancode = 0;
   bootstrap();
-}
 
-InputManager::~InputManager() {
-  delete[] scancode[0];
-  delete[] scancode[1];
+  input.onChange = {&InputManager::onChange, this};
 }
 
 void InputManager::bootstrap() {
@@ -316,8 +249,7 @@ void InputManager::bootstrap() {
           AbstractInput* abstract = nullptr;
           if(input.type == 0) abstract = new DigitalInput;
           if(input.type == 1) abstract = new RelativeInput;
-          if(input.type == 2) abstract = new AbsoluteInput;
-          if(input.type == 3) abstract = new RumbleInput;
+          if(input.type == 2) abstract = new RumbleInput;
           if(abstract == nullptr) continue;
 
           abstract->name = string{input.name}.replace(" ", "");

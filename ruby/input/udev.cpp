@@ -57,13 +57,22 @@ struct pInputUdev {
     return xlibMouse.acquired();
   }
 
+  vector<HID::Device*> poll() {
+    vector<HID::Device*> devices;
+    xlibKeyboard.poll(devices);
+    xlibMouse.poll(devices);
+    udev.poll(devices);
+    return devices;
+  }
+
   bool poll(int16_t* table) {
     xlibKeyboard.poll(table);
     xlibMouse.poll(table);
     udev.poll(table);
+    return true;
   }
 
-  void rumble(unsigned id, bool enable) {
+  void rumble(uint64_t id, bool enable) {
     udev.rumble(id, enable);
   }
 

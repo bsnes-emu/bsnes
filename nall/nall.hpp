@@ -24,6 +24,7 @@
 #include <nall/group.hpp>
 #include <nall/gzip.hpp>
 #include <nall/hashset.hpp>
+#include <nall/hid.hpp>
 #include <nall/http.hpp>
 #include <nall/image.hpp>
 #include <nall/inflate.hpp>

@@ -1,3 +1,6 @@
+#ifndef RUBY_INPUT_JOYPAD_XINPUT
+#define RUBY_INPUT_JOYPAD_XINPUT
+
 #include <xinput.h>
 
 namespace ruby {
@@ -99,3 +102,5 @@ struct InputJoypadXInput {
 };
 
 }
+
+#endif

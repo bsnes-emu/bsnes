@@ -139,7 +139,7 @@ Interface::Interface() {
     device.input.append({ 7, 0, "Down"  });
     device.input.append({ 8, 0, "R"     });
     device.input.append({ 9, 0, "L"     });
-    device.input.append({10, 3, "Rumble"});
+    device.input.append({10, 2, "Rumble"});
     device.order = {6, 7, 5, 4, 1, 0, 9, 8, 2, 3, 10};
     this->device.append(device);
   }

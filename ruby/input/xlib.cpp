@@ -1,27 +1,25 @@
-#include <SDL/SDL.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
 
 #include "keyboard/xlib.cpp"
 #include "mouse/xlib.cpp"
-#include "joypad/sdl.cpp"
 
 namespace ruby {
 
-struct pInputSDL {
+struct pInputXlib {
   InputKeyboardXlib xlibKeyboard;
   InputMouseXlib xlibMouse;
-  InputJoypadSDL sdl;
 
   struct Settings {
     uintptr_t handle = 0;
   } settings;
 
   bool cap(const string& name) {
-    if(name == Input::Handle) return true;
     if(name == Input::KeyboardSupport) return true;
     if(name == Input::MouseSupport) return true;
-    if(name == Input::JoypadSupport) return true;
     return false;
   }
 
@@ -54,7 +52,6 @@ struct pInputSDL {
   bool poll(int16_t* table) {
     xlibKeyboard.poll(table);
     xlibMouse.poll(table);
-    sdl.poll(table);
     return true;
   }
 
@@ -64,17 +61,15 @@ struct pInputSDL {
   bool init() {
     if(xlibKeyboard.init() == false) return false;
     if(xlibMouse.init(settings.handle) == false) return false;
-    if(sdl.init() == false) return false;
     return true;
   }
 
   void term() {
     xlibKeyboard.term();
     xlibMouse.term();
-    sdl.term();
   }
 };
 
-DeclareInput(SDL)
+DeclareInput(Xlib)
 
 }

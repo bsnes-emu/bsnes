@@ -13,8 +13,9 @@ struct Input {
   virtual bool unacquire() { return false; }
   virtual bool acquired() { return false; }
 
+  virtual nall::vector<nall::HID::Device*> poll() { return {}; }
   virtual bool poll(int16_t* table) { return false; }
-  virtual void rumble(unsigned id, bool enable) {}
+  virtual void rumble(uint64_t id, bool enable) {}
   virtual bool init() { return true; }
   virtual void term() {}
 

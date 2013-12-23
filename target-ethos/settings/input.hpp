@@ -28,7 +28,7 @@ struct InputSettings : SettingsLayout {
   void eraseInput();
   void assignInput();
   void assignMouseInput(unsigned n);
-  void inputEvent(unsigned scancode, int16_t value, bool allowMouseInput = false);
+  void inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue, bool allowMouseInput = false);
   InputSettings();
 
 private:

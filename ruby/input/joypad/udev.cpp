@@ -1,3 +1,6 @@
+#ifndef RUBY_INPUT_JOYPAD_UDEV
+#define RUBY_INPUT_JOYPAD_UDEV
+
 namespace ruby {
 
 struct InputJoypadUdev {
@@ -21,9 +24,13 @@ struct InputJoypadUdev {
   };
 
   struct Joystick {
-    string path;
-    dev_t device = 0;
+    HID::Joypad hid;
+
     int fd = -1;
+    dev_t device = 0;
+    string deviceName;
+    string devicePath;
+
     uint8_t evbit[(EV_MAX + 7) / 8] = {0};
     uint8_t keybit[(KEY_MAX + 7) / 8] = {0};
     uint8_t absbit[(ABS_MAX + 7) / 8] = {0};
@@ -44,6 +51,48 @@ struct InputJoypadUdev {
     unsigned effectID = 0;
   };
   vector<Joystick> joysticks;
+
+  void assign(HID::Joypad& hid, unsigned groupID, unsigned inputID, int16_t value) {
+    auto& group = hid.group[groupID];
+    if(group.input[inputID].value == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
+    group.input[inputID].value = value;
+  }
+
+  void poll(vector<HID::Device*>& devices) {
+    for(auto& js : joysticks) {
+      input_event events[32];
+      signed length = 0;
+      while((length = read(js.fd, events, sizeof(events))) > 0) {
+        length /= sizeof(input_event);
+        for(unsigned i = 0; i < length; i++) {
+          signed code = events[i].code;
+          signed type = events[i].type;
+          signed value = events[i].value;
+
+          if(type == EV_ABS) {
+            if(auto input = js.axes.find({code})) {
+              signed range = input().info.maximum - input().info.minimum;
+              value = (value - input().info.minimum) * 65535ll / range - 32767;
+              assign(js.hid, HID::Joypad::GroupID::Axis, input().id, sclamp<16>(value));
+            } else if(auto input = js.hats.find({code})) {
+              signed range = input().info.maximum - input().info.minimum;
+              value = (value - input().info.minimum) * 65535ll / range - 32767;
+              assign(js.hid, HID::Joypad::GroupID::Hat, input().id, sclamp<16>(value));
+            }
+          } else if(type == EV_KEY) {
+            if(code >= BTN_MISC) {
+              if(auto input = js.buttons.find({code})) {
+                assign(js.hid, HID::Joypad::GroupID::Button, input().id, (bool)value);
+              }
+            }
+          }
+        }
+      }
+
+      devices.append(&js.hid);
+    }
+  }
 
   bool poll(int16_t* table) {
     unsigned i = 0;
@@ -121,18 +170,18 @@ struct InputJoypadUdev {
     return true;
   }
 
-  void rumble(unsigned id, bool enable) {
-    if(id >= joysticks.size()) return;
+  void rumble(uint64_t id, bool enable) {
+    for(auto& js : joysticks) {
+      if(js.hid.id != id) continue;
+      if(js.hid.rumble == false) continue;
 
-    Joystick& js = joysticks[id];
-    if(js.rumble == false) return;
-
-    input_event play;
-    memset(&play, 0, sizeof(input_event));
-    play.type = EV_FF;
-    play.code = js.effectID;
-    play.value = enable;
-    write(js.fd, &play, sizeof(input_event));
+      input_event play;
+      memset(&play, 0, sizeof(input_event));
+      play.type = EV_FF;
+      play.code = js.effectID;
+      play.value = enable;
+      write(js.fd, &play, sizeof(input_event));
+    }
   }
 
   bool init() {
@@ -167,15 +216,15 @@ struct InputJoypadUdev {
   }
 
 private:
-  void createJoystick(udev_device* device, const char* path) {
+  void createJoystick(udev_device* device, const char* devicePath) {
     Joystick js;
-    js.path = path;
+    js.devicePath = devicePath;
 
     struct stat st;
-    if(stat(path, &st) < 0) return;
+    if(stat(devicePath, &st) < 0) return;
     js.device = st.st_rdev;
 
-    js.fd = open(path, O_RDWR | O_NONBLOCK);
+    js.fd = open(devicePath, O_RDWR | O_NONBLOCK);
     if(js.fd < 0) return;
 
     uint8_t evbit[(EV_MAX + 7) / 8] = {0};
@@ -199,6 +248,7 @@ private:
           if(js.vendorID == udev_device_get_sysattr_value(root, "idVendor")
           && js.productID == udev_device_get_sysattr_value(root, "idProduct")
           ) {
+            js.deviceName = udev_device_get_devpath(root);
             js.manufacturer = udev_device_get_sysattr_value(root, "manufacturer");
             js.product = udev_device_get_sysattr_value(root, "product");
             js.serial = udev_device_get_sysattr_value(root, "serial");
@@ -244,11 +294,24 @@ private:
         js.effectID = effect.id;
       }
 
+      createJoystickHID(js);
       joysticks.append(js);
     }
 
     #undef testBit
   }
+
+  void createJoystickHID(Joystick& js) {
+    uint64_t pathID = crc32_calculate((const uint8_t*)js.deviceName.data(), js.deviceName.size());
+    js.hid.id = pathID << 32 | hex(js.vendorID) << 16 | hex(js.productID) << 0;
+
+    for(unsigned n = 0; n < js.axes.size(); n++) js.hid.axis.append({n});
+    for(unsigned n = 0; n < js.hats.size(); n++) js.hid.hat.append({n});
+    for(unsigned n = 0; n < js.buttons.size(); n++) js.hid.button.append({n});
+    js.hid.rumble = js.rumble;
+  }
 };
 
 }
+
+#endif

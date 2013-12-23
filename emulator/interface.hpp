@@ -31,7 +31,7 @@ struct Interface {
     string name;
     struct Input {
       unsigned id;
-      unsigned type;  //0 = digital, 1 = analog (relative), 2 = analog (absolute), 3 = rumble
+      unsigned type;  //0 = digital, 1 = analog (relative), 2 = rumble
       string name;
       unsigned guid;
     };

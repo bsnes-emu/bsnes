@@ -19,8 +19,7 @@ using namespace nall;
 /* Video */
 
 #define DeclareVideo(Name) \
-  class Video##Name : public Video { \
-  public: \
+  struct Video##Name : Video { \
     bool cap(const string& name) { return p.cap(name); } \
     any get(const string& name) { return p.get(name); } \
     bool set(const string& name, const any& value) { return p.set(name, value); } \
@@ -79,8 +78,7 @@ using namespace nall;
 /* Audio */
 
 #define DeclareAudio(Name) \
-  class Audio##Name : public Audio { \
-  public: \
+  struct Audio##Name : Audio { \
     bool cap(const string& name) { return p.cap(name); } \
     any get(const string& name) { return p.get(name); } \
     bool set(const string& name, const any& value) { return p.set(name, value); } \
@@ -132,8 +130,7 @@ using namespace nall;
 /* Input */
 
 #define DeclareInput(Name) \
-  class Input##Name : public Input { \
-  public: \
+  struct Input##Name : Input { \
     bool cap(const string& name) { return p.cap(name); } \
     any get(const string& name) { return p.get(name); } \
     bool set(const string& name, const any& value) { return p.set(name, value); } \
@@ -142,8 +139,9 @@ using namespace nall;
     bool unacquire() { return p.unacquire(); } \
     bool acquired() { return p.acquired(); } \
     \
+    vector<HID::Device*> poll() { return p.poll(); } \
     bool poll(int16_t* table) { return p.poll(table); } \
-    void rumble(unsigned id, bool enable) { return p.rumble(id, enable); } \
+    void rumble(uint64_t id, bool enable) { return p.rumble(id, enable); } \
     bool init() { return p.init(); } \
     void term() { p.term(); } \
     \
@@ -174,6 +172,6 @@ using namespace nall;
   #include <ruby/input/udev.cpp>
 #endif
 
-#ifdef INPUT_X
-  #include <ruby/input/x.cpp>
+#ifdef INPUT_XLIB
+  #include <ruby/input/xlib.cpp>
 #endif

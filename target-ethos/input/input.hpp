@@ -1,45 +1,42 @@
+extern HID::Null hidNull;
+
 struct AbstractInput {
   string name;
   string mapping;
-  bool logic;  //0 = OR, 1 = AND
-  bool state;
+  bool logic = 0;  //0 = OR, 1 = AND
+  bool state = 0;
 
   struct Input {
-    enum class Type : unsigned { Button, MouseButton, MouseAxis, HatUp, HatDown, HatLeft, HatRight, Axis, AxisLo, AxisHi, Rumble } type;
-    unsigned scancode;
+    HID::Device* device = nullptr;
+    uint64_t id = 0;
+    unsigned group = 0;
+    unsigned input = 0;
+    enum class Qualifier : unsigned { None, Lo, Hi } qualifier;
   };
   vector<Input> inputList;
 
   void bind();
   bool append(string mapping);
-  virtual bool bind(unsigned scancode, int16_t value) = 0;
-  virtual int16_t poll() = 0;
+  virtual bool bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) { return false; }
+  virtual int16_t poll() { return 0; }
   virtual void rumble(bool enable) {}
-  AbstractInput();
 };
 
 struct DigitalInput : AbstractInput {
   using AbstractInput::bind;
-  bool bind(unsigned scancode, int16_t value);
+  bool bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
   int16_t poll();
 };
 
 struct RelativeInput : AbstractInput {
   using AbstractInput::bind;
-  bool bind(unsigned scancode, int16_t value);
-  int16_t poll();
-};
-
-struct AbsoluteInput : AbstractInput {
-  using AbstractInput::bind;
-  bool bind(unsigned scancode, int16_t value);
+  bool bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
   int16_t poll();
 };
 
 struct RumbleInput : AbstractInput {
   using AbstractInput::bind;
-  bool bind(unsigned scancode, int16_t value);
-  int16_t poll();
+  bool bind(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
   void rumble(bool enable);
 };
 
@@ -50,18 +47,17 @@ struct HotkeyInput : DigitalInput {
 };
 
 struct InputManager {
+  vector<HID::Device*> devices;
   vector<AbstractInput*> inputMap;
   vector<HotkeyInput*> hotkeyMap;
-  int16_t* scancode[2];
-  bool activeScancode;
 
+  void onChange(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
+  HID::Device* findMouse();
   void bind();
   void poll();
-  int16_t poll(unsigned scancode);
   void saveConfiguration();
   void bootstrap();
   InputManager();
-  ~InputManager();
 
   //hotkeys.cpp
   void appendHotkeys();

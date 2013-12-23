@@ -395,8 +395,8 @@ void InputInterface::driver(const char* driver) {
   else if(!strcmp(driver, "SDL")) p = new InputSDL();
   #endif
 
-  #ifdef INPUT_X
-  else if(!strcmp(driver, "X-Windows")) p = new InputX();
+  #ifdef INPUT_XLIB
+  else if(!strcmp(driver, "Xlib")) p = new InputXlib();
   #endif
 
   else p = new Input();
@@ -415,8 +415,8 @@ const char* InputInterface::optimalDriver() {
   return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
-  #elif defined(INPUT_X)
-  return "X-Windows";
+  #elif defined(INPUT_XLIB)
+  return "Xlib";
 
   #else
   return "None";
@@ -436,8 +436,8 @@ const char* InputInterface::safestDriver() {
   return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
-  #elif defined(INPUT_X)
-  return "X-Windows";
+  #elif defined(INPUT_XLIB)
+  return "Xlib";
 
   #else
   return "none";
@@ -473,8 +473,8 @@ const char* InputInterface::availableDrivers() {
   "SDL;"
   #endif
 
-  #if defined(INPUT_X)
-  "X-Windows;"
+  #if defined(INPUT_XLIB)
+  "Xlib;"
   #endif
 
   "None";
@@ -499,8 +499,9 @@ bool InputInterface::set(const string& name, const any& value) { return p ? p->s
 bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
+vector<HID::Device*> InputInterface::poll() { return p ? p->poll() : vector<HID::Device*>(); }
 bool InputInterface::poll(int16_t* table) { return p ? p->poll(table) : false; }
-void InputInterface::rumble(unsigned id, bool enable) { if(p) return p->rumble(id, enable); }
+void InputInterface::rumble(uint64_t id, bool enable) { if(p) return p->rumble(id, enable); }
 InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
 

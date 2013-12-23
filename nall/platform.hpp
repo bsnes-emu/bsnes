@@ -21,6 +21,7 @@ namespace Math {
 #include <utility>
 
 #include <assert.h>
+#include <endian.h>
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
