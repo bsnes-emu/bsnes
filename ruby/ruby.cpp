@@ -375,12 +375,8 @@ void InputInterface::driver(const char* driver) {
 
   if(0);
 
-  #ifdef INPUT_DIRECTINPUT
-  else if(!strcmp(driver, "DirectInput")) p = new InputDI();
-  #endif
-
-  #ifdef INPUT_RAWINPUT
-  else if(!strcmp(driver, "RawInput")) p = new InputRaw();
+  #ifdef INPUT_WINDOWS
+  else if(!strcmp(driver, "Windows")) p = new InputWindows();
   #endif
 
   #ifdef INPUT_CARBON
@@ -403,10 +399,8 @@ void InputInterface::driver(const char* driver) {
 }
 
 const char* InputInterface::optimalDriver() {
-  #if defined(INPUT_RAWINPUT)
-  return "RawInput";
-  #elif defined(INPUT_DIRECTINPUT)
-  return "DirectInput";
+  #if defined(INPUT_WINDOWS)
+  return "Windows";
 
   #elif defined(INPUT_CARBON)
   return "Carbon";
@@ -424,10 +418,8 @@ const char* InputInterface::optimalDriver() {
 }
 
 const char* InputInterface::safestDriver() {
-  #if defined(INPUT_RAWINPUT)
-  return "RawInput";
-  #elif defined(INPUT_DIRECTINPUT)
-  return "DirectInput";
+  #if defined(INPUT_WINDOWS)
+  return "Windows";
 
   #elif defined(INPUT_CARBON)
   return "Carbon";
@@ -449,12 +441,8 @@ const char* InputInterface::availableDrivers() {
 
   //Windows
 
-  #if defined(INPUT_RAWINPUT)
-  "RawInput;"
-  #endif
-
-  #if defined(INPUT_DIRECTINPUT)
-  "DirectInput;"
+  #if defined(INPUT_WINDOWS)
+  "Windows;"
   #endif
 
   //OS X
@@ -500,8 +488,7 @@ bool InputInterface::acquire() { return p ? p->acquire() : false; }
 bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
 bool InputInterface::acquired() { return p ? p->acquired() : false; }
 vector<HID::Device*> InputInterface::poll() { return p ? p->poll() : vector<HID::Device*>(); }
-bool InputInterface::poll(int16_t* table) { return p ? p->poll(table) : false; }
-void InputInterface::rumble(uint64_t id, bool enable) { if(p) return p->rumble(id, enable); }
+bool InputInterface::rumble(uint64_t id, bool enable) { return p ? p->rumble(id, enable) : false; }
 InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
 

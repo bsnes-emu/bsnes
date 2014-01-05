@@ -8,6 +8,7 @@ namespace phoenix {
 
 #include "font.hpp"
 #include "desktop.hpp"
+#include "monitor.hpp"
 #include "keyboard.hpp"
 #include "mouse.hpp"
 #include "browser-window.hpp"

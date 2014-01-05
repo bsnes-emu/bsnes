@@ -49,13 +49,15 @@ struct pInputXlib {
     return xlibMouse.acquired();
   }
 
-  bool poll(int16_t* table) {
-    xlibKeyboard.poll(table);
-    xlibMouse.poll(table);
-    return true;
+  vector<HID::Device*> poll() {
+    vector<HID::Device*> devices;
+    xlibKeyboard.poll(devices);
+    xlibMouse.poll(devices);
+    return devices;
   }
 
-  void rumble(unsigned id, bool enable) {
+  bool rumble(uint64_t id, bool enable) {
+    return false;
   }
 
   bool init() {

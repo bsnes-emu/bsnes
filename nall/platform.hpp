@@ -21,7 +21,6 @@ namespace Math {
 #include <utility>
 
 #include <assert.h>
-#include <endian.h>
 #include <errno.h>
 #include <limits.h>
 #include <math.h>
@@ -42,6 +41,7 @@ namespace Math {
   #undef interface
   #define dllexport __declspec(dllexport)
 #else
+  #include <endian.h>
   #include <unistd.h>
   #include <pwd.h>
   #define dllexport

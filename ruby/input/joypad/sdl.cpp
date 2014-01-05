@@ -4,59 +4,74 @@
 namespace ruby {
 
 struct InputJoypadSDL {
-  struct Joystick {
+  struct Joypad {
+    HID::Joypad hid;
+
     unsigned id = 0;
     SDL_Joystick* handle = nullptr;
   };
-  vector<Joystick> joysticks;
+  vector<Joypad> joypads;
 
-  bool poll(int16_t* table) {
+  void assign(HID::Joypad& hid, unsigned groupID, unsigned inputID, int16_t value) {
+    auto& group = hid.group[groupID];
+    if(group.input[inputID].value == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
+    group.input[inputID].value = value;
+  }
+
+  void poll(vector<HID::Device*>& devices) {
     SDL_JoystickUpdate();
-    for(auto& js : joysticks) {
-      unsigned axes = min((unsigned)Joypad::Axes, SDL_JoystickNumAxes(js.handle));
-      for(unsigned axis = 0; axis < axes; axis++) {
-        table[joypad(js.id).axis(axis)] = (int16_t)SDL_JoystickGetAxis(js.handle, axis);
+
+    for(auto& jp : joypads) {
+      for(unsigned n = 0; n < jp.hid.axis().input.size(); n++) {
+        assign(jp.hid, HID::Joypad::GroupID::Axis, n, (int16_t)SDL_JoystickGetAxis(jp.handle, n));
       }
 
-      unsigned hats = min((unsigned)Joypad::Hats, SDL_JoystickNumHats(js.handle));
-      for(unsigned hat = 0; hat < hats; hat++) {
-        uint8_t state = SDL_JoystickGetHat(js.handle, hat);
-        int16_t value = 0;
-        if(state & SDL_HAT_UP   ) value |= Joypad::HatUp;
-        if(state & SDL_HAT_DOWN ) value |= Joypad::HatDown;
-        if(state & SDL_HAT_LEFT ) value |= Joypad::HatLeft;
-        if(state & SDL_HAT_RIGHT) value |= Joypad::HatRight;
-        table[joypad(js.id).hat(hat)] = value;
+      for(signed n = 0; n < (signed)jp.hid.hat().input.size() - 1; n += 2) {
+        uint8_t state = SDL_JoystickGetHat(jp.handle, n >> 1);
+        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 0, state & SDL_HAT_LEFT ? -32768 : state & SDL_HAT_RIGHT ? +32767 : 0);
+        assign(jp.hid, HID::Joypad::GroupID::Hat, n + 1, state & SDL_HAT_UP ? -32768 : state & SDL_HAT_DOWN ? +32767 : 0);
       }
 
-      //there is no SDL_JoystickNumButtons function
-      for(unsigned button = 0; button < Joypad::Buttons; button++) {
-        table[joypad(js.id).button(button)] = (bool)SDL_JoystickGetButton(js.handle, button);
+      for(unsigned n = 0; n < jp.hid.button().input.size(); n++) {
+        assign(jp.hid, HID::Joypad::GroupID::Button, n, (bool)SDL_JoystickGetButton(jp.handle, n));
       }
+
+      devices.append(&jp.hid);
     }
-
-    return true;
   }
 
   bool init() {
     SDL_InitSubSystem(SDL_INIT_JOYSTICK);
     SDL_JoystickEventState(SDL_IGNORE);
 
-    unsigned joystickCount = SDL_NumJoysticks();
-    for(unsigned id = 0; id < joystickCount; id++) {
-      Joystick joystick;
-      joystick.id = id;
-      joystick.handle = SDL_JoystickOpen(id);
+    unsigned joypadCount = SDL_NumJoysticks();
+    for(unsigned id = 0; id < joypadCount; id++) {
+      Joypad jp;
+      jp.id = id;
+      jp.handle = SDL_JoystickOpen(id);
+
+      unsigned axes = SDL_JoystickNumAxes(jp.handle);
+      unsigned hats = SDL_JoystickNumHats(jp.handle) * 2;
+      unsigned buttons = 32;  //there is no SDL_JoystickNumButtons()
+
+      jp.hid.id = 2 + jp.id;
+      for(unsigned n = 0; n < axes; n++) jp.hid.axis().append({n});
+      for(unsigned n = 0; n < hats; n++) jp.hid.hat().append({n});
+      for(unsigned n = 0; n < buttons; n++) jp.hid.button().append({n});
+      jp.hid.rumble = false;
+
+      joypads.append(jp);
     }
 
     return true;
   }
 
   void term() {
-    for(auto& js : joysticks) {
-      SDL_JoystickClose(js.handle);
+    for(auto& jp : joypads) {
+      SDL_JoystickClose(jp.handle);
     }
-    joysticks.reset();
+    joypads.reset();
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
   }
 };

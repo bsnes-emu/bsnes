@@ -68,8 +68,8 @@ void APU::Wave::power() {
   frequency = 0;
   counter = 0;
 
-  random_lfsr r;
-  for(auto& n : pattern) n = r() & 15;
+//random_lfsr r;
+  for(auto& n : pattern) n = 0;
 
   output = 0;
   length = 0;

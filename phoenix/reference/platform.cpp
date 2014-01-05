@@ -2,6 +2,7 @@
 
 #include "font.cpp"
 #include "desktop.cpp"
+#include "monitor.cpp"
 #include "keyboard.cpp"
 #include "mouse.cpp"
 #include "browser-window.cpp"

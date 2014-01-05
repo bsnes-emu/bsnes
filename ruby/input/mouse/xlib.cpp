@@ -81,7 +81,7 @@ struct InputMouseXlib {
       assign(HID::Mouse::GroupID::Axis, 0, (int16_t)(rootXReturn - screenWidth  / 2));
       assign(HID::Mouse::GroupID::Axis, 1, (int16_t)(rootYReturn - screenHeight / 2));
 
-      if(hid.axis.input[0].value != 0 || hid.axis.input[1].value != 0) {
+      if(hid.axis().input[0].value != 0 || hid.axis().input[1].value != 0) {
         //if mouse moved, re-center mouse for next poll
         XWarpPointer(display, None, rootWindow, 0, 0, 0, 0, screenWidth / 2, screenHeight / 2);
       }
@@ -102,45 +102,6 @@ struct InputMouseXlib {
     devices.append(&hid);
   }
 
-  bool poll(int16_t* table) {
-    Window rootReturn;
-    Window childReturn;
-    signed rootXReturn = 0;
-    signed rootYReturn = 0;
-    signed windowXReturn = 0;
-    signed windowYReturn = 0;
-    unsigned maskReturn = 0;
-    XQueryPointer(display, handle, &rootReturn, &childReturn, &rootXReturn, &rootYReturn, &windowXReturn, &windowYReturn, &maskReturn);
-
-    if(acquired()) {
-      XWindowAttributes attributes;
-      XGetWindowAttributes(display, handle, &attributes);
-
-      //absolute -> relative conversion
-      table[mouse(0).axis(0)] = (int16_t)(rootXReturn - screenWidth  / 2);
-      table[mouse(0).axis(1)] = (int16_t)(rootYReturn - screenHeight / 2);
-
-      if(table[mouse(0).axis(0)] != 0 || table[mouse(0).axis(1)] != 0) {
-        //if mouse moved, re-center mouse for next poll
-        XWarpPointer(display, None, rootWindow, 0, 0, 0, 0, screenWidth / 2, screenHeight / 2);
-      }
-    } else {
-      table[mouse(0).axis(0)] = (int16_t)(rootXReturn - ms.relativeX);
-      table[mouse(0).axis(1)] = (int16_t)(rootYReturn - ms.relativeY);
-
-      ms.relativeX = rootXReturn;
-      ms.relativeY = rootYReturn;
-    }
-
-    table[mouse(0).button(0)] = (bool)(maskReturn & Button1Mask);
-    table[mouse(0).button(1)] = (bool)(maskReturn & Button2Mask);
-    table[mouse(0).button(2)] = (bool)(maskReturn & Button3Mask);
-    table[mouse(0).button(3)] = (bool)(maskReturn & Button4Mask);
-    table[mouse(0).button(4)] = (bool)(maskReturn & Button5Mask);
-
-    return true;
-  }
-
   bool init(uintptr_t handle) {
     this->handle = handle;
     display = XOpenDisplay(0);
@@ -151,6 +112,7 @@ struct InputMouseXlib {
     screenWidth = attributes.width;
     screenHeight = attributes.height;
 
+    //Xlib: because XShowCursor(display, false) would just be too easy
     //create invisible cursor for use when mouse is acquired
     Pixmap pixmap;
     XColor black, unused;
@@ -168,14 +130,14 @@ struct InputMouseXlib {
 
     hid.id = 2;
 
-    hid.axis.append({"X"});
-    hid.axis.append({"Y"});
+    hid.axis().append({"X"});
+    hid.axis().append({"Y"});
 
-    hid.button.append({"Left"});
-    hid.button.append({"Middle"});
-    hid.button.append({"Right"});
-    hid.button.append({"Up"});
-    hid.button.append({"Down"});
+    hid.button().append({"Left"});
+    hid.button().append({"Middle"});
+    hid.button().append({"Right"});
+    hid.button().append({"Up"});
+    hid.button().append({"Down"});
 
     return true;
   }

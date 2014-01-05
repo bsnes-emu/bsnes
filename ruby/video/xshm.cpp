@@ -4,39 +4,54 @@
 namespace ruby {
 
 struct pVideoXShm {
-  struct {
-    Display* display;
+  struct Device {
+    Display* display = nullptr;
     int screen;
-    Visual *visual;
     int depth;
+    Visual* visual = nullptr;
     Window window;
 
     XShmSegmentInfo shmInfo;
-    XImage* image;
-    uint32_t* buffer;
+    XImage* image = nullptr;
+    uint32_t* buffer = nullptr;
     unsigned width, height;
   } device;
 
-  struct {
+  struct Settings {
     uintptr_t handle;
+    unsigned depth = 24;
 
-    uint32_t* buffer;
+    uint32_t* buffer = nullptr;
     unsigned width, height;
   } settings;
 
+  struct Color {
+    unsigned depth;
+    unsigned shift;
+
+    unsigned idepth;
+    unsigned ishift;
+  } red, green, blue;
+
   bool cap(const string& name) {
     if(name == Video::Handle) return true;
+    if(name == Video::Depth) return true;
     return false;
   }
 
   any get(const string& name) {
     if(name == Video::Handle) return settings.handle;
+    if(name == Video::Depth) return settings.depth;
+    return false;
   }
 
   bool set(const string& name, const any& value) {
     if(name == Video::Handle) {
       settings.handle = any_cast<uintptr_t>(value);
       return true;
+    }
+    if(name == Video::Depth) {
+      return setDepth(any_cast<unsigned>(value));
     }
     return false;
   }
@@ -66,7 +81,7 @@ struct pVideoXShm {
     if(settings.buffer == nullptr) return;
     size();
 
-    float xRatio = (float)settings.width / (float)device.width;
+    float xRatio = (float)settings.width  / (float)device.width;
     float yRatio = (float)settings.height / (float)device.height;
     float yStep = 0;
     for(unsigned y = 0; y < device.height; y++) {
@@ -77,7 +92,12 @@ struct pVideoXShm {
       for(unsigned x = 0; x < device.width; x++) {
         uint32_t color = sp[(unsigned)xStep];
         xStep += xRatio;
-        *dp++ = ((color >> 20) & 0x000003ff) | ((color) & 0x000ffc00) | ((color << 20) & 0x3ff00000);
+        unsigned r = (color >> red.ishift  ) & ((1 << red.idepth  ) - 1);
+        unsigned g = (color >> green.ishift) & ((1 << green.idepth) - 1);
+        unsigned b = (color >> blue.ishift ) & ((1 << blue.idepth ) - 1);
+        *dp++ = image::normalize(r, red.idepth,   red.depth  ) << red.shift
+              | image::normalize(g, green.idepth, green.depth) << green.shift
+              | image::normalize(b, blue.idepth,  blue.depth ) << blue.shift;
       }
     }
 
@@ -93,15 +113,36 @@ struct pVideoXShm {
   bool init() {
     device.display = XOpenDisplay(0);
     device.screen = DefaultScreen(device.display);
-    device.visual = DefaultVisual(device.display, device.screen);
-    device.depth = DefaultDepth(device.display, device.screen);
 
-    XSetWindowAttributes attributes;
-    attributes.border_pixel = 0;
+    XWindowAttributes getAttributes;
+    XGetWindowAttributes(device.display, (Window)settings.handle, &getAttributes);
+    device.depth = getAttributes.depth;
+    device.visual = getAttributes.visual;
+    unsigned visualID = XVisualIDFromVisual(device.visual);
+
+    XVisualInfo visualTemplate = {0};
+    visualTemplate.screen = device.screen;
+    visualTemplate.depth = device.depth;
+    int visualsMatched = 0;
+    XVisualInfo* visualList = XGetVisualInfo(device.display, VisualScreenMask | VisualDepthMask, &visualTemplate, &visualsMatched);
+    for(unsigned n = 0; n < visualsMatched; n++) {
+      auto& v = visualList[n];
+      if(v.visualid == visualID) {
+        red.depth   = bit::count(v.red_mask),   red.shift   = bit::first(v.red_mask);
+        green.depth = bit::count(v.green_mask), green.shift = bit::first(v.green_mask);
+        blue.depth  = bit::count(v.blue_mask),  blue.shift  = bit::first(v.blue_mask);
+        break;
+      }
+    }
+    XFree(visualList);
+    setDepth(settings.depth);
+
+    XSetWindowAttributes setAttributes = {0};
+    setAttributes.border_pixel = 0;
     device.window = XCreateWindow(device.display, (Window)settings.handle,
-      0, 0, 256, 256,
-      0, device.depth, InputOutput, device.visual,
-      CWBorderPixel, &attributes
+      0, 0, 256, 256, 0,
+      getAttributes.depth, InputOutput, getAttributes.visual,
+      CWBorderPixel, &setAttributes
     );
     XSetWindowBackground(device.display, device.window, 0);
     XMapWindow(device.display, device.window);
@@ -118,12 +159,8 @@ struct pVideoXShm {
 
   void term() {
     free();
-  }
 
-  pVideoXShm() {
-    device.buffer = nullptr;
-
-    settings.buffer = nullptr;
+    if(device.display) { XCloseDisplay(device.display); device.display = nullptr; }
   }
 
   ~pVideoXShm() {
@@ -131,6 +168,26 @@ struct pVideoXShm {
   }
 
 //internal:
+  bool setDepth(unsigned depth) {
+    if(depth == 24) {
+      settings.depth = 24;
+      red.idepth   = 8, red.ishift   = 16;
+      green.idepth = 8, green.ishift =  8;
+      blue.idepth  = 8, blue.ishift  =  0;
+      return true;
+    }
+
+    if(depth == 30) {
+      settings.depth = 30;
+      red.idepth   = 10, red.ishift   = 20;
+      green.idepth = 10, green.ishift = 10;
+      blue.idepth  = 10, blue.ishift  =  0;
+      return true;
+    }
+
+    return false;
+  }
+
   bool size() {
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(device.display, settings.handle, &windowAttributes);

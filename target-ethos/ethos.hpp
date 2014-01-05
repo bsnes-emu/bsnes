@@ -4,7 +4,7 @@
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dsp.hpp>
-#include <nall/input.hpp>
+#include <nall/hid.hpp>
 #include <nall/invoke.hpp>
 #include <nall/map.hpp>
 #include <nall/stream/file.hpp>

@@ -55,6 +55,12 @@ struct pDesktop {
   static Geometry workspace();
 };
 
+struct pMonitor {
+  static unsigned count();
+  static Geometry geometry(unsigned monitor);
+  static unsigned primary();
+};
+
 struct pKeyboard {
   static bool pressed(Keyboard::Scancode scancode);
   static vector<bool> state();

@@ -45,7 +45,8 @@ Geometry pWindow::geometry() {
   if(window.state.fullScreen) {
     unsigned menuHeight = window.state.menuVisible ? qtMenu->height() : 0;
     unsigned statusHeight = window.state.statusVisible ? qtStatus->height() : 0;
-    return {0, menuHeight, Desktop::size().width, Desktop::size().height - menuHeight - statusHeight};
+    QRect geometry = qtWindow->geometry();  //frameGeometry() includes frame even though it's not visible in fullscreen mode
+    return {geometry.x(), geometry.y() + menuHeight, geometry.width(), geometry.height() - menuHeight - statusHeight};
   }
   return window.state.geometry;
 }

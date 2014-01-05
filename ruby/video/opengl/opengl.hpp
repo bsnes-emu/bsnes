@@ -28,6 +28,9 @@ struct OpenGLTexture {
   GLuint format = GL_RGBA8;
   GLuint filter = GL_LINEAR;
   GLuint wrap = GL_CLAMP_TO_BORDER;
+
+  GLuint getFormat() const;
+  GLuint getType() const;
 };
 
 struct OpenGLSurface : OpenGLTexture {
@@ -47,7 +50,6 @@ struct OpenGLSurface : OpenGLTexture {
 };
 
 struct OpenGLProgram : OpenGLSurface {
-  //configuration
   unsigned phase = 0;   //frame counter
   unsigned modulo = 0;  //frame counter modulus
   unsigned absoluteWidth = 0;
@@ -63,18 +65,9 @@ struct OpenGLProgram : OpenGLSurface {
 
 struct OpenGL : OpenGLProgram {
   vector<OpenGLProgram> programs;
-  vector<OpenGLTexture> frames;
-  struct History {
-    unsigned length = 0;
-    GLuint format = GL_RGBA8;
-    GLuint filter = GL_LINEAR;
-    GLuint wrap = GL_CLAMP_TO_BORDER;
-  } history;
-
-  GLuint inputFormat = GL_UNSIGNED_INT_8_8_8_8_REV;
+  vector<OpenGLTexture> history;
   unsigned outputWidth = 0;
   unsigned outputHeight = 0;
-
   struct Setting {
     string name;
     string value;
@@ -87,7 +80,7 @@ struct OpenGL : OpenGLProgram {
   set<Setting> settings;
 
   void shader(const char* pathname);
-  void bind(const Markup::Node& node, const string& pathname);
+  void allocateHistory(unsigned size);
   bool lock(uint32_t*& data, unsigned& pitch);
   void clear();
   void refresh();
@@ -95,6 +88,7 @@ struct OpenGL : OpenGLProgram {
   void term();
 };
 
+#include "texture.hpp"
 #include "surface.hpp"
 #include "program.hpp"
 #include "main.hpp"

@@ -36,10 +36,6 @@ namespace HID {
     string name;
     vector<Group> group;
 
-    Device() {
-      group.resize(4);
-    }
-
     uint32_t pathID() const { return (uint32_t)(id >> 32); }
     uint32_t deviceID() const { return (uint32_t)(id >> 0); }
     uint16_t vendorID() const { return (uint16_t)(id >> 16); }
@@ -49,6 +45,10 @@ namespace HID {
     virtual bool isKeyboard() const { return false; }
     virtual bool isMouse() const { return false; }
     virtual bool isJoypad() const { return false; }
+
+    void append(const string& name) {
+      group.append({name});
+    }
 
     optional<unsigned> find(const string& name) {
       for(unsigned id = 0; id < group.size(); id++) {
@@ -68,11 +68,12 @@ namespace HID {
 
   struct Keyboard : Device {
     enum GroupID : unsigned { Button };
-    Group& button = group[0];
+
+    Group& button() { return group[GroupID::Button]; }
 
     Keyboard() {
       name = "Keyboard";
-      button.name = "Button";
+      append("Button");
     }
 
     bool isKeyboard() const { return true; }
@@ -80,13 +81,14 @@ namespace HID {
 
   struct Mouse : Device {
     enum GroupID : unsigned { Axis, Button };
-    Group& axis = group[0];
-    Group& button = group[1];
+
+    Group& axis() { return group[GroupID::Axis]; }
+    Group& button() { return group[GroupID::Button]; }
 
     Mouse() {
       name = "Mouse";
-      axis.name = "Axis";
-      button.name = "Button";
+      append("Axis");
+      append("Button");
     }
 
     bool isMouse() const { return true; }
@@ -94,18 +96,19 @@ namespace HID {
 
   struct Joypad : Device {
     enum GroupID : unsigned { Axis, Hat, Trigger, Button };
-    Group& axis = group[0];
-    Group& hat = group[1];
-    Group& trigger = group[2];
-    Group& button = group[3];
+
+    Group& axis() { return group[GroupID::Axis]; }
+    Group& hat() { return group[GroupID::Hat]; }
+    Group& trigger() { return group[GroupID::Trigger]; }
+    Group& button() { return group[GroupID::Button]; }
     bool rumble = false;
 
     Joypad() {
       name = "Joypad";
-      axis.name = "Axis";
-      hat.name = "Hat";
-      trigger.name = "Trigger";
-      button.name = "Button";
+      append("Axis");
+      append("Hat");
+      append("Trigger");
+      append("Button");
     }
 
     bool isJoypad() const { return true; }

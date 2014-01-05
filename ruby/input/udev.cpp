@@ -65,15 +65,8 @@ struct pInputUdev {
     return devices;
   }
 
-  bool poll(int16_t* table) {
-    xlibKeyboard.poll(table);
-    xlibMouse.poll(table);
-    udev.poll(table);
-    return true;
-  }
-
-  void rumble(uint64_t id, bool enable) {
-    udev.rumble(id, enable);
+  bool rumble(uint64_t id, bool enable) {
+    return udev.rumble(id, enable);
   }
 
   bool init() {

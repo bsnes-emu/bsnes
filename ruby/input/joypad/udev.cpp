@@ -10,26 +10,26 @@ struct InputJoypadUdev {
   udev_list_entry* devices = nullptr;
   udev_list_entry* item = nullptr;
 
-  struct JoystickInput {
+  struct JoypadInput {
     signed code = 0;
     unsigned id = 0;
     int16_t value = 0;
     input_absinfo info;
 
-    JoystickInput() {}
-    JoystickInput(signed code) : code(code) {}
-    JoystickInput(signed code, unsigned id) : code(code), id(id) {}
-    bool operator< (const JoystickInput& source) const { return code <  source.code; }
-    bool operator==(const JoystickInput& source) const { return code == source.code; }
+    JoypadInput() {}
+    JoypadInput(signed code) : code(code) {}
+    JoypadInput(signed code, unsigned id) : code(code), id(id) {}
+    bool operator< (const JoypadInput& source) const { return code <  source.code; }
+    bool operator==(const JoypadInput& source) const { return code == source.code; }
   };
 
-  struct Joystick {
+  struct Joypad {
     HID::Joypad hid;
 
     int fd = -1;
     dev_t device = 0;
     string deviceName;
-    string devicePath;
+    string deviceNode;
 
     uint8_t evbit[(EV_MAX + 7) / 8] = {0};
     uint8_t keybit[(KEY_MAX + 7) / 8] = {0};
@@ -44,13 +44,13 @@ struct InputJoypadUdev {
     string vendorID;
     string productID;
 
-    set<JoystickInput> axes;
-    set<JoystickInput> hats;
-    set<JoystickInput> buttons;
+    set<JoypadInput> axes;
+    set<JoypadInput> hats;
+    set<JoypadInput> buttons;
     bool rumble = false;
     unsigned effectID = 0;
   };
-  vector<Joystick> joysticks;
+  vector<Joypad> joypads;
 
   void assign(HID::Joypad& hid, unsigned groupID, unsigned inputID, int16_t value) {
     auto& group = hid.group[groupID];
@@ -60,10 +60,12 @@ struct InputJoypadUdev {
   }
 
   void poll(vector<HID::Device*>& devices) {
-    for(auto& js : joysticks) {
+    while(hotplugDevicesAvailable()) hotplugDevice();
+
+    for(auto& jp : joypads) {
       input_event events[32];
       signed length = 0;
-      while((length = read(js.fd, events, sizeof(events))) > 0) {
+      while((length = read(jp.fd, events, sizeof(events))) > 0) {
         length /= sizeof(input_event);
         for(unsigned i = 0; i < length; i++) {
           signed code = events[i].code;
@@ -71,117 +73,44 @@ struct InputJoypadUdev {
           signed value = events[i].value;
 
           if(type == EV_ABS) {
-            if(auto input = js.axes.find({code})) {
+            if(auto input = jp.axes.find({code})) {
               signed range = input().info.maximum - input().info.minimum;
               value = (value - input().info.minimum) * 65535ll / range - 32767;
-              assign(js.hid, HID::Joypad::GroupID::Axis, input().id, sclamp<16>(value));
-            } else if(auto input = js.hats.find({code})) {
+              assign(jp.hid, HID::Joypad::GroupID::Axis, input().id, sclamp<16>(value));
+            } else if(auto input = jp.hats.find({code})) {
               signed range = input().info.maximum - input().info.minimum;
               value = (value - input().info.minimum) * 65535ll / range - 32767;
-              assign(js.hid, HID::Joypad::GroupID::Hat, input().id, sclamp<16>(value));
+              assign(jp.hid, HID::Joypad::GroupID::Hat, input().id, sclamp<16>(value));
             }
           } else if(type == EV_KEY) {
             if(code >= BTN_MISC) {
-              if(auto input = js.buttons.find({code})) {
-                assign(js.hid, HID::Joypad::GroupID::Button, input().id, (bool)value);
+              if(auto input = jp.buttons.find({code})) {
+                assign(jp.hid, HID::Joypad::GroupID::Button, input().id, (bool)value);
               }
             }
           }
         }
       }
 
-      devices.append(&js.hid);
+      devices.append(&jp.hid);
     }
   }
 
-  bool poll(int16_t* table) {
-    unsigned i = 0;
-    for(auto& js : joysticks) {
-      input_event events[32];
-      signed length = 0;
-      while((length = read(js.fd, events, sizeof(events))) > 0) {
-        length /= sizeof(input_event);
-        for(unsigned i = 0; i < length; i++) {
-          signed code = events[i].code;
-          signed type = events[i].type;
-          signed value = events[i].value;
-
-          if(type == EV_ABS) {
-            if(auto input = js.axes.find({code})) {
-              signed range = input().info.maximum - input().info.minimum;
-              signed axis = (value - input().info.minimum) * 65535ll / range - 32767;
-              if(axis > +32767) axis = +32767;
-              if(axis < -32768) axis = -32768;
-              input().value = axis;
-            }
-            if(auto input = js.hats.find({code})) {
-              input().value = value;
-            }
-          }
-
-          if(type == EV_KEY) {
-            if(code >= BTN_MISC) {
-              if(auto input = js.buttons.find({code})) {
-                input().value = value;
-              }
-            }
-          }
-        }
-      }
-
-      for(auto input : js.axes) {
-        table[joypad(i).axis(input.id)] = input.value;
-      }
-
-      for(unsigned id = 0; id < (js.hats.size() + 1) / 2; id++) {
-        table[joypad(i).hat(id)] = 0;
-      }
-
-      for(auto input : js.hats) {
-        unsigned hat = 0;
-        if(input.code == ABS_HAT0X || input.code == ABS_HAT0Y) hat = 0;
-        if(input.code == ABS_HAT1X || input.code == ABS_HAT1Y) hat = 1;
-        if(input.code == ABS_HAT2X || input.code == ABS_HAT2Y) hat = 2;
-        if(input.code == ABS_HAT3X || input.code == ABS_HAT3Y) hat = 3;
-
-        bool orientation = 0;
-        if(input.code == ABS_HAT0X || input.code == ABS_HAT1X || input.code == ABS_HAT2X || input.code == ABS_HAT3X) orientation = 0;
-        if(input.code == ABS_HAT0Y || input.code == ABS_HAT1Y || input.code == ABS_HAT2Y || input.code == ABS_HAT3Y) orientation = 1;
-
-        signed value = 0;
-        if(orientation == 0) {
-          if(input.value < 0) value |= Joypad::HatLeft;
-          if(input.value > 0) value |= Joypad::HatRight;
-        } else {
-          if(input.value < 0) value |= Joypad::HatUp;
-          if(input.value > 0) value |= Joypad::HatDown;
-        }
-
-        table[joypad(i).hat(hat)] |= value;
-      }
-
-      for(auto input : js.buttons) {
-        table[joypad(i).button(input.id)] = input.value;
-      }
-
-      i++;
-    }
-
-    return true;
-  }
-
-  void rumble(uint64_t id, bool enable) {
-    for(auto& js : joysticks) {
-      if(js.hid.id != id) continue;
-      if(js.hid.rumble == false) continue;
+  bool rumble(uint64_t id, bool enable) {
+    for(auto& jp : joypads) {
+      if(jp.hid.id != id) continue;
+      if(jp.hid.rumble == false) continue;
 
       input_event play;
       memset(&play, 0, sizeof(input_event));
       play.type = EV_FF;
-      play.code = js.effectID;
+      play.code = jp.effectID;
       play.value = enable;
-      write(js.fd, &play, sizeof(input_event));
+      write(jp.fd, &play, sizeof(input_event));
+      return true;
     }
+
+    return false;
   }
 
   bool init() {
@@ -200,10 +129,10 @@ struct InputJoypadUdev {
       udev_enumerate_scan_devices(enumerator);
       devices = udev_enumerate_get_list_entry(enumerator);
       for(udev_list_entry* item = devices; item != nullptr; item = udev_list_entry_get_next(item)) {
-        const char* name = udev_list_entry_get_name(item);
-        struct udev_device* device = udev_device_new_from_syspath(context, name);
-        const char* deviceNode = udev_device_get_devnode(device);
-        if(deviceNode) createJoystick(device, deviceNode);
+        string name = udev_list_entry_get_name(item);
+        udev_device* device = udev_device_new_from_syspath(context, name);
+        string deviceNode = udev_device_get_devnode(device);
+        if(deviceNode) createJoypad(device, deviceNode);
         udev_device_unref(device);
       }
     }
@@ -216,42 +145,66 @@ struct InputJoypadUdev {
   }
 
 private:
-  void createJoystick(udev_device* device, const char* devicePath) {
-    Joystick js;
-    js.devicePath = devicePath;
+  bool hotplugDevicesAvailable() {
+    pollfd fd = {0};
+    fd.fd = udev_monitor_get_fd(monitor);
+    fd.events = POLLIN;
+    return (::poll(&fd, 1, 0) == 1) && (fd.revents & POLLIN);
+  }
+
+  void hotplugDevice() {
+    udev_device* device = udev_monitor_receive_device(monitor);
+    if(device == nullptr) return;
+
+    string value = udev_device_get_property_value(device, "ID_INPUT_JOYSTICK");
+    string action = udev_device_get_action(device);
+    string deviceNode = udev_device_get_devnode(device);
+    if(value == "1") {
+      if(action == "add") {
+        createJoypad(device, deviceNode);
+      }
+      if(action == "remove") {
+        removeJoypad(device, deviceNode);
+      }
+    }
+  }
+
+  void createJoypad(udev_device* device, const string& deviceNode) {
+    Joypad jp;
+    jp.deviceNode = deviceNode;
 
     struct stat st;
-    if(stat(devicePath, &st) < 0) return;
-    js.device = st.st_rdev;
+    if(stat(deviceNode, &st) < 0) return;
+    jp.device = st.st_rdev;
 
-    js.fd = open(devicePath, O_RDWR | O_NONBLOCK);
-    if(js.fd < 0) return;
+    jp.fd = open(deviceNode, O_RDWR | O_NONBLOCK);
+    if(jp.fd < 0) return;
 
     uint8_t evbit[(EV_MAX + 7) / 8] = {0};
     uint8_t keybit[(KEY_MAX + 7) / 8] = {0};
     uint8_t absbit[(ABS_MAX + 7) / 8] = {0};
 
-    ioctl(js.fd, EVIOCGBIT(0, sizeof(js.evbit)), js.evbit);
-    ioctl(js.fd, EVIOCGBIT(EV_KEY, sizeof(js.keybit)), js.keybit);
-    ioctl(js.fd, EVIOCGBIT(EV_ABS, sizeof(js.absbit)), js.absbit);
-    ioctl(js.fd, EVIOCGBIT(EV_FF, sizeof(js.ffbit)), js.ffbit);
-    ioctl(js.fd, EVIOCGEFFECTS, &js.effects);
+    ioctl(jp.fd, EVIOCGBIT(0, sizeof(jp.evbit)), jp.evbit);
+    ioctl(jp.fd, EVIOCGBIT(EV_KEY, sizeof(jp.keybit)), jp.keybit);
+    ioctl(jp.fd, EVIOCGBIT(EV_ABS, sizeof(jp.absbit)), jp.absbit);
+    ioctl(jp.fd, EVIOCGBIT(EV_FF, sizeof(jp.ffbit)), jp.ffbit);
+    ioctl(jp.fd, EVIOCGEFFECTS, &jp.effects);
 
     #define testBit(buffer, bit) (buffer[(bit) >> 3] & 1 << ((bit) & 7))
 
-    if(testBit(js.evbit, EV_KEY)) {
+    if(testBit(jp.evbit, EV_KEY)) {
       if(udev_device* parent = udev_device_get_parent_with_subsystem_devtype(device, "input", nullptr)) {
-        js.name = udev_device_get_sysattr_value(parent, "name");
-        js.vendorID = udev_device_get_sysattr_value(parent, "id/vendor");
-        js.productID = udev_device_get_sysattr_value(parent, "id/product");
+        jp.name = udev_device_get_sysattr_value(parent, "name");
+        jp.vendorID = udev_device_get_sysattr_value(parent, "id/vendor");
+        jp.productID = udev_device_get_sysattr_value(parent, "id/product");
         if(udev_device* root = udev_device_get_parent_with_subsystem_devtype(parent, "usb", "usb_device")) {
-          if(js.vendorID == udev_device_get_sysattr_value(root, "idVendor")
-          && js.productID == udev_device_get_sysattr_value(root, "idProduct")
+          if(jp.vendorID == udev_device_get_sysattr_value(root, "idVendor")
+          && jp.productID == udev_device_get_sysattr_value(root, "idProduct")
           ) {
-            js.deviceName = udev_device_get_devpath(root);
-            js.manufacturer = udev_device_get_sysattr_value(root, "manufacturer");
-            js.product = udev_device_get_sysattr_value(root, "product");
-            js.serial = udev_device_get_sysattr_value(root, "serial");
+            jp.deviceName = udev_device_get_devpath(root);
+            jp.manufacturer = udev_device_get_sysattr_value(root, "manufacturer");
+            jp.product = udev_device_get_sysattr_value(root, "product");
+            jp.serial = udev_device_get_sysattr_value(root, "serial");
           }
         }
       }
@@ -260,55 +213,65 @@ private:
       unsigned hats = 0;
       unsigned buttons = 0;
       for(signed i = 0; i < ABS_MISC; i++) {
-        if(testBit(js.absbit, i)) {
+        if(testBit(jp.absbit, i)) {
           if(i >= ABS_HAT0X && i <= ABS_HAT3Y) {
-            if(auto hat = js.hats.insert({i, hats++})) {
-              ioctl(js.fd, EVIOCGABS(i), &hat().info);
+            if(auto hat = jp.hats.insert({i, hats++})) {
+              ioctl(jp.fd, EVIOCGABS(i), &hat().info);
             }
           } else {
-            if(auto axis = js.axes.insert({i, axes++})) {
-              ioctl(js.fd, EVIOCGABS(i), &axis().info);
+            if(auto axis = jp.axes.insert({i, axes++})) {
+              ioctl(jp.fd, EVIOCGABS(i), &axis().info);
             }
           }
         }
       }
       for(signed i = BTN_JOYSTICK; i < KEY_MAX; i++) {
-        if(testBit(js.keybit, i)) {
-          js.buttons.insert({i, buttons++});
+        if(testBit(jp.keybit, i)) {
+          jp.buttons.insert({i, buttons++});
         }
       }
       for(signed i = BTN_MISC; i < BTN_JOYSTICK; i++) {
-        if(testBit(js.keybit, i)) {
-          js.buttons.insert({i, buttons++});
+        if(testBit(jp.keybit, i)) {
+          jp.buttons.insert({i, buttons++});
         }
       }
-      js.rumble = js.effects >= 2 && testBit(js.ffbit, FF_RUMBLE);
-      if(js.rumble) {
+      jp.rumble = jp.effects >= 2 && testBit(jp.ffbit, FF_RUMBLE);
+      if(jp.rumble) {
         ff_effect effect;
         memset(&effect, 0, sizeof(ff_effect));
         effect.type = FF_RUMBLE;
         effect.id = -1;
         effect.u.rumble.strong_magnitude = 65535;
         effect.u.rumble.weak_magnitude   = 65535;
-        ioctl(js.fd, EVIOCSFF, &effect);
-        js.effectID = effect.id;
+        ioctl(jp.fd, EVIOCSFF, &effect);
+        jp.effectID = effect.id;
       }
 
-      createJoystickHID(js);
-      joysticks.append(js);
+      createJoypadHID(jp);
+      joypads.append(jp);
     }
 
     #undef testBit
   }
 
-  void createJoystickHID(Joystick& js) {
-    uint64_t pathID = crc32_calculate((const uint8_t*)js.deviceName.data(), js.deviceName.size());
-    js.hid.id = pathID << 32 | hex(js.vendorID) << 16 | hex(js.productID) << 0;
+  void createJoypadHID(Joypad& jp) {
+    uint64_t pathID = crc32_calculate((const uint8_t*)jp.deviceName.data(), jp.deviceName.size());
+    jp.hid.id = pathID << 32 | hex(jp.vendorID) << 16 | hex(jp.productID) << 0;
 
-    for(unsigned n = 0; n < js.axes.size(); n++) js.hid.axis.append({n});
-    for(unsigned n = 0; n < js.hats.size(); n++) js.hid.hat.append({n});
-    for(unsigned n = 0; n < js.buttons.size(); n++) js.hid.button.append({n});
-    js.hid.rumble = js.rumble;
+    for(unsigned n = 0; n < jp.axes.size(); n++) jp.hid.axis().append({n});
+    for(unsigned n = 0; n < jp.hats.size(); n++) jp.hid.hat().append({n});
+    for(unsigned n = 0; n < jp.buttons.size(); n++) jp.hid.button().append({n});
+    jp.hid.rumble = jp.rumble;
+  }
+
+  void removeJoypad(udev_device* device, const string& deviceNode) {
+    for(unsigned n = 0; n < joypads.size(); n++) {
+      if(joypads[n].deviceNode == deviceNode) {
+        close(joypads[n].fd);
+        joypads.remove(n);
+        return;
+      }
+    }
   }
 };
 

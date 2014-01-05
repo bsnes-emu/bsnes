@@ -24,7 +24,7 @@ struct ODBC {
   template<typename... Args> inline bool execute(Args&&... args);
   inline void release();
   inline unsigned rows();
-  inline optional<lstring> read();
+  inline lstring read();
 
 private:
   char* buffer = nullptr;
@@ -128,15 +128,15 @@ unsigned ODBC::rows() {
 }
 
 //valid after select
-optional<lstring> ODBC::read() {
-  if(!sqlStatement) return false;
+lstring ODBC::read() {
+  if(!sqlStatement) return {};
 
   auto result = SQLFetch(sqlStatement);
-  if(result != SQL_SUCCESS && result != SQL_SUCCESS_WITH_INFO) return false;
+  if(result != SQL_SUCCESS && result != SQL_SUCCESS_WITH_INFO) return {};
 
   SQLSMALLINT sqlColumns = 0;
   result = SQLNumResultCols(sqlStatement, &sqlColumns);
-  if(result != SQL_SUCCESS && result != SQL_SUCCESS_WITH_INFO) return false;
+  if(result != SQL_SUCCESS && result != SQL_SUCCESS_WITH_INFO) return {};
 
   lstring data;
   for(unsigned column = 0; column < sqlColumns; column++) {
@@ -145,7 +145,7 @@ optional<lstring> ODBC::read() {
     data.append(buffer);
   }
 
-  return {true, data};
+  return data;
 }
 
 }

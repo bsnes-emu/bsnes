@@ -4,6 +4,8 @@ static unsigned glrSize(unsigned size) {
 }
 
 static GLuint glrFormat(const string& format) {
+  if(format == "r32i"   ) return GL_R32I;
+  if(format == "r32ui"  ) return GL_R32UI;
   if(format == "rgba8"  ) return GL_RGBA8;
   if(format == "rgb10a2") return GL_RGB10_A2;
   if(format == "rgba12" ) return GL_RGBA12;

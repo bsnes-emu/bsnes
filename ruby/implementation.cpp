@@ -140,8 +140,7 @@ using namespace nall;
     bool acquired() { return p.acquired(); } \
     \
     vector<HID::Device*> poll() { return p.poll(); } \
-    bool poll(int16_t* table) { return p.poll(table); } \
-    void rumble(uint64_t id, bool enable) { return p.rumble(id, enable); } \
+    bool rumble(uint64_t id, bool enable) { return p.rumble(id, enable); } \
     bool init() { return p.init(); } \
     void term() { p.term(); } \
     \
@@ -156,20 +155,16 @@ using namespace nall;
   #include <ruby/input/carbon.cpp>
 #endif
 
-#ifdef INPUT_DIRECTINPUT
-  #include <ruby/input/directinput.cpp>
-#endif
-
-#ifdef INPUT_RAWINPUT
-  #include <ruby/input/rawinput.cpp>
-#endif
-
 #ifdef INPUT_SDL
   #include <ruby/input/sdl.cpp>
 #endif
 
 #ifdef INPUT_UDEV
   #include <ruby/input/udev.cpp>
+#endif
+
+#ifdef INPUT_WINDOWS
+  #include <ruby/input/windows.cpp>
 #endif
 
 #ifdef INPUT_XLIB

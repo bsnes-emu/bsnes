@@ -134,6 +134,12 @@ struct Desktop {
   Desktop() = delete;
 };
 
+struct Monitor {
+  static unsigned count();
+  static Geometry geometry(unsigned monitor);
+  static unsigned primary();
+};
+
 struct Keyboard {
   #include "keyboard.hpp"
   static bool pressed(Scancode scancode);

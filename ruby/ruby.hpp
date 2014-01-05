@@ -8,7 +8,6 @@
 #define RUBY_H
 
 #include <nall/nall.hpp>
-#include <nall/input.hpp>
 
 namespace ruby {
 
@@ -81,8 +80,7 @@ struct InputInterface {
   bool acquired();
 
   nall::vector<nall::HID::Device*> poll();
-  bool poll(int16_t* table);
-  void rumble(uint64_t id, bool enable);
+  bool rumble(uint64_t id, bool enable);
 
   InputInterface();
   ~InputInterface();

@@ -140,6 +140,21 @@ Geometry Desktop::workspace() {
   return pDesktop::workspace();
 }
 
+//Monitor
+//=======
+
+unsigned Monitor::count() {
+  return pMonitor::count();
+}
+
+Geometry Monitor::geometry(unsigned monitor) {
+  return pMonitor::geometry(monitor);
+}
+
+unsigned Monitor::primary() {
+  return pMonitor::primary();
+}
+
 //Keyboard
 //========
 

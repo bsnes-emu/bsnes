@@ -1,7 +1,7 @@
 namespace phoenix {
 
 Size pDesktop::size() {
-  return {GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN)};
+  return {GetSystemMetrics(SM_CXVIRTUALSCREEN), GetSystemMetrics(SM_CYVIRTUALSCREEN)};
 }
 
 Geometry pDesktop::workspace() {

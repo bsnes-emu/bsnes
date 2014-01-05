@@ -39,7 +39,7 @@ ifeq ($(platform),windows)
   else
     link += -mwindows
   endif
-  link += -s -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -lws2_32
+  link += -s -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -lws2_32 -ldxguid
   link += -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc
 else ifeq ($(platform),macosx)
   flags += -march=native

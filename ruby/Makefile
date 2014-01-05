@@ -23,9 +23,8 @@ rubylink += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
 rubylink += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
 rubylink += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
 
-rubylink += $(if $(findstring input.directinput,$(ruby)),-ldinput8 -ldxguid)
-rubylink += $(if $(findstring input.rawinput,$(ruby)),-ldinput8 -ldxguid)
 rubylink += $(if $(findstring input.udev,$(ruby)),-ludev)
+rubylink += $(if $(findstring input.windows,$(ruby)),-ldinput8 -ldxguid)
 
 rubylink += $(if $(findstring .sdl,$(ruby)),`sdl-config --libs`)
 

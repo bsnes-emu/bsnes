@@ -141,9 +141,19 @@ void pWindow::setFullScreen(bool fullScreen) {
     SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | (window.state.resizable ? ResizableStyle : FixedStyle));
     setGeometry(window.state.geometry);
   } else {
+    HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFOEX info;
+    memset(&info, 0, sizeof(MONITORINFOEX));
+    info.cbSize = sizeof(MONITORINFOEX);
+    GetMonitorInfo(monitor, &info);
+    RECT rc = info.rcMonitor;
+    Geometry geometry = {rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top};
     SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | WS_POPUP);
     Geometry margin = frameMargin();
-    setGeometry({margin.x, margin.y, GetSystemMetrics(SM_CXSCREEN) - margin.width, GetSystemMetrics(SM_CYSCREEN) - margin.height});
+    setGeometry({
+      geometry.x + margin.x, geometry.y + margin.y,
+      geometry.width - margin.width, geometry.height - margin.height
+    });
   }
   locked = false;
 }

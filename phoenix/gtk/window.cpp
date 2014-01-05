@@ -187,13 +187,12 @@ bool pWindow::focused() {
 }
 
 Geometry pWindow::geometry() {
-  if(window.state.fullScreen == true) return {
-    0,
-    menuHeight(),
-    Desktop::size().width,
-    Desktop::size().height - menuHeight() - statusHeight()
-  };
-
+  if(window.state.fullScreen) {
+    int x, y, width, height;
+    gtk_window_get_position(GTK_WINDOW(widget), &x, &y);
+    gtk_window_get_size(GTK_WINDOW(widget), &width, &height);
+    return {x, y + menuHeight(), width, height - menuHeight() - statusHeight()};
+  }
   return window.state.geometry;
 }
 
@@ -227,6 +226,13 @@ void pWindow::setFullScreen(bool fullScreen) {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
   } else {
     gtk_window_fullscreen(GTK_WINDOW(widget));
+  /*unsigned monitor = gdk_screen_get_monitor_at_window(gdk_screen_get_default(), gtk_widget_get_window(widget));
+    GdkRectangle rectangle = {0};
+    gdk_screen_get_monitor_geometry(gdk_screen_get_default(), monitor, &rectangle);
+    gtk_window_set_decorated(GTK_WINDOW(widget), false);
+    gtk_window_move(GTK_WINDOW(widget), rectangle.x, rectangle.y);
+    gtk_window_resize(GTK_WINDOW(widget), rectangle.width, rectangle.height);
+    gtk_widget_set_size_request(formContainer, rectangle.width, rectangle.height);*/
   }
 }
 

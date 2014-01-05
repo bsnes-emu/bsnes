@@ -15,7 +15,7 @@ void OpenGLSurface::size(unsigned w, unsigned h) {
   buffer = new uint32_t[w * h]();
   glGenTextures(1, &texture);
   glBindTexture(GL_TEXTURE_2D, texture);
-  glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, format, w, h, 0, getFormat(), getType(), buffer);
 
   if(framebuffer) {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);

@@ -9,7 +9,6 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
   if(h.endsWith("%")) relativeHeight = real(h.rtrim<1>("%")) / 100.0;
   else absoluteHeight = decimal(h);
 
-  if(node.name != "program") return;
   format = glrFormat(node["format"].text());
 
   program = glCreateProgram();
@@ -62,8 +61,8 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
     unsigned w = glrSize(image.width), h = glrSize(image.height);
     uint32_t* buffer = new uint32_t[w * h]();
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, pixmaps(n).format, w, h, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, buffer);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image.data);
+    glTexImage2D(GL_TEXTURE_2D, 0, pixmaps(n).format, w, h, 0, pixmaps(n).getFormat(), pixmaps(n).getType(), buffer);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, getFormat(), getType(), image.data);
     delete[] buffer;
   }
 

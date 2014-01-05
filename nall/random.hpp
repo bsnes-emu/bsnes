@@ -1,31 +1,42 @@
 #ifndef NALL_RANDOM_HPP
 #define NALL_RANDOM_HPP
 
-//pseudo-random number generator
-//very low-quality, but very fast (based on CRC32 polynomial)
+#include <nall/serializer.hpp>
+#include <nall/stdint.hpp>
 
 namespace nall {
 
-inline unsigned prng() {
-  static unsigned n = 0;
-  return n = (n >> 1) ^ (((n & 1) - 1) & 0xedb88320);
-}
+struct RandomNumberGenerator {
+  virtual void seed(uint64_t) = 0;
+  virtual uint64_t operator()() = 0;
+  virtual void serialize(serializer&) = 0;
+};
 
-struct random_lfsr {
-  inline void seed(unsigned seed__) {
-    seed_ = seed__;
+//Galois LFSR using CRC64 polynomials
+struct LinearFeedbackShiftRegisterGenerator : RandomNumberGenerator {
+  void seed(uint64_t seed) {
+    lfsr = seed;
+    for(unsigned n = 0; n < 8; n++) operator()();
   }
 
-  inline unsigned operator()() {
-    return seed_ = (seed_ >> 1) ^ (((seed_ & 1) - 1) & 0xedb88320);
+  uint64_t operator()() {
+    return lfsr = (lfsr >> 1) ^ (-(lfsr & 1) & crc64jones);
   }
 
-  random_lfsr() : seed_(0) {
+  void serialize(serializer& s) {
+    s.integer(lfsr);
   }
 
 private:
-  unsigned seed_;
+  static const uint64_t crc64ecma  = 0x42f0e1eba9ea3693;
+  static const uint64_t crc64jones = 0xad93d23594c935a9;
+  uint64_t lfsr = crc64ecma;
 };
+
+inline uint64_t random() {
+  static LinearFeedbackShiftRegisterGenerator lfsr;
+  return lfsr();
+}
 
 }
 
