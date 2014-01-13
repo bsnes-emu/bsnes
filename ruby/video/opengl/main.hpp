@@ -4,7 +4,7 @@ void OpenGL::shader(const char* pathname) {
 
   settings.reset();
 
-  format = GL_RGBA8;
+  format = inputFormat;
   filter = GL_LINEAR;
   wrap = GL_CLAMP_TO_BORDER;
   absoluteWidth = 0, absoluteHeight = 0;

@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "higan";
-  static const char Version[] = "093.12";
+  static const char Version[] = "093.13";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
   static const char Website[] = "http://byuu.org/";
@@ -33,6 +33,7 @@ namespace Emulator {
 #include <nall/property.hpp>
 #include <nall/random.hpp>
 #include <nall/serializer.hpp>
+#include <nall/set.hpp>
 #include <nall/sha256.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>

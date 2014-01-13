@@ -84,8 +84,13 @@ unsigned Bus::reduce(unsigned addr, unsigned mask) {
 }
 
 uint8 Bus::read(unsigned addr) {
-  if(cheat.override[addr]) return cheat.read(addr);
-  return reader[lookup[addr]](target[addr]);
+  uint8 data = reader[lookup[addr]](target[addr]);
+
+  if(cheat.enable()) {
+    if(auto result = cheat.find(addr, data)) return result();
+  }
+
+  return data;
 }
 
 void Bus::write(unsigned addr, uint8 data) {

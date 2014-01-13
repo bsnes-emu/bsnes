@@ -310,32 +310,31 @@ bool Interface::unserialize(serializer& s) {
 }
 
 void Interface::cheatSet(const lstring& list) {
+  cheat.reset();
+
   //Super Game Boy
   if(cartridge.has_gb_slot()) {
     GameBoy::cheat.reset();
-    for(auto& code : list) {
-      lstring codelist = code.split("+");
-      for(auto& part : codelist) {
-        unsigned addr, data, comp;
-        part.trim();
-        if(GameBoy::Cheat::decode(part, addr, data, comp)) GameBoy::cheat.append({addr, data, comp});
+    for(auto& codeset : list) {
+      lstring codes = codeset.split("+");
+      for(auto& code : codes) {
+        lstring part = code.split("/");
+        if(part.size() == 2) GameBoy::cheat.append(hex(part[0]), hex(part[1]));
+        if(part.size() == 3) GameBoy::cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
       }
     }
-    GameBoy::cheat.synchronize();
     return;
   }
 
   //Super Famicom, Broadcast Satellaview, Sufami Turbo
-  cheat.reset();
-  for(auto& code : list) {
-    lstring codelist = code.split("+");
-    for(auto& part : codelist) {
-      unsigned addr, data;
-      part.trim();
-      if(Cheat::decode(part, addr, data)) cheat.append({addr, data});
+  for(auto& codeset : list) {
+    lstring codes = codeset.split("+");
+    for(auto& code : codes) {
+      lstring part = code.split("/");
+      if(part.size() == 2) cheat.append(hex(part[0]), hex(part[1]));
+      if(part.size() == 3) cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
     }
   }
-  cheat.synchronize();
 }
 
 void Interface::paletteUpdate(PaletteMode mode) {

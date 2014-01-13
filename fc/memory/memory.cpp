@@ -17,15 +17,8 @@ uint8 Bus::read(uint16 addr) {
   else if(addr <= 0x3fff) data = ppu.read(addr);
   else if(addr <= 0x4017) data = cpu.read(addr);
 
-  if(cheat.override[addr]) {
-    for(unsigned n = 0; n < cheat.size(); n++) {
-      if(cheat[n].addr == addr) {
-        if(cheat[n].comp > 255 || cheat[n].comp == data) {
-          data = cheat[n].data;
-          break;
-        }
-      }
-    }
+  if(cheat.enable()) {
+    if(auto result = cheat.find(addr, data)) return result();
   }
 
   return data;

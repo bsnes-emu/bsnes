@@ -66,8 +66,8 @@ struct pVideoGLX : OpenGL {
       if(depth > DefaultDepth(display, screen)) return false;
 
       switch(depth) {
-      case 24: format = GL_RGBA8; break;
-      case 30: format = GL_RGB10_A2; break;
+      case 24: inputFormat = GL_RGBA8; break;
+      case 30: inputFormat = GL_RGB10_A2; break;
       default: return false;
       }
 

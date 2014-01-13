@@ -66,6 +66,7 @@ struct OpenGLProgram : OpenGLSurface {
 struct OpenGL : OpenGLProgram {
   vector<OpenGLProgram> programs;
   vector<OpenGLTexture> history;
+  GLuint inputFormat = GL_RGBA8;
   unsigned outputWidth = 0;
   unsigned outputHeight = 0;
   struct Setting {

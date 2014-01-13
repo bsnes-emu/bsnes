@@ -105,14 +105,14 @@ bool Interface::unserialize(serializer& s) {
 
 void Interface::cheatSet(const lstring& list) {
   cheat.reset();
-  for(auto& code : list) {
-    lstring codelist = code.split("+");
-    for(auto& part : codelist) {
-      unsigned addr, data, comp;
-      if(Cheat::decode(part, addr, data, comp)) cheat.append({addr, data, comp});
+  for(auto& codeset : list) {
+    lstring codes = codeset.split("+");
+    for(auto& code : codes) {
+      lstring part = code.split("/");
+      if(part.size() == 2) cheat.append(hex(part[0]), hex(part[1]));
+      if(part.size() == 3) cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
     }
   }
-  cheat.synchronize();
 }
 
 void Interface::paletteUpdate(PaletteMode mode) {

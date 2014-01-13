@@ -1,27 +1,17 @@
-struct CheatCode {
-  unsigned addr;
-  unsigned data;
-};
+struct Cheat {
+  struct Code {
+    unsigned addr;
+    unsigned comp;
+    unsigned data;
+  };
+  vector<Code> codes;
+  enum : unsigned { Unused = ~0u };
 
-struct Cheat : public vector<CheatCode> {
-  uint8* override;
-
-  bool enabled() const;
-  void enable(bool);
-  void synchronize();
-  uint8 read(unsigned) const;
-  void init();
-
-  Cheat();
-  ~Cheat();
-
-  static bool decode(string, unsigned&, unsigned&);
-
-private:
-  bool system_enabled;
-  bool code_enabled;
-  bool cheat_enabled;
-  unsigned mirror(unsigned) const;
+  alwaysinline bool enable() const { return codes.size() > 0; }
+  void reset();
+  void append(unsigned addr, unsigned data);
+  void append(unsigned addr, unsigned comp, unsigned data);
+  optional<unsigned> find(unsigned addr, unsigned comp);
 };
 
 extern Cheat cheat;

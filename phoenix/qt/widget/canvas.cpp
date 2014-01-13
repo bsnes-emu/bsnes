@@ -67,7 +67,7 @@ void pCanvas::rasterize() {
   if(canvas.state.mode == Canvas::Mode::Gradient) {
     nall::image image;
     image.allocate(width, height);
-    image.gradient(
+    image.linearGradient(
       canvas.state.gradient[0].argb(), canvas.state.gradient[1].argb(), canvas.state.gradient[2].argb(), canvas.state.gradient[3].argb()
     );
     memcpy(surface->bits(), image.data, image.size);

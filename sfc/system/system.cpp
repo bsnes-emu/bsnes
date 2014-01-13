@@ -140,7 +140,6 @@ void System::load() {
   if(cartridge.has_st_slots()) sufamiturboA.load(), sufamiturboB.load();
 
   serialize_init();
-  cheat.init();
 }
 
 void System::unload() {
