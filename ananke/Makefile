@@ -21,6 +21,7 @@ resource: force
 
 clean:
 	-@$(call delete,obj/*.o)
+	-@$(call delete,*.dll)
 	-@$(call delete,*.so)
 
 install: uninstall

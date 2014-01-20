@@ -12,7 +12,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Toggle Mouse Capture";
-    hotkey->mapping = "KB0::F12";
+    hotkey->mapping = "1/Button/F12";
 
     hotkey->press = [] {
       input.acquired() ? input.unacquire() : input.acquire();
@@ -22,7 +22,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name = "Show Library";
-    hotkey->mapping = "KB0::L";
+    hotkey->mapping = "1/Button/L";
 
     hotkey->press = [] {
       libraryManager->show();
@@ -32,7 +32,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name = "Pause Emulation";
-    hotkey->mapping = "KB0::P";
+    hotkey->mapping = "1/Button/P";
 
     hotkey->press = [] {
       program->pause = !program->pause;
@@ -42,7 +42,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Fast Forward";
-    hotkey->mapping = "KB0::Tilde";
+    hotkey->mapping = "1/Button/Tilde";
 
     hotkey->press = [] {
       video.set(Video::Synchronize, false);
@@ -80,7 +80,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Save State";
-    hotkey->mapping = "KB0::F5";
+    hotkey->mapping = "1/Button/F5";
 
     hotkey->press = [&] {
       utility->saveState(activeSlot);
@@ -90,7 +90,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Load State";
-    hotkey->mapping = "KB0::F7";
+    hotkey->mapping = "1/Button/F7";
 
     hotkey->press = [&] {
       utility->loadState(activeSlot);
@@ -100,7 +100,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Decrement Slot";
-    hotkey->mapping = "KB0::F6";
+    hotkey->mapping = "1/Button/F6";
 
     hotkey->press = [&] {
       if(--activeSlot == 0) activeSlot = 5;
@@ -111,7 +111,7 @@ void InputManager::appendHotkeys() {
   {
     auto hotkey = new HotkeyInput;
     hotkey->name    = "Increment Slot";
-    hotkey->mapping = "KB0::F8";
+    hotkey->mapping = "1/Button/F8";
 
     hotkey->press = [&] {
       if(++activeSlot == 6) activeSlot = 1;

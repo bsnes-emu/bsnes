@@ -214,7 +214,7 @@ void pListView::onActivate(LPARAM lparam) {
   if(listView.state.text.empty() || !listView.state.selected) return;
 //LVN_ITEMACTIVATE is not re-entrant until DispatchMessage() completes
 //if(listView.onActivate) listView.onActivate();
-  messageQueue.append({Message::Type::ListView_OnActivate, (Object*)&listView});
+  PostMessage(parentHwnd, WM_APP + AppMessage::ListView_onActivate, 0, (LPARAM)&listView);
 }
 
 void pListView::onChange(LPARAM lparam) {

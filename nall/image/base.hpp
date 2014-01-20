@@ -70,12 +70,15 @@ struct image {
 
   //fill.hpp
   inline void fill(uint64_t color = 0);
-  inline void linearGradient(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
-  inline void horizontalGradient(uint64_t a, uint64_t b);
-  inline void verticalGradient(uint64_t a, uint64_t b);
+  inline void gradient(uint64_t a, uint64_t b, uint64_t c, uint64_t d);
+  inline void gradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY, function<double (double, double)> callback);
+  inline void crossGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
+  inline void diamondGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
+  inline void horizontalGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
   inline void radialGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
-  inline void radialGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY);
-  inline void radialGradient(uint64_t a, uint64_t b);
+  inline void sphericalGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
+  inline void squareGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
+  inline void verticalGradient(uint64_t a, uint64_t b, signed radiusX, signed radiusY, signed centerX, signed centerY);
 
   //scale.hpp
   inline void scale(unsigned width, unsigned height, bool linear = true);

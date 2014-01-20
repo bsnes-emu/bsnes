@@ -17,5 +17,5 @@ vec2 radialDistortion(vec2 coord) {
 }
 
 void main() {
-  fragColor = texture2D(source[0], radialDistortion(texCoord));
+  fragColor = texture(source[0], radialDistortion(texCoord));
 }

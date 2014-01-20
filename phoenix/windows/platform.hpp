@@ -1,16 +1,12 @@
 namespace phoenix {
 
-typedef LRESULT CALLBACK (*WindowProc)(HWND, UINT, WPARAM, LPARAM);
-
-struct Message {
-  enum class Type : unsigned {
-    ListView_OnActivate,
+struct AppMessage {
+  enum : unsigned {
+    ListView_onActivate = 0,
   };
-  Type type;
-  Object* object;
 };
 
-static vector<Message> messageQueue;
+typedef LRESULT CALLBACK (*WindowProc)(HWND, UINT, WPARAM, LPARAM);
 
 struct pApplication {
   static void run();

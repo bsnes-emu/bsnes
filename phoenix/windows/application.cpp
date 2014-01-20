@@ -2,7 +2,6 @@ namespace phoenix {
 
 static bool Application_keyboardProc(HWND, UINT, WPARAM, LPARAM);
 static void Application_processDialogMessage(MSG&);
-static void Application_processMessageQueue();
 static LRESULT CALLBACK Application_windowProc(HWND, UINT, WPARAM, LPARAM);
 
 void pApplication::run() {
@@ -39,24 +38,13 @@ void Application_processDialogMessage(MSG& msg) {
   || msg.message == WM_SYSKEYDOWN || msg.message == WM_SYSKEYUP) {
     if(Application_keyboardProc(msg.hwnd, msg.message, msg.wParam, msg.lParam)) {
       DispatchMessage(&msg);
-      return Application_processMessageQueue();
+      return;
     }
   }
 
   if(!IsDialogMessage(GetForegroundWindow(), &msg)) {
     TranslateMessage(&msg);
     DispatchMessage(&msg);
-    Application_processMessageQueue();
-  }
-}
-
-static void Application_processMessageQueue() {
-  while(!messageQueue.empty()) {
-    Message message = messageQueue.takeFirst();
-    if(message.type == Message::Type::ListView_OnActivate) {
-      ListView* listView = (ListView*)message.object;
-      if(listView->onActivate) listView->onActivate();
-    }
   }
 }
 

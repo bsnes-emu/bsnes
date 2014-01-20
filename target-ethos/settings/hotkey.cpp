@@ -25,8 +25,7 @@ void HotkeySettings::synchronize() {
 void HotkeySettings::refresh() {
   unsigned index = 0;
   for(auto& hotkey : inputManager->hotkeyMap) {
-    string mapping = hotkey->mapping;
-    mapping.replace(",", " and ");
+    string mapping = inputManager->sanitize(hotkey->mapping, " and ");
     inputList.setText(index++, {hotkey->name, mapping});
   }
   synchronize();

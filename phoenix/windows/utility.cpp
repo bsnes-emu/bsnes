@@ -299,6 +299,12 @@ static LRESULT CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT
     break;
   }
 
+  case WM_APP + AppMessage::ListView_onActivate: {
+    ListView* listView = (ListView*)lparam;
+    if(listView && listView->onActivate) listView->onActivate();
+    break;
+  }
+
   case WM_HSCROLL:
   case WM_VSCROLL: {
     Object* object = nullptr;

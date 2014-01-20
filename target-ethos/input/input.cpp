@@ -185,6 +185,20 @@ HotkeyInput::HotkeyInput() {
 
 //
 
+//convert an input mapping string to a more human-readable form for the UI
+string InputManager::sanitize(string mapping, string concatenate) const {
+  lstring values = mapping.split(",");
+  for(auto& value : values) {
+    lstring part = value.split("/");
+    if(part.size() < 2) continue;  //skip "None" mapping
+    if(part[0] == "1") part[0] = "Keyboard";
+    else if(part[0] == "2") part[0] = "Mouse";
+    else part[0] = {"Joypad(", part[0].slice(0, 3), ")"};
+    value = part.merge(".");
+  }
+  return values.merge(concatenate);
+}
+
 void InputManager::onChange(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
   if(settings->focused()) {
     inputSettings->inputEvent(device, group, input, oldValue, newValue);

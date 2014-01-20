@@ -121,8 +121,7 @@ void InputSettings::inputChanged() {
   for(unsigned number : activeDevice().order) {
     auto& input = activeDevice().input[number];
     auto abstract = inputManager->inputMap(input.guid);
-    string mapping = abstract->mapping;
-    mapping.replace(",", " or ");
+    string mapping = inputManager->sanitize(abstract->mapping, " or ");
     inputList.setText(index++, {input.name, mapping});
   }
 }
