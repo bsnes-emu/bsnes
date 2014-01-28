@@ -29,11 +29,13 @@ struct Interface : Emulator::Interface {
   //Super Game Boy bindings
   struct Hook {
     virtual void lcdScanline() {}
+    virtual void lcdOutput(uint2 color) {}
     virtual void joypWrite(bool p15, bool p14) {}
   };
   Hook* hook = nullptr;
 
   void lcdScanline();
+  void lcdOutput(uint2 color);
   void joypWrite(bool p15, bool p14);
 
   string title();

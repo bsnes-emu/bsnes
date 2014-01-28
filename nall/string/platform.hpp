@@ -22,6 +22,20 @@ string realpath(const string& name) {
   return result;
 }
 
+string programpath() {
+  #if defined(PLATFORM_WINDOWS)
+  int argc = 0;
+  wchar_t** argv = CommandLineToArgvW(GetCommandLine(), &argc);
+  string argv0 = (const char*)utf8_t(argv[0]);
+  LocalFree(argv);
+  return realpath(argv0);
+  #else
+  Dl_info info;
+  dladdr((void*)&programpath, &info);
+  return realpath(info.dli_fname);
+  #endif
+}
+
 // /home/username/
 // c:/users/username/
 string userpath() {

@@ -107,13 +107,9 @@ struct InputJoypadDirectInput {
     Joypad jp;
     jp.vendorID = instance->guidProduct.Data1 >> 0;
     jp.productID = instance->guidProduct.Data1 >> 16;
+    jp.isXInputDevice = false;
     if(auto device = rawinput.find(jp.vendorID, jp.productID)) {
-      jp.pathID = crc32_calculate((const uint8_t*)device().path.data(), device().path.size());
-      jp.hid.id = (uint64_t)jp.pathID << 32 | jp.vendorID << 16 | jp.productID << 0;
       jp.isXInputDevice = device().isXInputDevice;
-    } else {
-      //this should never occur
-      return DIENUM_CONTINUE;
     }
 
     //Microsoft has intentionally imposed artificial restrictions on XInput devices when used with DirectInput
@@ -132,6 +128,17 @@ struct InputJoypadDirectInput {
     device->EnumObjects(DirectInput_EnumJoypadAxesCallback, (void*)this, DIDFT_ABSAXIS);
     device->EnumObjects(DirectInput_EnumJoypadEffectsCallback, (void*)this, DIDFT_FFACTUATOR);
     jp.hid.rumble = effects > 0;
+
+    DIPROPGUIDANDPATH property;
+    memset(&property, 0, sizeof(DIPROPGUIDANDPATH));
+    property.diph.dwSize = sizeof(DIPROPGUIDANDPATH);
+    property.diph.dwHeaderSize = sizeof(DIPROPHEADER);
+    property.diph.dwObj = 0;
+    property.diph.dwHow = DIPH_DEVICE;
+    device->GetProperty(DIPROP_GUIDANDPATH, &property.diph);
+    string devicePath = (const char*)utf8_t(property.wszPath);
+    jp.pathID = crc32_calculate((const uint8_t*)devicePath.data(), devicePath.size());
+    jp.hid.id = (uint64_t)jp.pathID << 32 | jp.vendorID << 16 | jp.productID << 0;
 
     if(jp.hid.rumble) {
       //disable auto-centering spring for rumble support

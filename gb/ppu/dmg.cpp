@@ -79,6 +79,7 @@ void PPU::dmg_run() {
 
   uint32* output = screen + status.ly * 160 + px++;
   *output = color;
+  interface->lcdOutput(color);  //Super Game Boy notification
 }
 
 void PPU::dmg_run_bg() {

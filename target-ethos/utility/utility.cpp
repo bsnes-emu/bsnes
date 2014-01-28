@@ -89,7 +89,7 @@ void Utility::load() {
   presentation->setTitle(system().title());
 
   cheatEditor->load({pathname[0], "cheats.bml"});
-  stateManager->load({pathname[0], "bsnes/states.bsa"}, 1);
+  stateManager->load({pathname[0], "higan/states.bsa"}, 1);
 
   synchronizeDSP();
 
@@ -104,7 +104,7 @@ void Utility::unload() {
   if(tracerEnable) tracerToggle();
 
   cheatEditor->save({pathname[0], "cheats.bml"});
-  stateManager->save({pathname[0], "bsnes/states.bsa"}, 1);
+  stateManager->save({pathname[0], "higan/states.bsa"}, 1);
 
   system().unload();
   path.reset();
@@ -125,14 +125,14 @@ void Utility::saveState(unsigned slot) {
   if(program->active == nullptr) return;
   serializer s = system().serialize();
   if(s.size() == 0) return;
-  directory::create({pathname[0], "bsnes/"});
-  if(file::write({pathname[0], "bsnes/state-", slot, ".bsa"}, s.data(), s.size()) == false);
+  directory::create({pathname[0], "higan/"});
+  if(file::write({pathname[0], "higan/state-", slot, ".bsa"}, s.data(), s.size()) == false);
   showMessage({"Saved to slot ", slot});
 }
 
 void Utility::loadState(unsigned slot) {
   if(program->active == nullptr) return;
-  auto memory = file::read({pathname[0], "bsnes/state-", slot, ".bsa"});
+  auto memory = file::read({pathname[0], "higan/state-", slot, ".bsa"});
   if(memory.size() == 0) return showMessage({"Unable to locate slot ", slot, " state"});
   serializer s(memory.data(), memory.size());
   if(system().unserialize(s) == false) return showMessage({"Slot ", slot, " state incompatible"});

@@ -8,6 +8,10 @@ void Interface::lcdScanline() {
   if(hook) hook->lcdScanline();
 }
 
+void Interface::lcdOutput(uint2 color) {
+  if(hook) hook->lcdOutput(color);
+}
+
 void Interface::joypWrite(bool p15, bool p14) {
   if(hook) hook->joypWrite(p15, p14);
 }

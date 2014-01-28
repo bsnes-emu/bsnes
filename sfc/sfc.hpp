@@ -12,7 +12,7 @@
 namespace SuperFamicom {
   namespace Info {
     static const char Name[] = "bsnes";
-    static const unsigned SerializerVersion = 27;
+    static const unsigned SerializerVersion = 28;
   }
 }
 

@@ -6,7 +6,8 @@ gb  := gb
 gba := gba
 
 profile := accuracy
-target  := ethos
+target := ethos
+# target := loki
 
 # options += debugger
 # arch := x86
@@ -77,6 +78,7 @@ flags := $(flags) $(foreach o,$(call strupper,$(options)),-D$o)
 
 # targets
 clean:
+	-@$(call delete,out/*)
 	-@$(call delete,obj/*.o)
 	-@$(call delete,obj/*.a)
 	-@$(call delete,obj/*.so)

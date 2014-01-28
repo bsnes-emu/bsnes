@@ -35,18 +35,21 @@ struct pInputCarbon {
     group.input[inputID].value = value;
   }
 
-  void poll(vector<HID::Device*>& devices) {
+  vector<HID::Device*> poll() {
+    vector<HID::Device*> devices;
+
     KeyMap keymap;
     GetKeys(keymap);
     uint8_t* buffer = (uint8_t*)keymap;
 
     unsigned inputID = 0;
     for(auto& key : keys) {
-      bool value = buffer[key.id >> 3] & (1 << (key.id & 7)));
+      bool value = buffer[key.id >> 3] & (1 << (key.id & 7));
       assign(kb.hid, HID::Keyboard::GroupID::Button, inputID++, value);
     }
 
     devices.append(&kb.hid);
+    return devices;
   }
 
   bool rumble(uint64_t id, bool enable) {

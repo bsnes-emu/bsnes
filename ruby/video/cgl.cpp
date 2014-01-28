@@ -15,13 +15,12 @@ namespace ruby {
 namespace ruby {
 
 struct pVideoCGL : OpenGL {
-  RubyVideoCGL* view;
+  RubyVideoCGL* view = nullptr;
 
   struct {
-    NSView* handle;
-
-    bool synchronize;
-    unsigned filter;
+    NSView* handle = nullptr;
+    bool synchronize = false;
+    unsigned filter = 0;
     string shader;
   } settings;
 
@@ -155,14 +154,6 @@ struct pVideoCGL : OpenGL {
       [view release];
       view = nil;
     }
-  }
-
-  pVideoCGL() {
-    view = nil;
-
-    settings.handle = nil;
-    settings.synchronize = false;
-    settings.filter = 0;
   }
 
   ~pVideoCGL() {

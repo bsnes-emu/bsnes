@@ -1,27 +1,12 @@
 #ifdef ICD2_CPP
 
-//convert linear pixel data to 2bpp planar tiledata
-void ICD2::render(const uint32* source) {
-  memset(lcd.output, 0x00, 320 * sizeof(uint16));
-
-  for(unsigned y = 0; y < 8; y++) {
-    for(unsigned x = 0; x < 160; x++) {
-      unsigned pixel = *source++;
-      unsigned addr = y * 2 + (x / 8 * 16);
-      lcd.output[addr + 0] |= ((pixel & 1) >> 0) << (7 - (x & 7));
-      lcd.output[addr + 1] |= ((pixel & 2) >> 1) << (7 - (x & 7));
-    }
-  }
-}
-
 uint8 ICD2::read(unsigned addr) {
   addr &= 0xffff;
 
   //LY counter
   if(addr == 0x6000) {
-    r6000_ly = GameBoy::ppu.status.ly;
-    r6000_row = lcd.row;
-    return r6000_ly;
+    unsigned y = min(143u, GameBoy::ppu.status.ly);
+    return (y & ~7) | write_bank;
   }
 
   //command ready port
@@ -47,8 +32,8 @@ uint8 ICD2::read(unsigned addr) {
 
   //VRAM port
   if(addr == 0x7800) {
-    uint8 data = lcd.output[r7800];
-    r7800 = (r7800 + 1) % 320;
+    uint8 data = output[read_bank * 512 + read_addr];
+    read_addr = (read_addr + 1) & 511;
     return data;
   }
 
@@ -60,12 +45,8 @@ void ICD2::write(unsigned addr, uint8 data) {
 
   //VRAM port
   if(addr == 0x6001) {
-    r6001 = data;
-    r7800 = 0;
-
-    unsigned offset = (r6000_row - (4 - (r6001 - (r6000_ly & 3)))) & 3;
-    render(lcd.buffer + offset * 160 * 8);
-
+    read_bank = data & 3;
+    read_addr = 0;
     return;
   }
 

@@ -1,8 +1,3 @@
-/*
-  audio.xaudio2 (2010-08-14)
-  author: OV2
-*/
-
 #include "xaudio2.hpp"
 #include <windows.h>
 
@@ -132,7 +127,19 @@ public:
       return false;
     }
 
-    if(FAILED(hr = pXAudio2->CreateMasteringVoice( &pMasterVoice, 2, settings.frequency, 0, 0 , NULL))) {
+    unsigned deviceCount = 0;
+    pXAudio2->GetDeviceCount(&deviceCount);
+    if(deviceCount == 0) { term(); return false; }
+
+    unsigned deviceID = 0;
+    for(unsigned deviceIndex = 0; deviceIndex < deviceCount; deviceIndex++) {
+      XAUDIO2_DEVICE_DETAILS deviceDetails;
+      memset(&deviceDetails, 0, sizeof(XAUDIO2_DEVICE_DETAILS));
+      pXAudio2->GetDeviceDetails(deviceIndex, &deviceDetails);
+      if(deviceDetails.Role & DefaultGameDevice) deviceID = deviceIndex;
+    }
+
+    if(FAILED(hr = pXAudio2->CreateMasteringVoice(&pMasterVoice, 2, settings.frequency, 0, deviceID, NULL))) {
       return false;
     }
 
@@ -145,7 +152,7 @@ public:
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
     wfx.cbSize = 0;
 
-    if(FAILED(hr = pXAudio2->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx, XAUDIO2_VOICE_NOSRC , XAUDIO2_DEFAULT_FREQ_RATIO, this, NULL, NULL))) {
+    if(FAILED(hr = pXAudio2->CreateSourceVoice(&pSourceVoice, (WAVEFORMATEX*)&wfx, XAUDIO2_VOICE_NOSRC, XAUDIO2_DEFAULT_FREQ_RATIO, this, NULL, NULL))) {
       return false;
     }
 

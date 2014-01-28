@@ -54,10 +54,10 @@ obj/ui-general.o: $(ui)/general/general.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 
-obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/*)
+obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/)
 	$(compiler) $(rubyflags) -c $< -o $@
 
-obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/*)
+obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/)
 	$(compiler) $(phoenixflags) -c $< -o $@
 
 obj/resource.o: $(ui)/resource.rc
@@ -99,7 +99,6 @@ else
 	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
 	sudo install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
 	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
-
 	sudo mkdir -p /usr/share/$(name)
 	sudo cp -R profile/* /usr/share/$(name)
 	sudo cp data/cheats.bml /usr/share/$(name)/cheats.bml

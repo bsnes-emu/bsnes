@@ -52,20 +52,19 @@ void ICD2::power() {
 void ICD2::reset() {
   create(ICD2::Enter, cpu.frequency / 5);
 
-  r6000_ly = 0x00;
-  r6000_row = 0x00;
   r6003 = 0x00;
   r6004 = 0xff;
   r6005 = 0xff;
   r6006 = 0xff;
   r6007 = 0xff;
   for(auto& r : r7000) r = 0x00;
-  r7800 = 0x0000;
   mlt_req = 0;
 
-  for(auto& n : lcd.buffer) n = 0;
-  for(auto& n : lcd.output) n = 0;
-  lcd.row = 0;
+  for(auto& n : output) n = 0xff;
+  read_bank = 0;
+  read_addr = 0;
+  write_bank = 0;
+  write_addr = 0;
 
   packetsize = 0;
   joyp_id = 3;

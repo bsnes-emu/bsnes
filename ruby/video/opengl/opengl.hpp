@@ -79,6 +79,7 @@ struct OpenGL : OpenGLProgram {
     Setting(const string& name, const string& value) : name(name), value(value) {}
   };
   set<Setting> settings;
+  bool initialized = false;
 
   void shader(const char* pathname);
   void allocateHistory(unsigned size);

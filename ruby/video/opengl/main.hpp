@@ -200,11 +200,13 @@ bool OpenGL::init() {
   glrLinkProgram(program);
 
   shader(nullptr);
-  return true;
+  return initialized = true;
 }
 
 void OpenGL::term() {
+  if(initialized == false) return;
   shader(nullptr);  //release shader resources (eg frame[] history)
   OpenGLSurface::release();
   if(buffer) { delete[] buffer; buffer = nullptr; }
+  initialized = false;
 }

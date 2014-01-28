@@ -18,21 +18,19 @@ void ICD2::serialize(serializer& s) {
   s.integer(bitdata);
   s.integer(bitoffset);
 
-  s.integer(r6000_ly);
-  s.integer(r6000_row);
-  s.integer(r6001);
   s.integer(r6003);
   s.integer(r6004);
   s.integer(r6005);
   s.integer(r6006);
   s.integer(r6007);
   s.array(r7000);
-  s.integer(r7800);
   s.integer(mlt_req);
 
-  s.array(lcd.buffer);
-  s.array(lcd.output);
-  s.integer(lcd.row);
+  s.array(output);
+  s.integer(read_bank);
+  s.integer(read_addr);
+  s.integer(write_bank);
+  s.integer(write_addr);
 }
 
 #endif

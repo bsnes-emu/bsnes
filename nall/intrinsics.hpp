@@ -3,6 +3,13 @@
 
 namespace nall {
 
+#if defined(_WIN32)
+#elif defined(__APPLE__)
+  #include <machine/endian.h>
+#else
+  #include <endian.h>
+#endif
+
 struct Intrinsics {
   enum class Compiler : unsigned { Clang, GCC, VisualCPP, Unknown };
   enum class Platform : unsigned { Windows, MacOSX, X, Unknown };  //X = Linux, BSD, etc

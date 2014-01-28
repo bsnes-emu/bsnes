@@ -56,31 +56,28 @@ MappedRAM::MappedRAM() : data_(nullptr), size_(0), write_protect_(false) {}
 //Bus
 
 unsigned Bus::mirror(unsigned addr, unsigned size) {
+  if(size == 0) return 0;
   unsigned base = 0;
-  if(size) {
-    unsigned mask = 1 << 23;
-    while(addr >= size) {
-      while(!(addr & mask)) mask >>= 1;
-      addr -= mask;
-      if(size > mask) {
-        size -= mask;
-        base += mask;
-      }
-      mask >>= 1;
+  unsigned mask = 1 << 23;
+  while(addr >= size) {
+    while(!(addr & mask)) mask >>= 1;
+    addr -= mask;
+    if(size > mask) {
+      size -= mask;
+      base += mask;
     }
-    base += addr;
+    mask >>= 1;
   }
-  return base;
+  return base + addr;
 }
 
 unsigned Bus::reduce(unsigned addr, unsigned mask) {
-  unsigned result = 0, length = 0;
-  for(unsigned n = 0; n < 24; n++) {
-    unsigned bit = 1 << n;
-    if(mask & bit) continue;
-    result |= (bool)(addr & bit) << length++;
+  while(mask) {
+    unsigned bits = (mask & -mask) - 1;
+    addr = ((addr >> 1) & ~bits) | (addr & bits);
+    mask = (mask & (mask - 1)) >> 1;
   }
-  return result;
+  return addr;
 }
 
 uint8 Bus::read(unsigned addr) {

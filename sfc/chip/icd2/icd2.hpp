@@ -16,8 +16,8 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
   void serialize(serializer&);
 
 private:
-  Emulator::Interface::Bind* bind;
-  GameBoy::Interface::Hook* hook;
+  Emulator::Interface::Bind* bind = nullptr;
+  GameBoy::Interface::Hook* hook = nullptr;
   #include "interface/interface.hpp"
   #include "mmio/mmio.hpp"
 };

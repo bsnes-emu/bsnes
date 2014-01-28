@@ -1,4 +1,5 @@
 void lcdScanline();
+void lcdOutput(uint2 color);
 void joypWrite(bool p15, bool p14);
 
 uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue);

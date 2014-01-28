@@ -201,6 +201,7 @@ template<signed precision = 0, char padchar = '0'> inline string binary(uintmax_
 //platform.hpp
 inline string activepath();
 inline string realpath(const string& name);
+inline string programpath();
 inline string userpath();
 inline string configpath();
 inline string sharedpath();

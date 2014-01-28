@@ -25,6 +25,8 @@ void PPU::main() {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
+    interface->lcdScanline();  //Super Game Boy notification
+
     if(status.display_enable && status.ly < 144) {
       if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
       add_clocks(92);
@@ -56,7 +58,6 @@ void PPU::scanline() {
   if(++status.ly == 154) frame();
 
   if(status.ly < 144) {
-    interface->lcdScanline();  //Super Game Boy rendering notification
     system.cgb() ? cgb_scanline() : dmg_scanline();
   }
 

@@ -1,13 +1,20 @@
 #ifdef ICD2_CPP
 
-//called on rendered lines 0-143 (not on Vblank lines 144-153)
 void ICD2::lcdScanline() {
+  if(GameBoy::ppu.status.ly > 143) return;  //Vblank
   if((GameBoy::ppu.status.ly & 7) == 0) {
-    lcd.row = (lcd.row + 1) & 3;
+    write_bank = (write_bank + 1) & 3;
+    write_addr = 0;
   }
+}
 
-  unsigned offset = (lcd.row * 160 * 8) + ((GameBoy::ppu.status.ly & 7) * 160);
-  memcpy(lcd.buffer + offset, GameBoy::ppu.screen + GameBoy::ppu.status.ly * 160, 160 * sizeof(uint32));
+void ICD2::lcdOutput(uint2 color) {
+  unsigned y = write_addr / 160;
+  unsigned x = write_addr % 160;
+  unsigned addr = write_bank * 512 + y * 2 + x / 8 * 16;
+  output[addr + 0] = (output[addr + 0] << 1) | (bool)(color & 1);
+  output[addr + 1] = (output[addr + 1] << 1) | (bool)(color & 2);
+  write_addr = (write_addr + 1) % 1280;
 }
 
 void ICD2::joypWrite(bool p15, bool p14) {
