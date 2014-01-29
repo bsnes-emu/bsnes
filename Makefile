@@ -14,8 +14,8 @@ target := ethos
 # console := true
 
 # compiler
-flags   += -I. -O3 -fomit-frame-pointer
-link    +=
+flags += -I. -O3 -fomit-frame-pointer
+link +=
 objects := libco
 
 # profile-guided optimization mode

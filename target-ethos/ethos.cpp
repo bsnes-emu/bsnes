@@ -45,7 +45,7 @@ Program::Program(int argc, char** argv) {
   pause = false;
   autopause = false;
 
-  basepath = dir(realpath(argv[0]));
+  basepath = nall::programpath();
   userpath = {nall::configpath(), "higan/"};
   sharedpath = {nall::sharedpath(), "higan/"};
   directory::create(userpath);

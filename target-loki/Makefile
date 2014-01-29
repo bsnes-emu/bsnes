@@ -6,9 +6,22 @@ include processor/Makefile
 include sfc/Makefile
 include gb/Makefile
 
-ui_objects := ui-loki
-ui_objects += phoenix
+ui_objects := ui-loki ui-interface ui-presentation ui-terminal
+ui_objects += ruby phoenix
 ui_objects += $(if $(call streq,$(platform),windows),resource)
+
+ifeq ($(platform),windows)
+  ruby := video.wgl audio.xaudio2 input.windows
+else ifeq ($(platform),macosx)
+  ruby := video.cgl audio.openal input.carbon
+else ifeq ($(platform),linux)
+  ruby := video.glx audio.alsa input.udev
+else ifeq ($(platform),bsd)
+  ruby := video.glx audio.openal input.x
+endif
+
+include ruby/Makefile
+link += $(rubylink)
 
 include phoenix/Makefile
 link += $(phoenixlink)
@@ -17,6 +30,12 @@ objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-loki.o: $(ui)/loki.cpp $(call rwildcard,$(ui)/)
+obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
+obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
+obj/ui-terminal.o: $(ui)/terminal/terminal.cpp $(call rwildcard,$(ui)/)
+
+obj/ruby.o: ruby/ruby.cpp $(call rwildcard,ruby/)
+	$(compiler) $(rubyflags) -c $< -o $@
 
 obj/phoenix.o: phoenix/phoenix.cpp $(call rwildcard,phoenix/)
 	$(compiler) $(phoenixflags) -c $< -o $@
@@ -43,6 +62,9 @@ else ifeq ($(platform),macosx)
 else
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 endif
+
+resource:
+	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
 ifeq ($(platform),windows)
