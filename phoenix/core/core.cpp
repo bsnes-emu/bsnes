@@ -1221,8 +1221,17 @@ void Console::print(const string& text) {
   return p.print(text);
 }
 
+string Console::prompt() const {
+  return state.prompt;
+}
+
 void Console::reset() {
   return p.reset();
+}
+
+void Console::setPrompt(const string& prompt) {
+  state.prompt = prompt;
+  return p.setPrompt(prompt);
 }
 
 Console::Console():

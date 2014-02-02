@@ -15,12 +15,7 @@ string Program::path(string name) {
 }
 
 void Program::main() {
-  if(pause) {
-    usleep(20 * 1000);
-    return;
-  }
-
-  emulator->run();
+  debugger->run();
 }
 
 Program::Program(string pathname) {
@@ -31,7 +26,9 @@ Program::Program(string pathname) {
   sharedpath = {nall::sharedpath(), "loki/"};
   directory::create(userpath);
 
+  new Settings;
   new Interface;
+  new Debugger;
   new Presentation;
   new Terminal;
 
@@ -39,19 +36,19 @@ Program::Program(string pathname) {
   terminal->setVisible();
   Application::processEvents();
 
-  video.driver(video.optimalDriver());
+  video.driver(settings->video.driver);
   video.set(Video::Handle, presentation->viewport.handle());
-  video.set(Video::Synchronize, false);
+  video.set(Video::Synchronize, settings->video.synchronize);
   video.set(Video::Filter, Video::FilterNearest);
   if(video.init() == false) { video.driver("None"); video.init(); }
 
-  audio.driver(audio.optimalDriver());
+  audio.driver(settings->audio.driver);
   audio.set(Audio::Handle, presentation->viewport.handle());
-  audio.set(Audio::Synchronize, true);
+  audio.set(Audio::Synchronize, settings->audio.synchronize);
   audio.set(Audio::Frequency, 48000u);
   if(audio.init() == false) { audio.driver("None"); audio.init(); }
 
-  input.driver(input.optimalDriver());
+  input.driver(settings->input.driver);
   input.set(Input::Handle, presentation->viewport.handle());
   if(input.init() == false) { input.driver("None"); input.init(); }
   input.onChange = {&Interface::inputEvent, interface};
@@ -65,11 +62,14 @@ Program::Program(string pathname) {
   presentation->showSplash();
 
   interface->load(pathname);
+  debugger->load();
 
   Application::main = {&Program::main, this};
   Application::run();
 
+  debugger->unload();
   interface->unload();
+  settings->save();
 }
 
 int main(int argc, char** argv) {

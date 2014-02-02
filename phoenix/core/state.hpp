@@ -125,6 +125,7 @@ struct ComboButton::State {
 };
 
 struct Console::State {
+  string prompt;
 };
 
 struct Frame::State {

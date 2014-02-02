@@ -38,18 +38,18 @@ endif
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
-    flags :=
+    flags := -fwrapv
     link :=
   else ifeq ($(platform),macosx)
     compiler := clang++
-    flags := -w -stdlib=libc++
+    flags := -fwrapv -w -stdlib=libc++
     link := -lc++ -lobjc
   else ifeq ($(platform),bsd)
     compiler := clang++
-    flags := -w -I/usr/local/include
+    flags := -fwrapv -w -I/usr/local/include
   else
     compiler := g++
-    flags :=
+    flags := -fwrapv
     link :=
   endif
 

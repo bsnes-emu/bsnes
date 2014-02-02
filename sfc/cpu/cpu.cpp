@@ -88,7 +88,7 @@ void CPU::op_step() {
   debugger.op_exec(regs.pc.d);
   if(interface->tracer.open()) {
     char text[4096];
-    disassemble_opcode(text, regs.pc.d);
+    disassemble_opcode(text);
     interface->tracer.print(text, "\n");
   }
 

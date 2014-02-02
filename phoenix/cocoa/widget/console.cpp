@@ -17,6 +17,9 @@ void pConsole::print(string text) {
 void pConsole::reset() {
 }
 
+void pConsole::setPrompt(string prompt) {
+}
+
 void pConsole::constructor() {
   @autoreleasepool {
     cocoaView = cocoaConsole = [[CocoaConsole alloc] initWith:console];

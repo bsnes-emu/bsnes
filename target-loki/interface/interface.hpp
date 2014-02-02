@@ -18,6 +18,7 @@ struct Interface : Emulator::Interface::Bind {
   string server();
   void notify(string text);
 
+  string pathname;  //path to game folder
   lstring pathnames;
   struct Gamepad {
     bool up = false;

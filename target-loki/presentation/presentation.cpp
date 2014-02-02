@@ -14,7 +14,7 @@ Presentation::Presentation() {
   onClose = &Application::quit;
 
   splash.allocate(512, 480);
-  splash.verticalGradient(0xff00003f, 0xff000000, 512, 480, 256, 0);
+  splash.verticalGradient(0xff00005f, 0xff000000, 512, 480, 256, 0);
   nall::image floor;
   floor.allocate(512, 480);
   floor.radialGradient(0xffff0000, 0x00000000, 384, 240, 256, 415);

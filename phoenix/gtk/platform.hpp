@@ -348,9 +348,11 @@ struct pConsole : public pWidget {
   GtkWidget* subWidget;
   GtkTextBuffer* textBuffer;
   string command;
+  string previousPrompt;
 
   void print(string text);
   void reset();
+  void setPrompt(string prompt);
 
   pConsole(Console& console) : pWidget(console), console(console) {}
   void constructor();

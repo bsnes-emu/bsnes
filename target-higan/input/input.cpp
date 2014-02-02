@@ -1,4 +1,4 @@
-#include "../ethos.hpp"
+#include "../higan.hpp"
 #include "hotkeys.cpp"
 InputManager* inputManager = nullptr;
 HID::Null hidNull;

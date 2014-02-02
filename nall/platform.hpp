@@ -73,13 +73,13 @@ namespace Math {
 //================
 
 #if defined(__clang__) || defined(__GNUC__)
-  #define noinline      __attribute__((noinline))
+  #define neverinline   __attribute__((noinline))
   #define alwaysinline  inline __attribute__((always_inline))
 #elif defined(_MSC_VER)
-  #define noinline      __declspec(noinline)
+  #define neverinline   __declspec(noinline)
   #define alwaysinline  inline __forceinline
 #else
-  #define noinline
+  #define neverinline
   #define alwaysinline  inline
 #endif
 

@@ -432,6 +432,7 @@ public:
 
   void print(string text);
   void reset();
+  void setPrompt(string prompt);
 
   pConsole(Console& console) : pWidget(console), console(console) {}
   void constructor();

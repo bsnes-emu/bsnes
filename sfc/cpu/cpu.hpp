@@ -136,7 +136,7 @@ privileged:
 
   struct Debugger {
     hook<void (uint24)> op_exec;
-    hook<void (uint24)> op_read;
+    hook<void (uint24, uint8)> op_read;
     hook<void (uint24, uint8)> op_write;
     hook<void ()> op_nmi;
     hook<void ()> op_irq;

@@ -102,8 +102,7 @@ template<typename TT> struct optional {
 
   optional& operator=(const optional& source) {
     reset();
-    valid = source.valid;
-    if(valid) operator=(source);
+    if(source) operator=(source());
     return *this;
   }
 

@@ -14,6 +14,9 @@ void pConsole::print(string text) {
 void pConsole::reset() {
 }
 
+void pConsole::setPrompt(string prompt) {
+}
+
 void pConsole::constructor() {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, L"EDIT", L"",

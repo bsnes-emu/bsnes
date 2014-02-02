@@ -6,6 +6,9 @@ void pConsole::print(string text) {
 void pConsole::reset() {
 }
 
+void pConsole::setPrompt(string prompt) {
+}
+
 void pConsole::constructor() {
 }
 

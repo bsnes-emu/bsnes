@@ -6,10 +6,13 @@ gb  := gb
 gba := gba
 
 profile := accuracy
-target := ethos
+target := higan
 # target := loki
 
-# options += debugger
+ifeq ($(target),loki)
+  options += debugger
+endif
+
 # arch := x86
 # console := true
 

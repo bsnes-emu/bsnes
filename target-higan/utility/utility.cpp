@@ -1,4 +1,4 @@
-#include "../ethos.hpp"
+#include "../higan.hpp"
 
 Utility* utility = nullptr;
 

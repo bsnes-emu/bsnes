@@ -13,19 +13,21 @@ bool Interface::load(string pathname) {
   if(!directory::exists(pathname)) return false;
 
   string type = extension(pathname);
-  pathname.append("/");
 
   for(auto& media : emulator->media) {
     if(media.bootable == false) continue;
     if(type != media.type) continue;
 
+    this->pathname = pathname.append("/");
     pathnames.reset();
     pathnames(0) = program->path({media.name, ".sys/"});
     pathnames(media.id) = pathname;
+    echo("Loaded ", pathname, "\n");
 
     emulator->load(media.id);
     emulator->paletteUpdate(Emulator::Interface::PaletteMode::Standard);
     emulator->power();
+    presentation->setTitle(emulator->title());
 
     return true;
   }
@@ -66,12 +68,14 @@ void Interface::loadRequest(unsigned id, string path) {
   if(file::exists(pathname) == false) return;
   mmapstream stream(pathname);
   emulator->load(id, stream);
+  echo("Loaded ", path, "\n");
 }
 
 void Interface::saveRequest(unsigned id, string path) {
   string pathname = {pathnames(emulator->group(id)), path};
   filestream stream(pathname, file::mode::write);
   emulator->save(id, stream);
+  echo("Saved ", path, "\n");
 }
 
 uint32_t Interface::videoColor(unsigned source, uint16_t alpha, uint16_t red, uint16_t green, uint16_t blue) {
@@ -101,6 +105,7 @@ void Interface::videoRefresh(const uint32_t* palette, const uint32_t* data, unsi
 }
 
 void Interface::audioSample(int16_t lsample, int16_t rsample) {
+  if(settings->audio.mute) lsample = 0, rsample = 0;
   signed samples[] = {lsample, rsample};
   dspaudio.sample(samples);
   while(dspaudio.pending()) {

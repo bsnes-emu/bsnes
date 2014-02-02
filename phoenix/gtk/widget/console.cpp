@@ -5,14 +5,34 @@ static bool Console_keyPress(GtkWidget* widget, GdkEventKey* event, Console* sel
 }
 
 void pConsole::print(string text) {
+  //insert text before prompt and command, so as not to interrupt the current command
+  GtkTextIter iter;
+  gtk_text_buffer_get_end_iter(textBuffer, &iter);
+  gtk_text_iter_set_offset(&iter, gtk_text_iter_get_offset(&iter) - console.prompt().size() - command.size());
+  gtk_text_buffer_insert(textBuffer, &iter, text, -1);
   seekCursorToEnd();
-  gtk_text_buffer_insert_at_cursor(textBuffer, text, -1);
-  GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
-  gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(subWidget), mark);
 }
 
 void pConsole::reset() {
-  gtk_text_buffer_set_text(textBuffer, "", -1);
+  //flush history and command; draw prompt
+  command.reset();
+  gtk_text_buffer_set_text(textBuffer, console.prompt(), -1);
+  seekCursorToEnd();
+}
+
+void pConsole::setPrompt(string prompt) {
+  //erase old prompt; insert new prompt in its place
+  GtkTextIter lhs, rhs, iter;
+  gtk_text_buffer_get_end_iter(textBuffer, &lhs);
+  gtk_text_buffer_get_end_iter(textBuffer, &rhs);
+  gtk_text_iter_set_offset(&lhs, gtk_text_iter_get_offset(&lhs) - previousPrompt.size() - command.size());
+  gtk_text_iter_set_offset(&rhs, gtk_text_iter_get_offset(&rhs) - command.size());
+  gtk_text_buffer_delete(textBuffer, &lhs, &rhs);
+  gtk_text_buffer_get_end_iter(textBuffer, &iter);
+  gtk_text_iter_set_offset(&iter, gtk_text_iter_get_offset(&iter) - command.size());
+  gtk_text_buffer_insert(textBuffer, &iter, prompt, -1);
+  seekCursorToEnd();
+  previousPrompt = prompt;
 }
 
 void pConsole::constructor() {
@@ -51,27 +71,37 @@ bool pConsole::keyPress(unsigned scancode, unsigned mask) {
   if(mask & (GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK)) return false;  //allow actions such as Ctrl+C (copy)
 
   if(scancode == GDK_KEY_Return || scancode == GDK_KEY_KP_Enter) {
-    print("\n");
-    if(console.onActivate) console.onActivate(command);
+    //add current prompt and command to history; print new prompt; execute command
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(textBuffer, &iter);
+    gtk_text_buffer_insert(textBuffer, &iter, string{"\n", console.prompt()}, -1);
+    string s = command;
     command.reset();
+    if(console.onActivate) console.onActivate(s);
+    seekCursorToEnd();
     return true;
   }
 
   if(scancode == GDK_KEY_BackSpace) {
     if(command.size()) {
+      //delete last character of command
       command.resize(command.size() - 1);
       GtkTextIter lhs, rhs;
       gtk_text_buffer_get_end_iter(textBuffer, &lhs);
       gtk_text_buffer_get_end_iter(textBuffer, &rhs);
       gtk_text_iter_set_offset(&lhs, gtk_text_iter_get_offset(&lhs) - 1);
       gtk_text_buffer_delete(textBuffer, &lhs, &rhs);
-      seekCursorToEnd();
     }
+    seekCursorToEnd();
     return true;
   }
 
   if(scancode >= 0x20 && scancode <= 0x7e) {
-    print({(char)scancode});
+    //add character to end of command
+    GtkTextIter iter;
+    gtk_text_buffer_get_end_iter(textBuffer, &iter);
+    gtk_text_buffer_insert(textBuffer, &iter, string{(char)scancode}, -1);
+    seekCursorToEnd();
     command.append((char)scancode);
     return true;
   }
@@ -80,9 +110,12 @@ bool pConsole::keyPress(unsigned scancode, unsigned mask) {
 }
 
 void pConsole::seekCursorToEnd() {
+  //place cursor at end of text buffer; scroll text view to the cursor to ensure it is visible
   GtkTextIter iter;
   gtk_text_buffer_get_end_iter(textBuffer, &iter);
   gtk_text_buffer_place_cursor(textBuffer, &iter);
+  GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
+  gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(subWidget), mark);
 }
 
 }

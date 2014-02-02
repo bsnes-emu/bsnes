@@ -1,4 +1,4 @@
-#include "../ethos.hpp"
+#include "../higan.hpp"
 Interface* interface = nullptr;
 
 void Interface::loadRequest(unsigned id, string name, string type) {

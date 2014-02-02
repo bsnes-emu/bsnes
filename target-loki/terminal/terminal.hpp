@@ -5,7 +5,7 @@ struct Terminal : Window {
   Terminal();
   void command(string s);
   void reset();
-  template<typename... Args> void print(Args&&... args);
+  void print(const string& text);
 };
 
 extern Terminal* terminal;

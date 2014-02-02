@@ -11,25 +11,23 @@ void CPU::op_io() {
 }
 
 uint8 CPU::op_read(uint32 addr) {
-  debugger.op_read(addr);
-
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count - 4);
   regs.mdr = bus.read(addr);
   add_clocks(4);
   alu_edge();
+  debugger.op_read(addr, regs.mdr);
   return regs.mdr;
 }
 
 void CPU::op_write(uint32 addr, uint8 data) {
-  debugger.op_write(addr, data);
-
   alu_edge();
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count);
   bus.write(addr, regs.mdr = data);
+  debugger.op_write(addr, regs.mdr);
 }
 
 unsigned CPU::speed(unsigned addr) const {

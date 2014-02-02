@@ -1,4 +1,4 @@
-#include "../ethos.hpp"
+#include "../higan.hpp"
 WindowManager* windowManager = nullptr;
 
 void WindowManager::append(Window* window, string name) {

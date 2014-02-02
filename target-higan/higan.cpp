@@ -1,4 +1,4 @@
-#include "ethos.hpp"
+#include "higan.hpp"
 #include "bootstrap.cpp"
 #include "resource/resource.cpp"
 

@@ -525,7 +525,9 @@ struct Console : private nall::base_from_member<pConsole&>, Widget {
   template<typename... Args> void print(Args&&... args) { print({args...}); }
 
   void print(const nall::string& text);
+  nall::string prompt() const;
   void reset();
+  void setPrompt(const nall::string& prompt);
 
   Console();
   ~Console();
