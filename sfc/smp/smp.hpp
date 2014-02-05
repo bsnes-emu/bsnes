@@ -50,7 +50,7 @@ privileged:
 
   struct Debugger {
     hook<void (uint16)> op_exec;
-    hook<void (uint16)> op_read;
+    hook<void (uint16, uint8)> op_read;
     hook<void (uint16, uint8)> op_write;
   } debugger;
 

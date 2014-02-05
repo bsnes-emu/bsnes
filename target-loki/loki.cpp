@@ -15,7 +15,7 @@ string Program::path(string name) {
 }
 
 void Program::main() {
-  debugger->run();
+  debugger->main();
 }
 
 Program::Program(string pathname) {

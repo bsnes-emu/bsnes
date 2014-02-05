@@ -11,6 +11,7 @@
 #include <nall/atoi.hpp>
 #include <nall/base64.hpp>
 #include <nall/bit.hpp>
+#include <nall/bitvector.hpp>
 #include <nall/bmp.hpp>
 #include <nall/config.hpp>
 #include <nall/crc16.hpp>

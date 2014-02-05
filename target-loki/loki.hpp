@@ -3,6 +3,7 @@
 namespace SFC = SuperFamicom;
 
 #include <nall/platform.hpp>
+#include <nall/bitvector.hpp>
 #include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dsp.hpp>

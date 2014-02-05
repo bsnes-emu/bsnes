@@ -31,45 +31,42 @@ uint16 PPU::get_vram_address() {
 }
 
 uint8 PPU::vram_read(unsigned addr) {
-  debugger.vram_read(addr);
-
+  uint8 data = 0x00;
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
-    return vram[addr];
+    data = vram[addr];
+    debugger.vram_read(addr, data);
   }
-  return 0x00;
+  return data;
 }
 
 void PPU::vram_write(unsigned addr, uint8 data) {
-  debugger.vram_write(addr, data);
-
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     vram[addr] = data;
+    debugger.vram_write(addr, data);
   }
 }
 
 uint8 PPU::oam_read(unsigned addr) {
-  debugger.oam_read(addr);
-
-  return oam[addr];
+  uint8 data = oam[addr];
+  debugger.oam_read(addr, data);
+  return data;
 }
 
 void PPU::oam_write(unsigned addr, uint8 data) {
-  debugger.oam_write(addr, data);
-
   oam[addr] = data;
   sprite.update(addr, data);
+  debugger.oam_write(addr, data);
 }
 
 uint8 PPU::cgram_read(unsigned addr) {
-  debugger.cgram_read(addr);
-
-  return cgram[addr];
+  uint8 data = cgram[addr];
+  debugger.cgram_read(addr, data);
+  return data;
 }
 
 void PPU::cgram_write(unsigned addr, uint8 data) {
-  debugger.cgram_write(addr, data);
-
   cgram[addr] = data;
+  debugger.cgram_write(addr, data);
 }
 
 void PPU::mmio_update_video_mode() {
