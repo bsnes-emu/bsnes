@@ -2,7 +2,6 @@ struct Interface : Emulator::Interface::Bind {
   Interface();
   bool load(string pathname);
   void unload();
-  void inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
 
   //bindings
   void loadRequest(unsigned id, string name, string type);
@@ -20,20 +19,6 @@ struct Interface : Emulator::Interface::Bind {
 
   string pathname;  //path to game folder
   lstring pathnames;
-  struct Gamepad {
-    bool up = false;
-    bool down = false;
-    bool left = false;
-    bool right = false;
-    bool b = false;
-    bool a = false;
-    bool y = false;
-    bool x = false;
-    bool l = false;
-    bool r = false;
-    bool select = false;
-    bool start = false;
-  } gamepad;
 };
 
 extern Interface* interface;

@@ -60,12 +60,15 @@ struct Debugger {
   void smpRead(uint16 addr, uint8 data);
   void smpWrite(uint16 addr, uint8 data);
   string sourceName(Source source);
+  void stateLoad(string filename);
+  void stateSave(string filename);
   void tracerDisable(Source source);
   void tracerEnable(Source source, string filename);
   void tracerMaskDisable(Source source);
   void tracerMaskEnable(Source source);
 
-  bool running = false;
+  bool running = false;      //emulation runs asynchronously (cooperatively) to terminal commands
+  bool savingState = false;  //suppresses all break events to allow state to be captured synchronously
 
   uint8* apuUsage = nullptr;
   vector<Breakpoint> breakpoints;

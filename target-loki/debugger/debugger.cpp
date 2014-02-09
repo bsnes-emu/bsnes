@@ -77,6 +77,7 @@ void Debugger::leave() {
 }
 
 bool Debugger::breakpointTest(Source source, Breakpoint::Mode mode, unsigned addr, uint8 data) {
+  if(savingState) return false;
   for(unsigned n = 0; n < breakpoints.size(); n++) {
     auto& bp = breakpoints[n];
     if(bp.source != source) continue;
@@ -122,6 +123,8 @@ void Debugger::cpuExec(uint24 addr) {
       cpuTracerFile.print(cpuDisassemble(), "\n");
     }
   }
+
+  if(savingState) return;
 
   if(breakpointTest(Source::CPU, Breakpoint::Mode::Execute, addr)) {
     echo(cpuDisassemble(), "\n");
@@ -366,6 +369,8 @@ void Debugger::smpExec(uint16 addr) {
     }
   }
 
+  if(savingState) return;
+
   if(breakpointTest(Source::SMP, Breakpoint::Mode::Execute, addr)) {
     echo(smpDisassemble(), "\n");
     return leave();
@@ -421,6 +426,23 @@ string Debugger::sourceName(Source source) {
   case Source::CGRAM: return "cgram";
   }
   return "none";
+}
+
+void Debugger::stateLoad(string filename) {
+  auto memory = file::read(filename);
+  if(memory.size() == 0) return echo("Error: state file ", notdir(filename), " not found\n");
+  serializer s(memory.data(), memory.size());
+  if(emulator->unserialize(s) == false) return echo("Error: failed to unserialize state from ", notdir(filename), "\n");
+  echo("State loaded from ", notdir(filename), "\n");
+}
+
+void Debugger::stateSave(string filename) {
+  savingState = true;
+  serializer s = emulator->serialize();
+  if(file::write(filename, s.data(), s.size())) {
+    echo("State saved to ", notdir(filename), "\n");
+  }
+  savingState = false;
 }
 
 void Debugger::tracerDisable(Source source) {

@@ -14,9 +14,15 @@ struct Settings : Configuration::Document {
     string driver;
   } input;
 
+  struct Geometry : Configuration::Node {
+    string presentation;
+    string terminal;
+  } geometry;
+
   Settings();
   void load();
-  void save();
+  void unload();
+
   void command(string s, lstring args);
 };
 

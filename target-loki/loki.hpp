@@ -22,6 +22,7 @@ using namespace ruby;
 using namespace phoenix;
 
 #include "settings/settings.hpp"
+#include "input/input.hpp"
 #include "interface/interface.hpp"
 #include "debugger/debugger.hpp"
 #include "presentation/presentation.hpp"

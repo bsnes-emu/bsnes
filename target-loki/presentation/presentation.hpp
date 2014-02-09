@@ -1,10 +1,11 @@
 struct Presentation : Window {
-  FixedLayout layout;
-  Viewport viewport;
-  nall::image splash;
-
   Presentation();
   void showSplash();
+
+  FixedLayout layout;
+  Viewport viewport;
+
+  nall::image splash;
 };
 
 extern Presentation* presentation;

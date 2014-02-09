@@ -3,9 +3,13 @@ Terminal* terminal = nullptr;
 
 Terminal::Terminal() {
   terminal = this;
+  if(settings->geometry.terminal.empty()) {
+    unsigned y = 64 + presentation->geometry().height + presentation->frameMargin().height;
+    settings->geometry.terminal = {"64,", y, ",800,480"};
+  }
 
   setTitle({"loki v", Emulator::Version});
-  setWindowGeometry({0, 480 + frameMargin().height, 800, 480});
+  setGeometry(settings->geometry.terminal);
 
   console.setFont(Font::monospace(8));
   console.setPrompt("$ ");
@@ -17,7 +21,52 @@ Terminal::Terminal() {
   console.onActivate = {&Terminal::command, this};
 }
 
+void Terminal::load() {
+  if(file::exists(program->path("aliases.cfg"))) {
+    string filedata = file::read(program->path("aliases.cfg"));
+    lstring lines = filedata.split("\n");
+    for(auto& line : lines) {
+      lstring part = line.split<1>(" => ");
+      if(part.size() != 2) continue;
+      aliases.append({part[0], part[1]});
+    }
+  }
+
+  if(file::exists(program->path("hotkeys.cfg"))) {
+    string filedata = file::read(program->path("hotkeys.cfg"));
+    lstring lines = filedata.split("\n");
+    for(auto& line : lines) {
+      lstring part = line.split<1>(" => ");
+      if(part.size() != 2) continue;
+      hotkeys.append({part[0], part[1]});
+    }
+  }
+}
+
+void Terminal::unload() {
+  file fp;
+  if(fp.open(program->path("aliases.cfg"), file::mode::write)) {
+    for(auto& alias : aliases) fp.print(alias.name, " => ", alias.mapping, "\n");
+    fp.close();
+  }
+  if(fp.open(program->path("hotkeys.cfg"), file::mode::write)) {
+    for(auto& hotkey : hotkeys) fp.print(hotkey.name, " => ", hotkey.mapping, "\n");
+    fp.close();
+  }
+}
+
 void Terminal::command(string t) {
+  for(auto& alias : aliases) {
+    lstring tokens;
+    if(tokenize(tokens, t, alias.name) == false) continue;
+    string output = alias.mapping;
+    for(unsigned n = 0; n < tokens.size(); n++) {
+      output.replace(string{"{", 1 + n, "}"}, tokens[n]);
+    }
+    t = output;
+    break;
+  }
+
   auto source = Debugger::Source::CPU;
   if(t.beginsWith("cpu/"  )) { source = Debugger::Source::CPU;   t.ltrim<1>("cpu/"  ); }
   if(t.beginsWith("smp/"  )) { source = Debugger::Source::SMP;   t.ltrim<1>("smp/"  ); }
@@ -32,13 +81,40 @@ void Terminal::command(string t) {
   if(source == Debugger::Source::CPU) t.replace("$", hex(SFC::cpu.regs.pc));
   if(source == Debugger::Source::SMP) t.replace("$", hex(SFC::smp.regs.pc));
 
-  lstring args = t.strip().qsplit(" ").strip();
-  string s = args.takeFirst();
+  lstring part = t.strip().split<1>(" "), args;
+  string s = part(0);
+  string p = part(1);
+  if(p) args = p.qsplit(" ").strip();
   unsigned argc = args.size();
 
   if(s.empty()) return;
 
   if(s.beginsWith("settings.")) return settings->command(s, args);
+
+  if(s == "aliases") {
+    echoAliases();
+    return;
+  }
+
+  if(s == "aliases.append") {
+    lstring part = p.qsplit<1>("=>").strip();
+    if(part.size() == 2) aliases.append({part[0], part[1]});
+    echoAliases();
+    return;
+  }
+
+  if(s == "aliases.remove" && argc == 1) {
+    unsigned n = decimal(args[0]);
+    if(n < aliases.size()) aliases.remove(n);
+    echoAliases();
+    return;
+  }
+
+  if(s == "aliases.reset") {
+    aliases.reset();
+    echo("All aliases removed\n");
+    return;
+  }
 
   if(s == "break") {
     debugger->stop();
@@ -74,6 +150,7 @@ void Terminal::command(string t) {
 
   if(s == "breakpoints.reset") {
     debugger->breakpoints.reset();
+    echo("All breakpoints removed\n");
     return;
   }
 
@@ -112,6 +189,37 @@ void Terminal::command(string t) {
     return;
   }
 
+  if(s == "hotkeys") {
+    echoHotkeys();
+    return;
+  }
+
+  if(s == "hotkeys.append") {
+    lstring part = p.qsplit<1>("=>").strip();
+    if(part.size() == 2) hotkeys.append({part[0], part[1]});
+    echoHotkeys();
+    return;
+  }
+
+  if(s == "hotkeys.remove" && argc == 1) {
+    unsigned n = decimal(args[0]);
+    if(n < hotkeys.size()) hotkeys.remove(n);
+    echoHotkeys();
+    return;
+  }
+
+  if(s == "hotkeys.reset") {
+    hotkeys.reset();
+    echo("All hotkeys removed\n");
+    return;
+  }
+
+  if(s == "power") {
+    emulator->power();
+    echo("System has been power cycled\n");
+    return;
+  }
+
   if(s == "quit") {
     Application::quit();
     return;
@@ -121,6 +229,12 @@ void Terminal::command(string t) {
     unsigned addr = hex(args[0]);
     uint8_t data = debugger->memoryRead(source, addr);
     echo(debugger->sourceName(source), "/", hex<6>(addr), " = ", hex<2>(data), "\n");
+    return;
+  }
+
+  if(s == "reset") {
+    emulator->reset();
+    echo("System has been reset\n");
     return;
   }
 
@@ -140,6 +254,18 @@ void Terminal::command(string t) {
     debugger->run();
     if(source == Debugger::Source::CPU) debugger->cpuRunTo = (unsigned)hex(args[0]);
     if(source == Debugger::Source::SMP) debugger->smpRunTo = (unsigned)hex(args[0]);
+    return;
+  }
+
+  if(s == "state.load" && argc == 1) {
+    string pathname = {interface->pathname, "loki/state-", args[0], ".bst"};
+    debugger->stateLoad(pathname);
+    return;
+  }
+
+  if(s == "state.save" && argc == 1) {
+    string pathname = {interface->pathname, "loki/state-", args[0], ".bst"};
+    debugger->stateSave(pathname);
     return;
   }
 
@@ -202,6 +328,36 @@ void Terminal::command(string t) {
   }
 
   echo("Error: unrecognized command: ", s, "\n");
+}
+
+void Terminal::echoAliases() {
+  if(aliases.size() == 0) return echo("No aliases defined\n");
+  echo("#    alias\n");
+  echo("---  -----\n");
+  for(unsigned n = 0; n < aliases.size(); n++) {
+    echo(format<-3>(n), "  ", aliases[n].name, " => ", aliases[n].mapping, "\n");
+  }
+}
+
+void Terminal::echoHotkeys() {
+  if(hotkeys.size() == 0) return echo("No hotkeys defined\n");
+  echo("#    hotkey\n");
+  echo("---  ------\n");
+  for(unsigned n = 0; n < hotkeys.size(); n++) {
+    echo(format<-3>(n), "  ", hotkeys[n].name, " => ", hotkeys[n].mapping, "\n");
+  }
+}
+
+void Terminal::inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
+  if(focused() == false) return;
+  if(device.isKeyboard() == false) return;    //only capture keyboard events
+  if(oldValue != 0 || newValue != 1) return;  //only capture key down events
+  string name = device.group[group].input[input].name;
+
+  for(auto& hotkey : hotkeys) {
+    if(name != hotkey.name) continue;
+    command(hotkey.mapping);
+  }
 }
 
 void Terminal::reset() {

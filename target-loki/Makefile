@@ -6,7 +6,7 @@ include processor/Makefile
 include sfc/Makefile
 include gb/Makefile
 
-ui_objects := ui-loki ui-settings
+ui_objects := ui-loki ui-settings ui-input
 ui_objects += ui-interface ui-debugger
 ui_objects += ui-presentation ui-terminal
 ui_objects += ruby phoenix
@@ -33,6 +33,7 @@ objects := $(patsubst %,obj/%.o,$(objects))
 
 obj/ui-loki.o: $(ui)/loki.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-interface.o: $(ui)/interface/interface.cpp $(call rwildcard,$(ui)/)
 obj/ui-debugger.o: $(ui)/debugger/debugger.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)

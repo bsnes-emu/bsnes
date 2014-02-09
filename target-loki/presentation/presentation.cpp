@@ -3,9 +3,12 @@ Presentation* presentation = nullptr;
 
 Presentation::Presentation() {
   presentation = this;
+  if(settings->geometry.presentation.empty()) {
+    settings->geometry.presentation = "64,64,512,480";
+  }
 
   setTitle({"loki v", Emulator::Version});
-  setWindowGeometry({0, 0, 512, 480});
+  setGeometry(settings->geometry.presentation);
   setResizable(false);
 
   layout.append(viewport, {0, 0, 512, 480});

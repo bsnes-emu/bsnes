@@ -16,15 +16,23 @@ Settings::Settings() {
   input.append(input.driver = ruby::input.optimalDriver(), "Driver");
   append(input, "Input");
 
+  geometry.append(geometry.presentation = "", "Presentation");
+  geometry.append(geometry.terminal = "", "Terminal");
+  append(geometry, "Geometry");
+
   load();
 }
 
 void Settings::load() {
   Configuration::Document::load(program->path("settings.bml"));
-  save();  //create configuration file if it does not exist
+  Configuration::Document::save(program->path("settings.bml"));
 }
 
-void Settings::save() {
+void Settings::unload() {
+  //remember window geometry for next run
+  geometry.presentation = presentation->geometry().text();
+  geometry.terminal = terminal->geometry().text();
+
   Configuration::Document::save(program->path("settings.bml"));
 }
 

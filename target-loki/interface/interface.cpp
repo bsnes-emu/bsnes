@@ -39,25 +39,6 @@ void Interface::unload() {
   emulator->unload();
 }
 
-void Interface::inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue) {
-  if(device.isKeyboard() == false) return;
-
-  switch(input) {
-  case 84: gamepad.up = newValue; break;
-  case 85: gamepad.down = newValue; break;
-  case 86: gamepad.left = newValue; break;
-  case 87: gamepad.right = newValue; break;
-  case 60: gamepad.b = newValue; break;
-  case 58: gamepad.a = newValue; break;
-  case 35: gamepad.y = newValue; break;
-  case 53: gamepad.x = newValue; break;
-  case 38: gamepad.l = newValue; break;
-  case 37: gamepad.r = newValue; break;
-  case 65: gamepad.select = newValue; break;
-  case 89: gamepad.start = newValue; break;
-  }
-}
-
 //bindings
 
 void Interface::loadRequest(unsigned id, string name, string type) {
@@ -100,8 +81,6 @@ void Interface::videoRefresh(const uint32_t* palette, const uint32_t* data, unsi
     video.unlock();
     video.refresh();
   }
-
-  input.poll();
 }
 
 void Interface::audioSample(int16_t lsample, int16_t rsample) {
@@ -115,25 +94,8 @@ void Interface::audioSample(int16_t lsample, int16_t rsample) {
 }
 
 int16_t Interface::inputPoll(unsigned port, unsigned device, unsigned input) {
-  if(presentation->focused() == false) return 0;
-  if(port != 0 || device != 0) return 0;
-
-  switch(input) {
-  case  0: return gamepad.b;
-  case  1: return gamepad.y;
-  case  2: return gamepad.select;
-  case  3: return gamepad.start;
-  case  4: return gamepad.up;
-  case  5: return gamepad.down;
-  case  6: return gamepad.left;
-  case  7: return gamepad.right;
-  case  8: return gamepad.a;
-  case  9: return gamepad.x;
-  case 10: return gamepad.l;
-  case 11: return gamepad.r;
-  }
-
-  return 0;
+  unsigned guid = emulator->port[port].device[device].input[input].guid;
+  return inputManager->inputMap[guid]->poll();
 }
 
 void Interface::inputRumble(unsigned port, unsigned device, unsigned input, bool enable) {

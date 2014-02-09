@@ -15,6 +15,7 @@ string Program::path(string name) {
 }
 
 void Program::main() {
+  inputManager->poll();
   debugger->main();
 }
 
@@ -27,6 +28,7 @@ Program::Program(string pathname) {
   directory::create(userpath);
 
   new Settings;
+  new InputManager;
   new Interface;
   new Debugger;
   new Presentation;
@@ -51,7 +53,7 @@ Program::Program(string pathname) {
   input.driver(settings->input.driver);
   input.set(Input::Handle, presentation->viewport.handle());
   if(input.init() == false) { input.driver("None"); input.init(); }
-  input.onChange = {&Interface::inputEvent, interface};
+  input.onChange = {&Terminal::inputEvent, terminal};
 
   dspaudio.setPrecision(16);
   dspaudio.setBalance(0.0);
@@ -61,15 +63,19 @@ Program::Program(string pathname) {
 
   presentation->showSplash();
 
+  inputManager->load();
   interface->load(pathname);
   debugger->load();
+  terminal->load();
 
   Application::main = {&Program::main, this};
   Application::run();
 
+  terminal->unload();
   debugger->unload();
   interface->unload();
-  settings->save();
+  inputManager->unload();
+  settings->unload();
 }
 
 int main(int argc, char** argv) {
