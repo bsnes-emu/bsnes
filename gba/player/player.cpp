@@ -56,21 +56,20 @@ void Player::frame() {
   }
 }
 
-optional<uint16> Player::keyinput() {
-  if(status.logoDetected == false) return false;
-
-  switch(status.logoCounter) {
-  case 0: return {true, 0x03ff};
-  case 1: return {true, 0x03ff};
-  case 2: return {true, 0x030f};
+maybe<uint16> Player::keyinput() {
+  if(status.logoDetected) {
+    switch(status.logoCounter) {
+    case 0: return 0x03ff;
+    case 1: return 0x03ff;
+    case 2: return 0x030f;
+    }
   }
-  unreachable;
+  return nothing;
 }
 
-optional<uint32> Player::read() {
-  if(status.enable == false) return false;
-
-  return {true, status.send};
+maybe<uint32> Player::read() {
+  if(status.enable) return status.send;
+  return nothing;
 }
 
 void Player::write(uint8 byte, uint2 addr) {

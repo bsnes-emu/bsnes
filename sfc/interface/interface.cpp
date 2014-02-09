@@ -270,7 +270,6 @@ void Interface::save(unsigned id, const stream& stream) {
 void Interface::unload() {
   save();
   cartridge.unload();
-  tracerEnable(false);
 }
 
 void Interface::connect(unsigned port, unsigned device) {
@@ -339,38 +338,6 @@ void Interface::cheatSet(const lstring& list) {
 
 void Interface::paletteUpdate(PaletteMode mode) {
   video.generate_palette(mode);
-}
-
-bool Interface::tracerEnable(bool trace) {
-  string pathname = {path(group(ID::ROM)), "debug/"};
-  if(trace == true) directory::create(pathname);
-
-  if(trace == true && !tracer.open()) {
-    for(unsigned n = 0; n <= 999; n++) {
-      string filename = {pathname, "trace-", format<3, '0'>(n), ".log"};
-      if(file::exists(filename)) continue;
-      tracer.open(filename, file::mode::write);
-      return true;
-    }
-  }
-
-  if(trace == false && tracer.open()) {
-    tracer.close();
-    return true;
-  }
-
-  return false;
-}
-
-void Interface::exportMemory() {
-  string pathname = {path(group(ID::ROM)), "debug/"};
-  directory::create(pathname);
-
-  file::write({pathname, "work.ram"}, cpu.wram, 128 * 1024);
-  file::write({pathname, "video.ram"}, ppu.vram, 64 * 1024);
-  file::write({pathname, "sprite.ram"}, ppu.oam, 544);
-  file::write({pathname, "palette.ram"}, ppu.cgram, 512);
-  file::write({pathname, "apu.ram"}, smp.apuram, 64 * 1024);
 }
 
 Interface::Interface() {

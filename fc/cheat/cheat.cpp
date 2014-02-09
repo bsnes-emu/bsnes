@@ -16,13 +16,13 @@ void Cheat::append(unsigned addr, unsigned comp, unsigned data) {
   codes.append({addr, comp, data});
 }
 
-optional<unsigned> Cheat::find(unsigned addr, unsigned comp) {
+maybe<unsigned> Cheat::find(unsigned addr, unsigned comp) {
   for(auto& code : codes) {
     if(code.addr == addr && (code.comp == Unused || code.comp == comp)) {
-      return {true, code.data};
+      return code.data;
     }
   }
-  return false;
+  return nothing;
 }
 
 }

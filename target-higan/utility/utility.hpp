@@ -17,8 +17,6 @@ struct Utility {
   void saveState(unsigned slot);
   void loadState(unsigned slot);
 
-  void tracerToggle();
-
   void synchronizeDSP();
   void synchronizeRuby();
   void updatePalette();
@@ -32,16 +30,13 @@ struct Utility {
 
   string libraryPath();
 
-  Utility();
-
   lstring path;
   lstring pathname;
 
 private:
-  bool tracerEnable;
   string statusText;
   string statusMessage;
-  time_t statusTime;
+  time_t statusTime = 0;
 };
 
 extern Utility* utility;

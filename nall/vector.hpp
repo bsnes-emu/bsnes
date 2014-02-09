@@ -7,6 +7,7 @@
 #include <utility>
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
+#include <nall/maybe.hpp>
 #include <nall/sort.hpp>
 #include <nall/utility.hpp>
 
@@ -164,9 +165,9 @@ public:
     nall::sort(pool + poolbase, objectsize, lessthan);
   }
 
-  optional<unsigned> find(const T& data) {
-    for(unsigned n = 0; n < objectsize; n++) if(pool[poolbase + n] == data) return {true, n};
-    return false;
+  maybe<unsigned> find(const T& data) {
+    for(unsigned n = 0; n < objectsize; n++) if(pool[poolbase + n] == data) return n;
+    return nothing;
   }
 
   T& first() {

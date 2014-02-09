@@ -2,11 +2,11 @@
 
 namespace nall {
 
-optional<unsigned> lstring::find(rstring key) const {
+maybe<unsigned> lstring::find(rstring key) const {
   for(unsigned i = 0; i < size(); i++) {
-    if(operator[](i) == key) return {true, i};
+    if(operator[](i) == key) return i;
   }
-  return false;
+  return nothing;
 }
 
 string lstring::merge(const string& separator) const {

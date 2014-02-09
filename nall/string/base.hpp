@@ -107,10 +107,10 @@ public:
 
   inline string& strip();
 
-  inline optional<unsigned> find(rstring key) const;
-  inline optional<unsigned> ifind(rstring key) const;
-  inline optional<unsigned> qfind(rstring key) const;
-  inline optional<unsigned> iqfind(rstring key) const;
+  inline maybe<unsigned> find(rstring key) const;
+  inline maybe<unsigned> ifind(rstring key) const;
+  inline maybe<unsigned> qfind(rstring key) const;
+  inline maybe<unsigned> iqfind(rstring key) const;
 
   //core.hpp
   inline explicit operator bool() const;
@@ -155,7 +155,7 @@ public:
 
 //list.hpp
 struct lstring : vector<string> {
-  inline optional<unsigned> find(rstring) const;
+  inline maybe<unsigned> find(rstring) const;
   inline string merge(const string&) const;
   inline lstring& isort();
   inline lstring& strip();

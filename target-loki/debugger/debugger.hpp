@@ -1,11 +1,11 @@
 struct Debugger {
-  enum class Source : unsigned { CPU, SMP, PPU, DSP, APU, VRAM, OAM, CGRAM };
+  enum class Source : unsigned { CPU, SMP, PPU, DSP, APU, WRAM, VRAM, OAM, CGRAM };
 
   struct Breakpoint {
     Source source = Source::CPU;
     enum class Mode : unsigned { Disabled, Read, Write, Execute } mode = Mode::Disabled;
     unsigned addr = 0;
-    optional<uint8> data = false;
+    maybe<uint8> data;
     unsigned triggered = 0;  //counter for number of times breakpoint was hit
   };
 
@@ -19,8 +19,9 @@ struct Debugger {
       FlagM    = 0x10,
       FlagX    = 0x20,
       //APU
-      DspRead  = 0x08,
-      DspWrite = 0x10,
+      FlagP    = 0x08,
+      DspRead  = 0x10,
+      DspWrite = 0x20,
     };
   };
 
@@ -41,7 +42,7 @@ struct Debugger {
   void cpuRead(uint24 addr, uint8 data);
   void cpuWrite(uint24 addr, uint8 data);
   void echoBreakpoints();
-  void echoDisassemble(unsigned addr, signed size);
+  void echoDisassemble(Source source, unsigned addr, signed size);
   void echoHex(Source source, unsigned addr, signed size);
   void memoryExport(Source source, string filename);
   uint8 memoryRead(Source source, unsigned addr);
@@ -53,22 +54,36 @@ struct Debugger {
   void ppuOamWrite(uint16 addr, uint8 data);
   void ppuVramRead(uint16 addr, uint8 data);
   void ppuVramWrite(uint16 addr, uint8 data);
+  string smpDisassemble();
+  string smpDisassemble(uint16 addr, bool p);
   void smpExec(uint16 addr);
   void smpRead(uint16 addr, uint8 data);
   void smpWrite(uint16 addr, uint8 data);
   string sourceName(Source source);
+  void tracerDisable(Source source);
+  void tracerEnable(Source source, string filename);
+  void tracerMaskDisable(Source source);
+  void tracerMaskEnable(Source source);
 
   bool running = false;
 
+  uint8* apuUsage = nullptr;
   vector<Breakpoint> breakpoints;
-  optional<unsigned> cpuRunFor = false;
-  optional<unsigned> cpuRunTo = false;
-  optional<unsigned> cpuStepFor = false;
-  optional<unsigned> cpuStepTo = false;
-  file tracerFile;
-  bitvector tracerMask;
-  uint8* usageCPU = nullptr;
-  uint8* usageAPU = nullptr;
+  unsigned cpuInstructionCounter = 0;
+  maybe<unsigned> cpuRunFor;
+  maybe<unsigned> cpuRunTo;
+  maybe<unsigned> cpuStepFor;
+  maybe<unsigned> cpuStepTo;
+  file cpuTracerFile;
+  bitvector cpuTracerMask;
+  uint8* cpuUsage = nullptr;
+  unsigned smpInstructionCounter = 0;
+  maybe<unsigned> smpRunFor;
+  maybe<unsigned> smpRunTo;
+  maybe<unsigned> smpStepFor;
+  maybe<unsigned> smpStepTo;
+  file smpTracerFile;
+  bitvector smpTracerMask;
 };
 
 extern Debugger* debugger;

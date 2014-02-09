@@ -114,10 +114,10 @@ string& string::strip() {
   return *this;
 }
 
-optional<unsigned> string::find(rstring key) const { return strpos(data(), key); }
-optional<unsigned> string::ifind(rstring key) const { return istrpos(data(), key); }
-optional<unsigned> string::qfind(rstring key) const { return qstrpos(data(), key); }
-optional<unsigned> string::iqfind(rstring key) const { return iqstrpos(data(), key); }
+maybe<unsigned> string::find(rstring key) const { return strpos(data(), key); }
+maybe<unsigned> string::ifind(rstring key) const { return istrpos(data(), key); }
+maybe<unsigned> string::qfind(rstring key) const { return qstrpos(data(), key); }
+maybe<unsigned> string::iqfind(rstring key) const { return iqstrpos(data(), key); }
 
 }
 

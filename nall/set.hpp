@@ -45,22 +45,22 @@ template<typename T> struct set {
     nodes = 0;
   }
 
-  optional<T&> find(const T& value) {
+  maybe<T&> find(const T& value) {
     if(node_t* node = find(root, value)) return node->value;
-    return false;
+    return nothing;
   }
 
-  optional<const T&> find(const T& value) const {
+  maybe<const T&> find(const T& value) const {
     if(node_t* node = find(root, value)) return node->value;
-    return false;
+    return nothing;
   }
 
-  optional<T&> insert(const T& value) {
+  maybe<T&> insert(const T& value) {
     unsigned count = size();
     node_t* v = insert(root, value);
     root->red = 0;
-    if(size() == count) return false;
-    return {true, v->value};
+    if(size() == count) return nothing;
+    return v->value;
   }
 
   template<typename... Args> bool insert(const T& value, Args&&... args) {

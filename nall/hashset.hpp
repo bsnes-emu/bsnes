@@ -88,19 +88,19 @@ public:
     length = size;
   }
 
-  optional<T&> find(const T& value) {
-    if(!pool) return false;
+  maybe<T&> find(const T& value) {
+    if(!pool) return nothing;
 
     unsigned hash = value.hash() & (length - 1);
     while(pool[hash]) {
-      if(value == *pool[hash]) return {true, *pool[hash]};
+      if(value == *pool[hash]) return *pool[hash];
       if(++hash >= length) hash = 0;
     }
 
-    return false;
+    return nothing;
   }
 
-  optional<T&> insert(const T& value) {
+  maybe<T&> insert(const T& value) {
     if(!pool) pool = new T*[length]();
 
     //double pool size when load is >= 50%
@@ -111,7 +111,7 @@ public:
     while(pool[hash]) if(++hash >= length) hash = 0;
     pool[hash] = new T(value);
 
-    return {true, *pool[hash]};
+    return *pool[hash];
   }
 
   bool remove(const T& value) {

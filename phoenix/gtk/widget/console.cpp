@@ -5,34 +5,28 @@ static bool Console_keyPress(GtkWidget* widget, GdkEventKey* event, Console* sel
 }
 
 void pConsole::print(string text) {
-  //insert text before prompt and command, so as not to interrupt the current command
+  //insert text before prompt and command
   GtkTextIter iter;
-  gtk_text_buffer_get_end_iter(textBuffer, &iter);
-  gtk_text_iter_set_offset(&iter, gtk_text_iter_get_offset(&iter) - console.prompt().size() - command.size());
+  gtk_text_buffer_get_iter_at_line_offset(textBuffer, &iter, gtk_text_buffer_get_line_count(textBuffer), 0);
   gtk_text_buffer_insert(textBuffer, &iter, text, -1);
-  seekCursorToEnd();
+  seekToEnd();
 }
 
 void pConsole::reset() {
-  //flush history and command; draw prompt
-  command.reset();
+  //flush history and redraw prompt
   gtk_text_buffer_set_text(textBuffer, console.prompt(), -1);
-  seekCursorToEnd();
+  seekToEnd();
 }
 
 void pConsole::setPrompt(string prompt) {
-  //erase old prompt; insert new prompt in its place
-  GtkTextIter lhs, rhs, iter;
-  gtk_text_buffer_get_end_iter(textBuffer, &lhs);
-  gtk_text_buffer_get_end_iter(textBuffer, &rhs);
-  gtk_text_iter_set_offset(&lhs, gtk_text_iter_get_offset(&lhs) - previousPrompt.size() - command.size());
-  gtk_text_iter_set_offset(&rhs, gtk_text_iter_get_offset(&rhs) - command.size());
+  //erase previous prompt and replace it with new prompt
+  GtkTextIter lhs, rhs;
+  gtk_text_buffer_get_iter_at_line_offset(textBuffer, &lhs, gtk_text_buffer_get_line_count(textBuffer), 0);
+  gtk_text_buffer_get_iter_at_line_offset(textBuffer, &rhs, gtk_text_buffer_get_line_count(textBuffer), previousPrompt.size());
   gtk_text_buffer_delete(textBuffer, &lhs, &rhs);
-  gtk_text_buffer_get_end_iter(textBuffer, &iter);
-  gtk_text_iter_set_offset(&iter, gtk_text_iter_get_offset(&iter) - command.size());
-  gtk_text_buffer_insert(textBuffer, &iter, prompt, -1);
-  seekCursorToEnd();
-  previousPrompt = prompt;
+  gtk_text_buffer_get_iter_at_line_offset(textBuffer, &lhs, gtk_text_buffer_get_line_count(textBuffer), 0);
+  gtk_text_buffer_insert(textBuffer, &lhs, previousPrompt = prompt, -1);
+  seekToEnd();
 }
 
 void pConsole::constructor() {
@@ -47,7 +41,7 @@ void pConsole::constructor() {
 
   textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(subWidget));
 
-  GdkColor background = CreateColor(48, 24, 24);
+  GdkColor background = CreateColor(72, 24, 24);
   gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &background);
   GdkColor foreground = CreateColor(255, 255, 255);
   gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &foreground);
@@ -70,50 +64,116 @@ void pConsole::orphan() {
 bool pConsole::keyPress(unsigned scancode, unsigned mask) {
   if(mask & (GDK_CONTROL_MASK | GDK_MOD1_MASK | GDK_SUPER_MASK)) return false;  //allow actions such as Ctrl+C (copy)
 
+  GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
+  GtkTextIter start, cursor, end;
+  gtk_text_buffer_get_iter_at_line_offset(textBuffer, &start, gtk_text_buffer_get_line_count(textBuffer), console.prompt().size());
+  gtk_text_buffer_get_iter_at_mark(textBuffer, &cursor, mark);
+  gtk_text_buffer_get_end_iter(textBuffer, &end);
+
   if(scancode == GDK_KEY_Return || scancode == GDK_KEY_KP_Enter) {
-    //add current prompt and command to history; print new prompt; execute command
-    GtkTextIter iter;
-    gtk_text_buffer_get_end_iter(textBuffer, &iter);
-    gtk_text_buffer_insert(textBuffer, &iter, string{"\n", console.prompt()}, -1);
-    string s = command;
-    command.reset();
+    char* temp = gtk_text_buffer_get_text(textBuffer, &start, &end, true);
+    string s = temp;
+    g_free(temp);
+    gtk_text_buffer_insert(textBuffer, &end, string{"\n", console.prompt()}, -1);
     if(console.onActivate) console.onActivate(s);
-    seekCursorToEnd();
+    if(s) history.prepend(s);
+    if(history.size() > 128) history.removeLast();
+    historyOffset = 0;
+    seekToEnd();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Up) {
+    gtk_text_buffer_delete(textBuffer, &start, &end);
+    gtk_text_buffer_get_end_iter(textBuffer, &end);
+    if(historyOffset < history.size()) {
+      gtk_text_buffer_insert(textBuffer, &end, history[historyOffset++], -1);
+    }
+    seekToEnd();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Down) {
+    gtk_text_buffer_delete(textBuffer, &start, &end);
+    gtk_text_buffer_get_end_iter(textBuffer, &end);
+    if(historyOffset > 0) {
+      gtk_text_buffer_insert(textBuffer, &end, history[--historyOffset], -1);
+    }
+    seekToEnd();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Left) {
+    if(gtk_text_iter_get_offset(&cursor) <= gtk_text_iter_get_offset(&start)) {
+      gtk_text_buffer_place_cursor(textBuffer, &start);
+    } else {
+      gtk_text_iter_set_offset(&cursor, gtk_text_iter_get_offset(&cursor) - 1);
+      gtk_text_buffer_place_cursor(textBuffer, &cursor);
+    }
+    seekToMark();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Right) {
+    if(gtk_text_iter_get_offset(&cursor) < gtk_text_iter_get_offset(&start)) {
+      gtk_text_buffer_place_cursor(textBuffer, &end);
+    } else if(gtk_text_iter_get_offset(&cursor) < gtk_text_iter_get_offset(&end)) {
+      gtk_text_iter_set_offset(&cursor, gtk_text_iter_get_offset(&cursor) + 1);
+      gtk_text_buffer_place_cursor(textBuffer, &cursor);
+    }
+    seekToMark();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Home) {
+    gtk_text_buffer_place_cursor(textBuffer, &start);
+    seekToMark();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_End) {
+    gtk_text_buffer_place_cursor(textBuffer, &end);
+    seekToMark();
     return true;
   }
 
   if(scancode == GDK_KEY_BackSpace) {
-    if(command.size()) {
-      //delete last character of command
-      command.resize(command.size() - 1);
-      GtkTextIter lhs, rhs;
-      gtk_text_buffer_get_end_iter(textBuffer, &lhs);
-      gtk_text_buffer_get_end_iter(textBuffer, &rhs);
-      gtk_text_iter_set_offset(&lhs, gtk_text_iter_get_offset(&lhs) - 1);
-      gtk_text_buffer_delete(textBuffer, &lhs, &rhs);
-    }
-    seekCursorToEnd();
+    if(gtk_text_iter_get_offset(&cursor) <= gtk_text_iter_get_offset(&start)) return true;
+    GtkTextIter lhs = cursor;
+    gtk_text_iter_set_offset(&lhs, gtk_text_iter_get_offset(&cursor) - 1);
+    gtk_text_buffer_delete(textBuffer, &lhs, &cursor);
+    seekToMark();
+    return true;
+  }
+
+  if(scancode == GDK_KEY_Delete) {
+    if(gtk_text_iter_get_offset(&cursor) < gtk_text_iter_get_offset(&start)) return true;
+    if(gtk_text_iter_get_offset(&cursor) == gtk_text_iter_get_offset(&end)) return true;
+    GtkTextIter rhs = cursor;
+    gtk_text_iter_set_offset(&rhs, gtk_text_iter_get_offset(&cursor) + 1);
+    gtk_text_buffer_delete(textBuffer, &cursor, &rhs);
+    seekToMark();
     return true;
   }
 
   if(scancode >= 0x20 && scancode <= 0x7e) {
-    //add character to end of command
-    GtkTextIter iter;
-    gtk_text_buffer_get_end_iter(textBuffer, &iter);
-    gtk_text_buffer_insert(textBuffer, &iter, string{(char)scancode}, -1);
-    seekCursorToEnd();
-    command.append((char)scancode);
+    if(gtk_text_iter_get_offset(&cursor) < gtk_text_iter_get_offset(&start)) return true;
+    gtk_text_buffer_insert(textBuffer, &cursor, string{(char)scancode}, -1);
+    seekToMark();
     return true;
   }
 
   return false;
 }
 
-void pConsole::seekCursorToEnd() {
-  //place cursor at end of text buffer; scroll text view to the cursor to ensure it is visible
+void pConsole::seekToEnd() {
   GtkTextIter iter;
   gtk_text_buffer_get_end_iter(textBuffer, &iter);
   gtk_text_buffer_place_cursor(textBuffer, &iter);
+  seekToMark();
+}
+
+void pConsole::seekToMark() {
   GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
   gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(subWidget), mark);
 }

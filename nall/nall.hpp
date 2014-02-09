@@ -34,6 +34,7 @@
 #include <nall/invoke.hpp>
 #include <nall/map.hpp>
 #include <nall/matrix.hpp>
+#include <nall/maybe.hpp>
 #include <nall/png.hpp>
 #include <nall/property.hpp>
 #include <nall/random.hpp>

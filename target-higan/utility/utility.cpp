@@ -101,7 +101,6 @@ void Utility::load() {
 
 void Utility::unload() {
   if(program->active == nullptr) return;
-  if(tracerEnable) tracerToggle();
 
   cheatEditor->save({pathname[0], "cheats.bml"});
   stateManager->save({pathname[0], "higan/states.bsa"}, 1);
@@ -137,16 +136,6 @@ void Utility::loadState(unsigned slot) {
   serializer s(memory.data(), memory.size());
   if(system().unserialize(s) == false) return showMessage({"Slot ", slot, " state incompatible"});
   showMessage({"Loaded from slot ", slot});
-}
-
-void Utility::tracerToggle() {
-  if(program->active == nullptr) return;
-  tracerEnable = !tracerEnable;
-  bool result = system().tracerEnable(tracerEnable);
-  if( tracerEnable &&  result) return utility->showMessage("Tracer activated");
-  if( tracerEnable && !result) return tracerEnable = false, utility->showMessage("Unable to activate tracer");
-  if(!tracerEnable &&  result) return utility->showMessage("Tracer deactivated");
-  if(!tracerEnable && !result) return utility->showMessage("Unable to deactivate tracer");
 }
 
 void Utility::synchronizeDSP() {
@@ -322,9 +311,4 @@ string Utility::libraryPath() {
   if(path.empty()) path = {userpath(), "Emulation/"};
   if(path.endsWith("/") == false) path.append("/");
   return path;
-}
-
-Utility::Utility() {
-  tracerEnable = false;
-  statusTime = 0;
 }

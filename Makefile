@@ -6,8 +6,8 @@ gb  := gb
 gba := gba
 
 profile := accuracy
-target := higan
-# target := loki
+# target := higan
+target := loki
 
 ifeq ($(target),loki)
   options += debugger

@@ -34,8 +34,8 @@ QFont pFont::create(string description) {
 
   if(part[0] != "") family = part[0];
   if(part.size() >= 2) size = decimal(part[1]);
-  if(part.size() >= 3) bold = part[2].find("Bold");
-  if(part.size() >= 3) italic = part[2].find("Italic");
+  if(part.size() >= 3) bold = (bool)part[2].find("Bold");
+  if(part.size() >= 3) italic = (bool)part[2].find("Italic");
 
   QFont qtFont;
   qtFont.setFamily(family);

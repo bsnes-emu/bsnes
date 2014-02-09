@@ -1,4 +1,4 @@
-string SPC700::disassemble_opcode(uint16 addr) {
+string SPC700::disassemble_opcode(uint16 addr, bool p) {
   auto read = [&](uint16 addr) -> uint8 {
     return disassembler_read(addr);
   };
@@ -11,7 +11,7 @@ string SPC700::disassemble_opcode(uint16 addr) {
   auto a = [&] { return hex<4>((read(addr + 1) << 0) + (read(addr + 2) << 8)); };
   auto b = [&](unsigned n) { return hex<2>(read(addr + 1 + n)); };
   auto r = [&](unsigned r, unsigned n = 0) { return hex<4>(addr + r + (int8)read(addr + 1 + n)); };
-  auto dp = [&](unsigned n) { return hex<3>((regs.p.p << 8) + read(addr + 1 + n)); };
+  auto dp = [&](unsigned n) { return hex<3>((p << 8) + read(addr + 1 + n)); };
   auto ab = [&] {
     unsigned n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
     return string{ hex<4>(n & 0x1fff), ":", hex<1>(n >> 13) };

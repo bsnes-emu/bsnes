@@ -36,11 +36,11 @@ inline bool strccat(char* target, const char* source, unsigned length);
 inline void strpcpy(char*& target, const char* source, unsigned& length);
 
 //strpos.hpp
-inline optional<unsigned> strpos(const char* str, const char* key);
-inline optional<unsigned> istrpos(const char* str, const char* key);
-inline optional<unsigned> qstrpos(const char* str, const char* key);
-inline optional<unsigned> iqstrpos(const char* str, const char* key);
-template<bool Insensitive = false, bool Quoted = false> inline optional<unsigned> ustrpos(const char* str, const char* key);
+inline maybe<unsigned> strpos(const char* str, const char* key);
+inline maybe<unsigned> istrpos(const char* str, const char* key);
+inline maybe<unsigned> qstrpos(const char* str, const char* key);
+inline maybe<unsigned> iqstrpos(const char* str, const char* key);
+template<bool Insensitive = false, bool Quoted = false> inline maybe<unsigned> ustrpos(const char* str, const char* key);
 
 //trim.hpp
 template<unsigned Limit = 0> inline char* ltrim(char* str, const char* key = " ");

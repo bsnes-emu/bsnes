@@ -16,9 +16,9 @@ template<typename T, typename U> struct map {
     node_t(const T& key, const U& value) : key(key), value(value) {}
   };
 
-  optional<U> find(const T& key) const {
-    if(auto node = root.find({key})) return {true, node().value};
-    return false;
+  maybe<U&> find(const T& key) const {
+    if(auto node = root.find({key})) return node().value;
+    return nothing;
   }
 
   void insert(const T& key, const U& value) { root.insert({key, value}); }
@@ -36,8 +36,8 @@ protected:
 };
 
 template<typename T, typename U> struct bimap {
-  optional<U> find(const T& key) const { return tmap.find(key); }
-  optional<T> find(const U& key) const { return umap.find(key); }
+  maybe<U&> find(const T& key) const { return tmap.find(key); }
+  maybe<T&> find(const U& key) const { return umap.find(key); }
   void insert(const T& key, const U& value) { tmap.insert(key, value); umap.insert(value, key); }
   void remove(const T& key) { if(auto p = tmap.find(key)) { umap.remove(p().value); tmap.remove(key); } }
   void remove(const U& key) { if(auto p = umap.find(key)) { tmap.remove(p().value); umap.remove(key); } }

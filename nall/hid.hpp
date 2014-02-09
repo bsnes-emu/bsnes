@@ -23,11 +23,11 @@ namespace HID {
       input.append({name});
     }
 
-    optional<unsigned> find(const string& name) {
+    maybe<unsigned> find(const string& name) {
       for(unsigned id = 0; id < input.size(); id++) {
-        if(input[id].name == name) return {true, id};
+        if(input[id].name == name) return id;
       }
-      return false;
+      return nothing;
     }
   };
 
@@ -50,11 +50,11 @@ namespace HID {
       group.append({name});
     }
 
-    optional<unsigned> find(const string& name) {
+    maybe<unsigned> find(const string& name) {
       for(unsigned id = 0; id < group.size(); id++) {
-        if(group[id].name == name) return {true, id};
+        if(group[id].name == name) return id;
       }
-      return false;
+      return nothing;
     }
   };
 

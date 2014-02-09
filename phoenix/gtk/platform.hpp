@@ -347,8 +347,9 @@ struct pConsole : public pWidget {
   Console& console;
   GtkWidget* subWidget;
   GtkTextBuffer* textBuffer;
-  string command;
   string previousPrompt;
+  lstring history;
+  unsigned historyOffset = 0;
 
   void print(string text);
   void reset();
@@ -359,7 +360,8 @@ struct pConsole : public pWidget {
   void destructor();
   void orphan();
   bool keyPress(unsigned scancode, unsigned mask);
-  void seekCursorToEnd();
+  void seekToEnd();
+  void seekToMark();
 };
 
 struct pFrame : public pWidget {

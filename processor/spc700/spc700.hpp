@@ -19,7 +19,7 @@ struct SPC700 {
   uint8 opcode;
 
   void serialize(serializer&);
-  string disassemble_opcode(uint16 addr);
+  string disassemble_opcode(uint16 addr, bool p);
 
 protected:
   uint8 op_adc(uint8, uint8);

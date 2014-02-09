@@ -11,7 +11,7 @@ struct Cheat {
   void reset();
   void append(unsigned addr, unsigned data);
   void append(unsigned addr, unsigned comp, unsigned data);
-  optional<unsigned> find(unsigned addr, unsigned comp);
+  maybe<unsigned> find(unsigned addr, unsigned comp);
 };
 
 extern Cheat cheat;

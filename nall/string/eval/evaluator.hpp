@@ -93,16 +93,16 @@ inline int64_t evaluateInteger(Node* node) {
   throw "invalid operator";
 }
 
-inline optional<int64_t> integer(const string& expression) {
+inline maybe<int64_t> integer(const string& expression) {
   try {
     auto tree = new Node;
     const char* p = expression;
     parse(tree, p, 0);
     auto result = evaluateInteger(tree);
     delete tree;
-    return {true, result};
+    return result;
   } catch(const char*) {
-    return false;
+    return nothing;
   }
 }
 
@@ -138,16 +138,16 @@ inline long double evaluateReal(Node* node) {
   throw "invalid operator";
 }
 
-inline optional<long double> real(const string& expression) {
+inline maybe<long double> real(const string& expression) {
   try {
     auto tree = new Node;
     const char* p = expression;
     parse(tree, p, 0);
     auto result = evaluateReal(tree);
     delete tree;
-    return {true, result};
+    return result;
   } catch(const char*) {
-    return false;
+    return nothing;
   }
 }
 

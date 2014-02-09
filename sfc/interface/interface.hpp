@@ -117,13 +117,8 @@ struct Interface : Emulator::Interface {
 
   void paletteUpdate(PaletteMode mode);
 
-  //debugger functions
-  bool tracerEnable(bool);
-  void exportMemory();
-
   Interface();
 
-  file tracer;
   vector<Device> device;
 };
 

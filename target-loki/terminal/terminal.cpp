@@ -24,6 +24,7 @@ void Terminal::command(string t) {
   if(t.beginsWith("ppu/"  )) { source = Debugger::Source::PPU;   t.ltrim<1>("ppu/"  ); }
   if(t.beginsWith("dsp/"  )) { source = Debugger::Source::DSP;   t.ltrim<1>("dsp/"  ); }
   if(t.beginsWith("apu/"  )) { source = Debugger::Source::APU;   t.ltrim<1>("apu/"  ); }
+  if(t.beginsWith("wram/" )) { source = Debugger::Source::WRAM;  t.ltrim<1>("wram/" ); }
   if(t.beginsWith("vram/" )) { source = Debugger::Source::VRAM;  t.ltrim<1>("vram/" ); }
   if(t.beginsWith("oam/"  )) { source = Debugger::Source::OAM;   t.ltrim<1>("oam/"  ); }
   if(t.beginsWith("cgram/")) { source = Debugger::Source::CGRAM; t.ltrim<1>("cgram/"); }
@@ -56,7 +57,7 @@ void Terminal::command(string t) {
     if(args[0] == "write"  ) bp.mode = Debugger::Breakpoint::Mode::Write;
     if(args[0] == "execute") bp.mode = Debugger::Breakpoint::Mode::Execute;
     bp.addr = hex(args[1]);
-    if(argc >= 3) bp.data = {true, (uint8_t)hex(args[2])};
+    if(argc >= 3) bp.data = (uint8_t)hex(args[2]);
     debugger->breakpoints.append(bp);
     debugger->echoBreakpoints();
     return;
@@ -81,13 +82,25 @@ void Terminal::command(string t) {
     return;
   }
 
+  if(s == "counter") {
+    if(source == Debugger::Source::CPU) echo("CPU instructions executed: ", debugger->cpuInstructionCounter, "\n");
+    if(source == Debugger::Source::SMP) echo("SMP instructions executed: ", debugger->smpInstructionCounter, "\n");
+    return;
+  }
+
+  if(s == "counter.reset") {
+    if(source == Debugger::Source::CPU) { echo("CPU instruction counter reset\n"); debugger->cpuInstructionCounter = 0; }
+    if(source == Debugger::Source::SMP) { echo("SMP instruction counter reset\n"); debugger->smpInstructionCounter = 0; }
+    return;
+  }
+
   if(s == "disassemble" && argc >= 1 && argc <= 2) {
-    debugger->echoDisassemble(hex(args[0]), argc == 2 ? decimal(args[1]) : 16);
+    debugger->echoDisassemble(source, hex(args[0]), argc == 2 ? decimal(args[1]) : 16);
     return;
   }
 
   if(s == "export" && argc <= 1) {
-    string filename = {debugger->sourceName(source), "-", string::datetime().transform(" :", "--"), ".bin"};
+    string filename = {debugger->sourceName(source), "-", string::datetime().transform(" :", "--"), ".ram"};
     if(argc >= 1) filename = args[0];
     string pathname = {interface->pathname, "loki/", filename};
     debugger->memoryExport(source, pathname);
@@ -118,68 +131,65 @@ void Terminal::command(string t) {
 
   if(s == "run.for" && argc == 1) {
     debugger->run();
-    debugger->cpuRunFor = {true, (unsigned)decimal(args[0])};
+    if(source == Debugger::Source::CPU) debugger->cpuRunFor = (unsigned)decimal(args[0]);
+    if(source == Debugger::Source::SMP) debugger->smpRunFor = (unsigned)decimal(args[0]);
     return;
   }
 
   if(s == "run.to" && argc == 1) {
     debugger->run();
-    debugger->cpuRunTo = {true, (unsigned)hex(args[0])};
+    if(source == Debugger::Source::CPU) debugger->cpuRunTo = (unsigned)hex(args[0]);
+    if(source == Debugger::Source::SMP) debugger->smpRunTo = (unsigned)hex(args[0]);
     return;
   }
 
   if(s == "step" && argc == 0) {
     debugger->run();
-    debugger->cpuStepFor = {true, 1u};
+    if(source == Debugger::Source::CPU) debugger->cpuStepFor = 1u;
+    if(source == Debugger::Source::SMP) debugger->smpStepFor = 1u;
     return;
   }
 
   if(s == "step.for" && argc == 1) {
     debugger->run();
-    debugger->cpuStepFor = {true, (unsigned)decimal(args[0])};
+    if(source == Debugger::Source::CPU) debugger->cpuStepFor = (unsigned)decimal(args[0]);
+    if(source == Debugger::Source::SMP) debugger->smpStepFor = (unsigned)decimal(args[0]);
     return;
   }
 
   if(s == "step.to" && argc == 1) {
     debugger->run();
-    debugger->cpuStepTo = {true, (unsigned)hex(args[0])};
+    if(source == Debugger::Source::CPU) debugger->cpuStepTo = (unsigned)hex(args[0]);
+    if(source == Debugger::Source::SMP) debugger->smpStepTo = (unsigned)hex(args[0]);
     return;
   }
 
   if(s == "tracer.enable" && argc <= 1) {
-    if(debugger->tracerFile.open() == false) {
-      string filename = {"trace-", string::datetime().transform(" :", "--"), ".log"};
-      if(argc >= 1) filename = args[0];
-      string pathname = {interface->pathname, "loki/", filename};
-      if(debugger->tracerFile.open(pathname, file::mode::write)) {
-        echo("Tracer enabled\n");
-      }
-    }
+    string filename = {debugger->sourceName(source), "-trace-", string::datetime().transform(" :", "--"), ".log"};
+    if(argc >= 1) filename = args[0];
+    string pathname = {interface->pathname, "loki/", filename};
+    debugger->tracerEnable(source, pathname);
     return;
   }
 
   if(s == "tracer.disable") {
-    if(debugger->tracerFile.open() == true) {
-      debugger->tracerFile.close();
-      echo("Tracer disabled\n");
-    }
+    debugger->tracerDisable(source);
     return;
   }
 
-  if(s == "tracer.mask" && argc == 1) {
-    if(args[0] != "false") {
-      debugger->tracerMask.resize(0x1000000);
-      debugger->tracerMask.clear();
-      echo("Tracer mask enabled\n");
-    } else {
-      debugger->tracerMask.reset();
-      echo("Tracer mask disabled\n");
-    }
+  if(s == "tracer.mask.enable") {
+    debugger->tracerMaskEnable(source);
+    return;
+  }
+
+  if(s == "tracer.mask.disable") {
+    debugger->tracerMaskDisable(source);
     return;
   }
 
   if(s == "usage.reset") {
-    memset(debugger->usageCPU, 0, 0x1000000);
+    if(source == Debugger::Source::CPU) memset(debugger->cpuUsage, 0x00, 0x1000000);
+    if(source == Debugger::Source::APU) memset(debugger->apuUsage, 0x00, 0x10000);
     return;
   }
 

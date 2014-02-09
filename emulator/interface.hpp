@@ -111,10 +111,6 @@ struct Interface {
   //utility functions
   enum class PaletteMode : unsigned { Literal, Channel, Standard, Emulation };
   virtual void paletteUpdate(PaletteMode mode) {}
-
-  //debugger functions
-  virtual bool tracerEnable(bool) { return false; }
-  virtual void exportMemory() {}
 };
 
 }

@@ -20,37 +20,30 @@ Debugger::Debugger() {
 void Debugger::load() {
   directory::create({interface->pathname, "loki/"});
 
-  usageCPU = new uint8[0x1000000]();
-  usageAPU = new uint8[0x10000]();
+  cpuUsage = new uint8[0x1000000]();
+  apuUsage = new uint8[0x10000]();
   file fp;
 
-  if(fp.open({interface->pathname, "loki/usage.cpu.bin"}, file::mode::read)) {
-    if(fp.size() == 0x1000000) fp.read(usageCPU, 0x1000000);
+  if(fp.open({interface->pathname, "loki/cpu.usage.map"}, file::mode::read)) {
+    if(fp.size() == 0x1000000) fp.read(cpuUsage, 0x1000000);
     fp.close();
   }
 
-  if(fp.open({interface->pathname, "loki/usage.apu.bin"}, file::mode::read)) {
-    if(fp.size() == 0x10000) fp.read(usageAPU, 0x10000);
+  if(fp.open({interface->pathname, "loki/apu.usage.map"}, file::mode::read)) {
+    if(fp.size() == 0x10000) fp.read(apuUsage, 0x10000);
     fp.close();
   }
 }
 
 void Debugger::unload() {
-  if(tracerFile.open()) tracerFile.close();
-
-  file fp;
-  if(fp.open({interface->pathname, "loki/usage.cpu.bin"}, file::mode::write)) {
-    fp.write(usageCPU, 0x1000000);
-    fp.close();
-  }
-  if(fp.open({interface->pathname, "loki/usage.apu.bin"}, file::mode::write)) {
-    fp.write(usageAPU, 0x10000);
-    fp.close();
-  }
-  delete[] usageCPU;
-  delete[] usageAPU;
-  usageCPU = nullptr;
-  usageAPU = nullptr;
+  if(cpuTracerFile.open()) cpuTracerFile.close();
+  if(smpTracerFile.open()) smpTracerFile.close();
+  file::write({interface->pathname, "loki/cpu.usage.map"}, cpuUsage, 0x1000000);
+  file::write({interface->pathname, "loki/apu.usage.map"}, apuUsage, 0x10000);
+  delete[] cpuUsage;
+  delete[] apuUsage;
+  cpuUsage = nullptr;
+  apuUsage = nullptr;
 }
 
 void Debugger::main() {
@@ -68,10 +61,14 @@ void Debugger::run() {
 
 void Debugger::stop() {
   running = false;
-  cpuRunFor.reset();
-  cpuRunTo.reset();
-  cpuStepFor.reset();
-  cpuStepTo.reset();
+  cpuRunFor = nothing;
+  cpuRunTo = nothing;
+  cpuStepFor = nothing;
+  cpuStepTo = nothing;
+  smpRunFor = nothing;
+  smpRunTo = nothing;
+  smpStepFor = nothing;
+  smpStepTo = nothing;
 }
 
 void Debugger::leave() {
@@ -86,10 +83,11 @@ bool Debugger::breakpointTest(Source source, Breakpoint::Mode mode, unsigned add
     if(bp.mode != mode) continue;
     if(bp.addr != addr) continue;
     if(bp.mode != Breakpoint::Mode::Execute && bp.data && bp.data() != data) continue;
-    echo("Breakpoint #", n, " hit");
-    if(bp.mode == Breakpoint::Mode::Read ) echo("; read ",  hex<2>(data));
-    if(bp.mode == Breakpoint::Mode::Write) echo("; wrote ", hex<2>(data));
-    echo("; triggered: ", ++bp.triggered, "\n");
+    string output = {"Breakpoint #", n, " hit"};
+    if(bp.mode == Breakpoint::Mode::Read ) output.append("; read ",  hex<2>(data));
+    if(bp.mode == Breakpoint::Mode::Write) output.append("; wrote ", hex<2>(data));
+    output.append("; triggered: ", ++bp.triggered);
+    echo(output, "\n");
     return true;
   }
   return false;
@@ -98,28 +96,30 @@ bool Debugger::breakpointTest(Source source, Breakpoint::Mode mode, unsigned add
 string Debugger::cpuDisassemble() {
   char text[4096];
   SFC::cpu.disassemble_opcode(text);
-  return {text, " I:", (unsigned)SFC::cpu.field(), " V:", format<3>(SFC::cpu.vcounter()), " H:", format<4>(SFC::cpu.hcounter())};
+  return {text, " F:", (unsigned)SFC::cpu.field(), " V:", format<3>(SFC::cpu.vcounter()), " H:", format<4>(SFC::cpu.hcounter())};
 }
 
 string Debugger::cpuDisassemble(unsigned addr, bool e, bool m, bool x) {
   char text[4096];
   SFC::cpu.disassemble_opcode(text, addr, e, m, x);
-  return {text, " I:", (unsigned)SFC::cpu.field(), " V:", format<3>(SFC::cpu.vcounter()), " H:", format<4>(SFC::cpu.hcounter())};
+  return {text, " F:", (unsigned)SFC::cpu.field(), " V:", format<3>(SFC::cpu.vcounter()), " H:", format<4>(SFC::cpu.hcounter())};
 }
 
 void Debugger::cpuExec(uint24 addr) {
-  usageCPU[addr] |= Usage::Execute;
-  if(SFC::cpu.regs.e   == 0) usageCPU[addr] &= ~Usage::FlagE;
-  if(SFC::cpu.regs.p.m == 0) usageCPU[addr] &= ~Usage::FlagM;
-  if(SFC::cpu.regs.p.x == 0) usageCPU[addr] &= ~Usage::FlagX;
-  if(SFC::cpu.regs.e   == 1) usageCPU[addr] |=  Usage::FlagE;
-  if(SFC::cpu.regs.p.m == 1) usageCPU[addr] |=  Usage::FlagM;
-  if(SFC::cpu.regs.p.x == 1) usageCPU[addr] |=  Usage::FlagX;
+  cpuUsage[addr] |= Usage::Execute;
+  if(SFC::cpu.regs.e   == 0) cpuUsage[addr] &= ~Usage::FlagE;
+  if(SFC::cpu.regs.p.m == 0) cpuUsage[addr] &= ~Usage::FlagM;
+  if(SFC::cpu.regs.p.x == 0) cpuUsage[addr] &= ~Usage::FlagX;
+  if(SFC::cpu.regs.e   == 1) cpuUsage[addr] |=  Usage::FlagE;
+  if(SFC::cpu.regs.p.m == 1) cpuUsage[addr] |=  Usage::FlagM;
+  if(SFC::cpu.regs.p.x == 1) cpuUsage[addr] |=  Usage::FlagX;
 
-  if(tracerFile.open()) {
-    if(!tracerMask || tracerMask[addr] == false) {
-      if(tracerMask) tracerMask[addr] = true;
-      tracerFile.print(cpuDisassemble(), "\n");
+  cpuInstructionCounter++;
+
+  if(cpuTracerFile.open()) {
+    if(!cpuTracerMask || cpuTracerMask[addr] == false) {
+      if(cpuTracerMask) cpuTracerMask[addr] = true;
+      cpuTracerFile.print(cpuDisassemble(), "\n");
     }
   }
 
@@ -154,12 +154,12 @@ void Debugger::cpuExec(uint24 addr) {
 }
 
 void Debugger::cpuRead(uint24 addr, uint8 data) {
-  usageCPU[addr] |= Usage::Read;
+  cpuUsage[addr] |= Usage::Read;
   if(breakpointTest(Source::CPU, Breakpoint::Mode::Read, addr, data)) leave();
 }
 
 void Debugger::cpuWrite(uint24 addr, uint8 data) {
-  usageCPU[addr] |= Usage::Write;
+  cpuUsage[addr] |= Usage::Write;
   if(breakpointTest(Source::CPU, Breakpoint::Mode::Write, addr, data)) leave();
 }
 
@@ -182,21 +182,30 @@ void Debugger::echoBreakpoints() {
   }
 }
 
-void Debugger::echoDisassemble(unsigned addr, signed size) {
-  if(!(usageCPU[addr] & Usage::Execute)) return echo("No usage data available for cpu/", hex<6>(addr), "\n");
+void Debugger::echoDisassemble(Source source, unsigned addr, signed size) {
+  if(source != Source::CPU && source != Source::SMP) return;
+  const unsigned maximumDisplacement = (source == Source::CPU ? 5 : 4);  //maximum opcode length
+  uint8* usage = (source == Source::CPU ? cpuUsage : apuUsage);
+  if(!(usage[addr] & Usage::Execute)) return echo("No usage data available for ", sourceName(source), "/", hex<6>(addr), "\n");
 
   while(size > 0) {
-    string text = cpuDisassemble(addr, usageCPU[addr] & Usage::FlagE, usageCPU[addr] & Usage::FlagM, usageCPU[addr] & Usage::FlagX);
+    string text;
+    if(source == Source::CPU) {
+      text = cpuDisassemble(addr, usage[addr] & Usage::FlagE, usage[addr] & Usage::FlagM, usage[addr] & Usage::FlagX);
+    }
+    if(source == Source::SMP) {
+      text = smpDisassemble(addr, usage[addr] & Usage::FlagP);
+    }
     text.resize(20);  //remove register information
     echo(text, "\n");
     if(--size <= 0) break;
 
     unsigned displacement = 1;
-    while(displacement < 5) {  //maximum opcode length is four bytes
-      if(usageCPU[addr + displacement] & Usage::Execute) break;
+    while(displacement < maximumDisplacement) {  //maximum opcode length is four bytes
+      if(usage[addr + displacement] & Usage::Execute) break;
       displacement++;
     }
-    if(displacement >= 5) {
+    if(displacement >= maximumDisplacement) {
       echo("...\n");
       return;
     }
@@ -205,6 +214,7 @@ void Debugger::echoDisassemble(unsigned addr, signed size) {
 }
 
 void Debugger::echoHex(Source source, unsigned addr, signed size) {
+  if(memorySize(source) == 0) return;  //not a valid memory pool
   while(size > 0) {
     string hexdata, asciidata;
     for(unsigned n = 0; n < 16; n++) {
@@ -245,6 +255,10 @@ uint8 Debugger::memoryRead(Source source, unsigned addr) {
     return SFC::smp.apuram[addr & 0xffff];
   }
 
+  if(source == Source::WRAM) {
+    return SFC::cpu.wram[addr & 0x1ffff];
+  }
+
   if(source == Source::VRAM) {
     return SFC::ppu.vram[addr & 0xffff];
   }
@@ -264,11 +278,12 @@ unsigned Debugger::memorySize(Source source) {
   switch(source) {
   case Source::CPU: return 0x1000000;
   case Source::APU: return 0x10000;
+  case Source::WRAM: return 0x20000;
   case Source::VRAM: return 0x10000;
   case Source::OAM: return 544;
   case Source::CGRAM: return 512;
   }
-  return 1;
+  return 0;
 }
 
 void Debugger::memoryWrite(Source source, unsigned addr, uint8 data) {
@@ -279,6 +294,11 @@ void Debugger::memoryWrite(Source source, unsigned addr, uint8 data) {
 
   if(source == Source::APU) {
     SFC::smp.apuram[addr & 0xffff] = data;
+    return;
+  }
+
+  if(source == Source::WRAM) {
+    SFC::cpu.wram[addr & 0x1ffff] = data;
     return;
   }
 
@@ -324,22 +344,66 @@ void Debugger::ppuVramWrite(uint16 addr, uint8 data) {
   if(breakpointTest(Source::VRAM, Breakpoint::Mode::Write, addr, data)) leave();
 }
 
+string Debugger::smpDisassemble() {
+  return SFC::smp.disassemble_opcode(SFC::smp.regs.pc, SFC::smp.regs.p.p);
+}
+
+string Debugger::smpDisassemble(uint16 addr, bool p) {
+  return SFC::smp.disassemble_opcode(addr, p);
+}
+
 void Debugger::smpExec(uint16 addr) {
-  usageAPU[addr] |= Usage::Execute;
+  apuUsage[addr] |= Usage::Execute;
+  if(SFC::smp.regs.p.p == 0) apuUsage[addr] &= ~Usage::FlagP;
+  if(SFC::smp.regs.p.p == 1) apuUsage[addr] |=  Usage::FlagP;
+
+  smpInstructionCounter++;
+
+  if(smpTracerFile.open()) {
+    if(!smpTracerMask || smpTracerMask[addr] == false) {
+      if(smpTracerMask) smpTracerMask[addr] = true;
+      smpTracerFile.print(smpDisassemble(), "\n");
+    }
+  }
 
   if(breakpointTest(Source::SMP, Breakpoint::Mode::Execute, addr)) {
-    leave();
+    echo(smpDisassemble(), "\n");
+    return leave();
+  }
+
+  if(smpRunFor) {
+    if(--smpRunFor() == 0) {
+      echo(smpDisassemble(), "\n");
+      return leave();
+    }
+  }
+
+  if(smpRunTo) {
+    if(addr == smpRunTo()) {
+      echo(smpDisassemble(), "\n");
+      return leave();
+    }
+  }
+
+  if(smpStepFor) {
+    echo(smpDisassemble(), "\n");
+    if(--smpStepFor() == 0) return leave();
+  }
+
+  if(smpStepTo) {
+    echo(smpDisassemble(), "\n");
+    if(addr == smpStepTo()) return leave();
   }
 }
 
 void Debugger::smpRead(uint16 addr, uint8 data) {
-  usageAPU[addr] |= Usage::Read;
+  apuUsage[addr] |= Usage::Read;
   if(breakpointTest(Source::SMP, Breakpoint::Mode::Read, addr, data)) leave();
   if(breakpointTest(Source::APU, Breakpoint::Mode::Read, addr, data)) leave();
 }
 
 void Debugger::smpWrite(uint16 addr, uint8 data) {
-  usageAPU[addr] |= Usage::Write;
+  apuUsage[addr] |= Usage::Write;
   if(breakpointTest(Source::SMP, Breakpoint::Mode::Write, addr, data)) leave();
   if(breakpointTest(Source::APU, Breakpoint::Mode::Write, addr, data)) leave();
 }
@@ -351,9 +415,43 @@ string Debugger::sourceName(Source source) {
   case Source::PPU: return "ppu";
   case Source::DSP: return "dsp";
   case Source::APU: return "apu";
+  case Source::WRAM: return "wram";
   case Source::VRAM: return "vram";
   case Source::OAM: return "oam";
   case Source::CGRAM: return "cgram";
   }
   return "none";
+}
+
+void Debugger::tracerDisable(Source source) {
+  if(source != Source::CPU && source != Source::SMP) return;
+  file& tracerFile = (source == Source::CPU ? cpuTracerFile : smpTracerFile);
+  if(tracerFile.open() == false) return;
+  tracerFile.close();
+  echo(sourceName(source).upper(), " tracer disabled\n");
+}
+
+void Debugger::tracerEnable(Source source, string filename) {
+  if(source != Source::CPU && source != Source::SMP) return;
+  file& tracerFile = (source == Source::CPU ? cpuTracerFile : smpTracerFile);
+  if(tracerFile.open() == true) return;
+  if(tracerFile.open(filename, file::mode::write)) {
+    echo(sourceName(source).upper(), " tracer enabled\n");
+  }
+}
+
+void Debugger::tracerMaskDisable(Source source) {
+  if(source != Source::CPU && source != Source::SMP) return;
+  bitvector& tracerMask = (source == Source::CPU ? cpuTracerMask : smpTracerMask);
+  tracerMask.reset();
+  echo(sourceName(source).upper(), " tracer mask disabled\n");
+}
+
+void Debugger::tracerMaskEnable(Source source) {
+  if(source != Source::CPU && source != Source::SMP) return;
+  bitvector& tracerMask = (source == Source::CPU ? cpuTracerMask : smpTracerMask);
+  unsigned size = (source == Source::CPU ? 0x1000000 : 0x10000);
+  tracerMask.resize(size);
+  tracerMask.clear();
+  echo(sourceName(source).upper(), " tracer mask enabled\n");
 }
