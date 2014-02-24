@@ -31,10 +31,16 @@ Size pLineEdit::minimumSize() {
   return {size.width + 10, size.height + 8};
 }
 
+void pLineEdit::setBackgroundColor(Color color) {
+}
+
 void pLineEdit::setEditable(bool editable) {
   @autoreleasepool {
     [cocoaView setEditable:editable];
   }
+}
+
+void pLineEdit::setForegroundColor(Color color) {
 }
 
 void pLineEdit::setText(string text) {

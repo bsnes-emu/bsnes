@@ -14,7 +14,9 @@ struct pLineEdit : public pWidget {
   CocoaLineEdit* cocoaLineEdit = nullptr;
 
   Size minimumSize();
+  void setBackgroundColor(Color color);
   void setEditable(bool editable);
+  void setForegroundColor(Color color);
   void setText(string text);
   string text();
 

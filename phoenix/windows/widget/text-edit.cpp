@@ -1,5 +1,8 @@
 namespace phoenix {
 
+void pTextEdit::setBackgroundColor(Color color) {
+}
+
 void pTextEdit::setCursorPosition(unsigned position) {
   if(position == ~0) position >>= 1;  //Edit_SetSel takes signed type
   Edit_SetSel(hwnd, position, position);
@@ -8,6 +11,9 @@ void pTextEdit::setCursorPosition(unsigned position) {
 
 void pTextEdit::setEditable(bool editable) {
   SendMessage(hwnd, EM_SETREADONLY, editable == false, (LPARAM)0);
+}
+
+void pTextEdit::setForegroundColor(Color color) {
 }
 
 void pTextEdit::setText(string text) {

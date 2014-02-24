@@ -24,22 +24,26 @@ char* strupper(char* str) {
 
 char* qstrlower(char* s) {
   if(!s) return nullptr;
+  char* base = s;
   bool quoted = false;
   while(*s) {
     if(*s == '\"' || *s == '\'') quoted ^= 1;
     if(quoted == false && *s >= 'A' && *s <= 'Z') *s += 0x20;
     s++;
   }
+  return base;
 }
 
 char* qstrupper(char* s) {
   if(!s) return nullptr;
+  char* base = s;
   bool quoted = false;
   while(*s) {
     if(*s == '\"' || *s == '\'') quoted ^= 1;
     if(quoted == false && *s >= 'a' && *s <= 'z') *s -= 0x20;
     s++;
   }
+  return base;
 }
 
 char* strtr(char* dest, const char* before, const char* after) {

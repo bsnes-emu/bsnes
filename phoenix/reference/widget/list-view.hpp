@@ -7,8 +7,10 @@ struct pListView : public pWidget {
   void autoSizeColumns();
   void remove(unsigned selection);
   void reset();
+  void setBackgroundColor(Color color);
   void setCheckable(bool checkable);
   void setChecked(unsigned selection, bool checked);
+  void setForegroundColor(Color color);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
   void setImage(unsigned selection, unsigned position, const image& image);

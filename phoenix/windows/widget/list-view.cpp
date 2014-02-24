@@ -56,6 +56,9 @@ void pListView::reset() {
   buildImageList();  //free previously allocated images
 }
 
+void pListView::setBackgroundColor(Color color) {
+}
+
 void pListView::setCheckable(bool checkable) {
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES | (checkable ? LVS_EX_CHECKBOXES : 0));
 }
@@ -64,6 +67,9 @@ void pListView::setChecked(unsigned selection, bool checked) {
   locked = true;
   ListView_SetCheckState(hwnd, selection, checked);
   locked = false;
+}
+
+void pListView::setForegroundColor(Color color) {
 }
 
 void pListView::setGeometry(Geometry geometry) {

@@ -11,7 +11,9 @@ struct pHexEdit : public pWidget {
   HexEdit& hexEdit;
   CocoaHexEdit* cocoaHexEdit = nullptr;
 
+  void setBackgroundColor(Color color);
   void setColumns(unsigned columns);
+  void setForegroundColor(Color color);
   void setLength(unsigned length);
   void setOffset(unsigned offset);
   void setRows(unsigned rows);

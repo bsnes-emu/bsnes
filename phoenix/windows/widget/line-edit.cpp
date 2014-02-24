@@ -5,8 +5,14 @@ Size pLineEdit::minimumSize() {
   return {size.width + 12, size.height + 10};
 }
 
+void pLineEdit::setBackgroundColor(Color color) {
+}
+
 void pLineEdit::setEditable(bool editable) {
   SendMessage(hwnd, EM_SETREADONLY, editable == false, 0);
+}
+
+void pLineEdit::setForegroundColor(Color color) {
 }
 
 void pLineEdit::setText(string text) {

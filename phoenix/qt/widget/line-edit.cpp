@@ -5,8 +5,14 @@ Size pLineEdit::minimumSize() {
   return {size.width + 12, size.height + 12};
 }
 
+void pLineEdit::setBackgroundColor(Color color) {
+}
+
 void pLineEdit::setEditable(bool editable) {
   qtLineEdit->setReadOnly(!editable);
+}
+
+void pLineEdit::setForegroundColor(Color color) {
 }
 
 void pLineEdit::setText(string text) {

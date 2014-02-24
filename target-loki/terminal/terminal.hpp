@@ -19,6 +19,7 @@ struct Terminal : Window {
   void inputEvent(HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue);
   void reset();
   void print(const string& text);
+  void setColors();
 
   VerticalLayout layout;
   Console console;

@@ -8,7 +8,7 @@
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 
-#if defined(PLATFORM_X) || defined(PLATFORM_MACOSX)
+#if defined(PLATFORM_XORG) || defined(PLATFORM_MACOSX)
   #include <dlfcn.h>
 #elif defined(PLATFORM_WINDOWS)
   #include <windows.h>
@@ -35,7 +35,7 @@ private:
   uintptr_t handle = 0;
 };
 
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_XORG)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
   handle = (uintptr_t)dlopen(string(path, !path.empty() && !path.endsWith("/") ? "/" : "", "lib", name, ".so"), RTLD_LAZY);

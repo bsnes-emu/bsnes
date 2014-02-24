@@ -60,8 +60,8 @@ void Audio::flush() {
     signed cop_right = (int16)(cop_sample >> 16);
 
     interface->audioSample(
-      sclamp<16>((dsp_left  + cop_left ) / 2),
-      sclamp<16>((dsp_right + cop_right) / 2)
+      sclamp<16>(dsp_left  + cop_left ),
+      sclamp<16>(dsp_right + cop_right)
     );
   }
 }

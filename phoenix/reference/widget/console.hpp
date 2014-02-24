@@ -5,6 +5,8 @@ struct pConsole : public pWidget {
 
   void print(string text);
   void reset();
+  void setBackgroundColor(Color color);
+  void setForegroundColor(Color color);
   void setPrompt(string prompt);
 
   pConsole(Console& console) : pWidget(console), console(console) {}

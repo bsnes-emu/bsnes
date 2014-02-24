@@ -9,6 +9,11 @@ bool pTextEdit::focused() {
   return GTK_WIDGET_HAS_FOCUS(subWidget);
 }
 
+void pTextEdit::setBackgroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
 void pTextEdit::setCursorPosition(unsigned position) {
   GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
   GtkTextIter iter;
@@ -20,6 +25,11 @@ void pTextEdit::setCursorPosition(unsigned position) {
 
 void pTextEdit::setEditable(bool editable) {
   gtk_text_view_set_editable(GTK_TEXT_VIEW(subWidget), editable);
+}
+
+void pTextEdit::setForegroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &gdkColor);
 }
 
 void pTextEdit::setText(string text) {

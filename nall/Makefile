@@ -34,29 +34,45 @@ ifeq ($(platform),)
   endif
 endif
 
+cflags := -x c -std=c99
+objcflags := -x objective-c -std=c99
+cppflags := -x c++ -std=c++11
+objcppflags := -x objective-c++ -std=c++11
+flags :=
+link :=
+
 # compiler detection
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
-    flags := -fwrapv
-    link :=
   else ifeq ($(platform),macosx)
     compiler := clang++
-    flags := -fwrapv -w -stdlib=libc++
-    link := -lc++ -lobjc
   else ifeq ($(platform),bsd)
-    compiler := clang++
-    flags := -fwrapv -w -I/usr/local/include
+    compiler := g++47
   else
     compiler := g++
-    flags := -fwrapv
-    link :=
   endif
+endif
 
-  cflags := -x c -std=c99
-  objcflags := -x objective-c -std=c99
-  cppflags := -x c++ -std=c++11
-  objcppflags := -x objective-c++ -std=c++11
+# gcc settings
+ifeq ($(findstring g++,$(compiler)),g++)
+  flags += -fwrapv
+endif
+
+# clang settings
+ifeq ($(findstring clang++,$(compiler)),clang++)
+  flags += -fwrapv -w
+endif
+
+# macosx settings
+ifeq ($(platform),macosx)
+  flags += -stdlib=libc++
+  link += -lc++ -lobjc
+endif
+
+# bsd settings
+ifeq ($(platform),bsd)
+  flags += -I/usr/local/include
 endif
 
 # cross-compilation support

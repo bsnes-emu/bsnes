@@ -18,6 +18,16 @@ void pConsole::reset() {
   seekToEnd();
 }
 
+void pConsole::setBackgroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
+void pConsole::setForegroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
 void pConsole::setPrompt(string prompt) {
   //erase previous prompt and replace it with new prompt
   GtkTextIter lhs, rhs;
@@ -40,11 +50,6 @@ void pConsole::constructor() {
   gtk_container_add(GTK_CONTAINER(gtkWidget), subWidget);
 
   textBuffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(subWidget));
-
-  GdkColor background = CreateColor(72, 24, 24);
-  gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &background);
-  GdkColor foreground = CreateColor(255, 255, 255);
-  gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &foreground);
 
   g_signal_connect(G_OBJECT(subWidget), "key-press-event", G_CALLBACK(Console_keyPress), (gpointer)&console);
 

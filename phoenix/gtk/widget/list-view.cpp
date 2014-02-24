@@ -61,6 +61,11 @@ void pListView::reset() {
   gtk_scrolled_window_set_vadjustment(GTK_SCROLLED_WINDOW(gtkWidget), 0);
 }
 
+void pListView::setBackgroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
 void pListView::setCheckable(bool checkable) {
   gtk_cell_renderer_set_visible(column(0).checkbutton, checkable);
 }
@@ -70,6 +75,11 @@ void pListView::setChecked(unsigned selection, bool checked) {
   GtkTreeIter iter;
   gtk_tree_model_get_iter_from_string(model, &iter, string(selection));
   gtk_list_store_set(GTK_LIST_STORE(model), &iter, 0, checked, -1);
+}
+
+void pListView::setForegroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &gdkColor);
 }
 
 void pListView::setHeaderText(const lstring& text) {

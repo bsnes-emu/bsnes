@@ -432,6 +432,8 @@ public:
 
   void print(string text);
   void reset();
+  void setBackgroundColor(Color color);
+  void setForegroundColor(Color color);
   void setPrompt(string prompt);
 
   pConsole(Console& console) : pWidget(console), console(console) {}
@@ -480,7 +482,9 @@ public:
   QHBoxLayout* qtLayout;
   QtHexEditScrollBar* qtScroll;
 
+  void setBackgroundColor(Color color);
   void setColumns(unsigned columns);
+  void setForegroundColor(Color color);
   void setLength(unsigned length);
   void setOffset(unsigned offset);
   void setRows(unsigned rows);
@@ -560,7 +564,9 @@ public:
   QLineEdit* qtLineEdit;
 
   Size minimumSize();
+  void setBackgroundColor(Color color);
   void setEditable(bool editable);
+  void setForegroundColor(Color color);
   void setText(string text);
   string text();
 
@@ -585,8 +591,10 @@ public:
   void autoSizeColumns();
   void remove(unsigned selection);
   void reset();
+  void setBackgroundColor(Color color);
   void setCheckable(bool checkable);
   void setChecked(unsigned selection, bool checked);
+  void setForegroundColor(Color color);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
   void setImage(unsigned selection, unsigned position, const image& image);
@@ -699,8 +707,10 @@ public:
   TextEdit& textEdit;
   QTextEdit* qtTextEdit;
 
+  void setBackgroundColor(Color color);
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
+  void setForegroundColor(Color color);
   void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();

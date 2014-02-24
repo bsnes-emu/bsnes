@@ -1,21 +1,19 @@
 #ifndef NALL_PLATFORM_HPP
 #define NALL_PLATFORM_HPP
 
+#include <nall/intrinsics.hpp>
+
 namespace Math {
   static const long double e  = 2.71828182845904523536;
   static const long double Pi = 3.14159265358979323846;
 }
 
-#if defined(_WIN32)
+#if defined(PLATFORM_WINDOWS)
   //minimum version needed for _wstat64, etc
   #undef  __MSVCRT_VERSION__
   #define __MSVCRT_VERSION__ 0x0601
   #include <nall/windows/utf8.hpp>
 #endif
-
-//=========================
-//standard platform headers
-//=========================
 
 #include <limits>
 #include <utility>
@@ -33,7 +31,7 @@ namespace Math {
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#if defined(_WIN32)
+#if defined(PLATFORM_WINDOWS)
   #include <io.h>
   #include <direct.h>
   #include <shlobj.h>
@@ -47,16 +45,11 @@ namespace Math {
   #define dllexport
 #endif
 
-//==========
-//Visual C++
-//==========
-
-#if defined(_MSC_VER)
-  #pragma warning(disable:4996)  //disable libc "deprecation" warnings
+#if defined(COMPILER_CL)
   #define va_copy(dest, src) ((dest) = (src))
 #endif
 
-#if defined(_WIN32)
+#if defined(PLATFORM_WINDOWS)
   __declspec(dllimport) int _fileno(FILE*);
 
   inline int access(const char* path, int amode) { return _waccess(nall::utf16_t(path), amode); }
@@ -68,14 +61,10 @@ namespace Math {
   inline void usleep(unsigned milliseconds) { Sleep(milliseconds / 1000); }
 #endif
 
-//================
-//inline expansion
-//================
-
-#if defined(__clang__) || defined(__GNUC__)
+#if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
   #define neverinline   __attribute__((noinline))
   #define alwaysinline  inline __attribute__((always_inline))
-#elif defined(_MSC_VER)
+#elif defined(COMPILER_CL)
   #define neverinline   __declspec(noinline)
   #define alwaysinline  inline __forceinline
 #else
@@ -83,11 +72,7 @@ namespace Math {
   #define alwaysinline  inline
 #endif
 
-//===========
-//unreachable
-//===========
-
-#if defined(__clang__) || defined(__GNUC__)
+#if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
   #define unreachable __builtin_unreachable()
 #else
   #define unreachable throw

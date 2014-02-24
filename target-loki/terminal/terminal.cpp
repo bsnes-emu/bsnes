@@ -13,6 +13,7 @@ Terminal::Terminal() {
 
   console.setFont(Font::monospace(8));
   console.setPrompt("$ ");
+  setColors();
 
   layout.append(console, {~0, ~0});
   append(layout);
@@ -366,4 +367,18 @@ void Terminal::reset() {
 
 void Terminal::print(const string& text) {
   console.print(text);
+}
+
+void Terminal::setColors() {
+  console.setBackgroundColor({
+    (uint8)(settings->terminal.backgroundColor >> 16),
+    (uint8)(settings->terminal.backgroundColor >>  8),
+    (uint8)(settings->terminal.backgroundColor >>  0)
+  });
+
+  console.setForegroundColor({
+    (uint8)(settings->terminal.foregroundColor >> 16),
+    (uint8)(settings->terminal.foregroundColor >>  8),
+    (uint8)(settings->terminal.foregroundColor >>  0)
+  });
 }

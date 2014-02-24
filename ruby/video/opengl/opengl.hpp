@@ -1,4 +1,4 @@
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_XORG)
   #include <GL/gl.h>
   #include <GL/glx.h>
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))

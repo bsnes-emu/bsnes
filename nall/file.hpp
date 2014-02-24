@@ -188,7 +188,7 @@ struct file : varint {
     if(!fp) return;  //file not open
     buffer_flush();
 
-    uintmax_t req_offset = file_offset;
+    intmax_t req_offset = file_offset;
     switch(index_) {
     case index::absolute: req_offset  = offset; break;
     case index::relative: req_offset += offset; break;

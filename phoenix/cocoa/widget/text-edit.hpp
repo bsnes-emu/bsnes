@@ -15,9 +15,11 @@ struct pTextEdit : public pWidget {
   TextEdit& textEdit;
   CocoaTextEdit* cocoaTextEdit = nullptr;
 
+  void setBackgroundColor(Color color);
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
   void setFont(string font);
+  void setForegroundColor(Color color);
   void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();

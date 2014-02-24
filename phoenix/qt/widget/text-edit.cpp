@@ -1,5 +1,8 @@
 namespace phoenix {
 
+void pTextEdit::setBackgroundColor(Color color) {
+}
+
 void pTextEdit::setCursorPosition(unsigned position) {
   QTextCursor cursor = qtTextEdit->textCursor();
   unsigned lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
@@ -9,6 +12,9 @@ void pTextEdit::setCursorPosition(unsigned position) {
 
 void pTextEdit::setEditable(bool editable) {
   qtTextEdit->setTextInteractionFlags(editable ? Qt::TextEditorInteraction : Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
+}
+
+void pTextEdit::setForegroundColor(Color color) {
 }
 
 void pTextEdit::setText(string text) {

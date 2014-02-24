@@ -12,10 +12,16 @@ void pListView::remove(unsigned selection) {
 void pListView::reset() {
 }
 
+void pListView::setBackgroundColor(Color color) {
+}
+
 void pListView::setCheckable(bool checkable) {
 }
 
 void pListView::setChecked(unsigned selection, bool checked) {
+}
+
+void pListView::setForegroundColor(Color color) {
 }
 
 void pListView::setHeaderText(const lstring& text) {

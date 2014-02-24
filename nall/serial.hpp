@@ -5,7 +5,7 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 
-#if !defined(PLATFORM_X) && !defined(PLATFORM_MACOSX)
+#if !defined(PLATFORM_XORG) && !defined(PLATFORM_MACOSX)
   #error "nall/serial: unsupported platform"
 #endif
 

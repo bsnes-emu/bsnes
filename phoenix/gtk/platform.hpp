@@ -353,6 +353,8 @@ struct pConsole : public pWidget {
 
   void print(string text);
   void reset();
+  void setBackgroundColor(Color color);
+  void setForegroundColor(Color color);
   void setPrompt(string prompt);
 
   pConsole(Console& console) : pWidget(console), console(console) {}
@@ -389,7 +391,9 @@ struct pHexEdit : public pWidget {
   GtkTextMark* textCursor;
 
   bool focused();
+  void setBackgroundColor(Color color);
   void setColumns(unsigned columns);
+  void setForegroundColor(Color color);
   void setLength(unsigned length);
   void setOffset(unsigned offset);
   void setRows(unsigned rows);
@@ -451,7 +455,9 @@ struct pLineEdit : public pWidget {
   LineEdit& lineEdit;
 
   Size minimumSize();
+  void setBackgroundColor(Color color);
   void setEditable(bool editable);
+  void setForegroundColor(Color color);
   void setText(string text);
   string text();
 
@@ -479,8 +485,10 @@ struct pListView : public pWidget {
   bool focused();
   void remove(unsigned selection);
   void reset();
+  void setBackgroundColor(Color color);
   void setCheckable(bool checkable);
   void setChecked(unsigned selection, bool checked);
+  void setForegroundColor(Color color);
   void setHeaderText(const lstring& text);
   void setHeaderVisible(bool visible);
   void setImage(unsigned selection, unsigned position, const image& image);
@@ -577,8 +585,10 @@ struct pTextEdit : public pWidget {
   GtkTextBuffer* textBuffer;
 
   bool focused();
+  void setBackgroundColor(Color color);
   void setCursorPosition(unsigned position);
   void setEditable(bool editable);
+  void setForegroundColor(Color color);
   void setText(string text);
   void setWordWrap(bool wordWrap);
   string text();

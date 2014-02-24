@@ -24,7 +24,7 @@ struct MessageWindow::State {
 
 struct Window::State {
   bool backgroundColorOverride = false;
-  Color backgroundColor = {0, 0, 0, 255};
+  Color backgroundColor = {0, 0, 0};
   bool droppable = false;
   bool fullScreen = false;
   Geometry geometry = {128, 128, 256, 256};
@@ -125,6 +125,8 @@ struct ComboButton::State {
 };
 
 struct Console::State {
+  Color backgroundColor = {255, 255, 255};
+  Color foregroundColor = {0, 0, 0};
   string prompt;
 };
 
@@ -134,7 +136,9 @@ struct Frame::State {
 };
 
 struct HexEdit::State {
+  Color backgroundColor = {255, 255, 255};
   unsigned columns = 16;
+  Color foregroundColor = {0, 0, 0};
   unsigned length = 0;
   unsigned offset = 0;
   unsigned rows = 16;
@@ -155,13 +159,17 @@ struct Label::State {
 };
 
 struct LineEdit::State {
+  Color backgroundColor = {255, 255, 255};
   bool editable = true;
+  Color foregroundColor = {0, 0, 0};
   string text;
 };
 
 struct ListView::State {
+  Color backgroundColor = {255, 255, 255};
   bool checkable = false;
   vector<bool> checked;
+  Color foregroundColor = {0, 0, 0};
   lstring headerText;
   bool headerVisible = false;
   vector<vector<nall::image>> image;
@@ -196,8 +204,10 @@ struct TabFrame::State {
 };
 
 struct TextEdit::State {
+  Color backgroundColor = {255, 255, 255};
   unsigned cursorPosition = 0;
   bool editable = true;
+  Color foregroundColor = {0, 0, 0};
   string text;
   bool wordWrap = true;
 };

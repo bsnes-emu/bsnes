@@ -27,9 +27,19 @@ bool pHexEdit::focused() {
   return GTK_WIDGET_HAS_FOCUS(subWidget) || GTK_WIDGET_HAS_FOCUS(scrollBar);
 }
 
+void pHexEdit::setBackgroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
 void pHexEdit::setColumns(unsigned columns) {
   setScroll();
   update();
+}
+
+void pHexEdit::setForegroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_text(subWidget, GTK_STATE_NORMAL, &gdkColor);
 }
 
 void pHexEdit::setLength(unsigned length) {

@@ -27,7 +27,7 @@ template<typename... Args> inline void invoke(const string& name, Args&&... args
   ShellExecuteW(NULL, NULL, utf16_t(name), utf16_t(arguments), NULL, SW_SHOWNORMAL);
 }
 
-#elif defined(PLATFORM_X)
+#elif defined(PLATFORM_XORG)
 
 template<typename... Args> inline void invoke(const string& name, Args&&... args) {
   pid_t pid = fork();

@@ -331,7 +331,7 @@ void pWindow::constructor() {
     if(file::exists(filename)) {
       //maximum image size supported by GTK+ is 256x256; so we must scale larger images ourselves
       nall::image icon(filename);
-      icon.scale(min(256u, icon.width), min(256u, icon.height), Interpolation::Hermite);
+      icon.scale(min(256u, icon.width), min(256u, icon.height), true);
       GdkPixbuf* pixbuf = CreatePixbuf(icon);
       gtk_window_set_icon(GTK_WINDOW(widget), pixbuf);
       g_object_unref(G_OBJECT(pixbuf));

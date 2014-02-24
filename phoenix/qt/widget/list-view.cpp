@@ -29,6 +29,9 @@ void pListView::reset() {
   qtListView->clear();
 }
 
+void pListView::setBackgroundColor(Color color) {
+}
+
 void pListView::setCheckable(bool checkable) {
   if(checkable) {
     auto items = qtListView->findItems("", Qt::MatchContains);
@@ -41,6 +44,9 @@ void pListView::setChecked(unsigned selection, bool checked) {
   QTreeWidgetItem* item = qtListView->topLevelItem(selection);
   if(item) item->setCheckState(0, checked ? Qt::Checked : Qt::Unchecked);
   locked = false;
+}
+
+void pListView::setForegroundColor(Color color) {
 }
 
 void pListView::setHeaderText(const lstring& text) {

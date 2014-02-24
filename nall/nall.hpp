@@ -58,7 +58,7 @@
   #include <nall/windows/utf8.hpp>
 #endif
 
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_XORG)
   #include <nall/serial.hpp>
 #endif
 

@@ -109,6 +109,8 @@ bool StateManager::save(string filename, unsigned revision) {
       fp.write(slot.data(), slot.capacity());
     }
   }
+
+  return true;
 }
 
 void StateManager::slotLoad() {

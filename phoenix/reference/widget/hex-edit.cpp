@@ -1,6 +1,12 @@
 namespace phoenix {
 
+void pHexEdit::setBackgroundColor(Color color) {
+}
+
 void pHexEdit::setColumns(unsigned columns) {
+}
+
+void pHexEdit::setForegroundColor(Color color) {
 }
 
 void pHexEdit::setLength(unsigned length) {

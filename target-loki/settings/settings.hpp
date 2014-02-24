@@ -14,6 +14,11 @@ struct Settings : Configuration::Document {
     string driver;
   } input;
 
+  struct Terminal : Configuration::Node {
+    unsigned backgroundColor;
+    unsigned foregroundColor;
+  } terminal;
+
   struct Geometry : Configuration::Node {
     string presentation;
     string terminal;

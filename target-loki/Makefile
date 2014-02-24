@@ -72,21 +72,25 @@ resource:
 	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
-ifeq ($(platform),windows)
+ifneq ($(shell id -un),root)
+	$(error "make install must be run as root")
+else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
-	sudo mkdir -p /Library/Application\ Support/$(name)
-	sudo cp -R profile/* /Library/Application\ Support/$(name)
-	sudo chmod -R 777 /Library/Application\ Support/$(name)
+	mkdir -p /Library/Application\ Support/$(name)
+	cp -R profile/* /Library/Application\ Support/$(name)
+	chmod -R 777 /Library/Application\ Support/$(name)
 else
-	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
-	sudo mkdir -p /usr/share/$(name)
-	sudo cp -R profile/* /usr/share/$(name)
-	sudo chmod -R 777 /usr/share/$(name)
+	cp out/$(name) $(prefix)/bin/$(name)
+	mkdir -p /usr/share/$(name)
+	cp -R profile/* /usr/share/$(name)
+	chmod -R 777 /usr/share/$(name)
 endif
 
 uninstall:
-ifeq ($(platform),windows)
+ifneq ($(shell id -un),root)
+	$(error "make uninstall must be run as root")
+else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
 else
-	sudo rm $(DESTDIR)$(prefix)/bin/$(name)
+	rm $(prefix)/bin/$(name)
 endif

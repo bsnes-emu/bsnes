@@ -524,9 +524,13 @@ struct Console : private nall::base_from_member<pConsole&>, Widget {
 
   template<typename... Args> void print(Args&&... args) { print({args...}); }
 
+  Color backgroundColor() const;
+  Color foregroundColor() const;
   void print(const nall::string& text);
   nall::string prompt() const;
   void reset();
+  void setBackgroundColor(Color color);
+  void setForegroundColor(Color color);
   void setPrompt(const nall::string& prompt);
 
   Console();
@@ -553,11 +557,15 @@ struct HexEdit : private nall::base_from_member<pHexEdit&>, Widget {
   nall::function<uint8_t (unsigned)> onRead;
   nall::function<void (unsigned, uint8_t)> onWrite;
 
+  Color backgroundColor() const;
   unsigned columns() const;
+  Color foregroundColor() const;
   unsigned length() const;
   unsigned offset() const;
   unsigned rows() const;
+  void setBackgroundColor(Color color);
   void setColumns(unsigned columns);
+  void setForegroundColor(Color color);
   void setLength(unsigned length);
   void setOffset(unsigned offset);
   void setRows(unsigned rows);
@@ -615,8 +623,12 @@ struct LineEdit : private nall::base_from_member<pLineEdit&>, Widget {
   nall::function<void ()> onActivate;
   nall::function<void ()> onChange;
 
+  Color backgroundColor() const;
   bool editable() const;
+  Color foregroundColor() const;
+  void setBackgroundColor(Color color);
   void setEditable(bool editable = true);
+  void setForegroundColor(Color color);
   void setText(const nall::string& text);
   nall::string text();
 
@@ -634,9 +646,11 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
 
   void append(const nall::lstring& text);
   void autoSizeColumns();
+  Color backgroundColor() const;
   bool checkable() const;
   bool checked(unsigned selection) const;
   unsigned columns() const;
+  Color foregroundColor() const;
   bool headerVisible() const;
   nall::image image(unsigned selection, unsigned position) const;
   void remove(unsigned selection);
@@ -644,8 +658,10 @@ struct ListView : private nall::base_from_member<pListView&>, Widget {
   unsigned rows() const;
   bool selected() const;
   unsigned selection() const;
+  void setBackgroundColor(Color color);
   void setCheckable(bool checkable = true);
   void setChecked(unsigned selection, bool checked = true);
+  void setForegroundColor(Color color);
   void setHeaderText(const nall::lstring& text);
   void setHeaderVisible(bool visible = true);
   void setImage(unsigned selection, unsigned position, const nall::image& image = nall::image{});
@@ -736,9 +752,13 @@ struct TabFrame : private nall::base_from_member<pTabFrame&>, Widget {
 struct TextEdit : private nall::base_from_member<pTextEdit&>, Widget {
   nall::function<void ()> onChange;
 
+  Color backgroundColor() const;
   bool editable() const;
+  Color foregroundColor() const;
+  void setBackgroundColor(Color color);
   void setCursorPosition(unsigned position);
   void setEditable(bool editable = true);
+  void setForegroundColor(Color color);
   void setText(const nall::string& text);
   void setWordWrap(bool wordWrap = true);
   nall::string text();

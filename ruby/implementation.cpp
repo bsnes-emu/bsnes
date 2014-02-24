@@ -1,6 +1,6 @@
 /* Global Headers */
 
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_XORG)
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>

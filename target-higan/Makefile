@@ -25,11 +25,11 @@ else ifeq ($(platform),macosx)
 else ifeq ($(platform),linux)
   ruby := video.glx video.xv video.xshm video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
-  ruby += input.udev input.sdl input.x
+  ruby += input.udev input.sdl input.xlib
 else ifeq ($(platform),bsd)
   ruby := video.glx
   ruby += audio.openal audio.oss
-  ruby += input.x
+  ruby += input.xlib
 endif
 
 # phoenix
@@ -89,25 +89,29 @@ resource:
 	sourcery $(ui)/resource/resource.bml $(ui)/resource/resource.cpp $(ui)/resource/resource.hpp
 
 install:
-ifeq ($(platform),windows)
+ifneq ($(shell id -un),root)
+	$(error "make install must be run as root")
+else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
-	sudo mkdir -p /Library/Application\ Support/$(name)
-	sudo cp -R profile/* /Library/Application\ Support/$(name)
-	sudo cp data/cheats.bml /Library/Application\ Support/$(name)/cheats.bml
-	sudo chmod -R 777 /Library/Application\ Support/$(name)
+	mkdir -p /Library/Application\ Support/$(name)
+	cp -R profile/* /Library/Application\ Support/$(name)
+	cp data/cheats.bml /Library/Application\ Support/$(name)/cheats.bml
+	chmod -R 777 /Library/Application\ Support/$(name)
 else
-	sudo install -D -m 755 out/$(name) $(DESTDIR)$(prefix)/bin/$(name)
-	sudo install -D -m 644 data/$(name).png $(DESTDIR)$(prefix)/share/pixmaps/$(name).png
-	sudo install -D -m 644 data/$(name).desktop $(DESTDIR)$(prefix)/share/applications/$(name).desktop
-	sudo mkdir -p /usr/share/$(name)
-	sudo cp -R profile/* /usr/share/$(name)
-	sudo cp data/cheats.bml /usr/share/$(name)/cheats.bml
-	sudo chmod -R 777 /usr/share/$(name)
+	cp out/$(name) $(prefix)/bin/$(name)
+	cp data/$(name).png $(prefix)/share/pixmaps/$(name).png
+	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
+	mkdir -p /usr/share/$(name)
+	cp -R profile/* /usr/share/$(name)
+	cp data/cheats.bml /usr/share/$(name)/cheats.bml
+	chmod -R 777 /usr/share/$(name)
 endif
 
 uninstall:
-ifeq ($(platform),windows)
+ifneq ($(shell id -un),root)
+	$(error "make uninstall must be run as root")
+else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
 else
-	sudo rm $(DESTDIR)$(prefix)/bin/$(name)
+	rm $(prefix)/bin/$(name)
 endif

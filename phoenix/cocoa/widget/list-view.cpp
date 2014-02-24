@@ -250,6 +250,9 @@ void pListView::reset() {
   }
 }
 
+void pListView::setBackgroundColor(Color color) {
+}
+
 void pListView::setCheckable(bool checkable) {
   @autoreleasepool {
     [cocoaView reloadColumns];
@@ -266,6 +269,9 @@ void pListView::setFont(string font) {
   @autoreleasepool {
     [cocoaView setFont:pFont::cocoaFont(font)];
   }
+}
+
+void pListView::setForegroundColor(Color color) {
 }
 
 void pListView::setHeaderText(const lstring& text) {

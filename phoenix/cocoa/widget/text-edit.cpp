@@ -43,6 +43,9 @@
 
 namespace phoenix {
 
+void pTextEdit::setBackgroundColor(Color color) {
+}
+
 void pTextEdit::setCursorPosition(unsigned position) {
   @autoreleasepool {
     string text = [[[cocoaView content] string] UTF8String];
@@ -61,6 +64,9 @@ void pTextEdit::setFont(string font) {
   @autoreleasepool {
     [[cocoaView content] setFont:pFont::cocoaFont(font)];
   }
+}
+
+void pTextEdit::setForegroundColor(Color color) {
 }
 
 void pTextEdit::setText(string text) {

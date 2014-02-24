@@ -5,8 +5,9 @@
 #include <nall/function.hpp>
 #include <nall/intrinsics.hpp>
 
-#if defined(PLATFORM_X) || defined(PLATFORM_MACOSX)
-  #include <pthread.h>
+#if defined(PLATFORM_XORG) || defined(PLATFORM_MACOSX)
+
+#include <pthread.h>
 
 namespace nall {
 
@@ -64,7 +65,9 @@ void* thread_entry_point(void* parameter) {
 }
 
 }
+
 #elif defined(PLATFORM_WINDOWS)
+
 namespace nall {
 
 inline DWORD WINAPI thread_entry_point(LPVOID);
@@ -122,6 +125,7 @@ inline DWORD WINAPI thread_entry_point(LPVOID parameter) {
 }
 
 }
+
 #endif
 
 #endif

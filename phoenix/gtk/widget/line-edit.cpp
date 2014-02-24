@@ -14,8 +14,18 @@ Size pLineEdit::minimumSize() {
   return {size.width + 10, size.height + 10};
 }
 
+void pLineEdit::setBackgroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_base(gtkWidget, GTK_STATE_NORMAL, &gdkColor);
+}
+
 void pLineEdit::setEditable(bool editable) {
   gtk_editable_set_editable(GTK_EDITABLE(gtkWidget), editable);
+}
+
+void pLineEdit::setForegroundColor(Color color) {
+  GdkColor gdkColor = CreateColor(color.red, color.green, color.blue);
+  gtk_widget_modify_text(gtkWidget, GTK_STATE_NORMAL, &gdkColor);
 }
 
 void pLineEdit::setText(string text) {

@@ -3,16 +3,9 @@
 
 namespace nall {
 
-#if defined(_WIN32)
-#elif defined(__APPLE__)
-  #include <machine/endian.h>
-#else
-  #include <endian.h>
-#endif
-
 struct Intrinsics {
-  enum class Compiler : unsigned { Clang, GCC, VisualCPP, Unknown };
-  enum class Platform : unsigned { Windows, MacOSX, X, Unknown };  //X = Linux, BSD, etc
+  enum class Compiler : unsigned { Clang, GCC, CL, Unknown };
+  enum class Platform : unsigned { Windows, MacOSX, Linux, BSD, Unknown };
   enum class Architecture : unsigned { x86, amd64, Unknown };
   enum class Endian : unsigned { LSB, MSB, Unknown };
 
@@ -27,12 +20,20 @@ struct Intrinsics {
 #if defined(__clang__)
   #define COMPILER_CLANG
   Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::Clang; }
+
+  #pragma clang diagnostic ignored "-Wempty-body"
+  #pragma clang diagnostic ignored "-Wparentheses"
+  #pragma clang diagnostic ignored "-Wreturn-type"
+  #pragma clang diagnostic ignored "-Wswitch"
+  #pragma clang diagnostic ignored "-Wtautological-compare"
 #elif defined(__GNUC__)
   #define COMPILER_GCC
   Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::GCC; }
 #elif defined(_MSC_VER)
-  #define COMPILER_VISUALCPP
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::VisualCPP; }
+  #define COMPILER_CL
+  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::CL; }
+
+  #pragma warning(disable:4996)  //disable libc "deprecation" warnings
 #else
   #warning "unable to detect compiler"
   #define COMPILER_UNKNOWN
@@ -47,9 +48,14 @@ struct Intrinsics {
 #elif defined(__APPLE__)
   #define PLATFORM_MACOSX
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::MacOSX; }
-#elif defined(linux) || defined(__linux__) || defined(__sun__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__GNU__)
-  #define PLATFORM_X
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::X; }
+#elif defined(linux) || defined(__linux__)
+  #define PLATFORM_LINUX
+  #define PLATFORM_XORG
+  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Linux; }
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  #define PLATFORM_BSD
+  #define PLATFORM_XORG
+  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::BSD; }
 #else
   #warning "unable to detect platform"
   #define PLATFORM_UNKNOWN
@@ -57,6 +63,14 @@ struct Intrinsics {
 #endif
 
 /* Architecture Detection */
+
+#if defined(PLATFORM_MACOSX)
+  #include <machine/endian.h>
+#elif defined(PLATFORM_LINUX)
+  #include <endian.h>
+#elif defined(PLATFORM_BSD)
+  #include <sys/endian.h>
+#endif
 
 #if defined(__i386__) || defined(_M_IX86)
   #define ARCH_X86

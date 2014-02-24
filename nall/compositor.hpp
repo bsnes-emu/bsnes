@@ -9,7 +9,7 @@ struct compositor {
   inline static bool enabled();
   inline static bool enable(bool status);
 
-  #if defined(PLATFORM_X)
+  #if defined(PLATFORM_XORG)
   enum class Compositor : unsigned { Unknown, Metacity, Xfwm4 };
   inline static Compositor detect();
 
@@ -21,7 +21,7 @@ struct compositor {
   #endif
 };
 
-#if defined(PLATFORM_X)
+#if defined(PLATFORM_XORG)
 
 //Metacity
 

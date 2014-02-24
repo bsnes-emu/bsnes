@@ -1217,6 +1217,14 @@ ComboButton::~ComboButton() {
 //Console
 //=======
 
+Color Console::backgroundColor() const {
+  return state.backgroundColor;
+}
+
+Color Console::foregroundColor() const {
+  return state.foregroundColor;
+}
+
 void Console::print(const string& text) {
   return p.print(text);
 }
@@ -1227,6 +1235,16 @@ string Console::prompt() const {
 
 void Console::reset() {
   return p.reset();
+}
+
+void Console::setBackgroundColor(Color color) {
+  state.backgroundColor = color;
+  return p.setBackgroundColor(color);
+}
+
+void Console::setForegroundColor(Color color) {
+  state.foregroundColor = color;
+  return p.setForegroundColor(color);
 }
 
 void Console::setPrompt(const string& prompt) {
@@ -1288,8 +1306,16 @@ Frame::~Frame() {
 //HexEdit
 //=======
 
+Color HexEdit::backgroundColor() const {
+  return state.backgroundColor;
+}
+
 unsigned HexEdit::columns() const {
   return state.columns;
+}
+
+Color HexEdit::foregroundColor() const {
+  return state.foregroundColor;
 }
 
 unsigned HexEdit::length() const {
@@ -1304,9 +1330,19 @@ unsigned HexEdit::rows() const {
   return state.rows;
 }
 
+void HexEdit::setBackgroundColor(Color color) {
+  state.backgroundColor = color;
+  return p.setBackgroundColor(color);
+}
+
 void HexEdit::setColumns(unsigned columns) {
   state.columns = columns;
   return p.setColumns(columns);
+}
+
+void HexEdit::setForegroundColor(Color color) {
+  state.foregroundColor = color;
+  return p.setForegroundColor(color);
 }
 
 void HexEdit::setLength(unsigned length) {
@@ -1437,13 +1473,31 @@ Label::~Label() {
 //LineEdit
 //========
 
+Color LineEdit::backgroundColor() const {
+  return state.backgroundColor;
+}
+
 bool LineEdit::editable() const {
   return state.editable;
+}
+
+Color LineEdit::foregroundColor() const {
+  return state.foregroundColor;
+}
+
+void LineEdit::setBackgroundColor(Color color) {
+  state.backgroundColor = color;
+  return p.setBackgroundColor(color);
 }
 
 void LineEdit::setEditable(bool editable) {
   state.editable = editable;
   return p.setEditable(editable);
+}
+
+void LineEdit::setForegroundColor(Color color) {
+  state.foregroundColor = color;
+  return p.setForegroundColor(color);
 }
 
 void LineEdit::setText(const string& text) {
@@ -1482,6 +1536,10 @@ void ListView::autoSizeColumns() {
   return p.autoSizeColumns();
 }
 
+Color ListView::backgroundColor() const {
+  return state.backgroundColor;
+}
+
 bool ListView::checkable() const {
   return state.checkable;
 }
@@ -1493,6 +1551,10 @@ bool ListView::checked(unsigned selection) const {
 
 unsigned ListView::columns() const {
   return max(1u, state.headerText.size());
+}
+
+Color ListView::foregroundColor() const {
+  return state.foregroundColor;
 }
 
 bool ListView::headerVisible() const {
@@ -1533,6 +1595,11 @@ unsigned ListView::selection() const {
   return state.selection;
 }
 
+void ListView::setBackgroundColor(Color color) {
+  state.backgroundColor = color;
+  return p.setBackgroundColor(color);
+}
+
 void ListView::setCheckable(bool checkable) {
   state.checkable = checkable;
   return p.setCheckable(checkable);
@@ -1542,6 +1609,11 @@ void ListView::setChecked(unsigned selection, bool checked) {
   if(selection >= state.text.size()) return;
   state.checked[selection] = checked;
   return p.setChecked(selection, checked);
+}
+
+void ListView::setForegroundColor(Color color) {
+  state.foregroundColor = color;
+  return p.setForegroundColor(color);
 }
 
 void ListView::setHeaderText(const lstring& text) {
@@ -1811,8 +1883,21 @@ TabFrame::~TabFrame() {
 //TextEdit
 //========
 
+Color TextEdit::backgroundColor() const {
+  return state.backgroundColor;
+}
+
 bool TextEdit::editable() const {
   return state.editable;
+}
+
+Color TextEdit::foregroundColor() const {
+  return state.foregroundColor;
+}
+
+void TextEdit::setBackgroundColor(Color color) {
+  state.backgroundColor = color;
+  return p.setBackgroundColor(color);
 }
 
 void TextEdit::setCursorPosition(unsigned position) {
@@ -1823,6 +1908,11 @@ void TextEdit::setCursorPosition(unsigned position) {
 void TextEdit::setEditable(bool editable) {
   state.editable = editable;
   return p.setEditable(editable);
+}
+
+void TextEdit::setForegroundColor(Color color) {
+  state.foregroundColor = color;
+  return p.setForegroundColor(color);
 }
 
 void TextEdit::setText(const string& text) {

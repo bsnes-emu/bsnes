@@ -49,8 +49,14 @@ static LRESULT CALLBACK HexEdit_windowProc(HWND hwnd, UINT msg, WPARAM wparam, L
   return hexEdit.p.windowProc(hwnd, msg, wparam, lparam);
 }
 
+void pHexEdit::setBackgroundColor(Color color) {
+}
+
 void pHexEdit::setColumns(unsigned columns) {
   update();
+}
+
+void pHexEdit::setForegroundColor(Color color) {
 }
 
 void pHexEdit::setLength(unsigned length) {

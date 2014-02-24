@@ -16,11 +16,10 @@ struct MSU1 : Coprocessor {
   void serialize(serializer&);
 
 private:
-  bool boot;
   file datafile;
   file audiofile;
 
-  enum Flag {
+  enum Flag : unsigned {
     DataBusy       = 0x80,
     AudioBusy      = 0x40,
     AudioRepeating = 0x20,
@@ -30,8 +29,10 @@ private:
   };
 
   struct MMIO {
-    uint32 data_offset;
-    uint32 audio_offset;
+    uint32 data_seek_offset;
+    uint32 data_read_offset;
+
+    uint32 audio_play_offset;
     uint32 audio_loop_offset;
 
     uint16 audio_track;
