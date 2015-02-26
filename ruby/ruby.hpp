@@ -1,8 +1,11 @@
-/*
-  ruby
-  version: 0.11 (2013-12-19)
-  license: public domain
-*/
+/* ruby
+ * author: byuu
+ * license: ISC
+ * version: 0.11 (2013-12-19)
+ *
+ * ruby is a cross-platform hardware abstraction layer
+ * it provides a common interface to video, audio and input devices
+ */
 
 #ifndef RUBY_H
 #define RUBY_H

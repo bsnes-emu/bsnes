@@ -36,7 +36,7 @@ template<typename... Args> inline void invoke(const string& name, Args&&... args
     const char** argp = argv;
     lstring argl(std::forward<Args>(args)...);
     *argp++ = (const char*)name;
-    for(auto &arg : argl) *argp++ = (const char*)arg;
+    for(auto& arg : argl) *argp++ = (const char*)arg;
     *argp++ = nullptr;
 
     if(execvp(name, (char* const*)argv) < 0) {

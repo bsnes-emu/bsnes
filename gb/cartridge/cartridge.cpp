@@ -25,7 +25,7 @@ void Cartridge::load_empty(System::Revision revision) {
   romdata = allocate<uint8>(romsize, 0xff);
   ramsize = 0;
   mapper = &mbc0;
-  sha256 = nall::sha256(romdata, romsize);
+  sha256 = Hash::SHA256(romdata, romsize).digest();
   loaded = true;
   system.load(revision);
 }
@@ -94,7 +94,7 @@ void Cartridge::load(System::Revision revision) {
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  sha256 = nall::sha256(romdata, romsize);
+  sha256 = Hash::SHA256(romdata, romsize).digest();
   loaded = true;
   system.load(revision);
 }

@@ -20,7 +20,7 @@ void Player::power() {
 }
 
 void Player::frame() {
-  uint32 hash = crc32_calculate((const uint8*)ppu.output, 240 * 160 * sizeof(uint32));
+  uint32 hash = Hash::CRC32(ppu.output, 240 * 160 * sizeof(uint32)).value();
   status.logoDetected = (hash == 0x7776eb55);
 
   if(status.logoDetected) {

@@ -109,6 +109,7 @@ struct pVideoSDL {
   bool init() {
     display = XOpenDisplay(0);
 
+    //todo: this causes a segfault inside SDL_SetVideoMode on FreeBSD (works under Linux)
     char env[512];
     sprintf(env, "SDL_WINDOWID=%ld", (long int)settings.handle);
     putenv(env);

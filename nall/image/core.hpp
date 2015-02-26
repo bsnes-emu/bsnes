@@ -3,6 +3,10 @@
 
 namespace nall {
 
+image::operator bool() const {
+  return !empty();
+}
+
 bool image::operator==(const image& source) {
   if(width != source.width) return false;
   if(height != source.height) return false;
@@ -86,6 +90,10 @@ image::image(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, 
 
 image::image(const string& filename) {
   load(filename);
+}
+
+image::image(const vector<uint8_t>& buffer) {
+  loadPNG(buffer.data(), buffer.size());
 }
 
 image::image(const uint8_t* data, unsigned size) {

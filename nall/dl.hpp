@@ -38,8 +38,10 @@ private:
 #if defined(PLATFORM_XORG)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
-  handle = (uintptr_t)dlopen(string(path, !path.empty() && !path.endsWith("/") ? "/" : "", "lib", name, ".so"), RTLD_LAZY);
+  if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr_t)dlopen(string(userpath(), ".local/lib/lib", name, ".so"), RTLD_LAZY);
   if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr_t)dlopen(string("lib", name, ".so"), RTLD_LAZY);
   return handle;
 }
 
@@ -62,8 +64,10 @@ inline void library::close() {
 #elif defined(PLATFORM_MACOSX)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
-  handle = (uintptr_t)dlopen(string(path, !path.empty() && !path.endsWith("/") ? "/" : "", "lib", name, ".dylib"), RTLD_LAZY);
+  if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".dylib"), RTLD_LAZY);
+  if(!handle) handle = (uintptr_t)dlopen(string(userpath(), ".local/lib/lib", name, ".dylib"), RTLD_LAZY);
   if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".dylib"), RTLD_LAZY);
+  if(!handle) handle = (uintptr_t)dlopen(string("lib", name, ".dylib"), RTLD_LAZY);
   return handle;
 }
 
@@ -86,8 +90,14 @@ inline void library::close() {
 #elif defined(PLATFORM_WINDOWS)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
-  string filepath(path, !path.empty() && !path.endsWith("/") && !path.endsWith("\\") ? "/" : "", name, ".dll");
-  handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+  if(path) {
+    string filepath = {path, name, ".dll"};
+    handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+  }
+  if(!handle) {
+    string filepath = {name, ".dll"};
+    handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+  }
   return handle;
 }
 

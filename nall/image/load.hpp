@@ -35,7 +35,7 @@ bool image::loadPNG(const string& filename) {
 }
 
 bool image::loadPNG(const uint8_t* pngData, unsigned pngSize) {
-  png source;
+  Decode::PNG source;
   if(source.decode(pngData, pngSize) == false) return false;
 
   allocate(source.info.width, source.info.height);

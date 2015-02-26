@@ -1,0 +1,62 @@
+namespace phoenix {
+
+Size pLineEdit::minimumSize() {
+  Size size = pFont::size(qtWidget->font(), lineEdit.state.text);
+  return {size.width + 12, size.height + 12};
+}
+
+void pLineEdit::setBackgroundColor(Color color) {
+  QPalette palette = qtLineEdit->palette();
+  palette.setColor(QPalette::Base, QColor(color.red, color.green, color.blue));
+  qtLineEdit->setPalette(palette);
+  qtLineEdit->setAutoFillBackground(true);
+}
+
+void pLineEdit::setEditable(bool editable) {
+  qtLineEdit->setReadOnly(!editable);
+}
+
+void pLineEdit::setForegroundColor(Color color) {
+  QPalette palette = qtLineEdit->palette();
+  palette.setColor(QPalette::Text, QColor(color.red, color.green, color.blue));
+  qtLineEdit->setPalette(palette);
+}
+
+void pLineEdit::setText(string text) {
+  qtLineEdit->setText(QString::fromUtf8(text));
+}
+
+string pLineEdit::text() {
+  return qtLineEdit->text().toUtf8().constData();
+}
+
+void pLineEdit::constructor() {
+  qtWidget = qtLineEdit = new QLineEdit;
+  connect(qtLineEdit, SIGNAL(returnPressed()), SLOT(onActivate()));
+  connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
+
+  pWidget::synchronizeState();
+  setEditable(lineEdit.state.editable);
+  setText(lineEdit.state.text);
+}
+
+void pLineEdit::destructor() {
+  delete qtLineEdit;
+  qtWidget = qtLineEdit = nullptr;
+}
+
+void pLineEdit::orphan() {
+  destructor();
+  constructor();
+}
+
+void pLineEdit::onActivate() {
+  if(lineEdit.onActivate) lineEdit.onActivate();
+}
+
+void pLineEdit::onChange() {
+  lineEdit.state.text = text();
+  if(lineEdit.onChange) lineEdit.onChange();
+}
+
+}

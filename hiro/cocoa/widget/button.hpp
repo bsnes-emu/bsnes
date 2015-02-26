@@ -1,0 +1,26 @@
+@interface CocoaButton : NSButton {
+@public
+  phoenix::Button* button;
+}
+-(id) initWith:(phoenix::Button&)button;
+-(IBAction) activate:(id)sender;
+@end
+
+namespace phoenix {
+
+struct pButton : public pWidget {
+  Button& button;
+  CocoaButton* cocoaButton = nullptr;
+
+  Size minimumSize();
+  void setBordered(bool bordered);
+  void setGeometry(Geometry geometry);
+  void setImage(const image& image, Orientation orientation);
+  void setText(string text);
+
+  pButton(Button& button) : pWidget(button), button(button) {}
+  void constructor();
+  void destructor();
+};
+
+}

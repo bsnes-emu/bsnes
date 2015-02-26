@@ -12,9 +12,9 @@ string LR35902::disassemble(uint16 pc) {
     " SP:", hex<4>(r[SP])
   };
 
-  memcpy(output +   0, hex<4>(pc), 4);
-  memcpy(output +   6, opcode, opcode.length());
-  memcpy(output +  23, registers, registers.length());
+  memcpy(output +   0, hex<4>(pc).data(), 4);
+  memcpy(output +   6, opcode.data(), opcode.length());
+  memcpy(output +  23, registers.data(), registers.length());
   output[63] = 0;
   return output;
 }

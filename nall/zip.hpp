@@ -3,8 +3,8 @@
 
 //creates uncompressed ZIP archives
 
-#include <nall/crc32.hpp>
 #include <nall/string.hpp>
+#include <nall/hash/crc32.hpp>
 
 namespace nall {
 
@@ -21,7 +21,7 @@ struct zip {
   //append file: append("path/file", data, size);
   void append(string filename, const uint8_t* data = nullptr, unsigned size = 0u) {
     filename.transform("\\", "/");
-    uint32_t checksum = crc32_calculate(data, size);
+    uint32_t checksum = Hash::CRC32(data, size).value();
     directory.append({filename, checksum, size, fp.offset()});
 
     fp.writel(0x04034b50, 4);         //signature

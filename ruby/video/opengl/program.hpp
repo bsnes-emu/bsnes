@@ -4,9 +4,9 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
   modulo = glrModulo(node["modulo"].integer());
 
   string w = node["width"].text(), h = node["height"].text();
-  if(w.endsWith("%")) relativeWidth = real(w.rtrim<1>("%")) / 100.0;
+  if(w.endsWith("%")) relativeWidth = real(w.rtrim("%")) / 100.0;
   else absoluteWidth = decimal(w);
-  if(h.endsWith("%")) relativeHeight = real(h.rtrim<1>("%")) / 100.0;
+  if(h.endsWith("%")) relativeHeight = real(h.rtrim("%")) / 100.0;
   else absoluteHeight = decimal(h);
 
   format = glrFormat(node["format"].text());
@@ -78,7 +78,7 @@ void OpenGLProgram::parse(OpenGL* instance, string& source) {
     if(auto position = s.find("//")) s.resize(position());  //strip comments
     s.strip();  //remove extraneous whitespace
     if(s.match("#in ?*")) {
-      s.ltrim<1>("#in ").strip();
+      s.ltrim("#in ").strip();
       if(auto setting = instance->settings.find({s})) {
         line = {"#define ", setting().name, " ", setting().value};
       } else {

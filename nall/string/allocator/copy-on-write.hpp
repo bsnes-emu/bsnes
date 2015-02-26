@@ -1,102 +1,90 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
-/*
-copy on write (COW) allocator
-sizeof(string) == 24 (amd64)
-
-utilizes a shared_ptr to reference count strings
-allows string copies to execute as fast as string moves
-requires extra computations, which will be slower for all string sizes
-
-pros:
-* lower memory usage
-* pass-by-value does not require heap allocation; obviates pass-by-const-reference
-
-cons:
-* added overhead to fetch data()
-* added heap allocation for reference-count pool
-* no potential for in-place resize (always copies)
-* larger sizeof(string)
-
-*/
-
 namespace nall {
 
-char* string::data() {
-  if(!_data.unique()) _copy();
-  return _data.get();
+string::string() : _data(nullptr), _refs(nullptr), _capacity(0), _size(0) {
 }
 
-const char* string::data() const {
-  if(!_data) return "";
-  return _data.get();
+auto string::pointer() -> char* {
+  static char _null[] = "";
+  if(!_data) return _null;
+  if(*_refs > 1) _data = _copy();  //make unique for write operations
+  return _data;
 }
 
-//copy _data (to make unique or to grow in size)
-void string::_copy() {
-  auto copy = new char[_capacity + 1];
-  if(_data.get()) memcpy(copy, _data.get(), min(_capacity, _size));
-  copy[_size] = 0;
-  copy[_capacity] = 0;
-  _data.reset(copy);
+auto string::data() const -> const char* {
+  static const char _null[] = "";
+  if(!_data) return _null;
+  return _data;
 }
 
-//amortize growth to O(log n)
-//allocate one extra byte to always store null-terminator for libc usage
-void string::reserve(unsigned capacity) {
-  if(capacity > _capacity) {
-    _capacity = bit::round(capacity + 1) - 1;
-    _copy();
+auto string::reset() -> type& {
+  if(_data && !--*_refs) {
+    memory::free(_data);
+    _data = nullptr;  //_refs = nullptr; is unnecessary
   }
-}
-
-void string::resize(unsigned size) {
-  reserve(size);
-  data()[_size = size] = 0;
-}
-
-void string::reset() {
-  _data.reset();
   _capacity = 0;
   _size = 0;
-}
-
-string& string::operator=(const string& source) {
-  if(&source == this) return *this;
-  reset();
-  _data = source._data;
-  _capacity = source._capacity;
-  _size = source._size;
   return *this;
 }
 
-string& string::operator=(string&& source) {
+auto string::reserve(unsigned capacity) -> type& {
+  if(capacity > _capacity) {
+    _capacity = bit::round(max(31u, capacity) + 1) - 1;
+    _data = _data ? _copy() : _allocate();
+  }
+  return *this;
+}
+
+auto string::resize(unsigned size) -> type& {
+  reserve(size);
+  pointer()[_size = size] = 0;
+  return *this;
+}
+
+auto string::operator=(const string& source) -> string& {
   if(&source == this) return *this;
   reset();
-  _data = std::move(source._data);
+  if(source._data) {
+    _data = source._data;
+    _refs = source._refs;
+    _capacity = source._capacity;
+    _size = source._size;
+    ++*_refs;
+  }
+  return *this;
+}
+
+auto string::operator=(string&& source) -> string& {
+  if(&source == this) return *this;
+  reset();
+  _data = source._data;
+  _refs = source._refs;
   _capacity = source._capacity;
   _size = source._size;
+  source._data = nullptr;
+  source._refs = nullptr;
   source._capacity = 0;
   source._size = 0;
   return *this;
 }
 
-template<typename T, typename... Args> string::string(T&& source, Args&&... args) {
-  construct();
-  sprint(*this, std::forward<T>(source), std::forward<Args>(args)...);
+auto string::_allocate() -> char* {
+  auto _temp = (char*)memory::allocate(_capacity + 1 + sizeof(unsigned));
+  *_temp = 0;
+  _refs = (unsigned*)(_temp + _capacity + 1);  //this will always be aligned by 32 via reserve()
+  *_refs = 1;
+  return _temp;
 }
 
-string::string() {
-  construct();
-}
-
-string::~string() {
-  reset();
-}
-
-void string::construct() {
-  _capacity = 0;
-  _size = 0;
+auto string::_copy() -> char* {
+  auto _temp = (char*)memory::allocate(_capacity + 1 + sizeof(unsigned));
+  memory::copy(_temp, _data, _size = min(_capacity, _size));
+  _temp[_size] = 0;
+  --*_refs;
+  _refs = (unsigned*)(_temp + _capacity + 1);
+  *_refs = 1;
+  return _temp;
 }
 
 }

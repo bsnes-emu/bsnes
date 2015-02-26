@@ -1,7 +1,6 @@
 #ifndef NALL_BEAT_METADATA_HPP
 #define NALL_BEAT_METADATA_HPP
 
-#include <nall/crc32.hpp>
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
 #include <nall/stdint.hpp>
@@ -75,11 +74,11 @@ bool bpsmetadata::save(const string& filename, const string& metadata) {
     return data;
   };
 
-  uint32_t checksum = ~0;
+  Hash::CRC32 checksum;
 
   auto write = [&](uint8_t data) {
     targetFile.write(data);
-    checksum = crc32_adjust(checksum, data);
+    checksum.data(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -105,7 +104,7 @@ bool bpsmetadata::save(const string& filename, const string& metadata) {
   for(unsigned n = 0; n < targetLength; n++) write(metadata[n]);
   unsigned length = sourceFile.size() - sourceFile.offset() - 4;
   for(unsigned n = 0; n < length; n++) write(read());
-  uint32_t outputChecksum = ~checksum;
+  uint32_t outputChecksum = checksum.value();
   for(unsigned n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   targetFile.close();

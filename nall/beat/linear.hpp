@@ -1,7 +1,6 @@
 #ifndef NALL_BEAT_LINEAR_HPP
 #define NALL_BEAT_LINEAR_HPP
 
-#include <nall/crc32.hpp>
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
 #include <nall/stdint.hpp>
@@ -56,12 +55,12 @@ bool bpslinear::create(const string& filename, const string& metadata) {
   file modifyFile;
   if(modifyFile.open(filename, file::mode::write) == false) return false;
 
-  uint32_t modifyChecksum = ~0;
+  Hash::CRC32 modifyChecksum;
   unsigned targetRelativeOffset = 0, outputOffset = 0;
 
   auto write = [&](uint8_t data) {
     modifyFile.write(data);
-    modifyChecksum = crc32_adjust(modifyChecksum, data);
+    modifyChecksum.data(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -136,11 +135,11 @@ bool bpslinear::create(const string& filename, const string& metadata) {
 
   targetReadFlush();
 
-  uint32_t sourceChecksum = crc32_calculate(sourceData, sourceSize);
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, sourceSize).value();
   for(unsigned n = 0; n < 32; n += 8) write(sourceChecksum >> n);
-  uint32_t targetChecksum = crc32_calculate(targetData, targetSize);
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
   for(unsigned n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32_t outputChecksum = ~modifyChecksum;
+  uint32_t outputChecksum = modifyChecksum.value();
   for(unsigned n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

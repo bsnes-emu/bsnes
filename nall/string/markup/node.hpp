@@ -20,6 +20,10 @@ struct Node {
     return string{data}.strip();
   }
 
+  bool boolean() const {
+    return text() != "false";
+  }
+
   intmax_t integer() const {
     return numeral(text());
   }
@@ -93,7 +97,7 @@ struct Node {
     if(name.match("*[*]")) {
       lstring side = name.split<1>("[");
       name = side(0);
-      side = side(1).rtrim<1>("]").split<1>("-");
+      side = side(1).rtrim("]").split<1>("-");
       lo = side(0).empty() ?  0u : numeral(side(0));
       hi = side(1).empty() ? ~0u : numeral(side(1));
     }
@@ -101,7 +105,7 @@ struct Node {
     if(name.match("*(*)")) {
       lstring side = name.split<1>("(");
       name = side(0);
-      rule = side(1).rtrim<1>(")");
+      rule = side(1).rtrim(")");
     }
 
     unsigned position = 0;

@@ -1,3 +1,10 @@
+//XShm driver for Xorg
+
+//Note that on composited displays, the alpha bits will allow translucency underneath the active window
+//As this is not a feature of ruby, this driver must always set the alpha bits on clear() and refresh()
+
+//Linear interpolation is only applied horizontally for performance reasons, although Nearest is still much faster
+
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
@@ -18,30 +25,22 @@ struct pVideoXShm {
   } device;
 
   struct Settings {
-    uintptr_t handle;
-    unsigned depth = 24;
+    uintptr_t handle = 0;
+    unsigned filter = Video::FilterLinear;
 
     uint32_t* buffer = nullptr;
     unsigned width, height;
   } settings;
 
-  struct Color {
-    unsigned depth;
-    unsigned shift;
-
-    unsigned idepth;
-    unsigned ishift;
-  } red, green, blue;
-
   bool cap(const string& name) {
     if(name == Video::Handle) return true;
-    if(name == Video::Depth) return true;
+    if(name == Video::Filter) return true;
     return false;
   }
 
   any get(const string& name) {
     if(name == Video::Handle) return settings.handle;
-    if(name == Video::Depth) return settings.depth;
+    if(name == Video::Filter) return settings.filter;
     return false;
   }
 
@@ -50,8 +49,9 @@ struct pVideoXShm {
       settings.handle = any_cast<uintptr_t>(value);
       return true;
     }
-    if(name == Video::Depth) {
-      return setDepth(any_cast<unsigned>(value));
+    if(name == Video::Filter) {
+      settings.filter = any_cast<unsigned>(value);
+      return true;
     }
     return false;
   }
@@ -60,7 +60,7 @@ struct pVideoXShm {
     if(settings.buffer == nullptr || settings.width != width || settings.height != height) {
       if(settings.buffer) delete[] settings.buffer;
       settings.width = width, settings.height = height;
-      settings.buffer = new uint32_t[width * height]();
+      settings.buffer = new uint32_t[width * height + 16];  //+16 is padding for linear interpolation
     }
 
     data = settings.buffer;
@@ -73,7 +73,9 @@ struct pVideoXShm {
 
   void clear() {
     if(settings.buffer == nullptr) return;
-    memset(settings.buffer, 0, settings.width * settings.height * sizeof(uint32_t));
+    uint32_t* dp = settings.buffer;
+    unsigned length = settings.width * settings.height;
+    while(length--) *dp++ = (255u << 24);
     refresh();
   }
 
@@ -81,23 +83,27 @@ struct pVideoXShm {
     if(settings.buffer == nullptr) return;
     size();
 
-    float xRatio = (float)settings.width  / (float)device.width;
-    float yRatio = (float)settings.height / (float)device.height;
-    float yStep = 0;
+    float xratio = (float)settings.width  / (float)device.width;
+    float yratio = (float)settings.height / (float)device.height;
+
+    #pragma omp parallel for
     for(unsigned y = 0; y < device.height; y++) {
-      uint32_t* sp = settings.buffer + (unsigned)yStep * settings.width;
+      float ystep = y * yratio;
+      float xstep = 0;
+
+      uint32_t* sp = settings.buffer + (unsigned)ystep * settings.width;
       uint32_t* dp = device.buffer + y * device.width;
-      yStep += yRatio;
-      float xStep = 0;
-      for(unsigned x = 0; x < device.width; x++) {
-        uint32_t color = sp[(unsigned)xStep];
-        xStep += xRatio;
-        unsigned r = (color >> red.ishift  ) & ((1 << red.idepth  ) - 1);
-        unsigned g = (color >> green.ishift) & ((1 << green.idepth) - 1);
-        unsigned b = (color >> blue.ishift ) & ((1 << blue.idepth ) - 1);
-        *dp++ = image::normalize(r, red.idepth,   red.depth  ) << red.shift
-              | image::normalize(g, green.idepth, green.depth) << green.shift
-              | image::normalize(b, blue.idepth,  blue.depth ) << blue.shift;
+
+      if(settings.filter == Video::FilterNearest) {
+        for(unsigned x = 0; x < device.width; x++) {
+          *dp++ = (255u << 24) | sp[(unsigned)xstep];
+          xstep += xratio;
+        }
+      } else {  //settings.filter == Video::FilterLinear
+        for(unsigned x = 0; x < device.width; x++) {
+          *dp++ = (255u << 24) | interpolate(xstep - (unsigned)xstep, sp[(unsigned)xstep], sp[(unsigned)xstep + 1]);
+          xstep += xratio;
+        }
       }
     }
 
@@ -118,24 +124,12 @@ struct pVideoXShm {
     XGetWindowAttributes(device.display, (Window)settings.handle, &getAttributes);
     device.depth = getAttributes.depth;
     device.visual = getAttributes.visual;
-    unsigned visualID = XVisualIDFromVisual(device.visual);
-
-    XVisualInfo visualTemplate = {0};
-    visualTemplate.screen = device.screen;
-    visualTemplate.depth = device.depth;
-    int visualsMatched = 0;
-    XVisualInfo* visualList = XGetVisualInfo(device.display, VisualScreenMask | VisualDepthMask, &visualTemplate, &visualsMatched);
-    for(unsigned n = 0; n < visualsMatched; n++) {
-      auto& v = visualList[n];
-      if(v.visualid == visualID) {
-        red.depth   = bit::count(v.red_mask),   red.shift   = bit::first(v.red_mask);
-        green.depth = bit::count(v.green_mask), green.shift = bit::first(v.green_mask);
-        blue.depth  = bit::count(v.blue_mask),  blue.shift  = bit::first(v.blue_mask);
-        break;
-      }
+    //driver only supports 32-bit pixels
+    //note that even on 15-bit and 16-bit displays, the window visual's depth should be 32
+    if(device.depth < 24 || device.depth > 32) {
+      free();
+      return false;
     }
-    XFree(visualList);
-    setDepth(settings.depth);
 
     XSetWindowAttributes setAttributes = {0};
     setAttributes.border_pixel = 0;
@@ -168,26 +162,6 @@ struct pVideoXShm {
   }
 
 //internal:
-  bool setDepth(unsigned depth) {
-    if(depth == 24) {
-      settings.depth = 24;
-      red.idepth   = 8, red.ishift   = 16;
-      green.idepth = 8, green.ishift =  8;
-      blue.idepth  = 8, blue.ishift  =  0;
-      return true;
-    }
-
-    if(depth == 30) {
-      settings.depth = 30;
-      red.idepth   = 10, red.ishift   = 20;
-      green.idepth = 10, green.ishift = 10;
-      blue.idepth  = 10, blue.ishift  =  0;
-      return true;
-    }
-
-    return false;
-  }
-
   bool size() {
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(device.display, settings.handle, &windowAttributes);
@@ -197,7 +171,6 @@ struct pVideoXShm {
     XResizeWindow(device.display, device.window, device.width, device.height);
     free();
 
-    //create
     device.shmInfo.shmid = shmget(IPC_PRIVATE, device.width * device.height * sizeof(uint32_t), IPC_CREAT | 0777);
     if(device.shmInfo.shmid < 0) return false;
 
@@ -219,6 +192,15 @@ struct pVideoXShm {
     XDestroyImage(device.image);
     shmdt(device.shmInfo.shmaddr);
     shmctl(device.shmInfo.shmid, IPC_RMID, 0);
+  }
+
+  alwaysinline uint32_t interpolate(float mu, uint32_t a, uint32_t b) {
+    uint8_t ar = (a >> 16), ag = (a >> 8), ab = (a >> 0);
+    uint8_t br = (b >> 16), bg = (b >> 8), bb = (b >> 0);
+    uint8_t cr = ar * (1.0 - mu) + br * mu;
+    uint8_t cg = ag * (1.0 - mu) + bg * mu;
+    uint8_t cb = ab * (1.0 - mu) + bb * mu;
+    return (cr << 16) | (cg << 8) | (cb << 0);
   }
 };
 

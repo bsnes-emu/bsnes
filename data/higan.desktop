@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=higan
-Comment=SNES emulator
+Comment=Nintendo emulator
 Exec=higan
 Icon=higan
 Terminal=false

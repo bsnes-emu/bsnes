@@ -273,7 +273,7 @@ string SMTP::contacts(const vector<Information::Contact>& contacts) {
   for(auto& contact : contacts) {
     result.append(this->contact(contact), "; ");
   }
-  result.rtrim<1>("; ");
+  result.rtrim("; ");
   return result;
 }
 

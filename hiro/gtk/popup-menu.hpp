@@ -1,0 +1,14 @@
+namespace hiro {
+
+struct pPopupMenu : pObject {
+  Declare(PopupMenu, Object)
+
+  auto append(sAction action) -> void;
+  auto remove(sAction action) -> void;
+  auto setFont(const string& font) -> void override;
+  auto setVisible(bool visible) -> void;
+
+  GtkWidget* gtkMenu = nullptr;
+};
+
+}

@@ -8,7 +8,7 @@ serializer System::serialize() {
   memcpy(&hash, (const char*)cartridge.sha256(), 64);
   memset(&description, 0, sizeof description);
   memset(&profile, 0, sizeof profile);
-  strmcpy(profile, Emulator::Profile, sizeof profile);
+  strcpy(profile, Emulator::Profile);
 
   s.integer(signature);
   s.integer(version);

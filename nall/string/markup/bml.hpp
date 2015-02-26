@@ -71,7 +71,7 @@ protected:
       if(length == 0) throw "Invalid attribute name";
       node.name = substr(p, 0, length);
       node.parseData(p += length);
-      node.data.rtrim<1>("\n");
+      node.data.rtrim("\n");
       children.append(node);
     }
   }
@@ -98,7 +98,7 @@ protected:
       children.append(node);
     }
 
-    data.rtrim<1>("\n");
+    data.rtrim("\n");
   }
 
   //read top-level nodes

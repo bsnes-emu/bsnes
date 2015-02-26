@@ -15,11 +15,7 @@ struct any {
   }
 
   template<typename T> any& operator=(const T& value) {
-    typedef typename type_if<
-      std::is_array<T>::value,
-      typename std::remove_extent<typename std::add_const<T>::type>::type*,
-      T
-    >::type auto_t;
+    using auto_t = type_if<is_array<T>, typename std::remove_extent<typename std::add_const<T>::type>::type*, T>;
 
     if(type() == typeid(auto_t)) {
       static_cast<holder<auto_t>*>(container)->value = (auto_t)value;
@@ -46,7 +42,7 @@ struct any {
 
   any() = default;
   any(const any& source) { operator=(source); }
-  any(any&& source) { operator=(std::move(source)); }
+  any(any&& source) { operator=(move(source)); }
   template<typename T> any(const T& value) { operator=(value); }
   ~any() { reset(); }
 

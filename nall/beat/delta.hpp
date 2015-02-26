@@ -1,7 +1,6 @@
 #ifndef NALL_BEAT_DELTA_HPP
 #define NALL_BEAT_DELTA_HPP
 
-#include <nall/crc32.hpp>
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
 #include <nall/stdint.hpp>
@@ -63,12 +62,12 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
   file modifyFile;
   if(modifyFile.open(filename, file::mode::write) == false) return false;
 
-  uint32_t sourceChecksum = ~0, modifyChecksum = ~0;
+  Hash::CRC32 sourceChecksum, modifyChecksum;
   unsigned sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
   auto write = [&](uint8_t data) {
     modifyFile.write(data);
-    modifyChecksum = crc32_adjust(modifyChecksum, data);
+    modifyChecksum.data(data);
   };
 
   auto encode = [&](uint64_t data) {
@@ -103,7 +102,7 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
   //source tree creation
   for(unsigned offset = 0; offset < sourceSize; offset++) {
     uint16_t symbol = sourceData[offset + 0];
-    sourceChecksum = crc32_adjust(sourceChecksum, symbol);
+    sourceChecksum.data(symbol);
     if(offset < sourceSize - 1) symbol |= sourceData[offset + 1] << 8;
     Node *node = new Node;
     node->offset = offset;
@@ -199,11 +198,10 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
 
   targetReadFlush();
 
-  sourceChecksum = ~sourceChecksum;
-  for(unsigned n = 0; n < 32; n += 8) write(sourceChecksum >> n);
-  uint32_t targetChecksum = crc32_calculate(targetData, targetSize);
+  for(unsigned n = 0; n < 32; n += 8) write(sourceChecksum.value() >> n);
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
   for(unsigned n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32_t outputChecksum = ~modifyChecksum;
+  uint32_t outputChecksum = modifyChecksum.value();
   for(unsigned n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

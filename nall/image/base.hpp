@@ -47,6 +47,7 @@ struct image {
   static inline uint64_t normalize(uint64_t color, unsigned sourceDepth, unsigned targetDepth);
 
   //core.hpp
+  inline explicit operator bool() const;
   inline bool operator==(const image& source);
   inline bool operator!=(const image& source);
 
@@ -56,6 +57,7 @@ struct image {
   inline image(image&& source);
   inline image(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask);
   inline image(const string& filename);
+  inline image(const vector<uint8_t>& buffer);
   inline image(const uint8_t* data, unsigned size);
   inline image();
   inline ~image();

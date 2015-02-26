@@ -1,66 +1,69 @@
 #ifndef NALL_THREAD_HPP
 #define NALL_THREAD_HPP
 
+//simple thread library
+//primary rationale is that std::thread does not support custom stack sizes
+//this is highly critical in certain applications such as threaded web servers
+//an added bonus is that it avoids licensing issues on Windows
+//win32-pthreads (needed for std::thread) is licensed under the GPL only
+
 #include <nall/platform.hpp>
 #include <nall/function.hpp>
 #include <nall/intrinsics.hpp>
 
-#if defined(PLATFORM_XORG) || defined(PLATFORM_MACOSX)
+#if defined(PLATFORM_BSD) || defined(PLATFORM_LINUX) || defined(PLATFORM_MACOSX)
 
 #include <pthread.h>
 
 namespace nall {
 
-inline void* thread_entry_point(void*);
-
 struct thread {
-  thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
-    initialize();
-    pthread_create(&pthread, nullptr, thread_entry_point, (void*)this);
-  }
+  inline auto join() -> void;
 
-  ~thread() {
-    join();
-  }
+  static inline auto create(const function<void (uintptr_t)>& callback, uintptr_t parameter = 0, unsigned stacksize = 0) -> thread;
+  static inline auto detach() -> void;
+  static inline auto exit() -> void;
 
-  bool active() const {
-    return completed == false;
-  }
-
-  void join() {
-    if(dead) return;
-    dead = true;
-    pthread_join(pthread, nullptr);
-  }
-
-  static bool primary() {
-    initialize();
-    return pthread_equal(primaryThread(), pthread_self());
-  }
+  struct context {
+    function<void (uintptr_t)> callback;
+    uintptr_t parameter = 0;
+  };
 
 private:
-  pthread_t pthread;
-  function<void ()> entryPoint;
-  volatile bool completed, dead;
-  friend void* thread_entry_point(void*);
-
-  static void initialize() {
-    static bool initialized = false;
-    if(initialized) return;
-    initialized = true;
-    primaryThread() = pthread_self();
-  }
-
-  static pthread_t& primaryThread() {
-    static pthread_t thread;
-    return thread;
-  }
+  pthread_t handle;
 };
 
-void* thread_entry_point(void* parameter) {
-  thread* context = (thread*)parameter;
-  context->entryPoint();
-  context->completed = true;
+inline auto _threadCallback(void* parameter) -> void* {
+  auto context = (thread::context*)parameter;
+  context->callback(context->parameter);
+  delete context;
+  return nullptr;
+}
+
+auto thread::join() -> void {
+  pthread_join(handle, nullptr);
+}
+
+auto thread::create(const function<void (uintptr_t)>& callback, uintptr_t parameter, unsigned stacksize) -> thread {
+  thread instance;
+
+  auto context = new thread::context;
+  context->callback = callback;
+  context->parameter = parameter;
+
+  pthread_attr_t attr;
+  pthread_attr_init(&attr);
+  if(stacksize) pthread_attr_setstacksize(&attr, max(PTHREAD_STACK_MIN, stacksize));
+
+  pthread_create(&instance.handle, &attr, _threadCallback, (void*)context);
+  return instance;
+}
+
+auto thread::detach() -> void {
+  pthread_detach(pthread_self());
+}
+
+auto thread::exit() -> void {
   pthread_exit(nullptr);
 }
 
@@ -70,58 +73,64 @@ void* thread_entry_point(void* parameter) {
 
 namespace nall {
 
-inline DWORD WINAPI thread_entry_point(LPVOID);
-
 struct thread {
-  thread(function<void ()> entryPoint) : entryPoint(entryPoint), completed(false), dead(false) {
-    initialize();
-    hthread = CreateThread(nullptr, 0, thread_entry_point, (void*)this, 0, nullptr);
-  }
+  inline ~thread();
+  inline auto join() -> void;
 
-  ~thread() {
-    join();
-  }
+  static inline auto create(const function<void (uintptr_t)>& callback, uintptr_t parameter = 0, unsigned stacksize = 0) -> thread;
+  static inline auto detach() -> void;
+  static inline auto exit() -> void;
 
-  bool active() const {
-    return completed == false;
-  }
-
-  void join() {
-    if(dead) return;
-    dead = true;
-    WaitForSingleObject(hthread, INFINITE);
-    CloseHandle(hthread);
-  }
-
-  static bool primary() {
-    initialize();
-    return primaryThread() == GetCurrentThreadId();
-  }
+  struct context {
+    function<void (uintptr_t)> callback;
+    uintptr_t parameter = 0;
+  };
 
 private:
-  HANDLE hthread;
-  function<void ()> entryPoint;
-  volatile bool completed, dead;
-  friend DWORD WINAPI thread_entry_point(LPVOID);
-
-  static void initialize() {
-    static bool initialized = false;
-    if(initialized) return;
-    initialized = true;
-    primaryThread() = GetCurrentThreadId();
-  }
-
-  static DWORD& primaryThread() {
-    static DWORD thread;
-    return thread;
-  }
+  HANDLE handle = 0;
 };
 
-inline DWORD WINAPI thread_entry_point(LPVOID parameter) {
-  thread *context = (thread*)parameter;
-  context->entryPoint();
-  context->completed = true;
+inline auto WINAPI _threadCallback(void* parameter) -> DWORD {
+  auto context = (thread::context*)parameter;
+  context->callback(context->parameter);
+  delete context;
   return 0;
+}
+
+thread::~thread() {
+  if(handle) {
+    CloseHandle(handle);
+    handle = 0;
+  }
+}
+
+auto thread::join() -> void {
+  if(handle) {
+    WaitForSingleObject(handle, INFINITE);
+    CloseHandle(handle);
+    handle = 0;
+  }
+}
+
+auto thread::create(const function<void (uintptr_t)>& callback, uintptr_t parameter, unsigned stacksize) -> thread {
+  thread instance;
+
+  auto context = new thread::context;
+  context->callback = callback;
+  context->parameter = parameter;
+
+  instance.handle = CreateThread(nullptr, stacksize, _threadCallback, (void*)context, 0, nullptr);
+  return instance;
+}
+
+auto thread::detach() -> void {
+  //Windows threads do not use this concept:
+  //~thread() frees resources via CloseHandle()
+  //thread continues to run even after handle is closed
+}
+
+auto thread::exit() -> void {
+  ExitThread(0);
 }
 
 }

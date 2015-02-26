@@ -1,0 +1,92 @@
+namespace name=Icon
+  namespace name=Action
+    binary name=Add file=icon/action/add.png
+    binary name=Attach file=icon/action/attach.png
+    binary name=Bookmark file=icon/action/bookmark.png
+    binary name=FullScreen file=icon/action/full-screen.png
+    binary name=Mute file=icon/action/mute.png
+    binary name=New file=icon/action/new.png
+    binary name=Open file=icon/action/open.png
+    binary name=Properties file=icon/action/properties.png
+    binary name=Quit file=icon/action/quit.png
+    binary name=Refresh file=icon/action/refresh.png
+    binary name=Remove file=icon/action/remove.png
+    binary name=Save file=icon/action/save.png
+    binary name=Search file=icon/action/search.png
+    binary name=Settings file=icon/action/settings.png
+    binary name=Stop file=icon/action/stop.png
+  namespace name=Application
+    binary name=Browser file=icon/application/browser.png
+    binary name=Calculator file=icon/application/calculator.png
+    binary name=Calendar file=icon/application/calendar.png
+    binary name=Chat file=icon/application/chat.png
+    binary name=FileManager file=icon/application/file-manager.png
+    binary name=Mail file=icon/application/mail.png
+    binary name=Monitor file=icon/application/monitor.png
+    binary name=Terminal file=icon/application/terminal.png
+    binary name=TextEditor file=icon/application/text-editor.png
+  namespace name=Device
+    binary name=Clock file=icon/device/clock.png
+    binary name=Display file=icon/device/display.png
+    binary name=Joypad file=icon/device/joypad.png
+    binary name=Keyboard file=icon/device/keyboard.png
+    binary name=Microphone file=icon/device/microphone.png
+    binary name=Mouse file=icon/device/mouse.png
+    binary name=Network file=icon/device/network.png
+    binary name=Optical file=icon/device/optical.png
+    binary name=Printer file=icon/device/printer.png
+    binary name=Speaker file=icon/device/speaker.png
+    binary name=Storage file=icon/device/storage.png
+  namespace name=Edit
+    binary name=Clear file=icon/edit/clear.png
+    binary name=Copy file=icon/edit/copy.png
+    binary name=Cut file=icon/edit/cut.png
+    binary name=Delete file=icon/edit/delete.png
+    binary name=Find file=icon/edit/find.png
+    binary name=Paste file=icon/edit/paste.png
+    binary name=Redo file=icon/edit/redo.png
+    binary name=Replace file=icon/edit/replace.png
+    binary name=Undo file=icon/edit/undo.png
+  namespace name=Emblem
+    binary name=Archive file=icon/emblem/archive.png
+    binary name=Audio file=icon/emblem/audio.png
+    binary name=Binary file=icon/emblem/binary.png
+    binary name=File file=icon/emblem/file.png
+    binary name=Folder file=icon/emblem/folder.png
+    binary name=Font file=icon/emblem/font.png
+    binary name=Image file=icon/emblem/image.png
+    binary name=Markup file=icon/emblem/markup.png
+    binary name=Program file=icon/emblem/program.png
+    binary name=Script file=icon/emblem/script.png
+    binary name=Text file=icon/emblem/text.png
+    binary name=Video file=icon/emblem/video.png
+  namespace name=Go
+    binary name=Down file=icon/go/down.png
+    binary name=Home file=icon/go/home.png
+    binary name=Left file=icon/go/left.png
+    binary name=Right file=icon/go/right.png
+    binary name=Up file=icon/go/up.png
+  namespace name=Media
+    binary name=Back file=icon/media/back.png
+    binary name=Eject file=icon/media/eject.png
+    binary name=Flash file=icon/media/flash.png
+    binary name=Floppy file=icon/media/floppy.png
+    binary name=Next file=icon/media/next.png
+    binary name=Optical file=icon/media/optical.png
+    binary name=Pause file=icon/media/pause.png
+    binary name=Play file=icon/media/play.png
+    binary name=Record file=icon/media/record.png
+    binary name=Rewind file=icon/media/rewind.png
+    binary name=Skip file=icon/media/skip.png
+    binary name=Stop file=icon/media/stop.png
+  namespace name=Place
+    binary name=Bookmarks file=icon/place/bookmarks.png
+    binary name=Desktop file=icon/place/desktop.png
+    binary name=Home file=icon/place/home.png
+    binary name=Server file=icon/place/server.png
+    binary name=Share file=icon/place/share.png
+  namespace name=Prompt
+    binary name=Error file=icon/prompt/error.png
+    binary name=Information file=icon/prompt/information.png
+    binary name=Question file=icon/prompt/question.png
+    binary name=Warning file=icon/prompt/warning.png

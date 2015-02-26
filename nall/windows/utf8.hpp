@@ -6,11 +6,9 @@
 
 #if defined(_WIN32)
 
-#undef UNICODE
-#undef _WIN32_WINNT
-#undef  NOMINMAX
+#undef  UNICODE
 #define UNICODE
-#define _WIN32_WINNT 0x0501
+#undef  NOMINMAX
 #define NOMINMAX
 #include <winsock2.h>
 #include <windows.h>

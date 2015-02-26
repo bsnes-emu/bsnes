@@ -2,7 +2,7 @@
 
 namespace nall {
 
-string activepath() {
+auto activepath() -> string {
   char path[PATH_MAX] = "";
   auto unused = getcwd(path, PATH_MAX);
   string result = path;
@@ -12,17 +12,17 @@ string activepath() {
   return result;
 }
 
-string realpath(const string& name) {
+auto realpath(rstring name) -> string {
   string result;
   char path[PATH_MAX] = "";
-  if(::realpath(name, path)) result = dir(path);
+  if(::realpath(name, path)) result = string{path}.pathname();
   if(result.empty()) result = activepath();
   result.transform("\\", "/");
   if(result.endsWith("/") == false) result.append("/");
   return result;
 }
 
-string programpath() {
+auto programpath() -> string {
   #if defined(PLATFORM_WINDOWS)
   int argc = 0;
   wchar_t** argv = CommandLineToArgvW(GetCommandLine(), &argc);
@@ -38,7 +38,7 @@ string programpath() {
 
 // /home/username/
 // c:/users/username/
-string userpath() {
+auto userpath() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_PROFILE | CSIDL_FLAG_CREATE, nullptr, 0, path);
@@ -55,7 +55,7 @@ string userpath() {
 
 // /home/username/.config/
 // c:/users/username/appdata/roaming/
-string configpath() {
+auto configpath() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
@@ -74,7 +74,7 @@ string configpath() {
 // /usr/share
 // /Library/Application Support/
 // c:/ProgramData/
-string sharedpath() {
+auto sharedpath() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_COMMON_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
@@ -92,7 +92,7 @@ string sharedpath() {
 
 // /tmp
 // c:/users/username/AppData/Local/Temp/
-string temppath() {
+auto temppath() -> string {
   #if defined(PLATFORM_WINDOWS)
   wchar_t path[PATH_MAX] = L"";
   GetTempPathW(PATH_MAX, path);

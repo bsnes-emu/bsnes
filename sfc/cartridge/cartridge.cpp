@@ -66,56 +66,44 @@ void Cartridge::load() {
 
   //Super Game Boy
   if(cartridge.has_gb_slot()) {
-    sha256 = nall::sha256(GameBoy::cartridge.romdata, GameBoy::cartridge.romsize);
+    sha256 = Hash::SHA256(GameBoy::cartridge.romdata, GameBoy::cartridge.romsize).digest();
   }
 
   //Broadcast Satellaview
   else if(cartridge.has_bs_cart() && cartridge.has_bs_slot()) {
-    sha256 = nall::sha256(satellaviewcartridge.memory.data(), satellaviewcartridge.memory.size());
+    sha256 = Hash::SHA256(satellaviewcartridge.memory.data(), satellaviewcartridge.memory.size()).digest();
   }
 
   //Sufami Turbo
   else if(cartridge.has_st_slots()) {
-    sha256_ctx sha;
-    uint8_t hash[32];
-    sha256_init(&sha);
-    sha256_chunk(&sha, sufamiturboA.rom.data(), sufamiturboA.rom.size());
-    sha256_chunk(&sha, sufamiturboB.rom.data(), sufamiturboB.rom.size());
-    sha256_final(&sha);
-    sha256_hash(&sha, hash);
-    string result;
-    for(auto& byte : hash) result.append(hex<2>(byte));
-    sha256 = result;
+    Hash::SHA256 sha;
+    sha.data(sufamiturboA.rom.data(), sufamiturboA.rom.size());
+    sha.data(sufamiturboB.rom.data(), sufamiturboB.rom.size());
+    sha256 = sha.digest();
   }
 
   //Super Famicom
   else {
-    sha256_ctx sha;
-    uint8_t hash[32];
-    vector<uint8_t> buffer;
-    sha256_init(&sha);
+    Hash::SHA256 sha;
     //hash each ROM image that exists; any with size() == 0 is ignored by sha256_chunk()
-    sha256_chunk(&sha, rom.data(), rom.size());
-    sha256_chunk(&sha, bsxcartridge.rom.data(), bsxcartridge.rom.size());
-    sha256_chunk(&sha, sa1.rom.data(), sa1.rom.size());
-    sha256_chunk(&sha, superfx.rom.data(), superfx.rom.size());
-    sha256_chunk(&sha, hitachidsp.rom.data(), hitachidsp.rom.size());
-    sha256_chunk(&sha, spc7110.prom.data(), spc7110.prom.size());
-    sha256_chunk(&sha, spc7110.drom.data(), spc7110.drom.size());
-    sha256_chunk(&sha, sdd1.rom.data(), sdd1.rom.size());
+    sha.data(rom.data(), rom.size());
+    sha.data(bsxcartridge.rom.data(), bsxcartridge.rom.size());
+    sha.data(sa1.rom.data(), sa1.rom.size());
+    sha.data(superfx.rom.data(), superfx.rom.size());
+    sha.data(hitachidsp.rom.data(), hitachidsp.rom.size());
+    sha.data(spc7110.prom.data(), spc7110.prom.size());
+    sha.data(spc7110.drom.data(), spc7110.drom.size());
+    sha.data(sdd1.rom.data(), sdd1.rom.size());
     //hash all firmware that exists
+    vector<uint8> buffer;
     buffer = armdsp.firmware();
-    sha256_chunk(&sha, buffer.data(), buffer.size());
+    sha.data(buffer.data(), buffer.size());
     buffer = hitachidsp.firmware();
-    sha256_chunk(&sha, buffer.data(), buffer.size());
+    sha.data(buffer.data(), buffer.size());
     buffer = necdsp.firmware();
-    sha256_chunk(&sha, buffer.data(), buffer.size());
+    sha.data(buffer.data(), buffer.size());
     //finalize hash
-    sha256_final(&sha);
-    sha256_hash(&sha, hash);
-    string result;
-    for(auto& byte : hash) result.append(hex<2>(byte));
-    sha256 = result;
+    sha256 = sha.digest();
   }
 
   rom.write_protect(true);

@@ -1,5 +1,6 @@
 #include <ruby/ruby.hpp>
 
+#undef deprecated
 #undef mkdir
 #undef usleep
 #include <ruby/implementation.cpp>

@@ -1,7 +1,6 @@
 #ifndef NALL_BEAT_PATCH_HPP
 #define NALL_BEAT_PATCH_HPP
 
-#include <nall/crc32.hpp>
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
 #include <nall/stdint.hpp>
@@ -129,12 +128,12 @@ unsigned bpspatch::size() const {
 bpspatch::result bpspatch::apply() {
   if(modifySize < 19) return result::patch_too_small;
 
-  uint32_t modifyChecksum = ~0, targetChecksum = ~0;
+  Hash::CRC32 modifyChecksum, targetChecksum;
   unsigned modifyOffset = 0, sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
   auto read = [&]() -> uint8_t {
     uint8_t data = modifyData[modifyOffset++];
-    modifyChecksum = crc32_adjust(modifyChecksum, data);
+    modifyChecksum.data(data);
     return data;
   };
 
@@ -152,7 +151,7 @@ bpspatch::result bpspatch::apply() {
 
   auto write = [&](uint8_t data) {
     targetData[outputOffset++] = data;
-    targetChecksum = crc32_adjust(targetChecksum, data);
+    targetChecksum.data(data);
   };
 
   if(read() != 'B') return result::patch_invalid_header;
@@ -201,14 +200,13 @@ bpspatch::result bpspatch::apply() {
   uint32_t modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
   for(unsigned n = 0; n < 32; n += 8) modifySourceChecksum |= read() << n;
   for(unsigned n = 0; n < 32; n += 8) modifyTargetChecksum |= read() << n;
-  uint32_t checksum = ~modifyChecksum;
+  uint32_t checksum = modifyChecksum.value();
   for(unsigned n = 0; n < 32; n += 8) modifyModifyChecksum |= read() << n;
 
-  uint32_t sourceChecksum = crc32_calculate(sourceData, modifySourceSize);
-  targetChecksum = ~targetChecksum;
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
 
   if(sourceChecksum != modifySourceChecksum) return result::source_checksum_invalid;
-  if(targetChecksum != modifyTargetChecksum) return result::target_checksum_invalid;
+  if(targetChecksum.value() != modifyTargetChecksum) return result::target_checksum_invalid;
   if(checksum != modifyModifyChecksum) return result::patch_checksum_invalid;
 
   return result::success;

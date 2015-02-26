@@ -52,7 +52,7 @@ struct varint {
 
 template<unsigned bits> struct uint_t {
 private:
-  typedef typename type_if<bits <= 8 * sizeof(unsigned), unsigned, uintmax_t>::type type_t;
+  using type_t = type_if<expression<bits <= 8 * sizeof(unsigned)>, unsigned, uintmax_t>;
   type_t data;
 
 public:
@@ -84,7 +84,7 @@ public:
 
 template<unsigned bits> struct int_t {
 private:
-  typedef typename type_if<bits <= 8 * sizeof(signed), signed, intmax_t>::type type_t;
+  using type_t = type_if<expression<bits <= 8 * sizeof(signed)>, signed, intmax_t>;
   type_t data;
 
 public:

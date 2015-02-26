@@ -109,7 +109,10 @@ public:
   }
 
   void insert(unsigned position, const T& data) {
-    if(position == 0) return prepend(data);
+    if(position == 0) {
+      prepend(data);
+      return;
+    }
     append(data);
     if(position == ~0u) return;
     for(signed n = objectsize - 1; n > position; n--) {
@@ -165,7 +168,7 @@ public:
     nall::sort(pool + poolbase, objectsize, lessthan);
   }
 
-  maybe<unsigned> find(const T& data) {
+  maybe<unsigned> find(const T& data) const {
     for(unsigned n = 0; n < objectsize; n++) if(pool[poolbase + n] == data) return n;
     return nothing;
   }
@@ -243,6 +246,7 @@ public:
 
   //copy
   inline vector& operator=(const vector& source) {
+    if(this == &source) return *this;
     reset();
     reserve(source.size());
     for(auto& data : source) append(data);
@@ -251,6 +255,7 @@ public:
 
   //move
   inline vector& operator=(vector&& source) {
+    if(this == &source) return *this;
     reset();
     pool = source.pool;
     poolbase = source.poolbase;

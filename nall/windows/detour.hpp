@@ -75,7 +75,7 @@ bool detour::insert(const string& moduleName, const string& functionName, void*&
     #if 1
     string output = { "detour::insert(", moduleName, "::", functionName, ") failed: " };
     for(unsigned n = 0; n < 16; n++) output.append(hex<2>(sourceData[n]), " ");
-    output.rtrim<1>(" ");
+    output.rtrim(" ");
     MessageBoxA(0, output, "nall::detour", MB_OK);
     #endif
     return false;

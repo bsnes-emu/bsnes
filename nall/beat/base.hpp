@@ -6,24 +6,24 @@ namespace nall {
 struct beatBase {
 protected:
   file fp;
-  uint32_t checksum;
+  Hash::CRC32 checksum;
 
   void ls(lstring& list, const string& path, const string& basepath) {
     lstring paths = directory::folders(path);
     for(auto& pathname : paths) {
-      list.append(string{path, pathname}.ltrim<1>(basepath));
+      list.append(string{path, pathname}.ltrim(basepath));
       ls(list, {path, pathname}, basepath);
     }
 
     lstring files = directory::files(path);
     for(auto& filename : files) {
-      list.append(string{path, filename}.ltrim<1>(basepath));
+      list.append(string{path, filename}.ltrim(basepath));
     }
   }
 
   void write(uint8_t data) {
     fp.write(data);
-    checksum = crc32_adjust(checksum, data);
+    checksum.data(data);
   }
 
   void writeNumber(uint64_t data) {
@@ -50,7 +50,7 @@ protected:
 
   uint8_t read() {
     uint8_t data = fp.read();
-    checksum = crc32_adjust(checksum, data);
+    checksum.data(data);
     return data;
   }
 
@@ -68,12 +68,12 @@ protected:
 
   string readString(unsigned length) {
     string text;
-    text.reserve(length + 1);
-    for(unsigned n = 0; n < length; n++) {
-      text[n] = fp.read();
-      checksum = crc32_adjust(checksum, text[n]);
+    text.resize(length + 1);
+    char* p = text.pointer();
+    while(length--) {
+      *p = fp.read();
+      checksum.data(*p++);
     }
-    text[length] = 0;
     return text;
   }
 

@@ -3,26 +3,18 @@
 
 #include <nall/platform.hpp>
 #include <nall/stdint.hpp>
+#include <nall/storage.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
-#include <nall/windows/utf8.hpp>
+#include <nall/hash/sha256.hpp>
 #include <nall/stream/memory.hpp>
 
 namespace nall {
 
-inline FILE* fopen_utf8(const string& filename, const string& mode) {
-  #if !defined(_WIN32)
-  return fopen(filename, mode);
-  #else
-  return _wfopen(utf16_t(filename), utf16_t(mode));
-  #endif
-}
-
-struct file : varint {
+struct file : storage, varint {
   enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
   enum class index : unsigned { absolute, relative };
-  enum class time : unsigned { create, modify, access };
 
   static bool copy(const string& sourcename, const string& targetname) {
     file rd, wr;
@@ -32,21 +24,16 @@ struct file : varint {
     return true;
   }
 
+  //attempt to rename file first
+  //this will fail if paths point to different file systems; fall back to copy+remove in this case
   static bool move(const string& sourcename, const string& targetname) {
-    auto result = rename(sourcename, targetname);
-    if(result == 0) return true;
-    if(errno == EXDEV) {
-      //cannot move files between file systems; copy file instead of failing
-      if(file::copy(sourcename, targetname)) {
-        file::remove(sourcename);
-        return true;
-      }
+    if(rename(sourcename, targetname)) return true;
+    if(!writable(sourcename)) return false;
+    if(copy(sourcename, targetname)) {
+      remove(sourcename);
+      return true;
     }
     return false;
-  }
-
-  static bool remove(const string& filename) {
-    return unlink(filename) == 0;
   }
 
   static bool truncate(const string& filename, unsigned size) {
@@ -54,13 +41,36 @@ struct file : varint {
     return truncate(filename, size) == 0;
     #else
     bool result = false;
-    FILE* fp = fopen(filename, "rb+");
+    FILE* fp = _wfopen(utf16_t(filename), L"rb+");
     if(fp) {
       result = _chsize(fileno(fp), size) == 0;
       fclose(fp);
     }
     return result;
     #endif
+  }
+
+  //specialization of storage::exists(); returns false for folders
+  static bool exists(const string& filename) {
+    #if !defined(_WIN32)
+    struct stat data;
+    if(stat(filename, &data) != 0) return false;
+    #else
+    struct __stat64 data;
+    if(_wstat64(utf16_t(filename), &data) != 0) return false;
+    #endif
+    return !(data.st_mode & S_IFDIR);
+  }
+
+  static uintmax_t size(const string& filename) {
+    #if !defined(_WIN32)
+    struct stat data;
+    stat(filename, &data);
+    #else
+    struct __stat64 data;
+    _wstat64(utf16_t(filename), &data);
+    #endif
+    return S_ISREG(data.st_mode) ? data.st_size : 0u;
   }
 
   static vector<uint8_t> read(const string& filename) {
@@ -115,7 +125,7 @@ struct file : varint {
 
   static string sha256(const string& filename) {
     auto buffer = read(filename);
-    return nall::sha256(buffer.data(), buffer.size());
+    return Hash::SHA256(buffer.data(), buffer.size()).digest();
   }
 
   uint8_t read() {
@@ -231,44 +241,6 @@ struct file : varint {
     return file_offset >= file_size;
   }
 
-  static bool exists(const string& filename) {
-    #if !defined(_WIN32)
-    struct stat data;
-    if(stat(filename, &data) != 0) return false;
-    #else
-    struct __stat64 data;
-    if(_wstat64(utf16_t(filename), &data) != 0) return false;
-    #endif
-    //return true if this is a file, and false if this is a directory
-    return !(data.st_mode & S_IFDIR);
-  }
-
-  static uintmax_t size(const string& filename) {
-    #if !defined(_WIN32)
-    struct stat data;
-    stat(filename, &data);
-    #else
-    struct __stat64 data;
-    _wstat64(utf16_t(filename), &data);
-    #endif
-    return S_ISREG(data.st_mode) ? data.st_size : 0u;
-  }
-
-  static time_t timestamp(const string& filename, file::time mode = file::time::create) {
-    #if !defined(_WIN32)
-    struct stat data;
-    stat(filename, &data);
-    #else
-    struct __stat64 data;
-    _wstat64(utf16_t(filename), &data);
-    #endif
-    switch(mode) { default:
-    case file::time::create: return data.st_ctime;
-    case file::time::modify: return data.st_mtime;
-    case file::time::access: return data.st_atime;
-    }
-  }
-
   bool open() const {
     return fp;
   }
@@ -309,8 +281,9 @@ struct file : varint {
     fp = nullptr;
   }
 
-  file() {
-  }
+  file& operator=(const file&) = delete;
+  file(const file&) = delete;
+  file() = default;
 
   file(const string& filename, mode mode_) {
     open(filename, mode_);
@@ -319,9 +292,6 @@ struct file : varint {
   ~file() {
     close();
   }
-
-  file& operator=(const file&) = delete;
-  file(const file&) = delete;
 
 private:
   enum { buffer_size = 1 << 12, buffer_mask = buffer_size - 1 };

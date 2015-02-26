@@ -92,7 +92,7 @@ struct registry {
         wchar_t name[NWR_SIZE] = L"";
         DWORD size = NWR_SIZE * sizeof(wchar_t);
         RegEnumKeyEx(handle, n, (wchar_t*)&name, &size, nullptr, nullptr, nullptr, nullptr);
-        result.append({(const char*)utf8_t(name), "/"});
+        result.append(string{(const char*)utf8_t(name), "/"});
       }
       for(unsigned n = 0; n < nodes; n++) {
         wchar_t name[NWR_SIZE] = L"";

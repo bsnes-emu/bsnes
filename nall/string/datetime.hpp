@@ -2,28 +2,29 @@
 
 namespace nall {
 
-string string::date() {
-  time_t timestamp = ::time(nullptr);
+auto string::date(time_t timestamp) -> string {
+  if(timestamp == 0) timestamp = ::time(nullptr);
   tm* info = localtime(&timestamp);
   return {
-    format<4, '0'>(1900 + info->tm_year), "-",
-    format<2, '0'>(1 + info->tm_mon), "-",
-    format<2, '0'>(info->tm_mday)
+    nall::decimal<4>(1900 + info->tm_year), "-",
+    nall::decimal<2>(1 + info->tm_mon), "-",
+    nall::decimal<2>(info->tm_mday)
   };
 }
 
-string string::time() {
-  time_t timestamp = ::time(nullptr);
+auto string::time(time_t timestamp) -> string {
+  if(timestamp == 0) timestamp = ::time(nullptr);
   tm* info = localtime(&timestamp);
   return {
-    format<2, '0'>(info->tm_hour), ":",
-    format<2, '0'>(info->tm_min), ":",
-    format<2, '0'>(info->tm_sec)
+    nall::decimal<2>(info->tm_hour), ":",
+    nall::decimal<2>(info->tm_min), ":",
+    nall::decimal<2>(info->tm_sec)
   };
 }
 
-string string::datetime() {
-  return {string::date(), " ", string::time()};
+auto string::datetime(time_t timestamp) -> string {
+  if(timestamp == 0) timestamp = ::time(nullptr);
+  return {string::date(timestamp), " ", string::time(timestamp)};
 }
 
 }

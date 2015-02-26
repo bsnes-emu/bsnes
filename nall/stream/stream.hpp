@@ -51,7 +51,6 @@ struct stream {
   string text() const {
     string buffer;
     buffer.resize(size() + 1);
-    buffer[size()] = 0;
     seek(0);
     read((uint8_t*)buffer.data(), size());
     return buffer;

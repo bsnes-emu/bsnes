@@ -39,34 +39,34 @@ protected:
     target.reserve(length + 1);
 
     #if defined(NALL_XML_LITERAL)
-    memcpy(target(), source, length);
+    memory::copy(target.pointer(), source, length);
     target[length] = 0;
     return;
     #endif
 
-    char* output = target.data();
+    char* output = target.pointer();
     while(length) {
       if(*source == '&') {
-        if(!memcmp(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }
-        if(!memcmp(source, "&gt;",   4)) { *output++ = '>';  source += 4; length -= 4; continue; }
-        if(!memcmp(source, "&amp;",  5)) { *output++ = '&';  source += 5; length -= 5; continue; }
-        if(!memcmp(source, "&apos;", 6)) { *output++ = '\''; source += 6; length -= 6; continue; }
-        if(!memcmp(source, "&quot;", 6)) { *output++ = '\"'; source += 6; length -= 6; continue; }
+        if(!memory::compare(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }
+        if(!memory::compare(source, "&gt;",   4)) { *output++ = '>';  source += 4; length -= 4; continue; }
+        if(!memory::compare(source, "&amp;",  5)) { *output++ = '&';  source += 5; length -= 5; continue; }
+        if(!memory::compare(source, "&apos;", 6)) { *output++ = '\''; source += 6; length -= 6; continue; }
+        if(!memory::compare(source, "&quot;", 6)) { *output++ = '\"'; source += 6; length -= 6; continue; }
       }
 
       if(attribute == false && source[0] == '<' && source[1] == '!') {
         //comment
-        if(!memcmp(source, "<!--", 4)) {
+        if(!memory::compare(source, "<!--", 4)) {
           source += 4, length -= 4;
-          while(memcmp(source, "-->", 3)) source++, length--;
+          while(memory::compare(source, "-->", 3)) source++, length--;
           source += 3, length -= 3;
           continue;
         }
 
         //CDATA
-        if(!memcmp(source, "<![CDATA[", 9)) {
+        if(!memory::compare(source, "<![CDATA[", 9)) {
           source += 9, length -= 9;
-          while(memcmp(source, "]]>", 3)) *output++ = *source++, length--;
+          while(memory::compare(source, "]]>", 3)) *output++ = *source++, length--;
           source += 3, length -= 3;
           continue;
         }
@@ -81,23 +81,23 @@ protected:
     if(*(p + 1) != '!') return false;
 
     //comment
-    if(!memcmp(p, "<!--", 4)) {
-      while(*p && memcmp(p, "-->", 3)) p++;
+    if(!memory::compare(p, "<!--", 4)) {
+      while(*p && memory::compare(p, "-->", 3)) p++;
       if(!*p) throw "unclosed comment";
       p += 3;
       return true;
     }
 
     //CDATA
-    if(!memcmp(p, "<![CDATA[", 9)) {
-      while(*p && memcmp(p, "]]>", 3)) p++;
+    if(!memory::compare(p, "<![CDATA[", 9)) {
+      while(*p && memory::compare(p, "]]>", 3)) p++;
       if(!*p) throw "unclosed CDATA";
       p += 3;
       return true;
     }
 
     //DOCTYPE
-    if(!memcmp(p, "<!DOCTYPE", 9)) {
+    if(!memory::compare(p, "<!DOCTYPE", 9)) {
       unsigned counter = 0;
       do {
         char n = *p++;
@@ -171,7 +171,7 @@ protected:
     while(*p && *p != '>') p++;
     if(*p != '>') throw "unclosed closure element";
     const char* nameEnd = p++;
-    if(memcmp(name, nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
+    if(memory::compare(name.data(), nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
     return true;
   }
 

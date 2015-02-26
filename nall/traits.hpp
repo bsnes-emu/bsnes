@@ -2,32 +2,51 @@
 #define NALL_TRAITS_HPP
 
 #include <type_traits>
+#include <utility>
 
 namespace nall {
+  using std::forward;
+  using std::move;
+  using std::decay;
+  using std::declval;
 
-template<typename T> class has_default_constructor {
-  template<signed> class receive_size{};
-  template<typename U> static signed sfinae(receive_size<sizeof U()>*);
-  template<typename U> static char sfinae(...);
+  using true_type = std::true_type;
+  using false_type = std::false_type;
 
-public:
-  enum : bool { value = sizeof(sfinae<T>(0)) == sizeof(signed) };
-};
+  template<typename T, typename U> using is_same = std::is_same<T, U>;
+  template<typename T, typename U> using is_base_of = std::is_base_of<T, U>;
+  template<typename T> using is_array = std::is_array<T>;
+  template<typename T> using is_function = std::is_function<T>;
+  template<typename T> using is_integral = std::is_integral<T>;
+}
 
-template<bool C, typename T = bool> struct enable_if { typedef T type; };
-template<typename T> struct enable_if<false, T> {};
+namespace nall {
+  template<bool C> struct expression { static constexpr bool value = C; };
+}
 
-template<bool C, typename T, typename F> struct type_if { typedef T type; };
-template<typename T, typename F> struct type_if<false, T, F> { typedef F type; };
+namespace nall {
+  namespace traits {
+    enum class enable_type {};
+    enum class disable_type {};
 
-template<bool A, bool B> struct static_and { enum { value = false }; };
-template<> struct static_and<true, true> { enum { value = true }; };
+    template<bool C, typename T = void> struct enable_if { using type = T; };
+    template<typename T> struct enable_if<false, T> {};
 
-template<bool A, bool B> struct static_or { enum { value = false }; };
-template<> struct static_or<false, true> { enum { value = true }; };
-template<> struct static_or<true, false> { enum { value = true }; };
-template<> struct static_or<true, true> { enum { value = true }; };
+    template<bool C, typename T = void> struct disable_if { using type = T; };
+    template<typename T> struct disable_if<true, T> {};
+  }
 
+  template<typename C, typename T = void> using enable_if = typename traits::enable_if<C::value, T>::type;
+  template<typename C, typename T = void> using disable_if = typename traits::disable_if<C::value, T>::type;
+}
+
+namespace nall {
+  namespace traits {
+    template<bool C, typename T, typename F> struct type_if { using type = T; };
+    template<typename T, typename F> struct type_if<false, T, F> { using type = F; };
+  }
+
+  template<typename C, typename T, typename F> using type_if = typename traits::type_if<C::value, T, F>::type;
 }
 
 #endif

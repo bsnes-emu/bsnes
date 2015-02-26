@@ -68,7 +68,7 @@ void Cartridge::load() {
     }
   }
 
-  sha256 = nall::sha256(rom.data, rom_size);
+  sha256 = Hash::SHA256(rom.data, rom_size).digest();
 
   system.load();
   loaded = true;

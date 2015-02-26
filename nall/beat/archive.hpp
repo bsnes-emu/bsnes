@@ -10,7 +10,7 @@ struct beatArchive : beatBase {
     if(fp.open(beatname, file::mode::write) == false) return false;
     if(pathname.endsWith("/") == false) pathname.append("/");
 
-    checksum = ~0;
+    checksum.reset();
     writeString("BPA1");
     writeNumber(metadata.length());
     writeString(metadata);
@@ -19,7 +19,7 @@ struct beatArchive : beatBase {
     ls(list, pathname, pathname);
     for(auto &name : list) {
       if(name.endsWith("/")) {
-        name.rtrim<1>("/");
+        name.rtrim("/");
         writeNumber(0 | ((name.length() - 1) << 1));
         writeString(name);
       } else {
@@ -29,17 +29,17 @@ struct beatArchive : beatBase {
         writeString(name);
         unsigned size = stream.size();
         writeNumber(size);
-        uint32_t checksum = ~0;
+        Hash::CRC32 checksum;
         while(size--) {
           uint8_t data = stream.read();
           write(data);
-          checksum = crc32_adjust(checksum, data);
+          checksum.data(data);
         }
-        writeChecksum(~checksum);
+        writeChecksum(checksum.value());
       }
     }
 
-    writeChecksum(~checksum);
+    writeChecksum(checksum.value());
     fp.close();
     return true;
   }
@@ -48,7 +48,7 @@ struct beatArchive : beatBase {
     if(fp.open(beatname, file::mode::read) == false) return false;
     if(pathname.endsWith("/") == false) pathname.append("/");
 
-    checksum = ~0;
+    checksum.reset();
     if(readString(4) != "BPA1") return false;
     unsigned length = readNumber();
     while(length--) read();
@@ -65,17 +65,17 @@ struct beatArchive : beatBase {
         file stream;
         if(stream.open({pathname, name}, file::mode::write) == false) return false;
         unsigned size = readNumber();
-        uint32_t checksum = ~0;
+        Hash::CRC32 checksum;
         while(size--) {
           uint8_t data = read();
           stream.write(data);
-          checksum = crc32_adjust(checksum, data);
+          checksum.data(data);
         }
-        if(readChecksum(~checksum) == false) return false;
+        if(readChecksum(checksum.value()) == false) return false;
       }
     }
 
-    return readChecksum(~checksum);
+    return readChecksum(checksum.value());
   }
 };
 

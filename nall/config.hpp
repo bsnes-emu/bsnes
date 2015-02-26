@@ -60,7 +60,7 @@ struct Node {
     for(auto& child : children) {
       auto leaf = path[child.name];
       if(!leaf.exists()) continue;
-      if(!child.empty()) child.set(leaf.data.trim<1>(" ", "\r"));
+      if(!child.empty()) child.set(leaf.text());
       child.load(leaf);
     }
   }

@@ -182,7 +182,7 @@ string R6502::disassemble() {
   #undef op
 
   output.append("                ");
-  output[20] = 0;
+  output.resize(20);
 
   output.append(
     "A:", hex<2>(regs.a), " X:", hex<2>(regs.x), " Y:", hex<2>(regs.y), " S:", hex<2>(regs.s), " ",

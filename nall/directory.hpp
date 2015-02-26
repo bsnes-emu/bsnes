@@ -4,6 +4,7 @@
 #include <nall/file.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
+#include <nall/storage.hpp>
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 
@@ -17,7 +18,7 @@
 
 namespace nall {
 
-struct directory {
+struct directory : storage {
   static bool create(const string& pathname, unsigned permissions = 0755);  //recursive
   static bool remove(const string& pathname);  //recursive
   static bool exists(const string& pathname);
@@ -73,7 +74,7 @@ private:
 #if defined(PLATFORM_WINDOWS)
   inline bool directory::create(const string& pathname, unsigned permissions) {
     string path;
-    lstring list = string{pathname}.transform("\\", "/").rtrim<1>("/").split("/");
+    lstring list = string{pathname}.transform("\\", "/").rtrim("/").split("/");
     bool result = true;
     for(auto& part : list) {
       path.append(part, "/");
@@ -93,7 +94,7 @@ private:
 
   inline bool directory::exists(const string& pathname) {
     string name = pathname;
-    name.trim<1>("\"");
+    name.trim("\"", "\"");
     DWORD result = GetFileAttributes(utf16_t(name));
     if(result == INVALID_FILE_ATTRIBUTES) return false;
     return (result & FILE_ATTRIBUTE_DIRECTORY);
@@ -103,7 +104,7 @@ private:
     lstring list;
     string path = pathname;
     path.transform("/", "\\");
-    if(!strend(path, "\\")) path.append("\\");
+    if(!path.endsWith("\\")) path.append("\\");
     path.append("*");
     HANDLE handle;
     WIN32_FIND_DATA data;
@@ -133,7 +134,7 @@ private:
     lstring list;
     string path = pathname;
     path.transform("/", "\\");
-    if(!strend(path, "\\")) path.append("\\");
+    if(!path.endsWith("\\")) path.append("\\");
     path.append("*");
     HANDLE handle;
     WIN32_FIND_DATA data;
@@ -154,12 +155,24 @@ private:
     return list;
   }
 #else
+  inline bool directory_is_folder(DIR* dp, struct dirent* ep) {
+    if(ep->d_type == DT_DIR) return true;
+    if(ep->d_type == DT_LNK || ep->d_type == DT_UNKNOWN) {
+      //symbolic links must be resolved to determine type
+      struct stat sp = {0};
+      fstatat(dirfd(dp), ep->d_name, &sp, 0);
+      return S_ISDIR(sp.st_mode);
+    }
+    return false;
+  }
+
   inline bool directory::create(const string& pathname, unsigned permissions) {
     string path;
-    lstring list = string{pathname}.rtrim<1>("/").split("/");
+    lstring list = string{pathname}.rtrim("/").split("/");
     bool result = true;
     for(auto& part : list) {
       path.append(part, "/");
+      if(directory::exists(path)) continue;
       result &= (mkdir(path, permissions) == 0);
     }
     return result;
@@ -175,7 +188,7 @@ private:
   }
 
   inline bool directory::exists(const string& pathname) {
-    DIR *dp = opendir(pathname);
+    DIR* dp = opendir(pathname);
     if(!dp) return false;
     closedir(dp);
     return true;
@@ -190,15 +203,9 @@ private:
       while(ep = readdir(dp)) {
         if(!strcmp(ep->d_name, ".")) continue;
         if(!strcmp(ep->d_name, "..")) continue;
-        bool is_directory = ep->d_type & DT_DIR;
-        if(ep->d_type & DT_UNKNOWN) {
-          struct stat sp = {0};
-          stat(string{pathname, ep->d_name}, &sp);
-          is_directory = S_ISDIR(sp.st_mode);
-        }
-        if(is_directory) {
-          if(strmatch(ep->d_name, pattern)) list.append(ep->d_name);
-        }
+        if(!directory_is_folder(dp, ep)) continue;
+        string name{ep->d_name};
+        if(name.match(pattern)) list.append(std::move(name));
       }
       closedir(dp);
     }
@@ -215,9 +222,9 @@ private:
       while(ep = readdir(dp)) {
         if(!strcmp(ep->d_name, ".")) continue;
         if(!strcmp(ep->d_name, "..")) continue;
-        if((ep->d_type & DT_DIR) == 0) {
-          if(strmatch(ep->d_name, pattern)) list.append(ep->d_name);
-        }
+        if(directory_is_folder(dp, ep)) continue;
+        string name{ep->d_name};
+        if(name.match(pattern)) list.append(std::move(name));
       }
       closedir(dp);
     }

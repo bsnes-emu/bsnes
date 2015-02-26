@@ -23,7 +23,7 @@ struct bpsmulti {
   bool create(const string& patchName, const string& sourcePath, const string& targetPath, bool delta = false, const string& metadata = "") {
     if(fp.open()) fp.close();
     fp.open(patchName, file::mode::write);
-    checksum = ~0;
+    checksum.reset();
 
     writeString("BPM1");  //signature
     writeNumber(metadata.length());
@@ -35,7 +35,7 @@ struct bpsmulti {
 
     for(auto& targetName : targetList) {
       if(targetName.endsWith("/")) {
-        targetName.rtrim<1>("/");
+        targetName.rtrim("/");
         writeNumber(CreatePath | ((targetName.length() - 1) << 2));
         writeString(targetName);
       } else if(auto position = sourceList.find(targetName)) {  //if sourceName == targetName
@@ -44,19 +44,19 @@ struct bpsmulti {
         dp.open({targetPath, targetName}, file::mode::read);
 
         bool identical = sp.size() == dp.size();
-        uint32_t cksum = ~0;
+        Hash::CRC32 cksum;
 
         for(unsigned n = 0; n < sp.size(); n++) {
           uint8_t byte = sp.read();
           if(identical && byte != dp.read()) identical = false;
-          cksum = crc32_adjust(cksum, byte);
+          cksum.data(byte);
         }
 
         if(identical) {
           writeNumber(MirrorFile | ((targetName.length() - 1) << 2));
           writeString(targetName);
           writeNumber(OriginSource);
-          writeChecksum(~cksum);
+          writeChecksum(cksum.value());
         } else {
           writeNumber(ModifyFile | ((targetName.length() - 1) << 2));
           writeString(targetName);
@@ -84,12 +84,12 @@ struct bpsmulti {
         auto buffer = file::read({targetPath, targetName});
         writeNumber(buffer.size());
         for(auto &byte : buffer) write(byte);
-        writeChecksum(crc32_calculate(buffer.data(), buffer.size()));
+        writeChecksum(Hash::CRC32(buffer.data(), buffer.size()).value());
       }
     }
 
     //checksum
-    writeChecksum(~checksum);
+    writeChecksum(checksum.value());
     fp.close();
     return true;
   }
@@ -100,7 +100,7 @@ struct bpsmulti {
 
     if(fp.open()) fp.close();
     fp.open(patchName, file::mode::read);
-    checksum = ~0;
+    checksum.reset();
 
     if(readString(4) != "BPM1") return false;
     auto metadataLength = readNumber();
@@ -142,7 +142,7 @@ struct bpsmulti {
       }
     }
 
-    uint32_t cksum = ~checksum;
+    uint32_t cksum = checksum.value();
     if(read() != (uint8_t)(cksum >>  0)) return false;
     if(read() != (uint8_t)(cksum >>  8)) return false;
     if(read() != (uint8_t)(cksum >> 16)) return false;
@@ -154,25 +154,25 @@ struct bpsmulti {
 
 protected:
   file fp;
-  uint32_t checksum;
+  Hash::CRC32 checksum;
 
   //create() functions
   void ls(lstring& list, const string& path, const string& basepath) {
     lstring paths = directory::folders(path);
     for(auto& pathname : paths) {
-      list.append(string{path, pathname}.ltrim<1>(basepath));
+      list.append(string{path, pathname}.ltrim(basepath));
       ls(list, {path, pathname}, basepath);
     }
 
     lstring files = directory::files(path);
     for(auto& filename : files) {
-      list.append(string{path, filename}.ltrim<1>(basepath));
+      list.append(string{path, filename}.ltrim(basepath));
     }
   }
 
   void write(uint8_t data) {
     fp.write(data);
-    checksum = crc32_adjust(checksum, data);
+    checksum.data(data);
   }
 
   void writeNumber(uint64_t data) {
@@ -203,7 +203,7 @@ protected:
   //apply() functions
   uint8_t read() {
     uint8_t data = fp.read();
-    checksum = crc32_adjust(checksum, data);
+    checksum.data(data);
     return data;
   }
 
@@ -221,9 +221,9 @@ protected:
 
   string readString(unsigned length) {
     string text;
-    text.reserve(length + 1);
-    for(unsigned n = 0; n < length; n++) text[n] = read();
-    text[length] = 0;
+    text.resize(length + 1);
+    char* p = text.pointer();
+    while(length--) *p++ = read();
     return text;
   }
 

@@ -3,52 +3,93 @@
 namespace nall {
 
 template<unsigned Limit, bool Insensitive, bool Quoted>
-string& string::ureplace(rstring key, rstring token) {
-  if(key.size() == 0) return *this;
-  enum : unsigned { limit = Limit ? Limit : ~0u };
+auto _replace(string& self, rstring from, rstring to) -> string& {
+  if(Limit == 0 || from.size() == 0) return self;
 
-  const char* p = data();
-  unsigned counter = 0;
+  signed size = self.size();
+  signed matches = 0;
+  signed quoted = 0;
 
-  while(*p) {
-    if(quoteskip<Quoted>(p)) continue;
-    for(unsigned n = 0;; n++) {
-      if(key[n] == 0) { counter++; p += n; break; }
-      if(!chrequal<Insensitive>(key[n], p[n])) { p++; break; }
+  //count matches first, so that we only need to reallocate memory once
+  //(recording matches would also require memory allocation, so this is not done)
+  { const char* p = self.data();
+    for(signed n = 0; n <= size - (signed)from.size();) {
+      if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
+      if(_compare<Insensitive>(p + n, size - n, from.data(), from.size())) { n++; continue; }
+
+      if(++matches >= Limit) break;
+      n += from.size();
     }
   }
-  if(counter == 0) return *this;
-  if(Limit) counter = min(counter, Limit);
+  if(matches == 0) return self;
 
-  char* t = data();
-  char* base = nullptr;
-  signed displacement = token.size() - key.size();
-  signed displacementSize = displacement * counter;
+  //in-place overwrite
+  if(to.size() == from.size()) {
+    char* p = self.pointer();
 
-  if(token.size() > key.size()) {
-    t = base = strduplicate(data());
-    reserve((unsigned)(p - data()) + displacementSize);
-  }
-  char* o = data();
+    for(signed n = 0, remaining = matches, quoted = 0; n <= size - (signed)from.size();) {
+      if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
+      if(_compare<Insensitive>(p + n, size - n, from.data(), from.size())) { n++; continue; }
 
-  while(*t && counter) {
-    if(quotecopy<Quoted>(o, t)) continue;
-    for(unsigned n = 0;; n++) {
-      if(key[n] == 0) { counter--; memcpy(o, token, token.size()); t += key.size(); o += token.size(); break; }
-      if(!chrequal<Insensitive>(key[n], t[n])) { *o++ = *t++; break; }
+      memory::copy(p + n, to.data(), to.size());
+
+      if(!--remaining) break;
+      n += from.size();
     }
   }
-  do *o++ = *t; while(*t++);
-  if(base) free(base);
 
-  resize(_size + displacementSize);
-  return *this;
+  //left-to-right shrink
+  else if(to.size() < from.size()) {
+    char* p = self.pointer();
+    signed offset = 0;
+    signed base = 0;
+
+    for(signed n = 0, remaining = matches, quoted = 0; n <= size - (signed)from.size();) {
+      if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
+      if(_compare<Insensitive>(p + n, size - n, from.data(), from.size())) { n++; continue; }
+
+      if(offset) memory::move(p + offset, p + base, n - base);
+      memory::copy(p + offset + (n - base), to.data(), to.size());
+      offset += (n - base) + to.size();
+
+      n += from.size();
+      base = n;
+      if(!--remaining) break;
+    }
+
+    memory::move(p + offset, p + base, size - base);
+    self.resize(size - matches * (from.size() - to.size()));
+  }
+
+  //right-to-left expand
+  else if(to.size() > from.size()) {
+    self.resize(size + matches * (to.size() - from.size()));
+    char* p = self.pointer();
+
+    signed offset = self.size();
+    signed base = size;
+
+    for(signed n = size, remaining = matches; n >= (signed)from.size();) {  //quoted reused from parent scope since we are iterating backward
+      if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n--; continue; } if(quoted) { n--; continue; } }
+      if(_compare<Insensitive>(p + n - from.size(), size - n + from.size(), from.data(), from.size())) { n--; continue; }
+
+      memory::move(p + offset - (base - n), p + base - (base - n), base - n);
+      memory::copy(p + offset - (base - n) - to.size(), to.data(), to.size());
+      offset -= (base - n) + to.size();
+
+      if(!--remaining) break;
+      n -= from.size();
+      base = n;
+    }
+  }
+
+  return self;
 }
 
-template<unsigned Limit> string& string::replace(rstring key, rstring token) { return ureplace<Limit, false, false>(key, token); }
-template<unsigned Limit> string& string::ireplace(rstring key, rstring token) { return ureplace<Limit, true, false>(key, token); }
-template<unsigned Limit> string& string::qreplace(rstring key, rstring token) { return ureplace<Limit, false, true>(key, token); }
-template<unsigned Limit> string& string::iqreplace(rstring key, rstring token) { return ureplace<Limit, true, true>(key, token); }
+template<unsigned L> auto replace(string& self, rstring from, rstring to) -> string& { return _replace<L, 0, 0>(self, from, to); }
+template<unsigned L> auto ireplace(string& self, rstring from, rstring to) -> string& { return _replace<L, 1, 0>(self, from, to); }
+template<unsigned L> auto qreplace(string& self, rstring from, rstring to) -> string& { return _replace<L, 0, 1>(self, from, to); }
+template<unsigned L> auto iqreplace(string& self, rstring from, rstring to) -> string& { return _replace<L, 1, 1>(self, from, to); }
 
 };
 
