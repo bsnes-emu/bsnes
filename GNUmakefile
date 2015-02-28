@@ -6,7 +6,7 @@ gb  := gb
 gba := gba
 
 profile := accuracy
-target := higan
+target := tomoko
 
 # arch := x86
 # console := true

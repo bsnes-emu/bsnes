@@ -6,3 +6,7 @@
 using namespace nall;
 using namespace ruby;
 using namespace hiro;
+
+#include "program/program.hpp"
+#include "library/library.hpp"
+#include "presentation/presentation.hpp"
