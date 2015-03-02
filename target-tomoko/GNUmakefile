@@ -8,14 +8,23 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile
 
-ui_objects := ui-tomoko ui-program
-ui_objects += ui-library ui-presentation
+ui_objects := ui-tomoko ui-program ui-input
+ui_objects += ui-library ui-settings ui-presentation
 ui_objects += ruby hiro
 
 # platform
 ifeq ($(platform),windows)
+  ruby := video.direct3d video.wgl video.directdraw video.gdi
+  ruby += audio.xaudio2 audio.directsound
+  ruby += input.windows
 else ifeq ($(platform),macosx)
+  ruby := video.cgl
+  ruby += audio.openal
+  ruby += input.carbon
 else ifeq ($(platform),linux)
+  ruby := video.glx video.xv video.xshm video.sdl
+  ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
+  ruby += input.udev input.sdl input.xlib
 else ifeq ($(platform),bsd)
   ruby := video.glx video.xshm
   ruby += audio.openal audio.oss
@@ -42,7 +51,9 @@ obj/hiro.o: hiro/hiro.cpp $(call rwildcard,hiro/)
 
 obj/ui-tomoko.o: $(ui)/tomoko.cpp $(call rwildcard,$(ui)/)
 obj/ui-program.o: $(ui)/program/program.cpp $(call rwildcard,$(ui)/)
+obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-library.o: $(ui)/library/library.cpp $(call rwildcard,$(ui)/)
+obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
 
 # targets

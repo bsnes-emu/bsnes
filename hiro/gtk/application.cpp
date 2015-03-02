@@ -37,14 +37,14 @@ void pApplication::initialize() {
 
   #if 1
   int argc = 1;
-  char* argv[] = {new char[8], nullptr};
-  strcpy(argv[0], "phoenix");
+  char* argv[] = {new char[5], nullptr};
+  strcpy(argv[0], "hiro");
   #else
   //--g-fatal-warnings will force a trap on Gtk-CRITICAL errors
-  //this allows gdb to perform a backtrace to find error origin point
+  //this allows gdb to perform a backtrace to find an error's origin point
   int argc = 2;
-  char* argv[] = {new char[8], new char[19], nullptr};
-  strcpy(argv[0], "phoenix");
+  char* argv[] = {new char[5], new char[19], nullptr};
+  strcpy(argv[0], "hiro");
   strcpy(argv[1], "--g-fatal-warnings");
   #endif
   char** argvp = argv;
@@ -54,20 +54,20 @@ void pApplication::initialize() {
   g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
 
   gtk_rc_parse_string(R"(
-    style "PhoenixWindow"
+    style "HiroWindow"
     {
       GtkWindow::resize-grip-width = 0
       GtkWindow::resize-grip-height = 0
     }
-    class "GtkWindow" style "PhoenixWindow"
+    class "GtkWindow" style "HiroWindow"
 
-    style "PhoenixTreeView"
+    style "HiroTreeView"
     {
       GtkTreeView::vertical-separator = 0
     }
-    class "GtkTreeView" style "PhoenixTreeView"
+    class "GtkTreeView" style "HiroTreeView"
 
-    style "PhoenixTabFrameCloseButton"
+    style "HiroTabFrameCloseButton"
     {
       GtkWidget::focus-line-width = 0
       GtkWidget::focus-padding = 0
@@ -75,7 +75,7 @@ void pApplication::initialize() {
       GtkButton::default-outer-border = {0, 0, 0, 0}
       GtkButton::inner-border = {0, 1, 0, 0}
     }
-    widget_class "*.<GtkNotebook>.<GtkHBox>.<GtkButton>" style "PhoenixTabFrameCloseButton"
+    widget_class "*.<GtkNotebook>.<GtkHBox>.<GtkButton>" style "HiroTabFrameCloseButton"
   )");
 
   pKeyboard::initialize();

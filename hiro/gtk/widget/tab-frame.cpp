@@ -91,12 +91,23 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
 }
 
 auto pTabFrame::container(mWidget& widget) -> GtkWidget* {
-  auto widgetLayout = widget.parentLayout();
+  //TabFrame holds multiple TabFrameItem controls
+  //each TabFrameItem has its own GtkWindow; plus its own layout
+  //we need to recurse up from the widget to its topmost layout before the TabFrameItem
+  //once we know the topmost layout, we search through all TabFrameItems for a match
+  mObject* object = &widget;
+  while(object) {
+    if(object->parentTabFrameItem()) break;
+    if(auto layout = object->parentLayout()) { object = layout; continue; }
+    break;
+  }
+
   unsigned position = 0;
   for(auto& item : state().items) {
-    if(item->state.layout.data() == widgetLayout) return tabs[position].child;
+    if(item->state.layout.data() == object) return tabs[position].child;
     position++;
   }
+
   return nullptr;
 }
 

@@ -33,7 +33,7 @@ struct Interface {
       unsigned id;
       unsigned type;  //0 = digital, 1 = analog (relative), 2 = rumble
       string name;
-      unsigned guid;
+      uintptr_t guid;
     };
     vector<Input> input;
     vector<unsigned> order;

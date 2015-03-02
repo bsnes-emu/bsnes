@@ -3,7 +3,9 @@ struct Program : Emulator::Interface::Bind {
   Program();
   auto emulator() -> Emulator::Interface&;
   auto main() -> void;
-  auto setEmulator(Emulator::Interface&) -> void;
+  auto quit() -> void;
+  auto setEmulator(Emulator::Interface*) -> void;
+  auto drawSplashScreen() -> void;
 
   //interface.cpp
   auto loadRequest(unsigned id, string name, string type) -> void override;
@@ -21,6 +23,7 @@ struct Program : Emulator::Interface::Bind {
   //media.cpp
   auto loadMedia(string location) -> void;
   auto loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void;
+  auto unloadMedia() -> void;
 
   DSP dsp;
 

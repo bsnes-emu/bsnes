@@ -9,6 +9,7 @@ Program* program = nullptr;
 
 Program::Program() {
   program = this;
+  directory::create({configpath(), "tomoko/"});
   Application::onMain({&Program::main, this});
 
   emulators.append(new Famicom::Interface);
@@ -17,7 +18,9 @@ Program::Program() {
   emulators.append(new GameBoyAdvance::Interface);
   for(auto& emulator : emulators) emulator->bind = this;
 
+  new InputManager;
   new LibraryManager;
+  new SettingsManager;
   new Presentation;
 
   presentation->setVisible();
@@ -34,7 +37,7 @@ Program::Program() {
   audio.set(Audio::Latency, 80u);
   if(!audio.init()) { audio.driver("None"); audio.init(); }
 
-  input.driver("XInput");
+  input.driver("Xlib");
   input.set(Input::Handle, presentation->viewport.handle());
   if(!input.init()) { input.driver("None"); input.init(); }
 
@@ -45,19 +48,7 @@ Program::Program() {
   dsp.setResampler(DSP::ResampleEngine::Sinc);
   dsp.setResamplerFrequency(96000);
 
-  uint32* output;
-  unsigned length;
-  if(video.lock(output, length, 640, 480)) {
-    for(auto y : range(480)) {
-      uint32* dp = output + y * (length >> 2);
-      for(auto x : range(640)) {
-        *dp++ = 0xff401010;
-      }
-    }
-
-    video.unlock();
-    video.refresh();
-  }
+  drawSplashScreen();
 }
 
 auto Program::emulator() -> Emulator::Interface& {
@@ -66,6 +57,8 @@ auto Program::emulator() -> Emulator::Interface& {
 }
 
 auto Program::main() -> void {
+  inputManager->poll();
+
   if(activeEmulator == nullptr || emulator().loaded() == false) {
     audio.clear();
     usleep(20 * 1000);
@@ -75,6 +68,37 @@ auto Program::main() -> void {
   emulator().run();
 }
 
-auto Program::setEmulator(Emulator::Interface& emulator) -> void {
-  activeEmulator = &emulator;
+auto Program::quit() -> void {
+  unloadMedia();
+  inputManager->quit();
+  exit(0);
+}
+
+auto Program::setEmulator(Emulator::Interface* emulator) -> void {
+  activeEmulator = emulator;
+}
+
+auto Program::drawSplashScreen() -> void {
+  image emblem{string{userpath(), ".local/share/icons/tomoko.png"}};
+  emblem.alphaBlend(0x000000);
+  emblem.scale(128, 128);
+
+  uint32* output;
+  unsigned length;
+  if(video.lock(output, length, 512, 480)) {
+    for(auto y : range(480)) {
+      uint32* dp = output + y * (length >> 2);
+      for(auto x : range(640)) *dp++ = 0xff000000;
+    }
+    unsigned z = 0;
+    for(auto y : range(emblem.height)) {
+      uint32* dp = output + (480 - emblem.height + y - 8) * (length >> 2) + (512 - emblem.width - 8);
+      for(auto x : range(emblem.width)) {
+        *dp++ = emblem.read(emblem.data + z);
+        z += 4;
+      }
+    }
+    video.unlock();
+    video.refresh();
+  }
 }

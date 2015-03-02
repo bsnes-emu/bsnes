@@ -326,7 +326,7 @@ auto pWindow::setVisible(bool visible) -> void {
 auto pWindow::_append(mWidget& widget) -> void {
   if(!widget.self()) return;
   if(auto parent = widget.parentWidget(true)) {
-    if(parent->self()) widget.self()->gtkParent = parent->self()->container(widget);
+    if(auto instance = parent->self()) widget.self()->gtkParent = instance->container(widget);
   } else {
     widget.self()->gtkParent = formContainer;
   }

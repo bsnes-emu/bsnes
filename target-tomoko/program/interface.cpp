@@ -10,7 +10,11 @@ auto Program::loadRequest(unsigned id, string path) -> void {
   return emulator().load(id, stream);
 }
 
+//request from emulation core to save non-volatile media file
 auto Program::saveRequest(unsigned id, string path) -> void {
+  string location = {mediaPaths(emulator().group(id)), path};
+  filestream stream{location, file::mode::write};
+  return emulator().save(id, stream);
 }
 
 auto Program::videoColor(unsigned source, uint16 alpha, uint16 red, uint16 green, uint16 blue) -> uint32 {
@@ -62,6 +66,10 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
 }
 
 auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16 {
+  auto guid = emulator().port[port].device[device].input[input].guid;
+  auto mapping = (InputMapping*)guid;
+  if(mapping) return mapping->poll();
+  return 0;
 }
 
 auto Program::inputRumble(unsigned port, unsigned device, unsigned input, bool enable) -> void {

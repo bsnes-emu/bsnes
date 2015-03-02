@@ -16,18 +16,25 @@ Presentation::Presentation() {
     }
   }
 
-  superFamicomMenu.setText("Super Famicom");
+  systemMenu.setVisible(false);
+  powerSystem.setText("Power");
+  resetSystem.setText("Reset");
+  unloadSystem.setText("Unload").onActivate([&] { program->unloadMedia(); });
 
   settingsMenu.setText("Settings");
+  showConfiguration.setText("Configuration ...").onActivate([&] {
+    settingsManager->setVisible();
+    settingsManager->setFocused();
+  });
 
   toolsMenu.setText("Tools");
 
   statusBar.setFont(Font::sans(8, "Bold"));
 
-  onClose(&Application::quit);
+  onClose([&] { program->quit(); });
 
   setTitle({"tomoko v", Emulator::Version});
-  setResizable(false);
-  setSize({640, 480});
+//setResizable(false);
+  setSize({512, 480});
   setCentered();
 }
