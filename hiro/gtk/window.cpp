@@ -183,6 +183,9 @@ auto pWindow::destruct() -> void {
 }
 
 auto pWindow::append(shared_pointer<mMenuBar> menuBar) -> void {
+  _setMenuEnabled(menuBar->enabled(true));
+  _setMenuFont(menuBar->font(true));
+  _setMenuVisible(menuBar->visible(true));
 }
 
 auto pWindow::append(shared_pointer<mStatusBar> statusBar) -> void {
@@ -298,9 +301,16 @@ auto pWindow::setVisible(bool visible) -> void {
     if(menuBar->self()) menuBar->self()->setVisible(menuBar->visible(true));
   }
 
+  if(auto& layout = state().layout) {
+    if(layout->self()) layout->self()->setVisible(layout->visible(true));
+  }
+
   if(auto& statusBar = state().statusBar) {
     if(statusBar->self()) statusBar->self()->setVisible(statusBar->visible(true));
   }
+
+  //GTK+ returns invalid widget sizes below without this call
+  Application::processEvents();
 
   if(visible) {
     if(gtk_widget_get_visible(gtkMenu)) {
@@ -317,8 +327,6 @@ auto pWindow::setVisible(bool visible) -> void {
   }
 
   if(auto& layout = state().layout) {
-    if(layout->self()) layout->self()->setVisible(layout->visible(true));
-    Application::processEvents();  //todo: this should not be necessary
     layout->setGeometry(self().geometry().setPosition(0, 0));
   }
 }

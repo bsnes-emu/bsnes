@@ -66,9 +66,11 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
 }
 
 auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16 {
-  auto guid = emulator().port[port].device[device].input[input].guid;
-  auto mapping = (InputMapping*)guid;
-  if(mapping) return mapping->poll();
+  if(presentation->focused()) {
+    auto guid = emulator().port[port].device[device].input[input].guid;
+    auto mapping = (InputMapping*)guid;
+    if(mapping) return mapping->poll();
+  }
   return 0;
 }
 

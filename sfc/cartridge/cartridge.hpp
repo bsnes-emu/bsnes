@@ -114,7 +114,6 @@ private:
   void parse_markup_spc7110(Markup::Node);
   void parse_markup_sdd1(Markup::Node);
   void parse_markup_obc1(Markup::Node);
-  void parse_markup_hsu1(Markup::Node);
   void parse_markup_msu1(Markup::Node);
 
   friend class Interface;

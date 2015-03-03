@@ -23,11 +23,11 @@ struct RawInput {
   };
   vector<Device> devices;
 
-  optional<Device&> find(uint16_t vendorID, uint16_t productID) {
+  maybe<Device&> find(uint16_t vendorID, uint16_t productID) {
     for(auto& device : devices) {
-      if(device.vendorID == vendorID && device.productID == productID) return {true, device};
+      if(device.vendorID == vendorID && device.productID == productID) return device;
     }
-    return false;
+    return nothing;
   }
 
   void scanDevices() {

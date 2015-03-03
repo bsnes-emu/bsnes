@@ -10,7 +10,6 @@
   #include <Carbon/Carbon.h>
   #undef decimal
 #elif defined(PLATFORM_WINDOWS)
-  #define _WIN32_WINNT 0x0501
   #include <windows.h>
 #endif
 

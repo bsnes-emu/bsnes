@@ -76,8 +76,8 @@ InputManager::InputManager() {
     config.append(nodeEmulator, string{inputEmulator.name}.replace(" ", ""));
   }
 
-  config.load({configpath(), "tomoko/settings.bml"});
-  config.save({configpath(), "tomoko/settings.bml"});
+  config.load({configpath(), "tomoko/input.bml"});
+  config.save({configpath(), "tomoko/input.bml"});
   poll();  //will call bind();
 }
 
@@ -115,5 +115,5 @@ auto InputManager::onChange(HID::Device& device, unsigned group, unsigned input,
 }
 
 auto InputManager::quit() -> void {
-  config.save({configpath(), "tomoko/settings.bml"});
+  config.save({configpath(), "tomoko/input.bml"});
 }

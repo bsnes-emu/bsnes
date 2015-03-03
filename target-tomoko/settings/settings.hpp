@@ -24,12 +24,27 @@ struct InputSettings : TabFrameItem {
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 
+struct AdvancedSettings : TabFrameItem {
+  AdvancedSettings(TabFrame*);
+
+  VerticalLayout layout{this};
+    Label driverLabel{&layout, Size{~0, 0}, 0};
+    HorizontalLayout driverLayout{&layout, Size{~0, 0}};
+      Label videoLabel{&driverLayout, Size{0, 0}};
+      ComboButton videoDriver{&driverLayout, Size{~0, 0}};
+      Label audioLabel{&driverLayout, Size{0, 0}};
+      ComboButton audioDriver{&driverLayout, Size{~0, 0}};
+      Label inputLabel{&driverLayout, Size{0, 0}};
+      ComboButton inputDriver{&driverLayout, Size{~0, 0}};
+};
+
 struct SettingsManager : Window {
   SettingsManager();
 
   VerticalLayout layout{this};
     TabFrame panelLayout{&layout, Size{~0, ~0}};
       InputSettings input{&panelLayout};
+      AdvancedSettings advanced{&panelLayout};
 
   StatusBar statusBar{this};
 };

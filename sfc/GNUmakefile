@@ -7,7 +7,7 @@ sfc_objects += sfc-sa1 sfc-superfx
 sfc_objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 sfc_objects += sfc-epsonrtc sfc-sharprtc
 sfc_objects += sfc-spc7110 sfc-sdd1 sfc-obc1
-sfc_objects += sfc-hsu1 sfc-msu1
+sfc_objects += sfc-msu1
 sfc_objects += sfc-satellaviewcart sfc-sufamiturbo
 objects += $(sfc_objects)
 
@@ -30,14 +30,14 @@ else ifeq ($(profile),performance)
   sfcdsp := $(sfc)/alt/dsp
   sfcppu := $(sfc)/alt/ppu-performance
 else
-  $(error unknown profile.)
+  $(error unknown Super Famicom profile)
 endif
 
 obj/sfc-interface.o:       $(sfc)/interface/interface.cpp $(call rwildcard,$(sfc)/interface)
 obj/sfc-system.o:          $(sfc)/system/system.cpp $(call rwildcard,$(sfc)/system/)
 obj/sfc-controller.o:      $(sfc)/controller/controller.cpp $(call rwildcard,$(sfc)/controller/)
-obj/sfc-cartridge.o:       $(sfc)/cartridge/cartridge.cpp $(sfc)/cartridge/*
-obj/sfc-cheat.o:           $(sfc)/cheat/cheat.cpp $(sfc)/cheat/*
+obj/sfc-cartridge.o:       $(sfc)/cartridge/cartridge.cpp $(call rwildcard,$(sfc)/cartridge/)
+obj/sfc-cheat.o:           $(sfc)/cheat/cheat.cpp $(call rwildcard,$(sfc)/cheat/)
 obj/sfc-memory.o:          $(sfc)/memory/memory.cpp $(call rwildcard,$(sfc)/memory/)
 obj/sfc-cpu.o:             $(sfccpu)/cpu.cpp $(call rwildcard,$(sfccpu)/)
 obj/sfc-smp.o:             $(sfcsmp)/smp.cpp $(call rwildcard,$(sfcsmp)/)
@@ -61,12 +61,11 @@ obj/sfc-necdsp.o:          $(sfc)/chip/necdsp/necdsp.cpp $(call rwildcard,$(sfc)
 obj/sfc-epsonrtc.o:        $(sfc)/chip/epsonrtc/epsonrtc.cpp $(call rwildcard,$(sfc)/chip/epsonrtc/)
 obj/sfc-sharprtc.o:        $(sfc)/chip/sharprtc/sharprtc.cpp $(call rwildcard,$(sfc)/chip/sharprtc/)
 
-obj/sfc-spc7110.o:         $(sfc)/chip/spc7110/spc7110.cpp $(sfc)/chip/spc7110/*
-obj/sfc-sdd1.o:            $(sfc)/chip/sdd1/sdd1.cpp $(sfc)/chip/sdd1/*
-obj/sfc-obc1.o:            $(sfc)/chip/obc1/obc1.cpp $(sfc)/chip/obc1/*
+obj/sfc-spc7110.o:         $(sfc)/chip/spc7110/spc7110.cpp $(call rwildcard,$(sfc)/chip/spc7110/)
+obj/sfc-sdd1.o:            $(sfc)/chip/sdd1/sdd1.cpp $(call rwildcard,$(sfc)/chip/sdd1/)
+obj/sfc-obc1.o:            $(sfc)/chip/obc1/obc1.cpp $(call rwildcard,$(sfc)/chip/obc1/)
 
-obj/sfc-hsu1.o:            $(sfc)/chip/hsu1/hsu1.cpp $(sfc)/chip/hsu1/*
-obj/sfc-msu1.o:            $(sfc)/chip/msu1/msu1.cpp $(sfc)/chip/msu1/*
+obj/sfc-msu1.o:            $(sfc)/chip/msu1/msu1.cpp $(call rwildcard,$(sfc)/chip/msu1/)
 
 obj/sfc-satellaviewcart.o: $(sfc)/slot/satellaview/satellaview.cpp $(call rwildcard,$(sfc)/slot/satellaview/)
 obj/sfc-sufamiturbo.o:     $(sfc)/slot/sufamiturbo/sufamiturbo.cpp $(call rwildcard,$(sfc)/slot/sufamiturbo/)

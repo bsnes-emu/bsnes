@@ -255,7 +255,7 @@ private:
   }
 
   void createJoypadHID(Joypad& jp) {
-    uint64_t pathID = crc32_calculate((const uint8_t*)jp.deviceName.data(), jp.deviceName.size());
+    uint64_t pathID = Hash::CRC32(jp.deviceName.data(), jp.deviceName.size()).value();
     jp.hid.id = pathID << 32 | hex(jp.vendorID) << 16 | hex(jp.productID) << 0;
 
     for(unsigned n = 0; n < jp.axes.size(); n++) jp.hid.axis().append({n});

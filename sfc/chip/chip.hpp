@@ -22,7 +22,6 @@ struct Coprocessor : Thread {
 #include <sfc/chip/sdd1/sdd1.hpp>
 #include <sfc/chip/obc1/obc1.hpp>
 
-#include <sfc/chip/hsu1/hsu1.hpp>
 #include <sfc/chip/msu1/msu1.hpp>
 
 void Coprocessor::step(unsigned clocks) {

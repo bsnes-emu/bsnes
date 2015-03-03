@@ -5,7 +5,6 @@ struct Program : Emulator::Interface::Bind {
   auto main() -> void;
   auto quit() -> void;
   auto setEmulator(Emulator::Interface*) -> void;
-  auto drawSplashScreen() -> void;
 
   //interface.cpp
   auto loadRequest(unsigned id, string name, string type) -> void override;

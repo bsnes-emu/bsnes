@@ -70,7 +70,6 @@ void System::serialize_all(serializer& s) {
   if(cartridge.has_spc7110()) spc7110.serialize(s);
   if(cartridge.has_sdd1()) sdd1.serialize(s);
   if(cartridge.has_obc1()) obc1.serialize(s);
-  if(cartridge.has_hsu1()) hsu1.serialize(s);
   if(cartridge.has_msu1()) msu1.serialize(s);
   if(cartridge.has_st_slots()) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
 }

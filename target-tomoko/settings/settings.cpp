@@ -1,5 +1,6 @@
 #include "../tomoko.hpp"
 #include "input.cpp"
+#include "advanced.cpp"
 SettingsManager* settingsManager = nullptr;
 
 SettingsManager::SettingsManager() {

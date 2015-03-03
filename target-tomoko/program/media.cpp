@@ -1,5 +1,6 @@
 auto Program::loadMedia(string location) -> void {
   location.transform("\\", "/");
+  if(!location.endsWith("/")) location.append("/");
   if(!directory::exists(location)) return;
 
   string type = suffixname(location).ltrim(".");
@@ -23,8 +24,9 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   emulator().load(media.id);
   emulator().power();
 
+  presentation->resizeViewport();
   presentation->setTitle(emulator().title());
-  presentation->systemMenu.setText(emulator().information.name).setVisible(true);
+  presentation->systemMenu.setVisible(true);
 }
 
 auto Program::unloadMedia() -> void {
@@ -35,5 +37,4 @@ auto Program::unloadMedia() -> void {
 
   presentation->setTitle({"tomoko v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
-  drawSplashScreen();
 }

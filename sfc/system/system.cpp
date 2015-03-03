@@ -79,7 +79,6 @@ void System::init() {
   spc7110.init();
   sdd1.init();
   obc1.init();
-  hsu1.init();
   msu1.init();
   satellaviewcartridge.init();
 
@@ -134,7 +133,6 @@ void System::load() {
   if(cartridge.has_spc7110()) spc7110.load();
   if(cartridge.has_sdd1()) sdd1.load();
   if(cartridge.has_obc1()) obc1.load();
-  if(cartridge.has_hsu1()) hsu1.load();
   if(cartridge.has_msu1()) msu1.load();
   if(cartridge.has_bs_slot()) satellaviewcartridge.load();
   if(cartridge.has_st_slots()) sufamiturboA.load(), sufamiturboB.load();
@@ -158,7 +156,6 @@ void System::unload() {
   if(cartridge.has_spc7110()) spc7110.unload();
   if(cartridge.has_sdd1()) sdd1.unload();
   if(cartridge.has_obc1()) obc1.unload();
-  if(cartridge.has_hsu1()) hsu1.unload();
   if(cartridge.has_msu1()) msu1.unload();
   if(cartridge.has_bs_slot()) satellaviewcartridge.unload();
   if(cartridge.has_st_slots()) sufamiturboA.unload(), sufamiturboB.unload();
@@ -187,7 +184,6 @@ void System::power() {
   if(cartridge.has_spc7110()) spc7110.power();
   if(cartridge.has_sdd1()) sdd1.power();
   if(cartridge.has_obc1()) obc1.power();
-  if(cartridge.has_hsu1()) hsu1.power();
   if(cartridge.has_msu1()) msu1.power();
   if(cartridge.has_bs_slot()) satellaviewcartridge.power();
 
@@ -215,7 +211,6 @@ void System::reset() {
   if(cartridge.has_spc7110()) spc7110.reset();
   if(cartridge.has_sdd1()) sdd1.reset();
   if(cartridge.has_obc1()) obc1.reset();
-  if(cartridge.has_hsu1()) hsu1.reset();
   if(cartridge.has_msu1()) msu1.reset();
   if(cartridge.has_bs_slot()) satellaviewcartridge.reset();
 

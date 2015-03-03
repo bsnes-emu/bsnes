@@ -8,7 +8,7 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile
 
-ui_objects := ui-tomoko ui-program ui-input
+ui_objects := ui-tomoko ui-program ui-configuration ui-input
 ui_objects += ui-library ui-settings ui-presentation
 ui_objects += ruby hiro
 
@@ -51,6 +51,7 @@ obj/hiro.o: hiro/hiro.cpp $(call rwildcard,hiro/)
 
 obj/ui-tomoko.o: $(ui)/tomoko.cpp $(call rwildcard,$(ui)/)
 obj/ui-program.o: $(ui)/program/program.cpp $(call rwildcard,$(ui)/)
+obj/ui-configuration.o: $(ui)/configuration/configuration.cpp $(call rwildcard,$(ui)/)
 obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-library.o: $(ui)/library/library.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
