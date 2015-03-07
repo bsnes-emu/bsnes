@@ -1,6 +1,8 @@
 namespace hiro {
 
+#if defined(PLATFORM_XORG)
 XlibDisplay* pApplication::display = nullptr;
+#endif
 
 void pApplication::run() {
   if(Application::state.onMain) {
@@ -24,10 +26,19 @@ void pApplication::processEvents() {
 void pApplication::quit() {
   //if gtk_main() was invoked, call gtk_main_quit()
   if(gtk_main_level()) gtk_main_quit();
+
+  #if defined(PLATFORM_XORG)
+  //todo: Keyboard::poll() is being called after Application::quit();
+  //so if display is closed; this causes a segfault
+  //XCloseDisplay(display);
+  //display = nullptr;
+  #endif
 }
 
 void pApplication::initialize() {
+  #if defined(PLATFORM_XORG)
   display = XOpenDisplay(nullptr);
+  #endif
 
   settings = new Settings;
   settings->load();
@@ -48,10 +59,23 @@ void pApplication::initialize() {
   strcpy(argv[1], "--g-fatal-warnings");
   #endif
   char** argvp = argv;
-  gtk_init(&argc, &argvp);
 
+  gtk_init(&argc, &argvp);
   GtkSettings* gtkSettings = gtk_settings_get_default();
+
+  //allow buttons to show icons
+  g_type_class_unref(g_type_class_ref(GTK_TYPE_BUTTON));
   g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
+
+  #if defined(PLATFORM_WINDOWS)
+  //there is a serious bug in GTK 2.24 for Windows with the "ime" (Windows IME) input method:
+  //by default, it will be impossible to type in text fields at all.
+  //there are various tricks to get around this; but they are unintuitive and unreliable.
+  //the "ime" method is chosen when various international system locales (eg Japanese) are selected.
+  //here, we override the default input method to use the "Simple" type instead to avoid the bug.
+  //obviously, this has a drawback: in-place editing for IMEs will not work in this mode.
+  g_object_set(gtkSettings, "gtk-im-module", "gtk-im-context-simple", nullptr);
+  #endif
 
   gtk_rc_parse_string(R"(
     style "HiroWindow"

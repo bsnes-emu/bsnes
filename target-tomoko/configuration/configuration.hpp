@@ -7,6 +7,8 @@ struct ConfigurationManager : Configuration::Document {
     bool synchronize = false;
     string scale = "Normal";
     bool aspectCorrection = true;
+    string filter = "Blur";
+    bool colorEmulation = true;
   } video;
 
   struct Audio : Configuration::Node {

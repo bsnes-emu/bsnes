@@ -236,6 +236,17 @@ auto mWindow::setModal(bool modal) -> type& {
   return *this;
 }
 
+auto mWindow::setPlacement(double x, double y) -> type& {
+  x = max(0.0, min(1.0, x));
+  y = max(0.0, min(1.0, y));
+  auto workspace = Desktop::workspace();
+  auto geometry = frameGeometry();
+  signed left = x * (workspace.width() - geometry.width());
+  signed top = y * (workspace.height() - geometry.height());
+  setFramePosition({left, top});
+  return *this;
+}
+
 auto mWindow::setPosition(Position position) -> type& {
   return setGeometry({
     position.x(), position.y(),

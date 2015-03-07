@@ -61,10 +61,8 @@ namespace Math {
   #undef  interface
   #define dllexport __declspec(dllexport)
   #define MSG_NOSIGNAL 0
-  __declspec(dllimport) auto _fileno(FILE*) -> int;
 
   inline auto access(const char* path, int amode) -> int { return _waccess(nall::utf16_t(path), amode); }
-  inline auto fileno(FILE* stream) -> int { return _fileno(stream); }
   inline auto getcwd(char* buf, size_t size) -> char* { wchar_t wpath[PATH_MAX] = L""; if(!_wgetcwd(wpath, size)) return nullptr; strcpy(buf, nall::utf8_t(wpath)); return buf; }
   inline auto mkdir(const char* path, int mode) -> int { return _wmkdir(nall::utf16_t(path)); }
   inline auto putenv(const char* value) -> int { return _wputenv(nall::utf16_t(value)); }

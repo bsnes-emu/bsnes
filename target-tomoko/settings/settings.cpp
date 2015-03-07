@@ -10,6 +10,8 @@ SettingsManager::SettingsManager() {
   statusBar.setFont(Font::sans(8, "Bold"));
 
   setTitle("Configuration Settings");
-  setPosition({0, 0});
   setSize({600, 400});
+  setPlacement(0.0, 1.0);
+
+  input.mappingList.resizeColumns();
 }

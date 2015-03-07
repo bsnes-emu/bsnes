@@ -2,6 +2,7 @@ struct InputMapping {
   auto bind() -> void;
   auto bind(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool;
   auto poll() -> int16;
+  auto unbind() -> void;
 
   string name;
   string assignment = "None";

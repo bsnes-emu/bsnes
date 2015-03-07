@@ -20,13 +20,14 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   mediaPaths(media.id) = location;
 
   setEmulator(&_emulator);
-  emulator().paletteUpdate(Emulator::Interface::PaletteMode::Standard);
+  updateVideoPalette();
   emulator().load(media.id);
   emulator().power();
 
   presentation->resizeViewport();
   presentation->setTitle(emulator().title());
   presentation->systemMenu.setVisible(true);
+  presentation->toolsMenu.setVisible(true);
 }
 
 auto Program::unloadMedia() -> void {
@@ -37,4 +38,5 @@ auto Program::unloadMedia() -> void {
 
   presentation->setTitle({"tomoko v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
+  presentation->toolsMenu.setVisible(false);
 }

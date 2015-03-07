@@ -8,6 +8,13 @@ Size pDesktop::size() {
 }
 
 Geometry pDesktop::workspace() {
+  #if defined(PLATFORM_WINDOWS)
+  RECT rc;
+  SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
+  return {rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top};
+  #endif
+
+  #if defined(PLATFORM_XORG)
   XlibDisplay* display = XOpenDisplay(nullptr);
   int screen = DefaultScreen(display);
 
@@ -35,6 +42,7 @@ Geometry pDesktop::workspace() {
     gdk_screen_get_width(gdk_screen_get_default()),
     gdk_screen_get_height(gdk_screen_get_default())
   };
+  #endif
 }
 
 }

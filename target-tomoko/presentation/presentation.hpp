@@ -18,6 +18,12 @@ struct Presentation : Window {
         MenuRadioItem videoScaleLarge{&videoScaleMenu};
         MenuSeparator videoScaleSeparator{&videoScaleMenu};
         MenuCheckItem aspectCorrection{&videoScaleMenu};
+        MenuCheckItem maskOverscan{&videoScaleMenu};
+      Menu videoFilterMenu{&settingsMenu};
+        MenuRadioItem videoFilterNone{&videoFilterMenu};
+        MenuRadioItem videoFilterBlur{&videoFilterMenu};
+        MenuSeparator videoFilterSeparator{&videoFilterMenu};
+        MenuCheckItem colorEmulation{&videoFilterMenu};
       MenuSeparator settingsMenuSeparator1{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};
@@ -25,6 +31,21 @@ struct Presentation : Window {
       MenuSeparator settingsMenuSeparator2{&settingsMenu};
       MenuItem showConfiguration{&settingsMenu};
     Menu toolsMenu{&menuBar};
+      Menu saveStateMenu{&toolsMenu};
+        MenuItem saveSlot1{&saveStateMenu};
+        MenuItem saveSlot2{&saveStateMenu};
+        MenuItem saveSlot3{&saveStateMenu};
+        MenuItem saveSlot4{&saveStateMenu};
+        MenuItem saveSlot5{&saveStateMenu};
+      Menu loadStateMenu{&toolsMenu};
+        MenuItem loadSlot1{&loadStateMenu};
+        MenuItem loadSlot2{&loadStateMenu};
+        MenuItem loadSlot3{&loadStateMenu};
+        MenuItem loadSlot4{&loadStateMenu};
+        MenuItem loadSlot5{&loadStateMenu};
+      MenuSeparator toolsMenuSeparator{&toolsMenu};
+        MenuItem stateManager{&toolsMenu};
+        MenuItem cheatEditor{&toolsMenu};
 
   VerticalLayout layout{this};
     Viewport viewport{&layout, Size{~0, ~0}};

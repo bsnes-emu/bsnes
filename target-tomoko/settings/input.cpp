@@ -9,10 +9,22 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   emulatorList.onChange([&] { reloadPorts(); });
   portList.onChange([&] { reloadDevices(); });
   deviceList.onChange([&] { reloadMappings(); });
-  mappingList.onActivate([&] { assignMapping(); });
+  mappingList.onActivate([&] { assignMapping(); }).onChange([&] {
+    eraseButton.setEnabled((bool)mappingList.selected());
+  });
   mappingList.setHeaderVisible();
-  resetButton.setText("Reset");
-  eraseButton.setText("Erase");
+  resetButton.setText("Reset").onActivate([&] {
+    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsManager).question() == 0) {
+      for(auto& mapping : activeDevice().mappings) mapping->unbind();
+      refreshMappings();
+    }
+  });
+  eraseButton.setText("Erase").onActivate([&] {
+    if(auto mapping = mappingList.selected()) {
+      activeDevice().mappings[mapping->offset()]->unbind();
+      refreshMappings();
+    }
+  });
   reloadPorts();
 }
 
@@ -45,9 +57,11 @@ auto InputSettings::reloadDevices() -> void {
 }
 
 auto InputSettings::reloadMappings() -> void {
+  eraseButton.setEnabled(false);
   mappingList.reset();
   mappingList.append(ListViewColumn().setText("Name"));
-  mappingList.append(ListViewColumn().setText("Mapping"));
+  mappingList.append(ListViewColumn().setText("Mapping").setWidth(~0));
+  mappingList.append(ListViewColumn().setText("Device"));
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(ListViewItem().setText(0, mapping->name));
   }
@@ -57,7 +71,10 @@ auto InputSettings::reloadMappings() -> void {
 auto InputSettings::refreshMappings() -> void {
   unsigned position = 0;
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.item(position++)->setText(1, mapping->assignment);
+    auto path = mapping->assignment.split("/");
+    string assignment = path.takeLast();
+    string device = path(0);
+    mappingList.item(position++)->setText(1, assignment).setText(2, device);
   }
   mappingList.resizeColumns();
 }

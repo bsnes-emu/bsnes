@@ -39,9 +39,21 @@ Presentation::Presentation() {
     config().video.scale = "Large";
     resizeViewport();
   });
+  videoFilterMenu.setText("Video Filter");
+  MenuRadioItem::group({videoFilterNone, videoFilterBlur});
+  if(config().video.filter == "None") videoFilterNone.setChecked();
+  if(config().video.filter == "Blur") videoFilterBlur.setChecked();
+  videoFilterNone.setText("None").onActivate([&] { config().video.filter = "None"; program->updateVideoFilter(); });
+  videoFilterBlur.setText("Blur").onActivate([&] { config().video.filter = "Blur"; program->updateVideoFilter(); });
+  colorEmulation.setText("Color Emulation").setChecked(config().video.colorEmulation).onToggle([&] {
+    config().video.colorEmulation = colorEmulation.checked();
+    program->updateVideoPalette();
+  });
   aspectCorrection.setText("Aspect Correction").setChecked(config().video.aspectCorrection).onToggle([&] {
     config().video.aspectCorrection = aspectCorrection.checked();
     resizeViewport();
+  });
+  maskOverscan.setText("Mask Overscan").onToggle([&] {
   });
   synchronizeVideo.setText("Synchronize Video").setChecked(config().video.synchronize).onToggle([&] {
     config().video.synchronize = synchronizeVideo.checked();
@@ -60,7 +72,21 @@ Presentation::Presentation() {
     settingsManager->setFocused();
   });
 
-  toolsMenu.setText("Tools");
+  toolsMenu.setText("Tools").setVisible(false);
+  saveStateMenu.setText("Save State");
+  saveSlot1.setText("Slot 1").onActivate([&] {});
+  saveSlot2.setText("Slot 2").onActivate([&] {});
+  saveSlot3.setText("Slot 3").onActivate([&] {});
+  saveSlot4.setText("Slot 4").onActivate([&] {});
+  saveSlot5.setText("Slot 5").onActivate([&] {});
+  loadStateMenu.setText("Load State");
+  loadSlot1.setText("Slot 1").onActivate([&] {});
+  loadSlot2.setText("Slot 2").onActivate([&] {});
+  loadSlot3.setText("Slot 3").onActivate([&] {});
+  loadSlot4.setText("Slot 4").onActivate([&] {});
+  loadSlot5.setText("Slot 5").onActivate([&] {});
+  stateManager.setText("State Manager").onActivate([&] {});
+  cheatEditor.setText("Cheat Editor").onActivate([&] {});
 
   statusBar.setFont(Font::sans(8, "Bold"));
 
@@ -88,7 +114,7 @@ auto Presentation::resizeViewport() -> void {
   }
 
   setSize({width, height});
-  setCentered();
+  setPlacement(0.5, 0.5);
   if(!program->activeEmulator) drawSplashScreen();
 }
 

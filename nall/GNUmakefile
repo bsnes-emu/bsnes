@@ -41,6 +41,7 @@ link :=
 ifeq ($(compiler),)
   ifeq ($(platform),windows)
     compiler := g++
+    cppflags := -x c++ -std=gnu++14
   else ifeq ($(platform),macosx)
     compiler := clang++
   else ifeq ($(platform),bsd)

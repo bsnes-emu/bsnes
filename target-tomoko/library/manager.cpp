@@ -15,7 +15,7 @@ LibraryManager::LibraryManager() {
 
   setTitle("Library");
   setSize({640, 800});
-  setPosition({0, 0});
+  setPlacement(0.0, 0.0);
 }
 
 auto LibraryManager::show(const string& type) -> void {

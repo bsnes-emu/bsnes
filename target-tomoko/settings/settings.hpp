@@ -28,7 +28,7 @@ struct AdvancedSettings : TabFrameItem {
   AdvancedSettings(TabFrame*);
 
   VerticalLayout layout{this};
-    Label driverLabel{&layout, Size{~0, 0}, 0};
+    Label driverLabel{&layout, Size{~0, 0}, 2};
     HorizontalLayout driverLayout{&layout, Size{~0, 0}};
       Label videoLabel{&driverLayout, Size{0, 0}};
       ComboButton videoDriver{&driverLayout, Size{~0, 0}};

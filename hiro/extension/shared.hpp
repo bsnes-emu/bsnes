@@ -112,6 +112,7 @@ struct Window : sWindow {
   auto setFullScreen(bool fullScreen = true) -> type& { return self().setFullScreen(fullScreen), *this; }
   auto setGeometry(Geometry geometry) -> type& { return self().setGeometry(geometry), *this; }
   auto setModal(bool modal = true) -> type& { return self().setModal(modal), *this; }
+  auto setPlacement(double x, double y) -> type& { return self().setPlacement(x, y), *this; }
   auto setPosition(Position position) -> type& { return self().setPosition(position), *this; }
   auto setResizable(bool resizable = true) -> type& { return self().setResizable(resizable), *this; }
   auto setSize(Size size) -> type& { return self().setSize(size), *this; }

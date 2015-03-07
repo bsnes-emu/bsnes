@@ -9,6 +9,8 @@ ConfigurationManager::ConfigurationManager() {
   video.append(video.synchronize, "Synchronize");
   video.append(video.scale, "Scale");
   video.append(video.aspectCorrection, "AspectCorrection");
+  video.append(video.filter, "Filter");
+  video.append(video.colorEmulation, "ColorEmulation");
   append(video, "Video");
 
   audio.append(audio.driver, "Driver");

@@ -19,6 +19,8 @@ auto InputMapping::bind() -> void {
 }
 
 auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool {
+  if(device.group[group].input[input].name == "Escape") return unbind(), true;
+
   this->assignment = {hex(device.id), "/", group, "/", input, "/", device.group[group].input[input].name};
   this->device = &device;
   this->group = group;
@@ -29,6 +31,13 @@ auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int
 auto InputMapping::poll() -> int16 {
   if(device) return device->group[group].input[input].value;
   return 0;
+}
+
+auto InputMapping::unbind() -> void {
+  this->assignment = "None";
+  this->device = nullptr;
+  this->group = 0;
+  this->input = 0;
 }
 
 //

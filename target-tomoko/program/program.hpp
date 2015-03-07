@@ -24,6 +24,10 @@ struct Program : Emulator::Interface::Bind {
   auto loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void;
   auto unloadMedia() -> void;
 
+  //utility.cpp
+  auto updateVideoFilter() -> void;
+  auto updateVideoPalette() -> void;
+
   DSP dsp;
 
   vector<Emulator::Interface*> emulators;

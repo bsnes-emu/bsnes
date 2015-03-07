@@ -1,3 +1,5 @@
+#include <nall/intrinsics.hpp>
+
 #if defined(HIRO_WINDOWS)
   #include "../windows/header.hpp"
 #elif defined(HIRO_QT)

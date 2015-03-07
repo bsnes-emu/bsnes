@@ -5,6 +5,7 @@
 #include <gba/interface/interface.hpp>
 #include "interface.cpp"
 #include "media.cpp"
+#include "utility.cpp"
 Program* program = nullptr;
 
 Program::Program() {
@@ -50,6 +51,8 @@ Program::Program() {
   dsp.setResamplerFrequency(96000);
 
   presentation->drawSplashScreen();
+
+  updateVideoFilter();
 }
 
 auto Program::emulator() -> Emulator::Interface& {

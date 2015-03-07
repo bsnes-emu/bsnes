@@ -1,8 +1,8 @@
 #define UNICODE
-#define WINVER 0x0501
-#define _WIN32_WINNT 0x0501
-#define _WIN32_IE 0x0600
-#define __MSVCRT_VERSION__ 0x0601
+#define WINVER 0x0601
+#define _WIN32_WINNT WINVER
+#define _WIN32_IE WINVER
+#define __MSVCRT_VERSION__ WINVER
 #define NOMINMAX
 
 #include <winsock2.h>

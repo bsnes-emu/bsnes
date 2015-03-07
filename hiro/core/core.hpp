@@ -508,6 +508,7 @@ struct mWindow : mObject {
   auto setFullScreen(bool fullScreen = true) -> type&;
   auto setGeometry(Geometry geometry) -> type&;
   auto setModal(bool modal = true) -> type&;
+  auto setPlacement(double x, double y) -> type&;
   auto setPosition(Position position) -> type&;
   auto setResizable(bool resizable = true) -> type&;
   auto setSize(Size size) -> type&;
