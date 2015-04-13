@@ -24,6 +24,22 @@ struct InputSettings : TabFrameItem {
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 
+struct HotkeySettings : TabFrameItem {
+  HotkeySettings(TabFrame*);
+  auto reloadMappings() -> void;
+  auto refreshMappings() -> void;
+  auto assignMapping() -> void;
+  auto inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
+
+  InputMapping* activeMapping = nullptr;
+
+  VerticalLayout layout{this};
+    ListView mappingList{&layout, Size{~0, ~0}};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Widget spacer{&controlLayout, Size{~0, 0}};
+      Button eraseButton{&controlLayout, Size{80, 0}};
+};
+
 struct AdvancedSettings : TabFrameItem {
   AdvancedSettings(TabFrame*);
 
@@ -44,6 +60,7 @@ struct SettingsManager : Window {
   VerticalLayout layout{this};
     TabFrame panelLayout{&layout, Size{~0, ~0}};
       InputSettings input{&panelLayout};
+      HotkeySettings hotkeys{&panelLayout};
       AdvancedSettings advanced{&panelLayout};
 
   StatusBar statusBar{this};

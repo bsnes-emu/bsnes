@@ -2,6 +2,10 @@ struct ConfigurationManager : Configuration::Document {
   ConfigurationManager();
   auto quit() -> void;
 
+  struct UserInterface : Configuration::Node {
+    bool showStatusBar = true;
+  } userInterface;
+
   struct Video : Configuration::Node {
     string driver;
     bool synchronize = false;

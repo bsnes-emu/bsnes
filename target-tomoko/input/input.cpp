@@ -1,4 +1,5 @@
 #include "../tomoko.hpp"
+#include "hotkeys.cpp"
 InputManager* inputManager = nullptr;
 
 auto InputMapping::bind() -> void {
@@ -85,6 +86,7 @@ InputManager::InputManager() {
     config.append(nodeEmulator, string{inputEmulator.name}.replace(" ", ""));
   }
 
+  appendHotkeys();
   config.load({configpath(), "tomoko/input.bml"});
   config.save({configpath(), "tomoko/input.bml"});
   poll();  //will call bind();
@@ -99,6 +101,10 @@ auto InputManager::bind() -> void {
         }
       }
     }
+  }
+
+  for(auto& hotkey : hotkeys) {
+    hotkey->bind();
   }
 }
 
@@ -115,14 +121,19 @@ auto InputManager::poll() -> void {
     this->devices = devices;
     bind();
   }
+
+  if(presentation && presentation->focused()) pollHotkeys();
 }
 
 auto InputManager::onChange(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
   if(settingsManager->focused()) {
     settingsManager->input.inputEvent(device, group, input, oldValue, newValue);
+    settingsManager->hotkeys.inputEvent(device, group, input, oldValue, newValue);
   }
 }
 
 auto InputManager::quit() -> void {
   config.save({configpath(), "tomoko/input.bml"});
+  emulators.reset();
+  hotkeys.reset();
 }

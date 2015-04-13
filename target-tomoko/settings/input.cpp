@@ -9,10 +9,11 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   emulatorList.onChange([&] { reloadPorts(); });
   portList.onChange([&] { reloadDevices(); });
   deviceList.onChange([&] { reloadMappings(); });
-  mappingList.onActivate([&] { assignMapping(); }).onChange([&] {
+  mappingList.setHeaderVisible();
+  mappingList.onActivate([&] { assignMapping(); });
+  mappingList.onChange([&] {
     eraseButton.setEnabled((bool)mappingList.selected());
   });
-  mappingList.setHeaderVisible();
   resetButton.setText("Reset").onActivate([&] {
     if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsManager).question() == 0) {
       for(auto& mapping : activeDevice().mappings) mapping->unbind();
@@ -25,6 +26,7 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
       refreshMappings();
     }
   });
+
   reloadPorts();
 }
 

@@ -18,6 +18,7 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
 
   mediaPaths(0) = {userpath(), "Emulation/System/", media.name, ".sys/"};
   mediaPaths(media.id) = location;
+  folderPaths.append(location);
 
   setEmulator(&_emulator);
   updateVideoPalette();
@@ -35,6 +36,8 @@ auto Program::unloadMedia() -> void {
   emulator().unload();
 
   setEmulator(nullptr);
+  mediaPaths.reset();
+  folderPaths.reset();
 
   presentation->setTitle({"tomoko v", Emulator::Version});
   presentation->systemMenu.setVisible(false);

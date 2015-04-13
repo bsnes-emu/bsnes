@@ -1,6 +1,7 @@
 struct Presentation : Window {
   Presentation();
   auto resizeViewport() -> void;
+  auto toggleFullScreen() -> void;
   auto drawSplashScreen() -> void;
 
   MenuBar menuBar{this};
@@ -28,6 +29,7 @@ struct Presentation : Window {
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
+      MenuCheckItem showStatusBar{&settingsMenu};
       MenuSeparator settingsMenuSeparator2{&settingsMenu};
       MenuItem showConfiguration{&settingsMenu};
     Menu toolsMenu{&menuBar};
@@ -47,8 +49,8 @@ struct Presentation : Window {
         MenuItem stateManager{&toolsMenu};
         MenuItem cheatEditor{&toolsMenu};
 
-  VerticalLayout layout{this};
-    Viewport viewport{&layout, Size{~0, ~0}};
+  FixedLayout layout{this};
+    Viewport viewport{&layout, Geometry{0, 0, 1, 1}};
 
   StatusBar statusBar{this};
 };

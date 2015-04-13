@@ -51,7 +51,7 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
   time(&current);
   if(current != previous) {
     previous = current;
-    presentation->statusBar.setText({"FPS: ", frameCounter});
+    statusText = {"FPS: ", frameCounter};
     frameCounter = 0;
   }
 }

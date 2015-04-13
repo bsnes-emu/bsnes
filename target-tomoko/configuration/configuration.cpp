@@ -5,6 +5,9 @@ auto config() -> ConfigurationManager& { return *configurationManager; }
 ConfigurationManager::ConfigurationManager() {
   configurationManager = this;
 
+  userInterface.append(userInterface.showStatusBar, "ShowStatusBar");
+  append(userInterface, "UserInterface");
+
   video.append(video.driver, "Driver");
   video.append(video.synchronize, "Synchronize");
   video.append(video.scale, "Scale");

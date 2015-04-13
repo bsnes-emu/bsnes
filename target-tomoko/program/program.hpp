@@ -24,7 +24,13 @@ struct Program : Emulator::Interface::Bind {
   auto loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void;
   auto unloadMedia() -> void;
 
+  //state.cpp
+  auto loadState(unsigned slot) -> bool;
+  auto saveState(unsigned slot) -> bool;
+
   //utility.cpp
+  auto showMessage(const string& text) -> void;
+  auto updateStatusText() -> void;
   auto updateVideoFilter() -> void;
   auto updateVideoPalette() -> void;
 
@@ -32,7 +38,13 @@ struct Program : Emulator::Interface::Bind {
 
   vector<Emulator::Interface*> emulators;
   Emulator::Interface* activeEmulator = nullptr;
+
   vector<string> mediaPaths;
+  vector<string> folderPaths;
+
+  string statusText;
+  string statusMessage;
+  time_t statusTime = 0;
 };
 
 extern Program* program;

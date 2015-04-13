@@ -1,5 +1,6 @@
 #include "../tomoko.hpp"
 #include "input.cpp"
+#include "hotkeys.cpp"
 #include "advanced.cpp"
 SettingsManager* settingsManager = nullptr;
 
@@ -14,4 +15,5 @@ SettingsManager::SettingsManager() {
   setPlacement(0.0, 1.0);
 
   input.mappingList.resizeColumns();
+  hotkeys.mappingList.resizeColumns();
 }

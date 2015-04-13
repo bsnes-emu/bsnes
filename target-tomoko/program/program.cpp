@@ -5,6 +5,7 @@
 #include <gba/interface/interface.hpp>
 #include "interface.cpp"
 #include "media.cpp"
+#include "state.cpp"
 #include "utility.cpp"
 Program* program = nullptr;
 
@@ -56,14 +57,15 @@ Program::Program() {
 }
 
 auto Program::emulator() -> Emulator::Interface& {
-  if(activeEmulator == nullptr) throw;
+  if(!activeEmulator) throw;
   return *activeEmulator;
 }
 
 auto Program::main() -> void {
+  updateStatusText();
   inputManager->poll();
 
-  if(activeEmulator == nullptr || emulator().loaded() == false) {
+  if(!activeEmulator || emulator().loaded() == false) {
     audio.clear();
     usleep(20 * 1000);
     return;

@@ -139,9 +139,8 @@ template<> struct stringify<vector<uint8_t>> {
   auto data() const -> const char* { return _text.data(); }
   auto size() const -> unsigned { return _text.size(); }
   stringify(vector<uint8_t> source) {
-    _text.resize(source.size() + 1);
+    _text.resize(source.size());
     memory::copy(_text.data(), source.data(), source.size());
-    _text[_text.size()] = 0;
   }
 };
 
@@ -150,9 +149,8 @@ template<> struct stringify<const vector<uint8_t>&> {
   auto data() const -> const char* { return _text.data(); }
   auto size() const -> unsigned { return _text.size(); }
   stringify(const vector<uint8_t>& source) {
-    _text.resize(source.size() + 1);
+    _text.resize(source.size());
     memory::copy(_text.data(), source.data(), source.size());
-    _text[_text.size()] = 0;
   }
 };
 
