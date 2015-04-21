@@ -4,13 +4,16 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
 
   layout.setMargin(5);
   cheatList.append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setHorizontalAlignment(1.0));
-  cheatList.append(ListViewColumn().setText("Code(s)").setWidth(0));
+  cheatList.append(ListViewColumn().setText("Code(s)"));
   cheatList.append(ListViewColumn().setText("Description").setWidth(~0));
   for(auto slot : range(Slots)) cheatList.append(ListViewItem().setText(0, 1 + slot));
   cheatList.setCheckable();
   cheatList.setHeaderVisible();
-  cheatList.onChange([&] { doChange(); });
-  cheatList.onToggle([&](sListViewItem) { synchronizeCodes(); });
+  cheatList.onChange([&] { doChangeSelected(); });
+  cheatList.onToggle([&](sListViewItem item) {
+    cheats[item->offset()].enabled = item->checked();
+    synchronizeCodes();
+  });
   codeLabel.setText("Code(s):");
   codeValue.onChange([&] { doModify(); });
   descriptionLabel.setText("Description:");
@@ -20,11 +23,11 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   eraseButton.setText("Erase").onActivate([&] { doErase(); });
 }
 
-auto CheatEditor::doChange() -> void {
+auto CheatEditor::doChangeSelected() -> void {
   if(auto item = cheatList.selected()) {
-    unsigned slot = item->offset();
-    codeValue.setEnabled(true).setText(cheats[slot].code);
-    descriptionValue.setEnabled(true).setText(cheats[slot].description);
+    auto& cheat = cheats[item->offset()];
+    codeValue.setEnabled(true).setText(cheat.code);
+    descriptionValue.setEnabled(true).setText(cheat.description);
     eraseButton.setEnabled(true);
   } else {
     codeValue.setEnabled(false).setText("");
@@ -35,9 +38,9 @@ auto CheatEditor::doChange() -> void {
 
 auto CheatEditor::doModify() -> void {
   if(auto item = cheatList.selected()) {
-    unsigned slot = item->offset();
-    cheats[slot].code = codeValue.text();
-    cheats[slot].description = descriptionValue.text();
+    auto& cheat = cheats[item->offset()];
+    cheat.code = codeValue.text();
+    cheat.description = descriptionValue.text();
     doRefresh();
     synchronizeCodes();
   }
@@ -45,26 +48,28 @@ auto CheatEditor::doModify() -> void {
 
 auto CheatEditor::doRefresh() -> void {
   for(auto slot : range(Slots)) {
-    if(cheats[slot].code || cheats[slot].description) {
-      lstring codes = cheats[slot].code.split("+");
+    auto& cheat = cheats[slot];
+    if(cheat.code || cheat.description) {
+      lstring codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
-      cheatList.item(slot)->setText(1, codes[0]).setText(2, cheats[slot].description);
+      cheatList.item(slot)->setChecked(cheat.enabled).setText(1, codes[0]).setText(2, cheat.description);
     } else {
-      cheatList.item(slot)->setText(1, "").setText(2, "(empty)");
+      cheatList.item(slot)->setChecked(false).setText(1, "").setText(2, "(empty)");
     }
   }
 
   cheatList.resizeColumns();
 }
 
-auto CheatEditor::doReset() -> void {
-  if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == 0) {
+auto CheatEditor::doReset(bool force) -> void {
+  if(force || MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == 0) {
     for(auto& cheat : cheats) {
+      cheat.enabled = false;
       cheat.code = "";
       cheat.description = "";
     }
     cheatList.setSelected(false);
-    doChange();
+    doChangeSelected();
     doRefresh();
     synchronizeCodes();
   }
@@ -72,9 +77,10 @@ auto CheatEditor::doReset() -> void {
 
 auto CheatEditor::doErase() -> void {
   if(auto item = cheatList.selected()) {
-    unsigned slot = item->offset();
-    cheats[slot].code = "";
-    cheats[slot].description = "";
+    auto& cheat = cheats[item->offset()];
+    cheat.enabled = false;
+    cheat.code = "";
+    cheat.description = "";
     codeValue.setText("");
     descriptionValue.setText("");
     doRefresh();
@@ -86,10 +92,9 @@ auto CheatEditor::synchronizeCodes() -> void {
   if(!emulator) return;
 
   lstring codes;
-  for(auto slot : range(Slots)) {
-    if(!cheatList.item(slot)->checked()) continue;
-    if(!cheats[slot].code) continue;
-    codes.append(cheats[slot].code);
+  for(auto& cheat : cheats) {
+    if(!cheat.enabled || !cheat.code) continue;
+    codes.append(cheat.code);
   }
 
   emulator->cheatSet(codes);
@@ -97,15 +102,45 @@ auto CheatEditor::synchronizeCodes() -> void {
 
 //returns true if code was added
 //returns false if there are no more free slots for additional codes
-auto CheatEditor::addCode(const string& code, const string& description) -> bool {
+auto CheatEditor::addCode(const string& code, const string& description, bool enabled) -> bool {
   for(auto& cheat : cheats) {
     if(cheat.code || cheat.description) continue;
-
+    cheat.enabled = enabled;
     cheat.code = code;
     cheat.description = description;
-    doRefresh();
     return true;
   }
 
   return false;
+}
+
+auto CheatEditor::loadCheats() -> void {
+  doReset(true);
+  auto contents = string::read({program->folderPaths[0], "cheats.bml"});
+  auto document = Markup::Document(contents);
+  for(auto& cheat : document["cartridge"]) {
+    if(cheat.name != "cheat") continue;
+    if(!addCode(cheat["code"].text(), cheat["description"].text(), cheat["enabled"].exists())) break;
+  }
+  doRefresh();
+  synchronizeCodes();
+}
+
+auto CheatEditor::saveCheats() -> void {
+  if(!emulator) return;
+  string document = {"cartridge sha256:", emulator->sha256(), "\n"};
+  unsigned count = 0;
+  for(auto& cheat : cheats) {
+    if(!cheat.code && !cheat.description) continue;
+    document.append("  cheat", cheat.enabled ? " enabled" : "", "\n");
+    document.append("    description:", cheat.description, "\n");
+    document.append("    code:", cheat.code, "\n");
+    count++;
+  }
+  if(count) {
+    file::write({program->folderPaths[0], "cheats.bml"}, document);
+  } else {
+    file::remove({program->folderPaths[0], "cheats.bml"});
+  }
+  doReset(true);
 }

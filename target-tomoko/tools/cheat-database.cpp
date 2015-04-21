@@ -49,4 +49,5 @@ auto CheatDatabase::addCodes() -> void {
     }
   }
   setVisible(false);
+  toolsManager->cheatEditor.doRefresh();
 }

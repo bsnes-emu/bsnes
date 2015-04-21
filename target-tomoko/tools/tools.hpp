@@ -18,15 +18,18 @@ struct CheatEditor : TabFrameItem {
   enum : unsigned { Slots = 128 };
 
   CheatEditor(TabFrame*);
-  auto doChange() -> void;
+  auto doChangeSelected() -> void;
   auto doModify() -> void;
   auto doRefresh() -> void;
-  auto doReset() -> void;
+  auto doReset(bool force = false) -> void;
   auto doErase() -> void;
   auto synchronizeCodes() -> void;
-  auto addCode(const string& code, const string& description) -> bool;
+  auto addCode(const string& code, const string& description, bool enabled = false) -> bool;
+  auto loadCheats() -> void;
+  auto saveCheats() -> void;
 
   struct Cheat {
+    bool enabled = false;
     string code;
     string description;
   };

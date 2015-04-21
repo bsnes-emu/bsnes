@@ -40,6 +40,21 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
       }
     }
 
+    if(emulator->information.overscan && config().video.overscan.mask) {
+      unsigned h = config().video.overscan.horizontal;
+      unsigned v = config().video.overscan.vertical;
+
+      if(h) for(auto y : range(height)) {
+        memory::fill(output + y * length, 4 * h);
+        memory::fill(output + y * length + (width - h), 4 * h);
+      }
+
+      if(v) for(auto y : range(v)) {
+        memory::fill(output + y * length, 4 * width);
+        memory::fill(output + (height - 1 - y) * length, 4 * width);
+      }
+    }
+
     video.unlock();
     video.refresh();
   }

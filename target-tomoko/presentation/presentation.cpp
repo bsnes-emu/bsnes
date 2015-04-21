@@ -39,6 +39,10 @@ Presentation::Presentation() {
     config().video.scale = "Large";
     resizeViewport();
   });
+  aspectCorrection.setText("Aspect Correction").setChecked(config().video.aspectCorrection).onToggle([&] {
+    config().video.aspectCorrection = aspectCorrection.checked();
+    resizeViewport();
+  });
   videoFilterMenu.setText("Video Filter");
   MenuRadioItem::group({videoFilterNone, videoFilterBlur});
   if(config().video.filter == "None") videoFilterNone.setChecked();
@@ -49,11 +53,8 @@ Presentation::Presentation() {
     config().video.colorEmulation = colorEmulation.checked();
     program->updateVideoPalette();
   });
-  aspectCorrection.setText("Aspect Correction").setChecked(config().video.aspectCorrection).onToggle([&] {
-    config().video.aspectCorrection = aspectCorrection.checked();
-    resizeViewport();
-  });
-  maskOverscan.setText("Mask Overscan").onToggle([&] {
+  maskOverscan.setText("Mask Overscan").setChecked(config().video.overscan.mask).onToggle([&] {
+    config().video.overscan.mask = maskOverscan.checked();
   });
   synchronizeVideo.setText("Synchronize Video").setChecked(config().video.synchronize).onToggle([&] {
     config().video.synchronize = synchronizeVideo.checked();

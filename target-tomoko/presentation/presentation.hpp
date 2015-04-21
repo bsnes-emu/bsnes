@@ -19,12 +19,12 @@ struct Presentation : Window {
         MenuRadioItem videoScaleLarge{&videoScaleMenu};
         MenuSeparator videoScaleSeparator{&videoScaleMenu};
         MenuCheckItem aspectCorrection{&videoScaleMenu};
-        MenuCheckItem maskOverscan{&videoScaleMenu};
       Menu videoFilterMenu{&settingsMenu};
         MenuRadioItem videoFilterNone{&videoFilterMenu};
         MenuRadioItem videoFilterBlur{&videoFilterMenu};
         MenuSeparator videoFilterSeparator{&videoFilterMenu};
         MenuCheckItem colorEmulation{&videoFilterMenu};
+        MenuCheckItem maskOverscan{&videoFilterMenu};
       MenuSeparator settingsMenuSeparator1{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};

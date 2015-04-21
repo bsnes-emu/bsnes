@@ -17,6 +17,10 @@ ConfigurationManager::ConfigurationManager() {
   video.append(video.aspectCorrection, "AspectCorrection");
   video.append(video.filter, "Filter");
   video.append(video.colorEmulation, "ColorEmulation");
+  video.overscan.append(video.overscan.mask, "Mask");
+  video.overscan.append(video.overscan.horizontal, "Horizontal");
+  video.overscan.append(video.overscan.vertical, "Vertical");
+  video.append(video.overscan, "Overscan");
   append(video, "Video");
 
   audio.append(audio.driver, "Driver");

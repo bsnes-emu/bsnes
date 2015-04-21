@@ -29,13 +29,14 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   presentation->setTitle(emulator->title());
   presentation->systemMenu.setVisible(true);
   presentation->toolsMenu.setVisible(true);
-  toolsManager->cheatEditor.doRefresh();
+  toolsManager->cheatEditor.loadCheats();
   toolsManager->stateManager.doRefresh();
 }
 
 auto Program::unloadMedia() -> void {
   if(!emulator) return;
 
+  toolsManager->cheatEditor.saveCheats();
   emulator->unload();
   emulator = nullptr;
 
@@ -45,4 +46,5 @@ auto Program::unloadMedia() -> void {
   presentation->setTitle({"tomoko v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
   presentation->toolsMenu.setVisible(false);
+  toolsManager->setVisible(false);
 }

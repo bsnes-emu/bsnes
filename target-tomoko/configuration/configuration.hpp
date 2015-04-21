@@ -17,6 +17,12 @@ struct ConfigurationManager : Configuration::Document {
     bool aspectCorrection = true;
     string filter = "Blur";
     bool colorEmulation = true;
+
+    struct Overscan : Configuration::Node {
+      bool mask = false;
+      unsigned horizontal = 8;
+      unsigned vertical = 8;
+    } overscan;
   } video;
 
   struct Audio : Configuration::Node {
