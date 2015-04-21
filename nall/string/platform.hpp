@@ -71,6 +71,24 @@ auto configpath() -> string {
   return result;
 }
 
+// /home/username/.local/
+// c:/users/username/appdata/local/
+auto localpath() -> string {
+  #if defined(PLATFORM_WINDOWS)
+  whcar_t path[PATH_MAX] = L"";
+  SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
+  string result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  #elif defined(PLATFORM_MACOSX)
+  string result = {userpath(), "Library/Application Support/"};
+  #else
+  string result = {userpath(), ".local/"};
+  #endif
+  if(result.empty()) result = ".";
+  if(result.endsWith("/") == false) result.append("/");
+  return result;
+}
+
 // /usr/share
 // /Library/Application Support/
 // c:/ProgramData/

@@ -1,3 +1,16 @@
+auto Program::powerCycle() -> void {
+  if(!emulator) return;
+  emulator->power();
+  showMessage("Power cycled");
+}
+
+auto Program::softReset() -> void {
+  if(!emulator) return;
+  if(!emulator->information.resettable) return powerCycle();
+  emulator->reset();
+  showMessage("System reset");
+}
+
 auto Program::showMessage(const string& text) -> void {
   statusTime = time(0);
   statusMessage = text;
@@ -9,9 +22,9 @@ auto Program::updateStatusText() -> void {
   string text;
   if((currentTime - statusTime) <= 2) {
     text = statusMessage;
-  } else if(!activeEmulator || emulator().loaded() == false) {
+  } else if(!emulator || emulator->loaded() == false) {
     text = "No cartridge loaded";
-  } else if(0) {
+  } else if(pause) {
     text = "Paused";
   } else {
     text = statusText;
@@ -28,8 +41,8 @@ auto Program::updateVideoFilter() -> void {
 }
 
 auto Program::updateVideoPalette() -> void {
-  if(!activeEmulator) return;
-  emulator().paletteUpdate(config().video.colorEmulation
+  if(!emulator) return;
+  emulator->paletteUpdate(config().video.colorEmulation
   ? Emulator::Interface::PaletteMode::Emulation
   : Emulator::Interface::PaletteMode::Standard
   );

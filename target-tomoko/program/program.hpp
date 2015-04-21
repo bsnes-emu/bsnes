@@ -1,10 +1,8 @@
 struct Program : Emulator::Interface::Bind {
   //program.cpp
   Program();
-  auto emulator() -> Emulator::Interface&;
   auto main() -> void;
   auto quit() -> void;
-  auto setEmulator(Emulator::Interface*) -> void;
 
   //interface.cpp
   auto loadRequest(unsigned id, string name, string type) -> void override;
@@ -25,19 +23,22 @@ struct Program : Emulator::Interface::Bind {
   auto unloadMedia() -> void;
 
   //state.cpp
-  auto loadState(unsigned slot) -> bool;
-  auto saveState(unsigned slot) -> bool;
+  auto stateName(unsigned slot, bool manager = false) -> string;
+  auto loadState(unsigned slot, bool manager = false) -> bool;
+  auto saveState(unsigned slot, bool manager = false) -> bool;
 
   //utility.cpp
+  auto powerCycle() -> void;
+  auto softReset() -> void;
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;
   auto updateVideoFilter() -> void;
   auto updateVideoPalette() -> void;
 
   DSP dsp;
+  bool pause = false;
 
   vector<Emulator::Interface*> emulators;
-  Emulator::Interface* activeEmulator = nullptr;
 
   vector<string> mediaPaths;
   vector<string> folderPaths;

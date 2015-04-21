@@ -3,6 +3,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Advanced");
 
   layout.setMargin(5);
+
   driverLabel.setText("Driver Selection").setFont(Font::sans(8, "Bold"));
   videoLabel.setText("Video:");
   videoDriver.onChange([&] { config().video.driver = videoDriver.selected()->text(); });
@@ -28,4 +29,13 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
     inputDriver.append(item);
     if(config().input.driver == driver) item.setSelected();
   }
+
+  libraryLabel.setText("Game Library").setFont(Font::sans(8, "Bold"));
+  libraryPrefix.setText("Location:");
+  libraryLocation.setEditable(false).setText(config().library.location);
+  libraryChange.setText("Change ...").onActivate([&] {
+    if(auto location = BrowserDialog().setParent(*presentation).selectFolder()) {
+      libraryLocation.setText(config().library.location = location);
+    }
+  });
 }

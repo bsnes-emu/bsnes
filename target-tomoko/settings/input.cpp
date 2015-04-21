@@ -63,7 +63,7 @@ auto InputSettings::reloadMappings() -> void {
   mappingList.reset();
   mappingList.append(ListViewColumn().setText("Name"));
   mappingList.append(ListViewColumn().setText("Mapping").setWidth(~0));
-  mappingList.append(ListViewColumn().setText("Device"));
+  mappingList.append(ListViewColumn().setText("Device").setForegroundColor({0, 128, 0}));
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(ListViewItem().setText(0, mapping->name));
   }

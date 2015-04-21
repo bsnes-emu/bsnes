@@ -9,7 +9,7 @@ include gb/GNUmakefile
 include gba/GNUmakefile
 
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
-ui_objects += ui-library ui-settings ui-presentation
+ui_objects += ui-library ui-settings ui-tools ui-presentation
 ui_objects += ruby hiro
 
 # platform
@@ -55,6 +55,7 @@ obj/ui-configuration.o: $(ui)/configuration/configuration.cpp $(call rwildcard,$
 obj/ui-input.o: $(ui)/input/input.cpp $(call rwildcard,$(ui)/)
 obj/ui-library.o: $(ui)/library/library.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
+obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
 
 # targets
@@ -67,9 +68,13 @@ ifeq ($(shell id -un),root)
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
 else
+	mkdir -p $(prefix)/bin/
+	mkdir -p $(prefix)/share/icons/
+	mkdir -p $(prefix)/$(name)/
+	mkdir -p ~/Emulation/System/
 	cp out/$(name) $(prefix)/bin/$(name)
 	cp data/higan.png $(prefix)/share/icons/$(name).png
-	mkdir -p ~/Emulation/System/
+	cp data/cheats.bml $(prefix)/$(name)/cheats.bml
 	cp -R profile/* ~/Emulation/System/
 endif
 

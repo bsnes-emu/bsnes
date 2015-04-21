@@ -14,6 +14,15 @@ SettingsManager::SettingsManager() {
   setSize({600, 400});
   setPlacement(0.0, 1.0);
 
-  input.mappingList.resizeColumns();
-  hotkeys.mappingList.resizeColumns();
+  onSize([&] {
+    input.mappingList.resizeColumns();
+    hotkeys.mappingList.resizeColumns();
+  });
+}
+
+auto SettingsManager::show(unsigned setting) -> void {
+  panel.item(setting)->setSelected();
+  setVisible();
+  setFocused();
+  doSize();
 }

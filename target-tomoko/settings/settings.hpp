@@ -52,16 +52,22 @@ struct AdvancedSettings : TabFrameItem {
       ComboButton audioDriver{&driverLayout, Size{~0, 0}};
       Label inputLabel{&driverLayout, Size{0, 0}};
       ComboButton inputDriver{&driverLayout, Size{~0, 0}};
+    Label libraryLabel{&layout, Size{~0, 0}, 2};
+    HorizontalLayout libraryLayout{&layout, Size{~0, 0}};
+      Label libraryPrefix{&libraryLayout, Size{0, 0}};
+      LineEdit libraryLocation{&libraryLayout, Size{~0, 0}};
+      Button libraryChange{&libraryLayout, Size{0, 0}};
 };
 
 struct SettingsManager : Window {
   SettingsManager();
+  auto show(unsigned setting) -> void;
 
   VerticalLayout layout{this};
-    TabFrame panelLayout{&layout, Size{~0, ~0}};
-      InputSettings input{&panelLayout};
-      HotkeySettings hotkeys{&panelLayout};
-      AdvancedSettings advanced{&panelLayout};
+    TabFrame panel{&layout, Size{~0, ~0}};
+      InputSettings input{&panel};
+      HotkeySettings hotkeys{&panel};
+      AdvancedSettings advanced{&panel};
 
   StatusBar statusBar{this};
 };

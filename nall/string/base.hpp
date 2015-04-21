@@ -93,6 +93,7 @@ inline auto realpath(rstring name) -> string;
 inline auto programpath() -> string;
 inline auto userpath() -> string;
 inline auto configpath() -> string;
+inline auto localpath() -> string;
 inline auto sharedpath() -> string;
 inline auto temppath() -> string;
 

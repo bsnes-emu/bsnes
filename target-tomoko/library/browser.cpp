@@ -4,12 +4,12 @@ LibraryBrowser::LibraryBrowser(TabFrame& parent, Emulator::Interface::Media& med
   layout.setMargin(5);
   gameList.onActivate([&] {
     libraryManager->setVisible(false);
-    program->loadMedia({userpath(), "Emulation/", this->media.name, "/", gameList.selected()->text(), ".", this->media.type, "/"});
+    program->loadMedia({config().library.location, this->media.name, "/", gameList.selected()->text(), ".", this->media.type, "/"});
   });
 }
 
 auto LibraryBrowser::reload() -> void {
-  string path = {userpath(), "Emulation/", media.name};
+  string path = {config().library.location, media.name};
   directory::create(path);
 
   gameList.reset();

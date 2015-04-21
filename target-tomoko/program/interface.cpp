@@ -4,17 +4,17 @@ auto Program::loadRequest(unsigned id, string name, string type) -> void {
 
 //request from emulation core to load non-volatile media file
 auto Program::loadRequest(unsigned id, string path) -> void {
-  string location = {mediaPaths(emulator().group(id)), path};
+  string location = {mediaPaths(emulator->group(id)), path};
   if(!file::exists(location)) return;
   mmapstream stream{location};
-  return emulator().load(id, stream);
+  return emulator->load(id, stream);
 }
 
 //request from emulation core to save non-volatile media file
 auto Program::saveRequest(unsigned id, string path) -> void {
-  string location = {mediaPaths(emulator().group(id)), path};
+  string location = {mediaPaths(emulator->group(id)), path};
   filestream stream{location, file::mode::write};
-  return emulator().save(id, stream);
+  return emulator->save(id, stream);
 }
 
 auto Program::videoColor(unsigned source, uint16 alpha, uint16 red, uint16 green, uint16 blue) -> uint32 {
@@ -67,7 +67,7 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
 
 auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16 {
   if(presentation->focused()) {
-    auto guid = emulator().port[port].device[device].input[input].guid;
+    auto guid = emulator->port[port].device[device].input[input].guid;
     auto mapping = (InputMapping*)guid;
     if(mapping) return mapping->poll();
   }

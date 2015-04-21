@@ -46,8 +46,8 @@ struct Presentation : Window {
         MenuItem loadSlot4{&loadStateMenu};
         MenuItem loadSlot5{&loadStateMenu};
       MenuSeparator toolsMenuSeparator{&toolsMenu};
-        MenuItem stateManager{&toolsMenu};
-        MenuItem cheatEditor{&toolsMenu};
+      MenuItem cheatEditor{&toolsMenu};
+      MenuItem stateManager{&toolsMenu};
 
   FixedLayout layout{this};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};

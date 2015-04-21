@@ -6,6 +6,10 @@ struct ConfigurationManager : Configuration::Document {
     bool showStatusBar = true;
   } userInterface;
 
+  struct Library : Configuration::Node {
+    string location;
+  } library;
+
   struct Video : Configuration::Node {
     string driver;
     bool synchronize = false;

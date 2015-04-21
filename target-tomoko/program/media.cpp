@@ -20,22 +20,25 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   mediaPaths(media.id) = location;
   folderPaths.append(location);
 
-  setEmulator(&_emulator);
+  emulator = &_emulator;
   updateVideoPalette();
-  emulator().load(media.id);
-  emulator().power();
+  emulator->load(media.id);
+  emulator->power();
 
   presentation->resizeViewport();
-  presentation->setTitle(emulator().title());
+  presentation->setTitle(emulator->title());
   presentation->systemMenu.setVisible(true);
   presentation->toolsMenu.setVisible(true);
+  toolsManager->cheatEditor.doRefresh();
+  toolsManager->stateManager.doRefresh();
 }
 
 auto Program::unloadMedia() -> void {
-  if(activeEmulator == nullptr) return;
-  emulator().unload();
+  if(!emulator) return;
 
-  setEmulator(nullptr);
+  emulator->unload();
+  emulator = nullptr;
+
   mediaPaths.reset();
   folderPaths.reset();
 

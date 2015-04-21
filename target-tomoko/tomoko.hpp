@@ -1,4 +1,5 @@
 #include <emulator/emulator.hpp>
+extern Emulator::Interface* emulator;
 
 #include <nall/nall.hpp>
 #include <ruby/ruby.hpp>
@@ -12,4 +13,5 @@ using namespace hiro;
 #include "input/input.hpp"
 #include "library/library.hpp"
 #include "settings/settings.hpp"
+#include "tools/tools.hpp"
 #include "presentation/presentation.hpp"

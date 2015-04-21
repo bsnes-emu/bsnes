@@ -24,6 +24,8 @@ Program::Program() {
   new InputManager;
   new LibraryManager;
   new SettingsManager;
+  new CheatDatabase;
+  new ToolsManager;
   new Presentation;
 
   presentation->setVisible();
@@ -56,22 +58,17 @@ Program::Program() {
   updateVideoFilter();
 }
 
-auto Program::emulator() -> Emulator::Interface& {
-  if(!activeEmulator) throw;
-  return *activeEmulator;
-}
-
 auto Program::main() -> void {
   updateStatusText();
   inputManager->poll();
 
-  if(!activeEmulator || emulator().loaded() == false) {
+  if(!emulator || !emulator->loaded() || pause) {
     audio.clear();
     usleep(20 * 1000);
     return;
   }
 
-  emulator().run();
+  emulator->run();
 }
 
 auto Program::quit() -> void {
@@ -82,8 +79,4 @@ auto Program::quit() -> void {
   audio.term();
   input.term();
   Application::quit();
-}
-
-auto Program::setEmulator(Emulator::Interface* emulator) -> void {
-  activeEmulator = emulator;
 }

@@ -17,8 +17,8 @@ Presentation::Presentation() {
   }
 
   systemMenu.setText("System").setVisible(false);
-  powerSystem.setText("Power");
-  resetSystem.setText("Reset");
+  powerSystem.setText("Power").onActivate([&] { program->powerCycle(); });
+  resetSystem.setText("Reset").onActivate([&] { program->softReset(); });
   unloadSystem.setText("Unload").onActivate([&] { program->unloadMedia(); drawSplashScreen(); });
 
   settingsMenu.setText("Settings");
@@ -72,10 +72,7 @@ Presentation::Presentation() {
     statusBar.setVisible(config().userInterface.showStatusBar);
     if(visible()) resizeViewport();
   });
-  showConfiguration.setText("Configuration ...").onActivate([&] {
-    settingsManager->setVisible();
-    settingsManager->setFocused();
-  });
+  showConfiguration.setText("Configuration ...").onActivate([&] { settingsManager->show(0); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveStateMenu.setText("Save State");
@@ -90,8 +87,8 @@ Presentation::Presentation() {
   loadSlot3.setText("Slot 3").onActivate([&] { program->loadState(3); });
   loadSlot4.setText("Slot 4").onActivate([&] { program->loadState(4); });
   loadSlot5.setText("Slot 5").onActivate([&] { program->loadState(5); });
-  stateManager.setText("State Manager").onActivate([&] {});
-  cheatEditor.setText("Cheat Editor").onActivate([&] {});
+  cheatEditor.setText("Cheat Editor").onActivate([&] { toolsManager->show(0); });
+  stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
 
   statusBar.setFont(Font::sans(8, "Bold"));
   statusBar.setVisible(config().userInterface.showStatusBar);
@@ -108,15 +105,13 @@ auto Presentation::resizeViewport() -> void {
   signed width  = 256;
   signed height = 240;
 
-  if(program->activeEmulator) {
-    width  = program->emulator().information.width;
-    height = program->emulator().information.height;
+  if(emulator) {
+    width  = emulator->information.width;
+    height = emulator->information.height;
   }
 
   if(fullScreen() == false) {
-    bool arc = config().video.aspectCorrection
-            && program->activeEmulator
-            && program->emulator().information.aspectRatio != 1.0;
+    bool arc = config().video.aspectCorrection && emulator && emulator->information.aspectRatio != 1.0;
 
     if(config().video.scale == "Small" ) width *= 1, height *= 1;
     if(config().video.scale == "Normal") width *= 2, height *= 2;
@@ -149,7 +144,7 @@ auto Presentation::resizeViewport() -> void {
     viewport.setGeometry({x, y, width, height});
   }
 
-  if(!program->activeEmulator) drawSplashScreen();
+  if(!emulator) drawSplashScreen();
 }
 
 auto Presentation::toggleFullScreen() -> void {

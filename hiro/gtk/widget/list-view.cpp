@@ -49,7 +49,12 @@ auto pListView::destruct() -> void {
 auto pListView::append(sListViewColumn column) -> void {
   gtk_tree_view_append_column(gtkTreeView, column->self()->gtkColumn);
   gtk_widget_show_all(column->self()->gtkHeader);
+  column->setBackgroundColor(column->backgroundColor());
+  column->setEditable(column->editable());
   column->setFont(column->font());
+  column->setForegroundColor(column->foregroundColor());
+  column->setHorizontalAlignment(column->horizontalAlignment());
+  column->setVerticalAlignment(column->verticalAlignment());
   setCheckable(state().checkable);
   _createModel();
   gtk_tree_view_set_rules_hint(gtkTreeView, self().columns() >= 2);  //two or more columns + checkbutton column
@@ -118,7 +123,7 @@ auto pListView::resizeColumns() -> void {
     }
     for(auto row : range(self().items())) {
       maximumWidth = max(maximumWidth, 8  //margin
-      + (row == 0 && state().checkable ? 24 : 0)  //check box
+      + (row == 0 && state().checkable ? 32 : 0)  //check box
       + state().items[row]->state.icon(column, {}).width
       + Font::size(state().columns[column]->font(true), state().items[row]->state.text(column, "")).width()
       );

@@ -8,6 +8,9 @@ ConfigurationManager::ConfigurationManager() {
   userInterface.append(userInterface.showStatusBar, "ShowStatusBar");
   append(userInterface, "UserInterface");
 
+  library.append(library.location, "Location");
+  append(library, "Library");
+
   video.append(video.driver, "Driver");
   video.append(video.synchronize, "Synchronize");
   video.append(video.scale, "Scale");
@@ -25,6 +28,7 @@ ConfigurationManager::ConfigurationManager() {
   append(input, "Input");
 
   load({configpath(), "tomoko/settings.bml"});
+  if(!library.location) library.location = {userpath(), "Emulation/"};
   if(!video.driver) video.driver = ruby::video.safestDriver();
   if(!audio.driver) audio.driver = ruby::audio.safestDriver();
   if(!input.driver) input.driver = ruby::input.safestDriver();

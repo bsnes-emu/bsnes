@@ -13,7 +13,6 @@ LibraryManager::LibraryManager() {
     }
   }
 
-  setTitle("Library");
   setSize({640, 800});
   setPlacement(0.0, 0.0);
 }
@@ -24,6 +23,7 @@ auto LibraryManager::show(const string& type) -> void {
     browser->select();
   }
 
+  setTitle({"Library (", config().library.location, ")"});
   setVisible();
   setFocused();
 }
