@@ -117,10 +117,9 @@ auto CheatEditor::addCode(const string& code, const string& description, bool en
 auto CheatEditor::loadCheats() -> void {
   doReset(true);
   auto contents = string::read({program->folderPaths[0], "cheats.bml"});
-  auto document = Markup::Document(contents);
-  for(auto& cheat : document["cartridge"]) {
-    if(cheat.name != "cheat") continue;
-    if(!addCode(cheat["code"].text(), cheat["description"].text(), cheat["enabled"].exists())) break;
+  auto document = BML::unserialize(contents);
+  for(auto cheat : document["cartridge"].find("cheat")) {
+    if(!addCode(cheat["code"].text(), cheat["description"].text(), (bool)cheat["enabled"])) break;
   }
   doRefresh();
   synchronizeCodes();

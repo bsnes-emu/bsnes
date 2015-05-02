@@ -1,21 +1,29 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
 //XML v1.0 subset parser
-//revision 0.03
+//revision 0.04
 
 namespace nall {
 namespace XML {
 
-struct Node : Markup::Node {
+//metadata:
+//  0 = element
+//  1 = attribute
+
+struct ManagedNode;
+using SharedNode = shared_pointer<ManagedNode>;
+
+struct ManagedNode : Markup::ManagedNode {
 protected:
   inline string escape() const {
-    string result = data;
+    string result = _value;
     result.replace("&", "&amp;");
     result.replace("<", "&lt;");
     result.replace(">", "&gt;");
-    if(attribute == false) return result;
-    result.replace("\'", "&apos;");
-    result.replace("\"", "&quot;");
+    if(_metadata == 1) {
+      result.replace("\'", "&apos;");
+      result.replace("\"", "&quot;");
+    }
     return result;
   }
 
@@ -54,7 +62,7 @@ protected:
         if(!memory::compare(source, "&quot;", 6)) { *output++ = '\"'; source += 6; length -= 6; continue; }
       }
 
-      if(attribute == false && source[0] == '<' && source[1] == '!') {
+      if(_metadata == 0 && source[0] == '<' && source[1] == '!') {
         //comment
         if(!memory::compare(source, "<!--", 4)) {
           source += 4, length -= 4;
@@ -117,8 +125,8 @@ protected:
     const char* nameStart = ++p;  //skip '<'
     while(isName(*p)) p++;
     const char* nameEnd = p;
-    copy(name, nameStart, nameEnd - nameStart);
-    if(name.empty()) throw "missing element name";
+    copy(_name, nameStart, nameEnd - nameStart);
+    if(_name.empty()) throw "missing element name";
 
     //parse attributes
     while(*p) {
@@ -127,14 +135,14 @@ protected:
       if(*p == '?' || *p == '/' || *p == '>') break;
 
       //parse attribute name
-      Node attribute;
-      attribute.attribute = true;
+      SharedNode attribute(new ManagedNode);
+      attribute->_metadata = 1;
 
       const char* nameStart = p;
       while(isName(*p)) p++;
       const char* nameEnd = p;
-      copy(attribute.name, nameStart, nameEnd - nameStart);
-      if(attribute.name.empty()) throw "missing attribute name";
+      copy(attribute->_name, nameStart, nameEnd - nameStart);
+      if(attribute->_name.empty()) throw "missing attribute name";
 
       //parse attribute data
       if(*p++ != '=') throw "missing attribute value";
@@ -145,8 +153,8 @@ protected:
       if(!*p) throw "missing attribute data terminal";
       const char* dataEnd = p++;  //skip closing terminal
 
-      copy(attribute.data, dataStart, dataEnd - dataStart);
-      children.append(attribute);
+      copy(attribute->_value, dataStart, dataEnd - dataStart);
+      _children.append(attribute);
     }
 
     //parse closure
@@ -158,9 +166,9 @@ protected:
 
   //parse element and all of its child elements
   inline void parseElement(const char*& p) {
-    Node node;
-    if(node.parseHead(p) == false) node.parse(p);
-    children.append(node);
+    SharedNode node(new ManagedNode);
+    if(node->parseHead(p) == false) node->parse(p);
+    _children.append(node);
   }
 
   //return true if </tag> matches this node's name
@@ -171,7 +179,7 @@ protected:
     while(*p && *p != '>') p++;
     if(*p != '>') throw "unclosed closure element";
     const char* nameEnd = p++;
-    if(memory::compare(name.data(), nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
+    if(memory::compare(_name.data(), nameStart, nameEnd - nameStart)) throw "closure element name mismatch";
     return true;
   }
 
@@ -189,29 +197,23 @@ protected:
       parseElement(p);
     }
 
-    copy(data, dataStart, dataEnd - dataStart);
-  }
-};
-
-struct Document : Node {
-  string error;
-
-  inline bool load(const char* document) {
-    if(document == nullptr) return false;
-    reset();
-    try {
-      parse(document);
-    } catch(const char* error) {
-      reset();
-      this->error = error;
-      return false;
-    }
-    return true;
+    copy(_value, dataStart, dataEnd - dataStart);
   }
 
-  inline Document() {}
-  inline Document(const char* document) { load(document); }
+  friend auto unserialize(const string&) -> Markup::SharedNode;
 };
+
+inline auto unserialize(const string& markup) -> Markup::SharedNode {
+  auto node = new ManagedNode;
+  try {
+    const char* p = markup;
+    node->parse(p);
+  } catch(const char* error) {
+    delete node;
+    node = nullptr;
+  }
+  return node;
+}
 
 }
 }

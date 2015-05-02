@@ -5,6 +5,7 @@
 #include <utility>
 
 namespace nall {
+  using std::nullptr_t;
   using std::forward;
   using std::move;
   using std::decay;

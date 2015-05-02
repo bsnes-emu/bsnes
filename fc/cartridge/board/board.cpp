@@ -86,31 +86,31 @@ Board::Board(Markup::Node& document) {
   cartridge.board = this;
   auto cartridge = document["cartridge"];
 
-  information.type = cartridge["board/type"].data;
-  information.battery = cartridge["prg/ram/name"].exists();
+  information.type = cartridge["board/type"].text();
+  information.battery = (bool)cartridge["prg/ram/name"];
 
   auto prom = cartridge["prg/rom"];
   auto pram = cartridge["prg/ram"];
   auto crom = cartridge["chr/rom"];
   auto cram = cartridge["chr/ram"];
 
-  prgrom.size = numeral(prom["size"].data);
-  prgram.size = numeral(pram["size"].data);
-  chrrom.size = numeral(crom["size"].data);
-  chrram.size = numeral(cram["size"].data);
+  prgrom.size = prom["size"].text().numeral();
+  prgram.size = pram["size"].text().numeral();
+  chrrom.size = crom["size"].text().numeral();
+  chrram.size = cram["size"].text().numeral();
 
   if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
   if(prgram.size) prgram.data = new uint8[prgram.size]();
   if(chrrom.size) chrrom.data = new uint8[chrrom.size]();
   if(chrram.size) chrram.data = new uint8[chrram.size]();
 
-  if(prom["name"].data) interface->loadRequest(ID::ProgramROM, prom["name"].data);
-  if(pram["name"].data) interface->loadRequest(ID::ProgramRAM, pram["name"].data);
-  if(crom["name"].data) interface->loadRequest(ID::CharacterROM, crom["name"].data);
-  if(cram["name"].data) interface->loadRequest(ID::CharacterRAM, cram["name"].data);
+  if(auto name = prom["name"].text()) interface->loadRequest(ID::ProgramROM, name);
+  if(auto name = pram["name"].text()) interface->loadRequest(ID::ProgramRAM, name);
+  if(auto name = crom["name"].text()) interface->loadRequest(ID::CharacterROM, name);
+  if(auto name = cram["name"].text()) interface->loadRequest(ID::CharacterRAM, name);
 
-  if(pram["name"].data) Famicom::cartridge.memory.append({ID::ProgramRAM, pram["name"].data});
-  if(cram["name"].data) Famicom::cartridge.memory.append({ID::CharacterRAM, cram["name"].data});
+  if(auto name = pram["name"].text()) Famicom::cartridge.memory.append({ID::ProgramRAM, name});
+  if(auto name = cram["name"].text()) Famicom::cartridge.memory.append({ID::CharacterRAM, name});
 
   prgram.writable = true;
   chrram.writable = true;
@@ -120,7 +120,7 @@ Board::~Board() {
 }
 
 Board* Board::load(string manifest) {
-  auto document = Markup::Document(manifest);
+  auto document = BML::unserialize(manifest);
   cartridge.information.title = document["information/title"].text();
 
   string type = document["cartridge/board/type"].text();

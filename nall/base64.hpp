@@ -77,7 +77,7 @@ vector<uint8_t> Base64::decode(const string& text) {
   uint8_t buffer, output;
   for(unsigned i = 0; i < text.size(); i++) {
     uint8_t buffer = value(text[i]);
-    if(buffer == 0) break;
+    if(buffer > 63) break;
 
     switch(i & 3) {
     case 0:
@@ -129,7 +129,7 @@ uint8_t Base64::value(char n) {
   if(n >= '0' && n <= '9') return n - '0' + 52;
   if(n == '+' || n == '-') return 62;
   if(n == '/' || n == '_') return 63;
-  return 0;
+  return 64;  //error code
 }
 
 }

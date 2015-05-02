@@ -48,7 +48,7 @@ void serialize(serializer& s) {
 }
 
 NES_CNROM(Markup::Node& document) : Board(document) {
-  settings.mirror = document["cartridge"]["mirror"]["mode"].data == "vertical" ? 1 : 0;
+  settings.mirror = document["cartridge/mirror/mode"].text() == "vertical" ? 1 : 0;
 }
 
 };

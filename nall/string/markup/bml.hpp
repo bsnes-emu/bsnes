@@ -1,12 +1,17 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
 //BML v1.0 parser
-//revision 0.03
+//revision 0.04
 
 namespace nall {
 namespace BML {
 
-struct Node : Markup::Node {
+//metadata is used to store nesting level
+
+struct ManagedNode;
+using SharedNode = shared_pointer<ManagedNode>;
+
+struct ManagedNode : Markup::ManagedNode {
 protected:
   //test to verify if a valid character for a node name
   bool valid(char p) const {  //A-Z, a-z, 0-9, -.
@@ -32,7 +37,7 @@ protected:
     unsigned length = 0;
     while(valid(p[length])) length++;
     if(length == 0) throw "Invalid node name";
-    name = substr(p, 0, length);
+    _name = substr(p, 0, length);
     p += length;
   }
 
@@ -41,18 +46,18 @@ protected:
       unsigned length = 2;
       while(p[length] && p[length] != '\n' && p[length] != '\"') length++;
       if(p[length] != '\"') throw "Unescaped value";
-      data = {substr(p, 2, length - 2), "\n"};
+      _value = {substr(p, 2, length - 2), "\n"};
       p += length + 1;
     } else if(*p == '=') {
       unsigned length = 1;
       while(p[length] && p[length] != '\n' && p[length] != '\"' && p[length] != ' ') length++;
       if(p[length] == '\"') throw "Illegal character in value";
-      data = {substr(p, 1, length - 1), "\n"};
+      _value = {substr(p, 1, length - 1), "\n"};
       p += length;
     } else if(*p == ':') {
       unsigned length = 1;
       while(p[length] && p[length] != '\n') length++;
-      data = {substr(p, 1, length - 1), "\n"};
+      _value = {substr(p, 1, length - 1), "\n"};
       p += length;
     }
   }
@@ -64,41 +69,40 @@ protected:
       while(*p == ' ') p++;  //skip excess spaces
       if(*(p + 0) == '/' && *(p + 1) == '/') break;  //skip comments
 
-      Node node;
-      node.attribute = true;
+      SharedNode node(new ManagedNode);
       unsigned length = 0;
       while(valid(p[length])) length++;
       if(length == 0) throw "Invalid attribute name";
-      node.name = substr(p, 0, length);
-      node.parseData(p += length);
-      node.data.rtrim("\n");
-      children.append(node);
+      node->_name = substr(p, 0, length);
+      node->parseData(p += length);
+      node->_value.rtrim("\n");
+      _children.append(node);
     }
   }
 
   //read a node and all of its child nodes
   void parseNode(const lstring& text, unsigned& y) {
     const char* p = text[y++];
-    level = parseDepth(p);
+    _metadata = parseDepth(p);
     parseName(p);
     parseData(p);
     parseAttributes(p);
 
     while(y < text.size()) {
       unsigned depth = readDepth(text[y]);
-      if(depth <= level) break;
+      if(depth <= _metadata) break;
 
       if(text[y][depth] == ':') {
-        data.append(substr(text[y++], depth + 1), "\n");
+        _value.append(substr(text[y++], depth + 1), "\n");
         continue;
       }
 
-      Node node;
-      node.parseNode(text, y);
-      children.append(node);
+      SharedNode node(new ManagedNode);
+      node->parseNode(text, y);
+      _children.append(node);
     }
 
-    data.rtrim("\n");
+    _value.rtrim("\n");
   }
 
   //read top-level nodes
@@ -120,36 +124,58 @@ protected:
 
     unsigned y = 0;
     while(y < text.size()) {
-      Node node;
-      node.parseNode(text, y);
-      if(node.level > 0) throw "Root nodes cannot be indented";
-      children.append(node);
+      SharedNode node(new ManagedNode);
+      node->parseNode(text, y);
+      if(node->_metadata > 0) throw "Root nodes cannot be indented";
+      _children.append(node);
     }
   }
 
-  friend class Document;
+  friend auto unserialize(const string&) -> Markup::Node;
 };
 
-struct Document : Node {
-  string error;
+inline auto unserialize(const string& markup) -> Markup::Node {
+  SharedNode node(new ManagedNode);
+  try {
+    node->parse(markup);
+  } catch(const char* error) {
+    node.reset();
+  }
+  return (Markup::SharedNode&)node;
+}
 
-  bool load(const string& document) {
-    name = "", data = "";
-
-    try {
-      parse(document);
-    } catch(const char* error) {
-      this->error = error;
-      children.reset();
-      return false;
+inline auto serialize(const Markup::Node& node, unsigned depth = 0) -> string {
+  if(!node.name()) {
+    string result;
+    for(auto leaf : node) {
+      result.append(serialize(leaf, depth));
     }
-    return true;
+    return result;
   }
 
-  Document(const string& document = "") {
-    load(document);
+  string padding;
+  padding.resize(depth * 2);
+  for(auto& byte : padding) byte = ' ';
+
+  lstring lines;
+  if(auto value = node.value()) lines = value.split("\n");
+
+  string result;
+  result.append(padding);
+  result.append(node.name());
+  if(lines.size() == 1) result.append(":", lines[0]);
+  result.append("\n");
+  if(lines.size() > 1) {
+    padding.append("  ");
+    for(auto& line : lines) {
+      result.append(padding, ":", line, "\n");
+    }
   }
-};
+  for(auto leaf : node) {
+    result.append(serialize(leaf, depth + 1));
+  }
+  return result;
+}
 
 }
 }

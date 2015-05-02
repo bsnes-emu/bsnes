@@ -26,10 +26,10 @@ struct httpRole {
 };
 
 auto httpRole::configure(const string& parameters) -> bool {
-  auto document = Markup::Document(parameters);
-  for(auto& parameter : document) {
-    string& name = parameter.name;
-    signed value = parameter.integer();
+  auto document = BML::unserialize(parameters);
+  for(auto parameter : document) {
+    auto name = parameter.name();
+    auto value = parameter.integer();
 
     if(0);
     else if(name == "connectionLimit") settings.connectionLimit = value;

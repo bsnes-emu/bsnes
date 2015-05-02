@@ -8,6 +8,7 @@
 #include <nall/algorithm.hpp>
 #include <nall/bit.hpp>
 #include <nall/maybe.hpp>
+#include <nall/memory.hpp>
 #include <nall/sort.hpp>
 #include <nall/utility.hpp>
 
@@ -43,7 +44,7 @@ public:
   void reset() {
     if(pool) {
       for(unsigned n = 0; n < objectsize; n++) pool[poolbase + n].~T();
-      free(pool);
+      memory::free(pool);
     }
     pool = nullptr;
     poolbase = 0;
@@ -55,7 +56,7 @@ public:
     if(size <= poolsize) return;
     size = bit::round(size);  //amortize growth
 
-    T* copy = (T*)calloc(size, sizeof(T));
+    T* copy = (T*)memory::allocate(size * sizeof(T));
     for(unsigned n = 0; n < objectsize; n++) new(copy + n) T(std::move(pool[poolbase + n]));
     free(pool);
     pool = copy;
@@ -63,9 +64,10 @@ public:
     poolsize = size;
   }
 
-  void resize(unsigned size) {
-    T* copy = (T*)calloc(size, sizeof(T));
+  void resize(unsigned size, T value = T()) {
+    T* copy = (T*)memory::allocate(size * sizeof(T));
     for(unsigned n = 0; n < size && n < objectsize; n++) new(copy + n) T(std::move(pool[poolbase + n]));
+    for(unsigned n = objectsize; n < size; n++) new(copy + n) T(value);
     reset();
     pool = copy;
     poolbase = 0;

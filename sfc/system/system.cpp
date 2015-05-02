@@ -94,10 +94,11 @@ void System::term() {
 
 void System::load() {
   string manifest = string::read({interface->path(ID::System), "manifest.bml"});
-  auto document = Markup::Document(manifest);
+  auto document = BML::unserialize(manifest);
 
-  interface->loadRequest(ID::IPLROM, document["system/smp/rom/name"].data);
-  if(!file::exists({interface->path(ID::System), document["system/smp/rom/name"].data})) {
+  auto iplrom = document["system/smp/rom/name"].text();
+  interface->loadRequest(ID::IPLROM, iplrom);
+  if(!file::exists({interface->path(ID::System), iplrom})) {
     interface->notify("Error: required Super Famicom firmware ipl.rom not found.\n");
   }
 

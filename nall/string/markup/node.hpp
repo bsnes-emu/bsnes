@@ -1,151 +1,123 @@
 #ifdef NALL_STRING_INTERNAL_HPP
 
-//note: specific markups inherit from Markup::Node
-//vector<Node> will slice any data; so derived nodes must not contain data nor virtual functions
-//vector<Node*> would incur a large performance penalty and greatly increased complexity
-
 namespace nall {
 namespace Markup {
 
-struct Node {
-  string name;
-  string data;
-  bool attribute;
+struct Node;
+struct ManagedNode;
+using SharedNode = shared_pointer<ManagedNode>;
 
-  bool exists() const {
-    return !name.empty();
+struct ManagedNode {
+  ManagedNode() = default;
+  ManagedNode(const string& name) : _name(name) {}
+  ManagedNode(const string& name, const string& value) : _name(name), _value(value) {}
+
+  auto clone() const -> SharedNode {
+    SharedNode clone(new ManagedNode(_name, _value));
+    for(auto& child : _children) clone->_children.append(child->clone());
+    return clone;
   }
-
-  string text() const {
-    return string{data}.strip();
-  }
-
-  bool boolean() const {
-    return text() != "false";
-  }
-
-  intmax_t integer() const {
-    return numeral(text());
-  }
-
-  uintmax_t decimal() const {
-    return numeral(text());
-  }
-
-  void reset() {
-    children.reset();
-  }
-
-  bool evaluate(const string& query) const {
-    if(query.empty()) return true;
-    lstring rules = string{query}.replace(" ", "").split(",");
-
-    for(auto& rule : rules) {
-      enum class Comparator : unsigned { ID, EQ, NE, LT, LE, GT, GE };
-      auto comparator = Comparator::ID;
-           if(rule.match("*!=*")) comparator = Comparator::NE;
-      else if(rule.match("*<=*")) comparator = Comparator::LE;
-      else if(rule.match("*>=*")) comparator = Comparator::GE;
-      else if(rule.match ("*=*")) comparator = Comparator::EQ;
-      else if(rule.match ("*<*")) comparator = Comparator::LT;
-      else if(rule.match ("*>*")) comparator = Comparator::GT;
-
-      if(comparator == Comparator::ID) {
-        if(find(rule).size()) continue;
-        return false;
-      }
-
-      lstring side;
-      switch(comparator) {
-      case Comparator::EQ: side = rule.split<1> ("="); break;
-      case Comparator::NE: side = rule.split<1>("!="); break;
-      case Comparator::LT: side = rule.split<1> ("<"); break;
-      case Comparator::LE: side = rule.split<1>("<="); break;
-      case Comparator::GT: side = rule.split<1> (">"); break;
-      case Comparator::GE: side = rule.split<1>(">="); break;
-      }
-
-      string data = text();
-      if(side(0).empty() == false) {
-        auto result = find(side(0));
-        if(result.size() == 0) return false;
-        data = result(0).data;
-      }
-
-      switch(comparator) {
-      case Comparator::EQ: if(data.match(side(1)) ==  true)      continue; break;
-      case Comparator::NE: if(data.match(side(1)) == false)      continue; break;
-      case Comparator::LT: if(numeral(data)  < numeral(side(1))) continue; break;
-      case Comparator::LE: if(numeral(data) <= numeral(side(1))) continue; break;
-      case Comparator::GT: if(numeral(data)  > numeral(side(1))) continue; break;
-      case Comparator::GE: if(numeral(data) >= numeral(side(1))) continue; break;
-      }
-
-      return false;
-    }
-
-    return true;
-  }
-
-  vector<Node> find(const string& query) const {
-    vector<Node> result;
-
-    lstring path = query.split("/");
-    string name = path.take(0), rule;
-    unsigned lo = 0u, hi = ~0u;
-
-    if(name.match("*[*]")) {
-      lstring side = name.split<1>("[");
-      name = side(0);
-      side = side(1).rtrim("]").split<1>("-");
-      lo = side(0).empty() ?  0u : numeral(side(0));
-      hi = side(1).empty() ? ~0u : numeral(side(1));
-    }
-
-    if(name.match("*(*)")) {
-      lstring side = name.split<1>("(");
-      name = side(0);
-      rule = side(1).rtrim(")");
-    }
-
-    unsigned position = 0;
-    for(auto& node : children) {
-      if(node.name.match(name) == false) continue;
-      if(node.evaluate(rule) == false) continue;
-
-      bool inrange = position >= lo && position <= hi;
-      position++;
-      if(inrange == false) continue;
-
-      if(path.size() == 0) result.append(node);
-      else {
-        auto list = node.find(path.merge("/"));
-        for(auto& item : list) result.append(item);
-      }
-    }
-
-    return result;
-  }
-
-  Node operator[](const string& query) const {
-    auto result = find(query);
-    return result(0);
-  }
-
-  vector<Node>::iterator begin() { return children.begin(); }
-  vector<Node>::iterator end() { return children.end(); }
-
-  const vector<Node>::constIterator begin() const { return children.begin(); }
-  const vector<Node>::constIterator end() const { return children.end(); }
-
-  Node() : attribute(false), level(0) {}
 
 protected:
-  unsigned level;
-  vector<Node> children;
+  string _name;
+  string _value;
+  uintptr_t _metadata = 0;
+  vector<SharedNode> _children;
+
+  inline auto _evaluate(string query) const -> bool;
+  inline auto _find(const string& query) const -> vector<Node>;
+  inline auto _lookup(const string& path) const -> Node;
+  inline auto _create(const string& path) -> Node;
+
+  friend class Node;
+};
+
+struct Node {
+  Node() : shared(new ManagedNode) {}
+  Node(const SharedNode& source) : shared(source ? source : new ManagedNode) {}
+  Node(const string& name) : shared(new ManagedNode(name)) {}
+  Node(const string& name, const string& value) : shared(new ManagedNode(name, value)) {}
+
+  auto unique() const -> bool { return shared.unique(); }
+  auto clone() const -> Node { return shared->clone(); }
+
+  explicit operator bool() const { return shared->_name || shared->_children; }
+  auto name() const -> string { return shared->_name; }
+  auto value() const -> string { return shared->_value; }
+
+  auto text() const -> string { return value().strip(); }
+  auto boolean() const -> bool { return text() == "true"; }
+  auto integer() const -> intmax_t { return text().numeral(); }
+  auto decimal() const -> uintmax_t { return text().numeral(); }
+
+  auto setName(const string& name = "") -> void { shared->_name = name; }
+  auto setValue(const string& value = "") -> void { shared->_value = value; }
+
+  auto reset() -> void { shared->_children.reset(); }
+  auto size() const -> unsigned { return shared->_children.size(); }
+
+  auto prepend(const Node& node) -> void { shared->_children.prepend(node.shared); }
+  auto append(const Node& node) -> void { shared->_children.append(node.shared); }
+  auto remove(const Node& node) -> bool {
+    for(auto n : range(size())) {
+      if(node.shared == shared->_children[n]) {
+        return shared->_children.remove(n), true;
+      }
+    }
+    return false;
+  }
+
+  auto at(unsigned position) const -> Node {
+    if(position >= size()) return {};
+    return shared->_children[position];
+  }
+
+  auto swap(unsigned x, unsigned y) -> bool {
+    if(x >= size() || y >= size()) return false;
+    return std::swap(shared->_children[x], shared->_children[y]), true;
+  }
+
+  auto insert(unsigned position, const Node& node) -> bool {
+    if(position > size()) return false;  //used > instead of >= to allow indexed-equivalent of append()
+    return shared->_children.insert(position, node.shared), true;
+  }
+
+  auto remove(unsigned position) -> bool {
+    if(position >= size()) return false;
+    return shared->_children.remove(position), true;
+  }
+
+  auto operator()(const string& path) -> Node { return shared->_create(path); }
+  auto operator[](const string& path) const -> Node { return shared->_lookup(path); }
+  auto find(const string& query) const -> vector<Node> { return shared->_find(query); }
+
+  struct iterator {
+    auto operator*() -> Node { return {source.shared->_children[position]}; }
+    auto operator!=(const iterator& source) const -> bool { return position != source.position; }
+    auto operator++() -> iterator& { return position++, *this; }
+    iterator(const Node& source, unsigned position) : source(source), position(position) {}
+
+  private:
+    const Node& source;
+    unsigned position;
+  };
+
+  auto begin() const -> iterator { return iterator(*this, 0); }
+  auto end() const -> iterator { return iterator(*this, size()); }
+
+protected:
+  SharedNode shared;
 };
 
 }
+}
+
+namespace nall {
+
+inline range_t range(const Markup::Node& node) {
+  return range_t{0, (signed)node.size(), 1};
+}
+
 }
 
 #endif

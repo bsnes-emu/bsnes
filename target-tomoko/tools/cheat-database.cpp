@@ -16,17 +16,15 @@ auto CheatDatabase::findCodes() -> void {
   auto sha256 = emulator->sha256();
 
   auto contents = string::read({localpath(), "tomoko/cheats.bml"});
-  auto document = Markup::Document(contents);
+  auto document = BML::unserialize(contents);
 
-  for(auto& cartridge : document) {
-    if(cartridge.name != "cartridge") continue;
+  for(auto cartridge : document.find("cartridge")) {
     if(cartridge["sha256"].text() != sha256) continue;
 
     codes.reset();
     cheatList.reset();
     cheatList.append(ListViewColumn().setWidth(~0));
-    for(auto& cheat : cartridge) {
-      if(cheat.name != "cheat") continue;
+    for(auto cheat : cartridge.find("cheat")) {
       codes.append(cheat["code"].text());
       cheatList.append(ListViewItem().setText(0, cheat["description"].text()));
     }

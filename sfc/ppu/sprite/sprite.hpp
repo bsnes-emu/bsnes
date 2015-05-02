@@ -9,8 +9,8 @@ struct Sprite {
     uint8 priority;
     uint8 palette;
     bool size;
-    unsigned width() const;
-    unsigned height() const;
+    alwaysinline unsigned width() const;
+    alwaysinline unsigned height() const;
   } list[128];
 
   struct TileItem {
@@ -64,8 +64,8 @@ struct Sprite {
   void synchronize();
 
   //sprite.cpp
-  void address_reset();
-  void set_first_sprite();
+  alwaysinline void address_reset();
+  alwaysinline void set_first_sprite();
   void frame();
   void scanline();
   void run();

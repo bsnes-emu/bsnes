@@ -54,9 +54,9 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
     pixmaps(n).format = format;
     pixmaps(n).filter = filter;
     pixmaps(n).wrap = wrap;
-    if(leaf["format"].exists()) pixmaps(n).format = glrFormat(leaf["format"].text());
-    if(leaf["filter"].exists()) pixmaps(n).filter = glrFilter(leaf["filter"].text());
-    if(leaf["wrap"].exists()) pixmaps(n).wrap = glrWrap(leaf["wrap"].text());
+    if(leaf["format"]) pixmaps(n).format = glrFormat(leaf["format"].text());
+    if(leaf["filter"]) pixmaps(n).filter = glrFilter(leaf["filter"].text());
+    if(leaf["wrap"]) pixmaps(n).wrap = glrWrap(leaf["wrap"].text());
 
     unsigned w = glrSize(image.width), h = glrSize(image.height);
     uint32_t* buffer = new uint32_t[w * h]();

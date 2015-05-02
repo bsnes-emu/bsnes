@@ -30,8 +30,8 @@ struct Background {
     uint16 voffset;
   } cache;
 
-  unsigned voffset() const;
-  unsigned hoffset() const;
+  alwaysinline unsigned voffset() const;
+  alwaysinline unsigned hoffset() const;
 
   struct Output {
     struct Pixel {
@@ -69,7 +69,7 @@ struct Background {
   void get_tile();
   unsigned get_tile_color();
   unsigned get_tile(unsigned x, unsigned y);
-  signed clip(signed n);
+  alwaysinline signed clip(signed n);
   void begin_mode7();
   void run_mode7();
 

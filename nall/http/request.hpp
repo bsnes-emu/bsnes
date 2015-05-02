@@ -32,11 +32,14 @@ struct httpRequest : httpMessage {
   auto removeHeader(const string& name) -> type& { return httpMessage::removeHeader(name), *this; }
   auto setHeader(const string& name, const string& value = "") -> type& { return httpMessage::setHeader(name, value), *this; }
 
-  auto get(const string& name) -> string { return _get.get(name); }
-  auto setGet(const string& name, const string& value = "") -> void { return _get.set(name, value); }
+  auto cookie(const string& name) const -> string { return _cookie.get(name); }
+  auto setCookie(const string& name, const string& value = "") -> void { _cookie.set(name, value); }
 
-  auto post(const string& name) -> string { return _post.get(name); }
-  auto setPost(const string& name, const string& value = "") -> void { return _post.set(name, value); }
+  auto get(const string& name) const -> string { return _get.get(name); }
+  auto setGet(const string& name, const string& value = "") -> void { _get.set(name, value); }
+
+  auto post(const string& name) const -> string { return _post.get(name); }
+  auto setPost(const string& name, const string& value = "") -> void { _post.set(name, value); }
 
 //private:
   uint32_t _ip = 0;
@@ -112,6 +115,14 @@ auto httpRequest::setHead() -> bool {
     auto part = header.split<1>(":").strip();
     if(!part[0] || part.size() != 2) continue;
     appendHeader(part[0], part[1]);
+
+    if(part[0].iequals("Cookie")) {
+      for(auto& block : part[1].split(";")) {
+        lstring variable = block.split<1>("=").strip();
+        variable(1).ltrim("\"").rtrim("\"");
+        if(variable(0)) setCookie(variable(0), variable(1));
+      }
+    }
   }
 
   if(requestHost) setHeader("Host", requestHost);  //request URI overrides host header
@@ -131,7 +142,7 @@ auto httpRequest::body(const function<bool (const uint8_t*, unsigned)>& callback
 auto httpRequest::setBody() -> bool {
   if(requestType() == RequestType::Post) {
     if(header("Content-Type").iequals("application/x-www-form-urlencoded")) {
-      for(auto& block : _body.split("\n")) {
+      for(auto& block : _body.split("&")) {
         lstring variable = block.rtrim("\r").split<1>("=");
         if(variable(0)) setPost(variable(0), variable(1));
       }

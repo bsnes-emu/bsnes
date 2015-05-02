@@ -21,7 +21,7 @@
 #include <nall/bit.hpp>
 #include <nall/bitvector.hpp>
 #include <nall/bmp.hpp>
-#include <nall/config.hpp>
+//#include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/dl.hpp>
 #include <nall/endian.hpp>
@@ -60,6 +60,7 @@
 #include <nall/decode/gzip.hpp>
 #include <nall/decode/inflate.hpp>
 #include <nall/decode/png.hpp>
+#include <nall/decode/url.hpp>
 #include <nall/decode/zip.hpp>
 #include <nall/hash/crc16.hpp>
 #include <nall/hash/crc32.hpp>

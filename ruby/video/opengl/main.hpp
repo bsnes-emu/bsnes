@@ -12,32 +12,32 @@ void OpenGL::shader(const char* pathname) {
 
   unsigned historySize = 0;
   if(pathname) {
-    auto document = Markup::Document(file::read({pathname, "manifest.bml"}));
+    auto document = BML::unserialize(file::read({pathname, "manifest.bml"}));
 
-    for(auto& node : document["settings"]) {
-      settings.insert({node.name, node.text()});
+    for(auto node : document["settings"]) {
+      settings.insert({node.name(), node.text()});
     }
 
-    for(auto& node : document["input"]) {
-      if(node.name == "history") historySize = node.decimal();
-      if(node.name == "format") format = glrFormat(node.text());
-      if(node.name == "filter") filter = glrFilter(node.text());
-      if(node.name == "wrap") wrap = glrWrap(node.text());
+    for(auto node : document["input"]) {
+      if(node.name() == "history") historySize = node.decimal();
+      if(node.name() == "format") format = glrFormat(node.text());
+      if(node.name() == "filter") filter = glrFilter(node.text());
+      if(node.name() == "wrap") wrap = glrWrap(node.text());
     }
 
-    for(auto& node : document["output"]) {
+    for(auto node : document["output"]) {
       string text = node.text();
-      if(node.name == "width") {
+      if(node.name() == "width") {
         if(text.endsWith("%")) relativeWidth = real(text.rtrim("%")) / 100.0;
         else absoluteWidth = decimal(text);
       }
-      if(node.name == "height") {
+      if(node.name() == "height") {
         if(text.endsWith("%")) relativeHeight = real(text.rtrim("%")) / 100.0;
         else absoluteHeight = decimal(text);
       }
     }
 
-    for(auto& node : document.find("program")) {
+    for(auto node : document.find("program")) {
       unsigned n = programs.size();
       programs(n).bind(this, node, pathname);
     }

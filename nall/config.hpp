@@ -58,10 +58,10 @@ struct Node {
 
   void load(Markup::Node path) {
     for(auto& child : children) {
-      auto leaf = path[child.name];
-      if(!leaf.exists()) continue;
-      if(!child.empty()) child.set(leaf.text());
-      child.load(leaf);
+      if(auto leaf = path[child.name]) {
+        if(!child.empty()) child.set(leaf.text());
+        child.load(leaf);
+      }
     }
   }
 
@@ -84,7 +84,7 @@ struct Node {
 struct Document : Node {
   bool load(const string& filename) {
     if(!file::exists(filename)) return false;
-    auto document = Markup::Document(string::read(filename));
+    auto document = BML::unserialize(string::read(filename));
     Node::load(document);
     return true;
   }

@@ -30,15 +30,15 @@ struct Screen {
   } math;
 
   void scanline();
-  void run();
+  alwaysinline void run();
   void reset();
 
   uint16 get_pixel_sub(bool hires);
   uint16 get_pixel_main();
   uint16 addsub(unsigned x, unsigned y);
-  uint16 get_color(unsigned palette);
-  uint16 get_direct_color(unsigned palette, unsigned tile);
-  uint16 fixed_color() const;
+  alwaysinline uint16 get_color(unsigned palette);
+  alwaysinline uint16 get_direct_color(unsigned palette, unsigned tile);
+  alwaysinline uint16 fixed_color() const;
 
   void serialize(serializer&);
   Screen(PPU& self);

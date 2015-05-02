@@ -211,6 +211,8 @@ public:
   auto operator> (const char* s) const -> bool { return strcmp(data(), s) >  0; }
   auto operator>=(const char* s) const -> bool { return strcmp(data(), s) >= 0; }
 
+  auto operator+=(const string& s) -> type& { return append(s); }
+
   string(const string& source) : string() { operator=(source); }
   string(string&& source) : string() { operator=(std::move(source)); }
 
@@ -223,6 +225,7 @@ public:
   inline auto integer() const -> intmax_t { return nall::integer(*this); }
   inline auto decimal() const -> uintmax_t { return nall::decimal(*this); }
   inline auto hex() const -> uintmax_t { return nall::hex(*this); }
+  inline auto numeral() const -> intmax_t { return nall::numeral(*this); }
 
   //core.hpp
   inline auto operator[](signed) const -> const char&;
@@ -244,7 +247,7 @@ public:
 
   //compare.hpp
   auto compare(rstring source) const -> signed { return nall::compare(*this, source); }
-  auto icompare(rstring source) const -> signed { return nall::compare(*this, source); }
+  auto icompare(rstring source) const -> signed { return nall::icompare(*this, source); }
 
   auto equals(rstring source) const -> bool { return nall::equals(*this, source); }
   auto iequals(rstring source) const -> bool { return nall::iequals(*this, source); }

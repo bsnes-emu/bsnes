@@ -115,7 +115,7 @@ void Cartridge::load() {
 
 void Cartridge::load_super_game_boy() {
   interface->loadRequest(ID::SuperGameBoyManifest, "manifest.bml");
-  auto document = Markup::Document(information.markup.gameBoy);
+  auto document = BML::unserialize(information.markup.gameBoy);
   information.title.gameBoy = document["information/title"].text();
 
   auto rom = document["cartridge/rom"];
@@ -124,22 +124,22 @@ void Cartridge::load_super_game_boy() {
   GameBoy::cartridge.information.markup = information.markup.gameBoy;
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy);
 
-  if(rom["name"].exists()) interface->loadRequest(ID::SuperGameBoyROM, rom["name"].data);
-  if(ram["name"].exists()) interface->loadRequest(ID::SuperGameBoyRAM, ram["name"].data);
-  if(ram["name"].exists()) memory.append({ID::SuperGameBoyRAM, ram["name"].data});
+  if(rom["name"]) interface->loadRequest(ID::SuperGameBoyROM, rom["name"].text());
+  if(ram["name"]) interface->loadRequest(ID::SuperGameBoyRAM, ram["name"].text());
+  if(ram["name"]) memory.append({ID::SuperGameBoyRAM, ram["name"].text()});
 }
 
 void Cartridge::load_satellaview() {
   interface->loadRequest(ID::SatellaviewManifest, "manifest.bml");
-  auto document = Markup::Document(information.markup.satellaview);
+  auto document = BML::unserialize(information.markup.satellaview);
   information.title.satellaview = document["information/title"].text();
 
   auto rom = document["cartridge/rom"];
 
-  if(rom["name"].exists()) {
-    unsigned size = numeral(rom["size"].data);
+  if(rom["name"]) {
+    unsigned size = rom["size"].decimal();
     satellaviewcartridge.memory.map(allocate<uint8>(size, 0xff), size);
-    interface->loadRequest(ID::SatellaviewROM, rom["name"].data);
+    interface->loadRequest(ID::SatellaviewROM, rom["name"].text());
 
     satellaviewcartridge.readonly = (rom["type"].text() == "MaskROM");
   }
@@ -147,49 +147,49 @@ void Cartridge::load_satellaview() {
 
 void Cartridge::load_sufami_turbo_a() {
   interface->loadRequest(ID::SufamiTurboSlotAManifest, "manifest.bml");
-  auto document = Markup::Document(information.markup.sufamiTurboA);
+  auto document = BML::unserialize(information.markup.sufamiTurboA);
   information.title.sufamiTurboA = document["information/title"].text();
 
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 
-  if(rom["name"].exists()) {
-    unsigned size = numeral(rom["size"].data);
+  if(rom["name"]) {
+    unsigned size = rom["size"].decimal();
     sufamiturboA.rom.map(allocate<uint8>(size, 0xff), size);
-    interface->loadRequest(ID::SufamiTurboSlotAROM, rom["name"].data);
+    interface->loadRequest(ID::SufamiTurboSlotAROM, rom["name"].text());
   }
 
-  if(ram["name"].exists()) {
-    unsigned size = numeral(ram["size"].data);
+  if(ram["name"]) {
+    unsigned size = ram["size"].decimal();
     sufamiturboA.ram.map(allocate<uint8>(size, 0xff), size);
-    interface->loadRequest(ID::SufamiTurboSlotARAM, ram["name"].data);
-    memory.append({ID::SufamiTurboSlotARAM, ram["name"].data});
+    interface->loadRequest(ID::SufamiTurboSlotARAM, ram["name"].text());
+    memory.append({ID::SufamiTurboSlotARAM, ram["name"].text()});
   }
 
-  if(document["cartridge/linkable"].exists()) {
+  if(document["cartridge/linkable"]) {
     interface->loadRequest(ID::SufamiTurboSlotB, "Sufami Turbo - Slot B", "st");
   }
 }
 
 void Cartridge::load_sufami_turbo_b() {
   interface->loadRequest(ID::SufamiTurboSlotBManifest, "manifest.bml");
-  auto document = Markup::Document(information.markup.sufamiTurboB);
+  auto document = BML::unserialize(information.markup.sufamiTurboB);
   information.title.sufamiTurboB = document["information/title"].text();
 
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 
-  if(rom["name"].exists()) {
-    unsigned size = numeral(rom["size"].data);
+  if(rom["name"]) {
+    unsigned size = rom["size"].decimal();
     sufamiturboB.rom.map(allocate<uint8>(size, 0xff), size);
-    interface->loadRequest(ID::SufamiTurboSlotBROM, rom["name"].data);
+    interface->loadRequest(ID::SufamiTurboSlotBROM, rom["name"].text());
   }
 
-  if(ram["name"].exists()) {
-    unsigned size = numeral(ram["size"].data);
+  if(ram["name"]) {
+    unsigned size = ram["size"].decimal();
     sufamiturboB.ram.map(allocate<uint8>(size, 0xff), size);
-    interface->loadRequest(ID::SufamiTurboSlotBRAM, ram["name"].data);
-    memory.append({ID::SufamiTurboSlotBRAM, ram["name"].data});
+    interface->loadRequest(ID::SufamiTurboSlotBRAM, ram["name"].text());
+    memory.append({ID::SufamiTurboSlotBRAM, ram["name"].text()});
   }
 }
 

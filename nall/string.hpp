@@ -16,6 +16,7 @@
 #include <nall/intrinsics.hpp>
 #include <nall/memory.hpp>
 #include <nall/method.hpp>
+#include <nall/shared-pointer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
@@ -48,9 +49,9 @@
 #include <nall/string/eval/parser.hpp>
 #include <nall/string/eval/evaluator.hpp>
 #include <nall/string/markup/node.hpp>
+#include <nall/string/markup/find.hpp>
 #include <nall/string/markup/bml.hpp>
 #include <nall/string/markup/xml.hpp>
-#include <nall/string/markup/document.hpp>
 #include <nall/string/transform/cml.hpp>
 #include <nall/string/transform/dml.hpp>
 #undef NALL_STRING_INTERNAL_HPP
