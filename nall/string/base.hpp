@@ -211,8 +211,6 @@ public:
   auto operator> (const char* s) const -> bool { return strcmp(data(), s) >  0; }
   auto operator>=(const char* s) const -> bool { return strcmp(data(), s) >= 0; }
 
-  auto operator+=(const string& s) -> type& { return append(s); }
-
   string(const string& source) : string() { operator=(source); }
   string(string&& source) : string() { operator=(std::move(source)); }
 

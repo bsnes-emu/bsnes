@@ -124,9 +124,9 @@ void Cartridge::load_super_game_boy() {
   GameBoy::cartridge.information.markup = information.markup.gameBoy;
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy);
 
-  if(rom["name"]) interface->loadRequest(ID::SuperGameBoyROM, rom["name"].text());
-  if(ram["name"]) interface->loadRequest(ID::SuperGameBoyRAM, ram["name"].text());
-  if(ram["name"]) memory.append({ID::SuperGameBoyRAM, ram["name"].text()});
+  if(auto name = rom["name"].text()) interface->loadRequest(ID::SuperGameBoyROM, name);
+  if(auto name = ram["name"].text()) interface->loadRequest(ID::SuperGameBoyRAM, name);
+  if(auto name = ram["name"].text()) memory.append({ID::SuperGameBoyRAM, name});
 }
 
 void Cartridge::load_satellaview() {

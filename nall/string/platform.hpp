@@ -75,7 +75,7 @@ auto configpath() -> string {
 // c:/users/username/appdata/local/
 auto localpath() -> string {
   #if defined(PLATFORM_WINDOWS)
-  whcar_t path[PATH_MAX] = L"";
+  wchar_t path[PATH_MAX] = L"";
   SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");

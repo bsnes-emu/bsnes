@@ -74,9 +74,9 @@ void Cartridge::load(System::Revision revision) {
 
   //Super Game Boy core loads memory from Super Famicom core
   if(revision != System::Revision::SuperGameBoy) {
-    if(rom["name"]) interface->loadRequest(ID::ROM, rom["name"].text());
-    if(ram["name"]) interface->loadRequest(ID::RAM, ram["name"].text());
-    if(ram["name"]) memory.append({ID::RAM, ram["name"].text()});
+    if(auto name = rom["name"].text()) interface->loadRequest(ID::ROM, name);
+    if(auto name = ram["name"].text()) interface->loadRequest(ID::RAM, name);
+    if(auto name = ram["name"].text()) memory.append({ID::RAM, name});
   }
 
   information.romsize = rom["size"].decimal();

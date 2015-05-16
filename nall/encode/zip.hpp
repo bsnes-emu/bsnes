@@ -6,10 +6,10 @@
 #include <nall/string.hpp>
 #include <nall/hash/crc32.hpp>
 
-namespace nall {
+namespace nall { namespace Encode {
 
-struct zip {
-  zip(const string& filename) {
+struct ZIP {
+  ZIP(const string& filename) {
     fp.open(filename, file::mode::write);
     time_t currentTime = time(nullptr);
     tm* info = localtime(&currentTime);
@@ -40,7 +40,7 @@ struct zip {
     fp.write(data, size);             //file data
   }
 
-  ~zip() {
+  ~ZIP() {
     //central directory
     unsigned baseOffset = fp.offset();
     for(auto& entry : directory) {
@@ -90,6 +90,6 @@ protected:
   vector<entry_t> directory;
 };
 
-}
+}}
 
 #endif

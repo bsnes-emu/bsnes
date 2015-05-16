@@ -14,26 +14,26 @@ using SharedNode = shared_pointer<ManagedNode>;
 struct ManagedNode : Markup::ManagedNode {
 protected:
   //test to verify if a valid character for a node name
-  bool valid(char p) const {  //A-Z, a-z, 0-9, -.
+  auto valid(char p) const -> bool {  //A-Z, a-z, 0-9, -.
     return p - 'A' < 26u || p - 'a' < 26u || p - '0' < 10u || p - '-' < 2u;
   }
 
   //determine indentation level, without incrementing pointer
-  unsigned readDepth(const char* p) {
+  auto readDepth(const char* p) -> unsigned {
     unsigned depth = 0;
     while(p[depth] == '\t' || p[depth] == ' ') depth++;
     return depth;
   }
 
   //determine indentation level
-  unsigned parseDepth(const char*& p) {
+  auto parseDepth(const char*& p) -> unsigned {
     unsigned depth = readDepth(p);
     p += depth;
     return depth;
   }
 
   //read name
-  void parseName(const char*& p) {
+  auto parseName(const char*& p) -> void {
     unsigned length = 0;
     while(valid(p[length])) length++;
     if(length == 0) throw "Invalid node name";
@@ -41,7 +41,7 @@ protected:
     p += length;
   }
 
-  void parseData(const char*& p) {
+  auto parseData(const char*& p) -> void {
     if(*p == '=' && *(p + 1) == '\"') {
       unsigned length = 2;
       while(p[length] && p[length] != '\n' && p[length] != '\"') length++;
@@ -63,7 +63,7 @@ protected:
   }
 
   //read all attributes for a node
-  void parseAttributes(const char*& p) {
+  auto parseAttributes(const char*& p) -> void {
     while(*p && *p != '\n') {
       if(*p != ' ') throw "Invalid node name";
       while(*p == ' ') p++;  //skip excess spaces
@@ -81,7 +81,7 @@ protected:
   }
 
   //read a node and all of its child nodes
-  void parseNode(const lstring& text, unsigned& y) {
+  auto parseNode(const lstring& text, unsigned& y) -> void {
     const char* p = text[y++];
     _metadata = parseDepth(p);
     parseName(p);
@@ -106,22 +106,32 @@ protected:
   }
 
   //read top-level nodes
-  void parse(const string& document) {
-    lstring text = string{document}.replace("\r", "").split("\n");
-
-    //remove empty lines and comment lines
-    for(unsigned y = 0; y < text.size();) {
-      unsigned x = 0;
+  auto parse(string document) -> void {
+    //in order to simplify the parsing logic; we do an initial pass to normalize the data
+    //the below code will turn '\r\n' into '\n'; skip empty lines; and skip comment lines
+    char* p = document.pointer(), *output = p;
+    while(*p) {
+      char* origin = p;
       bool empty = true;
-      while(x < text[y].size()) {
-        if(text[y][x] == ' ' || text[y][x] == '\t') { x++; continue; }
-        empty = (text[y][x + 0] == '/' && text[y][x + 1] == '/');
+      while(*p) {
+        //scan for first non-whitespace character. if it's a line feed or comment; skip the line
+        if(p[0] == ' ' || p[0] == '\t') { p++; continue; }
+        empty = p[0] == '\r' || p[0] == '\n' || (p[0] == '/' && p[1] == '/');
         break;
       }
-      if(empty) text.remove(y);
-      else y++;
-    }
+      while(*p) {
+        if(p[0] == '\r') p[0] = '\n';  //turns '\r\n' into '\n\n' (second '\n' will be skipped)
+        if(*p++ == '\n') break;        //include '\n' in the output to be copied
+      }
+      if(empty) continue;
 
+      memory::move(output, origin, p - origin);
+      output += p - origin;
+    }
+    document.resize(document.size() - (p - output)).rtrim("\n");
+    if(document.size() == 0) return;  //empty document
+
+    auto text = document.split("\n");
     unsigned y = 0;
     while(y < text.size()) {
       SharedNode node(new ManagedNode);

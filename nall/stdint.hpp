@@ -27,6 +27,11 @@
   #include <stdint.h>
 #endif
 
+#if defined(__SIZEOF_INT128__)
+  using int128_t = signed __int128;
+  using uint128_t = unsigned __int128;
+#endif
+
 namespace nall {
 
 static_assert(sizeof(int8_t)   == 1, "int8_t is not of the correct size" );
