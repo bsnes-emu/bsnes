@@ -1,3 +1,5 @@
+#if defined(Hiro_PopupMenu)
+
 auto mPopupMenu::allocate() -> pObject* {
   return new pPopupMenu(*this);
 }
@@ -45,3 +47,5 @@ auto mPopupMenu::setVisible(bool visible) -> type& {
   signal(setVisible, visible);
   return *this;
 }
+
+#endif

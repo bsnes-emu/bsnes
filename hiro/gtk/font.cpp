@@ -1,3 +1,5 @@
+#if defined(Hiro_Font)
+
 namespace hiro {
 
 string pFont::serif(unsigned size, string style) {
@@ -75,3 +77,5 @@ void pFont::setFont(GtkWidget* widget, gpointer font) {
 }
 
 }
+
+#endif

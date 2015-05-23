@@ -1,3 +1,5 @@
+#if defined(Hiro_Timer)
+
 auto mTimer::allocate() -> pObject* {
   return new pTimer(*this);
 }
@@ -22,3 +24,5 @@ auto mTimer::setInterval(unsigned interval) -> type& {
   signal(setInterval, interval);
   return *this;
 }
+
+#endif

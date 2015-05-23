@@ -1,3 +1,5 @@
+#if defined(Hiro_Canvas)
+
 namespace hiro {
 
 struct pCanvas : pWidget {
@@ -26,3 +28,5 @@ struct pCanvas : pWidget {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Font)
+
 namespace hiro {
 
 struct pFont {
@@ -14,3 +16,5 @@ struct pFont {
 };
 
 }
+
+#endif

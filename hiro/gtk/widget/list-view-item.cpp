@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 namespace hiro {
 
 auto pListViewItem::construct() -> void {
@@ -57,3 +59,5 @@ auto pListViewItem::_parent() -> pListView* {
 }
 
 }
+
+#endif

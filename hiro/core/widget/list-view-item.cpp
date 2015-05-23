@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 auto mListViewItem::allocate() -> pObject* {
   return new pListViewItem(*this);
 }
@@ -63,3 +65,5 @@ auto mListViewItem::setText(unsigned column, const string& text) -> type& {
 auto mListViewItem::text(unsigned column) const -> string {
   return state.text(column, "");
 }
+
+#endif

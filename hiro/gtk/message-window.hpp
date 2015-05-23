@@ -1,3 +1,5 @@
+#if defined(Hiro_MessageWindow)
+
 namespace hiro {
 
 struct pMessageWindow {
@@ -8,3 +10,5 @@ struct pMessageWindow {
 };
 
 }
+
+#endif

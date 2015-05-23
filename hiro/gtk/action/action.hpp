@@ -1,3 +1,5 @@
+#if defined(Hiro_Action)
+
 namespace hiro {
 
 struct pAction : pObject {
@@ -13,3 +15,5 @@ struct pAction : pObject {
 };
 
 }
+
+#endif

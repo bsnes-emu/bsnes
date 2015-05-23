@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 namespace hiro {
 
 struct pTabFrame : pWidget {
@@ -37,3 +39,5 @@ struct pTabFrame : pWidget {
 };
 
 }
+
+#endif

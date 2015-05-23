@@ -1,3 +1,5 @@
+#if defined(Hiro_Mouse)
+
 namespace hiro {
 
 struct pMouse {
@@ -6,3 +8,5 @@ struct pMouse {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_BrowserDialog)
+
 struct BrowserDialogWindow;
 
 struct BrowserDialog {
@@ -27,3 +29,5 @@ private:
 
   friend class BrowserDialogWindow;
 };
+
+#endif

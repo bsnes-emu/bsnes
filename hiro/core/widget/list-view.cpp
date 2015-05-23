@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 auto mListView::allocate() -> pObject* {
   return new pListView(*this);
 }
@@ -226,3 +228,5 @@ auto mListView::setSelected(bool selected) -> type& {
   signal(setSelected, selected);
   return *this;
 }
+
+#endif

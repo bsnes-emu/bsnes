@@ -1,3 +1,5 @@
+#if defined(Hiro_ComboButton)
+
 namespace hiro {
 
 auto pComboButtonItem::construct() -> void {
@@ -40,3 +42,5 @@ auto pComboButtonItem::_parent() -> pComboButton* {
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuRadioItem)
+
 namespace hiro {
 
 struct pMenuRadioItem : pAction {
@@ -12,3 +14,5 @@ struct pMenuRadioItem : pAction {
 };
 
 }
+
+#endif

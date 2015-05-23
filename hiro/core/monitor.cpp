@@ -1,3 +1,5 @@
+#if defined(Hiro_Monitor)
+
 auto Monitor::count() -> unsigned {
   return pMonitor::count();
 }
@@ -9,3 +11,5 @@ auto Monitor::geometry(unsigned monitor) -> Geometry {
 auto Monitor::primary() -> unsigned {
   return pMonitor::primary();
 }
+
+#endif

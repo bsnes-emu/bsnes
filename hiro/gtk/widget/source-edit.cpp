@@ -1,3 +1,5 @@
+#if defined(Hiro_SourceEdit)
+
 namespace hiro {
 
 static auto SourceEdit_change(GtkTextBuffer*, pSourceEdit* p) -> void {
@@ -124,3 +126,5 @@ auto pSourceEdit::text() const -> string {
 }
 
 }
+
+#endif

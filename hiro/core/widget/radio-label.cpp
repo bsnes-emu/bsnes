@@ -1,3 +1,5 @@
+#if defined(Hiro_RadioLabel)
+
 auto mRadioLabel::allocate() -> pObject* {
   return new pRadioLabel(*this);
 }
@@ -49,3 +51,5 @@ auto mRadioLabel::setText(const string& text) -> type& {
 auto mRadioLabel::text() const -> string {
   return state.text;
 }
+
+#endif

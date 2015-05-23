@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 namespace hiro {
 
 struct pListViewColumn : pObject {
@@ -30,3 +32,5 @@ struct pListViewColumn : pObject {
 };
 
 }
+
+#endif

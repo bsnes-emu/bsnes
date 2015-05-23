@@ -1,3 +1,5 @@
+#if defined(Hiro_Widget)
+
 auto mWidget::allocate() -> pObject* {
   return new pWidget(*this);
 }
@@ -18,3 +20,5 @@ auto mWidget::remove() -> type& {
   setParent();
   return *this;
 }
+
+#endif

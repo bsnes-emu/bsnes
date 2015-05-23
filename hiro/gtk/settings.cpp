@@ -1,12 +1,12 @@
 namespace hiro {
 
 void Settings::load() {
-  string path = {userpath(), ".config/phoenix/"};
+  string path = {configpath(), "hiro/"};
   Configuration::Document::load({path, "gtk.bml"});
 }
 
 void Settings::save() {
-  string path = {userpath(), ".config/phoenix/"};
+  string path = {configpath(), "hiro/"};
   directory::create(path, 0755);
   Configuration::Document::save({path, "gtk.bml"});
 }

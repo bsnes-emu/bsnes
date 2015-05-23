@@ -1,3 +1,5 @@
+#if defined(Hiro_VerticalScroller)
+
 namespace hiro {
 
 struct pVerticalScroller : pWidget {
@@ -9,3 +11,5 @@ struct pVerticalScroller : pWidget {
 };
 
 }
+
+#endif

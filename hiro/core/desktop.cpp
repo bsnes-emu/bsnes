@@ -1,3 +1,5 @@
+#if defined(Hiro_Desktop)
+
 auto Desktop::size() -> Size {
   return pDesktop::size();
 }
@@ -5,3 +7,5 @@ auto Desktop::size() -> Size {
 auto Desktop::workspace() -> Geometry {
   return pDesktop::workspace();
 }
+
+#endif

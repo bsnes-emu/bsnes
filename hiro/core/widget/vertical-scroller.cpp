@@ -1,3 +1,5 @@
+#if defined(Hiro_VerticalScroller)
+
 auto mVerticalScroller::allocate() -> pObject* {
   return new pVerticalScroller(*this);
 }
@@ -32,3 +34,5 @@ auto mVerticalScroller::setPosition(unsigned position) -> type& {
   signal(setPosition, position);
   return *this;
 }
+
+#endif

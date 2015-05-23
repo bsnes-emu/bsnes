@@ -1,3 +1,5 @@
+#if defined(Hiro_Mouse)
+
 auto Mouse::position() -> Position {
   return pMouse::position();
 }
@@ -9,3 +11,5 @@ auto Mouse::pressed(Mouse::Button button) -> bool {
 auto Mouse::released(Mouse::Button button) -> bool {
   return !pressed(button);
 }
+
+#endif

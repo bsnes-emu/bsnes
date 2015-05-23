@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuItem)
+
 namespace hiro {
 
 static auto MenuItem_activate(GtkMenuItem*, pMenuItem* p) -> void {
@@ -28,3 +30,5 @@ auto pMenuItem::setText(const string& text) -> void {
 }
 
 }
+
+#endif

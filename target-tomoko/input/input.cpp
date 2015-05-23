@@ -5,7 +5,7 @@ InputManager* inputManager = nullptr;
 auto InputMapping::bind() -> void {
   auto token = assignment.split("/");
   if(token.size() < 3) return unbind();
-  uint64_t id = token[0].hex();
+  uint64_t id = hex(token[0]);
   unsigned group = token[1].decimal();
   unsigned input = token[2].decimal();
   string qualifier = token(3, "None");

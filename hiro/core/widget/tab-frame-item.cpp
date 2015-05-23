@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 auto mTabFrameItem::allocate() -> pObject* {
   return new pTabFrameItem(*this);
 }
@@ -93,3 +95,5 @@ auto mTabFrameItem::setText(const string& text) -> type& {
 auto mTabFrameItem::text() const -> string {
   return state.text;
 }
+
+#endif

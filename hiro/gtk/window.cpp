@@ -1,3 +1,5 @@
+#if defined(Hiro_Window)
+
 namespace hiro {
 
 static auto Window_close(GtkWidget* widget, GdkEvent* event, pWindow* p) -> signed {
@@ -406,3 +408,5 @@ auto pWindow::_statusHeight() const -> signed {
 }
 
 }
+
+#endif

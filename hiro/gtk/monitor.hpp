@@ -1,3 +1,5 @@
+#if defined(Hiro_Monitor)
+
 namespace hiro {
 
 struct pMonitor {
@@ -7,3 +9,5 @@ struct pMonitor {
 };
 
 }
+
+#endif

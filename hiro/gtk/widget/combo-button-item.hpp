@@ -1,3 +1,5 @@
+#if defined(Hiro_ComboButton)
+
 namespace hiro {
 
 struct pComboButtonItem : pObject {
@@ -13,3 +15,5 @@ struct pComboButtonItem : pObject {
 };
 
 }
+
+#endif

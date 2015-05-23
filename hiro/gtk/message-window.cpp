@@ -1,3 +1,5 @@
+#if defined(Hiro_MessageWindow)
+
 namespace hiro {
 
 static auto Message(MessageWindow::State& state, GtkMessageType messageStyle) -> MessageWindow::Response {
@@ -58,3 +60,5 @@ auto pMessageWindow::warning(MessageWindow::State& state) -> MessageWindow::Resp
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Hotkey)
+
 auto mHotkey::allocate() -> pObject* {
   return new pHotkey(*this);
 }
@@ -51,3 +53,5 @@ auto mHotkey::setSequence(const string& sequence) -> type& {
   }
   return *this;
 }
+
+#endif

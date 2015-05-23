@@ -1,3 +1,5 @@
+#if defined(Hiro_Color)
+
 Color::Color() {
   setColor(0, 0, 0, 0);
 }
@@ -81,3 +83,5 @@ auto Color::setRed(signed red) -> type& {
 auto Color::value() const -> uint32_t {
   return (state.alpha << 24) + (state.red << 16) + (state.green << 8) + (state.blue << 0);
 }
+
+#endif

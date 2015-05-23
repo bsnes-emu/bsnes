@@ -1,3 +1,5 @@
+#if defined(Hiro_Viewport)
+
 namespace hiro {
 
 static auto Viewport_dropEvent(GtkWidget* widget, GdkDragContext* context, signed x, signed y,
@@ -82,3 +84,5 @@ auto pViewport::setDroppable(bool droppable) -> void {
 }
 
 }
+
+#endif

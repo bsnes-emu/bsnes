@@ -1,3 +1,5 @@
+#if defined(Hiro_Sizable)
+
 auto mSizable::allocate() -> pObject* {
   return new pSizable(*this);
 }
@@ -15,3 +17,5 @@ auto mSizable::setGeometry(Geometry geometry) -> type& {
   signal(setGeometry, geometry);
   return *this;
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuBar)
+
 namespace hiro {
 
 auto pMenuBar::construct() -> void {
@@ -43,3 +45,5 @@ auto pMenuBar::_parent() -> pWindow* {
 }
 
 }
+
+#endif

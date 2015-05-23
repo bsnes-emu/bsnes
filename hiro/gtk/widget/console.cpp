@@ -1,3 +1,5 @@
+#if defined(Hiro_Console)
+
 namespace hiro {
 
 static auto Console_keyPress(GtkWidget*, GdkEventKey* event, pConsole* p) -> signed {
@@ -183,3 +185,5 @@ auto pConsole::_seekToMark() -> void {
 }
 
 }
+
+#endif

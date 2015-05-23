@@ -1,3 +1,5 @@
+#if defined(Hiro_BrowserWindow)
+
 auto BrowserWindow::directory() -> string {
   return pBrowserWindow::directory(state);
 }
@@ -29,3 +31,5 @@ auto BrowserWindow::setTitle(const string& title) -> type& {
   state.title = title;
   return *this;
 }
+
+#endif

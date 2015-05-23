@@ -1,3 +1,5 @@
+#if defined(Hiro_CheckButton)
+
 auto mCheckButton::allocate() -> pObject* {
   return new pCheckButton(*this);
 }
@@ -62,3 +64,5 @@ auto mCheckButton::setText(const string& text) -> type& {
 auto mCheckButton::text() const -> string {
   return state.text;
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuBar)
+
 auto mMenuBar::allocate() -> pObject* {
   return new pMenuBar(*this);
 }
@@ -45,3 +47,5 @@ auto mMenuBar::reset() -> type& {
   while(state.menus) remove(state.menus.last());
   return *this;
 }
+
+#endif

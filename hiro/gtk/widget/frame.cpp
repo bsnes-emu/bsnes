@@ -1,3 +1,5 @@
+#if defined(Hiro_Frame)
+
 namespace hiro {
 
 auto pFrame::construct() -> void {
@@ -64,3 +66,5 @@ auto pFrame::_layout() -> pLayout* {
 }
 
 }
+
+#endif

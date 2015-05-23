@@ -1,3 +1,5 @@
+#if defined(Hiro_Label)
+
 auto mLabel::allocate() -> pObject* {
   return new pLabel(*this);
 }
@@ -35,3 +37,5 @@ auto mLabel::text() const -> string {
 auto mLabel::verticalAlignment() const -> double {
   return state.verticalAlignment;
 }
+
+#endif

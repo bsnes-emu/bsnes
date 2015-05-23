@@ -1,3 +1,5 @@
+#if defined(Hiro_BrowserDialog)
+
 struct BrowserDialogWindow {
   BrowserDialogWindow(BrowserDialog::State& state) : state(state) {}
   auto accept() -> void;
@@ -229,3 +231,5 @@ auto BrowserDialog::_run() -> lstring {
   if(!state.path) state.path = userpath();
   return BrowserDialogWindow(state).run();
 }
+
+#endif

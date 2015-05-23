@@ -1,3 +1,5 @@
+#if defined(Hiro_RadioButton)
+
 namespace hiro {
 
 struct pRadioButton : pWidget {
@@ -15,3 +17,5 @@ struct pRadioButton : pWidget {
 };
 
 }
+
+#endif

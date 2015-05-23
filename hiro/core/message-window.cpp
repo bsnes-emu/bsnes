@@ -1,3 +1,5 @@
+#if defined(Hiro_MessageWindow)
+
 MessageWindow::MessageWindow(const string& text) {
   state.text = text;
 }
@@ -36,3 +38,5 @@ auto MessageWindow::warning(MessageWindow::Buttons buttons) -> Response {
   state.buttons = buttons;
   return pMessageWindow::warning(state);
 }
+
+#endif

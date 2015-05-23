@@ -1,3 +1,5 @@
+#if defined(Hiro_Object)
+
 mObject::mObject() {
   Application::initialize();
 }
@@ -30,7 +32,9 @@ auto mObject::destruct() -> void {
 //otherwise, the pObject is not allocated until it is attached to a non-abstract parent
 auto mObject::abstract() const -> bool {
   if(dynamic_cast<const mWindow*>(this)) return false;
+  #if defined(Hiro_PopupMenu)
   if(dynamic_cast<const mPopupMenu*>(this)) return false;
+  #endif
   if(auto object = parent()) return object->abstract();
   return true;
 }
@@ -65,6 +69,7 @@ auto mObject::parent() const -> mObject* {
   return state.parent;
 }
 
+#if defined(Hiro_ComboButton)
 auto mObject::parentComboButton(bool recursive) const -> mComboButton* {
   if(auto comboButton = dynamic_cast<mComboButton*>(parent())) return comboButton;
   if(recursive) {
@@ -72,7 +77,9 @@ auto mObject::parentComboButton(bool recursive) const -> mComboButton* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Frame)
 auto mObject::parentFrame(bool recursive) const -> mFrame* {
   if(auto frame = dynamic_cast<mFrame*>(parent())) return frame;
   if(recursive) {
@@ -80,7 +87,9 @@ auto mObject::parentFrame(bool recursive) const -> mFrame* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_IconView)
 auto mObject::parentIconView(bool recursive) const -> mIconView* {
   if(auto iconView = dynamic_cast<mIconView*>(parent())) return iconView;
   if(recursive) {
@@ -88,7 +97,9 @@ auto mObject::parentIconView(bool recursive) const -> mIconView* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Layout)
 auto mObject::parentLayout(bool recursive) const -> mLayout* {
   if(auto layout = dynamic_cast<mLayout*>(parent())) return layout;
   if(recursive) {
@@ -96,7 +107,9 @@ auto mObject::parentLayout(bool recursive) const -> mLayout* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_ListView)
 auto mObject::parentListView(bool recursive) const -> mListView* {
   if(auto listView = dynamic_cast<mListView*>(parent())) return listView;
   if(recursive) {
@@ -104,7 +117,9 @@ auto mObject::parentListView(bool recursive) const -> mListView* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Menu)
 auto mObject::parentMenu(bool recursive) const -> mMenu* {
   if(auto menu = dynamic_cast<mMenu*>(parent())) return menu;
   if(recursive) {
@@ -112,7 +127,9 @@ auto mObject::parentMenu(bool recursive) const -> mMenu* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_MenuBar)
 auto mObject::parentMenuBar(bool recursive) const -> mMenuBar* {
   if(auto menuBar = dynamic_cast<mMenuBar*>(parent())) return menuBar;
   if(recursive) {
@@ -120,7 +137,9 @@ auto mObject::parentMenuBar(bool recursive) const -> mMenuBar* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_PopupMenu)
 auto mObject::parentPopupMenu(bool recursive) const -> mPopupMenu* {
   if(auto popupMenu = dynamic_cast<mPopupMenu*>(parent())) return popupMenu;
   if(recursive) {
@@ -128,7 +147,9 @@ auto mObject::parentPopupMenu(bool recursive) const -> mPopupMenu* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Sizable)
 auto mObject::parentSizable(bool recursive) const -> mSizable* {
   if(auto sizable = dynamic_cast<mSizable*>(parent())) return sizable;
   if(recursive) {
@@ -136,7 +157,9 @@ auto mObject::parentSizable(bool recursive) const -> mSizable* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_TabFrame)
 auto mObject::parentTabFrame(bool recursive) const -> mTabFrame* {
   if(auto tabFrame = dynamic_cast<mTabFrame*>(parent())) return tabFrame;
   if(recursive) {
@@ -144,7 +167,9 @@ auto mObject::parentTabFrame(bool recursive) const -> mTabFrame* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_TabFrame)
 auto mObject::parentTabFrameItem(bool recursive) const -> mTabFrameItem* {
   if(auto tabFrameItem = dynamic_cast<mTabFrameItem*>(parent())) return tabFrameItem;
   if(recursive) {
@@ -152,7 +177,9 @@ auto mObject::parentTabFrameItem(bool recursive) const -> mTabFrameItem* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_TreeView)
 auto mObject::parentTreeView(bool recursive) const -> mTreeView* {
   if(auto treeView = dynamic_cast<mTreeView*>(parent())) return treeView;
   if(recursive) {
@@ -160,7 +187,9 @@ auto mObject::parentTreeView(bool recursive) const -> mTreeView* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_TreeView)
 auto mObject::parentTreeViewItem(bool recursive) const -> mTreeViewItem* {
   if(auto treeViewItem = dynamic_cast<mTreeViewItem*>(parent())) return treeViewItem;
   if(recursive) {
@@ -168,7 +197,9 @@ auto mObject::parentTreeViewItem(bool recursive) const -> mTreeViewItem* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Widget)
 auto mObject::parentWidget(bool recursive) const -> mWidget* {
   if(auto widget = dynamic_cast<mWidget*>(parent())) return widget;
   if(recursive) {
@@ -176,7 +207,9 @@ auto mObject::parentWidget(bool recursive) const -> mWidget* {
   }
   return nullptr;
 }
+#endif
 
+#if defined(Hiro_Window)
 auto mObject::parentWindow(bool recursive) const -> mWindow* {
   if(auto window = dynamic_cast<mWindow*>(parent())) return window;
   if(recursive) {
@@ -184,6 +217,7 @@ auto mObject::parentWindow(bool recursive) const -> mWindow* {
   }
   return nullptr;
 }
+#endif
 
 auto mObject::remove() -> type& {
   signal(remove);
@@ -231,3 +265,5 @@ auto mObject::visible(bool recursive) const -> bool {
   if(auto object = parent()) return object->visible(true);
   return true;
 }
+
+#endif

@@ -219,11 +219,9 @@ public:
   auto begin() const -> const char* { return &data()[0]; }
   auto end() const -> const char* { return &data()[size()]; }
 
-  //nall/atoi.hpp
-  inline auto integer() const -> intmax_t { return nall::integer(*this); }
-  inline auto decimal() const -> uintmax_t { return nall::decimal(*this); }
-  inline auto hex() const -> uintmax_t { return nall::hex(*this); }
-  inline auto numeral() const -> intmax_t { return nall::numeral(*this); }
+  //atoi.hpp
+  inline auto integer() const -> intmax_t;
+  inline auto decimal() const -> uintmax_t;
 
   //core.hpp
   inline auto operator[](signed) const -> const char&;

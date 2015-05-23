@@ -1,3 +1,5 @@
+#if defined(Hiro_Window)
+
 namespace hiro {
 
 struct pWindow : pObject {
@@ -44,3 +46,5 @@ struct pWindow : pObject {
 };
 
 }
+
+#endif

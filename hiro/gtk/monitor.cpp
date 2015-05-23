@@ -1,3 +1,5 @@
+#if defined(Hiro_Monitor)
+
 namespace hiro {
 
 unsigned pMonitor::count() {
@@ -15,3 +17,5 @@ unsigned pMonitor::primary() {
 }
 
 }
+
+#endif

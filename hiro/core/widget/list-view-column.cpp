@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 auto mListViewColumn::allocate() -> pObject* {
   return new pListViewColumn(*this);
 }
@@ -133,3 +135,5 @@ auto mListViewColumn::verticalAlignment() const -> double {
 auto mListViewColumn::width() const -> signed {
   return state.width;
 }
+
+#endif

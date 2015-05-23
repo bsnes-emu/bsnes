@@ -103,9 +103,10 @@ Presentation::Presentation() {
 }
 
 auto Presentation::updateEmulator() -> void {
-  inputPort1.reset();
-  inputPort2.reset();
   if(!emulator) return;
+  resetSystem.setVisible(emulator->information.resettable);
+  inputPort1.setVisible(false).reset();
+  inputPort2.setVisible(false).reset();
 
   for(auto n : range(emulator->port)) {
     if(n >= 2) break;
@@ -113,7 +114,7 @@ auto Presentation::updateEmulator() -> void {
     auto& menu = (n == 0 ? inputPort1 : inputPort2);
     menu.setText(port.name);
 
-    vector<wMenuRadioItem> items;
+    vector<MenuRadioItem> items;
     for(auto& device : port.device) {
       MenuRadioItem item{&menu};
       item.setText(device.name).onActivate([=] {
@@ -122,7 +123,10 @@ auto Presentation::updateEmulator() -> void {
       items.append(item);
     }
     MenuRadioItem::group(items);
+    if(items.size() > 1) menu.setVisible();
   }
+
+  systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible());
 }
 
 auto Presentation::resizeViewport() -> void {
@@ -157,8 +161,8 @@ auto Presentation::resizeViewport() -> void {
     width *= 1 + multiplier;
     height *= multiplier;
 
-    signed x  = (desktop.width() - width) / 2;
-    signed y  = (desktop.height() - height) / 2;
+    signed x = (desktop.width() - width) / 2;
+    signed y = (desktop.height() - height) / 2;
 
     if(x < 0) x = 0;
     if(y < 0) y = 0;

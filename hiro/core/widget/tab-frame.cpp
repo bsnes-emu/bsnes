@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 auto mTabFrame::allocate() -> pObject* {
   return new pTabFrame(*this);
 }
@@ -88,3 +90,5 @@ auto mTabFrame::setParent(mObject* parent, signed offset) -> type& {
   for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;
 }
+
+#endif

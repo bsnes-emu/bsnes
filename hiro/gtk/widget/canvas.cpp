@@ -1,3 +1,5 @@
+#if defined(Hiro_Canvas)
+
 namespace hiro {
 
 static auto Canvas_drop(GtkWidget* widget, GdkDragContext* context, signed x, signed y,
@@ -210,3 +212,5 @@ auto pCanvas::_release() -> void {
 }
 
 }
+
+#endif

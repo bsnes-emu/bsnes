@@ -1,3 +1,5 @@
+#if defined(Hiro_Layout)
+
 auto mLayout::allocate() -> pObject* {
   return new pLayout(*this);
 }
@@ -17,7 +19,9 @@ auto mLayout::append(shared_pointer<mSizable> sizable) -> type& {
 }
 
 auto mLayout::remove() -> type& {
+  #if defined(Hiro_TabFrame)
   if(auto tabFrameItem = parentTabFrameItem()) tabFrameItem->remove(tabFrameItem->layout());
+  #endif
   if(auto layout = parentLayout()) layout->remove(layout->sizable(offset()));
   if(auto window = parentWindow()) window->remove(window->layout());
   setParent();
@@ -56,3 +60,5 @@ auto mLayout::sizable(unsigned position) const -> shared_pointer<mSizable> {
 auto mLayout::sizables() const -> unsigned {
   return state.sizables.size();
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_CheckLabel)
+
 auto mCheckLabel::allocate() -> pObject* {
   return new pCheckLabel(*this);
 }
@@ -32,3 +34,5 @@ auto mCheckLabel::setText(const string& text) -> type& {
 auto mCheckLabel::text() const -> string {
   return state.text;
 }
+
+#endif

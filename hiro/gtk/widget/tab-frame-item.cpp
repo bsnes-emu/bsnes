@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 namespace hiro {
 
 auto pTabFrameItem::construct() -> void {
@@ -44,3 +46,5 @@ auto pTabFrameItem::_parent() -> pTabFrame* {
 }
 
 }
+
+#endif

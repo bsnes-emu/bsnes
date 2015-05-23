@@ -1,3 +1,5 @@
+#if defined(Hiro_Frame)
+
 namespace hiro {
 
 struct pFrame : pWidget {
@@ -18,3 +20,5 @@ struct pFrame : pWidget {
 };
 
 }
+
+#endif

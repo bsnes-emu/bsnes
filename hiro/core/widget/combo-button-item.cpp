@@ -1,3 +1,5 @@
+#if defined(Hiro_ComboButton)
+
 auto mComboButtonItem::allocate() -> pObject* {
   return new pComboButtonItem(*this);
 }
@@ -41,3 +43,5 @@ auto mComboButtonItem::setText(const string& text) -> type& {
 auto mComboButtonItem::text() const -> string {
   return state.text;
 }
+
+#endif

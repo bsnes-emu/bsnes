@@ -1,3 +1,5 @@
+#if defined(Hiro_Canvas)
+
 auto mCanvas::allocate() -> pObject* {
   return new pCanvas(*this);
 }
@@ -123,3 +125,5 @@ auto mCanvas::update() -> type& {
   signal(update);
   return *this;
 }
+
+#endif

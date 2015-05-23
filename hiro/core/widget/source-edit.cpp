@@ -1,3 +1,5 @@
+#if defined(Hiro_SourceEdit)
+
 auto mSourceEdit::allocate() -> pObject* {
   return new pSourceEdit(*this);
 }
@@ -50,3 +52,5 @@ auto mSourceEdit::setText(const string& text) -> type& {
 auto mSourceEdit::text() const -> string {
   return signal(text);
 }
+
+#endif

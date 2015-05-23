@@ -1,3 +1,5 @@
+#if defined(Hiro_BrowserWindow)
+
 namespace hiro {
 
 struct pBrowserWindow {
@@ -7,3 +9,5 @@ struct pBrowserWindow {
 };
 
 }
+
+#endif

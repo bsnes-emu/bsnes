@@ -1,3 +1,5 @@
+#if defined(Hiro_TreeView)
+
 namespace hiro {
 
 auto pTreeViewItem::construct() -> void {
@@ -80,3 +82,5 @@ auto pTreeViewItem::_parentWidget() -> pTreeView* {
 }
 
 }
+
+#endif

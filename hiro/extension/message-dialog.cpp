@@ -1,3 +1,5 @@
+#if defined(Hiro_MessageDialog)
+
 MessageDialog::MessageDialog(const string& text) {
   state.text = text;
 }
@@ -75,3 +77,5 @@ auto MessageDialog::_run() -> signed {
 
   return state.response;
 }
+
+#endif

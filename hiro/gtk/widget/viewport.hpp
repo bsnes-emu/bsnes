@@ -1,3 +1,5 @@
+#if defined(Hiro_Viewport)
+
 namespace hiro {
 
 struct pViewport : pWidget {
@@ -8,3 +10,5 @@ struct pViewport : pWidget {
 };
 
 }
+
+#endif

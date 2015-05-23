@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 namespace hiro {
 
 struct pTabFrameItem : pObject {
@@ -13,3 +15,5 @@ struct pTabFrameItem : pObject {
 };
 
 }
+
+#endif

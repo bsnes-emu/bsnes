@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuItem)
+
 auto mMenuItem::allocate() -> pObject* {
   return new pMenuItem(*this);
 }
@@ -32,3 +34,5 @@ auto mMenuItem::setText(const string& text) -> type& {
 auto mMenuItem::text() const -> string {
   return state.text;
 }
+
+#endif

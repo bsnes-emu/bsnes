@@ -1,3 +1,5 @@
+#if defined(Hiro_Menu)
+
 namespace hiro {
 
 struct pMenu : pAction {
@@ -13,3 +15,5 @@ struct pMenu : pAction {
 };
 
 }
+
+#endif

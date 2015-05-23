@@ -1,3 +1,5 @@
+#if defined(Hiro_Timer)
+
 namespace hiro {
 
 static auto Timer_trigger(pTimer* p) -> signed {
@@ -29,3 +31,5 @@ auto pTimer::setInterval(unsigned interval) -> void {
 }
 
 }
+
+#endif

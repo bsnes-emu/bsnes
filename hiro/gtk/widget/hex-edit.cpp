@@ -1,3 +1,5 @@
+#if defined(Hiro_HexEdit)
+
 namespace hiro {
 
 static auto HexEdit_keyPress(GtkWidget* widget, GdkEventKey* event, pHexEdit* p) -> signed {
@@ -307,3 +309,5 @@ auto pHexEdit::updateScroll() -> void {
 }
 
 }
+
+#endif

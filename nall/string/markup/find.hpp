@@ -41,10 +41,10 @@ auto ManagedNode::_evaluate(string query) const -> bool {
     switch(comparator) {
     case Comparator::EQ: if(data.match(side(1)) ==  true)      continue; break;
     case Comparator::NE: if(data.match(side(1)) == false)      continue; break;
-    case Comparator::LT: if(numeral(data)  < numeral(side(1))) continue; break;
-    case Comparator::LE: if(numeral(data) <= numeral(side(1))) continue; break;
-    case Comparator::GT: if(numeral(data)  > numeral(side(1))) continue; break;
-    case Comparator::GE: if(numeral(data) >= numeral(side(1))) continue; break;
+    case Comparator::LT: if(data.decimal()  < side(1).decimal()) continue; break;
+    case Comparator::LE: if(data.decimal() <= side(1).decimal()) continue; break;
+    case Comparator::GT: if(data.decimal()  > side(1).decimal()) continue; break;
+    case Comparator::GE: if(data.decimal() >= side(1).decimal()) continue; break;
     }
 
     return false;
@@ -65,10 +65,10 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
     name = p(0);
     if(p(1).find("-")) {
       p = p(1).split<1>("-");
-      lo = p(0).empty() ?  0u : numeral(p(0));
-      hi = p(1).empty() ? ~0u : numeral(p(1));
+      lo = p(0).empty() ?  0u : p(0).decimal();
+      hi = p(1).empty() ? ~0u : p(1).decimal();
     } else {
-      lo = hi = numeral(p(1));
+      lo = hi = p(1).decimal();
     }
   }
 

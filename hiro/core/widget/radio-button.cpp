@@ -1,3 +1,5 @@
+#if defined(Hiro_RadioButton)
+
 auto mRadioButton::allocate() -> pObject* {
   return new pRadioButton(*this);
 }
@@ -79,3 +81,5 @@ auto mRadioButton::setText(const string& text) -> type& {
 auto mRadioButton::text() const -> string {
   return state.text;
 }
+
+#endif

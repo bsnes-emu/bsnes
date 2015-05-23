@@ -1,3 +1,5 @@
+#if defined(Hiro_VerticalSlider)
+
 namespace hiro {
 
 static auto VerticalSlider_change(GtkRange* gtkRange, pVerticalSlider* p) -> void {
@@ -38,3 +40,5 @@ auto pVerticalSlider::setPosition(unsigned position) -> void {
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 namespace hiro {
 
 struct pListView : pWidget {
@@ -43,3 +45,5 @@ struct pListView : pWidget {
 };
 
 }
+
+#endif

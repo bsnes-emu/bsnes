@@ -1,3 +1,5 @@
+#if defined(Hiro_Layout)
+
 namespace hiro {
 
 struct pLayout : pSizable {
@@ -9,3 +11,5 @@ struct pLayout : pSizable {
 };
 
 }
+
+#endif

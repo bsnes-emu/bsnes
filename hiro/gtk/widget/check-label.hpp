@@ -1,3 +1,5 @@
+#if defined(Hiro_CheckLabel)
+
 namespace hiro {
 
 struct pCheckLabel : pWidget {
@@ -9,3 +11,5 @@ struct pCheckLabel : pWidget {
 };
 
 }
+
+#endif

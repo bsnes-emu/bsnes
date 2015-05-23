@@ -15,11 +15,6 @@
 #include "core.hpp"
 using namespace nall;
 
-namespace hiro {
-  Application::State Application::state;
-  Keyboard::State Keyboard::state;
-}
-
 #if defined(HIRO_WINDOWS)
   #include "../windows/platform.cpp"
 #elif defined(HIRO_QT)

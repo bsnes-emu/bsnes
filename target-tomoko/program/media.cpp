@@ -21,8 +21,9 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   folderPaths.append(location);
 
   emulator = &_emulator;
-  updateVideoPalette();
   emulator->load(media.id);
+  updateVideoPalette();
+  dsp.setFrequency(emulator->audioFrequency());
   emulator->power();
 
   presentation->resizeViewport();

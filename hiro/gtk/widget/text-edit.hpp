@@ -1,3 +1,5 @@
+#if defined(Hiro_TextEdit)
+
 namespace hiro {
 
 struct pTextEdit : pWidget {
@@ -17,3 +19,5 @@ struct pTextEdit : pWidget {
 };
 
 }
+
+#endif

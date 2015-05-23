@@ -1,3 +1,5 @@
+#if defined(Hiro_Font)
+
 auto Font::serif(unsigned size, const string& style) -> string {
   return pFont::serif(size, style);
 }
@@ -13,3 +15,5 @@ auto Font::monospace(unsigned size, const string& style) -> string {
 auto Font::size(const string& font, const string& text) -> Size {
   return pFont::size(font, text);
 }
+
+#endif

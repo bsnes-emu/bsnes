@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 namespace hiro {
 
 static auto ListView_activate(GtkTreeView*, GtkTreePath*, GtkTreeViewColumn*, pListView* p) -> void { return p->_doActivate(); }
@@ -372,3 +374,5 @@ auto pListView::_updateSelected() -> void {
 }
 
 }
+
+#endif

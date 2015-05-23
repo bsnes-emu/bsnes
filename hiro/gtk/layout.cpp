@@ -1,3 +1,5 @@
+#if defined(Hiro_Layout)
+
 namespace hiro {
 
 auto pLayout::construct() -> void {
@@ -27,3 +29,5 @@ auto pLayout::setVisible(bool visible) -> void {
 }
 
 }
+
+#endif

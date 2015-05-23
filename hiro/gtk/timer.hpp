@@ -1,3 +1,5 @@
+#if defined(Hiro_Timer)
+
 namespace hiro {
 
 struct pTimer : pObject {
@@ -8,3 +10,5 @@ struct pTimer : pObject {
 };
 
 }
+
+#endif

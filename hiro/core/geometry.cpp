@@ -1,3 +1,5 @@
+#if defined(Hiro_Geometry)
+
 Geometry::Geometry() {
   setGeometry(0, 0, 0, 0);
 }
@@ -110,3 +112,5 @@ auto Geometry::x() const -> signed {
 auto Geometry::y() const -> signed {
   return state.y;
 }
+
+#endif

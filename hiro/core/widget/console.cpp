@@ -1,3 +1,5 @@
+#if defined(Hiro_Console)
+
 auto mConsole::allocate() -> pObject* {
   return new pConsole(*this);
 }
@@ -52,3 +54,5 @@ auto mConsole::setPrompt(const string& prompt) -> type& {
   signal(setPrompt, prompt);
   return *this;
 }
+
+#endif

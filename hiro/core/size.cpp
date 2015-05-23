@@ -1,3 +1,5 @@
+#if defined(Hiro_Size)
+
 Size::Size() {
   setSize(0, 0);
 }
@@ -41,3 +43,5 @@ auto Size::setWidth(signed width) -> type& {
 auto Size::width() const -> signed {
   return state.width;
 }
+
+#endif

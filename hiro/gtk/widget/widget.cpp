@@ -1,3 +1,5 @@
+#if defined(Hiro_Widget)
+
 namespace hiro {
 
 auto pWidget::construct() -> void {
@@ -49,3 +51,5 @@ auto pWidget::setVisible(bool visible) -> void {
 }
 
 }
+
+#endif

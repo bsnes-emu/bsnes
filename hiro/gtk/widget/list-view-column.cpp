@@ -1,3 +1,5 @@
+#if defined(Hiro_ListView)
+
 namespace hiro {
 
 auto pListViewColumn::construct() -> void {
@@ -131,3 +133,5 @@ auto pListViewColumn::_setAlignment() -> void {
 }
 
 }
+
+#endif

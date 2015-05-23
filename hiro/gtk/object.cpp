@@ -1,3 +1,5 @@
+#if defined(Hiro_Object)
+
 namespace hiro {
 
 auto pObject::construct() -> void {
@@ -29,3 +31,5 @@ auto pObject::setVisible(bool visible) -> void {
 }
 
 }
+
+#endif

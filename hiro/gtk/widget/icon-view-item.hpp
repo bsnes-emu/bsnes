@@ -1,3 +1,5 @@
+#if defined(Hiro_IconView)
+
 namespace hiro {
 
 struct pIconViewItem : pObject {
@@ -11,3 +13,5 @@ struct pIconViewItem : pObject {
 };
 
 }
+
+#endif

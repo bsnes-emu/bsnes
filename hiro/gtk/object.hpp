@@ -1,3 +1,5 @@
+#if defined(Hiro_Object)
+
 namespace hiro {
 
 struct pObject {
@@ -25,3 +27,5 @@ struct pObject {
 };
 
 }
+
+#endif

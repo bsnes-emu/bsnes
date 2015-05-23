@@ -1,3 +1,5 @@
+#if defined(Hiro_Widget)
+
 namespace hiro {
 
 struct pWidget : pSizable {
@@ -16,3 +18,5 @@ struct pWidget : pSizable {
 };
 
 }
+
+#endif

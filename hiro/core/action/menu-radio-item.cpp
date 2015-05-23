@@ -1,10 +1,12 @@
+#if defined(Hiro_MenuRadioItem)
+
 auto mMenuRadioItem::allocate() -> pObject* {
   return new pMenuRadioItem(*this);
 }
 
 //
 
-auto mMenuRadioItem::group(const vector<shared_pointer_weak<mMenuRadioItem>>& group) -> void {
+auto mMenuRadioItem::group(const vector<wMenuRadioItem>& group) -> void {
   for(auto& weak : group) {
     if(auto item = weak.acquire()) item->state.group = group;
   }
@@ -49,3 +51,5 @@ auto mMenuRadioItem::setText(const string& text) -> type& {
 auto mMenuRadioItem::text() const -> string {
   return state.text;
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Action)
+
 namespace hiro {
 
 auto pAction::construct() -> void {
@@ -29,3 +31,5 @@ auto pAction::_mnemonic(string text) -> string {
 }
 
 }
+
+#endif

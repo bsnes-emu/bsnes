@@ -1,3 +1,5 @@
+#if defined(Hiro_TextEdit)
+
 namespace hiro {
 
 static auto TextEdit_change(GtkTextBuffer* textBuffer, pTextEdit* p) -> void {
@@ -98,3 +100,5 @@ auto pTextEdit::text() const -> string {
 }
 
 }
+
+#endif

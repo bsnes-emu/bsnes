@@ -1,3 +1,5 @@
+#if defined(Hiro_BrowserWindow)
+
 namespace hiro {
 
 static void BrowserWindow_addFilters(GtkWidget* dialog, lstring filters) {
@@ -86,3 +88,5 @@ auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
 }
 
 }
+
+#endif

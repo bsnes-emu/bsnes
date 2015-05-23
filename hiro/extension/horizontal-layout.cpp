@@ -1,3 +1,5 @@
+#if defined(Hiro_HorizontalLayout)
+
 auto mHorizontalLayout::append(shared_pointer<mSizable> sizable, Size size, signed spacing) -> type& {
   properties.append({size.width(), size.height(), spacing < 0 ? settings.spacing : spacing});
   mLayout::append(sizable);
@@ -123,3 +125,5 @@ auto mHorizontalLayout::setVisible(bool visible) -> type& {
   }
   return *this;
 }
+
+#endif

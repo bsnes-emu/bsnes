@@ -1,3 +1,5 @@
+#if defined(Hiro_Sizable)
+
 namespace hiro {
 
 struct pSizable : pObject {
@@ -8,3 +10,5 @@ struct pSizable : pObject {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Console)
+
 namespace hiro {
 
 struct pConsole : pWidget {
@@ -21,3 +23,5 @@ struct pConsole : pWidget {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_VerticalLayout)
+
 auto mVerticalLayout::append(shared_pointer<mSizable> sizable, Size size, signed spacing) -> type& {
   properties.append({size.width(), size.height(), spacing < 0 ? settings.spacing : spacing});
   mLayout::append(sizable);
@@ -125,3 +127,5 @@ auto mVerticalLayout::setVisible(bool visible) -> type& {
   }
   return *this;
 }
+
+#endif

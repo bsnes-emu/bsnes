@@ -1,3 +1,5 @@
+#if defined(Hiro_TreeView)
+
 auto mTreeView::allocate() -> pObject* {
   return new pTreeView(*this);
 }
@@ -126,3 +128,5 @@ auto mTreeView::setForegroundColor(Color color) -> type& {
   signal(setForegroundColor, color);
   return *this;
 }
+
+#endif

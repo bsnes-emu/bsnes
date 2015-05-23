@@ -1,3 +1,5 @@
+#if defined(Hiro_Application)
+
 namespace hiro {
 
 struct pApplication {
@@ -14,3 +16,5 @@ struct pApplication {
 };
 
 }
+
+#endif

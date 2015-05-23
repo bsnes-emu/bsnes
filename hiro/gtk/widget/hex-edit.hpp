@@ -1,3 +1,5 @@
+#if defined(Hiro_HexEdit)
+
 namespace hiro {
 
 struct pHexEdit : pWidget {
@@ -29,3 +31,5 @@ struct pHexEdit : pWidget {
 };
 
 }
+
+#endif

@@ -28,6 +28,7 @@
 #define NALL_STRING_INTERNAL_HPP
 #include <nall/string/base.hpp>
 #include <nall/string/ref.hpp>
+#include <nall/string/atoi.hpp>
 #include <nall/string/cast.hpp>
 #include <nall/string/compare.hpp>
 #include <nall/string/convert.hpp>

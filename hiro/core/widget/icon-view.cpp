@@ -1,3 +1,5 @@
+#if defined(Hiro_IconView)
+
 auto mIconView::allocate() -> pObject* {
   return new pIconView(*this);
 }
@@ -146,3 +148,5 @@ auto mIconView::setSelected(const vector<signed>& selections) -> type& {
   signal(setItemSelected, selections);
   return *this;
 }
+
+#endif

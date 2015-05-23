@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuRadioItem)
+
 namespace hiro {
 
 static auto MenuRadioItem_activate(GtkCheckMenuItem* gtkCheckMenuItem, pMenuRadioItem* p) -> void {
@@ -73,3 +75,5 @@ auto pMenuRadioItem::_parent() -> pMenuRadioItem& {
 }
 
 }
+
+#endif

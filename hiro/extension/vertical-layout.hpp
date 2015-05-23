@@ -1,3 +1,5 @@
+#if defined(Hiro_VerticalLayout)
+
 struct mVerticalLayout : mLayout {
   using type = mVerticalLayout;
   using mLayout::append;
@@ -28,3 +30,5 @@ struct mVerticalLayout : mLayout {
   };
   nall::vector<Properties> properties;
 };
+
+#endif

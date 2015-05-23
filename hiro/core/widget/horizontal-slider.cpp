@@ -1,3 +1,5 @@
+#if defined(Hiro_HorizontalSlider)
+
 auto mHorizontalSlider::allocate() -> pObject* {
   return new pHorizontalSlider(*this);
 }
@@ -32,3 +34,5 @@ auto mHorizontalSlider::setPosition(unsigned position) -> type& {
   signal(setPosition, position);
   return *this;
 }
+
+#endif

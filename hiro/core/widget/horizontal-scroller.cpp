@@ -1,3 +1,5 @@
+#if defined(Hiro_HorizontalScroller)
+
 auto mHorizontalScroller::allocate() -> pObject* {
   return new pHorizontalScroller(*this);
 }
@@ -32,3 +34,5 @@ auto mHorizontalScroller::setPosition(unsigned position) -> type& {
   signal(setPosition, position);
   return *this;
 }
+
+#endif

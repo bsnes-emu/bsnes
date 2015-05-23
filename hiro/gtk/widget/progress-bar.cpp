@@ -1,3 +1,5 @@
+#if defined(Hiro_ProgressBar)
+
 namespace hiro {
 
 auto pProgressBar::construct() -> void {
@@ -22,3 +24,5 @@ auto pProgressBar::setPosition(unsigned position) -> void {
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_IconView)
+
 namespace hiro {
 
 static auto IconView_activate(GtkIconView* iconView, GtkTreePath* path, pIconView* p) -> void {
@@ -222,3 +224,5 @@ auto pIconView::_updateSelected() -> void {
 }
 
 }
+
+#endif

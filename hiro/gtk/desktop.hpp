@@ -1,3 +1,5 @@
+#if defined(Hiro_Desktop)
+
 namespace hiro {
 
 struct pDesktop {
@@ -6,3 +8,5 @@ struct pDesktop {
 };
 
 }
+
+#endif

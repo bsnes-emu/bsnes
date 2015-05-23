@@ -1,3 +1,5 @@
+#if defined(Hiro_Keyboard)
+
 namespace hiro {
 
 auto pKeyboard::poll() -> vector<bool> {
@@ -245,3 +247,5 @@ auto pKeyboard::initialize() -> void {
 }
 
 }
+
+#endif

@@ -47,8 +47,8 @@ struct Node {
 
   auto text() const -> string { return value().strip(); }
   auto boolean() const -> bool { return text() == "true"; }
-  auto integer() const -> intmax_t { return text().numeral(); }
-  auto decimal() const -> uintmax_t { return text().numeral(); }
+  auto integer() const -> intmax_t { return text().integer(); }
+  auto decimal() const -> uintmax_t { return text().decimal(); }
 
   auto setName(const string& name = "") -> void { shared->_name = name; }
   auto setValue(const string& value = "") -> void { shared->_value = value; }

@@ -1,3 +1,5 @@
+#if defined(Hiro_RadioLabel)
+
 namespace hiro {
 
 struct pRadioLabel : pWidget {
@@ -12,3 +14,5 @@ struct pRadioLabel : pWidget {
 };
 
 }
+
+#endif

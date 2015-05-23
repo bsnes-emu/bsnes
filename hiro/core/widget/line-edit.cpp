@@ -1,3 +1,5 @@
+#if defined(Hiro_LineEdit)
+
 auto mLineEdit::allocate() -> pObject* {
   return new pLineEdit(*this);
 }
@@ -61,3 +63,5 @@ auto mLineEdit::setText(const string& text) -> type& {
 auto mLineEdit::text() const -> string {
   return state.text;
 }
+
+#endif

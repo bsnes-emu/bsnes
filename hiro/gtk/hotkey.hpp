@@ -1,3 +1,5 @@
+#if defined(Hiro_Hotkey)
+
 namespace hiro {
 
 struct pHotkey : pObject {
@@ -5,3 +7,5 @@ struct pHotkey : pObject {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Label)
+
 namespace hiro {
 
 auto pLabel::construct() -> void {
@@ -39,3 +41,5 @@ auto pLabel::_setAlignment() -> void {
 }
 
 }
+
+#endif

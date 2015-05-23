@@ -1,3 +1,5 @@
+#if defined(Hiro_TabFrame)
+
 namespace hiro {
 
 static auto TabFrame_change(GtkNotebook* notebook, GtkWidget* page, unsigned position, pTabFrame* p) -> void {
@@ -274,3 +276,5 @@ auto pTabFrame::_tabWidth() -> unsigned {
 }
 
 }
+
+#endif

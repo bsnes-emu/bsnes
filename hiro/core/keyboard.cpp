@@ -1,3 +1,7 @@
+#if defined(Hiro_Keyboard)
+
+Keyboard::State Keyboard::state;
+
 const vector<string> Keyboard::keys = {
   //physical keyboard buttons
   "Escape", "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
@@ -72,3 +76,5 @@ auto Keyboard::remove(sHotkey hotkey) -> void {
     state.hotkeys.remove(*offset);
   }
 }
+
+#endif

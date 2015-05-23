@@ -1,3 +1,5 @@
+#if defined(Hiro_TreeView)
+
 namespace hiro {
 
 struct pTreeView : pWidget {
@@ -30,3 +32,5 @@ struct pTreeView : pWidget {
 };
 
 }
+
+#endif

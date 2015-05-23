@@ -1,3 +1,5 @@
+#if defined(Hiro_Application)
+
 namespace hiro {
 
 #if defined(PLATFORM_XORG)
@@ -106,3 +108,5 @@ void pApplication::initialize() {
 }
 
 }
+
+#endif

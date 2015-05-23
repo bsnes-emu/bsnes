@@ -1,3 +1,5 @@
+#if defined(Hiro_TreeView)
+
 auto mTreeViewItem::allocate() -> pObject* {
   return new pTreeViewItem(*this);
 }
@@ -96,3 +98,5 @@ auto mTreeViewItem::setText(const string& text) -> type& {
 auto mTreeViewItem::text() const -> string {
   return state.text;
 }
+
+#endif

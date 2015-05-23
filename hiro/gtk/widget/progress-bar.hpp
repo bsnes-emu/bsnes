@@ -1,3 +1,5 @@
+#if defined(Hiro_ProgressBar)
+
 namespace hiro {
 
 struct pProgressBar : pWidget {
@@ -8,3 +10,5 @@ struct pProgressBar : pWidget {
 };
 
 }
+
+#endif

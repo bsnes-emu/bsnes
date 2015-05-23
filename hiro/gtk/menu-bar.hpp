@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuBar)
+
 namespace hiro {
 
 struct pMenuBar : pObject {
@@ -13,3 +15,5 @@ struct pMenuBar : pObject {
 };
 
 }
+
+#endif

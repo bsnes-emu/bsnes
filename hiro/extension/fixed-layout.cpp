@@ -1,3 +1,5 @@
+#if defined(Hiro_FixedLayout)
+
 auto mFixedLayout::append(shared_pointer<mSizable> sizable, Geometry geometry) -> type& {
   properties.append({geometry});
   mLayout::append(sizable);
@@ -49,3 +51,5 @@ auto mFixedLayout::setVisible(bool visible) -> type& {
   }
   return *this;
 }
+
+#endif

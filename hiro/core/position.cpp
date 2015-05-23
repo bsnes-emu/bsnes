@@ -1,3 +1,5 @@
+#if defined(Hiro_Position)
+
 Position::Position() {
   setPosition(0, 0);
 }
@@ -41,3 +43,5 @@ auto Position::x() const -> signed {
 auto Position::y() const -> signed {
   return state.y;
 }
+
+#endif

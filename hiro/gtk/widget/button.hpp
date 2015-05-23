@@ -1,3 +1,5 @@
+#if defined(Hiro_Button)
+
 namespace hiro {
 
 struct pButton : pWidget {
@@ -15,3 +17,5 @@ struct pButton : pWidget {
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_RadioButton)
+
 namespace hiro {
 
 static auto RadioButton_activate(GtkToggleButton*, pRadioButton* p) -> void {
@@ -99,3 +101,5 @@ auto pRadioButton::_parent() -> pRadioButton& {
 }
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Button)
+
 namespace hiro {
 
 static auto Button_activate(GtkButton* gtkButton, pButton* p) -> void { p->_doActivate(); }
@@ -66,3 +68,5 @@ auto pButton::_doActivate() -> void {
 }
 
 }
+
+#endif

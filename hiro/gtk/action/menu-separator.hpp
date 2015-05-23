@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuSeparator)
+
 namespace hiro {
 
 struct pMenuSeparator : pAction {
@@ -5,3 +7,5 @@ struct pMenuSeparator : pAction {
 };
 
 }
+
+#endif

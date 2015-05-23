@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuCheckItem)
+
 auto mMenuCheckItem::allocate() -> pObject* {
   return new pMenuCheckItem(*this);
 }
@@ -31,3 +33,5 @@ auto mMenuCheckItem::setText(const string& text) -> type& {
 auto mMenuCheckItem::text() const -> string {
   return state.text;
 }
+
+#endif

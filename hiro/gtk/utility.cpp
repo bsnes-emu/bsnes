@@ -1,5 +1,6 @@
 namespace hiro {
 
+#if defined(Hiro_Color)
 static auto CreateColor(const Color& color) -> GdkColor {
   GdkColor gdkColor;
   gdkColor.pixel = (color.red() << 16) | (color.green() << 8) | (color.blue() << 0);
@@ -8,6 +9,7 @@ static auto CreateColor(const Color& color) -> GdkColor {
   gdkColor.blue = (color.blue() << 8) | (color.blue() << 0);
   return gdkColor;
 }
+#endif
 
 static auto CreatePixbuf(const nall::image& image, bool scale = false) -> GdkPixbuf* {
   nall::image gdkImage = image;

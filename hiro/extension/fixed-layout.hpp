@@ -1,3 +1,5 @@
+#if defined(Hiro_FixedLayout)
+
 struct mFixedLayout : mLayout {
   using type = mFixedLayout;
   using mLayout::append;
@@ -16,3 +18,5 @@ struct mFixedLayout : mLayout {
   };
   nall::vector<Properties> properties;
 };
+
+#endif

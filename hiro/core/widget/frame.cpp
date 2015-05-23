@@ -1,3 +1,5 @@
+#if defined(Hiro_Frame)
+
 auto mFrame::allocate() -> pObject* {
   return new pFrame(*this);
 }
@@ -40,3 +42,5 @@ auto mFrame::setText(const string& text) -> type& {
 auto mFrame::text() const -> string {
   return state.text;
 }
+
+#endif

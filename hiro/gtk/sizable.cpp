@@ -1,3 +1,5 @@
+#if defined(Hiro_Sizable)
+
 namespace hiro {
 
 auto pSizable::construct() -> void {
@@ -14,3 +16,5 @@ auto pSizable::setGeometry(Geometry geometry) -> void {
 }
 
 }
+
+#endif

@@ -10,6 +10,7 @@
 #ifndef HIRO_HPP
 #define HIRO_HPP
 
+#include "components.hpp"
 #include "core/core.hpp"
 #include "extension/extension.hpp"
 

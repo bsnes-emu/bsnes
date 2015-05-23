@@ -1,3 +1,5 @@
+#if defined(Hiro_LineEdit)
+
 namespace hiro {
 
 static auto LineEdit_activate(GtkEntry*, pLineEdit* p) -> void {
@@ -53,3 +55,5 @@ auto pLineEdit::setText(const string& text) -> void {
 }
 
 }
+
+#endif

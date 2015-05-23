@@ -1,3 +1,5 @@
+#if defined(Hiro_HexEdit)
+
 auto mHexEdit::allocate() -> pObject* {
   return new pHexEdit(*this);
 }
@@ -87,3 +89,5 @@ auto mHexEdit::update() -> type& {
   signal(update);
   return *this;
 }
+
+#endif

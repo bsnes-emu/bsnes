@@ -1,3 +1,5 @@
+#if defined(Hiro_ComboButton)
+
 auto mComboButton::allocate() -> pObject* {
   return new pComboButton(*this);
 }
@@ -59,3 +61,5 @@ auto mComboButton::selected() const -> sComboButtonItem {
   if(state.selected >= 0) return state.items[state.selected];
   return {};
 }
+
+#endif

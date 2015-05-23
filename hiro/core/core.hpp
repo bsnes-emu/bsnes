@@ -83,6 +83,7 @@ enum class Edge : unsigned { Top, Bottom, Left, Right };
 
 enum class Orientation : unsigned { Horizontal, Vertical };
 
+#if defined(Hiro_Application)
 struct Application {
   Application() = delete;
 
@@ -134,7 +135,9 @@ struct Application {
   static State state;
   static auto initialize() -> void;
 };
+#endif
 
+#if defined(Hiro_Color)
 struct Color {
   using type = Color;
 
@@ -168,7 +171,9 @@ struct Color {
     signed blue;
   } state;
 };
+#endif
 
+#if defined(Hiro_Position)
 struct Position {
   using type = Position;
 
@@ -191,7 +196,9 @@ struct Position {
     signed y;
   } state;
 };
+#endif
 
+#if defined(Hiro_Size)
 struct Size {
   using type = Size;
 
@@ -217,7 +224,9 @@ struct Size {
     signed height;
   } state;
 };
+#endif
 
+#if defined(Hiro_Geometry)
 struct Geometry {
   using type = Geometry;
 
@@ -256,7 +265,9 @@ struct Geometry {
     signed height;
   } state;
 };
+#endif
 
+#if defined(Hiro_Font)
 struct Font {
   Font() = delete;
 
@@ -265,14 +276,18 @@ struct Font {
   static auto monospace(unsigned size = 0, const string& style = "") -> string;
   static auto size(const string& font, const string& text = " ") -> Size;
 };
+#endif
 
+#if defined(Hiro_Desktop)
 struct Desktop {
   Desktop() = delete;
 
   static auto size() -> Size;
   static auto workspace() -> Geometry;
 };
+#endif
 
+#if defined(Hiro_Monitor)
 struct Monitor {
   Monitor() = delete;
 
@@ -280,7 +295,9 @@ struct Monitor {
   static auto geometry(unsigned monitor) -> Geometry;
   static auto primary() -> unsigned;
 };
+#endif
 
+#if defined(Hiro_Keyboard)
 struct Keyboard {
   Keyboard() = delete;
 
@@ -300,7 +317,9 @@ struct Keyboard {
   };
   static State state;
 };
+#endif
 
+#if defined(Hiro_Mouse)
 struct Mouse {
   enum class Button : unsigned { Left, Middle, Right };
 
@@ -310,7 +329,9 @@ struct Mouse {
   static auto pressed(Button) -> bool;
   static auto released(Button) -> bool;
 };
+#endif
 
+#if defined(Hiro_BrowserWindow)
 struct BrowserWindow {
   using type = BrowserWindow;
 
@@ -330,7 +351,9 @@ struct BrowserWindow {
     string title;
   } state;
 };
+#endif
 
+#if defined(Hiro_MessageWindow)
 struct MessageWindow {
   enum class Buttons : unsigned { Ok, OkCancel, YesNo, YesNoCancel };
   enum class Response : unsigned { Ok, Cancel, Yes, No };
@@ -355,6 +378,7 @@ struct MessageWindow {
     string title;
   } state;
 };
+#endif
 
 #define Declare(Name) \
   using type = m##Name; \
@@ -372,6 +396,7 @@ struct MessageWindow {
   } \
   virtual auto allocate() -> pObject*; \
 
+#if defined(Hiro_Object)
 struct mObject {
   Declare(Object)
 
@@ -426,7 +451,9 @@ struct mObject {
   virtual auto construct() -> void;
   virtual auto destruct() -> void;
 };
+#endif
 
+#if defined(Hiro_Hotkey)
 struct mHotkey : mObject {
   Declare(Hotkey)
 
@@ -450,7 +477,9 @@ struct mHotkey : mObject {
     string sequence;
   } state;
 };
+#endif
 
+#if defined(Hiro_Timer)
 struct mTimer : mObject {
   Declare(Timer)
 
@@ -465,7 +494,9 @@ struct mTimer : mObject {
     function<void ()> onActivate;
   } state;
 };
+#endif
 
+#if defined(Hiro_Window)
 struct mWindow : mObject {
   Declare(Window)
   using mObject::remove;
@@ -538,7 +569,9 @@ struct mWindow : mObject {
 
   auto destruct() -> void;
 };
+#endif
 
+#if defined(Hiro_StatusBar)
 struct mStatusBar : mObject {
   Declare(StatusBar)
 
@@ -551,7 +584,9 @@ struct mStatusBar : mObject {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_MenuBar)
 struct mMenuBar : mObject {
   Declare(MenuBar)
 
@@ -569,7 +604,9 @@ struct mMenuBar : mObject {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_PopupMenu)
 struct mPopupMenu : mObject {
   Declare(PopupMenu)
   using mObject::remove;
@@ -588,7 +625,9 @@ struct mPopupMenu : mObject {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_Action)
 struct mAction : mObject {
   Declare(Action)
 
@@ -598,7 +637,9 @@ struct mAction : mObject {
   struct State {
   } state;
 };
+#endif
 
+#if defined(Hiro_Menu)
 struct mMenu : mAction {
   Declare(Menu)
   using mObject::remove;
@@ -622,7 +663,9 @@ struct mMenu : mAction {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_MenuSeparator)
 struct mMenuSeparator : mAction {
   Declare(MenuSeparator)
 
@@ -630,7 +673,9 @@ struct mMenuSeparator : mAction {
   struct State {
   } state;
 };
+#endif
 
+#if defined(Hiro_MenuItem)
 struct mMenuItem : mAction {
   Declare(MenuItem)
 
@@ -648,7 +693,9 @@ struct mMenuItem : mAction {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_MenuCheckItem)
 struct mMenuCheckItem : mAction {
   Declare(MenuCheckItem)
 
@@ -666,7 +713,9 @@ struct mMenuCheckItem : mAction {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_MenuRadioItem)
 struct mMenuRadioItem : mAction {
   Declare(MenuRadioItem)
 
@@ -687,7 +736,9 @@ struct mMenuRadioItem : mAction {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_Sizable)
 struct mSizable : mObject {
   Declare(Sizable)
 
@@ -700,7 +751,9 @@ struct mSizable : mObject {
     Geometry geometry;
   } state;
 };
+#endif
 
+#if defined(Hiro_Layout)
 struct mLayout : mSizable {
   Declare(Layout)
 
@@ -719,7 +772,9 @@ struct mLayout : mSizable {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_Widget)
 struct mWidget : mSizable {
   Declare(Widget)
 
@@ -732,7 +787,9 @@ struct mWidget : mSizable {
     function<void ()> onSize;
   } state;
 };
+#endif
 
+#if defined(Hiro_Button)
 struct mButton : mWidget {
   Declare(Button)
 
@@ -756,7 +813,9 @@ struct mButton : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_Canvas)
 struct mCanvas : mWidget {
   Declare(Canvas)
 
@@ -800,7 +859,9 @@ struct mCanvas : mWidget {
     Size size;
   } state;
 };
+#endif
 
+#if defined(Hiro_CheckButton)
 struct mCheckButton : mWidget {
   Declare(CheckButton)
 
@@ -827,7 +888,9 @@ struct mCheckButton : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_CheckLabel)
 struct mCheckLabel : mWidget {
   Declare(CheckLabel)
 
@@ -845,7 +908,9 @@ struct mCheckLabel : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_ComboButton)
 struct mComboButton : mWidget {
   Declare(ComboButton)
   using mObject::remove;
@@ -868,7 +933,9 @@ struct mComboButton : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_ComboButton)
 struct mComboButtonItem : mObject {
   Declare(ComboButtonItem)
 
@@ -886,7 +953,9 @@ struct mComboButtonItem : mObject {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_Console)
 struct mConsole : mWidget {
   Declare(Console)
 
@@ -909,7 +978,9 @@ struct mConsole : mWidget {
     string prompt;
   } state;
 };
+#endif
 
+#if defined(Hiro_Frame)
 struct mFrame : mWidget {
   Declare(Frame)
   using mObject::remove;
@@ -929,7 +1000,9 @@ struct mFrame : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_HexEdit)
 struct mHexEdit : mWidget {
   Declare(HexEdit)
 
@@ -963,7 +1036,9 @@ struct mHexEdit : mWidget {
     unsigned rows = 16;
   } state;
 };
+#endif
 
+#if defined(Hiro_HorizontalScroller)
 struct mHorizontalScroller : mWidget {
   Declare(HorizontalScroller)
 
@@ -981,7 +1056,9 @@ struct mHorizontalScroller : mWidget {
     unsigned position = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_HorizontalSlider)
 struct mHorizontalSlider : mWidget {
   Declare(HorizontalSlider)
 
@@ -999,7 +1076,9 @@ struct mHorizontalSlider : mWidget {
     unsigned position = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_IconView)
 struct mIconView : mWidget {
   Declare(IconView)
   using mObject::remove;
@@ -1044,7 +1123,9 @@ struct mIconView : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_IconView)
 struct mIconViewItem : mObject {
   Declare(IconViewItem)
 
@@ -1063,7 +1144,9 @@ struct mIconViewItem : mObject {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_Label)
 struct mLabel : mWidget {
   Declare(Label)
 
@@ -1081,7 +1164,9 @@ struct mLabel : mWidget {
     double verticalAlignment = 0.5;
   } state;
 };
+#endif
 
+#if defined(Hiro_LineEdit)
 struct mLineEdit : mWidget {
   Declare(LineEdit)
 
@@ -1108,7 +1193,9 @@ struct mLineEdit : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct mListView : mWidget {
   Declare(ListView)
   using mObject::remove;
@@ -1174,7 +1261,9 @@ struct mListView : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct mListViewColumn : mObject {
   Declare(ListViewColumn)
 
@@ -1220,7 +1309,9 @@ struct mListViewColumn : mObject {
     signed width = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct mListViewItem : mObject {
   Declare(ListViewItem)
 
@@ -1244,7 +1335,9 @@ struct mListViewItem : mObject {
     lstring text;
   } state;
 };
+#endif
 
+#if defined(Hiro_ProgressBar)
 struct mProgressBar : mWidget {
   Declare(ProgressBar)
 
@@ -1256,7 +1349,9 @@ struct mProgressBar : mWidget {
     unsigned position = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_RadioButton)
 struct mRadioButton : mWidget {
   Declare(RadioButton)
 
@@ -1286,7 +1381,9 @@ struct mRadioButton : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_RadioLabel)
 struct mRadioLabel : mWidget {
   Declare(RadioLabel)
 
@@ -1307,7 +1404,9 @@ struct mRadioLabel : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_SourceEdit)
 struct mSourceEdit : mWidget {
   Declare(SourceEdit)
 
@@ -1330,7 +1429,9 @@ struct mSourceEdit : mWidget {
     string text;
   } state;
 };
+#endif
 
+#if defined(Hiro_TabFrame)
 struct mTabFrame : mWidget {
   Declare(TabFrame)
   using mObject::remove;
@@ -1364,7 +1465,9 @@ struct mTabFrame : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_TabFrame)
 struct mTabFrameItem : mObject {
   Declare(TabFrameItem)
 
@@ -1396,7 +1499,9 @@ struct mTabFrameItem : mObject {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_TextEdit)
 struct mTextEdit : mWidget {
   Declare(TextEdit)
 
@@ -1429,7 +1534,9 @@ struct mTextEdit : mWidget {
     bool wordWrap = true;
   } state;
 };
+#endif
 
+#if defined(Hiro_TreeView)
 struct mTreeView : mWidget {
   Declare(TreeView)
   using mObject::remove;
@@ -1472,7 +1579,9 @@ struct mTreeView : mWidget {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_TreeView)
 struct mTreeViewItem : mObject {
   Declare(TreeViewItem)
 
@@ -1502,7 +1611,9 @@ struct mTreeViewItem : mObject {
 
   auto destruct() -> void override;
 };
+#endif
 
+#if defined(Hiro_VerticalScroller)
 struct mVerticalScroller : mWidget {
   Declare(VerticalScroller)
 
@@ -1520,7 +1631,9 @@ struct mVerticalScroller : mWidget {
     unsigned position = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_VerticalSlider)
 struct mVerticalSlider : mWidget {
   Declare(VerticalSlider)
 
@@ -1538,7 +1651,9 @@ struct mVerticalSlider : mWidget {
     unsigned position = 0;
   } state;
 };
+#endif
 
+#if defined(Hiro_Viewport)
 struct mViewport : mWidget {
   Declare(Viewport)
 
@@ -1566,6 +1681,7 @@ struct mViewport : mWidget {
     function<void (Mouse::Button)> onMouseRelease;
   } state;
 };
+#endif
 
 #undef Declare
 

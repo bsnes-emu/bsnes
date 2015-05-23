@@ -1,3 +1,5 @@
+#if defined(Hiro_Window)
+
 auto mWindow::allocate() -> pObject* {
   return new pWindow(*this);
 }
@@ -280,3 +282,5 @@ auto mWindow::statusBar() const -> shared_pointer<mStatusBar> {
 auto mWindow::title() const -> string {
   return state.title;
 }
+
+#endif

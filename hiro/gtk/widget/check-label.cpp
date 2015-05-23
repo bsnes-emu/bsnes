@@ -1,3 +1,5 @@
+#if defined(Hiro_CheckLabel)
+
 namespace hiro {
 
 static auto CheckLabel_toggle(GtkToggleButton* toggleButton, pCheckLabel* p) -> void {
@@ -37,3 +39,5 @@ auto pCheckLabel::setText(const string& text) -> void {
 }
 
 }
+
+#endif

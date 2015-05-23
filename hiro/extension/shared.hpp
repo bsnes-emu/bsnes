@@ -45,10 +45,13 @@
   auto doSize() const -> void { return self().doSize(); } \
   auto onSize(const function<void ()>& function = {}) -> type& { return self().onSize(function), *this; } \
 
+#if defined(Hiro_Object)
 struct Object : sObject {
   DeclareObject(Object)
 };
+#endif
 
+#if defined(Hiro_Hotkey)
 struct Hotkey : sHotkey {
   DeclareObject(Hotkey)
 
@@ -61,7 +64,9 @@ struct Hotkey : sHotkey {
   auto setParent(sObject object) -> type& { return self().setParent(object), *this; }
   auto setSequence(const string& sequence = "") -> type& { return self().setSequence(sequence), *this; }
 };
+#endif
 
+#if defined(Hiro_Timer)
 struct Timer : sTimer {
   DeclareObject(Timer)
 
@@ -70,7 +75,9 @@ struct Timer : sTimer {
   auto onActivate(const function<void ()>& function = {}) -> type& { return self().onActivate(function), *this; }
   auto setInterval(unsigned interval = 0) -> type& { return self().setInterval(interval), *this; }
 };
+#endif
 
+#if defined(Hiro_Window)
 struct Window : sWindow {
   DeclareObject(Window)
 
@@ -120,14 +127,18 @@ struct Window : sWindow {
   auto statusBar() const -> sStatusBar { return self().statusBar(); }
   auto title() const -> string { return self().title(); }
 };
+#endif
 
+#if defined(Hiro_StatusBar)
 struct StatusBar : sStatusBar {
   DeclareObject(StatusBar)
 
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_MenuBar)
 struct MenuBar : sMenuBar {
   DeclareObject(MenuBar)
 
@@ -137,7 +148,9 @@ struct MenuBar : sMenuBar {
   auto remove(sMenu menu) -> type& { return self().remove(menu), *this; }
   auto reset() -> type& { return self().reset(), *this; }
 };
+#endif
 
+#if defined(Hiro_PopupMenu)
 struct PopupMenu : sPopupMenu {
   DeclareObject(PopupMenu)
 
@@ -147,11 +160,15 @@ struct PopupMenu : sPopupMenu {
   auto remove(sAction action) -> type& { return self().remove(action), *this; }
   auto reset() -> type& { return self().reset(), *this; }
 };
+#endif
 
+#if defined(Hiro_Action)
 struct Action : sAction {
   DeclareAction(Action)
 };
+#endif
 
+#if defined(Hiro_Menu)
 struct Menu : sMenu {
   DeclareAction(Menu)
 
@@ -165,11 +182,15 @@ struct Menu : sMenu {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_MenuSeparator)
 struct MenuSeparator : sMenuSeparator {
   DeclareAction(MenuSeparator)
 };
+#endif
 
+#if defined(Hiro_MenuItem)
 struct MenuItem : sMenuItem {
   DeclareAction(MenuItem)
 
@@ -180,7 +201,9 @@ struct MenuItem : sMenuItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_MenuCheckItem)
 struct MenuCheckItem : sMenuCheckItem {
   DeclareAction(MenuCheckItem)
 
@@ -191,7 +214,9 @@ struct MenuCheckItem : sMenuCheckItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_MenuRadioItem)
 struct MenuRadioItem : sMenuRadioItem {
   DeclareAction(MenuRadioItem)
 
@@ -202,21 +227,33 @@ struct MenuRadioItem : sMenuRadioItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 
-  static auto group(const vector<wMenuRadioItem>& group) -> void { return mMenuRadioItem::group(group); }
+  static auto group(const vector<MenuRadioItem>& group) -> void {
+    vector<wMenuRadioItem> items;
+    for(auto& item : group) items.append(item);
+    return mMenuRadioItem::group(items);
+  }
 };
+#endif
 
+#if defined(Hiro_Sizable)
 struct Sizable : sSizable {
   DeclareSizable(Sizable)
 };
+#endif
 
+#if defined(Hiro_Layout)
 struct Layout : sLayout {
   DeclareLayout(Layout)
 };
+#endif
 
+#if defined(Hiro_Widget)
 struct Widget : sWidget {
   DeclareWidget(Widget)
 };
+#endif
 
+#if defined(Hiro_Button)
 struct Button : sButton {
   DeclareWidget(Button)
 
@@ -231,7 +268,9 @@ struct Button : sButton {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_Canvas)
 struct Canvas : sCanvas {
   DeclareWidget(Canvas)
 
@@ -260,7 +299,9 @@ struct Canvas : sCanvas {
   auto size() const -> Size { return self().size(); }
   auto update() -> type& { return self().update(), *this; }
 };
+#endif
 
+#if defined(Hiro_CheckButton)
 struct CheckButton : sCheckButton {
   DeclareWidget(CheckButton)
 
@@ -277,7 +318,9 @@ struct CheckButton : sCheckButton {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_CheckLabel)
 struct CheckLabel : sCheckLabel {
   DeclareWidget(CheckLabel)
 
@@ -288,7 +331,9 @@ struct CheckLabel : sCheckLabel {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_ComboButton)
 struct ComboButton : sComboButton {
   DeclareWidget(ComboButton)
 
@@ -301,7 +346,9 @@ struct ComboButton : sComboButton {
   auto reset() -> type& { return self().reset(), *this; }
   auto selected() const -> sComboButtonItem { return self().selected(); }
 };
+#endif
 
+#if defined(Hiro_ComboButton)
 struct ComboButtonItem : sComboButtonItem {
   DeclareObject(ComboButtonItem)
 
@@ -312,7 +359,9 @@ struct ComboButtonItem : sComboButtonItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_Console)
 struct Console : sConsole {
   DeclareWidget(Console)
 
@@ -327,7 +376,9 @@ struct Console : sConsole {
   auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
   auto setPrompt(const string& prompt = "") -> type& { return self().setPrompt(prompt), *this; }
 };
+#endif
 
+#if defined(Hiro_Frame)
 struct Frame : sFrame {
   DeclareWidget(Frame)
 
@@ -338,7 +389,9 @@ struct Frame : sFrame {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_HexEdit)
 struct HexEdit : sHexEdit {
   DeclareWidget(HexEdit)
 
@@ -360,7 +413,9 @@ struct HexEdit : sHexEdit {
   auto setRows(unsigned rows = 16) -> type& { return self().setRows(rows), *this; }
   auto update() -> type& { return self().update(), *this; }
 };
+#endif
 
+#if defined(Hiro_HorizontalScroller)
 struct HorizontalScroller : sHorizontalScroller {
   DeclareWidget(HorizontalScroller)
 
@@ -371,7 +426,9 @@ struct HorizontalScroller : sHorizontalScroller {
   auto setLength(unsigned length = 101) -> type& { return self().setLength(length), *this; }
   auto setPosition(unsigned position = 0) -> type& { return self().setPosition(position), *this; }
 };
+#endif
 
+#if defined(Hiro_HorizontalSlider)
 struct HorizontalSlider : sHorizontalSlider {
   DeclareWidget(HorizontalSlider)
 
@@ -382,7 +439,9 @@ struct HorizontalSlider : sHorizontalSlider {
   auto setLength(unsigned length = 101) -> type& { return self().setLength(length), *this; }
   auto setPosition(unsigned position = 0) -> type& { return self().setPosition(position), *this; }
 };
+#endif
 
+#if defined(Hiro_IconView)
 struct IconView : sIconView {
   DeclareWidget(IconView)
 
@@ -411,7 +470,9 @@ struct IconView : sIconView {
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type& { return self().setOrientation(orientation), *this; }
   auto setSelected(const vector<signed>& selections) -> type& { return self().setSelected(selections), *this; }
 };
+#endif
 
+#if defined(Hiro_IconView)
 struct IconViewItem : sIconViewItem {
   DeclareObject(IconViewItem)
 
@@ -422,7 +483,9 @@ struct IconViewItem : sIconViewItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_Label)
 struct Label : sLabel {
   DeclareWidget(Label)
 
@@ -433,7 +496,9 @@ struct Label : sLabel {
   auto text() const -> string { return self().text(); }
   auto verticalAlignment() const -> double { return self().verticalAlignment(); }
 };
+#endif
 
+#if defined(Hiro_LineEdit)
 struct LineEdit : sLineEdit {
   DeclareWidget(LineEdit)
 
@@ -450,7 +515,9 @@ struct LineEdit : sLineEdit {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct ListView : sListView {
   DeclareWidget(ListView)
 
@@ -494,7 +561,9 @@ struct ListView : sListView {
   auto setMultiSelect(bool multiSelect = true) -> type& { return self().setMultiSelect(multiSelect), *this; }
   auto setSelected(bool selected = true) -> type& { return self().setSelected(selected), *this; }
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct ListViewColumn : sListViewColumn {
   DeclareObject(ListViewColumn)
 
@@ -521,7 +590,9 @@ struct ListViewColumn : sListViewColumn {
   auto verticalAlignment() const -> double { return self().verticalAlignment(); }
   auto width() const -> signed { return self().width(); }
 };
+#endif
 
+#if defined(Hiro_ListView)
 struct ListViewItem : sListViewItem {
   DeclareObject(ListViewItem)
 
@@ -535,14 +606,18 @@ struct ListViewItem : sListViewItem {
   auto setText(unsigned column, const string& text = "") -> type& { return self().setText(column, text), *this; }
   auto text(unsigned column = 0) const -> string { return self().text(column); }
 };
+#endif
 
+#if defined(Hiro_ProgressBar)
 struct ProgressBar : sProgressBar {
   DeclareWidget(ProgressBar)
 
   auto position() const -> unsigned { return self().position(); }
   auto setPosition(unsigned position = 0) -> type& { return self().setPosition(position), *this; }
 };
+#endif
 
+#if defined(Hiro_RadioButton)
 struct RadioButton : sRadioButton {
   DeclareWidget(RadioButton)
 
@@ -559,9 +634,15 @@ struct RadioButton : sRadioButton {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 
-  static auto group(const vector<wRadioButton>& group) -> void { return mRadioButton::group(group); }
+  static auto group(const vector<RadioButton>& group) -> void {
+    vector<wRadioButton> items;
+    for(auto& item : group) items.append(item);
+    return mRadioButton::group(items);
+  }
 };
+#endif
 
+#if defined(Hiro_RadioLabel)
 struct RadioLabel : sRadioLabel {
   DeclareWidget(RadioLabel)
 
@@ -572,9 +653,15 @@ struct RadioLabel : sRadioLabel {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 
-  static auto group(const vector<wRadioLabel>& group) -> void { return mRadioLabel::group(group); }
+  static auto group(const vector<RadioLabel>& group) -> void {
+    vector<wRadioLabel> items;
+    for(auto& item : items) items.append(item);
+    return mRadioLabel::group(items);
+  }
 };
+#endif
 
+#if defined(Hiro_SourceEdit)
 struct SourceEdit : sSourceEdit {
   DeclareWidget(SourceEdit)
 
@@ -588,7 +675,9 @@ struct SourceEdit : sSourceEdit {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_TabFrame)
 struct TabFrame : sTabFrame {
   DeclareWidget(TabFrame)
 
@@ -607,7 +696,9 @@ struct TabFrame : sTabFrame {
   auto selected() const -> sTabFrameItem { return self().selected(); }
   auto setEdge(Edge edge = Edge::Top) -> type& { return self().setEdge(edge), *this; }
 };
+#endif
 
+#if defined(Hiro_TabFrame)
 struct TabFrameItem : sTabFrameItem {
   DeclareObject(TabFrameItem)
 
@@ -626,7 +717,9 @@ struct TabFrameItem : sTabFrameItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_TextEdit)
 struct TextEdit : sTextEdit {
   DeclareWidget(TextEdit)
 
@@ -647,7 +740,9 @@ struct TextEdit : sTextEdit {
   auto text() const -> string { return self().text(); }
   auto wordWrap() const -> bool { return self().wordWrap(); }
 };
+#endif
 
+#if defined(Hiro_TreeView)
 struct TreeView : sTreeView {
   DeclareWidget(TreeView)
 
@@ -674,7 +769,9 @@ struct TreeView : sTreeView {
   auto setCheckable(bool checkable = true) -> type& { return self().setCheckable(checkable), *this; }
   auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
 };
+#endif
 
+#if defined(Hiro_TreeView)
 struct TreeViewItem : sTreeViewItem {
   DeclareObject(TreeViewItem)
 
@@ -692,7 +789,9 @@ struct TreeViewItem : sTreeViewItem {
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
 };
+#endif
 
+#if defined(Hiro_VerticalScroller)
 struct VerticalScroller : sVerticalScroller {
   DeclareWidget(VerticalScroller)
 
@@ -703,7 +802,9 @@ struct VerticalScroller : sVerticalScroller {
   auto setLength(unsigned length = 101) -> type& { return self().setLength(length), *this; }
   auto setPosition(unsigned position = 0) -> type& { return self().setPosition(position), *this; }
 };
+#endif
 
+#if defined(Hiro_VerticalSlider)
 struct VerticalSlider : sVerticalSlider {
   DeclareWidget(VerticalSlider)
 
@@ -714,7 +815,9 @@ struct VerticalSlider : sVerticalSlider {
   auto setLength(unsigned length = 101) -> type& { return self().setLength(length), *this; }
   auto setPosition(unsigned position = 0) -> type& { return self().setPosition(position), *this; }
 };
+#endif
 
+#if defined(Hiro_Viewport)
 struct Viewport : sViewport {
   DeclareWidget(Viewport)
 
@@ -732,17 +835,19 @@ struct Viewport : sViewport {
   auto onMouseRelease(const function<void (Mouse::Button)>& function = {}) -> type& { return self().onMouseRelease(function), *this; }
   auto setDroppable(bool droppable = true) -> type& { return self().setDroppable(droppable), *this; }
 };
+#endif
 
+#if defined(Hiro_FixedLayout)
 using sFixedLayout = shared_pointer<mFixedLayout>;
-using sHorizontalLayout = shared_pointer<mHorizontalLayout>;
-using sVerticalLayout = shared_pointer<mVerticalLayout>;
-
 struct FixedLayout : sFixedLayout {
   DeclareLayout(FixedLayout)
 
   auto append(sSizable sizable, Geometry geometry) -> type& { return self().append(sizable, geometry), *this; }
 };
+#endif
 
+#if defined(Hiro_HorizontalLayout)
+using sHorizontalLayout = shared_pointer<mHorizontalLayout>;
 struct HorizontalLayout : sHorizontalLayout {
   DeclareLayout(HorizontalLayout)
 
@@ -751,7 +856,10 @@ struct HorizontalLayout : sHorizontalLayout {
   auto setMargin(signed margin = 0) -> type& { return self().setMargin(margin), *this; }
   auto setSpacing(signed spacing = 5) -> type& { return self().setSpacing(spacing), *this; }
 };
+#endif
 
+#if defined(Hiro_VerticalLayout)
+using sVerticalLayout = shared_pointer<mVerticalLayout>;
 struct VerticalLayout : sVerticalLayout {
   DeclareLayout(VerticalLayout)
 
@@ -760,6 +868,7 @@ struct VerticalLayout : sVerticalLayout {
   auto setMargin(signed margin = 0) -> type& { return self().setMargin(margin), *this; }
   auto setSpacing(signed spacing = 5) -> type& { return self().setSpacing(spacing), *this; }
 };
+#endif
 
 #undef Declare
 #undef DeclareObject

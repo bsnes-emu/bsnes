@@ -1,3 +1,5 @@
+#if defined(Hiro_IconView)
+
 namespace hiro {
 
 auto pIconViewItem::construct() -> void {
@@ -30,3 +32,5 @@ auto pIconViewItem::_parent() -> pIconView* {
 }
 
 }
+
+#endif

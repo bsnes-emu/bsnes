@@ -1,3 +1,5 @@
+#if defined(Hiro_Desktop)
+
 namespace hiro {
 
 Size pDesktop::size() {
@@ -46,3 +48,5 @@ Geometry pDesktop::workspace() {
 }
 
 }
+
+#endif

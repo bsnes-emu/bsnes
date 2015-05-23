@@ -1,3 +1,5 @@
+#if defined(Hiro_ProgressBar)
+
 auto mProgressBar::allocate() -> pObject* {
   return new pProgressBar(*this);
 }
@@ -13,3 +15,5 @@ auto mProgressBar::setPosition(unsigned position) -> type& {
   signal(setPosition, position);
   return *this;
 }
+
+#endif

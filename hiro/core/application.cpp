@@ -1,3 +1,7 @@
+#if defined(Hiro_Application)
+
+Application::State Application::state;
+
 auto Application::doMain() -> void {
   if(state.onMain) return state.onMain();
 }
@@ -95,3 +99,5 @@ auto Application::initialize() -> void {
     return pApplication::initialize();
   }
 }
+
+#endif

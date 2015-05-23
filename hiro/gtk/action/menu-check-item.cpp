@@ -1,3 +1,5 @@
+#if defined(Hiro_MenuCheckItem)
+
 namespace hiro {
 
 static auto MenuCheckItem_toggle(GtkCheckMenuItem* gtkCheckMenuItem, pMenuCheckItem* p) -> void {
@@ -32,3 +34,5 @@ auto pMenuCheckItem::setText(const string& text) -> void {
 }
 
 }
+
+#endif

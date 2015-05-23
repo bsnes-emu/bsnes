@@ -1,3 +1,5 @@
+#if defined(Hiro_ComboButton)
+
 namespace hiro {
 
 static auto ComboButton_change(GtkComboBox* comboBox, pComboButton* p) -> void { p->_updateSelected(); }
@@ -89,3 +91,5 @@ auto pComboButton::_updateSelected() -> void {
 }
 
 }
+
+#endif

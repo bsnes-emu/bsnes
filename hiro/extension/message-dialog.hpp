@@ -1,3 +1,5 @@
+#if defined(Hiro_MessageDialog)
+
 struct MessageDialog {
   using type = MessageDialog;
 
@@ -22,3 +24,5 @@ private:
 
   auto _run() -> signed;
 };
+
+#endif

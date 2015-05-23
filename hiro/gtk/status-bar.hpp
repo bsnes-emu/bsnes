@@ -1,3 +1,5 @@
+#if defined(Hiro_StatusBar)
+
 namespace hiro {
 
 struct pStatusBar : pObject {
@@ -12,3 +14,5 @@ struct pStatusBar : pObject {
 };
 
 }
+
+#endif

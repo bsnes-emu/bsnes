@@ -1,3 +1,5 @@
+#if defined(Hiro_IconView)
+
 auto mIconViewItem::allocate() -> pObject* {
   return new pIconViewItem(*this);
 }
@@ -38,3 +40,5 @@ auto mIconViewItem::setText(const string& text) -> type& {
 auto mIconViewItem::text() const -> string {
   return state.text;
 }
+
+#endif

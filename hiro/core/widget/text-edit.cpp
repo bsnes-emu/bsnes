@@ -1,3 +1,5 @@
+#if defined(Hiro_TextEdit)
+
 auto mTextEdit::allocate() -> pObject* {
   return new pTextEdit(*this);
 }
@@ -81,3 +83,5 @@ auto mTextEdit::text() const -> string {
 auto mTextEdit::wordWrap() const -> bool {
   return state.wordWrap;
 }
+
+#endif

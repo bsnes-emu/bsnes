@@ -1,3 +1,5 @@
+#if defined(Hiro_Button)
+
 auto mButton::allocate() -> pObject* {
   return new pButton(*this);
 }
@@ -52,3 +54,5 @@ auto mButton::setText(const string& text) -> type& {
 auto mButton::text() const -> string {
   return state.text;
 }
+
+#endif

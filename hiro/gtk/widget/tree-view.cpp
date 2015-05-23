@@ -1,3 +1,5 @@
+#if defined(Hiro_TreeView)
+
 namespace hiro {
 
 static auto TreeView_activate(GtkTreeView*, GtkTreePath* gtkPath, GtkTreeViewColumn*, pTreeView* p) -> void { p->_activatePath(gtkPath); }
@@ -160,3 +162,5 @@ auto pTreeView::_updateSelected() -> void {
 }
 
 }
+
+#endif

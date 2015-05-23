@@ -1,3 +1,5 @@
+#if defined(Hiro_HorizontalScroller)
+
 namespace hiro {
 
 static auto HorizontalScroller_change(GtkRange* gtkRange, pHorizontalScroller* p) -> void {
@@ -39,3 +41,5 @@ auto pHorizontalScroller::setPosition(unsigned position) -> void {
 }
 
 }
+
+#endif

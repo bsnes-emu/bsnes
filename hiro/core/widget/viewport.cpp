@@ -1,3 +1,5 @@
+#if defined(Hiro_Viewport)
+
 auto mViewport::allocate() -> pObject* {
   return new pViewport(*this);
 }
@@ -62,3 +64,5 @@ auto mViewport::setDroppable(bool droppable) -> type& {
   signal(setDroppable, droppable);
   return *this;
 }
+
+#endif
