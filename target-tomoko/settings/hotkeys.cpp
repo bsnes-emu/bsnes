@@ -33,10 +33,7 @@ auto HotkeySettings::reloadMappings() -> void {
 auto HotkeySettings::refreshMappings() -> void {
   unsigned position = 0;
   for(auto& hotkey : inputManager->hotkeys) {
-    auto path = hotkey->assignment.split("/");
-    string assignment = path.takeLast();
-    string device = path(0);
-    mappingList.item(position++)->setText(1, assignment).setText(2, device);
+    mappingList.item(position++)->setText(1, hotkey->assignmentName()).setText(2, hotkey->deviceName());
   }
   mappingList.resizeColumns();
 }

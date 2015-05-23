@@ -49,8 +49,6 @@ else ifeq ($(platform),linux)
   link += -lX11 -lXext -ldl
 else ifeq ($(platform),bsd)
   flags += -march=native
-  link += -Wl,-rpath=/usr/local/lib
-  link += -Wl,-rpath=/usr/local/lib/gcc49
   link += -Wl,-export-dynamic
   link += -lX11 -lXext
 else

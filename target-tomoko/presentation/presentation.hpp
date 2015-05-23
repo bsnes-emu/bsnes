@@ -1,5 +1,6 @@
 struct Presentation : Window {
   Presentation();
+  auto updateEmulator() -> void;
   auto resizeViewport() -> void;
   auto toggleFullScreen() -> void;
   auto drawSplashScreen() -> void;
@@ -10,7 +11,10 @@ struct Presentation : Window {
     Menu systemMenu{&menuBar};
       MenuItem powerSystem{&systemMenu};
       MenuItem resetSystem{&systemMenu};
-      MenuSeparator systemMenuSeparator{&systemMenu};
+      MenuSeparator systemMenuSeparatorPorts{&systemMenu};
+      Menu inputPort1{&systemMenu};
+      Menu inputPort2{&systemMenu};
+      MenuSeparator systemMenuSeparatorUnload{&systemMenu};
       MenuItem unloadSystem{&systemMenu};
     Menu settingsMenu{&menuBar};
       Menu videoScaleMenu{&settingsMenu};

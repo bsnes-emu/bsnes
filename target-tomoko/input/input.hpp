@@ -4,12 +4,20 @@ struct InputMapping {
   auto poll() -> int16;
   auto unbind() -> void;
 
+  auto isDigital() const -> bool { return !link || link->type == 0; }
+  auto isAnalog() const -> bool { return link && link->type == 1; }
+  auto isRumble() const -> bool { return link && link->type == 2; }
+
+  auto assignmentName() const -> string;
+  auto deviceName() const -> string;
+
   string name;
   string assignment = "None";
   Emulator::Interface::Device::Input* link = nullptr;
   HID::Device* device = nullptr;
   unsigned group = 0;
   unsigned input = 0;
+  enum class Qualifier : unsigned { None, Lo, Hi, Rumble } qualifier = Qualifier::None;
 };
 
 struct InputHotkey : InputMapping {
@@ -39,6 +47,8 @@ struct InputManager {
   auto poll() -> void;
   auto onChange(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
   auto quit() -> void;
+
+  auto findMouse() -> HID::Device*;
 
   //hotkeys.cpp
   auto appendHotkeys() -> void;

@@ -8,6 +8,14 @@ auto InputManager::appendHotkeys() -> void {
   }
 
   { auto hotkey = new InputHotkey;
+    hotkey->name = "Toggle Mouse Capture";
+    hotkey->action = [] {
+      input.acquired() ? input.unacquire() : input.acquire();
+    };
+    hotkeys.append(hotkey);
+  }
+
+  { auto hotkey = new InputHotkey;
     hotkey->name = "Save State";
     hotkey->action = [] {
       program->saveState(0);

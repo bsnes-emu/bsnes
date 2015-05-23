@@ -1,5 +1,6 @@
 struct InputSettings : TabFrameItem {
   InputSettings(TabFrame*);
+  auto updateControls() -> void;
   auto activeEmulator() -> InputEmulator&;
   auto activePort() -> InputPort&;
   auto activeDevice() -> InputDevice&;
@@ -8,7 +9,8 @@ struct InputSettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
-  auto inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
+  auto assignMouseInput(unsigned id) -> void;
+  auto inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
   InputMapping* activeMapping = nullptr;
 
@@ -19,6 +21,9 @@ struct InputSettings : TabFrameItem {
       ComboButton deviceList{&selectionLayout, Size{~0, 0}};
     ListView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Button assignMouse1{&controlLayout, Size{100, 0}};
+      Button assignMouse2{&controlLayout, Size{100, 0}};
+      Button assignMouse3{&controlLayout, Size{100, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
       Button resetButton{&controlLayout, Size{80, 0}};
       Button eraseButton{&controlLayout, Size{80, 0}};
@@ -61,6 +66,7 @@ struct AdvancedSettings : TabFrameItem {
 
 struct SettingsManager : Window {
   SettingsManager();
+  auto setVisible(bool visible = true) -> SettingsManager&;
   auto show(unsigned setting) -> void;
 
   VerticalLayout layout{this};

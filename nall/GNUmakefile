@@ -73,6 +73,8 @@ endif
 # bsd settings
 ifeq ($(platform),bsd)
   flags += -I/usr/local/include
+  link += -Wl,-rpath=/usr/local/lib
+  link += -Wl,-rpath=/usr/local/lib/gcc49
 endif
 
 # cross-compilation support

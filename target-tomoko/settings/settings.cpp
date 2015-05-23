@@ -20,6 +20,15 @@ SettingsManager::SettingsManager() {
   });
 }
 
+auto SettingsManager::setVisible(bool visible) -> SettingsManager& {
+  if(visible) {
+    input.refreshMappings();
+    hotkeys.refreshMappings();
+  }
+  Window::setVisible(visible);
+  return *this;
+}
+
 auto SettingsManager::show(unsigned setting) -> void {
   panel.item(setting)->setSelected();
   setVisible();

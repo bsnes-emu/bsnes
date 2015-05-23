@@ -102,6 +102,29 @@ Presentation::Presentation() {
   resizeViewport();
 }
 
+auto Presentation::updateEmulator() -> void {
+  inputPort1.reset();
+  inputPort2.reset();
+  if(!emulator) return;
+
+  for(auto n : range(emulator->port)) {
+    if(n >= 2) break;
+    auto& port = emulator->port[n];
+    auto& menu = (n == 0 ? inputPort1 : inputPort2);
+    menu.setText(port.name);
+
+    vector<wMenuRadioItem> items;
+    for(auto& device : port.device) {
+      MenuRadioItem item{&menu};
+      item.setText(device.name).onActivate([=] {
+        emulator->connect(port.id, device.id);
+      });
+      items.append(item);
+    }
+    MenuRadioItem::group(items);
+  }
+}
+
 auto Presentation::resizeViewport() -> void {
   signed width  = 256;
   signed height = 240;
@@ -154,7 +177,9 @@ auto Presentation::toggleFullScreen() -> void {
     statusBar.setVisible(false);
     setResizable(true);
     setFullScreen(true);
+    if(!input.acquired()) input.acquire();
   } else {
+    if(input.acquired()) input.unacquire();
     setFullScreen(false);
     setResizable(false);
     menuBar.setVisible(true);

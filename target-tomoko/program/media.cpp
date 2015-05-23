@@ -29,6 +29,7 @@ auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Med
   presentation->setTitle(emulator->title());
   presentation->systemMenu.setVisible(true);
   presentation->toolsMenu.setVisible(true);
+  presentation->updateEmulator();
   toolsManager->cheatEditor.loadCheats();
   toolsManager->stateManager.doRefresh();
 }
