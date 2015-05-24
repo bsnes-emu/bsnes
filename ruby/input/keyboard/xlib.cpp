@@ -4,7 +4,7 @@
 namespace ruby {
 
 struct InputKeyboardXlib {
-  HID::Keyboard hid;
+  shared_pointer<HID::Keyboard> hid{new HID::Keyboard};
 
   Display* display = nullptr;
 
@@ -15,14 +15,14 @@ struct InputKeyboardXlib {
   };
   vector<Key> keys;
 
-  void assign(unsigned inputID, bool value) {
-    auto& group = hid.group[HID::Keyboard::GroupID::Button];
-    if(group.input[inputID].value == value) return;
-    if(input.onChange) input.onChange(hid, HID::Keyboard::GroupID::Button, inputID, group.input[inputID].value, value);
-    group.input[inputID].value = value;
+  auto assign(unsigned inputID, bool value) -> void {
+    auto& group = hid->buttons();
+    if(group.input(inputID).value() == value) return;
+    if(input.onChange) input.onChange(hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
+    group.input(inputID).setValue(value);
   }
 
-  void poll(vector<HID::Device*>& devices) {
+  auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
     char state[32];
     XQueryKeymap(display, state);
 
@@ -31,10 +31,10 @@ struct InputKeyboardXlib {
       assign(n, value);
     }
 
-    devices.append(&hid);
+    devices.append(hid);
   }
 
-  bool init() {
+  auto init() -> bool {
     display = XOpenDisplay(0);
 
     keys.append({"Escape", XK_Escape});
@@ -151,17 +151,17 @@ struct InputKeyboardXlib {
     keys.append({"RightSuper", XK_Super_R});
     keys.append({"Menu", XK_Menu});
 
-    hid.id = 1;
+    hid->setID(1);
 
     for(unsigned n = 0; n < keys.size(); n++) {
-      hid.button().append(keys[n].name);
+      hid->buttons().append(keys[n].name);
       keys[n].keycode = XKeysymToKeycode(display, keys[n].keysym);
     }
 
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(display) {
       XCloseDisplay(display);
       display = nullptr;

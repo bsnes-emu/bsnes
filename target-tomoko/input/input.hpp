@@ -1,6 +1,6 @@
 struct InputMapping {
   auto bind() -> void;
-  auto bind(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool;
+  auto bind(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool;
   auto poll() -> int16;
   auto unbind() -> void;
 
@@ -8,13 +8,13 @@ struct InputMapping {
   auto isAnalog() const -> bool { return link && link->type == 1; }
   auto isRumble() const -> bool { return link && link->type == 2; }
 
-  auto assignmentName() const -> string;
-  auto deviceName() const -> string;
+  auto assignmentName() -> string;
+  auto deviceName() -> string;
 
   string name;
   string assignment = "None";
   Emulator::Interface::Device::Input* link = nullptr;
-  HID::Device* device = nullptr;
+  shared_pointer<HID::Device> device;
   unsigned group = 0;
   unsigned input = 0;
   enum class Qualifier : unsigned { None, Lo, Hi, Rumble } qualifier = Qualifier::None;
@@ -45,16 +45,16 @@ struct InputManager {
   InputManager();
   auto bind() -> void;
   auto poll() -> void;
-  auto onChange(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
+  auto onChange(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
   auto quit() -> void;
 
-  auto findMouse() -> HID::Device*;
+  auto findMouse() -> shared_pointer<HID::Device>;
 
   //hotkeys.cpp
   auto appendHotkeys() -> void;
   auto pollHotkeys() -> void;
 
-  vector<HID::Device*> devices;
+  vector<shared_pointer<HID::Device>> devices;
   vector<InputEmulator> emulators;
   vector<InputHotkey*> hotkeys;
   Configuration::Document config;

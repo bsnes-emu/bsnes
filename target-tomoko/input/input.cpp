@@ -5,13 +5,13 @@ InputManager* inputManager = nullptr;
 auto InputMapping::bind() -> void {
   auto token = assignment.split("/");
   if(token.size() < 3) return unbind();
-  uint64_t id = hex(token[0]);
+  uint64_t id = token[0].decimal();
   unsigned group = token[1].decimal();
   unsigned input = token[2].decimal();
   string qualifier = token(3, "None");
 
   for(auto& device : inputManager->devices) {
-    if(id != device->id) continue;
+    if(id != device->id()) continue;
 
     this->device = device;
     this->group = group;
@@ -24,25 +24,25 @@ auto InputMapping::bind() -> void {
   }
 }
 
-auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool {
-  if(device.isNull() || (device.isKeyboard() && device.group[group].input[input].name == "Escape")) {
+auto InputMapping::bind(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool {
+  if(device->isNull() || (device->isKeyboard() && device->group(group).input(input).name() == "Escape")) {
     return unbind(), true;
   }
 
-  string encoding = {hex(device.id), "/", group, "/", input};
+  string encoding = {"0x", hex(device->id()), "/", group, "/", input};
 
   if(isDigital()) {
-    if((device.isKeyboard() && group == HID::Keyboard::GroupID::Button)
-    || (device.isMouse() && group == HID::Mouse::GroupID::Button)
-    || (device.isJoypad() && group == HID::Joypad::GroupID::Button)) {
+    if((device->isKeyboard() && group == HID::Keyboard::GroupID::Button)
+    || (device->isMouse() && group == HID::Mouse::GroupID::Button)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Button)) {
       if(newValue) {
         this->assignment = encoding;
         return bind(), true;
       }
     }
 
-    if((device.isJoypad() && group == HID::Joypad::GroupID::Axis)
-    || (device.isJoypad() && group == HID::Joypad::GroupID::Hat)) {
+    if((device->isJoypad() && group == HID::Joypad::GroupID::Axis)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)) {
       if(newValue < -16384) {
         this->assignment = {encoding, "/Lo"};
         return bind(), true;
@@ -56,9 +56,9 @@ auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int
   }
 
   if(isAnalog()) {
-    if((device.isMouse() && group == HID::Mouse::GroupID::Axis)
-    || (device.isJoypad() && group == HID::Joypad::GroupID::Axis)
-    || (device.isJoypad() && group == HID::Joypad::GroupID::Hat)) {
+    if((device->isMouse() && group == HID::Mouse::GroupID::Axis)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Axis)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)) {
       if(newValue < -16384 || newValue > +16384) {
         this->assignment = encoding;
         return bind(), true;
@@ -67,7 +67,7 @@ auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int
   }
 
   if(isRumble()) {
-    if(device.isJoypad() && group == HID::Joypad::GroupID::Button) {
+    if(device->isJoypad() && group == HID::Joypad::GroupID::Button) {
       if(newValue) {
         encoding = {this->assignment, "/Rumble"};
         return bind(), true;
@@ -80,7 +80,7 @@ auto InputMapping::bind(HID::Device& device, unsigned group, unsigned input, int
 
 auto InputMapping::poll() -> int16 {
   if(!device) return 0;
-  auto value = device->group[group].input[input].value;
+  auto value = device->group(group).input(input).value();
 
   if(isDigital()) {
     if(device->isKeyboard() && group == HID::Keyboard::GroupID::Button) return value != 0;
@@ -110,21 +110,21 @@ auto InputMapping::unbind() -> void {
   this->qualifier = Qualifier::None;
 }
 
-auto InputMapping::assignmentName() const -> string {
+auto InputMapping::assignmentName() -> string {
   if(!device) return "None";
   string path;
-  path.append(device->name);
-  path.append(".", device->group[group].name);
-  path.append(".", device->group[group].input[input].name);
+  path.append(device->name());
+  path.append(".", device->group(group).name());
+  path.append(".", device->group(group).input(input).name());
   if(qualifier == Qualifier::Lo) path.append(".Lo");
   if(qualifier == Qualifier::Hi) path.append(".Hi");
   if(qualifier == Qualifier::Rumble) path.append(".Rumble");
   return path;
 }
 
-auto InputMapping::deviceName() const -> string {
+auto InputMapping::deviceName() -> string {
   if(!device) return "";
-  return device->id;
+  return hex(device->id());
 }
 
 //
@@ -211,7 +211,7 @@ auto InputManager::poll() -> void {
   if(presentation && presentation->focused()) pollHotkeys();
 }
 
-auto InputManager::onChange(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
+auto InputManager::onChange(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
   if(settingsManager->focused()) {
     settingsManager->input.inputEvent(device, group, input, oldValue, newValue);
     settingsManager->hotkeys.inputEvent(device, group, input, oldValue, newValue);
@@ -224,9 +224,9 @@ auto InputManager::quit() -> void {
   hotkeys.reset();
 }
 
-auto InputManager::findMouse() -> HID::Device* {
-  for(auto device : devices) {
+auto InputManager::findMouse() -> shared_pointer<HID::Device> {
+  for(auto& device : devices) {
     if(device->isMouse()) return device;
   }
-  return nullptr;
+  return {};
 }

@@ -47,9 +47,9 @@ auto HotkeySettings::assignMapping() -> void {
   }
 }
 
-auto HotkeySettings::inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
+auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
   if(!activeMapping) return;
-  if(!device.isKeyboard() || oldValue != 0 || newValue != 1) return;
+  if(!device->isKeyboard() || oldValue != 0 || newValue != 1) return;
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping = nullptr;

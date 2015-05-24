@@ -1,14 +1,14 @@
 /* ruby
  * author: byuu
  * license: ISC
- * version: 0.11 (2013-12-19)
+ * version: 0.12 (2015-05-24)
  *
  * ruby is a cross-platform hardware abstraction layer
  * it provides a common interface to video, audio and input devices
  */
 
-#ifndef RUBY_H
-#define RUBY_H
+#ifndef RUBY_HPP
+#define RUBY_HPP
 
 #include <nall/nall.hpp>
 
@@ -65,28 +65,27 @@ private:
 };
 
 struct InputInterface {
-  nall::function<void (nall::HID::Device& device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue)> onChange;
+  nall::function<void (nall::shared_pointer<nall::HID::Device> device, unsigned group, unsigned input, int16_t oldValue, int16_t newValue)> onChange;
 
-  void driver(const char* driver = "");
-  const char* optimalDriver();
-  const char* safestDriver();
-  const char* availableDrivers();
-  bool init();
-  void term();
-
-  bool cap(const nall::string& name);
-  nall::any get(const nall::string& name);
-  bool set(const nall::string& name, const nall::any& value);
-
-  bool acquire();
-  bool unacquire();
-  bool acquired();
-
-  nall::vector<nall::HID::Device*> poll();
-  bool rumble(uint64_t id, bool enable);
-
-  InputInterface();
   ~InputInterface();
+
+  auto driver(nall::string driver = "") -> void;
+  auto optimalDriver() -> nall::string;
+  auto safestDriver() -> nall::string;
+  auto availableDrivers() -> nall::string;
+  auto init() -> bool;
+  auto term() -> void;
+
+  auto cap(const nall::string& name) -> bool;
+  auto get(const nall::string& name) -> nall::any;
+  auto set(const nall::string& name, const nall::any& value) -> bool;
+
+  auto acquire() -> bool;
+  auto unacquire() -> bool;
+  auto acquired() -> bool;
+
+  auto poll() -> nall::vector<nall::shared_pointer<nall::HID::Device>>;
+  auto rumble(uint64_t id, bool enable) -> bool;
 
 private:
   Input* p = nullptr;

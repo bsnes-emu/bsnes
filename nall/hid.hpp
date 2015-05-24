@@ -1,120 +1,110 @@
 #ifndef NALL_HID_HPP
 #define NALL_HID_HPP
 
-namespace nall {
+namespace nall { namespace HID {
 
-namespace HID {
-  struct Input {
-    string name;
-    int16_t value = 0;
+struct Input {
+  Input(const string& name) : _name(name) {}
 
-    Input() {}
-    Input(const string& name) : name(name) {}
-  };
+  auto name() const -> string { return _name; }
+  auto value() const -> int16_t { return _value; }
+  auto setValue(int16_t value) -> void { _value = value; }
 
-  struct Group {
-    string name;
-    vector<Input> input;
+private:
+  string _name;
+  int16_t _value = 0;
+  friend class Group;
+};
 
-    Group() {}
-    Group(const string& name) : name(name) {}
+struct Group : vector<Input> {
+  Group(const string& name) : _name(name) {}
 
-    void append(const string& name) {
-      input.append({name});
+  auto name() const -> string { return _name; }
+  auto input(unsigned id) -> Input& { return operator[](id); }
+  auto append(const string& name) -> void { vector::append({name}); }
+
+  auto find(const string& name) const -> maybe<unsigned> {
+    for(auto id : range(size())) {
+      if(operator[](id)._name == name) return id;
     }
+    return nothing;
+  }
 
-    maybe<unsigned> find(const string& name) {
-      for(unsigned id = 0; id < input.size(); id++) {
-        if(input[id].name == name) return id;
-      }
-      return nothing;
+private:
+  string _name;
+  friend class Device;
+};
+
+struct Device : vector<Group> {
+  Device(const string& name) : _name(name) {}
+
+  auto pathID() const -> uint32_t { return (uint32_t)(_id >> 32); }
+  auto deviceID() const -> uint32_t { return (uint32_t)(_id >> 0); }
+  auto vendorID() const -> uint16_t  { return (uint16_t)(_id >> 16); }
+  auto productID() const -> uint16_t { return (uint16_t)(_id >> 0); }
+
+  virtual auto isNull() const -> bool { return false; }
+  virtual auto isKeyboard() const -> bool { return false; }
+  virtual auto isMouse() const -> bool { return false; }
+  virtual auto isJoypad() const -> bool { return false; }
+
+  auto name() const -> string { return _name; }
+  auto id() const -> uint64_t { return _id; }
+  auto setID(uint64_t id) -> void { _id = id; }
+  auto group(unsigned id) -> Group& { return operator[](id); }
+  auto append(const string& name) -> void { vector::append({name}); }
+
+  auto find(const string& name) const -> maybe<unsigned> {
+    for(auto id : range(size())) {
+      if(operator[](id)._name == name) return id;
     }
-  };
+    return nothing;
+  }
 
-  struct Device {
-    uint64_t id = 0;
-    string name;
-    vector<Group> group;
+private:
+  string _name;
+  uint64_t _id = 0;
+};
 
-    uint32_t pathID() const { return (uint32_t)(id >> 32); }
-    uint32_t deviceID() const { return (uint32_t)(id >> 0); }
-    uint16_t vendorID() const { return (uint16_t)(id >> 16); }
-    uint16_t productID() const { return (uint16_t)(id >> 0); }
+struct Null : Device {
+  Null() : Device("Null") {}
+  auto isNull() const -> bool { return true; }
+};
 
-    virtual bool isNull() const { return false; }
-    virtual bool isKeyboard() const { return false; }
-    virtual bool isMouse() const { return false; }
-    virtual bool isJoypad() const { return false; }
+struct Keyboard : Device {
+  enum GroupID : unsigned { Button };
 
-    void append(const string& name) {
-      group.append({name});
-    }
+  Keyboard() : Device("Keyboard") { append("Button"); }
+  auto isKeyboard() const -> bool { return true; }
+  auto buttons() -> Group& { return group(GroupID::Button); }
+};
 
-    maybe<unsigned> find(const string& name) {
-      for(unsigned id = 0; id < group.size(); id++) {
-        if(group[id].name == name) return id;
-      }
-      return nothing;
-    }
-  };
+struct Mouse : Device {
+  enum GroupID : unsigned { Axis, Button };
 
-  struct Null : Device {
-    Null() {
-      name = "Null";
-    }
+  Mouse() : Device("Mouse") { append("Axis"), append("Button"); }
+  auto isMouse() const -> bool { return true; }
+  auto axes() -> Group& { return group(GroupID::Axis); }
+  auto buttons() -> Group& { return group(GroupID::Button); }
+};
 
-    bool isNull() const { return true; }
-  };
+struct Joypad : Device {
+  enum GroupID : unsigned { Axis, Hat, Trigger, Button };
 
-  struct Keyboard : Device {
-    enum GroupID : unsigned { Button };
+  Joypad() : Device("Joypad") { append("Axis"), append("Hat"), append("Trigger"), append("Button"); }
+  auto isJoypad() const -> bool { return true; }
+  auto axes() -> Group& { return group(GroupID::Axis); }
+  auto hats() -> Group& { return group(GroupID::Hat); }
+  auto triggers() -> Group& { return group(GroupID::Trigger); }
+  auto buttons() -> Group& { return group(GroupID::Button); }
 
-    Group& button() { return group[GroupID::Button]; }
+  auto rumble() const -> bool { return _rumble; }
+  auto setRumble(bool rumble) -> void { _rumble = rumble; }
 
-    Keyboard() {
-      name = "Keyboard";
-      append("Button");
-    }
+private:
+  bool _rumble = false;
+};
 
-    bool isKeyboard() const { return true; }
-  };
-
-  struct Mouse : Device {
-    enum GroupID : unsigned { Axis, Button };
-
-    Group& axis() { return group[GroupID::Axis]; }
-    Group& button() { return group[GroupID::Button]; }
-
-    Mouse() {
-      name = "Mouse";
-      append("Axis");
-      append("Button");
-    }
-
-    bool isMouse() const { return true; }
-  };
-
-  struct Joypad : Device {
-    enum GroupID : unsigned { Axis, Hat, Trigger, Button };
-
-    Group& axis() { return group[GroupID::Axis]; }
-    Group& hat() { return group[GroupID::Hat]; }
-    Group& trigger() { return group[GroupID::Trigger]; }
-    Group& button() { return group[GroupID::Button]; }
-    bool rumble = false;
-
-    Joypad() {
-      name = "Joypad";
-      append("Axis");
-      append("Hat");
-      append("Trigger");
-      append("Button");
-    }
-
-    bool isJoypad() const { return true; }
-  };
-}
-
-}
+}}
 
 #endif

@@ -14,19 +14,19 @@ ui_objects += ruby hiro
 
 # platform
 ifeq ($(platform),windows)
-  ruby := video.direct3d video.wgl video.directdraw video.gdi
+  ruby += video.direct3d video.wgl video.directdraw video.gdi
   ruby += audio.xaudio2 audio.directsound
   ruby += input.windows
 else ifeq ($(platform),macosx)
-  ruby := video.cgl
+  ruby += video.cgl
   ruby += audio.openal
   ruby += input.carbon
 else ifeq ($(platform),linux)
-  ruby := video.glx video.xv video.xshm video.sdl
+  ruby += video.glx video.xv video.xshm video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
-  ruby += input.udev input.sdl input.xlib
+  ruby += input.sdl input.xlib  #input.udev
 else ifeq ($(platform),bsd)
-  ruby := video.glx video.xv video.xshm video.sdl
+  ruby += video.glx video.xv video.xshm video.sdl
   ruby += audio.openal audio.oss
   ruby += input.sdl input.xlib
 endif

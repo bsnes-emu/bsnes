@@ -115,17 +115,17 @@ auto InputSettings::assignMouseInput(unsigned id) -> void {
       activeMapping = activeDevice().mappings[mapping->offset()];
 
       if(activeMapping->isDigital()) {
-        return inputEvent(*mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
+        return inputEvent(mouse, HID::Mouse::GroupID::Button, id, 0, 1, true);
       } else if(activeMapping->isAnalog()) {
-        return inputEvent(*mouse, HID::Mouse::GroupID::Axis, id, 0, +32767, true);
+        return inputEvent(mouse, HID::Mouse::GroupID::Axis, id, 0, +32767, true);
       }
     }
   }
 }
 
-auto InputSettings::inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput) -> void {
+auto InputSettings::inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput) -> void {
   if(!activeMapping) return;
-  if(device.isMouse() && !allowMouseInput) return;
+  if(device->isMouse() && !allowMouseInput) return;
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping = nullptr;

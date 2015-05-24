@@ -130,21 +130,21 @@ using namespace nall;
 
 #define DeclareInput(Name) \
   struct Input##Name : Input { \
-    bool cap(const string& name) { return p.cap(name); } \
-    any get(const string& name) { return p.get(name); } \
-    bool set(const string& name, const any& value) { return p.set(name, value); } \
-    \
-    bool acquire() { return p.acquire(); } \
-    bool unacquire() { return p.unacquire(); } \
-    bool acquired() { return p.acquired(); } \
-    \
-    vector<HID::Device*> poll() { return p.poll(); } \
-    bool rumble(uint64_t id, bool enable) { return p.rumble(id, enable); } \
-    bool init() { return p.init(); } \
-    void term() { p.term(); } \
-    \
     Input##Name() : p(*new pInput##Name) {} \
     ~Input##Name() { delete &p; } \
+    \
+    auto cap(const string& name) -> bool { return p.cap(name); } \
+    auto get(const string& name) -> any { return p.get(name); } \
+    auto set(const string& name, const any& value) -> bool { return p.set(name, value); } \
+    \
+    auto acquire() -> bool { return p.acquire(); } \
+    auto unacquire() -> bool { return p.unacquire(); } \
+    auto acquired() -> bool { return p.acquired(); } \
+    \
+    auto poll() -> vector<shared_pointer<HID::Device>> { return p.poll(); } \
+    auto rumble(uint64_t id, bool enable) -> bool { return p.rumble(id, enable); } \
+    auto init() -> bool { return p.init(); } \
+    auto term() -> void { p.term(); } \
   \
   private: \
     pInput##Name& p; \

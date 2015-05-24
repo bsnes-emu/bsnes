@@ -10,7 +10,7 @@ struct InputSettings : TabFrameItem {
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
   auto assignMouseInput(unsigned id) -> void;
-  auto inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
+  auto inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
   InputMapping* activeMapping = nullptr;
 
@@ -34,7 +34,7 @@ struct HotkeySettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
-  auto inputEvent(HID::Device& device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
+  auto inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
 
   InputMapping* activeMapping = nullptr;
 

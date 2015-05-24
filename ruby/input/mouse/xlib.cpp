@@ -4,7 +4,7 @@
 namespace ruby {
 
 struct InputMouseXlib {
-  HID::Mouse hid;
+  shared_pointer<HID::Mouse> hid{new HID::Mouse};
 
   uintptr_t handle = 0;
 
@@ -23,7 +23,7 @@ struct InputMouseXlib {
     unsigned relativeY = 0;
   } ms;
 
-  bool acquire() {
+  auto acquire() -> bool {
     if(acquired()) return true;
 
     if(XGrabPointer(display, handle, True, 0, GrabModeAsync, GrabModeAsync, rootWindow, invisibleCursor, CurrentTime) == GrabSuccess) {
@@ -42,7 +42,7 @@ struct InputMouseXlib {
     }
   }
 
-  bool unacquire() {
+  auto unacquire() -> bool {
     if(acquired()) {
       //restore cursor acceleration and release cursor
       XChangePointerControl(display, True, True, ms.numerator, ms.denominator, ms.threshold);
@@ -52,18 +52,18 @@ struct InputMouseXlib {
     return true;
   }
 
-  bool acquired() {
+  auto acquired() -> bool {
     return ms.acquired;
   }
 
-  void assign(unsigned groupID, unsigned inputID, int16_t value) {
-    auto& group = hid.group[groupID];
-    if(group.input[inputID].value == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
-    group.input[inputID].value = value;
+  auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
+    auto& group = hid->group(groupID);
+    if(group.input(inputID).value() == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    group.input(inputID).setValue(value);
   }
 
-  void poll(vector<HID::Device*>& devices) {
+  auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
     Window rootReturn;
     Window childReturn;
     signed rootXReturn = 0;
@@ -81,7 +81,7 @@ struct InputMouseXlib {
       assign(HID::Mouse::GroupID::Axis, 0, (int16_t)(rootXReturn - screenWidth  / 2));
       assign(HID::Mouse::GroupID::Axis, 1, (int16_t)(rootYReturn - screenHeight / 2));
 
-      if(hid.axis().input[0].value != 0 || hid.axis().input[1].value != 0) {
+      if(hid->axes().input(0).value() != 0 || hid->axes().input(1).value() != 0) {
         //if mouse moved, re-center mouse for next poll
         XWarpPointer(display, None, rootWindow, 0, 0, 0, 0, screenWidth / 2, screenHeight / 2);
       }
@@ -99,10 +99,10 @@ struct InputMouseXlib {
     assign(HID::Mouse::GroupID::Button, 3, (bool)(maskReturn & Button4Mask));
     assign(HID::Mouse::GroupID::Button, 4, (bool)(maskReturn & Button5Mask));
 
-    devices.append(&hid);
+    devices.append(hid);
   }
 
-  bool init(uintptr_t handle) {
+  auto init(uintptr_t handle) -> bool {
     this->handle = handle;
     display = XOpenDisplay(0);
     rootWindow = DefaultRootWindow(display);
@@ -128,21 +128,21 @@ struct InputMouseXlib {
     ms.relativeX = 0;
     ms.relativeY = 0;
 
-    hid.id = 2;
+    hid->setID(2);
 
-    hid.axis().append({"X"});
-    hid.axis().append({"Y"});
+    hid->axes().append("X");
+    hid->axes().append("Y");
 
-    hid.button().append({"Left"});
-    hid.button().append({"Middle"});
-    hid.button().append({"Right"});
-    hid.button().append({"Up"});
-    hid.button().append({"Down"});
+    hid->buttons().append("Left");
+    hid->buttons().append("Middle");
+    hid->buttons().append("Right");
+    hid->buttons().append("Up");
+    hid->buttons().append("Down");
 
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     unacquire();
     XFreeCursor(display, invisibleCursor);
     XCloseDisplay(display);

@@ -363,43 +363,43 @@ AudioInterface::~AudioInterface() { term(); }
 
 /* InputInterface */
 
-const char* Input::Handle = "Handle";
-const char* Input::KeyboardSupport = "KeyboardSupport";
-const char* Input::MouseSupport = "MouseSupport";
-const char* Input::JoypadSupport = "JoypadSupport";
-const char* Input::JoypadRumbleSupport = "JoypadRumbleSupport";
+const string Input::Handle = "Handle";
+const string Input::KeyboardSupport = "KeyboardSupport";
+const string Input::MouseSupport = "MouseSupport";
+const string Input::JoypadSupport = "JoypadSupport";
+const string Input::JoypadRumbleSupport = "JoypadRumbleSupport";
 
-void InputInterface::driver(const char* driver) {
+auto InputInterface::driver(string driver) -> void {
   if(p) term();
 
-  if(!driver || !*driver) driver = optimalDriver();
+  if(!driver) driver = optimalDriver();
 
   if(0);
 
   #ifdef INPUT_WINDOWS
-  else if(!strcmp(driver, "Windows")) p = new InputWindows();
+  else if(driver == "Windows") p = new InputWindows();
   #endif
 
   #ifdef INPUT_CARBON
-  else if(!strcmp(driver, "Carbon")) p = new InputCarbon();
+  else if(driver == "Carbon") p = new InputCarbon();
   #endif
 
   #ifdef INPUT_UDEV
-  else if(!strcmp(driver, "udev")) p = new InputUdev();
+  else if(driver == "udev") p = new InputUdev();
   #endif
 
   #ifdef INPUT_SDL
-  else if(!strcmp(driver, "SDL")) p = new InputSDL();
+  else if(driver == "SDL") p = new InputSDL();
   #endif
 
   #ifdef INPUT_XLIB
-  else if(!strcmp(driver, "Xlib")) p = new InputXlib();
+  else if(driver == "Xlib") p = new InputXlib();
   #endif
 
   else p = new Input();
 }
 
-const char* InputInterface::optimalDriver() {
+auto InputInterface::optimalDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
 
@@ -418,7 +418,7 @@ const char* InputInterface::optimalDriver() {
   #endif
 }
 
-const char* InputInterface::safestDriver() {
+auto InputInterface::safestDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
 
@@ -437,7 +437,7 @@ const char* InputInterface::safestDriver() {
   #endif
 }
 
-const char* InputInterface::availableDrivers() {
+auto InputInterface::availableDrivers() -> string {
   return
 
   //Windows
@@ -469,12 +469,12 @@ const char* InputInterface::availableDrivers() {
   "None";
 }
 
-bool InputInterface::init() {
+auto InputInterface::init() -> bool {
   if(!p) driver();
   return p->init();
 }
 
-void InputInterface::term() {
+auto InputInterface::term() -> void {
   if(p) {
     p->term();
     delete p;
@@ -482,15 +482,14 @@ void InputInterface::term() {
   }
 }
 
-bool InputInterface::cap(const string& name) { return p ? p->cap(name) : false; }
-any InputInterface::get(const string& name) { return p ? p->get(name) : false; }
-bool InputInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
-bool InputInterface::acquire() { return p ? p->acquire() : false; }
-bool InputInterface::unacquire() { return p ? p->unacquire() : false; }
-bool InputInterface::acquired() { return p ? p->acquired() : false; }
-vector<HID::Device*> InputInterface::poll() { return p ? p->poll() : vector<HID::Device*>(); }
-bool InputInterface::rumble(uint64_t id, bool enable) { return p ? p->rumble(id, enable) : false; }
-InputInterface::InputInterface() : p(nullptr) {}
 InputInterface::~InputInterface() { term(); }
+auto InputInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
+auto InputInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
+auto InputInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
+auto InputInterface::acquire() -> bool { return p ? p->acquire() : false; }
+auto InputInterface::unacquire() -> bool { return p ? p->unacquire() : false; }
+auto InputInterface::acquired() -> bool { return p ? p->acquired() : false; }
+auto InputInterface::poll() -> vector<shared_pointer<HID::Device>> { return p ? p->poll() : vector<shared_pointer<HID::Device>>(); }
+auto InputInterface::rumble(uint64_t id, bool enable) -> bool { return p ? p->rumble(id, enable) : false; }
 
 };
