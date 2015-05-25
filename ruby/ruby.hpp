@@ -19,46 +19,44 @@ namespace ruby {
 #include <ruby/input.hpp>
 
 struct VideoInterface {
-  void driver(const char* driver = "");
-  const char* optimalDriver();
-  const char* safestDriver();
-  const char* availableDrivers();
-  bool init();
-  void term();
-
-  bool cap(const nall::string& name);
-  nall::any get(const nall::string& name);
-  bool set(const nall::string& name, const nall::any& value);
-
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height);
-  void unlock();
-  void clear();
-  void refresh();
-
-  VideoInterface();
   ~VideoInterface();
+
+  auto driver(nall::string driver = "") -> void;
+  auto optimalDriver() -> nall::string;
+  auto safestDriver() -> nall::string;
+  auto availableDrivers() -> nall::string;
+  auto init() -> bool;
+  auto term() -> void;
+
+  auto cap(const nall::string& name) -> bool;
+  auto get(const nall::string& name) -> nall::any;
+  auto set(const nall::string& name, const nall::any& value) -> bool;
+
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool;
+  auto unlock() -> void;
+  auto clear() -> void;
+  auto refresh() -> void;
 
 private:
   Video* p = nullptr;
 };
 
 struct AudioInterface {
-  void driver(const char* driver = "");
-  const char* optimalDriver();
-  const char* safestDriver();
-  const char* availableDrivers();
-  bool init();
-  void term();
-
-  bool cap(const nall::string& name);
-  nall::any get(const nall::string& name);
-  bool set(const nall::string& name, const nall::any& value);
-
-  void sample(uint16_t left, uint16_t right);
-  void clear();
-
-  AudioInterface();
   ~AudioInterface();
+
+  auto driver(nall::string driver = "") -> void;
+  auto optimalDriver() -> nall::string;
+  auto safestDriver() -> nall::string;
+  auto availableDrivers() -> nall::string;
+  auto init() -> bool;
+  auto term() -> void;
+
+  auto cap(const nall::string& name) -> bool;
+  auto get(const nall::string& name) -> nall::any;
+  auto set(const nall::string& name, const nall::any& value) -> bool;
+
+  auto sample(uint16_t left, uint16_t right) -> void;
+  auto clear() -> void;
 
 private:
   Audio* p = nullptr;
@@ -83,7 +81,6 @@ struct InputInterface {
   auto acquire() -> bool;
   auto unacquire() -> bool;
   auto acquired() -> bool;
-
   auto poll() -> nall::vector<nall::shared_pointer<nall::HID::Device>>;
   auto rumble(uint64_t id, bool enable) -> bool;
 

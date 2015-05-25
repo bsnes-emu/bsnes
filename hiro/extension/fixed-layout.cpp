@@ -31,7 +31,7 @@ auto mFixedLayout::reset() -> type& {
 auto mFixedLayout::setEnabled(bool enabled) -> type& {
   mLayout::setEnabled(enabled);
   for(auto n : range(sizables())) {
-    sizable(n)->setEnabled(sizable(n)->enabled(true));
+    sizable(n)->setEnabled(sizable(n)->enabled());
   }
   return *this;
 }
@@ -39,7 +39,7 @@ auto mFixedLayout::setEnabled(bool enabled) -> type& {
 auto mFixedLayout::setFont(const string& font) -> type& {
   mLayout::setFont(font);
   for(auto n : range(sizables())) {
-    sizable(n)->setFont(sizable(n)->font(true));
+    sizable(n)->setFont(sizable(n)->font());
   }
   return *this;
 }
@@ -47,7 +47,7 @@ auto mFixedLayout::setFont(const string& font) -> type& {
 auto mFixedLayout::setVisible(bool visible) -> type& {
   mLayout::setVisible(visible);
   for(auto n : range(sizables())) {
-    sizable(n)->setVisible(sizable(n)->visible(true));
+    sizable(n)->setVisible(sizable(n)->visible());
   }
   return *this;
 }

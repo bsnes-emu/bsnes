@@ -1,9 +1,3 @@
-/*
-  audio.openal (2007-12-26)
-  author: Nach
-  contributors: byuu, wertigon, _willow_
-*/
-
 #if defined(PLATFORM_MACOSX)
   #include <OpenAL/al.h>
   #include <OpenAL/alc.h>
@@ -14,15 +8,14 @@
 
 namespace ruby {
 
-class pAudioOpenAL {
-public:
+struct pAudioOpenAL {
   struct {
     ALCdevice* handle;
     ALCcontext* context;
     ALuint source;
     ALenum format;
     unsigned latency;
-    unsigned queue_length;
+    unsigned queueLength;
   } device;
 
   struct {
@@ -37,21 +30,21 @@ public:
     unsigned latency;
   } settings;
 
-  bool cap(const string& name) {
+  auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
     if(name == Audio::Frequency) return true;
     if(name == Audio::Latency) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
     if(name == Audio::Latency) return settings.latency;
     return false;
   }
 
-  bool set(const string& name, const any& value) {
+  auto set(const string& name, const any& value) -> bool {
     if(name == Audio::Synchronize) {
       settings.synchronize = any_cast<bool>(value);
       return true;
@@ -65,7 +58,7 @@ public:
     if(name == Audio::Latency) {
       if(settings.latency != any_cast<unsigned>(value)) {
         settings.latency = any_cast<unsigned>(value);
-        update_latency();
+        updateLatency();
       }
       return true;
     }
@@ -73,7 +66,7 @@ public:
     return false;
   }
 
-  void sample(uint16_t sl, uint16_t sr) {
+  auto sample(uint16_t sl, uint16_t sr) -> void {
     buffer.data[buffer.length++] = sl + (sr << 16);
     if(buffer.length < buffer.size) return;
 
@@ -84,17 +77,17 @@ public:
       while(processed--) {
         alSourceUnqueueBuffers(device.source, 1, &albuffer);
         alDeleteBuffers(1, &albuffer);
-        device.queue_length--;
+        device.queueLength--;
       }
       //wait for buffer playback to catch up to sample generation if not synchronizing
-      if(settings.synchronize == false || device.queue_length < 3) break;
+      if(settings.synchronize == false || device.queueLength < 3) break;
     }
 
-    if(device.queue_length < 3) {
+    if(device.queueLength < 3) {
       alGenBuffers(1, &albuffer);
       alBufferData(albuffer, device.format, buffer.data, buffer.size * 4, settings.frequency);
       alSourceQueueBuffers(device.source, 1, &albuffer);
-      device.queue_length++;
+      device.queueLength++;
     }
 
     ALint playing;
@@ -103,32 +96,26 @@ public:
     buffer.length = 0;
   }
 
-  void clear() {
+  auto clear() -> void {
   }
 
-  void update_latency() {
-    if(buffer.data) delete[] buffer.data;
-    buffer.size = settings.frequency * settings.latency / 1000.0 + 0.5;
-    buffer.data = new uint32_t[buffer.size];
-  }
-
-  bool init() {
-    update_latency();
-    device.queue_length = 0;
+  auto init() -> bool {
+    updateLatency();
+    device.queueLength = 0;
 
     bool success = false;
-    if(device.handle = alcOpenDevice(NULL)) {
-      if(device.context = alcCreateContext(device.handle, NULL)) {
+    if(device.handle = alcOpenDevice(nullptr)) {
+      if(device.context = alcCreateContext(device.handle, nullptr)) {
         alcMakeContextCurrent(device.context);
         alGenSources(1, &device.source);
 
-        //alSourcef (device.source, AL_PITCH, 1.0);
-        //alSourcef (device.source, AL_GAIN, 1.0);
-        //alSource3f(device.source, AL_POSITION, 0.0, 0.0, 0.0);
-        //alSource3f(device.source, AL_VELOCITY, 0.0, 0.0, 0.0);
-        //alSource3f(device.source, AL_DIRECTION, 0.0, 0.0, 0.0);
-        //alSourcef (device.source, AL_ROLLOFF_FACTOR, 0.0);
-        //alSourcei (device.source, AL_SOURCE_RELATIVE, AL_TRUE);
+      //alSourcef (device.source, AL_PITCH, 1.0);
+      //alSourcef (device.source, AL_GAIN, 1.0);
+      //alSource3f(device.source, AL_POSITION, 0.0, 0.0, 0.0);
+      //alSource3f(device.source, AL_VELOCITY, 0.0, 0.0, 0.0);
+      //alSource3f(device.source, AL_DIRECTION, 0.0, 0.0, 0.0);
+      //alSourcef (device.source, AL_ROLLOFF_FACTOR, 0.0);
+      //alSourcei (device.source, AL_SOURCE_RELATIVE, AL_TRUE);
 
         alListener3f(AL_POSITION, 0.0, 0.0, 0.0);
         alListener3f(AL_VELOCITY, 0.0, 0.0, 0.0);
@@ -147,7 +134,7 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(alIsSource(device.source) == AL_TRUE) {
       int playing = 0;
       alGetSourcei(device.source, AL_SOURCE_STATE, &playing);
@@ -159,7 +146,7 @@ public:
           ALuint albuffer = 0;
           alSourceUnqueueBuffers(device.source, 1, &albuffer);
           alDeleteBuffers(1, &albuffer);
-          device.queue_length--;
+          device.queueLength--;
         }
       }
 
@@ -168,7 +155,7 @@ public:
     }
 
     if(device.context) {
-      alcMakeContextCurrent(NULL);
+      alcMakeContextCurrent(nullptr);
       alcDestroyContext(device.context);
       device.context = 0;
     }
@@ -189,7 +176,7 @@ public:
     device.handle = 0;
     device.context = 0;
     device.format = AL_FORMAT_STEREO16;
-    device.queue_length = 0;
+    device.queueLength = 0;
 
     buffer.data = 0;
     buffer.length = 0;
@@ -202,6 +189,27 @@ public:
 
   ~pAudioOpenAL() {
     term();
+  }
+
+private:
+  auto queryDevices() -> lstring {
+    lstring result;
+
+    const char* buffer = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
+    if(!buffer) return result;
+
+    while(buffer[0] || buffer[1]) {
+      result.append(buffer);
+      while(buffer[0]) buffer++;
+    }
+
+    return result;
+  }
+
+  auto updateLatency() -> void {
+    if(buffer.data) delete[] buffer.data;
+    buffer.size = settings.frequency * settings.latency / 1000.0 + 0.5;
+    buffer.data = new uint32_t[buffer.size]();
   }
 };
 

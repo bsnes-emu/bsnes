@@ -160,14 +160,14 @@ template<> struct stringify<char*> {
   const char* _data;
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(char* source) : _data(source) {}
+  stringify(char* source) : _data(source ? source : "") {}
 };
 
 template<> struct stringify<const char*> {
   const char* _data;
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(const char* source) : _data(source) {}
+  stringify(const char* source) : _data(source ? source : "") {}
 };
 
 //strings

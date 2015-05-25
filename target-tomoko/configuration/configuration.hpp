@@ -27,6 +27,7 @@ struct ConfigurationManager : Configuration::Document {
 
   struct Audio : Configuration::Node {
     string driver;
+    string device;
     bool synchronize = true;
     bool mute = false;
   } audio;

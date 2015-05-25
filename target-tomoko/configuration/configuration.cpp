@@ -24,6 +24,7 @@ ConfigurationManager::ConfigurationManager() {
   append(video, "Video");
 
   audio.append(audio.driver, "Driver");
+  audio.append(audio.device, "Device");
   audio.append(audio.synchronize, "Synchronize");
   audio.append(audio.mute, "Mute");
   append(audio, "Audio");

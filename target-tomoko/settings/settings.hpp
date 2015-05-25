@@ -42,6 +42,7 @@ struct HotkeySettings : TabFrameItem {
     ListView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
+      Button resetButton{&controlLayout, Size{80, 0}};
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 

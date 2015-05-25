@@ -102,11 +102,11 @@ auto InputSettings::refreshMappings() -> void {
 auto InputSettings::assignMapping() -> void {
   inputManager->poll();  //clear any pending events first
 
-  auto mapping = mappingList.selected();
-  activeMapping = activeDevice().mappings[mapping->offset()];
-
-//settingsManager->layout.setEnabled(false);
-  settingsManager->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+  if(auto mapping = mappingList.selected()) {
+    activeMapping = activeDevice().mappings[mapping->offset()];
+    settingsManager->layout.setEnabled(false);
+    settingsManager->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
+  }
 }
 
 auto InputSettings::assignMouseInput(unsigned id) -> void {
@@ -130,7 +130,7 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, unsigned grou
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping = nullptr;
     settingsManager->statusBar.setText("");
-  //settingsManager->layout.setEnabled(true);  //todo: this isn't enabling child widgets properly (bug in hiro)
+    settingsManager->layout.setEnabled(true);
     refreshMappings();
   }
 }

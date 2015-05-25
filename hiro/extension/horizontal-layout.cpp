@@ -51,7 +51,7 @@ auto mHorizontalLayout::setAlignment(double alignment) -> type& {
 auto mHorizontalLayout::setEnabled(bool enabled) -> type& {
   mLayout::setEnabled(enabled);
   for(auto n : range(sizables())) {
-    sizable(n)->setEnabled(sizable(n)->enabled(true));
+    sizable(n)->setEnabled(sizable(n)->enabled());
   }
   return *this;
 }
@@ -59,7 +59,7 @@ auto mHorizontalLayout::setEnabled(bool enabled) -> type& {
 auto mHorizontalLayout::setFont(const string& font) -> type& {
   mLayout::setFont(font);
   for(auto n : range(sizables())) {
-    sizable(n)->setFont(sizable(n)->font(true));
+    sizable(n)->setFont(sizable(n)->font());
   }
   return *this;
 }
@@ -121,7 +121,7 @@ auto mHorizontalLayout::setSpacing(signed spacing) -> type& {
 auto mHorizontalLayout::setVisible(bool visible) -> type& {
   mLayout::setVisible(visible);
   for(auto n : range(sizables())) {
-    sizable(n)->setVisible(sizable(n)->visible(true));
+    sizable(n)->setVisible(sizable(n)->visible());
   }
   return *this;
 }

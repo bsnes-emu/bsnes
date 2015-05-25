@@ -13,70 +13,70 @@ InputInterface input;
 
 /* VideoInterface */
 
-const char* Video::Handle = "Handle";
-const char* Video::Synchronize = "Synchronize";
-const char* Video::Depth = "Depth";
-const char* Video::Filter = "Filter";
-const char* Video::Shader = "Shader";
+const string Video::Handle = "Handle";
+const string Video::Synchronize = "Synchronize";
+const string Video::Depth = "Depth";
+const string Video::Filter = "Filter";
+const string Video::Shader = "Shader";
 
 const unsigned Video::FilterNearest = 0;
-const unsigned Video::FilterLinear  = 1;
+const unsigned Video::FilterLinear = 1;
 
-void VideoInterface::driver(const char* driver) {
+auto VideoInterface::driver(string driver) -> void {
   if(p) term();
 
-  if(!driver || !*driver) driver = optimalDriver();
+  if(!driver) driver = optimalDriver();
 
   if(0);
 
   #ifdef VIDEO_CGL
-  else if(!strcmp(driver, "OpenGL")) p = new VideoCGL();
+  else if(driver == "OpenGL") p = new VideoCGL();
   #endif
 
   #ifdef VIDEO_DIRECT3D
-  else if(!strcmp(driver, "Direct3D")) p = new VideoD3D();
+  else if(driver == "Direct3D") p = new VideoD3D();
   #endif
 
   #ifdef VIDEO_DIRECTDRAW
-  else if(!strcmp(driver, "DirectDraw")) p = new VideoDD();
+  else if(driver == "DirectDraw") p = new VideoDD();
   #endif
 
   #ifdef VIDEO_GDI
-  else if(!strcmp(driver, "GDI")) p = new VideoGDI();
+  else if(driver == "GDI") p = new VideoGDI();
   #endif
 
   #ifdef VIDEO_GLX
-  else if(!strcmp(driver, "OpenGL")) p = new VideoGLX();
+  else if(driver == "OpenGL") p = new VideoGLX();
   #endif
 
   #ifdef VIDEO_QTOPENGL
-  else if(!strcmp(driver, "Qt-OpenGL")) p = new VideoQtOpenGL();
+  else if(driver == "Qt-OpenGL") p = new VideoQtOpenGL();
   #endif
 
   #ifdef VIDEO_QTRASTER
-  else if(!strcmp(driver, "Qt-Raster")) p = new VideoQtRaster();
+  else if(driver == "Qt-Raster") p = new VideoQtRaster();
   #endif
 
   #ifdef VIDEO_SDL
-  else if(!strcmp(driver, "SDL")) p = new VideoSDL();
+  else if(driver == "SDL") p = new VideoSDL();
   #endif
 
   #ifdef VIDEO_WGL
-  else if(!strcmp(driver, "OpenGL")) p = new VideoWGL();
+  else if(driver == "OpenGL") p = new VideoWGL();
   #endif
 
   #ifdef VIDEO_XSHM
-  else if(!strcmp(driver, "XShm")) p = new VideoXShm();
+  else if(driver == "XShm") p = new VideoXShm();
   #endif
 
   #ifdef VIDEO_XV
-  else if(!strcmp(driver, "X-Video")) p = new VideoXv();
+  else if(driver == "X-Video") p = new VideoXv();
   #endif
 
   else p = new Video();
 }
 
-const char* VideoInterface::optimalDriver() {
+auto VideoInterface::optimalDriver() -> string {
   #if defined(VIDEO_WGL)
   return "OpenGL";
   #elif defined(VIDEO_DIRECT3D)
@@ -103,7 +103,7 @@ const char* VideoInterface::optimalDriver() {
   #endif
 }
 
-const char* VideoInterface::safestDriver() {
+auto VideoInterface::safestDriver() -> string {
   #if defined(VIDEO_DIRECT3D)
   return "Direct3D";
   #elif defined(VIDEO_WGL)
@@ -130,7 +130,7 @@ const char* VideoInterface::safestDriver() {
   #endif
 }
 
-const char* VideoInterface::availableDrivers() {
+auto VideoInterface::availableDrivers() -> string {
   return
 
   //Windows
@@ -178,12 +178,12 @@ const char* VideoInterface::availableDrivers() {
   "None";
 }
 
-bool VideoInterface::init() {
+auto VideoInterface::init() -> bool {
   if(!p) driver();
   return p->init();
 }
 
-void VideoInterface::term() {
+auto VideoInterface::term() -> void {
   if(p) {
     p->term();
     delete p;
@@ -191,66 +191,66 @@ void VideoInterface::term() {
   }
 }
 
-bool VideoInterface::cap(const string& name) { return p ? p->cap(name) : false; }
-any VideoInterface::get(const string& name) { return p ? p->get(name) : false; }
-bool VideoInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
-bool VideoInterface::lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) { return p ? p->lock(data, pitch, width, height) : false; }
-void VideoInterface::unlock() { if(p) p->unlock(); }
-void VideoInterface::clear() { if(p) p->clear(); }
-void VideoInterface::refresh() { if(p) p->refresh(); }
-VideoInterface::VideoInterface() : p(nullptr) {}
 VideoInterface::~VideoInterface() { term(); }
+auto VideoInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
+auto VideoInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
+auto VideoInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
+auto VideoInterface::lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool { return p ? p->lock(data, pitch, width, height) : false; }
+auto VideoInterface::unlock() -> void { if(p) p->unlock(); }
+auto VideoInterface::clear() -> void { if(p) p->clear(); }
+auto VideoInterface::refresh() -> void { if(p) p->refresh(); }
 
 /* AudioInterface */
 
-const char* Audio::Handle = "Handle";
-const char* Audio::Synchronize = "Synchronize";
-const char* Audio::Frequency = "Frequency";
-const char* Audio::Latency = "Latency";
+const string Audio::Device = "Device";
+const string Audio::Handle = "Handle";
+const string Audio::Synchronize = "Synchronize";
+const string Audio::Frequency = "Frequency";
+const string Audio::Latency = "Latency";
 
-void AudioInterface::driver(const char* driver) {
+auto AudioInterface::driver(string driver) -> void {
   if(p) term();
 
-  if(!driver || !*driver) driver = optimalDriver();
+  if(!driver) driver = optimalDriver();
 
   if(0);
 
   #ifdef AUDIO_ALSA
-  else if(!strcmp(driver, "ALSA")) p = new AudioALSA();
+  else if(driver == "ALSA") p = new AudioALSA();
   #endif
 
   #ifdef AUDIO_AO
-  else if(!strcmp(driver, "libao")) p = new AudioAO();
+  else if(driver == "libao") p = new AudioAO();
   #endif
 
   #ifdef AUDIO_DIRECTSOUND
-  else if(!strcmp(driver, "DirectSound")) p = new AudioDS();
+  else if(driver == "DirectSound") p = new AudioDS();
   #endif
 
   #ifdef AUDIO_OPENAL
-  else if(!strcmp(driver, "OpenAL")) p = new AudioOpenAL();
+  else if(driver == "OpenAL") p = new AudioOpenAL();
   #endif
 
   #ifdef AUDIO_OSS
-  else if(!strcmp(driver, "OSS")) p = new AudioOSS();
+  else if(driver == "OSS") p = new AudioOSS();
   #endif
 
   #ifdef AUDIO_PULSEAUDIO
-  else if(!strcmp(driver, "PulseAudio")) p = new AudioPulseAudio();
+  else if(driver == "PulseAudio") p = new AudioPulseAudio();
   #endif
 
   #ifdef AUDIO_PULSEAUDIOSIMPLE
-  else if(!strcmp(driver, "PulseAudioSimple")) p = new AudioPulseAudioSimple();
+  else if(driver == "PulseAudioSimple") p = new AudioPulseAudioSimple();
   #endif
 
   #ifdef AUDIO_XAUDIO2
-  else if(!strcmp(driver, "XAudio2")) p = new AudioXAudio2();
+  else if(driver == "XAudio2") p = new AudioXAudio2();
   #endif
 
   else p = new Audio();
 }
 
-const char* AudioInterface::optimalDriver() {
+auto AudioInterface::optimalDriver() -> string {
   #if defined(AUDIO_XAUDIO2)
   return "XAudio2";
   #elif defined(AUDIO_DIRECTSOUND)
@@ -274,7 +274,7 @@ const char* AudioInterface::optimalDriver() {
   #endif
 }
 
-const char* AudioInterface::safestDriver() {
+auto AudioInterface::safestDriver() -> string {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
   #elif defined(AUDIO_XAUDIO2)
@@ -298,7 +298,7 @@ const char* AudioInterface::safestDriver() {
   #endif
 }
 
-const char* AudioInterface::availableDrivers() {
+auto AudioInterface::availableDrivers() -> string {
   return
 
   //Windows
@@ -340,12 +340,12 @@ const char* AudioInterface::availableDrivers() {
   "None";
 }
 
-bool AudioInterface::init() {
+auto AudioInterface::init() -> bool {
   if(!p) driver();
   return p->init();
 }
 
-void AudioInterface::term() {
+auto AudioInterface::term() -> void {
   if(p) {
     p->term();
     delete p;
@@ -353,13 +353,12 @@ void AudioInterface::term() {
   }
 }
 
-bool AudioInterface::cap(const string& name) { return p ? p->cap(name) : false; }
-any AudioInterface::get(const string& name) { return p ? p->get(name) : false; }
-bool AudioInterface::set(const string& name, const any& value) { return p ? p->set(name, value) : false; }
-void AudioInterface::sample(uint16_t left, uint16_t right) { if(p) p->sample(left, right); }
-void AudioInterface::clear() { if(p) p->clear(); }
-AudioInterface::AudioInterface() : p(nullptr) {}
 AudioInterface::~AudioInterface() { term(); }
+auto AudioInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
+auto AudioInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
+auto AudioInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
+auto AudioInterface::sample(uint16_t left, uint16_t right) -> void { if(p) p->sample(left, right); }
+auto AudioInterface::clear() -> void { if(p) p->clear(); }
 
 /* InputInterface */
 

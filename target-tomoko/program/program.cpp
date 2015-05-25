@@ -36,6 +36,7 @@ Program::Program() {
   if(!video.init()) { video.driver("None"); video.init(); }
 
   audio.driver(config().audio.driver);
+  audio.set(Audio::Device, config().audio.device);
   audio.set(Audio::Handle, presentation->viewport.handle());
   audio.set(Audio::Synchronize, config().audio.synchronize);
   audio.set(Audio::Frequency, 96000u);
