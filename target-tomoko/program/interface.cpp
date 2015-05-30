@@ -1,11 +1,10 @@
 //request from emulation core to load non-volatile media folder
 auto Program::loadRequest(unsigned id, string name, string type) -> void {
   string location = BrowserDialog()
-  .setParent(*presentation)
   .setTitle({"Load ", name})
   .setPath({config().library.location, name})
   .setFilters({string{name, "|*.", type}})
-  .selectFolder();
+  .openFolder();
   if(!directory::exists(location)) return;
 
   mediaPaths(id) = location;

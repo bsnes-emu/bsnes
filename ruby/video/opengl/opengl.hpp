@@ -22,18 +22,23 @@ namespace ruby {
 struct OpenGL;
 
 struct OpenGLTexture {
+  auto getFormat() const -> GLuint;
+  auto getType() const -> GLuint;
+
   GLuint texture = 0;
   unsigned width = 0;
   unsigned height = 0;
   GLuint format = GL_RGBA8;
   GLuint filter = GL_LINEAR;
   GLuint wrap = GL_CLAMP_TO_BORDER;
-
-  GLuint getFormat() const;
-  GLuint getType() const;
 };
 
 struct OpenGLSurface : OpenGLTexture {
+  auto allocate() -> void;
+  auto size(unsigned width, unsigned height) -> void;
+  auto release() -> void;
+  auto render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight) -> void;
+
   GLuint program = 0;
   GLuint framebuffer = 0;
   GLuint vao = 0;
@@ -42,14 +47,13 @@ struct OpenGLSurface : OpenGLTexture {
   GLuint geometry = 0;
   GLuint fragment = 0;
   uint32_t* buffer = nullptr;
-
-  void allocate();
-  void size(unsigned width, unsigned height);
-  void release();
-  void render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight);
 };
 
 struct OpenGLProgram : OpenGLSurface {
+  auto bind(OpenGL* instance, const Markup::Node& node, const string& pathname) -> void;
+  auto parse(OpenGL* instance, string& source) -> void;
+  auto release() -> void;
+
   unsigned phase = 0;   //frame counter
   unsigned modulo = 0;  //frame counter modulus
   unsigned absoluteWidth = 0;
@@ -57,13 +61,17 @@ struct OpenGLProgram : OpenGLSurface {
   double relativeWidth = 0;
   double relativeHeight = 0;
   vector<OpenGLTexture> pixmaps;
-
-  void bind(OpenGL* instance, const Markup::Node& node, const string& pathname);
-  void parse(OpenGL* instance, string& source);
-  void release();
 };
 
 struct OpenGL : OpenGLProgram {
+  auto shader(const string& pathname) -> void;
+  auto allocateHistory(unsigned size) -> void;
+  auto lock(uint32_t*& data, unsigned& pitch) -> bool;
+  auto clear() -> void;
+  auto refresh() -> void;
+  auto init() -> bool;
+  auto term() -> void;
+
   vector<OpenGLProgram> programs;
   vector<OpenGLTexture> history;
   GLuint inputFormat = GL_RGBA8;
@@ -72,22 +80,14 @@ struct OpenGL : OpenGLProgram {
   struct Setting {
     string name;
     string value;
-    bool operator< (const Setting& source) { return name <  source.name; }
-    bool operator==(const Setting& source) { return name == source.name; }
-    Setting() {}
+    bool operator< (const Setting& source) const { return name <  source.name; }
+    bool operator==(const Setting& source) const { return name == source.name; }
+    Setting() = default;
     Setting(const string& name) : name(name) {}
     Setting(const string& name, const string& value) : name(name), value(value) {}
   };
   set<Setting> settings;
   bool initialized = false;
-
-  void shader(const char* pathname);
-  void allocateHistory(unsigned size);
-  bool lock(uint32_t*& data, unsigned& pitch);
-  void clear();
-  void refresh();
-  bool init();
-  void term();
 };
 
 #include "texture.hpp"

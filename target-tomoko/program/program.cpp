@@ -22,7 +22,6 @@ Program::Program() {
 
   new ConfigurationManager;
   new InputManager;
-  new LibraryManager;
   new SettingsManager;
   new CheatDatabase;
   new ToolsManager;

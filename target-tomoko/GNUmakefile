@@ -9,7 +9,7 @@ include gb/GNUmakefile
 include gba/GNUmakefile
 
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
-ui_objects += ui-library ui-settings ui-tools ui-presentation
+ui_objects += ui-settings ui-tools ui-presentation
 ui_objects += ruby hiro
 
 # platform

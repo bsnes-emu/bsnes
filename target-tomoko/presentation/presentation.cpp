@@ -7,10 +7,18 @@ Presentation::Presentation() {
   libraryMenu.setText("Library");
   for(auto& emulator : program->emulators) {
     for(auto& media : emulator->media) {
-      if(media.bootable == false) continue;
+      if(!media.bootable) continue;
       auto item = new MenuItem{&libraryMenu};
       item->setText({media.name, " ..."}).onActivate([=] {
-        libraryManager->show(media.type);
+        directory::create({config().library.location, media.name});
+        auto location = BrowserDialog()
+        .setTitle({"Load ", media.name})
+        .setPath({config().library.location, media.name})
+        .setFilters(string{media.name, "|*.", media.type})
+        .openFolder();
+        if(directory::exists(location)) {
+          program->loadMedia(location);
+        }
       });
       loadBootableMedia.append(item);
     }
@@ -73,7 +81,7 @@ Presentation::Presentation() {
     statusBar.setVisible(config().userInterface.showStatusBar);
     if(visible()) resizeViewport();
   });
-  showConfiguration.setText("Configuration ...").onActivate([&] { settingsManager->show(0); });
+  showConfiguration.setText("Configuration ...").onActivate([&] { settingsManager->show(2); });
 
   toolsMenu.setText("Tools").setVisible(false);
   saveStateMenu.setText("Save State");
@@ -98,7 +106,7 @@ Presentation::Presentation() {
 
   setTitle({"tomoko v", Emulator::Version});
   setResizable(false);
-  setBackgroundColor({16, 16, 16});
+  setBackgroundColor({0, 0, 0});
   resizeViewport();
 }
 
@@ -130,24 +138,32 @@ auto Presentation::updateEmulator() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
+  signed scale = 1;
+  if(config().video.scale == "Small" ) scale = 1;
+  if(config().video.scale == "Normal") scale = 2;
+  if(config().video.scale == "Large" ) scale = 4;
+
   signed width  = 256;
   signed height = 240;
-
   if(emulator) {
     width  = emulator->information.width;
     height = emulator->information.height;
   }
 
+  bool arc = config().video.aspectCorrection;
+
   if(fullScreen() == false) {
-    bool arc = config().video.aspectCorrection && emulator && emulator->information.aspectRatio != 1.0;
+    signed windowWidth  = 256 * scale;
+    signed windowHeight = 240 * scale;
+    if(arc) windowWidth = windowWidth * 8 / 7;
 
-    if(config().video.scale == "Small" ) width *= 1, height *= 1;
-    if(config().video.scale == "Normal") width *= 2, height *= 2;
-    if(config().video.scale == "Large" ) width *= 4, height *= 4;
-    if(arc) width = width * 8 / 7;
+    double stretch = (arc && emulator && emulator->information.aspectRatio != 1.0) ? 8.0 / 7.0 : 1.0;
+    signed multiplier = min(windowWidth / (signed)(width * stretch), windowHeight / height);
+    width = width * multiplier * stretch;
+    height = height * multiplier;
 
-    setSize({width, height});
-    viewport.setGeometry({0, 0, width, height});
+    setSize({windowWidth, windowHeight});
+    viewport.setGeometry({(windowWidth - width) / 2, (windowHeight - height) / 2, width, height});
     setPlacement(0.5, 0.5);
   } else {
     auto desktop = Desktop::size();

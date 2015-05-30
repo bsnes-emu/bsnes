@@ -25,12 +25,12 @@ struct pInputXlib {
 
   auto get(const string& name) -> any {
     if(name == Input::Handle) return (uintptr_t)settings.handle;
-    return false;
+    return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle) {
-      settings.handle = any_cast<uintptr_t>(value);
+    if(name == Input::Handle && value.is<uintptr_t>()) {
+      settings.handle = value.get<uintptr_t>();
       return true;
     }
 

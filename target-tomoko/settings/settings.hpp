@@ -1,3 +1,15 @@
+struct VideoSettings : TabFrameItem {
+  VideoSettings(TabFrame*);
+
+  VerticalLayout layout{this};
+};
+
+struct AudioSettings : TabFrameItem {
+  AudioSettings(TabFrame*);
+
+  VerticalLayout layout{this};
+};
+
 struct InputSettings : TabFrameItem {
   InputSettings(TabFrame*);
   auto updateControls() -> void;
@@ -46,6 +58,12 @@ struct HotkeySettings : TabFrameItem {
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 
+struct TimingSettings : TabFrameItem {
+  TimingSettings(TabFrame*);
+
+  VerticalLayout layout{this};
+};
+
 struct AdvancedSettings : TabFrameItem {
   AdvancedSettings(TabFrame*);
 
@@ -72,8 +90,11 @@ struct SettingsManager : Window {
 
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
+      VideoSettings video{&panel};
+      AudioSettings audio{&panel};
       InputSettings input{&panel};
       HotkeySettings hotkeys{&panel};
+      TimingSettings timing{&panel};
       AdvancedSettings advanced{&panel};
 
   StatusBar statusBar{this};

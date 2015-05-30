@@ -1,4 +1,4 @@
-void OpenGL::shader(const char* pathname) {
+auto OpenGL::shader(const string& pathname) -> void {
   for(auto& program : programs) program.release();
   programs.reset();
 
@@ -29,11 +29,11 @@ void OpenGL::shader(const char* pathname) {
       string text = node.text();
       if(node.name() == "width") {
         if(text.endsWith("%")) relativeWidth = real(text.rtrim("%")) / 100.0;
-        else absoluteWidth = decimal(text);
+        else absoluteWidth = text.decimal();
       }
       if(node.name() == "height") {
         if(text.endsWith("%")) relativeHeight = real(text.rtrim("%")) / 100.0;
-        else absoluteHeight = decimal(text);
+        else absoluteHeight = text.decimal();
       }
     }
 
@@ -51,7 +51,7 @@ void OpenGL::shader(const char* pathname) {
   allocateHistory(historySize);
 }
 
-void OpenGL::allocateHistory(unsigned size) {
+auto OpenGL::allocateHistory(unsigned size) -> void {
   for(auto& frame : history) glDeleteTextures(1, &frame.texture);
   history.reset();
   while(size--) {
@@ -65,12 +65,12 @@ void OpenGL::allocateHistory(unsigned size) {
   }
 }
 
-bool OpenGL::lock(uint32_t*& data, unsigned& pitch) {
+auto OpenGL::lock(uint32_t*& data, unsigned& pitch) -> bool {
   pitch = width * sizeof(uint32_t);
   return data = buffer;
 }
 
-void OpenGL::clear() {
+auto OpenGL::clear() -> void {
   for(auto& p : programs) {
     glUseProgram(p.program);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, p.framebuffer);
@@ -83,7 +83,7 @@ void OpenGL::clear() {
   glClear(GL_COLOR_BUFFER_BIT);
 }
 
-void OpenGL::refresh() {
+auto OpenGL::refresh() -> void {
   clear();
 
   glActiveTexture(GL_TEXTURE0);
@@ -180,7 +180,7 @@ void OpenGL::refresh() {
   }
 }
 
-bool OpenGL::init() {
+auto OpenGL::init() -> bool {
   if(!OpenGLBind()) return false;
 
   glDisable(GL_ALPHA_TEST);
@@ -199,13 +199,13 @@ bool OpenGL::init() {
   OpenGLSurface::allocate();
   glrLinkProgram(program);
 
-  shader(nullptr);
+  shader("");
   return initialized = true;
 }
 
-void OpenGL::term() {
+auto OpenGL::term() -> void {
   if(initialized == false) return;
-  shader(nullptr);  //release shader resources (eg frame[] history)
+  shader("");  //release shader resources (eg frame[] history)
   OpenGLSurface::release();
   if(buffer) { delete[] buffer; buffer = nullptr; }
   initialized = false;

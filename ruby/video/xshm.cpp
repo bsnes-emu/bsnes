@@ -13,15 +13,16 @@ namespace ruby {
 struct pVideoXShm {
   struct Device {
     Display* display = nullptr;
-    int screen;
-    int depth;
+    signed screen = 0;
+    signed depth = 0;
     Visual* visual = nullptr;
-    Window window;
+    Window window = 0;
 
     XShmSegmentInfo shmInfo;
     XImage* image = nullptr;
     uint32_t* buffer = nullptr;
-    unsigned width, height;
+    unsigned width = 0;
+    unsigned height = 0;
   } device;
 
   struct Settings {
@@ -29,34 +30,39 @@ struct pVideoXShm {
     unsigned filter = Video::FilterLinear;
 
     uint32_t* buffer = nullptr;
-    unsigned width, height;
+    unsigned width = 0;
+    unsigned height = 0;
   } settings;
 
-  bool cap(const string& name) {
+  ~pVideoXShm() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     if(name == Video::Filter) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return settings.handle;
     if(name == Video::Filter) return settings.filter;
+    return {};
+  }
+
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = value.get<uintptr_t>();
+      return true;
+    }
+    if(name == Video::Filter && value.is<unsigned>()) {
+      settings.filter = value.get<unsigned>();
+      return true;
+    }
     return false;
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = any_cast<uintptr_t>(value);
-      return true;
-    }
-    if(name == Video::Filter) {
-      settings.filter = any_cast<unsigned>(value);
-      return true;
-    }
-    return false;
-  }
-
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     if(settings.buffer == nullptr || settings.width != width || settings.height != height) {
       if(settings.buffer) delete[] settings.buffer;
       settings.width = width, settings.height = height;
@@ -68,18 +74,18 @@ struct pVideoXShm {
     return true;
   }
 
-  void unlock() {
+  auto unlock() -> void {
   }
 
-  void clear() {
+  auto clear() -> void {
     if(settings.buffer == nullptr) return;
     uint32_t* dp = settings.buffer;
     unsigned length = settings.width * settings.height;
-    while(length--) *dp++ = (255u << 24);
+    while(length--) *dp++ = 255u << 24;
     refresh();
   }
 
-  void refresh() {
+  auto refresh() -> void {
     if(settings.buffer == nullptr) return;
     size();
 
@@ -96,12 +102,12 @@ struct pVideoXShm {
 
       if(settings.filter == Video::FilterNearest) {
         for(unsigned x = 0; x < device.width; x++) {
-          *dp++ = (255u << 24) | sp[(unsigned)xstep];
+          *dp++ = 255u << 24 | sp[(unsigned)xstep];
           xstep += xratio;
         }
       } else {  //settings.filter == Video::FilterLinear
         for(unsigned x = 0; x < device.width; x++) {
-          *dp++ = (255u << 24) | interpolate(xstep - (unsigned)xstep, sp[(unsigned)xstep], sp[(unsigned)xstep + 1]);
+          *dp++ = 255u << 24 | interpolate(xstep - (unsigned)xstep, sp[(unsigned)xstep], sp[(unsigned)xstep + 1]);
           xstep += xratio;
         }
       }
@@ -116,7 +122,7 @@ struct pVideoXShm {
     XFlush(device.display);
   }
 
-  bool init() {
+  auto init() -> bool {
     device.display = XOpenDisplay(0);
     device.screen = DefaultScreen(device.display);
 
@@ -151,18 +157,16 @@ struct pVideoXShm {
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     free();
-
-    if(device.display) { XCloseDisplay(device.display); device.display = nullptr; }
+    if(device.display) {
+      XCloseDisplay(device.display);
+      device.display = nullptr;
+    }
   }
 
-  ~pVideoXShm() {
-    term();
-  }
-
-//internal:
-  bool size() {
+private:
+  auto size() -> bool {
     XWindowAttributes windowAttributes;
     XGetWindowAttributes(device.display, settings.handle, &windowAttributes);
 
@@ -185,7 +189,7 @@ struct pVideoXShm {
     return true;
   }
 
-  void free() {
+  auto free() -> void {
     if(device.buffer == nullptr) return;
     device.buffer = nullptr;
     XShmDetach(device.display, &device.shmInfo);
@@ -194,13 +198,13 @@ struct pVideoXShm {
     shmctl(device.shmInfo.shmid, IPC_RMID, 0);
   }
 
-  alwaysinline uint32_t interpolate(float mu, uint32_t a, uint32_t b) {
-    uint8_t ar = (a >> 16), ag = (a >> 8), ab = (a >> 0);
-    uint8_t br = (b >> 16), bg = (b >> 8), bb = (b >> 0);
+  alwaysinline auto interpolate(float mu, uint32_t a, uint32_t b) -> uint32_t {
+    uint8_t ar = a >> 16, ag = a >> 8, ab = a >> 0;
+    uint8_t br = b >> 16, bg = b >> 8, bb = b >> 0;
     uint8_t cr = ar * (1.0 - mu) + br * mu;
     uint8_t cg = ag * (1.0 - mu) + bg * mu;
     uint8_t cb = ab * (1.0 - mu) + bb * mu;
-    return (cr << 16) | (cg << 8) | (cb << 0);
+    return cr << 16 | cg << 8 | cb << 0;
   }
 };
 

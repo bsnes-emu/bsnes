@@ -6,31 +6,36 @@
 namespace ruby {
 
 struct pVideoGLX : OpenGL {
-  GLXContext (*glXCreateContextAttribs)(Display*, GLXFBConfig, GLXContext, int, const int*) = nullptr;
-  int (*glXSwapInterval)(int) = nullptr;
+  auto (*glXCreateContextAttribs)(Display*, GLXFBConfig, GLXContext, signed, const signed*) -> GLXContext = nullptr;
+  auto (*glXSwapInterval)(signed) -> signed = nullptr;
 
-  Display* display;
-  int screen;
-  Window xwindow;
-  Colormap colormap;
-  GLXContext glxcontext;
-  GLXWindow glxwindow;
+  Display* display = nullptr;
+  signed screen = 0;
+  Window xwindow = 0;
+  Colormap colormap = 0;
+  GLXContext glxcontext = nullptr;
+  GLXWindow glxwindow = 0;
 
   struct {
-    int version_major, version_minor;
-    bool double_buffer;
-    bool is_direct;
+    signed version_major = 0;
+    signed version_minor = 0;
+    bool doubleBuffer = false;
+    bool isDirect = false;
   } glx;
 
   struct {
-    Window handle;
-    bool synchronize;
-    unsigned depth;
-    unsigned filter;
+    Window handle = 0;
+    bool synchronize = false;
+    unsigned depth = 24;
+    unsigned filter = 1;  //linear
     string shader;
   } settings;
 
-  bool cap(const string& name) {
+  ~pVideoGLX() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Depth) return true;
@@ -39,30 +44,31 @@ struct pVideoGLX : OpenGL {
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Depth) return settings.depth;
     if(name == Video::Filter) return settings.filter;
-    return false;
+    if(name == Video::Shader) return settings.shader;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = value.get<uintptr_t>();
       return true;
     }
 
-    if(name == Video::Synchronize) {
-      if(settings.synchronize != any_cast<bool>(value)) {
-        settings.synchronize = any_cast<bool>(value);
+    if(name == Video::Synchronize && value.is<bool>()) {
+      if(settings.synchronize != value.get<bool>()) {
+        settings.synchronize = value.get<bool>();
         if(glXSwapInterval) glXSwapInterval(settings.synchronize);
         return true;
       }
     }
 
-    if(name == Video::Depth) {
-      unsigned depth = any_cast<unsigned>(value);
+    if(name == Video::Depth && value.is<unsigned>()) {
+      unsigned depth = value.get<unsigned>();
       if(depth > DefaultDepth(display, screen)) return false;
 
       switch(depth) {
@@ -75,14 +81,14 @@ struct pVideoGLX : OpenGL {
       return true;
     }
 
-    if(name == Video::Filter) {
-      settings.filter = any_cast<unsigned>(value);
+    if(name == Video::Filter && value.is<unsigned>()) {
+      settings.filter = value.get<unsigned>();
       if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
-    if(name == Video::Shader) {
-      settings.shader = any_cast<const char*>(value);
+    if(name == Video::Shader && value.is<string>()) {
+      settings.shader = value.get<string>();
       OpenGL::shader(settings.shader);
       if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
@@ -91,20 +97,20 @@ struct pVideoGLX : OpenGL {
     return false;
   }
 
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
-  void unlock() {
+  auto unlock() -> void {
   }
 
-  void clear() {
+  auto clear() -> void {
     OpenGL::clear();
-    if(glx.double_buffer) glXSwapBuffers(display, glxwindow);
+    if(glx.doubleBuffer) glXSwapBuffers(display, glxwindow);
   }
 
-  void refresh() {
+  auto refresh() -> void {
     //we must ensure that the child window is the same size as the parent window.
     //unfortunately, we cannot hook the parent window resize event notification,
     //as we did not create the parent window, nor have any knowledge of the toolkit used.
@@ -118,11 +124,14 @@ struct pVideoGLX : OpenGL {
 
     outputWidth = parent.width, outputHeight = parent.height;
     OpenGL::refresh();
-    if(glx.double_buffer) glXSwapBuffers(display, glxwindow);
+    if(glx.doubleBuffer) glXSwapBuffers(display, glxwindow);
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
+
+    display = XOpenDisplay(0);
+    screen = DefaultScreen(display);
 
     glXQueryVersion(display, &glx.version_major, &glx.version_minor);
     //require GLX 1.2+ API
@@ -133,7 +142,7 @@ struct pVideoGLX : OpenGL {
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
-    int attributeList[] = {
+    signed attributeList[] = {
       GLX_DRAWABLE_TYPE, GLX_WINDOW_BIT,
       GLX_RENDER_TYPE, GLX_RGBA_BIT,
       GLX_DOUBLEBUFFER, True,
@@ -143,7 +152,7 @@ struct pVideoGLX : OpenGL {
       None
     };
 
-    int fbCount;
+    signed fbCount;
     GLXFBConfig* fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
     if(fbCount == 0) return false;
 
@@ -174,12 +183,12 @@ struct pVideoGLX : OpenGL {
     glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
-    glXCreateContextAttribs = (GLXContext (*)(Display*, GLXFBConfig, GLXContext, int, const int*))glGetProcAddress("glXCreateContextAttribsARB");
-    glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalSGI");
-    if(!glXSwapInterval) glXSwapInterval = (int (*)(int))glGetProcAddress("glXSwapIntervalMESA");
+    glXCreateContextAttribs = (GLXContext (*)(Display*, GLXFBConfig, GLXContext, signed, const signed*))glGetProcAddress("glXCreateContextAttribsARB");
+    glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
+    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
 
     if(glXCreateContextAttribs) {
-      int attributes[] = {
+      signed attributes[] = {
         GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
         GLX_CONTEXT_MINOR_VERSION_ARB, 2,
         None
@@ -197,16 +206,16 @@ struct pVideoGLX : OpenGL {
     }
 
     //read attributes of frame buffer for later use, as requested attributes from above are not always granted
-    int value = 0;
+    signed value = 0;
     glXGetConfig(display, vi, GLX_DOUBLEBUFFER, &value);
-    glx.double_buffer = value;
-    glx.is_direct = glXIsDirect(display, glxcontext);
+    glx.doubleBuffer = value;
+    glx.isDirect = glXIsDirect(display, glxcontext);
 
     OpenGL::init();
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     OpenGL::term();
 
     if(glxcontext) {
@@ -223,26 +232,11 @@ struct pVideoGLX : OpenGL {
       XFreeColormap(display, colormap);
       colormap = 0;
     }
-  }
 
-  pVideoGLX() {
-    display = XOpenDisplay(0);
-    screen = DefaultScreen(display);
-
-    settings.handle = 0;
-    settings.synchronize = false;
-    settings.depth = 24;
-    settings.filter = 1;  //linear
-
-    xwindow = 0;
-    colormap = 0;
-    glxcontext = nullptr;
-    glxwindow = 0;
-  }
-
-  ~pVideoGLX() {
-    term();
-    XCloseDisplay(display);
+    if(display) {
+      XCloseDisplay(display);
+      display = nullptr;
+    }
   }
 };
 

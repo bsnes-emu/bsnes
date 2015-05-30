@@ -4,19 +4,19 @@ MessageDialog::MessageDialog(const string& text) {
   state.text = text;
 }
 
-auto MessageDialog::error(const lstring& buttons) -> signed {
+auto MessageDialog::error(const lstring& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Error;
   return _run();
 }
 
-auto MessageDialog::information(const lstring& buttons) -> signed {
+auto MessageDialog::information(const lstring& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Information;
   return _run();
 }
 
-auto MessageDialog::question(const lstring& buttons) -> signed {
+auto MessageDialog::question(const lstring& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Question;
   return _run();
@@ -37,13 +37,13 @@ auto MessageDialog::setTitle(const string& title) -> type& {
   return *this;
 }
 
-auto MessageDialog::warning(const lstring& buttons) -> signed {
+auto MessageDialog::warning(const lstring& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Warning;
   return _run();
 }
 
-auto MessageDialog::_run() -> signed {
+auto MessageDialog::_run() -> string {
   Window window;
     VerticalLayout layout{&window};
       HorizontalLayout messageLayout{&layout, Size{~0, 0}, 8};
@@ -57,7 +57,7 @@ auto MessageDialog::_run() -> signed {
   messageText.setText(state.text);
   for(auto n : range(state.buttons)) {
     Button button{&controlLayout, Size{80, 0}, 8};
-    button.onActivate([&, n] { state.response = n; window.setModal(false); });
+    button.onActivate([&, n] { state.response = state.buttons[n]; window.setModal(false); });
     button.setText(state.buttons[n]);
     button.setFocused();  //the last button will have effective focus
   }
@@ -66,7 +66,7 @@ auto MessageDialog::_run() -> signed {
   signed widthButtons = 8 + state.buttons.size() * 88;
   signed width = max(320, widthMessage, widthButtons);
 
-  window.onClose([&] { state.response = -1; window.setModal(false); });
+  window.onClose([&] { window.setModal(false); });
   window.setTitle(state.title);
   window.setResizable(false);
   window.setSize({width, layout.minimumSize().height()});

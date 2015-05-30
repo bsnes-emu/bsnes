@@ -1,9 +1,9 @@
-static unsigned glrSize(unsigned size) {
+static auto glrSize(unsigned size) -> unsigned {
   return size;
 //return bit::round(size);  //return nearest power of two
 }
 
-static GLuint glrFormat(const string& format) {
+static auto glrFormat(const string& format) -> GLuint {
   if(format == "r32i"   ) return GL_R32I;
   if(format == "r32ui"  ) return GL_R32UI;
   if(format == "rgba8"  ) return GL_RGBA8;
@@ -15,53 +15,53 @@ static GLuint glrFormat(const string& format) {
   return GL_RGBA8;
 }
 
-static GLuint glrFilter(const string& filter) {
+static auto glrFilter(const string& filter) -> GLuint {
   if(filter == "nearest") return GL_NEAREST;
   if(filter == "linear" ) return GL_LINEAR;
   return GL_LINEAR;
 }
 
-static GLuint glrWrap(const string& wrap) {
+static auto glrWrap(const string& wrap)  -> GLuint {
   if(wrap == "border") return GL_CLAMP_TO_BORDER;
   if(wrap == "edge"  ) return GL_CLAMP_TO_EDGE;
   if(wrap == "repeat") return GL_REPEAT;
   return GL_CLAMP_TO_BORDER;
 }
 
-static unsigned glrModulo(unsigned modulo) {
+static auto glrModulo(unsigned modulo) -> unsigned {
   if(modulo) return modulo;
   return 300;  //divisible by 2, 3, 4, 5, 6, 10, 12, 15, 20, 25, 30, 50, 60, 100, 150
 }
 
-static GLuint glrProgram() {
+static auto glrProgram() -> GLuint {
   GLuint program = 0;
   glGetIntegerv(GL_CURRENT_PROGRAM, (GLint*)&program);
   return program;
 }
 
-static void glrUniform1i(const string& name, GLint value) {
+static auto glrUniform1i(const string& name, GLint value) -> void {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniform1i(location, value);
 }
 
-static void glrUniform4f(const string& name, GLfloat value0, GLfloat value1, GLfloat value2, GLfloat value3) {
+static auto glrUniform4f(const string& name, GLfloat value0, GLfloat value1, GLfloat value2, GLfloat value3) -> void {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniform4f(location, value0, value1, value2, value3);
 }
 
-static void glrUniformMatrix4fv(const string& name, GLfloat *values) {
+static auto glrUniformMatrix4fv(const string& name, GLfloat* values) -> void {
   GLint location = glGetUniformLocation(glrProgram(), name);
   glUniformMatrix4fv(location, 1, GL_FALSE, values);
 }
 
-static void glrParameters(GLuint filter, GLuint wrap) {
+static auto glrParameters(GLuint filter, GLuint wrap) -> void {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrap);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrap);
 }
 
-static GLuint glrCreateShader(GLuint program, GLuint type, const char* source) {
+static auto glrCreateShader(GLuint program, GLuint type, const char* source) -> GLuint {
   GLuint shader = glCreateShader(type);
   glShaderSource(shader, 1, &source, 0);
   glCompileShader(shader);
@@ -80,7 +80,7 @@ static GLuint glrCreateShader(GLuint program, GLuint type, const char* source) {
   return shader;
 }
 
-static void glrLinkProgram(GLuint program) {
+static auto glrLinkProgram(GLuint program) -> void {
   glLinkProgram(program);
   GLint result = GL_FALSE;
   glGetProgramiv(program, GL_LINK_STATUS, &result);

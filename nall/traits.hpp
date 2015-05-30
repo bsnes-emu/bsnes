@@ -19,6 +19,9 @@ namespace nall {
   template<typename T> using is_array = std::is_array<T>;
   template<typename T> using is_function = std::is_function<T>;
   template<typename T> using is_integral = std::is_integral<T>;
+  template<typename T> using add_const = std::add_const<T>;
+  template<typename T> using remove_extent = std::remove_extent<T>;
+  template<typename T> using remove_reference = std::remove_reference<T>;
 }
 
 namespace nall {

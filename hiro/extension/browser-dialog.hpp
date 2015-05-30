@@ -6,26 +6,27 @@ struct BrowserDialog {
   using type = BrowserDialog;
 
   BrowserDialog();
-  auto openFile() -> nall::string;      //one existing file
-  auto openFiles() -> nall::lstring;    //any existing files or folders
-  auto saveFile() -> nall::string;      //one file
-  auto selectFolder() -> nall::string;  //one existing folder
-  auto setFilters(const nall::lstring& filters = {"All|*"}) -> type&;
-  auto setParent(const nall::shared_pointer<mWindow>& parent) -> type&;
-  auto setPath(const nall::string& path = "") -> type&;
-  auto setTitle(const nall::string& title = "") -> type&;
+  auto openFile() -> string;      //one existing file
+  auto openFiles() -> lstring;    //any existing files or folders
+  auto openFolder() -> string;    //one existing folder
+  auto saveFile() -> string;      //one file
+  auto selectFolder() -> string;  //one existing folder
+  auto setFilters(const lstring& filters = {}) -> type&;
+  auto setParent(const sWindow& parent) -> type&;
+  auto setPath(const string& path = "") -> type&;
+  auto setTitle(const string& title = "") -> type&;
 
 private:
   struct State {
-    nall::string action;
-    nall::lstring filters = {"*"};
-    nall::shared_pointer<mWindow> parent;
-    nall::string path;
-    nall::lstring response;
-    nall::string title;
+    string action;
+    lstring filters = {"*"};
+    sWindow parent;
+    string path;
+    lstring response;
+    string title;
   } state;
 
-  auto _run() -> nall::lstring;
+  auto _run() -> lstring;
 
   friend class BrowserDialogWindow;
 };

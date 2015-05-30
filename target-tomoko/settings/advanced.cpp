@@ -34,7 +34,7 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
   libraryPrefix.setText("Location:");
   libraryLocation.setEditable(false).setText(config().library.location);
   libraryChange.setText("Change ...").onActivate([&] {
-    if(auto location = BrowserDialog().setParent(*presentation).selectFolder()) {
+    if(auto location = BrowserDialog().setTitle("Select Library Location").selectFolder()) {
       libraryLocation.setText(config().library.location = location);
     }
   });

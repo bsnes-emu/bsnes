@@ -1,13 +1,13 @@
-void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const string& pathname) {
+auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const string& pathname) -> void {
   filter = glrFilter(node["filter"].text());
   wrap = glrWrap(node["wrap"].text());
   modulo = glrModulo(node["modulo"].integer());
 
   string w = node["width"].text(), h = node["height"].text();
   if(w.endsWith("%")) relativeWidth = real(w.rtrim("%")) / 100.0;
-  else absoluteWidth = decimal(w);
+  else absoluteWidth = w.decimal();
   if(h.endsWith("%")) relativeHeight = real(h.rtrim("%")) / 100.0;
-  else absoluteHeight = decimal(h);
+  else absoluteHeight = h.decimal();
 
   format = glrFormat(node["format"].text());
 
@@ -71,7 +71,7 @@ void OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 }
 
 //apply manifest settings to shader source #in tags
-void OpenGLProgram::parse(OpenGL* instance, string& source) {
+auto OpenGLProgram::parse(OpenGL* instance, string& source) -> void {
   lstring lines = source.split("\n");
   for(auto& line : lines) {
     string s = line;
@@ -89,7 +89,7 @@ void OpenGLProgram::parse(OpenGL* instance, string& source) {
   source = lines.merge("\n");
 }
 
-void OpenGLProgram::release() {
+auto OpenGLProgram::release() -> void {
   OpenGLSurface::release();
   for(auto& pixmap : pixmaps) glDeleteTextures(1, &pixmap.texture);
   pixmaps.reset();

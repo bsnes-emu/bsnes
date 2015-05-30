@@ -84,7 +84,7 @@ auto StateManager::doSave() -> void {
 }
 
 auto StateManager::doReset() -> void {
-  if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == 0) {
+  if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == "Yes") {
     for(auto slot : range(Slots)) file::remove(program->stateName(1 + slot, true));
     doRefresh();
   }

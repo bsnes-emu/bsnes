@@ -62,7 +62,7 @@ auto CheatEditor::doRefresh() -> void {
 }
 
 auto CheatEditor::doReset(bool force) -> void {
-  if(force || MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == 0) {
+  if(force || MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == "Yes") {
     for(auto& cheat : cheats) {
       cheat.enabled = false;
       cheat.code = "";

@@ -48,24 +48,24 @@ struct pAudioOSS {
     if(name == Audio::Device) return settings.device;
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
-    return false;
+    return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Device) {
-      settings.device = any_cast<string>(value);
+    if(name == Audio::Device && value.is<string>()) {
+      settings.device = value.get<string>();
       if(!settings.device) settings.device = "/dev/dsp";
       return true;
     }
 
-    if(name == Audio::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+    if(name == Audio::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       updateSynchronization();
       return true;
     }
 
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       if(device.fd >= 0) init();
       return true;
     }

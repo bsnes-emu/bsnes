@@ -6,6 +6,7 @@ struct BrowserDialogWindow {
   auto activate() -> void;
   auto change() -> void;
   auto isFolder(const string& name) -> bool;
+  auto isMatch(const string& name) -> bool;
   auto run() -> lstring;
   auto setPath(string path) -> void;
 
@@ -25,6 +26,7 @@ private:
         Button cancelButton{&controlLayout, Size{80, 0}, 8};
 
   BrowserDialog::State& state;
+  vector<lstring> filters;
 };
 
 //accept button clicked, or enter pressed on file name line edit
@@ -45,12 +47,18 @@ auto BrowserDialogWindow::accept() -> void {
     }
   }
 
+  if(state.action == "openFolder" && selectedItems) {
+    string name = selectedItems.first()->text(0);
+    if(!isMatch(name)) return setPath({state.path, name});
+    state.response.append(string{state.path, name, "/"});
+  }
+
   if(state.action == "saveFile") {
     string name = fileName.text();
     if(!name && selectedItems) name = selectedItems.first()->text(0);
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
-      if(MessageDialog("File already exists; overwrite it?").question() != 0) return;
+      if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
     }
     state.response.append(string{state.path, name});
   }
@@ -66,15 +74,18 @@ auto BrowserDialogWindow::accept() -> void {
 //list view item double-clicked, or enter pressed on selected list view item
 auto BrowserDialogWindow::activate() -> void {
   auto selectedItem = view.selected();
+
   if(state.action == "saveFile" && selectedItem) {
     string name = selectedItem->text(0);
     if(isFolder(name)) return setPath({state.path, name});
-    fileName.setText(isFolder(name) ? "" : name);
+    fileName.setText(name);
   }
+
   if(state.action == "selectFolder" && selectedItem) {
     string name = selectedItem->text(0);
     if(isFolder(name)) return setPath({state.path, name});
   }
+
   accept();
 }
 
@@ -93,34 +104,41 @@ auto BrowserDialogWindow::isFolder(const string& name) -> bool {
   return directory::exists({state.path, name});
 }
 
+auto BrowserDialogWindow::isMatch(const string& name) -> bool {
+  if(auto selectedItem = filterList.selected()) {
+    for(auto& filter : filters[selectedItem->offset()]) {
+      if(name.match(filter)) return true;
+    }
+  }
+  return false;
+}
+
 auto BrowserDialogWindow::run() -> lstring {
   state.response.reset();
 
   layout.setMargin(8);
   pathName.onActivate([&] { setPath(pathName.text()); });
-  pathHome.onActivate([&] { setPath(userpath()); });
-  pathHome.setBordered(false).setIcon(Icon::Go::Home);
-  pathRefresh.onActivate([&] { setPath(state.path); });
-  pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh);
-  pathUp.onActivate([&] { setPath(state.path.dirname()); });
-  pathUp.setBordered(false).setIcon(Icon::Go::Up);
-  view.onActivate([&] { activate(); });
-  view.onChange([&] { change(); });
-  view.setMultiSelect(state.action == "openFiles");
-  filterList.onChange([&] { setPath(state.path); });
+  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
+  pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
+  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(state.path.dirname()); });
+  view.setMultiSelect(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
+  filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
     auto part = filter.split<1>("|");
     filterList.append(ComboButtonItem().setText(part.first()));
   }
-  filterList.setVisible(state.action != "selectFolder");
-  fileName.onActivate([&] { accept(); });
-  fileName.setVisible(state.action == "saveFile");
+  fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); });
   acceptButton.onActivate([&] { accept(); });
-  if(state.action == "openFile" || state.action == "openFiles") acceptButton.setText("Open");
+  if(state.action == "openFile" || state.action == "openFiles" || state.action == "openFolder") acceptButton.setText("Open");
   if(state.action == "saveFile") acceptButton.setText("Save");
   if(state.action == "selectFolder") acceptButton.setText("Select");
-  cancelButton.onActivate([&] { window.setModal(false); });
-  cancelButton.setText("Cancel");
+  cancelButton.setText("Cancel").onActivate([&] { window.setModal(false); });
+
+  if(!state.filters) state.filters.append("All|*");
+  for(auto& filter : state.filters) {
+    auto part = filter.split<1>("|");
+    filters.append(part.last().split(":"));
+  }
 
   setPath(state.path);
 
@@ -146,30 +164,30 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   view.append(ListViewColumn().setWidth(~0));
   view.append(ListViewColumn().setWidth( 0).setForegroundColor({192, 128, 128}));
 
-  for(auto& folder : directory::folders(path)) {
+  auto contents = directory::contents(path);
+  bool folderMode = state.action == "openFolder";
+
+  for(auto content : contents) {
+    if(!content.endsWith("/")) continue;
+    if(folderMode && isMatch(content.rtrim("/"))) continue;
+
     ListViewItem item{&view};
     item.setIcon(0, Icon::Emblem::Folder);
-    item.setText(0, folder.rtrim("/"));
-    item.setText(1, octal<3>(storage::mode({path, folder}) & 0777));
+    item.setText(0, content.rtrim("/"));
+    item.setText(1, octal<3>(storage::mode({path, content}) & 0777));
   }
 
-  if(state.action != "selectFolder") {  //don't show files during folder selection
-    string filter = "*";
-    if(auto selected = filterList.selected()) {
-      auto part = state.filters[selected->offset()].split<1>("|");
-      filter = part.last();
-    }
+  for(auto content : contents) {
+    if(content.endsWith("/") && !folderMode) continue;
+    if(!isMatch(content.rtrim("/"))) continue;
 
-    for(auto& file : directory::files(path)) {
-      if(!file.match(filter)) continue;
-      ListViewItem item{&view};
-      item.setIcon(0, Icon::Emblem::File);
-      item.setText(0, file);
-      item.setText(1, octal<3>(storage::mode({path, file}) & 0777));
-    }
+    ListViewItem item{&view};
+    item.setIcon(0, folderMode ? Icon::Action::Open : Icon::Emblem::File);
+    item.setText(0, content.rtrim("/"));
+    item.setText(1, octal<3>(storage::mode({path, content}) & 0777));
   }
 
-  if(view.items()) view.setSelected({0});
+  if(view.items()) view.item(0)->setSelected();
   Application::processEvents();
   view.resizeColumns().setFocused().doChange();
 }
@@ -191,7 +209,14 @@ auto BrowserDialog::openFiles() -> lstring {
   if(!state.title) state.title = "Open Files";
   if(auto result = _run()) return result;
   return {};
-};
+}
+
+auto BrowserDialog::openFolder() -> string {
+  state.action = "openFolder";
+  if(!state.title) state.title = "Open Folder";
+  if(auto result = _run()) return result.first();
+  return {};
+}
 
 auto BrowserDialog::saveFile() -> string {
   state.action = "saveFile";
@@ -212,7 +237,7 @@ auto BrowserDialog::setFilters(const lstring& filters) -> type& {
   return *this;
 }
 
-auto BrowserDialog::setParent(const shared_pointer<mWindow>& parent) -> type& {
+auto BrowserDialog::setParent(const sWindow& parent) -> type& {
   state.parent = parent;
   return *this;
 }

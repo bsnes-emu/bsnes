@@ -3,26 +3,26 @@
 struct MessageDialog {
   using type = MessageDialog;
 
-  MessageDialog(const nall::string& text = "");
-  auto error(const nall::lstring& buttons = {"Ok"}) -> signed;
-  auto information(const nall::lstring& buttons = {"Ok"}) -> signed;
-  auto question(const nall::lstring& buttons = {"Yes", "No"}) -> signed;
-  auto setParent(nall::shared_pointer<mWindow> parent = {}) -> type&;
-  auto setText(const nall::string& text = "") -> type&;
-  auto setTitle(const nall::string& title = "") -> type&;
-  auto warning(const nall::lstring& buttons = {"Ok"}) -> signed;
+  MessageDialog(const string& text = "");
+  auto error(const lstring& buttons = {"Ok"}) -> string;
+  auto information(const lstring& buttons = {"Ok"}) -> string;
+  auto question(const lstring& buttons = {"Yes", "No"}) -> string;
+  auto setParent(sWindow parent = {}) -> type&;
+  auto setText(const string& text = "") -> type&;
+  auto setTitle(const string& title = "") -> type&;
+  auto warning(const lstring& buttons = {"Ok"}) -> string;
 
 private:
   struct State {
-    nall::lstring buttons;
-    nall::vector<uint8_t> icon;
-    nall::shared_pointer<mWindow> parent;
-    signed response = -1;
-    nall::string text;
-    nall::string title;
+    lstring buttons;
+    vector<uint8_t> icon;
+    sWindow parent;
+    string response;
+    string text;
+    string title;
   } state;
 
-  auto _run() -> signed;
+  auto _run() -> string;
 };
 
 #endif

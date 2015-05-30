@@ -11,7 +11,6 @@ using namespace hiro;
 #include "program/program.hpp"
 #include "configuration/configuration.hpp"
 #include "input/input.hpp"
-#include "library/library.hpp"
 #include "settings/settings.hpp"
 #include "tools/tools.hpp"
 #include "presentation/presentation.hpp"

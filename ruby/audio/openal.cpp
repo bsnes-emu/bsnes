@@ -10,25 +10,29 @@ namespace ruby {
 
 struct pAudioOpenAL {
   struct {
-    ALCdevice* handle;
-    ALCcontext* context;
-    ALuint source;
-    ALenum format;
-    unsigned latency;
-    unsigned queueLength;
+    ALCdevice* handle = nullptr;
+    ALCcontext* context = nullptr;
+    ALuint source = 0;
+    ALenum format = AL_FORMAT_STEREO16;
+    unsigned latency = 0;
+    unsigned queueLength = 0;
   } device;
 
   struct {
-    uint32_t* data;
-    unsigned length;
-    unsigned size;
+    uint32_t* data = nullptr;
+    unsigned length = 0;
+    unsigned size = 0;
   } buffer;
 
   struct {
-    bool synchronize;
-    unsigned frequency;
-    unsigned latency;
+    bool synchronize = true;
+    unsigned frequency = 22050;
+    unsigned latency = 40;
   } settings;
+
+  ~pAudioOpenAL() {
+    term();
+  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
@@ -41,23 +45,23 @@ struct pAudioOpenAL {
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
     if(name == Audio::Latency) return settings.latency;
-    return false;
+    return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Audio::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+    if(name == Audio::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       return true;
     }
 
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       return true;
     }
 
-    if(name == Audio::Latency) {
-      if(settings.latency != any_cast<unsigned>(value)) {
-        settings.latency = any_cast<unsigned>(value);
+    if(name == Audio::Latency && value.is<unsigned>()) {
+      if(settings.latency != value.get<unsigned>()) {
+        settings.latency = value.get<unsigned>();
         updateLatency();
       }
       return true;
@@ -66,8 +70,8 @@ struct pAudioOpenAL {
     return false;
   }
 
-  auto sample(uint16_t sl, uint16_t sr) -> void {
-    buffer.data[buffer.length++] = sl + (sr << 16);
+  auto sample(uint16_t left, uint16_t right) -> void {
+    buffer.data[buffer.length++] = left << 0 | right << 16;
     if(buffer.length < buffer.size) return;
 
     ALuint albuffer = 0;
@@ -169,26 +173,6 @@ struct pAudioOpenAL {
       delete[] buffer.data;
       buffer.data = 0;
     }
-  }
-
-  pAudioOpenAL() {
-    device.source = 0;
-    device.handle = 0;
-    device.context = 0;
-    device.format = AL_FORMAT_STEREO16;
-    device.queueLength = 0;
-
-    buffer.data = 0;
-    buffer.length = 0;
-    buffer.size = 0;
-
-    settings.synchronize = true;
-    settings.frequency = 22050;
-    settings.latency = 40;
-  }
-
-  ~pAudioOpenAL() {
-    term();
   }
 
 private:

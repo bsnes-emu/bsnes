@@ -7,15 +7,36 @@
 namespace nall {
 
 struct any {
-  bool empty() const { return container; }
-  void reset() { if(container) { delete container; container = nullptr; } }
+  any() = default;
+  any(const any& source) { operator=(source); }
+  any(any&& source) { operator=(move(source)); }
+  template<typename T> any(const T& value) { operator=(value); }
+  ~any() { reset(); }
 
-  const std::type_info& type() const {
+  explicit operator bool() const { return container; }
+  auto empty() const -> bool { return !container; }
+  auto reset() -> void { if(container) { delete container; container = nullptr; } }
+
+  auto type() const -> const std::type_info& {
     return container ? container->type() : typeid(void);
   }
 
-  template<typename T> any& operator=(const T& value) {
-    using auto_t = type_if<is_array<T>, typename std::remove_extent<typename std::add_const<T>::type>::type*, T>;
+  template<typename T> auto is() const -> bool {
+    return type() == typeid(typename remove_reference<T>::type);
+  }
+
+  template<typename T> auto get() -> T& {
+    if(!is<T>()) throw;
+    return static_cast<holder<typename remove_reference<T>::type>*>(container)->value;
+  }
+
+  template<typename T> auto get() const -> const T& {
+    if(!is<T>()) throw;
+    return static_cast<holder<typename remove_reference<T>::type>*>(container)->value;
+  }
+
+  template<typename T> auto operator=(const T& value) -> any& {
+    using auto_t = type_if<is_array<T>, typename remove_extent<typename add_const<T>::type>::type*, T>;
 
     if(type() == typeid(auto_t)) {
       static_cast<holder<auto_t>*>(container)->value = (auto_t)value;
@@ -27,67 +48,34 @@ struct any {
     return *this;
   }
 
-  any& operator=(const any& source) {
+  auto operator=(const any& source) -> any& {
     if(container) { delete container; container = nullptr; }
     if(source.container) container = source.container->copy();
     return *this;
   }
 
-  any& operator=(any&& source) {
+  auto operator=(any&& source) -> any& {
     if(container) delete container;
     container = source.container;
     source.container = nullptr;
     return *this;
   }
 
-  any() = default;
-  any(const any& source) { operator=(source); }
-  any(any&& source) { operator=(move(source)); }
-  template<typename T> any(const T& value) { operator=(value); }
-  ~any() { reset(); }
-
 private:
   struct placeholder {
-    virtual const std::type_info& type() const = 0;
-    virtual placeholder* copy() const = 0;
-    virtual ~placeholder() {}
+    virtual ~placeholder() = default;
+    virtual auto type() const -> const std::type_info& = 0;
+    virtual auto copy() const -> placeholder* = 0;
   };
   placeholder* container = nullptr;
 
   template<typename T> struct holder : placeholder {
-    T value;
-    const std::type_info& type() const { return typeid(T); }
-    placeholder* copy() const { return new holder(value); }
     holder(const T& value) : value(value) {}
+    auto type() const -> const std::type_info& { return typeid(T); }
+    auto copy() const -> placeholder* { return new holder(value); }
+    T value;
   };
-
-  template<typename T> friend T any_cast(any&);
-  template<typename T> friend T any_cast(const any&);
-  template<typename T> friend T* any_cast(any*);
-  template<typename T> friend const T* any_cast(const any*);
 };
-
-template<typename T> T any_cast(any& value) {
-  typedef typename std::remove_reference<T>::type nonref;
-  if(value.type() != typeid(nonref)) throw;
-  return static_cast<any::holder<nonref>*>(value.container)->value;
-}
-
-template<typename T> T any_cast(const any& value) {
-  typedef const typename std::remove_reference<T>::type nonref;
-  if(value.type() != typeid(nonref)) throw;
-  return static_cast<any::holder<nonref>*>(value.container)->value;
-}
-
-template<typename T> T* any_cast(any* value) {
-  if(!value || value->type() != typeid(T)) return nullptr;
-  return &static_cast<any::holder<T>*>(value->container)->value;
-}
-
-template<typename T> const T* any_cast(const any* value) {
-  if(!value || value->type() != typeid(T)) return nullptr;
-  return &static_cast<any::holder<T>*>(value->container)->value;
-}
 
 }
 

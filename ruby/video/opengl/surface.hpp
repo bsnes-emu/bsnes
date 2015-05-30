@@ -1,10 +1,10 @@
-void OpenGLSurface::allocate() {
+auto OpenGLSurface::allocate() -> void {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
   glGenBuffers(3, &vbo[0]);
 }
 
-void OpenGLSurface::size(unsigned w, unsigned h) {
+auto OpenGLSurface::size(unsigned w, unsigned h) -> void {
   if(width == w && height == h) return;
   width = w, height = h;
   w = glrSize(w), h = glrSize(h);
@@ -25,7 +25,7 @@ void OpenGLSurface::size(unsigned w, unsigned h) {
   }
 }
 
-void OpenGLSurface::release() {
+auto OpenGLSurface::release() -> void {
   if(vbo[0]) { glDeleteBuffers(3, &vbo[0]); for(auto &o : vbo) o = 0; }
   if(vao) { glDeleteVertexArrays(1, &vao); vao = 0; }
   if(vertex) { glDetachShader(program, vertex); glDeleteShader(vertex); vertex = 0; }
@@ -37,7 +37,7 @@ void OpenGLSurface::release() {
   width = 0, height = 0;
 }
 
-void OpenGLSurface::render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight) {
+auto OpenGLSurface::render(unsigned sourceWidth, unsigned sourceHeight, unsigned targetWidth, unsigned targetHeight) -> void {
   glViewport(0, 0, targetWidth, targetHeight);
 
   float w = (float)sourceWidth / (float)glrSize(sourceWidth);

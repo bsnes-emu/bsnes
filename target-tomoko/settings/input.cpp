@@ -16,7 +16,7 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   assignMouse2.setVisible(false).onActivate([&] { assignMouseInput(1); });
   assignMouse3.setVisible(false).onActivate([&] { assignMouseInput(2); });
   resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsManager).question() == 0) {
+    if(MessageDialog("Are you sure you want to erase all mappings for this device?").setParent(*settingsManager).question() == "Yes") {
       for(auto& mapping : activeDevice().mappings) mapping->unbind();
       refreshMappings();
     }

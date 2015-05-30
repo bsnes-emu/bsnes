@@ -9,7 +9,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
     eraseButton.setEnabled((bool)mappingList.selected());
   });
   resetButton.setText("Reset").onActivate([&] {
-    if(MessageDialog("Are you sure you want to erase all hotkey mappings?").setParent(*settingsManager).question() == 0) {
+    if(MessageDialog("Are you sure you want to erase all hotkey mappings?").setParent(*settingsManager).question() == "Yes") {
       for(auto& mapping : inputManager->hotkeys) mapping->unbind();
       refreshMappings();
     }

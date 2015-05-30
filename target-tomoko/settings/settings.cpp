@@ -1,6 +1,9 @@
 #include "../tomoko.hpp"
+#include "video.cpp"
+#include "audio.cpp"
 #include "input.cpp"
 #include "hotkeys.cpp"
+#include "timing.cpp"
 #include "advanced.cpp"
 SettingsManager* settingsManager = nullptr;
 
