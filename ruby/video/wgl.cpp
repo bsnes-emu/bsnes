@@ -9,19 +9,23 @@ struct pVideoWGL : OpenGL {
   HGLRC (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) = nullptr;
   BOOL (APIENTRY* wglSwapInterval)(int) = nullptr;
 
-  HDC display;
-  HGLRC wglcontext;
-  HWND window;
-  HINSTANCE glwindow;
+  HDC display = nullptr;
+  HGLRC wglcontext = nullptr;
+  HWND window = nullptr;
+  HINSTANCE glwindow = nullptr;
 
   struct {
-    HWND handle;
-    bool synchronize;
-    unsigned filter;
+    HWND handle = nullptr;
+    bool synchronize = false;
+    unsigned filter = Video::FilterNearest;
     string shader;
   } settings;
 
-  bool cap(const string& name) {
+  ~pVideoWGL() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
@@ -29,22 +33,22 @@ struct pVideoWGL : OpenGL {
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = (HWND)any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = (HWND)value.get<uintptr_t>();
       return true;
     }
 
-    if(name == Video::Synchronize) {
-      if(settings.synchronize != any_cast<bool>(value)) {
-        settings.synchronize = any_cast<bool>(value);
+    if(name == Video::Synchronize && value.is<bool>()) {
+      if(settings.synchronize != value.get<bool>()) {
+        settings.synchronize = value.get<bool>();
         if(wglcontext) {
           init();
           OpenGL::shader(settings.shader);
@@ -53,36 +57,36 @@ struct pVideoWGL : OpenGL {
       }
     }
 
-    if(name == Video::Filter) {
-      settings.filter = any_cast<unsigned>(value);
-      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+    if(name == Video::Filter && value.is<unsigned>()) {
+      settings.filter = value.get<unsigned>();
+      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
-    if(name == Video::Shader) {
-      settings.shader = any_cast<const char*>(value);
+    if(name == Video::Shader && value.is<string>()) {
+      settings.shader = value.get<string>();
       OpenGL::shader(settings.shader);
-      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
     return false;
   }
 
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
 
-  void unlock() {
+  auto unlock() -> void {
   }
 
-  void clear() {
+  auto clear() -> void {
     OpenGL::clear();
     SwapBuffers(display);
   }
 
-  void refresh() {
+  auto refresh() -> void {
     RECT rc;
     GetClientRect(settings.handle, &rc);
     outputWidth = rc.right - rc.left, outputHeight = rc.bottom - rc.top;
@@ -90,7 +94,7 @@ struct pVideoWGL : OpenGL {
     SwapBuffers(display);
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     GLuint pixel_format;
@@ -133,26 +137,14 @@ struct pVideoWGL : OpenGL {
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     OpenGL::term();
 
     if(wglcontext) {
       wglDeleteContext(wglcontext);
-      wglcontext = 0;
+      wglcontext = nullptr;
     }
   }
-
-  pVideoWGL() {
-    settings.handle = 0;
-    settings.synchronize = false;
-    settings.filter = 0;
-
-    window = 0;
-    wglcontext = 0;
-    glwindow = 0;
-  }
-
-  ~pVideoWGL() { term(); }
 };
 
 DeclareVideo(WGL)

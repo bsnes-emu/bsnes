@@ -27,19 +27,19 @@ struct InputJoypadXInput {
   pXInputSetState XInputSetState = nullptr;
 
   struct Joypad {
-    HID::Joypad hid;
-    unsigned id;
+    shared_pointer<HID::Joypad> hid{new HID::Joypad};
+    unsigned id = 0;
   };
   vector<Joypad> joypads;
 
-  void assign(HID::Joypad& hid, unsigned groupID, unsigned inputID, int16_t value) {
-    auto& group = hid.group[groupID];
-    if(group.input[inputID].value == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
-    group.input[inputID].value = value;
+  auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
+    auto& group = hid->group(groupID);
+    if(group.input(inputID).value() == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    group.input(inputID).setValue(value);
   }
 
-  void poll(vector<HID::Device*>& devices) {
+  auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
     for(auto& jp : joypads) {
       XINPUT_STATE state;
       if(XInputGetStateEx(jp.id, &state) != ERROR_SUCCESS) continue;
@@ -83,13 +83,13 @@ struct InputJoypadXInput {
       assign(jp.hid, HID::Joypad::GroupID::Button,  9, (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_RIGHT_THUMB));
       assign(jp.hid, HID::Joypad::GroupID::Button, 10, (bool)(state.Gamepad.wButtons & XINPUT_GAMEPAD_GUIDE));
 
-      devices.append(&jp.hid);
+      devices.append(jp.hid);
     }
   }
 
-  bool rumble(uint64_t id, bool enable) {
+  auto rumble(uint64_t id, bool enable) -> bool {
     for(auto& jp : joypads) {
-      if(jp.hid.id != id) continue;
+      if(jp.hid->id() != id) continue;
 
       XINPUT_VIBRATION vibration;
       memset(&vibration, 0, sizeof(XINPUT_VIBRATION));
@@ -102,7 +102,7 @@ struct InputJoypadXInput {
     return false;
   }
 
-  bool init() {
+  auto init() -> bool {
     if(!libxinput) libxinput = LoadLibraryA("xinput1_3.dll");
     if(!libxinput) return false;
 
@@ -118,30 +118,31 @@ struct InputJoypadXInput {
     for(unsigned id = 0; id < 4; id++) {
       Joypad jp;
       jp.id = id;
-      jp.hid.id = (uint64_t)(1 + id) << 32 | 0x045e << 16 | 0x028e << 0;  //Xbox 360 Player# + VendorID + ProductID
+      jp.hid->setID((uint64_t)(1 + id) << 32 | 0x045e << 16 | 0x028e << 0);  //Xbox 360 Player# + VendorID + ProductID
+      jp.hid->setRumble(true);
 
-      jp.hid.axis().append({"LeftThumbX"});
-      jp.hid.axis().append({"LeftThumbY"});
-      jp.hid.axis().append({"RightThumbX"});
-      jp.hid.axis().append({"RightThumbY"});
+      jp.hid->axes().append("LeftThumbX");
+      jp.hid->axes().append("LeftThumbY");
+      jp.hid->axes().append("RightThumbX");
+      jp.hid->axes().append("RightThumbY");
 
-      jp.hid.hat().append({"HatX"});
-      jp.hid.hat().append({"HatY"});
+      jp.hid->hats().append("HatX");
+      jp.hid->hats().append("HatY");
 
-      jp.hid.trigger().append({"LeftTrigger"});
-      jp.hid.trigger().append({"RightTrigger"});
+      jp.hid->triggers().append("LeftTrigger");
+      jp.hid->triggers().append("RightTrigger");
 
-      jp.hid.button().append({"A"});
-      jp.hid.button().append({"B"});
-      jp.hid.button().append({"X"});
-      jp.hid.button().append({"Y"});
-      jp.hid.button().append({"Back"});
-      jp.hid.button().append({"Start"});
-      jp.hid.button().append({"LeftShoulder"});
-      jp.hid.button().append({"RightShoulder"});
-      jp.hid.button().append({"LeftThumb"});
-      jp.hid.button().append({"RightThumb"});
-      jp.hid.button().append({"Guide"});
+      jp.hid->buttons().append("A");
+      jp.hid->buttons().append("B");
+      jp.hid->buttons().append("X");
+      jp.hid->buttons().append("Y");
+      jp.hid->buttons().append("Back");
+      jp.hid->buttons().append("Start");
+      jp.hid->buttons().append("LeftShoulder");
+      jp.hid->buttons().append("RightShoulder");
+      jp.hid->buttons().append("LeftThumb");
+      jp.hid->buttons().append("RightThumb");
+      jp.hid->buttons().append("Guide");
 
       joypads.append(jp);
     }
@@ -149,7 +150,7 @@ struct InputJoypadXInput {
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(!libxinput) return;
 
     FreeLibrary(libxinput);

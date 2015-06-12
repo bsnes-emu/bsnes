@@ -75,6 +75,11 @@ public:
     objectsize = size;
   }
 
+  void reallocate(unsigned size, T value = T()) {
+    reset();
+    resize(size, value);
+  }
+
   template<typename... Args> void prepend(const T& data, Args&&... args) {
     prepend(std::forward<Args>(args)...);
     prepend(data);

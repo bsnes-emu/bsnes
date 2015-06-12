@@ -7,23 +7,28 @@ struct pListView : pWidget {
 
   auto append(sListViewColumn column) -> void;
   auto append(sListViewItem item) -> void;
+  auto checkAll() -> void;
   auto focused() -> bool;
   auto remove(sListViewColumn column) -> void;
   auto remove(sListViewItem item) -> void;
   auto reset() -> void;
   auto resizeColumns() -> void;
+  auto selectAll() -> void;
   auto setBackgroundColor(Color color) -> void;
+  auto setBatchable(bool batchable) -> void;
   auto setCheckable(bool checkable) -> void;
-  auto setChecked(bool checked) -> void;
   auto setFocused() -> void override;
   auto setFont(const string& font) -> void override;
   auto setForegroundColor(Color color) -> void;
   auto setGridVisible(bool visible) -> void;
   auto setHeaderVisible(bool visible) -> void;
-  auto setMultiSelect(bool multiSelect) -> void;
-  auto setSelected(bool selected) -> void;
+  auto setSortable(bool sortable) -> void;
+  auto uncheckAll() -> void;
+  auto unselectAll() -> void;
 
+  auto _cellWidth(unsigned row, unsigned column) -> unsigned;
   auto _column(unsigned column) -> pListViewColumn*;
+  auto _columnWidth(unsigned column) -> unsigned;
   auto _createModel() -> void;
   auto _doActivate() -> void;
   auto _doChange() -> void;
@@ -34,6 +39,7 @@ struct pListView : pWidget {
   auto _doMouseMove() -> signed;
   auto _doToggle(const char* path) -> void;
   auto _updateSelected() -> void;
+  auto _width(unsigned column) -> unsigned;
 
   GtkScrolledWindow* gtkScrolledWindow = nullptr;
   GtkWidget* gtkWidgetChild = nullptr;

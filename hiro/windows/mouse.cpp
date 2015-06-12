@@ -1,12 +1,14 @@
-namespace phoenix {
+#if defined(Hiro_Mouse)
 
-Position pMouse::position() {
-  POINT point = {0};
+namespace hiro {
+
+auto pMouse::position() -> Position {
+  POINT point{0};
   GetCursorPos(&point);
   return {point.x, point.y};
 }
 
-bool pMouse::pressed(Mouse::Button button) {
+auto pMouse::pressed(Mouse::Button button) -> bool {
   switch(button) {
   case Mouse::Button::Left: return GetAsyncKeyState(VK_LBUTTON) & 0x8000;
   case Mouse::Button::Middle: return GetAsyncKeyState(VK_MBUTTON) & 0x8000;
@@ -16,3 +18,5 @@ bool pMouse::pressed(Mouse::Button button) {
 }
 
 }
+
+#endif

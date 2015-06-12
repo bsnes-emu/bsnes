@@ -30,8 +30,18 @@ auto mListView::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
+auto mListView::batchable() const -> bool {
+  return state.batchable;
+}
+
 auto mListView::checkable() const -> bool {
   return state.checkable;
+}
+
+auto mListView::checkAll() -> type& {
+  for(auto& item : state.items) item->state.checked = true;
+  signal(checkAll);
+  return *this;
 }
 
 auto mListView::checked() const -> vector<sListViewItem> {
@@ -63,8 +73,8 @@ auto mListView::doContext() const -> void {
   if(state.onContext) return state.onContext();
 }
 
-auto mListView::doEdit(sListViewItem item, sListViewColumn column) const -> void {
-  if(state.onEdit) return state.onEdit(item, column);
+auto mListView::doEdit(sListViewCell cell) const -> void {
+  if(state.onEdit) return state.onEdit(cell);
 }
 
 auto mListView::doSort(sListViewColumn column) const -> void {
@@ -96,10 +106,6 @@ auto mListView::items() const -> unsigned {
   return state.items.size();
 }
 
-auto mListView::multiSelect() const -> bool {
-  return state.multiSelect;
-}
-
 auto mListView::onActivate(const function<void ()>& function) -> type& {
   state.onActivate = function;
   return *this;
@@ -115,7 +121,7 @@ auto mListView::onContext(const function<void ()>& function) -> type& {
   return *this;
 }
 
-auto mListView::onEdit(const function<void (sListViewItem, sListViewColumn)>& function) -> type& {
+auto mListView::onEdit(const function<void (sListViewCell)>& function) -> type& {
   state.onEdit = function;
   return *this;
 }
@@ -154,15 +160,21 @@ auto mListView::remove(sListViewItem item) -> type& {
 
 auto mListView::reset() -> type& {
   signal(reset);
-  for(auto& column : state.columns) column->setParent();
-  state.columns.reset();
   for(auto& item : state.items) item->setParent();
   state.items.reset();
+  for(auto& column : state.columns) column->setParent();
+  state.columns.reset();
   return *this;
 }
 
 auto mListView::resizeColumns() -> type& {
   signal(resizeColumns);
+  return *this;
+}
+
+auto mListView::selectAll() -> type& {
+  for(auto& item : state.items) item->state.selected = true;
+  signal(selectAll);
   return *this;
 }
 
@@ -187,15 +199,15 @@ auto mListView::setBackgroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mListView::setCheckable(bool checkable) -> type& {
-  state.checkable = checkable;
-  signal(setCheckable, checkable);
+auto mListView::setBatchable(bool batchable) -> type& {
+  state.batchable = batchable;
+  signal(setBatchable, batchable);
   return *this;
 }
 
-auto mListView::setChecked(bool checked) -> type& {
-  for(auto& item : state.items) item->state.checked = checked;
-  signal(setChecked, checked);
+auto mListView::setCheckable(bool checkable) -> type& {
+  state.checkable = checkable;
+  signal(setCheckable, checkable);
   return *this;
 }
 
@@ -217,15 +229,34 @@ auto mListView::setHeaderVisible(bool visible) -> type& {
   return *this;
 }
 
-auto mListView::setMultiSelect(bool multiSelect) -> type& {
-  state.multiSelect = multiSelect;
-  signal(setMultiSelect, multiSelect);
+auto mListView::setParent(mObject* parent, signed offset) -> type& {
+  for(auto& item : state.items) item->destruct();
+  for(auto& column : state.columns) column->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& column : state.columns) column->setParent(this, column->offset());
+  for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;
 }
 
-auto mListView::setSelected(bool selected) -> type& {
-  for(auto& item : state.items) item->state.selected = selected;
-  signal(setSelected, selected);
+auto mListView::setSortable(bool sortable) -> type& {
+  state.sortable = sortable;
+  signal(setSortable, sortable);
+  return *this;
+}
+
+auto mListView::sortable() const -> bool {
+  return state.sortable;
+}
+
+auto mListView::uncheckAll() -> type& {
+  for(auto& item : state.items) item->state.checked = false;
+  signal(uncheckAll);
+  return *this;
+}
+
+auto mListView::unselectAll() -> type& {
+  for(auto& item : state.items) item->state.selected = false;
+  signal(unselectAll);
   return *this;
 }
 

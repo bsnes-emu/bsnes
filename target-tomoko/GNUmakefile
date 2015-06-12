@@ -11,6 +11,7 @@ include gba/GNUmakefile
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
 ui_objects += ui-settings ui-tools ui-presentation
 ui_objects += ruby hiro
+ui_objects += $(if $(call streq,$(platform),windows),ui-resource)
 
 # platform
 ifeq ($(platform),windows)
@@ -57,6 +58,9 @@ obj/ui-library.o: $(ui)/library/library.cpp $(call rwildcard,$(ui)/)
 obj/ui-settings.o: $(ui)/settings/settings.cpp $(call rwildcard,$(ui)/)
 obj/ui-tools.o: $(ui)/tools/tools.cpp $(call rwildcard,$(ui)/)
 obj/ui-presentation.o: $(ui)/presentation/presentation.cpp $(call rwildcard,$(ui)/)
+
+obj/ui-resource.o:
+	windres data/resource.rc obj/ui-resource.o
 
 # targets
 build: $(objects)

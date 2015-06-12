@@ -5,6 +5,8 @@ namespace hiro {
 struct pTabFrameItem : pObject {
   Declare(TabFrameItem, Object)
 
+  auto append(sLayout layout) -> void;
+  auto remove(sLayout layout) -> void;
   auto setClosable(bool closable) -> void;
   auto setIcon(const image& icon) -> void;
   auto setMovable(bool movable) -> void;

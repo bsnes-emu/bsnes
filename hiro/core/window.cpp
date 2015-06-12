@@ -19,6 +19,7 @@ auto mWindow::append(shared_pointer<mLayout> layout) -> type& {
   layout->setGeometry(geometry().setPosition(0, 0));
   layout->setParent(this, 0);
   layout->setGeometry(geometry().setPosition(0, 0));
+  signal(append, layout);
   return *this;
 }
 
@@ -129,6 +130,7 @@ auto mWindow::onSize(const function<void ()>& function) -> type& {
 }
 
 auto mWindow::remove(shared_pointer<mLayout> layout) -> type& {
+  signal(remove, layout);
   layout->setParent();
   state.layout.reset();
   return *this;

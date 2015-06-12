@@ -6,12 +6,32 @@ auto mListViewItem::allocate() -> pObject* {
 
 //
 
+auto mListViewItem::append(sListViewCell cell) -> type& {
+  state.cells.append(cell);
+  cell->setParent(this, cells() - 1);
+  signal(append, cell);
+  return *this;
+}
+
+auto mListViewItem::backgroundColor() const -> Color {
+  return state.backgroundColor;
+}
+
+auto mListViewItem::cell(unsigned position) const -> sListViewCell {
+  if(position < cells()) return state.cells[position];
+  return {};
+}
+
+auto mListViewItem::cells() const -> unsigned {
+  return state.cells.size();
+}
+
 auto mListViewItem::checked() const -> bool {
   return state.checked;
 }
 
-auto mListViewItem::icon(unsigned column) const -> image {
-  return state.icon(column, {});
+auto mListViewItem::foregroundColor() const -> Color {
+  return state.foregroundColor;
 }
 
 auto mListViewItem::remove() -> type& {
@@ -19,8 +39,24 @@ auto mListViewItem::remove() -> type& {
   return *this;
 }
 
+auto mListViewItem::remove(sListViewCell cell) -> type& {
+  signal(remove, cell);
+  state.cells.remove(cell->offset());
+  for(auto n : range(cell->offset(), cells())) {
+    state.cells[n]->offset(-1);
+  }
+  cell->setParent();
+  return *this;
+}
+
 auto mListViewItem::selected() const -> bool {
   return state.selected;
+}
+
+auto mListViewItem::setBackgroundColor(Color color) -> type& {
+  state.backgroundColor = color;
+  signal(setBackgroundColor, color);
+  return *this;
 }
 
 auto mListViewItem::setChecked(bool checked) -> type& {
@@ -34,9 +70,16 @@ auto mListViewItem::setFocused() -> type& {
   return *this;
 }
 
-auto mListViewItem::setIcon(unsigned column, const image& icon) -> type& {
-  state.icon(column) = icon;
-  signal(setIcon, column, icon);
+auto mListViewItem::setForegroundColor(Color color) -> type& {
+  state.foregroundColor = color;
+  signal(setForegroundColor, color);
+  return *this;
+}
+
+auto mListViewItem::setParent(mObject* parent, signed offset) -> type& {
+  for(auto& cell : state.cells) cell->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& cell : state.cells) cell->setParent(this, cell->offset());
   return *this;
 }
 
@@ -44,26 +87,6 @@ auto mListViewItem::setSelected(bool selected) -> type& {
   state.selected = selected;
   signal(setSelected, selected);
   return *this;
-}
-
-auto mListViewItem::setText(const lstring& text) -> type& {
-  state.text = text;
-  if(auto listView = parentListView()) {
-    for(auto column : range(listView->columns())) {
-      setText(column, text(column, ""));
-    }
-  }
-  return *this;
-}
-
-auto mListViewItem::setText(unsigned column, const string& text) -> type& {
-  state.text(column) = text;
-  signal(setText, column, text);
-  return *this;
-}
-
-auto mListViewItem::text(unsigned column) const -> string {
-  return state.text(column, "");
 }
 
 #endif

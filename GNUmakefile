@@ -12,8 +12,7 @@ target := tomoko
 # console := true
 
 # compiler
-flags += -I. -O3 -fopenmp
-link += -fopenmp
+flags += -I. -O3
 objects := libco
 
 # profile-guided optimization mode
@@ -44,11 +43,13 @@ ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
   flags += -march=native
 else ifeq ($(platform),linux)
-  flags += -march=native
+  flags += -march=native -fopenmp
+  link += -fopenmp
   link += -Wl,-export-dynamic
   link += -lX11 -lXext -ldl
 else ifeq ($(platform),bsd)
-  flags += -march=native
+  flags += -march=native -fopenmp
+  link += -fopenmp
   link += -Wl,-export-dynamic
   link += -lX11 -lXext
 else

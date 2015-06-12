@@ -15,6 +15,7 @@ auto mTabFrameItem::append(sLayout layout) -> type& {
   if(auto& layout = state.layout) remove(layout);
   state.layout = layout;
   layout->setParent(this, 0);
+  signal(append, layout);
   return *this;
 }
 
@@ -40,8 +41,9 @@ auto mTabFrameItem::remove() -> type& {
 }
 
 auto mTabFrameItem::remove(sLayout layout) -> type& {
-  layout->setParent();
+  signal(remove, layout);
   state.layout.reset();
+  layout->setParent();
   return *this;
 }
 
@@ -51,8 +53,7 @@ auto mTabFrameItem::reset() -> type& {
 }
 
 auto mTabFrameItem::selected() const -> bool {
-  if(auto tabFrame = parentTabFrame()) return offset() == tabFrame->state.selected;
-  return false;
+  return state.selected;
 }
 
 auto mTabFrameItem::setClosable(bool closable) -> type& {
@@ -81,7 +82,10 @@ auto mTabFrameItem::setParent(mObject* parent, signed offset) -> type& {
 }
 
 auto mTabFrameItem::setSelected() -> type& {
-  if(auto tabFrame = parentTabFrame()) tabFrame->state.selected = offset();
+  if(auto parent = parentTabFrame()) {
+    for(auto& item : parent->state.items) item->state.selected = false;
+  }
+  state.selected = true;
   signal(setSelected);
   return *this;
 }

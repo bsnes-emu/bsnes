@@ -15,7 +15,6 @@ auto mComboButton::append(sComboButtonItem item) -> type& {
   state.items.append(item);
   item->setParent(this, items() - 1);
   signal(append, item);
-  if(state.selected < 0) item->setSelected();
   return *this;
 }
 
@@ -49,17 +48,23 @@ auto mComboButton::remove(sComboButtonItem item) -> type& {
 
 auto mComboButton::reset() -> type& {
   signal(reset);
-  for(auto& item : state.items) {
-    item->setParent();
-  }
+  for(auto& item : state.items) item->setParent();
   state.items.reset();
-  state.selected = -1;
   return *this;
 }
 
 auto mComboButton::selected() const -> sComboButtonItem {
-  if(state.selected >= 0) return state.items[state.selected];
+  for(auto& item : state.items) {
+    if(item->selected()) return item;
+  }
   return {};
+}
+
+auto mComboButton::setParent(mObject* parent, signed offset) -> type& {
+  for(auto& item : state.items) item->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& item : state.items) item->setParent(this, item->offset());
+  return *this;
 }
 
 #endif

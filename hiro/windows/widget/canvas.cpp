@@ -1,17 +1,16 @@
-namespace phoenix {
+#if defined(Hiro_Canvas)
 
-static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
-  if(!dynamic_cast<Canvas*>(object)) return DefWindowProc(hwnd, msg, wparam, lparam);
-  Canvas& canvas = (Canvas&)*object;
+namespace hiro {
+
+static auto CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
+  if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
+  auto canvas = dynamic_cast<mCanvas*>(object);
+  if(!canvas) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   if(msg == WM_DROPFILES) {
-    lstring paths = DropPaths(wparam);
-    if(paths.empty() == false) {
-      if(canvas.onDrop) canvas.onDrop(paths);
-    }
-    return FALSE;
+    if(auto paths = DropPaths(wparam)) canvas->doDrop(paths);
+    return false;
   }
 
   if(msg == WM_GETDLGCODE) {
@@ -20,102 +19,96 @@ static LRESULT CALLBACK Canvas_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LP
 
   if(msg == WM_ERASEBKGND) {
     //background is erased during WM_PAINT to prevent flickering
-    return TRUE;
+    return true;
   }
 
   if(msg == WM_PAINT) {
-    canvas.p.paint();
-    return TRUE;
+    if(auto self = canvas->self()) self->_paint();
+    return true;
   }
 
   if(msg == WM_MOUSEMOVE) {
-    TRACKMOUSEEVENT tracker = {sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd};
+    TRACKMOUSEEVENT tracker{sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd};
     TrackMouseEvent(&tracker);
-    if(canvas.onMouseMove) canvas.onMouseMove({(int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam)});
+    canvas->doMouseMove({(int16_t)LOWORD(lparam), (int16_t)HIWORD(lparam)});
   }
 
   if(msg == WM_MOUSELEAVE) {
-    if(canvas.onMouseLeave) canvas.onMouseLeave();
+    canvas->doMouseLeave();
   }
 
   if(msg == WM_LBUTTONDOWN || msg == WM_MBUTTONDOWN || msg == WM_RBUTTONDOWN) {
-    if(canvas.onMousePress) switch(msg) {
-    case WM_LBUTTONDOWN: canvas.onMousePress(Mouse::Button::Left); break;
-    case WM_MBUTTONDOWN: canvas.onMousePress(Mouse::Button::Middle); break;
-    case WM_RBUTTONDOWN: canvas.onMousePress(Mouse::Button::Right); break;
+    switch(msg) {
+    case WM_LBUTTONDOWN: canvas->doMousePress(Mouse::Button::Left); break;
+    case WM_MBUTTONDOWN: canvas->doMousePress(Mouse::Button::Middle); break;
+    case WM_RBUTTONDOWN: canvas->doMousePress(Mouse::Button::Right); break;
     }
   }
 
   if(msg == WM_LBUTTONUP || msg == WM_MBUTTONUP || msg == WM_RBUTTONUP) {
-    if(canvas.onMouseRelease) switch(msg) {
-    case WM_LBUTTONUP: canvas.onMouseRelease(Mouse::Button::Left); break;
-    case WM_MBUTTONUP: canvas.onMouseRelease(Mouse::Button::Middle); break;
-    case WM_RBUTTONUP: canvas.onMouseRelease(Mouse::Button::Right); break;
+    switch(msg) {
+    case WM_LBUTTONUP: canvas->doMouseRelease(Mouse::Button::Left); break;
+    case WM_MBUTTONUP: canvas->doMouseRelease(Mouse::Button::Middle); break;
+    case WM_RBUTTONUP: canvas->doMouseRelease(Mouse::Button::Right); break;
     }
   }
 
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void pCanvas::setDroppable(bool droppable) {
-  DragAcceptFiles(hwnd, droppable);
+auto pCanvas::construct() -> void {
+  hwnd = CreateWindow(L"hiroCanvas", L"", WS_CHILD, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setDroppable(state().droppable);
+  update();
 }
 
-void pCanvas::setGeometry(Geometry geometry) {
-  if(canvas.state.width == 0 || canvas.state.height == 0) rasterize();
-  unsigned width = canvas.state.width;
-  unsigned height = canvas.state.height;
-  if(width == 0) width = widget.state.geometry.width;
-  if(height == 0) height = widget.state.geometry.height;
-
-  if(width < geometry.width) {
-    geometry.x += (geometry.width - width) / 2;
-    geometry.width = width;
-  }
-
-  if(height < geometry.height) {
-    geometry.y += (geometry.height - height) / 2;
-    geometry.height = height;
-  }
-
-  pWidget::setGeometry(geometry);
-}
-
-void pCanvas::setMode(Canvas::Mode mode) {
-  rasterize(), redraw();
-}
-
-void pCanvas::setSize(Size size) {
-  rasterize(), redraw();
-}
-
-void pCanvas::constructor() {
-  hwnd = CreateWindow(L"phoenix_canvas", L"", WS_CHILD, 0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&canvas);
-  setDroppable(canvas.state.droppable);
-  rasterize();
-  synchronize();
-}
-
-void pCanvas::destructor() {
-  release();
+auto pCanvas::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pCanvas::orphan() {
-  destructor();
-  constructor();
+auto pCanvas::minimumSize() const -> Size {
+  return {max(0, state().size.width()), max(0, state().size.height())};
 }
 
-void pCanvas::paint() {
-  if(surface == nullptr) return;
+auto pCanvas::setColor(Color color) -> void {
+  mode = Mode::Color;
+  update();
+}
 
+auto pCanvas::setData(Size size) -> void {
+  mode = Mode::Data;
+  update();
+}
+
+auto pCanvas::setDroppable(bool droppable) -> void {
+  DragAcceptFiles(hwnd, droppable);
+}
+
+auto pCanvas::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  update();
+}
+
+auto pCanvas::setGradient(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight) -> void {
+  mode = Mode::Gradient;
+  update();
+}
+
+auto pCanvas::setIcon(const image& icon) -> void {
+  mode = Mode::Icon;
+  update();
+}
+
+auto pCanvas::update() -> void {
+  _rasterize();
+  _redraw();
+}
+
+auto pCanvas::_paint() -> void {
   PAINTSTRUCT ps;
   BeginPaint(hwnd, &ps);
-
-  uint32_t* data = surface;
-  unsigned width = surfaceWidth;
-  unsigned height = surfaceHeight;
 
   HDC hdc = CreateCompatibleDC(ps.hdc);
   BITMAPINFO bmi;
@@ -126,21 +119,17 @@ void pCanvas::paint() {
   bmi.bmiHeader.biCompression = BI_RGB;
   bmi.bmiHeader.biWidth = width;
   bmi.bmiHeader.biHeight = -height;  //GDI stores bitmaps upside now; negative height flips bitmap
-  bmi.bmiHeader.biSizeImage = width * height * sizeof(uint32_t);
+  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32_t);
   void* bits = nullptr;
   HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
-  if(bits) memcpy(bits, data, width * height * sizeof(uint32_t));
+  if(bits) memory::copy(bits, pixels.data(), pixels.size() * sizeof(uint32_t));
   SelectObject(hdc, bitmap);
-
-  BLENDFUNCTION bf;
-  bf.BlendOp = AC_SRC_OVER;
-  bf.BlendFlags = 0;
-  bf.SourceConstantAlpha = 255;
-  bf.AlphaFormat = AC_SRC_ALPHA;
 
   RECT rc;
   GetClientRect(hwnd, &rc);
   DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+
+  BLENDFUNCTION bf{AC_SRC_OVER, 0, (BYTE)255, AC_SRC_ALPHA};
   AlphaBlend(ps.hdc, 0, 0, width, height, hdc, 0, 0, width, height, bf);
 
   DeleteObject(bitmap);
@@ -149,61 +138,52 @@ void pCanvas::paint() {
   EndPaint(hwnd, &ps);
 }
 
-void pCanvas::rasterize() {
-  unsigned width = canvas.state.width;
-  unsigned height = canvas.state.height;
-  if(width == 0) width = widget.state.geometry.width;
-  if(height == 0) height = widget.state.geometry.height;
+auto pCanvas::_rasterize() -> void {
+  if(mode == Mode::Color || mode == Mode::Gradient) {
+    width = self().geometry().width();
+    height = self().geometry().height();
+  } else {
+    width = state().size.width();
+    height = state().size.height();
+  }
+  if(width <= 0 || height <= 0) return;
 
-  if(width != surfaceWidth || height != surfaceHeight) release();
-  if(!surface) surface = new uint32_t[width * height];
+  pixels.reallocate(width * height);
 
-  if(canvas.state.mode == Canvas::Mode::Color) {
-    nall::image image;
-    image.allocate(width, height);
-    image.fill(canvas.state.color.argb());
-    memcpy(surface, image.data, image.size);
+  if(mode == Mode::Color) {
+    uint32_t color = state().color.value();
+    for(auto& pixel : pixels) pixel = color;
   }
 
-  if(canvas.state.mode == Canvas::Mode::Gradient) {
-    nall::image image;
-    image.allocate(width, height);
-    image.gradient(
-      canvas.state.gradient[0].argb(), canvas.state.gradient[1].argb(), canvas.state.gradient[2].argb(), canvas.state.gradient[3].argb()
+  if(mode == Mode::Gradient) {
+    image fill;
+    fill.allocate(width, height);
+    fill.gradient(
+      state().gradient[0].value(), state().gradient[1].value(),
+      state().gradient[2].value(), state().gradient[3].value()
     );
-    memcpy(surface, image.data, image.size);
+    memory::copy(pixels.data(), fill.data, fill.size);
   }
 
-  if(canvas.state.mode == Canvas::Mode::Image) {
-    nall::image image = canvas.state.image;
-    image.scale(width, height);
-    image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-    memcpy(surface, image.data, image.size);
+  if(mode == Mode::Icon) {
+    auto icon = state().icon;
+    icon.scale(width, height);
+    icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+    memory::copy(pixels.data(), icon.data, icon.size);
   }
 
-  if(canvas.state.mode == Canvas::Mode::Data) {
-    if(width == canvas.state.width && height == canvas.state.height) {
-      memcpy(surface, canvas.state.data, width * height * sizeof(uint32_t));
-    } else {
-      memset(surface, 0x00, width * height * sizeof(uint32_t));
-    }
+  if(mode == Mode::Data) {
+    memory::copy(
+      pixels.data(), pixels.size() * sizeof(uint32_t),
+      state().data.data(), state().data.size() * sizeof(uint32_t)
+    );
   }
-
-  surfaceWidth = width;
-  surfaceHeight = height;
 }
 
-void pCanvas::redraw() {
+auto pCanvas::_redraw() -> void {
   InvalidateRect(hwnd, 0, false);
 }
 
-void pCanvas::release() {
-  if(surface) {
-    delete[] surface;
-    surface = nullptr;
-    surfaceWidth = 0;
-    surfaceHeight = 0;
-  }
 }
 
-}
+#endif

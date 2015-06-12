@@ -184,13 +184,16 @@ auto pWindow::construct() -> void {
 auto pWindow::destruct() -> void {
 }
 
-auto pWindow::append(shared_pointer<mMenuBar> menuBar) -> void {
+auto pWindow::append(sLayout layout) -> void {
+}
+
+auto pWindow::append(sMenuBar menuBar) -> void {
   _setMenuEnabled(menuBar->enabled(true));
   _setMenuFont(menuBar->font(true));
   _setMenuVisible(menuBar->visible(true));
 }
 
-auto pWindow::append(shared_pointer<mStatusBar> statusBar) -> void {
+auto pWindow::append(sStatusBar statusBar) -> void {
   _setStatusEnabled(statusBar->enabled(true));
   _setStatusFont(statusBar->font(true));
   _setStatusText(statusBar->text());
@@ -215,11 +218,14 @@ auto pWindow::frameMargin() const -> Geometry {
   };
 }
 
-auto pWindow::remove(shared_pointer<mMenuBar> menuBar) -> void {
+auto pWindow::remove(sLayout layout) -> void {
+}
+
+auto pWindow::remove(sMenuBar menuBar) -> void {
   _setMenuVisible(false);
 }
 
-auto pWindow::remove(shared_pointer<mStatusBar> statusBar) -> void {
+auto pWindow::remove(sStatusBar statusBar) -> void {
   _setStatusVisible(false);
 }
 

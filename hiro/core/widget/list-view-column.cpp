@@ -19,6 +19,10 @@ auto mListViewColumn::editable() const -> bool {
   return state.editable;
 }
 
+auto mListViewColumn::expandable() const -> bool {
+  return state.expandable;
+}
+
 auto mListViewColumn::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
@@ -58,6 +62,12 @@ auto mListViewColumn::setEditable(bool editable) -> type& {
   return *this;
 }
 
+auto mListViewColumn::setExpandable(bool expandable) -> type& {
+  state.expandable = expandable;
+  signal(setExpandable, expandable);
+  return *this;
+}
+
 auto mListViewColumn::setFont(const string& font) -> type& {
   state.font = font;
   signal(setFont, this->font(true));
@@ -89,12 +99,6 @@ auto mListViewColumn::setResizable(bool resizable) -> type& {
   return *this;
 }
 
-auto mListViewColumn::setSortable(bool sortable) -> type& {
-  state.sortable = sortable;
-  signal(setSortable, sortable);
-  return *this;
-}
-
 auto mListViewColumn::setText(const string& text) -> type& {
   state.text = text;
   signal(setText, text);
@@ -115,13 +119,9 @@ auto mListViewColumn::setVisible(bool visible) -> type& {
 }
 
 auto mListViewColumn::setWidth(signed width) -> type& {
-  state.width = width;
+  state.width = max(0, width);
   signal(setWidth, width);
   return *this;
-}
-
-auto mListViewColumn::sortable() const -> bool {
-  return state.sortable;
 }
 
 auto mListViewColumn::text() const -> string {

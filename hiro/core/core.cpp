@@ -43,7 +43,10 @@ namespace hiro {
   #include "mouse.cpp"
   #include "browser-window.cpp"
   #include "message-window.cpp"
+
   #include "object.cpp"
+  #include "group.cpp"
+
   #include "hotkey.cpp"
   #include "timer.cpp"
   #include "window.cpp"
@@ -80,6 +83,7 @@ namespace hiro {
   #include "widget/list-view.cpp"
   #include "widget/list-view-column.cpp"
   #include "widget/list-view-item.cpp"
+  #include "widget/list-view-cell.cpp"
   #include "widget/progress-bar.cpp"
   #include "widget/radio-button.cpp"
   #include "widget/radio-label.cpp"

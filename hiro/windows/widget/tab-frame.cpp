@@ -1,128 +1,127 @@
-namespace phoenix {
+#if defined(Hiro_TabFrame)
 
-static LRESULT CALLBACK TabFrame_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-  Object* object = (Object*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-  if(object == nullptr) return DefWindowProc(hwnd, msg, wparam, lparam);
-  TabFrame& tabFrame = (TabFrame&)*object;
-  return Shared_windowProc(tabFrame.p.windowProc, hwnd, msg, wparam, lparam);
-}
+namespace hiro {
 
-void pTabFrame::append(string text, const image& image) {
-  unsigned selection = TabCtrl_GetItemCount(hwnd);
-  wchar_t wtext[] = L"";
-  TCITEM item;
-  item.mask = TCIF_TEXT;
-  item.pszText = wtext;
-  TabCtrl_InsertItem(hwnd, selection, &item);
-  setText(selection, text);
-  if(!image.empty()) setImage(selection, image);
-}
-
-void pTabFrame::remove(unsigned selection) {
-  TabCtrl_DeleteItem(hwnd, selection);
-  buildImageList();
-}
-
-void pTabFrame::setEnabled(bool enabled) {
-  pWidget::setEnabled(enabled);
-  for(auto& layout : tabFrame.state.layout) {
-    if(layout) layout->setEnabled(layout->enabled());
+static auto CALLBACK TabFrame_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
+    if(auto tabFrame = dynamic_cast<mTabFrame*>(object)) {
+      return Shared_windowProc(tabFrame->self()->windowProc, hwnd, msg, wparam, lparam);
+    }
   }
+  return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 
-void pTabFrame::setGeometry(Geometry geometry) {
-  pWidget::setGeometry(geometry);
-  geometry.x += 1, geometry.width -= 4;
-  geometry.y += 21, geometry.height -= 23;
-  for(auto& layout : tabFrame.state.layout) {
-    if(layout) layout->setGeometry(geometry);
-  }
-}
-
-void pTabFrame::setImage(unsigned selection, const image& image) {
-  buildImageList();
-}
-
-void pTabFrame::setSelection(unsigned selection) {
-  TabCtrl_SetCurSel(hwnd, selection);
-  synchronizeLayout();
-}
-
-void pTabFrame::setText(unsigned selection, string text) {
-  utf16_t wtext(text);
-  TCITEM item;
-  item.mask = TCIF_TEXT;
-  item.pszText = (wchar_t*)wtext;
-  TabCtrl_SetItem(hwnd, selection, &item);
-}
-
-void pTabFrame::setVisible(bool visible) {
-  pWidget::setVisible(visible);
-  for(auto& layout : tabFrame.state.layout) {
-    if(layout) layout->setVisible(layout->visible());
-  }
-}
-
-void pTabFrame::constructor() {
+auto pTabFrame::construct() -> void {
   hwnd = CreateWindow(WC_TABCONTROL, L"",
     WS_CHILD | WS_TABSTOP,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&tabFrame);
-
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)TabFrame_windowProc);
-
-  setDefaultFont();
-  for(auto& text : tabFrame.state.text) append(text, {});
-  buildImageList();
-  setSelection(tabFrame.state.selection);
-  synchronize();
+  pWidget::_setState();
+  for(auto& item : state().items) append(item);
 }
 
-void pTabFrame::destructor() {
+auto pTabFrame::destruct() -> void {
   if(imageList) { ImageList_Destroy(imageList); imageList = nullptr; }
   DestroyWindow(hwnd);
 }
 
-void pTabFrame::orphan() {
-  destructor();
-  constructor();
+auto pTabFrame::append(sTabFrameItem item) -> void {
+  wchar_t text[] = L"";
+  TCITEM tcItem;
+  tcItem.mask = TCIF_TEXT;
+  tcItem.pszText = text;
+  TabCtrl_InsertItem(hwnd, item->offset(), &tcItem);
+  if(auto self = item->self()) {
+    self->setClosable(item->state.closable);
+    self->setIcon(item->state.icon);
+    self->setMovable(item->state.movable);
+    self->setText(item->state.text);
+    if(item->selected()) self->setSelected();
+  }
+  _buildImageList();
+  _synchronizeLayout();
 }
 
-void pTabFrame::buildImageList() {
-  if(imageList) ImageList_Destroy(imageList);
-  unsigned size = pFont::size(hfont, " ").height;
+auto pTabFrame::remove(sTabFrameItem item) -> void {
+  TabCtrl_DeleteItem(hwnd, item->offset());
+  _buildImageList();
+}
+
+auto pTabFrame::setEdge(Edge edge) -> void {
+  //unsupported
+}
+
+auto pTabFrame::setEnabled(bool enabled) -> void {
+  pWidget::setEnabled(enabled);
+  for(auto& item : state().items) {
+    if(auto layout = item->state.layout) {
+      if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
+    }
+  }
+}
+
+auto pTabFrame::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  geometry.setX(geometry.x() + 1);
+  geometry.setY(geometry.y() + 21);
+  geometry.setWidth(geometry.width() - 4);
+  geometry.setHeight(geometry.height() - 23);
+  for(auto& item : state().items) {
+    if(auto layout = item->state.layout) {
+      layout->setGeometry(geometry);
+    }
+  }
+}
+
+auto pTabFrame::setVisible(bool visible) -> void {
+  pWidget::setVisible(visible);
+  for(auto& item : state().items) {
+    if(auto layout = item->state.layout) {
+      if(auto self = layout->self()) self->setVisible(layout->visible(true));
+    }
+  }
+}
+
+auto pTabFrame::_buildImageList() -> void {
+  unsigned size = pFont::size(hfont, " ").height();
+
+  if(imageList) { ImageList_Destroy(imageList); imageList = nullptr; }
   imageList = ImageList_Create(size, size, ILC_COLOR32, 1, 0);
-  for(auto& image : tabFrame.state.image) {
-    ImageList_Append(imageList, image, size);
+  for(auto& item : state().items) {
+    ImageList_Append(imageList, item->state.icon, size);
   }
   TabCtrl_SetImageList(hwnd, imageList);
-  for(unsigned n = 0; n < tabFrame.state.image.size(); n++) {
-    TCITEM item;
-    item.mask = TCIF_IMAGE;
-    item.iImage = (tabFrame.state.image(n).empty() ? -1 : n);
-    TabCtrl_SetItem(hwnd, n, &item);
+  for(auto offset : range(state().items)) {
+    TCITEM tcItem;
+    tcItem.mask = TCIF_IMAGE;
+    tcItem.iImage = state().items[offset]->state.icon ? offset : -1;
+    TabCtrl_SetItem(hwnd, offset, &tcItem);
   }
 }
 
-void pTabFrame::synchronizeLayout() {
-  unsigned selection = 0;
-  for(auto& layout : tabFrame.state.layout) {
-    if(layout) layout->setVisible(selection == tabFrame.state.selection);
-    selection++;
+auto pTabFrame::_synchronizeLayout() -> void {
+  for(auto& item : state().items) {
+    if(auto layout = item->state.layout) {
+      layout->setVisible(item->selected());
+    }
   }
 }
 
-void pTabFrame::onChange() {
-  tabFrame.state.selection = TabCtrl_GetCurSel(hwnd);
-  synchronizeLayout();
-  if(tabFrame.onChange) tabFrame.onChange();
+auto pTabFrame::onChange() -> void {
+  unsigned selected = TabCtrl_GetCurSel(hwnd);
+  for(auto& item : state().items) item->state.selected = false;
+  if(auto item = self().item(selected)) item->state.selected = true;
+  _synchronizeLayout();
+  self().doChange();
 }
 
 //called only if TCS_OWNERDRAWFIXED style is used
 //this style disables XP/Vista theming of the TabFrame
-void pTabFrame::onDrawItem(LPARAM lparam) {
-  LPDRAWITEMSTRUCT item = (LPDRAWITEMSTRUCT)lparam;
+auto pTabFrame::onDrawItem(LPARAM lparam) -> void {
+/*
+  auto item = (LPDRAWITEMSTRUCT)lparam;
   FillRect(item->hDC, &item->rcItem, GetSysColorBrush(COLOR_3DFACE));
   SetBkMode(item->hDC, TRANSPARENT);
   SetTextColor(item->hDC, GetSysColor(COLOR_BTNTEXT));
@@ -138,6 +137,9 @@ void pTabFrame::onDrawItem(LPARAM lparam) {
     }
     TextOut(item->hDC, item->rcItem.left + (width - size.width) / 2, item->rcItem.top + 2, utf16_t(text), text.size());
   }
+*/
 }
 
 }
+
+#endif

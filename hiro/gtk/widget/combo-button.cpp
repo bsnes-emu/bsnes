@@ -17,10 +17,7 @@ auto pComboButton::construct() -> void {
   gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(gtkWidget), gtkCellText, true);
   gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(gtkWidget), gtkCellText, "text", 1, nullptr);
 
-  for(auto& item : state().items) {
-    append(item);
-    if(item->selected()) item->setSelected();
-  }
+  for(auto& item : state().items) append(item);
 
   g_signal_connect(G_OBJECT(gtkWidget), "changed", G_CALLBACK(ComboButton_change), (gpointer)this);
 
@@ -33,11 +30,13 @@ auto pComboButton::destruct() -> void {
 
 auto pComboButton::append(sComboButtonItem item) -> void {
   lock();
-  if(auto delegate = item->self()) {
-    gtk_list_store_append(gtkListStore, &delegate->gtkIter);
-    item->setIcon(item->state.icon);
-    item->setText(item->state.text);
+  if(auto self = item->self()) {
+    gtk_list_store_append(gtkListStore, &self->gtkIter);
+    self->setIcon(item->state.icon);
+    if(item->state.selected) self->setSelected();
+    self->setText(item->state.text);
   }
+  if(gtk_combo_box_get_active(gtkComboBox) < 0) item->setSelected();
   unlock();
 }
 
@@ -46,25 +45,19 @@ auto pComboButton::minimumSize() const -> Size {
   signed maximumWidth = 0;
   for(auto& item : state().items) {
     maximumWidth = max(maximumWidth,
-      (item->state.icon ? 2 + pFont::size(font, " ").height() : 0)
+      (item->state.icon ? pFont::size(font, " ").height() + 2 : 0)
     + pFont::size(font, item->state.text).width()
     );
   }
-  Size size = pFont::size(font, " ");
-  return {maximumWidth + 40, size.height() + 12};
+  return {maximumWidth + 40, pFont::size(font, " ").height() + 12};
 }
 
 auto pComboButton::remove(sComboButtonItem item) -> void {
   lock();
   if(auto delegate = item->self()) {
     gtk_list_store_remove(gtkListStore, &delegate->gtkIter);
-    //if the currently selected item is removed; GTK+ deselects everything
-    //detect this behavior and select the first item instead of nothing
-    if(gtk_combo_box_get_active(GTK_COMBO_BOX(gtkWidget)) < 0) {
-      if(gtk_tree_model_iter_n_children(gtkTreeModel, nullptr) > 0) {
-        gtk_combo_box_set_active(GTK_COMBO_BOX(gtkWidget), 0);
-        state().selected = 0;
-      }
+    if(gtk_combo_box_get_active(gtkComboBox) < 0) {
+      if(auto item = self().item(0)) item->setSelected();
     }
   }
   unlock();
@@ -83,10 +76,13 @@ auto pComboButton::setFont(const string& font) -> void {
 }
 
 auto pComboButton::_updateSelected() -> void {
+  for(auto& item : state().items) item->state.selected = false;
   signed selected = gtk_combo_box_get_active(gtkComboBox);
   if(selected >= 0) {
-    state().selected = selected;
-    if(!locked()) self().doChange();
+    if(auto item = self().item(selected)) {
+      item->state.selected = true;
+      if(!locked()) self().doChange();
+    }
   }
 }
 

@@ -240,7 +240,7 @@ auto pKeyboard::initialize() -> void {
       #include <hiro/platform/xorg/keyboard.hpp>
     #endif
 
-  //print("[phoenix/gtk] warning: unhandled key: ", key, "\n");
+  //print("[hiro/gtk] warning: unhandled key: ", key, "\n");
     append(0);
   }
   #undef map

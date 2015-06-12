@@ -31,10 +31,18 @@ auto mObject::destruct() -> void {
 //if the mObject is not abstract, the pObject delegate is allocated immediately
 //otherwise, the pObject is not allocated until it is attached to a non-abstract parent
 auto mObject::abstract() const -> bool {
+  #if defined(Hiro_Group)
+  if(dynamic_cast<const mGroup*>(this)) return false;
+  #endif
+
+  #if defined(Hiro_Window)
   if(dynamic_cast<const mWindow*>(this)) return false;
+  #endif
+
   #if defined(Hiro_PopupMenu)
   if(dynamic_cast<const mPopupMenu*>(this)) return false;
   #endif
+
   if(auto object = parent()) return object->abstract();
   return true;
 }
@@ -54,6 +62,10 @@ auto mObject::font(bool recursive) const -> string {
   if(!recursive || state.font) return state.font;
   if(auto object = parent()) return object->font(true);
   return Application::font();
+}
+
+auto mObject::group() const -> sGroup {
+  return {};
 }
 
 auto mObject::offset() const -> signed {
@@ -114,6 +126,16 @@ auto mObject::parentListView(bool recursive) const -> mListView* {
   if(auto listView = dynamic_cast<mListView*>(parent())) return listView;
   if(recursive) {
     if(auto object = parent()) return object->parentListView(true);
+  }
+  return nullptr;
+}
+#endif
+
+#if defined(Hiro_ListView)
+auto mObject::parentListViewItem(bool recursive) const -> mListViewItem* {
+  if(auto listViewItem = dynamic_cast<mListViewItem*>(parent())) return listViewItem;
+  if(recursive) {
+    if(auto object = parent()) return object->parentListViewItem(true);
   }
   return nullptr;
 }
@@ -243,6 +265,10 @@ auto mObject::setFocused() -> type& {
 auto mObject::setFont(const string& font) -> type& {
   state.font = font;
   signal(setFont, this->font(true));
+  return *this;
+}
+
+auto mObject::setGroup(sGroup group) -> type& {
   return *this;
 }
 

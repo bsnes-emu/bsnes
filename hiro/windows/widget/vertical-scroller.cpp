@@ -1,45 +1,42 @@
-namespace phoenix {
+#if defined(Hiro_VerticalScroller)
 
-Size pVerticalScroller::minimumSize() {
-  return {18, 0};
-}
+namespace hiro {
 
-void pVerticalScroller::setLength(unsigned length) {
-  length += (length == 0);
-  SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
-  verticalScroller.setPosition(0);
-}
-
-void pVerticalScroller::setPosition(unsigned position) {
-  SetScrollPos(hwnd, SB_CTL, position, TRUE);
-}
-
-void pVerticalScroller::constructor() {
+auto pVerticalScroller::construct() -> void {
   hwnd = CreateWindow(
     L"SCROLLBAR", L"", WS_CHILD | SBS_VERT,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalScroller);
-  unsigned position = verticalScroller.state.position;
-  setLength(verticalScroller.state.length);
-  verticalScroller.setPosition(position);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setLength(state().length);
+  setPosition(state().position);
 }
 
-void pVerticalScroller::destructor() {
+auto pVerticalScroller::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pVerticalScroller::orphan() {
-  destructor();
-  constructor();
+auto pVerticalScroller::minimumSize() const -> Size {
+  return {18, 0};
 }
 
-void pVerticalScroller::onChange(WPARAM wparam) {
+auto pVerticalScroller::setLength(unsigned length) -> void {
+  length += (length == 0);
+  SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
+}
+
+auto pVerticalScroller::setPosition(unsigned position) -> void {
+  SetScrollPos(hwnd, SB_CTL, position, TRUE);
+}
+
+auto pVerticalScroller::onChange(WPARAM wparam) -> void {
   unsigned position = ScrollEvent(hwnd, wparam);
-  if(position == verticalScroller.state.position) return;
-  verticalScroller.state.position = position;
-  if(verticalScroller.onChange) verticalScroller.onChange();
+  if(position == state().position) return;
+  state().position = position;
+  self().doChange();
 }
 
 }
+
+#endif

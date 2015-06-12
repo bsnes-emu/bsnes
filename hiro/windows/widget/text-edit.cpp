@@ -1,39 +1,60 @@
-namespace phoenix {
+#if defined(Hiro_TextEdit)
 
-void pTextEdit::setBackgroundColor(Color color) {
-  if(backgroundBrush) DeleteObject(backgroundBrush);
-  backgroundBrush = CreateSolidBrush(RGB(color.red, color.green, color.blue));
+namespace hiro {
+
+auto pTextEdit::construct() -> void {
+  hwnd = CreateWindowEx(
+    WS_EX_CLIENTEDGE, L"EDIT", L"",
+    WS_CHILD | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (!state().wordWrap ? WS_HSCROLL | ES_AUTOHSCROLL : 0),
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
+  );
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setBackgroundColor(state().backgroundColor);
+  setCursorPosition(state().cursorPosition);
+  setEditable(state().editable);
+  setText(state().text);
 }
 
-void pTextEdit::setCursorPosition(unsigned position) {
+auto pTextEdit::destruct() -> void {
+  state().text = text();
+  if(backgroundBrush) { DeleteObject(backgroundBrush); backgroundBrush = 0; }
+  DestroyWindow(hwnd);
+}
+
+auto pTextEdit::setBackgroundColor(Color color) -> void {
+  if(backgroundBrush) { DeleteObject(backgroundBrush); backgroundBrush = 0; }
+  backgroundBrush = CreateSolidBrush(color ? CreateRGB(color) : GetSysColor(COLOR_WINDOW));
+}
+
+auto pTextEdit::setCursorPosition(unsigned position) -> void {
   if(position == ~0) position >>= 1;  //Edit_SetSel takes signed type
   Edit_SetSel(hwnd, position, position);
   Edit_ScrollCaret(hwnd);
 }
 
-void pTextEdit::setEditable(bool editable) {
+auto pTextEdit::setEditable(bool editable) -> void {
   SendMessage(hwnd, EM_SETREADONLY, editable == false, (LPARAM)0);
 }
 
-void pTextEdit::setForegroundColor(Color color) {
+auto pTextEdit::setForegroundColor(Color color) -> void {
 }
 
-void pTextEdit::setText(string text) {
-  locked = true;
-  string output = text;
-  output.replace("\r", "");
-  output.replace("\n", "\r\n");
-  SetWindowText(hwnd, utf16_t(output));
-  locked = false;
+auto pTextEdit::setText(string text) -> void {
+  lock();
+  text.replace("\r", "");
+  text.replace("\n", "\r\n");
+  SetWindowText(hwnd, utf16_t(text));
+  unlock();
 }
 
-void pTextEdit::setWordWrap(bool wordWrap) {
+auto pTextEdit::setWordWrap(bool wordWrap) -> void {
   //ES_AUTOHSCROLL cannot be changed after widget creation.
   //As a result, we must destroy and re-create widget to change this setting.
-  orphan();
+  reconstruct();
 }
 
-string pTextEdit::text() {
+auto pTextEdit::text() const -> string {
   unsigned length = GetWindowTextLength(hwnd);
   wchar_t buffer[length + 1];
   GetWindowText(hwnd, buffer, length + 1);
@@ -43,34 +64,10 @@ string pTextEdit::text() {
   return text;
 }
 
-void pTextEdit::constructor() {
-  hwnd = CreateWindowEx(
-    WS_EX_CLIENTEDGE, L"EDIT", L"",
-    WS_CHILD | WS_TABSTOP | WS_VSCROLL | ES_AUTOVSCROLL | ES_MULTILINE | ES_WANTRETURN | (textEdit.state.wordWrap == false ? WS_HSCROLL | ES_AUTOHSCROLL : 0),
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
-  );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&textEdit);
-  setDefaultFont();
-  setBackgroundColor(textEdit.state.backgroundColor);
-  setCursorPosition(textEdit.state.cursorPosition);
-  setEditable(textEdit.state.editable);
-  setText(textEdit.state.text);
-  synchronize();
-}
-
-void pTextEdit::destructor() {
-  textEdit.state.text = text();
-  DestroyWindow(hwnd);
-}
-
-void pTextEdit::orphan() {
-  destructor();
-  constructor();
-}
-
-void pTextEdit::onChange() {
-  if(locked) return;
-  if(textEdit.onChange) textEdit.onChange();
+auto pTextEdit::onChange() -> void {
+  if(!locked()) self().doChange();
 }
 
 }
+
+#endif

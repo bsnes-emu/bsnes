@@ -1,17 +1,41 @@
-namespace phoenix {
+#if defined(Hiro_Object)
 
-vector<pObject*> pObject::objects;
+namespace hiro {
 
-pObject::pObject(Object& object) : object(object) {
-  static unsigned uniqueId = 100;
-  objects.append(this);
-  id = uniqueId++;
-  locked = false;
+auto pObject::construct() -> void {
 }
 
-Object* pObject::find(unsigned id) {
-  for(auto& item : objects) if(item->id == id) return &item->object;
-  return nullptr;
+auto pObject::destruct() -> void {
+}
+
+auto pObject::reconstruct() -> void {
+}
+
+auto pObject::focused() const -> bool {
+  return false;
+}
+
+auto pObject::remove() -> void {
+}
+
+auto pObject::reset() -> void {
+}
+
+auto pObject::setEnabled(bool enabled) -> void {
+}
+
+auto pObject::setFocused() -> void {
+}
+
+auto pObject::setFont(const string& font) -> void {
+}
+
+auto pObject::setGroup(sGroup group) -> void {
+}
+
+auto pObject::setVisible(bool visible) -> void {
 }
 
 }
+
+#endif

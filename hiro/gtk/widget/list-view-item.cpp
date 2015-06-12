@@ -8,6 +8,15 @@ auto pListViewItem::construct() -> void {
 auto pListViewItem::destruct() -> void {
 }
 
+auto pListViewItem::append(sListViewCell cell) -> void {
+}
+
+auto pListViewItem::remove(sListViewCell cell) -> void {
+}
+
+auto pListViewItem::setBackgroundColor(Color color) -> void {
+}
+
 auto pListViewItem::setChecked(bool checked) -> void {
   if(auto parent = _parent()) {
     gtk_list_store_set(parent->gtkListStore, &gtkIter, 0, checked, -1);
@@ -23,15 +32,7 @@ auto pListViewItem::setFocused() -> void {
   }
 }
 
-auto pListViewItem::setIcon(unsigned column, const image& icon) -> void {
-  if(auto parent = _parent()) {
-    if(icon) {
-      auto pixbuf = CreatePixbuf(icon, true);
-      gtk_list_store_set(parent->gtkListStore, &gtkIter, 1 + column * 2, pixbuf, -1);
-    } else {
-      gtk_list_store_set(parent->gtkListStore, &gtkIter, 1 + column * 2, nullptr, -1);
-    }
-  }
+auto pListViewItem::setForegroundColor(Color color) -> void {
 }
 
 auto pListViewItem::setSelected(bool selected) -> void {
@@ -44,12 +45,6 @@ auto pListViewItem::setSelected(bool selected) -> void {
     }
     parent->_updateSelected();
     parent->unlock();
-  }
-}
-
-auto pListViewItem::setText(unsigned column, const string& text) -> void {
-  if(auto parent = _parent()) {
-    gtk_list_store_set(parent->gtkListStore, &gtkIter, 1 + column * 2 + 1, text.data(), -1);
   }
 }
 

@@ -83,10 +83,14 @@ auto InputSettings::reloadMappings() -> void {
   eraseButton.setEnabled(false);
   mappingList.reset();
   mappingList.append(ListViewColumn().setText("Name"));
-  mappingList.append(ListViewColumn().setText("Mapping").setWidth(~0));
+  mappingList.append(ListViewColumn().setText("Mapping").setExpandable());
   mappingList.append(ListViewColumn().setText("Device").setForegroundColor({0, 128, 0}));
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.append(ListViewItem().setText(0, mapping->name));
+    mappingList.append(ListViewItem()
+      .append(ListViewCell().setText(mapping->name))
+      .append(ListViewCell())
+      .append(ListViewCell())
+    );
   }
   refreshMappings();
 }
@@ -94,7 +98,9 @@ auto InputSettings::reloadMappings() -> void {
 auto InputSettings::refreshMappings() -> void {
   unsigned position = 0;
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.item(position++)->setText(1, mapping->assignmentName()).setText(2, mapping->deviceName());
+    mappingList.item(position)->cell(1)->setText(mapping->assignmentName());
+    mappingList.item(position)->cell(2)->setText(mapping->deviceName());
+    position++;
   }
   mappingList.resizeColumns();
 }

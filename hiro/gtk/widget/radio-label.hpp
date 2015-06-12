@@ -7,10 +7,13 @@ struct pRadioLabel : pWidget {
 
   auto minimumSize() const -> Size;
   auto setChecked() -> void;
-  auto setGroup(const vector<shared_pointer_weak<mRadioLabel>>& group) -> void;
+  auto setGroup(sGroup group) -> void;
   auto setText(const string& text) -> void;
 
-  auto _parent() -> pRadioLabel&;
+  auto groupLocked() const -> bool;
+
+  GtkToggleButton* gtkToggleButton = nullptr;
+  GtkRadioButton* gtkRadioButton = nullptr;
 };
 
 }

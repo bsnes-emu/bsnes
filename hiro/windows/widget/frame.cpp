@@ -1,50 +1,54 @@
-namespace phoenix {
+#if defined(Hiro_Frame)
 
-void pFrame::setEnabled(bool enabled) {
-  if(frame.state.layout) frame.state.layout->setEnabled(frame.state.layout->enabled());
-  pWidget::setEnabled(enabled);
-}
+namespace hiro {
 
-void pFrame::setGeometry(Geometry geometry) {
-  bool empty = frame.state.text.empty();
-  Size size = pFont::size(hfont, frame.state.text);
-  pWidget::setGeometry({
-    geometry.x, geometry.y - (empty ? size.height >> 1 : 0),
-    geometry.width, geometry.height + (empty ? size.height >> 1 : 0)
-  });
-  if(frame.state.layout == nullptr) return;
-  if(empty) size.height = 1;
-  geometry.x += 1, geometry.width -= 2;
-  geometry.y += size.height, geometry.height -= size.height + 2;
-  frame.state.layout->setGeometry(geometry);
-}
-
-void pFrame::setText(string text) {
-  SetWindowText(hwnd, utf16_t(text));
-}
-
-void pFrame::setVisible(bool visible) {
-  if(frame.state.layout) frame.state.layout->setVisible(frame.state.layout->visible());
-  pWidget::setVisible(visible);
-}
-
-void pFrame::constructor() {
+auto pFrame::construct() -> void {
   hwnd = CreateWindow(L"BUTTON", L"",
     WS_CHILD | BS_GROUPBOX,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&frame);
-  setDefaultFont();
-  setText(frame.state.text);
-  synchronize();
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setText(state().text);
 }
 
-void pFrame::destructor() {
+auto pFrame::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pFrame::orphan() {
-  destructor();
-  constructor();
+auto pFrame::setEnabled(bool enabled) -> void {
+  if(auto layout = state().layout) layout->setEnabled(layout->enabled());
+  pWidget::setEnabled(enabled);
+}
+
+auto pFrame::setGeometry(Geometry geometry) -> void {
+  bool empty = !state().text;
+  auto size = pFont::size(hfont, state().text);
+  pWidget::setGeometry({
+    geometry.x(),
+    geometry.y() - (empty ? size.height() >> 1 : 0),
+    geometry.width(),
+    geometry.height() + (empty ? size.height() >> 1 : 0)
+  });
+  if(auto layout = state().layout) {
+    if(empty) size.setHeight(1);
+    layout->setGeometry({
+      geometry.x() + 1,
+      geometry.y() + size.height(),
+      geometry.width() - 2,
+      geometry.height() - (size.height() + 2)
+    });
+  }
+}
+
+auto pFrame::setText(const string& text) -> void {
+  SetWindowText(hwnd, utf16_t(text));
+}
+
+auto pFrame::setVisible(bool visible) -> void {
+  if(auto layout = state().layout) layout->setVisible(layout->visible());
+  pWidget::setVisible(visible);
 }
 
 }
+
+#endif

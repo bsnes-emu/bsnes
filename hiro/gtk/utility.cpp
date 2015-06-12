@@ -12,6 +12,8 @@ static auto CreateColor(const Color& color) -> GdkColor {
 #endif
 
 static auto CreatePixbuf(const nall::image& image, bool scale = false) -> GdkPixbuf* {
+  if(!image) return nullptr;
+
   nall::image gdkImage = image;
   gdkImage.transform(0, 32, 255u << 24, 255u << 0, 255u << 8, 255u << 16);
   if(scale) gdkImage.scale(15, 15);

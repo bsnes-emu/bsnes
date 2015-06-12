@@ -3,7 +3,7 @@
 namespace hiro {
 
 static auto RadioLabel_activate(GtkToggleButton*, pRadioLabel* p) -> void {
-  if(p->_parent().locked()) return;
+  if(p->groupLocked()) return;
   bool wasChecked = p->state().checked;
   p->setChecked();
   if(!wasChecked) p->self().doActivate();
@@ -11,8 +11,9 @@ static auto RadioLabel_activate(GtkToggleButton*, pRadioLabel* p) -> void {
 
 auto pRadioLabel::construct() -> void {
   gtkWidget = gtk_radio_button_new_with_label(nullptr, "");
+  gtkToggleButton = GTK_TOGGLE_BUTTON(gtkWidget);
+  gtkRadioButton = GTK_RADIO_BUTTON(gtkWidget);
 
-  setGroup(state().group);
   setText(state().text);
 
   g_signal_connect(G_OBJECT(gtkWidget), "toggled", G_CALLBACK(RadioLabel_activate), (gpointer)this);
@@ -30,30 +31,29 @@ auto pRadioLabel::minimumSize() const -> Size {
 }
 
 auto pRadioLabel::setChecked() -> void {
-  _parent().lock();
-  for(auto& weak : state().group) {
-    if(auto item = weak.acquire()) item->state.checked = false;
-  }
-  gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(gtkWidget), state().checked = true);
-  _parent().unlock();
+  lock();
+  gtk_toggle_button_set_active(gtkToggleButton, true);
+  unlock();
 }
 
-auto pRadioLabel::setGroup(const vector<shared_pointer_weak<mRadioLabel>>& group) -> void {
-  if(&_parent() == this) return;
-  _parent().lock();
-  gtk_radio_button_set_group(
-    GTK_RADIO_BUTTON(gtkWidget),
-    gtk_radio_button_get_group(GTK_RADIO_BUTTON(_parent().gtkWidget))
-  );
-  for(auto& weak : state().group) {
-    if(auto item = weak.acquire()) {
-      if(item->self() && item->checked()) {
-        gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(item->self()->gtkWidget), true);
-        break;
+auto pRadioLabel::setGroup(sGroup group) -> void {
+  if(!group) return;
+
+  maybe<GtkRadioButton*> gtkRadioButton;
+  for(auto& weak : group->state.objects) {
+    if(auto object = weak.acquire()) {
+      if(auto radioLabel = dynamic_cast<mRadioLabel*>(object.data())) {
+        if(auto self = radioLabel->self()) {
+          self->lock();
+          gtk_radio_button_set_group(self->gtkRadioButton, nullptr);
+          if(!gtkRadioButton) gtkRadioButton = self->gtkRadioButton;
+          else gtk_radio_button_set_group(self->gtkRadioButton, gtk_radio_button_get_group(*gtkRadioButton));
+          gtk_toggle_button_set_active(self->gtkToggleButton, radioLabel->checked());
+          self->unlock();
+        }
       }
     }
   }
-  _parent().unlock();
 }
 
 auto pRadioLabel::setText(const string& text) -> void {
@@ -61,13 +61,18 @@ auto pRadioLabel::setText(const string& text) -> void {
   setFont(self().font(true));  //gtk_button_set_label() recreates label, which destroys currently assigned font
 }
 
-auto pRadioLabel::_parent() -> pRadioLabel& {
-  if(state().group.size()) {
-    if(auto item = state().group.first().acquire()) {
-      if(item->self()) return *item->self();
+auto pRadioLabel::groupLocked() const -> bool {
+  if(auto group = state().group) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto self = object->self()) {
+          if(self->locked()) return true;
+        }
+      }
     }
+    return false;
   }
-  return *this;
+  return locked();
 }
 
 }

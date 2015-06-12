@@ -1,113 +1,124 @@
-namespace phoenix {
+#if defined(Hiro_Menu)
 
-void pMenu::append(Action& action) {
-  action.p.parentMenu = &menu;
-  if(parentWindow) parentWindow->p.updateMenu();
+namespace hiro {
+
+auto pMenu::construct() -> void {
+  _createBitmap();
 }
 
-void pMenu::remove(Action& action) {
-  if(parentWindow) parentWindow->p.updateMenu();
-  action.p.parentMenu = 0;
+auto pMenu::destruct() -> void {
+  if(hbitmap) { DeleteObject(hbitmap); hbitmap = nullptr; }
+  if(hmenu) { DestroyMenu(hmenu); hmenu = nullptr; }
 }
 
-void pMenu::setImage(const image& image) {
-  createBitmap();
-  if(parentWindow) parentWindow->p.updateMenu();
+auto pMenu::append(sAction action) -> void {
+  _synchronize();
 }
 
-void pMenu::setText(string text) {
-  if(parentWindow) parentWindow->p.updateMenu();
+auto pMenu::remove(sAction action) -> void {
+  _synchronize();
 }
 
-void pMenu::constructor() {
-  hmenu = 0;
-  createBitmap();
+auto pMenu::setIcon(const image& icon) -> void {
+  _createBitmap();
+  _synchronize();
 }
 
-void pMenu::destructor() {
-  if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
-  if(parentMenu) {
-    parentMenu->remove(menu);
-  } else if(parentWindow) {
-    //belongs to window's main menubar
-    parentWindow->remove(menu);
-  }
+auto pMenu::setText(const string& text) -> void {
+  _synchronize();
 }
 
-void pMenu::createBitmap() {
+auto pMenu::_createBitmap() -> void {
   if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
 
-  if(menu.state.image.width && menu.state.image.height) {
-    nall::image nallImage = menu.state.image;
-    nallImage.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-    nallImage.alphaBlend(GetSysColor(COLOR_MENU));  //Windows does not alpha blend menu icons properly (leaves black outline)
-    nallImage.scale(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), Interpolation::Linear);
-    hbitmap = CreateBitmap(nallImage);
+  if(auto icon = state().icon) {
+    icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+    icon.alphaBlend(GetSysColor(COLOR_MENU));  //Windows does not alpha blend menu icons properly (leaves black outline)
+    icon.scale(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), Interpolation::Linear);
+    hbitmap = CreateBitmap(icon);
   }
 }
 
 //Windows actions lack the ability to toggle visibility.
 //To support this, menus must be destroyed and recreated when toggling any action's visibility.
-void pMenu::update(Window& parentWindow, Menu* parentMenu) {
-  this->parentMenu = parentMenu;
-  this->parentWindow = &parentWindow;
-
+auto pMenu::_update() -> void {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreatePopupMenu();
 
-  for(auto& action : menu.state.action) {
-    action.p.parentMenu = &menu;
-    action.p.parentWindow = &parentWindow;
+  MENUINFO mi{sizeof(MENUINFO)};
+  mi.fMask = MIM_STYLE;
+  mi.dwStyle = MNS_NOTIFYBYPOS;  //| MNS_MODELESS;
+  SetMenuInfo(hmenu, &mi);
 
-    unsigned enabled = action.state.enabled ? 0 : MF_GRAYED;
-    if(dynamic_cast<Menu*>(&action)) {
-      Menu& item = (Menu&)action;
-      if(action.state.visible) {
-        item.p.update(parentWindow, &menu);
-        AppendMenu(hmenu, MF_STRING | MF_POPUP | enabled, (UINT_PTR)item.p.hmenu, utf16_t(item.state.text));
+  unsigned position = 0;
 
-        if(item.state.image.width && item.state.image.height) {
-          MENUITEMINFO mii = {sizeof(MENUITEMINFO)};
+  for(auto& action : state().actions) {
+    if(!action->self()) continue;
+    action->self()->position = position;
+    unsigned enabled = action->enabled() ? 0 : MF_GRAYED;
+
+    MENUITEMINFO mii{sizeof(MENUITEMINFO)};
+    mii.fMask = MIIM_DATA;
+    mii.dwItemData = (ULONG_PTR)action.data();
+
+    if(auto menu = dynamic_cast<mMenu*>(action.data())) {
+      if(menu->visible()) {
+        menu->self()->_update();
+        AppendMenu(hmenu, MF_STRING | MF_POPUP | enabled, (UINT_PTR)menu->self()->hmenu, utf16_t(menu->text()));
+        if(auto bitmap = menu->self()->hbitmap) {
           //Windows XP and below displays MIIM_BITMAP + hbmpItem in its own column (separate from check/radio marks)
           //this causes too much spacing, so use a custom checkmark image instead
-          mii.fMask = MIIM_CHECKMARKS;
-          mii.hbmpUnchecked = item.p.hbitmap;
-          SetMenuItemInfo(hmenu, (UINT_PTR)item.p.hmenu, FALSE, &mii);
+          mii.fMask |= MIIM_CHECKMARKS;
+          mii.hbmpUnchecked = bitmap;
         }
+        SetMenuItemInfo(hmenu, position++, true, &mii);
       }
-    } else if(dynamic_cast<Separator*>(&action)) {
-      Separator& item = (Separator&)action;
-      if(action.state.visible) {
-        AppendMenu(hmenu, MF_SEPARATOR | enabled, item.p.id, L"");
-      }
-    } else if(dynamic_cast<Item*>(&action)) {
-      Item& item = (Item&)action;
-      if(action.state.visible) {
-        AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
-
-        if(item.state.image.width && item.state.image.height) {
-          MENUITEMINFO mii = { sizeof(MENUITEMINFO) };
-          //Windows XP and below displays MIIM_BITMAP + hbmpItem in its own column (separate from check/radio marks)
-          //this causes too much spacing, so use a custom checkmark image instead
-          mii.fMask = MIIM_CHECKMARKS;
-          mii.hbmpUnchecked = item.p.hbitmap;
-          SetMenuItemInfo(hmenu, item.p.id, FALSE, &mii);
-        }
-      }
-    } else if(dynamic_cast<CheckItem*>(&action)) {
-      CheckItem& item = (CheckItem&)action;
-      if(action.state.visible) {
-        AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
-      }
-      if(item.state.checked) item.setChecked();
-    } else if(dynamic_cast<RadioItem*>(&action)) {
-      RadioItem& item = (RadioItem&)action;
-      if(action.state.visible) {
-        AppendMenu(hmenu, MF_STRING | enabled, item.p.id, utf16_t(item.state.text));
-      }
-      if(item.state.checked) item.setChecked();
     }
+
+    #if defined(Hiro_MenuSeparator)
+    else if(auto menuSeparator = dynamic_cast<mMenuSeparator*>(action.data())) {
+      if(menuSeparator->visible()) {
+        AppendMenu(hmenu, MF_SEPARATOR | enabled, position, L"");
+        SetMenuItemInfo(hmenu, position++, true, &mii);
+      }
+    }
+    #endif
+
+    #if defined(Hiro_MenuItem)
+    else if(auto menuItem = dynamic_cast<mMenuItem*>(action.data())) {
+      if(menuItem->visible()) {
+        AppendMenu(hmenu, MF_STRING | enabled, position, utf16_t(menuItem->text()));
+        if(auto bitmap = menuItem->self()->hbitmap) {
+          mii.fMask |= MIIM_CHECKMARKS;
+          mii.hbmpUnchecked = bitmap;
+        }
+        SetMenuItemInfo(hmenu, position++, true, &mii);
+      }
+    }
+    #endif
+
+    #if defined(Hiro_MenuCheckItem)
+    else if(auto menuCheckItem = dynamic_cast<mMenuCheckItem*>(action.data())) {
+      if(menuCheckItem->visible()) {
+        AppendMenu(hmenu, MF_STRING | enabled, position, utf16_t(menuCheckItem->text()));
+        SetMenuItemInfo(hmenu, position++, true, &mii);
+        if(menuCheckItem->checked()) menuCheckItem->setChecked();
+      }
+    }
+    #endif
+
+    #if defined(Hiro_MenuRadioItem)
+    else if(auto menuRadioItem = dynamic_cast<mMenuRadioItem*>(action.data())) {
+      if(menuRadioItem->visible()) {
+        AppendMenu(hmenu, MF_STRING | enabled, position, utf16_t(menuRadioItem->text()));
+        SetMenuItemInfo(hmenu, position++, true, &mii);
+        if(menuRadioItem->checked()) menuRadioItem->setChecked();
+      }
+    }
+    #endif
   }
 }
 
 }
+
+#endif

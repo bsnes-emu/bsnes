@@ -11,24 +11,24 @@ typedef HRESULT (__stdcall* TextureProc)(LPDIRECT3DDEVICE9, LPCTSTR, LPDIRECT3DT
 
 namespace ruby {
 
-class pVideoD3D {
-public:
-  LPDIRECT3D9              lpd3d;
-  LPDIRECT3DDEVICE9        device;
-  LPDIRECT3DVERTEXBUFFER9  vertex_buffer;
-  LPDIRECT3DVERTEXBUFFER9* vertex_ptr;
+struct pVideoD3D {
+  LPDIRECT3D9              lpd3d = nullptr;
+  LPDIRECT3DDEVICE9        device = nullptr;
+  LPDIRECT3DVERTEXBUFFER9  vertex_buffer = nullptr;
+  LPDIRECT3DVERTEXBUFFER9* vertex_ptr = nullptr;
   D3DPRESENT_PARAMETERS    presentation;
   D3DSURFACE_DESC          d3dsd;
   D3DLOCKED_RECT           d3dlr;
   D3DRASTER_STATUS         d3drs;
   D3DCAPS9                 d3dcaps;
-  LPDIRECT3DTEXTURE9       texture;
-  LPDIRECT3DSURFACE9       surface;
-  LPD3DXEFFECT             effect;
+  LPDIRECT3DTEXTURE9       texture = nullptr;
+  LPDIRECT3DSURFACE9       surface = nullptr;
+  LPD3DXEFFECT             effect = nullptr;
   string                   shader_source_markup;
 
-  bool lost;
-  unsigned iwidth, iheight;
+  bool lost = true;
+  unsigned iwidth;
+  unsigned iheight;
 
   struct d3dvertex {
     float x, y, z, rhw;  //screen coords
@@ -48,9 +48,9 @@ public:
   } caps;
 
   struct {
-    HWND handle;
-    bool synchronize;
-    unsigned filter;
+    HWND handle = nullptr;
+    bool synchronize = false;
+    unsigned filter = Video::FilterLinear;
 
     unsigned width;
     unsigned height;
@@ -61,7 +61,11 @@ public:
     unsigned height;
   } state;
 
-  bool cap(const string& name) {
+  ~pVideoD3D() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     if(name == Video::Filter) return true;
@@ -69,40 +73,40 @@ public:
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = (HWND)any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = (HWND)value.get<uintptr_t>();
       return true;
     }
 
-    if(name == Video::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+    if(name == Video::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       return true;
     }
 
-    if(name == Video::Filter) {
-      settings.filter = any_cast<unsigned>(value);
+    if(name == Video::Filter && value.is<unsigned>()) {
+      settings.filter = value.get<unsigned>();
       if(lpd3d) update_filter();
       return true;
     }
 
-    if(name == Video::Shader) {
+    if(name == Video::Shader && value.is<string>()) {
       return false;
-      set_shader(any_cast<const char*>(value));
-      return true;
+    //set_shader(value.get<string>());
+    //return true;
     }
 
     return false;
   }
 
-  bool recover() {
+  auto recover() -> bool {
     if(!device) return false;
 
     if(lost) {
@@ -142,7 +146,7 @@ public:
     return true;
   }
 
-  unsigned rounded_power_of_two(unsigned n) {
+  auto rounded_power_of_two(unsigned n) -> unsigned {
     n--;
     n |= n >>  1;
     n |= n >>  2;
@@ -152,7 +156,7 @@ public:
     return n + 1;
   }
 
-  void resize(unsigned width, unsigned height) {
+  auto resize(unsigned width, unsigned height) -> void {
     if(iwidth >= width && iheight >= height) return;
 
     iwidth  = rounded_power_of_two(max(width,  iwidth ));
@@ -167,7 +171,7 @@ public:
     device->CreateTexture(iwidth, iheight, 1, flags.t_usage, D3DFMT_X8R8G8B8, (D3DPOOL)flags.t_pool, &texture, NULL);
   }
 
-  void update_filter() {
+  auto update_filter() -> void {
     if(!device) return;
     if(lost && !recover()) return;
 
@@ -188,11 +192,11 @@ public:
   //
   //  (x,y) screen coords, in pixels
   //  (u,v) texture coords, betweeen 0.0 (top, left) to 1.0 (bottom, right)
-  void set_vertex(
+  auto set_vertex(
     uint32_t px, uint32_t py, uint32_t pw, uint32_t ph,
     uint32_t tw, uint32_t th,
     uint32_t x, uint32_t y, uint32_t w, uint32_t h
-  ) {
+  ) -> void {
     d3dvertex vertex[4];
     vertex[0].x = vertex[2].x = (double)(x     - 0.5);
     vertex[1].x = vertex[3].x = (double)(x + w - 0.5);
@@ -217,7 +221,7 @@ public:
     device->SetStreamSource(0, vertex_buffer, 0, sizeof(d3dvertex));
   }
 
-  void clear() {
+  auto clear() -> void {
     if(lost && !recover()) return;
 
     texture->GetLevelDesc(0, &d3dsd);
@@ -236,7 +240,7 @@ public:
     }
   }
 
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     if(lost && !recover()) return false;
 
     if(width != settings.width || height != settings.height) {
@@ -251,13 +255,13 @@ public:
     return data = (uint32_t*)d3dlr.pBits;
   }
 
-  void unlock() {
+  auto unlock() -> void {
     surface->UnlockRect();
     surface->Release();
     surface = nullptr;
   }
 
-  void refresh() {
+  auto refresh() -> void {
     if(lost && !recover()) return;
 
     RECT rd, rs;  //dest, source rectangles
@@ -333,7 +337,7 @@ public:
     if(device->Present(0, 0, 0, 0) == D3DERR_DEVICELOST) lost = true;
   }
 
-  void set_shader(const char* source) {
+  auto set_shader(const char* source) -> void {
     if(!caps.shader) return;
 
     if(effect) {
@@ -347,9 +351,9 @@ public:
     }
     shader_source_markup = source;
 
-    XML::Document document(shader_source_markup);
-    bool is_hlsl = document["shader"]["language"].data == "HLSL";
-    string shader_source = document["shader"]["source"].data;
+    auto document = BML::unserialize(shader_source_markup);
+    bool is_hlsl = document["shader"]["language"].text() == "HLSL";
+    string shader_source = document["shader"]["source"].text();
     if(shader_source == "") return;
 
     HMODULE d3dx;
@@ -373,7 +377,7 @@ public:
     effect->SetTechnique(hTech);
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     RECT rd;
@@ -428,31 +432,17 @@ public:
     return true;
   }
 
-  void release_resources() {
+  auto release_resources() -> void {
     if(effect) { effect->Release(); effect = 0; }
     if(vertex_buffer) { vertex_buffer->Release(); vertex_buffer = 0; }
     if(surface) { surface->Release(); surface = 0; }
     if(texture) { texture->Release(); texture = 0; }
   }
 
-  void term() {
+  auto term() -> void {
     release_resources();
     if(device) { device->Release(); device = 0; }
     if(lpd3d) { lpd3d->Release(); lpd3d = 0; }
-  }
-
-  pVideoD3D() {
-    effect = 0;
-    vertex_buffer = 0;
-    surface = 0;
-    texture = 0;
-    device = 0;
-    lpd3d = 0;
-    lost = true;
-
-    settings.handle = 0;
-    settings.synchronize = false;
-    settings.filter = Video::FilterLinear;
   }
 };
 

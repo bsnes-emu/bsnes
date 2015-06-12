@@ -1,6 +1,6 @@
 #define Declare(Name) \
   using type = Name; \
-  Name() : s##Name(new m##Name, [](m##Name* p) { \
+  Name() : s##Name(new m##Name, [](auto p) { \
     p->unbind(); \
     delete p; \
   }) { \
@@ -48,6 +48,27 @@
 #if defined(Hiro_Object)
 struct Object : sObject {
   DeclareObject(Object)
+};
+#endif
+
+#if defined(Hiro_Group)
+struct Group : sGroup {
+  using type = Group;
+  Group() : sGroup(new mGroup, [](auto p) { p->unbind(); delete p; }) { (*this)->bind(*this); }
+  template<typename... P> Group(P&&... p) : Group() { _append(std::forward<P>(p)...); }
+  auto self() const -> mGroup& { return (mGroup&)operator*(); }
+
+  auto append(sObject object) -> type& { return self().append(object), *this; }
+  auto object(unsigned position) const -> sObject { return self().object(position); }
+  auto objects() const -> unsigned { return self().objects(); }
+  auto remove(sObject object) -> type& { return self().remove(object), *this; }
+
+private:
+  auto _append() -> void {}
+  template<typename T, typename... P> auto _append(T* object, P&&... p) -> void {
+    append(*object);
+    _append(std::forward<P>(p)...);
+  }
 };
 #endif
 
@@ -222,16 +243,11 @@ struct MenuRadioItem : sMenuRadioItem {
 
   auto checked() const -> bool { return self().checked(); }
   auto doActivate() const -> void { return self().doActivate(); }
+  auto group() const -> sGroup { return self().group(); }
   auto onActivate(const function<void ()>& function = {}) -> type& { return self().onActivate(function), *this; }
   auto setChecked() -> type& { return self().setChecked(), *this; }
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
-
-  static auto group(const vector<MenuRadioItem>& group) -> void {
-    vector<wMenuRadioItem> items;
-    for(auto& item : group) items.append(item);
-    return mMenuRadioItem::group(items);
-  }
 };
 #endif
 
@@ -345,6 +361,7 @@ struct ComboButton : sComboButton {
   auto remove(sComboButtonItem item) -> type& { return self().remove(item), *this; }
   auto reset() -> type& { return self().reset(), *this; }
   auto selected() const -> sComboButtonItem { return self().selected(); }
+  auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& { return self().setParent(parent, offset), *this; }
 };
 #endif
 
@@ -524,14 +541,16 @@ struct ListView : sListView {
   auto append(sListViewColumn column) -> type& { return self().append(column), *this; }
   auto append(sListViewItem item) -> type& { return self().append(item), *this; }
   auto backgroundColor() const -> Color { return self().backgroundColor(); }
+  auto batchable() const -> bool { return self().batchable(); }
   auto checkable() const -> bool { return self().checkable(); }
+  auto checkAll() -> type& { return self().checkAll(), *this; }
   auto checked() const -> vector<sListViewItem> { return self().checked(); }
   auto column(unsigned position) -> sListViewColumn { return self().column(position); }
   auto columns() const -> unsigned { return self().columns(); }
   auto doActivate() const -> void { return self().doActivate(); }
   auto doChange() const -> void { return self().doChange(); }
   auto doContext() const -> void { return self().doContext(); }
-  auto doEdit(sListViewItem item, sListViewColumn column) const -> void { return self().doEdit(item, column); }
+  auto doEdit(sListViewCell cell) const -> void { return self().doEdit(cell); }
   auto doSort(sListViewColumn column) const -> void { return self().doSort(column); }
   auto doToggle(sListViewItem item) const -> void { return self().doToggle(item); }
   auto foregroundColor() const -> Color { return self().foregroundColor(); }
@@ -539,27 +558,29 @@ struct ListView : sListView {
   auto headerVisible() const -> bool { return self().headerVisible(); }
   auto item(unsigned position) -> sListViewItem { return self().item(position); }
   auto items() const -> unsigned { return self().items(); }
-  auto multiSelect() const -> bool { return self().multiSelect(); }
   auto onActivate(const function<void ()>& function = {}) -> type& { return self().onActivate(function), *this; }
   auto onChange(const function<void ()>& function = {}) -> type& { return self().onChange(function), *this; }
   auto onContext(const function<void ()>& function = {}) -> type& { return self().onContext(function), *this; }
-  auto onEdit(const function<void (sListViewItem, sListViewColumn)>& function = {}) -> type& { return self().onEdit(function), *this; }
+  auto onEdit(const function<void (sListViewCell)>& function = {}) -> type& { return self().onEdit(function), *this; }
   auto onSort(const function<void (sListViewColumn)>& function = {}) -> type& { return self().onSort(function), *this; }
   auto onToggle(const function<void (sListViewItem)>& function = {}) -> type& { return self().onToggle(function), *this; }
   auto remove(sListViewColumn column) -> type& { return self().remove(column), *this; }
   auto remove(sListViewItem item) -> type& { return self().remove(item), *this; }
   auto reset() -> type& { return self().reset(), *this; }
   auto resizeColumns() -> type& { return self().resizeColumns(), *this; }
+  auto selectAll() -> type& { return self().selectAll(), *this; }
   auto selected() const -> sListViewItem { return self().selected(); }
   auto selectedItems() const -> vector<sListViewItem> { return self().selectedItems(); }
   auto setBackgroundColor(Color color = {}) -> type& { return self().setBackgroundColor(color), *this; }
+  auto setBatchable(bool batchable = true) -> type& { return self().setBatchable(batchable), *this; }
   auto setCheckable(bool checkable = true) -> type& { return self().setCheckable(checkable), *this; }
-  auto setChecked(bool checked = true) -> type& { return self().setChecked(checked), *this; }
   auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
   auto setGridVisible(bool visible = true) -> type& { return self().setGridVisible(visible), *this; }
   auto setHeaderVisible(bool visible = true) -> type& { return self().setHeaderVisible(visible), *this; }
-  auto setMultiSelect(bool multiSelect = true) -> type& { return self().setMultiSelect(multiSelect), *this; }
-  auto setSelected(bool selected = true) -> type& { return self().setSelected(selected), *this; }
+  auto setSortable(bool sortable = true) -> type& { return self().setSortable(sortable), *this; }
+  auto sortable() const -> bool { return self().sortable(); }
+  auto uncheckAll() -> type& { return self().uncheckAll(), *this; }
+  auto unselectAll() -> type& { return self().unselectAll(), *this; }
 };
 #endif
 
@@ -570,6 +591,7 @@ struct ListViewColumn : sListViewColumn {
   auto active() const -> bool { return self().active(); }
   auto backgroundColor() const -> Color { return self().backgroundColor(); }
   auto editable() const -> bool { return self().editable(); }
+  auto expandable() const -> bool { return self().expandable(); }
   auto foregroundColor() const -> Color { return self().foregroundColor(); }
   auto horizontalAlignment() const -> double { return self().horizontalAlignment(); }
   auto icon() const -> image { return self().icon(); }
@@ -577,15 +599,14 @@ struct ListViewColumn : sListViewColumn {
   auto setActive() -> type& { return self().setActive(), *this; }
   auto setBackgroundColor(Color color = {}) -> type& { return self().setBackgroundColor(color), *this; }
   auto setEditable(bool editable = true) -> type& { return self().setEditable(editable), *this; }
+  auto setExpandable(bool expandable = true) -> type& { return self().setExpandable(expandable), *this; }
   auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
   auto setHorizontalAlignment(double alignment = 0.0) -> type& { return self().setHorizontalAlignment(alignment), *this; }
   auto setIcon(const image& icon = {}) -> type& { return self().setIcon(icon), *this; }
   auto setResizable(bool resizable = true) -> type& { return self().setResizable(resizable), *this; }
-  auto setSortable(bool sortable = true) -> type& { return self().setSortable(sortable), *this; }
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto setVerticalAlignment(double alignment = 0.5) -> type& { return self().setVerticalAlignment(alignment), *this; }
   auto setWidth(signed width = 0) -> type& { return self().setWidth(width), *this; }
-  auto sortable() const -> bool { return self().sortable(); }
   auto text() const -> string { return self().text(); }
   auto verticalAlignment() const -> double { return self().verticalAlignment(); }
   auto width() const -> signed { return self().width(); }
@@ -596,15 +617,33 @@ struct ListViewColumn : sListViewColumn {
 struct ListViewItem : sListViewItem {
   DeclareObject(ListViewItem)
 
+  auto append(sListViewCell cell) -> type& { return self().append(cell), *this; }
+  auto backgroundColor() const -> Color { return self().backgroundColor(); }
+  auto cell(unsigned position) const -> sListViewCell { return self().cell(position); }
+  auto cells() const -> unsigned { return self().cells(); }
   auto checked() const -> bool { return self().checked(); }
-  auto icon(unsigned column = 0) const -> image { return self().icon(column); }
+  auto foregroundColor() const -> Color { return self().foregroundColor(); }
+  auto remove(sListViewCell cell) -> type& { return self().remove(cell), *this; }
   auto selected() const -> bool { return self().selected(); }
+  auto setBackgroundColor(Color color = {}) -> type& { return self().setBackgroundColor(color), *this; }
   auto setChecked(bool checked = true) -> type& { return self().setChecked(checked), *this; }
-  auto setIcon(unsigned column, const image& icon = {}) -> type& { return self().setIcon(column, icon), *this; }
+  auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
   auto setSelected(bool selected = true) -> type& { return self().setSelected(selected), *this; }
-  auto setText(const lstring& text) -> type& { return self().setText(text), *this; }
-  auto setText(unsigned column, const string& text = "") -> type& { return self().setText(column, text), *this; }
-  auto text(unsigned column = 0) const -> string { return self().text(column); }
+};
+#endif
+
+#if defined(Hiro_ListView)
+struct ListViewCell : sListViewCell {
+  DeclareObject(ListViewCell)
+
+  auto backgroundColor() const -> Color { return self().backgroundColor(); }
+  auto foregroundColor() const -> Color { return self().foregroundColor(); }
+  auto icon() const -> image { return self().icon(); }
+  auto setBackgroundColor(Color color = {}) -> type& { return self().setBackgroundColor(color), *this; }
+  auto setForegroundColor(Color color = {}) -> type& { return self().setForegroundColor(color), *this; }
+  auto setIcon(const image& icon = {}) -> type& { return self().setIcon(icon), *this; }
+  auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
+  auto text() const -> string { return self().text(); }
 };
 #endif
 
@@ -624,6 +663,7 @@ struct RadioButton : sRadioButton {
   auto bordered() const -> bool { return self().bordered(); }
   auto checked() const -> bool { return self().checked(); }
   auto doActivate() const -> void { return self().doActivate(); }
+  auto group() const -> sGroup { return self().group(); }
   auto icon() const -> image { return self().icon(); }
   auto onActivate(const function<void ()>& function = {}) -> type& { return self().onActivate(function), *this; }
   auto orientation() const -> Orientation { return self().orientation(); }
@@ -633,12 +673,6 @@ struct RadioButton : sRadioButton {
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type& { return self().setOrientation(orientation), *this; }
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
-
-  static auto group(const vector<RadioButton>& group) -> void {
-    vector<wRadioButton> items;
-    for(auto& item : group) items.append(item);
-    return mRadioButton::group(items);
-  }
 };
 #endif
 
@@ -648,16 +682,11 @@ struct RadioLabel : sRadioLabel {
 
   auto checked() const -> bool { return self().checked(); }
   auto doActivate() const -> void { return self().doActivate(); }
+  auto group() const -> sGroup { return self().group(); }
   auto onActivate(const function<void ()>& function = {}) -> type& { return self().onActivate(function), *this; }
   auto setChecked() -> type& { return self().setChecked(), *this; }
   auto setText(const string& text = "") -> type& { return self().setText(text), *this; }
   auto text() const -> string { return self().text(); }
-
-  static auto group(const vector<RadioLabel>& group) -> void {
-    vector<wRadioLabel> items;
-    for(auto& item : items) items.append(item);
-    return mRadioLabel::group(items);
-  }
 };
 #endif
 

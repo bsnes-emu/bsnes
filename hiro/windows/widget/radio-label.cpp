@@ -1,49 +1,55 @@
-namespace phoenix {
+#if defined(Hiro_RadioLabel)
 
-Size pRadioLabel::minimumSize() {
-  Size size = pFont::size(hfont, radioLabel.state.text);
-  return {size.width + 20, size.height + 4};
-}
+namespace hiro {
 
-void pRadioLabel::setChecked() {
-  for(auto& item : radioLabel.state.group) {
-    SendMessage(item.p.hwnd, BM_SETCHECK, (WPARAM)(&item == &radioLabel), 0);
-  }
-}
-
-void pRadioLabel::setGroup(const group<RadioLabel>& group) {
-}
-
-void pRadioLabel::setText(string text) {
-  SetWindowText(hwnd, utf16_t(text));
-}
-
-void pRadioLabel::constructor() {
+auto pRadioLabel::construct() -> void {
   hwnd = CreateWindow(
     L"BUTTON", L"",
     WS_CHILD | WS_TABSTOP | BS_RADIOBUTTON,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&radioLabel);
-  setDefaultFont();
-  if(radioLabel.state.checked) setChecked();
-  setText(radioLabel.state.text);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  if(state().checked) setChecked();
+  setText(state().text);
 }
 
-void pRadioLabel::destructor() {
+auto pRadioLabel::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pRadioLabel::orphan() {
-  destructor();
-  constructor();
+auto pRadioLabel::minimumSize() -> Size {
+  auto size = pFont::size(hfont, state().text);
+  return {size.width() + 20, size.height() + 4};
 }
 
-void pRadioLabel::onActivate() {
-  if(radioLabel.state.checked) return;
-  radioLabel.setChecked();
-  if(radioLabel.onActivate) radioLabel.onActivate();
+auto pRadioLabel::setChecked() -> void {
+  if(auto group = self().group()) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto radioLabel = dynamic_cast<mRadioLabel*>(object.data())) {
+          if(auto self = radioLabel->self()) {
+            SendMessage(self->hwnd, BM_SETCHECK, (WPARAM)(&self->reference == &reference), 0);
+          }
+        }
+      }
+    }
+  }
+}
+
+auto pRadioLabel::setGroup(sGroup group) -> void {
+}
+
+auto pRadioLabel::setText(const string& text) -> void {
+  SetWindowText(hwnd, utf16_t(text));
+}
+
+auto pRadioLabel::onActivate() -> void {
+  if(state().checked) return;
+  self().setChecked();
+  self().doActivate();
 }
 
 }
+
+#endif

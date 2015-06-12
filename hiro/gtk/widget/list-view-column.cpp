@@ -63,6 +63,12 @@ auto pListViewColumn::setEditable(bool editable) -> void {
   g_object_set(G_OBJECT(gtkCellText), "editable", editable ? TRUE : FALSE, nullptr);
 }
 
+auto pListViewColumn::setExpandable(bool expandable) -> void {
+  if(auto parent = _parent()) {
+    parent->resizeColumns();
+  }
+}
+
 auto pListViewColumn::setFont(const string& font) -> void {
   pFont::setFont(gtkHeaderText, font);
   auto fontDescription = pFont::create(font);
@@ -93,10 +99,6 @@ auto pListViewColumn::setIcon(const image& icon) -> void {
 
 auto pListViewColumn::setResizable(bool resizable) -> void {
   gtk_tree_view_column_set_resizable(gtkColumn, resizable);
-}
-
-auto pListViewColumn::setSortable(bool sortable) -> void {
-  gtk_tree_view_column_set_clickable(gtkColumn, sortable);
 }
 
 auto pListViewColumn::setText(const string& text) -> void {

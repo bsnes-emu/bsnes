@@ -4,9 +4,12 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
 
   layout.setMargin(5);
   stateList.append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setHorizontalAlignment(1.0));
-  stateList.append(ListViewColumn().setText("Description").setWidth(~0));
-  for(unsigned slot = 0; slot < Slots; slot++) {
-    stateList.append(ListViewItem().setText(0, 1 + slot));
+  stateList.append(ListViewColumn().setText("Description").setExpandable());
+  for(auto slot : range(Slots)) {
+    stateList.append(ListViewItem()
+      .append(ListViewCell().setText(1 + slot))
+      .append(ListViewCell())
+    );
   }
   stateList.setHeaderVisible();
   stateList.onActivate([&] { doLoad(); });
@@ -48,9 +51,9 @@ auto StateManager::doRefresh() -> void {
       description.reserve(512);
       memory::copy(description.pointer(), buffer.data() + 72, 512);
       description.resize(description.length());
-      stateList.item(slot)->setText(1, description);
+      stateList.item(slot)->cell(1)->setText(description);
     } else {
-      stateList.item(slot)->setText(1, "(empty)");
+      stateList.item(slot)->cell(1)->setText("(empty)");
     }
   }
   doChange();

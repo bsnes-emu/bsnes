@@ -3,7 +3,7 @@ namespace hiro {
   struct pMenu;
   struct pLayout;
   struct pWidget;
-};
+}
 
 #define Declare(Name, Base) \
   p##Name(m##Name& reference) : p##Base(reference) {} \
@@ -19,7 +19,10 @@ namespace hiro {
 #include "mouse.hpp"
 #include "browser-window.hpp"
 #include "message-window.hpp"
+
 #include "object.hpp"
+#include "group.hpp"
+
 #include "hotkey.hpp"
 #include "timer.hpp"
 #include "window.hpp"
@@ -56,6 +59,7 @@ namespace hiro {
 #include "widget/list-view.hpp"
 #include "widget/list-view-column.hpp"
 #include "widget/list-view-item.hpp"
+#include "widget/list-view-cell.hpp"
 #include "widget/progress-bar.hpp"
 #include "widget/radio-button.hpp"
 #include "widget/radio-label.hpp"

@@ -8,13 +8,11 @@ static auto MenuRadioItem_activate(GtkCheckMenuItem* gtkCheckMenuItem, pMenuRadi
 
 auto pMenuRadioItem::construct() -> void {
   widget = gtk_radio_menu_item_new_with_mnemonic(0, "");
-  setGroup(state().group);
+  gtkCheckMenuItem = GTK_CHECK_MENU_ITEM(widget);
+  gtkRadioMenuItem = GTK_RADIO_MENU_ITEM(widget);
+
   setText(state().text);
-  for(auto& weak : state().group) {
-    if(auto item = weak.acquire()) {
-      if(item->self()) gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item->self()->widget), item->checked());
-    }
-  }
+
   g_signal_connect(G_OBJECT(widget), "toggled", G_CALLBACK(MenuRadioItem_activate), (gpointer)this);
 }
 
@@ -23,55 +21,54 @@ auto pMenuRadioItem::destruct() -> void {
 }
 
 auto pMenuRadioItem::setChecked() -> void {
-  _parent().lock();
-  for(auto& weak : state().group) {
-    if(auto item = weak.acquire()) {
-      if(item->self()) gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(item->self()->widget), false);
-    }
-  }
-  gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(widget), true);
-  _parent().unlock();
+  lock();
+  gtk_check_menu_item_set_active(gtkCheckMenuItem, true);
+  unlock();
 }
 
-auto pMenuRadioItem::setGroup(const vector<shared_pointer_weak<mMenuRadioItem>>& group) -> void {
-  _parent().lock();
-  shared_pointer<mMenuRadioItem> first;
-  for(auto& weak : group) {
-    if(!first) {
-      first = weak.acquire();
-      continue;
-    }
-    if(auto item = weak.acquire()) {
-      if(item->self() && first->self()) {
-        GSList* currentGroup = gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(first->self()->widget));
-        if(currentGroup != gtk_radio_menu_item_get_group(GTK_RADIO_MENU_ITEM(item->self()->widget))) {
-          gtk_radio_menu_item_set_group(GTK_RADIO_MENU_ITEM(item->self()->widget), currentGroup);
+auto pMenuRadioItem::setGroup(sGroup group) -> void {
+  if(!group) return;
+
+  maybe<GtkRadioMenuItem*> gtkRadioMenuItem;
+  for(auto& weak : group->state.objects) {
+    if(auto object = weak.acquire()) {
+      if(auto menuRadioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
+        if(auto self = menuRadioItem->self()) {
+          self->lock();
+          gtk_radio_menu_item_set_group(self->gtkRadioMenuItem, nullptr);
+          if(!gtkRadioMenuItem) gtkRadioMenuItem = self->gtkRadioMenuItem;
+          else gtk_radio_menu_item_set_group(self->gtkRadioMenuItem, gtk_radio_menu_item_get_group(*gtkRadioMenuItem));
+          gtk_check_menu_item_set_active(self->gtkCheckMenuItem, menuRadioItem->checked());
+          self->unlock();
         }
       }
     }
   }
-  _parent().unlock();
 }
 
 auto pMenuRadioItem::setText(const string& text) -> void {
   gtk_menu_item_set_label(GTK_MENU_ITEM(widget), _mnemonic(text));
 }
 
-auto pMenuRadioItem::_doActivate() -> void {
-  if(!_parent().locked()) {
-    bool wasChecked = state().checked;
-    self().setChecked();
-    if(!wasChecked) self().doActivate();
+auto pMenuRadioItem::groupLocked() const -> bool {
+  if(auto group = state().group) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto self = object->self()) {
+          if(self->locked()) return true;
+        }
+      }
+    }
+    return false;
   }
+  return locked();
 }
 
-auto pMenuRadioItem::_parent() -> pMenuRadioItem& {
-  if(state().group.size()) {
-    if(auto item = state().group.first().acquire()) {
-      if(item->self()) return *item->self();
-    }
-  }
-  return *this;
+auto pMenuRadioItem::_doActivate() -> void {
+  if(groupLocked()) return;
+  bool wasChecked = state().checked;
+  self().setChecked();
+  if(!wasChecked) self().doActivate();
 }
 
 }

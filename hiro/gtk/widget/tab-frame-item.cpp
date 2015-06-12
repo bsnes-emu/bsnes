@@ -10,6 +10,12 @@ auto pTabFrameItem::destruct() -> void {
   if(auto layout = state().layout) layout->destruct();
 }
 
+auto pTabFrameItem::append(sLayout layout) -> void {
+}
+
+auto pTabFrameItem::remove(sLayout layout) -> void {
+}
+
 auto pTabFrameItem::setClosable(bool closable) -> void {
   if(auto parent = _parent()) {
     parent->setItemClosable(self().offset(), closable);

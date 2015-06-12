@@ -15,4 +15,42 @@
 #include <nall/windows/registry.hpp>
 #include <nall/windows/utf8.hpp>
 
-#define TBS_TRANSPARENTBKGND 0x1000
+//MinGW/32-bit has painfully outdated platform headers ...
+
+#if !defined(Button_SetImageList)
+  typedef struct {
+    HIMAGELIST himl;
+    RECT margin;
+    UINT uAlign;
+  } BUTTON_IMAGELIST, *PBUTTON_IMAGELIST;
+
+  #define BUTTON_IMAGELIST_ALIGN_LEFT 0
+  #define BUTTON_IMAGELIST_ALIGN_RIGHT 1
+  #define BUTTON_IMAGELIST_ALIGN_TOP 2
+  #define BUTTON_IMAGELIST_ALIGN_BOTTOM 3
+  #define BUTTON_IMAGELIST_ALIGN_CENTER 4
+
+  #define BCM_FIRST 0x1600
+  #define BCM_SETIMAGELIST (BCM_FIRST+2)
+  #define Button_SetImageList(hwnd, pbuttonImagelist) (WINBOOL)SNDMSG((hwnd),BCM_SETIMAGELIST,0,(LPARAM)(pbuttonImagelist))
+#endif
+
+#if !defined(BP_CHECKBOX)
+  #define BP_CHECKBOX 3
+#endif
+
+#if !defined(CBS_UNCHECKEDNORMAL)
+  #define CBS_UNCHECKEDNORMAL 1
+#endif
+
+#if !defined(CBS_CHECKEDNORMAL)
+  #define CBS_CHECKEDNORMAL 5
+#endif
+
+#if !defined(LVCFMT_FIXED_WIDTH)
+  #define LVCFMT_FIXED_WIDTH 0x0100
+#endif
+
+#if !defined(TBS_TRANSPARENTBKGND)
+  #define TBS_TRANSPARENTBKGND 0x1000
+#endif

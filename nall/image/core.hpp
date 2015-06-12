@@ -7,7 +7,7 @@ image::operator bool() const {
   return !empty();
 }
 
-bool image::operator==(const image& source) {
+bool image::operator==(const image& source) const {
   if(width != source.width) return false;
   if(height != source.height) return false;
   if(pitch != source.pitch) return false;
@@ -23,11 +23,12 @@ bool image::operator==(const image& source) {
   return memcmp(data, source.data, width * height * stride) == 0;
 }
 
-bool image::operator!=(const image& source) {
+bool image::operator!=(const image& source) const {
   return !operator==(source);
 }
 
 image& image::operator=(const image& source) {
+  if(this == &source) return *this;
   free();
 
   width = source.width;
@@ -49,6 +50,7 @@ image& image::operator=(const image& source) {
 }
 
 image& image::operator=(image&& source) {
+  if(this == &source) return *this;
   free();
 
   width = source.width;

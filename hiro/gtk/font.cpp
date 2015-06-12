@@ -2,31 +2,31 @@
 
 namespace hiro {
 
-string pFont::serif(unsigned size, string style) {
+auto pFont::serif(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Serif, ", size, ", ", style};
 }
 
-string pFont::sans(unsigned size, string style) {
+auto pFont::sans(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Sans, ", size, ", ", style};
 }
 
-string pFont::monospace(unsigned size, string style) {
+auto pFont::monospace(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(string font, string text) {
+auto pFont::size(string font, string text) -> Size {
   PangoFontDescription* description = create(font);
   Size size = pFont::size(description, text);
   free(description);
   return size;
 }
 
-PangoFontDescription* pFont::create(string description) {
+auto pFont::create(string description) -> PangoFontDescription* {
   lstring part = description.split<2>(",").strip();
 
   string family = "Sans";
@@ -47,11 +47,11 @@ PangoFontDescription* pFont::create(string description) {
   return font;
 }
 
-void pFont::free(PangoFontDescription* font) {
+auto pFont::free(PangoFontDescription* font) -> void {
   pango_font_description_free(font);
 }
 
-Size pFont::size(PangoFontDescription* font, string text) {
+auto pFont::size(PangoFontDescription* font, string text) -> Size {
   PangoContext* context = gdk_pango_context_get_for_screen(gdk_screen_get_default());
   PangoLayout* layout = pango_layout_new(context);
   pango_layout_set_font_description(layout, font);
@@ -62,13 +62,13 @@ Size pFont::size(PangoFontDescription* font, string text) {
   return {width, height};
 }
 
-void pFont::setFont(GtkWidget* widget, string font) {
+auto pFont::setFont(GtkWidget* widget, string font) -> void {
   auto gtkFont = pFont::create(font);
   pFont::setFont(widget, (gpointer)gtkFont);
   pFont::free(gtkFont);
 }
 
-void pFont::setFont(GtkWidget* widget, gpointer font) {
+auto pFont::setFont(GtkWidget* widget, gpointer font) -> void {
   if(font == nullptr) return;
   gtk_widget_modify_font(widget, (PangoFontDescription*)font);
   if(GTK_IS_CONTAINER(widget)) {

@@ -3,16 +3,16 @@
 namespace hiro {
 
 struct pFont {
-  static string serif(unsigned size, string style);
-  static string sans(unsigned size, string style);
-  static string monospace(unsigned size, string style);
-  static Size size(string font, string text);
+  static auto serif(unsigned size, string style) -> string;
+  static auto sans(unsigned size, string style) -> string;
+  static auto monospace(unsigned size, string style) -> string;
+  static auto size(string font, string text) -> Size;
 
-  static PangoFontDescription* create(string description);
-  static void free(PangoFontDescription* font);
-  static Size size(PangoFontDescription* font, string text);
-  static void setFont(GtkWidget* widget, string font);
-  static void setFont(GtkWidget* widget, gpointer font);
+  static auto create(string description) -> PangoFontDescription*;
+  static auto free(PangoFontDescription* font) -> void;
+  static auto size(PangoFontDescription* font, string text) -> Size;
+  static auto setFont(GtkWidget* widget, string font) -> void;
+  static auto setFont(GtkWidget* widget, gpointer font) -> void;
 };
 
 }

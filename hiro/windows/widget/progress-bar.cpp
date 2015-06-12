@@ -1,31 +1,30 @@
-namespace phoenix {
+#if defined(Hiro_ProgressBar)
 
-Size pProgressBar::minimumSize() {
-  return {0, 23};
-}
+namespace hiro {
 
-void pProgressBar::setPosition(unsigned position) {
-  SendMessage(hwnd, PBM_SETPOS, (WPARAM)position, 0);
-}
-
-void pProgressBar::constructor() {
+auto pProgressBar::construct() -> void {
   hwnd = CreateWindow(PROGRESS_CLASS, L"",
     WS_CHILD | PBS_SMOOTH,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&progressBar);
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
   SendMessage(hwnd, PBM_SETRANGE, 0, MAKELPARAM(0, 100));
   SendMessage(hwnd, PBM_SETSTEP, MAKEWPARAM(1, 0), 0);
-  setPosition(progressBar.state.position);
-  synchronize();
+  setPosition(state().position);
 }
 
-void pProgressBar::destructor() {
+auto pProgressBar::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pProgressBar::orphan() {
-  destructor();
-  constructor();
+auto pProgressBar::minimumSize() const -> Size {
+  return {0, 23};
+}
+
+auto pProgressBar::setPosition(unsigned position) -> void {
+  SendMessage(hwnd, PBM_SETPOS, (WPARAM)position, 0);
 }
 
 }
+
+#endif

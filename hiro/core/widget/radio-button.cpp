@@ -6,20 +6,6 @@ auto mRadioButton::allocate() -> pObject* {
 
 //
 
-auto mRadioButton::group(const vector<shared_pointer_weak<mRadioButton>>& group) -> void {
-  for(auto& weak : group) {
-    if(auto item = weak.acquire()) item->state.group = group;
-  }
-  for(auto& weak : group) {
-    if(auto item = weak.acquire()) {
-      if(item->self()) item->self()->setGroup(group);
-    }
-  }
-  if(group.size()) {
-    if(auto item = group.first().acquire()) item->setChecked();
-  }
-}
-
 auto mRadioButton::bordered() const -> bool {
   return state.bordered;
 }
@@ -30,6 +16,10 @@ auto mRadioButton::checked() const -> bool {
 
 auto mRadioButton::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
+}
+
+auto mRadioButton::group() const -> sGroup {
+  return state.group;
 }
 
 auto mRadioButton::icon() const -> image {
@@ -52,11 +42,23 @@ auto mRadioButton::setBordered(bool bordered) -> type& {
 }
 
 auto mRadioButton::setChecked() -> type& {
-  for(auto& weak : state.group) {
-    if(auto item = weak.acquire()) item->state.checked = false;
+  if(auto group = this->group()) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto radioButton = dynamic_cast<mRadioButton*>(object.data())) {
+          radioButton->state.checked = false;
+        }
+      }
+    }
   }
   state.checked = true;
   signal(setChecked);
+  return *this;
+}
+
+auto mRadioButton::setGroup(sGroup group) -> type& {
+  state.group = group;
+  signal(setGroup, group);
   return *this;
 }
 

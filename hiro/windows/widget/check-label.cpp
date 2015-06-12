@@ -1,44 +1,42 @@
-namespace phoenix {
+#if defined(Hiro_CheckLabel)
 
-Size pCheckLabel::minimumSize() {
-  Size size = pFont::size(hfont, checkLabel.state.text);
-  return {size.width + 20, size.height + 4};
-}
+namespace hiro {
 
-void pCheckLabel::setChecked(bool checked) {
-  SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
-}
-
-void pCheckLabel::setText(string text) {
-  SetWindowText(hwnd, utf16_t(text));
-}
-
-void pCheckLabel::constructor() {
+auto pCheckLabel::construct() -> void {
   hwnd = CreateWindow(
     L"BUTTON", L"",
     WS_CHILD | WS_TABSTOP | BS_CHECKBOX,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&checkLabel);
-  setDefaultFont();
-  setChecked(checkLabel.state.checked);
-  setText(checkLabel.state.text);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setChecked(state().checked);
+  setText(state().text);
 }
 
-void pCheckLabel::destructor() {
+auto pCheckLabel::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pCheckLabel::orphan() {
-  destructor();
-  constructor();
+auto pCheckLabel::minimumSize() -> Size {
+  auto size = pFont::size(hfont, state().text);
+  return {size.width() + 20, size.height() + 4};
 }
 
-void pCheckLabel::onToggle() {
-  checkLabel.state.checked = !checkLabel.state.checked;
-  setChecked(checkLabel.state.checked);
-  if(checkLabel.onToggle) checkLabel.onToggle();
+auto pCheckLabel::setChecked(bool checked) -> void {
+  SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
+}
+
+auto pCheckLabel::setText(const string& text) -> void {
+  SetWindowText(hwnd, utf16_t(text));
+}
+
+auto pCheckLabel::onToggle() -> void {
+  state().checked = !state().checked;
+  setChecked(state().checked);
+  self().doToggle();
 }
 
 }
+
+#endif

@@ -5,8 +5,14 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   layout.setMargin(5);
   cheatList.append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setHorizontalAlignment(1.0));
   cheatList.append(ListViewColumn().setText("Code(s)"));
-  cheatList.append(ListViewColumn().setText("Description").setWidth(~0));
-  for(auto slot : range(Slots)) cheatList.append(ListViewItem().setText(0, 1 + slot));
+  cheatList.append(ListViewColumn().setText("Description").setExpandable());
+  for(auto slot : range(Slots)) {
+    cheatList.append(ListViewItem()
+      .append(ListViewCell().setText(1 + slot))
+      .append(ListViewCell())
+      .append(ListViewCell())
+    );
+  }
   cheatList.setCheckable();
   cheatList.setHeaderVisible();
   cheatList.onChange([&] { doChangeSelected(); });
@@ -52,9 +58,13 @@ auto CheatEditor::doRefresh() -> void {
     if(cheat.code || cheat.description) {
       lstring codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
-      cheatList.item(slot)->setChecked(cheat.enabled).setText(1, codes[0]).setText(2, cheat.description);
+      cheatList.item(slot)->setChecked(cheat.enabled);
+      cheatList.item(slot)->cell(1)->setText(codes[0]);
+      cheatList.item(slot)->cell(2)->setText(cheat.description);
     } else {
-      cheatList.item(slot)->setChecked(false).setText(1, "").setText(2, "(empty)");
+      cheatList.item(slot)->setChecked(false);
+      cheatList.item(slot)->cell(1)->setText("");
+      cheatList.item(slot)->cell(2)->setText("(empty)");
     }
   }
 
@@ -68,7 +78,7 @@ auto CheatEditor::doReset(bool force) -> void {
       cheat.code = "";
       cheat.description = "";
     }
-    cheatList.setSelected(false);
+    cheatList.unselectAll();
     doChangeSelected();
     doRefresh();
     synchronizeCodes();

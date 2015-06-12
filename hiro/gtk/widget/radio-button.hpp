@@ -8,12 +8,12 @@ struct pRadioButton : pWidget {
   auto minimumSize() const -> Size;
   auto setBordered(bool bordered) -> void;
   auto setChecked() -> void;
-  auto setGroup(const vector<wRadioButton>& group) -> void;
+  auto setGroup(sGroup group) -> void;
   auto setIcon(const image& icon) -> void;
   auto setOrientation(Orientation orientation) -> void;
   auto setText(const string& text) -> void;
 
-  auto _parent() -> pRadioButton&;
+  auto groupLocked() const -> bool;
 };
 
 }

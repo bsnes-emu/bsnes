@@ -21,11 +21,13 @@ struct Presentation : Window {
         MenuRadioItem videoScaleSmall{&videoScaleMenu};
         MenuRadioItem videoScaleNormal{&videoScaleMenu};
         MenuRadioItem videoScaleLarge{&videoScaleMenu};
+          Group videoScales{&videoScaleSmall, &videoScaleNormal, &videoScaleLarge};
         MenuSeparator videoScaleSeparator{&videoScaleMenu};
         MenuCheckItem aspectCorrection{&videoScaleMenu};
       Menu videoFilterMenu{&settingsMenu};
         MenuRadioItem videoFilterNone{&videoFilterMenu};
         MenuRadioItem videoFilterBlur{&videoFilterMenu};
+          Group videoFilters{&videoFilterNone, &videoFilterBlur};
         MenuSeparator videoFilterSeparator{&videoFilterMenu};
         MenuCheckItem colorEmulation{&videoFilterMenu};
         MenuCheckItem maskOverscan{&videoFilterMenu};

@@ -28,10 +28,14 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
 auto HotkeySettings::reloadMappings() -> void {
   mappingList.reset();
   mappingList.append(ListViewColumn().setText("Name"));
-  mappingList.append(ListViewColumn().setText("Mapping").setWidth(~0));
+  mappingList.append(ListViewColumn().setText("Mapping").setExpandable());
   mappingList.append(ListViewColumn().setText("Device"));
   for(auto& hotkey : inputManager->hotkeys) {
-    mappingList.append(ListViewItem().setText(0, hotkey->name));
+    mappingList.append(ListViewItem()
+      .append(ListViewCell().setText(hotkey->name))
+      .append(ListViewCell())
+      .append(ListViewCell())
+    );
   }
   mappingList.resizeColumns();
 }
@@ -39,7 +43,9 @@ auto HotkeySettings::reloadMappings() -> void {
 auto HotkeySettings::refreshMappings() -> void {
   unsigned position = 0;
   for(auto& hotkey : inputManager->hotkeys) {
-    mappingList.item(position++)->setText(1, hotkey->assignmentName()).setText(2, hotkey->deviceName());
+    mappingList.item(position)->cell(1)->setText(hotkey->assignmentName());
+    mappingList.item(position)->cell(2)->setText(hotkey->deviceName());
+    position++;
   }
   mappingList.resizeColumns();
 }

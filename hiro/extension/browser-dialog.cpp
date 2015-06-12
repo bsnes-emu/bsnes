@@ -35,27 +35,27 @@ auto BrowserDialogWindow::accept() -> void {
   auto selectedItems = view.selectedItems();
 
   if(state.action == "openFile" && selectedItems) {
-    string name = selectedItems.first()->text(0);
+    string name = selectedItems.first()->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name});
   }
 
   if(state.action == "openFiles") {
     for(auto selectedItem : selectedItems) {
-      string name = selectedItem->text(0);
+      string name = selectedItem->cell(0)->text();
       state.response.append(string{state.path, name, isFolder(name) ? "/" : ""});
     }
   }
 
   if(state.action == "openFolder" && selectedItems) {
-    string name = selectedItems.first()->text(0);
+    string name = selectedItems.first()->cell(0)->text();
     if(!isMatch(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name, "/"});
   }
 
   if(state.action == "saveFile") {
     string name = fileName.text();
-    if(!name && selectedItems) name = selectedItems.first()->text(0);
+    if(!name && selectedItems) name = selectedItems.first()->cell(0)->text();
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
@@ -64,7 +64,7 @@ auto BrowserDialogWindow::accept() -> void {
   }
 
   if(state.action == "selectFolder" && selectedItems) {
-    string name = selectedItems.first()->text(0);
+    string name = selectedItems.first()->cell(0)->text();
     if(isFolder(name)) state.response.append(string{state.path, name, "/"});
   }
 
@@ -76,13 +76,13 @@ auto BrowserDialogWindow::activate() -> void {
   auto selectedItem = view.selected();
 
   if(state.action == "saveFile" && selectedItem) {
-    string name = selectedItem->text(0);
+    string name = selectedItem->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
     fileName.setText(name);
   }
 
   if(state.action == "selectFolder" && selectedItem) {
-    string name = selectedItem->text(0);
+    string name = selectedItem->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
   }
 
@@ -94,7 +94,7 @@ auto BrowserDialogWindow::change() -> void {
   fileName.setText("");
   if(state.action == "saveFile") {
     if(auto selectedItem = view.selected()) {
-      string name = selectedItem->text(0);
+      string name = selectedItem->cell(0)->text();
       if(!isFolder(name)) fileName.setText(name);
     }
   }
@@ -121,7 +121,7 @@ auto BrowserDialogWindow::run() -> lstring {
   pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
   pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
   pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(state.path.dirname()); });
-  view.setMultiSelect(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
+  view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
     auto part = filter.split<1>("|");
@@ -161,8 +161,8 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   pathName.setText(state.path = path);
 
   view.reset();
-  view.append(ListViewColumn().setWidth(~0));
-  view.append(ListViewColumn().setWidth( 0).setForegroundColor({192, 128, 128}));
+  view.append(ListViewColumn().setExpandable());
+  view.append(ListViewColumn().setForegroundColor({192, 128, 128}));
 
   auto contents = directory::contents(path);
   bool folderMode = state.action == "openFolder";
@@ -171,20 +171,20 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     if(!content.endsWith("/")) continue;
     if(folderMode && isMatch(content.rtrim("/"))) continue;
 
-    ListViewItem item{&view};
-    item.setIcon(0, Icon::Emblem::Folder);
-    item.setText(0, content.rtrim("/"));
-    item.setText(1, octal<3>(storage::mode({path, content}) & 0777));
+    view.append(ListViewItem()
+      .append(ListViewCell().setText(content.rtrim("/")).setIcon(Icon::Emblem::Folder))
+      .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
+    );
   }
 
   for(auto content : contents) {
     if(content.endsWith("/") && !folderMode) continue;
     if(!isMatch(content.rtrim("/"))) continue;
 
-    ListViewItem item{&view};
-    item.setIcon(0, folderMode ? Icon::Action::Open : Icon::Emblem::File);
-    item.setText(0, content.rtrim("/"));
-    item.setText(1, octal<3>(storage::mode({path, content}) & 0777));
+    view.append(ListViewItem()
+      .append(ListViewCell().setText(content.rtrim("/")).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
+      .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
+    );
   }
 
   if(view.items()) view.item(0)->setSelected();

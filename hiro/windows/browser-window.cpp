@@ -1,6 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_BrowserWindow)
 
-static int CALLBACK BrowserWindowCallbackProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpdata) {
+namespace hiro {
+
+static auto CALLBACK BrowserWindowCallbackProc(HWND hwnd, UINT msg, LPARAM lparam, LPARAM lpdata) -> signed {
   if(msg == BFFM_INITIALIZED) {
     if(lpdata) {
       auto state = (BrowserWindow::State*)lpdata;
@@ -12,7 +14,7 @@ static int CALLBACK BrowserWindowCallbackProc(HWND hwnd, UINT msg, LPARAM lparam
   return 0;
 }
 
-static string BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) {
+static auto BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) -> string {
   string path = string{state.path}.replace("/", "\\");
 
   string filters;
@@ -46,7 +48,7 @@ static string BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) {
   OPENFILENAME ofn;
   memset(&ofn, 0, sizeof(OPENFILENAME));
   ofn.lStructSize = sizeof(OPENFILENAME);
-  ofn.hwndOwner = state.parent ? state.parent->p.hwnd : 0;
+  ofn.hwndOwner = state.parent ? state.parent->self()->hwnd : 0;
   ofn.lpstrFilter = wfilters;
   ofn.lpstrInitialDir = wpath;
   ofn.lpstrFile = wname;
@@ -62,11 +64,11 @@ static string BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) {
   return name;
 }
 
-string pBrowserWindow::directory(BrowserWindow::State& state) {
+auto pBrowserWindow::directory(BrowserWindow::State& state) -> string {
   wchar_t wname[PATH_MAX + 1] = L"";
 
   BROWSEINFO bi;
-  bi.hwndOwner = state.parent ? state.parent->p.hwnd : 0;
+  bi.hwndOwner = state.parent ? state.parent->self()->hwnd : 0;
   bi.pidlRoot = NULL;
   bi.pszDisplayName = wname;
   bi.lpszTitle = L"\nChoose a directory:";
@@ -94,12 +96,14 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
   return name;
 }
 
-string pBrowserWindow::open(BrowserWindow::State& state) {
+auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
   return BrowserWindow_fileDialog(0, state);
 }
 
-string pBrowserWindow::save(BrowserWindow::State& state) {
+auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
   return BrowserWindow_fileDialog(1, state);
 }
 
 }
+
+#endif

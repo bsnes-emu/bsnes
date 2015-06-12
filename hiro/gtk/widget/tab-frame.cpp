@@ -3,7 +3,9 @@
 namespace hiro {
 
 static auto TabFrame_change(GtkNotebook* notebook, GtkWidget* page, unsigned position, pTabFrame* p) -> void {
-  p->state().selected = position;
+  for(auto& item : p->state().items) item->state.selected = false;
+  if(auto item = p->self().item(position)) item->state.selected = true;
+
   p->_synchronizeLayout();
   if(!p->locked()) p->self().doChange();
 }
@@ -22,7 +24,10 @@ static auto TabFrame_close(GtkButton* button, pTabFrame* p) -> void {
 }
 
 static auto TabFrame_move(GtkNotebook* notebook, GtkWidget* page, unsigned moveTo, pTabFrame* p) -> void {
-  p->state().selected = gtk_notebook_get_current_page(notebook);
+  unsigned position = gtk_notebook_get_current_page(notebook);
+  for(auto& item : p->state().items) item->state.selected = false;
+  if(auto item = p->self().item(position)) item->state.selected = true;
+
   maybe<unsigned> moveFrom;
   for(auto n : range(p->tabs)) {
     if(page == p->tabs[n].child) {
@@ -45,7 +50,6 @@ auto pTabFrame::construct() -> void {
   tabs.reset();  //todo: memory leak, need to release each tab
   for(auto& item : state().items) append(item);
   setEdge(state().edge);
-  setItemSelected(state().selected);
 
   g_signal_connect(G_OBJECT(gtkWidget), "page-reordered", G_CALLBACK(TabFrame_move), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "switch-page", G_CALLBACK(TabFrame_change), (gpointer)this);
@@ -87,6 +91,7 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
 
   setFont(self().font(true));
   setItemMovable(item->offset(), item->movable());
+  if(item->selected()) setItemSelected(item->offset());
   _synchronizeTab(tabs.size() - 1);
   setGeometry(self().geometry());
   unlock();
@@ -128,7 +133,10 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
   }
   tabs.remove(item->offset());
   gtk_notebook_remove_page(GTK_NOTEBOOK(gtkWidget), item->offset());
-  state().selected = gtk_notebook_get_current_page(GTK_NOTEBOOK(gtkWidget));
+
+  unsigned position = gtk_notebook_get_current_page(GTK_NOTEBOOK(gtkWidget));
+  for(auto& item : state().items) item->state.selected = false;
+  if(auto item = self().item(position)) item->state.selected = true;
   unlock();
 }
 
@@ -218,14 +226,12 @@ auto pTabFrame::setVisible(bool visible) -> void {
 }
 
 auto pTabFrame::_synchronizeLayout() -> void {
-  unsigned position = 0;
   for(auto& item : state().items) {
     if(auto layout = item->state.layout) {
-      if(layout->self()) {
-        layout->self()->setVisible(layout->visible(true) && position == state().selected);
+      if(auto self = layout->self()) {
+        self->setVisible(layout->visible(true) && item->selected());
       }
     }
-    position++;
   }
 }
 

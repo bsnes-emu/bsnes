@@ -2,40 +2,48 @@
 
 namespace ruby {
 
-class pVideoGDI {
-public:
-  uint32_t* buffer;
-  HBITMAP bitmap;
-  HDC bitmapdc;
+struct pVideoGDI {
+  uint32_t* buffer = nullptr;
+  HBITMAP bitmap = nullptr;
+  HDC bitmapdc = nullptr;
   BITMAPINFO bmi;
 
   struct {
-    HWND handle;
+    HWND handle = nullptr;
 
     unsigned width;
     unsigned height;
   } settings;
 
-  bool cap(const string& name) {
+  pVideoGDI() {
+    buffer = (uint32_t*)memory::allocate(1024 * 1024 * sizeof(uint32_t));
+  }
+
+  ~pVideoGDI() {
+    if(buffer) memory::free(buffer);
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = (HWND)any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = (HWND)value.get<uintptr_t>();
       return true;
     }
 
     return false;
   }
 
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     settings.width  = width;
     settings.height = height;
 
@@ -43,11 +51,11 @@ public:
     return data = buffer;
   }
 
-  void unlock() {}
+  auto unlock() -> void {}
 
-  void clear() {}
+  auto clear() -> void {}
 
-  void refresh() {
+  auto refresh() -> void {
     RECT rc;
     GetClientRect(settings.handle, &rc);
 
@@ -57,7 +65,7 @@ public:
     ReleaseDC(settings.handle, hdc);
   }
 
-  bool init() {
+  auto init() -> bool {
     HDC hdc = GetDC(settings.handle);
     bitmapdc = CreateCompatibleDC(hdc);
     assert(bitmapdc);
@@ -80,18 +88,9 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     DeleteObject(bitmap);
     DeleteDC(bitmapdc);
-  }
-
-  pVideoGDI() {
-    buffer = (uint32_t*)malloc(1024 * 1024 * sizeof(uint32_t));
-    settings.handle = 0;
-  }
-
-  ~pVideoGDI() {
-    if(buffer) free(buffer);
   }
 };
 

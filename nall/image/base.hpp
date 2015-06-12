@@ -19,11 +19,11 @@ struct image {
     unsigned depth;
     unsigned shift;
 
-    inline bool operator==(const channel& source) {
+    inline bool operator==(const channel& source) const {
       return mask == source.mask && depth == source.depth && shift == source.shift;
     }
 
-    inline bool operator!=(const channel& source) {
+    inline bool operator!=(const channel& source) const {
       return !operator==(source);
     }
   };
@@ -48,8 +48,8 @@ struct image {
 
   //core.hpp
   inline explicit operator bool() const;
-  inline bool operator==(const image& source);
-  inline bool operator!=(const image& source);
+  inline bool operator==(const image& source) const;
+  inline bool operator!=(const image& source) const;
 
   inline image& operator=(const image& source);
   inline image& operator=(image&& source);

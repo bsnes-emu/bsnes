@@ -26,12 +26,13 @@ auto pListView::construct() -> void {
   gtk_widget_show(gtkWidgetChild);
 
   setBackgroundColor(state().backgroundColor);
+  setBatchable(state().batchable);
   setCheckable(state().checkable);
   setFont(self().font(true));
   setForegroundColor(state().foregroundColor);
   setGridVisible(state().gridVisible);
   setHeaderVisible(state().headerVisible);
-  setMultiSelect(state().multiSelect);
+  setSortable(state().sortable);
 
   g_signal_connect(G_OBJECT(gtkTreeView), "button-press-event", G_CALLBACK(ListView_buttonEvent), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkTreeView), "button-release-event", G_CALLBACK(ListView_buttonEvent), (gpointer)this);
@@ -56,9 +57,12 @@ auto pListView::append(sListViewColumn column) -> void {
   column->setFont(column->font());
   column->setForegroundColor(column->foregroundColor());
   column->setHorizontalAlignment(column->horizontalAlignment());
+  column->setResizable(column->resizable());
   column->setVerticalAlignment(column->verticalAlignment());
   setCheckable(state().checkable);
+  setSortable(state().sortable);
   _createModel();
+  resizeColumns();
   gtk_tree_view_set_rules_hint(gtkTreeView, self().columns() >= 2);  //two or more columns + checkbutton column
 }
 
@@ -68,8 +72,18 @@ auto pListView::append(sListViewItem item) -> void {
   item->setChecked(item->checked());
   item->setSelected(item->selected());
   for(auto column : range(self().columns())) {
-    item->setIcon(column, item->state.icon(column, {}));
-    item->setText(column, item->state.text(column, ""));
+    if(auto cell = item->cell(column)) {
+      if(auto self = cell->self()) {
+        self->setIcon(cell->state.icon);
+        self->setText(cell->state.text);
+      }
+    }
+  }
+}
+
+auto pListView::checkAll() -> void {
+  for(auto& item : state().items) {
+    if(auto delegate = item->self()) delegate->setChecked(true);
   }
 }
 
@@ -106,64 +120,44 @@ auto pListView::reset() -> void {
   gtk_tree_view_set_rules_hint(gtkTreeView, false);
 }
 
-//column widths:
-//< 0 = expanding (consume all remaining space)
-//  0 = auto (resize to contents
-//> 0 = fixed width
 auto pListView::resizeColumns() -> void {
   lock();
 
-  //compute the minimum width required for each column based upon the contents of all rows
-  vector<signed> minimumWidths;
-  for(auto column : range(self().columns())) {
-    signed maximumWidth = 1;
-    if(self().headerVisible()) {
-      maximumWidth = max(maximumWidth, 8 //margin
-      + state().columns[column]->state.icon.width
-      + Font::size(state().columns[column]->font(true), state().columns[column]->state.text).width()
-      );
+  vector<signed> widths;
+  signed minimumWidth = 0;
+  signed expandable = 0;
+  for(auto column : range(state().columns)) {
+    signed width = _width(column);
+    widths.append(width);
+    minimumWidth += width;
+    if(state().columns[column]->expandable()) expandable++;
+  }
+
+  signed maximumWidth = self().geometry().width() - 6;
+  if(auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow)) {
+    if(gtk_widget_get_visible(scrollBar)) maximumWidth -= scrollBar->allocation.width;
+  }
+
+  signed expandWidth = 0;
+  if(expandable && maximumWidth > minimumWidth) {
+    expandWidth = (maximumWidth - minimumWidth) / expandable;
+  }
+
+  for(auto column : range(state().columns)) {
+    if(auto self = state().columns[column]->self()) {
+      signed width = widths[column];
+      if(self->state().expandable) width += expandWidth;
+      gtk_tree_view_column_set_fixed_width(self->gtkColumn, width);
     }
-    for(auto row : range(self().items())) {
-      maximumWidth = max(maximumWidth, 8  //margin
-      + (row == 0 && state().checkable ? 32 : 0)  //check box
-      + state().items[row]->state.icon(column, {}).width
-      + Font::size(state().columns[column]->font(true), state().items[row]->state.text(column, "")).width()
-      );
-    }
-    if(!state().columns[column]->visible()) maximumWidth = 1;
-    minimumWidths.append(maximumWidth);
-  }
-
-  //subtract the widths of all non-expanding columns from the available widget space
-  signed expansions = 0;  //count the number of expanded columns
-  signed emptyWidth = pSizable::state().geometry.width() - 5;  //margin
-  for(auto column : range(self().columns())) {
-    signed width = state().columns[column]->width();
-    if(!state().columns[column]->visible()) width = 1;
-    if(width < 0) { expansions++; continue; }
-    if(width == 0) width = minimumWidths[column];
-    emptyWidth -= width;
-  }
-
-  //the vertical scroll bar consumes header space when visible; subtract it from available space if needed
-  auto scrollBar = gtk_scrolled_window_get_vscrollbar(gtkScrolledWindow);
-  if(scrollBar && gtk_widget_get_visible(scrollBar)) {
-    emptyWidth -= scrollBar->allocation.width;
-  }
-
-  //divide remaining space among all expanded columns
-  if(expansions && emptyWidth >= expansions) emptyWidth /= expansions;
-  else emptyWidth = 1;
-
-  for(auto column : range(self().columns())) {
-    signed width = state().columns[column]->width();
-    if(!state().columns[column]->visible()) width = 1;
-    if(width < 0) width = emptyWidth;
-    if(width == 0) width = minimumWidths[column];
-    gtk_tree_view_column_set_fixed_width(_column(column)->gtkColumn, width);
   }
 
   unlock();
+}
+
+auto pListView::selectAll() -> void {
+  for(auto& item : state().items) {
+    if(auto delegate = item->self()) delegate->setSelected(true);
+  }
 }
 
 auto pListView::setBackgroundColor(Color color) -> void {
@@ -171,15 +165,13 @@ auto pListView::setBackgroundColor(Color color) -> void {
   gtk_widget_modify_base(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
 }
 
+auto pListView::setBatchable(bool batchable) -> void {
+  gtk_tree_selection_set_mode(gtkTreeSelection, batchable ? GTK_SELECTION_MULTIPLE : GTK_SELECTION_SINGLE);
+}
+
 auto pListView::setCheckable(bool checkable) -> void {
   if(auto delegate = _column(0)) {
     gtk_cell_renderer_set_visible(delegate->gtkCellToggle, checkable);
-  }
-}
-
-auto pListView::setChecked(bool checked) -> void {
-  for(auto& item : state().items) {
-    if(auto delegate = item->self()) delegate->setChecked(checked);
   }
 }
 
@@ -206,19 +198,58 @@ auto pListView::setHeaderVisible(bool visible) -> void {
   gtk_tree_view_set_headers_visible(gtkTreeView, visible);
 }
 
-auto pListView::setMultiSelect(bool multiSelect) -> void {
-  gtk_tree_selection_set_mode(gtkTreeSelection, multiSelect ? GTK_SELECTION_MULTIPLE : GTK_SELECTION_SINGLE);
+auto pListView::setSortable(bool sortable) -> void {
+  for(auto& column : state().columns) {
+    if(auto delegate = column->self()) {
+      gtk_tree_view_column_set_clickable(delegate->gtkColumn, sortable);
+    }
+  }
 }
 
-auto pListView::setSelected(bool selected) -> void {
+auto pListView::uncheckAll() -> void {
   for(auto& item : state().items) {
-    if(auto delegate = item->self()) delegate->setSelected(selected);
+    if(auto delegate = item->self()) delegate->setChecked(false);
   }
+}
+
+auto pListView::unselectAll() -> void {
+  for(auto& item : state().items) {
+    if(auto delegate = item->self()) delegate->setSelected(false);
+  }
+}
+
+auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
+  unsigned width = 8;  //margin
+  if(state().checkable && _column == 0) width += 32;  //checkbox
+  if(auto item = self().item(_row)) {
+    if(auto cell = item->cell(_column)) {
+      if(auto& icon = cell->state.icon) {
+        width += icon.width + 2;
+      }
+      if(auto& text = cell->state.text) {
+        width += Font::size(cell->font(true), text).width();
+      }
+    }
+  }
+  return width;
 }
 
 auto pListView::_column(unsigned column) -> pListViewColumn* {
   if(auto delegate = self().column(column)) return delegate->self();
   return nullptr;
+}
+
+auto pListView::_columnWidth(unsigned _column) -> unsigned {
+  unsigned width = 8;  //margin
+  if(auto column = self().column(_column)) {
+    if(auto& icon = column->state.icon) {
+      width += icon.width + 2;
+    }
+    if(auto& text = column->state.text) {
+      width += Font::size(column->font(true), text).width();
+    }
+  }
+  return width;
 }
 
 auto pListView::_createModel() -> void {
@@ -256,13 +287,16 @@ auto pListView::_doContext() -> void {
 auto pListView::_doEdit(GtkCellRendererText* gtkCellRendererText, const char* path, const char* text) -> void {
   for(auto& column : state().columns) {
     if(auto delegate = column->self()) {
-      if(gtkCellRendererText = GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
-        if(auto item = self().item(decimal(path))) {
-          if(string{text} != item->text(column->offset())) {
-            item->setText(column->offset(), text);
-            if(!locked()) self().doEdit(item, column);
+      if(gtkCellRendererText == GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
+        auto row = decimal(path);
+        if(auto item = self().item(row)) {
+          if(auto cell = item->cell(column->offset())) {
+            if(string{text} != cell->state.text) {
+              cell->setText(text);
+              if(!locked()) self().doEdit(cell);
+            }
+            return;
           }
-          return;
         }
       }
     }
@@ -277,7 +311,7 @@ auto pListView::_doEvent(GdkEventButton* event) -> signed {
     //when clicking in empty space below the last list view item; GTK+ does not deselect all items;
     //below code enables this functionality, to match behavior with all other UI toolkits (and because it's very convenient to have)
     if(path == nullptr && gtk_tree_selection_count_selected_rows(gtkTreeSelection) > 0) {
-      self().setSelected({});
+      self().unselectAll();
       self().doChange();
       return true;
     }
@@ -371,6 +405,19 @@ auto pListView::_updateSelected() -> void {
   }
 
   if(!locked()) self().doChange();
+}
+
+auto pListView::_width(unsigned column) -> unsigned {
+  if(auto width = state().columns[column]->width()) return width;
+  unsigned width = 1;
+  if(!state().columns[column]->visible()) return width;
+  if(state().headerVisible) {
+    width = max(width, _columnWidth(column));
+  }
+  for(auto row : range(state().items)) {
+    width = max(width, _cellWidth(row, column));
+  }
+  return width;
 }
 
 }

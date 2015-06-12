@@ -14,12 +14,14 @@ struct pWindow : pObject {
   GtkAllocation lastAllocation = {0};
   bool onSizePending = false;
 
-  auto append(shared_pointer<mMenuBar> menuBar) -> void;
-  auto append(shared_pointer<mStatusBar> statusBar) -> void;
+  auto append(sLayout layout) -> void;
+  auto append(sMenuBar menuBar) -> void;
+  auto append(sStatusBar statusBar) -> void;
   auto focused() const -> bool override;
   auto frameMargin() const -> Geometry;
-  auto remove(shared_pointer<mMenuBar> menuBar) -> void;
-  auto remove(shared_pointer<mStatusBar> statusBar) -> void;
+  auto remove(sLayout layout) -> void;
+  auto remove(sMenuBar menuBar) -> void;
+  auto remove(sStatusBar statusBar) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setDroppable(bool droppable) -> void;
   auto setEnabled(bool enabled) -> void override;

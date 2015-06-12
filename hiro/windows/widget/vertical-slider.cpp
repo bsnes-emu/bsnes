@@ -1,47 +1,43 @@
-namespace phoenix {
+#if defined(Hiro_VerticalSlider)
 
-Size pVerticalSlider::minimumSize() {
-  return {0, 25};
-}
+namespace hiro {
 
-void pVerticalSlider::setLength(unsigned length) {
-  length += (length == 0);
-  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(0, length - 1));
-  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)(length >> 3));
-  verticalSlider.setPosition(0);
-}
-
-void pVerticalSlider::setPosition(unsigned position) {
-  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)position);
-}
-
-void pVerticalSlider::constructor() {
+auto pVerticalSlider::construct() -> void {
   hwnd = CreateWindow(
     TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_TRANSPARENTBKGND | TBS_NOTICKS | TBS_BOTH | TBS_VERT,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&verticalSlider);
-
-  unsigned position = verticalSlider.state.position;
-  setLength(verticalSlider.state.length);
-  verticalSlider.setPosition(position);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setLength(state().length);
+  setPosition(state().position);
 }
 
-void pVerticalSlider::destructor() {
+auto pVerticalSlider::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pVerticalSlider::orphan() {
-  destructor();
-  constructor();
+auto pVerticalSlider::minimumSize() const -> Size {
+  return {0, 25};
 }
 
-void pVerticalSlider::onChange() {
+auto pVerticalSlider::setLength(unsigned length) -> void {
+  length += (length == 0);
+  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(0, length - 1));
+  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)(length >> 3));
+}
+
+auto pVerticalSlider::setPosition(unsigned position) -> void {
+  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)position);
+}
+
+auto pVerticalSlider::onChange() -> void {
   unsigned position = SendMessage(hwnd, TBM_GETPOS, 0, 0);
-  if(position == verticalSlider.state.position) return;
-  verticalSlider.state.position = position;
-  if(verticalSlider.onChange) verticalSlider.onChange();
+  if(position == state().position) return;
+  state().position = position;
+  self().doChange();
 }
 
 }
+
+#endif

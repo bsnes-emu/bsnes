@@ -1,4 +1,6 @@
-namespace phoenix {
+#if defined(Hiro_Monitor)
+
+namespace hiro {
 
 struct MonitorInfo {
   unsigned monitor = 0;
@@ -7,7 +9,7 @@ struct MonitorInfo {
   Geometry geometry;
 };
 
-static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) {
+static auto CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData) -> BOOL {
   MonitorInfo& info = *(MonitorInfo*)dwData;
   MONITORINFOEX mi;
   memset(&mi, 0, sizeof(MONITORINFOEX));
@@ -23,21 +25,23 @@ static BOOL CALLBACK MonitorEnumProc(HMONITOR hMonitor, HDC hdcMonitor, LPRECT l
   return TRUE;
 }
 
-unsigned pMonitor::count() {
+auto pMonitor::count() -> unsigned {
   return GetSystemMetrics(SM_CMONITORS);
 }
 
-Geometry pMonitor::geometry(unsigned monitor) {
+auto pMonitor::geometry(unsigned monitor) -> Geometry {
   MonitorInfo info;
   info.monitor = monitor;
   EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&info);
   return info.geometry;
 }
 
-unsigned pMonitor::primary() {
+auto pMonitor::primary() -> unsigned {
   MonitorInfo info;
   EnumDisplayMonitors(NULL, NULL, MonitorEnumProc, (LPARAM)&info);
   return info.primary;
 }
 
 }
+
+#endif

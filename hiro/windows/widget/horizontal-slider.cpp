@@ -1,47 +1,43 @@
-namespace phoenix {
+#if defined(Hiro_HorizontalSlider)
 
-Size pHorizontalSlider::minimumSize() {
-  return {0, 25};
-}
+namespace hiro {
 
-void pHorizontalSlider::setLength(unsigned length) {
-  length += (length == 0);
-  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(0, length - 1));
-  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)(length >> 3));
-  horizontalSlider.setPosition(0);
-}
-
-void pHorizontalSlider::setPosition(unsigned position) {
-  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)position);
-}
-
-void pHorizontalSlider::constructor() {
+auto pHorizontalSlider::construct() -> void {
   hwnd = CreateWindow(
     TRACKBAR_CLASS, L"", WS_CHILD | WS_TABSTOP | TBS_TRANSPARENTBKGND | TBS_NOTICKS | TBS_BOTH | TBS_HORZ,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalSlider);
-
-  unsigned position = horizontalSlider.state.position;
-  setLength(horizontalSlider.state.length);
-  horizontalSlider.setPosition(position);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setLength(state().length);
+  setPosition(state().position);
 }
 
-void pHorizontalSlider::destructor() {
+auto pHorizontalSlider::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pHorizontalSlider::orphan() {
-  destructor();
-  constructor();
+auto pHorizontalSlider::minimumSize() const -> Size {
+  return {0, 25};
 }
 
-void pHorizontalSlider::onChange() {
+auto pHorizontalSlider::setLength(unsigned length) -> void {
+  length += (length == 0);
+  SendMessage(hwnd, TBM_SETRANGE, (WPARAM)true, (LPARAM)MAKELONG(0, length - 1));
+  SendMessage(hwnd, TBM_SETPAGESIZE, 0, (LPARAM)(length >> 3));
+}
+
+auto pHorizontalSlider::setPosition(unsigned position) -> void {
+  SendMessage(hwnd, TBM_SETPOS, (WPARAM)true, (LPARAM)position);
+}
+
+auto pHorizontalSlider::onChange() -> void {
   unsigned position = SendMessage(hwnd, TBM_GETPOS, 0, 0);
-  if(position == horizontalSlider.state.position) return;
-  horizontalSlider.state.position = position;
-  if(horizontalSlider.onChange) horizontalSlider.onChange();
+  if(position == state().position) return;
+  state().position = position;
+  self().doChange();
 }
 
 }
+
+#endif

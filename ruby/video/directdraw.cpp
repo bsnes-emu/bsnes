@@ -2,51 +2,56 @@
 
 namespace ruby {
 
-class pVideoDD {
-public:
-  LPDIRECTDRAW lpdd;
-  LPDIRECTDRAW7 lpdd7;
-  LPDIRECTDRAWSURFACE7 screen, raster;
-  LPDIRECTDRAWCLIPPER clipper;
+struct pVideoDD {
+  LPDIRECTDRAW lpdd = nullptr;
+  LPDIRECTDRAW7 lpdd7 = nullptr;
+  LPDIRECTDRAWSURFACE7 screen = nullptr;
+  LPDIRECTDRAWSURFACE7 raster = nullptr;
+  LPDIRECTDRAWCLIPPER clipper = nullptr;
   DDSURFACEDESC2 ddsd;
   DDSCAPS2 ddscaps;
-  unsigned iwidth, iheight;
+  unsigned iwidth;
+  unsigned iheight;
 
   struct {
-    HWND handle;
-    bool synchronize;
+    HWND handle = nullptr;
+    bool synchronize = false;
 
     unsigned width;
     unsigned height;
   } settings;
 
-  bool cap(const string& name) {
+  ~pVideoDD() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
     if(name == Video::Synchronize) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Video::Handle) {
-      settings.handle = (HWND)any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = (HWND)value.get<uintptr_t>();
       return true;
     }
 
-    if(name == Video::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+    if(name == Video::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       return true;
     }
 
     return false;
   }
 
-  void resize(unsigned width, unsigned height) {
+  auto resize(unsigned width, unsigned height) -> void {
     if(iwidth >= width && iheight >= height) return;
 
     iwidth  = max(width,  iwidth);
@@ -85,7 +90,7 @@ public:
     if(lpdd7->CreateSurface(&ddsd, &raster, 0) == DD_OK) return clear();
   }
 
-  void clear() {
+  auto clear() -> void {
     DDBLTFX fx;
     fx.dwSize = sizeof(DDBLTFX);
     fx.dwFillColor = 0x00000000;
@@ -93,7 +98,7 @@ public:
     raster->Blt(0, 0, 0, DDBLT_WAIT | DDBLT_COLORFILL, &fx);
   }
 
-  bool lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) {
+  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
     if(width != settings.width || height != settings.height) {
       resize(settings.width = width, settings.height = height);
     }
@@ -106,11 +111,11 @@ public:
     return data = (uint32_t*)ddsd.lpSurface;
   }
 
-  void unlock() {
+  auto unlock() -> void {
     raster->Unlock(0);
   }
 
-  void refresh() {
+  auto refresh() -> void {
     if(settings.synchronize) {
       while(true) {
         BOOL in_vblank;
@@ -134,7 +139,7 @@ public:
     }
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     DirectDrawCreate(0, &lpdd, 0);
@@ -162,22 +167,12 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(clipper) { clipper->Release(); clipper = 0; }
     if(raster) { raster->Release(); raster = 0; }
     if(screen) { screen->Release(); screen = 0; }
     if(lpdd7) { lpdd7->Release(); lpdd7 = 0; }
     if(lpdd) { lpdd->Release(); lpdd = 0; }
-  }
-
-  pVideoDD() {
-    lpdd = 0;
-    lpdd7 = 0;
-    screen = 0;
-    raster = 0;
-    clipper = 0;
-
-    settings.handle = 0;
   }
 };
 

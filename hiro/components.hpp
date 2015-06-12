@@ -25,6 +25,8 @@
 #define Hiro_MessageWindow
 
 #define Hiro_Object
+#define Hiro_Group
+
 #define Hiro_Hotkey
 #define Hiro_Timer
 
@@ -48,22 +50,22 @@
 #define Hiro_CheckButton
 #define Hiro_CheckLabel
 #define Hiro_ComboButton
-#define Hiro_Console
+//#define Hiro_Console
 #define Hiro_Frame
 #define Hiro_HexEdit
 #define Hiro_HorizontalScroller
 #define Hiro_HorizontalSlider
-#define Hiro_IconView
+//#define Hiro_IconView
 #define Hiro_Label
 #define Hiro_LineEdit
 #define Hiro_ListView
 #define Hiro_ProgressBar
 #define Hiro_RadioButton
 #define Hiro_RadioLabel
-#define Hiro_SourceView
+//#define Hiro_SourceView
 #define Hiro_TabFrame
 #define Hiro_TextEdit
-#define Hiro_TreeView
+//#define Hiro_TreeView
 #define Hiro_VerticalScroller
 #define Hiro_VerticalSlider
 #define Hiro_Viewport

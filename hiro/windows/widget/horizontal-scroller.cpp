@@ -1,45 +1,42 @@
-namespace phoenix {
+#if defined(Hiro_HorizontalScroller)
 
-Size pHorizontalScroller::minimumSize() {
-  return {0, 18};
-}
+namespace hiro {
 
-void pHorizontalScroller::setLength(unsigned length) {
-  length += (length == 0);
-  SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
-  horizontalScroller.setPosition(0);
-}
-
-void pHorizontalScroller::setPosition(unsigned position) {
-  SetScrollPos(hwnd, SB_CTL, position, TRUE);
-}
-
-void pHorizontalScroller::constructor() {
+auto pHorizontalScroller::construct() -> void {
   hwnd = CreateWindow(
     L"SCROLLBAR", L"", WS_CHILD | WS_TABSTOP | SBS_HORZ,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&horizontalScroller);
-  unsigned position = horizontalScroller.state.position;
-  setLength(horizontalScroller.state.length);
-  horizontalScroller.setPosition(position);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  setLength(state().length);
+  setPosition(state().position);
 }
 
-void pHorizontalScroller::destructor() {
+auto pHorizontalScroller::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pHorizontalScroller::orphan() {
-  destructor();
-  constructor();
+auto pHorizontalScroller::minimumSize() const -> Size {
+  return {0, 18};
 }
 
-void pHorizontalScroller::onChange(WPARAM wparam) {
+auto pHorizontalScroller::setLength(unsigned length) -> void {
+  length += (length == 0);
+  SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
+}
+
+auto pHorizontalScroller::setPosition(unsigned position) -> void {
+  SetScrollPos(hwnd, SB_CTL, position, TRUE);
+}
+
+auto pHorizontalScroller::onChange(WPARAM wparam) -> void {
   unsigned position = ScrollEvent(hwnd, wparam);
-  if(position == horizontalScroller.state.position) return;
-  horizontalScroller.state.position = position;
-  if(horizontalScroller.onChange) horizontalScroller.onChange();
+  if(position == state().position) return;
+  state().position = position;
+  self().doChange();
 }
 
 }
+
+#endif

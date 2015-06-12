@@ -1,6 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_MessageWindow)
 
-static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons buttons, UINT response) {
+namespace hiro {
+
+static auto MessageWindow_response(MessageWindow::Buttons buttons, UINT response) -> MessageWindow::Response {
   if(response == IDOK) return MessageWindow::Response::Ok;
   if(response == IDCANCEL) return MessageWindow::Response::Cancel;
   if(response == IDYES) return MessageWindow::Response::Yes;
@@ -15,7 +17,7 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   throw;
 }
 
-static UINT MessageWindow_buttons(MessageWindow::Buttons buttons) {
+static auto MessageWindow_buttons(MessageWindow::Buttons buttons) -> UINT {
   if(buttons == MessageWindow::Buttons::Ok) return MB_OK;
   if(buttons == MessageWindow::Buttons::OkCancel) return MB_OKCANCEL;
   if(buttons == MessageWindow::Buttons::YesNo) return MB_YESNO;
@@ -23,32 +25,34 @@ static UINT MessageWindow_buttons(MessageWindow::Buttons buttons) {
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
+auto pMessageWindow::error(MessageWindow::State& state) -> MessageWindow::Response {
   UINT flags = MB_ICONERROR | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
-    state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
+    state.parent ? state.parent->self()->hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
+auto pMessageWindow::information(MessageWindow::State& state) -> MessageWindow::Response {
   UINT flags = MB_ICONINFORMATION | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
-    state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
+    state.parent ? state.parent->self()->hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
+auto pMessageWindow::question(MessageWindow::State& state) -> MessageWindow::Response {
   UINT flags = MB_ICONQUESTION | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
-    state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
+    state.parent ? state.parent->self()->hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
+auto pMessageWindow::warning(MessageWindow::State& state) -> MessageWindow::Response {
   UINT flags = MB_ICONWARNING | MessageWindow_buttons(state.buttons);
   return MessageWindow_response(state.buttons, MessageBox(
-    state.parent ? state.parent->p.hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
+    state.parent ? state.parent->self()->hwnd : 0, utf16_t(state.text), utf16_t(state.title), flags
   ));
 }
 
 }
+
+#endif

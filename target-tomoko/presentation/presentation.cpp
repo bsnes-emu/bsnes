@@ -31,7 +31,6 @@ Presentation::Presentation() {
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
-  MenuRadioItem::group({videoScaleSmall, videoScaleNormal, videoScaleLarge});
   if(config().video.scale == "Small") videoScaleSmall.setChecked();
   if(config().video.scale == "Normal") videoScaleNormal.setChecked();
   if(config().video.scale == "Large") videoScaleLarge.setChecked();
@@ -52,7 +51,6 @@ Presentation::Presentation() {
     resizeViewport();
   });
   videoFilterMenu.setText("Video Filter");
-  MenuRadioItem::group({videoFilterNone, videoFilterBlur});
   if(config().video.filter == "None") videoFilterNone.setChecked();
   if(config().video.filter == "Blur") videoFilterBlur.setChecked();
   videoFilterNone.setText("None").onActivate([&] { config().video.filter = "None"; program->updateVideoFilter(); });
@@ -122,16 +120,15 @@ auto Presentation::updateEmulator() -> void {
     auto& menu = (n == 0 ? inputPort1 : inputPort2);
     menu.setText(port.name);
 
-    vector<MenuRadioItem> items;
+    Group devices;
     for(auto& device : port.device) {
       MenuRadioItem item{&menu};
       item.setText(device.name).onActivate([=] {
         emulator->connect(port.id, device.id);
       });
-      items.append(item);
+      devices.append(item);
     }
-    MenuRadioItem::group(items);
-    if(items.size() > 1) menu.setVisible();
+    if(devices.objects() > 1) menu.setVisible();
   }
 
   systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible());

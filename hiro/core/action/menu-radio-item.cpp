@@ -6,20 +6,6 @@ auto mMenuRadioItem::allocate() -> pObject* {
 
 //
 
-auto mMenuRadioItem::group(const vector<wMenuRadioItem>& group) -> void {
-  for(auto& weak : group) {
-    if(auto item = weak.acquire()) item->state.group = group;
-  }
-  for(auto& weak : group) {
-    if(auto item = weak.acquire()) {
-      if(item->self()) item->self()->setGroup(group);
-    }
-  }
-  if(group.size()) {
-    if(auto item = group.first().acquire()) item->setChecked();
-  }
-}
-
 auto mMenuRadioItem::checked() const -> bool {
   return state.checked;
 }
@@ -28,17 +14,33 @@ auto mMenuRadioItem::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
+auto mMenuRadioItem::group() const -> sGroup {
+  return state.group;
+}
+
 auto mMenuRadioItem::onActivate(const function<void ()>& function) -> type& {
   state.onActivate = function;
   return *this;
 }
 
 auto mMenuRadioItem::setChecked() -> type& {
-  for(auto& weak : state.group) {
-    if(auto item = weak.acquire()) item->state.checked = false;
+  if(auto group = this->group()) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto menuRadioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
+          menuRadioItem->state.checked = false;
+        }
+      }
+    }
   }
   state.checked = true;
   signal(setChecked);
+  return *this;
+}
+
+auto mMenuRadioItem::setGroup(sGroup group) -> type& {
+  state.group = group;
+  signal(setGroup, group);
   return *this;
 }
 

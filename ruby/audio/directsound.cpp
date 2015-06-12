@@ -1,39 +1,42 @@
-/*
-  audio.directsound (2007-12-26)
-  author: byuu
-*/
-
 #include <dsound.h>
 
 namespace ruby {
 
-class pAudioDS {
-public:
-  LPDIRECTSOUND ds;
-  LPDIRECTSOUNDBUFFER dsb_p, dsb_b;
+struct pAudioDS {
+  LPDIRECTSOUND ds = nullptr;
+  LPDIRECTSOUNDBUFFER dsb_p = nullptr;
+  LPDIRECTSOUNDBUFFER dsb_b = nullptr;
   DSBUFFERDESC dsbd;
   WAVEFORMATEX wfx;
 
   struct {
-    unsigned rings;
-    unsigned latency;
+    unsigned rings = 0;
+    unsigned latency = 0;
 
-    uint32_t* buffer;
-    unsigned bufferoffset;
+    uint32_t* buffer = nullptr;
+    unsigned bufferoffset = 0;
 
-    unsigned readring;
-    unsigned writering;
-    int distance;
+    unsigned readring = 0;
+    unsigned writering = 0;
+    int distance = 0;
   } device;
 
   struct {
-    HWND handle;
-    bool synchronize;
-    unsigned frequency;
-    unsigned latency;
+    HWND handle = nullptr;
+    bool synchronize = false;
+    unsigned frequency = 22050;
+    unsigned latency = 120;
   } settings;
 
-  bool cap(const string& name) {
+  pAudioDS() {
+    settings.handle = GetDesktopWindow();
+  }
+
+  ~pAudioDS() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Audio::Handle) return true;
     if(name == Audio::Synchronize) return true;
     if(name == Audio::Frequency) return true;
@@ -41,34 +44,34 @@ public:
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Handle) return (uintptr_t)settings.handle;
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
     if(name == Audio::Latency) return settings.latency;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Audio::Handle) {
-      settings.handle = (HWND)any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Audio::Handle && value.is<uintptr_t>()) {
+      settings.handle = (HWND)value.get<uintptr_t>();
       return true;
     }
 
-    if(name == Audio::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+    if(name == Audio::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       if(ds) clear();
       return true;
     }
 
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       if(ds) init();
       return true;
     }
 
-    if(name == Audio::Latency) {
-      settings.latency = any_cast<unsigned>(value);
+    if(name == Audio::Latency && value.is<unsigned>()) {
+      settings.latency = value.get<unsigned>();
       if(ds) init();
       return true;
     }
@@ -76,7 +79,7 @@ public:
     return false;
   }
 
-  void sample(uint16_t left, uint16_t right) {
+  auto sample(uint16_t left, uint16_t right) -> void {
     device.buffer[device.bufferoffset++] = left + (right << 16);
     if(device.bufferoffset < device.latency) return;
     device.bufferoffset = 0;
@@ -113,7 +116,7 @@ public:
     }
   }
 
-  void clear() {
+  auto clear() -> void {
     device.readring  = 0;
     device.writering = device.rings - 1;
     device.distance  = device.rings - 1;
@@ -134,7 +137,7 @@ public:
     dsb_b->Play(0, 0, DSBPLAY_LOOPING);
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     device.rings   = 8;
@@ -175,7 +178,7 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(device.buffer) {
       delete[] device.buffer;
       device.buffer = 0;
@@ -184,23 +187,6 @@ public:
     if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = 0; }
     if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = 0; }
     if(ds) { ds->Release(); ds = 0; }
-  }
-
-  pAudioDS() {
-    ds = 0;
-    dsb_p = 0;
-    dsb_b = 0;
-
-    device.buffer = 0;
-    device.bufferoffset = 0;
-    device.readring = 0;
-    device.writering = 0;
-    device.distance = 0;
-
-    settings.handle = GetDesktopWindow();
-    settings.synchronize = false;
-    settings.frequency = 22050;
-    settings.latency = 120;
   }
 };
 

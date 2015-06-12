@@ -1,34 +1,36 @@
-namespace phoenix {
+#if defined(Hiro_Font)
 
-string pFont::serif(unsigned size, string style) {
+namespace hiro {
+
+auto pFont::serif(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Georgia, ", size, ", ", style};
 }
 
-string pFont::sans(unsigned size, string style) {
+auto pFont::sans(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Tahoma, ", size, ", ", style};
 }
 
-string pFont::monospace(unsigned size, string style) {
+auto pFont::monospace(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Lucida Console, ", size, ", ", style};
 }
 
-Size pFont::size(string font, string text) {
+auto pFont::size(const string& font, const string& text) -> Size {
   HFONT hfont = pFont::create(font);
   Size size = pFont::size(hfont, text);
   pFont::free(hfont);
   return size;
 }
 
-HFONT pFont::create(string description) {
+auto pFont::create(const string& description) -> HFONT {
   lstring part = description.split<2>(",").strip();
 
-  string family = "Sans";
+  string family = "Tahoma";
   unsigned size = 8u;
   bool bold = false;
   bool italic = false;
@@ -40,16 +42,16 @@ HFONT pFont::create(string description) {
 
   return CreateFont(
     -(size * 96.0 / 72.0 + 0.5),
-    0, 0, 0, bold == false ? FW_NORMAL : FW_BOLD, italic, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, bold ? FW_BOLD : FW_NORMAL, italic, 0, 0, 0, 0, 0, 0, 0,
     utf16_t(family)
   );
 }
 
-void pFont::free(HFONT hfont) {
+auto pFont::free(HFONT hfont) -> void {
   DeleteObject(hfont);
 }
 
-Size pFont::size(HFONT hfont, string text) {
+auto pFont::size(HFONT hfont, string text) -> Size {
   //temporary fix: empty text string returns height of zero; bad for eg Button height
   if(text.empty()) text = " ";
 
@@ -62,3 +64,5 @@ Size pFont::size(HFONT hfont, string text) {
 }
 
 }
+
+#endif

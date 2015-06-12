@@ -1,84 +1,94 @@
-namespace phoenix {
+#if defined(Hiro_CheckButton)
 
-Size pCheckButton::minimumSize() {
-  Size size = pFont::size(hfont, checkButton.state.text);
+namespace hiro {
 
-  if(checkButton.state.orientation == Orientation::Horizontal) {
-    size.width += checkButton.state.image.width;
-    size.height = max(checkButton.state.image.height, size.height);
-  }
-
-  if(checkButton.state.orientation == Orientation::Vertical) {
-    size.width = max(checkButton.state.image.width, size.width);
-    size.height += checkButton.state.image.height;
-  }
-
-  return {size.width + 20, size.height + 10};
-}
-
-void pCheckButton::setChecked(bool checked) {
-  SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
-}
-
-void pCheckButton::setImage(const image& image, Orientation orientation) {
-  nall::image nallImage = image;
-  nallImage.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-
-  if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
-  if(himagelist) { ImageList_Destroy(himagelist); himagelist = 0; }
-
-  if(OsVersion() < WindowsVista) nallImage.alphaBlend(GetSysColor(COLOR_BTNFACE));
-  hbitmap = CreateBitmap(nallImage);
-  himagelist = ImageList_Create(nallImage.width, nallImage.height, ILC_COLOR32, 1, 0);
-  ImageList_Add(himagelist, hbitmap, NULL);
-  BUTTON_IMAGELIST list;
-  list.himl = himagelist;
-  switch(orientation) {
-  case Orientation::Horizontal: SetRect(&list.margin, 5, 0, 0, 0); list.uAlign = BUTTON_IMAGELIST_ALIGN_LEFT; break;
-  case Orientation::Vertical:   SetRect(&list.margin, 0, 5, 0, 0); list.uAlign = BUTTON_IMAGELIST_ALIGN_TOP;  break;
-  }
-  Button_SetImageList(hwnd, &list);
-
-  setText(checkButton.state.text);
-}
-
-void pCheckButton::setText(string text) {
-  if(text.empty()) {
-    SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) |  BS_BITMAP);
-  } else {
-    SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) & ~BS_BITMAP);
-  }
-
-  SetWindowText(hwnd, utf16_t(text));
-}
-
-void pCheckButton::constructor() {
+auto pCheckButton::construct() -> void {
   hwnd = CreateWindow(L"BUTTON", L"",
     WS_CHILD | WS_TABSTOP | BS_CHECKBOX | BS_PUSHLIKE,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&checkButton);
-  setDefaultFont();
-  setChecked(checkButton.state.checked);
-  setImage(checkButton.state.image, checkButton.state.orientation);
-//setText(checkButton.state.text);
-  synchronize();
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  _setState();
+  setBordered(state().bordered);
+  setChecked(state().checked);
 }
 
-void pCheckButton::destructor() {
+auto pCheckButton::destruct() -> void {
   if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
   if(himagelist) { ImageList_Destroy(himagelist); himagelist = 0; }
   DestroyWindow(hwnd);
 }
 
-void pCheckButton::orphan() {
-  destructor();
-  constructor();
+auto pCheckButton::minimumSize() -> Size {
+  auto size = pFont::size(hfont, state().text);
+
+  if(state().orientation == Orientation::Horizontal) {
+    size.setWidth(size.width() + state().icon.width);
+    size.setHeight(max(size.height(), state().icon.height));
+  }
+
+  if(state().orientation == Orientation::Vertical) {
+    size.setWidth(max(size.width(), state().icon.width));
+    size.setHeight(size.height() + state().icon.height);
+  }
+
+  return {size.width() + (state().text ? 20 : 10), size.height() + 10};
 }
 
-void pCheckButton::onToggle() {
-  checkButton.state.checked = !checkButton.state.checked;
-  setChecked(checkButton.state.checked);
-  if(checkButton.onToggle) checkButton.onToggle();
+auto pCheckButton::setBordered(bool bordered) -> void {
+}
+
+auto pCheckButton::setChecked(bool checked) -> void {
+  SendMessage(hwnd, BM_SETCHECK, (WPARAM)checked, 0);
+}
+
+auto pCheckButton::setIcon(const image& icon) -> void {
+  _setState();
+}
+
+auto pCheckButton::setOrientation(Orientation orientation) -> void {
+  _setState();
+}
+
+auto pCheckButton::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pCheckButton::onToggle() -> void {
+  state().checked = !state().checked;
+  setChecked(state().checked);
+  self().doToggle();
+}
+
+auto pCheckButton::_setState() -> void {
+  image icon = state().icon;
+  icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+
+  if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
+  if(himagelist) { ImageList_Destroy(himagelist); himagelist = 0; }
+
+  if(OsVersion() < WindowsVista) icon.alphaBlend(GetSysColor(COLOR_BTNFACE));
+
+  hbitmap = CreateBitmap(icon);
+  himagelist = ImageList_Create(icon.width, icon.height, ILC_COLOR32, 1, 0);
+  ImageList_Add(himagelist, hbitmap, NULL);
+  BUTTON_IMAGELIST list;
+  list.himl = himagelist;
+  switch(state().orientation) {
+  case Orientation::Horizontal: SetRect(&list.margin, 5, 0, 0, 0); list.uAlign = BUTTON_IMAGELIST_ALIGN_LEFT; break;
+  case Orientation::Vertical:   SetRect(&list.margin, 0, 5, 0, 0); list.uAlign = BUTTON_IMAGELIST_ALIGN_TOP;  break;
+  }
+  Button_SetImageList(hwnd, &list);
+
+  if(auto text = state().text) {
+    SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) &~ BS_BITMAP);
+    SetWindowText(hwnd, utf16_t(text));
+  } else {
+    SetWindowLongPtr(hwnd, GWL_STYLE, GetWindowLongPtr(hwnd, GWL_STYLE) |  BS_BITMAP);
+    SetWindowText(hwnd, L"");
+  }
 }
 
 }
+
+#endif

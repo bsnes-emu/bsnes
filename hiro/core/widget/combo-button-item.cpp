@@ -16,8 +16,7 @@ auto mComboButtonItem::remove() -> type& {
 }
 
 auto mComboButtonItem::selected() const -> bool {
-  if(auto comboButton = parentComboButton()) return comboButton->state.selected == offset();
-  return false;
+  return state.selected;
 }
 
 auto mComboButtonItem::setIcon(const image& icon) -> type& {
@@ -28,9 +27,10 @@ auto mComboButtonItem::setIcon(const image& icon) -> type& {
 
 auto mComboButtonItem::setSelected() -> type& {
   if(auto parent = parentComboButton()) {
-    parent->state.selected = offset();
-    signal(setSelected);
+    for(auto& item : parent->state.items) item->state.selected = false;
   }
+  state.selected = true;
+  signal(setSelected);
   return *this;
 }
 

@@ -1,77 +1,67 @@
-namespace phoenix {
+#if defined(Hiro_ComboButton)
 
-void pComboButton::append(string text) {
-  SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16_t(text));
-  if(SendMessage(hwnd, CB_GETCOUNT, 0, 0) == 1) setSelection(0);
-}
+namespace hiro {
 
-Size pComboButton::minimumSize() {
-  unsigned maximumWidth = 0;
-  for(auto& text : comboButton.state.text) maximumWidth = max(maximumWidth, pFont::size(hfont, text).width);
-  return {maximumWidth + 24, pFont::size(hfont, " ").height + 10};
-}
-
-void pComboButton::remove(unsigned selection) {
-  locked = true;
-  SendMessage(hwnd, CB_DELETESTRING, selection, 0);
-  locked = false;
-
-  if(selection == comboButton.state.selection) comboButton.setSelection(0);
-}
-
-void pComboButton::reset() {
-  SendMessage(hwnd, CB_RESETCONTENT, 0, 0);
-}
-
-void pComboButton::setGeometry(Geometry geometry) {
-  //height = minimum drop-down list height; use CB_SETITEMHEIGHT to control actual widget height
-  pWidget::setGeometry({geometry.x, geometry.y, geometry.width, 1});
-  RECT rc;
-  GetWindowRect(hwnd, &rc);
-  unsigned adjustedHeight = geometry.height - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
-  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
-}
-
-void pComboButton::setSelection(unsigned selection) {
-  SendMessage(hwnd, CB_SETCURSEL, selection, 0);
-}
-
-void pComboButton::setText(unsigned selection, string text) {
-  locked = true;
-  SendMessage(hwnd, CB_DELETESTRING, selection, 0);
-  SendMessage(hwnd, CB_INSERTSTRING, selection, (LPARAM)(wchar_t*)utf16_t(text));
-  setSelection(comboButton.state.selection);
-  locked = false;
-}
-
-void pComboButton::constructor() {
+auto pComboButton::construct() -> void {
   hwnd = CreateWindow(
     L"COMBOBOX", L"",
     WS_CHILD | WS_TABSTOP | CBS_DROPDOWNLIST | CBS_HASSTRINGS,
     0, 0, 0, 0,
-    parentHwnd, (HMENU)id, GetModuleHandle(0), 0
+    _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
-  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&comboButton);
-  setDefaultFont();
-  for(auto& text : comboButton.state.text) append(text);
-  setSelection(comboButton.state.selection);
-  synchronize();
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  pWidget::_setState();
+  for(auto& item : state().items) append(item);
 }
 
-void pComboButton::destructor() {
+auto pComboButton::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-void pComboButton::orphan() {
-  destructor();
-  constructor();
+auto pComboButton::append(sComboButtonItem item) -> void {
+  lock();
+  SendMessage(hwnd, CB_ADDSTRING, 0, (LPARAM)(wchar_t*)utf16_t(item->state.text));
+  if(item->state.selected) SendMessage(hwnd, CB_SETCURSEL, item->offset(), 0);
+  if(SendMessage(hwnd, CB_GETCURSEL, 0, 0) == CB_ERR) item->setSelected();
+  unlock();
 }
 
-void pComboButton::onChange() {
-  unsigned selection = SendMessage(hwnd, CB_GETCURSEL, 0, 0);
-  if(selection == comboButton.state.selection) return;
-  comboButton.state.selection = selection;
-  if(comboButton.onChange) comboButton.onChange();
+auto pComboButton::minimumSize() const -> Size {
+  signed width = 0;
+  for(auto& item : state().items) {
+    width = max(width, pFont::size(hfont, item->state.text).width());
+  }
+  return {width + 24, pFont::size(hfont, " ").height() + 10};
+}
+
+auto pComboButton::remove(sComboButtonItem item) -> void {
+  lock();
+  SendMessage(hwnd, CB_DELETESTRING, item->offset(), 0);
+  if(item->state.selected) SendMessage(hwnd, CB_SETCURSEL, 0, 0);
+  unlock();
+}
+
+auto pComboButton::reset() -> void {
+  SendMessage(hwnd, CB_RESETCONTENT, 0, 0);
+}
+
+auto pComboButton::setGeometry(Geometry geometry) -> void {
+  //height = minimum drop-down list height; use CB_SETITEMHEIGHT to control actual widget height
+  pWidget::setGeometry({geometry.x(), geometry.y(), geometry.width(), 1});
+  RECT rc;
+  GetWindowRect(hwnd, &rc);
+  unsigned adjustedHeight = geometry.height() - ((rc.bottom - rc.top) - SendMessage(hwnd, CB_GETITEMHEIGHT, (WPARAM)-1, 0));
+  SendMessage(hwnd, CB_SETITEMHEIGHT, (WPARAM)-1, adjustedHeight);
+}
+
+auto pComboButton::onChange() -> void {
+  signed offset = SendMessage(hwnd, CB_GETCURSEL, 0, 0);
+  if(offset == CB_ERR) return;
+  for(auto& item : state().items) item->state.selected = false;
+  if(auto item = self().item(offset)) item->setSelected();
+  self().doChange();
 }
 
 }
+
+#endif

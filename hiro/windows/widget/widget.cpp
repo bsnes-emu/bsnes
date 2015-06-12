@@ -1,82 +1,90 @@
-namespace phoenix {
+#if defined(Hiro_Widget)
 
-bool pWidget::focused() {
+namespace hiro {
+
+auto pWidget::construct() -> void {
+  abstract = true;
+  //todo: create hiroWidget
+  hwnd = CreateWindow(L"hiroLabel", L"", WS_CHILD, 0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  _setState();
+}
+
+auto pWidget::destruct() -> void {
+  DeleteObject(hfont);
+  DestroyWindow(hwnd);
+}
+
+auto pWidget::focused() -> bool {
   return GetFocus() == hwnd;
 }
 
-Size pWidget::minimumSize() {
+auto pWidget::minimumSize() -> Size {
   return {0, 0};
 }
 
-void pWidget::setEnabled(bool enabled) {
-  if(!widget.parent()) enabled = false;
-  if(widget.state.abstract) enabled = false;
-  if(!widget.enabledToAll()) enabled = false;
+auto pWidget::setEnabled(bool enabled) -> void {
+  if(!self().parentWindow(true)) enabled = false;
+  if(!self().enabled(true)) enabled = false;
+  if(abstract) enabled = false;
   EnableWindow(hwnd, enabled);
 }
 
-void pWidget::setFocused() {
+auto pWidget::setFocused() -> void {
   SetFocus(hwnd);
 }
 
-void pWidget::setFont(string font) {
+auto pWidget::setFont(const string&) -> void {
+  auto font = self().font(true);
+  if(!font) font = Font::sans(8);
   if(hfont) DeleteObject(hfont);
   hfont = pFont::create(font);
   SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
 }
 
-void pWidget::setGeometry(Geometry geometry) {
-  if(GetParentWidget(&sizable)) {
-    Position displacement = GetParentWidget(&sizable)->state.geometry.position();
-    geometry.x -= displacement.x;
-    geometry.y -= displacement.y;
+auto pWidget::setGeometry(Geometry geometry) -> void {
+  if(auto parent = _parentWidget()) {
+    Position displacement = parent->geometry().position();
+    geometry.setX(geometry.x() - displacement.x());
+    geometry.setY(geometry.y() - displacement.y());
   }
-  SetWindowPos(hwnd, NULL, geometry.x, geometry.y, geometry.width, geometry.height, SWP_NOZORDER);
-  if(widget.onSize) widget.onSize();
+  SetWindowPos(hwnd, NULL, geometry.x(), geometry.y(), geometry.width(), geometry.height(), SWP_NOZORDER);
+  self().doSize();
 }
 
-void pWidget::setVisible(bool visible) {
-  if(!widget.parent()) visible = false;
-  if(widget.state.abstract) visible = false;
-  if(!widget.visibleToAll()) visible = false;
+auto pWidget::setVisible(bool visible) -> void {
+  if(!self().parentWindow(true)) visible = false;
+  if(!self().visible(true)) visible = false;
+  if(abstract) visible = false;
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
 }
 
-void pWidget::constructor() {
-  hfont = pFont::create(Font::sans(8));
-  if(widget.state.abstract) {
-    hwnd = CreateWindow(L"phoenix_label", L"",
-    WS_CHILD,
-    0, 0, 0, 0, parentHwnd, (HMENU)id, GetModuleHandle(0), 0);
-    SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&widget);
-  }
+//
+
+auto pWidget::_parentHandle() -> HWND {
+  if(auto parent = _parentWidget()) return parent->self()->hwnd;
+  if(auto parent = _parentWindow()) return parent->self()->hwnd;
+  return 0;
 }
 
-void pWidget::destructor() {
-  if(widget.state.abstract) {
-    DestroyWindow(hwnd);
-  }
+auto pWidget::_parentWidget() -> maybe<mWidget&> {
+  #if defined(Hiro_TabFrame)
+  if(auto parent = self().parentTabFrame(true)) return *parent;
+  #endif
+  return nothing;
 }
 
-void pWidget::orphan() {
-  destructor();
-  constructor();
+auto pWidget::_parentWindow() -> maybe<mWindow&> {
+  if(auto parent = self().parentWindow(true)) return *parent;
+  return nothing;
 }
 
-void pWidget::setDefaultFont() {
-  string description = widget.state.font;
-  if(description.empty()) description = Font::sans(8);
-  hfont = pFont::create(description);
-  SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
-}
-
-//calling Widget::setParent destroys widget and re-creates it:
-//need to re-apply visiblity and enabled status; called by each subclassed setParent() function
-//constructors are called top-down, so set each widget to the top of the z-order (so children appear on top of parents)
-void pWidget::synchronize() {
-  widget.setEnabled(widget.enabled());
-  widget.setVisible(widget.visible());
-  SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+auto pWidget::_setState() -> void {
+  setEnabled(self().enabled());
+  setFont(self().font());
+  setVisible(self().visible());
 }
 
 }
+
+#endif

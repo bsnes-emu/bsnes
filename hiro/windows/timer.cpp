@@ -1,35 +1,39 @@
-namespace phoenix {
+#if defined(Hiro_Timer)
+
+namespace hiro {
 
 static vector<pTimer*> timers;
 
-static void CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) {
+static auto CALLBACK Timer_timeoutProc(HWND hwnd, UINT msg, UINT_PTR timerID, DWORD time) -> void {
   for(auto& timer : timers) {
-    if(timer->htimer == timerID) {
-      if(timer->timer.onActivate) timer->timer.onActivate();
-      return;
-    }
+    if(timer->htimer == timerID) return timer->self().doActivate();
   }
 }
 
-void pTimer::setEnabled(bool enabled) {
+auto pTimer::construct() -> void {
+  timers.append(this);
+  htimer = 0;
+}
+
+auto pTimer::destruct() -> void {
+}
+
+auto pTimer::setEnabled(bool enabled) -> void {
   if(htimer) {
     KillTimer(NULL, htimer);
     htimer = 0;
   }
 
   if(enabled == true) {
-    htimer = SetTimer(NULL, 0u, timer.state.interval, Timer_timeoutProc);
+    htimer = SetTimer(NULL, 0u, state().interval, Timer_timeoutProc);
   }
 }
 
-void pTimer::setInterval(unsigned interval) {
+auto pTimer::setInterval(unsigned interval) -> void {
   //destroy and recreate timer if interval changed
-  setEnabled(timer.state.enabled);
-}
-
-void pTimer::constructor() {
-  timers.append(this);
-  htimer = 0;
+  setEnabled(self().enabled(true));
 }
 
 }
+
+#endif
