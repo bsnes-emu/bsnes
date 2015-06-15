@@ -17,6 +17,7 @@ struct pWindow : pObject {
   auto setDroppable(bool droppable) -> void;
   auto setEnabled(bool enabled) -> void;
   auto setFocused() -> void;
+  auto setFont(const string& font) -> void override;
   auto setFullScreen(bool fullScreen) -> void;
   auto setGeometry(Geometry geometry) -> void;
   auto setModal(bool modal) -> void;

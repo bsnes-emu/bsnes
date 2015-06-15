@@ -10,10 +10,10 @@ Presentation::Presentation() {
       if(!media.bootable) continue;
       auto item = new MenuItem{&libraryMenu};
       item->setText({media.name, " ..."}).onActivate([=] {
-        directory::create({config().library.location, media.name});
+        directory::create({config->library.location, media.name});
         auto location = BrowserDialog()
         .setTitle({"Load ", media.name})
-        .setPath({config().library.location, media.name})
+        .setPath({config->library.location, media.name})
         .setFilters(string{media.name, "|*.", media.type})
         .openFolder();
         if(directory::exists(location)) {
@@ -31,52 +31,52 @@ Presentation::Presentation() {
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
-  if(config().video.scale == "Small") videoScaleSmall.setChecked();
-  if(config().video.scale == "Normal") videoScaleNormal.setChecked();
-  if(config().video.scale == "Large") videoScaleLarge.setChecked();
+  if(config->video.scale == "Small") videoScaleSmall.setChecked();
+  if(config->video.scale == "Normal") videoScaleNormal.setChecked();
+  if(config->video.scale == "Large") videoScaleLarge.setChecked();
   videoScaleSmall.setText("Small").onActivate([&] {
-    config().video.scale = "Small";
+    config->video.scale = "Small";
     resizeViewport();
   });
   videoScaleNormal.setText("Normal").onActivate([&] {
-    config().video.scale = "Normal";
+    config->video.scale = "Normal";
     resizeViewport();
   });
   videoScaleLarge.setText("Large").onActivate([&] {
-    config().video.scale = "Large";
+    config->video.scale = "Large";
     resizeViewport();
   });
-  aspectCorrection.setText("Aspect Correction").setChecked(config().video.aspectCorrection).onToggle([&] {
-    config().video.aspectCorrection = aspectCorrection.checked();
+  aspectCorrection.setText("Aspect Correction").setChecked(config->video.aspectCorrection).onToggle([&] {
+    config->video.aspectCorrection = aspectCorrection.checked();
     resizeViewport();
   });
   videoFilterMenu.setText("Video Filter");
-  if(config().video.filter == "None") videoFilterNone.setChecked();
-  if(config().video.filter == "Blur") videoFilterBlur.setChecked();
-  videoFilterNone.setText("None").onActivate([&] { config().video.filter = "None"; program->updateVideoFilter(); });
-  videoFilterBlur.setText("Blur").onActivate([&] { config().video.filter = "Blur"; program->updateVideoFilter(); });
-  colorEmulation.setText("Color Emulation").setChecked(config().video.colorEmulation).onToggle([&] {
-    config().video.colorEmulation = colorEmulation.checked();
+  if(config->video.filter == "None") videoFilterNone.setChecked();
+  if(config->video.filter == "Blur") videoFilterBlur.setChecked();
+  videoFilterNone.setText("None").onActivate([&] { config->video.filter = "None"; program->updateVideoFilter(); });
+  videoFilterBlur.setText("Blur").onActivate([&] { config->video.filter = "Blur"; program->updateVideoFilter(); });
+  colorEmulation.setText("Color Emulation").setChecked(config->video.colorEmulation).onToggle([&] {
+    config->video.colorEmulation = colorEmulation.checked();
     program->updateVideoPalette();
   });
-  maskOverscan.setText("Mask Overscan").setChecked(config().video.overscan.mask).onToggle([&] {
-    config().video.overscan.mask = maskOverscan.checked();
+  maskOverscan.setText("Mask Overscan").setChecked(config->video.overscan.mask).onToggle([&] {
+    config->video.overscan.mask = maskOverscan.checked();
   });
-  synchronizeVideo.setText("Synchronize Video").setChecked(config().video.synchronize).onToggle([&] {
-    config().video.synchronize = synchronizeVideo.checked();
-    video.set(Video::Synchronize, config().video.synchronize);
+  synchronizeVideo.setText("Synchronize Video").setChecked(config->video.synchronize).onToggle([&] {
+    config->video.synchronize = synchronizeVideo.checked();
+    video.set(Video::Synchronize, config->video.synchronize);
   });
-  synchronizeAudio.setText("Synchronize Audio").setChecked(config().audio.synchronize).onToggle([&] {
-    config().audio.synchronize = synchronizeAudio.checked();
-    audio.set(Audio::Synchronize, config().audio.synchronize);
+  synchronizeAudio.setText("Synchronize Audio").setChecked(config->audio.synchronize).onToggle([&] {
+    config->audio.synchronize = synchronizeAudio.checked();
+    audio.set(Audio::Synchronize, config->audio.synchronize);
   });
-  muteAudio.setText("Mute Audio").setChecked(config().audio.mute).onToggle([&] {
-    config().audio.mute = muteAudio.checked();
-    program->dsp.setVolume(config().audio.mute ? 0.0 : 1.0);
+  muteAudio.setText("Mute Audio").setChecked(config->audio.mute).onToggle([&] {
+    config->audio.mute = muteAudio.checked();
+    program->dsp.setVolume(config->audio.mute ? 0.0 : 1.0);
   });
-  showStatusBar.setText("Show Status Bar").setChecked(config().userInterface.showStatusBar).onToggle([&] {
-    config().userInterface.showStatusBar = showStatusBar.checked();
-    statusBar.setVisible(config().userInterface.showStatusBar);
+  showStatusBar.setText("Show Status Bar").setChecked(config->userInterface.showStatusBar).onToggle([&] {
+    config->userInterface.showStatusBar = showStatusBar.checked();
+    statusBar.setVisible(config->userInterface.showStatusBar);
     if(visible()) resizeViewport();
   });
   showConfiguration.setText("Configuration ...").onActivate([&] { settingsManager->show(2); });
@@ -98,7 +98,7 @@ Presentation::Presentation() {
   stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
 
   statusBar.setFont(Font::sans(8, "Bold"));
-  statusBar.setVisible(config().userInterface.showStatusBar);
+  statusBar.setVisible(config->userInterface.showStatusBar);
 
   onClose([&] { program->quit(); });
 
@@ -136,9 +136,9 @@ auto Presentation::updateEmulator() -> void {
 
 auto Presentation::resizeViewport() -> void {
   signed scale = 1;
-  if(config().video.scale == "Small" ) scale = 1;
-  if(config().video.scale == "Normal") scale = 2;
-  if(config().video.scale == "Large" ) scale = 4;
+  if(config->video.scale == "Small" ) scale = 1;
+  if(config->video.scale == "Normal") scale = 2;
+  if(config->video.scale == "Large" ) scale = 4;
 
   signed width  = 256;
   signed height = 240;
@@ -147,7 +147,7 @@ auto Presentation::resizeViewport() -> void {
     height = emulator->information.height;
   }
 
-  bool arc = config().video.aspectCorrection;
+  bool arc = config->video.aspectCorrection;
 
   if(fullScreen() == false) {
     signed windowWidth  = 256 * scale;
@@ -200,7 +200,7 @@ auto Presentation::toggleFullScreen() -> void {
     setFullScreen(false);
     setResizable(false);
     menuBar.setVisible(true);
-    statusBar.setVisible(config().userInterface.showStatusBar);
+    statusBar.setVisible(config->userInterface.showStatusBar);
   }
 
   Application::processEvents();

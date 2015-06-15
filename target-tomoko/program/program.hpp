@@ -34,6 +34,8 @@ struct Program : Emulator::Interface::Bind {
   auto updateStatusText() -> void;
   auto updateVideoFilter() -> void;
   auto updateVideoPalette() -> void;
+  auto updateAudio() -> void;
+  auto updateDSP() -> void;
 
   DSP dsp;
   bool pause = false;

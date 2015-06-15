@@ -1,9 +1,8 @@
 #include "../tomoko.hpp"
-ConfigurationManager* configurationManager = nullptr;
-auto config() -> ConfigurationManager& { return *configurationManager; }
+ConfigurationManager* config = nullptr;
 
 ConfigurationManager::ConfigurationManager() {
-  configurationManager = this;
+  config = this;
 
   userInterface.append(userInterface.showStatusBar, "ShowStatusBar");
   append(userInterface, "UserInterface");
@@ -17,6 +16,9 @@ ConfigurationManager::ConfigurationManager() {
   video.append(video.aspectCorrection, "AspectCorrection");
   video.append(video.filter, "Filter");
   video.append(video.colorEmulation, "ColorEmulation");
+  video.append(video.saturation, "Saturation");
+  video.append(video.gamma, "Gamma");
+  video.append(video.luminance, "Luminance");
   video.overscan.append(video.overscan.mask, "Mask");
   video.overscan.append(video.overscan.horizontal, "Horizontal");
   video.overscan.append(video.overscan.vertical, "Vertical");
@@ -27,10 +29,18 @@ ConfigurationManager::ConfigurationManager() {
   audio.append(audio.device, "Device");
   audio.append(audio.synchronize, "Synchronize");
   audio.append(audio.mute, "Mute");
+  audio.append(audio.volume, "Volume");
+  audio.append(audio.frequency, "Frequency");
+  audio.append(audio.latency, "Latency");
+  audio.append(audio.resampler, "Resampler");
   append(audio, "Audio");
 
   input.append(input.driver, "Driver");
   append(input, "Input");
+
+  timing.append(timing.video, "Video");
+  timing.append(timing.audio, "Audio");
+  append(timing, "Timing");
 
   load({configpath(), "tomoko/settings.bml"});
   if(!library.location) library.location = {userpath(), "Emulation/"};

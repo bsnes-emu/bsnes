@@ -6,36 +6,36 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   driverLabel.setText("Driver Selection").setFont(Font::sans(8, "Bold"));
   videoLabel.setText("Video:");
-  videoDriver.onChange([&] { config().video.driver = videoDriver.selected()->text(); });
+  videoDriver.onChange([&] { config->video.driver = videoDriver.selected()->text(); });
   for(auto& driver : string{video.availableDrivers()}.split(";")) {
     ComboButtonItem item;
     item.setText(driver);
     videoDriver.append(item);
-    if(config().video.driver == driver) item.setSelected();
+    if(config->video.driver == driver) item.setSelected();
   }
   audioLabel.setText("Audio:");
-  audioDriver.onChange([&] { config().audio.driver = audioDriver.selected()->text(); });
+  audioDriver.onChange([&] { config->audio.driver = audioDriver.selected()->text(); });
   for(auto& driver : string{audio.availableDrivers()}.split(";")) {
     ComboButtonItem item;
     item.setText(driver);
     audioDriver.append(item);
-    if(config().audio.driver == driver) item.setSelected();
+    if(config->audio.driver == driver) item.setSelected();
   }
   inputLabel.setText("Input:");
-  inputDriver.onChange([&] { config().input.driver = inputDriver.selected()->text(); });
+  inputDriver.onChange([&] { config->input.driver = inputDriver.selected()->text(); });
   for(auto& driver : string{input.availableDrivers()}.split(";")) {
     ComboButtonItem item;
     item.setText(driver);
     inputDriver.append(item);
-    if(config().input.driver == driver) item.setSelected();
+    if(config->input.driver == driver) item.setSelected();
   }
 
   libraryLabel.setText("Game Library").setFont(Font::sans(8, "Bold"));
   libraryPrefix.setText("Location:");
-  libraryLocation.setEditable(false).setText(config().library.location);
+  libraryLocation.setEditable(false).setText(config->library.location);
   libraryChange.setText("Change ...").onActivate([&] {
     if(auto location = BrowserDialog().setTitle("Select Library Location").selectFolder()) {
-      libraryLocation.setText(config().library.location = location);
+      libraryLocation.setText(config->library.location = location);
     }
   });
 }

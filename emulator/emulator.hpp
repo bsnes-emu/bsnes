@@ -3,7 +3,7 @@
 
 namespace Emulator {
   static const char Name[] = "higan";
-  static const char Version[] = "094.25";
+  static const char Version[] = "094.26";
   static const char Author[] = "byuu";
   static const char License[] = "GPLv3";
   static const char Website[] = "http://byuu.org/";
@@ -52,7 +52,7 @@ template<typename T> struct hook;
 template<typename R, typename... P> struct hook<R (P...)> {
   function<R (P...)> callback;
 
-  R operator()(P... p) const {
+  auto operator()(P... p) const -> R {
     #if defined(DEBUGGER)
     if(callback) return callback(std::forward<P>(p)...);
     #endif
@@ -67,7 +67,7 @@ template<typename R, typename... P> struct hook<R (P...)> {
   template<typename C> hook(R (C::*function)(P...) const, C* object) { callback = {function, object}; }
   template<typename L> hook(const L& function) { callback = function; }
 
-  hook& operator=(const hook& hook) { callback = hook.callback; return *this; }
+  auto operator=(const hook& source) -> hook& { callback = source.callback; return *this; }
 };
 
 #if defined(DEBUGGER)

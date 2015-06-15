@@ -47,70 +47,70 @@ struct Interface {
   vector<Port> port;
 
   struct Bind {
-    virtual void loadRequest(unsigned, string, string) {}
-    virtual void loadRequest(unsigned, string) {}
-    virtual void saveRequest(unsigned, string) {}
-    virtual uint32_t videoColor(unsigned, uint16_t, uint16_t, uint16_t, uint16_t) { return 0u; }
-    virtual void videoRefresh(const uint32_t*, const uint32_t*, unsigned, unsigned, unsigned) {}
-    virtual void audioSample(int16_t, int16_t) {}
-    virtual int16_t inputPoll(unsigned, unsigned, unsigned) { return 0; }
-    virtual void inputRumble(unsigned, unsigned, unsigned, bool) {}
-    virtual unsigned dipSettings(const Markup::Node&) { return 0; }
-    virtual string path(unsigned) { return ""; }
-    virtual string server() { return ""; }
-    virtual void notify(string text) { print(text, "\n"); }
+    virtual auto loadRequest(unsigned, string, string) -> void {}
+    virtual auto loadRequest(unsigned, string) -> void {}
+    virtual auto saveRequest(unsigned, string) -> void {}
+    virtual auto videoColor(unsigned, uint16_t, uint16_t, uint16_t, uint16_t) -> uint32_t { return 0u; }
+    virtual auto videoRefresh(const uint32_t*, const uint32_t*, unsigned, unsigned, unsigned) -> void {}
+    virtual auto audioSample(int16_t, int16_t) -> void {}
+    virtual auto inputPoll(unsigned, unsigned, unsigned) -> int16_t { return 0; }
+    virtual auto inputRumble(unsigned, unsigned, unsigned, bool) -> void {}
+    virtual auto dipSettings(const Markup::Node&) -> unsigned { return 0; }
+    virtual auto path(unsigned) -> string { return ""; }
+    virtual auto server() -> string { return ""; }
+    virtual auto notify(string text) -> void { print(text, "\n"); }
   };
   Bind* bind = nullptr;
 
   //callback bindings (provided by user interface)
-  void loadRequest(unsigned id, string name, string type) { return bind->loadRequest(id, name, type); }
-  void loadRequest(unsigned id, string path) { return bind->loadRequest(id, path); }
-  void saveRequest(unsigned id, string path) { return bind->saveRequest(id, path); }
-  uint32_t videoColor(unsigned source, uint16_t alpha, uint16_t red, uint16_t green, uint16_t blue) { return bind->videoColor(source, alpha, red, green, blue); }
-  void videoRefresh(const uint32_t* palette, const uint32_t* data, unsigned pitch, unsigned width, unsigned height) { return bind->videoRefresh(palette, data, pitch, width, height); }
-  void audioSample(int16_t lsample, int16_t rsample) { return bind->audioSample(lsample, rsample); }
-  int16_t inputPoll(unsigned port, unsigned device, unsigned input) { return bind->inputPoll(port, device, input); }
-  void inputRumble(unsigned port, unsigned device, unsigned input, bool enable) { return bind->inputRumble(port, device, input, enable); }
-  unsigned dipSettings(const Markup::Node& node) { return bind->dipSettings(node); }
-  string path(unsigned group) { return bind->path(group); }
-  string server() { return bind->server(); }
-  template<typename... Args> void notify(Args&&... args) { return bind->notify({std::forward<Args>(args)...}); }
+  auto loadRequest(unsigned id, string name, string type) -> void { return bind->loadRequest(id, name, type); }
+  auto loadRequest(unsigned id, string path) -> void { return bind->loadRequest(id, path); }
+  auto saveRequest(unsigned id, string path) -> void { return bind->saveRequest(id, path); }
+  auto videoColor(unsigned source, uint16_t alpha, uint16_t red, uint16_t green, uint16_t blue) -> uint32_t { return bind->videoColor(source, alpha, red, green, blue); }
+  auto videoRefresh(const uint32_t* palette, const uint32_t* data, unsigned pitch, unsigned width, unsigned height) -> void { return bind->videoRefresh(palette, data, pitch, width, height); }
+  auto audioSample(int16_t lsample, int16_t rsample) -> void { return bind->audioSample(lsample, rsample); }
+  auto inputPoll(unsigned port, unsigned device, unsigned input) -> int16_t { return bind->inputPoll(port, device, input); }
+  auto inputRumble(unsigned port, unsigned device, unsigned input, bool enable) -> void { return bind->inputRumble(port, device, input, enable); }
+  auto dipSettings(const Markup::Node& node) -> unsigned { return bind->dipSettings(node); }
+  auto path(unsigned group) -> string { return bind->path(group); }
+  auto server() -> string { return bind->server(); }
+  template<typename... P> auto notify(P&&... p) -> void { return bind->notify({forward<P>(p)...}); }
 
   //information
-  virtual string title() = 0;
-  virtual double videoFrequency() = 0;
-  virtual double audioFrequency() = 0;
+  virtual auto title() -> string = 0;
+  virtual auto videoFrequency() -> double = 0;
+  virtual auto audioFrequency() -> double = 0;
 
   //media interface
-  virtual bool loaded() { return false; }
-  virtual string sha256() { return ""; }
-  virtual unsigned group(unsigned id) = 0;
-  virtual void load(unsigned id) {}
-  virtual void save() {}
-  virtual void load(unsigned id, const stream& memory) {}
-  virtual void save(unsigned id, const stream& memory) {}
-  virtual void unload() {}
+  virtual auto loaded() -> bool { return false; }
+  virtual auto sha256() -> string { return ""; }
+  virtual auto group(unsigned id) -> unsigned = 0;
+  virtual auto load(unsigned id) -> void {}
+  virtual auto save() -> void {}
+  virtual auto load(unsigned id, const stream& memory) -> void {}
+  virtual auto save(unsigned id, const stream& memory) -> void {}
+  virtual auto unload() -> void {}
 
   //system interface
-  virtual void connect(unsigned port, unsigned device) {}
-  virtual void power() {}
-  virtual void reset() {}
-  virtual void run() {}
+  virtual auto connect(unsigned port, unsigned device) -> void {}
+  virtual auto power() -> void {}
+  virtual auto reset() -> void {}
+  virtual auto run() -> void {}
 
   //time functions
-  virtual bool rtc() { return false; }
-  virtual void rtcsync() {}
+  virtual auto rtc() -> bool { return false; }
+  virtual auto rtcsync() -> void {}
 
   //state functions
-  virtual serializer serialize() = 0;
-  virtual bool unserialize(serializer&) = 0;
+  virtual auto serialize() -> serializer = 0;
+  virtual auto unserialize(serializer&) -> bool = 0;
 
   //cheat functions
-  virtual void cheatSet(const lstring& = lstring{}) {}
+  virtual auto cheatSet(const lstring& = lstring{}) -> void {}
 
   //utility functions
   enum class PaletteMode : unsigned { Literal, Channel, Standard, Emulation };
-  virtual void paletteUpdate(PaletteMode mode) {}
+  virtual auto paletteUpdate(PaletteMode mode) -> void {}
 };
 
 }

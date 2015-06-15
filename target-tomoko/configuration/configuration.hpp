@@ -17,6 +17,9 @@ struct ConfigurationManager : Configuration::Document {
     bool aspectCorrection = true;
     string filter = "Blur";
     bool colorEmulation = true;
+    unsigned saturation = 100;
+    unsigned gamma = 100;
+    unsigned luminance = 100;
 
     struct Overscan : Configuration::Node {
       bool mask = false;
@@ -30,12 +33,20 @@ struct ConfigurationManager : Configuration::Document {
     string device;
     bool synchronize = true;
     bool mute = false;
+    unsigned volume = 100;
+    unsigned frequency = 48000;
+    unsigned latency = 60;
+    string resampler = "Sinc";
   } audio;
 
   struct Input : Configuration::Node {
     string driver;
   } input;
+
+  struct Timing : Configuration::Node {
+    double video = 60.0;
+    double audio = 48000.0;
+  } timing;
 };
 
-extern ConfigurationManager* configurationManager;
-auto config() -> ConfigurationManager&;
+extern ConfigurationManager* config;

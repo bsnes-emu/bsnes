@@ -72,11 +72,20 @@ auto pWindow::setDroppable(bool droppable) -> void {
 }
 
 auto pWindow::setEnabled(bool enabled) -> void {
+  if(auto layout = state().layout) {
+    if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
+  }
 }
 
 auto pWindow::setFocused() -> void {
   if(!self().visible()) self().setVisible(true);
   SetFocus(hwnd);
+}
+
+auto pWindow::setFont(const string& font) -> void {
+  if(auto layout = state().layout) {
+    if(auto self = layout->self()) self->setFont(layout->font(true));
+  }
 }
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
@@ -138,7 +147,7 @@ auto pWindow::setModal(bool modality) -> void {
 }
 
 auto pWindow::setResizable(bool resizable) -> void {
-  SetWindowLongPtr(hwnd, GWL_STYLE, state().resizable ? ResizableStyle : FixedStyle);
+  SetWindowLongPtr(hwnd, GWL_STYLE, WS_VISIBLE | (state().resizable ? ResizableStyle : FixedStyle));
   setGeometry(state().geometry);
 }
 
@@ -149,6 +158,10 @@ auto pWindow::setTitle(string text) -> void {
 auto pWindow::setVisible(bool visible) -> void {
   ShowWindow(hwnd, visible ? SW_SHOWNORMAL : SW_HIDE);
   if(!visible) setModal(false);
+
+  if(auto layout = state().layout) {
+    if(auto self = layout->self()) self->setVisible(layout->visible(true));
+  }
 }
 
 //

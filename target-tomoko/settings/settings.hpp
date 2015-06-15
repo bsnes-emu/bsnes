@@ -2,12 +2,50 @@ struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
 
   VerticalLayout layout{this};
+    Label colorAdjustmentLabel{&layout, Size{~0, 0}};
+    HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
+      Label saturationLabel{&saturationLayout, Size{80, 0}};
+      Label saturationValue{&saturationLayout, Size{80, 0}};
+      HorizontalSlider saturationSlider{&saturationLayout, Size{~0, 0}};
+    HorizontalLayout gammaLayout{&layout, Size{~0, 0}};
+      Label gammaLabel{&gammaLayout, Size{80, 0}};
+      Label gammaValue{&gammaLayout, Size{80, 0}};
+      HorizontalSlider gammaSlider{&gammaLayout, Size{~0, 0}};
+    HorizontalLayout luminanceLayout{&layout, Size{~0, 0}};
+      Label luminanceLabel{&luminanceLayout, Size{80, 0}};
+      Label luminanceValue{&luminanceLayout, Size{80, 0}};
+      HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
+    Label overscanMaskLabel{&layout, Size{~0, 0}};
+    HorizontalLayout horizontalMaskLayout{&layout, Size{~0, 0}};
+      Label horizontalMaskLabel{&horizontalMaskLayout, Size{80, 0}};
+      Label horizontalMaskValue{&horizontalMaskLayout, Size{80, 0}};
+      HorizontalSlider horizontalMaskSlider{&horizontalMaskLayout, Size{~0, 0}};
+    HorizontalLayout verticalMaskLayout{&layout, Size{~0, 0}};
+      Label verticalMaskLabel{&verticalMaskLayout, Size{80, 0}};
+      Label verticalMaskValue{&verticalMaskLayout, Size{80, 0}};
+      HorizontalSlider verticalMaskSlider{&verticalMaskLayout, Size{~0, 0}};
+
+  auto update() -> void;
 };
 
 struct AudioSettings : TabFrameItem {
   AudioSettings(TabFrame*);
 
   VerticalLayout layout{this};
+    HorizontalLayout controlLayout{&layout, Size{~0, 0}};
+      Label frequencyLabel{&controlLayout, Size{0, 0}};
+      ComboButton frequencyCombo{&controlLayout, Size{~0, 0}};
+      Label latencyLabel{&controlLayout, Size{0, 0}};
+      ComboButton latencyCombo{&controlLayout, Size{~0, 0}};
+      Label resamplerLabel{&controlLayout, Size{0, 0}};
+      ComboButton resamplerCombo{&controlLayout, Size{~0, 0}};
+    HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
+      Label volumeLabel{&volumeLayout, Size{80, 0}};
+      Label volumeValue{&volumeLayout, Size{80, 0}};
+      HorizontalSlider volumeSlider{&volumeLayout, Size{~0, 0}};
+
+  auto update() -> void;
+  auto updateVolume() -> void;
 };
 
 struct InputSettings : TabFrameItem {
@@ -62,6 +100,16 @@ struct TimingSettings : TabFrameItem {
   TimingSettings(TabFrame*);
 
   VerticalLayout layout{this};
+    HorizontalLayout videoLayout{&layout, Size{~0, 0}};
+      Label videoLabel{&videoLayout, Size{40, 0}};
+      LineEdit videoValue{&videoLayout, Size{80, 0}};
+      Button videoAssign{&videoLayout, Size{80, 0}};
+    HorizontalLayout audioLayout{&layout, Size{~0, 0}};
+      Label audioLabel{&audioLayout, Size{40, 0}};
+      LineEdit audioValue{&audioLayout, Size{80, 0}};
+      Button audioAssign{&audioLayout, Size{80, 0}};
+
+  auto update() -> void;
 };
 
 struct AdvancedSettings : TabFrameItem {
