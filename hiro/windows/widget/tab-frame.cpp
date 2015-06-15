@@ -5,9 +5,12 @@ namespace hiro {
 static auto CALLBACK TabFrame_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
   if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
     if(auto tabFrame = dynamic_cast<mTabFrame*>(object)) {
-      return Shared_windowProc(tabFrame->self()->windowProc, hwnd, msg, wparam, lparam);
+      if(auto self = tabFrame->self()) {
+        return Shared_windowProc(self->windowProc, hwnd, msg, wparam, lparam);
+      }
     }
   }
+
   return DefWindowProc(hwnd, msg, wparam, lparam);
 }
 

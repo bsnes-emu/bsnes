@@ -24,7 +24,7 @@ struct InputJoypadUdev {
   };
 
   struct Joypad {
-    HID::Joypad hid;
+    shared_pointer<HID::Joypad> hid{new HID::Joypad};
 
     int fd = -1;
     dev_t device = 0;
@@ -52,14 +52,14 @@ struct InputJoypadUdev {
   };
   vector<Joypad> joypads;
 
-  void assign(HID::Joypad& hid, unsigned groupID, unsigned inputID, int16_t value) {
-    auto& group = hid.group[groupID];
-    if(group.input[inputID].value == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
-    group.input[inputID].value = value;
+  auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
+    auto& group = hid->group(groupID);
+    if(group.input(inputID).value() == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    group.input(inputID).setValue(value);
   }
 
-  void poll(vector<HID::Device*>& devices) {
+  auto poll(vector<shared_pointer<HID::Device>>& devices) -> void {
     while(hotplugDevicesAvailable()) hotplugDevice();
 
     for(auto& jp : joypads) {
@@ -92,14 +92,14 @@ struct InputJoypadUdev {
         }
       }
 
-      devices.append(&jp.hid);
+      devices.append(jp.hid);
     }
   }
 
-  bool rumble(uint64_t id, bool enable) {
+  auto rumble(uint64_t id, bool enable) -> bool {
     for(auto& jp : joypads) {
-      if(jp.hid.id != id) continue;
-      if(jp.hid.rumble == false) continue;
+      if(jp.hid->id() != id) continue;
+      if(!jp.hid->rumble()) continue;
 
       input_event play;
       memset(&play, 0, sizeof(input_event));
@@ -113,7 +113,7 @@ struct InputJoypadUdev {
     return false;
   }
 
-  bool init() {
+  auto init() -> bool {
     context = udev_new();
     if(context == nullptr) return false;
 
@@ -140,19 +140,19 @@ struct InputJoypadUdev {
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(enumerator) { udev_enumerate_unref(enumerator); enumerator = nullptr; }
   }
 
 private:
-  bool hotplugDevicesAvailable() {
+  auto hotplugDevicesAvailable() -> bool {
     pollfd fd = {0};
     fd.fd = udev_monitor_get_fd(monitor);
     fd.events = POLLIN;
     return (::poll(&fd, 1, 0) == 1) && (fd.revents & POLLIN);
   }
 
-  void hotplugDevice() {
+  auto hotplugDevice() -> void {
     udev_device* device = udev_monitor_receive_device(monitor);
     if(device == nullptr) return;
 
@@ -169,7 +169,7 @@ private:
     }
   }
 
-  void createJoypad(udev_device* device, const string& deviceNode) {
+  auto createJoypad(udev_device* device, const string& deviceNode) -> void {
     Joypad jp;
     jp.deviceNode = deviceNode;
 
@@ -254,17 +254,17 @@ private:
     #undef testBit
   }
 
-  void createJoypadHID(Joypad& jp) {
+  auto createJoypadHID(Joypad& jp) -> void {
     uint64_t pathID = Hash::CRC32(jp.deviceName.data(), jp.deviceName.size()).value();
-    jp.hid.id = pathID << 32 | hex(jp.vendorID) << 16 | hex(jp.productID) << 0;
+    jp.hid->setID(pathID << 32 | hex(jp.vendorID) << 16 | hex(jp.productID) << 0);
 
-    for(unsigned n = 0; n < jp.axes.size(); n++) jp.hid.axis().append({n});
-    for(unsigned n = 0; n < jp.hats.size(); n++) jp.hid.hat().append({n});
-    for(unsigned n = 0; n < jp.buttons.size(); n++) jp.hid.button().append({n});
-    jp.hid.rumble = jp.rumble;
+    for(unsigned n = 0; n < jp.axes.size(); n++) jp.hid->axes().append(n);
+    for(unsigned n = 0; n < jp.hats.size(); n++) jp.hid->hats().append(n);
+    for(unsigned n = 0; n < jp.buttons.size(); n++) jp.hid->buttons().append(n);
+    jp.hid->setRumble(jp.rumble);
   }
 
-  void removeJoypad(udev_device* device, const string& deviceNode) {
+  auto removeJoypad(udev_device* device, const string& deviceNode) -> void {
     for(unsigned n = 0; n < joypads.size(); n++) {
       if(joypads[n].deviceNode == deviceNode) {
         close(joypads[n].fd);

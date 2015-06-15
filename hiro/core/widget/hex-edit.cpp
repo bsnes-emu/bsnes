@@ -35,13 +35,13 @@ auto mHexEdit::offset() const -> unsigned {
   return state.offset;
 }
 
-auto mHexEdit::onRead(const function<uint8_t (unsigned)>& function) -> type& {
-  state.onRead = function;
+auto mHexEdit::onRead(const function<uint8_t (unsigned)>& callback) -> type& {
+  state.onRead = callback;
   return *this;
 }
 
-auto mHexEdit::onWrite(const function<void (unsigned, uint8_t)>& function) -> type& {
-  state.onWrite = function;
+auto mHexEdit::onWrite(const function<void (unsigned, uint8_t)>& callback) -> type& {
+  state.onWrite = callback;
   return *this;
 }
 

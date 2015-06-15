@@ -26,13 +26,13 @@ auto mLineEdit::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mLineEdit::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mLineEdit::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 
-auto mLineEdit::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mLineEdit::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 

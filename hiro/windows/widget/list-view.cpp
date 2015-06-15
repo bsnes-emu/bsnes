@@ -2,6 +2,25 @@
 
 namespace hiro {
 
+static auto CALLBACK ListView_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  if(auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA)) {
+    if(auto listView = dynamic_cast<mListView*>(object)) {
+      if(auto self = listView->self()) {
+        if(!listView->enabled(true)) {
+          if(msg == WM_KEYDOWN || msg == WM_KEYUP || msg == WM_SYSKEYDOWN || msg == WM_SYSKEYUP) {
+            //WC_LISTVIEW responds to key messages even when its HWND is disabled
+            //the control should be inactive when disabled; so we intercept the messages here
+            return false;
+          }
+        }
+        return self->windowProc(hwnd, msg, wparam, lparam);
+      }
+    }
+  }
+
+  return DefWindowProc(hwnd, msg, wparam, lparam);
+}
+
 auto pListView::construct() -> void {
   hwnd = CreateWindowEx(
     WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
@@ -9,6 +28,8 @@ auto pListView::construct() -> void {
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
+  windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
+  SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)&ListView_windowProc);
   ListView_SetExtendedListViewStyle(hwnd, LVS_EX_FULLROWSELECT | LVS_EX_SUBITEMIMAGES);
   pWidget::_setState();
   setBackgroundColor(state().backgroundColor);

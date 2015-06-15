@@ -51,6 +51,7 @@ namespace Math {
   #include <sys/socket.h>
   #include <netinet/in.h>
   #include <netdb.h>
+  #include <poll.h>
 #endif
 
 #if defined(COMPILER_CL)
@@ -58,17 +59,40 @@ namespace Math {
 #endif
 
 #if defined(PLATFORM_WINDOWS)
+  //fight Microsoft's ardent efforts at vendor lock-in
+
   #undef  interface
   #define dllexport __declspec(dllexport)
   #define MSG_NOSIGNAL 0
 
+  extern "C" {
+    using pollfd = WSAPOLLFD;
+  }
+
   inline auto access(const char* path, int amode) -> int { return _waccess(nall::utf16_t(path), amode); }
   inline auto getcwd(char* buf, size_t size) -> char* { wchar_t wpath[PATH_MAX] = L""; if(!_wgetcwd(wpath, size)) return nullptr; strcpy(buf, nall::utf8_t(wpath)); return buf; }
   inline auto mkdir(const char* path, int mode) -> int { return _wmkdir(nall::utf16_t(path)); }
+  inline auto poll(struct pollfd fds[], unsigned long nfds, int timeout) -> int { return WSAPoll(fds, nfds, timeout); }
   inline auto putenv(const char* value) -> int { return _wputenv(nall::utf16_t(value)); }
   inline auto realpath(const char* file_name, char* resolved_name) -> char* { wchar_t wfile_name[PATH_MAX] = L""; if(!_wfullpath(wfile_name, nall::utf16_t(file_name), PATH_MAX)) return nullptr; strcpy(resolved_name, nall::utf8_t(wfile_name)); return resolved_name; }
   inline auto rename(const char* oldname, const char* newname) -> int { return _wrename(nall::utf16_t(oldname), nall::utf16_t(newname)); }
   inline auto usleep(unsigned milliseconds) -> void { Sleep(milliseconds / 1000); }
+
+  namespace nall {
+    //network functions take void*, not char*. this allows them to be used without casting
+
+    inline auto recv(int socket, void* buffer, size_t length, int flags) -> ssize_t {
+      return ::recv(socket, (char*)buffer, length, flags);
+    }
+
+    inline auto send(int socket, const void* buffer, size_t length, int flags) -> ssize_t {
+      return ::send(socket, (const char*)buffer, length, flags);
+    }
+
+    inline auto setsockopt(int socket, int level, int option_name, const void* option_value, socklen_t option_len) -> int {
+      return ::setsockopt(socket, level, option_name, (const char*)option_value, option_len);
+    }
+  }
 #else
   #define dllexport
 #endif

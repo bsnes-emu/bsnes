@@ -1,35 +1,38 @@
-/*
-  audio.ao (2008-06-01)
-  authors: Nach, RedDwarf
-*/
-
 #include <ao/ao.h>
 
 namespace ruby {
 
-class pAudioAO {
-public:
+struct pAudioAO {
   int driver_id;
   ao_sample_format driver_format;
-  ao_device* audio_device;
+  ao_device* audio_device = nullptr;
 
   struct {
-    unsigned frequency;
+    unsigned frequency = 22050;
   } settings;
 
-  bool cap(const string& name) {
+  pAudioAO() {
+    ao_initialize();
+  }
+
+  ~pAudioAO() {
+    term();
+  //ao_shutdown(); //FIXME: this is causing a segfault for some reason when called ...
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Audio::Frequency) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Frequency) return settings.frequency;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       if(audio_device) init();
       return true;
     }
@@ -37,15 +40,15 @@ public:
     return false;
   }
 
-  void sample(uint16_t l_sample, uint16_t r_sample) {
+  auto sample(uint16_t l_sample, uint16_t r_sample) -> void {
     uint32_t samp = (l_sample << 0) + (r_sample << 16);
     ao_play(audio_device, (char*)&samp, 4); //This may need to be byte swapped for Big Endian
   }
 
-  void clear() {
+  auto clear() -> void {
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     driver_id = ao_default_driver_id(); //ao_driver_id((const char*)driver)
@@ -69,23 +72,11 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(audio_device) {
       ao_close(audio_device);
-      audio_device = 0;
+      audio_device = nullptr;
     }
-  }
-
-  pAudioAO() {
-    audio_device = 0;
-    ao_initialize();
-
-    settings.frequency = 22050;
-  }
-
-  ~pAudioAO() {
-    term();
-  //ao_shutdown(); //FIXME: this is causing a segfault for some reason when called ...
   }
 };
 

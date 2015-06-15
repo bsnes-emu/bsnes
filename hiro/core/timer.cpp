@@ -14,8 +14,8 @@ auto mTimer::interval() const -> unsigned {
   return state.interval;
 }
 
-auto mTimer::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mTimer::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 

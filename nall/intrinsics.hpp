@@ -56,13 +56,16 @@ namespace nall {
   #define PLATFORM_WINDOWS
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Windows; }
 #elif defined(__APPLE__)
+  #define PLATFORM_POSIX
   #define PLATFORM_MACOSX
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::MacOSX; }
 #elif defined(linux) || defined(__linux__)
+  #define PLATFORM_POSIX
   #define PLATFORM_LINUX
   #define PLATFORM_XORG
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Linux; }
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  #define PLATFORM_POSIX
   #define PLATFORM_BSD
   #define PLATFORM_XORG
   Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::BSD; }

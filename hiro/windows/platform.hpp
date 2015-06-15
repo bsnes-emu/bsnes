@@ -17,6 +17,8 @@ struct AppMessage {
 
 using WindowProc = auto CALLBACK (*)(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
+static vector<wObject> windows;
+
 }
 
 #define Declare(Name, Base) \

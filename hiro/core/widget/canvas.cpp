@@ -46,28 +46,28 @@ auto mCanvas::icon() const -> image {
   return state.icon;
 }
 
-auto mCanvas::onDrop(const function<void (lstring)>& function) -> type& {
-  state.onDrop = function;
+auto mCanvas::onDrop(const function<void (lstring)>& callback) -> type& {
+  state.onDrop = callback;
   return *this;
 }
 
-auto mCanvas::onMouseLeave(const function<void ()>& function) -> type& {
-  state.onMouseLeave = function;
+auto mCanvas::onMouseLeave(const function<void ()>& callback) -> type& {
+  state.onMouseLeave = callback;
   return *this;
 }
 
-auto mCanvas::onMouseMove(const function<void (Position)>& function) -> type& {
-  state.onMouseMove = function;
+auto mCanvas::onMouseMove(const function<void (Position)>& callback) -> type& {
+  state.onMouseMove = callback;
   return *this;
 }
 
-auto mCanvas::onMousePress(const function<void (Mouse::Button)>& function) -> type& {
-  state.onMousePress = function;
+auto mCanvas::onMousePress(const function<void (Mouse::Button)>& callback) -> type& {
+  state.onMousePress = callback;
   return *this;
 }
 
-auto mCanvas::onMouseRelease(const function<void (Mouse::Button)>& function) -> type& {
-  state.onMouseRelease = function;
+auto mCanvas::onMouseRelease(const function<void (Mouse::Button)>& callback) -> type& {
+  state.onMouseRelease = callback;
   return *this;
 }
 

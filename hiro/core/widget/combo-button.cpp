@@ -31,8 +31,8 @@ auto mComboButton::items() const -> unsigned {
   return state.items.size();
 }
 
-auto mComboButton::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mComboButton::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
@@ -40,7 +40,7 @@ auto mComboButton::remove(sComboButtonItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   item->setParent();
   return *this;

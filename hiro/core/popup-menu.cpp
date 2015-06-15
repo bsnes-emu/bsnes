@@ -32,7 +32,7 @@ auto mPopupMenu::remove(sAction action) -> type& {
   signal(remove, action);
   state.actions.remove(offset);
   for(auto n : range(offset, actions())) {
-    state.actions[n]->offset(-1);
+    state.actions[n]->adjustOffset(-1);
   }
   action->setParent();
   return *this;

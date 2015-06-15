@@ -4,12 +4,8 @@ Color::Color() {
   setColor(0, 0, 0, 0);
 }
 
-Color::Color(signed red, signed green, signed blue) {
-  setColor(255, red, green, blue);
-}
-
-Color::Color(signed alpha, signed red, signed green, signed blue) {
-  setColor(alpha, red, green, blue);
+Color::Color(signed red, signed green, signed blue, signed alpha) {
+  setColor(red, green, blue, alpha);
 }
 
 Color::operator bool() const {
@@ -17,7 +13,7 @@ Color::operator bool() const {
 }
 
 auto Color::operator==(const Color& source) const -> bool {
-  return alpha() == source.alpha() && red() == source.red() && green() == source.green() && blue() == source.blue();
+  return red() == source.red() && green() == source.green() && blue() == source.blue() && alpha() == source.alpha();
 }
 
 auto Color::operator!=(const Color& source) const -> bool {
@@ -33,7 +29,7 @@ auto Color::blue() const -> uint8_t {
 }
 
 auto Color::empty() const -> bool {
-  return state.alpha == 0 && state.red == 0 && state.green == 0 && state.blue == 0;
+  return state.red == 0 && state.green == 0 && state.blue == 0 && state.alpha == 0;
 }
 
 auto Color::green() const -> uint8_t {
@@ -55,18 +51,14 @@ auto Color::setBlue(signed blue) -> type& {
 }
 
 auto Color::setColor(Color color) -> type& {
-  return setColor(color.alpha(), color.red(), color.green(), color.blue());
+  return setColor(color.red(), color.green(), color.blue(), color.alpha());
 }
 
-auto Color::setColor(signed red, signed green, signed blue) -> type& {
-  return setColor(255, red, green, blue);
-}
-
-auto Color::setColor(signed alpha, signed red, signed green, signed blue) -> type& {
-  state.alpha = max(0, min(255, alpha));
+auto Color::setColor(signed red, signed green, signed blue, signed alpha) -> type& {
   state.red   = max(0, min(255, red  ));
   state.green = max(0, min(255, green));
   state.blue  = max(0, min(255, blue ));
+  state.alpha = max(0, min(255, alpha));
   return *this;
 }
 

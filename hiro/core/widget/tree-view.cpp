@@ -69,23 +69,23 @@ auto mTreeView::items() const -> unsigned {
   return state.items.size();
 }
 
-auto mTreeView::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mTreeView::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 
-auto mTreeView::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mTreeView::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mTreeView::onContext(const function<void ()>& function) -> type& {
-  state.onContext = function;
+auto mTreeView::onContext(const function<void ()>& callback) -> type& {
+  state.onContext = callback;
   return *this;
 }
 
-auto mTreeView::onToggle(const function<void (sTreeViewItem)>& function) -> type& {
-  state.onToggle = function;
+auto mTreeView::onToggle(const function<void (sTreeViewItem)>& callback) -> type& {
+  state.onToggle = callback;
   return *this;
 }
 
@@ -93,7 +93,7 @@ auto mTreeView::remove(sTreeViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   item->setParent();
   return *this;

@@ -2,8 +2,6 @@
 
 namespace hiro {
 
-vector<pWindow*> pWindow::modal;
-
 static const unsigned FixedStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_BORDER;
 static const unsigned ResizableStyle = WS_SYSMENU | WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_THICKFRAME;
 
@@ -12,9 +10,13 @@ auto pWindow::construct() -> void {
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   setDroppable(state().droppable);
   setGeometry({128, 128, 256, 256});
+
+  windows.append(self().instance);
 }
 
 auto pWindow::destruct() -> void {
+  if(auto position = windows.find(self().instance)) windows.remove(*position);
+
   if(hbrush) { DeleteObject(hbrush); hbrush = nullptr; }
   DestroyWindow(hwnd);
 }
@@ -28,7 +30,7 @@ auto pWindow::append(sMenuBar menuBar) -> void {
 auto pWindow::append(sStatusBar statusBar) -> void {
 }
 
-auto pWindow::focused() const -> bool override {
+auto pWindow::focused() const -> bool {
   return (GetForegroundWindow() == hwnd);
 }
 
@@ -122,7 +124,7 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
 
 auto pWindow::setModal(bool modality) -> void {
   if(modality) {
-    modal.appendOnce(this);
+    _modalityUpdate();
     while(state().modal) {
       Application::processEvents();
       if(Application::state.onMain) {
@@ -131,7 +133,7 @@ auto pWindow::setModal(bool modality) -> void {
         usleep(20 * 1000);
       }
     }
-    if(auto position = modal.find(this)) modal.remove(position());
+    _modalityUpdate();
   }
 }
 
@@ -223,6 +225,39 @@ auto pWindow::_geometry() -> Geometry {
   signed height = (rc.bottom - rc.top) - margin.height();
 
   return {x, y, width, height};
+}
+
+auto pWindow::_modalityCount() -> unsigned {
+  unsigned modalWindows = 0;
+  for(auto& weak : windows) {
+    if(auto object = weak.acquire()) {
+      if(auto window = dynamic_cast<mWindow*>(object.data())) {
+        if(window->modal()) modalWindows++;
+      }
+    }
+  }
+  return modalWindows;
+}
+
+auto pWindow::_modalityDisabled() -> bool {
+  if(_modalityCount() == 0) return false;
+  return !state().modal;
+}
+
+auto pWindow::_modalityUpdate() -> void {
+  unsigned modalWindows = _modalityCount();
+  for(auto& weak : windows) {
+    if(auto object = weak.acquire()) {
+      if(auto window = dynamic_cast<mWindow*>(object.data())) {
+        if(auto self = window->self()) {
+          bool enabled = !modalWindows || window->modal();
+          if(IsWindowEnabled(self->hwnd) != enabled) {
+            EnableWindow(self->hwnd, enabled);
+          }
+        }
+      }
+    }
+  }
 }
 
 }

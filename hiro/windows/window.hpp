@@ -33,13 +33,14 @@ struct pWindow : pObject {
   auto onSize() -> void;
 
   auto _geometry() -> Geometry;
+  auto _modalityCount() -> unsigned;
+  auto _modalityDisabled() -> bool;
+  auto _modalityUpdate() -> void;
 
   HWND hwnd = nullptr;
   HFONT hstatusfont = nullptr;
   HBRUSH hbrush = nullptr;
   COLORREF hbrushColor = 0;
-
-  static vector<pWindow*> modal;
 };
 
 }

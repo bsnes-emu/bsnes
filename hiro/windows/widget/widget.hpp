@@ -5,7 +5,7 @@ namespace hiro {
 struct pWidget : pSizable {
   Declare(Widget, Sizable)
 
-  auto focused() -> bool;
+  auto focused() const -> bool override;
   virtual auto minimumSize() -> Size;
   auto setEnabled(bool enabled) -> void override;
   auto setFocused() -> void;
@@ -14,8 +14,8 @@ struct pWidget : pSizable {
   auto setVisible(bool visible) -> void override;
 
   auto _parentHandle() -> HWND;
-  auto _parentWidget() -> maybe<mWidget&>;
-  auto _parentWindow() -> maybe<mWindow&>;
+  auto _parentWidget() -> maybe<pWidget&>;
+  auto _parentWindow() -> maybe<pWindow&>;
   auto _setState() -> void;
 
   bool abstract = false;

@@ -1,6 +1,6 @@
 #if defined(Hiro_VerticalLayout)
 
-auto mVerticalLayout::append(shared_pointer<mSizable> sizable, Size size, signed spacing) -> type& {
+auto mVerticalLayout::append(sSizable sizable, Size size, signed spacing) -> type& {
   properties.append({size.width(), size.height(), spacing < 0 ? settings.spacing : spacing});
   mLayout::append(sizable);
   return *this;
@@ -31,7 +31,7 @@ auto mVerticalLayout::minimumSize() const -> Size {
   return {settings.margin * 2 + width, settings.margin * 2 + height};
 }
 
-auto mVerticalLayout::remove(shared_pointer<mSizable> sizable) -> type& {
+auto mVerticalLayout::remove(sSizable sizable) -> type& {
   properties.remove(sizable->offset());
   mLayout::remove(sizable);
   return *this;

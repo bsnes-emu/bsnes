@@ -22,8 +22,8 @@ auto mCheckButton::icon() const -> image {
   return state.icon;
 }
 
-auto mCheckButton::onToggle(const function<void ()>& function) -> type& {
-  state.onToggle = function;
+auto mCheckButton::onToggle(const function<void ()>& callback) -> type& {
+  state.onToggle = callback;
   return *this;
 }
 

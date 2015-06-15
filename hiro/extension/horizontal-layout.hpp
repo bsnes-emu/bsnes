@@ -5,13 +5,13 @@ struct mHorizontalLayout : mLayout {
   using mLayout::append;
   using mLayout::remove;
 
-  auto append(nall::shared_pointer<mSizable> sizable, Size size, signed spacing = 5) -> type&;
+  auto append(sSizable sizable, Size size, signed spacing = 5) -> type&;
   auto minimumSize() const -> Size override;
-  auto remove(nall::shared_pointer<mSizable> sizable) -> type& override;
+  auto remove(sSizable sizable) -> type& override;
   auto reset() -> type& override;
   auto setAlignment(double alignment = 0.5) -> type&;
   auto setEnabled(bool enabled = true) -> type& override;
-  auto setFont(const nall::string& font = "") -> type& override;
+  auto setFont(const string& font = "") -> type& override;
   auto setGeometry(Geometry geometry) -> type& override;
   auto setMargin(signed margin = 0) -> type&;
   auto setSpacing(signed spacing = 5) -> type&;
@@ -28,7 +28,7 @@ struct mHorizontalLayout : mLayout {
     signed height;
     signed spacing;
   };
-  nall::vector<Property> properties;
+  vector<Property> properties;
 };
 
 #endif

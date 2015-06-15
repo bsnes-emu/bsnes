@@ -14,8 +14,8 @@ auto mHorizontalScroller::length() const -> unsigned {
   return state.length;
 }
 
-auto mHorizontalScroller::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mHorizontalScroller::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 

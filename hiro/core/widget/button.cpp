@@ -18,8 +18,8 @@ auto mButton::icon() const -> image {
   return state.icon;
 }
 
-auto mButton::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mButton::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 

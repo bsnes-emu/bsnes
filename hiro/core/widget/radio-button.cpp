@@ -26,8 +26,8 @@ auto mRadioButton::icon() const -> image {
   return state.icon;
 }
 
-auto mRadioButton::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mRadioButton::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 

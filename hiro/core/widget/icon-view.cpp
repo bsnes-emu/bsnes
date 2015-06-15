@@ -55,18 +55,18 @@ auto mIconView::multiSelect() const -> bool {
   return state.multiSelect;
 }
 
-auto mIconView::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mIconView::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 
-auto mIconView::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mIconView::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mIconView::onContext(const function<void ()>& function) -> type& {
-  state.onContext = function;
+auto mIconView::onContext(const function<void ()>& callback) -> type& {
+  state.onContext = callback;
   return *this;
 }
 
@@ -78,7 +78,7 @@ auto mIconView::remove(shared_pointer<mIconViewItem> item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   item->setParent();
   return *this;

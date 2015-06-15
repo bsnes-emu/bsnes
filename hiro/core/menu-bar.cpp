@@ -37,7 +37,7 @@ auto mMenuBar::remove(shared_pointer<mMenu> menu) -> type& {
   signal(remove, *menu);
   state.menus.remove(offset);
   for(auto n : range(offset, menus())) {
-    state.menus[n]->offset(-1);
+    state.menus[n]->adjustOffset(-1);
   }
   menu->setParent();
   return *this;

@@ -54,7 +54,7 @@ auto mTreeViewItem::remove(sTreeViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   item->setParent();
   return *this;

@@ -80,7 +80,7 @@ struct shared_pointer {
     reset();
   }
 
-  shared_pointer& operator=(T* source) {
+  auto operator=(T* source) -> shared_pointer& {
     reset();
     if(source) {
       manager = new shared_pointer_manager((void*)source);
@@ -89,7 +89,7 @@ struct shared_pointer {
     return *this;
   }
 
-  shared_pointer& operator=(const shared_pointer& source) {
+  auto operator=(const shared_pointer& source) -> shared_pointer& {
     if(this != &source) {
       reset();
       if((bool)source) {
@@ -100,7 +100,7 @@ struct shared_pointer {
     return *this;
   }
 
-  shared_pointer& operator=(shared_pointer&& source) {
+  auto operator=(shared_pointer&& source) -> shared_pointer& {
     if(this != &source) {
       reset();
       manager = source.manager;
@@ -110,7 +110,7 @@ struct shared_pointer {
   }
 
   template<typename U, typename = enable_if<is_compatible<U>>>
-  shared_pointer& operator=(const shared_pointer<U>& source) {
+  auto operator=(const shared_pointer<U>& source) -> shared_pointer& {
     if((uintptr_t)this != (uintptr_t)&source) {
       reset();
       if((bool)source) {
@@ -122,7 +122,7 @@ struct shared_pointer {
   }
 
   template<typename U, typename = enable_if<is_compatible<U>>>
-  shared_pointer& operator=(shared_pointer&& source) {
+  auto operator=(shared_pointer&& source) -> shared_pointer& {
     if((uintptr_t)this != (uintptr_t)&source) {
       reset();
       manager = source.manager;
@@ -132,7 +132,7 @@ struct shared_pointer {
   }
 
   template<typename U, typename = enable_if<is_compatible<U>>>
-  shared_pointer& operator=(const shared_pointer_weak<U>& source) {
+  auto operator=(const shared_pointer_weak<U>& source) -> shared_pointer& {
     reset();
     if((bool)source) {
       manager = source.manager;
@@ -141,32 +141,32 @@ struct shared_pointer {
     return *this;
   }
 
-  T* data() {
+  auto data() -> T* {
     if(manager) return (T*)manager->pointer;
     return nullptr;
   }
 
-  const T* data() const {
+  auto data() const -> const T* {
     if(manager) return (T*)manager->pointer;
     return nullptr;
   }
 
-  T* operator->() { return data(); }
-  const T* operator->() const { return data(); }
+  auto operator->() -> T* { return data(); }
+  auto operator->() const -> const T* { return data(); }
 
-  T& operator*() { return *data(); }
-  const T& operator*() const { return *data(); }
+  auto operator*() -> T& { return *data(); }
+  auto operator*() const -> const T& { return *data(); }
 
-  T& operator()() { return *data(); }
-  const T& operator()() const { return *data(); }
+  auto operator()() -> T& { return *data(); }
+  auto operator()() const -> const T& { return *data(); }
 
   template<typename U>
-  bool operator==(const shared_pointer<U>& source) const {
+  auto operator==(const shared_pointer<U>& source) const -> bool {
     return manager == source.manager;
   }
 
   template<typename U>
-  bool operator!=(const shared_pointer<U>& source) const {
+  auto operator!=(const shared_pointer<U>& source) const -> bool {
     return manager != source.manager;
   }
 
@@ -174,15 +174,15 @@ struct shared_pointer {
     return !empty();
   }
 
-  bool empty() const {
+  auto empty() const -> bool {
     return !manager || !manager->strong;
   }
 
-  bool unique() const {
+  auto unique() const -> bool {
     return manager && manager->strong == 1;
   }
 
-  void reset() {
+  auto reset() -> void {
     if(manager && manager->strong) {
       //pointer may contain weak references; if strong==0 it may destroy manager
       //as such, we must destroy strong before decrementing it to zero
@@ -204,7 +204,7 @@ struct shared_pointer {
   }
 
   template<typename U>
-  shared_pointer<U> cast() {
+  auto cast() -> shared_pointer<U> {
     if(auto pointer = dynamic_cast<U*>(data())) {
       return {*this, pointer};
     }
@@ -224,7 +224,7 @@ struct shared_pointer_weak {
     operator=(source);
   }
 
-  shared_pointer_weak& operator=(const shared_pointer<T>& source) {
+  auto operator=(const shared_pointer<T>& source) -> shared_pointer_weak& {
     reset();
     if(manager = source.manager) manager->weak++;
     return *this;
@@ -234,19 +234,27 @@ struct shared_pointer_weak {
     reset();
   }
 
+  auto operator==(const shared_pointer_weak& source) const -> bool {
+    return manager == source.manager;
+  }
+
+  auto operator!=(const shared_pointer_weak& source) const -> bool {
+    return manager != source.manager;
+  }
+
   explicit operator bool() const {
     return !empty();
   }
 
-  bool empty() const {
+  auto empty() const -> bool {
     return !manager || !manager->strong;
   }
 
-  shared_pointer<T> acquire() const {
+  auto acquire() const -> shared_pointer<T> {
     return shared_pointer<T>(*this);
   }
 
-  void reset() {
+  auto reset() -> void {
     if(manager && --manager->weak == 0) {
       if(manager->strong == 0) {
         delete manager;

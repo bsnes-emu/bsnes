@@ -30,13 +30,13 @@ auto mTextEdit::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mTextEdit::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mTextEdit::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mTextEdit::onMove(const function<void ()>& function) -> type& {
-  state.onMove = function;
+auto mTextEdit::onMove(const function<void ()>& callback) -> type& {
+  state.onMove = callback;
   return *this;
 }
 

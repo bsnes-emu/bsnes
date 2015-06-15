@@ -43,18 +43,18 @@ auto mTabFrame::items() const -> unsigned {
   return state.items.size();
 }
 
-auto mTabFrame::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mTabFrame::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mTabFrame::onClose(const function<void (sTabFrameItem)>& function) -> type& {
-  state.onClose = function;
+auto mTabFrame::onClose(const function<void (sTabFrameItem)>& callback) -> type& {
+  state.onClose = callback;
   return *this;
 }
 
-auto mTabFrame::onMove(const function<void (sTabFrameItem, sTabFrameItem)>& function) -> type& {
-  state.onMove = function;
+auto mTabFrame::onMove(const function<void (sTabFrameItem, sTabFrameItem)>& callback) -> type& {
+  state.onMove = callback;
   return *this;
 }
 
@@ -64,7 +64,7 @@ auto mTabFrame::remove(sTabFrameItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(offset, items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   return *this;
 }

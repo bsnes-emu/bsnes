@@ -1,40 +1,40 @@
-//audio.pulseaudiosimple (2010-01-05)
-//author: byuu
-
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
 namespace ruby {
 
-class pAudioPulseAudioSimple {
-public:
+struct pAudioPulseAudioSimple {
   struct {
-    pa_simple* handle;
+    pa_simple* handle = nullptr;
     pa_sample_spec spec;
   } device;
 
   struct {
-    uint32_t* data;
-    unsigned offset;
+    uint32_t* data = nullptr;
+    unsigned offset = 0;
   } buffer;
 
   struct {
-    unsigned frequency;
+    unsigned frequency = 22050;
   } settings;
 
-  bool cap(const string& name) {
+  ~pAudioPulseAudioSimple() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Audio::Frequency) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Frequency) return settings.frequency;
-    return false;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       if(device.handle) init();
       return true;
     }
@@ -42,7 +42,7 @@ public:
     return false;
   }
 
-  void sample(uint16_t left, uint16_t right) {
+  auto sample(uint16_t left, uint16_t right) -> void {
     if(!device.handle) return;
 
     buffer.data[buffer.offset++] = left + (right << 16);
@@ -53,10 +53,10 @@ public:
     }
   }
 
-  void clear() {
+  auto clear() -> void {
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     device.spec.format   = PA_SAMPLE_S16LE;
@@ -85,7 +85,7 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(device.handle) {
       int error;
       pa_simple_flush(device.handle, &error);
@@ -97,16 +97,6 @@ public:
       delete[] buffer.data;
       buffer.data = nullptr;
     }
-  }
-
-  pAudioPulseAudioSimple() {
-    device.handle = nullptr;
-    buffer.data = nullptr;
-    settings.frequency = 22050;
-  }
-
-  ~pAudioPulseAudioSimple() {
-    term();
   }
 };
 

@@ -8,39 +8,39 @@ struct pInputCarbon {
   vector<Key> keys;
 
   struct Keyboard {
-    HID::Keyboard hid;
+    shared_pointer<HID::Keyboard> hid{new HID::Keyboard};
   } kb;
 
-  bool cap(const string& name) {
+  auto cap(const string& name) -> bool {
     if(name == Input::KeyboardSupport) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
+    return {};
+  }
+
+  auto set(const string& name, const any& value) -> bool {
     return false;
   }
 
-  bool set(const string& name, const any& value) {
-    return false;
+  auto acquire() -> bool { return false; }
+  auto unacquire() -> bool { return false; }
+  auto acquired() -> bool { return false; }
+
+  auto assign(shared_pointer<HID::Device> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
+    auto& group = hid->group(groupID);
+    if(group.input(inputID).value() == value) return;
+    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    group.input(inputID).setValue(value);
   }
 
-  bool acquire() { return false; }
-  bool unacquire() { return false; }
-  bool acquired() { return false; }
-
-  void assign(HID::Device& hid, unsigned groupID, unsigned inputID, int16_t value) {
-    auto& group = hid.group[groupID];
-    if(group.input[inputID].value == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input[inputID].value, value);
-    group.input[inputID].value = value;
-  }
-
-  vector<HID::Device*> poll() {
-    vector<HID::Device*> devices;
+  auto poll() -> vector<shared_pointer<HID::Device>> {
+    vector<shared_pointer<HID::Device>> devices;
 
     KeyMap keymap;
     GetKeys(keymap);
-    uint8_t* buffer = (uint8_t*)keymap;
+    auto buffer = (uint8_t*)keymap;
 
     unsigned inputID = 0;
     for(auto& key : keys) {
@@ -48,15 +48,15 @@ struct pInputCarbon {
       assign(kb.hid, HID::Keyboard::GroupID::Button, inputID++, value);
     }
 
-    devices.append(&kb.hid);
+    devices.append(kb.hid);
     return devices;
   }
 
-  bool rumble(uint64_t id, bool enable) {
+  auto rumble(uint64_t id, bool enable) -> bool {
     return false;
   }
 
-  bool init() {
+  auto init() -> bool {
     keys.append({0x35, "Escape"});
     keys.append({0x7a, "F1"});
     keys.append({0x78, "F2"});
@@ -170,13 +170,13 @@ struct pInputCarbon {
     keys.append({0x3a, "Alt"});
     keys.append({0x37, "Super"});
 
-    kb.hid.id = 1;
-    for(auto& key : keys) kb.hid.button().append({key.name});
+    kb.hid->setID(1);
+    for(auto& key : keys) kb.hid->buttons().append(key.name);
 
     return true;
   }
 
-  void term() {
+  auto term() -> void {
   }
 };
 

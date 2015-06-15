@@ -14,13 +14,13 @@ auto mSourceEdit::doMove() const -> void {
   if(state.onMove) return state.onMove();
 }
 
-auto mSourceEdit::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mSourceEdit::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mSourceEdit::onMove(const function<void ()>& function) -> type& {
-  state.onMove = function;
+auto mSourceEdit::onMove(const function<void ()>& callback) -> type& {
+  state.onMove = callback;
   return *this;
 }
 

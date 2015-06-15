@@ -136,22 +136,28 @@ auto pApplication::initialize() -> void {
 static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> bool {
   if(msg != WM_KEYDOWN && msg != WM_SYSKEYDOWN && msg != WM_KEYUP && msg != WM_SYSKEYUP) return false;
 
-  GUITHREADINFO info;
-  memset(&info, 0, sizeof(GUITHREADINFO));
-  info.cbSize = sizeof(GUITHREADINFO);
+  GUITHREADINFO info{sizeof(GUITHREADINFO)};
   GetGUIThreadInfo(GetCurrentThreadId(), &info);
+
   auto object = (mObject*)GetWindowLongPtr(info.hwndFocus, GWLP_USERDATA);
   if(!object) return false;
 
   if(auto window = dynamic_cast<mWindow*>(object)) {
-    if(pWindow::modal && !pWindow::modal.find(window->self())) return false;
-
-    if(auto code = pKeyboard::_translate(wparam, lparam)) {
-      if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) window->doKeyPress(code);
-      if(msg == WM_KEYUP || msg == WM_SYSKEYUP) window->doKeyRelease(code);
+    if(auto self = window->self()) {
+      if(!self->_modalityDisabled()) {
+        if(auto code = pKeyboard::_translate(wparam, lparam)) {
+          if(msg == WM_KEYDOWN || msg == WM_SYSKEYDOWN) window->doKeyPress(code);
+          if(msg == WM_KEYUP || msg == WM_SYSKEYUP) window->doKeyRelease(code);
+        }
+      }
     }
-
     return false;
+  }
+
+  if(auto window = object->parentWindow(true)) {
+    if(auto self = window->self()) {
+      if(self->_modalityDisabled()) return false;
+    }
   }
 
   if(msg == WM_KEYDOWN) {
@@ -225,23 +231,26 @@ case WM_GETMINMAXINFO: {
 */
 
 static auto CALLBACK Application_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  if(Application::state.quit) return DefWindowProc(hwnd, msg, wparam, lparam);
+
   auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
-  auto& window = dynamic_cast<mWindow*>(object) ? (mWindow&)*object : *object->parentWindow(true);
+  auto window = dynamic_cast<mWindow*>(object);
+  if(!window) window = object->parentWindow(true);
+  if(!window) return DefWindowProc(hwnd, msg, wparam, lparam);
+  auto pWindow = window->self();
+  if(!pWindow) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-  bool process = true;
-  if(pWindow::modal && !pWindow::modal.find(window.self())) process = false;
-  if(Application::state.quit) process = false;
-  if(!process) return DefWindowProc(hwnd, msg, wparam, lparam);
+  if(pWindow->_modalityDisabled()) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   switch(msg) {
-  case WM_CLOSE: window.self()->onClose(); return TRUE;
-  case WM_MOVE: window.self()->onMove(); break;
-  case WM_SIZE: window.self()->onSize(); break;
-  case WM_DROPFILES: window.self()->onDrop(wparam); return FALSE;
-  case WM_ERASEBKGND: if(window.self()->onEraseBackground()) return true; break;
-  case WM_ENTERMENULOOP: case WM_ENTERSIZEMOVE: window.self()->onModalBegin(); return FALSE;
-  case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: window.self()->onModalEnd(); return FALSE;
+  case WM_CLOSE: pWindow->onClose(); return true;
+  case WM_MOVE: pWindow->onMove(); break;
+  case WM_SIZE: pWindow->onSize(); break;
+  case WM_DROPFILES: pWindow->onDrop(wparam); return false;
+  case WM_ERASEBKGND: if(pWindow->onEraseBackground()) return true; break;
+  case WM_ENTERMENULOOP: case WM_ENTERSIZEMOVE: pWindow->onModalBegin(); return false;
+  case WM_EXITMENULOOP: case WM_EXITSIZEMOVE: pWindow->onModalEnd(); return false;
   }
 
   return Shared_windowProc(DefWindowProc, hwnd, msg, wparam, lparam);

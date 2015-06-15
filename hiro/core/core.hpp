@@ -92,7 +92,7 @@ struct Application {
   static auto doMain() -> void;
   static auto font() -> string;
   static auto name() -> string;
-  static auto onMain(const function<void ()>& function = {}) -> void;
+  static auto onMain(const function<void ()>& callback = {}) -> void;
   static auto run() -> void;
   static auto pendingEvents() -> bool;
   static auto processEvents() -> void;
@@ -102,7 +102,7 @@ struct Application {
 
   struct Windows {
     static auto doModalChange(bool modal) -> void;
-    static auto onModalChange(const function<void (bool)>& function = {}) -> void;
+    static auto onModalChange(const function<void (bool)>& callback = {}) -> void;
   };
 
   struct Cocoa {
@@ -110,10 +110,10 @@ struct Application {
     static auto doActivate() -> void;
     static auto doPreferences() -> void;
     static auto doQuit() -> void;
-    static auto onAbout(const function<void ()>& function = {}) -> void;
-    static auto onActivate(const function<void ()>& function = {}) -> void;
-    static auto onPreferences(const function<void ()>& function = {}) -> void;
-    static auto onQuit(const function<void ()>& function = {}) -> void;
+    static auto onAbout(const function<void ()>& callback = {}) -> void;
+    static auto onActivate(const function<void ()>& callback = {}) -> void;
+    static auto onPreferences(const function<void ()>& callback = {}) -> void;
+    static auto onQuit(const function<void ()>& callback = {}) -> void;
   };
 
 //private:
@@ -144,8 +144,7 @@ struct Color {
   using type = Color;
 
   Color();
-  Color(signed red, signed green, signed blue);
-  Color(signed alpha, signed red, signed green, signed blue);
+  Color(signed red, signed green, signed blue, signed alpha = 255);
 
   explicit operator bool() const;
   auto operator==(const Color& source) const -> bool;
@@ -159,18 +158,17 @@ struct Color {
   auto setAlpha(signed alpha) -> type&;
   auto setBlue(signed blue) -> type&;
   auto setColor(Color color = {}) -> type&;
-  auto setColor(signed red, signed green, signed blue) -> type&;
-  auto setColor(signed alpha, signed red, signed green, signed blue) -> type&;
+  auto setColor(signed red, signed green, signed blue, signed alpha = 255) -> type&;
   auto setGreen(signed green) -> type&;
   auto setRed(signed red) -> type&;
   auto value() const -> uint32_t;
 
 //private:
   struct State {
-    signed alpha;
     signed red;
     signed green;
     signed blue;
+    signed alpha;
   } state;
 };
 #endif
@@ -408,12 +406,12 @@ struct mObject {
   mObject& operator=(const mObject&) = delete;
 
   auto abstract() const -> bool;
+  auto adjustOffset(signed displacement) -> type&;
   auto enabled(bool recursive = false) const -> bool;
   virtual auto focused() const -> bool;
   auto font(bool recursive = false) const -> string;
   virtual auto group() const -> sGroup;
   auto offset() const -> signed;
-  auto offset(signed displacement) -> type&;
   auto parent() const -> mObject*;
   auto parentComboButton(bool recursive = false) const -> mComboButton*;
   auto parentFrame(bool recursive = false) const -> mFrame*;
@@ -481,8 +479,8 @@ struct mHotkey : mObject {
 
   auto doPress() const -> void;
   auto doRelease() const -> void;
-  auto onPress(const function<void ()>& function = {}) -> type&;
-  auto onRelease(const function<void ()>& function = {}) -> type&;
+  auto onPress(const function<void ()>& callback = {}) -> type&;
+  auto onRelease(const function<void ()>& callback = {}) -> type&;
   auto parent() const -> wObject;
   auto remove() -> type& override;
   auto sequence() const -> string;
@@ -507,7 +505,7 @@ struct mTimer : mObject {
 
   auto doActivate() const -> void;
   auto interval() const -> unsigned;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setInterval(unsigned interval = 0) -> type&;
 
 //private:
@@ -540,20 +538,19 @@ struct mWindow : mObject {
   auto layout() const -> sLayout;
   auto menuBar() const -> sMenuBar;
   auto modal() const -> bool;
-  auto onClose(const function<void ()>& function = {}) -> type&;
-  auto onDrop(const function<void (lstring)>& function = {}) -> type&;
-  auto onKeyPress(const function<void (signed)>& function = {}) -> type&;
-  auto onKeyRelease(const function<void (signed)>& function = {}) -> type&;
-  auto onMove(const function<void ()>& function = {}) -> type&;
-  auto onSize(const function<void ()>& function = {}) -> type&;
+  auto onClose(const function<void ()>& callback = {}) -> type&;
+  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onKeyPress(const function<void (signed)>& callback = {}) -> type&;
+  auto onKeyRelease(const function<void (signed)>& callback = {}) -> type&;
+  auto onMove(const function<void ()>& callback = {}) -> type&;
+  auto onSize(const function<void ()>& callback = {}) -> type&;
   auto remove(sLayout layout) -> type&;
   auto remove(sMenuBar menuBar) -> type&;
   auto remove(sStatusBar statusBar) -> type&;
   auto reset() -> type& override;
   auto resizable() const -> bool;
   auto setBackgroundColor(Color color = {}) -> type&;
-  auto setCentered() -> type&;
-  auto setCentered(sWindow parent) -> type&;
+  auto setCentered(sWindow parent = {}) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
   auto setFrameGeometry(Geometry geometry) -> type&;
   auto setFramePosition(Position position) -> type&;
@@ -706,7 +703,7 @@ struct mMenuItem : mAction {
 
   auto doActivate() const -> void;
   auto icon() const -> image;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setIcon(const image& icon = {}) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -726,7 +723,7 @@ struct mMenuCheckItem : mAction {
 
   auto checked() const -> bool;
   auto doToggle() const -> void;
-  auto onToggle(const function<void ()>& function = {}) -> type&;
+  auto onToggle(const function<void ()>& callback = {}) -> type&;
   auto setChecked(bool checked = true) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -747,7 +744,7 @@ struct mMenuRadioItem : mAction {
   auto checked() const -> bool;
   auto doActivate() const -> void;
   auto group() const -> sGroup override;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setChecked() -> type&;
   auto setGroup(sGroup group = {}) -> type& override;
   auto setText(const string& text = "") -> type&;
@@ -804,7 +801,7 @@ struct mWidget : mSizable {
   Declare(Widget)
 
   auto doSize() const -> void;
-  auto onSize(const function<void ()>& function = {}) -> type&;
+  auto onSize(const function<void ()>& callback = {}) -> type&;
   auto remove() -> type& override;
 
 //private:
@@ -821,7 +818,7 @@ struct mButton : mWidget {
   auto bordered() const -> bool;
   auto doActivate() const -> void;
   auto icon() const -> image;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
   auto setIcon(const image& icon = {}) -> type&;
@@ -854,11 +851,11 @@ struct mCanvas : mWidget {
   auto doMouseRelease(Mouse::Button button) const -> void;
   auto gradient() const -> vector<Color>;
   auto icon() const -> image;
-  auto onDrop(const function<void (lstring)>& function = {}) -> type&;
-  auto onMouseLeave(const function<void ()>& function = {}) -> type&;
-  auto onMouseMove(const function<void (Position)>& function = {}) -> type&;
-  auto onMousePress(const function<void (Mouse::Button)>& function = {}) -> type&;
-  auto onMouseRelease(const function<void (Mouse::Button)>& function = {}) -> type&;
+  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
+  auto onMouseMove(const function<void (Position)>& callback = {}) -> type&;
+  auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
+  auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) -> type&;
   auto setColor(Color color) -> type&;
   auto setData(Size size) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
@@ -894,7 +891,7 @@ struct mCheckButton : mWidget {
   auto checked() const -> bool;
   auto doToggle() const -> void;
   auto icon() const -> image;
-  auto onToggle(const function<void ()>& function = {}) -> type&;
+  auto onToggle(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
   auto setChecked(bool checked = true) -> type&;
@@ -921,7 +918,7 @@ struct mCheckLabel : mWidget {
 
   auto checked() const -> bool;
   auto doToggle() const -> void;
-  auto onToggle(const function<void ()>& function = {}) -> type&;
+  auto onToggle(const function<void ()>& callback = {}) -> type&;
   auto setChecked(bool checked = true) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -944,7 +941,7 @@ struct mComboButton : mWidget {
   auto doChange() const -> void;
   auto item(unsigned position) const -> sComboButtonItem;
   auto items() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto remove(sComboButtonItem item) -> type&;
   auto reset() -> type&;
   auto selected() const -> sComboButtonItem;
@@ -988,7 +985,7 @@ struct mConsole : mWidget {
   auto backgroundColor() const -> Color;
   auto doActivate(string) const -> void;
   auto foregroundColor() const -> Color;
-  auto onActivate(const function<void (string)>& function = {}) -> type&;
+  auto onActivate(const function<void (string)>& callback = {}) -> type&;
   auto print(const string& text) -> type&;
   auto prompt() const -> string;
   auto reset() -> type&;
@@ -1040,8 +1037,8 @@ struct mHexEdit : mWidget {
   auto foregroundColor() const -> Color;
   auto length() const -> unsigned;
   auto offset() const -> unsigned;
-  auto onRead(const function<uint8_t (unsigned)>& function = {}) -> type&;
-  auto onWrite(const function<void (unsigned, uint8_t)>& function = {}) -> type&;
+  auto onRead(const function<uint8_t (unsigned)>& callback = {}) -> type&;
+  auto onWrite(const function<void (unsigned, uint8_t)>& callback = {}) -> type&;
   auto rows() const -> unsigned;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setColumns(unsigned columns = 16) -> type&;
@@ -1071,7 +1068,7 @@ struct mHorizontalScroller : mWidget {
 
   auto doChange() const -> void;
   auto length() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto position() const -> unsigned;
   auto setLength(unsigned length = 101) -> type&;
   auto setPosition(unsigned position = 0) -> type&;
@@ -1091,7 +1088,7 @@ struct mHorizontalSlider : mWidget {
 
   auto doChange() const -> void;
   auto length() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto position() const -> unsigned;
   auto setLength(unsigned length = 101) -> type&;
   auto setPosition(unsigned position = 0) -> type&;
@@ -1120,9 +1117,9 @@ struct mIconView : mWidget {
   auto item(unsigned position) const -> sIconViewItem;
   auto items() const -> unsigned;
   auto multiSelect() const -> bool;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onContext(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onContext(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto remove(sIconViewItem item) -> type&;
   auto reset() -> type&;
@@ -1203,8 +1200,8 @@ struct mLineEdit : mWidget {
   auto doChange() const -> void;
   auto editable() const -> bool;
   auto foregroundColor() const -> Color;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setEditable(bool editable = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
@@ -1248,12 +1245,12 @@ struct mListView : mWidget {
   auto headerVisible() const -> bool;
   auto item(unsigned position) const -> sListViewItem;
   auto items() const -> unsigned;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onContext(const function<void ()>& function = {}) -> type&;
-  auto onEdit(const function<void (sListViewCell)>& function = {}) -> type&;
-  auto onSort(const function<void (sListViewColumn)>& function = {}) -> type&;
-  auto onToggle(const function<void (sListViewItem)>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onContext(const function<void ()>& callback = {}) -> type&;
+  auto onEdit(const function<void (sListViewCell)>& callback = {}) -> type&;
+  auto onSort(const function<void (sListViewColumn)>& callback = {}) -> type&;
+  auto onToggle(const function<void (sListViewItem)>& callback = {}) -> type&;
   auto remove(sListViewColumn column) -> type&;
   auto remove(sListViewItem item) -> type&;
   auto reset() -> type&;
@@ -1422,7 +1419,7 @@ struct mRadioButton : mWidget {
   auto doActivate() const -> void;
   auto group() const -> sGroup override;
   auto icon() const -> image;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
   auto setChecked() -> type&;
@@ -1452,7 +1449,7 @@ struct mRadioLabel : mWidget {
   auto checked() const -> bool;
   auto doActivate() const -> void;
   auto group() const -> sGroup override;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setChecked() -> type&;
   auto setGroup(sGroup group = {}) -> type& override;
   auto setText(const string& text = "") -> type&;
@@ -1474,8 +1471,8 @@ struct mSourceEdit : mWidget {
 
   auto doChange() const -> void;
   auto doMove() const -> void;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onMove(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onMove(const function<void ()>& callback = {}) -> type&;
   auto position() const -> unsigned;
   auto setPosition(signed position) -> type&;
   auto setSelected(Position selected) -> type&;
@@ -1506,9 +1503,9 @@ struct mTabFrame : mWidget {
   auto edge() const -> Edge;
   auto item(unsigned position) const -> sTabFrameItem;
   auto items() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onClose(const function<void (sTabFrameItem)>& function = {}) -> type&;
-  auto onMove(const function<void (sTabFrameItem, sTabFrameItem)>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onClose(const function<void (sTabFrameItem)>& callback = {}) -> type&;
+  auto onMove(const function<void (sTabFrameItem, sTabFrameItem)>& callback = {}) -> type&;
   auto remove(sTabFrameItem item) -> type&;
   auto reset() -> type&;
   auto selected() const -> sTabFrameItem;
@@ -1573,8 +1570,8 @@ struct mTextEdit : mWidget {
   auto doMove() const -> void;
   auto editable() const -> bool;
   auto foregroundColor() const -> Color;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onMove(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onMove(const function<void ()>& callback = {}) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setCursorPosition(unsigned position) -> type&;
   auto setEditable(bool editable = true) -> type&;
@@ -1615,10 +1612,10 @@ struct mTreeView : mWidget {
   auto foregroundColor() const -> Color;
   auto item(const string& path) const -> sTreeViewItem;
   auto items() const -> unsigned;
-  auto onActivate(const function<void ()>& function = {}) -> type&;
-  auto onChange(const function<void ()>& function = {}) -> type&;
-  auto onContext(const function<void ()>& function = {}) -> type&;
-  auto onToggle(const function<void (sTreeViewItem)>& function = {}) -> type&;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto onContext(const function<void ()>& callback = {}) -> type&;
+  auto onToggle(const function<void (sTreeViewItem)>& callback = {}) -> type&;
   auto remove(sTreeViewItem item) -> type&;
   auto reset() -> type&;
   auto selected() const -> sTreeViewItem;
@@ -1683,7 +1680,7 @@ struct mVerticalScroller : mWidget {
 
   auto doChange() const -> void;
   auto length() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto position() const -> unsigned;
   auto setLength(unsigned length = 101) -> type&;
   auto setPosition(unsigned position = 0) -> type&;
@@ -1703,7 +1700,7 @@ struct mVerticalSlider : mWidget {
 
   auto doChange() const -> void;
   auto length() const -> unsigned;
-  auto onChange(const function<void ()>& function = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
   auto position() const -> unsigned;
   auto setLength(unsigned length = 101) -> type&;
   auto setPosition(unsigned position = 0) -> type&;
@@ -1728,11 +1725,11 @@ struct mViewport : mWidget {
   auto doMouseRelease(Mouse::Button button) const -> void;
   auto droppable() const -> bool;
   auto handle() const -> uintptr_t;
-  auto onDrop(const function<void (lstring)>& function = {}) -> type&;
-  auto onMouseLeave(const function<void ()>& function = {}) -> type&;
-  auto onMouseMove(const function<void (Position position)>& function = {}) -> type&;
-  auto onMousePress(const function<void (Mouse::Button)>& function = {}) -> type&;
-  auto onMouseRelease(const function<void (Mouse::Button)>& function = {}) -> type&;
+  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
+  auto onMouseMove(const function<void (Position position)>& callback = {}) -> type&;
+  auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
+  auto onMouseRelease(const function<void (Mouse::Button)>& callback = {}) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
 
 //private:

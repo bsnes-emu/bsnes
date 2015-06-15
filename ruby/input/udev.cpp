@@ -23,7 +23,7 @@ struct pInputUdev {
     uintptr_t handle = 0;
   } settings;
 
-  bool cap(const string& name) {
+  auto cap(const string& name) -> bool {
     if(name == Input::Handle) return true;
     if(name == Input::KeyboardSupport) return true;
     if(name == Input::MouseSupport) return true;
@@ -32,51 +32,51 @@ struct pInputUdev {
     return false;
   }
 
-  any get(const string& name) {
-    if(name == Input::Handle) return (uintptr_t)settings.handle;
-    return false;
+  auto get(const string& name) -> any {
+    if(name == Input::Handle) return settings.handle;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Input::Handle) {
-      settings.handle = any_cast<uintptr_t>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Input::Handle && value.is<uintptr_t>()) {
+      settings.handle = value.get<uintptr_t>();
       return true;
     }
     return false;
   }
 
-  bool acquire() {
+  auto acquire() -> bool {
     return xlibMouse.acquire();
   }
 
-  bool unacquire() {
+  auto unacquire() -> bool {
     return xlibMouse.unacquire();
   }
 
-  bool acquired() {
+  auto acquired() -> bool {
     return xlibMouse.acquired();
   }
 
-  vector<HID::Device*> poll() {
-    vector<HID::Device*> devices;
+  auto poll() -> vector<shared_pointer<HID::Device>> {
+    vector<shared_pointer<HID::Device>> devices;
     xlibKeyboard.poll(devices);
     xlibMouse.poll(devices);
     udev.poll(devices);
     return devices;
   }
 
-  bool rumble(uint64_t id, bool enable) {
+  auto rumble(uint64_t id, bool enable) -> bool {
     return udev.rumble(id, enable);
   }
 
-  bool init() {
+  auto init() -> bool {
     if(xlibKeyboard.init() == false) return false;
     if(xlibMouse.init(settings.handle) == false) return false;
     if(udev.init() == false) return false;
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     xlibKeyboard.term();
     xlibMouse.term();
     udev.term();

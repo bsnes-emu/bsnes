@@ -1,70 +1,74 @@
-//audio.pulseaudio (2010-01-05)
-//author: RedDwarf
-
 #include <pulse/pulseaudio.h>
 
 namespace ruby {
 
-class pAudioPulseAudio {
-public:
+struct pAudioPulseAudio {
   struct {
-    pa_mainloop* mainloop;
-    pa_context* context;
-    pa_stream* stream;
+    pa_mainloop* mainloop = nullptr;
+    pa_context* context = nullptr;
+    pa_stream* stream = nullptr;
     pa_sample_spec spec;
     pa_buffer_attr buffer_attr;
     bool first;
   } device;
 
   struct {
-    uint32_t* data;
+    uint32_t* data = nullptr;
     size_t size;
     unsigned offset;
   } buffer;
 
   struct {
-    bool synchronize;
-    unsigned frequency;
-    unsigned latency;
+    bool synchronize = false;
+    unsigned frequency = 22050;
+    unsigned latency = 60;
   } settings;
 
-  bool cap(const string& name) {
+  ~pAudioPulseAudio() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
     if(name == Audio::Frequency) return true;
     if(name == Audio::Latency) return true;
+    return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
     if(name == Audio::Latency) return settings.latency;
+    return {};
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Audio::Synchronize) {
-      settings.synchronize = any_cast<bool>(value);
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Audio::Synchronize && value.is<bool>()) {
+      settings.synchronize = value.get<bool>();
       return true;
     }
 
-    if(name == Audio::Frequency) {
-      settings.frequency = any_cast<unsigned>(value);
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      settings.frequency = value.get<unsigned>();
       if(device.stream) {
         pa_operation_unref(pa_stream_update_sample_rate(device.stream, settings.frequency, NULL, NULL));
       }
       return true;
     }
 
-    if(name == Audio::Latency) {
-      settings.latency = any_cast<unsigned>(value);
+    if(name == Audio::Latency && value.is<unsigned>()) {
+      settings.latency = value.get<unsigned>();
       if(device.stream) {
         device.buffer_attr.tlength = pa_usec_to_bytes(settings.latency * PA_USEC_PER_MSEC, &device.spec);
         pa_stream_set_buffer_attr(device.stream, &device.buffer_attr, NULL, NULL);
       }
       return true;
     }
+
+    return false;
   }
 
-  void sample(uint16_t left, uint16_t right) {
+  auto sample(uint16_t left, uint16_t right) -> void {
     pa_stream_begin_write(device.stream, (void**)&buffer.data, &buffer.size);
     buffer.data[buffer.offset++] = left + (right << 16);
     if((buffer.offset + 1) * pa_frame_size(&device.spec) <= buffer.size) return;
@@ -89,10 +93,10 @@ public:
     buffer.offset = 0;
   }
 
-  void clear() {
+  auto clear() -> void {
   }
 
-  bool init() {
+  auto init() -> bool {
     device.mainloop = pa_mainloop_new();
 
     device.context = pa_context_new(pa_mainloop_get_api(device.mainloop), "ruby::pulseaudio");
@@ -133,42 +137,28 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(buffer.data) {
       pa_stream_cancel_write(device.stream);
-      buffer.data = 0;
+      buffer.data = nullptr;
     }
 
     if(device.stream) {
       pa_stream_disconnect(device.stream);
       pa_stream_unref(device.stream);
-      device.stream = 0;
+      device.stream = nullptr;
     }
 
     if(device.context) {
       pa_context_disconnect(device.context);
       pa_context_unref(device.context);
-      device.context = 0;
+      device.context = nullptr;
     }
 
     if(device.mainloop) {
       pa_mainloop_free(device.mainloop);
-      device.mainloop = 0;
+      device.mainloop = nullptr;
     }
-  }
-
-  pAudioPulseAudio() {
-    device.mainloop = 0;
-    device.context = 0;
-    device.stream = 0;
-    buffer.data = 0;
-    settings.synchronize = false;
-    settings.frequency = 22050;
-    settings.latency = 60;
-  }
-
-  ~pAudioPulseAudio() {
-    term();
   }
 };
 

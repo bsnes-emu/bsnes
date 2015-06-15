@@ -145,16 +145,17 @@ static auto CALLBACK Menu_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
 }
 
 static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
+  if(Application::state.quit) return DefWindowProc(hwnd, msg, wparam, lparam);
+
   auto object = (mObject*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
   if(!object) return DefWindowProc(hwnd, msg, wparam, lparam);
   auto window = dynamic_cast<mWindow*>(object);
   if(!window) window = object->parentWindow(true);
   if(!window) return DefWindowProc(hwnd, msg, wparam, lparam);
+  auto pWindow = window->self();
+  if(!pWindow) return DefWindowProc(hwnd, msg, wparam, lparam);
 
-  bool process = true;
-  if(pWindow::modal && !pWindow::modal.find(window->self())) process = false;
-  if(Application::state.quit) process = false;
-  if(!process) return DefWindowProc(hwnd, msg, wparam, lparam);
+  if(pWindow->_modalityDisabled()) return DefWindowProc(hwnd, msg, wparam, lparam);
 
   switch(msg) {
   case WM_CTLCOLORBTN:

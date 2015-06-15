@@ -47,6 +47,11 @@ auto mObject::abstract() const -> bool {
   return true;
 }
 
+auto mObject::adjustOffset(signed displacement) -> type& {
+  state.offset += displacement;
+  return *this;
+}
+
 auto mObject::enabled(bool recursive) const -> bool {
   if(!recursive || !state.enabled) return state.enabled;
   if(auto object = parent()) return object->enabled(true);
@@ -70,11 +75,6 @@ auto mObject::group() const -> sGroup {
 
 auto mObject::offset() const -> signed {
   return state.offset;
-}
-
-auto mObject::offset(signed displacement) -> type& {
-  state.offset += displacement;
-  return *this;
 }
 
 auto mObject::parent() const -> mObject* {

@@ -14,8 +14,8 @@ auto mMenuCheckItem::doToggle() const -> void {
   if(state.onToggle) return state.onToggle();
 }
 
-auto mMenuCheckItem::onToggle(const function<void ()>& function) -> type& {
-  state.onToggle = function;
+auto mMenuCheckItem::onToggle(const function<void ()>& callback) -> type& {
+  state.onToggle = callback;
   return *this;
 }
 

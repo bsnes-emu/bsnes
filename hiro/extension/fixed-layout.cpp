@@ -1,6 +1,6 @@
 #if defined(Hiro_FixedLayout)
 
-auto mFixedLayout::append(shared_pointer<mSizable> sizable, Geometry geometry) -> type& {
+auto mFixedLayout::append(sSizable sizable, Geometry geometry) -> type& {
   properties.append({geometry});
   mLayout::append(sizable);
   sizable->setGeometry(geometry);
@@ -16,7 +16,7 @@ auto mFixedLayout::minimumSize() const -> Size {
   return {width, height};
 }
 
-auto mFixedLayout::remove(shared_pointer<mSizable> sizable) -> type& {
+auto mFixedLayout::remove(sSizable sizable) -> type& {
   properties.remove(sizable->offset());
   mLayout::remove(sizable);
   return *this;

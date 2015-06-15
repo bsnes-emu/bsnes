@@ -14,8 +14,8 @@ auto Application::name() -> string {
   return state.name;
 }
 
-auto Application::onMain(const nall::function<void ()>& function) -> void {
-  state.onMain = function;
+auto Application::onMain(const function<void ()>& callback) -> void {
+  state.onMain = callback;
 }
 
 auto Application::run() -> void {
@@ -50,8 +50,8 @@ auto Application::Windows::doModalChange(bool modal) -> void {
   if(state.windows.onModalChange) return state.windows.onModalChange(modal);
 }
 
-auto Application::Windows::onModalChange(const function<void (bool)>& function) -> void {
-  state.windows.onModalChange = function;
+auto Application::Windows::onModalChange(const function<void (bool)>& callback) -> void {
+  state.windows.onModalChange = callback;
 }
 
 //Cocoa
@@ -73,20 +73,20 @@ auto Application::Cocoa::doQuit() -> void {
   if(state.cocoa.onQuit) return state.cocoa.onQuit();
 }
 
-auto Application::Cocoa::onAbout(const function<void ()>& function) -> void {
-  state.cocoa.onAbout = function;
+auto Application::Cocoa::onAbout(const function<void ()>& callback) -> void {
+  state.cocoa.onAbout = callback;
 }
 
-auto Application::Cocoa::onActivate(const function<void ()>& function) -> void {
-  state.cocoa.onActivate = function;
+auto Application::Cocoa::onActivate(const function<void ()>& callback) -> void {
+  state.cocoa.onActivate = callback;
 }
 
-auto Application::Cocoa::onPreferences(const function<void ()>& function) -> void {
-  state.cocoa.onPreferences = function;
+auto Application::Cocoa::onPreferences(const function<void ()>& callback) -> void {
+  state.cocoa.onPreferences = callback;
 }
 
-auto Application::Cocoa::onQuit(const function<void ()>& function) -> void {
-  state.cocoa.onQuit = function;
+auto Application::Cocoa::onQuit(const function<void ()>& callback) -> void {
+  state.cocoa.onQuit = callback;
 }
 
 //Internal

@@ -15,8 +15,9 @@ auto pWidget::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pWidget::focused() -> bool {
-  return GetFocus() == hwnd;
+auto pWidget::focused() const -> bool {
+  auto focused = GetFocus();
+  return hwnd == focused || IsChild(hwnd, focused);
 }
 
 auto pWidget::minimumSize() -> Size {
@@ -44,11 +45,11 @@ auto pWidget::setFont(const string&) -> void {
 
 auto pWidget::setGeometry(Geometry geometry) -> void {
   if(auto parent = _parentWidget()) {
-    Position displacement = parent->geometry().position();
+    auto displacement = parent->self().geometry().position();
     geometry.setX(geometry.x() - displacement.x());
     geometry.setY(geometry.y() - displacement.y());
   }
-  SetWindowPos(hwnd, NULL, geometry.x(), geometry.y(), geometry.width(), geometry.height(), SWP_NOZORDER);
+  SetWindowPos(hwnd, nullptr, geometry.x(), geometry.y(), geometry.width(), geometry.height(), SWP_NOZORDER);
   self().doSize();
 }
 
@@ -62,20 +63,24 @@ auto pWidget::setVisible(bool visible) -> void {
 //
 
 auto pWidget::_parentHandle() -> HWND {
-  if(auto parent = _parentWidget()) return parent->self()->hwnd;
-  if(auto parent = _parentWindow()) return parent->self()->hwnd;
-  return 0;
+  if(auto parent = _parentWidget()) return parent->hwnd;
+  if(auto parent = _parentWindow()) return parent->hwnd;
+  return nullptr;
 }
 
-auto pWidget::_parentWidget() -> maybe<mWidget&> {
+auto pWidget::_parentWidget() -> maybe<pWidget&> {
   #if defined(Hiro_TabFrame)
-  if(auto parent = self().parentTabFrame(true)) return *parent;
+  if(auto parent = self().parentTabFrame(true)) {
+    if(auto self = parent->self()) return *self;
+  }
   #endif
   return nothing;
 }
 
-auto pWidget::_parentWindow() -> maybe<mWindow&> {
-  if(auto parent = self().parentWindow(true)) return *parent;
+auto pWidget::_parentWindow() -> maybe<pWindow&> {
+  if(auto parent = self().parentWindow(true)) {
+    if(auto self = parent->self()) return *self;
+  }
   return nothing;
 }
 

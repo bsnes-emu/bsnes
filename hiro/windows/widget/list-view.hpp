@@ -38,6 +38,7 @@ struct pListView : pWidget {
   auto _setIcons() -> void;
   auto _width(unsigned column) -> unsigned;
 
+  WindowProc windowProc = nullptr;
   HIMAGELIST imageList = 0;
   vector<image> icons;
 };

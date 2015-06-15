@@ -34,7 +34,7 @@ auto mLayout::remove(shared_pointer<mSizable> sizable) -> type& {
   sizable->setParent();
   state.sizables.remove(offset);
   for(auto n : range(offset, sizables())) {
-    state.sizables[n]->offset(-1);
+    state.sizables[n]->adjustOffset(-1);
   }
   setGeometry(geometry());
   return *this;

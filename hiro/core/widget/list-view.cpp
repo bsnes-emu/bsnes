@@ -106,33 +106,33 @@ auto mListView::items() const -> unsigned {
   return state.items.size();
 }
 
-auto mListView::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mListView::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 
-auto mListView::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mListView::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 
-auto mListView::onContext(const function<void ()>& function) -> type& {
-  state.onContext = function;
+auto mListView::onContext(const function<void ()>& callback) -> type& {
+  state.onContext = callback;
   return *this;
 }
 
-auto mListView::onEdit(const function<void (sListViewCell)>& function) -> type& {
-  state.onEdit = function;
+auto mListView::onEdit(const function<void (sListViewCell)>& callback) -> type& {
+  state.onEdit = callback;
   return *this;
 }
 
-auto mListView::onSort(const function<void (sListViewColumn)>& function) -> type& {
-  state.onSort = function;
+auto mListView::onSort(const function<void (sListViewColumn)>& callback) -> type& {
+  state.onSort = callback;
   return *this;
 }
 
-auto mListView::onToggle(const function<void (sListViewItem)>& function) -> type& {
-  state.onToggle = function;
+auto mListView::onToggle(const function<void (sListViewItem)>& callback) -> type& {
+  state.onToggle = callback;
   return *this;
 }
 
@@ -142,7 +142,7 @@ auto mListView::remove(sListViewColumn column) -> type& {
   state.items.reset();
   state.columns.remove(column->offset());
   for(auto n : range(column->offset(), columns())) {
-    state.columns[n]->offset(-1);
+    state.columns[n]->adjustOffset(-1);
   }
   column->setParent();
   return *this;
@@ -152,7 +152,7 @@ auto mListView::remove(sListViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {
-    state.items[n]->offset(-1);
+    state.items[n]->adjustOffset(-1);
   }
   item->setParent();
   return *this;

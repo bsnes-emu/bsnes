@@ -1,75 +1,75 @@
-//audio.alsa (2009-11-30)
-//authors: BearOso, byuu, Nach, RedDwarf
-
 #include <alsa/asoundlib.h>
 
 namespace ruby {
 
-class pAudioALSA {
-public:
+struct pAudioALSA {
   struct {
-    snd_pcm_t* handle;
-    snd_pcm_format_t format;
+    snd_pcm_t* handle = nullptr;
+    snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
     snd_pcm_uframes_t buffer_size;
     snd_pcm_uframes_t period_size;
-    int channels;
-    const char* name;
+    int channels = 2;
+    const char* name = "default";
   } device;
 
   struct {
-    uint32_t* data;
-    unsigned length;
+    uint32_t* data = nullptr;
+    unsigned length = 0;
   } buffer;
 
   struct {
-    bool synchronize;
-    unsigned frequency;
-    unsigned latency;
+    bool synchronize = false;
+    unsigned frequency = 22050;
+    unsigned latency = 60;
   } settings;
 
-  bool cap(const string& name) {
+  ~pAudioALSA() {
+    term();
+  }
+
+  auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
     if(name == Audio::Frequency) return true;
     if(name == Audio::Latency) return true;
     return false;
   }
 
-  any get(const string& name) {
+  auto get(const string& name) -> any {
     if(name == Audio::Synchronize) return settings.synchronize;
     if(name == Audio::Frequency) return settings.frequency;
     if(name == Audio::Latency) return settings.latency;
+    return {};
+  }
+
+  auto set(const string& name, const any& value) -> bool {
+    if(name == Audio::Synchronize && value.is<bool>()) {
+      if(settings.synchronize != value.get<bool>()) {
+        settings.synchronize = value.get<bool>();
+        if(device.handle) init();
+      }
+      return true;
+    }
+
+    if(name == Audio::Frequency && value.is<unsigned>()) {
+      if(settings.frequency != value.get<unsigned>()) {
+        settings.frequency = value.get<unsigned>();
+        if(device.handle) init();
+      }
+      return true;
+    }
+
+    if(name == Audio::Latency && value.is<unsigned>()) {
+      if(settings.latency != value.get<unsigned>()) {
+        settings.latency = value.get<unsigned>();
+        if(device.handle) init();
+      }
+      return true;
+    }
+
     return false;
   }
 
-  bool set(const string& name, const any& value) {
-    if(name == Audio::Synchronize) {
-      if(settings.synchronize != any_cast<bool>(value)) {
-        settings.synchronize = any_cast<bool>(value);
-        if(device.handle) init();
-      }
-      return true;
-    }
-
-    if(name == Audio::Frequency) {
-      if(settings.frequency != any_cast<unsigned>(value)) {
-        settings.frequency = any_cast<unsigned>(value);
-        if(device.handle) init();
-      }
-      return true;
-    }
-
-    if(name == Audio::Latency) {
-      if(settings.latency != any_cast<unsigned>(value)) {
-        settings.latency = any_cast<unsigned>(value);
-        if(device.handle) init();
-      }
-      return true;
-    }
-
-    return false;
-  }
-
-  void sample(uint16_t left, uint16_t right) {
+  auto sample(uint16_t left, uint16_t right) -> void {
     if(!device.handle) return;
 
     buffer.data[buffer.length++] = left + (right << 16);
@@ -123,10 +123,10 @@ public:
     }
   }
 
-  void clear() {
+  auto clear() -> void {
   }
 
-  bool init() {
+  auto init() -> bool {
     term();
 
     if(snd_pcm_open(&device.handle, device.name, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) {
@@ -203,7 +203,7 @@ public:
     return true;
   }
 
-  void term() {
+  auto term() -> void {
     if(device.handle) {
     //snd_pcm_drain(device.handle);  //prevents popping noise; but causes multi-second lag
       snd_pcm_close(device.handle);
@@ -214,24 +214,6 @@ public:
       delete[] buffer.data;
       buffer.data = 0;
 	}
-  }
-
-  pAudioALSA() {
-    device.handle = 0;
-    device.format = SND_PCM_FORMAT_S16_LE;
-    device.channels = 2;
-    device.name = "default";
-
-    buffer.data = 0;
-    buffer.length = 0;
-
-    settings.synchronize = false;
-    settings.frequency = 22050;
-    settings.latency = 60;
-  }
-
-  ~pAudioALSA() {
-    term();
   }
 };
 

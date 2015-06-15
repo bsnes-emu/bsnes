@@ -10,8 +10,8 @@ auto mWidget::doSize() const -> void {
   if(state.onSize) return state.onSize();
 }
 
-auto mWidget::onSize(const function<void ()>& function) -> type& {
-  state.onSize = function;
+auto mWidget::onSize(const function<void ()>& callback) -> type& {
+  state.onSize = callback;
   return *this;
 }
 

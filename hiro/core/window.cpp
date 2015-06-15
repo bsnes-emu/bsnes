@@ -13,7 +13,7 @@ auto mWindow::destruct() -> void {
 
 //
 
-auto mWindow::append(shared_pointer<mLayout> layout) -> type& {
+auto mWindow::append(sLayout layout) -> type& {
   if(auto& layout = state.layout) remove(layout);
   state.layout = layout;
   layout->setGeometry(geometry().setPosition(0, 0));
@@ -23,7 +23,7 @@ auto mWindow::append(shared_pointer<mLayout> layout) -> type& {
   return *this;
 }
 
-auto mWindow::append(shared_pointer<mMenuBar> menuBar) -> type& {
+auto mWindow::append(sMenuBar menuBar) -> type& {
   if(auto& menuBar = state.menuBar) remove(menuBar);
   menuBar->setParent(this, 0);
   state.menuBar = menuBar;
@@ -31,7 +31,7 @@ auto mWindow::append(shared_pointer<mMenuBar> menuBar) -> type& {
   return *this;
 }
 
-auto mWindow::append(shared_pointer<mStatusBar> statusBar) -> type& {
+auto mWindow::append(sStatusBar statusBar) -> type& {
   if(auto& statusBar = state.statusBar) remove(statusBar);
   statusBar->setParent(this, 0);
   state.statusBar = statusBar;
@@ -99,44 +99,44 @@ auto mWindow::modal() const -> bool {
   return state.modal;
 }
 
-auto mWindow::onClose(const function<void ()>& function) -> type& {
-  state.onClose = function;
+auto mWindow::onClose(const function<void ()>& callback) -> type& {
+  state.onClose = callback;
   return *this;
 }
 
-auto mWindow::onDrop(const function<void (lstring)>& function) -> type& {
-  state.onDrop = function;
+auto mWindow::onDrop(const function<void (lstring)>& callback) -> type& {
+  state.onDrop = callback;
   return *this;
 }
 
-auto mWindow::onKeyPress(const function<void (signed)>& function) -> type& {
-  state.onKeyPress = function;
+auto mWindow::onKeyPress(const function<void (signed)>& callback) -> type& {
+  state.onKeyPress = callback;
   return *this;
 }
 
-auto mWindow::onKeyRelease(const function<void (signed)>& function) -> type& {
-  state.onKeyRelease = function;
+auto mWindow::onKeyRelease(const function<void (signed)>& callback) -> type& {
+  state.onKeyRelease = callback;
   return *this;
 }
 
-auto mWindow::onMove(const function<void ()>& function) -> type& {
-  state.onMove = function;
+auto mWindow::onMove(const function<void ()>& callback) -> type& {
+  state.onMove = callback;
   return *this;
 }
 
-auto mWindow::onSize(const function<void ()>& function) -> type& {
-  state.onSize = function;
+auto mWindow::onSize(const function<void ()>& callback) -> type& {
+  state.onSize = callback;
   return *this;
 }
 
-auto mWindow::remove(shared_pointer<mLayout> layout) -> type& {
+auto mWindow::remove(sLayout layout) -> type& {
   signal(remove, layout);
   layout->setParent();
   state.layout.reset();
   return *this;
 }
 
-auto mWindow::remove(shared_pointer<mMenuBar> menuBar) -> type& {
+auto mWindow::remove(sMenuBar menuBar) -> type& {
   signal(remove, menuBar);
   menuBar->reset();
   menuBar->setParent();
@@ -144,7 +144,7 @@ auto mWindow::remove(shared_pointer<mMenuBar> menuBar) -> type& {
   return *this;
 }
 
-auto mWindow::remove(shared_pointer<mStatusBar> statusBar) -> type& {
+auto mWindow::remove(sStatusBar statusBar) -> type& {
   signal(remove, statusBar);
   statusBar->setParent();
   state.statusBar.reset();
@@ -168,19 +168,8 @@ auto mWindow::setBackgroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mWindow::setCentered() -> type& {
-  Geometry workspace = Desktop::workspace();
-  Geometry geometry = frameGeometry();
-  signed x = workspace.x();
-  signed y = workspace.y();
-  if(workspace.width() > geometry.width()) x += (workspace.width() - geometry.width()) / 2;
-  if(workspace.height() > geometry.height()) y += (workspace.height() - geometry.height()) / 2;
-  return setFrameGeometry({x, y, geometry.width(), geometry.height()});
-}
-
-auto mWindow::setCentered(shared_pointer<mWindow> parent) -> type& {
-  if(!parent) return setCentered();
-  Geometry workspace = parent->frameGeometry();
+auto mWindow::setCentered(sWindow parent) -> type& {
+  Geometry workspace = parent ? parent->frameGeometry() : Desktop::workspace();
   Geometry geometry = frameGeometry();
   signed x = workspace.x();
   signed y = workspace.y();

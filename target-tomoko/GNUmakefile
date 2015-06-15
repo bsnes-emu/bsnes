@@ -25,7 +25,7 @@ else ifeq ($(platform),macosx)
 else ifeq ($(platform),linux)
   ruby += video.glx video.xv video.xshm video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
-  ruby += input.sdl input.xlib  #input.udev
+  ruby += input.udev input.sdl input.xlib
 else ifeq ($(platform),bsd)
   ruby += video.glx video.xv video.xshm video.sdl
   ruby += audio.openal audio.oss

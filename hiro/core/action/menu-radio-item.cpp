@@ -18,8 +18,8 @@ auto mMenuRadioItem::group() const -> sGroup {
   return state.group;
 }
 
-auto mMenuRadioItem::onActivate(const function<void ()>& function) -> type& {
-  state.onActivate = function;
+auto mMenuRadioItem::onActivate(const function<void ()>& callback) -> type& {
+  state.onActivate = callback;
   return *this;
 }
 

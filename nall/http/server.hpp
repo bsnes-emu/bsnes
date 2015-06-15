@@ -1,9 +1,6 @@
 #ifndef NALL_HTTP_SERVER_HPP
 #define NALL_HTTP_SERVER_HPP
 
-#include <poll.h>
-#include <atomic>
-
 #include <nall/service.hpp>
 #include <nall/http/role.hpp>
 

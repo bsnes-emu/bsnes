@@ -34,28 +34,28 @@ auto mViewport::handle() const -> uintptr_t {
   return signal(handle);
 }
 
-auto mViewport::onDrop(const function<void (lstring)>& function) -> type& {
-  state.onDrop = function;
+auto mViewport::onDrop(const function<void (lstring)>& callback) -> type& {
+  state.onDrop = callback;
   return *this;
 }
 
-auto mViewport::onMouseLeave(const function<void ()>& function) -> type& {
-  state.onMouseLeave = function;
+auto mViewport::onMouseLeave(const function<void ()>& callback) -> type& {
+  state.onMouseLeave = callback;
   return *this;
 }
 
-auto mViewport::onMouseMove(const function<void (Position)>& function) -> type& {
-  state.onMouseMove = function;
+auto mViewport::onMouseMove(const function<void (Position)>& callback) -> type& {
+  state.onMouseMove = callback;
   return *this;
 }
 
-auto mViewport::onMousePress(const function<void (Mouse::Button)>& function) -> type& {
-  state.onMousePress = function;
+auto mViewport::onMousePress(const function<void (Mouse::Button)>& callback) -> type& {
+  state.onMousePress = callback;
   return *this;
 }
 
-auto mViewport::onMouseRelease(const function<void (Mouse::Button)>& function) -> type& {
-  state.onMouseRelease = function;
+auto mViewport::onMouseRelease(const function<void (Mouse::Button)>& callback) -> type& {
+  state.onMouseRelease = callback;
   return *this;
 }
 

@@ -14,13 +14,13 @@ auto mHotkey::doRelease() const -> void {
   if(state.onRelease) return state.onRelease();
 }
 
-auto mHotkey::onPress(const function<void ()>& function) -> type& {
-  state.onPress = function;
+auto mHotkey::onPress(const function<void ()>& callback) -> type& {
+  state.onPress = callback;
   return *this;
 }
 
-auto mHotkey::onRelease(const function<void ()>& function) -> type& {
-  state.onRelease = function;
+auto mHotkey::onRelease(const function<void ()>& callback) -> type& {
+  state.onRelease = callback;
   return *this;
 }
 

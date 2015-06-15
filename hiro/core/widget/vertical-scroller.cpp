@@ -14,8 +14,8 @@ auto mVerticalScroller::length() const -> unsigned {
   return state.length;
 }
 
-auto mVerticalScroller::onChange(const function<void ()>& function) -> type& {
-  state.onChange = function;
+auto mVerticalScroller::onChange(const function<void ()>& callback) -> type& {
+  state.onChange = callback;
   return *this;
 }
 

@@ -43,7 +43,7 @@ auto mListViewItem::remove(sListViewCell cell) -> type& {
   signal(remove, cell);
   state.cells.remove(cell->offset());
   for(auto n : range(cell->offset(), cells())) {
-    state.cells[n]->offset(-1);
+    state.cells[n]->adjustOffset(-1);
   }
   cell->setParent();
   return *this;
