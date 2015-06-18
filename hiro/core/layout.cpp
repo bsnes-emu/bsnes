@@ -11,7 +11,7 @@ auto mLayout::destruct() -> void {
 
 //
 
-auto mLayout::append(shared_pointer<mSizable> sizable) -> type& {
+auto mLayout::append(sSizable sizable) -> type& {
   state.sizables.append(sizable);
   sizable->setParent(this, sizables() - 1);
   setGeometry(geometry());
@@ -29,7 +29,7 @@ auto mLayout::remove() -> type& {
   return *this;
 }
 
-auto mLayout::remove(shared_pointer<mSizable> sizable) -> type& {
+auto mLayout::remove(sSizable sizable) -> type& {
   auto offset = sizable->offset();
   sizable->setParent();
   state.sizables.remove(offset);
@@ -52,9 +52,9 @@ auto mLayout::setParent(mObject* parent, signed offset) -> type& {
   return *this;
 }
 
-auto mLayout::sizable(unsigned position) const -> shared_pointer<mSizable> {
-  if(position >= sizables()) throw;
-  return state.sizables[position];
+auto mLayout::sizable(unsigned position) const -> Sizable {
+  if(position < sizables()) return state.sizables[position];
+  return {};
 }
 
 auto mLayout::sizables() const -> unsigned {

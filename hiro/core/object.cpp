@@ -69,7 +69,7 @@ auto mObject::font(bool recursive) const -> string {
   return Application::font();
 }
 
-auto mObject::group() const -> sGroup {
+auto mObject::group() const -> Group {
   return {};
 }
 

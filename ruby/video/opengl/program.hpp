@@ -41,7 +41,7 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   for(auto& leaf : node.find("pixmap")) {
     nall::image image({pathname, leaf.text()});
-    image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+    image.transform();
     if(image.empty()) continue;
 
     GLuint texture;
@@ -49,8 +49,8 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
     unsigned n = pixmaps.size();
     pixmaps(n).texture = texture;
-    pixmaps(n).width = image.width;
-    pixmaps(n).height = image.height;
+    pixmaps(n).width = image.width();
+    pixmaps(n).height = image.height();
     pixmaps(n).format = format;
     pixmaps(n).filter = filter;
     pixmaps(n).wrap = wrap;
@@ -58,11 +58,11 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
     if(leaf["filter"]) pixmaps(n).filter = glrFilter(leaf["filter"].text());
     if(leaf["wrap"]) pixmaps(n).wrap = glrWrap(leaf["wrap"].text());
 
-    unsigned w = glrSize(image.width), h = glrSize(image.height);
+    unsigned w = glrSize(image.width()), h = glrSize(image.height());
     uint32_t* buffer = new uint32_t[w * h]();
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, pixmaps(n).format, w, h, 0, pixmaps(n).getFormat(), pixmaps(n).getType(), buffer);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width, image.height, getFormat(), getType(), image.data);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image.width(), image.height(), getFormat(), getType(), image.data());
     delete[] buffer;
   }
 

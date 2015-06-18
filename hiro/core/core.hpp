@@ -24,6 +24,7 @@ using nall::vector;
 namespace hiro {
 
 #define Declare(Name) \
+  struct Name; \
   struct m##Name; \
   struct p##Name; \
   using s##Name = shared_pointer<m##Name>; \
@@ -302,7 +303,7 @@ struct Keyboard {
   Keyboard() = delete;
 
   static auto append(sHotkey hotkey) -> void;
-  static auto hotkey(unsigned position) -> sHotkey;
+  static auto hotkey(unsigned position) -> Hotkey;
   static auto hotkeys() -> unsigned;
   static auto poll() -> vector<bool>;
   static auto pressed(const string& key) -> bool;
@@ -410,7 +411,7 @@ struct mObject {
   auto enabled(bool recursive = false) const -> bool;
   virtual auto focused() const -> bool;
   auto font(bool recursive = false) const -> string;
-  virtual auto group() const -> sGroup;
+  virtual auto group() const -> Group;
   auto offset() const -> signed;
   auto parent() const -> mObject*;
   auto parentComboButton(bool recursive = false) const -> mComboButton*;
@@ -462,7 +463,7 @@ struct mGroup : mObject {
   using mObject::remove;
 
   auto append(sObject object) -> type&;
-  auto object(unsigned offset) const -> sObject;
+  auto object(unsigned offset) const -> Object;
   auto objects() const -> unsigned;
   auto remove(sObject object) -> type&;
 
@@ -535,8 +536,8 @@ struct mWindow : mObject {
   auto frameGeometry() const -> Geometry;
   auto fullScreen() const -> bool;
   auto geometry() const -> Geometry;
-  auto layout() const -> sLayout;
-  auto menuBar() const -> sMenuBar;
+  auto layout() const -> Layout;
+  auto menuBar() const -> MenuBar;
   auto modal() const -> bool;
   auto onClose(const function<void ()>& callback = {}) -> type&;
   auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
@@ -563,7 +564,7 @@ struct mWindow : mObject {
   auto setResizable(bool resizable = true) -> type&;
   auto setSize(Size size) -> type&;
   auto setTitle(const string& title = "") -> type&;
-  auto statusBar() const -> sStatusBar;
+  auto statusBar() const -> StatusBar;
   auto title() const -> string;
 
 //private:
@@ -610,7 +611,7 @@ struct mMenuBar : mObject {
   Declare(MenuBar)
 
   auto append(sMenu menu) -> type&;
-  auto menu(unsigned position) const -> sMenu;
+  auto menu(unsigned position) const -> Menu;
   auto menus() const -> unsigned;
   auto remove() -> type& override;
   auto remove(sMenu menu) -> type&;
@@ -631,7 +632,7 @@ struct mPopupMenu : mObject {
   Declare(PopupMenu)
   using mObject::remove;
 
-  auto action(unsigned position) const -> sAction;
+  auto action(unsigned position) const -> Action;
   auto actions() const -> unsigned;
   auto append(sAction action) -> type&;
   auto remove(sAction action) -> type&;
@@ -665,7 +666,7 @@ struct mMenu : mAction {
   Declare(Menu)
   using mObject::remove;
 
-  auto action(unsigned position) const -> sAction;
+  auto action(unsigned position) const -> Action;
   auto actions() const -> unsigned;
   auto append(sAction action) -> type&;
   auto icon() const -> image;
@@ -743,7 +744,7 @@ struct mMenuRadioItem : mAction {
 
   auto checked() const -> bool;
   auto doActivate() const -> void;
-  auto group() const -> sGroup override;
+  auto group() const -> Group override;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setChecked() -> type&;
   auto setGroup(sGroup group = {}) -> type& override;
@@ -784,7 +785,7 @@ struct mLayout : mSizable {
   virtual auto remove(sSizable sizable) -> type&;
   virtual auto reset() -> type&;
   auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
-  auto sizable(unsigned position) const -> sSizable;
+  auto sizable(unsigned position) const -> Sizable;
   auto sizables() const -> unsigned;
 
 //private:
@@ -939,12 +940,12 @@ struct mComboButton : mWidget {
 
   auto append(sComboButtonItem item) -> type&;
   auto doChange() const -> void;
-  auto item(unsigned position) const -> sComboButtonItem;
+  auto item(unsigned position) const -> ComboButtonItem;
   auto items() const -> unsigned;
   auto onChange(const function<void ()>& callback = {}) -> type&;
   auto remove(sComboButtonItem item) -> type&;
   auto reset() -> type&;
-  auto selected() const -> sComboButtonItem;
+  auto selected() const -> ComboButtonItem;
   auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
 
 //private:
@@ -1009,7 +1010,7 @@ struct mFrame : mWidget {
   using mObject::remove;
 
   auto append(sLayout layout) -> type&;
-  auto layout() const -> sLayout;
+  auto layout() const -> Layout;
   auto remove(sLayout layout) -> type&;
   auto reset() -> type&;
 //TODO setParent()
@@ -1114,7 +1115,7 @@ struct mIconView : mWidget {
   auto doContext() const -> void;
   auto flow() const -> Orientation;
   auto foregroundColor() const -> Color;
-  auto item(unsigned position) const -> sIconViewItem;
+  auto item(unsigned position) const -> IconViewItem;
   auto items() const -> unsigned;
   auto multiSelect() const -> bool;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
@@ -1231,8 +1232,8 @@ struct mListView : mWidget {
   auto batchable() const -> bool;
   auto checkable() const -> bool;
   auto checkAll() -> type&;
-  auto checked() const -> vector<sListViewItem>;
-  auto column(unsigned position) const -> sListViewColumn;
+  auto checked() const -> vector<ListViewItem>;
+  auto column(unsigned position) const -> ListViewColumn;
   auto columns() const -> unsigned;
   auto doActivate() const -> void;
   auto doChange() const -> void;
@@ -1243,21 +1244,21 @@ struct mListView : mWidget {
   auto foregroundColor() const -> Color;
   auto gridVisible() const -> bool;
   auto headerVisible() const -> bool;
-  auto item(unsigned position) const -> sListViewItem;
+  auto item(unsigned position) const -> ListViewItem;
   auto items() const -> unsigned;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
   auto onContext(const function<void ()>& callback = {}) -> type&;
-  auto onEdit(const function<void (sListViewCell)>& callback = {}) -> type&;
-  auto onSort(const function<void (sListViewColumn)>& callback = {}) -> type&;
-  auto onToggle(const function<void (sListViewItem)>& callback = {}) -> type&;
+  auto onEdit(const function<void (ListViewCell)>& callback = {}) -> type&;
+  auto onSort(const function<void (ListViewColumn)>& callback = {}) -> type&;
+  auto onToggle(const function<void (ListViewItem)>& callback = {}) -> type&;
   auto remove(sListViewColumn column) -> type&;
   auto remove(sListViewItem item) -> type&;
   auto reset() -> type&;
   auto resizeColumns() -> type&;
   auto selectAll() -> type&;
-  auto selected() const -> sListViewItem;
-  auto selectedItems() const -> vector<sListViewItem>;
+  auto selected() const -> ListViewItem;
+  auto selectedItems() const -> vector<ListViewItem>;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setBatchable(bool batchable = true) -> type&;
   auto setCheckable(bool checkable = true) -> type&;
@@ -1284,9 +1285,9 @@ struct mListView : mWidget {
     function<void ()> onActivate;
     function<void ()> onChange;
     function<void ()> onContext;
-    function<void (sListViewCell)> onEdit;
-    function<void (sListViewColumn)> onSort;
-    function<void (sListViewItem)> onToggle;
+    function<void (ListViewCell)> onEdit;
+    function<void (ListViewColumn)> onSort;
+    function<void (ListViewItem)> onToggle;
     bool sortable = false;
   } state;
 
@@ -1348,7 +1349,7 @@ struct mListViewItem : mObject {
 
   auto append(sListViewCell cell) -> type&;
   auto backgroundColor() const -> Color;
-  auto cell(unsigned position) const -> sListViewCell;
+  auto cell(unsigned position) const -> ListViewCell;
   auto cells() const -> unsigned;
   auto checked() const -> bool;
   auto foregroundColor() const -> Color;
@@ -1417,7 +1418,7 @@ struct mRadioButton : mWidget {
   auto bordered() const -> bool;
   auto checked() const -> bool;
   auto doActivate() const -> void;
-  auto group() const -> sGroup override;
+  auto group() const -> Group override;
   auto icon() const -> image;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
@@ -1448,7 +1449,7 @@ struct mRadioLabel : mWidget {
 
   auto checked() const -> bool;
   auto doActivate() const -> void;
-  auto group() const -> sGroup override;
+  auto group() const -> Group override;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto setChecked() -> type&;
   auto setGroup(sGroup group = {}) -> type& override;
@@ -1501,14 +1502,14 @@ struct mTabFrame : mWidget {
   auto doClose(sTabFrameItem item) const -> void;
   auto doMove(sTabFrameItem from, sTabFrameItem to) const -> void;
   auto edge() const -> Edge;
-  auto item(unsigned position) const -> sTabFrameItem;
+  auto item(unsigned position) const -> TabFrameItem;
   auto items() const -> unsigned;
   auto onChange(const function<void ()>& callback = {}) -> type&;
-  auto onClose(const function<void (sTabFrameItem)>& callback = {}) -> type&;
-  auto onMove(const function<void (sTabFrameItem, sTabFrameItem)>& callback = {}) -> type&;
+  auto onClose(const function<void (TabFrameItem)>& callback = {}) -> type&;
+  auto onMove(const function<void (TabFrameItem, TabFrameItem)>& callback = {}) -> type&;
   auto remove(sTabFrameItem item) -> type&;
   auto reset() -> type&;
-  auto selected() const -> sTabFrameItem;
+  auto selected() const -> TabFrameItem;
   auto setEdge(Edge edge = Edge::Top) -> type&;
   auto setParent(mObject* object = nullptr, signed offset = -1) -> type& override;
 
@@ -1517,8 +1518,8 @@ struct mTabFrame : mWidget {
     Edge edge = Edge::Top;
     vector<sTabFrameItem> items;
     function<void ()> onChange;
-    function<void (sTabFrameItem)> onClose;
-    function<void (sTabFrameItem, sTabFrameItem)> onMove;
+    function<void (TabFrameItem)> onClose;
+    function<void (TabFrameItem, TabFrameItem)> onMove;
   } state;
 
   auto destruct() -> void override;
@@ -1532,7 +1533,7 @@ struct mTabFrameItem : mObject {
   auto append(sLayout layout) -> type&;
   auto closable() const -> bool;
   auto icon() const -> image;
-  auto layout() const -> sLayout;
+  auto layout() const -> Layout;
   auto movable() const -> bool;
   auto remove() -> type& override;
   auto remove(sLayout layout) -> type&;
@@ -1610,7 +1611,7 @@ struct mTreeView : mWidget {
   auto doToggle(sTreeViewItem item) const -> void;
   auto expand() -> type&;
   auto foregroundColor() const -> Color;
-  auto item(const string& path) const -> sTreeViewItem;
+  auto item(const string& path) const -> TreeViewItem;
   auto items() const -> unsigned;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto onChange(const function<void ()>& callback = {}) -> type&;
@@ -1618,7 +1619,7 @@ struct mTreeView : mWidget {
   auto onToggle(const function<void (sTreeViewItem)>& callback = {}) -> type&;
   auto remove(sTreeViewItem item) -> type&;
   auto reset() -> type&;
-  auto selected() const -> sTreeViewItem;
+  auto selected() const -> TreeViewItem;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setCheckable(bool checkable = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
@@ -1648,7 +1649,7 @@ struct mTreeViewItem : mObject {
   auto append(sTreeViewItem item) -> type&;
   auto checked() const -> bool;
   auto icon() const -> image;
-  auto item(const string& path) const -> sTreeViewItem;
+  auto item(const string& path) const -> TreeViewItem;
   auto items() const -> unsigned;
   auto path() const -> string;
   auto remove() -> type& override;
@@ -1745,5 +1746,7 @@ struct mViewport : mWidget {
 #endif
 
 #undef Declare
+
+#include "shared.hpp"
 
 }

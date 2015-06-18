@@ -13,19 +13,36 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   }
   stateList.setHeaderVisible();
   stateList.onActivate([&] { doLoad(); });
-  stateList.onChange([&] { doChange(); });
+  stateList.onChange([&] { doChangeSelected(); });
   descriptionLabel.setText("Description:");
-  descriptionValue.onChange([&] { doLabel(); });
+  descriptionValue.onChange([&] { doChangeDescription(); });
   saveButton.setText("Save").onActivate([&] { doSave(); });
   loadButton.setText("Load").onActivate([&] { doLoad(); });
   resetButton.setText("Reset").onActivate([&] { doReset(); });
   eraseButton.setText("Erase").onActivate([&] { doErase(); });
 }
 
-auto StateManager::doChange() -> void {
+auto StateManager::doUpdateControls() -> void {
   vector<uint8> buffer;
   if(auto item = stateList.selected()) {
-    buffer = file::read(program->stateName(1 + item->offset(), true));
+    buffer = file::read(program->stateName(1 + item.offset(), true));
+  }
+
+  if(buffer.size() >= 584) {
+    descriptionValue.setEnabled(true);
+    loadButton.setEnabled(true);
+    eraseButton.setEnabled(true);
+  } else {
+    descriptionValue.setEnabled(false);
+    loadButton.setEnabled(false);
+    eraseButton.setEnabled(false);
+  }
+}
+
+auto StateManager::doChangeSelected() -> void {
+  vector<uint8> buffer;
+  if(auto item = stateList.selected()) {
+    buffer = file::read(program->stateName(1 + item.offset(), true));
   }
 
   if(buffer.size() >= 584) {
@@ -33,56 +50,55 @@ auto StateManager::doChange() -> void {
     description.reserve(512);
     memory::copy(description.pointer(), buffer.data() + 72, 512);
     description.resize(description.length());
-    descriptionValue.setEnabled(true).setText(description);
-    loadButton.setEnabled(true);
-    eraseButton.setEnabled(true);
+    descriptionValue.setText(description);
   } else {
-    descriptionValue.setEnabled(false).setText("");
-    loadButton.setEnabled(false);
-    eraseButton.setEnabled(false);
+    descriptionValue.setText("");
   }
+
+  doUpdateControls();
 }
 
 auto StateManager::doRefresh() -> void {
-  for(unsigned slot = 0; slot < Slots; slot++) {
+  for(auto slot : range(Slots)) {
     auto buffer = file::read(program->stateName(1 + slot, true));
     if(buffer.size() >= 584) {
       string description;
       description.reserve(512);
       memory::copy(description.pointer(), buffer.data() + 72, 512);
       description.resize(description.length());
-      stateList.item(slot)->cell(1)->setText(description);
+      stateList.item(slot).cell(1).setText(description).setForegroundColor({0, 0, 0});
     } else {
-      stateList.item(slot)->cell(1)->setText("(empty)");
+      stateList.item(slot).cell(1).setText("(empty)").setForegroundColor({128, 128, 128});
     }
   }
-  doChange();
 }
 
-auto StateManager::doLabel() -> void {
+auto StateManager::doChangeDescription() -> void {
   if(auto item = stateList.selected()) {
-    auto buffer = file::read(program->stateName(1 + item->offset(), true));
+    auto buffer = file::read(program->stateName(1 + item.offset(), true));
     if(buffer.size() >= 584) {
       string description = descriptionValue.text();
       description.reserve(512);
       memory::copy(buffer.data() + 72, description.data(), 512);
-      file::write(program->stateName(1 + item->offset(), true), buffer);
+      file::write(program->stateName(1 + item.offset(), true), buffer);
       doRefresh();
+      doUpdateControls();
     }
   }
 }
 
 auto StateManager::doLoad() -> void {
   if(auto item = stateList.selected()) {
-    program->loadState(1 + item->offset(), true);
+    program->loadState(1 + item.offset(), true);
   }
 }
 
 auto StateManager::doSave() -> void {
   if(auto item = stateList.selected()) {
-    program->saveState(1 + item->offset(), true);
+    program->saveState(1 + item.offset(), true);
     doRefresh();
-    descriptionValue.setFocused();
+    doUpdateControls();
+    descriptionValue.setText("").setFocused();
   }
 }
 
@@ -90,12 +106,14 @@ auto StateManager::doReset() -> void {
   if(MessageDialog().setParent(*toolsManager).setText("Permanently erase all slots?").question() == "Yes") {
     for(auto slot : range(Slots)) file::remove(program->stateName(1 + slot, true));
     doRefresh();
+    doUpdateControls();
   }
 }
 
 auto StateManager::doErase() -> void {
   if(auto item = stateList.selected()) {
-    file::remove(program->stateName(1 + item->offset(), true));
+    file::remove(program->stateName(1 + item.offset(), true));
     doRefresh();
+    doUpdateControls();
   }
 }

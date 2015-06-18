@@ -369,9 +369,9 @@ auto pWindow::_setIcon(const string& pathname) -> bool {
   filename = {pathname, Application::state.name, ".png"};
   if(file::exists(filename)) {
     //maximum image size GTK+ supports is 256x256; scale image down if necessary to prevent error
-    nall::image icon(filename);
-    icon.scale(min(256u, icon.width), min(256u, icon.height), true);
-    GdkPixbuf* pixbuf = CreatePixbuf(icon);
+    image icon(filename);
+    icon.scale(min(256u, icon.width()), min(256u, icon.height()), true);
+    auto pixbuf = CreatePixbuf(icon);
     gtk_window_set_icon(GTK_WINDOW(widget), pixbuf);
     g_object_unref(G_OBJECT(pixbuf));
     return true;

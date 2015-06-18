@@ -11,16 +11,16 @@ auto mMenuBar::destruct() -> void {
 
 //
 
-auto mMenuBar::append(shared_pointer<mMenu> menu) -> type& {
+auto mMenuBar::append(sMenu menu) -> type& {
   state.menus.append(menu);
   menu->setParent(this, menus() - 1);
   signal(append, menu);
   return *this;
 }
 
-auto mMenuBar::menu(unsigned position) const -> shared_pointer<mMenu> {
-  if(position >= menus()) throw;
-  return state.menus[position];
+auto mMenuBar::menu(unsigned position) const -> Menu {
+  if(position < menus()) return state.menus[position];
+  return {};
 }
 
 auto mMenuBar::menus() const -> unsigned {
@@ -32,7 +32,7 @@ auto mMenuBar::remove() -> type& {
   return *this;
 }
 
-auto mMenuBar::remove(shared_pointer<mMenu> menu) -> type& {
+auto mMenuBar::remove(sMenu menu) -> type& {
   signed offset = menu->offset();
   signal(remove, *menu);
   state.menus.remove(offset);

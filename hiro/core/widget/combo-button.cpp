@@ -22,7 +22,7 @@ auto mComboButton::doChange() const -> void {
   if(state.onChange) return state.onChange();
 }
 
-auto mComboButton::item(unsigned position) const -> sComboButtonItem {
+auto mComboButton::item(unsigned position) const -> ComboButtonItem {
   if(position < items()) return state.items[position];
   return {};
 }
@@ -53,11 +53,11 @@ auto mComboButton::reset() -> type& {
   return *this;
 }
 
-auto mComboButton::selected() const -> sComboButtonItem {
+auto mComboButton::selected() const -> ComboButtonItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {};
+  return {nullptr};
 }
 
 auto mComboButton::setParent(mObject* parent, signed offset) -> type& {

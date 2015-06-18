@@ -174,14 +174,14 @@ auto pCanvas::_rasterize() -> void {
     fill.gradient(
       state().gradient[0].value(), state().gradient[1].value(), state().gradient[2].value(), state().gradient[3].value()
     );
-    memory::copy(buffer, fill.data, fill.size);
+    memory::copy(buffer, fill.data(), fill.size());
   }
 
   if(mode == Mode::Icon) {
     auto icon = state().icon;
     icon.scale(width, height);
-    icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-    memory::copy(buffer, icon.data, icon.size);
+    icon.transform();
+    memory::copy(buffer, icon.data(), icon.size());
   }
 
   if(mode == Mode::Data) {

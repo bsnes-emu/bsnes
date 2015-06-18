@@ -11,18 +11,18 @@ auto mFrame::destruct() -> void {
 
 //
 
-auto mFrame::append(shared_pointer<mLayout> layout) -> type& {
+auto mFrame::append(sLayout layout) -> type& {
   if(auto& layout = state.layout) remove(layout);
   state.layout = layout;
   layout->setParent(this, 0);
   return *this;
 }
 
-auto mFrame::layout() const -> shared_pointer<mLayout> {
+auto mFrame::layout() const -> Layout {
   return state.layout;
 }
 
-auto mFrame::remove(shared_pointer<mLayout> layout) -> type& {
+auto mFrame::remove(sLayout layout) -> type& {
   layout->setParent();
   state.layout.reset();
   return *this;

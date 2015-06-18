@@ -18,7 +18,7 @@ auto mRadioButton::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
-auto mRadioButton::group() const -> sGroup {
+auto mRadioButton::group() const -> Group {
   return state.group;
 }
 

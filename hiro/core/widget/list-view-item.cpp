@@ -17,7 +17,7 @@ auto mListViewItem::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
-auto mListViewItem::cell(unsigned position) const -> sListViewCell {
+auto mListViewItem::cell(unsigned position) const -> ListViewCell {
   if(position < cells()) return state.cells[position];
   return {};
 }

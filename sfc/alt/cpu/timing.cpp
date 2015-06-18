@@ -31,7 +31,7 @@ void CPU::add_clocks(unsigned clocks) {
     if(status.virq_enabled) {
       unsigned cpu_time = vcounter() * 1364 + hcounter();
       unsigned irq_time = status.vtime * 1364 + status.htime * 4;
-      unsigned framelines = (system.region() == System::Region::NTSC ? 262 : 312) + field();
+      unsigned framelines = (system.region() == System::Region::NTSC ? 262 : 312) + (ppu.interlace() && !field());
       if(cpu_time > irq_time) irq_time += framelines * 1364;
       bool irq_valid = status.irq_valid;
       status.irq_valid = cpu_time <= irq_time && cpu_time + clocks > irq_time;

@@ -56,7 +56,7 @@ auto mTreeView::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mTreeView::item(const string& path) const -> sTreeViewItem {
+auto mTreeView::item(const string& path) const -> TreeViewItem {
   if(path.empty()) return {};
   auto paths = path.split("/");
   unsigned position = decimal(paths.takeFirst());
@@ -107,7 +107,7 @@ auto mTreeView::reset() -> type& {
   return *this;
 }
 
-auto mTreeView::selected() const -> sTreeViewItem {
+auto mTreeView::selected() const -> TreeViewItem {
   return item(state.selectedPath);
 }
 

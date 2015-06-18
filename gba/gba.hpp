@@ -6,7 +6,7 @@
 
 namespace GameBoyAdvance {
   namespace Info {
-    static const char Name[] = "bgba";
+    static const string Name = "bgba";
     static const unsigned SerializerVersion = 2;
   }
 }
@@ -24,28 +24,25 @@ namespace GameBoyAdvance {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
 
   struct Thread {
-    cothread_t thread;
-    unsigned frequency;
-    signed clock;
+    ~Thread() {
+      if(thread) co_delete(thread);
+    }
 
-    inline void create(void (*entrypoint)(), unsigned frequency) {
+    auto create(void (*entrypoint)(), unsigned frequency) -> void {
       if(thread) co_delete(thread);
       thread = co_create(65536 * sizeof(void*), entrypoint);
       this->frequency = frequency;
       clock = 0;
     }
 
-    inline void serialize(serializer& s) {
+    auto serialize(serializer& s) -> void {
       s.integer(frequency);
       s.integer(clock);
     }
 
-    inline Thread() : thread(nullptr) {
-    }
-
-    inline ~Thread() {
-      if(thread) co_delete(thread);
-    }
+    cothread_t thread = nullptr;
+    unsigned frequency = 0;
+    signed clock = 0;
   };
 
   #include <gba/memory/memory.hpp>

@@ -3,41 +3,42 @@
 
 namespace nall {
 
-void image::impose(blend mode, unsigned targetX, unsigned targetY, image source, unsigned sourceX, unsigned sourceY, unsigned sourceWidth, unsigned sourceHeight) {
-  source.transform(endian, depth, alpha.mask, red.mask, green.mask, blue.mask);
+auto image::impose(blend mode, unsigned targetX, unsigned targetY, image source, unsigned sourceX, unsigned sourceY, unsigned sourceWidth, unsigned sourceHeight) -> void {
+  source.transform(_endian, _depth, _alpha.mask(), _red.mask(), _green.mask(), _blue.mask());
 
+  #pragma omp parallel for
   for(unsigned y = 0; y < sourceHeight; y++) {
-    const uint8_t* sp = source.data + source.pitch * (sourceY + y) + source.stride * sourceX;
-    uint8_t* dp = data + pitch * (targetY + y) + stride * targetX;
+    const uint8_t* sp = source._data + source.pitch() * (sourceY + y) + source.stride() * sourceX;
+    uint8_t* dp = _data + pitch() * (targetY + y) + stride() * targetX;
     for(unsigned x = 0; x < sourceWidth; x++) {
       uint64_t sourceColor = source.read(sp);
       uint64_t targetColor = read(dp);
 
-      int64_t sa = (sourceColor & alpha.mask) >> alpha.shift;
-      int64_t sr = (sourceColor & red.mask  ) >> red.shift;
-      int64_t sg = (sourceColor & green.mask) >> green.shift;
-      int64_t sb = (sourceColor & blue.mask ) >> blue.shift;
+      int64_t sa = (sourceColor & _alpha.mask()) >> _alpha.shift();
+      int64_t sr = (sourceColor & _red.mask()  ) >> _red.shift();
+      int64_t sg = (sourceColor & _green.mask()) >> _green.shift();
+      int64_t sb = (sourceColor & _blue.mask() ) >> _blue.shift();
 
-      int64_t da = (targetColor & alpha.mask) >> alpha.shift;
-      int64_t dr = (targetColor & red.mask  ) >> red.shift;
-      int64_t dg = (targetColor & green.mask) >> green.shift;
-      int64_t db = (targetColor & blue.mask ) >> blue.shift;
+      int64_t da = (targetColor & _alpha.mask()) >> _alpha.shift();
+      int64_t dr = (targetColor & _red.mask()  ) >> _red.shift();
+      int64_t dg = (targetColor & _green.mask()) >> _green.shift();
+      int64_t db = (targetColor & _blue.mask() ) >> _blue.shift();
 
       uint64_t a, r, g, b;
 
       switch(mode) {
       case blend::add:
         a = max(sa, da);
-        r = min(red.mask   >> red.shift,   ((sr * sa) >> alpha.depth) + ((dr * da) >> alpha.depth));
-        g = min(green.mask >> green.shift, ((sg * sa) >> alpha.depth) + ((dg * da) >> alpha.depth));
-        b = min(blue.mask  >> blue.shift,  ((sb * sa) >> alpha.depth) + ((db * da) >> alpha.depth));
+        r = min(_red.mask()   >> _red.shift(),   ((sr * sa) >> _alpha.depth()) + ((dr * da) >> _alpha.depth()));
+        g = min(_green.mask() >> _green.shift(), ((sg * sa) >> _alpha.depth()) + ((dg * da) >> _alpha.depth()));
+        b = min(_blue.mask()  >> _blue.shift(),  ((sb * sa) >> _alpha.depth()) + ((db * da) >> _alpha.depth()));
         break;
 
       case blend::sourceAlpha:
         a = max(sa, da);
-        r = dr + (((sr - dr) * sa) >> alpha.depth);
-        g = dg + (((sg - dg) * sa) >> alpha.depth);
-        b = db + (((sb - db) * sa) >> alpha.depth);
+        r = dr + (((sr - dr) * sa) >> _alpha.depth());
+        g = dg + (((sg - dg) * sa) >> _alpha.depth());
+        b = db + (((sb - db) * sa) >> _alpha.depth());
         break;
 
       case blend::sourceColor:
@@ -49,9 +50,9 @@ void image::impose(blend mode, unsigned targetX, unsigned targetY, image source,
 
       case blend::targetAlpha:
         a = max(sa, da);
-        r = sr + (((dr - sr) * da) >> alpha.depth);
-        g = sg + (((dg - sg) * da) >> alpha.depth);
-        b = sb + (((db - sb) * da) >> alpha.depth);
+        r = sr + (((dr - sr) * da) >> _alpha.depth());
+        g = sg + (((dg - sg) * da) >> _alpha.depth());
+        b = sb + (((db - sb) * da) >> _alpha.depth());
         break;
 
       case blend::targetColor:
@@ -62,9 +63,9 @@ void image::impose(blend mode, unsigned targetX, unsigned targetY, image source,
         break;
       }
 
-      write(dp, (a << alpha.shift) | (r << red.shift) | (g << green.shift) | (b << blue.shift));
-      sp += source.stride;
-      dp += stride;
+      write(dp, (a << _alpha.shift()) | (r << _red.shift()) | (g << _green.shift()) | (b << _blue.shift()));
+      sp += source.stride();
+      dp += stride();
     }
   }
 }

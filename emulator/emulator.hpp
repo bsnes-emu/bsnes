@@ -1,47 +1,26 @@
 #ifndef EMULATOR_HPP
 #define EMULATOR_HPP
 
+#include <nall/nall.hpp>
+#include <nall/dsp.hpp>
+#include <nall/priority-queue.hpp>
+using namespace nall;
+
 namespace Emulator {
-  static const char Name[] = "higan";
-  static const char Version[] = "094.26";
-  static const char Author[] = "byuu";
-  static const char License[] = "GPLv3";
-  static const char Website[] = "http://byuu.org/";
+  static const string Name = "higan";
+  static const string Version = "094.27";
+  static const string Author = "byuu";
+  static const string License = "GPLv3";
+  static const string Website = "http://byuu.org/";
 
   #if defined(PROFILE_ACCURACY)
-  static const char Profile[] = "Accuracy";
+  static const string Profile = "Accuracy";
   #elif defined(PROFILE_BALANCED)
-  static const char Profile[] = "Balanced";
+  static const string Profile = "Balanced";
   #elif defined(PROFILE_PERFORMANCE)
-  static const char Profile[] = "Performance";
+  static const string Profile = "Performance";
   #endif
 }
-
-#include <nall/platform.hpp>
-#include <nall/algorithm.hpp>
-#include <nall/base64.hpp>
-#include <nall/directory.hpp>
-#include <nall/dl.hpp>
-#include <nall/dsp.hpp>
-#include <nall/endian.hpp>
-#include <nall/file.hpp>
-#include <nall/function.hpp>
-#include <nall/image.hpp>
-#include <nall/invoke.hpp>
-#include <nall/priority-queue.hpp>
-#include <nall/property.hpp>
-#include <nall/random.hpp>
-#include <nall/serializer.hpp>
-#include <nall/set.hpp>
-#include <nall/stdint.hpp>
-#include <nall/string.hpp>
-#include <nall/utility.hpp>
-#include <nall/varint.hpp>
-#include <nall/vector.hpp>
-#include <nall/hash/sha256.hpp>
-#include <nall/stream/memory.hpp>
-#include <nall/stream/vector.hpp>
-using namespace nall;
 
 #include "interface.hpp"
 

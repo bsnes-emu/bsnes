@@ -29,9 +29,9 @@ auto Keyboard::append(sHotkey hotkey) -> void {
   state.hotkeys.append(hotkey);
 }
 
-auto Keyboard::hotkey(unsigned position) -> sHotkey {
-  if(position >= hotkeys()) throw;
-  return state.hotkeys[position];
+auto Keyboard::hotkey(unsigned position) -> Hotkey {
+  if(position < hotkeys()) return state.hotkeys[position];
+  return {};
 }
 
 auto Keyboard::hotkeys() -> unsigned {

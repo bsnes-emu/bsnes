@@ -44,15 +44,15 @@ auto mListView::checkAll() -> type& {
   return *this;
 }
 
-auto mListView::checked() const -> vector<sListViewItem> {
-  vector<sListViewItem> items;
+auto mListView::checked() const -> vector<ListViewItem> {
+  vector<ListViewItem> items;
   for(auto& item : state.items) {
     if(item->checked()) items.append(item);
   }
   return items;
 }
 
-auto mListView::column(unsigned position) const -> sListViewColumn {
+auto mListView::column(unsigned position) const -> ListViewColumn {
   if(position < columns()) return state.columns[position];
   return {};
 }
@@ -97,7 +97,7 @@ auto mListView::headerVisible() const -> bool {
   return state.headerVisible;
 }
 
-auto mListView::item(unsigned position) const -> sListViewItem {
+auto mListView::item(unsigned position) const -> ListViewItem {
   if(position < items()) return state.items[position];
   return {};
 }
@@ -121,17 +121,17 @@ auto mListView::onContext(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mListView::onEdit(const function<void (sListViewCell)>& callback) -> type& {
+auto mListView::onEdit(const function<void (ListViewCell)>& callback) -> type& {
   state.onEdit = callback;
   return *this;
 }
 
-auto mListView::onSort(const function<void (sListViewColumn)>& callback) -> type& {
+auto mListView::onSort(const function<void (ListViewColumn)>& callback) -> type& {
   state.onSort = callback;
   return *this;
 }
 
-auto mListView::onToggle(const function<void (sListViewItem)>& callback) -> type& {
+auto mListView::onToggle(const function<void (ListViewItem)>& callback) -> type& {
   state.onToggle = callback;
   return *this;
 }
@@ -178,15 +178,15 @@ auto mListView::selectAll() -> type& {
   return *this;
 }
 
-auto mListView::selected() const -> sListViewItem {
+auto mListView::selected() const -> ListViewItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {};
+  return {nullptr};
 }
 
-auto mListView::selectedItems() const -> vector<sListViewItem> {
-  vector<sListViewItem> items;
+auto mListView::selectedItems() const -> vector<ListViewItem> {
+  vector<ListViewItem> items;
   for(auto& item : state.items) {
     if(item->selected()) items.append(item);
   }

@@ -87,11 +87,11 @@ auto mWindow::geometry() const -> Geometry {
   return state.geometry;
 }
 
-auto mWindow::layout() const -> shared_pointer<mLayout> {
+auto mWindow::layout() const -> Layout {
   return state.layout;
 }
 
-auto mWindow::menuBar() const -> shared_pointer<mMenuBar> {
+auto mWindow::menuBar() const -> MenuBar {
   return state.menuBar;
 }
 
@@ -266,7 +266,7 @@ auto mWindow::setTitle(const string& title) -> type& {
   return *this;
 }
 
-auto mWindow::statusBar() const -> shared_pointer<mStatusBar> {
+auto mWindow::statusBar() const -> StatusBar {
   return state.statusBar;
 }
 

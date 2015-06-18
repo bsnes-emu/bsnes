@@ -232,12 +232,17 @@ auto pListView::onChange(LPARAM lparam) -> void {
     PostMessageOnce(_parentHandle(), AppMessage::ListView_onChange, 0, (LPARAM)&reference);
   }
 
-  unsigned row = nmlistview->iItem;
-  unsigned mask = ((nmlistview->uNewState & LVIS_STATEIMAGEMASK) >> 12) - 1;
-  if((mask == 0 || mask == 1) && !locked()) {
-    if(auto item = self().item(row)) {
-      item->state.checked = !item->state.checked;
-      self().doToggle(item);
+  if(!locked()) {
+    unsigned row = nmlistview->iItem;
+    unsigned mask = nmlistview->uNewState & LVIS_STATEIMAGEMASK;
+    if(mask == 0x1000 || mask == 0x2000) {
+      bool checked = mask == 0x2000;
+      if(auto item = self().item(row)) {
+        if(checked != item->state.checked) {  //WC_LISTVIEW sends this message twice
+          item->state.checked = checked;
+          self().doToggle(item);
+        }
+      }
     }
   }
 }
@@ -288,7 +293,7 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
       if(!cell) continue;
       if(auto icon = cell->state.icon) {
         icon.scale(iconSize, iconSize);
-        icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+        icon.transform();
         auto bitmap = CreateBitmap(icon);
         SelectBitmap(hdcSource, bitmap);
         BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(selected ? 128 : 255), AC_SRC_ALPHA};
@@ -413,7 +418,7 @@ auto pListView::_setIcons() -> void {
     auto icon = state().columns(column)->state.icon;
     if(icon) {
       icon.scale(16, 16);
-      icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+      icon.transform();
     } else {
       icon.allocate(16, 16);
       icon.fill(0x00ffffff);

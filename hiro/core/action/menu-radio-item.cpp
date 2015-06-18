@@ -14,7 +14,7 @@ auto mMenuRadioItem::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
-auto mMenuRadioItem::group() const -> sGroup {
+auto mMenuRadioItem::group() const -> Group {
   return state.group;
 }
 

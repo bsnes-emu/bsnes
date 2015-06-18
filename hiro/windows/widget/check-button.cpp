@@ -23,13 +23,13 @@ auto pCheckButton::minimumSize() -> Size {
   auto size = pFont::size(hfont, state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width);
-    size.setHeight(max(size.height(), state().icon.height));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().icon.width));
-    size.setHeight(size.height() + state().icon.height);
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
   return {size.width() + (state().text ? 20 : 10), size.height() + 10};
@@ -62,16 +62,16 @@ auto pCheckButton::onToggle() -> void {
 
 auto pCheckButton::_setState() -> void {
   image icon = state().icon;
-  icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  icon.transform();
 
-  if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
-  if(himagelist) { ImageList_Destroy(himagelist); himagelist = 0; }
+  if(hbitmap) { DeleteObject(hbitmap); hbitmap = nullptr; }
+  if(himagelist) { ImageList_Destroy(himagelist); himagelist = nullptr; }
 
   if(OsVersion() < WindowsVista) icon.alphaBlend(GetSysColor(COLOR_BTNFACE));
 
   hbitmap = CreateBitmap(icon);
-  himagelist = ImageList_Create(icon.width, icon.height, ILC_COLOR32, 1, 0);
-  ImageList_Add(himagelist, hbitmap, NULL);
+  himagelist = ImageList_Create(icon.width(), icon.height(), ILC_COLOR32, 1, 0);
+  ImageList_Add(himagelist, hbitmap, nullptr);
   BUTTON_IMAGELIST list;
   list.himl = himagelist;
   switch(state().orientation) {

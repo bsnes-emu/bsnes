@@ -16,7 +16,7 @@ struct parser {
   //import from canvas to bitstream
   bool save(bitstream& stream, uint64_t offset, context& ctx) {
     if(stream.readonly) return false;
-    parse(0, stream, offset, ctx, canvas.width, canvas.height);
+    parse(0, stream, offset, ctx, canvas.width(), canvas.height());
     return true;
   }
 
@@ -25,16 +25,16 @@ struct parser {
 
 private:
   uint32_t read(unsigned x, unsigned y) const {
-    unsigned addr = y * canvas.width + x;
-    if(addr >= canvas.width * canvas.height) return 0u;
-    uint32_t *buffer = (uint32_t*)canvas.data;
+    unsigned addr = y * canvas.width() + x;
+    if(addr >= canvas.width() * canvas.height()) return 0u;
+    uint32_t *buffer = (uint32_t*)canvas.data();
     return buffer[addr];
   }
 
   void write(unsigned x, unsigned y, uint32_t data) {
-    unsigned addr = y * canvas.width + x;
-    if(addr >= canvas.width * canvas.height) return;
-    uint32_t *buffer = (uint32_t*)canvas.data;
+    unsigned addr = y * canvas.width() + x;
+    if(addr >= canvas.width() * canvas.height()) return;
+    uint32_t *buffer = (uint32_t*)canvas.data();
     buffer[addr] = data;
   }
 

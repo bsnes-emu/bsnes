@@ -26,13 +26,13 @@ auto pButton::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width);
-    size.setHeight(max(size.height(), state().icon.height));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().icon.width));
-    size.setHeight(size.height() + state().icon.height);
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
   return {size.width() + (state().text ? 24 : 12), size.height() + 12};

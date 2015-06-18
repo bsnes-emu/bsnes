@@ -11,7 +11,7 @@ auto mIconView::destruct() -> void {
 
 //
 
-auto mIconView::append(shared_pointer<mIconViewItem> item) -> type& {
+auto mIconView::append(sIconViewItem item) -> type& {
   state.items.append(item);
   item->setParent(this, items() - 1);
   signal(append, item);
@@ -42,9 +42,9 @@ auto mIconView::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mIconView::item(unsigned position) const -> shared_pointer<mIconViewItem> {
-  if(position >= items()) throw;
-  return state.items[position];
+auto mIconView::item(unsigned position) const -> IconViewItem {
+  if(position < items()) return state.items[position];
+  return {};
 }
 
 auto mIconView::items() const -> unsigned {
@@ -74,7 +74,7 @@ auto mIconView::orientation() const -> Orientation {
   return state.orientation;
 }
 
-auto mIconView::remove(shared_pointer<mIconViewItem> item) -> type& {
+auto mIconView::remove(sIconViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
   for(auto n : range(item->offset(), items())) {

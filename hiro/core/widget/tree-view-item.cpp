@@ -26,7 +26,7 @@ auto mTreeViewItem::icon() const -> image {
   return state.icon;
 }
 
-auto mTreeViewItem::item(const string& path) const -> sTreeViewItem {
+auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
   if(path.empty()) return {};
   auto paths = path.split("/");
   unsigned position = decimal(paths.takeFirst());

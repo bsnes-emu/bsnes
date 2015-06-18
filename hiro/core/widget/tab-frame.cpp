@@ -34,7 +34,7 @@ auto mTabFrame::edge() const -> Edge {
   return state.edge;
 }
 
-auto mTabFrame::item(unsigned position) const -> sTabFrameItem {
+auto mTabFrame::item(unsigned position) const -> TabFrameItem {
   if(position < items()) return state.items[position];
   return {};
 }
@@ -48,12 +48,12 @@ auto mTabFrame::onChange(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mTabFrame::onClose(const function<void (sTabFrameItem)>& callback) -> type& {
+auto mTabFrame::onClose(const function<void (TabFrameItem)>& callback) -> type& {
   state.onClose = callback;
   return *this;
 }
 
-auto mTabFrame::onMove(const function<void (sTabFrameItem, sTabFrameItem)>& callback) -> type& {
+auto mTabFrame::onMove(const function<void (TabFrameItem, TabFrameItem)>& callback) -> type& {
   state.onMove = callback;
   return *this;
 }
@@ -74,11 +74,11 @@ auto mTabFrame::reset() -> type& {
   return *this;
 }
 
-auto mTabFrame::selected() const -> sTabFrameItem {
+auto mTabFrame::selected() const -> TabFrameItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {};
+  return {nullptr};
 }
 
 auto mTabFrame::setEdge(Edge edge) -> type& {

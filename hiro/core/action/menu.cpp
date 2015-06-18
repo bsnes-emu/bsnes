@@ -11,9 +11,9 @@ auto mMenu::destruct() -> void {
 
 //
 
-auto mMenu::action(unsigned position) const -> sAction {
-  if(position >= actions()) throw;
-  return state.actions[position];
+auto mMenu::action(unsigned position) const -> Action {
+  if(position < actions()) return state.actions[position];
+  return {};
 }
 
 auto mMenu::actions() const -> unsigned {

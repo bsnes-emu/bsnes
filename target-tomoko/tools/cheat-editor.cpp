@@ -16,8 +16,8 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   cheatList.setCheckable();
   cheatList.setHeaderVisible();
   cheatList.onChange([&] { doChangeSelected(); });
-  cheatList.onToggle([&](sListViewItem item) {
-    cheats[item->offset()].enabled = item->checked();
+  cheatList.onToggle([&](ListViewItem item) {
+    cheats[item.offset()].enabled = item.checked();
     synchronizeCodes();
   });
   codeLabel.setText("Code(s):");
@@ -31,7 +31,7 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
 
 auto CheatEditor::doChangeSelected() -> void {
   if(auto item = cheatList.selected()) {
-    auto& cheat = cheats[item->offset()];
+    auto& cheat = cheats[item.offset()];
     codeValue.setEnabled(true).setText(cheat.code);
     descriptionValue.setEnabled(true).setText(cheat.description);
     eraseButton.setEnabled(true);
@@ -44,7 +44,7 @@ auto CheatEditor::doChangeSelected() -> void {
 
 auto CheatEditor::doModify() -> void {
   if(auto item = cheatList.selected()) {
-    auto& cheat = cheats[item->offset()];
+    auto& cheat = cheats[item.offset()];
     cheat.code = codeValue.text();
     cheat.description = descriptionValue.text();
     doRefresh();
@@ -58,13 +58,13 @@ auto CheatEditor::doRefresh() -> void {
     if(cheat.code || cheat.description) {
       lstring codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
-      cheatList.item(slot)->setChecked(cheat.enabled);
-      cheatList.item(slot)->cell(1)->setText(codes[0]);
-      cheatList.item(slot)->cell(2)->setText(cheat.description);
+      cheatList.item(slot).setChecked(cheat.enabled);
+      cheatList.item(slot).cell(1).setText(codes[0]);
+      cheatList.item(slot).cell(2).setText(cheat.description).setForegroundColor({0, 0, 0});
     } else {
-      cheatList.item(slot)->setChecked(false);
-      cheatList.item(slot)->cell(1)->setText("");
-      cheatList.item(slot)->cell(2)->setText("(empty)");
+      cheatList.item(slot).setChecked(false);
+      cheatList.item(slot).cell(1).setText("");
+      cheatList.item(slot).cell(2).setText("(empty)").setForegroundColor({128, 128, 128});
     }
   }
 
@@ -87,7 +87,7 @@ auto CheatEditor::doReset(bool force) -> void {
 
 auto CheatEditor::doErase() -> void {
   if(auto item = cheatList.selected()) {
-    auto& cheat = cheats[item->offset()];
+    auto& cheat = cheats[item.offset()];
     cheat.enabled = false;
     cheat.code = "";
     cheat.description = "";

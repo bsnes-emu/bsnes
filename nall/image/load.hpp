@@ -3,24 +3,24 @@
 
 namespace nall {
 
-bool image::loadBMP(const string& filename) {
+auto image::loadBMP(const string& filename) -> bool {
   uint32_t* outputData;
   unsigned outputWidth, outputHeight;
   if(bmp::read(filename, outputData, outputWidth, outputHeight) == false) return false;
 
   allocate(outputWidth, outputHeight);
   const uint32_t* sp = outputData;
-  uint8_t* dp = data;
+  uint8_t* dp = _data;
 
   for(unsigned y = 0; y < outputHeight; y++) {
     for(unsigned x = 0; x < outputWidth; x++) {
       uint32_t color = *sp++;
-      uint64_t a = normalize((uint8_t)(color >> 24), 8, alpha.depth);
-      uint64_t r = normalize((uint8_t)(color >> 16), 8, red.depth);
-      uint64_t g = normalize((uint8_t)(color >>  8), 8, green.depth);
-      uint64_t b = normalize((uint8_t)(color >>  0), 8, blue.depth);
-      write(dp, (a << alpha.shift) | (r << red.shift) | (g << green.shift) | (b << blue.shift));
-      dp += stride;
+      uint64_t a = normalize((uint8_t)(color >> 24), 8, _alpha.depth());
+      uint64_t r = normalize((uint8_t)(color >> 16), 8, _red.depth());
+      uint64_t g = normalize((uint8_t)(color >>  8), 8, _green.depth());
+      uint64_t b = normalize((uint8_t)(color >>  0), 8, _blue.depth());
+      write(dp, (a << _alpha.shift()) | (r << _red.shift()) | (g << _green.shift()) | (b << _blue.shift()));
+      dp += stride();
     }
   }
 
@@ -28,19 +28,19 @@ bool image::loadBMP(const string& filename) {
   return true;
 }
 
-bool image::loadPNG(const string& filename) {
+auto image::loadPNG(const string& filename) -> bool {
   if(!file::exists(filename)) return false;
   auto buffer = file::read(filename);
   return loadPNG(buffer.data(), buffer.size());
 }
 
-bool image::loadPNG(const uint8_t* pngData, unsigned pngSize) {
+auto image::loadPNG(const uint8_t* pngData, unsigned pngSize) -> bool {
   Decode::PNG source;
   if(source.decode(pngData, pngSize) == false) return false;
 
   allocate(source.info.width, source.info.height);
   const uint8_t* sp = source.data;
-  uint8_t* dp = data;
+  uint8_t* dp = _data;
 
   auto decode = [&]() -> uint64_t {
     uint64_t p, r, g, b, a;
@@ -75,18 +75,18 @@ bool image::loadPNG(const uint8_t* pngData, unsigned pngSize) {
       break;
     }
 
-    a = normalize(a, source.info.bitDepth, alpha.depth);
-    r = normalize(r, source.info.bitDepth, red.depth);
-    g = normalize(g, source.info.bitDepth, green.depth);
-    b = normalize(b, source.info.bitDepth, blue.depth);
+    a = normalize(a, source.info.bitDepth, _alpha.depth());
+    r = normalize(r, source.info.bitDepth, _red.depth());
+    g = normalize(g, source.info.bitDepth, _green.depth());
+    b = normalize(b, source.info.bitDepth, _blue.depth());
 
-    return (a << alpha.shift) | (r << red.shift) | (g << green.shift) | (b << blue.shift);
+    return (a << _alpha.shift()) | (r << _red.shift()) | (g << _green.shift()) | (b << _blue.shift());
   };
 
-  for(unsigned y = 0; y < height; y++) {
-    for(unsigned x = 0; x < width; x++) {
+  for(unsigned y = 0; y < _height; y++) {
+    for(unsigned x = 0; x < _width; x++) {
       write(dp, decode());
-      dp += stride;
+      dp += stride();
     }
   }
 

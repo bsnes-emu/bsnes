@@ -14,7 +14,7 @@ auto mRadioLabel::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
-auto mRadioLabel::group() const -> sGroup {
+auto mRadioLabel::group() const -> Group {
   return state.group;
 }
 

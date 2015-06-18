@@ -12,20 +12,20 @@ static auto OsVersion() -> unsigned {
   return (versionInfo.dwMajorVersion << 8) + (versionInfo.dwMajorVersion << 0);
 }
 
-static auto CreateBitmap(const image& image) -> HBITMAP {
+static auto CreateBitmap(const image& icon) -> HBITMAP {
   HDC hdc = GetDC(0);
   BITMAPINFO bitmapInfo;
   memset(&bitmapInfo, 0, sizeof(BITMAPINFO));
   bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-  bitmapInfo.bmiHeader.biWidth = image.width;
-  bitmapInfo.bmiHeader.biHeight = -image.height;  //bitmaps are stored upside down unless we negate height
+  bitmapInfo.bmiHeader.biWidth = icon.width();
+  bitmapInfo.bmiHeader.biHeight = -(signed)icon.height();  //bitmaps are stored upside down unless we negate height
   bitmapInfo.bmiHeader.biPlanes = 1;
   bitmapInfo.bmiHeader.biBitCount = 32;
   bitmapInfo.bmiHeader.biCompression = BI_RGB;
-  bitmapInfo.bmiHeader.biSizeImage = image.width * image.height * 4;
+  bitmapInfo.bmiHeader.biSizeImage = icon.size();
   void* bits = nullptr;
   HBITMAP hbitmap = CreateDIBSection(hdc, &bitmapInfo, DIB_RGB_COLORS, &bits, NULL, 0);
-  if(bits) memcpy(bits, image.data, image.width * image.height * 4);
+  if(bits) memory::copy(bits, icon.data(), icon.size());
   ReleaseDC(0, hdc);
   return hbitmap;
 }
@@ -68,7 +68,7 @@ static auto ImageList_Append(HIMAGELIST imageList, const image& source, unsigned
     image.allocate(scale, scale);
     image.fill(GetSysColor(COLOR_WINDOW));
   }
-  image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+  image.transform();
   image.scale(scale, scale);
   HBITMAP bitmap = CreateBitmap(image);
   ImageList_Add(imageList, bitmap, NULL);

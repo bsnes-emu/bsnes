@@ -3,91 +3,22 @@
 
 namespace nall {
 
-image::operator bool() const {
-  return !empty();
-}
-
-bool image::operator==(const image& source) const {
-  if(width != source.width) return false;
-  if(height != source.height) return false;
-  if(pitch != source.pitch) return false;
-
-  if(endian != source.endian) return false;
-  if(stride != source.stride) return false;
-
-  if(alpha != source.alpha) return false;
-  if(red != source.red) return false;
-  if(green != source.green) return false;
-  if(blue != source.blue) return false;
-
-  return memcmp(data, source.data, width * height * stride) == 0;
-}
-
-bool image::operator!=(const image& source) const {
-  return !operator==(source);
-}
-
-image& image::operator=(const image& source) {
-  if(this == &source) return *this;
-  free();
-
-  width = source.width;
-  height = source.height;
-  pitch = source.pitch;
-  size = source.size;
-
-  endian = source.endian;
-  stride = source.stride;
-
-  alpha = source.alpha;
-  red = source.red;
-  green = source.green;
-  blue = source.blue;
-
-  data = allocate(width, height, stride);
-  memcpy(data, source.data, source.size);
-  return *this;
-}
-
-image& image::operator=(image&& source) {
-  if(this == &source) return *this;
-  free();
-
-  width = source.width;
-  height = source.height;
-  pitch = source.pitch;
-  size = source.size;
-
-  endian = source.endian;
-  stride = source.stride;
-
-  alpha = source.alpha;
-  red = source.red;
-  green = source.green;
-  blue = source.blue;
-
-  data = source.data;
-  source.data = nullptr;
-  return *this;
-}
-
 image::image(const image& source) {
   operator=(source);
 }
 
 image::image(image&& source) {
-  operator=(std::forward<image>(source));
+  operator=(forward<image>(source));
 }
 
 image::image(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask) {
-  this->endian = endian;
-  this->depth  = depth;
-  this->stride = (depth / 8) + ((depth & 7) > 0);
+  _endian = endian;
+  _depth  = depth;
 
-  alpha = {alphaMask, bitDepth(alphaMask), bitShift(alphaMask)};
-  red   = {redMask,   bitDepth(redMask),   bitShift(redMask  )};
-  green = {greenMask, bitDepth(greenMask), bitShift(greenMask)};
-  blue  = {blueMask,  bitDepth(blueMask),  bitShift(blueMask )};
+  _alpha = {alphaMask, bitDepth(alphaMask), bitShift(alphaMask)};
+  _red   = {redMask,   bitDepth(redMask),   bitShift(redMask  )};
+  _green = {greenMask, bitDepth(greenMask), bitShift(greenMask)};
+  _blue  = {blueMask,  bitDepth(blueMask),  bitShift(blueMask )};
 }
 
 image::image(const string& filename) {
@@ -109,63 +40,122 @@ image::~image() {
   free();
 }
 
-uint64_t image::read(const uint8_t* data) const {
+auto image::operator=(const image& source) -> image& {
+  if(this == &source) return *this;
+  free();
+
+  _width = source._width;
+  _height = source._height;
+
+  _endian = source._endian;
+  _depth = source._depth;
+
+  _alpha = source._alpha;
+  _red = source._red;
+  _green = source._green;
+  _blue = source._blue;
+
+  _data = allocate(_width, _height, stride());
+  memory::copy(_data, source._data, source.size());
+  return *this;
+}
+
+auto image::operator=(image&& source) -> image& {
+  if(this == &source) return *this;
+  free();
+
+  _width = source._width;
+  _height = source._height;
+
+  _endian = source._endian;
+  _depth = source._depth;
+
+  _alpha = source._alpha;
+  _red = source._red;
+  _green = source._green;
+  _blue = source._blue;
+
+  _data = source._data;
+  source._data = nullptr;
+  return *this;
+}
+
+image::operator bool() const {
+  return !empty();
+}
+
+auto image::operator==(const image& source) const -> bool {
+  if(_width != source._width) return false;
+  if(_height != source._height) return false;
+
+  if(_endian != source._endian) return false;
+  if(_depth != source._depth) return false;
+
+  if(_alpha != source._alpha) return false;
+  if(_red != source._red) return false;
+  if(_green != source._green) return false;
+  if(_blue != source._blue) return false;
+
+  return memory::compare(_data, source._data, size()) == 0;
+}
+
+auto image::operator!=(const image& source) const -> bool {
+  return !operator==(source);
+}
+
+auto image::read(const uint8_t* data) const -> uint64_t {
   uint64_t result = 0;
-  if(endian == 0) {
-    for(signed n = stride - 1; n >= 0; n--) result = (result << 8) | data[n];
+  if(_endian == 0) {
+    for(signed n = stride() - 1; n >= 0; n--) result = (result << 8) | data[n];
   } else {
-    for(signed n = 0; n < stride; n++) result = (result << 8) | data[n];
+    for(signed n = 0; n < stride(); n++) result = (result << 8) | data[n];
   }
   return result;
 }
 
-void image::write(uint8_t* data, uint64_t value) const {
-  if(endian == 0) {
-    for(signed n = 0; n < stride; n++) {
+auto image::write(uint8_t* data, uint64_t value) const -> void {
+  if(_endian == 0) {
+    for(signed n = 0; n < stride(); n++) {
       data[n] = value;
       value >>= 8;
     }
   } else {
-    for(signed n = stride - 1; n >= 0; n--) {
+    for(signed n = stride() - 1; n >= 0; n--) {
       data[n] = value;
       value >>= 8;
     }
   }
 }
 
-void image::free() {
-  if(data) delete[] data;
-  data = nullptr;
+auto image::free() -> void {
+  if(_data) delete[] _data;
+  _data = nullptr;
 }
 
-bool image::empty() const {
-  if(data == nullptr) return true;
-  if(width == 0 || height == 0) return true;
-  return false;
+auto image::empty() const -> bool {
+  return !_data || !_width || !_height;
 }
 
-bool image::load(const string& filename) {
+auto image::load(const string& filename) -> bool {
   if(loadBMP(filename) == true) return true;
   if(loadPNG(filename) == true) return true;
   return false;
 }
 
-void image::allocate(unsigned width, unsigned height) {
-  if(data != nullptr && this->width == width && this->height == height) return;
+auto image::allocate(unsigned width, unsigned height) -> void {
+  if(_data && _width == width && _height == height) return;
   free();
-  data = allocate(width, height, stride);
-  pitch = width * stride;
-  size = height * pitch;
-  this->width = width;
-  this->height = height;
+  _width = width;
+  _height = height;
+  _data = allocate(_width, _height, stride());
 }
 
-uint8_t* image::allocate(unsigned width, unsigned height, unsigned stride) {
+auto image::allocate(unsigned width, unsigned height, unsigned stride) -> uint8_t* {
   //allocate 1x1 larger than requested; so that linear interpolation does not require bounds-checking
   unsigned size = width * height * stride;
   unsigned padding = width * stride + stride;
-  uint8_t* data = new uint8_t[size + padding];
-  memset(data + size, 0x00, padding);
+  auto data = new uint8_t[size + padding];
+  memory::fill(data + size, padding);
   return data;
 }
 

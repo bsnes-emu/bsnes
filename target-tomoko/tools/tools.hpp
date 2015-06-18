@@ -54,9 +54,10 @@ struct StateManager : TabFrameItem {
   enum : unsigned { Slots = 32 };
 
   StateManager(TabFrame*);
-  auto doChange() -> void;
+  auto doChangeSelected() -> void;
   auto doRefresh() -> void;
-  auto doLabel() -> void;
+  auto doUpdateControls() -> void;
+  auto doChangeDescription() -> void;
   auto doLoad() -> void;
   auto doSave() -> void;
   auto doReset() -> void;

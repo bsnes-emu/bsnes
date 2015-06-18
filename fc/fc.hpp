@@ -6,7 +6,7 @@
 
 namespace Famicom {
   namespace Info {
-    static const char Name[] = "bnes";
+    static const string Name = "bnes";
     static const unsigned SerializerVersion = 2;
   }
 }
@@ -22,28 +22,25 @@ namespace Famicom {
 
 namespace Famicom {
   struct Thread {
-    cothread_t thread;
-    unsigned frequency;
-    int64 clock;
+    ~Thread() {
+      if(thread) co_delete(thread);
+    }
 
-    inline void create(void (*entrypoint)(), unsigned frequency) {
+    auto create(void (*entrypoint)(), unsigned frequency) -> void {
       if(thread) co_delete(thread);
       thread = co_create(65536 * sizeof(void*), entrypoint);
       this->frequency = frequency;
       clock = 0;
     }
 
-    inline void serialize(serializer& s) {
+    auto serialize(serializer& s) -> void {
       s.integer(frequency);
       s.integer(clock);
     }
 
-    inline Thread() : thread(nullptr) {
-    }
-
-    inline ~Thread() {
-      if(thread) co_delete(thread);
-    }
+    cothread_t thread = nullptr;
+    unsigned frequency = 0;
+    int64 clock = 0;
   };
 
   #include <fc/system/system.hpp>

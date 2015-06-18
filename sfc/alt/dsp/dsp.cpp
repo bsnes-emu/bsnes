@@ -50,6 +50,7 @@ void DSP::power() {
 }
 
 void DSP::reset() {
+  Thread::clock = 0;
   spc_dsp.soft_reset();
   spc_dsp.set_output(samplebuffer, 8192);
 }

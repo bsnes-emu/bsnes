@@ -107,7 +107,7 @@ auto mCanvas::setHorizontalGradient(Color left, Color right) -> type& {
 }
 
 auto mCanvas::setIcon(const image& icon) -> type& {
-  state.size = {(signed)icon.width, (signed)icon.height};
+  state.size = {(signed)icon.width(), (signed)icon.height()};
   state.icon = icon;
   signal(setIcon, icon);
   return *this;

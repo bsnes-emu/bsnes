@@ -27,7 +27,7 @@ auto mTabFrameItem::icon() const -> image {
   return state.icon;
 }
 
-auto mTabFrameItem::layout() const -> sLayout {
+auto mTabFrameItem::layout() const -> Layout {
   return state.layout;
 }
 

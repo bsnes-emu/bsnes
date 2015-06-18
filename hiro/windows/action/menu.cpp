@@ -32,7 +32,7 @@ auto pMenu::_createBitmap() -> void {
   if(hbitmap) { DeleteObject(hbitmap); hbitmap = 0; }
 
   if(auto icon = state().icon) {
-    icon.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+    icon.transform();
     icon.alphaBlend(GetSysColor(COLOR_MENU));  //Windows does not alpha blend menu icons properly (leaves black outline)
     icon.scale(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), Interpolation::Linear);
     hbitmap = CreateBitmap(icon);
