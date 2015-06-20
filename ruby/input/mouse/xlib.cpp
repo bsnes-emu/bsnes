@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_MOUSE_XLIB
 #define RUBY_INPUT_MOUSE_XLIB
 
-namespace ruby {
-
 struct InputMouseXlib {
+  Input& input;
+  InputMouseXlib(Input& input) : input(input) {}
+
   shared_pointer<HID::Mouse> hid{new HID::Mouse};
 
   uintptr_t handle = 0;
@@ -42,7 +43,7 @@ struct InputMouseXlib {
     }
   }
 
-  auto unacquire() -> bool {
+  auto release() -> bool {
     if(acquired()) {
       //restore cursor acceleration and release cursor
       XChangePointerControl(display, True, True, ms.numerator, ms.denominator, ms.threshold);
@@ -59,7 +60,7 @@ struct InputMouseXlib {
   auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -143,12 +144,10 @@ struct InputMouseXlib {
   }
 
   auto term() -> void {
-    unacquire();
+    release();
     XFreeCursor(display, invisibleCursor);
     XCloseDisplay(display);
   }
 };
-
-}
 
 #endif

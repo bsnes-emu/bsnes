@@ -12,12 +12,12 @@
 #include "mouse/xlib.cpp"
 #include "joypad/udev.cpp"
 
-namespace ruby {
-
-struct pInputUdev {
+struct InputUdev : input {
   InputKeyboardXlib xlibKeyboard;
   InputMouseXlib xlibMouse;
   InputJoypadUdev udev;
+  Input() : xlibKeyboard(*this), xlibMouse(*this), udev(*this) {}
+  ~Input() { term(); }
 
   struct Settings {
     uintptr_t handle = 0;
@@ -49,8 +49,8 @@ struct pInputUdev {
     return xlibMouse.acquire();
   }
 
-  auto unacquire() -> bool {
-    return xlibMouse.unacquire();
+  auto release() -> bool {
+    return xlibMouse.release();
   }
 
   auto acquired() -> bool {
@@ -82,7 +82,3 @@ struct pInputUdev {
     udev.term();
   }
 };
-
-DeclareInput(Udev)
-
-}

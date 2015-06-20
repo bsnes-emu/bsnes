@@ -1,8 +1,8 @@
 #include <ddraw.h>
 
-namespace ruby {
+struct VideoDD : Video {
+  ~VideoDD() { term(); }
 
-struct pVideoDD {
   LPDIRECTDRAW lpdd = nullptr;
   LPDIRECTDRAW7 lpdd7 = nullptr;
   LPDIRECTDRAWSURFACE7 screen = nullptr;
@@ -20,10 +20,6 @@ struct pVideoDD {
     unsigned width;
     unsigned height;
   } settings;
-
-  ~pVideoDD() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -140,8 +136,6 @@ struct pVideoDD {
   }
 
   auto init() -> bool {
-    term();
-
     DirectDrawCreate(0, &lpdd, 0);
     lpdd->QueryInterface(IID_IDirectDraw7, (void**)&lpdd7);
     if(lpdd) { lpdd->Release(); lpdd = 0; }
@@ -174,8 +168,4 @@ struct pVideoDD {
     if(lpdd7) { lpdd7->Release(); lpdd7 = 0; }
     if(lpdd) { lpdd->Release(); lpdd = 0; }
   }
-};
-
-DeclareVideo(DD)
-
 };

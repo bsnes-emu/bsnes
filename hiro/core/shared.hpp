@@ -6,15 +6,14 @@
   }) { \
     (*this)->bind(*this); \
   } \
-  Name(std::nullptr_t) {} \
-  Name(const s##Name& source) : s##Name(source) {} \
-  explicit operator bool() const { return !empty(); } \
+  Name(const s##Name& source) : s##Name(source) { assert(source); } \
+  explicit operator bool() const { return self().operator bool(); } \
   auto self() const -> m##Name& { return (m##Name&)operator*(); } \
 
 #define DeclareSharedObject(Name) \
   DeclareShared(Name) \
   template<typename T, typename... P> Name(T* parent, P&&... p) : Name() { \
-    if(parent && *parent) (*parent)->append(*this, std::forward<P>(p)...); \
+    if(parent) (*parent)->append(*this, std::forward<P>(p)...); \
   } \
   auto enabled(bool recursive = false) const { return self().enabled(recursive); } \
   auto focused() const { return self().focused(); } \

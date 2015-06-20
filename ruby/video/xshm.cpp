@@ -8,9 +8,9 @@
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
-namespace ruby {
+struct VideoXShm : Video {
+  ~VideoXShm() { term(); }
 
-struct pVideoXShm {
   struct Device {
     Display* display = nullptr;
     signed screen = 0;
@@ -33,10 +33,6 @@ struct pVideoXShm {
     unsigned width = 0;
     unsigned height = 0;
   } settings;
-
-  ~pVideoXShm() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -207,7 +203,3 @@ private:
     return cr << 16 | cg << 8 | cb << 0;
   }
 };
-
-DeclareVideo(XShm)
-
-}

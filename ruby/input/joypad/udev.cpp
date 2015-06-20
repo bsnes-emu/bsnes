@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_JOYPAD_UDEV
 #define RUBY_INPUT_JOYPAD_UDEV
 
-namespace ruby {
-
 struct InputJoypadUdev {
+  Input& input;
+  InputJoypadUdev(Input& input) : input(input) {}
+
   udev* context = nullptr;
   udev_monitor* monitor = nullptr;
   udev_enumerate* enumerator = nullptr;
@@ -55,7 +56,7 @@ struct InputJoypadUdev {
   auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -274,7 +275,5 @@ private:
     }
   }
 };
-
-}
 
 #endif

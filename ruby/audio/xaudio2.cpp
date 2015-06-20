@@ -1,9 +1,9 @@
 #include "xaudio2.hpp"
 #include <windows.h>
 
-namespace ruby {
+struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
+  AudioXAudio2() { term(); }
 
-struct pAudioXAudio2 : public IXAudio2VoiceCallback {
   IXAudio2* pXAudio2 = nullptr;
   IXAudio2MasteringVoice* pMasterVoice = nullptr;
   IXAudio2SourceVoice* pSourceVoice = nullptr;
@@ -32,10 +32,6 @@ struct pAudioXAudio2 : public IXAudio2VoiceCallback {
     unsigned frequency = 22050;
     unsigned latency = 120;
   } settings;
-
-  ~pAudioXAudio2() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
@@ -117,8 +113,6 @@ struct pAudioXAudio2 : public IXAudio2VoiceCallback {
   }
 
   auto init() -> bool {
-    term();
-
     device.buffers = 8;
     device.latency = settings.frequency * settings.latency / device.buffers / 1000.0 + 0.5;
     device.buffer = new uint32_t[device.latency * device.buffers];
@@ -186,8 +180,4 @@ struct pAudioXAudio2 : public IXAudio2VoiceCallback {
   STDMETHODIMP_(void) OnBufferEnd(void* pBufferContext) {
     InterlockedDecrement(&device.submitbuffers);
   }
-};
-
-DeclareAudio(XAudio2)
-
 };

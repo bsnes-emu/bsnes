@@ -64,11 +64,11 @@ Presentation::Presentation() {
   });
   synchronizeVideo.setText("Synchronize Video").setChecked(config->video.synchronize).onToggle([&] {
     config->video.synchronize = synchronizeVideo.checked();
-    video.set(Video::Synchronize, config->video.synchronize);
+    video->set(Video::Synchronize, config->video.synchronize);
   });
   synchronizeAudio.setText("Synchronize Audio").setChecked(config->audio.synchronize).onToggle([&] {
     config->audio.synchronize = synchronizeAudio.checked();
-    audio.set(Audio::Synchronize, config->audio.synchronize);
+    audio->set(Audio::Synchronize, config->audio.synchronize);
   });
   muteAudio.setText("Mute Audio").setChecked(config->audio.mute).onToggle([&] {
     config->audio.mute = muteAudio.checked();
@@ -194,9 +194,9 @@ auto Presentation::toggleFullScreen() -> void {
     statusBar.setVisible(false);
     setResizable(true);
     setFullScreen(true);
-    if(!input.acquired()) input.acquire();
+    if(!input->acquired()) input->acquire();
   } else {
-    if(input.acquired()) input.unacquire();
+    if(input->acquired()) input->release();
     setFullScreen(false);
     setResizable(false);
     menuBar.setVisible(true);
@@ -208,14 +208,15 @@ auto Presentation::toggleFullScreen() -> void {
 }
 
 auto Presentation::drawSplashScreen() -> void {
+  if(!video) return;
   uint32* output;
   unsigned length;
-  if(video.lock(output, length, 256, 240)) {
+  if(video->lock(output, length, 256, 240)) {
     for(auto y : range(240)) {
       uint32* dp = output + y * (length >> 2);
       for(auto x : range(256)) *dp++ = 0xff000000;
     }
-    video.unlock();
-    video.refresh();
+    video->unlock();
+    video->refresh();
   }
 }

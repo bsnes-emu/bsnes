@@ -6,12 +6,12 @@
 #include "mouse/xlib.cpp"
 #include "joypad/sdl.cpp"
 
-namespace ruby {
-
-struct pInputSDL {
+struct InputSDL : Input {
   InputKeyboardXlib xlibKeyboard;
   InputMouseXlib xlibMouse;
   InputJoypadSDL sdl;
+  InputSDL() : xlibKeyboard(*this), xlibMouse(*this), sdl(*this) {}
+  ~InputSDL() { term(); }
 
   struct Settings {
     uintptr_t handle = 0;
@@ -43,8 +43,8 @@ struct pInputSDL {
     return xlibMouse.acquire();
   }
 
-  auto unacquire() -> bool {
-    return xlibMouse.unacquire();
+  auto release() -> bool {
+    return xlibMouse.release();
   }
 
   auto acquired() -> bool {
@@ -76,7 +76,3 @@ struct pInputSDL {
     sdl.term();
   }
 };
-
-DeclareInput(SDL)
-
-}

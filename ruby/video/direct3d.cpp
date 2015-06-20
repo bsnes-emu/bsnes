@@ -9,9 +9,9 @@
 typedef HRESULT (__stdcall* EffectProc)(LPDIRECT3DDEVICE9, LPCVOID, UINT, D3DXMACRO const*, LPD3DXINCLUDE, DWORD, LPD3DXEFFECTPOOL, LPD3DXEFFECT*, LPD3DXBUFFER*);
 typedef HRESULT (__stdcall* TextureProc)(LPDIRECT3DDEVICE9, LPCTSTR, LPDIRECT3DTEXTURE9*);
 
-namespace ruby {
+struct VideoD3D : Video {
+  ~VideoD3D() { term(); }
 
-struct pVideoD3D {
   LPDIRECT3D9              lpd3d = nullptr;
   LPDIRECT3DDEVICE9        device = nullptr;
   LPDIRECT3DVERTEXBUFFER9  vertex_buffer = nullptr;
@@ -60,10 +60,6 @@ struct pVideoD3D {
     unsigned width;
     unsigned height;
   } state;
-
-  ~pVideoD3D() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -378,8 +374,6 @@ struct pVideoD3D {
   }
 
   auto init() -> bool {
-    term();
-
     RECT rd;
     GetClientRect(settings.handle, &rd);
     state.width  = rd.right;
@@ -444,10 +438,6 @@ struct pVideoD3D {
     if(device) { device->Release(); device = 0; }
     if(lpd3d) { lpd3d->Release(); lpd3d = 0; }
   }
-};
-
-DeclareVideo(D3D)
-
 };
 
 #undef D3DVERTEX

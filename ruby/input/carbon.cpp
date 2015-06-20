@@ -1,6 +1,6 @@
-namespace ruby {
+struct InputCarbon : Input {
+  ~InputCarbon() { term(); }
 
-struct pInputCarbon {
   struct Key {
     uint8_t id;
     string name;
@@ -25,7 +25,7 @@ struct pInputCarbon {
   }
 
   auto acquire() -> bool { return false; }
-  auto unacquire() -> bool { return false; }
+  auto release() -> bool { return false; }
   auto acquired() -> bool { return false; }
 
   auto assign(shared_pointer<HID::Device> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
@@ -178,8 +178,4 @@ struct pInputCarbon {
 
   auto term() -> void {
   }
-};
-
-DeclareInput(Carbon)
-
 };

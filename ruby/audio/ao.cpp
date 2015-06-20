@@ -1,8 +1,8 @@
 #include <ao/ao.h>
 
-namespace ruby {
+struct AudioAO : Audio {
+  ~AudioAO() { term(); }
 
-struct pAudioAO {
   int driver_id;
   ao_sample_format driver_format;
   ao_device* audio_device = nullptr;
@@ -10,15 +10,6 @@ struct pAudioAO {
   struct {
     unsigned frequency = 22050;
   } settings;
-
-  pAudioAO() {
-    ao_initialize();
-  }
-
-  ~pAudioAO() {
-    term();
-  //ao_shutdown(); //FIXME: this is causing a segfault for some reason when called ...
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Frequency) return true;
@@ -49,7 +40,7 @@ struct pAudioAO {
   }
 
   auto init() -> bool {
-    term();
+    ao_initialize();
 
     driver_id = ao_default_driver_id(); //ao_driver_id((const char*)driver)
     if(driver_id < 0) return false;
@@ -77,9 +68,6 @@ struct pAudioAO {
       ao_close(audio_device);
       audio_device = nullptr;
     }
+    ao_shutdown();
   }
-};
-
-DeclareAudio(AO)
-
 };

@@ -18,6 +18,8 @@
 
 #define LIBCO_C
 #include "libco.h"
+
+#define _BSD_SOURCE
 #include <stdlib.h>
 #include <ucontext.h>
 

@@ -1,8 +1,8 @@
 #include <alsa/asoundlib.h>
 
-namespace ruby {
+struct AudioALSA : Audio {
+  ~AudioALSA() { term(); }
 
-struct pAudioALSA {
   struct {
     snd_pcm_t* handle = nullptr;
     snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
@@ -22,10 +22,6 @@ struct pAudioALSA {
     unsigned frequency = 22050;
     unsigned latency = 60;
   } settings;
-
-  ~pAudioALSA() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
@@ -127,8 +123,6 @@ struct pAudioALSA {
   }
 
   auto init() -> bool {
-    term();
-
     if(snd_pcm_open(&device.handle, device.name, SND_PCM_STREAM_PLAYBACK, SND_PCM_NONBLOCK) < 0) {
       term();
       return false;
@@ -215,8 +209,4 @@ struct pAudioALSA {
       buffer.data = 0;
 	}
   }
-};
-
-DeclareAudio(ALSA)
-
 };

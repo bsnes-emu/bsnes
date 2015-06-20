@@ -57,7 +57,7 @@ auto mComboButton::selected() const -> ComboButtonItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {nullptr};
+  return {};
 }
 
 auto mComboButton::setParent(mObject* parent, signed offset) -> type& {

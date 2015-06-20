@@ -1,8 +1,8 @@
 #include <dsound.h>
 
-namespace ruby {
+struct AudioDS : Audio {
+  ~AudioDS() { term(); }
 
-struct pAudioDS {
   LPDIRECTSOUND ds = nullptr;
   LPDIRECTSOUNDBUFFER dsb_p = nullptr;
   LPDIRECTSOUNDBUFFER dsb_b = nullptr;
@@ -27,14 +27,6 @@ struct pAudioDS {
     unsigned frequency = 22050;
     unsigned latency = 120;
   } settings;
-
-  pAudioDS() {
-    settings.handle = GetDesktopWindow();
-  }
-
-  ~pAudioDS() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Handle) return true;
@@ -138,7 +130,7 @@ struct pAudioDS {
   }
 
   auto init() -> bool {
-    term();
+    settings.handle = GetDesktopWindow();
 
     device.rings   = 8;
     device.latency = settings.frequency * settings.latency / device.rings / 1000.0 + 0.5;
@@ -188,8 +180,4 @@ struct pAudioDS {
     if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = 0; }
     if(ds) { ds->Release(); ds = 0; }
   }
-};
-
-DeclareAudio(DS)
-
 };

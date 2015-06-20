@@ -406,6 +406,8 @@ struct mObject {
   mObject(const mObject&) = delete;
   mObject& operator=(const mObject&) = delete;
 
+  explicit operator bool() const;
+
   auto abstract() const -> bool;
   auto adjustOffset(signed displacement) -> type&;
   auto enabled(bool recursive = false) const -> bool;

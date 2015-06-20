@@ -1,8 +1,8 @@
 #include <assert.h>
 
-namespace ruby {
+struct VideoGDI : Video {
+  ~VideoGDI() { term(); }
 
-struct pVideoGDI {
   uint32_t* buffer = nullptr;
   HBITMAP bitmap = nullptr;
   HDC bitmapdc = nullptr;
@@ -11,18 +11,9 @@ struct pVideoGDI {
   struct {
     HWND handle = nullptr;
 
-    unsigned width;
-    unsigned height;
+    unsigned width = 0;
+    unsigned height = 0;
   } settings;
-
-  pVideoGDI() {
-    buffer = (uint32_t*)memory::allocate(1024 * 1024 * sizeof(uint32_t));
-  }
-
-  ~pVideoGDI() {
-    if(buffer) memory::free(buffer);
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -66,6 +57,8 @@ struct pVideoGDI {
   }
 
   auto init() -> bool {
+    buffer = (uint32_t*)memory::allocate(1024 * 1024 * sizeof(uint32_t));
+
     HDC hdc = GetDC(settings.handle);
     bitmapdc = CreateCompatibleDC(hdc);
     assert(bitmapdc);
@@ -91,9 +84,6 @@ struct pVideoGDI {
   auto term() -> void {
     DeleteObject(bitmap);
     DeleteDC(bitmapdc);
+    if(buffer) { memory::free(buffer); buffer = nullptr; }
   }
-};
-
-DeclareVideo(GDI)
-
 };

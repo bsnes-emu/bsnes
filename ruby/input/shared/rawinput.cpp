@@ -1,11 +1,12 @@
 #ifndef RUBY_INPUT_SHARED_RAWINPUT
 #define RUBY_INPUT_SHARED_RAWINPUT
 
-namespace ruby {
-
 auto CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
 struct RawInput {
+  Input& input;
+  RawInput(Input& input) : input(input) {}
+
   HANDLE mutex = nullptr;
   HWND hwnd = nullptr;
   bool ready = false;
@@ -155,8 +156,6 @@ auto WINAPI RawInputThreadProc(void*) -> DWORD {
 
 auto CALLBACK RawInputWindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {
   return rawinput.windowProc(hwnd, msg, wparam, lparam);
-}
-
 }
 
 #endif

@@ -1,17 +1,65 @@
 #include <ruby/ruby.hpp>
+using namespace nall;
+using namespace ruby;
+
+/* Shared */
 
 #undef deprecated
 #undef mkdir
 #undef usleep
-#include <ruby/implementation.cpp>
+
+#if defined(PLATFORM_XORG)
+  #include <X11/Xlib.h>
+  #include <X11/Xutil.h>
+  #include <X11/Xatom.h>
+#elif defined(PLATFORM_MACOSX)
+  #define decimal CocoaDecimal
+  #include <Cocoa/Cocoa.h>
+  #include <Carbon/Carbon.h>
+  #undef decimal
+#elif defined(PLATFORM_WINDOWS)
+  #include <windows.h>
+#endif
+
+/* Video */
+
+#if defined(VIDEO_CGL)
+  #include <ruby/video/cgl.cpp>
+#endif
+
+#if defined(VIDEO_DIRECT3D)
+  #include <ruby/video/direct3d.cpp>
+#endif
+
+#if defined(VIDEO_DIRECTDRAW)
+  #include <ruby/video/directdraw.cpp>
+#endif
+
+#if defined(VIDEO_GDI)
+  #include <ruby/video/gdi.cpp>
+#endif
+
+#if defined(VIDEO_GLX)
+  #include <ruby/video/glx.cpp>
+#endif
+
+#if defined(VIDEO_SDL)
+  #include <ruby/video/sdl.cpp>
+#endif
+
+#if defined(VIDEO_WGL)
+  #include <ruby/video/wgl.cpp>
+#endif
+
+#if defined(VIDEO_XSHM)
+  #include <ruby/video/xshm.cpp>
+#endif
+
+#if defined(VIDEO_XV)
+  #include <ruby/video/xv.cpp>
+#endif
 
 namespace ruby {
-
-VideoInterface video;
-AudioInterface audio;
-InputInterface input;
-
-/* VideoInterface */
 
 const string Video::Handle = "Handle";
 const string Video::Synchronize = "Synchronize";
@@ -22,61 +70,49 @@ const string Video::Shader = "Shader";
 const unsigned Video::FilterNearest = 0;
 const unsigned Video::FilterLinear = 1;
 
-auto VideoInterface::driver(string driver) -> void {
-  if(p) term();
+auto Video::create(const string& driver) -> Video* {
+  if(!driver) return create(optimalDriver());
 
-  if(!driver) driver = optimalDriver();
-
-  if(0);
-
-  #ifdef VIDEO_CGL
-  else if(driver == "OpenGL") p = new VideoCGL();
+  #if defined(VIDEO_CGL)
+  if(driver == "OpenGL") return new VideoCGL;
   #endif
 
-  #ifdef VIDEO_DIRECT3D
-  else if(driver == "Direct3D") p = new VideoD3D();
+  #if defined(VIDEO_DIRECT3D)
+  if(driver == "Direct3D") return new VideoD3D;
   #endif
 
-  #ifdef VIDEO_DIRECTDRAW
-  else if(driver == "DirectDraw") p = new VideoDD();
+  #if defined(VIDEO_DIRECTDRAW)
+  if(driver == "DirectDraw") return new VideoDD;
   #endif
 
-  #ifdef VIDEO_GDI
-  else if(driver == "GDI") p = new VideoGDI();
+  #if defined(VIDEO_GDI)
+  if(driver == "GDI") return new VideoGDI;
   #endif
 
-  #ifdef VIDEO_GLX
-  else if(driver == "OpenGL") p = new VideoGLX();
+  #if defined(VIDEO_GLX)
+  if(driver == "OpenGL") return new VideoGLX;
   #endif
 
-  #ifdef VIDEO_QTOPENGL
-  else if(driver == "Qt-OpenGL") p = new VideoQtOpenGL();
+  #if defined(VIDEO_SDL)
+  if(driver == "SDL") return new VideoSDL;
   #endif
 
-  #ifdef VIDEO_QTRASTER
-  else if(driver == "Qt-Raster") p = new VideoQtRaster();
+  #if defined(VIDEO_WGL)
+  if(driver == "OpenGL") return new VideoWGL;
   #endif
 
-  #ifdef VIDEO_SDL
-  else if(driver == "SDL") p = new VideoSDL();
+  #if defined(VIDEO_XSHM)
+  if(driver == "XShm") return new VideoXShm;
   #endif
 
-  #ifdef VIDEO_WGL
-  else if(driver == "OpenGL") p = new VideoWGL();
+  #if defined(VIDEO_XV)
+  if(driver == "X-Video") return new VideoXv;
   #endif
 
-  #ifdef VIDEO_XSHM
-  else if(driver == "XShm") p = new VideoXShm();
-  #endif
-
-  #ifdef VIDEO_XV
-  else if(driver == "X-Video") p = new VideoXv();
-  #endif
-
-  else p = new Video();
+  return new Video;
 }
 
-auto VideoInterface::optimalDriver() -> string {
+auto Video::optimalDriver() -> string {
   #if defined(VIDEO_WGL)
   return "OpenGL";
   #elif defined(VIDEO_DIRECT3D)
@@ -85,10 +121,8 @@ auto VideoInterface::optimalDriver() -> string {
   return "DirectDraw";
   #elif defined(VIDEO_GDI)
   return "GDI";
-
   #elif defined(VIDEO_CGL)
   return "OpenGL";
-
   #elif defined(VIDEO_GLX)
   return "OpenGL";
   #elif defined(VIDEO_XV)
@@ -97,13 +131,12 @@ auto VideoInterface::optimalDriver() -> string {
   return "XShm";
   #elif defined(VIDEO_SDL)
   return "SDL";
-
   #else
   return "None";
   #endif
 }
 
-auto VideoInterface::safestDriver() -> string {
+auto Video::safestDriver() -> string {
   #if defined(VIDEO_DIRECT3D)
   return "Direct3D";
   #elif defined(VIDEO_WGL)
@@ -112,10 +145,8 @@ auto VideoInterface::safestDriver() -> string {
   return "DirectDraw";
   #elif defined(VIDEO_GDI)
   return "GDI";
-
   #elif defined(VIDEO_CGL)
   return "OpenGL";
-
   #elif defined(VIDEO_XSHM)
   return "XShm";
   #elif defined(VIDEO_SDL)
@@ -124,83 +155,90 @@ auto VideoInterface::safestDriver() -> string {
   return "X-Video";
   #elif defined(VIDEO_GLX)
   return "OpenGL";
-
   #else
   return "None";
   #endif
 }
 
-auto VideoInterface::availableDrivers() -> string {
-  return
-
-  //Windows
+auto Video::availableDrivers() -> lstring {
+  return {
 
   #if defined(VIDEO_WGL)
-  "OpenGL;"
+  "OpenGL",
   #endif
 
   #if defined(VIDEO_DIRECT3D)
-  "Direct3D;"
+  "Direct3D",
   #endif
 
   #if defined(VIDEO_DIRECTDRAW)
-  "DirectDraw;"
+  "DirectDraw",
   #endif
 
   #if defined(VIDEO_GDI)
-  "GDI;"
+  "GDI",
   #endif
-
-  //OS X
 
   #if defined(VIDEO_CGL)
-  "OpenGL;"
+  "OpenGL",
   #endif
 
-  //Linux
-
   #if defined(VIDEO_GLX)
-  "OpenGL;"
+  "OpenGL",
   #endif
 
   #if defined(VIDEO_XV)
-  "X-Video;"
+  "X-Video",
   #endif
 
   #if defined(VIDEO_XSHM)
-  "XShm;"
+  "XShm",
   #endif
 
   #if defined(VIDEO_SDL)
-  "SDL;"
+  "SDL",
   #endif
 
-  "None";
+  "None"};
 }
 
-auto VideoInterface::init() -> bool {
-  if(!p) driver();
-  return p->init();
 }
 
-auto VideoInterface::term() -> void {
-  if(p) {
-    p->term();
-    delete p;
-    p = nullptr;
-  }
-}
+/* Audio */
 
-VideoInterface::~VideoInterface() { term(); }
-auto VideoInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
-auto VideoInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
-auto VideoInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
-auto VideoInterface::lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool { return p ? p->lock(data, pitch, width, height) : false; }
-auto VideoInterface::unlock() -> void { if(p) p->unlock(); }
-auto VideoInterface::clear() -> void { if(p) p->clear(); }
-auto VideoInterface::refresh() -> void { if(p) p->refresh(); }
+#if defined(AUDIO_ALSA)
+  #include <ruby/audio/alsa.cpp>
+#endif
 
-/* AudioInterface */
+#if defined(AUDIO_AO)
+  #include <ruby/audio/ao.cpp>
+#endif
+
+#if defined(AUDIO_DIRECTSOUND)
+  #include <ruby/audio/directsound.cpp>
+#endif
+
+#if defined(AUDIO_OPENAL)
+  #include <ruby/audio/openal.cpp>
+#endif
+
+#if defined(AUDIO_OSS)
+  #include <ruby/audio/oss.cpp>
+#endif
+
+#if defined(AUDIO_PULSEAUDIO)
+  #include <ruby/audio/pulseaudio.cpp>
+#endif
+
+#if defined(AUDIO_PULSEAUDIOSIMPLE)
+  #include <ruby/audio/pulseaudiosimple.cpp>
+#endif
+
+#if defined(AUDIO_XAUDIO2)
+  #include <ruby/audio/xaudio2.cpp>
+#endif
+
+namespace ruby {
 
 const string Audio::Device = "Device";
 const string Audio::Handle = "Handle";
@@ -208,80 +246,75 @@ const string Audio::Synchronize = "Synchronize";
 const string Audio::Frequency = "Frequency";
 const string Audio::Latency = "Latency";
 
-auto AudioInterface::driver(string driver) -> void {
-  if(p) term();
+auto Audio::create(const string& driver) -> Audio* {
+  if(!driver) return create(optimalDriver());
 
-  if(!driver) driver = optimalDriver();
-
-  if(0);
-
-  #ifdef AUDIO_ALSA
-  else if(driver == "ALSA") p = new AudioALSA();
+  #if defined(AUDIO_ALSA)
+  if(driver == "ALSA") return new AudioALSA;
   #endif
 
-  #ifdef AUDIO_AO
-  else if(driver == "libao") p = new AudioAO();
+  #if defined(AUDIO_AO)
+  if(driver == "libao") return new AudioAO;
   #endif
 
-  #ifdef AUDIO_DIRECTSOUND
-  else if(driver == "DirectSound") p = new AudioDS();
+  #if defined(AUDIO_DIRECTSOUND)
+  if(driver == "DirectSound") return new AudioDS;
   #endif
 
-  #ifdef AUDIO_OPENAL
-  else if(driver == "OpenAL") p = new AudioOpenAL();
+  #if defined(AUDIO_OPENAL)
+  if(driver == "OpenAL") return new AudioOpenAL;
   #endif
 
-  #ifdef AUDIO_OSS
-  else if(driver == "OSS") p = new AudioOSS();
+  #if defined(AUDIO_OSS)
+  if(driver == "OSS") return new AudioOSS;
   #endif
 
-  #ifdef AUDIO_PULSEAUDIO
-  else if(driver == "PulseAudio") p = new AudioPulseAudio();
+  #if defined(AUDIO_PULSEAUDIO)
+  if(driver == "PulseAudio") return new AudioPulseAudio;
   #endif
 
-  #ifdef AUDIO_PULSEAUDIOSIMPLE
-  else if(driver == "PulseAudioSimple") p = new AudioPulseAudioSimple();
+  #if defined(AUDIO_PULSEAUDIOSIMPLE)
+  if(driver == "PulseAudioSimple") return new AudioPulseAudioSimple;
   #endif
 
-  #ifdef AUDIO_XAUDIO2
-  else if(driver == "XAudio2") p = new AudioXAudio2();
+  #if defined(AUDIO_XAUDIO2)
+  if(driver == "XAudio2") return new AudioXAudio2;
   #endif
 
-  else p = new Audio();
+  return new Audio;
 }
 
-auto AudioInterface::optimalDriver() -> string {
+auto Audio::optimalDriver() -> string {
   #if defined(AUDIO_XAUDIO2)
   return "XAudio2";
   #elif defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
-
   #elif defined(AUDIO_ALSA)
   return "ALSA";
-  #elif defined(AUDIO_OPENAL)
-  return "OpenAL";
   #elif defined(AUDIO_OSS)
   return "OSS";
+  #elif defined(AUDIO_OPENAL)
+  return "OpenAL";
   #elif defined(AUDIO_PULSEAUDIO)
   return "PulseAudio";
   #elif defined(AUDIO_PULSEAUDIOSIMPLE)
   return "PulseAudioSimple";
   #elif defined(AUDIO_AO)
   return "libao";
-
   #else
   return "None";
   #endif
 }
 
-auto AudioInterface::safestDriver() -> string {
+auto Audio::safestDriver() -> string {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
   #elif defined(AUDIO_XAUDIO2)
   return "XAudio2";
-
   #elif defined(AUDIO_ALSA)
   return "ALSA";
+  #elif defined(AUDIO_OSS)
+  return "OSS";
   #elif defined(AUDIO_OPENAL)
   return "OpenAL";
   #elif defined(AUDIO_PULSEAUDIO)
@@ -290,77 +323,74 @@ auto AudioInterface::safestDriver() -> string {
   return "PulseAudioSimple";
   #elif defined(AUDIO_AO)
   return "libao";
-  #elif defined(AUDIO_OSS)
-  return "OSS";
-
   #else
   return "None";
   #endif
 }
 
-auto AudioInterface::availableDrivers() -> string {
-  return
-
-  //Windows
+auto Audio::availableDrivers() -> lstring {
+  return {
 
   #if defined(AUDIO_XAUDIO2)
-  "XAudio2;"
+  "XAudio2",
   #endif
 
   #if defined(AUDIO_DIRECTSOUND)
-  "DirectSound;"
+  "DirectSound",
   #endif
-
-  //Linux
 
   #if defined(AUDIO_ALSA)
-  "ALSA;"
-  #endif
-
-  #if defined(AUDIO_OPENAL)
-  "OpenAL;"
+  "ALSA",
   #endif
 
   #if defined(AUDIO_OSS)
-  "OSS;"
+  "OSS",
+  #endif
+
+  #if defined(AUDIO_OPENAL)
+  "OpenAL",
   #endif
 
   #if defined(AUDIO_PULSEAUDIO)
-  "PulseAudio;"
+  "PulseAudio",
   #endif
 
   #if defined(AUDIO_PULSEAUDIOSIMPLE)
-  "PulseAudioSimple;"
+  "PulseAudioSimple",
   #endif
 
   #if defined(AUDIO_AO)
-  "libao;"
+  "libao",
   #endif
 
-  "None";
+  "None"};
 }
 
-auto AudioInterface::init() -> bool {
-  if(!p) driver();
-  return p->init();
 }
 
-auto AudioInterface::term() -> void {
-  if(p) {
-    p->term();
-    delete p;
-    p = nullptr;
-  }
-}
+/* Input */
 
-AudioInterface::~AudioInterface() { term(); }
-auto AudioInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
-auto AudioInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
-auto AudioInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
-auto AudioInterface::sample(uint16_t left, uint16_t right) -> void { if(p) p->sample(left, right); }
-auto AudioInterface::clear() -> void { if(p) p->clear(); }
+#if defined(INPUT_CARBON)
+  #include <ruby/input/carbon.cpp>
+#endif
 
-/* InputInterface */
+#if defined(INPUT_SDL)
+  #include <ruby/input/sdl.cpp>
+#endif
+
+#if defined(INPUT_UDEV)
+  #include <ruby/input/udev.cpp>
+#endif
+
+#if defined(INPUT_WINDOWS)
+  #include <ruby/input/windows.cpp>
+#endif
+
+#if defined(INPUT_XLIB)
+  #include <ruby/input/xlib.cpp>
+#endif
+
+namespace ruby {
 
 const string Input::Handle = "Handle";
 const string Input::KeyboardSupport = "KeyboardSupport";
@@ -368,127 +398,88 @@ const string Input::MouseSupport = "MouseSupport";
 const string Input::JoypadSupport = "JoypadSupport";
 const string Input::JoypadRumbleSupport = "JoypadRumbleSupport";
 
-auto InputInterface::driver(string driver) -> void {
-  if(p) term();
+auto Input::create(const string& driver) -> Input* {
+  if(!driver) return create(optimalDriver());
 
-  if(!driver) driver = optimalDriver();
-
-  if(0);
-
-  #ifdef INPUT_WINDOWS
-  else if(driver == "Windows") p = new InputWindows();
+  #if defined(INPUT_WINDOWS)
+  if(driver == "Windows") return new InputWindows;
   #endif
 
-  #ifdef INPUT_CARBON
-  else if(driver == "Carbon") p = new InputCarbon();
+  #if defined(INPUT_CARBON)
+  if(driver == "Carbon") return new InputCarbon;
   #endif
 
-  #ifdef INPUT_UDEV
-  else if(driver == "udev") p = new InputUdev();
+  #if defined(INPUT_UDEV)
+  if(driver == "udev") return new InputUdev;
   #endif
 
-  #ifdef INPUT_SDL
-  else if(driver == "SDL") p = new InputSDL();
+  #if defined(INPUT_SDL)
+  if(driver == "SDL") return new InputSDL;
   #endif
 
-  #ifdef INPUT_XLIB
-  else if(driver == "Xlib") p = new InputXlib();
+  #if defined(INPUT_XLIB)
+  if(driver == "Xlib") return new InputXlib;
   #endif
 
-  else p = new Input();
+  return new Input;
 }
 
-auto InputInterface::optimalDriver() -> string {
+auto Input::optimalDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
-
   #elif defined(INPUT_CARBON)
   return "Carbon";
-
   #elif defined(INPUT_UDEV)
   return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_XLIB)
   return "Xlib";
-
   #else
   return "None";
   #endif
 }
 
-auto InputInterface::safestDriver() -> string {
+auto Input::safestDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
-
   #elif defined(INPUT_CARBON)
   return "Carbon";
-
   #elif defined(INPUT_UDEV)
   return "udev";
   #elif defined(INPUT_SDL)
   return "SDL";
   #elif defined(INPUT_XLIB)
   return "Xlib";
-
   #else
   return "none";
   #endif
 }
 
-auto InputInterface::availableDrivers() -> string {
-  return
-
-  //Windows
+auto Input::availableDrivers() -> lstring {
+  return {
 
   #if defined(INPUT_WINDOWS)
-  "Windows;"
+  "Windows",
   #endif
-
-  //OS X
 
   #if defined(INPUT_CARBON)
-  "Carbon;"
+  "Carbon",
   #endif
 
-  //Linux
-
   #if defined(INPUT_UDEV)
-  "udev;"
+  "udev",
   #endif
 
   #if defined(INPUT_SDL)
-  "SDL;"
+  "SDL",
   #endif
 
   #if defined(INPUT_XLIB)
-  "Xlib;"
+  "Xlib",
   #endif
 
-  "None";
+  "None"};
 }
 
-auto InputInterface::init() -> bool {
-  if(!p) driver();
-  return p->init();
 }
-
-auto InputInterface::term() -> void {
-  if(p) {
-    p->term();
-    delete p;
-    p = nullptr;
-  }
-}
-
-InputInterface::~InputInterface() { term(); }
-auto InputInterface::cap(const string& name) -> bool { return p ? p->cap(name) : false; }
-auto InputInterface::get(const string& name) -> any { return p ? p->get(name) : false; }
-auto InputInterface::set(const string& name, const any& value) -> bool { return p ? p->set(name, value) : false; }
-auto InputInterface::acquire() -> bool { return p ? p->acquire() : false; }
-auto InputInterface::unacquire() -> bool { return p ? p->unacquire() : false; }
-auto InputInterface::acquired() -> bool { return p ? p->acquired() : false; }
-auto InputInterface::poll() -> vector<shared_pointer<HID::Device>> { return p ? p->poll() : vector<shared_pointer<HID::Device>>(); }
-auto InputInterface::rumble(uint64_t id, bool enable) -> bool { return p ? p->rumble(id, enable) : false; }
-
-};

@@ -36,8 +36,8 @@ auto Program::updateStatusText() -> void {
 }
 
 auto Program::updateVideoFilter() -> void {
-  if(config->video.filter == "None") video.set(Video::Filter, Video::FilterNearest);
-  if(config->video.filter == "Blur") video.set(Video::Filter, Video::FilterLinear);
+  if(config->video.filter == "None") video->set(Video::Filter, Video::FilterNearest);
+  if(config->video.filter == "Blur") video->set(Video::Filter, Video::FilterLinear);
 }
 
 auto Program::updateVideoPalette() -> void {
@@ -49,8 +49,9 @@ auto Program::updateVideoPalette() -> void {
 }
 
 auto Program::updateAudio() -> void {
-  audio.set(Audio::Frequency, config->audio.frequency);
-  audio.set(Audio::Latency, config->audio.latency);
+  if(!audio) return;
+  audio->set(Audio::Frequency, config->audio.frequency);
+  audio->set(Audio::Latency, config->audio.latency);
   if(auto resampler = config->audio.resampler) {
     if(resampler == "Linear" ) dsp.setResampler(DSP::ResampleEngine::Linear);
     if(resampler == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);

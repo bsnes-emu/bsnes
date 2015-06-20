@@ -1,20 +1,18 @@
 #include "opengl/opengl.hpp"
 
-namespace ruby {
-  struct pVideoCGL;
-}
+struct VideoCGL;
 
 @interface RubyVideoCGL : NSOpenGLView {
 @public
-  ruby::pVideoCGL* video;
+  ruby::VideoCGL* video;
 }
--(id) initWith:(ruby::pVideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
+-(id) initWith:(ruby::VideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
 -(void) reshape;
 @end
 
-namespace ruby {
+struct VideoCGL : Video, OpenGL {
+  ~VideoCGL() { term(); }
 
-struct pVideoCGL : OpenGL {
   RubyVideoCGL* view = nullptr;
 
   struct {
@@ -23,10 +21,6 @@ struct pVideoCGL : OpenGL {
     unsigned filter = Video::FilterNearest;
     string shader;
   } settings;
-
-  ~pVideoCGL() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -113,8 +107,6 @@ struct pVideoCGL : OpenGL {
   }
 
   auto init() -> bool {
-    term();
-
     @autoreleasepool {
       NSOpenGLPixelFormatAttribute attributes[] = {
         NSOpenGLPFAOpenGLProfile, NSOpenGLProfileVersion3_2Core,
@@ -161,13 +153,9 @@ struct pVideoCGL : OpenGL {
   }
 };
 
-DeclareVideo(CGL)
-
-}
-
 @implementation RubyVideoCGL : NSOpenGLView
 
--(id) initWith:(ruby::pVideoCGL*)videoPointer pixelFormat:(NSOpenGLPixelFormat*)pixelFormat {
+-(id) initWith:(ruby::VideoCGL*)videoPointer pixelFormat:(NSOpenGLPixelFormat*)pixelFormat {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:pixelFormat]) {
     video = videoPointer;
   }

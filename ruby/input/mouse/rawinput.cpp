@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_MOUSE_RAWINPUT
 #define RUBY_INPUT_MOUSE_RAWINPUT
 
-namespace ruby {
-
 struct InputMouseRawInput {
+  Input& input;
+  InputMouseRawInput(Input& input) : input(input) {}
+
   uintptr_t handle = 0;
   bool mouseAcquired = false;
 
@@ -24,7 +25,7 @@ struct InputMouseRawInput {
     return true;
   }
 
-  auto unacquire() -> bool {
+  auto release() -> bool {
     if(mouseAcquired == true) {
       mouseAcquired = false;
       ReleaseCapture();
@@ -70,7 +71,7 @@ struct InputMouseRawInput {
   auto assign(unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = ms.hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(ms.hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(ms.hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -114,10 +115,8 @@ struct InputMouseRawInput {
   }
 
   auto term() -> void {
-    unacquire();
+    release();
   }
 };
-
-}
 
 #endif

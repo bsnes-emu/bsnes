@@ -63,7 +63,7 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
   uint32* output;
   unsigned length;
 
-  if(video.lock(output, length, width, height)) {
+  if(video->lock(output, length, width, height)) {
     pitch >>= 2, length >>= 2;
 
     for(auto y : range(height)) {
@@ -89,8 +89,8 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
       }
     }
 
-    video.unlock();
-    video.refresh();
+    video->unlock();
+    video->refresh();
   }
 
   static unsigned frameCounter = 0;
@@ -110,7 +110,7 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
   dsp.sample(samples);
   while(dsp.pending()) {
     dsp.read(samples);
-    audio.sample(samples[0], samples[1]);
+    audio->sample(samples[0], samples[1]);
   }
 }
 

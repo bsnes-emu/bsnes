@@ -7,11 +7,11 @@
 #include "keyboard/xlib.cpp"
 #include "mouse/xlib.cpp"
 
-namespace ruby {
-
-struct pInputXlib {
+struct InputXlib : Input {
   InputKeyboardXlib xlibKeyboard;
   InputMouseXlib xlibMouse;
+  InputXlib() : xlibKeyboard(*this), xlibMouse(*this) {}
+  ~InputXlib() { term(); }
 
   struct Settings {
     uintptr_t handle = 0;
@@ -41,8 +41,8 @@ struct pInputXlib {
     return xlibMouse.acquire();
   }
 
-  auto unacquire() -> bool {
-    return xlibMouse.unacquire();
+  auto release() -> bool {
+    return xlibMouse.release();
   }
 
   auto acquired() -> bool {
@@ -71,7 +71,3 @@ struct pInputXlib {
     xlibMouse.term();
   }
 };
-
-DeclareInput(Xlib)
-
-}

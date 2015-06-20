@@ -3,9 +3,9 @@
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
 
-namespace ruby {
+struct VideoGLX : Video, OpenGL {
+  ~VideoGLX() { term(); }
 
-struct pVideoGLX : OpenGL {
   auto (*glXCreateContextAttribs)(Display*, GLXFBConfig, GLXContext, signed, const signed*) -> GLXContext = nullptr;
   auto (*glXSwapInterval)(signed) -> signed = nullptr;
 
@@ -30,10 +30,6 @@ struct pVideoGLX : OpenGL {
     unsigned filter = 1;  //linear
     string shader;
   } settings;
-
-  ~pVideoGLX() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -128,8 +124,6 @@ struct pVideoGLX : OpenGL {
   }
 
   auto init() -> bool {
-    term();
-
     display = XOpenDisplay(0);
     screen = DefaultScreen(display);
 
@@ -238,8 +232,4 @@ struct pVideoGLX : OpenGL {
       display = nullptr;
     }
   }
-};
-
-DeclareVideo(GLX)
-
 };

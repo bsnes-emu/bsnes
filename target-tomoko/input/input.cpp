@@ -131,7 +131,6 @@ auto InputMapping::deviceName() -> string {
 
 InputManager::InputManager() {
   inputManager = this;
-  input.onChange = {&InputManager::onChange, this};
 
   for(auto& emulator : program->emulators) {
     Configuration::Node nodeEmulator;
@@ -175,7 +174,6 @@ InputManager::InputManager() {
   appendHotkeys();
   config.load({configpath(), "tomoko/input.bml"});
   config.save({configpath(), "tomoko/input.bml"});
-  poll();  //will call bind();
 }
 
 auto InputManager::bind() -> void {
@@ -195,7 +193,7 @@ auto InputManager::bind() -> void {
 }
 
 auto InputManager::poll() -> void {
-  auto devices = input.poll();
+  auto devices = input->poll();
   bool changed = devices.size() != this->devices.size();
   if(changed == false) {
     for(auto n : range(devices)) {

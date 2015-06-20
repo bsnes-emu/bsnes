@@ -1,9 +1,9 @@
 #include <pulse/simple.h>
 #include <pulse/error.h>
 
-namespace ruby {
+struct AudioPulseAudioSimple : Audio {
+  ~AudioPulseAudioSimple() { term(); }
 
-struct pAudioPulseAudioSimple {
   struct {
     pa_simple* handle = nullptr;
     pa_sample_spec spec;
@@ -17,10 +17,6 @@ struct pAudioPulseAudioSimple {
   struct {
     unsigned frequency = 22050;
   } settings;
-
-  ~pAudioPulseAudioSimple() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Frequency) return true;
@@ -57,8 +53,6 @@ struct pAudioPulseAudioSimple {
   }
 
   auto init() -> bool {
-    term();
-
     device.spec.format   = PA_SAMPLE_S16LE;
     device.spec.channels = 2;
     device.spec.rate     = settings.frequency;
@@ -98,8 +92,4 @@ struct pAudioPulseAudioSimple {
       buffer.data = nullptr;
     }
   }
-};
-
-DeclareAudio(PulseAudioSimple)
-
 };

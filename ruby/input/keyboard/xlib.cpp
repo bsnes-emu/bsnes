@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_KEYBOARD_XLIB
 #define RUBY_INPUT_KEYBOARD_XLIB
 
-namespace ruby {
-
 struct InputKeyboardXlib {
+  Input& input;
+  InputKeyboardXlib(Input& input) : input(input) {}
+
   shared_pointer<HID::Keyboard> hid{new HID::Keyboard};
 
   Display* display = nullptr;
@@ -18,7 +19,7 @@ struct InputKeyboardXlib {
   auto assign(unsigned inputID, bool value) -> void {
     auto& group = hid->buttons();
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -168,7 +169,5 @@ struct InputKeyboardXlib {
     }
   }
 };
-
-}
 
 #endif

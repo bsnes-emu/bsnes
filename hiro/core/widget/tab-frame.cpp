@@ -78,7 +78,7 @@ auto mTabFrame::selected() const -> TabFrameItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {nullptr};
+  return {};
 }
 
 auto mTabFrame::setEdge(Edge edge) -> type& {

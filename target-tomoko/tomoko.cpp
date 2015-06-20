@@ -1,4 +1,7 @@
 #include "tomoko.hpp"
+Video* video = nullptr;
+Audio* audio = nullptr;
+Input* input = nullptr;
 Emulator::Interface* emulator = nullptr;
 
 #include <nall/main.hpp>

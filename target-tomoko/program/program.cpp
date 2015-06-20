@@ -13,6 +13,7 @@ Program::Program() {
   program = this;
   directory::create({configpath(), "tomoko/"});
   Application::onMain({&Program::main, this});
+  Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
 
   emulators.append(new Famicom::Interface);
   emulators.append(new SuperFamicom::Interface);
@@ -29,22 +30,32 @@ Program::Program() {
 
   presentation->setVisible();
 
-  video.driver(config->video.driver);
-  video.set(Video::Handle, presentation->viewport.handle());
-  video.set(Video::Synchronize, config->video.synchronize);
-  if(!video.init()) { video.driver("None"); video.init(); }
+  video = Video::create(config->video.driver);
+  video->set(Video::Handle, presentation->viewport.handle());
+  video->set(Video::Synchronize, config->video.synchronize);
+  if(!video->init()) {
+    delete video;
+    video = Video::create("None");
+  }
 
-  audio.driver(config->audio.driver);
-  audio.set(Audio::Device, config->audio.device);
-  audio.set(Audio::Handle, presentation->viewport.handle());
-  audio.set(Audio::Synchronize, config->audio.synchronize);
-  audio.set(Audio::Frequency, 96000u);
-  audio.set(Audio::Latency, 80u);
-  if(!audio.init()) { audio.driver("None"); audio.init(); }
+  audio = Audio::create(config->audio.driver);
+  audio->set(Audio::Device, config->audio.device);
+  audio->set(Audio::Handle, presentation->viewport.handle());
+  audio->set(Audio::Synchronize, config->audio.synchronize);
+  audio->set(Audio::Frequency, 96000u);
+  audio->set(Audio::Latency, 80u);
+  if(!audio->init()) {
+    delete audio;
+    audio = Audio::create("None");
+  }
 
-  input.driver(config->input.driver);
-  input.set(Input::Handle, presentation->viewport.handle());
-  if(!input.init()) { input.driver("None"); input.init(); }
+  input = Input::create(config->input.driver);
+  input->set(Input::Handle, presentation->viewport.handle());
+  input->onChange({&InputManager::onChange, inputManager});
+  if(!input->init()) {
+    delete input;
+    input = Input::create("None");
+  }
 
   dsp.setPrecision(16);
   dsp.setBalance(0.0);
@@ -63,7 +74,7 @@ auto Program::main() -> void {
   inputManager->poll();
 
   if(!emulator || !emulator->loaded() || pause) {
-    audio.clear();
+    audio->clear();
     usleep(20 * 1000);
     return;
   }
@@ -75,8 +86,8 @@ auto Program::quit() -> void {
   unloadMedia();
   config->quit();
   inputManager->quit();
-  video.term();
-  audio.term();
-  input.term();
+  delete video;
+  delete audio;
+  delete input;
   Application::quit();
 }

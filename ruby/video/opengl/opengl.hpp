@@ -13,8 +13,6 @@
   #error "ruby::OpenGL: unsupported platform"
 #endif
 
-namespace ruby {
-
 #include "bind.hpp"
 #include "shaders.hpp"
 #include "utility.hpp"
@@ -94,5 +92,3 @@ struct OpenGL : OpenGLProgram {
 #include "surface.hpp"
 #include "program.hpp"
 #include "main.hpp"
-
-}

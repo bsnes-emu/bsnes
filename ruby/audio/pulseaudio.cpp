@@ -1,8 +1,8 @@
 #include <pulse/pulseaudio.h>
 
-namespace ruby {
+struct AudioPulseAudio : Audio {
+  ~AudioPulseAudio() { term(); }
 
-struct pAudioPulseAudio {
   struct {
     pa_mainloop* mainloop = nullptr;
     pa_context* context = nullptr;
@@ -23,10 +23,6 @@ struct pAudioPulseAudio {
     unsigned frequency = 22050;
     unsigned latency = 60;
   } settings;
-
-  ~pAudioPulseAudio() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
@@ -161,7 +157,3 @@ struct pAudioPulseAudio {
     }
   }
 };
-
-DeclareAudio(PulseAudio)
-
-}

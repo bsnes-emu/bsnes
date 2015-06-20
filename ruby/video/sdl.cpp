@@ -5,9 +5,9 @@
 #include <X11/extensions/XShm.h>
 #include <SDL/SDL.h>
 
-namespace ruby {
+struct VideoSDL : Video {
+  ~VideoSDL() { term(); }
 
-struct pVideoSDL {
   Display* display = nullptr;
   SDL_Surface* screen = nullptr;
   SDL_Surface* buffer = nullptr;
@@ -20,10 +20,6 @@ struct pVideoSDL {
     unsigned width = 0;
     unsigned height = 0;
   } settings;
-
-  ~pVideoSDL() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -136,8 +132,4 @@ struct pVideoSDL {
     SDL_FreeSurface(buffer);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
   }
-};
-
-DeclareVideo(SDL)
-
 };

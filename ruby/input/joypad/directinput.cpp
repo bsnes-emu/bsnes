@@ -1,13 +1,14 @@
 #ifndef RUBY_INPUT_JOYPAD_DIRECTINPUT
 #define RUBY_INPUT_JOYPAD_DIRECTINPUT
 
-namespace ruby {
-
 auto CALLBACK DirectInput_EnumJoypadsCallback(const DIDEVICEINSTANCE* instance, void* p) -> BOOL;
 auto CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) -> BOOL;
 auto CALLBACK DirectInput_EnumJoypadEffectsCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) -> BOOL;
 
 struct InputJoypadDirectInput {
+  Input& input;
+  InputJoypadDirectInput(Input& input) : input(input) {}
+
   struct Joypad {
     shared_pointer<HID::Joypad> hid{new HID::Joypad};
 
@@ -30,7 +31,7 @@ struct InputJoypadDirectInput {
   auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -211,8 +212,6 @@ auto CALLBACK DirectInput_EnumJoypadAxesCallback(const DIDEVICEOBJECTINSTANCE* i
 
 auto CALLBACK DirectInput_EnumJoypadEffectsCallback(const DIDEVICEOBJECTINSTANCE* instance, void* p) -> BOOL {
   return ((InputJoypadDirectInput*)p)->initEffect(instance);
-}
-
 }
 
 #endif

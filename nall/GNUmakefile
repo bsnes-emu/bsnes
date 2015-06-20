@@ -15,18 +15,20 @@ ifeq ($(platform),)
   else ifneq ($(findstring Windows,$(uname)),)
     platform := windows
     delete = del $(subst /,\,$1)
-  else ifneq ($(findstring CYGWIN,$(uname)),)
+  else ifneq ($(findstring _NT,$(uname)),)
     platform := windows
     delete = del $(subst /,\,$1)
   else ifneq ($(findstring Darwin,$(uname)),)
     platform := macosx
     delete = rm -f $1
+  else ifneq ($(findstring Linux,$(uname)),)
+    platform := linux
+    delete = rm -f $1
   else ifneq ($(findstring BSD,$(uname)),)
     platform := bsd
     delete = rm -f $1
   else
-    platform := linux
-    delete = rm -f $1
+    $(error unknown platform, please specify manually.)
   endif
 endif
 
@@ -44,6 +46,8 @@ ifeq ($(compiler),)
     cppflags := -x c++ -std=gnu++14
   else ifeq ($(platform),macosx)
     compiler := clang++
+  else ifeq ($(platform),linux)
+    compiler := g++-4.9
   else ifeq ($(platform),bsd)
     compiler := g++49
   else

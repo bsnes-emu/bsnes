@@ -43,7 +43,6 @@ PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers = nullptr;
 PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers = nullptr;
 PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer = nullptr;
 PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D = nullptr;
-PFNGLACTIVETEXTUREPROC glActiveTexture = nullptr;
 
 static bool OpenGLBind() {
   #define bind(prototype, function) \
@@ -90,7 +89,6 @@ static bool OpenGLBind() {
   bind(PFNGLDELETEFRAMEBUFFERSPROC, glDeleteFramebuffers);
   bind(PFNGLBINDFRAMEBUFFERPROC, glBindFramebuffer);
   bind(PFNGLFRAMEBUFFERTEXTURE2DPROC, glFramebufferTexture2D);
-  bind(PFNGLACTIVETEXTUREPROC, glActiveTexture);
 
   #undef bind
 

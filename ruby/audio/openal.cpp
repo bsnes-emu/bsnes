@@ -6,9 +6,9 @@
   #include <AL/alc.h>
 #endif
 
-namespace ruby {
+struct AudioOpenAL : Audio {
+  ~AudioOpenAL() { term(); }
 
-struct pAudioOpenAL {
   struct {
     ALCdevice* handle = nullptr;
     ALCcontext* context = nullptr;
@@ -29,10 +29,6 @@ struct pAudioOpenAL {
     unsigned frequency = 22050;
     unsigned latency = 40;
   } settings;
-
-  ~pAudioOpenAL() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Synchronize) return true;
@@ -195,8 +191,4 @@ private:
     buffer.size = settings.frequency * settings.latency / 1000.0 + 0.5;
     buffer.data = new uint32_t[buffer.size]();
   }
-};
-
-DeclareAudio(OpenAL)
-
 };

@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_JOYPAD_SDL
 #define RUBY_INPUT_JOYPAD_SDL
 
-namespace ruby {
-
 struct InputJoypadSDL {
+  Input& input;
+  InputJoypadSDL(Input& input) : input(input) {}
+
   struct Joypad {
     shared_pointer<HID::Joypad> hid{new HID::Joypad};
 
@@ -15,7 +16,7 @@ struct InputJoypadSDL {
   auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -74,7 +75,5 @@ struct InputJoypadSDL {
     SDL_QuitSubSystem(SDL_INIT_JOYSTICK);
   }
 };
-
-}
 
 #endif

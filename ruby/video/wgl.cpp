@@ -3,9 +3,9 @@
 #define WGL_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define WGL_CONTEXT_MINOR_VERSION_ARB 0x2092
 
-namespace ruby {
+struct VideoWGL : Video, OpenGL {
+  ~VideoWGL() { term(); }
 
-struct pVideoWGL : OpenGL {
   HGLRC (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) = nullptr;
   BOOL (APIENTRY* wglSwapInterval)(int) = nullptr;
 
@@ -20,10 +20,6 @@ struct pVideoWGL : OpenGL {
     unsigned filter = Video::FilterNearest;
     string shader;
   } settings;
-
-  ~pVideoWGL() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -95,8 +91,6 @@ struct pVideoWGL : OpenGL {
   }
 
   auto init() -> bool {
-    term();
-
     GLuint pixel_format;
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
@@ -145,8 +139,4 @@ struct pVideoWGL : OpenGL {
       wglcontext = nullptr;
     }
   }
-};
-
-DeclareVideo(WGL)
-
 };

@@ -19,9 +19,10 @@ typedef DWORD WINAPI (*pXInputPowerOffController)(DWORD dwUserIndex);
 
 #define XINPUT_GAMEPAD_GUIDE  0x0400
 
-namespace ruby {
-
 struct InputJoypadXInput {
+  Input& input;
+  InputJoypadXInput(Input& input) : input(input) {}
+
   HMODULE libxinput = nullptr;
   pXInputGetStateEx XInputGetStateEx = nullptr;
   pXInputSetState XInputSetState = nullptr;
@@ -35,7 +36,7 @@ struct InputJoypadXInput {
   auto assign(shared_pointer<HID::Joypad> hid, unsigned groupID, unsigned inputID, int16_t value) -> void {
     auto& group = hid->group(groupID);
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(hid, groupID, inputID, group.input(inputID).value(), value);
+    input.doChange(hid, groupID, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -157,7 +158,5 @@ struct InputJoypadXInput {
     libxinput = nullptr;
   }
 };
-
-}
 
 #endif

@@ -26,6 +26,11 @@ auto mObject::destruct() -> void {
 
 //
 
+//used to test if returned items "exist" from eg Window::layout(), ListView::selected(), etc.
+mObject::operator bool() const {
+  return parent() || !abstract();
+}
+
 //this is used to control dynamic allocation of pObject delegates
 //an mObject is abstract only if it has no top-level object (eg a Button not attached to any Window)
 //if the mObject is not abstract, the pObject delegate is allocated immediately

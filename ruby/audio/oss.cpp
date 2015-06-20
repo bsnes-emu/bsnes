@@ -18,9 +18,9 @@
   #define SNDCTL_DSP_POLICY _IOW('P', 45, signed)
 #endif
 
-namespace ruby {
+struct AudioOSS : Audio {
+  ~AudioOSS() { term(); }
 
-struct pAudioOSS {
   struct {
     signed fd = -1;
     signed format = AFMT_S16_LE;
@@ -32,10 +32,6 @@ struct pAudioOSS {
     bool synchronize = true;
     unsigned frequency = 22050;
   } settings;
-
-  ~pAudioOSS() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Audio::Device) return true;
@@ -82,8 +78,6 @@ struct pAudioOSS {
   }
 
   auto init() -> bool {
-    term();
-
     device.fd = open(settings.device, O_WRONLY, O_NONBLOCK);
     if(device.fd < 0) return false;
 
@@ -118,8 +112,4 @@ private:
     settings.synchronize ? flags &=~ O_NONBLOCK : flags |= O_NONBLOCK;
     fcntl(device.fd, F_SETFL, flags);
   }
-};
-
-DeclareAudio(OSS)
-
 };

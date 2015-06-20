@@ -1,9 +1,10 @@
 #ifndef RUBY_INPUT_KEYBOARD_RAWINPUT
 #define RUBY_INPUT_KEYBOARD_RAWINPUT
 
-namespace ruby {
-
 struct InputKeyboardRawInput {
+  Input& input;
+  InputKeyboardRawInput(Input& input) : input(input) {}
+
   struct Key {
     uint16_t code;
     uint16_t flag;
@@ -29,7 +30,7 @@ struct InputKeyboardRawInput {
   auto assign(unsigned inputID, bool value) -> void {
     auto& group = kb.hid->buttons();
     if(group.input(inputID).value() == value) return;
-    if(input.onChange) input.onChange(kb.hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
+    input.doChange(kb.hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
     group.input(inputID).setValue(value);
   }
 
@@ -172,7 +173,5 @@ struct InputKeyboardRawInput {
   void term() {
   }
 };
-
-}
 
 #endif

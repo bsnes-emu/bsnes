@@ -8,23 +8,19 @@
 #include "joypad/xinput.cpp"
 #include "joypad/directinput.cpp"
 
-namespace ruby {
-
-struct pInputWindows {
+struct InputWindows : Input {
   InputKeyboardRawInput rawinputKeyboard;
   InputMouseRawInput rawinputMouse;
   InputJoypadXInput xinput;
   InputJoypadDirectInput directinput;
+  InputWindows() : rawinputKeyboard(*this), rawinputMouse(*this), xinput(*this), directinput(*this) {}
+  ~InputWindows() { term(); }
 
   LPDIRECTINPUT8 directinputContext = nullptr;
 
   struct Settings {
     uintptr_t handle = 0;
   } settings;
-
-  ~pInputWindows() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Input::Handle) return true;
@@ -52,8 +48,8 @@ struct pInputWindows {
     return rawinputMouse.acquire();
   }
 
-  auto unacquire() -> bool {
-    return rawinputMouse.unacquire();
+  auto release() -> bool {
+    return rawinputMouse.release();
   }
 
   auto acquired() -> bool {

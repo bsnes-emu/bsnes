@@ -6,9 +6,9 @@
 
 extern "C" auto XvShmCreateImage(Display*, XvPortID, signed, char*, signed, signed, XShmSegmentInfo*) -> XvImage*;
 
-namespace ruby {
+struct VideoXv : Video {
+  ~VideoXv() { term(); }
 
-struct pVideoXv {
   uint32_t* buffer = nullptr;
   uint8_t* ytable = nullptr;
   uint8_t* utable = nullptr;
@@ -50,10 +50,6 @@ struct pVideoXv {
     unsigned width = 0;
     unsigned height = 0;
   } settings;
-
-  ~pVideoXv() {
-    term();
-  }
 
   auto cap(const string& name) -> bool {
     if(name == Video::Handle) return true;
@@ -480,8 +476,4 @@ private:
       vtable[i] = v < 0 ? 0 : v > 255 ? 255 : v;
     }
   }
-};
-
-DeclareVideo(Xv)
-
 };

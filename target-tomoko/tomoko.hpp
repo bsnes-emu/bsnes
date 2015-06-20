@@ -1,12 +1,15 @@
-#include <emulator/emulator.hpp>
-extern Emulator::Interface* emulator;
-
 #include <nall/nall.hpp>
 #include <ruby/ruby.hpp>
 #include <hiro/hiro.hpp>
 using namespace nall;
 using namespace ruby;
 using namespace hiro;
+extern Video* video;
+extern Audio* audio;
+extern Input* input;
+
+#include <emulator/emulator.hpp>
+extern Emulator::Interface* emulator;
 
 #include "program/program.hpp"
 #include "configuration/configuration.hpp"

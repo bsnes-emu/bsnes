@@ -182,7 +182,7 @@ auto mListView::selected() const -> ListViewItem {
   for(auto& item : state.items) {
     if(item->selected()) return item;
   }
-  return {nullptr};
+  return {};
 }
 
 auto mListView::selectedItems() const -> vector<ListViewItem> {
