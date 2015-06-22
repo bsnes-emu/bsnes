@@ -5,7 +5,7 @@ namespace hiro {
 auto pKeyboard::poll() -> vector<bool> {
   vector<bool> result;
   char state[256];
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   XQueryKeymap(pApplication::display, state);
   #endif
   for(auto& code : settings->keycodes) {
@@ -16,7 +16,7 @@ auto pKeyboard::poll() -> vector<bool> {
 
 auto pKeyboard::pressed(unsigned code) -> bool {
   char state[256];
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   XQueryKeymap(pApplication::display, state);
   #endif
   return _pressed(state, code);
@@ -26,12 +26,12 @@ auto pKeyboard::_pressed(const char* state, uint16_t code) -> bool {
   uint8_t lo = code >> 0;
   uint8_t hi = code >> 8;
 
-  #if defined(PLATFORM_WINDOWS)
+  #if defined(DISPLAY_WINDOWS)
   if(lo && GetAsyncKeyState(lo) & 0x8000) return true;
   if(hi && GetAsyncKeyState(hi) & 0x8000) return true;
   #endif
 
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   if(lo && state[lo >> 3] & (1 << (lo & 7))) return true;
   if(hi && state[hi >> 3] & (1 << (hi & 7))) return true;
   #endif
@@ -223,7 +223,7 @@ auto pKeyboard::_translate(unsigned code) -> signed {
 
 auto pKeyboard::initialize() -> void {
   auto append = [](unsigned lo, unsigned hi = 0) {
-    #if defined(PLATFORM_XORG)
+    #if defined(DISPLAY_XORG)
     lo = lo ? (uint8_t)XKeysymToKeycode(pApplication::display, lo) : 0;
     hi = hi ? (uint8_t)XKeysymToKeycode(pApplication::display, hi) : 0;
     #endif
@@ -232,11 +232,11 @@ auto pKeyboard::initialize() -> void {
 
   #define map(name, ...) if(key == name) { append(__VA_ARGS__); continue; }
   for(auto& key : Keyboard::keys) {
-    #if defined(PLATFORM_WINDOWS)
+    #if defined(DISPLAY_WINDOWS)
       #include <hiro/platform/windows/keyboard.hpp>
     #endif
 
-    #if defined(PLATFORM_XORG)
+    #if defined(DISPLAY_XORG)
       #include <hiro/platform/xorg/keyboard.hpp>
     #endif
 

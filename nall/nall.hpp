@@ -70,7 +70,7 @@
   #include <nall/windows/utf8.hpp>
 #endif
 
-#if defined(PLATFORM_XORG)
+#if defined(API_POSIX)
   #include <nall/serial.hpp>
 #endif
 

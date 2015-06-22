@@ -5,8 +5,8 @@
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 
-#if !defined(PLATFORM_XORG) && !defined(PLATFORM_MACOSX)
-  #error "nall/serial: unsupported platform"
+#if !defined(API_POSIX)
+  #error "nall/serial: unsupported system"
 #endif
 
 #include <sys/ioctl.h>

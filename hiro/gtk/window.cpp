@@ -281,13 +281,13 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
 auto pWindow::setModal(bool modal) -> void {
   if(modal) {
     gtk_window_set_modal(GTK_WINDOW(widget), true);
-    while(state().modal) {
-      Application::processEvents();
+    while(!Application::state.quit && state().modal) {
       if(Application::state.onMain) {
         Application::doMain();
       } else {
         usleep(20 * 1000);
       }
+      Application::processEvents();
     }
     gtk_window_set_modal(GTK_WINDOW(widget), false);
   }

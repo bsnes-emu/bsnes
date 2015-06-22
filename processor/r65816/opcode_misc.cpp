@@ -1,12 +1,12 @@
-void R65816::op_nop() {
+auto R65816::op_nop() {
 L op_io_irq();
 }
 
-void R65816::op_wdm() {
+auto R65816::op_wdm() {
 L op_readpc();
 }
 
-void R65816::op_xba() {
+auto R65816::op_xba() {
   op_io();
 L op_io();
   regs.a.l ^= regs.a.h;
@@ -16,7 +16,7 @@ L op_io();
   regs.p.z = (regs.a.l == 0);
 }
 
-template<int adjust> void R65816::op_move_b() {
+auto R65816::op_move_b(signed adjust) {
   dp = op_readpc();
   sp = op_readpc();
   regs.db = dp;
@@ -29,7 +29,7 @@ L op_io();
   if(regs.a.w--) regs.pc.w -= 3;
 }
 
-template<int adjust> void R65816::op_move_w() {
+auto R65816::op_move_w(signed adjust) {
   dp = op_readpc();
   sp = op_readpc();
   regs.db = dp;
@@ -42,40 +42,40 @@ L op_io();
   if(regs.a.w--) regs.pc.w -= 3;
 }
 
-template<int vectorE, int vectorN> void R65816::op_interrupt_e() {
+auto R65816::op_interrupt_e(uint16 vector) {
   op_readpc();
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.p);
-  rd.l = op_readlong(vectorE + 0);
+  rd.l = op_readlong(vector + 0);
   regs.pc.b = 0;
   regs.p.i = 1;
   regs.p.d = 0;
-L rd.h = op_readlong(vectorE + 1);
+L rd.h = op_readlong(vector + 1);
   regs.pc.w = rd.w;
 }
 
-template<int vectorE, int vectorN> void R65816::op_interrupt_n() {
+auto R65816::op_interrupt_n(uint16 vector) {
   op_readpc();
   op_writestack(regs.pc.b);
   op_writestack(regs.pc.h);
   op_writestack(regs.pc.l);
   op_writestack(regs.p);
-  rd.l = op_readlong(vectorN + 0);
+  rd.l = op_readlong(vector + 0);
   regs.pc.b = 0x00;
   regs.p.i = 1;
   regs.p.d = 0;
-L rd.h = op_readlong(vectorN + 1);
+L rd.h = op_readlong(vector + 1);
   regs.pc.w = rd.w;
 }
 
-void R65816::op_stp() {
+auto R65816::op_stp() {
   while(regs.wai = true) {
 L   op_io();
   }
 }
 
-void R65816::op_wai() {
+auto R65816::op_wai() {
   regs.wai = true;
   while(regs.wai) {
 L   op_io();
@@ -83,40 +83,36 @@ L   op_io();
   op_io();
 }
 
-void R65816::op_xce() {
+auto R65816::op_xce() {
 L op_io_irq();
   bool carry = regs.p.c;
   regs.p.c = regs.e;
   regs.e = carry;
   if(regs.e) {
-    regs.p |= 0x30;
+    regs.p.m = 1;
+    regs.p.x = 1;
+    regs.x.h = 0x00;
+    regs.y.h = 0x00;
     regs.s.h = 0x01;
   }
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
-  }
-  update_table();
 }
 
-template<int mask, int value> void R65816::op_flag() {
+auto R65816::op_flag(bool& flag, bool value) {
 L op_io_irq();
-  regs.p = (regs.p & ~mask) | value;
+  flag = value;
 }
 
-template<int mode> void R65816::op_pflag_e() {
+auto R65816::op_pflag_e(bool mode) {
   rd.l = op_readpc();
 L op_io();
   regs.p = (mode ? regs.p | rd.l : regs.p & ~rd.l);
-  regs.p |= 0x30;
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
-  }
-  update_table();
+  regs.p.m = 1;
+  regs.p.x = 1;
+  regs.x.h = 0x00;
+  regs.y.h = 0x00;
 }
 
-template<int mode> void R65816::op_pflag_n() {
+auto R65816::op_pflag_n(bool mode) {
   rd.l = op_readpc();
 L op_io();
   regs.p = (mode ? regs.p | rd.l : regs.p & ~rd.l);
@@ -124,114 +120,113 @@ L op_io();
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-  update_table();
 }
 
-template<int from, int to> void R65816::op_transfer_b() {
+auto R65816::op_transfer_b(reg16_t& from, reg16_t& to) {
 L op_io_irq();
-  regs.r[to].l = regs.r[from].l;
-  regs.p.n = (regs.r[to].l & 0x80);
-  regs.p.z = (regs.r[to].l == 0);
+  to.l = from.l;
+  regs.p.n = (to.l & 0x80);
+  regs.p.z = (to.l == 0);
 }
 
-template<int from, int to> void R65816::op_transfer_w() {
+auto R65816::op_transfer_w(reg16_t& from, reg16_t& to) {
 L op_io_irq();
-  regs.r[to].w = regs.r[from].w;
-  regs.p.n = (regs.r[to].w & 0x8000);
-  regs.p.z = (regs.r[to].w == 0);
+  to.w = from.w;
+  regs.p.n = (to.w & 0x8000);
+  regs.p.z = (to.w == 0);
 }
 
-void R65816::op_tcs_e() {
+auto R65816::op_tcs_e() {
 L op_io_irq();
   regs.s.l = regs.a.l;
 }
 
-void R65816::op_tcs_n() {
+auto R65816::op_tcs_n() {
 L op_io_irq();
   regs.s.w = regs.a.w;
 }
 
-void R65816::op_tsx_b() {
+auto R65816::op_tsx_b() {
 L op_io_irq();
   regs.x.l = regs.s.l;
   regs.p.n = (regs.x.l & 0x80);
   regs.p.z = (regs.x.l == 0);
 }
 
-void R65816::op_tsx_w() {
+auto R65816::op_tsx_w() {
 L op_io_irq();
   regs.x.w = regs.s.w;
   regs.p.n = (regs.x.w & 0x8000);
   regs.p.z = (regs.x.w == 0);
 }
 
-void R65816::op_txs_e() {
+auto R65816::op_txs_e() {
 L op_io_irq();
   regs.s.l = regs.x.l;
 }
 
-void R65816::op_txs_n() {
+auto R65816::op_txs_n() {
 L op_io_irq();
   regs.s.w = regs.x.w;
 }
 
-template<int n> void R65816::op_push_b() {
+auto R65816::op_push_b(reg16_t& reg) {
   op_io();
-L op_writestack(regs.r[n].l);
+L op_writestack(reg.l);
 }
 
-template<int n> void R65816::op_push_w() {
+auto R65816::op_push_w(reg16_t& reg) {
   op_io();
-  op_writestack(regs.r[n].h);
-L op_writestack(regs.r[n].l);
+  op_writestack(reg.h);
+L op_writestack(reg.l);
 }
 
-void R65816::op_phd_e() {
+auto R65816::op_phd_e() {
   op_io();
   op_writestackn(regs.d.h);
 L op_writestackn(regs.d.l);
   regs.s.h = 0x01;
 }
 
-void R65816::op_phd_n() {
+auto R65816::op_phd_n() {
   op_io();
   op_writestackn(regs.d.h);
 L op_writestackn(regs.d.l);
 }
 
-void R65816::op_phb() {
+auto R65816::op_phb() {
   op_io();
 L op_writestack(regs.db);
 }
 
-void R65816::op_phk() {
+auto R65816::op_phk() {
   op_io();
 L op_writestack(regs.pc.b);
 }
 
-void R65816::op_php() {
+auto R65816::op_php() {
   op_io();
 L op_writestack(regs.p);
 }
 
-template<int n> void R65816::op_pull_b() {
+auto R65816::op_pull_b(reg16_t& reg) {
   op_io();
   op_io();
-L regs.r[n].l = op_readstack();
-  regs.p.n = (regs.r[n].l & 0x80);
-  regs.p.z = (regs.r[n].l == 0);
+L reg.l = op_readstack();
+  regs.p.n = (reg.l & 0x80);
+  regs.p.z = (reg.l == 0);
 }
 
-template<int n> void R65816::op_pull_w() {
+auto R65816::op_pull_w(reg16_t& reg) {
   op_io();
   op_io();
-  regs.r[n].l = op_readstack();
-L regs.r[n].h = op_readstack();
-  regs.p.n = (regs.r[n].w & 0x8000);
-  regs.p.z = (regs.r[n].w == 0);
+  reg.l = op_readstack();
+L reg.h = op_readstack();
+  regs.p.n = (reg.w & 0x8000);
+  regs.p.z = (reg.w == 0);
 }
 
-void R65816::op_pld_e() {
+auto R65816::op_pld_e() {
   op_io();
   op_io();
   regs.d.l = op_readstackn();
@@ -241,7 +236,7 @@ L regs.d.h = op_readstackn();
   regs.s.h = 0x01;
 }
 
-void R65816::op_pld_n() {
+auto R65816::op_pld_n() {
   op_io();
   op_io();
   regs.d.l = op_readstackn();
@@ -250,7 +245,7 @@ L regs.d.h = op_readstackn();
   regs.p.z = (regs.d.w == 0);
 }
 
-void R65816::op_plb() {
+auto R65816::op_plb() {
   op_io();
   op_io();
 L regs.db = op_readstack();
@@ -258,7 +253,7 @@ L regs.db = op_readstack();
   regs.p.z = (regs.db == 0);
 }
 
-void R65816::op_plp_e() {
+auto R65816::op_plp_e() {
   op_io();
   op_io();
 L regs.p = op_readstack() | 0x30;
@@ -266,10 +261,9 @@ L regs.p = op_readstack() | 0x30;
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-  update_table();
 }
 
-void R65816::op_plp_n() {
+auto R65816::op_plp_n() {
   op_io();
   op_io();
 L regs.p = op_readstack();
@@ -277,10 +271,9 @@ L regs.p = op_readstack();
     regs.x.h = 0x00;
     regs.y.h = 0x00;
   }
-  update_table();
 }
 
-void R65816::op_pea_e() {
+auto R65816::op_pea_e() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_writestackn(aa.h);
@@ -288,14 +281,14 @@ L op_writestackn(aa.l);
   regs.s.h = 0x01;
 }
 
-void R65816::op_pea_n() {
+auto R65816::op_pea_n() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_writestackn(aa.h);
 L op_writestackn(aa.l);
 }
 
-void R65816::op_pei_e() {
+auto R65816::op_pei_e() {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -305,7 +298,7 @@ L op_writestackn(aa.l);
   regs.s.h = 0x01;
 }
 
-void R65816::op_pei_n() {
+auto R65816::op_pei_n() {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -314,7 +307,7 @@ void R65816::op_pei_n() {
 L op_writestackn(aa.l);
 }
 
-void R65816::op_per_e() {
+auto R65816::op_per_e() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -324,7 +317,7 @@ L op_writestackn(rd.l);
   regs.s.h = 0x01;
 }
 
-void R65816::op_per_n() {
+auto R65816::op_per_n() {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();

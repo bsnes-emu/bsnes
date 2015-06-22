@@ -1,4 +1,4 @@
-#if defined(PLATFORM_WINDOWS)
+#if defined(DISPLAY_WINDOWS)
   #define UNICODE
   #define WINVER 0x0601
   #define _WIN32_WINNT WINVER
@@ -20,15 +20,15 @@
   #include <gdk/gdkkeysyms.h>
   #include <gtk/gtk.h>
   #if defined(Hiro_SourceEdit)
-  #include <gtksourceview/gtksourceview.h>
-  #include <gtksourceview/gtksourcelanguagemanager.h>
-  #include <gtksourceview/gtksourcestyleschememanager.h>
+    #include <gtksourceview/gtksourceview.h>
+    #include <gtksourceview/gtksourcelanguagemanager.h>
+    #include <gtksourceview/gtksourcestyleschememanager.h>
   #endif
   #include <nall/windows/registry.hpp>
   #include <nall/windows/utf8.hpp>
 #endif
 
-#if defined(PLATFORM_XORG)
+#if defined(DISPLAY_XORG)
   #include <nall/xorg/guard.hpp>
   #include <X11/Xatom.h>
   #include <cairo.h>
@@ -37,9 +37,9 @@
   #include <gdk/gdkkeysyms.h>
   #include <gtk/gtk.h>
   #if defined(Hiro_SourceEdit)
-  #include <gtksourceview/gtksourceview.h>
-  #include <gtksourceview/gtksourcelanguagemanager.h>
-  #include <gtksourceview/gtksourcestyleschememanager.h>
+    #include <gtksourceview/gtksourceview.h>
+    #include <gtksourceview/gtksourcelanguagemanager.h>
+    #include <gtksourceview/gtksourcestyleschememanager.h>
   #endif
   #include <nall/xorg/guard.hpp>
 #endif

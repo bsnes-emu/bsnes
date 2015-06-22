@@ -1,33 +1,33 @@
-template<void (R65816::*op)()> void R65816::op_read_const_b() {
+auto R65816::op_read_const_b(fp op) {
 L rd.l = op_readpc();
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_const_w() {
+auto R65816::op_read_const_w(fp op) {
   rd.l = op_readpc();
 L rd.h = op_readpc();
   call(op);
 }
 
-void R65816::op_read_bit_const_b() {
+auto R65816::op_read_bit_const_b() {
 L rd.l = op_readpc();
   regs.p.z = ((rd.l & regs.a.l) == 0);
 }
 
-void R65816::op_read_bit_const_w() {
+auto R65816::op_read_bit_const_w() {
   rd.l = op_readpc();
 L rd.h = op_readpc();
   regs.p.z = ((rd.w & regs.a.w) == 0);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addr_b() {
+auto R65816::op_read_addr_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
 L rd.l = op_readdbr(aa.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addr_w() {
+auto R65816::op_read_addr_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w + 0);
@@ -35,7 +35,7 @@ L rd.h = op_readdbr(aa.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addrx_b() {
+auto R65816::op_read_addrx_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
@@ -43,7 +43,7 @@ L rd.l = op_readdbr(aa.w + regs.x.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addrx_w() {
+auto R65816::op_read_addrx_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.x.w);
@@ -52,7 +52,7 @@ L rd.h = op_readdbr(aa.w + regs.x.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addry_b() {
+auto R65816::op_read_addry_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
@@ -60,7 +60,7 @@ L rd.l = op_readdbr(aa.w + regs.y.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_addry_w() {
+auto R65816::op_read_addry_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io_cond4(aa.w, aa.w + regs.y.w);
@@ -69,7 +69,7 @@ L rd.h = op_readdbr(aa.w + regs.y.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_long_b() {
+auto R65816::op_read_long_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
@@ -77,7 +77,7 @@ L rd.l = op_readlong(aa.d);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_long_w() {
+auto R65816::op_read_long_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
@@ -86,7 +86,7 @@ L rd.h = op_readlong(aa.d + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_longx_b() {
+auto R65816::op_read_longx_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
@@ -94,7 +94,7 @@ L rd.l = op_readlong(aa.d + regs.x.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_longx_w() {
+auto R65816::op_read_longx_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   aa.b = op_readpc();
@@ -103,14 +103,14 @@ L rd.h = op_readlong(aa.d + regs.x.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_dp_b() {
+auto R65816::op_read_dp_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
 L rd.l = op_readdp(dp);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_dp_w() {
+auto R65816::op_read_dp_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp + 0);
@@ -118,24 +118,24 @@ L rd.h = op_readdp(dp + 1);
   call(op);
 }
 
-template<void (R65816::*op)(), int n> void R65816::op_read_dpr_b() {
+auto R65816::op_read_dpr_b(fp op, reg16_t& reg) {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-L rd.l = op_readdp(dp + regs.r[n].w);
+L rd.l = op_readdp(dp + reg.w);
   call(op);
 }
 
-template<void (R65816::*op)(), int n> void R65816::op_read_dpr_w() {
+auto R65816::op_read_dpr_w(fp op, reg16_t& reg) {
   dp = op_readpc();
   op_io_cond2();
   op_io();
-  rd.l = op_readdp(dp + regs.r[n].w + 0);
-L rd.h = op_readdp(dp + regs.r[n].w + 1);
+  rd.l = op_readdp(dp + reg.w + 0);
+L rd.h = op_readdp(dp + reg.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idp_b() {
+auto R65816::op_read_idp_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -144,7 +144,7 @@ L rd.l = op_readdbr(aa.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idp_w() {
+auto R65816::op_read_idp_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -154,7 +154,7 @@ L rd.h = op_readdbr(aa.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idpx_b() {
+auto R65816::op_read_idpx_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -164,7 +164,7 @@ L rd.l = op_readdbr(aa.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idpx_w() {
+auto R65816::op_read_idpx_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -175,7 +175,7 @@ L rd.h = op_readdbr(aa.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idpy_b() {
+auto R65816::op_read_idpy_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -185,7 +185,7 @@ L rd.l = op_readdbr(aa.w + regs.y.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_idpy_w() {
+auto R65816::op_read_idpy_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -196,7 +196,7 @@ L rd.h = op_readdbr(aa.w + regs.y.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_ildp_b() {
+auto R65816::op_read_ildp_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -206,7 +206,7 @@ L rd.l = op_readlong(aa.d);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_ildp_w() {
+auto R65816::op_read_ildp_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -217,7 +217,7 @@ L rd.h = op_readlong(aa.d + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_ildpy_b() {
+auto R65816::op_read_ildpy_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -227,7 +227,7 @@ L rd.l = op_readlong(aa.d + regs.y.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_ildpy_w() {
+auto R65816::op_read_ildpy_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   aa.l = op_readdp(dp + 0);
@@ -238,14 +238,14 @@ L rd.h = op_readlong(aa.d + regs.y.w + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_sr_b() {
+auto R65816::op_read_sr_b(fp op) {
   sp = op_readpc();
   op_io();
 L rd.l = op_readsp(sp);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_sr_w() {
+auto R65816::op_read_sr_w(fp op) {
   sp = op_readpc();
   op_io();
   rd.l = op_readsp(sp + 0);
@@ -253,7 +253,7 @@ L rd.h = op_readsp(sp + 1);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_isry_b() {
+auto R65816::op_read_isry_b(fp op) {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp + 0);
@@ -263,7 +263,7 @@ L rd.l = op_readdbr(aa.w + regs.y.w);
   call(op);
 }
 
-template<void (R65816::*op)()> void R65816::op_read_isry_w() {
+auto R65816::op_read_isry_w(fp op) {
   sp = op_readpc();
   op_io();
   aa.l = op_readsp(sp + 0);

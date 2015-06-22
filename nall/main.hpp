@@ -10,7 +10,7 @@ namespace nall {
   auto main(int argc, char** argv) -> int {
     #if defined(PLATFORM_WINDOWS)
     CoInitialize(0);
-    WSAData wsaData = {0};
+    WSAData wsaData{0};
     WSAStartup(MAKEWORD(2, 2), &wsaData);
     utf8_args(argc, argv);
     #endif

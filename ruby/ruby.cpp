@@ -8,16 +8,16 @@ using namespace ruby;
 #undef mkdir
 #undef usleep
 
-#if defined(PLATFORM_XORG)
+#if defined(DISPLAY_XORG)
   #include <X11/Xlib.h>
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
-#elif defined(PLATFORM_MACOSX)
+#elif defined(DISPLAY_QUARTZ)
   #define decimal CocoaDecimal
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
   #undef decimal
-#elif defined(PLATFORM_WINDOWS)
+#elif defined(DISPLAY_WINDOWS)
   #include <windows.h>
 #endif
 

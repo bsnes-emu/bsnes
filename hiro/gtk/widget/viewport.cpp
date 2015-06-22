@@ -67,11 +67,11 @@ auto pViewport::destruct() -> void {
 }
 
 auto pViewport::handle() const -> uintptr_t {
-  #if defined(PLATFORM_WINDOWS)
+  #if defined(DISPLAY_WINDOWS)
   return (uintptr_t)GDK_WINDOW_HWND(gtk_widget_get_window(gtkWidget));
   #endif
 
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   return GDK_WINDOW_XID(gtk_widget_get_window(gtkWidget));
   #endif
 }

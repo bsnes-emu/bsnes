@@ -4,11 +4,11 @@
 #include <nall/memory.hpp>
 #include <nall/string.hpp>
 
-#if defined(PLATFORM_POSIX)
+#if defined(API_POSIX)
   #include <nall/posix/shared-memory.hpp>
 #endif
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(API_WINDOWS)
   #include <nall/windows/shared-memory.hpp>
 #endif
 

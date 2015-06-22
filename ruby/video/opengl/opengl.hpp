@@ -1,11 +1,11 @@
-#if defined(PLATFORM_XORG)
+#if defined(DISPLAY_XORG)
   #include <GL/gl.h>
   #include <GL/glx.h>
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
-#elif defined(PLATFORM_MACOSX)
+#elif defined(DISPLAY_QUARTZ)
   #include <OpenGL/gl.h>
   #include <OpenGL/gl3.h>
-#elif defined(PLATFORM_WINDOWS)
+#elif defined(DISPLAY_WINDOWS)
   #include <GL/gl.h>
   #include <GL/glext.h>
   #define glGetProcAddress(name) wglGetProcAddress(name)

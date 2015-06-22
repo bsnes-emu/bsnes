@@ -5,11 +5,11 @@
 
 #include <nall/shared-memory.hpp>
 
-#if defined(PLATFORM_POSIX)
+#if defined(API_POSIX)
   #include <nall/posix/service.hpp>
 #endif
 
-#if defined(PLATFORM_WINDOWS)
+#if defined(API_WINDOWS)
   #include <nall/windows/service.hpp>
 #endif
 

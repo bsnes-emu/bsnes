@@ -1,7 +1,7 @@
 #ifdef PPU_CPP
 
 unsigned PPU::Screen::get_palette(unsigned color) {
-  #if defined(ARCH_LSB)
+  #if defined(ENDIAN_LSB)
   return ((uint16*)ppu.cgram)[color];
   #else
   color <<= 1;

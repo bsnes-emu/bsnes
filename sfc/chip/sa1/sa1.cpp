@@ -32,7 +32,7 @@ void SA1::enter() {
       continue;
     }
 
-    (this->*opcode_table[op_readpc()])();
+    op_exec();
   }
 }
 
@@ -152,7 +152,6 @@ void SA1::reset() {
   regs.mdr    = 0x00;
   regs.wai    = false;
   regs.vector = 0x0000;
-  R65816::update_table();
 
   status.tick_counter = 0;
 

@@ -11,7 +11,7 @@
 #include <nall/function.hpp>
 #include <nall/intrinsics.hpp>
 
-#if defined(PLATFORM_BSD) || defined(PLATFORM_LINUX) || defined(PLATFORM_MACOSX)
+#if defined(API_POSIX)
 
 #include <pthread.h>
 
@@ -69,7 +69,7 @@ auto thread::exit() -> void {
 
 }
 
-#elif defined(PLATFORM_WINDOWS)
+#elif defined(API_WINDOWS)
 
 namespace nall {
 

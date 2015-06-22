@@ -8,11 +8,11 @@
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 
-#if defined(PLATFORM_XORG) || defined(PLATFORM_MACOSX)
-  #include <dlfcn.h>
-#elif defined(PLATFORM_WINDOWS)
+#if defined(PLATFORM_WINDOWS)
   #include <windows.h>
   #include <nall/windows/utf8.hpp>
+#else
+  #include <dlfcn.h>
 #endif
 
 namespace nall {
@@ -35,7 +35,7 @@ private:
   uintptr_t handle = 0;
 };
 
-#if defined(PLATFORM_XORG)
+#if defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
 inline bool library::open(const string& name, const string& path) {
   if(handle) close();
   if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".so"), RTLD_LAZY);

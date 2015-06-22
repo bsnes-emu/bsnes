@@ -103,7 +103,3 @@ struct InputWindows : Input {
     if(directinputContext) { directinputContext->Release(); directinputContext = nullptr; }
   }
 };
-
-DeclareInput(Windows)
-
-}

@@ -12,219 +12,218 @@ struct R65816 {
   #include "memory.hpp"
   #include "disassembler.hpp"
 
+  using fp = auto (R65816::*)() -> void;
+
+  virtual auto op_io() -> void = 0;
+  virtual auto op_read(uint32_t addr) -> uint8_t = 0;
+  virtual auto op_write(uint32_t addr, uint8_t data) -> void = 0;
+  virtual auto last_cycle() -> void = 0;
+  virtual auto interrupt_pending() -> bool = 0;
+  virtual auto op_irq() -> void;
+
+  virtual auto disassembler_read(uint32 addr) -> uint8 { return 0u; }
+
+  //r65816.cpp
+  alwaysinline auto op_io_irq() -> void;
+  alwaysinline auto op_io_cond2() -> void;
+  alwaysinline auto op_io_cond4(uint16 x, uint16 y) -> void;
+  alwaysinline auto op_io_cond6(uint16 addr) -> void;
+
+  //algorithms.cpp
+  auto op_adc_b();
+  auto op_adc_w();
+  auto op_and_b();
+  auto op_and_w();
+  auto op_bit_b();
+  auto op_bit_w();
+  auto op_cmp_b();
+  auto op_cmp_w();
+  auto op_cpx_b();
+  auto op_cpx_w();
+  auto op_cpy_b();
+  auto op_cpy_w();
+  auto op_eor_b();
+  auto op_eor_w();
+  auto op_lda_b();
+  auto op_lda_w();
+  auto op_ldx_b();
+  auto op_ldx_w();
+  auto op_ldy_b();
+  auto op_ldy_w();
+  auto op_ora_b();
+  auto op_ora_w();
+  auto op_sbc_b();
+  auto op_sbc_w();
+
+  auto op_inc_b();
+  auto op_inc_w();
+  auto op_dec_b();
+  auto op_dec_w();
+  auto op_asl_b();
+  auto op_asl_w();
+  auto op_lsr_b();
+  auto op_lsr_w();
+  auto op_rol_b();
+  auto op_rol_w();
+  auto op_ror_b();
+  auto op_ror_w();
+  auto op_trb_b();
+  auto op_trb_w();
+  auto op_tsb_b();
+  auto op_tsb_w();
+
+  //opcode_read.cpp
+  auto op_read_const_b(fp);
+  auto op_read_const_w(fp);
+  auto op_read_bit_const_b();
+  auto op_read_bit_const_w();
+  auto op_read_addr_b(fp);
+  auto op_read_addr_w(fp);
+  auto op_read_addrx_b(fp);
+  auto op_read_addrx_w(fp);
+  auto op_read_addry_b(fp);
+  auto op_read_addry_w(fp);
+  auto op_read_long_b(fp);
+  auto op_read_long_w(fp);
+  auto op_read_longx_b(fp);
+  auto op_read_longx_w(fp);
+  auto op_read_dp_b(fp);
+  auto op_read_dp_w(fp);
+  auto op_read_dpr_b(fp, reg16_t&);
+  auto op_read_dpr_w(fp, reg16_t&);
+  auto op_read_idp_b(fp);
+  auto op_read_idp_w(fp);
+  auto op_read_idpx_b(fp);
+  auto op_read_idpx_w(fp);
+  auto op_read_idpy_b(fp);
+  auto op_read_idpy_w(fp);
+  auto op_read_ildp_b(fp);
+  auto op_read_ildp_w(fp);
+  auto op_read_ildpy_b(fp);
+  auto op_read_ildpy_w(fp);
+  auto op_read_sr_b(fp);
+  auto op_read_sr_w(fp);
+  auto op_read_isry_b(fp);
+  auto op_read_isry_w(fp);
+
+  //opcode_write.cpp
+  auto op_write_addr_b(reg16_t&);
+  auto op_write_addr_w(reg16_t&);
+  auto op_write_addrr_b(reg16_t&, reg16_t&);
+  auto op_write_addrr_w(reg16_t&, reg16_t&);
+  auto op_write_longr_b(reg16_t&);
+  auto op_write_longr_w(reg16_t&);
+  auto op_write_dp_b(reg16_t&);
+  auto op_write_dp_w(reg16_t&);
+  auto op_write_dpr_b(reg16_t&, reg16_t&);
+  auto op_write_dpr_w(reg16_t&, reg16_t&);
+  auto op_sta_idp_b();
+  auto op_sta_idp_w();
+  auto op_sta_ildp_b();
+  auto op_sta_ildp_w();
+  auto op_sta_idpx_b();
+  auto op_sta_idpx_w();
+  auto op_sta_idpy_b();
+  auto op_sta_idpy_w();
+  auto op_sta_ildpy_b();
+  auto op_sta_ildpy_w();
+  auto op_sta_sr_b();
+  auto op_sta_sr_w();
+  auto op_sta_isry_b();
+  auto op_sta_isry_w();
+
+  //opcode_rmw.cpp
+  auto op_adjust_imm_b(reg16_t&, signed);
+  auto op_adjust_imm_w(reg16_t&, signed);
+  auto op_asl_imm_b();
+  auto op_asl_imm_w();
+  auto op_lsr_imm_b();
+  auto op_lsr_imm_w();
+  auto op_rol_imm_b();
+  auto op_rol_imm_w();
+  auto op_ror_imm_b();
+  auto op_ror_imm_w();
+  auto op_adjust_addr_b(fp op);
+  auto op_adjust_addr_w(fp op);
+  auto op_adjust_addrx_b(fp op);
+  auto op_adjust_addrx_w(fp op);
+  auto op_adjust_dp_b(fp op);
+  auto op_adjust_dp_w(fp op);
+  auto op_adjust_dpx_b(fp op);
+  auto op_adjust_dpx_w(fp op);
+
+  //opcode_pc.cpp
+  auto op_branch(bool flag, bool value);
+  auto op_bra();
+  auto op_brl();
+  auto op_jmp_addr();
+  auto op_jmp_long();
+  auto op_jmp_iaddr();
+  auto op_jmp_iaddrx();
+  auto op_jmp_iladdr();
+  auto op_jsr_addr();
+  auto op_jsr_long_e();
+  auto op_jsr_long_n();
+  auto op_jsr_iaddrx_e();
+  auto op_jsr_iaddrx_n();
+  auto op_rti_e();
+  auto op_rti_n();
+  auto op_rts();
+  auto op_rtl_e();
+  auto op_rtl_n();
+
+  //opcode_misc.cpp
+  auto op_nop();
+  auto op_wdm();
+  auto op_xba();
+  auto op_move_b(signed adjust);
+  auto op_move_w(signed adjust);
+  auto op_interrupt_e(uint16);
+  auto op_interrupt_n(uint16);
+  auto op_stp();
+  auto op_wai();
+  auto op_xce();
+  auto op_flag(bool& flag, bool value);
+  auto op_pflag_e(bool);
+  auto op_pflag_n(bool);
+  auto op_transfer_b(reg16_t&, reg16_t&);
+  auto op_transfer_w(reg16_t&, reg16_t&);
+  auto op_tcs_e();
+  auto op_tcs_n();
+  auto op_tsx_b();
+  auto op_tsx_w();
+  auto op_txs_e();
+  auto op_txs_n();
+  auto op_push_b(reg16_t&);
+  auto op_push_w(reg16_t&);
+  auto op_phd_e();
+  auto op_phd_n();
+  auto op_phb();
+  auto op_phk();
+  auto op_php();
+  auto op_pull_b(reg16_t&);
+  auto op_pull_w(reg16_t&);
+  auto op_pld_e();
+  auto op_pld_n();
+  auto op_plb();
+  auto op_plp_e();
+  auto op_plp_n();
+  auto op_pea_e();
+  auto op_pea_n();
+  auto op_pei_e();
+  auto op_pei_n();
+  auto op_per_e();
+  auto op_per_n();
+
+  //switch.cpp
+  auto op_exec() -> void;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   regs_t regs;
   reg24_t aa, rd;
-  uint8_t sp, dp;
-
-  virtual void op_io() = 0;
-  virtual uint8_t op_read(uint32_t addr) = 0;
-  virtual void op_write(uint32_t addr, uint8_t data) = 0;
-  virtual void last_cycle() = 0;
-  virtual bool interrupt_pending() = 0;
-  virtual void op_irq();
-
-  virtual uint8 disassembler_read(uint32 addr) { return 0u; }
-
-  void op_io_irq();
-  void op_io_cond2();
-  void op_io_cond4(uint16 x, uint16 y);
-  void op_io_cond6(uint16 addr);
-
-  void op_adc_b();
-  void op_adc_w();
-  void op_and_b();
-  void op_and_w();
-  void op_bit_b();
-  void op_bit_w();
-  void op_cmp_b();
-  void op_cmp_w();
-  void op_cpx_b();
-  void op_cpx_w();
-  void op_cpy_b();
-  void op_cpy_w();
-  void op_eor_b();
-  void op_eor_w();
-  void op_lda_b();
-  void op_lda_w();
-  void op_ldx_b();
-  void op_ldx_w();
-  void op_ldy_b();
-  void op_ldy_w();
-  void op_ora_b();
-  void op_ora_w();
-  void op_sbc_b();
-  void op_sbc_w();
-
-  void op_inc_b();
-  void op_inc_w();
-  void op_dec_b();
-  void op_dec_w();
-  void op_asl_b();
-  void op_asl_w();
-  void op_lsr_b();
-  void op_lsr_w();
-  void op_rol_b();
-  void op_rol_w();
-  void op_ror_b();
-  void op_ror_w();
-  void op_trb_b();
-  void op_trb_w();
-  void op_tsb_b();
-  void op_tsb_w();
-
-  template<void (R65816::*)()> void op_read_const_b();
-  template<void (R65816::*)()> void op_read_const_w();
-  void op_read_bit_const_b();
-  void op_read_bit_const_w();
-  template<void (R65816::*)()> void op_read_addr_b();
-  template<void (R65816::*)()> void op_read_addr_w();
-  template<void (R65816::*)()> void op_read_addrx_b();
-  template<void (R65816::*)()> void op_read_addrx_w();
-  template<void (R65816::*)()> void op_read_addry_b();
-  template<void (R65816::*)()> void op_read_addry_w();
-  template<void (R65816::*)()> void op_read_long_b();
-  template<void (R65816::*)()> void op_read_long_w();
-  template<void (R65816::*)()> void op_read_longx_b();
-  template<void (R65816::*)()> void op_read_longx_w();
-  template<void (R65816::*)()> void op_read_dp_b();
-  template<void (R65816::*)()> void op_read_dp_w();
-  template<void (R65816::*)(), int> void op_read_dpr_b();
-  template<void (R65816::*)(), int> void op_read_dpr_w();
-  template<void (R65816::*)()> void op_read_idp_b();
-  template<void (R65816::*)()> void op_read_idp_w();
-  template<void (R65816::*)()> void op_read_idpx_b();
-  template<void (R65816::*)()> void op_read_idpx_w();
-  template<void (R65816::*)()> void op_read_idpy_b();
-  template<void (R65816::*)()> void op_read_idpy_w();
-  template<void (R65816::*)()> void op_read_ildp_b();
-  template<void (R65816::*)()> void op_read_ildp_w();
-  template<void (R65816::*)()> void op_read_ildpy_b();
-  template<void (R65816::*)()> void op_read_ildpy_w();
-  template<void (R65816::*)()> void op_read_sr_b();
-  template<void (R65816::*)()> void op_read_sr_w();
-  template<void (R65816::*)()> void op_read_isry_b();
-  template<void (R65816::*)()> void op_read_isry_w();
-
-  template<int> void op_write_addr_b();
-  template<int> void op_write_addr_w();
-  template<int, int> void op_write_addrr_b();
-  template<int, int> void op_write_addrr_w();
-  template<int> void op_write_longr_b();
-  template<int> void op_write_longr_w();
-  template<int> void op_write_dp_b();
-  template<int> void op_write_dp_w();
-  template<int, int> void op_write_dpr_b();
-  template<int, int> void op_write_dpr_w();
-  void op_sta_idp_b();
-  void op_sta_idp_w();
-  void op_sta_ildp_b();
-  void op_sta_ildp_w();
-  void op_sta_idpx_b();
-  void op_sta_idpx_w();
-  void op_sta_idpy_b();
-  void op_sta_idpy_w();
-  void op_sta_ildpy_b();
-  void op_sta_ildpy_w();
-  void op_sta_sr_b();
-  void op_sta_sr_w();
-  void op_sta_isry_b();
-  void op_sta_isry_w();
-
-  template<int, int> void op_adjust_imm_b();
-  template<int, int> void op_adjust_imm_w();
-  void op_asl_imm_b();
-  void op_asl_imm_w();
-  void op_lsr_imm_b();
-  void op_lsr_imm_w();
-  void op_rol_imm_b();
-  void op_rol_imm_w();
-  void op_ror_imm_b();
-  void op_ror_imm_w();
-  template<void (R65816::*)()> void op_adjust_addr_b();
-  template<void (R65816::*)()> void op_adjust_addr_w();
-  template<void (R65816::*)()> void op_adjust_addrx_b();
-  template<void (R65816::*)()> void op_adjust_addrx_w();
-  template<void (R65816::*)()> void op_adjust_dp_b();
-  template<void (R65816::*)()> void op_adjust_dp_w();
-  template<void (R65816::*)()> void op_adjust_dpx_b();
-  template<void (R65816::*)()> void op_adjust_dpx_w();
-
-  template<int, int> void op_branch();
-  void op_bra();
-  void op_brl();
-  void op_jmp_addr();
-  void op_jmp_long();
-  void op_jmp_iaddr();
-  void op_jmp_iaddrx();
-  void op_jmp_iladdr();
-  void op_jsr_addr();
-  void op_jsr_long_e();
-  void op_jsr_long_n();
-  void op_jsr_iaddrx_e();
-  void op_jsr_iaddrx_n();
-  void op_rti_e();
-  void op_rti_n();
-  void op_rts();
-  void op_rtl_e();
-  void op_rtl_n();
-
-  void op_nop();
-  void op_wdm();
-  void op_xba();
-  template<int> void op_move_b();
-  template<int> void op_move_w();
-  template<int, int> void op_interrupt_e();
-  template<int, int> void op_interrupt_n();
-  void op_stp();
-  void op_wai();
-  void op_xce();
-  template<int, int> void op_flag();
-  template<int> void op_pflag_e();
-  template<int> void op_pflag_n();
-  template<int, int> void op_transfer_b();
-  template<int, int> void op_transfer_w();
-  void op_tcs_e();
-  void op_tcs_n();
-  void op_tsx_b();
-  void op_tsx_w();
-  void op_txs_e();
-  void op_txs_n();
-  template<int> void op_push_b();
-  template<int> void op_push_w();
-  void op_phd_e();
-  void op_phd_n();
-  void op_phb();
-  void op_phk();
-  void op_php();
-  template<int> void op_pull_b();
-  template<int> void op_pull_w();
-  void op_pld_e();
-  void op_pld_n();
-  void op_plb();
-  void op_plp_e();
-  void op_plp_n();
-  void op_pea_e();
-  void op_pea_n();
-  void op_pei_e();
-  void op_pei_n();
-  void op_per_e();
-  void op_per_n();
-
-  void (R65816::**opcode_table)();
-  void (R65816::*op_table[5 * 256])();
-  void initialize_opcode_table();
-  void update_table();
-
-  enum {
-    table_EM =    0,  // 8-bit accumulator,  8-bit index (emulation mode)
-    table_MX =  256,  // 8-bit accumulator,  8-bit index
-    table_Mx =  512,  // 8-bit accumulator, 16-bit index
-    table_mX =  768,  //16-bit accumulator,  8-bit index
-    table_mx = 1024,  //16-bit accumulator, 16-bit index
-  };
-
-  void serialize(serializer&);
-  R65816();
+  uint8 sp, dp;
 };
 
 }

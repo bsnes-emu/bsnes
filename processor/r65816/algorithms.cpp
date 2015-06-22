@@ -1,4 +1,4 @@
-inline void R65816::op_adc_b() {
+auto R65816::op_adc_b() {
   int result;
 
   if(!regs.p.d) {
@@ -19,7 +19,7 @@ inline void R65816::op_adc_b() {
   regs.a.l = result;
 }
 
-inline void R65816::op_adc_w() {
+auto R65816::op_adc_w() {
   int result;
 
   if(!regs.p.d) {
@@ -46,133 +46,133 @@ inline void R65816::op_adc_w() {
   regs.a.w = result;
 }
 
-inline void R65816::op_and_b() {
+auto R65816::op_and_b() {
   regs.a.l &= rd.l;
   regs.p.n = regs.a.l & 0x80;
   regs.p.z = regs.a.l == 0;
 }
 
-inline void R65816::op_and_w() {
+auto R65816::op_and_w() {
   regs.a.w &= rd.w;
   regs.p.n = regs.a.w & 0x8000;
   regs.p.z = regs.a.w == 0;
 }
 
-inline void R65816::op_bit_b() {
+auto R65816::op_bit_b() {
   regs.p.n = rd.l & 0x80;
   regs.p.v = rd.l & 0x40;
   regs.p.z = (rd.l & regs.a.l) == 0;
 }
 
-inline void R65816::op_bit_w() {
+auto R65816::op_bit_w() {
   regs.p.n = rd.w & 0x8000;
   regs.p.v = rd.w & 0x4000;
   regs.p.z = (rd.w & regs.a.w) == 0;
 }
 
-inline void R65816::op_cmp_b() {
+auto R65816::op_cmp_b() {
   int r = regs.a.l - rd.l;
   regs.p.n = r & 0x80;
   regs.p.z = (uint8)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_cmp_w() {
+auto R65816::op_cmp_w() {
   int r = regs.a.w - rd.w;
   regs.p.n = r & 0x8000;
   regs.p.z = (uint16)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_cpx_b() {
+auto R65816::op_cpx_b() {
   int r = regs.x.l - rd.l;
   regs.p.n = r & 0x80;
   regs.p.z = (uint8)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_cpx_w() {
+auto R65816::op_cpx_w() {
   int r = regs.x.w - rd.w;
   regs.p.n = r & 0x8000;
   regs.p.z = (uint16)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_cpy_b() {
+auto R65816::op_cpy_b() {
   int r = regs.y.l - rd.l;
   regs.p.n = r & 0x80;
   regs.p.z = (uint8)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_cpy_w() {
+auto R65816::op_cpy_w() {
   int r = regs.y.w - rd.w;
   regs.p.n = r & 0x8000;
   regs.p.z = (uint16)r == 0;
   regs.p.c = r >= 0;
 }
 
-inline void R65816::op_eor_b() {
+auto R65816::op_eor_b() {
   regs.a.l ^= rd.l;
   regs.p.n = regs.a.l & 0x80;
   regs.p.z = regs.a.l == 0;
 }
 
-inline void R65816::op_eor_w() {
+auto R65816::op_eor_w() {
   regs.a.w ^= rd.w;
   regs.p.n = regs.a.w & 0x8000;
   regs.p.z = regs.a.w == 0;
 }
 
-inline void R65816::op_lda_b() {
+auto R65816::op_lda_b() {
   regs.a.l = rd.l;
   regs.p.n = regs.a.l & 0x80;
   regs.p.z = regs.a.l == 0;
 }
 
-inline void R65816::op_lda_w() {
+auto R65816::op_lda_w() {
   regs.a.w = rd.w;
   regs.p.n = regs.a.w & 0x8000;
   regs.p.z = regs.a.w == 0;
 }
 
-inline void R65816::op_ldx_b() {
+auto R65816::op_ldx_b() {
   regs.x.l = rd.l;
   regs.p.n = regs.x.l & 0x80;
   regs.p.z = regs.x.l == 0;
 }
 
-inline void R65816::op_ldx_w() {
+auto R65816::op_ldx_w() {
   regs.x.w = rd.w;
   regs.p.n = regs.x.w & 0x8000;
   regs.p.z = regs.x.w == 0;
 }
 
-inline void R65816::op_ldy_b() {
+auto R65816::op_ldy_b() {
   regs.y.l = rd.l;
   regs.p.n = regs.y.l & 0x80;
   regs.p.z = regs.y.l == 0;
 }
 
-inline void R65816::op_ldy_w() {
+auto R65816::op_ldy_w() {
   regs.y.w = rd.w;
   regs.p.n = regs.y.w & 0x8000;
   regs.p.z = regs.y.w == 0;
 }
 
-inline void R65816::op_ora_b() {
+auto R65816::op_ora_b() {
   regs.a.l |= rd.l;
   regs.p.n = regs.a.l & 0x80;
   regs.p.z = regs.a.l == 0;
 }
 
-inline void R65816::op_ora_w() {
+auto R65816::op_ora_w() {
   regs.a.w |= rd.w;
   regs.p.n = regs.a.w & 0x8000;
   regs.p.z = regs.a.w == 0;
 }
 
-inline void R65816::op_sbc_b() {
+auto R65816::op_sbc_b() {
   int result;
   rd.l ^= 0xff;
 
@@ -194,7 +194,7 @@ inline void R65816::op_sbc_b() {
   regs.a.l = result;
 }
 
-inline void R65816::op_sbc_w() {
+auto R65816::op_sbc_w() {
   int result;
   rd.w ^= 0xffff;
 
@@ -222,59 +222,59 @@ inline void R65816::op_sbc_w() {
   regs.a.w = result;
 }
 
-inline void R65816::op_inc_b() {
+auto R65816::op_inc_b() {
   rd.l++;
   regs.p.n = rd.l & 0x80;
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_inc_w() {
+auto R65816::op_inc_w() {
   rd.w++;
   regs.p.n = rd.w & 0x8000;
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_dec_b() {
+auto R65816::op_dec_b() {
   rd.l--;
   regs.p.n = rd.l & 0x80;
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_dec_w() {
+auto R65816::op_dec_w() {
   rd.w--;
   regs.p.n = rd.w & 0x8000;
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_asl_b() {
+auto R65816::op_asl_b() {
   regs.p.c = rd.l & 0x80;
   rd.l <<= 1;
   regs.p.n = rd.l & 0x80;
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_asl_w() {
+auto R65816::op_asl_w() {
   regs.p.c = rd.w & 0x8000;
   rd.w <<= 1;
   regs.p.n = rd.w & 0x8000;
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_lsr_b() {
+auto R65816::op_lsr_b() {
   regs.p.c = rd.l & 1;
   rd.l >>= 1;
   regs.p.n = rd.l & 0x80;
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_lsr_w() {
+auto R65816::op_lsr_w() {
   regs.p.c = rd.w & 1;
   rd.w >>= 1;
   regs.p.n = rd.w & 0x8000;
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_rol_b() {
+auto R65816::op_rol_b() {
   unsigned carry = (unsigned)regs.p.c;
   regs.p.c = rd.l & 0x80;
   rd.l = (rd.l << 1) | carry;
@@ -282,7 +282,7 @@ inline void R65816::op_rol_b() {
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_rol_w() {
+auto R65816::op_rol_w() {
   unsigned carry = (unsigned)regs.p.c;
   regs.p.c = rd.w & 0x8000;
   rd.w = (rd.w << 1) | carry;
@@ -290,7 +290,7 @@ inline void R65816::op_rol_w() {
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_ror_b() {
+auto R65816::op_ror_b() {
   unsigned carry = (unsigned)regs.p.c << 7;
   regs.p.c = rd.l & 1;
   rd.l = carry | (rd.l >> 1);
@@ -298,7 +298,7 @@ inline void R65816::op_ror_b() {
   regs.p.z = rd.l == 0;
 }
 
-inline void R65816::op_ror_w() {
+auto R65816::op_ror_w() {
   unsigned carry = (unsigned)regs.p.c << 15;
   regs.p.c = rd.w & 1;
   rd.w = carry | (rd.w >> 1);
@@ -306,22 +306,22 @@ inline void R65816::op_ror_w() {
   regs.p.z = rd.w == 0;
 }
 
-inline void R65816::op_trb_b() {
+auto R65816::op_trb_b() {
   regs.p.z = (rd.l & regs.a.l) == 0;
   rd.l &= ~regs.a.l;
 }
 
-inline void R65816::op_trb_w() {
+auto R65816::op_trb_w() {
   regs.p.z = (rd.w & regs.a.w) == 0;
   rd.w &= ~regs.a.w;
 }
 
-inline void R65816::op_tsb_b() {
+auto R65816::op_tsb_b() {
   regs.p.z = (rd.l & regs.a.l) == 0;
   rd.l |= regs.a.l;
 }
 
-inline void R65816::op_tsb_w() {
+auto R65816::op_tsb_w() {
   regs.p.z = (rd.w & regs.a.w) == 0;
   rd.w |= regs.a.w;
 }

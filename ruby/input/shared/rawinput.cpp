@@ -4,9 +4,6 @@
 auto CALLBACK RawInputWindowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
 struct RawInput {
-  Input& input;
-  RawInput(Input& input) : input(input) {}
-
   HANDLE mutex = nullptr;
   HWND hwnd = nullptr;
   bool ready = false;

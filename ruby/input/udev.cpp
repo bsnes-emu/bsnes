@@ -12,12 +12,12 @@
 #include "mouse/xlib.cpp"
 #include "joypad/udev.cpp"
 
-struct InputUdev : input {
+struct InputUdev : Input {
   InputKeyboardXlib xlibKeyboard;
   InputMouseXlib xlibMouse;
   InputJoypadUdev udev;
-  Input() : xlibKeyboard(*this), xlibMouse(*this), udev(*this) {}
-  ~Input() { term(); }
+  InputUdev() : xlibKeyboard(*this), xlibMouse(*this), udev(*this) {}
+  ~InputUdev() { term(); }
 
   struct Settings {
     uintptr_t handle = 0;

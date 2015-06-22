@@ -149,6 +149,7 @@ auto BrowserDialogWindow::run() -> lstring {
   window.setCentered(state.parent);
   window.setVisible();
   view.resizeColumns();
+  view.setFocused();
   window.setModal();
   window.setVisible(false);
 

@@ -2,19 +2,21 @@
 #define NALL_INTRINSICS_HPP
 
 namespace nall {
+  struct Intrinsics {
+    enum class Compiler : unsigned { Clang, GCC, VisualCPP, Unknown };
+    enum class Platform : unsigned { Windows, MacOSX, Linux, BSD, Unknown };
+    enum class API : unsigned { Windows, Posix, Unknown };
+    enum class Display : unsigned { Windows, Quartz, Xorg, Unknown };
+    enum class Processor : unsigned { x86, amd64, ARM, PPC32, PPC64, Unknown };
+    enum class Endian : unsigned { LSB, MSB, Unknown };
 
-struct Intrinsics {
-  enum class Compiler : unsigned { Clang, GCC, CL, Unknown };
-  enum class Platform : unsigned { Windows, MacOSX, Linux, BSD, Unknown };
-  enum class Architecture : unsigned { x86, amd64, Unknown };
-  enum class Endian : unsigned { LSB, MSB, Unknown };
-
-  static inline Compiler compiler();
-  static inline Platform platform();
-  static inline Architecture architecture();
-  static inline Endian endian();
-};
-
+    static inline auto compiler() -> Compiler;
+    static inline auto platform() -> Platform;
+    static inline auto api() -> API;
+    static inline auto display() -> Display;
+    static inline auto processor() -> Processor;
+    static inline auto endian() -> Endian;
+  };
 }
 
 /* Compiler detection */
@@ -23,7 +25,7 @@ namespace nall {
 
 #if defined(__clang__)
   #define COMPILER_CLANG
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::Clang; }
+  auto Intrinsics::compiler() -> Compiler { return Compiler::Clang; }
 
   #pragma clang diagnostic ignored "-Wunknown-pragmas"
   #pragma clang diagnostic ignored "-Wempty-body"
@@ -34,16 +36,16 @@ namespace nall {
   #pragma clang diagnostic ignored "-Wtautological-compare"
 #elif defined(__GNUC__)
   #define COMPILER_GCC
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::GCC; }
+  auto Intrinsics::compiler() -> Compiler { return Compiler::GCC; }
 #elif defined(_MSC_VER)
-  #define COMPILER_CL
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::CL; }
+  #define COMPILER_VISUALCPP
+  auto Intrinsics::compiler() -> Compiler { return Compiler::VisualCPP; }
 
   #pragma warning(disable:4996)  //disable libc "deprecation" warnings
 #else
   #warning "unable to detect compiler"
   #define COMPILER_UNKNOWN
-  Intrinsics::Compiler Intrinsics::compiler() { return Intrinsics::Compiler::Unknown; }
+  auto Intrinsics::compiler() -> Compiler { return Compiler::Unknown; }
 #endif
 
 }
@@ -54,30 +56,43 @@ namespace nall {
 
 #if defined(_WIN32)
   #define PLATFORM_WINDOWS
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Windows; }
+  #define API_WINDOWS
+  #define DISPLAY_WINDOW
+  auto Intrinsics::platform() -> Platform { return Platform::Windows; }
+  auto Intrinsics::api() -> API { return API::Windows; }
+  auto Intrinsics::display() -> Display { return Display::Windows; }
 #elif defined(__APPLE__)
-  #define PLATFORM_POSIX
   #define PLATFORM_MACOSX
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::MacOSX; }
+  #define API_POSIX
+  #define DISPLAY_QUARTZ
+  auto Intrinsics::platform() -> Platform { return Platform::MacOSX; }
+  auto Intrinsics::api() -> API { return API::Posix; }
+  auto Intrinsics::display() -> Display { return Display::Quartz; }
 #elif defined(linux) || defined(__linux__)
-  #define PLATFORM_POSIX
   #define PLATFORM_LINUX
-  #define PLATFORM_XORG
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Linux; }
+  #define API_POSIX
+  #define DISPLAY_XORG
+  auto Intrinsics::platform() -> Platform { return Platform::Linux; }
+  auto Intrinsics::api() -> API { return API::Posix; }
+  auto Intrinsics::display() -> Display { return Display::Xorg; }
 #elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
-  #define PLATFORM_POSIX
   #define PLATFORM_BSD
-  #define PLATFORM_XORG
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::BSD; }
+  #define API_POSIX
+  #define DISPLAY_XORG
+  auto Intrinsics::platform() -> Platform { return Platform::BSD; }
+  auto Intrinsics::api() -> API { return API::Posix; }
+  auto Intrinsics::display() -> Display { return Display::Xorg; }
 #else
   #warning "unable to detect platform"
   #define PLATFORM_UNKNOWN
-  Intrinsics::Platform Intrinsics::platform() { return Intrinsics::Platform::Unknown; }
+  #define API_UNKNOWN
+  #define DISPLAY_UNKNOWN
+  auto Intrinsics::platform() -> Platform { return Platform::Unknown; }
+  auto Intrinsics::api() -> API { return API::Unknown; }
+  auto Intrinsics::display() -> Display { return Display::Unknown; }
 #endif
 
 }
-
-/* Architecture Detection */
 
 #if defined(PLATFORM_MACOSX)
   #include <machine/endian.h>
@@ -87,18 +102,29 @@ namespace nall {
   #include <sys/endian.h>
 #endif
 
+/* Processor Detection */
+
 namespace nall {
 
 #if defined(__i386__) || defined(_M_IX86)
-  #define ARCH_X86
-  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::x86; }
+  #define PROCESSOR_X86
+  auto Intrinsics::processor() -> Processor { return Processor::x86; }
 #elif defined(__amd64__) || defined(_M_AMD64)
-  #define ARCH_AMD64
-  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::amd64; }
+  #define PROCESSOR_AMD64
+  auto Intrinsics::processor() -> Processor { return Processor::amd64; }
+#elif defined(__arm__)
+  #define PROCESSOR_ARM
+  auto Intrinsics::processor() -> Processor { return Processor::ARM; }
+#elif defined(__ppc64__) || defined(_ARCH_PPC64)
+  #define PROCESSOR_PPC64
+  auto Intrinsics::processor() -> Processor { return Processor::PPC64; }
+#elif defined(__ppc__) || defined(_ARCH_PPC) || defined(_M_PPC)
+  #define PROCESSOR_PPC32
+  auto Intrinsics::processor() -> Processor { return Processor::PPC32; }
 #else
-  #warning "unable to detect architecture"
-  #define ARCH_UNKNOWN
-  Intrinsics::Architecture Intrinsics::architecture() { return Intrinsics::Architecture::Unknown; }
+  #warning "unable to detect processor"
+  #define PROCESSOR_UNKNOWN
+  auto Intrinsics::processor() -> Processor { return Processor::Unknown; }
 #endif
 
 }
@@ -109,14 +135,14 @@ namespace nall {
 
 #if (defined(__BYTE_ORDER) && defined(__LITTLE_ENDIAN) && __BYTE_ORDER == __LITTLE_ENDIAN) || defined(__LITTLE_ENDIAN__) || defined(__i386__) || defined(__amd64__) || defined(_M_IX86) || defined(_M_AMD64)
   #define ENDIAN_LSB
-  Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::LSB; }
+  auto Intrinsics::endian() -> Endian { return Endian::LSB; }
 #elif (defined(__BYTE_ORDER) && defined(__BIG_ENDIAN) && __BYTE_ORDER == __BIG_ENDIAN) || defined(__BIG_ENDIAN__) || defined(__powerpc__) || defined(_M_PPC)
   #define ENDIAN_MSB
-  Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::MSB; }
+  auto Intrinsics::endian() -> Endian { return Endian::MSB; }
 #else
   #warning "unable to detect endian"
   #define ENDIAN_UNKNOWN
-  Intrinsics::Endian Intrinsics::endian() { return Intrinsics::Endian::Unknown; }
+  auto Intrinsics::endian() -> Endian { return Endian::Unknown; }
 #endif
 
 }

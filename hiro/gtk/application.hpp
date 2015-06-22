@@ -3,7 +3,7 @@
 namespace hiro {
 
 struct pApplication {
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   static XlibDisplay* display;
   #endif
 

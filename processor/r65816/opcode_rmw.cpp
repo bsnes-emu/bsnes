@@ -1,18 +1,18 @@
-template<int n, int adjust> void R65816::op_adjust_imm_b() {
+auto R65816::op_adjust_imm_b(reg16_t& reg, signed adjust) {
 L op_io_irq();
-  regs.r[n].l += adjust;
-  regs.p.n = (regs.r[n].l & 0x80);
-  regs.p.z = (regs.r[n].l == 0);
+  reg.l += adjust;
+  regs.p.n = (reg.l & 0x80);
+  regs.p.z = (reg.l == 0);
 }
 
-template<int n, int adjust> void R65816::op_adjust_imm_w() {
+auto R65816::op_adjust_imm_w(reg16_t& reg, signed adjust) {
 L op_io_irq();
-  regs.r[n].w += adjust;
-  regs.p.n = (regs.r[n].w & 0x8000);
-  regs.p.z = (regs.r[n].w == 0);
+  reg.w += adjust;
+  regs.p.n = (reg.w & 0x8000);
+  regs.p.z = (reg.w == 0);
 }
 
-void R65816::op_asl_imm_b() {
+auto R65816::op_asl_imm_b() {
 L op_io_irq();
   regs.p.c = (regs.a.l & 0x80);
   regs.a.l <<= 1;
@@ -20,7 +20,7 @@ L op_io_irq();
   regs.p.z = (regs.a.l == 0);
 }
 
-void R65816::op_asl_imm_w() {
+auto R65816::op_asl_imm_w() {
 L op_io_irq();
   regs.p.c = (regs.a.w & 0x8000);
   regs.a.w <<= 1;
@@ -28,7 +28,7 @@ L op_io_irq();
   regs.p.z = (regs.a.w == 0);
 }
 
-void R65816::op_lsr_imm_b() {
+auto R65816::op_lsr_imm_b() {
 L op_io_irq();
   regs.p.c = (regs.a.l & 0x01);
   regs.a.l >>= 1;
@@ -36,7 +36,7 @@ L op_io_irq();
   regs.p.z = (regs.a.l == 0);
 }
 
-void R65816::op_lsr_imm_w() {
+auto R65816::op_lsr_imm_w() {
 L op_io_irq();
   regs.p.c = (regs.a.w & 0x0001);
   regs.a.w >>= 1;
@@ -44,7 +44,7 @@ L op_io_irq();
   regs.p.z = (regs.a.w == 0);
 }
 
-void R65816::op_rol_imm_b() {
+auto R65816::op_rol_imm_b() {
 L op_io_irq();
   bool carry = regs.p.c;
   regs.p.c = (regs.a.l & 0x80);
@@ -53,7 +53,7 @@ L op_io_irq();
   regs.p.z = (regs.a.l == 0);
 }
 
-void R65816::op_rol_imm_w() {
+auto R65816::op_rol_imm_w() {
 L op_io_irq();
   bool carry = regs.p.c;
   regs.p.c = (regs.a.w & 0x8000);
@@ -62,7 +62,7 @@ L op_io_irq();
   regs.p.z = (regs.a.w == 0);
 }
 
-void R65816::op_ror_imm_b() {
+auto R65816::op_ror_imm_b() {
 L op_io_irq();
   bool carry = regs.p.c;
   regs.p.c = (regs.a.l & 0x01);
@@ -71,7 +71,7 @@ L op_io_irq();
   regs.p.z = (regs.a.l == 0);
 }
 
-void R65816::op_ror_imm_w() {
+auto R65816::op_ror_imm_w() {
 L op_io_irq();
   bool carry = regs.p.c;
   regs.p.c = (regs.a.w & 0x0001);
@@ -80,7 +80,7 @@ L op_io_irq();
   regs.p.z = (regs.a.w == 0);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_addr_b() {
+auto R65816::op_adjust_addr_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w);
@@ -89,7 +89,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_addr_b() {
 L op_writedbr(aa.w, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_addr_w() {
+auto R65816::op_adjust_addr_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   rd.l = op_readdbr(aa.w + 0);
@@ -100,7 +100,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_addr_w() {
 L op_writedbr(aa.w + 0, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_addrx_b() {
+auto R65816::op_adjust_addrx_b(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -110,7 +110,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_addrx_b() {
 L op_writedbr(aa.w + regs.x.w, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_addrx_w() {
+auto R65816::op_adjust_addrx_w(fp op) {
   aa.l = op_readpc();
   aa.h = op_readpc();
   op_io();
@@ -122,7 +122,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_addrx_w() {
 L op_writedbr(aa.w + regs.x.w + 0, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_dp_b() {
+auto R65816::op_adjust_dp_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp);
@@ -131,7 +131,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_dp_b() {
 L op_writedp(dp, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_dp_w() {
+auto R65816::op_adjust_dp_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   rd.l = op_readdp(dp + 0);
@@ -142,7 +142,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_dp_w() {
 L op_writedp(dp + 0, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_dpx_b() {
+auto R65816::op_adjust_dpx_b(fp op) {
   dp = op_readpc();
   op_io_cond2();
   op_io();
@@ -152,7 +152,7 @@ template<void (R65816::*op)()> void R65816::op_adjust_dpx_b() {
 L op_writedp(dp + regs.x.w, rd.l);
 }
 
-template<void (R65816::*op)()> void R65816::op_adjust_dpx_w() {
+auto R65816::op_adjust_dpx_w(fp op) {
   dp = op_readpc();
   op_io_cond2();
   op_io();

@@ -8,12 +8,6 @@ namespace Processor {
 #include "serialization.cpp"
 
 #define L last_cycle();
-#define A 0
-#define X 1
-#define Y 2
-#define Z 3
-#define S 4
-#define D 5
 #define call(op) (this->*op)()
 
 #include "opcode_read.cpp"
@@ -21,15 +15,9 @@ namespace Processor {
 #include "opcode_rmw.cpp"
 #include "opcode_pc.cpp"
 #include "opcode_misc.cpp"
-#include "table.cpp"
+#include "switch.cpp"
 
 #undef L
-#undef A
-#undef X
-#undef Y
-#undef Z
-#undef S
-#undef D
 #undef call
 
 //immediate, 2-cycle opcodes with I/O cycle will become bus read
@@ -40,7 +28,7 @@ namespace Processor {
 //  tcd, tcs, tdc, tsc, tsx, txs,
 //  inc, inx, iny, dec, dex, dey,
 //  asl, lsr, rol, ror, nop, xce.
-alwaysinline void R65816::op_io_irq() {
+auto R65816::op_io_irq() -> void {
   if(interrupt_pending()) {
     //modify I/O cycle to bus read cycle, do not increment PC
     op_read(regs.pc.d);
@@ -49,25 +37,25 @@ alwaysinline void R65816::op_io_irq() {
   }
 }
 
-alwaysinline void R65816::op_io_cond2() {
+auto R65816::op_io_cond2() -> void {
   if(regs.d.l != 0x00) {
     op_io();
   }
 }
 
-alwaysinline void R65816::op_io_cond4(uint16 x, uint16 y) {
+auto R65816::op_io_cond4(uint16 x, uint16 y) -> void {
   if(!regs.p.x || (x & 0xff00) != (y & 0xff00)) {
     op_io();
   }
 }
 
-alwaysinline void R65816::op_io_cond6(uint16 addr) {
+auto R65816::op_io_cond6(uint16 addr) -> void {
   if(regs.e && (regs.pc.w & 0xff00) != (addr & 0xff00)) {
     op_io();
   }
 }
 
-void R65816::op_irq() {
+auto R65816::op_irq() -> void {
   op_read(regs.pc.d);
   op_io();
   if(!regs.e) op_writestack(regs.pc.b);
@@ -80,10 +68,6 @@ void R65816::op_irq() {
   regs.p.d  = 0;
   rd.h = op_read(regs.vector + 1);
   regs.pc.w = rd.w;
-}
-
-R65816::R65816() {
-  initialize_opcode_table();
 }
 
 }

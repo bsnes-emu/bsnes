@@ -1,8 +1,4 @@
-#if defined(PLATFORM_MACOSX)
-static bool OpenGLBind() {
-  return true;
-}
-#else
+#if defined(DISPLAY_WINDOWS) || defined(DISPLAY_XORG)
 PFNGLCREATEPROGRAMPROC glCreateProgram = nullptr;
 PFNGLDELETEPROGRAMPROC glDeleteProgram = nullptr;
 PFNGLUSEPROGRAMPROC glUseProgram = nullptr;
@@ -43,12 +39,17 @@ PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers = nullptr;
 PFNGLDELETEFRAMEBUFFERSPROC glDeleteFramebuffers = nullptr;
 PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer = nullptr;
 PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D = nullptr;
+#endif
+#if defined(DISPLAY_WINDOWS)
+PFNGLACTIVETEXTUREPROC glActiveTexture = nullptr;
+#endif
 
 static bool OpenGLBind() {
   #define bind(prototype, function) \
     function = (prototype)glGetProcAddress(#function); \
     if(function == nullptr) return false
 
+  #if defined(DISPLAY_WINDOWS) || defined(DISPLAY_XORG)
   bind(PFNGLCREATEPROGRAMPROC, glCreateProgram);
   bind(PFNGLDELETEPROGRAMPROC, glDeleteProgram);
   bind(PFNGLUSEPROGRAMPROC, glUseProgram);
@@ -89,9 +90,12 @@ static bool OpenGLBind() {
   bind(PFNGLDELETEFRAMEBUFFERSPROC, glDeleteFramebuffers);
   bind(PFNGLBINDFRAMEBUFFERPROC, glBindFramebuffer);
   bind(PFNGLFRAMEBUFFERTEXTURE2DPROC, glFramebufferTexture2D);
+  #endif
+  #if defined(DISPLAY_WINDOWS)
+  bind(PFNGLACTIVETEXTUREPROC, glActiveTexture);
+  #endif
 
   #undef bind
 
   return true;
 }
-#endif

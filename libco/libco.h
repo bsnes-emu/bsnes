@@ -1,6 +1,7 @@
 /*
   libco
-  version: 0.16 (2010-12-24)
+  version: 0.17 (2015-06-18)
+  author: byuu
   license: public domain
 */
 

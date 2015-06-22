@@ -54,7 +54,7 @@ namespace Math {
   #include <poll.h>
 #endif
 
-#if defined(COMPILER_CL)
+#if defined(COMPILER_VISUALCPP)
   #define va_copy(dest, src) ((dest) = (src))
 #endif
 
@@ -101,7 +101,7 @@ namespace Math {
   #define neverinline   __attribute__((noinline))
   #define alwaysinline  inline __attribute__((always_inline))
   #define deprecated    __attribute__((deprecated))
-#elif defined(COMPILER_CL)
+#elif defined(COMPILER_VISUALCPP)
   #define neverinline   __declspec(noinline)
   #define alwaysinline  inline __forceinline
   #define deprecated    __declspec(deprecated)

@@ -10,13 +10,13 @@ Size pDesktop::size() {
 }
 
 Geometry pDesktop::workspace() {
-  #if defined(PLATFORM_WINDOWS)
+  #if defined(DISPLAY_WINDOWS)
   RECT rc;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);
   return {rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top};
   #endif
 
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   XlibDisplay* display = XOpenDisplay(nullptr);
   int screen = DefaultScreen(display);
 

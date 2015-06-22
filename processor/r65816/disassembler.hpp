@@ -22,9 +22,9 @@ enum : unsigned {
   OPTYPE_RELW,      //relw
 };
 
-void disassemble_opcode(char* output);
-void disassemble_opcode(char* output, uint32 addr, bool e, bool m, bool x);
-uint8 dreadb(uint32 addr);
-uint16 dreadw(uint32 addr);
-uint32 dreadl(uint32 addr);
-uint32 decode(uint8 offset_type, uint32 addr);
+auto disassemble_opcode(char* output) -> void;
+auto disassemble_opcode(char* output, uint32 addr, bool e, bool m, bool x) -> void;
+auto dreadb(uint32 addr) -> uint8;
+auto dreadw(uint32 addr) -> uint16;
+auto dreadl(uint32 addr) -> uint32;
+auto decode(uint8 offset_type, uint32 addr) -> uint32;

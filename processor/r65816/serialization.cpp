@@ -1,4 +1,4 @@
-void R65816::serialize(serializer& s) {
+auto R65816::serialize(serializer& s) -> void {
   s.integer(regs.pc.d);
 
   s.integer(regs.a.w);
@@ -28,6 +28,4 @@ void R65816::serialize(serializer& s) {
   s.integer(rd.d);
   s.integer(sp);
   s.integer(dp);
-
-  update_table();
 }

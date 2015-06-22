@@ -2,15 +2,15 @@
 
 namespace hiro {
 
-#if defined(PLATFORM_XORG)
+#if defined(DISPLAY_XORG)
 XlibDisplay* pApplication::display = nullptr;
 #endif
 
 void pApplication::run() {
   if(Application::state.onMain) {
-    while(Application::state.quit == false) {
-      processEvents();
+    while(!Application::state.quit) {
       Application::doMain();
+      processEvents();
     }
   } else {
     gtk_main();
@@ -29,7 +29,7 @@ void pApplication::quit() {
   //if gtk_main() was invoked, call gtk_main_quit()
   if(gtk_main_level()) gtk_main_quit();
 
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   //todo: Keyboard::poll() is being called after Application::quit();
   //so if display is closed; this causes a segfault
   //XCloseDisplay(display);
@@ -38,7 +38,7 @@ void pApplication::quit() {
 }
 
 void pApplication::initialize() {
-  #if defined(PLATFORM_XORG)
+  #if defined(DISPLAY_XORG)
   display = XOpenDisplay(nullptr);
   #endif
 
@@ -69,7 +69,7 @@ void pApplication::initialize() {
   g_type_class_unref(g_type_class_ref(GTK_TYPE_BUTTON));
   g_object_set(gtkSettings, "gtk-button-images", true, nullptr);
 
-  #if defined(PLATFORM_WINDOWS)
+  #if defined(DISPLAY_WINDOWS)
   //there is a serious bug in GTK 2.24 for Windows with the "ime" (Windows IME) input method:
   //by default, it will be impossible to type in text fields at all.
   //there are various tricks to get around this; but they are unintuitive and unreliable.
