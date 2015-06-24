@@ -1,4 +1,4 @@
-bool ARM::condition(uint4 condition) {
+auto ARM::condition(uint4 condition) -> bool {
   switch(condition) {
   case  0: return cpsr().z == 1;                          //EQ (equal)
   case  1: return cpsr().z == 0;                          //NE (not equal)
@@ -19,7 +19,7 @@ bool ARM::condition(uint4 condition) {
   }
 }
 
-uint32 ARM::bit(uint32 result) {
+auto ARM::bit(uint32 result) -> uint32 {
   if(cpsr().t || instruction() & (1 << 20)) {
     cpsr().n = result >> 31;
     cpsr().z = result == 0;
@@ -28,7 +28,7 @@ uint32 ARM::bit(uint32 result) {
   return result;
 }
 
-uint32 ARM::add(uint32 source, uint32 modify, bool carry) {
+auto ARM::add(uint32 source, uint32 modify, bool carry) -> uint32 {
   uint32 result = source + modify + carry;
   if(cpsr().t || instruction() & (1 << 20)) {
     uint32 overflow = ~(source ^ modify) & (source ^ result);
@@ -40,11 +40,16 @@ uint32 ARM::add(uint32 source, uint32 modify, bool carry) {
   return result;
 }
 
-uint32 ARM::sub(uint32 source, uint32 modify, bool carry) {
+auto ARM::sub(uint32 source, uint32 modify, bool carry) -> uint32 {
   return add(source, ~modify, carry);
 }
 
-uint32 ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) {
+auto ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) -> uint32 {
+       if((multiplier & 0xffffff00) == 0x00000000 || (multiplier & 0xffffff00 == 0xffffff00)) step(1);
+  else if((multiplier & 0xffff0000) == 0x00000000 || (multiplier & 0xffff0000 == 0xffff0000)) step(2);
+  else if((multiplier & 0xff000000) == 0x00000000 || (multiplier & 0xff000000 == 0xff000000)) step(3);
+  else step(4);
+
   product += multiplicand * multiplier;
 
   if(cpsr().t || instruction() & (1 << 20)) {
@@ -55,7 +60,7 @@ uint32 ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) {
   return product;
 }
 
-uint32 ARM::lsl(uint32 source, uint8 shift) {
+auto ARM::lsl(uint32 source, uint8 shift) -> uint32 {
   carryout() = cpsr().c;
   if(shift == 0) return source;
 
@@ -64,7 +69,7 @@ uint32 ARM::lsl(uint32 source, uint8 shift) {
   return source;
 }
 
-uint32 ARM::lsr(uint32 source, uint8 shift) {
+auto ARM::lsr(uint32 source, uint8 shift) -> uint32 {
   carryout() = cpsr().c;
   if(shift == 0) return source;
 
@@ -73,7 +78,7 @@ uint32 ARM::lsr(uint32 source, uint8 shift) {
   return source;
 }
 
-uint32 ARM::asr(uint32 source, uint8 shift) {
+auto ARM::asr(uint32 source, uint8 shift) -> uint32 {
   carryout() = cpsr().c;
   if(shift == 0) return source;
 
@@ -82,7 +87,7 @@ uint32 ARM::asr(uint32 source, uint8 shift) {
   return source;
 }
 
-uint32 ARM::ror(uint32 source, uint8 shift) {
+auto ARM::ror(uint32 source, uint8 shift) -> uint32 {
   carryout() = cpsr().c;
   if(shift == 0) return source;
 
@@ -92,7 +97,7 @@ uint32 ARM::ror(uint32 source, uint8 shift) {
   return source;
 }
 
-uint32 ARM::rrx(uint32 source) {
+auto ARM::rrx(uint32 source) -> uint32 {
   carryout() = source & 1;
   return (cpsr().c << 31) | (source >> 1);
 }

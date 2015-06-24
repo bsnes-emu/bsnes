@@ -3,44 +3,54 @@
 
 namespace Processor {
 
-//ARMv3
-//ARMv4TDMI
+//Supported Models:
+//* ARMv3 (ST018)
+//* ARMv4 (ARM7TDMI)
 
 struct ARM {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
+
   #include "registers.hpp"
   #include "instructions-arm.hpp"
   #include "instructions-thumb.hpp"
   #include "disassembler.hpp"
-  virtual void step(unsigned clocks) = 0;
-  virtual void bus_idle(uint32 addr) = 0;
-  virtual uint32 bus_read(uint32 addr, uint32 size) = 0;
-  virtual void bus_write(uint32 addr, uint32 size, uint32 word) = 0;
 
-  void power();
-  void exec();
-  void idle();
-  uint32 read(uint32 addr, uint32 size);
-  uint32 load(uint32 addr, uint32 size);
-  void write(uint32 addr, uint32 size, uint32 word);
-  void store(uint32 addr, uint32 size, uint32 word);
-  void vector(uint32 addr, Processor::Mode mode);
+  virtual auto step(unsigned clocks) -> void = 0;
+  virtual auto bus_idle(uint32 addr) -> void = 0;
+  virtual auto bus_read(uint32 addr, uint32 size) -> uint32 = 0;
+  virtual auto bus_write(uint32 addr, uint32 size, uint32 word) -> void = 0;
 
-  bool condition(uint4 condition);
-  uint32 bit(uint32 result);
-  uint32 add(uint32 source, uint32 modify, bool carry);
-  uint32 sub(uint32 source, uint32 modify, bool carry);
-  uint32 mul(uint32 product, uint32 multiplicand, uint32 multiplier);
-  uint32 lsl(uint32 source, uint8 shift);
-  uint32 lsr(uint32 source, uint8 shift);
-  uint32 asr(uint32 source, uint8 shift);
-  uint32 ror(uint32 source, uint8 shift);
-  uint32 rrx(uint32 source);
+  //arm.cpp
+  auto power() -> void;
+  auto exec() -> void;
+  auto idle() -> void;
+  auto read(uint32 addr, uint32 size) -> uint32;
+  auto load(uint32 addr, uint32 size) -> uint32;
+  auto write(uint32 addr, uint32 size, uint32 word) -> void;
+  auto store(uint32 addr, uint32 size, uint32 word) -> void;
+  auto vector(uint32 addr, Processor::Mode mode) -> void;
 
-  void serialize(serializer&);
+  //algorithms.cpp
+  auto condition(uint4 condition) -> bool;
+  auto bit(uint32 result) -> uint32;
+  auto add(uint32 source, uint32 modify, bool carry) -> uint32;
+  auto sub(uint32 source, uint32 modify, bool carry) -> uint32;
+  auto mul(uint32 product, uint32 multiplicand, uint32 multiplier) -> uint32;
+  auto lsl(uint32 source, uint8 shift) -> uint32;
+  auto lsr(uint32 source, uint8 shift) -> uint32;
+  auto asr(uint32 source, uint8 shift) -> uint32;
+  auto ror(uint32 source, uint8 shift) -> uint32;
+  auto rrx(uint32 source) -> uint32;
 
-  bool trace;
-  uintmax_t instructions;
+  //step.cpp
+  auto arm_step() -> void;
+  auto thumb_step() -> void;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
+  bool trace{false};
+  uintmax_t instructions{0};
 };
 
 }

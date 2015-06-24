@@ -1,3 +1,3 @@
-void Bus::serialize(serializer& s) {
+auto Bus::serialize(serializer& s) -> void {
   s.integer(idleflag);
 }

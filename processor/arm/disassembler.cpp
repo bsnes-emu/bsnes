@@ -1,6 +1,6 @@
 #ifdef PROCESSOR_ARM_HPP
 
-string ARM::disassemble_arm_instruction(uint32 pc) {
+auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -440,7 +440,7 @@ string ARM::disassemble_arm_instruction(uint32 pc) {
   return output;
 }
 
-string ARM::disassemble_thumb_instruction(uint32 pc) {
+auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -761,7 +761,7 @@ string ARM::disassemble_thumb_instruction(uint32 pc) {
   return output;
 }
 
-string ARM::disassemble_registers() {
+auto ARM::disassemble_registers() -> string {
   string output;
   output.append( "r0:", hex<8>(r( 0)), " r1:", hex<8>(r( 1)), "  r2:", hex<8>(r( 2)), "  r3:", hex<8>(r( 3)), "  ");
   output.append( "r4:", hex<8>(r( 4)), " r5:", hex<8>(r( 5)),  " r6:", hex<8>(r( 6)),  " r7:", hex<8>(r( 7)), " ");

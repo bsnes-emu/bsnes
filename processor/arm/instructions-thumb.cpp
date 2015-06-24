@@ -1,65 +1,6 @@
 #ifdef PROCESSOR_ARM_HPP
 
-void ARM::thumb_step() {
-  if(pipeline.reload) {
-    pipeline.reload = false;
-    r(15).data &= ~1;
-
-    sequential() = false;
-    pipeline.fetch.address = r(15) & ~1;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
-
-    pipeline_step();
-  }
-
-  pipeline_step();
-
-  if(processor.irqline && cpsr().i == 0) {
-    vector(0x00000018, Processor::Mode::IRQ);
-    r(14) += 2;
-    return;
-  }
-
-  instructions++;
-  if(trace) {
-    print(disassemble_registers(), "\n");
-    print(disassemble_thumb_instruction(pipeline.execute.address), "\n");
-  }
-
-  #define decode(pattern, execute) if( \
-    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
-    == std::integral_constant<uint32, bit::test(pattern)>::value \
-  ) return thumb_op_ ## execute()
-
-  decode("0001 10?? ???? ????", adjust_register);
-  decode("0001 11?? ???? ????", adjust_immediate);
-  decode("000? ???? ???? ????", shift_immediate);
-  decode("001? ???? ???? ????", immediate);
-  decode("0100 00?? ???? ????", alu);
-  decode("0100 0111 0??? ?---", branch_exchange);
-  decode("0100 01?? ???? ????", alu_hi);
-  decode("0100 1??? ???? ????", load_literal);
-  decode("0101 ???? ???? ????", move_register_offset);
-  decode("0110 ???? ???? ????", move_word_immediate);
-  decode("0111 ???? ???? ????", move_byte_immediate);
-  decode("1000 ???? ???? ????", move_half_immediate);
-  decode("1001 ???? ???? ????", move_stack);
-  decode("1010 ???? ???? ????", add_register_hi);
-  decode("1011 0000 ???? ????", adjust_stack);
-  decode("1011 ?10? ???? ????", stack_multiple);
-  decode("1100 ???? ???? ????", move_multiple);
-  decode("1101 1111 ???? ????", software_interrupt);
-  decode("1101 ???? ???? ????", branch_conditional);
-  decode("1110 0??? ???? ????", branch_short);
-  decode("1111 0??? ???? ????", branch_long_prefix);
-  decode("1111 1??? ???? ????", branch_long_suffix);
-
-  #undef decode
-
-  crash = true;
-}
-
-void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
+auto ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
   switch(opcode) {
   case  0: r(d) = bit(r(d) & r(m));          break;  //AND
   case  1: r(d) = bit(r(d) ^ r(m));          break;  //EOR
@@ -74,7 +15,7 @@ void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
   case 10:        sub(r(d), r(m), 1);        break;  //CMP
   case 11:        add(r(d), r(m), 0);        break;  //CMN
   case 12: r(d) = bit(r(d) | r(m));          break;  //ORR
-  case 13: r(d) = mul(0, r(d), r(m));        break;  //MUL
+  case 13: r(d) = mul(0, r(m), r(d));        break;  //MUL
   case 14: r(d) = bit(r(d) & ~r(m));         break;  //BIC
   case 15: r(d) = bit(~r(m));                break;  //MVN
   }
@@ -86,7 +27,7 @@ void ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
 //m = rm
 //n = rn
 //d = rd
-void ARM::thumb_op_adjust_register() {
+auto ARM::thumb_op_adjust_register() {
   uint1 opcode = instruction() >> 9;
   uint3 m = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -104,7 +45,7 @@ void ARM::thumb_op_adjust_register() {
 //i = immediate
 //n = rn
 //d = rd
-void ARM::thumb_op_adjust_immediate() {
+auto ARM::thumb_op_adjust_immediate() {
   uint1 opcode = instruction() >> 9;
   uint3 immediate = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -122,7 +63,7 @@ void ARM::thumb_op_adjust_immediate() {
 //i = immediate
 //m = rm
 //d = rd
-void ARM::thumb_op_shift_immediate() {
+auto ARM::thumb_op_shift_immediate() {
   uint2 opcode = instruction() >> 11;
   uint5 immediate = instruction() >> 6;
   uint3 m = instruction() >> 3;
@@ -140,7 +81,7 @@ void ARM::thumb_op_shift_immediate() {
 //o = opcode
 //r = (rd,rn)
 //i = immediate
-void ARM::thumb_op_immediate() {
+auto ARM::thumb_op_immediate() {
   uint2 opcode = instruction() >> 11;
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
@@ -158,7 +99,7 @@ void ARM::thumb_op_immediate() {
 //o = opcode
 //m = rm
 //d = rd
-void ARM::thumb_op_alu() {
+auto ARM::thumb_op_alu() {
   uint4 opcode = instruction() >> 6;
   uint3 m = instruction() >> 3;
   uint3 d = instruction();
@@ -169,7 +110,7 @@ void ARM::thumb_op_alu() {
 //bx rm
 //0100 0111 0mmm m---
 //m = rm
-void ARM::thumb_op_branch_exchange() {
+auto ARM::thumb_op_branch_exchange() {
   uint4 m = instruction() >> 3;
 
   cpsr().t = r(m) & 1;
@@ -181,7 +122,7 @@ void ARM::thumb_op_branch_exchange() {
 //o = opcode
 //M:m = rm
 //D:d = rd
-void ARM::thumb_op_alu_hi() {
+auto ARM::thumb_op_alu_hi() {
   uint2 opcode = instruction() >> 8;
   uint4 m = instruction() >> 3;
   uint3 dl = instruction();
@@ -199,7 +140,7 @@ void ARM::thumb_op_alu_hi() {
 //0100 1ddd oooo oooo
 //d = rd
 //o = offset
-void ARM::thumb_op_load_literal() {
+auto ARM::thumb_op_load_literal() {
   uint3 d = instruction() >> 8;
   uint8 displacement = instruction();
 
@@ -213,7 +154,7 @@ void ARM::thumb_op_load_literal() {
 //m = rm
 //n = rn
 //d = rd
-void ARM::thumb_op_move_register_offset() {
+auto ARM::thumb_op_move_register_offset() {
   uint3 opcode = instruction() >> 9;
   uint3 m = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -237,7 +178,7 @@ void ARM::thumb_op_move_register_offset() {
 //o = offset
 //n = rn
 //d = rd
-void ARM::thumb_op_move_word_immediate() {
+auto ARM::thumb_op_move_word_immediate() {
   uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -253,7 +194,7 @@ void ARM::thumb_op_move_word_immediate() {
 //o = offset
 //n = rn
 //d = rd
-void ARM::thumb_op_move_byte_immediate() {
+auto ARM::thumb_op_move_byte_immediate() {
   uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -269,7 +210,7 @@ void ARM::thumb_op_move_byte_immediate() {
 //o = offset
 //n = rn
 //d = rd
-void ARM::thumb_op_move_half_immediate() {
+auto ARM::thumb_op_move_half_immediate() {
   uint1 l = instruction() >> 11;
   uint5 offset = instruction() >> 6;
   uint3 n = instruction() >> 3;
@@ -284,7 +225,7 @@ void ARM::thumb_op_move_half_immediate() {
 //l = load
 //d = rd
 //i = immediate
-void ARM::thumb_op_move_stack() {
+auto ARM::thumb_op_move_stack() {
   uint1 l = instruction() >> 11;
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
@@ -298,7 +239,7 @@ void ARM::thumb_op_move_stack() {
 //s = sp (0 = pc)
 //d = rd
 //i = immediate
-void ARM::thumb_op_add_register_hi() {
+auto ARM::thumb_op_add_register_hi() {
   uint1 sp = instruction() >> 11;
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
@@ -311,7 +252,7 @@ void ARM::thumb_op_add_register_hi() {
 //1011 0000 oiii iiii
 //o = opcode
 //i = immediate
-void ARM::thumb_op_adjust_stack() {
+auto ARM::thumb_op_adjust_stack() {
   uint1 opcode = instruction() >> 7;
   uint7 immediate = instruction();
 
@@ -325,7 +266,7 @@ void ARM::thumb_op_adjust_stack() {
 //o = opcode (0 = push, 1 = pop)
 //r = push lr -or- pop pc
 //l = register list
-void ARM::thumb_op_stack_multiple() {
+auto ARM::thumb_op_stack_multiple() {
   uint1 l = instruction() >> 11;
   uint1 branch = instruction() >> 8;
   uint8 list = instruction();
@@ -336,7 +277,7 @@ void ARM::thumb_op_stack_multiple() {
 
   sequential() = false;
   for(unsigned m = 0; m < 8; m++) {
-    if(list & (1 << m)) {
+    if(list & 1 << m) {
       if(l == 1) r(m) = read(sp, Word);  //POP
       if(l == 0) write(sp, Word, r(m));  //PUSH
       sp += 4;
@@ -360,27 +301,29 @@ void ARM::thumb_op_stack_multiple() {
 //l = load (0 = save)
 //n = rn
 //l = register list
-void ARM::thumb_op_move_multiple() {
+auto ARM::thumb_op_move_multiple() {
   uint1 l = instruction() >> 11;
   uint3 n = instruction() >> 8;
   uint8 list = instruction();
+  uint32 rn = r(n);  //rn may be in register list; so we must cache it
 
   sequential() = false;
   for(unsigned m = 0; m < 8; m++) {
-    if(list & (1 << m)) {
-      if(l == 1) r(m) = read(r(n), Word);  //LDMIA
-      if(l == 0) write(r(n), Word, r(m));  //STMIA
-      r(n) += 4;
+    if(list & 1 << m) {
+      if(l == 1) r(m) = read(rn, Word);  //LDMIA
+      if(l == 0) write(rn, Word, r(m));  //STMIA
+      rn += 4;
     }
   }
 
+  if(l == 0 || (list & 1 << n) == 0) r(n) = rn;  //update rn on save or when not in register list
   if(l == 1) idle();
 }
 
 //swi #immediate
 //1101 1111 iiii iiii
 //i = immediate
-void ARM::thumb_op_software_interrupt() {
+auto ARM::thumb_op_software_interrupt() {
   uint8 immediate = instruction();
 
   vector(0x00000008, Processor::Mode::SVC);
@@ -390,7 +333,7 @@ void ARM::thumb_op_software_interrupt() {
 //1101 cccc dddd dddd
 //c = condition
 //d = displacement
-void ARM::thumb_op_branch_conditional() {
+auto ARM::thumb_op_branch_conditional() {
   uint4 flagcondition = instruction() >> 8;
   int8 displacement = instruction();
 
@@ -401,7 +344,7 @@ void ARM::thumb_op_branch_conditional() {
 //b address
 //1110 0ooo oooo oooo
 //o = offset
-void ARM::thumb_op_branch_short() {
+auto ARM::thumb_op_branch_short() {
   int11 displacement = instruction();
 
   r(15) += displacement * 2;
@@ -410,7 +353,7 @@ void ARM::thumb_op_branch_short() {
 //bl address
 //1111 0ooo oooo oooo
 //o = offset
-void ARM::thumb_op_branch_long_prefix() {
+auto ARM::thumb_op_branch_long_prefix() {
   int11 offsethi = instruction();
 
   r(14) = r(15) + ((offsethi * 2) << 11);
@@ -419,7 +362,7 @@ void ARM::thumb_op_branch_long_prefix() {
 //bl address
 //1111 1ooo oooo oooo
 //o = offset
-void ARM::thumb_op_branch_long_suffix() {
+auto ARM::thumb_op_branch_long_suffix() {
   uint11 offsetlo = instruction();
 
   r(15) = r(14) + (offsetlo * 2);

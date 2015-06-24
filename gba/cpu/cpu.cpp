@@ -76,12 +76,12 @@ void CPU::bus_idle(uint32 addr) {
 }
 
 uint32 CPU::bus_read(uint32 addr, uint32 size) {
-  step(bus.speed(addr, size));
+  step(bus.wait(addr, size));
   return bus.read(addr, size);
 }
 
 void CPU::bus_write(uint32 addr, uint32 size, uint32 word) {
-  step(bus.speed(addr, size));
+  step(bus.wait(addr, size));
   return bus.write(addr, size, word);
 }
 

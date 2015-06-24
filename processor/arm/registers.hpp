@@ -1,39 +1,30 @@
 struct GPR {
-  uint32 data;
-  function<void ()> modify;
-
   inline operator uint32() const { return data; }
-  inline GPR& operator=(uint32 n) { data = n; if(modify) modify(); return *this; }
-  inline GPR& operator=(const GPR& source) { return operator=(source.data); }
+  inline auto operator=(uint32 n) { data = n; if(modify) modify(); return *this; }
+  inline auto operator=(const GPR& source) { return operator=(source.data); }
 
-  inline GPR& operator &=(uint32 n) { return operator=(data  & n); }
-  inline GPR& operator |=(uint32 n) { return operator=(data  | n); }
-  inline GPR& operator ^=(uint32 n) { return operator=(data  ^ n); }
-  inline GPR& operator +=(uint32 n) { return operator=(data  + n); }
-  inline GPR& operator -=(uint32 n) { return operator=(data  - n); }
-  inline GPR& operator *=(uint32 n) { return operator=(data  * n); }
-  inline GPR& operator /=(uint32 n) { return operator=(data  / n); }
-  inline GPR& operator %=(uint32 n) { return operator=(data  % n); }
-  inline GPR& operator<<=(uint32 n) { return operator=(data << n); }
-  inline GPR& operator>>=(uint32 n) { return operator=(data >> n); }
+  inline auto operator &=(uint32 n) { return operator=(data  & n); }
+  inline auto operator |=(uint32 n) { return operator=(data  | n); }
+  inline auto operator ^=(uint32 n) { return operator=(data  ^ n); }
+  inline auto operator +=(uint32 n) { return operator=(data  + n); }
+  inline auto operator -=(uint32 n) { return operator=(data  - n); }
+  inline auto operator *=(uint32 n) { return operator=(data  * n); }
+  inline auto operator /=(uint32 n) { return operator=(data  / n); }
+  inline auto operator %=(uint32 n) { return operator=(data  % n); }
+  inline auto operator<<=(uint32 n) { return operator=(data << n); }
+  inline auto operator>>=(uint32 n) { return operator=(data >> n); }
+
+  uint32 data{0};
+  function<void ()> modify;
 };
 
 struct PSR {
-  bool n;      //negative
-  bool z;      //zero
-  bool c;      //carry
-  bool v;      //overflow
-  bool i;      //irq
-  bool f;      //fiq
-  bool t;      //thumb
-  unsigned m;  //mode
-
   inline operator uint32() const {
     return (n << 31) + (z << 30) + (c << 29) + (v << 28)
          + (i <<  7) + (f <<  6) + (t <<  5) + (m <<  0);
   }
 
-  inline PSR& operator=(uint32 d) {
+  inline auto operator=(uint32 d) {
     n = d & (1 << 31);
     z = d & (1 << 30);
     c = d & (1 << 29);
@@ -45,15 +36,24 @@ struct PSR {
     return *this;
   }
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
+
+  bool n{false};  //negative
+  bool z{false};  //zero
+  bool c{false};  //carry
+  bool v{false};  //overflow
+  bool i{false};  //irq
+  bool f{false};  //fiq
+  bool t{false};  //thumb
+  unsigned m{0};  //mode
 };
 
 struct Pipeline {
-  bool reload;
+  bool reload{false};
 
   struct Instruction {
-    uint32 address;
-    uint32 instruction;
+    uint32 address{0};
+    uint32 instruction{0};
   };
 
   Instruction execute;
@@ -105,29 +105,29 @@ struct Processor {
 
   GPR pc;
   PSR cpsr;
-  bool carryout;
-  bool sequential;
-  bool irqline;
+  bool carryout{false};
+  bool sequential{false};
+  bool irqline{false};
 
   GPR* r[16];
   PSR* spsr;
 
-  void power();
-  void setMode(Mode);
+  auto power() -> void;
+  auto setMode(Mode) -> void;
 };
 
 Processor processor;
 Pipeline pipeline;
-bool crash;
+bool crash{false};
 
-void pipeline_step();
+auto pipeline_step() -> void;
 
-alwaysinline GPR& r(unsigned n) { return *processor.r[n]; }
-alwaysinline PSR& cpsr() { return processor.cpsr; }
-alwaysinline PSR& spsr() { return *processor.spsr; }
-alwaysinline bool& carryout() { return processor.carryout; }
-alwaysinline bool& sequential() { return processor.sequential; }
-alwaysinline uint32 instruction() { return pipeline.execute.instruction; }
-alwaysinline Processor::Mode mode() { return (Processor::Mode)processor.cpsr.m; }
-alwaysinline bool privilegedmode() const { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
-alwaysinline bool exceptionmode() const { return privilegedmode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }
+alwaysinline auto r(unsigned n) -> GPR& { return *processor.r[n]; }
+alwaysinline auto cpsr() -> PSR& { return processor.cpsr; }
+alwaysinline auto spsr() -> PSR& { return *processor.spsr; }
+alwaysinline auto carryout() -> bool& { return processor.carryout; }
+alwaysinline auto sequential() -> bool& { return processor.sequential; }
+alwaysinline auto instruction() -> uint32 { return pipeline.execute.instruction; }
+alwaysinline auto mode() -> Processor::Mode { return (Processor::Mode)processor.cpsr.m; }
+alwaysinline auto privilegedmode() const -> bool { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
+alwaysinline auto exceptionmode() const -> bool { return privilegedmode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }

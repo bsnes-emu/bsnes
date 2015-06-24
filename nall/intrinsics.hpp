@@ -57,7 +57,7 @@ namespace nall {
 #if defined(_WIN32)
   #define PLATFORM_WINDOWS
   #define API_WINDOWS
-  #define DISPLAY_WINDOW
+  #define DISPLAY_WINDOWS
   auto Intrinsics::platform() -> Platform { return Platform::Windows; }
   auto Intrinsics::api() -> API { return API::Windows; }
   auto Intrinsics::display() -> Display { return Display::Windows; }

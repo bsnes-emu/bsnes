@@ -16,10 +16,10 @@ void CPU::dma_transfer(Registers::DMA& dma) {
 
   sequential() = false;
   do {
-    step(bus.speed(dma.run.source, size));
+    step(bus.wait(dma.run.source, size));
     uint32 word = bus.read(dma.run.source, size);
 
-    step(bus.speed(dma.run.target, size));
+    step(bus.wait(dma.run.target, size));
     bus.write(dma.run.target, size, word);
 
     sequential() = true;

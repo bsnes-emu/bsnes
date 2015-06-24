@@ -1,64 +1,6 @@
 #ifdef PROCESSOR_ARM_HPP
 
-void ARM::arm_step() {
-  if(pipeline.reload) {
-    pipeline.reload = false;
-    r(15).data &= ~3;
-
-    sequential() = false;
-    pipeline.fetch.address = r(15) & ~3;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
-
-    pipeline_step();
-  }
-
-  pipeline_step();
-
-  if(processor.irqline && cpsr().i == 0) {
-    vector(0x00000018, Processor::Mode::IRQ);
-    return;
-  }
-
-  instructions++;
-  if(trace) {
-    print(disassemble_registers(), "\n");
-    print(disassemble_arm_instruction(pipeline.execute.address), "\n");
-    usleep(100000);
-  }
-
-  if(condition(instruction() >> 28) == false) return;
-
-  #define decode(pattern, execute) if( \
-    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
-    == std::integral_constant<uint32, bit::test(pattern)>::value \
-  ) return arm_op_ ## execute()
-
-  decode("???? 0001 0010 ++++ ++++ ++++ 0001 ????", branch_exchange_register);
-  decode("???? 0000 00?? ???? ???? ???? 1001 ????", multiply);
-  decode("???? 0000 1??? ???? ???? ???? 1001 ????", multiply_long);
-  decode("???? 0001 0?00 ++++ ???? ---- 0000 ----", move_to_register_from_status);
-  decode("???? 0001 0?00 ???? ???? ---- 1001 ????", memory_swap);
-  decode("???? 0001 0?10 ???? ++++ ---- 0000 ????", move_to_status_from_register);
-  decode("???? 0011 0?10 ???? ++++ ???? ???? ????", move_to_status_from_immediate);
-  decode("???? 000? ?0?1 ???? ???? ---- 11?1 ????", load_register);
-  decode("???? 000? ?1?1 ???? ???? ???? 11?1 ????", load_immediate);
-  decode("???? 000? ?0?? ???? ???? ---- 1011 ????", move_half_register);
-  decode("???? 000? ?1?? ???? ???? ???? 1011 ????", move_half_immediate);
-  decode("???? 000? ???? ???? ???? ???? ???0 ????", data_immediate_shift);
-  decode("???? 000? ???? ???? ???? ???? 0??1 ????", data_register_shift);
-  decode("???? 001? ???? ???? ???? ???? ???? ????", data_immediate);
-  decode("???? 010? ???? ???? ???? ???? ???? ????", move_immediate_offset);
-  decode("???? 011? ???? ???? ???? ???? ???0 ????", move_register_offset);
-  decode("???? 100? ???? ???? ???? ???? ???? ????", move_multiple);
-  decode("???? 101? ???? ???? ???? ???? ???? ????", branch);
-  decode("???? 1111 ???? ???? ???? ???? ???? ????", software_interrupt);
-
-  #undef decode
-
-  crash = true;
-}
-
-void ARM::arm_opcode(uint32 rm) {
+auto ARM::arm_opcode(uint32 rm) {
   uint4 opcode = instruction() >> 21;
   uint1 save = instruction() >> 20;
   uint4 n = instruction() >> 16;
@@ -91,7 +33,7 @@ void ARM::arm_opcode(uint32 rm) {
   }
 }
 
-void ARM::arm_move_to_status(uint32 rm) {
+auto ARM::arm_move_to_status(uint32 rm) {
   uint1 source = instruction() >> 22;
   uint4 field = instruction() >> 16;
 
@@ -130,7 +72,7 @@ void ARM::arm_move_to_status(uint32 rm) {
 //n = rn
 //s = rs
 //m = rm
-void ARM::arm_op_multiply() {
+auto ARM::arm_op_multiply() {
   uint1 accumulate = instruction() >> 21;
   uint1 save = instruction() >> 20;
   uint4 d = instruction() >> 16;
@@ -138,7 +80,6 @@ void ARM::arm_op_multiply() {
   uint4 s = instruction() >> 8;
   uint4 m = instruction();
 
-  step(1);
   r(d) = mul(accumulate ? r(n) : 0u, r(m), r(s));
 }
 
@@ -153,7 +94,7 @@ void ARM::arm_op_multiply() {
 //l = rdlo
 //s = rs
 //m = rm
-void ARM::arm_op_multiply_long() {
+auto ARM::arm_op_multiply_long() {
   uint1 signextend = instruction() >> 22;
   uint1 accumulate = instruction() >> 21;
   uint1 save = instruction() >> 20;
@@ -190,7 +131,7 @@ void ARM::arm_op_multiply_long() {
 //n = rn
 //d = rd
 //m = rm
-void ARM::arm_op_memory_swap() {
+auto ARM::arm_op_memory_swap() {
   uint1 byte = instruction() >> 22;
   uint4 n = instruction() >> 16;
   uint4 d = instruction() >> 12;
@@ -212,7 +153,7 @@ void ARM::arm_op_memory_swap() {
 //n = rn
 //d = rd
 //m = rm
-void ARM::arm_op_move_half_register() {
+auto ARM::arm_op_move_half_register() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
@@ -244,7 +185,7 @@ void ARM::arm_op_move_half_register() {
 //d = rd
 //i = immediate hi
 //i = immediate lo
-void ARM::arm_op_move_half_immediate() {
+auto ARM::arm_op_move_half_immediate() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
@@ -276,7 +217,7 @@ void ARM::arm_op_move_half_immediate() {
 //d = rd
 //h = half (0 = byte)
 //m = rm
-void ARM::arm_op_load_register() {
+auto ARM::arm_op_load_register() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
@@ -308,7 +249,7 @@ void ARM::arm_op_load_register() {
 //i = immediate hi
 //h = half (0 = byte)
 //i = immediate lo
-void ARM::arm_op_load_immediate() {
+auto ARM::arm_op_load_immediate() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 writeback = instruction() >> 21;
@@ -334,7 +275,7 @@ void ARM::arm_op_load_immediate() {
 //c = condition
 //r = SPSR (0 = CPSR)
 //d = rd
-void ARM::arm_op_move_to_register_from_status() {
+auto ARM::arm_op_move_to_register_from_status() {
   uint1 source = instruction() >> 22;
   uint4 d = instruction() >> 12;
 
@@ -352,7 +293,7 @@ void ARM::arm_op_move_to_register_from_status() {
 //r = SPSR (0 = CPSR)
 //f = field mask
 //m = rm
-void ARM::arm_op_move_to_status_from_register() {
+auto ARM::arm_op_move_to_status_from_register() {
   uint4 m = instruction();
 
   arm_move_to_status(r(m));
@@ -362,7 +303,7 @@ void ARM::arm_op_move_to_status_from_register() {
 //cccc 0001 0010 ++++ ++++ ++++ 0001 mmmm
 //c = condition
 //m = rm
-void ARM::arm_op_branch_exchange_register() {
+auto ARM::arm_op_branch_exchange_register() {
   uint4 m = instruction();
 
   cpsr().t = r(m) & 1;
@@ -376,7 +317,7 @@ void ARM::arm_op_branch_exchange_register() {
 //f = field mask
 //r = rotate
 //i = immediate
-void ARM::arm_op_move_to_status_from_immediate() {
+auto ARM::arm_op_move_to_status_from_immediate() {
   uint4 rotate = instruction() >> 8;
   uint8 immediate = instruction();
 
@@ -398,7 +339,7 @@ void ARM::arm_op_move_to_status_from_immediate() {
 //l = shift immediate
 //s = shift
 //m = rm
-void ARM::arm_op_data_immediate_shift() {
+auto ARM::arm_op_data_immediate_shift() {
   uint1 save = instruction() >> 20;
   uint5 shift = instruction() >> 7;
   uint2 mode = instruction() >> 5;
@@ -428,7 +369,7 @@ void ARM::arm_op_data_immediate_shift() {
 //s = rs
 //s = shift
 //m = rm
-void ARM::arm_op_data_register_shift() {
+auto ARM::arm_op_data_register_shift() {
   uint1 save = instruction() >> 20;
   uint4 s = instruction() >> 8;
   uint2 mode = instruction() >> 5;
@@ -457,7 +398,7 @@ void ARM::arm_op_data_register_shift() {
 //d = rd
 //s = shift immediate
 //i = immediate
-void ARM::arm_op_data_immediate() {
+auto ARM::arm_op_data_immediate() {
   uint1 save = instruction() >> 20;
   uint4 shift = instruction() >> 8;
   uint8 immediate = instruction();
@@ -482,7 +423,7 @@ void ARM::arm_op_data_immediate() {
 //n = rn
 //d = rd
 //i = immediate
-void ARM::arm_op_move_immediate_offset() {
+auto ARM::arm_op_move_immediate_offset() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 byte = instruction() >> 22;
@@ -517,7 +458,7 @@ void ARM::arm_op_move_immediate_offset() {
 //l = shift immediate
 //s = shift mode
 //m = rm
-void ARM::arm_op_move_register_offset() {
+auto ARM::arm_op_move_register_offset() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 byte = instruction() >> 22;
@@ -558,7 +499,7 @@ void ARM::arm_op_move_register_offset() {
 //l = load (0 = save)
 //n = rn
 //l = register list
-void ARM::arm_op_move_multiple() {
+auto ARM::arm_op_move_multiple() {
   uint1 pre = instruction() >> 24;
   uint1 up = instruction() >> 23;
   uint1 s = instruction() >> 22;
@@ -612,7 +553,7 @@ void ARM::arm_op_move_multiple() {
 //c = condition
 //l = link
 //d = displacement (24-bit signed)
-void ARM::arm_op_branch() {
+auto ARM::arm_op_branch() {
   uint1 link = instruction() >> 24;
   int24 displacement = instruction();
 
@@ -624,7 +565,7 @@ void ARM::arm_op_branch() {
 //cccc 1111 iiii iiii iiii iiii iiii iiii
 //c = condition
 //i = immediate
-void ARM::arm_op_software_interrupt() {
+auto ARM::arm_op_software_interrupt() {
   uint24 immediate = instruction();
 
   vector(0x00000008, Processor::Mode::SVC);

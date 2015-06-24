@@ -1,6 +1,6 @@
 #ifdef PROCESSOR_ARM_HPP
 
-void ARM::Processor::power() {
+auto ARM::Processor::power() -> void {
   r0 = r1 = r2 = r3 = r4 = r5 = r6 = r7 = 0;
   usr.r8 = usr.r9 = usr.r10 = usr.r11 = usr.r12 = usr.sp = usr.lr = 0;
   fiq.r8 = fiq.r9 = fiq.r10 = fiq.r11 = fiq.r12 = fiq.sp = fiq.lr = 0;
@@ -34,7 +34,7 @@ void ARM::Processor::power() {
   r[15] = &pc;
 }
 
-void ARM::Processor::setMode(Mode mode) {
+auto ARM::Processor::setMode(Mode mode) -> void {
   cpsr.m = 0x10 | (unsigned)mode;
 
   if(mode == Mode::FIQ) {
@@ -61,7 +61,7 @@ void ARM::Processor::setMode(Mode mode) {
   }
 }
 
-void ARM::pipeline_step() {
+auto ARM::pipeline_step() -> void {
   pipeline.execute = pipeline.decode;
   pipeline.decode = pipeline.fetch;
 

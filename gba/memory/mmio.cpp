@@ -1,4 +1,4 @@
-uint32 MMIO::read(uint32 addr, uint32 size) {
+auto MMIO::read(uint32 addr, uint32 size) -> uint32 {
   uint32 word = 0;
 
   switch(size) {
@@ -22,7 +22,7 @@ uint32 MMIO::read(uint32 addr, uint32 size) {
   return word;
 }
 
-void MMIO::write(uint32 addr, uint32 size, uint32 word) {
+auto MMIO::write(uint32 addr, uint32 size, uint32 word) -> void {
   switch(size) {
   case Word:
     addr &= ~3;

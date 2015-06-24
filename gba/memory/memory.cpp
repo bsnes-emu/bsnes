@@ -7,13 +7,13 @@ namespace GameBoyAdvance {
 Bus bus;
 
 struct UnmappedMemory : Memory {
-  uint32 read(uint32 addr, uint32 size) { return 0u; }
-  void write(uint32 addr, uint32 size, uint32 word) {}
+  auto read(uint32 addr, uint32 size) -> uint32 { return 0; }
+  auto write(uint32 addr, uint32 size, uint32 word) -> void {}
 };
 
 static UnmappedMemory unmappedMemory;
 
-uint32 Bus::mirror(uint32 addr, uint32 size) {
+auto Bus::mirror(uint32 addr, uint32 size) -> uint32 {
   uint32 base = 0;
   if(size) {
     uint32 mask = 1 << 27;  //28-bit bus
@@ -31,46 +31,46 @@ uint32 Bus::mirror(uint32 addr, uint32 size) {
   return base;
 }
 
-uint32 Bus::speed(uint32 addr, uint32 size) {
-  if(addr & 0x08000000) {
-    static unsigned timing[] = {5, 4, 3, 9};
+auto Bus::wait(uint32 addr, uint32 size) -> unsigned {
+  switch(addr & 0x0f000000) {
+  case 0x00000000: return 1;
+  case 0x01000000: return 1;
+  case 0x02000000: return (16 - cpu.regs.memory.control.ewramwait) * (size == Word ? 2 : 1);
+  case 0x03000000: return 1;
+  case 0x04000000: return 2;
+  case 0x05000000: return 1 + (size == Word);
+  case 0x06000000: return 1 + (size == Word);
+  case 0x07000000: return 1;
+  default: {
     unsigned n = cpu.regs.wait.control.nwait[addr >> 25 & 3];
     unsigned s = cpu.regs.wait.control.swait[addr >> 25 & 3];
+
+    static unsigned timing[] = {5, 4, 3, 9};
     n = timing[n];
 
-    switch(addr >> 25 & 3) {
-    case 0: s = s ? 3 : 2; break;
-    case 1: s = s ? 5 : 2; break;
-    case 2: s = s ? 9 : 2; break;
-    case 3: s = n; break;
+    switch(addr & 0x0e000000) {
+    case 0x08000000: s = s ? 2 : 3; break;
+    case 0x0a000000: s = s ? 2 : 5; break;
+    case 0x0c000000: s = s ? 2 : 9; break;
+    case 0x0e000000: s = n; break;
     }
 
     bool sequential = cpu.sequential();
-    if((addr & 0xffff << 1) == 0) sequential = false;  //N cycle on 16-bit ROM crossing page boundary (RAM S==N)
+    if((addr & 0x1fffe) == 0) sequential = false;  //N cycle on 16-bit ROM crossing 128KB page boundary (RAM S==N)
     if(idleflag) sequential = false;  //LDR/LDM interrupts instruction fetches
 
-    if(sequential) return s << (size == Word);  //16-bit bus requires two transfers for words
-    if(size == Word) n += s;
-    return n;
+    unsigned clocks = sequential ? s : n;
+    if(size == Word) clocks += s;  //16-bit bus requires two transfers for words
+    return clocks;
   }
-
-  switch(addr >> 24 & 7) {
-  case 0: return 1;
-  case 1: return 1;
-  case 2: return (1 + 15 - cpu.regs.memory.control.ewramwait) << (size == Word);
-  case 3: return 1;
-  case 4: return 1;
-  case 5: return 1 << (size == Word);
-  case 6: return 1 << (size == Word);
-  case 7: return 1;
   }
 }
 
-void Bus::idle(uint32 addr) {
+auto Bus::idle(uint32 addr) -> void {
   if(addr & 0x08000000) idleflag = true;
 }
 
-uint32 Bus::read(uint32 addr, uint32 size) {
+auto Bus::read(uint32 addr, uint32 size) -> uint32 {
   idleflag = false;
   if(addr & 0x08000000) return cartridge.read(addr, size);
 
@@ -89,7 +89,7 @@ uint32 Bus::read(uint32 addr, uint32 size) {
   }
 }
 
-void Bus::write(uint32 addr, uint32 size, uint32 word) {
+auto Bus::write(uint32 addr, uint32 size, uint32 word) -> void {
   idleflag = false;
   if(addr & 0x08000000) return cartridge.write(addr, size, word);
 
@@ -108,7 +108,7 @@ void Bus::write(uint32 addr, uint32 size, uint32 word) {
   }
 }
 
-void Bus::power() {
+auto Bus::power() -> void {
   for(unsigned n = 0; n < 0x400; n++) mmio[n] = &unmappedMemory;
   idleflag = false;
 }

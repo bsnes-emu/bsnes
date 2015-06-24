@@ -150,7 +150,7 @@ struct Registers {
 
   struct WaitControl {
     uint2 nwait[4];
-    uint2 swait[4];
+    uint1 swait[4];
     uint2 phi;
     uint1 prefetch;
     uint1 gametype;
