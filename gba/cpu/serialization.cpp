@@ -1,4 +1,4 @@
-void CPU::serialize(serializer& s) {
+auto CPU::serialize(serializer& s) -> void {
   ARM::serialize(s);
   Thread::serialize(s);
 

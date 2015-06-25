@@ -30,12 +30,12 @@ else
   endif
 
   ifeq ($(hiro),gtk)
-    hiroflags = $(cppflags) $(flags) -DHIRO_GTK `pkg-config --cflags gtk+-2.0 gtksourceview-2.0`
-    hirolink = `pkg-config --libs gtk+-2.0 gtksourceview-2.0` -lX11
+    hiroflags = $(cppflags) $(flags) -DHIRO_GTK $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
+    hirolink = -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
   endif
 
   ifeq ($(hiro),qt)
-    hiroflags = $(cppflags) $(flags) -DHIRO_QT `pkg-config --cflags QtCore QtGui`
-    hirolink = `pkg-config --libs QtCore QtGui` -lX11
+    hiroflags = $(cppflags) $(flags) -DHIRO_QT $(shell pkg-config --cflags QtCore QtGui)
+    hirolink = -lX11 $(shell pkg-config --libs QtCore QtGui)
   endif
 endif

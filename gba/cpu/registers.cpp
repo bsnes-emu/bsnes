@@ -11,7 +11,7 @@ CPU::Registers::DMAControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::DMAControl::operator=(uint16 source) {
+auto CPU::Registers::DMAControl::operator=(uint16 source) -> uint16 {
   targetmode = source >>  5;
   sourcemode = source >>  7;
   repeat     = source >>  9;
@@ -32,7 +32,7 @@ CPU::Registers::TimerControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::TimerControl::operator=(uint16 source) {
+auto CPU::Registers::TimerControl::operator=(uint16 source) -> uint16 {
   frequency = source >> 0;
   cascade   = source >> 2;
   irq       = source >> 6;
@@ -52,7 +52,7 @@ CPU::Registers::SerialControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::SerialControl::operator=(uint16 source) {
+auto CPU::Registers::SerialControl::operator=(uint16 source) -> uint16 {
   shiftclockselect      = source >>  0;
   shiftclockfrequency   = source >>  1;
   transferenablereceive = source >>  2;
@@ -80,7 +80,7 @@ CPU::Registers::KeypadControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::KeypadControl::operator=(uint16 source) {
+auto CPU::Registers::KeypadControl::operator=(uint16 source) -> uint16 {
   flag[0]   = source >>  0;
   flag[1]   = source >>  1;
   flag[2]   = source >>  2;
@@ -111,7 +111,7 @@ CPU::Registers::JoybusSettings::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::JoybusSettings::operator=(uint16 source) {
+auto CPU::Registers::JoybusSettings::operator=(uint16 source) -> uint16 {
   sc        = source >>  0;
   sd        = source >>  1;
   si        = source >>  2;
@@ -134,7 +134,7 @@ CPU::Registers::JoybusControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::JoybusControl::operator=(uint16 source) {
+auto CPU::Registers::JoybusControl::operator=(uint16 source) -> uint16 {
   resetsignal     = source >> 0;
   receivecomplete = source >> 1;
   sendcomplete    = source >> 2;
@@ -150,7 +150,7 @@ CPU::Registers::JoybusStatus::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::JoybusStatus::operator=(uint16 source) {
+auto CPU::Registers::JoybusStatus::operator=(uint16 source) -> uint16 {
   receiveflag = source >> 1;
   sendflag    = source >> 3;
   generalflag = source >> 4;
@@ -176,7 +176,7 @@ CPU::Registers::Interrupt::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::Interrupt::operator=(uint16 source) {
+auto CPU::Registers::Interrupt::operator=(uint16 source) -> uint16 {
   vblank       = source >>  0;
   hblank       = source >>  1;
   vcoincidence = source >>  2;
@@ -209,7 +209,7 @@ CPU::Registers::WaitControl::operator uint16() const {
   );
 }
 
-uint16 CPU::Registers::WaitControl::operator=(uint16 source) {
+auto CPU::Registers::WaitControl::operator=(uint16 source) -> uint16 {
   nwait[3] = (source >>  0) & 3;
   nwait[0] = (source >>  2) & 3;
   swait[0] = (source >>  4) & 1;
@@ -234,7 +234,7 @@ CPU::Registers::MemoryControl::operator uint32() const {
   );
 }
 
-uint32 CPU::Registers::MemoryControl::operator=(uint32 source) {
+auto CPU::Registers::MemoryControl::operator=(uint32 source) -> uint32 {
   disable   = source >>  0;
   unknown1  = source >>  1;
   ewram     = source >>  5;

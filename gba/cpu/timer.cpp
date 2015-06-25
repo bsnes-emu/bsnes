@@ -1,4 +1,4 @@
-void CPU::timer_step(unsigned clocks) {
+auto CPU::timer_step(unsigned clocks) -> void {
   for(unsigned c = 0; c < clocks; c++) {
     for(unsigned n = 0; n < 4; n++) {
       auto& timer = regs.timer[n];
@@ -14,7 +14,7 @@ void CPU::timer_step(unsigned clocks) {
   }
 }
 
-void CPU::timer_increment(unsigned n) {
+auto CPU::timer_increment(unsigned n) -> void {
   auto& timer = regs.timer[n];
   if(++timer.period == 0) {
     timer.period = timer.reload;
@@ -30,7 +30,7 @@ void CPU::timer_increment(unsigned n) {
   }
 }
 
-void CPU::timer_fifo_run(unsigned n) {
+auto CPU::timer_fifo_run(unsigned n) -> void {
   apu.fifo[n].read();
   if(apu.fifo[n].size > 16) return;
 

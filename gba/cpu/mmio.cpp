@@ -1,4 +1,4 @@
-uint8 CPU::read(uint32 addr) {
+auto CPU::read(uint32 addr) -> uint8 {
   uint8 result = 0;
 
   switch(addr) {
@@ -137,7 +137,7 @@ uint8 CPU::read(uint32 addr) {
   return 0u;
 }
 
-void CPU::write(uint32 addr, uint8 byte) {
+auto CPU::write(uint32 addr, uint8 byte) -> void {
   switch(addr) {
 
   //DMA0SAD

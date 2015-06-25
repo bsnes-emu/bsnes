@@ -307,7 +307,7 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
         utf16_t wText(text);
         SetBkMode(hdc, TRANSPARENT);
         SetTextColor(hdc, selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : CreateRGB(_foregroundColor(row, column)));
-        auto style = DT_SINGLELINE | DT_END_ELLIPSIS;
+        auto style = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
         style |= halign < 0.333 ? DT_LEFT : halign > 0.666 ? DT_RIGHT : DT_CENTER;
         style |= valign < 0.333 ? DT_TOP : valign > 0.666 ? DT_BOTTOM : DT_VCENTER;
         rc.right -= 2;

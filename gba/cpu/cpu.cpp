@@ -10,7 +10,7 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 CPU cpu;
 
-void CPU::Enter() {
+auto CPU::Enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
       scheduler.sync = Scheduler::SynchronizeMode::All;
@@ -21,7 +21,7 @@ void CPU::Enter() {
   }
 }
 
-void CPU::main() {
+auto CPU::main() -> void {
   #if defined(DEBUG)
   if(crash) {
     print(cpsr().t ? disassemble_thumb_instruction(pipeline.execute.address)
@@ -57,12 +57,12 @@ void CPU::main() {
   exec();
 }
 
-void CPU::step(unsigned clocks) {
+auto CPU::step(unsigned clocks) -> void {
   timer_step(clocks);
   sync_step(clocks);
 }
 
-void CPU::sync_step(unsigned clocks) {
+auto CPU::sync_step(unsigned clocks) -> void {
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
 
@@ -70,26 +70,26 @@ void CPU::sync_step(unsigned clocks) {
   if(apu.clock < 0) co_switch(apu.thread);
 }
 
-void CPU::bus_idle(uint32 addr) {
+auto CPU::bus_idle(uint32 addr) -> void {
   step(1);
   return bus.idle(addr);
 }
 
-uint32 CPU::bus_read(uint32 addr, uint32 size) {
+auto CPU::bus_read(uint32 addr, uint32 size) -> uint32 {
   step(bus.wait(addr, size));
   return bus.read(addr, size);
 }
 
-void CPU::bus_write(uint32 addr, uint32 size, uint32 word) {
+auto CPU::bus_write(uint32 addr, uint32 size, uint32 word) -> void {
   step(bus.wait(addr, size));
   return bus.write(addr, size, word);
 }
 
-void CPU::keypad_run() {
+auto CPU::keypad_run() -> void {
   if(regs.keypad.control.enable == false) return;
 
   bool test = regs.keypad.control.condition;  //0 = OR, 1 = AND
-  for(unsigned n = 0; n < 10; n++) {
+  for(auto n : range(10)) {
     if(regs.keypad.control.flag[n] == false) continue;
     bool input = interface->inputPoll(0, 0, n);
     if(regs.keypad.control.condition == 0) test |= input;
@@ -98,12 +98,12 @@ void CPU::keypad_run() {
   if(test) regs.irq.flag.keypad = true;
 }
 
-void CPU::power() {
+auto CPU::power() -> void {
   create(CPU::Enter, 16777216);
 
   ARM::power();
-  for(unsigned n = 0; n <  32 * 1024; n++) iwram[n] = 0;
-  for(unsigned n = 0; n < 256 * 1024; n++) ewram[n] = 0;
+  for(auto n : range( 32 * 1024)) iwram[n] = 0;
+  for(auto n : range(256 * 1024)) ewram[n] = 0;
 
   for(auto& dma : regs.dma) {
     dma.source = 0;

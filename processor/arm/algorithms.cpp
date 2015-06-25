@@ -45,10 +45,10 @@ auto ARM::sub(uint32 source, uint32 modify, bool carry) -> uint32 {
 }
 
 auto ARM::mul(uint32 product, uint32 multiplicand, uint32 multiplier) -> uint32 {
-       if((multiplier & 0xffffff00) == 0x00000000 || (multiplier & 0xffffff00 == 0xffffff00)) step(1);
-  else if((multiplier & 0xffff0000) == 0x00000000 || (multiplier & 0xffff0000 == 0xffff0000)) step(2);
-  else if((multiplier & 0xff000000) == 0x00000000 || (multiplier & 0xff000000 == 0xff000000)) step(3);
-  else step(4);
+  idle();
+  if((multiplier & 0xffffff00) != 0x00000000 && (multiplier & 0xffffff00) != 0xffffff00) idle();
+  if((multiplier & 0xffff0000) != 0x00000000 && (multiplier & 0xffff0000) != 0xffff0000) idle();
+  if((multiplier & 0xff000000) != 0x00000000 && (multiplier & 0xff000000) != 0xff000000) idle();
 
   product += multiplicand * multiplier;
 

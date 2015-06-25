@@ -1,4 +1,4 @@
-uint32 CPU::iwram_read(uint32 addr, uint32 size) {
+auto CPU::iwram_read(uint32 addr, uint32 size) -> uint32 {
   if(regs.memory.control.disable) return cpu.pipeline.fetch.instruction;
 
   if(size == Word) return iwram_read(addr &~ 2, Half) << 0 | iwram_read(addr | 2, Half) << 16;
@@ -7,7 +7,7 @@ uint32 CPU::iwram_read(uint32 addr, uint32 size) {
   return iwram[addr & 0x7fff];
 }
 
-void CPU::iwram_write(uint32 addr, uint32 size, uint32 word) {
+auto CPU::iwram_write(uint32 addr, uint32 size, uint32 word) -> void {
   if(regs.memory.control.disable) return;
 
   if(size == Word) {
@@ -25,7 +25,7 @@ void CPU::iwram_write(uint32 addr, uint32 size, uint32 word) {
   iwram[addr & 0x7fff] = word;
 }
 
-uint32 CPU::ewram_read(uint32 addr, uint32 size) {
+auto CPU::ewram_read(uint32 addr, uint32 size) -> uint32 {
   if(regs.memory.control.disable) return cpu.pipeline.fetch.instruction;
   if(regs.memory.control.ewram == false) return iwram_read(addr, size);
 
@@ -35,7 +35,7 @@ uint32 CPU::ewram_read(uint32 addr, uint32 size) {
   return ewram[addr & 0x3ffff];
 }
 
-void CPU::ewram_write(uint32 addr, uint32 size, uint32 word) {
+auto CPU::ewram_write(uint32 addr, uint32 size, uint32 word) -> void {
   if(regs.memory.control.disable) return;
   if(regs.memory.control.ewram == false) return iwram_write(addr, size, word);
 

@@ -182,6 +182,7 @@ auto pWindow::construct() -> void {
 }
 
 auto pWindow::destruct() -> void {
+  gtk_widget_destroy(widget);
 }
 
 auto pWindow::append(sLayout layout) -> void {

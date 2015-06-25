@@ -521,9 +521,9 @@ auto ARM::arm_op_move_multiple() {
 
   if(usr) processor.setMode(Processor::Mode::USR);
 
-  sequential() = false;
   for(unsigned m = 0; m < 16; m++) {
-    if(list & (1 << m)) {
+    sequential() = false;
+    if(list & 1 << m) {
       if(l == 1) r(m) = read(rn, Word);
       if(l == 0) write(rn, Word, r(m));
       rn += 4;
