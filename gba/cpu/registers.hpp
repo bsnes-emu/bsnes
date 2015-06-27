@@ -43,6 +43,7 @@ struct Registers {
   struct Timer {
     uint16 period;
     uint16 reload;
+    bool pending;
     TimerControl control;
   } timer[4];
 

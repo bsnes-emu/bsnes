@@ -106,6 +106,7 @@ Presentation::Presentation() {
   setResizable(false);
   setBackgroundColor({0, 0, 0});
   resizeViewport();
+  setCentered();
 }
 
 auto Presentation::updateEmulator() -> void {
@@ -161,7 +162,6 @@ auto Presentation::resizeViewport() -> void {
 
     setSize({windowWidth, windowHeight});
     viewport.setGeometry({(windowWidth - width) / 2, (windowHeight - height) / 2, width, height});
-    setPlacement(0.5, 0.5);
   } else {
     auto desktop = Desktop::size();
 

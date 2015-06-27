@@ -1,7 +1,11 @@
 struct CPU : Processor::ARM, Thread, MMIO {
+  using ARM::read;
+  using ARM::write;
+
   uint8* iwram = nullptr;
   uint8* ewram = nullptr;
   #include "registers.hpp"
+  #include "prefetch.hpp"
   #include "state.hpp"
 
   //cpu.cpp
@@ -12,8 +16,10 @@ struct CPU : Processor::ARM, Thread, MMIO {
   auto sync_step(unsigned clocks) -> void;
 
   auto bus_idle(uint32 addr) -> void;
-  auto bus_read(uint32 addr, uint32 size) -> uint32;
-  auto bus_write(uint32 addr, uint32 size, uint32 word) -> void;
+  auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32;
+  auto bus_load(uint32 addr, uint32 size, bool mode) -> uint32;
+  auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
+  auto bus_store(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
 
   auto keypad_run() -> void;
   auto power() -> void;

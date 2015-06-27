@@ -2,6 +2,15 @@ auto CPU::timer_step(unsigned clocks) -> void {
   for(unsigned c = 0; c < clocks; c++) {
     for(unsigned n = 0; n < 4; n++) {
       auto& timer = regs.timer[n];
+
+      if(timer.pending) {
+        timer.pending = false;
+        if(timer.control.enable == 1) {
+          timer.period = timer.reload;
+        }
+        continue;
+      }
+
       if(timer.control.enable == false || timer.control.cascade == true) continue;
 
       static unsigned mask[] = {0, 63, 255, 1023};

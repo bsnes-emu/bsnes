@@ -9,6 +9,7 @@ namespace Processor {
 
 struct ARM {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
+  enum : bool { Nonsequential = 0, Sequential = 1 };
 
   #include "registers.hpp"
   #include "instructions-arm.hpp"
@@ -17,17 +18,19 @@ struct ARM {
 
   virtual auto step(unsigned clocks) -> void = 0;
   virtual auto bus_idle(uint32 addr) -> void = 0;
-  virtual auto bus_read(uint32 addr, uint32 size) -> uint32 = 0;
-  virtual auto bus_write(uint32 addr, uint32 size, uint32 word) -> void = 0;
+  virtual auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32 = 0;
+  virtual auto bus_load(uint32 addr, uint32 size, bool mode) -> uint32 = 0;
+  virtual auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void = 0;
+  virtual auto bus_store(uint32 addr, uint32 size, bool mode, uint32 word) -> void = 0;
 
   //arm.cpp
   auto power() -> void;
   auto exec() -> void;
   auto idle() -> void;
-  auto read(uint32 addr, uint32 size) -> uint32;
-  auto load(uint32 addr, uint32 size) -> uint32;
-  auto write(uint32 addr, uint32 size, uint32 word) -> void;
-  auto store(uint32 addr, uint32 size, uint32 word) -> void;
+  auto read(uint32 addr, uint32 size, bool mode) -> uint32;
+  auto load(uint32 addr, uint32 size, bool mode) -> uint32;
+  auto write(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
+  auto store(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
   auto vector(uint32 addr, Processor::Mode mode) -> void;
 
   //algorithms.cpp

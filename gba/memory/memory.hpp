@@ -13,8 +13,7 @@ struct MMIO : Memory {
 struct Bus : Memory {
   static auto mirror(uint32 addr, uint32 size) -> uint32;
 
-  auto wait(uint32 addr, uint32 size) -> unsigned;
-  auto idle(uint32 addr) -> void;
+  auto wait(uint32 addr, uint32 size, bool mode) -> unsigned;
   auto read(uint32 addr, uint32 size) -> uint32;
   auto write(uint32 addr, uint32 size, uint32 word) -> void;
   auto power() -> void;
@@ -22,7 +21,6 @@ struct Bus : Memory {
   auto serialize(serializer&) -> void;
 
   Memory* mmio[0x400]{nullptr};
-  bool idleflag{false};
 };
 
 extern Bus bus;

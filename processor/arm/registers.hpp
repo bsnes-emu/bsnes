@@ -14,8 +14,8 @@ struct GPR {
   inline auto operator<<=(uint32 n) { return operator=(data << n); }
   inline auto operator>>=(uint32 n) { return operator=(data >> n); }
 
-  uint32 data{0};
-  function<void ()> modify;
+  uint32 data = 0;
+  function<auto () -> void> modify;
 };
 
 struct PSR {
@@ -38,22 +38,22 @@ struct PSR {
 
   auto serialize(serializer&) -> void;
 
-  bool n{false};  //negative
-  bool z{false};  //zero
-  bool c{false};  //carry
-  bool v{false};  //overflow
-  bool i{false};  //irq
-  bool f{false};  //fiq
-  bool t{false};  //thumb
-  unsigned m{0};  //mode
+  bool n = false;  //negative
+  bool z = false;  //zero
+  bool c = false;  //carry
+  bool v = false;  //overflow
+  bool i = false;  //irq
+  bool f = false;  //fiq
+  bool t = false;  //thumb
+  unsigned m = 0;  //mode
 };
 
 struct Pipeline {
-  bool reload{false};
+  bool reload = false;
 
   struct Instruction {
-    uint32 address{0};
-    uint32 instruction{0};
+    uint32 address = 0;
+    uint32 instruction = 0;
   };
 
   Instruction execute;
@@ -105,12 +105,12 @@ struct Processor {
 
   GPR pc;
   PSR cpsr;
-  bool carryout{false};
-  bool sequential{false};
-  bool irqline{false};
+  bool carryout = false;
+  bool nonsequential = false;
+  bool irqline = false;
 
-  GPR* r[16];
-  PSR* spsr;
+  GPR* r[16] = {nullptr};
+  PSR* spsr = nullptr;
 
   auto power() -> void;
   auto setMode(Mode) -> void;
@@ -118,7 +118,7 @@ struct Processor {
 
 Processor processor;
 Pipeline pipeline;
-bool crash{false};
+bool crash = false;
 
 auto pipeline_step() -> void;
 
@@ -126,8 +126,7 @@ alwaysinline auto r(unsigned n) -> GPR& { return *processor.r[n]; }
 alwaysinline auto cpsr() -> PSR& { return processor.cpsr; }
 alwaysinline auto spsr() -> PSR& { return *processor.spsr; }
 alwaysinline auto carryout() -> bool& { return processor.carryout; }
-alwaysinline auto sequential() -> bool& { return processor.sequential; }
 alwaysinline auto instruction() -> uint32 { return pipeline.execute.instruction; }
 alwaysinline auto mode() -> Processor::Mode { return (Processor::Mode)processor.cpsr.m; }
-alwaysinline auto privilegedmode() const -> bool { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
-alwaysinline auto exceptionmode() const -> bool { return privilegedmode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }
+alwaysinline auto privilegedMode() const -> bool { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
+alwaysinline auto exceptionMode() const -> bool { return privilegedMode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }

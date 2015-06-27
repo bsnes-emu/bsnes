@@ -11,7 +11,7 @@ auto ARM::Processor::power() -> void {
   pc = 0;
 
   carryout = false;
-  sequential = false;
+  nonsequential = false;
   irqline = false;
 
   cpsr = 0;
@@ -68,11 +68,11 @@ auto ARM::pipeline_step() -> void {
   if(cpsr().t == 0) {
     r(15).data += 4;
     pipeline.fetch.address = r(15) & ~3;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Word, Sequential);
   } else {
     r(15).data += 2;
     pipeline.fetch.address = r(15) & ~1;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Half, Sequential);
   }
 }
 

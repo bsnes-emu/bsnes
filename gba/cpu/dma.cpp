@@ -17,21 +17,16 @@ auto CPU::dma_run() -> void {
 
 auto CPU::dma_exec(Registers::DMA& dma) -> void {
   unsigned size = dma.control.size ? Word : Half;
+  unsigned mode = dma.run.length == dma.length ? Nonsequential : Sequential;
   unsigned seek = dma.control.size ? 4 : 2;
 
-  if(dma.run.length == dma.length) {
+  if(mode == Nonsequential) {
     idle();
     idle();
-    sequential() = false;
-  } else {
-    sequential() = true;
   }
 
-  step(bus.wait(dma.run.source, size));
-  uint32 word = bus.read(dma.run.source, size);
-
-  step(bus.wait(dma.run.target, size));
-  bus.write(dma.run.target, size, word);
+  uint32 word = bus_read(dma.run.source, size, mode);
+  bus_write(dma.run.target, size, mode, word);
 
   switch(dma.control.sourcemode) {
   case 0: dma.run.source += seek; break;

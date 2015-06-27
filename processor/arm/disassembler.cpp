@@ -32,7 +32,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
 
   string output{hex<8>(pc), "  "};
 
-  uint32 instruction = read(pc & ~3, Word);
+  uint32 instruction = read(pc & ~3, Word, Nonsequential);
   output.append(hex<8>(instruction), "  ");
 
   //multiply()
@@ -134,7 +134,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half)));
+    if(rn == 15) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half, Nonsequential)));
     return output;
   }
 
@@ -184,8 +184,8 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15 && half == 1) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half)));
-    if(rn == 15 && half == 0) output.append(" =0x", hex<2>(read(pc + 8 + (up ? +immediate : -immediate), Byte)));
+    if(rn == 15 && half == 1) output.append(" =0x", hex<4>(read(pc + 8 + (up ? +immediate : -immediate), Half, Nonsequential)));
+    if(rn == 15 && half == 0) output.append(" =0x", hex<2>(read(pc + 8 + (up ? +immediate : -immediate), Byte, Nonsequential)));
     return output;
   }
 
@@ -359,7 +359,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     if(pre == 1) output.append("]");
     if(pre == 0 || writeback == 1) output.append("!");
 
-    if(rn == 15) output.append(" =0x", hex<8>(read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word)));
+    if(rn == 15) output.append(" =0x", hex<8>(read(pc + 8 + (up ? +immediate : -immediate), byte ? Byte : Word, Nonsequential)));
     return output;
   }
 
@@ -457,7 +457,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
 
   string output{hex<8>(pc), "  "};
 
-  uint16 instruction = read(pc & ~1, Half);
+  uint16 instruction = read(pc & ~1, Half, Nonsequential);
   output.append(hex<4>(instruction), "  ");
 
   //adjust_register()
@@ -571,7 +571,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
 
     unsigned rm = ((pc + 4) & ~3) + displacement * 4;
     output.append("ldr ", registers[rd], ",[pc,#0x", hex<3>(rm), "]");
-    output.append(" =0x", hex<8>(read(rm, Word)));
+    output.append(" =0x", hex<8>(read(rm, Word, Nonsequential)));
 
     return output;
   }
@@ -740,7 +740,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
   //bl address
   if((instruction & 0xf800) == 0xf000) {
     uint11 offsethi = instruction;
-    instruction = read((pc & ~1) + 2, Half);
+    instruction = read((pc & ~1) + 2, Half, Nonsequential);
     uint11 offsetlo = instruction;
 
     int22 displacement = (offsethi << 11) | (offsetlo << 0);

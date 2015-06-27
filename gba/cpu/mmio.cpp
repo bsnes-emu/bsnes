@@ -231,7 +231,7 @@ auto CPU::write(uint32 addr, uint8 byte) -> void {
     bool enable = timer.control.enable;
     timer.control = byte;
     if(enable == 0 && timer.control.enable == 1) {
-      timer.period = timer.reload;
+      timer.pending = true;
     }
     return;
   }

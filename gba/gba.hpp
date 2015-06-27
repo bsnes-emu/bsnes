@@ -22,6 +22,7 @@ namespace GameBoyAdvance {
 
 namespace GameBoyAdvance {
   enum : unsigned { Byte = 8, Half = 16, Word = 32 };
+  enum : bool { Nonsequential = 0, Sequential = 1 };
 
   struct Thread {
     ~Thread() {

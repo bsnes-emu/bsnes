@@ -3,6 +3,7 @@
 namespace GameBoyAdvance {
 
 #include "registers.cpp"
+#include "prefetch.cpp"
 #include "mmio.cpp"
 #include "memory.cpp"
 #include "dma.cpp"
@@ -71,18 +72,40 @@ auto CPU::sync_step(unsigned clocks) -> void {
 }
 
 auto CPU::bus_idle(uint32 addr) -> void {
+  if(regs.wait.control.prefetch) prefetch_run();
   step(1);
-  return bus.idle(addr);
 }
 
-auto CPU::bus_read(uint32 addr, uint32 size) -> uint32 {
-  step(bus.wait(addr, size));
-  return bus.read(addr, size);
+auto CPU::bus_read(uint32 addr, uint32 size, bool mode) -> uint32 {
+  if(regs.wait.control.prefetch) {
+    if((addr & 0x0fffffff) >= 0x08000000 && (addr & 0x0fffffff) <= 0x0dffffff) {
+      if(auto word = prefetch_read(addr, size)) {
+        step(1 + (size == Word));
+        return *word;
+      }
+    }
+  }
+
+  unsigned wait = bus.wait(addr, size, mode);
+  unsigned word = bus.read(addr, size);
+  step(wait);
+  return word;
 }
 
-auto CPU::bus_write(uint32 addr, uint32 size, uint32 word) -> void {
-  step(bus.wait(addr, size));
-  return bus.write(addr, size, word);
+auto CPU::bus_load(uint32 addr, uint32 size, bool mode) -> uint32 {
+  if(regs.wait.control.prefetch) prefetch_run();
+  return bus_read(addr, size, mode);
+}
+
+auto CPU::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
+  unsigned wait = bus.wait(addr, size, mode);
+  step(wait);
+  bus.write(addr, size, word);
+}
+
+auto CPU::bus_store(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
+  if(regs.wait.control.prefetch) prefetch_run();
+  return bus_write(addr, size, mode, word);
 }
 
 auto CPU::keypad_run() -> void {
@@ -118,6 +141,7 @@ auto CPU::power() -> void {
   for(auto& timer : regs.timer) {
     timer.period = 0;
     timer.reload = 0;
+    timer.pending = false;
     timer.control = 0;
   }
   regs.keypad.control = 0;

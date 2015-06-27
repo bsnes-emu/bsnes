@@ -3,9 +3,8 @@ auto ARM::arm_step() -> void {
     pipeline.reload = false;
     r(15).data &= ~3;
 
-    sequential() = false;
     pipeline.fetch.address = r(15) & ~3;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Word);
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Word, Nonsequential);
 
     pipeline_step();
   }
@@ -61,9 +60,8 @@ auto ARM::thumb_step() -> void {
     pipeline.reload = false;
     r(15).data &= ~1;
 
-    sequential() = false;
     pipeline.fetch.address = r(15) & ~1;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Half);
+    pipeline.fetch.instruction = read(pipeline.fetch.address, Half, Nonsequential);
 
     pipeline_step();
   }

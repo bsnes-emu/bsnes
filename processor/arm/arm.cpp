@@ -29,18 +29,18 @@ auto ARM::exec() -> void {
 }
 
 auto ARM::idle() -> void {
+  processor.nonsequential = true;
   bus_idle(r(15));
 }
 
-auto ARM::read(uint32 addr, uint32 size) -> uint32 {
-  uint32 word = bus_read(addr, size);
-  sequential() = true;
-  return word;
+auto ARM::read(uint32 addr, uint32 size, bool mode) -> uint32 {
+  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
+  return bus_read(addr, size, mode);
 }
 
-auto ARM::load(uint32 addr, uint32 size) -> uint32 {
-  sequential() = false;
-  uint32 word = read(addr, size);
+auto ARM::load(uint32 addr, uint32 size, bool mode) -> uint32 {
+  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
+  uint32 word = bus_load(addr, size, mode);
 
   if(size == Half) { word &= 0xffff; word |= word << 16; }
   if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
@@ -53,18 +53,18 @@ auto ARM::load(uint32 addr, uint32 size) -> uint32 {
   return word;
 }
 
-auto ARM::write(uint32 addr, uint32 size, uint32 word) -> void {
-  bus_write(addr, size, word);
-  sequential() = true;
+auto ARM::write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
+  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
+  return bus_write(addr, size, mode, word);
 }
 
-auto ARM::store(uint32 addr, uint32 size, uint32 word) -> void {
+auto ARM::store(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
   if(size == Half) { word &= 0xffff; word |= word << 16; }
   if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
 
-  sequential() = false;
-  write(addr, size, word);
-  sequential() = false;
+  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
+  bus_store(addr, size, mode, word);
+  processor.nonsequential = true;
 }
 
 auto ARM::vector(uint32 addr, Processor::Mode mode) -> void {
