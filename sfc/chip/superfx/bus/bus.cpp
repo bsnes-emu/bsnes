@@ -2,11 +2,11 @@
 
 //ROM / RAM access from the S-CPU
 
-unsigned SuperFX::CPUROM::size() const {
+auto SuperFX::CPUROM::size() const -> unsigned {
   return superfx.rom.size();
 }
 
-uint8 SuperFX::CPUROM::read(unsigned addr) {
+auto SuperFX::CPUROM::read(unsigned addr) -> uint8 {
   if(superfx.regs.sfr.g && superfx.regs.scmr.ron) {
     static const uint8_t data[16] = {
       0x00, 0x01, 0x00, 0x01, 0x04, 0x01, 0x00, 0x01,
@@ -17,20 +17,20 @@ uint8 SuperFX::CPUROM::read(unsigned addr) {
   return superfx.rom.read(addr);
 }
 
-void SuperFX::CPUROM::write(unsigned addr, uint8 data) {
+auto SuperFX::CPUROM::write(unsigned addr, uint8 data) -> void {
   superfx.rom.write(addr, data);
 }
 
-unsigned SuperFX::CPURAM::size() const {
+auto SuperFX::CPURAM::size() const -> unsigned {
   return superfx.ram.size();
 }
 
-uint8 SuperFX::CPURAM::read(unsigned addr) {
+auto SuperFX::CPURAM::read(unsigned addr) -> uint8 {
   if(superfx.regs.sfr.g && superfx.regs.scmr.ran) return cpu.regs.mdr;
   return superfx.ram.read(addr);
 }
 
-void SuperFX::CPURAM::write(unsigned addr, uint8 data) {
+auto SuperFX::CPURAM::write(unsigned addr, uint8 data) -> void {
   superfx.ram.write(addr, data);
 }
 

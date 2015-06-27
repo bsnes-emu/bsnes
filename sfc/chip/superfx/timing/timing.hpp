@@ -1,19 +1,16 @@
-unsigned cache_access_speed;
-unsigned memory_access_speed;
-bool r15_modified;
+bool r15_modified = false;
 
-void step(unsigned clocks);
+auto step(unsigned clocks) -> void;
 
-void rombuffer_sync();
-void rombuffer_update();
-uint8 rombuffer_read();
+auto rombuffer_sync() -> void;
+auto rombuffer_update() -> void;
+auto rombuffer_read() -> uint8;
 
-void rambuffer_sync();
-uint8 rambuffer_read(uint16 addr);
-void rambuffer_write(uint16 addr, uint8 data);
+auto rambuffer_sync() -> void;
+auto rambuffer_read(uint16 addr) -> uint8;
+auto rambuffer_write(uint16 addr, uint8 data) -> void;
 
-void r14_modify(uint16);
-void r15_modify(uint16);
+auto r14_modify(uint16) -> void;
+auto r15_modify(uint16) -> void;
 
-void update_speed();
-void timing_reset();
+auto timing_reset() -> void;

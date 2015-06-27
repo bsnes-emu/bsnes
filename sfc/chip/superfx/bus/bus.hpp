@@ -1,11 +1,11 @@
 struct CPUROM : Memory {
-  unsigned size() const;
-  uint8 read(unsigned);
-  void write(unsigned, uint8);
+  auto size() const -> unsigned;
+  auto read(unsigned) -> uint8;
+  auto write(unsigned, uint8) -> void;
 } cpurom;
 
 struct CPURAM : Memory {
-  unsigned size() const;
-  uint8 read(unsigned);
-  void write(unsigned, uint8);
+  auto size() const -> unsigned;
+  auto read(unsigned) -> uint8;
+  auto write(unsigned, uint8) -> void;
 } cpuram;

@@ -1,4 +1,4 @@
-void GSU::initialize_opcode_table() {
+auto GSU::initialize_opcode_table() -> void {
   #define op4(id, name) \
     op(id+ 0, name< 1>) op(id+ 1, name< 2>) op(id+ 2, name< 3>) op(id+ 3, name< 4>)
 

@@ -9,18 +9,21 @@ struct SuperFX : Processor::GSU, Coprocessor {
   #include "timing/timing.hpp"
   #include "disassembler/disassembler.hpp"
 
-  static void Enter();
-  void enter();
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-  void serialize(serializer&);
+  //superfx.cpp
+  static auto Enter() -> void;
+
+  auto enter() -> void;
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
 
 privileged:
-  unsigned clockmode = 0;  //0 = selectable, 1 = force 10.74mhz, 2 = force 21.48mhz
-  unsigned instruction_counter;
+  unsigned instruction_counter = 0;
 };
 
 extern SuperFX superfx;

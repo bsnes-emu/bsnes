@@ -1,16 +1,16 @@
 #ifdef SUPERFX_CPP
 
-void SuperFX::stop() {
+auto SuperFX::stop() -> void {
   cpu.regs.irq = 1;
 }
 
-uint8 SuperFX::color(uint8 source) {
+auto SuperFX::color(uint8 source) -> uint8 {
   if(regs.por.highnibble) return (regs.colr & 0xf0) | (source >> 4);
   if(regs.por.freezehigh) return (regs.colr & 0xf0) | (source & 0x0f);
   return source;
 }
 
-void SuperFX::plot(uint8 x, uint8 y) {
+auto SuperFX::plot(uint8 x, uint8 y) -> void {
   uint8 color = regs.colr;
 
   if(regs.por.dither && regs.scmr.md != 3) {
@@ -48,7 +48,7 @@ void SuperFX::plot(uint8 x, uint8 y) {
   }
 }
 
-uint8 SuperFX::rpix(uint8 x, uint8 y) {
+auto SuperFX::rpix(uint8 x, uint8 y) -> uint8 {
   pixelcache_flush(pixelcache[1]);
   pixelcache_flush(pixelcache[0]);
 
@@ -66,14 +66,14 @@ uint8 SuperFX::rpix(uint8 x, uint8 y) {
 
   for(unsigned n = 0; n < bpp; n++) {
     unsigned byte = ((n >> 1) << 4) + (n & 1);  // = [n]{ 0, 1, 16, 17, 32, 33, 48, 49 };
-    step(memory_access_speed);
+    step(memory_access_speed());
     data |= ((bus_read(addr + byte) >> x) & 1) << n;
   }
 
   return data;
 }
 
-void SuperFX::pixelcache_flush(pixelcache_t& cache) {
+auto SuperFX::pixelcache_flush(pixelcache_t& cache) -> void {
   if(cache.bitpend == 0x00) return;
 
   uint8 x = cache.offset << 3;
@@ -94,11 +94,11 @@ void SuperFX::pixelcache_flush(pixelcache_t& cache) {
     uint8 data = 0x00;
     for(unsigned x = 0; x < 8; x++) data |= ((cache.data[x] >> n) & 1) << x;
     if(cache.bitpend != 0xff) {
-      step(memory_access_speed);
+      step(memory_access_speed());
       data &= cache.bitpend;
       data |= bus_read(addr + byte) & ~cache.bitpend;
     }
-    step(memory_access_speed);
+    step(memory_access_speed());
     bus_write(addr + byte, data);
   }
 

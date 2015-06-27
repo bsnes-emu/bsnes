@@ -1,34 +1,36 @@
 //accepts a callback binding so r14 writes can trigger ROM buffering transparently
 struct reg16_t {
-  uint16 data;
-  function<void (uint16)> modify;
+  uint16 data = 0;
+  function<auto (uint16) -> void> modify;
 
-  inline operator unsigned() const { return data; }
-  inline uint16 assign(uint16 i) {
+  inline operator unsigned() const {
+    return data;
+  }
+
+  inline auto assign(uint16 i) -> uint16 {
     if(modify) modify(i);
     else data = i;
     return data;
   }
 
-  inline unsigned operator++() { return assign(data + 1); }
-  inline unsigned operator--() { return assign(data - 1); }
-  inline unsigned operator++(int) { unsigned r = data; assign(data + 1); return r; }
-  inline unsigned operator--(int) { unsigned r = data; assign(data - 1); return r; }
-  inline unsigned operator   = (unsigned i) { return assign(i); }
-  inline unsigned operator  |= (unsigned i) { return assign(data | i); }
-  inline unsigned operator  ^= (unsigned i) { return assign(data ^ i); }
-  inline unsigned operator  &= (unsigned i) { return assign(data & i); }
-  inline unsigned operator <<= (unsigned i) { return assign(data << i); }
-  inline unsigned operator >>= (unsigned i) { return assign(data >> i); }
-  inline unsigned operator  += (unsigned i) { return assign(data + i); }
-  inline unsigned operator  -= (unsigned i) { return assign(data - i); }
-  inline unsigned operator  *= (unsigned i) { return assign(data * i); }
-  inline unsigned operator  /= (unsigned i) { return assign(data / i); }
-  inline unsigned operator  %= (unsigned i) { return assign(data % i); }
+  inline auto operator++() { return assign(data + 1); }
+  inline auto operator--() { return assign(data - 1); }
+  inline auto operator++(int) { unsigned r = data; assign(data + 1); return r; }
+  inline auto operator--(int) { unsigned r = data; assign(data - 1); return r; }
+  inline auto operator   = (unsigned i) { return assign(i); }
+  inline auto operator  |= (unsigned i) { return assign(data | i); }
+  inline auto operator  ^= (unsigned i) { return assign(data ^ i); }
+  inline auto operator  &= (unsigned i) { return assign(data & i); }
+  inline auto operator <<= (unsigned i) { return assign(data << i); }
+  inline auto operator >>= (unsigned i) { return assign(data >> i); }
+  inline auto operator  += (unsigned i) { return assign(data + i); }
+  inline auto operator  -= (unsigned i) { return assign(data - i); }
+  inline auto operator  *= (unsigned i) { return assign(data * i); }
+  inline auto operator  /= (unsigned i) { return assign(data / i); }
+  inline auto operator  %= (unsigned i) { return assign(data % i); }
 
-  inline unsigned operator   = (const reg16_t& i) { return assign(i); }
+  inline auto operator   = (const reg16_t& i) { return assign(i); }
 
-  reg16_t() : data(0) {}
   reg16_t(const reg16_t&) = delete;
 };
 
@@ -51,7 +53,7 @@ struct sfr_t {
          | (r << 6) | (g << 5) | (ov << 4) | (s << 3) | (cy << 2) | (z << 1);
   }
 
-  sfr_t& operator=(uint16_t data) {
+  auto& operator=(uint16_t data) {
     irq  = data & 0x8000;
     b    = data & 0x1000;
     ih   = data & 0x0800;
@@ -78,7 +80,7 @@ struct scmr_t {
     return ((ht >> 1) << 5) | (ron << 4) | (ran << 3) | ((ht & 1) << 2) | (md);
   }
 
-  scmr_t& operator=(uint8 data) {
+  auto& operator=(uint8 data) {
     ht  = (bool)(data & 0x20) << 1;
     ht |= (bool)(data & 0x04) << 0;
     ron = data & 0x10;
@@ -99,7 +101,7 @@ struct por_t {
     return (obj << 4) | (freezehigh << 3) | (highnibble << 2) | (dither << 1) | (transparent);
   }
 
-  por_t& operator=(uint8 data) {
+  auto& operator=(uint8 data) {
     obj         = data & 0x10;
     freezehigh  = data & 0x08;
     highnibble  = data & 0x04;
@@ -117,7 +119,7 @@ struct cfgr_t {
     return (irq << 7) | (ms0 << 5);
   }
 
-  cfgr_t& operator=(uint8 data) {
+  auto& operator=(uint8 data) {
     irq = data & 0x80;
     ms0 = data & 0x20;
     return *this;
@@ -151,10 +153,10 @@ struct regs_t {
   uint8 ramdr;      //RAM buffer data register
 
   unsigned sreg, dreg;
-  reg16_t& sr() { return r[sreg]; }  //source register (from)
-  reg16_t& dr() { return r[dreg]; }  //destination register (to)
+  auto& sr() { return r[sreg]; }  //source register (from)
+  auto& dr() { return r[dreg]; }  //destination register (to)
 
-  void reset() {
+  auto reset() -> void {
     sfr.b    = 0;
     sfr.alt1 = 0;
     sfr.alt2 = 0;

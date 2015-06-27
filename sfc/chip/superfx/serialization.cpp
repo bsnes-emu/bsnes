@@ -1,16 +1,11 @@
 #ifdef SUPERFX_CPP
 
-void SuperFX::serialize(serializer& s) {
+auto SuperFX::serialize(serializer& s) -> void {
   GSU::serialize(s);
   Thread::serialize(s);
 
   s.array(ram.data(), ram.size());
-
-  s.integer(clockmode);
   s.integer(instruction_counter);
-
-  s.integer(cache_access_speed);
-  s.integer(memory_access_speed);
   s.integer(r15_modified);
 }
 

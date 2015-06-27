@@ -1,6 +1,6 @@
 #ifdef SUPERFX_CPP
 
-uint8 SuperFX::bus_read(unsigned addr) {
+auto SuperFX::bus_read(unsigned addr) -> uint8 {
   if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff, $00-3f:8000-ffff
     while(!regs.scmr.ron && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
@@ -26,7 +26,7 @@ uint8 SuperFX::bus_read(unsigned addr) {
   }
 }
 
-void SuperFX::bus_write(unsigned addr, uint8 data) {
+auto SuperFX::bus_write(unsigned addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
     while(!regs.scmr.ran && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
@@ -36,19 +36,19 @@ void SuperFX::bus_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 SuperFX::op_read(uint16 addr) {
+auto SuperFX::op_read(uint16 addr) -> uint8 {
   uint16 offset = addr - regs.cbr;
   if(offset < 512) {
     if(cache.valid[offset >> 4] == false) {
       unsigned dp = offset & 0xfff0;
       unsigned sp = (regs.pbr << 16) + ((regs.cbr + dp) & 0xfff0);
       for(unsigned n = 0; n < 16; n++) {
-        step(memory_access_speed);
+        step(memory_access_speed());
         cache.buffer[dp++] = bus_read(sp++);
       }
       cache.valid[offset >> 4] = true;
     } else {
-      step(cache_access_speed);
+      step(cache_access_speed());
     }
     return cache.buffer[offset];
   }
@@ -56,46 +56,46 @@ uint8 SuperFX::op_read(uint16 addr) {
   if(regs.pbr <= 0x5f) {
     //$[00-5f]:[0000-ffff] ROM
     rombuffer_sync();
-    step(memory_access_speed);
+    step(memory_access_speed());
     return bus_read((regs.pbr << 16) + addr);
   } else {
     //$[60-7f]:[0000-ffff] RAM
     rambuffer_sync();
-    step(memory_access_speed);
+    step(memory_access_speed());
     return bus_read((regs.pbr << 16) + addr);
   }
 }
 
-uint8 SuperFX::peekpipe() {
+auto SuperFX::peekpipe() -> uint8 {
   uint8 result = regs.pipeline;
   regs.pipeline = op_read(regs.r[15]);
   r15_modified = false;
   return result;
 }
 
-uint8 SuperFX::pipe() {
+auto SuperFX::pipe() -> uint8 {
   uint8 result = regs.pipeline;
   regs.pipeline = op_read(++regs.r[15]);
   r15_modified = false;
   return result;
 }
 
-void SuperFX::cache_flush() {
+auto SuperFX::cache_flush() -> void {
   for(unsigned n = 0; n < 32; n++) cache.valid[n] = false;
 }
 
-uint8 SuperFX::cache_mmio_read(uint16 addr) {
+auto SuperFX::cache_mmio_read(uint16 addr) -> uint8 {
   addr = (addr + regs.cbr) & 511;
   return cache.buffer[addr];
 }
 
-void SuperFX::cache_mmio_write(uint16 addr, uint8 data) {
+auto SuperFX::cache_mmio_write(uint16 addr, uint8 data) -> void {
   addr = (addr + regs.cbr) & 511;
   cache.buffer[addr] = data;
   if((addr & 15) == 15) cache.valid[addr >> 4] = true;
 }
 
-void SuperFX::memory_reset() {
+auto SuperFX::memory_reset() -> void {
   rom_mask = rom.size() - 1;
   ram_mask = ram.size() - 1;
 

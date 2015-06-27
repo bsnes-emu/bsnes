@@ -13,9 +13,11 @@ namespace SuperFamicom {
 
 SuperFX superfx;
 
-void SuperFX::Enter() { superfx.enter(); }
+auto SuperFX::Enter() -> void {
+  superfx.enter();
+}
 
-void SuperFX::enter() {
+auto SuperFX::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -37,25 +39,25 @@ void SuperFX::enter() {
   }
 }
 
-void SuperFX::init() {
+auto SuperFX::init() -> void {
   initialize_opcode_table();
   regs.r[14].modify = {&SuperFX::r14_modify, this};
   regs.r[15].modify = {&SuperFX::r15_modify, this};
 }
 
-void SuperFX::load() {
+auto SuperFX::load() -> void {
 }
 
-void SuperFX::unload() {
+auto SuperFX::unload() -> void {
   rom.reset();
   ram.reset();
 }
 
-void SuperFX::power() {
+auto SuperFX::power() -> void {
   GSU::power();
 }
 
-void SuperFX::reset() {
+auto SuperFX::reset() -> void {
   GSU::reset();
   create(SuperFX::Enter, system.cpu_frequency());
   instruction_counter = 0;
