@@ -4,7 +4,6 @@
 namespace Processor {
 
 struct GSU {
-  unsigned clockmode;  //0 = selectable; 1 = force 10.74mhz; 2 = force 21.48mhz
   #include "registers.hpp"
 
   virtual auto step(unsigned clocks) -> void = 0;
@@ -23,9 +22,6 @@ struct GSU {
   virtual auto cache_flush() -> void = 0;
 
   //gsu.cpp
-  auto cache_access_speed() -> unsigned;
-  auto memory_access_speed() -> unsigned;
-
   auto power() -> void;
   auto reset() -> void;
 

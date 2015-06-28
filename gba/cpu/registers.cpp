@@ -221,6 +221,9 @@ auto CPU::Registers::WaitControl::operator=(uint16 source) -> uint16 {
   prefetch = (source >> 14) & 1;
   gametype = (source >> 15) & 1;
   swait[3] = nwait[3];
+
+  cpu.prefetch.stalled = true;
+
   return operator uint16();
 }
 

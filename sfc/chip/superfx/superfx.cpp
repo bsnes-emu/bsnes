@@ -25,17 +25,12 @@ auto SuperFX::enter() -> void {
 
     if(regs.sfr.g == 0) {
       step(6);
-      synchronize_cpu();
       continue;
     }
 
-    (this->*opcode_table[(regs.sfr & 0x0300) + peekpipe()])();
+    unsigned opcode = (regs.sfr & 0x0300) + peekpipe();
+    (this->*opcode_table[opcode])();
     if(r15_modified == false) regs.r[15]++;
-
-    if(++instruction_counter >= 128) {
-      instruction_counter = 0;
-      synchronize_cpu();
-    }
   }
 }
 
@@ -60,7 +55,6 @@ auto SuperFX::power() -> void {
 auto SuperFX::reset() -> void {
   GSU::reset();
   create(SuperFX::Enter, system.cpu_frequency());
-  instruction_counter = 0;
   memory_reset();
   timing_reset();
 }

@@ -63,49 +63,78 @@ auto CPU::step(unsigned clocks) -> void {
   sync_step(clocks);
 }
 
+auto CPU::bus_idle(uint32 addr) -> void {
+  step(1);
+  prefetch_step(1);
+}
+
+auto CPU::bus_read(uint32 addr, uint32 size, bool mode) -> uint32 {
+  unsigned wait = bus.wait(addr, size, mode);
+
+  if(addr < 0x0800'0000) {
+    unsigned word = bus.read(addr, size);
+    step(wait);
+    prefetch_step(wait);
+    return word;
+  }
+
+  if(addr < 0x0e00'0000) {
+    if(regs.wait.control.prefetch) {
+      if(mode == Nonsequential) prefetch_start(addr);
+      unsigned word = prefetch_take();
+      if(size == Byte) word = (addr & 1) ? (word >> 8) : (word & 0xff);
+      if(size == Word) word |= prefetch_take() << 16;
+      return word;
+    }
+
+    unsigned word = cartridge.read(addr, size);
+    step(wait);
+    return word;
+  }
+
+  if(addr < 0x1000'0000) {
+    prefetch_stall();
+    unsigned word = bus.read(addr, size);
+    step(wait);
+    return word;
+  }
+
+  step(wait);
+  prefetch_step(wait);
+  return 0x0000'0000;  //open bus?
+}
+
+auto CPU::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
+  unsigned wait = bus.wait(addr, size, mode);
+
+  if(addr < 0x0800'0000) {
+    step(wait);
+    prefetch_step(wait);
+    return bus.write(addr, size, word);
+  }
+
+  if(addr < 0x0e00'0000) {
+    prefetch_stall();
+    step(wait);
+    return bus.write(addr, size, word);
+  }
+
+  if(addr < 0x1000'0000) {
+    prefetch_stall();
+    step(wait);
+    return bus.write(addr, size, word);
+  }
+
+  step(wait);
+  prefetch_step(wait);
+}
+
 auto CPU::sync_step(unsigned clocks) -> void {
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
 
   apu.clock -= clocks;
   if(apu.clock < 0) co_switch(apu.thread);
-}
-
-auto CPU::bus_idle(uint32 addr) -> void {
-  if(regs.wait.control.prefetch) prefetch_run();
-  step(1);
-}
-
-auto CPU::bus_read(uint32 addr, uint32 size, bool mode) -> uint32 {
-  if(regs.wait.control.prefetch) {
-    if((addr & 0x0fffffff) >= 0x08000000 && (addr & 0x0fffffff) <= 0x0dffffff) {
-      if(auto word = prefetch_read(addr, size)) {
-        step(1 + (size == Word));
-        return *word;
-      }
-    }
-  }
-
-  unsigned wait = bus.wait(addr, size, mode);
-  unsigned word = bus.read(addr, size);
-  step(wait);
-  return word;
-}
-
-auto CPU::bus_load(uint32 addr, uint32 size, bool mode) -> uint32 {
-  if(regs.wait.control.prefetch) prefetch_run();
-  return bus_read(addr, size, mode);
-}
-
-auto CPU::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
-  unsigned wait = bus.wait(addr, size, mode);
-  step(wait);
-  bus.write(addr, size, word);
-}
-
-auto CPU::bus_store(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
-  if(regs.wait.control.prefetch) prefetch_run();
-  return bus_write(addr, size, mode, word);
 }
 
 auto CPU::keypad_run() -> void {
@@ -122,7 +151,7 @@ auto CPU::keypad_run() -> void {
 }
 
 auto CPU::power() -> void {
-  create(CPU::Enter, 16777216);
+  create(CPU::Enter, 16'777'216);
 
   ARM::power();
   for(auto n : range( 32 * 1024)) iwram[n] = 0;
@@ -152,7 +181,7 @@ auto CPU::power() -> void {
   regs.postboot = 0;
   regs.mode = Registers::Mode::Normal;
   regs.clock = 0;
-  regs.memory.control = 0x0d000020;
+  regs.memory.control = 0x0d00'0020;
 
   pending.dma.vblank = 0;
   pending.dma.hblank = 0;

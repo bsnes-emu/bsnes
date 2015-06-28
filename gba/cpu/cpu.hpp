@@ -12,15 +12,13 @@ struct CPU : Processor::ARM, Thread, MMIO {
   static auto Enter() -> void;
 
   auto main() -> void;
-  auto step(unsigned clocks) -> void;
+
+  auto step(unsigned clocks) -> void override;
+  auto bus_idle(uint32 addr) -> void override;
+  auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32 override;
+  auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void override;
+
   auto sync_step(unsigned clocks) -> void;
-
-  auto bus_idle(uint32 addr) -> void;
-  auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32;
-  auto bus_load(uint32 addr, uint32 size, bool mode) -> uint32;
-  auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
-  auto bus_store(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
-
   auto keypad_run() -> void;
   auto power() -> void;
 

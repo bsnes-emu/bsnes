@@ -1,26 +1,15 @@
 #include <processor/processor.hpp>
 #include "gsu.hpp"
 
+//note: multiplication results *may* sometimes be invalid when both CLSR and MS0 are set
+//the product of multiplication in this mode (21mhz + fast-multiply) has not been analyzed;
+//however, the timing of this mode has been confirmed to work as specified below
+
 namespace Processor {
 
 #include "instructions.cpp"
 #include "table.cpp"
 #include "serialization.cpp"
-
-//note: multiplication results *may* sometimes be invalid when both CLSR and MS0 are set
-//the product of multiplication in this mode (21mhz + fast-multiply) has not been analyzed;
-//however, the timing of this mode has been confirmed to work as specified below
-auto GSU::cache_access_speed() -> unsigned {
-  if(clockmode == 1) return 2;
-  if(clockmode == 2) return 1;
-  return regs.clsr ? 1 : 2;
-}
-
-auto GSU::memory_access_speed() -> unsigned {
-  if(clockmode == 1) return 6;
-  if(clockmode == 2) return 5;
-  return regs.clsr ? 5 : 6;
-}
 
 auto GSU::power() -> void {
 }

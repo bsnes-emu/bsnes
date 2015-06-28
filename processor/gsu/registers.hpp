@@ -31,6 +31,7 @@ struct reg16_t {
 
   inline auto operator   = (const reg16_t& i) { return assign(i); }
 
+  reg16_t() = default;
   reg16_t(const reg16_t&) = delete;
 };
 

@@ -40,7 +40,7 @@ auto ARM::read(uint32 addr, uint32 size, bool mode) -> uint32 {
 
 auto ARM::load(uint32 addr, uint32 size, bool mode) -> uint32 {
   if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  uint32 word = bus_load(addr, size, mode);
+  uint32 word = bus_read(addr, size, mode);
 
   if(size == Half) { word &= 0xffff; word |= word << 16; }
   if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
@@ -63,7 +63,7 @@ auto ARM::store(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
   if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
 
   if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  bus_store(addr, size, mode, word);
+  bus_write(addr, size, mode, word);
   processor.nonsequential = true;
 }
 

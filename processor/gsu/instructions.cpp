@@ -383,7 +383,7 @@ auto GSU::op_mult_r() {
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
-  if(!regs.cfgr.ms0) step(cache_access_speed());
+  if(!regs.cfgr.ms0) step(regs.clsr ? 1 : 2);
 }
 
 //$80-8f(alt1): umult rN
@@ -393,7 +393,7 @@ auto GSU::op_umult_r() {
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
-  if(!regs.cfgr.ms0) step(cache_access_speed());
+  if(!regs.cfgr.ms0) step(regs.clsr ? 1 : 2);
 }
 
 //$80-8f(alt2): mult #N
@@ -403,7 +403,7 @@ auto GSU::op_mult_i() {
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
-  if(!regs.cfgr.ms0) step(cache_access_speed());
+  if(!regs.cfgr.ms0) step(regs.clsr ? 1 : 2);
 }
 
 //$80-8f(alt3): umult #N
@@ -413,7 +413,7 @@ auto GSU::op_umult_i() {
   regs.sfr.s = (regs.dr() & 0x8000);
   regs.sfr.z = (regs.dr() == 0);
   regs.reset();
-  if(!regs.cfgr.ms0) step(cache_access_speed());
+  if(!regs.cfgr.ms0) step(regs.clsr ? 1 : 2);
 }
 
 //$90: sbk
@@ -499,7 +499,7 @@ auto GSU::op_fmult() {
   regs.sfr.cy = (result & 0x8000);
   regs.sfr.z  = (regs.dr() == 0);
   regs.reset();
-  step(4 + (regs.cfgr.ms0 << 2));
+  step((regs.cfgr.ms0 ? 3 : 7) * (regs.clsr ? 1 : 2));
 }
 
 //$9f(alt1): lmult
@@ -511,7 +511,7 @@ auto GSU::op_lmult() {
   regs.sfr.cy = (result & 0x8000);
   regs.sfr.z  = (regs.dr() == 0);
   regs.reset();
-  step(4 + (regs.cfgr.ms0 << 2));
+  step((regs.cfgr.ms0 ? 3 : 7) * (regs.clsr ? 1 : 2));
 }
 
 //$a0-af(alt0): ibt rN,#pp
@@ -618,7 +618,7 @@ auto GSU::op_getc() {
 //$df(alt2): ramb
 auto GSU::op_ramb() {
   rambuffer_sync();
-  regs.rambr = regs.sr();
+  regs.rambr = regs.sr() & 0x01;
   regs.reset();
 }
 

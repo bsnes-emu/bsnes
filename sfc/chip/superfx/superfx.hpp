@@ -21,9 +21,6 @@ struct SuperFX : Processor::GSU, Coprocessor {
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
-
-privileged:
-  unsigned instruction_counter = 0;
 };
 
 extern SuperFX superfx;

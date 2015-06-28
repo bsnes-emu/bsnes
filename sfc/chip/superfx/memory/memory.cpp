@@ -43,12 +43,12 @@ auto SuperFX::op_read(uint16 addr) -> uint8 {
       unsigned dp = offset & 0xfff0;
       unsigned sp = (regs.pbr << 16) + ((regs.cbr + dp) & 0xfff0);
       for(unsigned n = 0; n < 16; n++) {
-        step(memory_access_speed());
+        step(regs.clsr ? 5 : 6);
         cache.buffer[dp++] = bus_read(sp++);
       }
       cache.valid[offset >> 4] = true;
     } else {
-      step(cache_access_speed());
+      step(regs.clsr ? 1 : 2);
     }
     return cache.buffer[offset];
   }
@@ -56,12 +56,12 @@ auto SuperFX::op_read(uint16 addr) -> uint8 {
   if(regs.pbr <= 0x5f) {
     //$[00-5f]:[0000-ffff] ROM
     rombuffer_sync();
-    step(memory_access_speed());
+    step(regs.clsr ? 5 : 6);
     return bus_read((regs.pbr << 16) + addr);
   } else {
     //$[60-7f]:[0000-ffff] RAM
     rambuffer_sync();
-    step(memory_access_speed());
+    step(regs.clsr ? 5 : 6);
     return bus_read((regs.pbr << 16) + addr);
   }
 }

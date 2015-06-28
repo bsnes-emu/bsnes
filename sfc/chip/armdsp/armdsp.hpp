@@ -10,12 +10,10 @@ struct ArmDSP : Processor::ARM, Coprocessor {
   static void Enter();
   void enter();
 
-  void step(unsigned clocks);
-  void bus_idle(uint32 addr);
-  uint32 bus_read(uint32 addr, uint32 size, bool mode);
-  uint32 bus_load(uint32 addr, uint32 size, bool mode);
-  void bus_write(uint32 addr, uint32 size, bool mode, uint32 word);
-  void bus_store(uint32 addr, uint32 size, bool mode, uint32 word);
+  void step(unsigned clocks) override;
+  void bus_idle(uint32 addr) override;
+  uint32 bus_read(uint32 addr, uint32 size, bool mode) override;
+  void bus_write(uint32 addr, uint32 size, bool mode, uint32 word) override;
 
   uint8 mmio_read(unsigned addr);
   void mmio_write(unsigned addr, uint8 data);

@@ -1,5 +1,8 @@
 #ifdef ARMDSP_CPP
 
+//note: timings are completely unverified
+//due to the ST018 chip design (on-die ROM), testing is nearly impossible
+
 void ArmDSP::bus_idle(uint32 addr) {
   step(1);
 }
@@ -42,10 +45,6 @@ uint32 ArmDSP::bus_read(uint32 addr, uint32 size, bool mode) {
   }
 
   return 0u;
-}
-
-uint32 ArmDSP::bus_load(uint32 addr, uint32 size, bool mode) {
-  return bus_read(addr, size, mode);
 }
 
 void ArmDSP::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) {
@@ -100,10 +99,6 @@ void ArmDSP::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) {
     bridge.timer = bridge.timerlatch;
     return;
   }
-}
-
-void ArmDSP::bus_store(uint32 addr, uint32 size, bool mode, uint32 word) {
-  return bus_write(addr, size, mode, word);
 }
 
 #endif

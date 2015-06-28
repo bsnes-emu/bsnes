@@ -1,6 +1,4 @@
 auto GSU::serialize(serializer& s) -> void {
-  s.integer(clockmode);
-
   s.integer(regs.pipeline);
   s.integer(regs.ramaddr);
 

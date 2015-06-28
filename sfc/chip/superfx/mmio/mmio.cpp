@@ -87,7 +87,7 @@ auto SuperFX::mmio_write(unsigned addr, uint8 data) -> void {
   } break;
 
   case 0x3033: {
-    regs.bramr = data;
+    regs.bramr = data & 0x01;
   } break;
 
   case 0x3034: {
@@ -104,7 +104,7 @@ auto SuperFX::mmio_write(unsigned addr, uint8 data) -> void {
   } break;
 
   case 0x3039: {
-    regs.clsr = data;
+    regs.clsr = data & 0x01;
   } break;
 
   case 0x303a: {

@@ -26,7 +26,7 @@ auto SuperFX::rombuffer_sync() -> void {
 
 auto SuperFX::rombuffer_update() -> void {
   regs.sfr.r = 1;
-  regs.romcl = memory_access_speed();
+  regs.romcl = regs.clsr ? 5 : 6;
 }
 
 auto SuperFX::rombuffer_read() -> uint8 {
@@ -45,7 +45,7 @@ auto SuperFX::rambuffer_read(uint16 addr) -> uint8 {
 
 auto SuperFX::rambuffer_write(uint16 addr, uint8 data) -> void {
   rambuffer_sync();
-  regs.ramcl = memory_access_speed();
+  regs.ramcl = regs.clsr ? 5 : 6;
   regs.ramar = addr;
   regs.ramdr = data;
 }

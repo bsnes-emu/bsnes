@@ -41,6 +41,7 @@ auto mMenuRadioItem::setChecked() -> type& {
 auto mMenuRadioItem::setGroup(sGroup group) -> type& {
   state.group = group;
   signal(setGroup, group);
+  if(group && group->objects() == 1) setChecked();
   return *this;
 }
 

@@ -33,7 +33,7 @@ struct Interface {
       unsigned id;
       unsigned type;  //0 = digital, 1 = analog (relative), 2 = rumble
       string name;
-      uintptr_t guid;
+      uintptr_t guid;  //user data field
     };
     vector<Input> input;
     vector<unsigned> order;
@@ -57,7 +57,6 @@ struct Interface {
     virtual auto inputRumble(unsigned, unsigned, unsigned, bool) -> void {}
     virtual auto dipSettings(const Markup::Node&) -> unsigned { return 0; }
     virtual auto path(unsigned) -> string { return ""; }
-    virtual auto server() -> string { return ""; }
     virtual auto notify(string text) -> void { print(text, "\n"); }
   };
   Bind* bind = nullptr;
@@ -73,7 +72,6 @@ struct Interface {
   auto inputRumble(unsigned port, unsigned device, unsigned input, bool enable) -> void { return bind->inputRumble(port, device, input, enable); }
   auto dipSettings(const Markup::Node& node) -> unsigned { return bind->dipSettings(node); }
   auto path(unsigned group) -> string { return bind->path(group); }
-  auto server() -> string { return bind->server(); }
   template<typename... P> auto notify(P&&... p) -> void { return bind->notify({forward<P>(p)...}); }
 
   //information

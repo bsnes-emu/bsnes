@@ -8,7 +8,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "094.33";
+  static const string Version = "094.34";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -33,7 +33,7 @@ template<typename R, typename... P> struct hook<R (P...)> {
 
   auto operator()(P... p) const -> R {
     #if defined(DEBUGGER)
-    if(callback) return callback(std::forward<P>(p)...);
+    if(callback) return callback(forward<P>(p)...);
     #endif
     return R();
   }
