@@ -11,7 +11,6 @@ auto ARM::Processor::power() -> void {
   pc = 0;
 
   carryout = false;
-  nonsequential = false;
   irqline = false;
 
   cpsr = 0;
@@ -58,21 +57,6 @@ auto ARM::Processor::setMode(Mode mode) -> void {
   case Mode::ABT: r[13] = &abt.sp; r[14] = &abt.lr; spsr = &abt.spsr; break;
   case Mode::UND: r[13] = &und.sp; r[14] = &und.lr; spsr = &und.spsr; break;
   default:        r[13] = &usr.sp; r[14] = &usr.lr; spsr = nullptr;   break;
-  }
-}
-
-auto ARM::pipeline_step() -> void {
-  pipeline.execute = pipeline.decode;
-  pipeline.decode = pipeline.fetch;
-
-  if(cpsr().t == 0) {
-    r(15).data += 4;
-    pipeline.fetch.address = r(15) & ~3;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Word, Sequential);
-  } else {
-    r(15).data += 2;
-    pipeline.fetch.address = r(15) & ~1;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Half, Sequential);
   }
 }
 

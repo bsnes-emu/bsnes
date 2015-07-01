@@ -43,7 +43,6 @@ void System::serialize_all(serializer& s) {
   cpu.serialize(s);
   ppu.serialize(s);
   apu.serialize(s);
-  bus.serialize(s);
   player.serialize(s);
 }
 

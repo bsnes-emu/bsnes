@@ -4,6 +4,7 @@ namespace GameBoyAdvance {
 
 #include "registers.cpp"
 #include "prefetch.cpp"
+#include "bus.cpp"
 #include "mmio.cpp"
 #include "memory.cpp"
 #include "dma.cpp"
@@ -63,72 +64,6 @@ auto CPU::step(unsigned clocks) -> void {
   sync_step(clocks);
 }
 
-auto CPU::bus_idle(uint32 addr) -> void {
-  step(1);
-  prefetch_step(1);
-}
-
-auto CPU::bus_read(uint32 addr, uint32 size, bool mode) -> uint32 {
-  unsigned wait = bus.wait(addr, size, mode);
-
-  if(addr < 0x0800'0000) {
-    unsigned word = bus.read(addr, size);
-    step(wait);
-    prefetch_step(wait);
-    return word;
-  }
-
-  if(addr < 0x0e00'0000) {
-    if(regs.wait.control.prefetch) {
-      if(mode == Nonsequential) prefetch_start(addr);
-      unsigned word = prefetch_take();
-      if(size == Byte) word = (addr & 1) ? (word >> 8) : (word & 0xff);
-      if(size == Word) word |= prefetch_take() << 16;
-      return word;
-    }
-
-    unsigned word = cartridge.read(addr, size);
-    step(wait);
-    return word;
-  }
-
-  if(addr < 0x1000'0000) {
-    prefetch_stall();
-    unsigned word = bus.read(addr, size);
-    step(wait);
-    return word;
-  }
-
-  step(wait);
-  prefetch_step(wait);
-  return 0x0000'0000;  //open bus?
-}
-
-auto CPU::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
-  unsigned wait = bus.wait(addr, size, mode);
-
-  if(addr < 0x0800'0000) {
-    step(wait);
-    prefetch_step(wait);
-    return bus.write(addr, size, word);
-  }
-
-  if(addr < 0x0e00'0000) {
-    prefetch_stall();
-    step(wait);
-    return bus.write(addr, size, word);
-  }
-
-  if(addr < 0x1000'0000) {
-    prefetch_stall();
-    step(wait);
-    return bus.write(addr, size, word);
-  }
-
-  step(wait);
-  prefetch_step(wait);
-}
-
 auto CPU::sync_step(unsigned clocks) -> void {
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
@@ -186,6 +121,8 @@ auto CPU::power() -> void {
   pending.dma.vblank = 0;
   pending.dma.hblank = 0;
   pending.dma.hdma = 0;
+
+  active.dma = false;
 
   for(unsigned n = 0x0b0; n <= 0x0df; n++) bus.mmio[n] = this;  //DMA
   for(unsigned n = 0x100; n <= 0x10f; n++) bus.mmio[n] = this;  //Timers

@@ -21,8 +21,16 @@ namespace GameBoyAdvance {
 #include <libco/libco.h>
 
 namespace GameBoyAdvance {
-  enum : unsigned { Byte = 8, Half = 16, Word = 32 };
-  enum : bool { Nonsequential = 0, Sequential = 1 };
+  enum : unsigned {       //mode flags for bus_read, bus_write:
+    Nonsequential =   1,  //N cycle
+    Sequential    =   2,  //S cycle
+    Prefetch      =   4,  //instruction fetch (eligible for prefetch)
+    Byte          =   8,  //8-bit access
+    Half          =  16,  //16-bit access
+    Word          =  32,  //32-bit access
+    Load          =  64,  //load operation
+    Store         = 128,  //store operation
+  };
 
   struct Thread {
     ~Thread() {

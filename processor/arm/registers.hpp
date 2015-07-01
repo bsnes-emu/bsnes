@@ -50,6 +50,7 @@ struct PSR {
 
 struct Pipeline {
   bool reload = false;
+  bool nonsequential = false;
 
   struct Instruction {
     uint32 address = 0;
@@ -106,7 +107,6 @@ struct Processor {
   GPR pc;
   PSR cpsr;
   bool carryout = false;
-  bool nonsequential = false;
   bool irqline = false;
 
   GPR* r[16] = {nullptr};
@@ -119,8 +119,6 @@ struct Processor {
 Processor processor;
 Pipeline pipeline;
 bool crash = false;
-
-auto pipeline_step() -> void;
 
 alwaysinline auto r(unsigned n) -> GPR& { return *processor.r[n]; }
 alwaysinline auto cpsr() -> PSR& { return processor.cpsr; }

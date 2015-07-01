@@ -1,43 +1,37 @@
-auto CPU::prefetch_stall() -> void {
-  prefetch.stalled = true;
-}
+auto CPU::prefetch_sync(uint32 addr) -> void {
+  if(addr == prefetch.addr) return;
 
-auto CPU::prefetch_start(uint32 addr) -> void {
-  prefetch.stalled = false;
-  prefetch.slots   = 0;
-  prefetch.input   = 0;
-  prefetch.output  = 0;
-  prefetch.addr    = addr;
-  prefetch.wait    = bus.wait(addr, Half, Nonsequential);
+  prefetch.addr = addr;
+  prefetch.load = addr;
+  prefetch.wait = bus_wait(Half | Nonsequential, prefetch.load);
 }
 
 auto CPU::prefetch_step(unsigned clocks) -> void {
-  if(!regs.wait.control.prefetch || prefetch.stalled) return;
+  step(clocks);
+  if(!regs.wait.control.prefetch || active.dma) return;
 
   prefetch.wait -= clocks;
-  while(prefetch.wait <= 0) {
-    if(prefetch.slots < 8) {
-      prefetch.slot[prefetch.output++] = cartridge.read(prefetch.addr, Half);
-      prefetch.slots++;
-      prefetch.addr += 2;
-    }
-    prefetch.wait += bus.wait(prefetch.addr, Half, Sequential);
+  while(!prefetch.full() && prefetch.wait <= 0) {
+    prefetch.slot[prefetch.load >> 1 & 7] = cartridge.rom_read(Half, prefetch.load);
+    prefetch.load += 2;
+    prefetch.wait += bus_wait(Half | Sequential, prefetch.load);
   }
 }
 
 auto CPU::prefetch_wait() -> void {
-  step(prefetch.wait);
+  if(!regs.wait.control.prefetch || prefetch.full()) return;
+
   prefetch_step(prefetch.wait);
+  prefetch.wait = bus_wait(Half | Nonsequential, prefetch.load);
 }
 
-auto CPU::prefetch_take() -> uint16 {
-  if(prefetch.slots) {
-    step(1);
-    prefetch_step(1);
-  } else {
-    prefetch_wait();
-  }
+auto CPU::prefetch_read() -> uint16 {
+  if(prefetch.empty()) prefetch_step(prefetch.wait);
+  else prefetch_step(1);
 
-  prefetch.slots--;
-  return prefetch.slot[prefetch.input++];
+  if(prefetch.full()) prefetch.wait = bus_wait(Half | Sequential, prefetch.load);
+
+  uint16 half = prefetch.slot[prefetch.addr >> 1 & 7];
+  prefetch.addr += 2;
+  return half;
 }

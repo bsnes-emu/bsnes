@@ -1,10 +1,31 @@
+auto ARM::pipeline_step() -> void {
+  pipeline.execute = pipeline.decode;
+  pipeline.decode = pipeline.fetch;
+
+  unsigned sequential = Sequential;
+  if(pipeline.nonsequential) {
+    pipeline.nonsequential = false;
+    sequential = Nonsequential;
+  }
+
+  if(cpsr().t == 0) {
+    r(15).data += 4;
+    pipeline.fetch.address = r(15) & ~3;
+    pipeline.fetch.instruction = read(Prefetch | Word | sequential, pipeline.fetch.address);
+  } else {
+    r(15).data += 2;
+    pipeline.fetch.address = r(15) & ~1;
+    pipeline.fetch.instruction = read(Prefetch | Half | sequential, pipeline.fetch.address);
+  }
+}
+
 auto ARM::arm_step() -> void {
   if(pipeline.reload) {
     pipeline.reload = false;
     r(15).data &= ~3;
 
     pipeline.fetch.address = r(15) & ~3;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Word, Nonsequential);
+    pipeline.fetch.instruction = read(Prefetch | Word | Nonsequential, pipeline.fetch.address);
 
     pipeline_step();
   }
@@ -61,7 +82,7 @@ auto ARM::thumb_step() -> void {
     r(15).data &= ~1;
 
     pipeline.fetch.address = r(15) & ~1;
-    pipeline.fetch.instruction = read(pipeline.fetch.address, Half, Nonsequential);
+    pipeline.fetch.instruction = read(Prefetch | Half | Nonsequential, pipeline.fetch.address);
 
     pipeline_step();
   }

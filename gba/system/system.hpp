@@ -3,15 +3,15 @@ enum class Input : unsigned {
 };
 
 struct BIOS : Memory {
-  uint8* data;
-  unsigned size;
-  uint32 mdr;
-
-  uint32 read(uint32 addr, uint32 size);
-  void write(uint32 addr, uint32 size, uint32 word);
-
   BIOS();
   ~BIOS();
+
+  auto read(unsigned mode, uint32 addr) -> uint32 override;
+  auto write(unsigned mode, uint32 addr, uint32 word) -> void override;
+
+  uint8* data = nullptr;
+  unsigned size = 0;
+  uint32 mdr = 0;
 };
 
 struct System {

@@ -1,4 +1,6 @@
 auto CPU::dma_run() -> void {
+  active.dma = true;
+
   while(true) {
     bool transferred = false;
     for(auto n : range(4)) {
@@ -13,20 +15,26 @@ auto CPU::dma_run() -> void {
     }
     if(!transferred) break;
   }
+
+  active.dma = false;
 }
 
 auto CPU::dma_exec(Registers::DMA& dma) -> void {
-  unsigned size = dma.control.size ? Word : Half;
-  unsigned mode = dma.run.length == dma.length ? Nonsequential : Sequential;
   unsigned seek = dma.control.size ? 4 : 2;
+  unsigned mode = dma.control.size ? Word : Half;
+  mode |= dma.run.length == dma.length ? Nonsequential : Sequential;
 
-  if(mode == Nonsequential) {
-    idle();
-    idle();
+  if(mode & Nonsequential) {
+    if((dma.source & 0x0800'0000) && (dma.target & 0x0800'0000)) {
+      //ROM -> ROM transfer
+    } else {
+      idle();
+      idle();
+    }
   }
 
-  uint32 word = bus_read(dma.run.source, size, mode);
-  bus_write(dma.run.target, size, mode, word);
+  uint32 word = bus_read(mode, dma.run.source);
+  bus_write(mode, dma.run.target, word);
 
   switch(dma.control.sourcemode) {
   case 0: dma.run.source += seek; break;

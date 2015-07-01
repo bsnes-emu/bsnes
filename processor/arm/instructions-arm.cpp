@@ -137,8 +137,8 @@ auto ARM::arm_op_memory_swap() {
   uint4 d = instruction() >> 12;
   uint4 m = instruction();
 
-  uint32 word = load(r(n), byte ? Byte : Word, Nonsequential);
-  store(r(n), byte ? Byte : Word, Nonsequential, r(m));
+  uint32 word = load((byte ? Byte : Word) | Nonsequential, r(n));
+  store((byte ? Byte : Word) | Nonsequential, r(n), r(m));
   r(d) = word;
 }
 
@@ -166,8 +166,8 @@ auto ARM::arm_op_move_half_register() {
   uint32 rm = r(m);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(l == 1) r(d) = load(rn, Half, Nonsequential);
-  if(l == 0) store(rn, Half, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Half | Nonsequential, rn);
+  if(l == 0) store(Half | Nonsequential, rn, r(d));
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -199,8 +199,8 @@ auto ARM::arm_op_move_half_immediate() {
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  if(l == 1) r(d) = load(rn, Half, Nonsequential);
-  if(l == 0) store(rn, Half, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Half | Nonsequential, rn);
+  if(l == 0) store(Half | Nonsequential, rn, r(d));
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -230,7 +230,7 @@ auto ARM::arm_op_load_register() {
   uint32 rm = r(m);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  uint32 word = load(rn, half ? Half : Byte, Nonsequential);
+  uint32 word = load((half ? Half : Byte) | Nonsequential, rn);
   r(d) = half ? (int16)word : (int8)word;
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
@@ -263,7 +263,7 @@ auto ARM::arm_op_load_immediate() {
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  uint32 word = load(rn, half ? Half : Byte, Nonsequential);
+  uint32 word = load((half ? Half : Byte) | Nonsequential, rn);
   r(d) = half ? (int16)word : (int8)word;
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
@@ -437,8 +437,8 @@ auto ARM::arm_op_move_immediate_offset() {
   auto& rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(l == 1) rd = load(rn, byte ? Byte : Word, Nonsequential);
-  if(l == 0) store(rn, byte ? Byte : Word, Nonsequential, rd);
+  if(l == 1) rd = load((byte ? Byte : Word) | Nonsequential, rn);
+  if(l == 0) store((byte ? Byte : Word) | Nonsequential, rn, rd);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -482,8 +482,8 @@ auto ARM::arm_op_move_register_offset() {
   if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(l == 1) rd = load(rn, byte ? Byte : Word, Nonsequential);
-  if(l == 0) store(rn, byte ? Byte : Word, Nonsequential, rd);
+  if(l == 1) rd = load((byte ? Byte : Word) | Nonsequential, rn);
+  if(l == 0) store((byte ? Byte : Word) | Nonsequential, rn, rd);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
@@ -521,11 +521,13 @@ auto ARM::arm_op_move_multiple() {
 
   if(usr) processor.setMode(Processor::Mode::USR);
 
+  unsigned sequential = Nonsequential;
   for(unsigned m = 0; m < 16; m++) {
     if(list & 1 << m) {
-      if(l == 1) r(m) = read(rn, Word, Nonsequential);
-      if(l == 0) write(rn, Word, Nonsequential, r(m));
+      if(l == 1) r(m) = read(Word | sequential, rn);
+      if(l == 0) write(Word | sequential, rn, r(m));
       rn += 4;
+      sequential = Sequential;
     }
   }
 
@@ -540,7 +542,7 @@ auto ARM::arm_op_move_multiple() {
       }
     }
   } else {
-    processor.nonsequential = true;
+    pipeline.nonsequential = true;
   }
 
   if(writeback) {

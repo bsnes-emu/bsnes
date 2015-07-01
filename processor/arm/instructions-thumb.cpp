@@ -145,7 +145,7 @@ auto ARM::thumb_op_load_literal() {
   uint8 displacement = instruction();
 
   unsigned rm = (r(15) & ~3) + displacement * 4;
-  r(d) = load(rm, Word, Nonsequential);
+  r(d) = load(Word | Nonsequential, rm);
 }
 
 //(ld(r,s),str){b,h} rd,[rn,rm]
@@ -161,14 +161,14 @@ auto ARM::thumb_op_move_register_offset() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: store(r(n) + r(m), Word, Nonsequential, r(d));        break;  //STR
-  case 1: store(r(n) + r(m), Half, Nonsequential, r(d));        break;  //STRH
-  case 2: store(r(n) + r(m), Byte, Nonsequential, r(d));        break;  //STRB
-  case 3: r(d) =  (int8)load(r(n) + r(m), Byte, Nonsequential); break;  //LDSB
-  case 4: r(d) = load(r(n) + r(m), Word, Nonsequential);        break;  //LDR
-  case 5: r(d) = load(r(n) + r(m), Half, Nonsequential);        break;  //LDRH
-  case 6: r(d) = load(r(n) + r(m), Byte, Nonsequential);        break;  //LDRB
-  case 7: r(d) = (int16)load(r(n) + r(m), Half, Nonsequential); break;  //LDSH
+  case 0: store(Word | Nonsequential, r(n) + r(m), r(d));        break;  //STR
+  case 1: store(Half | Nonsequential, r(n) + r(m), r(d));        break;  //STRH
+  case 2: store(Byte | Nonsequential, r(n) + r(m), r(d));        break;  //STRB
+  case 3: r(d) =  (int8)load(Byte | Nonsequential, r(n) + r(m)); break;  //LDSB
+  case 4: r(d) = load(Word | Nonsequential, r(n) + r(m));        break;  //LDR
+  case 5: r(d) = load(Half | Nonsequential, r(n) + r(m));        break;  //LDRH
+  case 6: r(d) = load(Byte | Nonsequential, r(n) + r(m));        break;  //LDRB
+  case 7: r(d) = (int16)load(Half | Nonsequential, r(n) + r(m)); break;  //LDSH
   }
 }
 
@@ -184,8 +184,8 @@ auto ARM::thumb_op_move_word_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(l == 1) r(d) = load(r(n) + offset * 4, Word, Nonsequential);
-  if(l == 0) store(r(n) + offset * 4, Word, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Word | Nonsequential, r(n) + offset * 4);
+  if(l == 0) store(Word | Nonsequential, r(n) + offset * 4, r(d));
 }
 
 //(ldr,str)b rd,[rn,#offset]
@@ -200,8 +200,8 @@ auto ARM::thumb_op_move_byte_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(l == 1) r(d) = load(r(n) + offset, Byte, Nonsequential);
-  if(l == 0) store(r(n) + offset, Byte, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Byte | Nonsequential, r(n) + offset);
+  if(l == 0) store(Byte | Nonsequential, r(n) + offset, r(d));
 }
 
 //(ldr,str)h rd,[rn,#offset]
@@ -216,8 +216,8 @@ auto ARM::thumb_op_move_half_immediate() {
   uint3 n = instruction() >> 3;
   uint3 d = instruction() >> 0;
 
-  if(l == 1) r(d) = load(r(n) + offset * 2, Half, Nonsequential);
-  if(l == 0) store(r(n) + offset * 2, Half, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Half | Nonsequential, r(n) + offset * 2);
+  if(l == 0) store(Half | Nonsequential, r(n) + offset * 2, r(d));
 }
 
 //(ldr,str) rd,[sp,#immediate]
@@ -230,8 +230,8 @@ auto ARM::thumb_op_move_stack() {
   uint3 d = instruction() >> 8;
   uint8 immediate = instruction();
 
-  if(l == 1) r(d) = load(r(13) + immediate * 4, Word, Nonsequential);
-  if(l == 0) store(r(13) + immediate * 4, Word, Nonsequential, r(d));
+  if(l == 1) r(d) = load(Word | Nonsequential, r(13) + immediate * 4);
+  if(l == 0) store(Word | Nonsequential, r(13) + immediate * 4, r(d));
 }
 
 //add rd,{pc,sp},#immediate
@@ -275,24 +275,30 @@ auto ARM::thumb_op_stack_multiple() {
   if(l == 1) sp = r(13);
   if(l == 0) sp = r(13) - (bit::count(list) + branch) * 4;
 
+  unsigned sequential = Nonsequential;
   for(unsigned m = 0; m < 8; m++) {
     if(list & 1 << m) {
-      if(l == 1) r(m) = read(sp, Word, Nonsequential);  //POP
-      if(l == 0) write(sp, Word, Nonsequential, r(m));  //PUSH
+      if(l == 1) r(m) = read(Word | sequential, sp);  //POP
+      if(l == 0) write(Word | sequential, sp, r(m));  //PUSH
       sp += 4;
+      sequential = Sequential;
     }
   }
 
   if(branch) {
     //note: ARMv5+ POP sets cpsr().t
-    if(l == 1) r(15) = read(sp, Word, Nonsequential);  //POP
-    if(l == 0) write(sp, Word, Nonsequential, r(14));  //PUSH
+    if(l == 1) r(15) = read(Word | Nonsequential, sp);  //POP
+    if(l == 0) write(Word | Nonsequential, sp, r(14));  //PUSH
     sp += 4;
   }
 
-  if(l == 1) idle();
-  if(l == 1) r(13) += (bit::count(list) + branch) * 4;
-  if(l == 0) r(13) -= (bit::count(list) + branch) * 4;
+  if(l == 1) {
+    idle();
+    r(13) += (bit::count(list) + branch) * 4;
+  } else {
+    pipeline.nonsequential = true;
+    r(13) -= (bit::count(list) + branch) * 4;
+  }
 }
 
 //(ldmia,stmia) rn!,{r...}
@@ -308,8 +314,8 @@ auto ARM::thumb_op_move_multiple() {
 
   for(unsigned m = 0; m < 8; m++) {
     if(list & 1 << m) {
-      if(l == 1) r(m) = read(rn, Word, Nonsequential);  //LDMIA
-      if(l == 0) write(rn, Word, Nonsequential, r(m));  //STMIA
+      if(l == 1) r(m) = read(Word | Nonsequential, rn);  //LDMIA
+      if(l == 0) write(Word | Nonsequential, rn, r(m));  //STMIA
       rn += 4;
     }
   }

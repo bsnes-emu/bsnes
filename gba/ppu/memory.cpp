@@ -1,65 +1,62 @@
-uint32 PPU::vram_read(uint32 addr, uint32 size) {
+auto PPU::vram_read(unsigned mode, uint32 addr) -> uint32 {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
-  switch(size) {
-  case Word:
+  if(mode & Word) {
     addr &= ~3;
     return vram[addr + 0] << 0 | vram[addr + 1] << 8 | vram[addr + 2] << 16 | vram[addr + 3] << 24;
-  case Half:
+  } else if(mode & Half) {
     addr &= ~1;
     return vram[addr + 0] << 0 | vram[addr + 1] << 8;
-  case Byte:
+  } else if(mode & Byte) {
     return vram[addr];
+  } else {
+    throw;
   }
 }
 
-void PPU::vram_write(uint32 addr, uint32 size, uint32 word) {
+auto PPU::vram_write(unsigned mode, uint32 addr, uint32 word) -> void {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
-  switch(size) {
-  case Word:
+  if(mode & Word) {
     addr &= ~3;
     vram[addr + 0] = word >>  0;
     vram[addr + 1] = word >>  8;
     vram[addr + 2] = word >> 16;
     vram[addr + 3] = word >> 24;
-    break;
-  case Half:
+  } else if(mode & Half) {
     addr &= ~1;
     vram[addr + 0] = word >>  0;
     vram[addr + 1] = word >>  8;
-    break;
-  case Byte:
+  } else if(mode & Byte) {
     addr &= ~1;
     vram[addr + 0] = word;
     vram[addr + 1] = word;
-    break;
   }
 }
 
-uint32 PPU::pram_read(uint32 addr, uint32 size) {
-  if(size == Word) return pram_read(addr & ~2, Half) << 0 | pram_read(addr | 2, Half) << 16;
-  if(size == Byte) return pram_read(addr, Half) >> ((addr & 1) * 8);
+auto PPU::pram_read(unsigned mode, uint32 addr) -> uint32 {
+  if(mode & Word) return pram_read(Half, addr & ~2) << 0 | pram_read(Half, addr | 2) << 16;
+  if(mode & Byte) return pram_read(Half, addr) >> ((addr & 1) * 8);
   return pram[addr >> 1 & 511];
 }
 
-void PPU::pram_write(uint32 addr, uint32 size, uint32 word) {
-  if(size == Word) {
-    pram_write(addr & ~2, Half, word >>  0);
-    pram_write(addr |  2, Half, word >> 16);
+auto PPU::pram_write(unsigned mode, uint32 addr, uint32 word) -> void {
+  if(mode & Word) {
+    pram_write(Half, addr & ~2, word >>  0);
+    pram_write(Half, addr |  2, word >> 16);
     return;
   }
 
-  if(size == Byte) {
-    return pram_write(addr, Half, word << 8 | word << 0);
+  if(mode & Byte) {
+    return pram_write(Half, addr, word << 8 | word << 0);
   }
 
   pram[addr >> 1 & 511] = word & 0x7fff;
 }
 
-uint32 PPU::oam_read(uint32 addr, uint32 size) {
-  if(size == Word) return oam_read(addr & ~2, Half) << 0 | oam_read(addr | 2, Half) << 16;
-  if(size == Byte) return oam_read(addr, Half) >> ((addr & 1) * 8);
+auto PPU::oam_read(unsigned mode, uint32 addr) -> uint32 {
+  if(mode & Word) return oam_read(Half, addr & ~2) << 0 | oam_read(Half, addr | 2) << 16;
+  if(mode & Byte) return oam_read(Half, addr) >> ((addr & 1) * 8);
 
   auto& obj = object[addr >> 3 & 127];
   auto& par = objectparam[addr >> 5 & 31];
@@ -101,15 +98,15 @@ uint32 PPU::oam_read(uint32 addr, uint32 size) {
   }
 }
 
-void PPU::oam_write(uint32 addr, uint32 size, uint32 word) {
-  if(size == Word) {
-    oam_write(addr & ~2, Half, word >>  0);
-    oam_write(addr |  2, Half, word >> 16);
+auto PPU::oam_write(unsigned mode, uint32 addr, uint32 word) -> void {
+  if(mode & Word) {
+    oam_write(Half, addr & ~2, word >>  0);
+    oam_write(Half, addr |  2, word >> 16);
     return;
   }
 
-  if(size == Byte) {
-    return oam_write(addr, Half, word << 8 | word << 0);
+  if(mode & Byte) {
+    return oam_write(Half, addr, word << 8 | word << 0);
   }
 
   auto& obj = object[addr >> 3 & 127];

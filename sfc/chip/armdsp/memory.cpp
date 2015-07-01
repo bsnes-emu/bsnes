@@ -3,32 +3,33 @@
 //note: timings are completely unverified
 //due to the ST018 chip design (on-die ROM), testing is nearly impossible
 
-void ArmDSP::bus_idle(uint32 addr) {
+void ArmDSP::bus_idle() {
   step(1);
 }
 
-uint32 ArmDSP::bus_read(uint32 addr, uint32 size, bool mode) {
+uint32 ArmDSP::bus_read(unsigned mode, uint32 addr) {
   step(1);
 
-  static auto memory = [&](const uint8 *memory, uint32 addr, uint32 size) -> uint32 {
-    switch(size) {
-    case Word:
+  static auto memory = [&](const uint8 *memory, unsigned mode, uint32 addr) -> uint32 {
+    if(mode & Word) {
       memory += addr & ~3;
       return memory[0] << 0 | memory[1] << 8 | memory[2] << 16 | memory[3] << 24;
-    case Byte:
+    } else if(mode & Byte) {
       return memory[addr];
+    } else {
+      return 0;  //should never occur
     }
   };
 
   switch(addr & 0xe0000000) {
-  case 0x00000000: return memory(programROM, addr & 0x1ffff, size);
+  case 0x00000000: return memory(programROM, mode, addr & 0x1ffff);
   case 0x20000000: return pipeline.fetch.instruction;
   case 0x40000000: break;
   case 0x60000000: return 0x40404001;
   case 0x80000000: return pipeline.fetch.instruction;
-  case 0xa0000000: return memory(dataROM, addr & 0x7fff, size);
+  case 0xa0000000: return memory(dataROM, mode, addr & 0x7fff);
   case 0xc0000000: return pipeline.fetch.instruction;
-  case 0xe0000000: return memory(programRAM, addr & 0x3fff, size);
+  case 0xe0000000: return memory(programRAM, mode, addr & 0x3fff);
   }
 
   addr &= 0xe000003f;
@@ -44,25 +45,22 @@ uint32 ArmDSP::bus_read(uint32 addr, uint32 size, bool mode) {
     return bridge.status();
   }
 
-  return 0u;
+  return 0;
 }
 
-void ArmDSP::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) {
+void ArmDSP::bus_write(unsigned mode, uint32 addr, uint32 word) {
   step(1);
 
-  static auto memory = [](uint8 *memory, uint32 addr, uint32 size, uint32 word) {
-    switch(size) {
-    case Word:
+  static auto memory = [](uint8 *memory, unsigned mode, uint32 addr, uint32 word) {
+    if(mode & Word) {
       memory += addr & ~3;
       *memory++ = word >>  0;
       *memory++ = word >>  8;
       *memory++ = word >> 16;
       *memory++ = word >> 24;
-      break;
-    case Byte:
+    } else if(mode & Byte) {
       memory += addr;
       *memory++ = word >>  0;
-      break;
     }
   };
 
@@ -74,7 +72,7 @@ void ArmDSP::bus_write(uint32 addr, uint32 size, bool mode, uint32 word) {
   case 0x80000000: return;
   case 0xa0000000: return;
   case 0xc0000000: return;
-  case 0xe0000000: return memory(programRAM, addr & 0x3fff, size, word);
+  case 0xe0000000: return memory(programRAM, mode, addr & 0x3fff, word);
   }
 
   addr &= 0xe000003f;

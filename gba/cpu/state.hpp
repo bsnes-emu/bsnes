@@ -5,3 +5,7 @@ struct Pending {
     bool hdma;
   } dma;
 } pending;
+
+struct Active {
+  bool dma;
+} active;

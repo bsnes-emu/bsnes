@@ -16,14 +16,14 @@ struct PPU : Thread, MMIO {
   uint8 read(uint32 addr);
   void write(uint32 addr, uint8 byte);
 
-  uint32 vram_read(uint32 addr, uint32 size);
-  void vram_write(uint32 addr, uint32 size, uint32 word);
+  auto vram_read(unsigned mode, uint32 addr) -> uint32;
+  auto vram_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
-  uint32 pram_read(uint32 addr, uint32 size);
-  void pram_write(uint32 addr, uint32 size, uint32 word);
+  auto pram_read(unsigned mode, uint32 addr) -> uint32;
+  auto pram_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
-  uint32 oam_read(uint32 addr, uint32 size);
-  void oam_write(uint32 addr, uint32 size, uint32 word);
+  auto oam_read(unsigned mode, uint32 addr) -> uint32;
+  auto oam_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
   void render_backgrounds();
   void render_background_linear(Registers::Background&);

@@ -55,10 +55,10 @@ auto ARM::serialize(serializer& s) -> void {
   s.integer(processor.pc.data);
   processor.cpsr.serialize(s);
   s.integer(processor.carryout);
-  s.integer(processor.nonsequential);
   s.integer(processor.irqline);
 
   s.integer(pipeline.reload);
+  s.integer(pipeline.nonsequential);
   s.integer(pipeline.execute.address);
   s.integer(pipeline.execute.instruction);
   s.integer(pipeline.decode.address);

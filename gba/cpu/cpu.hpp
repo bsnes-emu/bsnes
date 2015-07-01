@@ -14,9 +14,6 @@ struct CPU : Processor::ARM, Thread, MMIO {
   auto main() -> void;
 
   auto step(unsigned clocks) -> void override;
-  auto bus_idle(uint32 addr) -> void override;
-  auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32 override;
-  auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void override;
 
   auto sync_step(unsigned clocks) -> void;
   auto keypad_run() -> void;
@@ -25,15 +22,21 @@ struct CPU : Processor::ARM, Thread, MMIO {
   CPU();
   ~CPU();
 
+  //bus.cpp
+  auto bus_idle() -> void override;
+  auto bus_read(unsigned mode, uint32 addr) -> uint32 override;
+  auto bus_write(unsigned mode, uint32 addr, uint32 word) -> void override;
+  auto bus_wait(unsigned mode, uint32 addr) -> unsigned;
+
   //mmio.cpp
   auto read(uint32 addr) -> uint8;
   auto write(uint32 addr, uint8 byte) -> void;
 
-  auto iwram_read(uint32 addr, uint32 size) -> uint32;
-  auto iwram_write(uint32 addr, uint32 size, uint32 word) -> void;
+  auto iwram_read(unsigned mode, uint32 addr) -> uint32;
+  auto iwram_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
-  auto ewram_read(uint32 addr, uint32 size) -> uint32;
-  auto ewram_write(uint32 addr, uint32 size, uint32 word) -> void;
+  auto ewram_read(unsigned mode, uint32 addr) -> uint32;
+  auto ewram_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
   //dma.cpp
   auto dma_run() -> void;

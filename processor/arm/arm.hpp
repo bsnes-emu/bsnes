@@ -4,12 +4,20 @@
 namespace Processor {
 
 //Supported Models:
-//* ARMv3 (ST018)
-//* ARMv4 (ARM7TDMI)
+//* ARMv3  (ARM60)
+//* ARMv4T (ARM7TDMI)
 
 struct ARM {
-  enum : unsigned { Byte = 8, Half = 16, Word = 32 };
-  enum : bool { Nonsequential = 0, Sequential = 1 };
+  enum : unsigned {       //mode flags for bus_read, bus_write:
+    Nonsequential =   1,  //N cycle
+    Sequential    =   2,  //S cycle
+    Prefetch      =   4,  //instruction fetch (eligible for prefetch)
+    Byte          =   8,  //8-bit access
+    Half          =  16,  //16-bit access
+    Word          =  32,  //32-bit access
+    Load          =  64,  //load operation
+    Store         = 128,  //store operation
+  };
 
   #include "registers.hpp"
   #include "instructions-arm.hpp"
@@ -17,18 +25,18 @@ struct ARM {
   #include "disassembler.hpp"
 
   virtual auto step(unsigned clocks) -> void = 0;
-  virtual auto bus_idle(uint32 addr) -> void = 0;
-  virtual auto bus_read(uint32 addr, uint32 size, bool mode) -> uint32 = 0;
-  virtual auto bus_write(uint32 addr, uint32 size, bool mode, uint32 word) -> void = 0;
+  virtual auto bus_idle() -> void = 0;
+  virtual auto bus_read(unsigned mode, uint32 addr) -> uint32 = 0;
+  virtual auto bus_write(unsigned mode, uint32 addr, uint32 word) -> void = 0;
 
   //arm.cpp
   auto power() -> void;
   auto exec() -> void;
   auto idle() -> void;
-  auto read(uint32 addr, uint32 size, bool mode) -> uint32;
-  auto load(uint32 addr, uint32 size, bool mode) -> uint32;
-  auto write(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
-  auto store(uint32 addr, uint32 size, bool mode, uint32 word) -> void;
+  auto read(unsigned mode, uint32 addr) -> uint32;
+  auto load(unsigned mode, uint32 addr) -> uint32;
+  auto write(unsigned mode, uint32 addr, uint32 word) -> void;
+  auto store(unsigned mode, uint32 addr, uint32 word) -> void;
   auto vector(uint32 addr, Processor::Mode mode) -> void;
 
   //algorithms.cpp
@@ -44,14 +52,15 @@ struct ARM {
   auto rrx(uint32 source) -> uint32;
 
   //step.cpp
+  auto pipeline_step() -> void;
   auto arm_step() -> void;
   auto thumb_step() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  bool trace{false};
-  uintmax_t instructions{0};
+  bool trace = false;
+  uintmax_t instructions = 0;
 };
 
 }

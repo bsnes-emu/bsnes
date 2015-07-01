@@ -28,13 +28,17 @@ struct Cartridge : property<Cartridge> {
   uint8* ram_data();
   unsigned ram_size();
 
-  uint32 read(uint8* data, uint32 addr, uint32 size);
-  void write(uint8* data, uint32 addr, uint32 size, uint32 word);
+  auto read(uint8* data, unsigned mode, uint32 addr) -> uint32;
+  auto write(uint8* data, unsigned mode, uint32 addr, uint32 word) -> void;
 
-  uint32 read(uint32 addr, uint32 size);
-  void write(uint32 addr, uint32 size, uint32 word);
+  auto rom_read(unsigned mode, uint32 addr) -> uint32;
+  auto rom_write(unsigned mode, uint32 addr, uint32 word) -> void;
+
+  auto ram_read(unsigned mode, uint32 addr) -> uint32;
+  auto ram_write(unsigned mode, uint32 addr, uint32 word) -> void;
 
   void serialize(serializer&);
+
   Cartridge();
   ~Cartridge();
 };

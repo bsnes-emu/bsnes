@@ -15,6 +15,7 @@ auto ARM::power() -> void {
   processor.power();
   vector(0x00000000, Processor::Mode::SVC);
   pipeline.reload = true;
+  pipeline.nonsequential = true;
   crash = false;
   r(15).modify = [&] {
     pipeline.reload = true;
@@ -29,42 +30,41 @@ auto ARM::exec() -> void {
 }
 
 auto ARM::idle() -> void {
-  processor.nonsequential = true;
-  bus_idle(r(15));
+  pipeline.nonsequential = true;
+  return bus_idle();
 }
 
-auto ARM::read(uint32 addr, uint32 size, bool mode) -> uint32 {
-  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  return bus_read(addr, size, mode);
+auto ARM::read(unsigned mode, uint32 addr) -> uint32 {
+  return bus_read(mode, addr);
 }
 
-auto ARM::load(uint32 addr, uint32 size, bool mode) -> uint32 {
-  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  uint32 word = bus_read(addr, size, mode);
+auto ARM::load(unsigned mode, uint32 addr) -> uint32 {
+  pipeline.nonsequential = true;
+  uint32 word = bus_read(Load | mode, addr);
 
-  if(size == Half) { word &= 0xffff; word |= word << 16; }
-  if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
+  if(mode & Half) { word &= 0xffff; word |= word << 16; }
+  if(mode & Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
 
   word = ror(word, 8 * (addr & 3));
   idle();
 
-  if(size == Half) word &= 0xffff;
-  if(size == Byte) word &= 0xff;
+  if(mode & Half) word &= 0xffff;
+  if(mode & Byte) word &= 0xff;
   return word;
 }
 
-auto ARM::write(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
-  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  return bus_write(addr, size, mode, word);
+auto ARM::write(unsigned mode, uint32 addr, uint32 word) -> void {
+  pipeline.nonsequential = true;
+  return bus_write(mode, addr, word);
 }
 
-auto ARM::store(uint32 addr, uint32 size, bool mode, uint32 word) -> void {
-  if(size == Half) { word &= 0xffff; word |= word << 16; }
-  if(size == Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
+auto ARM::store(unsigned mode, uint32 addr, uint32 word) -> void {
+  pipeline.nonsequential = true;
 
-  if(processor.nonsequential) processor.nonsequential = false, mode = Nonsequential;
-  bus_write(addr, size, mode, word);
-  processor.nonsequential = true;
+  if(mode & Half) { word &= 0xffff; word |= word << 16; }
+  if(mode & Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
+
+  return bus_write(Store | mode, addr, word);
 }
 
 auto ARM::vector(uint32 addr, Processor::Mode mode) -> void {
