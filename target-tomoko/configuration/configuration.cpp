@@ -42,14 +42,14 @@ ConfigurationManager::ConfigurationManager() {
   timing.append(timing.audio, "Audio");
   append(timing, "Timing");
 
-  load({configpath(), "tomoko/settings.bml"});
+  load(locate({configpath(), "tomoko/"}, "settings.bml"));
   if(!library.location) library.location = {userpath(), "Emulation/"};
   if(!video.driver) video.driver = ruby::Video::safestDriver();
   if(!audio.driver) audio.driver = ruby::Audio::safestDriver();
   if(!input.driver) input.driver = ruby::Input::safestDriver();
-  save({configpath(), "tomoko/settings.bml"});
+  save(locate({configpath(), "tomoko/"}, "settings.bml"));
 }
 
 auto ConfigurationManager::quit() -> void {
-  save({configpath(), "tomoko/settings.bml"});
+  save(locate({configpath(), "tomoko/"}, "settings.bml"));
 }

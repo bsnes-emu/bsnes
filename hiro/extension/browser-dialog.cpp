@@ -170,20 +170,22 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
   for(auto content : contents) {
     if(!content.endsWith("/")) continue;
-    if(folderMode && isMatch(content.rtrim("/"))) continue;
+    content.rtrim("/");
+    if(folderMode && isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content.rtrim("/")).setIcon(Icon::Emblem::Folder))
+      .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
       .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
     );
   }
 
   for(auto content : contents) {
-    if(content.endsWith("/") && !folderMode) continue;
-    if(!isMatch(content.rtrim("/"))) continue;
+    if(content.endsWith("/") != folderMode) continue;  //file mode shows files; folder mode shows folders
+    content.rtrim("/");
+    if(!isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content.rtrim("/")).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
+      .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
       .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
     );
   }

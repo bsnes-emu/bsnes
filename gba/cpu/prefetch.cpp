@@ -10,16 +10,16 @@ auto CPU::prefetch_step(unsigned clocks) -> void {
   step(clocks);
   if(!regs.wait.control.prefetch || active.dma) return;
 
-  prefetch.wait -= clocks;
-  while(!prefetch.full() && prefetch.wait <= 0) {
+  while(!prefetch.full() && clocks--) {
+    if(--prefetch.wait) continue;
     prefetch.slot[prefetch.load >> 1 & 7] = cartridge.rom_read(Half, prefetch.load);
     prefetch.load += 2;
-    prefetch.wait += bus_wait(Half | Sequential, prefetch.load);
+    prefetch.wait = bus_wait(Half | Sequential, prefetch.load);
   }
 }
 
 auto CPU::prefetch_wait() -> void {
-  if(!regs.wait.control.prefetch || prefetch.full()) return;
+  if(!regs.wait.control.prefetch || active.dma || prefetch.full()) return;
 
   prefetch_step(prefetch.wait);
   prefetch.wait = bus_wait(Half | Nonsequential, prefetch.load);

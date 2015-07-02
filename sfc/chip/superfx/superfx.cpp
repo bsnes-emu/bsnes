@@ -28,9 +28,9 @@ auto SuperFX::enter() -> void {
       continue;
     }
 
-    unsigned opcode = (regs.sfr & 0x0300) + peekpipe();
+    unsigned opcode = regs.sfr.alt2 << 9 | regs.sfr.alt1 << 8 | peekpipe();
     (this->*opcode_table[opcode])();
-    if(r15_modified == false) regs.r[15]++;
+    if(!r15_modified) regs.r[15]++;
   }
 }
 

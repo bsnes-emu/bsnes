@@ -16,7 +16,7 @@ auto Program::loadMedia(string location) -> void {
 auto Program::loadMedia(Emulator::Interface& _emulator, Emulator::Interface::Media& media, const string& location) -> void {
   unloadMedia();
 
-  mediaPaths(0) = {userpath(), "Emulation/System/", media.name, ".sys/"};
+  mediaPaths(0) = locate({userpath(), "Emulation/System/"}, {media.name, ".sys/"});
   mediaPaths(media.id) = location;
   folderPaths.append(location);
 

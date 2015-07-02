@@ -18,6 +18,12 @@ auto pListViewCell::setIcon(const image& icon) -> void {
 }
 
 auto pListViewCell::setText(const string& text) -> void {
+  if(auto parent = _parent()) {
+    if(auto listView = parent->_parent()) {
+      //ListView uses a custom drawing routine; so we need to tell the control to repaint itself manually
+      PostMessageOnce(listView->_parentHandle(), AppMessage::ListView_doPaint, 0, (LPARAM)&listView->reference);
+    }
+  }
 }
 
 auto pListViewCell::_parent() -> maybe<pListViewItem&> {

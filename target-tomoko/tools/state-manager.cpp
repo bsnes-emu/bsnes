@@ -20,6 +20,8 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
   loadButton.setText("Load").onActivate([&] { doLoad(); });
   resetButton.setText("Reset").onActivate([&] { doReset(); });
   eraseButton.setText("Erase").onActivate([&] { doErase(); });
+
+  doUpdateControls();
 }
 
 auto StateManager::doUpdateControls() -> void {
@@ -33,7 +35,7 @@ auto StateManager::doUpdateControls() -> void {
     loadButton.setEnabled(true);
     eraseButton.setEnabled(true);
   } else {
-    descriptionValue.setEnabled(false);
+    descriptionValue.setEnabled(false).setText("");
     loadButton.setEnabled(false);
     eraseButton.setEnabled(false);
   }
@@ -43,18 +45,17 @@ auto StateManager::doChangeSelected() -> void {
   vector<uint8> buffer;
   if(auto item = stateList.selected()) {
     buffer = file::read(program->stateName(1 + item.offset(), true));
+    if(buffer.size() >= 584) {
+      string description;
+      description.reserve(512);
+      memory::copy(description.pointer(), buffer.data() + 72, 512);
+      description.resize(description.length());
+      descriptionValue.setEnabled(true).setText(description);
+      return doUpdateControls();
+    }
   }
 
-  if(buffer.size() >= 584) {
-    string description;
-    description.reserve(512);
-    memory::copy(description.pointer(), buffer.data() + 72, 512);
-    description.resize(description.length());
-    descriptionValue.setText(description);
-  } else {
-    descriptionValue.setText("");
-  }
-
+  descriptionValue.setEnabled(false).setText("");
   doUpdateControls();
 }
 

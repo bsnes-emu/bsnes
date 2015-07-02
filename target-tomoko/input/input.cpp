@@ -172,8 +172,8 @@ InputManager::InputManager() {
   }
 
   appendHotkeys();
-  config.load({configpath(), "tomoko/input.bml"});
-  config.save({configpath(), "tomoko/input.bml"});
+  config.load(locate({configpath(), "tomoko/"}, "input.bml"));
+  config.save(locate({configpath(), "tomoko/"}, "input.bml"));
 }
 
 auto InputManager::bind() -> void {
@@ -217,7 +217,7 @@ auto InputManager::onChange(shared_pointer<HID::Device> device, unsigned group, 
 }
 
 auto InputManager::quit() -> void {
-  config.save({configpath(), "tomoko/input.bml"});
+  config.save(locate({configpath(), "tomoko/"}, "input.bml"));
   emulators.reset();
   hotkeys.reset();
 }

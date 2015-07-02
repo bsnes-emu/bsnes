@@ -10,6 +10,7 @@ struct pWidget;
 struct AppMessage {
   enum : unsigned {
     None = WM_APP,
+    ListView_doPaint,
     ListView_onActivate,
     ListView_onChange,
   };

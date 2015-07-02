@@ -324,6 +324,13 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   }
 
   #if defined(Hiro_ListView)
+  case AppMessage::ListView_doPaint: {
+    if(auto listView = (mListView*)lparam) {
+      if(auto self = listView->self()) InvalidateRect(self->hwnd, nullptr, true);
+    }
+    break;
+  }
+
   case AppMessage::ListView_onActivate: {
     if(auto listView = (mListView*)lparam) listView->doActivate();
     break;
