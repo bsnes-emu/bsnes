@@ -59,13 +59,13 @@ inline auto ifindFrom(const string& self, signed offset, rstring source) -> mayb
 
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
-template<signed precision = 0, char padchar = '0'> inline auto integer(intmax_t value) -> string;
-template<signed precision = 0, char padchar = '0'> inline auto decimal(uintmax_t value) -> string;
-template<signed precision = 0, char padchar = '0'> inline auto hex(uintmax_t value) -> string;
-template<signed precision = 0, char padchar = '0'> inline auto octal(uintmax_t value) -> string;
-template<signed precision = 0, char padchar = '0'> inline auto binary(uintmax_t value) -> string;
-template<signed precision = 0, typename T> inline auto pointer(const T* value) -> string;
-template<signed precision = 0> inline auto pointer(uintptr_t value) -> string;
+inline auto integer(intmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto decimal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
+inline auto pointer(uintptr_t value, long precision = 0) -> string;
 inline auto real(long double value) -> string;
 
 //hash.hpp
@@ -98,31 +98,31 @@ inline auto sharedpath() -> string;
 inline auto temppath() -> string;
 
 //replace.hpp
-template<unsigned L, bool I, bool Q> inline auto _replace(string& self, rstring from, rstring to) -> string&;
-template<unsigned L = ~0u> inline auto replace(string& self, rstring from, rstring to) -> string&;
-template<unsigned L = ~0u> inline auto ireplace(string& self, rstring from, rstring to) -> string&;
-template<unsigned L = ~0u> inline auto qreplace(string& self, rstring from, rstring to) -> string&;
-template<unsigned L = ~0u> inline auto iqreplace(string& self, rstring from, rstring to) -> string&;
+template<bool I, bool Q> inline auto _replace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
+inline auto replace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
+inline auto ireplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
+inline auto qreplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
+inline auto iqreplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
 
 //split.hpp
-template<unsigned L, bool I, bool Q> inline auto _split(lstring& self, rstring source, rstring find) -> lstring&;
-template<unsigned L = ~0u> inline auto split(string& self, rstring key) -> lstring;
-template<unsigned L = ~0u> inline auto isplit(string& self, rstring key) -> lstring;
-template<unsigned L = ~0u> inline auto qsplit(string& self, rstring key) -> lstring;
-template<unsigned L = ~0u> inline auto iqsplit(string& self, rstring key) -> lstring;
+template<bool I, bool Q> inline auto _split(lstring& self, rstring source, rstring find, long limit = LONG_MAX) -> lstring&;
+inline auto split(string& self, rstring key, long limit = LONG_MAX) -> lstring;
+inline auto isplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
+inline auto qsplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
+inline auto iqsplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
 
 //trim.hpp
-inline auto trim(string& self, rstring lhs, rstring rhs) -> bool;
-inline auto ltrim(string& self, rstring lhs) -> bool;
-inline auto rtrim(string& self, rstring rhs) -> bool;
+inline auto trim(string& self, rstring lhs, rstring rhs, long limit = LONG_MAX) -> string&;
+inline auto ltrim(string& self, rstring lhs, long limit = LONG_MAX) -> string&;
+inline auto rtrim(string& self, rstring rhs, long limit = LONG_MAX) -> string&;
 
-inline auto itrim(string& self, rstring lhs, rstring rhs) -> bool;
-inline auto iltrim(string& self, rstring lhs) -> bool;
-inline auto irtrim(string& self, rstring rhs) -> bool;
+inline auto itrim(string& self, rstring lhs, rstring rhs, long limit = LONG_MAX) -> string&;
+inline auto iltrim(string& self, rstring lhs, long limit = LONG_MAX) -> string&;
+inline auto irtrim(string& self, rstring rhs, long limit = LONG_MAX) -> string&;
 
-inline auto strip(string& self) -> bool;
-inline auto lstrip(string& self) -> bool;
-inline auto rstrip(string& self) -> bool;
+inline auto strip(string& self) -> string&;
+inline auto lstrip(string& self) -> string&;
+inline auto rstrip(string& self) -> string&;
 
 //utility.hpp
 inline auto fill(string& self, char fill = ' ') -> string&;
@@ -190,7 +190,7 @@ public:
   inline auto operator=(const string&) -> type&;
   inline auto operator=(string&&) -> type&;
 
-  template<typename T, typename... P> string(T&& s, P&&... p) : string() { append(std::forward<T>(s), std::forward<P>(p)...); }
+  template<typename T, typename... P> string(T&& s, P&&... p) : string() { append(forward<T>(s), forward<P>(p)...); }
   ~string() { reset(); }
 
   explicit operator bool() const { return _size; }
@@ -222,6 +222,7 @@ public:
   //atoi.hpp
   inline auto integer() const -> intmax_t;
   inline auto decimal() const -> uintmax_t;
+  inline auto real() const -> double;
 
   //core.hpp
   inline auto operator[](signed) const -> const char&;
@@ -236,7 +237,7 @@ public:
 
   //utility.hpp
   inline static auto read(const string& filename) -> string;
-  template<unsigned L> inline static auto repeat(const string& pattern) -> string;
+  inline static auto repeat(const string& pattern, unsigned times) -> string;
 
   //extension methods
   //=================
@@ -264,8 +265,8 @@ public:
   auto transform(rstring from, rstring to) -> type& { return nall::transform(*this, from, to); }
 
   //core.hpp
-  template<typename... P> auto assign(P&&... p) -> type& { return nall::assign(*this, std::forward<P>(p)...); }
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, std::forward<P>(p)...); }
+  template<typename... P> auto assign(P&&... p) -> type& { return nall::assign(*this, forward<P>(p)...); }
+  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
   auto empty() const -> bool { return nall::empty(*this); }
   auto length() const -> unsigned { return nall::length(*this); }
 
@@ -297,29 +298,29 @@ public:
   auto suffixname() const -> string { return nall::suffixname(*this); }
 
   //replace.hpp
-  template<unsigned L = ~0u> auto replace(rstring from, rstring to) -> type& { return nall::_replace<L, 0, 0>(*this, from, to); }
-  template<unsigned L = ~0u> auto ireplace(rstring from, rstring to) -> type& { return nall::_replace<L, 1, 0>(*this, from, to); }
-  template<unsigned L = ~0u> auto qreplace(rstring from, rstring to) -> type& { return nall::_replace<L, 0, 1>(*this, from, to); }
-  template<unsigned L = ~0u> auto iqreplace(rstring from, rstring to) -> type& { return nall::_replace<L, 1, 1>(*this, from, to); }
+  auto replace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<0, 0>(*this, from, to, limit); }
+  auto ireplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<1, 0>(*this, from, to, limit); }
+  auto qreplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<0, 1>(*this, from, to, limit); }
+  auto iqreplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<1, 1>(*this, from, to, limit); }
 
   //split.hpp
-  template<unsigned L = ~0u> inline auto split(rstring key) const -> lstring;
-  template<unsigned L = ~0u> inline auto isplit(rstring key) const -> lstring;
-  template<unsigned L = ~0u> inline auto qsplit(rstring key) const -> lstring;
-  template<unsigned L = ~0u> inline auto iqsplit(rstring key) const -> lstring;
+  inline auto split(rstring key, long limit = LONG_MAX) const -> lstring;
+  inline auto isplit(rstring key, long limit = LONG_MAX) const -> lstring;
+  inline auto qsplit(rstring key, long limit = LONG_MAX) const -> lstring;
+  inline auto iqsplit(rstring key, long limit = LONG_MAX) const -> lstring;
 
   //trim.hpp
-  auto trim(rstring lhs, rstring rhs) -> type& { return nall::trim(*this, lhs, rhs), *this; }
-  auto ltrim(rstring lhs) -> type& { return nall::ltrim(*this, lhs), *this; }
-  auto rtrim(rstring rhs) -> type& { return nall::rtrim(*this, rhs), *this; }
+  auto trim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type& { return nall::trim(*this, lhs, rhs, limit); }
+  auto ltrim(rstring lhs, long limit = LONG_MAX) -> type& { return nall::ltrim(*this, lhs, limit); }
+  auto rtrim(rstring rhs, long limit = LONG_MAX) -> type& { return nall::rtrim(*this, rhs, limit); }
 
-  auto itrim(rstring lhs, rstring rhs) -> type& { return nall::itrim(*this, lhs, rhs), *this; }
-  auto iltrim(rstring lhs) -> type& { return nall::iltrim(*this, lhs), *this; }
-  auto irtrim(rstring rhs) -> type& { return nall::irtrim(*this, rhs), *this; }
+  auto itrim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type& { return nall::itrim(*this, lhs, rhs, limit); }
+  auto iltrim(rstring lhs, long limit = LONG_MAX) -> type& { return nall::iltrim(*this, lhs, limit); }
+  auto irtrim(rstring rhs, long limit = LONG_MAX) -> type& { return nall::irtrim(*this, rhs, limit); }
 
-  auto strip() -> type& { return nall::strip(*this), *this; }
-  auto lstrip() -> type& { return nall::lstrip(*this), *this; }
-  auto rstrip() -> type& { return nall::rstrip(*this), *this; }
+  auto strip() -> type& { return nall::strip(*this); }
+  auto lstrip() -> type& { return nall::lstrip(*this); }
+  auto rstrip() -> type& { return nall::rstrip(*this); }
 
   //utility.hpp
   auto fill(char fill = ' ') -> type& { return nall::fill(*this, fill); }
@@ -348,7 +349,7 @@ struct lstring : vector<string> {
   lstring(const lstring& source) { vector::operator=(source); }
   lstring(lstring& source) { vector::operator=(source); }
   lstring(lstring&& source) { vector::operator=(std::move(source)); }
-  template<typename... P> lstring(P&&... p) { append(std::forward<P>(p)...); }
+  template<typename... P> lstring(P&&... p) { append(forward<P>(p)...); }
 
   //list.hpp
   inline auto operator==(const lstring&) const -> bool;
@@ -364,17 +365,17 @@ struct lstring : vector<string> {
   //=================
 
   //list.hpp
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, std::forward<P>(p)...); }
+  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
   auto find(const string& source) const -> maybe<unsigned> { return nall::find(*this, source); }
   auto ifind(const string& source) const -> maybe<unsigned> { return nall::ifind(*this, source); }
   auto merge(const string& separator) const -> string { return nall::merge(*this, separator); }
   auto strip() -> type& { return nall::strip(*this); }
 
   //split.hpp
-  template<unsigned L = ~0u> auto split(rstring source, rstring on) -> type& { return nall::_split<L, 0, 0>(*this, source, on); }
-  template<unsigned L = ~0u> auto isplit(rstring source, rstring on) -> type& { return nall::_split<L, 1, 0>(*this, source, on); }
-  template<unsigned L = ~0u> auto qsplit(rstring source, rstring on) -> type& { return nall::_split<L, 0, 1>(*this, source, on); }
-  template<unsigned L = ~0u> auto iqsplit(rstring source, rstring on) -> type& { return nall::_split<L, 1, 1>(*this, source, on); }
+  auto split(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<0, 0>(*this, source, on, limit); }
+  auto isplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<1, 0>(*this, source, on, limit); }
+  auto qsplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<0, 1>(*this, source, on, limit); }
+  auto iqsplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<1, 1>(*this, source, on, limit); }
 };
 
 //format.hpp
@@ -384,8 +385,8 @@ inline auto append(format& self) -> format&;
 struct format : vector<string> {
   using type = format;
 
-  template<typename... P> format(P&&... p) { reserve(sizeof...(p)); append(std::forward<P>(p)...); }
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, std::forward<P>(p)...); }
+  template<typename... P> format(P&&... p) { reserve(sizeof...(p)); append(forward<P>(p)...); }
+  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
 };
 
 }

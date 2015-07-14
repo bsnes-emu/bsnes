@@ -22,33 +22,35 @@ namespace nall {
 struct filemap {
   enum class mode : unsigned { read, write, readwrite, writeread };
 
-  explicit operator bool() const { return open(); }
-  bool open() const { return p_open(); }
-  bool open(const string& filename, mode mode_) { return p_open(filename, mode_); }
-  void close() { return p_close(); }
-  unsigned size() const { return p_size; }
-  uint8_t* data() { return p_handle; }
-  const uint8_t* data() const { return p_handle; }
   filemap() { p_ctor(); }
   filemap(const string& filename, mode mode_) { p_ctor(); p_open(filename, mode_); }
   ~filemap() { p_dtor(); }
 
+  explicit operator bool() const { return open(); }
+  auto open() const -> bool { return p_open(); }
+  auto open(const string& filename, mode mode_) -> bool { return p_open(filename, mode_); }
+  auto close() -> void { return p_close(); }
+  auto size() const -> unsigned { return p_size; }
+  auto data() -> uint8_t* { return p_handle; }
+  auto data() const -> const uint8_t* { return p_handle; }
+
 private:
-  uint8_t *p_handle = nullptr;
+  uint8_t* p_handle = nullptr;
   unsigned p_size = 0;
 
-  #if defined(_WIN32)
+  #if defined(API_WINDOWS)
   //=============
   //MapViewOfFile
   //=============
 
-  HANDLE p_filehandle, p_maphandle;
+  HANDLE p_filehandle;
+  HANDLE p_maphandle;
 
-  bool p_open() const {
+  auto p_open() const -> bool {
     return p_handle;
   }
 
-  bool p_open(const string& filename, mode mode_) {
+  auto p_open(const string& filename, mode mode_) -> bool {
     if(file::exists(filename) && file::size(filename) == 0) {
       p_handle = nullptr;
       p_size = 0;
@@ -103,7 +105,7 @@ private:
     return p_handle;
   }
 
-  void p_close() {
+  auto p_close() -> void {
     if(p_handle) {
       UnmapViewOfFile(p_handle);
       p_handle = nullptr;
@@ -120,12 +122,12 @@ private:
     }
   }
 
-  void p_ctor() {
+  auto p_ctor() -> void {
     p_filehandle = INVALID_HANDLE_VALUE;
     p_maphandle  = INVALID_HANDLE_VALUE;
   }
 
-  void p_dtor() {
+  auto p_dtor() -> void {
     close();
   }
 
@@ -136,11 +138,11 @@ private:
 
   int p_fd;
 
-  bool p_open() const {
+  auto p_open() const -> bool {
     return p_handle;
   }
 
-  bool p_open(const string& filename, mode mode_) {
+  auto p_open(const string& filename, mode mode_) -> bool {
     if(file::exists(filename) && file::size(filename) == 0) {
       p_handle = nullptr;
       p_size = 0;
@@ -187,7 +189,7 @@ private:
     return p_handle;
   }
 
-  void p_close() {
+  auto p_close() -> void {
     if(p_handle) {
       munmap(p_handle, p_size);
       p_handle = nullptr;
@@ -199,11 +201,11 @@ private:
     }
   }
 
-  void p_ctor() {
+  auto p_ctor() -> void {
     p_fd = -1;
   }
 
-  void p_dtor() {
+  auto p_dtor() -> void {
     p_close();
   }
 

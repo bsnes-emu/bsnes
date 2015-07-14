@@ -9,11 +9,11 @@
 namespace nall {
 
 struct bmp {
-  inline static bool read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height);
-  inline static bool write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha = false);
+  inline static auto read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height) -> bool;
+  inline static auto write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha = false) -> bool;
 };
 
-bool bmp::read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height) {
+auto bmp::read(const string& filename, uint32_t*& data, unsigned& width, unsigned& height) -> bool {
   file fp;
   if(fp.open(filename, file::mode::read) == false) return false;
   if(fp.size() < 0x36) return false;
@@ -55,7 +55,7 @@ bool bmp::read(const string& filename, uint32_t*& data, unsigned& width, unsigne
   return true;
 }
 
-bool bmp::write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha) {
+auto bmp::write(const string& filename, const uint32_t* data, unsigned width, unsigned height, unsigned pitch, bool alpha) -> bool {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
 

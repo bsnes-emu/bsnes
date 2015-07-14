@@ -27,7 +27,7 @@ auto pFont::size(string font, string text) -> Size {
 }
 
 auto pFont::create(string description) -> PangoFontDescription* {
-  lstring part = description.split<2>(",").strip();
+  lstring part = description.split(",", 2L).strip();
 
   string family = "Sans";
   unsigned size = 8u;

@@ -23,31 +23,31 @@ struct serializer;
 
 template<typename T>
 struct has_serialize {
-  template<typename C> static char test(decltype(std::declval<C>().serialize(std::declval<serializer&>()))*);
-  template<typename C> static long test(...);
+  template<typename C> static auto test(decltype(std::declval<C>().serialize(std::declval<serializer&>()))*) -> char;
+  template<typename C> static auto test(...) -> long;
   static const bool value = sizeof(test<T>(0)) == sizeof(char);
 };
 
 struct serializer {
   enum mode_t { Load, Save, Size };
 
-  mode_t mode() const {
+  auto mode() const -> mode_t {
     return _mode;
   }
 
-  const uint8_t* data() const {
+  auto data() const -> const uint8_t* {
     return _data;
   }
 
-  unsigned size() const {
+  auto size() const -> unsigned {
     return _size;
   }
 
-  unsigned capacity() const {
+  auto capacity() const -> unsigned {
     return _capacity;
   }
 
-  template<typename T> serializer& floatingpoint(T& value) {
+  template<typename T> auto floatingpoint(T& value) -> serializer& {
     enum { size = sizeof(T) };
     //this is rather dangerous, and not cross-platform safe;
     //but there is no standardized way to export FP-values
@@ -62,7 +62,7 @@ struct serializer {
     return *this;
   }
 
-  template<typename T> serializer& integer(T& value) {
+  template<typename T> auto integer(T& value) -> serializer& {
     enum { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
     if(_mode == Save) {
       for(unsigned n = 0; n < size; n++) _data[_size++] = (uintmax_t)value >> (n << 3);
@@ -75,23 +75,23 @@ struct serializer {
     return *this;
   }
 
-  template<typename T, int N> serializer& array(T (&array)[N]) {
+  template<typename T, int N> auto array(T (&array)[N]) -> serializer& {
     for(unsigned n = 0; n < N; n++) operator()(array[n]);
     return *this;
   }
 
-  template<typename T> serializer& array(T array, unsigned size) {
+  template<typename T> auto array(T array, unsigned size) -> serializer& {
     for(unsigned n = 0; n < size; n++) operator()(array[n]);
     return *this;
   }
 
-  template<typename T> serializer& operator()(T& value, typename std::enable_if<has_serialize<T>::value>::type* = 0) { value.serialize(*this); return *this; }
-  template<typename T> serializer& operator()(T& value, typename std::enable_if<std::is_integral<T>::value>::type* = 0) { return integer(value); }
-  template<typename T> serializer& operator()(T& value, typename std::enable_if<std::is_floating_point<T>::value>::type* = 0) { return floatingpoint(value); }
-  template<typename T> serializer& operator()(T& value, typename std::enable_if<std::is_array<T>::value>::type* = 0) { return array(value); }
-  template<typename T> serializer& operator()(T& value, unsigned size, typename std::enable_if<std::is_pointer<T>::value>::type* = 0) { return array(value, size); }
+  template<typename T> auto operator()(T& value, typename std::enable_if<has_serialize<T>::value>::type* = 0) -> serializer& { value.serialize(*this); return *this; }
+  template<typename T> auto operator()(T& value, typename std::enable_if<std::is_integral<T>::value>::type* = 0) -> serializer& { return integer(value); }
+  template<typename T> auto operator()(T& value, typename std::enable_if<std::is_floating_point<T>::value>::type* = 0) -> serializer& { return floatingpoint(value); }
+  template<typename T> auto operator()(T& value, typename std::enable_if<std::is_array<T>::value>::type* = 0) -> serializer& { return array(value); }
+  template<typename T> auto operator()(T& value, unsigned size, typename std::enable_if<std::is_pointer<T>::value>::type* = 0) -> serializer& { return array(value, size); }
 
-  serializer& operator=(const serializer& s) {
+  auto operator=(const serializer& s) -> serializer& {
     if(_data) delete[] _data;
 
     _mode = s._mode;
@@ -103,7 +103,7 @@ struct serializer {
     return *this;
   }
 
-  serializer& operator=(serializer&& s) {
+  auto operator=(serializer&& s) -> serializer& {
     if(_data) delete[] _data;
 
     _mode = s._mode;
@@ -117,7 +117,7 @@ struct serializer {
 
   serializer() = default;
   serializer(const serializer& s) { operator=(s); }
-  serializer(serializer&& s) { operator=(std::move(s)); }
+  serializer(serializer&& s) { operator=(move(s)); }
 
   serializer(unsigned capacity) {
     _mode = Save;

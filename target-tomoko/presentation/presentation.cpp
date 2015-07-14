@@ -102,7 +102,7 @@ Presentation::Presentation() {
 
   onClose([&] { program->quit(); });
 
-  setTitle({"tomoko v", Emulator::Version});
+  setTitle({"higan v", Emulator::Version});
   setResizable(false);
   setBackgroundColor({0, 0, 0});
   resizeViewport();

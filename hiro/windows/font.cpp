@@ -28,7 +28,7 @@ auto pFont::size(const string& font, const string& text) -> Size {
 }
 
 auto pFont::create(const string& description) -> HFONT {
-  lstring part = description.split<2>(",").strip();
+  lstring part = description.split(",", 2L).strip();
 
   string family = "Tahoma";
   unsigned size = 8u;

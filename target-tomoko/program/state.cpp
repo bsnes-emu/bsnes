@@ -2,7 +2,7 @@ auto Program::stateName(unsigned slot, bool manager) -> string {
   return {
     folderPaths[0], "higan/states/",
     manager ? "managed/" : "quick/",
-    "slot-", decimal<2>(slot), ".bst"
+    "slot-", decimal(slot, 2L), ".bst"
   };
 }
 

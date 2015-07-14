@@ -95,15 +95,15 @@ auto httpResponse::setHead() -> bool {
   lstring headers = _head.split("\n");
   string response = headers.takeFirst().rtrim("\r");
 
-       if(iltrim(response, "HTTP/1.0 "));
-  else if(iltrim(response, "HTTP/1.1 "));
+       if(response.ibeginsWith("HTTP/1.0 ")) response.iltrim("HTTP/1.0 ", 1L);
+  else if(response.ibeginsWith("HTTP/1.1 ")) response.iltrim("HTTP/1.1 ", 1L);
   else return false;
 
   setResponseType(decimal(response));
 
   for(auto& header : headers) {
     if(header.beginsWith(" ") || header.beginsWith("\t")) continue;
-    lstring variable = header.split<1>(":").strip();
+    lstring variable = header.split(":", 1L).strip();
     if(variable.size() != 2) continue;
     appendHeader(variable[0], variable[1]);
   }

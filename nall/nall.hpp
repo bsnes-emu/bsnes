@@ -28,7 +28,6 @@
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
 #include <nall/function.hpp>
-#include <nall/group.hpp>
 #include <nall/hashset.hpp>
 #include <nall/hid.hpp>
 #include <nall/image.hpp>

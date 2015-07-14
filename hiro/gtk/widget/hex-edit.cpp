@@ -122,7 +122,7 @@ auto pHexEdit::update() -> void {
   string output;
   unsigned offset = state().offset;
   for(auto row : range(state().rows)) {
-    output.append(hex<8>(offset));
+    output.append(hex(offset, 8L));
     output.append("  ");
 
     string hexdata;
@@ -130,7 +130,7 @@ auto pHexEdit::update() -> void {
     for(auto column : range(state().columns)) {
       if(offset < state().length) {
         uint8_t data = self().doRead(offset++);
-        hexdata.append(hex<2>(data));
+        hexdata.append(hex(data, 2L));
         hexdata.append(" ");
         ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
       } else {

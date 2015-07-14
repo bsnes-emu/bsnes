@@ -64,9 +64,9 @@ struct context {
     for(auto& item : list) {
       item.strip();
       if(item.match("f(?*) ?*")) {
-        item.ltrim("f(");
-        lstring part = item.split<1>(") ");
-        lstring args = part[0].split<3>(";").strip();
+        item.ltrim("f(", 1L);
+        lstring part = item.split(") ", 1L);
+        lstring args = part[0].split(";", 3L).strip();
 
         unsigned length = eval(args(0, "0"));
         unsigned offset = eval(args(1, "0"));
@@ -85,10 +85,10 @@ struct context {
         }
       } else if(item.match("base64*")) {
         unsigned offset = 0;
-        item.ltrim("base64");
+        item.ltrim("base64", 1L);
         if(item.match("(?*) *")) {
-          item.ltrim("(");
-          lstring part = item.split<1>(") ");
+          item.ltrim("(", 1L);
+          lstring part = item.split(") ", 1L);
           offset = eval(part[0]);
           item = part(1, "");
         }
@@ -101,7 +101,7 @@ struct context {
           if(c == '_') buffer.append(offset + 63);
         }
       } else if(item.match("file *")) {
-        item.ltrim("file ");
+        item.ltrim("file ", 1L);
         item.strip();
         //...
       } else if(item.empty() == false) {
@@ -115,7 +115,7 @@ struct context {
 
     lstring lines = data.split("\n");
     for(auto& line : lines) {
-      lstring part = line.split<1>(":").strip();
+      lstring part = line.split(":", 1L).strip();
       if(part.size() != 2) continue;
 
       if(part[0] == "offset") offset = eval(part[1]);

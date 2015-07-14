@@ -40,13 +40,13 @@ void Bus::map_reset() {
 
 void Bus::map_xml() {
   for(auto& m : cartridge.mapping) {
-    lstring part = m.addr.split<1>(":");
+    lstring part = m.addr.split(":", 1L);
     lstring banks = part(0).split(",");
     lstring addrs = part(1).split(",");
     for(auto& bank : banks) {
       for(auto& addr : addrs) {
-        lstring bankpart = bank.split<1>("-");
-        lstring addrpart = addr.split<1>("-");
+        lstring bankpart = bank.split("-", 1L);
+        lstring addrpart = addr.split("-", 1L);
         unsigned banklo = hex(bankpart(0));
         unsigned bankhi = hex(bankpart(1, bankpart(0)));
         unsigned addrlo = hex(addrpart(0));

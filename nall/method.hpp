@@ -20,7 +20,7 @@ template<typename T> struct method {
   template<typename F> struct chain {
     chain(T& self, const F& f) : self(self), f(f) {}
     template<typename... P> auto operator()(P&&... p) -> T& {
-      return f(self, std::forward<P>(p)...), self;
+      return f(self, forward<P>(p)...), self;
     }
   private:
     T& self;
@@ -30,7 +30,7 @@ template<typename T> struct method {
   template<typename F> struct const_chain {
     const_chain(const T& self, const F& f) : self(self), f(f) {}
     template<typename... P> auto operator()(P&&... p) const -> const T& {
-      return f(self, std::forward<P>(p)...), self;
+      return f(self, forward<P>(p)...), self;
     }
   private:
     const T& self;
@@ -44,13 +44,13 @@ template<typename T> struct method {
   auto operator[](const F& f) const -> const_chain<F> { return const_chain<F>((const T&)*this, f); }
 
   template<typename F, typename... P, typename = enable_if<is_function<F>>>
-  auto operator()(const F& f, P&&... p) -> decltype(f((T&)*this, std::forward<P>(p)...)) {
-    return f((T&)*this, std::forward<P>(p)...);
+  auto operator()(const F& f, P&&... p) -> decltype(f((T&)*this, forward<P>(p)...)) {
+    return f((T&)*this, forward<P>(p)...);
   }
 
   template<typename F, typename... P, typename = enable_if<is_function<F>>>
-  auto operator()(const F& f, P&&... p) const -> decltype(f((const T&)*this, std::forward<P>(p)...)) {
-    return f((const T&)*this, std::forward<P>(p)...);
+  auto operator()(const F& f, P&&... p) const -> decltype(f((const T&)*this, forward<P>(p)...)) {
+    return f((const T&)*this, forward<P>(p)...);
   }
 };
 

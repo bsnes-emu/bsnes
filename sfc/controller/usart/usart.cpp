@@ -123,7 +123,7 @@ USART::USART(bool port) : Controller(port) {
   txdata = 0;
 
   string filename = {interface->path(ID::SuperFamicom), "usart.so"};
-  if(open_absolute(filename)) {
+  if(openAbsolute(filename)) {
     init = sym("usart_init");
     main = sym("usart_main");
     if(init && main) create(Controller::Enter, 10000000);

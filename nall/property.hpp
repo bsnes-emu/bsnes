@@ -5,36 +5,36 @@ namespace nall {
 
 template<typename C> struct property {
   template<typename T> struct readonly {
-    const T* operator->() const { return &value; }
-    const T& operator()() const { return value; }
+    auto operator->() const -> const T* { return &value; }
+    auto operator()() const -> const T& { return value; }
     operator const T&() const { return value; }
   private:
-    T* operator->() { return &value; }
+    auto operator->() -> T* { return &value; }
     operator T&() { return value; }
-    const T& operator=(const T& value_) { return value = value_; }
+    auto operator=(const T& value_) -> const T& { return value = value_; }
     T value;
     friend C;
   };
 
   template<typename T> struct writeonly {
-    void operator=(const T& value_) { value = value_; }
+    auto operator=(const T& value_) -> void { value = value_; }
   private:
-    const T* operator->() const { return &value; }
-    const T& operator()() const { return value; }
+    auto operator->() const -> const T* { return &value; }
+    auto operator()() const -> const T& { return value; }
     operator const T&() const { return value; }
-    T* operator->() { return &value; }
+    auto operator->() -> T* { return &value; }
     operator T&() { return value; }
     T value;
     friend C;
   };
 
   template<typename T> struct readwrite {
-    const T* operator->() const { return &value; }
-    const T& operator()() const { return value; }
+    auto operator->() const -> const T* { return &value; }
+    auto operator()() const -> const T& { return value; }
     operator const T&() const { return value; }
-    T* operator->() { return &value; }
+    auto operator->() -> T* { return &value; }
     operator T&() { return value; }
-    const T& operator=(const T& value_) { return value = value_; }
+    auto operator=(const T& value_) -> const T& { return value = value_; }
     T value;
   };
 };

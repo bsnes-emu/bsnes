@@ -16,6 +16,10 @@ auto string::decimal() const -> uintmax_t {
   return nall::decimal(data());
 }
 
+auto string::real() const -> double {
+  return nall::real(data());
+}
+
 }
 
 #endif

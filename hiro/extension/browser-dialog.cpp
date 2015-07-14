@@ -124,7 +124,7 @@ auto BrowserDialogWindow::run() -> lstring {
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
-    auto part = filter.split<1>("|");
+    auto part = filter.split("|", 1L);
     filterList.append(ComboButtonItem().setText(part.first()));
   }
   fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); });
@@ -136,7 +136,7 @@ auto BrowserDialogWindow::run() -> lstring {
 
   if(!state.filters) state.filters.append("All|*");
   for(auto& filter : state.filters) {
-    auto part = filter.split<1>("|");
+    auto part = filter.split("|", 1L);
     filters.append(part.last().split(":"));
   }
 
@@ -165,7 +165,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   view.append(ListViewColumn().setExpandable());
   view.append(ListViewColumn().setForegroundColor({192, 128, 128}));
 
-  auto contents = directory::contents(path);
+  auto contents = directory::icontents(path);
   bool folderMode = state.action == "openFolder";
 
   for(auto content : contents) {
@@ -175,7 +175,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
-      .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
+      .append(ListViewCell().setText(octal(storage::mode({path, content}) & 0777, 3L)))
     );
   }
 
@@ -186,7 +186,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
-      .append(ListViewCell().setText(octal<3>(storage::mode({path, content}) & 0777)))
+      .append(ListViewCell().setText(octal(storage::mode({path, content}) & 0777, 3L)))
     );
   }
 

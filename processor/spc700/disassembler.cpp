@@ -8,13 +8,13 @@ string SPC700::disassemble_opcode(uint16 addr, bool p) {
     return pc + offset;
   };
 
-  auto a = [&] { return hex<4>((read(addr + 1) << 0) + (read(addr + 2) << 8)); };
-  auto b = [&](unsigned n) { return hex<2>(read(addr + 1 + n)); };
-  auto r = [&](unsigned r, unsigned n = 0) { return hex<4>(addr + r + (int8)read(addr + 1 + n)); };
-  auto dp = [&](unsigned n) { return hex<3>((p << 8) + read(addr + 1 + n)); };
+  auto a = [&] { return hex((read(addr + 1) << 0) + (read(addr + 2) << 8), 4L); };
+  auto b = [&](unsigned n) { return hex(read(addr + 1 + n), 2L); };
+  auto r = [&](unsigned r, unsigned n = 0) { return hex(addr + r + (int8)read(addr + 1 + n), 4L); };
+  auto dp = [&](unsigned n) { return hex((p << 8) + read(addr + 1 + n), 3L); };
   auto ab = [&] {
     unsigned n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
-    return string{ hex<4>(n & 0x1fff), ":", hex<1>(n >> 13) };
+    return string{ hex(n & 0x1fff, 4L), ":", hex(n >> 13, 1L) };
   };
 
   auto mnemonic = [&]() -> string {
@@ -279,17 +279,17 @@ string SPC700::disassemble_opcode(uint16 addr, bool p) {
     throw;
   };
 
-  string output = { "..", hex<4>(addr), " ", mnemonic() };
+  string output = { "..", hex(addr, 4L), " ", mnemonic() };
 
   unsigned length = output.length();
   while(length++ < 30) output.append(" ");
 
   output.append(
-    "YA:", hex<4>(regs.ya),
-    " A:", hex<2>(regs.a),
-    " X:", hex<2>(regs.x),
-    " Y:", hex<2>(regs.y),
-    " S:", hex<2>(regs.s),
+    "YA:", hex(regs.ya, 4L),
+    " A:", hex(regs.a,  2L),
+    " X:", hex(regs.x,  2L),
+    " Y:", hex(regs.y,  2L),
+    " S:", hex(regs.s,  2L),
     " ",
     regs.p.n ? "N" : "n",
     regs.p.v ? "V" : "v",

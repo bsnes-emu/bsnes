@@ -29,7 +29,7 @@ inline string evaluateExpression(Node* node) {
     for(auto& link : node->link) {
       result.append(evaluateExpression(link), ", ");
     }
-    return result.rtrim(", ").append(")");
+    return result.rtrim(", ", 1L).append(")");
   }
   }
   #undef p

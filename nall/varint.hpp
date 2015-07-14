@@ -9,10 +9,10 @@
 namespace nall {
 
 struct varint {
-  virtual uint8_t read() = 0;
-  virtual void write(uint8_t) = 0;
+  virtual auto read() -> uint8_t = 0;
+  virtual auto write(uint8_t) -> void = 0;
 
-  uintmax_t readvu() {
+  auto readvu() -> uintmax_t {
     uintmax_t data = 0, shift = 1;
     while(true) {
       uint8_t x = read();
@@ -24,7 +24,7 @@ struct varint {
     return data;
   }
 
-  intmax_t readvs() {
+  auto readvs() -> intmax_t {
     uintmax_t data = readvu();
     bool sign = data & 1;
     data >>= 1;
@@ -32,7 +32,7 @@ struct varint {
     return data;
   }
 
-  void writevu(uintmax_t data) {
+  auto writevu(uintmax_t data) -> void {
     while(true) {
       uint8_t x = data & 0x7f;
       data >>= 7;
@@ -42,7 +42,7 @@ struct varint {
     }
   }
 
-  void writevs(intmax_t data) {
+  auto writevs(intmax_t data) -> void {
     bool sign = data < 0;
     if(sign) data = -data;
     data = (data << 1) | sign;
@@ -51,97 +51,96 @@ struct varint {
 };
 
 template<unsigned bits> struct uint_t {
-private:
   using type_t = type_if<expression<bits <= 8 * sizeof(unsigned)>, unsigned, uintmax_t>;
-  type_t data;
 
-public:
   inline operator type_t() const { return data; }
-  inline type_t operator ++(int) { type_t r = data; data = uclip<bits>(data + 1); return r; }
-  inline type_t operator --(int) { type_t r = data; data = uclip<bits>(data - 1); return r; }
-  inline type_t operator ++() { return data = uclip<bits>(data + 1); }
-  inline type_t operator --() { return data = uclip<bits>(data - 1); }
-  inline type_t operator  =(const type_t i) { return data = uclip<bits>(i); }
-  inline type_t operator |=(const type_t i) { return data = uclip<bits>(data  | i); }
-  inline type_t operator ^=(const type_t i) { return data = uclip<bits>(data  ^ i); }
-  inline type_t operator &=(const type_t i) { return data = uclip<bits>(data  & i); }
-  inline type_t operator<<=(const type_t i) { return data = uclip<bits>(data << i); }
-  inline type_t operator>>=(const type_t i) { return data = uclip<bits>(data >> i); }
-  inline type_t operator +=(const type_t i) { return data = uclip<bits>(data  + i); }
-  inline type_t operator -=(const type_t i) { return data = uclip<bits>(data  - i); }
-  inline type_t operator *=(const type_t i) { return data = uclip<bits>(data  * i); }
-  inline type_t operator /=(const type_t i) { return data = uclip<bits>(data  / i); }
-  inline type_t operator %=(const type_t i) { return data = uclip<bits>(data  % i); }
+  inline auto operator ++(int) { type_t r = data; data = uclip<bits>(data + 1); return r; }
+  inline auto operator --(int) { type_t r = data; data = uclip<bits>(data - 1); return r; }
+  inline auto operator ++() { return data = uclip<bits>(data + 1); }
+  inline auto operator --() { return data = uclip<bits>(data - 1); }
+  inline auto operator  =(const type_t i) { return data = uclip<bits>(i); }
+  inline auto operator |=(const type_t i) { return data = uclip<bits>(data  | i); }
+  inline auto operator ^=(const type_t i) { return data = uclip<bits>(data  ^ i); }
+  inline auto operator &=(const type_t i) { return data = uclip<bits>(data  & i); }
+  inline auto operator<<=(const type_t i) { return data = uclip<bits>(data << i); }
+  inline auto operator>>=(const type_t i) { return data = uclip<bits>(data >> i); }
+  inline auto operator +=(const type_t i) { return data = uclip<bits>(data  + i); }
+  inline auto operator -=(const type_t i) { return data = uclip<bits>(data  - i); }
+  inline auto operator *=(const type_t i) { return data = uclip<bits>(data  * i); }
+  inline auto operator /=(const type_t i) { return data = uclip<bits>(data  / i); }
+  inline auto operator %=(const type_t i) { return data = uclip<bits>(data  % i); }
 
   inline uint_t() : data(0) {}
   inline uint_t(const type_t i) : data(uclip<bits>(i)) {}
 
-  template<unsigned s> inline type_t operator=(const uint_t<s> &i) { return data = uclip<bits>((type_t)i); }
-  template<unsigned s> inline uint_t(const uint_t<s> &i) : data(uclip<bits>(i)) {}
+  template<unsigned s> inline uint_t(const uint_t<s>& i) : data(uclip<bits>(i)) {}
+  template<unsigned s> inline auto operator=(const uint_t<s>& i) { return data = uclip<bits>((type_t)i); }
 
-  void serialize(serializer& s) { s(data); }
+  auto serialize(serializer& s) { s(data); }
+
+private:
+  type_t data;
 };
 
 template<unsigned bits> struct int_t {
-private:
   using type_t = type_if<expression<bits <= 8 * sizeof(signed)>, signed, intmax_t>;
-  type_t data;
 
-public:
   inline operator type_t() const { return data; }
-  inline type_t operator ++(int) { type_t r = data; data = sclip<bits>(data + 1); return r; }
-  inline type_t operator --(int) { type_t r = data; data = sclip<bits>(data - 1); return r; }
-  inline type_t operator ++() { return data = sclip<bits>(data + 1); }
-  inline type_t operator --() { return data = sclip<bits>(data - 1); }
-  inline type_t operator  =(const type_t i) { return data = sclip<bits>(i); }
-  inline type_t operator |=(const type_t i) { return data = sclip<bits>(data  | i); }
-  inline type_t operator ^=(const type_t i) { return data = sclip<bits>(data  ^ i); }
-  inline type_t operator &=(const type_t i) { return data = sclip<bits>(data  & i); }
-  inline type_t operator<<=(const type_t i) { return data = sclip<bits>(data << i); }
-  inline type_t operator>>=(const type_t i) { return data = sclip<bits>(data >> i); }
-  inline type_t operator +=(const type_t i) { return data = sclip<bits>(data  + i); }
-  inline type_t operator -=(const type_t i) { return data = sclip<bits>(data  - i); }
-  inline type_t operator *=(const type_t i) { return data = sclip<bits>(data  * i); }
-  inline type_t operator /=(const type_t i) { return data = sclip<bits>(data  / i); }
-  inline type_t operator %=(const type_t i) { return data = sclip<bits>(data  % i); }
+  inline auto operator ++(int) { type_t r = data; data = sclip<bits>(data + 1); return r; }
+  inline auto operator --(int) { type_t r = data; data = sclip<bits>(data - 1); return r; }
+  inline auto operator ++() { return data = sclip<bits>(data + 1); }
+  inline auto operator --() { return data = sclip<bits>(data - 1); }
+  inline auto operator  =(const type_t i) { return data = sclip<bits>(i); }
+  inline auto operator |=(const type_t i) { return data = sclip<bits>(data  | i); }
+  inline auto operator ^=(const type_t i) { return data = sclip<bits>(data  ^ i); }
+  inline auto operator &=(const type_t i) { return data = sclip<bits>(data  & i); }
+  inline auto operator<<=(const type_t i) { return data = sclip<bits>(data << i); }
+  inline auto operator>>=(const type_t i) { return data = sclip<bits>(data >> i); }
+  inline auto operator +=(const type_t i) { return data = sclip<bits>(data  + i); }
+  inline auto operator -=(const type_t i) { return data = sclip<bits>(data  - i); }
+  inline auto operator *=(const type_t i) { return data = sclip<bits>(data  * i); }
+  inline auto operator /=(const type_t i) { return data = sclip<bits>(data  / i); }
+  inline auto operator %=(const type_t i) { return data = sclip<bits>(data  % i); }
 
   inline int_t() : data(0) {}
   inline int_t(const type_t i) : data(sclip<bits>(i)) {}
 
-  template<unsigned s> inline type_t operator=(const int_t<s> &i) { return data = sclip<bits>((type_t)i); }
-  template<unsigned s> inline int_t(const int_t<s> &i) : data(sclip<bits>(i)) {}
+  template<unsigned s> inline int_t(const int_t<s>& i) : data(sclip<bits>(i)) {}
+  template<unsigned s> inline auto operator=(const int_t<s>& i) { return data = sclip<bits>((type_t)i); }
 
-  void serialize(serializer& s) { s(data); }
+  auto serialize(serializer& s) { s(data); }
+
+private:
+  type_t data;
 };
 
 template<typename type_t> struct varuint_t {
-private:
-  type_t data;
-  type_t mask;
-
-public:
   inline operator type_t() const { return data; }
-  inline type_t operator ++(int) { type_t r = data; data = (data + 1) & mask; return r; }
-  inline type_t operator --(int) { type_t r = data; data = (data - 1) & mask; return r; }
-  inline type_t operator ++() { return data = (data + 1) & mask; }
-  inline type_t operator --() { return data = (data - 1) & mask; }
-  inline type_t operator  =(const type_t i) { return data = (i) & mask; }
-  inline type_t operator |=(const type_t i) { return data = (data  | i) & mask; }
-  inline type_t operator ^=(const type_t i) { return data = (data  ^ i) & mask; }
-  inline type_t operator &=(const type_t i) { return data = (data  & i) & mask; }
-  inline type_t operator<<=(const type_t i) { return data = (data << i) & mask; }
-  inline type_t operator>>=(const type_t i) { return data = (data >> i) & mask; }
-  inline type_t operator +=(const type_t i) { return data = (data  + i) & mask; }
-  inline type_t operator -=(const type_t i) { return data = (data  - i) & mask; }
-  inline type_t operator *=(const type_t i) { return data = (data  * i) & mask; }
-  inline type_t operator /=(const type_t i) { return data = (data  / i) & mask; }
-  inline type_t operator %=(const type_t i) { return data = (data  % i) & mask; }
+  inline auto operator ++(int) { type_t r = data; data = (data + 1) & mask; return r; }
+  inline auto operator --(int) { type_t r = data; data = (data - 1) & mask; return r; }
+  inline auto operator ++() { return data = (data + 1) & mask; }
+  inline auto operator --() { return data = (data - 1) & mask; }
+  inline auto operator  =(const type_t i) { return data = (i) & mask; }
+  inline auto operator |=(const type_t i) { return data = (data  | i) & mask; }
+  inline auto operator ^=(const type_t i) { return data = (data  ^ i) & mask; }
+  inline auto operator &=(const type_t i) { return data = (data  & i) & mask; }
+  inline auto operator<<=(const type_t i) { return data = (data << i) & mask; }
+  inline auto operator>>=(const type_t i) { return data = (data >> i) & mask; }
+  inline auto operator +=(const type_t i) { return data = (data  + i) & mask; }
+  inline auto operator -=(const type_t i) { return data = (data  - i) & mask; }
+  inline auto operator *=(const type_t i) { return data = (data  * i) & mask; }
+  inline auto operator /=(const type_t i) { return data = (data  / i) & mask; }
+  inline auto operator %=(const type_t i) { return data = (data  % i) & mask; }
 
-  inline void bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
+  inline auto bits(type_t bits) { mask = (1ull << (bits - 1)) + ((1ull << (bits - 1)) - 1); data &= mask; }
   inline varuint_t() : data(0ull), mask((type_t)~0ull) {}
   inline varuint_t(const type_t i) : data(i), mask((type_t)~0ull) {}
 
-  void serialize(serializer& s) { s(data); s(mask); }
+  auto serialize(serializer& s) { s(data); s(mask); }
+
+private:
+  type_t data;
+  type_t mask;
 };
 
 }

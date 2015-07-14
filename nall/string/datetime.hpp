@@ -6,9 +6,9 @@ auto string::date(time_t timestamp) -> string {
   if(timestamp == 0) timestamp = ::time(nullptr);
   tm* info = localtime(&timestamp);
   return {
-    nall::decimal<4>(1900 + info->tm_year), "-",
-    nall::decimal<2>(1 + info->tm_mon), "-",
-    nall::decimal<2>(info->tm_mday)
+    nall::decimal(1900 + info->tm_year, 4L), "-",
+    nall::decimal(1 + info->tm_mon, 2L), "-",
+    nall::decimal(info->tm_mday, 2L)
   };
 }
 
@@ -16,9 +16,9 @@ auto string::time(time_t timestamp) -> string {
   if(timestamp == 0) timestamp = ::time(nullptr);
   tm* info = localtime(&timestamp);
   return {
-    nall::decimal<2>(info->tm_hour), ":",
-    nall::decimal<2>(info->tm_min), ":",
-    nall::decimal<2>(info->tm_sec)
+    nall::decimal(info->tm_hour, 2L), ":",
+    nall::decimal(info->tm_min, 2L), ":",
+    nall::decimal(info->tm_sec, 2L)
   };
 }
 

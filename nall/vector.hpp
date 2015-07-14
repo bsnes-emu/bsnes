@@ -17,22 +17,15 @@ namespace nall {
 template<typename T> struct vector {
   struct exception_out_of_bounds{};
 
-protected:
-  T* pool = nullptr;
-  unsigned poolbase = 0;
-  unsigned poolsize = 0;
-  unsigned objectsize = 0;
-
-public:
   explicit operator bool() const { return objectsize; }
-  T* data() { return pool + poolbase; }
-  const T* data() const { return pool + poolbase; }
+  auto data() -> T* { return pool + poolbase; }
+  auto data() const -> const T* { return pool + poolbase; }
 
-  bool empty() const { return objectsize == 0; }
-  unsigned size() const { return objectsize; }
-  unsigned capacity() const { return poolsize; }
+  auto empty() const -> bool { return objectsize == 0; }
+  auto size() const -> unsigned { return objectsize; }
+  auto capacity() const -> unsigned { return poolsize; }
 
-  T* move() {
+  auto move() -> T* {
     T* result = pool + poolbase;
     pool = nullptr;
     poolbase = 0;
@@ -41,7 +34,7 @@ public:
     return result;
   }
 
-  void reset() {
+  auto reset() -> void {
     if(pool) {
       for(unsigned n = 0; n < objectsize; n++) pool[poolbase + n].~T();
       memory::free(pool);
@@ -52,7 +45,7 @@ public:
     objectsize = 0;
   }
 
-  void reserve(unsigned size) {
+  auto reserve(unsigned size) -> void {
     if(size <= poolsize) return;
     size = bit::round(size);  //amortize growth
 
@@ -64,7 +57,7 @@ public:
     poolsize = size;
   }
 
-  void resize(unsigned size, T value = T()) {
+  auto resize(unsigned size, T value = T()) -> void {
     T* copy = (T*)memory::allocate(size * sizeof(T));
     for(unsigned n = 0; n < size && n < objectsize; n++) new(copy + n) T(std::move(pool[poolbase + n]));
     for(unsigned n = objectsize; n < size; n++) new(copy + n) T(value);
@@ -75,17 +68,17 @@ public:
     objectsize = size;
   }
 
-  void reallocate(unsigned size, T value = T()) {
+  auto reallocate(unsigned size, T value = T()) -> void {
     reset();
     resize(size, value);
   }
 
-  template<typename... Args> void prepend(const T& data, Args&&... args) {
-    prepend(std::forward<Args>(args)...);
+  template<typename... Args> auto prepend(const T& data, Args&&... args) -> void {
+    prepend(forward<Args>(args)...);
     prepend(data);
   }
 
-  T& prepend(const T& data) {
+  auto prepend(const T& data) -> T& {
     reserve(objectsize + 1);
     if(poolbase == 0) {
       unsigned available = poolsize - objectsize;
@@ -99,23 +92,23 @@ public:
     return first();
   }
 
-  template<typename... Args> void append(const T& data, Args&&... args) {
+  template<typename... Args> auto append(const T& data, Args&&... args) -> void {
     append(data);
-    append(std::forward<Args>(args)...);
+    append(forward<Args>(args)...);
   }
 
-  T& append(const T& data) {
+  auto append(const T& data) -> T& {
     reserve(poolbase + objectsize + 1);
     new(pool + poolbase + objectsize++) T(data);
     return last();
   }
 
-  bool appendOnce(const T& data) {
+  auto appendOnce(const T& data) -> bool {
     if(find(data)) return false;
     return append(data), true;
   }
 
-  void insert(unsigned position, const T& data) {
+  auto insert(unsigned position, const T& data) -> void {
     if(position == 0) {
       prepend(data);
       return;
@@ -128,7 +121,7 @@ public:
     pool[poolbase + position] = data;
   }
 
-  void remove(unsigned position = ~0u, unsigned length = 1) {
+  auto remove(unsigned position = ~0u, unsigned length = 1) -> void {
     if(position == ~0u) position = objectsize - 1;
     if(position + length > objectsize) throw exception_out_of_bounds{};
 
@@ -147,112 +140,112 @@ public:
     objectsize -= length;
   }
 
-  void removeFirst() { return remove(0); }
-  void removeLast() { return remove(~0u); }
+  auto removeFirst() -> void { return remove(0); }
+  auto removeLast() -> void { return remove(~0u); }
 
-  T take(unsigned position = ~0u) {
+  auto take(unsigned position = ~0u) -> T {
     if(position == ~0u) position = objectsize - 1;
     T object = pool[poolbase + position];
     remove(position);
     return object;
   }
 
-  T takeFirst() { return take(0); }
-  T takeLast() { return take(~0u); }
+  auto takeFirst() -> T { return take(0); }
+  auto takeLast() -> T { return take(~0u); }
 
-  void reverse() {
+  auto reverse() -> void {
     unsigned pivot = size() / 2;
     for(unsigned l = 0, r = size() - 1; l < pivot; l++, r--) {
       std::swap(pool[poolbase + l], pool[poolbase + r]);
     }
   }
 
-  void sort() {
+  auto sort() -> void {
     nall::sort(pool + poolbase, objectsize);
   }
 
-  template<typename Comparator> void sort(const Comparator &lessthan) {
+  template<typename Comparator> auto sort(const Comparator& lessthan) -> void {
     nall::sort(pool + poolbase, objectsize, lessthan);
   }
 
-  maybe<unsigned> find(const T& data) const {
+  auto find(const T& data) const -> maybe<unsigned> {
     for(unsigned n = 0; n < objectsize; n++) if(pool[poolbase + n] == data) return n;
     return nothing;
   }
 
-  T& first() {
+  auto first() -> T& {
     if(objectsize == 0) throw exception_out_of_bounds();
     return pool[poolbase];
   }
 
-  const T& first() const {
+  auto first() const -> const T& {
     if(objectsize == 0) throw exception_out_of_bounds();
     return pool[poolbase];
   }
 
-  T& last() {
+  auto last() -> T& {
     if(objectsize == 0) throw exception_out_of_bounds();
     return pool[poolbase + objectsize - 1];
   }
 
-  const T& last() const {
+  auto last() const -> const T& {
     if(objectsize == 0) throw exception_out_of_bounds();
     return pool[poolbase + objectsize - 1];
   }
 
   //access
-  inline T& operator[](unsigned position) {
+  inline auto operator[](unsigned position) -> T& {
     if(position >= objectsize) throw exception_out_of_bounds();
     return pool[poolbase + position];
   }
 
-  inline const T& operator[](unsigned position) const {
+  inline auto operator[](unsigned position) const -> const T& {
     if(position >= objectsize) throw exception_out_of_bounds();
     return pool[poolbase + position];
   }
 
-  inline T& operator()(unsigned position) {
+  inline auto operator()(unsigned position) -> T& {
     if(position >= poolsize) reserve(position + 1);
     while(position >= objectsize) append(T());
     return pool[poolbase + position];
   }
 
-  inline const T& operator()(unsigned position, const T& data) const {
+  inline auto operator()(unsigned position, const T& data) const -> const T& {
     if(position >= objectsize) return data;
     return pool[poolbase + position];
   }
 
   //iteration
   struct iterator {
-    T& operator*() { return source.operator[](position); }
-    bool operator!=(const iterator& source) const { return position != source.position; }
-    iterator& operator++() { position++; return *this; }
     iterator(vector& source, unsigned position) : source(source), position(position) {}
+    auto operator*() -> T& { return source.operator[](position); }
+    auto operator!=(const iterator& source) const -> bool { return position != source.position; }
+    auto operator++() -> iterator& { position++; return *this; }
 
   private:
     vector& source;
     unsigned position;
   };
 
-  iterator begin() { return iterator(*this, 0); }
-  iterator end() { return iterator(*this, size()); }
+  auto begin() -> iterator { return iterator(*this, 0); }
+  auto end() -> iterator { return iterator(*this, size()); }
 
   struct constIterator {
-    const T& operator*() const { return source.operator[](position); }
-    bool operator!=(const constIterator& source) const { return position != source.position; }
-    constIterator& operator++() { position++; return *this; }
     constIterator(const vector& source, unsigned position) : source(source), position(position) {}
+    auto operator*() const -> const T& { return source.operator[](position); }
+    auto operator!=(const constIterator& source) const -> bool { return position != source.position; }
+    auto operator++() -> constIterator& { position++; return *this; }
 
   private:
     const vector& source;
     unsigned position;
   };
 
-  const constIterator begin() const { return constIterator(*this, 0); }
-  const constIterator end() const { return constIterator(*this, size()); }
+  auto begin() const -> const constIterator { return constIterator(*this, 0); }
+  auto end() const -> const constIterator { return constIterator(*this, size()); }
 
   //copy
-  inline vector& operator=(const vector& source) {
+  inline auto operator=(const vector& source) -> vector& {
     if(this == &source) return *this;
     reset();
     reserve(source.size());
@@ -261,7 +254,7 @@ public:
   }
 
   //move
-  inline vector& operator=(vector&& source) {
+  inline auto operator=(vector&& source) -> vector& {
     if(this == &source) return *this;
     reset();
     pool = source.pool;
@@ -281,6 +274,12 @@ public:
   vector(const vector& source) { operator=(source); }
   vector(vector&& source) { operator=(std::move(source)); }
   ~vector() { reset(); }
+
+protected:
+  T* pool = nullptr;
+  unsigned poolbase = 0;
+  unsigned poolsize = 0;
+  unsigned objectsize = 0;
 };
 
 }

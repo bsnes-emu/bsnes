@@ -199,7 +199,7 @@ void Cartridge::parse_markup_event(Markup::Node root) {
   if(root["name"].text() == "Powerfest '94") event.board = Event::Board::Powerfest94;
 
   event.revision = root["revision"].text() == "B" ? 2 : 1;
-  lstring part = root["timer"].text().split<1>(":");
+  lstring part = root["timer"].text().split(":", 1L);
   if(part.size() == 1) event.timer = decimal(part(0));
   if(part.size() == 2) event.timer = decimal(part(0)) * 60 + decimal(part(1));
 

@@ -9,45 +9,47 @@ template<typename T, typename U> struct map {
   struct node_t {
     T key;
     U value;
-    bool operator< (const node_t& source) const { return key <  source.key; }
-    bool operator==(const node_t& source) const { return key == source.key; }
     node_t() = default;
     node_t(const T& key) : key(key) {}
     node_t(const T& key, const U& value) : key(key), value(value) {}
+    auto operator< (const node_t& source) const -> bool { return key <  source.key; }
+    auto operator==(const node_t& source) const -> bool { return key == source.key; }
   };
 
-  maybe<U&> find(const T& key) const {
+  auto find(const T& key) const -> maybe<U&> {
     if(auto node = root.find({key})) return node().value;
     return nothing;
   }
 
-  void insert(const T& key, const U& value) { root.insert({key, value}); }
-  void remove(const T& key) { root.remove({key}); }
-  unsigned size() const { return root.size(); }
-  void reset() { root.reset(); }
+  auto insert(const T& key, const U& value) -> void { root.insert({key, value}); }
+  auto remove(const T& key) -> void { root.remove({key}); }
+  auto size() const -> unsigned { return root.size(); }
+  auto reset() -> void { root.reset(); }
 
-  typename set<node_t>::iterator begin() { return root.begin(); }
-  typename set<node_t>::iterator end() { return root.end(); }
-  const typename set<node_t>::iterator begin() const { return root.begin(); }
-  const typename set<node_t>::iterator end() const { return root.end(); }
+  auto begin() -> typename set<node_t>::iterator { return root.begin(); }
+  auto end() -> typename set<node_t>::iterator { return root.end(); }
+
+  auto begin() const -> const typename set<node_t>::iterator { return root.begin(); }
+  auto end() const -> const typename set<node_t>::iterator { return root.end(); }
 
 protected:
   set<node_t> root;
 };
 
 template<typename T, typename U> struct bimap {
-  maybe<U&> find(const T& key) const { return tmap.find(key); }
-  maybe<T&> find(const U& key) const { return umap.find(key); }
-  void insert(const T& key, const U& value) { tmap.insert(key, value); umap.insert(value, key); }
-  void remove(const T& key) { if(auto p = tmap.find(key)) { umap.remove(p().value); tmap.remove(key); } }
-  void remove(const U& key) { if(auto p = umap.find(key)) { tmap.remove(p().value); umap.remove(key); } }
-  unsigned size() const { return tmap.size(); }
-  void reset() { tmap.reset(); umap.reset(); }
+  auto find(const T& key) const -> maybe<U&> { return tmap.find(key); }
+  auto find(const U& key) const -> maybe<T&> { return umap.find(key); }
+  auto insert(const T& key, const U& value) -> void { tmap.insert(key, value); umap.insert(value, key); }
+  auto remove(const T& key) -> void { if(auto p = tmap.find(key)) { umap.remove(p().value); tmap.remove(key); } }
+  auto remove(const U& key) -> void { if(auto p = umap.find(key)) { tmap.remove(p().value); umap.remove(key); } }
+  auto size() const -> unsigned { return tmap.size(); }
+  auto reset() -> void { tmap.reset(); umap.reset(); }
 
-  typename set<typename map<T, U>::node_t>::iterator begin() { return tmap.begin(); }
-  typename set<typename map<T, U>::node_t>::iterator end() { return tmap.end(); }
-  const typename set<typename map<T, U>::node_t>::iterator begin() const { return tmap.begin(); }
-  const typename set<typename map<T, U>::node_t>::iterator end() const { return tmap.end(); }
+  auto begin() -> typename set<typename map<T, U>::node_t>::iterator { return tmap.begin(); }
+  auto end() -> typename set<typename map<T, U>::node_t>::iterator { return tmap.end(); }
+
+  auto begin() const -> const typename set<typename map<T, U>::node_t>::iterator { return tmap.begin(); }
+  auto end() const -> const typename set<typename map<T, U>::node_t>::iterator { return tmap.end(); }
 
 protected:
   map<T, U> tmap;

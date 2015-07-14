@@ -348,7 +348,7 @@ void HG51B::instruction() {
   }
 
   else {
-    print("Hitachi DSP: unknown opcode @ ", hex<4>(regs.pc - 1), " = ", hex<4>(opcode), "\n");
+    print("Hitachi DSP: unknown opcode @ ", hex(regs.pc - 1, 4L), " = ", hex(opcode, 4L), "\n");
     regs.halt = true;
   }
 }

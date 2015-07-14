@@ -23,12 +23,12 @@ auto ManagedNode::_evaluate(string query) const -> bool {
 
     lstring side;
     switch(comparator) {
-    case Comparator::EQ: side = rule.split<1> ("="); break;
-    case Comparator::NE: side = rule.split<1>("!="); break;
-    case Comparator::LT: side = rule.split<1> ("<"); break;
-    case Comparator::LE: side = rule.split<1>("<="); break;
-    case Comparator::GT: side = rule.split<1> (">"); break;
-    case Comparator::GE: side = rule.split<1>(">="); break;
+    case Comparator::EQ: side = rule.split ("=", 1L); break;
+    case Comparator::NE: side = rule.split("!=", 1L); break;
+    case Comparator::LT: side = rule.split ("<", 1L); break;
+    case Comparator::LE: side = rule.split("<=", 1L); break;
+    case Comparator::GT: side = rule.split (">", 1L); break;
+    case Comparator::GE: side = rule.split(">=", 1L); break;
     }
 
     string data = string{_value}.strip();
@@ -61,10 +61,10 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
   unsigned lo = 0u, hi = ~0u;
 
   if(name.match("*[*]")) {
-    auto p = name.rtrim("]").split<1>("[");
+    auto p = name.rtrim("]", 1L).split("[", 1L);
     name = p(0);
     if(p(1).find("-")) {
-      p = p(1).split<1>("-");
+      p = p(1).split("-", 1L);
       lo = p(0).empty() ?  0u : p(0).decimal();
       hi = p(1).empty() ? ~0u : p(1).decimal();
     } else {
@@ -73,7 +73,7 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
   }
 
   if(name.match("*(*)")) {
-    auto p = name.rtrim(")").split<1>("(");
+    auto p = name.rtrim(")", 1L).split("(", 1L);
     name = p(0);
     rule = p(1);
   }

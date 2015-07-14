@@ -42,9 +42,9 @@ void generate(const char* sourceFilename, const char* targetFilename) {
       opcode.opcode = hex(arguments[0]);
       array.append(opcode);
 
-      line.rtrim<1>(",");
+      line.rtrim(",", 1L);
       if(line.endswith(" {")) {
-        line.rtrim<1>("{ ");
+        line.rtrim("{ ", 1L);
         sourceStart = currentLine + 1;
         break;
       }
@@ -52,7 +52,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
 
     if(cycle_accurate == false) {
       foreach(opcode, array) {
-        fp.print("case 0x", hex<2>(opcode.opcode), ": {\n");
+        fp.print("case 0x", hex(opcode.opcode, 2L), ": {\n");
 
         for(unsigned n = sourceStart; n < lines.size(); n++) {
           if(lines[n] == "}") break;
@@ -85,7 +85,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
       }
     } else {
       foreach(opcode, array) {
-        fp.print("case 0x", hex<2>(opcode.opcode), ": {\n");
+        fp.print("case 0x", hex(opcode.opcode, 2L), ": {\n");
         fp.print("  switch(opcode_cycle++) {\n");
 
         for(unsigned n = sourceStart; n < lines.size(); n++) {
@@ -101,7 +101,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
             output = { "  ", lines[n] };
           } else {
             lstring part;
-            part.split<1>(":", lines[n]);
+            part.split(":", lines[n], 1L);
             fp.print("  case ", (unsigned)decimal(part[0]), ":\n");
             output = { "    ", part[1] };
           }

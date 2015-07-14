@@ -55,7 +55,7 @@ struct shared_memory {
   auto create(const string& name, unsigned size) -> bool {
     reset();
 
-    _name = {"/nall::", string{name}.transform("/", ":")};
+    _name = {"/nall-", string{name}.transform("/:", "--")};
     _size = size;
 
     //O_CREAT | O_EXCL seems to throw ENOENT even when semaphore does not exist ...
@@ -102,7 +102,7 @@ struct shared_memory {
   auto open(const string& name, unsigned size) -> bool {
     reset();
 
-    _name = {"/nall::", string{name}.transform("/", ":")};
+    _name = {"/nall-", string{name}.transform("/:", "--")};
     _size = size;
 
     _semaphore = sem_open(_name, 0, 0644);

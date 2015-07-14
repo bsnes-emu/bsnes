@@ -22,9 +22,8 @@ auto string::read(const string& filename) -> string {
   return fclose(fp), result;
 }
 
-template<unsigned L> auto string::repeat(const string& pattern) -> string {
+auto string::repeat(const string& pattern, unsigned times) -> string {
   string result;
-  unsigned times = L;
   while(times--) result.append(pattern);
   return result;
 }

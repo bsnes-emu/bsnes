@@ -8,7 +8,7 @@
 
 namespace nall {
 
-template<typename type_t> void priority_queue_nocallback(type_t) {}
+template<typename type_t> auto priority_queue_nocallback(type_t) -> void {}
 
 //priority queue implementation using binary min-heap array;
 //does not require normalize() function.
@@ -16,14 +16,27 @@ template<typename type_t> void priority_queue_nocallback(type_t) {}
 //O(log n) append (enqueue)
 //O(log n) remove (dequeue)
 template<typename type_t> struct priority_queue {
-  inline void tick(unsigned ticks) {
+  priority_queue(unsigned size, function<void (type_t)> callback = &priority_queue_nocallback<type_t>) : callback(callback) {
+    heap = new heap_t[size];
+    heapcapacity = size;
+    reset();
+  }
+
+  ~priority_queue() {
+    delete[] heap;
+  }
+
+  priority_queue(const priority_queue&) = delete;
+  auto operator=(const priority_queue&) -> priority_queue& = delete;
+
+  inline auto tick(unsigned ticks) -> void {
     basecounter += ticks;
     while(heapsize && gte(basecounter, heap[0].counter)) callback(dequeue());
   }
 
   //counter is relative to current time (eg enqueue(64, ...) fires in 64 ticks);
   //counter cannot exceed std::numeric_limits<unsigned>::max() >> 1.
-  void enqueue(unsigned counter, type_t event) {
+  auto enqueue(unsigned counter, type_t event) -> void {
     unsigned child = heapsize++;
     counter += basecounter;
 
@@ -40,7 +53,7 @@ template<typename type_t> struct priority_queue {
     heap[child].event = event;
   }
 
-  type_t dequeue() {
+  auto dequeue() -> type_t {
     type_t event(heap[0].event);
     unsigned parent = 0;
     unsigned counter = heap[--heapsize].counter;
@@ -61,12 +74,12 @@ template<typename type_t> struct priority_queue {
     return event;
   }
 
-  void reset() {
+  auto reset() -> void {
     basecounter = 0;
     heapsize = 0;
   }
 
-  void serialize(serializer& s) {
+  auto serialize(serializer& s) -> void {
     s.integer(basecounter);
     s.integer(heapsize);
     for(unsigned n = 0; n < heapcapacity; n++) {
@@ -74,20 +87,6 @@ template<typename type_t> struct priority_queue {
       s.integer(heap[n].event);
     }
   }
-
-  priority_queue(unsigned size, function<void (type_t)> callback = &priority_queue_nocallback<type_t>)
-  : callback(callback) {
-    heap = new heap_t[size];
-    heapcapacity = size;
-    reset();
-  }
-
-  ~priority_queue() {
-    delete[] heap;
-  }
-
-  priority_queue& operator=(const priority_queue&) = delete;
-  priority_queue(const priority_queue&) = delete;
 
 private:
   function<void (type_t)> callback;
@@ -100,7 +99,7 @@ private:
   } *heap;
 
   //return true if x is greater than or equal to y
-  inline bool gte(unsigned x, unsigned y) {
+  inline auto gte(unsigned x, unsigned y) -> bool {
     return x - y < (std::numeric_limits<unsigned>::max() >> 1);
   }
 };

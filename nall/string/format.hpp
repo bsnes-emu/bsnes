@@ -73,7 +73,7 @@ template<typename... P> auto print(P&&... p) -> void {
   fputs(s.data(), stdout);
 }
 
-template<signed precision, char padchar> auto integer(intmax_t value) -> string {
+auto integer(intmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(1 + sizeof(intmax_t) * 3);
   char* p = buffer.pointer();
@@ -92,7 +92,7 @@ template<signed precision, char padchar> auto integer(intmax_t value) -> string 
   return buffer;
 }
 
-template<signed precision, char padchar> auto decimal(uintmax_t value) -> string {
+auto decimal(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 3);
   char* p = buffer.pointer();
@@ -108,7 +108,7 @@ template<signed precision, char padchar> auto decimal(uintmax_t value) -> string
   return buffer;
 }
 
-template<signed precision, char padchar> auto hex(uintmax_t value) -> string {
+auto hex(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 2);
   char* p = buffer.pointer();
@@ -125,7 +125,7 @@ template<signed precision, char padchar> auto hex(uintmax_t value) -> string {
   return buffer;
 }
 
-template<signed precision, char padchar> auto octal(uintmax_t value) -> string {
+auto octal(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 3);
   char* p = buffer.pointer();
@@ -141,7 +141,7 @@ template<signed precision, char padchar> auto octal(uintmax_t value) -> string {
   return buffer;
 }
 
-template<signed precision, char padchar> auto binary(uintmax_t value) -> string {
+auto binary(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 8);
   char* p = buffer.pointer();
@@ -157,14 +157,14 @@ template<signed precision, char padchar> auto binary(uintmax_t value) -> string 
   return buffer;
 }
 
-template<signed precision, typename T> auto pointer(const T* value) -> string {
+template<typename T> auto pointer(const T* value, long precision) -> string {
   if(value == nullptr) return "(null)";
-  return {"0x", hex<precision>((uintptr_t)value)};
+  return {"0x", hex((uintptr_t)value, precision)};
 }
 
-template<signed precision> auto pointer(uintptr_t value) -> string {
+auto pointer(uintptr_t value, long precision) -> string {
   if(value == 0) return "(null)";
-  return {"0x", hex<precision>(value)};
+  return {"0x", hex(value, precision)};
 }
 
 auto real(long double value) -> string {

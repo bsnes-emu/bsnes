@@ -8,26 +8,20 @@
 //remove: O(1) average; O(n) worst
 //
 //requirements:
-//  unsigned T::hash() const;
-//  bool T::operator==(const T&) const;
+//  auto T::hash() const -> unsigned;
+//  auto T::operator==(const T&) const -> bool;
 
 namespace nall {
 
 template<typename T>
 struct hashset {
-protected:
-  T** pool = nullptr;
-  unsigned length = 8;  //length of pool
-  unsigned count = 0;   //number of objects inside of the pool
-
-public:
-  hashset() {}
+  hashset() = default;
   hashset(unsigned length) : length(bit::round(length)) {}
   hashset(const hashset& source) { operator=(source); }
-  hashset(hashset&& source) { operator=(std::move(source)); }
+  hashset(hashset&& source) { operator=(move(source)); }
   ~hashset() { reset(); }
 
-  hashset& operator=(const hashset& source) {
+  auto operator=(const hashset& source) -> hashset& {
     reset();
     if(source.pool) {
       for(unsigned n = 0; n < source.count; n++) {
@@ -37,7 +31,7 @@ public:
     return *this;
   }
 
-  hashset& operator=(hashset&& source) {
+  auto operator=(hashset&& source) -> hashset& {
     reset();
     pool = source.pool;
     length = source.length;
@@ -48,11 +42,11 @@ public:
     return *this;
   }
 
-  unsigned capacity() const { return length; }
-  unsigned size() const { return count; }
-  bool empty() const { return count == 0; }
+  auto capacity() const -> unsigned { return length; }
+  auto size() const -> unsigned { return count; }
+  auto empty() const -> bool { return count == 0; }
 
-  void reset() {
+  auto reset() -> void {
     if(pool) {
       for(unsigned n = 0; n < length; n++) {
         if(pool[n]) {
@@ -67,7 +61,7 @@ public:
     count = 0;
   }
 
-  void reserve(unsigned size) {
+  auto reserve(unsigned size) -> void {
     //ensure all items will fit into pool (with <= 50% load) and amortize growth
     size = bit::round(max(size, count << 1));
     T** copy = new T*[size]();
@@ -88,7 +82,7 @@ public:
     length = size;
   }
 
-  maybe<T&> find(const T& value) {
+  auto find(const T& value) -> maybe<T&> {
     if(!pool) return nothing;
 
     unsigned hash = value.hash() & (length - 1);
@@ -100,7 +94,7 @@ public:
     return nothing;
   }
 
-  maybe<T&> insert(const T& value) {
+  auto insert(const T& value) -> maybe<T&> {
     if(!pool) pool = new T*[length]();
 
     //double pool size when load is >= 50%
@@ -114,7 +108,7 @@ public:
     return *pool[hash];
   }
 
-  bool remove(const T& value) {
+  auto remove(const T& value) -> bool {
     if(!pool) return false;
 
     unsigned hash = value.hash() & (length - 1);
@@ -130,6 +124,11 @@ public:
 
     return false;
   }
+
+protected:
+  T** pool = nullptr;
+  unsigned length = 8;  //length of pool
+  unsigned count = 0;   //number of objects inside of the pool
 };
 
 }

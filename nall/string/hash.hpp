@@ -4,16 +4,16 @@ namespace nall {
 
 namespace Hash {
   auto CRC16::digest() -> string {
-    return hex<4>(value());
+    return hex(value(), 4L);
   }
 
   auto CRC32::digest() -> string {
-    return hex<8>(value());
+    return hex(value(), 8L);
   }
 
   auto SHA256::digest() const -> string {
     string result;
-    for(auto n : value()) result.append(hex<2>(n));
+    for(auto n : value()) result.append(hex(n, 2L));
     return result;
   }
 }

@@ -20,7 +20,7 @@
 
 namespace nall {
 
-template<typename T, typename Comparator> void sort(T list[], unsigned size, const Comparator& lessthan) {
+template<typename T, typename Comparator> auto sort(T list[], unsigned size, const Comparator& lessthan) -> void {
   if(size <= 1) return;  //nothing to sort
 
   //use insertion sort to quickly sort smaller blocks
@@ -68,7 +68,7 @@ template<typename T, typename Comparator> void sort(T list[], unsigned size, con
   delete[] buffer;
 }
 
-template<typename T> void sort(T list[], unsigned size) {
+template<typename T> auto sort(T list[], unsigned size) -> void {
   return sort(list, size, [](const T& l, const T& r) { return l < r; });
 }
 

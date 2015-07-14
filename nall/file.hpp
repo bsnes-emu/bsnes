@@ -153,6 +153,13 @@ struct file : storage, varint {
     return data;
   }
 
+  auto reads(unsigned length) -> string {
+    string result;
+    result.resize(length);
+    for(auto& byte : result) byte = read();
+    return result;
+  }
+
   auto read(uint8_t* buffer, unsigned length) -> void {
     while(length--) *buffer++ = read();
   }
@@ -177,6 +184,10 @@ struct file : storage, varint {
     for(int i = length - 1; i >= 0; i--) {
       write(data >> (i << 3));
     }
+  }
+
+  auto writes(const string& s) -> void {
+    for(auto byte : s) write(byte);
   }
 
   auto write(const uint8_t* buffer, unsigned length) -> void {

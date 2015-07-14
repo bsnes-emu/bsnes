@@ -14,10 +14,22 @@ struct httpServer : httpRole, service {
   ~httpServer() { close(); }
 
 private:
-  signed fd = -1;
   function<httpResponse (httpRequest&)> callback;
-  struct sockaddr_in addrin = {0};
   std::atomic<signed> connections{0};
+
+  signed fd4 = -1;
+  signed fd6 = -1;
+  struct sockaddr_in addrin4 = {0};
+  struct sockaddr_in6 addrin6 = {0};
+
+  auto ipv4() const -> bool { return fd4 >= 0; }
+  auto ipv6() const -> bool { return fd6 >= 0; }
+
+  auto ipv4_close() -> void { if(fd4 >= 0) ::close(fd4); fd4 = -1; }
+  auto ipv6_close() -> void { if(fd6 >= 0) ::close(fd6); fd6 = -1; }
+
+  auto ipv4_scan() -> bool;
+  auto ipv6_scan() -> bool;
 };
 
 auto httpServer::open(unsigned port, const string& serviceName, const string& command) -> bool {
@@ -25,8 +37,9 @@ auto httpServer::open(unsigned port, const string& serviceName, const string& co
     if(!service::command(serviceName, command)) return false;
   }
 
-  fd = socket(AF_INET, SOCK_STREAM, 0);
-  if(fd < 0) return false;
+  fd4 = socket(AF_INET, SOCK_STREAM, 0);
+  fd6 = socket(AF_INET6, SOCK_STREAM, 0);
+  if(!ipv4() && !ipv6()) return false;
 
   {
   #if defined(SO_RCVTIMEO)
@@ -34,7 +47,8 @@ auto httpServer::open(unsigned port, const string& serviceName, const string& co
     struct timeval rcvtimeo;
     rcvtimeo.tv_sec  = settings.timeoutReceive / 1000;
     rcvtimeo.tv_usec = settings.timeoutReceive % 1000 * 1000;
-    setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &rcvtimeo, sizeof(struct timeval));
+    if(ipv4()) setsockopt(fd4, SOL_SOCKET, SO_RCVTIMEO, &rcvtimeo, sizeof(struct timeval));
+    if(ipv6()) setsockopt(fd6, SOL_SOCKET, SO_RCVTIMEO, &rcvtimeo, sizeof(struct timeval));
   }
   #endif
 
@@ -43,37 +57,41 @@ auto httpServer::open(unsigned port, const string& serviceName, const string& co
     struct timeval sndtimeo;
     sndtimeo.tv_sec  = settings.timeoutSend / 1000;
     sndtimeo.tv_usec = settings.timeoutSend % 1000 * 1000;
-    setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &sndtimeo, sizeof(struct timeval));
+    if(ipv4()) setsockopt(fd4, SOL_SOCKET, SO_SNDTIMEO, &sndtimeo, sizeof(struct timeval));
+    if(ipv6()) setsockopt(fd6, SOL_SOCKET, SO_SNDTIMEO, &sndtimeo, sizeof(struct timeval));
   }
   #endif
 
   #if defined(SO_NOSIGPIPE)  //BSD, OSX
   signed nosigpipe = 1;
-  setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(signed));
+  if(ipv4()) setsockopt(fd4, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(signed));
+  if(ipv6()) setsockopt(fd6, SOL_SOCKET, SO_NOSIGPIPE, &nosigpipe, sizeof(signed));
   #endif
 
   #if defined(SO_REUSEADDR)  //BSD, Linux, OSX
   signed reuseaddr = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(signed));
+  if(ipv4()) setsockopt(fd4, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(signed));
+  if(ipv6()) setsockopt(fd6, SOL_SOCKET, SO_REUSEADDR, &reuseaddr, sizeof(signed));
   #endif
 
   #if defined(SO_REUSEPORT)  //BSD, OSX
   signed reuseport = 1;
-  setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &reuseport, sizeof(signed));
+  if(ipv4()) setsockopt(fd4, SOL_SOCKET, SO_REUSEPORT, &reuseport, sizeof(signed));
+  if(ipv6()) setsockopt(fd6, SOL_SOCKET, SO_REUSEPORT, &reuseport, sizeof(signed));
   #endif
   }
 
-  addrin.sin_family = AF_INET;
-  addrin.sin_addr.s_addr = htonl(INADDR_ANY);
-  addrin.sin_port = htons(port);
+  addrin4.sin_family = AF_INET;
+  addrin4.sin_addr.s_addr = htonl(INADDR_ANY);
+  addrin4.sin_port = htons(port);
 
-  signed result = bind(fd, (struct sockaddr*)&addrin, sizeof(addrin));
-  if(result < 0) return close(), false;
+  addrin6.sin6_family = AF_INET6;
+  addrin6.sin6_addr = in6addr_any;
+  addrin6.sin6_port = htons(port);
 
-  result = listen(fd, SOMAXCONN);  //system-wide limit (per port)
-  if(result < 0) return close(), false;
-
-  return true;
+  if(bind(fd4, (struct sockaddr*)&addrin4, sizeof(addrin4)) < 0 || listen(fd4, SOMAXCONN) < 0) ipv4_close();
+  if(bind(fd6, (struct sockaddr*)&addrin6, sizeof(addrin6)) < 0 || listen(fd6, SOMAXCONN) < 0) ipv6_close();
+  return ipv4() || ipv6();
 }
 
 auto httpServer::main(const function<httpResponse (httpRequest&)>& function) -> void {
@@ -82,15 +100,19 @@ auto httpServer::main(const function<httpResponse (httpRequest&)>& function) -> 
 
 auto httpServer::scan() -> string {
   if(auto command = service::receive()) return command;
-
   if(connections >= settings.connectionLimit) return "busy";
+  if(ipv4() && ipv4_scan()) return "ok";
+  if(ipv6() && ipv6_scan()) return "ok";
+  return "idle";
+}
 
+auto httpServer::ipv4_scan() -> bool {
   struct pollfd query = {0};
-  query.fd = fd;
+  query.fd = fd4;
   query.events = POLLIN;
   poll(&query, 1, 0);
 
-  if(query.fd == fd && query.revents & POLLIN) {
+  if(query.fd == fd4 && query.revents & POLLIN) {
     ++connections;
 
     thread::create([&](uintptr_t) {
@@ -100,11 +122,19 @@ auto httpServer::scan() -> string {
       struct sockaddr_in settings = {0};
       socklen_t socklen = sizeof(sockaddr_in);
 
-      clientfd = accept(fd, (struct sockaddr*)&settings, &socklen);
+      clientfd = accept(fd4, (struct sockaddr*)&settings, &socklen);
       if(clientfd < 0) return;
 
+      uint32_t ip = ntohl(settings.sin_addr.s_addr);
+
       httpRequest request;
-      request._ip = ntohl(settings.sin_addr.s_addr);
+      request._ipv6 = false;
+      request._ip = {
+        (uint8_t)(ip >> 24), ".",
+        (uint8_t)(ip >> 16), ".",
+        (uint8_t)(ip >>  8), ".",
+        (uint8_t)(ip >>  0)
+      };
 
       if(download(clientfd, request) && callback) {
         auto response = callback(request);
@@ -116,16 +146,64 @@ auto httpServer::scan() -> string {
       ::close(clientfd);
       --connections;
     }, 0, settings.threadStackSize);
+
+    return true;
   }
 
-  return "ok";
+  return false;
+}
+
+auto httpServer::ipv6_scan() -> bool {
+  struct pollfd query = {0};
+  query.fd = fd6;
+  query.events = POLLIN;
+  poll(&query, 1, 0);
+
+  if(query.fd == fd6 && query.revents & POLLIN) {
+    ++connections;
+
+    thread::create([&](uintptr_t) {
+      thread::detach();
+
+      signed clientfd = -1;
+      struct sockaddr_in6 settings = {0};
+      socklen_t socklen = sizeof(sockaddr_in6);
+
+      clientfd = accept(fd6, (struct sockaddr*)&settings, &socklen);
+      if(clientfd < 0) return;
+
+      unsigned char* ip = settings.sin6_addr.s6_addr;
+      uint16_t ipSegment[8] = {0};
+      for(auto n : range(8)) ipSegment[n] = ip[n * 2 + 0] * 256 + ip[n * 2 + 1];
+
+      httpRequest request;
+      request._ipv6 = true;
+      for(auto n : range(8)) {
+        uint16_t value = ip[n * 2 + 0] * 256 + ip[n * 2 + 1];
+        request._ip.append(hex(value, 4L));
+        if(n != 7) request._ip.append(":");
+      }
+
+      if(download(clientfd, request) && callback) {
+        auto response = callback(request);
+        upload(clientfd, response);
+      } else {
+        upload(clientfd, httpResponse());  //"501 Not Implemented"
+      }
+
+      ::close(clientfd);
+      --connections;
+    }, 0, settings.threadStackSize);
+
+    return true;
+  }
+
+  return false;
 }
 
 auto httpServer::close() -> void {
-  if(fd) {
-    ::close(fd);
-    fd = -1;
-  }
+  ipv4_close();
+  ipv6_close();
 }
 
 }

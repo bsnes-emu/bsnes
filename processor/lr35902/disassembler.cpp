@@ -5,14 +5,14 @@ string LR35902::disassemble(uint16 pc) {
 
   string opcode = disassemble_opcode(pc);
   string registers = {
-    " AF:", hex<4>(r[AF]),
-    " BC:", hex<4>(r[BC]),
-    " DE:", hex<4>(r[DE]),
-    " HL:", hex<4>(r[HL]),
-    " SP:", hex<4>(r[SP])
+    " AF:", hex(r[AF], 4L),
+    " BC:", hex(r[BC], 4L),
+    " DE:", hex(r[DE], 4L),
+    " HL:", hex(r[HL], 4L),
+    " SP:", hex(r[SP], 4L)
   };
 
-  memcpy(output +   0, hex<4>(pc).data(), 4);
+  memcpy(output +   0, hex(pc, 4L).data(), 4);
   memcpy(output +   6, opcode.data(), opcode.length());
   memcpy(output +  23, registers.data(), registers.length());
   output[63] = 0;
@@ -27,68 +27,68 @@ string LR35902::disassemble_opcode(uint16 pc) {
 
   switch(opcode) {
     case 0x00: return { "nop" };
-    case 0x01: return { "ld   bc,$", hex<2>(p1), hex<2>(p0) };
+    case 0x01: return { "ld   bc,$", hex(p1, 2L), hex(p0, 2L) };
     case 0x02: return { "ld   (bc),a" };
     case 0x03: return { "inc  bc" };
     case 0x04: return { "inc  b" };
     case 0x05: return { "dec  b" };
-    case 0x06: return { "ld   b,$", hex<2>(p0) };
+    case 0x06: return { "ld   b,$", hex(p0, 2L) };
     case 0x07: return { "rlc  a" };
-    case 0x08: return { "ld   ($", hex<2>(p1), hex<2>(p0), "),sp" };
+    case 0x08: return { "ld   ($", hex(p1, 2L), hex(p0, 2L), "),sp" };
     case 0x09: return { "add  hl,bc" };
     case 0x0a: return { "ld   a,(bc)" };
     case 0x0b: return { "dec  bc" };
     case 0x0c: return { "inc  c" };
     case 0x0d: return { "dec  c" };
-    case 0x0e: return { "ld   c,$", hex<2>(p0) };
+    case 0x0e: return { "ld   c,$", hex(p0, 2L) };
     case 0x0f: return { "rrc  a" };
     case 0x10: return { "stop" };
-    case 0x11: return { "ld   de,$", hex<2>(p1), hex<2>(p0) };
+    case 0x11: return { "ld   de,$", hex(p1, 2L), hex(p0, 2L) };
     case 0x12: return { "ld   (de),a" };
     case 0x13: return { "inc  de" };
     case 0x14: return { "inc  d" };
     case 0x15: return { "dec  d" };
-    case 0x16: return { "ld   d,$", hex<2>(p0) };
+    case 0x16: return { "ld   d,$", hex(p0, 2L) };
     case 0x17: return { "rl   a" };
-    case 0x18: return { "jr   $", hex<4>(r[PC] + 2 + (int8)p0) };
+    case 0x18: return { "jr   $", hex(r[PC] + 2 + (int8)p0, 4L) };
     case 0x19: return { "add  hl,de" };
     case 0x1a: return { "ld   a,(de)" };
     case 0x1b: return { "dec  de" };
     case 0x1c: return { "inc  e" };
     case 0x1d: return { "dec  e" };
-    case 0x1e: return { "ld   e,$", hex<2>(p0) };
+    case 0x1e: return { "ld   e,$", hex(p0, 2L) };
     case 0x1f: return { "rr   a" };
-    case 0x20: return { "jr   nz,$", hex<4>(r[PC] + 2 + (int8)p0) };
-    case 0x21: return { "ld   hl,$", hex<2>(p1), hex<2>(p0) };
+    case 0x20: return { "jr   nz,$", hex(r[PC] + 2 + (int8)p0, 4L) };
+    case 0x21: return { "ld   hl,$", hex(p1, 2L), hex(p0, 2L) };
     case 0x22: return { "ldi  (hl),a" };
     case 0x23: return { "inc  hl" };
     case 0x24: return { "inc  h" };
     case 0x25: return { "dec  h" };
-    case 0x26: return { "ld   h,$", hex<2>(p0) };
+    case 0x26: return { "ld   h,$", hex(p0, 2L) };
     case 0x27: return { "daa" };
-    case 0x28: return { "jr   z,$", hex<4>(r[PC] + 2 + (int8)p0) };
+    case 0x28: return { "jr   z,$", hex(r[PC] + 2 + (int8)p0, 4L) };
     case 0x29: return { "add  hl,hl" };
     case 0x2a: return { "ldi  a,(hl)" };
     case 0x2b: return { "dec  hl" };
     case 0x2c: return { "inc  l" };
     case 0x2d: return { "dec  l" };
-    case 0x2e: return { "ld   l,$", hex<2>(p0) };
+    case 0x2e: return { "ld   l,$", hex(p0, 2L) };
     case 0x2f: return { "cpl" };
-    case 0x30: return { "jr   nc,$", hex<4>(r[PC] + 2 + (int8)p0) };
-    case 0x31: return { "ld   sp,$", hex<2>(p1), hex<2>(p0) };
+    case 0x30: return { "jr   nc,$", hex(r[PC] + 2 + (int8)p0, 4L) };
+    case 0x31: return { "ld   sp,$", hex(p1, 2L), hex(p0, 2L) };
     case 0x32: return { "ldd  (hl),a" };
     case 0x33: return { "inc  sp" };
     case 0x34: return { "inc  (hl)" };
     case 0x35: return { "dec  (hl)" };
-    case 0x36: return { "ld   (hl),$", hex<2>(p0) };
+    case 0x36: return { "ld   (hl),$", hex(p0, 2L) };
     case 0x37: return { "scf" };
-    case 0x38: return { "jr   c,$", hex<4>(r[PC] + 2 + (int8)p0) };
+    case 0x38: return { "jr   c,$", hex(r[PC] + 2 + (int8)p0, 4L) };
     case 0x39: return { "add  hl,sp" };
     case 0x3a: return { "ldd  a,(hl)" };
     case 0x3b: return { "dec  sp" };
     case 0x3c: return { "inc  a" };
     case 0x3d: return { "dec  a" };
-    case 0x3e: return { "ld   a,$", hex<2>(p0) };
+    case 0x3e: return { "ld   a,$", hex(p0, 2L) };
     case 0x3f: return { "ccf" };
     case 0x40: return { "ld   b,b" };
     case 0x41: return { "ld   b,c" };
@@ -220,67 +220,67 @@ string LR35902::disassemble_opcode(uint16 pc) {
     case 0xbf: return { "cp   a,a" };
     case 0xc0: return { "ret  nz" };
     case 0xc1: return { "pop  bc" };
-    case 0xc2: return { "jp   nz,$", hex<2>(p1), hex<2>(p0) };
-    case 0xc3: return { "jp   $", hex<2>(p1), hex<2>(p0) };
-    case 0xc4: return { "call nz,$", hex<2>(p1), hex<2>(p0) };
+    case 0xc2: return { "jp   nz,$", hex(p1, 2L), hex(p0, 2L) };
+    case 0xc3: return { "jp   $", hex(p1, 2L), hex(p0, 2L) };
+    case 0xc4: return { "call nz,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xc5: return { "push bc" };
-    case 0xc6: return { "add  a,$", hex<2>(p0) };
+    case 0xc6: return { "add  a,$", hex(p0, 2L) };
     case 0xc7: return { "rst  $0000" };
     case 0xc8: return { "ret  z" };
     case 0xc9: return { "ret" };
-    case 0xca: return { "jp   z,$", hex<2>(p1), hex<2>(p0) };
+    case 0xca: return { "jp   z,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xcb: return disassemble_opcode_cb(pc + 1);
-    case 0xcc: return { "call z,$", hex<2>(p1), hex<2>(p0) };
-    case 0xcd: return { "call $", hex<2>(p1), hex<2>(p0) };
-    case 0xce: return { "adc  a,$", hex<2>(p0) };
+    case 0xcc: return { "call z,$", hex(p1, 2L), hex(p0, 2L) };
+    case 0xcd: return { "call $", hex(p1, 2L), hex(p0, 2L) };
+    case 0xce: return { "adc  a,$", hex(p0, 2L) };
     case 0xcf: return { "rst  $0008" };
     case 0xd0: return { "ret  nc" };
     case 0xd1: return { "pop  de" };
-    case 0xd2: return { "jp   nc,$", hex<2>(p1), hex<2>(p0) };
+    case 0xd2: return { "jp   nc,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xd3: return { "xx" };
-    case 0xd4: return { "call nc,$", hex<2>(p1), hex<2>(p0) };
+    case 0xd4: return { "call nc,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xd5: return { "push de" };
-    case 0xd6: return { "sub  a,$", hex<2>(p0) };
+    case 0xd6: return { "sub  a,$", hex(p0, 2L) };
     case 0xd7: return { "rst  $0010" };
     case 0xd8: return { "ret  c" };
     case 0xd9: return { "reti" };
-    case 0xda: return { "jp   c,$", hex<2>(p1), hex<2>(p0) };
+    case 0xda: return { "jp   c,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xdb: return { "xx" };
-    case 0xdc: return { "call c,$", hex<2>(p1), hex<2>(p0) };
+    case 0xdc: return { "call c,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xdd: return { "xx" };
-    case 0xde: return { "sbc  a,$", hex<2>(p0) };
+    case 0xde: return { "sbc  a,$", hex(p0, 2L) };
     case 0xdf: return { "rst  $0018" };
-    case 0xe0: return { "ld   ($ff", hex<2>(p0), "),a" };
+    case 0xe0: return { "ld   ($ff", hex(p0, 2L), "),a" };
     case 0xe1: return { "pop  hl" };
     case 0xe2: return { "ld   ($ff00+c),a" };
     case 0xe3: return { "xx" };
     case 0xe4: return { "xx" };
     case 0xe5: return { "push hl" };
-    case 0xe6: return { "and  a,$", hex<2>(p0) };
+    case 0xe6: return { "and  a,$", hex(p0, 2L) };
     case 0xe7: return { "rst  $0020" };
-    case 0xe8: return { "add  sp,$", hex<4>((int8)p0) };
+    case 0xe8: return { "add  sp,$", hex((int8)p0, 4L) };
     case 0xe9: return { "jp   hl" };
-    case 0xea: return { "ld   ($", hex<2>(p1), hex<2>(p0), "),a" };
+    case 0xea: return { "ld   ($", hex(p1, 2L), hex(p0, 2L), "),a" };
     case 0xeb: return { "xx" };
     case 0xec: return { "xx" };
     case 0xed: return { "xx" };
-    case 0xee: return { "xor  a,$", hex<2>(p0) };
+    case 0xee: return { "xor  a,$", hex(p0, 2L) };
     case 0xef: return { "rst  $0028" };
-    case 0xf0: return { "ld   a,($ff", hex<2>(p0), ")" };
+    case 0xf0: return { "ld   a,($ff", hex(p0, 2L), ")" };
     case 0xf1: return { "pop  af" };
     case 0xf2: return { "ld   a,($ff00+c)" };
     case 0xf3: return { "di" };
     case 0xf4: return { "xx" };
     case 0xf5: return { "push af" };
-    case 0xf6: return { "or  a,$", hex<2>(p0) };
+    case 0xf6: return { "or  a,$", hex(p0, 2L) };
     case 0xf7: return { "rst  $0030" };
-    case 0xf8: return { "ld   hl,sp+$", hex<4>((int8)p0) };
+    case 0xf8: return { "ld   hl,sp+$", hex((int8)p0, 4L) };
     case 0xf9: return { "ld   sp,hl" };
-    case 0xfa: return { "ld   a,($", hex<2>(p1), hex<2>(p0), ")" };
+    case 0xfa: return { "ld   a,($", hex(p1, 2L), hex(p0, 2L), ")" };
     case 0xfb: return { "ei" };
     case 0xfc: return { "xx" };
     case 0xfd: return { "xx" };
-    case 0xfe: return { "cp   a,$", hex<2>(p0) };
+    case 0xfe: return { "cp   a,$", hex(p0, 2L) };
     case 0xff: return { "rst  $0038" };
   }
 

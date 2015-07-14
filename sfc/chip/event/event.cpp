@@ -60,13 +60,13 @@ void Event::submitScore() {
     data.append("ba:", ba[0], ",", ba[1], "\n");
   }
 
-/*lstring side = interface->server().split<1>("@");
-  string username = side(0).split<1>(":")(0);
-  string password = side(0).split<1>(":")(1);
-  side(1).ltrim("http://");
-  string hostname = side(1).split<1>("/")(0);
-  string hostpath = side(1).split<1>("/")(1);
-  side = hostname.split<1>(":");
+/*lstring side = interface->server().split("@", 1L);
+  string username = side(0).split(":", 1L)(0);
+  string password = side(0).split(":", 1L)(1);
+  side(1).ltrim("http://", 1L);
+  string hostname = side(1).split("/", 1L)(0);
+  string hostpath = side(1).split("/", 1L)(1);
+  side = hostname.split(":", 1L);
   hostname = side(0);
   string hostport = side(1);
   if(hostport.empty()) hostport = "80";
