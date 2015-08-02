@@ -109,7 +109,7 @@ protected:
   auto parse(string document) -> void {
     //in order to simplify the parsing logic; we do an initial pass to normalize the data
     //the below code will turn '\r\n' into '\n'; skip empty lines; and skip comment lines
-    char* p = document.pointer(), *output = p;
+    char* p = document.get(), *output = p;
     while(*p) {
       char* origin = p;
       bool empty = true;

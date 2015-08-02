@@ -63,6 +63,11 @@ void Cartridge::load() {
       flashrom.size = info["size"].decimal();
       for(unsigned n = 0; n < flashrom.size; n++) flashrom.data[n] = 0xff;
 
+      //if FlashROM ID not provided; guess that it's a Macronix chip
+      //this will not work for all games; in which case, the ID must be specified manually
+      if(!flashrom.id && flashrom.size ==  64 * 1024) flashrom.id = 0x1cc2;
+      if(!flashrom.id && flashrom.size == 128 * 1024) flashrom.id = 0x09c2;
+
       interface->loadRequest(ID::FlashROM, info["name"].text());
       memory.append({ID::FlashROM, info["name"].text()});
     }

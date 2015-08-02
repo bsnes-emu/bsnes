@@ -48,7 +48,7 @@ auto StateManager::doChangeSelected() -> void {
     if(buffer.size() >= 584) {
       string description;
       description.reserve(512);
-      memory::copy(description.pointer(), buffer.data() + 72, 512);
+      memory::copy(description.get(), buffer.data() + 72, 512);
       description.resize(description.length());
       descriptionValue.setEnabled(true).setText(description);
       return doUpdateControls();
@@ -65,7 +65,7 @@ auto StateManager::doRefresh() -> void {
     if(buffer.size() >= 584) {
       string description;
       description.reserve(512);
-      memory::copy(description.pointer(), buffer.data() + 72, 512);
+      memory::copy(description.get(), buffer.data() + 72, 512);
       description.resize(description.length());
       stateList.item(slot).cell(1).setText(description).setForegroundColor({0, 0, 0});
     } else {

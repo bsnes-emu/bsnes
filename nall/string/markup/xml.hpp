@@ -52,7 +52,7 @@ protected:
     return;
     #endif
 
-    char* output = target.pointer();
+    char* output = target.get();
     while(length) {
       if(*source == '&') {
         if(!memory::compare(source, "&lt;",   4)) { *output++ = '<';  source += 4; length -= 4; continue; }

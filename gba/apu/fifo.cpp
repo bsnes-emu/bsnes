@@ -5,8 +5,8 @@ void APU::FIFO::read() {
 }
 
 void APU::FIFO::write(int8 byte) {
-  if(size == 32) return;
-  size++;
+  if(size == 32) rdoffset++;
+  else size++;
   sample[wroffset++] = byte;
 }
 

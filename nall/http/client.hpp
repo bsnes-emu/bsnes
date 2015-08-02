@@ -3,21 +3,21 @@
 
 #include <nall/http/role.hpp>
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpClient : httpRole {
+struct Client : Role {
   inline auto open(const string& hostname, unsigned port = 80) -> bool;
-  inline auto upload(const httpRequest& request) -> bool;
-  inline auto download(const httpRequest& request) -> httpResponse;
+  inline auto upload(const Request& request) -> bool;
+  inline auto download(const Request& request) -> Response;
   inline auto close() -> void;
-  ~httpClient() { close(); }
+  ~Client() { close(); }
 
 private:
   signed fd = -1;
   addrinfo* info = nullptr;
 };
 
-auto httpClient::open(const string& hostname, unsigned port) -> bool {
+auto Client::open(const string& hostname, unsigned port) -> bool {
   addrinfo hint = {0};
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;
@@ -32,17 +32,17 @@ auto httpClient::open(const string& hostname, unsigned port) -> bool {
   return true;
 }
 
-auto httpClient::upload(const httpRequest& request) -> bool {
-  return httpRole::upload(fd, request);
+auto Client::upload(const Request& request) -> bool {
+  return Role::upload(fd, request);
 }
 
-auto httpClient::download(const httpRequest& request) -> httpResponse {
-  httpResponse response(request);
-  httpRole::download(fd, response);
+auto Client::download(const Request& request) -> Response {
+  Response response(request);
+  Role::download(fd, response);
   return response;
 }
 
-auto httpClient::close() -> void {
+auto Client::close() -> void {
   if(fd) {
     ::close(fd);
     fd = -1;
@@ -54,6 +54,6 @@ auto httpClient::close() -> void {
   }
 }
 
-}
+}}
 
 #endif

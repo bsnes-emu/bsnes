@@ -31,8 +31,8 @@ struct PNG {
   uint8_t* data = nullptr;
   unsigned size = 0;
 
-  inline bool decode(const string& filename);
-  inline bool decode(const uint8_t* sourceData, unsigned sourceSize);
+  inline bool load(const string& filename);
+  inline bool load(const uint8_t* sourceData, unsigned sourceSize);
   inline unsigned readbits(const uint8_t*& data);
   unsigned bitpos = 0;
 
@@ -54,14 +54,14 @@ protected:
   inline unsigned read(const uint8_t* data, unsigned length);
 };
 
-bool PNG::decode(const string& filename) {
+bool PNG::load(const string& filename) {
   if(auto memory = file::read(filename)) {
-    return decode(memory.data(), memory.size());
+    return load(memory.data(), memory.size());
   }
   return false;
 }
 
-bool PNG::decode(const uint8_t* sourceData, unsigned sourceSize) {
+bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
   if(sourceSize < 8) return false;
   if(read(sourceData + 0, 4) != 0x89504e47) return false;
   if(read(sourceData + 4, 4) != 0x0d0a1a0a) return false;

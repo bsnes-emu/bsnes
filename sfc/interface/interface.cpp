@@ -66,9 +66,9 @@ unsigned Interface::group(unsigned id) {
   case ID::SDD1RAM:
   case ID::OBC1RAM:
   case ID::SuperGameBoyBootROM:
-  case ID::BsxROM:
-  case ID::BsxRAM:
-  case ID::BsxPSRAM:
+  case ID::MCCROM:
+  case ID::MCCRAM:
+  case ID::MCCPSRAM:
     return 1;
   case ID::SuperGameBoy:
   case ID::SuperGameBoyManifest:
@@ -96,10 +96,10 @@ unsigned Interface::group(unsigned id) {
 
 void Interface::load(unsigned id) {
   if(id == ID::SuperFamicom) cartridge.load();
-  if(id == ID::SuperGameBoy) cartridge.load_super_game_boy();
-  if(id == ID::Satellaview) cartridge.load_satellaview();
-  if(id == ID::SufamiTurboSlotA) cartridge.load_sufami_turbo_a();
-  if(id == ID::SufamiTurboSlotB) cartridge.load_sufami_turbo_b();
+  if(id == ID::SuperGameBoy) cartridge.loadSuperGameBoy();
+  if(id == ID::Satellaview) cartridge.loadSatellaview();
+  if(id == ID::SufamiTurboSlotA) cartridge.loadSufamiTurboA();
+  if(id == ID::SufamiTurboSlotB) cartridge.loadSufamiTurboB();
 }
 
 void Interface::save() {
@@ -193,9 +193,9 @@ void Interface::load(unsigned id, const stream& stream) {
     stream.read(GameBoy::system.bootROM.sgb, min(stream.size(), 256u));
   }
 
-  if(id == ID::BsxROM) bsxcartridge.rom.read(stream);
-  if(id == ID::BsxRAM) bsxcartridge.ram.read(stream);
-  if(id == ID::BsxPSRAM) bsxcartridge.psram.read(stream);
+  if(id == ID::MCCROM) mcc.rom.read(stream);
+  if(id == ID::MCCRAM) mcc.ram.read(stream);
+  if(id == ID::MCCPSRAM) mcc.psram.read(stream);
 
   if(id == ID::SuperGameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
 
@@ -260,8 +260,8 @@ void Interface::save(unsigned id, const stream& stream) {
 
   if(id == ID::SuperGameBoyRAM) stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
 
-  if(id == ID::BsxRAM) stream.write(bsxcartridge.ram.data(), bsxcartridge.ram.size());
-  if(id == ID::BsxPSRAM) stream.write(bsxcartridge.psram.data(), bsxcartridge.psram.size());
+  if(id == ID::MCCRAM) stream.write(mcc.ram.data(), mcc.ram.size());
+  if(id == ID::MCCPSRAM) stream.write(mcc.psram.data(), mcc.psram.size());
 
   if(id == ID::SufamiTurboSlotARAM) stream.write(sufamiturboA.ram.data(), sufamiturboA.ram.size());
   if(id == ID::SufamiTurboSlotBRAM) stream.write(sufamiturboB.ram.data(), sufamiturboB.ram.size());
@@ -289,14 +289,14 @@ void Interface::run() {
 }
 
 bool Interface::rtc() {
-  if(cartridge.has_epsonrtc()) return true;
-  if(cartridge.has_sharprtc()) return true;
+  if(cartridge.hasEpsonRTC()) return true;
+  if(cartridge.hasSharpRTC()) return true;
   return false;
 }
 
 void Interface::rtcsync() {
-  if(cartridge.has_epsonrtc()) epsonrtc.sync();
-  if(cartridge.has_sharprtc()) sharprtc.sync();
+  if(cartridge.hasEpsonRTC()) epsonrtc.sync();
+  if(cartridge.hasSharpRTC()) sharprtc.sync();
 }
 
 serializer Interface::serialize() {
@@ -312,7 +312,7 @@ void Interface::cheatSet(const lstring& list) {
   cheat.reset();
 
   //Super Game Boy
-  if(cartridge.has_gb_slot()) {
+  if(cartridge.hasICD2()) {
     GameBoy::cheat.reset();
     for(auto& codeset : list) {
       lstring codes = codeset.split("+");

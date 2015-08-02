@@ -3,10 +3,10 @@
 
 #include <nall/http/message.hpp>
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpRequest : httpMessage {
-  using type = httpRequest;
+struct Request : Message {
+  using type = Request;
 
   enum class RequestType : unsigned { None, Head, Get, Post };
 
@@ -28,9 +28,9 @@ struct httpRequest : httpMessage {
   auto path() const -> string { return _path; }
   auto setPath(const string& value) -> void { _path = value; }
 
-  auto appendHeader(const string& name, const string& value = "") -> type& { return httpMessage::appendHeader(name, value), *this; }
-  auto removeHeader(const string& name) -> type& { return httpMessage::removeHeader(name), *this; }
-  auto setHeader(const string& name, const string& value = "") -> type& { return httpMessage::setHeader(name, value), *this; }
+  auto appendHeader(const string& name, const string& value = "") -> type& { return Message::appendHeader(name, value), *this; }
+  auto removeHeader(const string& name) -> type& { return Message::removeHeader(name), *this; }
+  auto setHeader(const string& name, const string& value = "") -> type& { return Message::setHeader(name, value), *this; }
 
   auto cookie(const string& name) const -> string { return _cookie.get(name); }
   auto setCookie(const string& name, const string& value = "") -> void { _cookie.set(name, value); }
@@ -46,12 +46,12 @@ struct httpRequest : httpMessage {
   string _ip;
   RequestType _requestType = RequestType::None;
   string _path;
-  httpVariables _cookie;
-  httpVariables _get;
-  httpVariables _post;
+  Variables _cookie;
+  Variables _get;
+  Variables _post;
 };
 
-auto httpRequest::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
   if(!callback) return false;
   string output;
 
@@ -79,7 +79,7 @@ auto httpRequest::head(const function<bool (const uint8_t*, unsigned)>& callback
   return callback(output.binary(), output.size());
 }
 
-auto httpRequest::setHead() -> bool {
+auto Request::setHead() -> bool {
   lstring headers = _head.split("\n");
   string request = headers.takeFirst().rtrim("\r");
   string requestHost;
@@ -130,7 +130,7 @@ auto httpRequest::setHead() -> bool {
   return true;
 }
 
-auto httpRequest::body(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Request::body(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
   if(!callback) return false;
 
   if(_body) {
@@ -140,7 +140,7 @@ auto httpRequest::body(const function<bool (const uint8_t*, unsigned)>& callback
   return true;
 }
 
-auto httpRequest::setBody() -> bool {
+auto Request::setBody() -> bool {
   if(requestType() == RequestType::Post) {
     if(header("Content-Type").iequals("application/x-www-form-urlencoded")) {
       for(auto& block : _body.split("&")) {
@@ -153,6 +153,6 @@ auto httpRequest::setBody() -> bool {
   return true;
 }
 
-}
+}}
 
 #endif

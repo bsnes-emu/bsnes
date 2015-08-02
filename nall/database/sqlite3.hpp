@@ -31,6 +31,14 @@ struct SQLite3 {
       return *this;
     }
 
+    explicit operator bool() {
+      return sqlite3_data_count(statement());
+    }
+
+    auto columns() -> unsigned {
+      return sqlite3_column_count(statement());
+    }
+
     auto integer(unsigned column) -> int64_t {
       return sqlite3_column_int64(statement(), column);
     }
@@ -47,7 +55,7 @@ struct SQLite3 {
       string result;
       if(auto text = sqlite3_column_text(statement(), column)) {
         result.resize(sqlite3_column_bytes(statement(), column));
-        memory::copy(result.pointer(), text, result.size());
+        memory::copy(result.get(), text, result.size());
       }
       return result;
     }

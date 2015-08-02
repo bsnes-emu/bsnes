@@ -1,12 +1,12 @@
 struct SatellaviewBaseUnit : Memory {
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  auto read(unsigned addr) -> uint8;
+  auto write(unsigned addr, uint8 data) -> void;
 
 private:
   struct {

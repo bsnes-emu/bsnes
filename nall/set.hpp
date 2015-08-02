@@ -29,13 +29,26 @@ template<typename T> struct set {
   node_t* root = nullptr;
   unsigned nodes = 0;
 
-  auto operator=(const set& source) -> set& { copy(source); return *this; }
-  auto operator=(set&& source) -> set& { move(std::move(source)); return *this; }
+  set() = default;
   set(const set& source) { operator=(source); }
   set(set&& source) { operator=(move(source)); }
   set(std::initializer_list<T> list) { for(auto& value : list) insert(value); }
-  set() = default;
   ~set() { reset(); }
+
+  auto operator=(const set& source) -> set& {
+    reset();
+    copy(root, source.root);
+    nodes = source.nodes;
+    return *this;
+  }
+
+  auto operator=(set&& source) -> set& {
+    root = source.root;
+    nodes = source.nodes;
+    source.root = nullptr;
+    source.nodes = 0;
+    return *this;
+  }
 
   auto size() const -> unsigned { return nodes; }
   auto empty() const -> bool { return nodes == 0; }
@@ -63,9 +76,9 @@ template<typename T> struct set {
     return v->value;
   }
 
-  template<typename... Args> auto insert(const T& value, Args&&... args) -> bool {
+  template<typename... P> auto insert(const T& value, P&&... p) -> bool {
     bool result = insert(value);
-    insert(forward<Args>(args)...) | result;
+    insert(forward<P>(p)...) | result;
     return result;
   }
 
@@ -77,9 +90,9 @@ template<typename T> struct set {
     return size() < count;
   }
 
-  template<typename... Args> auto remove(const T& value, Args&&... args) -> bool {
+  template<typename... P> auto remove(const T& value, P&&... p) -> bool {
     bool result = remove(value);
-    return remove(forward<Args>(args)...) | result;
+    return remove(forward<P>(p)...) | result;
   }
 
   struct base_iterator {
@@ -139,25 +152,12 @@ private:
     node = nullptr;
   }
 
-  auto copy(const set& source) -> void {
-    reset();
-    copy(root, source.root);
-    nodes = source.nodes;
-  }
-
   auto copy(node_t*& target, const node_t* source) -> void {
     if(!source) return;
     target = new node_t(source->value);
     target->red = source->red;
     copy(target->link[0], source->link[0]);
     copy(target->link[1], source->link[1]);
-  }
-
-  auto move(set&& source) -> void {
-    root = source.root;
-    nodes = source.nodes;
-    source.root = nullptr;
-    source.nodes = 0;
   }
 
   auto find(node_t* node, const T& value) const -> node_t* {

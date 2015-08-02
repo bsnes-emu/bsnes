@@ -182,7 +182,7 @@ protected:
 
 public:
   inline string();
-  inline auto pointer() -> char*;
+  inline auto get() -> char*;
   inline auto data() const -> const char*;
   inline auto reset() -> type&;
   inline auto reserve(unsigned) -> type&;
@@ -214,8 +214,8 @@ public:
   string(const string& source) : string() { operator=(source); }
   string(string&& source) : string() { operator=(std::move(source)); }
 
-  auto begin() -> char* { return &pointer()[0]; }
-  auto end() -> char* { return &pointer()[size()]; }
+  auto begin() -> char* { return &get()[0]; }
+  auto end() -> char* { return &get()[size()]; }
   auto begin() const -> const char* { return &data()[0]; }
   auto end() const -> const char* { return &data()[size()]; }
 

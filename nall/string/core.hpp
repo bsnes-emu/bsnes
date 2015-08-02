@@ -43,7 +43,7 @@ template<typename T> auto _append(string& self, const stringify<T>& source) -> s
   unsigned size = self.size();
   unsigned length = source.size();
   self.resize(size + length);
-  memory::copy(self.pointer() + size, source.data(), length);
+  memory::copy(self.get() + size, source.data(), length);
   return self;
 }
 

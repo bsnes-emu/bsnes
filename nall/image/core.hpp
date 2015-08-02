@@ -26,11 +26,17 @@ image::image(const string& filename) {
 }
 
 image::image(const vector<uint8_t>& buffer) {
-  loadPNG(buffer.data(), buffer.size());
+  auto data = buffer.data();
+  auto size = buffer.size();
+  if(0);
+  else if(data[0] == 'B' && data[1] == 'M') loadBMP(data, size);
+  else if(data[1] == 'P' && data[2] == 'N' && data[3] == 'G') loadPNG(data, size);
 }
 
 image::image(const uint8_t* data, unsigned size) {
-  loadPNG(data, size);
+  if(0);
+  else if(data[0] == 'B' && data[1] == 'M') loadBMP(data, size);
+  else if(data[1] == 'P' && data[2] == 'N' && data[3] == 'G') loadPNG(data, size);
 }
 
 image::image() {

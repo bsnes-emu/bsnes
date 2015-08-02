@@ -46,24 +46,24 @@ auto MessageDialog::warning(const lstring& buttons) -> string {
 auto MessageDialog::_run() -> string {
   Window window;
     VerticalLayout layout{&window};
-      HorizontalLayout messageLayout{&layout, Size{~0, 0}, 8};
-        Canvas messageIcon{&messageLayout, Size{16, 16}, 8};
+      HorizontalLayout messageLayout{&layout, Size{~0, 0}, 5};
+        Canvas messageIcon{&messageLayout, Size{16, 16}, 5};
         Label messageText{&messageLayout, Size{~0, 0}};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
         Widget controlSpacer{&controlLayout, Size{~0, 0}};
 
-  layout.setMargin(8);
+  layout.setMargin(5);
   messageIcon.setIcon(state.icon);
   messageText.setText(state.text);
   for(auto n : range(state.buttons)) {
-    Button button{&controlLayout, Size{80, 0}, 8};
+    Button button{&controlLayout, Size{80, 0}, 5};
     button.onActivate([&, n] { state.response = state.buttons[n]; window.setModal(false); });
     button.setText(state.buttons[n]);
     button.setFocused();  //the last button will have effective focus
   }
 
-  signed widthMessage = 8 + 16 + 8 + Font::size(Font::sans(), state.text).width() + 8;
-  signed widthButtons = 8 + state.buttons.size() * 88;
+  signed widthMessage = 5 + 16 + 5 + Font::size(Font::sans(), state.text).width() + 5;
+  signed widthButtons = 5 + state.buttons.size() * 85;
   signed width = max(320, widthMessage, widthButtons);
 
   window.onClose([&] { window.setModal(false); });

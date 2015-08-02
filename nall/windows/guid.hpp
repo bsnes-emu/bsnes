@@ -13,15 +13,15 @@ inline string guid() {
   for(unsigned n = 0; n < 256; n++) lfsr();
 
   string output;
-  for(unsigned n = 0; n < 4; n++) output.append(hex<2>(lfsr()));
+  for(unsigned n = 0; n < 4; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex<2>(lfsr()));
+  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex<2>(lfsr()));
+  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex<2>(lfsr()));
+  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 6; n++) output.append(hex<2>(lfsr()));
+  for(unsigned n = 0; n < 6; n++) output.append(hex(lfsr(), 2L));
   return {"{", output, "}"};
 }
 

@@ -107,7 +107,7 @@ struct InputJoypadUdev {
       play.type = EV_FF;
       play.code = jp.effectID;
       play.value = enable;
-      write(jp.fd, &play, sizeof(input_event));
+      auto unused = write(jp.fd, &play, sizeof(input_event));
       return true;
     }
 

@@ -35,6 +35,11 @@ struct any {
     return static_cast<holder<typename remove_reference<T>::type>*>(container)->value;
   }
 
+  template<typename T> auto get(const T& fallback) const -> const T& {
+    if(!is<T>()) return fallback;
+    return static_cast<holder<typename remove_reference<T>::type>*>(container)->value;
+  }
+
   template<typename T> auto operator=(const T& value) -> any& {
     using auto_t = type_if<is_array<T>, typename remove_extent<typename add_const<T>::type>::type*, T>;
 

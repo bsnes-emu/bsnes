@@ -13,17 +13,17 @@ struct BrowserDialogWindow {
 private:
   Window window;
     VerticalLayout layout{&window};
-      HorizontalLayout pathLayout{&layout, Size{~0, 0}, 8};
+      HorizontalLayout pathLayout{&layout, Size{~0, 0}, 5};
         LineEdit pathName{&pathLayout, Size{~0, 0}, 0};
         Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathRefresh{&pathLayout, Size{0, 0}, 0};
         Button pathUp{&pathLayout, Size{0, 0}, 0};
-      ListView view{&layout, Size{~0, ~0}, 8};
+      ListView view{&layout, Size{~0, ~0}, 5};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-        ComboButton filterList{&controlLayout, Size{120, 0}, 8};
-        LineEdit fileName{&controlLayout, Size{~0, 0}, 8};
-        Button acceptButton{&controlLayout, Size{80, 0}, 8};
-        Button cancelButton{&controlLayout, Size{80, 0}, 8};
+        ComboButton filterList{&controlLayout, Size{120, 0}, 5};
+        LineEdit fileName{&controlLayout, Size{~0, 0}, 5};
+        Button acceptButton{&controlLayout, Size{80, 0}, 5};
+        Button cancelButton{&controlLayout, Size{80, 0}, 5};
 
   BrowserDialog::State& state;
   vector<lstring> filters;
@@ -116,7 +116,7 @@ auto BrowserDialogWindow::isMatch(const string& name) -> bool {
 auto BrowserDialogWindow::run() -> lstring {
   state.response.reset();
 
-  layout.setMargin(8);
+  layout.setMargin(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
   pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
   pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
@@ -175,7 +175,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
-      .append(ListViewCell().setText(octal(storage::mode({path, content}) & 0777, 3L)))
+      .append(ListViewCell().setText(octal(file_system_object::mode({path, content}) & 0777, 3L)))
     );
   }
 
@@ -186,7 +186,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
-      .append(ListViewCell().setText(octal(storage::mode({path, content}) & 0777, 3L)))
+      .append(ListViewCell().setText(octal(file_system_object::mode({path, content}) & 0777, 3L)))
     );
   }
 

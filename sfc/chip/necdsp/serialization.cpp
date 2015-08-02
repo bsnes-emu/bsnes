@@ -2,7 +2,7 @@
 
 vector<uint8> NECDSP::firmware() {
   vector<uint8> buffer;
-  if(cartridge.has_necdsp() == false) return buffer;
+  if(!cartridge.hasNECDSP()) return buffer;
   unsigned plength = 2048, dlength = 1024;
   if(revision == Revision::uPD96050) plength = 16384, dlength = 2048;
   buffer.reserve(plength * 3 + dlength * 2);

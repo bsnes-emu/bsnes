@@ -2,7 +2,7 @@ sfc_objects := sfc-interface sfc-system sfc-controller
 sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
 sfc_objects += sfc-satellaviewbase
-sfc_objects += sfc-icd2 sfc-bsx sfc-nss sfc-event
+sfc_objects += sfc-icd2 sfc-mcc sfc-nss sfc-event
 sfc_objects += sfc-sa1 sfc-superfx
 sfc_objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
 sfc_objects += sfc-epsonrtc sfc-sharprtc
@@ -47,7 +47,7 @@ obj/sfc-ppu.o:             $(sfcppu)/ppu.cpp $(call rwildcard,$(sfcppu)/)
 obj/sfc-satellaviewbase.o: $(sfc)/base/satellaview/satellaview.cpp $(call rwildcard,$(sfc)/base/satellaview/)
 
 obj/sfc-icd2.o:            $(sfc)/chip/icd2/icd2.cpp $(call rwildcard,$(sfc)/chip/icd2/)
-obj/sfc-bsx.o:             $(sfc)/chip/bsx/bsx.cpp $(call rwildcard,$(sfc)/chip/bsx/)
+obj/sfc-mcc.o:             $(sfc)/chip/mcc/mcc.cpp $(call rwildcard,$(sfc)/chip/mcc/)
 obj/sfc-nss.o:             $(sfc)/chip/nss/nss.cpp $(call rwildcard,$(sfc)/chip/nss/)
 obj/sfc-event.o:           $(sfc)/chip/event/event.cpp $(call rwildcard,$(sfc)/chip/event/)
 

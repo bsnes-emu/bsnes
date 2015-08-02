@@ -3,13 +3,13 @@
 
 #include <nall/http/message.hpp>
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpResponse : httpMessage {
-  using type = httpResponse;
+struct Response : Message {
+  using type = Response;
 
-  httpResponse() = default;
-  httpResponse(const httpRequest& request) { setRequest(request); }
+  Response() = default;
+  Response(const Request& request) { setRequest(request); }
 
   explicit operator bool() const { return responseType() != 0; }
   auto operator()(unsigned responseType) -> type& { return setResponseType(responseType); }
@@ -20,15 +20,15 @@ struct httpResponse : httpMessage {
   inline auto body(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool;
   inline auto setBody() -> bool;
 
-  auto request() const -> const httpRequest* { return _request; }
-  auto setRequest(const httpRequest& value) -> type& { _request = &value; return *this; }
+  auto request() const -> const Request* { return _request; }
+  auto setRequest(const Request& value) -> type& { _request = &value; return *this; }
 
   auto responseType() const -> unsigned { return _responseType; }
   auto setResponseType(unsigned value) -> type& { _responseType = value; return *this; }
 
-  auto appendHeader(const string& name, const string& value = "") -> type& { return httpMessage::appendHeader(name, value), *this; }
-  auto removeHeader(const string& name) -> type& { return httpMessage::removeHeader(name), *this; }
-  auto setHeader(const string& name, const string& value = "") -> type& { return httpMessage::setHeader(name, value), *this; }
+  auto appendHeader(const string& name, const string& value = "") -> type& { return Message::appendHeader(name, value), *this; }
+  auto removeHeader(const string& name) -> type& { return Message::removeHeader(name), *this; }
+  auto setHeader(const string& name, const string& value = "") -> type& { return Message::setHeader(name, value), *this; }
 
   auto hasData() const -> bool { return (bool)_data; }
   auto data() const -> const vector<uint8_t>& { return _data; }
@@ -49,14 +49,14 @@ struct httpResponse : httpMessage {
   inline auto findResponseType() const -> string;
   inline auto setFileETag() -> void;
 
-  const httpRequest* _request = nullptr;
+  const Request* _request = nullptr;
   unsigned _responseType = 0;
   vector<uint8_t> _data;
   string _file;
   string _text;
 };
 
-auto httpResponse::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Response::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
   if(!callback) return false;
   string output;
 
@@ -91,7 +91,7 @@ auto httpResponse::head(const function<bool (const uint8_t*, unsigned)>& callbac
   return callback(output.binary(), output.size());
 }
 
-auto httpResponse::setHead() -> bool {
+auto Response::setHead() -> bool {
   lstring headers = _head.split("\n");
   string response = headers.takeFirst().rtrim("\r");
 
@@ -111,7 +111,7 @@ auto httpResponse::setHead() -> bool {
   return true;
 }
 
-auto httpResponse::body(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Response::body(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
   if(!callback) return false;
   if(!hasBody()) return true;
   bool chunked = header("Transfer-Encoding") == "chunked";
@@ -143,13 +143,13 @@ auto httpResponse::body(const function<bool (const uint8_t*, unsigned)>& callbac
   return true;
 }
 
-auto httpResponse::setBody() -> bool {
+auto Response::setBody() -> bool {
   return true;
 }
 
-auto httpResponse::hasBody() const -> bool {
+auto Response::hasBody() const -> bool {
   if(auto request = this->request()) {
-    if(request->requestType() == httpRequest::RequestType::Head) return false;
+    if(request->requestType() == Request::RequestType::Head) return false;
   }
   if(responseType() == 301) return false;
   if(responseType() == 302) return false;
@@ -159,7 +159,7 @@ auto httpResponse::hasBody() const -> bool {
   return true;
 }
 
-auto httpResponse::findContentLength() const -> unsigned {
+auto Response::findContentLength() const -> unsigned {
   if(auto contentLength = header("Content-Length")) return decimal(contentLength);
   if(_body) return _body.size();
   if(hasData()) return data().size();
@@ -168,14 +168,14 @@ auto httpResponse::findContentLength() const -> unsigned {
   return findResponseType().size();
 }
 
-auto httpResponse::findContentType() const -> string {
+auto Response::findContentType() const -> string {
   if(auto contentType = header("Content-Type")) return contentType;
   if(hasData()) return "application/octet-stream";
   if(hasFile()) return findContentType(file().suffixname());
   return "text/html; charset=utf-8";
 }
 
-auto httpResponse::findContentType(const string& s) const -> string {
+auto Response::findContentType(const string& s) const -> string {
   if(s == ".7z"  ) return "application/x-7z-compressed";
   if(s == ".avi" ) return "video/avi";
   if(s == ".bml" ) return "text/plain; charset=utf-8";
@@ -209,7 +209,7 @@ auto httpResponse::findContentType(const string& s) const -> string {
   return "application/octet-stream";  //binary
 }
 
-auto httpResponse::findResponseType() const -> string {
+auto Response::findResponseType() const -> string {
   switch(responseType()) {
   case 200: return "200 OK";
   case 301: return "301 Moved Permanently";
@@ -227,13 +227,13 @@ auto httpResponse::findResponseType() const -> string {
   return "501 Not Implemented";
 }
 
-auto httpResponse::setData(const vector<uint8_t>& value) -> type& {
+auto Response::setData(const vector<uint8_t>& value) -> type& {
   _data = value;
   setHeader("Content-Length", value.size());
   return *this;
 }
 
-auto httpResponse::setFile(const string& value) -> type& {
+auto Response::setFile(const string& value) -> type& {
   _file = value;
   string eTag = {"\"", string::datetime(file::timestamp(value, file::time::modify)), "\""};
   setHeader("Content-Length", file::size(value));
@@ -242,12 +242,12 @@ auto httpResponse::setFile(const string& value) -> type& {
   return *this;
 }
 
-auto httpResponse::setText(const string& value) -> type& {
+auto Response::setText(const string& value) -> type& {
   _text = value;
   setHeader("Content-Length", value.size());
   return *this;
 }
 
-}
+}}
 
 #endif

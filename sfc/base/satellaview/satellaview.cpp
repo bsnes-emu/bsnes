@@ -5,10 +5,10 @@ namespace SuperFamicom {
 
 SatellaviewBaseUnit satellaviewbaseunit;
 
-void SatellaviewBaseUnit::init() {
+auto SatellaviewBaseUnit::init() -> void {
 }
 
-void SatellaviewBaseUnit::load() {
+auto SatellaviewBaseUnit::load() -> void {
   bus.map(
     {&SatellaviewBaseUnit::read, &satellaviewbaseunit},
     {&SatellaviewBaseUnit::write, &satellaviewbaseunit},
@@ -21,17 +21,17 @@ void SatellaviewBaseUnit::load() {
   );
 }
 
-void SatellaviewBaseUnit::unload() {
+auto SatellaviewBaseUnit::unload() -> void {
 }
 
-void SatellaviewBaseUnit::power() {
+auto SatellaviewBaseUnit::power() -> void {
 }
 
-void SatellaviewBaseUnit::reset() {
+auto SatellaviewBaseUnit::reset() -> void {
   memset(&regs, 0x00, sizeof regs);
 }
 
-uint8 SatellaviewBaseUnit::read(unsigned addr) {
+auto SatellaviewBaseUnit::read(unsigned addr) -> uint8 {
   addr &= 0xffff;
 
   switch(addr) {
@@ -89,7 +89,7 @@ uint8 SatellaviewBaseUnit::read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SatellaviewBaseUnit::write(unsigned addr, uint8 data) {
+auto SatellaviewBaseUnit::write(unsigned addr, uint8 data) -> void {
   addr &= 0xffff;
 
   switch(addr) {

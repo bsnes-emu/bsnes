@@ -28,20 +28,26 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
   scan(contents, pathname, pathname);
 
   for(auto& name : contents) {
-    if(name.endsWith("/")) {
-      name.rtrim("/");
-      beat.writevu(0 | ((name.length() - 1) << 1));
-      beat.writes(name);
-    } else {
-      File input{{pathname, name}, file::mode::read};
-      if(!input) return false;
+    string location{pathname, name};
+    bool directory = name.endsWith("/");
+    bool readable = file_system_object::readable(location);
+    bool writable = file_system_object::writable(location);
+    bool executable = file_system_object::executable(location);
+    unsigned info = directory << 0 | readable << 1 | writable << 2 | executable << 3 | (name.rtrim("/").size() - 1) << 4;
 
-      beat.writevu(1 | ((name.length() - 1) << 1));
-      beat.writes(name);
+    beat.writevu(info);
+    beat.writes(name);
+    if(directory) continue;
+
+    File input{location, file::mode::read};
+    if(input) {
       auto size = input.size();
       beat.writevu(size);
       while(size--) beat.write(input.read());
       beat.writel(input.checksum.value(), 4);
+    } else {
+      beat.writevu(0);
+      beat.writel(0x00000000, 4);
     }
   }
 
@@ -61,14 +67,20 @@ auto Archive::unpack(const string& beatname, const string& pathname) -> bool {
 
   directory::create(pathname);
   while(beat.offset() < beat.size() - 4) {
-    auto data = beat.readvu();
-    auto name = beat.reads((data >> 1) + 1);
+    auto info = beat.readvu();
+    auto name = beat.reads((info >> 4) + 1);
     if(name.find("\\") || name.find("../")) return false;  //block path exploits
 
-    if((data & 1) == 0) {
-      directory::create({pathname, name});
+    string location{pathname, name};
+    bool directory = info & 1;
+    bool readable = info & 2;
+    bool writable = info & 4;
+    bool executable = info & 8;
+
+    if(directory) {
+      if(!nall::directory::create(location)) return false;
     } else {
-      File output{{pathname, name}, file::mode::write};
+      File output{location, file::mode::write};
       if(!output) return false;
 
       auto size = beat.readvu();
@@ -90,9 +102,10 @@ auto Archive::extract(const string& beatname, const string& filename) -> vector<
   beat.seek(beat.offset() + size);
 
   while(beat.offset() < beat.size() - 4) {
-    auto data = beat.readvu();
-    auto name = beat.reads((data >> 1) + 1);
-    if((data & 1) == 0) continue;
+    auto info = beat.readvu();
+    auto name = beat.reads((info >> 4) + 1);
+    if(info & 1) continue;  //ignore directories
+
     auto size = beat.readvu();
     if(name != filename) {
       beat.seek(beat.offset() + size + 4);

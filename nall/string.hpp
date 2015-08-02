@@ -15,7 +15,6 @@
 #include <nall/function.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/memory.hpp>
-#include <nall/method.hpp>
 #include <nall/shared-pointer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/utility.hpp>

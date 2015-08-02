@@ -1,5 +1,5 @@
-#ifndef NALL_ZIP_HPP
-#define NALL_ZIP_HPP
+#ifndef NALL_ENCODE_ZIP_HPP
+#define NALL_ENCODE_ZIP_HPP
 
 //creates uncompressed ZIP archives
 
@@ -19,7 +19,7 @@ struct ZIP {
 
   //append path: append("path/");
   //append file: append("path/file", data, size);
-  void append(string filename, const uint8_t* data = nullptr, unsigned size = 0u) {
+  auto append(string filename, const uint8_t* data = nullptr, unsigned size = 0u) -> void {
     filename.transform("\\", "/");
     uint32_t checksum = Hash::CRC32(data, size).value();
     directory.append({filename, checksum, size, fp.offset()});

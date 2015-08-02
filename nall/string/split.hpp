@@ -18,7 +18,7 @@ template<bool Insensitive, bool Quoted> auto _split(lstring& self, rstring sourc
 
     string& s = self(matches);
     s.resize(n - base);
-    memory::copy(s.pointer(), p + base, n - base);
+    memory::copy(s.get(), p + base, n - base);
 
     n += find.size();
     base = n;
@@ -27,7 +27,7 @@ template<bool Insensitive, bool Quoted> auto _split(lstring& self, rstring sourc
 
   string& s = self(matches);
   s.resize(size - base);
-  memory::copy(s.pointer(), p + base, size - base);
+  memory::copy(s.get(), p + base, size - base);
 
   return self;
 }

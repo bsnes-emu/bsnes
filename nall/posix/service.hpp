@@ -83,7 +83,7 @@ auto service::receive() -> string {
     if(auto data = shared.acquire()) {
       if(*data) {
         command.resize(4095);
-        memory::copy(command.pointer(), data, 4095);
+        memory::copy(command.get(), data, 4095);
         memory::fill(data, 4096);
       }
       shared.release();

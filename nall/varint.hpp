@@ -26,9 +26,9 @@ struct varint {
 
   auto readvs() -> intmax_t {
     uintmax_t data = readvu();
-    bool sign = data & 1;
+    bool negate = data & 1;
     data >>= 1;
-    if(sign) data = -data;
+    if(negate) data = ~data;
     return data;
   }
 
@@ -43,9 +43,9 @@ struct varint {
   }
 
   auto writevs(intmax_t data) -> void {
-    bool sign = data < 0;
-    if(sign) data = -data;
-    data = (data << 1) | sign;
+    bool negate = data < 0;
+    if(negate) data = ~data;
+    data = (data << 1) | negate;
     writevu(data);
   }
 };

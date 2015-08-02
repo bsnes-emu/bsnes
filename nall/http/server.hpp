@@ -4,17 +4,17 @@
 #include <nall/service.hpp>
 #include <nall/http/role.hpp>
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpServer : httpRole, service {
+struct Server : Role, service {
   inline auto open(unsigned port = 8080, const string& serviceName = "", const string& command = "") -> bool;
-  inline auto main(const function<httpResponse (httpRequest&)>& function = {}) -> void;
+  inline auto main(const function<Response (Request&)>& function = {}) -> void;
   inline auto scan() -> string;
   inline auto close() -> void;
-  ~httpServer() { close(); }
+  ~Server() { close(); }
 
 private:
-  function<httpResponse (httpRequest&)> callback;
+  function<Response (Request&)> callback;
   std::atomic<signed> connections{0};
 
   signed fd4 = -1;
@@ -32,7 +32,7 @@ private:
   auto ipv6_scan() -> bool;
 };
 
-auto httpServer::open(unsigned port, const string& serviceName, const string& command) -> bool {
+auto Server::open(unsigned port, const string& serviceName, const string& command) -> bool {
   if(serviceName) {
     if(!service::command(serviceName, command)) return false;
   }
@@ -94,11 +94,11 @@ auto httpServer::open(unsigned port, const string& serviceName, const string& co
   return ipv4() || ipv6();
 }
 
-auto httpServer::main(const function<httpResponse (httpRequest&)>& function) -> void {
+auto Server::main(const function<Response (Request&)>& function) -> void {
   callback = function;
 }
 
-auto httpServer::scan() -> string {
+auto Server::scan() -> string {
   if(auto command = service::receive()) return command;
   if(connections >= settings.connectionLimit) return "busy";
   if(ipv4() && ipv4_scan()) return "ok";
@@ -106,7 +106,7 @@ auto httpServer::scan() -> string {
   return "idle";
 }
 
-auto httpServer::ipv4_scan() -> bool {
+auto Server::ipv4_scan() -> bool {
   struct pollfd query = {0};
   query.fd = fd4;
   query.events = POLLIN;
@@ -127,7 +127,7 @@ auto httpServer::ipv4_scan() -> bool {
 
       uint32_t ip = ntohl(settings.sin_addr.s_addr);
 
-      httpRequest request;
+      Request request;
       request._ipv6 = false;
       request._ip = {
         (uint8_t)(ip >> 24), ".",
@@ -140,7 +140,7 @@ auto httpServer::ipv4_scan() -> bool {
         auto response = callback(request);
         upload(clientfd, response);
       } else {
-        upload(clientfd, httpResponse());  //"501 Not Implemented"
+        upload(clientfd, Response());  //"501 Not Implemented"
       }
 
       ::close(clientfd);
@@ -153,7 +153,7 @@ auto httpServer::ipv4_scan() -> bool {
   return false;
 }
 
-auto httpServer::ipv6_scan() -> bool {
+auto Server::ipv6_scan() -> bool {
   struct pollfd query = {0};
   query.fd = fd6;
   query.events = POLLIN;
@@ -172,23 +172,41 @@ auto httpServer::ipv6_scan() -> bool {
       clientfd = accept(fd6, (struct sockaddr*)&settings, &socklen);
       if(clientfd < 0) return;
 
-      unsigned char* ip = settings.sin6_addr.s6_addr;
-      uint16_t ipSegment[8] = {0};
+      uint8_t* ip = settings.sin6_addr.s6_addr;
+      uint16_t ipSegment[8];
       for(auto n : range(8)) ipSegment[n] = ip[n * 2 + 0] * 256 + ip[n * 2 + 1];
 
-      httpRequest request;
+      Request request;
       request._ipv6 = true;
+      //RFC5952 IPv6 encoding: the first longest 2+ consecutive zero-sequence is compressed to "::"
+      signed zeroOffset  = -1;
+      signed zeroLength  =  0;
+      signed zeroCounter =  0;
       for(auto n : range(8)) {
-        uint16_t value = ip[n * 2 + 0] * 256 + ip[n * 2 + 1];
-        request._ip.append(hex(value, 4L));
-        if(n != 7) request._ip.append(":");
+        uint16_t value = ipSegment[n];
+        if(value == 0) zeroCounter++;
+        if(zeroCounter > zeroLength) {
+          zeroLength = zeroCounter;
+          zeroOffset = 1 + n - zeroLength;
+        }
+        if(value != 0) zeroCounter = 0;
+      }
+      if(zeroLength == 1) zeroOffset = -1;
+      for(unsigned n = 0; n < 8;) {
+        if(n == zeroOffset) {
+          request._ip.append(n == 0 ? "::" : ":");
+          n += zeroLength;
+        } else {
+          uint16_t value = ipSegment[n];
+          request._ip.append(hex(value), n++ != 7 ? ":" : "");
+        }
       }
 
       if(download(clientfd, request) && callback) {
         auto response = callback(request);
         upload(clientfd, response);
       } else {
-        upload(clientfd, httpResponse());  //"501 Not Implemented"
+        upload(clientfd, Response());  //"501 Not Implemented"
       }
 
       ::close(clientfd);
@@ -201,11 +219,11 @@ auto httpServer::ipv6_scan() -> bool {
   return false;
 }
 
-auto httpServer::close() -> void {
+auto Server::close() -> void {
   ipv4_close();
   ipv6_close();
 }
 
-}
+}}
 
 #endif

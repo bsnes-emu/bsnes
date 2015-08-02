@@ -2,7 +2,7 @@
 
 vector<uint8> HitachiDSP::firmware() {
   vector<uint8> buffer;
-  if(cartridge.has_hitachidsp() == false) return buffer;
+  if(!cartridge.hasHitachiDSP()) return buffer;
   buffer.reserve(1024 * 3);
   for(unsigned n = 0; n < 1024; n++) {
     buffer.append(dataROM[n] >>  0);

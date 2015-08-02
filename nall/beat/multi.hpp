@@ -222,7 +222,7 @@ protected:
   string readString(unsigned length) {
     string text;
     text.resize(length + 1);
-    char* p = text.pointer();
+    char* p = text.get();
     while(length--) *p++ = read();
     return text;
   }

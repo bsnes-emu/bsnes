@@ -5,7 +5,7 @@ namespace nall {
 string::string() : _data(nullptr), _refs(nullptr), _capacity(0), _size(0) {
 }
 
-auto string::pointer() -> char* {
+auto string::get() -> char* {
   static char _null[] = "";
   if(!_data) return _null;
   if(*_refs > 1) _data = _copy();  //make unique for write operations
@@ -38,7 +38,7 @@ auto string::reserve(unsigned capacity) -> type& {
 
 auto string::resize(unsigned size) -> type& {
   reserve(size);
-  pointer()[_size = size] = 0;
+  get()[_size = size] = 0;
   return *this;
 }
 

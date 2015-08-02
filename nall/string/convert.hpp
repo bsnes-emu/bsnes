@@ -3,7 +3,7 @@
 namespace nall {
 
 auto downcase(string& self) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   for(unsigned n = 0; n < self.size(); n++) {
     if(p[n] >= 'A' && p[n] <= 'Z') p[n] += 0x20;
   }
@@ -11,7 +11,7 @@ auto downcase(string& self) -> string& {
 }
 
 auto qdowncase(string& self) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   for(unsigned n = 0, quoted = 0; n < self.size(); n++) {
     if(p[n] == '\"') quoted ^= 1;
     if(!quoted && p[n] >= 'A' && p[n] <= 'Z') p[n] += 0x20;
@@ -20,7 +20,7 @@ auto qdowncase(string& self) -> string& {
 }
 
 auto upcase(string& self) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   for(unsigned n = 0; n < self.size(); n++) {
     if(p[n] >= 'a' && p[n] <= 'z') p[n] -= 0x20;
   }
@@ -28,7 +28,7 @@ auto upcase(string& self) -> string& {
 }
 
 auto qupcase(string& self) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   for(unsigned n = 0, quoted = 0; n < self.size(); n++) {
     if(p[n] == '\"') quoted ^= 1;
     if(!quoted && p[n] >= 'a' && p[n] <= 'z') p[n] -= 0x20;
@@ -38,7 +38,7 @@ auto qupcase(string& self) -> string& {
 
 auto transform(string& self, rstring from, rstring to) -> string& {
   if(from.size() != to.size() || from.size() == 0) return self;  //patterns must be the same length
-  char* p = self.pointer();
+  char* p = self.get();
   for(unsigned n = 0; n < self.size(); n++) {
     for(unsigned s = 0; s < from.size(); s++) {
       if(p[n] == from[s]) {

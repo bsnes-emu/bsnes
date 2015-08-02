@@ -4,32 +4,32 @@
 //httpMessage: base class for httpRequest and httpResponse
 //provides shared functionality
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpVariable {
+struct Variable {
   string name;
   string value;
 };
 
-struct httpVariables : vector<httpVariable> {
+struct Variables : vector<Variable> {
   auto append(const string& name, const string& value) -> void;
   auto get(const string& name) const -> string;
   auto remove(const string& name) -> void;
   auto set(const string& name, const string& value) -> void;
 };
 
-auto httpVariables::append(const string& name, const string& value) -> void {
+auto Variables::append(const string& name, const string& value) -> void {
   vector::append({name, value});
 }
 
-auto httpVariables::get(const string& name) const -> string {
+auto Variables::get(const string& name) const -> string {
   for(auto& variable : *this) {
     if(variable.name.iequals(name)) return variable.value;
   }
   return "";
 }
 
-auto httpVariables::remove(const string& name) -> void {
+auto Variables::remove(const string& name) -> void {
   while(true) {
     unsigned n = 0;
     bool found = false;
@@ -43,7 +43,7 @@ auto httpVariables::remove(const string& name) -> void {
   }
 }
 
-auto httpVariables::set(const string& name, const string& value) -> void {
+auto Variables::set(const string& name, const string& value) -> void {
   for(auto& variable : *this) {
     if(!variable.name.iequals(name)) continue;
     variable.name = name;
@@ -53,8 +53,8 @@ auto httpVariables::set(const string& name, const string& value) -> void {
   vector::append({name, value});
 }
 
-struct httpMessage {
-  using type = httpMessage;
+struct Message {
+  using type = Message;
 
   virtual auto head(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool = 0;
   virtual auto setHead() -> bool = 0;
@@ -69,9 +69,9 @@ struct httpMessage {
 
   string _head;
   string _body;
-  httpVariables _header;
+  Variables _header;
 };
 
-}
+}}
 
 #endif

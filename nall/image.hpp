@@ -3,10 +3,10 @@
 
 #include <algorithm>
 
-#include <nall/bmp.hpp>
 #include <nall/filemap.hpp>
 #include <nall/interpolation.hpp>
 #include <nall/stdint.hpp>
+#include <nall/decode/bmp.hpp>
 #include <nall/decode/png.hpp>
 #include <nall/image/base.hpp>
 #include <nall/image/static.hpp>

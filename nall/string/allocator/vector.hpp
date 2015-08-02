@@ -19,7 +19,7 @@ cons:
 
 namespace nall {
 
-auto string::pointer() -> char* {
+auto string::get() -> char* {
   if(_capacity == 0) reserve(1);
   return _data;
 }
@@ -47,7 +47,7 @@ auto string::reserve(unsigned capacity) -> type& {
 
 auto string::resize(unsigned size) -> type& {
   reserve(size);
-  pointer()[_size = size] = 0;
+  get()[_size = size] = 0;
   return *this;
 }
 

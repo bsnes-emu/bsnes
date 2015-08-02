@@ -57,21 +57,22 @@ void System::serialize_all(serializer& s) {
   ppu.serialize(s);
   dsp.serialize(s);
 
-  if(cartridge.has_gb_slot()) icd2.serialize(s);
-  if(cartridge.has_bs_cart()) bsxcartridge.serialize(s);
-  if(cartridge.has_event()) event.serialize(s);
-  if(cartridge.has_sa1()) sa1.serialize(s);
-  if(cartridge.has_superfx()) superfx.serialize(s);
-  if(cartridge.has_armdsp()) armdsp.serialize(s);
-  if(cartridge.has_hitachidsp()) hitachidsp.serialize(s);
-  if(cartridge.has_necdsp()) necdsp.serialize(s);
-  if(cartridge.has_epsonrtc()) epsonrtc.serialize(s);
-  if(cartridge.has_sharprtc()) sharprtc.serialize(s);
-  if(cartridge.has_spc7110()) spc7110.serialize(s);
-  if(cartridge.has_sdd1()) sdd1.serialize(s);
-  if(cartridge.has_obc1()) obc1.serialize(s);
-  if(cartridge.has_msu1()) msu1.serialize(s);
-  if(cartridge.has_st_slots()) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
+  if(cartridge.hasICD2()) icd2.serialize(s);
+  if(cartridge.hasMCC()) mcc.serialize(s);
+  if(cartridge.hasEvent()) event.serialize(s);
+  if(cartridge.hasSA1()) sa1.serialize(s);
+  if(cartridge.hasSuperFX()) superfx.serialize(s);
+  if(cartridge.hasARMDSP()) armdsp.serialize(s);
+  if(cartridge.hasHitachiDSP()) hitachidsp.serialize(s);
+  if(cartridge.hasNECDSP()) necdsp.serialize(s);
+  if(cartridge.hasEpsonRTC()) epsonrtc.serialize(s);
+  if(cartridge.hasSharpRTC()) sharprtc.serialize(s);
+  if(cartridge.hasSPC7110()) spc7110.serialize(s);
+  if(cartridge.hasSDD1()) sdd1.serialize(s);
+  if(cartridge.hasOBC1()) obc1.serialize(s);
+  if(cartridge.hasMSU1()) msu1.serialize(s);
+
+  if(cartridge.hasSufamiTurboSlots()) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
 }
 
 //perform dry-run state save:

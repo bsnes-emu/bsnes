@@ -54,7 +54,7 @@ auto string::format(const nall::format& params) -> type& {
   }
 
   resize(size);
-  memory::copy(pointer(), data, size);
+  memory::copy(get(), data, size);
   memory::free(data);
   return *this;
 }
@@ -76,7 +76,7 @@ template<typename... P> auto print(P&&... p) -> void {
 auto integer(intmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(1 + sizeof(intmax_t) * 3);
-  char* p = buffer.pointer();
+  char* p = buffer.get();
 
   bool negative = value < 0;
   value = abs(value);
@@ -95,7 +95,7 @@ auto integer(intmax_t value, long precision, char padchar) -> string {
 auto decimal(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 3);
-  char* p = buffer.pointer();
+  char* p = buffer.get();
 
   unsigned size = 0;
   do {
@@ -111,7 +111,7 @@ auto decimal(uintmax_t value, long precision, char padchar) -> string {
 auto hex(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 2);
-  char* p = buffer.pointer();
+  char* p = buffer.get();
 
   unsigned size = 0;
   do {
@@ -128,7 +128,7 @@ auto hex(uintmax_t value, long precision, char padchar) -> string {
 auto octal(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 3);
-  char* p = buffer.pointer();
+  char* p = buffer.get();
 
   unsigned size = 0;
   do {
@@ -144,7 +144,7 @@ auto octal(uintmax_t value, long precision, char padchar) -> string {
 auto binary(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax_t) * 8);
-  char* p = buffer.pointer();
+  char* p = buffer.get();
 
   unsigned size = 0;
   do {
@@ -170,7 +170,7 @@ auto pointer(uintptr_t value, long precision) -> string {
 auto real(long double value) -> string {
   string temp;
   temp.resize(real(nullptr, value));
-  real(temp.pointer(), value);
+  real(temp.get(), value);
   return temp;
 }
 

@@ -1,54 +1,42 @@
 struct Cartridge : property<Cartridge> {
-  enum class Region : unsigned {
-    NTSC,
-    PAL,
-  };
-
-  enum class Slot : unsigned {
-    Base,
-    Bsx,
-    SufamiTurbo,
-    SufamiTurboA,
-    SufamiTurboB,
-    GameBoy,
-  };
+  enum class Region : unsigned { NTSC, PAL };
 
   MappedRAM rom;
   MappedRAM ram;
 
-  readonly<bool> loaded;
-  readonly<string> sha256;
+  auto loaded() const -> bool { return _loaded; }
+  auto sha256() const -> string { return _sha256; }
+  auto region() const -> Region { return _region; }
 
-  readonly<Region> region;
+  readonly<bool> hasICD2;
+  readonly<bool> hasMCC;
+  readonly<bool> hasNSSDIP;
+  readonly<bool> hasEvent;
+  readonly<bool> hasSA1;
+  readonly<bool> hasSuperFX;
+  readonly<bool> hasARMDSP;
+  readonly<bool> hasHitachiDSP;
+  readonly<bool> hasNECDSP;
+  readonly<bool> hasEpsonRTC;
+  readonly<bool> hasSharpRTC;
+  readonly<bool> hasSPC7110;
+  readonly<bool> hasSDD1;
+  readonly<bool> hasOBC1;
+  readonly<bool> hasMSU1;
 
-  readonly<bool> has_gb_slot;
-  readonly<bool> has_bs_cart;
-  readonly<bool> has_bs_slot;
-  readonly<bool> has_st_slots;
-  readonly<bool> has_nss_dip;
-  readonly<bool> has_event;
-  readonly<bool> has_sa1;
-  readonly<bool> has_superfx;
-  readonly<bool> has_armdsp;
-  readonly<bool> has_hitachidsp;
-  readonly<bool> has_necdsp;
-  readonly<bool> has_epsonrtc;
-  readonly<bool> has_sharprtc;
-  readonly<bool> has_spc7110;
-  readonly<bool> has_sdd1;
-  readonly<bool> has_obc1;
-  readonly<bool> has_hsu1;
-  readonly<bool> has_msu1;
+  readonly<bool> hasSuperGameBoySlot;
+  readonly<bool> hasSatellaviewSlot;
+  readonly<bool> hasSufamiTurboSlots;
 
   struct Mapping {
     function<uint8 (unsigned)> reader;
     function<void (unsigned, uint8)> writer;
     string addr;
-    unsigned size;
-    unsigned base;
-    unsigned mask;
+    unsigned size = 0;
+    unsigned base = 0;
+    unsigned mask = 0;
 
-    Mapping();
+    Mapping() = default;
     Mapping(const function<uint8 (unsigned)>&, const function<void (unsigned, uint8)>&);
     Mapping(SuperFamicom::Memory&);
   };
@@ -78,45 +66,50 @@ struct Cartridge : property<Cartridge> {
     } title;
   } information;
 
-  string title();
+  Cartridge() = default;
+  ~Cartridge() { unload(); }
 
-  void load();
-  void unload();
+  auto title() -> string;
 
-  void serialize(serializer&);
-  Cartridge();
-  ~Cartridge();
+  auto load() -> void;
+  auto unload() -> void;
+
+  auto serialize(serializer&) -> void;
 
 private:
-  void load_super_game_boy();
-  void load_satellaview();
-  void load_sufami_turbo_a();
-  void load_sufami_turbo_b();
-
-  void parse_markup(const char*);
-  void parse_markup_map(Mapping&, Markup::Node);
-  void parse_markup_memory(MappedRAM&, Markup::Node, unsigned id, bool writable);
-
-  void parse_markup_cartridge(Markup::Node);
-  void parse_markup_icd2(Markup::Node);
-  void parse_markup_bsx(Markup::Node);
-  void parse_markup_satellaview(Markup::Node);
-  void parse_markup_sufamiturbo(Markup::Node, bool slot);
-  void parse_markup_nss(Markup::Node);
-  void parse_markup_event(Markup::Node);
-  void parse_markup_sa1(Markup::Node);
-  void parse_markup_superfx(Markup::Node);
-  void parse_markup_armdsp(Markup::Node);
-  void parse_markup_hitachidsp(Markup::Node, unsigned roms);
-  void parse_markup_necdsp(Markup::Node);
-  void parse_markup_epsonrtc(Markup::Node);
-  void parse_markup_sharprtc(Markup::Node);
-  void parse_markup_spc7110(Markup::Node);
-  void parse_markup_sdd1(Markup::Node);
-  void parse_markup_obc1(Markup::Node);
-  void parse_markup_msu1(Markup::Node);
-
+  auto loadSuperGameBoy() -> void;
+  auto loadSatellaview() -> void;
+  auto loadSufamiTurboA() -> void;
+  auto loadSufamiTurboB() -> void;
   friend class Interface;
+
+  //markup.cpp
+  auto parseMarkup(const string&) -> void;
+  auto parseMarkupMap(Mapping&, Markup::Node) -> void;
+  auto parseMarkupMemory(MappedRAM&, Markup::Node, unsigned id, bool writable) -> void;
+
+  auto parseMarkupCartridge(Markup::Node) -> void;
+  auto parseMarkupICD2(Markup::Node) -> void;
+  auto parseMarkupMCC(Markup::Node) -> void;
+  auto parseMarkupSatellaview(Markup::Node) -> void;
+  auto parseMarkupSufamiTurbo(Markup::Node, bool slot) -> void;
+  auto parseMarkupNSS(Markup::Node) -> void;
+  auto parseMarkupEvent(Markup::Node) -> void;
+  auto parseMarkupSA1(Markup::Node) -> void;
+  auto parseMarkupSuperFX(Markup::Node) -> void;
+  auto parseMarkupARMDSP(Markup::Node) -> void;
+  auto parseMarkupHitachiDSP(Markup::Node, unsigned roms) -> void;
+  auto parseMarkupNECDSP(Markup::Node) -> void;
+  auto parseMarkupEpsonRTC(Markup::Node) -> void;
+  auto parseMarkupSharpRTC(Markup::Node) -> void;
+  auto parseMarkupSPC7110(Markup::Node) -> void;
+  auto parseMarkupSDD1(Markup::Node) -> void;
+  auto parseMarkupOBC1(Markup::Node) -> void;
+  auto parseMarkupMSU1(Markup::Node) -> void;
+
+  bool _loaded = false;
+  string _sha256;
+  Region _region = Region::NTSC;
 };
 
 extern Cartridge cartridge;

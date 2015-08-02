@@ -25,7 +25,7 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
 
   //in-place overwrite
   if(to.size() == from.size()) {
-    char* p = self.pointer();
+    char* p = self.get();
 
     for(signed n = 0, remaining = matches, quoted = 0; n <= size - (signed)from.size();) {
       if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
@@ -40,7 +40,7 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
 
   //left-to-right shrink
   else if(to.size() < from.size()) {
-    char* p = self.pointer();
+    char* p = self.get();
     signed offset = 0;
     signed base = 0;
 
@@ -64,7 +64,7 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
   //right-to-left expand
   else if(to.size() > from.size()) {
     self.resize(size + matches * (to.size() - from.size()));
-    char* p = self.pointer();
+    char* p = self.get();
 
     signed offset = self.size();
     signed base = size;

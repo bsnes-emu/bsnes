@@ -63,9 +63,9 @@ struct ID {
 
     SuperGameBoyBootROM,
 
-    BsxROM,
-    BsxRAM,
-    BsxPSRAM,
+    MCCROM,
+    MCCRAM,
+    MCCPSRAM,
 
     SuperGameBoyManifest,
     SuperGameBoyROM,

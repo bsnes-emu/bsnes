@@ -18,7 +18,7 @@ auto string::read(const string& filename) -> string {
 
   rewind(fp);
   result.resize(filesize);
-  fread(result.pointer(), 1, filesize, fp);
+  auto unused = fread(result.get(), 1, filesize, fp);
   return fclose(fp), result;
 }
 
@@ -29,7 +29,7 @@ auto string::repeat(const string& pattern, unsigned times) -> string {
 }
 
 auto fill(string& self, char fill) -> string& {
-  memory::fill(self.pointer(), self.size(), fill);
+  memory::fill(self.get(), self.size(), fill);
   return self;
 }
 
@@ -42,14 +42,14 @@ auto hash(const string& self) -> unsigned {
 }
 
 auto remove(string& self, unsigned offset, unsigned length) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   length = min(length, self.size());
   memory::move(p + offset, p + offset + length, self.size() - length);
   return self.resize(self.size() - length);
 }
 
 auto reverse(string& self) -> string& {
-  char* p = self.pointer();
+  char* p = self.get();
   unsigned size = self.size();
   unsigned pivot = size >> 1;
   for(signed x = 0, y = size - 1; x < pivot && y >= 0; x++, y--) std::swap(p[x], p[y]);
@@ -67,13 +67,13 @@ auto size(string& self, signed length, char fill) -> string& {
 
   if(size < length) {  //expand
     self.resize(length);
-    char* p = self.pointer();
+    char* p = self.get();
     unsigned displacement = length - size;
     if(right) memory::move(p + displacement, p, size);
     else p += size;
     while(displacement--) *p++ = fill;
   } else {  //shrink
-    char* p = self.pointer();
+    char* p = self.get();
     unsigned displacement = size - length;
     if(right) memory::move(p, p + displacement, length);
     self.resize(length);
@@ -87,7 +87,7 @@ auto slice(const string& self, signed offset, signed length) -> string {
   if(offset < self.size()) {
     if(length < 0) length = self.size() - offset;
     result.resize(length);
-    memory::copy(result.pointer(), self.data() + offset, length);
+    memory::copy(result.get(), self.data() + offset, length);
   }
   return result;
 }
@@ -97,7 +97,7 @@ auto substr(rstring source, signed offset, signed length) -> string {
   string result;
   if(length < 0) length = source.size() - offset;
   result.resize(length);
-  memory::copy(result.pointer(), source.data() + offset, length);
+  memory::copy(result.get(), source.data() + offset, length);
   return result;
 }
 

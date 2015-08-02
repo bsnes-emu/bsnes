@@ -4,16 +4,21 @@
 namespace nall {
 
 auto image::loadBMP(const string& filename) -> bool {
-  uint32_t* outputData;
-  unsigned outputWidth, outputHeight;
-  if(bmp::read(filename, outputData, outputWidth, outputHeight) == false) return false;
+  if(!file::exists(filename)) return false;
+  auto buffer = file::read(filename);
+  return loadBMP(buffer.data(), buffer.size());
+}
 
-  allocate(outputWidth, outputHeight);
-  const uint32_t* sp = outputData;
+auto image::loadBMP(const uint8_t* bmpData, unsigned bmpSize) -> bool {
+  Decode::BMP source;
+  if(!source.load(bmpData, bmpSize)) return false;
+
+  allocate(source.width(), source.height());
+  const uint32_t* sp = source.data();
   uint8_t* dp = _data;
 
-  for(unsigned y = 0; y < outputHeight; y++) {
-    for(unsigned x = 0; x < outputWidth; x++) {
+  for(unsigned y = 0; y < _height; y++) {
+    for(unsigned x = 0; x < _width; x++) {
       uint32_t color = *sp++;
       uint64_t a = normalize((uint8_t)(color >> 24), 8, _alpha.depth());
       uint64_t r = normalize((uint8_t)(color >> 16), 8, _red.depth());
@@ -23,9 +28,6 @@ auto image::loadBMP(const string& filename) -> bool {
       dp += stride();
     }
   }
-
-  delete[] outputData;
-  return true;
 }
 
 auto image::loadPNG(const string& filename) -> bool {
@@ -36,7 +38,7 @@ auto image::loadPNG(const string& filename) -> bool {
 
 auto image::loadPNG(const uint8_t* pngData, unsigned pngSize) -> bool {
   Decode::PNG source;
-  if(source.decode(pngData, pngSize) == false) return false;
+  if(!source.load(pngData, pngSize)) return false;
 
   allocate(source.info.width, source.info.height);
   const uint8_t* sp = source.data;

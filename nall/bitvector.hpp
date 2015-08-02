@@ -1,6 +1,8 @@
 #ifndef NALL_BITVECTOR_HPP
 #define NALL_BITVECTOR_HPP
 
+#include <nall/memory.hpp>
+
 namespace nall {
 
 struct bitvector {

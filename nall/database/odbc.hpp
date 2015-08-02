@@ -20,44 +20,61 @@ struct ODBC {
     auto operator=(Statement&& source) -> Statement& {
       _statement = source._statement;
       _output = source._output;
+      _values = move(source._values);
       source._statement = nullptr;
       source._output = 0;
       return *this;
     }
 
+    auto columns() -> unsigned {
+      SQLSMALLINT columns = 0;
+      if(statement()) SQLNumResultCols(statement(), &columns);
+      return columns;
+    }
+
     auto integer(unsigned column) -> int64_t {
+      if(auto value = _values(column)) return value.get<int64_t>(0);
       int64_t value = 0;
       SQLGetData(statement(), 1 + column, SQL_C_SBIGINT, &value, 0, nullptr);
+      _values(column) = (int64_t)value;
       return value;
     }
 
     auto decimal(unsigned column) -> uint64_t {
+      if(auto value = _values(column)) return value.get<uint64_t>(0);
       uint64_t value = 0;
       SQLGetData(statement(), 1 + column, SQL_C_UBIGINT, &value, 0, nullptr);
+      _values(column) = (uint64_t)value;
       return value;
     }
 
     auto real(unsigned column) -> double {
+      if(auto value = _values(column)) return value.get<double>(0.0);
       double value = 0.0;
       SQLGetData(statement(), 1 + column, SQL_C_DOUBLE, &value, 0, nullptr);
+      _values(column) = (double)value;
       return value;
     }
 
     auto text(unsigned column) -> string {
+      if(auto value = _values(column)) return value.get<string>({});
       string value;
       value.resize(65535);
       SQLLEN size = 0;
-      SQLGetData(statement(), 1 + column, SQL_C_CHAR, value.pointer(), value.size(), &size);
+      SQLGetData(statement(), 1 + column, SQL_C_CHAR, value.get(), value.size(), &size);
       value.resize(size);
+      _values(column) = (string)value;
       return value;
     }
 
     auto data(unsigned column) -> vector<uint8_t> {
+      if(auto value = _values(column)) return value.get<vector<uint8_t>>({});
       vector<uint8_t> value;
       value.resize(65535);
       SQLLEN size = 0;
       SQLGetData(statement(), 1 + column, SQL_C_CHAR, value.data(), value.size(), &size);
       value.resize(size);
+      _values(column) = (vector<uint8_t>)value;
       return value;
     }
 
@@ -72,6 +89,7 @@ struct ODBC {
 
     SQLHANDLE _statement = nullptr;
     unsigned _output = 0;
+    vector<any> _values;  //some ODBC drivers (eg MS-SQL) do not allow the same column to be read more than once
   };
 
   struct Query : Statement {
@@ -89,16 +107,21 @@ struct ODBC {
     }
 
     auto operator=(Query&& source) -> Query& {
+      Statement::operator=(move(source));
       _bindings = move(source._bindings);
-      _statement = source._statement;
       _result = source._result;
       _input = source._input;
       _stepped = source._stepped;
-      source._statement = nullptr;
       source._result = SQL_SUCCESS;
       source._input = 0;
       source._stepped = false;
       return *this;
+    }
+
+    explicit operator bool() {
+      //this is likely not the best way to test if the query has returned data ...
+      //but I wasn't able to find an ODBC API for this seemingly simple task
+      return statement() && success();
     }
 
     //ODBC SQLBindParameter only holds pointers to data values
@@ -140,11 +163,13 @@ struct ODBC {
           } else if(binding.value.is<double>()) {
             SQLBindParameter(_statement, 1 + binding.column, SQL_PARAM_INPUT, SQL_C_DOUBLE, SQL_DOUBLE, 0, 0, &binding.value.get<double>(), 0, nullptr);
           } else if(binding.value.is<string>()) {
+            auto& value = binding.value.get<string>();
             SQLLEN length = SQL_NTS;
-            SQLBindParameter(_statement, 1 + binding.column, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, 0, 0, (SQLPOINTER)binding.value.get<string>().data(), 0, &length);
+            SQLBindParameter(_statement, 1 + binding.column, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, value.size(), 0, (SQLPOINTER)value.data(), 0, &length);
           } else if(binding.value.is<vector<uint8_t>>()) {
-            SQLLEN length = binding.value.get<vector<uint8_t>>().size();
-            SQLBindParameter(_statement, 1 + binding.column, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARBINARY, 0, 0, (SQLPOINTER)binding.value.get<vector<uint8_t>>().data(), 0, &length);
+            auto& value = binding.value.get<vector<uint8_t>>();
+            SQLLEN length = value.size();
+            SQLBindParameter(_statement, 1 + binding.column, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARBINARY, value.size(), 0, (SQLPOINTER)value.data(), 0, &length);
           }
         }
 
@@ -153,6 +178,7 @@ struct ODBC {
         if(!success()) return false;
       }
 
+      _values.reset();  //clear previous row's cached read results
       _result = SQLFetch(_statement);
       _output = 0;
       return success();

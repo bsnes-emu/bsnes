@@ -48,10 +48,11 @@ auto basename(const string& self) -> string {
 // /parent/child.type/(name).type
 auto prefixname(const string& self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
-  for(signed offset = self.size() - 1, suffix = 0; offset >= 0; offset--, p--) {
+  for(signed offset = self.size() - 1, suffix = -1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
-    if(*p == '/') return slice(self, offset + 1, suffix ? suffix - offset - 1 : 0).rtrim("/");
-    if(*p == '.' && suffix == 0) suffix = offset;
+    if(*p == '/') return slice(self, offset + 1, suffix >= 0 ? suffix - offset - 1 : 0).rtrim("/");
+    if(*p == '.' && suffix == -1) { suffix = offset; continue; }
+    if(offset == 0) return slice(self, offset, suffix).rtrim("/");
   }
   return "";
 }

@@ -22,7 +22,7 @@ namespace nall {
 string::string() : _data(nullptr), _capacity(SSO - 1), _size(0) {
 }
 
-auto string::pointer() -> char* {
+auto string::get() -> char* {
   if(_capacity < SSO) return _text;
   if(*_refs > 1) _copy();
   return _data;
@@ -59,7 +59,7 @@ auto string::reserve(unsigned capacity) -> type& {
 
 auto string::resize(unsigned size) -> type& {
   reserve(size);
-  pointer()[_size = size] = 0;
+  get()[_size = size] = 0;
   return *this;
 }
 

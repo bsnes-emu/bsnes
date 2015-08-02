@@ -81,6 +81,14 @@ ifeq ($(platform),bsd)
   link += -Wl,-rpath=/usr/local/lib/gcc49
 endif
 
+# threading support
+ifeq ($(threaded),true)
+  ifneq ($(filter $(platform),linux bsd),)
+    flags += -pthread
+    link += -lrt
+  endif
+endif
+
 # cross-compilation support
 ifeq ($(arch),x86)
   flags := -m32 $(flags)

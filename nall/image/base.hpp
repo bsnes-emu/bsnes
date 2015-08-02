@@ -118,6 +118,7 @@ private:
 
   //load.hpp
   inline auto loadBMP(const string& filename) -> bool;
+  inline auto loadBMP(const uint8_t* data, unsigned size) -> bool;
   inline auto loadPNG(const string& filename) -> bool;
   inline auto loadPNG(const uint8_t* data, unsigned size) -> bool;
 

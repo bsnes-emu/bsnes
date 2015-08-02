@@ -1,15 +1,15 @@
 #ifndef NALL_HTTP_ROLE_HPP
 #define NALL_HTTP_ROLE_HPP
 
-//httpRole: base class for httpClient and httpServer
+//Role: base class for Client and Server
 //provides shared functionality
 
 #include <nall/http/request.hpp>
 #include <nall/http/response.hpp>
 
-namespace nall {
+namespace nall { namespace HTTP {
 
-struct httpRole {
+struct Role {
   struct Settings {
     signed connectionLimit =   1024;  //server
     signed headSizeLimit   =  16384;  //client, server
@@ -21,11 +21,11 @@ struct httpRole {
   } settings;
 
   inline auto configure(const string& parameters) -> bool;
-  inline auto download(signed fd, httpMessage& message) -> bool;
-  inline auto upload(signed fd, const httpMessage& message) -> bool;
+  inline auto download(signed fd, Message& message) -> bool;
+  inline auto upload(signed fd, const Message& message) -> bool;
 };
 
-auto httpRole::configure(const string& parameters) -> bool {
+auto Role::configure(const string& parameters) -> bool {
   auto document = BML::unserialize(parameters);
   for(auto parameter : document) {
     auto name = parameter.name();
@@ -43,7 +43,7 @@ auto httpRole::configure(const string& parameters) -> bool {
   return true;
 }
 
-auto httpRole::download(signed fd, httpMessage& message) -> bool {
+auto Role::download(signed fd, Message& message) -> bool {
   auto& head = message._head;
   auto& body = message._body;
   string chunk;
@@ -112,14 +112,14 @@ auto httpRole::download(signed fd, httpMessage& message) -> bool {
 
     if(!chunked) {
       body.resize(body.size() + length);
-      memory::copy(body.pointer() + body.size() - length, p, length);
+      memory::copy(body.get() + body.size() - length, p, length);
 
       p += length;
       length = 0;
     } else {
       signed transferLength = min(length, chunkLength);
       body.resize(body.size() + transferLength);
-      memory::copy(body.pointer() + body.size() - transferLength, p, transferLength);
+      memory::copy(body.get() + body.size() - transferLength, p, transferLength);
 
       p += transferLength;
       length -= transferLength;
@@ -136,7 +136,7 @@ auto httpRole::download(signed fd, httpMessage& message) -> bool {
   return true;
 }
 
-auto httpRole::upload(signed fd, const httpMessage& message) -> bool {
+auto Role::upload(signed fd, const Message& message) -> bool {
   auto transfer = [&](const uint8_t* data, unsigned size) -> bool {
     while(size) {
       signed length = send(fd, data, min(size, settings.chunkSize), MSG_NOSIGNAL);
@@ -156,6 +156,6 @@ auto httpRole::upload(signed fd, const httpMessage& message) -> bool {
   return false;
 }
 
-}
+}}
 
 #endif

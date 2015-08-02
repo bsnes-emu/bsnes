@@ -26,7 +26,7 @@ string::string() {
   _size = 0;
 }
 
-auto string::pointer() -> char* {
+auto string::get() -> char* {
   if(_capacity < SSO) return _text;
   return _data;
 }
@@ -60,7 +60,7 @@ auto string::reserve(unsigned capacity) -> type& {
 
 auto string::resize(unsigned size) -> type& {
   reserve(size);
-  pointer()[_size = size] = 0;
+  get()[_size = size] = 0;
   return *this;
 }
 

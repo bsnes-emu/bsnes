@@ -6,110 +6,87 @@ namespace nall {
 struct nothing_t {};
 static nothing_t nothing;
 
-template<typename T, typename = void>
-class maybe {
-  T* value = nullptr;
+template<typename T>
+struct maybe {
+  inline maybe() {}
+  inline maybe(nothing_t) {}
+  inline maybe(const T& source) { operator=(source); }
+  inline maybe(T&& source) { operator=(move(source)); }
+  inline maybe(const maybe& source) { operator=(source); }
+  inline maybe(maybe&& source) { operator=(move(source)); }
+  inline ~maybe() { reset(); }
 
-public:
-  maybe() {}
-  maybe(nothing_t) {}
-  maybe(const T& source) { operator=(source); }
-  maybe(const maybe& source) { operator=(source); }
-  maybe(maybe&& source) { operator=(move(source)); }
-  ~maybe() { reset(); }
+  inline auto operator=(nothing_t) -> maybe& { reset(); return *this; }
+  inline auto operator=(const T& source) -> maybe& { reset(); _valid = true; new(&_value.t) T(source); return *this; }
+  inline auto operator=(T&& source) -> maybe& { reset(); _valid = true; new(&_value.t) T(move(source)); return *this; }
 
-  auto operator=(nothing_t) -> maybe& { reset(); return *this; }
-  auto operator=(const T& source) -> maybe& { reset(); value = new T(source); return *this; }
-  auto operator=(const maybe& source) -> maybe& { reset(); if(source) value = new T(source()); return *this; }
-  auto operator=(maybe&& source) -> maybe& { reset(); value = source.value; source.value = nullptr; return *this; }
-
-  auto operator==(const maybe& source) const -> bool {
-    if(value && source.value) return *value == *source.value;
-    return !value && !source.value;
+  inline auto operator=(const maybe& source) -> maybe& {
+    if(this == &source) return *this;
+    reset();
+    if(_valid = source._valid) new(&_value.t) T(source.get());
+    return *this;
   }
-  auto operator!=(const maybe& source) const -> bool { return !operator==(source); }
 
-  explicit operator bool() const { return value; }
-  auto operator->() -> T* { assert(value); return value; }
-  auto operator->() const -> T* { assert(value); return value; }
-  auto operator*() -> T& { assert(value); return *value; }
-  auto operator*() const -> T& { assert(value); return *value; }
-  auto operator()() -> T& { assert(value); return *value; }
-  auto operator()() const -> T& { assert(value); return *value; }
-  auto operator()(const T& invalid) const -> T& { if(value) return *value; return invalid; }
+  inline auto operator=(maybe&& source) -> maybe& {
+    if(this == &source) return *this;
+    reset();
+    if(_valid = source._valid) new(&_value.t) T(move(source.get()));
+    source._valid = false;
+    return *this;
+  }
 
-  auto empty() const -> bool { return value == nullptr; }
-  auto reset() -> void { if(value) { delete value; value = nullptr; } }
-  auto swap(maybe& source) -> void { std::swap(value, source.value); }
+  inline explicit operator bool() const { return _valid; }
+  inline auto reset() -> void { if(_valid) { _value.t.~T(); _valid = false; } }
+  inline auto data() -> T* { return _valid ? &_value.t : nullptr; }
+  inline auto get() -> T& { assert(_valid); return _value.t; }
+
+  inline auto data() const -> const T* { return ((maybe*)this)->data(); }
+  inline auto get() const -> const T& { return ((maybe*)this)->get(); }
+  inline auto operator->() -> T* { return data(); }
+  inline auto operator->() const -> const T* { return data(); }
+  inline auto operator*() -> T& { return get(); }
+  inline auto operator*() const -> const T& { return get(); }
+  inline auto operator()() -> T& { return get(); }
+  inline auto operator()() const -> const T& { return get(); }
+  inline auto operator()(const T& invalid) const -> const T& { return _valid ? get() : invalid; }
+
+private:
+  union U {
+    T t;
+    U() {}
+    ~U() {}
+  } _value;
+  bool _valid = false;
 };
 
 template<typename T>
-class maybe<T&> {
-  T* value = nullptr;
+struct maybe<T&> {
+  inline maybe() : _value(nullptr) {}
+  inline maybe(nothing_t) : _value(nullptr) {}
+  inline maybe(const T& source) : _value((T*)&source) {}
+  inline maybe(const maybe& source) : _value(source._value) {}
 
-public:
-  maybe() {}
-  maybe(nothing_t) {}
-  maybe(const T& source) { operator=(source); }
-  maybe(const maybe& source) { operator=(source); }
-  maybe(maybe&& source) { operator=(move(source)); }
+  inline auto operator=(nothing_t) -> maybe& { _value = nullptr; return *this; }
+  inline auto operator=(const T& source) -> maybe& { _value = (T*)&source; return *this; }
+  inline auto operator=(const maybe& source) -> maybe& { _value = source._value; return *this; }
 
-  auto operator=(nothing_t) -> maybe& { value = nullptr; return *this; }
-  auto operator=(const T& source) -> maybe& { value = (T*)&source; return *this; }
-  auto operator=(const maybe& source) -> maybe& { value = source.value; return *this; }
-  auto operator=(maybe&& source) -> maybe& { value = source.value; source.value = nullptr; return *this; }
+  inline explicit operator bool() const { return _value; }
+  inline auto reset() -> void { _value = nullptr; }
+  inline auto data() -> T* { return _value; }
+  inline auto get() -> T& { assert(_value); return *_value; }
 
-  auto operator==(const maybe& source) const -> bool {
-    if(value && source.value) return *value == *source.value;
-    return !value && !source.value;
-  }
-  auto operator!=(const maybe& source) const -> bool { return !operator==(source); }
+  inline auto data() const -> const T* { return ((maybe*)this)->data(); }
+  inline auto get() const -> const T& { return ((maybe*)this)->get(); }
+  inline auto operator->() -> T* { return data(); }
+  inline auto operator->() const -> const T* { return data(); }
+  inline auto operator*() -> T& { return get(); }
+  inline auto operator*() const -> const T& { return get(); }
+  inline auto operator()() -> T& { return get(); }
+  inline auto operator()() const -> const T& { return get(); }
+  inline auto operator()(const T& invalid) const -> const T& { return _value ? get() : invalid; }
 
-  explicit operator bool() const { return value; }
-  auto operator->() -> T* { assert(value); return value; }
-  auto operator->() const -> T* { assert(value); return *value; }
-  auto operator*() -> T& { assert(value); return *value; }
-  auto operator*() const -> T& { assert(value); return *value; }
-  auto operator()() -> T& { assert(value); return *value; }
-  auto operator()() const -> T& { assert(value); return *value; }
-  auto operator()(const T& invalid) const -> T& { if(value) return *value; return invalid; }
-
-  auto empty() const -> bool { return value == nullptr; }
-  auto reset() -> void { value = nullptr; }
-  auto swap(maybe& source) -> void { std::swap(value, source.value); }
-};
-
-template<typename T>
-class maybe<T, enable_if<is_integral<T>>> {
-  T value = 0;
-  bool valid = false;
-
-public:
-  maybe() {}
-  maybe(nothing_t) {}
-  maybe(const T& source) { operator=(source); }
-  maybe(const maybe& source) { operator=(source); }
-  maybe(maybe&& source) { operator=(move(source)); }
-
-  auto operator=(nothing_t) -> maybe& { valid = false; return *this; }
-  auto operator=(const T& source) -> maybe& { valid = true; value = source; return *this; }
-  auto operator=(const maybe& source) -> maybe& { valid = source.valid; value = source.value; return *this; }
-  auto operator=(maybe&& source) -> maybe& { valid = source.valid; value = source.value; source.valid = false; return *this; }
-
-  auto operator==(const maybe& source) const -> bool {
-    if(valid && source.valid) return value == source.value;
-    return !valid && !source.valid;
-  }
-  auto operator!=(const maybe& source) const -> bool { return !operator==(source); }
-
-  explicit operator bool() const { return valid; }
-  auto operator*() const -> T { assert(valid); return value; }
-  auto operator()() const -> T { assert(valid); return value; }
-  auto operator()(const T& invalid) const -> T { if(valid) return value; return invalid; }
-
-  auto empty() const -> bool { return !valid; }
-  auto reset() -> void { valid = false; }
-  auto swap(maybe& source) -> void { std::swap(valid, source.valid); std::swap(value, source.value); }
+private:
+  T* _value;
 };
 
 }

@@ -1,50 +1,50 @@
 #include <sfc/sfc.hpp>
 
-#define BSX_CPP
+#define MCC_CPP
 namespace SuperFamicom {
 
 #include "serialization.cpp"
-BSXCartridge bsxcartridge;
+MCC mcc;
 
-void BSXCartridge::init() {
+auto MCC::init() -> void {
 }
 
-void BSXCartridge::load() {
+auto MCC::load() -> void {
 }
 
-void BSXCartridge::unload() {
+auto MCC::unload() -> void {
   rom.reset();
   ram.reset();
   psram.reset();
 }
 
-void BSXCartridge::power() {
+auto MCC::power() -> void {
 }
 
-void BSXCartridge::reset() {
+auto MCC::reset() -> void {
   for(unsigned i = 0; i < 16; i++) r[i] = 0x00;
   r[0x07] = 0x80;
   r[0x08] = 0x80;
   mmio_commit();
 }
 
-uint8 BSXCartridge::memory_access(bool write, Memory& memory, unsigned addr, uint8 data) {
+auto MCC::memory_access(bool write, Memory& memory, unsigned addr, uint8 data) -> uint8 {
   if(write == 0) return memory_read(memory, addr);
   memory_write(memory, addr, data);
 }
 
-uint8 BSXCartridge::memory_read(Memory& memory, unsigned addr) {
+auto MCC::memory_read(Memory& memory, unsigned addr) -> uint8 {
   addr = bus.mirror(addr, memory.size());
   return memory.read(addr);
 }
 
-void BSXCartridge::memory_write(Memory& memory, unsigned addr, uint8 data) {
+auto MCC::memory_write(Memory& memory, unsigned addr, uint8 data) -> void {
   addr = bus.mirror(addr, memory.size());
   return memory.write(addr, data);
 }
 
 //mcu_access() allows mcu_read() and mcu_write() to share decoding logic
-uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
+auto MCC::mcu_access(bool write, unsigned addr, uint8 data) -> uint8 {
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
@@ -90,15 +90,15 @@ uint8 BSXCartridge::mcu_access(bool write, unsigned addr, uint8 data) {
   return cpu.regs.mdr;
 }
 
-uint8 BSXCartridge::mcu_read(unsigned addr) {
+auto MCC::mcu_read(unsigned addr) -> uint8 {
   return mcu_access(0, addr);
 }
 
-void BSXCartridge::mcu_write(unsigned addr, uint8 data) {
+auto MCC::mcu_write(unsigned addr, uint8 data) -> void {
   mcu_access(1, addr, data);
 }
 
-uint8 BSXCartridge::mmio_read(unsigned addr) {
+auto MCC::mmio_read(unsigned addr) -> uint8 {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     return r[n];
@@ -111,7 +111,7 @@ uint8 BSXCartridge::mmio_read(unsigned addr) {
   return 0x00;
 }
 
-void BSXCartridge::mmio_write(unsigned addr, uint8 data) {
+auto MCC::mmio_write(unsigned addr, uint8 data) -> void {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     r[n] = data;
@@ -124,7 +124,7 @@ void BSXCartridge::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-void BSXCartridge::mmio_commit() {
+auto MCC::mmio_commit() -> void {
   r00 = r[0x00] & 0x80;
   r01 = r[0x01] & 0x80;
   r02 = r[0x02] & 0x80;

@@ -2,8 +2,8 @@
 #define NALL_FILE_HPP
 
 #include <nall/platform.hpp>
+#include <nall/file-system-object.hpp>
 #include <nall/stdint.hpp>
-#include <nall/storage.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
@@ -12,7 +12,7 @@
 
 namespace nall {
 
-struct file : storage, varint {
+struct file : file_system_object, varint {
   enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
   enum class index : unsigned { absolute, relative };
 
@@ -37,25 +37,24 @@ struct file : storage, varint {
   }
 
   static auto truncate(const string& filename, unsigned size) -> bool {
-    #if !defined(_WIN32)
+    #if defined(API_POSIX)
     return truncate(filename, size) == 0;
-    #else
-    bool result = false;
-    FILE* fp = _wfopen(utf16_t(filename), L"rb+");
-    if(fp) {
-      result = _chsize(fileno(fp), size) == 0;
+    #elif defined(API_WINDOWS)
+    if(auto fp = _wfopen(utf16_t(filename), L"rb+")) {
+      bool result = _chsize(fileno(fp), size) == 0;
       fclose(fp);
+      return result;
     }
-    return result;
+    return false;
     #endif
   }
 
-  //specialization of storage::exists(); returns false for folders
+  //returns false if specified filename is a directory
   static auto exists(const string& filename) -> bool {
-    #if !defined(_WIN32)
+    #if defined(API_POSIX)
     struct stat data;
     if(stat(filename, &data) != 0) return false;
-    #else
+    #elif defined(API_WINDOWS)
     struct __stat64 data;
     if(_wstat64(utf16_t(filename), &data) != 0) return false;
     #endif
@@ -63,10 +62,10 @@ struct file : storage, varint {
   }
 
   static auto size(const string& filename) -> uintmax_t {
-    #if !defined(_WIN32)
+    #if defined(API_POSIX)
     struct stat data;
     stat(filename, &data);
-    #else
+    #elif defined(API_WINDOWS)
     struct __stat64 data;
     _wstat64(utf16_t(filename), &data);
     #endif
@@ -240,9 +239,9 @@ struct file : storage, varint {
 
   auto truncate(unsigned size) -> bool {
     if(!fp) return false;  //file not open
-    #if !defined(_WIN32)
+    #if defined(API_POSIX)
     return ftruncate(fileno(fp), size) == 0;
-    #else
+    #elif defined(API_WINDOWS)
     return _chsize(fileno(fp), size) == 0;
     #endif
   }
@@ -264,12 +263,12 @@ struct file : storage, varint {
     if(fp) return false;
 
     switch(file_mode = mode_) {
-    #if !defined(_WIN32)
+    #if defined(API_POSIX)
     case mode::read:      fp = fopen(filename, "rb" ); break;
     case mode::write:     fp = fopen(filename, "wb+"); break;  //need read permission for buffering
     case mode::readwrite: fp = fopen(filename, "rb+"); break;
     case mode::writeread: fp = fopen(filename, "wb+"); break;
-    #else
+    #elif defined(API_WINDOWS)
     case mode::read:      fp = _wfopen(utf16_t(filename), L"rb" ); break;
     case mode::write:     fp = _wfopen(utf16_t(filename), L"wb+"); break;
     case mode::readwrite: fp = _wfopen(utf16_t(filename), L"rb+"); break;

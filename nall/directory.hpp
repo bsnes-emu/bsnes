@@ -2,9 +2,9 @@
 #define NALL_DIRECTORY_HPP
 
 #include <nall/file.hpp>
+#include <nall/file-system-object.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
-#include <nall/storage.hpp>
 #include <nall/string.hpp>
 #include <nall/vector.hpp>
 
@@ -18,7 +18,7 @@
 
 namespace nall {
 
-struct directory : storage {
+struct directory : file_system_object {
   static auto create(const string& pathname, unsigned permissions = 0755) -> bool;  //recursive
   static auto remove(const string& pathname) -> bool;  //recursive
   static auto exists(const string& pathname) -> bool;
@@ -78,6 +78,7 @@ private:
     bool result = true;
     for(auto& part : list) {
       path.append(part, "/");
+      if(directory::exists(path)) continue;
       result &= (_wmkdir(utf16_t(path)) == 0);
     }
     return result;

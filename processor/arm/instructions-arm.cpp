@@ -514,11 +514,15 @@ auto ARM::arm_op_move_multiple() {
   if(pre == 1 && up == 0) rn = rn - bit::count(list) * 4 + 0;  //DB
   if(pre == 0 && up == 0) rn = rn - bit::count(list) * 4 + 4;  //DA
 
+  if(writeback && l == 1) {
+    if(up == 1) r(n) = r(n) + bit::count(list) * 4;  //IA, IB
+    if(up == 0) r(n) = r(n) - bit::count(list) * 4;  //DA, DB
+  }
+
   Processor::Mode pmode = mode();
   bool usr = false;
   if(s && l == 1 && (list & 0x8000) == 0) usr = true;
   if(s && l == 0) usr = true;
-
   if(usr) processor.setMode(Processor::Mode::USR);
 
   unsigned sequential = Nonsequential;
@@ -545,7 +549,7 @@ auto ARM::arm_op_move_multiple() {
     pipeline.nonsequential = true;
   }
 
-  if(writeback) {
+  if(writeback && l == 0) {
     if(up == 1) r(n) = r(n) + bit::count(list) * 4;  //IA, IB
     if(up == 0) r(n) = r(n) - bit::count(list) * 4;  //DA, DB
   }

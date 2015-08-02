@@ -1,10 +1,10 @@
 struct Coprocessor : Thread {
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
+  alwaysinline auto step(unsigned clocks) -> void;
+  alwaysinline auto synchronize_cpu() -> void;
 };
 
 #include <sfc/chip/icd2/icd2.hpp>
-#include <sfc/chip/bsx/bsx.hpp>
+#include <sfc/chip/mcc/mcc.hpp>
 #include <sfc/chip/nss/nss.hpp>
 #include <sfc/chip/event/event.hpp>
 
@@ -24,10 +24,10 @@ struct Coprocessor : Thread {
 
 #include <sfc/chip/msu1/msu1.hpp>
 
-void Coprocessor::step(unsigned clocks) {
+auto Coprocessor::step(unsigned clocks) -> void {
   clock += clocks * (uint64)cpu.frequency;
 }
 
-void Coprocessor::synchronize_cpu() {
+auto Coprocessor::synchronize_cpu() -> void {
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
