@@ -1,16 +1,16 @@
 struct SatellaviewCartridge : Memory {
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto size() const -> unsigned;
+  auto read(unsigned addr) -> uint8;
+  auto write(unsigned addr, uint8 data) -> void;
+
   MappedRAM memory;
   bool readonly;
-
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-
-  unsigned size() const;
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
 
 private:
   struct {

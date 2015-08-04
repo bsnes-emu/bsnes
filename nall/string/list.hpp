@@ -46,6 +46,14 @@ auto ifind(const lstring& self, const string& source) -> maybe<unsigned> {
   return nothing;
 }
 
+auto match(const lstring& self, const string& pattern) -> lstring {
+  lstring result;
+  for(unsigned n = 0; n < self.size(); n++) {
+    if(self[n].match(pattern)) result.append(self[n]);
+  }
+  return result;
+}
+
 auto merge(const lstring& self, const string& separator) -> string {
   string output;
   for(unsigned n = 0; n < self.size(); n++) {

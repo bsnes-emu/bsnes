@@ -1,10 +1,10 @@
 struct SufamiTurboCartridge {
+  auto load() -> void;
+  auto unload() -> void;
+  auto serialize(serializer&) -> void;
+
   MappedRAM rom;
   MappedRAM ram;
-
-  void load();
-  void unload();
-  void serialize(serializer&);
 };
 
 extern SufamiTurboCartridge sufamiturboA;

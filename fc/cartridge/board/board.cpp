@@ -104,10 +104,10 @@ Board::Board(Markup::Node& document) {
   if(chrrom.size) chrrom.data = new uint8[chrrom.size]();
   if(chrram.size) chrram.data = new uint8[chrram.size]();
 
-  if(auto name = prom["name"].text()) interface->loadRequest(ID::ProgramROM, name);
-  if(auto name = pram["name"].text()) interface->loadRequest(ID::ProgramRAM, name);
-  if(auto name = crom["name"].text()) interface->loadRequest(ID::CharacterROM, name);
-  if(auto name = cram["name"].text()) interface->loadRequest(ID::CharacterRAM, name);
+  if(auto name = prom["name"].text()) interface->loadRequest(ID::ProgramROM, name, true);
+  if(auto name = pram["name"].text()) interface->loadRequest(ID::ProgramRAM, name, false);
+  if(auto name = crom["name"].text()) interface->loadRequest(ID::CharacterROM, name, true);
+  if(auto name = cram["name"].text()) interface->loadRequest(ID::CharacterRAM, name, false);
 
   if(auto name = pram["name"].text()) Famicom::cartridge.memory.append({ID::ProgramRAM, name});
   if(auto name = cram["name"].text()) Famicom::cartridge.memory.append({ID::CharacterRAM, name});

@@ -163,7 +163,6 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
   view.reset();
   view.append(ListViewColumn().setExpandable());
-  view.append(ListViewColumn().setForegroundColor({192, 128, 128}));
 
   auto contents = directory::icontents(path);
   bool folderMode = state.action == "openFolder";
@@ -175,7 +174,6 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
-      .append(ListViewCell().setText(octal(file_system_object::mode({path, content}) & 0777, 3L)))
     );
   }
 
@@ -186,7 +184,6 @@ auto BrowserDialogWindow::setPath(string path) -> void {
 
     view.append(ListViewItem()
       .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
-      .append(ListViewCell().setText(octal(file_system_object::mode({path, content}) & 0777, 3L)))
     );
   }
 

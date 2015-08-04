@@ -1353,12 +1353,14 @@ struct mListViewItem : mObject {
   auto backgroundColor() const -> Color;
   auto cell(unsigned position) const -> ListViewCell;
   auto cells() const -> unsigned;
+  auto checkable() const -> bool;
   auto checked() const -> bool;
   auto foregroundColor() const -> Color;
   auto remove() -> type& override;
   auto remove(sListViewCell cell) -> type&;
   auto selected() const -> bool;
   auto setBackgroundColor(Color color = {}) -> type&;
+  auto setCheckable(bool checkable = true) -> type&;
   auto setChecked(bool checked = true) -> type&;
   auto setFocused() -> type& override;
   auto setForegroundColor(Color color = {}) -> type&;
@@ -1369,6 +1371,7 @@ struct mListViewItem : mObject {
   struct State {
     Color backgroundColor;
     vector<sListViewCell> cells;
+    bool checkable = true;
     bool checked = false;
     Color foregroundColor;
     bool selected = false;

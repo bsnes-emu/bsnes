@@ -35,7 +35,7 @@ void Cartridge::load(System::Revision revision) {
 
   system.revision = revision;  //needed for ID::Manifest to return correct group ID
   if(revision != System::Revision::SuperGameBoy) {
-    interface->loadRequest(ID::Manifest, "manifest.bml");
+    interface->loadRequest(ID::Manifest, "manifest.bml", true);
   }
 
   information.mapper = Mapper::Unknown;
@@ -74,8 +74,8 @@ void Cartridge::load(System::Revision revision) {
 
   //Super Game Boy core loads memory from Super Famicom core
   if(revision != System::Revision::SuperGameBoy) {
-    if(auto name = rom["name"].text()) interface->loadRequest(ID::ROM, name);
-    if(auto name = ram["name"].text()) interface->loadRequest(ID::RAM, name);
+    if(auto name = rom["name"].text()) interface->loadRequest(ID::ROM, name, true);
+    if(auto name = ram["name"].text()) interface->loadRequest(ID::RAM, name, false);
     if(auto name = ram["name"].text()) memory.append({ID::RAM, name});
   }
 

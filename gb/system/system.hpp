@@ -42,6 +42,10 @@ struct System {
   void serialize_init();
 
   System();
+
+  struct Information {
+    string manifest;
+  } information;
 };
 
 #include <gb/interface/interface.hpp>

@@ -169,13 +169,12 @@ void PPU::Background::run(bool screen) {
     if(hires == false) return;
   }
 
-  if(regs.mode == Mode::Inactive) return;
-  if(regs.mode == Mode::Mode7) return run_mode7();
-
   if(tile_counter-- == 0) {
     tile_counter = 7;
     get_tile();
   }
+
+  if(regs.mode == Mode::Mode7) return run_mode7();
 
   uint8 palette = get_tile_color();
   if(x == 0) mosaic.hcounter = 1;

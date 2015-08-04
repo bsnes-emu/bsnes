@@ -1,5 +1,5 @@
 //request from emulation core to load non-volatile media folder
-auto Program::loadRequest(unsigned id, string name, string type) -> void {
+auto Program::loadRequest(unsigned id, string name, string type, bool required) -> void {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
   .setPath({config->library.location, name})
@@ -13,16 +13,38 @@ auto Program::loadRequest(unsigned id, string name, string type) -> void {
 }
 
 //request from emulation core to load non-volatile media file
-auto Program::loadRequest(unsigned id, string path) -> void {
-  string location = {mediaPaths(emulator->group(id)), path};
-  if(!file::exists(location)) return;
-  mmapstream stream{location};
-  return emulator->load(id, stream);
+auto Program::loadRequest(unsigned id, string filename, bool required) -> void {
+  string pathname = mediaPaths(emulator->group(id));
+  string location = {pathname, filename};
+  if(file::exists(location)) {
+    mmapstream stream{location};
+    return emulator->load(id, stream);
+  }
+  if(filename == "manifest.bml") {
+    string manifest;
+    if(auto fp = popen(string{"icarus -m \"", pathname, "\""}, "r")) {
+      while(true) {
+        auto byte = fgetc(fp);
+        if(byte == EOF) break;
+        manifest.append((char)byte);
+      }
+      pclose(fp);
+    }
+    if(manifest) {
+      memorystream stream{manifest.binary(), manifest.size()};
+      return emulator->load(id, stream);
+    }
+  }
+  if(required) MessageDialog().setTitle("higan").setText({
+    "Missing required file: ", location.filename(), "\n\n",
+    "From location:\n", location.pathname()
+  }).error();
 }
 
 //request from emulation core to save non-volatile media file
-auto Program::saveRequest(unsigned id, string path) -> void {
-  string location = {mediaPaths(emulator->group(id)), path};
+auto Program::saveRequest(unsigned id, string filename) -> void {
+  string pathname = mediaPaths(emulator->group(id));
+  string location = {pathname, filename};
   filestream stream{location, file::mode::write};
   return emulator->save(id, stream);
 }

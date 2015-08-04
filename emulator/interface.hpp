@@ -47,8 +47,8 @@ struct Interface {
   vector<Port> port;
 
   struct Bind {
-    virtual auto loadRequest(unsigned, string, string) -> void {}
-    virtual auto loadRequest(unsigned, string) -> void {}
+    virtual auto loadRequest(unsigned, string, string, bool) -> void {}
+    virtual auto loadRequest(unsigned, string, bool) -> void {}
     virtual auto saveRequest(unsigned, string) -> void {}
     virtual auto videoColor(unsigned, uint16_t, uint16_t, uint16_t, uint16_t) -> uint32_t { return 0u; }
     virtual auto videoRefresh(const uint32_t*, const uint32_t*, unsigned, unsigned, unsigned) -> void {}
@@ -62,8 +62,8 @@ struct Interface {
   Bind* bind = nullptr;
 
   //callback bindings (provided by user interface)
-  auto loadRequest(unsigned id, string name, string type) -> void { return bind->loadRequest(id, name, type); }
-  auto loadRequest(unsigned id, string path) -> void { return bind->loadRequest(id, path); }
+  auto loadRequest(unsigned id, string name, string type, bool required) -> void { return bind->loadRequest(id, name, type, required); }
+  auto loadRequest(unsigned id, string path, bool required) -> void { return bind->loadRequest(id, path, required); }
   auto saveRequest(unsigned id, string path) -> void { return bind->saveRequest(id, path); }
   auto videoColor(unsigned source, uint16_t alpha, uint16_t red, uint16_t green, uint16_t blue) -> uint32_t { return bind->videoColor(source, alpha, red, green, blue); }
   auto videoRefresh(const uint32_t* palette, const uint32_t* data, unsigned pitch, unsigned width, unsigned height) -> void { return bind->videoRefresh(palette, data, pitch, width, height); }

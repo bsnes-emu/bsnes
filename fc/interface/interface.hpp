@@ -9,6 +9,8 @@ struct ID {
   };
 
   enum : unsigned {
+    SystemManifest,
+
     Manifest,
     ProgramROM,
     ProgramRAM,

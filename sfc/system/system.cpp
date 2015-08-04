@@ -18,7 +18,7 @@ void System::run() {
   scheduler.sync = Scheduler::SynchronizeMode::None;
 
   scheduler.enter();
-  if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+  if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
     video.update();
   }
 }
@@ -54,8 +54,8 @@ void System::runtosave() {
 void System::runthreadtosave() {
   while(true) {
     scheduler.enter();
-    if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+    if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
+    if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
       video.update();
     }
   }
@@ -93,13 +93,12 @@ void System::term() {
 }
 
 void System::load() {
-  string manifest = string::read({interface->path(ID::System), "manifest.bml"});
-  auto document = BML::unserialize(manifest);
+//string manifest = string::read({interface->path(ID::System), "manifest.bml"});
+  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+  auto document = BML::unserialize(information.manifest);
 
-  auto iplrom = document["system/smp/rom/name"].text();
-  interface->loadRequest(ID::IPLROM, iplrom);
-  if(!file::exists({interface->path(ID::System), iplrom})) {
-    interface->notify("Error: required Super Famicom firmware ipl.rom not found.\n");
+  if(auto iplrom = document["system/smp/rom/name"].text()) {
+    interface->loadRequest(ID::IPLROM, iplrom, true);
   }
 
   region = configuration.region;
@@ -113,8 +112,8 @@ void System::load() {
 
   audio.coprocessor_enable(false);
 
-  bus.map_reset();
-  bus.map_xml();
+  bus.reset();
+  bus.map();
 
   cpu.enable();
   ppu.enable();

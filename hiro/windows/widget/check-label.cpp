@@ -18,7 +18,7 @@ auto pCheckLabel::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pCheckLabel::minimumSize() -> Size {
+auto pCheckLabel::minimumSize() const -> Size {
   auto size = pFont::size(hfont, state().text);
   return {size.width() + 20, size.height() + 4};
 }

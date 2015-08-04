@@ -5,32 +5,17 @@ namespace SuperFamicom {
 
 Bus bus;
 
-void Bus::map(
-  const function<uint8 (unsigned)>& reader,
-  const function<void (unsigned, uint8)>& writer,
-  unsigned banklo, unsigned bankhi,
-  unsigned addrlo, unsigned addrhi,
-  unsigned size, unsigned base, unsigned mask
-) {
-  assert(banklo <= bankhi && banklo <= 0xff);
-  assert(addrlo <= addrhi && addrlo <= 0xffff);
-  assert(idcount < 255);
-
-  unsigned id = idcount++;
-  this->reader[id] = reader;
-  this->writer[id] = writer;
-
-  for(unsigned bank = banklo; bank <= bankhi; bank++) {
-    for(unsigned addr = addrlo; addr <= addrhi; addr++) {
-      unsigned offset = reduce(bank << 16 | addr, mask);
-      if(size) offset = base + mirror(offset, size - base);
-      lookup[bank << 16 | addr] = id;
-      target[bank << 16 | addr] = offset;
-    }
-  }
+Bus::Bus() {
+  lookup = new uint8 [16 * 1024 * 1024];
+  target = new uint32[16 * 1024 * 1024];
 }
 
-void Bus::map_reset() {
+Bus::~Bus() {
+  delete[] lookup;
+  delete[] target;
+}
+
+auto Bus::reset() -> void {
   function<uint8 (unsigned)> reader = [](unsigned) { return cpu.regs.mdr; };
   function<void (unsigned, uint8)> writer = [](unsigned, uint8) {};
 
@@ -38,7 +23,7 @@ void Bus::map_reset() {
   map(reader, writer, 0x00, 0xff, 0x0000, 0xffff);
 }
 
-void Bus::map_xml() {
+auto Bus::map() -> void {
   for(auto& m : cartridge.mapping) {
     lstring part = m.addr.split(":", 1L);
     lstring banks = part(0).split(",");
@@ -57,14 +42,29 @@ void Bus::map_xml() {
   }
 }
 
-Bus::Bus() {
-  lookup = new uint8 [16 * 1024 * 1024];
-  target = new uint32[16 * 1024 * 1024];
-}
+auto Bus::map(
+  const function<uint8 (unsigned)>& reader,
+  const function<void (unsigned, uint8)>& writer,
+  unsigned banklo, unsigned bankhi,
+  unsigned addrlo, unsigned addrhi,
+  unsigned size, unsigned base, unsigned mask
+) -> void {
+  assert(banklo <= bankhi && banklo <= 0xff);
+  assert(addrlo <= addrhi && addrlo <= 0xffff);
+  assert(idcount < 255);
 
-Bus::~Bus() {
-  delete[] lookup;
-  delete[] target;
+  unsigned id = idcount++;
+  this->reader[id] = reader;
+  this->writer[id] = writer;
+
+  for(unsigned bank = banklo; bank <= bankhi; bank++) {
+    for(unsigned addr = addrlo; addr <= addrhi; addr++) {
+      unsigned offset = reduce(bank << 16 | addr, mask);
+      if(size) offset = base + mirror(offset, size - base);
+      lookup[bank << 16 | addr] = id;
+      target[bank << 16 | addr] = offset;
+    }
+  }
 }
 
 }

@@ -13,6 +13,7 @@ struct ID {
     SufamiTurboSlotB,
 
     //memory (files)
+    SystemManifest,
     IPLROM,
 
     Manifest,
@@ -89,35 +90,35 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
-  string title();
-  double videoFrequency();
-  double audioFrequency();
-
-  bool loaded();
-  string sha256();
-  unsigned group(unsigned id);
-  void load(unsigned id);
-  void save();
-  void load(unsigned id, const stream& stream);
-  void save(unsigned id, const stream& stream);
-  void unload();
-
-  void connect(unsigned port, unsigned device);
-  void power();
-  void reset();
-  void run();
-
-  bool rtc();
-  void rtcsync();
-
-  serializer serialize();
-  bool unserialize(serializer&);
-
-  void cheatSet(const lstring&);
-
-  void paletteUpdate(PaletteMode mode);
-
   Interface();
+
+  auto title() -> string;
+  auto videoFrequency() -> double;
+  auto audioFrequency() -> double;
+
+  auto loaded() -> bool;
+  auto sha256() -> string;
+  auto group(unsigned id) -> unsigned;
+  auto load(unsigned id) -> void;
+  auto save() -> void;
+  auto load(unsigned id, const stream& stream) -> void;
+  auto save(unsigned id, const stream& stream) -> void;
+  auto unload() -> void;
+
+  auto connect(unsigned port, unsigned device) -> void;
+  auto power() -> void;
+  auto reset() -> void;
+  auto run() -> void;
+
+  auto rtc() -> bool;
+  auto rtcsync() -> void;
+
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+
+  auto cheatSet(const lstring&) -> void;
+
+  auto paletteUpdate(PaletteMode mode) -> void;
 
   vector<Device> device;
 };

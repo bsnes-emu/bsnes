@@ -24,13 +24,11 @@ void System::power() {
 }
 
 void System::load() {
-  string manifest = string::read({interface->path(ID::System), "manifest.bml"});
-  auto document = BML::unserialize(manifest);
+  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+  auto document = BML::unserialize(information.manifest);
 
-  auto bios = document["system/cpu/rom/name"].text();
-  interface->loadRequest(ID::BIOS, bios);
-  if(!file::exists({interface->path(ID::System), bios})) {
-    interface->notify("Error: required Game Boy Advance firmware bios.rom not found.\n");
+  if(auto bios = document["system/cpu/rom/name"].text()) {
+    interface->loadRequest(ID::BIOS, bios, true);
   }
 
   serialize_init();

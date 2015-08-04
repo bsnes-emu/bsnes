@@ -38,6 +38,7 @@ string Interface::sha256() {
 
 unsigned Interface::group(unsigned id) {
   switch(id) {
+  case ID::SystemManifest:
   case ID::GameBoyBootROM:
   case ID::SuperGameBoyBootROM:
   case ID::GameBoyColorBootROM:
@@ -68,6 +69,10 @@ void Interface::save() {
 }
 
 void Interface::load(unsigned id, const stream& stream) {
+  if(id == ID::SystemManifest) {
+    system.information.manifest = stream.text();
+  }
+
   if(id == ID::GameBoyBootROM) {
     stream.read(system.bootROM.dmg, min( 256u, stream.size()));
   }
@@ -80,7 +85,9 @@ void Interface::load(unsigned id, const stream& stream) {
     stream.read(system.bootROM.cgb, min(2048u, stream.size()));
   }
 
-  if(id == ID::Manifest) cartridge.information.markup = stream.text();
+  if(id == ID::Manifest) {
+    cartridge.information.markup = stream.text();
+  }
 
   if(id == ID::ROM) {
     stream.read(cartridge.romdata, min(cartridge.romsize, stream.size()));

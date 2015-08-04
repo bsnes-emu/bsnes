@@ -22,6 +22,7 @@ auto pListViewColumn::construct() -> void {
     gtkCellToggle = gtk_cell_renderer_toggle_new();
     gtk_tree_view_column_pack_start(gtkColumn, gtkCellToggle, false);
     gtk_tree_view_column_set_attributes(gtkColumn, gtkCellToggle, "active", 0, nullptr);
+    gtk_tree_view_column_set_cell_data_func(gtkColumn, GTK_CELL_RENDERER(gtkCellToggle), (GtkTreeCellDataFunc)ListView_cellRendererToggleDataFunc, (gpointer)_parent(), nullptr);
   }
 
   gtkCellIcon = gtk_cell_renderer_pixbuf_new();

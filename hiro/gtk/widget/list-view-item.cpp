@@ -17,6 +17,9 @@ auto pListViewItem::remove(sListViewCell cell) -> void {
 auto pListViewItem::setBackgroundColor(Color color) -> void {
 }
 
+auto pListViewItem::setCheckable(bool checkable) -> void {
+}
+
 auto pListViewItem::setChecked(bool checked) -> void {
   if(auto parent = _parent()) {
     gtk_list_store_set(parent->gtkListStore, &gtkIter, 0, checked, -1);

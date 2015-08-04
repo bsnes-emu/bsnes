@@ -31,6 +31,7 @@ struct pListView : pWidget {
   auto _columnWidth(unsigned column) -> unsigned;
   auto _createModel() -> void;
   auto _doActivate() -> void;
+  auto _doCellRendererToggleDataFunc(GtkCellRenderer* renderer, GtkTreeIter* iter) -> void;
   auto _doChange() -> void;
   auto _doContext() -> void;
   auto _doEdit(GtkCellRendererText* renderer, const char* path, const char* text) -> void;

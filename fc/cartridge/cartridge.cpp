@@ -19,7 +19,7 @@ void Cartridge::main() {
 }
 
 void Cartridge::load() {
-  interface->loadRequest(ID::Manifest, "manifest.bml");
+  interface->loadRequest(ID::Manifest, "manifest.bml", true);
 
   Board::load(information.markup);  //this call will set Cartridge::board if successful
   if(board == nullptr) return;

@@ -51,7 +51,7 @@ auto Cartridge::parseMarkupMemory(MappedRAM& ram, Markup::Node node, unsigned id
   unsigned size = node["size"].decimal();
   ram.map(allocate<uint8>(size, 0xff), size);
   if(name) {
-    interface->loadRequest(id, name);
+    interface->loadRequest(id, name, !writable);  //treat ROM as required; RAM as optional
     if(writable) memory.append({id, name});
   }
 }
@@ -83,10 +83,10 @@ auto Cartridge::parseMarkupICD2(Markup::Node root) -> void {
   icd2.revision = max(1, root["revision"].decimal());
 
   GameBoy::cartridge.load_empty(GameBoy::System::Revision::SuperGameBoy);
-  interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb");
+  interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb", false);
 
   string bootROMName = root["rom/name"].text();
-  interface->loadRequest(ID::SuperGameBoyBootROM, bootROMName);
+  interface->loadRequest(ID::SuperGameBoyBootROM, bootROMName, true);
 
   for(auto node : root.find("map")) {
     if(node["id"].text() == "io") {
@@ -309,10 +309,10 @@ auto Cartridge::parseMarkupARMDSP(Markup::Node root) -> void {
   string dataROMName = rom(1)["name"].text();
   string dataRAMName = ram(0)["name"].text();
 
-  interface->loadRequest(ID::ArmDSPPROM, programROMName);
-  interface->loadRequest(ID::ArmDSPDROM, dataROMName);
+  interface->loadRequest(ID::ArmDSPPROM, programROMName, true);
+  interface->loadRequest(ID::ArmDSPDROM, dataROMName, true);
   if(dataRAMName.empty() == false) {
-    interface->loadRequest(ID::ArmDSPRAM, dataRAMName);
+    interface->loadRequest(ID::ArmDSPRAM, dataRAMName, false);
     memory.append({ID::ArmDSPRAM, dataRAMName});
   }
 
@@ -344,9 +344,9 @@ auto Cartridge::parseMarkupHitachiDSP(Markup::Node root, unsigned roms) -> void 
   string dataROMName = rom(1)["name"].text();
   string dataRAMName = ram(1)["name"].text();
 
-  interface->loadRequest(ID::HitachiDSPDROM, dataROMName);
+  interface->loadRequest(ID::HitachiDSPDROM, dataROMName, true);
   if(dataRAMName.empty() == false) {
-    interface->loadRequest(ID::HitachiDSPDRAM, dataRAMName);
+    interface->loadRequest(ID::HitachiDSPDRAM, dataRAMName, false);
   }
 
   for(auto node : root.find("map")) {
@@ -394,19 +394,19 @@ auto Cartridge::parseMarkupNECDSP(Markup::Node root) -> void {
   string dataRAMName = ram(0)["name"].text();
 
   if(necdsp.revision == NECDSP::Revision::uPD7725) {
-    interface->loadRequest(ID::Nec7725DSPPROM, programROMName);
-    interface->loadRequest(ID::Nec7725DSPDROM, dataROMName);
+    interface->loadRequest(ID::Nec7725DSPPROM, programROMName, true);
+    interface->loadRequest(ID::Nec7725DSPDROM, dataROMName, true);
     if(dataRAMName.empty() == false) {
-      interface->loadRequest(ID::Nec7725DSPRAM, dataRAMName);
+      interface->loadRequest(ID::Nec7725DSPRAM, dataRAMName, false);
       memory.append({ID::Nec7725DSPRAM, dataRAMName});
     }
   }
 
   if(necdsp.revision == NECDSP::Revision::uPD96050) {
-    interface->loadRequest(ID::Nec96050DSPPROM, programROMName);
-    interface->loadRequest(ID::Nec96050DSPDROM, dataROMName);
+    interface->loadRequest(ID::Nec96050DSPPROM, programROMName, true);
+    interface->loadRequest(ID::Nec96050DSPDROM, dataROMName, true);
     if(dataRAMName.empty() == false) {
-      interface->loadRequest(ID::Nec96050DSPRAM, dataRAMName);
+      interface->loadRequest(ID::Nec96050DSPRAM, dataRAMName, false);
       memory.append({ID::Nec96050DSPRAM, dataRAMName});
     }
   }
@@ -431,7 +431,7 @@ auto Cartridge::parseMarkupEpsonRTC(Markup::Node root) -> void {
   hasEpsonRTC = true;
 
   string name = root["ram/name"].text();
-  interface->loadRequest(ID::EpsonRTC, name);
+  interface->loadRequest(ID::EpsonRTC, name, false);
   memory.append({ID::EpsonRTC, name});
 
   for(auto node : root.find("map")) {
@@ -447,7 +447,7 @@ auto Cartridge::parseMarkupSharpRTC(Markup::Node root) -> void {
   hasSharpRTC = true;
 
   string name = root["ram/name"].text();
-  interface->loadRequest(ID::SharpRTC, name);
+  interface->loadRequest(ID::SharpRTC, name, false);
   memory.append({ID::SharpRTC, name});
 
   for(auto node : root.find("map")) {

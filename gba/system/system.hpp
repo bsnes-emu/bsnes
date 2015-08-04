@@ -31,6 +31,10 @@ struct System {
   void serialize(serializer&);
   void serialize_all(serializer&);
   void serialize_init();
+
+  struct Information {
+    string manifest;
+  } information;
 };
 
 extern BIOS bios;

@@ -502,11 +502,13 @@ struct ListViewItem : sListViewItem {
   auto backgroundColor() const { return self().backgroundColor(); }
   auto cell(unsigned position) const { return self().cell(position); }
   auto cells() const { return self().cells(); }
+  auto checkable() const { return self().checkable(); }
   auto checked() const { return self().checked(); }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto remove(sListViewCell cell) { return self().remove(cell), *this; }
   auto selected() const { return self().selected(); }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
+  auto setCheckable(bool checkable = true) { return self().setCheckable(checkable), *this; }
   auto setChecked(bool checked = true) { return self().setChecked(checked), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
   auto setSelected(bool selected = true) { return self().setSelected(selected), *this; }

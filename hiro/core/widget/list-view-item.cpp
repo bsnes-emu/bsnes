@@ -26,8 +26,12 @@ auto mListViewItem::cells() const -> unsigned {
   return state.cells.size();
 }
 
+auto mListViewItem::checkable() const -> bool {
+  return state.checkable;
+}
+
 auto mListViewItem::checked() const -> bool {
-  return state.checked;
+  return state.checkable && state.checked;
 }
 
 auto mListViewItem::foregroundColor() const -> Color {
@@ -56,6 +60,12 @@ auto mListViewItem::selected() const -> bool {
 auto mListViewItem::setBackgroundColor(Color color) -> type& {
   state.backgroundColor = color;
   signal(setBackgroundColor, color);
+  return *this;
+}
+
+auto mListViewItem::setCheckable(bool checkable) -> type& {
+  state.checkable = checkable;
+  signal(setCheckable, checkable);
   return *this;
 }
 

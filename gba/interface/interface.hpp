@@ -9,6 +9,7 @@ struct ID {
   };
 
   enum : unsigned {
+    SystemManifest,
     BIOS,
 
     Manifest,

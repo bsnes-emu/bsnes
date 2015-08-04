@@ -13,18 +13,21 @@
 
 struct Controller : Thread {
   enum : bool { Port1 = 0, Port2 = 1 };
-  const bool port;
 
-  static void Enter();
-  virtual void enter();
-  void step(unsigned clocks);
-  void synchronize_cpu();
-
-  bool iobit();
-  void iobit(bool data);
-  virtual uint2 data() { return 0; }
-  virtual void latch(bool data) {}
   Controller(bool port);
+
+  static auto Enter() -> void;
+  virtual auto enter() -> void;
+
+  auto step(unsigned clocks) -> void;
+  auto synchronize_cpu() -> void;
+
+  auto iobit() -> bool;
+  auto iobit(bool data) -> void;
+  virtual auto data() -> uint2 { return 0; }
+  virtual auto latch(bool data) -> void {}
+
+  const bool port;
 };
 
 #include "gamepad/gamepad.hpp"

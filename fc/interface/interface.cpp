@@ -26,6 +26,8 @@ string Interface::sha256() {
 
 unsigned Interface::group(unsigned id) {
   switch(id) {
+  case ID::SystemManifest:
+    return 0;
   case ID::Manifest:
   case ID::ProgramROM:
   case ID::ProgramRAM:
@@ -48,7 +50,13 @@ void Interface::save() {
 }
 
 void Interface::load(unsigned id, const stream& stream) {
-  if(id == ID::Manifest) cartridge.information.markup = stream.text();
+  if(id == ID::SystemManifest) {
+    system.information.manifest = stream.text();
+  }
+
+  if(id == ID::Manifest) {
+    cartridge.information.markup = stream.text();
+  }
 
   if(id == ID::ProgramROM) {
     stream.read(cartridge.board->prgrom.data, min(cartridge.board->prgrom.size, stream.size()));

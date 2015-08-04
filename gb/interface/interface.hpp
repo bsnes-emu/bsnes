@@ -11,6 +11,7 @@ struct ID {
   };
 
   enum : unsigned {
+    SystemManifest,
     GameBoyBootROM,
     SuperGameBoyBootROM,
     GameBoyColorBootROM,

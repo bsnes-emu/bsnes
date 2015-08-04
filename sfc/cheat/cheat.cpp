@@ -5,19 +5,19 @@ namespace SuperFamicom {
 
 Cheat cheat;
 
-void Cheat::reset() {
+auto Cheat::reset() -> void {
   codes.reset();
 }
 
-void Cheat::append(unsigned addr, unsigned data) {
+auto Cheat::append(unsigned addr, unsigned data) -> void {
   codes.append({addr, Unused, data});
 }
 
-void Cheat::append(unsigned addr, unsigned comp, unsigned data) {
+auto Cheat::append(unsigned addr, unsigned comp, unsigned data) -> void {
   codes.append({addr, comp, data});
 }
 
-maybe<unsigned> Cheat::find(unsigned addr, unsigned comp) {
+auto Cheat::find(unsigned addr, unsigned comp) -> maybe<unsigned> {
   //WRAM mirroring: $00-3f,80-bf:0000-1fff -> $7e:0000-1fff
   if((addr & 0x40e000) == 0x000000) addr = 0x7e0000 | (addr & 0x1fff);
 
@@ -26,6 +26,7 @@ maybe<unsigned> Cheat::find(unsigned addr, unsigned comp) {
       return code.data;
     }
   }
+
   return nothing;
 }
 

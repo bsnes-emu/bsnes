@@ -340,6 +340,7 @@ template<typename... P> auto append(lstring& self, const string& value, P&&... p
 inline auto append(lstring& self) -> lstring&;
 inline auto find(const lstring& self, const string& source) -> maybe<unsigned>;
 inline auto ifind(const lstring& self, const string& source) -> maybe<unsigned>;
+inline auto match(const lstring& self, const string& pattern) -> lstring;
 inline auto merge(const lstring& self, const string& separator) -> string;
 inline auto strip(lstring& self) -> lstring&;
 
@@ -368,6 +369,7 @@ struct lstring : vector<string> {
   template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
   auto find(const string& source) const -> maybe<unsigned> { return nall::find(*this, source); }
   auto ifind(const string& source) const -> maybe<unsigned> { return nall::ifind(*this, source); }
+  auto match(const string& pattern) const -> lstring { return nall::match(*this, pattern); }
   auto merge(const string& separator) const -> string { return nall::merge(*this, separator); }
   auto strip() -> type& { return nall::strip(*this); }
 

@@ -37,11 +37,15 @@ namespace nall {
 #elif defined(__GNUC__)
   #define COMPILER_GCC
   auto Intrinsics::compiler() -> Compiler { return Compiler::GCC; }
+
+  #pragma GCC diagnostic ignored "-Wunknown-pragmas"
+  #pragma GCC diagnostic ignored "-Wpragmas"
+  #pragma GCC diagnostic ignored "-Wswitch-bool"
 #elif defined(_MSC_VER)
   #define COMPILER_VISUALCPP
   auto Intrinsics::compiler() -> Compiler { return Compiler::VisualCPP; }
 
-  #pragma warning(disable:4996)  //disable libc "deprecation" warnings
+  #pragma warning(disable:4996)  //libc "deprecation" warnings
 #else
   #warning "unable to detect compiler"
   #define COMPILER_UNKNOWN

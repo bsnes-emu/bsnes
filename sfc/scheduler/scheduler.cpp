@@ -2,31 +2,25 @@
 
 Scheduler scheduler;
 
-void Scheduler::enter() {
-  host_thread = co_active();
-  co_switch(thread);
-}
-
-void Scheduler::exit(ExitReason reason) {
-  exit_reason = reason;
-  thread = co_active();
-  co_switch(host_thread);
-}
-
-void Scheduler::debug() {
-  exit(ExitReason::DebuggerEvent);
-}
-
-void Scheduler::init() {
+auto Scheduler::init() -> void {
   host_thread = co_active();
   thread = cpu.thread;
   sync = SynchronizeMode::None;
 }
 
-Scheduler::Scheduler() {
-  host_thread = nullptr;
-  thread = nullptr;
-  exit_reason = ExitReason::UnknownEvent;
+auto Scheduler::enter() -> void {
+  host_thread = co_active();
+  co_switch(thread);
+}
+
+auto Scheduler::exit(ExitReason reason) -> void {
+  exit_reason = reason;
+  thread = co_active();
+  co_switch(host_thread);
+}
+
+auto Scheduler::debug() -> void {
+  exit(ExitReason::DebuggerEvent);
 }
 
 #endif

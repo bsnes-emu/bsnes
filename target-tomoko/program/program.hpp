@@ -5,8 +5,8 @@ struct Program : Emulator::Interface::Bind {
   auto quit() -> void;
 
   //interface.cpp
-  auto loadRequest(unsigned id, string name, string type) -> void override;
-  auto loadRequest(unsigned id, string path) -> void override;
+  auto loadRequest(unsigned id, string name, string type, bool required) -> void override;
+  auto loadRequest(unsigned id, string path, bool required) -> void override;
   auto saveRequest(unsigned id, string path) -> void override;
   auto videoColor(unsigned source, uint16 alpha, uint16 red, uint16 green, uint16 blue) -> uint32 override;
   auto videoRefresh(const uint32* palette, const uint32* data, unsigned pitch, unsigned width, unsigned height) -> void override;

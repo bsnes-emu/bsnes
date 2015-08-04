@@ -275,7 +275,7 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
       HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(_backgroundColor(row, column)));
       FillRect(hdc, &rc, brush);
       DeleteObject(brush);
-      if(state().checkable && column == 0) {
+      if(state().checkable && self().item(row).checkable() && column == 0) {
         if(auto htheme = OpenThemeData(hwnd, L"BUTTON")) {
           unsigned state = checked ? CBS_CHECKEDNORMAL : CBS_UNCHECKEDNORMAL;
           SIZE size;

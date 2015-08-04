@@ -1,23 +1,23 @@
 //Memory
 
-unsigned Memory::size() const { return 0; }
+auto Memory::size() const -> unsigned { return 0; }
 
 //StaticRAM
-
-uint8* StaticRAM::data() { return data_; }
-unsigned StaticRAM::size() const { return size_; }
-
-uint8 StaticRAM::read(unsigned addr) { return data_[addr]; }
-void StaticRAM::write(unsigned addr, uint8 n) { data_[addr] = n; }
-uint8& StaticRAM::operator[](unsigned addr) { return data_[addr]; }
-const uint8& StaticRAM::operator[](unsigned addr) const { return data_[addr]; }
 
 StaticRAM::StaticRAM(unsigned n) : size_(n) { data_ = new uint8[size_]; }
 StaticRAM::~StaticRAM() { delete[] data_; }
 
+auto StaticRAM::data() -> uint8* { return data_; }
+auto StaticRAM::size() const -> unsigned { return size_; }
+
+auto StaticRAM::read(unsigned addr) -> uint8 { return data_[addr]; }
+auto StaticRAM::write(unsigned addr, uint8 n) -> void { data_[addr] = n; }
+auto StaticRAM::operator[](unsigned addr) -> uint8& { return data_[addr]; }
+auto StaticRAM::operator[](unsigned addr) const -> const uint8& { return data_[addr]; }
+
 //MappedRAM
 
-void MappedRAM::reset() {
+auto MappedRAM::reset() -> void {
   if(data_) {
     delete[] data_;
     data_ = nullptr;
@@ -26,13 +26,13 @@ void MappedRAM::reset() {
   write_protect_ = false;
 }
 
-void MappedRAM::map(uint8* source, unsigned length) {
+auto MappedRAM::map(uint8* source, unsigned length) -> void {
   reset();
   data_ = source;
   size_ = data_ ? length : 0;
 }
 
-void MappedRAM::copy(const stream& memory) {
+auto MappedRAM::copy(const stream& memory) -> void {
   if(data_) delete[] data_;
   //round size up to multiple of 256-bytes
   size_ = (memory.size() & ~255) + ((bool)(memory.size() & 255) << 8);
@@ -40,22 +40,21 @@ void MappedRAM::copy(const stream& memory) {
   memory.read(data_, memory.size());
 }
 
-void MappedRAM::read(const stream& memory) {
+auto MappedRAM::read(const stream& memory) -> void {
   memory.read(data_, min(memory.size(), size_));
 }
 
-void MappedRAM::write_protect(bool status) { write_protect_ = status; }
-uint8* MappedRAM::data() { return data_; }
-unsigned MappedRAM::size() const { return size_; }
+auto MappedRAM::write_protect(bool status) -> void { write_protect_ = status; }
+auto MappedRAM::data() -> uint8* { return data_; }
+auto MappedRAM::size() const -> unsigned { return size_; }
 
-uint8 MappedRAM::read(unsigned addr) { return data_[addr]; }
-void MappedRAM::write(unsigned addr, uint8 n) { if(!write_protect_) data_[addr] = n; }
-const uint8& MappedRAM::operator[](unsigned addr) const { return data_[addr]; }
-MappedRAM::MappedRAM() : data_(nullptr), size_(0), write_protect_(false) {}
+auto MappedRAM::read(unsigned addr) -> uint8 { return data_[addr]; }
+auto MappedRAM::write(unsigned addr, uint8 n) -> void { if(!write_protect_) data_[addr] = n; }
+auto MappedRAM::operator[](unsigned addr) const -> const uint8& { return data_[addr]; }
 
 //Bus
 
-unsigned Bus::mirror(unsigned addr, unsigned size) {
+auto Bus::mirror(unsigned addr, unsigned size) -> unsigned {
   if(size == 0) return 0;
   unsigned base = 0;
   unsigned mask = 1 << 23;
@@ -71,7 +70,7 @@ unsigned Bus::mirror(unsigned addr, unsigned size) {
   return base + addr;
 }
 
-unsigned Bus::reduce(unsigned addr, unsigned mask) {
+auto Bus::reduce(unsigned addr, unsigned mask) -> unsigned {
   while(mask) {
     unsigned bits = (mask & -mask) - 1;
     addr = ((addr >> 1) & ~bits) | (addr & bits);
@@ -80,7 +79,7 @@ unsigned Bus::reduce(unsigned addr, unsigned mask) {
   return addr;
 }
 
-uint8 Bus::read(unsigned addr) {
+auto Bus::read(unsigned addr) -> uint8 {
   uint8 data = reader[lookup[addr]](target[addr]);
 
   if(cheat.enable()) {
@@ -90,6 +89,6 @@ uint8 Bus::read(unsigned addr) {
   return data;
 }
 
-void Bus::write(unsigned addr, uint8 data) {
+auto Bus::write(unsigned addr, uint8 data) -> void {
   return writer[lookup[addr]](target[addr], data);
 }

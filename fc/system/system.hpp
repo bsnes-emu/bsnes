@@ -17,6 +17,10 @@ struct System {
   void serialize_all(serializer&);
   void serialize_init();
   unsigned serialize_size;
+
+  struct Information {
+    string manifest;
+  } information;
 };
 
 extern System system;

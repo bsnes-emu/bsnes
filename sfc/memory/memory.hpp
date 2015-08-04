@@ -1,74 +1,72 @@
 struct Memory {
-  virtual inline unsigned size() const;
-  virtual uint8 read(unsigned addr) = 0;
-  virtual void write(unsigned addr, uint8 data) = 0;
+  virtual inline auto size() const -> unsigned;
+  virtual auto read(unsigned addr) -> uint8 = 0;
+  virtual auto write(unsigned addr, uint8 data) -> void = 0;
 };
 
 struct StaticRAM : Memory {
-  inline uint8* data();
-  inline unsigned size() const;
-
-  inline uint8 read(unsigned addr);
-  inline void write(unsigned addr, uint8 n);
-  inline uint8& operator[](unsigned addr);
-  inline const uint8& operator[](unsigned addr) const;
-
   inline StaticRAM(unsigned size);
   inline ~StaticRAM();
 
+  inline auto data() -> uint8*;
+  inline auto size() const -> unsigned;
+
+  inline auto read(unsigned addr) -> uint8;
+  inline auto write(unsigned addr, uint8 n) -> void;
+  inline auto operator[](unsigned addr) -> uint8&;
+  inline auto operator[](unsigned addr) const -> const uint8&;
+
 private:
-  uint8* data_;
-  unsigned size_;
+  uint8* data_ = nullptr;
+  unsigned size_ = 0;
 };
 
 struct MappedRAM : Memory {
-  inline void reset();
-  inline void map(uint8*, unsigned);
-  inline void copy(const stream& memory);
-  inline void read(const stream& memory);
+  inline auto reset() -> void;
+  inline auto map(uint8*, unsigned) -> void;
+  inline auto copy(const stream& memory) -> void;
+  inline auto read(const stream& memory) -> void;
 
-  inline void write_protect(bool status);
-  inline uint8* data();
-  inline unsigned size() const;
+  inline auto write_protect(bool status) -> void;
+  inline auto data() -> uint8*;
+  inline auto size() const -> unsigned;
 
-  inline uint8 read(unsigned addr);
-  inline void write(unsigned addr, uint8 n);
-  inline const uint8& operator[](unsigned addr) const;
-  inline MappedRAM();
+  inline auto read(unsigned addr) -> uint8;
+  inline auto write(unsigned addr, uint8 n) -> void;
+  inline auto operator[](unsigned addr) const -> const uint8&;
 
 private:
-  uint8* data_;
-  unsigned size_;
-  bool write_protect_;
+  uint8* data_ = nullptr;
+  unsigned size_ = 0;
+  bool write_protect_ = false;
 };
 
 struct Bus {
-  alwaysinline static unsigned mirror(unsigned addr, unsigned size);
-  alwaysinline static unsigned reduce(unsigned addr, unsigned mask);
+  alwaysinline static auto mirror(unsigned addr, unsigned size) -> unsigned;
+  alwaysinline static auto reduce(unsigned addr, unsigned mask) -> unsigned;
 
-  alwaysinline uint8 read(unsigned addr);
-  alwaysinline void write(unsigned addr, uint8 data);
+  Bus();
+  ~Bus();
 
-  uint8* lookup;
-  uint32* target;
+  alwaysinline auto read(unsigned addr) -> uint8;
+  alwaysinline auto write(unsigned addr, uint8 data) -> void;
 
-  unsigned idcount;
-  function<uint8 (unsigned)> reader[256];
-  function<void (unsigned, uint8)> writer[256];
-
-  void map(
+  auto reset() -> void;
+  auto map() -> void;
+  auto map(
     const function<uint8 (unsigned)>& reader,
     const function<void (unsigned, uint8)>& writer,
     unsigned banklo, unsigned bankhi,
     unsigned addrlo, unsigned addrhi,
     unsigned size = 0, unsigned base = 0, unsigned mask = 0
-  );
+  ) -> void;
 
-  void map_reset();
-  void map_xml();
+  uint8* lookup = nullptr;
+  uint32* target = nullptr;
 
-  Bus();
-  ~Bus();
+  unsigned idcount = 0;
+  function<uint8 (unsigned)> reader[256];
+  function<void (unsigned, uint8)> writer[256];
 };
 
 extern Bus bus;

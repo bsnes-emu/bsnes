@@ -9,6 +9,8 @@ static auto ListView_edit(GtkCellRendererText* renderer, const char* path, const
 static auto ListView_headerActivate(GtkTreeViewColumn* column, pListView* p) -> void { return p->_doHeaderActivate(column); }
 static auto ListView_mouseMoveEvent(GtkWidget*, GdkEvent*, pListView* p) -> signed { return p->_doMouseMove(); }
 static auto ListView_popup(GtkTreeView*, pListView* p) -> void { return p->_doContext(); }
+
+static auto ListView_cellRendererToggleDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeModel* model, GtkTreeIter* iter, pListView* p) -> void { return p->_doCellRendererToggleDataFunc(renderer, iter); }
 static auto ListView_toggle(GtkCellRendererToggle*, const char* path, pListView* p) -> void { return p->_doToggle(path); }
 
 auto pListView::construct() -> void {
@@ -274,6 +276,15 @@ auto pListView::_createModel() -> void {
 
 auto pListView::_doActivate() -> void {
   if(!locked()) self().doActivate();
+}
+
+auto pListView::_doCellRendererToggleDataFunc(GtkCellRenderer* renderer, GtkTreeIter* iter) -> void {
+  auto path = gtk_tree_model_get_string_from_iter(gtkTreeModel, iter);
+  auto row = decimal(path);
+  if(auto item = self().item(row)) {
+    gtk_cell_renderer_set_visible(renderer, state().checkable && item->state.checkable);
+  }
+  g_free(path);
 }
 
 auto pListView::_doChange() -> void {
