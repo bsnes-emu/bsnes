@@ -116,7 +116,7 @@ auto pIconView::setGeometry(Geometry geometry) -> void {
 }
 
 auto pIconView::setItemIcon(unsigned position, const image& icon) -> void {
-  if(position >= self().items()) return;
+  if(position >= self().itemCount()) return;
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, string{position})) {
     if(icon) {
@@ -129,7 +129,7 @@ auto pIconView::setItemIcon(unsigned position, const image& icon) -> void {
 }
 
 auto pIconView::setItemSelected(unsigned position, bool selected) -> void {
-  if(position >= self().items()) return;
+  if(position >= self().itemCount()) return;
   lock();
   GtkTreePath* path = gtk_tree_path_new_from_string(string{position});
   if(selected) {
@@ -165,7 +165,7 @@ auto pIconView::setItemSelectedNone() -> void {
 }
 
 auto pIconView::setItemText(unsigned position, const string& text) -> void {
-  if(position >= self().items()) return;
+  if(position >= self().itemCount()) return;
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, string{position})) {
     gtk_list_store_set(store, &iter, 1, (const char*)text, -1);
@@ -216,7 +216,7 @@ auto pIconView::_updateSelected() -> void {
   currentSelection = selected;
   for(auto& item : state().items) item->state.selected = false;
   for(auto& position : currentSelection) {
-    if(position >= self().items()) continue;
+    if(position >= self().itemCount()) continue;
     state().items[position]->state.selected = true;
   }
 

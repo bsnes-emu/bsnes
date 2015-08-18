@@ -12,7 +12,7 @@ ToolsManager::ToolsManager() {
 
   setTitle("Tools");
   setSize({600, 400});
-  setPlacement(1.0, 1.0);
+  setAlignment({1.0, 1.0});
 
   onSize([&] {
     cheatEditor.cheatList.resizeColumns();

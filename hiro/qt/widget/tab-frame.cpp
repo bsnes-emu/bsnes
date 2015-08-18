@@ -1,10 +1,31 @@
-namespace phoenix {
+#if defined(Hiro_TabFrame)
 
-void pTabFrame::append() {
-  qtTabFrame->addTab(new QWidget, "");
+namespace hiro {
+
+auto pTabFrame::construct() -> void {
+  qtWidget = qtTabFrame = new QtTabFrame(*this);
+  qtTabFrame->connect(qtTabFrame, SIGNAL(currentChanged(int)), SLOT(onChange(int)));
+
+  pWidget::construct();
+  _setState();
 }
 
-QWidget* pTabFrame::container(Widget& widget) {
+auto pTabFrame::destruct() -> void {
+  delete qtTabFrame;
+  qtWidget = qtTabFrame = nullptr;
+}
+
+auto pTabFrame::append(sTabFrameItem item) -> void {
+}
+
+auto pTabFrame::remove(sTabFrameItem item) -> void {
+}
+
+auto pTabFrame::setEdge(Edge edge) -> void {
+}
+
+/*
+auto pTabFrame::container(Widget& widget) -> QWidget* {
   Layout* widgetLayout = GetParentWidgetLayout(&widget);
   unsigned selection = 0;
   for(auto& layout : tabFrame.state.layout) {
@@ -14,22 +35,22 @@ QWidget* pTabFrame::container(Widget& widget) {
   return nullptr;
 }
 
-Position pTabFrame::displacement() {
+auto pTabFrame::displacement() -> Position {
   return {5, 33};
 }
 
-void pTabFrame::remove(unsigned selection) {
+auto pTabFrame::remove(unsigned selection) -> void {
   qtTabFrame->removeTab(selection);
 }
 
-void pTabFrame::setEnabled(bool enabled) {
+auto pTabFrame::setEnabled(bool enabled) -> void {
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setEnabled(layout->enabled());
   }
   pWidget::setEnabled(enabled);
 }
 
-void pTabFrame::setGeometry(Geometry geometry) {
+auto pTabFrame::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
   geometry.x += 0, geometry.width -= 5;
   geometry.y += 29, geometry.height -= 33;
@@ -38,58 +59,70 @@ void pTabFrame::setGeometry(Geometry geometry) {
   }
   synchronizeLayout();
 }
+*/
 
-void pTabFrame::setImage(unsigned selection, const image& image) {
+auto pTabFrame::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+
+//  geometry.setPosition({0, 0});
+//  geometry.setWidth(geometry.width() - 4);
+//  geometry.setHeight(geometry.height() - 25);
+
+  for(auto& item : state().items) {
+    if(auto self = item->self()) self->setGeometry(geometry);
+  }
+}
+
+/*
+auto pTabFrame::setIcon(unsigned selection, const image& icon) -> void {
   qtTabFrame->setTabIcon(selection, CreateIcon(image));
 }
 
-void pTabFrame::setSelected(unsigned selection) {
+auto pTabFrame::setSelected(unsigned selection) -> void {
   lock();
   qtTabFrame->setCurrentIndex(selection);
   synchronizeLayout();
   unlock();
 }
 
-void pTabFrame::setText(unsigned selection, string text) {
-  qtTabFrame->setTabText(selection, QString::fromUtf8(text));
-}
-
-void pTabFrame::setVisible(bool visible) {
+auto pTabFrame::setVisible(bool visible) -> void {
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setVisible(layout->visible());
   }
   pWidget::setVisible(visible);
 }
+*/
 
-void pTabFrame::constructor() {
-  qtWidget = qtTabFrame = new QTabWidget;
-  connect(qtTabFrame, SIGNAL(currentChanged(int)), SLOT(onChange(int)));
-
-  setSelected(tabFrame.state.selection);
-}
-
-void pTabFrame::destructor() {
-  delete qtTabFrame;
-  qtWidget = qtTabFrame = nullptr;
-}
-
-void pTabFrame::orphan() {
-  destructor();
-  constructor();
-}
-
-void pTabFrame::synchronizeLayout() {
+/*
+auto pTabFrame::synchronizeLayout() -> void {
   unsigned selection = 0;
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setVisible(selection == tabFrame.state.selection);
     selection++;
   }
 }
+*/
 
-void pTabFrame::onChange(int selection) {
-  tabFrame.state.selection = selection;
-  synchronizeLayout();
-  if(!locked() && tabFrame.onChange) tabFrame.onChange();
+auto pTabFrame::_setState() -> void {
+  for(auto& item : state().items) {
+    if(auto self = item->self()) self->_setState();
+//    if(auto layout = item->state.layout) {
+//      item->setVisible(item->visible(true));
+//    }
+  }
+}
+
+auto QtTabFrame::showEvent(QShowEvent* event) -> void {
+  QTabWidget::showEvent(event);
+  p._setState();  //needed to capture geometry of TabFrame for TabFrameItem layouts
+}
+
+auto QtTabFrame::onChange(int selection) -> void {
+//  state().selection = selection;
+//  synchronizeLayout();
+//  if(!p.locked()) p.self().doChange();
 }
 
 }
+
+#endif

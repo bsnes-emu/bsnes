@@ -125,9 +125,9 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
     //the new tab will be the one after this one
     unsigned displacement = 1;
     //... unless it's the last tab, in which case it's the one before it
-    if(item->offset() == self().items() - 1) displacement = -1;
+    if(item->offset() == self().itemCount() - 1) displacement = -1;
     //... unless there are no tabs left, in which case nothing is selected
-    if(self().items() > 1) {
+    if(self().itemCount() > 1) {
       setItemSelected(item->offset() + displacement);
     }
   }

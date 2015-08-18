@@ -48,9 +48,9 @@ auto Keyboard::poll() -> vector<bool> {
       active = false;
       break;
     }
-    if(auto parent = hotkey->state.parent.acquire()) {
-      //todo: set active = false if parent no longer exists
-      active &= parent->focused();
+    if(auto owner = hotkey->state.owner.acquire()) {
+      //todo: set active = false if owner no longer exists
+      active &= owner->focused();
     }
     if(hotkey->state.active != active) {
       hotkey->state.active = active;

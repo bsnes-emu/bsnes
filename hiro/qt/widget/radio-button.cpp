@@ -1,85 +1,95 @@
-namespace phoenix {
+#if defined(Hiro_RadioButton)
 
-Size pRadioButton::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), radioButton.state.text);
+namespace hiro {
 
-  if(radioButton.state.orientation == Orientation::Horizontal) {
-    size.width += radioButton.state.image.width;
-    size.height = max(radioButton.state.image.height, size.height);
-  }
-
-  if(radioButton.state.orientation == Orientation::Vertical) {
-    size.width = max(radioButton.state.image.width, size.width);
-    size.height += radioButton.state.image.height;
-  }
-
-  return {size.width + 20, size.height + 12};
-}
-
-void pRadioButton::setChecked() {
-  parent().lock();
-  for(auto& item : radioButton.state.group) {
-    bool checked = &item.p == this;
-    item.p.qtRadioButton->setChecked(item.state.checked = checked);
-  }
-  parent().unlock();
-}
-
-void pRadioButton::setGroup(const group<RadioButton>& group) {
-  parent().lock();
-  for(auto& item : radioButton.state.group) {
-    item.p.qtRadioButton->setChecked(item.state.checked);
-  }
-  parent().unlock();
-}
-
-void pRadioButton::setImage(const image& image, Orientation orientation) {
-  qtRadioButton->setIconSize(QSize(image.width, image.height));
-  qtRadioButton->setIcon(CreateIcon(image));
-  qtRadioButton->setStyleSheet("text-align: top;");
-  switch(orientation) {
-  case Orientation::Horizontal: qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
-  case Orientation::Vertical:   qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);  break;
-  }
-}
-
-void pRadioButton::setText(string text) {
-  qtRadioButton->setText(QString::fromUtf8(text));
-}
-
-pRadioButton& pRadioButton::parent() {
-  if(radioButton.state.group.size()) return radioButton.state.group.first().p;
-  return *this;
-}
-
-void pRadioButton::constructor() {
-  qtWidget = qtRadioButton = new QToolButton;
+auto pRadioButton::construct() -> void {
+  qtWidget = qtRadioButton = new QtRadioButton(*this);
   qtRadioButton->setCheckable(true);
   qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
-  connect(qtRadioButton, SIGNAL(toggled(bool)), SLOT(onActivate()));
+  qtRadioButton->connect(qtRadioButton, SIGNAL(toggled(bool)), SLOT(onActivate()));
 
-  pWidget::synchronizeState();
-  setGroup(radioButton.state.group);
-  setText(radioButton.state.text);
+  pWidget::construct();
+  _setState();
 }
 
-void pRadioButton::destructor() {
+auto pRadioButton::destruct() -> void {
   if(qtRadioButton) delete qtRadioButton;
   qtWidget = qtRadioButton = nullptr;
 }
 
-void pRadioButton::orphan() {
-  destructor();
-  constructor();
+auto pRadioButton::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+
+  if(state().orientation == Orientation::Horizontal) {
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(state().icon.height(), size.height()));
+  }
+
+  if(state().orientation == Orientation::Vertical) {
+    size.setWidth(max(state().icon.width(), size.width()));
+    size.setHeight(size.height() + state().icon.height());
+  }
+
+  return {size.width() + 20, size.height() + 12};
 }
 
-void pRadioButton::onActivate() {
-  if(parent().locked()) return;
-  bool wasChecked = radioButton.state.checked;
-  setChecked();
-  if(!wasChecked) {
-    if(radioButton.onActivate) radioButton.onActivate();
+auto pRadioButton::setBordered(bool bordered) -> void {
+}
+
+auto pRadioButton::setChecked() -> void {
+  _setState();
+}
+
+auto pRadioButton::setGroup(sGroup group) -> void {
+  _setState();
+}
+
+auto pRadioButton::setIcon(const image& icon) -> void {
+  _setState();
+}
+
+auto pRadioButton::setOrientation(Orientation orientation) -> void {
+  _setState();
+}
+
+auto pRadioButton::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pRadioButton::_setState() -> void {
+  if(auto& group = state().group) {
+    group->self()->lock();
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto radioButton = dynamic_cast<mRadioButton*>(object.data())) {
+          if(auto self = radioButton->self()) {
+            self->qtRadioButton->setChecked(radioButton->state.checked);
+          }
+        }
+      }
+    }
+    group->self()->unlock();
+  }
+  qtRadioButton->setIconSize(QSize(state().icon.width(), state().icon.height()));
+  qtRadioButton->setIcon(CreateIcon(state().icon));
+  qtRadioButton->setStyleSheet("text-align: top;");
+  switch(state().orientation) {
+  case Orientation::Horizontal: qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
+  case Orientation::Vertical:   qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);  break;
+  }
+  qtRadioButton->setText(QString::fromUtf8(state().text));
+}
+
+auto QtRadioButton::onActivate() -> void {
+  if(auto& group = p.state().group) {
+    if(!group->self()->locked()) {
+      bool wasChecked = p.state().checked;
+      p.self().setChecked();
+      if(!wasChecked) p.self().doActivate();
+    }
   }
 }
 
 }
+
+#endif

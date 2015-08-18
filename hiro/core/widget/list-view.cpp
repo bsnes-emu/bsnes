@@ -6,22 +6,27 @@ auto mListView::allocate() -> pObject* {
 
 auto mListView::destruct() -> void {
   for(auto& item : state.items) item->destruct();
-  for(auto& column : state.columns) column->destruct();
+  if(auto& header = state.header) header->destruct();
   mWidget::destruct();
 }
 
 //
 
-auto mListView::append(sListViewColumn column) -> type& {
-  state.columns.append(column);
-  column->setParent(this, columns() - 1);
-  signal(append, column);
+auto mListView::alignment() const -> Alignment {
+  return state.alignment;
+}
+
+auto mListView::append(sListViewHeader header) -> type& {
+  if(auto& header = state.header) remove(header);
+  state.header = header;
+  header->setParent(this, 0);
+  signal(append, header);
   return *this;
 }
 
 auto mListView::append(sListViewItem item) -> type& {
   state.items.append(item);
-  item->setParent(this, items() - 1);
+  item->setParent(this, itemCount() - 1);
   signal(append, item);
   return *this;
 }
@@ -34,31 +39,16 @@ auto mListView::batchable() const -> bool {
   return state.batchable;
 }
 
-auto mListView::checkable() const -> bool {
-  return state.checkable;
-}
-
-auto mListView::checkAll() -> type& {
-  for(auto& item : state.items) item->state.checked = true;
-  signal(checkAll);
-  return *this;
-}
-
-auto mListView::checked() const -> vector<ListViewItem> {
+auto mListView::batched() const -> vector<ListViewItem> {
   vector<ListViewItem> items;
   for(auto& item : state.items) {
-    if(item->checked()) items.append(item);
+    if(item->selected()) items.append(item);
   }
   return items;
 }
 
-auto mListView::column(unsigned position) const -> ListViewColumn {
-  if(position < columns()) return state.columns[position];
-  return {};
-}
-
-auto mListView::columns() const -> unsigned {
-  return state.columns.size();
+auto mListView::bordered() const -> bool {
+  return state.bordered;
 }
 
 auto mListView::doActivate() const -> void {
@@ -81,29 +71,31 @@ auto mListView::doSort(sListViewColumn column) const -> void {
   if(state.onSort) return state.onSort(column);
 }
 
-auto mListView::doToggle(sListViewItem item) const -> void {
-  if(state.onToggle) return state.onToggle(item);
+auto mListView::doToggle(sListViewCell cell) const -> void {
+  if(state.onToggle) return state.onToggle(cell);
 }
 
 auto mListView::foregroundColor() const -> Color {
   return state.foregroundColor;
 }
 
-auto mListView::gridVisible() const -> bool {
-  return state.gridVisible;
-}
-
-auto mListView::headerVisible() const -> bool {
-  return state.headerVisible;
+auto mListView::header() const -> ListViewHeader {
+  return state.header;
 }
 
 auto mListView::item(unsigned position) const -> ListViewItem {
-  if(position < items()) return state.items[position];
+  if(position < itemCount()) return state.items[position];
   return {};
 }
 
-auto mListView::items() const -> unsigned {
+auto mListView::itemCount() const -> unsigned {
   return state.items.size();
+}
+
+auto mListView::items() const -> vector<ListViewItem> {
+  vector<ListViewItem> items;
+  for(auto& item : state.items) items.append(item);
+  return items;
 }
 
 auto mListView::onActivate(const function<void ()>& callback) -> type& {
@@ -131,27 +123,22 @@ auto mListView::onSort(const function<void (ListViewColumn)>& callback) -> type&
   return *this;
 }
 
-auto mListView::onToggle(const function<void (ListViewItem)>& callback) -> type& {
+auto mListView::onToggle(const function<void (ListViewCell)>& callback) -> type& {
   state.onToggle = callback;
   return *this;
 }
 
-auto mListView::remove(sListViewColumn column) -> type& {
-  signal(remove, column);
-  for(auto& item : state.items) item->setParent();
-  state.items.reset();
-  state.columns.remove(column->offset());
-  for(auto n : range(column->offset(), columns())) {
-    state.columns[n]->adjustOffset(-1);
-  }
-  column->setParent();
+auto mListView::remove(sListViewHeader header) -> type& {
+  signal(remove, header);
+  header->setParent();
+  state.header.reset();
   return *this;
 }
 
 auto mListView::remove(sListViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(item->offset(), items())) {
+  for(auto n : range(item->offset(), itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   item->setParent();
@@ -162,19 +149,13 @@ auto mListView::reset() -> type& {
   signal(reset);
   for(auto& item : state.items) item->setParent();
   state.items.reset();
-  for(auto& column : state.columns) column->setParent();
-  state.columns.reset();
+  if(auto& header = state.header) header->setParent();
+  state.header.reset();
   return *this;
 }
 
 auto mListView::resizeColumns() -> type& {
   signal(resizeColumns);
-  return *this;
-}
-
-auto mListView::selectAll() -> type& {
-  for(auto& item : state.items) item->state.selected = true;
-  signal(selectAll);
   return *this;
 }
 
@@ -185,12 +166,10 @@ auto mListView::selected() const -> ListViewItem {
   return {};
 }
 
-auto mListView::selectedItems() const -> vector<ListViewItem> {
-  vector<ListViewItem> items;
-  for(auto& item : state.items) {
-    if(item->selected()) items.append(item);
-  }
-  return items;
+auto mListView::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  signal(setAlignment, alignment);
+  return *this;
 }
 
 auto mListView::setBackgroundColor(Color color) -> type& {
@@ -205,9 +184,9 @@ auto mListView::setBatchable(bool batchable) -> type& {
   return *this;
 }
 
-auto mListView::setCheckable(bool checkable) -> type& {
-  state.checkable = checkable;
-  signal(setCheckable, checkable);
+auto mListView::setBordered(bool bordered) -> type& {
+  state.bordered = bordered;
+  signal(setBordered, bordered);
   return *this;
 }
 
@@ -217,46 +196,12 @@ auto mListView::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mListView::setGridVisible(bool visible) -> type& {
-  state.gridVisible = visible;
-  signal(setGridVisible, visible);
-  return *this;
-}
-
-auto mListView::setHeaderVisible(bool visible) -> type& {
-  state.headerVisible = visible;
-  signal(setHeaderVisible, visible);
-  return *this;
-}
-
 auto mListView::setParent(mObject* parent, signed offset) -> type& {
   for(auto& item : state.items) item->destruct();
-  for(auto& column : state.columns) column->destruct();
+  if(auto& header = state.header) header->destruct();
   mObject::setParent(parent, offset);
-  for(auto& column : state.columns) column->setParent(this, column->offset());
+  if(auto& header = state.header) header->setParent(this, 0);
   for(auto& item : state.items) item->setParent(this, item->offset());
-  return *this;
-}
-
-auto mListView::setSortable(bool sortable) -> type& {
-  state.sortable = sortable;
-  signal(setSortable, sortable);
-  return *this;
-}
-
-auto mListView::sortable() const -> bool {
-  return state.sortable;
-}
-
-auto mListView::uncheckAll() -> type& {
-  for(auto& item : state.items) item->state.checked = false;
-  signal(uncheckAll);
-  return *this;
-}
-
-auto mListView::unselectAll() -> type& {
-  for(auto& item : state.items) item->state.selected = false;
-  signal(unselectAll);
   return *this;
 }
 

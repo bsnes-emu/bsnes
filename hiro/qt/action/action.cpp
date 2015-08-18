@@ -1,6 +1,15 @@
-namespace phoenix {
+#if defined(Hiro_Action)
 
-void pAction::setEnabled(bool enabled) {
+namespace hiro {
+
+auto pAction::construct() -> void {
+}
+
+auto pAction::destruct() -> void {
+}
+
+auto pAction::setEnabled(bool enabled) -> void {
+/*
   if(dynamic_cast<Menu*>(&action)) {
     ((Menu&)action).p.qtMenu->setEnabled(enabled);
   } else if(dynamic_cast<Separator*>(&action)) {
@@ -12,9 +21,11 @@ void pAction::setEnabled(bool enabled) {
   } else if(dynamic_cast<RadioItem*>(&action)) {
     ((RadioItem&)action).p.qtAction->setEnabled(enabled);
   }
+*/
 }
 
-void pAction::setFont(string font) {
+auto pAction::setFont(const string& font) -> void {
+/*
   QFont qtFont = pFont::create(font);
 
   if(dynamic_cast<Menu*>(&action)) {
@@ -28,9 +39,11 @@ void pAction::setFont(string font) {
   } else if(dynamic_cast<RadioItem*>(&action)) {
     ((RadioItem&)action).p.qtAction->setFont(qtFont);
   }
+*/
 }
 
-void pAction::setVisible(bool visible) {
+auto pAction::setVisible(bool visible) -> void {
+/*
   if(dynamic_cast<Menu*>(&action)) {
     ((Menu&)action).p.qtMenu->menuAction()->setVisible(visible);
   } else if(dynamic_cast<Separator*>(&action)) {
@@ -42,12 +55,33 @@ void pAction::setVisible(bool visible) {
   } else if(dynamic_cast<RadioItem*>(&action)) {
     ((RadioItem&)action).p.qtAction->setVisible(visible);
   }
+*/
 }
 
-void pAction::constructor() {
+auto pAction::_parentMenu() -> maybe<pMenu&> {
+  if(auto parent = self().parentMenu()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return nothing;
 }
 
-void pAction::destructor() {
+auto pAction::_parentMenuBar() -> maybe<pMenuBar&> {
+  if(auto parent = self().parentMenuBar()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return nothing;
+}
+
+auto pAction::_parentPopupMenu() -> maybe<pPopupMenu&> {
+  if(auto parent = self().parentPopupMenu()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return nothing;
+}
+
+auto pAction::_setState() -> void {
 }
 
 }
+
+#endif

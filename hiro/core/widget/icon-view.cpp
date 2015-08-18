@@ -13,7 +13,7 @@ auto mIconView::destruct() -> void {
 
 auto mIconView::append(sIconViewItem item) -> type& {
   state.items.append(item);
-  item->setParent(this, items() - 1);
+  item->setParent(this, itemCount() - 1);
   signal(append, item);
   return *this;
 }
@@ -43,12 +43,18 @@ auto mIconView::foregroundColor() const -> Color {
 }
 
 auto mIconView::item(unsigned position) const -> IconViewItem {
-  if(position < items()) return state.items[position];
+  if(position < itemCount()) return state.items[position];
   return {};
 }
 
-auto mIconView::items() const -> unsigned {
+auto mIconView::itemCount() const -> unsigned {
   return state.items.size();
+}
+
+auto mIconView::items() const -> vector<IconViewItem> {
+  vector<IconViewItem> items;
+  for(auto& item : state.items) items.append(item);
+  return items;
 }
 
 auto mIconView::multiSelect() const -> bool {
@@ -77,7 +83,7 @@ auto mIconView::orientation() const -> Orientation {
 auto mIconView::remove(sIconViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(item->offset(), items())) {
+  for(auto n : range(item->offset(), itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   item->setParent();
@@ -142,7 +148,7 @@ auto mIconView::setSelected(const vector<signed>& selections) -> type& {
   if(selectAll) return signal(setItemSelectedAll), *this;
   if(!selections) return signal(setItemSelectedNone), *this;
   for(auto& position : selections) {
-    if(position >= items()) continue;
+    if(position >= itemCount()) continue;
     state.items[position]->state.selected = true;
   }
   signal(setItemSelected, selections);

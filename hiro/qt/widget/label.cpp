@@ -1,29 +1,35 @@
-namespace phoenix {
+#if defined(Hiro_Label)
 
-Size pLabel::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), label.state.text);
-  return {size.width, size.height};
-}
+namespace hiro {
 
-void pLabel::setText(string text) {
-  qtLabel->setText(QString::fromUtf8(text));
-}
-
-void pLabel::constructor() {
+auto pLabel::construct() -> void {
   qtWidget = qtLabel = new QLabel;
 
-  pWidget::synchronizeState();
-  setText(label.state.text);
+  setAlignment(state().alignment);
+  setText(state().text);
+
+  pWidget::construct();
 }
 
-void pLabel::destructor() {
+auto pLabel::destruct() -> void {
   delete qtLabel;
   qtWidget = qtLabel = nullptr;
 }
 
-void pLabel::orphan() {
-  destructor();
-  constructor();
+auto pLabel::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+  return {size.width(), size.height()};
+}
+
+auto pLabel::setAlignment(Alignment alignment) -> void {
+  if(!alignment) alignment = {0.0, 0.5};
+  qtLabel->setAlignment((Qt::Alignment)CalculateAlignment(alignment));
+}
+
+auto pLabel::setText(const string& text) -> void {
+  qtLabel->setText(QString::fromUtf8(text));
 }
 
 }
+
+#endif

@@ -24,8 +24,8 @@ auto mHotkey::onRelease(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mHotkey::parent() const -> wObject {
-  return state.parent;
+auto mHotkey::owner() const -> wObject {
+  return state.owner;
 }
 
 auto mHotkey::remove() -> type& {
@@ -37,8 +37,8 @@ auto mHotkey::sequence() const -> string {
   return state.sequence;
 }
 
-auto mHotkey::setParent(sObject parent) -> type& {
-  state.parent = parent;
+auto mHotkey::setOwner(sObject owner) -> type& {
+  state.owner = owner;
   return *this;
 }
 

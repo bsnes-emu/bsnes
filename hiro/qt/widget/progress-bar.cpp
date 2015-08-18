@@ -1,30 +1,33 @@
-namespace phoenix {
+#if defined(Hiro_ProgressBar)
 
-Size pProgressBar::minimumSize() {
-  return {0, 25};
-}
+namespace hiro {
 
-void pProgressBar::setPosition(unsigned position) {
-  qtProgressBar->setValue(position);
-}
-
-void pProgressBar::constructor() {
+auto pProgressBar::construct() -> void {
   qtWidget = qtProgressBar = new QProgressBar;
   qtProgressBar->setRange(0, 100);
   qtProgressBar->setTextVisible(false);
 
-  pWidget::synchronizeState();
-  setPosition(progressBar.state.position);
+  pWidget::construct();
+  _setState();
 }
 
-void pProgressBar::destructor() {
+auto pProgressBar::destruct() -> void {
   delete qtProgressBar;
   qtWidget = qtProgressBar = nullptr;
 }
 
-void pProgressBar::orphan() {
-  destructor();
-  constructor();
+auto pProgressBar::minimumSize() const -> Size {
+  return {0, 25};
+}
+
+auto pProgressBar::setPosition(unsigned position) -> void {
+  _setState();
+}
+
+auto pProgressBar::_setState() -> void {
+  qtProgressBar->setValue(state().position);
 }
 
 }
+
+#endif

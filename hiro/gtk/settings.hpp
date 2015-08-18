@@ -16,9 +16,9 @@ struct Settings : Configuration::Document {
     unsigned backgroundColor;
   } window;
 
-  void load();
-  void save();
   Settings();
+  auto load() -> void;
+  auto save() -> void;
 };
 
 static Settings* settings = nullptr;

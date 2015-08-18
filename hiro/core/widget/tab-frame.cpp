@@ -13,7 +13,7 @@ auto mTabFrame::destruct() -> void {
 
 auto mTabFrame::append(sTabFrameItem item) -> type& {
   state.items.append(item);
-  item->setParent(this, items() - 1);
+  item->setParent(this, itemCount() - 1);
   signal(append, item);
   return *this;
 }
@@ -35,12 +35,18 @@ auto mTabFrame::edge() const -> Edge {
 }
 
 auto mTabFrame::item(unsigned position) const -> TabFrameItem {
-  if(position < items()) return state.items[position];
+  if(position < itemCount()) return state.items[position];
   return {};
 }
 
-auto mTabFrame::items() const -> unsigned {
+auto mTabFrame::itemCount() const -> unsigned {
   return state.items.size();
+}
+
+auto mTabFrame::items() const -> vector<TabFrameItem> {
+  vector<TabFrameItem> items;
+  for(auto& item : state.items) items.append(item);
+  return items;
 }
 
 auto mTabFrame::onChange(const function<void ()>& callback) -> type& {
@@ -63,7 +69,7 @@ auto mTabFrame::remove(sTabFrameItem item) -> type& {
   item->setParent();
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(offset, items())) {
+  for(auto n : range(offset, itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   return *this;

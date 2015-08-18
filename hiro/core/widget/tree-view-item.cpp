@@ -13,7 +13,7 @@ auto mTreeViewItem::destruct() -> void {
 
 auto mTreeViewItem::append(sTreeViewItem item) -> type& {
   state.items.append(item);
-  item->setParent(this, items() - 1);
+  item->setParent(this, itemCount() - 1);
   signal(append, item);
   return *this;
 }
@@ -30,13 +30,19 @@ auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
   if(path.empty()) return {};
   auto paths = path.split("/");
   unsigned position = decimal(paths.takeFirst());
-  if(position >= items()) return {};
+  if(position >= itemCount()) return {};
   if(paths.empty()) return state.items[position];
   return state.items[position]->item(paths.merge("/"));
 }
 
-auto mTreeViewItem::items() const -> unsigned {
+auto mTreeViewItem::itemCount() const -> unsigned {
   return state.items.size();
+}
+
+auto mTreeViewItem::items() const -> vector<TreeViewItem> {
+  vector<TreeViewItem> items;
+  for(auto& item : state.items) items.append(item);
+  return items;
 }
 
 auto mTreeViewItem::path() const -> string {
@@ -53,7 +59,7 @@ auto mTreeViewItem::remove() -> type& {
 auto mTreeViewItem::remove(sTreeViewItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(item->offset(), items())) {
+  for(auto n : range(item->offset(), itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   item->setParent();

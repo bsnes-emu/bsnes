@@ -1,28 +1,30 @@
-namespace phoenix {
+#if defined(Hiro_Font)
 
-string pFont::serif(unsigned size, string style) {
+namespace hiro {
+
+auto pFont::serif(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Serif, ", size, ", ", style};
 }
 
-string pFont::sans(unsigned size, string style) {
+auto pFont::sans(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Sans, ", size, ", ", style};
 }
 
-string pFont::monospace(unsigned size, string style) {
+auto pFont::monospace(unsigned size, string style) -> string {
   if(size == 0) size = 8;
   if(style == "") style = "Normal";
   return {"Liberation Mono, ", size, ", ", style};
 }
 
-Size pFont::size(string font, string text) {
+auto pFont::size(string font, string text) -> Size {
   return pFont::size(pFont::create(font), text);
 }
 
-QFont pFont::create(string description) {
+auto pFont::create(string description) -> QFont {
   lstring part = description.split(",", 2L).strip();
 
   string family = "Sans";
@@ -43,18 +45,20 @@ QFont pFont::create(string description) {
   return qtFont;
 }
 
-Size pFont::size(const QFont& qtFont, string text) {
+auto pFont::size(const QFont& qtFont, const string& text) -> Size {
   QFontMetrics metrics(qtFont);
 
   lstring lines;
-  lines.split("\n", text);
+  lines.split("\n", text ? text : " ");
 
   unsigned maxWidth = 0;
   for(auto& line : lines) {
     maxWidth = max(maxWidth, metrics.width(line));
   }
 
-  return {maxWidth, metrics.height() * lines.size()};
+  return Size().setWidth(maxWidth).setHeight(metrics.height() * lines.size());
 }
 
 }
+
+#endif

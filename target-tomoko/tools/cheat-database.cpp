@@ -2,13 +2,16 @@ CheatDatabase::CheatDatabase() {
   cheatDatabase = this;
 
   layout.setMargin(5);
-  cheatList.setCheckable();
-  selectAllButton.setText("Select All").onActivate([&] { cheatList.checkAll(); });
-  unselectAllButton.setText("Unselect All").onActivate([&] { cheatList.uncheckAll(); });
+  selectAllButton.setText("Select All").onActivate([&] {
+    for(auto& item : cheatList.items()) item.cell(0).setChecked(true);
+  });
+  unselectAllButton.setText("Unselect All").onActivate([&] {
+    for(auto& item : cheatList.items()) item.cell(0).setChecked(false);
+  });
   addCodesButton.setText("Add Codes").onActivate([&] { addCodes(); });
 
   setSize({800, 400});
-  setPlacement(0.5, 1.0);
+  setAlignment({0.5, 1.0});
 
   onSize([&] { cheatList.resizeColumns(); });
 }
@@ -25,11 +28,13 @@ auto CheatDatabase::findCodes() -> void {
 
     codes.reset();
     cheatList.reset();
-    cheatList.append(ListViewColumn().setExpandable());
+    cheatList.append(ListViewHeader().setVisible(false)
+      .append(ListViewColumn().setExpandable())
+    );
     for(auto cheat : cartridge.find("cheat")) {
       codes.append(cheat["code"].text());
       cheatList.append(ListViewItem()
-        .append(ListViewCell().setText(cheat["description"].text()))
+        .append(ListViewCell().setCheckable().setText(cheat["description"].text()))
       );
     }
 
@@ -43,9 +48,11 @@ auto CheatDatabase::findCodes() -> void {
 }
 
 auto CheatDatabase::addCodes() -> void {
-  for(auto item : cheatList.checked()) {
-    string code = codes(item->offset(), "");
-    string description = item->cell(0)->text();
+  for(auto& item : cheatList.items()) {
+    if(!item.cell(0).checked()) continue;
+
+    string code = codes(item.offset(), "");
+    string description = item.cell(0).text();
     if(toolsManager->cheatEditor.addCode(code, description) == false) {
       MessageDialog().setParent(*this).setText("Free slots exhausted. Not all codes could be added.").warning();
       break;

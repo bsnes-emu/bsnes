@@ -1,62 +1,71 @@
-namespace phoenix {
+#if defined(Hiro_LineEdit)
 
-Size pLineEdit::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), lineEdit.state.text);
-  return {size.width + 12, size.height + 12};
+namespace hiro {
+
+auto pLineEdit::construct() -> void {
+  qtWidget = qtLineEdit = new QtLineEdit(*this);
+  qtLineEdit->connect(qtLineEdit, SIGNAL(returnPressed()), SLOT(onActivate()));
+  qtLineEdit->connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
+
+  pWidget::construct();
+  _setState();
 }
 
-void pLineEdit::setBackgroundColor(Color color) {
-  QPalette palette = qtLineEdit->palette();
-  palette.setColor(QPalette::Base, QColor(color.red, color.green, color.blue));
-  qtLineEdit->setPalette(palette);
-  qtLineEdit->setAutoFillBackground(true);
-}
-
-void pLineEdit::setEditable(bool editable) {
-  qtLineEdit->setReadOnly(!editable);
-}
-
-void pLineEdit::setForegroundColor(Color color) {
-  QPalette palette = qtLineEdit->palette();
-  palette.setColor(QPalette::Text, QColor(color.red, color.green, color.blue));
-  qtLineEdit->setPalette(palette);
-}
-
-void pLineEdit::setText(string text) {
-  qtLineEdit->setText(QString::fromUtf8(text));
-}
-
-string pLineEdit::text() {
-  return qtLineEdit->text().toUtf8().constData();
-}
-
-void pLineEdit::constructor() {
-  qtWidget = qtLineEdit = new QLineEdit;
-  connect(qtLineEdit, SIGNAL(returnPressed()), SLOT(onActivate()));
-  connect(qtLineEdit, SIGNAL(textEdited(const QString&)), SLOT(onChange()));
-
-  pWidget::synchronizeState();
-  setEditable(lineEdit.state.editable);
-  setText(lineEdit.state.text);
-}
-
-void pLineEdit::destructor() {
+auto pLineEdit::destruct() -> void {
   delete qtLineEdit;
   qtWidget = qtLineEdit = nullptr;
 }
 
-void pLineEdit::orphan() {
-  destructor();
-  constructor();
+auto pLineEdit::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+  return {size.width() + 12, size.height() + 12};
 }
 
-void pLineEdit::onActivate() {
-  if(lineEdit.onActivate) lineEdit.onActivate();
+auto pLineEdit::setBackgroundColor(Color color) -> void {
+  _setState();
 }
 
-void pLineEdit::onChange() {
-  lineEdit.state.text = text();
-  if(lineEdit.onChange) lineEdit.onChange();
+auto pLineEdit::setEditable(bool editable) -> void {
+  _setState();
+}
+
+auto pLineEdit::setForegroundColor(Color color) -> void {
+  _setState();
+}
+
+auto pLineEdit::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pLineEdit::_setState() -> void {
+  if(auto color = state().backgroundColor) {
+    QPalette palette = qtLineEdit->palette();
+    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
+    qtLineEdit->setPalette(palette);
+    qtLineEdit->setAutoFillBackground(true);
+  } else {
+    //todo
+  }
+  qtLineEdit->setReadOnly(!state().editable);
+  if(auto color = state().foregroundColor) {
+    QPalette palette = qtLineEdit->palette();
+    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
+    qtLineEdit->setPalette(palette);
+  } else {
+    //todo
+  }
+  qtLineEdit->setText(QString::fromUtf8(state().text));
+}
+
+auto QtLineEdit::onActivate() -> void {
+  p.self().doActivate();
+}
+
+auto QtLineEdit::onChange() -> void {
+  p.state().text = text().toUtf8().constData();
+  p.self().doChange();
 }
 
 }
+
+#endif

@@ -8,7 +8,7 @@ auto pMenuBar::construct() -> void {
 auto pMenuBar::destruct() -> void {
 }
 
-auto pMenuBar::append(shared_pointer<mMenu> menu) -> void {
+auto pMenuBar::append(sMenu menu) -> void {
   if(auto parent = _parent()) {
     parent->_append(*menu);
     if(menu->self()) {
@@ -18,7 +18,7 @@ auto pMenuBar::append(shared_pointer<mMenu> menu) -> void {
   }
 }
 
-auto pMenuBar::remove(shared_pointer<mMenu> menu) -> void {
+auto pMenuBar::remove(sMenu menu) -> void {
 }
 
 auto pMenuBar::setEnabled(bool enabled) -> void {

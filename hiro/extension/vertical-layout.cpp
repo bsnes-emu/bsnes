@@ -9,7 +9,7 @@ auto mVerticalLayout::append(sSizable sizable, Size size, signed spacing) -> typ
 auto mVerticalLayout::minimumSize() const -> Size {
   signed width = 0, height = 0;
 
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
     if(child.width == Size::Minimum || child.width == Size::Maximum) {
       width = max(width, sizable(n)->minimumSize().width());
@@ -18,7 +18,7 @@ auto mVerticalLayout::minimumSize() const -> Size {
     width = max(width, child.width);
   }
 
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
     if(child.height == Size::Minimum || child.height == Size::Maximum) {
       height += sizable(n)->minimumSize().height();
@@ -50,7 +50,7 @@ auto mVerticalLayout::setAlignment(double alignment) -> type& {
 
 auto mVerticalLayout::setEnabled(bool enabled) -> type& {
   mLayout::setEnabled(enabled);
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     sizable(n)->setEnabled(sizable(n)->enabled());
   }
   return *this;
@@ -58,7 +58,7 @@ auto mVerticalLayout::setEnabled(bool enabled) -> type& {
 
 auto mVerticalLayout::setFont(const string& font) -> type& {
   mLayout::setFont(font);
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     sizable(n)->setFont(sizable(n)->font());
   }
   return *this;
@@ -68,7 +68,7 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   mLayout::setGeometry(containerGeometry);
 
   auto properties = this->properties;
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
     if(child.width  == Size::Minimum) child.width  = sizable(n)->minimumSize().width();
     if(child.height == Size::Minimum) child.height = sizable(n)->minimumSize().height();
@@ -95,7 +95,7 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   signed maximumWidth = 0;
   for(auto& child : properties) maximumWidth = max(maximumWidth, child.width);
 
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     auto& child = properties[sizable(n)->offset()];
     signed pivot = (maximumWidth - child.width) * settings.alignment;
     Geometry childGeometry = {geometry.x() + pivot, geometry.y(), child.width, child.height};
@@ -122,7 +122,7 @@ auto mVerticalLayout::setSpacing(signed spacing) -> type& {
 
 auto mVerticalLayout::setVisible(bool visible) -> type& {
   mLayout::setVisible(visible);
-  for(auto n : range(sizables())) {
+  for(auto n : range(sizableCount())) {
     sizable(n)->setVisible(sizable(n)->visible());
   }
   return *this;

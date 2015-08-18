@@ -1,6 +1,9 @@
-namespace phoenix {
+#if defined(Hiro_BrowserWindow)
 
-string pBrowserWindow::directory(BrowserWindow::State& state) {
+namespace hiro {
+
+auto pBrowserWindow::directory(BrowserWindow::State& state) -> string {
+/*
   QString directory = QFileDialog::getExistingDirectory(
     state.parent ? state.parent->p.qtWindow : nullptr,
     state.title ? state.title : "Select Directory",
@@ -9,9 +12,11 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
   string name = directory.toUtf8().constData();
   if(name && name.endsWith("/") == false) name.append("/");
   return name;
+*/
 }
 
-string pBrowserWindow::open(BrowserWindow::State& state) {
+auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
+/*
   string filters = state.filters.merge(";;");
 
   //convert filter list from phoenix to Qt format, example:
@@ -29,9 +34,11 @@ string pBrowserWindow::open(BrowserWindow::State& state) {
     QString::fromUtf8(state.path), QString::fromUtf8(filters)
   );
   return filename.toUtf8().constData();
+*/
 }
 
-string pBrowserWindow::save(BrowserWindow::State& state) {
+auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
+/*
   string filters = state.filters.merge(";;");
 
   //convert filter list from phoenix to Qt format, example:
@@ -49,6 +56,9 @@ string pBrowserWindow::save(BrowserWindow::State& state) {
     QString::fromUtf8(state.path), QString::fromUtf8(filters)
   );
   return filename.toUtf8().constData();
+*/
 }
 
 }
+
+#endif

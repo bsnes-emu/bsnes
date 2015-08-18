@@ -1,43 +1,46 @@
-namespace phoenix {
+#if defined(Hiro_VerticalScroller)
 
-Size pVerticalScroller::minimumSize() {
+namespace hiro {
+
+auto pVerticalScroller::construct() -> void {
+  qtWidget = qtVerticalScroller = new QtVerticalScroller(*this);
+  qtVerticalScroller->setRange(0, 100);
+  qtVerticalScroller->setPageStep(101 >> 3);
+  qtVerticalScroller->connect(qtVerticalScroller, SIGNAL(valueChanged(int)), SLOT(onChange()));
+
+  pWidget::construct();
+  _setState();
+}
+
+auto pVerticalScroller::destruct() -> void {
+  delete qtVerticalScroller;
+  qtWidget = qtVerticalScroller = nullptr;
+}
+
+auto pVerticalScroller::minimumSize() const -> Size {
   return {15, 0};
 }
 
-void pVerticalScroller::setLength(unsigned length) {
-  length += length == 0;
-  qtScroller->setRange(0, length - 1);
-  qtScroller->setPageStep(length >> 3);
+auto pVerticalScroller::setLength(unsigned length) -> void {
+  _setState();
 }
 
-void pVerticalScroller::setPosition(unsigned position) {
-  qtScroller->setValue(position);
+auto pVerticalScroller::setPosition(unsigned position) -> void {
+  _setState();
 }
 
-void pVerticalScroller::constructor() {
-  qtWidget = qtScroller = new QScrollBar(Qt::Vertical);
-  qtScroller->setRange(0, 100);
-  qtScroller->setPageStep(101 >> 3);
-  connect(qtScroller, SIGNAL(valueChanged(int)), SLOT(onChange()));
-
-  pWidget::synchronizeState();
-  setLength(verticalScroller.state.length);
-  setPosition(verticalScroller.state.position);
+auto pVerticalScroller::_setState() -> void {
+  signed length = state().length + (state().length == 0);
+  qtVerticalScroller->setRange(0, length - 1);
+  qtVerticalScroller->setPageStep(length >> 3);
+  qtVerticalScroller->setValue(state().position);
 }
 
-void pVerticalScroller::destructor() {
-  delete qtScroller;
-  qtWidget = qtScroller = nullptr;
-}
-
-void pVerticalScroller::orphan() {
-  destructor();
-  constructor();
-}
-
-void pVerticalScroller::onChange() {
-  verticalScroller.state.position = qtScroller->value();
-  if(verticalScroller.onChange) verticalScroller.onChange();
+auto QtVerticalScroller::onChange() -> void {
+  p.state().position = value();
+  p.self().doChange();
 }
 
 }
+
+#endif

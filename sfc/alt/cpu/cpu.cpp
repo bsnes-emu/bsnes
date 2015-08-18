@@ -72,12 +72,8 @@ void CPU::enter() {
       op_irq();
     }
 
-    op_step();
+    op_exec();
   }
-}
-
-alwaysinline void CPU::op_step() {
-  (this->*opcode_table[op_readpc()])();
 }
 
 void CPU::enable() {
@@ -128,7 +124,6 @@ void CPU::reset() {
   regs.e = 1;
   regs.mdr = 0x00;
   regs.wai = false;
-  update_table();
 
   regs.pc.l = bus.read(0xfffc);
   regs.pc.h = bus.read(0xfffd);

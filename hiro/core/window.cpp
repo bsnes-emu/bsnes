@@ -162,6 +162,16 @@ auto mWindow::resizable() const -> bool {
   return state.resizable;
 }
 
+auto mWindow::setAlignment(Alignment alignment) -> type& {
+  if(!alignment) alignment = {0.0, 0.0};
+  auto workspace = Desktop::workspace();
+  auto geometry = frameGeometry();
+  signed left = alignment.horizontal() * (workspace.width() - geometry.width());
+  signed top = alignment.vertical() * (workspace.height() - geometry.height());
+  setFramePosition({left, top});
+  return *this;
+}
+
 auto mWindow::setBackgroundColor(Color color) -> type& {
   state.backgroundColor = color;
   signal(setBackgroundColor, color);
@@ -226,17 +236,6 @@ auto mWindow::setGeometry(Geometry geometry) -> type& {
 auto mWindow::setModal(bool modal) -> type& {
   state.modal = modal;
   signal(setModal, modal);
-  return *this;
-}
-
-auto mWindow::setPlacement(double x, double y) -> type& {
-  x = max(0.0, min(1.0, x));
-  y = max(0.0, min(1.0, y));
-  auto workspace = Desktop::workspace();
-  auto geometry = frameGeometry();
-  signed left = x * (workspace.width() - geometry.width());
-  signed top = y * (workspace.height() - geometry.height());
-  setFramePosition({left, top});
   return *this;
 }
 

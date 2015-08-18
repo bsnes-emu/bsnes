@@ -12,17 +12,23 @@ auto mMenu::destruct() -> void {
 //
 
 auto mMenu::action(unsigned position) const -> Action {
-  if(position < actions()) return state.actions[position];
+  if(position < actionCount()) return state.actions[position];
   return {};
 }
 
-auto mMenu::actions() const -> unsigned {
+auto mMenu::actionCount() const -> unsigned {
   return state.actions.size();
+}
+
+auto mMenu::actions() const -> vector<Action> {
+  vector<Action> actions;
+  for(auto& action : state.actions) actions.append(action);
+  return actions;
 }
 
 auto mMenu::append(sAction action) -> type& {
   state.actions.append(action);
-  action->setParent(this, actions() - 1);
+  action->setParent(this, actionCount() - 1);
   signal(append, *action);
   return *this;
 }
@@ -34,7 +40,7 @@ auto mMenu::icon() const -> image {
 auto mMenu::remove(sAction action) -> type& {
   signal(remove, *action);
   state.actions.remove(action->offset());
-  for(auto n : range(action->offset(), actions())) {
+  for(auto n : range(action->offset(), actionCount())) {
     state.actions[n]->adjustOffset(-1);
   }
   action->setParent();

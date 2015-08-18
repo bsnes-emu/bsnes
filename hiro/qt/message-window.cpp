@@ -1,6 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_MessageWindow)
 
-static QMessageBox::StandardButtons MessageWindow_buttons(MessageWindow::Buttons buttons) {
+namespace hiro {
+
+static auto MessageWindow_buttons(MessageWindow::Buttons buttons) -> QMessageBox::StandardButtons {
   QMessageBox::StandardButtons standardButtons = QMessageBox::NoButton;
   if(buttons == MessageWindow::Buttons::Ok) standardButtons = QMessageBox::Ok;
   if(buttons == MessageWindow::Buttons::OkCancel) standardButtons = QMessageBox::Ok | QMessageBox::Cancel;
@@ -9,7 +11,7 @@ static QMessageBox::StandardButtons MessageWindow_buttons(MessageWindow::Buttons
   return standardButtons;
 }
 
-static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons buttons, QMessageBox::StandardButton response) {
+static auto MessageWindow_response(MessageWindow::Buttons buttons, QMessageBox::StandardButton response) -> MessageWindow::Response {
   if(response == QMessageBox::Ok) return MessageWindow::Response::Ok;
   if(response == QMessageBox::Cancel) return MessageWindow::Response::Cancel;
   if(response == QMessageBox::Yes) return MessageWindow::Response::Yes;
@@ -24,32 +26,34 @@ static MessageWindow::Response MessageWindow_response(MessageWindow::Buttons but
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
-  return MessageWindow_response(
-    state.buttons, QMessageBox::critical(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
-    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
-  );
+auto pMessageWindow::error(MessageWindow::State& state) -> MessageWindow::Response {
+//  return MessageWindow_response(
+//    state.buttons, QMessageBox::critical(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
+//    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
+//  );
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
-  return MessageWindow_response(
-    state.buttons, QMessageBox::information(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
-    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
-  );
+auto pMessageWindow::information(MessageWindow::State& state) -> MessageWindow::Response {
+//  return MessageWindow_response(
+//    state.buttons, QMessageBox::information(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
+//    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
+//  );
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
-  return MessageWindow_response(
-    state.buttons, QMessageBox::question(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
-    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
-  );
+auto pMessageWindow::question(MessageWindow::State& state) -> MessageWindow::Response {
+//  return MessageWindow_response(
+//    state.buttons, QMessageBox::question(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
+//    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
+//  );
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
-  return MessageWindow_response(
-    state.buttons, QMessageBox::warning(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
-    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
-  );
+auto pMessageWindow::warning(MessageWindow::State& state) -> MessageWindow::Response {
+//  return MessageWindow_response(
+//    state.buttons, QMessageBox::warning(state.parent ? state.parent->p.qtWindow : nullptr, state.title ? state.title : " ",
+//    QString::fromUtf8(state.text), MessageWindow_buttons(state.buttons))
+//  );
 }
 
 }
+
+#endif

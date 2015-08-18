@@ -1,63 +1,78 @@
-namespace phoenix {
+#if defined(Hiro_CheckButton)
 
-Size pCheckButton::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), checkButton.state.text);
+namespace hiro {
 
-  if(checkButton.state.orientation == Orientation::Horizontal) {
-    size.width += checkButton.state.image.width;
-    size.height = max(checkButton.state.image.height, size.height);
-  }
+auto pCheckButton::construct() -> void {
+  qtWidget = qtCheckButton = new QtCheckButton(*this);
+  qtCheckButton->setCheckable(true);
+  qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  qtCheckButton->connect(qtCheckButton, SIGNAL(toggled(bool)), SLOT(onToggle(bool)));
 
-  if(checkButton.state.orientation == Orientation::Vertical) {
-    size.width = max(checkButton.state.image.width, size.width);
-    size.height += checkButton.state.image.height;
-  }
-
-  return {size.width + 20, size.height + 12};
+  pWidget::construct();
+  _setState();
 }
 
-void pCheckButton::setChecked(bool checked) {
+auto pCheckButton::destruct() -> void {
+  delete qtCheckButton;
+  qtCheckButton = nullptr;
+}
+
+auto pCheckButton::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+
+  if(state().orientation == Orientation::Horizontal) {
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(state().icon.height(), size.height()));
+  }
+
+  if(state().orientation == Orientation::Vertical) {
+    size.setWidth(max(state().icon.width(), size.width()));
+    size.setHeight(size.height() + state().icon.height());
+  }
+
+  return {size.width() + 20, size.height() + 12};
+}
+
+auto pCheckButton::setBordered(bool bordered) -> void {
+  _setState();
+}
+
+auto pCheckButton::setChecked(bool checked) -> void {
+  _setState();
+}
+
+auto pCheckButton::setIcon(const image& icon) -> void {
+  _setState();
+}
+
+auto pCheckButton::setOrientation(Orientation orientation) -> void {
+  _setState();
+}
+
+auto pCheckButton::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pCheckButton::_setState() -> void {
   lock();
-  qtCheckButton->setChecked(checked);
-  unlock();
-}
-
-void pCheckButton::setImage(const image& image, Orientation orientation) {
-  qtCheckButton->setIconSize(QSize(image.width, image.height));
-  qtCheckButton->setIcon(CreateIcon(image));
+  qtCheckButton->setAutoRaise(!state().bordered);
+  qtCheckButton->setChecked(state().checked);
+  qtCheckButton->setIconSize(QSize(state().icon.width(), state().icon.height()));
+  qtCheckButton->setIcon(CreateIcon(state().icon));
   qtCheckButton->setStyleSheet("text-align: top;");
-  switch(orientation) {
+  switch(state().orientation) {
   case Orientation::Horizontal: qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
   case Orientation::Vertical:   qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon); break;
   }
+  qtCheckButton->setText(QString::fromUtf8(state().text));
+  unlock();
 }
 
-void pCheckButton::setText(string text) {
-  qtCheckButton->setText(QString::fromUtf8(text));
-}
-
-void pCheckButton::constructor() {
-  qtWidget = qtCheckButton = new QToolButton;
-  qtCheckButton->setCheckable(true);
-  qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
-  connect(qtCheckButton, SIGNAL(toggled(bool)), SLOT(onToggle(bool)));
-
-  pWidget::synchronizeState();
-  setChecked(checkButton.state.checked);
-  setText(checkButton.state.text);
-}
-
-void pCheckButton::destructor() {
-}
-
-void pCheckButton::orphan() {
-  destructor();
-  constructor();
-}
-
-void pCheckButton::onToggle(bool checked) {
-  checkButton.state.checked = checked;
-  if(!locked() && checkButton.onToggle) checkButton.onToggle();
+auto QtCheckButton::onToggle(bool checked) -> void {
+  p.state().checked = checked;
+  if(!p.locked()) p.self().doToggle();
 }
 
 }
+
+#endif

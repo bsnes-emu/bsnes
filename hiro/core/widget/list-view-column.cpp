@@ -11,6 +11,10 @@ auto mListViewColumn::active() const -> bool {
   return false;
 }
 
+auto mListViewColumn::alignment() const -> Alignment {
+  return state.alignment;
+}
+
 auto mListViewColumn::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
@@ -36,7 +40,7 @@ auto mListViewColumn::icon() const -> image {
 }
 
 auto mListViewColumn::remove() -> type& {
-  if(auto listView = parentListView()) listView->remove(*this);
+  if(auto listView = parentListViewHeader()) listView->remove(*this);
   return *this;
 }
 
@@ -47,6 +51,12 @@ auto mListViewColumn::resizable() const -> bool {
 auto mListViewColumn::setActive() -> type& {
   if(auto listView = parentListView()) listView->state.activeColumn = offset();
   signal(setActive);
+  return *this;
+}
+
+auto mListViewColumn::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  signal(setAlignment, alignment);
   return *this;
 }
 
@@ -65,12 +75,6 @@ auto mListViewColumn::setEditable(bool editable) -> type& {
 auto mListViewColumn::setExpandable(bool expandable) -> type& {
   state.expandable = expandable;
   signal(setExpandable, expandable);
-  return *this;
-}
-
-auto mListViewColumn::setFont(const string& font) -> type& {
-  state.font = font;
-  signal(setFont, this->font(true));
   return *this;
 }
 
@@ -99,6 +103,12 @@ auto mListViewColumn::setResizable(bool resizable) -> type& {
   return *this;
 }
 
+auto mListViewColumn::setSortable(bool sortable) -> type& {
+  state.sortable = sortable;
+  signal(setSortable, sortable);
+  return *this;
+}
+
 auto mListViewColumn::setText(const string& text) -> type& {
   state.text = text;
   signal(setText, text);
@@ -122,6 +132,10 @@ auto mListViewColumn::setWidth(signed width) -> type& {
   state.width = max(0, width);
   signal(setWidth, width);
   return *this;
+}
+
+auto mListViewColumn::sortable() const -> bool {
+  return state.sortable;
 }
 
 auto mListViewColumn::text() const -> string {

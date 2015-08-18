@@ -13,7 +13,7 @@ auto mComboButton::destruct() -> void {
 
 auto mComboButton::append(sComboButtonItem item) -> type& {
   state.items.append(item);
-  item->setParent(this, items() - 1);
+  item->setParent(this, itemCount() - 1);
   signal(append, item);
   return *this;
 }
@@ -23,12 +23,18 @@ auto mComboButton::doChange() const -> void {
 }
 
 auto mComboButton::item(unsigned position) const -> ComboButtonItem {
-  if(position < items()) return state.items[position];
+  if(position < itemCount()) return state.items[position];
   return {};
 }
 
-auto mComboButton::items() const -> unsigned {
+auto mComboButton::itemCount() const -> unsigned {
   return state.items.size();
+}
+
+auto mComboButton::items() const -> vector<ComboButtonItem> {
+  vector<ComboButtonItem> items;
+  for(auto& item : state.items) items.append(item);
+  return items;
 }
 
 auto mComboButton::onChange(const function<void ()>& callback) -> type& {
@@ -39,7 +45,7 @@ auto mComboButton::onChange(const function<void ()>& callback) -> type& {
 auto mComboButton::remove(sComboButtonItem item) -> type& {
   signal(remove, item);
   state.items.remove(item->offset());
-  for(auto n : range(item->offset(), items())) {
+  for(auto n : range(item->offset(), itemCount())) {
     state.items[n]->adjustOffset(-1);
   }
   item->setParent();

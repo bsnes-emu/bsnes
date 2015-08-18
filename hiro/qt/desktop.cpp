@@ -1,13 +1,17 @@
-namespace phoenix {
+#if defined(Hiro_Desktop)
 
-Size pDesktop::size() {
+namespace hiro {
+
+auto pDesktop::size() -> Size {
   QRect rect = QApplication::desktop()->screenGeometry();
   return {rect.width(), rect.height()};
 }
 
-Geometry pDesktop::workspace() {
+auto pDesktop::workspace() -> Geometry {
   QRect rect = QApplication::desktop()->availableGeometry();
   return {rect.x(), rect.y(), rect.width(), rect.height()};
 }
 
 }
+
+#endif

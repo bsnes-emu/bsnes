@@ -1,83 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_HexEdit)
 
-void pHexEdit::setBackgroundColor(Color color) {
-  QPalette palette = qtHexEdit->palette();
-  palette.setColor(QPalette::Base, QColor(color.red, color.green, color.blue));
-  qtHexEdit->setPalette(palette);
-  qtHexEdit->setAutoFillBackground(true);
-}
+namespace hiro {
 
-void pHexEdit::setColumns(unsigned columns) {
-  update();
-}
-
-void pHexEdit::setForegroundColor(Color color) {
-  QPalette palette = qtHexEdit->palette();
-  palette.setColor(QPalette::Text, QColor(color.red, color.green, color.blue));
-  qtHexEdit->setPalette(palette);
-}
-
-void pHexEdit::setLength(unsigned length) {
-  //add one if last row is not equal to column length (eg only part of the row is present)
-  bool indivisible = hexEdit.state.columns == 0 || (hexEdit.state.length % hexEdit.state.columns) != 0;
-  qtScroll->setRange(0, hexEdit.state.length / hexEdit.state.columns + indivisible - hexEdit.state.rows);
-  update();
-}
-
-void pHexEdit::setOffset(unsigned offset) {
-  lock();
-  qtScroll->setSliderPosition(hexEdit.state.offset / hexEdit.state.columns);
-  unlock();
-  update();
-}
-
-void pHexEdit::setRows(unsigned rows) {
-  qtScroll->setPageStep(hexEdit.state.rows);
-  update();
-}
-
-void pHexEdit::update() {
-  if(!hexEdit.onRead) {
-    qtHexEdit->setPlainText("");
-    return;
-  }
-
-  unsigned cursorPosition = qtHexEdit->textCursor().position();
-
-  string output;
-  unsigned offset = hexEdit.state.offset;
-  for(unsigned row = 0; row < hexEdit.state.rows; row++) {
-    output.append(hex<8>(offset));
-    output.append("  ");
-
-    string hexdata;
-    string ansidata = " ";
-
-    for(unsigned column = 0; column < hexEdit.state.columns; column++) {
-      if(offset < hexEdit.state.length) {
-        uint8_t data = hexEdit.onRead(offset++);
-        hexdata.append(hex<2>(data));
-        hexdata.append(" ");
-        ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
-      } else {
-        hexdata.append("   ");
-        ansidata.append(" ");
-      }
-    }
-
-    output.append(hexdata);
-    output.append(ansidata);
-    if(offset >= hexEdit.state.length) break;
-    if(row != hexEdit.state.rows - 1) output.append("\n");
-  }
-
-  qtHexEdit->setPlainText(QString::fromUtf8(output));
-  QTextCursor cursor = qtHexEdit->textCursor();
-  cursor.setPosition(cursorPosition);
-  qtHexEdit->setTextCursor(cursor);
-}
-
-void pHexEdit::constructor() {
+auto pHexEdit::construct() -> void {
   qtWidget = qtHexEdit = new QtHexEdit(*this);
 
   qtHexEdit->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -90,36 +15,92 @@ void pHexEdit::constructor() {
   qtLayout->setSpacing(0);
   qtHexEdit->setLayout(qtLayout);
 
-  qtScroll = new QtHexEditScrollBar(*this);
-  qtScroll->setSingleStep(1);
-  qtLayout->addWidget(qtScroll);
+  qtScrollBar = new QtHexEditScrollBar(*this);
+  qtScrollBar->setSingleStep(1);
+  qtLayout->addWidget(qtScrollBar);
 
-  connect(qtScroll, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
+  qtScrollBar->connect(qtScrollBar, SIGNAL(actionTriggered(int)), SLOT(onScroll()));
 
-  pWidget::synchronizeState();
-  setColumns(hexEdit.state.columns);
-  setRows(hexEdit.state.rows);
-  setLength(hexEdit.state.length);
-  setOffset(hexEdit.state.offset);
-  update();
+  pWidget::construct();
+  _setState();
 }
 
-void pHexEdit::destructor() {
-  delete qtScroll;
+auto pHexEdit::destruct() -> void {
+  delete qtScrollBar;
   delete qtLayout;
   delete qtHexEdit;
   qtWidget = qtHexEdit = nullptr;
   qtLayout = nullptr;
-  qtScroll = nullptr;
+  qtScrollBar = nullptr;
 }
 
-void pHexEdit::orphan() {
-  destructor();
-  constructor();
+auto pHexEdit::setAddress(unsigned address) -> void {
+  _setState();
 }
 
-void pHexEdit::keyPressEvent(QKeyEvent* event) {
-  if(!hexEdit.onRead) return;
+auto pHexEdit::setBackgroundColor(Color color) -> void {
+  _setState();
+}
+
+auto pHexEdit::setColumns(unsigned columns) -> void {
+  _setState();
+}
+
+auto pHexEdit::setForegroundColor(Color color) -> void {
+  _setState();
+}
+
+auto pHexEdit::setLength(unsigned length) -> void {
+  _setState();
+}
+
+auto pHexEdit::setRows(unsigned rows) -> void {
+  _setState();
+}
+
+auto pHexEdit::update() -> void {
+  if(!state().onRead) {
+    qtHexEdit->setPlainText("");
+    return;
+  }
+
+  unsigned cursorPosition = qtHexEdit->textCursor().position();
+
+  string output;
+  unsigned address = state().address;
+  for(unsigned row = 0; row < state().rows; row++) {
+    output.append(hex(address, 8L));
+    output.append("  ");
+
+    string hexdata;
+    string ansidata = " ";
+
+    for(unsigned column = 0; column < state().columns; column++) {
+      if(address < state().length) {
+        uint8_t data = self().doRead(address++);
+        hexdata.append(hex(data, 2L));
+        hexdata.append(" ");
+        ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
+      } else {
+        hexdata.append("   ");
+        ansidata.append(" ");
+      }
+    }
+
+    output.append(hexdata);
+    output.append(ansidata);
+    if(address >= state().length) break;
+    if(row != state().rows - 1) output.append("\n");
+  }
+
+  qtHexEdit->setPlainText(QString::fromUtf8(output));
+  QTextCursor cursor = qtHexEdit->textCursor();
+  cursor.setPosition(cursorPosition);
+  qtHexEdit->setTextCursor(cursor);
+}
+
+auto pHexEdit::_keyPressEvent(QKeyEvent* event) -> void {
+  if(!state().onRead) return;
 
   //allow Ctrl+C (copy)
   if(event->key() == Qt::Key_C && event->modifiers() == Qt::ControlModifier) {
@@ -131,7 +112,7 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
   if(event->modifiers() & (Qt::ControlModifier | Qt::AltModifier | Qt::MetaModifier)) return;
 
   QTextCursor cursor = qtHexEdit->textCursor();
-  signed lineWidth = 10 + (hexEdit.state.columns * 3) + 1 + hexEdit.state.columns + 1;
+  signed lineWidth = 10 + (state().columns * 3) + 1 + state().columns + 1;
   signed cursorY = cursor.position() / lineWidth;
   signed cursorX = cursor.position() % lineWidth;
 
@@ -168,27 +149,27 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
       cursor.setPosition(cursor.position() - lineWidth);
       qtHexEdit->setTextCursor(cursor);
     } else {
-      scrollTo(qtScroll->sliderPosition() - 1);
+      _scrollTo(qtScrollBar->sliderPosition() - 1);
     }
     return;
 
   case Qt::Key_Down:
-    if(cursorY >= rows() - 1) {
+    if(cursorY >= _rows() - 1) {
       //cannot scroll down further
-    } else if(cursorY < hexEdit.state.rows - 1) {
+    } else if(cursorY < state().rows - 1) {
       cursor.setPosition(cursor.position() + lineWidth);
       qtHexEdit->setTextCursor(cursor);
     } else {
-      scrollTo(qtScroll->sliderPosition() + 1);
+      _scrollTo(qtScrollBar->sliderPosition() + 1);
     }
     return;
 
   case Qt::Key_PageUp:
-    scrollTo(qtScroll->sliderPosition() - hexEdit.state.rows);
+    _scrollTo(qtScrollBar->sliderPosition() - state().rows);
     return;
 
   case Qt::Key_PageDown:
-    scrollTo(qtScroll->sliderPosition() + hexEdit.state.rows);
+    _scrollTo(qtScrollBar->sliderPosition() + state().rows);
     return;
 
   case Qt::Key_0: nibble =  0; break;
@@ -216,12 +197,12 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
       //not on a space
       bool cursorNibble = (cursorX % 3) == 1;  //0 = high, 1 = low
       cursorX /= 3;
-      if(cursorX < hexEdit.state.columns) {
+      if(cursorX < state().columns) {
         //not in ANSI region
-        unsigned offset = hexEdit.state.offset + (cursorY * hexEdit.state.columns + cursorX);
+        unsigned address = state().address + (cursorY * state().columns + cursorX);
 
-        if(offset >= hexEdit.state.length) return;  //do not edit past end of file
-        uint8_t data = hexEdit.onRead(offset);
+        if(address >= state().length) return;  //do not edit past end of file
+        uint8_t data = self().doRead(address);
 
         //write modified value
         if(cursorNibble == 1) {
@@ -229,11 +210,11 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
         } else {
           data = (data & 0x0f) | (nibble << 4);
         }
-        if(hexEdit.onWrite) hexEdit.onWrite(offset, data);
+        self().doWrite(address, data);
 
         //auto-advance cursor to next nibble/byte
         unsigned step = 1;
-        if(cursorNibble && cursorX != hexEdit.state.columns - 1) step = 2;
+        if(cursorNibble && cursorX != state().columns - 1) step = 2;
         cursor.setPosition(cursor.position() + step);
         qtHexEdit->setTextCursor(cursor);
 
@@ -245,54 +226,82 @@ void pHexEdit::keyPressEvent(QKeyEvent* event) {
 }
 
 //number of actual rows
-signed pHexEdit::rows() {
-  return (max(1u, hexEdit.state.length) + hexEdit.state.columns - 1) / hexEdit.state.columns;
+auto pHexEdit::_rows() -> signed {
+  return (max(1u, state().length) + state().columns - 1) / state().columns;
 }
 
 //number of scrollable row positions
-signed pHexEdit::rowsScrollable() {
-  return max(0u, rows() - hexEdit.state.rows);
+auto pHexEdit::_rowsScrollable() -> signed {
+  return max(0u, _rows() - state().rows);
 }
 
-void pHexEdit::scrollTo(signed position) {
-  if(position > rowsScrollable()) position = rowsScrollable();
+auto pHexEdit::_scrollTo(signed position) -> void {
+  if(position > _rowsScrollable()) position = _rowsScrollable();
   if(position < 0) position = 0;
-  qtScroll->setSliderPosition(position);
+  qtScrollBar->setSliderPosition(position);
 }
 
-void pHexEdit::onScroll() {
-  if(locked()) return;
-  unsigned offset = qtScroll->sliderPosition();
-  hexEdit.state.offset = offset * hexEdit.state.columns;
+auto pHexEdit::_setState() -> void {
+  lock();
+  if(auto color = state().backgroundColor) {
+    QPalette palette = qtHexEdit->palette();
+    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
+    qtHexEdit->setPalette(palette);
+    qtHexEdit->setAutoFillBackground(true);
+  } else {
+    //todo
+  }
+  if(auto color = state().foregroundColor) {
+    QPalette palette = qtHexEdit->palette();
+    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
+    qtHexEdit->setPalette(palette);
+  } else {
+    //todo
+  }
+  //add one if last row is not equal to column length (eg only part of the row is present)
+  bool indivisible = state().columns == 0 || (state().length % state().columns) != 0;
+  qtScrollBar->setRange(0, state().length / state().columns + indivisible - state().rows);
+  qtScrollBar->setSliderPosition(state().address / state().columns);
+  qtScrollBar->setPageStep(state().rows);
   update();
+  unlock();
 }
 
-void pHexEdit::QtHexEdit::keyPressEvent(QKeyEvent* event) {
-  self.keyPressEvent(event);
+auto QtHexEdit::keyPressEvent(QKeyEvent* event) -> void {
+  p._keyPressEvent(event);
 }
 
-void pHexEdit::QtHexEdit::keyPressEventAcknowledge(QKeyEvent* event) {
+auto QtHexEdit::keyPressEventAcknowledge(QKeyEvent* event) -> void {
   QTextEdit::keyPressEvent(event);
 }
 
-void pHexEdit::QtHexEdit::wheelEvent(QWheelEvent* event) {
+auto QtHexEdit::wheelEvent(QWheelEvent* event) -> void {
   if(event->orientation() == Qt::Vertical) {
     signed offset = event->delta() < 0 ? +1 : -1;
-    self.scrollTo(self.qtScroll->sliderPosition() + offset);
+    p._scrollTo(p.qtScrollBar->sliderPosition() + offset);
     event->accept();
   }
 }
 
-bool pHexEdit::QtHexEditScrollBar::event(QEvent* event) {
+auto QtHexEditScrollBar::event(QEvent* event) -> bool {
   if(event->type() == QEvent::Wheel) {
-    QWheelEvent* wheelEvent = (QWheelEvent*)event;
+    auto wheelEvent = (QWheelEvent*)event;
     if(wheelEvent->orientation() == Qt::Vertical) {
       signed offset = wheelEvent->delta() < 0 ? +1 : -1;
-      self.scrollTo(sliderPosition() + offset);
+      p._scrollTo(sliderPosition() + offset);
       return true;
     }
   }
   return QScrollBar::event(event);
 }
 
+auto QtHexEditScrollBar::onScroll() -> void {
+  if(p.locked()) return;
+  unsigned address = sliderPosition();
+  p.state().address = address * p.state().columns;
+  p.update();
 }
+
+}
+
+#endif

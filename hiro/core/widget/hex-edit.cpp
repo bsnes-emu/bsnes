@@ -6,6 +6,10 @@ auto mHexEdit::allocate() -> pObject* {
 
 //
 
+auto mHexEdit::address() const -> unsigned {
+  return state.address;
+}
+
 auto mHexEdit::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
@@ -31,10 +35,6 @@ auto mHexEdit::length() const -> unsigned {
   return state.length;
 }
 
-auto mHexEdit::offset() const -> unsigned {
-  return state.offset;
-}
-
 auto mHexEdit::onRead(const function<uint8_t (unsigned)>& callback) -> type& {
   state.onRead = callback;
   return *this;
@@ -47,6 +47,12 @@ auto mHexEdit::onWrite(const function<void (unsigned, uint8_t)>& callback) -> ty
 
 auto mHexEdit::rows() const -> unsigned {
   return state.rows;
+}
+
+auto mHexEdit::setAddress(unsigned address) -> type& {
+  state.address = address;
+  signal(setAddress, address);
+  return *this;
 }
 
 auto mHexEdit::setBackgroundColor(Color color) -> type& {
@@ -70,12 +76,6 @@ auto mHexEdit::setForegroundColor(Color color) -> type& {
 auto mHexEdit::setLength(unsigned length) -> type& {
   state.length = length;
   signal(setLength, length);
-  return *this;
-}
-
-auto mHexEdit::setOffset(unsigned offset) -> type& {
-  state.offset = offset;
-  signal(setOffset, offset);
   return *this;
 }
 

@@ -1,43 +1,46 @@
-namespace phoenix {
+#if defined(Hiro_HorizontalSlider)
 
-Size pHorizontalSlider::minimumSize() {
+namespace hiro {
+
+auto pHorizontalSlider::minimumSize() const -> Size {
   return {0, 20};
 }
 
-void pHorizontalSlider::setLength(unsigned length) {
-  length += length == 0;
-  qtSlider->setRange(0, length - 1);
-  qtSlider->setPageStep(length >> 3);
+auto pHorizontalSlider::setLength(unsigned length) -> void {
+  _setState();
 }
 
-void pHorizontalSlider::setPosition(unsigned position) {
-  qtSlider->setValue(position);
+auto pHorizontalSlider::setPosition(unsigned position) -> void {
+  _setState();
 }
 
-void pHorizontalSlider::constructor() {
-  qtWidget = qtSlider = new QSlider(Qt::Horizontal);
-  qtSlider->setRange(0, 100);
-  qtSlider->setPageStep(101 >> 3);
-  connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+auto pHorizontalSlider::construct() -> void {
+  qtWidget = qtHorizontalSlider = new QtHorizontalSlider(*this);
+  qtHorizontalSlider->setRange(0, 100);
+  qtHorizontalSlider->setPageStep(101 >> 3);
+  qtHorizontalSlider->connect(qtHorizontalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
-  pWidget::synchronizeState();
-  setLength(horizontalSlider.state.length);
-  setPosition(horizontalSlider.state.position);
+  pWidget::construct();
+  _setState();
 }
 
-void pHorizontalSlider::destructor() {
-  delete qtSlider;
-  qtWidget = qtSlider = nullptr;
+auto pHorizontalSlider::destruct() -> void {
+  delete qtHorizontalSlider;
+  qtWidget = qtHorizontalSlider = nullptr;
 }
 
-void pHorizontalSlider::orphan() {
-  destructor();
-  constructor();
+auto pHorizontalSlider::_setState() -> void {
+  signed length = state().length + (state().length == 0);
+  qtHorizontalSlider->setRange(0, length - 1);
+  qtHorizontalSlider->setPageStep(length >> 3);
+  qtHorizontalSlider->setValue(state().position);
 }
 
-void pHorizontalSlider::onChange() {
-  horizontalSlider.state.position = qtSlider->value();
-  if(horizontalSlider.onChange) horizontalSlider.onChange();
+auto QtHorizontalSlider::onChange() -> void {
+  p.state().position = value();
+  p.self().doChange();
 }
 
 }
+
+#endif

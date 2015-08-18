@@ -1,41 +1,44 @@
-namespace phoenix {
+#if defined(Hiro_Application)
+
+namespace hiro {
 
 XlibDisplay* pApplication::display = nullptr;
 
-void pApplication::run() {
-  if(Application::main) {
-    while(applicationState.quit == false) {
+auto pApplication::run() -> void {
+  if(Application::state.onMain) {
+    while(!Application::state.quit) {
+      Application::doMain();
       processEvents();
-      Application::main();
     }
   } else {
     QApplication::exec();
   }
 }
 
-bool pApplication::pendingEvents() {
+auto pApplication::pendingEvents() -> bool {
   return QApplication::hasPendingEvents();
 }
 
-void pApplication::processEvents() {
+auto pApplication::processEvents() -> void {
   while(pendingEvents()) QApplication::processEvents();
 }
 
-void pApplication::quit() {
+auto pApplication::quit() -> void {
   QApplication::quit();
-  //note: QApplication cannot be deleted; or libQtGui will crash
-  qtApplication = nullptr;
+  qtApplication = nullptr;  //note: deleting QApplication will crash libQtGui
 }
 
-void pApplication::syncX() {
-  for(unsigned n = 0; n < 8; n++) {
+//this is sadly necessary for things like determining window frame geometry
+//obviously, it is used as sparingly as possible
+auto pApplication::syncX() -> void {
+  for(auto n : range(8)) {
     QApplication::syncX();
     Application::processEvents();
     usleep(2000);
   }
 }
 
-void pApplication::initialize() {
+auto pApplication::initialize() -> void {
   display = XOpenDisplay(0);
 
   settings = new Settings;
@@ -43,7 +46,7 @@ void pApplication::initialize() {
 
   static int argc = 1;
   static char* argv[] = {new char[8], nullptr};
-  strcpy(argv[0], "phoenix");
+  strcpy(argv[0], "hiro");
   char** argvp = argv;
 
   qtApplication = new QApplication(argc, argvp);
@@ -52,3 +55,5 @@ void pApplication::initialize() {
 }
 
 }
+
+#endif

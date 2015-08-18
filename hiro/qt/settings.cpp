@@ -1,17 +1,6 @@
-namespace phoenix {
+namespace hiro {
 
-static Settings *settings = nullptr;
-
-void Settings::load() {
-  string path = {userpath(), ".config/phoenix/"};
-  Configuration::Document::load({path, "qt.bml"});
-}
-
-void Settings::save() {
-  string path = {userpath(), ".config/phoenix/"};
-  directory::create(path, 0755);
-  Configuration::Document::save({path, "qt.bml"});
-}
+static Settings* settings = nullptr;
 
 Settings::Settings() {
   geometry.append(geometry.frameX = 4, "FrameX");
@@ -21,6 +10,17 @@ Settings::Settings() {
   geometry.append(geometry.menuHeight = 20, "MenuHeight");
   geometry.append(geometry.statusHeight = 20, "StatusHeight");
   append(geometry, "Geometry");
+}
+
+auto Settings::load() -> void {
+  string path{configpath(), "hiro/"};
+  Configuration::Document::load({path, "qt.bml"});
+}
+
+auto Settings::save() -> void {
+  string path{configpath(), "hiro/"};
+  directory::create(path, 0755);
+  Configuration::Document::save({path, "qt.bml"});
 }
 
 }

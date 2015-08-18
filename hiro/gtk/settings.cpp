@@ -1,16 +1,5 @@
 namespace hiro {
 
-void Settings::load() {
-  string path = {configpath(), "hiro/"};
-  Configuration::Document::load({path, "gtk.bml"});
-}
-
-void Settings::save() {
-  string path = {configpath(), "hiro/"};
-  directory::create(path, 0755);
-  Configuration::Document::save({path, "gtk.bml"});
-}
-
 Settings::Settings() {
   geometry.append(geometry.frameX = 4, "FrameX");
   geometry.append(geometry.frameY = 24, "FrameY");
@@ -21,6 +10,17 @@ Settings::Settings() {
   append(geometry, "Geometry");
   window.append(window.backgroundColor = 0xedeceb, "BackgroundColor");
   append(window, "Window");
+}
+
+auto Settings::load() -> void {
+  string path = {configpath(), "hiro/"};
+  Configuration::Document::load({path, "gtk.bml"});
+}
+
+auto Settings::save() -> void {
+  string path = {configpath(), "hiro/"};
+  directory::create(path, 0755);
+  Configuration::Document::save({path, "gtk.bml"});
 }
 
 }

@@ -1,42 +1,45 @@
-namespace phoenix {
+#if defined(Hiro_CheckLabel)
 
-Size pCheckLabel::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), checkLabel.state.text);
-  return {size.width + 26, size.height + 6};
+namespace hiro {
+
+auto pCheckLabel::construct() -> void {
+  qtWidget = qtCheckLabel = new QtCheckLabel(*this);
+  qtCheckLabel->connect(qtCheckLabel, SIGNAL(stateChanged(int)), SLOT(onToggle()));
+
+  pWidget::construct();
+  _setState();
 }
 
-void pCheckLabel::setChecked(bool checked) {
-  lock();
-  qtCheckLabel->setChecked(checked);
-  unlock();
-}
-
-void pCheckLabel::setText(string text) {
-  qtCheckLabel->setText(QString::fromUtf8(text));
-}
-
-void pCheckLabel::constructor() {
-  qtWidget = qtCheckLabel = new QCheckBox;
-  connect(qtCheckLabel, SIGNAL(stateChanged(int)), SLOT(onToggle()));
-
-  pWidget::synchronizeState();
-  setChecked(checkLabel.state.checked);
-  setText(checkLabel.state.text);
-}
-
-void pCheckLabel::destructor() {
+auto pCheckLabel::destruct() -> void {
   delete qtCheckLabel;
   qtWidget = qtCheckLabel = nullptr;
 }
 
-void pCheckLabel::orphan() {
-  destructor();
-  constructor();
+auto pCheckLabel::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+  return {size.width() + 26, size.height() + 6};
 }
 
-void pCheckLabel::onToggle() {
-  checkLabel.state.checked = qtCheckLabel->isChecked();
-  if(!locked() && checkLabel.onToggle) checkLabel.onToggle();
+auto pCheckLabel::setChecked(bool checked) -> void {
+  _setState();
+}
+
+auto pCheckLabel::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pCheckLabel::_setState() -> void {
+  lock();
+  qtCheckLabel->setChecked(state().checked);
+  qtCheckLabel->setText(QString::fromUtf8(state().text));
+  unlock();
+}
+
+auto QtCheckLabel::onToggle() -> void {
+  p.state().checked = p.qtCheckLabel->isChecked();
+  if(!p.locked()) p.self().doToggle();
 }
 
 }
+
+#endif

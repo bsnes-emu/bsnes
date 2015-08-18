@@ -59,7 +59,7 @@ auto mRadioButton::setChecked() -> type& {
 auto mRadioButton::setGroup(sGroup group) -> type& {
   state.group = group;
   signal(setGroup, group);
-  if(group && group->objects() == 1) setChecked();
+  if(group && group->objectCount() == 1) setChecked();
   return *this;
 }
 

@@ -1,4 +1,6 @@
-namespace phoenix {
+#if defined(Hiro_IconView)
+
+namespace hiro {
 
 void pIconView::append() {
   lock();
@@ -146,3 +148,5 @@ void pIconView::QtListWidget::resizeEvent(QResizeEvent* event) {
 }
 
 }
+
+#endif

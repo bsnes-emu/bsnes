@@ -73,15 +73,20 @@ auto pHexEdit::construct() -> void {
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)HexEdit_windowProc);
 
   pWidget::_setState();
+  setAddress(state().address);
   setBackgroundColor(state().backgroundColor);
   setLength(state().length);
-  setOffset(state().offset);
   update();
   PostMessage(hwnd, EM_SETSEL, 10, 10);
 }
 
 auto pHexEdit::destruct() -> void {
   DestroyWindow(hwnd);
+}
+
+auto pHexEdit::setAddress(unsigned address) -> void {
+  SetScrollPos(scrollBar, SB_CTL, address / state().columns, true);
+  update();
 }
 
 auto pHexEdit::setBackgroundColor(Color color) -> void {
@@ -102,11 +107,6 @@ auto pHexEdit::setLength(unsigned length) -> void {
   update();
 }
 
-auto pHexEdit::setOffset(unsigned offset) -> void {
-  SetScrollPos(scrollBar, SB_CTL, offset / state().columns, true);
-  update();
-}
-
 auto pHexEdit::setRows(unsigned rows) -> void {
   update();
 }
@@ -120,16 +120,16 @@ auto pHexEdit::update() -> void {
   unsigned cursorPosition = Edit_GetSel(hwnd);
 
   string output;
-  unsigned offset = state().offset;
+  unsigned address = state().address;
   for(auto row : range(state().rows)) {
-    output.append(hex(offset, 8L));
+    output.append(hex(address, 8L));
     output.append("  ");
 
     string hexdata;
     string ansidata = " ";
     for(auto column : range(state().columns)) {
-      if(offset < state().length) {
-        uint8_t data = self().doRead(offset++);
+      if(address < state().length) {
+        uint8_t data = self().doRead(address++);
         hexdata.append(hex(data, 2L));
         hexdata.append(" ");
         ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
@@ -141,7 +141,7 @@ auto pHexEdit::update() -> void {
 
     output.append(hexdata);
     output.append(ansidata);
-    if(offset >= state().length) break;
+    if(address >= state().length) break;
     if(row != state().rows - 1) output.append("\r\n");
   }
 
@@ -199,7 +199,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
   else return false;
 
   if(cursorX >= 10) {
-    //not on an offset
+    //not on an address
     cursorX -= 10;
     if((cursorX % 3) != 2) {
       //not on a space
@@ -207,10 +207,10 @@ bool pHexEdit::keyPress(unsigned scancode) {
       cursorX /= 3;
       if(cursorX < state().columns) {
         //not in ANSI region
-        unsigned offset = state().offset + (cursorY * state().columns + cursorX);
+        unsigned address = state().address + (cursorY * state().columns + cursorX);
 
-        if(offset >= state().length) return false;  //do not edit past end of data
-        uint8_t data = self().doRead(offset);
+        if(address >= state().length) return false;  //do not edit past end of data
+        uint8_t data = self().doRead(address);
 
         //write modified value
         if(cursorNibble == 1) {
@@ -218,7 +218,7 @@ bool pHexEdit::keyPress(unsigned scancode) {
         } else {
           data = (data & 0x0f) | (scancode << 4);
         }
-        self().doWrite(offset, data);
+        self().doWrite(address, data);
 
         //auto-advance cursor to next nibble or byte
         position++;
@@ -243,14 +243,14 @@ signed pHexEdit::rowsScrollable() {
 }
 
 signed pHexEdit::scrollPosition() {
-  return state().offset / state().columns;
+  return state().address / state().columns;
 }
 
 void pHexEdit::scrollTo(signed position) {
   if(position > rowsScrollable()) position = rowsScrollable();
   if(position < 0) position = 0;
   if(position == scrollPosition()) return;
-  self().setOffset(position * state().columns);
+  self().setAddress(position * state().columns);
 }
 
 }

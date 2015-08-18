@@ -1,4 +1,6 @@
-namespace phoenix {
+#if defined(Hiro_Console)
+
+namespace hiro {
 
 void pConsole::print(string text) {
 }
@@ -50,3 +52,5 @@ void pConsole::QtConsole::keyPressEventAcknowledge(QKeyEvent* event) {
 }
 
 }
+
+#endif

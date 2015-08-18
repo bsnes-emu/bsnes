@@ -34,72 +34,27 @@ auto pListView::construct() -> void {
   pWidget::_setState();
   setBackgroundColor(state().backgroundColor);
   setBatchable(state().batchable);
-  setCheckable(state().checkable);
-  setGridVisible(state().gridVisible);
-  setHeaderVisible(state().headerVisible);
-  setSortable(state().sortable);
+  setBordered(state().bordered);
   _setIcons();
+  _setSortable();
   resizeColumns();
 }
 
 auto pListView::destruct() -> void {
-  if(imageList) { ImageList_Destroy(imageList); imageList = 0; }
+  if(imageList) { ImageList_Destroy(imageList); imageList = nullptr; }
   DestroyWindow(hwnd);
 }
 
-auto pListView::append(sListViewColumn column) -> void {
-  lock();
-  wchar_t text[] = L"";
-  LVCOLUMN lvColumn;
-  lvColumn.mask = LVCF_FMT | LVCF_TEXT | LVCF_SUBITEM;
-  lvColumn.fmt = LVCFMT_LEFT;
-  lvColumn.iSubItem = column->offset();
-  lvColumn.pszText = text;
-  ListView_InsertColumn(hwnd, column->offset(), &lvColumn);
-  if(auto self = column->self()) {
-    self->_setState();
-  }
-  resizeColumns();
-  unlock();
+auto pListView::append(sListViewHeader header) -> void {
 }
 
 auto pListView::append(sListViewItem item) -> void {
-  lock();
-  wchar_t text[] = L"";
-  LVITEM lvItem;
-  lvItem.mask = LVIF_TEXT;
-  lvItem.iItem = item->offset();
-  lvItem.iSubItem = 0;
-  lvItem.pszText = text;
-  ListView_InsertItem(hwnd, &lvItem);
-  if(auto self = item->self()) {
-    self->setChecked(item->state.checked);
-    self->setSelected(item->state.selected);
-  }
-  for(auto& cell : item->state.cells) {
-    if(auto self = cell->self()) {
-      self->_setState();
-    }
-  }
-  unlock();
 }
 
-auto pListView::checkAll() -> void {
-  for(auto& item : state().items) {
-    item->self()->setChecked(true);
-  }
-}
-
-auto pListView::remove(sListViewColumn column) -> void {
-  lock();
-  ListView_DeleteColumn(hwnd, column->offset());
-  unlock();
+auto pListView::remove(sListViewHeader header) -> void {
 }
 
 auto pListView::remove(sListViewItem item) -> void {
-  lock();
-  ListView_DeleteItem(hwnd, item->offset());
-  unlock();
 }
 
 auto pListView::reset() -> void {
@@ -114,45 +69,44 @@ auto pListView::reset() -> void {
 auto pListView::resizeColumns() -> void {
   lock();
 
-  vector<signed> widths;
-  signed minimumWidth = 0;
-  signed expandable = 0;
-  for(auto column : range(state().columns)) {
-    signed width = _width(column);
-    widths.append(width);
-    minimumWidth += width;
-    if(state().columns[column]->expandable()) expandable++;
-  }
-
-  signed maximumWidth = self().geometry().width() - 4;
-  SCROLLBARINFO sbInfo{sizeof(SCROLLBARINFO)};
-  if(GetScrollBarInfo(hwnd, OBJID_VSCROLL, &sbInfo)) {
-    if(!(sbInfo.rgstate[0] & STATE_SYSTEM_INVISIBLE)) {
-      maximumWidth -= sbInfo.rcScrollBar.right - sbInfo.rcScrollBar.left;
+  if(auto& header = state().header) {
+    vector<signed> widths;
+    signed minimumWidth = 0;
+    signed expandable = 0;
+    for(auto column : range(header->columnCount())) {
+      signed width = _width(column);
+      widths.append(width);
+      minimumWidth += width;
+      if(header->column(column).expandable()) expandable++;
     }
-  }
 
-  signed expandWidth = 0;
-  if(expandable && maximumWidth > minimumWidth) {
-    expandWidth = (maximumWidth - minimumWidth) / expandable;
-  }
+    signed maximumWidth = self().geometry().width() - 4;
+    SCROLLBARINFO sbInfo{sizeof(SCROLLBARINFO)};
+    if(GetScrollBarInfo(hwnd, OBJID_VSCROLL, &sbInfo)) {
+      if(!(sbInfo.rgstate[0] & STATE_SYSTEM_INVISIBLE)) {
+        maximumWidth -= sbInfo.rcScrollBar.right - sbInfo.rcScrollBar.left;
+      }
+    }
 
-  for(auto column : range(state().columns)) {
-    if(auto self = state().columns[column]->self()) {
-      signed width = widths[column];
-      if(self->state().expandable) width += expandWidth;
-      self->_width = width;
-      self->_setState();
+    signed expandWidth = 0;
+    if(expandable && maximumWidth > minimumWidth) {
+      expandWidth = (maximumWidth - minimumWidth) / expandable;
+    }
+
+    for(auto column : range(header->columnCount())) {
+      if(auto self = header->state.columns[column]->self()) {
+        signed width = widths[column];
+        if(self->state().expandable) width += expandWidth;
+        self->_width = width;
+        self->_setState();
+      }
     }
   }
 
   unlock();
 }
 
-auto pListView::selectAll() -> void {
-  lock();
-  ListView_SetItemState(hwnd, -1, LVIS_SELECTED, LVIS_SELECTED);
-  unlock();
+auto pListView::setAlignment(Alignment alignment) -> void {
 }
 
 auto pListView::setBackgroundColor(Color color) -> void {
@@ -166,42 +120,27 @@ auto pListView::setBatchable(bool batchable) -> void {
   SetWindowLong(hwnd, GWL_STYLE, style);
 }
 
-auto pListView::setCheckable(bool checkable) -> void {
-  auto style = ListView_GetExtendedListViewStyle(hwnd);
-  checkable ? style |= LVS_EX_CHECKBOXES : style &=~ LVS_EX_CHECKBOXES;
-  ListView_SetExtendedListViewStyle(hwnd, style);
+auto pListView::setBordered(bool bordered) -> void {
+  //rendered via onCustomDraw
 }
 
 auto pListView::setForegroundColor(Color color) -> void {
 }
 
-auto pListView::setGridVisible(bool visible) -> void {
-  //rendered via onCustomDraw
-}
-
-auto pListView::setHeaderVisible(bool visible) -> void {
-  auto style = GetWindowLong(hwnd, GWL_STYLE);
-  !visible ? style |= LVS_NOCOLUMNHEADER : style &=~ LVS_NOCOLUMNHEADER;
-  SetWindowLong(hwnd, GWL_STYLE, style);
-}
-
-auto pListView::setSortable(bool sortable) -> void {
-  auto style = GetWindowLong(hwnd, GWL_STYLE);
-  !sortable ? style |= LVS_NOSORTHEADER : style &=~ LVS_NOSORTHEADER;
-  SetWindowLong(hwnd, GWL_STYLE, style);
-}
-
-auto pListView::uncheckAll() -> void {
-  for(auto& item : state().items) {
-    item->self()->setChecked(false);
+auto pListView::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  if(auto& header = state().header) {
+    for(auto& column : header->state.columns) {
+      if(column->state.expandable) return resizeColumns();
+    }
   }
 }
 
-auto pListView::unselectAll() -> void {
-  lock();
-  ListView_SetItemState(hwnd, -1, 0, LVIS_FOCUSED | LVIS_SELECTED);
-  unlock();
-}
+/*auto pListView::setHeaderVisible(bool visible) -> void {
+  auto style = GetWindowLong(hwnd, GWL_STYLE);
+  !visible ? style |= LVS_NOCOLUMNHEADER : style &=~ LVS_NOCOLUMNHEADER;
+  SetWindowLong(hwnd, GWL_STYLE, style);
+}*/
 
 auto pListView::onActivate(LPARAM lparam) -> void {
   auto nmlistview = (LPNMLISTVIEW)lparam;
@@ -231,20 +170,6 @@ auto pListView::onChange(LPARAM lparam) -> void {
     //we use a delayed AppMessage so that only one callback event is fired off
     PostMessageOnce(_parentHandle(), AppMessage::ListView_onChange, 0, (LPARAM)&reference);
   }
-
-  if(!locked()) {
-    unsigned row = nmlistview->iItem;
-    unsigned mask = nmlistview->uNewState & LVIS_STATEIMAGEMASK;
-    if(mask == 0x1000 || mask == 0x2000) {
-      bool checked = mask == 0x2000;
-      if(auto item = self().item(row)) {
-        if(checked != item->state.checked) {  //WC_LISTVIEW sends this message twice
-          item->state.checked = checked;
-          self().doToggle(item);
-        }
-      }
-    }
-  }
 }
 
 auto pListView::onContext(LPARAM lparam) -> void {
@@ -264,59 +189,71 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
     HDC hdc = lvcd->nmcd.hdc;
     HDC hdcSource = CreateCompatibleDC(hdc);
     unsigned row = lvcd->nmcd.dwItemSpec;
-    for(auto column : range(state().columns)) {
+    auto& header = state().header;
+    if(!header) break;
+    for(auto column : range(header->columnCount())) {
       RECT rc, rcLabel;
       ListView_GetSubItemRect(hwnd, row, column, LVIR_BOUNDS, &rc);
       ListView_GetSubItemRect(hwnd, row, column, LVIR_LABEL, &rcLabel);
       rc.right = rcLabel.right;  //bounds of column 0 returns width of entire item
       signed iconSize = rc.bottom - rc.top - 1;
-      bool checked = state().items(row)->state.checked;
       bool selected = state().items(row)->state.selected;
-      HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(_backgroundColor(row, column)));
-      FillRect(hdc, &rc, brush);
-      DeleteObject(brush);
-      if(state().checkable && self().item(row).checkable() && column == 0) {
-        if(auto htheme = OpenThemeData(hwnd, L"BUTTON")) {
-          unsigned state = checked ? CBS_CHECKEDNORMAL : CBS_UNCHECKEDNORMAL;
-          SIZE size;
-          GetThemePartSize(htheme, hdc, BP_CHECKBOX, state, NULL, TS_TRUE, &size);
-          signed center = max(0, (rc.bottom - rc.top - size.cy) / 2);
-          RECT rd{rc.left + center, rc.top + center, rc.left + center + size.cx, rc.top + center + size.cy};
-          DrawThemeBackground(htheme, hdc, BP_CHECKBOX, state, &rd, NULL);
-          CloseThemeData(htheme);
+
+      if(auto cell = self().item(row)->cell(column)) {
+        HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(cell->backgroundColor(true)));
+        FillRect(hdc, &rc, brush);
+        DeleteObject(brush);
+
+        if(cell->state.checkable) {
+          if(auto htheme = OpenThemeData(hwnd, L"BUTTON")) {
+            unsigned state = cell->state.checked ? CBS_CHECKEDNORMAL : CBS_UNCHECKEDNORMAL;
+            SIZE size;
+            GetThemePartSize(htheme, hdc, BP_CHECKBOX, state, nullptr, TS_TRUE, &size);
+            signed center = max(0, (rc.bottom - rc.top - size.cy) / 2);
+            RECT rd{rc.left + center, rc.top + center, rc.left + center + size.cx, rc.top + center + size.cy};
+            DrawThemeBackground(htheme, hdc, BP_CHECKBOX, state, &rd, nullptr);
+            CloseThemeData(htheme);
+          }
+          rc.left += iconSize + 2;
+        } else {
+          rc.left += 2;
         }
-        rc.left += iconSize + 2;
+
+        if(auto icon = cell->state.icon) {
+          icon.scale(iconSize, iconSize);
+          icon.transform();
+          auto bitmap = CreateBitmap(icon);
+          SelectBitmap(hdcSource, bitmap);
+          BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(selected ? 128 : 255), AC_SRC_ALPHA};
+          AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, iconSize, iconSize, blend);
+          DeleteObject(bitmap);
+          rc.left += iconSize + 2;
+        }
+
+        if(auto text = cell->state.text) {
+          auto alignment = cell->alignment(true);
+          if(!alignment) alignment = {0.0, 0.5};
+          utf16_t wText(text);
+          SetBkMode(hdc, TRANSPARENT);
+          SetTextColor(hdc, selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : CreateRGB(cell->foregroundColor(true)));
+          auto style = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
+          style |= alignment.horizontal() < 0.333 ? DT_LEFT : alignment.horizontal() > 0.666 ? DT_RIGHT  : DT_CENTER;
+          style |= alignment.vertical()   < 0.333 ? DT_TOP  : alignment.vertical()   > 0.666 ? DT_BOTTOM : DT_VCENTER;
+          rc.right -= 2;
+          auto font = pFont::create(cell->font(true));
+          SelectObject(hdc, font);
+          DrawText(hdc, wText, -1, &rc, style);
+          DeleteObject(font);
+        }
       } else {
-        rc.left += 2;
+        auto color = state().backgroundColor;
+        if(!color) color = {255, 255, 255};
+        HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(color));
+        FillRect(hdc, &rc, brush);
+        DeleteObject(brush);
       }
-      auto cell = self().item(row)->cell(column);
-      if(!cell) continue;
-      if(auto icon = cell->state.icon) {
-        icon.scale(iconSize, iconSize);
-        icon.transform();
-        auto bitmap = CreateBitmap(icon);
-        SelectBitmap(hdcSource, bitmap);
-        BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(selected ? 128 : 255), AC_SRC_ALPHA};
-        AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, iconSize, iconSize, blend);
-        DeleteObject(bitmap);
-        rc.left += iconSize + 2;
-      }
-      if(auto text = cell->state.text) {
-        auto halign = state().columns(column)->state.horizontalAlignment;
-        auto valign = state().columns(column)->state.verticalAlignment;
-        utf16_t wText(text);
-        SetBkMode(hdc, TRANSPARENT);
-        SetTextColor(hdc, selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : CreateRGB(_foregroundColor(row, column)));
-        auto style = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
-        style |= halign < 0.333 ? DT_LEFT : halign > 0.666 ? DT_RIGHT : DT_CENTER;
-        style |= valign < 0.333 ? DT_TOP : valign > 0.666 ? DT_BOTTOM : DT_VCENTER;
-        rc.right -= 2;
-        auto font = pFont::create(_font(row, column));
-        SelectObject(hdc, font);
-        DrawText(hdc, wText, -1, &rc, style);
-        DeleteObject(font);
-      }
-      if(state().gridVisible) {
+
+      if(state().bordered) {
         ListView_GetSubItemRect(hwnd, row, column, LVIR_BOUNDS, &rc);
         rc.top = rc.bottom - 1;
         FillRect(hdc, &rc, (HBRUSH)GetStockObject(LTGRAY_BRUSH));
@@ -329,11 +266,33 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
     return CDRF_SKIPDEFAULT;
   }
   }
+
+  return CDRF_SKIPDEFAULT;
 }
 
 auto pListView::onSort(LPARAM lparam) -> void {
   auto nmlistview = (LPNMLISTVIEW)lparam;
-  self().doSort(self().column(nmlistview->iSubItem));
+  if(auto& header = state().header) {
+    if(auto column = header->column(nmlistview->iSubItem)) {
+      if(column->sortable()) self().doSort(column);
+    }
+  }
+}
+
+auto pListView::onToggle(LPARAM lparam) -> void {
+  auto itemActivate = (LPNMITEMACTIVATE)lparam;
+  LVHITTESTINFO hitTestInfo{0};
+  hitTestInfo.pt = itemActivate->ptAction;
+  ListView_SubItemHitTest(hwnd, &hitTestInfo);
+
+  if(auto cell = self().item(hitTestInfo.iItem).cell(hitTestInfo.iSubItem)) {
+    if(cell->state.checkable) {
+      cell->state.checked = !cell->state.checked;
+      if(!locked()) self().doToggle(cell);
+      //todo: try to find a way to only repaint this cell instead of the entire control to reduce flickering
+      PostMessageOnce(_parentHandle(), AppMessage::ListView_doPaint, 0, (LPARAM)&reference);
+    }
+  }
 }
 
 auto pListView::_backgroundColor(unsigned _row, unsigned _column) -> Color {
@@ -343,19 +302,21 @@ auto pListView::_backgroundColor(unsigned _row, unsigned _column) -> Color {
     }
     if(auto color = item->backgroundColor()) return color;
   }
-  if(auto column = self().column(_column)) {
-    if(auto color = column->backgroundColor()) return color;
-  }
+//  if(auto column = self().column(_column)) {
+//    if(auto color = column->backgroundColor()) return color;
+//  }
   if(auto color = self().backgroundColor()) return color;
-  if(state().columns.size() >= 2 && _row % 2) return {240, 240, 240};
+//  if(state().columns.size() >= 2 && _row % 2) return {240, 240, 240};
   return {255, 255, 255};
 }
 
 auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
   unsigned width = 6;
-  if(state().checkable && _column == 0) width += 16 + 2;
   if(auto item = self().item(_row)) {
     if(auto cell = item->cell(_column)) {
+      if(cell->state.checkable) {
+        width += 16 + 2;
+      }
       if(auto& icon = cell->state.icon) {
         width += 16 + 2;
       }
@@ -369,12 +330,14 @@ auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
 
 auto pListView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 12;
-  if(auto column = self().column(_column)) {
-    if(auto& icon = column->state.icon) {
-      width += 16 + 12;  //yes; icon spacing in column headers is excessive
-    }
-    if(auto& text = column->state.text) {
-      width += Font::size(self().font(true), text).width();
+  if(auto header = state().header) {
+    if(auto column = header->column(_column)) {
+      if(auto& icon = column->state.icon) {
+        width += 16 + 12;  //yes; icon spacing in column headers is excessive
+      }
+      if(auto& text = column->state.text) {
+        width += Font::size(self().font(true), text).width();
+      }
     }
   }
   return width;
@@ -387,9 +350,9 @@ auto pListView::_font(unsigned _row, unsigned _column) -> string {
     }
     if(auto font = item->font()) return font;
   }
-  if(auto column = self().column(_column)) {
-    if(auto font = column->font()) return font;
-  }
+//  if(auto column = self().column(_column)) {
+//    if(auto font = column->font()) return font;
+//  }
   if(auto font = self().font(true)) return font;
   return Font::sans(8);
 }
@@ -401,31 +364,33 @@ auto pListView::_foregroundColor(unsigned _row, unsigned _column) -> Color {
     }
     if(auto color = item->foregroundColor()) return color;
   }
-  if(auto column = self().column(_column)) {
-    if(auto color = column->foregroundColor()) return color;
-  }
+//  if(auto column = self().column(_column)) {
+//    if(auto color = column->foregroundColor()) return color;
+//  }
   if(auto color = self().foregroundColor()) return color;
   return {0, 0, 0};
 }
 
 auto pListView::_setIcons() -> void {
-  ListView_SetImageList(hwnd, NULL, LVSIL_SMALL);
+  ListView_SetImageList(hwnd, nullptr, LVSIL_SMALL);
   if(imageList) ImageList_Destroy(imageList);
   imageList = ImageList_Create(16, 16, ILC_COLOR32, 1, 0);
   ListView_SetImageList(hwnd, imageList, LVSIL_SMALL);
 
-  for(auto column : range(state().columns)) {
-    auto icon = state().columns(column)->state.icon;
-    if(icon) {
-      icon.scale(16, 16);
-      icon.transform();
-    } else {
-      icon.allocate(16, 16);
-      icon.fill(0x00ffffff);
+  if(auto& header = state().header) {
+    for(auto column : range(header->columnCount())) {
+      auto icon = header->state.columns[column]->state.icon;
+      if(icon) {
+        icon.scale(16, 16);
+        icon.transform();
+      } else {
+        icon.allocate(16, 16);
+        icon.fill(0x00ffffff);
+      }
+      auto bitmap = CreateBitmap(icon);
+      ImageList_Add(imageList, bitmap, nullptr);
+      DeleteObject(bitmap);
     }
-    auto bitmap = CreateBitmap(icon);
-    ImageList_Add(imageList, bitmap, NULL);
-    DeleteObject(bitmap);
   }
 
   //empty icon used for ListViewItems (drawn manually via onCustomDraw)
@@ -433,20 +398,35 @@ auto pListView::_setIcons() -> void {
   icon.allocate(16, 16);
   icon.fill(0x00ffffff);
   auto bitmap = CreateBitmap(icon);
-  ImageList_Add(imageList, bitmap, NULL);
+  ImageList_Add(imageList, bitmap, nullptr);
   DeleteObject(bitmap);
 }
 
+auto pListView::_setSortable() -> void {
+  bool sortable = false;
+  if(auto& header = state().header) {
+    for(auto& column : header->state.columns) {
+      if(column->sortable()) sortable = true;
+    }
+  }
+
+  //note: this won't change the visual style: WC_LISTVIEW caches this in CreateWindow
+  auto style = GetWindowLong(hwnd, GWL_STYLE);
+  !sortable ? style |= LVS_NOSORTHEADER : style &=~ LVS_NOSORTHEADER;
+  SetWindowLong(hwnd, GWL_STYLE, style);
+}
+
 auto pListView::_width(unsigned column) -> unsigned {
-  if(auto width = state().columns[column]->width()) return width;
-  unsigned width = 1;
-  if(state().headerVisible) {
-    width = max(width, _columnWidth(column));
+  if(auto& header = state().header) {
+    if(auto width = header->state.columns[column]->width()) return width;
+    unsigned width = 1;
+    if(header->visible()) width = max(width, _columnWidth(column));
+    for(auto row : range(state().items)) {
+      width = max(width, _cellWidth(row, column));
+    }
+    return width;
   }
-  for(auto row : range(state().items)) {
-    width = max(width, _cellWidth(row, column));
-  }
-  return width;
+  return 1;
 }
 
 }

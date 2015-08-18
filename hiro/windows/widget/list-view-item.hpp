@@ -7,14 +7,14 @@ struct pListViewItem : pObject {
 
   auto append(sListViewCell cell) -> void;
   auto remove(sListViewCell cell) -> void;
+  auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;
-  auto setCheckable(bool checkable) -> void;
-  auto setChecked(bool checked) -> void;
   auto setFocused() -> void;
   auto setForegroundColor(Color color) -> void;
   auto setSelected(bool selected) -> void;
 
   auto _parent() -> maybe<pListView&>;
+  auto _setState() -> void;
 };
 
 }

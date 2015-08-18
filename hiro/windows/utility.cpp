@@ -301,6 +301,10 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
         listView->self()->onSort(lparam);
         break;
       }
+      if(header->code == NM_CLICK || header->code == NM_DBLCLK) {
+        listView->self()->onToggle(lparam);
+        break;
+      }
       if(header->code == NM_RCLICK) {
         listView->self()->onContext(lparam);
         break;

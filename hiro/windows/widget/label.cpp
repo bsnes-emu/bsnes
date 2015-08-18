@@ -8,6 +8,7 @@ auto pLabel::construct() -> void {
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   pWidget::_setState();
+  setAlignment(state().alignment);
   setText(state().text);
 }
 
@@ -16,19 +17,17 @@ auto pLabel::destruct() -> void {
 }
 
 auto pLabel::minimumSize() const -> Size {
-  Size size = pFont::size(hfont, state().text);
+  auto size = pFont::size(hfont, state().text);
   return {size.width(), size.height()};
 }
 
-auto pLabel::setHorizontalAlignment(double alignment) -> void {
+auto pLabel::setAlignment(Alignment alignment) -> void {
+  InvalidateRect(hwnd, 0, false);
 }
 
 auto pLabel::setText(const string& text) -> void {
   SetWindowText(hwnd, utf16_t(text));
   InvalidateRect(hwnd, 0, false);
-}
-
-auto pLabel::setVerticalAlignment(double alignment) -> void {
 }
 
 static auto CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) -> LRESULT {

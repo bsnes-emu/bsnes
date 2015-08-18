@@ -3,7 +3,6 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Hotkeys");
 
   layout.setMargin(5);
-  mappingList.setHeaderVisible();
   mappingList.onActivate([&] { assignMapping(); });
   mappingList.onChange([&] {
     eraseButton.setEnabled((bool)mappingList.selected());
@@ -27,9 +26,11 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto HotkeySettings::reloadMappings() -> void {
   mappingList.reset();
-  mappingList.append(ListViewColumn().setText("Name"));
-  mappingList.append(ListViewColumn().setText("Mapping").setExpandable());
-  mappingList.append(ListViewColumn().setText("Device"));
+  mappingList.append(ListViewHeader().setVisible()
+    .append(ListViewColumn().setText("Name"))
+    .append(ListViewColumn().setText("Mapping").setExpandable())
+    .append(ListViewColumn().setText("Device"))
+  );
   for(auto& hotkey : inputManager->hotkeys) {
     mappingList.append(ListViewItem()
       .append(ListViewCell().setText(hotkey->name))

@@ -15,7 +15,7 @@ SettingsManager::SettingsManager() {
 
   setTitle("Configuration Settings");
   setSize({600, 400});
-  setPlacement(0.0, 1.0);
+  setAlignment({0.0, 1.0});
 
   onSize([&] {
     input.mappingList.resizeColumns();

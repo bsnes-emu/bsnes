@@ -9,7 +9,6 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   emulatorList.onChange([&] { reloadPorts(); });
   portList.onChange([&] { reloadDevices(); });
   deviceList.onChange([&] { reloadMappings(); });
-  mappingList.setHeaderVisible();
   mappingList.onActivate([&] { assignMapping(); });
   mappingList.onChange([&] { updateControls(); });
   assignMouse1.setVisible(false).onActivate([&] { assignMouseInput(0); });
@@ -82,9 +81,11 @@ auto InputSettings::reloadDevices() -> void {
 auto InputSettings::reloadMappings() -> void {
   eraseButton.setEnabled(false);
   mappingList.reset();
-  mappingList.append(ListViewColumn().setText("Name"));
-  mappingList.append(ListViewColumn().setText("Mapping").setExpandable());
-  mappingList.append(ListViewColumn().setText("Device").setForegroundColor({0, 128, 0}));
+  mappingList.append(ListViewHeader().setVisible()
+    .append(ListViewColumn().setText("Name"))
+    .append(ListViewColumn().setText("Mapping").setExpandable())
+    .append(ListViewColumn().setText("Device").setForegroundColor({0, 128, 0}))
+  );
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(ListViewItem()
       .append(ListViewCell().setText(mapping->name))

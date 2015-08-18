@@ -3,21 +3,21 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setText("Cheat Editor");
 
   layout.setMargin(5);
-  cheatList.append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setHorizontalAlignment(1.0));
-  cheatList.append(ListViewColumn().setText("Code(s)"));
-  cheatList.append(ListViewColumn().setText("Description").setExpandable());
+  cheatList.append(ListViewHeader().setVisible()
+    .append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
+    .append(ListViewColumn().setText("Code(s)"))
+    .append(ListViewColumn().setText("Description").setExpandable())
+  );
   for(auto slot : range(Slots)) {
     cheatList.append(ListViewItem()
-      .append(ListViewCell().setText(1 + slot))
+      .append(ListViewCell().setCheckable().setText(1 + slot))
       .append(ListViewCell())
       .append(ListViewCell())
     );
   }
-  cheatList.setCheckable();
-  cheatList.setHeaderVisible();
   cheatList.onChange([&] { doChangeSelected(); });
-  cheatList.onToggle([&](ListViewItem item) {
-    cheats[item.offset()].enabled = item.checked();
+  cheatList.onToggle([&](ListViewCell cell) {
+    cheats[cell.parent().offset()].enabled = cell.checked();
     synchronizeCodes();
   });
   codeLabel.setText("Code(s):");
@@ -58,11 +58,11 @@ auto CheatEditor::doRefresh() -> void {
     if(cheat.code || cheat.description) {
       lstring codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
-      cheatList.item(slot).setChecked(cheat.enabled);
+      cheatList.item(slot).cell(0).setChecked(cheat.enabled);
       cheatList.item(slot).cell(1).setText(codes[0]);
       cheatList.item(slot).cell(2).setText(cheat.description).setForegroundColor({0, 0, 0});
     } else {
-      cheatList.item(slot).setChecked(false);
+      cheatList.item(slot).cell(0).setChecked(false);
       cheatList.item(slot).cell(1).setText("");
       cheatList.item(slot).cell(2).setText("(empty)").setForegroundColor({128, 128, 128});
     }
@@ -78,7 +78,9 @@ auto CheatEditor::doReset(bool force) -> void {
       cheat.code = "";
       cheat.description = "";
     }
-    cheatList.unselectAll();
+    for(auto& item : cheatList.items()) {
+      item.cell(0).setChecked(false);
+    }
     doChangeSelected();
     doRefresh();
     synchronizeCodes();

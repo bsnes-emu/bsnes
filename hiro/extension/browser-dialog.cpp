@@ -32,30 +32,30 @@ private:
 //accept button clicked, or enter pressed on file name line edit
 //also called by list view activate after special case handling
 auto BrowserDialogWindow::accept() -> void {
-  auto selectedItems = view.selectedItems();
+  auto batched = view.batched();
 
-  if(state.action == "openFile" && selectedItems) {
-    string name = selectedItems.first()->cell(0)->text();
+  if(state.action == "openFile" && batched) {
+    string name = batched.first()->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name});
   }
 
   if(state.action == "openFiles") {
-    for(auto selectedItem : selectedItems) {
-      string name = selectedItem->cell(0)->text();
+    for(auto item : batched) {
+      string name = item->cell(0)->text();
       state.response.append(string{state.path, name, isFolder(name) ? "/" : ""});
     }
   }
 
-  if(state.action == "openFolder" && selectedItems) {
-    string name = selectedItems.first()->cell(0)->text();
+  if(state.action == "openFolder" && batched) {
+    string name = batched.first()->cell(0)->text();
     if(!isMatch(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name, "/"});
   }
 
   if(state.action == "saveFile") {
     string name = fileName.text();
-    if(!name && selectedItems) name = selectedItems.first()->cell(0)->text();
+    if(!name && batched) name = batched.first()->cell(0)->text();
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
@@ -63,8 +63,8 @@ auto BrowserDialogWindow::accept() -> void {
     state.response.append(string{state.path, name});
   }
 
-  if(state.action == "selectFolder" && selectedItems) {
-    string name = selectedItems.first()->cell(0)->text();
+  if(state.action == "selectFolder" && batched) {
+    string name = batched.first()->cell(0)->text();
     if(isFolder(name)) state.response.append(string{state.path, name, "/"});
   }
 
@@ -162,7 +162,9 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   pathName.setText(state.path = path);
 
   view.reset();
-  view.append(ListViewColumn().setExpandable());
+  view.append(ListViewHeader().setVisible(false)
+    .append(ListViewColumn().setExpandable())
+  );
 
   auto contents = directory::icontents(path);
   bool folderMode = state.action == "openFolder";

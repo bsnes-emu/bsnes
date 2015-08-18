@@ -1,66 +1,82 @@
-namespace phoenix {
+#if defined(Hiro_TextEdit)
 
-void pTextEdit::setBackgroundColor(Color color) {
-  QPalette palette = qtTextEdit->palette();
-  palette.setColor(QPalette::Base, QColor(color.red, color.green, color.blue));
-  qtTextEdit->setPalette(palette);
-  qtTextEdit->setAutoFillBackground(true);
+namespace hiro {
+
+auto pTextEdit::construct() -> void {
+  qtWidget = qtTextEdit = new QtTextEdit(*this);
+  qtTextEdit->connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
+
+  pWidget::construct();
+  _setState();
 }
 
-void pTextEdit::setCursorPosition(unsigned position) {
-  QTextCursor cursor = qtTextEdit->textCursor();
-  unsigned lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
-  cursor.setPosition(min(position, lastCharacter));
-  qtTextEdit->setTextCursor(cursor);
-}
-
-void pTextEdit::setEditable(bool editable) {
-  qtTextEdit->setTextInteractionFlags(editable ? Qt::TextEditorInteraction : Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse);
-}
-
-void pTextEdit::setForegroundColor(Color color) {
-  QPalette palette = qtTextEdit->palette();
-  palette.setColor(QPalette::Text, QColor(color.red, color.green, color.blue));
-  qtTextEdit->setPalette(palette);
-}
-
-void pTextEdit::setText(string text) {
-  qtTextEdit->setPlainText(QString::fromUtf8(text));
-}
-
-void pTextEdit::setWordWrap(bool wordWrap) {
-  qtTextEdit->setWordWrapMode(wordWrap ? QTextOption::WordWrap : QTextOption::NoWrap);
-  qtTextEdit->setHorizontalScrollBarPolicy(wordWrap ? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAlwaysOn);
-  qtTextEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
-}
-
-string pTextEdit::text() {
-  return qtTextEdit->toPlainText().toUtf8().constData();
-}
-
-void pTextEdit::constructor() {
-  qtWidget = qtTextEdit = new QTextEdit;
-  connect(qtTextEdit, SIGNAL(textChanged()), SLOT(onChange()));
-
-  pWidget::synchronizeState();
-  setEditable(textEdit.state.editable);
-  setText(textEdit.state.text);
-  setWordWrap(textEdit.state.wordWrap);
-}
-
-void pTextEdit::destructor() {
+auto pTextEdit::destruct() -> void {
   delete qtTextEdit;
   qtWidget = qtTextEdit = nullptr;
 }
 
-void pTextEdit::orphan() {
-  destructor();
-  constructor();
+auto pTextEdit::setBackgroundColor(Color color) -> void {
+  _setState();
 }
 
-void pTextEdit::onChange() {
-  textEdit.state.text = text();
-  if(textEdit.onChange) textEdit.onChange();
+auto pTextEdit::setCursorPosition(unsigned position) -> void {
+  _setState();
+}
+
+auto pTextEdit::setEditable(bool editable) -> void {
+  _setState();
+}
+
+auto pTextEdit::setForegroundColor(Color color) -> void {
+  _setState();
+}
+
+auto pTextEdit::setText(const string& text) -> void {
+  qtTextEdit->setPlainText(QString::fromUtf8(text));
+}
+
+auto pTextEdit::setWordWrap(bool wordWrap) -> void {
+  _setState();
+}
+
+auto pTextEdit::text() const -> string {
+  return qtTextEdit->toPlainText().toUtf8().constData();
+}
+
+auto pTextEdit::_setState() -> void {
+  if(auto color = state().backgroundColor) {
+    QPalette palette = qtTextEdit->palette();
+    palette.setColor(QPalette::Base, QColor(color.red(), color.green(), color.blue()));
+    qtTextEdit->setPalette(palette);
+    qtTextEdit->setAutoFillBackground(true);
+  } else {
+    //todo
+  }
+  QTextCursor cursor = qtTextEdit->textCursor();
+  unsigned lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
+  cursor.setPosition(min(state().cursorPosition, lastCharacter));
+  qtTextEdit->setTextCursor(cursor);
+  qtTextEdit->setTextInteractionFlags(state().editable
+    ? Qt::TextEditorInteraction
+    : Qt::TextSelectableByKeyboard | Qt::TextSelectableByMouse
+  );
+  if(auto color = state().foregroundColor) {
+    QPalette palette = qtTextEdit->palette();
+    palette.setColor(QPalette::Text, QColor(color.red(), color.green(), color.blue()));
+    qtTextEdit->setPalette(palette);
+  } else {
+    //todo
+  }
+  qtTextEdit->setWordWrapMode(state().wordWrap ? QTextOption::WordWrap : QTextOption::NoWrap);
+  qtTextEdit->setHorizontalScrollBarPolicy(state().wordWrap ? Qt::ScrollBarAlwaysOff : Qt::ScrollBarAlwaysOn);
+  qtTextEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOn);
+}
+
+auto QtTextEdit::onChange() -> void {
+//p.state().text = text();
+  p.self().doChange();
 }
 
 }
+
+#endif

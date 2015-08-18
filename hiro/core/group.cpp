@@ -15,7 +15,7 @@ auto mGroup::append(sObject object) -> type& {
 }
 
 auto mGroup::object(unsigned position) const -> Object {
-  if(position < state.objects.size()) {
+  if(position < objectCount()) {
     if(auto object = state.objects[position].acquire()) {
       return object;
     }
@@ -23,8 +23,16 @@ auto mGroup::object(unsigned position) const -> Object {
   return {};
 }
 
-auto mGroup::objects() const -> unsigned {
+auto mGroup::objectCount() const -> unsigned {
   return state.objects.size();
+}
+
+auto mGroup::objects() const -> vector<Object> {
+  vector<Object> objects;
+  for(auto& weak : state.objects) {
+    if(auto object = weak.acquire()) objects.append(object);
+  }
+  return objects;
 }
 
 auto mGroup::remove(sObject object) -> type& {

@@ -1,71 +1,68 @@
-namespace phoenix {
+#if defined(Hiro_Viewport)
 
-uintptr_t pViewport::handle() {
-  return (uintptr_t)qtViewport->winId();
-}
+namespace hiro {
 
-void pViewport::setDroppable(bool droppable) {
-  qtViewport->setAcceptDrops(droppable);
-}
-
-void pViewport::constructor() {
+auto pViewport::construct() -> void {
   qtWidget = qtViewport = new QtViewport(*this);
   qtViewport->setMouseTracking(true);
   qtViewport->setAttribute(Qt::WA_PaintOnScreen, true);
   qtViewport->setStyleSheet("background: #000000");
 
-  pWidget::synchronizeState();
+  pWidget::construct();
+  _setState();
 }
 
-void pViewport::destructor() {
+auto pViewport::destruct() -> void {
   delete qtViewport;
   qtWidget = qtViewport = nullptr;
 }
 
-void pViewport::orphan() {
-  destructor();
-  constructor();
+auto pViewport::handle() const -> uintptr_t {
+  return (uintptr_t)qtViewport->winId();
 }
 
-void pViewport::QtViewport::dragEnterEvent(QDragEnterEvent* event) {
+auto pViewport::setDroppable(bool droppable) -> void {
+  _setState();
+}
+
+auto pViewport::_setState() -> void {
+  qtViewport->setAcceptDrops(state().droppable);
+}
+
+auto QtViewport::dragEnterEvent(QDragEnterEvent* event) -> void {
   if(event->mimeData()->hasUrls()) {
     event->acceptProposedAction();
   }
 }
 
-void pViewport::QtViewport::dropEvent(QDropEvent* event) {
-  lstring paths = DropPaths(event);
-  if(paths.empty()) return;
-  if(self.viewport.onDrop) self.viewport.onDrop(paths);
+auto QtViewport::dropEvent(QDropEvent* event) -> void {
+  if(auto paths = DropPaths(event)) p.self().doDrop(paths);
 }
 
-void pViewport::QtViewport::leaveEvent(QEvent* event) {
-  if(self.viewport.onMouseLeave) self.viewport.onMouseLeave();
+auto QtViewport::leaveEvent(QEvent* event) -> void {
+  p.self().doMouseLeave();
 }
 
-void pViewport::QtViewport::mouseMoveEvent(QMouseEvent* event) {
-  if(self.viewport.onMouseMove) self.viewport.onMouseMove({event->pos().x(), event->pos().y()});
+auto QtViewport::mouseMoveEvent(QMouseEvent* event) -> void {
+  p.self().doMouseMove({event->pos().x(), event->pos().y()});
 }
 
-void pViewport::QtViewport::mousePressEvent(QMouseEvent* event) {
-  if(!self.viewport.onMousePress) return;
+auto QtViewport::mousePressEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
-  case Qt::LeftButton: self.viewport.onMousePress(Mouse::Button::Left); break;
-  case Qt::MidButton: self.viewport.onMousePress(Mouse::Button::Middle); break;
-  case Qt::RightButton: self.viewport.onMousePress(Mouse::Button::Right); break;
+  case Qt::LeftButton: p.self().doMousePress(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMousePress(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMousePress(Mouse::Button::Right); break;
   }
 }
 
-void pViewport::QtViewport::mouseReleaseEvent(QMouseEvent* event) {
-  if(!self.viewport.onMouseRelease) return;
+auto QtViewport::mouseReleaseEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
-  case Qt::LeftButton: self.viewport.onMouseRelease(Mouse::Button::Left); break;
-  case Qt::MidButton: self.viewport.onMouseRelease(Mouse::Button::Middle); break;
-  case Qt::RightButton: self.viewport.onMouseRelease(Mouse::Button::Right); break;
+  case Qt::LeftButton: p.self().doMouseRelease(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMouseRelease(Mouse::Button::Right); break;
   }
 }
 
-pViewport::QtViewport::QtViewport(pViewport& self) : self(self) {
 }
 
-}
+#endif

@@ -5,11 +5,11 @@ namespace hiro {
 struct pHexEdit : pWidget {
   Declare(HexEdit, Widget)
 
+  auto setAddress(unsigned address) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setColumns(unsigned columns) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setLength(unsigned length) -> void;
-  auto setOffset(unsigned offset) -> void;
   auto setRows(unsigned rows) -> void;
   auto update() -> void;
 

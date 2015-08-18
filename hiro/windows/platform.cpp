@@ -43,6 +43,7 @@
 #include "widget/label.cpp"
 #include "widget/line-edit.cpp"
 #include "widget/list-view.cpp"
+#include "widget/list-view-header.cpp"
 #include "widget/list-view-column.cpp"
 #include "widget/list-view-item.cpp"
 #include "widget/list-view-cell.cpp"

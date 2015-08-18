@@ -1,22 +1,37 @@
-namespace phoenix {
+namespace hiro {
 
-static QIcon CreateIcon(const nall::image& image, bool scale = false) {
-  if(image.empty()) return QIcon();
-  nall::image qtBuffer = image;
-  qtBuffer.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
+static auto CalculateAlignment(Alignment alignment) -> signed {
+  signed result = 0;
+  if(alignment.horizontal() < 0.333) result |= Qt::AlignLeft;
+  else if(alignment.horizontal() > 0.666) result |= Qt::AlignRight;
+  else result |= Qt::AlignCenter;
+  if(alignment.vertical() < 0.333) result |= Qt::AlignTop;
+  else if(alignment.vertical() > 0.666) result |= Qt::AlignBottom;
+  else result |= Qt::AlignVCenter;
+  return result;
+}
+
+static auto CreateBrush(Color color) -> QBrush {
+  return color ? QColor(color.red(), color.green(), color.blue()) : QBrush();
+}
+
+static auto CreateIcon(const nall::image& icon, bool scale = false) -> QIcon {
+  if(!icon) return QIcon();
+  auto qtBuffer = icon;
+  qtBuffer.transform();
   if(scale) qtBuffer.scale(16, 16, Interpolation::Linear);
-  QImage qtImage(qtBuffer.data, qtBuffer.width, qtBuffer.height, QImage::Format_ARGB32);
+  QImage qtImage(qtBuffer.data(), qtBuffer.width(), qtBuffer.height(), QImage::Format_ARGB32);
   return QIcon(QPixmap::fromImage(qtImage));
 }
 
-static lstring DropPaths(QDropEvent* event) {
+static auto DropPaths(QDropEvent* event) -> lstring {
   QList<QUrl> urls = event->mimeData()->urls();
   if(urls.size() == 0) return {};
 
   lstring paths;
-  for(unsigned n = 0; n < urls.size(); n++) {
-    string path = urls[n].path().toUtf8().constData();
-    if(path.empty()) continue;
+  for(auto n : range(urls.size())) {
+    string path{urls[n].path().toUtf8().constData()};
+    if(!path) continue;
     if(directory::exists(path) && !path.endsWith("/")) path.append("/");
     paths.append(path);
   }
@@ -24,7 +39,8 @@ static lstring DropPaths(QDropEvent* event) {
   return paths;
 }
 
-static Position GetDisplacement(Sizable* sizable) {
+/*
+static auto GetDisplacement(Sizable* sizable) -> Position {
   Position position;
   while(sizable->state.parent) {
     Position displacement = sizable->state.parent->p.displacement();
@@ -34,24 +50,30 @@ static Position GetDisplacement(Sizable* sizable) {
   }
   return position;
 }
+*/
 
-static Layout* GetParentWidgetLayout(Sizable* sizable) {
+/*
+static auto GetParentWidgetLayout(Sizable* sizable) -> Layout* {
   while(sizable) {
     if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Layout*)sizable;
     sizable = sizable->state.parent;
   }
   return nullptr;
 }
+*/
 
-static Widget* GetParentWidget(Sizable* sizable) {
+/*
+static auto GetParentWidget(Sizable* sizable) -> Widget* {
   while(sizable) {
     if(sizable->state.parent && dynamic_cast<TabFrame*>(sizable->state.parent)) return (Widget*)sizable->state.parent;
     sizable = sizable->state.parent;
   }
   return nullptr;
 }
+*/
 
-static Keyboard::Keycode Keysym(int keysym) {
+/*
+static auto Keysym(int keysym) -> Keyboard::Keycode {
   switch(keysym) {
   case XK_Escape: return Keyboard::Keycode::Escape;
   case XK_F1: return Keyboard::Keycode::F1;
@@ -233,5 +255,6 @@ static Keyboard::Keycode Keysym(int keysym) {
   }
   return Keyboard::Keycode::None;
 }
+*/
 
 }

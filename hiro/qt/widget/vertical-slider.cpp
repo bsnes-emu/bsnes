@@ -1,43 +1,47 @@
-namespace phoenix {
+#if defined(Hiro_VerticalSlider)
 
-Size pVerticalSlider::minimumSize() {
+namespace hiro {
+
+auto pVerticalSlider::minimumSize() const -> Size {
   return {20, 0};
 }
 
-void pVerticalSlider::setLength(unsigned length) {
-  length += length == 0;
-  qtSlider->setRange(0, length - 1);
-  qtSlider->setPageStep(length >> 3);
+auto pVerticalSlider::setLength(unsigned length) -> void {
+  _setState();
 }
 
-void pVerticalSlider::setPosition(unsigned position) {
-  qtSlider->setValue(position);
+auto pVerticalSlider::setPosition(unsigned position) -> void {
+  _setState();
 }
 
-void pVerticalSlider::constructor() {
-  qtWidget = qtSlider = new QSlider(Qt::Vertical);
-  qtSlider->setRange(0, 100);
-  qtSlider->setPageStep(101 >> 3);
-  connect(qtSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
+auto pVerticalSlider::construct() -> void {
+  qtWidget = qtVerticalSlider = new QtVerticalSlider(*this);
+  qtVerticalSlider->setInvertedAppearance(true);
+  qtVerticalSlider->setRange(0, 100);
+  qtVerticalSlider->setPageStep(101 >> 3);
+  qtVerticalSlider->connect(qtVerticalSlider, SIGNAL(valueChanged(int)), SLOT(onChange()));
 
-  pWidget::synchronizeState();
-  setLength(verticalSlider.state.length);
-  setPosition(verticalSlider.state.position);
+  pWidget::construct();
+  _setState();
 }
 
-void pVerticalSlider::destructor() {
-  delete qtSlider;
-  qtWidget = qtSlider = nullptr;
+auto pVerticalSlider::destruct() -> void {
+  delete qtVerticalSlider;
+  qtWidget = qtVerticalSlider = nullptr;
 }
 
-void pVerticalSlider::orphan() {
-  destructor();
-  constructor();
+auto pVerticalSlider::_setState() -> void {
+  signed length = state().length + (state().length == 0);
+  qtVerticalSlider->setRange(0, length - 1);
+  qtVerticalSlider->setPageStep(length >> 3);
+  qtVerticalSlider->setValue(state().position);
 }
 
-void pVerticalSlider::onChange() {
-  verticalSlider.state.position = qtSlider->value();
-  if(verticalSlider.onChange) verticalSlider.onChange();
+auto QtVerticalSlider::onChange() -> void {
+  p.state().position = value();
+  p.self().doChange();
 }
 
 }
+
+#endif

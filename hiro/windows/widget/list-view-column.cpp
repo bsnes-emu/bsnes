@@ -3,13 +3,33 @@
 namespace hiro {
 
 auto pListViewColumn::construct() -> void {
+  if(auto grandparent = _grandparent()) {
+    grandparent->lock();
+    wchar_t text[] = L"";
+    LVCOLUMN lvColumn{0};
+    lvColumn.mask = LVCF_FMT | LVCF_TEXT | LVCF_SUBITEM;
+    lvColumn.fmt = LVCFMT_LEFT;
+    lvColumn.iSubItem = self().offset();
+    lvColumn.pszText = text;
+    ListView_InsertColumn(grandparent->hwnd, self().offset(), &lvColumn);
+    _setState();
+    grandparent->unlock();
+  }
 }
 
 auto pListViewColumn::destruct() -> void {
+  if(auto grandparent = _grandparent()) {
+    grandparent->lock();
+    ListView_DeleteColumn(grandparent->hwnd, self().offset());
+    grandparent->unlock();
+  }
 }
 
 auto pListViewColumn::setActive() -> void {
   //unsupported
+}
+
+auto pListViewColumn::setAlignment(Alignment alignment) -> void {
 }
 
 auto pListViewColumn::setBackgroundColor(Color color) -> void {
@@ -37,6 +57,9 @@ auto pListViewColumn::setResizable(bool resizable) -> void {
   _setState();
 }
 
+auto pListViewColumn::setSortable(bool sortable) -> void {
+}
+
 auto pListViewColumn::setText(const string& text) -> void {
   _setState();
 }
@@ -48,17 +71,22 @@ auto pListViewColumn::setWidth(signed width) -> void {
   _setState();
 }
 
-auto pListViewColumn::_parent() -> maybe<pListView&> {
-  if(auto parent = self().parentListView()) {
+auto pListViewColumn::_grandparent() -> maybe<pListView&> {
+  if(auto parent = _parent()) return parent->_parent();
+  return nothing;
+}
+
+auto pListViewColumn::_parent() -> maybe<pListViewHeader&> {
+  if(auto parent = self().parentListViewHeader()) {
     if(auto self = parent->self()) return *self;
   }
   return nothing;
 }
 
 auto pListViewColumn::_setState() -> void {
-  if(auto parent = _parent()) {
-    parent->lock();
-    parent->_setIcons();
+  if(auto grandparent = _grandparent()) {
+    grandparent->lock();
+    grandparent->_setIcons();
     utf16_t text(state().text);
     LVCOLUMN lvColumn;
     lvColumn.mask = LVCF_FMT | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;
@@ -71,8 +99,8 @@ auto pListViewColumn::_setState() -> void {
     if(state().horizontalAlignment > 0.666) lvColumn.fmt = LVCFMT_RIGHT;
     if(state().icon) lvColumn.mask |= LVCF_IMAGE;
     if(!state().resizable) lvColumn.fmt |= LVCFMT_FIXED_WIDTH;
-    ListView_SetColumn(parent->hwnd, self().offset(), &lvColumn);
-    parent->unlock();
+    ListView_SetColumn(grandparent->hwnd, self().offset(), &lvColumn);
+    grandparent->unlock();
   }
 }
 

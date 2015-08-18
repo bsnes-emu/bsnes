@@ -3,9 +3,21 @@
 namespace hiro {
 
 auto pListViewItem::construct() -> void {
+  if(auto parent = _parent()) {
+    parent->lock();
+    gtk_list_store_append(parent->gtkListStore, &gtkIter);
+    _setState();
+    parent->unlock();
+  }
 }
 
 auto pListViewItem::destruct() -> void {
+  if(auto parent = _parent()) {
+    parent->lock();
+    gtk_list_store_remove(parent->gtkListStore, &gtkIter);
+    parent->_updateSelected();
+    parent->unlock();
+  }
 }
 
 auto pListViewItem::append(sListViewCell cell) -> void {
@@ -14,16 +26,10 @@ auto pListViewItem::append(sListViewCell cell) -> void {
 auto pListViewItem::remove(sListViewCell cell) -> void {
 }
 
+auto pListViewItem::setAlignment(Alignment alignment) -> void {
+}
+
 auto pListViewItem::setBackgroundColor(Color color) -> void {
-}
-
-auto pListViewItem::setCheckable(bool checkable) -> void {
-}
-
-auto pListViewItem::setChecked(bool checked) -> void {
-  if(auto parent = _parent()) {
-    gtk_list_store_set(parent->gtkListStore, &gtkIter, 0, checked, -1);
-  }
 }
 
 auto pListViewItem::setFocused() -> void {
@@ -39,21 +45,30 @@ auto pListViewItem::setForegroundColor(Color color) -> void {
 }
 
 auto pListViewItem::setSelected(bool selected) -> void {
+  _setState();
+}
+
+auto pListViewItem::_parent() -> maybe<pListView&> {
+  if(auto parent = self().parentListView()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return nothing;
+}
+
+auto pListViewItem::_setState() -> void {
   if(auto parent = _parent()) {
     parent->lock();
-    if(selected) {
+    if(state().selected) {
       gtk_tree_selection_select_iter(parent->gtkTreeSelection, &gtkIter);
     } else {
       gtk_tree_selection_unselect_iter(parent->gtkTreeSelection, &gtkIter);
     }
     parent->_updateSelected();
+    for(auto& cell : state().cells) {
+      if(auto self = cell->self()) self->_setState();
+    }
     parent->unlock();
   }
-}
-
-auto pListViewItem::_parent() -> pListView* {
-  if(auto parent = self().parentListView()) return parent->self();
-  return nullptr;
 }
 
 }

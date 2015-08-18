@@ -1,62 +1,66 @@
-namespace phoenix {
+#if defined(Hiro_Button)
 
-Size pButton::minimumSize() {
-  Size size = pFont::size(qtWidget->font(), button.state.text);
+namespace hiro {
 
-  if(button.state.orientation == Orientation::Horizontal) {
-    size.width += button.state.image.width;
-    size.height = max(button.state.image.height, size.height);
-  }
+auto pButton::construct() -> void {
+  qtWidget = qtButton = new QtButton(*this);
+  qtButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
+  qtButton->connect(qtButton, SIGNAL(released()), SLOT(onActivate()));
 
-  if(button.state.orientation == Orientation::Vertical) {
-    size.width = max(button.state.image.width, size.width);
-    size.height += button.state.image.height;
-  }
+  setBordered(state().bordered);
+  setIcon(state().icon);
+  setOrientation(state().orientation);
+  setText(state().text);
 
-  return {size.width + (button.state.text ? 20 : 12), size.height + 12};
+  pWidget::construct();
 }
 
-void pButton::setBordered(bool bordered) {
-  qtButton->setAutoRaise(bordered == false);
+auto pButton::destruct() -> void {
+  delete qtButton;
+  qtWidget = qtButton = nullptr;
 }
 
-void pButton::setImage(const image& image, Orientation orientation) {
-  qtButton->setIconSize(QSize(image.width, image.height));
-  qtButton->setIcon(CreateIcon(image));
+auto pButton::minimumSize() const -> Size {
+  auto size = pFont::size(qtWidget->font(), state().text);
+
+  if(state().orientation == Orientation::Horizontal) {
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(state().icon.height(), size.height()));
+  }
+
+  if(state().orientation == Orientation::Vertical) {
+    size.setWidth(max(state().icon.width(), size.width()));
+    size.setHeight(size.height() + state().icon.height());
+  }
+
+  return {size.width() + (state().text ? 20 : 12), size.height() + 12};
+}
+
+auto pButton::setBordered(bool bordered) -> void {
+  qtButton->setAutoRaise(!bordered);
+}
+
+auto pButton::setIcon(const image& icon) -> void {
+  qtButton->setIconSize(QSize(icon.width(), icon.height()));
+  qtButton->setIcon(CreateIcon(icon));
   qtButton->setStyleSheet("text-align: top;");
+}
+
+auto pButton::setOrientation(Orientation orientation) -> void {
   switch(orientation) {
   case Orientation::Horizontal: qtButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;
   case Orientation::Vertical:   qtButton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);  break;
   }
 }
 
-void pButton::setText(string text) {
+auto pButton::setText(const string& text) -> void {
   qtButton->setText(QString::fromUtf8(text));
 }
 
-void pButton::constructor() {
-  qtWidget = qtButton = new QToolButton;
-  qtButton->setToolButtonStyle(Qt::ToolButtonTextOnly);
-  connect(qtButton, SIGNAL(released()), SLOT(onActivate()));
-
-  pWidget::synchronizeState();
-  setBordered(button.state.bordered);
-  setImage(button.state.image, button.state.orientation);
-  setText(button.state.text);
-}
-
-void pButton::destructor() {
-  delete qtButton;
-  qtWidget = qtButton = nullptr;
-}
-
-void pButton::orphan() {
-  destructor();
-  constructor();
-}
-
-void pButton::onActivate() {
-  if(button.onActivate) button.onActivate();
+auto QtButton::onActivate() -> void {
+  p.self().doActivate();
 }
 
 }
+
+#endif

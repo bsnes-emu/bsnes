@@ -52,12 +52,12 @@ auto pHexEdit::construct() -> void {
   gtk_widget_show(subWidget);
   gtk_widget_show(container);
 
+  setAddress(state().address);
   setBackgroundColor(state().backgroundColor);
   setColumns(state().columns);
   setForegroundColor(state().foregroundColor);
   setRows(state().rows);
   setLength(state().length);
-  setOffset(state().offset);
   update();
 
   g_signal_connect(G_OBJECT(subWidget), "key-press-event", G_CALLBACK(HexEdit_keyPress), (gpointer)this);
@@ -80,6 +80,12 @@ auto pHexEdit::focused() const -> bool {
   return GTK_WIDGET_HAS_FOCUS(subWidget) || GTK_WIDGET_HAS_FOCUS(scrollBar);
 }
 
+auto pHexEdit::setAddress(unsigned address) -> void {
+  setScroll();
+  updateScroll();
+  update();
+}
+
 auto pHexEdit::setBackgroundColor(Color color) -> void {
   GdkColor gdkColor = CreateColor(color);
   gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
@@ -100,12 +106,6 @@ auto pHexEdit::setLength(unsigned length) -> void {
   update();
 }
 
-auto pHexEdit::setOffset(unsigned offset) -> void {
-  setScroll();
-  updateScroll();
-  update();
-}
-
 auto pHexEdit::setRows(unsigned rows) -> void {
   setScroll();
   update();
@@ -120,16 +120,16 @@ auto pHexEdit::update() -> void {
   unsigned position = cursorPosition();
 
   string output;
-  unsigned offset = state().offset;
+  unsigned address = state().address;
   for(auto row : range(state().rows)) {
-    output.append(hex(offset, 8L));
+    output.append(hex(address, 8L));
     output.append("  ");
 
     string hexdata;
     string ansidata = " ";
     for(auto column : range(state().columns)) {
-      if(offset < state().length) {
-        uint8_t data = self().doRead(offset++);
+      if(address < state().length) {
+        uint8_t data = self().doRead(address++);
         hexdata.append(hex(data, 2L));
         hexdata.append(" ");
         ansidata.append(data >= 0x20 && data <= 0x7e ? (char)data : '.');
@@ -141,7 +141,7 @@ auto pHexEdit::update() -> void {
 
     output.append(hexdata);
     output.append(ansidata);
-    if(offset >= state().length) break;
+    if(address >= state().length) break;
     if(row != state().rows - 1) output.append("\n");
   }
 
@@ -179,9 +179,9 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
   if(scancode == GDK_Up) {
     if(cursorY != 0) return false;
 
-    signed newOffset = state().offset - state().columns;
-    if(newOffset >= 0) {
-      self().setOffset(newOffset);
+    signed newAddress = state().address - state().columns;
+    if(newAddress >= 0) {
+      self().setAddress(newAddress);
       update();
     }
     return true;
@@ -191,34 +191,34 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
     if(cursorY >= rows() - 1) return true;
     if(cursorY != state().rows - 1) return false;
 
-    signed newOffset = state().offset + state().columns;
-    if(newOffset + state().columns * state().rows - (state().columns - 1) <= state().length) {
-      self().setOffset(newOffset);
+    signed newAddress = state().address + state().columns;
+    if(newAddress + state().columns * state().rows - (state().columns - 1) <= state().length) {
+      self().setAddress(newAddress);
       update();
     }
     return true;
   }
 
   if(scancode == GDK_Page_Up) {
-    signed newOffset = state().offset - state().columns * state().rows;
-    if(newOffset >= 0) {
-      self().setOffset(newOffset);
+    signed newAddress = state().address - state().columns * state().rows;
+    if(newAddress >= 0) {
+      self().setAddress(newAddress);
     } else {
-      self().setOffset(0);
+      self().setAddress(0);
     }
     update();
     return true;
   }
 
   if(scancode == GDK_Page_Down) {
-    signed newOffset = state().offset + state().columns * state().rows;
+    signed newAddress = state().address + state().columns * state().rows;
     for(auto n : range(state().rows)) {
-      if(newOffset + state().columns * state().rows - (state().columns - 1) <= state().length) {
-        self().setOffset(newOffset);
+      if(newAddress + state().columns * state().rows - (state().columns - 1) <= state().length) {
+        self().setAddress(newAddress);
         update();
         break;
       }
-      newOffset -= state().columns;
+      newAddress -= state().columns;
     }
     return true;
   }
@@ -238,10 +238,10 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
       cursorX /= 3;
       if(cursorX < state().columns) {
         //not in ANSI region
-        unsigned offset = state().offset + (cursorY * state().columns + cursorX);
+        unsigned address = state().address + (cursorY * state().columns + cursorX);
 
-        if(offset >= state().length) return false;  //do not edit past end of data
-        uint8_t data = self().doRead(offset);
+        if(address >= state().length) return false;  //do not edit past end of data
+        uint8_t data = self().doRead(address);
 
         //write modified value
         if(cursorNibble == 1) {
@@ -249,7 +249,7 @@ auto pHexEdit::keyPress(unsigned scancode, unsigned mask) -> bool {
         } else {
           data = (data & 0x0f) | (scancode << 4);
         }
-        self().doWrite(offset, data);
+        self().doWrite(address, data);
 
         //auto-advance cursor to next nibble/byte
         position++;
@@ -278,7 +278,7 @@ auto pHexEdit::rowsScrollable() -> signed {
 auto pHexEdit::scroll(signed position) -> void {
   if(position > rowsScrollable()) position = rowsScrollable();
   if(position < 0) position = 0;
-  self().setOffset(position * state().columns);
+  self().setAddress(position * state().columns);
 }
 
 auto pHexEdit::setCursorPosition(unsigned position) -> void {
@@ -304,7 +304,7 @@ auto pHexEdit::setScroll() -> void {
 }
 
 auto pHexEdit::updateScroll() -> void {
-  unsigned row = state().offset / state().columns;
+  unsigned row = state().address / state().columns;
   gtk_range_set_value(GTK_RANGE(scrollBar), row);
 }
 

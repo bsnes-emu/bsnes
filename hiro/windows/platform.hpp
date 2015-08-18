@@ -72,6 +72,7 @@ static vector<wObject> windows;
 #include "widget/label.hpp"
 #include "widget/line-edit.hpp"
 #include "widget/list-view.hpp"
+#include "widget/list-view-header.hpp"
 #include "widget/list-view-column.hpp"
 #include "widget/list-view-item.hpp"
 #include "widget/list-view-cell.hpp"

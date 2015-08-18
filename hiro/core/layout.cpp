@@ -13,7 +13,7 @@ auto mLayout::destruct() -> void {
 
 auto mLayout::append(sSizable sizable) -> type& {
   state.sizables.append(sizable);
-  sizable->setParent(this, sizables() - 1);
+  sizable->setParent(this, sizableCount() - 1);
   setGeometry(geometry());
   return *this;
 }
@@ -33,7 +33,7 @@ auto mLayout::remove(sSizable sizable) -> type& {
   auto offset = sizable->offset();
   sizable->setParent();
   state.sizables.remove(offset);
-  for(auto n : range(offset, sizables())) {
+  for(auto n : range(offset, sizableCount())) {
     state.sizables[n]->adjustOffset(-1);
   }
   setGeometry(geometry());
@@ -53,12 +53,18 @@ auto mLayout::setParent(mObject* parent, signed offset) -> type& {
 }
 
 auto mLayout::sizable(unsigned position) const -> Sizable {
-  if(position < sizables()) return state.sizables[position];
+  if(position < sizableCount()) return state.sizables[position];
   return {};
 }
 
-auto mLayout::sizables() const -> unsigned {
+auto mLayout::sizableCount() const -> unsigned {
   return state.sizables.size();
+}
+
+auto mLayout::sizables() const -> vector<Sizable> {
+  vector<Sizable> sizables;
+  for(auto& sizable : sizables) sizables.append(sizable);
+  return sizables;
 }
 
 #endif

@@ -1,11 +1,13 @@
-namespace phoenix {
+#if defined(Hiro_Mouse)
 
-Position pMouse::position() {
+namespace hiro {
+
+auto pMouse::position() -> Position {
   QPoint point = QCursor::pos();
   return {point.x(), point.y()};
 }
 
-bool pMouse::pressed(Mouse::Button button) {
+auto pMouse::pressed(Mouse::Button button) -> bool {
   Qt::MouseButtons buttons = QApplication::mouseButtons();
   switch(button) {
   case Mouse::Button::Left: return buttons & Qt::LeftButton;
@@ -16,3 +18,5 @@ bool pMouse::pressed(Mouse::Button button) {
 }
 
 }
+
+#endif

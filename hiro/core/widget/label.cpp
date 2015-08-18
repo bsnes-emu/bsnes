@@ -6,14 +6,13 @@ auto mLabel::allocate() -> pObject* {
 
 //
 
-auto mLabel::horizontalAlignment() const -> double {
-  return state.horizontalAlignment;
+auto mLabel::alignment() const -> Alignment {
+  return state.alignment;
 }
 
-auto mLabel::setHorizontalAlignment(double alignment) -> type& {
-  alignment = max(0.0, min(1.0, alignment));
-  state.horizontalAlignment = alignment;
-  signal(setHorizontalAlignment, alignment);
+auto mLabel::setAlignment(Alignment alignment) -> type& {
+  state.alignment = alignment;
+  signal(setAlignment, alignment);
   return *this;
 }
 
@@ -23,19 +22,8 @@ auto mLabel::setText(const string& text) -> type& {
   return *this;
 }
 
-auto mLabel::setVerticalAlignment(double alignment) -> type& {
-  alignment = max(0.0, min(1.0, alignment));
-  state.verticalAlignment = alignment;
-  signal(setVerticalAlignment, alignment);
-  return *this;
-}
-
 auto mLabel::text() const -> string {
   return state.text;
-}
-
-auto mLabel::verticalAlignment() const -> double {
-  return state.verticalAlignment;
 }
 
 #endif

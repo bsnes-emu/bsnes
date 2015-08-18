@@ -33,7 +33,6 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
 private:
   //cpu
   static void Enter();
-  void op_step();
 
   //timing
   struct QueueEvent {

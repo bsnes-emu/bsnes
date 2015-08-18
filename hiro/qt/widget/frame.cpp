@@ -1,30 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_Frame)
 
-void pFrame::setEnabled(bool enabled) {
-  if(frame.state.layout) frame.state.layout->setEnabled(frame.state.layout->enabled());
-  pWidget::setEnabled(enabled);
-}
+namespace hiro {
 
-void pFrame::setGeometry(Geometry geometry) {
-  pWidget::setGeometry(geometry);
-  if(frame.state.layout == nullptr) return;
-  Size size = pFont::size(widget.state.font, frame.state.text);
-  if(frame.state.text.empty()) size.height = 8;
-  geometry.x += 1, geometry.width -= 2;
-  geometry.y += size.height, geometry.height -= size.height + 1;
-  frame.state.layout->setGeometry(geometry);
-}
-
-void pFrame::setText(string text) {
-  qtFrame->setTitle(QString::fromUtf8(text));
-}
-
-void pFrame::setVisible(bool visible) {
-  if(frame.state.layout) frame.state.layout->setVisible(frame.state.layout->visible());
-  pWidget::setVisible(visible);
-}
-
-void pFrame::constructor() {
+auto pFrame::construct() -> void {
   qtWidget = qtFrame = new QGroupBox;
   if(QApplication::style()->objectName() == "gtk+") {
     //QGtkStyle (gtk+) theme disrespects font weight and omits the border, even if native GTK+ theme does not
@@ -35,18 +13,46 @@ void pFrame::constructor() {
     );
   }
 
-  pWidget::synchronizeState();
-  setText(frame.state.text);
+  pWidget::construct();
+  _setState();
 }
 
-void pFrame::destructor() {
+auto pFrame::destruct() -> void {
   delete qtFrame;
   qtWidget = qtFrame = nullptr;
 }
 
-void pFrame::orphan() {
-  destructor();
-  constructor();
+auto pFrame::setEnabled(bool enabled) -> void {
+  if(auto layout = state().layout) layout->setEnabled(layout->enabled(true));
+  pWidget::setEnabled(enabled);
+}
+
+auto pFrame::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry(geometry);
+  if(auto layout = state().layout) {
+    auto size = pFont::size(qtFrame->font(), state().text);
+    if(!state().text) size.setHeight(8);
+    layout->setGeometry({
+      4, size.height(),
+      geometry.width() - 8,
+      geometry.height() - size.height() - 4
+    });
+  }
+}
+
+auto pFrame::setText(const string& text) -> void {
+  _setState();
+}
+
+auto pFrame::setVisible(bool visible) -> void {
+  if(auto layout = state().layout) layout->setVisible(layout->visible(true));
+  pWidget::setVisible(visible);
+}
+
+auto pFrame::_setState() -> void {
+  qtFrame->setTitle(QString::fromUtf8(state().text));
 }
 
 }
+
+#endif

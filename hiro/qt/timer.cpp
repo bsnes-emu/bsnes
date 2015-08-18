@@ -1,6 +1,18 @@
-namespace phoenix {
+#if defined(Hiro_Timer)
 
-void pTimer::setEnabled(bool enabled) {
+namespace hiro {
+
+auto pTimer::construct() -> void {
+  qtTimer = new QtTimer(*this);
+  qtTimer->setInterval(0);
+  qtTimer->connect(qtTimer, SIGNAL(timeout()), SLOT(onActivate()));
+}
+
+auto pTimer::destruct() -> void {
+  delete qtTimer;
+}
+
+auto pTimer::setEnabled(bool enabled) -> void {
   if(enabled) {
     qtTimer->start();
   } else {
@@ -8,22 +20,14 @@ void pTimer::setEnabled(bool enabled) {
   }
 }
 
-void pTimer::setInterval(unsigned interval) {
+auto pTimer::setInterval(unsigned interval) -> void {
   qtTimer->setInterval(interval);
 }
 
-void pTimer::constructor() {
-  qtTimer = new QTimer;
-  qtTimer->setInterval(0);
-  connect(qtTimer, SIGNAL(timeout()), SLOT(onActivate()));
-}
-
-void pTimer::destructor() {
-  delete qtTimer;
-}
-
-void pTimer::onActivate() {
-  if(timer.onActivate) timer.onActivate();
+auto QtTimer::onActivate() -> void {
+  p.self().doActivate();
 }
 
 }
+
+#endif

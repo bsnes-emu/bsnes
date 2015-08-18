@@ -137,6 +137,16 @@ auto mObject::parentListView(bool recursive) const -> mListView* {
 #endif
 
 #if defined(Hiro_ListView)
+auto mObject::parentListViewHeader(bool recursive) const -> mListViewHeader* {
+  if(auto listViewHeader = dynamic_cast<mListViewHeader*>(parent())) return listViewHeader;
+  if(recursive) {
+    if(auto object = parent()) return object->parentListViewHeader(true);
+  }
+  return nullptr;
+}
+#endif
+
+#if defined(Hiro_ListView)
 auto mObject::parentListViewItem(bool recursive) const -> mListViewItem* {
   if(auto listViewItem = dynamic_cast<mListViewItem*>(parent())) return listViewItem;
   if(recursive) {

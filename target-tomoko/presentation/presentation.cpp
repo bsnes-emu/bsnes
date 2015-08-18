@@ -129,7 +129,7 @@ auto Presentation::updateEmulator() -> void {
       });
       devices.append(item);
     }
-    if(devices.objects() > 1) menu.setVisible();
+    if(devices.objectCount() > 1) menu.setVisible();
   }
 
   systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible());

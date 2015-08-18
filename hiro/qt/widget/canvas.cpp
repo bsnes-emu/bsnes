@@ -1,155 +1,180 @@
-namespace phoenix {
+#if defined(Hiro_Canvas)
 
-void pCanvas::setDroppable(bool droppable) {
-  qtCanvas->setAcceptDrops(droppable);
-}
+namespace hiro {
 
-void pCanvas::setGeometry(Geometry geometry) {
-  if(canvas.state.width == 0 || canvas.state.height == 0) rasterize();
-  unsigned width = canvas.state.width;
-  unsigned height = canvas.state.height;
-  if(width == 0) width = widget.state.geometry.width;
-  if(height == 0) height = widget.state.geometry.height;
-
-  if(width < geometry.width) {
-    geometry.x += (geometry.width - width) / 2;
-    geometry.width = width;
-  }
-
-  if(height < geometry.height) {
-    geometry.y += (geometry.height - height) / 2;
-    geometry.height = height;
-  }
-
-  pWidget::setGeometry(geometry);
-}
-
-void pCanvas::setMode(Canvas::Mode mode) {
-  rasterize();
-  qtCanvas->update();
-}
-
-void pCanvas::setSize(Size size) {
-  rasterize();
-  qtCanvas->update();
-}
-
-void pCanvas::constructor() {
+auto pCanvas::construct() -> void {
   qtWidget = qtCanvas = new QtCanvas(*this);
   qtCanvas->setMouseTracking(true);
 
-  pWidget::synchronizeState();
-  rasterize(), qtCanvas->update();
+  pWidget::construct();
+  _rasterize();
+  qtCanvas->update();
 }
 
-void pCanvas::destructor() {
-  release();
+auto pCanvas::destruct() -> void {
+  _release();
   delete qtCanvas;
   qtWidget = qtCanvas = nullptr;
 }
 
-void pCanvas::orphan() {
-  destructor();
-  constructor();
+auto pCanvas::minimumSize() const -> Size {
+  return {max(0, state().size.width()), max(0, state().size.height())};
 }
 
-void pCanvas::rasterize() {
-  unsigned width = canvas.state.width;
-  unsigned height = canvas.state.height;
-  if(width == 0) width = widget.state.geometry.width;
-  if(height == 0) height = widget.state.geometry.height;
+auto pCanvas::setColor(Color color) -> void {
+  mode = Mode::Color;
+  update();
+}
 
-  if(canvas.state.mode != Canvas::Mode::Color) {
-    if(width != surfaceWidth || height != surfaceHeight) release();
-    if(!surface) surface = new QImage(width, height, QImage::Format_ARGB32);
+auto pCanvas::setData(Size size) -> void {
+  mode = Mode::Data;
+  update();
+}
+
+auto pCanvas::setDroppable(bool droppable) -> void {
+  qtCanvas->setAcceptDrops(droppable);
+}
+
+auto pCanvas::setGeometry(Geometry geometry) -> void {
+  update();
+  pWidget::setGeometry(geometry);
+}
+
+auto pCanvas::setGradient(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight) -> void {
+  mode = Mode::Gradient;
+  update();
+}
+
+auto pCanvas::setIcon(const image& icon) -> void {
+  mode = Mode::Icon;
+  update();
+}
+
+auto pCanvas::update() -> void {
+  _rasterize();
+  qtCanvas->update();
+}
+
+auto pCanvas::_rasterize() -> void {
+  signed width = 0;
+  signed height = 0;
+
+  if(mode == Mode::Color || mode == Mode::Gradient) {
+    width = pSizable::state().geometry.width();
+    height = pSizable::state().geometry.height();
+  } else {
+    width = state().size.width();
+    height = state().size.height();
   }
 
-  if(canvas.state.mode == Canvas::Mode::Gradient) {
-    nall::image image;
-    image.allocate(width, height);
-    image.gradient(
-      canvas.state.gradient[0].argb(), canvas.state.gradient[1].argb(), canvas.state.gradient[2].argb(), canvas.state.gradient[3].argb()
+  if(width <= 0 || height <= 0) return;
+
+  if(width != qtImageWidth || height != qtImageHeight) _release();
+  qtImageWidth = width;
+  qtImageHeight = height;
+
+  if(!qtImage) qtImage = new QImage(width, height, QImage::Format_ARGB32);
+  auto buffer = (uint32_t*)qtImage->bits();
+
+  if(mode == Mode::Color) {
+    uint32_t color = state().color.value();
+    for(auto n : range(width * height)) buffer[n] = color;
+  }
+
+  if(mode == Mode::Gradient) {
+    image fill;
+    fill.allocate(width, height);
+    fill.gradient(
+      state().gradient[0].value(), state().gradient[1].value(), state().gradient[2].value(), state().gradient[3].value()
     );
-    memcpy(surface->bits(), image.data, image.size);
+    memory::copy(buffer, fill.data(), fill.size());
   }
 
-  if(canvas.state.mode == Canvas::Mode::Image) {
-    nall::image image = canvas.state.image;
-    image.scale(width, height);
-    image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-    memcpy(surface->bits(), image.data, image.size);
+  if(mode == Mode::Icon) {
+    auto icon = state().icon;
+    icon.scale(width, height);
+    icon.transform();
+    memory::copy(buffer, icon.data(), icon.size());
   }
 
-  if(canvas.state.mode == Canvas::Mode::Data) {
-    if(width == canvas.state.width && height == canvas.state.height) {
-      memcpy(surface->bits(), canvas.state.data, width * height * sizeof(uint32_t));
-    } else {
-      memset(surface->bits(), 0x00, width * height * sizeof(uint32_t));
-    }
+  if(mode == Mode::Data) {
+    memory::copy(buffer, state().data.data(), state().data.size() * sizeof(uint32_t));
   }
-
-  surfaceWidth = width;
-  surfaceHeight = height;
 }
 
-void pCanvas::release() {
-  if(surface == nullptr) return;
-  delete surface;
-  surface = nullptr;
-  surfaceWidth = 0;
-  surfaceHeight = 0;
+auto pCanvas::_release() -> void {
+  if(qtImage) {
+    delete qtImage;
+    qtImage = nullptr;
+  }
+  qtImageWidth = 0;
+  qtImageHeight = 0;
 }
 
-void pCanvas::QtCanvas::dragEnterEvent(QDragEnterEvent* event) {
+auto QtCanvas::dragEnterEvent(QDragEnterEvent* event) -> void {
   if(event->mimeData()->hasUrls()) {
     event->acceptProposedAction();
   }
 }
 
-void pCanvas::QtCanvas::dropEvent(QDropEvent* event) {
-  lstring paths = DropPaths(event);
-  if(paths.empty()) return;
-  if(self.canvas.onDrop) self.canvas.onDrop(paths);
+auto QtCanvas::dropEvent(QDropEvent* event) -> void {
+  if(auto paths = DropPaths(event)) p.self().doDrop(paths);
 }
 
-void pCanvas::QtCanvas::leaveEvent(QEvent* event) {
-  if(self.canvas.onMouseLeave) self.canvas.onMouseLeave();
+auto QtCanvas::leaveEvent(QEvent* event) -> void {
+  p.self().doMouseLeave();
 }
 
-void pCanvas::QtCanvas::mouseMoveEvent(QMouseEvent* event) {
-  if(self.canvas.onMouseMove) self.canvas.onMouseMove({event->pos().x(), event->pos().y()});
+auto QtCanvas::mouseMoveEvent(QMouseEvent* event) -> void {
+  p.self().doMouseMove({event->pos().x(), event->pos().y()});
 }
 
-void pCanvas::QtCanvas::mousePressEvent(QMouseEvent* event) {
-  if(!self.canvas.onMousePress) return;
+auto QtCanvas::mousePressEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
-  case Qt::LeftButton: self.canvas.onMousePress(Mouse::Button::Left); break;
-  case Qt::MidButton: self.canvas.onMousePress(Mouse::Button::Middle); break;
-  case Qt::RightButton: self.canvas.onMousePress(Mouse::Button::Right); break;
+  case Qt::LeftButton: p.self().doMousePress(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMousePress(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMousePress(Mouse::Button::Right); break;
   }
 }
 
-void pCanvas::QtCanvas::mouseReleaseEvent(QMouseEvent* event) {
-  if(!self.canvas.onMouseRelease) return;
+auto QtCanvas::mouseReleaseEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
-  case Qt::LeftButton: self.canvas.onMouseRelease(Mouse::Button::Left); break;
-  case Qt::MidButton: self.canvas.onMouseRelease(Mouse::Button::Middle); break;
-  case Qt::RightButton: self.canvas.onMouseRelease(Mouse::Button::Right); break;
+  case Qt::LeftButton: p.self().doMouseRelease(Mouse::Button::Left); break;
+  case Qt::MidButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
+  case Qt::RightButton: p.self().doMouseRelease(Mouse::Button::Right); break;
   }
 }
 
-void pCanvas::QtCanvas::paintEvent(QPaintEvent* event) {
-  Canvas& canvas = self.canvas;
-  QPainter painter(self.qtCanvas);
+auto QtCanvas::paintEvent(QPaintEvent* event) -> void {
+  if(!p.qtImage) return;
 
-  if(canvas.state.mode == Canvas::Mode::Color) {
-    painter.fillRect(event->rect(), QBrush(QColor(canvas.state.color.red, canvas.state.color.green, canvas.state.color.blue, canvas.state.color.alpha)));
+  signed sx = 0, sy = 0, dx = 0, dy = 0;
+  signed width = p.qtImageWidth;
+  signed height = p.qtImageHeight;
+  auto geometry = p.pSizable::state().geometry;
+
+  if(width <= geometry.width()) {
+    sx = 0;
+    dx = (geometry.width() - width) / 2;
   } else {
-    painter.drawImage(0, 0, *self.surface);
+    sx = (width - geometry.width()) / 2;
+    dx = 0;
+    width = geometry.width();
   }
+
+  if(height <= geometry.height()) {
+    sy = 0;
+    dy = (geometry.height() - height) / 2;
+  } else {
+    sy = (height - geometry.height()) / 2;
+    dy = 0;
+    height = geometry.height();
+  }
+
+  QPainter painter(p.qtCanvas);
+  painter.drawImage(dx, dy, *p.qtImage, sx, sy, width, height);
 }
 
-pCanvas::QtCanvas::QtCanvas(pCanvas& self) : self(self) {
 }
 
-}
+#endif

@@ -5,40 +5,34 @@ namespace hiro {
 struct pListView : pWidget {
   Declare(ListView, Widget)
 
-  auto append(sListViewColumn column) -> void;
+  auto append(sListViewHeader column) -> void;
   auto append(sListViewItem item) -> void;
-  auto checkAll() -> void;
-  auto focused() -> bool;
-  auto remove(sListViewColumn column) -> void;
+  auto focused() const -> bool override;
+  auto remove(sListViewHeader column) -> void;
   auto remove(sListViewItem item) -> void;
   auto reset() -> void;
   auto resizeColumns() -> void;
-  auto selectAll() -> void;
+  auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;
   auto setBatchable(bool batchable) -> void;
-  auto setCheckable(bool checkable) -> void;
+  auto setBordered(bool bordered) -> void;
   auto setFocused() -> void override;
   auto setFont(const string& font) -> void override;
   auto setForegroundColor(Color color) -> void;
-  auto setGridVisible(bool visible) -> void;
-  auto setHeaderVisible(bool visible) -> void;
-  auto setSortable(bool sortable) -> void;
-  auto uncheckAll() -> void;
-  auto unselectAll() -> void;
+  auto setGeometry(Geometry geometry) -> void override;
 
   auto _cellWidth(unsigned row, unsigned column) -> unsigned;
-  auto _column(unsigned column) -> pListViewColumn*;
   auto _columnWidth(unsigned column) -> unsigned;
   auto _createModel() -> void;
   auto _doActivate() -> void;
-  auto _doCellRendererToggleDataFunc(GtkCellRenderer* renderer, GtkTreeIter* iter) -> void;
   auto _doChange() -> void;
   auto _doContext() -> void;
-  auto _doEdit(GtkCellRendererText* renderer, const char* path, const char* text) -> void;
+  auto _doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void;
+  auto _doEdit(GtkCellRendererText* gtkCellRendererText, const char* path, const char* text) -> void;
   auto _doEvent(GdkEventButton* event) -> signed;
   auto _doHeaderActivate(GtkTreeViewColumn* column) -> void;
   auto _doMouseMove() -> signed;
-  auto _doToggle(const char* path) -> void;
+  auto _doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const char* path) -> void;
   auto _updateSelected() -> void;
   auto _width(unsigned column) -> unsigned;
 

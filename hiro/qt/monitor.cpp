@@ -1,16 +1,20 @@
-namespace phoenix {
+#if defined(Hiro_Monitor)
 
-unsigned pMonitor::count() {
+namespace hiro {
+
+auto pMonitor::count() -> unsigned {
   return QApplication::desktop()->screenCount();
 }
 
-Geometry pMonitor::geometry(unsigned monitor) {
+auto pMonitor::geometry(unsigned monitor) -> Geometry {
   QRect rectangle = QApplication::desktop()->screenGeometry(monitor);
   return {rectangle.x(), rectangle.y(), rectangle.width(), rectangle.height()};
 }
 
-unsigned pMonitor::primary() {
+auto pMonitor::primary() -> unsigned {
   return QApplication::desktop()->primaryScreen();
 }
 
 }
+
+#endif
