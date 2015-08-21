@@ -54,7 +54,7 @@
 #define Hiro_Console
 #define Hiro_Frame
 #define Hiro_HexEdit
-#define Hiro_HorizontalScroller
+#define Hiro_HorizontalScrollBar
 #define Hiro_HorizontalSlider
 #define Hiro_IconView
 #define Hiro_Label
@@ -67,7 +67,7 @@
 #define Hiro_TabFrame
 #define Hiro_TextEdit
 #define Hiro_TreeView
-#define Hiro_VerticalScroller
+#define Hiro_VerticalScrollBar
 #define Hiro_VerticalSlider
 #define Hiro_Viewport
 

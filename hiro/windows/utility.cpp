@@ -103,7 +103,7 @@ static auto ScrollEvent(HWND hwnd, WPARAM wparam) -> unsigned {
   info.fMask = SIF_POS;
   SetScrollInfo(hwnd, SB_CTL, &info, TRUE);
 
-  //Windows may clamp position to scroller range
+  //Windows may clamp position to scrollbar range
   GetScrollInfo(hwnd, SB_CTL, &info);
   return info.nPos;
 }
@@ -351,9 +351,9 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     auto object = (mObject*)GetWindowLongPtr((HWND)lparam, GWLP_USERDATA);
     if(!object) break;
 
-    #if defined(Hiro_HorizontalScroller)
-    if(auto horizontalScroller = dynamic_cast<mHorizontalScroller*>(object)) {
-      return horizontalScroller->self()->onChange(wparam), true;
+    #if defined(Hiro_HorizontalScrollBar)
+    if(auto horizontalScrollBar = dynamic_cast<mHorizontalScrollBar*>(object)) {
+      return horizontalScrollBar->self()->onChange(wparam), true;
     }
     #endif
 
@@ -363,9 +363,9 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     }
     #endif
 
-    #if defined(Hiro_VerticalScroller)
-    if(auto verticalScroller = dynamic_cast<mVerticalScroller*>(object)) {
-      return verticalScroller->self()->onChange(wparam), true;
+    #if defined(Hiro_VerticalScrollBar)
+    if(auto verticalScrollBar = dynamic_cast<mVerticalScrollBar*>(object)) {
+      return verticalScrollBar->self()->onChange(wparam), true;
     }
     #endif
 

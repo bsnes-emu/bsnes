@@ -57,15 +57,6 @@ auto pListView::remove(sListViewHeader header) -> void {
 auto pListView::remove(sListViewItem item) -> void {
 }
 
-auto pListView::reset() -> void {
-  lock();
-  ListView_DeleteAllItems(hwnd);
-  LVCOLUMN lvColumn{LVCF_WIDTH};
-  while(ListView_GetColumn(hwnd, 0, &lvColumn)) ListView_DeleteColumn(hwnd, 0);
-  _setIcons();  //free icon resources
-  unlock();
-}
-
 auto pListView::resizeColumns() -> void {
   lock();
 
@@ -200,7 +191,12 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
       bool selected = state().items(row)->state.selected;
 
       if(auto cell = self().item(row)->cell(column)) {
-        HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(cell->backgroundColor(true)));
+        auto backgroundColor = cell->backgroundColor(true);
+        HBRUSH brush = CreateSolidBrush(
+          selected ? GetSysColor(COLOR_HIGHLIGHT)
+        : backgroundColor ? CreateRGB(backgroundColor)
+        : GetSysColor(COLOR_WINDOW)
+        );
         FillRect(hdc, &rc, brush);
         DeleteObject(brush);
 
@@ -235,7 +231,12 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
           if(!alignment) alignment = {0.0, 0.5};
           utf16_t wText(text);
           SetBkMode(hdc, TRANSPARENT);
-          SetTextColor(hdc, selected ? GetSysColor(COLOR_HIGHLIGHTTEXT) : CreateRGB(cell->foregroundColor(true)));
+          auto foregroundColor = cell->foregroundColor(true);
+          SetTextColor(hdc,
+            selected ? GetSysColor(COLOR_HIGHLIGHTTEXT)
+          : foregroundColor ? CreateRGB(foregroundColor)
+          : GetSysColor(COLOR_WINDOWTEXT)
+          );
           auto style = DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS;
           style |= alignment.horizontal() < 0.333 ? DT_LEFT : alignment.horizontal() > 0.666 ? DT_RIGHT  : DT_CENTER;
           style |= alignment.vertical()   < 0.333 ? DT_TOP  : alignment.vertical()   > 0.666 ? DT_BOTTOM : DT_VCENTER;
@@ -246,9 +247,12 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
           DeleteObject(font);
         }
       } else {
-        auto color = state().backgroundColor;
-        if(!color) color = {255, 255, 255};
-        HBRUSH brush = CreateSolidBrush(selected ? GetSysColor(COLOR_HIGHLIGHT) : CreateRGB(color));
+        auto backgroundColor = state().backgroundColor;
+        HBRUSH brush = CreateSolidBrush(
+          selected ? GetSysColor(COLOR_HIGHLIGHT)
+        : backgroundColor ? CreateRGB(backgroundColor)
+        : GetSysColor(COLOR_WINDOW)
+        );
         FillRect(hdc, &rc, brush);
         DeleteObject(brush);
       }

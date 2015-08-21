@@ -1,9 +1,9 @@
-#if defined(Hiro_VerticalScroller)
+#if defined(Hiro_VerticalScrollBar)
 
 namespace hiro {
 
-struct pVerticalScroller : pWidget {
-  Declare(VerticalScroller, Widget)
+struct pVerticalScrollBar : pWidget {
+  Declare(VerticalScrollBar, Widget)
 
   auto minimumSize() const -> Size override;
   auto setLength(unsigned length) -> void;
@@ -11,7 +11,7 @@ struct pVerticalScroller : pWidget {
 
   auto _setState() -> void;
 
-  QtVerticalScroller* qtVerticalScroller = nullptr;
+  QtVerticalScrollBar* qtVerticalScrollBar = nullptr;
 };
 
 }

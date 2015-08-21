@@ -49,7 +49,7 @@ auto pFont::size(const QFont& qtFont, const string& text) -> Size {
   QFontMetrics metrics(qtFont);
 
   lstring lines;
-  lines.split("\n", text ? text : " ");
+  lines.split(text ? text : " ", "\n");
 
   unsigned maxWidth = 0;
   for(auto& line : lines) {

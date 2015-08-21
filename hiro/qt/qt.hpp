@@ -134,7 +134,7 @@ public:
   QtComboButton(pComboButton& p) : p(p) {}
   pComboButton& p;
 public slots:
-  void onChange();
+  void onChange(int offset);
 };
 #endif
 
@@ -160,12 +160,12 @@ public slots:
 };
 #endif
 
-#if defined(Hiro_HorizontalScroller)
-struct QtHorizontalScroller : public QScrollBar {
+#if defined(Hiro_HorizontalScrollBar)
+struct QtHorizontalScrollBar : public QScrollBar {
   Q_OBJECT
 public:
-  QtHorizontalScroller(pHorizontalScroller& p) : QScrollBar(Qt::Horizontal), p(p) {}
-  pHorizontalScroller& p;
+  QtHorizontalScrollBar(pHorizontalScrollBar& p) : QScrollBar(Qt::Horizontal), p(p) {}
+  pHorizontalScrollBar& p;
 public slots:
   void onChange();
 };
@@ -208,7 +208,7 @@ public slots:
   void onChange();
   void onContext();
   void onSort(int column);
-  void onToggle(QTreeWidgetItem* item);
+  void onToggle(QTreeWidgetItem* item, int column);
 };
 
 struct QtListViewDelegate : public QStyledItemDelegate {
@@ -263,12 +263,12 @@ public slots:
 };
 #endif
 
-#if defined(Hiro_VerticalScroller)
-struct QtVerticalScroller : public QScrollBar {
+#if defined(Hiro_VerticalScrollBar)
+struct QtVerticalScrollBar : public QScrollBar {
   Q_OBJECT
 public:
-  QtVerticalScroller(pVerticalScroller& p) : QScrollBar(Qt::Vertical), p(p) {}
-  pVerticalScroller& p;
+  QtVerticalScrollBar(pVerticalScrollBar& p) : QScrollBar(Qt::Vertical), p(p) {}
+  pVerticalScrollBar& p;
 public slots:
   void onChange();
 };

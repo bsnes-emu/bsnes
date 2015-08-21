@@ -35,12 +35,17 @@ inline auto range(signed offset, signed size, signed step) {
   return range_t{offset, size, step};
 }
 
-inline auto rangeReverse(signed size) {
+//reverse-range
+inline auto rrange(signed size) {
   return range_t{size - 1, -1, -1};
 }
 
 template<typename T> inline auto range(const vector<T>& container) {
   return range_t{0, (signed)container.size(), 1};
+}
+
+template<typename T> inline auto rrange(const vector<T>& container) {
+  return range_t{(signed)container.size() - 1, -1, -1};
 }
 
 }

@@ -19,7 +19,7 @@ auto pCheckButton::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pCheckButton::minimumSize() -> Size {
+auto pCheckButton::minimumSize() const -> Size {
   auto size = pFont::size(hfont, state().text);
 
   if(state().orientation == Orientation::Horizontal) {

@@ -5,7 +5,7 @@ namespace hiro {
 struct pRadioButton : pWidget {
   Declare(RadioButton, Widget)
 
-  auto minimumSize() -> Size;
+  auto minimumSize() const -> Size override;
   auto setBordered(bool bordered) -> void;
   auto setChecked() -> void;
   auto setGroup(sGroup group) -> void override;

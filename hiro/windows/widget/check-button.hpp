@@ -5,7 +5,7 @@ namespace hiro {
 struct pCheckButton : pWidget {
   Declare(CheckButton, Widget)
 
-  auto minimumSize() -> Size;
+  auto minimumSize() const -> Size override;
   auto setBordered(bool bordered) -> void;
   auto setChecked(bool checked) -> void;
   auto setIcon(const image& icon) -> void;

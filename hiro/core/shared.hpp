@@ -358,9 +358,9 @@ struct HexEdit : sHexEdit {
 };
 #endif
 
-#if defined(Hiro_HorizontalScroller)
-struct HorizontalScroller : sHorizontalScroller {
-  DeclareSharedWidget(HorizontalScroller)
+#if defined(Hiro_HorizontalScrollBar)
+struct HorizontalScrollBar : sHorizontalScrollBar {
+  DeclareSharedWidget(HorizontalScrollBar)
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }
@@ -762,9 +762,9 @@ struct TreeView : sTreeView {
 };
 #endif
 
-#if defined(Hiro_VerticalScroller)
-struct VerticalScroller : sVerticalScroller {
-  DeclareSharedWidget(VerticalScroller)
+#if defined(Hiro_VerticalScrollBar)
+struct VerticalScrollBar : sVerticalScrollBar {
+  DeclareSharedWidget(VerticalScrollBar)
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }

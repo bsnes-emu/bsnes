@@ -19,7 +19,7 @@ auto pRadioButton::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pRadioButton::minimumSize() -> Size {
+auto pRadioButton::minimumSize() const -> Size {
   auto size = pFont::size(hfont, state().text);
 
   if(state().orientation == Orientation::Horizontal) {

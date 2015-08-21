@@ -12,6 +12,7 @@ auto mComboButton::destruct() -> void {
 //
 
 auto mComboButton::append(sComboButtonItem item) -> type& {
+  if(!state.items) item->state.selected = true;
   state.items.append(item);
   item->setParent(this, itemCount() - 1);
   signal(append, item);

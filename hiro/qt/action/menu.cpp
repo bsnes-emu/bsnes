@@ -33,10 +33,6 @@ auto pMenu::append(sAction action) -> void {
 auto pMenu::remove(sAction action) -> void {
 }
 
-auto pMenu::setFont(const string& font) -> void {
-  _setState();
-}
-
 auto pMenu::setIcon(const image& icon) -> void {
   _setState();
 }
@@ -46,9 +42,11 @@ auto pMenu::setText(const string& text) -> void {
 }
 
 auto pMenu::_setState() -> void {
+  qtMenu->setEnabled(self().enabled());
   qtMenu->setFont(pFont::create(self().font(true)));
   qtMenu->setIcon(CreateIcon(state().icon));
   qtMenu->setTitle(QString::fromUtf8(state().text));
+  qtMenu->menuAction()->setVisible(self().visible());
 
   for(auto& action : state().actions) {
     if(auto self = action->self()) self->setFont(action->font(true));

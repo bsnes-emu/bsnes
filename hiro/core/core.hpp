@@ -57,7 +57,7 @@ Declare(ComboButtonItem)
 Declare(Console)
 Declare(Frame)
 Declare(HexEdit)
-Declare(HorizontalScroller)
+Declare(HorizontalScrollBar)
 Declare(HorizontalSlider)
 Declare(IconView)
 Declare(IconViewItem)
@@ -77,7 +77,7 @@ Declare(TabFrameItem)
 Declare(TextEdit)
 Declare(TreeView)
 Declare(TreeViewItem)
-Declare(VerticalScroller)
+Declare(VerticalScrollBar)
 Declare(VerticalSlider)
 Declare(Viewport)
 
@@ -297,12 +297,36 @@ struct Geometry {
 
 #if defined(Hiro_Font)
 struct Font {
-  Font() = delete;
+  using type = Font;
+
+  Font();
+  Font(const string& family, unsigned size = 0);
+
+  explicit operator bool() const;
+  auto operator==(const Font& source) const -> bool;
+  auto operator!=(const Font& source) const -> bool;
+
+  auto bold() const -> bool;
+  auto family() const -> string;
+  auto italic() const -> bool;
+  auto setBold(bool bold = true) -> type&;
+  auto setFamily(const string& family = "") -> type&;
+  auto setItalic(bool italic = true) -> type&;
+  auto setSize(unsigned size = 0) -> type&;
+  auto size() const -> unsigned;
 
   static auto serif(unsigned size = 0, const string& style = "") -> string;
   static auto sans(unsigned size = 0, const string& style = "") -> string;
   static auto monospace(unsigned size = 0, const string& style = "") -> string;
   static auto size(const string& font, const string& text = " ") -> Size;
+
+//private:
+  struct State {
+    string family;
+    unsigned size = 0;
+    bool bold = false;
+    bool italic = false;
+  } state;
 };
 #endif
 
@@ -1099,9 +1123,9 @@ struct mHexEdit : mWidget {
 };
 #endif
 
-#if defined(Hiro_HorizontalScroller)
-struct mHorizontalScroller : mWidget {
-  Declare(HorizontalScroller)
+#if defined(Hiro_HorizontalScrollBar)
+struct mHorizontalScrollBar : mWidget {
+  Declare(HorizontalScrollBar)
 
   auto doChange() const -> void;
   auto length() const -> unsigned;
@@ -1736,9 +1760,9 @@ struct mTreeViewItem : mObject {
 };
 #endif
 
-#if defined(Hiro_VerticalScroller)
-struct mVerticalScroller : mWidget {
-  Declare(VerticalScroller)
+#if defined(Hiro_VerticalScrollBar)
+struct mVerticalScrollBar : mWidget {
+  Declare(VerticalScrollBar)
 
   auto doChange() const -> void;
   auto length() const -> unsigned;

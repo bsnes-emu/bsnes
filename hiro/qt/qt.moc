@@ -608,13 +608,14 @@ static const uint qt_meta_data_hiro__QtComboButton[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      20,   31,   31,   31, 0x0a,
+      20,   34,   41,   41, 0x0a,
 
        0        // eod
 };
 
 static const char qt_meta_stringdata_hiro__QtComboButton[] = {
-    "hiro::QtComboButton\0onChange()\0\0"
+    "hiro::QtComboButton\0onChange(int)\0"
+    "offset\0\0"
 };
 
 void hiro::QtComboButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -623,11 +624,10 @@ void hiro::QtComboButton::qt_static_metacall(QObject *_o, QMetaObject::Call _c, 
         Q_ASSERT(staticMetaObject.cast(_o));
         QtComboButton *_t = static_cast<QtComboButton *>(_o);
         switch (_id) {
-        case 0: _t->onChange(); break;
+        case 0: _t->onChange((*reinterpret_cast< int(*)>(_a[1]))); break;
         default: ;
         }
     }
-    Q_UNUSED(_a);
 }
 
 const QMetaObjectExtraData hiro::QtComboButton::staticMetaObjectExtraData = {
@@ -804,7 +804,7 @@ int hiro::QtHexEditScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **
     }
     return _id;
 }
-static const uint qt_meta_data_hiro__QtHorizontalScroller[] = {
+static const uint qt_meta_data_hiro__QtHorizontalScrollBar[] = {
 
  // content:
        6,       // revision
@@ -818,21 +818,21 @@ static const uint qt_meta_data_hiro__QtHorizontalScroller[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      27,   38,   38,   38, 0x0a,
+      28,   39,   39,   39, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtHorizontalScroller[] = {
-    "hiro::QtHorizontalScroller\0onChange()\0"
+static const char qt_meta_stringdata_hiro__QtHorizontalScrollBar[] = {
+    "hiro::QtHorizontalScrollBar\0onChange()\0"
     "\0"
 };
 
-void hiro::QtHorizontalScroller::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void hiro::QtHorizontalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         Q_ASSERT(staticMetaObject.cast(_o));
-        QtHorizontalScroller *_t = static_cast<QtHorizontalScroller *>(_o);
+        QtHorizontalScrollBar *_t = static_cast<QtHorizontalScrollBar *>(_o);
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -841,33 +841,33 @@ void hiro::QtHorizontalScroller::qt_static_metacall(QObject *_o, QMetaObject::Ca
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtHorizontalScroller::staticMetaObjectExtraData = {
+const QMetaObjectExtraData hiro::QtHorizontalScrollBar::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject hiro::QtHorizontalScroller::staticMetaObject = {
-    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalScroller,
-      qt_meta_data_hiro__QtHorizontalScroller, &staticMetaObjectExtraData }
+const QMetaObject hiro::QtHorizontalScrollBar::staticMetaObject = {
+    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtHorizontalScrollBar,
+      qt_meta_data_hiro__QtHorizontalScrollBar, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtHorizontalScroller::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &hiro::QtHorizontalScrollBar::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *hiro::QtHorizontalScroller::metaObject() const
+const QMetaObject *hiro::QtHorizontalScrollBar::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *hiro::QtHorizontalScroller::qt_metacast(const char *_clname)
+void *hiro::QtHorizontalScrollBar::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalScroller))
-        return static_cast<void*>(const_cast< QtHorizontalScroller*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtHorizontalScrollBar))
+        return static_cast<void*>(const_cast< QtHorizontalScrollBar*>(this));
     return QScrollBar::qt_metacast(_clname);
 }
 
-int hiro::QtHorizontalScroller::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int hiro::QtHorizontalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QScrollBar::qt_metacall(_c, _id, _a);
     if (_id < 0)
@@ -1049,7 +1049,7 @@ static const uint qt_meta_data_hiro__QtListView[] = {
       31,   30,   30,   30, 0x0a,
       42,   30,   30,   30, 0x0a,
       54,   66,   30,   30, 0x0a,
-      73,  100,   30,   30, 0x0a,
+      73,  104,   30,   30, 0x0a,
 
        0        // eod
 };
@@ -1057,8 +1057,8 @@ static const uint qt_meta_data_hiro__QtListView[] = {
 static const char qt_meta_stringdata_hiro__QtListView[] = {
     "hiro::QtListView\0onActivate()\0\0"
     "onChange()\0onContext()\0onSort(int)\0"
-    "column\0onToggle(QTreeWidgetItem*)\0"
-    "item\0"
+    "column\0onToggle(QTreeWidgetItem*,int)\0"
+    "item,column\0"
 };
 
 void hiro::QtListView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
@@ -1071,7 +1071,7 @@ void hiro::QtListView::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int
         case 1: _t->onChange(); break;
         case 2: _t->onContext(); break;
         case 3: _t->onSort((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 4: _t->onToggle((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1]))); break;
+        case 4: _t->onToggle((*reinterpret_cast< QTreeWidgetItem*(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
     }
@@ -1411,7 +1411,7 @@ int hiro::QtTextEdit::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     }
     return _id;
 }
-static const uint qt_meta_data_hiro__QtVerticalScroller[] = {
+static const uint qt_meta_data_hiro__QtVerticalScrollBar[] = {
 
  // content:
        6,       // revision
@@ -1425,21 +1425,21 @@ static const uint qt_meta_data_hiro__QtVerticalScroller[] = {
        0,       // signalCount
 
  // slots: signature, parameters, type, tag, flags
-      25,   36,   36,   36, 0x0a,
+      26,   37,   37,   37, 0x0a,
 
        0        // eod
 };
 
-static const char qt_meta_stringdata_hiro__QtVerticalScroller[] = {
-    "hiro::QtVerticalScroller\0onChange()\0"
+static const char qt_meta_stringdata_hiro__QtVerticalScrollBar[] = {
+    "hiro::QtVerticalScrollBar\0onChange()\0"
     "\0"
 };
 
-void hiro::QtVerticalScroller::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void hiro::QtVerticalScrollBar::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
         Q_ASSERT(staticMetaObject.cast(_o));
-        QtVerticalScroller *_t = static_cast<QtVerticalScroller *>(_o);
+        QtVerticalScrollBar *_t = static_cast<QtVerticalScrollBar *>(_o);
         switch (_id) {
         case 0: _t->onChange(); break;
         default: ;
@@ -1448,33 +1448,33 @@ void hiro::QtVerticalScroller::qt_static_metacall(QObject *_o, QMetaObject::Call
     Q_UNUSED(_a);
 }
 
-const QMetaObjectExtraData hiro::QtVerticalScroller::staticMetaObjectExtraData = {
+const QMetaObjectExtraData hiro::QtVerticalScrollBar::staticMetaObjectExtraData = {
     0,  qt_static_metacall 
 };
 
-const QMetaObject hiro::QtVerticalScroller::staticMetaObject = {
-    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalScroller,
-      qt_meta_data_hiro__QtVerticalScroller, &staticMetaObjectExtraData }
+const QMetaObject hiro::QtVerticalScrollBar::staticMetaObject = {
+    { &QScrollBar::staticMetaObject, qt_meta_stringdata_hiro__QtVerticalScrollBar,
+      qt_meta_data_hiro__QtVerticalScrollBar, &staticMetaObjectExtraData }
 };
 
 #ifdef Q_NO_DATA_RELOCATION
-const QMetaObject &hiro::QtVerticalScroller::getStaticMetaObject() { return staticMetaObject; }
+const QMetaObject &hiro::QtVerticalScrollBar::getStaticMetaObject() { return staticMetaObject; }
 #endif //Q_NO_DATA_RELOCATION
 
-const QMetaObject *hiro::QtVerticalScroller::metaObject() const
+const QMetaObject *hiro::QtVerticalScrollBar::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->metaObject : &staticMetaObject;
 }
 
-void *hiro::QtVerticalScroller::qt_metacast(const char *_clname)
+void *hiro::QtVerticalScrollBar::qt_metacast(const char *_clname)
 {
     if (!_clname) return 0;
-    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalScroller))
-        return static_cast<void*>(const_cast< QtVerticalScroller*>(this));
+    if (!strcmp(_clname, qt_meta_stringdata_hiro__QtVerticalScrollBar))
+        return static_cast<void*>(const_cast< QtVerticalScrollBar*>(this));
     return QScrollBar::qt_metacast(_clname);
 }
 
-int hiro::QtVerticalScroller::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int hiro::QtVerticalScrollBar::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QScrollBar::qt_metacall(_c, _id, _a);
     if (_id < 0)

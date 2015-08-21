@@ -4,8 +4,10 @@ namespace hiro {
 
 auto pComboButtonItem::construct() -> void {
   if(auto parent = _parent()) {
+    parent->lock();
     parent->qtComboButton->addItem("");
     _setState();
+    parent->unlock();
   }
 }
 

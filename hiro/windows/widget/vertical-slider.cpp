@@ -18,7 +18,7 @@ auto pVerticalSlider::destruct() -> void {
 }
 
 auto pVerticalSlider::minimumSize() const -> Size {
-  return {0, 25};
+  return {25, 0};
 }
 
 auto pVerticalSlider::setLength(unsigned length) -> void {

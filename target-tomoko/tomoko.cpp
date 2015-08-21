@@ -15,6 +15,6 @@ auto locate(string pathname, string filename) -> string {
 #include <nall/main.hpp>
 auto nall::main(lstring args) -> void {
   Application::setName("tomoko");
-  new Program;
+  new Program(args);
   Application::run();
 }

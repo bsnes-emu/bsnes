@@ -1,9 +1,9 @@
-#if defined(Hiro_HorizontalScroller)
+#if defined(Hiro_HorizontalScrollBar)
 
 namespace hiro {
 
-struct pHorizontalScroller : pWidget {
-  Declare(HorizontalScroller, Widget)
+struct pHorizontalScrollBar : pWidget {
+  Declare(HorizontalScrollBar, Widget)
 
   auto minimumSize() const -> Size override;
   auto setLength(unsigned length) -> void;

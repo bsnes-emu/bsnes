@@ -9,7 +9,6 @@ struct pListView : pWidget {
   auto append(sListViewItem item) -> void;
   auto remove(sListViewHeader header) -> void;
   auto remove(sListViewItem item) -> void;
-  auto reset() -> void;
   auto resizeColumns() -> void;
   auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;

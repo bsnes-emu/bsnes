@@ -1,10 +1,10 @@
-#if defined(Hiro_VerticalScroller)
+#if defined(Hiro_HorizontalScrollBar)
 
 namespace hiro {
 
-auto pVerticalScroller::construct() -> void {
+auto pHorizontalScrollBar::construct() -> void {
   hwnd = CreateWindow(
-    L"SCROLLBAR", L"", WS_CHILD | SBS_VERT,
+    L"SCROLLBAR", L"", WS_CHILD | WS_TABSTOP | SBS_HORZ,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
@@ -13,24 +13,24 @@ auto pVerticalScroller::construct() -> void {
   setPosition(state().position);
 }
 
-auto pVerticalScroller::destruct() -> void {
+auto pHorizontalScrollBar::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
-auto pVerticalScroller::minimumSize() const -> Size {
-  return {18, 0};
+auto pHorizontalScrollBar::minimumSize() const -> Size {
+  return {0, 18};
 }
 
-auto pVerticalScroller::setLength(unsigned length) -> void {
+auto pHorizontalScrollBar::setLength(unsigned length) -> void {
   length += (length == 0);
   SetScrollRange(hwnd, SB_CTL, 0, length - 1, TRUE);
 }
 
-auto pVerticalScroller::setPosition(unsigned position) -> void {
+auto pHorizontalScrollBar::setPosition(unsigned position) -> void {
   SetScrollPos(hwnd, SB_CTL, position, TRUE);
 }
 
-auto pVerticalScroller::onChange(WPARAM wparam) -> void {
+auto pHorizontalScrollBar::onChange(WPARAM wparam) -> void {
   unsigned position = ScrollEvent(hwnd, wparam);
   if(position == state().position) return;
   state().position = position;

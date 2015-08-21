@@ -45,7 +45,7 @@
 #include "widget/combo-button-item.hpp"
 #include "widget/frame.hpp"
 #include "widget/hex-edit.hpp"
-#include "widget/horizontal-scroller.hpp"
+#include "widget/horizontal-scroll-bar.hpp"
 #include "widget/horizontal-slider.hpp"
 #include "widget/label.hpp"
 #include "widget/line-edit.hpp"
@@ -60,7 +60,7 @@
 #include "widget/tab-frame.hpp"
 #include "widget/tab-frame-item.hpp"
 #include "widget/text-edit.hpp"
-#include "widget/vertical-scroller.hpp"
+#include "widget/vertical-scroll-bar.hpp"
 #include "widget/vertical-slider.hpp"
 #include "widget/viewport.hpp"
 

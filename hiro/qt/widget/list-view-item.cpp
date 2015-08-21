@@ -6,10 +6,12 @@ auto pListViewItem::construct() -> void {
 }
 
 auto pListViewItem::destruct() -> void {
+  if(auto parent = _parent()) parent->lock();
   if(qtItem) {
     delete qtItem;
     qtItem = nullptr;
   }
+  if(auto parent = _parent()) parent->unlock();
 }
 
 auto pListViewItem::append(sListViewCell cell) -> void {

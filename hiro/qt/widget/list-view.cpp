@@ -17,7 +17,7 @@ auto pListView::construct() -> void {
   qtListView->connect(qtListView, SIGNAL(itemSelectionChanged()), SLOT(onChange()));
   qtListView->connect(qtListView, SIGNAL(customContextMenuRequested(const QPoint&)), SLOT(onContext()));
   qtListView->connect(qtListView->header(), SIGNAL(sectionClicked(int)), SLOT(onSort(int)));
-  qtListView->connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onToggle(QTreeWidgetItem*)));
+  qtListView->connect(qtListView, SIGNAL(itemChanged(QTreeWidgetItem*, int)), SLOT(onToggle(QTreeWidgetItem*, int)));
 
   setBackgroundColor(state().backgroundColor);
   setBatchable(state().batchable);
@@ -55,12 +55,6 @@ auto pListView::remove(sListViewHeader header) -> void {
 }
 
 auto pListView::remove(sListViewItem item) -> void {
-}
-
-auto pListView::reset() -> void {
-  lock();
-  qtListView->clear();
-  unlock();
 }
 
 auto pListView::resizeColumns() -> void {
@@ -194,15 +188,13 @@ auto QtListView::onActivate() -> void {
 }
 
 auto QtListView::onChange() -> void {
-/*
-  for(auto& item : listView.state.items) item.selected = false;
-  for(unsigned position = 0; position < qtListView->topLevelItemCount(); position++) {
-    if(auto item = qtListView->topLevelItem(position)) {
-      if(item->isSelected()) listView.state.items[position].selected = true;
+  for(auto& item : p.state().items) {
+    item->state.selected = false;
+    if(auto self = item->self()) {
+      if(self->qtItem->isSelected()) item->state.selected = true;
     }
   }
-  if(!locked() && listView.onChange) listView.onChange();
-*/
+  if(!p.locked()) p.self().doChange();
 }
 
 auto QtListView::onContext() -> void {
@@ -217,22 +209,17 @@ auto QtListView::onSort(int columnNumber) -> void {
   }
 }
 
-auto QtListView::onToggle(QTreeWidgetItem* item) -> void {
-/*
-  maybe<unsigned> row;
-  for(unsigned position = 0; position < qtListView->topLevelItemCount(); position++) {
-    if(auto topLevelItem = qtListView->topLevelItem(position)) {
-      if(topLevelItem == item) {
-        row = position;
-        break;
+auto QtListView::onToggle(QTreeWidgetItem* qtItem, int column) -> void {
+  for(auto& item : p.state().items) {
+    if(auto self = item->self()) {
+      if(qtItem == self->qtItem) {
+        if(auto cell = item->cell(column)) {
+          cell->state.checked = (qtItem->checkState(column) == Qt::Checked);
+          if(!p.locked()) p.self().doToggle(cell);
+        }
       }
     }
   }
-  if(row) {
-    listView.state.items[*row].checked = (item->checkState(0) == Qt::Checked);
-    if(!locked() && listView.onToggle) listView.onToggle(*row);
-  }
-*/
 }
 
 auto QtListView::mousePressEvent(QMouseEvent* event) -> void {

@@ -66,18 +66,6 @@ auto pListView::remove(sListViewHeader header) -> void {
 auto pListView::remove(sListViewItem item) -> void {
 }
 
-auto pListView::reset() -> void {
-  GList* list = gtk_tree_view_get_columns(gtkTreeView);
-  GList* p = list;
-  while(p && p->data) {
-    gtk_tree_view_remove_column(gtkTreeView, (GtkTreeViewColumn*)p->data);
-    p = p->next;
-  }
-  g_list_free(list);
-  _createModel();
-  gtk_tree_view_set_rules_hint(gtkTreeView, false);
-}
-
 auto pListView::resizeColumns() -> void {
   lock();
 
@@ -159,7 +147,7 @@ auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
   if(auto item = self().item(_row)) {
     if(auto cell = item->cell(_column)) {
       if(cell->state.checkable) {
-        width += 32;
+        width += 24;
       }
       if(auto& icon = cell->state.icon) {
         width += icon.width() + 2;

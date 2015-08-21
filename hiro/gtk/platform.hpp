@@ -50,7 +50,7 @@ namespace hiro {
 #include "widget/console.hpp"
 #include "widget/frame.hpp"
 #include "widget/hex-edit.hpp"
-#include "widget/horizontal-scroller.hpp"
+#include "widget/horizontal-scroll-bar.hpp"
 #include "widget/horizontal-slider.hpp"
 #include "widget/icon-view.hpp"
 #include "widget/icon-view-item.hpp"
@@ -70,7 +70,7 @@ namespace hiro {
 #include "widget/text-edit.hpp"
 #include "widget/tree-view.hpp"
 #include "widget/tree-view-item.hpp"
-#include "widget/vertical-scroller.hpp"
+#include "widget/vertical-scroll-bar.hpp"
 #include "widget/vertical-slider.hpp"
 #include "widget/viewport.hpp"
 

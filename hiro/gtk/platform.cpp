@@ -39,7 +39,7 @@
 #include "widget/console.cpp"
 #include "widget/frame.cpp"
 #include "widget/hex-edit.cpp"
-#include "widget/horizontal-scroller.cpp"
+#include "widget/horizontal-scroll-bar.cpp"
 #include "widget/horizontal-slider.cpp"
 #include "widget/icon-view.cpp"
 #include "widget/icon-view-item.cpp"
@@ -59,7 +59,7 @@
 #include "widget/text-edit.cpp"
 #include "widget/tree-view.cpp"
 #include "widget/tree-view-item.cpp"
-#include "widget/vertical-scroller.cpp"
+#include "widget/vertical-scroll-bar.cpp"
 #include "widget/vertical-slider.cpp"
 #include "widget/viewport.cpp"
 

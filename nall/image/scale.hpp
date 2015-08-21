@@ -4,6 +4,7 @@
 namespace nall {
 
 auto image::scale(unsigned outputWidth, unsigned outputHeight, bool linear) -> void {
+  if(!_data) return;
   if(_width == outputWidth && _height == outputHeight) return;  //no scaling necessary
   if(linear == false) return scaleNearest(outputWidth, outputHeight);
 

@@ -10,7 +10,6 @@ struct pListView : pWidget {
   auto focused() const -> bool override;
   auto remove(sListViewHeader column) -> void;
   auto remove(sListViewItem item) -> void;
-  auto reset() -> void;
   auto resizeColumns() -> void;
   auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;

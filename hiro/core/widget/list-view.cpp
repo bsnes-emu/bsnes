@@ -146,11 +146,8 @@ auto mListView::remove(sListViewItem item) -> type& {
 }
 
 auto mListView::reset() -> type& {
-  signal(reset);
-  for(auto& item : state.items) item->setParent();
-  state.items.reset();
-  if(auto& header = state.header) header->setParent();
-  state.header.reset();
+  for(auto n : rrange(state.items)) remove(state.items[n]);
+  if(auto& header = state.header) remove(header);
   return *this;
 }
 
