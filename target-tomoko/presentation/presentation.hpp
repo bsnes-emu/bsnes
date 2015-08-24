@@ -19,9 +19,9 @@ struct Presentation : Window {
     Menu settingsMenu{&menuBar};
       Menu videoScaleMenu{&settingsMenu};
         MenuRadioItem videoScaleSmall{&videoScaleMenu};
-        MenuRadioItem videoScaleNormal{&videoScaleMenu};
+        MenuRadioItem videoScaleMedium{&videoScaleMenu};
         MenuRadioItem videoScaleLarge{&videoScaleMenu};
-          Group videoScales{&videoScaleSmall, &videoScaleNormal, &videoScaleLarge};
+          Group videoScales{&videoScaleSmall, &videoScaleMedium, &videoScaleLarge};
         MenuSeparator videoScaleSeparator{&videoScaleMenu};
         MenuCheckItem aspectCorrection{&videoScaleMenu};
       Menu videoFilterMenu{&settingsMenu};

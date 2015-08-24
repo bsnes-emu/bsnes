@@ -13,7 +13,7 @@ struct ConfigurationManager : Configuration::Document {
   struct Video : Configuration::Node {
     string driver;
     bool synchronize = false;
-    string scale = "Normal";
+    string scale = "Small";
     bool aspectCorrection = true;
     string filter = "Blur";
     bool colorEmulation = true;

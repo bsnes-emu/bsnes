@@ -28,7 +28,7 @@ auto Program::loadMedia(Emulator::Interface& emulator_, Emulator::Interface::Med
 
   presentation->resizeViewport();
   presentation->setTitle(emulator->title());
-  presentation->systemMenu.setVisible(true);
+  presentation->systemMenu.setText(media.name).setVisible(true);
   presentation->toolsMenu.setVisible(true);
   presentation->updateEmulator();
   toolsManager->cheatEditor.loadCheats();

@@ -42,8 +42,9 @@ auto InputMapping::bind(shared_pointer<HID::Device> device, unsigned group, unsi
     }
 
     if((device->isJoypad() && group == HID::Joypad::GroupID::Axis)
-    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)) {
-      if(newValue < -16384) {
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Trigger)) {
+      if(newValue < -16384 && group != HID::Joypad::GroupID::Trigger) {  //triggers are always hi
         this->assignment = {encoding, "/Lo"};
         return bind(), true;
       }
@@ -69,7 +70,7 @@ auto InputMapping::bind(shared_pointer<HID::Device> device, unsigned group, unsi
   if(isRumble()) {
     if(device->isJoypad() && group == HID::Joypad::GroupID::Button) {
       if(newValue) {
-        encoding = {this->assignment, "/Rumble"};
+        this->assignment = {encoding, "/Rumble"};
         return bind(), true;
       }
     }
@@ -87,7 +88,8 @@ auto InputMapping::poll() -> int16 {
     if(device->isMouse() && group == HID::Mouse::GroupID::Button) return value != 0;
     if(device->isJoypad() && group == HID::Joypad::GroupID::Button) return value != 0;
     if((device->isJoypad() && group == HID::Joypad::GroupID::Axis)
-    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)) {
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Hat)
+    || (device->isJoypad() && group == HID::Joypad::GroupID::Trigger)) {
       if(qualifier == Qualifier::Lo) return value < -16384;
       if(qualifier == Qualifier::Hi) return value > +16384;
     }
@@ -100,6 +102,11 @@ auto InputMapping::poll() -> int16 {
   }
 
   return 0;
+}
+
+auto InputMapping::rumble(bool enable) -> void {
+  if(!device) return;
+  ::input->rumble(device->id(), enable);
 }
 
 auto InputMapping::unbind() -> void {

@@ -34,6 +34,7 @@ struct pWindow : pObject {
   QMenuBar* qtMenuBar = nullptr;
   QStatusBar* qtStatusBar = nullptr;
   QWidget* qtContainer = nullptr;
+  Geometry windowedGeometry{128, 128, 256, 256};
 };
 
 }

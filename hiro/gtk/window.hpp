@@ -5,15 +5,6 @@ namespace hiro {
 struct pWindow : pObject {
   Declare(Window, Object)
 
-  GtkWidget* widget = nullptr;
-  GtkWidget* menuContainer = nullptr;
-  GtkWidget* formContainer = nullptr;
-  GtkWidget* statusContainer = nullptr;
-  GtkWidget* gtkMenu = nullptr;
-  GtkWidget* gtkStatus = nullptr;
-  GtkAllocation lastAllocation = {0};
-  bool onSizePending = false;
-
   auto append(sLayout layout) -> void;
   auto append(sMenuBar menuBar) -> void;
   auto append(sStatusBar statusBar) -> void;
@@ -45,6 +36,16 @@ struct pWindow : pObject {
   auto _setStatusText(const string& text) -> void;
   auto _setStatusVisible(bool visible) -> void;
   auto _statusHeight() const -> signed;
+
+  GtkWidget* widget = nullptr;
+  GtkWidget* menuContainer = nullptr;
+  GtkWidget* formContainer = nullptr;
+  GtkWidget* statusContainer = nullptr;
+  GtkWidget* gtkMenu = nullptr;
+  GtkWidget* gtkStatus = nullptr;
+  GtkAllocation lastAllocation = {0};
+  bool onSizePending = false;
+  Geometry windowedGeometry{128, 128, 256, 256};
 };
 
 }

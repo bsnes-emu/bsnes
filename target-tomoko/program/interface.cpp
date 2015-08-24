@@ -146,6 +146,11 @@ auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16
 }
 
 auto Program::inputRumble(unsigned port, unsigned device, unsigned input, bool enable) -> void {
+  if(presentation->focused() || !enable) {
+    auto guid = emulator->port[port].device[device].input[input].guid;
+    auto mapping = (InputMapping*)guid;
+    if(mapping) return mapping->rumble(enable);
+  }
 }
 
 auto Program::dipSettings(const Markup::Node& node) -> unsigned {

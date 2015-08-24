@@ -63,7 +63,8 @@ struct AudioDS : Audio {
     }
 
     if(name == Audio::Latency && value.is<unsigned>()) {
-      settings.latency = value.get<unsigned>();
+      //latency settings below 40ms causes DirectSound to hang
+      settings.latency = max(40u, value.get<unsigned>());
       if(ds) init();
       return true;
     }

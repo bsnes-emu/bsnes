@@ -1,7 +1,7 @@
 auto InputManager::appendHotkeys() -> void {
   { auto hotkey = new InputHotkey;
     hotkey->name = "Toggle Fullscreen";
-    hotkey->action = [] {
+    hotkey->press = [] {
       presentation->toggleFullScreen();
     };
     hotkeys.append(hotkey);
@@ -9,7 +9,7 @@ auto InputManager::appendHotkeys() -> void {
 
   { auto hotkey = new InputHotkey;
     hotkey->name = "Toggle Mouse Capture";
-    hotkey->action = [] {
+    hotkey->press = [] {
       input->acquired() ? input->release() : input->acquire();
     };
     hotkeys.append(hotkey);
@@ -17,7 +17,7 @@ auto InputManager::appendHotkeys() -> void {
 
   { auto hotkey = new InputHotkey;
     hotkey->name = "Save State";
-    hotkey->action = [] {
+    hotkey->press = [] {
       program->saveState(0);
     };
     hotkeys.append(hotkey);
@@ -25,7 +25,7 @@ auto InputManager::appendHotkeys() -> void {
 
   { auto hotkey = new InputHotkey;
     hotkey->name = "Load State";
-    hotkey->action = [] {
+    hotkey->press = [] {
       program->loadState(0);
     };
     hotkeys.append(hotkey);
@@ -33,15 +33,28 @@ auto InputManager::appendHotkeys() -> void {
 
   { auto hotkey = new InputHotkey;
     hotkey->name = "Pause Emulation";
-    hotkey->action = [] {
+    hotkey->press = [] {
       program->pause = !program->pause;
     };
     hotkeys.append(hotkey);
   }
 
   { auto hotkey = new InputHotkey;
+    hotkey->name = "Fast Forward";
+    hotkey->press = [] {
+      video->set(Video::Synchronize, false);
+      audio->set(Audio::Synchronize, false);
+    };
+    hotkey->release = [] {
+      video->set(Video::Synchronize, ::config->video.synchronize);
+      audio->set(Audio::Synchronize, ::config->audio.synchronize);
+    };
+    hotkeys.append(hotkey);
+  }
+
+  { auto hotkey = new InputHotkey;
     hotkey->name = "Power Cycle";
-    hotkey->action = [] {
+    hotkey->press = [] {
       program->powerCycle();
     };
     hotkeys.append(hotkey);
@@ -49,7 +62,7 @@ auto InputManager::appendHotkeys() -> void {
 
   { auto hotkey = new InputHotkey;
     hotkey->name = "Soft Reset";
-    hotkey->action = [] {
+    hotkey->press = [] {
       program->softReset();
     };
     hotkeys.append(hotkey);
@@ -65,7 +78,8 @@ auto InputManager::appendHotkeys() -> void {
 auto InputManager::pollHotkeys() -> void {
   for(auto& hotkey : hotkeys) {
     int16 state = hotkey->poll();
-    if(hotkey->state == 0 && state == 1 && hotkey->action) hotkey->action();
+    if(hotkey->state == 0 && state == 1 && hotkey->press) hotkey->press();
+    if(hotkey->state == 1 && state == 0 && hotkey->release) hotkey->release();
     hotkey->state = state;
   }
 }

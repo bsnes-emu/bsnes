@@ -52,6 +52,10 @@ auto pListView::append(sListViewItem item) -> void {
 }
 
 auto pListView::remove(sListViewHeader header) -> void {
+  LVCOLUMN lvColumn{LVCF_WIDTH};
+  while(ListView_GetColumn(hwnd, 0, &lvColumn)) {
+    ListView_DeleteColumn(hwnd, 0);
+  }
 }
 
 auto pListView::remove(sListViewItem item) -> void {

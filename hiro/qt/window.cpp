@@ -89,13 +89,6 @@ auto pWindow::remove(sMenuBar menuBar) -> void {
 auto pWindow::remove(sStatusBar statusBar) -> void {
 }
 
-/*
-  //orphan() destroys and recreates widgets (to disassociate them from their parent);
-  //attempting to create widget again after QApplication::quit() crashes libQtGui
-  if(qtApplication) widget.p.orphan();
-}
-*/
-
 auto pWindow::setBackgroundColor(Color color) -> void {
   if(color) {
     QPalette palette;
@@ -120,15 +113,20 @@ auto pWindow::setFocused() -> void {
 }
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
-  if(!fullScreen) {
-    setResizable(state().resizable);
-    qtWindow->showNormal();
-    qtWindow->adjustSize();
-  } else {
+  lock();
+  if(fullScreen) {
+    windowedGeometry = state().geometry;
     qtLayout->setSizeConstraint(QLayout::SetDefaultConstraint);
     qtContainer->setFixedSize(Desktop::size().width() - frameMargin().width(), Desktop::size().height() - frameMargin().height());
     qtWindow->showFullScreen();
+    state().geometry = Monitor::geometry(Monitor::primary());
+  } else {
+    setResizable(state().resizable);
+    qtWindow->showNormal();
+    qtWindow->adjustSize();
+    self().setGeometry(windowedGeometry);
   }
+  unlock();
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
@@ -256,8 +254,10 @@ auto QtWindow::closeEvent(QCloseEvent* event) -> void {
 
 auto QtWindow::moveEvent(QMoveEvent* event) -> void {
   if(!p.locked() && !p.state().fullScreen && p.qtWindow->isVisible()) {
-    p.state().geometry.setX(p.state().geometry.x() + event->pos().x() - event->oldPos().x());
-    p.state().geometry.setY(p.state().geometry.y() + event->pos().y() - event->oldPos().y());
+    p.state().geometry.setPosition({
+      p.state().geometry.x() + event->pos().x() - event->oldPos().x(),
+      p.state().geometry.y() + event->pos().y() - event->oldPos().y()
+    });
   }
 
   if(!p.locked()) {
@@ -287,8 +287,10 @@ auto QtWindow::keyReleaseEvent(QKeyEvent* event) -> void {
 
 auto QtWindow::resizeEvent(QResizeEvent*) -> void {
   if(!p.locked() && !p.state().fullScreen && p.qtWindow->isVisible()) {
-    p.state().geometry.setWidth(p.qtContainer->geometry().width());
-    p.state().geometry.setHeight(p.qtContainer->geometry().height());
+    p.state().geometry.setSize({
+      p.qtContainer->geometry().width(),
+      p.qtContainer->geometry().height()
+    });
   }
 
   if(auto& layout = p.state().layout) {

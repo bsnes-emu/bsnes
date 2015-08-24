@@ -65,8 +65,7 @@ static auto Window_configure(GtkWidget* widget, GdkEvent* event, pWindow* p) -> 
   //move
   if(geometry.x() != p->state().geometry.x() || geometry.y() != p->state().geometry.y()) {
     if(!p->state().fullScreen) {
-      p->state().geometry.setX(geometry.x());
-      p->state().geometry.setY(geometry.y());
+      p->state().geometry.setPosition({geometry.x(), geometry.y()});
     }
     if(!p->locked()) p->self().doMove();
   }
@@ -106,8 +105,9 @@ static auto Window_sizeAllocate(GtkWidget* widget, GtkAllocation* allocation, pW
   if(allocation->width == p->lastAllocation.width
   && allocation->height == p->lastAllocation.height) return;
 
-  p->state().geometry.setWidth(allocation->width);
-  p->state().geometry.setHeight(allocation->height);
+  if(!p->state().fullScreen) {
+    p->state().geometry.setSize({allocation->width, allocation->height});
+  }
 
   if(auto& layout = p->state().layout) {
     layout->setGeometry(p->self().geometry().setPosition(0, 0));
@@ -259,10 +259,13 @@ auto pWindow::setFocused() -> void {
 }
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
-  if(fullScreen == false) {
-    gtk_window_unfullscreen(GTK_WINDOW(widget));
-  } else {
+  if(fullScreen) {
+    windowedGeometry = state().geometry;
     gtk_window_fullscreen(GTK_WINDOW(widget));
+    state().geometry = Monitor::geometry(Monitor::primary());
+  } else {
+    gtk_window_unfullscreen(GTK_WINDOW(widget));
+    state().geometry = windowedGeometry;
   }
 }
 

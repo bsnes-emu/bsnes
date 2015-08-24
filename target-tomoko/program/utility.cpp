@@ -50,6 +50,7 @@ auto Program::updateVideoPalette() -> void {
 
 auto Program::updateAudio() -> void {
   if(!audio) return;
+  audio->clear();
   audio->set(Audio::Frequency, config->audio.frequency);
   audio->set(Audio::Latency, config->audio.latency);
   if(auto resampler = config->audio.resampler) {

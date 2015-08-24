@@ -219,8 +219,10 @@ auto mWindow::setFrameSize(Size size) -> type& {
 }
 
 auto mWindow::setFullScreen(bool fullScreen) -> type& {
-  state.fullScreen = fullScreen;
-  signal(setFullScreen, fullScreen);
+  if(fullScreen != state.fullScreen) {
+    state.fullScreen = fullScreen;
+    signal(setFullScreen, fullScreen);
+  }
   return *this;
 }
 

@@ -91,10 +91,8 @@ auto pWindow::setFont(const string& font) -> void {
 auto pWindow::setFullScreen(bool fullScreen) -> void {
   auto style = GetWindowLongPtr(hwnd, GWL_STYLE) & WS_VISIBLE;
   lock();
-  if(fullScreen == false) {
-    SetWindowLongPtr(hwnd, GWL_STYLE, style | (state().resizable ? ResizableStyle : FixedStyle));
-    setGeometry(state().geometry);
-  } else {
+  if(fullScreen) {
+    windowedGeometry = self().geometry();
     HMONITOR monitor = MonitorFromWindow(hwnd, MONITOR_DEFAULTTONEAREST);
     MONITORINFOEX info;
     memset(&info, 0, sizeof(MONITORINFOEX));
@@ -104,10 +102,13 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
     Geometry geometry = {rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top};
     SetWindowLongPtr(hwnd, GWL_STYLE, style | WS_POPUP);
     Geometry margin = frameMargin();
-    setGeometry({
+    self().setGeometry({
       geometry.x() + margin.x(), geometry.y() + margin.y(),
       geometry.width() - margin.width(), geometry.height() - margin.height()
     });
+  } else {
+    SetWindowLongPtr(hwnd, GWL_STYLE, style | (state().resizable ? ResizableStyle : FixedStyle));
+    self().setGeometry(windowedGeometry);
   }
   unlock();
 }
@@ -116,7 +117,7 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   lock();
   Geometry margin = frameMargin();
   SetWindowPos(
-    hwnd, NULL,
+    hwnd, nullptr,
     geometry.x() - margin.x(), geometry.y() - margin.y(),
     geometry.width() + margin.width(), geometry.height() + margin.height(),
     SWP_NOZORDER | SWP_FRAMECHANGED
