@@ -14,7 +14,7 @@ struct pObject {
   virtual auto reset() -> void;
   virtual auto setEnabled(bool enabled) -> void;
   virtual auto setFocused() -> void;
-  virtual auto setFont(const string& font) -> void;
+  virtual auto setFont(const Font& font) -> void;
   virtual auto setGroup(sGroup group) -> void;
   virtual auto setVisible(bool visible) -> void;
 

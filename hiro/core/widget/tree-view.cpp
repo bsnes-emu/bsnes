@@ -22,15 +22,6 @@ auto mTreeView::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
-auto mTreeView::checkable() const -> bool {
-  return state.checkable;
-}
-
-auto mTreeView::collapse() -> type& {
-  signal(collapse);
-  return *this;
-}
-
 auto mTreeView::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
@@ -45,11 +36,6 @@ auto mTreeView::doContext() const -> void {
 
 auto mTreeView::doToggle(sTreeViewItem item) const -> void {
   if(state.onToggle) return state.onToggle(item);
-}
-
-auto mTreeView::expand() -> type& {
-  signal(expand);
-  return *this;
 }
 
 auto mTreeView::foregroundColor() const -> Color {
@@ -107,9 +93,7 @@ auto mTreeView::remove(sTreeViewItem item) -> type& {
 
 auto mTreeView::reset() -> type& {
   state.selectedPath.reset();
-  signal(reset);
-  for(auto& item : state.items) item->setParent();
-  state.items.reset();
+  for(auto n : rrange(state.items)) remove(state.items[n]);
   return *this;
 }
 
@@ -123,15 +107,16 @@ auto mTreeView::setBackgroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mTreeView::setCheckable(bool checkable) -> type& {
-  state.checkable = checkable;
-  signal(setCheckable, checkable);
-  return *this;
-}
-
 auto mTreeView::setForegroundColor(Color color) -> type& {
   state.foregroundColor = color;
   signal(setForegroundColor, color);
+  return *this;
+}
+
+auto mTreeView::setParent(mObject* object, signed offset) -> type& {
+  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  mObject::setParent(object, offset);
+  for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;
 }
 

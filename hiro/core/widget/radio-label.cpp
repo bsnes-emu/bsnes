@@ -39,9 +39,8 @@ auto mRadioLabel::setChecked() -> type& {
 }
 
 auto mRadioLabel::setGroup(sGroup group) -> type& {
-  state.group = group;
+  state.group = group ? group : Group{&instance};
   signal(setGroup, group);
-  if(group && group->objectCount() == 1) setChecked();
   return *this;
 }
 

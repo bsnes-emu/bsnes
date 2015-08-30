@@ -10,8 +10,8 @@ auto mMenuItem::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
-auto mMenuItem::icon() const -> image {
-  return state.icon;
+auto mMenuItem::image() const -> Image {
+  return state.image;
 }
 
 auto mMenuItem::onActivate(const function<void ()>& callback) -> type& {
@@ -19,9 +19,9 @@ auto mMenuItem::onActivate(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mMenuItem::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mMenuItem::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

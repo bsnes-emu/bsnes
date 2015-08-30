@@ -68,7 +68,7 @@ auto mObject::focused() const -> bool {
   return false;
 }
 
-auto mObject::font(bool recursive) const -> string {
+auto mObject::font(bool recursive) const -> Font {
   if(!recursive || state.font) return state.font;
   if(auto object = parent()) return object->font(true);
   return Application::font();
@@ -277,7 +277,7 @@ auto mObject::setFocused() -> type& {
   return *this;
 }
 
-auto mObject::setFont(const string& font) -> type& {
+auto mObject::setFont(const Font& font) -> type& {
   state.font = font;
   signal(setFont, this->font(true));
   return *this;

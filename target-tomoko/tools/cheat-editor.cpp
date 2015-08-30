@@ -1,5 +1,5 @@
 CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
-  setIcon(Icon::Edit::Replace);
+  setImage(Icon::Edit::Replace);
   setText("Cheat Editor");
 
   layout.setMargin(5);

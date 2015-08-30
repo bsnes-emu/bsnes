@@ -12,7 +12,7 @@ auto pAction::setEnabled(bool enabled) -> void {
   gtk_widget_set_sensitive(widget, enabled);
 }
 
-auto pAction::setFont(const string& font) -> void {
+auto pAction::setFont(const Font& font) -> void {
   pFont::setFont(widget, font);
 }
 

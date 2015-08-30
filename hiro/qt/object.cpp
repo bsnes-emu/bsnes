@@ -24,7 +24,7 @@ auto pObject::setEnabled(bool enabled) -> void {
 auto pObject::setFocused() -> void {
 }
 
-auto pObject::setFont(const string& font) -> void {
+auto pObject::setFont(const Font& font) -> void {
 }
 
 auto pObject::setVisible(bool visible) -> void {

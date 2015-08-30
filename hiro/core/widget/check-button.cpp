@@ -18,8 +18,8 @@ auto mCheckButton::doToggle() const -> void {
   if(state.onToggle) return state.onToggle();
 }
 
-auto mCheckButton::icon() const -> image {
-  return state.icon;
+auto mCheckButton::image() const -> Image {
+  return state.image;
 }
 
 auto mCheckButton::onToggle(const function<void ()>& callback) -> type& {
@@ -43,9 +43,9 @@ auto mCheckButton::setChecked(bool checked) -> type& {
   return *this;
 }
 
-auto mCheckButton::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mCheckButton::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

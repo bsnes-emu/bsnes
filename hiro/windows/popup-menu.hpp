@@ -7,7 +7,7 @@ struct pPopupMenu : pObject {
 
   auto append(sAction action) -> void;
   auto remove(sAction action) -> void;
-  auto setFont(const string& font) -> void override;
+  auto setFont(const Font& font) -> void override;
   auto setVisible(bool visible) -> void override;
 
   HWND hwnd = nullptr;

@@ -25,7 +25,7 @@ auto pListViewCell::setChecked(bool checked) -> void {
 auto pListViewCell::setForegroundColor(Color color) -> void {
 }
 
-auto pListViewCell::setIcon(const image& icon) -> void {
+auto pListViewCell::setImage(const Image& image) -> void {
   _setState();
 }
 
@@ -50,7 +50,7 @@ auto pListViewCell::_setState() -> void {
     if(auto grandparent = _grandparent()) {
       grandparent->lock();
       gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 0, state().checked, -1);
-      gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 1, CreatePixbuf(state().icon), -1);
+      gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 1, CreatePixbuf(state().image), -1);
       gtk_list_store_set(grandparent->gtkListStore, &parent->gtkIter, 3 * self().offset() + 2, state().text.data(), -1);
       grandparent->unlock();
     }

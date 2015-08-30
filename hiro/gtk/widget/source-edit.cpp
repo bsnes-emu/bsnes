@@ -7,11 +7,11 @@ static auto SourceEdit_change(GtkTextBuffer*, pSourceEdit* p) -> void {
 }
 
 static auto SourceEdit_move(GObject*, GParamSpec*, pSourceEdit* p) -> void {
-  signed position = 0;
-  g_object_get(G_OBJECT(p->gtkSourceBuffer), "cursor-position", &position, nullptr);
+  signed offset = 0;
+  g_object_get(G_OBJECT(p->gtkSourceBuffer), "cursor-position", &offset, nullptr);
 
-  if(p->state().position != position) {
-    p->state().position = position;
+  if(p->state().cursor.offset() != offset) {
+    p->state().cursor.setOffset(offset);
     if(!p->locked()) p->self().doMove();
   }
 }
@@ -68,10 +68,25 @@ auto pSourceEdit::destruct() -> void {
   gtk_widget_destroy(gtkWidget);
 }
 
+auto pSourceEdit::setCursor(Cursor cursor) -> void {
+  lock();
+  GtkTextIter offset, length;
+  gtk_text_buffer_get_end_iter(gtkTextBuffer, &offset);
+  gtk_text_buffer_get_end_iter(gtkTextBuffer, &length);
+  signed end = gtk_text_iter_get_offset(&offset);
+  gtk_text_iter_set_offset(&offset, max(0, min(end, cursor.offset())));
+  gtk_text_iter_set_offset(&length, max(0, min(end, cursor.offset() + cursor.length())));
+  gtk_text_buffer_select_range(gtkTextBuffer, &offset, &length);
+  auto mark = gtk_text_buffer_get_mark(gtkTextBuffer, "insert");
+  gtk_text_view_scroll_mark_onscreen(gtkTextView, mark);
+  unlock();
+}
+
 auto pSourceEdit::setFocused() -> void {
   gtk_widget_grab_focus(gtkWidgetSourceView);
 }
 
+/*
 auto pSourceEdit::setPosition(signed position) -> void {
   lock();
   GtkTextIter iter;
@@ -105,6 +120,7 @@ auto pSourceEdit::setSelected(Position selected) -> void {
   gtk_text_buffer_select_range(gtkTextBuffer, &startIter, &endIter);
   unlock();
 }
+*/
 
 auto pSourceEdit::setText(const string& text) -> void {
   lock();

@@ -9,7 +9,7 @@ struct pListViewItem : pObject {
   auto remove(sListViewCell cell) -> void;
   auto setAlignment(Alignment alignment) -> void;
   auto setBackgroundColor(Color color) -> void;
-  auto setFont(const string& font) -> void override;
+  auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
   auto setSelected(bool selected) -> void;
 

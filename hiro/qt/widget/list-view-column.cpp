@@ -28,7 +28,7 @@ auto pListViewColumn::setExpandable(bool expandable) -> void {
   _setState();
 }
 
-auto pListViewColumn::setFont(const string& font) -> void {
+auto pListViewColumn::setFont(const Font& font) -> void {
   _setState();
 }
 
@@ -40,7 +40,7 @@ auto pListViewColumn::setHorizontalAlignment(double alignment) -> void {
   _setState();
 }
 
-auto pListViewColumn::setIcon(const image& icon) -> void {
+auto pListViewColumn::setImage(const Image& image) -> void {
   //unsupported
 }
 

@@ -9,15 +9,17 @@
  * As such, this file is really only meant for disabling individual widgets or menu items.
  */
 
-#define Hiro_Application
-
 #define Hiro_Color
+#define Hiro_Gradient
 #define Hiro_Alignment
+#define Hiro_Cursor
 #define Hiro_Position
 #define Hiro_Size
 #define Hiro_Geometry
-
 #define Hiro_Font
+#define Hiro_Image
+
+#define Hiro_Application
 #define Hiro_Desktop
 #define Hiro_Monitor
 #define Hiro_Keyboard
@@ -63,7 +65,7 @@
 #define Hiro_ProgressBar
 #define Hiro_RadioButton
 #define Hiro_RadioLabel
-#define Hiro_SourceView
+#define Hiro_SourceEdit
 #define Hiro_TabFrame
 #define Hiro_TextEdit
 #define Hiro_TreeView
@@ -86,6 +88,6 @@
 #if defined(HIRO_WINDOWS) || defined(HIRO_QT)
   #undef Hiro_Console
   #undef Hiro_IconView
-  #undef Hiro_SourceView
+  #undef Hiro_SourceEdit
   #undef Hiro_TreeView
 #endif

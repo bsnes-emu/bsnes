@@ -24,6 +24,12 @@ static auto CreateIcon(const nall::image& icon, bool scale = false) -> QIcon {
   return QIcon(QPixmap::fromImage(qtImage));
 }
 
+static auto CreateImage(const Image& image, bool scale = false) -> QIcon {
+  if(!image) return QIcon();
+  QImage qtImage((const uint8_t*)image.data(), image.width(), image.height(), QImage::Format_ARGB32);
+  return QIcon(QPixmap::fromImage(qtImage));
+}
+
 static auto DropPaths(QDropEvent* event) -> lstring {
   QList<QUrl> urls = event->mimeData()->urls();
   if(urls.size() == 0) return {};

@@ -17,6 +17,10 @@ auto Alignment::horizontal() const -> double {
   return state.horizontal;
 }
 
+auto Alignment::reset() -> type& {
+  return setAlignment(-1.0, -1.0);
+}
+
 auto Alignment::setAlignment(double horizontal, double vertical) -> type& {
   state.horizontal = horizontal;
   state.vertical   = vertical;

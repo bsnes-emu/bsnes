@@ -54,7 +54,7 @@ auto mListViewCell::checked() const -> bool {
   return state.checkable && state.checked;
 }
 
-auto mListViewCell::font(bool recursive) const -> string {
+auto mListViewCell::font(bool recursive) const -> Font {
   if(auto font = mObject::font()) return font;
   if(recursive) {
     if(auto parent = parentListViewItem()) {
@@ -94,8 +94,8 @@ auto mListViewCell::foregroundColor(bool recursive) const -> Color {
   return state.foregroundColor;
 }
 
-auto mListViewCell::icon() const -> image {
-  return state.icon;
+auto mListViewCell::image() const -> Image {
+  return state.image;
 }
 
 auto mListViewCell::setAlignment(Alignment alignment) -> type& {
@@ -129,9 +129,9 @@ auto mListViewCell::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mListViewCell::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mListViewCell::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

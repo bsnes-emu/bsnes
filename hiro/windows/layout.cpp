@@ -14,7 +14,7 @@ auto pLayout::setEnabled(bool enabled) -> void {
   }
 }
 
-auto pLayout::setFont(const string& font) -> void {
+auto pLayout::setFont(const Font& font) -> void {
   for(auto& sizable : state().sizables) {
     if(auto self = sizable->self()) self->setFont(sizable->font(true));
   }

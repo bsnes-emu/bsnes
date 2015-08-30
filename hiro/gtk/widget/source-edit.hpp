@@ -5,9 +5,8 @@ namespace hiro {
 struct pSourceEdit : pWidget {
   Declare(SourceEdit, Widget)
 
+  auto setCursor(Cursor cursor) -> void;
   auto setFocused() -> void override;
-  auto setPosition(signed position) -> void;
-  auto setSelected(Position selected) -> void;
   auto setText(const string& text) -> void;
   auto text() const -> string;
 

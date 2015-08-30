@@ -49,7 +49,7 @@ auto pTabFrame::construct() -> void {
 
   tabs.reset();  //todo: memory leak, need to release each tab
   for(auto& item : state().items) append(item);
-  setEdge(state().edge);
+  setNavigation(state().navigation);
 
   g_signal_connect(G_OBJECT(gtkWidget), "page-reordered", G_CALLBACK(TabFrame_move), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "switch-page", G_CALLBACK(TabFrame_change), (gpointer)this);
@@ -72,7 +72,7 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
   tab.close = gtk_button_new_with_label("\u00d7");  //Unicode multiplication sign (looks better than 'X')
   gtk_button_set_focus_on_click(GTK_BUTTON(tab.close), false);
   gtk_button_set_relief(GTK_BUTTON(tab.close), GTK_RELIEF_NONE);
-  pFont::setFont(tab.close, Font::sans(9, "Bold"));
+  pFont::setFont(tab.close, Font("sans", 9).setBold());
   auto color = CreateColor({255, 0, 0});
   gtk_widget_modify_fg(gtk_bin_get_child(GTK_BIN(tab.close)), GTK_STATE_PRELIGHT, &color);
   tabs.append(tab);
@@ -140,18 +140,6 @@ auto pTabFrame::remove(sTabFrameItem item) -> void {
   unlock();
 }
 
-auto pTabFrame::setEdge(Edge edge) -> void {
-  GtkPositionType type;
-  switch(edge) { default:
-  case Edge::Top: type = GTK_POS_TOP; break;
-  case Edge::Bottom: type = GTK_POS_BOTTOM; break;
-  case Edge::Left: type = GTK_POS_LEFT; break;
-  case Edge::Right: type = GTK_POS_RIGHT; break;
-  }
-  gtk_notebook_set_tab_pos(GTK_NOTEBOOK(gtkWidget), type);
-  setGeometry(self().geometry());
-}
-
 auto pTabFrame::setEnabled(bool enabled) -> void {
   for(auto& item : state().items) {
     if(auto layout = item->state.layout) {
@@ -161,7 +149,7 @@ auto pTabFrame::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
 }
 
-auto pTabFrame::setFont(const string& font) -> void {
+auto pTabFrame::setFont(const Font& font) -> void {
   for(auto n : range(tabs.size())) {
     pFont::setFont(tabs[n].title, font);
     if(auto layout = state().items[n]->state.layout) {
@@ -174,7 +162,7 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
 
   geometry.setPosition(0, 0);
-  if(state().edge == Edge::Top || state().edge == Edge::Bottom) {
+  if(state().navigation == Navigation::Top || state().navigation == Navigation::Bottom) {
     geometry.setWidth(geometry.width() - 6);
     geometry.setHeight(geometry.height() - (15 + _tabHeight()));
   } else {
@@ -190,7 +178,7 @@ auto pTabFrame::setItemClosable(unsigned position, bool closable) -> void {
   _synchronizeTab(position);
 }
 
-auto pTabFrame::setItemIcon(unsigned position, const image& icon) -> void {
+auto pTabFrame::setItemImage(unsigned position, const Image& image) -> void {
   _synchronizeTab(position);
 }
 
@@ -212,6 +200,18 @@ auto pTabFrame::setItemSelected(unsigned position) -> void {
 
 auto pTabFrame::setItemText(unsigned position, const string& text) -> void {
   _synchronizeTab(position);
+}
+
+auto pTabFrame::setNavigation(Navigation navigation) -> void {
+  GtkPositionType type;
+  switch(navigation) { default:
+  case Navigation::Top: type = GTK_POS_TOP; break;
+  case Navigation::Bottom: type = GTK_POS_BOTTOM; break;
+  case Navigation::Left: type = GTK_POS_LEFT; break;
+  case Navigation::Right: type = GTK_POS_RIGHT; break;
+  }
+  gtk_notebook_set_tab_pos(GTK_NOTEBOOK(gtkWidget), type);
+  setGeometry(self().geometry());
 }
 
 auto pTabFrame::setVisible(bool visible) -> void {
@@ -239,16 +239,15 @@ auto pTabFrame::_synchronizeTab(unsigned position) -> void {
   auto& item = state().items[position];
   auto& tab = tabs[position];
   gtk_widget_set_visible(tab.close, item->closable());
-  if(auto copy = item->state.icon) {
+  if(auto& image = item->state.image) {
     unsigned size = pFont::size(self().font(true), " ").height();
-    copy.scale(size, size);
-    auto pixbuf = CreatePixbuf(copy);
+    auto pixbuf = CreatePixbuf(image, true);
     gtk_image_set_from_pixbuf(GTK_IMAGE(tab.image), pixbuf);
   } else {
     gtk_image_clear(GTK_IMAGE(tab.image));
   }
   string text = {
-    item->state.icon && item->state.text ? " " : "",
+    item->state.image && item->state.text ? " " : "",
     item->state.text,
     item->state.text && item->state.closable ? " " : ""
   };

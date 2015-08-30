@@ -22,6 +22,18 @@ auto mIconView::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
+auto mIconView::batchable() const -> bool {
+  return state.batchable;
+}
+
+auto mIconView::batched() const -> vector<IconViewItem> {
+  vector<IconViewItem> items;
+  for(auto& item : state.items) {
+    if(item->selected()) items.append(item);
+  }
+  return items;
+}
+
 auto mIconView::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
@@ -55,10 +67,6 @@ auto mIconView::items() const -> vector<IconViewItem> {
   vector<IconViewItem> items;
   for(auto& item : state.items) items.append(item);
   return items;
-}
-
-auto mIconView::multiSelect() const -> bool {
-  return state.multiSelect;
 }
 
 auto mIconView::onActivate(const function<void ()>& callback) -> type& {
@@ -97,24 +105,22 @@ auto mIconView::reset() -> type& {
   return *this;
 }
 
-auto mIconView::selected() const -> maybe<unsigned> {
+auto mIconView::selected() const -> IconViewItem {
   for(auto& item : state.items) {
-    if(item->selected()) return (unsigned)item->offset();
+    if(item->selected()) return item;
   }
-  return nothing;
-}
-
-auto mIconView::selectedItems() const -> vector<unsigned> {
-  vector<unsigned> result;
-  for(auto& item : state.items) {
-    if(item->selected()) result.append(item->offset());
-  }
-  return result;
+  return {};
 }
 
 auto mIconView::setBackgroundColor(Color color) -> type& {
   state.backgroundColor = color;
   signal(setBackgroundColor, color);
+  return *this;
+}
+
+auto mIconView::setBatchable(bool batchable) -> type& {
+  state.batchable = batchable;
+  signal(setBatchable, batchable);
   return *this;
 }
 
@@ -130,15 +136,16 @@ auto mIconView::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mIconView::setMultiSelect(bool multiSelect) -> type& {
-  state.multiSelect = multiSelect;
-  signal(setMultiSelect, multiSelect);
-  return *this;
-}
-
 auto mIconView::setOrientation(Orientation orientation) -> type& {
   state.orientation = orientation;
   signal(setOrientation, orientation);
+  return *this;
+}
+
+auto mIconView::setParent(mObject* parent, signed offset) -> type& {
+  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;
 }
 

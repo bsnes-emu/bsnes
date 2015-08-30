@@ -9,7 +9,7 @@ struct pComboButton : pWidget {
   auto minimumSize() const -> Size override;
   auto remove(sComboButtonItem item) -> void;
   auto reset() -> void;
-  auto setFont(const string& font) -> void override;
+  auto setFont(const Font& font) -> void override;
 
   auto _updateSelected() -> void;
 

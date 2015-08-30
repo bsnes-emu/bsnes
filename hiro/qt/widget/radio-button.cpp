@@ -9,6 +9,7 @@ auto pRadioButton::construct() -> void {
   qtRadioButton->connect(qtRadioButton, SIGNAL(toggled(bool)), SLOT(onActivate()));
 
   pWidget::construct();
+  setGroup(state().group);
   _setState();
 }
 
@@ -21,13 +22,13 @@ auto pRadioButton::minimumSize() const -> Size {
   auto size = pFont::size(qtWidget->font(), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width());
-    size.setHeight(max(state().icon.height(), size.height()));
+    size.setWidth(size.width() + state().image.width());
+    size.setHeight(max(state().image.height(), size.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(state().icon.width(), size.width()));
-    size.setHeight(size.height() + state().icon.height());
+    size.setWidth(max(state().image.width(), size.width()));
+    size.setHeight(size.height() + state().image.height());
   }
 
   return {size.width() + 20, size.height() + 12};
@@ -41,10 +42,24 @@ auto pRadioButton::setChecked() -> void {
 }
 
 auto pRadioButton::setGroup(sGroup group) -> void {
-  _setState();
+  bool first = true;
+  if(auto& group = state().group) {
+    group->self()->lock();
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto radioButton = dynamic_cast<mRadioButton*>(object.data())) {
+          if(auto self = radioButton->self()) {
+            self->qtRadioButton->setChecked(radioButton->state.checked = first);
+            first = false;
+          }
+        }
+      }
+    }
+    group->self()->unlock();
+  }
 }
 
-auto pRadioButton::setIcon(const image& icon) -> void {
+auto pRadioButton::setImage(const Image& image) -> void {
   _setState();
 }
 
@@ -70,8 +85,8 @@ auto pRadioButton::_setState() -> void {
     }
     group->self()->unlock();
   }
-  qtRadioButton->setIconSize(QSize(state().icon.width(), state().icon.height()));
-  qtRadioButton->setIcon(CreateIcon(state().icon));
+  qtRadioButton->setIconSize(QSize(state().image.width(), state().image.height()));
+  qtRadioButton->setIcon(CreateImage(state().image));
   qtRadioButton->setStyleSheet("text-align: top;");
   switch(state().orientation) {
   case Orientation::Horizontal: qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;

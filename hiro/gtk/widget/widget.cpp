@@ -33,7 +33,7 @@ auto pWidget::setFocused() -> void {
   gtk_widget_grab_focus(gtkWidget);
 }
 
-auto pWidget::setFont(const string& font) -> void {
+auto pWidget::setFont(const Font& font) -> void {
   if(!gtkWidget) return;
   return pFont::setFont(gtkWidget, font);
 }

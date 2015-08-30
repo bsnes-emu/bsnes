@@ -80,6 +80,7 @@ struct image {
   //utility.hpp
   inline auto crop(unsigned x, unsigned y, unsigned width, unsigned height) -> bool;
   inline auto alphaBlend(uint64_t alphaColor) -> void;
+  inline auto alphaMultiply() -> void;
   inline auto transform(const image& source = {}) -> void;
   inline auto transform(bool endian, unsigned depth, uint64_t alphaMask, uint64_t redMask, uint64_t greenMask, uint64_t blueMask) -> void;
 

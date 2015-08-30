@@ -34,7 +34,7 @@ auto pTabFrameItem::setGeometry(Geometry geometry) -> void {
   }
 }
 
-auto pTabFrameItem::setIcon(const image& icon) -> void {
+auto pTabFrameItem::setImage(const Image& image) -> void {
   _setState();
 }
 
@@ -62,7 +62,7 @@ auto pTabFrameItem::_parent() -> maybe<pTabFrame&> {
 
 auto pTabFrameItem::_setState() -> void {
   if(auto parent = _parent()) {
-    parent->qtTabFrame->setTabIcon(self().offset(), CreateIcon(state().icon));
+    parent->qtTabFrame->setTabIcon(self().offset(), CreateImage(state().image));
     if(state().selected) parent->qtTabFrame->setCurrentIndex(self().offset());
     parent->qtTabFrame->setTabText(self().offset(), QString::fromUtf8(state().text));
     if(auto layout = state().layout) {

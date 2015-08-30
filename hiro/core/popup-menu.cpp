@@ -50,7 +50,7 @@ auto mPopupMenu::reset() -> type& {
 }
 
 auto mPopupMenu::setParent(mObject* parent, signed offset) -> type& {
-  for(auto& action : state.actions) action->destruct();
+  for(auto n : rrange(state.actions)) state.actions[n]->destruct();
   mObject::setParent(parent, offset);
   for(auto& action : state.actions) action->construct();
   return *this;

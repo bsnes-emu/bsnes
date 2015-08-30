@@ -14,7 +14,7 @@ auto pStatusBar::setEnabled(bool enabled) -> void {
   }
 }
 
-auto pStatusBar::setFont(const string& font) -> void {
+auto pStatusBar::setFont(const Font& font) -> void {
   if(auto parent = _parent()) {
     parent->_setStatusFont(font);
   }

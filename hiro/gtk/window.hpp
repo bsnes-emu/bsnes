@@ -29,10 +29,10 @@ struct pWindow : pObject {
   auto _menuHeight() const -> signed;
   auto _setIcon(const string& basename) -> bool;
   auto _setMenuEnabled(bool enabled) -> void;
-  auto _setMenuFont(const string& font) -> void;
+  auto _setMenuFont(const Font& font) -> void;
   auto _setMenuVisible(bool visible) -> void;
   auto _setStatusEnabled(bool enabled) -> void;
-  auto _setStatusFont(const string& font) -> void;
+  auto _setStatusFont(const Font& font) -> void;
   auto _setStatusText(const string& text) -> void;
   auto _setStatusVisible(bool visible) -> void;
   auto _statusHeight() const -> signed;

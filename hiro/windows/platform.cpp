@@ -11,7 +11,6 @@
 #include "object.cpp"
 #include "group.cpp"
 
-#include "hotkey.cpp"
 #include "font.cpp"
 #include "timer.cpp"
 #include "window.cpp"

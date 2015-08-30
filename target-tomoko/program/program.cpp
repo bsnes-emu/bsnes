@@ -68,8 +68,15 @@ Program::Program(lstring args) {
 
   updateVideoFilter();
 
-  if(args.size() == 2 && directory::exists(args[1])) {
-    loadMedia(args[1]);
+  args.takeFirst();  //ignore program location in argument parsing
+  for(auto& argument : args) {
+    if(argument == "--fullscreen") {
+      presentation->toggleFullScreen();
+    } else {
+      auto location = argument;
+      if(file::exists(location)) location = dirname(location);
+      if(directory::exists(location)) loadMedia(location);
+    }
   }
 }
 

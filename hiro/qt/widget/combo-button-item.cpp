@@ -19,7 +19,7 @@ auto pComboButtonItem::destruct() -> void {
   }
 }
 
-auto pComboButtonItem::setIcon(const image& icon) -> void {
+auto pComboButtonItem::setImage(const Image& image) -> void {
   _setState();
 }
 
@@ -40,7 +40,7 @@ auto pComboButtonItem::_parent() -> maybe<pComboButton&> {
 
 auto pComboButtonItem::_setState() -> void {
   if(auto parent = _parent()) {
-    parent->qtComboButton->setItemIcon(self().offset(), CreateIcon(state().icon));
+    parent->qtComboButton->setItemIcon(self().offset(), CreateImage(state().image));
     if(state().selected) parent->qtComboButton->setCurrentIndex(self().offset());
     parent->qtComboButton->setItemText(self().offset(), QString::fromUtf8(state().text));
   }

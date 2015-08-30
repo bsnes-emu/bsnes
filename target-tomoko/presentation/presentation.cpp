@@ -97,7 +97,7 @@ Presentation::Presentation() {
   cheatEditor.setText("Cheat Editor").onActivate([&] { toolsManager->show(0); });
   stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
 
-  statusBar.setFont(Font::sans(8, "Bold"));
+  statusBar.setFont(Font().setBold());
   statusBar.setVisible(config->userInterface.showStatusBar);
 
   onClose([&] { program->quit(); });

@@ -23,7 +23,6 @@ namespace hiro {
 #include "object.hpp"
 #include "group.hpp"
 
-#include "hotkey.hpp"
 #include "timer.hpp"
 #include "window.hpp"
 #include "status-bar.hpp"

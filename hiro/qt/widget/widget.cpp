@@ -47,7 +47,7 @@ auto pWidget::setFocused() -> void {
   qtWidget->setFocus(Qt::OtherFocusReason);
 }
 
-auto pWidget::setFont(const string& font) -> void {
+auto pWidget::setFont(const Font& font) -> void {
   if(!qtWidget) return;
   qtWidget->setFont(pFont::create(font));
 }

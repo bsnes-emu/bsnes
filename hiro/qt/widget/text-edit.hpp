@@ -6,7 +6,7 @@ struct pTextEdit : pWidget {
   Declare(TextEdit, Widget)
 
   auto setBackgroundColor(Color color) -> void;
-  auto setCursorPosition(unsigned position) -> void;
+  auto setCursor(Cursor cursor) -> void;
   auto setEditable(bool editable) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setText(const string& text) -> void;

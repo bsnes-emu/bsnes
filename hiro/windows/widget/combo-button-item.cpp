@@ -8,7 +8,7 @@ auto pComboButtonItem::construct() -> void {
 auto pComboButtonItem::destruct() -> void {
 }
 
-auto pComboButtonItem::setIcon(const image& icon) -> void {
+auto pComboButtonItem::setImage(const Image& image) -> void {
   //unsupported
 }
 

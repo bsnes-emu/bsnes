@@ -19,7 +19,7 @@ auto pTextEdit::setBackgroundColor(Color color) -> void {
   _setState();
 }
 
-auto pTextEdit::setCursorPosition(unsigned position) -> void {
+auto pTextEdit::setCursor(Cursor cursor) -> void {
   _setState();
 }
 
@@ -53,8 +53,9 @@ auto pTextEdit::_setState() -> void {
     //todo
   }
   QTextCursor cursor = qtTextEdit->textCursor();
-  unsigned lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
-  cursor.setPosition(min(state().cursorPosition, lastCharacter));
+  signed lastCharacter = strlen(qtTextEdit->toPlainText().toUtf8().constData());
+  cursor.setPosition(max(0, min(lastCharacter, state().cursor.offset())));
+  cursor.setPosition(max(0, min(lastCharacter, state().cursor.offset() + state().cursor.length())), QTextCursor::KeepAnchor);
   qtTextEdit->setTextCursor(cursor);
   qtTextEdit->setTextInteractionFlags(state().editable
     ? Qt::TextEditorInteraction

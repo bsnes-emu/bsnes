@@ -7,9 +7,13 @@ struct pTreeViewItem : pObject {
 
   auto append(sTreeViewItem item) -> void;
   auto remove(sTreeViewItem item) -> void;
+  auto setBackgroundColor(Color color) -> void;
+  auto setCheckable(bool checkable) -> void;
   auto setChecked(bool checked) -> void;
+  auto setExpanded(bool expanded) -> void;
   auto setFocused() -> void;
-  auto setIcon(const image& icon) -> void;
+  auto setForegroundColor(Color color) -> void;
+  auto setImage(const Image& image) -> void;
   auto setSelected() -> void;
   auto setText(const string& text) -> void;
 

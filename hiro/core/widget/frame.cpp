@@ -33,6 +33,13 @@ auto mFrame::reset() -> type& {
   return *this;
 }
 
+auto mFrame::setParent(mObject* object, signed offset) -> type& {
+  if(auto& layout = state.layout) layout->destruct();
+  mObject::setParent(object, offset);
+  if(auto& layout = state.layout) layout->setParent(this, 0);
+  return *this;
+}
+
 auto mFrame::setText(const string& text) -> type& {
   state.text = text;
   signal(setText, text);

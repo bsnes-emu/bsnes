@@ -31,13 +31,17 @@ using namespace nall;
   (delegate ? self()->function(__VA_ARGS__) : decltype(self()->function(__VA_ARGS__))())
 
 namespace hiro {
-  #include "application.cpp"
   #include "color.cpp"
+  #include "gradient.cpp"
   #include "alignment.cpp"
+  #include "cursor.cpp"
   #include "position.cpp"
   #include "size.cpp"
   #include "geometry.cpp"
   #include "font.cpp"
+  #include "image.cpp"
+
+  #include "application.cpp"
   #include "desktop.cpp"
   #include "monitor.cpp"
   #include "keyboard.cpp"

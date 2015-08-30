@@ -6,6 +6,16 @@ auto mHorizontalLayout::append(sSizable sizable, Size size, signed spacing) -> t
   return *this;
 }
 
+auto mHorizontalLayout::modify(sSizable sizable, Size size, signed spacing) -> type& {
+  if(sizable && this->sizable(sizable->offset()) == sizable) {
+    auto& properties = this->properties[sizable->offset()];
+    properties.width = size.width();
+    properties.height = size.height();
+    properties.spacing = spacing;
+  }
+  return *this;
+}
+
 auto mHorizontalLayout::minimumSize() const -> Size {
   signed width = 0, height = 0;
 
@@ -56,7 +66,7 @@ auto mHorizontalLayout::setEnabled(bool enabled) -> type& {
   return *this;
 }
 
-auto mHorizontalLayout::setFont(const string& font) -> type& {
+auto mHorizontalLayout::setFont(const Font& font) -> type& {
   mLayout::setFont(font);
   for(auto n : range(sizableCount())) {
     sizable(n)->setFont(sizable(n)->font());

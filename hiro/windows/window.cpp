@@ -82,7 +82,7 @@ auto pWindow::setFocused() -> void {
   SetFocus(hwnd);
 }
 
-auto pWindow::setFont(const string& font) -> void {
+auto pWindow::setFont(const Font& font) -> void {
   if(auto layout = state().layout) {
     if(auto self = layout->self()) self->setFont(layout->font(true));
   }

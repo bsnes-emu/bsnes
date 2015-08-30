@@ -4,6 +4,7 @@ struct FixedLayout : sFixedLayout {
   DeclareSharedLayout(FixedLayout)
 
   auto append(sSizable sizable, Geometry geometry) { return self().append(sizable, geometry), *this; }
+  auto modify(sSizable sizable, Geometry geometry) { return self().modify(sizable, geometry), *this; }
 };
 #endif
 
@@ -13,6 +14,7 @@ struct HorizontalLayout : sHorizontalLayout {
   DeclareSharedLayout(HorizontalLayout)
 
   auto append(sSizable sizable, Size size, signed spacing = 5) { return self().append(sizable, size, spacing), *this; }
+  auto modify(sSizable sizable, Size size, signed spacing = 5) { return self().modify(sizable, size, spacing), *this; }
   auto setAlignment(double alignment = 0.5) { return self().setAlignment(alignment), *this; }
   auto setMargin(signed margin = 0) { return self().setMargin(margin), *this; }
   auto setSpacing(signed spacing = 5) { return self().setSpacing(spacing), *this; }
@@ -25,6 +27,7 @@ struct VerticalLayout : sVerticalLayout {
   DeclareSharedLayout(VerticalLayout)
 
   auto append(sSizable sizable, Size size, signed spacing = 5) { return self().append(sizable, size, spacing), *this; }
+  auto modify(sSizable sizable, Size size, signed spacing = 5) { return self().modify(sizable, size, spacing), *this; }
   auto setAlignment(double alignment = 0.0) { return self().setAlignment(alignment), *this; }
   auto setMargin(signed margin = 0) { return self().setMargin(margin), *this; }
   auto setSpacing(signed spacing = 5) { return self().setSpacing(spacing), *this; }

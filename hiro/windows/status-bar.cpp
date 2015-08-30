@@ -25,7 +25,7 @@ auto pStatusBar::setEnabled(bool enabled) -> void {
   //unsupported
 }
 
-auto pStatusBar::setFont(const string& font) -> void {
+auto pStatusBar::setFont(const Font& font) -> void {
   if(hfont) DeleteObject(hfont);
   hfont = pFont::create(font);
   if(hwnd) SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);

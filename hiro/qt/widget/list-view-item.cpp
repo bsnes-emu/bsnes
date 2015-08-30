@@ -28,7 +28,7 @@ auto pListViewItem::setBackgroundColor(Color color) -> void {
   _setState();
 }
 
-auto pListViewItem::setFont(const string& font) -> void {
+auto pListViewItem::setFont(const Font& font) -> void {
   _setState();
 }
 

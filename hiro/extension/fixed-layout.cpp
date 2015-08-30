@@ -7,6 +7,14 @@ auto mFixedLayout::append(sSizable sizable, Geometry geometry) -> type& {
   return *this;
 }
 
+auto mFixedLayout::modify(sSizable sizable, Geometry geometry) -> type& {
+  if(sizable && this->sizable(sizable->offset()) == sizable) {
+    auto& properties = this->properties[sizable->offset()];
+    properties.geometry = geometry;
+  }
+  return *this;
+}
+
 auto mFixedLayout::minimumSize() const -> Size {
   signed width = Size::Minimum, height = Size::Minimum;
   for(auto n : range(sizableCount())) {
@@ -36,7 +44,7 @@ auto mFixedLayout::setEnabled(bool enabled) -> type& {
   return *this;
 }
 
-auto mFixedLayout::setFont(const string& font) -> type& {
+auto mFixedLayout::setFont(const Font& font) -> type& {
   mLayout::setFont(font);
   for(auto n : range(sizableCount())) {
     sizable(n)->setFont(sizable(n)->font());

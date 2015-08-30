@@ -20,6 +20,10 @@ Geometry::Geometry(const string& text) {
   state.height = integer(part(3));
 }
 
+Geometry::operator bool() const {
+  return state.x || state.y || state.width || state.height;
+}
+
 auto Geometry::operator==(const Geometry& source) const -> bool {
   return x() == source.x() && y() == source.y() && width() == source.width() && height() == source.height();
 }
@@ -34,6 +38,10 @@ auto Geometry::height() const -> signed {
 
 auto Geometry::position() const -> Position {
   return {state.x, state.y};
+}
+
+auto Geometry::reset() -> type& {
+  return setGeometry(0, 0, 0, 0);
 }
 
 auto Geometry::setHeight(signed height) -> type& {

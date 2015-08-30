@@ -19,7 +19,7 @@ auto pMenuBar::setEnabled(bool enabled) -> void {
   _setState();
 }
 
-auto pMenuBar::setFont(const string& font) -> void {
+auto pMenuBar::setFont(const Font& font) -> void {
   _setState();
 }
 

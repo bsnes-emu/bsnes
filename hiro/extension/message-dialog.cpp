@@ -6,19 +6,19 @@ MessageDialog::MessageDialog(const string& text) {
 
 auto MessageDialog::error(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.icon = Icon::Prompt::Error;
+  state.image = Icon::Prompt::Error;
   return _run();
 }
 
 auto MessageDialog::information(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.icon = Icon::Prompt::Information;
+  state.image = Icon::Prompt::Information;
   return _run();
 }
 
 auto MessageDialog::question(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.icon = Icon::Prompt::Question;
+  state.image = Icon::Prompt::Question;
   return _run();
 }
 
@@ -39,7 +39,7 @@ auto MessageDialog::setTitle(const string& title) -> type& {
 
 auto MessageDialog::warning(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.icon = Icon::Prompt::Warning;
+  state.image = Icon::Prompt::Warning;
   return _run();
 }
 
@@ -53,7 +53,7 @@ auto MessageDialog::_run() -> string {
         Widget controlSpacer{&controlLayout, Size{~0, 0}};
 
   layout.setMargin(5);
-  messageIcon.setIcon(state.icon);
+  messageIcon.setImage(state.image);
   messageText.setText(state.text);
   for(auto n : range(state.buttons)) {
     Button button{&controlLayout, Size{80, 0}, 5};
@@ -62,7 +62,7 @@ auto MessageDialog::_run() -> string {
     button.setFocused();  //the last button will have effective focus
   }
 
-  signed widthMessage = 5 + 16 + 5 + Font::size(Font::sans(), state.text).width() + 5;
+  signed widthMessage = 5 + 16 + 5 + Font().size(state.text).width() + 5;
   signed widthButtons = 5 + state.buttons.size() * 85;
   signed width = max(320, widthMessage, widthButtons);
 

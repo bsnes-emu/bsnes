@@ -9,7 +9,7 @@ struct pWidget : pSizable {
   virtual auto minimumSize() -> Size;
   auto setEnabled(bool enabled) -> void override;
   auto setFocused() -> void;
-  auto setFont(const string& font) -> void override;
+  auto setFont(const Font& font) -> void override;
   virtual auto setGeometry(Geometry geometry) -> void;
   auto setVisible(bool visible) -> void override;
 

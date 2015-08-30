@@ -10,7 +10,7 @@ struct pListViewCell : pObject {
   auto setCheckable(bool checkable) -> void;
   auto setChecked(bool checked) -> void;
   auto setForegroundColor(Color color) -> void;
-  auto setIcon(const image& icon) -> void;
+  auto setImage(const Image& image) -> void;
   auto setText(const string& text) -> void;
 
   auto _parent() -> maybe<pListViewItem&>;

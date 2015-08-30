@@ -19,7 +19,7 @@ auto pCheckLabel::destruct() -> void {
 }
 
 auto pCheckLabel::minimumSize() const -> Size {
-  auto size = pFont::size(hfont, state().text);
+  auto size = pFont::size(self().font(true), state().text ? state().text : " ");
   return {size.width() + 20, size.height() + 4};
 }
 

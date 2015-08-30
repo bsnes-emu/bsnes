@@ -25,7 +25,7 @@ auto pMenuBar::setEnabled(bool enabled) -> void {
   _update();
 }
 
-auto pMenuBar::setFont(const string& font) -> void {
+auto pMenuBar::setFont(const Font& font) -> void {
   //unsupported
 }
 

@@ -21,13 +21,13 @@ auto pCheckButton::minimumSize() const -> Size {
   auto size = pFont::size(qtWidget->font(), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width());
-    size.setHeight(max(state().icon.height(), size.height()));
+    size.setWidth(size.width() + state().image.width());
+    size.setHeight(max(state().image.height(), size.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(state().icon.width(), size.width()));
-    size.setHeight(size.height() + state().icon.height());
+    size.setWidth(max(state().image.width(), size.width()));
+    size.setHeight(size.height() + state().image.height());
   }
 
   return {size.width() + 20, size.height() + 12};
@@ -41,7 +41,7 @@ auto pCheckButton::setChecked(bool checked) -> void {
   _setState();
 }
 
-auto pCheckButton::setIcon(const image& icon) -> void {
+auto pCheckButton::setImage(const Image& image) -> void {
   _setState();
 }
 
@@ -57,8 +57,8 @@ auto pCheckButton::_setState() -> void {
   lock();
   qtCheckButton->setAutoRaise(!state().bordered);
   qtCheckButton->setChecked(state().checked);
-  qtCheckButton->setIconSize(QSize(state().icon.width(), state().icon.height()));
-  qtCheckButton->setIcon(CreateIcon(state().icon));
+  qtCheckButton->setIconSize(QSize(state().image.width(), state().image.height()));
+  qtCheckButton->setIcon(CreateImage(state().image));
   qtCheckButton->setStyleSheet("text-align: top;");
   switch(state().orientation) {
   case Orientation::Horizontal: qtCheckButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;

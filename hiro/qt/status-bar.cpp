@@ -13,7 +13,7 @@ auto pStatusBar::setEnabled(bool enabled) -> void {
   _setState();
 }
 
-auto pStatusBar::setFont(const string& font) -> void {
+auto pStatusBar::setFont(const Font& font) -> void {
   _setState();
 }
 

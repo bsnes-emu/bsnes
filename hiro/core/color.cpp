@@ -9,7 +9,7 @@ Color::Color(signed red, signed green, signed blue, signed alpha) {
 }
 
 Color::operator bool() const {
-  return !empty();
+  return state.red || state.green || state.blue || state.alpha;
 }
 
 auto Color::operator==(const Color& source) const -> bool {
@@ -28,16 +28,16 @@ auto Color::blue() const -> uint8_t {
   return state.blue;
 }
 
-auto Color::empty() const -> bool {
-  return state.red == 0 && state.green == 0 && state.blue == 0 && state.alpha == 0;
-}
-
 auto Color::green() const -> uint8_t {
   return state.green;
 }
 
 auto Color::red() const -> uint8_t {
   return state.red;
+}
+
+auto Color::reset() -> type& {
+  return setColor(0, 0, 0, 0);
 }
 
 auto Color::setAlpha(signed alpha) -> type& {
@@ -73,7 +73,7 @@ auto Color::setRed(signed red) -> type& {
 }
 
 auto Color::value() const -> uint32_t {
-  return (state.alpha << 24) + (state.red << 16) + (state.green << 8) + (state.blue << 0);
+  return state.alpha << 24 | state.red << 16 | state.green << 8 | state.blue << 0;
 }
 
 #endif

@@ -12,7 +12,7 @@ auto pAction::setEnabled(bool enabled) -> void {
   _setState();
 }
 
-auto pAction::setFont(const string& font) -> void {
+auto pAction::setFont(const Font& font) -> void {
   _setState();
 }
 

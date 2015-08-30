@@ -33,7 +33,7 @@ auto pFrame::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
 }
 
-auto pFrame::setFont(const string& font) -> void {
+auto pFrame::setFont(const Font& font) -> void {
   if(auto layout = _layout()) layout->setFont(layout->self().font(true));
   pFont::setFont(gtkLabel, font);
 }

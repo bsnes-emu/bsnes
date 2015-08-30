@@ -35,6 +35,30 @@
   #define Button_SetImageList(hwnd, pbuttonImagelist) (WINBOOL)SNDMSG((hwnd),BCM_SETIMAGELIST,0,(LPARAM)(pbuttonImagelist))
 #endif
 
+#if !defined(BP_PUSHBUTTON)
+  #define BP_PUSHBUTTON 1
+#endif
+
+#if !defined(PBS_NORMAL)
+  #define PBS_NORMAL 1
+#endif
+
+#if !defined(PBS_HOT)
+  #define PBS_HOT 2
+#endif
+
+#if !defined(PBS_PRESSED)
+  #define PBS_PRESSED 3
+#endif
+
+#if !defined(PBS_DISABLED)
+  #define PBS_DISABLED 4
+#endif
+
+#if !defined(PBS_DEFAULTED)
+  #define PBS_DEFAULTED 5
+#endif
+
 #if !defined(BP_CHECKBOX)
   #define BP_CHECKBOX 3
 #endif

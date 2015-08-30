@@ -5,7 +5,7 @@ namespace hiro {
 static auto RadioButton_activate(GtkToggleButton*, pRadioButton* p) -> void {
   if(p->groupLocked()) return;
   bool wasChecked = p->state().checked;
-  p->setChecked();
+  p->self().setChecked();
   if(!wasChecked) p->self().doActivate();
 }
 
@@ -13,7 +13,7 @@ auto pRadioButton::construct() -> void {
   gtkWidget = gtk_toggle_button_new();
 
   setBordered(state().bordered);
-  setIcon(state().icon);
+  setImage(state().image);
   setOrientation(state().orientation);
   setText(state().text);
 
@@ -30,13 +30,13 @@ auto pRadioButton::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width());
-    size.setHeight(max(size.height(), state().icon.height()));
+    size.setWidth(size.width() + state().image.width());
+    size.setHeight(max(size.height(), state().image.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().icon.width()));
-    size.setHeight(size.height() + state().icon.height());
+    size.setWidth(max(size.width(), state().image.width()));
+    size.setHeight(size.height() + state().image.height());
   }
 
   return {size.width() + 24, size.height() + 12};
@@ -47,14 +47,12 @@ auto pRadioButton::setBordered(bool bordered) -> void {
 }
 
 auto pRadioButton::setChecked() -> void {
-  if(!self().group()) return;
   for(auto& weak : self().group()->state.objects) {
     if(auto object = weak.acquire()) {
       if(auto radioButton = dynamic_cast<mRadioButton*>(object.data())) {
         if(auto self = radioButton->self()) {
           self->lock();
-          bool checked = self == this;
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->gtkWidget), radioButton->state.checked = checked);
+          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->gtkWidget), radioButton->state.checked);
           self->unlock();
         }
       }
@@ -63,13 +61,14 @@ auto pRadioButton::setChecked() -> void {
 }
 
 auto pRadioButton::setGroup(sGroup group) -> void {
-  if(!group) return;
+  bool first = true;
   for(auto& weak : group->state.objects) {
     if(auto object = weak.acquire()) {
       if(auto radioButton = dynamic_cast<mRadioButton*>(object.data())) {
         if(auto self = radioButton->self()) {
           self->lock();
-          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->gtkWidget), radioButton->checked());
+          gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(self->gtkWidget), radioButton->state.checked = first);
+          first = false;
           self->unlock();
         }
       }
@@ -77,9 +76,9 @@ auto pRadioButton::setGroup(sGroup group) -> void {
   }
 }
 
-auto pRadioButton::setIcon(const image& icon) -> void {
-  if(icon) {
-    GtkImage* gtkImage = CreateImage(icon);
+auto pRadioButton::setImage(const Image& image) -> void {
+  if(image) {
+    GtkImage* gtkImage = CreateImage(image);
     gtk_button_set_image(GTK_BUTTON(gtkWidget), (GtkWidget*)gtkImage);
   } else {
     gtk_button_set_image(GTK_BUTTON(gtkWidget), nullptr);

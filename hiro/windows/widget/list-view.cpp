@@ -219,13 +219,11 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
           rc.left += 2;
         }
 
-        if(auto icon = cell->state.icon) {
-          icon.scale(iconSize, iconSize);
-          icon.transform();
-          auto bitmap = CreateBitmap(icon);
+        if(auto& image = cell->state.image) {
+          auto bitmap = CreateBitmap(image);
           SelectBitmap(hdcSource, bitmap);
           BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(selected ? 128 : 255), AC_SRC_ALPHA};
-          AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, iconSize, iconSize, blend);
+          AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, image.width(), image.height(), blend);
           DeleteObject(bitmap);
           rc.left += iconSize + 2;
         }
@@ -325,11 +323,11 @@ auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
       if(cell->state.checkable) {
         width += 16 + 2;
       }
-      if(auto& icon = cell->state.icon) {
+      if(auto& image = cell->state.image) {
         width += 16 + 2;
       }
       if(auto& text = cell->state.text) {
-        width += Font::size(_font(_row, _column), text).width();
+        width += pFont::size(_font(_row, _column), text).width();
       }
     }
   }
@@ -340,18 +338,18 @@ auto pListView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 12;
   if(auto header = state().header) {
     if(auto column = header->column(_column)) {
-      if(auto& icon = column->state.icon) {
+      if(auto& image = column->state.image) {
         width += 16 + 12;  //yes; icon spacing in column headers is excessive
       }
       if(auto& text = column->state.text) {
-        width += Font::size(self().font(true), text).width();
+        width += pFont::size(self().font(true), text).width();
       }
     }
   }
   return width;
 }
 
-auto pListView::_font(unsigned _row, unsigned _column) -> string {
+auto pListView::_font(unsigned _row, unsigned _column) -> Font {
   if(auto item = self().item(_row)) {
     if(auto cell = item->cell(_column)) {
       if(auto font = cell->font()) return font;
@@ -362,7 +360,7 @@ auto pListView::_font(unsigned _row, unsigned _column) -> string {
 //    if(auto font = column->font()) return font;
 //  }
   if(auto font = self().font(true)) return font;
-  return Font::sans(8);
+  return {};
 }
 
 auto pListView::_foregroundColor(unsigned _row, unsigned _column) -> Color {
@@ -387,10 +385,11 @@ auto pListView::_setIcons() -> void {
 
   if(auto& header = state().header) {
     for(auto column : range(header->columnCount())) {
-      auto icon = header->state.columns[column]->state.icon;
-      if(icon) {
+      nall::image icon;
+      if(auto& image = header->state.columns[column]->state.image) {
+        icon.allocate(image.width(), image.height());
+        memory::copy(icon.data(), image.data(), icon.size());
         icon.scale(16, 16);
-        icon.transform();
       } else {
         icon.allocate(16, 16);
         icon.fill(0x00ffffff);
@@ -402,7 +401,7 @@ auto pListView::_setIcons() -> void {
   }
 
   //empty icon used for ListViewItems (drawn manually via onCustomDraw)
-  image icon;
+  nall::image icon;
   icon.allocate(16, 16);
   icon.fill(0x00ffffff);
   auto bitmap = CreateBitmap(icon);

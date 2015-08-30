@@ -11,9 +11,9 @@ auto pTextEdit::construct() -> void {
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   pWidget::_setState();
   setBackgroundColor(state().backgroundColor);
-  setCursorPosition(state().cursorPosition);
   setEditable(state().editable);
   setText(state().text);
+  setCursor(state().cursor);
 }
 
 auto pTextEdit::destruct() -> void {
@@ -27,9 +27,11 @@ auto pTextEdit::setBackgroundColor(Color color) -> void {
   backgroundBrush = CreateSolidBrush(color ? CreateRGB(color) : GetSysColor(COLOR_WINDOW));
 }
 
-auto pTextEdit::setCursorPosition(unsigned position) -> void {
-  if(position == ~0) position >>= 1;  //Edit_SetSel takes signed type
-  Edit_SetSel(hwnd, position, position);
+auto pTextEdit::setCursor(Cursor cursor) -> void {
+  signed end = GetWindowTextLength(hwnd);
+  signed offset = max(0, min(end, cursor.offset()));
+  signed length = max(0, min(end, cursor.offset() + cursor.length()));
+  Edit_SetSel(hwnd, offset, length);
   Edit_ScrollCaret(hwnd);
 }
 

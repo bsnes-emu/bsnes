@@ -12,7 +12,7 @@ auto pCheckButton::construct() -> void {
 
   setBordered(state().bordered);
   setChecked(state().checked);
-  setIcon(state().icon);
+  setImage(state().image);
   setOrientation(state().orientation);
   setText(state().text);
 
@@ -29,13 +29,13 @@ auto pCheckButton::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().icon.width());
-    size.setHeight(max(size.height(), state().icon.height()));
+    size.setWidth(size.width() + state().image.width());
+    size.setHeight(max(size.height(), state().image.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().icon.width()));
-    size.setHeight(size.height() + state().icon.height());
+    size.setWidth(max(size.width(), state().image.width()));
+    size.setHeight(size.height() + state().image.height());
   }
 
   return {size.width() + 24, size.height() + 12};
@@ -51,9 +51,9 @@ auto pCheckButton::setChecked(bool checked) -> void {
   unlock();
 }
 
-auto pCheckButton::setIcon(const image& icon) -> void {
-  if(icon) {
-    GtkImage* gtkImage = CreateImage(icon);
+auto pCheckButton::setImage(const Image& image) -> void {
+  if(image) {
+    GtkImage* gtkImage = CreateImage(image);
     gtk_button_set_image(GTK_BUTTON(gtkWidget), (GtkWidget*)gtkImage);
   } else {
     gtk_button_set_image(GTK_BUTTON(gtkWidget), nullptr);

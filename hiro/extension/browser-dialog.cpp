@@ -15,8 +15,8 @@ private:
     VerticalLayout layout{&window};
       HorizontalLayout pathLayout{&layout, Size{~0, 0}, 5};
         LineEdit pathName{&pathLayout, Size{~0, 0}, 0};
-        Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathRefresh{&pathLayout, Size{0, 0}, 0};
+        Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathUp{&pathLayout, Size{0, 0}, 0};
       ListView view{&layout, Size{~0, ~0}, 5};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
@@ -118,9 +118,9 @@ auto BrowserDialogWindow::run() -> lstring {
 
   layout.setMargin(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
-  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
-  pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
-  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(state.path.dirname()); });
+  pathRefresh.setBordered(false).setImage(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
+  pathHome.setBordered(false).setImage(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
+  pathUp.setBordered(false).setImage(Icon::Go::Up).onActivate([&] { setPath(state.path.dirname()); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
@@ -175,7 +175,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     if(folderMode && isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
+      .append(ListViewCell().setText(content).setImage(Icon::Emblem::Folder))
     );
   }
 
@@ -185,7 +185,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     if(!isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
+      .append(ListViewCell().setText(content).setImage(folderMode ? Icon::Action::Open : Icon::Emblem::File))
     );
   }
 

@@ -18,12 +18,42 @@ auto mTreeViewItem::append(sTreeViewItem item) -> type& {
   return *this;
 }
 
+auto mTreeViewItem::backgroundColor(bool recursive) const -> Color {
+  if(auto color = state.backgroundColor) return color;
+  if(recursive) {
+    if(auto parent = parentTreeViewItem()) {
+      if(auto color = parent->backgroundColor(true)) return color;
+    }
+    if(auto parent = parentTreeView()) {
+      if(auto color = parent->backgroundColor()) return color;
+    }
+  }
+  return {};
+}
+
+auto mTreeViewItem::checkable() const -> bool {
+  return state.checkable;
+}
+
 auto mTreeViewItem::checked() const -> bool {
   return state.checked;
 }
 
-auto mTreeViewItem::icon() const -> image {
-  return state.icon;
+auto mTreeViewItem::foregroundColor(bool recursive) const -> Color {
+  if(auto color = state.foregroundColor) return color;
+  if(recursive) {
+    if(auto parent = parentTreeViewItem()) {
+      if(auto color = parent->foregroundColor(true)) return color;
+    }
+    if(auto parent = parentTreeView()) {
+      if(auto color = parent->foregroundColor()) return color;
+    }
+  }
+  return {};
+}
+
+auto mTreeViewItem::image() const -> Image {
+  return state.image;
 }
 
 auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
@@ -73,9 +103,26 @@ auto mTreeViewItem::selected() const -> bool {
   return false;
 }
 
+auto mTreeViewItem::setBackgroundColor(Color color) -> type& {
+  state.backgroundColor = color;
+  signal(setBackgroundColor, color);
+  return *this;
+}
+
+auto mTreeViewItem::setCheckable(bool checkable) -> type& {
+  state.checkable = checkable;
+  signal(setCheckable, checkable);
+  return *this;
+}
+
 auto mTreeViewItem::setChecked(bool checked) -> type& {
   state.checked = checked;
   signal(setChecked, checked);
+  return *this;
+}
+
+auto mTreeViewItem::setExpanded(bool expanded) -> type& {
+  signal(setExpanded, expanded);
   return *this;
 }
 
@@ -84,10 +131,22 @@ auto mTreeViewItem::setFocused() -> type& {
   return *this;
 }
 
-auto mTreeViewItem::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mTreeViewItem::setForegroundColor(Color color) -> type& {
+  state.foregroundColor = color;
+  signal(setForegroundColor, color);
   return *this;
+}
+
+auto mTreeViewItem::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
+  return *this;
+}
+
+auto mTreeViewItem::setParent(mObject* parent, signed offset) -> type& {
+  for(auto n : rrange(state.items)) state.items[n]->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& item : state.items) item->setParent(this, item->offset());
 }
 
 auto mTreeViewItem::setSelected() -> type& {

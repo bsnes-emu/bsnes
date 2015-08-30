@@ -6,7 +6,7 @@ auto Application::doMain() -> void {
   if(state.onMain) return state.onMain();
 }
 
-auto Application::font() -> string {
+auto Application::font() -> Font {
   return state.font;
 }
 
@@ -35,7 +35,7 @@ auto Application::quit() -> void {
   return pApplication::quit();
 }
 
-auto Application::setFont(const string& font) -> void {
+auto Application::setFont(const Font& font) -> void {
   state.font = font;
 }
 

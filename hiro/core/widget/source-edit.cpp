@@ -6,6 +6,10 @@ auto mSourceEdit::allocate() -> pObject* {
 
 //
 
+auto mSourceEdit::cursor() const -> Cursor {
+  return state.cursor;
+}
+
 auto mSourceEdit::doChange() const -> void {
   if(state.onChange) return state.onChange();
 }
@@ -24,22 +28,9 @@ auto mSourceEdit::onMove(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mSourceEdit::position() const -> unsigned {
-  return state.position;
-}
-
-auto mSourceEdit::setPosition(signed position) -> type& {
-  state.position = position;
-  signal(setPosition, position);
-  return *this;
-}
-
-auto mSourceEdit::setSelected(Position selected) -> type& {
-  if(selected.x() < 0) return *this;
-  if(selected.y() < 0) selected.setY(-1);
-  else if(selected.x() > selected.y()) return *this;
-  state.selected = selected;
-  signal(setSelected, selected);
+auto mSourceEdit::setCursor(Cursor cursor) -> type& {
+  state.cursor = cursor;
+  signal(setCursor, cursor);
   return *this;
 }
 

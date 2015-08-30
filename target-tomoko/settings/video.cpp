@@ -1,10 +1,10 @@
 VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setIcon(Icon::Device::Display);
+  setImage(Icon::Device::Display);
   setText("Video");
 
   layout.setMargin(5);
 
-  colorAdjustmentLabel.setFont(Font::sans(8, "Bold")).setText("Color Adjustment");
+  colorAdjustmentLabel.setFont(Font().setBold()).setText("Color Adjustment");
   saturationLabel.setText("Saturation:");
   saturationSlider.setLength(201).setPosition(config->video.saturation).onChange([&] { update(); });
   gammaLabel.setText("Gamma:");
@@ -12,7 +12,7 @@ VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
   luminanceLabel.setText("Luminance:");
   luminanceSlider.setLength(101).setPosition(config->video.luminance).onChange([&] { update(); });
 
-  overscanMaskLabel.setFont(Font::sans(8, "Bold")).setText("Overscan Mask");
+  overscanMaskLabel.setFont(Font().setBold()).setText("Overscan Mask");
   horizontalMaskLabel.setText("Horizontal:");
   horizontalMaskSlider.setLength(17).setPosition(config->video.overscan.horizontal).onChange([&] { update(); });
   verticalMaskLabel.setText("Vertical:");

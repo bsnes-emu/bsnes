@@ -39,9 +39,9 @@ auto pIconView::construct() -> void {
   gtk_widget_show(subWidget);
 
   setBackgroundColor(state().backgroundColor);
+  setBatchable(state().batchable);
   setFlow(state().flow);
   setForegroundColor(state().foregroundColor);
-  setMultiSelect(state().multiSelect);
   setOrientation(state().orientation);
   for(auto position : range(self().items())) {
     auto& item = state().items[position];
@@ -65,7 +65,7 @@ auto pIconView::destruct() -> void {
 auto pIconView::append(sIconViewItem item) -> void {
   GtkTreeIter iter;
   gtk_list_store_append(store, &iter);
-  setItemIcon(item->offset(), item->state.icon);
+  setItemImage(item->offset(), item->state.image);
   setItemSelected(item->offset(), item->state.selected);
   setItemText(item->offset(), item->state.text);
 }
@@ -92,6 +92,12 @@ auto pIconView::setBackgroundColor(Color color) -> void {
   gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
 }
 
+auto pIconView::setBatchable(bool batchable) -> void {
+  gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(subWidget),
+    batchable ? GTK_SELECTION_MULTIPLE : GTK_SELECTION_SINGLE
+  );
+}
+
 auto pIconView::setFlow(Orientation flow) -> void {
   //GTK+ does not support vertical flow ... the closest we can get is a horizontal flow with only one column
   if(flow == Orientation::Horizontal) {
@@ -115,12 +121,12 @@ auto pIconView::setGeometry(Geometry geometry) -> void {
   }
 }
 
-auto pIconView::setItemIcon(unsigned position, const image& icon) -> void {
+auto pIconView::setItemImage(unsigned position, const Image& image) -> void {
   if(position >= self().itemCount()) return;
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, string{position})) {
-    if(icon) {
-      GdkPixbuf* pixbuf = CreatePixbuf(icon);
+    if(image) {
+      GdkPixbuf* pixbuf = CreatePixbuf(image);
       gtk_list_store_set(store, &iter, 0, pixbuf, -1);
     } else {
       gtk_list_store_set(store, &iter, 0, nullptr, -1);
@@ -170,12 +176,6 @@ auto pIconView::setItemText(unsigned position, const string& text) -> void {
   if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, string{position})) {
     gtk_list_store_set(store, &iter, 1, (const char*)text, -1);
   }
-}
-
-auto pIconView::setMultiSelect(bool multiSelect) -> void {
-  gtk_icon_view_set_selection_mode(GTK_ICON_VIEW(subWidget),
-    multiSelect ? GTK_SELECTION_MULTIPLE : GTK_SELECTION_SINGLE
-  );
 }
 
 auto pIconView::setOrientation(Orientation orientation) -> void {

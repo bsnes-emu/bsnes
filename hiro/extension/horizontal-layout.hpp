@@ -7,11 +7,12 @@ struct mHorizontalLayout : mLayout {
 
   auto append(sSizable sizable, Size size, signed spacing = 5) -> type&;
   auto minimumSize() const -> Size override;
+  auto modify(sSizable sizable, Size size, signed spacing = 5) -> type&;
   auto remove(sSizable sizable) -> type& override;
   auto reset() -> type& override;
   auto setAlignment(double alignment = 0.5) -> type&;
   auto setEnabled(bool enabled = true) -> type& override;
-  auto setFont(const string& font = "") -> type& override;
+  auto setFont(const Font& font = {}) -> type& override;
   auto setGeometry(Geometry geometry) -> type& override;
   auto setMargin(signed margin = 0) -> type&;
   auto setSpacing(signed spacing = 5) -> type&;

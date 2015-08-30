@@ -11,7 +11,7 @@ auto mCanvas::color() const -> Color {
 }
 
 auto mCanvas::data() -> uint32_t* {
-  return state.data.data();
+  return state.image.data();
 }
 
 auto mCanvas::droppable() const -> bool {
@@ -38,12 +38,12 @@ auto mCanvas::doMouseRelease(Mouse::Button button) const -> void {
   if(state.onMouseRelease) return state.onMouseRelease(button);
 }
 
-auto mCanvas::gradient() const -> vector<Color> {
+auto mCanvas::gradient() const -> Gradient {
   return state.gradient;
 }
 
-auto mCanvas::icon() const -> image {
-  return state.icon;
+auto mCanvas::image() const -> Image {
+  return state.image;
 }
 
 auto mCanvas::onDrop(const function<void (lstring)>& callback) -> type& {
@@ -72,17 +72,8 @@ auto mCanvas::onMouseRelease(const function<void (Mouse::Button)>& callback) -> 
 }
 
 auto mCanvas::setColor(Color color) -> type& {
-  state.size = {};
   state.color = color;
   signal(setColor, color);
-  return *this;
-}
-
-auto mCanvas::setData(Size size) -> type& {
-  state.size = size;
-  state.data.resize(size.width() * size.height());
-  memory::fill(state.data.data(), size.width() * size.height() * sizeof(uint32_t));
-  signal(setData, size);
   return *this;
 }
 
@@ -92,33 +83,27 @@ auto mCanvas::setDroppable(bool droppable) -> type& {
   return *this;
 }
 
-auto mCanvas::setGradient(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight) -> type& {
-  state.size = {};
-  state.gradient[0] = topLeft;
-  state.gradient[1] = topRight;
-  state.gradient[2] = bottomLeft;
-  state.gradient[3] = bottomRight;
-  signal(setGradient, topLeft, topRight, bottomLeft, bottomRight);
+auto mCanvas::setGradient(Gradient gradient) -> type& {
+  state.gradient = gradient;
+  signal(setGradient, gradient);
   return *this;
 }
 
-auto mCanvas::setHorizontalGradient(Color left, Color right) -> type& {
-  return setGradient(left, right, left, right);
-}
-
-auto mCanvas::setIcon(const image& icon) -> type& {
-  state.size = {(signed)icon.width(), (signed)icon.height()};
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mCanvas::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 
-auto mCanvas::setVerticalGradient(Color top, Color bottom) -> type& {
-  return setGradient(top, top, bottom, bottom);
+auto mCanvas::setSize(Size size) -> type& {
+  Image image;
+  image.setSize(size);
+  memory::fill(image.data(), size.width() * size.height() * sizeof(uint32_t), 0x00);
+  return setImage(image);
 }
 
 auto mCanvas::size() const -> Size {
-  return state.size;
+  return state.image.size();
 }
 
 auto mCanvas::update() -> type& {

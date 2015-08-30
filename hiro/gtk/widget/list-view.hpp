@@ -16,7 +16,7 @@ struct pListView : pWidget {
   auto setBatchable(bool batchable) -> void;
   auto setBordered(bool bordered) -> void;
   auto setFocused() -> void override;
-  auto setFont(const string& font) -> void override;
+  auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
   auto setGeometry(Geometry geometry) -> void override;
 

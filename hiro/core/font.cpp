@@ -1,11 +1,14 @@
 #if defined(Hiro_Font)
 
-Font::Font() {
-}
+const string Font::Sans  = "{sans}";
+const string Font::Serif = "{serif}";
+const string Font::Mono  = "{mono}";
 
 Font::Font(const string& family, unsigned size) {
-  state.family = family;
-  state.size = size;
+  setFamily(family);
+  setSize(size);
+  state.bold = false;
+  state.italic = false;
 }
 
 Font::operator bool() const {
@@ -13,8 +16,8 @@ Font::operator bool() const {
 }
 
 auto Font::operator==(const Font& source) const -> bool {
-  return family() == source.family() || size() == source.size() && bold() == source.bold() && italic() == source.italic();
-};
+  return family() == source.family() && size() == source.size() && bold() == source.bold() && italic() == source.italic();
+}
 
 auto Font::operator!=(const Font& source) const -> bool {
   return !operator==(source);
@@ -30,6 +33,14 @@ auto Font::family() const -> string {
 
 auto Font::italic() const -> bool {
   return state.italic;
+}
+
+auto Font::reset() -> type& {
+  state.family = "";
+  state.size = 0;
+  state.bold = false;
+  state.italic = false;
+  return *this;
 }
 
 auto Font::setBold(bool bold) -> type& {
@@ -56,22 +67,8 @@ auto Font::size() const -> unsigned {
   return state.size;
 }
 
-//
-
-auto Font::serif(unsigned size, const string& style) -> string {
-  return pFont::serif(size, style);
-}
-
-auto Font::sans(unsigned size, const string& style) -> string {
-  return pFont::sans(size, style);
-}
-
-auto Font::monospace(unsigned size, const string& style) -> string {
-  return pFont::monospace(size, style);
-}
-
-auto Font::size(const string& font, const string& text) -> Size {
-  return pFont::size(font, text);
+auto Font::size(const string& text) const -> Size {
+  return pFont::size(*this, text);
 }
 
 #endif

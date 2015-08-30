@@ -194,7 +194,7 @@ auto mListView::setForegroundColor(Color color) -> type& {
 }
 
 auto mListView::setParent(mObject* parent, signed offset) -> type& {
-  for(auto& item : state.items) item->destruct();
+  for(auto n : rrange(state.items)) state.items[n]->destruct();
   if(auto& header = state.header) header->destruct();
   mObject::setParent(parent, offset);
   if(auto& header = state.header) header->setParent(this, 0);

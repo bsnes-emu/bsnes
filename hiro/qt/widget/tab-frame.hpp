@@ -7,8 +7,8 @@ struct pTabFrame : pWidget {
 
   auto append(sTabFrameItem item) -> void;
   auto remove(sTabFrameItem item) -> void;
-  auto setEdge(Edge edge) -> void;
   auto setGeometry(Geometry geometry) -> void override;
+  auto setNavigation(Navigation navigation) -> void;
 
   auto _setState() -> void;
 

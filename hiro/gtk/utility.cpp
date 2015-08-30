@@ -20,10 +20,45 @@ static auto CreatePixbuf(image icon, bool scale = false) -> GdkPixbuf* {
   auto pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, icon.width(), icon.height());
   memory::copy(gdk_pixbuf_get_pixels(pixbuf), icon.data(), icon.size());
 
+  if(scale) {
+    auto scaled = gdk_pixbuf_scale_simple(pixbuf, 15, 15, GDK_INTERP_BILINEAR);
+    g_object_unref(pixbuf);
+    pixbuf = scaled;
+  }
+
+  return pixbuf;
+}
+
+static auto CreatePixbuf(const Image& image, bool scale = false) -> GdkPixbuf* {
+  if(!image.state.data) return nullptr;
+
+  auto pixbuf = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, image.width(), image.height());
+
+  //ARGB -> ABGR conversion
+  const uint32_t* source = image.data();
+  uint32_t* target = (uint32_t*)gdk_pixbuf_get_pixels(pixbuf);
+  for(auto n : range(image.width() * image.height())) {
+    uint32_t pixel = *source++;
+    *target++ = (pixel & 0x00ff0000) >> 16 | (pixel & 0xff00ff00) | (pixel & 0x000000ff) << 16;
+  }
+
+  if(scale) {
+    auto scaled = gdk_pixbuf_scale_simple(pixbuf, 15, 15, GDK_INTERP_BILINEAR);
+    g_object_unref(pixbuf);
+    pixbuf = scaled;
+  }
+
   return pixbuf;
 }
 
 static auto CreateImage(const nall::image& image, bool scale = false) -> GtkImage* {
+  auto pixbuf = CreatePixbuf(image, scale);
+  auto gtkImage = (GtkImage*)gtk_image_new_from_pixbuf(pixbuf);
+  g_object_unref(pixbuf);
+  return gtkImage;
+}
+
+static auto CreateImage(const Image& image, bool scale = false) -> GtkImage* {
   auto pixbuf = CreatePixbuf(image, scale);
   auto gtkImage = (GtkImage*)gtk_image_new_from_pixbuf(pixbuf);
   g_object_unref(pixbuf);

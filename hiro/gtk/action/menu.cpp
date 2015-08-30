@@ -6,6 +6,7 @@ auto pMenu::construct() -> void {
   gtkMenu = gtk_menu_new();
   widget = gtk_image_menu_item_new_with_mnemonic("");
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(widget), gtkMenu);
+  setImage(state().image);
   setText(state().text);
 
   for(auto& action : state().actions) append(*action);
@@ -27,16 +28,16 @@ auto pMenu::append(sAction action) -> void {
 auto pMenu::remove(sAction action) -> void {
 }
 
-auto pMenu::setFont(const string& font) -> void {
+auto pMenu::setFont(const Font& font) -> void {
   pAction::setFont(font);
   for(auto& action : state().actions) {
     if(action->self()) action->self()->setFont(action->font(true));
   }
 }
 
-auto pMenu::setIcon(const image& icon) -> void {
-  if(icon) {
-    GtkImage* gtkImage = CreateImage(icon, true);
+auto pMenu::setImage(const Image& image) -> void {
+  if(image) {
+    GtkImage* gtkImage = CreateImage(image, true);
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), (GtkWidget*)gtkImage);
   } else {
     gtk_image_menu_item_set_image(GTK_IMAGE_MENU_ITEM(widget), nullptr);

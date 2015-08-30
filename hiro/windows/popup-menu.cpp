@@ -17,7 +17,7 @@ auto pPopupMenu::append(sAction action) -> void {
 auto pPopupMenu::remove(sAction action) -> void {
 }
 
-auto pPopupMenu::setFont(const string& font) -> void {
+auto pPopupMenu::setFont(const Font& font) -> void {
 }
 
 auto pPopupMenu::setVisible(bool visible) -> void {

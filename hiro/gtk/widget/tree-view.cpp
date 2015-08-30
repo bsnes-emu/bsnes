@@ -2,10 +2,14 @@
 
 namespace hiro {
 
+//gtk_tree_view_collapse_all(gtkTreeView);
+//gtk_tree_view_expand_all(gtkTreeView);
+
 static auto TreeView_activate(GtkTreeView*, GtkTreePath* gtkPath, GtkTreeViewColumn*, pTreeView* p) -> void { p->_activatePath(gtkPath); }
 static auto TreeView_buttonEvent(GtkTreeView*, GdkEventButton* gdkEvent, pTreeView* p) -> signed { return p->_buttonEvent(gdkEvent); }
 static auto TreeView_change(GtkTreeSelection*, pTreeView* p) -> void { p->_updateSelected(); }
 static auto TreeView_context(GtkTreeView*, pTreeView* p) -> void { p->self().doContext(); }
+static auto TreeView_dataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeModel* model, GtkTreeIter* iter, pTreeView* p) -> void { return p->_doDataFunc(column, renderer, iter); }
 static auto TreeView_toggle(GtkCellRendererToggle*, char* path, pTreeView* p) -> void { p->_togglePath(path); }
 
 auto pTreeView::construct() -> void {
@@ -29,15 +33,17 @@ auto pTreeView::construct() -> void {
   gtkCellToggle = gtk_cell_renderer_toggle_new();
   gtk_tree_view_column_pack_start(gtkTreeViewColumn, gtkCellToggle, false);
   gtk_tree_view_column_set_attributes(gtkTreeViewColumn, gtkCellToggle, "active", 0, nullptr);
-  gtk_cell_renderer_set_visible(gtkCellToggle, state().checkable);
+  gtk_tree_view_column_set_cell_data_func(gtkTreeViewColumn, GTK_CELL_RENDERER(gtkCellToggle), (GtkTreeCellDataFunc)TreeView_dataFunc, (gpointer)this, nullptr);
 
   gtkCellPixbuf = gtk_cell_renderer_pixbuf_new();
   gtk_tree_view_column_pack_start(gtkTreeViewColumn, gtkCellPixbuf, false);
   gtk_tree_view_column_set_attributes(gtkTreeViewColumn, gtkCellPixbuf, "pixbuf", 1, nullptr);
+  gtk_tree_view_column_set_cell_data_func(gtkTreeViewColumn, GTK_CELL_RENDERER(gtkCellPixbuf), (GtkTreeCellDataFunc)TreeView_dataFunc, (gpointer)this, nullptr);
 
   gtkCellText = gtk_cell_renderer_text_new();
   gtk_tree_view_column_pack_start(gtkTreeViewColumn, gtkCellText, true);
   gtk_tree_view_column_set_attributes(gtkTreeViewColumn, gtkCellText, "text", 2, nullptr);
+  gtk_tree_view_column_set_cell_data_func(gtkTreeViewColumn, GTK_CELL_RENDERER(gtkCellText), (GtkTreeCellDataFunc)TreeView_dataFunc, (gpointer)this, nullptr);
 
   gtk_tree_view_append_column(gtkTreeView, gtkTreeViewColumn);
   gtk_tree_view_set_search_column(gtkTreeView, 2);
@@ -63,38 +69,14 @@ auto pTreeView::destruct() -> void {
 //
 
 auto pTreeView::append(sTreeViewItem item) -> void {
-  gtk_tree_store_append(gtkTreeStore, &item->self()->gtkIter, nullptr);
-  item->setChecked(item->checked());
-  item->setIcon(item->icon());
-  item->setText(item->text());
-}
-
-auto pTreeView::collapse() -> void {
-  gtk_tree_view_collapse_all(gtkTreeView);
-}
-
-auto pTreeView::expand() -> void {
-  gtk_tree_view_expand_all(gtkTreeView);
 }
 
 auto pTreeView::remove(sTreeViewItem item) -> void {
-  gtk_tree_store_remove(gtkTreeStore, &item->self()->gtkIter);
-}
-
-auto pTreeView::reset() -> void {
-  gtk_tree_view_set_model(gtkTreeView, nullptr);
-  gtkTreeStore = gtk_tree_store_new(3, G_TYPE_BOOLEAN, GDK_TYPE_PIXBUF, G_TYPE_STRING);
-  gtkTreeModel = GTK_TREE_MODEL(gtkTreeStore);
-  gtk_tree_view_set_model(gtkTreeView, gtkTreeModel);
 }
 
 auto pTreeView::setBackgroundColor(Color color) -> void {
   auto gdkColor = CreateColor(color);
   gtk_widget_modify_base(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
-}
-
-auto pTreeView::setCheckable(bool checkable) -> void {
-  gtk_cell_renderer_set_visible(gtkCellToggle, checkable);
 }
 
 auto pTreeView::setForegroundColor(Color color) -> void {
@@ -134,6 +116,41 @@ auto pTreeView::_buttonEvent(GdkEventButton* gdkEvent) -> signed {
   }
 
   return false;
+}
+
+auto pTreeView::_doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void {
+  auto path = gtk_tree_model_get_string_from_iter(gtkTreeModel, iter);
+  auto parts = string{path}.split(":");
+  g_free(path);
+
+  auto item = self().item(decimal(parts.takeFirst()));
+  if(!item) return;
+  while(parts) {
+    item = item.item(decimal(parts.takeFirst()));
+    if(!item) return;
+  }
+
+  if(renderer == GTK_CELL_RENDERER(gtkCellToggle)) {
+    gtk_cell_renderer_set_visible(renderer, item->state.checkable);
+  } else if(renderer == GTK_CELL_RENDERER(gtkCellPixbuf)) {
+    gtk_cell_renderer_set_visible(renderer, (bool)item->state.image);
+  } else if(renderer == GTK_CELL_RENDERER(gtkCellText)) {
+    auto font = pFont::create(item->font(true));
+    g_object_set(G_OBJECT(renderer), "font-desc", font, nullptr);
+    pango_font_description_free(font);
+    if(auto color = item->foregroundColor(true)) {
+      auto gdkColor = CreateColor(color);
+      g_object_set(G_OBJECT(renderer), "foreground-gdk", &gdkColor, nullptr);
+    } else {
+      g_object_set(G_OBJECT(renderer), "foreground-set", false, nullptr);
+    }
+  }
+  if(auto color = item->backgroundColor(true)) {
+    auto gdkColor = CreateColor(color);
+    g_object_set(G_OBJECT(renderer), "cell-background-gdk", &gdkColor, nullptr);
+  } else {
+    g_object_set(G_OBJECT(renderer), "cell-background-set", false, nullptr);
+  }
 }
 
 auto pTreeView::_togglePath(string path) -> void {

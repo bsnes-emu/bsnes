@@ -8,12 +8,20 @@ Position::Position(signed x, signed y) {
   setPosition(x, y);
 }
 
+Position::operator bool() const {
+  return state.x || state.y;
+}
+
 auto Position::operator==(const Position& source) const -> bool {
   return x() == source.x() && y() == source.y();
 }
 
 auto Position::operator!=(const Position& source) const -> bool {
   return !operator==(source);
+}
+
+auto Position::reset() -> type& {
+  return setPosition(0, 0);
 }
 
 auto Position::setPosition(Position position) -> type& {

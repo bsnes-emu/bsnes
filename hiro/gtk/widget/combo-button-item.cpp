@@ -8,11 +8,10 @@ auto pComboButtonItem::construct() -> void {
 auto pComboButtonItem::destruct() -> void {
 }
 
-auto pComboButtonItem::setIcon(image icon) -> void {
+auto pComboButtonItem::setImage(const Image& image) -> void {
   if(auto parent = _parent()) {
     auto size = pFont::size(self().font(true), " ").height();
-    if(icon) icon.scale(size, size);
-    auto pixbuf = CreatePixbuf(icon);
+    auto pixbuf = CreatePixbuf(image, true);
     gtk_list_store_set(parent->gtkListStore, &gtkIter, 0, pixbuf, -1);
   }
 }

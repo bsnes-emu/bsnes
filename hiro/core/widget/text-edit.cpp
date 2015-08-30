@@ -10,8 +10,8 @@ auto mTextEdit::backgroundColor() const -> Color {
   return state.backgroundColor;
 }
 
-auto mTextEdit::cursorPosition() const -> unsigned {
-  return state.cursorPosition;
+auto mTextEdit::cursor() const -> Cursor {
+  return state.cursor;
 }
 
 auto mTextEdit::doChange() const -> void {
@@ -46,9 +46,9 @@ auto mTextEdit::setBackgroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mTextEdit::setCursorPosition(unsigned position) -> type& {
-  state.cursorPosition = position;
-  signal(setCursorPosition, position);
+auto mTextEdit::setCursor(Cursor cursor) -> type& {
+  state.cursor = cursor;
+  signal(setCursor, cursor);
   return *this;
 }
 

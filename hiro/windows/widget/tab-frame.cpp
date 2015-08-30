@@ -15,9 +15,10 @@ static auto CALLBACK TabFrame_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 }
 
 auto pTabFrame::construct() -> void {
-  hwnd = CreateWindow(WC_TABCONTROL, L"",
-    WS_CHILD | WS_TABSTOP,
-    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0);
+  hwnd = CreateWindow(
+    WC_TABCONTROL, L"", WS_CHILD | WS_TABSTOP,
+    0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
+  );
   SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)&reference);
   windowProc = (WindowProc)GetWindowLongPtr(hwnd, GWLP_WNDPROC);
   SetWindowLongPtr(hwnd, GWLP_WNDPROC, (LONG_PTR)TabFrame_windowProc);
@@ -38,7 +39,7 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
   TabCtrl_InsertItem(hwnd, item->offset(), &tcItem);
   if(auto self = item->self()) {
     self->setClosable(item->state.closable);
-    self->setIcon(item->state.icon);
+    self->setImage(item->state.image);
     self->setMovable(item->state.movable);
     self->setText(item->state.text);
     if(item->selected()) self->setSelected();
@@ -50,10 +51,6 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
 auto pTabFrame::remove(sTabFrameItem item) -> void {
   TabCtrl_DeleteItem(hwnd, item->offset());
   _buildImageList();
-}
-
-auto pTabFrame::setEdge(Edge edge) -> void {
-  //unsupported
 }
 
 auto pTabFrame::setEnabled(bool enabled) -> void {
@@ -78,6 +75,10 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
   }
 }
 
+auto pTabFrame::setNavigation(Navigation navigation) -> void {
+  //unsupported
+}
+
 auto pTabFrame::setVisible(bool visible) -> void {
   pWidget::setVisible(visible);
   for(auto& item : state().items) {
@@ -93,13 +94,13 @@ auto pTabFrame::_buildImageList() -> void {
   if(imageList) { ImageList_Destroy(imageList); imageList = nullptr; }
   imageList = ImageList_Create(size, size, ILC_COLOR32, 1, 0);
   for(auto& item : state().items) {
-    ImageList_Append(imageList, item->state.icon, size);
+    ImageList_Append(imageList, item->state.image, size);
   }
   TabCtrl_SetImageList(hwnd, imageList);
   for(auto offset : range(state().items)) {
     TCITEM tcItem;
     tcItem.mask = TCIF_IMAGE;
-    tcItem.iImage = state().items[offset]->state.icon ? offset : -1;
+    tcItem.iImage = state().items[offset]->state.image ? offset : -1;
     TabCtrl_SetItem(hwnd, offset, &tcItem);
   }
 }

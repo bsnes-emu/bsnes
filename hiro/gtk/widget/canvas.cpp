@@ -73,16 +73,11 @@ auto pCanvas::destruct() -> void {
 }
 
 auto pCanvas::minimumSize() const -> Size {
-  return {max(0, state().size.width()), max(0, state().size.height())};
+  if(auto& image = state().image) return image.size();
+  return {0, 0};
 }
 
 auto pCanvas::setColor(Color color) -> void {
-  mode = Mode::Color;
-  update();
-}
-
-auto pCanvas::setData(Size size) -> void {
-  mode = Mode::Data;
   update();
 }
 
@@ -98,13 +93,11 @@ auto pCanvas::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
 }
 
-auto pCanvas::setGradient(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight) -> void {
-  mode = Mode::Gradient;
+auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setIcon(const image& icon) -> void {
-  mode = Mode::Icon;
+auto pCanvas::setImage(const Image& image) -> void {
   update();
 }
 
@@ -146,14 +139,13 @@ auto pCanvas::_rasterize() -> void {
   signed width = 0;
   signed height = 0;
 
-  if(mode == Mode::Color || mode == Mode::Gradient) {
+  if(auto& image = state().image) {
+    width = image.width();
+    height = image.height();
+  } else {
     width = pSizable::state().geometry.width();
     height = pSizable::state().geometry.height();
-  } else {
-    width = state().size.width();
-    height = state().size.height();
   }
-
   if(width <= 0 || height <= 0) return;
 
   if(width != surfaceWidth || height != surfaceHeight) _release();
@@ -161,31 +153,19 @@ auto pCanvas::_rasterize() -> void {
   surfaceHeight = height;
 
   if(!surface) surface = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, width, height);
-  uint32_t* buffer = (uint32_t*)gdk_pixbuf_get_pixels(surface);
+  auto buffer = (uint32_t*)gdk_pixbuf_get_pixels(surface);
 
-  if(mode == Mode::Color) {
+  if(auto& image = state().image) {
+    memory::copy(buffer, state().image.data(), width * height * sizeof(uint32_t));
+  } else if(auto& gradient = state().gradient) {
+    auto& colors = gradient.state.colors;
+    nall::image fill;
+    fill.allocate(width, height);
+    fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
+    memory::copy(buffer, fill.data(), fill.size());
+  } else {
     uint32_t color = state().color.value();
     for(auto n : range(width * height)) buffer[n] = color;
-  }
-
-  if(mode == Mode::Gradient) {
-    image fill;
-    fill.allocate(width, height);
-    fill.gradient(
-      state().gradient[0].value(), state().gradient[1].value(), state().gradient[2].value(), state().gradient[3].value()
-    );
-    memory::copy(buffer, fill.data(), fill.size());
-  }
-
-  if(mode == Mode::Icon) {
-    auto icon = state().icon;
-    icon.scale(width, height);
-    icon.transform();
-    memory::copy(buffer, icon.data(), icon.size());
-  }
-
-  if(mode == Mode::Data) {
-    memory::copy(buffer, state().data.data(), state().data.size() * sizeof(uint32_t));
   }
 
   //ARGB -> ABGR conversion

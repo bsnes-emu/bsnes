@@ -7,11 +7,11 @@ static auto TextEdit_change(GtkTextBuffer* textBuffer, pTextEdit* p) -> void {
 }
 
 static auto TextEdit_move(GObject* object, GParamSpec* spec, pTextEdit* p) -> void {
-  int position = 0;
-  g_object_get(p->textBuffer, "cursor-position", &position, nullptr);
+  signed offset = 0;
+  g_object_get(p->textBuffer, "cursor-position", &offset, nullptr);
 
-  if(p->state().cursorPosition != position) {
-    p->state().cursorPosition = position;
+  if(p->state().cursor.offset() != offset) {
+    p->state().cursor.setOffset(offset);
     if(!p->locked()) p->self().doMove();
   }
 }
@@ -33,6 +33,7 @@ auto pTextEdit::construct() -> void {
   setForegroundColor(state().foregroundColor);
   setText(state().text);
   setWordWrap(state().wordWrap);
+  setCursor(state().cursor);
 
   g_signal_connect(G_OBJECT(textBuffer), "changed", G_CALLBACK(TextEdit_change), (gpointer)this);
   g_signal_connect(G_OBJECT(textBuffer), "notify::cursor-position", G_CALLBACK(TextEdit_move), (gpointer)this);
@@ -55,19 +56,26 @@ auto pTextEdit::setBackgroundColor(Color color) -> void {
   gtk_widget_modify_base(subWidget, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
 }
 
-auto pTextEdit::setCursorPosition(unsigned position) -> void {
+auto pTextEdit::setCursor(Cursor cursor) -> void {
   lock();
-  GtkTextMark* mark = gtk_text_buffer_get_mark(textBuffer, "insert");
-  GtkTextIter iter;
-  gtk_text_buffer_get_end_iter(textBuffer, &iter);
-  gtk_text_iter_set_offset(&iter, min(position, gtk_text_iter_get_offset(&iter)));
-  gtk_text_buffer_place_cursor(textBuffer, &iter);
+  GtkTextIter offset, length;
+  gtk_text_buffer_get_end_iter(textBuffer, &offset);
+  gtk_text_buffer_get_end_iter(textBuffer, &length);
+  signed end = gtk_text_iter_get_offset(&offset);
+  gtk_text_iter_set_offset(&offset, max(0, min(end, cursor.offset())));
+  gtk_text_iter_set_offset(&length, max(0, min(end, cursor.offset() + cursor.length())));
+  gtk_text_buffer_select_range(textBuffer, &offset, &length);
+  auto mark = gtk_text_buffer_get_mark(textBuffer, "insert");
   gtk_text_view_scroll_mark_onscreen(GTK_TEXT_VIEW(subWidget), mark);
   unlock();
 }
 
 auto pTextEdit::setEditable(bool editable) -> void {
   gtk_text_view_set_editable(GTK_TEXT_VIEW(subWidget), editable);
+}
+
+auto pTextEdit::setFocused() -> void {
+  gtk_widget_grab_focus(subWidget);
 }
 
 auto pTextEdit::setForegroundColor(Color color) -> void {

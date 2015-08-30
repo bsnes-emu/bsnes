@@ -27,7 +27,7 @@ struct pListView : pWidget {
   auto _backgroundColor(unsigned row, unsigned column) -> Color;
   auto _cellWidth(unsigned row, unsigned column) -> unsigned;
   auto _columnWidth(unsigned column) -> unsigned;
-  auto _font(unsigned row, unsigned column) -> string;
+  auto _font(unsigned row, unsigned column) -> Font;
   auto _foregroundColor(unsigned row, unsigned column) -> Color;
   auto _setIcons() -> void;
   auto _setSortable() -> void;

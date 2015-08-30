@@ -22,9 +22,6 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
 auto pTabFrame::remove(sTabFrameItem item) -> void {
 }
 
-auto pTabFrame::setEdge(Edge edge) -> void {
-}
-
 auto pTabFrame::setGeometry(Geometry geometry) -> void {
   pWidget::setGeometry(geometry);
 
@@ -33,7 +30,18 @@ auto pTabFrame::setGeometry(Geometry geometry) -> void {
   }
 }
 
+auto pTabFrame::setNavigation(Navigation navigation) -> void {
+  _setState();
+}
+
 auto pTabFrame::_setState() -> void {
+  switch(state().navigation) { default:
+  case Navigation::Top: qtTabFrame->setTabPosition(QTabWidget::TabPosition::North); break;
+  case Navigation::Bottom: qtTabFrame->setTabPosition(QTabWidget::TabPosition::South); break;
+  case Navigation::Left: qtTabFrame->setTabPosition(QTabWidget::TabPosition::West); break;
+  case Navigation::Right: qtTabFrame->setTabPosition(QTabWidget::TabPosition::East); break;
+  }
+
   for(auto& item : state().items) {
     if(auto self = item->self()) self->_setState();
   }

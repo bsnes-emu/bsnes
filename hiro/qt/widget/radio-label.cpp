@@ -8,6 +8,7 @@ auto pRadioLabel::construct() -> void {
   qtRadioLabel->connect(qtRadioLabel, SIGNAL(toggled(bool)), SLOT(onActivate()));
 
   pWidget::construct();
+  setGroup(state().group);
   _setState();
 }
 
@@ -26,7 +27,21 @@ auto pRadioLabel::setChecked() -> void {
 }
 
 auto pRadioLabel::setGroup(sGroup group) -> void {
-  _setState();
+  bool first = true;
+  if(auto& group = state().group) {
+    group->self()->lock();
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto radioLabel = dynamic_cast<mRadioLabel*>(object.data())) {
+          if(auto self = radioLabel->self()) {
+            self->qtRadioLabel->setChecked(radioLabel->state.checked = first);
+            first = false;
+          }
+        }
+      }
+    }
+    group->self()->unlock();
+  }
 }
 
 auto pRadioLabel::setText(const string& text) -> void {

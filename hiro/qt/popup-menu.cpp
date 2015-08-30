@@ -20,7 +20,7 @@ auto pPopupMenu::remove(sAction action) -> void {
   _setState();
 }
 
-auto pPopupMenu::setFont(const string& font) -> void {
+auto pPopupMenu::setFont(const Font& font) -> void {
   _setState();
 }
 

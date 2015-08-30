@@ -18,6 +18,7 @@ auto pMenuRadioItem::construct() -> void {
     parent->qtPopupMenu->addAction(qtMenuRadioItem);
   }
 
+  setGroup(state().group);
   _setState();
 }
 
@@ -33,7 +34,19 @@ auto pMenuRadioItem::setChecked() -> void {
 }
 
 auto pMenuRadioItem::setGroup(sGroup group) -> void {
-  _setState();
+  bool first = true;
+  if(auto& group = state().group) {
+    for(auto& weak : group->state.objects) {
+      if(auto object = weak.acquire()) {
+        if(auto menuRadioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
+          if(auto self = menuRadioItem->self()) {
+            self->qtMenuRadioItem->setChecked(menuRadioItem->state.checked = first);
+            first = false;
+          }
+        }
+      }
+    }
+  }
 }
 
 auto pMenuRadioItem::setText(const string& text) -> void {
@@ -41,7 +54,7 @@ auto pMenuRadioItem::setText(const string& text) -> void {
 }
 
 auto pMenuRadioItem::_setState() -> void {
-  if(auto group = state().group) {
+  if(auto& group = state().group) {
     if(auto object = group->object(0)) {
       if(auto menuRadioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
         if(auto self = menuRadioItem->self()) {
@@ -56,7 +69,7 @@ auto pMenuRadioItem::_setState() -> void {
 
 auto QtMenuRadioItem::onActivate() -> void {
   if(p.state().checked) return;
-  p.state().checked = true;
+  p.self().setChecked();
   p.self().doActivate();
 }
 

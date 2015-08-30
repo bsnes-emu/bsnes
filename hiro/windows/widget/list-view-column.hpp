@@ -12,7 +12,7 @@ struct pListViewColumn : pObject {
   auto setExpandable(bool expandable) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setHorizontalAlignment(double alignment) -> void;
-  auto setIcon(const image& icon) -> void;
+  auto setImage(const Image& image) -> void;
   auto setResizable(bool resizable) -> void;
   auto setSortable(bool sortable) -> void;
   auto setText(const string& text) -> void;

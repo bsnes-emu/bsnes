@@ -21,7 +21,7 @@ auto pPopupMenu::append(sAction action) -> void {
 auto pPopupMenu::remove(sAction action) -> void {
 }
 
-auto pPopupMenu::setFont(const string& font) -> void {
+auto pPopupMenu::setFont(const Font& font) -> void {
   for(auto& action : state().actions) {
     if(action->self()) action->self()->setFont(action->font(true));
   }

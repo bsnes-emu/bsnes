@@ -6,8 +6,8 @@ auto mIconViewItem::allocate() -> pObject* {
 
 //
 
-auto mIconViewItem::icon() const -> image {
-  return state.icon;
+auto mIconViewItem::image() const -> Image {
+  return state.image;
 }
 
 auto mIconViewItem::remove() -> type& {
@@ -19,9 +19,9 @@ auto mIconViewItem::selected() const -> bool {
   return state.selected;
 }
 
-auto mIconViewItem::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mIconViewItem::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

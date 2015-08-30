@@ -5,7 +5,7 @@ namespace hiro {
 static auto RadioLabel_activate(GtkToggleButton*, pRadioLabel* p) -> void {
   if(p->groupLocked()) return;
   bool wasChecked = p->state().checked;
-  p->setChecked();
+  p->self().setChecked();
   if(!wasChecked) p->self().doActivate();
 }
 
@@ -37,8 +37,6 @@ auto pRadioLabel::setChecked() -> void {
 }
 
 auto pRadioLabel::setGroup(sGroup group) -> void {
-  if(!group) return;
-
   maybe<GtkRadioButton*> gtkRadioButton;
   for(auto& weak : group->state.objects) {
     if(auto object = weak.acquire()) {
@@ -46,9 +44,13 @@ auto pRadioLabel::setGroup(sGroup group) -> void {
         if(auto self = radioLabel->self()) {
           self->lock();
           gtk_radio_button_set_group(self->gtkRadioButton, nullptr);
-          if(!gtkRadioButton) gtkRadioButton = self->gtkRadioButton;
-          else gtk_radio_button_set_group(self->gtkRadioButton, gtk_radio_button_get_group(*gtkRadioButton));
-          gtk_toggle_button_set_active(self->gtkToggleButton, radioLabel->checked());
+          if(!gtkRadioButton) {
+            gtkRadioButton = self->gtkRadioButton;
+            gtk_toggle_button_set_active(self->gtkToggleButton, radioLabel->state.checked = true);
+          } else {
+            gtk_radio_button_set_group(self->gtkRadioButton, gtk_radio_button_get_group(*gtkRadioButton));
+            gtk_toggle_button_set_active(self->gtkToggleButton, radioLabel->state.checked = false);
+          }
           self->unlock();
         }
       }

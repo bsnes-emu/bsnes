@@ -3,31 +3,53 @@
 namespace hiro {
 
 auto pTreeViewItem::construct() -> void {
+  if(auto parentWidget = _parentWidget()) {
+    if(auto parentItem = _parentItem()) {
+      gtk_tree_store_append(parentWidget->gtkTreeStore, &gtkIter, &parentItem->gtkIter);
+    } else {
+      gtk_tree_store_append(parentWidget->gtkTreeStore, &gtkIter, nullptr);
+    }
+    setChecked(state().checked);
+    setImage(state().image);
+    setText(state().text);
+  }
 }
 
 auto pTreeViewItem::destruct() -> void {
+  if(auto parent = _parentWidget()) {
+    gtk_tree_store_remove(parent->gtkTreeStore, &gtkIter);
+  }
 }
 
 //
 
 auto pTreeViewItem::append(sTreeViewItem item) -> void {
-  if(auto parentWidget = _parentWidget()) {
-    gtk_tree_store_append(parentWidget->gtkTreeStore, &item->self()->gtkIter, &gtkIter);
-    item->setChecked(item->checked());
-    item->setIcon(item->icon());
-    item->setText(item->text());
-  }
 }
 
 auto pTreeViewItem::remove(sTreeViewItem item) -> void {
-  if(auto parentWidget = _parentWidget()) {
-    gtk_tree_store_remove(parentWidget->gtkTreeStore, &item->self()->gtkIter);
-  }
+}
+
+auto pTreeViewItem::setBackgroundColor(Color color) -> void {
+}
+
+auto pTreeViewItem::setCheckable(bool checkable) -> void {
 }
 
 auto pTreeViewItem::setChecked(bool checked) -> void {
   if(auto parentWidget = _parentWidget()) {
     gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 0, checked, -1);
+  }
+}
+
+auto pTreeViewItem::setExpanded(bool expanded) -> void {
+  if(auto parentWidget = _parentWidget()) {
+    auto path = gtk_tree_model_get_path(parentWidget->gtkTreeModel, &gtkIter);
+    if(expanded) {
+      gtk_tree_view_expand_row(parentWidget->gtkTreeView, path, false);
+    } else {
+      gtk_tree_view_collapse_row(parentWidget->gtkTreeView, path);
+    }
+    gtk_tree_path_free(path);
   }
 }
 
@@ -40,10 +62,13 @@ auto pTreeViewItem::setFocused() -> void {
   }
 }
 
-auto pTreeViewItem::setIcon(const image& icon) -> void {
+auto pTreeViewItem::setForegroundColor(Color color) -> void {
+}
+
+auto pTreeViewItem::setImage(const Image& image) -> void {
   if(auto parentWidget = _parentWidget()) {
-    if(icon) {
-      auto pixbuf = CreatePixbuf(icon, true);
+    if(image) {
+      auto pixbuf = CreatePixbuf(image);
       gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 1, pixbuf, -1);
     } else {
       gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 1, nullptr, -1);

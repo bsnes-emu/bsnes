@@ -69,16 +69,11 @@ auto pCanvas::destruct() -> void {
 }
 
 auto pCanvas::minimumSize() const -> Size {
-  return {max(0, state().size.width()), max(0, state().size.height())};
+  if(auto& image = state().image) return image.size();
+  return {0, 0};
 }
 
 auto pCanvas::setColor(Color color) -> void {
-  mode = Mode::Color;
-  update();
-}
-
-auto pCanvas::setData(Size size) -> void {
-  mode = Mode::Data;
   update();
 }
 
@@ -91,13 +86,11 @@ auto pCanvas::setGeometry(Geometry geometry) -> void {
   update();
 }
 
-auto pCanvas::setGradient(Color topLeft, Color topRight, Color bottomLeft, Color bottomRight) -> void {
-  mode = Mode::Gradient;
+auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setIcon(const image& icon) -> void {
-  mode = Mode::Icon;
+auto pCanvas::setImage(const Image& image) -> void {
   update();
 }
 
@@ -121,8 +114,18 @@ auto pCanvas::_paint() -> void {
   bmi.bmiHeader.biHeight = -height;  //GDI stores bitmaps upside now; negative height flips bitmap
   bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32_t);
   void* bits = nullptr;
-  HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
-  if(bits) memory::copy(bits, pixels.data(), pixels.size() * sizeof(uint32_t));
+  HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
+  if(bits) {
+    auto source = (const uint8_t*)pixels.data();
+    auto target = (uint8_t*)bits;
+    for(auto n : range(width * height)) {
+      target[0] = (source[0] * source[3]) / 255;
+      target[1] = (source[1] * source[3]) / 255;
+      target[2] = (source[2] * source[3]) / 255;
+      target[3] = (source[3]);
+      source += 4, target += 4;
+    }
+  }
   SelectObject(hdc, bitmap);
 
   RECT rc;
@@ -139,44 +142,28 @@ auto pCanvas::_paint() -> void {
 }
 
 auto pCanvas::_rasterize() -> void {
-  if(mode == Mode::Color || mode == Mode::Gradient) {
+  if(auto& image = state().image) {
+    width = image.width();
+    height = image.height();
+  } else {
     width = self().geometry().width();
     height = self().geometry().height();
-  } else {
-    width = state().size.width();
-    height = state().size.height();
   }
   if(width <= 0 || height <= 0) return;
 
   pixels.reallocate(width * height);
 
-  if(mode == Mode::Color) {
+  if(auto& image = state().image) {
+    memory::copy(pixels.data(), image.data(), width * height * sizeof(uint32_t));
+  } else if(auto& gradient = state().gradient) {
+    auto& colors = gradient.state.colors;
+    nall::image fill;
+    fill.allocate(width, height);
+    fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
+    memory::copy(pixels.data(), fill.data(), fill.size());
+  } else {
     uint32_t color = state().color.value();
     for(auto& pixel : pixels) pixel = color;
-  }
-
-  if(mode == Mode::Gradient) {
-    image fill;
-    fill.allocate(width, height);
-    fill.gradient(
-      state().gradient[0].value(), state().gradient[1].value(),
-      state().gradient[2].value(), state().gradient[3].value()
-    );
-    memory::copy(pixels.data(), fill.data(), fill.size());
-  }
-
-  if(mode == Mode::Icon) {
-    auto icon = state().icon;
-    icon.scale(width, height);
-    icon.transform();
-    memory::copy(pixels.data(), icon.data(), icon.size());
-  }
-
-  if(mode == Mode::Data) {
-    memory::copy(
-      pixels.data(), pixels.size() * sizeof(uint32_t),
-      state().data.data(), state().data.size() * sizeof(uint32_t)
-    );
   }
 }
 

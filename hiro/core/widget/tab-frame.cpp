@@ -12,6 +12,7 @@ auto mTabFrame::destruct() -> void {
 //
 
 auto mTabFrame::append(sTabFrameItem item) -> type& {
+  if(!state.items) item->state.selected = true;
   state.items.append(item);
   item->setParent(this, itemCount() - 1);
   signal(append, item);
@@ -30,10 +31,6 @@ auto mTabFrame::doMove(sTabFrameItem from, sTabFrameItem to) const -> void {
   if(state.onMove) return state.onMove(from, to);
 }
 
-auto mTabFrame::edge() const -> Edge {
-  return state.edge;
-}
-
 auto mTabFrame::item(unsigned position) const -> TabFrameItem {
   if(position < itemCount()) return state.items[position];
   return {};
@@ -47,6 +44,10 @@ auto mTabFrame::items() const -> vector<TabFrameItem> {
   vector<TabFrameItem> items;
   for(auto& item : state.items) items.append(item);
   return items;
+}
+
+auto mTabFrame::navigation() const -> Navigation {
+  return state.navigation;
 }
 
 auto mTabFrame::onChange(const function<void ()>& callback) -> type& {
@@ -87,14 +88,14 @@ auto mTabFrame::selected() const -> TabFrameItem {
   return {};
 }
 
-auto mTabFrame::setEdge(Edge edge) -> type& {
-  state.edge = edge;
-  signal(setEdge, edge);
+auto mTabFrame::setNavigation(Navigation navigation) -> type& {
+  state.navigation = navigation;
+  signal(setNavigation, navigation);
   return *this;
 }
 
 auto mTabFrame::setParent(mObject* parent, signed offset) -> type& {
-  for(auto& item : state.items) item->destruct();
+  for(auto n : rrange(state.items)) state.items[n]->destruct();
   mObject::setParent(parent, offset);
   for(auto& item : state.items) item->setParent(this, item->offset());
   return *this;

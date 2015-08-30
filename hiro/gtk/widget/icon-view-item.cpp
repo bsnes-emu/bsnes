@@ -8,9 +8,9 @@ auto pIconViewItem::construct() -> void {
 auto pIconViewItem::destruct() -> void {
 }
 
-auto pIconViewItem::setIcon(const image& icon) -> void {
+auto pIconViewItem::setImage(const Image& image) -> void {
   if(auto parent = _parent()) {
-    parent->setItemIcon(self().offset(), icon);
+    parent->setItemImage(self().offset(), image);
   }
 }
 

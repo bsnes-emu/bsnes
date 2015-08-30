@@ -35,8 +35,8 @@ auto mListViewColumn::horizontalAlignment() const -> double {
   return state.horizontalAlignment;
 }
 
-auto mListViewColumn::icon() const -> image {
-  return state.icon;
+auto mListViewColumn::image() const -> Image {
+  return state.image;
 }
 
 auto mListViewColumn::remove() -> type& {
@@ -91,9 +91,9 @@ auto mListViewColumn::setHorizontalAlignment(double alignment) -> type& {
   return *this;
 }
 
-auto mListViewColumn::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mListViewColumn::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

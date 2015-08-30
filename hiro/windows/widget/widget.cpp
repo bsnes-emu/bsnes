@@ -35,11 +35,9 @@ auto pWidget::setFocused() -> void {
   SetFocus(hwnd);
 }
 
-auto pWidget::setFont(const string&) -> void {
-  auto font = self().font(true);
-  if(!font) font = Font::sans(8);
+auto pWidget::setFont(const Font&) -> void {
   if(hfont) DeleteObject(hfont);
-  hfont = pFont::create(font);
+  hfont = pFont::create(self().font(true));
   SendMessage(hwnd, WM_SETFONT, (WPARAM)hfont, 0);
 }
 

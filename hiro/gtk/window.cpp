@@ -388,7 +388,7 @@ auto pWindow::_setMenuEnabled(bool enabled) -> void {
   gtk_widget_set_sensitive(gtkMenu, enabled);
 }
 
-auto pWindow::_setMenuFont(const string& font) -> void {
+auto pWindow::_setMenuFont(const Font& font) -> void {
   pFont::setFont(gtkMenu, font);
 }
 
@@ -400,7 +400,7 @@ auto pWindow::_setStatusEnabled(bool enabled) -> void {
   gtk_widget_set_sensitive(gtkStatus, enabled);
 }
 
-auto pWindow::_setStatusFont(const string& font) -> void {
+auto pWindow::_setStatusFont(const Font& font) -> void {
   pFont::setFont(gtkStatus, font);
 }
 

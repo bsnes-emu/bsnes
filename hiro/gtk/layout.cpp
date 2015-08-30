@@ -13,7 +13,7 @@ auto pLayout::destruct() -> void {
 auto pLayout::setEnabled(bool enabled) -> void {
 }
 
-auto pLayout::setFont(const string& font) -> void {
+auto pLayout::setFont(const Font& font) -> void {
 }
 
 auto pLayout::setVisible(bool visible) -> void {

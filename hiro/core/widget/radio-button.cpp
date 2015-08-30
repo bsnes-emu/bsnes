@@ -22,8 +22,8 @@ auto mRadioButton::group() const -> Group {
   return state.group;
 }
 
-auto mRadioButton::icon() const -> image {
-  return state.icon;
+auto mRadioButton::image() const -> Image {
+  return state.image;
 }
 
 auto mRadioButton::onActivate(const function<void ()>& callback) -> type& {
@@ -57,15 +57,14 @@ auto mRadioButton::setChecked() -> type& {
 }
 
 auto mRadioButton::setGroup(sGroup group) -> type& {
-  state.group = group;
+  state.group = group ? group : Group{&instance};
   signal(setGroup, group);
-  if(group && group->objectCount() == 1) setChecked();
   return *this;
 }
 
-auto mRadioButton::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mRadioButton::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

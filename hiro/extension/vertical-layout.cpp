@@ -6,6 +6,16 @@ auto mVerticalLayout::append(sSizable sizable, Size size, signed spacing) -> typ
   return *this;
 }
 
+auto mVerticalLayout::modify(sSizable sizable, Size size, signed spacing) -> type& {
+  if(sizable && this->sizable(sizable->offset()) == sizable) {
+    auto& properties = this->properties[sizable->offset()];
+    properties.width = size.width();
+    properties.height = size.height();
+    properties.spacing = spacing;
+  }
+  return *this;
+}
+
 auto mVerticalLayout::minimumSize() const -> Size {
   signed width = 0, height = 0;
 
@@ -56,7 +66,7 @@ auto mVerticalLayout::setEnabled(bool enabled) -> type& {
   return *this;
 }
 
-auto mVerticalLayout::setFont(const string& font) -> type& {
+auto mVerticalLayout::setFont(const Font& font) -> type& {
   mLayout::setFont(font);
   for(auto n : range(sizableCount())) {
     sizable(n)->setFont(sizable(n)->font());

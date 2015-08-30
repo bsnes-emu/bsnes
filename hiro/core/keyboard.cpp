@@ -18,44 +18,43 @@ const vector<string> Keyboard::keys = {
   "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Zero",
 
   //group aliases
-  "Shift",    //"LeftShift" | "RightShift"
+  "Shift",    //"LeftShift"   | "RightShift"
   "Control",  //"LeftControl" | "RightControl"
-  "Alt",      //"LeftAlt" | "RightAlt"
-  "Super",    //"LeftSuper" | "RightSuper"
-  "Enter",    //"LeftEnter" | "RightEnter"
+  "Alt",      //"LeftAlt"     | "RightAlt"
+  "Super",    //"LeftSuper"   | "RightSuper"
+  "Enter",    //"LeftEnter"   | "RightEnter"
 };
 
-auto Keyboard::append(sHotkey hotkey) -> void {
+auto Keyboard::append(Hotkey hotkey) -> void {
   state.hotkeys.append(hotkey);
 }
 
 auto Keyboard::hotkey(unsigned position) -> Hotkey {
-  if(position < hotkeys()) return state.hotkeys[position];
+  if(position < hotkeyCount()) return state.hotkeys[position];
   return {};
 }
 
-auto Keyboard::hotkeys() -> unsigned {
+auto Keyboard::hotkeyCount() -> unsigned {
   return state.hotkeys.size();
+}
+
+auto Keyboard::hotkeys() -> vector<Hotkey> {
+  return state.hotkeys;
 }
 
 auto Keyboard::poll() -> vector<bool> {
   auto pressed = pKeyboard::poll();
 
   for(auto& hotkey : state.hotkeys) {
-    bool active = hotkey->state.sequence.size() > 0;
-    for(auto& key : hotkey->state.keys) {
+    bool active = hotkey.state->sequence.size() > 0;
+    for(auto& key : hotkey.state->keys) {
       if(pressed[key]) continue;
       active = false;
       break;
     }
-    if(auto owner = hotkey->state.owner.acquire()) {
-      //todo: set active = false if owner no longer exists
-      active &= owner->focused();
-    }
-    if(hotkey->state.active != active) {
-      hotkey->state.active = active;
-      if( active) hotkey->doPress();
-      if(!active) hotkey->doRelease();
+    if(hotkey.state->active != active) {
+      hotkey.state->active = active;
+      active ? hotkey.doPress() : hotkey.doRelease();
     }
   }
 
@@ -71,7 +70,7 @@ auto Keyboard::released(const string& key) -> bool {
   return !pressed(key);
 }
 
-auto Keyboard::remove(sHotkey hotkey) -> void {
+auto Keyboard::remove(Hotkey hotkey) -> void {
   if(auto offset = state.hotkeys.find(hotkey)) {
     state.hotkeys.remove(*offset);
   }

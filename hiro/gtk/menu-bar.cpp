@@ -27,7 +27,7 @@ auto pMenuBar::setEnabled(bool enabled) -> void {
   }
 }
 
-auto pMenuBar::setFont(const string& font) -> void {
+auto pMenuBar::setFont(const Font& font) -> void {
   if(auto parent = _parent()) {
     parent->_setMenuFont(font);
   }

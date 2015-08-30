@@ -1,54 +1,59 @@
 #if defined(Hiro_Hotkey)
 
-auto mHotkey::allocate() -> pObject* {
-  return new pHotkey(*this);
+Hotkey::Hotkey() : state(new Hotkey::State) {
+  setSequence();
 }
 
-//
-
-auto mHotkey::doPress() const -> void {
-  if(state.onPress) return state.onPress();
+Hotkey::Hotkey(const string& sequence) : state(new Hotkey::State) {
+  setSequence(sequence);
 }
 
-auto mHotkey::doRelease() const -> void {
-  if(state.onRelease) return state.onRelease();
+Hotkey::operator bool() const {
+  return state->sequence;
 }
 
-auto mHotkey::onPress(const function<void ()>& callback) -> type& {
-  state.onPress = callback;
+auto Hotkey::operator==(const Hotkey& source) const -> bool {
+  return state == source.state;
+}
+
+auto Hotkey::operator!=(const Hotkey& source) const -> bool {
+  return !operator==(source);
+}
+
+auto Hotkey::doPress() const -> void {
+  if(state->onPress) state->onPress();
+}
+
+auto Hotkey::doRelease() const -> void {
+  if(state->onRelease) state->onRelease();
+}
+
+auto Hotkey::onPress(const function<void ()>& callback) -> type& {
+  state->onPress = callback;
   return *this;
 }
 
-auto mHotkey::onRelease(const function<void ()>& callback) -> type& {
-  state.onRelease = callback;
+auto Hotkey::onRelease(const function<void ()>& callback) -> type& {
+  state->onRelease = callback;
   return *this;
 }
 
-auto mHotkey::owner() const -> wObject {
-  return state.owner;
-}
-
-auto mHotkey::remove() -> type& {
-//todo: remove from Keyboard::hotkeys
+auto Hotkey::reset() -> type& {
+  setSequence();
   return *this;
 }
 
-auto mHotkey::sequence() const -> string {
-  return state.sequence;
+auto Hotkey::sequence() const -> string {
+  return state->sequence;
 }
 
-auto mHotkey::setOwner(sObject owner) -> type& {
-  state.owner = owner;
-  return *this;
-}
-
-auto mHotkey::setSequence(const string& sequence) -> type& {
-  state.active = false;
-  state.sequence = sequence;
-  state.keys.reset();
+auto Hotkey::setSequence(const string& sequence) -> type& {
+  state->active = false;
+  state->sequence = sequence;
+  state->keys.reset();
   for(auto& key : sequence.split("+")) {
     if(auto position = Keyboard::keys.find(key)) {
-      state.keys.append(*position);
+      state->keys.append(*position);
     }
   }
   return *this;

@@ -33,8 +33,8 @@ auto mMenu::append(sAction action) -> type& {
   return *this;
 }
 
-auto mMenu::icon() const -> image {
-  return state.icon;
+auto mMenu::image() const -> Image {
+  return state.image;
 }
 
 auto mMenu::remove(sAction action) -> type& {
@@ -51,9 +51,16 @@ auto mMenu::reset() -> type& {
   return *this;
 }
 
-auto mMenu::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mMenu::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
+  return *this;
+}
+
+auto mMenu::setParent(mObject* parent, signed offset) -> type& {
+  for(auto n : rrange(state.actions)) state.actions[n]->destruct();
+  mObject::setParent(parent, offset);
+  for(auto& action : state.actions) action->setParent(this, action->offset());
   return *this;
 }
 

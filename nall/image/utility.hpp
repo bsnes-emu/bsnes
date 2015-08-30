@@ -56,6 +56,30 @@ auto image::alphaBlend(uint64_t alphaColor) -> void {
   }
 }
 
+auto image::alphaMultiply() -> void {
+  unsigned divisor = (1 << _alpha.depth()) - 1;
+
+  #pragma omp parallel for
+  for(unsigned y = 0; y < _height; y++) {
+    uint8_t* dp = _data + pitch() * y;
+    for(unsigned x = 0; x < _width; x++) {
+      uint64_t color = read(dp);
+
+      uint64_t colorA = (color & _alpha.mask()) >> _alpha.shift();
+      uint64_t colorR = (color & _red.mask()  ) >> _red.shift();
+      uint64_t colorG = (color & _green.mask()) >> _green.shift();
+      uint64_t colorB = (color & _blue.mask() ) >> _blue.shift();
+
+      colorR = (colorR * colorA) / divisor;
+      colorG = (colorG * colorA) / divisor;
+      colorB = (colorB * colorA) / divisor;
+
+      write(dp, (colorA << _alpha.shift()) | (colorR << _red.shift()) | (colorG << _green.shift()) | (colorB << _blue.shift()));
+      dp += stride();
+    }
+  }
+}
+
 auto image::transform(const image& source) -> void {
   return transform(source._endian, source._depth, source._alpha.mask(), source._red.mask(), source._green.mask(), source._blue.mask());
 }

@@ -6,8 +6,8 @@ auto mComboButtonItem::allocate() -> pObject* {
 
 //
 
-auto mComboButtonItem::icon() const -> image {
-  return state.icon;
+auto mComboButtonItem::image() const -> Image {
+  return state.image;
 }
 
 auto mComboButtonItem::remove() -> type& {
@@ -19,9 +19,9 @@ auto mComboButtonItem::selected() const -> bool {
   return state.selected;
 }
 
-auto mComboButtonItem::setIcon(const image& icon) -> type& {
-  state.icon = icon;
-  signal(setIcon, icon);
+auto mComboButtonItem::setImage(const Image& image) -> type& {
+  state.image = image;
+  signal(setImage, image);
   return *this;
 }
 

@@ -27,8 +27,6 @@ auto pMenuRadioItem::setChecked() -> void {
 }
 
 auto pMenuRadioItem::setGroup(sGroup group) -> void {
-  if(!group) return;
-
   maybe<GtkRadioMenuItem*> gtkRadioMenuItem;
   for(auto& weak : group->state.objects) {
     if(auto object = weak.acquire()) {
@@ -36,9 +34,13 @@ auto pMenuRadioItem::setGroup(sGroup group) -> void {
         if(auto self = menuRadioItem->self()) {
           self->lock();
           gtk_radio_menu_item_set_group(self->gtkRadioMenuItem, nullptr);
-          if(!gtkRadioMenuItem) gtkRadioMenuItem = self->gtkRadioMenuItem;
-          else gtk_radio_menu_item_set_group(self->gtkRadioMenuItem, gtk_radio_menu_item_get_group(*gtkRadioMenuItem));
-          gtk_check_menu_item_set_active(self->gtkCheckMenuItem, menuRadioItem->checked());
+          if(!gtkRadioMenuItem) {
+            gtkRadioMenuItem = self->gtkRadioMenuItem;
+            gtk_check_menu_item_set_active(self->gtkCheckMenuItem, menuRadioItem->state.checked = true);
+          } else {
+            gtk_radio_menu_item_set_group(self->gtkRadioMenuItem, gtk_radio_menu_item_get_group(*gtkRadioMenuItem));
+            gtk_check_menu_item_set_active(self->gtkCheckMenuItem, menuRadioItem->state.checked = false);
+          }
           self->unlock();
         }
       }
