@@ -12,14 +12,6 @@ Geometry::Geometry(signed x, signed y, signed width, signed height) {
   setGeometry(x, y, width, height);
 }
 
-Geometry::Geometry(const string& text) {
-  lstring part = text.split(",").strip();
-  state.x = integer(part(0));
-  state.y = integer(part(1));
-  state.width = integer(part(2));
-  state.height = integer(part(3));
-}
-
 Geometry::operator bool() const {
   return state.x || state.y || state.width || state.height;
 }
@@ -103,10 +95,6 @@ auto Geometry::setY(signed y) -> type& {
 
 auto Geometry::size() const -> Size {
   return {state.width, state.height};
-}
-
-auto Geometry::text() const -> string {
-  return {state.x, ",", state.y, ",", state.width, ",", state.height};
 }
 
 auto Geometry::width() const -> signed {

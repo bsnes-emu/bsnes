@@ -120,7 +120,7 @@ auto BrowserDialogWindow::run() -> lstring {
   pathName.onActivate([&] { setPath(pathName.text()); });
   pathRefresh.setBordered(false).setImage(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
   pathHome.setBordered(false).setImage(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
-  pathUp.setBordered(false).setImage(Icon::Go::Up).onActivate([&] { setPath(state.path.dirname()); });
+  pathUp.setBordered(false).setImage(Icon::Go::Up).onActivate([&] { setPath(dirname(state.path)); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {

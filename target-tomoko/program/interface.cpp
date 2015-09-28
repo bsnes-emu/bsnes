@@ -36,8 +36,8 @@ auto Program::loadRequest(unsigned id, string filename, bool required) -> void {
     }
   }
   if(required) MessageDialog().setTitle("higan").setText({
-    "Missing required file: ", location.filename(), "\n\n",
-    "From location:\n", location.pathname()
+    "Missing required file: ", nall::filename(location), "\n\n",
+    "From location:\n", nall::pathname(location)
   }).error();
 }
 

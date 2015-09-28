@@ -25,7 +25,7 @@ template<typename T> struct vector {
   auto size() const -> unsigned { return objectsize; }
   auto capacity() const -> unsigned { return poolsize; }
 
-  auto move() -> T* {
+  auto release() -> T* {
     T* result = pool + poolbase;
     pool = nullptr;
     poolbase = 0;
@@ -50,7 +50,7 @@ template<typename T> struct vector {
     size = bit::round(size);  //amortize growth
 
     T* copy = (T*)memory::allocate(size * sizeof(T));
-    for(unsigned n = 0; n < objectsize; n++) new(copy + n) T(std::move(pool[poolbase + n]));
+    for(unsigned n = 0; n < objectsize; n++) new(copy + n) T(move(pool[poolbase + n]));
     free(pool);
     pool = copy;
     poolbase = 0;
@@ -59,7 +59,7 @@ template<typename T> struct vector {
 
   auto resize(unsigned size, T value = T()) -> void {
     T* copy = (T*)memory::allocate(size * sizeof(T));
-    for(unsigned n = 0; n < size && n < objectsize; n++) new(copy + n) T(std::move(pool[poolbase + n]));
+    for(unsigned n = 0; n < size && n < objectsize; n++) new(copy + n) T(move(pool[poolbase + n]));
     for(unsigned n = objectsize; n < size; n++) new(copy + n) T(value);
     reset();
     pool = copy;
@@ -84,7 +84,7 @@ template<typename T> struct vector {
       unsigned available = poolsize - objectsize;
       poolbase = max(1u, available >> 1);
       for(signed n = objectsize - 1; n >= 0; n--) {
-        pool[poolbase + n] = std::move(pool[n]);
+        pool[poolbase + n] = move(pool[n]);
       }
     }
     new(pool + --poolbase) T(data);
@@ -116,7 +116,7 @@ template<typename T> struct vector {
     append(data);
     if(position == ~0u) return;
     for(signed n = objectsize - 1; n > position; n--) {
-      pool[poolbase + n] = std::move(pool[poolbase + n - 1]);
+      pool[poolbase + n] = move(pool[poolbase + n - 1]);
     }
     pool[poolbase + position] = data;
   }
@@ -131,7 +131,7 @@ template<typename T> struct vector {
     } else {
       for(unsigned n = position; n < objectsize; n++) {
         if(n + length < objectsize) {
-          pool[poolbase + n] = std::move(pool[poolbase + n + length]);
+          pool[poolbase + n] = move(pool[poolbase + n + length]);
         } else {
           pool[poolbase + n].~T();
         }
@@ -156,7 +156,7 @@ template<typename T> struct vector {
   auto reverse() -> void {
     unsigned pivot = size() / 2;
     for(unsigned l = 0, r = size() - 1; l < pivot; l++, r--) {
-      std::swap(pool[poolbase + l], pool[poolbase + r]);
+      swap(pool[poolbase + l], pool[poolbase + r]);
     }
   }
 
@@ -270,9 +270,9 @@ template<typename T> struct vector {
 
   //construction and destruction
   vector() = default;
-  vector(std::initializer_list<T> list) { for(auto& data : list) append(data); }
+  vector(initializer_list<T> list) { for(auto& data : list) append(data); }
   vector(const vector& source) { operator=(source); }
-  vector(vector&& source) { operator=(std::move(source)); }
+  vector(vector&& source) { operator=(move(source)); }
   ~vector() { reset(); }
 
 protected:

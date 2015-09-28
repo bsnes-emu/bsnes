@@ -18,15 +18,15 @@ namespace Hash {
   }
 }
 
-auto crc16(const string& self) -> string {
+auto crc16(rstring self) -> string {
   return Hash::CRC16(self.data(), self.size()).digest();
 }
 
-auto crc32(const string& self) -> string {
+auto crc32(rstring self) -> string {
   return Hash::CRC32(self.data(), self.size()).digest();
 }
 
-auto sha256(const string& self) -> string {
+auto sha256(rstring self) -> string {
   return Hash::SHA256(self.data(), self.size()).digest();
 }
 

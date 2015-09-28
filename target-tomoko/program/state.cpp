@@ -21,7 +21,7 @@ auto Program::saveState(unsigned slot, bool manager) -> bool {
   auto location = stateName(slot, manager);
   serializer s = emulator->serialize();
   if(s.size() == 0) return showMessage({"Failed to save state to slot ", slot}), false;
-  directory::create(location.pathname());
+  directory::create(pathname(location));
   if(file::write(location, s.data(), s.size()) == false) {
     return showMessage({"Unable to write to slot ", slot}), false;
   }

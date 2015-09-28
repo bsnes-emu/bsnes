@@ -2,101 +2,101 @@
 
 namespace nall {
 
-auto trim(string& self, rstring lhs, rstring rhs, long limit) -> string& {
-  rtrim(self, rhs, limit);
-  ltrim(self, lhs, limit);
-  return self;
+auto string::trim(rstring lhs, rstring rhs, long limit) -> string& {
+  rtrim(rhs, limit);
+  ltrim(lhs, limit);
+  return *this;
 }
 
-auto ltrim(string& self, rstring lhs, long limit) -> string& {
-  if(lhs.size() == 0) return self;
+auto string::ltrim(rstring lhs, long limit) -> string& {
+  if(lhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
     signed offset = lhs.size() * matches;
-    signed size = (signed)self.size() - offset;
-    if(size < (signed)lhs.size()) break;
-    if(memory::compare(self.data() + offset, lhs.data(), lhs.size()) != 0) break;
+    signed length = (signed)size() - offset;
+    if(length < (signed)lhs.size()) break;
+    if(memory::compare(data() + offset, lhs.data(), lhs.size()) != 0) break;
     matches++;
   }
-  if(matches) self.remove(0, lhs.size() * matches);
-  return self;
+  if(matches) remove(0, lhs.size() * matches);
+  return *this;
 }
 
-auto rtrim(string& self, rstring rhs, long limit) -> string& {
-  if(rhs.size() == 0) return self;
+auto string::rtrim(rstring rhs, long limit) -> string& {
+  if(rhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
-    signed offset = (signed)self.size() - rhs.size() * (matches + 1);
-    signed size = (signed)self.size() - offset;
-    if(offset < 0 || size < (signed)rhs.size()) break;
-    if(memory::compare(self.data() + offset, rhs.data(), rhs.size()) != 0) break;
+    signed offset = (signed)size() - rhs.size() * (matches + 1);
+    signed length = (signed)size() - offset;
+    if(offset < 0 || length < (signed)rhs.size()) break;
+    if(memory::compare(data() + offset, rhs.data(), rhs.size()) != 0) break;
     matches++;
   }
-  if(matches) self.resize(self.size() - rhs.size() * matches);
-  return self;
+  if(matches) resize(size() - rhs.size() * matches);
+  return *this;
 }
 
-auto itrim(string& self, rstring lhs, rstring rhs, long limit) -> string& {
-  irtrim(self, rhs, limit);
-  iltrim(self, lhs, limit);
-  return self;
+auto string::itrim(rstring lhs, rstring rhs, long limit) -> string& {
+  irtrim(rhs, limit);
+  iltrim(lhs, limit);
+  return *this;
 }
 
-auto iltrim(string& self, rstring lhs, long limit) -> string& {
-  if(lhs.size() == 0) return self;
+auto string::iltrim(rstring lhs, long limit) -> string& {
+  if(lhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
     signed offset = lhs.size() * matches;
-    signed size = (signed)self.size() - offset;
-    if(size < (signed)lhs.size()) break;
-    if(memory::icompare(self.data() + offset, lhs.data(), lhs.size()) != 0) break;
+    signed length = (signed)size() - offset;
+    if(length < (signed)lhs.size()) break;
+    if(memory::icompare(data() + offset, lhs.data(), lhs.size()) != 0) break;
     matches++;
   }
-  if(matches) self.remove(0, lhs.size() * matches);
-  return self;
+  if(matches) remove(0, lhs.size() * matches);
+  return *this;
 }
 
-auto irtrim(string& self, rstring rhs, long limit) -> string& {
-  if(rhs.size() == 0) return self;
+auto string::irtrim(rstring rhs, long limit) -> string& {
+  if(rhs.size() == 0) return *this;
   long matches = 0;
   while(matches < limit) {
-    signed offset = (signed)self.size() - rhs.size() * (matches + 1);
-    signed size = (signed)self.size() - offset;
-    if(offset < 0 || size < (signed)rhs.size()) break;
-    if(memory::icompare(self.data() + offset, rhs.data(), rhs.size()) != 0) break;
+    signed offset = (signed)size() - rhs.size() * (matches + 1);
+    signed length = (signed)size() - offset;
+    if(offset < 0 || length < (signed)rhs.size()) break;
+    if(memory::icompare(data() + offset, rhs.data(), rhs.size()) != 0) break;
     matches++;
   }
-  if(matches) self.resize(self.size() - rhs.size() * matches);
-  return self;
+  if(matches) resize(size() - rhs.size() * matches);
+  return *this;
 }
 
-auto strip(string& self) -> string& {
-  rstrip(self);
-  lstrip(self);
-  return self;
+auto string::strip() -> string& {
+  rstrip();
+  lstrip();
+  return *this;
 }
 
-auto lstrip(string& self) -> string& {
-  unsigned size = 0;
-  while(size < self.size()) {
-    char input = self[size];
+auto string::lstrip() -> string& {
+  unsigned length = 0;
+  while(length < size()) {
+    char input = operator[](length);
     if(input != ' ' && input != '\t' && input != '\r' && input != '\n') break;
-    size++;
+    length++;
   }
-  if(size) self.remove(0, size);
-  return self;
+  if(length) remove(0, length);
+  return *this;
 }
 
-auto rstrip(string& self) -> string& {
-  unsigned size = 0;
-  while(size < self.size()) {
+auto string::rstrip() -> string& {
+  unsigned length = 0;
+  while(length < size()) {
     bool matched = false;
-    char input = self[self.size() - size - 1];
+    char input = operator[](size() - length - 1);
     if(input != ' ' && input != '\t' && input != '\r' && input != '\n') break;
-    size++;
+    length++;
   }
-  if(size) self.resize(self.size() - size);
-  return self;
+  if(length) resize(size() - length);
+  return *this;
 }
 
 }

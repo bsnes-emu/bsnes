@@ -4,7 +4,7 @@ namespace nall {
 
 // (/parent/child.type/)
 // (/parent/child.type/)name.type
-auto pathname(const string& self) -> string {
+auto pathname(rstring self) -> string {
   const char* p = self.data() + self.size() - 1;
   for(signed offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/') return slice(self, 0, offset + 1);
@@ -14,7 +14,7 @@ auto pathname(const string& self) -> string {
 
 // /parent/child.type/()
 // /parent/child.type/(name.type)
-auto filename(const string& self) -> string {
+auto filename(rstring self) -> string {
   const char* p = self.data() + self.size() - 1;
   for(signed offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/') return slice(self, offset + 1);
@@ -24,18 +24,18 @@ auto filename(const string& self) -> string {
 
 // (/parent/)child.type/
 // (/parent/child.type/)name.type
-auto dirname(const string& self) -> string {
+auto dirname(rstring self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(signed offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
     if(*p == '/') return slice(self, 0, offset + 1);
   }
-  return self;  //this is the root directory
+  return self.data();  //this is the root directory
 }
 
 // /parent/(child.type/)
 // /parent/child.type/(name.type)
-auto basename(const string& self) -> string {
+auto basename(rstring self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(signed offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -46,7 +46,7 @@ auto basename(const string& self) -> string {
 
 // /parent/(child).type/
 // /parent/child.type/(name).type
-auto prefixname(const string& self) -> string {
+auto prefixname(rstring self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(signed offset = self.size() - 1, suffix = -1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -59,7 +59,7 @@ auto prefixname(const string& self) -> string {
 
 // /parent/child(.type)/
 // /parent/child.type/name(.type)
-auto suffixname(const string& self) -> string {
+auto suffixname(rstring self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(signed offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;

@@ -5,23 +5,23 @@
 #include <utility>
 
 namespace nall {
-  using std::nullptr_t;
-  using std::forward;
-  using std::move;
+  using std::add_const;
   using std::decay;
   using std::declval;
-
-  using true_type = std::true_type;
-  using false_type = std::false_type;
-
-  template<typename T, typename U> using is_same = std::is_same<T, U>;
-  template<typename T, typename U> using is_base_of = std::is_base_of<T, U>;
-  template<typename T> using is_array = std::is_array<T>;
-  template<typename T> using is_function = std::is_function<T>;
-  template<typename T> using is_integral = std::is_integral<T>;
-  template<typename T> using add_const = std::add_const<T>;
-  template<typename T> using remove_extent = std::remove_extent<T>;
-  template<typename T> using remove_reference = std::remove_reference<T>;
+  using std::false_type;
+  using std::forward;
+  using std::initializer_list;
+  using std::is_array;
+  using std::is_base_of;
+  using std::is_function;
+  using std::is_integral;
+  using std::is_same;
+  using std::move;
+  using std::nullptr_t;
+  using std::remove_extent;
+  using std::remove_reference;
+  using std::swap;
+  using std::true_type;
 }
 
 namespace nall {

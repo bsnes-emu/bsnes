@@ -22,7 +22,7 @@ struct zipstream : memorystream {
       if(file.name.match(filter)) {
         auto buffer = archive.extract(file);
         psize = buffer.size();
-        pdata = buffer.move();
+        pdata = buffer.release();
         return;
       }
     }

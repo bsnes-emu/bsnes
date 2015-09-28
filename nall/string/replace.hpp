@@ -3,16 +3,16 @@
 namespace nall {
 
 template<bool Insensitive, bool Quoted>
-auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
-  if(limit <= 0 || from.size() == 0) return self;
+auto string::_replace(rstring from, rstring to, long limit) -> string& {
+  if(limit <= 0 || from.size() == 0) return *this;
 
-  signed size = self.size();
+  signed size = this->size();
   signed matches = 0;
   signed quoted = 0;
 
   //count matches first, so that we only need to reallocate memory once
   //(recording matches would also require memory allocation, so this is not done)
-  { const char* p = self.data();
+  { const char* p = data();
     for(signed n = 0; n <= size - (signed)from.size();) {
       if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
       if(_compare<Insensitive>(p + n, size - n, from.data(), from.size())) { n++; continue; }
@@ -21,11 +21,11 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
       n += from.size();
     }
   }
-  if(matches == 0) return self;
+  if(matches == 0) return *this;
 
   //in-place overwrite
   if(to.size() == from.size()) {
-    char* p = self.get();
+    char* p = get();
 
     for(signed n = 0, remaining = matches, quoted = 0; n <= size - (signed)from.size();) {
       if(Quoted) { if(p[n] == '\"') { quoted ^= 1; n++; continue; } if(quoted) { n++; continue; } }
@@ -40,7 +40,7 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
 
   //left-to-right shrink
   else if(to.size() < from.size()) {
-    char* p = self.get();
+    char* p = get();
     signed offset = 0;
     signed base = 0;
 
@@ -58,15 +58,15 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
     }
 
     memory::move(p + offset, p + base, size - base);
-    self.resize(size - matches * (from.size() - to.size()));
+    resize(size - matches * (from.size() - to.size()));
   }
 
   //right-to-left expand
   else if(to.size() > from.size()) {
-    self.resize(size + matches * (to.size() - from.size()));
-    char* p = self.get();
+    resize(size + matches * (to.size() - from.size()));
+    char* p = get();
 
-    signed offset = self.size();
+    signed offset = this->size();
     signed base = size;
 
     for(signed n = size, remaining = matches; n >= (signed)from.size();) {  //quoted reused from parent scope since we are iterating backward
@@ -83,13 +83,13 @@ auto _replace(string& self, rstring from, rstring to, long limit) -> string& {
     }
   }
 
-  return self;
+  return *this;
 }
 
-auto replace(string& self, rstring from, rstring to, long limit) -> string& { return _replace<0, 0>(self, from, to, limit); }
-auto ireplace(string& self, rstring from, rstring to, long limit) -> string& { return _replace<1, 0>(self, from, to, limit); }
-auto qreplace(string& self, rstring from, rstring to, long limit) -> string& { return _replace<0, 1>(self, from, to, limit); }
-auto iqreplace(string& self, rstring from, rstring to, long limit) -> string& { return _replace<1, 1>(self, from, to, limit); }
+auto string::replace(rstring from, rstring to, long limit) -> string& { return _replace<0, 0>(from, to, limit); }
+auto string::ireplace(rstring from, rstring to, long limit) -> string& { return _replace<1, 0>(from, to, limit); }
+auto string::qreplace(rstring from, rstring to, long limit) -> string& { return _replace<0, 1>(from, to, limit); }
+auto string::iqreplace(rstring from, rstring to, long limit) -> string& { return _replace<1, 1>(from, to, limit); }
 
 };
 

@@ -4,16 +4,16 @@ ScanDialog::ScanDialog() {
   onClose(&Application::quit);
   layout.setMargin(5);
   pathEdit.onActivate([&] { refresh(); });
-  refreshButton.setIcon(Icon::Action::Refresh).setBordered(false).onActivate([&] {
+  refreshButton.setImage(Icon::Action::Refresh).setBordered(false).onActivate([&] {
     pathEdit.setText(settings.activePath);
     refresh();
   });
-  homeButton.setIcon(Icon::Go::Home).setBordered(false).onActivate([&] {
+  homeButton.setImage(Icon::Go::Home).setBordered(false).onActivate([&] {
     pathEdit.setText(userpath());
     refresh();
   });
-  upButton.setIcon(Icon::Go::Up).setBordered(false).onActivate([&] {
-    pathEdit.setText(settings.activePath.dirname());
+  upButton.setImage(Icon::Go::Up).setBordered(false).onActivate([&] {
+    pathEdit.setText(dirname(settings.activePath));
     refresh();
   });
   scanList.onActivate([&] { activate(); });
@@ -51,14 +51,14 @@ auto ScanDialog::refresh() -> void {
 
   for(auto& name : contents) {
     if(!name.endsWith("/")) continue;
-    if(gamePakType(name.suffixname())) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setIcon(Icon::Emblem::Folder).setText(name.rtrim("/"))));
+    if(gamePakType(suffixname(name))) continue;
+    scanList.append(ListViewItem().append(ListViewCell().setImage(Icon::Emblem::Folder).setText(name.rtrim("/"))));
   }
 
   for(auto& name : contents) {
     if(name.endsWith("/")) continue;
-    if(!gameRomType(name.suffixname().downcase())) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setCheckable().setIcon(Icon::Emblem::File).setText(name)));
+    if(!gameRomType(suffixname(name).downcase())) continue;
+    scanList.append(ListViewItem().append(ListViewCell().setCheckable().setImage(Icon::Emblem::File).setText(name)));
   }
 
   Application::processEvents();
@@ -69,7 +69,7 @@ auto ScanDialog::refresh() -> void {
 auto ScanDialog::activate() -> void {
   if(auto item = scanList.selected()) {
     string location{settings.activePath, item.cell(0).text()};
-    if(directory::exists(location) && !gamePakType(location.suffixname())) {
+    if(directory::exists(location) && !gamePakType(suffixname(location))) {
       pathEdit.setText(location);
       refresh();
     }

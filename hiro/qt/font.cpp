@@ -11,16 +11,16 @@ auto pFont::size(const QFont& qtFont, const string& text) -> Size {
   signed maxWidth = 0;
   auto lines = text.split("\n");
   for(auto& line : lines) {
-    maxWidth = max(maxWidth, metrics.width(line));
+    maxWidth = max(maxWidth, metrics.width(QString::fromUtf8(line)));
   }
   return {maxWidth, metrics.height() * (signed)lines.size()};
 }
 
-auto pFont::family(const string& family) -> string {
+auto pFont::family(const string& family) -> QString {
   if(family == Font::Sans ) return "Sans";
   if(family == Font::Serif) return "Serif";
   if(family == Font::Mono ) return "Liberation Mono";
-  return family ? family : "Sans";
+  return family ? QString::fromUtf8(family) : "Sans";
 }
 
 auto pFont::create(const Font& font) -> QFont {

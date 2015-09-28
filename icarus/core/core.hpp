@@ -1,5 +1,7 @@
 struct Icarus {
   //core.cpp
+  Icarus();
+
   auto error() const -> string;
   auto success() -> bool;
   auto failure(const string& message) -> bool;
@@ -47,4 +49,10 @@ struct Icarus {
 
 private:
   string errorMessage;
+
+  struct {
+    Markup::Node superFamicom;
+    Markup::Node bsxSatellaview;
+    Markup::Node sufamiTurbo;
+  } database;
 };

@@ -2,12 +2,13 @@
 
 namespace nall {
 
+struct string_view;
 struct string;
 struct format;
-struct stringref;
 struct lstring;
+
+using rstring = const string_view&;
 using cstring = const string&;
-using rstring = const stringref&;
 
 #define NALL_STRING_ALLOCATOR_ADAPTIVE
 //#define NALL_STRING_ALLOCATOR_COPY_ON_WRITE
@@ -16,46 +17,6 @@ using rstring = const stringref&;
 
 //cast.hpp
 template<typename T> struct stringify;
-
-//compare.hpp
-inline auto compare(const string& self, rstring source) -> signed;
-inline auto icompare(const string& self, rstring source) -> signed;
-
-inline auto equals(const string& self, rstring source) -> bool;
-inline auto iequals(const string& self, rstring source) -> bool;
-
-inline auto beginsWith(const string& self, rstring source) -> bool;
-inline auto ibeginsWith(const string& self, rstring source) -> bool;
-
-inline auto endsWith(const string& self, rstring source) -> bool;
-inline auto iendsWith(const string& self, rstring source) -> bool;
-
-//convert.hpp
-inline auto downcase(string& self) -> string&;
-inline auto qdowncase(string& self) -> string&;
-
-inline auto upcase(string& self) -> string&;
-inline auto qupcase(string& self) -> string&;
-
-inline auto transform(string& self, rstring from, rstring to) -> string&;
-
-//core.hpp
-template<typename... P> inline auto assign(string& self, P&&... p) -> string&;
-template<typename T, typename... P> inline auto append(string& self, const T& value, P&&... p) -> string&;
-template<typename... P> inline auto append(string& self, const format& value, P&&... p) -> string&;
-inline auto append(string& self) -> string&;
-template<typename T> inline auto _append(string& self, const stringify<T>& source) -> string&;
-inline auto empty(const string& self) -> bool;
-inline auto length(const string& self) -> unsigned;
-
-//find.hpp
-template<bool I, bool Q> inline auto _find(const string& self, signed offset, rstring source) -> maybe<unsigned>;
-inline auto find(const string& self, rstring source) -> maybe<unsigned>;
-inline auto ifind(const string& self, rstring source) -> maybe<unsigned>;
-inline auto qfind(const string& self, rstring source) -> maybe<unsigned>;
-inline auto iqfind(const string& self, rstring source) -> maybe<unsigned>;
-inline auto findFrom(const string& self, signed offset, rstring source) -> maybe<unsigned>;
-inline auto ifindFrom(const string& self, signed offset, rstring source) -> maybe<unsigned>;
 
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
@@ -69,23 +30,22 @@ inline auto pointer(uintptr_t value, long precision = 0) -> string;
 inline auto real(long double value) -> string;
 
 //hash.hpp
-inline auto crc16(const string& self) -> string;
-inline auto crc32(const string& self) -> string;
-inline auto sha256(const string& self) -> string;
+inline auto crc16(rstring self) -> string;
+inline auto crc32(rstring self) -> string;
+inline auto sha256(rstring self) -> string;
 
 //match.hpp
-inline auto match(const string& self, rstring source) -> bool;
-inline auto imatch(const string& self, rstring source) -> bool;
+inline auto tokenize(const char* s, const char* p) -> bool;
 inline auto tokenize(lstring& list, const char* s, const char* p) -> bool;
 
 //path.hpp
-inline auto pathname(const string& self) -> string;
-inline auto filename(const string& self) -> string;
+inline auto pathname(rstring self) -> string;
+inline auto filename(rstring self) -> string;
 
-inline auto dirname(const string& self) -> string;
-inline auto basename(const string& self) -> string;
-inline auto prefixname(const string& self) -> string;
-inline auto suffixname(const string& self) -> string;
+inline auto dirname(rstring self) -> string;
+inline auto basename(rstring self) -> string;
+inline auto prefixname(rstring self) -> string;
+inline auto suffixname(rstring self) -> string;
 
 //platform.hpp
 inline auto activepath() -> string;
@@ -97,41 +57,8 @@ inline auto localpath() -> string;
 inline auto sharedpath() -> string;
 inline auto temppath() -> string;
 
-//replace.hpp
-template<bool I, bool Q> inline auto _replace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
-inline auto replace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
-inline auto ireplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
-inline auto qreplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
-inline auto iqreplace(string& self, rstring from, rstring to, long limit = LONG_MAX) -> string&;
-
-//split.hpp
-template<bool I, bool Q> inline auto _split(lstring& self, rstring source, rstring find, long limit = LONG_MAX) -> lstring&;
-inline auto split(string& self, rstring key, long limit = LONG_MAX) -> lstring;
-inline auto isplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
-inline auto qsplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
-inline auto iqsplit(string& self, rstring key, long limit = LONG_MAX) -> lstring;
-
-//trim.hpp
-inline auto trim(string& self, rstring lhs, rstring rhs, long limit = LONG_MAX) -> string&;
-inline auto ltrim(string& self, rstring lhs, long limit = LONG_MAX) -> string&;
-inline auto rtrim(string& self, rstring rhs, long limit = LONG_MAX) -> string&;
-
-inline auto itrim(string& self, rstring lhs, rstring rhs, long limit = LONG_MAX) -> string&;
-inline auto iltrim(string& self, rstring lhs, long limit = LONG_MAX) -> string&;
-inline auto irtrim(string& self, rstring rhs, long limit = LONG_MAX) -> string&;
-
-inline auto strip(string& self) -> string&;
-inline auto lstrip(string& self) -> string&;
-inline auto rstrip(string& self) -> string&;
-
 //utility.hpp
-inline auto fill(string& self, char fill = ' ') -> string&;
-inline auto hash(const string& self) -> unsigned;
-inline auto remove(string& self, unsigned offset, unsigned length) -> string&;
-inline auto reverse(string& self) -> string&;
-inline auto size(string& self, signed length, char fill = ' ') -> string&;
-inline auto slice(const string& self, signed offset = 0, signed length = -1) -> string;
-inline auto substr(rstring source, signed offset = 0, signed length = -1) -> string;
+inline auto slice(rstring self, signed offset = 0, signed length = -1) -> string;
 
 inline auto integer(char* result, intmax_t value) -> char*;
 inline auto decimal(char* result, uintmax_t value) -> char*;
@@ -212,7 +139,7 @@ public:
   auto operator>=(const char* s) const -> bool { return strcmp(data(), s) >= 0; }
 
   string(const string& source) : string() { operator=(source); }
-  string(string&& source) : string() { operator=(std::move(source)); }
+  string(string&& source) : string() { operator=(move(source)); }
 
   auto begin() -> char* { return &get()[0]; }
   auto end() -> char* { return &get()[size()]; }
@@ -226,82 +153,67 @@ public:
 
   //core.hpp
   inline auto operator[](signed) const -> const char&;
+  template<typename... P> inline auto assign(P&&...) -> type&;
+  template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
+  template<typename... P> inline auto append(const nall::format&, P&&...) -> type&;
+  inline auto append() -> type&;
+  template<typename T> inline auto _append(const stringify<T>&) -> string&;
+  inline auto empty() const -> bool;
+  inline auto length() const -> unsigned;
 
   //datetime.hpp
   inline static auto date(time_t = 0) -> string;
   inline static auto time(time_t = 0) -> string;
   inline static auto datetime(time_t = 0) -> string;
 
+  //find.hpp
+  template<bool, bool> inline auto _find(signed, rstring) const -> maybe<unsigned>;
+
+  inline auto find(rstring source) const -> maybe<unsigned>;
+  inline auto ifind(rstring source) const -> maybe<unsigned>;
+  inline auto qfind(rstring source) const -> maybe<unsigned>;
+  inline auto iqfind(rstring source) const -> maybe<unsigned>;
+
+  inline auto findFrom(signed offset, rstring source) const -> maybe<unsigned>;
+  inline auto ifindFrom(signed offset, rstring source) const -> maybe<unsigned>;
+
   //format.hpp
   inline auto format(const nall::format& params) -> type&;
 
-  //utility.hpp
-  inline static auto read(const string& filename) -> string;
-  inline static auto repeat(const string& pattern, unsigned times) -> string;
-
-  //extension methods
-  //=================
-
   //compare.hpp
-  auto compare(rstring source) const -> signed { return nall::compare(*this, source); }
-  auto icompare(rstring source) const -> signed { return nall::icompare(*this, source); }
+  template<bool> inline static auto _compare(const char*, unsigned, const char*, unsigned) -> signed;
 
-  auto equals(rstring source) const -> bool { return nall::equals(*this, source); }
-  auto iequals(rstring source) const -> bool { return nall::iequals(*this, source); }
+  inline auto compare(rstring source) const -> signed;
+  inline auto icompare(rstring source) const -> signed;
 
-  auto beginsWith(rstring source) const -> bool { return nall::beginsWith(*this, source); }
-  auto ibeginsWith(rstring source) const -> bool { return nall::ibeginsWith(*this, source); }
+  inline auto equals(rstring source) const -> bool;
+  inline auto iequals(rstring source) const -> bool;
 
-  auto endsWith(rstring source) const -> bool { return nall::endsWith(*this, source); }
-  auto iendsWith(rstring source) const -> bool { return nall::iendsWith(*this, source); }
+  inline auto beginsWith(rstring source) const -> bool;
+  inline auto ibeginsWith(rstring source) const -> bool;
+
+  inline auto endsWith(rstring source) const -> bool;
+  inline auto iendsWith(rstring source) const -> bool;
 
   //convert.hpp
-  auto downcase() -> type& { return nall::downcase(*this); }
-  auto upcase() -> type& { return nall::upcase(*this); }
+  inline auto downcase() -> type&;
+  inline auto upcase() -> type&;
 
-  auto qdowncase() -> type& { return nall::qdowncase(*this); }
-  auto qupcase() -> type& { return nall::qupcase(*this); }
+  inline auto qdowncase() -> type&;
+  inline auto qupcase() -> type&;
 
-  auto transform(rstring from, rstring to) -> type& { return nall::transform(*this, from, to); }
-
-  //core.hpp
-  template<typename... P> auto assign(P&&... p) -> type& { return nall::assign(*this, forward<P>(p)...); }
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
-  auto empty() const -> bool { return nall::empty(*this); }
-  auto length() const -> unsigned { return nall::length(*this); }
-
-  //find.hpp
-  auto find(rstring source) const -> maybe<unsigned> { return nall::find(*this, source); }
-  auto ifind(rstring source) const -> maybe<unsigned> { return nall::ifind(*this, source); }
-  auto qfind(rstring source) const -> maybe<unsigned> { return nall::qfind(*this, source); }
-  auto iqfind(rstring source) const -> maybe<unsigned> { return nall::iqfind(*this, source); }
-
-  auto findFrom(signed offset, rstring source) const -> maybe<unsigned> { return nall::findFrom(*this, offset, source); }
-  auto ifindFrom(signed offset, rstring source) const -> maybe<unsigned> { return nall::ifindFrom(*this, offset, source); }
-
-  //hash.hpp
-  auto crc16() const -> string { return nall::crc16(*this); }
-  auto crc32() const -> string { return nall::crc32(*this); }
-  auto sha256() const -> string { return nall::sha256(*this); }
+  inline auto transform(rstring from, rstring to) -> type&;
 
   //match.hpp
-  auto match(rstring source) const -> bool { return nall::match(*this, source); }
-  auto imatch(rstring source) const -> bool { return nall::imatch(*this, source); }
-
-  //path.hpp
-  auto pathname() const -> string { return nall::pathname(*this); }
-  auto filename() const -> string { return nall::filename(*this); }
-
-  auto dirname() const -> string { return nall::dirname(*this); }
-  auto basename() const -> string { return nall::basename(*this); }
-  auto prefixname() const -> string { return nall::prefixname(*this); }
-  auto suffixname() const -> string { return nall::suffixname(*this); }
+  inline auto match(rstring source) const -> bool;
+  inline auto imatch(rstring source) const -> bool;
 
   //replace.hpp
-  auto replace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<0, 0>(*this, from, to, limit); }
-  auto ireplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<1, 0>(*this, from, to, limit); }
-  auto qreplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<0, 1>(*this, from, to, limit); }
-  auto iqreplace(rstring from, rstring to, long limit = LONG_MAX) -> type& { return nall::_replace<1, 1>(*this, from, to, limit); }
+  template<bool, bool> inline auto _replace(rstring, rstring, long) -> type&;
+  inline auto replace(rstring from, rstring to, long limit = LONG_MAX) -> type&;
+  inline auto ireplace(rstring from, rstring to, long limit = LONG_MAX) -> type&;
+  inline auto qreplace(rstring from, rstring to, long limit = LONG_MAX) -> type&;
+  inline auto iqreplace(rstring from, rstring to, long limit = LONG_MAX) -> type&;
 
   //split.hpp
   inline auto split(rstring key, long limit = LONG_MAX) const -> lstring;
@@ -310,39 +222,27 @@ public:
   inline auto iqsplit(rstring key, long limit = LONG_MAX) const -> lstring;
 
   //trim.hpp
-  auto trim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type& { return nall::trim(*this, lhs, rhs, limit); }
-  auto ltrim(rstring lhs, long limit = LONG_MAX) -> type& { return nall::ltrim(*this, lhs, limit); }
-  auto rtrim(rstring rhs, long limit = LONG_MAX) -> type& { return nall::rtrim(*this, rhs, limit); }
+  inline auto trim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type&;
+  inline auto ltrim(rstring lhs, long limit = LONG_MAX) -> type&;
+  inline auto rtrim(rstring rhs, long limit = LONG_MAX) -> type&;
 
-  auto itrim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type& { return nall::itrim(*this, lhs, rhs, limit); }
-  auto iltrim(rstring lhs, long limit = LONG_MAX) -> type& { return nall::iltrim(*this, lhs, limit); }
-  auto irtrim(rstring rhs, long limit = LONG_MAX) -> type& { return nall::irtrim(*this, rhs, limit); }
+  inline auto itrim(rstring lhs, rstring rhs, long limit = LONG_MAX) -> type&;
+  inline auto iltrim(rstring lhs, long limit = LONG_MAX) -> type&;
+  inline auto irtrim(rstring rhs, long limit = LONG_MAX) -> type&;
 
-  auto strip() -> type& { return nall::strip(*this); }
-  auto lstrip() -> type& { return nall::lstrip(*this); }
-  auto rstrip() -> type& { return nall::rstrip(*this); }
+  inline auto strip() -> type&;
+  inline auto lstrip() -> type&;
+  inline auto rstrip() -> type&;
 
   //utility.hpp
-  auto fill(char fill = ' ') -> type& { return nall::fill(*this, fill); }
-  auto hash() const -> const type& { return nall::hash(*this), *this; }
-  auto remove(unsigned offset, unsigned length) -> type& { return nall::remove(*this, offset, length); }
-  auto reverse() -> type& { return nall::reverse(*this); }
-  auto size(signed length, char fill = ' ') -> type& { return nall::size(*this, length, fill); }
-  auto slice(signed offset = 0, signed length = -1) const -> string { return nall::slice(*this, offset, length); }
-
-  #if defined(QSTRING_H)
-  inline operator QString() const;
-  #endif
+  inline static auto read(rstring filename) -> string;
+  inline static auto repeat(rstring pattern, unsigned times) -> string;
+  inline auto fill(char fill = ' ') -> type&;
+  inline auto hash() const -> unsigned;
+  inline auto remove(unsigned offset, unsigned length) -> type&;
+  inline auto reverse() -> type&;
+  inline auto size(signed length, char fill = ' ') -> type&;
 };
-
-//list.hpp
-template<typename... P> auto append(lstring& self, const string& value, P&&... p) -> lstring&;
-inline auto append(lstring& self) -> lstring&;
-inline auto find(const lstring& self, const string& source) -> maybe<unsigned>;
-inline auto ifind(const lstring& self, const string& source) -> maybe<unsigned>;
-inline auto match(const lstring& self, const string& pattern) -> lstring;
-inline auto merge(const lstring& self, const string& separator) -> string;
-inline auto strip(lstring& self) -> lstring&;
 
 struct lstring : vector<string> {
   using type = lstring;
@@ -362,33 +262,25 @@ struct lstring : vector<string> {
 
   inline auto isort() -> type&;
 
-  //extension methods
-  //=================
+  template<typename... P> inline auto append(const string&, P&&...) -> type&;
+  inline auto append() -> type&;
 
-  //list.hpp
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
-  auto find(const string& source) const -> maybe<unsigned> { return nall::find(*this, source); }
-  auto ifind(const string& source) const -> maybe<unsigned> { return nall::ifind(*this, source); }
-  auto match(const string& pattern) const -> lstring { return nall::match(*this, pattern); }
-  auto merge(const string& separator) const -> string { return nall::merge(*this, separator); }
-  auto strip() -> type& { return nall::strip(*this); }
+  inline auto find(rstring source) const -> maybe<unsigned>;
+  inline auto ifind(rstring source) const -> maybe<unsigned>;
+  inline auto match(rstring pattern) const -> lstring;
+  inline auto merge(rstring separator) const -> string;
+  inline auto strip() -> type&;
 
   //split.hpp
-  auto split(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<0, 0>(*this, source, on, limit); }
-  auto isplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<1, 0>(*this, source, on, limit); }
-  auto qsplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<0, 1>(*this, source, on, limit); }
-  auto iqsplit(rstring source, rstring on, long limit = LONG_MAX) -> type& { return nall::_split<1, 1>(*this, source, on, limit); }
+  template<bool, bool> inline auto _split(rstring, rstring, long) -> lstring&;
 };
-
-//format.hpp
-template<typename T, typename... P> inline auto append(format& self, const T& value, P&&... p) -> format&;
-inline auto append(format& self) -> format&;
 
 struct format : vector<string> {
   using type = format;
 
   template<typename... P> format(P&&... p) { reserve(sizeof...(p)); append(forward<P>(p)...); }
-  template<typename... P> auto append(P&&... p) -> type& { return nall::append(*this, forward<P>(p)...); }
+  template<typename T, typename... P> inline auto append(const T&, P&&... p) -> type&;
+  inline auto append() -> type&;
 };
 
 }

@@ -390,7 +390,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
       "  mcc\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
       "    ram id=save name=save.ram size=0x", hex(ram_size), "\n"
-      "    ram id=download name=bsx.ram size=0x80000\n"
+      "    ram id=download name=download.ram size=0x80000\n"
       "    map id=io address=00-3f,80-bf:5000-5fff\n"
       "    map id=rom address=00-3f,80-bf:8000-ffff\n"
       "    map id=rom address=40-7f,c0-ff:0000-ffff\n"

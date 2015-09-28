@@ -186,34 +186,24 @@ template<> struct stringify<const string&> {
   stringify(const string& source) : _text(source) {}
 };
 
-#if defined(QSTRING_H)
-
-//Qt
-
-template<> struct stringify<QString> {
-  const QString& _text;
-  auto data() const -> const char* { return _text.toUtf8().constData(); }
-  auto size() const -> unsigned { return _text.size(); }
-  stringify(const QString& source) : _text(source) {}
+template<> struct stringify<string_view> {
+  const string_view& _view;
+  auto data() const -> const char* { return _view.data(); }
+  auto size() const -> unsigned { return _view.size(); }
+  stringify(const string_view& source) : _view(source) {}
 };
 
-template<> struct stringify<const QString&> {
-  const QString& _text;
-  auto data() const -> const char* { return _text.toUtf8().constData(); }
-  auto size() const -> unsigned { return _text.size(); }
-  stringify(const QString& source) : _text(source) {}
+template<> struct stringify<const string_view&> {
+  const string_view& _view;
+  auto data() const -> const char* { return _view.data(); }
+  auto size() const -> unsigned { return _view.size(); }
+  stringify(const string_view& source) : _view(source) {}
 };
-
-string::operator QString() const {
-  return QString::fromUtf8(*this);
-}
-
-#endif
 
 //
 
 template<typename T> auto make_string(T value) -> stringify<T> {
-  return stringify<T>(std::forward<T>(value));
+  return stringify<T>(forward<T>(value));
 }
 
 }

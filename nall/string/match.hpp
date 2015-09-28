@@ -4,8 +4,8 @@ namespace nall {
 
 //todo: these functions are not binary-safe
 
-auto match(const string& self, rstring source) -> bool {
-  const char* s = self.data();
+auto string::match(rstring source) const -> bool {
+  const char* s = data();
   const char* p = source.data();
 
   const char* cp = nullptr;
@@ -28,12 +28,12 @@ auto match(const string& self, rstring source) -> bool {
   return !*p;
 }
 
-auto imatch(const string& self, rstring source) -> bool {
+auto string::imatch(rstring source) const -> bool {
   static auto chrlower = [](char c) -> char {
     return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
   };
 
-  const char* s = self.data();
+  const char* s = data();
   const char* p = source.data();
 
   const char* cp = nullptr;
@@ -56,7 +56,7 @@ auto imatch(const string& self, rstring source) -> bool {
   return !*p;
 }
 
-inline bool tokenize(const char* s, const char* p) {
+auto tokenize(const char* s, const char* p) -> bool {
   while(*s) {
     if(*p == '*') {
       while(*s) if(tokenize(s++, p + 1)) return true;
@@ -74,7 +74,7 @@ auto tokenize(lstring& list, const char* s, const char* p) -> bool {
       const char* b = s;
       while(*s) {
         if(tokenize(list, s++, p + 1)) {
-          list.prepend(substr(b, 0, --s - b));
+          list.prepend(slice(b, 0, --s - b));
           return true;
         }
       }

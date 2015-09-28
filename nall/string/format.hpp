@@ -59,17 +59,17 @@ auto string::format(const nall::format& params) -> type& {
   return *this;
 }
 
-template<typename T, typename... P> auto append(format& self, const T& value, P&&... p) -> format& {
-  self.vector<string>::append(value);
-  append(self, std::forward<P>(p)...);
+template<typename T, typename... P> auto format::append(const T& value, P&&... p) -> format& {
+  vector<string>::append(value);
+  return append(forward<P>(p)...);
 }
 
-auto append(format& self) -> format& {
-  return self;
+auto format::append() -> format& {
+  return *this;
 }
 
 template<typename... P> auto print(P&&... p) -> void {
-  string s{std::forward<P>(p)...};
+  string s{forward<P>(p)...};
   fputs(s.data(), stdout);
 }
 

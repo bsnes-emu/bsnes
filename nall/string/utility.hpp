@@ -2,7 +2,7 @@
 
 namespace nall {
 
-auto string::read(const string& filename) -> string {
+auto string::read(rstring filename) -> string {
   #if !defined(_WIN32)
   FILE* fp = fopen(filename, "rb");
   #else
@@ -22,82 +22,73 @@ auto string::read(const string& filename) -> string {
   return fclose(fp), result;
 }
 
-auto string::repeat(const string& pattern, unsigned times) -> string {
+auto string::repeat(rstring pattern, unsigned times) -> string {
   string result;
-  while(times--) result.append(pattern);
+  while(times--) result.append(pattern.data());
   return result;
 }
 
-auto fill(string& self, char fill) -> string& {
-  memory::fill(self.get(), self.size(), fill);
-  return self;
+auto string::fill(char fill) -> string& {
+  memory::fill(get(), size(), fill);
+  return *this;
 }
 
-auto hash(const string& self) -> unsigned {
-  const char* p = self.data();
-  unsigned size = self.size();
+auto string::hash() const -> unsigned {
+  const char* p = data();
+  unsigned length = size();
   unsigned result = 5381;
-  while(size--) result = (result << 5) + result + *p++;
+  while(length--) result = (result << 5) + result + *p++;
   return result;
 }
 
-auto remove(string& self, unsigned offset, unsigned length) -> string& {
-  char* p = self.get();
-  length = min(length, self.size());
-  memory::move(p + offset, p + offset + length, self.size() - length);
-  return self.resize(self.size() - length);
+auto string::remove(unsigned offset, unsigned length) -> string& {
+  char* p = get();
+  length = min(length, size());
+  memory::move(p + offset, p + offset + length, size() - length);
+  return resize(size() - length);
 }
 
-auto reverse(string& self) -> string& {
-  char* p = self.get();
-  unsigned size = self.size();
-  unsigned pivot = size >> 1;
-  for(signed x = 0, y = size - 1; x < pivot && y >= 0; x++, y--) std::swap(p[x], p[y]);
-  return self;
+auto string::reverse() -> string& {
+  char* p = get();
+  unsigned length = size();
+  unsigned pivot = length >> 1;
+  for(signed x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(p[x], p[y]);
+  return *this;
 }
 
 //+length => insert/delete from start (right justify)
 //-length => insert/delete from end (left justify)
-auto size(string& self, signed length, char fill) -> string& {
-  unsigned size = self.size();
-  if(size == length) return self;
+auto string::size(signed length, char fill) -> string& {
+  unsigned size = this->size();
+  if(size == length) return *this;
 
   bool right = length >= 0;
   length = abs(length);
 
   if(size < length) {  //expand
-    self.resize(length);
-    char* p = self.get();
+    resize(length);
+    char* p = get();
     unsigned displacement = length - size;
     if(right) memory::move(p + displacement, p, size);
     else p += size;
     while(displacement--) *p++ = fill;
   } else {  //shrink
-    char* p = self.get();
+    char* p = get();
     unsigned displacement = size - length;
     if(right) memory::move(p, p + displacement, length);
-    self.resize(length);
+    resize(length);
   }
 
-  return self;
+  return *this;
 }
 
-auto slice(const string& self, signed offset, signed length) -> string {
+auto slice(rstring self, signed offset, signed length) -> string {
   string result;
   if(offset < self.size()) {
     if(length < 0) length = self.size() - offset;
     result.resize(length);
     memory::copy(result.get(), self.data() + offset, length);
   }
-  return result;
-}
-
-//legacy function: required for some library functions, do not use in newly written code
-auto substr(rstring source, signed offset, signed length) -> string {
-  string result;
-  if(length < 0) length = source.size() - offset;
-  result.resize(length);
-  memory::copy(result.get(), source.data() + offset, length);
   return result;
 }
 

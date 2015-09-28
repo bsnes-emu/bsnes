@@ -3,11 +3,12 @@ auto CPU::bus_idle() -> void {
 }
 
 auto CPU::bus_read(unsigned mode, uint32 addr) -> uint32 {
-  addr &= 0x0fff'ffff;
   unsigned wait = bus_wait(mode, addr);
   unsigned word = pipeline.fetch.instruction;
 
-  if(addr & 0x0800'0000) {
+  if(addr >= 0x1000'0000) {
+    prefetch_step(wait);
+  } else if(addr & 0x0800'0000) {
     if(mode & Prefetch && regs.wait.control.prefetch) {
       prefetch_sync(addr);
       word = prefetch_read();
@@ -35,10 +36,11 @@ auto CPU::bus_read(unsigned mode, uint32 addr) -> uint32 {
 }
 
 auto CPU::bus_write(unsigned mode, uint32 addr, uint32 word) -> void {
-  addr &= 0x0fff'ffff;
   unsigned wait = bus_wait(mode, addr);
 
-  if(addr & 0x0800'0000) {
+  if(addr >= 0x1000'0000) {
+    prefetch_step(wait);
+  } else if(addr & 0x0800'0000) {
     if(!active.dma) prefetch_wait();
     step(wait);
     addr < 0x0e00'0000 ? cartridge.rom_write(mode, addr, word) : cartridge.ram_write(mode, addr, word);
@@ -56,11 +58,12 @@ auto CPU::bus_write(unsigned mode, uint32 addr, uint32 word) -> void {
 }
 
 auto CPU::bus_wait(unsigned mode, uint32 addr) -> unsigned {
-  if(addr < 0x0200'0000) return 1;
-  if(addr < 0x0300'0000) return (16 - regs.memory.control.ewramwait) * (mode & Word ? 2 : 1);
-  if(addr < 0x0500'0000) return 1;
-  if(addr < 0x0700'0000) return mode & Word ? 2 : 1;
-  if(addr < 0x0800'0000) return 1;
+  if(addr >= 0x1000'0000) return 1;  //unmapped
+  if(addr <  0x0200'0000) return 1;
+  if(addr <  0x0300'0000) return (16 - regs.memory.control.ewramwait) * (mode & Word ? 2 : 1);
+  if(addr <  0x0500'0000) return 1;
+  if(addr <  0x0700'0000) return mode & Word ? 2 : 1;
+  if(addr <  0x0800'0000) return 1;
 
   static unsigned timings[] = {5, 4, 3, 9};
   unsigned n = timings[regs.wait.control.nwait[addr >> 25 & 3]];

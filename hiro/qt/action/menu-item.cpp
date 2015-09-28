@@ -32,7 +32,7 @@ auto pMenuItem::setText(const string& text) -> void {
 
 auto pMenuItem::_setState() -> void {
   qtMenuItem->setIcon(CreateImage(state().image));
-  qtMenuItem->setText(state().text);
+  qtMenuItem->setText(QString::fromUtf8(state().text));
 }
 
 auto QtMenuItem::onActivate() -> void {

@@ -15,7 +15,7 @@ auto activepath() -> string {
 auto realpath(rstring name) -> string {
   string result;
   char path[PATH_MAX] = "";
-  if(::realpath(name, path)) result = string{path}.transform("\\", "/").pathname();
+  if(::realpath(name, path)) result = pathname(string{path}.transform("\\", "/"));
   if(result.empty()) return activepath();
   result.transform("\\", "/");
   if(result.endsWith("/") == false) result.append("/");

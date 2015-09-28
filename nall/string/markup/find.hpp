@@ -99,10 +99,10 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
 
 auto ManagedNode::_lookup(const string& path) const -> Node {
   if(auto position = path.find("/")) {
-    auto name = path.slice(0, *position);
+    auto name = slice(path, 0, *position);
     for(auto& node : _children) {
       if(name == node->_name) {
-        return node->_lookup(path.slice(*position + 1));
+        return node->_lookup(slice(path, *position + 1));
       }
     }
   } else for(auto& node : _children) {
@@ -113,14 +113,14 @@ auto ManagedNode::_lookup(const string& path) const -> Node {
 
 auto ManagedNode::_create(const string& path) -> Node {
   if(auto position = path.find("/")) {
-    auto name = path.slice(0, *position);
+    auto name = slice(path, 0, *position);
     for(auto& node : _children) {
       if(name == node->_name) {
-        return node->_create(path.slice(*position + 1));
+        return node->_create(slice(path, *position + 1));
       }
     }
     _children.append(new ManagedNode(name));
-    return _children.last()->_create(path.slice(*position + 1));
+    return _children.last()->_create(slice(path, *position + 1));
   }
   for(auto& node : _children) {
     if(path == node->_name) return node;

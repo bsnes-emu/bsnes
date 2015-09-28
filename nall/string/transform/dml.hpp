@@ -45,7 +45,7 @@ auto DML::parse(const string& filedata, const string& pathname) -> string {
 }
 
 auto DML::parse(const string& filename) -> string {
-  if(!settings.path) settings.path = filename.pathname();
+  if(!settings.path) settings.path = pathname(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
   return state.output;
@@ -68,7 +68,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
   if(block.beginsWith("<include ") && block.endsWith(">")) {
     string filename{pathname, block.trim("<include ", ">", 1L).strip()};
     string document = settings.reader ? settings.reader(filename) : string::read(filename);
-    parseDocument(document, filename.pathname(), depth + 1);
+    parseDocument(document, nall::pathname(filename), depth + 1);
   }
 
   //html
@@ -87,7 +87,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
     }
     auto content = lines.takeFirst().ltrim("# ", 1L).split(" => ", 1L);
     auto data = markup(content[0]);
-    auto name = escape(content(1, data.crc32()));
+    auto name = escape(content(1, crc32(data)));
     state.output.append("<header id=\"", name, "\">", data);
     for(auto& line : lines) {
       if(!line.beginsWith("# ")) continue;
@@ -98,14 +98,14 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
 
   //header
   else if(auto depth = count(block, '=')) {
-    auto content = lines.takeFirst().slice(depth + 1).split(" => ", 1L);
+    auto content = slice(lines.takeFirst(), depth + 1).split(" => ", 1L);
     auto data = markup(content[0]);
-    auto name = escape(content(1, data.crc32()));
+    auto name = escape(content(1, crc32(data)));
     if(depth <= 6) {
       state.output.append("<h", depth, " id=\"", name, "\">", data);
       for(auto& line : lines) {
         if(count(line, '=') != depth) continue;
-        state.output.append("<span>", line.slice(depth + 1), "</span>");
+        state.output.append("<span>", slice(line, depth + 1), "</span>");
       }
       state.output.append("</h", depth, ">\n");
     }
@@ -119,9 +119,9 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
       if(auto depth = count(line, '-')) {
         while(level < depth) level++, state.output.append("<ul>\n");
         while(level > depth) level--, state.output.append("</ul>\n");
-        auto content = line.slice(depth + 1).split(" => ", 1L);
+        auto content = slice(line, depth + 1).split(" => ", 1L);
         auto data = markup(content[0]);
-        auto name = escape(content(1, data.crc32()));
+        auto name = escape(content(1, crc32(data)));
         state.output.append("<li><a href=\"#", name, "\">", data, "</a></li>\n");
       }
     }
@@ -136,7 +136,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
       if(auto depth = count(line, '*')) {
         while(level < depth) level++, state.output.append("<ul>\n");
         while(level > depth) level--, state.output.append("</ul>\n");
-        auto data = markup(line.slice(depth + 1));
+        auto data = markup(slice(line, depth + 1));
         state.output.append("<li>", data, "</li>\n");
       }
     }
@@ -150,7 +150,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
       if(auto depth = count(line, '>')) {
         while(level < depth) level++, state.output.append("<blockquote>\n");
         while(level > depth) level--, state.output.append("</blockquote>\n");
-        auto data = markup(line.slice(depth + 1));
+        auto data = markup(slice(line, depth + 1));
         state.output.append(data, "\n");
       }
     }
@@ -231,7 +231,7 @@ auto DML::markup(const string& text) -> string {
 
     if(match && b == match && !f) {
       match = 0;
-      auto content = text.slice(offset, n - offset - 1);
+      auto content = slice(text, offset, n - offset - 1);
       if(b == '*') { output.append("<strong>", escape(content), "</strong>"); continue; }
       if(b == '/') { output.append("<em>", escape(content), "</em>"); continue; }
       if(b == '_') { output.append("<ins>", escape(content), "</ins>"); continue; }

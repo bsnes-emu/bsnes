@@ -22,52 +22,52 @@ auto lstring::isort() -> lstring& {
   return *this;
 }
 
-template<typename... P> auto append(lstring& self, const string& data, P&&... p) -> lstring& {
-  self.vector::append(data);
-  append(self, std::forward<P>(p)...);
-  return self;
+template<typename... P> auto lstring::append(const string& data, P&&... p) -> lstring& {
+  vector::append(data);
+  append(forward<P>(p)...);
+  return *this;
 }
 
-auto append(lstring& self) -> lstring& {
-  return self;
+auto lstring::append() -> lstring& {
+  return *this;
 }
 
-auto find(const lstring& self, const string& source) -> maybe<unsigned> {
-  for(unsigned n = 0; n < self.size(); n++) {
-    if(self[n].equals(source)) return n;
+auto lstring::find(rstring source) const -> maybe<unsigned> {
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n).equals(source)) return n;
   }
   return nothing;
 }
 
-auto ifind(const lstring& self, const string& source) -> maybe<unsigned> {
-  for(unsigned n = 0; n < self.size(); n++) {
-    if(self[n].iequals(source)) return n;
+auto lstring::ifind(rstring source) const -> maybe<unsigned> {
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n).iequals(source)) return n;
   }
   return nothing;
 }
 
-auto match(const lstring& self, const string& pattern) -> lstring {
+auto lstring::match(rstring pattern) const -> lstring {
   lstring result;
-  for(unsigned n = 0; n < self.size(); n++) {
-    if(self[n].match(pattern)) result.append(self[n]);
+  for(unsigned n = 0; n < size(); n++) {
+    if(operator[](n).match(pattern)) result.append(operator[](n));
   }
   return result;
 }
 
-auto merge(const lstring& self, const string& separator) -> string {
+auto lstring::merge(rstring separator) const -> string {
   string output;
-  for(unsigned n = 0; n < self.size(); n++) {
-    output.append(self[n]);
-    if(n < self.size() - 1) output.append(separator);
+  for(unsigned n = 0; n < size(); n++) {
+    output.append(operator[](n));
+    if(n < size() - 1) output.append(separator.data());
   }
   return output;
 }
 
-auto strip(lstring& self) -> lstring& {
-  for(unsigned n = 0; n < self.size(); n++) {
-    self[n].strip();
+auto lstring::strip() -> lstring& {
+  for(unsigned n = 0; n < size(); n++) {
+    operator[](n).strip();
   }
-  return self;
+  return *this;
 }
 
 }

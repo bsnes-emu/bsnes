@@ -33,7 +33,7 @@ private:
 };
 
 auto CML::parse(const string& filename) -> string {
-  if(!settings.path) settings.path = filename.pathname();
+  if(!settings.path) settings.path = pathname(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
   return state.output;
@@ -61,7 +61,7 @@ auto CML::parseDocument(const string& filedata, const string& pathname, unsigned
       name.ltrim("include ", 1L);
       string filename{pathname, name};
       string document = settings.reader ? settings.reader(filename) : string::read(filename);
-      parseDocument(document, filename.pathname(), depth + 1);
+      parseDocument(document, nall::pathname(filename), depth + 1);
       continue;
     }
 
@@ -80,10 +80,10 @@ auto CML::parseDocument(const string& filedata, const string& pathname, unsigned
       while(auto offset = value.find("var(")) {
         bool found = false;
         if(auto length = value.findFrom(*offset, ")")) {
-          string name = value.slice(*offset + 4, *length - 4);
+          string name = slice(value, *offset + 4, *length - 4);
           for(auto& variable : variables) {
             if(variable.name == name) {
-              value = {value.slice(0, *offset), variable.value, value.slice(*offset + *length + 1)};
+              value = {slice(value, 0, *offset), variable.value, slice(value, *offset + *length + 1)};
               found = true;
               break;
             }

@@ -171,7 +171,7 @@ auto Response::findContentLength() const -> unsigned {
 auto Response::findContentType() const -> string {
   if(auto contentType = header("Content-Type")) return contentType;
   if(hasData()) return "application/octet-stream";
-  if(hasFile()) return findContentType(file().suffixname());
+  if(hasFile()) return findContentType(suffixname(file()));
   return "text/html; charset=utf-8";
 }
 

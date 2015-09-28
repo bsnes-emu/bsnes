@@ -20,39 +20,37 @@ auto string::operator[](signed position) const -> const char& {
   return data()[position];
 }
 
-template<typename... P> auto assign(string& self, P&&... p) -> string& {
-  self.resize(0);
-  return self.append(std::forward<P>(p)...);
+template<typename... P> auto string::assign(P&&... p) -> string& {
+  resize(0);
+  return append(forward<P>(p)...);
 }
 
-template<typename T, typename... P> auto append(string& self, const T& value, P&&... p) -> string& {
-  _append(self, make_string(value));
-  return self.append(std::forward<P>(p)...);
+template<typename T, typename... P> auto string::append(const T& value, P&&... p) -> string& {
+  _append(make_string(value));
+  return append(forward<P>(p)...);
 }
 
-template<typename... P> auto append(string& self, const format& value, P&&... p) -> string& {
-  self.format(value);
-  return self.append(std::forward<P>(p)...);
+template<typename... P> auto string::append(const nall::format& value, P&&... p) -> string& {
+  format(value);
+  return append(forward<P>(p)...);
 }
 
-auto append(string& self) -> string& {
-  return self;
+auto string::append() -> string& {
+  return *this;
 }
 
-template<typename T> auto _append(string& self, const stringify<T>& source) -> string& {
-  unsigned size = self.size();
-  unsigned length = source.size();
-  self.resize(size + length);
-  memory::copy(self.get() + size, source.data(), length);
-  return self;
+template<typename T> auto string::_append(const stringify<T>& source) -> string& {
+  resize(size() + source.size());
+  memory::copy(get() + size() - source.size(), source.data(), source.size());
+  return *this;
 }
 
-auto empty(const string& self) -> bool {
-  return self.size() == 0;
+auto string::empty() const -> bool {
+  return size() == 0;
 }
 
-auto length(const string& self) -> unsigned {
-  return strlen(self.data());
+auto string::length() const -> unsigned {
+  return strlen(data());
 }
 
 }

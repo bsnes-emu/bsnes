@@ -2,47 +2,48 @@
 
 namespace nall {
 
-template<bool Insensitive> inline auto _compare(const char* target, unsigned capacity, const char* source, unsigned size) -> signed {
+template<bool Insensitive>
+auto string::_compare(const char* target, unsigned capacity, const char* source, unsigned size) -> signed {
   if(Insensitive) return memory::icompare(target, capacity, source, size);
   return memory::compare(target, capacity, source, size);
 }
 
-auto compare(const string& self, rstring source) -> signed {
-  return memory::compare(self.data(), self.size(), source.data(), source.size());
+auto string::compare(rstring source) const -> signed {
+  return memory::compare(data(), size(), source.data(), source.size());
 }
 
-auto icompare(const string& self, rstring source) -> signed {
-  return memory::icompare(self.data(), self.size(), source.data(), source.size());
+auto string::icompare(rstring source) const -> signed {
+  return memory::icompare(data(), size(), source.data(), source.size());
 }
 
-auto equals(const string& self, rstring source) -> bool {
-  if(self.size() != source.size()) return false;
-  return memory::compare(self.data(), source.data(), source.size()) == 0;
+auto string::equals(rstring source) const -> bool {
+  if(size() != source.size()) return false;
+  return memory::compare(data(), source.data(), source.size()) == 0;
 }
 
-auto iequals(const string& self, rstring source) -> bool {
-  if(self.size() != source.size()) return false;
-  return memory::icompare(self.data(), source.data(), source.size()) == 0;
+auto string::iequals(rstring source) const -> bool {
+  if(size() != source.size()) return false;
+  return memory::icompare(data(), source.data(), source.size()) == 0;
 }
 
-auto beginsWith(const string& self, rstring source) -> bool {
-  if(source.size() > self.size()) return false;
-  return memory::compare(self.data(), source.data(), source.size()) == 0;
+auto string::beginsWith(rstring source) const -> bool {
+  if(source.size() > size()) return false;
+  return memory::compare(data(), source.data(), source.size()) == 0;
 }
 
-auto ibeginsWith(const string& self, rstring source) -> bool {
-  if(source.size() > self.size()) return false;
-  return memory::icompare(self.data(), source.data(), source.size()) == 0;
+auto string::ibeginsWith(rstring source) const -> bool {
+  if(source.size() > size()) return false;
+  return memory::icompare(data(), source.data(), source.size()) == 0;
 }
 
-auto endsWith(const string& self, rstring source) -> bool {
-  if(source.size() > self.size()) return false;
-  return memory::compare(self.data() + self.size() - source.size(), source.data(), source.size()) == 0;
+auto string::endsWith(rstring source) const -> bool {
+  if(source.size() > size()) return false;
+  return memory::compare(data() + size() - source.size(), source.data(), source.size()) == 0;
 }
 
-auto iendsWith(const string& self, rstring source) -> bool {
-  if(source.size() > self.size()) return false;
-  return memory::icompare(self.data() + self.size() - source.size(), source.data(), source.size()) == 0;
+auto string::iendsWith(rstring source) const -> bool {
+  if(source.size() > size()) return false;
+  return memory::icompare(data() + size() - source.size(), source.data(), source.size()) == 0;
 }
 
 }

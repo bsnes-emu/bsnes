@@ -1,3 +1,15 @@
+namespace Database {
+  #include "../database/super-famicom.hpp"
+  #include "../database/bsx-satellaview.hpp"
+  #include "../database/sufami-turbo.hpp"
+}
+
+Icarus::Icarus() {
+  database.superFamicom = BML::unserialize(Database::SuperFamicom);
+  database.bsxSatellaview = BML::unserialize(Database::BsxSatellaview);
+  database.sufamiTurbo = BML::unserialize(Database::SufamiTurbo);
+}
+
 auto Icarus::error() const -> string {
   return errorMessage;
 }
@@ -16,7 +28,7 @@ auto Icarus::manifest(string location) -> string {
   location.transform("\\", "/").rtrim("/").append("/");
   if(!directory::exists(location)) return "";
 
-  auto type = location.suffixname().downcase();
+  auto type = suffixname(location).downcase();
   if(type == ".fc") return famicomManifest(location);
   if(type == ".sfc") return superFamicomManifest(location);
   if(type == ".gb") return gameBoyManifest(location);
@@ -33,8 +45,8 @@ auto Icarus::import(string location) -> bool {
   if(!file::exists(location)) return failure("file does not exist");
   if(!file::readable(location)) return failure("file is unreadable");
 
-  auto name = location.prefixname();
-  auto type = location.suffixname().downcase();
+  auto name = prefixname(location);
+  auto type = suffixname(location).downcase();
   if(!name || !type) return failure("invalid file name");
 
   auto buffer = file::read(location);
@@ -45,8 +57,8 @@ auto Icarus::import(string location) -> bool {
     if(!zip.open(location)) return failure("ZIP archive is invalid");
     if(!zip.file) return failure("ZIP archive is empty");
 
-    name = zip.file[0].name.prefixname();
-    type = zip.file[0].name.suffixname().downcase();
+    name = prefixname(zip.file[0].name);
+    type = suffixname(zip.file[0].name).downcase();
     buffer = zip.extract(zip.file[0]);
   }
 
