@@ -5,7 +5,7 @@ database revision=2015-09-28
 release
   cartridge region=NTSC
     board id:BSC-1A5B9P-01
-    bsx
+    mcc
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x8000
       ram name=download.ram size=0x40000

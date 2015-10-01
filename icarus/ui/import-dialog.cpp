@@ -20,7 +20,7 @@ auto ImportDialog::run(lstring locations) -> void {
 
   setVisible(true);
   for(auto& location : locations) {
-    auto name = basename(location);
+    auto name = nall::basename(location);
 
     if(abort) {
       errors.append(string{"[", name, "] aborted"});
