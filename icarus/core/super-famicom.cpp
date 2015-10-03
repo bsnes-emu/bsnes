@@ -73,6 +73,7 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, const string& location)
     auto name = rom["name"].text();
     auto size = rom["size"].decimal();
     if(name == "program.rom" || name == "data.rom" || firmwareAppended) {
+      if(size > buffer.size() - offset) return failure("ROM image is missing data");
       file::write({target, name}, buffer.data() + offset, size);
       offset += size;
     } else {

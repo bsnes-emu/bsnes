@@ -18,10 +18,14 @@ ScanDialog::ScanDialog() {
   });
   scanList.onActivate([&] { activate(); });
   selectAllButton.setText("Select All").onActivate([&] {
-    for(auto& item : scanList.items()) item.cell(0).setChecked(true);
+    for(auto& item : scanList.items()) {
+      if(item.cell(0).checkable()) item.cell(0).setChecked(true);
+    }
   });
   unselectAllButton.setText("Unselect All").onActivate([&] {
-    for(auto& item : scanList.items()) item.cell(0).setChecked(false);
+    for(auto& item : scanList.items()) {
+      if(item.cell(0).checkable()) item.cell(0).setChecked(false);
+    }
   });
   createManifestsLabel.setChecked(settings.createManifests).setText("Create Manifests").onToggle([&] {
     settings.createManifests = createManifestsLabel.checked();

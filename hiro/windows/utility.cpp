@@ -316,18 +316,12 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
   }
 
   case WM_NOTIFY: {
-    //WC_TABCONTROL requires parenting widgets to it; rather than the WINDOW
-    //without doing this; backgrounds on transparent controls (eg STATIC) are painted wrong
-    //this causes some WC_LISTVIEW WM_NOTIFY messages to only go to the WC_TABCONTROL WNDPROC
-    //all other controls also send their messages to the WC_TABCONTROL WNDPROC
-    //to avoid duplicating all message logic, hiro shares a WNDPROC with Window and TabFrame
-    //LVN_ITEM(ACTIVATE,CHANGED) are only sent to the TabFrame, as expected
-    //yet for unknown reasons, LVN_COLUMNCLICK and NM_(CLICK,DBLCLK,RCLICK) are
-    //sent to both the TabFrame, and then again to the Window's WNDPROC
-    //this causes on(Sort,Toggle,Context) to trigger callbacks twice
-    //if we try to block propagation to the Window (via return instead of break); then
-    //this will result in the LVN_ITEM(ACTIVATE,CHANGED) never being invoked (unsure why)
-    //as a workaround; we must detect these message to the Windows' WNDPROC, and block them
+    //Widgets inside a TabFrame must be parented to it rather than the Window.
+    //This is critical for proper inheritance of styles and message passing.
+    //However, by doing this, some WM_NOTIFY messages end up being sent to both
+    //the TabFrame and the Window; while others are only sent to the TabFrame.
+    //To save code, hiro uses a shared callback for both of these cases.
+    //So when a message is sent to both, we ignore the TabFrame message.
     bool isWindowCallback = (object == window);
 
     auto header = (LPNMHDR)lparam;
@@ -345,16 +339,16 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
         break;
       }
       if(header->code == LVN_COLUMNCLICK) {
-        if(!isWindowCallback) listView->self()->onSort(lparam);
+        if(isWindowCallback) listView->self()->onSort(lparam);
         break;
       }
       if(header->code == NM_CLICK || header->code == NM_DBLCLK) {
         //onToggle performs the test to ensure the ListViewItem clicked was checkable
-        if(!isWindowCallback) listView->self()->onToggle(lparam);
+        if(isWindowCallback) listView->self()->onToggle(lparam);
         break;
       }
       if(header->code == NM_RCLICK) {
-        if(!isWindowCallback) listView->self()->onContext(lparam);
+        if(isWindowCallback) listView->self()->onContext(lparam);
         break;
       }
       if(header->code == NM_CUSTOMDRAW) {

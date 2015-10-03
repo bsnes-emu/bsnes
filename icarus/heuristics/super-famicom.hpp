@@ -401,14 +401,14 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   else if(mapper == STROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
-      "  map id=rom address='00-1f,80-9f:8000-ffff mask=0x8000\n"
+      "  map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000\n"
       "  sufamiturbo\n"
-      "    slot id=A\n"
-      "      map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
-      "      map id=ram address=60-63,e0-e3:8000-ffff\n"
-      "    slot id=B\n"
-      "      map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000\n"
-      "      map id=ram address=70-73,f0-f3:8000-ffff\n"
+      "    map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
+      "    map id=ram address=60-6f,e0-ef:0000-ffff\n"
+      "  sufamiturbo\n"
+      "    map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000\n"
+      "    map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000\n"
+      "    map id=ram address=70-7f,f0-ff:0000-ffff\n"
     );
   }
 

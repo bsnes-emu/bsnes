@@ -1,6 +1,6 @@
 string SuperFamicom = R"(
 
-database revision=2015-09-28
+database revision=2015-10-02
 
 release
   cartridge region=NTSC
@@ -8,7 +8,7 @@ release
     mcc
       rom name=program.rom size=0x100000
       ram name=save.ram size=0x8000
-      ram name=download.ram size=0x40000
+      ram name=download.ram size=0x80000
       map id=io address=00-3f,80-bf:5000-5fff
       map id=rom address=00-3f,80-bf:8000-ffff
       map id=rom address=40-5f,c0-ff:0000-ffff
@@ -16,7 +16,7 @@ release
       map id=ram address=20-3f:6000-7fff mask=0xe000
       map id=ram address=70-77:0000-ffff
   information
-    title:    BS-X それは名前を盗まれた待の物語
+    title:    BS-X それは名前を盗まれた街の物語
     name:     BS-X - Sore wa Namae o Nusumareta Machi no Monogatari
     region:   JP
     revision: 1.1
@@ -5410,6 +5410,7 @@ release
   information
     title:    Last Action Hero
     name:     Last Action Hero
+    region:   NA
     revision: 1.0
     board:    SHVC-1A0N-10
     serial:   SNS-L5-USA
@@ -9030,7 +9031,7 @@ release
 release
   cartridge region=NTSC
     board type=BJ0N revision=01,20
-    rom name=program.rom size=0x400000
+    rom name=program.rom size=0x300000
     map id=rom address=00-3f,80-bf:8000-ffff
     map id=rom address=40-7d,c0-ff:0000-ffff
   information
@@ -9042,7 +9043,7 @@ release
     serial:   SNS-ZW-USA
     sha256:   34e1af0642c85148c5a3dc3c7ab4bcbda13a9fea190934b5526c555fff035651
     configuration
-      rom name=program.rom size=0x400000
+      rom name=program.rom size=0x300000
 
 release
   cartridge region=NTSC
