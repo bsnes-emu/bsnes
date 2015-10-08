@@ -1,6 +1,0 @@
-resource name=resource
-  binary id=home name=home.png
-  binary id=up name=up.png
-  binary id=folder name=folder.png
-  binary id=file name=file.png
-  binary id=archive name=archive.png
