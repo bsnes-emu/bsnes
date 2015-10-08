@@ -11,13 +11,13 @@ namespace nall { namespace HTTP {
 
 struct Role {
   struct Settings {
-    signed connectionLimit =   1024;  //server
-    signed headSizeLimit   =  16384;  //client, server
-    signed bodySizeLimit   =  65536;  //client, server
-    signed chunkSize       =  32768;  //client, server
-    signed threadStackSize = 131072;  //server
-    signed timeoutReceive  =  15000;  //server
-    signed timeoutSend     =  15000;  //server
+    signed connectionLimit =    1 * 1024;  //server
+    signed headSizeLimit   =   16 * 1024;  //client, server
+    signed bodySizeLimit   = 8192 * 1024;  //client, server
+    signed chunkSize       =   32 * 1024;  //client, server
+    signed threadStackSize =  128 * 1024;  //server
+    signed timeoutReceive  =   15 * 1000;  //server
+    signed timeoutSend     =   15 * 1000;  //server
   } settings;
 
   inline auto configure(const string& parameters) -> bool;
@@ -82,8 +82,8 @@ auto Role::download(signed fd, Message& message) -> bool {
       if(head.endsWith("\r\n\r\n") || head.endsWith("\n\n")) {
         headReceived = true;
         if(!message.setHead()) return false;
-        chunked = message.header("Transfer-Encoding").iequals("chunked");
-        contentLength = decimal(message.header("Content-Length"));
+        chunked = message.header["Transfer-Encoding"].value().iequals("chunked");
+        contentLength = message.header["Content-Length"].value().decimal();
       }
 
       continue;

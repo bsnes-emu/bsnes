@@ -11,47 +11,75 @@ struct Variable {
   string value;
 };
 
-struct Variables : vector<Variable> {
-  auto append(const string& name, const string& value) -> void;
-  auto get(const string& name) const -> string;
-  auto remove(const string& name) -> void;
-  auto set(const string& name, const string& value) -> void;
+struct SharedVariable {
+  SharedVariable(const string& name = "", const string& value = "") : shared(new Variable{name, value}) {}
+
+  explicit operator bool() const { return (bool)shared->name; }
+  auto operator()() const { return shared->value; }
+  auto& operator=(const string& value) { shared->value = value; return *this; }
+
+  auto name() const { return shared->name; }
+  auto value() const { return shared->value; }
+
+  auto& setName(const string& name) { shared->name = name; return *this; }
+  auto& setValue(const string& value = "") { shared->value = value; return *this; }
+
+  shared_pointer<Variable> shared;
 };
 
-auto Variables::append(const string& name, const string& value) -> void {
-  vector::append({name, value});
-}
-
-auto Variables::get(const string& name) const -> string {
-  for(auto& variable : *this) {
-    if(variable.name.iequals(name)) return variable.value;
-  }
-  return "";
-}
-
-auto Variables::remove(const string& name) -> void {
-  while(true) {
-    unsigned n = 0;
-    bool found = false;
-    for(auto& variable : *this) {
-      if(!variable.name.iequals(name)) { n++; continue; }
-      vector::remove(n);
-      found = true;
-      break;
+struct Variables {
+  auto operator[](const string& name) const -> SharedVariable {
+    for(auto& variable : variables) {
+      if(variable.shared->name.iequals(name)) return variable;
     }
-    if(found == false) break;
+    return {};
   }
-}
 
-auto Variables::set(const string& name, const string& value) -> void {
-  for(auto& variable : *this) {
-    if(!variable.name.iequals(name)) continue;
-    variable.name = name;
-    variable.value = value;
-    return;
+  auto operator()(const string& name) -> SharedVariable {
+    for(auto& variable : variables) {
+      if(variable.shared->name.iequals(name)) return variable;
+    }
+    return append(name);
   }
-  vector::append({name, value});
-}
+
+  auto find(const string& name) const -> vector<SharedVariable> {
+    vector<SharedVariable> result;
+    for(auto& variable : variables) {
+      if(variable.shared->name.iequals(name)) result.append(variable);
+    }
+    return result;
+  }
+
+  auto assign(const string& name, const string& value = "") -> SharedVariable {
+    for(auto& variable : variables) {
+      if(variable.shared->name.iequals(name)) {
+        variable.shared->value = value;
+        return variable;
+      }
+    }
+    return append(name, value);
+  }
+
+  auto append(const string& name, const string& value = "") -> SharedVariable {
+    SharedVariable variable{name, value};
+    variables.append(variable);
+    return variable;
+  }
+
+  auto remove(const string& name) -> void {
+    for(auto n : rrange(variables)) {
+      if(variables[n].shared->name.iequals(name)) variables.remove(n);
+    }
+  }
+
+  auto size() const { return variables.size(); }
+  auto begin() const { return variables.begin(); }
+  auto end() const { return variables.end(); }
+  auto begin() { return variables.begin(); }
+  auto end() { return variables.end(); }
+
+  vector<SharedVariable> variables;
+};
 
 struct Message {
   using type = Message;
@@ -62,14 +90,11 @@ struct Message {
   virtual auto body(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool = 0;
   virtual auto setBody() -> bool = 0;
 
-  virtual auto header(const string& name) const -> string { return _header.get(name); }
-  virtual auto appendHeader(const string& name, const string& value = "") -> type& { return _header.append(name, value), *this; }
-  virtual auto removeHeader(const string& name) -> type& { return _header.remove(name), *this; }
-  virtual auto setHeader(const string& name, const string& value = "") -> type& { return _header.set(name, value), *this; }
+  Variables header;
 
+//private:
   string _head;
   string _body;
-  Variables _header;
 };
 
 }}

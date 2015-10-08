@@ -1,6 +1,8 @@
 #ifndef NALL_HTTP_REQUEST_HPP
 #define NALL_HTTP_REQUEST_HPP
 
+#include <nall/decode/url.hpp>
+#include <nall/encode/url.hpp>
 #include <nall/http/message.hpp>
 
 namespace nall { namespace HTTP {
@@ -12,11 +14,11 @@ struct Request : Message {
 
   explicit operator bool() const { return requestType() != RequestType::None; }
 
-  inline auto head(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool;
-  inline auto setHead() -> bool;
+  inline auto head(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool override;
+  inline auto setHead() -> bool override;
 
-  inline auto body(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool;
-  inline auto setBody() -> bool;
+  inline auto body(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool override;
+  inline auto setBody() -> bool override;
 
   auto ipv4() const -> bool { return _ipv6 == false; }
   auto ipv6() const -> bool { return _ipv6 == true; }
@@ -28,27 +30,15 @@ struct Request : Message {
   auto path() const -> string { return _path; }
   auto setPath(const string& value) -> void { _path = value; }
 
-  auto appendHeader(const string& name, const string& value = "") -> type& { return Message::appendHeader(name, value), *this; }
-  auto removeHeader(const string& name) -> type& { return Message::removeHeader(name), *this; }
-  auto setHeader(const string& name, const string& value = "") -> type& { return Message::setHeader(name, value), *this; }
-
-  auto cookie(const string& name) const -> string { return _cookie.get(name); }
-  auto setCookie(const string& name, const string& value = "") -> void { _cookie.set(name, value); }
-
-  auto get(const string& name) const -> string { return _get.get(name); }
-  auto setGet(const string& name, const string& value = "") -> void { _get.set(name, value); }
-
-  auto post(const string& name) const -> string { return _post.get(name); }
-  auto setPost(const string& name, const string& value = "") -> void { _post.set(name, value); }
+  Variables cookie;
+  Variables get;
+  Variables post;
 
 //private:
   bool _ipv6 = false;
   string _ip;
   RequestType _requestType = RequestType::None;
   string _path;
-  Variables _cookie;
-  Variables _get;
-  Variables _post;
 };
 
 auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
@@ -56,10 +46,10 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
   string output;
 
   string request = path();
-  if(_get.size()) {
+  if(get.size()) {
     request.append("?");
-    for(auto& get : _get) {
-      request.append(get.name, "=", get.value, "&");
+    for(auto& variable : get) {
+      request.append(Encode::URL(variable.name()), "=", Encode::URL(variable.value()), "&");
     }
     request.rtrim("&", 1L);
   }
@@ -71,8 +61,8 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
   default: return false;
   }
 
-  for(auto& header : _header) {
-    output.append(header.name, ": ", header.value, "\r\n");
+  for(auto& variable : header) {
+    output.append(variable.name(), ": ", variable.value(), "\r\n");
   }
   output.append("\r\n");
 
@@ -81,7 +71,7 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
 
 auto Request::setHead() -> bool {
   lstring headers = _head.split("\n");
-  string request = headers.takeFirst().rtrim("\r");
+  string request = headers.takeFirst().rtrim("\r", 1L);
   string requestHost;
 
        if(request.iendsWith(" HTTP/1.0")) request.irtrim(" HTTP/1.0", 1L);
@@ -106,8 +96,10 @@ auto Request::setHead() -> bool {
 
   if(auto queryString = components(1)) {
     for(auto& block : queryString.split("&")) {
-      lstring variable = block.split("=", 1L);
-      if(variable(0)) setGet(variable(0), variable(1));
+      auto p = block.split("=", 1L);
+      auto name = Decode::URL(p(0));
+      auto value = Decode::URL(p(1));
+      if(name) get.append(name, value);
     }
   }
 
@@ -115,18 +107,19 @@ auto Request::setHead() -> bool {
     if(header.beginsWith(" ") || header.beginsWith("\t")) continue;
     auto part = header.split(":", 1L).strip();
     if(!part[0] || part.size() != 2) continue;
-    appendHeader(part[0], part[1]);
+    this->header.append(part[0], part[1]);
 
     if(part[0].iequals("Cookie")) {
       for(auto& block : part[1].split(";")) {
-        lstring variable = block.split("=", 1L).strip();
-        variable(1).trim("\"", "\"");
-        if(variable(0)) setCookie(variable(0), variable(1));
+        auto p = block.split("=", 1L).strip();
+        auto name = p(0);
+        auto value = p(1).trim("\"", "\"", 1L);
+        if(name) cookie.append(name, value);
       }
     }
   }
 
-  if(requestHost) setHeader("Host", requestHost);  //request URI overrides host header
+  if(requestHost) header.assign("Host", requestHost);  //request URI overrides host header
   return true;
 }
 
@@ -142,10 +135,46 @@ auto Request::body(const function<bool (const uint8_t*, unsigned)>& callback) co
 
 auto Request::setBody() -> bool {
   if(requestType() == RequestType::Post) {
-    if(header("Content-Type").iequals("application/x-www-form-urlencoded")) {
+    auto contentType = header["Content-Type"].value();
+    if(contentType.iequals("application/x-www-form-urlencoded")) {
       for(auto& block : _body.split("&")) {
-        lstring variable = block.rtrim("\r").split("=", 1L);
-        if(variable(0)) setPost(variable(0), variable(1));
+        auto p = block.rtrim("\r").split("=", 1L);
+        auto name = Decode::URL(p(0));
+        auto value = Decode::URL(p(1));
+        if(name) post.append(name, value);
+      }
+    } else if(contentType.imatch("multipart/form-data; boundary=?*")) {
+      auto boundary = contentType.iltrim("multipart/form-data; boundary=", 1L).trim("\"", "\"", 1L);
+      auto blocks = _body.split({"--", boundary}, 1024L);  //limit blocks to prevent memory exhaustion
+      for(auto& block : blocks) block.trim("\r\n", "\r\n", 1L);
+      if(blocks.size() < 2 || (blocks.takeFirst(), !blocks.takeLast().beginsWith("--"))) return false;
+      for(auto& block : blocks) {
+        string name;
+        string filename;
+        string contentType;
+
+        auto segments = block.split("\r\n\r\n", 1L);
+        for(auto& segment : segments(0).split("\r\n")) {
+          auto statement = segment.split(":", 1L);
+          if(statement(0).ibeginsWith("Content-Disposition")) {
+            for(auto& component : statement(1).split(";")) {
+              auto part = component.split("=", 1L).strip();
+              if(part(0).iequals("name")) {
+                name = part(1).trim("\"", "\"", 1L);
+              } else if(part(0).iequals("filename")) {
+                filename = part(1).trim("\"", "\"", 1L);
+              }
+            }
+          } else if(statement(0).ibeginsWith("Content-Type")) {
+            contentType = statement(1).strip();
+          }
+        }
+
+        if(name) {
+          post.append(name, segments(1));
+          post.append({name, ".filename"}, filename);
+          post.append({name, ".content-type"}, contentType);
+        }
       }
     }
   }

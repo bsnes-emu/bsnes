@@ -1,4 +1,4 @@
-database revision=2014-01-20
+database revision=2015-09-28
 
 cartridge sha256:8e844d77da01f86ace52823f1f974c9230f09e6a6cbf33a07abfe9beeff00292
   name:10-Yard Fight (USA, Europe)
@@ -297,11 +297,14 @@ cartridge sha256:3493f7621d964af7a56c407718ef1d056c6c46d4e4c6b3c48364d58a1b97a06
 cartridge sha256:c4d4ff0bd283656c63d9a30dfc7dc6d2956744730a3641ba2c8f9f8e7204d9a1
   name:Abadox - The Deadly Inner War (USA)
   cheat
+    description:Invincibility
+    code:dd08/f0/d0+de0c/d0/f0
+  cheat
     description:Invincible against touching enemies
     code:efe2/a5/60
   cheat
-    description:Invincible against walls
-    code:dd35/a9/d0+dd36/02/71
+    description:Invincible against walls (does not stop music)
+    code:d5ab/c0/00
   cheat
     description:Infinite lives (lives never decrease)
     code:c7d1/09
@@ -312,7 +315,7 @@ cartridge sha256:c4d4ff0bd283656c63d9a30dfc7dc6d2956744730a3641ba2c8f9f8e7204d9a
     description:Hit anywhere
     code:f1d5/90/d0+f1fa/d0/b0+f1b1/90/b0+f210/30/24
   cheat
-    description:Invincibility (distorts sound)
+    description:Invincibility (music stops if you touch a wall)
     code:0086/00+008a/00
   cheat
     description:One hit kills - bosses
@@ -988,13 +991,28 @@ cartridge sha256:c5e47c0479f500b86995fc8d09e132f5ba3f54cfd9a2a601ea3848bb60871a2
   name:Adventures of Lolo (USA)
   cheat
     description:Invincibility
-    code:c819/e6/60+b2a9/e6/60
+    code:9988/06/00+c8c1/45/00+ceb1/e6/a5
   cheat
     description:Infinite lives
     code:9995/c6/a5
   cheat
+    description:Infinite shots
+    code:b058/c6/a5
+  cheat
     description:Always have shot ability
     code:b055/fb/06
+  cheat
+    description:Hit anywhere
+    code:b12f/b0/d0+b130/0a/44
+  cheat
+    description:Chests are always open
+    code:af76/f0/90
+  cheat
+    description:Walk through anything
+    code:ace0/f0/24
+  cheat
+    description:Walk faster
+    code:ae43/ff/fe+ae25/ff/fe+ae3f/01/02+ae29/01/02
   cheat
     description:1 life for Lolo
     code:98c1/05/01
@@ -4569,6 +4587,9 @@ cartridge sha256:abbddcb7c85a9956f94e6185aa1f30c34c45ad0db2f7f9db40066d749ffa792
 cartridge sha256:8f349b0ed7d31a07ccdf26958de8219165eff7c9ad43801a82c5dcf831fd82c2
   name:BurgerTime (USA)
   cheat
+    description:Infinite Pepper Spray
+    code:d743/5c/ea
+  cheat
     description:Anti-gravity shoes
     code:d260/d0/24
   cheat
@@ -5396,6 +5417,9 @@ cartridge sha256:6e8d289635ac39479ff1d36733aa3f8b9650593ab972cedb8e2cdbfc03aaa73
   cheat
     description:No knock-back when hurt
     code:823c/8d/60
+  cheat
+    description:Disable automatic upwards scrolling (on vertical stages)
+    code:d73b/82/80
   cheat
     description:Walk twice as fast to the left
     code:9728/ff/fe
@@ -6273,6 +6297,15 @@ cartridge sha256:0512b4aa2220f74e40fe8652b758893fa87efb6c3407808f7dda0e190101743
     description:Infinite lives (alt)
     code:c907/ce/ad
   cheat
+    description:Get items from anywhere
+    code:df00/14/00+d640/dc/00
+  cheat
+    description:Hit anywhere
+    code:e3f6/53/00+e406/43/00
+  cheat
+    description:Walk through anything
+    code:b784/09/00+b753/06/00
+  cheat
     description:Start with 1 life - both players
     code:c5cd/03/00
   cheat
@@ -6366,6 +6399,9 @@ cartridge sha256:d41e28b1a33b3b6768e7c39c9fdfb1fda4b49940542d14085911fabd399e1ca
     description:Hit anywhere
     code:e388/90/d0+e3a1/b0/24+e37f/b0/24+e3c7/20/ad
   cheat
+    description:Enemies die automatically (causes graphical glitches in some levels)
+    code:e3f1/08/00+e358/f0/a9+e360/29/42
+  cheat
     description:Multi-jump - both players
     code:d476/b5/20+d477/b0/9f+d478/f0/d6+d479/08/ea+d480/d6/b5+d9e9/95/b5+d54a/a9/60
   cheat
@@ -6378,7 +6414,10 @@ cartridge sha256:d41e28b1a33b3b6768e7c39c9fdfb1fda4b49940542d14085911fabd399e1ca
     description:Run 4x as fast
     code:d75d/01/04+d761/ff/fc
   cheat
-    description:Keep weapons after losing life
+    description:Keep weapons after dying
+    code:dad3/95/a5
+  cheat
+    description:Keep weapons after dying (alt)
     code:dad3/2c
   cheat
     description:Press Select to change weapons - P1
@@ -7207,7 +7246,7 @@ cartridge sha256:9e31d3d918a352c0c5a81c52efc364253f3fb75cc84151ee904ad078be62d8e
     code:990e/14/0a
 
 cartridge sha256:c408dd19ca49e55173ff2c491868f437d8100671f7b9646ee20e3204e0ba216f
-  name:Demon Sword - Release the Power (USA)
+  name:Demon Sword (USA) (USA)
   cheat
     description:Invincibility
     code:8a3b/20/ad
@@ -7872,6 +7911,9 @@ cartridge sha256:c564704993cf79c94db5c2954792e99e86100586d0ef1d4bf1aefc6d008d4c0
     description:No enemies
     code:9021/72
   cheat
+    description:Enemies die automatically
+    code:b137/b1/a9+b138/29/27
+  cheat
     description:Never lose lives from falling
     code:8427/de/ad
   cheat
@@ -7943,6 +7985,9 @@ cartridge sha256:f329de1e2653499221dc4d14d0e8b1040fee87bda4daccf6098b316a1a024fe
   cheat
     description:No enemies
     code:9021/72
+  cheat
+    description:Enemies die automatically
+    code:b137/b1/a9+b138/29/27
   cheat
     description:Never lose lives from falling
     code:8427/de/ad
@@ -9183,6 +9228,12 @@ cartridge sha256:9d0396286f2c027367422b8347216a309200a21b019939f08a7c457c7c4c918
     description:Start with 36 nitros
     code:820a/04/25
 
+cartridge sha256:d1b51f04a6112d8f75d1bf29a9db5a06cfba308be824dcc9db15b228f8e85bd5
+  name:Esper Dream (Japan) (v1.0) [b]
+  cheat
+    description:Walk anywhere
+    code:b9c9/ff/00
+
 cartridge sha256:761df2c2e04f9ffec5eec59afd821bd74af3b155546519d649876aad37160c06
   name:Esper Dream 2 - Aratanaru Tatakai (Japan)
   cheat
@@ -9665,6 +9716,12 @@ cartridge sha256:2ae778c5a59fac650fa97e93d883381dbf96c5a0ad2c1db94fd822663904f7e
 
 cartridge sha256:fa456d852372173ea31b192459ba1a2026f779df67793327ba6e132476c1d034
   name:Final Fantasy (USA)
+  cheat
+    description:Skip intro screen
+    code:84d4/29/a9
+  cheat
+    description:Faster dialogue
+    code:d61c/a5/a9+d61d/1b/5e+d69f/f2/00
   cheat
     description:Almost infinite Gold
     code:a4d1/ed/2c+a4da/ed/2c
@@ -12813,6 +12870,9 @@ cartridge sha256:3775c1184419c0786841c5b4f2694b2a15e181678f92e75fb9b71bfb5668c7b
     description:Hit anywhere (except tanks and helicopters)
     code:b9a9/01/00+b9ab/13/3b+b9a8/29/c9
   cheat
+    description:Walk and shoot through walls
+    code:eb20/02/00
+  cheat
     description:Start with 1 life
     code:f631/03/01
   cheat
@@ -14466,6 +14526,9 @@ cartridge sha256:8aa5c70100080adf0f6d8945ea10382f3986b99d41e010c356991dfe061eaa8
     description:Prevent girl from moving in final stage
     code:ac39/01/00
   cheat
+    description:Win tournament rounds automatically
+    code:8895/d7/00
+  cheat
     description:Start with 1 chance
     code:86fa/03/01
   cheat
@@ -15090,6 +15153,12 @@ cartridge sha256:9caa01a2b81ce1f98b17520aee09d415da7192382c1e47316998b6c1be6168e
     description:Infinite lives
     code:c7db/d6/b5
   cheat
+    description:Infinite time
+    code:a015/c6/a5
+  cheat
+    description:Infinite time underwater
+    code:c640/c6/a5
+  cheat
     description:Infinite continues
     code:c90a/d6/2c
   cheat
@@ -15522,6 +15591,15 @@ cartridge sha256:f4b7d8d31c5bbfee69c117332fa3878d04dc3b6e693d1a343d3ef2f20b10a85
     description:Infinite lives (alt)
     code:0092/09
 
+cartridge sha256:333d9de968973202f641714d746012237dc9d65fb592aac10c6146ed1f2fdaeb
+  name:Last Armageddon (Japan)
+  cheat
+    description:No random battles
+    code:fe93/c9/a9
+  cheat
+    description:Walk anywhere
+    code:9a57/80/00
+
 cartridge sha256:f15382be46e474c596566c5a726ae39dadfa18289722bac2da44b6493bbabfec
   name:Last Ninja, The (USA)
   cheat
@@ -15804,6 +15882,9 @@ cartridge sha256:ec0d4ebf6d2fcecd1d95fef7329954efe79676959bc281ea908b226459bc6dc
     description:Speed writing
     code:8818/91
   cheat
+    description:Skip text
+    code:8873/05/00+885d/1b/00
+  cheat
     description:Walk faster
     code:b387/a5/a9+b388/00/b0
   cheat
@@ -15941,6 +16022,9 @@ cartridge sha256:085e5397a3487357c263dfa159fb0fe20a5f3ea8ef82d7af6a7e848d3b9364e
   cheat
     description:Speed writing
     code:8818/91
+  cheat
+    description:Skip text
+    code:8873/05/00+885d/1b/00
   cheat
     description:Walk faster
     code:b387/a5/a9+b388/00/b0
@@ -16473,28 +16557,28 @@ cartridge sha256:a5165565263eaf8bdc45a8e6a615704f9bf271cd6d547d22c098c80cbaffd87
     description:Collectable items never disappear
     code:aacd/de/60
   cheat
-    description:Increase Samson's health gauge
+    description:Increase health gauge - Little Samson
     code:e5c1/08/18
   cheat
-    description:Increase Kikira's health gauge
+    description:Increase health gauge - Kikira the Dragon
     code:e5c2/08/18
   cheat
-    description:Increase Gamm's health gauge
+    description:Increase health gauge - Gamm the Golem
     code:e5c3/10/20
   cheat
-    description:Increase K.O.'s health gauge
+    description:Increase health gauge - K.O. the Mouse
     code:e5c4/04/10
   cheat
-    description:Increase Samson's health
+    description:Increase health - Little Samson
     code:e5c5/08/18
   cheat
-    description:Increase Kikira's health
+    description:Increase health - Kikira the Dragon
     code:e5c6/08/18
   cheat
-    description:Increase Gamm's health
+    description:Increase health - Gamm the Golem
     code:e5c7/10/20
   cheat
-    description:Increase K.O.'s health
+    description:Increase health - K.O. the Mouse
     code:e5c8/04/10
   cheat
     description:Crystal ball adds 4 units to health gauge
@@ -16506,13 +16590,13 @@ cartridge sha256:a5165565263eaf8bdc45a8e6a615704f9bf271cd6d547d22c098c80cbaffd87
     description:Infinite health - Little Samson
     code:0097/08
   cheat
-    description:Infinite health - Dragon
+    description:Infinite health - Kikira the Dragon
     code:0098/08
   cheat
-    description:Infinite health - Golem
+    description:Infinite health - Gamm the Golem
     code:0099/0f
   cheat
-    description:Infinite health - Mouse
+    description:Infinite health - K.O. the Mouse
     code:009a/04
 
 cartridge sha256:33c362ea3dbce2ac449e0d877d85904c26fcaf4b197e27b23efe9cbe67f20e15
@@ -17149,6 +17233,9 @@ cartridge sha256:0cc334007d3eae698cdcd034d12ec9bab2b5266e85bc703cf24ccb4e2d63b65
     code:dce0/d6/60
   cheat
     description:Infinite time - bonus rounds
+    code:e371/ce/de
+  cheat
+    description:Infinite time - bonus rounds (alt)
     code:e371/ce/ad
   cheat
     description:Infinite power blocks
@@ -17295,6 +17382,9 @@ cartridge sha256:5314ad0c406161195b6bb100ee11304bab8af121bba85992be896d5cb26b109
     description:One hit kills on bosses
     code:f3a4/30
   cheat
+    description:Have all weapons
+    code:b41b/29/00+b2b6/ee/00+b1a1/52/00+b2a1/f0/a9
+  cheat
     description:Collectable items never disappear
     code:b6b6/fe/bd
   cheat
@@ -17397,17 +17487,26 @@ cartridge sha256:1e588d435e75d80c5c0b578b4fa8d196f2cf4346c11c9a7b7e435d768828ad0
     description:Infinite 3
     code:e340/c6/a5
   cheat
+    description:Hit anywhere (except bosses)
+    code:e632/90/d0+e686/b0/24+e659/d0/24+e664/f0/24+e621/b0/24
+  cheat
+    description:One hit kills
+    code:e686/b0/24+a634/b0/24
+  cheat
     description:Burst-fire from normal weapon
     code:da6d/27/23
   cheat
     description:Maximum weapon energy on pick-up
     code:834f/30/24
   cheat
-    description:Hit anywhere (except bosses)
-    code:e632/90/d0+e686/b0/24+e659/d0/24+e664/f0/24+e621/b0/24
+    description:Collectable items never disappear
+    code:bcf7/de/dd
   cheat
-    description:One hit kills
-    code:e686/b0/24+a634/b0/24
+    description:Have all weapons
+    code:925b/25/a9+926e/25/a9+93e4/99/ad+9434/90/a9+9493/90/a9
+  cheat
+    description:Main weapon can destroy Crash Blocks and Turrets
+    code:e664/f0/a9
   cheat
     description:Power-jumps
     code:8a71/04/06
@@ -17424,9 +17523,6 @@ cartridge sha256:1e588d435e75d80c5c0b578b4fa8d196f2cf4346c11c9a7b7e435d768828ad0
     description:Moonwalking
     code:8904/29/49
   cheat
-    description:Collectable items never disappear
-    code:bcf7/de/dd
-  cheat
     description:Enemies always drop extra lives
     code:f2ba/90/50+f2bb/cc/dd
   cheat
@@ -17439,8 +17535,11 @@ cartridge sha256:1e588d435e75d80c5c0b578b4fa8d196f2cf4346c11c9a7b7e435d768828ad0
     description:Special items re-appear after being collected
     code:e5e8/99/b9
   cheat
-    description:Able to access already defeated boss stages
+    description:Can access already defeated boss stages
     code:80e2/dc/00
+  cheat
+    description:Stop Quick Man's stage beams
+    code:da09/04/ff
   cheat
     description:Start with half health
     code:80c5/1c/0e
@@ -18210,7 +18309,7 @@ cartridge sha256:25f5359a73cac2d16ed98940f0b537f0392f232554d457ed476e21a5979419f
 cartridge sha256:f6d29afbd7ddad33672852232791a396695de2e77dccb83088a8d6b139d8c9cb
   name:Metal Gear (USA)
   cheat
-    description:Infinite health
+    description:Infinite life
     code:eae2/c6/a5+f231/c6/a5
   cheat
     description:Invincible against Gas
@@ -18255,10 +18354,10 @@ cartridge sha256:f6d29afbd7ddad33672852232791a396695de2e77dccb83088a8d6b139d8c9c
     description:Hit anywhere - Weapons except Grenade Launcher
     code:f25f/f0/50
   cheat
-    description:Start with a health boost
+    description:Start with a life boost
     code:d768/a6/a2+d769/6e/01+d7ca/05/08
   cheat
-    description:Start with a super health boost
+    description:Start with a super life boost
     code:d768/a6/a2+d769/6e/01+d7ca/05/0c
   cheat
     description:Start at mystery location 1
@@ -18425,6 +18524,9 @@ cartridge sha256:649db8035018f2512ccea70aca6606c3b3a6988cd9ed43953b38dc5103dec7b
   cheat
     description:Beam has longer range
     code:d505/55
+  cheat
+    description:Easier bomb jumping
+    code:d679/14/00+d164/32/00
   cheat
     description:Get items from anywhere
     code:dbaf/46/00+f488/f0/24
@@ -19460,6 +19562,30 @@ cartridge sha256:f997fe34edf1d998694aa979c81fe0063480274b4284498f230fffe694fe87a
   cheat
     description:Go Back 7 spaces instead of 3 on Chance
     code:8315/03/07
+  cheat
+    description:Infinite money - P1
+    code:03c5/09+03c6/09+03c7/09+03c8/09+03c9/09
+  cheat
+    description:Infinite money - P2
+    code:03ca/09+03cb/09+03cc/09+03cd/09+03ce/09
+  cheat
+    description:Infinite money - P3
+    code:03cf/09+03d0/09+03d1/09+03d2/09+03d3/09
+  cheat
+    description:Infinite money - P4
+    code:03d4/09+03d5/09+03d6/09+03d7/09+03d8/09
+  cheat
+    description:Infinite money - P5
+    code:03c9/09+03da/09+03db/09+03dc/09+03dd/09
+  cheat
+    description:Infinite money - P6
+    code:03de/09+03df/09+03e0/09+03e1/09+03e2/09
+  cheat
+    description:Infinite money - P7
+    code:03e3/09+03e4/09+03e5/09+03e6/09+03e7/09
+  cheat
+    description:Infinite money - P8
+    code:03e8/09+03e9/09+03ea/09+03eb/09+03ec/09
 
 cartridge sha256:08615e9e339bd2df713cdb15f6426895ba643fbd8f383758f7f5c06ebf7ac10b
   name:Monster in My Pocket (USA)
@@ -20016,6 +20142,12 @@ cartridge sha256:02caaf66cc43a4c5a8d54252fca7bcb929dad91c71f127eabe37f29ef919910
     description:Invincible out of fights
     code:d5d8/46
 
+cartridge sha256:590e508b47eb6d6c0088dffd83fe2436edd0d75e74faba7a9da2008770fb1986
+  name:Niji no Silk Road (Japan)
+  cheat
+    description:Walk anywhere
+    code:8187/36/89+8188/82/81
+
 cartridge sha256:b1c2ae757c5ec76f488893f130f0f7f1aacf36a25467b9012ca3a11ab52204ce
   name:Ninja Crusaders (USA)
   cheat
@@ -20558,6 +20690,9 @@ cartridge sha256:6d310d9f2249932c7187130ebd696c42ff05f678c3086ac727ee6a27fdad4f4
   cheat
     description:No random battles
     code:dc82/a9/60
+  cheat
+    description:Walk anywhere
+    code:dd70/2d/00
 
 cartridge sha256:d50327afa539f4a5ccfd6e10f685326eb0f01915ccf305f752deae2bf17385a6
   name:Over Horizon (Europe)
@@ -21053,6 +21188,33 @@ cartridge sha256:910ba4505b46a99b3779d84fd22ba8b18f3a649b0c1a11706c4609d06ce0bc1
   cheat
     description:Start with 9 balls
     code:c051/03/09
+
+cartridge sha256:836a6df9f6885b2b09d9daf3cecd67a4e5f36ae0b278a32c296779f067c8694f
+  name:Pinball Quest (USA)
+  cheat
+    description:Infinite Balls - Mini Games - P1
+    code:8000/00/00
+  cheat
+    description:Infinite Balls - Mini Games - P2
+    code:06f9/63
+  cheat
+    description:Infinite Balls - Mini Games - P3
+    code:06fa/63
+  cheat
+    description:Infinite Balls - Mini Games - P4
+    code:06fb/63
+  cheat
+    description:Max Attack Power - RPG mode
+    code:00c0/0c
+  cheat
+    description:Infinite Gold - RPG mode (1 of 3)
+    code:0082/63
+  cheat
+    description:Infinite Gold - RPG mode (2 of 3)
+    code:0083/63
+  cheat
+    description:Infinite Gold - RPG mode (3 of 3)
+    code:0084/63
 
 cartridge sha256:7dd47bac196af9874181e86f64402035e255814739828d5d00c03bac8689d40a
   name:Pipe 5 (Asia) (Unl)
@@ -22089,6 +22251,9 @@ cartridge sha256:a537916d210a97e41e669c77f3ebcccb681dc44db4d8b758c2109baf8590d91
 cartridge sha256:d4f1650059a011455577561ea607993a5046d452ba987b1c7381cad56550be0a
   name:R.B.I. Baseball (USA)
   cheat
+    description:Auto fielding
+    code:fada/09/00+fa1a/30/f0+fa1b/13/0f
+  cheat
     description:Perfectly straight pitches - both players
     code:bad3/36/80+bad2/71/a9
   cheat
@@ -22106,6 +22271,12 @@ cartridge sha256:d4f1650059a011455577561ea607993a5046d452ba987b1c7381cad56550be0
   cheat
     description:All missed pitches are strikes - both players
     code:bbe5/d0/10
+
+cartridge sha256:0df01b1d7b6efe38c98f2f0b131707d833c87874938d5722bf0a9a488c2e41c0
+  name:R.B.I. Baseball 2 (USA) (Unl)
+  cheat
+    description:Auto fielding
+    code:fac6/09/00+a703/30/f0+a704/13/0f
 
 cartridge sha256:3f9e3d3b48a897d94003df004ab4b332d749f85ea5d0e1a1b29b6d4f5634049a
   name:R.C. Pro-Am (USA) (Rev A)
@@ -22716,7 +22887,7 @@ cartridge sha256:bbe150f50bd11f5aa4e3edab47541261c58ab9899b6d9329450b3c77df17282
     description:Buildings collapse faster
     code:a6d4/f0/50+aa93/0d/15
   cheat
-    description:One hit to destroy buildings
+    description:One hit destroys buildings
     code:a1cf/05/80
   cheat
     description:More health - P1
@@ -24108,12 +24279,6 @@ cartridge sha256:2395a8a102bfc403bb2c474f77035483792ec15bce37695c9f2d96d62bc8fe1
     description:Infinite continues
     code:f55d/c6/a5
   cheat
-    description:9 continues
-    code:e08a/05/09
-  cheat
-    description:1 continue
-    code:e08a/05/01
-  cheat
     description:Don't lose energy from enemy attacks
     code:ac6d/9d/2c
   cheat
@@ -24126,11 +24291,23 @@ cartridge sha256:2395a8a102bfc403bb2c474f77035483792ec15bce37695c9f2d96d62bc8fe1
     description:Less energy gained from potion
     code:8c19/04/01
   cheat
+    description:Mega-jump
+    code:96c0/fe/ea
+  cheat
     description:40 Throwing Stars on pick-up
     code:8c31/14/28
   cheat
     description:20 Bombs on pick-up
     code:8c46/05/14
+  cheat
+    description:Some enemies can't move left or right
+    code:a12b/9d/ea
+  cheat
+    description:9 continues
+    code:e08a/05/09
+  cheat
+    description:1 continue
+    code:e08a/05/01
 
 cartridge sha256:fbc69cdaf7c1419906d8cf2a74ab70d11520b2f3877387b8fd70460b6e6dd542
   name:Shadowgate (USA)
@@ -26058,23 +26235,29 @@ cartridge sha256:3edd803db1cc88155720625ed8f3e362a5e3c660e7faf3285bbe3a2c6571511
     description:One hit kills
     code:a201/00
   cheat
+    description:Enemies die automatically (causes graphical glitches in some levels)
+    code:bb7d/38/18+a19d/1d/6b+f6ad/a5/a9+84ff/85/86+84fe/eb/1a
+  cheat
     description:Multi-jump - both players
     code:86e0/d0/24+86e9/6d/3a
   cheat
-    description:Keep equiped weapon after dying
+    description:Keep equipped weapon after dying
     code:8662/95/24
+  cheat
+    description:Keep weapon after dying
+    code:e5a0/95/a5+8662/95/a5
   cheat
     description:Run faster to the right
     code:8870/f0
-  cheat
-    description:Stage select after title screen
-    code:e4af/d0/f0
   cheat
     description:Press Start to complete current level
     code:ea9f/39/38+ea9d/01/04
   cheat
     description:Start a new game to view the ending
     code:e4c3/00/08
+  cheat
+    description:Stage select after title screen
+    code:e4af/d0/f0
   cheat
     description:Start with Spray Gun
     code:e5b4/57/b8+e5a1/b8/57+e5b2/00/02
@@ -26243,6 +26426,9 @@ cartridge sha256:fcb6a0ef3a20c19b356005fbb21dc8009563b1cb5a9aaebc8e9386b4a8c5912
   cheat
     description:Fireballs can kill Podoboo
     code:e02a/04/00+d790/32/00
+  cheat
+    description:World 8-4, wrong pipe will lead to next area
+    code:9e33/e1/ec+9e23/e1/e7+9e42/65/02
   cheat
     description:Enable level select
     code:8270/00
@@ -32271,6 +32457,9 @@ cartridge sha256:4cfc55e1521e58039d502f2a5ff16c233b84c0a05b1048185c75c971f3814c1
     description:Link can fly (hold A)
     code:953b/30/00
   cheat
+    description:Faster text (when talking to people)
+    code:b6be/df/00
+  cheat
     description:Walk through walls in Overworld
     code:871e/02/00
   cheat
@@ -32487,6 +32676,21 @@ cartridge sha256:d0850075065ecbd125a33accc952de5d012527be45aa14a1b8223a9adf1643a
     description:Start with 9 lives (Only effective in battle mode on first life)
     code:e266/03/09
 
+cartridge sha256:a18476a3b06ec3d9767ed6b6cf528dd204440a64e7781a3b18c1250c3c18f2ec
+  name:Zombie Hunter (Japan)
+  cheat
+    description:Invincibility
+    code:dfaa/13/00
+  cheat
+    description:One hit kills
+    code:dd8d/60/ea
+  cheat
+    description:Hit anywhere
+    code:dec1/10/00+deba/16/00+decb/b0/a9
+  cheat
+    description:Walk on air, jump to fall down
+    code:e070/f3/00
+
 cartridge sha256:91eae4e0e59dadd5de7cdbe71fe57e304d741ae5107928e29e0f6ff8813151a9
   name:Zombie Nation (USA)
   cheat
@@ -32555,6 +32759,18 @@ cartridge sha256:2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3
 
 cartridge sha256:4dd631433c867ba920997fd3add2c838b62e70e06e0ef55c53884b8b68b0dd27
   name:7th Saga, The (USA)
+  cheat
+    description:Enemies aren't generated
+    code:c01780/6b
+  cheat
+    description:Touching an enemy doesn't cause a battle
+    code:c01f36/6b
+  cheat
+    description:Sell an item for maximum gold
+    code:c0b139/80
+  cheat
+    description:Walk anywhere
+    code:c41d90/00
   cheat
     description:Human fighter has 50 HP
     code:c0623f/32
@@ -32681,15 +32897,6 @@ cartridge sha256:4dd631433c867ba920997fd3add2c838b62e70e06e0ef55c53884b8b68b0dd2
   cheat
     description:Alien has 20 speed
     code:c0627c/14
-  cheat
-    description:Enemies aren't generated
-    code:c01780/6b
-  cheat
-    description:Touching an enemy doesn't cause a battle
-    code:c01f36/6b
-  cheat
-    description:Sell an item for maximum gold
-    code:c0b139/80
   cheat
     description:Get 999 Max HP when you use a 'V Seed'
     code:c4a066/00
@@ -32969,6 +33176,9 @@ cartridge sha256:41af71166f509b0e615b00e7dc3cf2dc660d1701014ecadfd1629257b18471b
   cheat
     description:Max score
     code:7e00c4/99+7e00c5/99+7e00c6/99+7e00c7/99
+  cheat
+    description:Enable round select
+    code:88dc1a/80
 
 cartridge sha256:b8055844825653210d252d29a2229f9a3e7e512004e83940620173c57d8723f0
   name:ActRaiser (USA)
@@ -35144,6 +35354,24 @@ cartridge sha256:0f474dafe5a26f3dea491d18073dd490d2f1f91313a7e91086565510d38d9a0
   cheat
     description:Get Stars from anywhere
     code:85b493/80+85b494/19
+
+cartridge sha256:91f8c264f50051c5c9fadd4df09fbb6ca8b5b54a5ba6652ad133ba103b77317d
+  name:Aretha (Japan)
+  cheat
+    description:No random battles
+    code:0081a6/80
+  cheat
+    description:Walk anywhere
+    code:00b6b4/80+00b6a6/00
+
+cartridge sha256:d31ea0a6f9b3ee78a724ad500f09e5f534cacf57166ff55198fd703ca1ed6f48
+  name:Aretha II - Ariel no Fushigi na Tabi (Japan)
+  cheat
+    description:No random battles
+    code:0083d1/80
+  cheat
+    description:Walk anywhere
+    code:00b815/80+00b807/00
 
 cartridge sha256:14d3ece30898587eda20c661a4a55ec595ba6352ca1f0bfc177542aa0eef0039
   name:Arkanoid - Doh It Again (USA)
@@ -38634,6 +38862,15 @@ cartridge sha256:367725a149a471411e4f72ad77603b61fb101c9cab4521be5647e13708cc97b
     description:Start on level 7
     code:7e0078/06
 
+cartridge sha256:f6e308d437f89059986d779d1b5b7a30999b7a819108da91bd313f25e231c3a8
+  name:Chaos Seed - Feng Shui Kairouki (Japan)
+  cheat
+    description:Invincibility
+    code:c35a85/af
+  cheat
+    description:Infinite time
+    code:c49da4/ad
+
 cartridge sha256:aa69d4e19c2eb206fe88eba65994c830256c220e5506f59824aefa0a75dd44d5
   name:Chavez (USA)
   cheat
@@ -38742,17 +38979,38 @@ cartridge sha256:224572832b988f31a81c907f751f0292f5702a3acea5866ce6742387c7c6239
 cartridge sha256:06d1c2b06b716052c5596aaa0c2e5632a027fee1a9a28439e509f813c30829a9
   name:Chrono Trigger (USA)
   cheat
+    description:Party does not lose health from attacks (nor do some enemies)
+    code:c1eca0/ea
+  cheat
     description:Use "organize" to get 90 of all items
     code:c2ab8e/98+c2ab9c/00+c2ab9e/5a
   cheat
     description:Maxed out abilities for all characters
     code:c1f79b/87
   cheat
-    description:Every attack causes 9999 damage
+    description:Attacks cause 9999 damage (including enemy attacks)
     code:c1dce9/9e
   cheat
     description:Can open sealed chests
     code:c064ad/80
+  cheat
+    description:Can open sealed doors
+    code:c0644c/80
+  cheat
+    description:All portals open
+    code:7f00a6/07
+  cheat
+    description:Have all cats
+    code:7f0053/ff
+  cheat
+    description:Have all clones
+    code:7f005e/ff
+  cheat
+    description:Have all factory dolls
+    code:7f013c/c7
+  cheat
+    description:Have all PoYoZo's
+    code:7f005d/ff
   cheat
     description:Start with a higher max HP
     code:cc0005/ff
@@ -38807,6 +39065,9 @@ cartridge sha256:06d1c2b06b716052c5596aaa0c2e5632a027fee1a9a28439e509f813c30829a
   cheat
     description:Position 3 - Attack bar always full
     code:7eafad/00
+  cheat
+    description:Infinite Silver Points
+    code:7f0052/ff
   cheat
     description:Infinite Speed Boosts
     code:7e009a/03
@@ -39200,6 +39461,237 @@ cartridge sha256:5536cea2da39f2572abe3b0fcf71f8fcd981376b470b174969772aae4a7a184
   cheat
     description:Have 50 time outs - P1
     code:7fb1c7/32
+
+cartridge sha256:b0be35a0d5e500f4fffca5f2940e0ec52c81ce99dacd773c3ca9cf92f592d943
+  name:College Slam (USA)
+  cheat
+    description:Infinite Shot Clock
+    code:7e0db1/03+7e0db3/05
+  cheat
+    description:Unlock Extra Teams
+    code:7e2444/01
+  cheat
+    description:Display Shot% Power-up
+    code:7e0b30/01
+  cheat
+    description:Slippery Court Power-up
+    code:7e0b32/01
+  cheat
+    description:Infinite Turbo - P1
+    code:7e078a/20
+  cheat
+    description:Infinite Turbo - P2
+    code:7e088a/20
+  cheat
+    description:Infinite Turbo - P3
+    code:7e098a/20
+  cheat
+    description:Infinite Turbo - P4
+    code:7e0a8a/20
+  cheat
+    description:Power Push Power-up - P1
+    code:7e07ee/01
+  cheat
+    description:Power Push Power-up - P2
+    code:7e08ee/01
+  cheat
+    description:Power Push Power-up - P3
+    code:7e09ee/01
+  cheat
+    description:Power Push Power-up - P4
+    code:7e0aee/01
+  cheat
+    description:3-Point Power-up - P1
+    code:7e07ee/02
+  cheat
+    description:3-Point Power-up - P2
+    code:7e08ee/02
+  cheat
+    description:3-Point Power-up - P3
+    code:7e09ee/02
+  cheat
+    description:3-Point Power-up - P4
+    code:7e0aee/02
+  cheat
+    description:Infinite Turbo Power-up - P1
+    code:7e07ee/04
+  cheat
+    description:Infinite Turbo Power-up - P2
+    code:7e08ee/04
+  cheat
+    description:Infinite Turbo Power-up - P3
+    code:7e09ee/04
+  cheat
+    description:Infinite Turbo Power-up - P4
+    code:7e0aee/04
+  cheat
+    description:On-Fire Power-up - P1
+    code:7e07ee/08
+  cheat
+    description:On-Fire Power-up - P2
+    code:7e08ee/08
+  cheat
+    description:On-Fire Power-up - P3
+    code:7e09ee/08
+  cheat
+    description:On-Fire Power-up - P4
+    code:7e0aee/08
+  cheat
+    description:Super Dunk Power-up - P1
+    code:7e07ee/10
+  cheat
+    description:Super Dunk Power-up - P2
+    code:7e08ee/10
+  cheat
+    description:Super Dunk Power-up - P3
+    code:7e09ee/10
+  cheat
+    description:Super Dunk Power-up - P4
+    code:7e0aee/10
+  cheat
+    description:Max Power Power-up - P1
+    code:7e07ee/20
+  cheat
+    description:Max Power Power-up - P2
+    code:7e08ee/20
+  cheat
+    description:Max Power Power-up - P3
+    code:7e09ee/20
+  cheat
+    description:Max Power Power-up - P4
+    code:7e0aee/20
+  cheat
+    description:Goaltending Power-up - P1
+    code:7e07ee/40
+  cheat
+    description:Goaltending Power-up - P2
+    code:7e08ee/40
+  cheat
+    description:Goaltending Power-up - P3
+    code:7e09ee/40
+  cheat
+    description:Goaltending Power-up - P4
+    code:7e0aee/40
+  cheat
+    description:Quick Hands Power-up - P1
+    code:7e07ee/80
+  cheat
+    description:Quick Hands Power-up - P2
+    code:7e08ee/80
+  cheat
+    description:Quick Hands Power-up - P3
+    code:7e09ee/80
+  cheat
+    description:Quick Hands Power-up - P4
+    code:7e0aee/80
+  cheat
+    description:Offense Power-up - P1
+    code:7e07ef/01
+  cheat
+    description:Offense Power-up - P2
+    code:7e08ef/01
+  cheat
+    description:Offense Power-up - P3
+    code:7e09ef/01
+  cheat
+    description:Offense Power-up - P4
+    code:7e0aef/01
+  cheat
+    description:Super Speed Power-up - P1
+    code:7e07ef/02
+  cheat
+    description:Super Speed Power-up - P2
+    code:7e08ef/02
+  cheat
+    description:Super Speed Power-up - P3
+    code:7e09ef/02
+  cheat
+    description:Super Speed Power-up - P4
+    code:7e0aef/02
+  cheat
+    description:Knockdown Both Opponents Power-up - P1
+    code:7e07ef/04
+  cheat
+    description:Knockdown Both Opponents Power-up - P2
+    code:7e08ef/04
+  cheat
+    description:Knockdown Both Opponents Power-up - P3
+    code:7e09ef/04
+  cheat
+    description:Knockdown Both Opponents Power-up - P4
+    code:7e0aef/04
+  cheat
+    description:Teleport Pass Power-up - P1
+    code:7e07ef/08
+  cheat
+    description:Teleport Pass Power-up - P2
+    code:7e08ef/08
+  cheat
+    description:Teleport Pass Power-up - P3
+    code:7e09ef/08
+  cheat
+    description:Teleport Pass Power-up - P4
+    code:7e0aef/08
+  cheat
+    description:Knockdown Opposite Opponent Power-up - P1
+    code:7e07ef/10
+  cheat
+    description:Knockdown Opposite Opponent Power-up - P2
+    code:7e08ef/10
+  cheat
+    description:Knockdown Opposite Opponent Power-up - P3
+    code:7e09ef/10
+  cheat
+    description:Knockdown Opposite Opponent Power-up - P4
+    code:7e0aef/10
+  cheat
+    description:High Shots Power-up - P1
+    code:7e07ef/20
+  cheat
+    description:High Shots Power-up - P2
+    code:7e08ef/20
+  cheat
+    description:High Shots Power-up - P3
+    code:7e09ef/20
+  cheat
+    description:High Shots Power-up - P4
+    code:7e0aef/20
+  cheat
+    description:Whirlwind Power-up - P1
+    code:7e07ef/80
+  cheat
+    description:Whirlwind Power-up - P2
+    code:7e08ef/80
+  cheat
+    description:Whirlwind Power-up - P3
+    code:7e09ef/80
+  cheat
+    description:Whirlwind Power-up - P4
+    code:7e0aef/80
+  cheat
+    description:All Power-ups except Power Push, On-Fire, Knockdown Both Opponents, Knockdown Opposite Opponent and Whirlwind - P1
+    code:7e07ee/f6+7e07ef/2b
+  cheat
+    description:All Power-ups except Power Push, On-Fire, Knockdown Both Opponents, Knockdown Opposite Opponent and Whirlwind - P2
+    code:7e08ee/f6+7e08ef/2b
+  cheat
+    description:All Power-ups except Power Push, On-Fire, Knockdown Both Opponents, Knockdown Opposite Opponent and Whirlwind - P3
+    code:7e09ee/f6+7e09ef/2b
+  cheat
+    description:All Power-ups except Power Push, On-Fire, Knockdown Both Opponents, Knockdown Opposite Opponent and Whirlwind - P4
+    code:7e0aee/f6+7e0aef/2b
+  cheat
+    description:All Power-ups - P1
+    code:7e07ee/ff+7e07ef/bf
+  cheat
+    description:All Power-ups - P2
+    code:7e08ee/ff+7e08ef/bf
+  cheat
+    description:All Power-ups - P3
+    code:7e09ee/ff+7e09ef/bf
+  cheat
+    description:All Power-ups - P4
+    code:7e0aee/ff+7e0aef/bf
 
 cartridge sha256:c88a882ad72dfa07a9b1eb8a2183aa10057d60877a02edf90cf2cd8c78abe65e
   name:Combatribes, The (USA)
@@ -39617,6 +40109,12 @@ cartridge sha256:c4ae2797fac2586b8640064be6398f2b4f2b3158a07f26c66912b29f7fd197d
   cheat
     description:Infinite power
     code:019b53/ad+019b75/ad+019b97/ad
+  cheat
+    description:Freeze CPU Racers (always first place)
+    code:01b418/a5+01b470/a5
+  cheat
+    description:Drive anywhere
+    code:019a8a/ad+019757/ad+0198ab/64
 
 cartridge sha256:ad31b94ce928ecff605e2b89082154671691509e95d38370ed381437f2c36698
   name:Cybernator (USA)
@@ -40881,6 +41379,9 @@ cartridge sha256:7dbfc44d28a46e6d399628e43086aa9fd0b2abeda4c108751a5ad91c102c3aa
     description:Infinite credits - both players
     code:048e4c/ad
   cheat
+    description:Enable level select (pause and press select)
+    code:048873/0b+048250/00
+  cheat
     description:Hit and stomp anywhere
     code:01c6fa/80+01c6fb/15
   cheat
@@ -41007,14 +41508,17 @@ cartridge sha256:10e07e9e094e77a2b71bab3bac1d79a62b7a7bfdb80111044b1f9c64645c622
 cartridge sha256:fa8cacf5bbfc39ee6bbaa557adf89133d60d42f6cf9e1db30d5a36a469f74d15
   name:Donkey Kong Country (USA)
   cheat
-    description:Invincibility (no lockup)
-    code:bfa2a0/60+bfa11b/18+bfa3ac/18
-  cheat
     description:Invincibility
-    code:bfa2a0/60
+    code:bfc745/60+bfd31c/00
   cheat
-    description:Almost invincible (disable if you get stuck)
-    code:bfa2a0/60+bfa2c7/60
+    description:Invincibility in Mine Cart Carnage stage
+    code:b6a6a1/00
+  cheat
+    description:Kill enemies on contact
+    code:bfc746/82+bfd320/82+bfa79b/00+b686a2/ea
+  cheat
+    description:Can cartwheel and stomp enemies who are immune to it
+    code:bfa79b/00+b686a2/ea+be94c4/00
   cheat
     description:Infinite lives
     code:b6a861/ad
@@ -41178,14 +41682,17 @@ cartridge sha256:fa8cacf5bbfc39ee6bbaa557adf89133d60d42f6cf9e1db30d5a36a469f74d1
 cartridge sha256:df2644d435330192a13768cc1f79c5aa3084a64217a5250c6dd4ffdbe2175be4
   name:Donkey Kong Country (USA) (Rev 1)
   cheat
-    description:Invincibility (no lockup)
-    code:bfa2c7/60+bfa142/18+bfa3d3/18
-  cheat
     description:Invincibility
-    code:bfa2c7/60
+    code:bfd345/00+bfc76c/60
   cheat
-    description:Almost invincible (disable if you get stuck)
-    code:bfa2c7/60
+    description:Invincibility in Mine Cart Carnage stage
+    code:b6a6a3/00
+  cheat
+    description:Kill enemies on contact
+    code:bfc76d/82+bfd349/82+bfa7c2/00+b686a2/ea
+  cheat
+    description:Can cartwheel and stomp enemies who are immune to it
+    code:bfa7c2/00+b686a2/ea+be94c4/00
   cheat
     description:Infinite lives
     code:b6a863/ad
@@ -41274,11 +41781,17 @@ cartridge sha256:df2644d435330192a13768cc1f79c5aa3084a64217a5250c6dd4ffdbe2175be
 cartridge sha256:628147468c3539283197f58f03b94df49758a332831857481ea9cc31645f0527
   name:Donkey Kong Country (USA) (Rev 2)
   cheat
-    description:Invincibility (no lockup)
-    code:bfa2db/60+bfa156/18+bfa3e7/18
-  cheat
     description:Invincibility
-    code:bfa2db/60
+    code:bfd395/00+bfc79e/60
+  cheat
+    description:Invincibility in Mine Cart Carnage stage
+    code:b6a6ad/00
+  cheat
+    description:Kill enemies on contact
+    code:bfc79f/82+bfd399/82+bfa7e4/00+b686a2/ea
+  cheat
+    description:Can cartwheel and stomp enemies who are immune to it
+    code:bfa7e4/00+b686a2/ea+be94c8/00
   cheat
     description:Infinite lives
     code:b6a873/ad
@@ -41360,6 +41873,18 @@ cartridge sha256:628147468c3539283197f58f03b94df49758a332831857481ea9cc31645f052
   cheat
     description:Return of Kong (alt)
     code:7e0579/01
+
+cartridge sha256:07ff03fa8c8e31d2f8277ef2a9785022edebf7f79b694c66a00c66d8e563bce5
+  name:Donkey Kong Country (USA) (Competition Edition)
+  cheat
+    description:Kill enemies on contact
+    code:bfc783/82+bfd36f/82+bfa7d7/00+b686a2/ea
+  cheat
+    description:Can cartwheel and stomp enemies who are immune to it
+    code:bfa7d7/00+b686a2/ea+be94c4/00
+  cheat
+    description:Multi-jump
+    code:bfb367/80+bfb961/00+bfb980/00+bfb965/80
 
 cartridge sha256:b79c2bb86f6fc76e1fc61c62fc16d51c664c381e58bc2933be643bbc4d8b610c
   name:Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1)
@@ -41593,13 +42118,16 @@ cartridge sha256:2277a2d8dddb01fe5cb0ae9a0fa225d42b3a11adccaeafa18e3c339b3794a32
     code:b882b8/93
   cheat
     description:Invincibility (alt)
-    code:b8c64e/a9+b8c64f/09+b8c650/00
+    code:b8c64e/a9+b8c64f/09+b8c650/00+bee1ca/80
   cheat
     description:Infinite lives
     code:f880fa/a9
   cheat
     description:Infinite bear coins
     code:f490b5/09
+  cheat
+    description:Infinite fuel - Rocket Rush level
+    code:f8b4e6/ad
   cheat
     description:Get Funky's Gyrocopter with no need for DK coins
     code:f484ac/80+f484d7/80
@@ -41630,6 +42158,21 @@ cartridge sha256:2277a2d8dddb01fe5cb0ae9a0fa225d42b3a11adccaeafa18e3c339b3794a32
   cheat
     description:Multi-jump
     code:b8d79d/20+b8d79e/71+b8d79f/90+b8d7a0/60
+  cheat
+    description:Exit unbeaten levels
+    code:808b96/24+808bad/24
+  cheat
+    description:Normal controls in Poisonous Pipeline level
+    code:f8cd17/ca
+  cheat
+    description:No need to bash baddies in bonus round to get coin
+    code:bbd79b/24
+  cheat
+    description:No need to get bananas in bonus round to get coin
+    code:fbd845/f0
+  cheat
+    description:Skip intro screens
+    code:b287cb/80+b28cd6/80+b28f18/80+b28e7c/0f
 
 cartridge sha256:d45e26eb10c323ecd480e5f2326b223e29264c3adde67f48f0d2791128e519e8
   name:Doom (USA)
@@ -43746,6 +44289,12 @@ cartridge sha256:414bacc05a18a6137c0de060b4094ab6d1b75105342b0bb36a42e45d945a0e4
     description:Save anywhere
     code:0099cf/a9
   cheat
+    description:131,070 exp points after each battle
+    code:13ff7b/01+13ff91/b1
+  cheat
+    description:16,646,142 exp points after each battle
+    code:13ff7b/01+13ff91/b1+13ff8b/b3
+  cheat
     description:Get at least 150 GP after each battle
     code:03ed72/69+03ed73/96+03ed74/ea
   cheat
@@ -43755,7 +44304,7 @@ cartridge sha256:414bacc05a18a6137c0de060b4094ab6d1b75105342b0bb36a42e45d945a0e4
     description:Get at least 65,536 GP after each battle
     code:03ed87/ee
   cheat
-    description:Get 99 of items that you are given or find in a pot, treasure chest, ect
+    description:Get 99 of items that you are given or find in a pot, treasure chest, etc.
     code:009819/63
   cheat
     description:Get 99 arrows when you find them in a pot or treasure chest
@@ -43956,6 +44505,9 @@ cartridge sha256:414bacc05a18a6137c0de060b4094ab6d1b75105342b0bb36a42e45d945a0e4
 cartridge sha256:680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad06
   name:Final Fantasy II (USA)
   cheat
+    description:Skip intro
+    code:128020/09+128021/04
+  cheat
     description:Almost infinite HP (can make big and sometimes normal monsters invincible, disable to defeat them)
     code:03cae6/bd
   cheat
@@ -44010,6 +44562,12 @@ cartridge sha256:680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad0
     description:Save anywhere
     code:0099cf/a9
   cheat
+    description:131,070 exp points after each battle
+    code:13ff7b/01+13ff91/b1
+  cheat
+    description:16,646,142 exp points after each battle
+    code:13ff7b/01+13ff91/b1+13ff8b/b3
+  cheat
     description:Get at least 150 GP after each battle
     code:03ed5d/69+03ed5e/96+03ed5f/ea
   cheat
@@ -44019,7 +44577,7 @@ cartridge sha256:680535dc1c4196c53b40dc9c2c9bc159a77802ab8d4b474bef5dc0281c15ad0
     description:Get at least 65,536 GP after each battle
     code:03ed72/ee
   cheat
-    description:Get 99 of items that you are given or find in a pot, treasure chest, ect
+    description:Get 99 of items that you are given or find in a pot, treasure chest, etc.
     code:009819/63
   cheat
     description:Get 99 arrows when you find them in a pot or treasure chest
@@ -46905,6 +47463,9 @@ cartridge sha256:5a6deb5617e86a9f4b981031e939510e30c5c8ad047f5f012e40442113fd28c
     description:Invincibility
     code:c0419e/60
   cheat
+    description:Infinite health
+    code:7f0000/00
+  cheat
     description:Infinite time
     code:c08611/80
   cheat
@@ -48401,6 +48962,9 @@ cartridge sha256:62557ee2a3fc3b5a3f59431f966eb61bb380ba983ef6c7742cb55cf075f15f6
   cheat
     description:Have all items
     code:7e02b3/ff+7e02b4/ff+7e02b5/01+7e02aa/ff+7e02ab/ff+7e02ac/ff+7e02ad/ff+7e02ae/ff+7e02af/ff+7e02b0/ff+7e02b1/ff+7e02b2/ff
+  cheat
+    description:Walk through walls
+    code:80e643/11
 
 cartridge sha256:3ffbb6e0ccf8e9f5e4c72d9fe526a16371e562b71a91d6430e562bf358a5126b
   name:Jack Nicklaus Golf (USA)
@@ -49509,6 +50073,9 @@ cartridge sha256:7f05959f423bc656091ea3bddfbc89c877ae243dca346f63233e27973f34e0e
 cartridge sha256:05152bcf9bf086e7bcdbfa7dd8edfe2085f1339c4d7e193e0071c49a10471ef4
   name:Ka-blooey (USA)
   cheat
+    description:Invincibility
+    code:00b292/80+00c251/80
+  cheat
     description:Infinite lives
     code:008165/ad
   cheat
@@ -50223,6 +50790,9 @@ cartridge sha256:7a5261f1a5e84b67483c79fb002ce1539f2360f88333bda60f12e617d86e0de
     description:One button finishes and humiliations
     code:80b229/00
   cheat
+    description:Enable finishes during round
+    code:80b3ef/24+80b3f4/24+80b3fe/24+80b406/24+80b408/c9
+  cheat
     description:CPU cannot move from starting position
     code:7e0e08/01
   cheat
@@ -50246,6 +50816,9 @@ cartridge sha256:618a23636e07110e094277ec1d1e60c3620a6e9a5f386292808267593fa803a
   cheat
     description:One button finishes and humiliations
     code:80b222/00
+  cheat
+    description:Enable finishes during round
+    code:80b3e3/24+80b3e8/24+80b3f2/24+80b3fa/24+80b3fc/c9
   cheat
     description:CPU cannot perform special or danger moves
     code:80d624/a9+80d625/00
@@ -50427,6 +51000,9 @@ cartridge sha256:6638b5541059814d4c34574e5e277ef613aebf81c91d3def557a7642fb5840e
     description:Hit anywhere
     code:c08a63/80+c08a2f/80+c08a8f/80+c089f8/80+c089f1/80
   cheat
+    description:Enable 2-Player same character cheat
+    code:c12376/f0
+  cheat
     description:Start with level 6 Sword
     code:c07369/8e+c07370/85
   cheat
@@ -50579,6 +51155,9 @@ cartridge sha256:67937dd7a29a93b1aaabb6df89f0748369ff47f3f6c655a402c00d565797314
   cheat
     description:Boulder warnings don't appear
     code:88c2ba/b4
+  cheat
+    description:CPU gets all the boulders
+    code:88c2d0/ce+88c2d2/07+88c2d1/52
   cheat
     description:Only red blobs fall
     code:888e4f/a9+888e50/00+888e51/00
@@ -51509,6 +52088,15 @@ cartridge sha256:66871d66be19ad2c34c927d6b14cd8eb6fc3181965b6e517cb361f7316009cf
   cheat
     description:Trigger doors are open (works with most dungeon doors, some that even look closed)
     code:7e068d/ff
+  cheat
+    description:Hold button L to walk over pits
+    code:07dc8d/00+07dc8c/f2+07dc8f/20
+  cheat
+    description:Hold button R to walk over pits
+    code:07dc8d/00+07dc8c/f2+07dc8f/10
+  cheat
+    description:Prevent Zelda from saying 'Help me... I am in the dungeon of the castle' during the beginning of the game
+    code:099ff3/ad
   cheat
     description:Have Bombos Medallion
     code:7ef347/01
@@ -52576,7 +53164,7 @@ cartridge sha256:8510491f99400115ccf33570269bc4e484fb56370f7ac36f12e73eec19d342d
     code:7e05a3/09
 
 cartridge sha256:73731a5a7932965de02a9e98055dcf88b4d17b8f710a6ecfde3e36a1f248773b
-  name:Lufia & The Fortress of Doom (USA)
+  name:Lufia & the Fortress of Doom (USA)
   cheat
     description:Move around caves and world map quicker (except when leaving a vehicle)
     code:019829/20
@@ -56010,6 +56598,24 @@ cartridge sha256:44cc113ce1e7616cc737adea9e8f140436c9f1c3fba57e8e9db48025d4ace63
     description:Cheat menu enabled (in options menu)
     code:7e0104/01
 
+cartridge sha256:a203a13870eaec92095daef1196a0c9fe8416e600504d55dd0dc724d4f5f5cb0
+  name:Maui Mallard in Cold Shadow (USA)
+  cheat
+    description:Enable level skip cheat (press Select + Y + A during the game)
+    code:7e1f55/02
+  cheat
+    description:Enable infinite lives cheat
+    code:7e1f55/04
+  cheat
+    description:Enable water is harmless cheat
+    code:7e1f55/40
+  cheat
+    description:Enable infinite health cheat (health reaches 0, but you won't die)
+    code:7e1f55/80
+  cheat
+    description:Disable all cheats
+    code:7e1f55/00
+
 cartridge sha256:2a08704748f5ef6488348c4099729feca600412d331bda3756e51efd8b94e113
   name:MechWarrior (USA)
   cheat
@@ -57315,6 +57921,21 @@ cartridge sha256:3c6d3e4a9c9af160f1c1cf11ce4ead531d9500c1f58f1cbe682c90a5eaa3efb
     description:One button fatalities - Scorpion (Press Up, L or R)
     code:80d03f/0d
   cheat
+    description:Perform Kano's fatality from any distance
+    code:80d40a/24
+  cheat
+    description:Perform Rayden's fatality from any distance
+    code:80cb00/24
+  cheat
+    description:Perform Johnny Cage's fatality from any distance
+    code:80ca48/24
+  cheat
+    description:Perform Scorpion's fatality from any distance
+    code:80d03e/24
+  cheat
+    description:Perform Sub-Zero's fatality from any distance
+    code:80ccef/24
+  cheat
     description:All throws do more damage
     code:809053/78
   cheat
@@ -57708,6 +58329,15 @@ cartridge sha256:43e36a74fb73a7efc46b380599e269b1fff8f55ecf80f5cf50c34d02ceda041
     description:Have 127x more fatality time
     code:83a6d5/7f
   cheat
+    description:CPU always does fatalities
+    code:80cdef/24
+  cheat
+    description:CPU always does friendships and babalities (Smoke and Jade will also be in the Living Forest)
+    code:80ff47/80
+  cheat
+    description:Disable blood
+    code:84fda5/24
+  cheat
     description:Disable throws - 2P mode
     code:82da9f/8d
   cheat
@@ -57821,6 +58451,15 @@ cartridge sha256:ca2f86ca77f822fcd8e86f5a287f2a76d0becbb81a7bce73ae22909beb2f834
   cheat
     description:Have 127x more fatality time
     code:83a6e5/7f
+  cheat
+    description:CPU always does fatalities
+    code:80ce01/24
+  cheat
+    description:CPU always does friendships and babalities (Smoke and Jade will also be in the Living Forest)
+    code:80ff7a/80
+  cheat
+    description:Disable blood
+    code:84fda9/24
   cheat
     description:Disable throws - 2P mode
     code:82da9f/8d
@@ -58106,6 +58745,9 @@ cartridge sha256:c70b812a9d2df7f95b279e4050e03a4b8a68588a370816e645f378296b84e5d
 
 cartridge sha256:b257cffb3484e6be051a56268cb99ee888bd6d3e9c0e8d6d0779ff66c411f6ba
   name:NBA Jam - Tournament Edition (USA)
+  cheat
+    description:Enable extended roster
+    code:8aa145/a9
   cheat
     description:Infinite shot clock time
     code:80ad5a/ad
@@ -59262,6 +59904,12 @@ cartridge sha256:ce9c819d6496e58901b39d9b04558a89e09ccc3aac33690b8d02bb0406682a5
     description:Start on extra course (stats are for South Africa but the course is different)
     code:1f89d5/10
 
+cartridge sha256:620af60cd4a6683871e9339c2db63d87538819af29b3cf967a1729b53a3bd6b3
+  name:Nightmare Busters (Europe) (Proto)
+  cheat
+    description:Enable Extra Options in options menu
+    code:7e1f6b/02
+
 cartridge sha256:fccc96af24a2463b1c53253e1c5c8ef63641355fae53c0fb410427f29743262b
   name:Ninja Gaiden Trilogy (USA)
   cheat
@@ -59399,6 +60047,9 @@ cartridge sha256:3c109e50b91ec6df3bb8509778ae544c99433fb40dda9b801178dfe51305361
   cheat
     description:One hit kills
     code:038cbf/a9+038cc0/00+038cc1/00+02a3f0/a9+02a3f1/00+02a3f2/00
+  cheat
+    description:Go to stage select menu (disable once the menu loads)
+    code:7e0000/0a
 
 cartridge sha256:f099937ac4c8afb38c517c5d85475224985fb8f345dacb44994a617ea05bf4e5
   name:No Escape (USA)
@@ -60744,6 +61395,15 @@ cartridge sha256:b7291088f5c49e1fc55bf932076ec03f7b39f6e409ae06e884b57024c56cdc8
     description:Access all weapons (highlight weapon and press X to equip)
     code:81e7f4/de
   cheat
+    description:Super jump 2X
+    code:819102/f6
+  cheat
+    description:Super jump 3X
+    code:819102/f1
+  cheat
+    description:Walk through walls (horizontal)
+    code:81cd13/18
+  cheat
     description:Invincibility (alt)
     code:7e0410/dc
   cheat
@@ -60797,6 +61457,12 @@ cartridge sha256:b7291088f5c49e1fc55bf932076ec03f7b39f6e409ae06e884b57024c56cdc8
   cheat
     description:Have Energy Aid Kit
     code:7e0fe2/01
+
+cartridge sha256:a0b39d7fd7c39c5b0f41f3542fb8d2887530ded1c111b4ffb2a863845e704ecc
+  name:Pieces (USA)
+  cheat
+    description:Place pieces anywhere to auto place
+    code:c08261/00+c08267/00
 
 cartridge sha256:03d0127f5de3237e22ad00de0c20763274da7b71142dde693240ac96d10983a3
   name:Pilotwings (USA)
@@ -61037,6 +61703,9 @@ cartridge sha256:72b2b3bead3fcd27a1610ad5d4d8be3235efeaff96df2e7858911992a5892d2
   cheat
     description:Infinite lives - Rocky
     code:01e97e/00
+  cheat
+    description:Enable level select (pause and press select)
+    code:009ae8/80
   cheat
     description:Weapons don't deplete when hit - Pocky
     code:04ebd8/24
@@ -61860,8 +62529,14 @@ cartridge sha256:ba135ad37fef9932c2f840cf6cf82d559c232dfe0f85ba068a34755f3ad5f77
 cartridge sha256:89d57bf308033ef17f770a80080cbeed2d112244635d5b5f860f2016398cd2f6
   name:Q-bert 3 (USA)
   cheat
+    description:Invincibility
+    code:00b9a3/00
+  cheat
     description:Infinite lives
     code:00a776/ad
+  cheat
+    description:Step on any cube to clear level
+    code:009057/00
   cheat
     description:Start with 1 life instead of 5
     code:00808c/01
@@ -63822,8 +64497,155 @@ cartridge sha256:34e1af0642c85148c5a3dc3c7ab4bcbda13a9fea190934b5526c555fff03565
     description:Quicker 'jungle fever' for Rasta
     code:80bded/4a+80bdf7/02
   cheat
+    description:Infinite health - P1
+    code:7e0879/ff
+  cheat
+    description:Infinite health - P3
+    code:7e0c79/ff
+  cheat
+    description:Infinite health - P4
+    code:7e0e79/ff
+  cheat
+    description:No health - P1
+    code:7e0879/00
+  cheat
+    description:No health - P2
+    code:7e0a79/00
+  cheat
+    description:No health - P3
+    code:7e0c79/00
+  cheat
+    description:No health - P4
+    code:7e0e79/00
+  cheat
     description:Infinite time
     code:7e1a70/01
+  cheat
+    description:Infinite time (alt)
+    code:7e1a70/59+7e1a71/02
+  cheat
+    description:Infinite ringout time - all players
+    code:7e1a60/00
+  cheat
+    description:P1 wrestler modifier - Jumbo
+    code:7e1b86/00
+  cheat
+    description:P1 wrestler modifier - Biff
+    code:7e1b86/01
+  cheat
+    description:P1 wrestler modifier - Gunloc
+    code:7e1b86/02
+  cheat
+    description:P1 wrestler modifier - Oni
+    code:7e1b86/03
+  cheat
+    description:P1 wrestler modifier - Titan
+    code:7e1b86/04
+  cheat
+    description:P1 wrestler modifier - Stingray
+    code:7e1b86/05
+  cheat
+    description:P1 wrestler modifier - Haggar
+    code:7e1b86/06
+  cheat
+    description:P1 wrestler modifier - Grater
+    code:7e1b86/07
+  cheat
+    description:P1 wrestler modifier - Rasta
+    code:7e1b86/08
+  cheat
+    description:P1 wrestler modifier - Scorpion
+    code:7e1b86/09
+  cheat
+    description:P2 wrestler modifier - Jumbo
+    code:7e1b87/00
+  cheat
+    description:P2 wrestler modifier - Biff
+    code:7e1b87/01
+  cheat
+    description:P2 wrestler modifier - Gunloc
+    code:7e1b87/02
+  cheat
+    description:P2 wrestler modifier - Oni
+    code:7e1b87/03
+  cheat
+    description:P2 wrestler modifier - Titan
+    code:7e1b87/04
+  cheat
+    description:P2 wrestler modifier - Stingray
+    code:7e1b87/05
+  cheat
+    description:P2 wrestler modifier - Haggar
+    code:7e1b87/06
+  cheat
+    description:P2 wrestler modifier - Grater
+    code:7e1b87/07
+  cheat
+    description:P2 wrestler modifier - Rasta
+    code:7e1b87/08
+  cheat
+    description:P2 wrestler modifier - Scorpion
+    code:7e1b87/09
+  cheat
+    description:P3 wrestler modifier - Jumbo
+    code:7e1b88/00
+  cheat
+    description:P3 wrestler modifier - Biff
+    code:7e1b88/01
+  cheat
+    description:P3 wrestler modifier - Gunloc
+    code:7e1b88/02
+  cheat
+    description:P3 wrestler modifier - Oni
+    code:7e1b88/03
+  cheat
+    description:P3 wrestler modifier - Titan
+    code:7e1b88/04
+  cheat
+    description:P3 wrestler modifier - Stingray
+    code:7e1b88/05
+  cheat
+    description:P3 wrestler modifier - Haggar
+    code:7e1b88/06
+  cheat
+    description:P3 wrestler modifier - Grater
+    code:7e1b88/07
+  cheat
+    description:P3 wrestler modifier - Rasta
+    code:7e1b88/08
+  cheat
+    description:P3 wrestler modifier - Scorpion
+    code:7e1b88/09
+  cheat
+    description:P4 wrestler modifier - Jumbo
+    code:7e1b89/00
+  cheat
+    description:P4 wrestler modifier - Biff
+    code:7e1b89/01
+  cheat
+    description:P4 wrestler modifier - Gunloc
+    code:7e1b89/02
+  cheat
+    description:P4 wrestler modifier - Oni
+    code:7e1b89/03
+  cheat
+    description:P4 wrestler modifier - Titan
+    code:7e1b89/04
+  cheat
+    description:P4 wrestler modifier - Stingray
+    code:7e1b89/05
+  cheat
+    description:P4 wrestler modifier - Haggar
+    code:7e1b89/06
+  cheat
+    description:P4 wrestler modifier - Grater
+    code:7e1b89/07
+  cheat
+    description:P4 wrestler modifier - Rasta
+    code:7e1b89/08
+  cheat
+    description:P4 wrestler modifier - Scorpion
+    code:7e1b89/09
 
 cartridge sha256:7fb5236d10852125f0f37c2188b907d636647400a57bccbdb2f63098ffae8b2d
   name:Scooby-Doo Mystery (USA)
@@ -64511,6 +65333,15 @@ cartridge sha256:d09ca5adaee65cfd686742482bc55b1a3ce9bc5ebed61f24c5631555151a7fc
   cheat
     description:Always advance to the next level
     code:7e10a2/e7+7e10a3/03
+
+cartridge sha256:d50a40576c5494c039d2da64c19353d5d075345199ae7a9a7a077fde33dbd70c
+  name:Silva Saga II - The Legend of Light and Darkness (Japan)
+  cheat
+    description:No random battles
+    code:80c769/ad
+  cheat
+    description:Walk anywhere
+    code:80c7ee/80+80c7ef/64
 
 cartridge sha256:c0bd1b378337c32047a6b7122a3813beb646e496fbdb1fa5c87ab9856271e4c5
   name:SimAnt - The Electronic Ant Colony (USA)
@@ -65457,17 +66288,23 @@ cartridge sha256:dc5353ddc350816619230f25f8c51bddabf7438e6dfba21662eb1c479485673
 cartridge sha256:f5b7418c00ccac44615cfc57c7e17d57533837056886f6d733e6b714c36dec1f
   name:Space Megaforce (USA)
   cheat
-    description:Protection against enemy hits, and weapon level goes to 2 when hit
-    code:0288bb/a9+0288bc/06
+    description:Invincibility
+    code:0280be/d0
   cheat
-    description:Protection against enemy hits, and weapon level goes to 6 when hit
-    code:0288bb/a9+0288bc/06+0288c8/06
+    description:Infinite special lives (always respawn after dying as long as you have regular lives remaining)
+    code:0084a6/ad
   cheat
     description:Infinite bombs
     code:028777/00
   cheat
     description:Infinite ships
     code:02890f/00
+  cheat
+    description:Protection against enemy hits, and weapon goes to level 2 when hit
+    code:0288bb/a9+0288bc/06
+  cheat
+    description:Protection against enemy hits, and weapon goes to level 6 when hit
+    code:0288bb/a9+0288bc/06+0288c8/06
   cheat
     description:Hit anywhere
     code:01aa01/60+01aa03/d0+01aa04/2c+01aa00/ad+01aa02/0d
@@ -65576,6 +66413,9 @@ cartridge sha256:f5b7418c00ccac44615cfc57c7e17d57533837056886f6d733e6b714c36dec1
   cheat
     description:Start in area 12
     code:0081c1/a9+0081c2/0c
+  cheat
+    description:Enable debug mode
+    code:80fff0/ff
 
 cartridge sha256:14dc44687c8da35aec63b9edadbaac21bf7293f5171646f614139192e82ab071
   name:Spanky's Quest (USA)
@@ -65980,7 +66820,7 @@ cartridge sha256:964d21996e385e032b5d18baf716692ba1db780245cd71956c212045c1b8eb9
     code:7e0b28/07
 
 cartridge sha256:63210a91573fa8e19592f2e6c746a400831d804c00453739447d2df32e731df7
-  name:Spider-Man-X-Men - Arcade's Revenge (USA)
+  name:Spider-Man - X-Men - Arcade's Revenge (USA)
   cheat
     description:Invincibility after first hit (blinking) - Spider-Man
     code:188b60/ad
@@ -67728,6 +68568,9 @@ cartridge sha256:4efab3f49cbe91ec77b6cba747ddfedfdc0b080c755a8b6ba51234f0676c000
     description:Hit anywhere
     code:c60c0f/40+c60c0b/66+c60c0a/ad+c60c0c/0d
   cheat
+    description:Walk anywhere
+    code:c60b99/18
+  cheat
     description:Remove all blocks
     code:c61aa9/01
   cheat
@@ -68778,6 +69621,9 @@ cartridge sha256:a9e3e57d591e995e8e0dd228b619b6aed42205eaf55316fa8ff33f236b3a32b
     description:SMB3 - Mega power-jump
     code:23cb51/00
   cheat
+    description:SMB3 - Mushrooms always go to the right when spawned from a block
+    code:288fab/10
+  cheat
     description:SMB3 - Change to Big Mario whenever you go to the map
     code:208f59/a9+208f5a/01
   cheat
@@ -69732,6 +70578,9 @@ cartridge sha256:0838e531fe22c077528febe14cb3ff7c492f1f5fa8de354192bdff7137c27f5
     description:Multi-jump and float down (disable in water and to get on Yoshi)
     code:7e1471/01
   cheat
+    description:Swim on every level
+    code:00f2c3/a9
+  cheat
     description:Activate green blocks (disable before entering the Green Switch Palace)
     code:7e1f27/01
   cheat
@@ -70035,20 +70884,20 @@ cartridge sha256:12b77c4bc9c1832cee8881244659065ee1d84c70c3d29e6eaf92e6798cc2ca7
     description:Enemies die on contact (Speed Booster effect)
     code:a0a4b8/80+a0a4a4/80
   cheat
-    description:Skip intro and start on Planet Zebes on new game
-    code:82eebb/00
-  cheat
-    description:Select area when loading saved game A (press right on map screen)
-    code:81a81a/00+81a8af/80
-  cheat
     description:Switching areas fills the map
     code:808597/af+80859a/03
   cheat
-    description:Automatically collect secret and/or special items in current room (Missiles, Energy Tanks, ect)
+    description:Automatically collect secret and/or special items in current room (Missiles, Energy Tanks, etc.)
     code:84df92/24+84dff4/24
+  cheat
+    description:View all hidden blocks with X-ray Scope regardless of your viewing direction
+    code:88817c/0f
   cheat
     description:Can access Tourain from sunken statues room
     code:7ed820/c1+7ed821/1f
+  cheat
+    description:Disabled water
+    code:88c4b8/a9+88c4b9/ff+88c4ba/ff
   cheat
     description:Full movement in Maridia sand
     code:84b518/80+90981d/00
@@ -70062,11 +70911,17 @@ cartridge sha256:12b77c4bc9c1832cee8881244659065ee1d84c70c3d29e6eaf92e6798cc2ca7
     description:Metroids can be killed without being frozen first
     code:a3ef1c/24+a3ef27/80
   cheat
-    description:Display entire map
-    code:82947f/80+8294ef/80+8085ae/a9
+    description:Skip intro and start on Planet Zebes on new game
+    code:82eebb/00
+  cheat
+    description:Select area when loading saved game A (press right on map screen)
+    code:81a81a/00+81a8af/80
   cheat
     description:0 hours played
     code:70004e/00
+  cheat
+    description:Display entire map
+    code:82947f/80+8294ef/80+8085ae/a9
   cheat
     description:Brinstar mapped
     code:7ed909/ff
@@ -70415,6 +71270,9 @@ cartridge sha256:5a4b0c89606f71182fa5552ac476cc3bbda5ddc7d44e33f9184114aaea38020
 
 cartridge sha256:a3d803b8c6b0b6ac55085671040b840f993543915c7f802e14fb651beabe9b63
   name:Super Punch-Out!! (USA)
+  cheat
+    description:Invincibility against normal attacks
+    code:00c3fd/00
   cheat
     description:Infinite health against most punches
     code:00c824/ad
@@ -72327,6 +73185,21 @@ cartridge sha256:d802715fb4f09d7e499b5b3e577af641598a723dae7cedeaa93943bb53c6edb
     description:World 5 - Dark Kat always enabled
     code:c0ecd6/05
 
+cartridge sha256:40916fe512541aafba354e39c4ef63a9114de235526de5bb949a239a9257490e
+  name:Sword Maniac (Japan)
+  cheat
+    description:Infinite time
+    code:008bf8/ad
+  cheat
+    description:Infinite health
+    code:7e0a18/a0
+  cheat
+    description:Infinite lives
+    code:7e0a3e/09
+  cheat
+    description:Attack really fast
+    code:7e101e/01
+
 cartridge sha256:c2015d03dd3db08069b2a6ea1ed6b3e1ac1e3a5f804b02295c3cd3717add91ef
   name:Syndicate (USA)
   cheat
@@ -72687,6 +73560,15 @@ cartridge sha256:e3bd2296b860a547bb8594485048d3e1326a416405ed9e91139c75f8927acfe
     description:Infinite time (alt)
     code:7e0098/99
 
+cartridge sha256:7da4a3cfa5de4bb4722a6e2a42c26aae322b5e668f1645d8c870fb99e6080600
+  name:Tecmo Secret of the Stars (USA)
+  cheat
+    description:Reach level 99 after one battle
+    code:00af03/00
+  cheat
+    description:Kill one enemy to win battle (you only get exp for that one enemy)
+    code:00dd8c/00
+
 cartridge sha256:35dd020cf57fc402417ab6e4a6c49866c5a86bba25218c0aaf7ce85cb134bcf8
   name:Tecmo Super Bowl (USA)
   cheat
@@ -72873,6 +73755,9 @@ cartridge sha256:5b82cdd6f2da56f43680d6a5021faebe2e06036d30602c1a7917aa414cf8b5f
     description:Infinite lives
     code:00cea6/00
   cheat
+    description:Infinite Special Attack - Both Players
+    code:00c297/b5
+  cheat
     description:One hit kills (disable during Shredder's first fight)
     code:0485a7/80
   cheat
@@ -72929,6 +73814,12 @@ cartridge sha256:5b82cdd6f2da56f43680d6a5021faebe2e06036d30602c1a7917aa414cf8b5f
   cheat
     description:Infinite health (alt) (enable after level starts)
     code:7e044a/56
+  cheat
+    description:Infinite time
+    code:7e0096/99
+  cheat
+    description:Infinite time (alt)
+    code:7e0098/02
 
 cartridge sha256:849141370f164d6db3e5709da670726f958ce13ffef69319564db3fb0b12c69d
   name:Teenage Mutant Ninja Turtles - Tournament Fighters (USA)
@@ -73136,6 +74027,9 @@ cartridge sha256:3cdebbd8adc4bb6773a7995f542fdac49adefca71cba583255a1c1bf37ac394
   cheat
     description:Tetris - Always at high speed
     code:8197d3/a9+8197d4/0a+8197d5/ea
+  cheat
+    description:Dr. Mario - Drop pieces anywhere to complete level
+    code:82a343/80+82a34f/a9
   cheat
     description:Dr. Mario - The same piece always drops until you hit the change button
     code:82a05a/a9+82a05b/0a+82a05c/ea
@@ -74540,6 +75434,12 @@ cartridge sha256:c8187417a27a2f14ce2be35eebd0f112bd413b57d3589ae6d40b333bc21ba69
   cheat
     description:Infinite time
     code:7e02ce/00
+  cheat
+    description:Hit anywhere
+    code:848363/00
+  cheat
+    description:Multi-jump
+    code:829d5e/30+829d5d/fc
 
 cartridge sha256:259c25d4613f97f5fa7992900fb583625d7fb912c7ae09fa9def2e682834dc9f
   name:Twisted Tales of Spike McFang, The (USA)
@@ -74903,6 +75803,18 @@ cartridge sha256:cb2fdfce61858063bf4c9da4228381c3ec3abe423f4d378cddd174ae4adb261
   cheat
     description:Black background (wait for title screen to appear before proceeding)
     code:849584/ad
+  cheat
+    description:Press Left on main menu for Sound Test menu
+    code:83b6db/02
+  cheat
+    description:Press Right on main menu for Kool Stuff menu
+    code:83b70f/02
+  cheat
+    description:Press Up on main menu for Kooler Stuff menu
+    code:83b743/02
+  cheat
+    description:Press B on main menu for Scotts Stuff menu
+    code:83b777/02
   cheat
     description:First round / one button fatalities
     code:7e3be3/01
@@ -75932,6 +76844,9 @@ cartridge sha256:c8f159e2625ac8078535c06857ea28475706da45df494de8e46f50888272cf7
   cheat
     description:Infinite lives
     code:7e1fb2/04
+  cheat
+    description:Enable stage select after select player screen (disable before you exit the menu)
+    code:7e05f0/ff+7e05f1/ff
 
 cartridge sha256:2167fc7c5447b2287668d2f3e4ef1a285361b2292ecc8a4cbd9f966a460ad7a2
   name:Wing Commander (USA)
@@ -76742,6 +77657,138 @@ cartridge sha256:fbe8926fc0149d3e8e2aec20f15640ea6814f4f4b01c3960f3c477f5f17e890
   cheat
     description:Infinite health
     code:7eedde/02
+  cheat
+    description:Have Air Bubble 1D
+    code:7e4d00/02
+  cheat
+    description:Have Air Bubble on button Y
+    code:7e4d29/21
+  cheat
+    description:Have Balloon
+    code:7e4d07/02
+  cheat
+    description:Have Balloon on button Y
+    code:7e4d1c/28
+  cheat
+    description:Have Blue Spark 6C
+    code:7e4cf5/02
+  cheat
+    description:Have Blue Sparkly on button Y
+    code:7e4d26/16
+  cheat
+    description:Have Bubble Wand
+    code:7e4d0c/02
+  cheat
+    description:Have Bubble Wand on button Y
+    code:7e4d1d/2d
+  cheat
+    description:Have Daffodil
+    code:7e4ce2/02
+  cheat
+    description:Have Daffodil on button Y
+    code:7e4d1a/03
+  cheat
+    description:Have Daisy
+    code:7e4ce1/02
+  cheat
+    description:Have Daisy on button Y
+    code:7e4d17/02
+  cheat
+    description:Have Dwarf Teleport
+    code:7e4d11/02
+  cheat
+    description:Have Dwarf Teleport on button Y
+    code:7e4d1f/32
+  cheat
+    description:Have FishBowl E 4C
+    code:7e4d0d/02
+  cheat
+    description:Have FishBowl E on button Y
+    code:7e4d24/2e
+  cheat
+    description:Have Key - Gold 4C
+    code:7e4d03/02
+  cheat
+    description:Have Key - Gold on button Y
+    code:7e4d22/24
+  cheat
+    description:Have Key - Silver
+    code:7e4d04/02
+  cheat
+    description:Have Key - Silver on button Y
+    code:7e4d25/25
+  cheat
+    description:Have Golden Comb
+    code:7e4cf7/02
+  cheat
+    description:Have Golden Comb on button Y
+    code:7e4d20/18
+  cheat
+    description:Have Gold Spark 6C
+    code:7e4d15/02
+  cheat
+    description:Have Gold Spark on button Y
+    code:7e4d28/36
+  cheat
+    description:Have Golden Foxglove
+    code:7e4ce4/02
+  cheat
+    description:Have Golden Foxglove on button Y
+    code:7e4d19/05
+  cheat
+    description:Have Hour Glass
+    code:7e4cf6/02
+  cheat
+    description:Have Hour Glass on button Y
+    code:7e4d21/17
+  cheat
+    description:Have Mirror
+    code:7e4d08/02
+  cheat
+    description:Have Mirror on button Y
+    code:7e4d1e/29
+  cheat
+    description:Have Reflec Cry 6C
+    code:7e4d0a/02
+  cheat
+    description:Have Reflec Cry 6C on button Y
+    code:7e4d27/2b
+  cheat
+    description:Have Rose
+    code:7e4ce3/02
+  cheat
+    description:Have Rose on button Y
+    code:7e4d18/04
+  cheat
+    description:Have Spring 4C
+    code:7e4d0b/02
+  cheat
+    description:Have Spring on button Y
+    code:7e4d23/2c
+  cheat
+    description:Have Stun Dust
+    code:7e4d01/02
+  cheat
+    description:Have Stun Dust on button Y
+    code:7e4d1b/22
+  cheat
+    description:Have Tulip
+    code:7e4ce0/02
+  cheat
+    description:Have Tulip on button Y
+    code:7e4d16/01
+  cheat
+    description:Have Wheel 1D
+    code:7e4d05/02
+  cheat
+    description:Have Wheel on button Y
+    code:7e4d2b/26
+  cheat
+    description:Have Wrench 1D
+    code:7e4d02/04
+  cheat
+    description:Have Wrench on button Y
+    code:7e4d2a/23
 
 cartridge sha256:b0e74f0fe8d1e7fe2fe404341fea7c68e28f3a0ab78552d5092d413f2ecec417
   name:Ys III - Wanderers from Ys (USA)
@@ -77533,7 +78580,7 @@ cartridge sha256:4c156c4d826b9cba5741feb621de60c6294adb36553fc43971794bd2a4ffb34
     code:4928/06/00
 
 cartridge sha256:50c3a2193005c9134699ab00de16510fb946db10cdbc33bfacd8a3132926b72e
-  name:Adventures of Pinocchio, The (USA) (Proto)
+  name:Adventures of Pinocchio, The (Unknown) (Proto)
   cheat
     description:Invincibility
     code:14c0/e0/c9
@@ -77844,6 +78891,18 @@ cartridge sha256:7cebe1e446c56061f71e94b99cf6dfb7267cac0e21cb37b0f9a8118d5a127eb
     description:Millipede - Invincibility
     code:7543/ea/fa+7573/b8/37
 
+cartridge sha256:b9bb5b4d3274a7f4c443bd8fb2bf5f1018358d76a54c01e3a53f7ff610fa4fa6
+  name:Aretha (Japan)
+  cheat
+    description:Walk anywhere
+    code:562e/01/00
+
+cartridge sha256:afaf5380f970c2f07ff585a84bab50295fd17888591511cc1d71e8d7ddad7599
+  name:Aretha II (Japan)
+  cheat
+    description:Walk anywhere
+    code:4cce/01/00
+
 cartridge sha256:c504be420e7bfdcf9905fc4d6674fd4b7466e832976a7a48660b901086536d1f
   name:Army Men (USA, Europe) (En,Fr,De)
   cheat
@@ -77880,7 +78939,7 @@ cartridge sha256:801660458dc65c29701f21985943ba84c1f55cf57c9be3527b17548c33be260
     description:Hit anywhere
     code:1d14/d2/fa
 
-cartridge sha256:3f0688ed9219c44ce133647f0668cde50fdcba7ed8f04c34c3a0fc5ce596bfe5
+cartridge sha256:b34d96392f38b6b7c5462ce166f26e5c42f356dff6cff74ef9ac3e940ad7c6de
   name:Asteroids (USA, Europe)
   cheat
     description:Infinite lives
@@ -77889,7 +78948,7 @@ cartridge sha256:3f0688ed9219c44ce133647f0668cde50fdcba7ed8f04c34c3a0fc5ce596bfe
     description:No extra rocks as you go up levels
     code:2a7e/34/00
   cheat
-    description:Rocks go thru you unless you move from the middle
+    description:Invincible against rocks (from starting/center position only)
     code:2cb4/07/01+039c/35/00
   cheat
     description:Start with 1 life
@@ -78669,6 +79728,12 @@ cartridge sha256:5f7c1cdf6adbe6d6dcef488bd37d0da82fa356b79fd579b2022a149e983abc3
     description:All enemies frozen
     code:0100/c2/ff
 
+cartridge sha256:0e885739f2b4ce4a6a196e4db9f317d3346ce270276e44adce078927231096df
+  name:Bomberman Quest (USA) (SGB Enhanced)
+  cheat
+    description:Walk through walls
+    code:4a46/28/18
+
 cartridge sha256:6081309e7f5b63e4f6694965060c68baf82a775eb18e667c2c89898096e6e3d8
   name:Bonk's Adventure (USA)
   cheat
@@ -79110,14 +80175,20 @@ cartridge sha256:56d3dee063b8801704a284bd1bc229b94f15a3a448f485d347f04283d9bd16d
     description:Multi-jump
     code:5733/37/03+5732/fa/28+5736/02/51+572e/18/55+5735/fe/59+5731/c0/67+5737/c8/c9+1fe4/d0/c9+5730/b7/cb+5734/c7/cd+5170/ea/fa
 
+cartridge sha256:2f83ab433323f4d08f111ace559a7e29d37ff33fe1ca9d726edd5bb98a854ec2
+  name:Centipede (USA)
+  cheat
+    description:Kill one enemy to complete level
+    code:4586/01/05
+
 cartridge sha256:7e483524aa104928149e4e56f01b7e98c6eed70dcd30ac5d65cd9d2387cde5ff
-  name:Chessmaster, The (USA)
+  name:Chessmaster, The (DMG-N5) (USA)
   cheat
     description:Move pieces anywhere
     code:19d8/28/18+1a12/28/18+1a00/d9/00
 
 cartridge sha256:0a44d1f127436d73fc2f64201da0e0fd40793a414e533bba0a08e02dfb51cb10
-  name:Chessmaster, The (USA) (Rev A)
+  name:Chessmaster, The (DMG-N5) (USA) (Rev A)
   cheat
     description:Move pieces anywhere
     code:1ab6/28/18+1af8/28/18+1ae6/d1/00
@@ -79266,6 +80337,15 @@ cartridge sha256:3c86f30b11442c93b011287310dfea0a9c23a182527d8447769226e52ef29d5
     description:Hit anywhere
     code:08b9/77/00+0863/30/3e
 
+cartridge sha256:3ab8bcd08f0aa01c16ccc2bc286fc6c50cf2d140fd3ed411ef0e16e586410110
+  name:Crystalis (USA)
+  cheat
+    description:Hit anywhere
+    code:2a5b/28/3e
+  cheat
+    description:Walk anywhere
+    code:46b8/c0/00
+
 cartridge sha256:d5a1c0e7af970859449c47fcc80a5f4dfa4f456b20fdfcd49e753ce46f2dc3da
   name:Cyraid (USA)
   cheat
@@ -79312,7 +80392,7 @@ cartridge sha256:06d2f49483cf16f00580ba227d86174fdb9f72e555d9a9afea6aebcbfff012e
     code:019c/30/3e+019d/05/05
 
 cartridge sha256:30faf530573519d690d066093e9fae3b461d79df37c025a9ec9115f5fc5786e4
-  name:Daffy Duck (USA)
+  name:Daffy Duck (Europe)
   cheat
     description:Infinite jet pack
     code:3401/3c/af
@@ -79620,6 +80700,9 @@ cartridge sha256:2781f6b1014336e3318073f162cadd970329c8148fc62b5e795441cd6fd5705
     description:Infinite time
     code:0c34/01/00
   cheat
+    description:Can open doors without a key
+    code:407b/d2/fa
+  cheat
     description:Timer is 2x faster
     code:0c34/01/02
   cheat
@@ -79644,11 +80727,14 @@ cartridge sha256:eaf831ddd75e7cbc9990e478a139ac162034c03377670fdb79615a9aa2cc570
     description:Invincibility
     code:4081/28/3e
   cheat
+    description:Kill enemies on contact
+    code:2599/20/3e+25a5/7c/6d
+  cheat
     description:Infinite lives
     code:4d9d/35/00+4da0/c2/21
   cheat
     description:Multi-jump
-    code:55b5/0d/00+55aa/0c/01+55ac/17/1f+55b1/c6/29+55b2/fe/2d+55ad/38/30+55b3/06/36+55b0/0b/bd+55ab/c6/ca+55af/fa/cd+55b4/30/f6
+    code:54b4/38/3e
   cheat
     description:Always save game at end of level, regardless if you have KONG letters or not
     code:40cb/ca/c3
@@ -79676,6 +80762,18 @@ cartridge sha256:eaf831ddd75e7cbc9990e478a139ac162034c03377670fdb79615a9aa2cc570
   cheat
     description:Start with 99 lives
     code:6e89/05/63+7e95/05/63
+
+cartridge sha256:7722555df42413c6fd5434b717e82ba4a842cc0df3ef02fd0cd9b45b1bb5f2ca
+  name:Donkey Kong Land 2 (USA, Europe) (SGB Enhanced)
+  cheat
+    description:Multi-jump (disables hanging on horizontal ropes)
+    code:083b/22/00+0b33/20/18+085a/3a/36+0852/a4/a5+085b/5f/af
+  cheat
+    description:Glimmer's Galleon always lit
+    code:46ad/df/00
+  cheat
+    description:Can exit unbeaten levels
+    code:4a26/28/3e
 
 cartridge sha256:75f902ab8674c3cd379438fbd54cfe7e87ca3ddf9727679547261d1b77db720b
   name:Double Dragon (USA, Europe)
@@ -79785,6 +80883,12 @@ cartridge sha256:936df4d0f74620c784129259a22fc3216eea04f70c10cab6005457a0f681e31
     description:When selecting skill level, keep pressing down. Bleeping will continue, and computer will become more and more skillful.
     code:1a0b/03/ff
 
+cartridge sha256:3296ce126e2ebf61f99e39d82e20e0f7d7ade84539ddd48f7c0e21fef5f46932
+  name:Dr. Mario (World)
+  cheat
+    description:Drop capsules anywhere to clear level
+    code:2a3a/20/18+2be2/20/3e
+
 cartridge sha256:15fecc6e3d9f72e9cf3f5af7c1f034cc94a2007d29ea0a204976adcc0ff9a52e
   name:Dragon's Lair - The Legend (USA)
   cheat
@@ -79796,6 +80900,15 @@ cartridge sha256:8dab48cc81d14bcee7c73274df09cf5c4dd44c3b93d10a5a3175e04fead25de
   cheat
     description:Opponent doesn't attack
     code:68fc/fa/c9
+
+cartridge sha256:3996cbfb2f133a48f58a0d81420362caceaa3e348704d496ba6cbff0eb47139f
+  name:Dragon Warrior I & II (USA) (SGB Enhanced)
+  cheat
+    description:No random battles
+    code:40b1/38/3e
+  cheat
+    description:Walk anywhere
+    code:62f5/20/3e
 
 cartridge sha256:34f11935cb3c23102462aab9d96c09e25b81b35eef91f5e5456b2c3665734f0e
   name:Dragon Warrior III (USA)
@@ -79967,6 +81080,21 @@ cartridge sha256:5a462f1bbb4e75823c04c7a0b2a7497cbe7e709a425854c71c1fc4d60f16f44
 
 cartridge sha256:e5b1d116a8fb01b7a7213f906b3ef1bcc91a18f6826b01ee1bccd89429a0d906
   name:Final Fantasy Legend, The (USA)
+  cheat
+    description:Infinite items
+    code:4395/35/00+28cf/35/00
+  cheat
+    description:Enemies have 0 HP
+    code:5758/7b/af+575a/7a/af
+  cheat
+    description:Enemies have 0 in all abilities
+    code:5760/0a/af+5763/0a/af+5766/0a/af+5769/0a/af
+  cheat
+    description:No random battles
+    code:229a/c0/c9
+  cheat
+    description:Walk faster
+    code:245a/01/02
   cheat
     description:Human male - Start with 1 strength point
     code:7123/08/01
@@ -80567,6 +81695,12 @@ cartridge sha256:0dc2278500feb3844ba0ceabee289be011da1084903ab1c3fd681c83e719111
   cheat
     description:Infinite lives
     code:2cfd/35/3d
+  cheat
+    description:Multi-jump
+    code:5f23/30/00
+  cheat
+    description:Skip intro screen
+    code:3637/06/18+3638/00/23
 
 cartridge sha256:a04db245f19a55cd3ff43e2b3fc51cc747fc048a551c4e18639fef4af77553e1
   name:Humans, The (USA)
@@ -81499,7 +82633,7 @@ cartridge sha256:f15722ebebdae93e08bd6642d642614114f2d128778d6a131748c9855603e05
     code:0807/ff/06
 
 cartridge sha256:0d6c56da2fdb6b27d388912604ad97c2f71729604a075d76c1fcd923f29e6915
-  name:Lock'n Chase (World)
+  name:Lock n' Chase ~ Lock 'n' Chase (World)
   cheat
     description:Invincibility
     code:1764/28/3e
@@ -81901,7 +83035,7 @@ cartridge sha256:7c96841877908473f7873c91373b06bfd3749b341b4c4180c8fd2cc8b8308b6
     code:48ab/c2/fa
 
 cartridge sha256:bc14dac53de625535cc2825efa3d2399bf0c8c661f8a9417c4b97414a630cd0e
-  name:Mickey Mouse - Magic Wand (USA, Europe) (SGB Enhanced)
+  name:Mickey Mouse - Magic Wands (USA, Europe) (SGB Enhanced)
   cheat
     description:Invincibility
     code:0e92/c8/3e
@@ -82061,6 +83195,21 @@ cartridge sha256:f1bf118bd383a91ecf81f7ee759ce702b85cfee9f8cf11d8365cb243d555c60
   cheat
     description:Multi-jump
     code:4113/c2/fa+419e/2b/1d
+
+cartridge sha256:5bc4ca50f5cbbc2cf5e2fc98f4a4df661faab495369ab41d9a63c0f8d49c0fa3
+  name:Monopoly (USA)
+  cheat
+    description:Infinite money - P1
+    code:c47c/99+c47d/99+c47e/09
+  cheat
+    description:Infinite money - P2
+    code:c480/99+c481/99+c482/09
+  cheat
+    description:Infinite money - P3
+    code:c484/99+c485/99+c486/09
+  cheat
+    description:Infinite money - P4
+    code:c488/99+c489/99+c48a/09
 
 cartridge sha256:003097c7a363da268fa2853262c1924ee72fe23fc546834b247c359f69a684aa
   name:Montezuma's Return! (USA) (En,Es)
@@ -82256,6 +83405,66 @@ cartridge sha256:6c2733c0a57bbfe5075bec42e0735c685c934780db45b33f899f62dfea549f6
   cheat
     description:Hit anywhere - P1
     code:1d30/04/00
+  cheat
+    description:Enable Smoke
+    code:3dda/20/18
+  cheat
+    description:Infinite Fatality time
+    code:0e16/35/00
+  cheat
+    description:Cyrax one button Fatality (press Down)
+    code:44d5/80/16+44d4/00/ff+44d3/02/80
+  cheat
+    description:Cyrax one button Babality (press Punch)
+    code:44ca/20/22+44c9/00/ff
+  cheat
+    description:Kabal one button Fatality (press Kick)
+    code:462a/00/ff+462b/08/16
+  cheat
+    description:Kabal one button Babality (press Down)
+    code:4641/11/80+4643/10/22+4642/00/ff
+  cheat
+    description:Kano one button Fatality (press Down)
+    code:435b/11/80+435d/10/16+435c/00/ff
+  cheat
+    description:Kano one button Babality (press Kick)
+    code:436e/80/22+436d/00/ff
+  cheat
+    description:Sektor one button Fatality (press Block)
+    code:4468/20/16+4467/00/ff
+  cheat
+    description:Sektor one button Babality (press Kick)
+    code:4451/80/22+4450/00/ff
+  cheat
+    description:Sheeva one button Fatality (press Punch)
+    code:45d2/00/ff+45d3/10/16
+  cheat
+    description:Sheeva one button Babality (press Kick)
+    code:4601/00/ff+4602/20/22
+  cheat
+    description:Sindel one button Fatality (press Punch)
+    code:4573/10/16+4572/00/ff
+  cheat
+    description:Sindel one button Babality (press Up)
+    code:4559/10/22+4558/00/ff
+  cheat
+    description:Smoke one button Fatality (press Down)
+    code:451b/00/ff+451c/10/16
+  cheat
+    description:Smoke one button Babality (press Kick)
+    code:4525/00/ff+4526/20/22
+  cheat
+    description:Sonya one button Fatality (press Down)
+    code:4382/11/80+4383/10/ff+4384/00/16
+  cheat
+    description:Sonya one button Fatality (press Kick)
+    code:43d1/00/ff+43d2/10/22
+  cheat
+    description:Sub-Zero one button Fatality (press Forward)
+    code:46a2/00/ff+46a3/20/16
+  cheat
+    description:Sub-Zero one button Babality (press Kick)
+    code:46d2/00/ff+46d3/20/22
 
 cartridge sha256:cd999acce90fb40bb1231fda253fa8a0db9e26517ed4723353429aedf4ddf5db
   name:Mortal Kombat 4 (USA, Europe) (SGB Enhanced)
@@ -82265,6 +83474,36 @@ cartridge sha256:cd999acce90fb40bb1231fda253fa8a0db9e26517ed4723353429aedf4ddf5d
   cheat
     description:Hit anywhere - normal attacks
     code:1ccb/0f/00
+  cheat
+    description:Infinite Fatality Time
+    code:0e43/35/00
+  cheat
+    description:Fujin one button Fatality (press Back)
+    code:43e5/10/16+43e4/00/ff
+  cheat
+    description:Liu Kang one button Fatality (press Down)
+    code:43cb/10/16+43ca/00/ff
+  cheat
+    description:Quanchi one button Fatality (press Forward)
+    code:4363/80/16+4362/00/ff
+  cheat
+    description:Raiden one button Fatality (press Up)
+    code:43a9/40/16+43a8/00/ff
+  cheat
+    description:Reiko and Shinnok one button Fatality (press Back)
+    code:4331/80/16+4330/00/ff
+  cheat
+    description:Reptile one button Fatality (press Punch)
+    code:438e/10/16+438d/00/ff
+  cheat
+    description:Scorpion one button Fatality (press Back)
+    code:437b/10/16+437a/00/ff
+  cheat
+    description:Sub Zero one button Fatality (press Down)
+    code:43f9/10/16+43f8/00/ff
+  cheat
+    description:Tanya one button Fatality (press Down)
+    code:4349/40/16+4348/00/ff
 
 cartridge sha256:abc725f10251ae954a23c46b7e33b101bc52203fed4ffad49018858d82361964
   name:Motocross Maniacs (USA)
@@ -83445,6 +84684,12 @@ cartridge sha256:9fb0e41e4c8afe737a688dbdc1b6f7019874f7e9ef4c0a27cba2b8be329ce45
     description:Start with more energy - 2nd life
     code:4ee0/07/15
 
+cartridge sha256:211362382e3637edece46d5ccd470061466a37cd7794777f140ec3f228166e5a
+  name:Robopon - Sun Version (USA) (SGB Enhanced)
+  cheat
+    description:Walk anywhere
+    code:61b0/ff/00+546e/20/18
+
 cartridge sha256:92e8d1acd4d2d3297a961409d4bb0ed49c784be4a6e91cfceabd05ab11894f3d
   name:Roger Clemens' MVP Baseball (USA)
   cheat
@@ -84056,6 +85301,12 @@ cartridge sha256:664dae41e2d08070ead51e76c2d6865e52a122566cf79203b7c6c496968ded6
   cheat
     description:Start 1st level with 255 seconds on timer
     code:2e2d/96/ff
+
+cartridge sha256:31b92ae1c10e59372e14fe78cda20556d6ceba86930c60cc2a6bab8100f3a4b5
+  name:Splitz (Europe)
+  cheat
+    description:Infinite time
+    code:11f5/ea/fa
 
 cartridge sha256:7275c3af129971c53ce901321f6ca85b414ebd84574c420d66c38aa87c219fe3
   name:Spot - The Cool Adventure (USA)
@@ -84876,6 +86127,12 @@ cartridge sha256:91bd1f24827bde4dbb58ead76a8b4e5a507431ec9b6bbc7ef9473b852538a4d
     description:Start with 8 credits
     code:0b87/03/08
 
+cartridge sha256:1c93028e0882746e91721fedda27165281603744afa15f25fd7247d7c04071e8
+  name:Survival Kids (USA) (SGB Enhanced)
+  cheat
+    description:Walk anywhere
+    code:276e/20/3e
+
 cartridge sha256:f522c83d9dc77825a8bd5933e0877173fcb260fe72c5b032ef38b109250a63e9
   name:Swamp Thing (USA, Europe)
   cheat
@@ -84944,6 +86201,21 @@ cartridge sha256:351a3b24efa68f60009bc7e05d554034c8dc3d360d51d7399c80e6537089967
   cheat
     description:Hit anywhere
     code:51b0/34/00+5234/ca/fa
+
+cartridge sha256:731385527be39125a2044edbc46da9f5d9bc48cff7e320b213c45d77c5069067
+  name:Tarzan (USA, Europe)
+  cheat
+    description:Infinite time
+    code:4086/ea/fa
+  cheat
+    description:One hit kills
+    code:43ed/38/18+4441/38/18
+  cheat
+    description:Multi-jump
+    code:4784/20/3e
+  cheat
+    description:Only one special item needed
+    code:40bc/3d/af
 
 cartridge sha256:596787d9f1dfeef0151b20ce330ef78220e041d0a360b34dea75ce21c7cbb889
   name:Taz-Mania (USA, Europe)
@@ -85632,6 +86904,9 @@ cartridge sha256:9008df8d950b4e6966b38218e43bc3baf9bad91ef44b271b558aee6f38c993d
     description:Infinite money
     code:0b5b/ea/fa
   cheat
+    description:Walk anywhere
+    code:2a2b/05/00+2aec/20/18
+  cheat
     description:Start with dexterity of 10 - Shamino codes only - can't use with Journey Onward option
     code:762b/15/10
   cheat
@@ -85670,6 +86945,12 @@ cartridge sha256:9008df8d950b4e6966b38218e43bc3baf9bad91ef44b271b558aee6f38c993d
   cheat
     description:No energy replacement - Shamino codes only - can't use with Journey Onward option
     code:0c0a/ea/fa
+
+cartridge sha256:60d23465ffb1a84cb8c72a51146fd3bf2fa2fc323424098d801622e6190af761
+  name:Ultima - Runes of Virtue II (USA)
+  cheat
+    description:Walk anywhere (player and enemies)
+    code:19bc/b7/af+1866/ca/c3+19bd/c0/c8
 
 cartridge sha256:850a429b64b7ebcb8034da2c25789dff631d64682b1ce65f8de346c9744ae31e
   name:Universal Soldier (USA, Europe)
@@ -85881,6 +87162,12 @@ cartridge sha256:ac1682f17abcf590311a233289ee325214c2d71ab3a5aa175004002d85075e5
     description:Start with 650cc bike
     code:4965/20/3e+4966/03/01+4967/af/00
 
+cartridge sha256:5c11041f10b7ee96d433ef167dcb331acbf92deece796cdc10eb30ab7da1efee
+  name:Wave Race (USA, Europe)
+  cheat
+    description:Always have Dolphin Power
+    code:6ffa/20/3e+6fa9/46/00+6fa4/4b/00
+
 cartridge sha256:a3bd35fb1d2466868b5308a45e8ad3844925bd5dfa819b27ff67d0391b8e3511
   name:WCW Main Event (USA, Europe)
   cheat
@@ -85901,6 +87188,12 @@ cartridge sha256:a3bd35fb1d2466868b5308a45e8ad3844925bd5dfa819b27ff67d0391b8e351
 
 cartridge sha256:e424a9893faed6a486d66002ed606cf32d68dab71971ec461103396042800b63
   name:Wendy - Every Witch Way (USA, Europe)
+  cheat
+    description:Invincibility
+    code:4177/c0/c9
+  cheat
+    description:Infinite Stars
+    code:4190/ea/fa
   cheat
     description:Infinite time
     code:7fab/22/00
@@ -85988,6 +87281,9 @@ cartridge sha256:b396d2a15563b6144630d5ec5f0a8a2928a4b289ca215e6cc581df7a5fe295f
   cheat
     description:Infinite hints
     code:0870/35/00
+  cheat
+    description:Any word is acceptable
+    code:137d/20/18
   cheat
     description:Start with only 1 hint
     code:1bc9/04/01

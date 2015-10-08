@@ -166,7 +166,7 @@ InputManager::InputManager() {
           inputMapping->link = &input;
           input.guid = (uintptr_t)inputMapping;
 
-          nodeDevice.append(inputMapping->assignment, inputMapping->name);
+          nodeDevice.append(inputMapping->assignment, string{inputMapping->name}.replace(" ", ""));
         }
 
         nodePort.append(nodeDevice, string{inputDevice.name}.replace(" ", ""));

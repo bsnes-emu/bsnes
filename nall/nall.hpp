@@ -60,6 +60,7 @@
 #include <nall/decode/url.hpp>
 #include <nall/decode/zip.hpp>
 #include <nall/encode/base64.hpp>
+#include <nall/encode/url.hpp>
 #include <nall/hash/crc16.hpp>
 #include <nall/hash/crc32.hpp>
 #include <nall/hash/sha256.hpp>

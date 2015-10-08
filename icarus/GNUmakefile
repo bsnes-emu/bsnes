@@ -1,7 +1,7 @@
 include ../nall/GNUmakefile
 include ../hiro/GNUmakefile
 
-flags += -O3 -I..
+flags += -I.. -O3
 link +=
 objects := obj/hiro.o obj/icarus.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)

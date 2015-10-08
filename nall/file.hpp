@@ -91,19 +91,11 @@ struct file : file_system_object, varint {
   }
 
   static auto write(const string& filename, const string& text) -> bool {
-    file fp;
-    if(fp.open(filename, mode::write) == false) return false;
-    fp.print(text);
-    fp.close();
-    return true;
+    return write(filename, (const uint8_t*)text.data(), text.size());
   }
 
   static auto write(const string& filename, const vector<uint8_t>& buffer) -> bool {
-    file fp;
-    if(fp.open(filename, mode::write) == false) return false;
-    fp.write(buffer.data(), buffer.size());
-    fp.close();
-    return true;
+    return write(filename, buffer.data(), buffer.size());
   }
 
   static auto write(const string& filename, const uint8_t* data, unsigned size) -> bool {
