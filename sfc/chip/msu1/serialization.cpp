@@ -1,25 +1,28 @@
 #ifdef MSU1_CPP
 
-void MSU1::serialize(serializer& s) {
+auto MSU1::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
-  s.integer(mmio.data_seek_offset);
-  s.integer(mmio.data_read_offset);
+  s.integer(mmio.dataSeekOffset);
+  s.integer(mmio.dataReadOffset);
 
-  s.integer(mmio.audio_play_offset);
-  s.integer(mmio.audio_loop_offset);
+  s.integer(mmio.audioPlayOffset);
+  s.integer(mmio.audioLoopOffset);
 
-  s.integer(mmio.audio_track);
-  s.integer(mmio.audio_volume);
+  s.integer(mmio.audioTrack);
+  s.integer(mmio.audioVolume);
 
-  s.integer(mmio.data_busy);
-  s.integer(mmio.audio_busy);
-  s.integer(mmio.audio_repeat);
-  s.integer(mmio.audio_play);
-  s.integer(mmio.audio_error);
+  s.integer(mmio.audioResumeTrack);
+  s.integer(mmio.audioResumeOffset);
 
-  data_open();
-  audio_open();
+  s.integer(mmio.dataBusy);
+  s.integer(mmio.audioBusy);
+  s.integer(mmio.audioRepeat);
+  s.integer(mmio.audioPlay);
+  s.integer(mmio.audioError);
+
+  dataOpen();
+  audioOpen();
 }
 
 #endif

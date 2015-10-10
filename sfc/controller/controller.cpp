@@ -25,10 +25,10 @@ auto Controller::enter() -> void {
 
 auto Controller::step(unsigned clocks) -> void {
   clock += clocks * (uint64)cpu.frequency;
-  synchronize_cpu();
+  synchronizeCPU();
 }
 
-auto Controller::synchronize_cpu() -> void {
+auto Controller::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {

@@ -131,12 +131,6 @@ auto pListView::setGeometry(Geometry geometry) -> void {
   }
 }
 
-/*auto pListView::setHeaderVisible(bool visible) -> void {
-  auto style = GetWindowLong(hwnd, GWL_STYLE);
-  !visible ? style |= LVS_NOCOLUMNHEADER : style &=~ LVS_NOCOLUMNHEADER;
-  SetWindowLong(hwnd, GWL_STYLE, style);
-}*/
-
 auto pListView::onActivate(LPARAM lparam) -> void {
   auto nmlistview = (LPNMLISTVIEW)lparam;
   if(ListView_GetSelectedCount(hwnd) == 0) return;
@@ -213,6 +207,11 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
             RECT rd{rc.left + center, rc.top + center, rc.left + center + size.cx, rc.top + center + size.cy};
             DrawThemeBackground(htheme, hdc, BP_CHECKBOX, state, &rd, nullptr);
             CloseThemeData(htheme);
+          } else {
+            //Windows Classic
+            rc.left += 2;
+            RECT rd{rc.left, rc.top, rc.left + iconSize, rc.top + iconSize};
+            DrawFrameControl(hdc, &rd, DFC_BUTTON, DFCS_BUTTONCHECK | (cell->state.checked ? DFCS_CHECKED : 0));
           }
           rc.left += iconSize + 2;
         } else {

@@ -9,12 +9,7 @@ static auto Button_paintProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam,
     PAINTSTRUCT ps;
     BeginPaint(hwnd, &ps);
     auto state = Button_GetState(hwnd);
-    Button_CustomDraw(hwnd, ps,
-      (state & BST_PUSHED || checked) ? PBS_PRESSED
-    : (state & BST_HOT) ? PBS_HOT
-    : bordered ? (enabled ? PBS_NORMAL : PBS_DISABLED)
-    : 0, font, image, orientation, text
-    );
+    Button_CustomDraw(hwnd, ps, bordered, checked, enabled, state, font, image, orientation, text);
     EndPaint(hwnd, &ps);
   }
   return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -113,7 +108,7 @@ auto pButton::_setState() -> void {
 }
 
 //this function is designed to be used with Button, CheckButton, and RadioButton
-auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, unsigned state, const Font& font, const Image& image, Orientation orientation, const string& text) -> void {
+auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, bool enabled, unsigned state, const Font& font, const Image& image, Orientation orientation, const string& text) -> void {
   RECT rc;
   GetClientRect(hwnd, &rc);
   Geometry geometry{rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top}, imageGeometry, textGeometry;
@@ -138,23 +133,29 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, unsigned state, const Font& f
     break;
   }
 
-  HDC hdcSource = CreateCompatibleDC(ps.hdc);
-  DrawThemeParentBackground(hwnd, ps.hdc, &rc);
-
-  if(state) {
-    if(auto theme = OpenThemeData(hwnd, L"BUTTON")) {
-      DrawThemeBackground(theme, ps.hdc, BP_PUSHBUTTON, state, &rc, &ps.rcPaint);
-      CloseThemeData(theme);
-    }
+  if(auto theme = OpenThemeData(hwnd, L"BUTTON")) {
+    DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+    unsigned flags = 0;
+    if(state & BST_PUSHED || checked) flags = PBS_PRESSED;
+    else if(state & BST_HOT) flags = PBS_HOT;
+    else if(bordered) flags = enabled ? PBS_NORMAL : PBS_DISABLED;
+    if(bordered || flags) DrawThemeBackground(theme, ps.hdc, BP_PUSHBUTTON, flags, &rc, &ps.rcPaint);
+    CloseThemeData(theme);
+  } else {
+    //Windows Classic
+    FillRect(ps.hdc, &rc, GetSysColorBrush(COLOR_3DFACE));
+    unsigned flags = (state & BST_PUSHED || checked) ? DFCS_PUSHED : 0;
+    if(bordered || flags) DrawFrameControl(ps.hdc, &rc, DFC_BUTTON, DFCS_BUTTONPUSH | flags | (enabled ? 0 : DFCS_INACTIVE));
   }
 
   if(GetFocus() == hwnd) {
     signed offset = state ? 4 : 1;
     RECT rcFocus{rc.left + offset, rc.top + offset, rc.right - offset, rc.bottom - offset};
-    if(!state || state == PBS_NORMAL) DrawFocusRect(ps.hdc, &rcFocus);
+    if(!(state & BST_PUSHED) && !(state & BST_HOT)) DrawFocusRect(ps.hdc, &rcFocus);
   }
 
   if(image) {
+    HDC hdcSource = CreateCompatibleDC(ps.hdc);
     auto bitmap = CreateBitmap(image);
     SelectBitmap(hdcSource, bitmap);
     BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(IsWindowEnabled(hwnd) ? 255 : 128), AC_SRC_ALPHA};
@@ -163,6 +164,7 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, unsigned state, const Font& f
       hdcSource, 0, 0, image.width(), image.height(), blend
     );
     DeleteObject(bitmap);
+    DeleteDC(hdcSource);
   }
 
   if(text) {
@@ -175,8 +177,6 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, unsigned state, const Font& f
     DrawText(ps.hdc, wText, -1, &rcText, DT_NOPREFIX | DT_END_ELLIPSIS);
     DeleteObject(hFont);
   }
-
-  DeleteDC(hdcSource);
 }
 
 }

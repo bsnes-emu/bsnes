@@ -1,33 +1,33 @@
 #ifdef DSP_CPP
 
-void DSP::misc_27() {
-  state.t_pmon = REG(pmon) & ~1;  //voice 0 doesn't support PMON
+auto DSP::misc27() -> void {
+  state._pmon = REG(PMON) & ~1;  //voice 0 doesn't support PMON
 }
 
-void DSP::misc_28() {
-  state.t_non = REG(non);
-  state.t_eon = REG(eon);
-  state.t_dir = REG(dir);
+auto DSP::misc28() -> void {
+  state._non = REG(NON);
+  state._eon = REG(EON);
+  state._dir = REG(DIR);
 }
 
-void DSP::misc_29() {
-  state.every_other_sample ^= 1;
-  if(state.every_other_sample) {
-    state.new_kon &= ~state.kon;  //clears KON 63 clocks after it was last read
+auto DSP::misc29() -> void {
+  state.everyOtherSample ^= 1;
+  if(state.everyOtherSample) {
+    state.konBuffer &= ~state.kon;  //clears KON 63 clocks after it was last read
   }
 }
 
-void DSP::misc_30() {
-  if(state.every_other_sample) {
-    state.kon = state.new_kon;
-    state.t_koff = REG(koff);
+auto DSP::misc30() -> void {
+  if(state.everyOtherSample) {
+    state.kon = state.konBuffer;
+    state._koff = REG(KOFF);
   }
 
-  counter_tick();
+  counterTick();
 
   //noise
-  if(counter_poll(REG(flg) & 0x1f) == true) {
-    int feedback = (state.noise << 13) ^ (state.noise << 14);
+  if(counterPoll(REG(FLG) & 0x1f)) {
+    signed feedback = (state.noise << 13) ^ (state.noise << 14);
     state.noise = (feedback & 0x4000) ^ (state.noise >> 1);
   }
 }

@@ -1,6 +1,15 @@
 #ifdef CONTROLLER_CPP
 
-uint2 Gamepad::data() {
+Gamepad::Gamepad(bool port) : Controller(port) {
+  latched = 0;
+  counter = 0;
+
+  b = y = select = start = 0;
+  up = down = left = right = 0;
+  a = x = l = r = 0;
+}
+
+auto Gamepad::data() -> uint2 {
   if(counter >= 16) return 1;
   if(latched == 1) return interface->inputPoll(port, (unsigned)Input::Device::Joypad, (unsigned)Input::JoypadID::B);
 
@@ -23,7 +32,7 @@ uint2 Gamepad::data() {
   return 0;  //12-15: signature
 }
 
-void Gamepad::latch(bool data) {
+auto Gamepad::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
@@ -43,15 +52,6 @@ void Gamepad::latch(bool data) {
     l      = interface->inputPoll(port, id, 10);
     r      = interface->inputPoll(port, id, 11);
   }
-}
-
-Gamepad::Gamepad(bool port) : Controller(port) {
-  latched = 0;
-  counter = 0;
-
-  b = y = select = start = 0;
-  up = down = left = right = 0;
-  a = x = l = r = 0;
 }
 
 #endif

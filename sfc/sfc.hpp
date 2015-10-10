@@ -12,7 +12,7 @@
 namespace SuperFamicom {
   namespace Info {
     static const string Name = "bsnes";
-    static const unsigned SerializerVersion = 28;
+    static const unsigned SerializerVersion = 29;
   }
 }
 
@@ -32,7 +32,7 @@ namespace SuperFamicom {
       if(thread) co_delete(thread);
     }
 
-    auto create(void (*entrypoint)(), unsigned frequency) -> void {
+    auto create(auto (*entrypoint)() -> void, unsigned frequency) -> void {
       if(thread) co_delete(thread);
       thread = co_create(65536 * sizeof(void*), entrypoint);
       this->frequency = frequency;

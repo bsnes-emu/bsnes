@@ -1,6 +1,35 @@
 #ifdef CONTROLLER_CPP
 
-void Justifier::enter() {
+Justifier::Justifier(bool port, bool chained):
+Controller(port),
+chained(chained),
+device(chained == false ? (unsigned)Input::Device::Justifier : (unsigned)Input::Device::Justifiers)
+{
+  create(Controller::Enter, 21477272);
+  latched = 0;
+  counter = 0;
+  active = 0;
+
+  player1.x = 256 / 2;
+  player1.y = 240 / 2;
+  player1.trigger = false;
+  player2.start = false;
+
+  player2.x = 256 / 2;
+  player2.y = 240 / 2;
+  player2.trigger = false;
+  player2.start = false;
+
+  if(chained == false) {
+    player2.x = -1;
+    player2.y = -1;
+  } else {
+    player1.x -= 16;
+    player2.x += 16;
+  }
+}
+
+auto Justifier::enter() -> void {
   unsigned prev = 0;
   while(true) {
     unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
@@ -40,7 +69,7 @@ void Justifier::enter() {
   }
 }
 
-uint2 Justifier::data() {
+auto Justifier::data() -> uint2 {
   if(counter >= 32) return 1;
 
   if(counter == 0) {
@@ -93,40 +122,11 @@ uint2 Justifier::data() {
   }
 }
 
-void Justifier::latch(bool data) {
+auto Justifier::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
   if(latched == 0) active = !active;  //toggle between both controllers, even when unchained
-}
-
-Justifier::Justifier(bool port, bool chained):
-Controller(port),
-chained(chained),
-device(chained == false ? (unsigned)Input::Device::Justifier : (unsigned)Input::Device::Justifiers)
-{
-  create(Controller::Enter, 21477272);
-  latched = 0;
-  counter = 0;
-  active = 0;
-
-  player1.x = 256 / 2;
-  player1.y = 240 / 2;
-  player1.trigger = false;
-  player2.start = false;
-
-  player2.x = 256 / 2;
-  player2.y = 240 / 2;
-  player2.trigger = false;
-  player2.start = false;
-
-  if(chained == false) {
-    player2.x = -1;
-    player2.y = -1;
-  } else {
-    player1.x -= 16;
-    player2.x += 16;
-  }
 }
 
 #endif

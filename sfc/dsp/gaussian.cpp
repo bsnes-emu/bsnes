@@ -1,6 +1,6 @@
 #ifdef DSP_CPP
 
-const int16 DSP::gaussian_table[512] = {
+const int16 DSP::GaussianTable[512] = {
      0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
      1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    2,    2,    2,    2,    2,
      2,    2,    3,    3,    3,    3,    3,    4,    4,    4,    4,    4,    5,    5,    5,    5,
@@ -35,19 +35,19 @@ const int16 DSP::gaussian_table[512] = {
   1299, 1300, 1300, 1301, 1302, 1302, 1303, 1303, 1303, 1304, 1304, 1304, 1304, 1304, 1305, 1305,
 };
 
-int DSP::gaussian_interpolate(const voice_t& v) {
+auto DSP::gaussianInterpolate(const Voice& v) -> signed {
   //make pointers into gaussian table based on fractional position between samples
-  int offset = (v.interp_pos >> 4) & 0xff;
-  const int16* fwd = gaussian_table + 255 - offset;
-  const int16* rev = gaussian_table       + offset;  //mirror left half of gaussian table
+  signed offset = (v.gaussianOffset >> 4) & 0xff;
+  const int16* forward = GaussianTable + 255 - offset;
+  const int16* reverse = GaussianTable       + offset;  //mirror left half of gaussian table
 
-  offset = v.buf_pos + (v.interp_pos >> 12);
-  int output;
-  output  = (fwd[  0] * v.buffer[offset + 0]) >> 11;
-  output += (fwd[256] * v.buffer[offset + 1]) >> 11;
-  output += (rev[256] * v.buffer[offset + 2]) >> 11;
+  offset = v.bufferOffset + (v.gaussianOffset >> 12);
+  signed output;
+  output  = (forward[  0] * v.buffer[offset + 0]) >> 11;
+  output += (forward[256] * v.buffer[offset + 1]) >> 11;
+  output += (reverse[256] * v.buffer[offset + 2]) >> 11;
   output  = (int16)output;
-  output += (rev[  0] * v.buffer[offset + 3]) >> 11;
+  output += (reverse[  0] * v.buffer[offset + 3]) >> 11;
   return sclamp<16>(output) & ~1;
 }
 

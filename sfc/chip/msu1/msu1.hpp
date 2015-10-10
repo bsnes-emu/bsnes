@@ -1,23 +1,24 @@
 struct MSU1 : Coprocessor {
-  static void Enter();
-  void enter();
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  static auto Enter() -> void;
 
-  void data_open();
-  void audio_open();
+  auto enter() -> void;
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
+  auto dataOpen() -> void;
+  auto audioOpen() -> void;
 
-  void serialize(serializer&);
+  auto mmioRead(unsigned addr) -> uint8;
+  auto mmioWrite(unsigned addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
 
 private:
-  file datafile;
-  file audiofile;
+  file dataFile;
+  file audioFile;
 
   enum Flag : unsigned {
     DataBusy       = 0x80,
@@ -25,24 +26,27 @@ private:
     AudioRepeating = 0x20,
     AudioPlaying   = 0x10,
     AudioError     = 0x08,
-    Revision       = 0x01,
+    Revision       = 0x02,
   };
 
   struct MMIO {
-    uint32 data_seek_offset;
-    uint32 data_read_offset;
+    uint32 dataSeekOffset;
+    uint32 dataReadOffset;
 
-    uint32 audio_play_offset;
-    uint32 audio_loop_offset;
+    uint32 audioPlayOffset;
+    uint32 audioLoopOffset;
 
-    uint16 audio_track;
-    uint8 audio_volume;
+    uint16 audioTrack;
+    uint8 audioVolume;
 
-    bool data_busy;
-    bool audio_busy;
-    bool audio_repeat;
-    bool audio_play;
-    bool audio_error;
+    uint32 audioResumeTrack;
+    uint32 audioResumeOffset;
+
+    bool dataBusy;
+    bool audioBusy;
+    bool audioRepeat;
+    bool audioPlay;
+    bool audioError;
   } mmio;
 };
 

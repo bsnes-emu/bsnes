@@ -14,7 +14,31 @@
 //SNES Clock <> 1Kohm Resistor <> Teensy D5
 //Teensy D5 <> Teensy D7
 
-void USART::enter() {
+USART::USART(bool port) : Controller(port) {
+  latched = 0;
+  data1 = 0;
+  data2 = 0;
+  counter = 0;
+
+  rxlength = 0;
+  rxdata = 0;
+
+  txlength = 0;
+  txdata = 0;
+
+  string filename = {interface->path(ID::SuperFamicom), "usart.so"};
+  if(openAbsolute(filename)) {
+    init = sym("usart_init");
+    main = sym("usart_main");
+    if(init && main) create(Controller::Enter, 10000000);
+  }
+}
+
+USART::~USART() {
+  if(open()) close();
+}
+
+auto USART::enter() -> void {
   if(init && main) {
     init(
       {&USART::quit, this},
@@ -29,22 +53,22 @@ void USART::enter() {
   while(true) step(10000000);
 }
 
-bool USART::quit() {
+auto USART::quit() -> bool {
   step(1);
   return false;
 }
 
-void USART::usleep(unsigned milliseconds) {
+auto USART::usleep(unsigned milliseconds) -> void {
   step(10 * milliseconds);
 }
 
-bool USART::readable() {
+auto USART::readable() -> bool {
   step(1);
   return txbuffer.size();
 }
 
 //SNES -> USART
-uint8 USART::read() {
+auto USART::read() -> uint8 {
   step(1);
   while(txbuffer.size() == 0) step(1);
   uint8 data = txbuffer[0];
@@ -52,19 +76,19 @@ uint8 USART::read() {
   return data;
 }
 
-bool USART::writable() {
+auto USART::writable() -> bool {
   step(1);
   return true;
 }
 
 //USART -> SNES
-void USART::write(uint8 data) {
+auto USART::write(uint8 data) -> void {
   step(1);
   rxbuffer.append(data ^ 0xff);
 }
 
 //clock
-uint2 USART::data() {
+auto USART::data() -> uint2 {
   //Joypad
   if(iobit()) {
     if(counter >= 16) return 1;
@@ -104,34 +128,10 @@ uint2 USART::data() {
 }
 
 //latch
-void USART::latch(bool data) {
+auto USART::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
-}
-
-USART::USART(bool port) : Controller(port) {
-  latched = 0;
-  data1 = 0;
-  data2 = 0;
-  counter = 0;
-
-  rxlength = 0;
-  rxdata = 0;
-
-  txlength = 0;
-  txdata = 0;
-
-  string filename = {interface->path(ID::SuperFamicom), "usart.so"};
-  if(openAbsolute(filename)) {
-    init = sym("usart_init");
-    main = sym("usart_main");
-    if(init && main) create(Controller::Enter, 10000000);
-  }
-}
-
-USART::~USART() {
-  if(open()) close();
 }
 
 #endif

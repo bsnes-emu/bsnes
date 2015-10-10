@@ -20,7 +20,7 @@ struct Controller : Thread {
   virtual auto enter() -> void;
 
   auto step(unsigned clocks) -> void;
-  auto synchronize_cpu() -> void;
+  auto synchronizeCPU() -> void;
 
   auto iobit() -> bool;
   auto iobit(bool data) -> void;

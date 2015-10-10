@@ -1,6 +1,19 @@
 #ifdef CONTROLLER_CPP
 
-uint2 Mouse::data() {
+Mouse::Mouse(bool port) : Controller(port) {
+  latched = 0;
+  counter = 0;
+
+  speed = 0;
+  x = 0;
+  y = 0;
+  dx = 0;
+  dy = 0;
+  l = 0;
+  r = 0;
+}
+
+auto Mouse::data() -> uint2 {
   if(latched == 1) {
     speed = (speed + 1) % 3;
     return 0;
@@ -48,7 +61,7 @@ uint2 Mouse::data() {
   }
 }
 
-void Mouse::latch(bool data) {
+auto Mouse::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
@@ -72,19 +85,6 @@ void Mouse::latch(bool data) {
 
   x = min(127, x);
   y = min(127, y);
-}
-
-Mouse::Mouse(bool port) : Controller(port) {
-  latched = 0;
-  counter = 0;
-
-  speed = 0;
-  x = 0;
-  y = 0;
-  dx = 0;
-  dy = 0;
-  l = 0;
-  r = 0;
 }
 
 #endif

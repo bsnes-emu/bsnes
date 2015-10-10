@@ -5,7 +5,7 @@ static const unsigned WindowsXP    = 0x0501;
 static const unsigned WindowsVista = 0x0600;
 static const unsigned Windows7     = 0x0601;
 
-static auto Button_CustomDraw(HWND, PAINTSTRUCT&, unsigned, const Font&, const Image&, Orientation, const string&) -> void;
+static auto Button_CustomDraw(HWND, PAINTSTRUCT&, bool, bool, bool, unsigned, const Font&, const Image&, Orientation, const string&) -> void;
 
 static auto OsVersion() -> unsigned {
   OSVERSIONINFO versionInfo{0};

@@ -1,6 +1,12 @@
 #ifdef CONTROLLER_CPP
 
-uint2 Multitap::data() {
+Multitap::Multitap(bool port) : Controller(port) {
+  latched = 0;
+  counter1 = 0;
+  counter2 = 0;
+}
+
+auto Multitap::data() -> uint2 {
   if(latched) return 2;  //multitap detection
   unsigned index, port1, port2;
 
@@ -25,15 +31,9 @@ uint2 Multitap::data() {
   return (data2 << 1) | (data1 << 0);
 }
 
-void Multitap::latch(bool data) {
+auto Multitap::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
-  counter1 = 0;
-  counter2 = 0;
-}
-
-Multitap::Multitap(bool port) : Controller(port) {
-  latched = 0;
   counter1 = 0;
   counter2 = 0;
 }

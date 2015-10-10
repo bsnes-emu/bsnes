@@ -1,106 +1,106 @@
 #ifdef DSP_CPP
 
-int DSP::calc_fir(int i, bool channel) {
-  int s = state.echo_hist[channel][state.echo_hist_pos + i + 1];
-  return (s * (int8)REG(fir + i * 0x10)) >> 6;
+auto DSP::calculateFIR(signed i, bool channel) -> signed {
+  signed s = state.echoHistory[channel][state.echoHistoryOffset + i + 1];
+  return (s * (int8)REG(FIR + i * 0x10)) >> 6;
 }
 
-int DSP::echo_output(bool channel) {
-  int output = (int16)((state.t_main_out[channel] * (int8)REG(mvoll + channel * 0x10)) >> 7)
-             + (int16)((state.t_echo_in [channel] * (int8)REG(evoll + channel * 0x10)) >> 7);
+auto DSP::echoOutput(bool channel) -> signed {
+  signed output = (int16)((state._mainOut[channel] * (int8)REG(MVOLL + channel * 0x10)) >> 7)
+                + (int16)((state._echoIn [channel] * (int8)REG(EVOLL + channel * 0x10)) >> 7);
   return sclamp<16>(output);
 }
 
-void DSP::echo_read(bool channel) {
-  unsigned addr = state.t_echo_ptr + channel * 2;
+auto DSP::echoRead(bool channel) -> void {
+  unsigned addr = state._echoPointer + channel * 2;
   uint8 lo = smp.apuram[(uint16)(addr + 0)];
   uint8 hi = smp.apuram[(uint16)(addr + 1)];
-  int s = (int16)((hi << 8) + lo);
-  state.echo_hist[channel].write(state.echo_hist_pos, s >> 1);
+  signed s = (int16)((hi << 8) + lo);
+  state.echoHistory[channel].write(state.echoHistoryOffset, s >> 1);
 }
 
-void DSP::echo_write(bool channel) {
-  if(!(state.t_echo_disabled & 0x20)) {
-    unsigned addr = state.t_echo_ptr + channel * 2;
-    int s = state.t_echo_out[channel];
+auto DSP::echoWrite(bool channel) -> void {
+  if(!(state._echoDisabled & 0x20)) {
+    unsigned addr = state._echoPointer + channel * 2;
+    signed s = state._echoOut[channel];
     smp.apuram[(uint16)(addr + 0)] = s;
     smp.apuram[(uint16)(addr + 1)] = s >> 8;
   }
 
-  state.t_echo_out[channel] = 0;
+  state._echoOut[channel] = 0;
 }
 
-void DSP::echo_22() {
+auto DSP::echo22() -> void {
   //history
-  state.echo_hist_pos++;
-  if(state.echo_hist_pos >= echo_hist_size) state.echo_hist_pos = 0;
+  state.echoHistoryOffset++;
+  if(state.echoHistoryOffset >= EchoHistorySize) state.echoHistoryOffset = 0;
 
-  state.t_echo_ptr = (uint16)((state.t_esa << 8) + state.echo_offset);
-  echo_read(0);
+  state._echoPointer = (uint16)((state._esa << 8) + state.echoOffset);
+  echoRead(0);
 
   //FIR
-  int l = calc_fir(0, 0);
-  int r = calc_fir(0, 1);
+  signed l = calculateFIR(0, 0);
+  signed r = calculateFIR(0, 1);
 
-  state.t_echo_in[0] = l;
-  state.t_echo_in[1] = r;
+  state._echoIn[0] = l;
+  state._echoIn[1] = r;
 }
 
-void DSP::echo_23() {
-  int l = calc_fir(1, 0) + calc_fir(2, 0);
-  int r = calc_fir(1, 1) + calc_fir(2, 1);
+auto DSP::echo23() -> void {
+  signed l = calculateFIR(1, 0) + calculateFIR(2, 0);
+  signed r = calculateFIR(1, 1) + calculateFIR(2, 1);
 
-  state.t_echo_in[0] += l;
-  state.t_echo_in[1] += r;
+  state._echoIn[0] += l;
+  state._echoIn[1] += r;
 
-  echo_read(1);
+  echoRead(1);
 }
 
-void DSP::echo_24() {
-  int l = calc_fir(3, 0) + calc_fir(4, 0) + calc_fir(5, 0);
-  int r = calc_fir(3, 1) + calc_fir(4, 1) + calc_fir(5, 1);
+auto DSP::echo24() -> void {
+  signed l = calculateFIR(3, 0) + calculateFIR(4, 0) + calculateFIR(5, 0);
+  signed r = calculateFIR(3, 1) + calculateFIR(4, 1) + calculateFIR(5, 1);
 
-  state.t_echo_in[0] += l;
-  state.t_echo_in[1] += r;
+  state._echoIn[0] += l;
+  state._echoIn[1] += r;
 }
 
-void DSP::echo_25() {
-  int l = state.t_echo_in[0] + calc_fir(6, 0);
-  int r = state.t_echo_in[1] + calc_fir(6, 1);
+auto DSP::echo25() -> void {
+  signed l = state._echoIn[0] + calculateFIR(6, 0);
+  signed r = state._echoIn[1] + calculateFIR(6, 1);
 
   l = (int16)l;
   r = (int16)r;
 
-  l += (int16)calc_fir(7, 0);
-  r += (int16)calc_fir(7, 1);
+  l += (int16)calculateFIR(7, 0);
+  r += (int16)calculateFIR(7, 1);
 
-  state.t_echo_in[0] = sclamp<16>(l) & ~1;
-  state.t_echo_in[1] = sclamp<16>(r) & ~1;
+  state._echoIn[0] = sclamp<16>(l) & ~1;
+  state._echoIn[1] = sclamp<16>(r) & ~1;
 }
 
-void DSP::echo_26() {
+auto DSP::echo26() -> void {
   //left output volumes
   //(save sample for next clock so we can output both together)
-  state.t_main_out[0] = echo_output(0);
+  state._mainOut[0] = echoOutput(0);
 
   //echo feedback
-  int l = state.t_echo_out[0] + (int16)((state.t_echo_in[0] * (int8)REG(efb)) >> 7);
-  int r = state.t_echo_out[1] + (int16)((state.t_echo_in[1] * (int8)REG(efb)) >> 7);
+  signed l = state._echoOut[0] + (int16)((state._echoIn[0] * (int8)REG(EFB)) >> 7);
+  signed r = state._echoOut[1] + (int16)((state._echoIn[1] * (int8)REG(EFB)) >> 7);
 
-  state.t_echo_out[0] = sclamp<16>(l) & ~1;
-  state.t_echo_out[1] = sclamp<16>(r) & ~1;
+  state._echoOut[0] = sclamp<16>(l) & ~1;
+  state._echoOut[1] = sclamp<16>(r) & ~1;
 }
 
-void DSP::echo_27() {
+auto DSP::echo27() -> void {
   //output
-  int outl = state.t_main_out[0];
-  int outr = echo_output(1);
-  state.t_main_out[0] = 0;
-  state.t_main_out[1] = 0;
+  signed outl = state._mainOut[0];
+  signed outr = echoOutput(1);
+  state._mainOut[0] = 0;
+  state._mainOut[1] = 0;
 
   //TODO: global muting isn't this simple
   //(turns DAC on and off or something, causing small ~37-sample pulse when first muted)
-  if(REG(flg) & 0x40) {
+  if(REG(FLG) & 0x40) {
     outl = 0;
     outr = 0;
   }
@@ -109,27 +109,27 @@ void DSP::echo_27() {
   audio.sample(outl, outr);
 }
 
-void DSP::echo_28() {
-  state.t_echo_disabled = REG(flg);
+auto DSP::echo28() -> void {
+  state._echoDisabled = REG(FLG);
 }
 
-void DSP::echo_29() {
-  state.t_esa = REG(esa);
+auto DSP::echo29() -> void {
+  state._esa = REG(ESA);
 
-  if(!state.echo_offset) state.echo_length = (REG(edl) & 0x0f) << 11;
+  if(!state.echoOffset) state.echoLength = (REG(EDL) & 0x0f) << 11;
 
-  state.echo_offset += 4;
-  if(state.echo_offset >= state.echo_length) state.echo_offset = 0;
+  state.echoOffset += 4;
+  if(state.echoOffset >= state.echoLength) state.echoOffset = 0;
 
   //write left echo
-  echo_write(0);
+  echoWrite(0);
 
-  state.t_echo_disabled = REG(flg);
+  state._echoDisabled = REG(FLG);
 }
 
-void DSP::echo_30() {
+auto DSP::echo30() -> void {
   //write right echo
-  echo_write(1);
+  echoWrite(1);
 }
 
 #endif

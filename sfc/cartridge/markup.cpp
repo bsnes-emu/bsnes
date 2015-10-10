@@ -542,7 +542,7 @@ auto Cartridge::parseMarkupMSU1(Markup::Node root) -> void {
 
   for(auto node : root.find("map")) {
     if(node["id"].text() == "io") {
-      Mapping m({&MSU1::mmio_read, &msu1}, {&MSU1::mmio_write, &msu1});
+      Mapping m({&MSU1::mmioRead, &msu1}, {&MSU1::mmioWrite, &msu1});
       parseMarkupMap(m, node);
       mapping.append(m);
     }

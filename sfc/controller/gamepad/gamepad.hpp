@@ -1,7 +1,8 @@
 struct Gamepad : Controller {
-  uint2 data();
-  void latch(bool data);
   Gamepad(bool port);
+
+  auto data() -> uint2;
+  auto latch(bool data) -> void;
 
 private:
   bool latched;

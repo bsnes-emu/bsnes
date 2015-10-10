@@ -1,18 +1,18 @@
 struct USART : Controller, public library {
-  void enter();
-
-  bool quit();
-  void usleep(unsigned milliseconds);
-  bool readable();
-  uint8 read();
-  bool writable();
-  void write(uint8 data);
-
-  uint2 data();
-  void latch(bool data);
-
   USART(bool port);
   ~USART();
+
+  auto enter() -> void;
+
+  auto quit() -> bool;
+  auto usleep(unsigned milliseconds) -> void;
+  auto readable() -> bool;
+  auto read() -> uint8;
+  auto writable() -> bool;
+  auto write(uint8 data) -> void;
+
+  auto data() -> uint2;
+  auto latch(bool data) -> void;
 
 private:
   bool latched;

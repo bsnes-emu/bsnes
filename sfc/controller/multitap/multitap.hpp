@@ -1,7 +1,8 @@
 struct Multitap : Controller {
-  uint2 data();
-  void latch(bool data);
   Multitap(bool port);
+
+  auto data() -> uint2;
+  auto latch(bool data) -> void;
 
 private:
   bool latched;

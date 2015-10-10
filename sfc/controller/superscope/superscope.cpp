@@ -12,7 +12,27 @@
 //require manual polling of PIO ($4201.d6) to determine when iobit was written.
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
-void SuperScope::enter() {
+SuperScope::SuperScope(bool port) : Controller(port) {
+  create(Controller::Enter, 21477272);
+  latched = 0;
+  counter = 0;
+
+  //center cursor onscreen
+  x = 256 / 2;
+  y = 240 / 2;
+
+  trigger   = false;
+  cursor    = false;
+  turbo     = false;
+  pause     = false;
+  offscreen = false;
+
+  turbolock   = false;
+  triggerlock = false;
+  pauselock   = false;
+}
+
+auto SuperScope::enter() -> void {
   unsigned prev = 0;
   while(true) {
     unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
@@ -42,7 +62,7 @@ void SuperScope::enter() {
   }
 }
 
-uint2 SuperScope::data() {
+auto SuperScope::data() -> uint2 {
   if(counter >= 8) return 1;
 
   if(counter == 0) {
@@ -94,30 +114,10 @@ uint2 SuperScope::data() {
   }
 }
 
-void SuperScope::latch(bool data) {
+auto SuperScope::latch(bool data) -> void {
   if(latched == data) return;
   latched = data;
   counter = 0;
-}
-
-SuperScope::SuperScope(bool port) : Controller(port) {
-  create(Controller::Enter, 21477272);
-  latched = 0;
-  counter = 0;
-
-  //center cursor onscreen
-  x = 256 / 2;
-  y = 240 / 2;
-
-  trigger   = false;
-  cursor    = false;
-  turbo     = false;
-  pause     = false;
-  offscreen = false;
-
-  turbolock   = false;
-  triggerlock = false;
-  pauselock   = false;
 }
 
 #endif

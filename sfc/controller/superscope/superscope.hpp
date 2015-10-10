@@ -1,8 +1,9 @@
 struct SuperScope : Controller {
-  void enter();
-  uint2 data();
-  void latch(bool data);
   SuperScope(bool port);
+
+  auto enter() -> void;
+  auto data() -> uint2;
+  auto latch(bool data) -> void;
 
 //private:
   bool latched;
