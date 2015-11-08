@@ -15,6 +15,7 @@ ConfigurationManager::ConfigurationManager() {
   video.append(video.scale, "Scale");
   video.append(video.aspectCorrection, "AspectCorrection");
   video.append(video.filter, "Filter");
+  video.append(video.shader, "Shader");
   video.append(video.colorEmulation, "ColorEmulation");
   video.append(video.saturation, "Saturation");
   video.append(video.gamma, "Gamma");

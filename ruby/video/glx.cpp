@@ -3,10 +3,13 @@
 #define GLX_CONTEXT_MAJOR_VERSION_ARB 0x2091
 #define GLX_CONTEXT_MINOR_VERSION_ARB 0x2092
 
+auto VideoGLX_X11ErrorHandler(Display*, XErrorEvent*) -> int {
+  return 0;  //suppress errors
+}
+
 struct VideoGLX : Video, OpenGL {
   ~VideoGLX() { term(); }
 
-  auto (*glXCreateContextAttribs)(Display*, GLXFBConfig, GLXContext, signed, const signed*) -> GLXContext = nullptr;
   auto (*glXSwapInterval)(signed) -> signed = nullptr;
 
   Display* display = nullptr;
@@ -17,8 +20,8 @@ struct VideoGLX : Video, OpenGL {
   GLXWindow glxwindow = 0;
 
   struct {
-    signed version_major = 0;
-    signed version_minor = 0;
+    signed versionMajor = 0;
+    signed versionMinor = 0;
     bool doubleBuffer = false;
     bool isDirect = false;
   } glx;
@@ -127,12 +130,12 @@ struct VideoGLX : Video, OpenGL {
     display = XOpenDisplay(0);
     screen = DefaultScreen(display);
 
-    glXQueryVersion(display, &glx.version_major, &glx.version_minor);
     //require GLX 1.2+ API
-    if(glx.version_major < 1 || (glx.version_major == 1 && glx.version_minor < 2)) return false;
+    glXQueryVersion(display, &glx.versionMajor, &glx.versionMinor);
+    if(glx.versionMajor < 1 || (glx.versionMajor == 1 && glx.versionMinor < 2)) return false;
 
-    XWindowAttributes window_attributes;
-    XGetWindowAttributes(display, settings.handle, &window_attributes);
+    XWindowAttributes windowAttributes;
+    XGetWindowAttributes(display, settings.handle, &windowAttributes);
 
     //let GLX determine the best Visual to use for GL output; provide a few hints
     //note: some video drivers will override double buffering attribute
@@ -146,7 +149,7 @@ struct VideoGLX : Video, OpenGL {
       None
     };
 
-    signed fbCount;
+    signed fbCount = 0;
     GLXFBConfig* fbConfig = glXChooseFBConfig(display, screen, attributeList, &fbCount);
     if(fbCount == 0) return false;
 
@@ -161,7 +164,7 @@ struct VideoGLX : Video, OpenGL {
     attributes.colormap = colormap;
     attributes.border_pixel = 0;
     xwindow = XCreateWindow(display, /* parent = */ settings.handle,
-      /* x = */ 0, /* y = */ 0, window_attributes.width, window_attributes.height,
+      /* x = */ 0, /* y = */ 0, windowAttributes.width, windowAttributes.height,
       /* border_width = */ 0, vi->depth, InputOutput, vi->visual,
       CWColormap | CWBorderPixel, &attributes);
     XSetWindowBackground(display, xwindow, /* color = */ 0);
@@ -177,27 +180,39 @@ struct VideoGLX : Video, OpenGL {
     glxcontext = glXCreateContext(display, vi, /* sharelist = */ 0, /* direct = */ GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
-    glXCreateContextAttribs = (GLXContext (*)(Display*, GLXFBConfig, GLXContext, signed, const signed*))glGetProcAddress("glXCreateContextAttribsARB");
-    glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
+    //glXSwapInterval is used to toggle Vsync
+    //note that the ordering is very important! MESA declares SGI, but the SGI function does nothing
+                         glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalEXT");
     if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
+    if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
 
-    if(glXCreateContextAttribs) {
+    if(auto glXCreateContextAttribs = (auto (*)(Display*, GLXFBConfig, GLXContext, signed, const signed*) -> GLXContext)glGetProcAddress("glXCreateContextAttribsARB")) {
       signed attributes[] = {
         GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
         GLX_CONTEXT_MINOR_VERSION_ARB, 2,
         None
       };
-      GLXContext context = glXCreateContextAttribs(display, fbConfig[0], nullptr, true, attributes);
+
+      //glXCreateContextAttribs tends to throw BadRequest errors instead of simply failing gracefully
+      auto originalHandler = XSetErrorHandler(VideoGLX_X11ErrorHandler);
+      auto context = glXCreateContextAttribs(display, fbConfig[0], nullptr, true, attributes);
+      XSync(display, False);
+      XSetErrorHandler(originalHandler);
+
       if(context) {
         glXMakeCurrent(display, 0, nullptr);
         glXDestroyContext(display, glxcontext);
         glXMakeCurrent(display, glxwindow, glxcontext = context);
+      } else {
+        //OpenGL 3.2+ not supported (most likely OpenGL 2.x)
+        return false;
       }
+    } else {
+      //missing required glXCreateContextAtribs function
+      return false;
     }
 
-    if(glXSwapInterval) {
-      glXSwapInterval(settings.synchronize);
-    }
+    if(glXSwapInterval) glXSwapInterval(settings.synchronize);
 
     //read attributes of frame buffer for later use, as requested attributes from above are not always granted
     signed value = 0;

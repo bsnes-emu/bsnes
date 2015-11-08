@@ -36,8 +36,13 @@ auto Program::updateStatusText() -> void {
 }
 
 auto Program::updateVideoFilter() -> void {
-  if(config->video.filter == "None") video->set(Video::Filter, Video::FilterNearest);
-  if(config->video.filter == "Blur") video->set(Video::Filter, Video::FilterLinear);
+  if(config->video.driver == "OpenGL" && config->video.shader != "None" && directory::exists(config->video.shader)) {
+    video->set(Video::Filter, Video::FilterNearest);
+    video->set(Video::Shader, (string)config->video.shader);
+  } else {
+    video->set(Video::Filter, config->video.filter == "Blur" ? Video::FilterLinear : Video::FilterNearest);
+    video->set(Video::Shader, (string)"");
+  }
 }
 
 auto Program::updateVideoPalette() -> void {

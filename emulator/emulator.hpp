@@ -8,7 +8,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "095.01";
+  static const string Version = "095.02";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -41,9 +41,9 @@ template<typename R, typename... P> struct hook<R (P...)> {
   hook() {}
   hook(const hook& hook) { callback = hook.callback; }
   hook(void* function) { callback = function; }
-  hook(R (*function)(P...)) { callback = function; }
-  template<typename C> hook(R (C::*function)(P...), C* object) { callback = {function, object}; }
-  template<typename C> hook(R (C::*function)(P...) const, C* object) { callback = {function, object}; }
+  hook(auto (*function)(P...) -> R) { callback = function; }
+  template<typename C> hook(auto (C::*function)(P...) -> R, C* object) { callback = {function, object}; }
+  template<typename C> hook(auto (C::*function)(P...) const -> R, C* object) { callback = {function, object}; }
   template<typename L> hook(const L& function) { callback = function; }
 
   auto operator=(const hook& source) -> hook& { callback = source.callback; return *this; }

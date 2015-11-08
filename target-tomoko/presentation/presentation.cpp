@@ -62,6 +62,7 @@ Presentation::Presentation() {
   maskOverscan.setText("Mask Overscan").setChecked(config->video.overscan.mask).onToggle([&] {
     config->video.overscan.mask = maskOverscan.checked();
   });
+  loadShaders();
   synchronizeVideo.setText("Synchronize Video").setChecked(config->video.synchronize).onToggle([&] {
     config->video.synchronize = synchronizeVideo.checked();
     video->set(Video::Synchronize, config->video.synchronize);
@@ -136,55 +137,34 @@ auto Presentation::updateEmulator() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
-  signed scale = 1;
+  signed width   = emulator ? emulator->information.width  : 256;
+  signed height  = emulator ? emulator->information.height : 240;
+  double stretch = emulator ? emulator->information.aspectRatio : 1.0;
+  if(stretch != 1.0) {
+    //aspect correction is always enabled in fullscreen mode
+    if(!fullScreen() && !config->video.aspectCorrection) stretch = 1.0;
+  }
+
+  signed scale = 2;
   if(config->video.scale == "Small" ) scale = 2;
   if(config->video.scale == "Medium") scale = 3;
   if(config->video.scale == "Large" ) scale = 4;
 
-  signed width  = 256;
-  signed height = 240;
-  if(emulator) {
-    width  = emulator->information.width;
-    height = emulator->information.height;
-  }
-
-  bool arc = config->video.aspectCorrection;
-
-  if(fullScreen() == false) {
-    signed windowWidth  = 256 * scale;
-    signed windowHeight = 240 * scale;
-    if(arc) windowWidth = windowWidth * 8 / 7;
-
-    double stretch = (arc && emulator && emulator->information.aspectRatio != 1.0) ? 8.0 / 7.0 : 1.0;
-    signed multiplier = min(windowWidth / (signed)(width * stretch), windowHeight / height);
-    width = width * multiplier * stretch;
-    height = height * multiplier;
-
-    setSize({windowWidth, windowHeight});
-    viewport.setGeometry({(windowWidth - width) / 2, (windowHeight - height) / 2, width, height});
+  signed windowWidth = 0, windowHeight = 0;
+  if(!fullScreen()) {
+    windowWidth  = 256 * scale * (config->video.aspectCorrection ? 8.0 / 7.0 : 1.0);
+    windowHeight = 240 * scale;
   } else {
-    signed windowWidth  = geometry().width();
-    signed windowHeight = geometry().height();
-
-    //aspect ratio correction is always enabled in fullscreen mode
-    //note that below algorithm yields 7:6 ratio on 2560x(1440,1600) monitors
-    //this is extremely close to the optimum 8:7 ratio
-    //it is used so that linear interpolation isn't required
-    //todo: we should handle other resolutions nicely as well
-    unsigned multiplier = windowHeight / height;
-    width *= 1 + multiplier;
-    height *= multiplier;
-
-    signed x = (windowWidth - width) / 2;
-    signed y = (windowHeight - height) / 2;
-
-    if(x < 0) x = 0;
-    if(y < 0) y = 0;
-    if(width > windowWidth) width = windowWidth;
-    if(height > windowHeight) height = windowHeight;
-
-    viewport.setGeometry({x, y, width, height});
+    windowWidth  = geometry().width();
+    windowHeight = geometry().height();
   }
+
+  signed multiplier = min(windowWidth / (signed)(width * stretch), windowHeight / height);
+  width = width * multiplier * stretch;
+  height = height * multiplier;
+
+  if(!fullScreen()) setSize({windowWidth, windowHeight});
+  viewport.setGeometry({(windowWidth - width) / 2, (windowHeight - height) / 2, width, height});
 
   if(!emulator) drawSplashScreen();
 }
@@ -219,5 +199,36 @@ auto Presentation::drawSplashScreen() -> void {
     }
     video->unlock();
     video->refresh();
+  }
+}
+
+auto Presentation::loadShaders() -> void {
+  if(config->video.driver != "OpenGL") {
+    videoShaderMenu.setVisible(false);
+    return;
+  }
+
+  auto pathname = locate({localpath(), "tomoko/"}, "Video Shaders/");
+  for(auto shader : directory::folders(pathname, "*.shader")) {
+    MenuRadioItem item{&videoShaderMenu};
+    item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
+      config->video.shader = {pathname, shader};
+      program->updateVideoFilter();
+    });
+    videoShaders.append(item);
+  }
+
+  videoShaderMenu.setText("Video Shaders");
+  videoShaderNone.setChecked().setText("None").onActivate([=] {
+    config->video.shader = "None";
+    program->updateVideoFilter();
+  });
+
+  for(auto object : videoShaders.objects()) {
+    if(auto radioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
+      if(config->video.shader == string{pathname, radioItem->text(), ".shader/"}) {
+        radioItem->setChecked();
+      }
+    }
   }
 }

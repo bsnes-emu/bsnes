@@ -1,0 +1,4 @@
+program
+  filter: linear
+  wrap: border
+  fragment: scanline.fs

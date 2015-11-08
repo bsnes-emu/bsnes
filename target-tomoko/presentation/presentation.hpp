@@ -4,6 +4,7 @@ struct Presentation : Window {
   auto resizeViewport() -> void;
   auto toggleFullScreen() -> void;
   auto drawSplashScreen() -> void;
+  auto loadShaders() -> void;
 
   MenuBar menuBar{this};
     Menu libraryMenu{&menuBar};
@@ -31,6 +32,9 @@ struct Presentation : Window {
         MenuSeparator videoFilterSeparator{&videoFilterMenu};
         MenuCheckItem colorEmulation{&videoFilterMenu};
         MenuCheckItem maskOverscan{&videoFilterMenu};
+      Menu videoShaderMenu{&settingsMenu};
+        MenuRadioItem videoShaderNone{&videoShaderMenu};
+        Group videoShaders{&videoShaderNone};
       MenuSeparator settingsMenuSeparator1{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};

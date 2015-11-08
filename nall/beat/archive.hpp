@@ -30,10 +30,9 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
   for(auto& name : contents) {
     string location{pathname, name};
     bool directory = name.endsWith("/");
-    bool readable = file_system_object::readable(location);
     bool writable = file_system_object::writable(location);
     bool executable = file_system_object::executable(location);
-    unsigned info = directory << 0 | readable << 1 | writable << 2 | executable << 3 | (name.rtrim("/").size() - 1) << 4;
+    unsigned info = directory << 0 | writable << 1 | executable << 2 | (name.rtrim("/").size() - 1) << 3;
 
     beat.writevu(info);
     beat.writes(name);
@@ -68,14 +67,13 @@ auto Archive::unpack(const string& beatname, const string& pathname) -> bool {
   directory::create(pathname);
   while(beat.offset() < beat.size() - 4) {
     auto info = beat.readvu();
-    auto name = beat.reads((info >> 4) + 1);
+    auto name = beat.reads((info >> 3) + 1);
     if(name.find("\\") || name.find("../")) return false;  //block path exploits
 
     string location{pathname, name};
     bool directory = info & 1;
-    bool readable = info & 2;
-    bool writable = info & 4;
-    bool executable = info & 8;
+    bool writable = info & 2;
+    bool executable = info & 4;
 
     if(directory) {
       if(!nall::directory::create(location)) return false;
@@ -103,7 +101,7 @@ auto Archive::extract(const string& beatname, const string& filename) -> vector<
 
   while(beat.offset() < beat.size() - 4) {
     auto info = beat.readvu();
-    auto name = beat.reads((info >> 4) + 1);
+    auto name = beat.reads((info >> 3) + 1);
     if(info & 1) continue;  //ignore directories
 
     auto size = beat.readvu();

@@ -16,6 +16,7 @@ struct ConfigurationManager : Configuration::Document {
     string scale = "Small";
     bool aspectCorrection = true;
     string filter = "Blur";
+    string shader = "None";
     bool colorEmulation = true;
     unsigned saturation = 100;
     unsigned gamma = 100;
