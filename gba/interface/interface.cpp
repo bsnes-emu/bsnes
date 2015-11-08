@@ -26,10 +26,10 @@ unsigned Interface::group(unsigned id) {
   case ID::BIOS:
     return ID::System;
   case ID::Manifest:
-  case ID::ROM:
-  case ID::RAM:
+  case ID::MROM:
+  case ID::SRAM:
   case ID::EEPROM:
-  case ID::FlashROM:
+  case ID::FLASH:
     return ID::GameBoyAdvance;
   }
 
@@ -59,34 +59,34 @@ void Interface::load(unsigned id, const stream& stream) {
     cartridge.information.markup = stream.text();
   }
 
-  if(id == ID::ROM) {
-    stream.read(cartridge.rom.data, min(cartridge.rom.size, stream.size()));
+  if(id == ID::MROM) {
+    stream.read(cartridge.mrom.data, min(cartridge.mrom.size, stream.size()));
   }
 
-  if(id == ID::RAM) {
-    stream.read(cartridge.ram.data, min(cartridge.ram.size, stream.size()));
+  if(id == ID::SRAM) {
+    stream.read(cartridge.sram.data, min(cartridge.sram.size, stream.size()));
   }
 
   if(id == ID::EEPROM) {
     stream.read(cartridge.eeprom.data, min(cartridge.eeprom.size, stream.size()));
   }
 
-  if(id == ID::FlashROM) {
-    stream.read(cartridge.flashrom.data, min(cartridge.flashrom.size, stream.size()));
+  if(id == ID::FLASH) {
+    stream.read(cartridge.flash.data, min(cartridge.flash.size, stream.size()));
   }
 }
 
 void Interface::save(unsigned id, const stream& stream) {
-  if(id == ID::RAM) {
-    stream.write(cartridge.ram.data, cartridge.ram.size);
+  if(id == ID::SRAM) {
+    stream.write(cartridge.sram.data, cartridge.sram.size);
   }
 
   if(id == ID::EEPROM) {
     stream.write(cartridge.eeprom.data, cartridge.eeprom.size);
   }
 
-  if(id == ID::FlashROM) {
-    stream.write(cartridge.flashrom.data, cartridge.flashrom.size);
+  if(id == ID::FLASH) {
+    stream.write(cartridge.flash.data, cartridge.flash.size);
   }
 }
 

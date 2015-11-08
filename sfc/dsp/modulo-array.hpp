@@ -1,13 +1,5 @@
 template<typename T, unsigned size>
 struct ModuloArray {
-  ModuloArray() {
-    buffer = new T[size * 3]();
-  }
-
-  ~ModuloArray() {
-    delete[] buffer;
-  }
-
   inline auto operator[](signed index) const -> T {
     return buffer[size + index];
   }
@@ -27,5 +19,5 @@ struct ModuloArray {
   }
 
 private:
-  T* buffer;
+  T buffer[size * 3] = {0};
 };

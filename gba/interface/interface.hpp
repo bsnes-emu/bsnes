@@ -13,10 +13,10 @@ struct ID {
     BIOS,
 
     Manifest,
-    ROM,
-    RAM,
+    MROM,
+    SRAM,
     EEPROM,
-    FlashROM,
+    FLASH,
   };
 
   enum : unsigned {

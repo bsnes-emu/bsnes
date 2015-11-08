@@ -128,15 +128,18 @@ public:
   auto size() const -> unsigned { return _size; }
   auto capacity() const -> unsigned { return _capacity; }
 
-  auto operator==(const string& s) const -> bool { return size() == s.size() && memory::compare(data(), s.data(), s.size()) == 0; }
-  auto operator!=(const string& s) const -> bool { return size() != s.size() || memory::compare(data(), s.data(), s.size()) != 0; }
+  auto operator==(const string& source) const -> bool { return size() == source.size() && memory::compare(data(), source.data(), size()) == 0; }
+  auto operator!=(const string& source) const -> bool { return size() != source.size() || memory::compare(data(), source.data(), size()) != 0; }
 
-  auto operator==(const char* s) const -> bool { return strcmp(data(), s) == 0; }
-  auto operator!=(const char* s) const -> bool { return strcmp(data(), s) != 0; }
-  auto operator< (const char* s) const -> bool { return strcmp(data(), s) <  0; }
-  auto operator<=(const char* s) const -> bool { return strcmp(data(), s) <= 0; }
-  auto operator> (const char* s) const -> bool { return strcmp(data(), s) >  0; }
-  auto operator>=(const char* s) const -> bool { return strcmp(data(), s) >= 0; }
+  auto operator==(const char* source) const -> bool { return strcmp(data(), source) == 0; }
+  auto operator!=(const char* source) const -> bool { return strcmp(data(), source) != 0; }
+
+  auto operator==(rstring source) const -> bool { return compare(source) == 0; }
+  auto operator!=(rstring source) const -> bool { return compare(source) != 0; }
+  auto operator< (rstring source) const -> bool { return compare(source) <  0; }
+  auto operator<=(rstring source) const -> bool { return compare(source) <= 0; }
+  auto operator> (rstring source) const -> bool { return compare(source) >  0; }
+  auto operator>=(rstring source) const -> bool { return compare(source) >= 0; }
 
   string(const string& source) : string() { operator=(source); }
   string(string&& source) : string() { operator=(move(source)); }
@@ -182,6 +185,9 @@ public:
 
   //compare.hpp
   template<bool> inline static auto _compare(const char*, unsigned, const char*, unsigned) -> signed;
+
+  inline static auto compare(rstring, rstring) -> signed;
+  inline static auto icompare(rstring, rstring) -> signed;
 
   inline auto compare(rstring source) const -> signed;
   inline auto icompare(rstring source) const -> signed;

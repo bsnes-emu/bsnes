@@ -161,14 +161,14 @@ auto ARM::thumb_op_move_register_offset() {
   uint3 d = instruction() >> 0;
 
   switch(opcode) {
-  case 0: store(Word | Nonsequential, r(n) + r(m), r(d));        break;  //STR
-  case 1: store(Half | Nonsequential, r(n) + r(m), r(d));        break;  //STRH
-  case 2: store(Byte | Nonsequential, r(n) + r(m), r(d));        break;  //STRB
-  case 3: r(d) =  (int8)load(Byte | Nonsequential, r(n) + r(m)); break;  //LDSB
-  case 4: r(d) = load(Word | Nonsequential, r(n) + r(m));        break;  //LDR
-  case 5: r(d) = load(Half | Nonsequential, r(n) + r(m));        break;  //LDRH
-  case 6: r(d) = load(Byte | Nonsequential, r(n) + r(m));        break;  //LDRB
-  case 7: r(d) = (int16)load(Half | Nonsequential, r(n) + r(m)); break;  //LDSH
+  case 0: store(Word | Nonsequential, r(n) + r(m), r(d));          break;  //STR
+  case 1: store(Half | Nonsequential, r(n) + r(m), r(d));          break;  //STRH
+  case 2: store(Byte | Nonsequential, r(n) + r(m), r(d));          break;  //STRB
+  case 3: r(d) = load(Byte | Nonsequential | Signed, r(n) + r(m)); break;  //LDSB
+  case 4: r(d) = load(Word | Nonsequential, r(n) + r(m));          break;  //LDR
+  case 5: r(d) = load(Half | Nonsequential, r(n) + r(m));          break;  //LDRH
+  case 6: r(d) = load(Byte | Nonsequential, r(n) + r(m));          break;  //LDRB
+  case 7: r(d) = load(Half | Nonsequential | Signed, r(n) + r(m)); break;  //LDSH
   }
 }
 

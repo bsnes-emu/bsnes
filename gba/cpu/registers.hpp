@@ -18,6 +18,7 @@ struct Registers {
     varuint source;
     varuint target;
     varuint length;
+    uint32 data;
     DMAControl control;
 
     //internal

@@ -3,12 +3,11 @@
 
 #include <nall/nall.hpp>
 #include <nall/dsp.hpp>
-#include <nall/priority-queue.hpp>
 using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "095.02";
+  static const string Version = "095.03";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";

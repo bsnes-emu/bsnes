@@ -242,15 +242,15 @@ auto pWindow::setDroppable(bool droppable) -> void {
 
 auto pWindow::setEnabled(bool enabled) -> void {
   if(auto& menuBar = state().menuBar) {
-    if(menuBar->self()) menuBar->self()->setEnabled(menuBar->enabled(true));
+    if(auto self = menuBar->self()) self->setEnabled(menuBar->enabled(true));
   }
 
   if(auto& statusBar = state().statusBar) {
-    if(statusBar->self()) statusBar->self()->setEnabled(statusBar->enabled(true));
+    if(auto self = statusBar->self()) self->setEnabled(statusBar->enabled(true));
   }
 
   if(auto& layout = state().layout) {
-    if(layout->self()) layout->self()->setEnabled(layout->enabled(true));
+    if(auto self = layout->self()) self->setEnabled(layout->enabled(true));
   }
 }
 

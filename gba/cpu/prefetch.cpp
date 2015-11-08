@@ -12,7 +12,7 @@ auto CPU::prefetch_step(unsigned clocks) -> void {
 
   while(!prefetch.full() && clocks--) {
     if(--prefetch.wait) continue;
-    prefetch.slot[prefetch.load >> 1 & 7] = cartridge.rom_read(Half, prefetch.load);
+    prefetch.slot[prefetch.load >> 1 & 7] = cartridge.read(Half, prefetch.load);
     prefetch.load += 2;
     prefetch.wait = bus_wait(Half | Sequential, prefetch.load);
   }

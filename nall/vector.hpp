@@ -160,12 +160,10 @@ template<typename T> struct vector {
     }
   }
 
-  auto sort() -> void {
-    nall::sort(pool + poolbase, objectsize);
-  }
-
-  template<typename Comparator> auto sort(const Comparator& lessthan) -> void {
-    nall::sort(pool + poolbase, objectsize, lessthan);
+  auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](const T& lhs, const T& rhs) -> bool {
+    return lhs < rhs;
+  }) -> void {
+    nall::sort(pool + poolbase, objectsize, comparator);
   }
 
   auto find(const T& data) const -> maybe<unsigned> {

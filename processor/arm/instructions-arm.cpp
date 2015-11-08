@@ -164,13 +164,15 @@ auto ARM::arm_op_move_half_register() {
 
   uint32 rn = r(n);
   uint32 rm = r(m);
+  uint32 rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  if(l == 1) r(d) = load(Half | Nonsequential, rn);
-  if(l == 0) store(Half | Nonsequential, rn, r(d));
+  if(l == 1) rd = load(Half | Nonsequential, rn);
+  if(l == 0) store(Half | Nonsequential, rn, rd);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  if(l == 1) r(d) = rd;
 }
 
 //(ldr,str){condition}h rd,[rn{,+/-offset}]{!}
@@ -196,14 +198,16 @@ auto ARM::arm_op_move_half_immediate() {
   uint4 il = instruction();
 
   uint32 rn = r(n);
+  uint32 rd = r(d);
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  if(l == 1) r(d) = load(Half | Nonsequential, rn);
-  if(l == 0) store(Half | Nonsequential, rn, r(d));
+  if(l == 1) rd = load(Half | Nonsequential, rn);
+  if(l == 0) store(Half | Nonsequential, rn, rd);
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  if(l == 1) r(d) = rd;
 }
 
 //ldr{condition}s(h,b) rd,[rn,rm]{!}
@@ -228,13 +232,14 @@ auto ARM::arm_op_load_register() {
 
   uint32 rn = r(n);
   uint32 rm = r(m);
+  uint32 rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
-  uint32 word = load((half ? Half : Byte) | Nonsequential, rn);
-  r(d) = half ? (int16)word : (int8)word;
+  rd = load((half ? Half : Byte) | Nonsequential | Signed, rn);
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  r(d) = rd;
 }
 
 //ldr{condition}s(h,b) rd,[rn{,+/-offset}]{!}
@@ -260,14 +265,15 @@ auto ARM::arm_op_load_immediate() {
   uint4 il = instruction();
 
   uint32 rn = r(n);
+  uint32 rd = r(d);
   uint8 immediate = (ih << 4) + (il << 0);
 
   if(pre == 1) rn = up ? rn + immediate : rn - immediate;
-  uint32 word = load((half ? Half : Byte) | Nonsequential, rn);
-  r(d) = half ? (int16)word : (int8)word;
+  rd = load((half ? Half : Byte) | Nonsequential | Signed, rn);
   if(pre == 0) rn = up ? rn + immediate : rn - immediate;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  r(d) = rd;
 }
 
 //mrs{condition} rd,(c,s)psr
@@ -375,8 +381,8 @@ auto ARM::arm_op_data_register_shift() {
   uint2 mode = instruction() >> 5;
   uint4 m = instruction();
 
-  uint8 rs = r(s);
-  uint32 rm = r(m);
+  uint8 rs = r(s) + (s == 15 ? 4 : 0);
+  uint32 rm = r(m) + (m == 15 ? 4 : 0);
   carryout() = cpsr().c;
 
   if(mode == 0      ) rm = lsl(rm, rs < 33 ? rs : 33);
@@ -434,7 +440,7 @@ auto ARM::arm_op_move_immediate_offset() {
   uint12 rm = instruction();
 
   uint32 rn = r(n);
-  auto& rd = r(d);
+  uint32 rd = r(d);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;
   if(l == 1) rd = load((byte ? Byte : Word) | Nonsequential, rn);
@@ -442,6 +448,7 @@ auto ARM::arm_op_move_immediate_offset() {
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  if(l == 1) r(d) = rd;
 }
 
 //(ldr,str){condition}{b} rd,[rn,rm {mode} #immediate]{!}
@@ -471,7 +478,7 @@ auto ARM::arm_op_move_register_offset() {
   uint4 m = instruction();
 
   uint32 rn = r(n);
-  auto& rd = r(d);
+  uint32 rd = r(d);
   uint32 rs = immediate;
   uint32 rm = r(m);
   bool c = cpsr().c;
@@ -487,6 +494,7 @@ auto ARM::arm_op_move_register_offset() {
   if(pre == 0) rn = up ? rn + rm : rn - rm;
 
   if(pre == 0 || writeback == 1) r(n) = rn;
+  if(l == 1) r(d) = rd;
 }
 
 //(ldm,stm){condition}{mode} rn{!},{r...}

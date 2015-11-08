@@ -1,13 +1,13 @@
-bool Cartridge::EEPROM::read(unsigned addr) {
+auto Cartridge::EEPROM::read(unsigned addr) -> bool {
   return data[addr >> 3] & 0x80 >> (addr & 7);
 }
 
-void Cartridge::EEPROM::write(unsigned addr, bool bit) {
+auto Cartridge::EEPROM::write(unsigned addr, bool bit) -> void {
   if(bit == 0) data[addr >> 3] &=~ (0x80 >> (addr & 7));
   if(bit == 1) data[addr >> 3] |=  (0x80 >> (addr & 7));
 }
 
-bool Cartridge::EEPROM::read() {
+auto Cartridge::EEPROM::read() -> bool {
   bool bit = 1;
 
   //EEPROM size auto-detection
@@ -28,7 +28,7 @@ bool Cartridge::EEPROM::read() {
   return bit;
 }
 
-void Cartridge::EEPROM::write(bool bit) {
+auto Cartridge::EEPROM::write(bool bit) -> void {
   if(mode == Mode::Wait) {
     if(bit == 1) mode = Mode::Command;
   }
@@ -76,13 +76,13 @@ void Cartridge::EEPROM::write(bool bit) {
   }
 }
 
-void Cartridge::EEPROM::power() {
+auto Cartridge::EEPROM::power() -> void {
   mode = Mode::Wait;
   offset = 0;
   address = 0;
 }
 
-void Cartridge::EEPROM::serialize(serializer& s) {
+auto Cartridge::EEPROM::serialize(serializer& s) -> void {
   s.array(data, size);
   s.integer(size);
   s.integer(mask);

@@ -17,6 +17,7 @@ struct ARM {
     Word          =  32,  //32-bit access
     Load          =  64,  //load operation
     Store         = 128,  //store operation
+    Signed        = 256,  //sign extend
   };
 
   #include "registers.hpp"

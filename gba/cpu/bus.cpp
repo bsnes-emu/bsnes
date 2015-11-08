@@ -16,7 +16,7 @@ auto CPU::bus_read(unsigned mode, uint32 addr) -> uint32 {
     } else {
       if(!active.dma) prefetch_wait();
       step(wait - 1);
-      word = addr < 0x0e00'0000 ? cartridge.rom_read(mode, addr) : cartridge.ram_read(mode, addr);
+      word = cartridge.read(mode, addr);
       step(1);
     }
   } else {
@@ -43,7 +43,7 @@ auto CPU::bus_write(unsigned mode, uint32 addr, uint32 word) -> void {
   } else if(addr & 0x0800'0000) {
     if(!active.dma) prefetch_wait();
     step(wait);
-    addr < 0x0e00'0000 ? cartridge.rom_write(mode, addr, word) : cartridge.ram_write(mode, addr, word);
+    cartridge.write(mode, addr, word);
   } else {
     prefetch_step(wait);
          if(addr  < 0x0200'0000);

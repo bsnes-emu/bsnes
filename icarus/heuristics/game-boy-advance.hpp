@@ -38,13 +38,13 @@ GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t *data, unsigned s
   identifiers = list.merge(",");
 
   markup.append("cartridge\n");
-  markup.append("  rom name=program.rom size=0x", hex(size), "\n");
+  markup.append("  mrom name=program.rom size=0x", hex(size), "\n");
   if(0);
-  else if(identifiers.beginsWith("SRAM_V"    )) markup.append("  ram name=save.ram type=SRAM size=0x8000\n");
-  else if(identifiers.beginsWith("SRAM_F_V"  )) markup.append("  ram name=save.ram type=FRAM size=0x8000\n");
-  else if(identifiers.beginsWith("EEPROM_V"  )) markup.append("  ram name=save.ram type=EEPROM size=0x0\n");
-  else if(identifiers.beginsWith("FLASH_V"   )) markup.append("  ram name=save.ram type=FlashROM size=0x10000\n");
-  else if(identifiers.beginsWith("FLASH512_V")) markup.append("  ram name=save.ram type=FlashROM size=0x10000\n");
-  else if(identifiers.beginsWith("FLASH1M_V" )) markup.append("  ram name=save.ram type=FlashROM size=0x20000\n");
+  else if(identifiers.beginsWith("SRAM_V"    )) markup.append("  sram name=save.ram size=0x8000\n");
+  else if(identifiers.beginsWith("SRAM_F_V"  )) markup.append("  sram name=save.ram size=0x8000\n");
+  else if(identifiers.beginsWith("EEPROM_V"  )) markup.append("  eeprom name=save.ram size=0x0\n");
+  else if(identifiers.beginsWith("FLASH_V"   )) markup.append("  flash name=save.ram size=0x10000\n");
+  else if(identifiers.beginsWith("FLASH512_V")) markup.append("  flash name=save.ram size=0x10000\n");
+  else if(identifiers.beginsWith("FLASH1M_V" )) markup.append("  flash name=save.ram size=0x20000\n");
 //if(identifiers.empty() == false) markup.append("  #detected: ", identifiers, "\n");
 }

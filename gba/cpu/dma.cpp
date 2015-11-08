@@ -33,8 +33,17 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
     }
   }
 
-  uint32 word = bus_read(mode, dma.run.source);
-  bus_write(mode, dma.run.target, word);
+  if(dma.run.source < 0x0200'0000) {
+    idle();  //cannot access BIOS
+  } else {
+    dma.data = bus_read(mode, dma.run.source);
+  }
+
+  if(dma.run.target < 0x0200'0000) {
+    idle();  //cannot access BIOS
+  } else {
+    bus_write(mode, dma.run.target, dma.data);
+  }
 
   switch(dma.control.sourcemode) {
   case 0: dma.run.source += seek; break;

@@ -7,7 +7,7 @@
 //0x1362  128KB   32x4096  Sanyo
 //0x09c2  128KB   32x4096  Macronix
 
-uint8 Cartridge::FlashROM::read(uint16 addr) {
+auto Cartridge::FLASH::read(uint16 addr) -> uint8 {
   if(idmode) {
     if(addr == 0x0000) return id >> 0;
     if(addr == 0x0001) return id >> 8;
@@ -17,7 +17,7 @@ uint8 Cartridge::FlashROM::read(uint16 addr) {
   return data[bank << 16 | addr];
 }
 
-void Cartridge::FlashROM::write(uint16 addr, uint8 byte) {
+auto Cartridge::FLASH::write(uint16 addr, uint8 byte) -> void {
   if(bankselect) {
     bankselect = false;
     //bank select is only applicable on 128KB chips
@@ -77,7 +77,7 @@ void Cartridge::FlashROM::write(uint16 addr, uint8 byte) {
   }
 }
 
-void Cartridge::FlashROM::power() {
+auto Cartridge::FLASH::power() -> void {
   unlockhi = false;
   unlocklo = false;
   idmode = false;
@@ -86,7 +86,7 @@ void Cartridge::FlashROM::power() {
   bank = 0;
 }
 
-void Cartridge::FlashROM::serialize(serializer& s) {
+auto Cartridge::FLASH::serialize(serializer& s) -> void {
   s.array(data, size);
   s.integer(size);
   s.integer(id);

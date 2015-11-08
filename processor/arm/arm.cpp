@@ -42,14 +42,23 @@ auto ARM::load(unsigned mode, uint32 addr) -> uint32 {
   pipeline.nonsequential = true;
   uint32 word = bus_read(Load | mode, addr);
 
-  if(mode & Half) { word &= 0xffff; word |= word << 16; }
-  if(mode & Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
+  if(mode & Half) {
+    addr &= 1;
+    word = mode & Signed ? (int16)word : (uint16)word;
+  }
 
-  word = ror(word, 8 * (addr & 3));
+  if(mode & Byte) {
+    addr &= 0;
+    word = mode & Signed ? (int8)word : (uint8)word;
+  }
+
+  if(mode & Signed) {
+    word = asr(word, 8 * (addr & 3));
+  } else {
+    word = ror(word, 8 * (addr & 3));
+  }
+
   idle();
-
-  if(mode & Half) word &= 0xffff;
-  if(mode & Byte) word &= 0xff;
   return word;
 }
 

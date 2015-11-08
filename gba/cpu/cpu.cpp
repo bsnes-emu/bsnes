@@ -96,6 +96,7 @@ auto CPU::power() -> void {
     dma.source = 0;
     dma.target = 0;
     dma.length = 0;
+    dma.data = 0;
     dma.control = 0;
     dma.pending = 0;
     dma.run.target = 0;

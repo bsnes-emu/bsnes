@@ -9,6 +9,7 @@ auto CPU::serialize(serializer& s) -> void {
     s.integer(dma.source);
     s.integer(dma.target);
     s.integer(dma.length);
+    s.integer(dma.data);
     s.integer(dma.control.targetmode);
     s.integer(dma.control.sourcemode);
     s.integer(dma.control.repeat);
