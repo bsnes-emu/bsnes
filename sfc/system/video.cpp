@@ -105,20 +105,20 @@ void Video::draw_cursor(uint16_t color, int x, int y) {
 }
 
 void Video::update() {
-  switch(configuration.controller_port2) {
-  case Input::Device::SuperScope:
-    if(dynamic_cast<SuperScope*>(input.port2)) {
-      SuperScope &device = (SuperScope&)*input.port2;
-      draw_cursor(0x7c00, device.x, device.y);
+  switch(configuration.controllerPort2) {
+  case Device::ID::SuperScope:
+    if(dynamic_cast<SuperScope*>(device.controllerPort2)) {
+      SuperScope& controller = (SuperScope&)*device.controllerPort2;
+      draw_cursor(0x7c00, controller.x, controller.y);
     }
     break;
-  case Input::Device::Justifier:
-  case Input::Device::Justifiers:
-    if(dynamic_cast<Justifier*>(input.port2)) {
-      Justifier &device = (Justifier&)*input.port2;
-      draw_cursor(0x001f, device.player1.x, device.player1.y);
-      if(device.chained == false) break;
-      draw_cursor(0x02e0, device.player2.x, device.player2.y);
+  case Device::ID::Justifier:
+  case Device::ID::Justifiers:
+    if(dynamic_cast<Justifier*>(device.controllerPort2)) {
+      Justifier& controller = (Justifier&)*device.controllerPort2;
+      draw_cursor(0x001f, controller.player1.x, controller.player1.y);
+      if(!controller.chained) break;
+      draw_cursor(0x02e0, controller.player2.x, controller.player2.y);
     }
     break;
   }

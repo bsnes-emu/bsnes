@@ -33,8 +33,8 @@ void CPU::mmio_w2183(uint8 data) {
 //strobing $4016.d0 affects both controller port latches.
 //$4017 bit 0 writes are ignored.
 void CPU::mmio_w4016(uint8 data) {
-  input.port1->latch(data & 1);
-  input.port2->latch(data & 1);
+  device.controllerPort1->latch(data & 1);
+  device.controllerPort2->latch(data & 1);
 }
 
 //JOYSER0
@@ -42,7 +42,7 @@ void CPU::mmio_w4016(uint8 data) {
 //1-0 = Joypad serial data
 uint8 CPU::mmio_r4016() {
   uint8 r = regs.mdr & 0xfc;
-  r |= input.port1->data();
+  r |= device.controllerPort1->data();
   return r;
 }
 
@@ -52,7 +52,7 @@ uint8 CPU::mmio_r4016() {
 //1-0 = Joypad serial data
 uint8 CPU::mmio_r4017() {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
-  r |= input.port2->data();
+  r |= device.controllerPort2->data();
   return r;
 }
 
@@ -408,7 +408,7 @@ uint8 CPU::mmio_read(unsigned addr) {
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
     synchronize_smp();
-    return smp.port_read(addr);
+    return smp.portRead(addr);
   }
 
   //DMA

@@ -11,7 +11,7 @@ Gamepad::Gamepad(bool port) : Controller(port) {
 
 auto Gamepad::data() -> uint2 {
   if(counter >= 16) return 1;
-  if(latched == 1) return interface->inputPoll(port, (unsigned)Input::Device::Joypad, (unsigned)Input::JoypadID::B);
+  if(latched == 1) return interface->inputPoll(port, (unsigned)Device::ID::Gamepad, B);
 
   //note: D-pad physically prevents up+down and left+right from being pressed at the same time
   switch(counter++) {
@@ -38,19 +38,19 @@ auto Gamepad::latch(bool data) -> void {
   counter = 0;
 
   if(latched == 0) {
-    unsigned id = (unsigned)Input::Device::Joypad;
-    b      = interface->inputPoll(port, id,  0);
-    y      = interface->inputPoll(port, id,  1);
-    select = interface->inputPoll(port, id,  2);
-    start  = interface->inputPoll(port, id,  3);
-    up     = interface->inputPoll(port, id,  4);
-    down   = interface->inputPoll(port, id,  5);
-    left   = interface->inputPoll(port, id,  6);
-    right  = interface->inputPoll(port, id,  7);
-    a      = interface->inputPoll(port, id,  8);
-    x      = interface->inputPoll(port, id,  9);
-    l      = interface->inputPoll(port, id, 10);
-    r      = interface->inputPoll(port, id, 11);
+    auto id = (unsigned)Device::ID::Gamepad;
+    b      = interface->inputPoll(port, id, B);
+    y      = interface->inputPoll(port, id, Y);
+    select = interface->inputPoll(port, id, Select);
+    start  = interface->inputPoll(port, id, Start);
+    up     = interface->inputPoll(port, id, Up);
+    down   = interface->inputPoll(port, id, Down);
+    left   = interface->inputPoll(port, id, Left);
+    right  = interface->inputPoll(port, id, Right);
+    a      = interface->inputPoll(port, id, A);
+    x      = interface->inputPoll(port, id, X);
+    l      = interface->inputPoll(port, id, L);
+    r      = interface->inputPoll(port, id, R);
   }
 }
 

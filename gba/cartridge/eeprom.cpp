@@ -1,8 +1,8 @@
-auto Cartridge::EEPROM::read(unsigned addr) -> bool {
+auto Cartridge::EEPROM::read(uint addr) -> bool {
   return data[addr >> 3] & 0x80 >> (addr & 7);
 }
 
-auto Cartridge::EEPROM::write(unsigned addr, bool bit) -> void {
+auto Cartridge::EEPROM::write(uint addr, bool bit) -> void {
   if(bit == 0) data[addr >> 3] &=~ (0x80 >> (addr & 7));
   if(bit == 1) data[addr >> 3] |=  (0x80 >> (addr & 7));
 }
@@ -88,7 +88,7 @@ auto Cartridge::EEPROM::serialize(serializer& s) -> void {
   s.integer(mask);
   s.integer(test);
   s.integer(bits);
-  s.integer((unsigned&)mode);
+  s.integer((uint&)mode);
   s.integer(offset);
   s.integer(address);
 }

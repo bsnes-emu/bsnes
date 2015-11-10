@@ -1,6 +1,6 @@
 #include <sfc/sfc.hpp>
 
-#define SATELLAVIEW_BASE_UNIT_CPP
+#define SATELLAVIEW_EXPANSION_CPP
 namespace SuperFamicom {
 
 SatellaviewBaseUnit satellaviewbaseunit;

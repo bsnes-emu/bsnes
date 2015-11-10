@@ -3,7 +3,7 @@
 Justifier::Justifier(bool port, bool chained):
 Controller(port),
 chained(chained),
-device(chained == false ? (unsigned)Input::Device::Justifier : (unsigned)Input::Device::Justifiers)
+device(chained == false ? (unsigned)Device::ID::Justifier : (unsigned)Device::ID::Justifiers)
 {
   create(Controller::Enter, 21477272);
   latched = 0;
@@ -47,8 +47,8 @@ auto Justifier::enter() -> void {
     }
 
     if(next < prev) {
-      int nx1 = interface->inputPoll(port, device, 0 + (unsigned)Input::JustifierID::X);
-      int ny1 = interface->inputPoll(port, device, 0 + (unsigned)Input::JustifierID::Y);
+      int nx1 = interface->inputPoll(port, device, 0 + X);
+      int ny1 = interface->inputPoll(port, device, 0 + Y);
       nx1 += player1.x;
       ny1 += player1.y;
       player1.x = max(-16, min(256 + 16, nx1));
@@ -56,8 +56,8 @@ auto Justifier::enter() -> void {
     }
 
     if(next < prev && chained) {
-      int nx2 = interface->inputPoll(port, device, 4 + (unsigned)Input::JustifierID::X);
-      int ny2 = interface->inputPoll(port, device, 4 + (unsigned)Input::JustifierID::Y);
+      int nx2 = interface->inputPoll(port, device, 4 + X);
+      int ny2 = interface->inputPoll(port, device, 4 + Y);
       nx2 += player2.x;
       ny2 += player2.y;
       player2.x = max(-16, min(256 + 16, nx2));
@@ -73,13 +73,13 @@ auto Justifier::data() -> uint2 {
   if(counter >= 32) return 1;
 
   if(counter == 0) {
-    player1.trigger = interface->inputPoll(port, device, 0 + (unsigned)Input::JustifierID::Trigger);
-    player1.start   = interface->inputPoll(port, device, 0 + (unsigned)Input::JustifierID::Start);
+    player1.trigger = interface->inputPoll(port, device, 0 + Trigger);
+    player1.start   = interface->inputPoll(port, device, 0 + Start);
   }
 
   if(counter == 0 && chained) {
-    player2.trigger = interface->inputPoll(port, device, 4 + (unsigned)Input::JustifierID::Trigger);
-    player2.start   = interface->inputPoll(port, device, 4 + (unsigned)Input::JustifierID::Start);
+    player2.trigger = interface->inputPoll(port, device, 4 + Trigger);
+    player2.start   = interface->inputPoll(port, device, 4 + Start);
   }
 
   switch(counter++) {

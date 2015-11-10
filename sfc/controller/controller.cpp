@@ -15,8 +15,8 @@ Controller::Controller(bool port) : port(port) {
 }
 
 auto Controller::Enter() -> void {
-  if(co_active() == input.port1->thread) input.port1->enter();
-  if(co_active() == input.port2->thread) input.port2->enter();
+  if(co_active() == device.controllerPort1->thread) device.controllerPort1->enter();
+  if(co_active() == device.controllerPort2->thread) device.controllerPort2->enter();
 }
 
 auto Controller::enter() -> void {

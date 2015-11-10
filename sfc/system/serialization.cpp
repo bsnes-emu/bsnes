@@ -1,9 +1,9 @@
 #ifdef SYSTEM_CPP
 
-serializer System::serialize() {
-  serializer s(serialize_size);
+auto System::serialize() -> serializer {
+  serializer s(serializeSize);
 
-  unsigned signature = 0x31545342, version = Info::SerializerVersion;
+  uint signature = 0x31545342, version = Info::SerializerVersion;
   char hash[64], description[512], profile[16];
   memcpy(&hash, (const char*)cartridge.sha256(), 64);
   memset(&description, 0, sizeof description);
@@ -16,12 +16,12 @@ serializer System::serialize() {
   s.array(description);
   s.array(profile);
 
-  serialize_all(s);
+  serializeAll(s);
   return s;
 }
 
-bool System::unserialize(serializer& s) {
-  unsigned signature, version;
+auto System::unserialize(serializer& s) -> bool {
+  uint signature, version;
   char hash[64], description[512], profile[16];
 
   s.integer(signature);
@@ -35,7 +35,7 @@ bool System::unserialize(serializer& s) {
   if(strcmp(profile, Emulator::Profile)) return false;
 
   power();
-  serialize_all(s);
+  serializeAll(s);
   return true;
 }
 
@@ -43,12 +43,12 @@ bool System::unserialize(serializer& s) {
 //internal
 //========
 
-void System::serialize(serializer& s) {
-  s.integer((unsigned&)region);
-  s.integer((unsigned&)expansion);
+auto System::serialize(serializer& s) -> void {
+  s.integer((uint&)region);
+  s.integer((uint&)expansionPort);
 }
 
-void System::serialize_all(serializer& s) {
+auto System::serializeAll(serializer& s) -> void {
   cartridge.serialize(s);
   system.serialize(s);
   random.serialize(s);
@@ -78,10 +78,10 @@ void System::serialize_all(serializer& s) {
 //perform dry-run state save:
 //determines exactly how many bytes are needed to save state for this cartridge,
 //as amount varies per game (eg different RAM sizes, special chips, etc.)
-void System::serialize_init() {
+auto System::serializeInit() -> void {
   serializer s;
 
-  unsigned signature = 0, version = 0;
+  uint signature = 0, version = 0;
   char hash[64], profile[16], description[512];
 
   s.integer(signature);
@@ -90,8 +90,8 @@ void System::serialize_init() {
   s.array(profile);
   s.array(description);
 
-  serialize_all(s);
-  serialize_size = s.size();
+  serializeAll(s);
+  serializeSize = s.size();
 }
 
 #endif

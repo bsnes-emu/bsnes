@@ -83,9 +83,10 @@ struct ID {
     SufamiTurboSlotBROM,
     SufamiTurboSlotBRAM,
 
-    //controller ports
-    Port1 = 1,
-    Port2 = 2,
+    //device ports (bitmask)
+    ControllerPort1 = 1,
+    ControllerPort2 = 2,
+    ExpansionPort   = 4,
   };
 };
 

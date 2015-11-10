@@ -1,4 +1,8 @@
 struct Justifier : Controller {
+  enum : uint {
+    X, Y, Trigger, Start,
+  };
+
   Justifier(bool port, bool chained);
 
   auto enter() -> void;

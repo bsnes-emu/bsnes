@@ -54,7 +54,7 @@ auto SuperFX::power() -> void {
 
 auto SuperFX::reset() -> void {
   GSU::reset();
-  create(SuperFX::Enter, system.cpu_frequency());
+  create(SuperFX::Enter, system.cpuFrequency());
   memory_reset();
   timing_reset();
 }

@@ -18,8 +18,8 @@ void CPU::step(unsigned clocks) {
     auto& chip = *coprocessors[i];
     chip.clock -= clocks * (uint64)chip.frequency;
   }
-  input.port1->clock -= clocks * (uint64)input.port1->frequency;
-  input.port2->clock -= clocks * (uint64)input.port2->frequency;
+  device.controllerPort1->clock -= clocks * (uint64)device.controllerPort1->frequency;
+  device.controllerPort2->clock -= clocks * (uint64)device.controllerPort2->frequency;
   synchronize_controllers();
 }
 
@@ -47,8 +47,8 @@ void CPU::synchronize_coprocessors() {
 }
 
 void CPU::synchronize_controllers() {
-  if(input.port1->clock < 0) co_switch(input.port1->thread);
-  if(input.port2->clock < 0) co_switch(input.port2->thread);
+  if(device.controllerPort1->clock < 0) co_switch(device.controllerPort1->thread);
+  if(device.controllerPort2->clock < 0) co_switch(device.controllerPort2->thread);
 }
 
 void CPU::Enter() { cpu.enter(); }
@@ -125,7 +125,7 @@ void CPU::power() {
 }
 
 void CPU::reset() {
-  create(Enter, system.cpu_frequency());
+  create(Enter, system.cpuFrequency());
   coprocessors.reset();
   PPUcounter::reset();
 

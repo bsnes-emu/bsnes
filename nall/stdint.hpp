@@ -1,6 +1,8 @@
 #ifndef NALL_STDINT_HPP
 #define NALL_STDINT_HPP
 
+using uint = unsigned int;
+
 #if defined(_MSC_VER)
   typedef signed char int8_t;
   typedef signed short int16_t;

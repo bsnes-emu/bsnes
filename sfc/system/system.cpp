@@ -9,12 +9,17 @@ Random random;
 
 #include "video.cpp"
 #include "audio.cpp"
-#include "input.cpp"
+#include "device.cpp"
 #include "serialization.cpp"
 
 #include <sfc/scheduler/scheduler.cpp>
 
-void System::run() {
+System::System() {
+  region = Region::Autodetect;
+  expansionPort = Device::ID::eBoot;
+}
+
+auto System::run() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::None;
 
   scheduler.enter();
@@ -23,35 +28,35 @@ void System::run() {
   }
 }
 
-void System::runtosave() {
+auto System::runToSave() -> void {
   if(CPU::Threaded == true) {
     scheduler.sync = Scheduler::SynchronizeMode::CPU;
-    runthreadtosave();
+    runThreadToSave();
   }
 
   if(SMP::Threaded == true) {
     scheduler.thread = smp.thread;
-    runthreadtosave();
+    runThreadToSave();
   }
 
   if(PPU::Threaded == true) {
     scheduler.thread = ppu.thread;
-    runthreadtosave();
+    runThreadToSave();
   }
 
   if(DSP::Threaded == true) {
     scheduler.thread = dsp.thread;
-    runthreadtosave();
+    runThreadToSave();
   }
 
   for(unsigned i = 0; i < cpu.coprocessors.size(); i++) {
     auto& chip = *cpu.coprocessors[i];
     scheduler.thread = chip.thread;
-    runthreadtosave();
+    runThreadToSave();
   }
 }
 
-void System::runthreadtosave() {
+auto System::runThreadToSave() -> void {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
@@ -61,10 +66,12 @@ void System::runthreadtosave() {
   }
 }
 
-void System::init() {
+auto System::init() -> void {
   assert(interface != nullptr);
 
+  eboot.init();
   satellaviewbaseunit.init();
+
   icd2.init();
   mcc.init();
   nss.init();
@@ -80,20 +87,20 @@ void System::init() {
   sdd1.init();
   obc1.init();
   msu1.init();
+
   satellaviewcartridge.init();
 
   video.init();
   audio.init();
 
-  input.connect(0, configuration.controller_port1);
-  input.connect(1, configuration.controller_port2);
+  device.connect(0, configuration.controllerPort1);
+  device.connect(1, configuration.controllerPort2);
 }
 
-void System::term() {
+auto System::term() -> void {
 }
 
-void System::load() {
-//string manifest = string::read({interface->path(ID::System), "manifest.bml"});
+auto System::load() -> void {
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
 
@@ -102,13 +109,12 @@ void System::load() {
   }
 
   region = configuration.region;
-  expansion = configuration.expansion_port;
   if(region == Region::Autodetect) {
     region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
   }
-
-  cpu_frequency = region() == Region::NTSC ? 21477272 : 21281370;
-  apu_frequency = 24607104;
+  expansionPort = configuration.expansionPort;
+  cpuFrequency = region() == Region::NTSC ? 21477272 : 21281370;
+  apuFrequency = 24606720;
 
   audio.coprocessor_enable(false);
 
@@ -118,7 +124,9 @@ void System::load() {
   cpu.enable();
   ppu.enable();
 
-  if(expansion() == ExpansionPortDevice::Satellaview) satellaviewbaseunit.load();
+  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.load();
+  if(expansionPort() == Device::ID::eBoot) eboot.load();
+
   if(cartridge.hasICD2()) icd2.load();
   if(cartridge.hasMCC()) mcc.load();
   if(cartridge.hasNSSDIP()) nss.load();
@@ -138,11 +146,13 @@ void System::load() {
   if(cartridge.hasSatellaviewSlot()) satellaviewcartridge.load();
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.load(), sufamiturboB.load();
 
-  serialize_init();
+  serializeInit();
 }
 
-void System::unload() {
-  if(expansion() == ExpansionPortDevice::Satellaview) satellaviewbaseunit.unload();
+auto System::unload() -> void {
+  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.unload();
+  if(expansionPort() == Device::ID::eBoot) eboot.unload();
+
   if(cartridge.hasICD2()) icd2.unload();
   if(cartridge.hasMCC()) mcc.unload();
   if(cartridge.hasNSSDIP()) nss.unload();
@@ -163,15 +173,17 @@ void System::unload() {
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.unload(), sufamiturboB.unload();
 }
 
-void System::power() {
-  random.seed((unsigned)time(0));
+auto System::power() -> void {
+  random.seed((uint)time(0));
 
   cpu.power();
   smp.power();
   dsp.power();
   ppu.power();
 
-  if(expansion() == ExpansionPortDevice::Satellaview) satellaviewbaseunit.power();
+  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.power();
+  if(expansionPort() == Device::ID::eBoot) eboot.power();
+
   if(cartridge.hasICD2()) icd2.power();
   if(cartridge.hasMCC()) mcc.power();
   if(cartridge.hasNSSDIP()) nss.power();
@@ -193,13 +205,15 @@ void System::power() {
   reset();
 }
 
-void System::reset() {
+auto System::reset() -> void {
   cpu.reset();
   smp.reset();
   dsp.reset();
   ppu.reset();
 
-  if(expansion() == ExpansionPortDevice::Satellaview) satellaviewbaseunit.reset();
+  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.reset();
+  if(expansionPort() == Device::ID::eBoot) eboot.reset();
+
   if(cartridge.hasICD2()) icd2.reset();
   if(cartridge.hasMCC()) mcc.reset();
   if(cartridge.hasNSSDIP()) nss.reset();
@@ -231,21 +245,16 @@ void System::reset() {
   if(cartridge.hasMSU1()) cpu.coprocessors.append(&msu1);
 
   scheduler.init();
-  input.connect(0, configuration.controller_port1);
-  input.connect(1, configuration.controller_port2);
+  device.connect(0, configuration.controllerPort1);
+  device.connect(1, configuration.controllerPort2);
 }
 
-void System::scanline() {
+auto System::scanline() -> void {
   video.scanline();
   if(cpu.vcounter() == 241) scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
-void System::frame() {
-}
-
-System::System() {
-  region = Region::Autodetect;
-  expansion = ExpansionPortDevice::Satellaview;
+auto System::frame() -> void {
 }
 
 }

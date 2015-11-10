@@ -48,8 +48,8 @@ auto SuperScope::enter() -> void {
 
     if(next < prev) {
       //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
-      int nx = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::X);
-      int ny = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::Y);
+      int nx = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, X);
+      int ny = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Y);
       nx += x;
       ny += y;
       x = max(-16, min(256 + 16, nx));
@@ -67,7 +67,7 @@ auto SuperScope::data() -> uint2 {
 
   if(counter == 0) {
     //turbo is a switch; toggle is edge sensitive
-    bool newturbo = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::Turbo);
+    bool newturbo = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Turbo);
     if(newturbo && !turbo) {
       turbo = !turbo;  //toggle state
       turbolock = true;
@@ -78,7 +78,7 @@ auto SuperScope::data() -> uint2 {
     //trigger is a button
     //if turbo is active, trigger is level sensitive; otherwise, it is edge sensitive
     trigger = false;
-    bool newtrigger = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::Trigger);
+    bool newtrigger = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Trigger);
     if(newtrigger && (turbo || !triggerlock)) {
       trigger = true;
       triggerlock = true;
@@ -87,11 +87,11 @@ auto SuperScope::data() -> uint2 {
     }
 
     //cursor is a button; it is always level sensitive
-    cursor = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::Cursor);
+    cursor = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Cursor);
 
     //pause is a button; it is always edge sensitive
     pause = false;
-    bool newpause = interface->inputPoll(port, (unsigned)Input::Device::SuperScope, (unsigned)Input::SuperScopeID::Pause);
+    bool newpause = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Pause);
     if(newpause && !pauselock) {
       pause = true;
       pauselock = true;

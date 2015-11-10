@@ -12,7 +12,7 @@
 namespace SuperFamicom {
   namespace Info {
     static const string Name = "bsnes";
-    static const unsigned SerializerVersion = 29;
+    static const uint SerializerVersion = 29;
   }
 }
 
@@ -32,7 +32,7 @@ namespace SuperFamicom {
       if(thread) co_delete(thread);
     }
 
-    auto create(auto (*entrypoint)() -> void, unsigned frequency) -> void {
+    auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
       if(thread) co_delete(thread);
       thread = co_create(65536 * sizeof(void*), entrypoint);
       this->frequency = frequency;
@@ -45,7 +45,7 @@ namespace SuperFamicom {
     }
 
     cothread_t thread = nullptr;
-    unsigned frequency = 0;
+    uint frequency = 0;
     int64 clock = 0;
   };
 
@@ -62,7 +62,7 @@ namespace SuperFamicom {
 
   #include <sfc/controller/controller.hpp>
   #include <sfc/system/system.hpp>
-  #include <sfc/base/base.hpp>
+  #include <sfc/expansion/expansion.hpp>
   #include <sfc/chip/chip.hpp>
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>

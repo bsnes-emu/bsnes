@@ -10,7 +10,6 @@ namespace GameBoyAdvance {
 Cartridge cartridge;
 
 Cartridge::Cartridge() {
-  loaded = false;
   mrom.data = new uint8[mrom.size = 32 * 1024 * 1024];
   sram.data = new uint8[sram.size = 32 * 1024];
   eeprom.data = new uint8[eeprom.size = 8 * 1024];
@@ -24,6 +23,14 @@ Cartridge::~Cartridge() {
   delete[] flash.data;
 }
 
+auto Cartridge::loaded() const -> bool {
+  return isLoaded;
+}
+
+auto Cartridge::sha256() const -> string {
+  return information.sha256;
+}
+
 auto Cartridge::title() const -> string {
   return information.title;
 }
@@ -34,21 +41,18 @@ auto Cartridge::load() -> void {
   auto document = BML::unserialize(information.markup);
   information.title = document["information/title"].text();
 
-  unsigned mrom_size = 0;
+  hasSRAM   = false;
+  hasEEPROM = false;
+  hasFLASH  = false;
+
   if(auto info = document["cartridge/mrom"]) {
+    mrom.size = min(32 * 1024 * 1024, info["size"].decimal());
+
     interface->loadRequest(ID::MROM, info["name"].text(), true);
-    mrom_size = info["size"].decimal();
-    for(unsigned addr = mrom_size; addr < mrom.size; addr++) {
-      mrom.data[addr] = mrom.data[Bus::mirror(addr, mrom_size)];
-    }
   }
 
-  has_sram   = false;
-  has_eeprom = false;
-  has_flash  = false;
-
   if(auto info = document["cartridge/sram"]) {
-    has_sram = true;
+    hasSRAM = true;
     sram.size = min(32 * 1024, info["size"].decimal());
     sram.mask = sram.size - 1;
     for(auto n : range(sram.size)) sram.data[n] = 0xff;
@@ -58,12 +62,12 @@ auto Cartridge::load() -> void {
   }
 
   if(auto info = document["cartridge/eeprom"]) {
-    has_eeprom = true;
+    hasEEPROM = true;
     eeprom.size = min(8 * 1024, info["size"].decimal());
     eeprom.bits = eeprom.size <= 512 ? 6 : 14;
     if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
-    eeprom.mask = mrom_size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
-    eeprom.test = mrom_size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
+    eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
+    eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
     for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
 
     interface->loadRequest(ID::EEPROM, info["name"].text(), false);
@@ -71,7 +75,7 @@ auto Cartridge::load() -> void {
   }
 
   if(auto info = document["cartridge/flash"]) {
-    has_flash = true;
+    hasFLASH = true;
     flash.id = info["id"].decimal();
     flash.size = min(128 * 1024, info["size"].decimal());
     for(auto n : range(flash.size)) flash.data[n] = 0xff;
@@ -85,15 +89,15 @@ auto Cartridge::load() -> void {
     memory.append({ID::FLASH, info["name"].text()});
   }
 
-  sha256 = Hash::SHA256(mrom.data, mrom_size).digest();
+  information.sha256 = Hash::SHA256(mrom.data, mrom.size).digest();
 
   system.load();
-  loaded = true;
+  isLoaded = true;
 }
 
 auto Cartridge::unload() -> void {
-  if(loaded) {
-    loaded = false;
+  if(isLoaded) {
+    isLoaded = false;
     memory.reset();
   }
 }
@@ -105,24 +109,24 @@ auto Cartridge::power() -> void {
 
 #define RAM_ANALYZE
 
-auto Cartridge::read(unsigned mode, uint32 addr) -> uint32 {
+auto Cartridge::read(uint mode, uint32 addr) -> uint32 {
   if(addr < 0x0e00'0000) {
-    if(has_eeprom && (addr & eeprom.mask) == eeprom.test) return eeprom.read();
+    if(hasEEPROM && (addr & eeprom.mask) == eeprom.test) return eeprom.read();
     return mrom.read(mode, addr);
   } else {
-    if(has_sram) return sram.read(mode, addr);
-    if(has_flash) return flash.read(addr);
+    if(hasSRAM) return sram.read(mode, addr);
+    if(hasFLASH) return flash.read(addr);
     return cpu.pipeline.fetch.instruction;
   }
 }
 
-auto Cartridge::write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto Cartridge::write(uint mode, uint32 addr, uint32 word) -> void {
   if(addr < 0x0e00'0000) {
-    if(has_eeprom && (addr & eeprom.mask) == eeprom.test) return eeprom.write(word & 1);
+    if(hasEEPROM && (addr & eeprom.mask) == eeprom.test) return eeprom.write(word & 1);
     return mrom.write(mode, addr, word);
   } else {
-    if(has_sram) return sram.write(mode, addr, word);
-    if(has_flash) return flash.write(addr, word);
+    if(hasSRAM) return sram.write(mode, addr, word);
+    if(hasFLASH) return flash.write(addr, word);
   }
 }
 

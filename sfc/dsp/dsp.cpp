@@ -287,7 +287,7 @@ auto DSP::power() -> void {
 }
 
 auto DSP::reset() -> void {
-  create(Enter, system.apu_frequency());
+  create(Enter, system.apuFrequency());
 
   REG(FLG) = 0xe0;
   state.noise = 0x4000;

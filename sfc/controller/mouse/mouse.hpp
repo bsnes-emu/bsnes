@@ -1,4 +1,8 @@
 struct Mouse : Controller {
+  enum : uint {
+    X, Y, Left, Right,
+  };
+
   Mouse(bool port);
 
   auto data() -> uint2;

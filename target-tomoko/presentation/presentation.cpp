@@ -115,11 +115,12 @@ auto Presentation::updateEmulator() -> void {
   resetSystem.setVisible(emulator->information.resettable);
   inputPort1.setVisible(false).reset();
   inputPort2.setVisible(false).reset();
+  inputPort3.setVisible(false).reset();
 
   for(auto n : range(emulator->port)) {
-    if(n >= 2) break;
+    if(n >= 3) break;
     auto& port = emulator->port[n];
-    auto& menu = (n == 0 ? inputPort1 : inputPort2);
+    auto& menu = (n == 0 ? inputPort1 : n == 1 ? inputPort2 : inputPort3);
     menu.setText(port.name);
 
     Group devices;
@@ -133,7 +134,7 @@ auto Presentation::updateEmulator() -> void {
     if(devices.objectCount() > 1) menu.setVisible();
   }
 
-  systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible());
+  systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible() || inputPort3.visible());
 }
 
 auto Presentation::resizeViewport() -> void {

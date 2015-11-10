@@ -1,45 +1,41 @@
-struct Memory {
-  auto ror(uint32 word, unsigned shift) -> uint32 {
-    return word << 32 - shift | word >> shift;
-  }
-};
-
-struct MROM : Memory {
+struct MROM {
   uint8* data;
-  unsigned size;
-  unsigned mask;
+  uint size;
+  uint mask;
 
-  auto read(unsigned mode, uint32 addr) -> uint32;
-  auto write(unsigned mode, uint32 addr, uint32 word) -> void;
+  auto read(uint mode, uint32 addr) -> uint32;
+  auto write(uint mode, uint32 addr, uint32 word) -> void;
+
+  auto serialize(serializer&) -> void;
 } mrom;
 
-struct SRAM : Memory {
+struct SRAM {
   uint8* data;
-  unsigned size;
-  unsigned mask;
+  uint size;
+  uint mask;
 
-  auto read(unsigned mode, uint32 addr) -> uint32;
-  auto write(unsigned mode, uint32 addr, uint32 word) -> void;
+  auto read(uint mode, uint32 addr) -> uint32;
+  auto write(uint mode, uint32 addr, uint32 word) -> void;
 
   auto serialize(serializer&) -> void;
 } sram;
 
-struct EEPROM : Memory {
+struct EEPROM {
   uint8* data;
-  unsigned size;
-  unsigned mask;
-  unsigned test;
-  unsigned bits;
+  uint size;
+  uint mask;
+  uint test;
+  uint bits;
 
-  enum class Mode : unsigned {
+  enum class Mode : uint {
     Wait, Command, ReadAddress, ReadValidate, ReadData, WriteAddress, WriteData, WriteValidate
   } mode;
-  unsigned offset;
-  unsigned address;
-  unsigned addressbits;
+  uint offset;
+  uint address;
+  uint addressbits;
 
-  auto read(unsigned addr) -> bool;
-  auto write(unsigned addr, bool bit) -> void;
+  auto read(uint addr) -> bool;
+  auto write(uint addr, bool bit) -> void;
 
   auto read() -> bool;
   auto write(bool bit) -> void;
@@ -47,9 +43,9 @@ struct EEPROM : Memory {
   auto serialize(serializer&) -> void;
 } eeprom;
 
-struct FLASH : Memory {
+struct FLASH {
   uint8* data;
-  unsigned size;
+  uint size;
   uint16 id;
 
   bool unlockhi;

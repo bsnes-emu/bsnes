@@ -66,10 +66,10 @@ auto Mouse::latch(bool data) -> void {
   latched = data;
   counter = 0;
 
-  x = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::X);  //-n = left, 0 = center, +n = right
-  y = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Y);  //-n = up,   0 = center, +n = down
-  l = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Left );
-  r = interface->inputPoll(port, (unsigned)Input::Device::Mouse, (unsigned)Input::MouseID::Right);
+  x = interface->inputPoll(port, (unsigned)Device::ID::Mouse, X);  //-n = left, 0 = center, +n = right
+  y = interface->inputPoll(port, (unsigned)Device::ID::Mouse, Y);  //-n = up,   0 = center, +n = down
+  l = interface->inputPoll(port, (unsigned)Device::ID::Mouse, Left);
+  r = interface->inputPoll(port, (unsigned)Device::ID::Mouse, Right);
 
   dx = x < 0;  //0 = right, 1 = left
   dy = y < 0;  //0 = down,  1 = up

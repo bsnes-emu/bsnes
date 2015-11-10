@@ -1,63 +1,63 @@
 struct Interface;
 
+#include "video.hpp"
+#include "audio.hpp"
+#include "device.hpp"
+
 struct System : property<System> {
-  enum class Region : unsigned { NTSC = 0, PAL = 1, Autodetect = 2 };
-  enum class ExpansionPortDevice : unsigned { None = 0, Satellaview = 1 };
+  enum class Region : uint { NTSC = 0, PAL = 1, Autodetect = 2 };
 
-  void run();
-  void runtosave();
+  System();
 
-  void init();
-  void term();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  auto run() -> void;
+  auto runToSave() -> void;
 
-  void frame();
-  void scanline();
+  auto init() -> void;
+  auto term() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto frame() -> void;
+  auto scanline() -> void;
 
   //return *active* system information (settings are cached upon power-on)
   readonly<Region> region;
-  readonly<ExpansionPortDevice> expansion;
-  readonly<unsigned> cpu_frequency;
-  readonly<unsigned> apu_frequency;
-  readonly<unsigned> serialize_size;
+  readonly<Device::ID> expansionPort;
 
-  serializer serialize();
-  bool unserialize(serializer&);
+  readonly<uint> cpuFrequency;
+  readonly<uint> apuFrequency;
+  readonly<uint> serializeSize;
 
-  System();
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
 
   struct Information {
     string manifest;
   } information;
 
 private:
-  void runthreadtosave();
+  auto runThreadToSave() -> void;
 
-  void serialize(serializer&);
-  void serialize_all(serializer&);
-  void serialize_init();
+  auto serialize(serializer&) -> void;
+  auto serializeAll(serializer&) -> void;
+  auto serializeInit() -> void;
 
   friend class Cartridge;
   friend class Video;
   friend class Audio;
-  friend class Input;
+  friend class Device;
 };
 
 extern System system;
 
-#include "video.hpp"
-#include "audio.hpp"
-#include "input.hpp"
-
 #include <sfc/scheduler/scheduler.hpp>
 
 struct Configuration {
-  Input::Device controller_port1 = Input::Device::Joypad;
-  Input::Device controller_port2 = Input::Device::Joypad;
-  System::ExpansionPortDevice expansion_port = System::ExpansionPortDevice::Satellaview;
+  Device::ID controllerPort1 = Device::ID::Gamepad;
+  Device::ID controllerPort2 = Device::ID::Gamepad;
+  Device::ID expansionPort = Device::ID::eBoot;
   System::Region region = System::Region::Autodetect;
   bool random = true;
 };
@@ -65,21 +65,21 @@ struct Configuration {
 extern Configuration configuration;
 
 struct Random {
-  void seed(unsigned seed) {
+  auto seed(uint seed) -> void {
     iter = seed;
   }
 
-  unsigned operator()(unsigned result) {
+  auto operator()(uint result) -> uint {
     if(configuration.random == false) return result;
     return iter = (iter >> 1) ^ (((iter & 1) - 1) & 0xedb88320);
   }
 
-  void serialize(serializer& s) {
+  auto serialize(serializer& s) -> void {
     s.integer(iter);
   }
 
 private:
-  unsigned iter = 0;
+  uint iter = 0;
 };
 
 extern Random random;

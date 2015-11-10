@@ -7,7 +7,7 @@
 namespace GameBoyAdvance {
   namespace Info {
     static const string Name = "bgba";
-    static const unsigned SerializerVersion = 2;
+    static const uint SerializerVersion = 3;
   }
 }
 
@@ -21,7 +21,7 @@ namespace GameBoyAdvance {
 #include <libco/libco.h>
 
 namespace GameBoyAdvance {
-  enum : unsigned {       //mode flags for bus_read, bus_write:
+  enum : uint {           //mode flags for bus read, write:
     Nonsequential =   1,  //N cycle
     Sequential    =   2,  //S cycle
     Prefetch      =   4,  //instruction fetch (eligible for prefetch)
@@ -30,6 +30,7 @@ namespace GameBoyAdvance {
     Word          =  32,  //32-bit access
     Load          =  64,  //load operation
     Store         = 128,  //store operation
+    Signed        = 256,  //sign extended
   };
 
   struct Thread {
@@ -37,7 +38,7 @@ namespace GameBoyAdvance {
       if(thread) co_delete(thread);
     }
 
-    auto create(void (*entrypoint)(), unsigned frequency) -> void {
+    auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
       if(thread) co_delete(thread);
       thread = co_create(65536 * sizeof(void*), entrypoint);
       this->frequency = frequency;
@@ -50,8 +51,8 @@ namespace GameBoyAdvance {
     }
 
     cothread_t thread = nullptr;
-    unsigned frequency = 0;
-    signed clock = 0;
+    uint frequency = 0;
+    int clock = 0;
   };
 
   #include <gba/memory/memory.hpp>

@@ -26,7 +26,7 @@ USART::USART(bool port) : Controller(port) {
   txlength = 0;
   txdata = 0;
 
-  string filename = {interface->path(ID::SuperFamicom), "usart.so"};
+  string filename{interface->path(ID::SuperFamicom), "usart.so"};
   if(openAbsolute(filename)) {
     init = sym("usart_init");
     main = sym("usart_main");
@@ -93,7 +93,7 @@ auto USART::data() -> uint2 {
   if(iobit()) {
     if(counter >= 16) return 1;
     uint2 result = 0;
-    if(counter < 12) result = interface->inputPoll(port, (unsigned)Input::Device::Joypad, counter);
+    if(counter < 12) result = interface->inputPoll(port, (unsigned)Device::ID::Gamepad, counter);
     if(latched == 0) counter++;
     return result;
   }

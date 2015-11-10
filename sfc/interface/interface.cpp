@@ -22,7 +22,11 @@ Interface::Interface() {
   media.append({ID::SuperFamicom, "BS-X Satellaview", "bs",  false});
   media.append({ID::SuperFamicom, "Sufami Turbo",     "st",  false});
 
-  { Device device{0, ID::Port1 | ID::Port2, "Controller"};
+  { Device device{0, ID::ControllerPort1 | ID::ControllerPort2 | ID::ExpansionPort, "None"};
+    this->device.append(device);
+  }
+
+  { Device device{1, ID::ControllerPort1 | ID::ControllerPort2, "Gamepad"};
     device.input.append({ 0, 0, "B"     });
     device.input.append({ 1, 0, "Y"     });
     device.input.append({ 2, 0, "Select"});
@@ -39,7 +43,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{1, ID::Port1 | ID::Port2, "Multitap"};
+  { Device device{2, ID::ControllerPort1 | ID::ControllerPort2, "Multitap"};
     for(unsigned p = 1, n = 0; p <= 4; p++, n += 12) {
       device.input.append({n +  0, 0, {"Port ", p, " - ", "B"     }});
       device.input.append({n +  1, 0, {"Port ", p, " - ", "Y"     }});
@@ -59,7 +63,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{2, ID::Port1 | ID::Port2, "Mouse"};
+  { Device device{3, ID::ControllerPort1 | ID::ControllerPort2, "Mouse"};
     device.input.append({0, 1, "X-axis"});
     device.input.append({1, 1, "Y-axis"});
     device.input.append({2, 0, "Left"  });
@@ -68,7 +72,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{3, ID::Port2, "Super Scope"};
+  { Device device{4, ID::ControllerPort2, "Super Scope"};
     device.input.append({0, 1, "X-axis" });
     device.input.append({1, 1, "Y-axis" });
     device.input.append({2, 0, "Trigger"});
@@ -79,7 +83,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{4, ID::Port2, "Justifier"};
+  { Device device{5, ID::ControllerPort2, "Justifier"};
     device.input.append({0, 1, "X-axis" });
     device.input.append({1, 1, "Y-axis" });
     device.input.append({2, 0, "Trigger"});
@@ -88,7 +92,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{5, ID::Port2, "Justifiers"};
+  { Device device{6, ID::ControllerPort2, "Justifiers"};
     device.input.append({0, 1, "Port 1 - X-axis" });
     device.input.append({1, 1, "Port 1 - Y-axis" });
     device.input.append({2, 0, "Port 1 - Trigger"});
@@ -102,16 +106,21 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{6, ID::Port1, "Serial USART"};
+  { Device device{7, ID::ControllerPort1, "Serial USART"};
     this->device.append(device);
   }
 
-  { Device device{7, ID::Port1 | ID::Port2, "None"};
+  { Device device{8, ID::ExpansionPort, "Satellaview"};
     this->device.append(device);
   }
 
-  port.append({0, "Port 1"});
-  port.append({1, "Port 2"});
+  { Device device{9, ID::ExpansionPort, "eBoot"};
+    this->device.append(device);
+  }
+
+  port.append({0, "Controller Port 1"});
+  port.append({1, "Controller Port 2"});
+  port.append({2, "Expansion Port"});
 
   for(auto& device : this->device) {
     for(auto& port : this->port) {
@@ -128,13 +137,13 @@ auto Interface::title() -> string {
 
 auto Interface::videoFrequency() -> double {
   switch(system.region()) { default:
-  case System::Region::NTSC: return system.cpu_frequency() / (262.0 * 1364.0 - 4.0);
-  case System::Region::PAL:  return system.cpu_frequency() / (312.0 * 1364.0);
+  case System::Region::NTSC: return system.cpuFrequency() / (262.0 * 1364.0 - 4.0);
+  case System::Region::PAL:  return system.cpuFrequency() / (312.0 * 1364.0);
   }
 }
 
 auto Interface::audioFrequency() -> double {
-  return system.apu_frequency() / 768.0;
+  return system.apuFrequency() / 768.0;
 }
 
 auto Interface::loaded() -> bool {
@@ -396,7 +405,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(unsigned port, unsigned device) -> void {
-  input.connect(port, (Input::Device)device);
+  SuperFamicom::device.connect(port, (SuperFamicom::Device::ID)device);
 }
 
 auto Interface::power() -> void {
@@ -423,7 +432,7 @@ auto Interface::rtcsync() -> void {
 }
 
 auto Interface::serialize() -> serializer {
-  system.runtosave();
+  system.runToSave();
   return system.serialize();
 }
 

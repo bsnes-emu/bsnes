@@ -1,52 +1,51 @@
+//Sony CXP1100Q-1
+
 struct SMP : Processor::SPC700, Thread {
-  uint8 iplrom[64];
-  uint8 apuram[64 * 1024];
-
   enum : bool { Threaded = true };
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-  alwaysinline void synchronize_dsp();
 
-  uint8 port_read(uint2 port) const;
-  void port_write(uint2 port, uint8 data);
+  alwaysinline auto step(uint clocks) -> void;
+  alwaysinline auto synchronizeCPU() -> void;
+  alwaysinline auto synchronizeDSP() -> void;
 
-  void enter();
-  void power();
-  void reset();
+  auto portRead(uint2 port) const -> uint8;
+  auto portWrite(uint2 port, uint8 data) -> void;
 
-  void serialize(serializer&);
-  SMP();
-  ~SMP();
+  auto enter() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint8 iplrom[64] = {0};
+  uint8 apuram[64 * 1024] = {0};
 
 privileged:
   struct {
     //timing
-    unsigned clock_counter;
-    unsigned dsp_counter;
-    unsigned timer_step;
+    uint clockCounter;
+    uint dspCounter;
+    uint timerStep;
 
     //$00f0
-    uint8 clock_speed;
-    uint8 timer_speed;
-    bool timers_enable;
-    bool ram_disable;
-    bool ram_writable;
-    bool timers_disable;
+    uint8 clockSpeed;
+    uint8 timerSpeed;
+    bool timersEnable;
+    bool ramDisable;
+    bool ramWritable;
+    bool timersDisable;
 
     //$00f1
-    bool iplrom_enable;
+    bool iplromEnable;
 
     //$00f2
-    uint8 dsp_addr;
+    uint8 dspAddr;
 
     //$00f8,$00f9
     uint8 ram00f8;
     uint8 ram00f9;
   } status;
 
-  static void Enter();
-
-  friend class SMPcore;
+  static auto Enter() -> void;
 
   struct Debugger {
     hook<void (uint16)> op_exec;
@@ -55,39 +54,39 @@ privileged:
   } debugger;
 
   //memory.cpp
-  uint8 ram_read(uint16 addr);
-  void ram_write(uint16 addr, uint8 data);
+  auto ramRead(uint16 addr) -> uint8;
+  auto ramWrite(uint16 addr, uint8 data) -> void;
 
-  uint8 op_busread(uint16 addr);
-  void op_buswrite(uint16 addr, uint8 data);
+  auto busRead(uint16 addr) -> uint8;
+  auto busWrite(uint16 addr, uint8 data) -> void;
 
-  void op_io();
-  uint8 op_read(uint16 addr);
-  void op_write(uint16 addr, uint8 data);
+  auto op_io() -> void;
+  auto op_read(uint16 addr) -> uint8;
+  auto op_write(uint16 addr, uint8 data) -> void;
 
-  uint8 disassembler_read(uint16 addr);
+  auto disassembler_read(uint16 addr) -> uint8;
 
   //timing.cpp
-  template<unsigned frequency>
+  template<unsigned Frequency>
   struct Timer {
-    uint8 stage0_ticks;
-    uint8 stage1_ticks;
-    uint8 stage2_ticks;
-    uint4 stage3_ticks;
-    bool current_line;
+    uint8 stage0;
+    uint8 stage1;
+    uint8 stage2;
+    uint4 stage3;
+    bool line;
     bool enable;
     uint8 target;
 
-    void tick();
-    void synchronize_stage1();
+    auto tick() -> void;
+    auto synchronizeStage1() -> void;
   };
 
   Timer<192> timer0;
   Timer<192> timer1;
   Timer< 24> timer2;
 
-  alwaysinline void add_clocks(unsigned clocks);
-  alwaysinline void cycle_edge();
+  alwaysinline auto addClocks(uint clocks) -> void;
+  alwaysinline auto cycleEdge() -> void;
 };
 
 extern SMP smp;

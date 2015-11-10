@@ -15,6 +15,7 @@ struct Presentation : Window {
       MenuSeparator systemMenuSeparatorPorts{&systemMenu};
       Menu inputPort1{&systemMenu};
       Menu inputPort2{&systemMenu};
+      Menu inputPort3{&systemMenu};
       MenuSeparator systemMenuSeparatorUnload{&systemMenu};
       MenuItem unloadSystem{&systemMenu};
     Menu settingsMenu{&menuBar};

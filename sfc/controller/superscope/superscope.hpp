@@ -1,4 +1,8 @@
 struct SuperScope : Controller {
+  enum : uint {
+    X, Y, Trigger, Cursor, Turbo, Pause,
+  };
+
   SuperScope(bool port);
 
   auto enter() -> void;
