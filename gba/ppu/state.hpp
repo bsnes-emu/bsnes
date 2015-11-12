@@ -1,20 +1,20 @@
 struct Pixel {
-  bool enable;
-  unsigned priority;
-  unsigned color;
+  bool   enable;
+  uint2  priority;
+  uint15 color;
 
   //objects only
   bool translucent;
   bool mosaic;
 
-  alwaysinline void write(bool e) { enable = e; }
-  alwaysinline void write(bool e, unsigned p, unsigned c) { enable = e; priority = p; color = c; }
-  alwaysinline void write(bool e, unsigned p, unsigned c, bool t, bool m) { enable = e; priority = p; color = c; translucent = t; mosaic = m; }
+  alwaysinline auto write(bool e) { enable = e; }
+  alwaysinline auto write(bool e, uint p, uint c) { enable = e; priority = p; color = c; }
+  alwaysinline auto write(bool e, uint p, uint c, bool t, bool m) { enable = e; priority = p; color = c; translucent = t; mosaic = m; }
 } layer[6][240];
 
 bool windowmask[3][240];
-unsigned vmosaic[5];
-unsigned hmosaic[5];
+uint vmosaic[5];
+uint hmosaic[5];
 
 struct Object {
   uint8  y;
@@ -36,8 +36,8 @@ struct Object {
   uint4  palette;
 
   //ancillary data
-  unsigned width;
-  unsigned height;
+  uint width;
+  uint height;
 } object[128];
 
 struct ObjectParam {

@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define MEMORY_CPP
 namespace SuperFamicom {
 
 Bus bus;

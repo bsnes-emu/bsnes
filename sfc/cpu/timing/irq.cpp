@@ -1,11 +1,9 @@
-#ifdef CPU_CPP
-
 //called once every four clock cycles;
 //as NMI steps by scanlines (divisible by 4) and IRQ by PPU 4-cycle dots.
 //
 //ppu.(vh)counter(n) returns the value of said counters n-clocks before current time;
 //it is used to emulate hardware communication delay between opcode and interrupt units.
-void CPU::poll_interrupts() {
+auto CPU::poll_interrupts() -> void {
   //NMI hold
   if(status.nmi_hold) {
     status.nmi_hold = false;
@@ -46,7 +44,7 @@ void CPU::poll_interrupts() {
   status.irq_valid = irq_valid;
 }
 
-void CPU::nmitimen_update(uint8 data) {
+auto CPU::nmitimen_update(uint8 data) -> void {
   bool nmi_enabled  = status.nmi_enabled;
   bool virq_enabled = status.virq_enabled;
   bool hirq_enabled = status.hirq_enabled;
@@ -72,7 +70,7 @@ void CPU::nmitimen_update(uint8 data) {
   status.irq_lock = true;
 }
 
-bool CPU::rdnmi() {
+auto CPU::rdnmi() -> bool {
   bool result = status.nmi_line;
   if(!status.nmi_hold) {
     status.nmi_line = false;
@@ -80,7 +78,7 @@ bool CPU::rdnmi() {
   return result;
 }
 
-bool CPU::timeup() {
+auto CPU::timeup() -> bool {
   bool result = status.irq_line;
   if(!status.irq_hold) {
     status.irq_line = false;
@@ -89,18 +87,16 @@ bool CPU::timeup() {
   return result;
 }
 
-bool CPU::nmi_test() {
+auto CPU::nmi_test() -> bool {
   if(!status.nmi_transition) return false;
   status.nmi_transition = false;
   regs.wai = false;
   return true;
 }
 
-bool CPU::irq_test() {
+auto CPU::irq_test() -> bool {
   if(!status.irq_transition && !regs.irq) return false;
   status.irq_transition = false;
   regs.wai = false;
   return !regs.p.i;
 }
-
-#endif

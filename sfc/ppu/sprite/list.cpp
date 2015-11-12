@@ -1,8 +1,6 @@
-#ifdef PPU_CPP
-
-void PPU::Sprite::update(unsigned addr, uint8 data) {
+auto PPU::Sprite::update(uint addr, uint8 data) -> void {
   if(addr < 0x0200) {
-    unsigned n = addr >> 2;
+    uint n = addr >> 2;
     addr &= 3;
     if(addr == 0) {
       list[n].x = (list[n].x & 0x100) | data;
@@ -18,7 +16,7 @@ void PPU::Sprite::update(unsigned addr, uint8 data) {
       list[n].nameselect = data & 1;
     }
   } else {
-    unsigned n = (addr & 0x1f) << 2;
+    uint n = (addr & 0x1f) << 2;
     list[n + 0].x = ((data & 0x01) << 8) | (list[n + 0].x & 0xff);
     list[n + 0].size = data & 0x02;
     list[n + 1].x = ((data & 0x04) << 6) | (list[n + 1].x & 0xff);
@@ -30,29 +28,27 @@ void PPU::Sprite::update(unsigned addr, uint8 data) {
   }
 }
 
-void PPU::Sprite::synchronize() {
-  for(unsigned n = 0; n < 544; n++) update(n, ppu.oam[n]);
+auto PPU::Sprite::synchronize() -> void {
+  for(uint n = 0; n < 544; n++) update(n, ppu.oam[n]);
 }
 
-unsigned PPU::Sprite::SpriteItem::width() const {
+auto PPU::Sprite::SpriteItem::width() const -> uint{
   if(size == 0) {
-    static unsigned width[] = { 8,  8,  8, 16, 16, 32, 16, 16};
+    static uint width[] = { 8,  8,  8, 16, 16, 32, 16, 16};
     return width[ppu.sprite.regs.base_size];
   } else {
-    static unsigned width[] = {16, 32, 64, 32, 64, 64, 32, 32};
+    static uint width[] = {16, 32, 64, 32, 64, 64, 32, 32};
     return width[ppu.sprite.regs.base_size];
   }
 }
 
-unsigned PPU::Sprite::SpriteItem::height() const {
+auto PPU::Sprite::SpriteItem::height() const -> uint {
   if(size == 0) {
     if(ppu.sprite.regs.interlace && ppu.sprite.regs.base_size >= 6) return 16;
-    static unsigned height[] = { 8,  8,  8, 16, 16, 32, 32, 32};
+    static uint height[] = { 8,  8,  8, 16, 16, 32, 32, 32};
     return height[ppu.sprite.regs.base_size];
   } else {
-    static unsigned height[] = {16, 32, 64, 32, 64, 64, 64, 32};
+    static uint height[] = {16, 32, 64, 32, 64, 64, 64, 32};
     return height[ppu.sprite.regs.base_size];
   }
 }
-
-#endif

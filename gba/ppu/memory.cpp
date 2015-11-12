@@ -9,9 +9,9 @@ auto PPU::vram_read(unsigned mode, uint32 addr) -> uint32 {
     return vram[addr + 0] << 0 | vram[addr + 1] << 8;
   } else if(mode & Byte) {
     return vram[addr];
-  } else {
-    throw;
   }
+
+  return 0;  //should never occur
 }
 
 auto PPU::vram_write(unsigned mode, uint32 addr, uint32 word) -> void {
@@ -28,9 +28,13 @@ auto PPU::vram_write(unsigned mode, uint32 addr, uint32 word) -> void {
     vram[addr + 0] = word >>  0;
     vram[addr + 1] = word >>  8;
   } else if(mode & Byte) {
+    //8-bit writes to OBJ section of VRAM are ignored
+    if(regs.control.bgmode <= 2 && addr >= 0x10000) return;
+    if(regs.control.bgmode <= 5 && addr >= 0x14000) return;
+
     addr &= ~1;
-    vram[addr + 0] = word;
-    vram[addr + 1] = word;
+    vram[addr + 0] = (uint8)word;
+    vram[addr + 1] = (uint8)word;
   }
 }
 
@@ -48,10 +52,11 @@ auto PPU::pram_write(unsigned mode, uint32 addr, uint32 word) -> void {
   }
 
   if(mode & Byte) {
+    word = (uint8)word;
     return pram_write(Half, addr, word << 8 | word << 0);
   }
 
-  pram[addr >> 1 & 511] = word & 0x7fff;
+  pram[addr >> 1 & 511] = (uint16)word;
 }
 
 auto PPU::oam_read(unsigned mode, uint32 addr) -> uint32 {
@@ -105,9 +110,7 @@ auto PPU::oam_write(unsigned mode, uint32 addr, uint32 word) -> void {
     return;
   }
 
-  if(mode & Byte) {
-    return oam_write(Half, addr, word << 8 | word << 0);
-  }
+  if(mode & Byte) return;  //8-bit writes to OAM are ignored
 
   auto& obj = object[addr >> 3 & 127];
   auto& par = objectparam[addr >> 5 & 31];
@@ -147,14 +150,14 @@ auto PPU::oam_write(unsigned mode, uint32 addr, uint32 word) -> void {
 
   }
 
-  static unsigned widths[] = {
+  static uint widths[] = {
      8, 16, 32, 64,
     16, 32, 32, 64,
      8,  8, 16, 32,
      8,  8,  8,  8,  //invalid modes
   };
 
-  static unsigned heights[] = {
+  static uint heights[] = {
      8, 16, 32, 64,
      8,  8, 16, 32,
     16, 32, 32, 64,

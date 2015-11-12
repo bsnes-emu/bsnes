@@ -1,27 +1,28 @@
-#ifdef PPU_CPP
-
 #include "mode7.cpp"
 
-unsigned PPU::Background::voffset() const {
+PPU::Background::Background(PPU &self, uint id) : self(self), id(id) {
+}
+
+auto PPU::Background::voffset() const -> uint {
   if(regs.mosaic) return cache.voffset;
   return regs.voffset;
 }
 
-unsigned PPU::Background::hoffset() const {
+auto PPU::Background::hoffset() const -> uint {
   if(regs.mosaic) return cache.hoffset;
   return regs.hoffset;
 }
 
 //V = 0, H = 0
-void PPU::Background::frame() {
+auto PPU::Background::frame() -> void {
 }
 
 //H = 0
-void PPU::Background::scanline() {
+auto PPU::Background::scanline() -> void {
 }
 
 //H = 28
-void PPU::Background::begin() {
+auto PPU::Background::begin() -> void {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
   x = -7;
   y = self.vcounter();
@@ -51,7 +52,7 @@ void PPU::Background::begin() {
   }
 }
 
-void PPU::Background::get_tile() {
+auto PPU::Background::get_tile() -> void {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
 
   unsigned color_depth = (regs.mode == Mode::BPP2 ? 0 : regs.mode == Mode::BPP4 ? 1 : 2);
@@ -159,7 +160,7 @@ void PPU::Background::get_tile() {
   }
 }
 
-void PPU::Background::run(bool screen) {
+auto PPU::Background::run(bool screen) -> void {
   if(self.vcounter() == 0) return;
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
 
@@ -191,7 +192,7 @@ void PPU::Background::run(bool screen) {
   if(hires == false || screen == Screen::Sub ) if(regs.sub_enable ) output.sub  = mosaic;
 }
 
-unsigned PPU::Background::get_tile_color() {
+auto PPU::Background::get_tile_color() -> uint {
   unsigned color = 0;
 
   switch(regs.mode) {
@@ -211,7 +212,7 @@ unsigned PPU::Background::get_tile_color() {
   return color;
 }
 
-void PPU::Background::reset() {
+auto PPU::Background::reset() -> void {
   regs.tiledata_addr = (random(0x0000) & 0x07) << 13;
   regs.screen_addr = (random(0x0000) & 0x7c) << 9;
   regs.screen_size = random(0);
@@ -253,7 +254,7 @@ void PPU::Background::reset() {
   for(unsigned n = 0; n < 8; n++) data[n] = 0;
 }
 
-unsigned PPU::Background::get_tile(unsigned x, unsigned y) {
+auto PPU::Background::get_tile(uint x, uint y) -> uint {
   bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
   unsigned tile_height = (regs.tile_size == TileSize::Size8x8 ? 3 : 4);
   unsigned tile_width = (!hires ? tile_height : 4);
@@ -279,8 +280,3 @@ unsigned PPU::Background::get_tile(unsigned x, unsigned y) {
   uint16 addr = regs.screen_addr + (offset << 1);
   return (ppu.vram[addr + 0] << 0) + (ppu.vram[addr + 1] << 8);
 }
-
-PPU::Background::Background(PPU &self, unsigned id) : self(self), id(id) {
-}
-
-#endif

@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 const int16 DSP::GaussianTable[512] = {
      0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
      1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    2,    2,    2,    2,    2,
@@ -50,5 +48,3 @@ auto DSP::gaussianInterpolate(const Voice& v) -> signed {
   output += (reverse[  0] * v.buffer[offset + 3]) >> 11;
   return sclamp<16>(output) & ~1;
 }
-
-#endif

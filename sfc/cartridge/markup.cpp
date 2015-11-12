@@ -1,5 +1,3 @@
-#ifdef CARTRIDGE_CPP
-
 Cartridge::Mapping::Mapping(SuperFamicom::Memory& memory) {
   this->reader = {&SuperFamicom::Memory::read,  &memory};
   this->writer = {&SuperFamicom::Memory::write, &memory};
@@ -548,5 +546,3 @@ auto Cartridge::parseMarkupMSU1(Markup::Node root) -> void {
     }
   }
 }
-
-#endif

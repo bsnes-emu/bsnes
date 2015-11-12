@@ -1,37 +1,28 @@
 #include <sfc/sfc.hpp>
 
-#define SATELLAVIEW_EXPANSION_CPP
 namespace SuperFamicom {
 
-SatellaviewBaseUnit satellaviewbaseunit;
+Satellaview satellaview;
 
-auto SatellaviewBaseUnit::init() -> void {
+auto Satellaview::init() -> void {
 }
 
-auto SatellaviewBaseUnit::load() -> void {
-  bus.map(
-    {&SatellaviewBaseUnit::read, &satellaviewbaseunit},
-    {&SatellaviewBaseUnit::write, &satellaviewbaseunit},
-    0x00, 0x3f, 0x2188, 0x219f
-  );
-  bus.map(
-    {&SatellaviewBaseUnit::read, &satellaviewbaseunit},
-    {&SatellaviewBaseUnit::write, &satellaviewbaseunit},
-    0x80, 0xbf, 0x2188, 0x219f
-  );
+auto Satellaview::load() -> void {
+  bus.map({&Satellaview::read, &satellaview}, {&Satellaview::write, &satellaview}, 0x00, 0x3f, 0x2188, 0x219f);
+  bus.map({&Satellaview::read, &satellaview}, {&Satellaview::write, &satellaview}, 0x80, 0xbf, 0x2188, 0x219f);
 }
 
-auto SatellaviewBaseUnit::unload() -> void {
+auto Satellaview::unload() -> void {
 }
 
-auto SatellaviewBaseUnit::power() -> void {
+auto Satellaview::power() -> void {
 }
 
-auto SatellaviewBaseUnit::reset() -> void {
-  memset(&regs, 0x00, sizeof regs);
+auto Satellaview::reset() -> void {
+  memory::fill(&regs, sizeof regs);
 }
 
-auto SatellaviewBaseUnit::read(unsigned addr) -> uint8 {
+auto Satellaview::read(uint addr) -> uint8 {
   addr &= 0xffff;
 
   switch(addr) {
@@ -44,7 +35,7 @@ auto SatellaviewBaseUnit::read(unsigned addr) -> uint8 {
   case 0x2190: return regs.r2190;
 
   case 0x2192: {
-    unsigned counter = regs.r2192_counter++;
+    uint counter = regs.r2192_counter++;
     if(regs.r2192_counter >= 18) regs.r2192_counter = 0;
 
     if(counter == 0) {
@@ -89,7 +80,7 @@ auto SatellaviewBaseUnit::read(unsigned addr) -> uint8 {
   return cpu.regs.mdr;
 }
 
-auto SatellaviewBaseUnit::write(unsigned addr, uint8 data) -> void {
+auto Satellaview::write(uint addr, uint8 data) -> void {
   addr &= 0xffff;
 
   switch(addr) {

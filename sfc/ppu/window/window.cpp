@@ -1,10 +1,11 @@
-#ifdef PPU_CPP
+PPU::Window::Window(PPU& self) : self(self) {
+}
 
-void PPU::Window::scanline() {
+auto PPU::Window::scanline() -> void {
   x = 0;
 }
 
-void PPU::Window::run() {
+auto PPU::Window::run() -> void {
   bool main, sub;
   one = (x >= regs.one_left && x <= regs.one_right);
   two = (x >= regs.two_left && x <= regs.two_right);
@@ -80,12 +81,12 @@ void PPU::Window::run() {
   output.sub.color_enable = sub;
 }
 
-void PPU::Window::test(
+auto PPU::Window::test(
   bool& main, bool& sub,
   bool one_enable, bool one_invert,
   bool two_enable, bool two_invert,
   uint8 mask, bool main_enable, bool sub_enable
-) {
+) -> void {
   bool one = Window::one ^ one_invert;
   bool two = Window::two ^ two_invert;
   bool output;
@@ -109,7 +110,7 @@ void PPU::Window::test(
   sub = sub_enable ? output : false;
 }
 
-void PPU::Window::reset() {
+auto PPU::Window::reset() -> void {
   regs.bg1_one_enable = random(false);
   regs.bg1_one_invert = random(false);
   regs.bg1_two_enable = random(false);
@@ -164,8 +165,3 @@ void PPU::Window::reset() {
   one = 0;
   two = 0;
 }
-
-PPU::Window::Window(PPU& self) : self(self) {
-}
-
-#endif

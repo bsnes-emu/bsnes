@@ -1,11 +1,13 @@
 struct Background {
-  struct ID { enum { BG1, BG2, BG3, BG4 }; };
-  unsigned id;
+  struct ID { enum : uint { BG1, BG2, BG3, BG4 }; };
+  const uint id;
 
-  struct Mode { enum  { BPP2, BPP4, BPP8, Mode7, Inactive }; };
-  struct ScreenSize { enum { Size32x32, Size32x64, Size64x32, Size64x64 }; };
-  struct TileSize { enum { Size8x8, Size16x16 }; };
-  struct Screen { enum { Main, Sub }; };
+  struct Mode { enum : uint { BPP2, BPP4, BPP8, Mode7, Inactive }; };
+  struct ScreenSize { enum : uint { Size32x32, Size32x64, Size64x32, Size64x64 }; };
+  struct TileSize { enum : uint { Size8x8, Size16x16 }; };
+  struct Screen { enum : uint { Main, Sub }; };
+
+  Background(PPU& self, uint id);
 
   struct Regs {
     uint16 tiledata_addr;
@@ -14,9 +16,9 @@ struct Background {
     uint4 mosaic;
     bool tile_size;
 
-    unsigned mode;
-    unsigned priority0;
-    unsigned priority1;
+    uint mode;
+    uint priority0;
+    uint priority1;
 
     bool main_enable;
     bool sub_enable;
@@ -30,51 +32,50 @@ struct Background {
     uint16 voffset;
   } cache;
 
-  alwaysinline unsigned voffset() const;
-  alwaysinline unsigned hoffset() const;
+  alwaysinline auto voffset() const -> uint;
+  alwaysinline auto hoffset() const -> uint;
 
   struct Output {
     struct Pixel {
-      unsigned priority;  //0 = none (transparent)
+      uint priority;  //0 = none (transparent)
       uint8 palette;
       uint16 tile;
     } main, sub;
   } output;
 
   struct Mosaic : Output::Pixel {
-    unsigned vcounter;
-    unsigned voffset;
-    unsigned hcounter;
-    unsigned hoffset;
+    uint vcounter;
+    uint voffset;
+    uint hcounter;
+    uint hoffset;
   } mosaic;
 
   struct {
-    signed x;
-    signed y;
+    int x;
+    int y;
 
-    unsigned tile_counter;
-    unsigned tile;
-    unsigned priority;
-    unsigned palette_number;
-    unsigned palette_index;
+    uint tile_counter;
+    uint tile;
+    uint priority;
+    uint palette_number;
+    uint palette_index;
     uint8 data[8];
   };
 
-  void frame();
-  void scanline();
-  void begin();
-  void run(bool screen);
-  void reset();
+  auto frame() -> void;
+  auto scanline() -> void;
+  auto begin() -> void;
+  auto run(bool screen) -> void;
+  auto reset() -> void;
 
-  void get_tile();
-  unsigned get_tile_color();
-  unsigned get_tile(unsigned x, unsigned y);
-  alwaysinline signed clip(signed n);
-  void begin_mode7();
-  void run_mode7();
+  auto get_tile() -> void;
+  auto get_tile_color() -> uint;
+  auto get_tile(uint x, uint y) -> uint;
+  alwaysinline auto clip(int n) -> int;
+  auto begin_mode7() -> void;
+  auto run_mode7() -> void;
 
-  void serialize(serializer&);
-  Background(PPU& self, unsigned id);
+  auto serialize(serializer&) -> void;
 
   PPU& self;
   friend class PPU;

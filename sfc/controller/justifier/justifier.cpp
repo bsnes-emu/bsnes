@@ -1,5 +1,3 @@
-#ifdef CONTROLLER_CPP
-
 Justifier::Justifier(bool port, bool chained):
 Controller(port),
 chained(chained),
@@ -128,5 +126,3 @@ auto Justifier::latch(bool data) -> void {
   counter = 0;
   if(latched == 0) active = !active;  //toggle between both controllers, even when unchained
 }
-
-#endif

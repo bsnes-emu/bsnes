@@ -1,5 +1,3 @@
-#ifdef SMP_CPP
-
 alwaysinline auto SMP::ramRead(uint16 addr) -> uint8 {
   if(addr >= 0xffc0 && status.iplromEnable) return iplrom[addr & 0x3f];
   if(status.ramDisable) return 0x5a;  //0xff on mini-SNES
@@ -41,7 +39,7 @@ auto SMP::busRead(uint16 addr) -> uint8 {
   case 0xf6:  //CPUIO2
   case 0xf7:  //CPUIO3
     synchronizeCPU();
-    return cpu.port_read(addr);
+    return cpu.portRead(addr);
 
   case 0xf8:  //RAM0
     return status.ram00f8;
@@ -100,12 +98,12 @@ auto SMP::busWrite(uint16 addr, uint8 data) -> void {
       //emulated by simulating CPU writes of 0x00
       synchronizeCPU();
       if(data & 0x20) {
-        cpu.port_write(2, 0x00);
-        cpu.port_write(3, 0x00);
+        cpu.portWrite(2, 0x00);
+        cpu.portWrite(3, 0x00);
       }
       if(data & 0x10) {
-        cpu.port_write(0, 0x00);
-        cpu.port_write(1, 0x00);
+        cpu.portWrite(0, 0x00);
+        cpu.portWrite(1, 0x00);
       }
     }
 
@@ -201,5 +199,3 @@ auto SMP::disassembler_read(uint16 addr) -> uint8 {
   if((addr & 0xffc0) == 0xffc0 && status.iplromEnable) return iplrom[addr & 0x3f];
   return apuram[addr];
 }
-
-#endif

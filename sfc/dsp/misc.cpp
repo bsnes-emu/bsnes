@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 auto DSP::misc27() -> void {
   state._pmon = REG(PMON) & ~1;  //voice 0 doesn't support PMON
 }
@@ -31,5 +29,3 @@ auto DSP::misc30() -> void {
     state.noise = (feedback & 0x4000) ^ (state.noise >> 1);
   }
 }
-
-#endif

@@ -1,32 +1,33 @@
 struct CPU : Processor::R65816, Thread, public PPUcounter {
-  uint8 wram[128 * 1024];
-
   enum : bool { Threaded = true };
-  vector<Thread*> coprocessors;
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_smp();
-  void synchronize_ppu();
-  void synchronize_coprocessors();
-  void synchronize_controllers();
 
-  uint8 port_read(uint2 port) const;
-  void port_write(uint2 port, uint8 data);
-
-  uint8 pio();
-  bool joylatch();
-  alwaysinline bool interrupt_pending() { return status.interrupt_pending; }
-
-  void enter();
-  void enable();
-  void power();
-  void reset();
-
-  void serialize(serializer&);
   CPU();
-  ~CPU();
+
+  alwaysinline auto step(uint clocks) -> void;
+  alwaysinline auto synchronizeSMP() -> void;
+  auto synchronizePPU() -> void;
+  auto synchronizeCoprocessors() -> void;
+  auto synchronizeDevices() -> void;
+
+  auto portRead(uint2 port) const -> uint8;
+  auto portWrite(uint2 port, uint8 data) -> void;
+
+  auto pio() -> uint8;
+  auto joylatch() -> bool;
+  alwaysinline auto interrupt_pending() -> bool { return status.interrupt_pending; }
+
+  auto enter() -> void;
+  auto enable() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint8 wram[128 * 1024] = {0};
+  vector<Thread*> coprocessors;
 
 privileged:
-  unsigned cpu_version = 2;  //allowed: 1, 2
+  uint cpu_version = 2;  //allowed: 1, 2
 
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
@@ -36,19 +37,19 @@ privileged:
   struct Status {
     bool interrupt_pending;
 
-    unsigned clock_count;
-    unsigned line_clocks;
+    uint clock_count;
+    uint line_clocks;
 
     //timing
     bool irq_lock;
 
-    unsigned dram_refresh_position;
+    uint dram_refresh_position;
     bool dram_refreshed;
 
-    unsigned hdma_init_position;
+    uint hdma_init_position;
     bool hdma_init_triggered;
 
-    unsigned hdma_position;
+    uint hdma_position;
     bool hdma_triggered;
 
     bool nmi_valid;
@@ -67,8 +68,8 @@ privileged:
 
     //DMA
     bool dma_active;
-    unsigned dma_counter;
-    unsigned dma_clocks;
+    uint dma_counter;
+    uint dma_clocks;
     bool dma_pending;
     bool hdma_pending;
     bool hdma_mode;  //0 = init, 1 = run
@@ -76,8 +77,8 @@ privileged:
     //auto joypad polling
     bool auto_joypad_active;
     bool auto_joypad_latch;
-    unsigned auto_joypad_counter;
-    unsigned auto_joypad_clock;
+    uint auto_joypad_counter;
+    uint auto_joypad_clock;
 
     //MMIO
     //$2140-217f
@@ -112,7 +113,7 @@ privileged:
     uint9 virq_pos;
 
     //$420d
-    unsigned rom_speed;
+    uint rom_speed;
 
     //$4214-$4217
     uint16 rddiv;
@@ -126,13 +127,13 @@ privileged:
   } status;
 
   struct ALU {
-    unsigned mpyctr;
-    unsigned divctr;
-    unsigned shift;
+    uint mpyctr;
+    uint divctr;
+    uint shift;
   } alu;
 
-  static void Enter();
-  void op_step();
+  static auto Enter() -> void;
+  auto op_step() -> void;
 
   struct Debugger {
     hook<void (uint24)> op_exec;

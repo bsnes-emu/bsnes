@@ -1,22 +1,23 @@
-#ifdef PPU_CPP
-
 #include "list.cpp"
 
-void PPU::Sprite::address_reset() {
+PPU::Sprite::Sprite(PPU& self) : self(self) {
+}
+
+auto PPU::Sprite::address_reset() -> void {
   self.regs.oam_addr = self.regs.oam_baseaddr;
   set_first_sprite();
 }
 
-void PPU::Sprite::set_first_sprite() {
+auto PPU::Sprite::set_first_sprite() -> void {
   regs.first_sprite = (self.regs.oam_priority == false ? 0 : (self.regs.oam_addr >> 2) & 127);
 }
 
-void PPU::Sprite::frame() {
+auto PPU::Sprite::frame() -> void {
   regs.time_over = false;
   regs.range_over = false;
 }
 
-void PPU::Sprite::scanline() {
+auto PPU::Sprite::scanline() -> void {
   t.x = 0;
   t.y = self.vcounter();
 
@@ -45,7 +46,7 @@ void PPU::Sprite::scanline() {
   }
 }
 
-bool PPU::Sprite::on_scanline(SpriteItem& sprite) {
+auto PPU::Sprite::on_scanline(SpriteItem& sprite) -> bool {
   if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
   signed height = (regs.interlace == false ? sprite.height() : (sprite.height() >> 1));
   if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
@@ -53,7 +54,7 @@ bool PPU::Sprite::on_scanline(SpriteItem& sprite) {
   return false;
 }
 
-void PPU::Sprite::run() {
+auto PPU::Sprite::run() -> void {
   output.main.priority = 0;
   output.sub.priority = 0;
 
@@ -89,7 +90,7 @@ void PPU::Sprite::run() {
   }
 }
 
-void PPU::Sprite::tilefetch() {
+auto PPU::Sprite::tilefetch() -> void {
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
 
@@ -159,7 +160,7 @@ void PPU::Sprite::tilefetch() {
   regs.range_over |= (t.item_count > 32);
 }
 
-void PPU::Sprite::reset() {
+auto PPU::Sprite::reset() -> void {
   for(unsigned i = 0; i < 128; i++) {
     list[i].x = 0;
     list[i].y = 0;
@@ -216,8 +217,3 @@ void PPU::Sprite::reset() {
   output.sub.palette = 0;
   output.sub.priority = 0;
 }
-
-PPU::Sprite::Sprite(PPU& self) : self(self) {
-}
-
-#endif

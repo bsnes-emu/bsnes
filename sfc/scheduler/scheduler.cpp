@@ -1,5 +1,3 @@
-#ifdef SYSTEM_CPP
-
 Scheduler scheduler;
 
 auto Scheduler::init() -> void {
@@ -22,5 +20,3 @@ auto Scheduler::exit(ExitReason reason) -> void {
 auto Scheduler::debug() -> void {
   exit(ExitReason::DebuggerEvent);
 }
-
-#endif

@@ -1,12 +1,12 @@
-struct SatellaviewBaseUnit : Memory {
+struct Satellaview : Memory {
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(unsigned addr) -> uint8;
-  auto write(unsigned addr, uint8 data) -> void;
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
 private:
   struct {
@@ -22,4 +22,4 @@ private:
   } regs;
 };
 
-extern SatellaviewBaseUnit satellaviewbaseunit;
+extern Satellaview satellaview;

@@ -50,4 +50,13 @@ struct ConfigurationManager : Configuration::Document {
   } timing;
 };
 
+struct EmulatorSettings : Markup::Node {
+  EmulatorSettings();
+  auto quit() -> void;
+
+  auto get(string name) -> string;
+  auto set(string name, string value) -> void;
+};
+
 extern ConfigurationManager* config;
+extern EmulatorSettings* emulatorSettings;

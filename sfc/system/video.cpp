@@ -1,5 +1,3 @@
-#ifdef SYSTEM_CPP
-
 Video video;
 
 void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
@@ -163,5 +161,3 @@ void Video::init() {
   hires = false;
   for(auto& n : line_width) n = 256;
 }
-
-#endif

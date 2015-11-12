@@ -1,6 +1,6 @@
 struct Scheduler {
-  enum class SynchronizeMode : unsigned { None, CPU, All } sync;
-  enum class ExitReason : unsigned { UnknownEvent, FrameEvent, SynchronizeEvent, DebuggerEvent };
+  enum class SynchronizeMode : uint { None, CPU, All } sync;
+  enum class ExitReason : uint { UnknownEvent, FrameEvent, SynchronizeEvent, DebuggerEvent };
 
   auto init() -> void;
   auto enter() -> void;

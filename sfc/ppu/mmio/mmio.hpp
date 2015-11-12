@@ -1,6 +1,6 @@
 public:
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
+  auto mmio_read(uint addr) -> uint8;
+  auto mmio_write(uint addr, uint8 data) -> void;
 
 privileged:
 struct {
@@ -87,79 +87,79 @@ struct {
   uint16 vcounter;
 } regs;
 
-alwaysinline uint16 get_vram_address();
-alwaysinline uint8 vram_read(unsigned addr);
-alwaysinline void vram_write(unsigned addr, uint8 data);
-alwaysinline uint8 oam_read(unsigned addr);
-alwaysinline void oam_write(unsigned addr, uint8 data);
-alwaysinline uint8 cgram_read(unsigned addr);
-alwaysinline void cgram_write(unsigned addr, uint8 data);
+alwaysinline auto get_vram_address() -> uint16;
+alwaysinline auto vram_read(uint addr) -> uint8;
+alwaysinline auto vram_write(uint addr, uint8 data) -> void;
+alwaysinline auto oam_read(uint addr) -> uint8;
+alwaysinline auto oam_write(uint addr, uint8 data) -> void;
+alwaysinline auto cgram_read(uint addr) -> uint8;
+alwaysinline auto cgram_write(uint addr, uint8 data) -> void;
 
-void mmio_update_video_mode();
+auto mmio_update_video_mode() -> void;
 
-void mmio_w2100(uint8);  //INIDISP
-void mmio_w2101(uint8);  //OBSEL
-void mmio_w2102(uint8);  //OAMADDL
-void mmio_w2103(uint8);  //OAMADDH
-void mmio_w2104(uint8);  //OAMDATA
-void mmio_w2105(uint8);  //BGMODE
-void mmio_w2106(uint8);  //MOSAIC
-void mmio_w2107(uint8);  //BG1SC
-void mmio_w2108(uint8);  //BG2SC
-void mmio_w2109(uint8);  //BG3SC
-void mmio_w210a(uint8);  //BG4SC
-void mmio_w210b(uint8);  //BG12NBA
-void mmio_w210c(uint8);  //BG34NBA
-void mmio_w210d(uint8);  //BG1HOFS
-void mmio_w210e(uint8);  //BG1VOFS
-void mmio_w210f(uint8);  //BG2HOFS
-void mmio_w2110(uint8);  //BG2VOFS
-void mmio_w2111(uint8);  //BG3HOFS
-void mmio_w2112(uint8);  //BG3VOFS
-void mmio_w2113(uint8);  //BG4HOFS
-void mmio_w2114(uint8);  //BG4VOFS
-void mmio_w2115(uint8);  //VMAIN
-void mmio_w2116(uint8);  //VMADDL
-void mmio_w2117(uint8);  //VMADDH
-void mmio_w2118(uint8);  //VMDATAL
-void mmio_w2119(uint8);  //VMDATAH
-void mmio_w211a(uint8);  //M7SEL
-void mmio_w211b(uint8);  //M7A
-void mmio_w211c(uint8);  //M7B
-void mmio_w211d(uint8);  //M7C
-void mmio_w211e(uint8);  //M7D
-void mmio_w211f(uint8);  //M7X
-void mmio_w2120(uint8);  //M7Y
-void mmio_w2121(uint8);  //CGADD
-void mmio_w2122(uint8);  //CGDATA
-void mmio_w2123(uint8);  //W12SEL
-void mmio_w2124(uint8);  //W34SEL
-void mmio_w2125(uint8);  //WOBJSEL
-void mmio_w2126(uint8);  //WH0
-void mmio_w2127(uint8);  //WH1
-void mmio_w2128(uint8);  //WH2
-void mmio_w2129(uint8);  //WH3
-void mmio_w212a(uint8);  //WBGLOG
-void mmio_w212b(uint8);  //WOBJLOG
-void mmio_w212c(uint8);  //TM
-void mmio_w212d(uint8);  //TS
-void mmio_w212e(uint8);  //TMW
-void mmio_w212f(uint8);  //TSW
-void mmio_w2130(uint8);  //CGWSEL
-void mmio_w2131(uint8);  //CGADDSUB
-void mmio_w2132(uint8);  //COLDATA
-void mmio_w2133(uint8);  //SETINI
-uint8 mmio_r2134();  //MPYL
-uint8 mmio_r2135();  //MPYM
-uint8 mmio_r2136();  //MPYH
-uint8 mmio_r2137();  //SLHV
-uint8 mmio_r2138();  //OAMDATAREAD
-uint8 mmio_r2139();  //VMDATALREAD
-uint8 mmio_r213a();  //VMDATAHREAD
-uint8 mmio_r213b();  //CGDATAREAD
-uint8 mmio_r213c();  //OPHCT
-uint8 mmio_r213d();  //OPVCT
-uint8 mmio_r213e();  //STAT77
-uint8 mmio_r213f();  //STAT78
+auto mmio_w2100(uint8) -> void;  //INIDISP
+auto mmio_w2101(uint8) -> void;  //OBSEL
+auto mmio_w2102(uint8) -> void;  //OAMADDL
+auto mmio_w2103(uint8) -> void;  //OAMADDH
+auto mmio_w2104(uint8) -> void;  //OAMDATA
+auto mmio_w2105(uint8) -> void;  //BGMODE
+auto mmio_w2106(uint8) -> void;  //MOSAIC
+auto mmio_w2107(uint8) -> void;  //BG1SC
+auto mmio_w2108(uint8) -> void;  //BG2SC
+auto mmio_w2109(uint8) -> void;  //BG3SC
+auto mmio_w210a(uint8) -> void;  //BG4SC
+auto mmio_w210b(uint8) -> void;  //BG12NBA
+auto mmio_w210c(uint8) -> void;  //BG34NBA
+auto mmio_w210d(uint8) -> void;  //BG1HOFS
+auto mmio_w210e(uint8) -> void;  //BG1VOFS
+auto mmio_w210f(uint8) -> void;  //BG2HOFS
+auto mmio_w2110(uint8) -> void;  //BG2VOFS
+auto mmio_w2111(uint8) -> void;  //BG3HOFS
+auto mmio_w2112(uint8) -> void;  //BG3VOFS
+auto mmio_w2113(uint8) -> void;  //BG4HOFS
+auto mmio_w2114(uint8) -> void;  //BG4VOFS
+auto mmio_w2115(uint8) -> void;  //VMAIN
+auto mmio_w2116(uint8) -> void;  //VMADDL
+auto mmio_w2117(uint8) -> void;  //VMADDH
+auto mmio_w2118(uint8) -> void;  //VMDATAL
+auto mmio_w2119(uint8) -> void;  //VMDATAH
+auto mmio_w211a(uint8) -> void;  //M7SEL
+auto mmio_w211b(uint8) -> void;  //M7A
+auto mmio_w211c(uint8) -> void;  //M7B
+auto mmio_w211d(uint8) -> void;  //M7C
+auto mmio_w211e(uint8) -> void;  //M7D
+auto mmio_w211f(uint8) -> void;  //M7X
+auto mmio_w2120(uint8) -> void;  //M7Y
+auto mmio_w2121(uint8) -> void;  //CGADD
+auto mmio_w2122(uint8) -> void;  //CGDATA
+auto mmio_w2123(uint8) -> void;  //W12SEL
+auto mmio_w2124(uint8) -> void;  //W34SEL
+auto mmio_w2125(uint8) -> void;  //WOBJSEL
+auto mmio_w2126(uint8) -> void;  //WH0
+auto mmio_w2127(uint8) -> void;  //WH1
+auto mmio_w2128(uint8) -> void;  //WH2
+auto mmio_w2129(uint8) -> void;  //WH3
+auto mmio_w212a(uint8) -> void;  //WBGLOG
+auto mmio_w212b(uint8) -> void;  //WOBJLOG
+auto mmio_w212c(uint8) -> void;  //TM
+auto mmio_w212d(uint8) -> void;  //TS
+auto mmio_w212e(uint8) -> void;  //TMW
+auto mmio_w212f(uint8) -> void;  //TSW
+auto mmio_w2130(uint8) -> void;  //CGWSEL
+auto mmio_w2131(uint8) -> void;  //CGADDSUB
+auto mmio_w2132(uint8) -> void;  //COLDATA
+auto mmio_w2133(uint8) -> void;  //SETINI
+auto mmio_r2134() -> uint8;  //MPYL
+auto mmio_r2135() -> uint8;  //MPYM
+auto mmio_r2136() -> uint8;  //MPYH
+auto mmio_r2137() -> uint8;  //SLHV
+auto mmio_r2138() -> uint8;  //OAMDATAREAD
+auto mmio_r2139() -> uint8;  //VMDATALREAD
+auto mmio_r213a() -> uint8;  //VMDATAHREAD
+auto mmio_r213b() -> uint8;  //CGDATAREAD
+auto mmio_r213c() -> uint8;  //OPHCT
+auto mmio_r213d() -> uint8;  //OPVCT
+auto mmio_r213e() -> uint8;  //STAT77
+auto mmio_r213f() -> uint8;  //STAT78
 
-void mmio_reset();
+auto mmio_reset() -> void;

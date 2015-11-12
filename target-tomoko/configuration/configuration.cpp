@@ -1,5 +1,6 @@
 #include "../tomoko.hpp"
 ConfigurationManager* config = nullptr;
+EmulatorSettings* emulatorSettings = nullptr;
 
 ConfigurationManager::ConfigurationManager() {
   config = this;
@@ -53,4 +54,23 @@ ConfigurationManager::ConfigurationManager() {
 
 auto ConfigurationManager::quit() -> void {
   save(locate({configpath(), "tomoko/"}, "settings.bml"));
+}
+
+EmulatorSettings::EmulatorSettings() {
+  emulatorSettings = this;
+  (Markup::Node&)*this = BML::unserialize(string::read(locate({configpath(), "tomoko/"}, "emulators.bml")));
+}
+
+auto EmulatorSettings::quit() -> void {
+  file::write(locate({configpath(), "tomoko/"}, "emulators.bml"), BML::serialize(*this));
+}
+
+auto EmulatorSettings::get(string name) -> string {
+  name.replace(" ", "");
+  return (*this)(name).text();
+}
+
+auto EmulatorSettings::set(string name, string value) -> void {
+  name.replace(" ", "");
+  (*this)(name).setValue(value);
 }

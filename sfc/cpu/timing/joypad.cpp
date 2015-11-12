@@ -1,7 +1,5 @@
-#ifdef CPU_CPP
-
 //called every 256 clocks; see CPU::add_clocks()
-void CPU::step_auto_joypad_poll() {
+auto CPU::step_auto_joypad_poll() -> void {
   if(vcounter() >= (ppu.overscan() == false ? 225 : 240)) {
     //cache enable state at first iteration
     if(status.auto_joypad_counter == 0) status.auto_joypad_latch = status.auto_joypad_poll;
@@ -27,5 +25,3 @@ void CPU::step_auto_joypad_poll() {
     status.auto_joypad_counter++;
   }
 }
-
-#endif

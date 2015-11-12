@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 void DSP::serialize(serializer& s) {
   Thread::serialize(s);
 
@@ -59,5 +57,3 @@ void DSP::serialize(serializer& s) {
     s.integer(voice[n]._envxOut);
   }
 }
-
-#endif

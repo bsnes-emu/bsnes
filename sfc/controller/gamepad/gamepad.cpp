@@ -1,5 +1,3 @@
-#ifdef CONTROLLER_CPP
-
 Gamepad::Gamepad(bool port) : Controller(port) {
   latched = 0;
   counter = 0;
@@ -53,5 +51,3 @@ auto Gamepad::latch(bool data) -> void {
     r      = interface->inputPoll(port, id, R);
   }
 }
-
-#endif

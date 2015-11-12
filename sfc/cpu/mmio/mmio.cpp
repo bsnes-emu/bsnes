@@ -1,30 +1,33 @@
-#ifdef CPU_CPP
+auto CPU::pio() -> uint8 {
+  return status.pio;
+}
 
-uint8 CPU::pio() { return status.pio; }
-bool CPU::joylatch() { return status.joypad_strobe_latch; }
+auto CPU::joylatch() -> bool {
+  return status.joypad_strobe_latch;
+}
 
 //WMDATA
-uint8 CPU::mmio_r2180() {
+auto CPU::mmio_r2180() -> uint8 {
   return bus.read(0x7e0000 | status.wram_addr++);
 }
 
 //WMDATA
-void CPU::mmio_w2180(uint8 data) {
+auto CPU::mmio_w2180(uint8 data) -> void {
   bus.write(0x7e0000 | status.wram_addr++, data);
 }
 
 //WMADDL
-void CPU::mmio_w2181(uint8 data) {
+auto CPU::mmio_w2181(uint8 data) -> void {
   status.wram_addr = (status.wram_addr & 0x01ff00) | (data <<  0);
 }
 
 //WMADDM
-void CPU::mmio_w2182(uint8 data) {
+auto CPU::mmio_w2182(uint8 data) -> void {
   status.wram_addr = (status.wram_addr & 0x0100ff) | (data <<  8);
 }
 
 //WMADDH
-void CPU::mmio_w2183(uint8 data) {
+auto CPU::mmio_w2183(uint8 data) -> void {
   status.wram_addr = (status.wram_addr & 0x00ffff) | (data << 16);
 }
 
@@ -32,7 +35,7 @@ void CPU::mmio_w2183(uint8 data) {
 //bit 0 is shared between JOYSER0 and JOYSER1, therefore
 //strobing $4016.d0 affects both controller port latches.
 //$4017 bit 0 writes are ignored.
-void CPU::mmio_w4016(uint8 data) {
+auto CPU::mmio_w4016(uint8 data) -> void {
   device.controllerPort1->latch(data & 1);
   device.controllerPort2->latch(data & 1);
 }
@@ -40,7 +43,7 @@ void CPU::mmio_w4016(uint8 data) {
 //JOYSER0
 //7-2 = MDR
 //1-0 = Joypad serial data
-uint8 CPU::mmio_r4016() {
+auto CPU::mmio_r4016() -> uint8 {
   uint8 r = regs.mdr & 0xfc;
   r |= device.controllerPort1->data();
   return r;
@@ -50,31 +53,31 @@ uint8 CPU::mmio_r4016() {
 //7-5 = MDR
 //4-2 = Always 1 (pins are connected to GND)
 //1-0 = Joypad serial data
-uint8 CPU::mmio_r4017() {
+auto CPU::mmio_r4017() -> uint8 {
   uint8 r = (regs.mdr & 0xe0) | 0x1c;
   r |= device.controllerPort2->data();
   return r;
 }
 
 //NMITIMEN
-void CPU::mmio_w4200(uint8 data) {
+auto CPU::mmio_w4200(uint8 data) -> void {
   status.auto_joypad_poll = data & 1;
   nmitimen_update(data);
 }
 
 //WRIO
-void CPU::mmio_w4201(uint8 data) {
+auto CPU::mmio_w4201(uint8 data) -> void {
   if((status.pio & 0x80) && !(data & 0x80)) ppu.latch_counters();
   status.pio = data;
 }
 
 //WRMPYA
-void CPU::mmio_w4202(uint8 data) {
+auto CPU::mmio_w4202(uint8 data) -> void {
   status.wrmpya = data;
 }
 
 //WRMPYB
-void CPU::mmio_w4203(uint8 data) {
+auto CPU::mmio_w4203(uint8 data) -> void {
   status.rdmpy = 0;
   if(alu.mpyctr || alu.divctr) return;
 
@@ -86,17 +89,17 @@ void CPU::mmio_w4203(uint8 data) {
 }
 
 //WRDIVL
-void CPU::mmio_w4204(uint8 data) {
+auto CPU::mmio_w4204(uint8 data) -> void {
   status.wrdiva = (status.wrdiva & 0xff00) | (data << 0);
 }
 
 //WRDIVH
-void CPU::mmio_w4205(uint8 data) {
+auto CPU::mmio_w4205(uint8 data) -> void {
   status.wrdiva = (status.wrdiva & 0x00ff) | (data << 8);
 }
 
 //WRDIVB
-void CPU::mmio_w4206(uint8 data) {
+auto CPU::mmio_w4206(uint8 data) -> void {
   status.rdmpy = status.wrdiva;
   if(alu.mpyctr || alu.divctr) return;
 
@@ -107,27 +110,27 @@ void CPU::mmio_w4206(uint8 data) {
 }
 
 //HTIMEL
-void CPU::mmio_w4207(uint8 data) {
+auto CPU::mmio_w4207(uint8 data) -> void {
   status.hirq_pos = (status.hirq_pos & 0x0100) | (data << 0);
 }
 
 //HTIMEH
-void CPU::mmio_w4208(uint8 data) {
+auto CPU::mmio_w4208(uint8 data) -> void {
   status.hirq_pos = (status.hirq_pos & 0x00ff) | (data << 8);
 }
 
 //VTIMEL
-void CPU::mmio_w4209(uint8 data) {
+auto CPU::mmio_w4209(uint8 data) -> void {
   status.virq_pos = (status.virq_pos & 0x0100) | (data << 0);
 }
 
 //VTIMEH
-void CPU::mmio_w420a(uint8 data) {
+auto CPU::mmio_w420a(uint8 data) -> void {
   status.virq_pos = (status.virq_pos & 0x00ff) | (data << 8);
 }
 
 //DMAEN
-void CPU::mmio_w420b(uint8 data) {
+auto CPU::mmio_w420b(uint8 data) -> void {
   for(unsigned i = 0; i < 8; i++) {
     channel[i].dma_enabled = data & (1 << i);
   }
@@ -135,14 +138,14 @@ void CPU::mmio_w420b(uint8 data) {
 }
 
 //HDMAEN
-void CPU::mmio_w420c(uint8 data) {
+auto CPU::mmio_w420c(uint8 data) -> void {
   for(unsigned i = 0; i < 8; i++) {
     channel[i].hdma_enabled = data & (1 << i);
   }
 }
 
 //MEMSEL
-void CPU::mmio_w420d(uint8 data) {
+auto CPU::mmio_w420d(uint8 data) -> void {
   status.rom_speed = (data & 1 ? 6 : 8);
 }
 
@@ -150,7 +153,7 @@ void CPU::mmio_w420d(uint8 data) {
 //7   = NMI acknowledge
 //6-4 = MDR
 //3-0 = CPU (5a22) version
-uint8 CPU::mmio_r4210() {
+auto CPU::mmio_r4210() -> uint8 {
   uint8 r = (regs.mdr & 0x70);
   r |= (uint8)(rdnmi()) << 7;
   r |= (cpu_version & 0x0f);
@@ -160,7 +163,7 @@ uint8 CPU::mmio_r4210() {
 //TIMEUP
 //7   = IRQ acknowledge
 //6-0 = MDR
-uint8 CPU::mmio_r4211() {
+auto CPU::mmio_r4211() -> uint8 {
   uint8 r = (regs.mdr & 0x7f);
   r |= (uint8)(timeup()) << 7;
   return r;
@@ -171,7 +174,7 @@ uint8 CPU::mmio_r4211() {
 //6   = HBLANK acknowledge
 //5-1 = MDR
 //0   = JOYPAD acknowledge
-uint8 CPU::mmio_r4212() {
+auto CPU::mmio_r4212() -> uint8 {
   uint8 r = (regs.mdr & 0x3e);
   if(status.auto_joypad_active) r |= 0x01;
   if(hcounter() <= 2 || hcounter() >= 1096) r |= 0x40;  //hblank
@@ -180,41 +183,41 @@ uint8 CPU::mmio_r4212() {
 }
 
 //RDIO
-uint8 CPU::mmio_r4213() {
+auto CPU::mmio_r4213() -> uint8 {
   return status.pio;
 }
 
 //RDDIVL
-uint8 CPU::mmio_r4214() {
+auto CPU::mmio_r4214() -> uint8 {
   return status.rddiv >> 0;
 }
 
 //RDDIVH
-uint8 CPU::mmio_r4215() {
+auto CPU::mmio_r4215() -> uint8 {
   return status.rddiv >> 8;
 }
 
 //RDMPYL
-uint8 CPU::mmio_r4216() {
+auto CPU::mmio_r4216() -> uint8 {
   return status.rdmpy >> 0;
 }
 
 //RDMPYH
-uint8 CPU::mmio_r4217() {
+auto CPU::mmio_r4217() -> uint8 {
   return status.rdmpy >> 8;
 }
 
-uint8 CPU::mmio_r4218() { return status.joy1 >> 0; }  //JOY1L
-uint8 CPU::mmio_r4219() { return status.joy1 >> 8; }  //JOY1H
-uint8 CPU::mmio_r421a() { return status.joy2 >> 0; }  //JOY2L
-uint8 CPU::mmio_r421b() { return status.joy2 >> 8; }  //JOY2H
-uint8 CPU::mmio_r421c() { return status.joy3 >> 0; }  //JOY3L
-uint8 CPU::mmio_r421d() { return status.joy3 >> 8; }  //JOY3H
-uint8 CPU::mmio_r421e() { return status.joy4 >> 0; }  //JOY4L
-uint8 CPU::mmio_r421f() { return status.joy4 >> 8; }  //JOY4H
+auto CPU::mmio_r4218() -> uint8 { return status.joy1 >> 0; }  //JOY1L
+auto CPU::mmio_r4219() -> uint8 { return status.joy1 >> 8; }  //JOY1H
+auto CPU::mmio_r421a() -> uint8 { return status.joy2 >> 0; }  //JOY2L
+auto CPU::mmio_r421b() -> uint8 { return status.joy2 >> 8; }  //JOY2H
+auto CPU::mmio_r421c() -> uint8 { return status.joy3 >> 0; }  //JOY3L
+auto CPU::mmio_r421d() -> uint8 { return status.joy3 >> 8; }  //JOY3H
+auto CPU::mmio_r421e() -> uint8 { return status.joy4 >> 0; }  //JOY4L
+auto CPU::mmio_r421f() -> uint8 { return status.joy4 >> 8; }  //JOY4H
 
 //DMAPx
-uint8 CPU::mmio_r43x0(uint8 i) {
+auto CPU::mmio_r43x0(uint8 i) -> uint8 {
   return (channel[i].direction << 7)
        | (channel[i].indirect << 6)
        | (channel[i].unused << 5)
@@ -224,64 +227,64 @@ uint8 CPU::mmio_r43x0(uint8 i) {
 }
 
 //BBADx
-uint8 CPU::mmio_r43x1(uint8 i) {
+auto CPU::mmio_r43x1(uint8 i) -> uint8 {
   return channel[i].dest_addr;
 }
 
 //A1TxL
-uint8 CPU::mmio_r43x2(uint8 i) {
+auto CPU::mmio_r43x2(uint8 i) -> uint8 {
   return channel[i].source_addr >> 0;
 }
 
 //A1TxH
-uint8 CPU::mmio_r43x3(uint8 i) {
+auto CPU::mmio_r43x3(uint8 i) -> uint8 {
   return channel[i].source_addr >> 8;
 }
 
 //A1Bx
-uint8 CPU::mmio_r43x4(uint8 i) {
+auto CPU::mmio_r43x4(uint8 i) -> uint8 {
   return channel[i].source_bank;
 }
 
 //DASxL
 //union { uint16 transfer_size; uint16 indirect_addr; };
-uint8 CPU::mmio_r43x5(uint8 i) {
+auto CPU::mmio_r43x5(uint8 i) -> uint8 {
   return channel[i].transfer_size >> 0;
 }
 
 //DASxH
 //union { uint16 transfer_size; uint16 indirect_addr; };
-uint8 CPU::mmio_r43x6(uint8 i) {
+auto CPU::mmio_r43x6(uint8 i) -> uint8 {
   return channel[i].transfer_size >> 8;
 }
 
 //DASBx
-uint8 CPU::mmio_r43x7(uint8 i) {
+auto CPU::mmio_r43x7(uint8 i) -> uint8 {
   return channel[i].indirect_bank;
 }
 
 //A2AxL
-uint8 CPU::mmio_r43x8(uint8 i) {
+auto CPU::mmio_r43x8(uint8 i) -> uint8 {
   return channel[i].hdma_addr >> 0;
 }
 
 //A2AxH
-uint8 CPU::mmio_r43x9(uint8 i) {
+auto CPU::mmio_r43x9(uint8 i) -> uint8 {
   return channel[i].hdma_addr >> 8;
 }
 
 //NTRLx
-uint8 CPU::mmio_r43xa(uint8 i) {
+auto CPU::mmio_r43xa(uint8 i) -> uint8 {
   return channel[i].line_counter;
 }
 
 //???
-uint8 CPU::mmio_r43xb(uint8 i) {
+auto CPU::mmio_r43xb(uint8 i) -> uint8 {
   return channel[i].unknown;
 }
 
 //DMAPx
-void CPU::mmio_w43x0(uint8 i, uint8 data) {
+auto CPU::mmio_w43x0(uint8 i, uint8 data) -> void {
   channel[i].direction = data & 0x80;
   channel[i].indirect = data & 0x40;
   channel[i].unused = data & 0x20;
@@ -291,66 +294,66 @@ void CPU::mmio_w43x0(uint8 i, uint8 data) {
 }
 
 //DDBADx
-void CPU::mmio_w43x1(uint8 i, uint8 data) {
+auto CPU::mmio_w43x1(uint8 i, uint8 data) -> void {
   channel[i].dest_addr = data;
 }
 
 //A1TxL
-void CPU::mmio_w43x2(uint8 i, uint8 data) {
+auto CPU::mmio_w43x2(uint8 i, uint8 data) -> void {
   channel[i].source_addr = (channel[i].source_addr & 0xff00) | (data << 0);
 }
 
 //A1TxH
-void CPU::mmio_w43x3(uint8 i, uint8 data) {
+auto CPU::mmio_w43x3(uint8 i, uint8 data) -> void {
   channel[i].source_addr = (channel[i].source_addr & 0x00ff) | (data << 8);
 }
 
 //A1Bx
-void CPU::mmio_w43x4(uint8 i, uint8 data) {
+auto CPU::mmio_w43x4(uint8 i, uint8 data) -> void {
   channel[i].source_bank = data;
 }
 
 //DASxL
 //union { uint16 transfer_size; uint16 indirect_addr; };
-void CPU::mmio_w43x5(uint8 i, uint8 data) {
+auto CPU::mmio_w43x5(uint8 i, uint8 data) -> void {
   channel[i].transfer_size = (channel[i].transfer_size & 0xff00) | (data << 0);
 }
 
 //DASxH
 //union { uint16 transfer_size; uint16 indirect_addr; };
-void CPU::mmio_w43x6(uint8 i, uint8 data) {
+auto CPU::mmio_w43x6(uint8 i, uint8 data) -> void {
   channel[i].transfer_size = (channel[i].transfer_size & 0x00ff) | (data << 8);
 }
 
 //DASBx
-void CPU::mmio_w43x7(uint8 i, uint8 data) {
+auto CPU::mmio_w43x7(uint8 i, uint8 data) -> void {
   channel[i].indirect_bank = data;
 }
 
 //A2AxL
-void CPU::mmio_w43x8(uint8 i, uint8 data) {
+auto CPU::mmio_w43x8(uint8 i, uint8 data) -> void {
   channel[i].hdma_addr = (channel[i].hdma_addr & 0xff00) | (data << 0);
 }
 
 //A2AxH
-void CPU::mmio_w43x9(uint8 i, uint8 data) {
+auto CPU::mmio_w43x9(uint8 i, uint8 data) -> void {
   channel[i].hdma_addr = (channel[i].hdma_addr & 0x00ff) | (data << 8);
 }
 
 //NTRLx
-void CPU::mmio_w43xa(uint8 i, uint8 data) {
+auto CPU::mmio_w43xa(uint8 i, uint8 data) -> void {
   channel[i].line_counter = data;
 }
 
 //???
-void CPU::mmio_w43xb(uint8 i, uint8 data) {
+auto CPU::mmio_w43xb(uint8 i, uint8 data) -> void {
   channel[i].unknown = data;
 }
 
-void CPU::mmio_power() {
+auto CPU::mmio_power() -> void {
 }
 
-void CPU::mmio_reset() {
+auto CPU::mmio_reset() -> void {
   //$2140-217f
   for(auto& port : status.port) port = 0x00;
 
@@ -402,12 +405,12 @@ void CPU::mmio_reset() {
   alu.shift = 0;
 }
 
-uint8 CPU::mmio_read(unsigned addr) {
+auto CPU::mmio_read(uint addr) -> uint8 {
   addr &= 0xffff;
 
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
-    synchronize_smp();
+    synchronizeSMP();
     return smp.portRead(addr);
   }
 
@@ -459,13 +462,13 @@ uint8 CPU::mmio_read(unsigned addr) {
   return regs.mdr;
 }
 
-void CPU::mmio_write(unsigned addr, uint8 data) {
+auto CPU::mmio_write(uint addr, uint8 data) -> void {
   addr &= 0xffff;
 
   //APU
   if((addr & 0xffc0) == 0x2140) {  //$2140-$217f
-    synchronize_smp();
-    port_write(addr, data);
+    synchronizeSMP();
+    portWrite(addr, data);
     return;
   }
 
@@ -515,5 +518,3 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
   case 0x420d: mmio_w420d(data); return;
   }
 }
-
-#endif

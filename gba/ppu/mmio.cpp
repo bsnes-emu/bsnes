@@ -37,6 +37,10 @@ uint8 PPU::read(uint32 addr) {
   case 0x04000050: return regs.blend.control >> 0;
   case 0x04000051: return regs.blend.control >> 8;
 
+  //BLDALPHA
+  case 0x04000052: return regs.blend.eva;
+  case 0x04000053: return regs.blend.evb;
+
   }
 
   return 0u;
@@ -70,6 +74,7 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x0400000e: case 0x0400000f: {
     auto& bg = regs.bg[(addr >> 1) & 3];
     unsigned shift = (addr & 1) * 8;
+    if(addr == 0x04000009 || addr == 0x0400000b) byte &= 0xdf;  //clear affine wrap for BG0,1
     bg.control = (bg.control & ~(255 << shift)) | (byte << shift);
     return;
   }

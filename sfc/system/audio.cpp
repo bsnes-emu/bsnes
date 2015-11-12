@@ -1,5 +1,3 @@
-#ifdef SYSTEM_CPP
-
 Audio audio;
 
 void Audio::coprocessor_enable(bool state) {
@@ -65,5 +63,3 @@ void Audio::flush() {
     );
   }
 }
-
-#endif

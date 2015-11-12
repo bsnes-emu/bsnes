@@ -1,24 +1,24 @@
 //timing.cpp
-unsigned dma_counter();
+auto dma_counter() -> uint;
 
-void add_clocks(unsigned clocks);
-void scanline();
+auto add_clocks(uint clocks) -> void;
+auto scanline() -> void;
 
-alwaysinline void alu_edge();
-alwaysinline void dma_edge();
-alwaysinline void last_cycle();
+alwaysinline auto alu_edge() -> void;
+alwaysinline auto dma_edge() -> void;
+alwaysinline auto last_cycle() -> void;
 
-void timing_power();
-void timing_reset();
+auto timing_power() -> void;
+auto timing_reset() -> void;
 
 //irq.cpp
-alwaysinline void poll_interrupts();
-void nmitimen_update(uint8 data);
-bool rdnmi();
-bool timeup();
+alwaysinline auto poll_interrupts() -> void;
+auto nmitimen_update(uint8 data) -> void;
+auto rdnmi() -> bool;
+auto timeup() -> bool;
 
-alwaysinline bool nmi_test();
-alwaysinline bool irq_test();
+alwaysinline auto nmi_test() -> bool;
+alwaysinline auto irq_test() -> bool;
 
 //joypad.cpp
-void step_auto_joypad_poll();
+auto step_auto_joypad_poll() -> void;

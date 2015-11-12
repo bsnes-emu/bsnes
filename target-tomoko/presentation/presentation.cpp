@@ -127,11 +127,22 @@ auto Presentation::updateEmulator() -> void {
     for(auto& device : port.device) {
       MenuRadioItem item{&menu};
       item.setText(device.name).onActivate([=] {
+        emulatorSettings->set({emulator->information.name, "/", port.name}, device.name);
         emulator->connect(port.id, device.id);
       });
       devices.append(item);
     }
-    if(devices.objectCount() > 1) menu.setVisible();
+    if(devices.objectCount() > 1) {
+      string device = emulatorSettings->get({emulator->information.name, "/", port.name});
+      for(auto object : devices.objects()) {
+        if(auto item = dynamic_cast<mMenuRadioItem*>(object.data())) {
+          if(item->text() == device) {
+            item->setChecked().doActivate();
+          }
+        }
+      }
+      menu.setVisible();
+    }
   }
 
   systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible() || inputPort3.visible());

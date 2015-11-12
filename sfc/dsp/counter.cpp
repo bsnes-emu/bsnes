@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 //counter_rate = number of samples per counter event
 //all rates are evenly divisible by counter_range (0x7800, 30720, or 2048 * 5 * 3)
 //note that rate[0] is a special case, which never triggers
@@ -48,5 +46,3 @@ inline auto DSP::counterPoll(unsigned rate) -> bool {
   if(rate == 0) return false;
   return (((unsigned)state.counter + CounterOffset[rate]) % CounterRate[rate]) == 0;
 }
-
-#endif

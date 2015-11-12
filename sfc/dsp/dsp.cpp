@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define DSP_CPP
 namespace SuperFamicom {
 
 DSP dsp;

@@ -38,6 +38,7 @@ struct Registers {
   struct BackgroundControl {
     uint2 priority;
     uint2 characterbaseblock;
+    uint2 unused;
     uint1 mosaic;
     uint1 colormode;
     uint5 screenbaseblock;

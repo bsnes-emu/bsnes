@@ -22,6 +22,7 @@ Program::Program(lstring args) {
   for(auto& emulator : emulators) emulator->bind = this;
 
   new ConfigurationManager;
+  new EmulatorSettings;
   new InputManager;
   new SettingsManager;
   new CheatDatabase;
@@ -96,6 +97,7 @@ auto Program::main() -> void {
 auto Program::quit() -> void {
   unloadMedia();
   config->quit();
+  emulatorSettings->quit();
   inputManager->quit();
   delete video;
   delete audio;

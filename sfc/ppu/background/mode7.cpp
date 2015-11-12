@@ -1,17 +1,15 @@
-#ifdef PPU_CPP
-
-signed PPU::Background::clip(signed n) {
+auto PPU::Background::clip(int n) -> int {
   //13-bit sign extend: --s---nnnnnnnnnn -> ssssssnnnnnnnnnn
   return n & 0x2000 ? (n | ~1023) : (n & 1023);
 }
 
 //H = 28
-void PPU::Background::begin_mode7() {
+auto PPU::Background::begin_mode7() -> void {
   cache.hoffset = self.regs.mode7_hoffset;
   cache.voffset = self.regs.mode7_voffset;
 }
 
-void PPU::Background::run_mode7() {
+auto PPU::Background::run_mode7() -> void {
   signed a = sclip<16>(self.regs.m7a);
   signed b = sclip<16>(self.regs.m7b);
   signed c = sclip<16>(self.regs.m7c);
@@ -103,5 +101,3 @@ void PPU::Background::run_mode7() {
     output.sub.tile = 0;
   }
 }
-
-#endif

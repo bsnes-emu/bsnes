@@ -1,11 +1,9 @@
-#ifdef SYSTEM_CPP
-
 Device device;
 
 Device::Device() {
-  connect(0, ID::Gamepad);
-  connect(1, ID::Gamepad);
-  connect(2, ID::eBoot);
+  connect(0, ID::None);
+  connect(1, ID::None);
+  connect(2, ID::None);
 }
 
 Device::~Device() {
@@ -43,5 +41,3 @@ auto Device::connect(uint port, Device::ID id) -> void {
     configuration.expansionPort = id;
   }
 }
-
-#endif

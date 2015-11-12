@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define SATELLAVIEW_CARTRIDGE_CPP
 namespace SuperFamicom {
 
 SatellaviewCartridge satellaviewcartridge;

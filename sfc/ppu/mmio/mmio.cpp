@@ -1,25 +1,23 @@
-#ifdef PPU_CPP
-
-bool PPU::interlace() const {
+auto PPU::interlace() const -> bool {
   return display.interlace;
 }
 
-bool PPU::overscan() const {
+auto PPU::overscan() const -> bool {
   return display.overscan;
 }
 
-bool PPU::hires() const {
+auto PPU::hires() const -> bool {
   return true;
 }
 
-void PPU::latch_counters() {
-  cpu.synchronize_ppu();
+auto PPU::latch_counters() -> void {
+  cpu.synchronizePPU();
   regs.hcounter = hdot();
   regs.vcounter = vcounter();
   regs.counters_latched = true;
 }
 
-uint16 PPU::get_vram_address() {
+auto PPU::get_vram_address() -> uint16 {
   uint16 addr = regs.vram_addr;
   switch(regs.vram_mapping) {
   case 0: break;  //direct mapping
@@ -30,7 +28,7 @@ uint16 PPU::get_vram_address() {
   return (addr << 1);
 }
 
-uint8 PPU::vram_read(unsigned addr) {
+auto PPU::vram_read(uint addr) -> uint8 {
   uint8 data = 0x00;
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     data = vram[addr];
@@ -39,37 +37,37 @@ uint8 PPU::vram_read(unsigned addr) {
   return data;
 }
 
-void PPU::vram_write(unsigned addr, uint8 data) {
+auto PPU::vram_write(uint addr, uint8 data) -> void {
   if(regs.display_disable || vcounter() >= (!regs.overscan ? 225 : 240)) {
     vram[addr] = data;
     debugger.vram_write(addr, data);
   }
 }
 
-uint8 PPU::oam_read(unsigned addr) {
+auto PPU::oam_read(uint addr) -> uint8 {
   uint8 data = oam[addr];
   debugger.oam_read(addr, data);
   return data;
 }
 
-void PPU::oam_write(unsigned addr, uint8 data) {
+auto PPU::oam_write(uint addr, uint8 data) -> void {
   oam[addr] = data;
   sprite.update(addr, data);
   debugger.oam_write(addr, data);
 }
 
-uint8 PPU::cgram_read(unsigned addr) {
+auto PPU::cgram_read(uint addr) -> uint8 {
   uint8 data = cgram[addr];
   debugger.cgram_read(addr, data);
   return data;
 }
 
-void PPU::cgram_write(unsigned addr, uint8 data) {
+auto PPU::cgram_write(uint addr, uint8 data) -> void {
   cgram[addr] = data;
   debugger.cgram_write(addr, data);
 }
 
-void PPU::mmio_update_video_mode() {
+auto PPU::mmio_update_video_mode() -> void {
   switch(regs.bgmode) {
   case 0:
     bg1.regs.mode = Background::Mode::BPP2; bg1.regs.priority0 = 8; bg1.regs.priority1 = 11;
@@ -168,34 +166,34 @@ void PPU::mmio_update_video_mode() {
 }
 
 //INIDISP
-void PPU::mmio_w2100(uint8 data) {
+auto PPU::mmio_w2100(uint8 data) -> void {
   if(regs.display_disable && vcounter() == (!regs.overscan ? 225 : 240)) sprite.address_reset();
   regs.display_disable = data & 0x80;
   regs.display_brightness = data & 0x0f;
 }
 
 //OBSEL
-void PPU::mmio_w2101(uint8 data) {
+auto PPU::mmio_w2101(uint8 data) -> void {
   sprite.regs.base_size = (data >> 5) & 7;
   sprite.regs.nameselect = (data >> 3) & 3;
   sprite.regs.tiledata_addr = (data & 3) << 14;
 }
 
 //OAMADDL
-void PPU::mmio_w2102(uint8 data) {
+auto PPU::mmio_w2102(uint8 data) -> void {
   regs.oam_baseaddr = (regs.oam_baseaddr & 0x0200) | (data << 1);
   sprite.address_reset();
 }
 
 //OAMADDH
-void PPU::mmio_w2103(uint8 data) {
+auto PPU::mmio_w2103(uint8 data) -> void {
   regs.oam_priority = data & 0x80;
   regs.oam_baseaddr = ((data & 0x01) << 9) | (regs.oam_baseaddr & 0x01fe);
   sprite.address_reset();
 }
 
 //OAMDATA
-void PPU::mmio_w2104(uint8 data) {
+auto PPU::mmio_w2104(uint8 data) -> void {
   bool latch = regs.oam_addr & 1;
   uint10 addr = regs.oam_addr++;
   if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
@@ -212,7 +210,7 @@ void PPU::mmio_w2104(uint8 data) {
 }
 
 //BGMODE
-void PPU::mmio_w2105(uint8 data) {
+auto PPU::mmio_w2105(uint8 data) -> void {
   bg4.regs.tile_size = (data & 0x80);
   bg3.regs.tile_size = (data & 0x40);
   bg2.regs.tile_size = (data & 0x20);
@@ -223,7 +221,7 @@ void PPU::mmio_w2105(uint8 data) {
 }
 
 //MOSAIC
-void PPU::mmio_w2106(uint8 data) {
+auto PPU::mmio_w2106(uint8 data) -> void {
   unsigned mosaic_size = (data >> 4) & 15;
   bg4.regs.mosaic = (data & 0x08 ? mosaic_size : 0);
   bg3.regs.mosaic = (data & 0x04 ? mosaic_size : 0);
@@ -232,43 +230,43 @@ void PPU::mmio_w2106(uint8 data) {
 }
 
 //BG1SC
-void PPU::mmio_w2107(uint8 data) {
+auto PPU::mmio_w2107(uint8 data) -> void {
   bg1.regs.screen_addr = (data & 0x7c) << 9;
   bg1.regs.screen_size = data & 3;
 }
 
 //BG2SC
-void PPU::mmio_w2108(uint8 data) {
+auto PPU::mmio_w2108(uint8 data) -> void {
   bg2.regs.screen_addr = (data & 0x7c) << 9;
   bg2.regs.screen_size = data & 3;
 }
 
 //BG3SC
-void PPU::mmio_w2109(uint8 data) {
+auto PPU::mmio_w2109(uint8 data) -> void {
   bg3.regs.screen_addr = (data & 0x7c) << 9;
   bg3.regs.screen_size = data & 3;
 }
 
 //BG4SC
-void PPU::mmio_w210a(uint8 data) {
+auto PPU::mmio_w210a(uint8 data) -> void {
   bg4.regs.screen_addr = (data & 0x7c) << 9;
   bg4.regs.screen_size = data & 3;
 }
 
 //BG12NBA
-void PPU::mmio_w210b(uint8 data) {
+auto PPU::mmio_w210b(uint8 data) -> void {
   bg1.regs.tiledata_addr = (data & 0x07) << 13;
   bg2.regs.tiledata_addr = (data & 0x70) <<  9;
 }
 
 //BG34NBA
-void PPU::mmio_w210c(uint8 data) {
+auto PPU::mmio_w210c(uint8 data) -> void {
   bg3.regs.tiledata_addr = (data & 0x07) << 13;
   bg4.regs.tiledata_addr = (data & 0x70) <<  9;
 }
 
 //BG1HOFS
-void PPU::mmio_w210d(uint8 data) {
+auto PPU::mmio_w210d(uint8 data) -> void {
   regs.mode7_hoffset = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 
@@ -277,7 +275,7 @@ void PPU::mmio_w210d(uint8 data) {
 }
 
 //BG1VOFS
-void PPU::mmio_w210e(uint8 data) {
+auto PPU::mmio_w210e(uint8 data) -> void {
   regs.mode7_voffset = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 
@@ -286,43 +284,43 @@ void PPU::mmio_w210e(uint8 data) {
 }
 
 //BG2HOFS
-void PPU::mmio_w210f(uint8 data) {
+auto PPU::mmio_w210f(uint8 data) -> void {
   bg2.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg2.regs.hoffset >> 8) & 7);
   regs.bgofs_latchdata = data;
 }
 
 //BG2VOFS
-void PPU::mmio_w2110(uint8 data) {
+auto PPU::mmio_w2110(uint8 data) -> void {
   bg2.regs.voffset = (data << 8) | regs.bgofs_latchdata;
   regs.bgofs_latchdata = data;
 }
 
 //BG3HOFS
-void PPU::mmio_w2111(uint8 data) {
+auto PPU::mmio_w2111(uint8 data) -> void {
   bg3.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg3.regs.hoffset >> 8) & 7);
   regs.bgofs_latchdata = data;
 }
 
 //BG3VOFS
-void PPU::mmio_w2112(uint8 data) {
+auto PPU::mmio_w2112(uint8 data) -> void {
   bg3.regs.voffset = (data << 8) | regs.bgofs_latchdata;
   regs.bgofs_latchdata = data;
 }
 
 //BG4HOFS
-void PPU::mmio_w2113(uint8 data) {
+auto PPU::mmio_w2113(uint8 data) -> void {
   bg4.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg4.regs.hoffset >> 8) & 7);
   regs.bgofs_latchdata = data;
 }
 
 //BG4VOFS
-void PPU::mmio_w2114(uint8 data) {
+auto PPU::mmio_w2114(uint8 data) -> void {
   bg4.regs.voffset = (data << 8) | regs.bgofs_latchdata;
   regs.bgofs_latchdata = data;
 }
 
 //VMAIN
-void PPU::mmio_w2115(uint8 data) {
+auto PPU::mmio_w2115(uint8 data) -> void {
   regs.vram_incmode = data & 0x80;
   regs.vram_mapping = (data >> 2) & 3;
   switch(data & 3) {
@@ -334,7 +332,7 @@ void PPU::mmio_w2115(uint8 data) {
 }
 
 //VMADDL
-void PPU::mmio_w2116(uint8 data) {
+auto PPU::mmio_w2116(uint8 data) -> void {
   regs.vram_addr &= 0xff00;
   regs.vram_addr |= (data << 0);
   uint16 addr = get_vram_address();
@@ -343,7 +341,7 @@ void PPU::mmio_w2116(uint8 data) {
 }
 
 //VMADDH
-void PPU::mmio_w2117(uint8 data) {
+auto PPU::mmio_w2117(uint8 data) -> void {
   regs.vram_addr &= 0x00ff;
   regs.vram_addr |= (data << 8);
   uint16 addr = get_vram_address();
@@ -352,69 +350,69 @@ void PPU::mmio_w2117(uint8 data) {
 }
 
 //VMDATAL
-void PPU::mmio_w2118(uint8 data) {
+auto PPU::mmio_w2118(uint8 data) -> void {
   uint16 addr = get_vram_address() + 0;
   vram_write(addr, data);
   if(regs.vram_incmode == 0) regs.vram_addr += regs.vram_incsize;
 }
 
 //VMDATAH
-void PPU::mmio_w2119(uint8 data) {
+auto PPU::mmio_w2119(uint8 data) -> void {
   uint16 addr = get_vram_address() + 1;
   vram_write(addr, data);
   if(regs.vram_incmode == 1) regs.vram_addr += regs.vram_incsize;
 }
 
 //M7SEL
-void PPU::mmio_w211a(uint8 data) {
+auto PPU::mmio_w211a(uint8 data) -> void {
   regs.mode7_repeat = (data >> 6) & 3;
   regs.mode7_vflip = data & 0x02;
   regs.mode7_hflip = data & 0x01;
 }
 
 //M7A
-void PPU::mmio_w211b(uint8 data) {
+auto PPU::mmio_w211b(uint8 data) -> void {
   regs.m7a = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //M7B
-void PPU::mmio_w211c(uint8 data) {
+auto PPU::mmio_w211c(uint8 data) -> void {
   regs.m7b = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //M7C
-void PPU::mmio_w211d(uint8 data) {
+auto PPU::mmio_w211d(uint8 data) -> void {
   regs.m7c = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //M7D
-void PPU::mmio_w211e(uint8 data) {
+auto PPU::mmio_w211e(uint8 data) -> void {
   regs.m7d = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //M7X
-void PPU::mmio_w211f(uint8 data) {
+auto PPU::mmio_w211f(uint8 data) -> void {
   regs.m7x = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //M7Y
-void PPU::mmio_w2120(uint8 data) {
+auto PPU::mmio_w2120(uint8 data) -> void {
   regs.m7y = (data << 8) | regs.mode7_latchdata;
   regs.mode7_latchdata = data;
 }
 
 //CGADD
-void PPU::mmio_w2121(uint8 data) {
+auto PPU::mmio_w2121(uint8 data) -> void {
   regs.cgram_addr = data << 1;
 }
 
 //CGDATA
-void PPU::mmio_w2122(uint8 data) {
+auto PPU::mmio_w2122(uint8 data) -> void {
   bool latch = regs.cgram_addr & 1;
   uint9 addr = regs.cgram_addr++;
   if(regs.display_disable == false
@@ -431,7 +429,7 @@ void PPU::mmio_w2122(uint8 data) {
 }
 
 //W12SEL
-void PPU::mmio_w2123(uint8 data) {
+auto PPU::mmio_w2123(uint8 data) -> void {
   window.regs.bg2_two_enable = data & 0x80;
   window.regs.bg2_two_invert = data & 0x40;
   window.regs.bg2_one_enable = data & 0x20;
@@ -443,7 +441,7 @@ void PPU::mmio_w2123(uint8 data) {
 }
 
 //W34SEL
-void PPU::mmio_w2124(uint8 data) {
+auto PPU::mmio_w2124(uint8 data) -> void {
   window.regs.bg4_two_enable = data & 0x80;
   window.regs.bg4_two_invert = data & 0x40;
   window.regs.bg4_one_enable = data & 0x20;
@@ -455,7 +453,7 @@ void PPU::mmio_w2124(uint8 data) {
 }
 
 //WOBJSEL
-void PPU::mmio_w2125(uint8 data) {
+auto PPU::mmio_w2125(uint8 data) -> void {
   window.regs.col_two_enable = data & 0x80;
   window.regs.col_two_invert = data & 0x40;
   window.regs.col_one_enable = data & 0x20;
@@ -467,27 +465,27 @@ void PPU::mmio_w2125(uint8 data) {
 }
 
 //WH0
-void PPU::mmio_w2126(uint8 data) {
+auto PPU::mmio_w2126(uint8 data) -> void {
   window.regs.one_left = data;
 }
 
 //WH1
-void PPU::mmio_w2127(uint8 data) {
+auto PPU::mmio_w2127(uint8 data) -> void {
   window.regs.one_right = data;
 }
 
 //WH2
-void PPU::mmio_w2128(uint8 data) {
+auto PPU::mmio_w2128(uint8 data) -> void {
   window.regs.two_left = data;
 }
 
 //WH3
-void PPU::mmio_w2129(uint8 data) {
+auto PPU::mmio_w2129(uint8 data) -> void {
   window.regs.two_right = data;
 }
 
 //WBGLOG
-void PPU::mmio_w212a(uint8 data) {
+auto PPU::mmio_w212a(uint8 data) -> void {
   window.regs.bg4_mask = (data >> 6) & 3;
   window.regs.bg3_mask = (data >> 4) & 3;
   window.regs.bg2_mask = (data >> 2) & 3;
@@ -495,13 +493,13 @@ void PPU::mmio_w212a(uint8 data) {
 }
 
 //WOBJLOG
-void PPU::mmio_w212b(uint8 data) {
+auto PPU::mmio_w212b(uint8 data) -> void {
   window.regs.col_mask = (data >> 2) & 3;
   window.regs.oam_mask = (data >> 0) & 3;
 }
 
 //TM
-void PPU::mmio_w212c(uint8 data) {
+auto PPU::mmio_w212c(uint8 data) -> void {
   sprite.regs.main_enable = data & 0x10;
   bg4.regs.main_enable = data & 0x08;
   bg3.regs.main_enable = data & 0x04;
@@ -510,7 +508,7 @@ void PPU::mmio_w212c(uint8 data) {
 }
 
 //TS
-void PPU::mmio_w212d(uint8 data) {
+auto PPU::mmio_w212d(uint8 data) -> void {
   sprite.regs.sub_enable = data & 0x10;
   bg4.regs.sub_enable = data & 0x08;
   bg3.regs.sub_enable = data & 0x04;
@@ -519,7 +517,7 @@ void PPU::mmio_w212d(uint8 data) {
 }
 
 //TMW
-void PPU::mmio_w212e(uint8 data) {
+auto PPU::mmio_w212e(uint8 data) -> void {
   window.regs.oam_main_enable = data & 0x10;
   window.regs.bg4_main_enable = data & 0x08;
   window.regs.bg3_main_enable = data & 0x04;
@@ -528,7 +526,7 @@ void PPU::mmio_w212e(uint8 data) {
 }
 
 //TSW
-void PPU::mmio_w212f(uint8 data) {
+auto PPU::mmio_w212f(uint8 data) -> void {
   window.regs.oam_sub_enable = data & 0x10;
   window.regs.bg4_sub_enable = data & 0x08;
   window.regs.bg3_sub_enable = data & 0x04;
@@ -537,7 +535,7 @@ void PPU::mmio_w212f(uint8 data) {
 }
 
 //CGWSEL
-void PPU::mmio_w2130(uint8 data) {
+auto PPU::mmio_w2130(uint8 data) -> void {
   window.regs.col_main_mask = (data >> 6) & 3;
   window.regs.col_sub_mask = (data >> 4) & 3;
   screen.regs.addsub_mode = data & 0x02;
@@ -545,7 +543,7 @@ void PPU::mmio_w2130(uint8 data) {
 }
 
 //CGADDSUB
-void PPU::mmio_w2131(uint8 data) {
+auto PPU::mmio_w2131(uint8 data) -> void {
   screen.regs.color_mode = data & 0x80;
   screen.regs.color_halve = data & 0x40;
   screen.regs.back_color_enable = data & 0x20;
@@ -557,14 +555,14 @@ void PPU::mmio_w2131(uint8 data) {
 }
 
 //COLDATA
-void PPU::mmio_w2132(uint8 data) {
+auto PPU::mmio_w2132(uint8 data) -> void {
   if(data & 0x80) screen.regs.color_b = data & 0x1f;
   if(data & 0x40) screen.regs.color_g = data & 0x1f;
   if(data & 0x20) screen.regs.color_r = data & 0x1f;
 }
 
 //SETINI
-void PPU::mmio_w2133(uint8 data) {
+auto PPU::mmio_w2133(uint8 data) -> void {
   regs.mode7_extbg = data & 0x40;
   regs.pseudo_hires = data & 0x08;
   regs.overscan = data & 0x04;
@@ -574,34 +572,34 @@ void PPU::mmio_w2133(uint8 data) {
 }
 
 //MPYL
-uint8 PPU::mmio_r2134() {
+auto PPU::mmio_r2134() -> uint8 {
   unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
   regs.ppu1_mdr = (result >>  0);
   return regs.ppu1_mdr;
 }
 
 //MPYM
-uint8 PPU::mmio_r2135() {
+auto PPU::mmio_r2135() -> uint8 {
   unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
   regs.ppu1_mdr = (result >>  8);
   return regs.ppu1_mdr;
 }
 
 //MPYH
-uint8 PPU::mmio_r2136() {
+auto PPU::mmio_r2136() -> uint8 {
   unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
   regs.ppu1_mdr = (result >> 16);
   return regs.ppu1_mdr;
 }
 
 //SLHV
-uint8 PPU::mmio_r2137() {
+auto PPU::mmio_r2137() -> uint8 {
   if(cpu.pio() & 0x80) latch_counters();
   return cpu.regs.mdr;
 }
 
 //OAMDATAREAD
-uint8 PPU::mmio_r2138() {
+auto PPU::mmio_r2138() -> uint8 {
   uint10 addr = regs.oam_addr++;
   if(regs.display_disable == false && vcounter() < (!regs.overscan ? 225 : 240)) addr = regs.oam_iaddr;
   if(addr & 0x0200) addr &= 0x021f;
@@ -612,7 +610,7 @@ uint8 PPU::mmio_r2138() {
 }
 
 //VMDATALREAD
-uint8 PPU::mmio_r2139() {
+auto PPU::mmio_r2139() -> uint8 {
   uint16 addr = get_vram_address() + 0;
   regs.ppu1_mdr = regs.vram_readbuffer >> 0;
   if(regs.vram_incmode == 0) {
@@ -625,7 +623,7 @@ uint8 PPU::mmio_r2139() {
 }
 
 //VMDATAHREAD
-uint8 PPU::mmio_r213a() {
+auto PPU::mmio_r213a() -> uint8 {
   uint16 addr = get_vram_address() + 1;
   regs.ppu1_mdr = regs.vram_readbuffer >> 8;
   if(regs.vram_incmode == 1) {
@@ -638,7 +636,7 @@ uint8 PPU::mmio_r213a() {
 }
 
 //CGDATAREAD
-uint8 PPU::mmio_r213b() {
+auto PPU::mmio_r213b() -> uint8 {
   bool latch = regs.cgram_addr & 1;
   uint9 addr = regs.cgram_addr++;
   if(regs.display_disable == false
@@ -656,7 +654,7 @@ uint8 PPU::mmio_r213b() {
 }
 
 //OPHCT
-uint8 PPU::mmio_r213c() {
+auto PPU::mmio_r213c() -> uint8 {
   if(regs.latch_hcounter == 0) {
     regs.ppu2_mdr  = (regs.hcounter >> 0);
   } else {
@@ -668,7 +666,7 @@ uint8 PPU::mmio_r213c() {
 }
 
 //OPVCT
-uint8 PPU::mmio_r213d() {
+auto PPU::mmio_r213d() -> uint8 {
   if(regs.latch_vcounter == 0) {
     regs.ppu2_mdr  = (regs.vcounter >> 0);
   } else {
@@ -680,7 +678,7 @@ uint8 PPU::mmio_r213d() {
 }
 
 //STAT77
-uint8 PPU::mmio_r213e() {
+auto PPU::mmio_r213e() -> uint8 {
   regs.ppu1_mdr &= 0x10;
   regs.ppu1_mdr |= sprite.regs.time_over << 7;
   regs.ppu1_mdr |= sprite.regs.range_over << 6;
@@ -689,7 +687,7 @@ uint8 PPU::mmio_r213e() {
 }
 
 //STAT78
-uint8 PPU::mmio_r213f() {
+auto PPU::mmio_r213f() -> uint8 {
   regs.latch_hcounter = 0;
   regs.latch_vcounter = 0;
 
@@ -706,7 +704,7 @@ uint8 PPU::mmio_r213f() {
   return regs.ppu2_mdr;
 }
 
-void PPU::mmio_reset() {
+auto PPU::mmio_reset() -> void {
   regs.ppu1_mdr = random(0xff);
   regs.ppu2_mdr = random(0xff);
 
@@ -790,8 +788,8 @@ void PPU::mmio_reset() {
   regs.vcounter = 0;
 }
 
-uint8 PPU::mmio_read(unsigned addr) {
-  cpu.synchronize_ppu();
+auto PPU::mmio_read(uint addr) -> uint8 {
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
   case 0x2104:
@@ -829,8 +827,8 @@ uint8 PPU::mmio_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void PPU::mmio_write(unsigned addr, uint8 data) {
-  cpu.synchronize_ppu();
+auto PPU::mmio_write(uint addr, uint8 data) -> void {
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
   case 0x2100: return mmio_w2100(data);  //INIDISP
@@ -887,5 +885,3 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
   case 0x2133: return mmio_w2133(data);  //SETINI
   }
 }
-
-#endif

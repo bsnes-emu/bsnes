@@ -1,5 +1,3 @@
-#ifdef CONTROLLER_CPP
-
 //Synchronous serial communications cable emulation
 
 //Hardware:
@@ -133,5 +131,3 @@ auto USART::latch(bool data) -> void {
   latched = data;
   counter = 0;
 }
-
-#endif

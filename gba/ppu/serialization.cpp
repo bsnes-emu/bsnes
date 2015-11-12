@@ -28,6 +28,7 @@ void PPU::serialize(serializer& s) {
   for(auto& bg : regs.bg) {
     s.integer(bg.control.priority);
     s.integer(bg.control.characterbaseblock);
+    s.integer(bg.control.unused);
     s.integer(bg.control.mosaic);
     s.integer(bg.control.colormode);
     s.integer(bg.control.screenbaseblock);

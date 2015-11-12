@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define EBOOT_CPP
 namespace SuperFamicom {
 
 eBoot eboot;

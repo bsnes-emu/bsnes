@@ -1,5 +1,3 @@
-#ifdef SYSTEM_CPP
-
 auto System::serialize() -> serializer {
   serializer s(serializeSize);
 
@@ -93,5 +91,3 @@ auto System::serializeInit() -> void {
   serializeAll(s);
   serializeSize = s.size();
 }
-
-#endif

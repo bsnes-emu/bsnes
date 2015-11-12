@@ -73,6 +73,7 @@ PPU::Registers::BackgroundControl::operator uint16() const {
 uint16 PPU::Registers::BackgroundControl::operator=(uint16 source) {
   priority           = source >>  0;
   characterbaseblock = source >>  2;
+  unused             = source >>  4;
   mosaic             = source >>  6;
   colormode          = source >>  7;
   screenbaseblock    = source >>  8;

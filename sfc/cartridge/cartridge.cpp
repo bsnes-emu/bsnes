@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define CARTRIDGE_CPP
 namespace SuperFamicom {
 
 #include "markup.cpp"

@@ -1,32 +1,31 @@
 #ifndef NALL_EMULATION_SUPER_FAMICOM_USART_HPP
 #define NALL_EMULATION_SUPER_FAMICOM_USART_HPP
 
-#include <nall/platform.hpp>
-#include <nall/function.hpp>
+#include <nall/nall.hpp>
 #include <nall/serial.hpp>
-#include <nall/stdint.hpp>
+using namespace nall;
 
 #include <signal.h>
-#include <sys/time.h>
 #include <sys/resource.h>
+#include <sys/time.h>
 
 #define usartproc dllexport
 
-static nall::function<bool ()> usart_quit;
-static nall::function<void (unsigned milliseconds)> usart_usleep;
-static nall::function<bool ()> usart_readable;
-static nall::function<uint8_t ()> usart_read;
-static nall::function<bool ()> usart_writable;
-static nall::function<void (uint8_t data)> usart_write;
+static function<bool ()> usart_quit;
+static function<void (uint milliseconds)> usart_usleep;
+static function<bool ()> usart_readable;
+static function<uint8 ()> usart_read;
+static function<bool ()> usart_writable;
+static function<void (uint8 data)> usart_write;
 
-extern "C" usartproc void usart_init(
-  nall::function<bool ()> quit,
-  nall::function<void (unsigned milliseconds)> usleep,
-  nall::function<bool ()> readable,
-  nall::function<uint8_t ()> read,
-  nall::function<bool ()> writable,
-  nall::function<void (uint8_t data)> write
-) {
+extern "C" usartproc auto usart_init(
+  function<bool ()> quit,
+  function<void (uint milliseconds)> usleep,
+  function<bool ()> readable,
+  function<uint8 ()> read,
+  function<bool ()> writable,
+  function<void (uint8 data)> write
+) -> void {
   usart_quit = quit;
   usart_usleep = usleep;
   usart_readable = readable;
@@ -35,69 +34,67 @@ extern "C" usartproc void usart_init(
   usart_write = write;
 }
 
-extern "C" usartproc void usart_main(int, char**);
+extern "C" usartproc auto usart_main(nall::lstring) -> void;
 
 //
 
-static nall::serial usart;
+static serial usart;
 static bool usart_is_virtual = true;
 static bool usart_sigint = false;
 
-static bool usart_virtual() {
+static auto usart_virtual() -> bool {
   return usart_is_virtual;
 }
 
 //
 
-static bool usarthw_quit() {
+static auto usarthw_quit() -> bool {
   return usart_sigint;
 }
 
-static void usarthw_usleep(unsigned milliseconds) {
+static auto usarthw_usleep(uint milliseconds) -> void {
   usleep(milliseconds);
 }
 
-static bool usarthw_readable() {
+static auto usarthw_readable() -> bool {
   return usart.readable();
 }
 
-static uint8_t usarthw_read() {
+static auto usarthw_read() -> uint8 {
   while(true) {
-    uint8_t buffer[1];
-    signed length = usart.read((uint8_t*)&buffer, 1);
+    uint8 buffer[1];
+    int length = usart.read((uint8_t*)&buffer, 1);
     if(length > 0) return buffer[0];
   }
 }
 
-static bool usarthw_writable() {
+static auto usarthw_writable() -> bool {
   return usart.writable();
 }
 
-static void usarthw_write(uint8_t data) {
-  uint8_t buffer[1] = { data };
-  usart.write((uint8_t*)&buffer, 1);
+static auto usarthw_write(uint8 data) -> void {
+  uint8 buffer[1] = {data};
+  usart.write((uint8*)&buffer, 1);
 }
 
-static void sigint(int) {
+static auto sigint(int) -> void {
   signal(SIGINT, SIG_DFL);
   usart_sigint = true;
 }
 
-int main(int argc, char** argv) {
+#include <nall/main.hpp>
+auto nall::main(lstring args) -> void {
   setpriority(PRIO_PROCESS, 0, -20);  //requires superuser privileges; otherwise priority = +0
   signal(SIGINT, sigint);
 
-  if(usart.open("/dev/ttyACM0", 57600, true) == false) {
-    printf("error: unable to open USART hardware device\n");
-    return 0;
+  if(!usart.open("/dev/ttyACM0", 57600, true)) {
+    return print("error: unable to open USART hardware device\n");
   }
 
   usart_is_virtual = false;
   usart_init(usarthw_quit, usarthw_usleep, usarthw_readable, usarthw_read, usarthw_writable, usarthw_write);
-  usart_main(argc, argv);
+  usart_main(args);
   usart.close();
-
-  return 0;
 }
 
 #endif

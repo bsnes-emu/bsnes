@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 inline auto DSP::voiceOutput(Voice& v, bool channel) -> void {
   //apply left/right volume
   signed amp = (state._output * (int8)VREG(VOLL + channel)) >> 7;
@@ -170,5 +168,3 @@ auto DSP::voice9(Voice& v) -> void {
   //update ENVX
   VREG(ENVX) = (uint8)state.envxBuffer;
 }
-
-#endif

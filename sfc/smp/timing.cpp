@@ -1,5 +1,3 @@
-#ifdef SMP_CPP
-
 auto SMP::addClocks(uint clocks) -> void {
   step(clocks);
   synchronizeDSP();
@@ -58,5 +56,3 @@ auto SMP::Timer<Frequency>::synchronizeStage1() -> void {
   stage2 = 0;
   stage3++;
 }
-
-#endif

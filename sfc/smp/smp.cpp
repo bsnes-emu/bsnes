@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define SMP_CPP
 namespace SuperFamicom {
 
 SMP smp;

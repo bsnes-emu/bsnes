@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define CONTROLLER_CPP
 namespace SuperFamicom {
 
 #include "gamepad/gamepad.cpp"

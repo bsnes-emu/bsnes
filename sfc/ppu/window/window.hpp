@@ -64,24 +64,25 @@ struct Window {
   } output;
 
   struct {
-    unsigned x;
+    uint x;
     bool one;
     bool two;
   };
 
-  void scanline();
-  void run();
-  void reset();
+  Window(PPU& self);
 
-  void test(
+  auto scanline() -> void;
+  auto run() -> void;
+  auto reset() -> void;
+
+  auto test(
     bool& main, bool& sub,
     bool one_enable, bool one_invert,
     bool two_enable, bool two_invert,
     uint8 mask, bool main_enable, bool sub_enable
-  );
+  ) -> void;
 
-  void serialize(serializer&);
-  Window(PPU& self);
+  auto serialize(serializer&) -> void;
 
   PPU& self;
   friend class PPU;

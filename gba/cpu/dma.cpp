@@ -36,13 +36,19 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
   if(dma.run.source < 0x0200'0000) {
     idle();  //cannot access BIOS
   } else {
-    dma.data = bus_read(mode, dma.run.source);
+    uint32 addr = dma.run.source;
+    if(mode & Word) addr &= ~3;
+    if(mode & Half) addr &= ~1;
+    dma.data = bus_read(mode, addr);
   }
 
   if(dma.run.target < 0x0200'0000) {
     idle();  //cannot access BIOS
   } else {
-    bus_write(mode, dma.run.target, dma.data);
+    uint32 addr = dma.run.target;
+    if(mode & Word) addr &= ~3;
+    if(mode & Half) addr &= ~1;
+    bus_write(mode, addr, dma.data);
   }
 
   switch(dma.control.sourcemode) {

@@ -1,16 +1,19 @@
-#ifdef CPU_CPP
+auto CPU::portRead(uint2 port) const -> uint8 {
+  return status.port[port];
+}
 
-uint8 CPU::port_read(uint2 port) const { return status.port[port]; }
-void CPU::port_write(uint2 port, uint8 data) { status.port[port] = data; }
+auto CPU::portWrite(uint2 port, uint8 data) -> void {
+  status.port[port] = data;
+}
 
-void CPU::op_io() {
+auto CPU::op_io() -> void {
   status.clock_count = 6;
   dma_edge();
   add_clocks(6);
   alu_edge();
 }
 
-uint8 CPU::op_read(uint32 addr) {
+auto CPU::op_read(uint32 addr) -> uint8 {
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count - 4);
@@ -21,7 +24,7 @@ uint8 CPU::op_read(uint32 addr) {
   return regs.mdr;
 }
 
-void CPU::op_write(uint32 addr, uint8 data) {
+auto CPU::op_write(uint32 addr, uint8 data) -> void {
   alu_edge();
   status.clock_count = speed(addr);
   dma_edge();
@@ -30,7 +33,7 @@ void CPU::op_write(uint32 addr, uint8 data) {
   debugger.op_write(addr, regs.mdr);
 }
 
-unsigned CPU::speed(unsigned addr) const {
+auto CPU::speed(uint addr) const -> uint {
   if(addr & 0x408000) {
     if(addr & 0x800000) return status.rom_speed;
     return 8;
@@ -40,8 +43,6 @@ unsigned CPU::speed(unsigned addr) const {
   return 12;
 }
 
-uint8 CPU::disassembler_read(uint32 addr) {
+auto CPU::disassembler_read(uint32 addr) -> uint8 {
   return bus.read(addr);
 }
-
-#endif

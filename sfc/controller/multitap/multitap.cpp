@@ -1,5 +1,3 @@
-#ifdef CONTROLLER_CPP
-
 Multitap::Multitap(bool port) : Controller(port) {
   latched = 0;
   counter1 = 0;
@@ -37,5 +35,3 @@ auto Multitap::latch(bool data) -> void {
   counter1 = 0;
   counter2 = 0;
 }
-
-#endif

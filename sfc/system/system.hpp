@@ -55,9 +55,9 @@ extern System system;
 #include <sfc/scheduler/scheduler.hpp>
 
 struct Configuration {
-  Device::ID controllerPort1 = Device::ID::Gamepad;
-  Device::ID controllerPort2 = Device::ID::Gamepad;
-  Device::ID expansionPort = Device::ID::eBoot;
+  Device::ID controllerPort1 = Device::ID::None;
+  Device::ID controllerPort2 = Device::ID::None;
+  Device::ID expansionPort = Device::ID::None;
   System::Region region = System::Region::Autodetect;
   bool random = true;
 };

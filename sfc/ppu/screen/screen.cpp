@@ -1,6 +1,7 @@
-#ifdef PPU_CPP
+PPU::Screen::Screen(PPU& self) : self(self) {
+}
 
-void PPU::Screen::scanline() {
+auto PPU::Screen::scanline() -> void {
   output = self.output + self.vcounter() * 1024;
   if(self.display.interlace && self.field()) output += 512;
 
@@ -17,7 +18,7 @@ void PPU::Screen::scanline() {
   math.color_halve = regs.color_halve && !regs.addsub_mode && math.main.color_enable;
 }
 
-void PPU::Screen::run() {
+auto PPU::Screen::run() -> void {
   if(ppu.vcounter() == 0) return;
 
   bool hires   = self.regs.pseudo_hires || self.regs.bgmode == 5 || self.regs.bgmode == 6;
@@ -28,10 +29,10 @@ void PPU::Screen::run() {
   *output++ = (self.regs.display_brightness << 15) | (mscolor);
 }
 
-uint16 PPU::Screen::get_pixel_sub(bool hires) {
+auto PPU::Screen::get_pixel_sub(bool hires) -> uint16 {
   if(self.regs.display_disable || (!self.regs.overscan && self.vcounter() >= 225)) return 0;
 
-  unsigned priority = 0;
+  uint priority = 0;
   if(self.bg1.output.sub.priority) {
     priority = self.bg1.output.sub.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
@@ -67,10 +68,10 @@ uint16 PPU::Screen::get_pixel_sub(bool hires) {
   );
 }
 
-uint16 PPU::Screen::get_pixel_main() {
+auto PPU::Screen::get_pixel_main() -> uint16 {
   if(self.regs.display_disable || (!self.regs.overscan && self.vcounter() >= 225)) return 0;
 
-  unsigned priority = 0;
+  uint priority = 0;
   if(self.bg1.output.main.priority) {
     priority = self.bg1.output.main.priority;
     if(regs.direct_color && (self.regs.bgmode == 3 || self.regs.bgmode == 4 || self.regs.bgmode == 7)) {
@@ -123,18 +124,18 @@ uint16 PPU::Screen::get_pixel_main() {
   );
 }
 
-uint16 PPU::Screen::addsub(unsigned x, unsigned y) {
+auto PPU::Screen::addsub(uint x, uint y) -> uint16 {
   if(!regs.color_mode) {
     if(!math.color_halve) {
-      unsigned sum = x + y;
-      unsigned carry = (sum - ((x ^ y) & 0x0421)) & 0x8420;
+      uint sum = x + y;
+      uint carry = (sum - ((x ^ y) & 0x0421)) & 0x8420;
       return (sum - carry) | (carry - (carry >> 5));
     } else {
       return (x + y - ((x ^ y) & 0x0421)) >> 1;
     }
   } else {
-    unsigned diff = x - y + 0x8420;
-    unsigned borrow = (diff - ((x ^ y) & 0x8420)) & 0x8420;
+    uint diff = x - y + 0x8420;
+    uint borrow = (diff - ((x ^ y) & 0x8420)) & 0x8420;
     if(!math.color_halve) {
       return   (diff - borrow) & (borrow - (borrow >> 5));
     } else {
@@ -143,13 +144,13 @@ uint16 PPU::Screen::addsub(unsigned x, unsigned y) {
   }
 }
 
-uint16 PPU::Screen::get_color(unsigned palette) {
+auto PPU::Screen::get_color(uint palette) -> uint16 {
   palette <<= 1;
   self.regs.cgram_iaddr = palette;
   return ppu.cgram[palette + 0] + (ppu.cgram[palette + 1] << 8);
 }
 
-uint16 PPU::Screen::get_direct_color(unsigned palette, unsigned tile) {
+auto PPU::Screen::get_direct_color(uint palette, uint tile) -> uint16 {
   //palette = -------- BBGGGRRR
   //tile    = ---bgr-- --------
   //output  = 0BBb00GG Gg0RRRr0
@@ -158,11 +159,11 @@ uint16 PPU::Screen::get_direct_color(unsigned palette, unsigned tile) {
        + ((palette << 2) & 0x001c) + ((tile >> 9) & 0x0002);
 }
 
-uint16 PPU::Screen::fixed_color() const {
+auto PPU::Screen::fixed_color() const -> uint16 {
   return (regs.color_b << 10) | (regs.color_g << 5) | (regs.color_r << 0);
 }
 
-void PPU::Screen::reset() {
+auto PPU::Screen::reset() -> void {
   regs.addsub_mode = random(false);
   regs.direct_color = random(false);
   regs.color_mode = random(false);
@@ -177,8 +178,3 @@ void PPU::Screen::reset() {
   regs.color_g = random(0);
   regs.color_b = random(0);
 }
-
-PPU::Screen::Screen(PPU& self) : self(self) {
-}
-
-#endif

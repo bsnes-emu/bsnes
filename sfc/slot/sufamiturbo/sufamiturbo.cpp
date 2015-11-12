@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define SUFAMITURBO_CPP
 namespace SuperFamicom {
 
 #include "serialization.cpp"

@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 auto DSP::calculateFIR(signed i, bool channel) -> signed {
   signed s = state.echoHistory[channel][state.echoHistoryOffset + i + 1];
   return (s * (int8)REG(FIR + i * 0x10)) >> 6;
@@ -131,5 +129,3 @@ auto DSP::echo30() -> void {
   //write right echo
   echoWrite(1);
 }
-
-#endif

@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 auto DSP::brrDecode(Voice& v) -> void {
   //state.t_brr_byte = ram[v.brr_addr + v.brr_offset] cached from previous clock cycle
   signed nybbles = (state._brrByte << 8) + smp.apuram[(uint16)(v.brrAddress + v.brrOffset + 1)];
@@ -59,5 +57,3 @@ auto DSP::brrDecode(Voice& v) -> void {
     if(v.bufferOffset >= BrrBufferSize) v.bufferOffset = 0;
   }
 }
-
-#endif

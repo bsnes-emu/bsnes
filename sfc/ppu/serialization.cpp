@@ -1,6 +1,4 @@
-#ifdef PPU_CPP
-
-void PPUcounter::serialize(serializer& s) {
+auto PPUcounter::serialize(serializer& s) -> void {
   s.integer(status.interlace);
   s.integer(status.field);
   s.integer(status.vcounter);
@@ -12,7 +10,7 @@ void PPUcounter::serialize(serializer& s) {
   s.integer(history.index);
 }
 
-void PPU::serialize(serializer& s) {
+auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
   PPUcounter::serialize(s);
 
@@ -90,9 +88,7 @@ void PPU::serialize(serializer& s) {
   screen.serialize(s);
 }
 
-void PPU::Background::serialize(serializer& s) {
-  s.integer(id);
-
+auto PPU::Background::serialize(serializer& s) -> void {
   s.integer(regs.tiledata_addr);
   s.integer(regs.screen_addr);
   s.integer(regs.screen_size);
@@ -140,7 +136,7 @@ void PPU::Background::serialize(serializer& s) {
   s.array(data);
 }
 
-void PPU::Sprite::serialize(serializer& s) {
+auto PPU::Sprite::serialize(serializer& s) -> void {
   for(unsigned i = 0; i < 128; i++) {
     s.integer(list[i].x);
     s.integer(list[i].y);
@@ -198,7 +194,7 @@ void PPU::Sprite::serialize(serializer& s) {
   s.integer(output.sub.palette);
 }
 
-void PPU::Window::serialize(serializer& s) {
+auto PPU::Window::serialize(serializer& s) -> void {
   s.integer(regs.bg1_one_enable);
   s.integer(regs.bg1_one_invert);
   s.integer(regs.bg1_two_enable);
@@ -263,7 +259,7 @@ void PPU::Window::serialize(serializer& s) {
   s.integer(two);
 }
 
-void PPU::Screen::serialize(serializer& s) {
+auto PPU::Screen::serialize(serializer& s) -> void {
   s.integer(regs.addsub_mode);
   s.integer(regs.direct_color);
 
@@ -288,5 +284,3 @@ void PPU::Screen::serialize(serializer& s) {
   s.integer(math.addsub_mode);
   s.integer(math.color_halve);
 }
-
-#endif

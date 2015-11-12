@@ -1,5 +1,3 @@
-#ifdef SMP_CPP
-
 auto SMP::serialize(serializer& s) -> void {
   SPC700::serialize(s);
   Thread::serialize(s);
@@ -48,5 +46,3 @@ auto SMP::serialize(serializer& s) -> void {
   s.integer(timer2.enable);
   s.integer(timer2.target);
 }
-
-#endif

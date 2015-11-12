@@ -1,6 +1,4 @@
-#ifdef CPU_CPP
-
-void CPU::serialize(serializer& s) {
+auto CPU::serialize(serializer& s) -> void {
   R65816::serialize(s);
   Thread::serialize(s);
   PPUcounter::serialize(s);
@@ -89,7 +87,7 @@ void CPU::serialize(serializer& s) {
   s.integer(alu.divctr);
   s.integer(alu.shift);
 
-  for(unsigned i = 0; i < 8; i++) {
+  for(uint i = 0; i < 8; i++) {
     s.integer(channel[i].dma_enabled);
     s.integer(channel[i].hdma_enabled);
     s.integer(channel[i].direction);
@@ -114,5 +112,3 @@ void CPU::serialize(serializer& s) {
   s.integer(pipe.addr);
   s.integer(pipe.data);
 }
-
-#endif

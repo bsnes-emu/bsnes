@@ -1,5 +1,3 @@
-#ifdef CONTROLLER_CPP
-
 //The Super Scope is a light-gun: it detects the CRT beam cannon position,
 //and latches the counters by toggling iobit. This only works on controller
 //port 2, as iobit there is connected to the PPU H/V counter latch.
@@ -119,5 +117,3 @@ auto SuperScope::latch(bool data) -> void {
   latched = data;
   counter = 0;
 }
-
-#endif

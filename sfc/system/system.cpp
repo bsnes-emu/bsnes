@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define SYSTEM_CPP
 namespace SuperFamicom {
 
 System system;
@@ -70,7 +69,7 @@ auto System::init() -> void {
   assert(interface != nullptr);
 
   eboot.init();
-  satellaviewbaseunit.init();
+  satellaview.init();
 
   icd2.init();
   mcc.init();
@@ -124,7 +123,7 @@ auto System::load() -> void {
   cpu.enable();
   ppu.enable();
 
-  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.load();
+  if(expansionPort() == Device::ID::Satellaview) satellaview.load();
   if(expansionPort() == Device::ID::eBoot) eboot.load();
 
   if(cartridge.hasICD2()) icd2.load();
@@ -150,7 +149,7 @@ auto System::load() -> void {
 }
 
 auto System::unload() -> void {
-  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.unload();
+  if(expansionPort() == Device::ID::Satellaview) satellaview.unload();
   if(expansionPort() == Device::ID::eBoot) eboot.unload();
 
   if(cartridge.hasICD2()) icd2.unload();
@@ -181,7 +180,7 @@ auto System::power() -> void {
   dsp.power();
   ppu.power();
 
-  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.power();
+  if(expansionPort() == Device::ID::Satellaview) satellaview.power();
   if(expansionPort() == Device::ID::eBoot) eboot.power();
 
   if(cartridge.hasICD2()) icd2.power();
@@ -211,7 +210,7 @@ auto System::reset() -> void {
   dsp.reset();
   ppu.reset();
 
-  if(expansionPort() == Device::ID::Satellaview) satellaviewbaseunit.reset();
+  if(expansionPort() == Device::ID::Satellaview) satellaview.reset();
   if(expansionPort() == Device::ID::eBoot) eboot.reset();
 
   if(cartridge.hasICD2()) icd2.reset();

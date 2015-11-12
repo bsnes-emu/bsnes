@@ -56,6 +56,18 @@ struct Node {
     children.append(node);
   }
 
+  auto find(const string& path) -> maybe<Node&> {
+    auto p = path.split("/");
+    auto name = p.takeFirst();
+    for(auto& child : children) {
+      if(child.name == name) {
+        if(p.size() == 0) return child;
+        return child.find(p.merge("/"));
+      }
+    }
+    return nothing;
+  }
+
   auto load(Markup::Node path) -> void {
     for(auto& child : children) {
       if(auto leaf = path[child.name]) {

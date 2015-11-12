@@ -1,15 +1,13 @@
-#ifdef CPU_CPP
-
 #include "irq.cpp"
 #include "joypad.cpp"
 
-unsigned CPU::dma_counter() {
+auto CPU::dma_counter() -> uint {
   return (status.dma_counter + hcounter()) & 7;
 }
 
-void CPU::add_clocks(unsigned clocks) {
+auto CPU::add_clocks(uint clocks) -> void {
   status.irq_lock = false;
-  unsigned ticks = clocks >> 1;
+  uint ticks = clocks >> 1;
   while(ticks--) {
     tick();
     if(hcounter() & 2) poll_interrupts();
@@ -36,14 +34,14 @@ void CPU::add_clocks(unsigned clocks) {
 }
 
 //called by ppu.tick() when Hcounter=0
-void CPU::scanline() {
+auto CPU::scanline() -> void {
   status.dma_counter = (status.dma_counter + status.line_clocks) & 7;
   status.line_clocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
-  synchronize_smp();
-  synchronize_ppu();
-  synchronize_coprocessors();
+  synchronizeSMP();
+  synchronizePPU();
+  synchronizeDevices();
   system.scanline();
 
   if(vcounter() == 0) {
@@ -65,7 +63,7 @@ void CPU::scanline() {
   }
 }
 
-void CPU::alu_edge() {
+auto CPU::alu_edge() -> void {
   if(alu.mpyctr) {
     alu.mpyctr--;
     if(status.rddiv & 1) status.rdmpy += alu.shift;
@@ -84,7 +82,7 @@ void CPU::alu_edge() {
   }
 }
 
-void CPU::dma_edge() {
+auto CPU::dma_edge() -> void {
   //H/DMA pending && DMA inactive?
   //.. Run one full CPU cycle
   //.. HDMA pending && HDMA enabled ? DMA sync + HDMA run
@@ -149,7 +147,7 @@ void CPU::dma_edge() {
 //
 //status.irq_lock is used to simulate hardware delay before interrupts can
 //trigger during certain events (immediately after DMA, writes to $4200, etc)
-void CPU::last_cycle() {
+auto CPU::last_cycle() -> void {
   if(status.irq_lock == false) {
     status.nmi_pending |= nmi_test();
     status.irq_pending |= irq_test();
@@ -157,10 +155,10 @@ void CPU::last_cycle() {
   }
 }
 
-void CPU::timing_power() {
+auto CPU::timing_power() -> void {
 }
 
-void CPU::timing_reset() {
+auto CPU::timing_reset() -> void {
   status.clock_count = 0;
   status.line_clocks = lineclocks();
 
@@ -201,5 +199,3 @@ void CPU::timing_reset() {
   status.auto_joypad_counter = 0;
   status.auto_joypad_clock   = 0;
 }
-
-#endif

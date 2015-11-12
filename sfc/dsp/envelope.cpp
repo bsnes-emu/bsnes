@@ -1,5 +1,3 @@
-#ifdef DSP_CPP
-
 auto DSP::envelopeRun(Voice& v) -> void {
   signed envelope = v.envelope;
 
@@ -58,5 +56,3 @@ auto DSP::envelopeRun(Voice& v) -> void {
 
   if(counterPoll(rate)) v.envelope = envelope;
 }
-
-#endif
