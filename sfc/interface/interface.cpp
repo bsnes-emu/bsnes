@@ -44,7 +44,7 @@ Interface::Interface() {
   }
 
   { Device device{2, ID::ControllerPort1 | ID::ControllerPort2, "Multitap"};
-    for(unsigned p = 1, n = 0; p <= 4; p++, n += 12) {
+    for(uint p = 1, n = 0; p <= 4; p++, n += 12) {
       device.input.append({n +  0, 0, {"Port ", p, " - ", "B"     }});
       device.input.append({n +  1, 0, {"Port ", p, " - ", "Y"     }});
       device.input.append({n +  2, 0, {"Port ", p, " - ", "Select"}});
@@ -154,7 +154,7 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::group(unsigned id) -> unsigned {
+auto Interface::group(uint id) -> uint {
   switch(id) {
   case ID::SystemManifest:
   case ID::IPLROM:
@@ -222,7 +222,7 @@ auto Interface::group(unsigned id) -> unsigned {
   throw;
 }
 
-auto Interface::load(unsigned id) -> void {
+auto Interface::load(uint id) -> void {
   if(id == ID::SuperFamicom) cartridge.load();
   if(id == ID::SuperGameBoy) cartridge.loadSuperGameBoy();
   if(id == ID::Satellaview) cartridge.loadSatellaview();
@@ -236,7 +236,7 @@ auto Interface::save() -> void {
   }
 }
 
-auto Interface::load(unsigned id, const stream& stream) -> void {
+auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::SystemManifest) {
     system.information.manifest = stream.text();
   }
@@ -263,41 +263,41 @@ auto Interface::load(unsigned id, const stream& stream) -> void {
   if(id == ID::SuperFXRAM) superfx.ram.read(stream);
 
   if(id == ID::ArmDSPPROM) {
-    for(unsigned n = 0; n < 128 * 1024; n++) armdsp.programROM[n] = stream.read();
+    for(auto n : range(128 * 1024)) armdsp.programROM[n] = stream.read();
   }
   if(id == ID::ArmDSPDROM) {
-    for(unsigned n = 0; n <  32 * 1024; n++) armdsp.dataROM[n] = stream.read();
+    for(auto n : range( 32 * 1024)) armdsp.dataROM[n] = stream.read();
   }
   if(id == ID::ArmDSPRAM) {
-    for(unsigned n = 0; n <  16 * 1024; n++) armdsp.programRAM[n] = stream.read();
+    for(auto n : range( 16 * 1024)) armdsp.programRAM[n] = stream.read();
   }
 
   if(id == ID::HitachiDSPROM) hitachidsp.rom.read(stream);
   if(id == ID::HitachiDSPRAM) hitachidsp.ram.read(stream);
   if(id == ID::HitachiDSPDROM) {
-    for(unsigned n = 0; n < 1024; n++) hitachidsp.dataROM[n] = stream.readl(3);
+    for(auto n : range(1024)) hitachidsp.dataROM[n] = stream.readl(3);
   }
   if(id == ID::HitachiDSPDRAM) {
-    for(unsigned n = 0; n < 3072; n++) hitachidsp.dataRAM[n] = stream.readl(1);
+    for(auto n : range(3072)) hitachidsp.dataRAM[n] = stream.readl(1);
   }
 
   if(id == ID::Nec7725DSPPROM) {
-    for(unsigned n = 0; n <  2048; n++) necdsp.programROM[n] = stream.readl(3);
+    for(auto n : range( 2048)) necdsp.programROM[n] = stream.readl(3);
   }
   if(id == ID::Nec7725DSPDROM) {
-    for(unsigned n = 0; n <  1024; n++) necdsp.dataROM[n]    = stream.readl(2);
+    for(auto n : range( 1024)) necdsp.dataROM[n]    = stream.readl(2);
   }
   if(id == ID::Nec7725DSPRAM) {
-    for(unsigned n = 0; n <   256; n++) necdsp.dataRAM[n]    = stream.readl(2);
+    for(auto n : range(  256)) necdsp.dataRAM[n]    = stream.readl(2);
   }
   if(id == ID::Nec96050DSPPROM) {
-    for(unsigned n = 0; n < 16384; n++) necdsp.programROM[n] = stream.readl(3);
+    for(auto n : range(16384)) necdsp.programROM[n] = stream.readl(3);
   }
   if(id == ID::Nec96050DSPDROM) {
-    for(unsigned n = 0; n <  2048; n++) necdsp.dataROM[n]    = stream.readl(2);
+    for(auto n : range( 2048)) necdsp.dataROM[n]    = stream.readl(2);
   }
   if(id == ID::Nec96050DSPRAM) {
-    for(unsigned n = 0; n <  2048; n++) necdsp.dataRAM[n]    = stream.readl(2);
+    for(auto n : range( 2048)) necdsp.dataRAM[n]    = stream.readl(2);
   }
 
   if(id == ID::EpsonRTC) {
@@ -351,7 +351,7 @@ auto Interface::load(unsigned id, const stream& stream) -> void {
   if(id == ID::SufamiTurboSlotBRAM) sufamiturboB.ram.read(stream);
 }
 
-auto Interface::save(unsigned id, const stream& stream) -> void {
+auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::RAM) stream.write(cartridge.ram.data(), cartridge.ram.size());
   if(id == ID::EventRAM) stream.write(event.ram.data(), event.ram.size());
   if(id == ID::SA1IRAM) stream.write(sa1.iram.data(), sa1.iram.size());
@@ -359,19 +359,19 @@ auto Interface::save(unsigned id, const stream& stream) -> void {
   if(id == ID::SuperFXRAM) stream.write(superfx.ram.data(), superfx.ram.size());
 
   if(id == ID::ArmDSPRAM) {
-    for(unsigned n = 0; n < 16 * 1024; n++) stream.write(armdsp.programRAM[n]);
+    for(auto n : range(16 * 1024)) stream.write(armdsp.programRAM[n]);
   }
 
   if(id == ID::HitachiDSPRAM) stream.write(hitachidsp.ram.data(), hitachidsp.ram.size());
   if(id == ID::HitachiDSPDRAM) {
-    for(unsigned n = 0; n < 3072; n++) stream.writel(hitachidsp.dataRAM[n], 1);
+    for(auto n : range(3072)) stream.writel(hitachidsp.dataRAM[n], 1);
   }
 
   if(id == ID::Nec7725DSPRAM) {
-    for(unsigned n = 0; n <  256; n++) stream.writel(necdsp.dataRAM[n], 2);
+    for(auto n : range( 256)) stream.writel(necdsp.dataRAM[n], 2);
   }
   if(id == ID::Nec96050DSPRAM) {
-    for(unsigned n = 0; n < 2048; n++) stream.writel(necdsp.dataRAM[n], 2);
+    for(auto n : range(2048)) stream.writel(necdsp.dataRAM[n], 2);
   }
 
   if(id == ID::EpsonRTC) {
@@ -404,7 +404,7 @@ auto Interface::unload() -> void {
   cartridge.unload();
 }
 
-auto Interface::connect(unsigned port, unsigned device) -> void {
+auto Interface::connect(uint port, uint device) -> void {
   SuperFamicom::device.connect(port, (SuperFamicom::Device::ID)device);
 }
 

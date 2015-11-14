@@ -6,9 +6,21 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 ArmDSP armdsp;
 
-void ArmDSP::Enter() { armdsp.enter(); }
+ArmDSP::ArmDSP() {
+  programROM = new uint8[128 * 1024];
+  dataROM = new uint8[32 * 1024];
+  programRAM = new uint8[16 * 1024];
+}
 
-void ArmDSP::enter() {
+ArmDSP::~ArmDSP() {
+  delete[] programROM;
+  delete[] dataROM;
+  delete[] programRAM;
+}
+
+auto ArmDSP::Enter() -> void { armdsp.enter(); }
+
+auto ArmDSP::enter() -> void {
   //reset hold delay
   while(bridge.reset) {
     step(1);
@@ -37,7 +49,7 @@ void ArmDSP::enter() {
   }
 }
 
-void ArmDSP::step(unsigned clocks) {
+auto ArmDSP::step(uint clocks) -> void {
   if(bridge.timer && --bridge.timer == 0);
   Coprocessor::step(clocks);
   synchronize_cpu();
@@ -47,7 +59,7 @@ void ArmDSP::step(unsigned clocks) {
 //3800-3807 mirrored throughout
 //a0 ignored
 
-uint8 ArmDSP::mmio_read(unsigned addr) {
+auto ArmDSP::mmio_read(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
 
   uint8 data = 0x00;
@@ -71,7 +83,7 @@ uint8 ArmDSP::mmio_read(unsigned addr) {
   return data;
 }
 
-void ArmDSP::mmio_write(unsigned addr, uint8 data) {
+auto ArmDSP::mmio_write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
 
   addr &= 0xff06;
@@ -83,30 +95,30 @@ void ArmDSP::mmio_write(unsigned addr, uint8 data) {
 
   if(addr == 0x3804) {
     data &= 1;
-    if(!bridge.reset && data) arm_reset();
+    if(!bridge.reset && data) resetARM();
     bridge.reset = data;
   }
 }
 
-void ArmDSP::init() {
+auto ArmDSP::init() -> void {
 }
 
-void ArmDSP::load() {
+auto ArmDSP::load() -> void {
 }
 
-void ArmDSP::unload() {
+auto ArmDSP::unload() -> void {
 }
 
-void ArmDSP::power() {
-  for(unsigned n = 0; n < 16 * 1024; n++) programRAM[n] = random(0x00);
+auto ArmDSP::power() -> void {
+  for(auto n : range(16 * 1024)) programRAM[n] = random(0x00);
 }
 
-void ArmDSP::reset() {
+auto ArmDSP::reset() -> void {
   bridge.reset = false;
-  arm_reset();
+  resetARM();
 }
 
-void ArmDSP::arm_reset() {
+auto ArmDSP::resetARM() -> void {
   create(ArmDSP::Enter, 21477272);
   ARM::power();
 
@@ -116,18 +128,6 @@ void ArmDSP::arm_reset() {
   bridge.timerlatch = 0;
   bridge.cputoarm.ready = false;
   bridge.armtocpu.ready = false;
-}
-
-ArmDSP::ArmDSP() {
-  programROM = new uint8[128 * 1024];
-  dataROM = new uint8[32 * 1024];
-  programRAM = new uint8[16 * 1024];
-}
-
-ArmDSP::~ArmDSP() {
-  delete[] programROM;
-  delete[] dataROM;
-  delete[] programRAM;
 }
 
 }

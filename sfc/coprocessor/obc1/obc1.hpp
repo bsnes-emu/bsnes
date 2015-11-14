@@ -1,20 +1,20 @@
 struct OBC1 {
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
   MappedRAM ram;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
-
-  void serialize(serializer&);
-
 private:
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
+  auto ramRead(uint addr) -> uint8;
+  auto ramWrite(uint addr, uint8 data) -> void;
 
   struct {
     uint16 address;

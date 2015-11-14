@@ -39,13 +39,7 @@ uint8 APU::Sequencer::read(unsigned addr) const {
   | (lenable[2] << 6)
   | (lenable[3] << 7)
   );
-  case 2: return (
-    (enable[0]    << 0)
-  | (enable[1]    << 1)
-  | (enable[2]    << 2)
-  | (enable[3]    << 3)
-  | (masterenable << 7)
-  );
+  case 2: return (masterenable << 7);
   }
 }
 

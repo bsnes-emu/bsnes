@@ -1,20 +1,21 @@
 struct Video {
-  uint32_t* palette;
-  void generate_palette(Emulator::Interface::PaletteMode mode);
   Video();
   ~Video();
+  auto generate_palette(Emulator::Interface::PaletteMode mode) -> void;
+
+  uint32_t* palette = nullptr;
 
 private:
   bool hires;
-  unsigned line_width[240];
+  uint line_width[240];
 
-  void update();
-  void scanline();
-  void init();
+  auto update() -> void;
+  auto scanline() -> void;
+  auto init() -> void;
 
-  static const uint8_t gamma_ramp[32];
-  static const uint8_t cursor[15 * 15];
-  void draw_cursor(uint16_t color, int x, int y);
+  static const uint8 gamma_ramp[32];
+  static const uint8 cursor[15 * 15];
+  auto draw_cursor(uint16 color, int x, int y) -> void;
 
   friend class System;
 };

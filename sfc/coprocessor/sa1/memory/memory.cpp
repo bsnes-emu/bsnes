@@ -1,4 +1,4 @@
-uint8 SA1::bus_read(unsigned addr) {
+auto SA1::bus_read(uint addr) -> uint8 {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f|80-bf:2200-23ff
     return mmio_read(addr);
   }
@@ -39,7 +39,7 @@ uint8 SA1::bus_read(unsigned addr) {
   return regs.mdr;
 }
 
-void SA1::bus_write(unsigned addr, uint8 data) {
+auto SA1::bus_write(uint addr, uint8 data) -> void {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f|80-bf:2200-23ff
     return mmio_write(addr, data);
   }
@@ -73,7 +73,7 @@ void SA1::bus_write(unsigned addr, uint8 data) {
 //this is used both to keep VBR-reads from accessing MMIO registers, and
 //to avoid syncing the S-CPU and SA-1*; as both chips are able to access
 //these ports.
-uint8 SA1::vbr_read(unsigned addr) {
+auto SA1::vbr_read(uint addr) -> uint8 {
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     return mmcrom_read(addr);
   }
@@ -97,6 +97,8 @@ uint8 SA1::vbr_read(unsigned addr) {
   if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
     return iram.read(addr & 2047);
   }
+
+  return 0x00;
 }
 
 //ROM, I-RAM and MMIO registers are accessed at ~10.74MHz (2 clock ticks)
@@ -104,23 +106,23 @@ uint8 SA1::vbr_read(unsigned addr) {
 //tick() == 2 clock ticks
 //note: bus conflict delays are not emulated at this time
 
-void SA1::op_io() {
+auto SA1::op_io() -> void {
   tick();
 }
 
-uint8 SA1::op_read(unsigned addr) {
+auto SA1::op_read(uint addr) -> uint8 {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   return bus_read(addr);
 }
 
-void SA1::op_write(unsigned addr, uint8 data) {
+auto SA1::op_write(uint addr, uint8 data) -> void {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   bus_write(addr, regs.mdr = data);
 }
 
-uint8 SA1::mmcrom_read(unsigned addr) {
+auto SA1::mmcrom_read(uint addr) -> uint8 {
   if((addr & 0xffffe0) == 0x00ffe0) {
     if(addr == 0xffea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
     if(addr == 0xffeb && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 8;
@@ -128,7 +130,7 @@ uint8 SA1::mmcrom_read(unsigned addr) {
     if(addr == 0xffef && sa1.mmio.cpu_ivsw) return sa1.mmio.siv >> 8;
   }
 
-  static auto read = [](unsigned addr) {
+  static auto read = [](uint addr) {
     return sa1.rom.read(bus.mirror(addr, sa1.rom.size()));
   };
 
@@ -175,10 +177,10 @@ uint8 SA1::mmcrom_read(unsigned addr) {
   return 0x00;
 }
 
-void SA1::mmcrom_write(unsigned addr, uint8 data) {
+auto SA1::mmcrom_write(uint addr, uint8 data) -> void {
 }
 
-uint8 SA1::mmcbwram_read(unsigned addr) {
+auto SA1::mmcbwram_read(uint addr) -> uint8 {
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     cpu.synchronizeCoprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
@@ -192,7 +194,7 @@ uint8 SA1::mmcbwram_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SA1::mmcbwram_write(unsigned addr, uint8 data) {
+auto SA1::mmcbwram_write(uint addr, uint8 data) -> void {
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     cpu.synchronizeCoprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
@@ -204,7 +206,7 @@ void SA1::mmcbwram_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 SA1::mmc_sa1_read(unsigned addr) {
+auto SA1::mmc_sa1_read(uint addr) -> uint8 {
   synchronize_cpu();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
@@ -217,7 +219,7 @@ uint8 SA1::mmc_sa1_read(unsigned addr) {
   }
 }
 
-void SA1::mmc_sa1_write(unsigned addr, uint8 data) {
+auto SA1::mmc_sa1_write(uint addr, uint8 data) -> void {
   synchronize_cpu();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
@@ -230,10 +232,10 @@ void SA1::mmc_sa1_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 SA1::bitmap_read(unsigned addr) {
+auto SA1::bitmap_read(uint addr) -> uint8 {
   if(mmio.bbf == 0) {
     //4bpp
-    unsigned shift = addr & 1;
+    uint shift = addr & 1;
     addr = (addr >> 1) & (bwram.size() - 1);
     switch(shift) {
     case 0: return (bwram.read(addr) >> 0) & 15;
@@ -241,7 +243,7 @@ uint8 SA1::bitmap_read(unsigned addr) {
     }
   } else {
     //2bpp
-    unsigned shift = addr & 3;
+    uint shift = addr & 3;
     addr = (addr >> 2) & (bwram.size() - 1);
     switch(shift) {
     case 0: return (bwram.read(addr) >> 0) & 3;
@@ -252,10 +254,10 @@ uint8 SA1::bitmap_read(unsigned addr) {
   }
 }
 
-void SA1::bitmap_write(unsigned addr, uint8 data) {
+auto SA1::bitmap_write(uint addr, uint8 data) -> void {
   if(mmio.bbf == 0) {
     //4bpp
-    unsigned shift = addr & 1;
+    uint shift = addr & 1;
     addr = (addr >> 1) & (bwram.size() - 1);
     switch(shift) {
     case 0: data = (bwram.read(addr) & 0xf0) | ((data & 15) << 0); break;
@@ -263,7 +265,7 @@ void SA1::bitmap_write(unsigned addr, uint8 data) {
     }
   } else {
     //2bpp
-    unsigned shift = addr & 3;
+    uint shift = addr & 3;
     addr = (addr >> 2) & (bwram.size() - 1);
     switch(shift) {
     case 0: data = (bwram.read(addr) & 0xfc) | ((data &  3) << 0); break;

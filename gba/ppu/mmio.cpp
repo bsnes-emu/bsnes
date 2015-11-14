@@ -41,6 +41,8 @@ uint8 PPU::read(uint32 addr) {
   case 0x04000052: return regs.blend.eva;
   case 0x04000053: return regs.blend.evb;
 
+  //BLDY is write-only
+
   }
 
   return 0u;
@@ -194,11 +196,11 @@ void PPU::write(uint32 addr, uint8 byte) {
   case 0x04000051: regs.blend.control = (regs.blend.control & 0x00ff) | (byte << 8); return;
 
   //BLDALPHA
-  case 0x04000052: regs.blend.eva = std::min(16, byte & 0x1f); return;
-  case 0x04000053: regs.blend.evb = std::min(16, byte & 0x1f); return;
+  case 0x04000052: regs.blend.eva = byte & 0x1f; return;
+  case 0x04000053: regs.blend.evb = byte & 0x1f; return;
 
   //BLDY
-  case 0x04000054: regs.blend.evy = std::min(16, byte & 0x1f); return;
+  case 0x04000054: regs.blend.evy = byte & 0x1f; return;
   case 0x04000055: return;
 
   }

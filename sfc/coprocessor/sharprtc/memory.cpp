@@ -1,4 +1,4 @@
-uint4 SharpRTC::rtc_read(uint4 addr) {
+auto SharpRTC::rtc_read(uint4 addr) -> uint4 {
   switch(addr) {
   case  0: return second % 10;
   case  1: return second / 10;
@@ -17,7 +17,7 @@ uint4 SharpRTC::rtc_read(uint4 addr) {
   }
 }
 
-void SharpRTC::rtc_write(uint4 addr, uint4 data) {
+auto SharpRTC::rtc_write(uint4 addr, uint4 data) -> void {
   switch(addr) {
   case  0: second = second / 10 * 10 + data; break;
   case  1: second = data * 10 + second % 10; break;
@@ -35,14 +35,14 @@ void SharpRTC::rtc_write(uint4 addr, uint4 data) {
   }
 }
 
-void SharpRTC::load(const uint8* data) {
-  for(unsigned byte = 0; byte < 8; byte++) {
+auto SharpRTC::load(const uint8* data) -> void {
+  for(auto byte : range(8)) {
     rtc_write(byte * 2 + 0, data[byte] >> 0);
     rtc_write(byte * 2 + 1, data[byte] >> 4);
   }
 
   uint64 timestamp = 0;
-  for(unsigned byte = 0; byte < 8; byte++) {
+  for(auto byte : range(8)) {
     timestamp |= data[8 + byte] << (byte * 8);
   }
 
@@ -53,14 +53,14 @@ void SharpRTC::load(const uint8* data) {
   while(diff--) tick_second();
 }
 
-void SharpRTC::save(uint8* data) {
-  for(unsigned byte = 0; byte < 8; byte++) {
+auto SharpRTC::save(uint8* data) -> void {
+  for(auto byte : range(8)) {
     data[byte]  = rtc_read(byte * 2 + 0) << 0;
     data[byte] |= rtc_read(byte * 2 + 1) << 4;
   }
 
-  uint64 timestamp = (uint64)time(0);
-  for(unsigned byte = 0; byte < 8; byte++) {
+  uint64 timestamp = (uint64)time(nullptr);
+  for(auto byte : range(8)) {
     data[8 + byte] = timestamp;
     timestamp >>= 8;
   }

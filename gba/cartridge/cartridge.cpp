@@ -46,14 +46,14 @@ auto Cartridge::load() -> void {
   hasFLASH  = false;
 
   if(auto info = document["cartridge/mrom"]) {
-    mrom.size = min(32 * 1024 * 1024, info["size"].decimal());
+    mrom.size = min(32 * 1024 * 1024, info["size"].natural());
 
     interface->loadRequest(ID::MROM, info["name"].text(), true);
   }
 
   if(auto info = document["cartridge/sram"]) {
     hasSRAM = true;
-    sram.size = min(32 * 1024, info["size"].decimal());
+    sram.size = min(32 * 1024, info["size"].natural());
     sram.mask = sram.size - 1;
     for(auto n : range(sram.size)) sram.data[n] = 0xff;
 
@@ -63,7 +63,7 @@ auto Cartridge::load() -> void {
 
   if(auto info = document["cartridge/eeprom"]) {
     hasEEPROM = true;
-    eeprom.size = min(8 * 1024, info["size"].decimal());
+    eeprom.size = min(8 * 1024, info["size"].natural());
     eeprom.bits = eeprom.size <= 512 ? 6 : 14;
     if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
     eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
@@ -76,8 +76,8 @@ auto Cartridge::load() -> void {
 
   if(auto info = document["cartridge/flash"]) {
     hasFLASH = true;
-    flash.id = info["id"].decimal();
-    flash.size = min(128 * 1024, info["size"].decimal());
+    flash.id = info["id"].natural();
+    flash.size = min(128 * 1024, info["size"].natural());
     for(auto n : range(flash.size)) flash.data[n] = 0xff;
 
     //if flash ID not provided; guess that it's a Macronix chip

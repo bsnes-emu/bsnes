@@ -4,9 +4,9 @@ namespace SuperFamicom {
 
 Event event;
 
-void Event::Enter() { event.enter(); }
+auto Event::Enter() -> void { event.enter(); }
 
-void Event::enter() {
+auto Event::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -15,7 +15,6 @@ void Event::enter() {
     if(scoreActive && scoreSecondsRemaining) {
       if(--scoreSecondsRemaining == 0) {
         scoreActive = false;
-        submitScore();
       }
     }
 
@@ -33,40 +32,13 @@ void Event::enter() {
   }
 }
 
-void Event::submitScore() {
-  if(usedSaveState) return;
-
-  string data;
-  data.append("timer:", timer, "\n");
-  if(board == Board::CampusChallenge92) {
-    unsigned mw = 0, fz = 0, pw = 0;
-    for(unsigned n = 0x0408; n <= 0x040e; n++) mw = mw * 10 + ram.read(n);
-    for(unsigned n = 0x0413; n >= 0x0410; n--) fz = fz * 10 + ram.read(n);
-    for(unsigned n = 0x0418; n >= 0x0415; n--) pw = pw * 10 + ram.read(n);
-    data.append("mw:", mw, "\n");
-    data.append("fz:", fz, "\n");
-    data.append("pw:", pw, "\n");
-  }
-  if(board == Board::Powerfest94) {
-    unsigned ml = 0, mk[2] = {0}, ba[2] = {0};
-    for(unsigned n = 0x0408; n <= 0x040e; n++) ml = ml * 10 + ram.read(n);
-    for(unsigned n = 0x0413; n >= 0x0412; n--) mk[0] = mk[0] * 10 + ram.read(n);
-    for(unsigned n = 0x0411; n >= 0x0410; n--) mk[1] = mk[1] * 10 + ram.read(n);
-    for(unsigned n = 0x0418; n >= 0x0415; n--) ba[0] = ba[0] * 10 + ram.read(n);
-    for(unsigned n = 0x041a; n >= 0x0419; n--) ba[1] = ba[1] * 10 + ram.read(n);
-    data.append("ml:", ml, "\n");
-    data.append("mk:", mk[0], ",", mk[1], "\n");
-    data.append("ba:", ba[0], ",", ba[1], "\n");
-  }
+auto Event::init() -> void {
 }
 
-void Event::init() {
+auto Event::load() -> void {
 }
 
-void Event::load() {
-}
-
-void Event::unload() {
+auto Event::unload() -> void {
   rom[0].reset();
   rom[1].reset();
   rom[2].reset();
@@ -74,27 +46,25 @@ void Event::unload() {
   ram.reset();
 }
 
-void Event::power() {
-  usedSaveState = false;
+auto Event::power() -> void {
 }
 
-void Event::reset() {
+auto Event::reset() -> void {
   create(Event::Enter, 1);
-  for(unsigned n = 0; n < ram.size(); n++) ram.write(n, 0x00);
+  for(auto n : range(ram.size())) ram.write(n, 0x00);
   status = 0x00;
   select = 0x00;
   timerActive = false;
   scoreActive = false;
   timerSecondsRemaining = 0;
   scoreSecondsRemaining = 0;
-  usedSaveState = false;
 }
 
-uint8 Event::sr(unsigned) {
+auto Event::sr(uint) -> uint8 {
   return status;
 }
 
-void Event::dr(unsigned, uint8 data) {
+auto Event::dr(uint, uint8 data) -> void {
   select = data;
   if(timer && data == 0x09) {
     timerActive = true;
@@ -102,9 +72,9 @@ void Event::dr(unsigned, uint8 data) {
   }
 }
 
-uint8 Event::rom_read(unsigned addr) {
+auto Event::rom_read(uint addr) -> uint8 {
   if(board == Board::CampusChallenge92) {
-    unsigned id = 0;
+    uint id = 0;
     if(select == 0x09) id = 1;
     if(select == 0x05) id = 2;
     if(select == 0x03) id = 3;
@@ -117,7 +87,7 @@ uint8 Event::rom_read(unsigned addr) {
   }
 
   if(board == Board::Powerfest94) {
-    unsigned id = 0;
+    uint id = 0;
     if(select == 0x09) id = 1;
     if(select == 0x0c) id = 2;
     if(select == 0x0a) id = 3;
@@ -138,15 +108,15 @@ uint8 Event::rom_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-uint8 Event::ram_read(unsigned addr) {
+auto Event::ram_read(uint addr) -> uint8 {
   return ram.read(bus.mirror(addr, ram.size()));
 }
 
-void Event::ram_write(unsigned addr, uint8 data) {
+auto Event::ram_write(uint addr, uint8 data) -> void {
   return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
-void Event::serialize(serializer& s) {
+auto Event::serialize(serializer& s) -> void {
   Thread::serialize(s);
   s.array(ram.data(), ram.size());
   s.integer(status);
@@ -155,8 +125,6 @@ void Event::serialize(serializer& s) {
   s.integer(scoreActive);
   s.integer(timerSecondsRemaining);
   s.integer(scoreSecondsRemaining);
-
-  usedSaveState = true;
 }
 
 }

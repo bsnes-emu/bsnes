@@ -1,29 +1,29 @@
 //Epson RTC-4513 Real-Time Clock
 
 struct EpsonRTC : Coprocessor {
-  static void Enter();
-  void enter();
+  static auto Enter() -> void;
+  auto enter() -> void;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-  void sync();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+  auto sync() -> void;
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 
   uint21 clocks;
-  unsigned seconds;
+  uint seconds;
 
   uint2 chipselect;
-  enum class State : unsigned { Mode, Seek, Read, Write } state;
+  enum class State : uint { Mode, Seek, Read, Write } state;
   uint4 mdr;
   uint4 offset;
-  unsigned wait;
+  uint wait;
   uint1 ready;
   uint1 holdtick;
 
@@ -67,25 +67,25 @@ struct EpsonRTC : Coprocessor {
   uint1 test;
 
   //memory.cpp
-  void rtc_reset();
-  uint4 rtc_read(uint4 addr);
-  void rtc_write(uint4 addr, uint4 data);
+  auto rtc_reset() -> void;
+  auto rtc_read(uint4 addr) -> uint4;
+  auto rtc_write(uint4 addr, uint4 data) -> void;
 
-  void load(const uint8* data);
-  void save(uint8* data);
+  auto load(const uint8* data) -> void;
+  auto save(uint8* data) -> void;
 
   //time.cpp
-  void irq(uint2 period);
-  void duty();
-  void round_seconds();
-  void tick();
+  auto irq(uint2 period) -> void;
+  auto duty() -> void;
+  auto round_seconds() -> void;
+  auto tick() -> void;
 
-  void tick_second();
-  void tick_minute();
-  void tick_hour();
-  void tick_day();
-  void tick_month();
-  void tick_year();
+  auto tick_second() -> void;
+  auto tick_minute() -> void;
+  auto tick_hour() -> void;
+  auto tick_day() -> void;
+  auto tick_month() -> void;
+  auto tick_year() -> void;
 };
 
 extern EpsonRTC epsonrtc;

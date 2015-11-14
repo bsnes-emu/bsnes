@@ -43,7 +43,7 @@ struct SQLite3 {
       return sqlite3_column_int64(statement(), column);
     }
 
-    auto decimal(unsigned column) -> uint64_t {
+    auto natural(unsigned column) -> uint64_t {
       return sqlite3_column_int64(statement(), column);
     }
 
@@ -70,7 +70,7 @@ struct SQLite3 {
     }
 
     auto integer() -> int64_t { return integer(_output++); }
-    auto decimal() -> uint64_t { return decimal(_output++); }
+    auto natural() -> uint64_t { return natural(_output++); }
     auto real() -> double { return real(_output++); }
     auto text() -> string { return text(_output++); }
     auto data() -> vector<uint8_t> { return data(_output++); }

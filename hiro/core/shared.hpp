@@ -25,10 +25,12 @@
     } \
     return Object(); \
   } \
+  auto property(const string& name) const { return self().property(name); } \
   auto remove() { return self().remove(), *this; } \
   auto setEnabled(bool enabled = true) { return self().setEnabled(enabled), *this; } \
   auto setFocused() { return self().setFocused(), *this; } \
   auto setFont(const Font& font = {}) { return self().setFont(font), *this; } \
+  auto setProperty(const string& name, const string& value = "") { return self().setProperty(name, value), *this; } \
   auto setVisible(bool visible = true) { return self().setVisible(visible), *this; } \
   auto visible(bool recursive = false) const { return self().visible(recursive); } \
 

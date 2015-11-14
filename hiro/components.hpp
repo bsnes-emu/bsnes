@@ -27,6 +27,8 @@
 #define Hiro_BrowserWindow
 #define Hiro_MessageWindow
 
+#define Hiro_Property
+
 #define Hiro_Object
 #define Hiro_Group
 

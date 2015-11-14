@@ -1,19 +1,19 @@
 struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
-  unsigned revision;
+  static auto Enter() -> void;
+  auto enter() -> void;
 
-  static void Enter();
-  void enter();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  auto serialize(serializer&) -> void;
 
-  void serialize(serializer&);
+  uint revision;
 
 private:
   Emulator::Interface::Bind* bind = nullptr;

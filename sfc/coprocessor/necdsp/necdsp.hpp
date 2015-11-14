@@ -1,23 +1,23 @@
 struct NECDSP : Processor::uPD96050, Coprocessor {
+  static auto Enter() -> void;
+  auto enter() -> void;
+
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
+
+  auto ram_read(uint addr) -> uint8;
+  auto ram_write(uint addr, uint8 data) -> void;
+
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto firmware() const -> vector<uint8>;
+  auto serialize(serializer&) -> void;
+
   unsigned Select;
-
-  static void Enter();
-  void enter();
-
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
-
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
-
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-
-  vector<uint8> firmware();
-  void serialize(serializer&);
 };
 
 extern NECDSP necdsp;

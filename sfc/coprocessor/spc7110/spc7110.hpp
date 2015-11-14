@@ -1,67 +1,66 @@
 struct Decompressor;
 
 struct SPC7110 : Coprocessor {
+  SPC7110();
+  ~SPC7110();
+
+  static auto Enter() -> void;
+  auto enter() -> void;
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto add_clocks(uint clocks) -> void;
+
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
+
+  auto mcurom_read(uint addr) -> uint8;
+  auto mcurom_write(uint addr, uint8 data) -> void;
+
+  auto mcuram_read(uint addr) -> uint8;
+  auto mcuram_write(uint addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
+  //dcu.cpp
+  auto dcu_load_address() -> void;
+  auto dcu_begin_transfer() -> void;
+  auto dcu_read() -> uint8;
+
+  auto deinterleave_1bpp(uint length) -> void;
+  auto deinterleave_2bpp(uint length) -> void;
+  auto deinterleave_4bpp(uint length) -> void;
+
+  //data.cpp
+  auto datarom_read(uint addr) -> uint8;
+
+  auto data_offset() -> uint;
+  auto data_adjust() -> uint;
+  auto data_stride() -> uint;
+
+  auto set_data_offset(uint addr) -> void;
+  auto set_data_adjust(uint addr) -> void;
+
+  auto data_port_read() -> void;
+
+  auto data_port_increment_4810() -> void;
+  auto data_port_increment_4814() -> void;
+  auto data_port_increment_4815() -> void;
+  auto data_port_increment_481a() -> void;
+
+  //alu.cpp
+  auto alu_multiply() -> void;
+  auto alu_divide() -> void;
+
   MappedRAM prom;  //program ROM
   MappedRAM drom;  //data ROM
   MappedRAM ram;
 
-  static void Enter();
-  void enter();
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-
-  void add_clocks(unsigned clocks);
-
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
-
-  uint8 mcurom_read(unsigned addr);
-  void mcurom_write(unsigned addr, uint8 data);
-
-  uint8 mcuram_read(unsigned addr);
-  void mcuram_write(unsigned addr, uint8 data);
-
-  void serialize(serializer&);
-  SPC7110();
-  ~SPC7110();
-
-  //dcu.cpp
-  void dcu_load_address();
-  void dcu_begin_transfer();
-  uint8 dcu_read();
-
-  void deinterleave_1bpp(unsigned length);
-  void deinterleave_2bpp(unsigned length);
-  void deinterleave_4bpp(unsigned length);
-
-  //data.cpp
-  uint8 datarom_read(unsigned addr);
-
-  unsigned data_offset();
-  unsigned data_adjust();
-  unsigned data_stride();
-
-  void set_data_offset(unsigned addr);
-  void set_data_adjust(unsigned addr);
-
-  void data_port_read();
-
-  void data_port_increment_4810();
-  void data_port_increment_4814();
-  void data_port_increment_4815();
-  void data_port_increment_481a();
-
-  //alu.cpp
-  void alu_multiply();
-  void alu_divide();
-
 private:
-  //==================
   //decompression unit
-  //==================
   uint8 r4801;  //compression table B0
   uint8 r4802;  //compression table B1
   uint7 r4803;  //compression table B2
@@ -77,13 +76,11 @@ private:
   bool dcu_pending;
   uint2 dcu_mode;
   uint23 dcu_addr;
-  unsigned dcu_offset;
+  uint dcu_offset;
   uint8 dcu_tile[32];
   Decompressor* decompressor;
 
-  //==============
   //data port unit
-  //==============
   uint8 r4810;  //data port read + seek
   uint8 r4811;  //data offset B0
   uint8 r4812;  //data offset B1
@@ -95,9 +92,7 @@ private:
   uint8 r4818;  //data port settings
   uint8 r481a;  //data port seek
 
-  //=====================
   //arithmetic logic unit
-  //=====================
   uint8 r4820;  //16-bit multiplicand B0, 32-bit dividend B0
   uint8 r4821;  //16-bit multiplicand B1, 32-bit dividend B1
   uint8 r4822;  //32-bit dividend B2
@@ -118,9 +113,7 @@ private:
   bool mul_pending;
   bool div_pending;
 
-  //===================
   //memory control unit
-  //===================
   uint8 r4830;  //bank 0 mapping + SRAM write enable
   uint8 r4831;  //bank 1 mapping
   uint8 r4832;  //bank 2 mapping

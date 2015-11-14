@@ -66,10 +66,10 @@ void Cartridge::load(System::Revision revision) {
   auto rom = document["cartridge/rom"];
   auto ram = document["cartridge/ram"];
 
-  romsize = rom["size"].decimal();
+  romsize = rom["size"].natural();
   romdata = allocate<uint8>(romsize, 0xff);
 
-  ramsize = ram["size"].decimal();
+  ramsize = ram["size"].natural();
   ramdata = allocate<uint8>(ramsize, 0xff);
 
   //Super Game Boy core loads memory from Super Famicom core
@@ -79,8 +79,8 @@ void Cartridge::load(System::Revision revision) {
     if(auto name = ram["name"].text()) memory.append({ID::RAM, name});
   }
 
-  information.romsize = rom["size"].decimal();
-  information.ramsize = ram["size"].decimal();
+  information.romsize = rom["size"].natural();
+  information.ramsize = ram["size"].natural();
   information.battery = (bool)ram["name"];
 
   switch(information.mapper) { default:

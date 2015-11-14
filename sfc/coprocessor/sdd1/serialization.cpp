@@ -1,4 +1,4 @@
-void SDD1::serialize(serializer& s) {
+auto SDD1::serialize(serializer& s) -> void {
   s.array(ram.data(), ram.size());
 
   s.integer(sdd1_enable);
@@ -6,7 +6,7 @@ void SDD1::serialize(serializer& s) {
   s.integer(dma_ready);
   s.array(mmc);
 
-  for(unsigned n = 0; n < 8; n++) {
+  for(auto n : range(8)) {
     s.integer(dma[n].addr);
     s.integer(dma[n].size);
   }

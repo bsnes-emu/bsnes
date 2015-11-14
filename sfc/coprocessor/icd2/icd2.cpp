@@ -7,9 +7,9 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 ICD2 icd2;
 
-void ICD2::Enter() { icd2.enter(); }
+auto ICD2::Enter() -> void { icd2.enter(); }
 
-void ICD2::enter() {
+auto ICD2::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       GameBoy::system.runtosave();
@@ -28,27 +28,27 @@ void ICD2::enter() {
   }
 }
 
-void ICD2::init() {
+auto ICD2::init() -> void {
 }
 
-void ICD2::load() {
+auto ICD2::load() -> void {
   bind = GameBoy::interface->bind;
   hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
   GameBoy::interface->hook = this;
 }
 
-void ICD2::unload() {
+auto ICD2::unload() -> void {
   GameBoy::interface->bind = bind;
   GameBoy::interface->hook = hook;
 }
 
-void ICD2::power() {
+auto ICD2::power() -> void {
   audio.coprocessor_enable(true);
   audio.coprocessor_frequency(2 * 1024 * 1024);
 }
 
-void ICD2::reset() {
+auto ICD2::reset() -> void {
   create(ICD2::Enter, cpu.frequency / 5);
 
   r6003 = 0x00;

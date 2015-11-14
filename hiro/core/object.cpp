@@ -256,6 +256,13 @@ auto mObject::parentWindow(bool recursive) const -> mWindow* {
 }
 #endif
 
+auto mObject::property(const string& name) const -> string {
+  if(auto property = state.properties.find({name})) {
+    return property->value();
+  }
+  return {};
+}
+
 auto mObject::remove() -> type& {
   signal(remove);
   return *this;
@@ -292,6 +299,16 @@ auto mObject::setParent(mObject* parent, signed offset) -> type& {
   state.parent = parent;
   state.offset = offset;
   if(!abstract()) construct();
+  return *this;
+}
+
+auto mObject::setProperty(const string& name, const string& value) -> type& {
+  if(auto property = state.properties.find(name)) {
+    if(value) property->setValue(value);
+    else state.properties.remove(*property);
+  } else {
+    if(value) state.properties.insert({name, value});
+  }
   return *this;
 }
 

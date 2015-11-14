@@ -7,7 +7,7 @@ uint8 r7000[16];  //JOYP packet data
 uint8 mlt_req;    //number of active joypads
 
 uint8 output[4 * 512];
-unsigned read_bank;
-unsigned read_addr;
-unsigned write_bank;
-unsigned write_addr;
+uint read_bank;
+uint read_addr;
+uint write_bank;
+uint write_addr;

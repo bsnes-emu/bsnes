@@ -83,7 +83,7 @@ auto Role::download(signed fd, Message& message) -> bool {
         headReceived = true;
         if(!message.setHead()) return false;
         chunked = message.header["Transfer-Encoding"].value().iequals("chunked");
-        contentLength = message.header["Content-Length"].value().decimal();
+        contentLength = message.header["Content-Length"].value().natural();
       }
 
       continue;

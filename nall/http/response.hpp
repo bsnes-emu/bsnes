@@ -95,7 +95,7 @@ auto Response::setHead() -> bool {
   else if(response.ibeginsWith("HTTP/1.1 ")) response.iltrim("HTTP/1.1 ", 1L);
   else return false;
 
-  setResponseType(decimal(response));
+  setResponseType(natural(response));
 
   for(auto& header : headers) {
     if(header.beginsWith(" ") || header.beginsWith("\t")) continue;
@@ -156,7 +156,7 @@ auto Response::hasBody() const -> bool {
 }
 
 auto Response::findContentLength() const -> unsigned {
-  if(auto contentLength = header["Content-Length"]) return contentLength.value().decimal();
+  if(auto contentLength = header["Content-Length"]) return contentLength.value().natural();
   if(_body) return _body.size();
   if(hasData()) return data().size();
   if(hasFile()) return file::size(file());

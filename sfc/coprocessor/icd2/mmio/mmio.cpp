@@ -1,9 +1,9 @@
-uint8 ICD2::read(unsigned addr) {
+auto ICD2::read(uint addr) -> uint8 {
   addr &= 0xffff;
 
   //LY counter
   if(addr == 0x6000) {
-    unsigned y = min(143u, GameBoy::ppu.status.ly);
+    uint y = min(143u, GameBoy::ppu.status.ly);
     return (y & ~7) | write_bank;
   }
 
@@ -11,9 +11,9 @@ uint8 ICD2::read(unsigned addr) {
   if(addr == 0x6002) {
     bool data = packetsize > 0;
     if(data) {
-      for(unsigned i = 0; i < 16; i++) r7000[i] = packet[0][i];
+      for(auto n : range(16)) r7000[n] = packet[0][n];
       packetsize--;
-      for(unsigned i = 0; i < packetsize; i++) packet[i] = packet[i + 1];
+      for(auto n : range(packetsize)) packet[n] = packet[n + 1];
     }
     return data;
   }
@@ -38,7 +38,7 @@ uint8 ICD2::read(unsigned addr) {
   return 0x00;
 }
 
-void ICD2::write(unsigned addr, uint8 data) {
+auto ICD2::write(uint addr, uint8 data) -> void {
   addr &= 0xffff;
 
   //VRAM port

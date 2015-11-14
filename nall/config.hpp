@@ -11,7 +11,7 @@ namespace Configuration {
 struct Node {
   string name;
   string desc;
-  enum class Type : unsigned { Null, Bool, Signed, Unsigned, Double, String } type = Type::Null;
+  enum class Type : unsigned { Null, Boolean, Integer, Natural, Double, String } type = Type::Null;
   void* data = nullptr;
   vector<Node> children;
 
@@ -21,9 +21,9 @@ struct Node {
 
   auto get() const -> string {
     switch(type) {
-    case Type::Bool: return {*(bool*)data};
-    case Type::Signed: return {*(signed*)data};
-    case Type::Unsigned: return {*(unsigned*)data};
+    case Type::Boolean: return {*(bool*)data};
+    case Type::Integer: return {*(int*)data};
+    case Type::Natural: return {*(uint*)data};
     case Type::Double: return {*(double*)data};
     case Type::String: return {*(string*)data};
     }
@@ -32,18 +32,18 @@ struct Node {
 
   auto set(const string& value) -> void {
     switch(type) {
-    case Type::Bool: *(bool*)data = (value != "false"); break;
-    case Type::Signed: *(signed*)data = integer(value); break;
-    case Type::Unsigned: *(unsigned*)data = decimal(value); break;
+    case Type::Boolean: *(bool*)data = (value != "false"); break;
+    case Type::Integer: *(int*)data = integer(value); break;
+    case Type::Natural: *(uint*)data = natural(value); break;
     case Type::Double: *(double*)data = real(value); break;
     case Type::String: *(string*)data = value; break;
     }
   }
 
   auto assign() { type = Type::Null; data = nullptr; }
-  auto assign(bool& bind) { type = Type::Bool; data = (void*)&bind; }
-  auto assign(signed& bind) { type = Type::Signed; data = (void*)&bind; }
-  auto assign(unsigned& bind) { type = Type::Unsigned; data = (void*)&bind; }
+  auto assign(bool& bind) { type = Type::Boolean; data = (void*)&bind; }
+  auto assign(int& bind) { type = Type::Integer; data = (void*)&bind; }
+  auto assign(uint& bind) { type = Type::Natural; data = (void*)&bind; }
   auto assign(double& bind) { type = Type::Double; data = (void*)&bind; }
   auto assign(string& bind) { type = Type::String; data = (void*)&bind; }
   auto assign(const Node& node) { operator=(node); }
@@ -80,10 +80,10 @@ struct Node {
   auto save(file& fp, unsigned depth = 0) -> void {
     for(auto& child : children) {
       if(child.desc) {
-        for(unsigned n = 0; n < depth; n++) fp.print("  ");
+        for(auto n : range(depth)) fp.print("  ");
         fp.print("//", child.desc, "\n");
       }
-      for(unsigned n = 0; n < depth; n++) fp.print("  ");
+      for(auto n : range(depth)) fp.print("  ");
       fp.print(child.name);
       if(!child.empty()) fp.print(": ", child.get());
       fp.print("\n");

@@ -1,20 +1,20 @@
-void lcdScanline();
-void lcdOutput(uint2 color);
-void joypWrite(bool p15, bool p14);
+auto lcdScanline() -> void;
+auto lcdOutput(uint2 color) -> void;
+auto joypWrite(bool p15, bool p14) -> void;
 
-uint32_t videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue);
-void videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height);
-void audioSample(int16_t lsample, int16_t rsample);
-int16_t inputPoll(unsigned port, unsigned device, unsigned id);
+auto videoColor(uint source, uint16 red, uint16 green, uint16 blue) -> uint32;
+auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void;
+auto audioSample(int16 lsample, int16 rsample) -> void;
+auto inputPoll(uint port, uint device, uint id) -> int16;
 
 struct Packet {
+  auto operator[](uint addr) -> uint8& { return data[addr & 15]; }
   uint8 data[16];
-  uint8& operator[](unsigned addr) { return data[addr & 15]; }
 };
 Packet packet[64];
-unsigned packetsize;
+uint packetsize;
 
-unsigned joyp_id;
+uint joyp_id;
 bool joyp15lock;
 bool joyp14lock;
 bool pulselock;

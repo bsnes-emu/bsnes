@@ -3,42 +3,40 @@
 //* Powerfest '94
 
 struct Event : Coprocessor {
+  static auto Enter() -> void;
+  auto enter() -> void;
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto submitScore() -> void;
+
+  auto sr(uint) -> uint8;
+  auto dr(uint, uint8 data) -> void;
+  auto rom_read(uint addr) -> uint8;
+  auto ram_read(uint addr) -> uint8;
+  auto ram_write(uint addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
   MappedRAM rom[4];
   MappedRAM ram;
 
-  static void Enter();
-  void enter();
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  enum class Board : uint { CampusChallenge92, Powerfest94 } board;
+  uint revision;
+  uint timer;
 
-  void submitScore();
-
-  uint8 sr(unsigned);
-  void dr(unsigned, uint8 data);
-  uint8 rom_read(unsigned addr);
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
-
-  void serialize(serializer&);
-
-//private:
-  enum class Board : unsigned { CampusChallenge92, Powerfest94 } board;
-  unsigned revision;
-  unsigned timer;
-
+privileged:
   uint8 status;
   uint8 select;
 
   bool timerActive;
   bool scoreActive;
 
-  unsigned timerSecondsRemaining;
-  unsigned scoreSecondsRemaining;
-
-  bool usedSaveState;
+  uint timerSecondsRemaining;
+  uint scoreSecondsRemaining;
 };
 
 extern Event event;

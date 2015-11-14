@@ -77,6 +77,9 @@ void PPU::render_window(unsigned w) {
 }
 
 unsigned PPU::blend(unsigned above, unsigned eva, unsigned below, unsigned evb) {
+  eva = min(16, eva);
+  evb = min(16, evb);
+
   uint5 ar = above >> 0, ag = above >> 5, ab = above >> 10;
   uint5 br = below >> 0, bg = below >> 5, bb = below >> 10;
 

@@ -21,29 +21,29 @@ auto MCC::power() -> void {
 }
 
 auto MCC::reset() -> void {
-  for(unsigned i = 0; i < 16; i++) r[i] = 0x00;
+  for(auto n : range(16)) r[n] = 0x00;
   r[0x07] = 0x80;
   r[0x08] = 0x80;
   mmio_commit();
 }
 
-auto MCC::memory_access(bool write, Memory& memory, unsigned addr, uint8 data) -> uint8 {
+auto MCC::memory_access(bool write, Memory& memory, uint addr, uint8 data) -> uint8 {
   if(write == 0) return memory_read(memory, addr);
   memory_write(memory, addr, data);
 }
 
-auto MCC::memory_read(Memory& memory, unsigned addr) -> uint8 {
+auto MCC::memory_read(Memory& memory, uint addr) -> uint8 {
   addr = bus.mirror(addr, memory.size());
   return memory.read(addr);
 }
 
-auto MCC::memory_write(Memory& memory, unsigned addr, uint8 data) -> void {
+auto MCC::memory_write(Memory& memory, uint addr, uint8 data) -> void {
   addr = bus.mirror(addr, memory.size());
   return memory.write(addr, data);
 }
 
 //mcu_access() allows mcu_read() and mcu_write() to share decoding logic
-auto MCC::mcu_access(bool write, unsigned addr, uint8 data) -> uint8 {
+auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
@@ -89,15 +89,15 @@ auto MCC::mcu_access(bool write, unsigned addr, uint8 data) -> uint8 {
   return cpu.regs.mdr;
 }
 
-auto MCC::mcu_read(unsigned addr) -> uint8 {
+auto MCC::mcu_read(uint addr) -> uint8 {
   return mcu_access(0, addr);
 }
 
-auto MCC::mcu_write(unsigned addr, uint8 data) -> void {
+auto MCC::mcu_write(uint addr, uint8 data) -> void {
   mcu_access(1, addr, data);
 }
 
-auto MCC::mmio_read(unsigned addr) -> uint8 {
+auto MCC::mmio_read(uint addr) -> uint8 {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     return r[n];
@@ -110,7 +110,7 @@ auto MCC::mmio_read(unsigned addr) -> uint8 {
   return 0x00;
 }
 
-auto MCC::mmio_write(unsigned addr, uint8 data) -> void {
+auto MCC::mmio_write(uint addr, uint8 data) -> void {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     r[n] = data;

@@ -1,14 +1,14 @@
-void EpsonRTC::irq(uint2 period) {
+auto EpsonRTC::irq(uint2 period) -> void {
   if(stop || pause) return;
 
   if(period == irqperiod) irqflag = 1;
 }
 
-void EpsonRTC::duty() {
+auto EpsonRTC::duty() -> void {
   if(irqduty) irqflag = 0;
 }
 
-void EpsonRTC::round_seconds() {
+auto EpsonRTC::round_seconds() -> void {
   if(roundseconds == 0) return;
   roundseconds = 0;
 
@@ -17,7 +17,7 @@ void EpsonRTC::round_seconds() {
   secondhi = 0;
 }
 
-void EpsonRTC::tick() {
+auto EpsonRTC::tick() -> void {
   if(stop || pause) return;
 
   if(hold) {
@@ -32,7 +32,7 @@ void EpsonRTC::tick() {
 //below code provides bit-perfect emulation of invalid BCD values on the RTC-4513
 //code makes extensive use of variable-length integers (see epsonrtc.hpp for sizes)
 
-void EpsonRTC::tick_second() {
+auto EpsonRTC::tick_second() -> void {
   if(secondlo <= 8 || secondlo == 12) {
     secondlo++;
   } else {
@@ -46,7 +46,7 @@ void EpsonRTC::tick_second() {
   }
 }
 
-void EpsonRTC::tick_minute() {
+auto EpsonRTC::tick_minute() -> void {
   if(minutelo <= 8 || minutelo == 12) {
     minutelo++;
   } else {
@@ -60,7 +60,7 @@ void EpsonRTC::tick_minute() {
   }
 }
 
-void EpsonRTC::tick_hour() {
+auto EpsonRTC::tick_hour() -> void {
   if(atime) {
     if(hourhi < 2) {
       if(hourlo <= 8 || hourlo == 12) {
@@ -104,17 +104,17 @@ void EpsonRTC::tick_hour() {
   }
 }
 
-void EpsonRTC::tick_day() {
+auto EpsonRTC::tick_day() -> void {
   if(calendar == 0) return;
   weekday = (weekday + 1) + (weekday == 6);
 
   //January - December = 0x01 - 0x09; 0x10 - 0x12
-  static const unsigned daysinmonth[32] = {
+  static const uint daysinmonth[32] = {
     30, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 30, 31, 30,
     31, 30, 31, 30, 31, 30, 31, 30, 31, 30, 31, 30, 31, 30, 31, 30,
   };
 
-  unsigned days = daysinmonth[monthhi << 4 | monthlo];
+  uint days = daysinmonth[monthhi << 4 | monthlo];
   if(days == 28) {
     //add one day for leap years
     if((yearhi & 1) == 0 && ((yearlo - 0) & 3) == 0) days++;
@@ -153,7 +153,7 @@ void EpsonRTC::tick_day() {
   }
 }
 
-void EpsonRTC::tick_month() {
+auto EpsonRTC::tick_month() -> void {
   if(monthhi == 0 || !(monthlo & 2)) {
     if(monthlo <= 8 || monthlo == 12) {
       monthlo++;
@@ -168,7 +168,7 @@ void EpsonRTC::tick_month() {
   }
 }
 
-void EpsonRTC::tick_year() {
+auto EpsonRTC::tick_year() -> void {
   if(yearlo <= 8 || yearlo == 12) {
     yearlo++;
   } else {

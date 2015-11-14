@@ -11,8 +11,8 @@ struct MSU1 : Coprocessor {
   auto dataOpen() -> void;
   auto audioOpen() -> void;
 
-  auto mmioRead(unsigned addr) -> uint8;
-  auto mmioWrite(unsigned addr, uint8 data) -> void;
+  auto mmioRead(uint addr) -> uint8;
+  auto mmioWrite(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 
@@ -20,7 +20,7 @@ private:
   file dataFile;
   file audioFile;
 
-  enum Flag : unsigned {
+  enum Flag : uint {
     DataBusy       = 0x80,
     AudioBusy      = 0x40,
     AudioRepeating = 0x20,

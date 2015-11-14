@@ -1,25 +1,25 @@
-const unsigned SharpRTC::daysinmonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+const uint SharpRTC::daysinmonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
-void SharpRTC::tick_second() {
+auto SharpRTC::tick_second() -> void {
   if(++second < 60) return;
   second = 0;
   tick_minute();
 }
 
-void SharpRTC::tick_minute() {
+auto SharpRTC::tick_minute() -> void {
   if(++minute < 60) return;
   minute = 0;
   tick_hour();
 }
 
-void SharpRTC::tick_hour() {
+auto SharpRTC::tick_hour() -> void {
   if(++hour < 24) return;
   hour = 0;
   tick_day();
 }
 
-void SharpRTC::tick_day() {
-  unsigned days = daysinmonth[month % 12];
+auto SharpRTC::tick_day() -> void {
+  uint days = daysinmonth[month % 12];
 
   //add one day for leap years
        if(year % 400 == 0) days++;
@@ -31,13 +31,13 @@ void SharpRTC::tick_day() {
   tick_month();
 }
 
-void SharpRTC::tick_month() {
+auto SharpRTC::tick_month() -> void {
   if(month++ < 12) return;
   month = 1;
   tick_year();
 }
 
-void SharpRTC::tick_year() {
+auto SharpRTC::tick_year() -> void {
   year++;
   year = (uint12)year;
 }
@@ -45,9 +45,9 @@ void SharpRTC::tick_year() {
 //returns day of week for specified date
 //eg 0 = Sunday, 1 = Monday, ... 6 = Saturday
 //usage: calculate_weekday(2008, 1, 1) returns weekday of January 1st, 2008
-unsigned SharpRTC::calculate_weekday(unsigned year, unsigned month, unsigned day) {
-  unsigned y = 1000, m = 1;  //SharpRTC epoch is 1000-01-01
-  unsigned sum = 0;          //number of days passed since epoch
+auto SharpRTC::calculate_weekday(uint year, uint month, uint day) -> uint {
+  uint y = 1000, m = 1;  //SharpRTC epoch is 1000-01-01
+  uint sum = 0;          //number of days passed since epoch
 
   year = max(1000, year);
   month = max(1, min(12, month));
@@ -64,7 +64,7 @@ unsigned SharpRTC::calculate_weekday(unsigned year, unsigned month, unsigned day
   }
 
   while(m < month) {
-    unsigned days = daysinmonth[m - 1];
+    uint days = daysinmonth[m - 1];
     bool leapyearmonth = false;
     if(days == 28) {
       if(y % 4 == 0) {

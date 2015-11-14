@@ -123,10 +123,10 @@ auto pTreeView::_doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer
   auto parts = string{path}.split(":");
   g_free(path);
 
-  auto item = self().item(decimal(parts.takeFirst()));
+  auto item = self().item(parts.takeFirst().natural());
   if(!item) return;
   while(parts) {
-    item = item.item(decimal(parts.takeFirst()));
+    item = item.item(parts.takeFirst().natural());
     if(!item) return;
   }
 

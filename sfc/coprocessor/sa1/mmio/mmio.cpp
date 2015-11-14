@@ -1,5 +1,5 @@
 //(CCNT) SA-1 control
-void SA1::mmio_w2200(uint8 data) {
+auto SA1::mmio_w2200(uint8 data) -> void {
   if(mmio.sa1_resb && !(data & 0x80)) {
     //reset SA-1 CPU
     regs.pc.w = mmio.crv;
@@ -24,7 +24,7 @@ void SA1::mmio_w2200(uint8 data) {
 }
 
 //(SIE) S-CPU interrupt enable
-void SA1::mmio_w2201(uint8 data) {
+auto SA1::mmio_w2201(uint8 data) -> void {
   if(!mmio.cpu_irqen && (data & 0x80)) {
     if(mmio.cpu_irqfl) {
       mmio.cpu_irqcl = 0;
@@ -44,7 +44,7 @@ void SA1::mmio_w2201(uint8 data) {
 }
 
 //(SIC) S-CPU interrupt clear
-void SA1::mmio_w2202(uint8 data) {
+auto SA1::mmio_w2202(uint8 data) -> void {
   mmio.cpu_irqcl   = (data & 0x80);
   mmio.chdma_irqcl = (data & 0x20);
 
@@ -55,19 +55,19 @@ void SA1::mmio_w2202(uint8 data) {
 }
 
 //(CRV) SA-1 reset vector
-void SA1::mmio_w2203(uint8 data) { mmio.crv = (mmio.crv & 0xff00) | data; }
-void SA1::mmio_w2204(uint8 data) { mmio.crv = (data << 8) | (mmio.crv & 0xff); }
+auto SA1::mmio_w2203(uint8 data) -> void { mmio.crv = (mmio.crv & 0xff00) | data; }
+auto SA1::mmio_w2204(uint8 data) -> void { mmio.crv = (data << 8) | (mmio.crv & 0xff); }
 
 //(CNV) SA-1 NMI vector
-void SA1::mmio_w2205(uint8 data) { mmio.cnv = (mmio.cnv & 0xff00) | data; }
-void SA1::mmio_w2206(uint8 data) { mmio.cnv = (data << 8) | (mmio.cnv & 0xff); }
+auto SA1::mmio_w2205(uint8 data) -> void { mmio.cnv = (mmio.cnv & 0xff00) | data; }
+auto SA1::mmio_w2206(uint8 data) -> void { mmio.cnv = (data << 8) | (mmio.cnv & 0xff); }
 
 //(CIV) SA-1 IRQ vector
-void SA1::mmio_w2207(uint8 data) { mmio.civ = (mmio.civ & 0xff00) | data; }
-void SA1::mmio_w2208(uint8 data) { mmio.civ = (data << 8) | (mmio.civ & 0xff); }
+auto SA1::mmio_w2207(uint8 data) -> void { mmio.civ = (mmio.civ & 0xff00) | data; }
+auto SA1::mmio_w2208(uint8 data) -> void { mmio.civ = (data << 8) | (mmio.civ & 0xff); }
 
 //(SCNT) S-CPU control
-void SA1::mmio_w2209(uint8 data) {
+auto SA1::mmio_w2209(uint8 data) -> void {
   mmio.cpu_irq  = (data & 0x80);
   mmio.cpu_ivsw = (data & 0x40);
   mmio.cpu_nvsw = (data & 0x10);
@@ -83,7 +83,7 @@ void SA1::mmio_w2209(uint8 data) {
 }
 
 //(CIE) SA-1 interrupt enable
-void SA1::mmio_w220a(uint8 data) {
+auto SA1::mmio_w220a(uint8 data) -> void {
   if(!mmio.sa1_irqen   && (data & 0x80) && mmio.sa1_irqfl  ) mmio.sa1_irqcl   = 0;
   if(!mmio.timer_irqen && (data & 0x40) && mmio.timer_irqfl) mmio.timer_irqcl = 0;
   if(!mmio.dma_irqen   && (data & 0x20) && mmio.dma_irqfl  ) mmio.dma_irqcl   = 0;
@@ -96,7 +96,7 @@ void SA1::mmio_w220a(uint8 data) {
 }
 
 //(CIC) SA-1 interrupt clear
-void SA1::mmio_w220b(uint8 data) {
+auto SA1::mmio_w220b(uint8 data) -> void {
   mmio.sa1_irqcl   = (data & 0x80);
   mmio.timer_irqcl = (data & 0x40);
   mmio.dma_irqcl   = (data & 0x20);
@@ -109,96 +109,96 @@ void SA1::mmio_w220b(uint8 data) {
 }
 
 //(SNV) S-CPU NMI vector
-void SA1::mmio_w220c(uint8 data) { mmio.snv = (mmio.snv & 0xff00) | data;      }
-void SA1::mmio_w220d(uint8 data) { mmio.snv = (data << 8) | (mmio.snv & 0xff); }
+auto SA1::mmio_w220c(uint8 data) -> void { mmio.snv = (mmio.snv & 0xff00) | data;      }
+auto SA1::mmio_w220d(uint8 data) -> void { mmio.snv = (data << 8) | (mmio.snv & 0xff); }
 
 //(SIV) S-CPU IRQ vector
-void SA1::mmio_w220e(uint8 data) { mmio.siv = (mmio.siv & 0xff00) | data;      }
-void SA1::mmio_w220f(uint8 data) { mmio.siv = (data << 8) | (mmio.siv & 0xff); }
+auto SA1::mmio_w220e(uint8 data) -> void { mmio.siv = (mmio.siv & 0xff00) | data;      }
+auto SA1::mmio_w220f(uint8 data) -> void { mmio.siv = (data << 8) | (mmio.siv & 0xff); }
 
 //(TMC) H/V timer control
-void SA1::mmio_w2210(uint8 data) {
+auto SA1::mmio_w2210(uint8 data) -> void {
   mmio.hvselb = (data & 0x80);
   mmio.ven    = (data & 0x02);
   mmio.hen    = (data & 0x01);
 }
 
 //(CTR) SA-1 timer restart
-void SA1::mmio_w2211(uint8 data) {
+auto SA1::mmio_w2211(uint8 data) -> void {
   status.vcounter = 0;
   status.hcounter = 0;
 }
 
 //(HCNT) H-count
-void SA1::mmio_w2212(uint8 data) { mmio.hcnt = (mmio.hcnt & 0xff00) | (data << 0); }
-void SA1::mmio_w2213(uint8 data) { mmio.hcnt = (mmio.hcnt & 0x00ff) | (data << 8); }
+auto SA1::mmio_w2212(uint8 data) -> void { mmio.hcnt = (mmio.hcnt & 0xff00) | (data << 0); }
+auto SA1::mmio_w2213(uint8 data) -> void { mmio.hcnt = (mmio.hcnt & 0x00ff) | (data << 8); }
 
 //(VCNT) V-count
-void SA1::mmio_w2214(uint8 data) { mmio.vcnt = (mmio.vcnt & 0xff00) | (data << 0); }
-void SA1::mmio_w2215(uint8 data) { mmio.vcnt = (mmio.vcnt & 0x00ff) | (data << 8); }
+auto SA1::mmio_w2214(uint8 data) -> void { mmio.vcnt = (mmio.vcnt & 0xff00) | (data << 0); }
+auto SA1::mmio_w2215(uint8 data) -> void { mmio.vcnt = (mmio.vcnt & 0x00ff) | (data << 8); }
 
 //(CXB) Super MMC bank C
-void SA1::mmio_w2220(uint8 data) {
+auto SA1::mmio_w2220(uint8 data) -> void {
   mmio.cbmode = (data & 0x80);
   mmio.cb     = (data & 0x07);
 }
 
 //(DXB) Super MMC bank D
-void SA1::mmio_w2221(uint8 data) {
+auto SA1::mmio_w2221(uint8 data) -> void {
   mmio.dbmode = (data & 0x80);
   mmio.db     = (data & 0x07);
 }
 
 //(EXB) Super MMC bank E
-void SA1::mmio_w2222(uint8 data) {
+auto SA1::mmio_w2222(uint8 data) -> void {
   mmio.ebmode = (data & 0x80);
   mmio.eb     = (data & 0x07);
 }
 
 //(FXB) Super MMC bank F
-void SA1::mmio_w2223(uint8 data) {
+auto SA1::mmio_w2223(uint8 data) -> void {
   mmio.fbmode = (data & 0x80);
   mmio.fb     = (data & 0x07);
 }
 
 //(BMAPS) S-CPU BW-RAM address mapping
-void SA1::mmio_w2224(uint8 data) {
+auto SA1::mmio_w2224(uint8 data) -> void {
   mmio.sbm = (data & 0x1f);
 }
 
 //(BMAP) SA-1 BW-RAM address mapping
-void SA1::mmio_w2225(uint8 data) {
+auto SA1::mmio_w2225(uint8 data) -> void {
   mmio.sw46 = (data & 0x80);
   mmio.cbm  = (data & 0x7f);
 }
 
 //(SWBE) S-CPU BW-RAM write enable
-void SA1::mmio_w2226(uint8 data) {
+auto SA1::mmio_w2226(uint8 data) -> void {
   mmio.swen = (data & 0x80);
 }
 
 //(CWBE) SA-1 BW-RAM write enable
-void SA1::mmio_w2227(uint8 data) {
+auto SA1::mmio_w2227(uint8 data) -> void {
   mmio.cwen = (data & 0x80);
 }
 
 //(BWPA) BW-RAM write-protected area
-void SA1::mmio_w2228(uint8 data) {
+auto SA1::mmio_w2228(uint8 data) -> void {
   mmio.bwp = (data & 0x0f);
 }
 
 //(SIWP) S-CPU I-RAM write protection
-void SA1::mmio_w2229(uint8 data) {
+auto SA1::mmio_w2229(uint8 data) -> void {
   mmio.siwp = data;
 }
 
 //(CIWP) SA-1 I-RAM write protection
-void SA1::mmio_w222a(uint8 data) {
+auto SA1::mmio_w222a(uint8 data) -> void {
   mmio.ciwp = data;
 }
 
 //(DCNT) DMA control
-void SA1::mmio_w2230(uint8 data) {
+auto SA1::mmio_w2230(uint8 data) -> void {
   mmio.dmaen = (data & 0x80);
   mmio.dprio = (data & 0x40);
   mmio.cden  = (data & 0x20);
@@ -210,7 +210,7 @@ void SA1::mmio_w2230(uint8 data) {
 }
 
 //(CDMA) character conversion DMA parameters
-void SA1::mmio_w2231(uint8 data) {
+auto SA1::mmio_w2231(uint8 data) -> void {
   mmio.chdend  = (data & 0x80);
   mmio.dmasize = (data >> 2) & 7;
   mmio.dmacb   = (data & 0x03);
@@ -221,16 +221,16 @@ void SA1::mmio_w2231(uint8 data) {
 }
 
 //(SDA) DMA source device start address
-void SA1::mmio_w2232(uint8 data) { mmio.dsa = (mmio.dsa & 0xffff00) | (data <<  0); }
-void SA1::mmio_w2233(uint8 data) { mmio.dsa = (mmio.dsa & 0xff00ff) | (data <<  8); }
-void SA1::mmio_w2234(uint8 data) { mmio.dsa = (mmio.dsa & 0x00ffff) | (data << 16); }
+auto SA1::mmio_w2232(uint8 data) -> void { mmio.dsa = (mmio.dsa & 0xffff00) | (data <<  0); }
+auto SA1::mmio_w2233(uint8 data) -> void { mmio.dsa = (mmio.dsa & 0xff00ff) | (data <<  8); }
+auto SA1::mmio_w2234(uint8 data) -> void { mmio.dsa = (mmio.dsa & 0x00ffff) | (data << 16); }
 
 //(DDA) DMA destination start address
-void SA1::mmio_w2235(uint8 data) {
+auto SA1::mmio_w2235(uint8 data) -> void {
   mmio.dda = (mmio.dda & 0xffff00) | (data <<  0);
 }
 
-void SA1::mmio_w2236(uint8 data) {
+auto SA1::mmio_w2236(uint8 data) -> void {
   mmio.dda = (mmio.dda & 0xff00ff) | (data <<  8);
 
   if(mmio.dmaen == true) {
@@ -242,7 +242,7 @@ void SA1::mmio_w2236(uint8 data) {
   }
 }
 
-void SA1::mmio_w2237(uint8 data) {
+auto SA1::mmio_w2237(uint8 data) -> void {
   mmio.dda = (mmio.dda & 0x00ffff) | (data << 16);
 
   if(mmio.dmaen == true) {
@@ -253,23 +253,23 @@ void SA1::mmio_w2237(uint8 data) {
 }
 
 //(DTC) DMA terminal counter
-void SA1::mmio_w2238(uint8 data) { mmio.dtc = (mmio.dtc & 0xff00) | (data << 0); }
-void SA1::mmio_w2239(uint8 data) { mmio.dtc = (mmio.dtc & 0x00ff) | (data << 8); }
+auto SA1::mmio_w2238(uint8 data) -> void { mmio.dtc = (mmio.dtc & 0xff00) | (data << 0); }
+auto SA1::mmio_w2239(uint8 data) -> void { mmio.dtc = (mmio.dtc & 0x00ff) | (data << 8); }
 
 //(BBF) BW-RAM bitmap format
-void SA1::mmio_w223f(uint8 data) {
+auto SA1::mmio_w223f(uint8 data) -> void {
   mmio.bbf = (data & 0x80);
 }
 
 //(BRF) bitmap register files
-void SA1::mmio_w2240(uint8 data) { mmio.brf[ 0] = data; }
-void SA1::mmio_w2241(uint8 data) { mmio.brf[ 1] = data; }
-void SA1::mmio_w2242(uint8 data) { mmio.brf[ 2] = data; }
-void SA1::mmio_w2243(uint8 data) { mmio.brf[ 3] = data; }
-void SA1::mmio_w2244(uint8 data) { mmio.brf[ 4] = data; }
-void SA1::mmio_w2245(uint8 data) { mmio.brf[ 5] = data; }
-void SA1::mmio_w2246(uint8 data) { mmio.brf[ 6] = data; }
-void SA1::mmio_w2247(uint8 data) { mmio.brf[ 7] = data;
+auto SA1::mmio_w2240(uint8 data) -> void { mmio.brf[ 0] = data; }
+auto SA1::mmio_w2241(uint8 data) -> void { mmio.brf[ 1] = data; }
+auto SA1::mmio_w2242(uint8 data) -> void { mmio.brf[ 2] = data; }
+auto SA1::mmio_w2243(uint8 data) -> void { mmio.brf[ 3] = data; }
+auto SA1::mmio_w2244(uint8 data) -> void { mmio.brf[ 4] = data; }
+auto SA1::mmio_w2245(uint8 data) -> void { mmio.brf[ 5] = data; }
+auto SA1::mmio_w2246(uint8 data) -> void { mmio.brf[ 6] = data; }
+auto SA1::mmio_w2247(uint8 data) -> void { mmio.brf[ 7] = data;
   if(mmio.dmaen == true) {
     if(mmio.cden == 1 && mmio.cdsel == 0) {
       dma_cc2();
@@ -277,14 +277,14 @@ void SA1::mmio_w2247(uint8 data) { mmio.brf[ 7] = data;
   }
 }
 
-void SA1::mmio_w2248(uint8 data) { mmio.brf[ 8] = data; }
-void SA1::mmio_w2249(uint8 data) { mmio.brf[ 9] = data; }
-void SA1::mmio_w224a(uint8 data) { mmio.brf[10] = data; }
-void SA1::mmio_w224b(uint8 data) { mmio.brf[11] = data; }
-void SA1::mmio_w224c(uint8 data) { mmio.brf[12] = data; }
-void SA1::mmio_w224d(uint8 data) { mmio.brf[13] = data; }
-void SA1::mmio_w224e(uint8 data) { mmio.brf[14] = data; }
-void SA1::mmio_w224f(uint8 data) { mmio.brf[15] = data;
+auto SA1::mmio_w2248(uint8 data) -> void { mmio.brf[ 8] = data; }
+auto SA1::mmio_w2249(uint8 data) -> void { mmio.brf[ 9] = data; }
+auto SA1::mmio_w224a(uint8 data) -> void { mmio.brf[10] = data; }
+auto SA1::mmio_w224b(uint8 data) -> void { mmio.brf[11] = data; }
+auto SA1::mmio_w224c(uint8 data) -> void { mmio.brf[12] = data; }
+auto SA1::mmio_w224d(uint8 data) -> void { mmio.brf[13] = data; }
+auto SA1::mmio_w224e(uint8 data) -> void { mmio.brf[14] = data; }
+auto SA1::mmio_w224f(uint8 data) -> void { mmio.brf[15] = data;
   if(mmio.dmaen == true) {
     if(mmio.cden == 1 && mmio.cdsel == 0) {
       dma_cc2();
@@ -293,7 +293,7 @@ void SA1::mmio_w224f(uint8 data) { mmio.brf[15] = data;
 }
 
 //(MCNT) arithmetic control
-void SA1::mmio_w2250(uint8 data) {
+auto SA1::mmio_w2250(uint8 data) -> void {
   mmio.acm = (data & 0x02);
   mmio.md  = (data & 0x01);
 
@@ -301,24 +301,24 @@ void SA1::mmio_w2250(uint8 data) {
 }
 
 //(MAL) multiplicand / dividend low
-void SA1::mmio_w2251(uint8 data) {
+auto SA1::mmio_w2251(uint8 data) -> void {
   mmio.ma = (mmio.ma & 0xff00) | data;
 }
 
 //(MAH) multiplicand / dividend high
-void SA1::mmio_w2252(uint8 data) {
+auto SA1::mmio_w2252(uint8 data) -> void {
   mmio.ma = (data << 8) | (mmio.ma & 0x00ff);
 }
 
 //(MBL) multiplier / divisor low
-void SA1::mmio_w2253(uint8 data) {
+auto SA1::mmio_w2253(uint8 data) -> void {
   mmio.mb = (mmio.mb & 0xff00) | data;
 }
 
 //(MBH) multiplier / divisor high
 //multiplication / cumulative sum only resets MB
 //division resets both MA and MB
-void SA1::mmio_w2254(uint8 data) {
+auto SA1::mmio_w2254(uint8 data) -> void {
   mmio.mb = (data << 8) | (mmio.mb & 0x00ff);
 
   if(mmio.acm == 0) {
@@ -348,7 +348,7 @@ void SA1::mmio_w2254(uint8 data) {
 }
 
 //(VBD) variable-length bit processing
-void SA1::mmio_w2258(uint8 data) {
+auto SA1::mmio_w2258(uint8 data) -> void {
   mmio.hl = (data & 0x80);
   mmio.vb = (data & 0x0f);
   if(mmio.vb == 0) mmio.vb = 16;
@@ -362,12 +362,12 @@ void SA1::mmio_w2258(uint8 data) {
 }
 
 //(VDA) variable-length bit game pak ROM start address
-void SA1::mmio_w2259(uint8 data) { mmio.va = (mmio.va & 0xffff00) | (data <<  0); }
-void SA1::mmio_w225a(uint8 data) { mmio.va = (mmio.va & 0xff00ff) | (data <<  8); }
-void SA1::mmio_w225b(uint8 data) { mmio.va = (mmio.va & 0x00ffff) | (data << 16); mmio.vbit = 0; }
+auto SA1::mmio_w2259(uint8 data) -> void { mmio.va = (mmio.va & 0xffff00) | (data <<  0); }
+auto SA1::mmio_w225a(uint8 data) -> void { mmio.va = (mmio.va & 0xff00ff) | (data <<  8); }
+auto SA1::mmio_w225b(uint8 data) -> void { mmio.va = (mmio.va & 0x00ffff) | (data << 16); mmio.vbit = 0; }
 
 //(SFR) S-CPU flag read
-uint8 SA1::mmio_r2300() {
+auto SA1::mmio_r2300() -> uint8 {
   uint8 data;
   data  = mmio.cpu_irqfl   << 7;
   data |= mmio.cpu_ivsw    << 6;
@@ -378,7 +378,7 @@ uint8 SA1::mmio_r2300() {
 }
 
 //(CFR) SA-1 flag read
-uint8 SA1::mmio_r2301() {
+auto SA1::mmio_r2301() -> uint8 {
   uint8 data;
   data  = mmio.sa1_irqfl   << 7;
   data |= mmio.timer_irqfl << 6;
@@ -389,29 +389,33 @@ uint8 SA1::mmio_r2301() {
 }
 
 //(HCR) hcounter read
-uint8 SA1::mmio_r2302() {
+auto SA1::mmio_r2302() -> uint8 {
   //latch counters
   mmio.hcr = status.hcounter >> 2;
   mmio.vcr = status.vcounter;
-                            return mmio.hcr >> 0; }
-uint8 SA1::mmio_r2303() { return mmio.hcr >> 8; }
+  return mmio.hcr >> 0;
+}
+
+auto SA1::mmio_r2303() -> uint8 {
+  return mmio.hcr >> 8;
+}
 
 //(VCR) vcounter read
-uint8 SA1::mmio_r2304() { return mmio.vcr >> 0; }
-uint8 SA1::mmio_r2305() { return mmio.vcr >> 8; }
+auto SA1::mmio_r2304() -> uint8 { return mmio.vcr >> 0; }
+auto SA1::mmio_r2305() -> uint8 { return mmio.vcr >> 8; }
 
 //(MR) arithmetic result
-uint8 SA1::mmio_r2306() { return mmio.mr >>  0; }
-uint8 SA1::mmio_r2307() { return mmio.mr >>  8; }
-uint8 SA1::mmio_r2308() { return mmio.mr >> 16; }
-uint8 SA1::mmio_r2309() { return mmio.mr >> 24; }
-uint8 SA1::mmio_r230a() { return mmio.mr >> 32; }
+auto SA1::mmio_r2306() -> uint8 { return mmio.mr >>  0; }
+auto SA1::mmio_r2307() -> uint8 { return mmio.mr >>  8; }
+auto SA1::mmio_r2308() -> uint8 { return mmio.mr >> 16; }
+auto SA1::mmio_r2309() -> uint8 { return mmio.mr >> 24; }
+auto SA1::mmio_r230a() -> uint8 { return mmio.mr >> 32; }
 
 //(OF) arithmetic overflow flag
-uint8 SA1::mmio_r230b() { return mmio.overflow << 7; }
+auto SA1::mmio_r230b() -> uint8 { return mmio.overflow << 7; }
 
 //(VDPL) variable-length data read port low
-uint8 SA1::mmio_r230c() {
+auto SA1::mmio_r230c() -> uint8 {
   uint32 data = (vbr_read(mmio.va + 0) <<  0)
               | (vbr_read(mmio.va + 1) <<  8)
               | (vbr_read(mmio.va + 2) << 16);
@@ -420,7 +424,7 @@ uint8 SA1::mmio_r230c() {
 }
 
 //(VDPH) variable-length data read port high
-uint8 SA1::mmio_r230d() {
+auto SA1::mmio_r230d() -> uint8 {
   uint32 data = (vbr_read(mmio.va + 0) <<  0)
               | (vbr_read(mmio.va + 1) <<  8)
               | (vbr_read(mmio.va + 2) << 16);
@@ -437,11 +441,11 @@ uint8 SA1::mmio_r230d() {
 }
 
 //(VC) version code register
-uint8 SA1::mmio_r230e() {
+auto SA1::mmio_r230e() -> uint8 {
   return 0x01;  //true value unknown
 }
 
-uint8 SA1::mmio_read(unsigned addr) {
+auto SA1::mmio_read(uint addr) -> uint8 {
   (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronize_cpu());
   addr &= 0xffff;
 
@@ -466,7 +470,7 @@ uint8 SA1::mmio_read(unsigned addr) {
   return 0x00;
 }
 
-void SA1::mmio_write(unsigned addr, uint8 data) {
+auto SA1::mmio_write(uint addr, uint8 data) -> void {
   (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronize_cpu());
   addr &= 0xffff;
 

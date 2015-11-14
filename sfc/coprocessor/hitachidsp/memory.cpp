@@ -1,15 +1,15 @@
-uint8 HitachiDSP::bus_read(uint24 addr) {
+auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
   if((addr & 0x408000) == 0x008000) return bus.read(addr);  //$00-3f,80-bf:6000-7fff
   if((addr & 0xf88000) == 0x700000) return bus.read(addr);  //$70-77:0000-7fff
   return 0x00;
 }
 
-void HitachiDSP::bus_write(uint24 addr, uint8 data) {
+auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
   if((addr & 0x40e000) == 0x006000) return bus.write(addr, data);  //$00-3f,80-bf:6000-7fff
   if((addr & 0xf88000) == 0x700000) return bus.write(addr, data);  //$70-77:0000-7fff
 }
 
-uint8 HitachiDSP::rom_read(unsigned addr) {
+auto HitachiDSP::rom_read(uint addr) -> uint8 {
   if(co_active() == hitachidsp.thread || regs.halt) {
     addr = bus.mirror(addr, rom.size());
   //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
@@ -19,20 +19,20 @@ uint8 HitachiDSP::rom_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void HitachiDSP::rom_write(unsigned addr, uint8 data) {
+auto HitachiDSP::rom_write(uint addr, uint8 data) -> void {
 }
 
-uint8 HitachiDSP::ram_read(unsigned addr) {
+auto HitachiDSP::ram_read(uint addr) -> uint8 {
   if(ram.size() == 0) return 0x00;  //not open bus
   return ram.read(bus.mirror(addr, ram.size()));
 }
 
-void HitachiDSP::ram_write(unsigned addr, uint8 data) {
+auto HitachiDSP::ram_write(uint addr, uint8 data) -> void {
   if(ram.size() == 0) return;
   return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
-uint8 HitachiDSP::dsp_read(unsigned addr) {
+auto HitachiDSP::dsp_read(uint addr) -> uint8 {
   addr &= 0x1fff;
 
   //Data RAM
@@ -74,15 +74,15 @@ uint8 HitachiDSP::dsp_read(unsigned addr) {
 
   //GPRs
   if((addr >= 0x1f80 && addr <= 0x1faf) || (addr >= 0x1fc0 && addr <= 0x1fef)) {
-    unsigned index = (addr & 0x3f) / 3;        //0..15
-    unsigned shift = ((addr & 0x3f) % 3) * 8;  //0, 8, 16
+    uint index = (addr & 0x3f) / 3;        //0..15
+    uint shift = ((addr & 0x3f) % 3) * 8;  //0, 8, 16
     return regs.gpr[index] >> shift;
   }
 
   return 0x00;
 }
 
-void HitachiDSP::dsp_write(unsigned addr, uint8 data) {
+auto HitachiDSP::dsp_write(uint addr, uint8 data) -> void {
   addr &= 0x1fff;
 
   //Data RAM
@@ -129,7 +129,7 @@ void HitachiDSP::dsp_write(unsigned addr, uint8 data) {
 
   //GPRs
   if((addr >= 0x1f80 && addr <= 0x1faf) || (addr >= 0x1fc0 && addr <= 0x1fef)) {
-    unsigned index = (addr & 0x3f) / 3;
+    uint index = (addr & 0x3f) / 3;
     switch((addr & 0x3f) % 3) {
     case 0: regs.gpr[index] = (regs.gpr[index] & 0xffff00) | (data <<  0); return;
     case 1: regs.gpr[index] = (regs.gpr[index] & 0xff00ff) | (data <<  8); return;

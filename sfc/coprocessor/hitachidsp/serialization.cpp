@@ -1,8 +1,8 @@
-vector<uint8> HitachiDSP::firmware() {
+auto HitachiDSP::firmware() const -> vector<uint8> {
   vector<uint8> buffer;
   if(!cartridge.hasHitachiDSP()) return buffer;
   buffer.reserve(1024 * 3);
-  for(unsigned n = 0; n < 1024; n++) {
+  for(auto n : range(1024)) {
     buffer.append(dataROM[n] >>  0);
     buffer.append(dataROM[n] >>  8);
     buffer.append(dataROM[n] >> 16);
@@ -10,7 +10,7 @@ vector<uint8> HitachiDSP::firmware() {
   return buffer;
 }
 
-void HitachiDSP::serialize(serializer& s) {
+auto HitachiDSP::serialize(serializer& s) -> void {
   HG51B::serialize(s);
   Thread::serialize(s);
 

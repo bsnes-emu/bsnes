@@ -1,11 +1,11 @@
-void EpsonRTC::serialize(serializer& s) {
+auto EpsonRTC::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.integer(clocks);
   s.integer(seconds);
 
   s.integer(chipselect);
-  s.integer((unsigned&)state);
+  s.integer((uint&)state);
   s.integer(mdr);
   s.integer(offset);
   s.integer(wait);

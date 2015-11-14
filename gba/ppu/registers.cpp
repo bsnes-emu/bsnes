@@ -62,6 +62,7 @@ PPU::Registers::BackgroundControl::operator uint16() const {
   return (
     (priority           <<  0)
   | (characterbaseblock <<  2)
+  | (unused             <<  4)
   | (mosaic             <<  6)
   | (colormode          <<  7)
   | (screenbaseblock    <<  8)

@@ -4,31 +4,30 @@ namespace SuperFamicom {
 
 NSS nss;
 
-void NSS::init() {
-  dip = 0x00;
+auto NSS::init() -> void {
 }
 
-void NSS::load() {
+auto NSS::load() -> void {
 }
 
-void NSS::unload() {
+auto NSS::unload() -> void {
 }
 
-void NSS::power() {
+auto NSS::power() -> void {
 }
 
-void NSS::reset() {
+auto NSS::reset() -> void {
 }
 
-void NSS::set_dip(uint16 dip) {
+auto NSS::set_dip(uint16 dip) -> void {
   this->dip = dip;
 }
 
-uint8 NSS::read(unsigned addr) {
+auto NSS::read(uint addr) -> uint8 {
   return dip;
 }
 
-void NSS::write(unsigned addr, uint8 data) {
+auto NSS::write(uint addr, uint8 data) -> void {
 }
 
 }

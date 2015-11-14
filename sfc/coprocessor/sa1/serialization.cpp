@@ -1,4 +1,4 @@
-void SA1::serialize(serializer& s) {
+auto SA1::serialize(serializer& s) -> void {
   R65816::serialize(s);
   Thread::serialize(s);
 

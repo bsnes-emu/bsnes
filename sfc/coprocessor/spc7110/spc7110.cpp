@@ -16,9 +16,9 @@ SPC7110::~SPC7110() {
   delete decompressor;
 }
 
-void SPC7110::Enter() { spc7110.enter(); }
+auto SPC7110::Enter() -> void { spc7110.enter(); }
 
-void SPC7110::enter() {
+auto SPC7110::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -32,27 +32,27 @@ void SPC7110::enter() {
   }
 }
 
-void SPC7110::add_clocks(unsigned clocks) {
+auto SPC7110::add_clocks(uint clocks) -> void {
   step(clocks);
   synchronize_cpu();
 }
 
-void SPC7110::init() {
+auto SPC7110::init() -> void {
 }
 
-void SPC7110::load() {
+auto SPC7110::load() -> void {
 }
 
-void SPC7110::unload() {
+auto SPC7110::unload() -> void {
   prom.reset();
   drom.reset();
   ram.reset();
 }
 
-void SPC7110::power() {
+auto SPC7110::power() -> void {
 }
 
-void SPC7110::reset() {
+auto SPC7110::reset() -> void {
   create(SPC7110::Enter, 21477272);
 
   r4801 = 0x00;
@@ -109,7 +109,7 @@ void SPC7110::reset() {
   r4834 = 0x00;
 }
 
-uint8 SPC7110::read(unsigned addr) {
+auto SPC7110::read(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;
   addr = 0x4800 | (addr & 0x3f);
@@ -198,7 +198,7 @@ uint8 SPC7110::read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SPC7110::write(unsigned addr, uint8 data) {
+auto SPC7110::write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr = 0x4800 | (addr & 0x3f);
 
@@ -264,8 +264,8 @@ void SPC7110::write(unsigned addr, uint8 data) {
 //SPC7110::MCUROM
 //===============
 
-uint8 SPC7110::mcurom_read(unsigned addr) {
-  unsigned mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
+auto SPC7110::mcurom_read(uint addr) -> uint8 {
+  uint mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
 
   if((addr & 0x708000) == 0x008000  //$00-0f|80-8f:8000-ffff
   || (addr & 0xf00000) == 0xc00000  //      $c0-cf:0000-ffff
@@ -308,27 +308,27 @@ uint8 SPC7110::mcurom_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SPC7110::mcurom_write(unsigned addr, uint8 data) {
+auto SPC7110::mcurom_write(uint addr, uint8 data) -> void {
 }
 
 //===============
 //SPC7110::MCURAM
 //===============
 
-uint8 SPC7110::mcuram_read(unsigned addr) {
+auto SPC7110::mcuram_read(uint addr) -> uint8 {
   //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
-    unsigned bank = (addr >> 16) & 0x3f;
+    uint bank = (addr >> 16) & 0x3f;
     addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
     return ram.read(addr);
   }
   return 0x00;
 }
 
-void SPC7110::mcuram_write(unsigned addr, uint8 data) {
+auto SPC7110::mcuram_write(uint addr, uint8 data) -> void {
   //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
-    unsigned bank = (addr >> 16) & 0x3f;
+    uint bank = (addr >> 16) & 0x3f;
     addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
     ram.write(addr, data);
   }

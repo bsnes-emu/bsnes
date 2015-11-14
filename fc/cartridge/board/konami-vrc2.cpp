@@ -50,8 +50,8 @@ void serialize(serializer& s) {
 }
 
 KonamiVRC2(Markup::Node& document) : Board(document), vrc2(*this) {
-  settings.pinout.a0 = 1 << document["cartridge/chip/pinout/a0"].decimal();
-  settings.pinout.a1 = 1 << document["cartridge/chip/pinout/a1"].decimal();
+  settings.pinout.a0 = 1 << document["cartridge/chip/pinout/a0"].natural();
+  settings.pinout.a1 = 1 << document["cartridge/chip/pinout/a1"].natural();
 }
 
 };

@@ -10,9 +10,9 @@ SA1 sa1;
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"
 
-void SA1::Enter() { sa1.enter(); }
+auto SA1::Enter() -> void { sa1.enter(); }
 
-void SA1::enter() {
+auto SA1::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -35,7 +35,7 @@ void SA1::enter() {
   }
 }
 
-void SA1::op_irq() {
+auto SA1::op_irq() -> void {
   op_read(regs.pc.d);
   op_io();
   if(!regs.e) op_writestack(regs.pc.b);
@@ -48,7 +48,7 @@ void SA1::op_irq() {
   regs.p.d = 0;
 }
 
-void SA1::last_cycle() {
+auto SA1::last_cycle() -> void {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
     status.interrupt_pending = true;
     regs.vector = mmio.cnv;
@@ -75,11 +75,11 @@ void SA1::last_cycle() {
   }
 }
 
-bool SA1::interrupt_pending() {
+auto SA1::interrupt_pending() -> bool {
   return status.interrupt_pending;
 }
 
-void SA1::tick() {
+auto SA1::tick() -> void {
   step(2);
   if(++status.tick_counter == 0) synchronize_cpu();
 
@@ -110,33 +110,33 @@ void SA1::tick() {
   }
 }
 
-void SA1::trigger_irq() {
+auto SA1::trigger_irq() -> void {
   mmio.timer_irqfl = true;
   if(mmio.timer_irqen) mmio.timer_irqcl = 0;
 }
 
-void SA1::init() {
+auto SA1::init() -> void {
 }
 
-void SA1::load() {
+auto SA1::load() -> void {
 }
 
-void SA1::unload() {
+auto SA1::unload() -> void {
   rom.reset();
   iram.reset();
   bwram.reset();
 }
 
-void SA1::power() {
+auto SA1::power() -> void {
   regs.a = regs.x = regs.y = 0x0000;
   regs.s = 0x01ff;
 }
 
-void SA1::reset() {
+auto SA1::reset() -> void {
   create(SA1::Enter, system.cpuFrequency());
 
   cpubwram.dma = false;
-  for(unsigned addr = 0; addr < iram.size(); addr++) {
+  for(auto addr : range(iram.size())) {
     iram.write(addr, 0x00);
   }
 

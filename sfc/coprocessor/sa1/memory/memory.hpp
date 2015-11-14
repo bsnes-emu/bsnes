@@ -1,19 +1,19 @@
-uint8 bus_read(unsigned addr);
-void bus_write(unsigned addr, uint8 data);
-uint8 vbr_read(unsigned addr);
+auto bus_read(uint addr) -> uint8;
+auto bus_write(uint addr, uint8 data) -> void;
+auto vbr_read(uint addr) -> uint8;
 
-alwaysinline void op_io();
-alwaysinline uint8 op_read(unsigned addr);
-alwaysinline void op_write(unsigned addr, uint8 data);
+alwaysinline auto op_io() -> void;
+alwaysinline auto op_read(uint addr) -> uint8;
+alwaysinline auto op_write(uint addr, uint8 data) -> void;
 
-uint8 mmcrom_read(unsigned addr);
-void mmcrom_write(unsigned addr, uint8 data);
+auto mmcrom_read(uint addr) -> uint8;
+auto mmcrom_write(uint addr, uint8 data) -> void;
 
-uint8 mmcbwram_read(unsigned addr);
-void mmcbwram_write(unsigned addr, uint8 data);
+auto mmcbwram_read(uint addr) -> uint8;
+auto mmcbwram_write(uint addr, uint8 data) -> void;
 
-uint8 mmc_sa1_read(unsigned addr);
-void mmc_sa1_write(unsigned addr, uint8 data);
+auto mmc_sa1_read(uint addr) -> uint8;
+auto mmc_sa1_write(uint addr, uint8 data) -> void;
 
-uint8 bitmap_read(unsigned addr);
-void bitmap_write(unsigned addr, uint8 data);
+auto bitmap_read(uint addr) -> uint8;
+auto bitmap_write(uint addr, uint8 data) -> void;

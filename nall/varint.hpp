@@ -4,7 +4,6 @@
 #include <nall/bit.hpp>
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
-#include <nall/traits.hpp>
 
 namespace nall {
 
@@ -209,6 +208,8 @@ using int61 = nall::int_t<61>;
 using int62 = nall::int_t<62>;
 using int63 = nall::int_t<63>;
 using int64 = int64_t;
+using intmax = intmax_t;
+using intptr = intptr_t;
 
 using uint1 = nall::uint_t<1>;
 using uint2 = nall::uint_t<2>;
@@ -274,6 +275,8 @@ using uint61 = nall::uint_t<61>;
 using uint62 = nall::uint_t<62>;
 using uint63 = nall::uint_t<63>;
 using uint64 = uint64_t;
+using uintmax = uintmax_t;
+using uintptr = uintptr_t;
 
 #if defined(__SIZEOF_INT128__)
 using int128 = int128_t;

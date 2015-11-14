@@ -40,7 +40,7 @@ struct ODBC {
       return value;
     }
 
-    auto decimal(unsigned column) -> uint64_t {
+    auto natural(unsigned column) -> uint64_t {
       if(auto value = _values(column)) return value.get<uint64_t>(0);
       uint64_t value = 0;
       SQLGetData(statement(), 1 + column, SQL_C_UBIGINT, &value, 0, nullptr);
@@ -79,7 +79,7 @@ struct ODBC {
     }
 
     auto integer() -> int64_t { return integer(_output++); }
-    auto decimal() -> uint64_t { return decimal(_output++); }
+    auto natural() -> uint64_t { return natural(_output++); }
     auto real() -> double { return real(_output++); }
     auto text() -> string { return text(_output++); }
     auto data() -> vector<uint8_t> { return data(_output++); }

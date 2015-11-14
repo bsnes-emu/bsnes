@@ -5,74 +5,74 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 OBC1 obc1;
 
-void OBC1::init() {
+auto OBC1::init() -> void {
 }
 
-void OBC1::load() {
+auto OBC1::load() -> void {
 }
 
-void OBC1::unload() {
+auto OBC1::unload() -> void {
   ram.reset();
 }
 
-void OBC1::power() {
+auto OBC1::power() -> void {
 }
 
-void OBC1::reset() {
-  status.baseptr = (ram_read(0x1ff5) & 1) ? 0x1800 : 0x1c00;
-  status.address = (ram_read(0x1ff6) & 0x7f);
-  status.shift   = (ram_read(0x1ff6) & 3) << 1;
+auto OBC1::reset() -> void {
+  status.baseptr = (ramRead(0x1ff5) & 1) ? 0x1800 : 0x1c00;
+  status.address = (ramRead(0x1ff6) & 0x7f);
+  status.shift   = (ramRead(0x1ff6) & 3) << 1;
 }
 
-uint8 OBC1::read(unsigned addr) {
+auto OBC1::read(uint addr) -> uint8 {
   addr &= 0x1fff;
 
   switch(addr) {
-  case 0x1ff0: return ram_read(status.baseptr + (status.address << 2) + 0);
-  case 0x1ff1: return ram_read(status.baseptr + (status.address << 2) + 1);
-  case 0x1ff2: return ram_read(status.baseptr + (status.address << 2) + 2);
-  case 0x1ff3: return ram_read(status.baseptr + (status.address << 2) + 3);
-  case 0x1ff4: return ram_read(status.baseptr + (status.address >> 2) + 0x200);
+  case 0x1ff0: return ramRead(status.baseptr + (status.address << 2) + 0);
+  case 0x1ff1: return ramRead(status.baseptr + (status.address << 2) + 1);
+  case 0x1ff2: return ramRead(status.baseptr + (status.address << 2) + 2);
+  case 0x1ff3: return ramRead(status.baseptr + (status.address << 2) + 3);
+  case 0x1ff4: return ramRead(status.baseptr + (status.address >> 2) + 0x200);
   }
 
-  return ram_read(addr);
+  return ramRead(addr);
 }
 
-void OBC1::write(unsigned addr, uint8 data) {
+auto OBC1::write(uint addr, uint8 data) -> void {
   addr &= 0x1fff;
 
   switch(addr) {
-  case 0x1ff0: ram_write(status.baseptr + (status.address << 2) + 0, data); return;
-  case 0x1ff1: ram_write(status.baseptr + (status.address << 2) + 1, data); return;
-  case 0x1ff2: ram_write(status.baseptr + (status.address << 2) + 2, data); return;
-  case 0x1ff3: ram_write(status.baseptr + (status.address << 2) + 3, data); return;
+  case 0x1ff0: ramWrite(status.baseptr + (status.address << 2) + 0, data); return;
+  case 0x1ff1: ramWrite(status.baseptr + (status.address << 2) + 1, data); return;
+  case 0x1ff2: ramWrite(status.baseptr + (status.address << 2) + 2, data); return;
+  case 0x1ff3: ramWrite(status.baseptr + (status.address << 2) + 3, data); return;
   case 0x1ff4: {
-    uint8 temp = ram_read(status.baseptr + (status.address >> 2) + 0x200);
+    uint8 temp = ramRead(status.baseptr + (status.address >> 2) + 0x200);
     temp = (temp & ~(3 << status.shift)) | ((data & 3) << status.shift);
-    ram_write(status.baseptr + (status.address >> 2) + 0x200, temp);
+    ramWrite(status.baseptr + (status.address >> 2) + 0x200, temp);
   } return;
   case 0x1ff5:
     status.baseptr = (data & 1) ? 0x1800 : 0x1c00;
-    ram_write(addr, data);
+    ramWrite(addr, data);
     return;
   case 0x1ff6:
     status.address = (data & 0x7f);
     status.shift   = (data & 3) << 1;
-    ram_write(addr, data);
+    ramWrite(addr, data);
     return;
   case 0x1ff7:
-    ram_write(addr, data);
+    ramWrite(addr, data);
     return;
   }
 
-  return ram_write(addr, data);
+  return ramWrite(addr, data);
 }
 
-uint8 OBC1::ram_read(unsigned addr) {
+auto OBC1::ramRead(uint addr) -> uint8 {
   return ram.read(addr & 0x1fff);
 }
 
-void OBC1::ram_write(unsigned addr, uint8 data) {
+auto OBC1::ramWrite(uint addr, uint8 data) -> void {
   ram.write(addr & 0x1fff, data);
 }
 

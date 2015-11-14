@@ -35,7 +35,7 @@ NSFont* pFont::cocoaFont(string description) {
   CGFloat size = 8.0;
 
   if(!part(0).empty()) family = [NSString stringWithUTF8String:part(0)];
-  if(!part(1).empty()) size = decimal(part(1));
+  if(!part(1).empty()) size = part(1).natural();
   if(part(2).ifind("bold")) traits |= NSBoldFontMask;
   if(part(2).ifind("italic")) traits |= NSItalicFontMask;
   if(part(2).ifind("narrow")) traits |= NSNarrowFontMask;

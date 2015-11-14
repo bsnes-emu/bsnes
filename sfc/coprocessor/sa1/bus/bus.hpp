@@ -1,12 +1,12 @@
 struct CPUIRAM : Memory {
-  unsigned size() const;
-  alwaysinline uint8 read(unsigned);
-  alwaysinline void write(unsigned, uint8);
+  auto size() const -> uint;
+  alwaysinline auto read(uint) -> uint8;
+  alwaysinline auto write(uint, uint8) -> void;
 } cpuiram;
 
 struct CPUBWRAM : Memory {
-  unsigned size() const;
-  alwaysinline uint8 read(unsigned);
-  alwaysinline void write(unsigned, uint8);
+  auto size() const -> uint;
+  alwaysinline auto read(uint) -> uint8;
+  alwaysinline auto write(uint, uint8) -> void;
   bool dma;
 } cpubwram;

@@ -190,6 +190,7 @@ auto CPU::write(uint32 addr, uint8 byte) -> void {
   case 0x040000c6: case 0x040000c7:
   case 0x040000d2: case 0x040000d3:
   case 0x040000de: case 0x040000df: {
+    if(addr == 0x040000bb || addr == 0x040000c7 || addr == 0x040000d3) byte &= 0xf7;  //gamepak DRQ valid for DMA3 only
     auto& dma = regs.dma[(addr - 0x040000ba) / 12];
     unsigned shift = (addr & 1) * 8;
     bool enable = dma.control.enable;

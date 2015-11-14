@@ -1,47 +1,47 @@
 struct SharpRTC : Coprocessor {
-  static void Enter();
-  void enter();
+  static auto Enter() -> void;
+  auto enter() -> void;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-  void sync();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+  auto sync() -> void;
 
-  uint8 read(unsigned addr);
-  void write(unsigned addr, uint8 data);
+  auto read(uint addr) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 
-  enum class State : unsigned { Ready, Command, Read, Write } rtc_state;
-  signed rtc_index;
+  enum class State : uint { Ready, Command, Read, Write } rtc_state;
+  int rtc_index;
 
-  unsigned second;
-  unsigned minute;
-  unsigned hour;
-  unsigned day;
-  unsigned month;
-  unsigned year;
-  unsigned weekday;
+  uint second;
+  uint minute;
+  uint hour;
+  uint day;
+  uint month;
+  uint year;
+  uint weekday;
 
   //memory.cpp
-  uint4 rtc_read(uint4 addr);
-  void rtc_write(uint4 addr, uint4 data);
+  auto rtc_read(uint4 addr) -> uint4;
+  auto rtc_write(uint4 addr, uint4 data) -> void;
 
-  void load(const uint8* data);
-  void save(uint8* data);
+  auto load(const uint8* data) -> void;
+  auto save(uint8* data) -> void;
 
   //time.cpp
-  static const unsigned daysinmonth[12];
-  void tick_second();
-  void tick_minute();
-  void tick_hour();
-  void tick_day();
-  void tick_month();
-  void tick_year();
+  static const uint daysinmonth[12];
+  auto tick_second() -> void;
+  auto tick_minute() -> void;
+  auto tick_hour() -> void;
+  auto tick_day() -> void;
+  auto tick_month() -> void;
+  auto tick_year() -> void;
 
-  unsigned calculate_weekday(unsigned year, unsigned month, unsigned day);
+  auto calculate_weekday(uint year, uint month, uint day) -> uint;
 };
 
 extern SharpRTC sharprtc;

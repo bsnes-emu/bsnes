@@ -1,8 +1,4 @@
 struct SA1 : Processor::R65816, public Coprocessor {
-  MappedRAM rom;
-  MappedRAM iram;
-  MappedRAM bwram;
-
   #include "bus/bus.hpp"
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"
@@ -18,22 +14,26 @@ struct SA1 : Processor::R65816, public Coprocessor {
     uint16 hcounter;
   } status;
 
-  static void Enter();
-  void enter();
-  void tick();
-  void op_irq();
+  static auto Enter() -> void;
+  auto enter() -> void;
+  auto tick() -> void;
+  auto op_irq() -> void;
 
-  alwaysinline void trigger_irq();
-  alwaysinline void last_cycle();
-  alwaysinline bool interrupt_pending();
+  alwaysinline auto trigger_irq() -> void;
+  alwaysinline auto last_cycle() -> void;
+  alwaysinline auto interrupt_pending() -> bool;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
+
+  MappedRAM rom;
+  MappedRAM iram;
+  MappedRAM bwram;
 };
 
 extern SA1 sa1;

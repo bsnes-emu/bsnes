@@ -19,7 +19,7 @@ auto OpenGL::shader(const string& pathname) -> void {
     }
 
     for(auto node : document["input"]) {
-      if(node.name() == "history") historySize = node.decimal();
+      if(node.name() == "history") historySize = node.natural();
       if(node.name() == "format") format = glrFormat(node.text());
       if(node.name() == "filter") filter = glrFilter(node.text());
       if(node.name() == "wrap") wrap = glrWrap(node.text());
@@ -29,11 +29,11 @@ auto OpenGL::shader(const string& pathname) -> void {
       string text = node.text();
       if(node.name() == "width") {
         if(text.endsWith("%")) relativeWidth = real(text.rtrim("%", 1L)) / 100.0;
-        else absoluteWidth = text.decimal();
+        else absoluteWidth = text.natural();
       }
       if(node.name() == "height") {
         if(text.endsWith("%")) relativeHeight = real(text.rtrim("%", 1L)) / 100.0;
-        else absoluteHeight = text.decimal();
+        else absoluteHeight = text.natural();
       }
     }
 

@@ -1,35 +1,35 @@
 #include "decompressor.cpp"
 
-void SPC7110::dcu_load_address() {
-  unsigned table = r4801 | r4802 << 8 | r4803 << 16;
-  unsigned index = r4804 << 2;
+auto SPC7110::dcu_load_address() -> void {
+  uint table = r4801 | r4802 << 8 | r4803 << 16;
+  uint index = r4804 << 2;
 
-  unsigned addr = table + index;
+  uint addr = table + index;
   dcu_mode  = datarom_read(addr + 0);
   dcu_addr  = datarom_read(addr + 1) << 16;
   dcu_addr |= datarom_read(addr + 2) <<  8;
   dcu_addr |= datarom_read(addr + 3) <<  0;
 }
 
-void SPC7110::dcu_begin_transfer() {
+auto SPC7110::dcu_begin_transfer() -> void {
   if(dcu_mode == 3) return;  //invalid mode
 
   add_clocks(20);
   decompressor->initialize(dcu_mode, dcu_addr);
   decompressor->decode();
 
-  unsigned seek = r480b & 2 ? r4805 | r4806 << 8 : 0;
+  uint seek = r480b & 2 ? r4805 | r4806 << 8 : 0;
   while(seek--) decompressor->decode();
 
   r480c |= 0x80;
   dcu_offset = 0;
 }
 
-uint8 SPC7110::dcu_read() {
+auto SPC7110::dcu_read() -> uint8 {
   if((r480c & 0x80) == 0) return 0x00;
 
   if(dcu_offset == 0) {
-    for(unsigned row = 0; row < 8; row++) {
+    for(auto row : range(8)) {
       switch(decompressor->bpp) {
       case 1:
         dcu_tile[row] = decompressor->result;
@@ -46,7 +46,7 @@ uint8 SPC7110::dcu_read() {
         break;
       }
 
-      unsigned seek = r480b & 1 ? r4807 : 1;
+      uint seek = r480b & 1 ? r4807 : 1;
       while(seek--) decompressor->decode();
     }
   }

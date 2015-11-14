@@ -5,6 +5,7 @@
 #include <nall/image.hpp>
 #include <nall/maybe.hpp>
 #include <nall/range.hpp>
+#include <nall/set.hpp>
 #include <nall/shared-pointer.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
@@ -15,6 +16,8 @@
 using nall::function;
 using nall::lstring;
 using nall::maybe;
+using nall::nothing;
+using nall::set;
 using nall::shared_pointer;
 using nall::shared_pointer_weak;
 using nall::string;
@@ -542,6 +545,25 @@ struct MessageWindow {
 };
 #endif
 
+struct Property {
+  using type = Property;
+
+  Property(const string& name, const string& value = "");
+
+  auto operator==(const Property& source) const -> bool;
+  auto operator< (const Property& source) const -> bool;
+
+  auto name() const -> string;
+  auto setValue(const string& value = "") -> type&;
+  auto value() const -> string;
+
+private:
+  struct State {
+    string name;
+    string value;
+  } state;
+};
+
 #define Declare(Name) \
   using type = m##Name; \
   operator s##Name() const { return instance; } \
@@ -595,6 +617,7 @@ struct mObject {
   auto parentTreeViewItem(bool recursive = false) const -> mTreeViewItem*;
   auto parentWidget(bool recursive = false) const -> mWidget*;
   auto parentWindow(bool recursive = false) const -> mWindow*;
+  auto property(const string& name) const -> string;
   virtual auto remove() -> type&;
   virtual auto reset() -> type&;
   virtual auto setEnabled(bool enabled = true) -> type&;
@@ -602,6 +625,7 @@ struct mObject {
   virtual auto setFont(const Font& font = {}) -> type&;
   virtual auto setGroup(sGroup group = {}) -> type&;
   virtual auto setParent(mObject* parent = nullptr, signed offset = -1) -> type&;
+  virtual auto setProperty(const string& name, const string& value = "") -> type&;
   virtual auto setVisible(bool visible = true) -> type&;
   auto visible(bool recursive = false) const -> bool;
 
@@ -611,6 +635,7 @@ struct mObject {
     Font font;
     signed offset = -1;
     mObject* parent = nullptr;
+    set<Property> properties;
     bool visible = true;
   } state;
 

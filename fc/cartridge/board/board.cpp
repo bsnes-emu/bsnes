@@ -94,10 +94,10 @@ Board::Board(Markup::Node& document) {
   auto crom = cartridge["chr/rom"];
   auto cram = cartridge["chr/ram"];
 
-  prgrom.size = prom["size"].decimal();
-  prgram.size = pram["size"].decimal();
-  chrrom.size = crom["size"].decimal();
-  chrram.size = cram["size"].decimal();
+  prgrom.size = prom["size"].natural();
+  prgram.size = pram["size"].natural();
+  chrrom.size = crom["size"].natural();
+  chrram.size = cram["size"].natural();
 
   if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
   if(prgram.size) prgram.data = new uint8[prgram.size]();

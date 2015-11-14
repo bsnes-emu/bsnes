@@ -193,7 +193,7 @@ auto pIconView::_updateSelected() -> void {
   while(p) {
     auto path = (GtkTreePath*)p->data;
     char* pathString = gtk_tree_path_to_string(path);
-    unsigned position = decimal(pathString);
+    unsigned position = natural(pathString);
     g_free(pathString);
     selected.append(position);
     p = p->next;

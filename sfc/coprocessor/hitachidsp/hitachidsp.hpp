@@ -1,39 +1,39 @@
 struct HitachiDSP : Processor::HG51B, Coprocessor {
-  unsigned Frequency;
-  unsigned Roms;
-
   MappedRAM rom;
   MappedRAM ram;
 
   #include "mmio.hpp"
 
-  static void Enter();
-  void enter();
+  static auto Enter() -> void;
+  auto enter() -> void;
 
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
   //HG51B read/write
-  uint8 bus_read(uint24 addr);
-  void bus_write(uint24 addr, uint8 data);
+  auto bus_read(uint24 addr) -> uint8;
+  auto bus_write(uint24 addr, uint8 data) -> void;
 
   //CPU ROM read/write
-  uint8 rom_read(unsigned addr);
-  void rom_write(unsigned addr, uint8 data);
+  auto rom_read(uint addr) -> uint8;
+  auto rom_write(uint addr, uint8 data) -> void;
 
   //CPU RAM read/write
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
+  auto ram_read(uint addr) -> uint8;
+  auto ram_write(uint addr, uint8 data) -> void;
 
   //CPU MMIO read/write
-  uint8 dsp_read(unsigned addr);
-  void dsp_write(unsigned addr, uint8 data);
+  auto dsp_read(uint addr) -> uint8;
+  auto dsp_write(uint addr, uint8 data) -> void;
 
-  vector<uint8> firmware();
-  void serialize(serializer&);
+  auto firmware() const -> vector<uint8>;
+  auto serialize(serializer&) -> void;
+
+  uint Frequency;
+  uint Roms;
 };
 
 extern HitachiDSP hitachidsp;

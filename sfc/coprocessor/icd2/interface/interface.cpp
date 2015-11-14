@@ -1,4 +1,4 @@
-void ICD2::lcdScanline() {
+auto ICD2::lcdScanline() -> void {
   if(GameBoy::ppu.status.ly > 143) return;  //Vblank
   if((GameBoy::ppu.status.ly & 7) == 0) {
     write_bank = (write_bank + 1) & 3;
@@ -6,16 +6,16 @@ void ICD2::lcdScanline() {
   }
 }
 
-void ICD2::lcdOutput(uint2 color) {
-  unsigned y = write_addr / 160;
-  unsigned x = write_addr % 160;
-  unsigned addr = write_bank * 512 + y * 2 + x / 8 * 16;
+auto ICD2::lcdOutput(uint2 color) -> void {
+  uint y = write_addr / 160;
+  uint x = write_addr % 160;
+  uint addr = write_bank * 512 + y * 2 + x / 8 * 16;
   output[addr + 0] = (output[addr + 0] << 1) | (bool)(color & 1);
   output[addr + 1] = (output[addr + 1] << 1) | (bool)(color & 2);
   write_addr = (write_addr + 1) % 1280;
 }
 
-void ICD2::joypWrite(bool p15, bool p14) {
+auto ICD2::joypWrite(bool p15, bool p14) -> void {
   //joypad handling
   if(p15 == 1 && p14 == 1) {
     if(joyp15lock == 0 && joyp14lock == 0) {
@@ -85,21 +85,21 @@ void ICD2::joypWrite(bool p15, bool p14) {
   packetlock = true;
 }
 
-uint32_t ICD2::videoColor(unsigned source, uint16_t red, uint16_t green, uint16_t blue) {
+auto ICD2::videoColor(uint source, uint16 red, uint16 green, uint16 blue) -> uint32 {
   return source;
 }
 
-void ICD2::videoRefresh(const uint32_t* data, unsigned pitch, unsigned width, unsigned height) {
+auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
 }
 
-void ICD2::audioSample(int16_t left, int16_t right) {
+auto ICD2::audioSample(int16 left, int16 right) -> void {
   audio.coprocessor_sample(left, right);
 }
 
-int16_t ICD2::inputPoll(unsigned port, unsigned device, unsigned id) {
+auto ICD2::inputPoll(uint port, uint device, uint id) -> int16 {
   GameBoy::cpu.status.mlt_req = joyp_id & mlt_req;
 
-  unsigned data = 0x00;
+  uint data = 0x00;
   switch(joyp_id & mlt_req) {
   case 0: data = ~r6004; break;
   case 1: data = ~r6005; break;

@@ -7,13 +7,13 @@ struct Decompressor {
 
   Decompressor(SPC7110& spc7110) : spc7110(spc7110) {}
 
-  uint8 read() {
+  auto read() -> uint8 {
     return spc7110.datarom_read(offset++);
   }
 
   //inverse morton code transform: unpack big-endian packed pixels
   //returns odd bits in lower half; even bits in upper half
-  uint32 deinterleave(uint64 data, unsigned bits) {
+  auto deinterleave(uint64 data, uint bits) -> uint32 {
     data = data & (1ull << bits) - 1;
     data = 0x5555555555555555ull & (data << bits | data >> 1);
     data = 0x3333333333333333ull & (data | data >> 1);
@@ -24,7 +24,7 @@ struct Decompressor {
   }
 
   //extract a nibble and move it to the low four bits
-  uint64 moveToFront(uint64 list, unsigned nibble) {
+  auto moveToFront(uint64 list, uint nibble) -> uint64 {
     for(uint64 n = 0, mask = ~15; n < 64; n += 4, mask <<= 4) {
       if((list >> n & 15) != nibble) continue;
       return list = (list & mask) + (list << 4 & ~mask) + nibble;
@@ -32,8 +32,8 @@ struct Decompressor {
     return list;
   }
 
-  void initialize(unsigned mode, unsigned origin) {
-    for(auto &root : context) for(auto &node : root) node = {0, 0};
+  auto initialize(uint mode, uint origin) -> void {
+    for(auto& root : context) for(auto& node : root) node = {0, 0};
     bpp = 1 << mode;
     offset = origin;
     bits = 8;
@@ -45,18 +45,18 @@ struct Decompressor {
     colormap = 0xfedcba9876543210ull;
   }
 
-  void decode() {
-    for(unsigned pixel = 0; pixel < 8; pixel++) {
+  auto decode() -> void {
+    for(uint pixel = 0; pixel < 8; pixel++) {
       uint64 map = colormap;
-      unsigned diff = 0;
+      uint diff = 0;
 
       if(bpp > 1) {
-        unsigned pa = (bpp == 2 ? pixels >>  2 & 3 : pixels >>  0 & 15);
-        unsigned pb = (bpp == 2 ? pixels >> 14 & 3 : pixels >> 28 & 15);
-        unsigned pc = (bpp == 2 ? pixels >> 16 & 3 : pixels >> 32 & 15);
+        uint pa = (bpp == 2 ? pixels >>  2 & 3 : pixels >>  0 & 15);
+        uint pb = (bpp == 2 ? pixels >> 14 & 3 : pixels >> 28 & 15);
+        uint pc = (bpp == 2 ? pixels >> 16 & 3 : pixels >> 32 & 15);
 
         if(pa != pb || pb != pc) {
-          unsigned match = pa ^ pb ^ pc;
+          uint match = pa ^ pb ^ pc;
           diff = 4;                        //no match; all pixels differ
           if((match ^ pc) == 0) diff = 3;  //a == b; pixel c differs
           if((match ^ pb) == 0) diff = 2;  //c == a; pixel b differs
@@ -70,10 +70,10 @@ struct Decompressor {
         map = moveToFront(map, pa);
       }
 
-      for(unsigned plane = 0; plane < bpp; plane++) {
-        unsigned bit = bpp > 1 ? 1 << plane : 1 << (pixel & 3);
-        unsigned history = bit - 1 & output;
-        unsigned set = 0;
+      for(uint plane = 0; plane < bpp; plane++) {
+        uint bit = bpp > 1 ? 1 << plane : 1 << (pixel & 3);
+        uint history = bit - 1 & output;
+        uint set = 0;
 
         if(bpp == 1) set = pixel >= 4;
         if(bpp == 2) set = diff;
@@ -108,7 +108,7 @@ struct Decompressor {
         if(symbol == LPS && model.probability > Half) ctx.swap ^= 1;
       }
 
-      unsigned index = output & (1 << bpp) - 1;
+      uint index = output & (1 << bpp) - 1;
       if(bpp == 1) index ^= pixels >> 15 & 1;
 
       pixels = pixels << bpp | (map >> 4 * index & 15);
@@ -119,7 +119,7 @@ struct Decompressor {
     if(bpp == 4) result = deinterleave(deinterleave(pixels, 32), 32);
   }
 
-  void serialize(serializer& s) {
+  auto serialize(serializer& s) -> void {
     for(auto& root : context) {
       for(auto& node : root) {
         s.integer(node.prediction);
@@ -138,8 +138,8 @@ struct Decompressor {
     s.integer(result);
   }
 
-  enum : unsigned { MPS = 0, LPS = 1 };
-  enum : unsigned { One = 0xaa, Half = 0x55, Max = 0xff };
+  enum : uint { MPS = 0, LPS = 1 };
+  enum : uint { One = 0xaa, Half = 0x55, Max = 0xff };
 
   struct ModelState {
     uint8 probability;  //of the more probable symbol (MPS)
@@ -152,9 +152,9 @@ struct Decompressor {
     uint8 swap;         //if 1, exchange the role of MPS and LPS
   } context[5][15];     //not all 75 contexts exists; this simplifies the code
 
-  unsigned bpp;         //bits per pixel (1bpp = 1; 2bpp = 2; 4bpp = 4)
-  unsigned offset;      //SPC7110 data ROM read offset
-  unsigned bits;        //bits remaining in input
+  uint bpp;             //bits per pixel (1bpp = 1; 2bpp = 2; 4bpp = 4)
+  uint offset;          //SPC7110 data ROM read offset
+  uint bits;            //bits remaining in input
   uint16 range;         //arithmetic range: technically 8-bits, but Max+1 = 256
   uint16 input;         //input data from SPC7110 data ROM
   uint8 output;

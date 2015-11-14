@@ -45,7 +45,7 @@ auto mTreeView::foregroundColor() const -> Color {
 auto mTreeView::item(const string& path) const -> TreeViewItem {
   if(path.empty()) return {};
   auto paths = path.split("/");
-  unsigned position = decimal(paths.takeFirst());
+  unsigned position = paths.takeFirst().natural();
   if(position >= itemCount()) return {};
   if(paths.empty()) return state.items[position];
   return state.items[position]->item(paths.merge("/"));

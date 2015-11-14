@@ -5,9 +5,9 @@ InputManager* inputManager = nullptr;
 auto InputMapping::bind() -> void {
   auto token = assignment.split("/");
   if(token.size() < 3) return unbind();
-  uint64_t id = token[0].decimal();
-  unsigned group = token[1].decimal();
-  unsigned input = token[2].decimal();
+  uint64_t id = token[0].natural();
+  unsigned group = token[1].natural();
+  unsigned input = token[2].natural();
   string qualifier = token(3, "None");
 
   for(auto& device : inputManager->devices) {

@@ -35,8 +35,8 @@ auto MSU1::enter() -> void {
       }
     }
 
-    signed lchannel = (double)left  * (double)mmio.audioVolume / 255.0;
-    signed rchannel = (double)right * (double)mmio.audioVolume / 255.0;
+    int lchannel = (double)left  * (double)mmio.audioVolume / 255.0;
+    int rchannel = (double)right * (double)mmio.audioVolume / 255.0;
     left  = sclamp<16>(lchannel);
     right = sclamp<16>(rchannel);
     if(dsp.mute()) left = 0, right = 0;
@@ -103,7 +103,7 @@ auto MSU1::audioOpen() -> void {
   auto document = BML::unserialize(cartridge.information.markup.cartridge);
   string name = {"track-", mmio.audioTrack, ".pcm"};
   for(auto track : document.find("cartridge/msu1/track")) {
-    if(track["number"].decimal() != mmio.audioTrack) continue;
+    if(track["number"].natural() != mmio.audioTrack) continue;
     name = track["name"].text();
     break;
   }
@@ -123,7 +123,7 @@ auto MSU1::audioOpen() -> void {
   mmio.audioError = true;
 }
 
-auto MSU1::mmioRead(unsigned addr) -> uint8 {
+auto MSU1::mmioRead(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 
@@ -149,7 +149,7 @@ auto MSU1::mmioRead(unsigned addr) -> uint8 {
   }
 }
 
-auto MSU1::mmioWrite(unsigned addr, uint8 data) -> void {
+auto MSU1::mmioWrite(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 

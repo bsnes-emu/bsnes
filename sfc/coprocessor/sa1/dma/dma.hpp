@@ -1,11 +1,11 @@
 struct DMA {
-  enum CDEN { DmaNormal = 0, DmaCharConversion = 1 };
-  enum SD { SourceROM = 0, SourceBWRAM = 1, SourceIRAM = 2 };
-  enum DD { DestIRAM = 0, DestBWRAM = 1 };
-  unsigned line;
+  enum CDEN : uint { DmaNormal = 0, DmaCharConversion = 1 };
+  enum SD : uint { SourceROM = 0, SourceBWRAM = 1, SourceIRAM = 2 };
+  enum DD : uint { DestIRAM = 0, DestBWRAM = 1 };
+  uint line;
 } dma;
 
-void dma_normal();
-void dma_cc1();
-uint8 dma_cc1_read(unsigned addr);
-void dma_cc2();
+auto dma_normal() -> void;
+auto dma_cc1() -> void;
+auto dma_cc1_read(uint addr) -> uint8;
+auto dma_cc2() -> void;

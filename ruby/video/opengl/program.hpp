@@ -5,9 +5,9 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   string w = node["width"].text(), h = node["height"].text();
   if(w.endsWith("%")) relativeWidth = real(w.rtrim("%", 1L)) / 100.0;
-  else absoluteWidth = w.decimal();
+  else absoluteWidth = w.natural();
   if(h.endsWith("%")) relativeHeight = real(h.rtrim("%", 1L)) / 100.0;
-  else absoluteHeight = h.decimal();
+  else absoluteHeight = h.natural();
 
   format = glrFormat(node["format"].text());
 

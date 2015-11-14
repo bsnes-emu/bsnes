@@ -150,8 +150,8 @@ public:
   auto end() const -> const char* { return &data()[size()]; }
 
   //atoi.hpp
-  inline auto integer() const -> intmax_t;
-  inline auto decimal() const -> uintmax_t;
+  inline auto integer() const -> intmax;
+  inline auto natural() const -> uintmax;
   inline auto real() const -> double;
 
   //core.hpp

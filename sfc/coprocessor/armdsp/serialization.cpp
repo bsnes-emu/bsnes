@@ -1,13 +1,13 @@
-nall::vector<uint8> ArmDSP::firmware() {
+auto ArmDSP::firmware() const -> nall::vector<uint8> {
   nall::vector<uint8> buffer;
   if(!cartridge.hasARMDSP()) return buffer;
   buffer.reserve(128 * 1024 + 32 * 1024);
-  for(unsigned n = 0; n < 128 * 1024; n++) buffer.append(programROM[n]);
-  for(unsigned n = 0; n <  32 * 1024; n++) buffer.append(dataROM[n]);
+  for(auto n : range(128 * 1024)) buffer.append(programROM[n]);
+  for(auto n : range( 32 * 1024)) buffer.append(dataROM[n]);
   return buffer;
 }
 
-void ArmDSP::serialize(serializer& s) {
+auto ArmDSP::serialize(serializer& s) -> void {
   ARM::serialize(s);
   Thread::serialize(s);
 

@@ -60,8 +60,8 @@ struct Node {
 
   auto text() const -> string { return value().strip(); }
   auto boolean() const -> bool { return text() == "true"; }
-  auto integer() const -> intmax_t { return text().integer(); }
-  auto decimal() const -> uintmax_t { return text().decimal(); }
+  auto integer() const -> intmax { return text().integer(); }
+  auto natural() const -> uintmax { return text().natural(); }
 
   auto setName(const string& name = "") -> Node& { shared->_name = name; return *this; }
   auto setValue(const string& value = "") -> Node& { shared->_value = value; return *this; }

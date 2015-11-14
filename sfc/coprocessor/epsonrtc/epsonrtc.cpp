@@ -7,11 +7,11 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 EpsonRTC epsonrtc;
 
-void EpsonRTC::Enter() {
+auto EpsonRTC::Enter() -> void {
   epsonrtc.enter();
 }
 
-void EpsonRTC::enter() {
+auto EpsonRTC::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -36,12 +36,10 @@ void EpsonRTC::enter() {
   }
 }
 
-void EpsonRTC::init() {
+auto EpsonRTC::init() -> void {
 }
 
-void EpsonRTC::load() {
-  return;
-
+auto EpsonRTC::load() -> void {
   secondlo = 0;
   secondhi = 0;
   batteryfailure = 1;
@@ -82,13 +80,13 @@ void EpsonRTC::load() {
   test = 0;
 }
 
-void EpsonRTC::unload() {
+auto EpsonRTC::unload() -> void {
 }
 
-void EpsonRTC::power() {
+auto EpsonRTC::power() -> void {
 }
 
-void EpsonRTC::reset() {
+auto EpsonRTC::reset() -> void {
   create(EpsonRTC::Enter, 32768 * 64);
 
   clocks = 0;
@@ -102,19 +100,19 @@ void EpsonRTC::reset() {
   holdtick = 0;
 }
 
-void EpsonRTC::sync() {
+auto EpsonRTC::sync() -> void {
   time_t systime = time(0);
   tm* timeinfo = localtime(&systime);
 
-  unsigned second = min(59, timeinfo->tm_sec);
+  uint second = min(59, timeinfo->tm_sec);
   secondlo = second % 10;
   secondhi = second / 10;
 
-  unsigned minute = timeinfo->tm_min;
+  uint minute = timeinfo->tm_min;
   minutelo = minute % 10;
   minutehi = minute / 10;
 
-  unsigned hour = timeinfo->tm_hour;
+  uint hour = timeinfo->tm_hour;
   if(atime) {
     hourlo = hour % 10;
     hourhi = hour / 10;
@@ -126,15 +124,15 @@ void EpsonRTC::sync() {
     hourhi = hour / 10;
   }
 
-  unsigned day = timeinfo->tm_mday;
+  uint day = timeinfo->tm_mday;
   daylo = day % 10;
   dayhi = day / 10;
 
-  unsigned month = 1 + timeinfo->tm_mon;
+  uint month = 1 + timeinfo->tm_mon;
   monthlo = month % 10;
   monthhi = month / 10;
 
-  unsigned year = timeinfo->tm_year % 100;
+  uint year = timeinfo->tm_year % 100;
   yearlo = year % 10;
   yearhi = year / 10;
 
@@ -143,7 +141,7 @@ void EpsonRTC::sync() {
   resync = true;  //alert program that time has changed
 }
 
-uint8 EpsonRTC::read(unsigned addr) {
+auto EpsonRTC::read(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr &= 3;
 
@@ -166,7 +164,7 @@ uint8 EpsonRTC::read(unsigned addr) {
   }
 }
 
-void EpsonRTC::write(unsigned addr, uint8 data) {
+auto EpsonRTC::write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr &= 3, data &= 15;
 

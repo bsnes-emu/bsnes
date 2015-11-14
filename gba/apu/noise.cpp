@@ -32,10 +32,10 @@ void APU::Noise::clockenvelope() {
 
 uint8 APU::Noise::read(unsigned addr) const {
   switch(addr) {
-  case 1: return (length << 0);
+  case 1: return 0;
   case 2: return (envelope.frequency << 0) | (envelope.direction << 3) | (envelope.volume << 4);
   case 3: return (divisor << 0) | (narrowlfsr << 3) | (frequency << 4);
-  case 4: return (counter << 6) | (initialize << 7);
+  case 4: return (counter << 6);
   }
 }
 

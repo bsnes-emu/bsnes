@@ -5,9 +5,9 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 NECDSP necdsp;
 
-void NECDSP::Enter() { necdsp.enter(); }
+auto NECDSP::Enter() -> void { necdsp.enter(); }
 
-void NECDSP::enter() {
+auto NECDSP::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -19,7 +19,7 @@ void NECDSP::enter() {
   }
 }
 
-uint8 NECDSP::read(unsigned addr) {
+auto NECDSP::read(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
   if(addr & Select) {
     return uPD96050::sr_read();
@@ -28,7 +28,7 @@ uint8 NECDSP::read(unsigned addr) {
   }
 }
 
-void NECDSP::write(unsigned addr, uint8 data) {
+auto NECDSP::write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   if(addr & Select) {
     return uPD96050::sr_write(data);
@@ -37,29 +37,29 @@ void NECDSP::write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 NECDSP::ram_read(unsigned addr) {
+auto NECDSP::ram_read(uint addr) -> uint8 {
   cpu.synchronizeCoprocessors();
   return uPD96050::dp_read(addr);
 }
 
-void NECDSP::ram_write(unsigned addr, uint8 data) {
+auto NECDSP::ram_write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   return uPD96050::dp_write(addr, data);
 }
 
-void NECDSP::init() {
+auto NECDSP::init() -> void {
 }
 
-void NECDSP::load() {
+auto NECDSP::load() -> void {
 }
 
-void NECDSP::unload() {
+auto NECDSP::unload() -> void {
 }
 
-void NECDSP::power() {
+auto NECDSP::power() -> void {
 }
 
-void NECDSP::reset() {
+auto NECDSP::reset() -> void {
   create(NECDSP::Enter, frequency);
   uPD96050::power();
 }

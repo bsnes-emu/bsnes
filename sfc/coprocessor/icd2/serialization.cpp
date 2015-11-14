@@ -1,8 +1,8 @@
-void ICD2::serialize(serializer& s) {
+auto ICD2::serialize(serializer& s) -> void {
   Thread::serialize(s);
   GameBoy::system.serialize_all(s);
 
-  for(unsigned n = 0; n < 64; n++) s.array(packet[n].data);
+  for(auto n : range(64)) s.array(packet[n].data);
   s.integer(packetsize);
 
   s.integer(joyp_id);

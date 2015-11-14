@@ -212,7 +212,7 @@ auto pListView::_doContext() -> void {
 
 auto pListView::_doDataFunc(GtkTreeViewColumn* gtkColumn, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void {
   auto path = gtk_tree_model_get_string_from_iter(gtkTreeModel, iter);
-  auto row = decimal(path);
+  auto row = natural(path);
   g_free(path);
 
   if(auto& header = state().header) {
@@ -265,7 +265,7 @@ auto pListView::_doEdit(GtkCellRendererText* gtkCellRendererText, const char* pa
     for(auto& column : header->state.columns) {
       if(auto delegate = column->self()) {
         if(gtkCellRendererText == GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
-          auto row = decimal(path);
+          auto row = natural(path);
           if(auto item = self().item(row)) {
             if(auto cell = item->cell(column->offset())) {
               if(string{text} != cell->state.text) {
@@ -337,7 +337,7 @@ auto pListView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const ch
     for(auto& column : header->state.columns) {
       if(auto delegate = column->self()) {
         if(gtkCellRendererToggle == GTK_CELL_RENDERER_TOGGLE(delegate->gtkCellToggle)) {
-          auto row = decimal(path);
+          auto row = natural(path);
           if(auto item = self().item(row)) {
             if(auto cell = item->cell(column->offset())) {
               cell->setChecked(!cell->checked());
@@ -365,7 +365,7 @@ auto pListView::_updateSelected() -> void {
     GtkTreeIter iter;
     if(gtk_tree_model_get_iter(gtkTreeModel, &iter, (GtkTreePath*)p->data)) {
       char* pathname = gtk_tree_model_get_string_from_iter(gtkTreeModel, &iter);
-      unsigned selection = decimal(pathname);
+      unsigned selection = natural(pathname);
       g_free(pathname);
       selected.append(selection);
     }

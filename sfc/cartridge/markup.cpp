@@ -39,14 +39,14 @@ auto Cartridge::parseMarkup(const string& markup) -> void {
 
 auto Cartridge::parseMarkupMap(Mapping& m, Markup::Node map) -> void {
   m.addr = map["address"].text();
-  m.size = map["size"].decimal();
-  m.base = map["base"].decimal();
-  m.mask = map["mask"].decimal();
+  m.size = map["size"].natural();
+  m.base = map["base"].natural();
+  m.mask = map["mask"].natural();
 }
 
 auto Cartridge::parseMarkupMemory(MappedRAM& ram, Markup::Node node, unsigned id, bool writable) -> void {
   string name = node["name"].text();
-  unsigned size = node["size"].decimal();
+  unsigned size = node["size"].natural();
   ram.map(allocate<uint8>(size, 0xff), size);
   if(name) {
     interface->loadRequest(id, name, !writable);  //treat ROM as required; RAM as optional
@@ -78,7 +78,7 @@ auto Cartridge::parseMarkupCartridge(Markup::Node root) -> void {
 auto Cartridge::parseMarkupICD2(Markup::Node root) -> void {
   hasSuperGameBoySlot = true;
   hasICD2 = true;
-  icd2.revision = max(1, root["revision"].decimal());
+  icd2.revision = max(1, root["revision"].natural());
 
   GameBoy::cartridge.load_empty(GameBoy::System::Revision::SuperGameBoy);
   interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb", false);
@@ -188,7 +188,7 @@ auto Cartridge::parseMarkupEvent(Markup::Node root) -> void {
   hasEvent = true;
 
   for(auto node : root.find("rom")) {
-    unsigned id = node["id"].decimal();
+    unsigned id = node["id"].natural();
     if(id > 3) continue;
     parseMarkupMemory(event.rom[id], node, ID::EventROM0 + id, false);
   }
@@ -200,8 +200,8 @@ auto Cartridge::parseMarkupEvent(Markup::Node root) -> void {
 
   event.revision = root["revision"].text() == "B" ? 2 : 1;
   lstring part = root["timer"].text().split(":", 1L);
-  if(part.size() == 1) event.timer = decimal(part(0));
-  if(part.size() == 2) event.timer = decimal(part(0)) * 60 + decimal(part(1));
+  if(part.size() == 1) event.timer = part(0).natural();
+  if(part.size() == 2) event.timer = part(0).natural() * 60 + part(1).natural();
 
   for(auto node : root.find("map")) {
     if(node["id"].text() == "rom") {
@@ -338,7 +338,7 @@ auto Cartridge::parseMarkupHitachiDSP(Markup::Node root, unsigned roms) -> void 
   for(auto& word : hitachidsp.dataROM) word = 0x000000;
   for(auto& word : hitachidsp.dataRAM) word = 0x00;
 
-  hitachidsp.Frequency = root["frequency"].decimal();
+  hitachidsp.Frequency = root["frequency"].natural();
   if(hitachidsp.Frequency == 0) hitachidsp.frequency = 20000000;
   hitachidsp.Roms = roms;
 
@@ -380,7 +380,7 @@ auto Cartridge::parseMarkupNECDSP(Markup::Node root) -> void {
   for(auto& word : necdsp.dataROM) word = 0x0000;
   for(auto& word : necdsp.dataRAM) word = 0x0000;
 
-  necdsp.frequency = root["frequency"].decimal();
+  necdsp.frequency = root["frequency"].natural();
   if(necdsp.frequency == 0) necdsp.frequency = 8000000;
   necdsp.revision
   = root["model"].text() == "uPD7725"  ? NECDSP::Revision::uPD7725
@@ -417,7 +417,7 @@ auto Cartridge::parseMarkupNECDSP(Markup::Node root) -> void {
       Mapping m({&NECDSP::read, &necdsp}, {&NECDSP::write, &necdsp});
       parseMarkupMap(m, node);
       mapping.append(m);
-      necdsp.Select = node["select"].decimal();
+      necdsp.Select = node["select"].natural();
     }
 
     if(node["id"].text() == "ram") {

@@ -20,10 +20,10 @@ void APU::Wave::clocklength() {
 uint8 APU::Wave::read(unsigned addr) const {
   switch(addr) {
   case 0: return (mode << 5) | (bank << 6) | (dacenable << 7);
-  case 1: return (length << 0);
+  case 1: return 0;
   case 2: return (volume << 5);
-  case 3: return (frequency >> 0);
-  case 4: return (frequency >> 8) | (counter << 6) | (initialize << 7);
+  case 3: return 0;
+  case 4: return (counter << 6);
   }
 }
 

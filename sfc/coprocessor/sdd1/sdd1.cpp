@@ -7,7 +7,7 @@ SDD1 sdd1;
 #include "decomp.cpp"
 #include "serialization.cpp"
 
-void SDD1::init() {
+auto SDD1::init() -> void {
 }
 
 void SDD1::load() {
@@ -17,15 +17,15 @@ void SDD1::load() {
   bus.map({&SDD1::read, &sdd1}, {&SDD1::write, &sdd1}, 0x80, 0xbf, 0x4300, 0x437f);
 }
 
-void SDD1::unload() {
+auto SDD1::unload() -> void {
   rom.reset();
   ram.reset();
 }
 
-void SDD1::power() {
+auto SDD1::power() -> void {
 }
 
-void SDD1::reset() {
+auto SDD1::reset() -> void {
   sdd1_enable = 0x00;
   xfer_enable = 0x00;
   dma_ready = false;
@@ -35,13 +35,13 @@ void SDD1::reset() {
   mmc[2] = 2 << 20;
   mmc[3] = 3 << 20;
 
-  for(unsigned i = 0; i < 8; i++) {
-    dma[i].addr = 0;
-    dma[i].size = 0;
+  for(auto n : range(8)) {
+    dma[n].addr = 0;
+    dma[n].size = 0;
   }
 }
 
-uint8 SDD1::read(unsigned addr) {
+auto SDD1::read(uint addr) -> uint8 {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {
@@ -58,11 +58,11 @@ uint8 SDD1::read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SDD1::write(unsigned addr, uint8 data) {
+auto SDD1::write(uint addr, uint8 data) -> void {
   addr &= 0xffff;
 
   if((addr & 0x4380) == 0x4300) {
-    unsigned channel = (addr >> 4) & 7;
+    uint channel = (addr >> 4) & 7;
     switch(addr & 15) {
     case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
     case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
@@ -85,7 +85,7 @@ void SDD1::write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 SDD1::mmc_read(unsigned addr) {
+auto SDD1::mmc_read(uint addr) -> uint8 {
   return rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
 }
 
@@ -107,7 +107,7 @@ uint8 SDD1::mmc_read(unsigned addr) {
 //
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-uint8 SDD1::mcurom_read(unsigned addr) {
+auto SDD1::mcurom_read(uint addr) -> uint8 {
   if(addr < 0x400000) {  //(addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     return rom.read(addr);
   //addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
@@ -117,10 +117,10 @@ uint8 SDD1::mcurom_read(unsigned addr) {
   //$40-7f|c0-ff:0000-ffff (MMC)
   if(sdd1_enable & xfer_enable) {
     //at least one channel has S-DD1 decompression enabled ...
-    for(unsigned i = 0; i < 8; i++) {
-      if(sdd1_enable & xfer_enable & (1 << i)) {
+    for(auto n : range(8)) {
+      if(sdd1_enable & xfer_enable & (1 << n)) {
         //S-DD1 always uses fixed transfer mode, so address will not change during transfer
-        if(addr == dma[i].addr) {
+        if(addr == dma[n].addr) {
           if(!dma_ready) {
             //prepare streaming decompression
             decomp.init(addr);
@@ -129,9 +129,9 @@ uint8 SDD1::mcurom_read(unsigned addr) {
 
           //fetch a decompressed byte; once finished, disable channel and invalidate buffer
           uint8 data = decomp.read();
-          if(--dma[i].size == 0) {
+          if(--dma[n].size == 0) {
             dma_ready = false;
-            xfer_enable &= ~(1 << i);
+            xfer_enable &= ~(1 << n);
           }
 
           return data;
@@ -144,10 +144,10 @@ uint8 SDD1::mcurom_read(unsigned addr) {
   return mmc_read(addr);
 }
 
-void SDD1::mcurom_write(unsigned addr, uint8 data) {
+auto SDD1::mcurom_write(uint addr, uint8 data) -> void {
 }
 
-uint8 SDD1::mcuram_read(unsigned addr) {
+auto SDD1::mcuram_read(uint addr) -> uint8 {
   if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     return ram.read(addr & 0x1fff);
   }
@@ -159,7 +159,7 @@ uint8 SDD1::mcuram_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void SDD1::mcuram_write(unsigned addr, uint8 data) {
+auto SDD1::mcuram_write(uint addr, uint8 data) -> void {
   if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     return ram.write(addr & 0x1fff, data);
   }

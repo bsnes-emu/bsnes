@@ -32,7 +32,7 @@ auto string::format(const nall::format& params) -> type& {
     };
     if(!isNumeric(&data[x + 1], &data[y - 1])) { x++; continue; }
 
-    unsigned index = nall::decimal(&data[x + 1]);
+    unsigned index = nall::natural(&data[x + 1]);
     if(index >= params.size()) { x++; continue; }
 
     unsigned sourceSize = y - x;

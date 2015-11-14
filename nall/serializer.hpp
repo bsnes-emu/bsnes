@@ -12,9 +12,8 @@
 //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
 //- floating-point usage is not portable across different implementations
 
-#include <type_traits>
-#include <utility>
 #include <nall/stdint.hpp>
+#include <nall/traits.hpp>
 #include <nall/utility.hpp>
 
 namespace nall {

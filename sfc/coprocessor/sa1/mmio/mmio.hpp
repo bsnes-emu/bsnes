@@ -1,5 +1,5 @@
-uint8 mmio_read(unsigned addr);
-void mmio_write(unsigned addr, uint8 data);
+auto mmio_read(uint addr) -> uint8;
+auto mmio_write(uint addr, uint8 data) -> void;
 
 struct MMIO {
   //$2200 CCNT
@@ -63,19 +63,19 @@ struct MMIO {
 
   //$2220 CXB
   bool cbmode;
-  unsigned cb;
+  uint cb;
 
   //$2221 DXB
   bool dbmode;
-  unsigned db;
+  uint db;
 
   //$2222 EXB
   bool ebmode;
-  unsigned eb;
+  uint eb;
 
   //$2223 FXB
   bool fbmode;
-  unsigned fb;
+  uint fb;
 
   //$2224 BMAPS
   uint8 sbm;
@@ -168,88 +168,88 @@ struct MMIO {
   bool overflow;
 } mmio;
 
-void mmio_w2200(uint8);  //CCNT
-void mmio_w2201(uint8);  //SIE
-void mmio_w2202(uint8);  //SIC
-void mmio_w2203(uint8);  //CRVL
-void mmio_w2204(uint8);  //CRVH
-void mmio_w2205(uint8);  //CNVL
-void mmio_w2206(uint8);  //CNVH
-void mmio_w2207(uint8);  //CIVL
-void mmio_w2208(uint8);  //CIVH
-void mmio_w2209(uint8);  //SCNT
-void mmio_w220a(uint8);  //CIE
-void mmio_w220b(uint8);  //CIC
-void mmio_w220c(uint8);  //SNVL
-void mmio_w220d(uint8);  //SNVH
-void mmio_w220e(uint8);  //SIVL
-void mmio_w220f(uint8);  //SIVH
-void mmio_w2210(uint8);  //TMC
-void mmio_w2211(uint8);  //CTR
-void mmio_w2212(uint8);  //HCNTL
-void mmio_w2213(uint8);  //HCNTH
-void mmio_w2214(uint8);  //VCNTL
-void mmio_w2215(uint8);  //VCNTH
-void mmio_w2220(uint8);  //CXB
-void mmio_w2221(uint8);  //DXB
-void mmio_w2222(uint8);  //EXB
-void mmio_w2223(uint8);  //FXB
-void mmio_w2224(uint8);  //BMAPS
-void mmio_w2225(uint8);  //BMAP
-void mmio_w2226(uint8);  //SBWE
-void mmio_w2227(uint8);  //CBWE
-void mmio_w2228(uint8);  //BWPA
-void mmio_w2229(uint8);  //SIWP
-void mmio_w222a(uint8);  //CIWP
-void mmio_w2230(uint8);  //DCNT
-void mmio_w2231(uint8);  //CDMA
-void mmio_w2232(uint8);  //SDAL
-void mmio_w2233(uint8);  //SDAH
-void mmio_w2234(uint8);  //SDAB
-void mmio_w2235(uint8);  //DDAL
-void mmio_w2236(uint8);  //DDAH
-void mmio_w2237(uint8);  //DDAB
-void mmio_w2238(uint8);  //DTCL
-void mmio_w2239(uint8);  //DTCH
-void mmio_w223f(uint8);  //BBF
-void mmio_w2240(uint8);  //BRF0
-void mmio_w2241(uint8);  //BRF1
-void mmio_w2242(uint8);  //BRF2
-void mmio_w2243(uint8);  //BRF3
-void mmio_w2244(uint8);  //BRF4
-void mmio_w2245(uint8);  //BRF5
-void mmio_w2246(uint8);  //BRF6
-void mmio_w2247(uint8);  //BRF7
-void mmio_w2248(uint8);  //BRF8
-void mmio_w2249(uint8);  //BRF9
-void mmio_w224a(uint8);  //BRFA
-void mmio_w224b(uint8);  //BRFB
-void mmio_w224c(uint8);  //BRFC
-void mmio_w224d(uint8);  //BRFD
-void mmio_w224e(uint8);  //BRFE
-void mmio_w224f(uint8);  //BRFF
-void mmio_w2250(uint8);  //MCNT
-void mmio_w2251(uint8);  //MAL
-void mmio_w2252(uint8);  //MAH
-void mmio_w2253(uint8);  //MBL
-void mmio_w2254(uint8);  //MBH
-void mmio_w2258(uint8);  //VBD
-void mmio_w2259(uint8);  //VDAL
-void mmio_w225a(uint8);  //VDAH
-void mmio_w225b(uint8);  //VDAB
+auto mmio_w2200(uint8) -> void;  //CCNT
+auto mmio_w2201(uint8) -> void;  //SIE
+auto mmio_w2202(uint8) -> void;  //SIC
+auto mmio_w2203(uint8) -> void;  //CRVL
+auto mmio_w2204(uint8) -> void;  //CRVH
+auto mmio_w2205(uint8) -> void;  //CNVL
+auto mmio_w2206(uint8) -> void;  //CNVH
+auto mmio_w2207(uint8) -> void;  //CIVL
+auto mmio_w2208(uint8) -> void;  //CIVH
+auto mmio_w2209(uint8) -> void;  //SCNT
+auto mmio_w220a(uint8) -> void;  //CIE
+auto mmio_w220b(uint8) -> void;  //CIC
+auto mmio_w220c(uint8) -> void;  //SNVL
+auto mmio_w220d(uint8) -> void;  //SNVH
+auto mmio_w220e(uint8) -> void;  //SIVL
+auto mmio_w220f(uint8) -> void;  //SIVH
+auto mmio_w2210(uint8) -> void;  //TMC
+auto mmio_w2211(uint8) -> void;  //CTR
+auto mmio_w2212(uint8) -> void;  //HCNTL
+auto mmio_w2213(uint8) -> void;  //HCNTH
+auto mmio_w2214(uint8) -> void;  //VCNTL
+auto mmio_w2215(uint8) -> void;  //VCNTH
+auto mmio_w2220(uint8) -> void;  //CXB
+auto mmio_w2221(uint8) -> void;  //DXB
+auto mmio_w2222(uint8) -> void;  //EXB
+auto mmio_w2223(uint8) -> void;  //FXB
+auto mmio_w2224(uint8) -> void;  //BMAPS
+auto mmio_w2225(uint8) -> void;  //BMAP
+auto mmio_w2226(uint8) -> void;  //SBWE
+auto mmio_w2227(uint8) -> void;  //CBWE
+auto mmio_w2228(uint8) -> void;  //BWPA
+auto mmio_w2229(uint8) -> void;  //SIWP
+auto mmio_w222a(uint8) -> void;  //CIWP
+auto mmio_w2230(uint8) -> void;  //DCNT
+auto mmio_w2231(uint8) -> void;  //CDMA
+auto mmio_w2232(uint8) -> void;  //SDAL
+auto mmio_w2233(uint8) -> void;  //SDAH
+auto mmio_w2234(uint8) -> void;  //SDAB
+auto mmio_w2235(uint8) -> void;  //DDAL
+auto mmio_w2236(uint8) -> void;  //DDAH
+auto mmio_w2237(uint8) -> void;  //DDAB
+auto mmio_w2238(uint8) -> void;  //DTCL
+auto mmio_w2239(uint8) -> void;  //DTCH
+auto mmio_w223f(uint8) -> void;  //BBF
+auto mmio_w2240(uint8) -> void;  //BRF0
+auto mmio_w2241(uint8) -> void;  //BRF1
+auto mmio_w2242(uint8) -> void;  //BRF2
+auto mmio_w2243(uint8) -> void;  //BRF3
+auto mmio_w2244(uint8) -> void;  //BRF4
+auto mmio_w2245(uint8) -> void;  //BRF5
+auto mmio_w2246(uint8) -> void;  //BRF6
+auto mmio_w2247(uint8) -> void;  //BRF7
+auto mmio_w2248(uint8) -> void;  //BRF8
+auto mmio_w2249(uint8) -> void;  //BRF9
+auto mmio_w224a(uint8) -> void;  //BRFA
+auto mmio_w224b(uint8) -> void;  //BRFB
+auto mmio_w224c(uint8) -> void;  //BRFC
+auto mmio_w224d(uint8) -> void;  //BRFD
+auto mmio_w224e(uint8) -> void;  //BRFE
+auto mmio_w224f(uint8) -> void;  //BRFF
+auto mmio_w2250(uint8) -> void;  //MCNT
+auto mmio_w2251(uint8) -> void;  //MAL
+auto mmio_w2252(uint8) -> void;  //MAH
+auto mmio_w2253(uint8) -> void;  //MBL
+auto mmio_w2254(uint8) -> void;  //MBH
+auto mmio_w2258(uint8) -> void;  //VBD
+auto mmio_w2259(uint8) -> void;  //VDAL
+auto mmio_w225a(uint8) -> void;  //VDAH
+auto mmio_w225b(uint8) -> void;  //VDAB
 
-uint8 mmio_r2300();  //SFR
-uint8 mmio_r2301();  //CFR
-uint8 mmio_r2302();  //HCRL
-uint8 mmio_r2303();  //HCRH
-uint8 mmio_r2304();  //VCRL
-uint8 mmio_r2305();  //VCRH
-uint8 mmio_r2306();  //MR [00-07]
-uint8 mmio_r2307();  //MR [08-15]
-uint8 mmio_r2308();  //MR [16-23]
-uint8 mmio_r2309();  //MR [24-31]
-uint8 mmio_r230a();  //MR [32-40]
-uint8 mmio_r230b();  //OF
-uint8 mmio_r230c();  //VDPL
-uint8 mmio_r230d();  //VDPH
-uint8 mmio_r230e();  //VC
+auto mmio_r2300() -> uint8;  //SFR
+auto mmio_r2301() -> uint8;  //CFR
+auto mmio_r2302() -> uint8;  //HCRL
+auto mmio_r2303() -> uint8;  //HCRH
+auto mmio_r2304() -> uint8;  //VCRL
+auto mmio_r2305() -> uint8;  //VCRH
+auto mmio_r2306() -> uint8;  //MR [00-07]
+auto mmio_r2307() -> uint8;  //MR [08-15]
+auto mmio_r2308() -> uint8;  //MR [16-23]
+auto mmio_r2309() -> uint8;  //MR [24-31]
+auto mmio_r230a() -> uint8;  //MR [32-40]
+auto mmio_r230b() -> uint8;  //OF
+auto mmio_r230c() -> uint8;  //VDPL
+auto mmio_r230d() -> uint8;  //VDPH
+auto mmio_r230e() -> uint8;  //VC

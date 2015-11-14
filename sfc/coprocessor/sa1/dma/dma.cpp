@@ -2,7 +2,7 @@
 //direct data transfer
 //====================
 
-void SA1::dma_normal() {
+auto SA1::dma_normal() -> void {
   while(mmio.dtc--) {
     uint8 data = regs.mdr;
     uint32 dsa = mmio.dsa++;
@@ -56,7 +56,7 @@ void SA1::dma_normal() {
 //type-1 character conversion
 //===========================
 
-void SA1::dma_cc1() {
+auto SA1::dma_cc1() -> void {
   cpubwram.dma = true;
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
@@ -65,29 +65,29 @@ void SA1::dma_cc1() {
   }
 }
 
-uint8 SA1::dma_cc1_read(unsigned addr) {
+auto SA1::dma_cc1_read(uint addr) -> uint8 {
   //16 bytes/char (2bpp); 32 bytes/char (4bpp); 64 bytes/char (8bpp)
-  unsigned charmask = (1 << (6 - mmio.dmacb)) - 1;
+  uint charmask = (1 << (6 - mmio.dmacb)) - 1;
 
   if((addr & charmask) == 0) {
     //buffer next character to I-RAM
-    unsigned bpp = 2 << (2 - mmio.dmacb);
-    unsigned bpl = (8 << mmio.dmasize) >> mmio.dmacb;
-    unsigned bwmask = bwram.size() - 1;
-    unsigned tile = ((addr - mmio.dsa) & bwmask) >> (6 - mmio.dmacb);
-    unsigned ty = (tile >> mmio.dmasize);
-    unsigned tx = tile & ((1 << mmio.dmasize) - 1);
-    unsigned bwaddr = mmio.dsa + ty * 8 * bpl + tx * bpp;
+    uint bpp = 2 << (2 - mmio.dmacb);
+    uint bpl = (8 << mmio.dmasize) >> mmio.dmacb;
+    uint bwmask = bwram.size() - 1;
+    uint tile = ((addr - mmio.dsa) & bwmask) >> (6 - mmio.dmacb);
+    uint ty = (tile >> mmio.dmasize);
+    uint tx = tile & ((1 << mmio.dmasize) - 1);
+    uint bwaddr = mmio.dsa + ty * 8 * bpl + tx * bpp;
 
-    for(unsigned y = 0; y < 8; y++) {
+    for(auto y : range(8)) {
       uint64 data = 0;
-      for(unsigned byte = 0; byte < bpp; byte++) {
+      for(auto byte : range(bpp)) {
         data |= (uint64)bwram.read((bwaddr + byte) & bwmask) << (byte << 3);
       }
       bwaddr += bpl;
 
-      uint8 out[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-      for(unsigned x = 0; x < 8; x++) {
+      uint8 out[] = {0, 0, 0, 0, 0, 0, 0, 0};
+      for(auto x : range(8)) {
         out[0] |= (data & 1) << (7 - x); data >>= 1;
         out[1] |= (data & 1) << (7 - x); data >>= 1;
         if(mmio.dmacb == 2) continue;
@@ -100,8 +100,8 @@ uint8 SA1::dma_cc1_read(unsigned addr) {
         out[7] |= (data & 1) << (7 - x); data >>= 1;
       }
 
-      for(unsigned byte = 0; byte < bpp; byte++) {
-        unsigned p = mmio.dda + (y << 1) + ((byte & 6) << 3) + (byte & 1);
+      for(auto byte : range(bpp)) {
+        uint p = mmio.dda + (y << 1) + ((byte & 6) << 3) + (byte & 1);
         iram.write(p & 0x07ff, out[byte]);
       }
     }
@@ -114,18 +114,18 @@ uint8 SA1::dma_cc1_read(unsigned addr) {
 //type-2 character conversion
 //===========================
 
-void SA1::dma_cc2() {
+auto SA1::dma_cc2() -> void {
   //select register file index (0-7 or 8-15)
-  const uint8 *brf = &mmio.brf[(dma.line & 1) << 3];
-  unsigned bpp = 2 << (2 - mmio.dmacb);
-  unsigned addr = mmio.dda & 0x07ff;
+  const uint8* brf = &mmio.brf[(dma.line & 1) << 3];
+  uint bpp = 2 << (2 - mmio.dmacb);
+  uint addr = mmio.dda & 0x07ff;
   addr &= ~((1 << (7 - mmio.dmacb)) - 1);
   addr += (dma.line & 8) * bpp;
   addr += (dma.line & 7) * 2;
 
-  for(unsigned byte = 0; byte < bpp; byte++) {
+  for(auto byte : range(bpp)) {
     uint8 output = 0;
-    for(unsigned bit = 0; bit < 8; bit++) {
+    for(auto bit : range(8)) {
       output |= ((brf[bit] >> byte) & 1) << (7 - bit);
     }
     iram.write(addr + ((byte & 6) << 3) + (byte & 1), output);

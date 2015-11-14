@@ -137,7 +137,7 @@ auto Cartridge::loadSatellaview() -> void {
   auto rom = document["cartridge/rom"];
 
   if(rom["name"]) {
-    unsigned size = rom["size"].decimal();
+    unsigned size = rom["size"].natural();
     satellaviewcartridge.memory.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SatellaviewROM, rom["name"].text(), true);
 
@@ -154,13 +154,13 @@ auto Cartridge::loadSufamiTurboA() -> void {
   auto ram = document["cartridge/ram"];
 
   if(rom["name"]) {
-    unsigned size = rom["size"].decimal();
+    unsigned size = rom["size"].natural();
     sufamiturboA.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotAROM, rom["name"].text(), true);
   }
 
   if(ram["name"]) {
-    unsigned size = ram["size"].decimal();
+    unsigned size = ram["size"].natural();
     sufamiturboA.ram.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotARAM, ram["name"].text(), false);
     memory.append({ID::SufamiTurboSlotARAM, ram["name"].text()});
@@ -180,13 +180,13 @@ auto Cartridge::loadSufamiTurboB() -> void {
   auto ram = document["cartridge/ram"];
 
   if(rom["name"]) {
-    unsigned size = rom["size"].decimal();
+    unsigned size = rom["size"].natural();
     sufamiturboB.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotBROM, rom["name"].text(), true);
   }
 
   if(ram["name"]) {
-    unsigned size = ram["size"].decimal();
+    unsigned size = ram["size"].natural();
     sufamiturboB.ram.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotBRAM, ram["name"].text(), false);
     memory.append({ID::SufamiTurboSlotBRAM, ram["name"].text()});

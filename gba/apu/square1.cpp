@@ -25,10 +25,10 @@ void APU::Square1::clocksweep() {
 uint8 APU::Square1::read(unsigned addr) const {
   switch(addr) {
   case 0: return (sweep.shift << 0) | (sweep.direction << 3) | (sweep.frequency << 4);
-  case 1: return (length << 0) | (duty << 6);
+  case 1: return (duty << 6);
   case 2: return (envelope.frequency << 0) | (envelope.direction << 3) | (envelope.volume << 4);
-  case 3: return (frequency << 0);
-  case 4: return (frequency >> 8) | (counter << 6) | (initialize << 7);
+  case 3: return 0;
+  case 4: return (counter << 6);
   }
 }
 

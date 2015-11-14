@@ -6,16 +6,16 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 HitachiDSP hitachidsp;
 
-void HitachiDSP::Enter() { hitachidsp.enter(); }
+auto HitachiDSP::Enter() -> void { hitachidsp.enter(); }
 
-void HitachiDSP::enter() {
+auto HitachiDSP::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
     if(mmio.dma) {
-      for(unsigned n = 0; n < mmio.dma_length; n++) {
+      for(auto n : range(mmio.dma_length)) {
         bus.write(mmio.dma_target + n, bus.read(mmio.dma_source + n));
         step(2);
       }
@@ -29,18 +29,18 @@ void HitachiDSP::enter() {
   }
 }
 
-void HitachiDSP::init() {
+auto HitachiDSP::init() -> void {
 }
 
-void HitachiDSP::load() {
+auto HitachiDSP::load() -> void {
 }
 
-void HitachiDSP::unload() {
+auto HitachiDSP::unload() -> void {
   rom.reset();
   ram.reset();
 }
 
-void HitachiDSP::power() {
+auto HitachiDSP::power() -> void {
   mmio.dma = false;
 
   mmio.dma_source = 0x000000;
@@ -56,7 +56,7 @@ void HitachiDSP::power() {
   mmio.r1f52 = 0x01;
 }
 
-void HitachiDSP::reset() {
+auto HitachiDSP::reset() -> void {
   create(HitachiDSP::Enter, Frequency);
   HG51B::power();
 }

@@ -1,35 +1,35 @@
 //ARMv3 (ARM60)
 
 struct ArmDSP : Processor::ARM, Coprocessor {
-  uint8* programROM;
-  uint8* dataROM;
-  uint8* programRAM;
-
   #include "registers.hpp"
-
-  static void Enter();
-  void enter();
-
-  void step(unsigned clocks) override;
-  void bus_idle() override;
-  uint32 bus_read(unsigned mode, uint32 addr) override;
-  void bus_write(unsigned mode, uint32 addr, uint32 word) override;
-
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
-
-  void init();
-  void load();
-  void unload();
-  void power();
-  void reset();
-  void arm_reset();
-
-  nall::vector<uint8> firmware();
-  void serialize(serializer&);
 
   ArmDSP();
   ~ArmDSP();
+
+  static auto Enter() -> void;
+  auto enter() -> void;
+
+  auto step(uint clocks) -> void override;
+  auto bus_idle() -> void override;
+  auto bus_read(uint mode, uint32 addr) -> uint32 override;
+  auto bus_write(uint mode, uint32 addr, uint32 word) -> void override;
+
+  auto mmio_read(uint addr) -> uint8;
+  auto mmio_write(uint addr, uint8 data) -> void;
+
+  auto init() -> void;
+  auto load() -> void;
+  auto unload() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+  auto resetARM() -> void;
+
+  auto firmware() const -> nall::vector<uint8>;
+  auto serialize(serializer&) -> void;
+
+  uint8* programROM;
+  uint8* dataROM;
+  uint8* programRAM;
 };
 
 extern ArmDSP armdsp;

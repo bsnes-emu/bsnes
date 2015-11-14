@@ -11,7 +11,7 @@ struct Bridge {
   bool ready;
   bool signal;
 
-  uint8 status() const {
+  auto status() const -> uint8 {
     return (ready << 7) | (cputoarm.ready << 3) | (signal << 2) | (armtocpu.ready << 0);
   }
 } bridge;

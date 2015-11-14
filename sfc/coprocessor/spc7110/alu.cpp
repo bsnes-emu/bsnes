@@ -1,4 +1,4 @@
-void SPC7110::alu_multiply() {
+auto SPC7110::alu_multiply() -> void {
   add_clocks(30);
 
   if(r482e & 1) {
@@ -6,7 +6,7 @@ void SPC7110::alu_multiply() {
     int16 r0 = (int16)(r4824 | r4825 << 8);
     int16 r1 = (int16)(r4820 | r4821 << 8);
 
-    signed result = r0 * r1;
+    int result = r0 * r1;
     r4828 = result;
     r4829 = result >> 8;
     r482a = result >> 16;
@@ -16,7 +16,7 @@ void SPC7110::alu_multiply() {
     uint16 r0 = (uint16)(r4824 | r4825 << 8);
     uint16 r1 = (uint16)(r4820 | r4821 << 8);
 
-    unsigned result = r0 * r1;
+    uint result = r0 * r1;
     r4828 = result;
     r4829 = result >> 8;
     r482a = result >> 16;
@@ -26,7 +26,7 @@ void SPC7110::alu_multiply() {
   r482f &= 0x7f;
 }
 
-void SPC7110::alu_divide() {
+auto SPC7110::alu_divide() -> void {
   add_clocks(40);
 
   if(r482e & 1) {
