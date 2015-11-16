@@ -1,16 +1,16 @@
-void APU::FIFO::read() {
+auto APU::FIFO::read() -> void {
   if(size == 0) return;
   size--;
   output = sample[rdoffset++];
 }
 
-void APU::FIFO::write(int8 byte) {
+auto APU::FIFO::write(int8 byte) -> void {
   if(size == 32) rdoffset++;
   else size++;
   sample[wroffset++] = byte;
 }
 
-void APU::FIFO::reset() {
+auto APU::FIFO::reset() -> void {
   for(auto& byte : sample) byte = 0;
   output = 0;
 
@@ -19,7 +19,7 @@ void APU::FIFO::reset() {
   size = 0;
 }
 
-void APU::FIFO::power() {
+auto APU::FIFO::power() -> void {
   reset();
 
   lenable = 0;

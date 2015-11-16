@@ -6,7 +6,7 @@ auto CPU::prefetch_sync(uint32 addr) -> void {
   prefetch.wait = bus_wait(Half | Nonsequential, prefetch.load);
 }
 
-auto CPU::prefetch_step(unsigned clocks) -> void {
+auto CPU::prefetch_step(uint clocks) -> void {
   step(clocks);
   if(!regs.wait.control.prefetch || active.dma) return;
 

@@ -1,9 +1,9 @@
-void APU::Square1::runsweep(bool update) {
-  if(sweep.enable == false) return;
+auto APU::Square1::runsweep(bool update) -> void {
+  if(!sweep.enable) return;
 
   sweep.negate = sweep.direction;
-  unsigned delta = shadowfrequency >> sweep.shift;
-  signed updatefrequency = shadowfrequency + (sweep.negate ? -delta : delta);
+  uint delta = shadowfrequency >> sweep.shift;
+  int updatefrequency = shadowfrequency + (sweep.negate ? -delta : delta);
 
   if(updatefrequency > 2047) {
     enable = false;
@@ -14,7 +14,7 @@ void APU::Square1::runsweep(bool update) {
   }
 }
 
-void APU::Square1::clocksweep() {
+auto APU::Square1::clocksweep() -> void {
   if(enable && sweep.frequency && --sweep.period == 0) {
     sweep.period = sweep.frequency;
     runsweep(1);
@@ -22,7 +22,7 @@ void APU::Square1::clocksweep() {
   }
 }
 
-uint8 APU::Square1::read(unsigned addr) const {
+auto APU::Square1::read(uint addr) const -> uint8 {
   switch(addr) {
   case 0: return (sweep.shift << 0) | (sweep.direction << 3) | (sweep.frequency << 4);
   case 1: return (duty << 6);
@@ -32,7 +32,7 @@ uint8 APU::Square1::read(unsigned addr) const {
   }
 }
 
-void APU::Square1::write(unsigned addr, uint8 byte) {
+auto APU::Square1::write(uint addr, uint8 byte) -> void {
   switch(addr) {
   case 0:  //NR10
     if(sweep.negate && sweep.direction && !(byte & 0x08)) enable = false;
@@ -50,7 +50,7 @@ void APU::Square1::write(unsigned addr, uint8 byte) {
     envelope.frequency = byte >> 0;
     envelope.direction = byte >> 3;
     envelope.volume    = byte >> 4;
-    if(envelope.dacenable() == false) enable = false;
+    if(!envelope.dacEnable()) enable = false;
     break;
 
   case 3:  //NR13
@@ -63,7 +63,7 @@ void APU::Square1::write(unsigned addr, uint8 byte) {
     initialize = byte >> 7;
 
     if(initialize) {
-      enable = envelope.dacenable();
+      enable = envelope.dacEnable();
       period = 2 * (2048 - frequency);
       envelope.period = envelope.frequency;
       volume = envelope.volume;
@@ -78,7 +78,7 @@ void APU::Square1::write(unsigned addr, uint8 byte) {
   }
 }
 
-void APU::Square1::power() {
+auto APU::Square1::power() -> void {
   envelope.frequency = 0;
   envelope.direction = 0;
   envelope.direction = 0;

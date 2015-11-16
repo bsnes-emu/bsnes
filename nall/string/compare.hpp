@@ -3,25 +3,25 @@
 namespace nall {
 
 template<bool Insensitive>
-auto string::_compare(const char* target, unsigned capacity, const char* source, unsigned size) -> signed {
+auto string::_compare(const char* target, uint capacity, const char* source, uint size) -> signed {
   if(Insensitive) return memory::icompare(target, capacity, source, size);
   return memory::compare(target, capacity, source, size);
 }
 
 //size() + 1 includes null-terminator; required to properly compare strings of differing lengths
-auto string::compare(rstring x, rstring y) -> signed {
+auto string::compare(rstring x, rstring y) -> int {
   return memory::compare(x.data(), x.size() + 1, y.data(), y.size() + 1);
 }
 
-auto string::icompare(rstring x, rstring y) -> signed {
+auto string::icompare(rstring x, rstring y) -> int {
   return memory::icompare(x.data(), x.size() + 1, y.data(), y.size() + 1);
 }
 
-auto string::compare(rstring source) const -> signed {
+auto string::compare(rstring source) const -> int {
   return memory::compare(data(), size() + 1, source.data(), source.size() + 1);
 }
 
-auto string::icompare(rstring source) const -> signed {
+auto string::icompare(rstring source) const -> int {
   return memory::icompare(data(), size() + 1, source.data(), source.size() + 1);
 }
 

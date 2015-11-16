@@ -4,11 +4,11 @@ struct Registers {
     uint2 amplitude;
 
     operator uint16() const;
-    uint16 operator=(uint16 source);
-    SoundBias& operator=(const SoundBias&) = delete;
+    auto operator=(uint16 source) -> uint16;
+    auto operator=(const SoundBias&) -> SoundBias& = delete;
   } bias;
 
-  unsigned clock;
+  uint clock;
 } regs;
 
 struct Sweep {
@@ -28,7 +28,7 @@ struct Envelope {
 
   uint3 period;
 
-  inline bool dacenable() const { return volume || direction; }
+  auto dacEnable() const -> bool { return volume || direction; }
 };
 
 struct Square {
@@ -40,32 +40,32 @@ struct Square {
   uint1 counter;
   uint1 initialize;
 
-  signed shadowfrequency;
+  int shadowfrequency;
   uint1 signal;
   uint4 output;
-  unsigned period;
+  uint period;
   uint3 phase;
   uint4 volume;
 
-  void run();
-  void clocklength();
-  void clockenvelope();
+  auto run() -> void;
+  auto clocklength() -> void;
+  auto clockenvelope() -> void;
 };
 
 struct Square1 : Square {
   Sweep sweep;
 
-  void runsweep(bool update);
-  void clocksweep();
-  uint8 read(unsigned addr) const;
-  void write(unsigned addr, uint8 byte);
-  void power();
+  auto runsweep(bool update) -> void;
+  auto clocksweep() -> void;
+  auto read(uint addr) const -> uint8;
+  auto write(uint addr, uint8 byte) -> void;
+  auto power() -> void;
 } square1;
 
 struct Square2 : Square {
-  uint8 read(unsigned addr) const;
-  void write(unsigned addr, uint8 byte);
-  void power();
+  auto read(uint addr) const -> uint8;
+  auto write(uint addr, uint8 byte) -> void;
+  auto power() -> void;
 } square2;
 
 struct Wave {
@@ -84,15 +84,15 @@ struct Wave {
   uint4 patternaddr;
   uint1 patternbank;
   uint4 patternsample;
-  unsigned period;
+  uint period;
 
-  void run();
-  void clocklength();
-  uint8 read(unsigned addr) const;
-  void write(unsigned addr, uint8 byte);
-  uint8 readram(unsigned addr) const;
-  void writeram(unsigned addr, uint8 byte);
-  void power();
+  auto run() -> void;
+  auto clocklength() -> void;
+  auto read(uint addr) const -> uint8;
+  auto write(uint addr, uint8 byte) -> void;
+  auto readram(uint addr) const -> uint8;
+  auto writeram(uint addr, uint8 byte) -> void;
+  auto power() -> void;
 } wave;
 
 struct Noise {
@@ -107,16 +107,16 @@ struct Noise {
   uint1 enable;
   uint15 lfsr;
   uint4 output;
-  unsigned period;
+  uint period;
   uint4 volume;
 
-  unsigned divider() const;
-  void run();
-  void clocklength();
-  void clockenvelope();
-  uint8 read(unsigned addr) const;
-  void write(unsigned addr, uint8 byte);
-  void power();
+  auto divider() const -> uint;
+  auto run() -> void;
+  auto clocklength() -> void;
+  auto clockenvelope() -> void;
+  auto read(uint addr) const -> uint8;
+  auto write(uint addr, uint8 byte) -> void;
+  auto power() -> void;
 } noise;
 
 struct Sequencer {
@@ -133,9 +133,9 @@ struct Sequencer {
   int16 lsample;
   int16 rsample;
 
-  uint8 read(unsigned addr) const;
-  void write(unsigned addr, uint8 byte);
-  void power();
+  auto read(uint addr) const -> uint8;
+  auto write(uint addr, uint8 byte) -> void;
+  auto power() -> void;
 } sequencer;
 
 struct FIFO {
@@ -151,8 +151,8 @@ struct FIFO {
   uint1 renable;
   uint1 timer;
 
-  void read();
-  void write(int8 byte);
-  void reset();
-  void power();
+  auto read() -> void;
+  auto write(int8 byte) -> void;
+  auto reset() -> void;
+  auto power() -> void;
 } fifo[2];

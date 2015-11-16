@@ -22,7 +22,20 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 PPU ppu;
 
-void PPU::Enter() {
+PPU::PPU() {
+  output = new uint32[240 * 160];
+
+  regs.bg[0].id = BG0;
+  regs.bg[1].id = BG1;
+  regs.bg[2].id = BG2;
+  regs.bg[3].id = BG3;
+}
+
+PPU::~PPU() {
+  delete[] output;
+}
+
+auto PPU::Enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -32,22 +45,22 @@ void PPU::Enter() {
   }
 }
 
-void PPU::main() {
+auto PPU::main() -> void {
   scanline();
 }
 
-void PPU::step(unsigned clocks) {
+auto PPU::step(uint clocks) -> void {
   clock += clocks;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
-void PPU::power() {
+auto PPU::power() -> void {
   create(PPU::Enter, 16777216);
 
-  for(unsigned n = 0; n < 240 * 160; n++) output[n] = 0;
+  for(uint n = 0; n < 240 * 160; n++) output[n] = 0;
 
-  for(unsigned n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
-  for(unsigned n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
+  for(uint n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
+  for(uint n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
 
   regs.control = 0;
   regs.greenswap = 0;
@@ -84,10 +97,10 @@ void PPU::power() {
   regs.blend.evb = 0;
   regs.blend.evy = 0;
 
-  for(unsigned n = 0x000; n <= 0x055; n++) bus.mmio[n] = this;
+  for(uint n = 0x000; n <= 0x055; n++) bus.mmio[n] = this;
 }
 
-void PPU::scanline() {
+auto PPU::scanline() -> void {
   cpu.keypad_run();
 
   regs.status.vblank = regs.vcounter >= 160 && regs.vcounter <= 226;
@@ -116,7 +129,7 @@ void PPU::scanline() {
     if(regs.control.forceblank || cpu.regs.mode == CPU::Registers::Mode::Stop) {
       render_forceblank();
     } else {
-      for(unsigned x = 0; x < 240; x++) {
+      for(auto x : range(240)) {
         windowmask[0][x] = false;
         windowmask[1][x] = false;
         windowmask[2][x] = false;
@@ -148,22 +161,9 @@ void PPU::scanline() {
   if(++regs.vcounter == 228) regs.vcounter = 0;
 }
 
-void PPU::frame() {
+auto PPU::frame() -> void {
   player.frame();
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
-}
-
-PPU::PPU() {
-  output = new uint32[240 * 160];
-
-  regs.bg[0].id = BG0;
-  regs.bg[1].id = BG1;
-  regs.bg[2].id = BG2;
-  regs.bg[3].id = BG3;
-}
-
-PPU::~PPU() {
-  delete[] output;
 }
 
 }

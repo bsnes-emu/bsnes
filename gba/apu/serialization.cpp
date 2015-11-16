@@ -1,4 +1,4 @@
-void APU::serialize(serializer& s) {
+auto APU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.integer(regs.bias.level);

@@ -20,13 +20,13 @@ template<typename T> struct stringify;
 
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
-inline auto integer(intmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto decimal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto integer(intmax value, long precision = 0, char padchar = '0') -> string;
+inline auto decimal(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
 template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
-inline auto pointer(uintptr_t value, long precision = 0) -> string;
+inline auto pointer(uintptr value, long precision = 0) -> string;
 inline auto real(long double value) -> string;
 
 //hash.hpp
@@ -58,11 +58,11 @@ inline auto sharedpath() -> string;
 inline auto temppath() -> string;
 
 //utility.hpp
-inline auto slice(rstring self, signed offset = 0, signed length = -1) -> string;
+inline auto slice(rstring self, int offset = 0, int length = -1) -> string;
 
-inline auto integer(char* result, intmax_t value) -> char*;
-inline auto decimal(char* result, uintmax_t value) -> char*;
-inline auto real(char* str, long double value) -> unsigned;
+inline auto integer(char* result, intmax value) -> char*;
+inline auto decimal(char* result, uintmax value) -> char*;
+inline auto real(char* str, long double value) -> uint;
 
 struct string {
   using type = string;
@@ -70,11 +70,11 @@ struct string {
 
 protected:
   #if defined(NALL_STRING_ALLOCATOR_ADAPTIVE)
-  enum : unsigned { SSO = 24 };
+  enum : uint { SSO = 24 };
   union {
     struct {  //copy-on-write
       char* _data;
-      unsigned* _refs;
+      uint* _refs;
     };
     struct {  //small-string-optimization
       char _text[SSO];
@@ -87,13 +87,13 @@ protected:
 
   #if defined(NALL_STRING_ALLOCATOR_COPY_ON_WRITE)
   char* _data;
-  mutable unsigned* _refs;
+  mutable uint* _refs;
   inline auto _allocate() -> char*;
   inline auto _copy() -> char*;
   #endif
 
   #if defined(NALL_STRING_ALLOCATOR_SMALL_STRING_OPTIMIZATION)
-  enum : unsigned { SSO = 24 };
+  enum : uint { SSO = 24 };
   union {
     char* _data;
     char _text[SSO];
@@ -104,16 +104,16 @@ protected:
   char* _data;
   #endif
 
-  unsigned _capacity;
-  unsigned _size;
+  uint _capacity;
+  uint _size;
 
 public:
   inline string();
   inline auto get() -> char*;
   inline auto data() const -> const char*;
   inline auto reset() -> type&;
-  inline auto reserve(unsigned) -> type&;
-  inline auto resize(unsigned) -> type&;
+  inline auto reserve(uint) -> type&;
+  inline auto resize(uint) -> type&;
   inline auto operator=(const string&) -> type&;
   inline auto operator=(string&&) -> type&;
 
@@ -125,8 +125,8 @@ public:
   operator const char*() const { return (const char*)data(); }
 
   auto binary() const -> const uint8_t* { return (const uint8_t*)data(); }
-  auto size() const -> unsigned { return _size; }
-  auto capacity() const -> unsigned { return _capacity; }
+  auto size() const -> uint { return _size; }
+  auto capacity() const -> uint { return _capacity; }
 
   auto operator==(const string& source) const -> bool { return size() == source.size() && memory::compare(data(), source.data(), size()) == 0; }
   auto operator!=(const string& source) const -> bool { return size() != source.size() || memory::compare(data(), source.data(), size()) != 0; }
@@ -155,14 +155,14 @@ public:
   inline auto real() const -> double;
 
   //core.hpp
-  inline auto operator[](signed) const -> const char&;
+  inline auto operator[](int) const -> const char&;
   template<typename... P> inline auto assign(P&&...) -> type&;
   template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
   template<typename... P> inline auto append(const nall::format&, P&&...) -> type&;
   inline auto append() -> type&;
   template<typename T> inline auto _append(const stringify<T>&) -> string&;
   inline auto empty() const -> bool;
-  inline auto length() const -> unsigned;
+  inline auto length() const -> uint;
 
   //datetime.hpp
   inline static auto date(time_t = 0) -> string;
@@ -170,21 +170,21 @@ public:
   inline static auto datetime(time_t = 0) -> string;
 
   //find.hpp
-  template<bool, bool> inline auto _find(signed, rstring) const -> maybe<unsigned>;
+  template<bool, bool> inline auto _find(int, rstring) const -> maybe<uint>;
 
   inline auto find(rstring source) const -> maybe<unsigned>;
   inline auto ifind(rstring source) const -> maybe<unsigned>;
   inline auto qfind(rstring source) const -> maybe<unsigned>;
   inline auto iqfind(rstring source) const -> maybe<unsigned>;
 
-  inline auto findFrom(signed offset, rstring source) const -> maybe<unsigned>;
-  inline auto ifindFrom(signed offset, rstring source) const -> maybe<unsigned>;
+  inline auto findFrom(int offset, rstring source) const -> maybe<uint>;
+  inline auto ifindFrom(int offset, rstring source) const -> maybe<uint>;
 
   //format.hpp
   inline auto format(const nall::format& params) -> type&;
 
   //compare.hpp
-  template<bool> inline static auto _compare(const char*, unsigned, const char*, unsigned) -> signed;
+  template<bool> inline static auto _compare(const char*, uint, const char*, uint) -> signed;
 
   inline static auto compare(rstring, rstring) -> signed;
   inline static auto icompare(rstring, rstring) -> signed;
@@ -242,12 +242,12 @@ public:
 
   //utility.hpp
   inline static auto read(rstring filename) -> string;
-  inline static auto repeat(rstring pattern, unsigned times) -> string;
+  inline static auto repeat(rstring pattern, uint times) -> string;
   inline auto fill(char fill = ' ') -> type&;
-  inline auto hash() const -> unsigned;
-  inline auto remove(unsigned offset, unsigned length) -> type&;
+  inline auto hash() const -> uint;
+  inline auto remove(uint offset, uint length) -> type&;
   inline auto reverse() -> type&;
-  inline auto size(signed length, char fill = ' ') -> type&;
+  inline auto size(int length, char fill = ' ') -> type&;
 };
 
 struct lstring : vector<string> {
@@ -255,7 +255,7 @@ struct lstring : vector<string> {
 
   lstring(const lstring& source) { vector::operator=(source); }
   lstring(lstring& source) { vector::operator=(source); }
-  lstring(lstring&& source) { vector::operator=(std::move(source)); }
+  lstring(lstring&& source) { vector::operator=(move(source)); }
   template<typename... P> lstring(P&&... p) { append(forward<P>(p)...); }
 
   //list.hpp
@@ -264,15 +264,15 @@ struct lstring : vector<string> {
 
   inline auto operator=(const lstring& source) -> type& { return vector::operator=(source), *this; }
   inline auto operator=(lstring& source) -> type& { return vector::operator=(source), *this; }
-  inline auto operator=(lstring&& source) -> type& { return vector::operator=(std::move(source)), *this; }
+  inline auto operator=(lstring&& source) -> type& { return vector::operator=(move(source)), *this; }
 
   inline auto isort() -> type&;
 
   template<typename... P> inline auto append(const string&, P&&...) -> type&;
   inline auto append() -> type&;
 
-  inline auto find(rstring source) const -> maybe<unsigned>;
-  inline auto ifind(rstring source) const -> maybe<unsigned>;
+  inline auto find(rstring source) const -> maybe<uint>;
+  inline auto ifind(rstring source) const -> maybe<uint>;
   inline auto match(rstring pattern) const -> lstring;
   inline auto merge(rstring separator) const -> string;
   inline auto strip() -> type&;

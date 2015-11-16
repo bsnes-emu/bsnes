@@ -1,4 +1,4 @@
-auto PPU::vram_read(unsigned mode, uint32 addr) -> uint32 {
+auto PPU::vram_read(uint mode, uint32 addr) -> uint32 {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
   if(mode & Word) {
@@ -14,7 +14,7 @@ auto PPU::vram_read(unsigned mode, uint32 addr) -> uint32 {
   return 0;  //should never occur
 }
 
-auto PPU::vram_write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto PPU::vram_write(uint mode, uint32 addr, uint32 word) -> void {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
   if(mode & Word) {
@@ -38,13 +38,13 @@ auto PPU::vram_write(unsigned mode, uint32 addr, uint32 word) -> void {
   }
 }
 
-auto PPU::pram_read(unsigned mode, uint32 addr) -> uint32 {
+auto PPU::pram_read(uint mode, uint32 addr) -> uint32 {
   if(mode & Word) return pram_read(Half, addr & ~2) << 0 | pram_read(Half, addr | 2) << 16;
   if(mode & Byte) return pram_read(Half, addr) >> ((addr & 1) * 8);
   return pram[addr >> 1 & 511];
 }
 
-auto PPU::pram_write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto PPU::pram_write(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Word) {
     pram_write(Half, addr & ~2, word >>  0);
     pram_write(Half, addr |  2, word >> 16);
@@ -59,7 +59,7 @@ auto PPU::pram_write(unsigned mode, uint32 addr, uint32 word) -> void {
   pram[addr >> 1 & 511] = (uint16)word;
 }
 
-auto PPU::oam_read(unsigned mode, uint32 addr) -> uint32 {
+auto PPU::oam_read(uint mode, uint32 addr) -> uint32 {
   if(mode & Word) return oam_read(Half, addr & ~2) << 0 | oam_read(Half, addr | 2) << 16;
   if(mode & Byte) return oam_read(Half, addr) >> ((addr & 1) * 8);
 
@@ -103,7 +103,7 @@ auto PPU::oam_read(unsigned mode, uint32 addr) -> uint32 {
   }
 }
 
-auto PPU::oam_write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto PPU::oam_write(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Word) {
     oam_write(Half, addr & ~2, word >>  0);
     oam_write(Half, addr |  2, word >> 16);

@@ -1,76 +1,49 @@
 #include "../tomoko.hpp"
-ConfigurationManager* config = nullptr;
-EmulatorSettings* emulatorSettings = nullptr;
+Settings settings;
 
-ConfigurationManager::ConfigurationManager() {
-  config = this;
+Settings::Settings() {
+  Markup::Node::operator=(BML::unserialize(string::read(locate({configpath(), "tomoko/"}, "settings.bml"))));
 
-  userInterface.append(userInterface.showStatusBar, "ShowStatusBar");
-  append(userInterface, "UserInterface");
+  auto set = [&](const string& name, const string& value) {
+    //create node and set to default value only if it does not already exist
+    if(!operator[](name)) operator()(name).setValue(value);
+  };
 
-  library.append(library.location, "Location");
-  append(library, "Library");
+  set("UserInterface/ShowStatusBar", true);
 
-  video.append(video.driver, "Driver");
-  video.append(video.synchronize, "Synchronize");
-  video.append(video.scale, "Scale");
-  video.append(video.aspectCorrection, "AspectCorrection");
-  video.append(video.filter, "Filter");
-  video.append(video.shader, "Shader");
-  video.append(video.colorEmulation, "ColorEmulation");
-  video.append(video.saturation, "Saturation");
-  video.append(video.gamma, "Gamma");
-  video.append(video.luminance, "Luminance");
-  video.overscan.append(video.overscan.mask, "Mask");
-  video.overscan.append(video.overscan.horizontal, "Horizontal");
-  video.overscan.append(video.overscan.vertical, "Vertical");
-  video.append(video.overscan, "Overscan");
-  append(video, "Video");
+  set("Library/Location", {userpath(), "Emulation/"});
+  set("Library/IgnoreManifests", false);
 
-  audio.append(audio.driver, "Driver");
-  audio.append(audio.device, "Device");
-  audio.append(audio.synchronize, "Synchronize");
-  audio.append(audio.mute, "Mute");
-  audio.append(audio.volume, "Volume");
-  audio.append(audio.frequency, "Frequency");
-  audio.append(audio.latency, "Latency");
-  audio.append(audio.resampler, "Resampler");
-  append(audio, "Audio");
+  set("Video/Driver", ruby::Video::optimalDriver());
+  set("Video/Synchronize", false);
+  set("Video/Scale", "Small");
+  set("Video/AspectCorrection", true);
+  set("Video/Filter", "Blur");
+  set("Video/Shader", "None");
+  set("Video/ColorEmulation", true);
+  set("Video/Saturation", 100);
+  set("Video/Gamma", 100);
+  set("Video/Luminance", 100);
 
-  input.append(input.driver, "Driver");
-  append(input, "Input");
+  set("Video/Overscan/Mask", false);
+  set("Video/Overscan/Horizontal", 8);
+  set("Video/Overscan/Vertical", 8);
 
-  timing.append(timing.video, "Video");
-  timing.append(timing.audio, "Audio");
-  append(timing, "Timing");
+  set("Audio/Driver", ruby::Audio::optimalDriver());
+  set("Audio/Device", "");
+  set("Audio/Synchronize", true);
+  set("Audio/Mute", false);
+  set("Audio/Volume", 100);
+  set("Audio/Frequency", 48000);
+  set("Audio/Latency", 60);
+  set("Audio/Resampler", "Sinc");
 
-  load(locate({configpath(), "tomoko/"}, "settings.bml"));
-  if(!library.location) library.location = {userpath(), "Emulation/"};
-  if(!video.driver) video.driver = ruby::Video::safestDriver();
-  if(!audio.driver) audio.driver = ruby::Audio::safestDriver();
-  if(!input.driver) input.driver = ruby::Input::safestDriver();
-  save(locate({configpath(), "tomoko/"}, "settings.bml"));
+  set("Input/Driver", ruby::Input::optimalDriver());
+
+  set("Timing/Video", 60.0);
+  set("Timing/Audio", 48000.0);
 }
 
-auto ConfigurationManager::quit() -> void {
-  save(locate({configpath(), "tomoko/"}, "settings.bml"));
-}
-
-EmulatorSettings::EmulatorSettings() {
-  emulatorSettings = this;
-  (Markup::Node&)*this = BML::unserialize(string::read(locate({configpath(), "tomoko/"}, "emulators.bml")));
-}
-
-auto EmulatorSettings::quit() -> void {
-  file::write(locate({configpath(), "tomoko/"}, "emulators.bml"), BML::serialize(*this));
-}
-
-auto EmulatorSettings::get(string name) -> string {
-  name.replace(" ", "");
-  return (*this)(name).text();
-}
-
-auto EmulatorSettings::set(string name, string value) -> void {
-  name.replace(" ", "");
-  (*this)(name).setValue(value);
+auto Settings::quit() -> void {
+  file::write(locate({configpath(), "tomoko/"}, "settings.bml"), BML::serialize(*this));
 }

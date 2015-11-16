@@ -40,7 +40,7 @@ struct serial {
   }
 
   //-1 on error, otherwise return bytes read
-  auto read(uint8_t* data, unsigned length) -> int {
+  auto read(uint8_t* data, uint length) -> int {
     if(port_open == false) return -1;
     return ::read(port, (void*)data, length);
   }
@@ -59,12 +59,12 @@ struct serial {
   }
 
   //-1 on error, otherwise return bytes written
-  auto write(const uint8_t* data, unsigned length) -> int {
+  auto write(const uint8_t* data, uint length) -> int {
     if(port_open == false) return -1;
     return ::write(port, (void*)data, length);
   }
 
-  auto open(const string& portname, unsigned rate, bool flowcontrol) -> bool {
+  auto open(const string& portname, uint rate, bool flowcontrol) -> bool {
     close();
 
     port = ::open(portname, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);

@@ -43,7 +43,7 @@ protected:
   }
 
   //copy part of string from source document into target string; decode markup while copying
-  inline void copy(string& target, const char* source, unsigned length) {
+  inline void copy(string& target, const char* source, uint length) {
     target.reserve(length + 1);
 
     #if defined(NALL_XML_LITERAL)
@@ -106,7 +106,7 @@ protected:
 
     //DOCTYPE
     if(!memory::compare(p, "<!DOCTYPE", 9)) {
-      unsigned counter = 0;
+      uint counter = 0;
       do {
         char n = *p++;
         if(!n) throw "unclosed DOCTYPE";

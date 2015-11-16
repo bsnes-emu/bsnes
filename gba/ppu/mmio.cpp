@@ -1,4 +1,4 @@
-uint8 PPU::read(uint32 addr) {
+auto PPU::read(uint32 addr) -> uint8 {
   switch(addr) {
 
   //DISPCNT
@@ -48,7 +48,7 @@ uint8 PPU::read(uint32 addr) {
   return 0u;
 }
 
-void PPU::write(uint32 addr, uint8 byte) {
+auto PPU::write(uint32 addr, uint8 byte) -> void {
   switch(addr) {
 
   //DISPCNT

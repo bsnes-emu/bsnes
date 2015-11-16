@@ -3,32 +3,32 @@
 namespace nall {
 namespace Eval {
 
-inline bool whitespace(char n) {
+inline auto whitespace(char n) -> bool {
   return n == ' ' || n == '\t' || n == '\r' || n == '\n';
 }
 
-inline void parse(Node*& node, const char*& s, unsigned depth) {
-  auto unaryPrefix = [&](Node::Type type, unsigned seek, unsigned depth) {
+inline auto parse(Node*& node, const char*& s, uint depth) -> void {
+  auto unaryPrefix = [&](Node::Type type, uint seek, uint depth) {
     auto parent = new Node(type);
     parse(parent->link(0) = new Node, s += seek, depth);
     node = parent;
   };
 
-  auto unarySuffix = [&](Node::Type type, unsigned seek, unsigned depth) {
+  auto unarySuffix = [&](Node::Type type, uint seek, uint depth) {
     auto parent = new Node(type);
     parent->link(0) = node;
     parse(parent, s += seek, depth);
     node = parent;
   };
 
-  auto binary = [&](Node::Type type, unsigned seek, unsigned depth) {
+  auto binary = [&](Node::Type type, uint seek, uint depth) {
     auto parent = new Node(type);
     parent->link(0) = node;
     parse(parent->link(1) = new Node, s += seek, depth);
     node = parent;
   };
 
-  auto ternary = [&](Node::Type type, unsigned seek, unsigned depth) {
+  auto ternary = [&](Node::Type type, uint seek, uint depth) {
     auto parent = new Node(type);
     parent->link(0) = node;
     parse(parent->link(1) = new Node, s += seek, depth);
@@ -37,9 +37,9 @@ inline void parse(Node*& node, const char*& s, unsigned depth) {
     node = parent;
   };
 
-  auto separator = [&](Node::Type type, unsigned seek, unsigned depth) {
+  auto separator = [&](Node::Type type, uint seek, uint depth) {
     if(node->type != Node::Type::Separator) return binary(type, seek, depth);
-    unsigned n = node->link.size();
+    uint n = node->link.size();
     parse(node->link(n) = new Node, s += seek, depth);
   };
 
@@ -155,7 +155,7 @@ inline void parse(Node*& node, const char*& s, unsigned depth) {
   #undef p
 }
 
-inline Node* parse(const string& expression) {
+inline auto parse(const string& expression) -> Node* {
   auto result = new Node;
   const char* p = expression;
   parse(result, p, 0);

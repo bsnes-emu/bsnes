@@ -4,7 +4,7 @@ namespace nall {
 namespace Eval {
 
 struct Node {
-  enum class Type : unsigned {
+  enum class Type : uint {
     Null,
     Literal,
     Function, Subscript, Member, SuffixIncrement, SuffixDecrement,

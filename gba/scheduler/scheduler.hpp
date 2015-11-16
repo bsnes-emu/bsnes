@@ -1,16 +1,15 @@
 struct Scheduler : property<Scheduler> {
-  enum class SynchronizeMode : unsigned { None, CPU, All } sync;
-  enum class ExitReason : unsigned { UnknownEvent, FrameEvent, SynchronizeEvent };
+  enum class SynchronizeMode : uint { None, CPU, All } sync;
+  enum class ExitReason : uint { UnknownEvent, FrameEvent, SynchronizeEvent };
   readonly<ExitReason> exit_reason;
 
   cothread_t host;
   cothread_t active;
 
-  void enter();
-  void exit(ExitReason);
-
-  void power();
   Scheduler();
+  auto enter() -> void;
+  auto exit(ExitReason) -> void;
+  auto power() -> void;
 };
 
 extern Scheduler scheduler;

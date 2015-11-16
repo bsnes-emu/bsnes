@@ -6,36 +6,41 @@ AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   driverLabel.setText("Driver Selection").setFont(Font().setBold());
   videoLabel.setText("Video:");
-  videoDriver.onChange([&] { config->video.driver = videoDriver.selected()->text(); });
+  videoDriver.onChange([&] { settings["Video/Driver"].setValue(videoDriver.selected().text()); });
   for(auto& driver : Video::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
     videoDriver.append(item);
-    if(config->video.driver == driver) item.setSelected();
+    if(settings["Video/Driver"].text() == driver) item.setSelected();
   }
   audioLabel.setText("Audio:");
-  audioDriver.onChange([&] { config->audio.driver = audioDriver.selected()->text(); });
+  audioDriver.onChange([&] { settings["Audio/Driver"].setValue(audioDriver.selected().text()); });
   for(auto& driver : Audio::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
     audioDriver.append(item);
-    if(config->audio.driver == driver) item.setSelected();
+    if(settings["Audio/Driver"].text() == driver) item.setSelected();
   }
   inputLabel.setText("Input:");
-  inputDriver.onChange([&] { config->input.driver = inputDriver.selected()->text(); });
+  inputDriver.onChange([&] { settings["Input/Driver"].setValue(inputDriver.selected().text()); });
   for(auto& driver : Input::availableDrivers()) {
     ComboButtonItem item;
     item.setText(driver);
     inputDriver.append(item);
-    if(config->input.driver == driver) item.setSelected();
+    if(settings["Input/Driver"].text() == driver) item.setSelected();
   }
 
   libraryLabel.setText("Game Library").setFont(Font().setBold());
   libraryPrefix.setText("Location:");
-  libraryLocation.setEditable(false).setText(config->library.location);
+  libraryLocation.setEditable(false).setText(settings["Library/Location"].text());
   libraryChange.setText("Change ...").onActivate([&] {
     if(auto location = BrowserDialog().setTitle("Select Library Location").selectFolder()) {
-      libraryLocation.setText(config->library.location = location);
+      settings["Library/Location"].setValue(location);
+      libraryLocation.setText(location);
     }
+  });
+
+  ignoreManifests.setText("Ignore Manifests").setChecked(settings["Library/IgnoreManifests"].boolean()).onToggle([&] {
+    settings["Library/IgnoreManifests"].setValue(ignoreManifests.checked());
   });
 }

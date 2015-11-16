@@ -14,7 +14,7 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 APU apu;
 
-void APU::Enter() {
+auto APU::Enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -24,23 +24,23 @@ void APU::Enter() {
   }
 }
 
-void APU::main() {
-  for(unsigned n = 0; n < 64; n++) {
+auto APU::main() -> void {
+  for(auto n : range(64)) {
     runsequencer();
   }
 
-  signed lsample = regs.bias.level - 0x0200;
-  signed rsample = regs.bias.level - 0x0200;
+  int lsample = regs.bias.level - 0x0200;
+  int rsample = regs.bias.level - 0x0200;
 
   //(4-bit x 4 -> 6-bit) + 3-bit volume = 9-bit output
   if(sequencer.masterenable) {
-    signed lsequence = 0;
+    int lsequence = 0;
     if(sequencer.lenable[0]) lsequence += square1.output;
     if(sequencer.lenable[1]) lsequence += square2.output;
     if(sequencer.lenable[2]) lsequence +=    wave.output;
     if(sequencer.lenable[3]) lsequence +=   noise.output;
 
-    signed rsequence = 0;
+    int rsequence = 0;
     if(sequencer.renable[0]) rsequence += square1.output;
     if(sequencer.renable[1]) rsequence += square2.output;
     if(sequencer.renable[2]) rsequence +=    wave.output;
@@ -53,8 +53,8 @@ void APU::main() {
   }
 
   //(8-bit x 2 -> 7-bit) + 1-bit volume = 10-bit output
-  signed fifo0 = fifo[0].output + (1 << fifo[0].volume);
-  signed fifo1 = fifo[1].output + (1 << fifo[1].volume);
+  int fifo0 = fifo[0].output + (1 << fifo[0].volume);
+  int fifo1 = fifo[1].output + (1 << fifo[1].volume);
 
   if(fifo[0].lenable) lsample += fifo0;
   if(fifo[1].lenable) lsample += fifo1;
@@ -74,12 +74,12 @@ void APU::main() {
   step(512);
 }
 
-void APU::step(unsigned clocks) {
+auto APU::step(uint clocks) -> void {
   clock += clocks;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
-void APU::power() {
+auto APU::power() -> void {
   create(APU::Enter, 16777216);
 
   square1.power();
@@ -92,7 +92,7 @@ void APU::power() {
 
   regs.bias = 0x0200;
 
-  for(unsigned n = 0x060; n <= 0x0a7; n++) bus.mmio[n] = this;
+  for(uint n = 0x060; n <= 0x0a7; n++) bus.mmio[n] = this;
 }
 
 }

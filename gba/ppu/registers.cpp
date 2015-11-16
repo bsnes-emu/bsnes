@@ -17,7 +17,7 @@ PPU::Registers::Control::operator uint16() const {
   );
 }
 
-uint16 PPU::Registers::Control::operator=(uint16 source) {
+auto PPU::Registers::Control::operator=(uint16 source) -> uint16 {
   bgmode            = source >>  0;
   cgbmode           = source >>  3;
   frame             = source >>  4;
@@ -47,7 +47,7 @@ PPU::Registers::Status::operator uint16() const {
   );
 }
 
-uint16 PPU::Registers::Status::operator=(uint16 source) {
+auto PPU::Registers::Status::operator=(uint16 source) -> uint16 {
   vblank          = source >> 0;
   hblank          = source >> 1;
   vcoincidence    = source >> 2;
@@ -71,7 +71,7 @@ PPU::Registers::BackgroundControl::operator uint16() const {
   );
 }
 
-uint16 PPU::Registers::BackgroundControl::operator=(uint16 source) {
+auto PPU::Registers::BackgroundControl::operator=(uint16 source) -> uint16 {
   priority           = source >>  0;
   characterbaseblock = source >>  2;
   unused             = source >>  4;
@@ -94,7 +94,7 @@ PPU::Registers::WindowFlags::operator uint8() const {
   );
 }
 
-uint8 PPU::Registers::WindowFlags::operator=(uint8 source) {
+auto PPU::Registers::WindowFlags::operator=(uint8 source) -> uint8 {
   enable[BG0] = source >> 0;
   enable[BG1] = source >> 1;
   enable[BG2] = source >> 2;
@@ -122,7 +122,7 @@ PPU::Registers::BlendControl::operator uint16() const {
   );
 }
 
-uint16 PPU::Registers::BlendControl::operator=(uint16 source) {
+auto PPU::Registers::BlendControl::operator=(uint16 source) -> uint16 {
   above[BG0] = source >>  0;
   above[BG1] = source >>  1;
   above[BG2] = source >>  2;

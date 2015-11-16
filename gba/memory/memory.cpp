@@ -6,8 +6,8 @@ namespace GameBoyAdvance {
 Bus bus;
 
 struct UnmappedMemory : Memory {
-  auto read(unsigned mode, uint32 addr) -> uint32 override { return 0; }
-  auto write(unsigned mode, uint32 addr, uint32 word) -> void override {}
+  auto read(uint mode, uint32 addr) -> uint32 override { return 0; }
+  auto write(uint mode, uint32 addr, uint32 word) -> void override {}
 };
 
 static UnmappedMemory unmappedMemory;

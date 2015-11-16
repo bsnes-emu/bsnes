@@ -1,4 +1,4 @@
-uint8 APU::Square2::read(unsigned addr) const {
+auto APU::Square2::read(uint addr) const -> uint8 {
   switch(addr) {
   case 1: return (duty << 6);
   case 2: return (envelope.frequency << 0) | (envelope.direction << 3) | (envelope.volume << 4);
@@ -7,7 +7,7 @@ uint8 APU::Square2::read(unsigned addr) const {
   }
 }
 
-void APU::Square2::write(unsigned addr, uint8 byte) {
+auto APU::Square2::write(uint addr, uint8 byte) -> void {
   switch(addr) {
   case 1:  //NR21
     length = byte >> 0;
@@ -18,7 +18,7 @@ void APU::Square2::write(unsigned addr, uint8 byte) {
     envelope.frequency = byte >> 0;
     envelope.direction = byte >> 3;
     envelope.volume    = byte >> 4;
-    if(envelope.dacenable() == false) enable = false;
+    if(!envelope.dacEnable()) enable = false;
     break;
 
   case 3:  //NR23
@@ -31,7 +31,7 @@ void APU::Square2::write(unsigned addr, uint8 byte) {
     initialize = byte >> 7;
 
     if(initialize) {
-      enable = envelope.dacenable();
+      enable = envelope.dacEnable();
       period = 2 * (2048 - frequency);
       envelope.period = envelope.frequency;
       volume = envelope.volume;
@@ -41,7 +41,7 @@ void APU::Square2::write(unsigned addr, uint8 byte) {
   }
 }
 
-void APU::Square2::power() {
+auto APU::Square2::power() -> void {
   envelope.frequency = 0;
   envelope.direction = 0;
   envelope.direction = 0;

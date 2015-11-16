@@ -1,5 +1,5 @@
-enum : unsigned { OBJ = 0, BG0 = 1, BG1 = 2, BG2 = 3, BG3 = 4, SFX = 5 };
-enum : unsigned { In0 = 0, In1 = 1, Obj = 2, Out = 3 };
+enum : uint { OBJ = 0, BG0 = 1, BG1 = 2, BG2 = 3, BG3 = 4, SFX = 5 };
+enum : uint { In0 = 0, In1 = 1, Obj = 2, Out = 3 };
 
 struct Registers {
   struct Control {
@@ -13,8 +13,8 @@ struct Registers {
     uint1 enablewindow[3];
 
     operator uint16() const;
-    uint16 operator=(uint16 source);
-    Control& operator=(const Control&) = delete;
+    auto operator=(uint16 source) -> uint16;
+    auto operator=(const Control&) -> Control& = delete;
   } control;
 
   uint1 greenswap;
@@ -29,8 +29,8 @@ struct Registers {
     uint8 vcompare;
 
     operator uint16() const;
-    uint16 operator=(uint16 source);
-    Status& operator=(const Status&) = delete;
+    auto operator=(uint16 source) -> uint16;
+    auto operator=(const Status&) -> Status& = delete;
   } status;
 
   uint16 vcounter;
@@ -46,8 +46,8 @@ struct Registers {
     uint2 screensize;
 
     operator uint16() const;
-    uint16 operator=(uint16 source);
-    BackgroundControl& operator=(const BackgroundControl&) = delete;
+    auto operator=(uint16 source) -> uint16;
+    auto operator=(const BackgroundControl&) -> BackgroundControl& = delete;
   };
 
   struct Background {
@@ -61,17 +61,17 @@ struct Registers {
 
     //internal
     int28 lx, ly;
-    unsigned vmosaic;
-    unsigned hmosaic;
-    unsigned id;
+    uint vmosaic;
+    uint hmosaic;
+    uint id;
   } bg[4];
 
   struct WindowFlags {
     uint1 enable[6];
 
     operator uint8() const;
-    uint8 operator=(uint8 source);
-    WindowFlags& operator=(const WindowFlags&) = delete;
+    auto operator=(uint8 source) -> uint8;
+    auto operator=(const WindowFlags&) -> WindowFlags& = delete;
   };
 
   struct Window {
@@ -94,8 +94,8 @@ struct Registers {
     uint2 mode;
 
     operator uint16() const;
-    uint16 operator=(uint16 source);
-    BlendControl& operator=(const BlendControl&) = delete;
+    auto operator=(uint16 source) -> uint16;
+    auto operator=(const BlendControl&) -> BlendControl& = delete;
   };
 
   struct Blend {

@@ -103,7 +103,7 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(regs.memory.control.unknown2);
 
   s.integer(regs.postboot);
-  s.integer((unsigned&)regs.mode);
+  s.integer((uint&)regs.mode);
   s.integer(regs.clock);
 
   s.integer(pending.dma.vblank);

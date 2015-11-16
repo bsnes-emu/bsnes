@@ -4,21 +4,21 @@ struct Player {
     bool rumble;
 
     bool logoDetected;
-    unsigned logoCounter;
+    uint logoCounter;
 
-    unsigned packet;
+    uint packet;
     uint32 send;
     uint32 recv;
   } status;
 
-  void power();
-  void frame();
+  auto power() -> void;
+  auto frame() -> void;
 
-  maybe<uint16> keyinput();
-  maybe<uint32> read();
-  void write(uint8 byte, uint2 addr);
+  auto keyinput() -> maybe<uint16>;
+  auto read() -> maybe<uint32>;
+  auto write(uint8 byte, uint2 addr) -> void;
 
-  void serialize(serializer& s);
+  auto serialize(serializer& s) -> void;
 };
 
 extern Player player;

@@ -46,8 +46,8 @@ auto InputManager::appendHotkeys() -> void {
       audio->set(Audio::Synchronize, false);
     };
     hotkey->release = [] {
-      video->set(Video::Synchronize, ::config->video.synchronize);
-      audio->set(Audio::Synchronize, ::config->audio.synchronize);
+      video->set(Video::Synchronize, settings["Video/Synchronize"].boolean());
+      audio->set(Audio::Synchronize, settings["Audio/Synchronize"].boolean());
     };
     hotkeys.append(hotkey);
   }
@@ -68,11 +68,11 @@ auto InputManager::appendHotkeys() -> void {
     hotkeys.append(hotkey);
   }
 
-  Configuration::Node nodeHotkeys;
   for(auto& hotkey : hotkeys) {
-    nodeHotkeys.append(hotkey->assignment, string{hotkey->name}.replace(" ", ""));
+    hotkey->path = string{"Hotkey/", hotkey->name}.replace(" ", "");
+    hotkey->assignment = settings(hotkey->path).text();
+    hotkey->bind();
   }
-  config.append(nodeHotkeys, "Hotkeys");
 }
 
 auto InputManager::pollHotkeys() -> void {

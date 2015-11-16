@@ -2,7 +2,7 @@
 auto Program::loadRequest(unsigned id, string name, string type, bool required) -> void {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
-  .setPath({config->library.location, name})
+  .setPath({settings["Library/Location"].text(), name})
   .setFilters({string{name, "|*.", type}})
   .openFolder();
   if(!directory::exists(location)) return;
@@ -16,25 +16,30 @@ auto Program::loadRequest(unsigned id, string name, string type, bool required) 
 auto Program::loadRequest(unsigned id, string filename, bool required) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
+
+  if(filename == "manifest.bml" && !pathname.find(".sys/")) {
+    if(!file::exists(location) || settings["Library/IgnoreManifests"].boolean()) {
+      string manifest;
+      if(auto fp = popen(string{"icarus -m \"", pathname, "\""}, "r")) {
+        while(true) {
+          auto byte = fgetc(fp);
+          if(byte == EOF) break;
+          manifest.append((char)byte);
+        }
+        pclose(fp);
+      }
+      if(manifest) {
+        memorystream stream{(const uint8*)manifest.data(), manifest.size()};
+        return emulator->load(id, stream);
+      }
+    }
+  }
+
   if(file::exists(location)) {
     mmapstream stream{location};
     return emulator->load(id, stream);
   }
-  if(filename == "manifest.bml") {
-    string manifest;
-    if(auto fp = popen(string{"icarus -m \"", pathname, "\""}, "r")) {
-      while(true) {
-        auto byte = fgetc(fp);
-        if(byte == EOF) break;
-        manifest.append((char)byte);
-      }
-      pclose(fp);
-    }
-    if(manifest) {
-      memorystream stream{manifest.binary(), manifest.size()};
-      return emulator->load(id, stream);
-    }
-  }
+
   if(required) MessageDialog().setTitle("higan").setText({
     "Missing required file: ", nall::filename(location), "\n\n",
     "From location:\n", nall::pathname(location)
@@ -50,25 +55,25 @@ auto Program::saveRequest(unsigned id, string filename) -> void {
 }
 
 auto Program::videoColor(unsigned source, uint16 a, uint16 r, uint16 g, uint16 b) -> uint32 {
-  if(config->video.saturation != 100) {
+  if(settings["Video/Saturation"].natural() != 100) {
     uint16 grayscale = uclamp<16>((r + g + b) / 3);
-    double saturation = config->video.saturation * 0.01;
+    double saturation = settings["Video/Saturation"].natural() * 0.01;
     double inverse = max(0.0, 1.0 - saturation);
     r = uclamp<16>(r * saturation + grayscale * inverse);
     g = uclamp<16>(g * saturation + grayscale * inverse);
     b = uclamp<16>(b * saturation + grayscale * inverse);
   }
 
-  if(config->video.gamma != 100) {
-    double exponent = config->video.gamma * 0.01;
+  if(settings["Video/Gamma"].natural() != 100) {
+    double exponent = settings["Video/Gamma"].natural() * 0.01;
     double reciprocal = 1.0 / 32767.0;
     r = r > 32767 ? r : 32767 * pow(r * reciprocal, exponent);
     g = g > 32767 ? g : 32767 * pow(g * reciprocal, exponent);
     b = b > 32767 ? b : 32767 * pow(b * reciprocal, exponent);
   }
 
-  if(config->video.luminance != 100) {
-    double luminance = config->video.luminance * 0.01;
+  if(settings["Video/Luminance"].natural() != 100) {
+    double luminance = settings["Video/Luminance"].natural() * 0.01;
     r = r * luminance;
     g = g * luminance;
     b = b * luminance;
@@ -96,9 +101,9 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
       }
     }
 
-    if(emulator->information.overscan && config->video.overscan.mask) {
-      unsigned h = config->video.overscan.horizontal;
-      unsigned v = config->video.overscan.vertical;
+    if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
+      auto h = settings["Video/Overscan/Horizontal"].natural();
+      auto v = settings["Video/Overscan/Vertical"].natural();
 
       if(h) for(auto y : range(height)) {
         memory::fill(output + y * length, 4 * h);

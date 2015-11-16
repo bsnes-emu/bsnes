@@ -1,4 +1,4 @@
-void APU::Square::run() {
+auto APU::Square::run() -> void {
   if(period && --period == 0) {
     period = 2 * (2048 - frequency);
     phase++;
@@ -15,13 +15,13 @@ void APU::Square::run() {
   output = sample;
 }
 
-void APU::Square::clocklength() {
+auto APU::Square::clocklength() -> void {
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
 }
 
-void APU::Square::clockenvelope() {
+auto APU::Square::clockenvelope() -> void {
   if(enable && envelope.frequency && --envelope.period == 0) {
     envelope.period = envelope.frequency;
     if(envelope.direction == 0 && volume >  0) volume--;

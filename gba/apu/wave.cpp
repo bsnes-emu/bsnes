@@ -1,4 +1,4 @@
-void APU::Wave::run() {
+auto APU::Wave::run() -> void {
   if(period && --period == 0) {
     period = 1 * (2048 - frequency);
     patternsample = pattern[patternbank * 16 + patternaddr++];
@@ -6,18 +6,18 @@ void APU::Wave::run() {
   }
 
   output = patternsample;
-  static unsigned multiplier[] = {0, 4, 2, 1, 3, 3, 3, 3};
+  static uint multiplier[] = {0, 4, 2, 1, 3, 3, 3, 3};
   output = (output * multiplier[volume]) / 4;
   if(enable == false) output = 0;
 }
 
-void APU::Wave::clocklength() {
+auto APU::Wave::clocklength() -> void {
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
 }
 
-uint8 APU::Wave::read(unsigned addr) const {
+auto APU::Wave::read(uint addr) const -> uint8 {
   switch(addr) {
   case 0: return (mode << 5) | (bank << 6) | (dacenable << 7);
   case 1: return 0;
@@ -27,7 +27,7 @@ uint8 APU::Wave::read(unsigned addr) const {
   }
 }
 
-void APU::Wave::write(unsigned addr, uint8 byte) {
+auto APU::Wave::write(uint addr, uint8 byte) -> void {
   switch(addr) {
   case 0:  //NR30
     mode      = byte >> 5;
@@ -64,19 +64,19 @@ void APU::Wave::write(unsigned addr, uint8 byte) {
   }
 }
 
-uint8 APU::Wave::readram(unsigned addr) const {
+auto APU::Wave::readram(uint addr) const -> uint8 {
   uint8 byte = 0;
   byte |= pattern[addr * 2 + 0] << 0;
   byte |= pattern[addr * 2 + 1] << 4;
   return byte;
 }
 
-void APU::Wave::writeram(unsigned addr, uint8 byte) {
+auto APU::Wave::writeram(uint addr, uint8 byte) -> void {
   pattern[addr * 2 + 0] = byte >> 0;
   pattern[addr * 2 + 1] = byte >> 4;
 }
 
-void APU::Wave::power() {
+auto APU::Wave::power() -> void {
   mode = 0;
   bank = 0;
   dacenable = 0;

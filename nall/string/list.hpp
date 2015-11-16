@@ -5,7 +5,7 @@ namespace nall {
 auto lstring::operator==(const lstring& source) const -> bool {
   if(this == &source) return true;
   if(size() != source.size()) return false;
-  for(unsigned n = 0; n < size(); n++) {
+  for(uint n = 0; n < size(); n++) {
     if(operator[](n) != source[n]) return false;
   }
   return true;
@@ -32,15 +32,15 @@ auto lstring::append() -> lstring& {
   return *this;
 }
 
-auto lstring::find(rstring source) const -> maybe<unsigned> {
-  for(unsigned n = 0; n < size(); n++) {
+auto lstring::find(rstring source) const -> maybe<uint> {
+  for(uint n = 0; n < size(); n++) {
     if(operator[](n).equals(source)) return n;
   }
   return nothing;
 }
 
-auto lstring::ifind(rstring source) const -> maybe<unsigned> {
-  for(unsigned n = 0; n < size(); n++) {
+auto lstring::ifind(rstring source) const -> maybe<uint> {
+  for(uint n = 0; n < size(); n++) {
     if(operator[](n).iequals(source)) return n;
   }
   return nothing;
@@ -48,7 +48,7 @@ auto lstring::ifind(rstring source) const -> maybe<unsigned> {
 
 auto lstring::match(rstring pattern) const -> lstring {
   lstring result;
-  for(unsigned n = 0; n < size(); n++) {
+  for(uint n = 0; n < size(); n++) {
     if(operator[](n).match(pattern)) result.append(operator[](n));
   }
   return result;
@@ -56,7 +56,7 @@ auto lstring::match(rstring pattern) const -> lstring {
 
 auto lstring::merge(rstring separator) const -> string {
   string output;
-  for(unsigned n = 0; n < size(); n++) {
+  for(uint n = 0; n < size(); n++) {
     output.append(operator[](n));
     if(n < size() - 1) output.append(separator.data());
   }
@@ -64,7 +64,7 @@ auto lstring::merge(rstring separator) const -> string {
 }
 
 auto lstring::strip() -> lstring& {
-  for(unsigned n = 0; n < size(); n++) {
+  for(uint n = 0; n < size(); n++) {
     operator[](n).strip();
   }
   return *this;

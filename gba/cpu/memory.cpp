@@ -1,4 +1,4 @@
-auto CPU::iwram_read(unsigned mode, uint32 addr) -> uint32 {
+auto CPU::iwram_read(uint mode, uint32 addr) -> uint32 {
   if(regs.memory.control.disable) return cpu.pipeline.fetch.instruction;
 
   if(mode & Word) return iwram_read(Half, addr &~ 2) << 0 | iwram_read(Half, addr | 2) << 16;
@@ -7,7 +7,7 @@ auto CPU::iwram_read(unsigned mode, uint32 addr) -> uint32 {
   return iwram[addr & 0x7fff];
 }
 
-auto CPU::iwram_write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto CPU::iwram_write(uint mode, uint32 addr, uint32 word) -> void {
   if(regs.memory.control.disable) return;
 
   if(mode & Word) {
@@ -25,7 +25,7 @@ auto CPU::iwram_write(unsigned mode, uint32 addr, uint32 word) -> void {
   iwram[addr & 0x7fff] = word;
 }
 
-auto CPU::ewram_read(unsigned mode, uint32 addr) -> uint32 {
+auto CPU::ewram_read(uint mode, uint32 addr) -> uint32 {
   if(regs.memory.control.disable) return cpu.pipeline.fetch.instruction;
   if(!regs.memory.control.ewram) return iwram_read(mode, addr);
 
@@ -35,7 +35,7 @@ auto CPU::ewram_read(unsigned mode, uint32 addr) -> uint32 {
   return ewram[addr & 0x3ffff];
 }
 
-auto CPU::ewram_write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto CPU::ewram_write(uint mode, uint32 addr, uint32 word) -> void {
   if(regs.memory.control.disable) return;
   if(!regs.memory.control.ewram) return iwram_write(mode, addr, word);
 

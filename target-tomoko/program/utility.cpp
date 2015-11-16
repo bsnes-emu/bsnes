@@ -36,18 +36,21 @@ auto Program::updateStatusText() -> void {
 }
 
 auto Program::updateVideoFilter() -> void {
-  if(config->video.driver == "OpenGL" && config->video.shader != "None" && directory::exists(config->video.shader)) {
+  if(settings["Video/Driver"].text() == "OpenGL"
+  && settings["Video/Shader"].text() != "None"
+  && directory::exists(settings["Video/Shader"].text())
+  ) {
     video->set(Video::Filter, Video::FilterNearest);
-    video->set(Video::Shader, (string)config->video.shader);
+    video->set(Video::Shader, settings["Video/Shader"].text());
   } else {
-    video->set(Video::Filter, config->video.filter == "Blur" ? Video::FilterLinear : Video::FilterNearest);
+    video->set(Video::Filter, settings["Video/Filter"].text() == "Blur" ? Video::FilterLinear : Video::FilterNearest);
     video->set(Video::Shader, (string)"");
   }
 }
 
 auto Program::updateVideoPalette() -> void {
   if(!emulator) return;
-  emulator->paletteUpdate(config->video.colorEmulation
+  emulator->paletteUpdate(settings["Video/ColorEmulation"].boolean()
   ? Emulator::Interface::PaletteMode::Emulation
   : Emulator::Interface::PaletteMode::Standard
   );
@@ -56,23 +59,25 @@ auto Program::updateVideoPalette() -> void {
 auto Program::updateAudio() -> void {
   if(!audio) return;
   audio->clear();
-  audio->set(Audio::Frequency, config->audio.frequency);
-  audio->set(Audio::Latency, config->audio.latency);
-  if(auto resampler = config->audio.resampler) {
-    if(resampler == "Linear" ) dsp.setResampler(DSP::ResampleEngine::Linear);
-    if(resampler == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);
-    if(resampler == "Sinc"   ) dsp.setResampler(DSP::ResampleEngine::Sinc);
-  }
-  dsp.setResamplerFrequency(config->audio.frequency);
-  dsp.setVolume(config->audio.mute ? 0.0 : config->audio.volume * 0.01);
+  audio->set(Audio::Frequency, settings["Audio/Frequency"].natural());
+  audio->set(Audio::Latency, settings["Audio/Latency"].natural());
+  if(settings["Audio/Resampler"].text() == "Linear" ) dsp.setResampler(DSP::ResampleEngine::Linear);
+  if(settings["Audio/Resampler"].text() == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);
+  if(settings["Audio/Resampler"].text() == "Sinc"   ) dsp.setResampler(DSP::ResampleEngine::Sinc);
+  dsp.setResamplerFrequency(settings["Audio/Frequency"].natural());
+  updateAudioVolume();
   updateDSP();
+}
+
+auto Program::updateAudioVolume() -> void {
+  dsp.setVolume(settings["Audio/Mute"].boolean() ? 0.0 : settings["Audio/Volume"].natural() * 0.01);
 }
 
 auto Program::updateDSP() -> void {
   if(!emulator) return;
-  if(!config->video.synchronize) return dsp.setFrequency(emulator->audioFrequency());
+  if(!settings["Video/Synchronize"].boolean()) return dsp.setFrequency(emulator->audioFrequency());
 
   double inputRatio = emulator->audioFrequency() / emulator->videoFrequency();
-  double outputRatio = config->timing.audio / config->timing.video;
-  dsp.setFrequency(inputRatio / outputRatio * config->audio.frequency);
+  double outputRatio = settings["Timing/Audio"].real() / settings["Timing/Video"].real();
+  dsp.setFrequency(inputRatio / outputRatio * settings["Audio/Frequency"].natural());
 }

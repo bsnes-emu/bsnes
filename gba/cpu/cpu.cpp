@@ -12,6 +12,32 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 CPU cpu;
 
+CPU::CPU() {
+  iwram = new uint8[ 32 * 1024];
+  ewram = new uint8[256 * 1024];
+
+  regs.dma[0].source.bits(27); regs.dma[0].run.source.bits(27);
+  regs.dma[0].target.bits(27); regs.dma[0].run.target.bits(27);
+  regs.dma[0].length.bits(14); regs.dma[0].run.length.bits(14);
+
+  regs.dma[1].source.bits(28); regs.dma[1].run.source.bits(28);
+  regs.dma[1].target.bits(27); regs.dma[1].run.target.bits(27);
+  regs.dma[1].length.bits(14); regs.dma[1].run.length.bits(14);
+
+  regs.dma[2].source.bits(28); regs.dma[2].run.source.bits(28);
+  regs.dma[2].target.bits(27); regs.dma[2].run.target.bits(27);
+  regs.dma[2].length.bits(14); regs.dma[2].run.length.bits(14);
+
+  regs.dma[3].source.bits(28); regs.dma[3].run.source.bits(28);
+  regs.dma[3].target.bits(28); regs.dma[3].run.target.bits(28);
+  regs.dma[3].length.bits(16); regs.dma[3].run.length.bits(16);
+}
+
+CPU::~CPU() {
+  delete[] iwram;
+  delete[] ewram;
+}
+
 auto CPU::Enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
@@ -59,12 +85,12 @@ auto CPU::main() -> void {
   exec();
 }
 
-auto CPU::step(unsigned clocks) -> void {
+auto CPU::step(uint clocks) -> void {
   timer_step(clocks);
   sync_step(clocks);
 }
 
-auto CPU::sync_step(unsigned clocks) -> void {
+auto CPU::sync_step(uint clocks) -> void {
   ppu.clock -= clocks;
   if(ppu.clock < 0) co_switch(ppu.thread);
 
@@ -125,40 +151,14 @@ auto CPU::power() -> void {
 
   active.dma = false;
 
-  for(unsigned n = 0x0b0; n <= 0x0df; n++) bus.mmio[n] = this;  //DMA
-  for(unsigned n = 0x100; n <= 0x10f; n++) bus.mmio[n] = this;  //Timers
-  for(unsigned n = 0x120; n <= 0x12b; n++) bus.mmio[n] = this;  //Serial
-  for(unsigned n = 0x130; n <= 0x133; n++) bus.mmio[n] = this;  //Keypad
-  for(unsigned n = 0x134; n <= 0x159; n++) bus.mmio[n] = this;  //Serial
-  for(unsigned n = 0x200; n <= 0x209; n++) bus.mmio[n] = this;  //System
-  for(unsigned n = 0x300; n <= 0x301; n++) bus.mmio[n] = this;  //System
-  //0x080-0x083 mirrored via gba/memory/memory.cpp              //System
-}
-
-CPU::CPU() {
-  iwram = new uint8[ 32 * 1024];
-  ewram = new uint8[256 * 1024];
-
-  regs.dma[0].source.bits(27); regs.dma[0].run.source.bits(27);
-  regs.dma[0].target.bits(27); regs.dma[0].run.target.bits(27);
-  regs.dma[0].length.bits(14); regs.dma[0].run.length.bits(14);
-
-  regs.dma[1].source.bits(28); regs.dma[1].run.source.bits(28);
-  regs.dma[1].target.bits(27); regs.dma[1].run.target.bits(27);
-  regs.dma[1].length.bits(14); regs.dma[1].run.length.bits(14);
-
-  regs.dma[2].source.bits(28); regs.dma[2].run.source.bits(28);
-  regs.dma[2].target.bits(27); regs.dma[2].run.target.bits(27);
-  regs.dma[2].length.bits(14); regs.dma[2].run.length.bits(14);
-
-  regs.dma[3].source.bits(28); regs.dma[3].run.source.bits(28);
-  regs.dma[3].target.bits(28); regs.dma[3].run.target.bits(28);
-  regs.dma[3].length.bits(16); regs.dma[3].run.length.bits(16);
-}
-
-CPU::~CPU() {
-  delete[] iwram;
-  delete[] ewram;
+  for(uint n = 0x0b0; n <= 0x0df; n++) bus.mmio[n] = this;  //DMA
+  for(uint n = 0x100; n <= 0x10f; n++) bus.mmio[n] = this;  //Timers
+  for(uint n = 0x120; n <= 0x12b; n++) bus.mmio[n] = this;  //Serial
+  for(uint n = 0x130; n <= 0x133; n++) bus.mmio[n] = this;  //Keypad
+  for(uint n = 0x134; n <= 0x159; n++) bus.mmio[n] = this;  //Serial
+  for(uint n = 0x200; n <= 0x209; n++) bus.mmio[n] = this;  //System
+  for(uint n = 0x300; n <= 0x301; n++) bus.mmio[n] = this;  //System
+  //0x080-0x083 mirrored via gba/memory/memory.cpp          //System
 }
 
 }

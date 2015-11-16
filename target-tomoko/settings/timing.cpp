@@ -4,15 +4,15 @@ TimingSettings::TimingSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   layout.setMargin(5);
   videoLabel.setText("Video:");
-  videoValue.setText(config->timing.video).onActivate([&] { update(); });
+  videoValue.setText(settings["Timing/Video"].real()).onActivate([&] { update(); });
   videoAssign.setText("Assign").onActivate([&] { update(); });
   audioLabel.setText("Audio:");
-  audioValue.setText(config->timing.audio).onActivate([&] { update(); });
+  audioValue.setText(settings["Timing/Audio"].real()).onActivate([&] { update(); });
   audioAssign.setText("Assign").onActivate([&] { update(); });
 }
 
 auto TimingSettings::update() -> void {
-  config->timing.video = real(videoValue.text());
-  config->timing.audio = real(audioValue.text());
+  settings["Timing/Video"].setValue(videoValue.text().real());
+  settings["Timing/Audio"].setValue(audioValue.text().real());
   program->updateDSP();
 }

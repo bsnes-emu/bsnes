@@ -12,7 +12,8 @@ struct InputMapping {
   auto assignmentName() -> string;
   auto deviceName() -> string;
 
-  string name;
+  string path;  //configuration file key path
+  string name;  //input name (human readable)
   string assignment = "None";
   Emulator::Interface::Device::Input* link = nullptr;
   shared_pointer<HID::Device> device;
@@ -59,7 +60,6 @@ struct InputManager {
   vector<shared_pointer<HID::Device>> devices;
   vector<InputEmulator> emulators;
   vector<InputHotkey*> hotkeys;
-  Configuration::Document config;
 };
 
 extern InputManager* inputManager;

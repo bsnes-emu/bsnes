@@ -151,7 +151,7 @@ using int4 = nall::int_t<4>;
 using int5 = nall::int_t<5>;
 using int6 = nall::int_t<6>;
 using int7 = nall::int_t<7>;
-using int8 = int8_t;
+
 using int9 = nall::int_t<9>;
 using int10 = nall::int_t<10>;
 using int11 = nall::int_t<11>;
@@ -159,7 +159,7 @@ using int12 = nall::int_t<12>;
 using int13 = nall::int_t<13>;
 using int14 = nall::int_t<14>;
 using int15 = nall::int_t<15>;
-using int16 = int16_t;
+
 using int17 = nall::int_t<17>;
 using int18 = nall::int_t<18>;
 using int19 = nall::int_t<19>;
@@ -175,7 +175,7 @@ using int28 = nall::int_t<28>;
 using int29 = nall::int_t<29>;
 using int30 = nall::int_t<30>;
 using int31 = nall::int_t<31>;
-using int32 = int32_t;
+
 using int33 = nall::int_t<33>;
 using int34 = nall::int_t<34>;
 using int35 = nall::int_t<35>;
@@ -207,9 +207,6 @@ using int60 = nall::int_t<60>;
 using int61 = nall::int_t<61>;
 using int62 = nall::int_t<62>;
 using int63 = nall::int_t<63>;
-using int64 = int64_t;
-using intmax = intmax_t;
-using intptr = intptr_t;
 
 using uint1 = nall::uint_t<1>;
 using uint2 = nall::uint_t<2>;
@@ -218,7 +215,7 @@ using uint4 = nall::uint_t<4>;
 using uint5 = nall::uint_t<5>;
 using uint6 = nall::uint_t<6>;
 using uint7 = nall::uint_t<7>;
-using uint8 = uint8_t;
+
 using uint9 = nall::uint_t<9>;
 using uint10 = nall::uint_t<10>;
 using uint11 = nall::uint_t<11>;
@@ -226,7 +223,7 @@ using uint12 = nall::uint_t<12>;
 using uint13 = nall::uint_t<13>;
 using uint14 = nall::uint_t<14>;
 using uint15 = nall::uint_t<15>;
-using uint16 = uint16_t;
+
 using uint17 = nall::uint_t<17>;
 using uint18 = nall::uint_t<18>;
 using uint19 = nall::uint_t<19>;
@@ -242,7 +239,7 @@ using uint28 = nall::uint_t<28>;
 using uint29 = nall::uint_t<29>;
 using uint30 = nall::uint_t<30>;
 using uint31 = nall::uint_t<31>;
-using uint32 = uint32_t;
+
 using uint33 = nall::uint_t<33>;
 using uint34 = nall::uint_t<34>;
 using uint35 = nall::uint_t<35>;
@@ -274,13 +271,5 @@ using uint60 = nall::uint_t<60>;
 using uint61 = nall::uint_t<61>;
 using uint62 = nall::uint_t<62>;
 using uint63 = nall::uint_t<63>;
-using uint64 = uint64_t;
-using uintmax = uintmax_t;
-using uintptr = uintptr_t;
-
-#if defined(__SIZEOF_INT128__)
-using int128 = int128_t;
-using uint128 = uint128_t;
-#endif
 
 #endif

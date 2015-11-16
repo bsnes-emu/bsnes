@@ -7,7 +7,7 @@ namespace GameBoyAdvance {
 #include "serialization.cpp"
 Player player;
 
-void Player::power() {
+auto Player::power() -> void {
   status.enable = false;
   status.rumble = false;
 
@@ -19,7 +19,7 @@ void Player::power() {
   status.recv = 0;
 }
 
-void Player::frame() {
+auto Player::frame() -> void {
   uint32 hash = Hash::CRC32(ppu.output, 240 * 160 * sizeof(uint32)).value();
   status.logoDetected = (hash == 0x7776eb55);
 
@@ -29,7 +29,7 @@ void Player::frame() {
     status.packet = 0;
   }
 
-  if(status.enable == false) return;
+  if(!status.enable) return;
 
   if(cpu.regs.joybus.settings == 0x0000 && cpu.regs.serial.control == 0x5088) {
     status.packet = (status.packet + 1) % 17;
@@ -56,7 +56,7 @@ void Player::frame() {
   }
 }
 
-maybe<uint16> Player::keyinput() {
+auto Player::keyinput() -> maybe<uint16> {
   if(status.logoDetected) {
     switch(status.logoCounter) {
     case 0: return 0x03ff;
@@ -67,15 +67,15 @@ maybe<uint16> Player::keyinput() {
   return nothing;
 }
 
-maybe<uint32> Player::read() {
+auto Player::read() -> maybe<uint32> {
   if(status.enable) return status.send;
   return nothing;
 }
 
-void Player::write(uint8 byte, uint2 addr) {
-  if(status.enable == false) return;
+auto Player::write(uint8 byte, uint2 addr) -> void {
+  if(!status.enable) return;
 
-  unsigned shift = addr << 3;
+  uint shift = addr << 3;
   status.recv &= ~(255 << shift);
   status.recv |= byte << shift;
 

@@ -1,4 +1,4 @@
-auto MMIO::read(unsigned mode, uint32 addr) -> uint32 {
+auto MMIO::read(uint mode, uint32 addr) -> uint32 {
   uint32 word = 0;
 
   if(mode & Word) {
@@ -18,7 +18,7 @@ auto MMIO::read(unsigned mode, uint32 addr) -> uint32 {
   return word;
 }
 
-auto MMIO::write(unsigned mode, uint32 addr, uint32 word) -> void {
+auto MMIO::write(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Word) {
     addr &= ~3;
     write(addr + 0, word >>  0);

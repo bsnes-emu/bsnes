@@ -1,11 +1,9 @@
-void PPU::render_forceblank() {
+auto PPU::render_forceblank() -> void {
   uint32* line = output + regs.vcounter * 240;
-  for(unsigned x = 0; x < 240; x++) {
-    line[x] = 0x7fff;
-  }
+  for(auto x : range(240)) line[x] = 0x7fff;
 }
 
-void PPU::render_screen() {
+auto PPU::render_screen() -> void {
   uint32* line = output + regs.vcounter * 240;
 
   if(regs.bg[0].control.mosaic) render_mosaic_background(BG0);
@@ -14,7 +12,7 @@ void PPU::render_screen() {
   if(regs.bg[3].control.mosaic) render_mosaic_background(BG3);
   render_mosaic_object();
 
-  for(unsigned x = 0; x < 240; x++) {
+  for(auto x : range(240)) {
     Registers::WindowFlags flags;
     flags = ~0;  //enable all layers if no windows are enabled
 
@@ -27,9 +25,9 @@ void PPU::render_screen() {
     }
 
     //priority sorting: find topmost two pixels
-    unsigned a = 5, b = 5;
-    for(signed p = 3; p >= 0; p--) {
-      for(signed l = 5; l >= 0; l--) {
+    uint a = 5, b = 5;
+    for(int p = 3; p >= 0; p--) {
+      for(int l = 5; l >= 0; l--) {
         if(layer[l][x].enable && layer[l][x].priority == p && flags.enable[l]) {
           b = a;
           a = l;
@@ -41,18 +39,21 @@ void PPU::render_screen() {
     auto& below = layer[b];
     bool blendabove = regs.blend.control.above[a];
     bool blendbelow = regs.blend.control.below[b];
-    unsigned color = above[x].color;
+    uint color = above[x].color;
+    auto eva = min(16u, (unsigned)regs.blend.eva);
+    auto evb = min(16u, (unsigned)regs.blend.evb);
+    auto evy = min(16u, (unsigned)regs.blend.evy);
 
     //perform blending, if needed
     if(flags.enable[SFX] == false) {
     } else if(above[x].translucent && blendbelow) {
-      color = blend(above[x].color, regs.blend.eva, below[x].color, regs.blend.evb);
+      color = blend(above[x].color, eva, below[x].color, evb);
     } else if(regs.blend.control.mode == 1 && blendabove && blendbelow) {
-      color = blend(above[x].color, regs.blend.eva, below[x].color, regs.blend.evb);
+      color = blend(above[x].color, eva, below[x].color, evb);
     } else if(regs.blend.control.mode == 2 && blendabove) {
-      color = blend(above[x].color, 16 - regs.blend.evy, 0x7fff, regs.blend.evy);
+      color = blend(above[x].color, 16 - evy, 0x7fff, evy);
     } else if(regs.blend.control.mode == 3 && blendabove) {
-      color = blend(above[x].color, 16 - regs.blend.evy, 0x0000, regs.blend.evy);
+      color = blend(above[x].color, 16 - evy, 0x0000, evy);
     }
 
     //output pixel
@@ -60,32 +61,29 @@ void PPU::render_screen() {
   }
 }
 
-void PPU::render_window(unsigned w) {
-  unsigned y = regs.vcounter;
+auto PPU::render_window(uint w) -> void {
+  uint y = regs.vcounter;
 
-  unsigned y1 = regs.window[w].y1, y2 = regs.window[w].y2;
-  unsigned x1 = regs.window[w].x1, x2 = regs.window[w].x2;
+  uint y1 = regs.window[w].y1, y2 = regs.window[w].y2;
+  uint x1 = regs.window[w].x1, x2 = regs.window[w].x2;
 
   if(y2 < y1 || y2 > 160) y2 = 160;
   if(x2 < x1 || x2 > 240) x2 = 240;
 
   if(y >= y1 && y < y2) {
-    for(unsigned x = x1; x < x2; x++) {
+    for(uint x = x1; x < x2; x++) {
       windowmask[w][x] = true;
     }
   }
 }
 
-unsigned PPU::blend(unsigned above, unsigned eva, unsigned below, unsigned evb) {
-  eva = min(16, eva);
-  evb = min(16, evb);
-
+auto PPU::blend(uint above, uint eva, uint below, uint evb) -> uint {
   uint5 ar = above >> 0, ag = above >> 5, ab = above >> 10;
   uint5 br = below >> 0, bg = below >> 5, bb = below >> 10;
 
-  unsigned r = (ar * eva + br * evb) >> 4;
-  unsigned g = (ag * eva + bg * evb) >> 4;
-  unsigned b = (ab * eva + bb * evb) >> 4;
+  uint r = (ar * eva + br * evb) >> 4;
+  uint g = (ag * eva + bg * evb) >> 4;
+  uint b = (ab * eva + bb * evb) >> 4;
 
   return min(31, r) << 0 | min(31, g) << 5 | min(31, b) << 10;
 }

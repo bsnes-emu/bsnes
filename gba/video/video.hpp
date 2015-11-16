@@ -1,9 +1,10 @@
 struct Video {
-  uint32_t* palette = nullptr;
-  void generate_palette(Emulator::Interface::PaletteMode mode);
-
   Video();
   ~Video();
+
+  auto generatePalette(Emulator::Interface::PaletteMode mode) -> void;
+
+  uint32* palette = nullptr;
 
 private:
   static const uint8 curve[32];

@@ -44,7 +44,7 @@ auto string::reset() -> type& {
   return *this;
 }
 
-auto string::reserve(unsigned capacity) -> type& {
+auto string::reserve(uint capacity) -> type& {
   if(capacity <= _capacity) return *this;
   capacity = bit::round(capacity + 1) - 1;
   if(_capacity < SSO) {
@@ -58,7 +58,7 @@ auto string::reserve(unsigned capacity) -> type& {
   return *this;
 }
 
-auto string::resize(unsigned size) -> type& {
+auto string::resize(uint size) -> type& {
   reserve(size);
   get()[_size = size] = 0;
   return *this;

@@ -13,7 +13,7 @@ auto string::read(rstring filename) -> string {
   if(!fp) return result;
 
   fseek(fp, 0, SEEK_END);
-  signed filesize = ftell(fp);
+  int filesize = ftell(fp);
   if(filesize < 0) return fclose(fp), result;
 
   rewind(fp);
@@ -22,7 +22,7 @@ auto string::read(rstring filename) -> string {
   return fclose(fp), result;
 }
 
-auto string::repeat(rstring pattern, unsigned times) -> string {
+auto string::repeat(rstring pattern, uint times) -> string {
   string result;
   while(times--) result.append(pattern.data());
   return result;
@@ -35,13 +35,13 @@ auto string::fill(char fill) -> string& {
 
 auto string::hash() const -> unsigned {
   const char* p = data();
-  unsigned length = size();
-  unsigned result = 5381;
+  uint length = size();
+  uint result = 5381;
   while(length--) result = (result << 5) + result + *p++;
   return result;
 }
 
-auto string::remove(unsigned offset, unsigned length) -> string& {
+auto string::remove(uint offset, uint length) -> string& {
   char* p = get();
   length = min(length, size());
   memory::move(p + offset, p + offset + length, size() - length);
@@ -50,16 +50,16 @@ auto string::remove(unsigned offset, unsigned length) -> string& {
 
 auto string::reverse() -> string& {
   char* p = get();
-  unsigned length = size();
-  unsigned pivot = length >> 1;
-  for(signed x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(p[x], p[y]);
+  uint length = size();
+  uint pivot = length >> 1;
+  for(int x = 0, y = length - 1; x < pivot && y >= 0; x++, y--) std::swap(p[x], p[y]);
   return *this;
 }
 
 //+length => insert/delete from start (right justify)
 //-length => insert/delete from end (left justify)
-auto string::size(signed length, char fill) -> string& {
-  unsigned size = this->size();
+auto string::size(int length, char fill) -> string& {
+  uint size = this->size();
   if(size == length) return *this;
 
   bool right = length >= 0;
@@ -68,13 +68,13 @@ auto string::size(signed length, char fill) -> string& {
   if(size < length) {  //expand
     resize(length);
     char* p = get();
-    unsigned displacement = length - size;
+    uint displacement = length - size;
     if(right) memory::move(p + displacement, p, size);
     else p += size;
     while(displacement--) *p++ = fill;
   } else {  //shrink
     char* p = get();
-    unsigned displacement = size - length;
+    uint displacement = size - length;
     if(right) memory::move(p, p + displacement, length);
     resize(length);
   }
@@ -82,7 +82,7 @@ auto string::size(signed length, char fill) -> string& {
   return *this;
 }
 
-auto slice(rstring self, signed offset, signed length) -> string {
+auto slice(rstring self, int offset, int length) -> string {
   string result;
   if(offset < self.size()) {
     if(length < 0) length = self.size() - offset;
@@ -92,36 +92,36 @@ auto slice(rstring self, signed offset, signed length) -> string {
   return result;
 }
 
-auto integer(char* result, intmax_t value) -> char* {
+auto integer(char* result, intmax value) -> char* {
   bool negative = value < 0;
   if(negative) value = -value;
 
   char buffer[64];
-  unsigned size = 0;
+  uint size = 0;
 
   do {
-    unsigned n = value % 10;
+    uint n = value % 10;
     buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
   if(negative) buffer[size++] = '-';
 
-  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
+  for(int x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
   result[size] = 0;
   return result;
 }
 
-auto decimal(char* result, uintmax_t value) -> char* {
+auto decimal(char* result, uintmax value) -> char* {
   char buffer[64];
-  unsigned size = 0;
+  uint size = 0;
 
   do {
-    unsigned n = value % 10;
+    uint n = value % 10;
     buffer[size++] = '0' + n;
     value /= 10;
   } while(value);
 
-  for(signed x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
+  for(int x = size - 1, y = 0; x >= 0 && y < size; x--, y++) result[x] = buffer[y];
   result[size] = 0;
   return result;
 }
@@ -129,7 +129,7 @@ auto decimal(char* result, uintmax_t value) -> char* {
 //using sprintf is certainly not the most ideal method to convert
 //a double to a string ... but attempting to parse a double by
 //hand, digit-by-digit, results in subtle rounding errors.
-auto real(char* result, long double value) -> unsigned {
+auto real(char* result, long double value) -> uint {
   char buffer[256];
   #ifdef _WIN32
   //Windows C-runtime does not support long double via sprintf()
@@ -150,7 +150,7 @@ auto real(char* result, long double value) -> unsigned {
     }
   }
 
-  unsigned length = strlen(buffer);
+  uint length = strlen(buffer);
   if(result) strcpy(result, buffer);
   return length + 1;
 }

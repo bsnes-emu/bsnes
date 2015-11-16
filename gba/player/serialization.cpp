@@ -1,4 +1,4 @@
-void Player::serialize(serializer& s) {
+auto Player::serialize(serializer& s) -> void {
   s.integer(status.enable);
   s.integer(status.rumble);
 

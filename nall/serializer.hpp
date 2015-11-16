@@ -28,21 +28,21 @@ struct has_serialize {
 };
 
 struct serializer {
-  enum mode_t { Load, Save, Size };
+  enum Mode : uint { Load, Save, Size };
 
-  auto mode() const -> mode_t {
+  auto mode() const -> Mode {
     return _mode;
   }
 
-  auto data() const -> const uint8_t* {
+  auto data() const -> const uint8* {
     return _data;
   }
 
-  auto size() const -> unsigned {
+  auto size() const -> uint {
     return _size;
   }
 
-  auto capacity() const -> unsigned {
+  auto capacity() const -> uint {
     return _capacity;
   }
 
@@ -50,11 +50,11 @@ struct serializer {
     enum { size = sizeof(T) };
     //this is rather dangerous, and not cross-platform safe;
     //but there is no standardized way to export FP-values
-    uint8_t* p = (uint8_t*)&value;
+    auto p = (uint8*)&value;
     if(_mode == Save) {
-      for(unsigned n = 0; n < size; n++) _data[_size++] = p[n];
+      for(uint n = 0; n < size; n++) _data[_size++] = p[n];
     } else if(_mode == Load) {
-      for(unsigned n = 0; n < size; n++) p[n] = _data[_size++];
+      for(uint n = 0; n < size; n++) p[n] = _data[_size++];
     } else {
       _size += size;
     }
@@ -64,10 +64,10 @@ struct serializer {
   template<typename T> auto integer(T& value) -> serializer& {
     enum { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
     if(_mode == Save) {
-      for(unsigned n = 0; n < size; n++) _data[_size++] = (uintmax_t)value >> (n << 3);
+      for(uint n = 0; n < size; n++) _data[_size++] = (uintmax)value >> (n << 3);
     } else if(_mode == Load) {
       value = 0;
-      for(unsigned n = 0; n < size; n++) value |= (uintmax_t)_data[_size++] << (n << 3);
+      for(uint n = 0; n < size; n++) value |= (uintmax)_data[_size++] << (n << 3);
     } else if(_mode == Size) {
       _size += size;
     }
@@ -75,12 +75,12 @@ struct serializer {
   }
 
   template<typename T, int N> auto array(T (&array)[N]) -> serializer& {
-    for(unsigned n = 0; n < N; n++) operator()(array[n]);
+    for(uint n = 0; n < N; n++) operator()(array[n]);
     return *this;
   }
 
-  template<typename T> auto array(T array, unsigned size) -> serializer& {
-    for(unsigned n = 0; n < size; n++) operator()(array[n]);
+  template<typename T> auto array(T array, uint size) -> serializer& {
+    for(uint n = 0; n < size; n++) operator()(array[n]);
     return *this;
   }
 
@@ -88,13 +88,13 @@ struct serializer {
   template<typename T> auto operator()(T& value, typename std::enable_if<std::is_integral<T>::value>::type* = 0) -> serializer& { return integer(value); }
   template<typename T> auto operator()(T& value, typename std::enable_if<std::is_floating_point<T>::value>::type* = 0) -> serializer& { return floatingpoint(value); }
   template<typename T> auto operator()(T& value, typename std::enable_if<std::is_array<T>::value>::type* = 0) -> serializer& { return array(value); }
-  template<typename T> auto operator()(T& value, unsigned size, typename std::enable_if<std::is_pointer<T>::value>::type* = 0) -> serializer& { return array(value, size); }
+  template<typename T> auto operator()(T& value, uint size, typename std::enable_if<std::is_pointer<T>::value>::type* = 0) -> serializer& { return array(value, size); }
 
   auto operator=(const serializer& s) -> serializer& {
     if(_data) delete[] _data;
 
     _mode = s._mode;
-    _data = new uint8_t[s._capacity];
+    _data = new uint8[s._capacity];
     _size = s._size;
     _capacity = s._capacity;
 
@@ -118,16 +118,16 @@ struct serializer {
   serializer(const serializer& s) { operator=(s); }
   serializer(serializer&& s) { operator=(move(s)); }
 
-  serializer(unsigned capacity) {
+  serializer(uint capacity) {
     _mode = Save;
-    _data = new uint8_t[capacity]();
+    _data = new uint8[capacity]();
     _size = 0;
     _capacity = capacity;
   }
 
-  serializer(const uint8_t* data, unsigned capacity) {
+  serializer(const uint8* data, uint capacity) {
     _mode = Load;
-    _data = new uint8_t[capacity];
+    _data = new uint8[capacity];
     _size = 0;
     _capacity = capacity;
     memcpy(_data, data, capacity);
@@ -138,10 +138,10 @@ struct serializer {
   }
 
 private:
-  mode_t _mode = Size;
-  uint8_t* _data = nullptr;
-  unsigned _size = 0;
-  unsigned _capacity = 0;
+  Mode _mode = Size;
+  uint8* _data = nullptr;
+  uint _size = 0;
+  uint _capacity = 0;
 };
 
 };

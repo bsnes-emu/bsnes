@@ -6,8 +6,8 @@ namespace nall {
 //each {#} token will be replaced with its appropriate format parameter
 
 auto string::format(const nall::format& params) -> type& {
-  signed size = this->size();
-  char* data = (char*)memory::allocate(size);
+  auto size = (int)this->size();
+  auto data = (char*)memory::allocate(size);
   memory::copy(data, this->data(), size);
 
   signed x = 0;
@@ -32,19 +32,19 @@ auto string::format(const nall::format& params) -> type& {
     };
     if(!isNumeric(&data[x + 1], &data[y - 1])) { x++; continue; }
 
-    unsigned index = nall::natural(&data[x + 1]);
+    uint index = nall::natural(&data[x + 1]);
     if(index >= params.size()) { x++; continue; }
 
-    unsigned sourceSize = y - x;
-    unsigned targetSize = params[index].size();
-    unsigned remaining = size - x;
+    uint sourceSize = y - x;
+    uint targetSize = params[index].size();
+    uint remaining = size - x;
 
     if(sourceSize > targetSize) {
-      unsigned difference = sourceSize - targetSize;
+      uint difference = sourceSize - targetSize;
       memory::move(&data[x], &data[x + difference], remaining);
       size -= difference;
     } else if(targetSize > sourceSize) {
-      unsigned difference = targetSize - sourceSize;
+      uint difference = targetSize - sourceSize;
       data = (char*)realloc(data, size + difference);
       size += difference;
       memory::move(&data[x + difference], &data[x], remaining);
@@ -73,14 +73,14 @@ template<typename... P> auto print(P&&... p) -> void {
   fputs(s.data(), stdout);
 }
 
-auto integer(intmax_t value, long precision, char padchar) -> string {
+auto integer(intmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(1 + sizeof(intmax_t) * 3);
+  buffer.resize(1 + sizeof(intmax) * 3);
   char* p = buffer.get();
 
   bool negative = value < 0;
   value = abs(value);
-  unsigned size = 0;
+  uint size = 0;
   do {
     p[size++] = '0' + (value % 10);
     value /= 10;
@@ -92,12 +92,12 @@ auto integer(intmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto decimal(uintmax_t value, long precision, char padchar) -> string {
+auto decimal(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 3);
+  buffer.resize(sizeof(uintmax) * 3);
   char* p = buffer.get();
 
-  unsigned size = 0;
+  uint size = 0;
   do {
     p[size++] = '0' + (value % 10);
     value /= 10;
@@ -108,14 +108,14 @@ auto decimal(uintmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto hex(uintmax_t value, long precision, char padchar) -> string {
+auto hex(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 2);
+  buffer.resize(sizeof(uintmax) * 2);
   char* p = buffer.get();
 
-  unsigned size = 0;
+  uint size = 0;
   do {
-    unsigned n = value & 15;
+    uint n = value & 15;
     p[size++] = n < 10 ? '0' + n : 'a' + n - 10;
     value >>= 4;
   } while(value);
@@ -125,12 +125,12 @@ auto hex(uintmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto octal(uintmax_t value, long precision, char padchar) -> string {
+auto octal(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 3);
+  buffer.resize(sizeof(uintmax) * 3);
   char* p = buffer.get();
 
-  unsigned size = 0;
+  uint size = 0;
   do {
     p[size++] = '0' + (value & 7);
     value >>= 3;
@@ -141,12 +141,12 @@ auto octal(uintmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto binary(uintmax_t value, long precision, char padchar) -> string {
+auto binary(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 8);
+  buffer.resize(sizeof(uintmax) * 8);
   char* p = buffer.get();
 
-  unsigned size = 0;
+  uint size = 0;
   do {
     p[size++] = '0' + (value & 1);
     value >>= 1;
@@ -158,12 +158,12 @@ auto binary(uintmax_t value, long precision, char padchar) -> string {
 }
 
 template<typename T> auto pointer(const T* value, long precision) -> string {
-  if(value == nullptr) return "(null)";
-  return {"0x", hex((uintptr_t)value, precision)};
+  if(value == nullptr) return "(nullptr)";
+  return {"0x", hex((uintptr)value, precision)};
 }
 
-auto pointer(uintptr_t value, long precision) -> string {
-  if(value == 0) return "(null)";
+auto pointer(uintptr value, long precision) -> string {
+  if(value == 0) return "(nullptr)";
   return {"0x", hex(value, precision)};
 }
 

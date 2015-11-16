@@ -1,17 +1,17 @@
 struct APU : Thread, MMIO {
   #include "registers.hpp"
 
-  static void Enter();
-  void main();
-  void step(unsigned clocks);
+  static auto Enter() -> void;
+  auto main() -> void;
+  auto step(uint clocks) -> void;
 
-  uint8 read(uint32 addr);
-  void write(uint32 addr, uint8 byte);
-  void power();
+  auto read(uint32 addr) -> uint8;
+  auto write(uint32 addr, uint8 byte) -> void;
+  auto power() -> void;
 
-  void runsequencer();
+  auto runsequencer() -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 };
 
 extern APU apu;

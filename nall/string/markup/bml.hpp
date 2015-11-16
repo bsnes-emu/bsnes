@@ -19,22 +19,22 @@ protected:
   }
 
   //determine indentation level, without incrementing pointer
-  auto readDepth(const char* p) -> unsigned {
-    unsigned depth = 0;
+  auto readDepth(const char* p) -> uint {
+    uint depth = 0;
     while(p[depth] == '\t' || p[depth] == ' ') depth++;
     return depth;
   }
 
   //determine indentation level
-  auto parseDepth(const char*& p) -> unsigned {
-    unsigned depth = readDepth(p);
+  auto parseDepth(const char*& p) -> uint {
+    uint depth = readDepth(p);
     p += depth;
     return depth;
   }
 
   //read name
   auto parseName(const char*& p) -> void {
-    unsigned length = 0;
+    uint length = 0;
     while(valid(p[length])) length++;
     if(length == 0) throw "Invalid node name";
     _name = slice(p, 0, length);
@@ -43,19 +43,19 @@ protected:
 
   auto parseData(const char*& p) -> void {
     if(*p == '=' && *(p + 1) == '\"') {
-      unsigned length = 2;
+      uint length = 2;
       while(p[length] && p[length] != '\n' && p[length] != '\"') length++;
       if(p[length] != '\"') throw "Unescaped value";
       _value = {slice(p, 2, length - 2), "\n"};
       p += length + 1;
     } else if(*p == '=') {
-      unsigned length = 1;
+      uint length = 1;
       while(p[length] && p[length] != '\n' && p[length] != '\"' && p[length] != ' ') length++;
       if(p[length] == '\"') throw "Illegal character in value";
       _value = {slice(p, 1, length - 1), "\n"};
       p += length;
     } else if(*p == ':') {
-      unsigned length = 1;
+      uint length = 1;
       while(p[length] && p[length] != '\n') length++;
       _value = {slice(p, 1, length - 1), "\n"};
       p += length;
@@ -70,7 +70,7 @@ protected:
       if(*(p + 0) == '/' && *(p + 1) == '/') break;  //skip comments
 
       SharedNode node(new ManagedNode);
-      unsigned length = 0;
+      uint length = 0;
       while(valid(p[length])) length++;
       if(length == 0) throw "Invalid attribute name";
       node->_name = slice(p, 0, length);
@@ -81,7 +81,7 @@ protected:
   }
 
   //read a node and all of its child nodes
-  auto parseNode(const lstring& text, unsigned& y) -> void {
+  auto parseNode(const lstring& text, uint& y) -> void {
     const char* p = text[y++];
     _metadata = parseDepth(p);
     parseName(p);
@@ -89,7 +89,7 @@ protected:
     parseAttributes(p);
 
     while(y < text.size()) {
-      unsigned depth = readDepth(text[y]);
+      uint depth = readDepth(text[y]);
       if(depth <= _metadata) break;
 
       if(text[y][depth] == ':') {
@@ -132,7 +132,7 @@ protected:
     if(document.size() == 0) return;  //empty document
 
     auto text = document.split("\n");
-    unsigned y = 0;
+    uint y = 0;
     while(y < text.size()) {
       SharedNode node(new ManagedNode);
       node->parseNode(text, y);
@@ -154,7 +154,7 @@ inline auto unserialize(const string& markup) -> Markup::Node {
   return (Markup::SharedNode&)node;
 }
 
-inline auto serialize(const Markup::Node& node, unsigned depth = 0) -> string {
+inline auto serialize(const Markup::Node& node, uint depth = 0) -> string {
   if(!node.name()) {
     string result;
     for(auto leaf : node) {

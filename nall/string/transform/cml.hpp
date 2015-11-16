@@ -29,7 +29,7 @@ private:
   };
   vector<Variable> variables;
 
-  auto parseDocument(const string& filedata, const string& pathname, unsigned depth) -> bool;
+  auto parseDocument(const string& filedata, const string& pathname, uint depth) -> bool;
 };
 
 auto CML::parse(const string& filename) -> string {
@@ -45,7 +45,7 @@ auto CML::parse(const string& filedata, const string& pathname) -> string {
   return state.output;
 }
 
-auto CML::parseDocument(const string& filedata, const string& pathname, unsigned depth) -> bool {
+auto CML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
   if(depth >= 100) return false;  //prevent infinite recursion
 
   auto vendorAppend = [&](const string& name, const string& value) {

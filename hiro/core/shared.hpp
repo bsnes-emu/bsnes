@@ -60,6 +60,13 @@
 #if defined(Hiro_Object)
 struct Object : sObject {
   DeclareSharedObject(Object)
+
+  template<typename T> auto cast() -> T {
+    if(auto pointer = dynamic_cast<typename T::internalType*>(data())) {
+      if(auto shared = pointer->instance.acquire()) return T(shared);
+    }
+    return T();
+  }
 };
 #endif
 
@@ -152,6 +159,7 @@ struct MenuCheckItem : sMenuCheckItem {
 #if defined(Hiro_MenuRadioItem)
 struct MenuRadioItem : sMenuRadioItem {
   DeclareSharedAction(MenuRadioItem)
+  using internalType = mMenuRadioItem;
 
   auto checked() const { return self().checked(); }
   auto doActivate() const { return self().doActivate(); }
@@ -580,6 +588,7 @@ struct ProgressBar : sProgressBar {
 #if defined(Hiro_RadioButton)
 struct RadioButton : sRadioButton {
   DeclareSharedWidget(RadioButton)
+  using internalType = mRadioButton;
 
   auto bordered() const { return self().bordered(); }
   auto checked() const { return self().checked(); }
@@ -600,6 +609,7 @@ struct RadioButton : sRadioButton {
 #if defined(Hiro_RadioLabel)
 struct RadioLabel : sRadioLabel {
   DeclareSharedWidget(RadioLabel)
+  using internalType = mRadioLabel;
 
   auto checked() const { return self().checked(); }
   auto doActivate() const { return self().doActivate(); }

@@ -3,7 +3,7 @@
 namespace nall {
 namespace Eval {
 
-inline bool isLiteral(const char*& s) {
+inline auto isLiteral(const char*& s) -> bool {
   char n = s[0];
   return (n >= 'A' && n <= 'Z')
       || (n >= 'a' && n <= 'z')
@@ -12,7 +12,7 @@ inline bool isLiteral(const char*& s) {
       || (n == '\'' || n == '\"');
 }
 
-inline string literalNumber(const char*& s) {
+inline auto literalNumber(const char*& s) -> string {
   const char* p = s;
 
   //binary
@@ -64,7 +64,7 @@ inline string literalNumber(const char*& s) {
   return result;
 }
 
-inline string literalString(const char*& s) {
+inline auto literalString(const char*& s) -> string {
   const char* p = s;
   char escape = *p++;
 
@@ -76,7 +76,7 @@ inline string literalString(const char*& s) {
   return result;
 }
 
-inline string literalVariable(const char*& s) {
+inline auto literalVariable(const char*& s) -> string {
   const char* p = s;
 
   while(p[0] == '_' || p[0] == '.' || (p[0] >= 'A' && p[0] <= 'Z') || (p[0] >= 'a' && p[0] <= 'z') || (p[0] >= '0' && p[0] <= '9')) p++;
@@ -86,7 +86,7 @@ inline string literalVariable(const char*& s) {
   return result;
 }
 
-inline string literal(const char*& s) {
+inline auto literal(const char*& s) -> string {
   const char* p = s;
 
   if(p[0] >= '0' && p[0] <= '9') return literalNumber(s);

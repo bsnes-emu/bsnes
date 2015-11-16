@@ -129,6 +129,7 @@ struct AdvancedSettings : TabFrameItem {
       Label libraryPrefix{&libraryLayout, Size{0, 0}};
       LineEdit libraryLocation{&libraryLayout, Size{~0, 0}};
       Button libraryChange{&libraryLayout, Size{0, 0}};
+    CheckLabel ignoreManifests{&layout, Size{~0, 0}};
 };
 
 struct SettingsManager : Window {

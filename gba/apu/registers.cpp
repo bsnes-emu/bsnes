@@ -5,7 +5,7 @@ APU::Registers::SoundBias::operator uint16() const {
   );
 }
 
-uint16 APU::Registers::SoundBias::operator=(uint16 source) {
+auto APU::Registers::SoundBias::operator=(uint16 source) -> uint16 {
   level     = (source >>  0) & 1023;
   amplitude = (source >> 14) &    3;
   return operator uint16();

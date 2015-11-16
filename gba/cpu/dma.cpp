@@ -20,8 +20,8 @@ auto CPU::dma_run() -> void {
 }
 
 auto CPU::dma_exec(Registers::DMA& dma) -> void {
-  unsigned seek = dma.control.size ? 4 : 2;
-  unsigned mode = dma.control.size ? Word : Half;
+  uint seek = dma.control.size ? 4 : 2;
+  uint mode = dma.control.size ? Word : Half;
   mode |= dma.run.length == dma.length ? Nonsequential : Sequential;
 
   if(mode & Nonsequential) {

@@ -1,7 +1,7 @@
 Video video;
 
 Video::Video() {
-  palette = new uint32_t[1 << 19]();
+  palette = new uint32[1 << 19]();
 }
 
 Video::~Video() {
@@ -88,15 +88,15 @@ auto Video::draw_cursor(uint16 color, int x, int y) -> void {
     for(int cx = 0; cx < 15; cx++) {
       int vx = x + cx - 7;
       if(vx < 0 || vx >= 256) continue;  //do not draw offscreen
-      uint8_t pixel = cursor[cy * 15 + cx];
+      uint8 pixel = cursor[cy * 15 + cx];
       if(pixel == 0) continue;
-      uint32_t pixelcolor = (15 << 15) | ((pixel == 1) ? 0 : color);
+      uint32 pixelcolor = (15 << 15) | ((pixel == 1) ? 0 : color);
 
       if(hires == false) {
-        *((uint32_t*)data + vy * 1024 + vx) = pixelcolor;
+        *((uint32*)data + vy * 1024 + vx) = pixelcolor;
       } else {
-        *((uint32_t*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
-        *((uint32_t*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
+        *((uint32*)data + vy * 1024 + vx * 2 + 0) = pixelcolor;
+        *((uint32*)data + vy * 1024 + vx * 2 + 1) = pixelcolor;
       }
     }
   }
@@ -106,14 +106,14 @@ auto Video::update() -> void {
   switch(configuration.controllerPort2) {
   case Device::ID::SuperScope:
     if(dynamic_cast<SuperScope*>(device.controllerPort2)) {
-      auto controller = (SuperScope&)*device.controllerPort2;
+      auto& controller = (SuperScope&)*device.controllerPort2;
       draw_cursor(0x7c00, controller.x, controller.y);
     }
     break;
   case Device::ID::Justifier:
   case Device::ID::Justifiers:
     if(dynamic_cast<Justifier*>(device.controllerPort2)) {
-      auto controller = (Justifier&)*device.controllerPort2;
+      auto& controller = (Justifier&)*device.controllerPort2;
       draw_cursor(0x001f, controller.player1.x, controller.player1.y);
       if(!controller.chained) break;
       draw_cursor(0x02e0, controller.player2.x, controller.player2.y);

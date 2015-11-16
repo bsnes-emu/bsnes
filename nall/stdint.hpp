@@ -1,8 +1,6 @@
 #ifndef NALL_STDINT_HPP
 #define NALL_STDINT_HPP
 
-using uint = unsigned int;
-
 #if defined(_MSC_VER)
   typedef signed char int8_t;
   typedef signed short int16_t;
@@ -45,6 +43,26 @@ static_assert(sizeof(uint8_t)  == 1, "int8_t is not of the correct size" );
 static_assert(sizeof(uint16_t) == 2, "int16_t is not of the correct size");
 static_assert(sizeof(uint32_t) == 4, "int32_t is not of the correct size");
 static_assert(sizeof(uint64_t) == 8, "int64_t is not of the correct size");
+
+using int8 = int8_t;
+using int16 = int16_t;
+using int32 = int32_t;
+using int64 = int64_t;
+using intmax = intmax_t;
+using intptr = intptr_t;
+
+using uint = unsigned int;
+using uint8 = uint8_t;
+using uint16 = uint16_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
+using uintmax = uintmax_t;
+using uintptr = uintptr_t;
+
+#if defined(__SIZEOF_INT128__)
+using int128 = int128_t;
+using uint128 = uint128_t;
+#endif
 
 }
 

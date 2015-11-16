@@ -27,12 +27,12 @@ private:
 
   struct State {
     string output;
-    unsigned sections = 0;
+    uint sections = 0;
   } state;
 
-  auto parseDocument(const string& filedata, const string& pathname, unsigned depth) -> bool;
-  auto parseBlock(string& block, const string& pathname, unsigned depth) -> bool;
-  auto count(const string& text, char value) -> unsigned;
+  auto parseDocument(const string& filedata, const string& pathname, uint depth) -> bool;
+  auto parseBlock(string& block, const string& pathname, uint depth) -> bool;
+  auto count(const string& text, char value) -> uint;
 
   auto escape(const string& text) -> string;
   auto markup(const string& text) -> string;
@@ -51,7 +51,7 @@ auto DML::parse(const string& filename) -> string {
   return state.output;
 }
 
-auto DML::parseDocument(const string& filedata, const string& pathname, unsigned depth) -> bool {
+auto DML::parseDocument(const string& filedata, const string& pathname, uint depth) -> bool {
   if(depth >= 100) return false;  //attempt to prevent infinite recursion with reasonable limit
 
   auto blocks = filedata.split("\n\n");
@@ -60,7 +60,7 @@ auto DML::parseDocument(const string& filedata, const string& pathname, unsigned
   return true;
 }
 
-auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> bool {
+auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool {
   if(block.rstrip().empty()) return true;
   auto lines = block.split("\n");
 
@@ -114,7 +114,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
   //navigation
   else if(count(block, '-')) {
     state.output.append("<nav>\n");
-    unsigned level = 0;
+    uint level = 0;
     for(auto& line : lines) {
       if(auto depth = count(line, '-')) {
         while(level < depth) level++, state.output.append("<ul>\n");
@@ -131,7 +131,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
 
   //list
   else if(count(block, '*')) {
-    unsigned level = 0;
+    uint level = 0;
     for(auto& line : lines) {
       if(auto depth = count(line, '*')) {
         while(level < depth) level++, state.output.append("<ul>\n");
@@ -145,7 +145,7 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
 
   //quote
   else if(count(block, '>')) {
-    unsigned level = 0;
+    uint level = 0;
     for(auto& line : lines) {
       if(auto depth = count(line, '>')) {
         while(level < depth) level++, state.output.append("<blockquote>\n");
@@ -180,8 +180,8 @@ auto DML::parseBlock(string& block, const string& pathname, unsigned depth) -> b
   return true;
 }
 
-auto DML::count(const string& text, char value) -> unsigned {
-  for(unsigned n = 0; n < text.size(); n++) {
+auto DML::count(const string& text, char value) -> uint {
+  for(uint n = 0; n < text.size(); n++) {
     if(text[n] != value) {
       if(text[n] == ' ') return n;
       break;
@@ -206,8 +206,8 @@ auto DML::markup(const string& text) -> string {
   string output;
 
   char match = 0;
-  unsigned offset = 0;
-  for(unsigned n = 0; n < text.size();) {
+  uint offset = 0;
+  for(uint n = 0; n < text.size();) {
     char a = n ? text[n - 1] : 0;
     char b = text[n];
     char c = text[n++ + 1];

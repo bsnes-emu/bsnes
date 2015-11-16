@@ -15,7 +15,7 @@
 
 namespace nall {
 
-auto string::operator[](signed position) const -> const char& {
+auto string::operator[](int position) const -> const char& {
   if(position > size() + 1) throw exception_out_of_bounds{};
   return data()[position];
 }
@@ -49,7 +49,7 @@ auto string::empty() const -> bool {
   return size() == 0;
 }
 
-auto string::length() const -> unsigned {
+auto string::length() const -> uint {
   return strlen(data());
 }
 

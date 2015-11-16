@@ -7,7 +7,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
   if(!query) return true;
 
   for(auto& rule : query.replace(" ", "").split(",")) {
-    enum class Comparator : unsigned { ID, EQ, NE, LT, LE, GT, GE };
+    enum class Comparator : uint { ID, EQ, NE, LT, LE, GT, GE };
     auto comparator = Comparator::ID;
          if(rule.match("*!=*")) comparator = Comparator::NE;
     else if(rule.match("*<=*")) comparator = Comparator::LE;
@@ -58,7 +58,7 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
 
   lstring path = query.split("/");
   string name = path.take(0), rule;
-  unsigned lo = 0u, hi = ~0u;
+  uint lo = 0u, hi = ~0u;
 
   if(name.match("*[*]")) {
     auto p = name.rtrim("]", 1L).split("[", 1L);
@@ -78,7 +78,7 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
     rule = p(1);
   }
 
-  unsigned position = 0;
+  uint position = 0;
   for(auto& node : _children) {
     if(!node->_name.match(name)) continue;
     if(!node->_evaluate(rule)) continue;

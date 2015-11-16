@@ -62,12 +62,13 @@ struct Node {
   auto boolean() const -> bool { return text() == "true"; }
   auto integer() const -> intmax { return text().integer(); }
   auto natural() const -> uintmax { return text().natural(); }
+  auto real() const -> double { return text().real(); }
 
   auto setName(const string& name = "") -> Node& { shared->_name = name; return *this; }
   auto setValue(const string& value = "") -> Node& { shared->_value = value; return *this; }
 
   auto reset() -> void { shared->_children.reset(); }
-  auto size() const -> unsigned { return shared->_children.size(); }
+  auto size() const -> uint { return shared->_children.size(); }
 
   auto prepend(const Node& node) -> void { shared->_children.prepend(node.shared); }
   auto append(const Node& node) -> void { shared->_children.append(node.shared); }
@@ -80,17 +81,17 @@ struct Node {
     return false;
   }
 
-  auto insert(unsigned position, const Node& node) -> bool {
+  auto insert(uint position, const Node& node) -> bool {
     if(position > size()) return false;  //used > instead of >= to allow indexed-equivalent of append()
     return shared->_children.insert(position, node.shared), true;
   }
 
-  auto remove(unsigned position) -> bool {
+  auto remove(uint position) -> bool {
     if(position >= size()) return false;
     return shared->_children.remove(position), true;
   }
 
-  auto swap(unsigned x, unsigned y) -> bool {
+  auto swap(uint x, uint y) -> bool {
     if(x >= size() || y >= size()) return false;
     return std::swap(shared->_children[x], shared->_children[y]), true;
   }
@@ -103,7 +104,7 @@ struct Node {
     });
   }
 
-  auto operator[](signed position) -> Node {
+  auto operator[](int position) -> Node {
     if(position >= size()) return {};
     return shared->_children[position];
   }
@@ -116,11 +117,11 @@ struct Node {
     auto operator*() -> Node { return {source.shared->_children[position]}; }
     auto operator!=(const iterator& source) const -> bool { return position != source.position; }
     auto operator++() -> iterator& { return position++, *this; }
-    iterator(const Node& source, unsigned position) : source(source), position(position) {}
+    iterator(const Node& source, uint position) : source(source), position(position) {}
 
   private:
     const Node& source;
-    unsigned position;
+    uint position;
   };
 
   auto begin() const -> iterator { return iterator(*this, 0); }
@@ -136,7 +137,7 @@ protected:
 namespace nall {
 
 inline range_t range(const Markup::Node& node) {
-  return range_t{0, (signed)node.size(), 1};
+  return range_t{0, (int)node.size(), 1};
 }
 
 }

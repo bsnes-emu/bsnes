@@ -10,10 +10,10 @@ Presentation::Presentation() {
       if(!media.bootable) continue;
       auto item = new MenuItem{&libraryMenu};
       item->setText({media.name, " ..."}).onActivate([=] {
-        directory::create({config->library.location, media.name});
+        directory::create({settings["Library/Location"].text(), media.name});
         auto location = BrowserDialog()
         .setTitle({"Load ", media.name})
-        .setPath({config->library.location, media.name})
+        .setPath({settings["Library/Location"].text(), media.name})
         .setFilters(string{media.name, "|*.", media.type})
         .openFolder();
         if(directory::exists(location)) {
@@ -31,53 +31,59 @@ Presentation::Presentation() {
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
-  if(config->video.scale == "Small") videoScaleSmall.setChecked();
-  if(config->video.scale == "Medium") videoScaleMedium.setChecked();
-  if(config->video.scale == "Large") videoScaleLarge.setChecked();
+  if(settings["Video/Scale"].text() == "Small") videoScaleSmall.setChecked();
+  if(settings["Video/Scale"].text() == "Medium") videoScaleMedium.setChecked();
+  if(settings["Video/Scale"].text() == "Large") videoScaleLarge.setChecked();
   videoScaleSmall.setText("Small").onActivate([&] {
-    config->video.scale = "Small";
+    settings["Video/Scale"].setValue("Small");
     resizeViewport();
   });
   videoScaleMedium.setText("Medium").onActivate([&] {
-    config->video.scale = "Medium";
+    settings["Video/Scale"].setValue("Medium");
     resizeViewport();
   });
   videoScaleLarge.setText("Large").onActivate([&] {
-    config->video.scale = "Large";
+    settings["Video/Scale"].setValue("Large");
     resizeViewport();
   });
-  aspectCorrection.setText("Aspect Correction").setChecked(config->video.aspectCorrection).onToggle([&] {
-    config->video.aspectCorrection = aspectCorrection.checked();
+  aspectCorrection.setText("Aspect Correction").setChecked(settings["Video/AspectCorrection"].boolean()).onToggle([&] {
+    settings["Video/AspectCorrection"].setValue(aspectCorrection.checked());
     resizeViewport();
   });
   videoFilterMenu.setText("Video Filter");
-  if(config->video.filter == "None") videoFilterNone.setChecked();
-  if(config->video.filter == "Blur") videoFilterBlur.setChecked();
-  videoFilterNone.setText("None").onActivate([&] { config->video.filter = "None"; program->updateVideoFilter(); });
-  videoFilterBlur.setText("Blur").onActivate([&] { config->video.filter = "Blur"; program->updateVideoFilter(); });
-  colorEmulation.setText("Color Emulation").setChecked(config->video.colorEmulation).onToggle([&] {
-    config->video.colorEmulation = colorEmulation.checked();
+  if(settings["Video/Filter"].text() == "None") videoFilterNone.setChecked();
+  if(settings["Video/Filter"].text() == "Blur") videoFilterBlur.setChecked();
+  videoFilterNone.setText("None").onActivate([&] {
+    settings["Video/Filter"].setValue("None");
+    program->updateVideoFilter();
+  });
+  videoFilterBlur.setText("Blur").onActivate([&] {
+    settings["Video/Filter"].setValue("Blur");
+    program->updateVideoFilter();
+  });
+  colorEmulation.setText("Color Emulation").setChecked(settings["Video/ColorEmulation"].boolean()).onToggle([&] {
+    settings["Video/ColorEmulation"].setValue(colorEmulation.checked());
     program->updateVideoPalette();
   });
-  maskOverscan.setText("Mask Overscan").setChecked(config->video.overscan.mask).onToggle([&] {
-    config->video.overscan.mask = maskOverscan.checked();
+  maskOverscan.setText("Mask Overscan").setChecked(settings["Video/Overscan/Mask"].boolean()).onToggle([&] {
+    settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
   });
   loadShaders();
-  synchronizeVideo.setText("Synchronize Video").setChecked(config->video.synchronize).onToggle([&] {
-    config->video.synchronize = synchronizeVideo.checked();
-    video->set(Video::Synchronize, config->video.synchronize);
+  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).onToggle([&] {
+    settings["Video/Synchronize"].setValue(synchronizeVideo.checked());
+    video->set(Video::Synchronize, synchronizeVideo.checked());
   });
-  synchronizeAudio.setText("Synchronize Audio").setChecked(config->audio.synchronize).onToggle([&] {
-    config->audio.synchronize = synchronizeAudio.checked();
-    audio->set(Audio::Synchronize, config->audio.synchronize);
+  synchronizeAudio.setText("Synchronize Audio").setChecked(settings["Audio/Synchronize"].boolean()).onToggle([&] {
+    settings["Audio/Synchronize"].setValue(synchronizeAudio.checked());
+    audio->set(Audio::Synchronize, synchronizeVideo.checked());
   });
-  muteAudio.setText("Mute Audio").setChecked(config->audio.mute).onToggle([&] {
-    config->audio.mute = muteAudio.checked();
-    program->dsp.setVolume(config->audio.mute ? 0.0 : 1.0);
+  muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
+    settings["Audio/Mute"].setValue(muteAudio.checked());
+    program->updateAudioVolume();
   });
-  showStatusBar.setText("Show Status Bar").setChecked(config->userInterface.showStatusBar).onToggle([&] {
-    config->userInterface.showStatusBar = showStatusBar.checked();
-    statusBar.setVisible(config->userInterface.showStatusBar);
+  showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
+    settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());
+    statusBar.setVisible(showStatusBar.checked());
     if(visible()) resizeViewport();
   });
   showConfiguration.setText("Configuration ...").onActivate([&] { settingsManager->show(2); });
@@ -99,7 +105,7 @@ Presentation::Presentation() {
   stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
 
   statusBar.setFont(Font().setBold());
-  statusBar.setVisible(config->userInterface.showStatusBar);
+  statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
 
   onClose([&] { program->quit(); });
 
@@ -127,18 +133,18 @@ auto Presentation::updateEmulator() -> void {
     for(auto& device : port.device) {
       MenuRadioItem item{&menu};
       item.setText(device.name).onActivate([=] {
-        emulatorSettings->set({emulator->information.name, "/", port.name}, device.name);
+        auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
+        settings[path].setValue(device.name);
         emulator->connect(port.id, device.id);
       });
       devices.append(item);
     }
     if(devices.objectCount() > 1) {
-      string device = emulatorSettings->get({emulator->information.name, "/", port.name});
+      auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
+      auto device = settings(path).text();
       for(auto object : devices.objects()) {
-        if(auto item = dynamic_cast<mMenuRadioItem*>(object.data())) {
-          if(item->text() == device) {
-            item->setChecked().doActivate();
-          }
+        if(auto item = object.cast<MenuRadioItem>()) {
+          if(item.text() == device) item.setChecked().doActivate();
         }
       }
       menu.setVisible();
@@ -154,17 +160,17 @@ auto Presentation::resizeViewport() -> void {
   double stretch = emulator ? emulator->information.aspectRatio : 1.0;
   if(stretch != 1.0) {
     //aspect correction is always enabled in fullscreen mode
-    if(!fullScreen() && !config->video.aspectCorrection) stretch = 1.0;
+    if(!fullScreen() && !settings["Video/AspectCorrection"].boolean()) stretch = 1.0;
   }
 
   signed scale = 2;
-  if(config->video.scale == "Small" ) scale = 2;
-  if(config->video.scale == "Medium") scale = 3;
-  if(config->video.scale == "Large" ) scale = 4;
+  if(settings["Video/Scale"].text() == "Small" ) scale = 2;
+  if(settings["Video/Scale"].text() == "Medium") scale = 3;
+  if(settings["Video/Scale"].text() == "Large" ) scale = 4;
 
   signed windowWidth = 0, windowHeight = 0;
   if(!fullScreen()) {
-    windowWidth  = 256 * scale * (config->video.aspectCorrection ? 8.0 / 7.0 : 1.0);
+    windowWidth  = 256 * scale * (settings["Video/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
     windowHeight = 240 * scale;
   } else {
     windowWidth  = geometry().width();
@@ -193,7 +199,7 @@ auto Presentation::toggleFullScreen() -> void {
     setFullScreen(false);
     setResizable(false);
     menuBar.setVisible(true);
-    statusBar.setVisible(config->userInterface.showStatusBar);
+    statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
   }
 
   Application::processEvents();
@@ -215,7 +221,7 @@ auto Presentation::drawSplashScreen() -> void {
 }
 
 auto Presentation::loadShaders() -> void {
-  if(config->video.driver != "OpenGL") {
+  if(settings["Video/Driver"].text() != "OpenGL") {
     videoShaderMenu.setVisible(false);
     return;
   }
@@ -224,7 +230,7 @@ auto Presentation::loadShaders() -> void {
   for(auto shader : directory::folders(pathname, "*.shader")) {
     MenuRadioItem item{&videoShaderMenu};
     item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
-      config->video.shader = {pathname, shader};
+      settings["Video/Shader"].setValue({pathname, shader});
       program->updateVideoFilter();
     });
     videoShaders.append(item);
@@ -232,13 +238,13 @@ auto Presentation::loadShaders() -> void {
 
   videoShaderMenu.setText("Video Shaders");
   videoShaderNone.setChecked().setText("None").onActivate([=] {
-    config->video.shader = "None";
+    settings["Video/Shader"].setValue("None");
     program->updateVideoFilter();
   });
 
   for(auto object : videoShaders.objects()) {
     if(auto radioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
-      if(config->video.shader == string{pathname, radioItem->text(), ".shader/"}) {
+      if(settings["Video/Shader"].text() == string{pathname, radioItem->text(), ".shader/"}) {
         radioItem->setChecked();
       }
     }
