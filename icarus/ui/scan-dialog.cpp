@@ -5,7 +5,7 @@ ScanDialog::ScanDialog() {
   layout.setMargin(5);
   pathEdit.onActivate([&] { refresh(); });
   refreshButton.setImage(Icon::Action::Refresh).setBordered(false).onActivate([&] {
-    pathEdit.setText(settings.activePath);
+    pathEdit.setText(settings["icarus/Path"].text());
     refresh();
   });
   homeButton.setImage(Icon::Go::Home).setBordered(false).onActivate([&] {
@@ -13,7 +13,7 @@ ScanDialog::ScanDialog() {
     refresh();
   });
   upButton.setImage(Icon::Go::Up).setBordered(false).onActivate([&] {
-    pathEdit.setText(dirname(settings.activePath));
+    pathEdit.setText(dirname(settings["icarus/Path"].text()));
     refresh();
   });
   scanList.onActivate([&] { activate(); });
@@ -27,8 +27,10 @@ ScanDialog::ScanDialog() {
       if(item.cell(0).checkable()) item.cell(0).setChecked(false);
     }
   });
-  createManifestsLabel.setChecked(settings.createManifests).setText("Create Manifests").onToggle([&] {
-    settings.createManifests = createManifestsLabel.checked();
+  settingsButton.setText("Settings ...").onActivate([&] {
+    settingsDialog->setCentered(*this);
+    settingsDialog->setVisible();
+    settingsDialog->setFocused();
   });
   importButton.setText("Import ...").onActivate([&] { import(); });
 
@@ -39,7 +41,7 @@ ScanDialog::ScanDialog() {
 
 auto ScanDialog::show() -> void {
   setVisible();
-  pathEdit.setText(settings.activePath);
+  pathEdit.setText(settings["icarus/Path"].text());
   refresh();
 }
 
@@ -50,7 +52,8 @@ auto ScanDialog::refresh() -> void {
   auto pathname = pathEdit.text().transform("\\", "/").rtrim("/").append("/");
   if(!directory::exists(pathname)) return;
 
-  pathEdit.setText(settings.activePath = pathname);
+  settings["icarus/Path"].setValue(pathname);
+  pathEdit.setText(pathname);
   auto contents = directory::icontents(pathname);
 
   for(auto& name : contents) {
@@ -72,7 +75,7 @@ auto ScanDialog::refresh() -> void {
 
 auto ScanDialog::activate() -> void {
   if(auto item = scanList.selected()) {
-    string location{settings.activePath, item.cell(0).text()};
+    string location{settings["icarus/Path"].text(), item.cell(0).text()};
     if(directory::exists(location) && !gamePakType(suffixname(location))) {
       pathEdit.setText(location);
       refresh();
@@ -84,7 +87,7 @@ auto ScanDialog::import() -> void {
   lstring filenames;
   for(auto& item : scanList.items()) {
     if(item.cell(0).checked()) {
-      filenames.append(string{settings.activePath, item.cell(0).text()});
+      filenames.append(string{settings["icarus/Path"].text(), item.cell(0).text()});
     }
   }
 

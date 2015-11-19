@@ -25,14 +25,14 @@ auto Icarus::superFamicomManifest(vector<uint8_t>& buffer, const string& locatio
 auto Icarus::superFamicomImport(vector<uint8_t>& buffer, const string& location) -> bool {
   auto name = prefixname(location);
   auto source = pathname(location);
-  string target{settings.libraryPath, "Super Famicom/", name, ".sfc/"};
+  string target{settings["Library/Location"].text(), "Super Famicom/", name, ".sfc/"};
 //if(directory::exists(target)) return failure("game already exists");
 
   string markup;
   vector<Markup::Node> roms;
   bool firmwareAppended = true;
 
-  if(settings.useDatabase && !markup) {
+  if(settings["icarus/UseDatabase"].boolean() && !markup) {
     auto digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
     for(auto node : database.superFamicom) {
       if(node.name() != "release") continue;
@@ -44,7 +44,7 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, const string& location)
     }
   }
 
-  if(settings.useHeuristics && !markup) {
+  if(settings["icarus/UseHeuristics"].boolean() && !markup) {
     SuperFamicomCartridge cartridge{buffer.data(), buffer.size()};
     if(markup = cartridge.markup) {
       firmwareAppended = cartridge.firmware_appended;
@@ -59,7 +59,7 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, const string& location)
   superFamicomImportScanManifest(roms, document["cartridge"]);
   for(auto rom : roms) {
     auto name = rom["name"].text();
-    auto size = rom["size"].decimal();
+    auto size = rom["size"].natural();
     if(name == "program.rom" || name == "data.rom" || firmwareAppended) continue;
     if(file::size({source, name}) != size) return failure({"firmware (", name, ") missing or invalid"});
   }
@@ -67,11 +67,11 @@ auto Icarus::superFamicomImport(vector<uint8_t>& buffer, const string& location)
   if(!markup) return failure("failed to parse ROM image");
   if(!directory::create(target)) return failure("library path unwritable");
 
-  if(settings.createManifests) file::write({target, "manifest.bml"}, markup);
+  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   unsigned offset = (buffer.size() & 0x7fff) == 512 ? 512 : 0;  //skip header if present
   for(auto rom : roms) {
     auto name = rom["name"].text();
-    auto size = rom["size"].decimal();
+    auto size = rom["size"].natural();
     if(name == "program.rom" || name == "data.rom" || firmwareAppended) {
       if(size > buffer.size() - offset) return failure("ROM image is missing data");
       file::write({target, name}, buffer.data() + offset, size);

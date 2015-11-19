@@ -20,12 +20,12 @@ auto Icarus::gameBoyManifest(vector<uint8_t>& buffer, const string& location) ->
 auto Icarus::gameBoyImport(vector<uint8_t>& buffer, const string& location) -> bool {
   auto name = prefixname(location);
   auto source = pathname(location);
-  string target{settings.libraryPath, "Game Boy/", name, ".gb/"};
+  string target{settings["Library/Location"].text(), "Game Boy/", name, ".gb/"};
 //if(directory::exists(target)) return failure("game already exists");
 
   string markup;
 
-  if(settings.useHeuristics && !markup) {
+  if(settings["icarus/UseHeuristics"].boolean() && !markup) {
     GameBoyCartridge cartridge{buffer.data(), buffer.size()};
     if(markup = cartridge.markup) {
       markup.append("\n");
@@ -38,7 +38,7 @@ auto Icarus::gameBoyImport(vector<uint8_t>& buffer, const string& location) -> b
   if(!markup) return failure("failed to parse ROM image");
   if(!directory::create(target)) return failure("library path unwritable");
 
-  if(settings.createManifests) file::write({target, "manifest.bml"}, markup);
+  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "program.rom"}, buffer);
   return success();
 }

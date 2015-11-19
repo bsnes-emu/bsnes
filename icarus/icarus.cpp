@@ -4,6 +4,14 @@ using namespace nall;
 #include <hiro/hiro.hpp>
 using namespace hiro;
 
+//if file already exists in the same path as the binary; use it (portable mode)
+//if not, use default requested path (*nix/user mode)
+auto locate(string pathname, string filename) -> string {
+  string location{programpath(), filename};
+  if(file_system_object::exists(location)) return location;
+  return {pathname, filename};
+}
+
 #include "settings.cpp"
 Settings settings;
 
@@ -27,6 +35,7 @@ Icarus icarus;
 
 #include "ui/ui.hpp"
 #include "ui/scan-dialog.cpp"
+#include "ui/settings-dialog.cpp"
 #include "ui/import-dialog.cpp"
 #include "ui/error-dialog.cpp"
 
@@ -38,6 +47,7 @@ auto nall::main(lstring args) -> void {
   }
 
   new ScanDialog;
+  new SettingsDialog;
   new ImportDialog;
   new ErrorDialog;
   scanDialog->show();

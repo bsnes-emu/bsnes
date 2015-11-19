@@ -22,12 +22,12 @@ auto Icarus::famicomManifest(vector<uint8_t>& buffer, const string& location) ->
 auto Icarus::famicomImport(vector<uint8_t>& buffer, const string& location) -> bool {
   auto name = prefixname(location);
   auto source = pathname(location);
-  string target{settings.libraryPath, "Famicom/", name, ".fc/"};
+  string target{settings["Library/Location"].text(), "Famicom/", name, ".fc/"};
 //if(directory::exists(target)) return failure("game already exists");
 
   string markup;
 
-//if(settings.useHeuristics && !markup) {
+//if(settings["icarus/UseHeuristics"].boolean() && !markup) {
     FamicomCartridge cartridge{buffer.data(), buffer.size()};
     if(markup = cartridge.markup) {
       markup.append("\n");
@@ -40,7 +40,7 @@ auto Icarus::famicomImport(vector<uint8_t>& buffer, const string& location) -> b
   if(!markup) return failure("failed to parse ROM image");
   if(!directory::create(target)) return failure("library path unwritable");
 
-  if(settings.createManifests) file::write({target, "manifest.bml"}, markup);
+  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "ines.rom"}, buffer.data(), 16);
   file::write({target, "program.rom"}, buffer.data() + 16, cartridge.prgrom);
   if(!cartridge.chrrom) return success();

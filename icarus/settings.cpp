@@ -1,31 +1,24 @@
-struct Settings : Configuration::Document {
+struct Settings : Markup::Node {
   Settings();
   ~Settings();
-
-  Configuration::Node root;
-  string activePath;
-  string libraryPath;
-  bool createManifests = false;
-  bool useDatabase = true;
-  bool useHeuristics = true;
 };
 
 Settings::Settings() {
-  root.append(activePath, "ActivePath");
-  root.append(libraryPath, "LibraryPath");
-  root.append(createManifests, "CreateManifests");
-  root.append(useDatabase, "UseDatabase");
-  root.append(useHeuristics, "UseHeuristics");
-  append(root, "Settings");
+  Markup::Node::operator=(BML::unserialize(string::read(locate({configpath(), "icarus/"}, "settings.bml"))));
 
-  directory::create({configpath(), "icarus/"});
-  load({configpath(), "icarus/settings.bml"});
-  save({configpath(), "icarus/settings.bml"});
+  auto set = [&](const string& name, const string& value) {
+    //create node and set to default value only if it does not already exist
+    if(!operator[](name)) operator()(name).setValue(value);
+  };
 
-  if(!activePath) activePath = userpath();
-  if(!libraryPath) libraryPath = {userpath(), "Emulation/"};
+  set("Library/Location", {userpath(), "Emulation/"});
+
+  set("icarus/Path", userpath());
+  set("icarus/CreateManifests", false);
+  set("icarus/UseDatabase", true);
+  set("icarus/UseHeuristics", true);
 }
 
 Settings::~Settings() {
-  save({configpath(), "icarus/settings.bml"});
+  file::write(locate({configpath(), "icarus/"}, "settings.bml"), BML::serialize(*this));
 }

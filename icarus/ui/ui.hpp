@@ -19,8 +19,21 @@ struct ScanDialog : Window {
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Button selectAllButton{&controlLayout, Size{100, 0}};
       Button unselectAllButton{&controlLayout, Size{100, 0}};
-      CheckLabel createManifestsLabel{&controlLayout, Size{~0, 0}};
-      Button importButton{&controlLayout, Size{80, 0}};
+      Widget controlSpacer{&controlLayout, Size{~0, 0}};
+      Button settingsButton{&controlLayout, Size{100, 0}};
+      Button importButton{&controlLayout, Size{100, 0}};
+};
+
+struct SettingsDialog : Window {
+  SettingsDialog();
+
+  VerticalLayout layout{this};
+    HorizontalLayout locationLayout{&layout, Size{~0, 0}};
+      Label locationLabel{&locationLayout, Size{0, 0}};
+      LineEdit locationEdit{&locationLayout, Size{~0, 0}};
+      Button changeLocationButton{&locationLayout, Size{80, 0}};
+    CheckLabel createManifestsOption{&layout, Size{~0, 0}, 2};
+    CheckLabel useDatabaseOption{&layout, Size{~0, 0}};
 };
 
 struct ImportDialog : Window {
@@ -50,5 +63,6 @@ struct ErrorDialog : Window {
 };
 
 ScanDialog* scanDialog = nullptr;
+SettingsDialog* settingsDialog = nullptr;
 ImportDialog* importDialog = nullptr;
 ErrorDialog* errorDialog = nullptr;

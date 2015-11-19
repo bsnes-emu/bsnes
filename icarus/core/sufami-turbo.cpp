@@ -20,12 +20,12 @@ auto Icarus::sufamiTurboManifest(vector<uint8_t>& buffer, const string& location
 auto Icarus::sufamiTurboImport(vector<uint8_t>& buffer, const string& location) -> bool {
   auto name = prefixname(location);
   auto source = pathname(location);
-  string target{settings.libraryPath, "Sufami Turbo/", name, ".st/"};
+  string target{settings["Library/Location"].text(), "Sufami Turbo/", name, ".st/"};
 //if(directory::exists(target)) return failure("game already exists");
 
   string markup;
 
-  if(settings.useDatabase && !markup) {
+  if(settings["icarus/UseDatabase"].boolean() && !markup) {
     auto digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
     for(auto node : database.sufamiTurbo) {
       if(node.name() != "release") continue;
@@ -37,7 +37,7 @@ auto Icarus::sufamiTurboImport(vector<uint8_t>& buffer, const string& location) 
     }
   }
 
-  if(settings.useHeuristics && !markup) {
+  if(settings["icarus/UseHeuristics"].boolean() && !markup) {
     SufamiTurboCartridge cartridge{buffer.data(), buffer.size()};
     if(markup = cartridge.markup) {
       markup.append("\n");
@@ -50,7 +50,7 @@ auto Icarus::sufamiTurboImport(vector<uint8_t>& buffer, const string& location) 
   if(!markup) return failure("failed to parse ROM image");
   if(!directory::create(target)) return failure("library path unwritable");
 
-  if(settings.createManifests) file::write({target, "manifest.bml"}, markup);
+  if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "program.rom"}, buffer);
   return success();
 }
