@@ -1,16 +1,14 @@
-#ifdef APU_CPP
-
-void APU::Master::run() {
+auto APU::Master::run() -> void {
   if(enable == false) {
     center = 0;
     left   = 0;
     right  = 0;
 
-center_bias = left_bias = right_bias = 0;
+    center_bias = left_bias = right_bias = 0;
     return;
   }
 
-  signed sample = 0;
+  int sample = 0;
   sample += apu.square1.output;
   sample += apu.square2.output;
   sample +=    apu.wave.output;
@@ -41,7 +39,7 @@ center_bias = left_bias = right_bias = 0;
   right  >>= 1;
 }
 
-void APU::Master::write(unsigned r, uint8 data) {
+auto APU::Master::write(uint r, uint8 data) -> void {
   if(r == 0) {  //$ff24  NR50
     left_in_enable  = data & 0x80;
     left_volume     = (data >> 4) & 7;
@@ -65,7 +63,7 @@ void APU::Master::write(unsigned r, uint8 data) {
   }
 }
 
-void APU::Master::power() {
+auto APU::Master::power() -> void {
   left_in_enable = 0;
   left_volume = 0;
   right_in_enable = 0;
@@ -89,7 +87,7 @@ void APU::Master::power() {
   right_bias = 0;
 }
 
-void APU::Master::serialize(serializer& s) {
+auto APU::Master::serialize(serializer& s) -> void {
   s.integer(left_in_enable);
   s.integer(left_volume);
   s.integer(right_in_enable);
@@ -112,5 +110,3 @@ void APU::Master::serialize(serializer& s) {
   s.integer(left_bias);
   s.integer(right_bias);
 }
-
-#endif

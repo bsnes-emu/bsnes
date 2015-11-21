@@ -421,7 +421,7 @@ auto Cartridge::parseMarkupNECDSP(Markup::Node root) -> void {
     }
 
     if(node["id"].text() == "ram") {
-      Mapping m({&NECDSP::ram_read, &necdsp}, {&NECDSP::ram_write, &necdsp});
+      Mapping m({&NECDSP::readRAM, &necdsp}, {&NECDSP::writeRAM, &necdsp});
       parseMarkupMap(m, node);
       mapping.append(m);
     }

@@ -1,6 +1,4 @@
-#ifdef CARTRIDGE_CPP
-
-uint8 Cartridge::HuC1::mmio_read(uint16 addr) {
+auto Cartridge::HuC1::mmio_read(uint16 addr) -> uint8 {
   if((addr & 0xc000) == 0x0000) {  //$0000-3fff
     return cartridge.rom_read(addr);
   }
@@ -16,7 +14,7 @@ uint8 Cartridge::HuC1::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void Cartridge::HuC1::mmio_write(uint16 addr, uint8 data) {
+auto Cartridge::HuC1::mmio_write(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0x0000) {  //$0000-1fff
     ram_writable = (data & 0x0f) == 0x0a;
     return;
@@ -44,11 +42,9 @@ void Cartridge::HuC1::mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-void Cartridge::HuC1::power() {
+auto Cartridge::HuC1::power() -> void {
   ram_writable = false;
   rom_select = 0x01;
   ram_select = 0x00;
   model = 0;
 }
-
-#endif

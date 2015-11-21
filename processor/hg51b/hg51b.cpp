@@ -7,7 +7,7 @@ namespace Processor {
 #include "instructions.cpp"
 #include "serialization.cpp"
 
-void HG51B::exec(uint24 addr) {
+auto HG51B::exec(uint24 addr) -> void {
   if(regs.halt) return;
   addr = addr + regs.pc * 2;
   opcode  = bus_read(addr++) << 0;
@@ -16,7 +16,7 @@ void HG51B::exec(uint24 addr) {
   instruction();
 }
 
-void HG51B::power() {
+auto HG51B::power() -> void {
   regs.halt = true;
 
   regs.n = 0;

@@ -1,10 +1,8 @@
-#ifdef PPU_CPP
-
-unsigned PPU::vram_addr(uint16 addr) const {
+auto PPU::vram_addr(uint16 addr) const -> uint {
   return (status.vram_bank * 0x2000) + (addr & 0x1fff);
 }
 
-uint8 PPU::mmio_read(uint16 addr) {
+auto PPU::mmio_read(uint16 addr) -> uint8 {
   if(addr >= 0x8000 && addr <= 0x9fff) return vram[vram_addr(addr)];
   if(addr >= 0xfe00 && addr <= 0xfe9f) return oam[addr & 0xff];
 
@@ -20,7 +18,7 @@ uint8 PPU::mmio_read(uint16 addr) {
   }
 
   if(addr == 0xff41) {  //STAT
-    unsigned mode;
+    uint mode;
     if(status.ly >= 144) mode = 1;  //Vblank
     else if(status.lx < 80) mode = 2;  //OAM
     else if(status.lx < 252) mode = 3;  //LCD
@@ -90,7 +88,7 @@ uint8 PPU::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void PPU::mmio_write(uint16 addr, uint8 data) {
+auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
   if(addr >= 0x8000 && addr <= 0x9fff) { vram[vram_addr(addr)] = data; return; }
   if(addr >= 0xfe00 && addr <= 0xfe9f) { oam[addr & 0xff] = data; return; }
 
@@ -199,5 +197,3 @@ void PPU::mmio_write(uint16 addr, uint8 data) {
     if(status.obpi_increment) status.obpi++;
   }
 }
-
-#endif

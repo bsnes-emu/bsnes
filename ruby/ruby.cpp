@@ -1,3 +1,8 @@
+#ifdef _WIN32
+  #include <initguid.h>
+  #include <cguid.h>
+#endif
+
 #include <ruby/ruby.hpp>
 using namespace nall;
 using namespace ruby;
@@ -250,6 +255,10 @@ auto Video::availableDrivers() -> lstring {
   #include <ruby/audio/pulseaudiosimple.cpp>
 #endif
 
+#if defined(AUDIO_WASAPI)
+  #include <ruby/audio/wasapi.cpp>
+#endif
+
 #if defined(AUDIO_XAUDIO2)
   #include <ruby/audio/xaudio2.cpp>
 #endif
@@ -257,6 +266,7 @@ auto Video::availableDrivers() -> lstring {
 namespace ruby {
 
 const string Audio::Device = "Device";
+const string Audio::Exclusive = "Exclusive";
 const string Audio::Handle = "Handle";
 const string Audio::Synchronize = "Synchronize";
 const string Audio::Frequency = "Frequency";
@@ -293,6 +303,10 @@ auto Audio::create(const string& driver) -> Audio* {
   if(driver == "PulseAudioSimple") return new AudioPulseAudioSimple;
   #endif
 
+  #if defined(AUDIO_WASAPI)
+  if(driver == "WASAPI") return new AudioWASAPI;
+  #endif
+
   #if defined(AUDIO_XAUDIO2)
   if(driver == "XAudio2") return new AudioXAudio2;
   #endif
@@ -301,7 +315,9 @@ auto Audio::create(const string& driver) -> Audio* {
 }
 
 auto Audio::optimalDriver() -> string {
-  #if defined(AUDIO_XAUDIO2)
+  #if defined(AUDIO_WASAPI)
+  return "WASAPI";
+  #elif defined(AUDIO_XAUDIO2)
   return "XAudio2";
   #elif defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
@@ -325,6 +341,8 @@ auto Audio::optimalDriver() -> string {
 auto Audio::safestDriver() -> string {
   #if defined(AUDIO_DIRECTSOUND)
   return "DirectSound";
+  #elif defined(AUDIO_WASAPI)
+  return "WASAPI";
   #elif defined(AUDIO_XAUDIO2)
   return "XAudio2";
   #elif defined(AUDIO_ALSA)
@@ -346,6 +364,10 @@ auto Audio::safestDriver() -> string {
 
 auto Audio::availableDrivers() -> lstring {
   return {
+
+  #if defined(AUDIO_WASAPI)
+  "WASAPI",
+  #endif
 
   #if defined(AUDIO_XAUDIO2)
   "XAudio2",

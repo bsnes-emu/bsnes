@@ -1,20 +1,20 @@
-string SPC700::disassemble_opcode(uint16 addr, bool p) {
+auto SPC700::disassemble(uint16 addr, bool p) -> string {
   auto read = [&](uint16 addr) -> uint8 {
     return disassembler_read(addr);
   };
 
-  auto relative = [&](unsigned length, int8 offset) -> uint16 {
+  auto relative = [&](uint length, int8 offset) -> uint16 {
     uint16 pc = addr + length;
     return pc + offset;
   };
 
   auto a = [&] { return hex((read(addr + 1) << 0) + (read(addr + 2) << 8), 4L); };
-  auto b = [&](unsigned n) { return hex(read(addr + 1 + n), 2L); };
-  auto r = [&](unsigned r, unsigned n = 0) { return hex(addr + r + (int8)read(addr + 1 + n), 4L); };
-  auto dp = [&](unsigned n) { return hex((p << 8) + read(addr + 1 + n), 3L); };
+  auto b = [&](uint n) { return hex(read(addr + 1 + n), 2L); };
+  auto r = [&](uint r, uint n = 0) { return hex(addr + r + (int8)read(addr + 1 + n), 4L); };
+  auto dp = [&](uint n) { return hex((p << 8) + read(addr + 1 + n), 3L); };
   auto ab = [&] {
-    unsigned n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
-    return string{ hex(n & 0x1fff, 4L), ":", hex(n >> 13, 1L) };
+    uint n = (read(addr + 1) << 0) + (read(addr + 2) << 8);
+    return string{hex(n & 0x1fff, 4L), ":", hex(n >> 13, 1L)};
   };
 
   auto mnemonic = [&]() -> string {
@@ -279,9 +279,9 @@ string SPC700::disassemble_opcode(uint16 addr, bool p) {
     throw;
   };
 
-  string output = { "..", hex(addr, 4L), " ", mnemonic() };
+  string output = {"..", hex(addr, 4L), " ", mnemonic()};
 
-  unsigned length = output.length();
+  uint length = output.length();
   while(length++ < 30) output.append(" ");
 
   output.append(

@@ -21,6 +21,7 @@ rubylink += $(if $(findstring audio.ao,$(ruby)),-lao)
 rubylink += $(if $(findstring audio.directsound,$(ruby)),-ldsound)
 rubylink += $(if $(findstring audio.pulseaudio,$(ruby)),-lpulse)
 rubylink += $(if $(findstring audio.pulseaudiosimple,$(ruby)),-lpulse-simple)
+rubylink += $(if $(findstring audio.wasapi,$(ruby)),-lavrt -luuid)
 rubylink += $(if $(findstring audio.xaudio2,$(ruby)),-lole32)
 
 rubylink += $(if $(findstring input.udev,$(ruby)),-ludev)

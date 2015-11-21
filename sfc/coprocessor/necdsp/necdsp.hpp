@@ -5,8 +5,8 @@ struct NECDSP : Processor::uPD96050, Coprocessor {
   auto read(uint addr) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
-  auto ram_read(uint addr) -> uint8;
-  auto ram_write(uint addr, uint8 data) -> void;
+  auto readRAM(uint addr) -> uint8;
+  auto writeRAM(uint addr, uint8 data) -> void;
 
   auto init() -> void;
   auto load() -> void;

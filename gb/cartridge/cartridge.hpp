@@ -1,4 +1,23 @@
 struct Cartridge : MMIO, property<Cartridge> {
+  Cartridge();
+  ~Cartridge();
+
+  auto load_empty(System::Revision revision) -> void;
+  auto load(System::Revision revision) -> void;
+  auto unload() -> void;
+
+  auto rom_read(uint addr) -> uint8;
+  auto rom_write(uint addr, uint8 data) -> void;
+  auto ram_read(uint addr) -> uint8;
+  auto ram_write(uint addr, uint8 data) -> void;
+
+  auto mmio_read(uint16 addr) -> uint8;
+  auto mmio_write(uint16 addr, uint8 data) -> void;
+
+  auto power() -> void;
+
+  auto serialize(serializer&) -> void;
+
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
   #include "mbc2/mbc2.hpp"
@@ -8,7 +27,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   #include "huc1/huc1.hpp"
   #include "huc3/huc3.hpp"
 
-  enum Mapper : unsigned {
+  enum Mapper : uint {
     MBC0,
     MBC1,
     MBC2,
@@ -30,14 +49,14 @@ struct Cartridge : MMIO, property<Cartridge> {
     bool rtc;
     bool rumble;
 
-    unsigned romsize;
-    unsigned ramsize;
+    uint romsize;
+    uint ramsize;
   } information;
 
   string title();
 
   struct Memory {
-    unsigned id;
+    uint id;
     string name;
   };
   vector<Memory> memory;
@@ -45,32 +64,14 @@ struct Cartridge : MMIO, property<Cartridge> {
   readonly<bool> loaded;
   readonly<string> sha256;
 
-  uint8_t* romdata = nullptr;
-  unsigned romsize = 0;
+  uint8* romdata = nullptr;
+  uint romsize = 0;
 
-  uint8_t* ramdata = nullptr;
-  unsigned ramsize = 0;
+  uint8* ramdata = nullptr;
+  uint ramsize = 0;
 
   MMIO* mapper = nullptr;
   bool bootrom_enable = true;
-
-  void load_empty(System::Revision revision);
-  void load(System::Revision revision);
-  void unload();
-
-  uint8 rom_read(unsigned addr);
-  void rom_write(unsigned addr, uint8 data);
-  uint8 ram_read(unsigned addr);
-  void ram_write(unsigned addr, uint8 data);
-
-  uint8 mmio_read(uint16 addr);
-  void mmio_write(uint16 addr, uint8 data);
-
-  void power();
-
-  void serialize(serializer&);
-  Cartridge();
-  ~Cartridge();
 };
 
 extern Cartridge cartridge;

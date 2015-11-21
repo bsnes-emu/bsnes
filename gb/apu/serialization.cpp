@@ -1,6 +1,4 @@
-#ifdef APU_CPP
-
-void APU::serialize(serializer& s) {
+auto APU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.array(mmio_data);
@@ -13,5 +11,3 @@ void APU::serialize(serializer& s) {
   noise.serialize(s);
   master.serialize(s);
 }
-
-#endif

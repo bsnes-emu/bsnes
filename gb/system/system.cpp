@@ -1,21 +1,26 @@
 #include <gb/gb.hpp>
 
-#define SYSTEM_CPP
 namespace GameBoy {
 
 #include "serialization.cpp"
 System system;
 
-void System::run() {
+System::System() {
+  for(auto& byte : bootROM.dmg) byte = 0;
+  for(auto& byte : bootROM.sgb) byte = 0;
+  for(auto& byte : bootROM.cgb) byte = 0;
+}
+
+auto System::run() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::None;
 
   scheduler.enter();
-  if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+  if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
     interface->videoRefresh(video.palette, ppu.screen, 4 * 160, 160, 144);
   }
 }
 
-void System::runtosave() {
+auto System::runtosave() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::CPU;
   runthreadtosave();
 
@@ -30,21 +35,21 @@ void System::runtosave() {
   scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 
-void System::runthreadtosave() {
+auto System::runthreadtosave() -> void {
   while(true) {
     scheduler.enter();
-    if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
+    if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
+    if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
       interface->videoRefresh(video.palette, ppu.screen, 4 * 160, 160, 144);
     }
   }
 }
 
-void System::init() {
+auto System::init() -> void {
   assert(interface != nullptr);
 }
 
-void System::load(Revision revision) {
+auto System::load(Revision revision) -> void {
   this->revision = revision;
   serialize_init();
   if(revision == Revision::SuperGameBoy) return;  //Super Famicom core loads boot ROM for SGB
@@ -60,7 +65,7 @@ void System::load(Revision revision) {
   }
 }
 
-void System::power() {
+auto System::power() -> void {
   bus.power();
   cartridge.power();
   cpu.power();
@@ -69,12 +74,6 @@ void System::power() {
   scheduler.init();
 
   clocks_executed = 0;
-}
-
-System::System() {
-  for(auto& byte : bootROM.dmg) byte = 0;
-  for(auto& byte : bootROM.sgb) byte = 0;
-  for(auto& byte : bootROM.cgb) byte = 0;
 }
 
 }

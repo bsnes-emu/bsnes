@@ -1,6 +1,4 @@
-#ifdef PPU_CPP
-
-void PPU::serialize(serializer& s) {
+auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.array(vram);
@@ -68,5 +66,3 @@ void PPU::serialize(serializer& s) {
   s.integer(window.attr);
   s.integer(window.data);
 }
-
-#endif

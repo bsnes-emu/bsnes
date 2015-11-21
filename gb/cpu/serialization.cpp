@@ -1,6 +1,4 @@
-#ifdef CPU_CPP
-
-void CPU::serialize(serializer& s) {
+auto CPU::serialize(serializer& s) -> void {
   LR35902::serialize(s);
   Thread::serialize(s);
 
@@ -60,5 +58,3 @@ void CPU::serialize(serializer& s) {
   s.integer(oamdma.bank);
   s.integer(oamdma.offset);
 }
-
-#endif

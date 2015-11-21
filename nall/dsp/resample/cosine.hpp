@@ -1,33 +1,35 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct ResampleCosine : Resampler {
-  inline void setFrequency();
-  inline void clear();
-  inline void sample();
   ResampleCosine(DSP& dsp) : Resampler(dsp) {}
 
-  real fraction;
-  real step;
+  inline auto setFrequency() -> void;
+  inline auto clear() -> void;
+  inline auto sample() -> void;
+
+private:
+  double fraction;
+  double step;
 };
 
-void ResampleCosine::setFrequency() {
+auto ResampleCosine::setFrequency() -> void {
   fraction = 0.0;
   step = dsp.settings.frequency / frequency;
 }
 
-void ResampleCosine::clear() {
+auto ResampleCosine::clear() -> void {
   fraction = 0.0;
 }
 
-void ResampleCosine::sample() {
+auto ResampleCosine::sample() -> void {
   while(fraction <= 1.0) {
-    real channel[dsp.settings.channels];
+    double channel[dsp.settings.channels];
 
-    for(unsigned n = 0; n < dsp.settings.channels; n++) {
-      real a = dsp.buffer.read(n, -1);
-      real b = dsp.buffer.read(n, -0);
+    for(auto n : range(dsp.settings.channels)) {
+      double a = dsp.buffer.read(n, -1);
+      double b = dsp.buffer.read(n, -0);
 
-      real mu = fraction;
+      double mu = fraction;
       mu = (1.0 - cos(mu * 3.14159265)) / 2.0;
 
       channel[n] = a * (1.0 - mu) + b * mu;

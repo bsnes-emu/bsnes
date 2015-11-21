@@ -6,24 +6,22 @@
 
 namespace nall {
 
-//precision: can be float, double or long double
-#define real float
-
 struct DSP;
 
 struct Resampler {
-  DSP& dsp;
-  real frequency;
-
-  virtual void setFrequency() = 0;
-  virtual void clear() = 0;
-  virtual void sample() = 0;
   Resampler(DSP& dsp) : dsp(dsp) {}
   virtual ~Resampler() {}
+
+  virtual auto setFrequency() -> void = 0;
+  virtual auto clear() -> void = 0;
+  virtual auto sample() -> void = 0;
+
+  DSP& dsp;
+  double frequency = 44100.0;
 };
 
 struct DSP {
-  enum class ResampleEngine : unsigned {
+  enum class ResampleEngine : uint {
     Nearest,
     Linear,
     Cosine,
@@ -33,24 +31,48 @@ struct DSP {
     Sinc,
   };
 
-  inline void setChannels(unsigned channels);
-  inline void setPrecision(unsigned precision);
-  inline void setFrequency(real frequency);  //inputFrequency
-  inline void setVolume(real volume);
-  inline void setBalance(real balance);
-
-  inline void setResampler(ResampleEngine resamplingEngine);
-  inline void setResamplerFrequency(real frequency);  //outputFrequency
-
-  inline void sample(signed channel[]);
-  inline bool pending();
-  inline void read(signed channel[]);
-
-  inline void clear();
   inline DSP();
   inline ~DSP();
 
+  inline auto setChannels(uint channels) -> void;
+  inline auto setPrecision(uint precision) -> void;
+  inline auto setFrequency(double frequency) -> void;  //inputFrequency
+  inline auto setVolume(double volume) -> void;
+  inline auto setBalance(double balance) -> void;
+
+  inline auto setResampler(ResampleEngine resamplingEngine) -> void;
+  inline auto setResamplerFrequency(double frequency) -> void;  //outputFrequency
+
+  inline auto sample(int channel[]) -> void;
+  inline auto pending() const -> bool;
+  inline auto read(int channel[]) -> void;
+
+  inline auto clear() -> void;
+
 protected:
+  inline auto write(double channel[]) -> void;
+  inline auto adjustVolume() -> void;
+  inline auto adjustBalance() -> void;
+  inline auto clamp(const uint bits, const int input) -> int;
+
+  struct Settings {
+    uint channels;
+    uint precision;
+    double frequency;
+    double volume;
+    double balance;
+
+    //internal
+    double intensity;
+    double intensityInverse;
+  } settings;
+
+  Resampler* resampler = nullptr;
+
+  #include "buffer.hpp"
+  Buffer buffer;
+  Buffer output;
+
   friend class ResampleNearest;
   friend class ResampleLinear;
   friend class ResampleCosine;
@@ -58,29 +80,6 @@ protected:
   friend class ResampleAverage;
   friend class ResampleHermite;
   friend class ResampleSinc;
-
-  struct Settings {
-    unsigned channels;
-    unsigned precision;
-    real frequency;
-    real volume;
-    real balance;
-
-    //internal
-    real intensity;
-    real intensityInverse;
-  } settings;
-
-  Resampler* resampler = nullptr;
-  inline void write(real channel[]);
-
-  #include "buffer.hpp"
-  Buffer buffer;
-  Buffer output;
-
-  inline void adjustVolume();
-  inline void adjustBalance();
-  inline signed clamp(const unsigned bits, const signed x);
 };
 
 #include "resample/nearest.hpp"
@@ -91,59 +90,6 @@ protected:
 #include "resample/average.hpp"
 #include "resample/sinc.hpp"
 #include "settings.hpp"
-
-void DSP::sample(signed channel[]) {
-  for(unsigned c = 0; c < settings.channels; c++) {
-    buffer.write(c) = (real)channel[c] * settings.intensityInverse;
-  }
-  buffer.wroffset++;
-  resampler->sample();
-}
-
-bool DSP::pending() {
-  return output.rdoffset != output.wroffset;
-}
-
-void DSP::read(signed channel[]) {
-  adjustVolume();
-  adjustBalance();
-
-  for(unsigned c = 0; c < settings.channels; c++) {
-    channel[c] = clamp(settings.precision, output.read(c) * settings.intensity);
-  }
-  output.rdoffset++;
-}
-
-void DSP::write(real channel[]) {
-  for(unsigned c = 0; c < settings.channels; c++) {
-    output.write(c) = channel[c];
-  }
-  output.wroffset++;
-}
-
-void DSP::adjustVolume() {
-  for(unsigned c = 0; c < settings.channels; c++) {
-    output.read(c) *= settings.volume;
-  }
-}
-
-void DSP::adjustBalance() {
-  if(settings.channels != 2) return;  //TODO: support > 2 channels
-  if(settings.balance < 0.0) output.read(1) *= 1.0 + settings.balance;
-  if(settings.balance > 0.0) output.read(0) *= 1.0 - settings.balance;
-}
-
-signed DSP::clamp(const unsigned bits, const signed x) {
-  const signed b = 1U << (bits - 1);
-  const signed m = (1U << (bits - 1)) - 1;
-  return (x > m) ? m : (x < -b) ? -b : x;
-}
-
-void DSP::clear() {
-  buffer.clear();
-  output.clear();
-  resampler->clear();
-}
 
 DSP::DSP() {
   setResampler(ResampleEngine::Hermite);
@@ -162,7 +108,58 @@ DSP::~DSP() {
   if(resampler) delete resampler;
 }
 
-#undef real
+auto DSP::sample(int channel[]) -> void {
+  for(auto c : range(settings.channels)) {
+    buffer.write(c) = (double)channel[c] * settings.intensityInverse;
+  }
+  buffer.wroffset++;
+  resampler->sample();
+}
+
+auto DSP::pending() const -> bool {
+  return output.rdoffset != output.wroffset;
+}
+
+auto DSP::read(int channel[]) -> void {
+  adjustVolume();
+  adjustBalance();
+
+  for(auto c : range(settings.channels)) {
+    channel[c] = clamp(settings.precision, output.read(c) * settings.intensity);
+  }
+  output.rdoffset++;
+}
+
+auto DSP::write(double channel[]) -> void {
+  for(auto c : range(settings.channels)) {
+    output.write(c) = channel[c];
+  }
+  output.wroffset++;
+}
+
+auto DSP::adjustVolume() -> void {
+  for(auto c : range(settings.channels)) {
+    output.read(c) *= settings.volume;
+  }
+}
+
+auto DSP::adjustBalance() -> void {
+  if(settings.channels != 2) return;  //TODO: support > 2 channels
+  if(settings.balance < 0.0) output.read(1) *= 1.0 + settings.balance;
+  if(settings.balance > 0.0) output.read(0) *= 1.0 - settings.balance;
+}
+
+auto DSP::clamp(const uint bits, const int x) -> int {
+  const int b = 1U << (bits - 1);
+  const int m = (1U << (bits - 1)) - 1;
+  return (x > m) ? m : (x < -b) ? -b : x;
+}
+
+auto DSP::clear() -> void {
+  buffer.clear();
+  output.clear();
+  resampler->clear();
+}
 
 }
 

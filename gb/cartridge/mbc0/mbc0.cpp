@@ -1,6 +1,4 @@
-#ifdef CARTRIDGE_CPP
-
-uint8 Cartridge::MBC0::mmio_read(uint16 addr) {
+auto Cartridge::MBC0::mmio_read(uint16 addr) -> uint8 {
   if((addr & 0x8000) == 0x0000) {  //$0000-7fff
     return cartridge.rom_read(addr);
   }
@@ -12,14 +10,12 @@ uint8 Cartridge::MBC0::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void Cartridge::MBC0::mmio_write(uint16 addr, uint8 data) {
+auto Cartridge::MBC0::mmio_write(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
     cartridge.ram_write(addr & 0x1fff, data);
     return;
   }
 }
 
-void Cartridge::MBC0::power() {
+auto Cartridge::MBC0::power() -> void {
 }
-
-#endif

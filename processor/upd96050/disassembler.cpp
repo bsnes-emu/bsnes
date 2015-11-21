@@ -1,7 +1,5 @@
-#ifdef NECDSP_CPP
-
-string NECDSP::disassemble(uint14 ip) {
-  string output = { hex<4>(ip), "  " };
+auto uPD96050::disassemble(uint14 ip) -> string {
+  string output = {hex(ip, 4L), "  "};
   uint24 opcode = programROM[ip];
   uint2 type = opcode >> 22;
 
@@ -98,7 +96,7 @@ string NECDSP::disassemble(uint14 ip) {
     }
 
     if(dphm) {
-      output.append("\n      m", hex<1>(dphm));
+      output.append("\n      m", hex(dphm, 1L));
     }
 
     if(rpdcr == 1) {
@@ -160,7 +158,7 @@ string NECDSP::disassemble(uint14 ip) {
     default:    output.append("??????  "); break;
     }
 
-    output.append("$", hex<4>(jp));
+    output.append("$", hex(jp, 4L));
   }
 
   if(type == 3) {  //LD
@@ -168,7 +166,7 @@ string NECDSP::disassemble(uint14 ip) {
     uint16 id = opcode >> 6;
     uint4 dst = opcode >> 0;
 
-    output.append("$", hex<4>(id), ",");
+    output.append("$", hex(id, 4L), ",");
 
     switch(dst) {
     case  0: output.append("non"); break;
@@ -192,5 +190,3 @@ string NECDSP::disassemble(uint14 ip) {
 
   return output;
 }
-
-#endif

@@ -1,6 +1,4 @@
-#ifdef CARTRIDGE_CPP
-
-void Cartridge::serialize(serializer& s) {
+auto Cartridge::serialize(serializer& s) -> void {
   if(information.battery) s.array(ramdata, ramsize);
   s.integer(bootrom_enable);
 
@@ -50,5 +48,3 @@ void Cartridge::serialize(serializer& s) {
   s.integer(huc3.rom_select);
   s.integer(huc3.ram_select);
 }
-
-#endif

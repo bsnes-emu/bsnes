@@ -1,38 +1,74 @@
+//NEC uPD7720 (not supported)
+//NEC uPD7725
+//NEC uPD96050
+
 #ifndef PROCESSOR_UPD96050_HPP
 #define PROCESSOR_UPD96050_HPP
 
 namespace Processor {
 
-//NEC uPD7720 (not supported)
-//NEC uPD7725
-//NEC uPD96050
-
 struct uPD96050 {
-  enum class Revision : unsigned { uPD7725, uPD96050 } revision;
+  auto power() -> void;
+  auto exec() -> void;
+  auto serialize(serializer&) -> void;
+
+  auto execOP(uint24 opcode) -> void;
+  auto execRT(uint24 opcode) -> void;
+  auto execJP(uint24 opcode) -> void;
+  auto execLD(uint24 opcode) -> void;
+
+  auto readSR() -> uint8;
+  auto writeSR(uint8 data) -> void;
+
+  auto readDR() -> uint8;
+  auto writeDR(uint8 data) -> void;
+
+  auto readDP(uint12 addr) -> uint8;
+  auto writeDP(uint12 addr, uint8 data) -> void;
+
+  auto disassemble(uint14 ip) -> string;
+
+  enum class Revision : uint { uPD7725, uPD96050 } revision;
   uint24 programROM[16384];
   uint16 dataROM[2048];
   uint16 dataRAM[2048];
-  #include "registers.hpp"
 
-  void power();
-  void exec();
-  void serialize(serializer&);
+  //registers.cpp
+  struct Flag {
+    inline operator uint() const;
+    inline auto operator=(uint d) -> uint;
 
-  void exec_op(uint24 opcode);
-  void exec_rt(uint24 opcode);
-  void exec_jp(uint24 opcode);
-  void exec_ld(uint24 opcode);
+    bool s1, s0, c, z, ov1, ov0;
+  };
 
-  uint8 sr_read();
-  void sr_write(uint8 data);
+  struct Status {
+    inline operator uint() const;
+    inline auto operator=(uint d) -> uint;
 
-  uint8 dr_read();
-  void dr_write(uint8 data);
+    bool rqm, usf1, usf0, drs, dma, drc, soc, sic, ei, p1, p0;
+  };
 
-  uint8 dp_read(uint12 addr);
-  void dp_write(uint12 addr, uint8 data);
-
-  string disassemble(uint14 ip);
+  struct Regs {
+    uint16 stack[16];  //LIFO
+    varuint pc;        //program counter
+    varuint rp;        //ROM pointer
+    varuint dp;        //data pointer
+    uint4 sp;          //stack pointer
+    int16 k;
+    int16 l;
+    int16 m;
+    int16 n;
+    int16 a;           //accumulator
+    int16 b;           //accumulator
+    Flag flaga;
+    Flag flagb;
+    uint16 tr;         //temporary register
+    uint16 trb;        //temporary register
+    Status sr;         //status register
+    uint16 dr;         //data register
+    uint16 si;
+    uint16 so;
+  } regs;
 };
 
 }

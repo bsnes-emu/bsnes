@@ -1,6 +1,6 @@
 #ifdef PROCESSOR_HG51B_HPP
 
-void HG51B::serialize(serializer& s) {
+auto HG51B::serialize(serializer& s) -> void {
   s.array(dataRAM);
   for(auto& n : stack) s.integer(n);
   s.integer(opcode);

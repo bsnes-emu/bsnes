@@ -1,13 +1,13 @@
 #define call (this->*op)
 
-template<uint8 (SPC700::*op)(uint8)>
-void SPC700::op_adjust(uint8& r) {
+template<auto (SPC700::*op)(uint8) -> uint8>
+auto SPC700::op_adjust(uint8& r) -> void {
   op_io();
   r = call(r);
 }
 
-template<uint8 (SPC700::*op)(uint8)>
-void SPC700::op_adjust_addr() {
+template<auto (SPC700::*op)(uint8) -> uint8>
+auto SPC700::op_adjust_addr() -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   rd = op_read(dp);
@@ -15,15 +15,15 @@ void SPC700::op_adjust_addr() {
   op_write(dp, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8)>
-void SPC700::op_adjust_dp() {
+template<auto (SPC700::*op)(uint8) -> uint8>
+auto SPC700::op_adjust_dp() -> void {
   dp = op_readpc();
   rd = op_readdp(dp);
   rd = call(rd);
   op_writedp(dp, rd);
 }
 
-void SPC700::op_adjust_dpw(signed n) {
+auto SPC700::op_adjust_dpw(int n) -> void {
   dp = op_readpc();
   rd.w = op_readdp(dp) + n;
   op_writedp(dp++, rd.l);
@@ -33,8 +33,8 @@ void SPC700::op_adjust_dpw(signed n) {
   regs.p.z = rd == 0;
 }
 
-template<uint8 (SPC700::*op)(uint8)>
-void SPC700::op_adjust_dpx() {
+template<auto (SPC700::*op)(uint8) -> uint8>
+auto SPC700::op_adjust_dpx() -> void {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + regs.x);
@@ -42,7 +42,7 @@ void SPC700::op_adjust_dpx() {
   op_writedp(dp + regs.x, rd);
 }
 
-void SPC700::op_branch(bool condition) {
+auto SPC700::op_branch(bool condition) -> void {
   rd = op_readpc();
   if(condition == false) return;
   op_io();
@@ -50,7 +50,7 @@ void SPC700::op_branch(bool condition) {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_branch_bit() {
+auto SPC700::op_branch_bit() -> void {
   dp = op_readpc();
   sp = op_readdp(dp);
   rd = op_readpc();
@@ -61,28 +61,28 @@ void SPC700::op_branch_bit() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_pull(uint8& r) {
+auto SPC700::op_pull(uint8& r) -> void {
   op_io();
   op_io();
   r = op_readsp();
 }
 
-void SPC700::op_push(uint8 r) {
+auto SPC700::op_push(uint8 r) -> void {
   op_io();
   op_io();
   op_writesp(r);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_addr(uint8& r) {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_addr(uint8& r) -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   rd = op_read(dp);
   r = call(r, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_addri(uint8& r) {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_addri(uint8& r) -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_io();
@@ -90,29 +90,29 @@ void SPC700::op_read_addri(uint8& r) {
   regs.a = call(regs.a, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_const(uint8& r) {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_const(uint8& r) -> void {
   rd = op_readpc();
   r = call(r, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_dp(uint8& r) {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_dp(uint8& r) -> void {
   dp = op_readpc();
   rd = op_readdp(dp);
   r = call(r, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_dpi(uint8& r, uint8& i) {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_dpi(uint8& r, uint8& i) -> void {
   dp = op_readpc();
   op_io();
   rd = op_readdp(dp + i);
   r = call(r, rd);
 }
 
-template<uint16 (SPC700::*op)(uint16, uint16)>
-void SPC700::op_read_dpw() {
+template<auto (SPC700::*op)(uint16, uint16) -> uint16>
+auto SPC700::op_read_dpw() -> void {
   dp = op_readpc();
   rd.l = op_readdp(dp++);
   if(op != &SPC700::op_cpw) op_io();
@@ -120,8 +120,8 @@ void SPC700::op_read_dpw() {
   regs.ya = call(regs.ya, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_idpx() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_idpx() -> void {
   dp = op_readpc() + regs.x;
   op_io();
   sp.l = op_readdp(dp++);
@@ -130,8 +130,8 @@ void SPC700::op_read_idpx() {
   regs.a = call(regs.a, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_idpy() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_idpy() -> void {
   dp = op_readpc();
   op_io();
   sp.l = op_readdp(dp++);
@@ -140,14 +140,14 @@ void SPC700::op_read_idpy() {
   regs.a = call(regs.a, rd);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_read_ix() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_read_ix() -> void {
   op_io();
   rd = op_readdp(regs.x);
   regs.a = call(regs.a, rd);
 }
 
-void SPC700::op_set_addr_bit() {
+auto SPC700::op_set_addr_bit() -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   bit = dp >> 13;
@@ -182,19 +182,19 @@ void SPC700::op_set_addr_bit() {
   }
 }
 
-void SPC700::op_set_bit() {
+auto SPC700::op_set_bit() -> void {
   dp = op_readpc();
   rd = op_readdp(dp) & ~(1 << (opcode >> 5));
   op_writedp(dp, rd | (!(opcode & 0x10) << (opcode >> 5)));
 }
 
-void SPC700::op_set_flag(bool& flag, bool data) {
+auto SPC700::op_set_flag(bool& flag, bool data) -> void {
   op_io();
   if(&flag == &regs.p.i) op_io();
   flag = data;
 }
 
-void SPC700::op_test_addr(bool set) {
+auto SPC700::op_test_addr(bool set) -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   rd = op_read(dp);
@@ -204,7 +204,7 @@ void SPC700::op_test_addr(bool set) {
   op_write(dp, set ? rd | regs.a : rd & ~regs.a);
 }
 
-void SPC700::op_transfer(uint8& from, uint8& to) {
+auto SPC700::op_transfer(uint8& from, uint8& to) -> void {
   op_io();
   to = from;
   if(&to == &regs.s) return;
@@ -212,14 +212,14 @@ void SPC700::op_transfer(uint8& from, uint8& to) {
   regs.p.z = (to == 0);
 }
 
-void SPC700::op_write_addr(uint8& r) {
+auto SPC700::op_write_addr(uint8& r) -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_read(dp);
   op_write(dp, r);
 }
 
-void SPC700::op_write_addri(uint8& i) {
+auto SPC700::op_write_addri(uint8& i) -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_io();
@@ -228,21 +228,21 @@ void SPC700::op_write_addri(uint8& i) {
   op_write(dp, regs.a);
 }
 
-void SPC700::op_write_dp(uint8& r) {
+auto SPC700::op_write_dp(uint8& r) -> void {
   dp = op_readpc();
   op_readdp(dp);
   op_writedp(dp, r);
 }
 
-void SPC700::op_write_dpi(uint8& r, uint8& i) {
+auto SPC700::op_write_dpi(uint8& r, uint8& i) -> void {
   dp = op_readpc() + i;
   op_io();
   op_readdp(dp);
   op_writedp(dp, r);
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_write_dp_const() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_write_dp_const() -> void {
   rd = op_readpc();
   dp = op_readpc();
   wr = op_readdp(dp);
@@ -250,8 +250,8 @@ void SPC700::op_write_dp_const() {
   op != &SPC700::op_cmp ? op_writedp(dp, wr) : op_io();
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_write_dp_dp() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_write_dp_dp() -> void {
   sp = op_readpc();
   rd = op_readdp(sp);
   dp = op_readpc();
@@ -260,8 +260,8 @@ void SPC700::op_write_dp_dp() {
   op != &SPC700::op_cmp ? op_writedp(dp, wr) : op_io();
 }
 
-template<uint8 (SPC700::*op)(uint8, uint8)>
-void SPC700::op_write_ix_iy() {
+template<auto (SPC700::*op)(uint8, uint8) -> uint8>
+auto SPC700::op_write_ix_iy() -> void {
   op_io();
   rd = op_readdp(regs.y);
   wr = op_readdp(regs.x);
@@ -271,7 +271,7 @@ void SPC700::op_write_ix_iy() {
 
 //
 
-void SPC700::op_bne_dp() {
+auto SPC700::op_bne_dp() -> void {
   dp = op_readpc();
   sp = op_readdp(dp);
   rd = op_readpc();
@@ -282,7 +282,7 @@ void SPC700::op_bne_dp() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_bne_dpdec() {
+auto SPC700::op_bne_dpdec() -> void {
   dp = op_readpc();
   wr = op_readdp(dp);
   op_writedp(dp, --wr);
@@ -293,7 +293,7 @@ void SPC700::op_bne_dpdec() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_bne_dpx() {
+auto SPC700::op_bne_dpx() -> void {
   dp = op_readpc();
   op_io();
   sp = op_readdp(dp + regs.x);
@@ -305,7 +305,7 @@ void SPC700::op_bne_dpx() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_bne_ydec() {
+auto SPC700::op_bne_ydec() -> void {
   rd = op_readpc();
   op_io();
   op_io();
@@ -315,7 +315,7 @@ void SPC700::op_bne_ydec() {
   regs.pc += (int8)rd;
 }
 
-void SPC700::op_brk() {
+auto SPC700::op_brk() -> void {
   rd.l = op_read(0xffde);
   rd.h = op_read(0xffdf);
   op_io();
@@ -328,19 +328,19 @@ void SPC700::op_brk() {
   regs.p.i = 0;
 }
 
-void SPC700::op_clv() {
+auto SPC700::op_clv() -> void {
   op_io();
   regs.p.v = 0;
   regs.p.h = 0;
 }
 
-void SPC700::op_cmc() {
+auto SPC700::op_cmc() -> void {
   op_io();
   op_io();
   regs.p.c = !regs.p.c;
 }
 
-void SPC700::op_daa() {
+auto SPC700::op_daa() -> void {
   op_io();
   op_io();
   if(regs.p.c || (regs.a) > 0x99) {
@@ -354,7 +354,7 @@ void SPC700::op_daa() {
   regs.p.z = (regs.a == 0);
 }
 
-void SPC700::op_das() {
+auto SPC700::op_das() -> void {
   op_io();
   op_io();
   if(!regs.p.c || (regs.a) > 0x99) {
@@ -368,7 +368,7 @@ void SPC700::op_das() {
   regs.p.z = (regs.a == 0);
 }
 
-void SPC700::op_div_ya_x() {
+auto SPC700::op_div_ya_x() -> void {
   op_io();
   op_io();
   op_io();
@@ -399,13 +399,13 @@ void SPC700::op_div_ya_x() {
   regs.p.z = (regs.a == 0);
 }
 
-void SPC700::op_jmp_addr() {
+auto SPC700::op_jmp_addr() -> void {
   rd.l = op_readpc();
   rd.h = op_readpc();
   regs.pc = rd;
 }
 
-void SPC700::op_jmp_iaddrx() {
+auto SPC700::op_jmp_iaddrx() -> void {
   dp.l = op_readpc();
   dp.h = op_readpc();
   op_io();
@@ -415,7 +415,7 @@ void SPC700::op_jmp_iaddrx() {
   regs.pc = rd;
 }
 
-void SPC700::op_jsp_dp() {
+auto SPC700::op_jsp_dp() -> void {
   rd = op_readpc();
   op_io();
   op_io();
@@ -424,7 +424,7 @@ void SPC700::op_jsp_dp() {
   regs.pc = 0xff00 | rd;
 }
 
-void SPC700::op_jsr_addr() {
+auto SPC700::op_jsr_addr() -> void {
   rd.l = op_readpc();
   rd.h = op_readpc();
   op_io();
@@ -435,7 +435,7 @@ void SPC700::op_jsr_addr() {
   regs.pc = rd;
 }
 
-void SPC700::op_jst() {
+auto SPC700::op_jst() -> void {
   dp = 0xffde - ((opcode >> 4) << 1);
   rd.l = op_read(dp++);
   rd.h = op_read(dp++);
@@ -447,7 +447,7 @@ void SPC700::op_jst() {
   regs.pc = rd;
 }
 
-void SPC700::op_lda_ixinc() {
+auto SPC700::op_lda_ixinc() -> void {
   op_io();
   regs.a = op_readdp(regs.x++);
   op_io();
@@ -455,7 +455,7 @@ void SPC700::op_lda_ixinc() {
   regs.p.z = regs.a == 0;
 }
 
-void SPC700::op_mul_ya() {
+auto SPC700::op_mul_ya() -> void {
   op_io();
   op_io();
   op_io();
@@ -472,17 +472,17 @@ void SPC700::op_mul_ya() {
   regs.p.z = (regs.y == 0);
 }
 
-void SPC700::op_nop() {
+auto SPC700::op_nop() -> void {
   op_io();
 }
 
-void SPC700::op_plp() {
+auto SPC700::op_plp() -> void {
   op_io();
   op_io();
   regs.p = op_readsp();
 }
 
-void SPC700::op_rti() {
+auto SPC700::op_rti() -> void {
   regs.p = op_readsp();
   rd.l = op_readsp();
   rd.h = op_readsp();
@@ -491,7 +491,7 @@ void SPC700::op_rti() {
   regs.pc = rd;
 }
 
-void SPC700::op_rts() {
+auto SPC700::op_rts() -> void {
   rd.l = op_readsp();
   rd.h = op_readsp();
   op_io();
@@ -499,7 +499,7 @@ void SPC700::op_rts() {
   regs.pc = rd;
 }
 
-void SPC700::op_sta_idpx() {
+auto SPC700::op_sta_idpx() -> void {
   sp = op_readpc() + regs.x;
   op_io();
   dp.l = op_readdp(sp++);
@@ -508,7 +508,7 @@ void SPC700::op_sta_idpx() {
   op_write(dp, regs.a);
 }
 
-void SPC700::op_sta_idpy() {
+auto SPC700::op_sta_idpy() -> void {
   sp = op_readpc();
   dp.l = op_readdp(sp++);
   dp.h = op_readdp(sp++);
@@ -518,33 +518,33 @@ void SPC700::op_sta_idpy() {
   op_write(dp, regs.a);
 }
 
-void SPC700::op_sta_ix() {
+auto SPC700::op_sta_ix() -> void {
   op_io();
   op_readdp(regs.x);
   op_writedp(regs.x, regs.a);
 }
 
-void SPC700::op_sta_ixinc() {
+auto SPC700::op_sta_ixinc() -> void {
   op_io();
   op_io();
   op_writedp(regs.x++, regs.a);
 }
 
-void SPC700::op_stw_dp() {
+auto SPC700::op_stw_dp() -> void {
   dp = op_readpc();
   op_readdp(dp);
   op_writedp(dp++, regs.a);
   op_writedp(dp++, regs.y);
 }
 
-void SPC700::op_wait() {
+auto SPC700::op_wait() -> void {
   while(true) {
     op_io();
     op_io();
   }
 }
 
-void SPC700::op_xcn() {
+auto SPC700::op_xcn() -> void {
   op_io();
   op_io();
   op_io();

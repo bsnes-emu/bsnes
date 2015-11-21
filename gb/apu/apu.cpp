@@ -1,6 +1,5 @@
 #include <gb/gb.hpp>
 
-#define APU_CPP
 namespace GameBoy {
 
 #include "square1/square1.cpp"
@@ -11,11 +10,11 @@ namespace GameBoy {
 #include "serialization.cpp"
 APU apu;
 
-void APU::Main() {
+auto APU::Main() -> void {
   apu.main();
 }
 
-void APU::main() {
+auto APU::main() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -57,14 +56,14 @@ void APU::main() {
   }
 }
 
-void APU::hipass(int16& sample, int64& bias) {
+auto APU::hipass(int16& sample, int64& bias) -> void {
   bias += ((((int64)sample << 16) - (bias >> 16)) * 57593) >> 16;
   sample = sclamp<16>(sample - (bias >> 32));
 }
 
-void APU::power() {
+auto APU::power() -> void {
   create(Main, 2 * 1024 * 1024);
-  for(unsigned n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
+  for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   for(auto& n : mmio_data) n = 0x00;
   sequencer_base = 0;
@@ -77,7 +76,7 @@ void APU::power() {
   master.power();
 }
 
-uint8 APU::mmio_read(uint16 addr) {
+auto APU::mmio_read(uint16 addr) -> uint8 {
   static const uint8 table[48] = {
     0x80, 0x3f, 0x00, 0xff, 0xbf,                          //square1
     0xff, 0x3f, 0x00, 0xff, 0xbf,                          //square2
@@ -102,7 +101,7 @@ uint8 APU::mmio_read(uint16 addr) {
   return 0xff;
 }
 
-void APU::mmio_write(uint16 addr, uint8 data) {
+auto APU::mmio_write(uint16 addr, uint8 data) -> void {
   if(addr >= 0xff10 && addr <= 0xff3f) mmio_data[addr - 0xff10] = data;
 
   if(addr >= 0xff10 && addr <= 0xff14) return square1.write        (addr - 0xff10, data);

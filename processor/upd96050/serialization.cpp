@@ -1,4 +1,4 @@
-void uPD96050::serialize(serializer& s) {
+auto uPD96050::serialize(serializer& s) -> void {
   s.array(dataRAM);
 
   s.array(regs.stack);

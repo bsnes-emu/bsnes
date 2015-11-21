@@ -1,14 +1,16 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct Buffer {
-  double** sample = nullptr;
-  uint16_t rdoffset = 0;
-  uint16_t wroffset = 0;
-  unsigned channels = 0;
+  Buffer() {
+  }
 
-  void setChannels(unsigned channels) {
+  ~Buffer() {
+    setChannels(0);
+  }
+
+  auto setChannels(uint channels) -> void {
     if(sample) {
-      for(unsigned c = 0; c < this->channels; c++) {
+      for(auto c : range(this->channels)) {
         if(sample[c]) delete[] sample[c];
       }
       delete[] sample;
@@ -18,22 +20,22 @@ struct Buffer {
     if(channels == 0) return;
 
     sample = new double*[channels];
-    for(unsigned c = 0; c < channels; c++) {
+    for(auto c : range(channels)) {
       sample[c] = new double[65536]();
     }
   }
 
-  inline double& read(unsigned channel, signed offset = 0) {
-    return sample[channel][(uint16_t)(rdoffset + offset)];
+  inline auto read(uint channel, int offset = 0) -> double& {
+    return sample[channel][(uint16)(rdoffset + offset)];
   }
 
-  inline double& write(unsigned channel, signed offset = 0) {
-    return sample[channel][(uint16_t)(wroffset + offset)];
+  inline auto write(uint channel, int offset = 0) -> double& {
+    return sample[channel][(uint16)(wroffset + offset)];
   }
 
-  inline void clear() {
-    for(unsigned c = 0; c < channels; c++) {
-      for(unsigned n = 0; n < 65536; n++) {
+  inline auto clear() -> void {
+    for(auto c : range(channels)) {
+      for(auto n : range(65536)) {
         sample[c][n] = 0;
       }
     }
@@ -41,12 +43,10 @@ struct Buffer {
     wroffset = 0;
   }
 
-  Buffer() {
-  }
-
-  ~Buffer() {
-    setChannels(0);
-  }
+  double** sample = nullptr;
+  uint16 rdoffset = 0;
+  uint16 wroffset = 0;
+  uint channels = 0;
 };
 
 #endif

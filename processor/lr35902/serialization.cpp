@@ -1,4 +1,4 @@
-void LR35902::serialize(serializer& s) {
+auto LR35902::serialize(serializer& s) -> void {
   s.integer(r.a.data);
   s.integer(r.f.z);
   s.integer(r.f.n);

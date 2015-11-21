@@ -3,51 +3,61 @@
 #include "lib/sinc.hpp"
 
 struct ResampleSinc : Resampler {
-  inline void setFrequency();
-  inline void clear();
-  inline void sample();
   inline ResampleSinc(DSP& dsp);
+  inline ~ResampleSinc();
+
+  inline auto setFrequency() -> void;
+  inline auto clear() -> void;
+  inline auto sample() -> void;
 
 private:
   inline void remakeSinc();
-  SincResample* sinc_resampler[8];
+  SincResample* sincResampler[8] = {0};
 };
 
-void ResampleSinc::setFrequency() {
+ResampleSinc::ResampleSinc(DSP& dsp) : Resampler(dsp) {
+  for(auto n : range(8)) {
+    sincResampler[n] = nullptr;
+  }
+}
+
+ResampleSinc::~ResampleSinc() {
+  for(auto n : range(8)) {
+    if(sincResampler[n]) delete sincResampler[n];
+  }
+}
+
+auto ResampleSinc::setFrequency() -> void {
   remakeSinc();
 }
 
-void ResampleSinc::clear() {
+auto ResampleSinc::clear() -> void {
   remakeSinc();
 }
 
-void ResampleSinc::sample() {
-  for(unsigned c = 0; c < dsp.settings.channels; c++) {
-    sinc_resampler[c]->write(dsp.buffer.read(c));
+auto ResampleSinc::sample() -> void {
+  for(auto c : range(dsp.settings.channels)) {
+    sincResampler[c]->write(dsp.buffer.read(c));
   }
 
-  if(sinc_resampler[0]->output_avail()) {
+  if(sincResampler[0]->output_avail()) {
     do {
-      for(unsigned c = 0; c < dsp.settings.channels; c++) {
-        dsp.output.write(c) = sinc_resampler[c]->read();
+      for(auto c : range(dsp.settings.channels)) {
+        dsp.output.write(c) = sincResampler[c]->read();
       }
       dsp.output.wroffset++;
-    } while(sinc_resampler[0]->output_avail());
+    } while(sincResampler[0]->output_avail());
   }
 
   dsp.buffer.rdoffset++;
 }
 
-ResampleSinc::ResampleSinc(DSP& dsp) : Resampler(dsp) {
-  for(unsigned n = 0; n < 8; n++) sinc_resampler[n] = nullptr;
-}
-
-void ResampleSinc::remakeSinc() {
+auto ResampleSinc::remakeSinc() -> void {
   assert(dsp.settings.channels < 8);
 
-  for(unsigned c = 0; c < dsp.settings.channels; c++) {
-    if(sinc_resampler[c]) delete sinc_resampler[c];
-    sinc_resampler[c] = new SincResample(dsp.settings.frequency, frequency, 0.85, SincResample::QUALITY_HIGH);
+  for(auto c : range(dsp.settings.channels)) {
+    if(sincResampler[c]) delete sincResampler[c];
+    sincResampler[c] = new SincResample(dsp.settings.frequency, frequency, 0.85, SincResample::QUALITY_HIGH);
   }
 }
 

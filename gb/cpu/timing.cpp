@@ -2,11 +2,9 @@
 //  456 clocks/scanline
 //  154 scanlines/frame
 
-#ifdef CPU_CPP
-
-void CPU::add_clocks(unsigned clocks) {
+auto CPU::add_clocks(uint clocks) -> void {
   if(oamdma.active) {
-    for(unsigned n = 0; n < 4 * clocks; n++) {
+    for(uint n = 0; n < 4 * clocks; n++) {
       bus.write(0xfe00 + oamdma.offset, bus.read((oamdma.bank << 8) + oamdma.offset));
       if(++oamdma.offset == 160) {
         oamdma.active = false;
@@ -38,7 +36,7 @@ void CPU::add_clocks(unsigned clocks) {
   if(apu.clock < 0) co_switch(scheduler.active_thread = apu.thread);
 }
 
-void CPU::timer_262144hz() {
+auto CPU::timer_262144hz() -> void {
   if(status.timer_enable && status.timer_clock == 1) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -47,7 +45,7 @@ void CPU::timer_262144hz() {
   }
 }
 
-void CPU::timer_65536hz() {
+auto CPU::timer_65536hz() -> void {
   if(status.timer_enable && status.timer_clock == 2) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -56,7 +54,7 @@ void CPU::timer_65536hz() {
   }
 }
 
-void CPU::timer_16384hz() {
+auto CPU::timer_16384hz() -> void {
   if(status.timer_enable && status.timer_clock == 3) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -67,7 +65,7 @@ void CPU::timer_16384hz() {
   status.div++;
 }
 
-void CPU::timer_8192hz() {
+auto CPU::timer_8192hz() -> void {
   if(status.serial_transfer && status.serial_clock) {
     if(--status.serial_bits == 0) {
       status.serial_transfer = 0;
@@ -76,7 +74,7 @@ void CPU::timer_8192hz() {
   }
 }
 
-void CPU::timer_4096hz() {
+auto CPU::timer_4096hz() -> void {
   if(status.timer_enable && status.timer_clock == 0) {
     if(++status.tima == 0) {
       status.tima = status.tma;
@@ -85,14 +83,12 @@ void CPU::timer_4096hz() {
   }
 }
 
-void CPU::hblank() {
+auto CPU::hblank() -> void {
   if(status.dma_mode == 1 && status.dma_length && ppu.status.ly < 144) {
-    for(unsigned n = 0; n < 16; n++) {
+    for(auto n : range(16)) {
       dma_write(status.dma_target++, dma_read(status.dma_source++));
     }
     add_clocks(8 << status.speed_double);
     status.dma_length -= 16;
   }
 }
-
-#endif

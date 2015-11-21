@@ -1,6 +1,4 @@
-#ifdef CARTRIDGE_CPP
-
-uint8 Cartridge::MBC5::mmio_read(uint16 addr) {
+auto Cartridge::MBC5::mmio_read(uint16 addr) -> uint8 {
   if((addr & 0xc000) == 0x0000) {  //$0000-3fff
     return cartridge.rom_read(addr);
   }
@@ -17,7 +15,7 @@ uint8 Cartridge::MBC5::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void Cartridge::MBC5::mmio_write(uint16 addr, uint8 data) {
+auto Cartridge::MBC5::mmio_write(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0x0000) {  //$0000-1fff
     ram_enable = (data & 0x0f) == 0x0a;
     return;
@@ -44,10 +42,8 @@ void Cartridge::MBC5::mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-void Cartridge::MBC5::power() {
+auto Cartridge::MBC5::power() -> void {
   ram_enable = false;
   rom_select = 0x001;
   ram_select = 0x00;
 }
-
-#endif

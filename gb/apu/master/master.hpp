@@ -1,4 +1,10 @@
 struct Master {
+  auto run() -> void;
+  auto write(uint r, uint8 data) -> void;
+  auto power() -> void;
+
+  auto serialize(serializer&) -> void;
+
   bool left_in_enable;
   uint3 left_volume;
   bool right_in_enable;
@@ -20,9 +26,4 @@ struct Master {
   int64 center_bias;
   int64 left_bias;
   int64 right_bias;
-
-  void run();
-  void write(unsigned r, uint8 data);
-  void power();
-  void serialize(serializer&);
 };

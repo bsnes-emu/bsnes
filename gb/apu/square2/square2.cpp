@@ -1,10 +1,8 @@
-#ifdef APU_CPP
-
-bool APU::Square2::dac_enable() {
+auto APU::Square2::dac_enable() const -> bool {
   return (envelope_volume || envelope_direction);
 }
 
-void APU::Square2::run() {
+auto APU::Square2::run() -> void {
   if(period && --period == 0) {
     period = 2 * (2048 - frequency);
     phase++;
@@ -22,13 +20,13 @@ void APU::Square2::run() {
   output = sample;
 }
 
-void APU::Square2::clock_length() {
+auto APU::Square2::clock_length() -> void {
   if(counter && enable) {
     if(++length == 0) enable = false;
   }
 }
 
-void APU::Square2::clock_envelope() {
+auto APU::Square2::clock_envelope() -> void {
   if(enable && envelope_frequency && --envelope_period == 0) {
     envelope_period = envelope_frequency;
     if(envelope_direction == 0 && volume >  0) volume--;
@@ -36,7 +34,7 @@ void APU::Square2::clock_envelope() {
   }
 }
 
-void APU::Square2::write(unsigned r, uint8 data) {
+auto APU::Square2::write(uint r, uint8 data) -> void {
   if(r == 1) {  //$ff16  NR21
     duty = data >> 6;
     length = (data & 0x3f);
@@ -67,7 +65,7 @@ void APU::Square2::write(unsigned r, uint8 data) {
   }
 }
 
-void APU::Square2::power() {
+auto APU::Square2::power() -> void {
   enable = 0;
 
   duty = 0;
@@ -86,7 +84,7 @@ void APU::Square2::power() {
   volume = 0;
 }
 
-void APU::Square2::serialize(serializer& s) {
+auto APU::Square2::serialize(serializer& s) -> void {
   s.integer(enable);
 
   s.integer(duty);
@@ -104,5 +102,3 @@ void APU::Square2::serialize(serializer& s) {
   s.integer(envelope_period);
   s.integer(volume);
 }
-
-#endif

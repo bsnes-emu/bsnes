@@ -8,7 +8,7 @@ namespace Processor {
 #include "disassembler.cpp"
 #include "serialization.cpp"
 
-void SPC700::op_step() {
+auto SPC700::op_step() -> void {
   switch(opcode = op_readpc()) {
   case 0x00: return op_nop();
   case 0x01: return op_jst();

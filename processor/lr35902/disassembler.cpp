@@ -1,9 +1,9 @@
-string LR35902::disassemble(uint16 pc) {
+auto LR35902::disassemble(uint16 pc) -> string {
   char output[80];
   memset(output, ' ', sizeof output);
   output[79] = 0;
 
-  string opcode = disassemble_opcode(pc);
+  string opcode = disassembleOpcode(pc);
   string registers = {
     " AF:", hex(r[AF], 4L),
     " BC:", hex(r[BC], 4L),
@@ -19,7 +19,7 @@ string LR35902::disassemble(uint16 pc) {
   return output;
 }
 
-string LR35902::disassemble_opcode(uint16 pc) {
+auto LR35902::disassembleOpcode(uint16 pc) -> string {
   uint8 opcode = debugger_read(pc);
   uint8 p0 = debugger_read(pc + 1);
   uint8 p1 = debugger_read(pc + 2);
@@ -229,7 +229,7 @@ string LR35902::disassemble_opcode(uint16 pc) {
     case 0xc8: return { "ret  z" };
     case 0xc9: return { "ret" };
     case 0xca: return { "jp   z,$", hex(p1, 2L), hex(p0, 2L) };
-    case 0xcb: return disassemble_opcode_cb(pc + 1);
+    case 0xcb: return disassembleOpcodeCB(pc + 1);
     case 0xcc: return { "call z,$", hex(p1, 2L), hex(p0, 2L) };
     case 0xcd: return { "call $", hex(p1, 2L), hex(p0, 2L) };
     case 0xce: return { "adc  a,$", hex(p0, 2L) };
@@ -287,7 +287,7 @@ string LR35902::disassemble_opcode(uint16 pc) {
   return "";
 }
 
-string LR35902::disassemble_opcode_cb(uint16 pc) {
+auto LR35902::disassembleOpcodeCB(uint16 pc) -> string {
   uint8 opcode = debugger_read(pc);
   uint8 p0 = debugger_read(pc + 1);
   uint8 p1 = debugger_read(pc + 2);

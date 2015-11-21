@@ -1,19 +1,37 @@
 class Interface;
 
-enum class Input : unsigned {
+enum class Input : uint {
   Up, Down, Left, Right, B, A, Select, Start,
 };
 
 struct System {
-  enum class Revision : unsigned {
+  enum class Revision : uint {
     GameBoy,
     SuperGameBoy,
     GameBoyColor,
   } revision;
 
-  inline bool dmg() const { return revision == Revision::GameBoy; }
-  inline bool sgb() const { return revision == Revision::SuperGameBoy; }
-  inline bool cgb() const { return revision == Revision::GameBoyColor; }
+  System();
+
+  inline auto dmg() const { return revision == Revision::GameBoy; }
+  inline auto sgb() const { return revision == Revision::SuperGameBoy; }
+  inline auto cgb() const { return revision == Revision::GameBoyColor; }
+
+  auto run() -> void;
+  auto runtosave() -> void;
+  auto runthreadtosave() -> void;
+
+  auto init() -> void;
+  auto load(Revision) -> void;
+  auto power() -> void;
+
+  //serialization.cpp
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+
+  auto serialize(serializer&) -> void;
+  auto serialize_all(serializer&) -> void;
+  auto serialize_init() -> void;
 
   struct BootROM {
     uint8 dmg[ 256];
@@ -21,31 +39,12 @@ struct System {
     uint8 cgb[2048];
   } bootROM;
 
-  void run();
-  void runtosave();
-  void runthreadtosave();
-
-  void init();
-  void load(Revision);
-  void power();
-
-  unsigned clocks_executed;
-
-  //serialization.cpp
-  unsigned serialize_size;
-
-  serializer serialize();
-  bool unserialize(serializer&);
-
-  void serialize(serializer&);
-  void serialize_all(serializer&);
-  void serialize_init();
-
-  System();
-
   struct Information {
     string manifest;
   } information;
+
+  uint clocks_executed = 0;
+  uint serialize_size = 0;
 };
 
 #include <gb/interface/interface.hpp>

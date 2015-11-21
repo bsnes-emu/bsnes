@@ -1,4 +1,14 @@
 struct APU : Thread, MMIO {
+  static auto Main() -> void;
+  auto main() -> void;
+  auto hipass(int16& sample, int64& bias) -> void;
+  auto power() -> void;
+
+  auto mmio_read(uint16 addr) -> uint8;
+  auto mmio_write(uint16 addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
   #include "square1/square1.hpp"
   #include "square2/square2.hpp"
   #include "wave/wave.hpp"
@@ -14,16 +24,6 @@ struct APU : Thread, MMIO {
   Wave wave;
   Noise noise;
   Master master;
-
-  static void Main();
-  void main();
-  void hipass(int16& sample, int64& bias);
-  void power();
-
-  uint8 mmio_read(uint16 addr);
-  void mmio_write(uint16 addr, uint8 data);
-
-  void serialize(serializer&);
 };
 
 extern APU apu;

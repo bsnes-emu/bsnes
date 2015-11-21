@@ -1,46 +1,48 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct ResampleAverage : Resampler {
-  inline void setFrequency();
-  inline void clear();
-  inline void sample();
-  inline void sampleLinear();
   ResampleAverage(DSP& dsp) : Resampler(dsp) {}
 
-  real fraction;
-  real step;
+  inline auto setFrequency() -> void;
+  inline auto clear() -> void;
+  inline auto sample() -> void;
+  inline auto sampleLinear() -> void;
+
+private:
+  double fraction;
+  double step;
 };
 
-void ResampleAverage::setFrequency() {
+auto ResampleAverage::setFrequency() -> void {
   fraction = 0.0;
   step = dsp.settings.frequency / frequency;
 }
 
-void ResampleAverage::clear() {
+auto ResampleAverage::clear() -> void {
   fraction = 0.0;
 }
 
-void ResampleAverage::sample() {
+auto ResampleAverage::sample() -> void {
   //can only average if input frequency >= output frequency
   if(step < 1.0) return sampleLinear();
 
   fraction += 1.0;
 
-  real scalar = 1.0;
+  double scalar = 1.0;
   if(fraction > step) scalar = 1.0 - (fraction - step);
 
-  for(unsigned c = 0; c < dsp.settings.channels; c++) {
+  for(auto c : range(dsp.settings.channels)) {
     dsp.output.write(c) += dsp.buffer.read(c) * scalar;
   }
 
   if(fraction >= step) {
-    for(unsigned c = 0; c < dsp.settings.channels; c++) {
+    for(auto c : range(dsp.settings.channels)) {
       dsp.output.write(c) /= step;
     }
     dsp.output.wroffset++;
 
     fraction -= step;
-    for(unsigned c = 0; c < dsp.settings.channels; c++) {
+    for(auto c : range(dsp.settings.channels)) {
       dsp.output.write(c) = dsp.buffer.read(c) * fraction;
     }
   }
@@ -48,15 +50,15 @@ void ResampleAverage::sample() {
   dsp.buffer.rdoffset++;
 }
 
-void ResampleAverage::sampleLinear() {
+auto ResampleAverage::sampleLinear() -> void {
   while(fraction <= 1.0) {
-    real channel[dsp.settings.channels];
+    double channel[dsp.settings.channels];
 
-    for(unsigned n = 0; n < dsp.settings.channels; n++) {
-      real a = dsp.buffer.read(n, -1);
-      real b = dsp.buffer.read(n, -0);
+    for(auto n : range(dsp.settings.channels)) {
+      double a = dsp.buffer.read(n, -1);
+      double b = dsp.buffer.read(n, -0);
 
-      real mu = fraction;
+      double mu = fraction;
 
       channel[n] = a * (1.0 - mu) + b * mu;
     }

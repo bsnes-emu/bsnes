@@ -1,4 +1,4 @@
-void R6502::serialize(serializer& s) {
+auto R6502::serialize(serializer& s) -> void {
   s.integer(regs.mdr);
   s.integer(regs.pc);
   s.integer(regs.a);

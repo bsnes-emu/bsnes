@@ -12,11 +12,11 @@ namespace Processor {
 #include "disassembler.cpp"
 #include "serialization.cpp"
 
-uint8 R6502::mdr() const {
+auto R6502::mdr() const -> uint8 {
   return regs.mdr;
 }
 
-void R6502::power() {
+auto R6502::power() -> void {
   regs.a = 0x00;
   regs.x = 0x00;
   regs.y = 0x00;
@@ -24,13 +24,13 @@ void R6502::power() {
   regs.p = 0x04;
 }
 
-void R6502::reset() {
+auto R6502::reset() -> void {
   regs.mdr = 0x00;
   regs.s -= 3;
   regs.p.i = 1;
 }
 
-void R6502::interrupt() {
+auto R6502::interrupt() -> void {
   op_readpc();
   op_readpc();
   op_writesp(regs.pc >> 8);
@@ -45,7 +45,7 @@ L abs.h = op_read(vector++);
   regs.pc = abs.w;
 }
 
-void R6502::exec() {
+auto R6502::exec() -> void {
   uint8 opcode = op_readpci();
   switch(opcode) {
   case 0x00: return op_brk();

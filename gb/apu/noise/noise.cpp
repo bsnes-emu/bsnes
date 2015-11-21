@@ -1,10 +1,8 @@
-#ifdef APU_CPP
-
-bool APU::Noise::dac_enable() {
+auto APU::Noise::dac_enable() const -> bool {
   return (envelope_volume || envelope_direction);
 }
 
-void APU::Noise::run() {
+auto APU::Noise::run() -> void {
   if(period && --period == 0) {
     period = divisor << frequency;
     if(frequency < 14) {
@@ -19,13 +17,13 @@ void APU::Noise::run() {
   output = sample;
 }
 
-void APU::Noise::clock_length() {
+auto APU::Noise::clock_length() -> void {
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
 }
 
-void APU::Noise::clock_envelope() {
+auto APU::Noise::clock_envelope() -> void {
   if(enable && envelope_frequency && --envelope_period == 0) {
     envelope_period = envelope_frequency;
     if(envelope_direction == 0 && volume >  0) volume--;
@@ -33,7 +31,7 @@ void APU::Noise::clock_envelope() {
   }
 }
 
-void APU::Noise::write(unsigned r, uint8 data) {
+auto APU::Noise::write(uint r, uint8 data) -> void {
   if(r == 1) {  //$ff20  NR41
     length = data & 0x3f;
   }
@@ -66,7 +64,7 @@ void APU::Noise::write(unsigned r, uint8 data) {
   }
 }
 
-void APU::Noise::power() {
+auto APU::Noise::power() -> void {
   enable = 0;
 
   envelope_volume = 0;
@@ -85,7 +83,7 @@ void APU::Noise::power() {
   lfsr = 0;
 }
 
-void APU::Noise::serialize(serializer& s) {
+auto APU::Noise::serialize(serializer& s) -> void {
   s.integer(enable);
 
   s.integer(envelope_volume);
@@ -103,5 +101,3 @@ void APU::Noise::serialize(serializer& s) {
   s.integer(period);
   s.integer(lfsr);
 }
-
-#endif

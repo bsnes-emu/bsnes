@@ -1,7 +1,7 @@
 /* ruby
  * author: byuu
  * license: ISC
- * version: 0.13 (2015-06-18)
+ * version: 0.14 (2015-11-19)
  *
  * ruby is a cross-platform hardware abstraction layer
  * it provides a common interface to video, audio and input devices
@@ -46,6 +46,7 @@ struct Video {
 
 struct Audio {
   static const nall::string Device;
+  static const nall::string Exclusive;
   static const nall::string Handle;
   static const nall::string Synchronize;
   static const nall::string Frequency;

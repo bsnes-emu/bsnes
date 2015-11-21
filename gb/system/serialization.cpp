@@ -1,9 +1,7 @@
-#ifdef SYSTEM_CPP
-
-serializer System::serialize() {
+auto System::serialize() -> serializer {
   serializer s(serialize_size);
 
-  unsigned signature = 0x31545342, version = Info::SerializerVersion;
+  uint signature = 0x31545342, version = Info::SerializerVersion;
   char hash[64], description[512];
   memcpy(&hash, (const char*)cartridge.sha256(), 64);
   memset(&description, 0, sizeof description);
@@ -17,8 +15,8 @@ serializer System::serialize() {
   return s;
 }
 
-bool System::unserialize(serializer& s) {
-  unsigned signature, version;
+auto System::unserialize(serializer& s) -> bool {
+  uint signature, version;
   char hash[64], description[512];
 
   s.integer(signature);
@@ -34,11 +32,11 @@ bool System::unserialize(serializer& s) {
   return true;
 }
 
-void System::serialize(serializer& s) {
+auto System::serialize(serializer& s) -> void {
   s.integer(clocks_executed);
 }
 
-void System::serialize_all(serializer& s) {
+auto System::serialize_all(serializer& s) -> void {
   cartridge.serialize(s);
   system.serialize(s);
   cpu.serialize(s);
@@ -46,10 +44,10 @@ void System::serialize_all(serializer& s) {
   apu.serialize(s);
 }
 
-void System::serialize_init() {
+auto System::serialize_init() -> void {
   serializer s;
 
-  unsigned signature = 0, version = 0, crc32 = 0;
+  uint signature = 0, version = 0, crc32 = 0;
   char hash[64], description[512];
 
   s.integer(signature);
@@ -60,5 +58,3 @@ void System::serialize_init() {
   serialize_all(s);
   serialize_size = s.size();
 }
-
-#endif

@@ -1,6 +1,5 @@
 #include <gb/gb.hpp>
 
-#define CARTRIDGE_CPP
 namespace GameBoy {
 
 #include "mbc0/mbc0.cpp"
@@ -14,12 +13,21 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-string Cartridge::title() {
+Cartridge::Cartridge() {
+  loaded = false;
+  sha256 = "";
+}
+
+Cartridge::~Cartridge() {
+  unload();
+}
+
+auto Cartridge::title() -> string {
   return information.title;
 }
 
 //intended for use with Super Game Boy for when no Game Boy cartridge is inserted
-void Cartridge::load_empty(System::Revision revision) {
+auto Cartridge::load_empty(System::Revision revision) -> void {
   unload();
   romsize = 32768;
   romdata = allocate<uint8>(romsize, 0xff);
@@ -30,7 +38,7 @@ void Cartridge::load_empty(System::Revision revision) {
   system.load(revision);
 }
 
-void Cartridge::load(System::Revision revision) {
+auto Cartridge::load(System::Revision revision) -> void {
   unload();
 
   system.revision = revision;  //needed for ID::Manifest to return correct group ID
@@ -99,35 +107,35 @@ void Cartridge::load(System::Revision revision) {
   system.load(revision);
 }
 
-void Cartridge::unload() {
+auto Cartridge::unload() -> void {
   if(romdata) { delete[] romdata; romdata = nullptr; romsize = 0; }
   if(ramdata) { delete[] ramdata; ramdata = nullptr; ramsize = 0; }
   loaded = false;
 }
 
-uint8 Cartridge::rom_read(unsigned addr) {
+auto Cartridge::rom_read(uint addr) -> uint8 {
   if(addr >= romsize) addr %= romsize;
   return romdata[addr];
 }
 
-void Cartridge::rom_write(unsigned addr, uint8 data) {
+auto Cartridge::rom_write(uint addr, uint8 data) -> void {
   if(addr >= romsize) addr %= romsize;
   romdata[addr] = data;
 }
 
-uint8 Cartridge::ram_read(unsigned addr) {
+auto Cartridge::ram_read(uint addr) -> uint8 {
   if(ramsize == 0) return 0x00;
   if(addr >= ramsize) addr %= ramsize;
   return ramdata[addr];
 }
 
-void Cartridge::ram_write(unsigned addr, uint8 data) {
+auto Cartridge::ram_write(uint addr, uint8 data) -> void {
   if(ramsize == 0) return;
   if(addr >= ramsize) addr %= ramsize;
   ramdata[addr] = data;
 }
 
-uint8 Cartridge::mmio_read(uint16 addr) {
+auto Cartridge::mmio_read(uint16 addr) -> uint8 {
   if(addr == 0xff50) return 0x00;
 
   if(bootrom_enable) {
@@ -144,7 +152,7 @@ uint8 Cartridge::mmio_read(uint16 addr) {
   return mapper->mmio_read(addr);
 }
 
-void Cartridge::mmio_write(uint16 addr, uint8 data) {
+auto Cartridge::mmio_write(uint16 addr, uint8 data) -> void {
   if(bootrom_enable && addr == 0xff50) {
     bootrom_enable = false;
     return;
@@ -153,7 +161,7 @@ void Cartridge::mmio_write(uint16 addr, uint8 data) {
   mapper->mmio_write(addr, data);
 }
 
-void Cartridge::power() {
+auto Cartridge::power() -> void {
   bootrom_enable = true;
 
   mbc0.power();
@@ -165,18 +173,9 @@ void Cartridge::power() {
   huc1.power();
   huc3.power();
 
-  for(unsigned n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
-  for(unsigned n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = this;
+  for(uint n = 0x0000; n <= 0x7fff; n++) bus.mmio[n] = this;
+  for(uint n = 0xa000; n <= 0xbfff; n++) bus.mmio[n] = this;
   bus.mmio[0xff50] = this;
-}
-
-Cartridge::Cartridge() {
-  loaded = false;
-  sha256 = "";
-}
-
-Cartridge::~Cartridge() {
-  unload();
 }
 
 }

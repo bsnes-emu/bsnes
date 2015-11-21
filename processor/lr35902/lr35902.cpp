@@ -7,14 +7,14 @@ namespace Processor {
 #include "disassembler.cpp"
 #include "serialization.cpp"
 
-void LR35902::power() {
+auto LR35902::power() -> void {
   r.halt = false;
   r.stop = false;
   r.ei = false;
   r.ime = false;
 }
 
-void LR35902::exec() {
+auto LR35902::exec() -> void {
   uint8 opcode = op_read(r[PC]++);
   switch(opcode) {
   case 0x00: return op_nop();
@@ -276,7 +276,7 @@ void LR35902::exec() {
   }
 }
 
-void LR35902::exec_cb() {
+auto LR35902::execCB() -> void {
   uint8 opcode = op_read(r[PC]++);
   switch(opcode) {
   case 0x00: return op_rlc_r<B>();

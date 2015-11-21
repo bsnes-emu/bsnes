@@ -1,40 +1,42 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct ResampleCubic : Resampler {
-  inline void setFrequency();
-  inline void clear();
-  inline void sample();
   ResampleCubic(DSP& dsp) : Resampler(dsp) {}
 
-  real fraction;
-  real step;
+  inline auto setFrequency() -> void;
+  inline auto clear() -> void;
+  inline auto sample() -> void;
+
+private:
+  double fraction;
+  double step;
 };
 
-void ResampleCubic::setFrequency() {
+auto ResampleCubic::setFrequency() -> void {
   fraction = 0.0;
   step = dsp.settings.frequency / frequency;
 }
 
-void ResampleCubic::clear() {
+auto ResampleCubic::clear() -> void {
   fraction = 0.0;
 }
 
-void ResampleCubic::sample() {
+auto ResampleCubic::sample() -> void {
   while(fraction <= 1.0) {
-    real channel[dsp.settings.channels];
+    double channel[dsp.settings.channels];
 
-    for(unsigned n = 0; n < dsp.settings.channels; n++) {
-      real a = dsp.buffer.read(n, -3);
-      real b = dsp.buffer.read(n, -2);
-      real c = dsp.buffer.read(n, -1);
-      real d = dsp.buffer.read(n, -0);
+    for(auto n : range(dsp.settings.channels)) {
+      double a = dsp.buffer.read(n, -3);
+      double b = dsp.buffer.read(n, -2);
+      double c = dsp.buffer.read(n, -1);
+      double d = dsp.buffer.read(n, -0);
 
-      real mu = fraction;
+      double mu = fraction;
 
-      real A = d - c - a + b;
-      real B = a - b - A;
-      real C = c - a;
-      real D = b;
+      double A = d - c - a + b;
+      double B = a - b - A;
+      double C = c - a;
+      double D = b;
 
       channel[n] = A * (mu * 3) + B * (mu * 2) + C * mu + D;
     }

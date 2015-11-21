@@ -1,4 +1,37 @@
 struct PPU : Thread, MMIO {
+  static auto Main() -> void;
+  auto main() -> void;
+  auto add_clocks(uint clocks) -> void;
+  auto scanline() -> void;
+  auto frame() -> void;
+
+  auto hflip(uint data) const -> uint;
+
+  //mmio.cpp
+  auto vram_addr(uint16 addr) const -> uint;
+  auto mmio_read(uint16 addr) -> uint8;
+  auto mmio_write(uint16 addr, uint8 data) -> void;
+
+  //dmg.cpp
+  auto dmg_read_tile(bool select, uint x, uint y, uint& data) -> void;
+  auto dmg_scanline() -> void;
+  auto dmg_run() -> void;
+  auto dmg_run_bg() -> void;
+  auto dmg_run_window() -> void;
+  auto dmg_run_ob() -> void;
+
+  //cgb.cpp
+  auto cgb_read_tile(bool select, uint x, uint y, uint& attr, uint& data) -> void;
+  auto cgb_scanline() -> void;
+  auto cgb_run() -> void;
+  auto cgb_run_bg() -> void;
+  auto cgb_run_window() -> void;
+  auto cgb_run_ob() -> void;
+
+  auto power() -> void;
+
+  auto serialize(serializer&) -> void;
+
   uint8 vram[16384];  //GB = 8192, GBC = 16384
   uint8 oam[160];
   uint8 bgp[4];
@@ -7,7 +40,7 @@ struct PPU : Thread, MMIO {
   uint8 obpd[64];
 
   struct Status {
-    unsigned lx;
+    uint lx;
 
     //$ff40  LCDC
     bool display_enable;
@@ -66,57 +99,23 @@ struct PPU : Thread, MMIO {
   Pixel ob;
 
   struct Sprite {
-    unsigned x;
-    unsigned y;
-    unsigned tile;
-    unsigned attr;
-    unsigned data;
+    uint x;
+    uint y;
+    uint tile;
+    uint attr;
+    uint data;
   };
   Sprite sprite[10];
-  unsigned sprites;
+  uint sprites;
 
-  unsigned px;
+  uint px;
 
   struct Background {
-    unsigned attr;
-    unsigned data;
+    uint attr;
+    uint data;
   };
   Background background;
   Background window;
-
-  static void Main();
-  void main();
-  void add_clocks(unsigned clocks);
-  void scanline();
-  void frame();
-
-  unsigned hflip(unsigned data) const;
-
-  //mmio.cpp
-  unsigned vram_addr(uint16 addr) const;
-  uint8 mmio_read(uint16 addr);
-  void mmio_write(uint16 addr, uint8 data);
-
-  //dmg.cpp
-  void dmg_read_tile(bool select, unsigned x, unsigned y, unsigned& data);
-  void dmg_scanline();
-  void dmg_run();
-  void dmg_run_bg();
-  void dmg_run_window();
-  void dmg_run_ob();
-
-  //cgb.cpp
-  void cgb_read_tile(bool select, unsigned x, unsigned y, unsigned& attr, unsigned& data);
-  void cgb_scanline();
-  void cgb_run();
-  void cgb_run_bg();
-  void cgb_run_window();
-  void cgb_run_ob();
-
-  void power();
-
-  void serialize(serializer&);
-  PPU();
 };
 
 extern PPU ppu;

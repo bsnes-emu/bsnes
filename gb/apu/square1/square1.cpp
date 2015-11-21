@@ -1,10 +1,8 @@
-#ifdef APU_CPP
-
-bool APU::Square1::dac_enable() {
+auto APU::Square1::dac_enable() const -> bool {
   return (envelope_volume || envelope_direction);
 }
 
-void APU::Square1::run() {
+auto APU::Square1::run() -> void {
   if(period && --period == 0) {
     period = 2 * (2048 - frequency);
     phase++;
@@ -22,12 +20,12 @@ void APU::Square1::run() {
   output = sample;
 }
 
-void APU::Square1::sweep(bool update) {
+auto APU::Square1::sweep(bool update) -> void {
   if(sweep_enable == false) return;
 
   sweep_negate = sweep_direction;
-  unsigned delta = frequency_shadow >> sweep_shift;
-  signed freq = frequency_shadow + (sweep_negate ? -delta : delta);
+  uint delta = frequency_shadow >> sweep_shift;
+  int freq = frequency_shadow + (sweep_negate ? -delta : delta);
 
   if(freq > 2047) {
     enable = false;
@@ -38,13 +36,13 @@ void APU::Square1::sweep(bool update) {
   }
 }
 
-void APU::Square1::clock_length() {
+auto APU::Square1::clock_length() -> void {
   if(counter && enable) {
     if(++length == 0) enable = false;
   }
 }
 
-void APU::Square1::clock_sweep() {
+auto APU::Square1::clock_sweep() -> void {
   if(enable && sweep_frequency && --sweep_period == 0) {
     sweep_period = sweep_frequency;
     sweep(1);
@@ -52,7 +50,7 @@ void APU::Square1::clock_sweep() {
   }
 }
 
-void APU::Square1::clock_envelope() {
+auto APU::Square1::clock_envelope() -> void {
   if(enable && envelope_frequency && --envelope_period == 0) {
     envelope_period = envelope_frequency;
     if(envelope_direction == 0 && volume >  0) volume--;
@@ -60,7 +58,7 @@ void APU::Square1::clock_envelope() {
   }
 }
 
-void APU::Square1::write(unsigned r, uint8 data) {
+auto APU::Square1::write(uint r, uint8 data) -> void {
   if(r == 0) {  //$ff10  NR10
     if(sweep_negate && sweep_direction && !(data & 0x08)) enable = false;
     sweep_frequency = (data >> 4) & 7;
@@ -103,7 +101,7 @@ void APU::Square1::write(unsigned r, uint8 data) {
   }
 }
 
-void APU::Square1::power() {
+auto APU::Square1::power() -> void {
   enable = 0;
 
   sweep_frequency = 0;
@@ -129,7 +127,7 @@ void APU::Square1::power() {
   volume = 0;
 }
 
-void APU::Square1::serialize(serializer& s) {
+auto APU::Square1::serialize(serializer& s) -> void {
   s.integer(enable);
 
   s.integer(sweep_frequency);
@@ -154,5 +152,3 @@ void APU::Square1::serialize(serializer& s) {
   s.integer(sweep_enable);
   s.integer(volume);
 }
-
-#endif

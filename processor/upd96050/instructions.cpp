@@ -1,10 +1,10 @@
-void uPD96050::exec() {
+auto uPD96050::exec() -> void {
   uint24 opcode = programROM[regs.pc++];
   switch(opcode >> 22) {
-  case 0: exec_op(opcode); break;
-  case 1: exec_rt(opcode); break;
-  case 2: exec_jp(opcode); break;
-  case 3: exec_ld(opcode); break;
+  case 0: execOP(opcode); break;
+  case 1: execRT(opcode); break;
+  case 2: execJP(opcode); break;
+  case 3: execLD(opcode); break;
   }
 
   int32 result = (int32)regs.k * regs.l;  //sign + 30-bit result
@@ -12,7 +12,7 @@ void uPD96050::exec() {
   regs.n = result <<  1;  //store low 15-bits + zero
 }
 
-void uPD96050::exec_op(uint24 opcode) {
+auto uPD96050::execOP(uint24 opcode) -> void {
   uint2 pselect = opcode >> 20;  //P select
   uint4 alu     = opcode >> 16;  //ALU operation mode
   uint1 asl     = opcode >> 15;  //accumulator select
@@ -123,7 +123,7 @@ void uPD96050::exec_op(uint24 opcode) {
     }
   }
 
-  exec_ld((idb << 6) + dst);
+  execLD((idb << 6) + dst);
 
   switch(dpl) {
   case 1: regs.dp = (regs.dp & 0xf0) + ((regs.dp + 1) & 0x0f); break;  //DPINC
@@ -136,12 +136,12 @@ void uPD96050::exec_op(uint24 opcode) {
   if(rpdcr) regs.rp--;
 }
 
-void uPD96050::exec_rt(uint24 opcode) {
-  exec_op(opcode);
+auto uPD96050::execRT(uint24 opcode) -> void {
+  execOP(opcode);
   regs.pc = regs.stack[--regs.sp];
 }
 
-void uPD96050::exec_jp(uint24 opcode) {
+auto uPD96050::execJP(uint24 opcode) -> void {
   uint9 brch = opcode >> 13;  //branch
   uint11 na  = opcode >>  2;  //next address
   uint2 bank = opcode >>  0;  //bank address
@@ -197,7 +197,7 @@ void uPD96050::exec_jp(uint24 opcode) {
   }
 }
 
-void uPD96050::exec_ld(uint24 opcode) {
+auto uPD96050::execLD(uint24 opcode) -> void {
   uint16 id = opcode >> 6;  //immediate data
   uint4 dst = opcode >> 0;  //destination
 

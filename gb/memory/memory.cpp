@@ -1,47 +1,41 @@
 #include <gb/gb.hpp>
 
-#define MEMORY_CPP
 namespace GameBoy {
 
 Unmapped unmapped;
 Bus bus;
 
-uint8_t& Memory::operator[](unsigned addr) {
+Memory::~Memory() {
+  free();
+}
+
+auto Memory::operator[](uint addr) -> uint8& {
   return data[addr];
 }
 
-void Memory::allocate(unsigned size_) {
+auto Memory::allocate(uint size_) -> void {
   free();
   size = size_;
   data = new uint8_t[size]();
 }
 
-void Memory::copy(const uint8_t* data_, unsigned size_) {
+auto Memory::copy(const uint8_t* data_, unsigned size_) -> void {
   free();
   size = size_;
   data = new uint8_t[size];
   memcpy(data, data_, size);
 }
 
-void Memory::free() {
+auto Memory::free() -> void {
   if(data) {
     delete[] data;
-    data = 0;
+    data = nullptr;
   }
-}
-
-Memory::Memory() {
-  data = 0;
-  size = 0;
-}
-
-Memory::~Memory() {
-  free();
 }
 
 //
 
-uint8 Bus::read(uint16 addr) {
+auto Bus::read(uint16 addr) -> uint8 {
   uint8 data = mmio[addr]->mmio_read(addr);
 
   if(cheat.enable()) {
@@ -51,12 +45,12 @@ uint8 Bus::read(uint16 addr) {
   return data;
 }
 
-void Bus::write(uint16 addr, uint8 data) {
+auto Bus::write(uint16 addr, uint8 data) -> void {
   mmio[addr]->mmio_write(addr, data);
 }
 
-void Bus::power() {
-  for(unsigned n = 0x0000; n <= 0xffff; n++) mmio[n] = &unmapped;
+auto Bus::power() -> void {
+  for(auto n : range(65536)) mmio[n] = &unmapped;
 }
 
 }

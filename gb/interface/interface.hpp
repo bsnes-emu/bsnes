@@ -3,14 +3,14 @@ namespace GameBoy {
 #endif
 
 struct ID {
-  enum : unsigned {
+  enum : uint {
     System,
     GameBoy,
     SuperGameBoy,
     GameBoyColor,
   };
 
-  enum : unsigned {
+  enum : uint {
     SystemManifest,
     GameBoyBootROM,
     SuperGameBoyBootROM,
@@ -21,49 +21,49 @@ struct ID {
     RAM,
   };
 
-  enum : unsigned {
+  enum : uint {
     Device = 1,
   };
 };
 
 struct Interface : Emulator::Interface {
+  Interface();
+
+  auto title() -> string;
+  auto videoFrequency() -> double;
+  auto audioFrequency() -> double;
+
+  auto loaded() -> bool;
+  auto sha256() -> string;
+  auto group(uint id) -> uint;
+  auto load(uint id) -> void;
+  auto save() -> void;
+  auto load(uint id, const stream& stream) -> void;
+  auto save(uint id, const stream& stream) -> void;
+  auto unload() -> void;
+
+  auto power() -> void;
+  auto reset() -> void;
+  auto run() -> void;
+
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+
+  auto cheatSet(const lstring&) -> void;
+
+  auto paletteUpdate(PaletteMode mode) -> void;
+
   //Super Game Boy bindings
   struct Hook {
-    virtual void lcdScanline() {}
-    virtual void lcdOutput(uint2 color) {}
-    virtual void joypWrite(bool p15, bool p14) {}
+    virtual auto lcdScanline() -> void {}
+    virtual auto lcdOutput(uint2 color) -> void {}
+    virtual auto joypWrite(bool p15, bool p14) -> void {}
   };
   Hook* hook = nullptr;
 
-  void lcdScanline();
-  void lcdOutput(uint2 color);
-  void joypWrite(bool p15, bool p14);
-
-  string title();
-  double videoFrequency();
-  double audioFrequency();
-
-  bool loaded();
-  string sha256();
-  unsigned group(unsigned id);
-  void load(unsigned id);
-  void save();
-  void load(unsigned id, const stream& stream);
-  void save(unsigned id, const stream& stream);
-  void unload();
-
-  void power();
-  void reset();
-  void run();
-
-  serializer serialize();
-  bool unserialize(serializer&);
-
-  void cheatSet(const lstring&);
-
-  void paletteUpdate(PaletteMode mode);
-
-  Interface();
+  auto lcdScanline() -> void;
+  auto lcdOutput(uint2 color) -> void;
+  auto joypWrite(bool p15, bool p14) -> void;
 
 private:
   vector<Device> device;

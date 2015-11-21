@@ -1,16 +1,8 @@
 #include <gb/gb.hpp>
 
-#define VIDEO_CPP
 namespace GameBoy {
 
 Video video;
-
-void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
-  this->mode = mode;
-  if(system.dmg()) for(unsigned n = 0; n < 4; n++) palette[n] = palette_dmg(n);
-  if(system.sgb()) for(unsigned n = 0; n < 4; n++) palette[n] = palette_sgb(n);
-  if(system.cgb()) for(unsigned n = 0; n < (1 << 15); n++) palette[n] = palette_cgb(n);
-}
 
 Video::Video() {
   palette = new uint32_t[1 << 15]();
@@ -20,43 +12,50 @@ Video::~Video() {
   delete[] palette;
 }
 
-unsigned Video::palette_dmg(unsigned color) const {
+auto Video::generate_palette(Emulator::Interface::PaletteMode mode) -> void {
+  this->mode = mode;
+  if(system.dmg()) for(auto n : range(4)) palette[n] = paletteDMG(n);
+  if(system.sgb()) for(auto n : range(4)) palette[n] = paletteSGB(n);
+  if(system.cgb()) for(auto n : range(1 << 15)) palette[n] = paletteCGB(n);
+}
+
+auto Video::paletteDMG(uint color) const -> uint {
   if(mode == Emulator::Interface::PaletteMode::Literal) {
     return color;
   }
 
   if(mode == Emulator::Interface::PaletteMode::Channel) {
-    unsigned L = image::normalize(color, 2, 16);
+    uint L = image::normalize(color, 2, 16);
     return interface->videoColor(color, 0, 0, 0, L);
   }
 
   if(mode == Emulator::Interface::PaletteMode::Standard) {
-    unsigned L = image::normalize(3 - color, 2, 16);
+    uint L = image::normalize(3 - color, 2, 16);
     return interface->videoColor(color, 0, L, L, L);
   }
 
   if(mode == Emulator::Interface::PaletteMode::Emulation) {
-    unsigned R = monochrome[color][0];
-    unsigned G = monochrome[color][1];
-    unsigned B = monochrome[color][2];
+    uint R = monochrome[color][0];
+    uint G = monochrome[color][1];
+    uint B = monochrome[color][2];
     return interface->videoColor(color, 0, R, G, B);
   }
 
   return 0;
 }
 
-unsigned Video::palette_sgb(unsigned color) const {
+auto Video::paletteSGB(uint color) const -> uint {
   return color;
 }
 
-unsigned Video::palette_cgb(unsigned color) const {
+auto Video::paletteCGB(uint color) const -> uint {
   if(mode == Emulator::Interface::PaletteMode::Literal) {
     return color;
   }
 
-  unsigned r = (color >>  0) & 31;
-  unsigned g = (color >>  5) & 31;
-  unsigned b = (color >> 10) & 31;
+  uint r = (color >>  0) & 31;
+  uint g = (color >>  5) & 31;
+  uint b = (color >> 10) & 31;
 
   if(mode == Emulator::Interface::PaletteMode::Channel) {
     r = image::normalize(r, 5, 16);
@@ -73,9 +72,9 @@ unsigned Video::palette_cgb(unsigned color) const {
   }
 
   if(mode == Emulator::Interface::PaletteMode::Emulation) {
-    unsigned R = (r * 26 + g *  4 + b *  2);
-    unsigned G = (         g * 24 + b *  8);
-    unsigned B = (r *  6 + g *  4 + b * 22);
+    uint R = (r * 26 + g *  4 + b *  2);
+    uint G = (         g * 24 + b *  8);
+    uint B = (r *  6 + g *  4 + b * 22);
 
     R = min(960, R);
     G = min(960, G);

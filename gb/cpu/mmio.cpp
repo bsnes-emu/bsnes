@@ -1,24 +1,22 @@
-#ifdef CPU_CPP
-
-unsigned CPU::wram_addr(uint16 addr) const {
+auto CPU::wram_addr(uint16 addr) const -> uint {
   addr &= 0x1fff;
   if(addr < 0x1000) return addr;
   auto bank = status.wram_bank + (status.wram_bank == 0);
   return (bank * 0x1000) + (addr & 0x0fff);
 }
 
-void CPU::mmio_joyp_poll() {
-  unsigned button = 0, dpad = 0;
+auto CPU::mmio_joyp_poll() -> void {
+  uint button = 0, dpad = 0;
 
-  button |= interface->inputPoll(0, 0, (unsigned)Input::Start) << 3;
-  button |= interface->inputPoll(0, 0, (unsigned)Input::Select) << 2;
-  button |= interface->inputPoll(0, 0, (unsigned)Input::B) << 1;
-  button |= interface->inputPoll(0, 0, (unsigned)Input::A) << 0;
+  button |= interface->inputPoll(0, 0, (uint)Input::Start) << 3;
+  button |= interface->inputPoll(0, 0, (uint)Input::Select) << 2;
+  button |= interface->inputPoll(0, 0, (uint)Input::B) << 1;
+  button |= interface->inputPoll(0, 0, (uint)Input::A) << 0;
 
-  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Down) << 3;
-  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Up) << 2;
-  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Left) << 1;
-  dpad |= interface->inputPoll(0, 0, (unsigned)Input::Right) << 0;
+  dpad |= interface->inputPoll(0, 0, (uint)Input::Down) << 3;
+  dpad |= interface->inputPoll(0, 0, (uint)Input::Up) << 2;
+  dpad |= interface->inputPoll(0, 0, (uint)Input::Left) << 1;
+  dpad |= interface->inputPoll(0, 0, (uint)Input::Right) << 0;
 
   if(system.revision != System::Revision::SuperGameBoy) {
     //D-pad pivot makes it impossible to press opposing directions at the same time
@@ -34,7 +32,7 @@ void CPU::mmio_joyp_poll() {
   if(status.joyp != 0x0f) interrupt_raise(Interrupt::Joypad);
 }
 
-uint8 CPU::mmio_read(uint16 addr) {
+auto CPU::mmio_read(uint16 addr) -> uint8 {
   if(addr >= 0xc000 && addr <= 0xfdff) return wram[wram_addr(addr)];
   if(addr >= 0xff80 && addr <= 0xfffe) return hram[addr & 0x7f];
 
@@ -135,7 +133,7 @@ uint8 CPU::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void CPU::mmio_write(uint16 addr, uint8 data) {
+auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
   if(addr >= 0xc000 && addr <= 0xfdff) { wram[wram_addr(addr)] = data; return; }
   if(addr >= 0xff80 && addr <= 0xfffe) { hram[addr & 0x7f] = data; return; }
 
@@ -280,5 +278,3 @@ void CPU::mmio_write(uint16 addr, uint8 data) {
     return;
   }
 }
-
-#endif

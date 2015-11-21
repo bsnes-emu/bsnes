@@ -1,6 +1,4 @@
-#ifdef APU_CPP
-
-void APU::Wave::run() {
+auto APU::Wave::run() -> void {
   if(period && --period == 0) {
     period = 1 * (2048 - frequency);
     pattern_sample = pattern[++pattern_offset];
@@ -12,13 +10,13 @@ void APU::Wave::run() {
   output = sample;
 }
 
-void APU::Wave::clock_length() {
+auto APU::Wave::clock_length() -> void {
   if(enable && counter) {
     if(++length == 0) enable = false;
   }
 }
 
-void APU::Wave::write(unsigned r, uint8 data) {
+auto APU::Wave::write(uint r, uint8 data) -> void {
   if(r == 0) {  //$ff1a  NR30
     dac_enable = data & 0x80;
     if(dac_enable == false) enable = false;
@@ -54,13 +52,13 @@ void APU::Wave::write(unsigned r, uint8 data) {
   }
 }
 
-void APU::Wave::write_pattern(unsigned p, uint8 data) {
+auto APU::Wave::write_pattern(uint p, uint8 data) -> void {
   p <<= 1;
   pattern[p + 0] = (data >> 4) & 15;
   pattern[p + 1] = (data >> 0) & 15;
 }
 
-void APU::Wave::power() {
+auto APU::Wave::power() -> void {
   enable = 0;
 
   dac_enable = 0;
@@ -78,7 +76,7 @@ void APU::Wave::power() {
   pattern_sample = 0;
 }
 
-void APU::Wave::serialize(serializer& s) {
+auto APU::Wave::serialize(serializer& s) -> void {
   s.integer(enable);
 
   s.integer(dac_enable);
@@ -93,5 +91,3 @@ void APU::Wave::serialize(serializer& s) {
   s.integer(pattern_offset);
   s.integer(pattern_sample);
 }
-
-#endif

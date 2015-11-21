@@ -1,15 +1,15 @@
 struct Flags {
-  bool n, v, d, i, z, c;
-
-  inline operator unsigned() {
+  inline operator uint() {
     return (n << 7) | (v << 6) | (d << 3) | (i << 2) | (z << 1) | (c << 0);
   }
 
-  inline Flags& operator=(uint8 data) {
+  inline auto operator=(uint8 data) -> Flags& {
     n = data & 0x80; v = data & 0x40;
     d = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
     return *this;
   }
+
+  bool n, v, d, i, z, c;
 };
 
 struct Registers {

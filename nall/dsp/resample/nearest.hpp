@@ -1,33 +1,35 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
 struct ResampleNearest : Resampler {
-  inline void setFrequency();
-  inline void clear();
-  inline void sample();
   ResampleNearest(DSP& dsp) : Resampler(dsp) {}
 
-  real fraction;
-  real step;
+  inline auto setFrequency() -> void;
+  inline auto clear() -> void;
+  inline auto sample() -> void;
+
+private:
+  double fraction;
+  double step;
 };
 
-void ResampleNearest::setFrequency() {
+auto ResampleNearest::setFrequency() -> void {
   fraction = 0.0;
   step = dsp.settings.frequency / frequency;
 }
 
-void ResampleNearest::clear() {
+auto ResampleNearest::clear() -> void {
   fraction = 0.0;
 }
 
-void ResampleNearest::sample() {
+auto ResampleNearest::sample() -> void {
   while(fraction <= 1.0) {
-    real channel[dsp.settings.channels];
+    double channel[dsp.settings.channels];
 
-    for(unsigned n = 0; n < dsp.settings.channels; n++) {
-      real a = dsp.buffer.read(n, -1);
-      real b = dsp.buffer.read(n, -0);
+    for(auto n : range(dsp.settings.channels)) {
+      double a = dsp.buffer.read(n, -1);
+      double b = dsp.buffer.read(n, -0);
 
-      real mu = fraction;
+      double mu = fraction;
 
       channel[n] = mu < 0.5 ? a : b;
     }

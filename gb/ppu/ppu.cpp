@@ -6,7 +6,6 @@
 
 //LX     =   0-455
 
-#define PPU_CPP
 namespace GameBoy {
 
 #include "mmio.cpp"
@@ -15,11 +14,11 @@ namespace GameBoy {
 #include "serialization.cpp"
 PPU ppu;
 
-void PPU::Main() {
+auto PPU::Main() -> void {
   ppu.main();
 }
 
-void PPU::main() {
+auto PPU::main() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -30,7 +29,7 @@ void PPU::main() {
     if(status.display_enable && status.ly < 144) {
       if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
       add_clocks(92);
-      for(unsigned n = 0; n < 160; n++) {
+      for(auto n : range(160)) {
         system.cgb() ? cgb_run() : dmg_run();
         add_clocks(1);
       }
@@ -45,7 +44,7 @@ void PPU::main() {
   }
 }
 
-void PPU::add_clocks(unsigned clocks) {
+auto PPU::add_clocks(uint clocks) -> void {
   status.lx += clocks;
   clock += clocks * cpu.frequency;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
@@ -53,7 +52,7 @@ void PPU::add_clocks(unsigned clocks) {
   }
 }
 
-void PPU::scanline() {
+auto PPU::scanline() -> void {
   status.lx = 0;
   if(++status.ly == 154) frame();
 
@@ -71,23 +70,23 @@ void PPU::scanline() {
   }
 }
 
-void PPU::frame() {
+auto PPU::frame() -> void {
   status.ly = 0;
   scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
-unsigned PPU::hflip(unsigned data) const {
+auto PPU::hflip(uint data) const -> uint {
   return ((data & 0x8080) >> 7) | ((data & 0x4040) >> 5)
        | ((data & 0x2020) >> 3) | ((data & 0x1010) >> 1)
        | ((data & 0x0808) << 1) | ((data & 0x0404) << 3)
        | ((data & 0x0202) << 5) | ((data & 0x0101) << 7);
 }
 
-void PPU::power() {
+auto PPU::power() -> void {
   create(Main, 4 * 1024 * 1024);
 
-  for(unsigned n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
-  for(unsigned n = 0xfe00; n <= 0xfe9f; n++) bus.mmio[n] = this;  //OAM
+  for(uint n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
+  for(uint n = 0xfe00; n <= 0xfe9f; n++) bus.mmio[n] = this;  //OAM
 
   bus.mmio[0xff40] = this;  //LCDC
   bus.mmio[0xff41] = this;  //STAT
@@ -172,9 +171,6 @@ void PPU::power() {
 
   window.attr = 0;
   window.data = 0;
-}
-
-PPU::PPU() {
 }
 
 }

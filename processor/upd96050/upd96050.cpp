@@ -3,12 +3,13 @@
 
 namespace Processor {
 
+#include "registers.cpp"
 #include "instructions.cpp"
 #include "memory.cpp"
 #include "disassembler.cpp"
 #include "serialization.cpp"
 
-void uPD96050::power() {
+auto uPD96050::power() -> void {
   if(revision == Revision::uPD7725) {
     regs.pc.bits(11);
     regs.rp.bits(10);
@@ -21,7 +22,7 @@ void uPD96050::power() {
     regs.dp.bits(11);
   }
 
-  for(unsigned n = 0; n < 16; n++) regs.stack[n] = 0x0000;
+  for(auto n : range(16)) regs.stack[n] = 0x0000;
   regs.pc = 0x0000;
   regs.rp = 0x0000;
   regs.dp = 0x0000;

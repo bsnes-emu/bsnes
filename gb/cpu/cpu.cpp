@@ -1,6 +1,5 @@
 #include <gb/gb.hpp>
 
-#define CPU_CPP
 namespace GameBoy {
 
 #include "mmio.cpp"
@@ -9,11 +8,11 @@ namespace GameBoy {
 #include "serialization.cpp"
 CPU cpu;
 
-void CPU::Main() {
+auto CPU::Main() -> void {
   cpu.main();
 }
 
-void CPU::main() {
+auto CPU::main() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
       scheduler.sync = Scheduler::SynchronizeMode::All;
@@ -25,7 +24,7 @@ void CPU::main() {
   }
 }
 
-void CPU::interrupt_raise(CPU::Interrupt id) {
+auto CPU::interrupt_raise(CPU::Interrupt id) -> void {
   if(id == Interrupt::Vblank) {
     status.interrupt_request_vblank = 1;
     if(status.interrupt_enable_vblank) r.halt = false;
@@ -52,7 +51,7 @@ void CPU::interrupt_raise(CPU::Interrupt id) {
   }
 }
 
-void CPU::interrupt_test() {
+auto CPU::interrupt_test() -> void {
   if(r.ime) {
     if(status.interrupt_request_vblank && status.interrupt_enable_vblank) {
       status.interrupt_request_vblank = 0;
@@ -81,7 +80,7 @@ void CPU::interrupt_test() {
   }
 }
 
-void CPU::interrupt_exec(uint16 pc) {
+auto CPU::interrupt_exec(uint16 pc) -> void {
   r.ime = 0;
   op_write(--r[SP], r[PC] >> 8);
   op_write(--r[SP], r[PC] >> 0);
@@ -91,7 +90,7 @@ void CPU::interrupt_exec(uint16 pc) {
   op_io();
 }
 
-bool CPU::stop() {
+auto CPU::stop() -> bool {
   if(status.speed_switch) {
     status.speed_switch = 0;
     status.speed_double ^= 1;
@@ -102,13 +101,13 @@ bool CPU::stop() {
   return false;
 }
 
-void CPU::power() {
+auto CPU::power() -> void {
   create(Main, 4 * 1024 * 1024);
   LR35902::power();
 
-  for(unsigned n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
-  for(unsigned n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)
-  for(unsigned n = 0xff80; n <= 0xfffe; n++) bus.mmio[n] = this;  //HRAM
+  for(uint n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM
+  for(uint n = 0xe000; n <= 0xfdff; n++) bus.mmio[n] = this;  //WRAM (mirror)
+  for(uint n = 0xff80; n <= 0xfffe; n++) bus.mmio[n] = this;  //HRAM
 
   bus.mmio[0xff00] = this;  //JOYP
   bus.mmio[0xff01] = this;  //SB

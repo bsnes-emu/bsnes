@@ -1,35 +1,35 @@
 #ifdef NALL_DSP_INTERNAL_HPP
 
-void DSP::setChannels(unsigned channels) {
-  assert(channels > 0);
+auto DSP::setChannels(uint channels) -> void {
+  channels = max(1u, channels);
   buffer.setChannels(channels);
   output.setChannels(channels);
   settings.channels = channels;
 }
 
-void DSP::setPrecision(unsigned precision) {
+auto DSP::setPrecision(uint precision) -> void {
   settings.precision = precision;
   settings.intensity = 1 << (settings.precision - 1);
   settings.intensityInverse = 1.0 / settings.intensity;
 }
 
-void DSP::setFrequency(real frequency) {
+auto DSP::setFrequency(double frequency) -> void {
   settings.frequency = frequency;
   resampler->setFrequency();
 }
 
-void DSP::setVolume(real volume) {
+auto DSP::setVolume(double volume) -> void {
   settings.volume = volume;
 }
 
-void DSP::setBalance(real balance) {
+auto DSP::setBalance(double balance) -> void {
   settings.balance = balance;
 }
 
-void DSP::setResampler(ResampleEngine engine) {
+auto DSP::setResampler(ResampleEngine engine) -> void {
   if(resampler) delete resampler;
 
-  switch(engine) {
+  switch(engine) { default:
   case ResampleEngine::Nearest: resampler = new ResampleNearest(*this); return;
   case ResampleEngine::Linear:  resampler = new ResampleLinear (*this); return;
   case ResampleEngine::Cosine:  resampler = new ResampleCosine (*this); return;
@@ -38,11 +38,9 @@ void DSP::setResampler(ResampleEngine engine) {
   case ResampleEngine::Average: resampler = new ResampleAverage(*this); return;
   case ResampleEngine::Sinc:    resampler = new ResampleSinc   (*this); return;
   }
-
-  throw;
 }
 
-void DSP::setResamplerFrequency(real frequency) {
+auto DSP::setResamplerFrequency(double frequency) -> void {
   resampler->frequency = frequency;
   resampler->setFrequency();
 }

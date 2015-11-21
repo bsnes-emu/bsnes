@@ -1,6 +1,4 @@
-#ifdef CARTRIDGE_CPP
-
-void Cartridge::MBC3::second() {
+auto Cartridge::MBC3::second() -> void {
   if(rtc_halt == false) {
     if(++rtc_second >= 60) {
       rtc_second = 0;
@@ -18,7 +16,7 @@ void Cartridge::MBC3::second() {
   }
 }
 
-uint8 Cartridge::MBC3::mmio_read(uint16 addr) {
+auto Cartridge::MBC3::mmio_read(uint16 addr) -> uint8 {
   if((addr & 0xc000) == 0x0000) {  //$0000-3fff
     return cartridge.rom_read(addr);
   }
@@ -44,7 +42,7 @@ uint8 Cartridge::MBC3::mmio_read(uint16 addr) {
   return 0x00;
 }
 
-void Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) {
+auto Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0x0000) {  //$0000-1fff
     ram_enable = (data & 0x0f) == 0x0a;
     return;
@@ -97,7 +95,7 @@ void Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-void Cartridge::MBC3::power() {
+auto Cartridge::MBC3::power() -> void {
   ram_enable = false;
   rom_select = 0x01;
   ram_select = 0x00;
@@ -116,5 +114,3 @@ void Cartridge::MBC3::power() {
   rtc_latch_day = 0;
   rtc_latch_day_carry = false;
 }
-
-#endif
