@@ -11,38 +11,40 @@ namespace Famicom {
 #include "serialization.cpp"
 APU apu;
 
-const uint8 APU::length_counter_table[32] = {
-  0x0a, 0xfe, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06, 0xa0, 0x08, 0x3c, 0x0a, 0x0e, 0x0c, 0x1a, 0x0e,
-  0x0c, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16, 0xc0, 0x18, 0x48, 0x1a, 0x10, 0x1c, 0x20, 0x1e,
-};
+APU::APU() {
+  for(uint amp : range(32)) {
+    if(amp == 0) {
+      pulse_dac[amp] = 0;
+    } else {
+      pulse_dac[amp] = 16384.0 * 95.88 / (8128.0 / amp + 100.0);
+    }
+  }
 
-const uint16 APU::ntsc_noise_period_table[16] = {
-  4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068,
-};
+  for(uint dmc_amp : range(128)) {
+    for(uint triangle_amp : range(16)) {
+      for(uint noise_amp : range(16)) {
+        if(dmc_amp == 0 && triangle_amp == 0 && noise_amp == 0) {
+          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp] = 0;
+        } else {
+          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp]
+          = 16384.0 * 159.79 / (100.0 + 1.0 / (triangle_amp / 8227.0 + noise_amp / 12241.0 + dmc_amp / 22638.0));
+        }
+      }
+    }
+  }
+}
 
-const uint16 APU::pal_noise_period_table[16] = {
-  4, 7, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778,
-};
-
-const uint16 APU::ntsc_dmc_period_table[16] = {
-  428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54,
-};
-
-const uint16 APU::pal_dmc_period_table[16] = {
-  398, 354, 316, 298, 276, 236, 210, 198, 176, 148, 132, 118,  98, 78, 66, 50,
-};
-
-void APU::Main() {
+auto APU::Main() -> void {
   apu.main();
 }
 
-void APU::main() {
+auto APU::main() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    unsigned pulse_output, triangle_output, noise_output, dmc_output;
+    uint pulse_output, triangle_output, noise_output, dmc_output;
 
     pulse_output  = pulse[0].clock();
     pulse_output += pulse[1].clock();
@@ -52,7 +54,7 @@ void APU::main() {
 
     clock_frame_counter_divider();
 
-    signed output = pulse_dac[pulse_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
+    int output = pulse_dac[pulse_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
 
     output  = filter.run_hipass_strong(output);
     output += cartridge_sample;
@@ -66,20 +68,20 @@ void APU::main() {
   }
 }
 
-void APU::tick() {
+auto APU::tick() -> void {
   clock += 12;
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }
 
-void APU::set_irq_line() {
+auto APU::set_irq_line() -> void {
   cpu.set_irq_apu_line(frame.irq_pending || dmc.irq_pending);
 }
 
-void APU::set_sample(int16 sample) {
+auto APU::set_sample(int16 sample) -> void {
   cartridge_sample = sample;
 }
 
-void APU::power() {
+auto APU::power() -> void {
   filter.hipass_strong = 0;
   filter.hipass_weak = 0;
   filter.lopass = 0;
@@ -91,7 +93,7 @@ void APU::power() {
   dmc.power();
 }
 
-void APU::reset() {
+auto APU::reset() -> void {
   create(APU::Main, 21477272);
 
   pulse[0].reset();
@@ -112,7 +114,7 @@ void APU::reset() {
   set_irq_line();
 }
 
-uint8 APU::read(uint16 addr) {
+auto APU::read(uint16 addr) -> uint8 {
   if(addr == 0x4015) {
     uint8 result = 0x00;
     result |= pulse[0].length_counter ? 0x01 : 0;
@@ -132,8 +134,8 @@ uint8 APU::read(uint16 addr) {
   return cpu.mdr();
 }
 
-void APU::write(uint16 addr, uint8 data) {
-  const unsigned n = (addr >> 2) & 1;  //pulse#
+auto APU::write(uint16 addr, uint8 data) -> void {
+  const uint n = (addr >> 2) & 1;  //pulse#
 
   switch(addr) {
   case 0x4000: case 0x4004:
@@ -254,22 +256,22 @@ void APU::write(uint16 addr, uint8 data) {
   }
 }
 
-signed APU::Filter::run_hipass_strong(signed sample) {
+auto APU::Filter::run_hipass_strong(int sample) -> int {
   hipass_strong += ((((int64)sample << 16) - (hipass_strong >> 16)) * HiPassStrong) >> 16;
   return sample - (hipass_strong >> 32);
 }
 
-signed APU::Filter::run_hipass_weak(signed sample) {
+auto APU::Filter::run_hipass_weak(int sample) -> int {
   hipass_weak += ((((int64)sample << 16) - (hipass_weak >> 16)) * HiPassWeak) >> 16;
   return sample - (hipass_weak >> 32);
 }
 
-signed APU::Filter::run_lopass(signed sample) {
+auto APU::Filter::run_lopass(int sample) -> int {
   lopass += ((((int64)sample << 16) - (lopass >> 16)) * LoPass) >> 16;
   return (lopass >> 32);
 }
 
-void APU::clock_frame_counter() {
+auto APU::clock_frame_counter() -> void {
   frame.counter++;
 
   if(frame.counter & 1) {
@@ -295,7 +297,7 @@ void APU::clock_frame_counter() {
   }
 }
 
-void APU::clock_frame_counter_divider() {
+auto APU::clock_frame_counter_divider() -> void {
   frame.divider -= 2;
   if(frame.divider <= 0) {
     clock_frame_counter();
@@ -303,27 +305,25 @@ void APU::clock_frame_counter_divider() {
   }
 }
 
-APU::APU() {
-  for(unsigned amp = 0; amp < 32; amp++) {
-    if(amp == 0) {
-      pulse_dac[amp] = 0;
-    } else {
-      pulse_dac[amp] = 16384.0 * 95.88 / (8128.0 / amp + 100.0);
-    }
-  }
+const uint8 APU::length_counter_table[32] = {
+  0x0a, 0xfe, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06, 0xa0, 0x08, 0x3c, 0x0a, 0x0e, 0x0c, 0x1a, 0x0e,
+  0x0c, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16, 0xc0, 0x18, 0x48, 0x1a, 0x10, 0x1c, 0x20, 0x1e,
+};
 
-  for(unsigned dmc_amp = 0; dmc_amp < 128; dmc_amp++) {
-    for(unsigned triangle_amp = 0; triangle_amp < 16; triangle_amp++) {
-      for(unsigned noise_amp = 0; noise_amp < 16; noise_amp++) {
-        if(dmc_amp == 0 && triangle_amp == 0 && noise_amp == 0) {
-          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp] = 0;
-        } else {
-          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp]
-          = 16384.0 * 159.79 / (100.0 + 1.0 / (triangle_amp / 8227.0 + noise_amp / 12241.0 + dmc_amp / 22638.0));
-        }
-      }
-    }
-  }
-}
+const uint16 APU::ntsc_noise_period_table[16] = {
+  4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068,
+};
+
+const uint16 APU::pal_noise_period_table[16] = {
+  4, 7, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778,
+};
+
+const uint16 APU::ntsc_dmc_period_table[16] = {
+  428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54,
+};
+
+const uint16 APU::pal_dmc_period_table[16] = {
+  398, 354, 316, 298, 276, 236, 210, 198, 176, 148, 132, 118,  98, 78, 66, 50,
+};
 
 }

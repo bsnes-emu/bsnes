@@ -158,7 +158,7 @@ void PPU::mmio_update_video_mode() {
 }
 
 uint8 PPU::mmio_read(unsigned addr) {
-  cpu.synchronize_ppu();
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
   case 0x2104: case 0x2105: case 0x2106: case 0x2108: case 0x2109: case 0x210a:
@@ -279,7 +279,7 @@ uint8 PPU::mmio_read(unsigned addr) {
 }
 
 void PPU::mmio_write(unsigned addr, uint8 data) {
-  cpu.synchronize_ppu();
+  cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
   case 0x2100: {  //INIDISP

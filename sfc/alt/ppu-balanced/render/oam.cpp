@@ -1,6 +1,4 @@
-#ifdef PPU_CPP
-
-void PPU::update_sprite_list(unsigned addr, uint8 data) {
+auto PPU::update_sprite_list(uint addr, uint8 data) -> void {
   if(addr < 0x0200) {
     unsigned i = addr >> 2;
     switch(addr & 3) {
@@ -26,7 +24,7 @@ void PPU::update_sprite_list(unsigned addr, uint8 data) {
   }
 }
 
-void PPU::build_sprite_list() {
+auto PPU::build_sprite_list() -> void {
   if(sprite_list_valid == true) return;
   sprite_list_valid = true;
 
@@ -65,7 +63,7 @@ void PPU::build_sprite_list() {
   }
 }
 
-bool PPU::is_sprite_on_scanline() {
+auto PPU::is_sprite_on_scanline() -> bool {
   //if sprite is entirely offscreen and doesn't wrap around to the left side of the screen,
   //then it is not counted. this *should* be 256, and not 255, even though dot 256 is offscreen.
   sprite_item* spr = &sprite_list[active_sprite];
@@ -77,7 +75,7 @@ bool PPU::is_sprite_on_scanline() {
   return false;
 }
 
-void PPU::load_oam_tiles() {
+auto PPU::load_oam_tiles() -> void {
   sprite_item* spr = &sprite_list[active_sprite];
   uint16 tile_width = spr->width >> 3;
   int x = spr->x;
@@ -130,7 +128,7 @@ void PPU::load_oam_tiles() {
   }
 }
 
-void PPU::render_oam_tile(int tile_num) {
+auto PPU::render_oam_tile(int tile_num) -> void {
   oam_tileitem* t     = &oam_tilelist[tile_num];
   uint8* oam_td       = (uint8*)bg_tiledata[COLORDEPTH_16];
   uint8* oam_td_state = (uint8*)bg_tiledata_state[COLORDEPTH_16];
@@ -155,7 +153,7 @@ void PPU::render_oam_tile(int tile_num) {
   }
 }
 
-void PPU::render_line_oam_rto() {
+auto PPU::render_line_oam_rto() -> void {
   build_sprite_list();
 
   regs.oam_itemcount = 0;
@@ -200,7 +198,7 @@ void PPU::render_line_oam_rto() {
     pixel_cache[x].ce_sub  = (oam_line_pal[x] < 192); \
   }
 
-void PPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) {
+auto PPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) -> void {
   if(layer_enabled[OAM][0] == false) pri0_pos = 0;
   if(layer_enabled[OAM][1] == false) pri1_pos = 0;
   if(layer_enabled[OAM][2] == false) pri2_pos = 0;
@@ -233,5 +231,3 @@ void PPU::render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 
 
 #undef setpixel_main
 #undef setpixel_sub
-
-#endif

@@ -1,18 +1,18 @@
-void APU::DMC::start() {
+auto APU::DMC::start() -> void {
   if(length_counter == 0) {
     read_addr = 0x4000 + (addr_latch << 6);
     length_counter = (length_latch << 4) + 1;
   }
 }
 
-void APU::DMC::stop() {
+auto APU::DMC::stop() -> void {
   length_counter = 0;
   dma_delay_counter = 0;
   cpu.set_rdy_line(1);
   cpu.set_rdy_addr(false);
 }
 
-uint8 APU::DMC::clock() {
+auto APU::DMC::clock() -> uint8 {
   uint8 result = dac_latch;
 
   if(dma_delay_counter > 0) {
@@ -42,8 +42,8 @@ uint8 APU::DMC::clock() {
 
   if(--period_counter == 0) {
     if(have_sample) {
-      signed delta = (((sample >> bit_counter) & 1) << 2) - 2;
-      unsigned data = dac_latch + delta;
+      int delta = (((sample >> bit_counter) & 1) << 2) - 2;
+      uint data = dac_latch + delta;
       if((data & 0x80) == 0) dac_latch = data;
     }
 
@@ -68,10 +68,10 @@ uint8 APU::DMC::clock() {
   return result;
 }
 
-void APU::DMC::power() {
+auto APU::DMC::power() -> void {
 }
 
-void APU::DMC::reset() {
+auto APU::DMC::reset() -> void {
   length_counter = 0;
   irq_pending = 0;
 
@@ -91,7 +91,7 @@ void APU::DMC::reset() {
   sample = 0;
 }
 
-void APU::DMC::serialize(serializer& s) {
+auto APU::DMC::serialize(serializer& s) -> void {
   s.integer(length_counter);
   s.integer(irq_pending);
 

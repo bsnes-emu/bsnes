@@ -1,25 +1,25 @@
 struct Input {
-  enum class Device : unsigned {
+  enum class Device : uint {
     Joypad,
     None,
   };
 
-  void latch(bool data);
-  bool data(bool port);
-  void connect(bool port, Device device);
+  auto latch(bool data) -> void;
+  auto data(bool port) -> bool;
+  auto connect(bool port, Device device) -> void;
 
-  void power();
-  void reset();
+  auto power() -> void;
+  auto reset() -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 
 private:
   Device port1;
   Device port2;
 
   bool latchdata;
-  unsigned counter1;
-  unsigned counter2;
+  uint counter1;
+  uint counter2;
 };
 
 extern Input input;

@@ -1,5 +1,3 @@
-#ifdef PPU_CPP
-
 //bsnes mode7 renderer
 //
 //base algorithm written by anomie
@@ -12,8 +10,8 @@
 //--s---vvvvvvvvvv -> ssssssvvvvvvvvvv
 #define CLIP(x) ( ((x) & 0x2000) ? ( (x) | ~0x03ff) : ((x) & 0x03ff) )
 
-template<unsigned bg>
-void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
+template<uint bg>
+auto PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) -> void {
   if(layer_enabled[bg][0] == false) pri0_pos = 0;
   if(layer_enabled[bg][1] == false) pri1_pos = 0;
   if(pri0_pos + pri1_pos == 0) return;
@@ -140,5 +138,3 @@ void PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) {
 }
 
 #undef CLIP
-
-#endif

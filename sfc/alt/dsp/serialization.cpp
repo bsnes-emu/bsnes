@@ -1,16 +1,14 @@
-#ifdef DSP_CPP
-
-static void dsp_state_save(unsigned char **out, void *in, size_t size) {
+static auto dsp_state_save(unsigned char** out, void* in, size_t size) -> void {
   memcpy(*out, in, size);
   *out += size;
 }
 
-static void dsp_state_load(unsigned char **in, void *out, size_t size) {
+static auto dsp_state_load(unsigned char** in, void* out, size_t size) -> void {
   memcpy(out, *in, size);
   *in += size;
 }
 
-void DSP::serialize(serializer &s) {
+auto DSP::serialize(serializer &s) -> void {
   Thread::serialize(s);
   s.array(samplebuffer);
 
@@ -27,5 +25,3 @@ void DSP::serialize(serializer &s) {
     s.array(state);
   }
 }
-
-#endif

@@ -1,20 +1,18 @@
-#ifdef PPU_CPP
-
-inline uint16 PPU::get_palette(uint8 index) {
-  const unsigned addr = index << 1;
+inline auto PPU::get_palette(uint8 index) -> uint16 {
+  const uint addr = index << 1;
   return cgram[addr] + (cgram[addr + 1] << 8);
 }
 
 //p = 00000bgr <palette data>
 //t = BBGGGRRR <tilemap data>
 //r = 0BBb00GGGg0RRRr0 <return data>
-inline uint16 PPU::get_direct_color(uint8 p, uint8 t) {
+inline auto PPU::get_direct_color(uint8 p, uint8 t) -> uint16 {
   return ((t & 7) << 2) | ((p & 1) << 1) |
     (((t >> 3) & 7) << 7) | (((p >> 1) & 1) << 6) |
     ((t >> 6) << 13) | ((p >> 2) << 12);
 }
 
-inline uint16 PPU::get_pixel_normal(uint32 x) {
+inline auto PPU::get_pixel_normal(uint32 x) -> uint16 {
   pixel_t& p = pixel_cache[x];
   uint16 src_main, src_sub;
   uint8 bg_sub;
@@ -50,7 +48,7 @@ inline uint16 PPU::get_pixel_normal(uint32 x) {
   return src_main;
 }
 
-inline uint16 PPU::get_pixel_swap(uint32 x) {
+inline auto PPU::get_pixel_swap(uint32 x) -> uint16 {
   pixel_t& p = pixel_cache[x];
   uint16 src_main, src_sub;
   uint8 bg_sub;
@@ -86,7 +84,7 @@ inline uint16 PPU::get_pixel_swap(uint32 x) {
   return src_main;
 }
 
-inline void PPU::render_line_output() {
+inline auto PPU::render_line_output() -> void {
   uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
   uint32 curr, prev;
 
@@ -111,10 +109,8 @@ inline void PPU::render_line_output() {
   }
 }
 
-inline void PPU::render_line_clear() {
+inline auto PPU::render_line_clear() -> void {
   uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
-  unsigned width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
+  uint width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
   memset(ptr, 0, width * 2 * sizeof(uint32));
 }
-
-#endif

@@ -1,6 +1,6 @@
-void Input::serialize(serializer& s) {
-  s.integer((unsigned&)port1);
-  s.integer((unsigned&)port2);
+auto Input::serialize(serializer& s) -> void {
+  s.integer((uint&)port1);
+  s.integer((uint&)port2);
 
   s.integer(latchdata);
   s.integer(counter1);

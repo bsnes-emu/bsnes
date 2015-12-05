@@ -1,18 +1,19 @@
 struct Noise {
-  unsigned length_counter;
+  auto clock_length() -> void;
+  auto clock() -> uint8;
+
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint length_counter;
 
   Envelope envelope;
 
   uint4 period;
-  unsigned period_counter;
+  uint period_counter;
 
   bool short_mode;
   uint15 lfsr;
-
-  void clock_length();
-  uint8 clock();
-
-  void power();
-  void reset();
-  void serialize(serializer&);
 } noise;

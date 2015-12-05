@@ -5,14 +5,14 @@ namespace Famicom {
 #include "serialization.cpp"
 System system;
 
-void System::run() {
+auto System::run() -> void {
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
     interface->videoRefresh(video.palette, ppu.buffer, 4 * 256, 256, 240);
   }
 }
 
-void System::runtosave() {
+auto System::runtosave() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::PPU;
   runthreadtosave();
 
@@ -31,7 +31,7 @@ void System::runtosave() {
   scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 
-void System::runthreadtosave() {
+auto System::runthreadtosave() -> void {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
@@ -41,14 +41,14 @@ void System::runthreadtosave() {
   }
 }
 
-void System::load() {
+auto System::load() -> void {
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
 
   serialize_init();
 }
 
-void System::power() {
+auto System::power() -> void {
   cartridge.power();
   cpu.power();
   apu.power();
@@ -58,7 +58,7 @@ void System::power() {
   reset();
 }
 
-void System::reset() {
+auto System::reset() -> void {
   cartridge.reset();
   cpu.reset();
   apu.reset();
@@ -67,13 +67,13 @@ void System::reset() {
   scheduler.reset();
 }
 
-void System::init() {
+auto System::init() -> void {
   assert(interface != 0);
   input.connect(0, Input::Device::Joypad);
   input.connect(1, Input::Device::None);
 }
 
-void System::term() {
+auto System::term() -> void {
 }
 
 }

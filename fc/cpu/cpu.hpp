@@ -1,4 +1,37 @@
 struct CPU : Processor::R6502, Thread {
+  static auto Enter() -> void;
+  auto main() -> void;
+  auto add_clocks(uint clocks) -> void;
+
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto debugger_read(uint16 addr) -> uint8;
+
+  auto ram_read(uint16 addr) -> uint8;
+  auto ram_write(uint16 addr, uint8 data) -> void;
+
+  auto read(uint16 addr) -> uint8;
+  auto write(uint16 addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
+  //timing.cpp
+  auto op_read(uint16 addr) -> uint8;
+  auto op_write(uint16 addr, uint8 data) -> void;
+  auto last_cycle() -> void;
+  auto nmi(uint16& vector) -> void;
+
+  auto oam_dma() -> void;
+
+  auto set_nmi_line(bool) -> void;
+  auto set_irq_line(bool) -> void;
+  auto set_irq_apu_line(bool) -> void;
+
+  auto set_rdy_line(bool) -> void;
+  auto set_rdy_addr(bool valid, uint16 value = 0) -> void;
+
+//protected:
   uint8 ram[0x0800];
 
   struct Status {
@@ -16,41 +49,9 @@ struct CPU : Processor::R6502, Thread {
     uint8 oam_dma_page;
 
     bool controller_latch;
-    unsigned controller_port0;
-    unsigned controller_port1;
+    uint controller_port0;
+    uint controller_port1;
   } status;
-
-  static void Enter();
-  void main();
-  void add_clocks(unsigned clocks);
-
-  void power();
-  void reset();
-
-  uint8 debugger_read(uint16 addr);
-
-  uint8 ram_read(uint16 addr);
-  void ram_write(uint16 addr, uint8 data);
-
-  uint8 read(uint16 addr);
-  void write(uint16 addr, uint8 data);
-
-  void serialize(serializer&);
-
-  //timing.cpp
-  uint8 op_read(uint16 addr);
-  void op_write(uint16 addr, uint8 data);
-  void last_cycle();
-  void nmi(uint16 &vector);
-
-  void oam_dma();
-
-  void set_nmi_line(bool);
-  void set_irq_line(bool);
-  void set_irq_apu_line(bool);
-
-  void set_rdy_line(bool);
-  void set_rdy_addr(bool valid, uint16 value = 0);
 };
 
 extern CPU cpu;

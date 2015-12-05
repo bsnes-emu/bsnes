@@ -1,67 +1,65 @@
 struct NES_TxROM : Board {
+  NES_TxROM(Markup::Node& document) : Board(document), mmc3(*this) {
+    revision = Revision::TLROM;
+  }
 
-enum class Revision : unsigned {
-  TBROM,
-  TEROM,
-  TFROM,
-  TGROM,
-  TKROM,
-  TKSROM,
-  TLROM,
-  TL1ROM,
-  TL2ROM,
-  TLSROM,
-  TNROM,
-  TQROM,
-  TR1ROM,
-  TSROM,
-  TVROM,
-} revision;
+  auto main() -> void {
+    mmc3.main();
+  }
 
-MMC3 mmc3;
+  auto prg_read(uint addr) -> uint8 {
+    if((addr & 0xe000) == 0x6000) return mmc3.ram_read(addr);
+    if(addr & 0x8000) return prgrom.read(mmc3.prg_addr(addr));
+    return cpu.mdr();
+  }
 
-void main() {
-  mmc3.main();
-}
+  auto prg_write(uint addr, uint8 data) -> void {
+    if((addr & 0xe000) == 0x6000) return mmc3.ram_write(addr, data);
+    if(addr & 0x8000) return mmc3.reg_write(addr, data);
+  }
 
-uint8 prg_read(unsigned addr) {
-  if((addr & 0xe000) == 0x6000) return mmc3.ram_read(addr);
-  if(addr & 0x8000) return prgrom.read(mmc3.prg_addr(addr));
-  return cpu.mdr();
-}
+  auto chr_read(uint addr) -> uint8 {
+    mmc3.irq_test(addr);
+    if(addr & 0x2000) return ppu.ciram_read(mmc3.ciram_addr(addr));
+    return Board::chr_read(mmc3.chr_addr(addr));
+  }
 
-void prg_write(unsigned addr, uint8 data) {
-  if((addr & 0xe000) == 0x6000) return mmc3.ram_write(addr, data);
-  if(addr & 0x8000) return mmc3.reg_write(addr, data);
-}
+  auto chr_write(uint addr, uint8 data) -> void {
+    mmc3.irq_test(addr);
+    if(addr & 0x2000) return ppu.ciram_write(mmc3.ciram_addr(addr), data);
+    return Board::chr_write(mmc3.chr_addr(addr), data);
+  }
 
-uint8 chr_read(unsigned addr) {
-  mmc3.irq_test(addr);
-  if(addr & 0x2000) return ppu.ciram_read(mmc3.ciram_addr(addr));
-  return Board::chr_read(mmc3.chr_addr(addr));
-}
+  auto power() -> void {
+    mmc3.power();
+  }
 
-void chr_write(unsigned addr, uint8 data) {
-  mmc3.irq_test(addr);
-  if(addr & 0x2000) return ppu.ciram_write(mmc3.ciram_addr(addr), data);
-  return Board::chr_write(mmc3.chr_addr(addr), data);
-}
+  auto reset() -> void {
+    mmc3.reset();
+  }
 
-void power() {
-  mmc3.power();
-}
+  auto serialize(serializer& s) -> void {
+    Board::serialize(s);
+    mmc3.serialize(s);
+  }
 
-void reset() {
-  mmc3.reset();
-}
+  enum class Revision : uint {
+    TBROM,
+    TEROM,
+    TFROM,
+    TGROM,
+    TKROM,
+    TKSROM,
+    TLROM,
+    TL1ROM,
+    TL2ROM,
+    TLSROM,
+    TNROM,
+    TQROM,
+    TR1ROM,
+    TSROM,
+    TVROM,
+  } revision;
 
-void serialize(serializer& s) {
-  Board::serialize(s);
-  mmc3.serialize(s);
-}
-
-NES_TxROM(Markup::Node& document) : Board(document), mmc3(*this) {
-  revision = Revision::TLROM;
-}
-
+  MMC3 mmc3;
 };

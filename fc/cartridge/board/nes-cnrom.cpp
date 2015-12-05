@@ -1,54 +1,52 @@
 //NES-CNROM
 
 struct NES_CNROM : Board {
-
-struct Settings {
-  bool mirror;  //0 = horizontal, 1 = vertical
-} settings;
-
-uint2 chr_bank;
-
-uint8 prg_read(unsigned addr) {
-  if(addr & 0x8000) return prgrom.read(addr & 0x7fff);
-  return cpu.mdr();
-}
-
-void prg_write(unsigned addr, uint8 data) {
-  if(addr & 0x8000) chr_bank = data & 0x03;
-}
-
-uint8 chr_read(unsigned addr) {
-  if(addr & 0x2000) {
-    if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-    return ppu.ciram_read(addr & 0x07ff);
+  NES_CNROM(Markup::Node& document) : Board(document) {
+    settings.mirror = document["cartridge/mirror/mode"].text() == "vertical" ? 1 : 0;
   }
-  addr = (chr_bank * 0x2000) + (addr & 0x1fff);
-  return Board::chr_read(addr);
-}
 
-void chr_write(unsigned addr, uint8 data) {
-  if(addr & 0x2000) {
-    if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-    return ppu.ciram_write(addr & 0x07ff, data);
+  auto prg_read(uint addr) -> uint8 {
+    if(addr & 0x8000) return prgrom.read(addr & 0x7fff);
+    return cpu.mdr();
   }
-  addr = (chr_bank * 0x2000) + (addr & 0x1fff);
-  Board::chr_write(addr, data);
-}
 
-void power() {
-}
+  auto prg_write(uint addr, uint8 data) -> void {
+    if(addr & 0x8000) chr_bank = data & 0x03;
+  }
 
-void reset() {
-  chr_bank = 0;
-}
+  auto chr_read(uint addr) -> uint8 {
+    if(addr & 0x2000) {
+      if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
+      return ppu.ciram_read(addr & 0x07ff);
+    }
+    addr = (chr_bank * 0x2000) + (addr & 0x1fff);
+    return Board::chr_read(addr);
+  }
 
-void serialize(serializer& s) {
-  Board::serialize(s);
-  s.integer(chr_bank);
-}
+  auto chr_write(uint addr, uint8 data) -> void {
+    if(addr & 0x2000) {
+      if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
+      return ppu.ciram_write(addr & 0x07ff, data);
+    }
+    addr = (chr_bank * 0x2000) + (addr & 0x1fff);
+    Board::chr_write(addr, data);
+  }
 
-NES_CNROM(Markup::Node& document) : Board(document) {
-  settings.mirror = document["cartridge/mirror/mode"].text() == "vertical" ? 1 : 0;
-}
+  auto power() -> void {
+  }
 
+  auto reset() -> void {
+    chr_bank = 0;
+  }
+
+  auto serialize(serializer& s) -> void {
+    Board::serialize(s);
+    s.integer(chr_bank);
+  }
+
+  struct Settings {
+    bool mirror;  //0 = horizontal, 1 = vertical
+  } settings;
+
+  uint2 chr_bank;
 };

@@ -1,4 +1,4 @@
-bool APU::Sweep::check_period() {
+auto APU::Sweep::check_period() -> bool {
   if(pulse_period > 0x7ff) return false;
 
   if(decrement == 0) {
@@ -8,11 +8,11 @@ bool APU::Sweep::check_period() {
   return true;
 }
 
-void APU::Sweep::clock(unsigned channel) {
+auto APU::Sweep::clock(uint channel) -> void {
   if(--counter == 0) {
     counter = period + 1;
     if(enable && shift && pulse_period > 8) {
-      signed delta = pulse_period >> shift;
+      int delta = pulse_period >> shift;
 
       if(decrement) {
         pulse_period -= delta;
@@ -29,7 +29,7 @@ void APU::Sweep::clock(unsigned channel) {
   }
 }
 
-void APU::Sweep::power() {
+auto APU::Sweep::power() -> void {
   shift = 0;
   decrement = 0;
   period = 0;
@@ -39,10 +39,10 @@ void APU::Sweep::power() {
   pulse_period = 0;
 }
 
-void APU::Sweep::reset() {
+auto APU::Sweep::reset() -> void {
 }
 
-void APU::Sweep::serialize(serializer& s) {
+auto APU::Sweep::serialize(serializer& s) -> void {
   s.integer(shift);
   s.integer(decrement);
   s.integer(period);

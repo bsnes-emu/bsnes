@@ -2,7 +2,7 @@
 
 uint8 CPU::mmio_read(unsigned addr) {
   if((addr & 0xffc0) == 0x2140) {
-    synchronize_smp();
+    synchronizeSMP();
     return smp.port_read(addr & 3);
   }
 
@@ -15,13 +15,13 @@ uint8 CPU::mmio_read(unsigned addr) {
 
     case 0x4016: {
       uint8 result = regs.mdr & 0xfc;
-      result |= input.port1->data() & 3;
+      result |= device.controllerPort1->data() & 3;
       return result;
     }
 
     case 0x4017: {
       uint8 result = (regs.mdr & 0xe0) | 0x1c;
-      result |= input.port2->data() & 3;
+      result |= device.controllerPort2->data() & 3;
       return result;
     }
 
@@ -99,7 +99,7 @@ uint8 CPU::mmio_read(unsigned addr) {
 
 void CPU::mmio_write(unsigned addr, uint8 data) {
   if((addr & 0xffc0) == 0x2140) {
-    synchronize_smp();
+    synchronizeSMP();
     port_write(addr & 3, data);
     return;
   }
@@ -127,8 +127,8 @@ void CPU::mmio_write(unsigned addr, uint8 data) {
     }
 
     case 0x4016: {
-      input.port1->latch(data & 1);
-      input.port2->latch(data & 1);
+      device.controllerPort1->latch(data & 1);
+      device.controllerPort2->latch(data & 1);
       return;
     }
 

@@ -19,69 +19,6 @@
 #include "nes-uxrom.cpp"
 #include "sunsoft-5b.cpp"
 
-uint8 Board::Memory::read(unsigned addr) const {
-  return data[mirror(addr, size)];
-}
-
-void Board::Memory::write(unsigned addr, uint8 byte) {
-  if(writable) data[mirror(addr, size)] = byte;
-}
-
-unsigned Board::mirror(unsigned addr, unsigned size) {
-  unsigned base = 0;
-  if(size) {
-    unsigned mask = 1 << 23;
-    while(addr >= size) {
-      while(!(addr & mask)) mask >>= 1;
-      addr -= mask;
-      if(size > mask) {
-        size -= mask;
-        base += mask;
-      }
-      mask >>= 1;
-    }
-    base += addr;
-  }
-  return base;
-}
-
-void Board::main() {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    cartridge.clock += 12 * 4095;
-    tick();
-  }
-}
-
-void Board::tick() {
-  cartridge.clock += 12;
-  if(cartridge.clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
-}
-
-uint8 Board::chr_read(unsigned addr) {
-  if(chrram.size) return chrram.data[mirror(addr, chrram.size)];
-  if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
-  return 0u;
-}
-
-void Board::chr_write(unsigned addr, uint8 data) {
-  if(chrram.size) chrram.data[mirror(addr, chrram.size)] = data;
-}
-
-void Board::power() {
-}
-
-void Board::reset() {
-}
-
-void Board::serialize(serializer& s) {
-  if(prgram.size) s.array(prgram.data, prgram.size);
-  if(chrram.size) s.array(chrram.data, chrram.size);
-}
-
 Board::Board(Markup::Node& document) {
   cartridge.board = this;
   auto cartridge = document["cartridge"];
@@ -116,10 +53,70 @@ Board::Board(Markup::Node& document) {
   chrram.writable = true;
 }
 
-Board::~Board() {
+auto Board::Memory::read(uint addr) const -> uint8 {
+  return data[mirror(addr, size)];
 }
 
-Board* Board::load(string manifest) {
+auto Board::Memory::write(uint addr, uint8 byte) -> void {
+  if(writable) data[mirror(addr, size)] = byte;
+}
+
+auto Board::mirror(uint addr, uint size) -> uint {
+  uint base = 0;
+  if(size) {
+    uint mask = 1 << 23;
+    while(addr >= size) {
+      while(!(addr & mask)) mask >>= 1;
+      addr -= mask;
+      if(size > mask) {
+        size -= mask;
+        base += mask;
+      }
+      mask >>= 1;
+    }
+    base += addr;
+  }
+  return base;
+}
+
+auto Board::main() -> void {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    cartridge.clock += 12 * 4095;
+    tick();
+  }
+}
+
+auto Board::tick() -> void {
+  cartridge.clock += 12;
+  if(cartridge.clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+}
+
+auto Board::chr_read(uint addr) -> uint8 {
+  if(chrram.size) return chrram.data[mirror(addr, chrram.size)];
+  if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
+  return 0u;
+}
+
+auto Board::chr_write(uint addr, uint8 data) -> void {
+  if(chrram.size) chrram.data[mirror(addr, chrram.size)] = data;
+}
+
+auto Board::power() -> void {
+}
+
+auto Board::reset() -> void {
+}
+
+auto Board::serialize(serializer& s) -> void {
+  if(prgram.size) s.array(prgram.data, prgram.size);
+  if(chrram.size) s.array(chrram.data, chrram.size);
+}
+
+auto Board::load(string manifest) -> Board* {
   auto document = BML::unserialize(manifest);
   cartridge.information.title = document["information/title"].text();
 

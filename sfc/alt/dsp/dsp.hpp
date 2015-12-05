@@ -2,21 +2,23 @@
 
 struct DSP : Thread {
   enum : bool { Threaded = false };
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_smp();
 
-  bool mute();
-  uint8 read(uint8 addr);
-  void write(uint8 addr, uint8 data);
-
-  void enter();
-  void power();
-  void reset();
-
-  void channel_enable(unsigned channel, bool enable);
-
-  void serialize(serializer&);
   DSP();
+
+  alwaysinline auto step(uint clocks) -> void;
+  alwaysinline auto synchronizeSMP() -> void;
+
+  auto mute() -> bool;
+  auto read(uint8 addr) -> uint8;
+  auto write(uint8 addr, uint8 data) -> void;
+
+  auto enter() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto channel_enable(uint channel, bool enable) -> void;
+
+  auto serialize(serializer&) -> void;
 
 private:
   SPC_DSP spc_dsp;

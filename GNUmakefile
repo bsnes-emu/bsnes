@@ -7,8 +7,6 @@ gba := gba
 
 profile := accuracy
 target := tomoko
-
-# arch := x86
 # console := true
 
 # compiler
@@ -28,16 +26,12 @@ endif
 
 # platform
 ifeq ($(platform),windows)
-  ifeq ($(arch),x86)
-    flags += -m32
-    link += -m32
-  endif
   ifeq ($(console),true)
     link += -mconsole
   else
     link += -mwindows
   endif
-  link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32 -lole32 -lws2_32
+  link += -mthreads -luuid -lkernel32 -luser32 -lgdi32 -lcomctl32 -lcomdlg32 -lshell32
   link += -Wl,-enable-auto-import
   link += -Wl,-enable-runtime-pseudo-reloc
 else ifeq ($(platform),macosx)
@@ -46,7 +40,7 @@ else ifeq ($(platform),linux)
   flags += -march=native -fopenmp
   link += -fopenmp
   link += -Wl,-export-dynamic
-  link += -lX11 -lXext -ldl
+  link += -lX11 -lXext
 else ifeq ($(platform),bsd)
   flags += -march=native -fopenmp
   link += -fopenmp

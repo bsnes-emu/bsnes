@@ -4,10 +4,10 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
   enum : bool { Threaded = true };
   vector<Thread*> coprocessors;
   alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_smp();
-  void synchronize_ppu();
-  void synchronize_coprocessors();
-  void synchronize_controllers();
+  alwaysinline void synchronizeSMP();
+  void synchronizePPU();
+  void synchronizeCoprocessors();
+  void synchronizeDevices();
 
   uint8 pio();
   bool joylatch();

@@ -1,5 +1,3 @@
-#ifdef PPU_CPP
-
 #include "cache.cpp"
 #include "windows.cpp"
 #include "bg.cpp"
@@ -11,7 +9,7 @@
 //Mode 0: ->
 //     1,    2,    3,    4,    5,    6,    7,    8,    9,   10,   11,   12
 //  BG4B, BG3B, OAM0, BG4A, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
-void PPU::render_line_mode0() {
+auto PPU::render_line_mode0() -> void {
   render_line_bg<0, BG1, COLORDEPTH_4>(8, 11);
   render_line_bg<0, BG2, COLORDEPTH_4>(7, 10);
   render_line_bg<0, BG3, COLORDEPTH_4>(2,  5);
@@ -26,7 +24,7 @@ void PPU::render_line_mode0() {
 //Mode 1 (pri=0): ->
 //     1,    2,    3,    4,    5,    6,    7,    8,    9,   10
 //  BG3B, OAM0, BG3A, OAM1, BG2B, BG1B, OAM2, BG2A, BG1A, OAM3
-void PPU::render_line_mode1() {
+auto PPU::render_line_mode1() -> void {
   if(regs.bg3_priority) {
     render_line_bg<1, BG1, COLORDEPTH_16>(5,  8);
     render_line_bg<1, BG2, COLORDEPTH_16>(4,  7);
@@ -43,7 +41,7 @@ void PPU::render_line_mode1() {
 //Mode 2: ->
 //     1,    2,    3,    4,    5,    6,    7,    8
 //  BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
-void PPU::render_line_mode2() {
+auto PPU::render_line_mode2() -> void {
   render_line_bg<2, BG1, COLORDEPTH_16>(3, 7);
   render_line_bg<2, BG2, COLORDEPTH_16>(1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -52,7 +50,7 @@ void PPU::render_line_mode2() {
 //Mode 3: ->
 //     1,    2,    3,    4,    5,    6,    7,    8
 //  BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
-void PPU::render_line_mode3() {
+auto PPU::render_line_mode3() -> void {
   render_line_bg<3, BG1, COLORDEPTH_256>(3, 7);
   render_line_bg<3, BG2, COLORDEPTH_16 >(1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -61,7 +59,7 @@ void PPU::render_line_mode3() {
 //Mode 4: ->
 //     1,    2,    3,    4,    5,    6,    7,    8
 //  BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
-void PPU::render_line_mode4() {
+auto PPU::render_line_mode4() -> void {
   render_line_bg<4, BG1, COLORDEPTH_256>(3, 7);
   render_line_bg<4, BG2, COLORDEPTH_4  >(1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -70,7 +68,7 @@ void PPU::render_line_mode4() {
 //Mode 5: ->
 //     1,    2,    3,    4,    5,    6,    7,    8
 //  BG2B, OAM0, BG1B, OAM1, BG2A, OAM2, BG1A, OAM3
-void PPU::render_line_mode5() {
+auto PPU::render_line_mode5() -> void {
   render_line_bg<5, BG1, COLORDEPTH_16>(3, 7);
   render_line_bg<5, BG2, COLORDEPTH_4 >(1, 5);
   render_line_oam(2, 4, 6, 8);
@@ -79,7 +77,7 @@ void PPU::render_line_mode5() {
 //Mode 6: ->
 //     1,    2,    3,    4,    5,    6
 //  OAM0, BG1B, OAM1, OAM2, BG1A, OAM3
-void PPU::render_line_mode6() {
+auto PPU::render_line_mode6() -> void {
   render_line_bg<6, BG1, COLORDEPTH_16>(2, 5);
   render_line_oam(1, 3, 4, 6);
 }
@@ -91,7 +89,7 @@ void PPU::render_line_mode6() {
 //Mode 7 EXTBG: ->
 //     1,    2,    3,    4,    5,    6,    7
 //  BG2B, OAM0, BG1n, OAM1, BG2A, OAM2, OAM3
-void PPU::render_line_mode7() {
+auto PPU::render_line_mode7() -> void {
   if(regs.mode7_extbg == false) {
     render_line_mode7<BG1>(2, 2);
     render_line_oam(1, 3, 4, 5);
@@ -102,7 +100,7 @@ void PPU::render_line_mode7() {
   }
 }
 
-void PPU::render_line() {
+auto PPU::render_line() -> void {
   if(regs.display_disabled == true) {
     render_line_clear();
     return;
@@ -125,5 +123,3 @@ void PPU::render_line() {
 
   render_line_output();
 }
-
-#endif

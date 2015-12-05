@@ -1,12 +1,10 @@
-#ifdef PPU_CPP
-
-void PPU::latch_counters() {
+auto PPU::latch_counters() -> void {
   regs.hcounter = cpu.hdot();
   regs.vcounter = cpu.vcounter();
   regs.counters_latched = true;
 }
 
-uint16 PPU::get_vram_address() {
+auto PPU::get_vram_address() -> uint16 {
   uint16 addr = regs.vram_addr;
   switch(regs.vram_mapping) {
     case 0: break;  //direct mapping
@@ -22,7 +20,7 @@ uint16 PPU::get_vram_address() {
 //been validated on hardware, as has the edge case where the S-CPU MDR can be written if the
 //write occurs during the very last clock cycle of vblank.
 
-uint8 PPU::vram_mmio_read(uint16 addr) {
+auto PPU::vram_mmio_read(uint16 addr) -> uint8 {
   uint8 data;
 
   if(regs.display_disabled == true) {
@@ -51,7 +49,7 @@ uint8 PPU::vram_mmio_read(uint16 addr) {
   return data;
 }
 
-void PPU::vram_mmio_write(uint16 addr, uint8 data) {
+auto PPU::vram_mmio_write(uint16 addr, uint8 data) -> void {
   if(regs.display_disabled == true) {
     vram[addr] = data;
   } else {
@@ -79,7 +77,7 @@ void PPU::vram_mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-uint8 PPU::oam_mmio_read(uint16 addr) {
+auto PPU::oam_mmio_read(uint16 addr) -> uint8 {
   addr &= 0x03ff;
   if(addr & 0x0200) addr &= 0x021f;
   uint8 data;
@@ -97,7 +95,7 @@ uint8 PPU::oam_mmio_read(uint16 addr) {
   return data;
 }
 
-void PPU::oam_mmio_write(uint16 addr, uint8 data) {
+auto PPU::oam_mmio_write(uint16 addr, uint8 data) -> void {
   addr &= 0x03ff;
   if(addr & 0x0200) addr &= 0x021f;
 
@@ -117,7 +115,7 @@ void PPU::oam_mmio_write(uint16 addr, uint8 data) {
   }
 }
 
-uint8 PPU::cgram_mmio_read(uint16 addr) {
+auto PPU::cgram_mmio_read(uint16 addr) -> uint8 {
   addr &= 0x01ff;
   uint8 data;
 
@@ -137,7 +135,7 @@ uint8 PPU::cgram_mmio_read(uint16 addr) {
   return data;
 }
 
-void PPU::cgram_mmio_write(uint16 addr, uint8 data) {
+auto PPU::cgram_mmio_write(uint16 addr, uint8 data) -> void {
   addr &= 0x01ff;
   if(addr & 1) data &= 0x7f;
 
@@ -153,5 +151,3 @@ void PPU::cgram_mmio_write(uint16 addr, uint8 data) {
     }
   }
 }
-
-#endif

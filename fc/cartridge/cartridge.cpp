@@ -6,73 +6,77 @@ namespace Famicom {
 #include "board/board.cpp"
 Cartridge cartridge;
 
-string Cartridge::title() {
+auto Cartridge::loaded() const -> bool {
+  return _loaded;
+}
+
+auto Cartridge::sha256() const -> string {
+  return _sha256;
+}
+
+auto Cartridge::title() const -> string {
   return information.title;
 }
 
-void Cartridge::Main() {
+auto Cartridge::Main() -> void {
   cartridge.main();
 }
 
-void Cartridge::main() {
+auto Cartridge::main() -> void {
   board->main();
 }
 
-void Cartridge::load() {
+auto Cartridge::load() -> void {
   interface->loadRequest(ID::Manifest, "manifest.bml", true);
 
   Board::load(information.markup);  //this call will set Cartridge::board if successful
-  if(board == nullptr) return;
+  if(!board) return;
 
   Hash::SHA256 sha;
   sha.data(board->prgrom.data, board->prgrom.size);
   sha.data(board->chrrom.data, board->chrrom.size);
-  sha256 = sha.digest();
+  _sha256 = sha.digest();
 
   system.load();
-  loaded = true;
+  _loaded = true;
 }
 
-void Cartridge::unload() {
-  if(loaded == false) return;
-  loaded = false;
+auto Cartridge::unload() -> void {
+  if(!loaded()) return;
+  _loaded = false;
   memory.reset();
 }
 
-void Cartridge::power() {
+auto Cartridge::power() -> void {
   board->power();
 }
 
-void Cartridge::reset() {
+auto Cartridge::reset() -> void {
   create(Cartridge::Main, 21477272);
   board->reset();
 }
 
-Cartridge::Cartridge() {
-  loaded = false;
-}
-
-uint8 Cartridge::prg_read(unsigned addr) {
+auto Cartridge::prg_read(uint addr) -> uint8 {
   return board->prg_read(addr);
 }
 
-void Cartridge::prg_write(unsigned addr, uint8 data) {
+auto Cartridge::prg_write(uint addr, uint8 data) -> void {
   return board->prg_write(addr, data);
 }
 
-uint8 Cartridge::chr_read(unsigned addr) {
+auto Cartridge::chr_read(uint addr) -> uint8 {
   return board->chr_read(addr);
 }
 
-void Cartridge::chr_write(unsigned addr, uint8 data) {
+auto Cartridge::chr_write(uint addr, uint8 data) -> void {
   return board->chr_write(addr, data);
 }
 
-void Cartridge::scanline(unsigned y) {
+auto Cartridge::scanline(uint y) -> void {
   return board->scanline(y);
 }
 
-void Cartridge::serialize(serializer& s) {
+auto Cartridge::serialize(serializer& s) -> void {
   Thread::serialize(s);
   return board->serialize(s);
 }

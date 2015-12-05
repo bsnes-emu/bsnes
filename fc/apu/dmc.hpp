@@ -1,9 +1,18 @@
 struct DMC {
-  unsigned length_counter;
+  auto start() -> void;
+  auto stop() -> void;
+  auto clock() -> uint8;
+
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint length_counter;
   bool irq_pending;
 
   uint4 period;
-  unsigned period_counter;
+  uint period_counter;
 
   bool irq_enable;
   bool loop_mode;
@@ -13,7 +22,7 @@ struct DMC {
   uint8 length_latch;
 
   uint15 read_addr;
-  unsigned dma_delay_counter;
+  uint dma_delay_counter;
 
   uint3 bit_counter;
   bool have_dma_buffer;
@@ -21,12 +30,4 @@ struct DMC {
 
   bool have_sample;
   uint8 sample;
-
-  void start();
-  void stop();
-  uint8 clock();
-
-  void power();
-  void reset();
-  void serialize(serializer&);
 } dmc;

@@ -33,7 +33,7 @@ void SMP::enter() {
 }
 
 void SMP::power() {
-  Thread::frequency = system.apu_frequency();
+  Thread::frequency = system.apuFrequency();
   Thread::clock = 0;
 
   timer0.target = 0;

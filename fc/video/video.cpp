@@ -6,14 +6,22 @@ namespace Famicom {
 
 Video video;
 
-void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
-  for(unsigned color = 0; color < (1 << 9); color++) {
+Video::Video() {
+  palette = new uint32_t[1 << 9]();
+}
+
+Video::~Video() {
+  delete[] palette;
+}
+
+auto Video::generate_palette(Emulator::Interface::PaletteMode mode) -> void {
+  for(auto color : range(1 << 9)) {
     if(mode == Emulator::Interface::PaletteMode::Literal) {
       palette[color] = color;
     } else if(mode == Emulator::Interface::PaletteMode::Channel) {
-      unsigned emphasis = (color >> 6) &  7;
-      unsigned luma     = (color >> 4) &  3;
-      unsigned chroma   = (color >> 0) & 15;
+      uint emphasis = (color >> 6) &  7;
+      uint luma     = (color >> 4) &  3;
+      uint chroma   = (color >> 0) & 15;
       emphasis = image::normalize(emphasis, 3, 16);
       luma     = image::normalize(luma,     2, 16);
       chroma   = image::normalize(chroma,   4, 16);
@@ -26,19 +34,11 @@ void Video::generate_palette(Emulator::Interface::PaletteMode mode) {
   }
 }
 
-Video::Video() {
-  palette = new uint32_t[1 << 9]();
-}
-
-Video::~Video() {
-  delete[] palette;
-}
-
-uint32_t Video::generate_color(
-  unsigned n, double saturation, double hue,
+auto Video::generate_color(
+  uint n, double saturation, double hue,
   double contrast, double brightness, double gamma
-) {
-  signed color = (n & 0x0f), level = color < 0xe ? (n >> 4) & 3 : 1;
+) -> uint32 {
+  int color = (n & 0x0f), level = color < 0xe ? (n >> 4) & 3 : 1;
 
   static const double black = 0.518, white = 1.962, attenuation = 0.746;
   static const double levels[8] = {
@@ -52,8 +52,8 @@ uint32_t Video::generate_color(
   };
 
   double y = 0.0, i = 0.0, q = 0.0;
-  auto wave = [](signed p, signed color) { return (color + p + 8) % 12 < 6; };
-  for(signed p = 0; p < 12; p++) {
+  auto wave = [](int p, int color) { return (color + p + 8) % 12 < 6; };
+  for(int p : range(12)) {
     double spot = lo_and_hi[wave(p, color)];
 
     if(((n & 0x040) && wave(p, 12))
@@ -75,9 +75,9 @@ uint32_t Video::generate_color(
   q *= saturation;
 
   auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : std::pow(f, 2.2 / gamma); };
-  unsigned r = 65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
-  unsigned g = 65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
-  unsigned b = 65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
+  uint r = 65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
+  uint g = 65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
+  uint b = 65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
 
   return interface->videoColor(n, 0, uclamp<16>(r), uclamp<16>(g), uclamp<16>(b));
 }

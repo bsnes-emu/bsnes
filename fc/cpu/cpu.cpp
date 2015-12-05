@@ -6,7 +6,7 @@ namespace Famicom {
 #include "serialization.cpp"
 CPU cpu;
 
-void CPU::Enter() {
+auto CPU::Enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -16,7 +16,7 @@ void CPU::Enter() {
   }
 }
 
-void CPU::main() {
+auto CPU::main() -> void {
   if(status.interrupt_pending) {
     interrupt();
     return;
@@ -25,7 +25,7 @@ void CPU::main() {
   exec();
 }
 
-void CPU::add_clocks(unsigned clocks) {
+auto CPU::add_clocks(uint clocks) -> void {
   apu.clock -= clocks;
   if(apu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(apu.thread);
 
@@ -36,17 +36,17 @@ void CPU::add_clocks(unsigned clocks) {
   if(cartridge.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cartridge.thread);
 }
 
-void CPU::power() {
+auto CPU::power() -> void {
   R6502::power();
 
-  for(unsigned addr = 0; addr < 0x0800; addr++) ram[addr] = 0xff;
+  for(auto addr : range(0x0800)) ram[addr] = 0xff;
   ram[0x0008] = 0xf7;
   ram[0x0009] = 0xef;
   ram[0x000a] = 0xdf;
   ram[0x000f] = 0xbf;
 }
 
-void CPU::reset() {
+auto CPU::reset() -> void {
   R6502::reset();
   create(CPU::Enter, 21477272);
 
@@ -71,19 +71,19 @@ void CPU::reset() {
   status.controller_port1 = 0;
 }
 
-uint8 CPU::debugger_read(uint16 addr) {
+auto CPU::debugger_read(uint16 addr) -> uint8 {
   return bus.read(addr);
 }
 
-uint8 CPU::ram_read(uint16 addr) {
+auto CPU::ram_read(uint16 addr) -> uint8 {
   return ram[addr & 0x07ff];
 }
 
-void CPU::ram_write(uint16 addr, uint8 data) {
+auto CPU::ram_write(uint16 addr, uint8 data) -> void {
   ram[addr & 0x07ff] = data;
 }
 
-uint8 CPU::read(uint16 addr) {
+auto CPU::read(uint16 addr) -> uint8 {
   if(addr == 0x4016) {
     return (mdr() & 0xc0) | input.data(0);
   }
@@ -95,7 +95,7 @@ uint8 CPU::read(uint16 addr) {
   return apu.read(addr);
 }
 
-void CPU::write(uint16 addr, uint8 data) {
+auto CPU::write(uint16 addr, uint8 data) -> void {
   if(addr == 0x4014) {
     status.oam_dma_page = data;
     status.oam_dma_pending = true;

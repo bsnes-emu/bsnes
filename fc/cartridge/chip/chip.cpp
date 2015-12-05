@@ -9,9 +9,9 @@
 #include "vrc6.cpp"
 #include "vrc7.cpp"
 
-void Chip::tick() {
-  board.tick();
+Chip::Chip(Board& board) : board(board) {
 }
 
-Chip::Chip(Board& board) : board(board) {
+auto Chip::tick() -> void {
+  board.tick();
 }

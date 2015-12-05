@@ -1,6 +1,4 @@
-#ifdef PPU_CPP
-
-void PPUcounter::serialize(serializer& s) {
+auto PPUcounter::serialize(serializer& s) -> void {
   s.integer(status.interlace);
   s.integer(status.field);
   s.integer(status.vcounter);
@@ -12,7 +10,7 @@ void PPUcounter::serialize(serializer& s) {
   s.integer(history.index);
 }
 
-void PPU::serialize(serializer& s) {
+auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
   PPUcounter::serialize(s);
 
@@ -35,7 +33,7 @@ void PPU::serialize(serializer& s) {
 
   s.integer(regs.ppu1_mdr);
   s.integer(regs.ppu2_mdr);
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_y[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_y[n]);
 
   s.integer(regs.ioamaddr);
   s.integer(regs.icgramaddr);
@@ -54,24 +52,24 @@ void PPU::serialize(serializer& s) {
 
   s.integer(regs.oam_latchdata);
 
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_tilesize[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_tilesize[n]);
   s.integer(regs.bg3_priority);
   s.integer(regs.bg_mode);
 
   s.integer(regs.mosaic_size);
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.mosaic_enabled[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.mosaic_enabled[n]);
   s.integer(regs.mosaic_countdown);
 
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_scaddr[n]);
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_scsize[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_scaddr[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_scsize[n]);
 
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_tdaddr[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_tdaddr[n]);
 
   s.integer(regs.bg_ofslatch);
   s.integer(regs.m7_hofs);
   s.integer(regs.m7_vofs);
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_hofs[n]);
-  for(unsigned n = 0; n < 4; n++) s.integer(regs.bg_vofs[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_hofs[n]);
+  for(uint n = 0; n < 4; n++) s.integer(regs.bg_vofs[n]);
 
   s.integer(regs.vram_incmode);
   s.integer(regs.vram_mapping);
@@ -95,21 +93,21 @@ void PPU::serialize(serializer& s) {
 
   s.integer(regs.cgram_latchdata);
 
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.window1_enabled[n]);
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.window1_invert [n]);
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.window2_enabled[n]);
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.window2_invert [n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.window1_enabled[n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.window1_invert [n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.window2_enabled[n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.window2_invert [n]);
 
   s.integer(regs.window1_left);
   s.integer(regs.window1_right);
   s.integer(regs.window2_left);
   s.integer(regs.window2_right);
 
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.window_mask[n]);
-  for(unsigned n = 0; n < 5; n++) s.integer(regs.bg_enabled[n]);
-  for(unsigned n = 0; n < 5; n++) s.integer(regs.bgsub_enabled[n]);
-  for(unsigned n = 0; n < 5; n++) s.integer(regs.window_enabled[n]);
-  for(unsigned n = 0; n < 5; n++) s.integer(regs.sub_window_enabled[n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.window_mask[n]);
+  for(uint n = 0; n < 5; n++) s.integer(regs.bg_enabled[n]);
+  for(uint n = 0; n < 5; n++) s.integer(regs.bgsub_enabled[n]);
+  for(uint n = 0; n < 5; n++) s.integer(regs.window_enabled[n]);
+  for(uint n = 0; n < 5; n++) s.integer(regs.sub_window_enabled[n]);
 
   s.integer(regs.color_mask);
   s.integer(regs.colorsub_mask);
@@ -118,7 +116,7 @@ void PPU::serialize(serializer& s) {
 
   s.integer(regs.color_mode);
   s.integer(regs.color_halve);
-  for(unsigned n = 0; n < 6; n++) s.integer(regs.color_enabled[n]);
+  for(uint n = 0; n < 6; n++) s.integer(regs.color_enabled[n]);
 
   s.integer(regs.color_r);
   s.integer(regs.color_g);
@@ -145,7 +143,7 @@ void PPU::serialize(serializer& s) {
   s.integer(regs.oam_itemcount);
   s.integer(regs.oam_tilecount);
 
-  for(unsigned n = 0; n < 256; n++) {
+  for(uint n = 0; n < 256; n++) {
     s.integer(pixel_cache[n].src_main);
     s.integer(pixel_cache[n].src_sub);
     s.integer(pixel_cache[n].bg_main);
@@ -159,12 +157,12 @@ void PPU::serialize(serializer& s) {
   //better to just take a small speed hit than store all of bg_tiledata[3][] ...
   flush_tiledata_cache();
 
-  for(unsigned n = 0; n < 6; n++) {
+  for(uint n = 0; n < 6; n++) {
     s.array(window[n].main, 256);
     s.array(window[n].sub,  256);
   }
 
-  for(unsigned n = 0; n < 4; n++) {
+  for(uint n = 0; n < 4; n++) {
     s.integer(bg_info[n].tw);
     s.integer(bg_info[n].th);
     s.integer(bg_info[n].mx);
@@ -173,7 +171,7 @@ void PPU::serialize(serializer& s) {
     s.integer(bg_info[n].scy);
   }
 
-  for(unsigned n = 0; n < 128; n++) {
+  for(uint n = 0; n < 128; n++) {
     s.integer(sprite_list[n].width);
     s.integer(sprite_list[n].height);
     s.integer(sprite_list[n].x);
@@ -191,7 +189,7 @@ void PPU::serialize(serializer& s) {
 
   s.array(oam_itemlist, 32);
 
-  for(unsigned n = 0; n < 34; n++) {
+  for(uint n = 0; n < 34; n++) {
     s.integer(oam_tilelist[n].x);
     s.integer(oam_tilelist[n].y);
     s.integer(oam_tilelist[n].pri);
@@ -203,5 +201,3 @@ void PPU::serialize(serializer& s) {
   s.array(oam_line_pal, 256);
   s.array(oam_line_pri, 256);
 }
-
-#endif

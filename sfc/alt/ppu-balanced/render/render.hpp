@@ -1,16 +1,16 @@
 //render.cpp
-inline void render_line_mode0();
-inline void render_line_mode1();
-inline void render_line_mode2();
-inline void render_line_mode3();
-inline void render_line_mode4();
-inline void render_line_mode5();
-inline void render_line_mode6();
-inline void render_line_mode7();
+inline auto render_line_mode0() -> void;
+inline auto render_line_mode1() -> void;
+inline auto render_line_mode2() -> void;
+inline auto render_line_mode3() -> void;
+inline auto render_line_mode4() -> void;
+inline auto render_line_mode5() -> void;
+inline auto render_line_mode6() -> void;
+inline auto render_line_mode7() -> void;
 
 //cache.cpp
-enum { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };
-enum { TILE_2BIT = 0, TILE_4BIT = 1, TILE_8BIT = 2 };
+enum : uint { COLORDEPTH_4 = 0, COLORDEPTH_16 = 1, COLORDEPTH_256 = 2 };
+enum : uint { TILE_2BIT = 0, TILE_4BIT = 1, TILE_8BIT = 2 };
 
 struct pixel_t {
   //bgr555 color data for main/subscreen pixels: 0x0000 = transparent / use palette color # 0
@@ -28,19 +28,19 @@ struct pixel_t {
 uint8* bg_tiledata[3];
 uint8* bg_tiledata_state[3];  //0 = valid, 1 = dirty
 
-template<unsigned color_depth> void render_bg_tile(uint16 tile_num);
-inline void flush_pixel_cache();
-void alloc_tiledata_cache();
-void flush_tiledata_cache();
-void free_tiledata_cache();
+template<uint color_depth> auto render_bg_tile(uint16 tile_num) -> void;
+inline auto flush_pixel_cache() -> void;
+auto alloc_tiledata_cache() -> void;
+auto flush_tiledata_cache() -> void;
+auto free_tiledata_cache() -> void;
 
 //windows.cpp
 struct window_t {
   uint8 main[256], sub[256];
 } window[6];
 
-void build_window_table(uint8 bg, bool mainscreen);
-void build_window_tables(uint8 bg);
+auto build_window_table(uint8 bg, bool mainscreen) -> void;
+auto build_window_tables(uint8 bg) -> void;
 
 //bg.cpp
 struct {
@@ -48,10 +48,10 @@ struct {
   uint16 mx,  my;  //screen mask x, y
   uint16 scx, scy; //sc index offsets
 } bg_info[4];
-void update_bg_info();
+auto update_bg_info() -> void;
 
-template<unsigned bg> uint16 bg_get_tile(uint16 x, uint16 y);
-template<unsigned mode, unsigned bg, unsigned color_depth> void render_line_bg(uint8 pri0_pos, uint8 pri1_pos);
+template<uint bg> auto bg_get_tile(uint16 x, uint16 y) -> uint16;
+template<uint mode, uint bg, uint color_depth> auto render_line_bg(uint8 pri0_pos, uint8 pri1_pos) -> void;
 
 //oam.cpp
 struct sprite_item {
@@ -65,7 +65,7 @@ struct sprite_item {
   bool   size;
 } sprite_list[128];
 bool sprite_list_valid;
-unsigned active_sprite;
+uint active_sprite;
 
 uint8 oam_itemlist[32];
 struct oam_tileitem {
@@ -73,27 +73,27 @@ struct oam_tileitem {
   bool   hflip;
 } oam_tilelist[34];
 
-enum { OAM_PRI_NONE = 4 };
+enum : uint { OAM_PRI_NONE = 4 };
 uint8 oam_line_pal[256], oam_line_pri[256];
 
-void update_sprite_list(unsigned addr, uint8 data);
-void build_sprite_list();
-bool is_sprite_on_scanline();
-void load_oam_tiles();
-void render_oam_tile(int tile_num);
-void render_line_oam_rto();
-void render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos);
+auto update_sprite_list(unsigned addr, uint8 data) -> void;
+auto build_sprite_list() -> void;
+auto is_sprite_on_scanline() -> bool;
+auto load_oam_tiles() -> void;
+auto render_oam_tile(int tile_num) -> void;
+auto render_line_oam_rto() -> void;
+auto render_line_oam(uint8 pri0_pos, uint8 pri1_pos, uint8 pri2_pos, uint8 pri3_pos) -> void;
 
 //mode7.cpp
-template<unsigned bg> void render_line_mode7(uint8 pri0_pos, uint8 pri1_pos);
+template<uint bg> auto render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) -> void;
 
 //addsub.cpp
-inline uint16 addsub(uint32 x, uint32 y, bool halve);
+inline auto addsub(uint32 x, uint32 y, bool halve) -> uint16;
 
 //line.cpp
-inline uint16 get_palette(uint8 index);
-inline uint16 get_direct_color(uint8 p, uint8 t);
-inline uint16 get_pixel_normal(uint32 x);
-inline uint16 get_pixel_swap(uint32 x);
-void   render_line_output();
-void   render_line_clear();
+inline auto get_palette(uint8 index) -> uint16;
+inline auto get_direct_color(uint8 p, uint8 t) -> uint16;
+inline auto get_pixel_normal(uint32 x) -> uint16;
+inline auto get_pixel_swap(uint32 x) -> uint16;
+auto render_line_output() -> void;
+auto render_line_clear() -> void;

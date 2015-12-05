@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define DSP_CPP
 namespace SuperFamicom {
 
 DSP dsp;
@@ -8,11 +7,15 @@ DSP dsp;
 #include "serialization.cpp"
 #include "SPC_DSP.cpp"
 
-void DSP::step(unsigned clocks) {
+DSP::DSP() {
+  for(auto i : range(8)) channel_enabled[i] = true;
+}
+
+auto DSP::step(uint clocks) -> void {
   clock += clocks;
 }
 
-void DSP::synchronize_smp() {
+auto DSP::synchronizeSMP() -> void {
   if(SMP::Threaded == true) {
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(smp.thread);
   } else {
@@ -20,52 +23,48 @@ void DSP::synchronize_smp() {
   }
 }
 
-void DSP::enter() {
+auto DSP::enter() -> void {
   spc_dsp.run(1);
   step(24);
 
-  signed count = spc_dsp.sample_count();
+  int count = spc_dsp.sample_count();
   if(count > 0) {
-    for(unsigned n = 0; n < count; n += 2) audio.sample(samplebuffer[n + 0], samplebuffer[n + 1]);
+    for(uint n = 0; n < count; n += 2) audio.sample(samplebuffer[n + 0], samplebuffer[n + 1]);
     spc_dsp.set_output(samplebuffer, 8192);
   }
 }
 
-bool DSP::mute() {
+auto DSP::mute() -> bool {
   return spc_dsp.mute();
 }
 
-uint8 DSP::read(uint8 addr) {
+auto DSP::read(uint8 addr) -> uint8 {
   return spc_dsp.read(addr);
 }
 
-void DSP::write(uint8 addr, uint8 data) {
+auto DSP::write(uint8 addr, uint8 data) -> void {
   spc_dsp.write(addr, data);
 }
 
-void DSP::power() {
+auto DSP::power() -> void {
   spc_dsp.init(smp.apuram);
   spc_dsp.reset();
   spc_dsp.set_output(samplebuffer, 8192);
 }
 
-void DSP::reset() {
+auto DSP::reset() -> void {
   Thread::clock = 0;
   spc_dsp.soft_reset();
   spc_dsp.set_output(samplebuffer, 8192);
 }
 
-void DSP::channel_enable(unsigned channel, bool enable) {
+auto DSP::channel_enable(uint channel, bool enable) -> void {
   channel_enabled[channel & 7] = enable;
-  unsigned mask = 0;
-  for(unsigned i = 0; i < 8; i++) {
+  uint mask = 0;
+  for(auto i : range(8)) {
     if(channel_enabled[i] == false) mask |= 1 << i;
   }
   spc_dsp.mute_voices(mask);
-}
-
-DSP::DSP() {
-  for(unsigned i = 0; i < 8; i++) channel_enabled[i] = true;
 }
 
 }

@@ -4,27 +4,66 @@ namespace Famicom {
 
 Interface* interface = nullptr;
 
-string Interface::title() {
+Interface::Interface() {
+  interface = this;
+
+  information.name        = "Famicom";
+  information.width       = 256;
+  information.height      = 240;
+  information.overscan    = true;
+  information.aspectRatio = 8.0 / 7.0;
+  information.resettable  = true;
+  information.capability.states = true;
+  information.capability.cheats = true;
+
+  media.append({ID::Famicom, "Famicom", "fc", true});
+
+  { Device device{0, ID::Port1 | ID::Port2, "Controller"};
+    device.input.append({0, 0, "A"     });
+    device.input.append({1, 0, "B"     });
+    device.input.append({2, 0, "Select"});
+    device.input.append({3, 0, "Start" });
+    device.input.append({4, 0, "Up"    });
+    device.input.append({5, 0, "Down"  });
+    device.input.append({6, 0, "Left"  });
+    device.input.append({7, 0, "Right" });
+    device.order = {4, 5, 6, 7, 1, 0, 2, 3};
+    this->device.append(device);
+  }
+
+  port.append({0, "Port 1"});
+  port.append({1, "Port 2"});
+
+  for(auto& device : this->device) {
+    for(auto& port : this->port) {
+      if(device.portmask & (1 << port.id)) {
+        port.device.append(device);
+      }
+    }
+  }
+}
+
+auto Interface::title() -> string {
   return cartridge.title();
 }
 
-double Interface::videoFrequency() {
+auto Interface::videoFrequency() -> double {
   return 21477272.0 / (262.0 * 1364.0 - 4.0);
 }
 
-double Interface::audioFrequency() {
+auto Interface::audioFrequency() -> double {
   return 21477272.0 / 12.0;
 }
 
-bool Interface::loaded() {
+auto Interface::loaded() -> bool {
   return cartridge.loaded();
 }
 
-string Interface::sha256() {
+auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-unsigned Interface::group(unsigned id) {
+auto Interface::group(uint id) -> uint {
   switch(id) {
   case ID::SystemManifest:
     return 0;
@@ -39,17 +78,17 @@ unsigned Interface::group(unsigned id) {
   throw;
 }
 
-void Interface::load(unsigned id) {
+auto Interface::load(uint id) -> void {
   cartridge.load();
 }
 
-void Interface::save() {
+auto Interface::save() -> void {
   for(auto& memory : cartridge.memory) {
     saveRequest(memory.id, memory.name);
   }
 }
 
-void Interface::load(unsigned id, const stream& stream) {
+auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::SystemManifest) {
     system.information.manifest = stream.text();
   }
@@ -75,7 +114,7 @@ void Interface::load(unsigned id, const stream& stream) {
   }
 }
 
-void Interface::save(unsigned id, const stream& stream) {
+auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::ProgramRAM) {
     stream.write(cartridge.board->prgram.data, cartridge.board->prgram.size);
   }
@@ -85,33 +124,33 @@ void Interface::save(unsigned id, const stream& stream) {
   }
 }
 
-void Interface::unload() {
+auto Interface::unload() -> void {
   save();
   cartridge.unload();
 }
 
-void Interface::power() {
+auto Interface::power() -> void {
   system.power();
 }
 
-void Interface::reset() {
+auto Interface::reset() -> void {
   system.reset();
 }
 
-void Interface::run() {
+auto Interface::run() -> void {
   system.run();
 }
 
-serializer Interface::serialize() {
+auto Interface::serialize() -> serializer {
   system.runtosave();
   return system.serialize();
 }
 
-bool Interface::unserialize(serializer& s) {
+auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-void Interface::cheatSet(const lstring& list) {
+auto Interface::cheatSet(const lstring& list) -> void {
   cheat.reset();
   for(auto& codeset : list) {
     lstring codes = codeset.split("+");
@@ -123,48 +162,8 @@ void Interface::cheatSet(const lstring& list) {
   }
 }
 
-void Interface::paletteUpdate(PaletteMode mode) {
+auto Interface::paletteUpdate(PaletteMode mode) -> void {
   video.generate_palette(mode);
-}
-
-Interface::Interface() {
-  interface = this;
-
-  information.name        = "Famicom";
-  information.width       = 256;
-  information.height      = 240;
-  information.overscan    = true;
-  information.aspectRatio = 8.0 / 7.0;
-  information.resettable  = true;
-  information.capability.states = true;
-  information.capability.cheats = true;
-
-  media.append({ID::Famicom, "Famicom", "fc", true});
-
-  {
-    Device device{0, ID::Port1 | ID::Port2, "Controller"};
-    device.input.append({0, 0, "A"     });
-    device.input.append({1, 0, "B"     });
-    device.input.append({2, 0, "Select"});
-    device.input.append({3, 0, "Start" });
-    device.input.append({4, 0, "Up"    });
-    device.input.append({5, 0, "Down"  });
-    device.input.append({6, 0, "Left"  });
-    device.input.append({7, 0, "Right" });
-    device.order = {4, 5, 6, 7, 1, 0, 2, 3};
-    this->device.append(device);
-  }
-
-  port.append({0, "Port 1"});
-  port.append({1, "Port 2"});
-
-  for(auto& device : this->device) {
-    for(auto& port : this->port) {
-      if(device.portmask & (1 << port.id)) {
-        port.device.append(device);
-      }
-    }
-  }
 }
 
 }

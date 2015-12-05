@@ -3,12 +3,12 @@ namespace Famicom {
 #endif
 
 struct ID {
-  enum : unsigned {
+  enum : uint {
     System,
     Famicom,
   };
 
-  enum : unsigned {
+  enum : uint {
     SystemManifest,
 
     Manifest,
@@ -18,38 +18,38 @@ struct ID {
     CharacterRAM,
   };
 
-  enum : unsigned {
+  enum : uint {
     Port1 = 1,
     Port2 = 2,
   };
 };
 
 struct Interface : Emulator::Interface {
-  string title();
-  double videoFrequency();
-  double audioFrequency();
-
-  bool loaded();
-  string sha256();
-  unsigned group(unsigned id);
-  void load(unsigned id);
-  void save();
-  void load(unsigned id, const stream& stream);
-  void save(unsigned id, const stream& stream);
-  void unload();
-
-  void power();
-  void reset();
-  void run();
-
-  serializer serialize();
-  bool unserialize(serializer&);
-
-  void cheatSet(const lstring&);
-
-  void paletteUpdate(PaletteMode mode);
-
   Interface();
+
+  auto title() -> string;
+  auto videoFrequency() -> double;
+  auto audioFrequency() -> double;
+
+  auto loaded() -> bool;
+  auto sha256() -> string;
+  auto group(uint id) -> uint;
+  auto load(uint id) -> void;
+  auto save() -> void;
+  auto load(uint id, const stream& stream) -> void;
+  auto save(uint id, const stream& stream) -> void;
+  auto unload() -> void;
+
+  auto power() -> void;
+  auto reset() -> void;
+  auto run() -> void;
+
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+
+  auto cheatSet(const lstring&) -> void;
+
+  auto paletteUpdate(PaletteMode mode) -> void;
 
 private:
   vector<Device> device;

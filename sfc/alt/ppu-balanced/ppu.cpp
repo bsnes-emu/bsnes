@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define PPU_CPP
 namespace SuperFamicom {
 
 PPU ppu;
@@ -10,11 +9,44 @@ PPU ppu;
 #include "render/render.cpp"
 #include "serialization.cpp"
 
-void PPU::step(unsigned clocks) {
+PPU::PPU() {
+  surface = new uint32[512 * 512];
+  output = surface + 16 * 512;
+
+  alloc_tiledata_cache();
+
+  for(uint l : range(16)) {
+    for(uint i : range(4096)) {
+      mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
+    }
+  }
+
+  layer_enabled[BG1][0] = true;
+  layer_enabled[BG1][1] = true;
+  layer_enabled[BG2][0] = true;
+  layer_enabled[BG2][1] = true;
+  layer_enabled[BG3][0] = true;
+  layer_enabled[BG3][1] = true;
+  layer_enabled[BG4][0] = true;
+  layer_enabled[BG4][1] = true;
+  layer_enabled[OAM][0] = true;
+  layer_enabled[OAM][1] = true;
+  layer_enabled[OAM][2] = true;
+  layer_enabled[OAM][3] = true;
+  frameskip = 0;
+  framecounter = 0;
+}
+
+PPU::~PPU() {
+  delete[] surface;
+  free_tiledata_cache();
+}
+
+auto PPU::step(uint clocks) -> void {
   clock += clocks;
 }
 
-void PPU::synchronize_cpu() {
+auto PPU::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {
@@ -22,9 +54,9 @@ void PPU::synchronize_cpu() {
   }
 }
 
-void PPU::Enter() { ppu.enter(); }
+auto PPU::Enter() -> void { ppu.enter(); }
 
-void PPU::enter() {
+auto PPU::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -67,13 +99,13 @@ void PPU::enter() {
   }
 }
 
-void PPU::add_clocks(unsigned clocks) {
+auto PPU::add_clocks(uint clocks) -> void {
   tick(clocks);
   step(clocks);
-  synchronize_cpu();
+  synchronizeCPU();
 }
 
-void PPU::scanline() {
+auto PPU::scanline() -> void {
   line = vcounter();
 
   if(line == 0) {
@@ -98,7 +130,7 @@ void PPU::scanline() {
   }
 }
 
-void PPU::render_scanline() {
+auto PPU::render_scanline() -> void {
   if(line >= 1 && line < (!overscan() ? 225 : 240)) {
     if(framecounter) return;
     render_line_oam_rto();
@@ -106,7 +138,7 @@ void PPU::render_scanline() {
   }
 }
 
-void PPU::frame() {
+auto PPU::frame() -> void {
   system.frame();
 
   if(field() == 0) {
@@ -117,15 +149,15 @@ void PPU::frame() {
   framecounter = (frameskip == 0 ? 0 : (framecounter + 1) % frameskip);
 }
 
-void PPU::enable() {
-  function<uint8 (unsigned)> reader = {&PPU::mmio_read, (PPU*)&ppu};
-  function<void (unsigned, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
+auto PPU::enable() -> void {
+  function<uint8 (uint)> reader = {&PPU::mmio_read, (PPU*)&ppu};
+  function<void (uint, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
   bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
 }
 
-void PPU::power() {
+auto PPU::power() -> void {
   for(auto& n : vram) n = 0x00;
   for(auto& n : oam) n = 0x00;
   for(auto& n : cgram) n = 0x00;
@@ -340,8 +372,8 @@ void PPU::power() {
   reset();
 }
 
-void PPU::reset() {
-  create(Enter, system.cpu_frequency());
+auto PPU::reset() -> void {
+  create(Enter, system.cpuFrequency());
   PPUcounter::reset();
   memset(surface, 0, 512 * 512 * sizeof(uint32));
 
@@ -368,7 +400,7 @@ void PPU::reset() {
   regs.bg_y[3] = 0;
 }
 
-void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
+auto PPU::layer_enable(uint layer, uint priority, bool enable) -> void {
   switch(layer * 4 + priority) {
   case  0: layer_enabled[BG1][0] = enable; break;
   case  1: layer_enabled[BG1][1] = enable; break;
@@ -385,42 +417,9 @@ void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
   }
 }
 
-void PPU::set_frameskip(unsigned frameskip_) {
+auto PPU::set_frameskip(uint frameskip_) -> void {
   frameskip = frameskip_;
   framecounter = 0;
-}
-
-PPU::PPU() {
-  surface = new uint32[512 * 512];
-  output = surface + 16 * 512;
-
-  alloc_tiledata_cache();
-
-  for(unsigned l = 0; l < 16; l++) {
-    for(unsigned i = 0; i < 4096; i++) {
-      mosaic_table[l][i] = (i / (l + 1)) * (l + 1);
-    }
-  }
-
-  layer_enabled[BG1][0] = true;
-  layer_enabled[BG1][1] = true;
-  layer_enabled[BG2][0] = true;
-  layer_enabled[BG2][1] = true;
-  layer_enabled[BG3][0] = true;
-  layer_enabled[BG3][1] = true;
-  layer_enabled[BG4][0] = true;
-  layer_enabled[BG4][1] = true;
-  layer_enabled[OAM][0] = true;
-  layer_enabled[OAM][1] = true;
-  layer_enabled[OAM][2] = true;
-  layer_enabled[OAM][3] = true;
-  frameskip = 0;
-  framecounter = 0;
-}
-
-PPU::~PPU() {
-  delete[] surface;
-  free_tiledata_cache();
 }
 
 }

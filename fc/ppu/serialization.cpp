@@ -1,4 +1,4 @@
-void PPU::serialize(serializer& s) {
+auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.integer(status.mdr);
@@ -45,7 +45,7 @@ void PPU::serialize(serializer& s) {
   s.integer(raster.oam_iterator);
   s.integer(raster.oam_counter);
 
-  for(unsigned n = 0; n < 8; n++) {
+  for(auto n : range(8)) {
     s.integer(raster.oam[n].id);
     s.integer(raster.oam[n].y);
     s.integer(raster.oam[n].tile);
@@ -56,7 +56,7 @@ void PPU::serialize(serializer& s) {
     s.integer(raster.oam[n].tiledatahi);
   }
 
-  for(unsigned n = 0; n < 8; n++) {
+  for(auto n : range(8)) {
     s.integer(raster.soam[n].id);
     s.integer(raster.soam[n].y);
     s.integer(raster.soam[n].tile);

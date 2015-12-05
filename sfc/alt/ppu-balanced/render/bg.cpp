@@ -1,7 +1,5 @@
-#ifdef PPU_CPP
-
 //called once at the start of every rendered scanline
-void PPU::update_bg_info() {
+auto PPU::update_bg_info() -> void {
   const unsigned hires = (regs.bg_mode == 5 || regs.bg_mode == 6);
   const unsigned width = (!hires ? 256 : 512);
 
@@ -22,8 +20,8 @@ void PPU::update_bg_info() {
   }
 }
 
-template<unsigned bg>
-uint16 PPU::bg_get_tile(uint16 x, uint16 y) {
+template<uint bg>
+auto PPU::bg_get_tile(uint16 x, uint16 y) -> uint16 {
   x = (x & bg_info[bg].mx) >> bg_info[bg].tw;
   y = (y & bg_info[bg].my) >> bg_info[bg].th;
 
@@ -51,8 +49,8 @@ uint16 PPU::bg_get_tile(uint16 x, uint16 y) {
     pixel_cache[x].ce_sub  = false; \
   }
 
-template<unsigned mode, unsigned bg, unsigned color_depth>
-void PPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) {
+template<uint mode, uint bg, uint color_depth>
+auto PPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) -> void {
   if(layer_enabled[bg][0] == false) pri0_pos = 0;
   if(layer_enabled[bg][1] == false) pri1_pos = 0;
   if(pri0_pos + pri1_pos == 0) return;
@@ -205,5 +203,3 @@ void PPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) {
 
 #undef setpixel_main
 #undef setpixel_sub
-
-#endif

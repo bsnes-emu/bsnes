@@ -1,31 +1,33 @@
 struct APU : Thread {
-  static void Main();
-  void main();
-  void tick();
-  void set_irq_line();
-  void set_sample(int16 sample);
-
-  void power();
-  void reset();
-
-  uint8 read(uint16 addr);
-  void write(uint16 addr, uint8 data);
-
-  void serialize(serializer&);
   APU();
 
+  static auto Main() -> void;
+  auto main() -> void;
+  auto tick() -> void;
+  auto set_irq_line() -> void;
+  auto set_sample(int16 sample) -> void;
+
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto read(uint16 addr) -> uint8;
+  auto write(uint16 addr, uint8 data) -> void;
+
+  auto serialize(serializer&) -> void;
+
   struct Filter {
-    enum : signed { HiPassStrong = 225574, HiPassWeak = 57593, LoPass = 86322413 };
+    auto run_hipass_strong(int sample) -> int;
+    auto run_hipass_weak(int sample) -> int;
+    auto run_lopass(int sample) -> int;
+
+    auto serialize(serializer&) -> void;
+
+    enum : int { HiPassStrong = 225574, HiPassWeak = 57593, LoPass = 86322413 };
 
     int64 hipass_strong;
     int64 hipass_weak;
     int64 lopass;
-
-    signed run_hipass_strong(signed sample);
-    signed run_hipass_weak(signed sample);
-    signed run_lopass(signed sample);
-    void serialize(serializer&);
-  } filter;
+  };
 
   #include "envelope.hpp"
   #include "sweep.hpp"
@@ -35,19 +37,22 @@ struct APU : Thread {
   #include "dmc.hpp"
 
   struct FrameCounter {
-    enum : unsigned { NtscPeriod = 14915 };  //~(21.477MHz / 6 / 240hz)
+    auto serialize(serializer&) -> void;
+
+    enum : uint { NtscPeriod = 14915 };  //~(21.477MHz / 6 / 240hz)
 
     bool irq_pending;
 
     uint2 mode;
     uint2 counter;
-    signed divider;
+    int divider;
+  };
 
-    void serialize(serializer&);
-  } frame;
+  auto clock_frame_counter() -> void;
+  auto clock_frame_counter_divider() -> void;
 
-  void clock_frame_counter();
-  void clock_frame_counter_divider();
+  Filter filter;
+  FrameCounter frame;
 
   uint8 enabled_channels;
   int16 cartridge_sample;

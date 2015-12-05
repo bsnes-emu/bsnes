@@ -1,46 +1,46 @@
 struct PPU : Thread {
-  static void Main();
-  void main();
-  void tick();
+  static auto Main() -> void;
+  auto main() -> void;
+  auto tick() -> void;
 
-  void scanline();
-  void frame();
+  auto scanline() -> void;
+  auto frame() -> void;
 
-  void power();
-  void reset();
+  auto power() -> void;
+  auto reset() -> void;
 
-  uint8 read(uint16 addr);
-  void write(uint16 addr, uint8 data);
+  auto read(uint16 addr) -> uint8;
+  auto write(uint16 addr, uint8 data) -> void;
 
-  uint8 ciram_read(uint16 addr);
-  void ciram_write(uint16 addr, uint8 data);
+  auto ciram_read(uint16 addr) -> uint8;
+  auto ciram_write(uint16 addr, uint8 data) -> void;
 
-  uint8 cgram_read(uint16 addr);
-  void cgram_write(uint16 addr, uint8 data);
+  auto cgram_read(uint16 addr) -> uint8;
+  auto cgram_write(uint16 addr, uint8 data) -> void;
 
-  bool raster_enable() const;
-  unsigned nametable_addr() const;
-  unsigned scrollx() const;
-  unsigned scrolly() const;
-  unsigned sprite_height() const;
+  auto raster_enable() const -> bool;
+  auto nametable_addr() const -> uint;
+  auto scrollx() const -> uint;
+  auto scrolly() const -> uint;
+  auto sprite_height() const -> uint;
 
-  uint8 chr_load(uint16 addr);
+  auto chr_load(uint16 addr) -> uint8;
 
-  void scrollx_increment();
-  void scrolly_increment();
+  auto scrollx_increment() -> void;
+  auto scrolly_increment() -> void;
 
-  void raster_pixel();
-  void raster_sprite();
-  void raster_scanline();
+  auto raster_pixel() -> void;
+  auto raster_sprite() -> void;
+  auto raster_scanline() -> void;
 
-  void serialize(serializer&);
+  auto serialize(serializer&) -> void;
 
   struct Status {
     uint8 mdr;
 
     bool field;
-    unsigned lx;
-    unsigned ly;
+    uint lx;
+    uint ly;
 
     uint8 bus_data;
 
@@ -57,9 +57,9 @@ struct PPU : Thread {
     bool nmi_enable;
     bool master_select;
     bool sprite_size;
-    unsigned bg_addr;
-    unsigned sprite_addr;
-    unsigned vram_increment;
+    uint bg_addr;
+    uint sprite_addr;
+    uint vram_increment;
 
     //$2001
     uint3 emphasis;
@@ -83,8 +83,8 @@ struct PPU : Thread {
     uint16 tiledatalo;
     uint16 tiledatahi;
 
-    unsigned oam_iterator;
-    unsigned oam_counter;
+    uint oam_iterator;
+    uint oam_counter;
 
     struct OAM {
       uint8 id;

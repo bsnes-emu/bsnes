@@ -59,9 +59,9 @@ void CPU::add_clocks(unsigned clocks) {
 }
 
 void CPU::scanline() {
-  synchronize_smp();
-  synchronize_ppu();
-  synchronize_coprocessors();
+  synchronizeSMP();
+  synchronizePPU();
+  synchronizeCoprocessors();
   system.scanline();
 
   if(vcounter() == 0) hdma_init();
@@ -87,15 +87,15 @@ void CPU::scanline() {
 }
 
 void CPU::run_auto_joypad_poll() {
-  input.port1->latch(1);
-  input.port2->latch(1);
-  input.port1->latch(0);
-  input.port2->latch(0);
+  device.controllerPort1->latch(1);
+  device.controllerPort2->latch(1);
+  device.controllerPort1->latch(0);
+  device.controllerPort2->latch(0);
 
   uint16 joy1 = 0, joy2 = 0, joy3 = 0, joy4 = 0;
   for(unsigned i = 0; i < 16; i++) {
-    uint8 port0 = input.port1->data();
-    uint8 port1 = input.port2->data();
+    uint8 port0 = device.controllerPort1->data();
+    uint8 port1 = device.controllerPort2->data();
 
     joy1 |= (port0 & 1) ? (0x8000 >> i) : 0;
     joy2 |= (port1 & 1) ? (0x8000 >> i) : 0;

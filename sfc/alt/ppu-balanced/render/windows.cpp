@@ -1,7 +1,5 @@
-#ifdef PPU_CPP
-
 //screen: 0 = main, 1 = sub
-void PPU::build_window_table(uint8 bg, bool screen) {
+auto PPU::build_window_table(uint8 bg, bool screen) -> void {
   bool set = 1, clr = 0;
   uint8* table = (screen == 0 ? window[bg].main : window[bg].sub);
 
@@ -62,9 +60,7 @@ void PPU::build_window_table(uint8 bg, bool screen) {
   }
 }
 
-void PPU::build_window_tables(uint8 bg) {
+auto PPU::build_window_tables(uint8 bg) -> void {
   build_window_table(bg, 0);
   build_window_table(bg, 1);
 }
-
-#endif

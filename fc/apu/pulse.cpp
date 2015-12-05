@@ -1,14 +1,14 @@
-void APU::Pulse::clock_length() {
+auto APU::Pulse::clock_length() -> void {
   if(envelope.loop_mode == 0) {
     if(length_counter) length_counter--;
   }
 }
 
-uint8 APU::Pulse::clock() {
+auto APU::Pulse::clock() -> uint8 {
   if(sweep.check_period() == false) return 0;
   if(length_counter == 0) return 0;
 
-  static const unsigned duty_table[] = {1, 2, 4, 6};
+  static const uint duty_table[] = {1, 2, 4, 6};
   uint8 result = (duty_counter < duty_table[duty]) ? envelope.volume() : 0;
   if(sweep.pulse_period < 0x008) result = 0;
 
@@ -20,12 +20,12 @@ uint8 APU::Pulse::clock() {
   return result;
 }
 
-void APU::Pulse::power() {
+auto APU::Pulse::power() -> void {
   envelope.power();
   sweep.power();
 }
 
-void APU::Pulse::reset() {
+auto APU::Pulse::reset() -> void {
   envelope.reset();
   sweep.reset();
 
@@ -37,7 +37,7 @@ void APU::Pulse::reset() {
   period_counter = 1;
 }
 
-void APU::Pulse::serialize(serializer& s) {
+auto APU::Pulse::serialize(serializer& s) -> void {
   s.integer(length_counter);
 
   envelope.serialize(s);

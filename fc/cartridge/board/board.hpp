@@ -1,38 +1,39 @@
 struct Board {
   struct Memory {
-    uint8_t* data;
-    unsigned size;
-    bool writable;
-
-    inline uint8 read(unsigned addr) const;
-    inline void write(unsigned addr, uint8 data);
-
-    inline Memory(uint8_t* data, unsigned size) : data(data), size(size) {}
+    inline Memory(uint8_t* data, uint size) : data(data), size(size) {}
     inline Memory() : data(nullptr), size(0u), writable(false) {}
     inline ~Memory() { if(data) delete[] data; }
+
+    inline auto read(uint addr) const -> uint8;
+    inline auto write(uint addr, uint8 data) -> void;
+
+    uint8_t* data;
+    uint size;
+    bool writable;
   };
 
-  static unsigned mirror(unsigned addr, unsigned size);
-
-  virtual void main();
-  virtual void tick();
-
-  virtual uint8 prg_read(unsigned addr) = 0;
-  virtual void prg_write(unsigned addr, uint8 data) = 0;
-
-  virtual uint8 chr_read(unsigned addr);
-  virtual void chr_write(unsigned addr, uint8 data);
-
-  virtual inline void scanline(unsigned y) {}
-
-  virtual void power();
-  virtual void reset();
-
-  virtual void serialize(serializer&);
   Board(Markup::Node& document);
-  virtual ~Board();
+  virtual ~Board() = default;
 
-  static Board* load(string manifest);
+  static auto mirror(uint addr, uint size) -> uint;
+
+  virtual auto main() -> void;
+  virtual auto tick() -> void;
+
+  virtual auto prg_read(uint addr) -> uint8 = 0;
+  virtual auto prg_write(uint addr, uint8 data) -> void = 0;
+
+  virtual auto chr_read(uint addr) -> uint8;
+  virtual auto chr_write(uint addr, uint8 data) -> void;
+
+  virtual inline auto scanline(uint y) -> void {}
+
+  virtual auto power() -> void;
+  virtual auto reset() -> void;
+
+  virtual auto serialize(serializer&) -> void;
+
+  static auto load(string manifest) -> Board*;
 
   struct Information {
     string type;

@@ -1,26 +1,27 @@
 struct System {
-  void run();
-  void runtosave();
-  void runthreadtosave();
+  auto run() -> void;
+  auto runtosave() -> void;
+  auto runthreadtosave() -> void;
 
-  void load();
-  void power();
-  void reset();
+  auto load() -> void;
+  auto power() -> void;
+  auto reset() -> void;
 
-  void init();
-  void term();
+  auto init() -> void;
+  auto term() -> void;
 
-  serializer serialize();
-  bool unserialize(serializer&);
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
 
-  void serialize(serializer&);
-  void serialize_all(serializer&);
-  void serialize_init();
-  unsigned serialize_size;
+  auto serialize(serializer&) -> void;
+  auto serialize_all(serializer&) -> void;
+  auto serialize_init() -> void;
 
   struct Information {
     string manifest;
   } information;
+
+  uint serialize_size;
 };
 
 extern System system;

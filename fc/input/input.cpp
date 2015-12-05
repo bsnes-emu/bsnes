@@ -5,7 +5,7 @@ namespace Famicom {
 #include "serialization.cpp"
 Input input;
 
-void Input::latch(bool data) {
+auto Input::latch(bool data) -> void {
   latchdata = data;
 
   if(latchdata == 1) {
@@ -14,7 +14,7 @@ void Input::latch(bool data) {
   }
 }
 
-bool Input::data(bool port) {
+auto Input::data(bool port) -> bool {
   bool result = 0;
 
   if(port == 0) {
@@ -36,15 +36,15 @@ bool Input::data(bool port) {
   return result;
 }
 
-void Input::connect(bool port, Device device) {
+auto Input::connect(bool port, Device device) -> void {
   if(port == 0) port1 = device, counter1 = 0;
   if(port == 1) port2 = device, counter2 = 0;
 }
 
-void Input::power() {
+auto Input::power() -> void {
 }
 
-void Input::reset() {
+auto Input::reset() -> void {
   latchdata = 0;
   counter1 = 0;
   counter2 = 0;

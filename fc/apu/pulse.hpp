@@ -1,5 +1,14 @@
 struct Pulse {
-  unsigned length_counter;
+  auto clock_length() -> void;
+  auto check_period() -> bool;
+  auto clock() -> uint8;
+
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint length_counter;
 
   Envelope envelope;
   Sweep sweep;
@@ -8,13 +17,5 @@ struct Pulse {
   uint3 duty_counter;
 
   uint11 period;
-  unsigned period_counter;
-
-  void clock_length();
-  bool check_period();
-  uint8 clock();
-
-  void power();
-  void reset();
-  void serialize(serializer&);
+  uint period_counter;
 } pulse[2];

@@ -69,13 +69,18 @@ endif
 
 # windows settings
 ifeq ($(platform),windows)
-  link := $(link) -lws2_32 -lole32
+  link += -lws2_32 -lole32
 endif
 
 # macosx settings
 ifeq ($(platform),macosx)
   flags += -stdlib=libc++
   link += -lc++ -lobjc
+endif
+
+# linux settings
+ifeq ($(platform),linux)
+  link += -ldl
 endif
 
 # bsd settings
@@ -91,12 +96,6 @@ ifeq ($(threaded),true)
     flags += -pthread
     link += -lrt
   endif
-endif
-
-# cross-compilation support
-ifeq ($(arch),x86)
-  flags := -m32 $(flags)
-  link := -m32 $(link)
 endif
 
 # paths

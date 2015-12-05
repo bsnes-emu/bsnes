@@ -1,8 +1,8 @@
-unsigned APU::Envelope::volume() const {
+auto APU::Envelope::volume() const -> uint {
   return use_speed_as_volume ? speed : decay_volume;
 }
 
-void APU::Envelope::clock() {
+auto APU::Envelope::clock() -> void {
   if(reload_decay) {
     reload_decay = false;
     decay_volume = 0x0f;
@@ -16,10 +16,10 @@ void APU::Envelope::clock() {
   }
 }
 
-void APU::Envelope::power() {
+auto APU::Envelope::power() -> void {
 }
 
-void APU::Envelope::reset() {
+auto APU::Envelope::reset() -> void {
   speed = 0;
   use_speed_as_volume = 0;
   loop_mode = 0;
@@ -28,7 +28,7 @@ void APU::Envelope::reset() {
   decay_volume = 0;
 }
 
-void APU::Envelope::serialize(serializer& s) {
+auto APU::Envelope::serialize(serializer& s) -> void {
   s.integer(speed);
   s.integer(use_speed_as_volume);
   s.integer(loop_mode);

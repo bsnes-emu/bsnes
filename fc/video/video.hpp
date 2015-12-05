@@ -1,12 +1,13 @@
 struct Video {
-  uint32_t* palette = nullptr;
-  void generate_palette(Emulator::Interface::PaletteMode mode);
-
   Video();
   ~Video();
 
+  auto generate_palette(Emulator::Interface::PaletteMode mode) -> void;
+
+  uint32* palette = nullptr;
+
 private:
-  uint32_t generate_color(unsigned, double, double, double, double, double);
+  auto generate_color(uint, double, double, double, double, double) -> uint32;
 };
 
 extern Video video;

@@ -4,21 +4,21 @@ namespace Famicom {
 
 Scheduler scheduler;
 
-void Scheduler::enter() {
+auto Scheduler::enter() -> void {
   host_thread = co_active();
   co_switch(thread);
 }
 
-void Scheduler::exit(ExitReason reason) {
+auto Scheduler::exit(ExitReason reason) -> void {
   exit_reason = reason;
   thread = co_active();
   co_switch(host_thread);
 }
 
-void Scheduler::power() {
+auto Scheduler::power() -> void {
 }
 
-void Scheduler::reset() {
+auto Scheduler::reset() -> void {
   host_thread = co_active();
   thread = cpu.thread;
   sync = SynchronizeMode::None;
