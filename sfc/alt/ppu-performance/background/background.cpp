@@ -1,12 +1,30 @@
-#ifdef PPU_CPP
-
 #include "mode7.cpp"
 
-unsigned PPU::Background::get_tile(unsigned hoffset, unsigned voffset) {
-  unsigned tile_x = (hoffset & mask_x) >> tile_width;
-  unsigned tile_y = (voffset & mask_y) >> tile_height;
+PPU::Background::Background(PPU& self, uint id) : self(self), id(id) {
+  priority0_enable = true;
+  priority1_enable = true;
 
-  unsigned tile_pos = ((tile_y & 0x1f) << 5) + (tile_x & 0x1f);
+  opt_valid_bit = (id == ID::BG1 ? 0x2000 : id == ID::BG2 ? 0x4000 : 0x0000);
+
+  mosaic_table = new uint16*[16];
+  for(uint m = 0; m < 16; m++) {
+    mosaic_table[m] = new uint16[4096];
+    for(uint x = 0; x < 4096; x++) {
+      mosaic_table[m][x] = (x / (m + 1)) * (m + 1);
+    }
+  }
+}
+
+PPU::Background::~Background() {
+  for(uint m = 0; m < 16; m++) delete[] mosaic_table[m];
+  delete[] mosaic_table;
+}
+
+auto PPU::Background::get_tile(uint hoffset, uint voffset) -> uint {
+  uint tile_x = (hoffset & mask_x) >> tile_width;
+  uint tile_y = (voffset & mask_y) >> tile_height;
+
+  uint tile_pos = ((tile_y & 0x1f) << 5) + (tile_x & 0x1f);
   if(tile_y & 0x20) tile_pos += scy;
   if(tile_x & 0x20) tile_pos += scx;
 
@@ -14,8 +32,8 @@ unsigned PPU::Background::get_tile(unsigned hoffset, unsigned voffset) {
   return (ppu.vram[tiledata_addr + 0] << 0) + (ppu.vram[tiledata_addr + 1] << 8);
 }
 
-void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned& hoffset, unsigned& voffset) {
-  unsigned opt_x = (x + (hscroll & 7)), hval, vval;
+auto PPU::Background::offset_per_tile(uint x, uint y, uint& hoffset, uint& voffset) -> void {
+  uint opt_x = (x + (hscroll & 7)), hval, vval;
   if(opt_x >= 8) {
     hval = self.bg3.get_tile((opt_x - 8) + (self.bg3.regs.hoffset & ~7), self.bg3.regs.voffset + 0);
     if(self.regs.bgmode != 4)
@@ -40,7 +58,7 @@ void PPU::Background::offset_per_tile(unsigned x, unsigned y, unsigned& hoffset,
   }
 }
 
-void PPU::Background::scanline() {
+auto PPU::Background::scanline() -> void {
   if(self.vcounter() == 1) {
     mosaic_vcounter = regs.mosaic + 1;
     mosaic_voffset = 1;
@@ -68,7 +86,7 @@ void PPU::Background::scanline() {
   if(regs.screen_size == 3) scy <<= 1;
 }
 
-void PPU::Background::render() {
+auto PPU::Background::render() -> void {
   if(regs.mode == Mode::Inactive) return;
   if(regs.main_enable == false && regs.sub_enable == false) return;
 
@@ -76,38 +94,38 @@ void PPU::Background::render() {
   if(regs.sub_enable) window.render(1);
   if(regs.mode == Mode::Mode7) return render_mode7();
 
-  unsigned priority0 = (priority0_enable ? regs.priority0 : 0);
-  unsigned priority1 = (priority1_enable ? regs.priority1 : 0);
+  uint priority0 = (priority0_enable ? regs.priority0 : 0);
+  uint priority1 = (priority1_enable ? regs.priority1 : 0);
   if(priority0 + priority1 == 0) return;
 
-  unsigned mosaic_hcounter = 1;
-  unsigned mosaic_palette = 0;
-  unsigned mosaic_priority = 0;
-  unsigned mosaic_color = 0;
+  uint mosaic_hcounter = 1;
+  uint mosaic_palette = 0;
+  uint mosaic_priority = 0;
+  uint mosaic_color = 0;
 
-  const unsigned bgpal_index = (self.regs.bgmode == 0 ? id << 5 : 0);
-  const unsigned pal_size = 2 << regs.mode;
-  const unsigned tile_mask = 0x0fff >> regs.mode;
-  const unsigned tiledata_index = regs.tiledata_addr >> (4 + regs.mode);
+  const uint bgpal_index = (self.regs.bgmode == 0 ? id << 5 : 0);
+  const uint pal_size = 2 << regs.mode;
+  const uint tile_mask = 0x0fff >> regs.mode;
+  const uint tiledata_index = regs.tiledata_addr >> (4 + regs.mode);
 
   hscroll = regs.hoffset;
   vscroll = regs.voffset;
 
-  unsigned y = (regs.mosaic == 0 ? self.vcounter() : mosaic_voffset);
+  uint y = (regs.mosaic == 0 ? self.vcounter() : mosaic_voffset);
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) y = (y << 1) + self.field();
   }
 
-  unsigned tile_pri, tile_num;
-  unsigned pal_index, pal_num;
-  unsigned hoffset, voffset, col;
+  uint tile_pri, tile_num;
+  uint pal_index, pal_num;
+  uint hoffset, voffset, col;
   bool mirror_x, mirror_y;
 
   const bool is_opt_mode = (self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6);
   const bool is_direct_color_mode = (self.screen.regs.direct_color == true && id == ID::BG1 && (self.regs.bgmode == 3 || self.regs.bgmode == 4));
 
-  signed x = 0 - (hscroll & 7);
+  int x = 0 - (hscroll & 7);
   while(x < width) {
     hoffset = x + hscroll;
     voffset = y + vscroll;
@@ -127,12 +145,12 @@ void PPU::Background::render() {
     tile_num = ((tile_num & 0x03ff) + tiledata_index) & tile_mask;
 
     if(mirror_y) voffset ^= 7;
-    unsigned mirror_xmask = !mirror_x ? 0 : 7;
+    uint mirror_xmask = !mirror_x ? 0 : 7;
 
     uint8* tiledata = self.cache.tile(regs.mode, tile_num);
     tiledata += ((voffset & 7) * 8);
 
-    for(unsigned n = 0; n < 8; n++, x++) {
+    for(uint n = 0; n < 8; n++, x++) {
       if(x & width) continue;
       if(--mosaic_hcounter == 0) {
         mosaic_hcounter = regs.mosaic + 1;
@@ -150,7 +168,7 @@ void PPU::Background::render() {
         if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, mosaic_color, mosaic_priority, id);
         if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, mosaic_color, mosaic_priority, id);
       } else {
-        signed half_x = x >> 1;
+        int half_x = x >> 1;
         if(x & 1) {
           if(regs.main_enable && !window.main[half_x]) self.screen.output.plot_main(half_x, mosaic_color, mosaic_priority, id);
         } else {
@@ -160,25 +178,3 @@ void PPU::Background::render() {
     }
   }
 }
-
-PPU::Background::Background(PPU& self, unsigned id) : self(self), id(id) {
-  priority0_enable = true;
-  priority1_enable = true;
-
-  opt_valid_bit = (id == ID::BG1 ? 0x2000 : id == ID::BG2 ? 0x4000 : 0x0000);
-
-  mosaic_table = new uint16*[16];
-  for(unsigned m = 0; m < 16; m++) {
-    mosaic_table[m] = new uint16[4096];
-    for(unsigned x = 0; x < 4096; x++) {
-      mosaic_table[m][x] = (x / (m + 1)) * (m + 1);
-    }
-  }
-}
-
-PPU::Background::~Background() {
-  for(unsigned m = 0; m < 16; m++) delete[] mosaic_table[m];
-  delete[] mosaic_table;
-}
-
-#endif

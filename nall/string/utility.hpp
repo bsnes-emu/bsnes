@@ -111,7 +111,7 @@ auto integer(char* result, intmax value) -> char* {
   return result;
 }
 
-auto decimal(char* result, uintmax value) -> char* {
+auto natural(char* result, uintmax value) -> char* {
   char buffer[64];
   uint size = 0;
 

@@ -1,19 +1,32 @@
 class Sprite {
+  Sprite(PPU& self);
+
+  auto frame() -> void;
+  auto update_list(uint addr, uint8 data) -> void;
+  auto address_reset() -> void;
+  auto set_first() -> void;
+  alwaysinline auto on_scanline(uint sprite) -> bool;
+  auto render() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  PPU& self;
+
   bool priority0_enable;
   bool priority1_enable;
   bool priority2_enable;
   bool priority3_enable;
 
   struct Regs {
-    unsigned priority0;
-    unsigned priority1;
-    unsigned priority2;
-    unsigned priority3;
+    uint priority0;
+    uint priority1;
+    uint priority2;
+    uint priority3;
 
-    unsigned base_size;
-    unsigned nameselect;
-    unsigned tiledata_addr;
-    unsigned first_sprite;
+    uint base_size;
+    uint nameselect;
+    uint tiledata_addr;
+    uint first_sprite;
 
     bool main_enable;
     bool sub_enable;
@@ -25,27 +38,27 @@ class Sprite {
   } regs;
 
   struct List {
-    unsigned width;
-    unsigned height;
-    unsigned x;
-    unsigned y;
-    unsigned character;
+    uint width;
+    uint height;
+    uint x;
+    uint y;
+    uint character;
     bool use_nameselect;
     bool vflip;
     bool hflip;
-    unsigned palette;
-    unsigned priority;
+    uint palette;
+    uint priority;
     bool size;
   } list[128];
   bool list_valid;
 
   uint8 itemlist[32];
   struct TileList {
-    unsigned x;
-    unsigned y;
-    unsigned priority;
-    unsigned palette;
-    unsigned tile;
+    uint x;
+    uint y;
+    uint priority;
+    uint palette;
+    uint tile;
     bool hflip;
   } tilelist[34];
 
@@ -56,16 +69,5 @@ class Sprite {
 
   LayerWindow window;
 
-  void frame();
-  void update_list(unsigned addr, uint8 data);
-  void address_reset();
-  void set_first();
-  alwaysinline bool on_scanline(unsigned sprite);
-  void render();
-
-  void serialize(serializer&);
-  Sprite(PPU& self);
-
-  PPU& self;
   friend class PPU;
 };

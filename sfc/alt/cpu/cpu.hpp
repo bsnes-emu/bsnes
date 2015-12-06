@@ -1,72 +1,74 @@
 struct CPU : Processor::R65816, Thread, public PPUcounter {
-  uint8 wram[128 * 1024];
-
   enum : bool { Threaded = true };
-  vector<Thread*> coprocessors;
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronizeSMP();
-  void synchronizePPU();
-  void synchronizeCoprocessors();
-  void synchronizeDevices();
 
-  uint8 pio();
-  bool joylatch();
-  bool interrupt_pending();
-  uint8 port_read(uint8 port);
-  void port_write(uint8 port, uint8 data);
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
-
-  void op_io();
-  uint8 op_read(unsigned addr);
-  void op_write(unsigned addr, uint8 data);
-
-  void enter();
-  void enable();
-  void power();
-  void reset();
-
-  void serialize(serializer&);
   CPU();
-  ~CPU();
+
+  alwaysinline auto step(uint clocks) -> void;
+  alwaysinline auto synchronizeSMP() -> void;
+  auto synchronizePPU() -> void;
+  auto synchronizeCoprocessors() -> void;
+  auto synchronizeDevices() -> void;
+
+  auto pio() -> uint8;
+  auto joylatch() -> bool;
+  auto interrupt_pending() -> bool;
+  auto port_read(uint8 port) -> uint8;
+  auto port_write(uint8 port, uint8 data) -> void;
+  auto mmio_read(uint addr) -> uint8;
+  auto mmio_write(uint addr, uint8 data) -> void;
+
+  auto op_io() -> void;
+  auto op_read(uint addr) -> uint8;
+  auto op_write(uint addr, uint8 data) -> void;
+
+  auto enter() -> void;
+  auto enable() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  uint8 wram[128 * 1024];
+  vector<Thread*> coprocessors;
 
 private:
   //cpu
-  static void Enter();
+  static auto Enter() -> void;
 
   //timing
+  auto queue_event(uint id) -> void;
+  auto last_cycle() -> void;
+  auto add_clocks(uint clocks) -> void;
+  auto scanline() -> void;
+  auto run_auto_joypad_poll() -> void;
+
   struct QueueEvent {
-    enum : unsigned {
+    enum : uint {
       DramRefresh,
       HdmaRun,
     };
   };
-  nall::priority_queue<unsigned> queue;
-  void queue_event(unsigned id);
-  void last_cycle();
-  void add_clocks(unsigned clocks);
-  void scanline();
-  void run_auto_joypad_poll();
+  nall::priority_queue<uint> queue;
 
   //memory
-  unsigned speed(unsigned addr) const;
+  auto speed(uint addr) const -> uint;
 
   //dma
-  bool dma_transfer_valid(uint8 bbus, unsigned abus);
-  bool dma_addr_valid(unsigned abus);
-  uint8 dma_read(unsigned abus);
-  void dma_write(bool valid, unsigned addr, uint8 data);
-  void dma_transfer(bool direction, uint8 bbus, unsigned abus);
-  uint8 dma_bbus(unsigned i, unsigned index);
-  unsigned dma_addr(unsigned i);
-  unsigned hdma_addr(unsigned i);
-  unsigned hdma_iaddr(unsigned i);
-  void dma_run();
-  bool hdma_active_after(unsigned i);
-  void hdma_update(unsigned i);
-  void hdma_run();
-  void hdma_init();
-  void dma_reset();
+  auto dma_transfer_valid(uint8 bbus, uint abus) -> bool;
+  auto dma_addr_valid(uint abus) -> bool;
+  auto dma_read(uint abus) -> uint8;
+  auto dma_write(bool valid, uint addr, uint8 data) -> void;
+  auto dma_transfer(bool direction, uint8 bbus, uint abus) -> void;
+  auto dma_bbus(uint i, uint index) -> uint8;
+  auto dma_addr(uint i) -> uint;
+  auto hdma_addr(uint i) -> uint;
+  auto hdma_iaddr(uint i) -> uint;
+  auto dma_run() -> void;
+  auto hdma_active_after(uint i) -> bool;
+  auto hdma_update(uint i) -> void;
+  auto hdma_run() -> void;
+  auto hdma_init() -> void;
+  auto dma_reset() -> void;
 
   //registers
   uint8 port_data[4];
@@ -114,7 +116,7 @@ private:
     bool irq_lock;
     bool hdma_pending;
 
-    unsigned wram_addr;
+    uint wram_addr;
 
     bool joypad_strobe_latch;
 
@@ -133,7 +135,7 @@ private:
     uint16 htime;
     uint16 vtime;
 
-    unsigned rom_speed;
+    uint rom_speed;
 
     uint16 rddiv;
     uint16 rdmpy;

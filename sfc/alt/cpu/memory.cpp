@@ -1,41 +1,39 @@
-#ifdef CPU_CPP
-
-uint8 CPU::pio() {
+auto CPU::pio() -> uint8 {
   return status.pio;
 }
 
-bool CPU::joylatch() {
+auto CPU::joylatch() -> bool {
   return status.joypad_strobe_latch;
 }
 
-bool CPU::interrupt_pending() {
+auto CPU::interrupt_pending() -> bool {
   return false;
 }
 
-uint8 CPU::port_read(uint8 port) {
+auto CPU::port_read(uint8 port) -> uint8 {
   return port_data[port & 3];
 }
 
-void CPU::port_write(uint8 port, uint8 data) {
+auto CPU::port_write(uint8 port, uint8 data) -> void {
   port_data[port & 3] = data;
 }
 
-void CPU::op_io() {
+auto CPU::op_io() -> void {
   add_clocks(6);
 }
 
-uint8 CPU::op_read(unsigned addr) {
+auto CPU::op_read(uint addr) -> uint8 {
   regs.mdr = bus.read(addr);
   add_clocks(speed(addr));
   return regs.mdr;
 }
 
-void CPU::op_write(unsigned addr, uint8 data) {
+auto CPU::op_write(uint addr, uint8 data) -> void {
   add_clocks(speed(addr));
   bus.write(addr, regs.mdr = data);
 }
 
-unsigned CPU::speed(unsigned addr) const {
+auto CPU::speed(uint addr) const -> uint {
   if(addr & 0x408000) {
     if(addr & 0x800000) return status.rom_speed;
     return 8;
@@ -44,5 +42,3 @@ unsigned CPU::speed(unsigned addr) const {
   if((addr - 0x4000) & 0x7e00) return 6;
   return 12;
 }
-
-#endif

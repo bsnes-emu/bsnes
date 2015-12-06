@@ -92,7 +92,7 @@ auto integer(intmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto decimal(uintmax value, long precision, char padchar) -> string {
+auto natural(uintmax value, long precision, char padchar) -> string {
   string buffer;
   buffer.resize(sizeof(uintmax) * 3);
   char* p = buffer.get();

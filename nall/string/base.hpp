@@ -21,7 +21,7 @@ template<typename T> struct stringify;
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
 inline auto integer(intmax value, long precision = 0, char padchar = '0') -> string;
-inline auto decimal(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto natural(uintmax value, long precision = 0, char padchar = '0') -> string;
 inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
 inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
 inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
@@ -61,7 +61,7 @@ inline auto temppath() -> string;
 inline auto slice(rstring self, int offset = 0, int length = -1) -> string;
 
 inline auto integer(char* result, intmax value) -> char*;
-inline auto decimal(char* result, uintmax value) -> char*;
+inline auto natural(char* result, uintmax value) -> char*;
 inline auto real(char* str, long double value) -> uint;
 
 struct string {

@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define CPU_CPP
 namespace SuperFamicom {
 
 CPU cpu;
@@ -11,10 +10,14 @@ CPU cpu;
 #include "mmio.cpp"
 #include "timing.cpp"
 
-void CPU::step(unsigned clocks) {
+CPU::CPU() : queue(512, {&CPU::queue_event, this}) {
+  PPUcounter::scanline = {&CPU::scanline, this};
+}
+
+auto CPU::step(uint clocks) -> void {
   smp.clock -= clocks * (uint64)smp.frequency;
   ppu.clock -= clocks;
-  for(unsigned i = 0; i < coprocessors.size(); i++) {
+  for(uint i = 0; i < coprocessors.size(); i++) {
     auto& chip = *coprocessors[i];
     chip.clock -= clocks * (uint64)chip.frequency;
   }
@@ -23,7 +26,7 @@ void CPU::step(unsigned clocks) {
   synchronizeDevices();
 }
 
-void CPU::synchronizeSMP() {
+auto CPU::synchronizeSMP() -> void {
   if(SMP::Threaded == true) {
     if(smp.clock < 0) co_switch(smp.thread);
   } else {
@@ -31,7 +34,7 @@ void CPU::synchronizeSMP() {
   }
 }
 
-void CPU::synchronizePPU() {
+auto CPU::synchronizePPU() -> void {
   if(PPU::Threaded == true) {
     if(ppu.clock < 0) co_switch(ppu.thread);
   } else {
@@ -39,21 +42,21 @@ void CPU::synchronizePPU() {
   }
 }
 
-void CPU::synchronizeCoprocessors() {
-  for(unsigned i = 0; i < coprocessors.size(); i++) {
+auto CPU::synchronizeCoprocessors() -> void {
+  for(uint i = 0; i < coprocessors.size(); i++) {
     auto& chip = *coprocessors[i];
     if(chip.clock < 0) co_switch(chip.thread);
   }
 }
 
-void CPU::synchronizeDevices() {
+auto CPU::synchronizeDevices() -> void {
   if(device.controllerPort1->clock < 0) co_switch(device.controllerPort1->thread);
   if(device.controllerPort2->clock < 0) co_switch(device.controllerPort2->thread);
 }
 
-void CPU::Enter() { cpu.enter(); }
+auto CPU::Enter() -> void { cpu.enter(); }
 
-void CPU::enter() {
+auto CPU::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
       scheduler.sync = Scheduler::SynchronizeMode::All;
@@ -76,9 +79,9 @@ void CPU::enter() {
   }
 }
 
-void CPU::enable() {
-  function<uint8 (unsigned)> reader = {&CPU::mmio_read, (CPU*)&cpu};
-  function<void (unsigned, uint8)> writer = {&CPU::mmio_write, (CPU*)&cpu};
+auto CPU::enable() -> void {
+  function<uint8 (uint)> reader = {&CPU::mmio_read, (CPU*)&cpu};
+  function<void (uint, uint8)> writer = {&CPU::mmio_write, (CPU*)&cpu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2140, 0x2183);
   bus.map(reader, writer, 0x80, 0xbf, 0x2140, 0x2183);
@@ -92,15 +95,15 @@ void CPU::enable() {
   bus.map(reader, writer, 0x00, 0x3f, 0x4300, 0x437f);
   bus.map(reader, writer, 0x80, 0xbf, 0x4300, 0x437f);
 
-  reader = [](unsigned addr) { return cpu.wram[addr]; };
-  writer = [](unsigned addr, uint8 data) { cpu.wram[addr] = data; };
+  reader = [](uint addr) { return cpu.wram[addr]; };
+  writer = [](uint addr, uint8 data) { cpu.wram[addr] = data; };
 
   bus.map(reader, writer, 0x00, 0x3f, 0x0000, 0x1fff, 0x002000);
   bus.map(reader, writer, 0x80, 0xbf, 0x0000, 0x1fff, 0x002000);
   bus.map(reader, writer, 0x7e, 0x7f, 0x0000, 0xffff, 0x020000);
 }
 
-void CPU::power() {
+auto CPU::power() -> void {
   regs.a = 0x0000;
   regs.x = 0x0000;
   regs.y = 0x0000;
@@ -109,7 +112,7 @@ void CPU::power() {
   reset();
 }
 
-void CPU::reset() {
+auto CPU::reset() -> void {
   create(Enter, system.cpuFrequency());
   coprocessors.reset();
   PPUcounter::reset();
@@ -164,13 +167,6 @@ void CPU::reset() {
   status.joy4l = status.joy4h = 0x00;
 
   dma_reset();
-}
-
-CPU::CPU() : queue(512, {&CPU::queue_event, this}) {
-  PPUcounter::scanline = {&CPU::scanline, this};
-}
-
-CPU::~CPU() {
 }
 
 }

@@ -65,7 +65,7 @@ auto APU::Noise::write(uint addr, uint8 byte) -> void {
 
     if(initialize) {
       enable = envelope.dacEnable();
-      lfsr = ~0u;
+      lfsr = -1;
       envelope.period = envelope.frequency;
       volume = envelope.volume;
     }

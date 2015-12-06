@@ -1,5 +1,5 @@
-template<unsigned cycle_frequency>
-void SMP::Timer<cycle_frequency>::tick() {
+template<uint cycle_frequency>
+auto SMP::Timer<cycle_frequency>::tick() -> void {
   if(++stage1_ticks < cycle_frequency) return;
 
   stage1_ticks = 0;
@@ -11,8 +11,8 @@ void SMP::Timer<cycle_frequency>::tick() {
   stage3_ticks = (stage3_ticks + 1) & 15;
 }
 
-template<unsigned cycle_frequency>
-void SMP::Timer<cycle_frequency>::tick(unsigned clocks) {
+template<uint cycle_frequency>
+auto SMP::Timer<cycle_frequency>::tick(uint clocks) -> void {
   stage1_ticks += clocks;
   if(stage1_ticks < cycle_frequency) return;
 

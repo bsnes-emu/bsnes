@@ -1,16 +1,14 @@
-#ifdef PPU_CPP
-
-void PPU::latch_counters() {
+auto PPU::latch_counters() -> void {
   regs.hcounter = cpu.hdot();
   regs.vcounter = cpu.vcounter();
   regs.counters_latched = true;
 }
 
-bool PPU::interlace() const { return display.interlace; }
-bool PPU::overscan() const { return display.overscan; }
-bool PPU::hires() const { return regs.pseudo_hires || regs.bgmode == 5 || regs.bgmode == 6; }
+auto PPU::interlace() const -> bool { return display.interlace; }
+auto PPU::overscan() const -> bool { return display.overscan; }
+auto PPU::hires() const -> bool { return regs.pseudo_hires || regs.bgmode == 5 || regs.bgmode == 6; }
 
-uint16 PPU::get_vram_addr() {
+auto PPU::get_vram_addr() -> uint16 {
   uint16 addr = regs.vram_addr;
   switch(regs.vram_mapping) {
   case 0: break;
@@ -21,13 +19,13 @@ uint16 PPU::get_vram_addr() {
   return (addr << 1);
 }
 
-uint8 PPU::vram_read(unsigned addr) {
+auto PPU::vram_read(uint addr) -> uint8 {
   if(regs.display_disable) return vram[addr];
   if(cpu.vcounter() >= display.height) return vram[addr];
   return 0x00;
 }
 
-void PPU::vram_write(unsigned addr, uint8 data) {
+auto PPU::vram_write(uint addr, uint8 data) -> void {
   if(regs.display_disable || cpu.vcounter() >= display.height) {
     vram[addr] = data;
     cache.tilevalid[0][addr >> 4] = false;
@@ -37,29 +35,29 @@ void PPU::vram_write(unsigned addr, uint8 data) {
   }
 }
 
-uint8 PPU::oam_read(unsigned addr) {
+auto PPU::oam_read(uint addr) -> uint8 {
   if(addr & 0x0200) addr &= 0x021f;
   if(regs.display_disable) return oam[addr];
   if(cpu.vcounter() >= display.height) return oam[addr];
   return oam[0x0218];
 }
 
-void PPU::oam_write(unsigned addr, uint8 data) {
+auto PPU::oam_write(uint addr, uint8 data) -> void {
   if(addr & 0x0200) addr &= 0x021f;
   if(!regs.display_disable && cpu.vcounter() < display.height) addr = 0x0218;
   oam[addr] = data;
   sprite.update_list(addr, data);
 }
 
-uint8 PPU::cgram_read(unsigned addr) {
+auto PPU::cgram_read(uint addr) -> uint8 {
   return cgram[addr];
 }
 
-void PPU::cgram_write(unsigned addr, uint8 data) {
+auto PPU::cgram_write(uint addr, uint8 data) -> void {
   cgram[addr] = data;
 }
 
-void PPU::mmio_update_video_mode() {
+auto PPU::mmio_update_video_mode() -> void {
   switch(regs.bgmode) {
   case 0: {
     bg1.regs.mode = Background::Mode::BPP2; bg1.regs.priority0 = 8; bg1.regs.priority1 = 11;
@@ -157,7 +155,7 @@ void PPU::mmio_update_video_mode() {
   }
 }
 
-uint8 PPU::mmio_read(unsigned addr) {
+auto PPU::mmio_read(uint addr) -> uint8 {
   cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
@@ -278,7 +276,7 @@ uint8 PPU::mmio_read(unsigned addr) {
   return cpu.regs.mdr;
 }
 
-void PPU::mmio_write(unsigned addr, uint8 data) {
+auto PPU::mmio_write(uint addr, uint8 data) -> void {
   cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
@@ -680,7 +678,7 @@ void PPU::mmio_write(unsigned addr, uint8 data) {
   }
 }
 
-void PPU::mmio_reset() {
+auto PPU::mmio_reset() -> void {
   //internal
   regs.ppu1_mdr = 0;
   regs.ppu2_mdr = 0;
@@ -887,5 +885,3 @@ void PPU::mmio_reset() {
 
   mmio_update_video_mode();
 }
-
-#endif

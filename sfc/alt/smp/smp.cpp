@@ -12,7 +12,12 @@ SMP smp;
 #include "memory.cpp"
 #include "timing.cpp"
 
-void SMP::synchronize_cpu() {
+SMP::SMP() {
+  apuram = new uint8[64 * 1024];
+  for(auto& byte : iplrom) byte = 0;
+}
+
+auto SMP::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
   //if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {
@@ -20,7 +25,7 @@ void SMP::synchronize_cpu() {
   }
 }
 
-void SMP::synchronize_dsp() {
+auto SMP::synchronizeDSP() -> void {
   if(DSP::Threaded == true) {
   //if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
   } else {
@@ -28,11 +33,11 @@ void SMP::synchronize_dsp() {
   }
 }
 
-void SMP::enter() {
+auto SMP::enter() -> void {
   while(clock < 0) op_step();
 }
 
-void SMP::power() {
+auto SMP::power() -> void {
   Thread::frequency = system.apuFrequency();
   Thread::clock = 0;
 
@@ -40,7 +45,7 @@ void SMP::power() {
   timer1.target = 0;
   timer2.target = 0;
 
-  for(unsigned n = 0; n < 256; n++) {
+  for(uint n = 0; n < 256; n++) {
     cycle_table_dsp[n] = (cycle_count_table[n] * 24);
     cycle_table_cpu[n] = (cycle_count_table[n] * 24) * cpu.frequency;
   }
@@ -50,8 +55,8 @@ void SMP::power() {
   reset();
 }
 
-void SMP::reset() {
-  for(unsigned n = 0x0000; n <= 0xffff; n++) apuram[n] = 0x00;
+auto SMP::reset() -> void {
+  for(uint n = 0x0000; n <= 0xffff; n++) apuram[n] = 0x00;
 
   opcode_number = 0;
   opcode_cycle = 0;
@@ -80,7 +85,7 @@ void SMP::reset() {
   timer0.stage3_ticks = timer1.stage3_ticks = timer2.stage3_ticks = 0;
 }
 
-void SMP::serialize(serializer& s) {
+auto SMP::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
   s.array(apuram, 64 * 1024);
@@ -135,14 +140,6 @@ void SMP::serialize(serializer& s) {
   s.integer(timer2.stage1_ticks);
   s.integer(timer2.stage2_ticks);
   s.integer(timer2.stage3_ticks);
-}
-
-SMP::SMP() {
-  apuram = new uint8[64 * 1024];
-  for(auto& byte : iplrom) byte = 0;
-}
-
-SMP::~SMP() {
 }
 
 }

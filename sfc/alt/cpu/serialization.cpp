@@ -1,6 +1,4 @@
-#ifdef CPU_CPP
-
-void CPU::serialize(serializer& s) {
+auto CPU::serialize(serializer& s) -> void {
   R65816::serialize(s);
   Thread::serialize(s);
   PPUcounter::serialize(s);
@@ -10,7 +8,7 @@ void CPU::serialize(serializer& s) {
   queue.serialize(s);
   s.array(port_data);
 
-  for(unsigned i = 0; i < 8; i++) {
+  for(uint i = 0; i < 8; i++) {
     s.integer(channel[i].dma_enabled);
     s.integer(channel[i].hdma_enabled);
 
@@ -82,5 +80,3 @@ void CPU::serialize(serializer& s) {
   s.integer(status.joy4l);
   s.integer(status.joy4h);
 }
-
-#endif

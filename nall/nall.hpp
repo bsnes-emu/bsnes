@@ -37,6 +37,7 @@
 #include <nall/matrix.hpp>
 #include <nall/maybe.hpp>
 #include <nall/memory.hpp>
+#include <nall/primitives.hpp>
 #include <nall/property.hpp>
 #include <nall/random.hpp>
 #include <nall/range.hpp>

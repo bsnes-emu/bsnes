@@ -1,12 +1,12 @@
-unsigned SMP::port_read(unsigned addr) {
+auto SMP::port_read(uint addr) -> uint {
   return apuram[0xf4 + (addr & 3)];
 }
 
-void SMP::port_write(unsigned addr, unsigned data) {
+auto SMP::port_write(uint addr, uint data) -> void {
   apuram[0xf4 + (addr & 3)] = data;
 }
 
-unsigned SMP::mmio_read(unsigned addr) {
+auto SMP::mmio_read(uint addr) -> uint {
   switch(addr) {
 
   case 0xf2:
@@ -19,7 +19,7 @@ unsigned SMP::mmio_read(unsigned addr) {
   case 0xf5:
   case 0xf6:
   case 0xf7:
-    synchronize_cpu();
+    synchronizeCPU();
     return cpu.port_read(addr);
 
   case 0xf8:
@@ -51,14 +51,14 @@ unsigned SMP::mmio_read(unsigned addr) {
   return 0x00;
 }
 
-void SMP::mmio_write(unsigned addr, unsigned data) {
+auto SMP::mmio_write(uint addr, uint data) -> void {
   switch(addr) {
 
   case 0xf1:
     status.iplrom_enable = data & 0x80;
 
     if(data & 0x30) {
-      synchronize_cpu();
+      synchronizeCPU();
       if(data & 0x20) {
         cpu.port_write(3, 0x00);
         cpu.port_write(2, 0x00);
@@ -102,7 +102,7 @@ void SMP::mmio_write(unsigned addr, unsigned data) {
   case 0xf5:
   case 0xf6:
   case 0xf7:
-    synchronize_cpu();
+    synchronizeCPU();
     port_write(addr, data);
     break;
 

@@ -75,7 +75,7 @@ Presentation::Presentation() {
   });
   synchronizeAudio.setText("Synchronize Audio").setChecked(settings["Audio/Synchronize"].boolean()).onToggle([&] {
     settings["Audio/Synchronize"].setValue(synchronizeAudio.checked());
-    audio->set(Audio::Synchronize, synchronizeVideo.checked());
+    audio->set(Audio::Synchronize, synchronizeAudio.checked());
   });
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());

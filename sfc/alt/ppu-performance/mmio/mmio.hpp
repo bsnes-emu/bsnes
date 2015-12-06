@@ -1,6 +1,6 @@
 public:
-  uint8 mmio_read(unsigned addr);
-  void mmio_write(unsigned addr, uint8 data);
+  auto mmio_read(uint addr) -> uint8;
+  auto mmio_write(uint addr, uint8 data) -> void;
 
 private:
 
@@ -21,7 +21,7 @@ struct Regs {
 
   //$2100
   bool display_disable;
-  unsigned display_brightness;
+  uint display_brightness;
 
   //$2102-$2103
   uint16 oam_baseaddr;
@@ -30,7 +30,7 @@ struct Regs {
 
   //$2105
   bool bg3_priority;
-  unsigned bgmode;
+  uint bgmode;
 
   //$210d
   uint16 mode7_hoffset;
@@ -40,14 +40,14 @@ struct Regs {
 
   //$2115
   bool vram_incmode;
-  unsigned vram_mapping;
-  unsigned vram_incsize;
+  uint vram_mapping;
+  uint vram_incsize;
 
   //$2116-$2117
   uint16 vram_addr;
 
   //$211a
-  unsigned mode7_repeat;
+  uint mode7_repeat;
   bool mode7_vflip;
   bool mode7_hflip;
 
@@ -63,10 +63,10 @@ struct Regs {
   uint16 cgram_addr;
 
   //$2126-$212a
-  unsigned window_one_left;
-  unsigned window_one_right;
-  unsigned window_two_left;
-  unsigned window_two_right;
+  uint window_one_left;
+  uint window_one_right;
+  uint window_two_left;
+  uint window_two_right;
 
   //$2133
   bool mode7_extbg;
@@ -81,15 +81,15 @@ struct Regs {
   uint16 vcounter;
 } regs;
 
-uint16 get_vram_addr();
-uint8 vram_read(unsigned addr);
-void vram_write(unsigned addr, uint8 data);
+auto get_vram_addr() -> uint16;
+auto vram_read(uint addr) -> uint8;
+auto vram_write(uint addr, uint8 data) -> void;
 
-uint8 oam_read(unsigned addr);
-void oam_write(unsigned addr, uint8 data);
+auto oam_read(uint addr) -> uint8;
+auto oam_write(uint addr, uint8 data) -> void;
 
-uint8 cgram_read(unsigned addr);
-void cgram_write(unsigned addr, uint8 data);
+auto cgram_read(uint addr) -> uint8;
+auto cgram_write(uint addr, uint8 data) -> void;
 
-void mmio_update_video_mode();
-void mmio_reset();
+auto mmio_update_video_mode() -> void;
+auto mmio_reset() -> void;

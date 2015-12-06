@@ -1,30 +1,32 @@
 struct PPU : Thread, public PPUcounter {
+  enum : bool { Threaded = true };
+
+  PPU();
+  ~PPU();
+
+  alwaysinline auto step(uint clocks) -> void;
+  alwaysinline auto synchronizeCPU() -> void;
+
+  auto latch_counters() -> void;
+  auto interlace() const -> bool;
+  auto overscan() const -> bool;
+  auto hires() const -> bool;
+
+  auto enter() -> void;
+  auto enable() -> void;
+  auto power() -> void;
+  auto reset() -> void;
+  auto scanline() -> void;
+  auto frame() -> void;
+
+  auto layer_enable(uint layer, uint priority, bool enable) -> void;
+  auto set_frameskip(uint frameskip) -> void;
+
+  auto serialize(serializer&) -> void;
+
   uint8 vram[64 * 1024];
   uint8 oam[544];
   uint8 cgram[512];
-
-  enum : bool { Threaded = true };
-  alwaysinline void step(unsigned clocks);
-  alwaysinline void synchronize_cpu();
-
-  void latch_counters();
-  bool interlace() const;
-  bool overscan() const;
-  bool hires() const;
-
-  void enter();
-  void enable();
-  void power();
-  void reset();
-  void scanline();
-  void frame();
-
-  void layer_enable(unsigned layer, unsigned priority, bool enable);
-  void set_frameskip(unsigned frameskip);
-
-  void serialize(serializer&);
-  PPU();
-  ~PPU();
 
 private:
   uint32* surface;
@@ -48,15 +50,15 @@ private:
   struct Display {
     bool interlace;
     bool overscan;
-    unsigned width;
-    unsigned height;
-    unsigned frameskip;
-    unsigned framecounter;
+    uint width;
+    uint height;
+    uint frameskip;
+    uint framecounter;
   } display;
 
-  static void Enter();
-  void add_clocks(unsigned clocks);
-  void render_scanline();
+  static auto Enter() -> void;
+  auto add_clocks(uint clocks) -> void;
+  auto render_scanline() -> void;
 
   friend class PPU::Cache;
   friend class PPU::Background;

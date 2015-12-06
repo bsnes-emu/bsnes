@@ -1,14 +1,14 @@
-uint8 SMP::disassemble_read(uint16 addr) {
+auto SMP::disassemble_read(uint16 addr) -> uint8 {
   if(addr >= 0xffc0) return smp.iplrom[addr & 0x3f];
   return smp.apuram[addr];
 }
 
-uint16 SMP::relb(int8 offset, int op_len) {
+auto SMP::relb(int8 offset, int op_len) -> uint16 {
   uint16 pc = regs.pc + op_len;
   return pc + offset;
 }
 
-void SMP::disassemble_opcode(char* output, uint16 addr) {
+auto SMP::disassemble_opcode(char* output, uint16 addr) -> void {
   char* s;
   char t[512];
   uint8 op, op0, op1;

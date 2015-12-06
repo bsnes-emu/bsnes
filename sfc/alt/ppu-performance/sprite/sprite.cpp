@@ -1,13 +1,18 @@
-#ifdef PPU_CPP
+PPU::Sprite::Sprite(PPU& self) : self(self) {
+  priority0_enable = true;
+  priority1_enable = true;
+  priority2_enable = true;
+  priority3_enable = true;
+}
 
-void PPU::Sprite::frame() {
+auto PPU::Sprite::frame() -> void {
   regs.time_over = false;
   regs.range_over = false;
 }
 
-void PPU::Sprite::update_list(unsigned addr, uint8 data) {
+auto PPU::Sprite::update_list(uint addr, uint8 data) -> void {
   if(addr < 0x0200) {
-    unsigned i = addr >> 2;
+    uint i = addr >> 2;
     switch(addr & 3) {
       case 0: list[i].x = (list[i].x & 0x0100) | data; break;
       case 1: list[i].y = (data + 1) & 0xff; break;
@@ -20,7 +25,7 @@ void PPU::Sprite::update_list(unsigned addr, uint8 data) {
               break;
     }
   } else {
-    unsigned i = (addr & 0x1f) << 2;
+    uint i = (addr & 0x1f) << 2;
     list[i + 0].x = ((data & 0x01) << 8) | (list[i + 0].x & 0xff);
     list[i + 0].size = data & 0x02;
     list[i + 1].x = ((data & 0x04) << 6) | (list[i + 1].x & 0xff);
@@ -33,36 +38,36 @@ void PPU::Sprite::update_list(unsigned addr, uint8 data) {
   }
 }
 
-void PPU::Sprite::address_reset() {
+auto PPU::Sprite::address_reset() -> void {
   self.regs.oam_addr = self.regs.oam_baseaddr << 1;
   set_first();
 }
 
-void PPU::Sprite::set_first() {
+auto PPU::Sprite::set_first() -> void {
   regs.first_sprite = (self.regs.oam_priority == false ? 0 : (self.regs.oam_addr >> 2) & 127);
 }
 
-bool PPU::Sprite::on_scanline(unsigned sprite) {
+auto PPU::Sprite::on_scanline(uint sprite) -> bool {
   auto& s = list[sprite];
   if(s.x > 256 && (s.x + s.width - 1) < 512) return false;
-  signed height = (regs.interlace == false ? s.height : s.height >> 1);
+  int height = (regs.interlace == false ? s.height : s.height >> 1);
   if(self.vcounter() >= s.y && self.vcounter() < (s.y + height)) return true;
   if((s.y + height) >= 256 && self.vcounter() < ((s.y + height) & 255)) return true;
   return false;
 }
 
-void PPU::Sprite::render() {
+auto PPU::Sprite::render() -> void {
   if(list_valid == false) {
     list_valid = true;
-    for(unsigned i = 0; i < 128; i++) {
+    for(uint i = 0; i < 128; i++) {
       if(list[i].size == 0) {
-        static unsigned width[]  = { 8, 8, 8, 16, 16, 32, 16, 16 };
-        static unsigned height[] = { 8, 8, 8, 16, 16, 32, 32, 32 };
+        static uint width[]  = {8, 8, 8, 16, 16, 32, 16, 16};
+        static uint height[] = {8, 8, 8, 16, 16, 32, 32, 32};
         list[i].width = width[regs.base_size];
         list[i].height = height[regs.base_size];
       } else {
-        static unsigned width[]  = { 16, 32, 64, 32, 64, 64, 32, 32 };
-        static unsigned height[] = { 16, 32, 64, 32, 64, 64, 64, 32 };
+        static uint width[]  = {16, 32, 64, 32, 64, 64, 32, 32};
+        static uint height[] = {16, 32, 64, 32, 64, 64, 64, 32};
         list[i].width = width[regs.base_size];
         list[i].height = height[regs.base_size];
         if(regs.interlace && regs.base_size >= 6) list[i].height = 16;
@@ -70,25 +75,25 @@ void PPU::Sprite::render() {
     }
   }
 
-  unsigned itemcount = 0;
-  unsigned tilecount = 0;
+  uint itemcount = 0;
+  uint tilecount = 0;
   memset(output.priority, 0xff, 256);
   memset(itemlist, 0xff, 32);
-  for(unsigned i = 0; i < 34; i++) tilelist[i].tile = 0xffff;
+  for(uint i = 0; i < 34; i++) tilelist[i].tile = 0xffff;
 
-  for(unsigned i = 0; i < 128; i++) {
-    unsigned s = (regs.first_sprite + i) & 127;
+  for(uint i = 0; i < 128; i++) {
+    uint s = (regs.first_sprite + i) & 127;
     if(on_scanline(s) == false) continue;
     if(itemcount++ >= 32) break;
     itemlist[itemcount - 1] = s;
   }
 
-  for(signed i = 31; i >= 0; i--) {
+  for(int i = 31; i >= 0; i--) {
     if(itemlist[i] == 0xff) continue;
     auto& s = list[itemlist[i]];
-    unsigned tile_width = s.width >> 3;
-    signed x = s.x;
-    signed y = (self.vcounter() - s.y) & 0xff;
+    uint tile_width = s.width >> 3;
+    int x = s.x;
+    int y = (self.vcounter() - s.y) & 0xff;
     if(regs.interlace) y <<= 1;
 
     if(s.vflip) {
@@ -116,20 +121,20 @@ void PPU::Sprite::render() {
     chry &= 15;
     chry <<= 4;
 
-    for(unsigned tx = 0; tx < tile_width; tx++) {
-      unsigned sx = (x + (tx << 3)) & 511;
+    for(uint tx = 0; tx < tile_width; tx++) {
+      uint sx = (x + (tx << 3)) & 511;
       if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
       if(tilecount++ >= 34) break;
 
-      unsigned n = tilecount - 1;
+      uint n = tilecount - 1;
       tilelist[n].x = sx;
       tilelist[n].y = y;
       tilelist[n].priority = s.priority;
       tilelist[n].palette = 128 + (s.palette << 4);
       tilelist[n].hflip = s.hflip;
 
-      unsigned mx = (s.hflip == false) ? tx : ((tile_width - 1) - tx);
-      unsigned pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
+      uint mx = (s.hflip == false) ? tx : ((tile_width - 1) - tx);
+      uint pos = tdaddr + ((chry + ((chrx + mx) & 15)) << 5);
       tilelist[n].tile = (pos >> 5) & 0x07ff;
     }
   }
@@ -139,17 +144,17 @@ void PPU::Sprite::render() {
 
   if(regs.main_enable == false && regs.sub_enable == false) return;
 
-  for(unsigned i = 0; i < 34; i++) {
+  for(uint i = 0; i < 34; i++) {
     if(tilelist[i].tile == 0xffff) continue;
 
     auto& t = tilelist[i];
     uint8* tiledata = self.cache.tile_4bpp(t.tile);
     tiledata += (t.y & 7) << 3;
-    unsigned sx = t.x;
-    for(unsigned x = 0; x < 8; x++) {
+    uint sx = t.x;
+    for(uint x = 0; x < 8; x++) {
       sx &= 511;
       if(sx < 256) {
-        unsigned color = *(tiledata + (t.hflip == false ? x : 7 - x));
+        uint color = *(tiledata + (t.hflip == false ? x : 7 - x));
         if(color) {
           color += t.palette;
           output.palette[sx] = color;
@@ -163,28 +168,19 @@ void PPU::Sprite::render() {
   if(regs.main_enable) window.render(0);
   if(regs.sub_enable) window.render(1);
 
-  unsigned priority0 = (priority0_enable ? regs.priority0 : 0);
-  unsigned priority1 = (priority1_enable ? regs.priority1 : 0);
-  unsigned priority2 = (priority2_enable ? regs.priority2 : 0);
-  unsigned priority3 = (priority3_enable ? regs.priority3 : 0);
+  uint priority0 = (priority0_enable ? regs.priority0 : 0);
+  uint priority1 = (priority1_enable ? regs.priority1 : 0);
+  uint priority2 = (priority2_enable ? regs.priority2 : 0);
+  uint priority3 = (priority3_enable ? regs.priority3 : 0);
   if(priority0 + priority1 + priority2 + priority3 == 0) return;
-  const unsigned priority_table[] = { priority0, priority1, priority2, priority3 };
+  const uint priority_table[] = {priority0, priority1, priority2, priority3};
 
-  for(unsigned x = 0; x < 256; x++) {
+  for(uint x = 0; x < 256; x++) {
     if(output.priority[x] == 0xff) continue;
-    unsigned priority = priority_table[output.priority[x]];
-    unsigned palette = output.palette[x];
-    unsigned color = self.screen.get_palette(output.palette[x]);
+    uint priority = priority_table[output.priority[x]];
+    uint palette = output.palette[x];
+    uint color = self.screen.get_palette(output.palette[x]);
     if(regs.main_enable && !window.main[x]) self.screen.output.plot_main(x, color, priority, 4 + (palette < 192));
     if(regs.sub_enable && !window.sub[x]) self.screen.output.plot_sub(x, color, priority, 4 + (palette < 192));
   }
 }
-
-PPU::Sprite::Sprite(PPU& self) : self(self) {
-  priority0_enable = true;
-  priority1_enable = true;
-  priority2_enable = true;
-  priority3_enable = true;
-}
-
-#endif

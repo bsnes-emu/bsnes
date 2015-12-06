@@ -1,6 +1,5 @@
 #include <sfc/sfc.hpp>
 
-#define PPU_CPP
 namespace SuperFamicom {
 
 PPU ppu;
@@ -12,120 +11,6 @@ PPU ppu;
 #include "sprite/sprite.cpp"
 #include "screen/screen.cpp"
 #include "serialization.cpp"
-
-void PPU::step(unsigned clocks) {
-  clock += clocks;
-}
-
-void PPU::synchronize_cpu() {
-  if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
-  } else {
-    while(clock >= 0) cpu.enter();
-  }
-}
-
-void PPU::Enter() { ppu.enter(); }
-
-void PPU::enter() {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    scanline();
-    if(vcounter() < display.height && vcounter()) {
-      add_clocks(512);
-      render_scanline();
-      add_clocks(lineclocks() - 512);
-    } else {
-      add_clocks(lineclocks());
-    }
-  }
-}
-
-void PPU::add_clocks(unsigned clocks) {
-  tick(clocks);
-  step(clocks);
-  synchronize_cpu();
-}
-
-void PPU::render_scanline() {
-  if(display.framecounter) return;  //skip this frame?
-  bg1.scanline();
-  bg2.scanline();
-  bg3.scanline();
-  bg4.scanline();
-  if(regs.display_disable) return screen.render_black();
-  screen.scanline();
-  bg1.render();
-  bg2.render();
-  bg3.render();
-  bg4.render();
-  sprite.render();
-  screen.render();
-}
-
-void PPU::scanline() {
-  display.width = !hires() ? 256 : 512;
-  display.height = !overscan() ? 225 : 240;
-  if(vcounter() == 0) frame();
-  if(vcounter() == display.height && regs.display_disable == false) sprite.address_reset();
-}
-
-void PPU::frame() {
-  sprite.frame();
-  system.frame();
-  display.interlace = regs.interlace;
-  display.overscan = regs.overscan;
-  display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
-}
-
-void PPU::enable() {
-  function<uint8 (unsigned)> reader = {&PPU::mmio_read, (PPU*)&ppu};
-  function<void (unsigned, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
-
-  bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
-  bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
-}
-
-void PPU::power() {
-  for(auto& n : vram) n = 0;
-  for(auto& n : oam) n = 0;
-  for(auto& n : cgram) n = 0;
-  reset();
-}
-
-void PPU::reset() {
-  create(Enter, system.cpuFrequency());
-  PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint32));
-  mmio_reset();
-  display.interlace = false;
-  display.overscan = false;
-}
-
-void PPU::layer_enable(unsigned layer, unsigned priority, bool enable) {
-  switch(layer * 4 + priority) {
-  case  0: bg1.priority0_enable = enable; break;
-  case  1: bg1.priority1_enable = enable; break;
-  case  4: bg2.priority0_enable = enable; break;
-  case  5: bg2.priority1_enable = enable; break;
-  case  8: bg3.priority0_enable = enable; break;
-  case  9: bg3.priority1_enable = enable; break;
-  case 12: bg4.priority0_enable = enable; break;
-  case 13: bg4.priority1_enable = enable; break;
-  case 16: sprite.priority0_enable = enable; break;
-  case 17: sprite.priority1_enable = enable; break;
-  case 18: sprite.priority2_enable = enable; break;
-  case 19: sprite.priority3_enable = enable; break;
-  }
-}
-
-void PPU::set_frameskip(unsigned frameskip) {
-  display.frameskip = frameskip;
-  display.framecounter = 0;
-}
 
 PPU::PPU() :
 cache(*this),
@@ -145,6 +30,120 @@ screen(*this) {
 
 PPU::~PPU() {
   delete[] surface;
+}
+
+auto PPU::step(uint clocks) -> void {
+  clock += clocks;
+}
+
+auto PPU::synchronizeCPU() -> void {
+  if(CPU::Threaded == true) {
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  } else {
+    while(clock >= 0) cpu.enter();
+  }
+}
+
+auto PPU::Enter() -> void { ppu.enter(); }
+
+auto PPU::enter() -> void {
+  while(true) {
+    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
+      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    }
+
+    scanline();
+    if(vcounter() < display.height && vcounter()) {
+      add_clocks(512);
+      render_scanline();
+      add_clocks(lineclocks() - 512);
+    } else {
+      add_clocks(lineclocks());
+    }
+  }
+}
+
+auto PPU::add_clocks(uint clocks) -> void {
+  tick(clocks);
+  step(clocks);
+  synchronizeCPU();
+}
+
+auto PPU::render_scanline() -> void {
+  if(display.framecounter) return;  //skip this frame?
+  bg1.scanline();
+  bg2.scanline();
+  bg3.scanline();
+  bg4.scanline();
+  if(regs.display_disable) return screen.render_black();
+  screen.scanline();
+  bg1.render();
+  bg2.render();
+  bg3.render();
+  bg4.render();
+  sprite.render();
+  screen.render();
+}
+
+auto PPU::scanline() -> void {
+  display.width = !hires() ? 256 : 512;
+  display.height = !overscan() ? 225 : 240;
+  if(vcounter() == 0) frame();
+  if(vcounter() == display.height && regs.display_disable == false) sprite.address_reset();
+}
+
+auto PPU::frame() -> void {
+  sprite.frame();
+  system.frame();
+  display.interlace = regs.interlace;
+  display.overscan = regs.overscan;
+  display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
+}
+
+auto PPU::enable() -> void {
+  function<uint8 (uint)> reader = {&PPU::mmio_read, (PPU*)&ppu};
+  function<void (uint, uint8)> writer = {&PPU::mmio_write, (PPU*)&ppu};
+
+  bus.map(reader, writer, 0x00, 0x3f, 0x2100, 0x213f);
+  bus.map(reader, writer, 0x80, 0xbf, 0x2100, 0x213f);
+}
+
+auto PPU::power() -> void {
+  for(auto& n : vram) n = 0;
+  for(auto& n : oam) n = 0;
+  for(auto& n : cgram) n = 0;
+  reset();
+}
+
+auto PPU::reset() -> void {
+  create(Enter, system.cpuFrequency());
+  PPUcounter::reset();
+  memset(surface, 0, 512 * 512 * sizeof(uint32));
+  mmio_reset();
+  display.interlace = false;
+  display.overscan = false;
+}
+
+auto PPU::layer_enable(uint layer, uint priority, bool enable) -> void {
+  switch(layer * 4 + priority) {
+  case  0: bg1.priority0_enable = enable; break;
+  case  1: bg1.priority1_enable = enable; break;
+  case  4: bg2.priority0_enable = enable; break;
+  case  5: bg2.priority1_enable = enable; break;
+  case  8: bg3.priority0_enable = enable; break;
+  case  9: bg3.priority1_enable = enable; break;
+  case 12: bg4.priority0_enable = enable; break;
+  case 13: bg4.priority1_enable = enable; break;
+  case 16: sprite.priority0_enable = enable; break;
+  case 17: sprite.priority1_enable = enable; break;
+  case 18: sprite.priority2_enable = enable; break;
+  case 19: sprite.priority3_enable = enable; break;
+  }
+}
+
+auto PPU::set_frameskip(uint frameskip) -> void {
+  display.frameskip = frameskip;
+  display.framecounter = 0;
 }
 
 }

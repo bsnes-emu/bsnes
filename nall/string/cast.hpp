@@ -5,199 +5,215 @@
 
 namespace nall {
 
-//base types
+//booleans
 
 template<> struct stringify<bool> {
-  bool _value;
+  stringify(bool value) : _value(value) {}
   auto data() const -> const char* { return _value ? "true" : "false"; }
   auto size() const -> unsigned { return _value ? 4 : 5; }
-  stringify(bool value) : _value(value) {}
+  bool _value;
 };
 
+template<> struct stringify<Boolean> {
+  stringify(bool value) : _value(value) {}
+  auto data() const -> const char* { return _value ? "true" : "false"; }
+  auto size() const -> uint { return _value ? 4 : 5; }
+  bool _value;
+};
+
+//characters
+
 template<> struct stringify<char> {
-  char _data[2];
+  stringify(char source) { _data[0] = source; _data[1] = 0; }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return 1; }
-  stringify(char source) { _data[0] = source; _data[1] = 0; }
+  char _data[2];
 };
 
 //signed integers
 
 template<> struct stringify<signed char> {
-  char _data[2 + sizeof(signed char) * 3];
+  stringify(signed char source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(signed char source) { integer(_data, source); }
+  char _data[2 + sizeof(signed char) * 3];
 };
 
 template<> struct stringify<signed short> {
-  char _data[2 + sizeof(signed short) * 3];
+  stringify(signed short source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(signed short source) { integer(_data, source); }
+  char _data[2 + sizeof(signed short) * 3];
 };
 
 template<> struct stringify<signed int> {
-  char _data[2 + sizeof(signed int) * 3];
+  stringify(signed int source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(signed int source) { integer(_data, source); }
+  char _data[2 + sizeof(signed int) * 3];
 };
 
 template<> struct stringify<signed long> {
-  char _data[2 + sizeof(signed long) * 3];
+  stringify(signed long source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(signed long source) { integer(_data, source); }
+  char _data[2 + sizeof(signed long) * 3];
 };
 
 template<> struct stringify<signed long long> {
-  char _data[2 + sizeof(signed long long) * 3];
+  stringify(signed long long source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(signed long long source) { integer(_data, source); }
+  char _data[2 + sizeof(signed long long) * 3];
 };
 
-template<unsigned bits> struct stringify<int_t<bits>> {
-  char _data[2 + sizeof(intmax_t) * 3];
+template<uint Bits> struct stringify<Integer<Bits>> {
+  stringify(Integer<Bits> source) { integer(_data, source); }
   auto data() const -> const char* { return _data; }
-  auto size() const -> unsigned { return strlen(_data); }
-  stringify(int_t<bits> source) { integer(_data, source); }
+  auto size() const -> uint { return strlen(_data); }
+  char _data[2 + sizeof(int64_t) * 3];
 };
 
 //unsigned integers
 
 template<> struct stringify<unsigned char> {
-  char _data[1 + sizeof(unsigned char) * 3];
+  stringify(unsigned char source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(unsigned char source) { decimal(_data, source); }
+  char _data[1 + sizeof(unsigned char) * 3];
 };
 
 template<> struct stringify<unsigned short> {
-  char _data[1 + sizeof(unsigned short) * 3];
+  stringify(unsigned short source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(unsigned short source) { decimal(_data, source); }
+  char _data[1 + sizeof(unsigned short) * 3];
 };
 
 template<> struct stringify<unsigned int> {
-  char _data[1 + sizeof(unsigned int) * 3];
+  stringify(unsigned int source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(unsigned int source) { decimal(_data, source); }
+  char _data[1 + sizeof(unsigned int) * 3];
 };
 
 template<> struct stringify<unsigned long> {
-  char _data[1 + sizeof(unsigned long) * 3];
+  stringify(unsigned long source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(unsigned long source) { decimal(_data, source); }
+  char _data[1 + sizeof(unsigned long) * 3];
 };
 
 template<> struct stringify<unsigned long long> {
-  char _data[1 + sizeof(unsigned long long) * 3];
+  stringify(unsigned long long source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(unsigned long long source) { decimal(_data, source); }
+  char _data[1 + sizeof(unsigned long long) * 3];
 };
 
-template<unsigned bits> struct stringify<uint_t<bits>> {
-  char _data[1 + sizeof(uintmax_t) * 3];
+template<uint Bits> struct stringify<Natural<Bits>> {
+  stringify(Natural<Bits> source) { natural(_data, source); }
   auto data() const -> const char* { return _data; }
-  auto size() const -> unsigned { return strlen(_data); }
-  stringify(uint_t<bits> source) { decimal(_data, source); }
+  auto size() const -> uint { return strlen(_data); }
+  char _data[1 + sizeof(uint64_t) * 3];
 };
 
 //floating-point
 
 template<> struct stringify<float> {
-  char _data[256];
+  stringify(float source) { real(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(float source) { real(_data, source); }
+  char _data[256];
 };
 
 template<> struct stringify<double> {
-  char _data[256];
+  stringify(double source) { real(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(double source) { real(_data, source); }
+  char _data[256];
 };
 
 template<> struct stringify<long double> {
-  char _data[256];
+  stringify(long double source) { real(_data, source); }
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(long double source) { real(_data, source); }
+  char _data[256];
+};
+
+template<uint Bits> struct stringify<Real<Bits>> {
+  stringify(Real<Bits> source) { real(_data, source); }
+  auto data() const -> const char* { return _data; }
+  auto size() const -> uint { return strlen(_data); }
+  char _data[256];
 };
 
 //arrays
 
 template<> struct stringify<vector<uint8_t>> {
-  vector<char> _text;
-  auto data() const -> const char* { return _text.data(); }
-  auto size() const -> unsigned { return _text.size(); }
   stringify(vector<uint8_t> source) {
     _text.resize(source.size());
     memory::copy(_text.data(), source.data(), source.size());
   }
+  auto data() const -> const char* { return _text.data(); }
+  auto size() const -> unsigned { return _text.size(); }
+  vector<char> _text;
 };
 
 template<> struct stringify<const vector<uint8_t>&> {
-  vector<char> _text;
-  auto data() const -> const char* { return _text.data(); }
-  auto size() const -> unsigned { return _text.size(); }
   stringify(const vector<uint8_t>& source) {
     _text.resize(source.size());
     memory::copy(_text.data(), source.data(), source.size());
   }
+  auto data() const -> const char* { return _text.data(); }
+  auto size() const -> unsigned { return _text.size(); }
+  vector<char> _text;
 };
 
 //char arrays
 
 template<> struct stringify<char*> {
-  const char* _data;
+  stringify(char* source) : _data(source ? source : "") {}
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(char* source) : _data(source ? source : "") {}
+  const char* _data;
 };
 
 template<> struct stringify<const char*> {
-  const char* _data;
+  stringify(const char* source) : _data(source ? source : "") {}
   auto data() const -> const char* { return _data; }
   auto size() const -> unsigned { return strlen(_data); }
-  stringify(const char* source) : _data(source ? source : "") {}
+  const char* _data;
 };
 
 //strings
 
 template<> struct stringify<string> {
-  const string& _text;
+  stringify(const string& source) : _text(source) {}
   auto data() const -> const char* { return _text.data(); }
   auto size() const -> unsigned { return _text.size(); }
-  stringify(const string& source) : _text(source) {}
+  const string& _text;
 };
 
 template<> struct stringify<const string&> {
-  const string& _text;
+  stringify(const string& source) : _text(source) {}
   auto data() const -> const char* { return _text.data(); }
   auto size() const -> unsigned { return _text.size(); }
-  stringify(const string& source) : _text(source) {}
+  const string& _text;
 };
 
 template<> struct stringify<string_view> {
-  const string_view& _view;
+  stringify(const string_view& source) : _view(source) {}
   auto data() const -> const char* { return _view.data(); }
   auto size() const -> unsigned { return _view.size(); }
-  stringify(const string_view& source) : _view(source) {}
+  const string_view& _view;
 };
 
 template<> struct stringify<const string_view&> {
-  const string_view& _view;
+  stringify(const string_view& source) : _view(source) {}
   auto data() const -> const char* { return _view.data(); }
   auto size() const -> unsigned { return _view.size(); }
-  stringify(const string_view& source) : _view(source) {}
+  const string_view& _view;
 };
 
 //

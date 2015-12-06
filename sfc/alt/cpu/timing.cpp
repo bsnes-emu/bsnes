@@ -1,13 +1,11 @@
-#ifdef CPU_CPP
-
-void CPU::queue_event(unsigned id) {
+auto CPU::queue_event(uint id) -> void {
   switch(id) {
     case QueueEvent::DramRefresh: return add_clocks(40);
     case QueueEvent::HdmaRun: return hdma_run();
   }
 }
 
-void CPU::last_cycle() {
+auto CPU::last_cycle() -> void {
   if(status.irq_lock) {
     status.irq_lock = false;
     return;
@@ -26,18 +24,18 @@ void CPU::last_cycle() {
   }
 }
 
-void CPU::add_clocks(unsigned clocks) {
+auto CPU::add_clocks(uint clocks) -> void {
   if(status.hirq_enabled) {
     if(status.virq_enabled) {
-      unsigned cpu_time = vcounter() * 1364 + hcounter();
-      unsigned irq_time = status.vtime * 1364 + status.htime * 4;
-      unsigned framelines = (system.region() == System::Region::NTSC ? 262 : 312) + (ppu.interlace() && !field());
+      uint cpu_time = vcounter() * 1364 + hcounter();
+      uint irq_time = status.vtime * 1364 + status.htime * 4;
+      uint framelines = (system.region() == System::Region::NTSC ? 262 : 312) + (ppu.interlace() && !field());
       if(cpu_time > irq_time) irq_time += framelines * 1364;
       bool irq_valid = status.irq_valid;
       status.irq_valid = cpu_time <= irq_time && cpu_time + clocks > irq_time;
       if(!irq_valid && status.irq_valid) status.irq_line = true;
     } else {
-      unsigned irq_time = status.htime * 4;
+      uint irq_time = status.htime * 4;
       if(hcounter() > irq_time) irq_time += 1364;
       bool irq_valid = status.irq_valid;
       status.irq_valid = hcounter() <= irq_time && hcounter() + clocks > irq_time;
@@ -58,7 +56,7 @@ void CPU::add_clocks(unsigned clocks) {
   step(clocks);
 }
 
-void CPU::scanline() {
+auto CPU::scanline() -> void {
   synchronizeSMP();
   synchronizePPU();
   synchronizeCoprocessors();
@@ -86,14 +84,14 @@ void CPU::scanline() {
   }
 }
 
-void CPU::run_auto_joypad_poll() {
+auto CPU::run_auto_joypad_poll() -> void {
   device.controllerPort1->latch(1);
   device.controllerPort2->latch(1);
   device.controllerPort1->latch(0);
   device.controllerPort2->latch(0);
 
   uint16 joy1 = 0, joy2 = 0, joy3 = 0, joy4 = 0;
-  for(unsigned i = 0; i < 16; i++) {
+  for(uint i = 0; i < 16; i++) {
     uint8 port0 = device.controllerPort1->data();
     uint8 port1 = device.controllerPort2->data();
 
@@ -115,5 +113,3 @@ void CPU::run_auto_joypad_poll() {
   status.joy4l = joy4;
   status.joy4h = joy4 >> 8;
 }
-
-#endif

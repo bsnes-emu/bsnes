@@ -8,10 +8,10 @@ static bool cycle_accurate;
 struct opcode_t {
   string name;
   lstring args;
-  unsigned opcode;
+  uint opcode;
 };
 
-void generate(const char* sourceFilename, const char* targetFilename) {
+auto generate(const char* sourceFilename, const char* targetFilename) -> void {
   file fp;
   fp.open(targetFilename, file::mode::write);
 
@@ -28,7 +28,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
 
     linear_vector<opcode_t> array;
 
-    unsigned sourceStart = 0;
+    uint sourceStart = 0;
     foreach(line, lines, currentLine) {
       line.transform("()", "``");
       lstring part;
@@ -54,7 +54,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
       foreach(opcode, array) {
         fp.print("case 0x", hex(opcode.opcode, 2L), ": {\n");
 
-        for(unsigned n = sourceStart; n < lines.size(); n++) {
+        for(uint n = sourceStart; n < lines.size(); n++) {
           if(lines[n] == "}") break;
 
           string output;
@@ -88,7 +88,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
         fp.print("case 0x", hex(opcode.opcode, 2L), ": {\n");
         fp.print("  switch(opcode_cycle++) {\n");
 
-        for(unsigned n = sourceStart; n < lines.size(); n++) {
+        for(uint n = sourceStart; n < lines.size(); n++) {
           if(lines[n] == "}") break;
 
           bool nextLineEndsCycle = false;
@@ -135,7 +135,7 @@ void generate(const char* sourceFilename, const char* targetFilename) {
   fp.close();
 }
 
-int main() {
+auto main() -> int {
   cycle_accurate = false;
   generate("op_misc.b", "op_misc.cpp");
   generate("op_mov.b",  "op_mov.cpp" );
