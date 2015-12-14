@@ -4,26 +4,24 @@ namespace nall {
 namespace mosaic {
 
 struct bitstream {
-  filemap fp;
-  uint8_t* data = nullptr;
-  unsigned size = 0;
-  bool readonly = false;
-  bool endian = 1;
+  ~bitstream() {
+    close();
+  }
 
-  bool read(uint64_t addr) const {
+  auto read(uint64 addr) const -> bool {
     if(data == nullptr || (addr >> 3) >= size) return 0;
-    unsigned mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
+    uint mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     return data[addr >> 3] & mask;
   }
 
-  void write(uint64_t addr, bool value) {
+  auto write(uint64 addr, bool value) -> void {
     if(data == nullptr || readonly == true || (addr >> 3) >= size) return;
-    unsigned mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
+    uint mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     if(value == 0) data[addr >> 3] &= ~mask;
     if(value == 1) data[addr >> 3] |=  mask;
   }
 
-  bool open(const string& filename) {
+  auto open(const string& filename) -> bool {
     readonly = false;
     if(fp.open(filename, filemap::mode::readwrite) == false) {
       readonly = true;
@@ -36,17 +34,16 @@ struct bitstream {
     return true;
   }
 
-  void close() {
+  auto close() -> void {
     fp.close();
     data = nullptr;
   }
 
-  bitstream() {
-  }
-
-  ~bitstream() {
-    close();
-  }
+  filemap fp;
+  uint8* data = nullptr;
+  uint size = 0;
+  bool readonly = false;
+  bool endian = 1;
 };
 
 }

@@ -9,70 +9,70 @@
 namespace nall {
 
 struct bpsdelta {
-  inline void source(const uint8_t* data, unsigned size);
-  inline void target(const uint8_t* data, unsigned size);
+  inline auto source(const uint8* data, uint size) -> void;
+  inline auto target(const uint8* data, uint size) -> void;
 
-  inline bool source(const string& filename);
-  inline bool target(const string& filename);
-  inline bool create(const string& filename, const string& metadata = "");
+  inline auto source(const string& filename) -> bool;
+  inline auto target(const string& filename) -> bool;
+  inline auto create(const string& filename, const string& metadata = "") -> bool;
 
 protected:
-  enum : unsigned { SourceRead, TargetRead, SourceCopy, TargetCopy };
-  enum : unsigned { Granularity = 1 };
+  enum : uint { SourceRead, TargetRead, SourceCopy, TargetCopy };
+  enum : uint { Granularity = 1 };
 
   struct Node {
-    unsigned offset = 0;
-    Node* next = nullptr;
     Node() = default;
     ~Node() { if(next) delete next; }
+    uint offset = 0;
+    Node* next = nullptr;
   };
 
   filemap sourceFile;
-  const uint8_t* sourceData;
-  unsigned sourceSize;
+  const uint8* sourceData;
+  uint sourceSize;
 
   filemap targetFile;
-  const uint8_t* targetData;
-  unsigned targetSize;
+  const uint8* targetData;
+  uint targetSize;
 };
 
-void bpsdelta::source(const uint8_t* data, unsigned size) {
+auto bpsdelta::source(const uint8* data, uint size) -> void {
   sourceData = data;
   sourceSize = size;
 }
 
-void bpsdelta::target(const uint8_t* data, unsigned size) {
+auto bpsdelta::target(const uint8* data, uint size) -> void {
   targetData = data;
   targetSize = size;
 }
 
-bool bpsdelta::source(const string& filename) {
+auto bpsdelta::source(const string& filename) -> bool {
   if(sourceFile.open(filename, filemap::mode::read) == false) return false;
   source(sourceFile.data(), sourceFile.size());
   return true;
 }
 
-bool bpsdelta::target(const string& filename) {
+auto bpsdelta::target(const string& filename) -> bool {
   if(targetFile.open(filename, filemap::mode::read) == false) return false;
   target(targetFile.data(), targetFile.size());
   return true;
 }
 
-bool bpsdelta::create(const string& filename, const string& metadata) {
+auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
   file modifyFile;
   if(modifyFile.open(filename, file::mode::write) == false) return false;
 
   Hash::CRC32 sourceChecksum, modifyChecksum;
-  unsigned sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
+  uint sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
-  auto write = [&](uint8_t data) {
+  auto write = [&](uint8 data) {
     modifyFile.write(data);
     modifyChecksum.data(data);
   };
 
-  auto encode = [&](uint64_t data) {
+  auto encode = [&](uint64 data) {
     while(true) {
-      uint64_t x = data & 0x7f;
+      uint64 x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -91,17 +91,17 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
   encode(sourceSize);
   encode(targetSize);
 
-  unsigned markupSize = metadata.length();
+  uint markupSize = metadata.length();
   encode(markupSize);
-  for(unsigned n = 0; n < markupSize; n++) write(metadata[n]);
+  for(uint n = 0; n < markupSize; n++) write(metadata[n]);
 
   Node* sourceTree[65536];
   Node* targetTree[65536];
-  for(unsigned n = 0; n < 65536; n++) sourceTree[n] = nullptr, targetTree[n] = nullptr;
+  for(uint n = 0; n < 65536; n++) sourceTree[n] = nullptr, targetTree[n] = nullptr;
 
   //source tree creation
-  for(unsigned offset = 0; offset < sourceSize; offset++) {
-    uint16_t symbol = sourceData[offset + 0];
+  for(uint offset = 0; offset < sourceSize; offset++) {
+    uint16 symbol = sourceData[offset + 0];
     sourceChecksum.data(symbol);
     if(offset < sourceSize - 1) symbol |= sourceData[offset + 1] << 8;
     Node *node = new Node;
@@ -110,24 +110,24 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
     sourceTree[symbol] = node;
   }
 
-  unsigned targetReadLength = 0;
+  uint targetReadLength = 0;
 
   auto targetReadFlush = [&]() {
     if(targetReadLength) {
       encode(TargetRead | ((targetReadLength - 1) << 2));
-      unsigned offset = outputOffset - targetReadLength;
+      uint offset = outputOffset - targetReadLength;
       while(targetReadLength) write(targetData[offset++]), targetReadLength--;
     }
   };
 
   while(outputOffset < targetSize) {
-    unsigned maxLength = 0, maxOffset = 0, mode = TargetRead;
+    uint maxLength = 0, maxOffset = 0, mode = TargetRead;
 
-    uint16_t symbol = targetData[outputOffset + 0];
+    uint16 symbol = targetData[outputOffset + 0];
     if(outputOffset < targetSize - 1) symbol |= targetData[outputOffset + 1] << 8;
 
     { //source read
-      unsigned length = 0, offset = outputOffset;
+      uint length = 0, offset = outputOffset;
       while(offset < sourceSize && offset < targetSize && sourceData[offset] == targetData[offset]) {
         length++;
         offset++;
@@ -138,7 +138,7 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
     { //source copy
       Node* node = sourceTree[symbol];
       while(node) {
-        unsigned length = 0, x = node->offset, y = outputOffset;
+        uint length = 0, x = node->offset, y = outputOffset;
         while(x < sourceSize && y < targetSize && sourceData[x++] == targetData[y++]) length++;
         if(length > maxLength) maxLength = length, maxOffset = node->offset, mode = SourceCopy;
         node = node->next;
@@ -148,7 +148,7 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
     { //target copy
       Node* node = targetTree[symbol];
       while(node) {
-        unsigned length = 0, x = node->offset, y = outputOffset;
+        uint length = 0, x = node->offset, y = outputOffset;
         while(y < targetSize && targetData[x++] == targetData[y++]) length++;
         if(length > maxLength) maxLength = length, maxOffset = node->offset, mode = TargetCopy;
         node = node->next;
@@ -163,7 +163,7 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
 
     { //target read
       if(maxLength < 4) {
-        maxLength = min((unsigned)Granularity, targetSize - outputOffset);
+        maxLength = min((uint)Granularity, targetSize - outputOffset);
         mode = TargetRead;
       }
     }
@@ -181,7 +181,7 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
     case SourceCopy:
     case TargetCopy:
       encode(mode | ((maxLength - 1) << 2));
-      signed relativeOffset;
+      int relativeOffset;
       if(mode == SourceCopy) {
         relativeOffset = maxOffset - sourceRelativeOffset;
         sourceRelativeOffset = maxOffset + maxLength;
@@ -198,11 +198,11 @@ bool bpsdelta::create(const string& filename, const string& metadata) {
 
   targetReadFlush();
 
-  for(unsigned n = 0; n < 32; n += 8) write(sourceChecksum.value() >> n);
-  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
-  for(unsigned n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32_t outputChecksum = modifyChecksum.value();
-  for(unsigned n = 0; n < 32; n += 8) write(outputChecksum >> n);
+  for(uint n = 0; n < 32; n += 8) write(sourceChecksum.value() >> n);
+  uint32 targetChecksum = Hash::CRC32(targetData, targetSize).value();
+  for(uint n = 0; n < 32; n += 8) write(targetChecksum >> n);
+  uint32 outputChecksum = modifyChecksum.value();
+  for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();
   return true;

@@ -5,7 +5,7 @@ struct Satellaview : Memory {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(uint addr) -> uint8;
+  auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
 private:

@@ -52,14 +52,14 @@ auto ArmDSP::enter() -> void {
 auto ArmDSP::step(uint clocks) -> void {
   if(bridge.timer && --bridge.timer == 0);
   Coprocessor::step(clocks);
-  synchronize_cpu();
+  synchronizeCPU();
 }
 
 //MMIO: $00-3f|80-bf:3800-38ff
 //3800-3807 mirrored throughout
 //a0 ignored
 
-auto ArmDSP::mmio_read(uint addr) -> uint8 {
+auto ArmDSP::mmio_read(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
 
   uint8 data = 0x00;

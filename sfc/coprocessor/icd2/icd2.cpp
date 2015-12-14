@@ -24,7 +24,7 @@ auto ICD2::enter() -> void {
       audio.coprocessor_sample(0x0000, 0x0000);
       step(1);
     }
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 

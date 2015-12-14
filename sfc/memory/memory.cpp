@@ -15,8 +15,8 @@ Bus::~Bus() {
 }
 
 auto Bus::reset() -> void {
-  function<uint8 (unsigned)> reader = [](unsigned) { return cpu.regs.mdr; };
-  function<void (unsigned, uint8)> writer = [](unsigned, uint8) {};
+  function<auto (uint, uint8) -> uint8> reader = [](uint, uint8 data) { return data; };
+  function<auto (uint, uint8) -> void> writer = [](uint, uint8) {};
 
   idcount = 0;
   map(reader, writer, 0x00, 0xff, 0x0000, 0xffff);
@@ -31,10 +31,10 @@ auto Bus::map() -> void {
       for(auto& addr : addrs) {
         lstring bankpart = bank.split("-", 1L);
         lstring addrpart = addr.split("-", 1L);
-        unsigned banklo = hex(bankpart(0));
-        unsigned bankhi = hex(bankpart(1, bankpart(0)));
-        unsigned addrlo = hex(addrpart(0));
-        unsigned addrhi = hex(addrpart(1, addrpart(0)));
+        uint banklo = hex(bankpart(0));
+        uint bankhi = hex(bankpart(1, bankpart(0)));
+        uint addrlo = hex(addrpart(0));
+        uint addrhi = hex(addrpart(1, addrpart(0)));
         map(m.reader, m.writer, banklo, bankhi, addrlo, addrhi, m.size, m.base, m.mask);
       }
     }
@@ -42,23 +42,22 @@ auto Bus::map() -> void {
 }
 
 auto Bus::map(
-  const function<uint8 (unsigned)>& reader,
-  const function<void (unsigned, uint8)>& writer,
-  unsigned banklo, unsigned bankhi,
-  unsigned addrlo, unsigned addrhi,
-  unsigned size, unsigned base, unsigned mask
+  const function<uint8 (uint, uint8)>& reader,
+  const function<void (uint, uint8)>& writer,
+  uint banklo, uint bankhi, uint addrlo, uint addrhi,
+  uint size, uint base, uint mask
 ) -> void {
-  assert(banklo <= bankhi && banklo <= 0xff);
-  assert(addrlo <= addrhi && addrlo <= 0xffff);
+  assert(banklo <= bankhi && bankhi <= 0xff);
+  assert(addrlo <= addrhi && addrhi <= 0xffff);
   assert(idcount < 255);
 
-  unsigned id = idcount++;
+  uint id = idcount++;
   this->reader[id] = reader;
   this->writer[id] = writer;
 
-  for(unsigned bank = banklo; bank <= bankhi; bank++) {
-    for(unsigned addr = addrlo; addr <= addrhi; addr++) {
-      unsigned offset = reduce(bank << 16 | addr, mask);
+  for(uint bank = banklo; bank <= bankhi; bank++) {
+    for(uint addr = addrlo; addr <= addrhi; addr++) {
+      uint offset = reduce(bank << 16 | addr, mask);
       if(size) offset = base + mirror(offset, size - base);
       lookup[bank << 16 | addr] = id;
       target[bank << 16 | addr] = offset;

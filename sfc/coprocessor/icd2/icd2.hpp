@@ -8,7 +8,7 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(uint addr) -> uint8;
+  auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;

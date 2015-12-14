@@ -116,6 +116,8 @@ auto mHorizontalLayout::setGeometry(Geometry containerGeometry) -> type& {
     geometry.setX    (geometry.x()     + child.width + child.spacing);
     geometry.setWidth(geometry.width() - child.width + child.spacing);
   }
+
+  return *this;
 }
 
 auto mHorizontalLayout::setMargin(signed margin) -> type& {

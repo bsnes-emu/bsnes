@@ -43,7 +43,7 @@ auto MSU1::enter() -> void {
 
     audio.coprocessor_sample(left, right);
     step(1);
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 
@@ -123,7 +123,7 @@ auto MSU1::audioOpen() -> void {
   mmio.audioError = true;
 }
 
-auto MSU1::mmioRead(uint addr) -> uint8 {
+auto MSU1::mmioRead(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 

@@ -7,14 +7,14 @@ namespace nall {
 
 struct bitvector {
   bitvector() = default;
-  bitvector(unsigned size) { resize(size); }
+  bitvector(uint size) { resize(size); }
   bitvector(const bitvector& source) { operator=(source); }
   bitvector(bitvector&& source) { operator=(move(source)); }
   ~bitvector() { reset(); }
 
   auto operator=(const bitvector& source) -> bitvector& {
     bits = source.bits;
-    pool = (uint8_t*)memory::resize(pool, bytes());
+    pool = (uint8*)memory::resize(pool, bytes());
     memory::copy(pool, source.pool, bytes());
     return *this;
   }
@@ -29,10 +29,10 @@ struct bitvector {
 
   explicit operator bool() const { return bits > 0; }
   auto empty() const -> bool { return bits == 0; }
-  auto size() const -> unsigned { return bits; }
-  auto bytes() const -> unsigned { return (bits + 7) / 8; }
-  auto data() -> uint8_t* { return pool; }
-  auto data() const -> const uint8_t* { return pool; }
+  auto size() const -> uint { return bits; }
+  auto bytes() const -> uint { return (bits + 7) / 8; }
+  auto data() -> uint8* { return pool; }
+  auto data() const -> const uint8* { return pool; }
 
   auto reset() -> void {
     if(pool) free(pool);
@@ -40,15 +40,15 @@ struct bitvector {
     bits = 0;
   }
 
-  auto resize(unsigned size) -> void {
-    unsigned from = bits;
+  auto resize(uint size) -> void {
+    uint from = bits;
     bits = size;
-    for(unsigned n = size; n < from; n++) clear(n);  //on reduce
-    pool = (uint8_t*)memory::resize(pool, bytes());
-    for(unsigned n = from; n < size; n++) clear(n);  //on expand
+    for(uint n = size; n < from; n++) clear(n);  //on reduce
+    pool = (uint8*)memory::resize(pool, bytes());
+    for(uint n = from; n < size; n++) clear(n);  //on expand
   }
 
-  auto get(unsigned position) const -> bool {
+  auto get(uint position) const -> bool {
     return pool[position >> 3] & (0x80 >> (position & 7));
   }
 
@@ -58,60 +58,60 @@ struct bitvector {
 
   auto set() -> void {
     memory::fill(pool, bytes(), 0xff);
-    for(unsigned n = bits; n < bytes() * 8; n++) clear(n);
+    for(uint n = bits; n < bytes() * 8; n++) clear(n);
   }
 
-  auto clear(unsigned position) -> void {
+  auto clear(uint position) -> void {
     pool[position >> 3] &= ~(0x80 >> (position & 7));
   }
 
-  auto set(unsigned position) -> void {
+  auto set(uint position) -> void {
     pool[position >> 3] |=  (0x80 >> (position & 7));
   }
 
-  auto invert(unsigned position) -> void {
+  auto invert(uint position) -> void {
     get(position) ? clear(position) : set(position);
   }
 
-  auto set(unsigned position, bool value) -> void {
+  auto set(uint position, bool value) -> void {
     value ? set(position) : clear(position);
   }
 
   struct reference {
-    reference(bitvector& self, unsigned position) : self(self), position(position) {}
+    reference(bitvector& self, uint position) : self(self), position(position) {}
     operator bool() const { return self.get(position); }
     auto operator=(bool value) -> reference& { self.set(position, value); return *this; }
 
   protected:
     bitvector& self;
-    unsigned position;
+    uint position;
   };
 
-  auto operator[](unsigned position) -> reference {
+  auto operator[](uint position) -> reference {
     return reference(*this, position);
   }
 
-  auto operator[](unsigned position) const -> bool {
+  auto operator[](uint position) const -> bool {
     return get(position);
   }
 
   struct iterator {
-    iterator(bitvector& self, unsigned position) : self(self), position(position) {}
+    iterator(bitvector& self, uint position) : self(self), position(position) {}
     auto operator!=(const iterator& source) const -> bool { return position != source.position; }
     auto operator++() -> iterator& { position++; return *this; }
     auto operator*() -> reference { return self.operator[](position); }
 
   protected:
     bitvector& self;
-    unsigned position;
+    uint position;
   };
 
   auto begin() -> iterator { return iterator(*this, 0); }
   auto end() -> iterator { return iterator(*this, bits); }
 
 protected:
-  uint8_t* pool = nullptr;
-  unsigned bits = 0;
+  uint8* pool = nullptr;
+  uint bits = 0;
 };
 
 }

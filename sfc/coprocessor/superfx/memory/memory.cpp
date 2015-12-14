@@ -2,7 +2,7 @@ auto SuperFX::bus_read(unsigned addr) -> uint8 {
   if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff, $00-3f:8000-ffff
     while(!regs.scmr.ron && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
-      synchronize_cpu();
+      synchronizeCPU();
     }
     return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & rom_mask);
   }
@@ -10,7 +10,7 @@ auto SuperFX::bus_read(unsigned addr) -> uint8 {
   if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
     while(!regs.scmr.ron && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
-      synchronize_cpu();
+      synchronizeCPU();
     }
     return rom.read(addr & rom_mask);
   }
@@ -18,7 +18,7 @@ auto SuperFX::bus_read(unsigned addr) -> uint8 {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
     while(!regs.scmr.ran && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
-      synchronize_cpu();
+      synchronizeCPU();
     }
     return ram.read(addr & ram_mask);
   }
@@ -28,7 +28,7 @@ auto SuperFX::bus_write(unsigned addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
     while(!regs.scmr.ran && scheduler.sync != Scheduler::SynchronizeMode::All) {
       step(6);
-      synchronize_cpu();
+      synchronizeCPU();
     }
     return ram.write(addr & ram_mask, data);
   }

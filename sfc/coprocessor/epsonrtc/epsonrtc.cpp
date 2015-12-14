@@ -32,7 +32,7 @@ auto EpsonRTC::enter() -> void {
     }
 
     step(1);
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 
@@ -141,7 +141,7 @@ auto EpsonRTC::sync() -> void {
   resync = true;  //alert program that time has changed
 }
 
-auto EpsonRTC::read(uint addr) -> uint8 {
+auto EpsonRTC::read(uint addr, uint8 data) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr &= 3;
 
@@ -162,6 +162,8 @@ auto EpsonRTC::read(uint addr) -> uint8 {
   if(addr == 2) {
     return ready << 7;
   }
+
+  return data;
 }
 
 auto EpsonRTC::write(uint addr, uint8 data) -> void {

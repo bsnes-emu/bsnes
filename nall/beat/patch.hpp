@@ -9,18 +9,18 @@
 namespace nall {
 
 struct bpspatch {
-  inline bool modify(const uint8_t* data, unsigned size);
-  inline void source(const uint8_t* data, unsigned size);
-  inline void target(uint8_t* data, unsigned size);
+  inline auto modify(const uint8* data, uint size) -> bool;
+  inline auto source(const uint8* data, uint size) -> void;
+  inline auto target(uint8* data, uint size) -> void;
 
-  inline bool modify(const string& filename);
-  inline bool source(const string& filename);
-  inline bool target(const string& filename);
+  inline auto modify(const string& filename) -> bool;
+  inline auto source(const string& filename) -> bool;
+  inline auto target(const string& filename) -> bool;
 
-  inline string metadata() const;
-  inline unsigned size() const;
+  inline auto metadata() const -> string;
+  inline auto size() const -> uint;
 
-  enum result : unsigned {
+  enum result : uint {
     unknown,
     success,
     patch_too_small,
@@ -32,39 +32,39 @@ struct bpspatch {
     patch_checksum_invalid,
   };
 
-  inline result apply();
+  inline auto apply() -> result;
 
 protected:
-  enum : unsigned { SourceRead, TargetRead, SourceCopy, TargetCopy };
+  enum : uint { SourceRead, TargetRead, SourceCopy, TargetCopy };
 
   filemap modifyFile;
-  const uint8_t* modifyData;
-  unsigned modifySize;
+  const uint8* modifyData;
+  uint modifySize;
 
   filemap sourceFile;
-  const uint8_t* sourceData;
-  unsigned sourceSize;
+  const uint8* sourceData;
+  uint sourceSize;
 
   filemap targetFile;
-  uint8_t* targetData;
-  unsigned targetSize;
+  uint8* targetData;
+  uint targetSize;
 
-  unsigned modifySourceSize;
-  unsigned modifyTargetSize;
-  unsigned modifyMarkupSize;
+  uint modifySourceSize;
+  uint modifyTargetSize;
+  uint modifyMarkupSize;
   string metadataString;
 };
 
-bool bpspatch::modify(const uint8_t* data, unsigned size) {
+auto bpspatch::modify(const uint8* data, uint size) -> bool {
   if(size < 19) return false;
   modifyData = data;
   modifySize = size;
 
-  unsigned offset = 4;
-  auto decode = [&]() -> uint64_t {
-    uint64_t data = 0, shift = 1;
+  uint offset = 4;
+  auto decode = [&]() -> uint64 {
+    uint64 data = 0, shift = 1;
     while(true) {
-      uint8_t x = modifyData[offset++];
+      uint8 x = modifyData[offset++];
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -78,35 +78,35 @@ bool bpspatch::modify(const uint8_t* data, unsigned size) {
   modifyMarkupSize = decode();
 
   char buffer[modifyMarkupSize + 1];
-  for(unsigned n = 0; n < modifyMarkupSize; n++) buffer[n] = modifyData[offset++];
+  for(uint n = 0; n < modifyMarkupSize; n++) buffer[n] = modifyData[offset++];
   buffer[modifyMarkupSize] = 0;
   metadataString = (const char*)buffer;
 
   return true;
 }
 
-void bpspatch::source(const uint8_t* data, unsigned size) {
+auto bpspatch::source(const uint8* data, uint size) -> void {
   sourceData = data;
   sourceSize = size;
 }
 
-void bpspatch::target(uint8_t* data, unsigned size) {
+auto bpspatch::target(uint8* data, uint size) -> void {
   targetData = data;
   targetSize = size;
 }
 
-bool bpspatch::modify(const string& filename) {
+auto bpspatch::modify(const string& filename) -> bool {
   if(modifyFile.open(filename, filemap::mode::read) == false) return false;
   return modify(modifyFile.data(), modifyFile.size());
 }
 
-bool bpspatch::source(const string& filename) {
+auto bpspatch::source(const string& filename) -> bool {
   if(sourceFile.open(filename, filemap::mode::read) == false) return false;
   source(sourceFile.data(), sourceFile.size());
   return true;
 }
 
-bool bpspatch::target(const string& filename) {
+auto bpspatch::target(const string& filename) -> bool {
   file fp;
   if(fp.open(filename, file::mode::write) == false) return false;
   fp.truncate(modifyTargetSize);
@@ -117,30 +117,30 @@ bool bpspatch::target(const string& filename) {
   return true;
 }
 
-string bpspatch::metadata() const {
+auto bpspatch::metadata() const -> string {
   return metadataString;
 }
 
-unsigned bpspatch::size() const {
+auto bpspatch::size() const -> uint {
   return modifyTargetSize;
 }
 
-bpspatch::result bpspatch::apply() {
+auto bpspatch::apply() -> result {
   if(modifySize < 19) return result::patch_too_small;
 
   Hash::CRC32 modifyChecksum, targetChecksum;
-  unsigned modifyOffset = 0, sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
+  uint modifyOffset = 0, sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
-  auto read = [&]() -> uint8_t {
-    uint8_t data = modifyData[modifyOffset++];
+  auto read = [&]() -> uint8 {
+    uint8 data = modifyData[modifyOffset++];
     modifyChecksum.data(data);
     return data;
   };
 
-  auto decode = [&]() -> uint64_t {
-    uint64_t data = 0, shift = 1;
+  auto decode = [&]() -> uint64 {
+    uint64 data = 0, shift = 1;
     while(true) {
-      uint8_t x = read();
+      uint8 x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -149,7 +149,7 @@ bpspatch::result bpspatch::apply() {
     return data;
   };
 
-  auto write = [&](uint8_t data) {
+  auto write = [&](uint8 data) {
     targetData[outputOffset++] = data;
     targetChecksum.data(data);
   };
@@ -162,14 +162,14 @@ bpspatch::result bpspatch::apply() {
   modifySourceSize = decode();
   modifyTargetSize = decode();
   modifyMarkupSize = decode();
-  for(unsigned n = 0; n < modifyMarkupSize; n++) read();
+  for(uint n = 0; n < modifyMarkupSize; n++) read();
 
   if(modifySourceSize > sourceSize) return result::source_too_small;
   if(modifyTargetSize > targetSize) return result::target_too_small;
 
   while(modifyOffset < modifySize - 12) {
-    unsigned length = decode();
-    unsigned mode = length & 3;
+    uint length = decode();
+    uint mode = length & 3;
     length = (length >> 2) + 1;
 
     switch(mode) {
@@ -181,7 +181,7 @@ bpspatch::result bpspatch::apply() {
       break;
     case SourceCopy:
     case TargetCopy:
-      signed offset = decode();
+      int offset = decode();
       bool negative = offset & 1;
       offset >>= 1;
       if(negative) offset = -offset;
@@ -197,13 +197,13 @@ bpspatch::result bpspatch::apply() {
     }
   }
 
-  uint32_t modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
-  for(unsigned n = 0; n < 32; n += 8) modifySourceChecksum |= read() << n;
-  for(unsigned n = 0; n < 32; n += 8) modifyTargetChecksum |= read() << n;
-  uint32_t checksum = modifyChecksum.value();
-  for(unsigned n = 0; n < 32; n += 8) modifyModifyChecksum |= read() << n;
+  uint32 modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
+  for(uint n = 0; n < 32; n += 8) modifySourceChecksum |= read() << n;
+  for(uint n = 0; n < 32; n += 8) modifyTargetChecksum |= read() << n;
+  uint32 checksum = modifyChecksum.value();
+  for(uint n = 0; n < 32; n += 8) modifyModifyChecksum |= read() << n;
 
-  uint32_t sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
+  uint32 sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
 
   if(sourceChecksum != modifySourceChecksum) return result::source_checksum_invalid;
   if(targetChecksum.value() != modifyTargetChecksum) return result::target_checksum_invalid;

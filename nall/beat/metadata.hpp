@@ -9,26 +9,26 @@
 namespace nall {
 
 struct bpsmetadata {
-  inline bool load(const string& filename);
-  inline bool save(const string& filename, const string& metadata);
-  inline string metadata() const;
+  inline auto load(const string& filename) -> bool;
+  inline auto save(const string& filename, const string& metadata) -> bool;
+  inline auto metadata() const -> string;
 
 protected:
   file sourceFile;
   string metadataString;
 };
 
-bool bpsmetadata::load(const string& filename) {
+auto bpsmetadata::load(const string& filename) -> bool {
   if(sourceFile.open(filename, file::mode::read) == false) return false;
 
   auto read = [&]() -> uint8_t {
     return sourceFile.read();
   };
 
-  auto decode = [&]() -> uint64_t {
-    uint64_t data = 0, shift = 1;
+  auto decode = [&]() -> uint64 {
+    uint64 data = 0, shift = 1;
     while(true) {
-      uint8_t x = read();
+      uint8 x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -43,29 +43,29 @@ bool bpsmetadata::load(const string& filename) {
   if(read() != '1') return false;
   decode();
   decode();
-  unsigned metadataSize = decode();
+  uint metadataSize = decode();
   char data[metadataSize + 1];
-  for(unsigned n = 0; n < metadataSize; n++) data[n] = read();
+  for(uint n = 0; n < metadataSize; n++) data[n] = read();
   data[metadataSize] = 0;
   metadataString = (const char*)data;
 
   return true;
 }
 
-bool bpsmetadata::save(const string& filename, const string& metadata) {
+auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
   file targetFile;
   if(targetFile.open(filename, file::mode::write) == false) return false;
   if(sourceFile.open() == false) return false;
   sourceFile.seek(0);
 
-  auto read = [&]() -> uint8_t {
+  auto read = [&]() -> uint8 {
     return sourceFile.read();
   };
 
-  auto decode = [&]() -> uint64_t {
-    uint64_t data = 0, shift = 1;
+  auto decode = [&]() -> uint64 {
+    uint64 data = 0, shift = 1;
     while(true) {
-      uint8_t x = read();
+      uint8 x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -76,14 +76,14 @@ bool bpsmetadata::save(const string& filename, const string& metadata) {
 
   Hash::CRC32 checksum;
 
-  auto write = [&](uint8_t data) {
+  auto write = [&](uint8 data) {
     targetFile.write(data);
     checksum.data(data);
   };
 
-  auto encode = [&](uint64_t data) {
+  auto encode = [&](uint64 data) {
     while(true) {
-      uint64_t x = data & 0x7f;
+      uint64 x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -94,24 +94,24 @@ bool bpsmetadata::save(const string& filename, const string& metadata) {
     }
   };
 
-  for(unsigned n = 0; n < 4; n++) write(read());
+  for(uint n = 0; n < 4; n++) write(read());
   encode(decode());
   encode(decode());
-  unsigned sourceLength = decode();
-  unsigned targetLength = metadata.length();
+  uint sourceLength = decode();
+  uint targetLength = metadata.length();
   encode(targetLength);
   sourceFile.seek(sourceLength, file::index::relative);
-  for(unsigned n = 0; n < targetLength; n++) write(metadata[n]);
-  unsigned length = sourceFile.size() - sourceFile.offset() - 4;
-  for(unsigned n = 0; n < length; n++) write(read());
-  uint32_t outputChecksum = checksum.value();
-  for(unsigned n = 0; n < 32; n += 8) write(outputChecksum >> n);
+  for(uint n = 0; n < targetLength; n++) write(metadata[n]);
+  uint length = sourceFile.size() - sourceFile.offset() - 4;
+  for(uint n = 0; n < length; n++) write(read());
+  uint32 outputChecksum = checksum.value();
+  for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   targetFile.close();
   return true;
 }
 
-string bpsmetadata::metadata() const {
+auto bpsmetadata::metadata() const -> string {
   return metadataString;
 }
 

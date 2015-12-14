@@ -15,7 +15,7 @@ auto SuperFX::step(unsigned clocks) -> void {
   }
 
   Coprocessor::step(clocks);
-  synchronize_cpu();
+  synchronizeCPU();
 }
 
 auto SuperFX::rombuffer_sync() -> void {

@@ -7,75 +7,83 @@
 namespace nall { namespace Decode {
 
 struct PNG {
+  inline PNG();
+  inline ~PNG();
+
+  inline auto load(const string& filename) -> bool;
+  inline auto load(const uint8* sourceData, uint sourceSize) -> bool;
+  inline auto readbits(const uint8*& data) -> uint;
+
   struct Info {
-    unsigned width;
-    unsigned height;
-    unsigned bitDepth;
+    uint width;
+    uint height;
+    uint bitDepth;
     //colorType:
     //0 = L (luma)
     //2 = R,G,B
     //3 = P (palette)
     //4 = L,A
     //6 = R,G,B,A
-    unsigned colorType;
-    unsigned compressionMethod;
-    unsigned filterType;
-    unsigned interlaceMethod;
+    uint colorType;
+    uint compressionMethod;
+    uint filterType;
+    uint interlaceMethod;
 
-    unsigned bytesPerPixel;
-    unsigned pitch;
+    uint bytesPerPixel;
+    uint pitch;
 
-    uint8_t palette[256][3];
+    uint8 palette[256][3];
   } info;
 
-  uint8_t* data = nullptr;
-  unsigned size = 0;
+  uint8* data = nullptr;
+  uint size = 0;
 
-  inline bool load(const string& filename);
-  inline bool load(const uint8_t* sourceData, unsigned sourceSize);
-  inline unsigned readbits(const uint8_t*& data);
-  unsigned bitpos = 0;
-
-  inline PNG();
-  inline ~PNG();
+  uint bitpos = 0;
 
 protected:
-  enum class FourCC : unsigned {
+  enum class FourCC : uint {
     IHDR = 0x49484452,
     PLTE = 0x504c5445,
     IDAT = 0x49444154,
     IEND = 0x49454e44,
   };
 
-  inline unsigned interlace(unsigned pass, unsigned index);
-  inline unsigned inflateSize();
-  inline bool deinterlace(const uint8_t*& inputData, unsigned pass);
-  inline bool filter(uint8_t* outputData, const uint8_t* inputData, unsigned width, unsigned height);
-  inline unsigned read(const uint8_t* data, unsigned length);
+  inline auto interlace(uint pass, uint index) -> uint;
+  inline auto inflateSize() -> uint;
+  inline auto deinterlace(const uint8*& inputData, uint pass) -> bool;
+  inline auto filter(uint8* outputData, const uint8* inputData, uint width, uint height) -> bool;
+  inline auto read(const uint8* data, uint length) -> uint;
 };
 
-bool PNG::load(const string& filename) {
+PNG::PNG() {
+}
+
+PNG::~PNG() {
+  if(data) delete[] data;
+}
+
+auto PNG::load(const string& filename) -> bool {
   if(auto memory = file::read(filename)) {
     return load(memory.data(), memory.size());
   }
   return false;
 }
 
-bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
+auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
   if(sourceSize < 8) return false;
   if(read(sourceData + 0, 4) != 0x89504e47) return false;
   if(read(sourceData + 4, 4) != 0x0d0a1a0a) return false;
 
-  uint8_t* compressedData = nullptr;
-  unsigned compressedSize = 0;
+  uint8* compressedData = nullptr;
+  uint compressedSize = 0;
 
-  unsigned offset = 8;
+  uint offset = 8;
   while(offset < sourceSize) {
-    unsigned length   = read(sourceData + offset + 0, 4);
-    unsigned fourCC   = read(sourceData + offset + 4, 4);
-    unsigned checksum = read(sourceData + offset + 8 + length, 4);
+    uint length   = read(sourceData + offset + 0, 4);
+    uint fourCC   = read(sourceData + offset + 4, 4);
+    uint checksum = read(sourceData + offset + 8 + length, 4);
 
-    if(fourCC == (unsigned)FourCC::IHDR) {
+    if(fourCC == (uint)FourCC::IHDR) {
       info.width             = read(sourceData + offset +  8, 4);
       info.height            = read(sourceData + offset + 12, 4);
       info.bitDepth          = read(sourceData + offset + 16, 1);
@@ -108,30 +116,30 @@ bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
       info.pitch = (int)info.width * info.bytesPerPixel;
     }
 
-    if(fourCC == (unsigned)FourCC::PLTE) {
+    if(fourCC == (uint)FourCC::PLTE) {
       if(length % 3) return false;
-      for(unsigned n = 0, p = offset + 8; n < length / 3; n++) {
+      for(uint n = 0, p = offset + 8; n < length / 3; n++) {
         info.palette[n][0] = sourceData[p++];
         info.palette[n][1] = sourceData[p++];
         info.palette[n][2] = sourceData[p++];
       }
     }
 
-    if(fourCC == (unsigned)FourCC::IDAT) {
-      compressedData = (uint8_t*)realloc(compressedData, compressedSize + length);
+    if(fourCC == (uint)FourCC::IDAT) {
+      compressedData = (uint8*)realloc(compressedData, compressedSize + length);
       memcpy(compressedData + compressedSize, sourceData + offset + 8, length);
       compressedSize += length;
     }
 
-    if(fourCC == (unsigned)FourCC::IEND) {
+    if(fourCC == (uint)FourCC::IEND) {
       break;
     }
 
     offset += 4 + 4 + length + 4;
   }
 
-  unsigned interlacedSize = inflateSize();
-  uint8_t *interlacedData = new uint8_t[interlacedSize];
+  uint interlacedSize = inflateSize();
+  uint8 *interlacedData = new uint8[interlacedSize];
 
   bool result = inflate(interlacedData, interlacedSize, compressedData + 2, compressedSize - 6);
   free(compressedData);
@@ -142,7 +150,7 @@ bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
   }
 
   size = info.width * info.height * info.bytesPerPixel;
-  data = new uint8_t[size];
+  data = new uint8[size];
 
   if(info.interlaceMethod == 0) {
     if(filter(data, interlacedData, info.width, info.height) == false) {
@@ -152,8 +160,8 @@ bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
       return false;
     }
   } else {
-    const uint8_t *passData = interlacedData;
-    for(unsigned pass = 0; pass < 7; pass++) {
+    const uint8* passData = interlacedData;
+    for(uint pass = 0; pass < 7; pass++) {
       if(deinterlace(passData, pass) == false) {
         delete[] interlacedData;
         delete[] data;
@@ -167,8 +175,8 @@ bool PNG::load(const uint8_t* sourceData, unsigned sourceSize) {
   return true;
 }
 
-unsigned PNG::interlace(unsigned pass, unsigned index) {
-  static const unsigned data[7][4] = {
+auto PNG::interlace(uint pass, uint index) -> uint {
+  static const uint data[7][4] = {
     //x-distance, y-distance, x-origin, y-origin
     {8, 8, 0, 0},
     {8, 8, 4, 0},
@@ -181,39 +189,39 @@ unsigned PNG::interlace(unsigned pass, unsigned index) {
   return data[pass][index];
 }
 
-unsigned PNG::inflateSize() {
+auto PNG::inflateSize() -> uint {
   if(info.interlaceMethod == 0) {
     return info.width * info.height * info.bytesPerPixel + info.height;
   }
 
-  unsigned size = 0;
-  for(unsigned pass = 0; pass < 7; pass++) {
-    unsigned xd = interlace(pass, 0), yd = interlace(pass, 1);
-    unsigned xo = interlace(pass, 2), yo = interlace(pass, 3);
-    unsigned width  = (info.width  + (xd - xo - 1)) / xd;
-    unsigned height = (info.height + (yd - yo - 1)) / yd;
+  uint size = 0;
+  for(uint pass = 0; pass < 7; pass++) {
+    uint xd = interlace(pass, 0), yd = interlace(pass, 1);
+    uint xo = interlace(pass, 2), yo = interlace(pass, 3);
+    uint width  = (info.width  + (xd - xo - 1)) / xd;
+    uint height = (info.height + (yd - yo - 1)) / yd;
     if(width == 0 || height == 0) continue;
     size += width * height * info.bytesPerPixel + height;
   }
   return size;
 }
 
-bool PNG::deinterlace(const uint8_t*& inputData, unsigned pass) {
-  unsigned xd = interlace(pass, 0), yd = interlace(pass, 1);
-  unsigned xo = interlace(pass, 2), yo = interlace(pass, 3);
-  unsigned width  = (info.width  + (xd - xo - 1)) / xd;
-  unsigned height = (info.height + (yd - yo - 1)) / yd;
+auto PNG::deinterlace(const uint8*& inputData, uint pass) -> bool {
+  uint xd = interlace(pass, 0), yd = interlace(pass, 1);
+  uint xo = interlace(pass, 2), yo = interlace(pass, 3);
+  uint width  = (info.width  + (xd - xo - 1)) / xd;
+  uint height = (info.height + (yd - yo - 1)) / yd;
   if(width == 0 || height == 0) return true;
 
-  unsigned outputSize = width * height * info.bytesPerPixel;
-  uint8_t* outputData = new uint8_t[outputSize];
+  uint outputSize = width * height * info.bytesPerPixel;
+  uint8* outputData = new uint8[outputSize];
   bool result = filter(outputData, inputData, width, height);
 
-  const uint8_t* rd = outputData;
-  for(unsigned y = yo; y < info.height; y += yd) {
-    uint8_t* wr = data + y * info.pitch;
-    for(unsigned x = xo; x < info.width; x += xd) {
-      for(unsigned b = 0; b < info.bytesPerPixel; b++) {
+  const uint8* rd = outputData;
+  for(uint y = yo; y < info.height; y += yd) {
+    uint8* wr = data + y * info.pitch;
+    for(uint x = xo; x < info.width; x += xd) {
+      for(uint b = 0; b < info.bytesPerPixel; b++) {
         wr[x * info.bytesPerPixel + b] = *rd++;
       }
     }
@@ -224,12 +232,12 @@ bool PNG::deinterlace(const uint8_t*& inputData, unsigned pass) {
   return result;
 }
 
-bool PNG::filter(uint8_t* outputData, const uint8_t* inputData, unsigned width, unsigned height) {
-  uint8_t* wr = outputData;
-  const uint8_t* rd = inputData;
+auto PNG::filter(uint8* outputData, const uint8* inputData, uint width, uint height) -> bool {
+  uint8* wr = outputData;
+  const uint8* rd = inputData;
   int bpp = info.bytesPerPixel, pitch = width * bpp;
   for(int y = 0; y < height; y++) {
-    uint8_t filter = *rd++;
+    uint8 filter = *rd++;
 
     switch(filter) {
     case 0x00:  //None
@@ -255,7 +263,7 @@ bool PNG::filter(uint8_t* outputData, const uint8_t* inputData, unsigned width, 
         short a = x - bpp < 0 ? 0 : wr[x - bpp];
         short b = y - 1 < 0 ? 0 : wr[x - pitch];
 
-        wr[x] = rd[x] + (uint8_t)((a + b) / 2);
+        wr[x] = rd[x] + (uint8)((a + b) / 2);
       }
       break;
 
@@ -270,7 +278,7 @@ bool PNG::filter(uint8_t* outputData, const uint8_t* inputData, unsigned width, 
         short pb = p > b ? p - b : b - p;
         short pc = p > c ? p - c : c - p;
 
-        uint8_t paeth = (uint8_t)((pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c);
+        uint8 paeth = (uint8)((pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c);
 
         wr[x] = rd[x] + paeth;
       }
@@ -287,14 +295,14 @@ bool PNG::filter(uint8_t* outputData, const uint8_t* inputData, unsigned width, 
   return true;
 }
 
-unsigned PNG::read(const uint8_t* data, unsigned length) {
-  unsigned result = 0;
+auto PNG::read(const uint8* data, uint length) -> uint {
+  uint result = 0;
   while(length--) result = (result << 8) | (*data++);
   return result;
 }
 
-unsigned PNG::readbits(const uint8_t*& data) {
-  unsigned result = 0;
+auto PNG::readbits(const uint8*& data) -> uint {
+  uint result = 0;
   switch(info.bitDepth) {
   case 1:
     result = (*data >> bitpos) & 1;
@@ -320,13 +328,6 @@ unsigned PNG::readbits(const uint8_t*& data) {
     break;
   }
   return result;
-}
-
-PNG::PNG() {
-}
-
-PNG::~PNG() {
-  if(data) delete[] data;
 }
 
 }}

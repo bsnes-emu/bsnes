@@ -79,6 +79,16 @@ auto pTreeView::setBackgroundColor(Color color) -> void {
   gtk_widget_modify_base(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);
 }
 
+auto pTreeView::setFocused() -> void {
+  //gtk_widget_grab_focus() will select the first item if nothing is currently selected
+  //this behavior is undesirable. detect selection state first, and restore if required
+  lock();
+  bool selected = gtk_tree_selection_get_selected(gtkTreeSelection, nullptr, nullptr);
+  gtk_widget_grab_focus(gtkWidgetChild);
+  if(!selected) gtk_tree_selection_unselect_all(gtkTreeSelection);
+  unlock();
+}
+
 auto pTreeView::setForegroundColor(Color color) -> void {
   auto gdkColor = CreateColor(color);
   gtk_widget_modify_text(gtkWidgetChild, GTK_STATE_NORMAL, color ? &gdkColor : nullptr);

@@ -1,5 +1,5 @@
-auto ICD2::read(uint addr) -> uint8 {
-  addr &= 0xffff;
+auto ICD2::read(uint addr, uint8 data) -> uint8 {
+  addr &= 0x40ffff;
 
   //LY counter
   if(addr == 0x6000) {
@@ -9,7 +9,7 @@ auto ICD2::read(uint addr) -> uint8 {
 
   //command ready port
   if(addr == 0x6002) {
-    bool data = packetsize > 0;
+    data = packetsize > 0;
     if(data) {
       for(auto n : range(16)) r7000[n] = packet[0][n];
       packetsize--;
@@ -24,13 +24,13 @@ auto ICD2::read(uint addr) -> uint8 {
   }
 
   //command port
-  if((addr & 0xfff0) == 0x7000) {
+  if((addr & 0x40fff0) == 0x7000) {
     return r7000[addr & 15];
   }
 
   //VRAM port
   if(addr == 0x7800) {
-    uint8 data = output[read_bank * 512 + read_addr];
+    data = output[read_bank * 512 + read_addr];
     read_addr = (read_addr + 1) & 511;
     return data;
   }

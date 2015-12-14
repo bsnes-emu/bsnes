@@ -24,7 +24,7 @@ auto CPU::dma_addr_valid(uint32 abus) -> bool {
 
 auto CPU::dma_read(uint32 abus) -> uint8 {
   if(dma_addr_valid(abus) == false) return 0x00;
-  return bus.read(abus);
+  return bus.read(abus, regs.mdr);
 }
 
 //simulate two-stage pipeline for DMA transfers; example:
@@ -47,7 +47,7 @@ auto CPU::dma_transfer(bool direction, uint8 bbus, uint32 abus) -> void {
     dma_write(dma_transfer_valid(bbus, abus), 0x2100 | bbus, regs.mdr);
   } else {
     dma_add_clocks(4);
-    regs.mdr = dma_transfer_valid(bbus, abus) ? bus.read(0x2100 | bbus) : 0x00;
+    regs.mdr = dma_transfer_valid(bbus, abus) ? bus.read(0x2100 | bbus, regs.mdr) : 0x00;
     dma_add_clocks(4);
     dma_write(dma_addr_valid(abus), abus, regs.mdr);
   }

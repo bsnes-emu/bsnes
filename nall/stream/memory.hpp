@@ -9,37 +9,41 @@ struct memorystream : stream {
   using stream::read;
   using stream::write;
 
-  bool seekable() const { return true; }
-  bool readable() const { return true; }
-  bool writable() const { return pwritable; }
-  bool randomaccess() const { return true; }
+  memorystream() = default;
 
-  uint8_t* data() const { return pdata; }
-  unsigned size() const { return psize; }
-  unsigned offset() const { return poffset; }
-  void seek(unsigned offset) const { poffset = offset; }
-
-  uint8_t read() const { return pdata[poffset++]; }
-  void write(uint8_t data) const { pdata[poffset++] = data; }
-
-  uint8_t read(unsigned offset) const { return pdata[offset]; }
-  void write(unsigned offset, uint8_t data) const { pdata[offset] = data; }
-
-  memorystream() : pdata(nullptr), psize(0), poffset(0), pwritable(true) {}
-
-  memorystream(uint8_t* data, unsigned size) {
-    pdata = data, psize = size, poffset = 0;
+  memorystream(uint8* data, uint size) {
+    pdata = data;
+    psize = size;
     pwritable = true;
   }
 
-  memorystream(const uint8_t* data, unsigned size) {
-    pdata = (uint8_t*)data, psize = size, poffset = 0;
+  memorystream(const uint8* data, uint size) {
+    pdata = (uint8*)data;
+    psize = size;
     pwritable = false;
   }
 
+  auto seekable() const -> bool { return true; }
+  auto readable() const -> bool { return true; }
+  auto writable() const -> bool { return pwritable; }
+  auto randomaccess() const -> bool { return true; }
+
+  auto data() const -> uint8* { return pdata; }
+  auto size() const -> uint { return psize; }
+  auto offset() const -> uint { return poffset; }
+  auto seek(uint offset) const -> void { poffset = offset; }
+
+  auto read() const -> uint8 { return pdata[poffset++]; }
+  auto write(uint8 data) const -> void { pdata[poffset++] = data; }
+
+  auto read(uint offset) const -> uint8 { return pdata[offset]; }
+  auto write(uint offset, uint8 data) const -> void { pdata[offset] = data; }
+
 protected:
-  mutable uint8_t* pdata;
-  mutable unsigned psize, poffset, pwritable;
+  mutable uint8* pdata = nullptr;
+  mutable uint psize = 0;
+  mutable uint poffset = 0;
+  mutable bool pwritable = false;
 };
 
 }

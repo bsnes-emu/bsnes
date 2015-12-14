@@ -28,13 +28,13 @@ auto MCC::reset() -> void {
 }
 
 auto MCC::memory_access(bool write, Memory& memory, uint addr, uint8 data) -> uint8 {
-  if(write == 0) return memory_read(memory, addr);
+  if(write == 0) return memory_read(memory, addr, data);
   memory_write(memory, addr, data);
 }
 
-auto MCC::memory_read(Memory& memory, uint addr) -> uint8 {
+auto MCC::memory_read(Memory& memory, uint addr, uint8 data) -> uint8 {
   addr = bus.mirror(addr, memory.size());
-  return memory.read(addr);
+  return memory.read(addr, data);
 }
 
 auto MCC::memory_write(Memory& memory, uint addr, uint8 data) -> void {
@@ -86,25 +86,25 @@ auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
     return memory_access(write, memory, addr & 0x7fffff, data);
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
-auto MCC::mcu_read(uint addr) -> uint8 {
-  return mcu_access(0, addr);
+auto MCC::mcu_read(uint addr, uint8 data) -> uint8 {
+  return mcu_access(0, addr, data);
 }
 
 auto MCC::mcu_write(uint addr, uint8 data) -> void {
   mcu_access(1, addr, data);
 }
 
-auto MCC::mmio_read(uint addr) -> uint8 {
+auto MCC::mmio_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     return r[n];
   }
 
   if((addr & 0xf8f000) == 0x105000) {  //$10-17:5000-5fff
-    return memory_read(ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff));
+    return memory_read(ram, ((addr >> 16) & 7) * 0x1000 + (addr & 0xfff), data);
   }
 
   return 0x00;

@@ -41,11 +41,11 @@ auto SDD1::reset() -> void {
   }
 }
 
-auto SDD1::read(uint addr) -> uint8 {
-  addr &= 0xffff;
+auto SDD1::read(uint addr, uint8 data) -> uint8 {
+  addr &= 0x40ffff;
 
-  if((addr & 0x4380) == 0x4300) {
-    return cpu.mmio_read(addr);
+  if((addr & 0x404380) == 0x4300) {
+    return cpu.mmio_read(addr, data);
   }
 
   switch(addr) {
@@ -55,7 +55,7 @@ auto SDD1::read(uint addr) -> uint8 {
   case 0x4807: return mmc[3] >> 20;
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto SDD1::write(uint addr, uint8 data) -> void {
@@ -107,7 +107,7 @@ auto SDD1::mmc_read(uint addr) -> uint8 {
 //
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-auto SDD1::mcurom_read(uint addr) -> uint8 {
+auto SDD1::mcurom_read(uint addr, uint8) -> uint8 {
   if(addr < 0x400000) {  //(addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
     return rom.read(addr);
   //addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
@@ -147,16 +147,16 @@ auto SDD1::mcurom_read(uint addr) -> uint8 {
 auto SDD1::mcurom_write(uint addr, uint8 data) -> void {
 }
 
-auto SDD1::mcuram_read(uint addr) -> uint8 {
+auto SDD1::mcuram_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return ram.read(addr & 0x1fff);
+    return ram.read(addr & 0x1fff, data);
   }
 
   if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
-    return ram.read(addr & 0x1fff);
+    return ram.read(addr & 0x1fff, data);
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto SDD1::mcuram_write(uint addr, uint8 data) -> void {

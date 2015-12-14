@@ -17,7 +17,7 @@ auto CPU::op_read(uint32 addr) -> uint8 {
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count - 4);
-  regs.mdr = bus.read(addr);
+  regs.mdr = bus.read(addr, regs.mdr);
   add_clocks(4);
   alu_edge();
   debugger.op_read(addr, regs.mdr);
@@ -44,5 +44,5 @@ auto CPU::speed(uint addr) const -> uint {
 }
 
 auto CPU::disassembler_read(uint32 addr) -> uint8 {
-  return bus.read(addr);
+  return bus.read(addr, regs.mdr);
 }

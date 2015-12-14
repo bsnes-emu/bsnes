@@ -1,2 +1,2 @@
-auto mmio_read(unsigned addr) -> uint8;
-auto mmio_write(unsigned addr, uint8 data) -> void;
+auto mmio_read(uint addr, uint8 data) -> uint8;
+auto mmio_write(uint addr, uint8 data) -> void;

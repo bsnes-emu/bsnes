@@ -1,42 +1,42 @@
-auto SA1::bus_read(uint addr) -> uint8 {
+auto SA1::bus_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f|80-bf:2200-23ff
-    return mmio_read(addr);
+    return mmio_read(addr, data);
   }
 
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
-    return mmcrom_read(addr);
+    return mmcrom_read(addr, data);
   }
 
   if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
-    return mmcrom_read(addr);
+    return mmcrom_read(addr, data);
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return mmc_sa1_read(addr);
+    return mmc_sa1_read(addr, data);
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
-    synchronize_cpu();
-    return iram.read(addr & 2047);
+    synchronizeCPU();
+    return iram.read(addr & 2047, data);
   }
 
   if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
-    synchronize_cpu();
-    return iram.read(addr & 2047);
+    synchronizeCPU();
+    return iram.read(addr & 2047, data);
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    synchronize_cpu();
-    return bwram.read(addr & (bwram.size() - 1));
+    synchronizeCPU();
+    return bwram.read(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    synchronize_cpu();
-    return bitmap_read(addr & 0x0fffff);
+    synchronizeCPU();
+    return bitmap_read(addr & 0x0fffff, data);
   }
 
   //unmapped region
-  return regs.mdr;
+  return data;
 }
 
 auto SA1::bus_write(uint addr, uint8 data) -> void {
@@ -49,22 +49,22 @@ auto SA1::bus_write(uint addr, uint8 data) -> void {
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
-    synchronize_cpu();
+    synchronizeCPU();
     return iram.write(addr & 2047, data);
   }
 
   if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
-    synchronize_cpu();
+    synchronizeCPU();
     return iram.write(addr & 2047, data);
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    synchronize_cpu();
+    synchronizeCPU();
     return bwram.write(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    synchronize_cpu();
+    synchronizeCPU();
     return bitmap_write(addr & 0x0fffff, data);
   }
 }
@@ -73,29 +73,29 @@ auto SA1::bus_write(uint addr, uint8 data) -> void {
 //this is used both to keep VBR-reads from accessing MMIO registers, and
 //to avoid syncing the S-CPU and SA-1*; as both chips are able to access
 //these ports.
-auto SA1::vbr_read(uint addr) -> uint8 {
+auto SA1::vbr_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
-    return mmcrom_read(addr);
+    return mmcrom_read(addr, data);
   }
 
   if((addr & 0xc00000) == 0xc00000) {  //$c0-ff:0000-ffff
-    return mmcrom_read(addr);
+    return mmcrom_read(addr, data);
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
-    return bwram.read(addr & (bwram.size() - 1));
+    return bwram.read(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    return bwram.read(addr & (bwram.size() - 1));
+    return bwram.read(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f|80-bf:0000-07ff
-    return iram.read(addr & 2047);
+    return iram.read(addr & 2047, data);
   }
 
   if((addr & 0x40f800) == 0x003000) {  //$00-3f|80-bf:3000-37ff
-    return iram.read(addr & 2047);
+    return iram.read(addr & 2047, data);
   }
 
   return 0x00;
@@ -113,7 +113,7 @@ auto SA1::op_io() -> void {
 auto SA1::op_read(uint addr) -> uint8 {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  return bus_read(addr);
+  return bus_read(addr, regs.mdr);
 }
 
 auto SA1::op_write(uint addr, uint8 data) -> void {
@@ -122,7 +122,7 @@ auto SA1::op_write(uint addr, uint8 data) -> void {
   bus_write(addr, regs.mdr = data);
 }
 
-auto SA1::mmcrom_read(uint addr) -> uint8 {
+auto SA1::mmcrom_read(uint addr, uint8) -> uint8 {
   if((addr & 0xffffe0) == 0x00ffe0) {
     if(addr == 0xffea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
     if(addr == 0xffeb && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 8;
@@ -180,7 +180,7 @@ auto SA1::mmcrom_read(uint addr) -> uint8 {
 auto SA1::mmcrom_write(uint addr, uint8 data) -> void {
 }
 
-auto SA1::mmcbwram_read(uint addr) -> uint8 {
+auto SA1::mmcbwram_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0x40e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
     cpu.synchronizeCoprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
@@ -191,7 +191,7 @@ auto SA1::mmcbwram_read(uint addr) -> uint8 {
     return cpubwram.read(addr & 0x0fffff);
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto SA1::mmcbwram_write(uint addr, uint8 data) -> void {
@@ -206,21 +206,21 @@ auto SA1::mmcbwram_write(uint addr, uint8 data) -> void {
   }
 }
 
-auto SA1::mmc_sa1_read(uint addr) -> uint8 {
-  synchronize_cpu();
+auto SA1::mmc_sa1_read(uint addr, uint8 data) -> uint8 {
+  synchronizeCPU();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
     addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());
-    return bwram.read(addr);
+    return bwram.read(addr, data);
   } else {
     //$60-6f:0000-ffff x 128 projection
     addr = bus.mirror(mmio.cbm * 0x2000 + (addr & 0x1fff), 0x100000);
-    return bitmap_read(addr);
+    return bitmap_read(addr, data);
   }
 }
 
 auto SA1::mmc_sa1_write(uint addr, uint8 data) -> void {
-  synchronize_cpu();
+  synchronizeCPU();
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
     addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());
@@ -232,7 +232,7 @@ auto SA1::mmc_sa1_write(uint addr, uint8 data) -> void {
   }
 }
 
-auto SA1::bitmap_read(uint addr) -> uint8 {
+auto SA1::bitmap_read(uint addr, uint8 data) -> uint8 {
   if(mmio.bbf == 0) {
     //4bpp
     uint shift = addr & 1;

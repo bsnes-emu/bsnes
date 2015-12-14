@@ -4,95 +4,96 @@
 namespace nall {
 
 struct stream {
-  virtual bool seekable() const = 0;
-  virtual bool readable() const = 0;
-  virtual bool writable() const = 0;
-  virtual bool randomaccess() const = 0;
+  stream() = default;
+  virtual ~stream() = default;
 
-  virtual uint8_t* data() const { return nullptr; }
-  virtual unsigned size() const = 0;
-  virtual unsigned offset() const = 0;
-  virtual void seek(unsigned offset) const = 0;
+  stream(const stream&) = delete;
+  auto operator=(const stream&) -> stream& = delete;
 
-  virtual uint8_t read() const = 0;
-  virtual void write(uint8_t data) const = 0;
+  virtual auto seekable() const -> bool = 0;
+  virtual auto readable() const -> bool = 0;
+  virtual auto writable() const -> bool = 0;
+  virtual auto randomaccess() const -> bool = 0;
 
-  virtual uint8_t read(unsigned) const { return 0; }
-  virtual void write(unsigned, uint8_t) const {}
+  virtual auto data() const -> uint8* { return nullptr; }
+  virtual auto size() const -> uint = 0;
+  virtual auto offset() const -> uint = 0;
+  virtual auto seek(unsigned offset) const -> void = 0;
 
-  operator bool() const {
+  virtual auto read() const -> uint8 = 0;
+  virtual auto write(uint8_t data) const -> void = 0;
+
+  virtual auto read(uint) const -> uint8 { return 0; }
+  virtual auto write(uint, uint8) const -> void {}
+
+  explicit operator bool() const {
     return size();
   }
 
-  bool empty() const {
+  auto empty() const -> bool {
     return size() == 0;
   }
 
-  bool end() const {
+  auto end() const -> bool {
     return offset() >= size();
   }
 
-  uintmax_t readl(unsigned length = 1) const {
-    uintmax_t data = 0, shift = 0;
+  auto readl(uint length = 1) const -> uintmax {
+    uintmax data = 0, shift = 0;
     while(length--) { data |= read() << shift; shift += 8; }
     return data;
   }
 
-  uintmax_t readm(unsigned length = 1) const {
-    uintmax_t data = 0;
+  auto readm(uint length = 1) const -> uintmax {
+    uintmax data = 0;
     while(length--) data = (data << 8) | read();
     return data;
   }
 
-  void read(uint8_t* data, unsigned length) const {
+  auto read(uint8* data, uint length) const -> void {
     while(length--) *data++ = read();
   }
 
-  string text() const {
+  auto text() const -> string {
     string buffer;
     buffer.resize(size());
     seek(0);
-    read((uint8_t*)buffer.data(), size());
+    read((uint8*)buffer.get(), size());
     return buffer;
   }
 
-  void writel(uintmax_t data, unsigned length = 1) const {
+  auto writel(uintmax data, uint length = 1) const -> void {
     while(length--) {
       write(data);
       data >>= 8;
     }
   }
 
-  void writem(uintmax_t data, unsigned length = 1) const {
-    uintmax_t shift = 8 * length;
+  auto writem(uintmax data, uint length = 1) const -> void {
+    uintmax shift = 8 * length;
     while(length--) {
       shift -= 8;
       write(data >> shift);
     }
   }
 
-  void write(const uint8_t* data, unsigned length) const {
+  auto write(const uint8* data, uint length) const -> void {
     while(length--) write(*data++);
   }
 
   struct byte {
-    operator uint8_t() const { return s.read(offset); }
-    byte& operator=(uint8_t data) { s.write(offset, data); return *this; }
-    byte(const stream& s, unsigned offset) : s(s), offset(offset) {}
+    byte(const stream& s, uint offset) : s(s), offset(offset) {}
+    operator uint8() const { return s.read(offset); }
+    auto operator=(uint8_t data) -> byte& { s.write(offset, data); return *this; }
 
   private:
     const stream& s;
-    const unsigned offset;
+    const uint offset;
   };
 
-  byte operator[](unsigned offset) const {
+  auto operator[](uint offset) const -> byte {
     return byte(*this, offset);
   }
-
-  stream() {}
-  virtual ~stream() {}
-  stream(const stream&) = delete;
-  stream& operator=(const stream&) = delete;
 };
 
 }

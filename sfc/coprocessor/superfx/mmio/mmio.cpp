@@ -1,4 +1,4 @@
-auto SuperFX::mmio_read(unsigned addr) -> uint8 {
+auto SuperFX::mmio_read(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr &= 0xffff;
 
@@ -50,7 +50,7 @@ auto SuperFX::mmio_read(unsigned addr) -> uint8 {
   return 0x00;
 }
 
-auto SuperFX::mmio_write(unsigned addr, uint8 data) -> void {
+auto SuperFX::mmio_write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr &= 0xffff;
 
@@ -59,7 +59,7 @@ auto SuperFX::mmio_write(unsigned addr, uint8 data) -> void {
   }
 
   if(addr >= 0x3000 && addr <= 0x301f) {
-    unsigned n = (addr >> 1) & 15;
+    uint n = (addr >> 1) & 15;
     if((addr & 1) == 0) {
       regs.r[n] = (regs.r[n] & 0xff00) | data;
     } else {

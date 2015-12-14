@@ -11,14 +11,18 @@ namespace nall { namespace Decode {
 struct ZIP {
   struct File {
     string name;
-    const uint8_t* data;
-    unsigned size;
-    unsigned csize;
-    unsigned cmode;  //0 = uncompressed, 8 = deflate
-    unsigned crc32;
+    const uint8* data;
+    uint size;
+    uint csize;
+    uint cmode;  //0 = uncompressed, 8 = deflate
+    uint crc32;
   };
 
-  inline bool open(const string& filename) {
+  ~ZIP() {
+    close();
+  }
+
+  auto open(const string& filename) -> bool {
     close();
     if(fm.open(filename, filemap::mode::read) == false) return false;
     if(open(fm.data(), fm.size()) == false) {
@@ -28,7 +32,7 @@ struct ZIP {
     return true;
   }
 
-  inline bool open(const uint8_t* data, unsigned size) {
+  auto open(const uint8* data, uint size) -> bool {
     if(size < 22) return false;
 
     filedata = data;
@@ -36,19 +40,19 @@ struct ZIP {
 
     file.reset();
 
-    const uint8_t* footer = data + size - 22;
+    const uint8* footer = data + size - 22;
     while(true) {
       if(footer <= data + 22) return false;
       if(read(footer, 4) == 0x06054b50) {
-        unsigned commentlength = read(footer + 20, 2);
+        uint commentlength = read(footer + 20, 2);
         if(footer + 22 + commentlength == data + size) break;
       }
       footer--;
     }
-    const uint8_t* directory = data + read(footer + 16, 4);
+    const uint8* directory = data + read(footer + 16, 4);
 
     while(true) {
-      unsigned signature = read(directory + 0, 4);
+      uint signature = read(directory + 0, 4);
       if(signature != 0x02014b50) break;
 
       File file;
@@ -57,9 +61,9 @@ struct ZIP {
       file.csize = read(directory + 20, 4);
       file.size  = read(directory + 24, 4);
 
-      unsigned namelength = read(directory + 28, 2);
-      unsigned extralength = read(directory + 30, 2);
-      unsigned commentlength = read(directory + 32, 2);
+      uint namelength = read(directory + 28, 2);
+      uint extralength = read(directory + 30, 2);
+      uint commentlength = read(directory + 32, 2);
 
       char* filename = new char[namelength + 1];
       memcpy(filename, directory + 46, namelength);
@@ -67,9 +71,9 @@ struct ZIP {
       file.name = filename;
       delete[] filename;
 
-      unsigned offset = read(directory + 42, 4);
-      unsigned offsetNL = read(data + offset + 26, 2);
-      unsigned offsetEL = read(data + offset + 28, 2);
+      uint offset = read(directory + 42, 4);
+      uint offsetNL = read(data + offset + 26, 2);
+      uint offsetEL = read(data + offset + 28, 2);
       file.data = data + offset + 30 + offsetNL + offsetEL;
 
       directory += 46 + namelength + extralength + commentlength;
@@ -80,8 +84,8 @@ struct ZIP {
     return true;
   }
 
-  inline vector<uint8_t> extract(File& file) {
-    vector<uint8_t> buffer;
+  auto extract(File& file) -> vector<uint8> {
+    vector<uint8> buffer;
 
     if(file.cmode == 0) {
       buffer.resize(file.size);
@@ -98,21 +102,17 @@ struct ZIP {
     return buffer;
   }
 
-  inline void close() {
+  auto close() -> void {
     if(fm.open()) fm.close();
-  }
-
-  ~ZIP() {
-    close();
   }
 
 protected:
   filemap fm;
-  const uint8_t* filedata;
-  unsigned filesize;
+  const uint8* filedata;
+  uint filesize;
 
-  unsigned read(const uint8_t* data, unsigned size) {
-    unsigned result = 0, shift = 0;
+  auto read(const uint8* data, uint size) -> uint {
+    uint result = 0, shift = 0;
     while(size--) { result |= *data++ << shift; shift += 8; }
     return result;
   }

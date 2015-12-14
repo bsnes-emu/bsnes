@@ -21,7 +21,7 @@ auto SA1::enter() -> void {
     if(mmio.sa1_rdyb || mmio.sa1_resb) {
       //SA-1 co-processor is asleep
       tick();
-      synchronize_cpu();
+      synchronizeCPU();
       continue;
     }
 
@@ -81,7 +81,7 @@ auto SA1::interrupt_pending() -> bool {
 
 auto SA1::tick() -> void {
   step(2);
-  if(++status.tick_counter == 0) synchronize_cpu();
+  if(++status.tick_counter == 0) synchronizeCPU();
 
   //adjust counters:
   //note that internally, status counters are in clocks;

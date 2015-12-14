@@ -10,28 +10,29 @@ struct vectorstream : stream {
   using stream::read;
   using stream::write;
 
-  bool seekable() const { return true; }
-  bool readable() const { return true; }
-  bool writable() const { return pwritable; }
-  bool randomaccess() const { return true; }
+  vectorstream(vector<uint8>& memory) : memory(memory), pwritable(true) {}
+  vectorstream(const vector<uint8>& memory) : memory((vector<uint8>&)memory), pwritable(false) {}
 
-  uint8_t* data() const { return memory.data(); }
-  unsigned size() const { return memory.size(); }
-  unsigned offset() const { return poffset; }
-  void seek(unsigned offset) const { poffset = offset; }
+  auto seekable() const -> bool { return true; }
+  auto readable() const -> bool { return true; }
+  auto writable() const -> bool { return pwritable; }
+  auto randomaccess() const -> bool { return true; }
 
-  uint8_t read() const { return memory[poffset++]; }
-  void write(uint8_t data) const { memory[poffset++] = data; }
+  auto data() const -> uint8* { return memory.data(); }
+  auto size() const -> uint { return memory.size(); }
+  auto offset() const -> uint { return poffset; }
+  auto seek(unsigned offset) const -> void { poffset = offset; }
 
-  uint8_t read(unsigned offset) const { return memory[offset]; }
-  void write(unsigned offset, uint8_t data) const { memory[offset] = data; }
+  auto read() const -> uint8 { return memory[poffset++]; }
+  auto write(uint8 data) const -> void { memory[poffset++] = data; }
 
-  vectorstream(vector<uint8_t>& memory) : memory(memory), poffset(0), pwritable(true) {}
-  vectorstream(const vector<uint8_t>& memory) : memory((vector<uint8_t>&)memory), poffset(0), pwritable(false) {}
+  auto read(uint offset) const -> uint8 { return memory[offset]; }
+  auto write(uint offset, uint8 data) const -> void { memory[offset] = data; }
 
 protected:
-  vector<uint8_t>& memory;
-  mutable unsigned poffset, pwritable;
+  vector<uint8>& memory;
+  mutable uint poffset = 0;
+  mutable bool pwritable = false;
 };
 
 }

@@ -4,77 +4,72 @@ namespace nall {
 namespace mosaic {
 
 struct parser {
-  image canvas;
-
   //export from bitstream to canvas
-  void load(bitstream& stream, uint64_t offset, context& ctx, unsigned width, unsigned height) {
+  auto load(bitstream& stream, uint64 offset, context& ctx, uint width, uint height) -> void {
     canvas.allocate(width, height);
     canvas.fill(ctx.paddingColor);
     parse(1, stream, offset, ctx, width, height);
   }
 
   //import from canvas to bitstream
-  bool save(bitstream& stream, uint64_t offset, context& ctx) {
+  auto save(bitstream& stream, uint64_t offset, context& ctx) -> bool {
     if(stream.readonly) return false;
     parse(0, stream, offset, ctx, canvas.width(), canvas.height());
     return true;
   }
 
-  inline parser() : canvas(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0) {
-  }
-
 private:
-  uint32_t read(unsigned x, unsigned y) const {
-    unsigned addr = y * canvas.width() + x;
+  auto read(uint x, uint y) const -> uint32 {
+    uint addr = y * canvas.width() + x;
     if(addr >= canvas.width() * canvas.height()) return 0u;
-    uint32_t *buffer = (uint32_t*)canvas.data();
+    auto buffer = (uint32*)canvas.data();
     return buffer[addr];
   }
 
-  void write(unsigned x, unsigned y, uint32_t data) {
-    unsigned addr = y * canvas.width() + x;
+  auto write(uint x, uint y, uint32_t data) -> void {
+    uint addr = y * canvas.width() + x;
     if(addr >= canvas.width() * canvas.height()) return;
-    uint32_t *buffer = (uint32_t*)canvas.data();
+    auto buffer = (uint32*)canvas.data();
     buffer[addr] = data;
   }
 
-  void parse(bool load, bitstream& stream, uint64_t offset, context& ctx, unsigned width, unsigned height) {
+  auto parse(bool load, bitstream& stream, uint64 offset, context& ctx, uint width, uint height) -> void {
     stream.endian = ctx.endian;
-    unsigned canvasWidth = width / (ctx.mosaicWidth * ctx.tileWidth * ctx.blockWidth + ctx.paddingWidth);
-    unsigned canvasHeight = height / (ctx.mosaicHeight * ctx.tileHeight * ctx.blockHeight + ctx.paddingHeight);
-    unsigned bitsPerBlock = ctx.depth * ctx.blockWidth * ctx.blockHeight;
+    uint canvasWidth = width / (ctx.mosaicWidth * ctx.tileWidth * ctx.blockWidth + ctx.paddingWidth);
+    uint canvasHeight = height / (ctx.mosaicHeight * ctx.tileHeight * ctx.blockHeight + ctx.paddingHeight);
+    uint bitsPerBlock = ctx.depth * ctx.blockWidth * ctx.blockHeight;
 
-    unsigned objectOffset = 0;
-    for(unsigned objectY = 0; objectY < canvasHeight; objectY++) {
-      for(unsigned objectX = 0; objectX < canvasWidth; objectX++) {
+    uint objectOffset = 0;
+    for(uint objectY = 0; objectY < canvasHeight; objectY++) {
+      for(uint objectX = 0; objectX < canvasWidth; objectX++) {
         if(objectOffset >= ctx.count && ctx.count > 0) break;
-        unsigned objectIX = objectX * ctx.objectWidth();
-        unsigned objectIY = objectY * ctx.objectHeight();
+        uint objectIX = objectX * ctx.objectWidth();
+        uint objectIY = objectY * ctx.objectHeight();
         objectOffset++;
 
-        unsigned mosaicOffset = 0;
-        for(unsigned mosaicY = 0; mosaicY < ctx.mosaicHeight; mosaicY++) {
-          for(unsigned mosaicX = 0; mosaicX < ctx.mosaicWidth; mosaicX++) {
-            unsigned mosaicData = ctx.mosaic(mosaicOffset, mosaicOffset);
-            unsigned mosaicIX = (mosaicData % ctx.mosaicWidth) * (ctx.tileWidth * ctx.blockWidth);
-            unsigned mosaicIY = (mosaicData / ctx.mosaicWidth) * (ctx.tileHeight * ctx.blockHeight);
+        uint mosaicOffset = 0;
+        for(uint mosaicY = 0; mosaicY < ctx.mosaicHeight; mosaicY++) {
+          for(uint mosaicX = 0; mosaicX < ctx.mosaicWidth; mosaicX++) {
+            uint mosaicData = ctx.mosaic(mosaicOffset, mosaicOffset);
+            uint mosaicIX = (mosaicData % ctx.mosaicWidth) * (ctx.tileWidth * ctx.blockWidth);
+            uint mosaicIY = (mosaicData / ctx.mosaicWidth) * (ctx.tileHeight * ctx.blockHeight);
             mosaicOffset++;
 
-            unsigned tileOffset = 0;
-            for(unsigned tileY = 0; tileY < ctx.tileHeight; tileY++) {
-              for(unsigned tileX = 0; tileX < ctx.tileWidth; tileX++) {
-                unsigned tileData = ctx.tile(tileOffset, tileOffset);
-                unsigned tileIX = (tileData % ctx.tileWidth) * ctx.blockWidth;
-                unsigned tileIY = (tileData / ctx.tileWidth) * ctx.blockHeight;
+            uint tileOffset = 0;
+            for(uint tileY = 0; tileY < ctx.tileHeight; tileY++) {
+              for(uint tileX = 0; tileX < ctx.tileWidth; tileX++) {
+                uint tileData = ctx.tile(tileOffset, tileOffset);
+                uint tileIX = (tileData % ctx.tileWidth) * ctx.blockWidth;
+                uint tileIY = (tileData / ctx.tileWidth) * ctx.blockHeight;
                 tileOffset++;
 
-                unsigned blockOffset = 0;
-                for(unsigned blockY = 0; blockY < ctx.blockHeight; blockY++) {
-                  for(unsigned blockX = 0; blockX < ctx.blockWidth; blockX++) {
+                uint blockOffset = 0;
+                for(uint blockY = 0; blockY < ctx.blockHeight; blockY++) {
+                  for(uint blockX = 0; blockX < ctx.blockWidth; blockX++) {
                     if(load) {
-                      unsigned palette = 0;
-                      for(unsigned n = 0; n < ctx.depth; n++) {
-                        unsigned index = blockOffset++;
+                      uint palette = 0;
+                      for(uint n = 0; n < ctx.depth; n++) {
+                        uint index = blockOffset++;
                         if(ctx.order == 1) index = (index % ctx.depth) * ctx.blockWidth * ctx.blockHeight + (index / ctx.depth);
                         palette |= stream.read(offset + ctx.block(index, index)) << n;
                       }
@@ -90,8 +85,8 @@ private:
                         objectIY + mosaicIY + tileIY + blockY
                       );
 
-                      for(unsigned n = 0; n < ctx.depth; n++) {
-                        unsigned index = blockOffset++;
+                      for(uint n = 0; n < ctx.depth; n++) {
+                        uint index = blockOffset++;
                         if(ctx.order == 1) index = (index % ctx.depth) * ctx.blockWidth * ctx.blockHeight + (index / ctx.depth);
                         stream.write(offset + ctx.block(index, index), palette & 1);
                         palette >>= 1;
@@ -118,6 +113,8 @@ private:
       offset += ctx.mosaicOffset;
     }  //objectY
   }
+
+  image canvas;
 };
 
 }

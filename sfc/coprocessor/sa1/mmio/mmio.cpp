@@ -445,8 +445,8 @@ auto SA1::mmio_r230e() -> uint8 {
   return 0x01;  //true value unknown
 }
 
-auto SA1::mmio_read(uint addr) -> uint8 {
-  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronize_cpu());
+auto SA1::mmio_read(uint addr, uint8) -> uint8 {
+  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronizeCPU());
   addr &= 0xffff;
 
   switch(addr) {
@@ -471,7 +471,7 @@ auto SA1::mmio_read(uint addr) -> uint8 {
 }
 
 auto SA1::mmio_write(uint addr, uint8 data) -> void {
-  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronize_cpu());
+  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronizeCPU());
   addr &= 0xffff;
 
   switch(addr) {

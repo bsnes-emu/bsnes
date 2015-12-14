@@ -11,7 +11,7 @@ struct EpsonRTC : Coprocessor {
   auto reset() -> void;
   auto sync() -> void;
 
-  auto read(uint addr) -> uint8;
+  auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;

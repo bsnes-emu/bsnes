@@ -8,7 +8,7 @@ auto CPU::joylatch() -> bool {
 
 //WMDATA
 auto CPU::mmio_r2180() -> uint8 {
-  return bus.read(0x7e0000 | status.wram_addr++);
+  return bus.read(0x7e0000 | status.wram_addr++, regs.mdr);
 }
 
 //WMDATA
@@ -405,7 +405,7 @@ auto CPU::mmio_reset() -> void {
   alu.shift = 0;
 }
 
-auto CPU::mmio_read(uint addr) -> uint8 {
+auto CPU::mmio_read(uint addr, uint8 data) -> uint8 {
   addr &= 0xffff;
 
   //APU
@@ -416,7 +416,7 @@ auto CPU::mmio_read(uint addr) -> uint8 {
 
   //DMA
   if((addr & 0xff80) == 0x4300) {  //$4300-$437f
-    unsigned i = (addr >> 4) & 7;
+    uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
     case 0x0: return mmio_r43x0(i);
     case 0x1: return mmio_r43x1(i);
@@ -459,7 +459,7 @@ auto CPU::mmio_read(uint addr) -> uint8 {
   case 0x421f: return mmio_r421f();
   }
 
-  return regs.mdr;
+  return data;
 }
 
 auto CPU::mmio_write(uint addr, uint8 data) -> void {
@@ -474,7 +474,7 @@ auto CPU::mmio_write(uint addr, uint8 data) -> void {
 
   //DMA
   if((addr & 0xff80) == 0x4300) {  //$4300-$437f
-    unsigned i = (addr >> 4) & 7;
+    uint i = (addr >> 4) & 7;
     switch(addr & 0xf) {
     case 0x0: mmio_w43x0(i, data); return;
     case 0x1: mmio_w43x1(i, data); return;

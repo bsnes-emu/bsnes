@@ -8,6 +8,7 @@ struct pTreeView : pWidget {
   auto append(sTreeViewItem item) -> void;
   auto remove(sTreeViewItem item) -> void;
   auto setBackgroundColor(Color color) -> void;
+  auto setFocused() -> void override;
   auto setForegroundColor(Color color) -> void;
 
   auto _activatePath(GtkTreePath* gtkPath) -> void;

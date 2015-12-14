@@ -15,13 +15,13 @@ auto SA1::dma_normal() -> void {
     switch(mmio.sd) {
     case DMA::SourceROM:
       if((dsa & 0x408000) == 0x008000 || (dsa & 0xc00000) == 0xc00000) {
-        data = bus_read(dsa);
+        data = bus_read(dsa, data);
       }
       break;
 
     case DMA::SourceBWRAM:
       if((dsa & 0x40e000) == 0x006000 || (dsa & 0xf00000) == 0x400000) {
-        data = bus_read(dsa);
+        data = bus_read(dsa, data);
       }
       break;
 

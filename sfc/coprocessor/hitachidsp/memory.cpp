@@ -1,30 +1,32 @@
 auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
-  if((addr & 0x408000) == 0x008000) return bus.read(addr);  //$00-3f,80-bf:6000-7fff
-  if((addr & 0xf88000) == 0x700000) return bus.read(addr);  //$70-77:0000-7fff
+  //todo: read internally, not from Bus
+  if((addr & 0x408000) == 0x008000) return bus.read(addr, 0);  //$00-3f,80-bf:6000-7fff
+  if((addr & 0xf88000) == 0x700000) return bus.read(addr, 0);  //$70-77:0000-7fff
   return 0x00;
 }
 
 auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
+  //todo: write internally, not to Bus
   if((addr & 0x40e000) == 0x006000) return bus.write(addr, data);  //$00-3f,80-bf:6000-7fff
   if((addr & 0xf88000) == 0x700000) return bus.write(addr, data);  //$70-77:0000-7fff
 }
 
-auto HitachiDSP::rom_read(uint addr) -> uint8 {
+auto HitachiDSP::rom_read(uint addr, uint8 data) -> uint8 {
   if(co_active() == hitachidsp.thread || regs.halt) {
     addr = bus.mirror(addr, rom.size());
   //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
-    return rom.read(addr);
+    return rom.read(addr, data);
   }
   if((addr & 0x40ffe0) == 0x00ffe0) return mmio.vector[addr & 0x1f];
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto HitachiDSP::rom_write(uint addr, uint8 data) -> void {
 }
 
-auto HitachiDSP::ram_read(uint addr) -> uint8 {
+auto HitachiDSP::ram_read(uint addr, uint8 data) -> uint8 {
   if(ram.size() == 0) return 0x00;  //not open bus
-  return ram.read(bus.mirror(addr, ram.size()));
+  return ram.read(bus.mirror(addr, ram.size()), data);
 }
 
 auto HitachiDSP::ram_write(uint addr, uint8 data) -> void {
@@ -32,7 +34,7 @@ auto HitachiDSP::ram_write(uint addr, uint8 data) -> void {
   return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
-auto HitachiDSP::dsp_read(uint addr) -> uint8 {
+auto HitachiDSP::dsp_read(uint addr, uint8) -> uint8 {
   addr &= 0x1fff;
 
   //Data RAM

@@ -60,6 +60,7 @@
 #if defined(Hiro_Object)
 struct Object : sObject {
   DeclareSharedObject(Object)
+  using internalType = mObject;
 
   template<typename T> auto cast() -> T {
     if(auto pointer = dynamic_cast<typename T::internalType*>(data())) {
@@ -73,13 +74,22 @@ struct Object : sObject {
 #if defined(Hiro_Group)
 struct Group : sGroup {
   DeclareShared(Group)
+  using internalType = mGroup;
   template<typename... P> Group(P&&... p) : Group() { _append(std::forward<P>(p)...); }
 
   auto append(sObject object) -> type& { return self().append(object), *this; }
   auto object(unsigned position) const { return self().object(position); }
   auto objectCount() const { return self().objectCount(); }
-  auto objects() const { return self().objects(); }
+//auto objects() const { return self().objects(); }
   auto remove(sObject object) -> type& { return self().remove(object), *this; }
+
+  template<typename T = Object> auto objects() const -> vector<T> {
+    vector<T> objects;
+    for(auto object : self().objects()) {
+      if(auto cast = object.cast<T>()) objects.append(cast);
+    }
+    return objects;
+  }
 
 private:
   auto _append() {}
@@ -93,6 +103,7 @@ private:
 #if defined(Hiro_Timer)
 struct Timer : sTimer {
   DeclareSharedObject(Timer)
+  using internalType = mTimer;
 
   auto doActivate() const { return self().doActivate(); }
   auto interval() const { return self().interval(); }
@@ -104,12 +115,14 @@ struct Timer : sTimer {
 #if defined(Hiro_Action)
 struct Action : sAction {
   DeclareSharedAction(Action)
+  using internalType = mAction;
 };
 #endif
 
 #if defined(Hiro_Menu)
 struct Menu : sMenu {
   DeclareSharedAction(Menu)
+  using internalType = mMenu;
 
   auto action(unsigned position) const { return self().action(position); }
   auto actionCount() const { return self().actionCount(); }
@@ -127,12 +140,14 @@ struct Menu : sMenu {
 #if defined(Hiro_MenuSeparator)
 struct MenuSeparator : sMenuSeparator {
   DeclareSharedAction(MenuSeparator)
+  using internalType = mMenuSeparator;
 };
 #endif
 
 #if defined(Hiro_MenuItem)
 struct MenuItem : sMenuItem {
   DeclareSharedAction(MenuItem)
+  using internalType = mMenuItem;
 
   auto doActivate() const { return self().doActivate(); }
   auto image() const { return self().image(); }
@@ -146,6 +161,7 @@ struct MenuItem : sMenuItem {
 #if defined(Hiro_MenuCheckItem)
 struct MenuCheckItem : sMenuCheckItem {
   DeclareSharedAction(MenuCheckItem)
+  using internalType = mMenuCheckItem;
 
   auto checked() const { return self().checked(); }
   auto doToggle() const { return self().doToggle(); }
@@ -174,24 +190,28 @@ struct MenuRadioItem : sMenuRadioItem {
 #if defined(Hiro_Sizable)
 struct Sizable : sSizable {
   DeclareSharedSizable(Sizable)
+  using internalType = mSizable;
 };
 #endif
 
 #if defined(Hiro_Layout)
 struct Layout : sLayout {
   DeclareSharedLayout(Layout)
+  using internalType = mLayout;
 };
 #endif
 
 #if defined(Hiro_Widget)
 struct Widget : sWidget {
   DeclareSharedWidget(Widget)
+  using internalType = mWidget;
 };
 #endif
 
 #if defined(Hiro_Button)
 struct Button : sButton {
   DeclareSharedWidget(Button)
+  using internalType = mButton;
 
   auto bordered() const { return self().bordered(); }
   auto doActivate() const { return self().doActivate(); }
@@ -209,6 +229,7 @@ struct Button : sButton {
 #if defined(Hiro_Canvas)
 struct Canvas : sCanvas {
   DeclareSharedWidget(Canvas)
+  using internalType = mCanvas;
 
   auto color() const { return self().color(); }
   auto data() { return self().data(); }
@@ -237,6 +258,7 @@ struct Canvas : sCanvas {
 #if defined(Hiro_CheckButton)
 struct CheckButton : sCheckButton {
   DeclareSharedWidget(CheckButton)
+  using internalType = mCheckButton;
 
   auto bordered() const { return self().bordered(); }
   auto checked() const { return self().checked(); }
@@ -256,6 +278,7 @@ struct CheckButton : sCheckButton {
 #if defined(Hiro_CheckLabel)
 struct CheckLabel : sCheckLabel {
   DeclareSharedWidget(CheckLabel)
+  using internalType = mCheckLabel;
 
   auto checked() const { return self().checked(); }
   auto doToggle() const { return self().doToggle(); }
@@ -269,6 +292,7 @@ struct CheckLabel : sCheckLabel {
 #if defined(Hiro_ComboButton)
 struct ComboButtonItem : sComboButtonItem {
   DeclareSharedObject(ComboButtonItem)
+  using internalType = mComboButtonItem;
 
   auto image() const { return self().image(); }
   auto selected() const { return self().selected(); }
@@ -282,6 +306,7 @@ struct ComboButtonItem : sComboButtonItem {
 #if defined(Hiro_ComboButton)
 struct ComboButton : sComboButton {
   DeclareSharedWidget(ComboButton)
+  using internalType = mComboButton;
 
   auto append(sComboButtonItem item) { return self().append(item), *this; }
   auto doChange() const { return self().doChange(); }
@@ -299,6 +324,7 @@ struct ComboButton : sComboButton {
 #if defined(Hiro_Console)
 struct Console : sConsole {
   DeclareSharedWidget(Console)
+  using internalType = mConsole;
 
   auto backgroundColor() const { return self().backgroundColor(); }
   auto doActivate(string command) const { return self().doActivate(command); }
@@ -316,6 +342,7 @@ struct Console : sConsole {
 #if defined(Hiro_Frame)
 struct Frame : sFrame {
   DeclareSharedWidget(Frame)
+  using internalType = mFrame;
 
   auto append(sLayout layout) { return self().append(layout), *this; }
   auto layout() const { return self().layout(); }
@@ -329,6 +356,7 @@ struct Frame : sFrame {
 #if defined(Hiro_HexEdit)
 struct HexEdit : sHexEdit {
   DeclareSharedWidget(HexEdit)
+  using internalType = mHexEdit;
 
   auto address() const { return self().address(); }
   auto backgroundColor() const { return self().backgroundColor(); }
@@ -353,6 +381,7 @@ struct HexEdit : sHexEdit {
 #if defined(Hiro_HorizontalScrollBar)
 struct HorizontalScrollBar : sHorizontalScrollBar {
   DeclareSharedWidget(HorizontalScrollBar)
+  using internalType = mHorizontalScrollBar;
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }
@@ -366,6 +395,7 @@ struct HorizontalScrollBar : sHorizontalScrollBar {
 #if defined(Hiro_HorizontalSlider)
 struct HorizontalSlider : sHorizontalSlider {
   DeclareSharedWidget(HorizontalSlider)
+  using internalType = mHorizontalSlider;
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }
@@ -379,6 +409,7 @@ struct HorizontalSlider : sHorizontalSlider {
 #if defined(Hiro_IconView)
 struct IconViewItem : sIconViewItem {
   DeclareSharedObject(IconViewItem)
+  using internalType = mIconViewItem;
 
   auto image() const { return self().image(); }
   auto selected() const { return self().selected(); }
@@ -392,6 +423,7 @@ struct IconViewItem : sIconViewItem {
 #if defined(Hiro_IconView)
 struct IconView : sIconView {
   DeclareSharedWidget(IconView)
+  using internalType = mIconView;
 
   auto append(sIconViewItem item) { return self().append(item), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
@@ -424,6 +456,7 @@ struct IconView : sIconView {
 #if defined(Hiro_Label)
 struct Label : sLabel {
   DeclareSharedWidget(Label)
+  using internalType = mLabel;
 
   auto alignment() const { return self().alignment(); }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
@@ -435,6 +468,7 @@ struct Label : sLabel {
 #if defined(Hiro_LineEdit)
 struct LineEdit : sLineEdit {
   DeclareSharedWidget(LineEdit)
+  using internalType = mLineEdit;
 
   auto backgroundColor() const { return self().backgroundColor(); }
   auto doActivate() const { return self().doActivate(); }
@@ -454,6 +488,7 @@ struct LineEdit : sLineEdit {
 #if defined(Hiro_ListView)
 struct ListViewColumn : sListViewColumn {
   DeclareSharedObject(ListViewColumn)
+  using internalType = mListViewColumn;
 
   auto active() const { return self().active(); }
   auto alignment() const { return self().alignment(); }
@@ -485,6 +520,7 @@ struct ListViewColumn : sListViewColumn {
 #if defined(Hiro_ListView)
 struct ListViewHeader : sListViewHeader {
   DeclareSharedObject(ListViewHeader)
+  using internalType = mListViewHeader;
 
   auto append(sListViewColumn column) { return self().append(column), *this; }
   auto column(unsigned position) const { return self().column(position); }
@@ -497,6 +533,7 @@ struct ListViewHeader : sListViewHeader {
 #if defined(Hiro_ListView)
 struct ListViewCell : sListViewCell {
   DeclareSharedObject(ListViewCell)
+  using internalType = mListViewCell;
 
   auto alignment() const { return self().alignment(); }
   auto backgroundColor() const { return self().backgroundColor(); }
@@ -518,6 +555,7 @@ struct ListViewCell : sListViewCell {
 #if defined(Hiro_ListView)
 struct ListViewItem : sListViewItem {
   DeclareSharedObject(ListViewItem)
+  using internalType = mListViewItem;
 
   auto alignment() const { return self().alignment(); }
   auto append(sListViewCell cell) { return self().append(cell), *this; }
@@ -538,6 +576,7 @@ struct ListViewItem : sListViewItem {
 #if defined(Hiro_ListView)
 struct ListView : sListView {
   DeclareSharedWidget(ListView)
+  using internalType = mListView;
 
   auto alignment() const { return self().alignment(); }
   auto append(sListViewHeader header) { return self().append(header), *this; }
@@ -579,6 +618,7 @@ struct ListView : sListView {
 #if defined(Hiro_ProgressBar)
 struct ProgressBar : sProgressBar {
   DeclareSharedWidget(ProgressBar)
+  using internalType = mProgressBar;
 
   auto position() const { return self().position(); }
   auto setPosition(unsigned position = 0) { return self().setPosition(position), *this; }
@@ -624,6 +664,7 @@ struct RadioLabel : sRadioLabel {
 #if defined(Hiro_SourceEdit)
 struct SourceEdit : sSourceEdit {
   DeclareSharedWidget(SourceEdit)
+  using internalType = mSourceEdit;
 
   auto cursor() const { return self().cursor(); }
   auto doChange() const { return self().doChange(); }
@@ -639,6 +680,7 @@ struct SourceEdit : sSourceEdit {
 #if defined(Hiro_TabFrame)
 struct TabFrameItem : sTabFrameItem {
   DeclareSharedObject(TabFrameItem)
+  using internalType = mTabFrameItem;
 
   auto append(sLayout layout) { return self().append(layout), *this; }
   auto closable() const { return self().closable(); }
@@ -660,6 +702,7 @@ struct TabFrameItem : sTabFrameItem {
 #if defined(Hiro_TabFrame)
 struct TabFrame : sTabFrame {
   DeclareSharedWidget(TabFrame)
+  using internalType = mTabFrame;
 
   auto append(sTabFrameItem item) { return self().append(item), *this; }
   auto doChange() const { return self().doChange(); }
@@ -682,6 +725,7 @@ struct TabFrame : sTabFrame {
 #if defined(Hiro_TextEdit)
 struct TextEdit : sTextEdit {
   DeclareSharedWidget(TextEdit)
+  using internalType = mTextEdit;
 
   auto backgroundColor() const { return self().backgroundColor(); }
   auto cursor() const { return self().cursor(); }
@@ -705,6 +749,7 @@ struct TextEdit : sTextEdit {
 #if defined(Hiro_TreeView)
 struct TreeViewItem : sTreeViewItem {
   DeclareSharedObject(TreeViewItem)
+  using internalType = mTreeViewItem;
 
   auto append(sTreeViewItem item) { return self().append(item), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
@@ -733,6 +778,7 @@ struct TreeViewItem : sTreeViewItem {
 #if defined(Hiro_TreeView)
 struct TreeView : sTreeView {
   DeclareSharedWidget(TreeView)
+  using internalType = mTreeView;
 
   auto append(sTreeViewItem item) { return self().append(item), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
@@ -759,6 +805,7 @@ struct TreeView : sTreeView {
 #if defined(Hiro_VerticalScrollBar)
 struct VerticalScrollBar : sVerticalScrollBar {
   DeclareSharedWidget(VerticalScrollBar)
+  using internalType = mVerticalScrollBar;
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }
@@ -772,6 +819,7 @@ struct VerticalScrollBar : sVerticalScrollBar {
 #if defined(Hiro_VerticalSlider)
 struct VerticalSlider : sVerticalSlider {
   DeclareSharedWidget(VerticalSlider)
+  using internalType = mVerticalSlider;
 
   auto doChange() const { return self().doChange(); }
   auto length() const { return self().length(); }
@@ -785,6 +833,7 @@ struct VerticalSlider : sVerticalSlider {
 #if defined(Hiro_Viewport)
 struct Viewport : sViewport {
   DeclareSharedWidget(Viewport)
+  using internalType = mViewport;
 
   auto doDrop(lstring names) const { return self().doDrop(names); }
   auto doMouseLeave() const { return self().doMouseLeave(); }
@@ -805,6 +854,7 @@ struct Viewport : sViewport {
 #if defined(Hiro_StatusBar)
 struct StatusBar : sStatusBar {
   DeclareSharedObject(StatusBar)
+  using internalType = mStatusBar;
 
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -814,6 +864,7 @@ struct StatusBar : sStatusBar {
 #if defined(Hiro_PopupMenu)
 struct PopupMenu : sPopupMenu {
   DeclareSharedObject(PopupMenu)
+  using internalType = mPopupMenu;
 
   auto action(unsigned position) const { return self().action(position); }
   auto actionCount() const { return self().actionCount(); }
@@ -827,6 +878,7 @@ struct PopupMenu : sPopupMenu {
 #if defined(Hiro_MenuBar)
 struct MenuBar : sMenuBar {
   DeclareSharedObject(MenuBar)
+  using internalType = mMenuBar;
 
   auto append(sMenu menu) { return self().append(menu), *this; }
   auto menu(unsigned position) const { return self().menu(position); }
@@ -840,6 +892,7 @@ struct MenuBar : sMenuBar {
 #if defined(Hiro_Window)
 struct Window : sWindow {
   DeclareSharedObject(Window)
+  using internalType = mWindow;
 
   auto append(sLayout layout) { return self().append(layout), *this; }
   auto append(sMenuBar menuBar) { return self().append(menuBar), *this; }

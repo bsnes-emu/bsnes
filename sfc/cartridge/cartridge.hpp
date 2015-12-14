@@ -29,15 +29,15 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> hasSufamiTurboSlots;
 
   struct Mapping {
-    function<uint8 (unsigned)> reader;
-    function<void (unsigned, uint8)> writer;
+    function<auto (uint, uint8) -> uint8> reader;
+    function<auto (uint, uint8) -> void> writer;
     string addr;
-    unsigned size = 0;
-    unsigned base = 0;
-    unsigned mask = 0;
+    uint size = 0;
+    uint base = 0;
+    uint mask = 0;
 
     Mapping() = default;
-    Mapping(const function<uint8 (unsigned)>&, const function<void (unsigned, uint8)>&);
+    Mapping(const function<uint8 (uint, uint8)>&, const function<void (uint, uint8)>&);
     Mapping(SuperFamicom::Memory&);
   };
   vector<Mapping> mapping;

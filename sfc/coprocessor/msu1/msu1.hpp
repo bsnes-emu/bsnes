@@ -11,7 +11,7 @@ struct MSU1 : Coprocessor {
   auto dataOpen() -> void;
   auto audioOpen() -> void;
 
-  auto mmioRead(uint addr) -> uint8;
+  auto mmioRead(uint addr, uint8 data) -> uint8;
   auto mmioWrite(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;

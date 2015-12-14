@@ -22,7 +22,7 @@ auto Satellaview::reset() -> void {
   memory::fill(&regs, sizeof regs);
 }
 
-auto Satellaview::read(uint addr) -> uint8 {
+auto Satellaview::read(uint addr, uint8 data) -> uint8 {
   addr &= 0xffff;
 
   switch(addr) {
@@ -77,7 +77,7 @@ auto Satellaview::read(uint addr) -> uint8 {
   case 0x2199: return regs.r2199;
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto Satellaview::write(uint addr, uint8 data) -> void {

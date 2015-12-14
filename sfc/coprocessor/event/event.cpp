@@ -28,7 +28,7 @@ auto Event::enter() -> void {
     }
 
     step(1);
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 
@@ -60,7 +60,7 @@ auto Event::reset() -> void {
   scoreSecondsRemaining = 0;
 }
 
-auto Event::sr(uint) -> uint8 {
+auto Event::sr(uint, uint8) -> uint8 {
   return status;
 }
 
@@ -72,7 +72,7 @@ auto Event::dr(uint, uint8 data) -> void {
   }
 }
 
-auto Event::rom_read(uint addr) -> uint8 {
+auto Event::rom_read(uint addr, uint8 data) -> uint8 {
   if(board == Board::CampusChallenge92) {
     uint id = 0;
     if(select == 0x09) id = 1;
@@ -82,7 +82,7 @@ auto Event::rom_read(uint addr) -> uint8 {
 
     if(addr & 0x008000) {
       addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-      return rom[id].read(bus.mirror(addr, rom[id].size()));
+      return rom[id].read(bus.mirror(addr, rom[id].size()), data);
     }
   }
 
@@ -95,21 +95,21 @@ auto Event::rom_read(uint addr) -> uint8 {
 
     if(addr & 0x400000) {
       addr &= 0x3fffff;
-      return rom[id].read(bus.mirror(addr, rom[id].size()));
+      return rom[id].read(bus.mirror(addr, rom[id].size()), data);
     }
 
     if(addr & 0x008000) {
       addr &= 0x1fffff;
       if(id != 2) addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return rom[id].read(bus.mirror(addr, rom[id].size()));
+      return rom[id].read(bus.mirror(addr, rom[id].size()), data);
     }
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
-auto Event::ram_read(uint addr) -> uint8 {
-  return ram.read(bus.mirror(addr, ram.size()));
+auto Event::ram_read(uint addr, uint8 data) -> uint8 {
+  return ram.read(bus.mirror(addr, ram.size()), data);
 }
 
 auto Event::ram_write(uint addr, uint8 data) -> void {

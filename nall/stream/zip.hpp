@@ -10,8 +10,8 @@ struct zipstream : memorystream {
   using stream::write;
 
   zipstream(const stream& stream, const string& filter = "*") {
-    unsigned size = stream.size();
-    uint8_t* data = new uint8_t[size];
+    uint size = stream.size();
+    auto data = new uint8[size];
     stream.read(data, size);
 
     Decode::ZIP archive;

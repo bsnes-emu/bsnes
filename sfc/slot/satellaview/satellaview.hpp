@@ -5,16 +5,16 @@ struct SatellaviewCartridge : Memory {
   auto power() -> void;
   auto reset() -> void;
 
-  auto size() const -> unsigned;
-  auto read(unsigned addr) -> uint8;
-  auto write(unsigned addr, uint8 data) -> void;
+  auto size() const -> uint;
+  auto read(uint addr, uint8) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
 
   MappedRAM memory;
   bool readonly;
 
 private:
   struct {
-    unsigned command;
+    uint command;
     uint8 write_old;
     uint8 write_new;
 

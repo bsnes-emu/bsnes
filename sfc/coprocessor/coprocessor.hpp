@@ -1,6 +1,6 @@
 struct Coprocessor : Thread {
   alwaysinline auto step(uint clocks) -> void;
-  alwaysinline auto synchronize_cpu() -> void;
+  alwaysinline auto synchronizeCPU() -> void;
 };
 
 #include <sfc/coprocessor/icd2/icd2.hpp>
@@ -28,6 +28,6 @@ auto Coprocessor::step(uint clocks) -> void {
   clock += clocks * (uint64)cpu.frequency;
 }
 
-auto Coprocessor::synchronize_cpu() -> void {
+auto Coprocessor::synchronizeCPU() -> void {
   if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
 }

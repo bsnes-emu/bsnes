@@ -31,12 +31,12 @@ auto SatellaviewCartridge::reset() -> void {
   memory.write_protect(!regs.write_enable);
 }
 
-auto SatellaviewCartridge::size() const -> unsigned {
+auto SatellaviewCartridge::size() const -> uint {
   return memory.size();
 }
 
-auto SatellaviewCartridge::read(unsigned addr) -> uint8 {
-  if(readonly) return memory.read(bus.mirror(addr, memory.size()));
+auto SatellaviewCartridge::read(uint addr, uint8 data) -> uint8 {
+  if(readonly) return memory.read(bus.mirror(addr, memory.size()), data);
 
   if(addr == 0x0002) {
     if(regs.flash_enable) return 0x80;
@@ -61,10 +61,10 @@ auto SatellaviewCartridge::read(unsigned addr) -> uint8 {
     }
   }
 
-  return memory.read(addr);
+  return memory.read(addr, data);
 }
 
-auto SatellaviewCartridge::write(unsigned addr, uint8 data) -> void {
+auto SatellaviewCartridge::write(uint addr, uint8 data) -> void {
   if(readonly) return;
 
   if((addr & 0xff0000) == 0) {

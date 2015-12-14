@@ -7,21 +7,21 @@
 namespace nall {
 
 //generate unique GUID
-inline string guid() {
+inline auto guid() -> string {
   LinearFeedbackShiftRegisterGenerator lfsr;
   lfsr.seed(time(nullptr));
-  for(unsigned n = 0; n < 256; n++) lfsr();
+  for(uint n = 0; n < 256; n++) lfsr();
 
   string output;
-  for(unsigned n = 0; n < 4; n++) output.append(hex(lfsr(), 2L));
+  for(uint n = 0; n < 4; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
+  for(uint n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
+  for(uint n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
+  for(uint n = 0; n < 2; n++) output.append(hex(lfsr(), 2L));
   output.append("-");
-  for(unsigned n = 0; n < 6; n++) output.append(hex(lfsr(), 2L));
+  for(uint n = 0; n < 6; n++) output.append(hex(lfsr(), 2L));
   return {"{", output, "}"};
 }
 

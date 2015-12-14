@@ -10,14 +10,14 @@ struct gzipstream : memorystream {
   using stream::write;
 
   gzipstream(const stream& stream) {
-    unsigned size = stream.size();
-    uint8_t *data = new uint8_t[size];
+    uint size = stream.size();
+    auto data = new uint8[size];
     stream.read(data, size);
 
     Decode::GZIP archive;
     bool result = archive.decompress(data, size);
     delete[] data;
-    if(result == false) return;
+    if(!result) return;
 
     psize = archive.size;
     pdata = new uint8_t[psize];

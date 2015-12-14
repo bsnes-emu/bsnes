@@ -24,7 +24,7 @@ auto OBC1::reset() -> void {
   status.shift   = (ramRead(0x1ff6) & 3) << 1;
 }
 
-auto OBC1::read(uint addr) -> uint8 {
+auto OBC1::read(uint addr, uint8) -> uint8 {
   addr &= 0x1fff;
 
   switch(addr) {

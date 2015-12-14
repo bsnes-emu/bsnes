@@ -8,19 +8,19 @@
 namespace nall {
 
 struct bpsmulti {
-  enum : unsigned {
+  enum : uint {
     CreatePath = 0,
     CreateFile = 1,
     ModifyFile = 2,
     MirrorFile = 3,
   };
 
-  enum : unsigned {
+  enum : uint {
     OriginSource = 0,
     OriginTarget = 1,
   };
 
-  bool create(const string& patchName, const string& sourcePath, const string& targetPath, bool delta = false, const string& metadata = "") {
+  auto create(const string& patchName, const string& sourcePath, const string& targetPath, bool delta = false, const string& metadata = "") -> bool {
     if(fp.open()) fp.close();
     fp.open(patchName, file::mode::write);
     checksum.reset();
@@ -46,8 +46,8 @@ struct bpsmulti {
         bool identical = sp.size() == dp.size();
         Hash::CRC32 cksum;
 
-        for(unsigned n = 0; n < sp.size(); n++) {
-          uint8_t byte = sp.read();
+        for(uint n = 0; n < sp.size(); n++) {
+          uint8 byte = sp.read();
           if(identical && byte != dp.read()) identical = false;
           cksum.data(byte);
         }
@@ -83,7 +83,7 @@ struct bpsmulti {
         writeString(targetName);
         auto buffer = file::read({targetPath, targetName});
         writeNumber(buffer.size());
-        for(auto &byte : buffer) write(byte);
+        for(auto& byte : buffer) write(byte);
         writeChecksum(Hash::CRC32(buffer.data(), buffer.size()).value());
       }
     }
@@ -94,7 +94,7 @@ struct bpsmulti {
     return true;
   }
 
-  bool apply(const string& patchName, const string& sourcePath, const string& targetPath) {
+  auto apply(const string& patchName, const string& sourcePath, const string& targetPath) -> bool {
     directory::remove(targetPath);  //start with a clean directory
     directory::create(targetPath);
 
@@ -108,8 +108,8 @@ struct bpsmulti {
 
     while(fp.offset() < fp.size() - 4) {
       auto encoding = readNumber();
-      unsigned action = encoding & 3;
-      unsigned targetLength = (encoding >> 2) + 1;
+      uint action = encoding & 3;
+      uint targetLength = (encoding >> 2) + 1;
       string targetName = readString(targetLength);
 
       if(action == CreatePath) {
@@ -119,15 +119,15 @@ struct bpsmulti {
         fp.open({targetPath, targetName}, file::mode::write);
         auto fileSize = readNumber();
         while(fileSize--) fp.write(read());
-        uint32_t cksum = readChecksum();
+        uint32 cksum = readChecksum();
       } else if(action == ModifyFile) {
         auto encoding = readNumber();
         string originPath = encoding & 1 ? targetPath : sourcePath;
         string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
         auto patchSize = readNumber();
-        vector<uint8_t> buffer;
+        vector<uint8> buffer;
         buffer.resize(patchSize);
-        for(unsigned n = 0; n < patchSize; n++) buffer[n] = read();
+        for(uint n = 0; n < patchSize; n++) buffer[n] = read();
         bpspatch patch;
         patch.modify(buffer.data(), buffer.size());
         patch.source({originPath, sourceName});
@@ -138,15 +138,15 @@ struct bpsmulti {
         string originPath = encoding & 1 ? targetPath : sourcePath;
         string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
         file::copy({originPath, sourceName}, {targetPath, targetName});
-        uint32_t cksum = readChecksum();
+        uint32 cksum = readChecksum();
       }
     }
 
-    uint32_t cksum = checksum.value();
-    if(read() != (uint8_t)(cksum >>  0)) return false;
-    if(read() != (uint8_t)(cksum >>  8)) return false;
-    if(read() != (uint8_t)(cksum >> 16)) return false;
-    if(read() != (uint8_t)(cksum >> 24)) return false;
+    uint32 cksum = checksum.value();
+    if(read() != (uint8)(cksum >>  0)) return false;
+    if(read() != (uint8)(cksum >>  8)) return false;
+    if(read() != (uint8)(cksum >> 16)) return false;
+    if(read() != (uint8)(cksum >> 24)) return false;
 
     fp.close();
     return true;
@@ -157,7 +157,7 @@ protected:
   Hash::CRC32 checksum;
 
   //create() functions
-  void ls(lstring& list, const string& path, const string& basepath) {
+  auto ls(lstring& list, const string& path, const string& basepath) -> void {
     lstring paths = directory::folders(path);
     for(auto& pathname : paths) {
       list.append(string{path, pathname}.ltrim(basepath, 1L));
@@ -170,14 +170,14 @@ protected:
     }
   }
 
-  void write(uint8_t data) {
+  auto write(uint8 data) -> void {
     fp.write(data);
     checksum.data(data);
   }
 
-  void writeNumber(uint64_t data) {
+  auto writeNumber(uint64 data) -> void {
     while(true) {
-      uint64_t x = data & 0x7f;
+      uint64 x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -188,12 +188,12 @@ protected:
     }
   }
 
-  void writeString(const string& text) {
-    unsigned length = text.length();
-    for(unsigned n = 0; n < length; n++) write(text[n]);
+  auto writeString(const string& text) -> void {
+    uint length = text.length();
+    for(uint n = 0; n < length; n++) write(text[n]);
   }
 
-  void writeChecksum(uint32_t cksum) {
+  auto writeChecksum(uint32 cksum) -> void {
     write(cksum >>  0);
     write(cksum >>  8);
     write(cksum >> 16);
@@ -201,16 +201,16 @@ protected:
   }
 
   //apply() functions
-  uint8_t read() {
-    uint8_t data = fp.read();
+  auto read() -> uint8 {
+    uint8 data = fp.read();
     checksum.data(data);
     return data;
   }
 
-  uint64_t readNumber() {
-    uint64_t data = 0, shift = 1;
+  auto readNumber() -> uint64 {
+    uint64 data = 0, shift = 1;
     while(true) {
-      uint8_t x = read();
+      uint8 x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -219,7 +219,7 @@ protected:
     return data;
   }
 
-  string readString(unsigned length) {
+  auto readString(uint length) -> string {
     string text;
     text.resize(length + 1);
     char* p = text.get();
@@ -227,8 +227,8 @@ protected:
     return text;
   }
 
-  uint32_t readChecksum() {
-    uint32_t checksum = 0;
+  auto readChecksum() -> uint32 {
+    uint32 checksum = 0;
     checksum |= read() <<  0;
     checksum |= read() <<  8;
     checksum |= read() << 16;

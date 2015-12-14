@@ -3,7 +3,7 @@ Cartridge::Mapping::Mapping(SuperFamicom::Memory& memory) {
   this->writer = {&SuperFamicom::Memory::write, &memory};
 }
 
-Cartridge::Mapping::Mapping(const function<uint8 (unsigned)>& reader, const function<void (unsigned, uint8)>& writer) {
+Cartridge::Mapping::Mapping(const function<uint8 (uint, uint8)>& reader, const function<void (uint, uint8)>& writer) {
   this->reader = reader;
   this->writer = writer;
 }
@@ -217,13 +217,13 @@ auto Cartridge::parseMarkupEvent(Markup::Node root) -> void {
     }
 
     if(node["id"].text() == "dr") {
-      Mapping m([](unsigned) -> uint8 { return cpu.regs.mdr; }, {&Event::dr, &event});
+      Mapping m([](uint, uint8 data) -> uint8 { return data; }, {&Event::dr, &event});
       parseMarkupMap(m, node);
       mapping.append(m);
     }
 
     if(node["id"].text() == "sr") {
-      Mapping m({&Event::sr, &event}, [](unsigned, uint8) {});
+      Mapping m({&Event::sr, &event}, [](uint, uint8) {});
       parseMarkupMap(m, node);
       mapping.append(m);
     }
@@ -326,7 +326,7 @@ auto Cartridge::parseMarkupARMDSP(Markup::Node root) -> void {
   }
 }
 
-auto Cartridge::parseMarkupHitachiDSP(Markup::Node root, unsigned roms) -> void {
+auto Cartridge::parseMarkupHitachiDSP(Markup::Node root, uint roms) -> void {
   hasHitachiDSP = true;
 
   auto rom = root.find("rom");

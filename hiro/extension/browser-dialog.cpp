@@ -189,7 +189,6 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     );
   }
 
-  if(view.items()) view.item(0)->setSelected();
   Application::processEvents();
   view.resizeColumns().setFocused().doChange();
 }

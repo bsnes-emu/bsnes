@@ -15,11 +15,11 @@ auto NECDSP::enter() -> void {
 
     exec();
     step(1);
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 
-auto NECDSP::read(uint addr) -> uint8 {
+auto NECDSP::read(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   if(addr & Select) {
     return uPD96050::readSR();
@@ -37,7 +37,7 @@ auto NECDSP::write(uint addr, uint8 data) -> void {
   }
 }
 
-auto NECDSP::readRAM(uint addr) -> uint8 {
+auto NECDSP::readRAM(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   return uPD96050::readDP(addr);
 }

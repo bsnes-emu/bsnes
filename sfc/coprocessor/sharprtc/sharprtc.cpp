@@ -7,11 +7,11 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 SharpRTC sharprtc;
 
-void SharpRTC::Enter() {
+auto SharpRTC::Enter() -> void {
   sharprtc.enter();
 }
 
-void SharpRTC::enter() {
+auto SharpRTC::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
@@ -20,14 +20,14 @@ void SharpRTC::enter() {
     tick_second();
 
     step(1);
-    synchronize_cpu();
+    synchronizeCPU();
   }
 }
 
-void SharpRTC::init() {
+auto SharpRTC::init() -> void {
 }
 
-void SharpRTC::load() {
+auto SharpRTC::load() -> void {
   return;
 
   second = 0;
@@ -39,20 +39,20 @@ void SharpRTC::load() {
   weekday = 0;
 }
 
-void SharpRTC::unload() {
+auto SharpRTC::unload() -> void {
 }
 
-void SharpRTC::power() {
+auto SharpRTC::power() -> void {
 }
 
-void SharpRTC::reset() {
+auto SharpRTC::reset() -> void {
   create(SharpRTC::Enter, 1);
 
   rtc_state = State::Read;
   rtc_index = -1;
 }
 
-void SharpRTC::sync() {
+auto SharpRTC::sync() -> void {
   time_t systime = time(0);
   tm* timeinfo = localtime(&systime);
 
@@ -65,7 +65,7 @@ void SharpRTC::sync() {
   weekday = timeinfo->tm_wday;
 }
 
-uint8 SharpRTC::read(unsigned addr) {
+auto SharpRTC::read(uint addr, uint8 data) -> uint8 {
   addr &= 1;
 
   if(addr == 0) {
@@ -82,10 +82,10 @@ uint8 SharpRTC::read(unsigned addr) {
     }
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
-void SharpRTC::write(unsigned addr, uint8 data) {
+auto SharpRTC::write(uint addr, uint8 data) -> void {
   addr &= 1, data &= 15;
 
   if(addr == 1) {

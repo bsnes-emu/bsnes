@@ -6,16 +6,16 @@
 namespace nall { namespace Decode {
 
 namespace puff {
-  inline int puff(
+  inline auto puff(
     unsigned char* dest, unsigned long* destlen,
     unsigned char* source, unsigned long* sourcelen
-  );
+  ) -> int;
 }
 
-inline bool inflate(
-  uint8_t* target, unsigned targetLength,
-  const uint8_t* source, unsigned sourceLength
-) {
+inline auto inflate(
+  uint8* target, uint targetLength,
+  const uint8* source, uint sourceLength
+) -> bool {
   unsigned long tl = targetLength, sl = sourceLength;
   int result = puff::puff((unsigned char*)target, &tl, (unsigned char*)source, &sl);
   return result == 0;
@@ -23,7 +23,7 @@ inline bool inflate(
 
 namespace puff {
 
-enum {
+enum : uint {
   MAXBITS   =  15,
   MAXLCODES = 286,
   MAXDCODES =  30,
@@ -50,7 +50,7 @@ struct huffman {
   short* symbol;
 };
 
-inline int bits(state* s, int need) {
+inline auto bits(state* s, int need) -> int {
   long val;
 
   val = s->bitbuf;
@@ -66,8 +66,8 @@ inline int bits(state* s, int need) {
   return (int)(val & ((1L << need) - 1));
 }
 
-inline int stored(state* s) {
-  unsigned len;
+inline auto stored(state* s) -> int {
+  uint len;
 
   s->bitbuf = 0;
   s->bitcnt = 0;
@@ -91,7 +91,7 @@ inline int stored(state* s) {
   return 0;
 }
 
-inline int decode(state* s, huffman* h) {
+inline auto decode(state* s, huffman* h) -> int {
   int len, code, first, count, index, bitbuf, left;
   short* next;
 
@@ -126,7 +126,7 @@ inline int decode(state* s, huffman* h) {
   return -10;
 }
 
-inline int construct(huffman* h, short* length, int n) {
+inline auto construct(huffman* h, short* length, int n) -> int {
   int symbol, len, left;
   short offs[MAXBITS + 1];
 
@@ -151,9 +151,9 @@ inline int construct(huffman* h, short* length, int n) {
   return left;
 }
 
-inline int codes(state* s, huffman* lencode, huffman* distcode) {
+inline auto codes(state* s, huffman* lencode, huffman* distcode) -> int {
   int symbol, len;
-  unsigned dist;
+  uint dist;
   static const short lens[29] = {
     3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31,
     35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258
@@ -213,7 +213,7 @@ inline int codes(state* s, huffman* lencode, huffman* distcode) {
   return 0;
 }
 
-inline int fixed(state* s) {
+inline auto fixed(state* s) -> int {
   static int virgin = 1;
   static short lencnt[MAXBITS + 1], lensym[FIXLCODES];
   static short distcnt[MAXBITS + 1], distsym[MAXDCODES];
@@ -243,7 +243,7 @@ inline int fixed(state* s) {
   return codes(s, &lencode, &distcode);
 }
 
-inline int dynamic(state* s) {
+inline auto dynamic(state* s) -> int {
   int nlen, ndist, ncode, index, err;
   short lengths[MAXCODES];
   short lencnt[MAXBITS + 1], lensym[MAXLCODES];
@@ -303,10 +303,10 @@ inline int dynamic(state* s) {
   return codes(s, &lencode, &distcode);
 }
 
-inline int puff(
+inline auto puff(
   unsigned char* dest, unsigned long* destlen,
   unsigned char* source, unsigned long* sourcelen
-) {
+) -> int {
   state s;
   int last, type, err;
 

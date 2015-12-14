@@ -14,13 +14,13 @@ struct SPC7110 : Coprocessor {
 
   auto add_clocks(uint clocks) -> void;
 
-  auto read(uint addr) -> uint8;
+  auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
-  auto mcurom_read(uint addr) -> uint8;
+  auto mcurom_read(uint addr, uint8 data) -> uint8;
   auto mcurom_write(uint addr, uint8 data) -> void;
 
-  auto mcuram_read(uint addr) -> uint8;
+  auto mcuram_read(uint addr, uint8 data) -> uint8;
   auto mcuram_write(uint addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;

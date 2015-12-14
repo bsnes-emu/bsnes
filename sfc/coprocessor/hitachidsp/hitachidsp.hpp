@@ -18,15 +18,15 @@ struct HitachiDSP : Processor::HG51B, Coprocessor {
   auto bus_write(uint24 addr, uint8 data) -> void;
 
   //CPU ROM read/write
-  auto rom_read(uint addr) -> uint8;
+  auto rom_read(uint addr, uint8 data) -> uint8;
   auto rom_write(uint addr, uint8 data) -> void;
 
   //CPU RAM read/write
-  auto ram_read(uint addr) -> uint8;
+  auto ram_read(uint addr, uint8 data) -> uint8;
   auto ram_write(uint addr, uint8 data) -> void;
 
   //CPU MMIO read/write
-  auto dsp_read(uint addr) -> uint8;
+  auto dsp_read(uint addr, uint8 data) -> uint8;
   auto dsp_write(uint addr, uint8 data) -> void;
 
   auto firmware() const -> vector<uint8>;

@@ -119,7 +119,13 @@ auto pListView::setBordered(bool bordered) -> void {
 }
 
 auto pListView::setFocused() -> void {
+  //gtk_widget_grab_focus() will select the first item if nothing is currently selected
+  //this behavior is undesirable. detect selection state first, and restore if required
+  lock();
+  bool selected = gtk_tree_selection_get_selected(gtkTreeSelection, nullptr, nullptr);
   gtk_widget_grab_focus(gtkWidgetChild);
+  if(!selected) gtk_tree_selection_unselect_all(gtkTreeSelection);
+  unlock();
 }
 
 auto pListView::setFont(const Font& font) -> void {
