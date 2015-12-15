@@ -16,8 +16,7 @@ auto HitachiDSP::enter() -> void {
 
     if(mmio.dma) {
       for(auto n : range(mmio.dma_length)) {
-        //todo: access internally, not from Bus
-        bus.write(mmio.dma_target + n, bus.read(mmio.dma_source + n, 0));
+        bus_write(mmio.dma_target + n, bus_read(mmio.dma_source + n));
         step(2);
       }
       mmio.dma = false;

@@ -1,14 +1,32 @@
 auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
-  //todo: read internally, not from Bus
-  if((addr & 0x408000) == 0x008000) return bus.read(addr, 0);  //$00-3f,80-bf:6000-7fff
-  if((addr & 0xf88000) == 0x700000) return bus.read(addr, 0);  //$70-77:0000-7fff
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
+    return dsp_read(addr, 0x00);
+  }
+  if((addr & 0x408000) == 0x008000) {  //$00-3f,80-bf:8000-ffff
+    if(rom.size() == 0) return 0x00;
+    addr = ((addr & 0x3f0000) >> 1) | (addr & 0x7fff);
+    addr = bus.mirror(addr, rom.size());
+    return rom.read(addr, 0);
+  }
+  if((addr & 0xf88000) == 0x700000) {  //$70-77:0000-7fff
+    if(ram.size() == 0) return 0x00;
+    addr = ((addr & 0x070000) >> 1) | (addr & 0x7fff);
+    addr = Bus::mirror(addr, ram.size());
+    return ram.read(addr);
+  }
   return 0x00;
 }
 
 auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
-  //todo: write internally, not to Bus
-  if((addr & 0x40e000) == 0x006000) return bus.write(addr, data);  //$00-3f,80-bf:6000-7fff
-  if((addr & 0xf88000) == 0x700000) return bus.write(addr, data);  //$70-77:0000-7fff
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
+    return dsp_write(addr & 0x1fff, data);
+  }
+  if((addr & 0xf88000) == 0x700000) {  //$70-77:0000-7fff
+    if(ram.size() == 0) return;
+    addr = ((addr & 0x070000) >> 1) | (addr & 0x7fff);
+    addr = Bus::mirror(addr, ram.size());
+    return ram.write(addr, data);
+  }
 }
 
 auto HitachiDSP::rom_read(uint addr, uint8 data) -> uint8 {

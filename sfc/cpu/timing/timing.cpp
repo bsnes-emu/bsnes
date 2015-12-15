@@ -27,9 +27,9 @@ auto CPU::add_clocks(uint clocks) -> void {
   }
 
   #if defined(DEBUGGER)
-  synchronize_smp();
-  synchronize_ppu();
-  synchronize_coprocessors();
+  synchronizeSMP();
+  synchronizePPU();
+  synchronizeCoprocessors();
   #endif
 }
 
@@ -41,7 +41,7 @@ auto CPU::scanline() -> void {
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   synchronizeSMP();
   synchronizePPU();
-  synchronizeDevices();
+  synchronizeCoprocessors();
   system.scanline();
 
   if(vcounter() == 0) {

@@ -18,6 +18,8 @@
   #define PATH_MAX 260
 #endif
 
+using uint = unsigned;
+
 namespace nall {
   //UTF-8 to UTF-16
   struct utf16_t {
