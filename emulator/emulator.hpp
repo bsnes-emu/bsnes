@@ -7,7 +7,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "095.15";
+  static const string Version = "095.16";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -27,8 +27,8 @@ namespace Emulator {
 //no overhead (and no debugger invocation) if not compiled with -DDEBUGGER
 //wraps testing of function to allow invocation without a defined callback
 template<typename T> struct hook;
-template<typename R, typename... P> struct hook<R (P...)> {
-  function<R (P...)> callback;
+template<typename R, typename... P> struct hook<auto (P...) -> R> {
+  function<auto (P...) -> R> callback;
 
   auto operator()(P... p) const -> R {
     #if defined(DEBUGGER)

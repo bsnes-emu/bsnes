@@ -7,8 +7,8 @@ struct ID {
     //cartridges (folders)
     System,
     SuperFamicom,
-    SuperGameBoy,
-    Satellaview,
+    GameBoy,
+    BSMemory,
     SufamiTurboSlotA,
     SufamiTurboSlotB,
 
@@ -67,12 +67,12 @@ struct ID {
     MCCROM,
     MCCRAM,
 
-    SuperGameBoyManifest,
-    SuperGameBoyROM,
-    SuperGameBoyRAM,
+    GameBoyManifest,
+    GameBoyROM,
+    GameBoyRAM,
 
-    SatellaviewManifest,
-    SatellaviewROM,
+    BSMemoryManifest,
+    BSMemoryROM,
 
     SufamiTurboSlotAManifest,
     SufamiTurboSlotAROM,

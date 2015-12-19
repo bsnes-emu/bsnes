@@ -35,7 +35,18 @@ auto MCC::memory_access(bool write, Memory& memory, uint addr, uint8 data) -> ui
   }
 }
 
+//map address=00-3f,80-bf:8000-ffff mask=0x408000
+//map address=40-7d,c0-ff:0000-ffff
 auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
+  if(addr < 0x400000) {
+    //note: manifest maps 00-3f,80-bf:8000-ffff mask=0x408000 => 00-3f:0000-ffff
+    //the intention is consistency in pre-decoding as much as possible
+    //however, the MCC code is intended to be rewritten; and is too convoluted
+    //so for right now, I'm simply transforming it back to its original state
+    //this is very wasteful; but will be addressed once things are rewritten
+    addr = ((addr & 0x200000) << 2) | ((addr & 0x1f8000) << 1) | 0x8000 | (addr & 0x7fff);
+  }
+
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
@@ -70,7 +81,7 @@ auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
   || ((addr & 0x400000) == 0x400000)  //$40-7f,c0-ff:0000-ffff
   ) {
     if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-    Memory& memory = (r01 == 0 ? (Memory&)satellaviewcartridge : (Memory&)ram);
+    Memory& memory = (r01 == 0 ? (Memory&)bsmemory : (Memory&)ram);
     return memory_access(write, memory, addr & 0x7fffff, data);
   }
 

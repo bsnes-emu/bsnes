@@ -21,7 +21,7 @@ auto Cartridge::parseMarkup(const string& markup) -> void {
   if(auto node = board["ram"]) parseMarkupRAM(node);
   if(auto node = board["icd2"]) parseMarkupICD2(node);
   if(auto node = board["mcc"]) parseMarkupMCC(node);
-  if(auto node = board["satellaview"]) parseMarkupSatellaview(node);
+  if(auto node = board["bsmemory"]) parseMarkupBSMemory(node);
   if(auto node = board.find("sufamiturbo")) if(node(0)) parseMarkupSufamiTurbo(node(0), 0);
   if(auto node = board.find("sufamiturbo")) if(node(1)) parseMarkupSufamiTurbo(node(1), 1);
   if(auto node = board["nss"]) parseMarkupNSS(node);
@@ -88,12 +88,12 @@ auto Cartridge::parseMarkupRAM(Markup::Node root) -> void {
 }
 
 auto Cartridge::parseMarkupICD2(Markup::Node root) -> void {
-  hasSuperGameBoySlot = true;
+  hasGameBoySlot = true;
   hasICD2 = true;
   icd2.revision = max(1, root["revision"].natural());
 
   GameBoy::cartridge.load_empty(GameBoy::System::Revision::SuperGameBoy);
-  interface->loadRequest(ID::SuperGameBoy, "Game Boy", "gb", false);
+  interface->loadRequest(ID::GameBoy, "Game Boy", "gb", false);
 
   interface->loadRequest(ID::SuperGameBoyBootROM, root["brom"]["name"].text(), true);
 
@@ -103,10 +103,10 @@ auto Cartridge::parseMarkupICD2(Markup::Node root) -> void {
 }
 
 auto Cartridge::parseMarkupMCC(Markup::Node root) -> void {
-  hasSatellaviewSlot = true;
+  hasBSMemorySlot = true;
   hasMCC = true;
 
-  interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs", false);
+  interface->loadRequest(ID::BSMemory, "BS Memory", "bs", false);
 
   parseMarkupMemory(mcc.rom, root["rom"], ID::MCCROM, false);
   parseMarkupMemory(mcc.ram, root["ram"], ID::MCCRAM, true);
@@ -124,14 +124,14 @@ auto Cartridge::parseMarkupMCC(Markup::Node root) -> void {
   }
 }
 
-auto Cartridge::parseMarkupSatellaview(Markup::Node root) -> void {
-  hasSatellaviewSlot = true;
+auto Cartridge::parseMarkupBSMemory(Markup::Node root) -> void {
+  hasBSMemorySlot = true;
 
-  interface->loadRequest(ID::Satellaview, "BS-X Satellaview", "bs", false);
+  interface->loadRequest(ID::BSMemory, "BS Memory", "bs", false);
 
-  for(auto node : root["rom"].find("map")) {
-    if(satellaviewcartridge.memory.size() == 0) continue;
-    parseMarkupMap(node, satellaviewcartridge);
+  for(auto node : root.find("map")) {
+    if(bsmemory.memory.size() == 0) continue;
+    parseMarkupMap(node, bsmemory);
   }
 }
 
@@ -140,7 +140,7 @@ auto Cartridge::parseMarkupSufamiTurbo(Markup::Node root, bool slot) -> void {
 
   if(slot == 0) {
     //load required slot A (will request slot B if slot A cartridge is linkable)
-    interface->loadRequest(ID::SufamiTurboSlotA, "Sufami Turbo - Slot A", "st", false);
+    interface->loadRequest(ID::SufamiTurboSlotA, "Sufami Turbo", "st", false);
   }
 
   for(auto node : root["rom"].find("map")) {

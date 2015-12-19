@@ -1,15 +1,15 @@
-auto Icarus::gameBoyManifest(string location) -> string {
+auto Icarus::bsMemoryManifest(string location) -> string {
   vector<uint8> buffer;
   concatenate(buffer, {location, "program.rom"});
-  return gameBoyManifest(buffer, location);
+  return bsMemoryManifest(buffer, location);
 }
 
-auto Icarus::gameBoyManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::bsMemoryManifest(vector<uint8>& buffer, string location) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
   if(settings["icarus/UseDatabase"].boolean() && !markup) {
-    for(auto node : database.gameBoy) {
+    for(auto node : database.bsMemory) {
       if(node["sha256"].text() == digest) {
         markup.append(node.text(), "\n  sha256:   ", digest, "\n");
         break;
@@ -18,7 +18,7 @@ auto Icarus::gameBoyManifest(vector<uint8>& buffer, string location) -> string {
   }
 
   if(settings["icarus/UseHeuristics"].boolean() && !markup) {
-    GameBoyCartridge cartridge{buffer.data(), buffer.size()};
+    BSMemoryCartridge cartridge{buffer.data(), buffer.size()};
     if(markup = cartridge.markup) {
       markup.append("\n");
       markup.append("information\n");
@@ -31,13 +31,13 @@ auto Icarus::gameBoyManifest(vector<uint8>& buffer, string location) -> string {
   return markup;
 }
 
-auto Icarus::gameBoyImport(vector<uint8>& buffer, string location) -> bool {
+auto Icarus::bsMemoryImport(vector<uint8>& buffer, string location) -> bool {
   auto name = prefixname(location);
   auto source = pathname(location);
-  string target{settings["Library/Location"].text(), "Game Boy/", name, ".gb/"};
+  string target{settings["Library/Location"].text(), "BS Memory/", name, ".bs/"};
 //if(directory::exists(target)) return failure("game already exists");
 
-  auto markup = gameBoyManifest(buffer, location);
+  auto markup = bsMemoryManifest(buffer, location);
   if(!markup) return failure("failed to parse ROM image");
   if(!directory::create(target)) return failure("library path unwritable");
 

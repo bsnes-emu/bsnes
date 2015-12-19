@@ -68,8 +68,8 @@ auto System::runThreadToSave() -> void {
 auto System::init() -> void {
   assert(interface != nullptr);
 
-  eboot.init();
   satellaview.init();
+  eboot.init();
 
   icd2.init();
   mcc.init();
@@ -87,7 +87,7 @@ auto System::init() -> void {
   obc1.init();
   msu1.init();
 
-  satellaviewcartridge.init();
+  bsmemory.init();
 
   video.init();
   audio.init();
@@ -142,7 +142,7 @@ auto System::load() -> void {
   if(cartridge.hasOBC1()) obc1.load();
   if(cartridge.hasMSU1()) msu1.load();
 
-  if(cartridge.hasSatellaviewSlot()) satellaviewcartridge.load();
+  if(cartridge.hasBSMemorySlot()) bsmemory.load();
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
@@ -168,7 +168,7 @@ auto System::unload() -> void {
   if(cartridge.hasOBC1()) obc1.unload();
   if(cartridge.hasMSU1()) msu1.unload();
 
-  if(cartridge.hasSatellaviewSlot()) satellaviewcartridge.unload();
+  if(cartridge.hasBSMemorySlot()) bsmemory.unload();
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.unload(), sufamiturboB.unload();
 }
 
@@ -199,7 +199,7 @@ auto System::power() -> void {
   if(cartridge.hasOBC1()) obc1.power();
   if(cartridge.hasMSU1()) msu1.power();
 
-  if(cartridge.hasSatellaviewSlot()) satellaviewcartridge.power();
+  if(cartridge.hasBSMemorySlot()) bsmemory.power();
 
   reset();
 }
@@ -229,7 +229,7 @@ auto System::reset() -> void {
   if(cartridge.hasOBC1()) obc1.reset();
   if(cartridge.hasMSU1()) msu1.reset();
 
-  if(cartridge.hasSatellaviewSlot()) satellaviewcartridge.reset();
+  if(cartridge.hasBSMemorySlot()) bsmemory.reset();
 
   if(cartridge.hasICD2()) cpu.coprocessors.append(&icd2);
   if(cartridge.hasEvent()) cpu.coprocessors.append(&event);

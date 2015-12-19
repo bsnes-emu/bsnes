@@ -2,25 +2,25 @@
 
 namespace SuperFamicom {
 
-SatellaviewCartridge satellaviewcartridge;
+BSMemory bsmemory;
 
-auto SatellaviewCartridge::init() -> void {
+auto BSMemory::init() -> void {
 }
 
-auto SatellaviewCartridge::load() -> void {
+auto BSMemory::load() -> void {
   if(memory.size() == 0) {
     memory.map(allocate<uint8>(1024 * 1024, 0xff), 1024 * 1024);
   }
 }
 
-auto SatellaviewCartridge::unload() -> void {
+auto BSMemory::unload() -> void {
   memory.reset();
 }
 
-auto SatellaviewCartridge::power() -> void {
+auto BSMemory::power() -> void {
 }
 
-auto SatellaviewCartridge::reset() -> void {
+auto BSMemory::reset() -> void {
   regs.command   = 0;
   regs.write_old = 0x00;
   regs.write_new = 0x00;
@@ -31,12 +31,14 @@ auto SatellaviewCartridge::reset() -> void {
   memory.write_protect(!regs.write_enable);
 }
 
-auto SatellaviewCartridge::size() const -> uint {
+auto BSMemory::size() const -> uint {
   return memory.size();
 }
 
-auto SatellaviewCartridge::read(uint addr, uint8 data) -> uint8 {
-  if(readonly) return memory.read(bus.mirror(addr, memory.size()), data);
+auto BSMemory::read(uint addr, uint8 data) -> uint8 {
+  if(readonly) {
+    return memory.read(bus.mirror(addr, memory.size()), data);
+  }
 
   if(addr == 0x0002) {
     if(regs.flash_enable) return 0x80;
@@ -64,8 +66,10 @@ auto SatellaviewCartridge::read(uint addr, uint8 data) -> uint8 {
   return memory.read(addr, data);
 }
 
-auto SatellaviewCartridge::write(uint addr, uint8 data) -> void {
-  if(readonly) return;
+auto BSMemory::write(uint addr, uint8 data) -> void {
+  if(readonly) {
+    return;
+  }
 
   if((addr & 0xff0000) == 0) {
     regs.write_old = regs.write_new;

@@ -17,10 +17,10 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::SuperFamicom, "Super Famicom",    "sfc", true });
-  media.append({ID::SuperFamicom, "Game Boy",         "gb",  false});
-  media.append({ID::SuperFamicom, "BS-X Satellaview", "bs",  false});
-  media.append({ID::SuperFamicom, "Sufami Turbo",     "st",  false});
+  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true });
+  media.append({ID::SuperFamicom, "Game Boy",      "gb",  false});
+  media.append({ID::SuperFamicom, "BS Memory",     "bs",  false});
+  media.append({ID::SuperFamicom, "Sufami Turbo",  "st",  false});
 
   { Device device{0, ID::ControllerPort1 | ID::ControllerPort2 | ID::ExpansionPort, "None"};
     this->device.append(device);
@@ -201,14 +201,14 @@ auto Interface::group(uint id) -> uint {
   case ID::MCCROM:
   case ID::MCCRAM:
     return 1;
-  case ID::SuperGameBoy:
-  case ID::SuperGameBoyManifest:
-  case ID::SuperGameBoyROM:
-  case ID::SuperGameBoyRAM:
+  case ID::GameBoy:
+  case ID::GameBoyManifest:
+  case ID::GameBoyROM:
+  case ID::GameBoyRAM:
     return 2;
-  case ID::Satellaview:
-  case ID::SatellaviewManifest:
-  case ID::SatellaviewROM:
+  case ID::BSMemory:
+  case ID::BSMemoryManifest:
+  case ID::BSMemoryROM:
     return 3;
   case ID::SufamiTurboSlotA:
   case ID::SufamiTurboSlotAManifest:
@@ -227,8 +227,8 @@ auto Interface::group(uint id) -> uint {
 
 auto Interface::load(uint id) -> void {
   if(id == ID::SuperFamicom) cartridge.load();
-  if(id == ID::SuperGameBoy) cartridge.loadSuperGameBoy();
-  if(id == ID::Satellaview) cartridge.loadSatellaview();
+  if(id == ID::GameBoy) cartridge.loadGameBoy();
+  if(id == ID::BSMemory) cartridge.loadBSMemory();
   if(id == ID::SufamiTurboSlotA) cartridge.loadSufamiTurboA();
   if(id == ID::SufamiTurboSlotB) cartridge.loadSufamiTurboB();
 }
@@ -331,18 +331,18 @@ auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::MCCROM) mcc.rom.read(stream);
   if(id == ID::MCCRAM) mcc.ram.read(stream);
 
-  if(id == ID::SuperGameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
+  if(id == ID::GameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
 
-  if(id == ID::SuperGameBoyROM) {
+  if(id == ID::GameBoyROM) {
     stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
   }
 
-  if(id == ID::SuperGameBoyRAM) {
+  if(id == ID::GameBoyRAM) {
     stream.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, stream.size()));
   }
 
-  if(id == ID::SatellaviewManifest) cartridge.information.markup.satellaview = stream.text();
-  if(id == ID::SatellaviewROM) satellaviewcartridge.memory.read(stream);
+  if(id == ID::BSMemoryManifest) cartridge.information.markup.bsMemory = stream.text();
+  if(id == ID::BSMemoryROM) bsmemory.memory.read(stream);
 
   if(id == ID::SufamiTurboSlotAManifest) cartridge.information.markup.sufamiTurboA = stream.text();
   if(id == ID::SufamiTurboSlotAROM) sufamiturboA.rom.read(stream);
@@ -392,7 +392,7 @@ auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::SDD1RAM) stream.write(sdd1.ram.data(), sdd1.ram.size());
   if(id == ID::OBC1RAM) stream.write(obc1.ram.data(), obc1.ram.size());
 
-  if(id == ID::SuperGameBoyRAM) stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
+  if(id == ID::GameBoyRAM) stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
 
   if(id == ID::MCCRAM) stream.write(mcc.ram.data(), mcc.ram.size());
 

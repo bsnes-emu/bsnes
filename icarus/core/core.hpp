@@ -4,55 +4,59 @@ struct Icarus {
 
   auto error() const -> string;
   auto success() -> bool;
-  auto failure(const string& message) -> bool;
+  auto failure(string message) -> bool;
 
   auto manifest(string location) -> string;
   auto import(string location) -> bool;
 
-  auto concatenate(vector<uint8_t>& output, const string& location) -> void;
+  auto concatenate(vector<uint8>& output, string location) -> void;
 
   //famicom.cpp
-  auto famicomManifest(const string& location) -> string;
-  auto famicomManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto famicomImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto famicomManifest(string location) -> string;
+  auto famicomManifest(vector<uint8>& buffer, string location, uint* prgrom = nullptr, uint* chrrom = nullptr) -> string;
+  auto famicomImport(vector<uint8>& buffer, string location) -> bool;
 
   //super-famicom.cpp
-  auto superFamicomManifest(const string& location) -> string;
-  auto superFamicomManifest(vector<uint8_t>& buffer, const string& location) -> string;
+  auto superFamicomManifest(string location) -> string;
+  auto superFamicomManifest(vector<uint8>& buffer, string location, bool* firmwareAppended = nullptr) -> string;
   auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
-  auto superFamicomImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto superFamicomImport(vector<uint8>& buffer, string location) -> bool;
 
   //game-boy.cpp
-  auto gameBoyManifest(const string& location) -> string;
-  auto gameBoyManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto gameBoyImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto gameBoyManifest(string location) -> string;
+  auto gameBoyManifest(vector<uint8>& buffer, string location) -> string;
+  auto gameBoyImport(vector<uint8>& buffer, string location) -> bool;
 
   //game-boy-color.cpp
-  auto gameBoyColorManifest(const string& location) -> string;
-  auto gameBoyColorManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto gameBoyColorImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto gameBoyColorManifest(string location) -> string;
+  auto gameBoyColorManifest(vector<uint8>& buffer, string location) -> string;
+  auto gameBoyColorImport(vector<uint8>& buffer, string location) -> bool;
 
   //game-boy-advance.cpp
-  auto gameBoyAdvanceManifest(const string& location) -> string;
-  auto gameBoyAdvanceManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto gameBoyAdvanceImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto gameBoyAdvanceManifest(string location) -> string;
+  auto gameBoyAdvanceManifest(vector<uint8>& buffer, string location) -> string;
+  auto gameBoyAdvanceImport(vector<uint8>& buffer, string location) -> bool;
 
-  //bsx-satellaview.cpp
-  auto bsxSatellaviewManifest(const string& location) -> string;
-  auto bsxSatellaviewManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto bsxSatellaviewImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  //bs-memory.cpp
+  auto bsMemoryManifest(string location) -> string;
+  auto bsMemoryManifest(vector<uint8>& buffer, string location) -> string;
+  auto bsMemoryImport(vector<uint8>& buffer, string location) -> bool;
 
   //sufami-turbo.cpp
-  auto sufamiTurboManifest(const string& location) -> string;
-  auto sufamiTurboManifest(vector<uint8_t>& buffer, const string& location) -> string;
-  auto sufamiTurboImport(vector<uint8_t>& buffer, const string& location) -> bool;
+  auto sufamiTurboManifest(string location) -> string;
+  auto sufamiTurboManifest(vector<uint8>& buffer, string location) -> string;
+  auto sufamiTurboImport(vector<uint8>& buffer, string location) -> bool;
 
 private:
   string errorMessage;
 
   struct {
+    Markup::Node famicom;
     Markup::Node superFamicom;
-    Markup::Node bsxSatellaview;
+    Markup::Node gameBoy;
+    Markup::Node gameBoyColor;
+    Markup::Node gameBoyAdvance;
+    Markup::Node bsMemory;
     Markup::Node sufamiTurbo;
   } database;
 };

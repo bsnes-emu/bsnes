@@ -22,88 +22,69 @@ struct SuperFamicomCartridge {
     ResetVector = 0x3c,
   };
 
-  enum Mode : uint {
-    ModeNormal,
-    ModeBsxSlotted,
-    ModeBsx,
-    ModeSufamiTurbo,
-    ModeSuperGameBoy,
-  };
-
-  enum Type : uint {
-    TypeNormal,
-    TypeBsxSlotted,
-    TypeBsxBios,
-    TypeBsx,
-    TypeSufamiTurboBios,
-    TypeSufamiTurbo,
-    TypeSuperGameBoy1Bios,
-    TypeSuperGameBoy2Bios,
-    TypeGameBoy,
-    TypeUnknown,
-  };
-
-  enum Region : uint {
-    NTSC,
-    PAL,
-  };
-
-  enum MemoryMapper : uint {
+  enum class Type : uint {
+    SatellaviewBIOS,
+    SufamiTurboBIOS,
+    SuperGameBoy1BIOS,
+    SuperGameBoy2BIOS,
     LoROM,
     HiROM,
     ExLoROM,
     ExHiROM,
-    SuperFXROM,
-    SA1ROM,
-    SPC7110ROM,
-    BSCLoROM,
-    BSCHiROM,
-    BSXROM,
-    STROM,
+    SuperFX,
+    SA1,
+    LoROMSatellaview,
+    HiROMSatellaview,
+
+    //invalid types
+    Unknown,
+    GameBoy,
+    Satellaview,
+    SufamiTurbo,
   };
 
-  enum DSP1MemoryMapper : uint {
-    DSP1Unmapped,
-    DSP1LoROM1MB,
-    DSP1LoROM2MB,
-    DSP1HiROM,
+  enum class Region : uint {
+    NTSC,
+    PAL,
   };
 
-  bool loaded;             //is a base cartridge inserted?
-  uint crc32;              //crc32 of all cartridges (base+slot(s))
-  uint rom_size;
-  uint ram_size;
-  bool firmware_required;  //true if firmware is required for emulation
-  bool firmware_appended;  //true if firmware is present at end of data
+  enum class DSP1Type : uint {
+    None,
+    LoROM1MB,
+    LoROM2MB,
+    HiROM,
+  };
 
-  Mode mode;
-  Type type;
-  Region region;
-  MemoryMapper mapper;
-  DSP1MemoryMapper dsp1_mapper;
+  bool loaded = false;             //is a base cartridge inserted?
+  uint crc32 = 0;                  //crc32 of all cartridges (base+slot(s))
+  uint rom_size = 0;
+  uint ram_size = 0;
+  bool firmware_required = false;  //true if firmware is required for emulation
+  bool firmware_appended = false;  //true if firmware is present at end of data
 
-  bool has_bsx_slot;
-  bool has_superfx;
-  bool has_sa1;
-  bool has_sharprtc;
-  bool has_epsonrtc;
-  bool has_sdd1;
-  bool has_spc7110;
-  bool has_cx4;
-  bool has_dsp1;
-  bool has_dsp2;
-  bool has_dsp3;
-  bool has_dsp4;
-  bool has_obc1;
-  bool has_st010;
-  bool has_st011;
-  bool has_st018;
+  Type type = Type::Unknown;
+  Region region = Region::NTSC;
+  DSP1Type dsp1_type = DSP1Type::None;
+
+  bool has_bsx_slot = false;
+  bool has_superfx = false;
+  bool has_sa1 = false;
+  bool has_sharprtc = false;
+  bool has_epsonrtc = false;
+  bool has_sdd1 = false;
+  bool has_spc7110 = false;
+  bool has_cx4 = false;
+  bool has_dsp1 = false;
+  bool has_dsp2 = false;
+  bool has_dsp3 = false;
+  bool has_dsp4 = false;
+  bool has_obc1 = false;
+  bool has_st010 = false;
+  bool has_st011 = false;
+  bool has_st018 = false;
 };
 
 SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
-  firmware_required = false;
-  firmware_appended = false;
-
   //skip copier header
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
@@ -111,12 +92,13 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
 
   readHeader(data, size);
 
-  if(type == TypeGameBoy) return;
-  if(type == TypeBsx) return;
-  if(type == TypeSufamiTurbo) return;
+  if(type == Type::Unknown) return;
+  if(type == Type::GameBoy) return;
+  if(type == Type::Satellaview) return;
+  if(type == Type::SufamiTurbo) return;
 
   const char* range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
-  markup.append("board cic=", region == NTSC ? "411" : "413", "\n");
+  markup.append("board cic=", region == Region::NTSC ? "411" : "413", "\n");
 
   //detect appended firmware
 
@@ -184,7 +166,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     }
   }
 
-  if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) {
+  if(type == Type::SuperGameBoy1BIOS || type == Type::SuperGameBoy2BIOS) {
     firmware_required = true;
     if((rom_size & 0x7fff) == 0x100) {
       firmware_appended = true;
@@ -194,7 +176,40 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
 
   //end firmware detection
 
-  if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) {
+  if(type == Type::SatellaviewBIOS) {
+    markup.append(
+      "  ram name=save.ram size=0x", hex(ram_size), "\n"
+      "    map address=10-1f:5000-5fff mask=0xf000\n"
+      "  mcc\n"
+      "    map address=00-0f:5000\n"
+      "    map=mcu address=00-3f,80-bf:8000-ffff mask=0x408000\n"
+      "    map=mcu address=40-7d,c0-ff:0000-ffff\n"
+      "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    ram name=download.ram size=0x80000\n"
+      "      map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
+      "    bsmemory\n"
+    );
+  }
+
+  else if(type == Type::SufamiTurboBIOS) {
+    markup.append(
+      "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-1f,80-9f:8000-ffff mask=0x8000\n"
+      "  sufamiturbo\n"
+      "    rom\n"
+      "      map address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
+      "    ram\n"
+      "      map address=60-6f,e0-ef:0000-ffff\n"
+      "  sufamiturbo\n"
+      "    rom\n"
+      "      map address=40-5f,c0-df:0000-7fff mask=0x8000\n"
+      "      map address=40-5f,c0-df:8000-ffff mask=0x8000\n"
+      "    ram\n"
+      "      map address=70-7d,f0-ff:0000-ffff\n"
+    );
+  }
+
+  else if(type == Type::SuperGameBoy1BIOS || type == Type::SuperGameBoy2BIOS) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
@@ -248,11 +263,11 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == LoROM) {
+  else if(type == Type::LoROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
-      "    map address=40-6d,c0-ef:0000-7fff mask=0x8000\n"
+      "    map address=40-6f,c0-ef:0000-7fff mask=0x8000\n"
     );
     if(ram_size > 0) markup.append(
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
@@ -260,7 +275,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == HiROM) {
+  else if(type == Type::HiROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-3f,80-bf:8000-ffff\n"
@@ -272,7 +287,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == ExLoROM) {
+  else if(type == Type::ExLoROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-3f,80-bf:8000-ffff mask=0x8000\n"
@@ -285,7 +300,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == ExHiROM) {
+  else if(type == Type::ExHiROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-3f:8000-ffff base=0x400000\n"
@@ -300,7 +315,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == SuperFXROM) {
+  else if(type == Type::SuperFX) {
     markup.append(
       "  superfx\n"
       "    map address=00-3f,80-bf:3000-34ff\n"
@@ -315,7 +330,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == SA1ROM) {
+  else if(type == Type::SA1) {
     markup.append(
       "  sa1\n"
       "    map address=00-3f,80-bf:2200-23ff\n"
@@ -334,7 +349,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
-  else if(mapper == BSCLoROM) {
+  else if(type == Type::LoROMSatellaview) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-1f:8000-ffff base=0x000000 mask=0x8000\n"
@@ -343,53 +358,21 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
       "    map address=a0-bf:8000-ffff base=0x100000 mask=0x8000\n"
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
       "    map address=70-7d,f0-ff:0000-7fff mask=0x8000\n"
-      "  satellaview\n"
+      "  bsmemory\n"
       "    map address=c0-ef:0000-ffff\n"
     );
   }
 
-  else if(mapper == BSCHiROM) {
+  else if(type == Type::HiROMSatellaview) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
       "    map address=00-1f,80-9f:8000-ffff\n"
       "    map address=40-5f,c0-df:0000-ffff\n"
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
       "    map address=20-3f,a0-bf:6000-7fff\n"
-      "  satellaview\n"
+      "  bsmemory\n"
       "    map address=20-3f,a0-bf:8000-ffff\n"
       "    map address=60-7f,e0-ff:0000-ffff\n"
-    );
-  }
-
-  else if(mapper == BSXROM) {
-    markup.append(
-      "  ram name=save.ram size=0x", hex(ram_size), "\n"
-      "    map address=10-1f:5000-5fff mask=0xf000\n"
-      "  mcc\n"
-      "    map address=00-0f:5000\n"
-      "    map=mcu address=00-3f,80-bf:8000-ffff\n"
-      "    map=mcu address=40-7d,c0-ff:0000-ffff\n"
-      "    rom name=program.rom size=0x", hex(rom_size), "\n"
-      "    ram name=download.ram size=0x80000\n"
-      "      map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
-    );
-  }
-
-  else if(mapper == STROM) {
-    markup.append(
-      "  rom name=program.rom size=0x", hex(rom_size), "\n"
-      "    map address=00-1f,80-9f:8000-ffff mask=0x8000\n"
-      "  sufamiturbo\n"
-      "    rom\n"
-      "      map address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
-      "    ram\n"
-      "      map address=60-6f,e0-ef:0000-ffff\n"
-      "  sufamiturbo\n"
-      "    rom\n"
-      "      map address=40-5f,c0-df:0000-7fff mask=0x8000\n"
-      "      map address=40-5f,c0-df:8000-ffff mask=0x8000\n"
-      "    ram\n"
-      "      map address=70-7d,f0-ff:0000-ffff\n"
     );
   }
 
@@ -421,13 +404,13 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     markup.append(
       "  necdsp model=uPD7725 frequency=8000000\n"
     );
-    if(dsp1_mapper == DSP1LoROM1MB) markup.append(
+    if(dsp1_type == DSP1Type::LoROM1MB) markup.append(
       "    map address=20-3f,a0-bf:8000-ffff mask=0x3fff\n"
     );
-    if(dsp1_mapper == DSP1LoROM2MB) markup.append(
+    if(dsp1_type == DSP1Type::LoROM2MB) markup.append(
       "    map address=60-6f,e0-ef:0000-7fff mask=0x3fff\n"
     );
-    if(dsp1_mapper == DSP1HiROM) markup.append(
+    if(dsp1_type == DSP1Type::HiROM) markup.append(
       "    map address=00-1f,80-9f:6000-7fff mask=0xfff\n"
     );
     markup.append(
@@ -501,45 +484,13 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
 }
 
 auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
-  type        = TypeUnknown;
-  mapper      = LoROM;
-  dsp1_mapper = DSP1Unmapped;
-  region      = NTSC;
-  rom_size    = size;
-  ram_size    = 0;
-
-  has_bsx_slot   = false;
-  has_superfx    = false;
-  has_sa1        = false;
-  has_sharprtc   = false;
-  has_epsonrtc   = false;
-  has_sdd1       = false;
-  has_spc7110    = false;
-  has_cx4        = false;
-  has_dsp1       = false;
-  has_dsp2       = false;
-  has_dsp3       = false;
-  has_dsp4       = false;
-  has_obc1       = false;
-  has_st010      = false;
-  has_st011      = false;
-  has_st018      = false;
-
-  //=====================
   //detect Game Boy carts
-  //=====================
-
   if(size >= 0x0140) {
     if(data[0x0104] == 0xce && data[0x0105] == 0xed && data[0x0106] == 0x66 && data[0x0107] == 0x66
     && data[0x0108] == 0xcc && data[0x0109] == 0x0d && data[0x010a] == 0x00 && data[0x010b] == 0x0b) {
-      type = TypeGameBoy;
+      type = Type::GameBoy;
       return;
     }
-  }
-
-  if(size < 32768) {
-    type = TypeUnknown;
-    return;
   }
 
   const uint index = findHeader(data, size);
@@ -549,63 +500,51 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   const uint8 company  = data[index + Company];
   const uint8 regionid = data[index + CartRegion] & 0x7f;
 
+  this->rom_size = size;
   ram_size = 1024 << (data[index + RamSize] & 7);
   if(ram_size == 1024) ram_size = 0;  //no RAM present
   if(rom_size == 0 && ram_size) ram_size = 0;  //fix for Bazooka Blitzkrieg's malformed header (swapped ROM and RAM sizes)
 
   //0, 1, 13 = NTSC; 2 - 12 = PAL
-  region = (regionid <= 1 || regionid >= 13) ? NTSC : PAL;
+  region = (regionid <= 1 || regionid >= 13) ? Region::NTSC : Region::PAL;
 
-  //=======================
   //detect BS-X flash carts
-  //=======================
-
   if(data[index + 0x13] == 0x00 || data[index + 0x13] == 0xff) {
     if(data[index + 0x14] == 0x00) {
       const uint8 n15 = data[index + 0x15];
       if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
         if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
-          type = TypeBsx;
-          mapper = BSXROM;
-          region = NTSC;  //BS-X only released in Japan
+          type = Type::Satellaview;
+          region = Region::NTSC;  //BS-X only released in Japan
           return;
         }
       }
     }
   }
 
-  //=========================
   //detect Sufami Turbo carts
-  //=========================
-
   if(!memcmp(data, "BANDAI SFC-ADX", 14)) {
     if(!memcmp(data + 16, "SFC-ADX BACKUP", 14)) {
-      type = TypeSufamiTurboBios;
+      type = Type::SufamiTurboBIOS;
     } else {
-      type = TypeSufamiTurbo;
+      type = Type::SufamiTurbo;
     }
-    mapper = STROM;
-    region = NTSC;  //Sufami Turbo only released in Japan
-    return;         //RAM size handled outside this routine
+    region = Region::NTSC;  //Sufami Turbo only released in Japan
+    return;                 //RAM size handled outside this routine
   }
 
-  //==========================
   //detect Super Game Boy BIOS
-  //==========================
-
   if(!memcmp(data + index, "Super GAMEBOY2", 14)) {
-    type = TypeSuperGameBoy2Bios;
+    type = Type::SuperGameBoy2BIOS;
     return;
   }
 
   if(!memcmp(data + index, "Super GAMEBOY", 13)) {
-    type = TypeSuperGameBoy1Bios;
+    type = Type::SuperGameBoy1BIOS;
     return;
   }
 
-  //=====================
   //detect standard carts
-  //=====================
 
   //detect presence of BS-X flash cartridge connector (reads extended header information)
   if(data[index - 14] == 'Z') {
@@ -622,42 +561,38 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   if(has_bsx_slot) {
     if(!memcmp(data + index, "Satellaview BS-X     ", 21)) {
       //BS-X base cart
-      type = TypeBsxBios;
-      mapper = BSXROM;
-      region = NTSC;  //BS-X only released in Japan
-      return;         //RAM size handled internally by load_cart_bsx() -> BSXCart class
+      type = Type::SatellaviewBIOS;
+      region = Region::NTSC;  //BS-X only released in Japan
+      return;                 //RAM size handled internally by load_cart_bsx() -> BSXCart class
     } else {
-      type = TypeBsxSlotted;
-      mapper = (index == 0x7fc0 ? BSCLoROM : BSCHiROM);
-      region = NTSC;  //BS-X slotted cartridges only released in Japan
+      type = (index == 0x7fc0 ? Type::LoROMSatellaview : Type::HiROMSatellaview);
+      region = Region::NTSC;  //BS-X slotted cartridges only released in Japan
     }
   } else {
     //standard cart
-    type = TypeNormal;
-
     if(index == 0x7fc0 && size >= 0x401000) {
-      mapper = ExLoROM;
+      type = Type::ExLoROM;
     } else if(index == 0x7fc0 && mapperid == 0x32) {
-      mapper = ExLoROM;
+      type = Type::ExLoROM;
     } else if(index == 0x7fc0) {
-      mapper = LoROM;
+      type = Type::LoROM;
     } else if(index == 0xffc0) {
-      mapper = HiROM;
+      type = Type::HiROM;
     } else {  //index == 0x40ffc0
-      mapper = ExHiROM;
+      type = Type::ExHiROM;
     }
   }
 
   if(mapperid == 0x20 && (rom_type == 0x13 || rom_type == 0x14 || rom_type == 0x15 || rom_type == 0x1a)) {
     has_superfx = true;
-    mapper = SuperFXROM;
+    type = Type::SuperFX;
     ram_size = 1024 << (data[index - 3] & 7);
     if(ram_size == 1024) ram_size = 0;
   }
 
   if(mapperid == 0x23 && (rom_type == 0x32 || rom_type == 0x34 || rom_type == 0x35)) {
     has_sa1 = true;
-    mapper = SA1ROM;
+    type = Type::SA1;
   }
 
   if(mapperid == 0x35 && rom_type == 0x55) {
@@ -671,7 +606,6 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   if(mapperid == 0x3a && (rom_type == 0xf5 || rom_type == 0xf9)) {
     has_spc7110 = true;
     has_epsonrtc = (rom_type == 0xf9);
-    mapper = SPC7110ROM;
   }
 
   if(mapperid == 0x20 && rom_type == 0xf3) {
@@ -692,11 +626,11 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
 
   if(has_dsp1 == true) {
     if((mapperid & 0x2f) == 0x20 && size <= 0x100000) {
-      dsp1_mapper = DSP1LoROM1MB;
+      dsp1_type = DSP1Type::LoROM1MB;
     } else if((mapperid & 0x2f) == 0x20) {
-      dsp1_mapper = DSP1LoROM2MB;
+      dsp1_type = DSP1Type::LoROM2MB;
     } else if((mapperid & 0x2f) == 0x21) {
-      dsp1_mapper = DSP1HiROM;
+      dsp1_type = DSP1Type::HiROM;
     }
   }
 

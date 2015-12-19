@@ -1,4 +1,4 @@
-struct SatellaviewCartridge : Memory {
+struct BSMemory : Memory {
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;
@@ -24,4 +24,4 @@ private:
   } regs;
 };
 
-extern SatellaviewCartridge satellaviewcartridge;
+extern BSMemory bsmemory;

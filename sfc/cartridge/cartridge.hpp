@@ -24,8 +24,8 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> hasOBC1;
   readonly<bool> hasMSU1;
 
-  readonly<bool> hasSuperGameBoySlot;
-  readonly<bool> hasSatellaviewSlot;
+  readonly<bool> hasGameBoySlot;
+  readonly<bool> hasBSMemorySlot;
   readonly<bool> hasSufamiTurboSlots;
 
   auto manifest() -> string;
@@ -63,7 +63,7 @@ struct Cartridge : property<Cartridge> {
     struct Markup {
       string cartridge;
       string gameBoy;
-      string satellaview;
+      string bsMemory;
       string sufamiTurboA;
       string sufamiTurboB;
     } markup;
@@ -71,15 +71,15 @@ struct Cartridge : property<Cartridge> {
     struct Title {
       string cartridge;
       string gameBoy;
-      string satellaview;
+      string bsMemory;
       string sufamiTurboA;
       string sufamiTurboB;
     } title;
   } information;
 
 private:
-  auto loadSuperGameBoy() -> void;
-  auto loadSatellaview() -> void;
+  auto loadGameBoy() -> void;
+  auto loadBSMemory() -> void;
   auto loadSufamiTurboA() -> void;
   auto loadSufamiTurboB() -> void;
   friend class Interface;
@@ -94,7 +94,7 @@ private:
   auto parseMarkupRAM(Markup::Node) -> void;
   auto parseMarkupICD2(Markup::Node) -> void;
   auto parseMarkupMCC(Markup::Node) -> void;
-  auto parseMarkupSatellaview(Markup::Node) -> void;
+  auto parseMarkupBSMemory(Markup::Node) -> void;
   auto parseMarkupSufamiTurbo(Markup::Node, bool slot) -> void;
   auto parseMarkupNSS(Markup::Node) -> void;
   auto parseMarkupEvent(Markup::Node) -> void;

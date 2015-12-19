@@ -19,7 +19,7 @@ Settings settings;
 #include "heuristics/super-famicom.hpp"
 #include "heuristics/game-boy.hpp"
 #include "heuristics/game-boy-advance.hpp"
-#include "heuristics/bsx-satellaview.hpp"
+#include "heuristics/bs-memory.hpp"
 #include "heuristics/sufami-turbo.hpp"
 
 #include "core/core.hpp"
@@ -29,7 +29,7 @@ Settings settings;
 #include "core/game-boy.cpp"
 #include "core/game-boy-color.cpp"
 #include "core/game-boy-advance.cpp"
-#include "core/bsx-satellaview.cpp"
+#include "core/bs-memory.cpp"
 #include "core/sufami-turbo.cpp"
 Icarus icarus;
 

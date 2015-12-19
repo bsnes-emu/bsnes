@@ -3,7 +3,7 @@ ManifestViewer::ManifestViewer(TabFrame* parent) : TabFrameItem(parent) {
   setText("Manifest Viewer");
 
   layout.setMargin(5);
-  manifestView.setEditable(false).setFont(Font().setFamily(Font::Mono));
+  manifestView.setEditable(false).setWordWrap(false).setFont(Font().setFamily(Font::Mono));
 }
 
 auto ManifestViewer::doRefresh() -> void {

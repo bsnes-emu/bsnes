@@ -1,5 +1,11 @@
 Icarus::Icarus() {
+  database.famicom = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Famicom.bml")));
   database.superFamicom = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Super Famicom.bml")));
+  database.gameBoy = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Game Boy.bml")));
+  database.gameBoyColor = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Game Boy Color.bml")));
+  database.gameBoyAdvance = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Game Boy Advance.bml")));
+  database.bsMemory = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/BS Memory.bml")));
+  database.sufamiTurbo = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Sufami Turbo.bml")));
 }
 
 auto Icarus::error() const -> string {
@@ -11,7 +17,7 @@ auto Icarus::success() -> bool {
   return true;
 }
 
-auto Icarus::failure(const string& message) -> bool {
+auto Icarus::failure(string message) -> bool {
   errorMessage = message;
   return false;
 }
@@ -26,7 +32,7 @@ auto Icarus::manifest(string location) -> string {
   if(type == ".gb") return gameBoyManifest(location);
   if(type == ".gbc") return gameBoyColorManifest(location);
   if(type == ".gba") return gameBoyAdvanceManifest(location);
-  if(type == ".bs") return bsxSatellaviewManifest(location);
+  if(type == ".bs") return bsMemoryManifest(location);
   if(type == ".st") return sufamiTurboManifest(location);
 
   return "";
@@ -59,13 +65,13 @@ auto Icarus::import(string location) -> bool {
   if(type == ".gb") return gameBoyImport(buffer, location);
   if(type == ".gbc") return gameBoyColorImport(buffer, location);
   if(type == ".gba") return gameBoyAdvanceImport(buffer, location);
-  if(type == ".bs") return bsxSatellaviewImport(buffer, location);
+  if(type == ".bs") return bsMemoryImport(buffer, location);
   if(type == ".st") return sufamiTurboImport(buffer, location);
 
   return failure("unrecognized file extension");
 }
 
-auto Icarus::concatenate(vector<uint8_t>& output, const string& location) -> void {
+auto Icarus::concatenate(vector<uint8>& output, string location) -> void {
   if(auto input = file::read(location)) {
     auto size = output.size();
     output.resize(size + input.size());
