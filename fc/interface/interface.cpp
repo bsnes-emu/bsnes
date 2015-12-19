@@ -43,6 +43,10 @@ Interface::Interface() {
   }
 }
 
+auto Interface::manifest() -> string {
+  return cartridge.manifest();
+}
+
 auto Interface::title() -> string {
   return cartridge.title();
 }

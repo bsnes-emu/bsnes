@@ -7,6 +7,7 @@ struct Cartridge : Thread {
 
   auto loaded() const -> bool;
   auto sha256() const -> string;
+  auto manifest() const -> string;
   auto title() const -> string;
 
   auto load() -> void;

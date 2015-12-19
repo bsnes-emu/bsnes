@@ -75,6 +75,7 @@ struct Interface {
   template<typename... P> auto notify(P&&... p) -> void { return bind->notify({forward<P>(p)...}); }
 
   //information
+  virtual auto manifest() -> string = 0;
   virtual auto title() -> string = 0;
   virtual auto videoFrequency() -> double = 0;
   virtual auto audioFrequency() -> double = 0;

@@ -116,6 +116,13 @@ auto Event::ram_write(uint addr, uint8 data) -> void {
   return ram.write(bus.mirror(addr, ram.size()), data);
 }
 
+auto Event::read(uint addr, uint8 data) -> uint8 {
+  return data;
+}
+
+auto Event::write(uint addr, uint8 data) -> void {
+}
+
 auto Event::serialize(serializer& s) -> void {
   Thread::serialize(s);
   s.array(ram.data(), ram.size());

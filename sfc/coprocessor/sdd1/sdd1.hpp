@@ -8,6 +8,9 @@ struct SDD1 {
   auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
 
+  auto dma_read(uint addr, uint8 data) -> uint8;
+  auto dma_write(uint addr, uint8 data) -> void;
+
   auto mmc_read(uint addr) -> uint8;
 
   auto mcurom_read(uint addr, uint8 data) -> uint8;

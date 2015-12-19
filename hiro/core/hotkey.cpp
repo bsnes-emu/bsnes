@@ -9,7 +9,7 @@ Hotkey::Hotkey(const string& sequence) : state(new Hotkey::State) {
 }
 
 Hotkey::operator bool() const {
-  return state->sequence;
+  return (bool)state->sequence;
 }
 
 auto Hotkey::operator==(const Hotkey& source) const -> bool {

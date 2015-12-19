@@ -33,6 +33,7 @@ auto Program::loadMedia(Emulator::Interface& emulator_, Emulator::Interface::Med
   presentation->updateEmulator();
   toolsManager->cheatEditor.loadCheats();
   toolsManager->stateManager.doRefresh();
+  toolsManager->manifestViewer.doRefresh();
 }
 
 auto Program::unloadMedia() -> void {

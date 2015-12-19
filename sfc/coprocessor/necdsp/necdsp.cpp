@@ -21,7 +21,7 @@ auto NECDSP::enter() -> void {
 
 auto NECDSP::read(uint addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
-  if(addr & Select) {
+  if(addr & 1) {
     return uPD96050::readSR();
   } else {
     return uPD96050::readDR();
@@ -30,7 +30,7 @@ auto NECDSP::read(uint addr, uint8) -> uint8 {
 
 auto NECDSP::write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
-  if(addr & Select) {
+  if(addr & 1) {
     return uPD96050::writeSR(data);
   } else {
     return uPD96050::writeDR(data);

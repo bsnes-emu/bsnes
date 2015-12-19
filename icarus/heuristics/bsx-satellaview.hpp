@@ -5,6 +5,6 @@ struct BsxSatellaviewCartridge {
 };
 
 BsxSatellaviewCartridge::BsxSatellaviewCartridge(const uint8_t* data, unsigned size) {
-  markup.append("cartridge\n");
-  markup.append("  rom name=program.rom size=0x", hex(size), " type=FlashROM\n");
+  markup.append("board\n");
+  markup.append("  rom type=flash name=program.rom size=0x", hex(size), "\n");
 }

@@ -76,6 +76,14 @@ struct StateManager : TabFrameItem {
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 
+struct ManifestViewer : TabFrameItem {
+  ManifestViewer(TabFrame*);
+  auto doRefresh() -> void;
+
+  VerticalLayout layout{this};
+    TextEdit manifestView{&layout, Size{~0, ~0}};
+};
+
 struct ToolsManager : Window {
   ToolsManager();
   auto show(unsigned tool) -> void;
@@ -84,6 +92,7 @@ struct ToolsManager : Window {
     TabFrame panel{&layout, Size{~0, ~0}};
       CheatEditor cheatEditor{&panel};
       StateManager stateManager{&panel};
+      ManifestViewer manifestViewer{&panel};
 };
 
 extern CheatDatabase* cheatDatabase;

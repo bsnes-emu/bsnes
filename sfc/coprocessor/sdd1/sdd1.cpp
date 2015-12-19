@@ -13,8 +13,8 @@ auto SDD1::init() -> void {
 void SDD1::load() {
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map({&SDD1::read, &sdd1}, {&SDD1::write, &sdd1}, 0x00, 0x3f, 0x4300, 0x437f);
-  bus.map({&SDD1::read, &sdd1}, {&SDD1::write, &sdd1}, 0x80, 0xbf, 0x4300, 0x437f);
+  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, 0x00, 0x3f, 0x4300, 0x437f);
+  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, 0x80, 0xbf, 0x4300, 0x437f);
 }
 
 auto SDD1::unload() -> void {
@@ -42,11 +42,7 @@ auto SDD1::reset() -> void {
 }
 
 auto SDD1::read(uint addr, uint8 data) -> uint8 {
-  addr &= 0x40ffff;
-
-  if((addr & 0x404380) == 0x4300) {
-    return cpu.mmio_read(addr, data);
-  }
+  addr = 0x4800 | (addr & 7);
 
   switch(addr) {
   case 0x4804: return mmc[0] >> 20;
@@ -59,20 +55,7 @@ auto SDD1::read(uint addr, uint8 data) -> uint8 {
 }
 
 auto SDD1::write(uint addr, uint8 data) -> void {
-  addr &= 0xffff;
-
-  if((addr & 0x4380) == 0x4300) {
-    uint channel = (addr >> 4) & 7;
-    switch(addr & 15) {
-    case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
-    case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
-    case 4: dma[channel].addr = (dma[channel].addr & 0x00ffff) + (data << 16); break;
-
-    case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
-    case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
-    }
-    return cpu.mmio_write(addr, data);
-  }
+  addr = 0x4800 | (addr & 7);
 
   switch(addr) {
   case 0x4800: sdd1_enable = data; break;
@@ -83,6 +66,23 @@ auto SDD1::write(uint addr, uint8 data) -> void {
   case 0x4806: mmc[2] = data << 20; break;
   case 0x4807: mmc[3] = data << 20; break;
   }
+}
+
+auto SDD1::dma_read(uint addr, uint8 data) -> uint8 {
+  return cpu.mmio_read(addr, data);
+}
+
+auto SDD1::dma_write(uint addr, uint8 data) -> void {
+  uint channel = (addr >> 4) & 7;
+  switch(addr & 15) {
+  case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
+  case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
+  case 4: dma[channel].addr = (dma[channel].addr & 0x00ffff) + (data << 16); break;
+
+  case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
+  case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
+  }
+  return cpu.mmio_write(addr, data);
 }
 
 auto SDD1::mmc_read(uint addr) -> uint8 {
@@ -108,13 +108,12 @@ auto SDD1::mmc_read(uint addr) -> uint8 {
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
 auto SDD1::mcurom_read(uint addr, uint8) -> uint8 {
-  if(addr < 0x400000) {  //(addr & 0x408000) == 0x008000) {  //$00-3f|80-bf:8000-ffff
+  //map address=00-3f,80-bf:8000-ffff mask=0x808000 => 00-1f:0000-ffff
+  if(addr < 0x200000) {
     return rom.read(addr);
-  //addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
-  //return rom.read(addr);
   }
 
-  //$40-7f|c0-ff:0000-ffff (MMC)
+  //map address=c0-ff:0000-ffff
   if(sdd1_enable & xfer_enable) {
     //at least one channel has S-DD1 decompression enabled ...
     for(auto n : range(8)) {
@@ -148,7 +147,7 @@ auto SDD1::mcurom_write(uint addr, uint8 data) -> void {
 }
 
 auto SDD1::mcuram_read(uint addr, uint8 data) -> uint8 {
-  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+  if((addr & 0x60e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
     return ram.read(addr & 0x1fff, data);
   }
 
@@ -160,7 +159,7 @@ auto SDD1::mcuram_read(uint addr, uint8 data) -> uint8 {
 }
 
 auto SDD1::mcuram_write(uint addr, uint8 data) -> void {
-  if((addr & 0x60e000) == 0x006000) {  //$00-3f|80-bf:6000-7fff
+  if((addr & 0x60e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
     return ram.write(addr & 0x1fff, data);
   }
 

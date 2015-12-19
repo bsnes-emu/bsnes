@@ -37,6 +37,10 @@ Interface::Interface() {
   port.append({0, "Device", {device[0]}});
 }
 
+auto Interface::manifest() -> string {
+  return cartridge.manifest();
+}
+
 auto Interface::title() -> string {
   return cartridge.title();
 }

@@ -22,6 +22,7 @@ auto mMenuCheckItem::onToggle(const function<void ()>& callback) -> type& {
 auto mMenuCheckItem::setChecked(bool checked) -> type& {
   state.checked = checked;
   signal(setChecked, checked);
+  return *this;
 }
 
 auto mMenuCheckItem::setText(const string& text) -> type& {

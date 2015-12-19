@@ -1,13 +1,5 @@
-namespace Database {
-  #include "../database/super-famicom.hpp"
-  #include "../database/bsx-satellaview.hpp"
-  #include "../database/sufami-turbo.hpp"
-}
-
 Icarus::Icarus() {
-  database.superFamicom = BML::unserialize(Database::SuperFamicom);
-  database.bsxSatellaview = BML::unserialize(Database::BsxSatellaview);
-  database.sufamiTurbo = BML::unserialize(Database::SufamiTurbo);
+  database.superFamicom = BML::unserialize(string::read(locate({configpath(), "icarus/"}, "Database/Super Famicom.bml")));
 }
 
 auto Icarus::error() const -> string {

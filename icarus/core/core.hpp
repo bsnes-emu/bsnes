@@ -19,8 +19,8 @@ struct Icarus {
   //super-famicom.cpp
   auto superFamicomManifest(const string& location) -> string;
   auto superFamicomManifest(vector<uint8_t>& buffer, const string& location) -> string;
+  auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, const string& location) -> bool;
-  auto superFamicomImportScanManifest(vector<Markup::Node>& roms, Markup::Node node) -> void;
 
   //game-boy.cpp
   auto gameBoyManifest(const string& location) -> string;

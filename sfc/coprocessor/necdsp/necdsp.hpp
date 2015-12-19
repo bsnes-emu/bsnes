@@ -16,8 +16,6 @@ struct NECDSP : Processor::uPD96050, Coprocessor {
 
   auto firmware() const -> vector<uint8>;
   auto serialize(serializer&) -> void;
-
-  unsigned Select;
 };
 
 extern NECDSP necdsp;

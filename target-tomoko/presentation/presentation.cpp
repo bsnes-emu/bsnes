@@ -103,6 +103,7 @@ Presentation::Presentation() {
   loadSlot5.setText("Slot 5").onActivate([&] { program->loadState(5); });
   cheatEditor.setText("Cheat Editor").onActivate([&] { toolsManager->show(0); });
   stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
+  manifestViewer.setText("Manifest Viewer").onActivate([&] { toolsManager->show(2); });
 
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());

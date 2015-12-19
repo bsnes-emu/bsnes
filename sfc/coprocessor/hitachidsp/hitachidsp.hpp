@@ -25,6 +25,10 @@ struct HitachiDSP : Processor::HG51B, Coprocessor {
   auto ram_read(uint addr, uint8 data) -> uint8;
   auto ram_write(uint addr, uint8 data) -> void;
 
+  //HG51B data RAM read/write
+  auto dram_read(uint addr, uint8 data) -> uint8;
+  auto dram_write(uint addr, uint8 data) -> void;
+
   //CPU MMIO read/write
   auto dsp_read(uint addr, uint8 data) -> uint8;
   auto dsp_write(uint addr, uint8 data) -> void;

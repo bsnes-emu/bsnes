@@ -6,24 +6,52 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 Cartridge cartridge;
 
+auto Cartridge::manifest() -> string {
+  string manifest = information.markup.cartridge;
+
+  if(information.markup.gameBoy) {
+    manifest.append("\n[Super Game Boy]\n");
+    manifest.append(information.markup.gameBoy);
+  }
+
+  if(information.markup.satellaview) {
+    manifest.append("\n[BS-X Satellaview]\n");
+    manifest.append(information.markup.satellaview);
+  }
+
+  if(information.markup.sufamiTurboA) {
+    manifest.append("\n[Sufami Turbo - Slot A]\n");
+    manifest.append(information.markup.sufamiTurboA);
+  }
+
+  if(information.markup.sufamiTurboB) {
+    manifest.append("\n[Sufami Turbo - Slot B]\n");
+    manifest.append(information.markup.sufamiTurboB);
+  }
+
+  return manifest;
+}
+
 auto Cartridge::title() -> string {
-  if(information.title.gameBoy.empty() == false) {
-    return {information.title.cartridge, " + ", information.title.gameBoy};
+  string title = information.title.cartridge;
+
+  if(information.title.gameBoy) {
+    title.append(" + ", information.title.gameBoy);
   }
 
-  if(information.title.satellaview.empty() == false) {
-    return {information.title.cartridge, " + ", information.title.satellaview};
+  if(information.title.satellaview) {
+    title.append(" + ", information.title.satellaview);
   }
 
-  if(information.title.sufamiTurboA.empty() == false) {
-    if(information.title.sufamiTurboB.empty() == true) {
-      return {information.title.cartridge, " + ", information.title.sufamiTurboA};
-    } else {
-      return {information.title.cartridge, " + ", information.title.sufamiTurboA, " + ", information.title.sufamiTurboB};
-    }
+  if(information.title.sufamiTurboA) {
+    title.append(" + ", information.title.sufamiTurboA);
   }
 
-  return information.title.cartridge;
+  if(information.title.sufamiTurboB) {
+    title.append(" + ", information.title.sufamiTurboB);
+  }
+
+  return title;
 }
 
 auto Cartridge::load() -> void {
@@ -118,8 +146,8 @@ auto Cartridge::loadSuperGameBoy() -> void {
   auto document = BML::unserialize(information.markup.gameBoy);
   information.title.gameBoy = document["information/title"].text();
 
-  auto rom = document["cartridge/rom"];
-  auto ram = document["cartridge/ram"];
+  auto rom = document["board/rom"];
+  auto ram = document["board/ram"];
 
   GameBoy::cartridge.information.markup = information.markup.gameBoy;
   GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy);
@@ -134,7 +162,7 @@ auto Cartridge::loadSatellaview() -> void {
   auto document = BML::unserialize(information.markup.satellaview);
   information.title.satellaview = document["information/title"].text();
 
-  auto rom = document["cartridge/rom"];
+  auto rom = document["board/rom"];
 
   if(rom["name"]) {
     unsigned size = rom["size"].natural();
@@ -150,8 +178,8 @@ auto Cartridge::loadSufamiTurboA() -> void {
   auto document = BML::unserialize(information.markup.sufamiTurboA);
   information.title.sufamiTurboA = document["information/title"].text();
 
-  auto rom = document["cartridge/rom"];
-  auto ram = document["cartridge/ram"];
+  auto rom = document["board/rom"];
+  auto ram = document["board/ram"];
 
   if(rom["name"]) {
     unsigned size = rom["size"].natural();
@@ -166,7 +194,7 @@ auto Cartridge::loadSufamiTurboA() -> void {
     memory.append({ID::SufamiTurboSlotARAM, ram["name"].text()});
   }
 
-  if(document["cartridge/linkable"]) {
+  if(document["board/linkable"]) {
     interface->loadRequest(ID::SufamiTurboSlotB, "Sufami Turbo - Slot B", "st", false);
   }
 }
@@ -176,8 +204,8 @@ auto Cartridge::loadSufamiTurboB() -> void {
   auto document = BML::unserialize(information.markup.sufamiTurboB);
   information.title.sufamiTurboB = document["information/title"].text();
 
-  auto rom = document["cartridge/rom"];
-  auto ram = document["cartridge/ram"];
+  auto rom = document["board/rom"];
+  auto ram = document["board/ram"];
 
   if(rom["name"]) {
     unsigned size = rom["size"].natural();

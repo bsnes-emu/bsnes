@@ -53,7 +53,8 @@ struct Cartridge : MMIO, property<Cartridge> {
     uint ramsize;
   } information;
 
-  string title();
+  auto manifest() const -> string;
+  auto title() const -> string;
 
   struct Memory {
     uint id;

@@ -29,6 +29,7 @@ struct ID {
 struct Interface : Emulator::Interface {
   Interface();
 
+  auto manifest() -> string;
   auto title() -> string;
   auto videoFrequency() -> double;
   auto audioFrequency() -> double;

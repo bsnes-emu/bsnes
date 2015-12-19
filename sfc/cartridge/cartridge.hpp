@@ -1,8 +1,8 @@
 struct Cartridge : property<Cartridge> {
   enum class Region : unsigned { NTSC, PAL };
 
-  MappedRAM rom;
-  MappedRAM ram;
+  Cartridge() = default;
+  ~Cartridge() { unload(); }
 
   auto loaded() const -> bool { return _loaded; }
   auto sha256() const -> string { return _sha256; }
@@ -27,6 +27,17 @@ struct Cartridge : property<Cartridge> {
   readonly<bool> hasSuperGameBoySlot;
   readonly<bool> hasSatellaviewSlot;
   readonly<bool> hasSufamiTurboSlots;
+
+  auto manifest() -> string;
+  auto title() -> string;
+
+  auto load() -> void;
+  auto unload() -> void;
+
+  auto serialize(serializer&) -> void;
+
+  MappedRAM rom;
+  MappedRAM ram;
 
   struct Mapping {
     function<auto (uint, uint8) -> uint8> reader;
@@ -66,16 +77,6 @@ struct Cartridge : property<Cartridge> {
     } title;
   } information;
 
-  Cartridge() = default;
-  ~Cartridge() { unload(); }
-
-  auto title() -> string;
-
-  auto load() -> void;
-  auto unload() -> void;
-
-  auto serialize(serializer&) -> void;
-
 private:
   auto loadSuperGameBoy() -> void;
   auto loadSatellaview() -> void;
@@ -85,10 +86,12 @@ private:
 
   //markup.cpp
   auto parseMarkup(const string&) -> void;
-  auto parseMarkupMap(Mapping&, Markup::Node) -> void;
+  auto parseMarkupMap(Markup::Node, SuperFamicom::Memory&) -> void;
+  auto parseMarkupMap(Markup::Node, const function<uint8 (uint, uint8)>&, const function<void (uint, uint8)>&) -> void;
   auto parseMarkupMemory(MappedRAM&, Markup::Node, unsigned id, bool writable) -> void;
 
-  auto parseMarkupCartridge(Markup::Node) -> void;
+  auto parseMarkupROM(Markup::Node) -> void;
+  auto parseMarkupRAM(Markup::Node) -> void;
   auto parseMarkupICD2(Markup::Node) -> void;
   auto parseMarkupMCC(Markup::Node) -> void;
   auto parseMarkupSatellaview(Markup::Node) -> void;

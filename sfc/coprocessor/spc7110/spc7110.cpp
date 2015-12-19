@@ -111,15 +111,14 @@ auto SPC7110::reset() -> void {
 
 auto SPC7110::read(uint addr, uint8 data) -> uint8 {
   cpu.synchronizeCoprocessors();
-  if((addr & 0xff0000) == 0x500000) addr = 0x4800;
-  addr = 0x4800 | (addr & 0x3f);
+  if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
+  if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
+  addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f
 
   switch(addr) {
-
   //==================
   //decompression unit
   //==================
-
   case 0x4800: {
     uint16 counter = r4809 | r480a << 8;
     counter--;
@@ -143,7 +142,6 @@ auto SPC7110::read(uint addr, uint8 data) -> uint8 {
   //==============
   //data port unit
   //==============
-
   case 0x4810: {
     data = r4810;
     data_port_increment_4810();
@@ -165,7 +163,6 @@ auto SPC7110::read(uint addr, uint8 data) -> uint8 {
   //=====================
   //arithmetic logic unit
   //=====================
-
   case 0x4820: return r4820;
   case 0x4821: return r4821;
   case 0x4822: return r4822;
@@ -186,13 +183,11 @@ auto SPC7110::read(uint addr, uint8 data) -> uint8 {
   //===================
   //memory control unit
   //===================
-
   case 0x4830: return r4830;
   case 0x4831: return r4831;
   case 0x4832: return r4832;
   case 0x4833: return r4833;
   case 0x4834: return r4834;
-
   }
 
   return data;
@@ -200,14 +195,14 @@ auto SPC7110::read(uint addr, uint8 data) -> uint8 {
 
 auto SPC7110::write(uint addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
-  addr = 0x4800 | (addr & 0x3f);
+  if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
+  if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
+  addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f
 
   switch(addr) {
-
   //==================
   //decompression unit
   //==================
-
   case 0x4801: r4801 = data; break;
   case 0x4802: r4802 = data; break;
   case 0x4803: r4803 = data; break;
@@ -223,7 +218,6 @@ auto SPC7110::write(uint addr, uint8 data) -> void {
   //==============
   //data port unit
   //==============
-
   case 0x4811: r4811 = data; break;
   case 0x4812: r4812 = data; break;
   case 0x4813: r4813 = data; data_port_read(); break;
@@ -236,7 +230,6 @@ auto SPC7110::write(uint addr, uint8 data) -> void {
   //=====================
   //arithmetic logic unit
   //=====================
-
   case 0x4820: r4820 = data; break;
   case 0x4821: r4821 = data; break;
   case 0x4822: r4822 = data; break;
@@ -250,13 +243,11 @@ auto SPC7110::write(uint addr, uint8 data) -> void {
   //===================
   //memory control unit
   //===================
-
   case 0x4830: r4830 = data & 0x87; break;
   case 0x4831: r4831 = data & 0x07; break;
   case 0x4832: r4832 = data & 0x07; break;
   case 0x4833: r4833 = data & 0x07; break;
   case 0x4834: r4834 = data & 0x07; break;
-
   }
 }
 
@@ -264,12 +255,12 @@ auto SPC7110::write(uint addr, uint8 data) -> void {
 //SPC7110::MCUROM
 //===============
 
+//map address=00-3f,80-bf:8000-ffff mask=0x800000 => 00-3f:8000-ffff
+//map address=c0-ff:0000-ffff mask=0xc00000 => c0-ff:0000-ffff
 auto SPC7110::mcurom_read(uint addr, uint8 data) -> uint8 {
   uint mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
 
-  if((addr & 0x708000) == 0x008000  //$00-0f|80-8f:8000-ffff
-  || (addr & 0xf00000) == 0xc00000  //      $c0-cf:0000-ffff
-  ) {
+  if(addr < 0x100000) {  //$00-0f,80-8f:8000-ffff; $c0-cf:0000-ffff
     addr &= 0x0fffff;
     if(prom.size()) {  //8mbit PROM
       return prom.read(bus.mirror(0x000000 + addr, prom.size()));
@@ -278,9 +269,7 @@ auto SPC7110::mcurom_read(uint addr, uint8 data) -> uint8 {
     return datarom_read(addr);
   }
 
-  if((addr & 0x708000) == 0x108000  //$10-1f|90-9f:8000-ffff
-  || (addr & 0xf00000) == 0xd00000  //      $d0-df:0000-ffff
-  ) {
+  if(addr < 0x200000) {  //$10-1f,90-9f:8000-ffff; $d0-df:0000-ffff
     addr &= 0x0fffff;
     if(r4834 & 4) {  //16mbit PROM
       return prom.read(bus.mirror(0x100000 + addr, prom.size()));
@@ -289,17 +278,13 @@ auto SPC7110::mcurom_read(uint addr, uint8 data) -> uint8 {
     return datarom_read(addr);
   }
 
-  if((addr & 0x708000) == 0x208000  //$20-2f|a0-af:8000-ffff
-  || (addr & 0xf00000) == 0xe00000  //      $e0-ef:0000-ffff
-  ) {
+  if(addr < 0x300000) {  //$20-2f,a0-af:8000-ffff; $e0-ef:0000-ffff
     addr &= 0x0fffff;
     addr |= 0x100000 * (r4832 & 7);
     return datarom_read(addr);
   }
 
-  if((addr & 0x708000) == 0x308000  //$30-3f|b0-bf:8000-ffff
-  || (addr & 0xf00000) == 0xf00000  //      $f0-ff:0000-ffff
-  ) {
+  if(addr < 0x400000) {  //$30-3f,b0-bf:8000-ffff; $f0-ff:0000-ffff
     addr &= 0x0fffff;
     addr |= 0x100000 * (r4833 & 7);
     return datarom_read(addr);
@@ -315,21 +300,18 @@ auto SPC7110::mcurom_write(uint addr, uint8 data) -> void {
 //SPC7110::MCURAM
 //===============
 
+//map address=00-3f,80-bf:6000-7fff mask=0x80e000 => 00-07:0000-ffff
 auto SPC7110::mcuram_read(uint addr, uint8) -> uint8 {
-  //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
-    uint bank = (addr >> 16) & 0x3f;
-    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
+    addr = bus.mirror(addr, ram.size());
     return ram.read(addr);
   }
   return 0x00;
 }
 
 auto SPC7110::mcuram_write(uint addr, uint8 data) -> void {
-  //$00-3f|80-bf:6000-7fff
   if(r4830 & 0x80) {
-    uint bank = (addr >> 16) & 0x3f;
-    addr = bus.mirror(bank * 0x2000 + (addr & 0x1fff), ram.size());
+    addr = bus.mirror(addr, ram.size());
     ram.write(addr, data);
   }
 }

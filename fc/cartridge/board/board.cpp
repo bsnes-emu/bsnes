@@ -21,15 +21,15 @@
 
 Board::Board(Markup::Node& document) {
   cartridge.board = this;
-  auto cartridge = document["cartridge"];
+  auto board = document["board"];
 
-  information.type = cartridge["board/type"].text();
-  information.battery = (bool)cartridge["prg/ram/name"];
+  information.type = board["id"].text();
+  information.battery = (bool)board["prg/ram/name"];
 
-  auto prom = cartridge["prg/rom"];
-  auto pram = cartridge["prg/ram"];
-  auto crom = cartridge["chr/rom"];
-  auto cram = cartridge["chr/ram"];
+  auto prom = board["prg/rom"];
+  auto pram = board["prg/ram"];
+  auto crom = board["chr/rom"];
+  auto cram = board["chr/ram"];
 
   prgrom.size = prom["size"].natural();
   prgram.size = pram["size"].natural();
@@ -120,7 +120,7 @@ auto Board::load(string manifest) -> Board* {
   auto document = BML::unserialize(manifest);
   cartridge.information.title = document["information/title"].text();
 
-  string type = document["cartridge/board/type"].text();
+  string type = document["board/id"].text();
 
   if(type == "BANDAI-FCG"  ) return new BandaiFCG(document);
 

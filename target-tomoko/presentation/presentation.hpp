@@ -59,6 +59,7 @@ struct Presentation : Window {
       MenuSeparator toolsMenuSeparator{&toolsMenu};
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
+      MenuItem manifestViewer{&toolsMenu};
 
   FixedLayout layout{this};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};

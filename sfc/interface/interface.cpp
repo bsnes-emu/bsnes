@@ -131,6 +131,10 @@ Interface::Interface() {
   }
 }
 
+auto Interface::manifest() -> string {
+  return cartridge.manifest();
+}
+
 auto Interface::title() -> string {
   return cartridge.title();
 }
@@ -196,7 +200,6 @@ auto Interface::group(uint id) -> uint {
   case ID::SuperGameBoyBootROM:
   case ID::MCCROM:
   case ID::MCCRAM:
-  case ID::MCCPSRAM:
     return 1;
   case ID::SuperGameBoy:
   case ID::SuperGameBoyManifest:
@@ -327,7 +330,6 @@ auto Interface::load(uint id, const stream& stream) -> void {
 
   if(id == ID::MCCROM) mcc.rom.read(stream);
   if(id == ID::MCCRAM) mcc.ram.read(stream);
-  if(id == ID::MCCPSRAM) mcc.psram.read(stream);
 
   if(id == ID::SuperGameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
 
@@ -393,7 +395,6 @@ auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::SuperGameBoyRAM) stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
 
   if(id == ID::MCCRAM) stream.write(mcc.ram.data(), mcc.ram.size());
-  if(id == ID::MCCPSRAM) stream.write(mcc.psram.data(), mcc.psram.size());
 
   if(id == ID::SufamiTurboSlotARAM) stream.write(sufamiturboA.ram.data(), sufamiturboA.ram.size());
   if(id == ID::SufamiTurboSlotBRAM) stream.write(sufamiturboB.ram.data(), sufamiturboB.ram.size());

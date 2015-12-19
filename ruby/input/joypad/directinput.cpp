@@ -152,7 +152,7 @@ struct InputJoypadDirectInput {
       property.dwData = false;
       device->SetProperty(DIPROP_AUTOCENTER, &property.diph);
 
-      DWORD dwAxes[2] = {DIJOFS_X, DIJOFS_Y};
+      DWORD dwAxes[2] = {(DWORD)DIJOFS_X, (DWORD)DIJOFS_Y};
       LONG lDirection[2] = {0, 0};
       DICONSTANTFORCE force;
       force.lMagnitude = DI_FFNOMINALMAX;  //full force

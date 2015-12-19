@@ -1,14 +1,14 @@
 struct SuperFamicomCartridge {
-  SuperFamicomCartridge(const uint8_t *data, unsigned size);
+  SuperFamicomCartridge(const uint8* data, uint size);
 
   string markup;
 
 //private:
-  auto readHeader(const uint8_t *data, unsigned size) -> void;
-  auto findHeader(const uint8_t *data, unsigned size) -> unsigned;
-  auto scoreHeader(const uint8_t *data, unsigned size, unsigned addr) -> unsigned;
+  auto readHeader(const uint8* data, uint size) -> void;
+  auto findHeader(const uint8* data, uint size) -> uint;
+  auto scoreHeader(const uint8* data, uint size, uint addr) -> uint;
 
-  enum HeaderField : unsigned {
+  enum HeaderField : uint {
     CartName    = 0x00,
     Mapper      = 0x15,
     RomType     = 0x16,
@@ -22,7 +22,7 @@ struct SuperFamicomCartridge {
     ResetVector = 0x3c,
   };
 
-  enum Mode : unsigned {
+  enum Mode : uint {
     ModeNormal,
     ModeBsxSlotted,
     ModeBsx,
@@ -30,7 +30,7 @@ struct SuperFamicomCartridge {
     ModeSuperGameBoy,
   };
 
-  enum Type : unsigned {
+  enum Type : uint {
     TypeNormal,
     TypeBsxSlotted,
     TypeBsxBios,
@@ -43,12 +43,12 @@ struct SuperFamicomCartridge {
     TypeUnknown,
   };
 
-  enum Region : unsigned {
+  enum Region : uint {
     NTSC,
     PAL,
   };
 
-  enum MemoryMapper : unsigned {
+  enum MemoryMapper : uint {
     LoROM,
     HiROM,
     ExLoROM,
@@ -62,17 +62,17 @@ struct SuperFamicomCartridge {
     STROM,
   };
 
-  enum DSP1MemoryMapper : unsigned {
+  enum DSP1MemoryMapper : uint {
     DSP1Unmapped,
     DSP1LoROM1MB,
     DSP1LoROM2MB,
     DSP1HiROM,
   };
 
-  bool loaded;            //is a base cartridge inserted?
-  unsigned crc32;         //crc32 of all cartridges (base+slot(s))
-  unsigned rom_size;
-  unsigned ram_size;
+  bool loaded;             //is a base cartridge inserted?
+  uint crc32;              //crc32 of all cartridges (base+slot(s))
+  uint rom_size;
+  uint ram_size;
   bool firmware_required;  //true if firmware is required for emulation
   bool firmware_appended;  //true if firmware is present at end of data
 
@@ -100,7 +100,7 @@ struct SuperFamicomCartridge {
   bool has_st018;
 };
 
-SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size) {
+SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
   firmware_required = false;
   firmware_appended = false;
 
@@ -116,7 +116,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   if(type == TypeSufamiTurbo) return;
 
   const char* range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
-  markup.append("cartridge region=", region == NTSC ? "NTSC" : "PAL", "\n");
+  markup.append("board cic=", region == NTSC ? "411" : "413", "\n");
 
   //detect appended firmware
 
@@ -197,327 +197,310 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t *data, unsigned size)
   if(type == TypeSuperGameBoy1Bios || type == TypeSuperGameBoy2Bios) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
-      "  map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
+      "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
+      "    map address=40-7d,c0-ff:0000-7fff mask=0x8000\n"
       "  icd2 revision=1\n"
-      "    rom name=sgb.boot.rom size=0x100\n"
-      "    map id=io address=00-3f,80-bf:6000-7fff\n"
+      "    map address=00-3f,80-bf:6000-67ff,7000-7fff\n"
+      "    brom name=sgb.boot.rom size=0x100\n"
     );
   }
 
   else if(has_cx4) {
     markup.append(
       "  hitachidsp model=HG51B169 frequency=20000000\n"
-      "    rom id=program name=program.rom size=0x", hex(rom_size), "\n"
-      "    rom id=data name=cx4.data.rom size=0xc00\n"
-      "    ram id=data size=0xc00\n"
-      "    map id=io address=00-3f,80-bf:6000-7fff\n"
-      "    map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
-      "    map id=ram address=70-77:0000-7fff\n"
+      "    map address=00-3f,80-bf:6c00-6fff,7c00-7fff\n"
+      "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "      map address=00-3f,80-bf:8000-ffff mask=0x8000\n"
+      "    ram name=save.ram size=0\n"
+      "      map address=70-77:0000-7fff mask=0x8000\n"
+      "    drom name=cx4.data.rom size=0xc00\n"
+      "    dram name=cx4.data.ram size=0xc00 volatile\n"
+      "      map address=00-3f,80-bf:6000-6bff,7000-7bff mask=0xf000\n"
     );
   }
 
   else if(has_spc7110) {
     markup.append(
       "  spc7110\n"
-      "    rom id=program name=program.rom size=0x100000\n"
-      "    rom id=data name=data.rom size=0x", hex(rom_size - 0x100000), "\n"
+      "    map address=00-3f,80-bf:4800-483f\n"
+      "    map address=50,58:0000-ffff\n"
+      "    map=mcu address=00-3f,80-bf:8000-ffff mask=0x800000\n"
+      "    map=mcu address=c0-ff:0000-ffff mask=0xc00000\n"
+      "    prom name=program.rom size=0x100000\n"
+      "    drom name=data.rom size=0x", hex(rom_size - 0x100000), "\n"
       "    ram name=save.ram size=0x", hex(ram_size), "\n"
-      "    map id=io address=00-3f,80-bf:4800-483f\n"
-      "    map id=io address=50:0000-ffff\n"
-      "    map id=rom address=00-3f,80-bf:8000-ffff\n"
-      "    map id=rom address=c0-ff:0000-ffff\n"
-      "    map id=ram address=00-3f,80-bf:6000-7fff mask=0xe000\n"
+      "      map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
     );
   }
 
   else if(has_sdd1) {
     markup.append(
       "  sdd1\n"
+      "    map address=00-3f,80-bf:4800-4807\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "      map address=00-3f,80-bf:8000-ffff mask=0x808000\n"
+      "      map address=c0-ff:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
       "    ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "    map id=io address=00-3f,80-bf:4800-4807\n"
-      "    map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000\n"
-      "    map id=rom address=c0-ff:0000-ffff\n"
-    );
-    if(ram_size > 0) markup.append(
-      "    map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
-      "    map id=ram address=70-7f:0000-7fff\n"
+      "      map address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
+      "      map address=70-7d:0000-7fff mask=0x8000\n"
     );
   }
 
   else if(mapper == LoROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-7d,80-ff:8000-ffff mask=0x8000\n"
+      "    map address=40-6d,c0-ef:0000-7fff mask=0x8000\n"
     );
     if(ram_size > 0) markup.append(
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "  map id=rom address=00-7f,80-ff:8000-ffff mask=0x8000\n"
-    );
-    if(ram_size > 0) markup.append(
-      "  map id=ram address=70-7f,f0-ff:", range, "\n"
+      "    map address=70-7d,f0-ff:", range, "\n"
     );
   }
 
   else if(mapper == HiROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-3f,80-bf:8000-ffff\n"
+      "    map address=40-7f,c0-ff:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "  map id=rom address=00-3f,80-bf:8000-ffff\n"
-      "  map id=rom address=40-7f,c0-ff:0000-ffff\n"
-    );
-    if(ram_size > 0) markup.append(
-      "  map id=ram address=10-3f,90-bf:6000-7fff mask=0xe000\n"
+      "    map address=10-3f,90-bf:6000-7fff mask=0xe000\n"
     );
   }
 
   else if(mapper == ExLoROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-3f,80-bf:8000-ffff mask=0x8000\n"
+      "    map address=40-7d:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "  map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000\n"
-      "  map id=rom address=40-7f:0000-ffff\n"
-    );
-    if(ram_size > 0) markup.append(
-      "  map id=ram address=20-3f,a0-bf:6000-7fff\n"
-      "  map id=ram address=70-7f:0000-7fff\n"
+      "    map address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
+      "    map address=70-7d:0000-7fff mask=0x8000\n"
     );
   }
 
   else if(mapper == ExHiROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-3f:8000-ffff base=0x400000\n"
+      "    map address=40-7d:0000-ffff base=0x400000\n"
+      "    map address=80-bf:8000-ffff mask=0xc00000\n"
+      "    map address=c0-ff:0000-ffff mask=0xc00000\n"
     );
     if(ram_size > 0) markup.append(
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "  map id=rom address=00-3f:8000-ffff base=0x400000\n"
-      "  map id=rom address=40-7f:0000-ffff base=0x400000\n"
-      "  map id=rom address=80-bf:8000-ffff mask=0xc00000\n"
-      "  map id=rom address=c0-ff:0000-ffff mask=0xc00000\n"
-    );
-    if(ram_size > 0) markup.append(
-      "  map id=ram address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
-      "  map id=ram address=70-7f:", range, "\n"
+      "    map address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
+      "    map address=70-7d:", range, "\n"
     );
   }
 
   else if(mapper == SuperFXROM) {
     markup.append(
-      "  superfx revision=3\n"
+      "  superfx\n"
+      "    map address=00-3f,80-bf:3000-34ff\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "      map address=00-3f,80-bf:8000-ffff mask=0x8000\n"
+      "      map address=40-5f,c0-df:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
       "    ram name=save.ram size=0x", hex(ram_size), "\n"
-    );
-    markup.append(
-      "    map id=io address=00-3f,80-bf:3000-32ff\n"
-      "    map id=rom address=00-3f,80-bf:8000-ffff mask=0x8000\n"
-      "    map id=rom address=40-5f,c0-df:0000-ffff\n"
-    );
-    if(ram_size > 0) markup.append(
-      "    map id=ram address=00-3f,80-bf:6000-7fff size=0x2000\n"
-      "    map id=ram address=70-71,f0-f1:0000-ffff\n"
+      "      map address=00-3f,80-bf:6000-7fff size=0x2000\n"
+      "      map address=70-71,f0-f1:0000-ffff\n"
     );
   }
 
   else if(mapper == SA1ROM) {
     markup.append(
       "  sa1\n"
+      "    map address=00-3f,80-bf:2200-23ff\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
+      "      map address=00-3f,80-bf:8000-ffff mask=0x408000\n"
+      "      map address=c0-ff:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
-      "    ram id=bitmap name=save.ram size=0x", hex(ram_size), "\n"
+      "    bwram name=save.ram size=0x", hex(ram_size), "\n"
+      "      map address=00-3f,80-bf:6000-7fff size=0x2000\n"
+      "      map address=40-4f:0000-ffff\n"
     );
     markup.append(
-      "    ram id=internal size=0x800\n"
-      "    map id=io address=00-3f,80-bf:2200-23ff\n"
-      "    map id=rom address=00-3f,80-bf:8000-ffff\n"
-      "    map id=rom address=c0-ff:0000-ffff\n"
-    );
-    if(ram_size > 0) markup.append(
-      "    map id=bwram address=00-3f,80-bf:6000-7fff\n"
-      "    map id=bwram address=40-4f:0000-ffff\n"
-    );
-    markup.append(
-      "    map id=iram address=00-3f,80-bf:3000-37ff\n"
+      "    iram id=internal size=0x800 volatile\n"
+      "      map address=00-3f,80-bf:3000-37ff size=0x800\n"
     );
   }
 
   else if(mapper == BSCLoROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-1f:8000-ffff base=0x000000 mask=0x8000\n"
+      "    map address=20-3f:8000-ffff base=0x100000 mask=0x8000\n"
+      "    map address=80-9f:8000-ffff base=0x200000 mask=0x8000\n"
+      "    map address=a0-bf:8000-ffff base=0x100000 mask=0x8000\n"
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-      "  map id=rom address=00-1f:8000-ffff base=0x000000 mask=0x8000\n"
-      "  map id=rom address=20-3f:8000-ffff base=0x100000 mask=0x8000\n"
-      "  map id=rom address=80-9f:8000-ffff base=0x200000 mask=0x8000\n"
-      "  map id=rom address=a0-bf:8000-ffff base=0x100000 mask=0x8000\n"
-      "  map id=ram address=70-7f,f0-ff:0000-7fff\n"
+      "    map address=70-7d,f0-ff:0000-7fff mask=0x8000\n"
       "  satellaview\n"
-      "    map id=rom address=c0-ef:0000-ffff\n"
+      "    map address=c0-ef:0000-ffff\n"
     );
   }
 
   else if(mapper == BSCHiROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
+      "    map address=00-1f,80-9f:8000-ffff\n"
+      "    map address=40-5f,c0-df:0000-ffff\n"
       "  ram name=save.ram size=0x", hex(ram_size), "\n"
-      "  map id=rom address=00-1f,80-9f:8000-ffff\n"
-      "  map id=rom address=40-5f,c0-df:0000-ffff\n"
-      "  map id=ram address=20-3f,a0-bf:6000-7fff\n"
+      "    map address=20-3f,a0-bf:6000-7fff\n"
       "  satellaview\n"
-      "    map id=rom address=20-3f,a0-bf:8000-ffff\n"
-      "    map id=rom address=60-7f,e0-ff:0000-ffff\n"
+      "    map address=20-3f,a0-bf:8000-ffff\n"
+      "    map address=60-7f,e0-ff:0000-ffff\n"
     );
   }
 
   else if(mapper == BSXROM) {
     markup.append(
+      "  ram name=save.ram size=0x", hex(ram_size), "\n"
+      "    map address=10-1f:5000-5fff mask=0xf000\n"
       "  mcc\n"
+      "    map address=00-0f:5000\n"
+      "    map=mcu address=00-3f,80-bf:8000-ffff\n"
+      "    map=mcu address=40-7d,c0-ff:0000-ffff\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
-      "    ram id=save name=save.ram size=0x", hex(ram_size), "\n"
-      "    ram id=download name=download.ram size=0x80000\n"
-      "    map id=io address=00-3f,80-bf:5000-5fff\n"
-      "    map id=rom address=00-3f,80-bf:8000-ffff\n"
-      "    map id=rom address=40-7f,c0-ff:0000-ffff\n"
-      "    map id=ram address=20-3f:6000-7fff\n"
+      "    ram name=download.ram size=0x80000\n"
+      "      map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
     );
   }
 
   else if(mapper == STROM) {
     markup.append(
       "  rom name=program.rom size=0x", hex(rom_size), "\n"
-      "  map id=rom address=00-1f,80-9f:8000-ffff mask=0x8000\n"
+      "    map address=00-1f,80-9f:8000-ffff mask=0x8000\n"
       "  sufamiturbo\n"
-      "    map id=rom address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
-      "    map id=ram address=60-6f,e0-ef:0000-ffff\n"
+      "    rom\n"
+      "      map address=20-3f,a0-bf:8000-ffff mask=0x8000\n"
+      "    ram\n"
+      "      map address=60-6f,e0-ef:0000-ffff\n"
       "  sufamiturbo\n"
-      "    map id=rom address=40-5f,c0-df:0000-7fff mask=0x8000\n"
-      "    map id=rom address=40-5f,c0-df:8000-ffff mask=0x8000\n"
-      "    map id=ram address=70-7f,f0-ff:0000-ffff\n"
+      "    rom\n"
+      "      map address=40-5f,c0-df:0000-7fff mask=0x8000\n"
+      "      map address=40-5f,c0-df:8000-ffff mask=0x8000\n"
+      "    ram\n"
+      "      map address=70-7d,f0-ff:0000-ffff\n"
     );
   }
 
   if(has_sharprtc) {
     markup.append(
       "  sharprtc\n"
+      "    map address=00-3f,80-bf:2800-2801\n"
       "    ram name=rtc.ram size=0x10\n"
-      "    map id=io address=00-3f,80-bf:2800-2801\n"
     );
   }
 
   if(has_epsonrtc) {
     markup.append(
       "  epsonrtc\n"
+      "    map address=00-3f,80-bf:4840-4842\n"
       "    ram name=rtc.ram size=0x10\n"
-      "    map id=io address=00-3f,80-bf:4840-4842\n"
     );
   }
 
   if(has_obc1) {
     markup.append(
       "  obc1\n"
+      "    map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
       "    ram name=save.ram size=0x2000\n"
-      "    map id=io address=00-3f,80-bf:6000-7fff\n"
     );
   }
 
   if(has_dsp1) {
     markup.append(
       "  necdsp model=uPD7725 frequency=8000000\n"
-      "    rom id=program name=dsp1b.program.rom size=0x1800\n"
-      "    rom id=data name=dsp1b.data.rom size=0x800\n"
-      "    ram id=data size=0x200\n"
     );
     if(dsp1_mapper == DSP1LoROM1MB) markup.append(
-      "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
+      "    map address=20-3f,a0-bf:8000-ffff mask=0x3fff\n"
     );
     if(dsp1_mapper == DSP1LoROM2MB) markup.append(
-      "    map id=io address=60-6f,e0-ef:0000-7fff select=0x4000\n"
+      "    map address=60-6f,e0-ef:0000-7fff mask=0x3fff\n"
     );
     if(dsp1_mapper == DSP1HiROM) markup.append(
-      "    map id=io address=00-1f,80-9f:6000-7fff select=0x1000\n"
+      "    map address=00-1f,80-9f:6000-7fff mask=0xfff\n"
+    );
+    markup.append(
+      "    prom name=dsp1b.program.rom size=0x1800\n"
+      "    drom name=dsp1b.data.rom size=0x800\n"
+      "    dram name=dsp1b.data.ram size=0x200 volatile\n"
     );
   }
 
   if(has_dsp2) {
     markup.append(
       "  necdsp model=uPD7725 frequency=8000000\n"
-      "    rom id=program name=dsp2.program.rom size=0x1800\n"
-      "    rom id=data name=dsp2.data.rom size=0x800\n"
-      "    ram id=data size=0x200\n"
-      "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
+      "    map address=20-3f,a0-bf:8000-ffff mask=0x3fff\n"
+      "    prom name=dsp2.program.rom size=0x1800\n"
+      "    drom name=dsp2.data.rom size=0x800\n"
+      "    dram name=dsp2.data.ram size=0x200 volatile\n"
     );
   }
 
   if(has_dsp3) {
     markup.append(
       "  necdsp model=uPD7725 frequency=8000000\n"
-      "    rom id=program name=dsp3.program.rom size=0x1800\n"
-      "    rom id=data name=dsp3.data.rom size=0x800\n"
-      "    ram id=data size=0x200\n"
-      "    map id=io address=20-3f,a0-bf:8000-ffff select=0x4000\n"
+      "    map address=20-3f,a0-bf:8000-ffff mask=0x3fff\n"
+      "    prom name=dsp3.program.rom size=0x1800\n"
+      "    drom name=dsp3.data.rom size=0x800\n"
+      "    dram name=dsp3.data.ram size=0x200 volatile\n"
     );
   }
 
   if(has_dsp4) {
     markup.append(
       "  necdsp model=uPD7725 frequency=8000000\n"
-      "    rom id=program name=dsp4.program.rom size=0x1800\n"
-      "    rom id=data name=dsp4.data.rom size=0x800\n"
-      "    ram id=data size=0x200\n"
-      "    map id=io address=30-3f,b0-bf:8000-ffff select=0x4000\n"
+      "    map address=30-3f,b0-bf:8000-ffff mask=0x3fff\n"
+      "    prom name=dsp4.program.rom size=0x1800\n"
+      "    drom name=dsp4.data.rom size=0x800\n"
+      "    dram name=dsp4.data.ram size=0x200 volatile\n"
     );
   }
 
   if(has_st010) {
     markup.append(
       "  necdsp model=uPD96050 frequency=11000000\n"
-      "    rom id=program name=st010.program.rom size=0xc000\n"
-      "    rom id=data name=st010.data.rom size=0x1000\n"
-      "    ram id=data name=save.ram size=0x1000\n"
-      "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
-      "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
+      "    map address=60-67,e0-e7:0000-3fff\n"
+      "    prom name=st010.program.rom size=0xc000\n"
+      "    drom name=st010.data.rom size=0x1000\n"
+      "    dram name=save.ram size=0x1000\n"
+      "      map address=68-6f,e8-ef:0000-7fff mask=0x8000\n"
     );
   }
 
   if(has_st011) {
     markup.append(
       "  necdsp model=uPD96050 frequency=15000000\n"
-      "    rom id=program name=st011.program.rom size=0xc000\n"
-      "    rom id=data name=st011.data.rom size=0x1000\n"
-      "    ram id=data name=save.ram size=0x1000\n"
-      "    map id=io address=60-67,e0-e7:0000-3fff select=0x0001\n"
-      "    map id=ram address=68-6f,e8-ef:0000-7fff\n"
+      "    map address=60-67,e0-e7:0000-3fff\n"
+      "    prom name=st011.program.rom size=0xc000\n"
+      "    drom name=st011.data.rom size=0x1000\n"
+      "    dram name=save.ram size=0x1000\n"
+      "      map address=68-6f,e8-ef:0000-7fff mask=0x8000\n"
     );
   }
 
   if(has_st018) {
     markup.append(
       "  armdsp frequency=21477272\n"
-      "    rom id=program name=st018.program.rom size=0x20000\n"
-      "    rom id=data name=st018.data.rom size=0x8000\n"
-      "    ram name=save.ram size=0x4000\n"
-      "    map id=io address=00-3f,80-bf:3800-38ff\n"
+      "    map address=00-3f,80-bf:3800-38ff\n"
+      "    prom name=st018.program.rom size=0x20000\n"
+      "    drom name=st018.data.rom size=0x8000\n"
+      "    dram name=save.ram size=0x4000\n"
     );
   }
 }
 
-auto SuperFamicomCartridge::readHeader(const uint8_t *data, unsigned size) -> void {
+auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   type        = TypeUnknown;
   mapper      = LoROM;
   dsp1_mapper = DSP1Unmapped;
@@ -559,12 +542,12 @@ auto SuperFamicomCartridge::readHeader(const uint8_t *data, unsigned size) -> vo
     return;
   }
 
-  const unsigned index = findHeader(data, size);
-  const uint8_t mapperid = data[index + Mapper];
-  const uint8_t rom_type = data[index + RomType];
-  const uint8_t rom_size = data[index + RomSize];
-  const uint8_t company  = data[index + Company];
-  const uint8_t regionid = data[index + CartRegion] & 0x7f;
+  const uint index = findHeader(data, size);
+  const uint8 mapperid = data[index + Mapper];
+  const uint8 rom_type = data[index + RomType];
+  const uint8 rom_size = data[index + RomSize];
+  const uint8 company  = data[index + Company];
+  const uint8 regionid = data[index + CartRegion] & 0x7f;
 
   ram_size = 1024 << (data[index + RamSize] & 7);
   if(ram_size == 1024) ram_size = 0;  //no RAM present
@@ -579,7 +562,7 @@ auto SuperFamicomCartridge::readHeader(const uint8_t *data, unsigned size) -> vo
 
   if(data[index + 0x13] == 0x00 || data[index + 0x13] == 0xff) {
     if(data[index + 0x14] == 0x00) {
-      const uint8_t n15 = data[index + 0x15];
+      const uint8 n15 = data[index + 0x15];
       if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
         if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
           type = TypeBsx;
@@ -627,7 +610,7 @@ auto SuperFamicomCartridge::readHeader(const uint8_t *data, unsigned size) -> vo
   //detect presence of BS-X flash cartridge connector (reads extended header information)
   if(data[index - 14] == 'Z') {
     if(data[index - 11] == 'J') {
-      uint8_t n13 = data[index - 13];
+      uint8 n13 = data[index - 13];
       if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
         if(company == 0x33 || (data[index - 10] == 0x00 && data[index - 4] == 0x00)) {
           has_bsx_slot = true;
@@ -746,10 +729,10 @@ auto SuperFamicomCartridge::readHeader(const uint8_t *data, unsigned size) -> vo
   }
 }
 
-auto SuperFamicomCartridge::findHeader(const uint8_t *data, unsigned size) -> unsigned {
-  unsigned score_lo = scoreHeader(data, size, 0x007fc0);
-  unsigned score_hi = scoreHeader(data, size, 0x00ffc0);
-  unsigned score_ex = scoreHeader(data, size, 0x40ffc0);
+auto SuperFamicomCartridge::findHeader(const uint8* data, uint size) -> uint {
+  uint score_lo = scoreHeader(data, size, 0x007fc0);
+  uint score_hi = scoreHeader(data, size, 0x00ffc0);
+  uint score_ex = scoreHeader(data, size, 0x40ffc0);
   if(score_ex) score_ex += 4;  //favor ExHiROM on images > 32mbits
 
   if(score_lo >= score_hi && score_lo >= score_ex) {
@@ -761,16 +744,16 @@ auto SuperFamicomCartridge::findHeader(const uint8_t *data, unsigned size) -> un
   }
 }
 
-auto SuperFamicomCartridge::scoreHeader(const uint8_t *data, unsigned size, unsigned addr) -> unsigned {
+auto SuperFamicomCartridge::scoreHeader(const uint8* data, uint size, uint addr) -> uint {
   if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 
-  uint16_t resetvector = data[addr + ResetVector] | (data[addr + ResetVector + 1] << 8);
-  uint16_t checksum    = data[addr + Checksum   ] | (data[addr + Checksum    + 1] << 8);
-  uint16_t complement  = data[addr + Complement ] | (data[addr + Complement  + 1] << 8);
+  uint16 resetvector = data[addr + ResetVector] | (data[addr + ResetVector + 1] << 8);
+  uint16 checksum    = data[addr + Checksum   ] | (data[addr + Checksum    + 1] << 8);
+  uint16 complement  = data[addr + Complement ] | (data[addr + Complement  + 1] << 8);
 
-  uint8_t resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)];  //first opcode executed upon reset
-  uint8_t mapper  = data[addr + Mapper] & ~0x10;                      //mask off irrelevent FastROM-capable bit
+  uint8 resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)];  //first opcode executed upon reset
+  uint8 mapper  = data[addr + Mapper] & ~0x10;                      //mask off irrelevent FastROM-capable bit
 
   //$00:[000-7fff] contains uninitialized RAM and MMIO.
   //reset vector must point to ROM at $00:[8000-ffff] to be considered valid.

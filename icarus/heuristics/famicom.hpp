@@ -1,18 +1,18 @@
 struct FamicomCartridge {
-  FamicomCartridge(const uint8_t* data, unsigned size);
+  FamicomCartridge(const uint8* data, uint size);
 
   string markup;
 
 //private:
-  unsigned mapper;
-  unsigned mirror;
-  unsigned prgrom;
-  unsigned prgram;
-  unsigned chrrom;
-  unsigned chrram;
+  uint mapper;
+  uint mirror;
+  uint prgrom;
+  uint prgram;
+  uint chrrom;
+  uint chrram;
 };
 
-FamicomCartridge::FamicomCartridge(const uint8_t* data, unsigned size) {
+FamicomCartridge::FamicomCartridge(const uint8* data, uint size) {
   if(size < 16) return;
   if(data[0] != 'N') return;
   if(data[1] != 'E') return;
@@ -26,65 +26,65 @@ FamicomCartridge::FamicomCartridge(const uint8_t* data, unsigned size) {
   prgram = 0u;
   chrram = chrrom == 0u ? 8192u : 0u;
 
-  markup.append("cartridge\n");
+  markup.append("board ");
 
   switch(mapper) {
   default:
-    markup.append("  board type=NES-NROM-256\n");
+    markup.append("id:NES-NROM-256\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
   case   1:
-    markup.append("  board type=NES-SXROM\n");
+    markup.append("id:NES-SXROM\n");
     markup.append("  chip type=MMC1B2\n");
     prgram = 8192;
     break;
 
   case   2:
-    markup.append("  board type=NES-UOROM\n");
+    markup.append("id:NES-UOROM\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
   case   3:
-    markup.append("  board type=NES-CNROM\n");
+    markup.append("id:NES-CNROM\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
   case   4:
     //MMC3
-    markup.append("  board type=NES-TLROM\n");
+    markup.append("id:NES-TLROM\n");
     markup.append("  chip type=MMC3B\n");
     prgram = 8192;
     //MMC6
-  //markup.append("  board type=NES-HKROM\n");
+  //markup.append("id:NES-HKROM\n");
   //markup.append("  chip type=MMC6n");
   //prgram = 1024;
     break;
 
   case   5:
-    markup.append("  board type=NES-ELROM\n");
+    markup.append("id:NES-ELROM\n");
     markup.append("  chip type=MMC5\n");
     prgram = 65536;
     break;
 
   case   7:
-    markup.append("  board type=NES-AOROM\n");
+    markup.append("id:NES-AOROM\n");
     break;
 
   case   9:
-    markup.append("  board type=NES-PNROM\n");
+    markup.append("id:NES-PNROM\n");
     markup.append("  chip type=MMC2\n");
     prgram = 8192;
     break;
 
   case  10:
-    markup.append("  board type=NES-FKROM\n");
+    markup.append("id:NES-FKROM\n");
     markup.append("  chip type=MMC4\n");
     prgram = 8192;
     break;
 
   case  16:
-    markup.append("  board type=BANDAI-FCG\n");
+    markup.append("id:BANDAI-FCG\n");
     markup.append("  chip type=LZ93D50\n");
     break;
 
@@ -92,7 +92,7 @@ FamicomCartridge::FamicomCartridge(const uint8_t* data, unsigned size) {
   case  23:
   case  25:
     //VRC4
-    markup.append("  board type=KONAMI-VRC-4\n");
+    markup.append("id:KONAMI-VRC-4\n");
     markup.append("  chip type=VRC4\n");
     markup.append("    pinout a0=1 a1=0\n");
     prgram = 8192;
@@ -100,52 +100,52 @@ FamicomCartridge::FamicomCartridge(const uint8_t* data, unsigned size) {
 
   case  22:
     //VRC2
-    markup.append("  board type=KONAMI-VRC-2\n");
+    markup.append("id:KONAMI-VRC-2\n");
     markup.append("  chip type=VRC2\n");
     markup.append("    pinout a0=0 a1=1\n");
     break;
 
   case  24:
-    markup.append("  board type=KONAMI-VRC-6\n");
+    markup.append("id:KONAMI-VRC-6\n");
     markup.append("  chip type=VRC6\n");
     break;
 
   case  26:
-    markup.append("  board type=KONAMI-VRC-6\n");
+    markup.append("id:KONAMI-VRC-6\n");
     markup.append("  chip type=VRC6\n");
     prgram = 8192;
     break;
 
   case  34:
-    markup.append("  board type=NES-BNROM\n");
+    markup.append("id:NES-BNROM\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
   case  66:
-    markup.append("  board type=NES-GNROM\n");
+    markup.append("id:NES-GNROM\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     break;
 
   case  69:
-    markup.append("  board type=SUNSOFT-5B\n");
+    markup.append("id:SUNSOFT-5B\n");
     markup.append("  chip type=5B\n");
     prgram = 8192;
     break;
 
   case  73:
-    markup.append("  board type=KONAMI-VRC-3\n");
+    markup.append("id:KONAMI-VRC-3\n");
     markup.append("  chip type=VRC3\n");
     markup.append("  mirror mode=", mirror == 0 ? "horizontal" : "vertical", "\n");
     prgram = 8192;
     break;
 
   case  75:
-    markup.append("  board type=KONAMI-VRC-1\n");
+    markup.append("id:KONAMI-VRC-1\n");
     markup.append("  chip type=VRC1\n");
     break;
 
   case  85:
-    markup.append("  board type=KONAMI-VRC-7\n");
+    markup.append("id:KONAMI-VRC-7\n");
     markup.append("  chip type=VRC7\n");
     prgram = 8192;
     break;

@@ -3,7 +3,6 @@
 struct MCC {
   MappedRAM rom;
   MappedRAM ram;
-  MappedRAM psram;
 
   auto init() -> void;
   auto load() -> void;
@@ -12,16 +11,15 @@ struct MCC {
   auto reset() -> void;
 
   auto memory_access(bool write, Memory& memory, uint addr, uint8 data) -> uint8;
-  auto memory_read(Memory& memory, uint addr, uint8 data) -> uint8;
-  auto memory_write(Memory& memory, uint addr, uint8 data) -> void;
-
   auto mcu_access(bool write, uint addr, uint8 data) -> uint8;
+
   auto mcu_read(uint addr, uint8 data) -> uint8;
   auto mcu_write(uint addr, uint8 data) -> void;
 
-  auto mmio_read(uint addr, uint8 data) -> uint8;
-  auto mmio_write(uint addr, uint8 data) -> void;
-  auto mmio_commit() -> void;
+  auto read(uint addr, uint8 data) -> uint8;
+  auto write(uint addr, uint8 data) -> void;
+
+  auto commit() -> void;
 
   auto serialize(serializer&) -> void;
 

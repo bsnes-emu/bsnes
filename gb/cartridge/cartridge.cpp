@@ -22,7 +22,11 @@ Cartridge::~Cartridge() {
   unload();
 }
 
-auto Cartridge::title() -> string {
+auto Cartridge::manifest() const -> string {
+  return information.markup;
+}
+
+auto Cartridge::title() const -> string {
   return information.title;
 }
 
@@ -58,7 +62,7 @@ auto Cartridge::load(System::Revision revision) -> void {
   auto document = BML::unserialize(information.markup);
   information.title = document["information/title"].text();
 
-  auto mapperid = document["cartridge/board/type"].text();
+  auto mapperid = document["board/mapper"].text();
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
   if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
   if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
@@ -71,8 +75,8 @@ auto Cartridge::load(System::Revision revision) -> void {
   information.rtc = false;
   information.rumble = false;
 
-  auto rom = document["cartridge/rom"];
-  auto ram = document["cartridge/ram"];
+  auto rom = document["board/rom"];
+  auto ram = document["board/ram"];
 
   romsize = rom["size"].natural();
   romdata = allocate<uint8>(romsize, 0xff);

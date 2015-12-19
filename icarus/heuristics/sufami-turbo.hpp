@@ -11,7 +11,7 @@ SufamiTurboCartridge::SufamiTurboCartridge(const uint8_t* data, unsigned size) {
   unsigned ramsize = data[0x37] *   0x800;    //2KB
   bool linkable = data[0x35] != 0x00;  //TODO: unconfirmed
 
-  markup.append("cartridge", linkable ? " linkable" : "", "\n");
+  markup.append("board", linkable ? " linkable" : "", "\n");
   markup.append("  rom name=program.rom size=0x", hex(romsize), "\n");
   if(ramsize)
   markup.append("  ram name=save.ram size=0x", hex(ramsize), "\n");

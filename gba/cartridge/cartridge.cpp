@@ -31,6 +31,10 @@ auto Cartridge::sha256() const -> string {
   return information.sha256;
 }
 
+auto Cartridge::manifest() const -> string {
+  return information.markup;
+}
+
 auto Cartridge::title() const -> string {
   return information.title;
 }
@@ -45,48 +49,50 @@ auto Cartridge::load() -> void {
   hasEEPROM = false;
   hasFLASH  = false;
 
-  if(auto info = document["cartridge/mrom"]) {
+  if(auto info = document["board/rom"]) {
     mrom.size = min(32 * 1024 * 1024, info["size"].natural());
 
     interface->loadRequest(ID::MROM, info["name"].text(), true);
   }
 
-  if(auto info = document["cartridge/sram"]) {
-    hasSRAM = true;
-    sram.size = min(32 * 1024, info["size"].natural());
-    sram.mask = sram.size - 1;
-    for(auto n : range(sram.size)) sram.data[n] = 0xff;
+  if(auto info = document["board/ram"]) {
+    if(info["type"].text() == "sram") {
+      hasSRAM = true;
+      sram.size = min(32 * 1024, info["size"].natural());
+      sram.mask = sram.size - 1;
+      for(auto n : range(sram.size)) sram.data[n] = 0xff;
 
-    interface->loadRequest(ID::SRAM, info["name"].text(), false);
-    memory.append({ID::SRAM, info["name"].text()});
-  }
+      interface->loadRequest(ID::SRAM, info["name"].text(), false);
+      memory.append({ID::SRAM, info["name"].text()});
+    }
 
-  if(auto info = document["cartridge/eeprom"]) {
-    hasEEPROM = true;
-    eeprom.size = min(8 * 1024, info["size"].natural());
-    eeprom.bits = eeprom.size <= 512 ? 6 : 14;
-    if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
-    eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
-    eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
-    for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
+    if(info["type"].text() == "eeprom") {
+      hasEEPROM = true;
+      eeprom.size = min(8 * 1024, info["size"].natural());
+      eeprom.bits = eeprom.size <= 512 ? 6 : 14;
+      if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
+      eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
+      eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
+      for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
 
-    interface->loadRequest(ID::EEPROM, info["name"].text(), false);
-    memory.append({ID::EEPROM, info["name"].text()});
-  }
+      interface->loadRequest(ID::EEPROM, info["name"].text(), false);
+      memory.append({ID::EEPROM, info["name"].text()});
+    }
 
-  if(auto info = document["cartridge/flash"]) {
-    hasFLASH = true;
-    flash.id = info["id"].natural();
-    flash.size = min(128 * 1024, info["size"].natural());
-    for(auto n : range(flash.size)) flash.data[n] = 0xff;
+    if(info["type"].text() == "flash") {
+      hasFLASH = true;
+      flash.id = info["id"].natural();
+      flash.size = min(128 * 1024, info["size"].natural());
+      for(auto n : range(flash.size)) flash.data[n] = 0xff;
 
-    //if flash ID not provided; guess that it's a Macronix chip
-    //this will not work for all games; in which case, the ID must be specified manually
-    if(!flash.id && flash.size ==  64 * 1024) flash.id = 0x1cc2;
-    if(!flash.id && flash.size == 128 * 1024) flash.id = 0x09c2;
+      //if flash ID not provided; guess that it's a Macronix chip
+      //this will not work for all games; in which case, the ID must be specified manually
+      if(!flash.id && flash.size ==  64 * 1024) flash.id = 0x1cc2;
+      if(!flash.id && flash.size == 128 * 1024) flash.id = 0x09c2;
 
-    interface->loadRequest(ID::FLASH, info["name"].text(), false);
-    memory.append({ID::FLASH, info["name"].text()});
+      interface->loadRequest(ID::FLASH, info["name"].text(), false);
+      memory.append({ID::FLASH, info["name"].text()});
+    }
   }
 
   information.sha256 = Hash::SHA256(mrom.data, mrom.size).digest();

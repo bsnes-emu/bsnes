@@ -14,6 +14,10 @@ auto Cartridge::sha256() const -> string {
   return _sha256;
 }
 
+auto Cartridge::manifest() const -> string {
+  return information.markup;
+}
+
 auto Cartridge::title() const -> string {
   return information.title;
 }

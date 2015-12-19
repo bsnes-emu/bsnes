@@ -91,7 +91,7 @@ auto MSU1::reset() -> void {
 auto MSU1::dataOpen() -> void {
   if(dataFile.open()) dataFile.close();
   auto document = BML::unserialize(cartridge.information.markup.cartridge);
-  string name = document["cartridge/msu1/rom/name"].text();
+  string name = document["board/msu1/rom/name"].text();
   if(!name) name = "msu1.rom";
   if(dataFile.open({interface->path(ID::SuperFamicom), name}, file::mode::read)) {
     dataFile.seek(mmio.dataReadOffset);
@@ -102,7 +102,7 @@ auto MSU1::audioOpen() -> void {
   if(audioFile.open()) audioFile.close();
   auto document = BML::unserialize(cartridge.information.markup.cartridge);
   string name = {"track-", mmio.audioTrack, ".pcm"};
-  for(auto track : document.find("cartridge/msu1/track")) {
+  for(auto track : document.find("board/msu1/track")) {
     if(track["number"].natural() != mmio.audioTrack) continue;
     name = track["name"].text();
     break;

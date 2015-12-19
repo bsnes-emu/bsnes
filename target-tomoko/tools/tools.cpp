@@ -2,8 +2,10 @@
 #include "cheat-database.cpp"
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
+#include "manifest-viewer.cpp"
 CheatDatabase* cheatDatabase = nullptr;
 ToolsManager* toolsManager = nullptr;
+ManifestViewer* manifestViewer = nullptr;
 
 ToolsManager::ToolsManager() {
   toolsManager = this;

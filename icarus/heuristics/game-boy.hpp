@@ -100,8 +100,7 @@ GameBoyCartridge::GameBoyCartridge(uint8_t *romdata, unsigned romsize) {
 
   if(info.mapper == "MBC2") info.ramsize = 512;  //512 x 4-bit
 
-  markup.append("cartridge\n");
-  markup.append("  board type=", info.mapper, "\n");
+  markup.append("board mapper=", info.mapper, "\n");
   markup.append("  rom name=program.rom size=0x", hex(romsize), "\n");
   if(info.ramsize > 0) markup.append("  ram name=save.ram size=0x", hex(info.ramsize), "\n");
 }
