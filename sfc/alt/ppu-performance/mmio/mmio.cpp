@@ -155,7 +155,7 @@ auto PPU::mmio_update_video_mode() -> void {
   }
 }
 
-auto PPU::mmio_read(uint addr) -> uint8 {
+auto PPU::mmio_read(uint addr, uint8 data) -> uint8 {
   cpu.synchronizePPU();
 
   switch(addr & 0xffff) {
@@ -185,7 +185,7 @@ auto PPU::mmio_read(uint addr) -> uint8 {
 
   case 0x2137: {  //SLHV
     if(cpu.pio() & 0x80) latch_counters();
-    return cpu.regs.mdr;
+    return data;
   }
 
   case 0x2138: {  //OAMDATAREAD
@@ -273,7 +273,7 @@ auto PPU::mmio_read(uint addr) -> uint8 {
   }
   }
 
-  return cpu.regs.mdr;
+  return data;
 }
 
 auto PPU::mmio_write(uint addr, uint8 data) -> void {

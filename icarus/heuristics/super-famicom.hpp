@@ -1,5 +1,5 @@
 struct SuperFamicomCartridge {
-  SuperFamicomCartridge(const uint8* data, uint size);
+  SuperFamicomCartridge(const uint8* data, uint size, bool has_msu1 = false);
 
   string markup;
 
@@ -35,6 +35,8 @@ struct SuperFamicomCartridge {
     SA1,
     LoROMSatellaview,
     HiROMSatellaview,
+    CampusChallenge92,
+    Powerfest94,
 
     //invalid types
     Unknown,
@@ -84,7 +86,7 @@ struct SuperFamicomCartridge {
   bool has_st018 = false;
 };
 
-SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
+SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size, bool has_msu1) {
   //skip copier header
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
@@ -376,6 +378,47 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
     );
   }
 
+  else if(type == Type::CampusChallenge92) {
+    markup.append(
+      "  event=CC92 timer=360\n"
+      "    map address=c0,e0:0000\n"
+      "    map=mcu address=00-1f,80-9f:8000-ffff\n"
+      "    rom name=program.rom size=0x40000\n"
+      "    rom name=slot-1.rom size=0x80000\n"
+      "    rom name=slot-2.rom size=0x80000\n"
+      "    rom name=slot-3.rom size=0x80000\n"
+      "    ram name=save.ram size=0x2000 volatile\n"
+      "      map address=70-7d,f0-ff:0000-7fff mask=0x8000\n"
+      "  necdsp model=uPD7725 frequency=8000000\n"
+      "    map address=20-3f,a0-bf:8000-ffff mask=0x7fff\n"
+      "    prom name=dsp1.program.rom size=0x1800\n"
+      "    drom name=dsp1.data.rom size=0x800\n"
+      "    dram name=dsp1.data.ram size=0x200 volatile\n"
+    );
+    return;
+  }
+
+  else if(type == Type::Powerfest94) {
+    markup.append(
+      "  event=PF94 timer=360\n"
+      "    map address=10,20:6000\n"
+      "    map=mcu address=00-3f,80-bf:8000-ffff\n"
+      "    map=mcu address=c0-ff:0000-ffff\n"
+      "    rom name=program.rom size=0x40000\n"
+      "    rom name=slot-1.rom size=0x80000\n"
+      "    rom name=slot-2.rom size=0x80000\n"
+      "    rom name=slot-3.rom size=0x100000\n"
+      "    ram name=save.ram size=0x2000 volatile\n"
+      "      map address=30-3f,b0-bf:6000-7fff mask=0xe000\n"
+      "  necdsp model=uPD7725 frequency=8000000\n"
+      "    map address=00-0f,80-8f:6000-7fff mask=0xfff\n"
+      "    prom name=dsp1.program.rom size=0x1800\n"
+      "    drom name=dsp1.data.rom size=0x800\n"
+      "    dram name=dsp1.data.ram size=0x200 volatile\n"
+    );
+    return;
+  }
+
   if(has_sharprtc) {
     markup.append(
       "  sharprtc\n"
@@ -481,6 +524,14 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size) {
       "    dram name=save.ram size=0x4000\n"
     );
   }
+
+  if(has_msu1) {
+    markup.append(
+      "  msu1\n"
+      "    map address=00-3f,80-bf:2000-2007\n"
+      "    rom name=msu1.rom\n"
+    );
+  }
 }
 
 auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
@@ -499,6 +550,9 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   const uint8 rom_size = data[index + RomSize];
   const uint8 company  = data[index + Company];
   const uint8 regionid = data[index + CartRegion] & 0x7f;
+
+  const uint16 complement = data[index + Complement] | data[index + Complement + 1] << 8;
+  const uint16 checksum   = data[index + Checksum] | data[index + Checksum + 1] << 8;
 
   this->rom_size = size;
   ram_size = 1024 << (data[index + RamSize] & 7);
@@ -544,7 +598,24 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
     return;
   }
 
-  //detect standard carts
+  //detect competition carts
+  if(!memcmp(data + index, "\x00\x08\x22\x02\x1c\x00\x10\x00\x08\x65\x80\x84\x20\x00\x22\x25\x00\x83\x0c\x80\x10", 21)
+  && complement == 0x0100 && checksum == 0x2d02 && (size == 0x1c0000 || size == 0x1c8000)) {
+    type = Type::CampusChallenge92;  //dark title screen version
+    return;
+  }
+
+  if(!memcmp(data + index, "\xc9\x80\x80\x44\x15\x00\x62\x09\x29\xa0\x52\x70\x50\x12\x05\x35\x31\x63\xc0\x22\x01", 21)
+  && complement == 0x2011 && checksum == 0xf8c0 && (size == 0x240000 || size == 0x248000)) {
+    type = Type::Powerfest94;  //10,000 points version
+    return;
+  }
+
+  if(!memcmp(data + index, "PREHISTORIK MAN      ", 21)
+  && complement == 0xffff && checksum == 0x0000 && (size == 0x240000 || size == 0x248000)) {
+    type = Type::Powerfest94;  //1,000,000 points version
+    return;
+  }
 
   //detect presence of BS-X flash cartridge connector (reads extended header information)
   if(data[index - 14] == 'Z') {
@@ -578,8 +649,11 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
       type = Type::LoROM;
     } else if(index == 0xffc0) {
       type = Type::HiROM;
-    } else {  //index == 0x40ffc0
+    } else if(index == 0x40ffc0) {
       type = Type::ExHiROM;
+    } else {
+      type = Type::Unknown;
+      return;
     }
   }
 

@@ -23,7 +23,7 @@ auto CPU::op_io() -> void {
 }
 
 auto CPU::op_read(uint addr) -> uint8 {
-  regs.mdr = bus.read(addr);
+  regs.mdr = bus.read(addr, regs.mdr);
   add_clocks(speed(addr));
   return regs.mdr;
 }

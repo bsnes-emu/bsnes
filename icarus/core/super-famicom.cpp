@@ -3,6 +3,7 @@ auto Icarus::superFamicomManifest(string location) -> string {
   auto files = directory::files(location, "*.rom");
   concatenate(buffer, {location, "program.rom"});
   concatenate(buffer, {location, "data.rom"   });
+  for(auto& file : files.match("slot-*.rom"   )) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.boot.rom"   )) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.program.rom")) concatenate(buffer, {location, file});
   for(auto& file : files.match("*.data.rom"   )) concatenate(buffer, {location, file});
@@ -23,7 +24,8 @@ auto Icarus::superFamicomManifest(vector<uint8>& buffer, string location, bool* 
   }
 
   if(settings["icarus/UseHeuristics"].boolean() && !markup) {
-    SuperFamicomCartridge cartridge{buffer.data(), buffer.size()};
+    bool hasMSU1 = file::exists({location, "msu1.rom"});
+    SuperFamicomCartridge cartridge{buffer.data(), buffer.size(), hasMSU1};
     if(markup = cartridge.markup) {
       if(firmwareAppended) *firmwareAppended = cartridge.firmware_appended;
       markup.append("\n");

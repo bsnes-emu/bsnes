@@ -80,8 +80,8 @@ auto CPU::enter() -> void {
 }
 
 auto CPU::enable() -> void {
-  function<uint8 (uint)> reader = {&CPU::mmio_read, (CPU*)&cpu};
-  function<void (uint, uint8)> writer = {&CPU::mmio_write, (CPU*)&cpu};
+  function<auto (uint, uint8) -> uint8> reader{&CPU::mmio_read, (CPU*)&cpu};
+  function<auto (uint, uint8) -> void> writer{&CPU::mmio_write, (CPU*)&cpu};
 
   bus.map(reader, writer, 0x00, 0x3f, 0x2140, 0x2183);
   bus.map(reader, writer, 0x80, 0xbf, 0x2140, 0x2183);
@@ -95,7 +95,7 @@ auto CPU::enable() -> void {
   bus.map(reader, writer, 0x00, 0x3f, 0x4300, 0x437f);
   bus.map(reader, writer, 0x80, 0xbf, 0x4300, 0x437f);
 
-  reader = [](uint addr) { return cpu.wram[addr]; };
+  reader = [](uint addr, uint8 data) { return cpu.wram[addr]; };
   writer = [](uint addr, uint8 data) { cpu.wram[addr] = data; };
 
   bus.map(reader, writer, 0x00, 0x3f, 0x0000, 0x1fff, 0x002000);
@@ -128,8 +128,8 @@ auto CPU::reset() -> void {
   regs.mdr = 0x00;
   regs.wai = false;
 
-  regs.pc.l = bus.read(0xfffc);
-  regs.pc.h = bus.read(0xfffd);
+  regs.pc.l = bus.read(0xfffc, regs.mdr);
+  regs.pc.h = bus.read(0xfffd, regs.mdr);
   regs.pc.b = 0x00;
 
   status.nmi_valid = false;

@@ -4,7 +4,9 @@ namespace SuperFamicom {
 
 Event event;
 
-auto Event::Enter() -> void { event.enter(); }
+auto Event::Enter() -> void {
+  event.enter();
+}
 
 auto Event::enter() -> void {
   while(true) {
@@ -60,19 +62,7 @@ auto Event::reset() -> void {
   scoreSecondsRemaining = 0;
 }
 
-auto Event::sr(uint, uint8) -> uint8 {
-  return status;
-}
-
-auto Event::dr(uint, uint8 data) -> void {
-  select = data;
-  if(timer && data == 0x09) {
-    timerActive = true;
-    timerSecondsRemaining = timer;
-  }
-}
-
-auto Event::rom_read(uint addr, uint8 data) -> uint8 {
+auto Event::mcuRead(uint addr, uint8 data) -> uint8 {
   if(board == Board::CampusChallenge92) {
     uint id = 0;
     if(select == 0x09) id = 1;
@@ -108,19 +98,24 @@ auto Event::rom_read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto Event::ram_read(uint addr, uint8 data) -> uint8 {
-  return ram.read(bus.mirror(addr, ram.size()), data);
-}
-
-auto Event::ram_write(uint addr, uint8 data) -> void {
-  return ram.write(bus.mirror(addr, ram.size()), data);
+auto Event::mcuWrite(uint addr, uint8 data) -> void {
 }
 
 auto Event::read(uint addr, uint8 data) -> uint8 {
+  if(addr == 0x106000 || addr == 0xc00000) {
+    return status;
+  }
   return data;
 }
 
 auto Event::write(uint addr, uint8 data) -> void {
+  if(addr == 0x206000 || addr == 0xe00000) {
+    select = data;
+    if(timer && data == 0x09) {
+      timerActive = true;
+      timerSecondsRemaining = timer;
+    }
+  }
 }
 
 auto Event::serialize(serializer& s) -> void {

@@ -23,7 +23,7 @@ static auto CALLBACK ListView_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPA
 
 auto pListView::construct() -> void {
   hwnd = CreateWindowEx(
-    WS_EX_CLIENTEDGE, WC_LISTVIEW, L"",
+    WS_EX_CLIENTEDGE | LVS_EX_DOUBLEBUFFER, WC_LISTVIEW, L"",
     WS_CHILD | WS_TABSTOP | LVS_REPORT | LVS_SHOWSELALWAYS,
     0, 0, 0, 0, _parentHandle(), nullptr, GetModuleHandle(0), 0
   );

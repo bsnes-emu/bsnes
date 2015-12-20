@@ -44,6 +44,7 @@ auto mMenu::remove(sAction action) -> type& {
     state.actions[n]->adjustOffset(-1);
   }
   action->setParent();
+  return *this;
 }
 
 auto mMenu::reset() -> type& {

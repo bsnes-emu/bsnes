@@ -14,7 +14,7 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
   auto interrupt_pending() -> bool;
   auto port_read(uint8 port) -> uint8;
   auto port_write(uint8 port, uint8 data) -> void;
-  auto mmio_read(uint addr) -> uint8;
+  auto mmio_read(uint addr, uint8 data) -> uint8;
   auto mmio_write(uint addr, uint8 data) -> void;
 
   auto op_io() -> void;

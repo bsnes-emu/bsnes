@@ -1,4 +1,4 @@
-auto CPU::mmio_read(uint addr) -> uint8 {
+auto CPU::mmio_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0xffc0) == 0x2140) {
     synchronizeSMP();
     return smp.port_read(addr & 3);
@@ -6,7 +6,7 @@ auto CPU::mmio_read(uint addr) -> uint8 {
 
   switch(addr & 0xffff) {
     case 0x2180: {
-      uint8 result = bus.read(0x7e0000 | status.wram_addr);
+      uint8 result = bus.read(0x7e0000 | status.wram_addr, regs.mdr);
       status.wram_addr = (status.wram_addr + 1) & 0x01ffff;
       return result;
     }
@@ -92,7 +92,7 @@ auto CPU::mmio_read(uint addr) -> uint8 {
     }
   }
 
-  return regs.mdr;
+  return data;
 }
 
 auto CPU::mmio_write(uint addr, uint8 data) -> void {

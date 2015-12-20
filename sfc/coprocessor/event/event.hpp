@@ -11,13 +11,8 @@ struct Event : Coprocessor {
   auto power() -> void;
   auto reset() -> void;
 
-  auto submitScore() -> void;
-
-  auto sr(uint, uint8) -> uint8;
-  auto dr(uint, uint8 data) -> void;
-  auto rom_read(uint addr, uint8) -> uint8;
-  auto ram_read(uint addr, uint8) -> uint8;
-  auto ram_write(uint addr, uint8 data) -> void;
+  auto mcuRead(uint addr, uint8) -> uint8;
+  auto mcuWrite(uint addr, uint8) -> void;
 
   auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;
@@ -28,7 +23,6 @@ struct Event : Coprocessor {
   MappedRAM ram;
 
   enum class Board : uint { CampusChallenge92, Powerfest94 } board;
-  uint revision;
   uint timer;
 
 privileged:

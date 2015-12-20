@@ -177,44 +177,21 @@ auto Cartridge::parseMarkupEvent(Markup::Node root) -> void {
   parseMarkupMemory(event.ram, root["ram"], ID::EventRAM, true);
 
   event.board = Event::Board::CampusChallenge92;
-  if(root["name"].text() == "Campus Challenge '92") event.board = Event::Board::CampusChallenge92;
-  if(root["name"].text() == "Powerfest '94") event.board = Event::Board::Powerfest94;
-
-  event.revision = root["revision"].text() == "B" ? 2 : 1;
-  lstring part = root["timer"].text().split(":", 1L);
-  if(part.size() == 1) event.timer = part[0].natural();
-  if(part.size() == 2) event.timer = part[0].natural() * 60 + part[1].natural();
+  if(root.text() == "CC92") event.board = Event::Board::CampusChallenge92;
+  if(root.text() == "PF94") event.board = Event::Board::Powerfest94;
+  event.timer = root["timer"].natural();
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&Event::read, &event}, {&Event::write, &event});
+    if(node.text() == "mcu") {
+      parseMarkupMap(node, {&Event::mcuRead, &event}, {&Event::mcuWrite, &event});
+    } else {
+      parseMarkupMap(node, {&Event::read, &event}, {&Event::write, &event});
+    }
   }
 
-/*
-  //todo: define and support markup for coprocessor/event
-    if(node["id"].text() == "rom") {
-      Mapping m({&Event::rom_read, &event}, [](unsigned, uint8) {});
-      parseMarkupMap(m, node);
-      mapping.append(m);
-    }
-
-    if(node["id"].text() == "ram") {
-      Mapping m({&Event::ram_read, &event}, {&Event::ram_write, &event});
-      parseMarkupMap(m, node);
-      mapping.append(m);
-    }
-
-    if(node["id"].text() == "dr") {
-      Mapping m([](uint, uint8 data) -> uint8 { return data; }, {&Event::dr, &event});
-      parseMarkupMap(m, node);
-      mapping.append(m);
-    }
-
-    if(node["id"].text() == "sr") {
-      Mapping m({&Event::sr, &event}, [](uint, uint8) {});
-      parseMarkupMap(m, node);
-      mapping.append(m);
-    }
-*/
+  for(auto node : root["ram"].find("map")) {
+    parseMarkupMap(node, event.ram);
+  }
 }
 
 auto Cartridge::parseMarkupSA1(Markup::Node root) -> void {
