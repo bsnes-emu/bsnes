@@ -13,14 +13,14 @@
 namespace nall {
 
 struct file : file_system_object, varint {
-  enum class mode : unsigned { read, write, modify, append, readwrite = modify, writeread = append };
-  enum class index : unsigned { absolute, relative };
+  enum class mode : uint { read, write, modify, append, readwrite = modify, writeread = append };
+  enum class index : uint { absolute, relative };
 
   static auto copy(const string& sourcename, const string& targetname) -> bool {
     file rd, wr;
     if(rd.open(sourcename, mode::read) == false) return false;
     if(wr.open(targetname, mode::write) == false) return false;
-    for(unsigned n = 0; n < rd.size(); n++) wr.write(rd.read());
+    for(uint n = 0; n < rd.size(); n++) wr.write(rd.read());
     return true;
   }
 
@@ -36,7 +36,7 @@ struct file : file_system_object, varint {
     return false;
   }
 
-  static auto truncate(const string& filename, unsigned size) -> bool {
+  static auto truncate(const string& filename, uint size) -> bool {
     #if defined(API_POSIX)
     return truncate(filename, size) == 0;
     #elif defined(API_WINDOWS)
@@ -61,7 +61,7 @@ struct file : file_system_object, varint {
     return !(data.st_mode & S_IFDIR);
   }
 
-  static auto size(const string& filename) -> uintmax_t {
+  static auto size(const string& filename) -> uintmax {
     #if defined(API_POSIX)
     struct stat data;
     stat(filename, &data);
@@ -72,8 +72,8 @@ struct file : file_system_object, varint {
     return S_ISREG(data.st_mode) ? data.st_size : 0u;
   }
 
-  static auto read(const string& filename) -> vector<uint8_t> {
-    vector<uint8_t> memory;
+  static auto read(const string& filename) -> vector<uint8> {
+    vector<uint8> memory;
     file fp;
     if(fp.open(filename, mode::read)) {
       memory.resize(fp.size());
@@ -82,7 +82,7 @@ struct file : file_system_object, varint {
     return memory;
   }
 
-  static auto read(const string& filename, uint8_t* data, unsigned size) -> bool {
+  static auto read(const string& filename, uint8* data, uint size) -> bool {
     file fp;
     if(fp.open(filename, mode::read) == false) return false;
     fp.read(data, size);
@@ -91,14 +91,14 @@ struct file : file_system_object, varint {
   }
 
   static auto write(const string& filename, const string& text) -> bool {
-    return write(filename, (const uint8_t*)text.data(), text.size());
+    return write(filename, (const uint8*)text.data(), text.size());
   }
 
-  static auto write(const string& filename, const vector<uint8_t>& buffer) -> bool {
+  static auto write(const string& filename, const vector<uint8>& buffer) -> bool {
     return write(filename, buffer.data(), buffer.size());
   }
 
-  static auto write(const string& filename, const uint8_t* data, unsigned size) -> bool {
+  static auto write(const string& filename, const uint8* data, uint size) -> bool {
     file fp;
     if(fp.open(filename, mode::write) == false) return false;
     fp.write(data, size);
@@ -119,7 +119,7 @@ struct file : file_system_object, varint {
     return Hash::SHA256(buffer.data(), buffer.size()).digest();
   }
 
-  auto read() -> uint8_t {
+  auto read() -> uint8 {
     if(!fp) return 0xff;                       //file not open
     if(file_mode == mode::write) return 0xff;  //reads not permitted
     if(file_offset >= file_size) return 0xff;  //cannot read past end of file
@@ -127,16 +127,16 @@ struct file : file_system_object, varint {
     return buffer[(file_offset++) & buffer_mask];
   }
 
-  auto readl(unsigned length = 1) -> uintmax_t {
-    uintmax_t data = 0;
+  auto readl(uint length = 1) -> uintmax {
+    uintmax data = 0;
     for(int i = 0; i < length; i++) {
-      data |= (uintmax_t)read() << (i << 3);
+      data |= (uintmax)read() << (i << 3);
     }
     return data;
   }
 
-  auto readm(unsigned length = 1) -> uintmax_t {
-    uintmax_t data = 0;
+  auto readm(uint length = 1) -> uintmax {
+    uintmax data = 0;
     while(length--) {
       data <<= 8;
       data |= read();
@@ -144,18 +144,18 @@ struct file : file_system_object, varint {
     return data;
   }
 
-  auto reads(unsigned length) -> string {
+  auto reads(uint length) -> string {
     string result;
     result.resize(length);
     for(auto& byte : result) byte = read();
     return result;
   }
 
-  auto read(uint8_t* buffer, unsigned length) -> void {
+  auto read(uint8* buffer, uint length) -> void {
     while(length--) *buffer++ = read();
   }
 
-  auto write(uint8_t data) -> void {
+  auto write(uint8 data) -> void {
     if(!fp) return;                      //file not open
     if(file_mode == mode::read) return;  //writes not permitted
     buffer_sync();
@@ -164,14 +164,14 @@ struct file : file_system_object, varint {
     if(file_offset > file_size) file_size = file_offset;
   }
 
-  auto writel(uintmax_t data, unsigned length = 1) -> void {
+  auto writel(uintmax data, uint length = 1) -> void {
     while(length--) {
       write(data);
       data >>= 8;
     }
   }
 
-  auto writem(uintmax_t data, unsigned length = 1) -> void {
+  auto writem(uintmax data, uint length = 1) -> void {
     for(int i = length - 1; i >= 0; i--) {
       write(data >> (i << 3));
     }
@@ -181,7 +181,7 @@ struct file : file_system_object, varint {
     for(auto byte : s) write(byte);
   }
 
-  auto write(const uint8_t* buffer, unsigned length) -> void {
+  auto write(const uint8* buffer, uint length) -> void {
     while(length--) write(*buffer++);
   }
 
@@ -196,11 +196,11 @@ struct file : file_system_object, varint {
     fflush(fp);
   }
 
-  auto seek(signed offset, index index_ = index::absolute) -> void {
+  auto seek(int offset, index index_ = index::absolute) -> void {
     if(!fp) return;  //file not open
     buffer_flush();
 
-    intmax_t req_offset = file_offset;
+    intmax req_offset = file_offset;
     switch(index_) {
     case index::absolute: req_offset  = offset; break;
     case index::relative: req_offset += offset; break;
@@ -219,17 +219,17 @@ struct file : file_system_object, varint {
     file_offset = req_offset;
   }
 
-  auto offset() const -> unsigned {
+  auto offset() const -> uint {
     if(!fp) return 0;  //file not open
     return file_offset;
   }
 
-  auto size() const -> unsigned {
+  auto size() const -> uint {
     if(!fp) return 0;  //file not open
     return file_size;
   }
 
-  auto truncate(unsigned size) -> bool {
+  auto truncate(uint size) -> bool {
     if(!fp) return false;  //file not open
     #if defined(API_POSIX)
     return ftruncate(fileno(fp), size) == 0;
@@ -301,8 +301,8 @@ private:
   int buffer_offset = -1;  //invalidate buffer
   bool buffer_dirty = false;
   FILE* fp = nullptr;
-  unsigned file_offset = 0;
-  unsigned file_size = 0;
+  uint file_offset = 0;
+  uint file_size = 0;
   mode file_mode = mode::read;
 
   auto buffer_sync() -> void {
@@ -311,8 +311,8 @@ private:
       buffer_flush();
       buffer_offset = file_offset & ~buffer_mask;
       fseek(fp, buffer_offset, SEEK_SET);
-      unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
-      if(length) unsigned unused = fread(buffer, 1, length, fp);
+      uint length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
+      if(length) auto unused = fread(buffer, 1, length, fp);
     }
   }
 
@@ -322,8 +322,8 @@ private:
     if(buffer_offset < 0) return;        //buffer unused
     if(buffer_dirty == false) return;    //buffer unmodified since read
     fseek(fp, buffer_offset, SEEK_SET);
-    unsigned length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
-    if(length) unsigned unused = fwrite(buffer, 1, length, fp);
+    uint length = (buffer_offset + buffer_size) <= file_size ? buffer_size : (file_size & buffer_mask);
+    if(length) auto unused = fwrite(buffer, 1, length, fp);
     buffer_offset = -1;                  //invalidate buffer
     buffer_dirty = false;
   }

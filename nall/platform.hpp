@@ -49,6 +49,7 @@ namespace Math {
   #include <pwd.h>
   #include <grp.h>
   #include <sys/socket.h>
+  #include <sys/wait.h>
   #include <netinet/in.h>
   #include <netdb.h>
   #include <poll.h>

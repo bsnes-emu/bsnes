@@ -1,4 +1,4 @@
-auto Program::stateName(unsigned slot, bool manager) -> string {
+auto Program::stateName(uint slot, bool manager) -> string {
   return {
     folderPaths[0], "higan/states/",
     manager ? "managed/" : "quick/",
@@ -6,7 +6,7 @@ auto Program::stateName(unsigned slot, bool manager) -> string {
   };
 }
 
-auto Program::loadState(unsigned slot, bool manager) -> bool {
+auto Program::loadState(uint slot, bool manager) -> bool {
   if(!emulator) return false;
   auto location = stateName(slot, manager);
   auto memory = file::read(location);
@@ -16,7 +16,7 @@ auto Program::loadState(unsigned slot, bool manager) -> bool {
   return showMessage({"Loaded from slot ", slot}), true;
 }
 
-auto Program::saveState(unsigned slot, bool manager) -> bool {
+auto Program::saveState(uint slot, bool manager) -> bool {
   if(!emulator) return false;
   auto location = stateName(slot, manager);
   serializer s = emulator->serialize();

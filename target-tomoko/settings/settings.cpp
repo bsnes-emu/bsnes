@@ -32,7 +32,7 @@ auto SettingsManager::setVisible(bool visible) -> SettingsManager& {
   return *this;
 }
 
-auto SettingsManager::show(unsigned setting) -> void {
+auto SettingsManager::show(uint setting) -> void {
   panel.item(setting)->setSelected();
   setVisible();
   setFocused();

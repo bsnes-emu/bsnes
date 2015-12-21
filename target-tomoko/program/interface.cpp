@@ -1,5 +1,5 @@
 //request from emulation core to load non-volatile media folder
-auto Program::loadRequest(unsigned id, string name, string type, bool required) -> void {
+auto Program::loadRequest(uint id, string name, string type, bool required) -> void {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
   .setPath({settings["Library/Location"].text(), name})
@@ -13,22 +13,13 @@ auto Program::loadRequest(unsigned id, string name, string type, bool required) 
 }
 
 //request from emulation core to load non-volatile media file
-auto Program::loadRequest(unsigned id, string filename, bool required) -> void {
+auto Program::loadRequest(uint id, string filename, bool required) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
 
   if(filename == "manifest.bml" && !pathname.find(".sys/")) {
     if(!file::exists(location) || settings["Library/IgnoreManifests"].boolean()) {
-      string manifest;
-      if(auto fp = popen(string{"icarus -m \"", pathname, "\""}, "r")) {
-        while(true) {
-          auto byte = fgetc(fp);
-          if(byte == EOF) break;
-          manifest.append((char)byte);
-        }
-        pclose(fp);
-      }
-      if(manifest) {
+      if(auto manifest = execute("icarus", "-m", pathname)) {
         memorystream stream{(const uint8*)manifest.data(), manifest.size()};
         return emulator->load(id, stream);
       }
@@ -47,14 +38,14 @@ auto Program::loadRequest(unsigned id, string filename, bool required) -> void {
 }
 
 //request from emulation core to save non-volatile media file
-auto Program::saveRequest(unsigned id, string filename) -> void {
+auto Program::saveRequest(uint id, string filename) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
   filestream stream{location, file::mode::write};
   return emulator->save(id, stream);
 }
 
-auto Program::videoColor(unsigned source, uint16 a, uint16 r, uint16 g, uint16 b) -> uint32 {
+auto Program::videoColor(uint source, uint16 a, uint16 r, uint16 g, uint16 b) -> uint32 {
   if(settings["Video/Saturation"].natural() != 100) {
     uint16 grayscale = uclamp<16>((r + g + b) / 3);
     double saturation = settings["Video/Saturation"].natural() * 0.01;
@@ -86,9 +77,9 @@ auto Program::videoColor(unsigned source, uint16 a, uint16 r, uint16 g, uint16 b
   return a << 24 | r << 16 | g << 8 | b << 0;
 }
 
-auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned pitch, unsigned width, unsigned height) -> void {
+auto Program::videoRefresh(const uint32* palette, const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32* output;
-  unsigned length;
+  uint length;
 
   if(video->lock(output, length, width, height)) {
     pitch >>= 2, length >>= 2;
@@ -120,7 +111,7 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
     video->refresh();
   }
 
-  static unsigned frameCounter = 0;
+  static uint frameCounter = 0;
   static time_t previous, current;
   frameCounter++;
 
@@ -133,7 +124,7 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, unsigned p
 }
 
 auto Program::audioSample(int16 lsample, int16 rsample) -> void {
-  signed samples[] = {lsample, rsample};
+  int samples[] = {lsample, rsample};
   dsp.sample(samples);
   while(dsp.pending()) {
     dsp.read(samples);
@@ -141,7 +132,7 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
   }
 }
 
-auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16 {
+auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
   if(presentation->focused()) {
     auto guid = emulator->port[port].device[device].input[input].guid;
     auto mapping = (InputMapping*)guid;
@@ -150,7 +141,7 @@ auto Program::inputPoll(unsigned port, unsigned device, unsigned input) -> int16
   return 0;
 }
 
-auto Program::inputRumble(unsigned port, unsigned device, unsigned input, bool enable) -> void {
+auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
   if(presentation->focused() || !enable) {
     auto guid = emulator->port[port].device[device].input[input].guid;
     auto mapping = (InputMapping*)guid;
@@ -158,10 +149,10 @@ auto Program::inputRumble(unsigned port, unsigned device, unsigned input, bool e
   }
 }
 
-auto Program::dipSettings(const Markup::Node& node) -> unsigned {
+auto Program::dipSettings(const Markup::Node& node) -> uint {
 }
 
-auto Program::path(unsigned group) -> string {
+auto Program::path(uint group) -> string {
   return mediaPaths(group);
 }
 

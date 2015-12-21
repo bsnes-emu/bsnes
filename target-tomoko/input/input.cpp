@@ -5,9 +5,9 @@ InputManager* inputManager = nullptr;
 auto InputMapping::bind() -> void {
   auto token = assignment.split("/");
   if(token.size() < 3) return unbind();
-  uint64_t id = token[0].natural();
-  unsigned group = token[1].natural();
-  unsigned input = token[2].natural();
+  uint64 id = token[0].natural();
+  uint group = token[1].natural();
+  uint input = token[2].natural();
   string qualifier = token(3, "None");
 
   for(auto& device : inputManager->devices) {
@@ -26,7 +26,7 @@ auto InputMapping::bind() -> void {
   settings[path].setValue(assignment);
 }
 
-auto InputMapping::bind(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> bool {
+auto InputMapping::bind(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> bool {
   if(device->isNull() || (device->isKeyboard() && device->group(group).input(input).name() == "Escape")) {
     return unbind(), true;
   }
@@ -207,7 +207,7 @@ auto InputManager::poll() -> void {
   if(presentation && presentation->focused()) pollHotkeys();
 }
 
-auto InputManager::onChange(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
+auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void {
   if(settingsManager->focused()) {
     settingsManager->input.inputEvent(device, group, input, oldValue, newValue);
     settingsManager->hotkeys.inputEvent(device, group, input, oldValue, newValue);

@@ -156,20 +156,20 @@ auto Presentation::updateEmulator() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
-  signed width   = emulator ? emulator->information.width  : 256;
-  signed height  = emulator ? emulator->information.height : 240;
+  int width   = emulator ? emulator->information.width  : 256;
+  int height  = emulator ? emulator->information.height : 240;
   double stretch = emulator ? emulator->information.aspectRatio : 1.0;
   if(stretch != 1.0) {
     //aspect correction is always enabled in fullscreen mode
     if(!fullScreen() && !settings["Video/AspectCorrection"].boolean()) stretch = 1.0;
   }
 
-  signed scale = 2;
+  int scale = 2;
   if(settings["Video/Scale"].text() == "Small" ) scale = 2;
   if(settings["Video/Scale"].text() == "Medium") scale = 3;
   if(settings["Video/Scale"].text() == "Large" ) scale = 4;
 
-  signed windowWidth = 0, windowHeight = 0;
+  int windowWidth = 0, windowHeight = 0;
   if(!fullScreen()) {
     windowWidth  = 256 * scale * (settings["Video/AspectCorrection"].boolean() ? 8.0 / 7.0 : 1.0);
     windowHeight = 240 * scale;
@@ -178,7 +178,7 @@ auto Presentation::resizeViewport() -> void {
     windowHeight = geometry().height();
   }
 
-  signed multiplier = min(windowWidth / (signed)(width * stretch), windowHeight / height);
+  int multiplier = min(windowWidth / (int)(width * stretch), windowHeight / height);
   width = width * multiplier * stretch;
   height = height * multiplier;
 
@@ -210,7 +210,7 @@ auto Presentation::toggleFullScreen() -> void {
 auto Presentation::drawSplashScreen() -> void {
   if(!video) return;
   uint32* output;
-  unsigned length;
+  uint length;
   if(video->lock(output, length, 256, 240)) {
     for(auto y : range(240)) {
       uint32* dp = output + y * (length >> 2);

@@ -51,15 +51,16 @@ auto InputSettings::updateControls() -> void {
 }
 
 auto InputSettings::activeEmulator() -> InputEmulator& {
-  return inputManager->emulators[emulatorList.selected()->offset()];
+  return inputManager->emulators[emulatorList.selected().offset()];
 }
 
 auto InputSettings::activePort() -> InputPort& {
-  return activeEmulator().ports[portList.selected()->offset()];
+  return activeEmulator().ports[portList.selected().offset()];
 }
 
 auto InputSettings::activeDevice() -> InputDevice& {
-  return activePort().devices[deviceList.selected()->offset()];
+  auto index = deviceList.selected().property("index").natural();
+  return activePort().devices[index];
 }
 
 auto InputSettings::reloadPorts() -> void {
@@ -72,8 +73,10 @@ auto InputSettings::reloadPorts() -> void {
 
 auto InputSettings::reloadDevices() -> void {
   deviceList.reset();
-  for(auto& device : activePort().devices) {
-    deviceList.append(ComboButtonItem().setText(device.name));
+  for(auto n : range(activePort().devices)) {
+    auto& device = activePort().devices[n];
+    if(!device.mappings) continue;  //do not display devices that have no configurable inputs
+    deviceList.append(ComboButtonItem().setText(device.name).setProperty("index", n));
   }
   reloadMappings();
 }
@@ -97,7 +100,7 @@ auto InputSettings::reloadMappings() -> void {
 }
 
 auto InputSettings::refreshMappings() -> void {
-  unsigned position = 0;
+  uint position = 0;
   for(auto& mapping : activeDevice().mappings) {
     mappingList.item(position)->cell(1)->setText(mapping->assignmentName());
     mappingList.item(position)->cell(2)->setText(mapping->deviceName());
@@ -116,7 +119,7 @@ auto InputSettings::assignMapping() -> void {
   }
 }
 
-auto InputSettings::assignMouseInput(unsigned id) -> void {
+auto InputSettings::assignMouseInput(uint id) -> void {
   if(auto mouse = inputManager->findMouse()) {
     if(auto mapping = mappingList.selected()) {
       activeMapping = activeDevice().mappings[mapping->offset()];
@@ -130,7 +133,7 @@ auto InputSettings::assignMouseInput(unsigned id) -> void {
   }
 }
 
-auto InputSettings::inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput) -> void {
+auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput) -> void {
   if(!activeMapping) return;
   if(device->isMouse() && !allowMouseInput) return;
 

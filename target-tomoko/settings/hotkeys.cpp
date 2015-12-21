@@ -42,7 +42,7 @@ auto HotkeySettings::reloadMappings() -> void {
 }
 
 auto HotkeySettings::refreshMappings() -> void {
-  unsigned position = 0;
+  uint position = 0;
   for(auto& hotkey : inputManager->hotkeys) {
     mappingList.item(position)->cell(1)->setText(hotkey->assignmentName());
     mappingList.item(position)->cell(2)->setText(hotkey->deviceName());
@@ -61,7 +61,7 @@ auto HotkeySettings::assignMapping() -> void {
   }
 }
 
-auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void {
+auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void {
   if(!activeMapping) return;
   if(device->isMouse()) return;
 

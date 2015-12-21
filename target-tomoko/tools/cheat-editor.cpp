@@ -140,7 +140,7 @@ auto CheatEditor::loadCheats() -> void {
 auto CheatEditor::saveCheats() -> void {
   if(!emulator) return;
   string document = {"cartridge sha256:", emulator->sha256(), "\n"};
-  unsigned count = 0;
+  uint count = 0;
   for(auto& cheat : cheats) {
     if(!cheat.code && !cheat.description) continue;
     document.append("  cheat", cheat.enabled ? " enabled" : "", "\n");

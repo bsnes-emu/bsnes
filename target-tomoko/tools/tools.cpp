@@ -22,7 +22,7 @@ ToolsManager::ToolsManager() {
   });
 }
 
-auto ToolsManager::show(unsigned tool) -> void {
+auto ToolsManager::show(uint tool) -> void {
   panel.item(tool)->setSelected();
   setVisible();
   setFocused();

@@ -59,8 +59,8 @@ struct InputSettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
-  auto assignMouseInput(unsigned id) -> void;
-  auto inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
+  auto assignMouseInput(uint id) -> void;
+  auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
   InputMapping* activeMapping = nullptr;
 
@@ -84,7 +84,7 @@ struct HotkeySettings : TabFrameItem {
   auto reloadMappings() -> void;
   auto refreshMappings() -> void;
   auto assignMapping() -> void;
-  auto inputEvent(shared_pointer<HID::Device> device, unsigned group, unsigned input, int16 oldValue, int16 newValue) -> void;
+  auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
 
   InputMapping* activeMapping = nullptr;
 
@@ -135,7 +135,7 @@ struct AdvancedSettings : TabFrameItem {
 struct SettingsManager : Window {
   SettingsManager();
   auto setVisible(bool visible = true) -> SettingsManager&;
-  auto show(unsigned setting) -> void;
+  auto show(uint setting) -> void;
 
   VerticalLayout layout{this};
     TabFrame panel{&layout, Size{~0, ~0}};
