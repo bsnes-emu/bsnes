@@ -600,19 +600,19 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
 
   //detect competition carts
   if(!memcmp(data + index, "\x00\x08\x22\x02\x1c\x00\x10\x00\x08\x65\x80\x84\x20\x00\x22\x25\x00\x83\x0c\x80\x10", 21)
-  && complement == 0x0100 && checksum == 0x2d02 && (size == 0x1c0000 || size == 0x1c8000)) {
+  && complement == 0x0100 && checksum == 0x2d02 && (size == 0x1c0000 || size == 0x1c2000)) {
     type = Type::CampusChallenge92;  //dark title screen version
     return;
   }
 
   if(!memcmp(data + index, "\xc9\x80\x80\x44\x15\x00\x62\x09\x29\xa0\x52\x70\x50\x12\x05\x35\x31\x63\xc0\x22\x01", 21)
-  && complement == 0x2011 && checksum == 0xf8c0 && (size == 0x240000 || size == 0x248000)) {
+  && complement == 0x2011 && checksum == 0xf8c0 && (size == 0x240000 || size == 0x242000)) {
     type = Type::Powerfest94;  //10,000 points version
     return;
   }
 
   if(!memcmp(data + index, "PREHISTORIK MAN      ", 21)
-  && complement == 0xffff && checksum == 0x0000 && (size == 0x240000 || size == 0x248000)) {
+  && complement == 0xffff && checksum == 0x0000 && (size == 0x240000 || size == 0x242000)) {
     type = Type::Powerfest94;  //1,000,000 points version
     return;
   }
