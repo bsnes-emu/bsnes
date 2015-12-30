@@ -1,15 +1,16 @@
-namespace phoenix {
+#if defined(Hiro_Action)
 
-struct pAction : public pObject {
-  Action& action;
+namespace hiro {
+
+struct pAction :  pObject {
+  Declare(Action, Object)
+
+  auto setEnabled(bool enabled) -> void override;
+  auto setVisible(bool visible) -> void override;
+
   NSMenuItem* cocoaAction = nullptr;
-
-  void setEnabled(bool enabled);
-  void setVisible(bool visible);
-
-  pAction(Action& action) : pObject(action), action(action) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

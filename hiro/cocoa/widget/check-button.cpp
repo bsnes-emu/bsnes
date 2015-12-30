@@ -1,6 +1,8 @@
+#if defined(Hiro_CheckButton)
+
 @implementation CocoaCheckButton : NSButton
 
--(id) initWith:(phoenix::CheckButton&)checkButtonReference {
+-(id) initWith:(hiro::mCheckButton&)checkButtonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     checkButton = &checkButtonReference;
 
@@ -14,72 +16,88 @@
 
 -(IBAction) activate:(id)sender {
   checkButton->state.checked = [self state] != NSOffState;
-  if(checkButton->onToggle) checkButton->onToggle();
+  checkButton->doToggle();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-Size pCheckButton::minimumSize() {
-  Size size = Font::size(checkButton.font(), checkButton.state.text);
-
-  if(checkButton.state.orientation == Orientation::Horizontal) {
-    size.width += checkButton.state.image.width;
-    size.height = max(checkButton.state.image.height, size.height);
-  }
-
-  if(checkButton.state.orientation == Orientation::Vertical) {
-    size.width = max(checkButton.state.image.width, size.width);
-    size.height += checkButton.state.image.height;
-  }
-
-  return {size.width + 20, size.height + 4};
-}
-
-void pCheckButton::setChecked(bool checked) {
+auto pCheckButton::construct() -> void {
   @autoreleasepool {
-    [cocoaView setState:checked ? NSOnState : NSOffState];
+    cocoaView = cocoaCheckButton = [[CocoaCheckButton alloc] initWith:self()];
+    pWidget::construct();
+
+    setBordered(state().bordered);
+    setChecked(state().checked);
+    setImage(state().image);
+    setOrientation(state().orientation);
+    setText(state().text);
   }
 }
 
-void pCheckButton::setGeometry(Geometry geometry) {
-  pWidget::setGeometry({
-    geometry.x - 2, geometry.y - 2,
-    geometry.width + 4, geometry.height + 4
-  });
-}
-
-void pCheckButton::setImage(const image& image, Orientation orientation) {
-  @autoreleasepool {
-    if(image.empty()) {
-      [cocoaView setImage:nil];
-      return;
-    }
-
-    [cocoaView setImage:NSMakeImage(image)];
-
-    if(orientation == Orientation::Horizontal) [cocoaView setImagePosition:NSImageLeft];
-    if(orientation == Orientation::Vertical  ) [cocoaView setImagePosition:NSImageAbove];
-  }
-}
-
-void pCheckButton::setText(string text) {
-  @autoreleasepool {
-    [cocoaView setTitle:[NSString stringWithUTF8String:text]];
-  }
-}
-
-void pCheckButton::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaCheckButton = [[CocoaCheckButton alloc] initWith:checkButton];
-  }
-}
-
-void pCheckButton::destructor() {
+auto pCheckButton::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pCheckButton::minimumSize() const -> Size {
+  Size size = pFont::size(self().font(true), state().text);
+
+  if(state().orientation == Orientation::Horizontal) {
+    size.setWidth(size.width() + state().image.width());
+    size.setHeight(max(size.height(), state().image.height()));
+  }
+
+  if(state().orientation == Orientation::Vertical) {
+    size.setWidth(max(size.width(), state().image.width()));
+    size.setHeight(size.height() + state().image.height());
+  }
+
+  return {size.width() + 20, size.height() + 4};
 }
+
+auto pCheckButton::setBordered(bool bordered) -> void {
+}
+
+auto pCheckButton::setChecked(bool checked) -> void {
+  @autoreleasepool {
+    [cocoaView setState:checked ? NSOnState : NSOffState];
+  }
+}
+
+auto pCheckButton::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry({
+    geometry.x() - 2, geometry.y() - 2,
+    geometry.width() + 4, geometry.height() + 4
+  });
+}
+
+auto pCheckButton::setImage(const Image& image) -> void {
+  @autoreleasepool {
+    if(!image) {
+      [cocoaView setImage:nil];
+      return;
+    }
+
+    [cocoaView setImage:NSMakeImage(image)];
+  }
+}
+
+auto pCheckButton::setOrientation(Orientation orientation) -> void {
+  @autoreleasepool {
+    if(orientation == Orientation::Horizontal) [cocoaView setImagePosition:NSImageLeft];
+    if(orientation == Orientation::Vertical  ) [cocoaView setImagePosition:NSImageAbove];
+  }
+}
+
+auto pCheckButton::setText(const string& text) -> void {
+  @autoreleasepool {
+    [cocoaView setTitle:[NSString stringWithUTF8String:text]];
+  }
+}
+
+}
+
+#endif

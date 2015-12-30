@@ -33,6 +33,7 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     *argp++ = nullptr;
 
     dup2(fd[1], STDOUT_FILENO);
+    dup2(fd[1], STDERR_FILENO);
     close(fd[0]);
     close(fd[1]);
     execvp(name, (char* const*)argv);
@@ -117,8 +118,8 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
   while(true) {
     DWORD exitCode;
     GetExitCodeProcess(pi.hProcess, &exitCode);
-    if(exitCode != STILL_ACTIVE) break;
     Sleep(1);
+    if(exitCode != STILL_ACTIVE) break;
   }
 
   string result;

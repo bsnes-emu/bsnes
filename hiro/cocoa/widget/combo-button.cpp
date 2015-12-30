@@ -1,6 +1,8 @@
+#if defined(Hiro_ComboButton)
+
 @implementation CocoaComboButton : NSPopUpButton
 
--(id) initWith:(phoenix::ComboButton&)comboButtonReference {
+-(id) initWith:(hiro::mComboButton&)comboButtonReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0) pullsDown:NO]) {
     comboButton = &comboButtonReference;
 
@@ -11,68 +13,68 @@
 }
 
 -(IBAction) activate:(id)sender {
-  comboButton->state.selection = [self indexOfSelectedItem];
-  if(comboButton->onChange) comboButton->onChange();
+  if(auto p = comboButton->self()) p->_updateSelected([self indexOfSelectedItem]);
+  comboButton->doChange();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pComboButton::append(string text) {
+auto pComboButton::construct() -> void {
   @autoreleasepool {
-    [cocoaView addItemWithTitle:[NSString stringWithUTF8String:text]];
+    cocoaView = cocoaComboButton = [[CocoaComboButton alloc] initWith:self()];
+    pWidget::construct();
   }
 }
 
-Size pComboButton::minimumSize() {
-  unsigned maximumWidth = 0;
-  for(auto& text : comboButton.state.text) maximumWidth = max(maximumWidth, Font::size(comboButton.font(), text).width);
-  Size size = Font::size(comboButton.font(), " ");
-  return {maximumWidth + 36, size.height + 6};
-}
-
-void pComboButton::remove(unsigned selection) {
-  @autoreleasepool {
-    [cocoaView removeItemAtIndex:selection];
-  }
-}
-
-void pComboButton::reset() {
-  @autoreleasepool {
-    [cocoaView removeAllItems];
-  }
-}
-
-void pComboButton::setGeometry(Geometry geometry) {
-  pWidget::setGeometry({
-    geometry.x - 2, geometry.y,
-    geometry.width + 4, geometry.height
-  });
-}
-
-void pComboButton::setSelection(unsigned selection) {
-  @autoreleasepool {
-    [cocoaView selectItemAtIndex:selection];
-  }
-}
-
-void pComboButton::setText(unsigned selection, string text) {
-  @autoreleasepool {
-    [[cocoaView itemAtIndex:selection] setTitle:[NSString stringWithUTF8String:text]];
-  }
-}
-
-void pComboButton::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaComboButton = [[CocoaComboButton alloc] initWith:comboButton];
-  }
-}
-
-void pComboButton::destructor() {
+auto pComboButton::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pComboButton::append(sComboButtonItem item) -> void {
+  @autoreleasepool {
+    [cocoaView addItemWithTitle:[NSString stringWithUTF8String:item->text()]];
+  }
 }
+
+auto pComboButton::minimumSize() const -> Size {
+  auto font = self().font(true);
+  int maximumWidth = 0;
+  for(auto& item : state().items) {
+    maximumWidth = max(maximumWidth, pFont::size(font, item->state.text).width());
+  }
+  Size size = pFont::size(font, " ");
+  return {maximumWidth + 36, size.height() + 6};
+}
+
+auto pComboButton::remove(sComboButtonItem item) -> void {
+  @autoreleasepool {
+    [cocoaView removeItemAtIndex:item->offset()];
+  }
+}
+
+auto pComboButton::reset() -> void {
+  @autoreleasepool {
+    [cocoaView removeAllItems];
+  }
+}
+
+auto pComboButton::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry({
+    geometry.x() - 2, geometry.y(),
+    geometry.width() + 4, geometry.height()
+  });
+}
+
+auto pComboButton::_updateSelected(signed selected) -> void {
+  for(auto& item : state().items) {
+    item->state.selected = item->offset() == selected;
+  }
+}
+
+}
+
+#endif

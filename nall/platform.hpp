@@ -98,10 +98,17 @@ namespace Math {
   #define dllexport
 #endif
 
+#if defined(PLATFORM_MACOSX)
+  #define MSG_NOSIGNAL 0
+#endif
+
 #if defined(COMPILER_CLANG) || defined(COMPILER_GCC)
   #define neverinline   __attribute__((noinline))
   #define alwaysinline  inline __attribute__((always_inline))
+  #if !defined(PLATFORM_MACOSX)
+  //todo: we want this prefix; but it causes compilation errors
   #define deprecated    __attribute__((deprecated))
+  #endif
 #elif defined(COMPILER_VISUALCPP)
   #define neverinline   __declspec(noinline)
   #define alwaysinline  inline __forceinline

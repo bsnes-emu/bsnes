@@ -1,14 +1,16 @@
-namespace phoenix {
+#if defined(Hiro_Keyboard)
 
-bool pKeyboard::pressed(Keyboard::Scancode scancode) {
+namespace hiro {
+
+auto pKeyboard::poll() -> vector<bool> {
+  vector<bool> result;
+  return result;
+}
+
+auto pKeyboard::pressed(uint code) -> bool {
   return false;
 }
 
-vector<bool> pKeyboard::state() {
-  vector<bool> output;
-  output.resize((unsigned)Keyboard::Scancode::Limit);
-  for(auto& n : output) n = false;
-  return output;
 }
 
-}
+#endif

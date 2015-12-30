@@ -1,6 +1,8 @@
+#if defined(Hiro_ProgressBar)
+
 @implementation CocoaProgressBar : NSProgressIndicator
 
--(id) initWith:(phoenix::ProgressBar&)progressBarReference {
+-(id) initWith:(hiro::mProgressBar&)progressBarReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     progressBar = &progressBarReference;
 
@@ -13,25 +15,33 @@
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pProgressBar::setPosition(unsigned position) {
+auto pProgressBar::construct() -> void {
   @autoreleasepool {
-    [cocoaView setDoubleValue:position];
+    cocoaView = cocoaProgressBar = [[CocoaProgressBar alloc] initWith:self()];
+    pWidget::construct();
+
+    setPosition(state().position);
   }
 }
 
-void pProgressBar::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaProgressBar = [[CocoaProgressBar alloc] initWith:progressBar];
-    setPosition(progressBar.state.position);
-  }
-}
-
-void pProgressBar::destructor() {
+auto pProgressBar::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pProgressBar::minimumSize() const -> Size {
+  return {0, 12};
 }
+
+auto pProgressBar::setPosition(uint position) -> void {
+  @autoreleasepool {
+    [cocoaView setDoubleValue:position];
+  }
+}
+
+}
+
+#endif

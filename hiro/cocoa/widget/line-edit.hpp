@@ -1,28 +1,28 @@
+#if defined(Hiro_LineEdit)
+
 @interface CocoaLineEdit : NSTextField <NSTextFieldDelegate> {
 @public
-  phoenix::LineEdit* lineEdit;
+  hiro::mLineEdit* lineEdit;
 }
--(id) initWith:(phoenix::LineEdit&)lineEdit;
+-(id) initWith:(hiro::mLineEdit&)lineEdit;
 -(void) textDidChange:(NSNotification*)n;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pLineEdit : public pWidget {
-  LineEdit& lineEdit;
+struct pLineEdit : pWidget {
+  Declare(LineEdit, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setBackgroundColor(Color color) -> void;
+  auto setEditable(bool editable) -> void;
+  auto setForegroundColor(Color color) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaLineEdit* cocoaLineEdit = nullptr;
-
-  Size minimumSize();
-  void setBackgroundColor(Color color);
-  void setEditable(bool editable);
-  void setForegroundColor(Color color);
-  void setText(string text);
-  string text();
-
-  pLineEdit(LineEdit& lineEdit) : pWidget(lineEdit), lineEdit(lineEdit) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

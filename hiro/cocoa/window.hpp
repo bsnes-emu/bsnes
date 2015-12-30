@@ -1,11 +1,13 @@
+#if defined(Hiro_Window)
+
 @interface CocoaWindow : NSWindow <NSWindowDelegate> {
 @public
-  phoenix::Window* window;
+  hiro::mWindow* window;
   NSMenu* menuBar;
   NSMenu* rootMenu;
   NSTextField* statusBar;
 }
--(id) initWith:(phoenix::Window&)window;
+-(id) initWith:(hiro::mWindow&)window;
 -(BOOL) canBecomeKeyWindow;
 -(BOOL) canBecomeMainWindow;
 -(void) windowDidBecomeMain:(NSNotification*)notification;
@@ -21,46 +23,41 @@
 -(NSTextField*) statusBar;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pWindow : public pObject {
-  Window& window;
+struct pWindow : pObject {
+  Declare(Window, Object)
+
+  static auto none() -> Window&;
+
+  auto append(sLayout layout) -> void;
+  auto append(sMenuBar menuBar) -> void;
+  auto append(sStatusBar statusBar) -> void;
+  auto focused() const -> bool override;
+  auto frameMargin() const -> Geometry;
+  auto remove(sLayout layout) -> void;
+  auto remove(sMenuBar menuBar) -> void;
+  auto remove(sStatusBar statusBar) -> void;
+  auto setBackgroundColor(Color color) -> void;
+  auto setDroppable(bool droppable) -> void;
+  auto setFocused() -> void override;
+  auto setFullScreen(bool fullScreen) -> void;
+  auto setGeometry(Geometry geometry) -> void;
+  auto setModal(bool modal) -> void;
+  auto setResizable(bool resizable) -> void;
+  auto setTitle(const string& text) -> void;
+  auto setVisible(bool visible) -> void;
+
+  auto moveEvent() -> void;
+  auto sizeEvent() -> void;
+  auto statusBarHeight() -> uint;
+  auto statusBarReposition() -> void;
+
+  auto _append(mWidget& widget) -> void;
+
   CocoaWindow* cocoaWindow = nullptr;
-
-  static Window& none();
-
-  void append(Layout& layout);
-  void append(Menu& menu);
-  void append(Widget& widget);
-  bool focused();
-  Geometry frameMargin();
-  Geometry geometry();
-  void remove(Layout& layout);
-  void remove(Menu& menu);
-  void remove(Widget& widget);
-  void setBackgroundColor(Color color);
-  void setDroppable(bool droppable);
-  void setFocused();
-  void setFullScreen(bool fullScreen);
-  void setGeometry(Geometry geometry);
-  void setMenuFont(string font);
-  void setMenuVisible(bool visible);
-  void setModal(bool modal);
-  void setResizable(bool resizable);
-  void setStatusFont(string font);
-  void setStatusText(string text);
-  void setStatusVisible(bool visible);
-  void setTitle(string text);
-  void setVisible(bool visible);
-  void setWidgetFont(string font);
-
-  pWindow(Window& window) : pObject(window), window(window) {}
-  void constructor();
-  void destructor();
-  void moveEvent();
-  void sizeEvent();
-  unsigned statusBarHeight();
-  void statusBarReposition();
 };
 
 }
+
+#endif

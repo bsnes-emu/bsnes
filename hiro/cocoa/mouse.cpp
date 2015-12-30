@@ -1,11 +1,15 @@
-namespace phoenix {
+#if defined(Hiro_Mouse)
 
-Position pMouse::position() {
+namespace hiro {
+
+auto pMouse::position() -> Position {
   return {0, 0};
 }
 
-bool pMouse::pressed(Mouse::Button button) {
+auto pMouse::pressed(Mouse::Button button) -> bool {
   return false;
 }
 
 }
+
+#endif

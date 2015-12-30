@@ -1,8 +1,10 @@
-namespace phoenix {
+#if defined(Hiro_MessageWindow)
 
-enum class MessageWindowType : unsigned { Error, Information, Question, Warning };
+namespace hiro {
 
-MessageWindow::Response MessageWindow_dialog(MessageWindow::State& state, MessageWindowType type) {
+enum class MessageWindowType : uint { Error, Information, Question, Warning };
+
+auto MessageWindow_dialog(MessageWindow::State& state, MessageWindowType type) -> MessageWindow::Response {
   @autoreleasepool {
     NSAlert* alert = [[[NSAlert alloc] init] autorelease];
     if(state.title) [alert setMessageText:[NSString stringWithUTF8String:state.title]];
@@ -60,20 +62,22 @@ MessageWindow::Response MessageWindow_dialog(MessageWindow::State& state, Messag
   throw;
 }
 
-MessageWindow::Response pMessageWindow::error(MessageWindow::State& state) {
+auto pMessageWindow::error(MessageWindow::State& state) -> MessageWindow::Response {
   return MessageWindow_dialog(state, MessageWindowType::Error);
 }
 
-MessageWindow::Response pMessageWindow::information(MessageWindow::State& state) {
+auto pMessageWindow::information(MessageWindow::State& state) -> MessageWindow::Response {
   return MessageWindow_dialog(state, MessageWindowType::Information);
 }
 
-MessageWindow::Response pMessageWindow::question(MessageWindow::State& state) {
+auto pMessageWindow::question(MessageWindow::State& state) -> MessageWindow::Response {
   return MessageWindow_dialog(state, MessageWindowType::Question);
 }
 
-MessageWindow::Response pMessageWindow::warning(MessageWindow::State& state) {
+auto pMessageWindow::warning(MessageWindow::State& state) -> MessageWindow::Response {
   return MessageWindow_dialog(state, MessageWindowType::Warning);
 }
 
 }
+
+#endif

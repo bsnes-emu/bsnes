@@ -1,6 +1,8 @@
+#if defined(Hiro_ListView)
+
 @implementation CocoaListView : NSScrollView
 
--(id) initWith:(phoenix::ListView&)listViewReference {
+-(id) initWith:(hiro::mListView&)listViewReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     listView = &listViewReference;
     content = [[CocoaListViewContent alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
@@ -47,7 +49,7 @@
   if(font) [font release];
   font = fontPointer;
 
-  unsigned fontHeight = phoenix::pFont::size(font, " ").height;
+  uint fontHeight = hiro::pFont::size(font, " ").height();
   [content setFont:font];
   [content setRowHeight:fontHeight];
   [self reloadColumns];
@@ -58,10 +60,10 @@
     [content removeTableColumn:[[content tableColumns] lastObject]];
   }
 
-  if(listView->state.checkable) {
-    NSTableColumn *tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"check"];
-    NSTableHeaderCell *headerCell = [[NSTableHeaderCell alloc] initTextCell:@""];
-    NSButtonCell *dataCell = [[NSButtonCell alloc] initTextCell:@""];
+  if(false) {  //listView->state.checkable) {
+    NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:@"check"];
+    NSTableHeaderCell* headerCell = [[NSTableHeaderCell alloc] initTextCell:@""];
+    NSButtonCell* dataCell = [[NSButtonCell alloc] initTextCell:@""];
 
     [dataCell setButtonType:NSSwitchButton];
     [dataCell setControlSize:NSSmallControlSize];
@@ -75,11 +77,11 @@
     [content addTableColumn:tableColumn];
   }
 
-  lstring headers = listView->state.headerText;
+  lstring headers;  // = listView->state.headerText;
   if(headers.size() == 0) headers.append("");
-  [content setUsesAlternatingRowBackgroundColors:headers.size() >= 2];
+//[content setUsesAlternatingRowBackgroundColors:headers.size() >= 2];
 
-  for(unsigned column = 0; column < headers.size(); column++) {
+  for(auto column : range(headers)) {
     NSTableColumn* tableColumn = [[NSTableColumn alloc] initWithIdentifier:[[NSNumber numberWithInteger:column] stringValue]];
     NSTableHeaderCell* headerCell = [[NSTableHeaderCell alloc] initTextCell:[NSString stringWithUTF8String:headers(column)]];
     CocoaListViewCell* dataCell = [[CocoaListViewCell alloc] initTextCell:@""];
@@ -95,20 +97,20 @@
 }
 
 -(NSInteger) numberOfRowsInTableView:(NSTableView*)table {
-  return listView->state.text.size();
+  return 0;  //listView->state.text.size();
 }
 
 -(id) tableView:(NSTableView*)table objectValueForTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
   if([[tableColumn identifier] isEqualToString:@"check"]) {
-    auto checked = listView->state.checked(row) ? NSOnState : NSOffState;
+    auto checked = false;  //listView->state.checked(row) ? NSOnState : NSOffState;
     return [NSNumber numberWithInteger:checked];
   }
 
   NSInteger column = [[tableColumn identifier] integerValue];
-  unsigned height = [table rowHeight];
+  uint height = [table rowHeight];
 
-  NSString* text = [NSString stringWithUTF8String:listView->state.text(row)(column)];
-  NSImage* image = NSMakeImage(listView->state.image(row)(column), height, height);
+  NSString* text = nil;  //[NSString stringWithUTF8String:listView->state.text(row)(column)];
+  NSImage* image = nil;  //NSMakeImage(listView->state.image(row)(column), height, height);
 
   if(image) return @{ @"text":text, @"image":image };
   return @{ @"text":text };
@@ -124,8 +126,8 @@
 
 -(void) tableView:(NSTableView*)table setObjectValue:(id)object forTableColumn:(NSTableColumn*)tableColumn row:(NSInteger)row {
   if([[tableColumn identifier] isEqualToString:@"check"]) {
-    listView->state.checked(row) = [object integerValue] != NSOffState;
-    if(listView->onToggle) listView->onToggle(row);
+  //listView->state.checked(row) = [object integerValue] != NSOffState;
+  //listView->doToggle(row);
   }
 }
 
@@ -134,13 +136,13 @@
 }
 
 -(void) tableViewSelectionDidChange:(NSNotification*)notification {
-  listView->state.selected = true;
-  listView->state.selection = [content selectedRow];
-  if(listView->onChange) listView->onChange();
+//listView->state.selected = true;
+//listView->state.selection = [content selectedRow];
+  listView->doChange();
 }
 
 -(IBAction) activate:(id)sender {
-  if(listView->onActivate) listView->onActivate();
+  listView->doActivate();
 }
 
 -(IBAction) doubleAction:(id)sender {
@@ -177,7 +179,7 @@
 -(void) drawWithFrame:(NSRect)frame inView:(NSView*)view {
   NSString* text = [[self objectValue] objectForKey:@"text"];
   NSImage* image = [[self objectValue] objectForKey:@"image"];
-  unsigned textDisplacement = 0;
+  uint textDisplacement = 0;
 
   if(image) {
     [[NSGraphicsContext currentContext] saveGraphicsState];
@@ -207,15 +209,72 @@
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pListView::append(const lstring& text) {
+auto pListView::construct() -> void {
+  @autoreleasepool {
+    cocoaView = cocoaListView = [[CocoaListView alloc] initWith:self()];
+    pWidget::construct();
+
+    setAlignment(state().alignment);
+    setBackgroundColor(state().backgroundColor);
+    setBatchable(state().batchable);
+    setBordered(state().bordered);
+    setFont(self().font(true));
+    setForegroundColor(state().foregroundColor);
+  }
+}
+
+auto pListView::destruct() -> void {
+  @autoreleasepool {
+    [cocoaView release];
+  }
+}
+
+auto pListView::append(sListViewHeader header) -> void {
+}
+
+auto pListView::append(sListViewItem item) -> void {
+}
+
+auto pListView::remove(sListViewHeader header) -> void {
+}
+
+auto pListView::remove(sListViewItem item) -> void {
+}
+
+auto pListView::resizeColumns() -> void {
+}
+
+auto pListView::setAlignment(Alignment alignment) -> void {
+}
+
+auto pListView::setBackgroundColor(Color color) -> void {
+}
+
+auto pListView::setBatchable(bool batchable) -> void {
+}
+
+auto pListView::setBordered(bool bordered) -> void {
+}
+
+auto pListView::setFont(const Font& font) -> void {
+  @autoreleasepool {
+    [cocoaView setFont:pFont::create(font)];
+  }
+}
+
+auto pListView::setForegroundColor(Color color) -> void {
+}
+
+/*
+auto pListView::append(const lstring& text) -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
 
-void pListView::autoSizeColumns() {
+auto pListView::autoSizeColumns() -> void {
   @autoreleasepool {
     if(listView.state.checkable) {
       NSTableColumn* tableColumn = [[cocoaView content] tableColumnWithIdentifier:@"check"];
@@ -238,49 +297,37 @@ void pListView::autoSizeColumns() {
   }
 }
 
-void pListView::remove(unsigned selection) {
+auto pListView::remove(unsigned selection) -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
 
-void pListView::reset() {
+auto pListView::reset() -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
 
-void pListView::setBackgroundColor(Color color) {
-}
-
-void pListView::setCheckable(bool checkable) {
+auto pListView::setCheckable(bool checkable) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
   }
 }
 
-void pListView::setChecked(unsigned selection, bool checked) {
+auto pListView::setChecked(unsigned selection, bool checked) -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
 
-void pListView::setFont(string font) {
-  @autoreleasepool {
-    [cocoaView setFont:pFont::cocoaFont(font)];
-  }
-}
-
-void pListView::setForegroundColor(Color color) {
-}
-
-void pListView::setHeaderText(const lstring& text) {
+auto pListView::setHeaderText(const lstring& text) -> void {
   @autoreleasepool {
     [cocoaView reloadColumns];
   }
 }
 
-void pListView::setHeaderVisible(bool visible) {
+auto pListView::setHeaderVisible(bool visible) -> void {
   @autoreleasepool {
     if(visible) {
       [[cocoaView content] setHeaderView:[[[NSTableHeaderView alloc] init] autorelease]];
@@ -290,13 +337,13 @@ void pListView::setHeaderVisible(bool visible) {
   }
 }
 
-void pListView::setImage(unsigned selection, unsigned position, const image& image) {
+auto pListView::setImage(unsigned selection, unsigned position, const image& image) -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
 
-void pListView::setSelected(bool selected) {
+auto pListView::setSelected(bool selected) -> void {
   @autoreleasepool {
     if(selected == false) {
       [[cocoaView content] deselectAll:nil];
@@ -304,30 +351,19 @@ void pListView::setSelected(bool selected) {
   }
 }
 
-void pListView::setSelection(unsigned selection) {
+auto pListView::setSelection(unsigned selection) -> void {
   @autoreleasepool {
     [[cocoaView content] selectRowIndexes:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(selection, 1)] byExtendingSelection:NO];
   }
 }
 
-void pListView::setText(unsigned selection, unsigned position, const string text) {
+auto pListView::setText(unsigned selection, unsigned position, const string text) -> void {
   @autoreleasepool {
     [[cocoaView content] reloadData];
   }
 }
-
-void pListView::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaListView = [[CocoaListView alloc] initWith:listView];
-    setHeaderVisible(listView.state.headerVisible);
-    setHeaderText(listView.state.headerText);
-  }
-}
-
-void pListView::destructor() {
-  @autoreleasepool {
-    [cocoaView release];
-  }
-}
+*/
 
 }
+
+#endif

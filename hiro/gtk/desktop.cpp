@@ -2,14 +2,14 @@
 
 namespace hiro {
 
-Size pDesktop::size() {
+auto pDesktop::size() -> Size {
   return {
     gdk_screen_get_width(gdk_screen_get_default()),
     gdk_screen_get_height(gdk_screen_get_default())
   };
 }
 
-Geometry pDesktop::workspace() {
+auto pDesktop::workspace() -> Geometry {
   #if defined(DISPLAY_WINDOWS)
   RECT rc;
   SystemParametersInfo(SPI_GETWORKAREA, 0, &rc, 0);

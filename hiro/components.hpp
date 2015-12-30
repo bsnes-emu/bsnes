@@ -79,17 +79,21 @@
 #define Hiro_HorizontalLayout
 #define Hiro_VerticalLayout
 
+#if defined(HIRO_WINDOWS) || defined(HIRO_COCOA) || defined(HIRO_QT)
+  #undef Hiro_Console
+  #undef Hiro_IconView
+  #undef Hiro_SourceEdit
+  #undef Hiro_TreeView
+#endif
+
+#if defined(HIRO_COCOA)
+  #undef Hiro_HexEdit
+#endif
+
 #if defined(Hiro_Button) && defined(Hiro_Canvas) && defined(Hiro_Label)
   #define Hiro_MessageDialog
 #endif
 
 #if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_ListView) && defined(Hiro_MessageDialog)
   #define Hiro_BrowserDialog
-#endif
-
-#if defined(HIRO_WINDOWS) || defined(HIRO_QT)
-  #undef Hiro_Console
-  #undef Hiro_IconView
-  #undef Hiro_SourceEdit
-  #undef Hiro_TreeView
 #endif

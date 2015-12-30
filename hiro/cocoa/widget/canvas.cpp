@@ -1,6 +1,8 @@
+#if defined(Hiro_Canvas)
+
 @implementation CocoaCanvas : NSImageView
 
--(id) initWith:(phoenix::Canvas&)canvasReference {
+-(id) initWith:(hiro::mCanvas&)canvasReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     canvas = &canvasReference;
     [self setEditable:NO];  //disable image drag-and-drop functionality
@@ -20,11 +22,12 @@
 -(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
   lstring paths = DropPaths(sender);
   if(paths.empty()) return NO;
-  if(canvas->onDrop) canvas->onDrop(paths);
+  canvas->doDrop(paths);
   return YES;
 }
 
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown {
+/*
   if(auto& callback = isDown ? canvas->onMousePress : canvas->onMouseRelease) {
     switch([event buttonNumber]) {
     case 0: return callback(phoenix::Mouse::Button::Left);
@@ -32,16 +35,17 @@
     case 2: return callback(phoenix::Mouse::Button::Middle);
     }
   }
+*/
 }
 
 -(void) mouseExited:(NSEvent*)event {
-  if(canvas->onMouseLeave) canvas->onMouseLeave();
+  canvas->doMouseLeave();
 }
 
 -(void) mouseMove:(NSEvent*)event {
   if([event window] == nil) return;
   NSPoint location = [self convertPoint:[event locationInWindow] fromView:nil];
-  if(canvas->onMouseMove) canvas->onMouseMove({location.x, [self frame].size.height - 1 - location.y});
+  canvas->doMouseMove({(int)location.x, (int)([self frame].size.height - 1 - location.y)});
 }
 
 -(void) mouseDown:(NSEvent*)event {
@@ -82,9 +86,31 @@
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pCanvas::setDroppable(bool droppable) {
+auto pCanvas::construct() -> void {
+  @autoreleasepool {
+    cocoaView = cocoaCanvas = [[CocoaCanvas alloc] initWith:self()];
+    pWidget::construct();
+
+    setDroppable(state().droppable);
+  }
+}
+
+auto pCanvas::destruct() -> void {
+  @autoreleasepool {
+    [cocoaView release];
+  }
+}
+
+auto pCanvas::minimumSize() const -> Size {
+  return {0, 0};
+}
+
+auto pCanvas::setColor(Color color) -> void {
+}
+
+auto pCanvas::setDroppable(bool droppable) -> void {
   @autoreleasepool {
     if(droppable) {
       [cocoaCanvas registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
@@ -94,11 +120,12 @@ void pCanvas::setDroppable(bool droppable) {
   }
 }
 
-void pCanvas::setGeometry(Geometry geometry) {
+auto pCanvas::setGeometry(Geometry geometry) -> void {
+/*
   if(canvas.state.width == 0 || canvas.state.height == 0) rasterize();
 
-  unsigned width = canvas.state.width;
-  unsigned height = canvas.state.height;
+  uint width = canvas.state.width;
+  uint height = canvas.state.height;
   if(width == 0) width = widget.state.geometry.width;
   if(height == 0) height = widget.state.geometry.height;
 
@@ -111,32 +138,22 @@ void pCanvas::setGeometry(Geometry geometry) {
     geometry.y += (geometry.height - height) / 2;
     geometry.height = height;
   }
+*/
 
   pWidget::setGeometry(geometry);
 }
 
-void pCanvas::setMode(Canvas::Mode mode) {
-  rasterize(), redraw();
+auto pCanvas::setGradient(Gradient gradient) -> void {
 }
 
-void pCanvas::setSize(Size size) {
-  rasterize(), redraw();
+auto pCanvas::setImage(const Image& image) -> void {
 }
 
-void pCanvas::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaCanvas = [[CocoaCanvas alloc] initWith:canvas];
-  }
-  setSize(canvas.size());
+auto pCanvas::update() -> void {
 }
 
-void pCanvas::destructor() {
-  @autoreleasepool {
-    [cocoaView release];
-  }
-}
-
-void pCanvas::rasterize() {
+auto pCanvas::_rasterize() -> void {
+/*
   @autoreleasepool {
     unsigned width = canvas.state.width;
     unsigned height = canvas.state.height;
@@ -203,12 +220,15 @@ void pCanvas::rasterize() {
       }
     }
   }
+*/
 }
 
-void pCanvas::redraw() {
+auto pCanvas::_redraw() -> void {
   @autoreleasepool {
     [cocoaView setNeedsDisplay:YES];
   }
 }
 
 }
+
+#endif

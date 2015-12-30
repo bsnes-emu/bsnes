@@ -1,10 +1,17 @@
-namespace phoenix {
+namespace hiro {
   struct pFont;
   struct pWindow;
   struct pMenu;
   struct pLayout;
   struct pWidget;
 }
+
+#define Declare(Name, Base) \
+  p##Name(m##Name& reference) : p##Base(reference) {} \
+  auto self() const -> m##Name& { return (m##Name&)reference; } \
+  auto state() const -> m##Name::State& { return self().state; } \
+  auto construct() -> void override; \
+  auto destruct() -> void override; \
 
 #include "font.hpp"
 #include "desktop.hpp"
@@ -13,40 +20,55 @@ namespace phoenix {
 #include "mouse.hpp"
 #include "browser-window.hpp"
 #include "message-window.hpp"
+
 #include "object.hpp"
+#include "group.hpp"
+
 #include "timer.hpp"
 #include "window.hpp"
+#include "status-bar.hpp"
+#include "menu-bar.hpp"
+#include "popup-menu.hpp"
 
 #include "action/action.hpp"
 #include "action/menu.hpp"
-#include "action/separator.hpp"
-#include "action/item.hpp"
-#include "action/check-item.hpp"
-#include "action/radio-item.hpp"
+#include "action/menu-separator.hpp"
+#include "action/menu-item.hpp"
+#include "action/menu-check-item.hpp"
+#include "action/menu-radio-item.hpp"
 
-#include "widget/sizable.hpp"
-#include "widget/layout.hpp"
+#include "sizable.hpp"
+#include "layout.hpp"
+
 #include "widget/widget.hpp"
 #include "widget/button.hpp"
 #include "widget/canvas.hpp"
 #include "widget/check-button.hpp"
 #include "widget/check-label.hpp"
 #include "widget/combo-button.hpp"
+#include "widget/combo-button-item.hpp"
 #include "widget/console.hpp"
 #include "widget/frame.hpp"
 #include "widget/hex-edit.hpp"
-#include "widget/horizontal-scroller.hpp"
+#include "widget/horizontal-scroll-bar.hpp"
 #include "widget/horizontal-slider.hpp"
 #include "widget/label.hpp"
 #include "widget/line-edit.hpp"
 #include "widget/list-view.hpp"
+#include "widget/list-view-header.hpp"
+#include "widget/list-view-column.hpp"
+#include "widget/list-view-item.hpp"
+#include "widget/list-view-cell.hpp"
 #include "widget/progress-bar.hpp"
 #include "widget/radio-button.hpp"
 #include "widget/radio-label.hpp"
 #include "widget/tab-frame.hpp"
+#include "widget/tab-frame-item.hpp"
 #include "widget/text-edit.hpp"
-#include "widget/vertical-scroller.hpp"
+#include "widget/vertical-scroll-bar.hpp"
 #include "widget/vertical-slider.hpp"
 #include "widget/viewport.hpp"
+
+#undef Declare
 
 #include "application.hpp"

@@ -1,3 +1,5 @@
+#if defined(Hiro_HexEdit)
+
 @interface CocoaHexEdit : NSScrollView {
 @public
   phoenix::HexEdit* hexEdit;
@@ -5,7 +7,7 @@
 -(id) initWith:(phoenix::HexEdit&)hexEdit;
 @end
 
-namespace phoenix {
+namespace hiro {
 
 struct pHexEdit : public pWidget {
   HexEdit& hexEdit;
@@ -25,3 +27,5 @@ struct pHexEdit : public pWidget {
 };
 
 }
+
+#endif

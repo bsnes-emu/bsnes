@@ -1,26 +1,28 @@
+#if defined(Hiro_Button)
+
 @interface CocoaButton : NSButton {
 @public
-  phoenix::Button* button;
+  hiro::mButton* button;
 }
--(id) initWith:(phoenix::Button&)button;
+-(id) initWith:(hiro::mButton&)button;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pButton : public pWidget {
-  Button& button;
+struct pButton : pWidget {
+  Declare(Button, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setBordered(bool bordered) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setImage(const Image& image) -> void;
+  auto setOrientation(Orientation orientation) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaButton* cocoaButton = nullptr;
-
-  Size minimumSize();
-  void setBordered(bool bordered);
-  void setGeometry(Geometry geometry);
-  void setImage(const image& image, Orientation orientation);
-  void setText(string text);
-
-  pButton(Button& button) : pWidget(button), button(button) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

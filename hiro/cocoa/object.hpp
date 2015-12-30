@@ -1,14 +1,31 @@
-namespace phoenix {
+#if defined(Hiro_Object)
+
+namespace hiro {
 
 struct pObject {
-  Object& object;
-  bool locked;
-
-  pObject(Object& object) : object(object), locked(false) {}
+  pObject(mObject& reference) : reference(reference) {}
   virtual ~pObject() {}
+  auto self() const -> mObject& { return (mObject&)reference; }
+  auto state() const -> mObject::State& { return self().state; }
+  virtual auto construct() -> void;
+  virtual auto destruct() -> void;
 
-  void constructor();
-  void destructor();
+  virtual auto focused() const -> bool;
+  virtual auto remove() -> void;
+  virtual auto reset() -> void;
+  virtual auto setEnabled(bool enabled) -> void;
+  virtual auto setFocused() -> void;
+  virtual auto setFont(const Font& font) -> void;
+  virtual auto setVisible(bool visible) -> void;
+
+  auto locked() const -> bool { return locks != 0; }
+  auto lock() -> void { ++locks; }
+  auto unlock() -> void { --locks; }
+
+  mObject& reference;
+  signed locks = 0;
 };
 
 }
+
+#endif

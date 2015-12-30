@@ -1,6 +1,8 @@
+#if defined(Hiro_LineEdit)
+
 @implementation CocoaLineEdit : NSTextField
 
--(id) initWith:(phoenix::LineEdit&)lineEditReference {
+-(id) initWith:(hiro::mLineEdit&)lineEditReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     lineEdit = &lineEditReference;
 
@@ -15,57 +17,66 @@
 }
 
 -(void) textDidChange:(NSNotification*)n {
-  if(lineEdit->onChange) lineEdit->onChange();
+  lineEdit->doChange();
 }
 
 -(IBAction) activate:(id)sender {
-  if(lineEdit->onActivate) lineEdit->onActivate();
+  lineEdit->doActivate();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-Size pLineEdit::minimumSize() {
-  Size size = Font::size(lineEdit.font(), lineEdit.state.text);
-  return {size.width + 10, size.height + 8};
-}
-
-void pLineEdit::setBackgroundColor(Color color) {
-}
-
-void pLineEdit::setEditable(bool editable) {
+auto pLineEdit::construct() -> void {
   @autoreleasepool {
-    [cocoaView setEditable:editable];
+    cocoaView = cocoaLineEdit = [[CocoaLineEdit alloc] initWith:self()];
+    pWidget::construct();
+
+    setBackgroundColor(state().backgroundColor);
+    setEditable(state().editable);
+    setForegroundColor(state().foregroundColor);
+    setText(state().text);
   }
 }
 
-void pLineEdit::setForegroundColor(Color color) {
-}
-
-void pLineEdit::setText(string text) {
-  @autoreleasepool {
-    [cocoaView setStringValue:[NSString stringWithUTF8String:text]];
-  }
-}
-
-string pLineEdit::text() {
-  @autoreleasepool {
-    return [[cocoaView stringValue] UTF8String];
-  }
-}
-
-void pLineEdit::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaLineEdit = [[CocoaLineEdit alloc] initWith:lineEdit];
-    setEditable(lineEdit.state.editable);
-  }
-}
-
-void pLineEdit::destructor() {
+auto pLineEdit::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pLineEdit::minimumSize() const -> Size {
+  Size size = pFont::size(self().font(true), state().text);
+  return {size.width() + 10, size.height() + 8};
 }
+
+auto pLineEdit::setBackgroundColor(Color color) -> void {
+}
+
+auto pLineEdit::setEditable(bool editable) -> void {
+  @autoreleasepool {
+    [cocoaView setEditable:editable];
+  }
+}
+
+auto pLineEdit::setForegroundColor(Color color) -> void {
+}
+
+auto pLineEdit::setText(const string& text) -> void {
+  @autoreleasepool {
+    [cocoaView setStringValue:[NSString stringWithUTF8String:text]];
+  }
+}
+
+/*
+auto pLineEdit::text() const -> string {
+  @autoreleasepool {
+    return [[cocoaView stringValue] UTF8String];
+  }
+}
+*/
+
+}
+
+#endif

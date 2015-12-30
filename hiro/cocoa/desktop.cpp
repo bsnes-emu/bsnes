@@ -1,18 +1,22 @@
-namespace phoenix {
+#if defined(Hiro_Desktop)
 
-Size pDesktop::size() {
+namespace hiro {
+
+auto pDesktop::size() -> Size {
   @autoreleasepool {
     NSRect primary = [[[NSScreen screens] objectAtIndex:0] frame];
-    return {primary.size.width, primary.size.height};
+    return {(int)primary.size.width, (int)primary.size.height};
   }
 }
 
-Geometry pDesktop::workspace() {
+auto pDesktop::workspace() -> Geometry {
   @autoreleasepool {
     auto screen = Desktop::size();
     NSRect area = [[[NSScreen screens] objectAtIndex:0] visibleFrame];
-    return {area.origin.x, screen.height - area.size.height - area.origin.y, area.size.width, area.size.height};
+    return {(int)area.origin.x, (int)(screen.height() - area.size.height - area.origin.y), (int)area.size.width, (int)area.size.height};
   }
 }
 
 }
+
+#endif

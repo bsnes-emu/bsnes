@@ -1,26 +1,27 @@
+#if defined(Hiro_RadioLabel)
+
 @interface CocoaRadioLabel : NSButton {
 @public
-  phoenix::RadioLabel* radioLabel;
+  hiro::mRadioLabel* radioLabel;
 }
--(id) initWith:(phoenix::RadioLabel&)radioLabel;
+-(id) initWith:(hiro::mRadioLabel&)radioLabel;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pRadioLabel : public pWidget {
-  RadioLabel& radioLabel;
+struct pRadioLabel : pWidget {
+  Declare(RadioLabel, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setChecked() -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setGroup(sGroup group) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaRadioLabel* cocoaRadioLabel = nullptr;
-
-  Size minimumSize();
-  void setChecked();
-  void setGeometry(Geometry geometry);
-  void setGroup(const group<RadioLabel>& group);
-  void setText(string text);
-
-  pRadioLabel(RadioLabel& radioLabel) : pWidget(radioLabel), radioLabel(radioLabel) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

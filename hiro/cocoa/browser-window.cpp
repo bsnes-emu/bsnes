@@ -1,6 +1,8 @@
-namespace phoenix {
+#if defined(Hiro_BrowserWindow)
 
-string pBrowserWindow::directory(BrowserWindow::State& state) {
+namespace hiro {
+
+auto pBrowserWindow::directory(BrowserWindow::State& state) -> string {
   string result;
 
   @autoreleasepool {
@@ -18,13 +20,13 @@ string pBrowserWindow::directory(BrowserWindow::State& state) {
   return result;
 }
 
-string pBrowserWindow::open(BrowserWindow::State& state) {
+auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
   string result;
 
   @autoreleasepool {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
     for(auto& rule : state.filters) {
-      string pattern = rule.split<1>("(")(1).rtrim(")");
+      string pattern = rule.split("(", 1L)(1).rtrim(")", 1L);
       if(!pattern.empty()) [filters addObject:[NSString stringWithUTF8String:pattern]];
     }
     NSOpenPanel* panel = [NSOpenPanel openPanel];
@@ -43,13 +45,13 @@ string pBrowserWindow::open(BrowserWindow::State& state) {
   return result;
 }
 
-string pBrowserWindow::save(BrowserWindow::State& state) {
+auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
   string result;
 
   @autoreleasepool {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
     for(auto& rule : state.filters) {
-      string pattern = rule.split<1>("(")(1).rtrim(")");
+      string pattern = rule.split("(", 1L)(1).rtrim(")", 1L);
       if(!pattern.empty()) [filters addObject:[NSString stringWithUTF8String:pattern]];
     }
     NSSavePanel* panel = [NSSavePanel savePanel];
@@ -67,3 +69,5 @@ string pBrowserWindow::save(BrowserWindow::State& state) {
 }
 
 }
+
+#endif

@@ -1,6 +1,8 @@
+#if defined(Hiro_TextEdit)
+
 @implementation CocoaTextEdit : NSScrollView
 
--(id) initWith:(phoenix::TextEdit&)textEditReference {
+-(id) initWith:(hiro::mTextEdit&)textEditReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     textEdit = &textEditReference;
 
@@ -36,72 +38,76 @@
 
 -(void) textDidChange:(NSNotification*)notification {
   textEdit->state.text = [[content string] UTF8String];
-  if(textEdit->onChange) textEdit->onChange();
+  textEdit->doChange();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pTextEdit::setBackgroundColor(Color color) {
-}
-
-void pTextEdit::setCursorPosition(unsigned position) {
+auto pTextEdit::construct() -> void {
   @autoreleasepool {
-    string text = [[[cocoaView content] string] UTF8String];
-    position = min(position, text.length());
-    [[cocoaView content] setSelectedRange:NSMakeRange(position, 0)];
+    cocoaView = cocoaTextEdit = [[CocoaTextEdit alloc] initWith:self()];
+    pWidget::construct();
+
+    setEditable(state().editable);
+    setWordWrap(state().wordWrap);
+    setText(state().text);
+    setCursor(state().cursor);
   }
 }
 
-void pTextEdit::setEditable(bool editable) {
-  @autoreleasepool {
-    [[cocoaView content] setEditable:editable];
-  }
-}
-
-void pTextEdit::setFont(string font) {
-  @autoreleasepool {
-    [[cocoaView content] setFont:pFont::cocoaFont(font)];
-  }
-}
-
-void pTextEdit::setForegroundColor(Color color) {
-}
-
-void pTextEdit::setText(string text) {
-  @autoreleasepool {
-    [[cocoaView content] setString:[NSString stringWithUTF8String:text]];
-  }
-}
-
-void pTextEdit::setWordWrap(bool wordWrap) {
-  @autoreleasepool {
-    [cocoaView configure];
-  }
-}
-
-string pTextEdit::text() {
-  @autoreleasepool {
-    return [[[cocoaView content] string] UTF8String];
-  }
-}
-
-void pTextEdit::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaTextEdit = [[CocoaTextEdit alloc] initWith:textEdit];
-    setEditable(textEdit.state.editable);
-    setWordWrap(textEdit.state.wordWrap);
-    setFont(textEdit.font());
-    setText(textEdit.state.text);
-    setCursorPosition(textEdit.state.cursorPosition);
-  }
-}
-
-void pTextEdit::destructor() {
+auto pTextEdit::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pTextEdit::setBackgroundColor(Color color) -> void {
 }
+
+auto pTextEdit::setCursor(Cursor cursor) -> void {
+  @autoreleasepool {
+    //todo: handle text selection (cursor.length())
+    string text = [[[cocoaView content] string] UTF8String];
+    auto offset = min(cursor.offset(), text.length());
+    [[cocoaView content] setSelectedRange:NSMakeRange(offset, 0)];
+  }
+}
+
+auto pTextEdit::setEditable(bool editable) -> void {
+  @autoreleasepool {
+    [[cocoaView content] setEditable:editable];
+  }
+}
+
+auto pTextEdit::setFont(const Font& font) -> void {
+  @autoreleasepool {
+    [[cocoaView content] setFont:pFont::create(font)];
+  }
+}
+
+auto pTextEdit::setForegroundColor(Color color) -> void {
+}
+
+auto pTextEdit::setText(const string& text) -> void {
+  @autoreleasepool {
+    [[cocoaView content] setString:[NSString stringWithUTF8String:text]];
+  }
+}
+
+auto pTextEdit::setWordWrap(bool wordWrap) -> void {
+  @autoreleasepool {
+    [cocoaView configure];
+  }
+}
+
+auto pTextEdit::text() const -> string {
+  @autoreleasepool {
+    return [[[cocoaView content] string] UTF8String];
+  }
+}
+
+}
+
+#endif

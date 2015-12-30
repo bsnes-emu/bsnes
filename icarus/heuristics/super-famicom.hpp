@@ -100,7 +100,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size, bool 
   if(type == Type::SufamiTurbo) return;
 
   const char* range = (rom_size > 0x200000) || (ram_size > 32 * 1024) ? "0000-7fff" : "0000-ffff";
-  markup.append("board cic=", region == Region::NTSC ? "411" : "413", "\n");
+  markup.append("board region=", region == Region::NTSC ? "ntsc" : "pal", "\n");
 
   //detect appended firmware
 

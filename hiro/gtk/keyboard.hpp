@@ -1,4 +1,4 @@
-#if defined(Hiro_Mouse)
+#if defined(Hiro_Keyboard)
 
 namespace hiro {
 

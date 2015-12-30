@@ -1,9 +1,13 @@
-namespace phoenix {
+#if defined(Hiro_Monitor)
+
+namespace hiro {
 
 struct pMonitor {
-  static unsigned count();
-  static Geometry geometry(unsigned monitor);
-  static unsigned primary();
+  static auto count() -> uint;
+  static auto geometry(uint monitor) -> Geometry;
+  static auto primary() -> uint;
 };
 
 }
+
+#endif

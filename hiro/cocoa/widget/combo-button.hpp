@@ -1,28 +1,29 @@
+#if defined(Hiro_ComboButton)
+
 @interface CocoaComboButton : NSPopUpButton {
 @public
-  phoenix::ComboButton* comboButton;
+  hiro::mComboButton* comboButton;
 }
--(id) initWith:(phoenix::ComboButton&)comboButton;
+-(id) initWith:(hiro::mComboButton&)comboButton;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pComboButton : public pWidget {
-  ComboButton& comboButton;
+struct pComboButton : pWidget {
+  Declare(ComboButton, Widget)
+
+  auto append(sComboButtonItem item) -> void;
+  auto minimumSize() const -> Size override;
+  auto remove(sComboButtonItem item) -> void;
+  auto reset() -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+
+  auto _updateSelected(signed selected) -> void;
+
   CocoaComboButton* cocoaComboButton = nullptr;
-
-  void append(string text);
-  Size minimumSize();
-  void remove(unsigned selection);
-  void reset();
-  void setGeometry(Geometry geometry);
-  void setSelection(unsigned selection);
-  void setText(unsigned selection, string text);
-
-  pComboButton(ComboButton& comboButton) : pWidget(comboButton), comboButton(comboButton) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

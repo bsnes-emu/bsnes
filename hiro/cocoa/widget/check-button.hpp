@@ -1,26 +1,29 @@
+#if defined(Hiro_CheckButton)
+
 @interface CocoaCheckButton : NSButton {
 @public
-  phoenix::CheckButton* checkButton;
+  hiro::mCheckButton* checkButton;
 }
--(id) initWith:(phoenix::CheckButton&)checkButton;
+-(id) initWith:(hiro::mCheckButton&)checkButton;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pCheckButton : public pWidget {
-  CheckButton& checkButton;
+struct pCheckButton : pWidget {
+  Declare(CheckButton, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setBordered(bool bordered) -> void;
+  auto setChecked(bool checked) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setImage(const Image& image) -> void;
+  auto setOrientation(Orientation orientation) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaCheckButton* cocoaCheckButton = nullptr;
-
-  Size minimumSize();
-  void setChecked(bool checked);
-  void setGeometry(Geometry geometry);
-  void setImage(const image& image, Orientation orientation);
-  void setText(string text);
-
-  pCheckButton(CheckButton& checkButton) : pWidget(checkButton), checkButton(checkButton) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

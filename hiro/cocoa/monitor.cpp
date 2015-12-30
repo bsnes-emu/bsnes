@@ -1,21 +1,25 @@
-namespace phoenix {
+#if defined(Hiro_Monitor)
 
-unsigned pMonitor::count() {
+namespace hiro {
+
+auto pMonitor::count() -> uint {
   @autoreleasepool {
     return [[NSScreen screens] count];
   }
 }
 
-Geometry pMonitor::geometry(unsigned monitor) {
+auto pMonitor::geometry(uint monitor) -> Geometry {
   @autoreleasepool {
     NSRect rectangle = [[[NSScreen screens] objectAtIndex:monitor] frame];
-    return {rectangle.origin.x, rectangle.origin.y, rectangle.size.width, rectangle.size.height};
+    return {(int)rectangle.origin.x, (int)rectangle.origin.y, (int)rectangle.size.width, (int)rectangle.size.height};
   }
 }
 
-unsigned pMonitor::primary() {
+auto pMonitor::primary() -> uint {
   //on OS X, the primary monitor is always the first monitor
   return 0;
 }
 
 }
+
+#endif

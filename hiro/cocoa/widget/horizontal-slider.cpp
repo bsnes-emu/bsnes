@@ -1,6 +1,8 @@
+#if defined(Hiro_HorizontalSlider)
+
 @implementation CocoaHorizontalSlider : NSSlider
 
--(id) initWith:(phoenix::HorizontalSlider&)horizontalSliderReference {
+-(id) initWith:(hiro::mHorizontalSlider&)horizontalSliderReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 1, 0)]) {
     horizontalSlider = &horizontalSliderReference;
 
@@ -13,49 +15,52 @@
 
 -(IBAction) activate:(id)sender {
   horizontalSlider->state.position = [self doubleValue];
-  if(horizontalSlider->onChange) horizontalSlider->onChange();
+  horizontalSlider->doChange();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-Size pHorizontalSlider::minimumSize() {
-  return {48, 20};
-}
-
-void pHorizontalSlider::setGeometry(Geometry geometry) {
-  pWidget::setGeometry({
-    geometry.x - 2, geometry.y,
-    geometry.width + 4, geometry.height
-  });
-}
-
-void pHorizontalSlider::setLength(unsigned length) {
+auto pHorizontalSlider::construct() -> void {
   @autoreleasepool {
-    [cocoaView setMaxValue:length];
+    cocoaView = cocoaHorizontalSlider = [[CocoaHorizontalSlider alloc] initWith:self()];
+    pWidget::construct();
+
+    setLength(state().length);
+    setPosition(state().position);
   }
 }
 
-void pHorizontalSlider::setPosition(unsigned position) {
-  @autoreleasepool {
-    [cocoaView setDoubleValue:position];
-  }
-}
-
-void pHorizontalSlider::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaHorizontalSlider = [[CocoaHorizontalSlider alloc] initWith:horizontalSlider];
-
-    setLength(horizontalSlider.state.length);
-    setPosition(horizontalSlider.state.position);
-  }
-}
-
-void pHorizontalSlider::destructor() {
+auto pHorizontalSlider::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pHorizontalSlider::minimumSize() const -> Size {
+  return {48, 20};
 }
+
+auto pHorizontalSlider::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry({
+    geometry.x() - 2, geometry.y(),
+    geometry.width() + 4, geometry.height()
+  });
+}
+
+auto pHorizontalSlider::setLength(uint length) -> void {
+  @autoreleasepool {
+    [cocoaView setMaxValue:length];
+  }
+}
+
+auto pHorizontalSlider::setPosition(uint position) -> void {
+  @autoreleasepool {
+    [cocoaView setDoubleValue:position];
+  }
+}
+
+}
+
+#endif

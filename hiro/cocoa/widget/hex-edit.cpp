@@ -1,3 +1,5 @@
+#if defined(Hiro_HexEdit)
+
 @implementation CocoaHexEdit : NSScrollView
 
 -(id) initWith:(phoenix::HexEdit&)hexEditReference {
@@ -9,7 +11,7 @@
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
 void pHexEdit::setBackgroundColor(Color color) {
 }
@@ -45,3 +47,5 @@ void pHexEdit::destructor() {
 }
 
 }
+
+#endif

@@ -1,21 +1,23 @@
+#if defined(Hiro_ProgressBar)
+
 @interface CocoaProgressBar : NSProgressIndicator {
 @public
-  phoenix::ProgressBar* progressBar;
+  hiro::mProgressBar* progressBar;
 }
--(id) initWith:(phoenix::ProgressBar&)progressBar;
+-(id) initWith:(hiro::mProgressBar&)progressBar;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pProgressBar : public pWidget {
-  ProgressBar& progressBar;
+struct pProgressBar : pWidget {
+  Declare(ProgressBar, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setPosition(uint position) -> void;
+
   CocoaProgressBar* cocoaProgressBar = nullptr;
-
-  void setPosition(unsigned position);
-
-  pProgressBar(ProgressBar& progressBar) : pWidget(progressBar), progressBar(progressBar) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

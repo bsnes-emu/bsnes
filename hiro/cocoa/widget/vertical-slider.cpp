@@ -1,6 +1,8 @@
+#if defined(Hiro_VerticalSlider)
+
 @implementation CocoaVerticalSlider : NSSlider
 
--(id) initWith:(phoenix::VerticalSlider&)verticalSliderReference {
+-(id) initWith:(hiro::mVerticalSlider&)verticalSliderReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 1)]) {
     verticalSlider = &verticalSliderReference;
 
@@ -13,49 +15,52 @@
 
 -(IBAction) activate:(id)sender {
   verticalSlider->state.position = [self doubleValue];
-  if(verticalSlider->onChange) verticalSlider->onChange();
+  verticalSlider->doChange();
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-Size pVerticalSlider::minimumSize() {
-  return {20, 48};
-}
-
-void pVerticalSlider::setGeometry(Geometry geometry) {
-  pWidget::setGeometry({
-    geometry.x, geometry.y - 2,
-    geometry.width, geometry.height + 4
-  });
-}
-
-void pVerticalSlider::setLength(unsigned length) {
+auto pVerticalSlider::construct() -> void {
   @autoreleasepool {
-    [cocoaView setMaxValue:length];
+    cocoaView = cocoaVerticalSlider = [[CocoaVerticalSlider alloc] initWith:self()];
+    pWidget::construct();
+
+    setLength(state().length);
+    setPosition(state().position);
   }
 }
 
-void pVerticalSlider::setPosition(unsigned position) {
-  @autoreleasepool {
-    [cocoaView setDoubleValue:position];
-  }
-}
-
-void pVerticalSlider::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaVerticalSlider = [[CocoaVerticalSlider alloc] initWith:verticalSlider];
-
-    setLength(verticalSlider.state.length);
-    setPosition(verticalSlider.state.position);
-  }
-}
-
-void pVerticalSlider::destructor() {
+auto pVerticalSlider::destruct() -> void {
   @autoreleasepool {
     [cocoaView release];
   }
 }
 
+auto pVerticalSlider::minimumSize() const -> Size {
+  return {20, 48};
 }
+
+auto pVerticalSlider::setGeometry(Geometry geometry) -> void {
+  pWidget::setGeometry({
+    geometry.x(), geometry.y() - 2,
+    geometry.width(), geometry.height() + 4
+  });
+}
+
+auto pVerticalSlider::setLength(uint length) -> void {
+  @autoreleasepool {
+    [cocoaView setMaxValue:length];
+  }
+}
+
+auto pVerticalSlider::setPosition(uint position) -> void {
+  @autoreleasepool {
+    [cocoaView setDoubleValue:position];
+  }
+}
+
+}
+
+#endif

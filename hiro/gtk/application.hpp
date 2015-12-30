@@ -7,12 +7,12 @@ struct pApplication {
   static XlibDisplay* display;
   #endif
 
-  static void run();
-  static bool pendingEvents();
-  static void processEvents();
-  static void quit();
+  static auto run() -> void;
+  static auto pendingEvents() -> bool;
+  static auto processEvents() -> void;
+  static auto quit() -> void;
 
-  static void initialize();
+  static auto initialize() -> void;
 };
 
 }

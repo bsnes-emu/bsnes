@@ -1,25 +1,26 @@
+#if defined(Hiro_HorizontalSlider)
+
 @interface CocoaHorizontalSlider : NSSlider {
 @public
-  phoenix::HorizontalSlider* horizontalSlider;
+  hiro::mHorizontalSlider* horizontalSlider;
 }
--(id) initWith:(phoenix::HorizontalSlider&)horizontalSlider;
+-(id) initWith:(hiro::mHorizontalSlider&)horizontalSlider;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pHorizontalSlider : public pWidget {
-  HorizontalSlider& horizontalSlider;
+struct pHorizontalSlider : pWidget {
+  Declare(HorizontalSlider, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setGeometry(Geometry geometry) -> void;
+  auto setLength(uint length) -> void;
+  auto setPosition(uint position) -> void;
+
   CocoaHorizontalSlider* cocoaHorizontalSlider = nullptr;
-
-  Size minimumSize();
-  void setGeometry(Geometry geometry);
-  void setLength(unsigned length);
-  void setPosition(unsigned position);
-
-  pHorizontalSlider(HorizontalSlider& horizontalSlider) : pWidget(horizontalSlider), horizontalSlider(horizontalSlider) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

@@ -1,23 +1,25 @@
+#if defined(Hiro_Label)
+
 @interface CocoaLabel : NSTextField {
 @public
-  phoenix::Label* label;
+  hiro::mLabel* label;
 }
--(id) initWith:(phoenix::Label&)label;
+-(id) initWith:(hiro::mLabel&)label;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pLabel : public pWidget {
-  Label& label;
+struct pLabel : pWidget {
+  Declare(Label, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setAlignment(Alignment alignment) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setText(const string& text) -> void;
+
   CocoaLabel* cocoaLabel = nullptr;
-
-  Size minimumSize();
-  void setGeometry(Geometry geometry);
-  void setText(string text);
-
-  pLabel(Label& label) : pWidget(label), label(label) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

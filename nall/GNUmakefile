@@ -94,7 +94,7 @@ endif
 ifeq ($(threaded),true)
   ifneq ($(filter $(platform),linux bsd),)
     flags += -pthread
-    link += -lrt
+    link += -pthread -lrt
   endif
 endif
 

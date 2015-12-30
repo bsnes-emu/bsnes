@@ -1,41 +1,40 @@
+#if defined(Hiro_TabFrame)
+
 @interface CocoaTabFrame : NSTabView <NSTabViewDelegate> {
 @public
-  phoenix::TabFrame* tabFrame;
+  hiro::mTabFrame* tabFrame;
 }
--(id) initWith:(phoenix::TabFrame&)tabFrame;
+-(id) initWith:(hiro::mTabFrame&)tabFrame;
 -(void) tabView:(NSTabView*)tabView didSelectTabViewItem:(NSTabViewItem*)tabViewItem;
 @end
 
 @interface CocoaTabFrameItem : NSTabViewItem {
 @public
-  phoenix::TabFrame* tabFrame;
+  hiro::mTabFrame* tabFrame;
   CocoaTabFrame* cocoaTabFrame;
 }
--(id) initWith:(phoenix::TabFrame&)tabFrame;
+-(id) initWith:(hiro::mTabFrame&)tabFrame;
 -(NSSize) sizeOfLabel:(BOOL)shouldTruncateLabel;
 -(void) drawLabel:(BOOL)shouldTruncateLabel inRect:(NSRect)tabRect;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pTabFrame : public pWidget {
-  TabFrame& tabFrame;
+struct pTabFrame : pWidget {
+  Declare(TabFrame, Widget)
+
+  auto append(sTabFrameItem item) -> void;
+  auto remove(sTabFrameItem item) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setNavigation(Navigation navigation) -> void;
+
+  auto _synchronizeLayout() -> void;
+  auto _updateSelected(int selected) -> void;
+
   CocoaTabFrame* cocoaTabFrame = nullptr;
   vector<CocoaTabFrameItem*> tabs;
-
-  void append(string text, const image& image);
-  void remove(unsigned selection);
-  void setEnabled(bool enabled);
-  void setGeometry(Geometry geometry);
-  void setImage(unsigned selection, const image& image);
-  void setSelection(unsigned selection);
-  void setText(unsigned selection, string text);
-  void setVisible(bool visible);
-
-  pTabFrame(TabFrame& tabFrame) : pWidget(tabFrame), tabFrame(tabFrame) {}
-  void constructor();
-  void destructor();
-  void synchronizeLayout();
 };
 
 }
+
+#endif

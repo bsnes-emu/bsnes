@@ -1,25 +1,26 @@
+#if defined(Hiro_VerticalSlider)
+
 @interface CocoaVerticalSlider : NSSlider {
 @public
-  phoenix::VerticalSlider* verticalSlider;
+  hiro::mVerticalSlider* verticalSlider;
 }
--(id) initWith:(phoenix::VerticalSlider&)verticalSlider;
+-(id) initWith:(hiro::mVerticalSlider&)verticalSlider;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pVerticalSlider : public pWidget {
-  VerticalSlider& verticalSlider;
+struct pVerticalSlider : pWidget {
+  Declare(VerticalSlider, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setLength(uint length) -> void;
+  auto setPosition(uint position) -> void;
+
   CocoaVerticalSlider* cocoaVerticalSlider = nullptr;
-
-  Size minimumSize();
-  void setGeometry(Geometry geometry);
-  void setLength(unsigned length);
-  void setPosition(unsigned position);
-
-  pVerticalSlider(VerticalSlider& verticalSlider) : pWidget(verticalSlider), verticalSlider(verticalSlider) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

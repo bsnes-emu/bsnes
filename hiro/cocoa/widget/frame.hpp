@@ -1,26 +1,28 @@
+#if defined(Hiro_Frame)
+
 @interface CocoaFrame : NSBox {
 @public
-  phoenix::Frame* frame;
+  hiro::mFrame* frame;
 }
--(id) initWith:(phoenix::Frame&)frame;
+-(id) initWith:(hiro::mFrame&)frame;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pFrame : public pWidget {
-  Frame& frame;
+struct pFrame : pWidget {
+  Declare(Frame, Widget)
+
+  auto setEnabled(bool enabled) -> void override;
+  auto setFont(const Font& font) -> void override;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setText(const string& text) -> void;
+  auto setVisible(bool visible) -> void override;
+
+  auto _layout() -> maybe<pLayout&>;
+
   CocoaFrame* cocoaFrame = nullptr;
-
-  void setEnabled(bool enabled);
-  void setFont(string font);
-  void setGeometry(Geometry geometry);
-  void setText(string text);
-  void setVisible(bool visible);
-
-  pFrame(Frame& frame) : pWidget(frame), frame(frame) {}
-  void constructor();
-  void destructor();
-  void orphan();
 };
 
 }
+
+#endif

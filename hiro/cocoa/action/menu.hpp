@@ -1,26 +1,27 @@
+#if defined(Hiro_Menu)
+
 @interface CocoaMenu : NSMenuItem {
 @public
-  phoenix::Menu* menu;
+  hiro::mMenu* menu;
   NSMenu* cocoaMenu;
 }
--(id) initWith:(phoenix::Menu&)menu;
+-(id) initWith:(hiro::mMenu&)menu;
 -(NSMenu*) cocoaMenu;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pMenu : public pAction {
-  Menu& menu;
+struct pMenu : pAction {
+  Declare(Menu, Action)
+
+  auto append(sAction action) -> void;
+  auto remove(sAction action) -> void;
+  auto setImage(const Image& image) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaMenu* cocoaMenu = nullptr;
-
-  void append(Action& action);
-  void remove(Action& action);
-  void setImage(const image& image);
-  void setText(string text);
-
-  pMenu(Menu& menu) : pAction(menu), menu(menu) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

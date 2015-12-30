@@ -79,7 +79,7 @@ auto integer(intmax value, long precision, char padchar) -> string {
   char* p = buffer.get();
 
   bool negative = value < 0;
-  value = abs(value);
+  if(negative) value = -value;  //make positive
   uint size = 0;
   do {
     p[size++] = '0' + (value % 10);

@@ -1,8 +1,12 @@
-namespace phoenix {
+#if defined(Hiro_Keyboard)
+
+namespace hiro {
 
 struct pKeyboard {
-  static bool pressed(Keyboard::Scancode scancode);
-  static vector<bool> state();
+  static auto poll() -> vector<bool>;
+  static auto pressed(uint code) -> bool;
 };
 
 }
+
+#endif

@@ -1,3 +1,5 @@
+#if defined(Hiro_Application)
+
 @interface CocoaDelegate : NSObject <NSApplicationDelegate> {
 }
 -(NSApplicationTerminateReply) applicationShouldTerminate:(NSApplication*)sender;
@@ -6,15 +8,17 @@
 -(void) updateInDock:(NSTimer*)timer;
 @end
 
-namespace phoenix {
+namespace hiro {
 
 struct pApplication {
-  static void run();
-  static bool pendingEvents();
-  static void processEvents();
-  static void quit();
+  static auto run() -> void;
+  static auto pendingEvents() -> bool;
+  static auto processEvents() -> void;
+  static auto quit() -> void;
 
-  static void initialize();
+  static auto initialize() -> void;
 };
 
 }
+
+#endif

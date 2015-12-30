@@ -1,25 +1,26 @@
+#if defined(Hiro_CheckLabel)
+
 @interface CocoaCheckLabel : NSButton {
 @public
-  phoenix::CheckLabel* checkLabel;
+  hiro::mCheckLabel* checkLabel;
 }
--(id) initWith:(phoenix::CheckLabel&)checkLabel;
+-(id) initWith:(hiro::mCheckLabel&)checkLabel;
 -(IBAction) activate:(id)sender;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pCheckLabel : public pWidget {
-  CheckLabel& checkLabel;
+struct pCheckLabel : pWidget {
+  Declare(CheckLabel, Widget)
+
+  auto minimumSize() const -> Size override;
+  auto setChecked(bool checked) -> void;
+  auto setGeometry(Geometry geometry) -> void;
+  auto setText(const string& text) -> void;
+
   CocoaCheckLabel* cocoaCheckLabel = nullptr;
-
-  Size minimumSize();
-  void setChecked(bool checked);
-  void setGeometry(Geometry geometry);
-  void setText(string text);
-
-  pCheckLabel(CheckLabel& checkLabel) : pWidget(checkLabel), checkLabel(checkLabel) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

@@ -6,7 +6,7 @@ namespace hiro {
 XlibDisplay* pApplication::display = nullptr;
 #endif
 
-void pApplication::run() {
+auto pApplication::run() -> void {
   if(Application::state.onMain) {
     while(!Application::state.quit) {
       Application::doMain();
@@ -17,15 +17,15 @@ void pApplication::run() {
   }
 }
 
-bool pApplication::pendingEvents() {
+auto pApplication::pendingEvents() -> bool {
   return gtk_events_pending();
 }
 
-void pApplication::processEvents() {
+auto pApplication::processEvents() -> void {
   while(pendingEvents()) gtk_main_iteration_do(false);
 }
 
-void pApplication::quit() {
+auto pApplication::quit() -> void {
   //if gtk_main() was invoked, call gtk_main_quit()
   if(gtk_main_level()) gtk_main_quit();
 
@@ -37,7 +37,7 @@ void pApplication::quit() {
   #endif
 }
 
-void pApplication::initialize() {
+auto pApplication::initialize() -> void {
   #if defined(DISPLAY_XORG)
   display = XOpenDisplay(nullptr);
   #endif

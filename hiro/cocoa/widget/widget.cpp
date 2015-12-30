@@ -1,25 +1,46 @@
-namespace phoenix {
+#if defined(Hiro_Widget)
 
+namespace hiro {
+
+auto pWidget::construct() -> void {
+  @autoreleasepool {
+    if(!cocoaView) {
+      abstract = true;
+      cocoaView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
+      [cocoaView setHidden:true];
+    }
+
+    if(auto window = self().parentWindow(true)) {
+      if(auto p = window->self()) p->_append(self());
+      setEnabled(self().enabled(true));
+      setFont(self().font(true));
+      setVisible(self().visible(true));
+    }
+  }
+}
+
+auto pWidget::destruct() -> void {
+  @autoreleasepool {
+    [cocoaView release];
+  }
+}
+
+/*
 bool pWidget::enabled() {
   @autoreleasepool {
     return [cocoaView respondsToSelector:@selector(enabled)] && [cocoaView enabled];
   }
 }
+*/
 
-bool pWidget::focused() {
+auto pWidget::focused() const -> bool {
   @autoreleasepool {
     return cocoaView == [[cocoaView window] firstResponder];
   }
 }
 
-Size pWidget::minimumSize() {
-  return {0, 0};
-}
-
-void pWidget::setEnabled(bool enabled) {
-  if(!widget.parent()) enabled = false;
-  if(widget.state.abstract) enabled = false;
-  if(!widget.enabledToAll()) enabled = false;
+auto pWidget::setEnabled(bool enabled) -> void {
+  if(abstract) enabled = false;
 
   @autoreleasepool {
     if([cocoaView respondsToSelector:@selector(setEnabled:)]) {
@@ -28,52 +49,37 @@ void pWidget::setEnabled(bool enabled) {
   }
 }
 
-void pWidget::setFocused() {
+auto pWidget::setFocused() -> void {
   @autoreleasepool {
     [[cocoaView window] makeFirstResponder:cocoaView];
   }
 }
 
-void pWidget::setFont(string font) {
+auto pWidget::setFont(const Font& font) -> void {
   @autoreleasepool {
     if([cocoaView respondsToSelector:@selector(setFont:)]) {
-      [cocoaView setFont:pFont::cocoaFont(font)];
+      [cocoaView setFont:pFont::create(font)];
     }
   }
 }
 
-void pWidget::setGeometry(Geometry geometry) {
+auto pWidget::setGeometry(Geometry geometry) -> void {
   @autoreleasepool {
     CGFloat windowHeight = [[cocoaView superview] frame].size.height;
-    [cocoaView setFrame:NSMakeRect(geometry.x, windowHeight - geometry.y - geometry.height, geometry.width, geometry.height)];
+    [cocoaView setFrame:NSMakeRect(geometry.x(), windowHeight - geometry.y() - geometry.height(), geometry.width(), geometry.height())];
     [[cocoaView superview] setNeedsDisplay:YES];
   }
-  if(widget.onSize) widget.onSize();
+  self().doSize();
 }
 
-void pWidget::setVisible(bool visible) {
-  if(!widget.parent()) visible = false;
-  if(widget.state.abstract) visible = false;
-  if(!widget.visibleToAll()) visible = false;
+auto pWidget::setVisible(bool visible) -> void {
+  if(abstract) visible = false;
 
   @autoreleasepool {
     [cocoaView setHidden:!visible];
   }
 }
 
-void pWidget::constructor() {
-  if(!widget.state.abstract) return;
-
-  @autoreleasepool {
-    cocoaView = [[NSView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0)];
-    [cocoaView setHidden:true];
-  }
 }
 
-void pWidget::destructor() {
-  @autoreleasepool {
-    [cocoaView release];
-  }
-}
-
-}
+#endif

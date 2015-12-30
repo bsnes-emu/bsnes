@@ -1,6 +1,8 @@
+#if defined(Hiro_TabFrame)
+
 @implementation CocoaTabFrame : NSTabView
 
--(id) initWith:(phoenix::TabFrame&)tabFrameReference {
+-(id) initWith:(hiro::mTabFrame&)tabFrameReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     tabFrame = &tabFrameReference;
 
@@ -10,38 +12,38 @@
 }
 
 -(void) tabView:(NSTabView*)tabView didSelectTabViewItem:(NSTabViewItem*)tabViewItem {
-  tabFrame->state.selection = [tabView indexOfTabViewItem:tabViewItem];
-  tabFrame->p.synchronizeLayout();
-  if(tabFrame->onChange) tabFrame->onChange();
+  tabFrame->self()->_updateSelected([tabView indexOfTabViewItem:tabViewItem]);
+  tabFrame->self()->_synchronizeLayout();
+  tabFrame->doChange();
 }
 
 @end
 
 @implementation CocoaTabFrameItem : NSTabViewItem
 
--(id) initWith:(phoenix::TabFrame&)tabFrameReference {
+-(id) initWith:(hiro::mTabFrame&)tabFrameReference {
   if(self = [super initWithIdentifier:nil]) {
     tabFrame = &tabFrameReference;
-    cocoaTabFrame = tabFrame->p.cocoaTabFrame;
+    cocoaTabFrame = tabFrame->self()->cocoaTabFrame;
   }
   return self;
 }
 
 -(NSSize) sizeOfLabel:(BOOL)shouldTruncateLabel {
   NSSize sizeOfLabel = [super sizeOfLabel:shouldTruncateLabel];
-  signed selection = [cocoaTabFrame indexOfTabViewItem:self];
+  int selection = [cocoaTabFrame indexOfTabViewItem:self];
   if(selection < 0) return sizeOfLabel;  //should never happen
-  if(tabFrame->state.image[selection].empty() == false) {
-    unsigned iconSize = phoenix::Font::size(tabFrame->font(), " ").height;
-    sizeOfLabel.width += iconSize + 2;
-  }
+//  if(!tabFrame->state.image[selection].empty()) {
+//    uint iconSize = hiro::pFont::size(tabFrame->font(true), " ").height();
+//    sizeOfLabel.width += iconSize + 2;
+//  }
   return sizeOfLabel;
 }
 
 -(void) drawLabel:(BOOL)shouldTruncateLabel inRect:(NSRect)tabRect {
-  signed selection = [cocoaTabFrame indexOfTabViewItem:self];
-  if(selection >= 0 && tabFrame->state.image[selection].empty() == false) {
-    unsigned iconSize = phoenix::Font::size(tabFrame->font(), " ").height;
+  int selection = [cocoaTabFrame indexOfTabViewItem:self];
+/*if(selection >= 0 && !tabFrame->state.image[selection].empty()) {
+    uint iconSize = phoenix::Font::size(tabFrame->font(), " ").height;
     NSImage* image = NSMakeImage(tabFrame->state.image[selection]);
 
     [[NSGraphicsContext currentContext] saveGraphicsState];
@@ -51,15 +53,37 @@
 
     tabRect.origin.x += iconSize + 2;
     tabRect.size.width -= iconSize + 2;
-  }
+  }*/
   [super drawLabel:shouldTruncateLabel inRect:tabRect];
 }
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-void pTabFrame::append(string text, const image& image) {
+auto pTabFrame::construct() -> void {
+  @autoreleasepool {
+    cocoaView = cocoaTabFrame = [[CocoaTabFrame alloc] initWith:self()];
+    pWidget::construct();
+
+    setNavigation(state().navigation);
+  }
+}
+
+auto pTabFrame::destruct() -> void {
+  @autoreleasepool {
+    [cocoaView release];
+  }
+}
+
+auto pTabFrame::append(sTabFrameItem item) -> void {
+}
+
+auto pTabFrame::remove(sTabFrameItem item) -> void {
+}
+
+/*
+auto pTabFrame::append(string text, const image& image) -> void {
   @autoreleasepool {
     CocoaTabFrameItem* item = [[CocoaTabFrameItem alloc] initWith:tabFrame];
     [item setLabel:[NSString stringWithUTF8String:text]];
@@ -68,7 +92,7 @@ void pTabFrame::append(string text, const image& image) {
   }
 }
 
-void pTabFrame::remove(unsigned selection) {
+auto pTabFrame::remove(unsigned selection) -> void {
   @autoreleasepool {
     CocoaTabFrameItem* item = tabs[selection];
     [cocoaView removeTabViewItem:item];
@@ -76,14 +100,16 @@ void pTabFrame::remove(unsigned selection) {
   }
 }
 
-void pTabFrame::setEnabled(bool enabled) {
+auto pTabFrame::setEnabled(bool enabled) -> void {
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setEnabled(layout->enabled());
   }
   pWidget::setEnabled(enabled);
 }
+*/
 
-void pTabFrame::setGeometry(Geometry geometry) {
+auto pTabFrame::setGeometry(Geometry geometry) -> void {
+/*
   pWidget::setGeometry({
     geometry.x - 7, geometry.y - 5,
     geometry.width + 14, geometry.height + 6
@@ -95,12 +121,14 @@ void pTabFrame::setGeometry(Geometry geometry) {
     layout->setGeometry(geometry);
   }
   synchronizeLayout();
+*/
 }
 
-void pTabFrame::setImage(unsigned selection, const image& image) {
+auto pTabFrame::setNavigation(Navigation navigation) -> void {
 }
 
-void pTabFrame::setSelection(unsigned selection) {
+/*
+auto pTabFrame::setSelection(unsigned selection) -> void {
   @autoreleasepool {
     CocoaTabFrameItem* item = tabs[selection];
     [cocoaView selectTabViewItem:item];
@@ -108,38 +136,34 @@ void pTabFrame::setSelection(unsigned selection) {
   synchronizeLayout();
 }
 
-void pTabFrame::setText(unsigned selection, string text) {
+auto pTabFrame::setText(unsigned selection, string text) -> void {
   @autoreleasepool {
     CocoaTabFrameItem* item = tabs[selection];
     [item setLabel:[NSString stringWithUTF8String:text]];
   }
 }
 
-void pTabFrame::setVisible(bool visible) {
+auto pTabFrame::setVisible(bool visible) -> void {
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setVisible(layout->visible());
   }
   pWidget::setVisible(visible);
 }
+*/
 
-void pTabFrame::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaTabFrame = [[CocoaTabFrame alloc] initWith:tabFrame];
-  }
-}
-
-void pTabFrame::destructor() {
-  @autoreleasepool {
-    [cocoaView release];
-  }
-}
-
-void pTabFrame::synchronizeLayout() {
-  unsigned selection = 0;
+auto pTabFrame::_synchronizeLayout() -> void {
+/*
+  uint selection = 0;
   for(auto& layout : tabFrame.state.layout) {
     if(layout) layout->setVisible(selection == tabFrame.state.selection);
     selection++;
   }
+*/
+}
+
+auto pTabFrame::_updateSelected(int selected) -> void {
 }
 
 }
+
+#endif

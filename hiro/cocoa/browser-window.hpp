@@ -1,9 +1,13 @@
-namespace phoenix {
+#if defined(Hiro_BrowserWindow)
+
+namespace hiro {
 
 struct pBrowserWindow {
-  static string directory(BrowserWindow::State& state);
-  static string open(BrowserWindow::State& state);
-  static string save(BrowserWindow::State& state);
+  static auto directory(BrowserWindow::State& state) -> string;
+  static auto open(BrowserWindow::State& state) -> string;
+  static auto save(BrowserWindow::State& state) -> string;
 };
 
 }
+
+#endif

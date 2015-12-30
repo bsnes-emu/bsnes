@@ -1,21 +1,21 @@
-namespace phoenix {
+#if defined(Hiro_Widget)
 
-struct pWidget : public pSizable {
-  Widget& widget;
+namespace hiro {
+
+struct pWidget : pSizable {
+  Declare(Widget, Sizable)
+
+  auto focused() const -> bool;
+  auto setEnabled(bool enabled) -> void override;
+  auto setFocused() -> void override;
+  auto setFont(const Font& font) -> void override;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setVisible(bool visible) -> void override;
+
   NSView* cocoaView = nullptr;
-
-  bool enabled();
-  bool focused();
-  virtual Size minimumSize();
-  virtual void setEnabled(bool enabled);
-  void setFocused();
-  virtual void setFont(string font);
-  virtual void setGeometry(Geometry geometry);
-  virtual void setVisible(bool visible);
-
-  pWidget(Widget& widget) : pSizable(widget), widget(widget) {}
-  void constructor();
-  void destructor();
+  bool abstract = false;
 };
 
 }
+
+#endif

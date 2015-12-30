@@ -1,26 +1,27 @@
+#if defined(Hiro_Timer)
+
 @interface CocoaTimer : NSObject {
 @public
-  phoenix::Timer* timer;
+  hiro::mTimer* timer;
   NSTimer* instance;
 }
--(id) initWith:(phoenix::Timer&)timer;
+-(id) initWith:(hiro::mTimer&)timer;
 -(NSTimer*) instance;
 -(void) update;
 -(void) run:(NSTimer*)instance;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pTimer : public pObject {
-  Timer& timer;
+struct pTimer : pObject {
+  Declare(Timer, Object)
+
+  auto setEnabled(bool enabled) -> void;
+  auto setInterval(uint interval) -> void;
+
   CocoaTimer* cocoaTimer = nullptr;
-
-  void setEnabled(bool enabled);
-  void setInterval(unsigned interval);
-
-  pTimer(Timer& timer) : pObject(timer), timer(timer) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

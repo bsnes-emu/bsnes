@@ -1,8 +1,10 @@
+#if defined(Hiro_Canvas)
+
 @interface CocoaCanvas : NSImageView {
 @public
-  phoenix::Canvas* canvas;
+  hiro::mCanvas* canvas;
 }
--(id) initWith:(phoenix::Canvas&)canvas;
+-(id) initWith:(hiro::mCanvas&)canvas;
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender;
 -(BOOL) performDragOperation:(id<NSDraggingInfo>)sender;
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown;
@@ -19,24 +21,27 @@
 -(void) otherMouseDragged:(NSEvent*)event;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pCanvas : public pWidget {
-  Canvas& canvas;
+struct pCanvas : pWidget {
+  Declare(Canvas, Widget)
+
+  auto minimumSize() const -> Size;
+  auto setColor(Color color) -> void;
+  auto setDroppable(bool droppable) -> void;
+  auto setGeometry(Geometry geometry) -> void override;
+  auto setGradient(Gradient gradient) -> void;
+  auto setImage(const Image& image) -> void;
+  auto update() -> void;
+
+  auto _rasterize() -> void;
+  auto _redraw() -> void;
+
   CocoaCanvas* cocoaCanvas = nullptr;
-  unsigned surfaceWidth = 0;
-  unsigned surfaceHeight = 0;
-
-  void setDroppable(bool droppable);
-  void setGeometry(Geometry geometry);
-  void setMode(Canvas::Mode mode);
-  void setSize(Size size);
-
-  pCanvas(Canvas& canvas) : pWidget(canvas), canvas(canvas) {}
-  void constructor();
-  void destructor();
-  void rasterize();
-  void redraw();
+  uint surfaceWidth = 0;
+  uint surfaceHeight = 0;
 };
 
 }
+
+#endif

@@ -1,32 +1,33 @@
+#if defined(Hiro_TextEdit)
+
 @interface CocoaTextEdit : NSScrollView <NSTextViewDelegate> {
 @public
-  phoenix::TextEdit* textEdit;
+  hiro::mTextEdit* textEdit;
   NSTextView* content;
 }
--(id) initWith:(phoenix::TextEdit&)textEdit;
+-(id) initWith:(hiro::mTextEdit&)textEdit;
 -(NSTextView*) content;
 -(void) configure;
 -(void) textDidChange:(NSNotification*)notification;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pTextEdit : public pWidget {
-  TextEdit& textEdit;
+struct pTextEdit : pWidget {
+  Declare(TextEdit, Widget)
+
+  auto setBackgroundColor(Color color) -> void;
+  auto setCursor(Cursor cursor) -> void;
+  auto setEditable(bool editable) -> void;
+  auto setFont(const Font& font) -> void override;
+  auto setForegroundColor(Color color) -> void;
+  auto setText(const string& text) -> void;
+  auto setWordWrap(bool wordWrap) -> void;
+  auto text() const -> string;
+
   CocoaTextEdit* cocoaTextEdit = nullptr;
-
-  void setBackgroundColor(Color color);
-  void setCursorPosition(unsigned position);
-  void setEditable(bool editable);
-  void setFont(string font);
-  void setForegroundColor(Color color);
-  void setText(string text);
-  void setWordWrap(bool wordWrap);
-  string text();
-
-  pTextEdit(TextEdit& textEdit) : pWidget(textEdit), textEdit(textEdit) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

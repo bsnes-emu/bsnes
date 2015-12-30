@@ -1,9 +1,35 @@
-namespace phoenix {
+#if defined(Hiro_Object)
 
-void pObject::constructor() {
+namespace hiro {
+
+auto pObject::construct() -> void {
 }
 
-void pObject::destructor() {
+auto pObject::destruct() -> void {
+}
+
+auto pObject::focused() const -> bool {
+  return false;
+}
+
+auto pObject::remove() -> void {
+}
+
+auto pObject::reset() -> void {
+}
+
+auto pObject::setEnabled(bool enabled) -> void {
+}
+
+auto pObject::setFocused() -> void {
+}
+
+auto pObject::setFont(const Font& font) -> void {
+}
+
+auto pObject::setVisible(bool visible) -> void {
 }
 
 }
+
+#endif

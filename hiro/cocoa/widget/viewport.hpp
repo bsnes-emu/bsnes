@@ -1,8 +1,10 @@
+#if defined(Hiro_Viewport)
+
 @interface CocoaViewport : NSView {
 @public
-  phoenix::Viewport* viewport;
+  hiro::mViewport* viewport;
 }
--(id) initWith:(phoenix::Viewport&)viewport;
+-(id) initWith:(hiro::mViewport&)viewport;
 -(void) drawRect:(NSRect)rect;
 -(BOOL) acceptsFirstResponder;
 -(NSDragOperation) draggingEntered:(id<NSDraggingInfo>)sender;
@@ -11,18 +13,17 @@
 -(void) keyUp:(NSEvent*)event;
 @end
 
-namespace phoenix {
+namespace hiro {
 
-struct pViewport : public pWidget {
-  Viewport& viewport;
+struct pViewport : pWidget {
+  Declare(Viewport, Widget)
+
+  auto handle() const -> uintptr;
+  auto setDroppable(bool droppable) -> void;
+
   CocoaViewport* cocoaViewport = nullptr;
-
-  uintptr_t handle();
-  void setDroppable(bool droppable);
-
-  pViewport(Viewport& viewport) : pWidget(viewport), viewport(viewport) {}
-  void constructor();
-  void destructor();
 };
 
 }
+
+#endif

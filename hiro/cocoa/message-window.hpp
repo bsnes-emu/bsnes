@@ -1,10 +1,14 @@
-namespace phoenix {
+#if defined(Hiro_MessageWindow)
+
+namespace hiro {
 
 struct pMessageWindow {
-  static MessageWindow::Response error(MessageWindow::State& state);
-  static MessageWindow::Response information(MessageWindow::State& state);
-  static MessageWindow::Response question(MessageWindow::State& state);
-  static MessageWindow::Response warning(MessageWindow::State& state);
+  static auto error(MessageWindow::State& state) -> MessageWindow::Response;
+  static auto information(MessageWindow::State& state) -> MessageWindow::Response;
+  static auto question(MessageWindow::State& state) -> MessageWindow::Response;
+  static auto warning(MessageWindow::State& state) -> MessageWindow::Response;
 };
 
 }
+
+#endif

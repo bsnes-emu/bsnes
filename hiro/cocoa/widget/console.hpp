@@ -1,3 +1,5 @@
+#if defined(Hiro_Console)
+
 @interface CocoaConsole : NSScrollView {
 @public
   phoenix::Console* console;
@@ -5,7 +7,7 @@
 -(id) initWith:(phoenix::Console&)console;
 @end
 
-namespace phoenix {
+namespace hiro {
 
 struct pConsole : public pWidget {
   Console& console;
@@ -23,3 +25,5 @@ struct pConsole : public pWidget {
 };
 
 }
+
+#endif

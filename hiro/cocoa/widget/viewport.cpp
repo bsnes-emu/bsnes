@@ -1,6 +1,8 @@
+#if defined(Hiro_Viewport)
+
 @implementation CocoaViewport : NSView
 
--(id) initWith:(phoenix::Viewport&)viewportReference {
+-(id) initWith:(hiro::mViewport&)viewportReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     viewport = &viewportReference;
   }
@@ -23,7 +25,7 @@
 -(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
   lstring paths = DropPaths(sender);
   if(paths.empty()) return NO;
-  if(viewport->onDrop) viewport->onDrop(paths);
+  viewport->doDrop(paths);
   return YES;
 }
 
@@ -35,13 +37,26 @@
 
 @end
 
-namespace phoenix {
+namespace hiro {
 
-uintptr_t pViewport::handle() {
-  return (uintptr_t)cocoaViewport;
+auto pViewport::construct() -> void {
+  @autoreleasepool {
+    cocoaView = cocoaViewport = [[CocoaViewport alloc] initWith:self()];
+    pWidget::construct();
+  }
 }
 
-void pViewport::setDroppable(bool droppable) {
+auto pViewport::destruct() -> void {
+  @autoreleasepool {
+    [cocoaView release];
+  }
+}
+
+auto pViewport::handle() const -> uintptr {
+  return (uintptr)cocoaViewport;
+}
+
+auto pViewport::setDroppable(bool droppable) -> void {
   @autoreleasepool {
     if(droppable) {
       [cocoaViewport registerForDraggedTypes:[NSArray arrayWithObject:NSFilenamesPboardType]];
@@ -51,16 +66,6 @@ void pViewport::setDroppable(bool droppable) {
   }
 }
 
-void pViewport::constructor() {
-  @autoreleasepool {
-    cocoaView = cocoaViewport = [[CocoaViewport alloc] initWith:viewport];
-  }
 }
 
-void pViewport::destructor() {
-  @autoreleasepool {
-    [cocoaView release];
-  }
-}
-
-}
+#endif
