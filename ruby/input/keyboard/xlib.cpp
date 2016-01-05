@@ -11,12 +11,12 @@ struct InputKeyboardXlib {
 
   struct Key {
     string name;
-    unsigned keysym;
-    unsigned keycode;
+    uint keysym;
+    uint keycode;
   };
   vector<Key> keys;
 
-  auto assign(unsigned inputID, bool value) -> void {
+  auto assign(uint inputID, bool value) -> void {
     auto& group = hid->buttons();
     if(group.input(inputID).value() == value) return;
     input.doChange(hid, HID::Keyboard::GroupID::Button, inputID, group.input(inputID).value(), value);
@@ -27,9 +27,10 @@ struct InputKeyboardXlib {
     char state[32];
     XQueryKeymap(display, state);
 
-    for(unsigned n = 0; n < keys.size(); n++) {
-      bool value = state[keys[n].keycode >> 3] & (1 << (keys[n].keycode & 7));
-      assign(n, value);
+    uint inputID = 0;
+    for(auto& key : keys) {
+      bool value = state[key.keycode >> 3] & (1 << (key.keycode & 7));
+      assign(inputID++, value);
     }
 
     devices.append(hid);
@@ -154,9 +155,9 @@ struct InputKeyboardXlib {
 
     hid->setID(1);
 
-    for(unsigned n = 0; n < keys.size(); n++) {
-      hid->buttons().append(keys[n].name);
-      keys[n].keycode = XKeysymToKeycode(display, keys[n].keysym);
+    for(auto& key : keys) {
+      hid->buttons().append(key.name);
+      key.keycode = XKeysymToKeycode(display, key.keysym);
     }
 
     return true;

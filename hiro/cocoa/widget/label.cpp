@@ -1,15 +1,14 @@
 #if defined(Hiro_Label)
 
-@implementation CocoaLabel : NSTextField
+@implementation CocoaLabel : NSTextView
 
 -(id) initWith:(hiro::mLabel&)labelReference {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0)]) {
     label = &labelReference;
 
-    [self setAlignment:NSLeftTextAlignment];
-    [self setBordered:NO];
     [self setDrawsBackground:NO];
     [self setEditable:NO];
+    [self setRichText:NO];
   }
   return self;
 }
@@ -23,6 +22,7 @@ auto pLabel::construct() -> void {
     cocoaView = cocoaLabel = [[CocoaLabel alloc] initWith:self()];
     pWidget::construct();
 
+    setAlignment(state().alignment);
     setText(state().text);
   }
 }
@@ -38,29 +38,36 @@ auto pLabel::minimumSize() const -> Size {
 }
 
 auto pLabel::setAlignment(Alignment alignment) -> void {
+  @autoreleasepool {
+    NSMutableParagraphStyle* paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
+    paragraphStyle.alignment = NSTextAlignmentCenter;
+    if(alignment.horizontal() < 0.333) paragraphStyle.alignment = NSTextAlignmentLeft;
+    if(alignment.horizontal() > 0.666) paragraphStyle.alignment = NSTextAlignmentRight;
+    [cocoaView setDefaultParagraphStyle:paragraphStyle];
+  }
 }
 
 auto pLabel::setGeometry(Geometry geometry) -> void {
-  //NSTextField does not support vertical text centering:
+  //NSTextView does not support vertical text centering:
   //simulate this by adjusting the geometry placement (reduce height, move view down)
-  uint height = pFont::size(self().font(true), " ").height();
+  uint height = pFont::size(self().font(true), state().text).height();
   auto offset = geometry;
 
   if(geometry.height() > height) {
     uint diff = geometry.height() - height;
-    offset.setY(offset.y() + diff >> 1);
-    offset.setHeight(offset.height() - diff >> 1);
+    offset.setY(offset.y() + (diff >> 1));
+    offset.setHeight(offset.height() - (diff >> 1));
   }
 
   pWidget::setGeometry({
-    offset.x() - 3, offset.y() - 3,
-    offset.width() + 6, offset.height() + 6
+    offset.x() - 6, offset.y(),
+    offset.width() + 12, offset.height()
   });
 }
 
 auto pLabel::setText(const string& text) -> void {
   @autoreleasepool {
-    [cocoaView setStringValue:[NSString stringWithUTF8String:text]];
+    [cocoaView setString:[NSString stringWithUTF8String:text]];
   }
 }
 

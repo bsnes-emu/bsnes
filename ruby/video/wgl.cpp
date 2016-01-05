@@ -6,8 +6,8 @@
 struct VideoWGL : Video, OpenGL {
   ~VideoWGL() { term(); }
 
-  HGLRC (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) = nullptr;
-  BOOL (APIENTRY* wglSwapInterval)(int) = nullptr;
+  auto (APIENTRY* wglCreateContextAttribs)(HDC, HGLRC, const int*) -> HGLRC = nullptr;
+  auto (APIENTRY* wglSwapInterval)(int) -> BOOL = nullptr;
 
   HDC display = nullptr;
   HGLRC wglcontext = nullptr;
@@ -17,7 +17,7 @@ struct VideoWGL : Video, OpenGL {
   struct {
     HWND handle = nullptr;
     bool synchronize = false;
-    unsigned filter = Video::FilterNearest;
+    uint filter = Video::FilterNearest;
     string shader;
   } settings;
 
@@ -30,15 +30,15 @@ struct VideoWGL : Video, OpenGL {
   }
 
   auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
+    if(name == Video::Handle) return (uintptr)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
     return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (HWND)value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = (HWND)value.get<uintptr>();
       return true;
     }
 
@@ -53,8 +53,8 @@ struct VideoWGL : Video, OpenGL {
       }
     }
 
-    if(name == Video::Filter && value.is<unsigned>()) {
-      settings.filter = value.get<unsigned>();
+    if(name == Video::Filter && value.is<uint>()) {
+      settings.filter = value.get<uint>();
       if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
@@ -69,7 +69,7 @@ struct VideoWGL : Video, OpenGL {
     return false;
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto lock(uint32*& data, uint& pitch, uint width, uint height) -> bool {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }

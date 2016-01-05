@@ -21,7 +21,7 @@ ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
   ruby += video.cgl
   ruby += audio.openal
-  ruby += input.carbon
+  ruby += input.quartz input.carbon
 else ifeq ($(platform),linux)
   ruby += video.glx video.xv video.xshm video.sdl
   ruby += audio.alsa audio.openal audio.oss audio.pulseaudio audio.pulseaudiosimple audio.ao
@@ -67,12 +67,25 @@ obj/ui-resource.o:
 # targets
 build: $(objects)
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
+ifeq ($(platform),macosx)
+	@if [ -d out/higan.app ]; then rm -r out/higan.app; fi
+	mkdir -p out/higan.app/Contents/MacOS/
+	mkdir -p out/higan.app/Contents/Resources/
+	mv out/$(name) out/higan.app/Contents/MacOS/higan
+	cp data/higan.plist out/higan.app/Contents/Info.plist
+	sips -s format icns data/higan.png --out out/higan.app/Contents/Resources/higan.icns
+endif
 
 install:
 ifeq ($(shell id -un),root)
 	$(error "make install should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
+	mkdir -p ~/Library/Application\ Support/$(name)/
+	mkdir -p ~/Emulation/System/
+	cp -R out/higan.app /Applications/higan.app
+	cp data/cheats.bml ~/Library/Application\ Support/$(name)/
+	cp -R profile/* ~/Emulation/System/
 else
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/icons/
@@ -89,6 +102,7 @@ ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
+	if [ -d /Applications/higan.app ]; then rm -r /Applications/higan.app; fi
 else
 	if [ -f $(prefix)/bin/$(name) ]; then rm $(prefix)/bin/$(name); fi
 	if [ -f $(prefix)/share/icons/$(name).png ]; then rm $(prefix)/share/icons/$(name).png; fi

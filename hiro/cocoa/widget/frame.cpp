@@ -30,16 +30,22 @@ auto pFrame::destruct() -> void {
   }
 }
 
+auto pFrame::append(sLayout layout) -> void {
+}
+
+auto pFrame::remove(sLayout layout) -> void {
+}
+
 auto pFrame::setEnabled(bool enabled) -> void {
-  if(auto layout = _layout()) layout->setEnabled(layout->self().enabled(true));
   pWidget::setEnabled(enabled);
+  if(auto layout = _layout()) layout->setEnabled(layout->self().enabled(true));
 }
 
 auto pFrame::setFont(const Font& font) -> void {
   @autoreleasepool {
-    if(auto layout = _layout()) layout->setFont(layout->self().font(true));
     [cocoaView setTitleFont:pFont::create(font)];
   }
+  if(auto layout = _layout()) layout->setFont(layout->self().font(true));
 }
 
 auto pFrame::setGeometry(Geometry geometry) -> void {
@@ -49,12 +55,11 @@ auto pFrame::setGeometry(Geometry geometry) -> void {
     geometry.x() - 3, geometry.y() - (empty ? size.height() - 2 : 1),
     geometry.width() + 6, geometry.height() + (empty ? size.height() + 2 : 5)
   });
-  if(auto layout = _layout()) {
-    geometry.setX(geometry.x() + 1);
-    geometry.setY(geometry.y() + (empty ? 1 : size.height() - 2));
-    geometry.setWidth(geometry.width() - 2);
-    geometry.setHeight(geometry.height() - (empty ? 1 : size.height() - 1));
-    layout->setGeometry(geometry);
+  if(auto layout = state().layout) {
+    layout->setGeometry({
+      geometry.x() + 1, geometry.y() + (empty ? 1 : size.height() - 2),
+      geometry.width() - 2, geometry.height() - (empty ? 1 : size.height() - 1)
+    });
   }
 }
 
@@ -65,8 +70,8 @@ auto pFrame::setText(const string& text) -> void {
 }
 
 auto pFrame::setVisible(bool visible) -> void {
-  if(auto layout = _layout()) layout->setVisible(layout->self().visible(true));
   pWidget::setVisible(visible);
+  if(auto layout = _layout()) layout->setVisible(layout->self().visible(true));
 }
 
 auto pFrame::_layout() -> maybe<pLayout&> {

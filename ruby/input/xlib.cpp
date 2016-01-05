@@ -14,7 +14,7 @@ struct InputXlib : Input {
   ~InputXlib() { term(); }
 
   struct Settings {
-    uintptr_t handle = 0;
+    uintptr handle = 0;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -29,8 +29,8 @@ struct InputXlib : Input {
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr_t>()) {
-      settings.handle = value.get<uintptr_t>();
+    if(name == Input::Handle && value.is<uintptr>()) {
+      settings.handle = value.get<uintptr>();
       return true;
     }
 
@@ -56,7 +56,7 @@ struct InputXlib : Input {
     return devices;
   }
 
-  auto rumble(uint64_t id, bool enable) -> bool {
+  auto rumble(uint64 id, bool enable) -> bool {
     return false;
   }
 

@@ -12,6 +12,9 @@ struct pListViewCell : pObject {
   auto setForegroundColor(Color color) -> void;
   auto setImage(const Image& image) -> void;
   auto setText(const string& text) -> void;
+
+  auto _grandparent() -> maybe<pListView&>;
+  auto _parent() -> maybe<pListViewItem&>;
 };
 
 }

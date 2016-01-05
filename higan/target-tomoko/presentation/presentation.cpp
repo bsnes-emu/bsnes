@@ -105,6 +105,16 @@ Presentation::Presentation() {
   stateManager.setText("State Manager").onActivate([&] { toolsManager->show(1); });
   manifestViewer.setText("Manifest Viewer").onActivate([&] { toolsManager->show(2); });
 
+  helpMenu.setText("Help");
+  about.setText("About ...").onActivate([&] {
+    MessageDialog().setParent(*this).setTitle("About higan ...").setText({
+      Emulator::Name, " v", Emulator::Version, " (", Emulator::Profile, ")\n\n",
+      "Author: ", Emulator::Author, "\n",
+      "License: ", Emulator::License, "\n",
+      "Website: ", Emulator::Website
+    }).information();
+  });
+
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
 
@@ -115,6 +125,17 @@ Presentation::Presentation() {
   setBackgroundColor({0, 0, 0});
   resizeViewport();
   setCentered();
+
+  #if defined(PLATFORM_MACOSX)
+  showConfigurationSeparator.setVisible(false);
+  showConfiguration.setVisible(false);
+  helpMenu.setVisible(false);
+
+  Application::Cocoa::onAbout([&] { about.doActivate(); });
+  Application::Cocoa::onActivate([&] { setFocused(); });
+  Application::Cocoa::onPreferences([&] { showConfiguration.doActivate(); });
+  Application::Cocoa::onQuit([&] { doClose(); });
+  #endif
 }
 
 auto Presentation::updateEmulator() -> void {

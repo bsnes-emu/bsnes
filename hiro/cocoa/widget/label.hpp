@@ -1,6 +1,6 @@
 #if defined(Hiro_Label)
 
-@interface CocoaLabel : NSTextField {
+@interface CocoaLabel : NSTextView {
 @public
   hiro::mLabel* label;
 }

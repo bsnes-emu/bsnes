@@ -7,6 +7,8 @@ struct pMenuBar : pObject {
 
   auto append(sMenu menu) -> void;
   auto remove(sMenu menu) -> void;
+
+  auto _parent() -> maybe<pWindow&>;
 };
 
 }

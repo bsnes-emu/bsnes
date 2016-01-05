@@ -1,12 +1,13 @@
+#define GL_ALPHA_TEST 0x0bc0
 #include "opengl/opengl.hpp"
 
 struct VideoCGL;
 
 @interface RubyVideoCGL : NSOpenGLView {
 @public
-  ruby::VideoCGL* video;
+  VideoCGL* video;
 }
--(id) initWith:(ruby::VideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
+-(id) initWith:(VideoCGL*)video pixelFormat:(NSOpenGLPixelFormat*)pixelFormat;
 -(void) reshape;
 @end
 
@@ -18,7 +19,7 @@ struct VideoCGL : Video, OpenGL {
   struct {
     NSView* handle = nullptr;
     bool synchronize = false;
-    unsigned filter = Video::FilterNearest;
+    uint filter = Video::FilterNearest;
     string shader;
   } settings;
 
@@ -31,15 +32,15 @@ struct VideoCGL : Video, OpenGL {
   }
 
   auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr_t)settings.handle;
+    if(name == Video::Handle) return (uintptr)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
     return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr_t>()) {
-      settings.handle = (NSView*)value.get<uintptr_t>();
+    if(name == Video::Handle && value.is<uintptr>()) {
+      settings.handle = (NSView*)value.get<uintptr>();
       return true;
     }
 
@@ -58,8 +59,8 @@ struct VideoCGL : Video, OpenGL {
       return true;
     }
 
-    if(name == Video::Filter && value.is<unsigned>()) {
-      settings.filter = value.get<unsigned>();
+    if(name == Video::Filter && value.is<uint>()) {
+      settings.filter = value.get<uint>();
       if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
@@ -77,7 +78,7 @@ struct VideoCGL : Video, OpenGL {
     return false;
   }
 
-  auto lock(uint32_t*& data, unsigned& pitch, unsigned width, unsigned height) -> bool {
+  auto lock(uint32*& data, uint& pitch, uint width, uint height) -> bool {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }
@@ -98,7 +99,8 @@ struct VideoCGL : Video, OpenGL {
     @autoreleasepool {
       if([view lockFocusIfCanDraw]) {
         auto area = [view frame];
-        outputWidth = area.size.width, outputHeight = area.size.height;
+        outputWidth = area.size.width;
+        outputHeight = area.size.height;
         OpenGL::refresh();
         [[view openGLContext] flushBuffer];
         [view unlockFocus];
@@ -155,7 +157,7 @@ struct VideoCGL : Video, OpenGL {
 
 @implementation RubyVideoCGL : NSOpenGLView
 
--(id) initWith:(ruby::VideoCGL*)videoPointer pixelFormat:(NSOpenGLPixelFormat*)pixelFormat {
+-(id) initWith:(VideoCGL*)videoPointer pixelFormat:(NSOpenGLPixelFormat*)pixelFormat {
   if(self = [super initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:pixelFormat]) {
     video = videoPointer;
   }

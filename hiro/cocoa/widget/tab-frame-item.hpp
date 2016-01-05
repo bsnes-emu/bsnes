@@ -12,6 +12,10 @@ struct pTabFrameItem : pObject {
   auto setMovable(bool movable) -> void;
   auto setSelected() -> void;
   auto setText(const string& text) -> void;
+
+  CocoaTabFrameItem* cocoaTabFrameItem = nullptr;
+
+  auto _parent() -> maybe<pTabFrame&>;
 };
 
 }

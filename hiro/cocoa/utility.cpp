@@ -1,3 +1,7 @@
+auto NSMakeColor(const hiro::Color& color) -> NSColor* {
+  return [NSColor colorWithRed:(color.red() / 255.0) green:(color.green() / 255.0) blue:(color.blue() / 255.0) alpha:(color.alpha() / 255.0)];
+}
+
 auto NSMakeImage(hiro::Image image, uint scaleWidth = 0, uint scaleHeight = 0) -> NSImage* {
   if(!image.state.data) return nil;
 

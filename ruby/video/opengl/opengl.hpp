@@ -3,7 +3,6 @@
   #include <GL/glx.h>
   #define glGetProcAddress(name) (*glXGetProcAddress)((const GLubyte*)(name))
 #elif defined(DISPLAY_QUARTZ)
-  #include <OpenGL/gl.h>
   #include <OpenGL/gl3.h>
 #elif defined(DISPLAY_WINDOWS)
   #include <GL/gl.h>

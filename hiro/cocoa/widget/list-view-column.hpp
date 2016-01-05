@@ -20,6 +20,9 @@ struct pListViewColumn : pObject {
   auto setVerticalAlignment(double) -> void;
   auto setVisible(bool visible) -> void override;
   auto setWidth(signed width) -> void;
+
+  auto _grandparent() -> maybe<pListView&>;
+  auto _parent() -> maybe<pListViewHeader&>;
 };
 
 }

@@ -3,11 +3,18 @@ include ../hiro/GNUmakefile
 
 flags += -I.. -O3
 link +=
-objects := obj/hiro.o obj/icarus.o
+
+objects := obj/hiro.o
+objects += obj/icarus.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)
 
 all: $(objects)
-	$(compiler) -o icarus $(objects) $(link) $(hirolink)
+	$(compiler) -o out/icarus $(objects) $(link) $(hirolink)
+ifeq ($(platform),macosx)
+	@if [ -d out/icarus.app ]; then rm -r out/icarus.app; fi
+	mkdir -p out/icarus.app/Contents/MacOS/
+	mv out/icarus out/icarus.app/Contents/MacOS/
+endif
 
 obj/hiro.o: ../hiro/hiro.cpp
 	$(compiler) $(hiroflags) -o obj/hiro.o -c ../hiro/hiro.cpp
@@ -19,11 +26,22 @@ obj/resource.o:
 	windres ../hiro/windows/hiro.rc obj/resource.o
 
 clean:
-	if [ -f ./icarus ]; then rm ./icarus; fi
-	$(call delete,obj/*.o)
+ifeq ($(platform),macosx)
+	@if [ -d out/icarus.app ]; then rm out/icarus.app; fi
+endif
+	$(call delete,obj/*)
+	$(call delete,out/*)
 
 install:
+ifeq ($(platform),macosx)
+	cp -r out/icarus.app /Applications/icarus.app
+else
 	if [ -f ./icarus ]; then cp ./icarus $(prefix)/bin/icarus; fi
+endif
 
 uninstall:
+ifeq ($(platform),macosx)
+	if [ -d /Applications/icarus.app ]; then rm -r /Applications/icarus.app; fi
+else
 	if [ -f $(prefix)/bin/icarus ]; then rm $(prefix)/bin/icarus; fi
+endif

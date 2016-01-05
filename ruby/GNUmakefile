@@ -31,8 +31,18 @@ rubylink += $(if $(findstring .sdl,$(ruby)),$(shell sdl-config --libs))
 
 ifeq ($(platform),windows)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal32)
-else ifeq ($(platform),macosx)
+endif
+
+ifeq ($(platform),macosx)
   rubylink += $(if $(findstring audio.openal,$(ruby)),-framework OpenAL)
-else
+endif
+
+ifeq ($(platform),linux)
+  rubylink += -lX11 -lXext
+  rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
+endif
+
+ifeq ($(platform),bsd)
+  rubylink += -lX11 -lXext
   rubylink += $(if $(findstring audio.openal,$(ruby)),-lopenal)
 endif

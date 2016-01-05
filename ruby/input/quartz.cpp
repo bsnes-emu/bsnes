@@ -1,9 +1,9 @@
-#include "keyboard/carbon.cpp"
+#include "keyboard/quartz.cpp"
 
-struct InputCarbon : Input {
-  InputKeyboardCarbon carbonKeyboard;
-  InputCarbon() : carbonKeyboard(*this) {}
-  ~InputCarbon() { term(); }
+struct InputQuartz : Input {
+  InputKeyboardQuartz quartzKeyboard;
+  InputQuartz() : quartzKeyboard(*this) {}
+  ~InputQuartz() { term(); }
 
   auto cap(const string& name) -> bool {
     if(name == Input::KeyboardSupport) return true;
@@ -24,7 +24,7 @@ struct InputCarbon : Input {
 
   auto poll() -> vector<shared_pointer<HID::Device>> {
     vector<shared_pointer<HID::Device>> devices;
-    carbonKeyboard.poll(devices);
+    quartzKeyboard.poll(devices);
     return devices;
   }
 
@@ -33,11 +33,11 @@ struct InputCarbon : Input {
   }
 
   auto init() -> bool {
-    if(!carbonKeyboard.init()) return false;
+    if(!quartzKeyboard.init()) return false;
     return true;
   }
 
   auto term() -> void {
-    carbonKeyboard.term();
+    quartzKeyboard.term();
   }
 };

@@ -15,6 +15,7 @@ auto mFrame::append(sLayout layout) -> type& {
   if(auto& layout = state.layout) remove(layout);
   state.layout = layout;
   layout->setParent(this, 0);
+  signal(append, layout);
   return *this;
 }
 
@@ -23,6 +24,7 @@ auto mFrame::layout() const -> Layout {
 }
 
 auto mFrame::remove(sLayout layout) -> type& {
+  signal(remove, layout);
   layout->setParent();
   state.layout.reset();
   return *this;

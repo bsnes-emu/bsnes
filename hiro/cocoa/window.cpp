@@ -166,12 +166,13 @@ auto pWindow::append(sLayout layout) -> void {
 }
 
 auto pWindow::append(sMenuBar menuBar) -> void {
-  @autoreleasepool {
-//    [[cocoaWindow menuBar] addItem:menu.p.cocoaAction];
-  }
 }
 
 auto pWindow::append(sStatusBar statusBar) -> void {
+  statusBar->setEnabled(statusBar->enabled(true));
+  statusBar->setFont(statusBar->font(true));
+  statusBar->setText(statusBar->text());
+  statusBar->setVisible(statusBar->visible(true));
 }
 
 auto pWindow::focused() const -> bool {
@@ -187,16 +188,6 @@ auto pWindow::frameMargin() const -> Geometry {
   }
 }
 
-/*
-auto pWindow::geometry() -> Geometry {
-  @autoreleasepool {
-    NSRect area = [cocoaWindow contentRectForFrameRect:[cocoaWindow frame]];
-    area.size.height -= statusBarHeight();
-    return {area.origin.x, Desktop::size().height - area.origin.y - area.size.height, area.size.width, area.size.height};
-  }
-}
-*/
-
 auto pWindow::remove(sLayout layout) -> void {
   @autoreleasepool {
     [[cocoaWindow contentView] setNeedsDisplay:YES];
@@ -204,22 +195,13 @@ auto pWindow::remove(sLayout layout) -> void {
 }
 
 auto pWindow::remove(sMenuBar menuBar) -> void {
-  @autoreleasepool {
-//    [[cocoaWindow menuBar] removeItem:menu.p.cocoaAction];
-  }
 }
 
 auto pWindow::remove(sStatusBar statusBar) -> void {
-}
-
-/*
-auto pWindow::remove(Widget& widget) -> void {
   @autoreleasepool {
-    [widget.p.cocoaView removeFromSuperview];
-    [[cocoaWindow contentView] setNeedsDisplay:YES];
+    [[cocoaWindow statusBar] setHidden:YES];
   }
 }
-*/
 
 auto pWindow::setBackgroundColor(Color color) -> void {
   @autoreleasepool {
@@ -308,28 +290,6 @@ auto pWindow::setResizable(bool resizable) -> void {
   }
 }
 
-/*
-auto pWindow::setStatusFont(string font) -> void {
-  @autoreleasepool {
-    [[cocoaWindow statusBar] setFont:pFont::cocoaFont(font)];
-  }
-  statusBarReposition();
-}
-
-auto pWindow::setStatusText(string text) -> void {
-  @autoreleasepool {
-    [[cocoaWindow statusBar] setStringValue:[NSString stringWithUTF8String:text]];
-  }
-}
-
-auto pWindow::setStatusVisible(bool visible) -> void {
-  @autoreleasepool {
-    [[cocoaWindow statusBar] setHidden:!visible];
-    setGeometry(geometry());
-  }
-}
-*/
-
 auto pWindow::setTitle(const string& text) -> void {
   @autoreleasepool {
     [cocoaWindow setTitle:[NSString stringWithUTF8String:text]];
@@ -376,8 +336,9 @@ auto pWindow::sizeEvent() -> void {
 }
 
 auto pWindow::statusBarHeight() -> uint {
-  if(!state().statusBar) return 0;
-//return Font::size(window.state.statusFont, " ").height + 6;
+  if(auto& statusBar = state().statusBar) {
+    return pFont::size(statusBar->font(true), " ").height() + 6;
+  }
   return 0;
 }
 
@@ -399,6 +360,23 @@ auto pWindow::_append(mWidget& widget) -> void {
     }
   }
 }
+
+/*
+auto pWindow::geometry() -> Geometry {
+  @autoreleasepool {
+    NSRect area = [cocoaWindow contentRectForFrameRect:[cocoaWindow frame]];
+    area.size.height -= statusBarHeight();
+    return {area.origin.x, Desktop::size().height - area.origin.y - area.size.height, area.size.width, area.size.height};
+  }
+}
+
+auto pWindow::remove(Widget& widget) -> void {
+  @autoreleasepool {
+    [widget.p.cocoaView removeFromSuperview];
+    [[cocoaWindow contentView] setNeedsDisplay:YES];
+  }
+}
+*/
 
 }
 

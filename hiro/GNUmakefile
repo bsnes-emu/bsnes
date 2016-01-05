@@ -1,7 +1,9 @@
 ifeq ($(platform),)
   hiroflags = $(cppflags) $(flags) -DHIRO_REFERENCE
   hirolink =
-else ifeq ($(platform),windows)
+endif
+
+ifeq ($(platform),windows)
   ifeq ($(hiro),)
     hiro := windows
   endif
@@ -15,16 +17,20 @@ else ifeq ($(platform),windows)
     hiroflags = $(cppflags) $(flags) -DHIRO_GTK $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0)
     hirolink = $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
   endif
-else ifeq ($(platform),macosx)
+endif
+
+ifeq ($(platform),macosx)
   ifeq ($(hiro),)
     hiro := cocoa
   endif
 
   ifeq ($(hiro),cocoa)
-    hiroflags = $(objcppflags) $(flags) -DHIRO_COCOA
+    hiroflags = $(objcppflags) $(flags) -w -DHIRO_COCOA
     hirolink = -framework Cocoa -framework Carbon
   endif
-else
+endif
+
+ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(hiro),)
     hiro := gtk
   endif

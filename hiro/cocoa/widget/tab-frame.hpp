@@ -25,11 +25,13 @@ struct pTabFrame : pWidget {
 
   auto append(sTabFrameItem item) -> void;
   auto remove(sTabFrameItem item) -> void;
+  auto setEnabled(bool enabled) -> void override;
+  auto setFont(const Font& font) -> void override;
   auto setGeometry(Geometry geometry) -> void override;
   auto setNavigation(Navigation navigation) -> void;
+  auto setVisible(bool visible) -> void override;
 
   auto _synchronizeLayout() -> void;
-  auto _updateSelected(int selected) -> void;
 
   CocoaTabFrame* cocoaTabFrame = nullptr;
   vector<CocoaTabFrameItem*> tabs;

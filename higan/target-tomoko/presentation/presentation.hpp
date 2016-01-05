@@ -36,12 +36,12 @@ struct Presentation : Window {
       Menu videoShaderMenu{&settingsMenu};
         MenuRadioItem videoShaderNone{&videoShaderMenu};
         Group videoShaders{&videoShaderNone};
-      MenuSeparator settingsMenuSeparator1{&settingsMenu};
+      MenuSeparator videoSettingsSeparator{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};
       MenuCheckItem muteAudio{&settingsMenu};
       MenuCheckItem showStatusBar{&settingsMenu};
-      MenuSeparator settingsMenuSeparator2{&settingsMenu};
+      MenuSeparator showConfigurationSeparator{&settingsMenu};
       MenuItem showConfiguration{&settingsMenu};
     Menu toolsMenu{&menuBar};
       Menu saveStateMenu{&toolsMenu};
@@ -60,6 +60,8 @@ struct Presentation : Window {
       MenuItem cheatEditor{&toolsMenu};
       MenuItem stateManager{&toolsMenu};
       MenuItem manifestViewer{&toolsMenu};
+    Menu helpMenu{&menuBar};
+      MenuItem about{&helpMenu};
 
   FixedLayout layout{this};
     Viewport viewport{&layout, Geometry{0, 0, 1, 1}};

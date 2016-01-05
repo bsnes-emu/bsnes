@@ -12,6 +12,8 @@ struct pListViewItem : pObject {
   auto setFocused() -> void;
   auto setForegroundColor(Color color) -> void;
   auto setSelected(bool selected) -> void;
+
+  auto _parent() -> maybe<pListView&>;
 };
 
 }

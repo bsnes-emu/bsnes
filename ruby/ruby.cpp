@@ -18,9 +18,11 @@ using namespace ruby;
   #include <X11/Xutil.h>
   #include <X11/Xatom.h>
 #elif defined(DISPLAY_QUARTZ)
+  #define Boolean CocoaBoolean
   #define decimal CocoaDecimal
   #include <Cocoa/Cocoa.h>
   #include <Carbon/Carbon.h>
+  #undef Boolean
   #undef decimal
 #elif defined(DISPLAY_WINDOWS)
   #include <windows.h>
@@ -412,6 +414,10 @@ auto Audio::availableDrivers() -> lstring {
   #include <ruby/input/carbon.cpp>
 #endif
 
+#if defined(INPUT_QUARTZ)
+  #include <ruby/input/quartz.cpp>
+#endif
+
 #if defined(INPUT_SDL)
   #include <ruby/input/sdl.cpp>
 #endif
@@ -443,6 +449,10 @@ auto Input::create(const string& driver) -> Input* {
   if(driver == "Windows") return new InputWindows;
   #endif
 
+  #if defined(INPUT_QUARTZ)
+  if(driver == "Quartz") return new InputQuartz;
+  #endif
+
   #if defined(INPUT_CARBON)
   if(driver == "Carbon") return new InputCarbon;
   #endif
@@ -465,6 +475,8 @@ auto Input::create(const string& driver) -> Input* {
 auto Input::optimalDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
+  #elif defined(INPUT_QUARTZ)
+  return "Quartz";
   #elif defined(INPUT_CARBON)
   return "Carbon";
   #elif defined(INPUT_UDEV)
@@ -481,6 +493,8 @@ auto Input::optimalDriver() -> string {
 auto Input::safestDriver() -> string {
   #if defined(INPUT_WINDOWS)
   return "Windows";
+  #elif defined(INPUT_QUARTZ)
+  return "Quartz";
   #elif defined(INPUT_CARBON)
   return "Carbon";
   #elif defined(INPUT_UDEV)
@@ -499,6 +513,10 @@ auto Input::availableDrivers() -> lstring {
 
   #if defined(INPUT_WINDOWS)
   "Windows",
+  #endif
+
+  #if defined(INPUT_QUARTZ)
+  "Quartz",
   #endif
 
   #if defined(INPUT_CARBON)

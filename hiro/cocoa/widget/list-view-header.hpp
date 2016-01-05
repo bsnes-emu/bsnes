@@ -7,6 +7,9 @@ struct pListViewHeader : pObject {
 
   auto append(sListViewColumn column) -> void;
   auto remove(sListViewColumn column) -> void;
+  auto setVisible(bool visible) -> void override;
+
+  auto _parent() -> maybe<pListView&>;
 };
 
 }

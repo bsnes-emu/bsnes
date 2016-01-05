@@ -9,9 +9,19 @@ auto pListViewItem::destruct() -> void {
 }
 
 auto pListViewItem::append(sListViewCell cell) -> void {
+  @autoreleasepool {
+    if(auto listView = _parent()) {
+      [[listView->cocoaView content] reloadData];
+    }
+  }
 }
 
 auto pListViewItem::remove(sListViewCell cell) -> void {
+  @autoreleasepool {
+    if(auto listView = _parent()) {
+      [[listView->cocoaView content] reloadData];
+    }
+  }
 }
 
 auto pListViewItem::setAlignment(Alignment alignment) -> void {
@@ -27,6 +37,13 @@ auto pListViewItem::setForegroundColor(Color color) -> void {
 }
 
 auto pListViewItem::setSelected(bool selected) -> void {
+}
+
+auto pListViewItem::_parent() -> maybe<pListView&> {
+  if(auto parent = self().parentListView()) {
+    if(auto self = parent->self()) return *self;
+  }
+  return nothing;
 }
 
 }

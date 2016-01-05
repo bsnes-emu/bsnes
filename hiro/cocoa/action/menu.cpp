@@ -39,20 +39,24 @@ auto pMenu::destruct() -> void {
 
 auto pMenu::append(sAction action) -> void {
   @autoreleasepool {
-//    [[cocoaAction cocoaMenu] addItem:action.p.cocoaAction];
+    if(auto pAction = action->self()) {
+      [[cocoaAction cocoaMenu] addItem:pAction->cocoaAction];
+    }
   }
 }
 
 auto pMenu::remove(sAction action) -> void {
   @autoreleasepool {
-//    [[cocoaAction cocoaMenu] removeItem:action.p.cocoaAction];
+    if(auto pAction = action->self()) {
+      [[cocoaAction cocoaMenu] removeItem:pAction->cocoaAction];
+    }
   }
 }
 
 auto pMenu::setImage(const Image& image) -> void {
   @autoreleasepool {
     uint size = 15;  //there is no API to retrieve the optimal size
-//    [cocoaAction setImage:NSMakeImage(image, size, size)];
+    [cocoaAction setImage:NSMakeImage(image, size, size)];
   }
 }
 
