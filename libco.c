@@ -3,6 +3,10 @@
   license: public domain
 */
 
+#if defined(__clang__)
+  #pragma clang diagnostic ignored "-Wparentheses"
+#endif
+
 #if defined(__clang__) || defined(__GNUC__)
   #if defined(__i386__)
     #include "x86.c"
