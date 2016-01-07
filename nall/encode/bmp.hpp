@@ -1,5 +1,4 @@
-#ifndef NALL_ENCODE_BMP_HPP
-#define NALL_ENCODE_BMP_HPP
+#pragma once
 
 namespace nall { namespace Encode {
 
@@ -45,5 +44,3 @@ struct BMP {
 };
 
 }}
-
-#endif

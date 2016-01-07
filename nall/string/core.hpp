@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 //only allocators may access _data or modify _size and _capacity
 //all other functions must use data(), size(), capacity()
@@ -54,5 +54,3 @@ auto string::length() const -> uint {
 }
 
 }
-
-#endif

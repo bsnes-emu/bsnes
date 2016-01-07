@@ -22,7 +22,7 @@ auto pMenuItem::destruct() -> void {
   qtMenuItem = nullptr;
 }
 
-auto pMenuItem::setImage(const Image& icon) -> void {
+auto pMenuItem::setIcon(const image& icon) -> void {
   _setState();
 }
 
@@ -31,7 +31,7 @@ auto pMenuItem::setText(const string& text) -> void {
 }
 
 auto pMenuItem::_setState() -> void {
-  qtMenuItem->setIcon(CreateImage(state().image));
+  qtMenuItem->setIcon(CreateIcon(state().icon));
   qtMenuItem->setText(QString::fromUtf8(state().text));
 }
 

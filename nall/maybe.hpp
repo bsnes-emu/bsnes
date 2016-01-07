@@ -1,5 +1,4 @@
-#ifndef NALL_MAYBE_HPP
-#define NALL_MAYBE_HPP
+#pragma once
 
 namespace nall {
 
@@ -90,5 +89,3 @@ private:
 };
 
 }
-
-#endif

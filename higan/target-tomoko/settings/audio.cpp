@@ -1,5 +1,5 @@
 AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Device::Speaker);
+  setIcon(Icon::Device::Speaker);
   setText("Audio");
 
   layout.setMargin(5);

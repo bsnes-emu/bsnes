@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_GZIP_HPP
-#define NALL_DECODE_GZIP_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/decode/inflate.hpp>
@@ -77,5 +76,3 @@ auto GZIP::decompress(const uint8* data, uint size) -> bool {
 }
 
 }}
-
-#endif

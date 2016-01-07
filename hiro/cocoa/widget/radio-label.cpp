@@ -34,6 +34,7 @@ auto pRadioLabel::construct() -> void {
 
 auto pRadioLabel::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

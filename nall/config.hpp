@@ -1,5 +1,4 @@
-#ifndef NALL_CONFIG_HPP
-#define NALL_CONFIG_HPP
+#pragma once
 
 #include <nall/platform.hpp>
 #include <nall/file.hpp>
@@ -111,5 +110,3 @@ struct Document : Node {
 
 }
 }
-
-#endif

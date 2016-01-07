@@ -337,7 +337,9 @@ auto pWindow::sizeEvent() -> void {
 
 auto pWindow::statusBarHeight() -> uint {
   if(auto& statusBar = state().statusBar) {
-    return pFont::size(statusBar->font(true), " ").height() + 6;
+    if(statusBar->visible()) {
+      return pFont::size(statusBar->font(true), " ").height() + 6;
+    }
   }
   return 0;
 }

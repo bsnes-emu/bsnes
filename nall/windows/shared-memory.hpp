@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_SHARED_MEMORY_HPP
-#define NALL_WINDOWS_SHARED_MEMORY_HPP
+#pragma once
 
 namespace nall {
 
@@ -26,5 +25,3 @@ struct shared_memory {
 };
 
 }
-
-#endif

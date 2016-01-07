@@ -94,8 +94,8 @@ auto mListViewCell::foregroundColor(bool recursive) const -> Color {
   return state.foregroundColor;
 }
 
-auto mListViewCell::image() const -> Image {
-  return state.image;
+auto mListViewCell::icon() const -> image {
+  return state.icon;
 }
 
 auto mListViewCell::setAlignment(Alignment alignment) -> type& {
@@ -129,9 +129,9 @@ auto mListViewCell::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mListViewCell::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mListViewCell::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

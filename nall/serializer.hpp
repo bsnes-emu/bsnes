@@ -1,5 +1,4 @@
-#ifndef NALL_SERIALIZER_HPP
-#define NALL_SERIALIZER_HPP
+#pragma once
 
 //serializer: a class designed to save and restore the state of classes.
 //
@@ -145,5 +144,3 @@ private:
 };
 
 };
-
-#endif

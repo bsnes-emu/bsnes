@@ -1,5 +1,4 @@
-#ifndef NALL_POSIX_SHARED_MEMORY_HPP
-#define NALL_POSIX_SHARED_MEMORY_HPP
+#pragma once
 
 #include <semaphore.h>
 #include <sys/mman.h>
@@ -150,5 +149,3 @@ private:
 };
 
 }
-
-#endif

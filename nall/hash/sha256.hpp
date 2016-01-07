@@ -1,5 +1,4 @@
-#ifndef NALL_HASH_SHA256_HPP
-#define NALL_HASH_SHA256_HPP
+#pragma once
 
 #include <nall/range.hpp>
 
@@ -107,5 +106,3 @@ private:
 };
 
 }}
-
-#endif

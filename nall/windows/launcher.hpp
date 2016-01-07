@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_LAUNCHER_HPP
-#define NALL_WINDOWS_LAUNCHER_HPP
+#pragma once
 
 namespace nall {
 
@@ -90,5 +89,3 @@ auto launch(const char* applicationName, const char* libraryName, uint32 entryPo
 }
 
 }
-
-#endif

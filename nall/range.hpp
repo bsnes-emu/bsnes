@@ -1,5 +1,4 @@
-#ifndef NALL_RANGE_HPP
-#define NALL_RANGE_HPP
+#pragma once
 
 namespace nall {
 
@@ -49,5 +48,3 @@ template<typename T> inline auto rrange(const vector<T>& container) {
 }
 
 }
-
-#endif

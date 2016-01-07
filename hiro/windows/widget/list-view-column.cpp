@@ -49,7 +49,7 @@ auto pListViewColumn::setHorizontalAlignment(double alignment) -> void {
   _setState();
 }
 
-auto pListViewColumn::setImage(const Image& image) -> void {
+auto pListViewColumn::setIcon(const image& icon) -> void {
   _setState();
 }
 
@@ -97,7 +97,7 @@ auto pListViewColumn::_setState() -> void {
     lvColumn.cx = _width;
     if(state().horizontalAlignment < 0.333) lvColumn.fmt = LVCFMT_LEFT;
     if(state().horizontalAlignment > 0.666) lvColumn.fmt = LVCFMT_RIGHT;
-    if(state().image) lvColumn.mask |= LVCF_IMAGE;
+    if(state().icon) lvColumn.mask |= LVCF_IMAGE;
     if(!state().resizable) lvColumn.fmt |= LVCFMT_FIXED_WIDTH;
     ListView_SetColumn(grandparent->hwnd, self().offset(), &lvColumn);
     grandparent->unlock();

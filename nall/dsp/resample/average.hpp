@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct ResampleAverage : Resampler {
   ResampleAverage(DSP& dsp) : Resampler(dsp) {}
@@ -70,5 +70,3 @@ auto ResampleAverage::sampleLinear() -> void {
   dsp.buffer.rdoffset++;
   fraction -= 1.0;
 }
-
-#endif

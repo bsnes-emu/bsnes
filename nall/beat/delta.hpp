@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_DELTA_HPP
-#define NALL_BEAT_DELTA_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
@@ -209,5 +208,3 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
 }
 
 }
-
-#endif

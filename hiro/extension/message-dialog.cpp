@@ -6,19 +6,19 @@ MessageDialog::MessageDialog(const string& text) {
 
 auto MessageDialog::error(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.image = Icon::Prompt::Error;
+  state.icon = Icon::Prompt::Error;
   return _run();
 }
 
 auto MessageDialog::information(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.image = Icon::Prompt::Information;
+  state.icon = Icon::Prompt::Information;
   return _run();
 }
 
 auto MessageDialog::question(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.image = Icon::Prompt::Question;
+  state.icon = Icon::Prompt::Question;
   return _run();
 }
 
@@ -39,7 +39,7 @@ auto MessageDialog::setTitle(const string& title) -> type& {
 
 auto MessageDialog::warning(const lstring& buttons) -> string {
   state.buttons = buttons;
-  state.image = Icon::Prompt::Warning;
+  state.icon = Icon::Prompt::Warning;
   return _run();
 }
 
@@ -53,7 +53,7 @@ auto MessageDialog::_run() -> string {
         Widget controlSpacer{&controlLayout, Size{~0, 0}};
 
   layout.setMargin(5);
-  messageIcon.setImage(state.image);
+  messageIcon.setIcon(state.icon);
   messageText.setText(state.text);
   for(auto n : range(state.buttons)) {
     Button button{&controlLayout, Size{80, 0}, 5};

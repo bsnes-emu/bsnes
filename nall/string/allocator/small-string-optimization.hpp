@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 /*
 small string optimization (SSO) allocator
@@ -91,5 +91,3 @@ auto string::operator=(string&& source) -> type& {
 }
 
 }
-
-#endif

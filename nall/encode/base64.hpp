@@ -1,5 +1,4 @@
-#ifndef NALL_ENCODE_BASE64_HPP
-#define NALL_ENCODE_BASE64_HPP
+#pragma once
 
 namespace nall { namespace Encode {
 
@@ -66,5 +65,3 @@ inline auto Base64(const string& text, const string& format = "MIME") -> string 
 }
 
 }}
-
-#endif

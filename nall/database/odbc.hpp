@@ -1,5 +1,4 @@
-#ifndef NALL_DATABASE_ODBC_HPP
-#define NALL_DATABASE_ODBC_HPP
+#pragma once
 
 #include <nall/string.hpp>
 
@@ -296,5 +295,3 @@ private:
 };
 
 }}
-
-#endif

@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 /*****
   adaptive allocator
@@ -119,5 +119,3 @@ auto string::_resize() -> void {
 }
 
 }
-
-#endif

@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -70,5 +70,3 @@ auto suffixname(rstring self) -> string {
 }
 
 }
-
-#endif

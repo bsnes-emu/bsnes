@@ -69,7 +69,7 @@ auto pCanvas::destruct() -> void {
 }
 
 auto pCanvas::minimumSize() const -> Size {
-  if(auto& image = state().image) return image.size();
+  if(auto& icon = state().icon) return {(int)icon.width(), (int)icon.height()};
   return {0, 0};
 }
 
@@ -90,7 +90,7 @@ auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setImage(const Image& image) -> void {
+auto pCanvas::setIcon(const image& icon) -> void {
   update();
 }
 
@@ -112,12 +112,12 @@ auto pCanvas::_paint() -> void {
   bmi.bmiHeader.biCompression = BI_RGB;
   bmi.bmiHeader.biWidth = width;
   bmi.bmiHeader.biHeight = -height;  //GDI stores bitmaps upside now; negative height flips bitmap
-  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32_t);
+  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32);
   void* bits = nullptr;
   HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
   if(bits) {
-    auto source = (const uint8_t*)pixels.data();
-    auto target = (uint8_t*)bits;
+    auto source = (const uint8*)pixels.data();
+    auto target = (uint8*)bits;
     for(auto n : range(width * height)) {
       target[0] = (source[0] * source[3]) / 255;
       target[1] = (source[1] * source[3]) / 255;
@@ -142,9 +142,9 @@ auto pCanvas::_paint() -> void {
 }
 
 auto pCanvas::_rasterize() -> void {
-  if(auto& image = state().image) {
-    width = image.width();
-    height = image.height();
+  if(auto& icon = state().icon) {
+    width = icon.width();
+    height = icon.height();
   } else {
     width = self().geometry().width();
     height = self().geometry().height();
@@ -153,16 +153,16 @@ auto pCanvas::_rasterize() -> void {
 
   pixels.reallocate(width * height);
 
-  if(auto& image = state().image) {
-    memory::copy(pixels.data(), image.data(), width * height * sizeof(uint32_t));
+  if(auto& icon = state().icon) {
+    memory::copy(pixels.data(), icon.data(), width * height * sizeof(uint32));
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
-    nall::image fill;
+    image fill;
     fill.allocate(width, height);
     fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
     memory::copy(pixels.data(), fill.data(), fill.size());
   } else {
-    uint32_t color = state().color.value();
+    uint32 color = state().color.value();
     for(auto& pixel : pixels) pixel = color;
   }
 }

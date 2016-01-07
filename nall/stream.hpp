@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_HPP
-#define NALL_STREAM_HPP
+#pragma once
 
 #include <algorithm>
 #include <memory>
@@ -11,7 +10,6 @@
 #include <nall/decode/gzip.hpp>
 #include <nall/decode/zip.hpp>
 
-#define NALL_STREAM_INTERNAL_HPP
 #include <nall/stream/stream.hpp>
 #include <nall/stream/memory.hpp>
 #include <nall/stream/mmap.hpp>
@@ -19,6 +17,3 @@
 #include <nall/stream/gzip.hpp>
 #include <nall/stream/zip.hpp>
 #include <nall/stream/auto.hpp>
-#undef NALL_STREAM_INTERNAL_HPP
-
-#endif

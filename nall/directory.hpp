@@ -1,5 +1,4 @@
-#ifndef NALL_DIRECTORY_HPP
-#define NALL_DIRECTORY_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/file-system-object.hpp>
@@ -234,5 +233,3 @@ private:
 #endif
 
 }
-
-#endif

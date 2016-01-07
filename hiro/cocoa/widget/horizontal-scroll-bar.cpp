@@ -66,6 +66,7 @@ auto pHorizontalScrollBar::construct() -> void {
 
 auto pHorizontalScrollBar::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

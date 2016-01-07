@@ -5,7 +5,7 @@ namespace hiro {
 struct pMenuItem : pAction {
   Declare(MenuItem, Action)
 
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setText(const string& text) -> void;
 
   auto onActivate() -> void;

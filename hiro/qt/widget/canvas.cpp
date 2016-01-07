@@ -18,7 +18,7 @@ auto pCanvas::destruct() -> void {
 }
 
 auto pCanvas::minimumSize() const -> Size {
-  if(auto& image = state().image) return image.size();
+  if(auto& icon = state().icon) return {(int)icon.width(), (int)icon.height()};
   return {0, 0};
 }
 
@@ -39,7 +39,7 @@ auto pCanvas::setGradient(Gradient gradient) -> void {
   update();
 }
 
-auto pCanvas::setImage(const Image& image) -> void {
+auto pCanvas::setIcon(const image& icon) -> void {
   update();
 }
 
@@ -52,9 +52,9 @@ auto pCanvas::_rasterize() -> void {
   signed width = 0;
   signed height = 0;
 
-  if(auto& image = state().image) {
-    width = image.width();
-    height = image.height();
+  if(auto& icon = state().icon) {
+    width = icon.width();
+    height = icon.height();
   } else {
     width = pSizable::state().geometry.width();
     height = pSizable::state().geometry.height();
@@ -66,18 +66,18 @@ auto pCanvas::_rasterize() -> void {
   qtImageHeight = height;
 
   if(!qtImage) qtImage = new QImage(width, height, QImage::Format_ARGB32);
-  auto buffer = (uint32_t*)qtImage->bits();
+  auto buffer = (uint32*)qtImage->bits();
 
-  if(auto& image = state().image) {
-    memory::copy(buffer, state().image.data(), width * height * sizeof(uint32_t));
+  if(auto& icon = state().icon) {
+    memory::copy(buffer, state().icon.data(), width * height * sizeof(uint32));
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
-    nall::image fill;
+    image fill;
     fill.allocate(width, height);
     fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
     memory::copy(buffer, fill.data(), fill.size());
   } else {
-    uint32_t color = state().color.value();
+    uint32 color = state().color.value();
     for(auto n : range(width * height)) buffer[n] = color;
   }
 }

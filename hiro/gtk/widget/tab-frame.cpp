@@ -178,7 +178,7 @@ auto pTabFrame::setItemClosable(unsigned position, bool closable) -> void {
   _synchronizeTab(position);
 }
 
-auto pTabFrame::setItemImage(unsigned position, const Image& image) -> void {
+auto pTabFrame::setItemIcon(unsigned position, const image& icon) -> void {
   _synchronizeTab(position);
 }
 
@@ -239,15 +239,15 @@ auto pTabFrame::_synchronizeTab(unsigned position) -> void {
   auto& item = state().items[position];
   auto& tab = tabs[position];
   gtk_widget_set_visible(tab.close, item->closable());
-  if(auto& image = item->state.image) {
-    unsigned size = pFont::size(self().font(true), " ").height();
-    auto pixbuf = CreatePixbuf(image, true);
+  if(auto& icon = item->state.icon) {
+    uint size = pFont::size(self().font(true), " ").height();
+    auto pixbuf = CreatePixbuf(icon, true);
     gtk_image_set_from_pixbuf(GTK_IMAGE(tab.image), pixbuf);
   } else {
     gtk_image_clear(GTK_IMAGE(tab.image));
   }
   string text = {
-    item->state.image && item->state.text ? " " : "",
+    item->state.icon && item->state.text ? " " : "",
     item->state.text,
     item->state.text && item->state.closable ? " " : ""
   };

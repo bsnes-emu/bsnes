@@ -30,6 +30,7 @@ auto pComboButton::construct() -> void {
 
 auto pComboButton::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

@@ -15,6 +15,12 @@ auto pFrame::destruct() -> void {
   DestroyWindow(hwnd);
 }
 
+auto pFrame::append(sLayout layout) -> void {
+}
+
+auto pFrame::remove(sLayout layout) -> void {
+}
+
 auto pFrame::setEnabled(bool enabled) -> void {
   if(auto layout = state().layout) layout->setEnabled(layout->enabled());
   pWidget::setEnabled(enabled);

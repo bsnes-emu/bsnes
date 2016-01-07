@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_RESPONSE_HPP
-#define NALL_HTTP_RESPONSE_HPP
+#pragma once
 
 #include <nall/http/message.hpp>
 
@@ -245,5 +244,3 @@ auto Response::setText(const string& value) -> type& {
 }
 
 }}
-
-#endif

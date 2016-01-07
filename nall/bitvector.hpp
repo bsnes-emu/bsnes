@@ -1,5 +1,4 @@
-#ifndef NALL_BITVECTOR_HPP
-#define NALL_BITVECTOR_HPP
+#pragma once
 
 #include <nall/memory.hpp>
 
@@ -115,5 +114,3 @@ protected:
 };
 
 }
-
-#endif

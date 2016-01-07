@@ -1,5 +1,4 @@
-#ifndef NALL_SET_HPP
-#define NALL_SET_HPP
+#pragma once
 
 //set
 //implementation: red-black tree
@@ -263,5 +262,3 @@ private:
 };
 
 }
-
-#endif

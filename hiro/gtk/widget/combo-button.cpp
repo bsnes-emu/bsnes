@@ -32,7 +32,7 @@ auto pComboButton::append(sComboButtonItem item) -> void {
   lock();
   if(auto self = item->self()) {
     gtk_list_store_append(gtkListStore, &self->gtkIter);
-    self->setImage(item->state.image);
+    self->setIcon(item->state.icon);
     if(item->state.selected) self->setSelected();
     self->setText(item->state.text);
   }
@@ -45,7 +45,7 @@ auto pComboButton::minimumSize() const -> Size {
   signed maximumWidth = 0;
   for(auto& item : state().items) {
     maximumWidth = max(maximumWidth,
-      (item->state.image ? pFont::size(font, " ").height() + 2 : 0)
+      (item->state.icon ? pFont::size(font, " ").height() + 2 : 0)
     + pFont::size(font, item->state.text).width()
     );
   }

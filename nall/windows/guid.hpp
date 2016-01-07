@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_GUID_HPP
-#define NALL_WINDOWS_GUID_HPP
+#pragma once
 
 #include <nall/random.hpp>
 #include <nall/string.hpp>
@@ -26,5 +25,3 @@ inline auto guid() -> string {
 }
 
 }
-
-#endif

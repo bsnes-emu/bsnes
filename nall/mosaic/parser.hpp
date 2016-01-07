@@ -1,7 +1,6 @@
-#ifdef NALL_MOSAIC_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace mosaic {
+namespace nall { namespace mosaic {
 
 struct parser {
   //export from bitstream to canvas
@@ -117,7 +116,4 @@ private:
   image canvas;
 };
 
-}
-}
-
-#endif
+}}

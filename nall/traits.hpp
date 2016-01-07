@@ -1,5 +1,4 @@
-#ifndef NALL_TRAITS_HPP
-#define NALL_TRAITS_HPP
+#pragma once
 
 #include <type_traits>
 #include <utility>
@@ -52,5 +51,3 @@ namespace nall {
 
   template<typename C, typename T, typename F> using type_if = typename traits::type_if<C::value, T, F>::type;
 }
-
-#endif

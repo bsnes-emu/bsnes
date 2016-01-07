@@ -1,5 +1,4 @@
-#ifndef NALL_ENCODE_ZIP_HPP
-#define NALL_ENCODE_ZIP_HPP
+#pragma once
 
 //creates uncompressed ZIP archives
 
@@ -91,5 +90,3 @@ protected:
 };
 
 }}
-
-#endif

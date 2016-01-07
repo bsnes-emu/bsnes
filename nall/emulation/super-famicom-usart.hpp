@@ -1,5 +1,4 @@
-#ifndef NALL_EMULATION_SUPER_FAMICOM_USART_HPP
-#define NALL_EMULATION_SUPER_FAMICOM_USART_HPP
+#pragma once
 
 #include <nall/nall.hpp>
 #include <nall/serial.hpp>
@@ -11,20 +10,20 @@ using namespace nall;
 
 #define usartproc dllexport
 
-static function<bool ()> usart_quit;
-static function<void (uint milliseconds)> usart_usleep;
-static function<bool ()> usart_readable;
-static function<uint8 ()> usart_read;
-static function<bool ()> usart_writable;
-static function<void (uint8 data)> usart_write;
+static function<auto () -> bool> usart_quit;
+static function<auto (uint milliseconds) -> void> usart_usleep;
+static function<auto () -> bool> usart_readable;
+static function<auto () -> uint8> usart_read;
+static function<auto () -> bool> usart_writable;
+static function<auto (uint8 data) -> void> usart_write;
 
 extern "C" usartproc auto usart_init(
-  function<bool ()> quit,
-  function<void (uint milliseconds)> usleep,
-  function<bool ()> readable,
-  function<uint8 ()> read,
-  function<bool ()> writable,
-  function<void (uint8 data)> write
+  function<auto () -> bool> quit,
+  function<auto (uint milliseconds) -> void> usleep,
+  function<auto () -> bool> readable,
+  function<auto () -> uint8> read,
+  function<auto () -> bool> writable,
+  function<auto (uint8 data) -> void> write
 ) -> void {
   usart_quit = quit;
   usart_usleep = usleep;
@@ -96,5 +95,3 @@ auto nall::main(lstring args) -> void {
   usart_main(args);
   usart.close();
 }
-
-#endif

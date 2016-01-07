@@ -29,6 +29,7 @@ auto pLabel::construct() -> void {
 
 auto pLabel::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

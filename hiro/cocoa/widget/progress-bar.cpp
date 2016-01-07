@@ -28,6 +28,7 @@ auto pProgressBar::construct() -> void {
 
 auto pProgressBar::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

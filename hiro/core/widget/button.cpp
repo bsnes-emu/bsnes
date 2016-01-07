@@ -14,8 +14,8 @@ auto mButton::doActivate() const -> void {
   if(state.onActivate) return state.onActivate();
 }
 
-auto mButton::image() const -> Image {
-  return state.image;
+auto mButton::icon() const -> image {
+  return state.icon;
 }
 
 auto mButton::onActivate(const function<void ()>& callback) -> type& {
@@ -33,9 +33,9 @@ auto mButton::setBordered(bool bordered) -> type& {
   return *this;
 }
 
-auto mButton::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mButton::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

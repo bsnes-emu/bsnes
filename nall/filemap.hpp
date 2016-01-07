@@ -1,5 +1,4 @@
-#ifndef NALL_FILEMAP_HPP
-#define NALL_FILEMAP_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/stdint.hpp>
@@ -213,5 +212,3 @@ private:
 };
 
 }
-
-#endif

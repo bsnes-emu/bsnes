@@ -33,8 +33,8 @@ auto mMenu::append(sAction action) -> type& {
   return *this;
 }
 
-auto mMenu::image() const -> Image {
-  return state.image;
+auto mMenu::icon() const -> image {
+  return state.icon;
 }
 
 auto mMenu::remove(sAction action) -> type& {
@@ -52,9 +52,9 @@ auto mMenu::reset() -> type& {
   return *this;
 }
 
-auto mMenu::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mMenu::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

@@ -1,5 +1,5 @@
 InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Device::Joypad);
+  setIcon(Icon::Device::Joypad);
   setText("Input");
 
   layout.setMargin(5);

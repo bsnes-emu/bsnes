@@ -23,8 +23,8 @@ auto mTabFrameItem::closable() const -> bool {
   return state.closable;
 }
 
-auto mTabFrameItem::image() const -> Image {
-  return state.image;
+auto mTabFrameItem::icon() const -> image {
+  return state.icon;
 }
 
 auto mTabFrameItem::layout() const -> Layout {
@@ -62,9 +62,9 @@ auto mTabFrameItem::setClosable(bool closable) -> type& {
   return *this;
 }
 
-auto mTabFrameItem::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mTabFrameItem::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

@@ -52,8 +52,8 @@ auto mTreeViewItem::foregroundColor(bool recursive) const -> Color {
   return {};
 }
 
-auto mTreeViewItem::image() const -> Image {
-  return state.image;
+auto mTreeViewItem::icon() const -> image {
+  return state.icon;
 }
 
 auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
@@ -137,9 +137,9 @@ auto mTreeViewItem::setForegroundColor(Color color) -> type& {
   return *this;
 }
 
-auto mTreeViewItem::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mTreeViewItem::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

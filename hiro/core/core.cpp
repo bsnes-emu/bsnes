@@ -39,7 +39,6 @@ namespace hiro {
   #include "size.cpp"
   #include "geometry.cpp"
   #include "font.cpp"
-  #include "image.cpp"
 
   #include "application.cpp"
   #include "desktop.cpp"

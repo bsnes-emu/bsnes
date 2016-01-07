@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 #include <math.h>
 #include <vector>
@@ -162,5 +162,3 @@ auto DSP::clear() -> void {
 }
 
 }
-
-#endif

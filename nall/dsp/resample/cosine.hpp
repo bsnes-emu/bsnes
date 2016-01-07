@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct ResampleCosine : Resampler {
   ResampleCosine(DSP& dsp) : Resampler(dsp) {}
@@ -42,5 +42,3 @@ auto ResampleCosine::sample() -> void {
   dsp.buffer.rdoffset++;
   fraction -= 1.0;
 }
-
-#endif

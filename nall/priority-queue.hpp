@@ -1,5 +1,4 @@
-#ifndef NALL_PRIORITY_QUEUE_HPP
-#define NALL_PRIORITY_QUEUE_HPP
+#pragma once
 
 #include <limits>
 #include <nall/function.hpp>
@@ -105,5 +104,3 @@ private:
 };
 
 }
-
-#endif

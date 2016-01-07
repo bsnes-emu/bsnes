@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -290,5 +290,3 @@ struct format : vector<string> {
 };
 
 }
-
-#endif

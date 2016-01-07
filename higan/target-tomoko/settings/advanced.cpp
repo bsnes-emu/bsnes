@@ -1,5 +1,5 @@
 AdvancedSettings::AdvancedSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Action::Settings);
+  setIcon(Icon::Action::Settings);
   setText("Advanced");
 
   layout.setMargin(5);

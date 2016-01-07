@@ -1,4 +1,4 @@
-#ifdef NALL_MEMORY_INTERNAL_HPP
+#pragma once
 
 #include <nall/algorithm.hpp>
 
@@ -127,5 +127,3 @@ auto memory::fill(void* target, unsigned capacity, uint8_t data) -> void* {
 }
 
 }
-
-#endif

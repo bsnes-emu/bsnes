@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Eval {
+namespace nall { namespace Eval {
 
 inline auto evaluateExpression(Node* node) -> string {
   #define p(n) evaluateExpression(node->link[n])
@@ -144,7 +143,4 @@ inline auto real(const string& expression) -> maybe<long double> {
   }
 }
 
-}
-}
-
-#endif
+}}

@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_FILE_HPP
-#define NALL_BEAT_FILE_HPP
+#pragma once
 
 namespace nall { namespace Beat {
 
@@ -22,5 +21,3 @@ auto File::write(uint8_t data) -> void {
 }
 
 }}
-
-#endif

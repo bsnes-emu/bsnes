@@ -1,5 +1,5 @@
 TimingSettings::TimingSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Device::Clock);
+  setIcon(Icon::Device::Clock);
   setText("Timing");
 
   layout.setMargin(5);

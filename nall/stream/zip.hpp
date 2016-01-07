@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_ZIP_HPP
-#define NALL_STREAM_ZIP_HPP
+#pragma once
 
 #include <nall/decode/zip.hpp>
 
@@ -34,5 +33,3 @@ struct zipstream : memorystream {
 };
 
 }
-
-#endif

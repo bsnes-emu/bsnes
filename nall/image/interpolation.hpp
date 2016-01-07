@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_INTERPOLATION_HPP
-#define NALL_IMAGE_INTERPOLATION_HPP
+#pragma once
 
 namespace nall {
 
@@ -61,5 +60,3 @@ auto image::interpolate4i(uint64_t a, uint64_t b, uint64_t c, uint64_t d, uint32
 }
 
 }
-
-#endif

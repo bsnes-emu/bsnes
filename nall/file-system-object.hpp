@@ -1,5 +1,4 @@
-#ifndef NALL_STORAGE_HPP
-#define NALL_STORAGE_HPP
+#pragma once
 
 //generic abstraction layer for common storage operations against both files and directories
 //these functions are not recursive; use directory::create() and directory::remove() for recursion
@@ -77,5 +76,3 @@ struct file_system_object {
 };
 
 }
-
-#endif

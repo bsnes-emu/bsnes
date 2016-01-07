@@ -14,6 +14,7 @@
 #include <nall/vector.hpp>
 
 using nall::function;
+using nall::image;
 using nall::lstring;
 using nall::maybe;
 using nall::nothing;
@@ -323,36 +324,6 @@ struct Font {
     unsigned size;
     bool bold;
     bool italic;
-  } state;
-};
-#endif
-
-#if defined(Hiro_Image)
-struct Image {
-  using type = Image;
-
-  Image();
-  Image(const Image& source);
-  Image(const string& source);
-  Image(const vector<uint8_t>& source);
-  Image(const uint32_t* data, Size size);
-  ~Image();
-
-  explicit operator bool() const;
-  auto operator=(const Image& source) -> type&;
-
-  auto data() const -> uint32_t*;
-  auto height() const -> signed;
-  auto reset() -> type&;
-  auto setImage(const uint32_t* data, Size size) -> type&;
-  auto setSize(Size size = {}) -> type&;
-  auto size() const -> Size;
-  auto width() const -> signed;
-
-//private:
-  struct State {
-    uint32_t* data = nullptr;
-    Size size;
   } state;
 };
 #endif
@@ -837,10 +808,10 @@ struct mMenu : mAction {
   auto actionCount() const -> unsigned;
   auto actions() const -> vector<Action>;
   auto append(sAction action) -> type&;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto remove(sAction action) -> type&;
   auto reset() -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setParent(mObject* parent = nullptr, signed offset = -1) -> type& override;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -848,7 +819,7 @@ struct mMenu : mAction {
 //private:
   struct State {
     vector<sAction> actions;
-    Image image;
+    image icon;
     string text;
   } state;
 
@@ -871,15 +842,15 @@ struct mMenuItem : mAction {
   Declare(MenuItem)
 
   auto doActivate() const -> void;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
 
 //private:
   struct State {
-    Image image;
+    image icon;
     function<void ()> onActivate;
     string text;
   } state;
@@ -987,11 +958,11 @@ struct mButton : mWidget {
 
   auto bordered() const -> bool;
   auto doActivate() const -> void;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -999,7 +970,7 @@ struct mButton : mWidget {
 //private:
   struct State {
     bool bordered = true;
-    Image image;
+    image icon;
     function<void ()> onActivate;
     Orientation orientation = Orientation::Horizontal;
     string text;
@@ -1020,7 +991,7 @@ struct mCanvas : mWidget {
   auto doMousePress(Mouse::Button button) const -> void;
   auto doMouseRelease(Mouse::Button button) const -> void;
   auto gradient() const -> Gradient;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
   auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
   auto onMouseMove(const function<void (Position)>& callback = {}) -> type&;
@@ -1029,7 +1000,7 @@ struct mCanvas : mWidget {
   auto setColor(Color color = {}) -> type&;
   auto setDroppable(bool droppable = true) -> type&;
   auto setGradient(Gradient gradient = {}) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setSize(Size size = {}) -> type&;
   auto size() const -> Size;
   auto update() -> type&;
@@ -1039,7 +1010,7 @@ struct mCanvas : mWidget {
     Color color;
     bool droppable = false;
     Gradient gradient;
-    Image image;
+    image icon;
     function<void (lstring)> onDrop;
     function<void ()> onMouseLeave;
     function<void (Position)> onMouseMove;
@@ -1056,12 +1027,12 @@ struct mCheckButton : mWidget {
   auto bordered() const -> bool;
   auto checked() const -> bool;
   auto doToggle() const -> void;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto onToggle(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
   auto setChecked(bool checked = true) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -1070,7 +1041,7 @@ struct mCheckButton : mWidget {
   struct State {
     bool bordered = true;
     bool checked = false;
-    Image image;
+    image icon;
     function<void ()> onToggle;
     Orientation orientation = Orientation::Horizontal;
     string text;
@@ -1128,17 +1099,17 @@ struct mComboButton : mWidget {
 struct mComboButtonItem : mObject {
   Declare(ComboButtonItem)
 
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto remove() -> type& override;
   auto selected() const -> bool;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setSelected() -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
 
 //private:
   struct State {
-    Image image;
+    image icon;
     bool selected = false;
     string text;
   } state;
@@ -1322,17 +1293,17 @@ struct mIconView : mWidget {
 struct mIconViewItem : mObject {
   Declare(IconViewItem)
 
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto remove() -> type& override;
   auto selected() const -> bool;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setSelected(bool selected = true) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
 
 //private:
   struct State {
-    Image image;
+    image icon;
     bool selected = false;
     string text;
   } state;
@@ -1478,7 +1449,7 @@ struct mListViewColumn : mObject {
   auto expandable() const -> bool;
   auto foregroundColor() const -> Color;
   auto horizontalAlignment() const -> double;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto remove() -> type& override;
   auto resizable() const -> bool;
   auto setActive() -> type&;
@@ -1488,7 +1459,7 @@ struct mListViewColumn : mObject {
   auto setExpandable(bool expandable = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
   auto setHorizontalAlignment(double alignment = 0.0) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setResizable(bool resizable = true) -> type&;
   auto setSortable(bool sortable = true) -> type&;
   auto setText(const string& text = "") -> type&;
@@ -1508,7 +1479,7 @@ struct mListViewColumn : mObject {
     bool expandable = false;
     Color foregroundColor;
     double horizontalAlignment = 0.0;
-    Image image;
+    image icon;
     bool resizable = true;
     bool sortable = false;
     string text;
@@ -1561,13 +1532,13 @@ struct mListViewCell : mObject {
   auto checked() const -> bool;
   auto font(bool recursive = false) const -> Font;
   auto foregroundColor(bool recursive = false) const -> Color;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto setAlignment(Alignment alignment = {}) -> type&;
   auto setBackgroundColor(Color color = {}) -> type&;
   auto setCheckable(bool checkable = true) -> type&;
   auto setChecked(bool checked = true) -> type&;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
 
@@ -1578,7 +1549,7 @@ struct mListViewCell : mObject {
     bool checkable = false;
     bool checked = false;
     Color foregroundColor;
-    Image image;
+    image icon;
     string text;
   } state;
 };
@@ -1606,13 +1577,13 @@ struct mRadioButton : mWidget {
   auto checked() const -> bool;
   auto doActivate() const -> void;
   auto group() const -> Group override;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto onActivate(const function<void ()>& callback = {}) -> type&;
   auto orientation() const -> Orientation;
   auto setBordered(bool bordered = true) -> type&;
   auto setChecked() -> type&;
   auto setGroup(sGroup group = {}) -> type& override;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setOrientation(Orientation orientation = Orientation::Horizontal) -> type&;
   auto setText(const string& text = "") -> type&;
   auto text() const -> string;
@@ -1622,7 +1593,7 @@ struct mRadioButton : mWidget {
     bool bordered = true;
     bool checked = false;
     sGroup group;
-    Image image;
+    image icon;
     function<void ()> onActivate;
     Orientation orientation = Orientation::Horizontal;
     string text;
@@ -1718,7 +1689,7 @@ struct mTabFrameItem : mObject {
 
   auto append(sLayout layout) -> type&;
   auto closable() const -> bool;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto layout() const -> Layout;
   auto movable() const -> bool;
   auto remove() -> type& override;
@@ -1726,7 +1697,7 @@ struct mTabFrameItem : mObject {
   auto reset() -> type&;
   auto selected() const -> bool;
   auto setClosable(bool closable = true) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setMovable(bool movable = true) -> type&;
   auto setParent(mObject* object = nullptr, signed offset = -1) -> type& override;
   auto setSelected() -> type&;
@@ -1736,7 +1707,7 @@ struct mTabFrameItem : mObject {
 //private:
   struct State {
     bool closable = false;
-    Image image;
+    image icon;
     sLayout layout;
     bool movable = false;
     bool selected = false;
@@ -1833,7 +1804,7 @@ struct mTreeViewItem : mObject {
   auto checkable() const -> bool;
   auto checked() const -> bool;
   auto foregroundColor(bool recursive = false) const -> Color;
-  auto image() const -> Image;
+  auto icon() const -> image;
   auto item(const string& path) const -> TreeViewItem;
   auto itemCount() const -> unsigned;
   auto items() const -> vector<TreeViewItem>;
@@ -1847,7 +1818,7 @@ struct mTreeViewItem : mObject {
   auto setExpanded(bool expanded = true) -> type&;
   auto setFocused() -> type& override;
   auto setForegroundColor(Color color = {}) -> type&;
-  auto setImage(const Image& image = {}) -> type&;
+  auto setIcon(const image& icon = {}) -> type&;
   auto setParent(mObject* parent = nullptr, signed offset = -1) -> type&;
   auto setSelected() -> type&;
   auto setText(const string& text = "") -> type&;
@@ -1859,7 +1830,7 @@ struct mTreeViewItem : mObject {
     bool checkable = false;
     bool checked = false;
     Color foregroundColor;
-    Image image;
+    image icon;
     vector<sTreeViewItem> items;
     string text;
   } state;

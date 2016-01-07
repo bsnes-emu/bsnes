@@ -26,6 +26,7 @@ auto pFrame::construct() -> void {
 
 auto pFrame::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

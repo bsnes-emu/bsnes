@@ -1,5 +1,4 @@
-#ifndef NALL_PRIMITIVES_HPP
-#define NALL_PRIMITIVES_HPP
+#pragma once
 
 #include <nall/serializer.hpp>
 #include <nall/traits.hpp>
@@ -212,5 +211,3 @@ template<uint Bits> struct Real {
 };
 
 }
-
-#endif

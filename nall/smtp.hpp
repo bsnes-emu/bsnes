@@ -1,5 +1,4 @@
-#ifndef NALL_SMTP_HPP
-#define NALL_SMTP_HPP
+#pragma once
 
 #include <nall/base64.hpp>
 #include <nall/stdint.hpp>
@@ -314,5 +313,3 @@ SMTP::SMTP() {
 #endif
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_HPP
-#define NALL_IMAGE_HPP
+#pragma once
 
 #include <algorithm>
 
@@ -17,5 +16,3 @@
 #include <nall/image/scale.hpp>
 #include <nall/image/blend.hpp>
 #include <nall/image/utility.hpp>
-
-#endif

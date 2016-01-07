@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct ResampleNearest : Resampler {
   ResampleNearest(DSP& dsp) : Resampler(dsp) {}
@@ -41,5 +41,3 @@ auto ResampleNearest::sample() -> void {
   dsp.buffer.rdoffset++;
   fraction -= 1.0;
 }
-
-#endif

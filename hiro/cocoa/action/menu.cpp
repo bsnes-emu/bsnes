@@ -25,7 +25,7 @@ auto pMenu::construct() -> void {
     cocoaAction = cocoaMenu = [[CocoaMenu alloc] initWith:self()];
     pAction::construct();
 
-    setImage(state().image);
+    setIcon(state().icon);
     setText(state().text);
   }
 }
@@ -53,10 +53,10 @@ auto pMenu::remove(sAction action) -> void {
   }
 }
 
-auto pMenu::setImage(const Image& image) -> void {
+auto pMenu::setIcon(const image& icon) -> void {
   @autoreleasepool {
     uint size = 15;  //there is no API to retrieve the optimal size
-    [cocoaAction setImage:NSMakeImage(image, size, size)];
+    [cocoaAction setImage:NSMakeImage(icon, size, size)];
   }
 }
 

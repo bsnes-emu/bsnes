@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -92,5 +92,3 @@ auto string::qreplace(rstring from, rstring to, long limit) -> string& { return 
 auto string::iqreplace(rstring from, rstring to, long limit) -> string& { return _replace<1, 1>(from, to, limit); }
 
 };
-
-#endif

@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 /* CSS Markup Language (CML) v1.0 parser
  * revision 0.02
@@ -101,5 +101,3 @@ auto CML::parseDocument(const string& filedata, const string& pathname, uint dep
 }
 
 }}
-
-#endif

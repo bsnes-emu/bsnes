@@ -1,5 +1,4 @@
-#ifndef NALL_PROPERTY_HPP
-#define NALL_PROPERTY_HPP
+#pragma once
 
 namespace nall {
 
@@ -40,5 +39,3 @@ template<typename C> struct property {
 };
 
 }
-
-#endif

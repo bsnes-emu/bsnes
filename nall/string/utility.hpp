@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -156,5 +156,3 @@ auto real(char* result, long double value) -> uint {
 }
 
 }
-
-#endif

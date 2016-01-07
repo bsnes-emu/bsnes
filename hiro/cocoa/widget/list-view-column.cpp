@@ -42,7 +42,7 @@ auto pListViewColumn::setForegroundColor(Color color) -> void {
 auto pListViewColumn::setHorizontalAlignment(double alignment) -> void {
 }
 
-auto pListViewColumn::setImage(const Image& image) -> void {
+auto pListViewColumn::setIcon(const image& icon) -> void {
 }
 
 auto pListViewColumn::setResizable(bool resizable) -> void {

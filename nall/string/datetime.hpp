@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -28,5 +28,3 @@ auto string::datetime(time_t timestamp) -> string {
 }
 
 }
-
-#endif

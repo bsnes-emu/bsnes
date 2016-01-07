@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct Buffer {
   Buffer() {
@@ -48,5 +48,3 @@ struct Buffer {
   uint16 wroffset = 0;
   uint channels = 0;
 };
-
-#endif

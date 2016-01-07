@@ -1,5 +1,4 @@
-#ifndef NALL_MAIN_HPP
-#define NALL_MAIN_HPP
+#pragma once
 
 #include <nall/platform.hpp>
 #include <nall/string.hpp>
@@ -25,5 +24,3 @@ namespace nall {
 auto main(int argc, char** argv) -> int {
   return nall::main(argc, argv);
 }
-
-#endif

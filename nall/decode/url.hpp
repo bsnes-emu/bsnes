@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_URL_HPP
-#define NALL_DECODE_URL_HPP
+#pragma once
 
 namespace nall { namespace Decode {
 
@@ -32,5 +31,3 @@ inline auto URL(const string& input) -> string {
 }
 
 }}
-
-#endif

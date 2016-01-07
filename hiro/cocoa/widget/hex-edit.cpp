@@ -42,6 +42,7 @@ void pHexEdit::constructor() {
 
 void pHexEdit::destructor() {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

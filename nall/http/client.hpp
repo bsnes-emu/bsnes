@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_CLIENT_HPP
-#define NALL_HTTP_CLIENT_HPP
+#pragma once
 
 #include <nall/http/role.hpp>
 
@@ -55,5 +54,3 @@ auto Client::close() -> void {
 }
 
 }}
-
-#endif

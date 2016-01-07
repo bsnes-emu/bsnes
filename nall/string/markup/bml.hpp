@@ -1,10 +1,9 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 //BML v1.0 parser
 //revision 0.04
 
-namespace nall {
-namespace BML {
+namespace nall { namespace BML {
 
 //metadata is used to store nesting level
 
@@ -187,7 +186,4 @@ inline auto serialize(const Markup::Node& node, uint depth = 0) -> string {
   return result;
 }
 
-}
-}
-
-#endif
+}}

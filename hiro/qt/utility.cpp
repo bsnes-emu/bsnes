@@ -15,18 +15,12 @@ static auto CreateBrush(Color color) -> QBrush {
   return color ? QColor(color.red(), color.green(), color.blue()) : QBrush();
 }
 
-static auto CreateIcon(const nall::image& icon, bool scale = false) -> QIcon {
+static auto CreateIcon(const image& icon, bool scale = false) -> QIcon {
   if(!icon) return QIcon();
   auto qtBuffer = icon;
   qtBuffer.transform();
   if(scale) qtBuffer.scale(16, 16, Interpolation::Linear);
   QImage qtImage(qtBuffer.data(), qtBuffer.width(), qtBuffer.height(), QImage::Format_ARGB32);
-  return QIcon(QPixmap::fromImage(qtImage));
-}
-
-static auto CreateImage(const Image& image, bool scale = false) -> QIcon {
-  if(!image) return QIcon();
-  QImage qtImage((const uint8_t*)image.data(), image.width(), image.height(), QImage::Format_ARGB32);
   return QIcon(QPixmap::fromImage(qtImage));
 }
 

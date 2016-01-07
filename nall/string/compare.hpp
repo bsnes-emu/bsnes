@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -56,5 +56,3 @@ auto string::iendsWith(rstring source) const -> bool {
 }
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_SERVICE_HPP
-#define NALL_WINDOWS_SERVICE_HPP
+#pragma once
 
 namespace nall {
 
@@ -12,5 +11,3 @@ struct service {
 };
 
 }
-
-#endif

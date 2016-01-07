@@ -1,7 +1,6 @@
-#ifdef NALL_MOSAIC_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace mosaic {
+namespace nall { namespace mosaic {
 
 struct bitstream {
   ~bitstream() {
@@ -46,7 +45,4 @@ struct bitstream {
   bool endian = 1;
 };
 
-}
-}
-
-#endif
+}}

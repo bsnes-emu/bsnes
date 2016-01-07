@@ -13,7 +13,7 @@ struct pTreeViewItem : pObject {
   auto setExpanded(bool expanded) -> void;
   auto setFocused() -> void;
   auto setForegroundColor(Color color) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setSelected() -> void;
   auto setText(const string& text) -> void;
 

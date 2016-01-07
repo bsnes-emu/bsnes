@@ -66,6 +66,7 @@ auto pVerticalScrollBar::construct() -> void {
 
 auto pVerticalScrollBar::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -39,5 +39,3 @@ auto string::qsplit(rstring on, long limit) const -> lstring { return lstring().
 auto string::iqsplit(rstring on, long limit) const -> lstring { return lstring()._split<1, 1>(*this, on, limit); }
 
 }
-
-#endif

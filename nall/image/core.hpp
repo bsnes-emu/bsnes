@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_CORE_HPP
-#define NALL_IMAGE_CORE_HPP
+#pragma once
 
 namespace nall {
 
@@ -166,5 +165,3 @@ auto image::allocate(unsigned width, unsigned height, unsigned stride) -> uint8_
 }
 
 }
-
-#endif

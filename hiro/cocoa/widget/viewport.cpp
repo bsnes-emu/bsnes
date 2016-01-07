@@ -48,6 +48,7 @@ auto pViewport::construct() -> void {
 
 auto pViewport::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

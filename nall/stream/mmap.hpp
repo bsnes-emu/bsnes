@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_MMAP_HPP
-#define NALL_STREAM_MMAP_HPP
+#pragma once
 
 #include <nall/filemap.hpp>
 
@@ -40,5 +39,3 @@ private:
 };
 
 }
-
-#endif

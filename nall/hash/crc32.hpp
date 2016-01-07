@@ -1,5 +1,4 @@
-#ifndef NALL_HASH_CRC32_HPP
-#define NALL_HASH_CRC32_HPP
+#pragma once
 
 #include <nall/range.hpp>
 
@@ -81,5 +80,3 @@ private:
 };
 
 }}
-
-#endif

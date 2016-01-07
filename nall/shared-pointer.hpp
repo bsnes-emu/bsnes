@@ -1,5 +1,4 @@
-#ifndef NALL_SHARED_POINTER_HPP
-#define NALL_SHARED_POINTER_HPP
+#pragma once
 
 #include <nall/function.hpp>
 #include <nall/maybe.hpp>
@@ -272,5 +271,3 @@ struct shared_pointer_new : shared_pointer<T> {
 };
 
 }
-
-#endif

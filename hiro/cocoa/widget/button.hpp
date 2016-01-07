@@ -16,7 +16,7 @@ struct pButton : pWidget {
   auto minimumSize() const -> Size override;
   auto setBordered(bool bordered) -> void;
   auto setGeometry(Geometry geometry) -> void override;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setOrientation(Orientation orientation) -> void;
   auto setText(const string& text) -> void;
 

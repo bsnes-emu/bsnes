@@ -1,5 +1,4 @@
-#ifndef NALL_POSIX_SERVICE_HPP
-#define NALL_POSIX_SERVICE_HPP
+#pragma once
 
 #include <signal.h>
 
@@ -113,5 +112,3 @@ auto service::stop() const -> bool {
 }
 
 }
-
-#endif

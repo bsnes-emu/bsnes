@@ -1,3 +1,5 @@
+#pragma once
+
 /* nall
  * author: byuu
  * license: ISC
@@ -5,9 +7,6 @@
  * nall is a header library that provides both fundamental and useful classes
  * its goals are portability, consistency, minimalism and reusability
  */
-
-#ifndef NALL_HPP
-#define NALL_HPP
 
 //include the most common nall headers with one statement
 //does not include the most obscure components with high cost and low usage
@@ -73,6 +72,4 @@
 
 #if defined(API_POSIX)
   #include <nall/serial.hpp>
-#endif
-
 #endif

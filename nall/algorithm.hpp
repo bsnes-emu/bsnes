@@ -1,5 +1,4 @@
-#ifndef NALL_ALGORITHM_HPP
-#define NALL_ALGORITHM_HPP
+#pragma once
 
 #include <nall/traits.hpp>
 
@@ -25,5 +24,3 @@ template<typename T, typename U, typename... P> auto max(const T& t, const U& u,
 }
 
 }}
-
-#endif

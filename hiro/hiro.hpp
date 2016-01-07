@@ -1,3 +1,5 @@
+#pragma once
+
 /* hiro
  * author: byuu
  * license: ISC
@@ -6,9 +8,6 @@
  * it provides a consistent, minimal API wrapper to: Windows, Cocoa, GTK+ and Qt
  * it also provides a reference wrapper for terminal applications with optional UIs
  */
-
-#ifndef HIRO_HPP
-#define HIRO_HPP
 
 #include "components.hpp"
 #include "core/core.hpp"
@@ -20,5 +19,3 @@
 #undef DeclareSharedSizable
 #undef DeclareSharedLayout
 #undef DeclareSharedWidget
-
-#endif

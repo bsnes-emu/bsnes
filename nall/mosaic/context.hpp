@@ -1,7 +1,6 @@
-#ifdef NALL_MOSAIC_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace mosaic {
+namespace nall { namespace mosaic {
 
 struct context {
   context() {
@@ -219,7 +218,4 @@ struct context {
   vector<uint> palette;
 };
 
-}
-}
-
-#endif
+}}

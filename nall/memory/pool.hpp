@@ -1,4 +1,4 @@
-#ifdef NALL_MEMORY_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 namespace memory {
@@ -60,5 +60,3 @@ struct pool_spsc {
 
 }
 }
-
-#endif

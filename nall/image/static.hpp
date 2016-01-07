@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_STATIC_HPP
-#define NALL_IMAGE_STATIC_HPP
+#pragma once
 
 namespace nall {
 
@@ -27,5 +26,3 @@ auto image::normalize(uint64_t color, unsigned sourceDepth, unsigned targetDepth
 }
 
 }
-
-#endif

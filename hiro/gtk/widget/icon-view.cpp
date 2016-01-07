@@ -65,7 +65,7 @@ auto pIconView::destruct() -> void {
 auto pIconView::append(sIconViewItem item) -> void {
   GtkTreeIter iter;
   gtk_list_store_append(store, &iter);
-  setItemImage(item->offset(), item->state.image);
+  setItemIcon(item->offset(), item->state.icon);
   setItemSelected(item->offset(), item->state.selected);
   setItemText(item->offset(), item->state.text);
 }
@@ -121,12 +121,12 @@ auto pIconView::setGeometry(Geometry geometry) -> void {
   }
 }
 
-auto pIconView::setItemImage(unsigned position, const Image& image) -> void {
+auto pIconView::setItemIcon(unsigned position, const image& icon) -> void {
   if(position >= self().itemCount()) return;
   GtkTreeIter iter;
   if(gtk_tree_model_get_iter_from_string(GTK_TREE_MODEL(store), &iter, string{position})) {
-    if(image) {
-      GdkPixbuf* pixbuf = CreatePixbuf(image);
+    if(icon) {
+      GdkPixbuf* pixbuf = CreatePixbuf(icon);
       gtk_list_store_set(store, &iter, 0, pixbuf, -1);
     } else {
       gtk_list_store_set(store, &iter, 0, nullptr, -1);

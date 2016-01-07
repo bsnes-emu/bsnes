@@ -3,13 +3,13 @@
 namespace hiro {
 
 static auto Button_paintProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam,
-  bool bordered, bool checked, bool enabled, const Font& font, const Image& image, Orientation orientation, const string& text
+  bool bordered, bool checked, bool enabled, const Font& font, const image& icon, Orientation orientation, const string& text
 ) -> LRESULT {
   if(msg == WM_PAINT) {
     PAINTSTRUCT ps;
     BeginPaint(hwnd, &ps);
     auto state = Button_GetState(hwnd);
-    Button_CustomDraw(hwnd, ps, bordered, checked, enabled, state, font, image, orientation, text);
+    Button_CustomDraw(hwnd, ps, bordered, checked, enabled, state, font, icon, orientation, text);
     EndPaint(hwnd, &ps);
   }
   return DefWindowProc(hwnd, msg, wparam, lparam);
@@ -27,7 +27,7 @@ static auto CALLBACK Button_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARA
         if(msg == WM_ERASEBKGND) return DefWindowProc(hwnd, msg, wparam, lparam);
         if(msg == WM_PAINT) return Button_paintProc(hwnd, msg, wparam, lparam,
           button->state.bordered, false, button->enabled(true), button->font(true),
-          button->state.image, button->state.orientation, button->state.text
+          button->state.icon, button->state.orientation, button->state.text
         );
         return self->windowProc(hwnd, msg, wparam, lparam);
       }
@@ -53,16 +53,16 @@ auto pButton::destruct() -> void {
 }
 
 auto pButton::minimumSize() const -> Size {
-  Size image = state().image.size();
+  Size icon = {(int)state().icon.width(), (int)state().icon.height()};
   Size text = state().text ? pFont::size(self().font(true), state().text) : Size{};
   Size size;
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(image.width() + (image && text ? 5 : 0) + text.width());
-    size.setHeight(max(image.height(), text.height()));
+    size.setWidth(icon.width() + (icon && text ? 5 : 0) + text.width());
+    size.setHeight(max(icon.height(), text.height()));
   }
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(image.width(), text.width()));
-    size.setHeight(image.height() + (image && text ? 5 : 0) + text.height());
+    size.setWidth(max(icon.width(), text.width()));
+    size.setHeight(icon.height() + (icon && text ? 5 : 0) + text.height());
   }
   size.setHeight(max(size.height(), pFont::size(self().font(true), " ").height()));
   return {size.width() + (state().bordered && text ? 20 : 10), size.height() + 10};
@@ -82,7 +82,7 @@ auto pButton::setFont(const Font& font) -> void {
   _setState();
 }
 
-auto pButton::setImage(const Image& image) -> void {
+auto pButton::setIcon(const image& icon) -> void {
   _setState();
 }
 
@@ -108,11 +108,11 @@ auto pButton::_setState() -> void {
 }
 
 //this function is designed to be used with Button, CheckButton, and RadioButton
-auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, bool enabled, unsigned state, const Font& font, const Image& image, Orientation orientation, const string& text) -> void {
+auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, bool enabled, unsigned state, const Font& font, const image& icon, Orientation orientation, const string& text) -> void {
   RECT rc;
   GetClientRect(hwnd, &rc);
-  Geometry geometry{rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top}, imageGeometry, textGeometry;
-  if(image) imageGeometry.setSize(image.size());
+  Geometry geometry{rc.left, rc.top, rc.right - rc.left, rc.bottom - rc.top}, iconGeometry, textGeometry;
+  if(icon) iconGeometry.setSize({(int)icon.width(), (int)icon.height()});
   if(text) textGeometry.setSize(pFont::size(font, text));
 
   Position position;
@@ -120,15 +120,15 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, 
 
   switch(orientation) {
   case Orientation::Horizontal:
-    size = {imageGeometry.width() + (image && text ? 5 : 0) + textGeometry.width(), max(imageGeometry.height(), textGeometry.height())};
+    size = {iconGeometry.width() + (icon && text ? 5 : 0) + textGeometry.width(), max(iconGeometry.height(), textGeometry.height())};
     position = {(geometry.width() - size.width()) / 2, (geometry.height() - size.height()) / 2};
-    imageGeometry.setPosition({position.x(), position.y() + (size.height() - imageGeometry.height()) / 2});
+    iconGeometry.setPosition({position.x(), position.y() + (size.height() - iconGeometry.height()) / 2});
     textGeometry.setPosition({position.x() + size.width() - textGeometry.width(), position.y() + (size.height() - textGeometry.height()) / 2});
     break;
   case Orientation::Vertical:
-    size = {max(imageGeometry.width(), textGeometry.width()), imageGeometry.height() + (image && text ? 5 : 0) + textGeometry.height()};
+    size = {max(iconGeometry.width(), textGeometry.width()), iconGeometry.height() + (icon && text ? 5 : 0) + textGeometry.height()};
     position = {(geometry.width() - size.width()) / 2, (geometry.height() - size.height()) / 2};
-    imageGeometry.setPosition({position.x() + (size.width() - imageGeometry.width()) / 2, position.y()});
+    iconGeometry.setPosition({position.x() + (size.width() - iconGeometry.width()) / 2, position.y()});
     textGeometry.setPosition({position.x() + (size.width() - textGeometry.width()) / 2, position.y() + size.height() - textGeometry.height()});
     break;
   }
@@ -154,14 +154,14 @@ auto Button_CustomDraw(HWND hwnd, PAINTSTRUCT& ps, bool bordered, bool checked, 
     if(!(state & BST_PUSHED) && !(state & BST_HOT)) DrawFocusRect(ps.hdc, &rcFocus);
   }
 
-  if(image) {
+  if(icon) {
     HDC hdcSource = CreateCompatibleDC(ps.hdc);
-    auto bitmap = CreateBitmap(image);
+    auto bitmap = CreateBitmap(icon);
     SelectBitmap(hdcSource, bitmap);
     BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(IsWindowEnabled(hwnd) ? 255 : 128), AC_SRC_ALPHA};
     AlphaBlend(
-      ps.hdc, imageGeometry.x(), imageGeometry.y(), image.width(), image.height(),
-      hdcSource, 0, 0, image.width(), image.height(), blend
+      ps.hdc, iconGeometry.x(), iconGeometry.y(), icon.width(), icon.height(),
+      hdcSource, 0, 0, icon.width(), icon.height(), blend
     );
     DeleteObject(bitmap);
     DeleteDC(hdcSource);

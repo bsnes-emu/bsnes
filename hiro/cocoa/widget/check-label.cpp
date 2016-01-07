@@ -34,6 +34,7 @@ auto pCheckLabel::construct() -> void {
 
 auto pCheckLabel::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

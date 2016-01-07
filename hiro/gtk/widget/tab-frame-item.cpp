@@ -22,9 +22,9 @@ auto pTabFrameItem::setClosable(bool closable) -> void {
   }
 }
 
-auto pTabFrameItem::setImage(const Image& image) -> void {
+auto pTabFrameItem::setIcon(const image& icon) -> void {
   if(auto parent = _parent()) {
-    parent->setItemImage(self().offset(), image);
+    parent->setItemIcon(self().offset(), icon);
   }
 }
 

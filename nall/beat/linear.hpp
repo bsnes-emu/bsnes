@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_LINEAR_HPP
-#define NALL_BEAT_LINEAR_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
@@ -147,5 +146,3 @@ auto bpslinear::create(const string& filename, const string& metadata) -> bool {
 }
 
 }
-
-#endif

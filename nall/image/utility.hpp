@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_UTILITY_HPP
-#define NALL_IMAGE_UTILITY_HPP
+#pragma once
 
 namespace nall {
 
@@ -117,5 +116,3 @@ auto image::transform(bool outputEndian, unsigned outputDepth, uint64_t outputAl
 }
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_ARCHIVE_HPP
-#define NALL_BEAT_ARCHIVE_HPP
+#pragma once
 
 #include <nall/beat/file.hpp>
 
@@ -130,5 +129,3 @@ auto Archive::scan(lstring& result, const string& basename, const string& pathna
 }
 
 }}
-
-#endif

@@ -36,6 +36,7 @@ auto pStatusBar::setVisible(bool visible) -> void {
   @autoreleasepool {
     if(auto parent = _parent()) {
       [[parent->cocoaWindow statusBar] setHidden:!visible];
+      parent->setGeometry(parent->state().geometry);
     }
   }
 }

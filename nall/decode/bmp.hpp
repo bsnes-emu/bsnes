@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_BMP_HPP
-#define NALL_DECODE_BMP_HPP
+#pragma once
 
 namespace nall { namespace Decode {
 
@@ -75,5 +74,3 @@ private:
 };
 
 }}
-
-#endif

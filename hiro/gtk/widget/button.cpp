@@ -9,7 +9,7 @@ auto pButton::construct() -> void {
   gtkButton = GTK_BUTTON(gtkWidget);
 
   setBordered(state().bordered);
-  setImage(state().image);
+  setIcon(state().icon);
   setOrientation(state().orientation);
   setText(state().text);
 
@@ -26,13 +26,13 @@ auto pButton::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().image.width());
-    size.setHeight(max(size.height(), state().image.height()));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().image.width()));
-    size.setHeight(size.height() + state().image.height());
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
   return {size.width() + (state().text ? 24 : 12), size.height() + 12};
@@ -42,9 +42,9 @@ auto pButton::setBordered(bool bordered) -> void {
   gtk_button_set_relief(gtkButton, bordered ? GTK_RELIEF_NORMAL : GTK_RELIEF_NONE);
 }
 
-auto pButton::setImage(const Image& image) -> void {
-  if(image) {
-    auto gtkImage = CreateImage(image);
+auto pButton::setIcon(const image& icon) -> void {
+  if(icon) {
+    auto gtkImage = CreateImage(icon);
     gtk_button_set_image(gtkButton, (GtkWidget*)gtkImage);
   } else {
     gtk_button_set_image(gtkButton, nullptr);

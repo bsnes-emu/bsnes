@@ -1,5 +1,4 @@
-#ifndef NALL_HASHSET_HPP
-#define NALL_HASHSET_HPP
+#pragma once
 
 //hashset
 //
@@ -132,5 +131,3 @@ protected:
 };
 
 }
-
-#endif

@@ -118,9 +118,9 @@ auto BrowserDialogWindow::run() -> lstring {
 
   layout.setMargin(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
-  pathRefresh.setBordered(false).setImage(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
-  pathHome.setBordered(false).setImage(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
-  pathUp.setBordered(false).setImage(Icon::Go::Up).onActivate([&] { setPath(dirname(state.path)); });
+  pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
+  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
+  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(dirname(state.path)); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
@@ -175,7 +175,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     if(folderMode && isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setImage(Icon::Emblem::Folder))
+      .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
     );
   }
 
@@ -185,7 +185,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     if(!isMatch(content)) continue;
 
     view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setImage(folderMode ? Icon::Action::Open : Icon::Emblem::File))
+      .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
     );
   }
 

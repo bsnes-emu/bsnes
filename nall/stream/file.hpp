@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_FILE_HPP
-#define NALL_STREAM_FILE_HPP
+#pragma once
 
 #include <nall/file.hpp>
 
@@ -38,5 +37,3 @@ private:
 };
 
 }
-
-#endif

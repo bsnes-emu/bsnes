@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct ResampleHermite : Resampler {
   ResampleHermite(DSP& dsp) : Resampler(dsp) {}
@@ -60,5 +60,3 @@ auto ResampleHermite::sample() -> void {
   dsp.buffer.rdoffset++;
   fraction -= 1.0;
 }
-
-#endif

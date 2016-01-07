@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_ROLE_HPP
-#define NALL_HTTP_ROLE_HPP
+#pragma once
 
 //Role: base class for Client and Server
 //provides shared functionality
@@ -157,5 +156,3 @@ auto Role::upload(signed fd, const Message& message) -> bool {
 }
 
 }}
-
-#endif

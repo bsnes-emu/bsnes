@@ -22,13 +22,13 @@ auto pRadioButton::minimumSize() const -> Size {
   auto size = pFont::size(qtWidget->font(), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().image.width());
-    size.setHeight(max(state().image.height(), size.height()));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(state().image.width(), size.width()));
-    size.setHeight(size.height() + state().image.height());
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
   return {size.width() + 20, size.height() + 12};
@@ -59,7 +59,7 @@ auto pRadioButton::setGroup(sGroup group) -> void {
   }
 }
 
-auto pRadioButton::setImage(const Image& image) -> void {
+auto pRadioButton::setIcon(const image& icon) -> void {
   _setState();
 }
 
@@ -85,8 +85,8 @@ auto pRadioButton::_setState() -> void {
     }
     group->self()->unlock();
   }
-  qtRadioButton->setIconSize(QSize(state().image.width(), state().image.height()));
-  qtRadioButton->setIcon(CreateImage(state().image));
+  qtRadioButton->setIconSize(QSize(state().icon.width(), state().icon.height()));
+  qtRadioButton->setIcon(CreateIcon(state().icon));
   qtRadioButton->setStyleSheet("text-align: top;");
   switch(state().orientation) {
   case Orientation::Horizontal: qtRadioButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon); break;

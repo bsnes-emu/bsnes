@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -88,5 +88,3 @@ auto tokenize(lstring& list, const char* s, const char* p) -> bool {
 }
 
 }
-
-#endif

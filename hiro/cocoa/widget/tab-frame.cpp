@@ -33,7 +33,7 @@
   int selection = [cocoaTabFrame indexOfTabViewItem:self];
   if(selection >= 0) {
     if(auto item = tabFrame->item(selection)) {
-      if(item->state.image) {
+      if(item->state.icon) {
         uint iconSize = hiro::pFont::size(tabFrame->font(true), " ").height();
         sizeOfLabel.width += iconSize + 2;
       }
@@ -46,9 +46,9 @@
   int selection = [cocoaTabFrame indexOfTabViewItem:self];
   if(selection >= 0) {
     if(auto item = tabFrame->item(selection)) {
-      if(item->state.image) {
+      if(item->state.icon) {
         uint iconSize = hiro::pFont::size(tabFrame->font(true), " ").height();
-        NSImage* image = NSMakeImage(item->state.image);
+        NSImage* image = NSMakeImage(item->state.icon);
 
         [[NSGraphicsContext currentContext] saveGraphicsState];
         NSRect targetRect = NSMakeRect(tabRect.origin.x, tabRect.origin.y + 2, iconSize, iconSize);
@@ -78,6 +78,7 @@ auto pTabFrame::construct() -> void {
 
 auto pTabFrame::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

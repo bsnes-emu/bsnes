@@ -177,8 +177,8 @@
         frame.size.width -= frame.size.height + 2;
       }
 
-      if(listViewCell->state.image) {
-        NSImage* image = NSMakeImage(listViewCell->state.image, frame.size.height, frame.size.height);
+      if(listViewCell->state.icon) {
+        NSImage* image = NSMakeImage(listViewCell->state.icon, frame.size.height, frame.size.height);
         [[NSGraphicsContext currentContext] saveGraphicsState];
         NSRect targetRect = NSMakeRect(frame.origin.x, frame.origin.y, frame.size.height, frame.size.height);
         NSRect sourceRect = NSMakeRect(0, 0, [image size].width, [image size].height);
@@ -269,6 +269,7 @@ auto pListView::construct() -> void {
 
 auto pListView::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }
@@ -361,8 +362,8 @@ auto pListView::_cellWidth(uint row, uint column) -> uint {
       if(pListViewCell->state.checkable) {
         width += 24;
       }
-      if(auto& image = pListViewCell->state.image) {
-        width += image.width() + 2;
+      if(auto& icon = pListViewCell->state.icon) {
+        width += icon.width() + 2;
       }
       if(auto& text = pListViewCell->state.text) {
         width += pFont::size(pListViewCell->font(true), text).width();
@@ -376,8 +377,8 @@ auto pListView::_columnWidth(uint column) -> uint {
   uint width = 8;
   if(auto& header = state().header) {
     if(auto pListViewColumn = header->column(column)) {
-      if(auto& image = pListViewColumn->state.image) {
-        width += image.width() + 2;
+      if(auto& icon = pListViewColumn->state.icon) {
+        width += icon.width() + 2;
       }
       if(auto& text = pListViewColumn->state.text) {
         width += pFont::size(pListViewColumn->font(true), text).width();

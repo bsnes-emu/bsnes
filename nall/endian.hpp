@@ -1,5 +1,4 @@
-#ifndef NALL_ENDIAN_HPP
-#define NALL_ENDIAN_HPP
+#pragma once
 
 #include <nall/intrinsics.hpp>
 
@@ -37,6 +36,4 @@
   #define order_msb8(a,b,c,d,e,f,g,h) a,b,c,d,e,f,g,h
 #else
   #error "Unknown endian. Please specify in nall/intrinsics.hpp"
-#endif
-
 #endif

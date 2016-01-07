@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_STREAM_HPP
-#define NALL_STREAM_STREAM_HPP
+#pragma once
 
 namespace nall {
 
@@ -97,5 +96,3 @@ struct stream {
 };
 
 }
-
-#endif

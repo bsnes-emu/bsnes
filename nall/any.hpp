@@ -1,5 +1,4 @@
-#ifndef NALL_ANY_HPP
-#define NALL_ANY_HPP
+#pragma once
 
 #include <typeinfo>
 #include <nall/traits.hpp>
@@ -83,5 +82,3 @@ private:
 };
 
 }
-
-#endif

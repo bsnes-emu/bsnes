@@ -1,5 +1,5 @@
 HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Device::Keyboard);
+  setIcon(Icon::Device::Keyboard);
   setText("Hotkeys");
 
   layout.setMargin(5);

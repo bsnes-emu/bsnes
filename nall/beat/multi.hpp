@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_MULTI_HPP
-#define NALL_BEAT_MULTI_HPP
+#pragma once
 
 #include <nall/beat/patch.hpp>
 #include <nall/beat/linear.hpp>
@@ -238,5 +237,3 @@ protected:
 };
 
 }
-
-#endif

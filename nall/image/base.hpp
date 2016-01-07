@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_BASE_HPP
-#define NALL_IMAGE_BASE_HPP
+#pragma once
 
 namespace nall {
 
@@ -149,5 +148,3 @@ private:
 };
 
 }
-
-#endif

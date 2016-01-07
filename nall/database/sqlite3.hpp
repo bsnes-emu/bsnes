@@ -1,5 +1,4 @@
-#ifndef NALL_DATABASE_SQLITE3_HPP
-#define NALL_DATABASE_SQLITE3_HPP
+#pragma once
 
 /* SQLite3 C++ RAII wrapper for nall
  *
@@ -202,5 +201,3 @@ protected:
 };
 
 }}
-
-#endif

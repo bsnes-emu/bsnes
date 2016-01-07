@@ -13,7 +13,7 @@ struct pIconView : pWidget {
   auto setFlow(Orientation flow) -> void;
   auto setForegroundColor(Color color) -> void;
   auto setGeometry(Geometry geometry) -> void;
-  auto setItemImage(unsigned position, const Image& image) -> void;
+  auto setItemIcon(unsigned position, const image& icon) -> void;
   auto setItemSelected(unsigned position, bool selected) -> void;
   auto setItemSelected(const vector<signed>& selections) -> void;
   auto setItemSelectedAll() -> void;

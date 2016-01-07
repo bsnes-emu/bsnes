@@ -8,7 +8,7 @@ auto pButton::construct() -> void {
   qtButton->connect(qtButton, SIGNAL(released()), SLOT(onActivate()));
 
   setBordered(state().bordered);
-  setImage(state().image);
+  setIcon(state().icon);
   setOrientation(state().orientation);
   setText(state().text);
 
@@ -24,13 +24,13 @@ auto pButton::minimumSize() const -> Size {
   auto size = pFont::size(qtWidget->font(), state().text ? state().text : " ");
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().image.width());
-    size.setHeight(max(state().image.height(), size.height()));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(state().image.width(), size.width()));
-    size.setHeight(size.height() + state().image.height());
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
   return {size.width() + (state().text ? 20 : 12), size.height() + 12};
@@ -40,9 +40,9 @@ auto pButton::setBordered(bool bordered) -> void {
   qtButton->setAutoRaise(!bordered);
 }
 
-auto pButton::setImage(const Image& image) -> void {
-  qtButton->setIconSize(QSize(image.width(), image.height()));
-  qtButton->setIcon(CreateImage(image));
+auto pButton::setIcon(const image& icon) -> void {
+  qtButton->setIconSize(QSize(icon.width(), icon.height()));
+  qtButton->setIcon(CreateIcon(icon));
   qtButton->setStyleSheet("text-align: top;");
 }
 

@@ -218,11 +218,11 @@ auto pListView::onCustomDraw(LPARAM lparam) -> LRESULT {
           rc.left += 2;
         }
 
-        if(auto& image = cell->state.image) {
-          auto bitmap = CreateBitmap(image);
+        if(auto& icon = cell->state.icon) {
+          auto bitmap = CreateBitmap(icon);
           SelectBitmap(hdcSource, bitmap);
           BLENDFUNCTION blend{AC_SRC_OVER, 0, (BYTE)(selected ? 128 : 255), AC_SRC_ALPHA};
-          AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, image.width(), image.height(), blend);
+          AlphaBlend(hdc, rc.left, rc.top, iconSize, iconSize, hdcSource, 0, 0, icon.width(), icon.height(), blend);
           DeleteObject(bitmap);
           rc.left += iconSize + 2;
         }
@@ -322,7 +322,7 @@ auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
       if(cell->state.checkable) {
         width += 16 + 2;
       }
-      if(auto& image = cell->state.image) {
+      if(auto& icon = cell->state.icon) {
         width += 16 + 2;
       }
       if(auto& text = cell->state.text) {
@@ -337,7 +337,7 @@ auto pListView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 12;
   if(auto header = state().header) {
     if(auto column = header->column(_column)) {
-      if(auto& image = column->state.image) {
+      if(auto& icon = column->state.icon) {
         width += 16 + 12;  //yes; icon spacing in column headers is excessive
       }
       if(auto& text = column->state.text) {
@@ -384,10 +384,10 @@ auto pListView::_setIcons() -> void {
 
   if(auto& header = state().header) {
     for(auto column : range(header->columnCount())) {
-      nall::image icon;
-      if(auto& image = header->state.columns[column]->state.image) {
-        icon.allocate(image.width(), image.height());
-        memory::copy(icon.data(), image.data(), icon.size());
+      image icon;
+      if(auto& sourceIcon = header->state.columns[column]->state.icon) {
+        icon.allocate(sourceIcon.width(), sourceIcon.height());
+        memory::copy(icon.data(), sourceIcon.data(), icon.size());
         icon.scale(16, 16);
       } else {
         icon.allocate(16, 16);
@@ -400,7 +400,7 @@ auto pListView::_setIcons() -> void {
   }
 
   //empty icon used for ListViewItems (drawn manually via onCustomDraw)
-  nall::image icon;
+  image icon;
   icon.allocate(16, 16);
   icon.fill(0x00ffffff);
   auto bitmap = CreateBitmap(icon);

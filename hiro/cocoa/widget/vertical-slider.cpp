@@ -34,6 +34,7 @@ auto pVerticalSlider::construct() -> void {
 
 auto pVerticalSlider::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

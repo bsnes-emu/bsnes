@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_SERVER_HPP
-#define NALL_HTTP_SERVER_HPP
+#pragma once
 
 #include <nall/service.hpp>
 #include <nall/http/role.hpp>
@@ -225,5 +224,3 @@ auto Server::close() -> void {
 }
 
 }}
-
-#endif

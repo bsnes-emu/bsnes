@@ -23,7 +23,7 @@ auto pListViewCell::setChecked(bool checked) -> void {
 auto pListViewCell::setForegroundColor(Color color) -> void {
 }
 
-auto pListViewCell::setImage(const Image& image) -> void {
+auto pListViewCell::setIcon(const image& icon) -> void {
 }
 
 auto pListViewCell::setText(const string& text) -> void {

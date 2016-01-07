@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_DETOUR_HPP
-#define NALL_WINDOWS_DETOUR_HPP
+#pragma once
 
 #include <nall/foreach.hpp>
 #include <nall/platform.hpp>
@@ -188,5 +187,3 @@ auto detour::mirror(uint8* target, const uint8* source) -> uint {
 #undef RelNear
 
 }
-
-#endif

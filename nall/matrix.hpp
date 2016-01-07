@@ -1,5 +1,4 @@
-#ifndef NALL_MATRIX_HPP
-#define NALL_MATRIX_HPP
+#pragma once
 
 namespace nall {
 
@@ -29,5 +28,3 @@ template<typename T> inline auto Multiply(const T* xdata, unsigned xrows, unsign
 }
 
 }
-
-#endif

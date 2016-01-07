@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 /* Document Markup Language (DML) v1.0 parser
  * revision 0.03
@@ -265,5 +265,3 @@ auto DML::markup(const string& text) -> string {
 }
 
 }}
-
-#endif

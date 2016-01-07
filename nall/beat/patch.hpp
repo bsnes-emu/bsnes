@@ -1,5 +1,4 @@
-#ifndef NALL_BEAT_PATCH_HPP
-#define NALL_BEAT_PATCH_HPP
+#pragma once
 
 #include <nall/file.hpp>
 #include <nall/filemap.hpp>
@@ -213,5 +212,3 @@ auto bpspatch::apply() -> result {
 }
 
 }
-
-#endif

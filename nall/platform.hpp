@@ -1,5 +1,4 @@
-#ifndef NALL_PLATFORM_HPP
-#define NALL_PLATFORM_HPP
+#pragma once
 
 #include <nall/intrinsics.hpp>
 
@@ -131,6 +130,4 @@ namespace Math {
   //auto function() override -> return_type;  //this is the syntax that GCC 4.7.x requires
   //in order to compile code correctly with both compilers, we disable the override keyword for GCC
   #define override
-#endif
-
 #endif

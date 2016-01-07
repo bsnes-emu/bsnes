@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Markup {
+namespace nall { namespace Markup {
 
 struct Node;
 struct ManagedNode;
@@ -131,8 +130,7 @@ protected:
   SharedNode shared;
 };
 
-}
-}
+}}
 
 namespace nall {
 
@@ -141,5 +139,3 @@ inline range_t range(const Markup::Node& node) {
 }
 
 }
-
-#endif

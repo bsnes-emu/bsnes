@@ -1,5 +1,4 @@
-#ifndef NALL_INTERPOLATION_HPP
-#define NALL_INTERPOLATION_HPP
+#pragma once
 
 namespace nall {
 
@@ -55,5 +54,3 @@ struct Interpolation {
 };
 
 }
-
-#endif

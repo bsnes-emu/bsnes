@@ -1,5 +1,4 @@
-#ifndef NALL_WINDOWS_REGISTRY_HPP
-#define NALL_WINDOWS_REGISTRY_HPP
+#pragma once
 
 #include <nall/platform.hpp>
 #include <nall/string.hpp>
@@ -117,5 +116,3 @@ private:
 };
 
 }
-
-#endif

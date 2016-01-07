@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 struct ResampleCubic : Resampler {
   ResampleCubic(DSP& dsp) : Resampler(dsp) {}
@@ -48,5 +48,3 @@ auto ResampleCubic::sample() -> void {
   dsp.buffer.rdoffset++;
   fraction -= 1.0;
 }
-
-#endif

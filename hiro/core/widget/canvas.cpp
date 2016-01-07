@@ -10,8 +10,8 @@ auto mCanvas::color() const -> Color {
   return state.color;
 }
 
-auto mCanvas::data() -> uint32_t* {
-  return state.image.data();
+auto mCanvas::data() -> uint32* {
+  return (uint32*)state.icon.data();
 }
 
 auto mCanvas::droppable() const -> bool {
@@ -42,8 +42,8 @@ auto mCanvas::gradient() const -> Gradient {
   return state.gradient;
 }
 
-auto mCanvas::image() const -> Image {
-  return state.image;
+auto mCanvas::icon() const -> image {
+  return state.icon;
 }
 
 auto mCanvas::onDrop(const function<void (lstring)>& callback) -> type& {
@@ -89,21 +89,20 @@ auto mCanvas::setGradient(Gradient gradient) -> type& {
   return *this;
 }
 
-auto mCanvas::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mCanvas::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 
 auto mCanvas::setSize(Size size) -> type& {
-  Image image;
-  image.setSize(size);
-  memory::fill(image.data(), size.width() * size.height() * sizeof(uint32_t), 0x00);
-  return setImage(image);
+  image icon;
+  icon.allocate(size.width(), size.height());
+  return setIcon(icon);
 }
 
 auto mCanvas::size() const -> Size {
-  return state.image.size();
+  return {(int)state.icon.width(), (int)state.icon.height()};
 }
 
 auto mCanvas::update() -> type& {

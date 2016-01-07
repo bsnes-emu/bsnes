@@ -8,7 +8,7 @@ struct pTabFrameItem : pObject {
   auto append(sLayout layout) -> void;
   auto remove(sLayout layout) -> void;
   auto setClosable(bool closable) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setGeometry(Geometry geometry) -> void;
   auto setMovable(bool movable) -> void;
   auto setSelected() -> void;

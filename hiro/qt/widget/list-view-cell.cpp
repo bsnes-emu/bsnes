@@ -32,7 +32,7 @@ auto pListViewCell::setForegroundColor(Color color) -> void {
   _setState();
 }
 
-auto pListViewCell::setImage(const Image& image) -> void {
+auto pListViewCell::setIcon(const image& icon) -> void {
   _setState();
 }
 
@@ -60,7 +60,7 @@ auto pListViewCell::_setState() -> void {
       }
       parent->qtItem->setFont(self().offset(), pFont::create(self().font(true)));
       parent->qtItem->setForeground(self().offset(), CreateBrush(self().foregroundColor(true)));
-      parent->qtItem->setIcon(self().offset(), CreateImage(state().image));
+      parent->qtItem->setIcon(self().offset(), CreateIcon(state().icon));
       parent->qtItem->setText(self().offset(), QString::fromUtf8(state().text));
       parent->qtItem->setTextAlignment(self().offset(), CalculateAlignment(self().alignment(true)));
       grandparent->unlock();

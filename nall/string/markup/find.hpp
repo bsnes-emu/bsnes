@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Markup {
+namespace nall { namespace Markup {
 
 auto ManagedNode::_evaluate(string query) const -> bool {
   if(!query) return true;
@@ -129,7 +128,4 @@ auto ManagedNode::_create(const string& path) -> Node {
   return _children.last();
 }
 
-}
-}
-
-#endif
+}}

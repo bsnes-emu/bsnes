@@ -24,7 +24,7 @@ auto pTabFrameItem::setClosable(bool closable) -> void {
   //unsupported
 }
 
-auto pTabFrameItem::setImage(const Image& image) -> void {
+auto pTabFrameItem::setIcon(const image& icon) -> void {
   if(auto parent = _parent()) {
     parent->_buildImageList();
   }

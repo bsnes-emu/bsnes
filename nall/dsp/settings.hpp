@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 auto DSP::setChannels(uint channels) -> void {
   channels = max(1u, channels);
@@ -44,5 +44,3 @@ auto DSP::setResamplerFrequency(double frequency) -> void {
   resampler->frequency = frequency;
   resampler->setFrequency();
 }
-
-#endif

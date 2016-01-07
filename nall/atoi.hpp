@@ -1,5 +1,4 @@
-#ifndef NALL_ATOI_HPP
-#define NALL_ATOI_HPP
+#pragma once
 
 #include <nall/stdint.hpp>
 
@@ -86,5 +85,3 @@ inline auto real(const char* s) -> double {
 }
 
 }
-
-#endif

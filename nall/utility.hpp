@@ -1,5 +1,4 @@
-#ifndef NALL_UTILITY_HPP
-#define NALL_UTILITY_HPP
+#pragma once
 
 #include <utility>
 
@@ -17,5 +16,3 @@ template<typename T> inline auto allocate(unsigned size, const T& value) -> T* {
 }
 
 }
-
-#endif

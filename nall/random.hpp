@@ -1,5 +1,4 @@
-#ifndef NALL_RANDOM_HPP
-#define NALL_RANDOM_HPP
+#pragma once
 
 #include <nall/serializer.hpp>
 #include <nall/stdint.hpp>
@@ -39,5 +38,3 @@ inline auto random() -> uint64_t {
 }
 
 }
-
-#endif

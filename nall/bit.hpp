@@ -1,5 +1,4 @@
-#ifndef NALL_BIT_HPP
-#define NALL_BIT_HPP
+#pragma once
 
 #include <nall/stdint.hpp>
 
@@ -84,5 +83,3 @@ namespace bit {
 }
 
 }
-
-#endif

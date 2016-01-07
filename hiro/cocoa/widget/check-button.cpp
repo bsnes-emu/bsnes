@@ -30,7 +30,7 @@ auto pCheckButton::construct() -> void {
 
     setBordered(state().bordered);
     setChecked(state().checked);
-    setImage(state().image);
+    setIcon(state().icon);
     setOrientation(state().orientation);
     setText(state().text);
   }
@@ -38,6 +38,7 @@ auto pCheckButton::construct() -> void {
 
 auto pCheckButton::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }
@@ -46,16 +47,16 @@ auto pCheckButton::minimumSize() const -> Size {
   Size size = pFont::size(self().font(true), state().text);
 
   if(state().orientation == Orientation::Horizontal) {
-    size.setWidth(size.width() + state().image.width());
-    size.setHeight(max(size.height(), state().image.height()));
+    size.setWidth(size.width() + state().icon.width());
+    size.setHeight(max(size.height(), state().icon.height()));
   }
 
   if(state().orientation == Orientation::Vertical) {
-    size.setWidth(max(size.width(), state().image.width()));
-    size.setHeight(size.height() + state().image.height());
+    size.setWidth(max(size.width(), state().icon.width()));
+    size.setHeight(size.height() + state().icon.height());
   }
 
-  return {size.width() + 20, size.height() + 4};
+  return {size.width() + (state().text ? 20 : 8), size.height() + 8};
 }
 
 auto pCheckButton::setBordered(bool bordered) -> void {
@@ -74,14 +75,9 @@ auto pCheckButton::setGeometry(Geometry geometry) -> void {
   });
 }
 
-auto pCheckButton::setImage(const Image& image) -> void {
+auto pCheckButton::setIcon(const image& icon) -> void {
   @autoreleasepool {
-    if(!image) {
-      [cocoaView setImage:nil];
-      return;
-    }
-
-    [cocoaView setImage:NSMakeImage(image)];
+    [cocoaView setImage:NSMakeImage(icon)];
   }
 }
 

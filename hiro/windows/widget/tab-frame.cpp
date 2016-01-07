@@ -39,7 +39,7 @@ auto pTabFrame::append(sTabFrameItem item) -> void {
   TabCtrl_InsertItem(hwnd, item->offset(), &tcItem);
   if(auto self = item->self()) {
     self->setClosable(item->state.closable);
-    self->setImage(item->state.image);
+    self->setIcon(item->state.icon);
     self->setMovable(item->state.movable);
     self->setText(item->state.text);
     if(item->selected()) self->setSelected();
@@ -94,13 +94,13 @@ auto pTabFrame::_buildImageList() -> void {
   if(imageList) { ImageList_Destroy(imageList); imageList = nullptr; }
   imageList = ImageList_Create(size, size, ILC_COLOR32, 1, 0);
   for(auto& item : state().items) {
-    ImageList_Append(imageList, item->state.image, size);
+    ImageList_Append(imageList, item->state.icon, size);
   }
   TabCtrl_SetImageList(hwnd, imageList);
   for(auto offset : range(state().items)) {
     TCITEM tcItem;
     tcItem.mask = TCIF_IMAGE;
-    tcItem.iImage = state().items[offset]->state.image ? offset : -1;
+    tcItem.iImage = state().items[offset]->state.icon ? offset : -1;
     TabCtrl_SetItem(hwnd, offset, &tcItem);
   }
 }

@@ -17,7 +17,6 @@
 #define Hiro_Size
 #define Hiro_Geometry
 #define Hiro_Font
-#define Hiro_Image
 
 #define Hiro_Application
 #define Hiro_Desktop

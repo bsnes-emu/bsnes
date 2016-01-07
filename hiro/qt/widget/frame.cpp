@@ -22,6 +22,12 @@ auto pFrame::destruct() -> void {
   qtWidget = qtFrame = nullptr;
 }
 
+auto pFrame::append(sLayout layout) -> void {
+}
+
+auto pFrame::remove(sLayout layout) -> void {
+}
+
 auto pFrame::setEnabled(bool enabled) -> void {
   if(auto layout = state().layout) layout->setEnabled(layout->enabled(true));
   pWidget::setEnabled(enabled);

@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Eval {
+namespace nall { namespace Eval {
 
 inline auto whitespace(char n) -> bool {
   return n == ' ' || n == '\t' || n == '\r' || n == '\n';
@@ -162,7 +161,4 @@ inline auto parse(const string& expression) -> Node* {
   return result;
 }
 
-}
-}
-
-#endif
+}}

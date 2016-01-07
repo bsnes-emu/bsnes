@@ -1,5 +1,5 @@
 StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Application::FileManager);
+  setIcon(Icon::Application::FileManager);
   setText("State Manager");
 
   layout.setMargin(5);

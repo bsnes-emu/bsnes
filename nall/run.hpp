@@ -1,5 +1,4 @@
-#ifndef NALL_RUN_HPP
-#define NALL_RUN_HPP
+#pragma once
 
 //auto execute(const string& name, const string& args...) -> string;
 //[[synchronous]]
@@ -159,5 +158,3 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
 #endif
 
 }
-
-#endif

@@ -1,4 +1,4 @@
-#ifdef NALL_DSP_INTERNAL_HPP
+#pragma once
 
 #include "lib/sinc.hpp"
 
@@ -60,5 +60,3 @@ auto ResampleSinc::remakeSinc() -> void {
     sincResampler[c] = new SincResample(dsp.settings.frequency, frequency, 0.85, SincResample::QUALITY_HIGH);
   }
 }
-
-#endif

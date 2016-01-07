@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 //convert any (supported) type to a const char* without constructing a new nall::string
 //this is used inside string{...} to build nall::string values
@@ -223,5 +223,3 @@ template<typename T> auto make_string(T value) -> stringify<T> {
 }
 
 }
-
-#endif

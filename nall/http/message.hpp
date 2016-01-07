@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_MESSAGE_HPP
-#define NALL_HTTP_MESSAGE_HPP
+#pragma once
 
 //httpMessage: base class for httpRequest and httpResponse
 //provides shared functionality
@@ -98,5 +97,3 @@ struct Message {
 };
 
 }}
-
-#endif

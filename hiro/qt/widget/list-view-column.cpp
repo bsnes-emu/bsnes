@@ -40,7 +40,7 @@ auto pListViewColumn::setHorizontalAlignment(double alignment) -> void {
   _setState();
 }
 
-auto pListViewColumn::setImage(const Image& image) -> void {
+auto pListViewColumn::setIcon(const image& icon) -> void {
   //unsupported
 }
 

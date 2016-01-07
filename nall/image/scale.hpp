@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_SCALE_HPP
-#define NALL_IMAGE_SCALE_HPP
+#pragma once
 
 namespace nall {
 
@@ -180,5 +179,3 @@ auto image::scaleNearest(unsigned outputWidth, unsigned outputHeight) -> void {
 }
 
 }
-
-#endif

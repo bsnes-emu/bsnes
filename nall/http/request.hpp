@@ -1,5 +1,4 @@
-#ifndef NALL_HTTP_REQUEST_HPP
-#define NALL_HTTP_REQUEST_HPP
+#pragma once
 
 #include <nall/decode/url.hpp>
 #include <nall/encode/url.hpp>
@@ -183,5 +182,3 @@ auto Request::setBody() -> bool {
 }
 
 }}
-
-#endif

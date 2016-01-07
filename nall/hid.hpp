@@ -1,5 +1,4 @@
-#ifndef NALL_HID_HPP
-#define NALL_HID_HPP
+#pragma once
 
 namespace nall { namespace HID {
 
@@ -106,5 +105,3 @@ private:
 };
 
 }}
-
-#endif

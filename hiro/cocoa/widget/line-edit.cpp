@@ -42,6 +42,7 @@ auto pLineEdit::construct() -> void {
 
 auto pLineEdit::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

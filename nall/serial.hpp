@@ -1,5 +1,4 @@
-#ifndef NALL_SERIAL_HPP
-#define NALL_SERIAL_HPP
+#pragma once
 
 #include <nall/intrinsics.hpp>
 #include <nall/stdint.hpp>
@@ -114,5 +113,3 @@ private:
 };
 
 }
-
-#endif

@@ -21,17 +21,10 @@ auto pWidget::construct() -> void {
 
 auto pWidget::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }
-
-/*
-bool pWidget::enabled() {
-  @autoreleasepool {
-    return [cocoaView respondsToSelector:@selector(enabled)] && [cocoaView enabled];
-  }
-}
-*/
 
 auto pWidget::focused() const -> bool {
   @autoreleasepool {
@@ -79,6 +72,14 @@ auto pWidget::setVisible(bool visible) -> void {
     [cocoaView setHidden:!visible];
   }
 }
+
+/*
+bool pWidget::enabled() {
+  @autoreleasepool {
+    return [cocoaView respondsToSelector:@selector(enabled)] && [cocoaView enabled];
+  }
+}
+*/
 
 }
 

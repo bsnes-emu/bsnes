@@ -1,3 +1,5 @@
+#pragma once
+
 /* ruby
  * author: byuu
  * license: ISC
@@ -6,9 +8,6 @@
  * ruby is a cross-platform hardware abstraction layer
  * it provides a common interface to video, audio and input devices
  */
-
-#ifndef RUBY_HPP
-#define RUBY_HPP
 
 #include <nall/nall.hpp>
 
@@ -107,5 +106,3 @@ private:
 };
 
 }
-
-#endif

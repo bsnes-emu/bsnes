@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -51,5 +51,3 @@ auto string::transform(rstring from, rstring to) -> string& {
 }
 
 }
-
-#endif

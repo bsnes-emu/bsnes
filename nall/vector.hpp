@@ -1,5 +1,4 @@
-#ifndef NALL_VECTOR_HPP
-#define NALL_VECTOR_HPP
+#pragma once
 
 #include <algorithm>
 #include <initializer_list>
@@ -281,5 +280,3 @@ protected:
 };
 
 }
-
-#endif

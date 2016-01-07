@@ -4,15 +4,15 @@ ScanDialog::ScanDialog() {
   onClose(&Application::quit);
   layout.setMargin(5);
   pathEdit.onActivate([&] { refresh(); });
-  refreshButton.setImage(Icon::Action::Refresh).setBordered(false).onActivate([&] {
+  refreshButton.setIcon(Icon::Action::Refresh).setBordered(false).onActivate([&] {
     pathEdit.setText(settings["icarus/Path"].text());
     refresh();
   });
-  homeButton.setImage(Icon::Go::Home).setBordered(false).onActivate([&] {
+  homeButton.setIcon(Icon::Go::Home).setBordered(false).onActivate([&] {
     pathEdit.setText(userpath());
     refresh();
   });
-  upButton.setImage(Icon::Go::Up).setBordered(false).onActivate([&] {
+  upButton.setIcon(Icon::Go::Up).setBordered(false).onActivate([&] {
     pathEdit.setText(dirname(settings["icarus/Path"].text()));
     refresh();
   });
@@ -59,13 +59,13 @@ auto ScanDialog::refresh() -> void {
   for(auto& name : contents) {
     if(!name.endsWith("/")) continue;
     if(gamePakType(suffixname(name))) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setImage(Icon::Emblem::Folder).setText(name.rtrim("/"))));
+    scanList.append(ListViewItem().append(ListViewCell().setIcon(Icon::Emblem::Folder).setText(name.rtrim("/"))));
   }
 
   for(auto& name : contents) {
     if(name.endsWith("/")) continue;
     if(!gameRomType(suffixname(name).downcase())) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setCheckable().setImage(Icon::Emblem::File).setText(name)));
+    scanList.append(ListViewItem().append(ListViewCell().setCheckable().setIcon(Icon::Emblem::File).setText(name)));
   }
 
   Application::processEvents();

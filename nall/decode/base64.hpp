@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_BASE64_HPP
-#define NALL_DECODE_BASE64_HPP
+#pragma once
 
 namespace nall { namespace Decode {
 
@@ -45,5 +44,3 @@ inline auto Base64(const string& text) -> vector<uint8_t> {
 }
 
 }}
-
-#endif

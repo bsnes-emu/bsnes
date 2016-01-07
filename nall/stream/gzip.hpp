@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_GZIP_HPP
-#define NALL_STREAM_GZIP_HPP
+#pragma once
 
 #include <nall/decode/gzip.hpp>
 
@@ -30,5 +29,3 @@ struct gzipstream : memorystream {
 };
 
 }
-
-#endif

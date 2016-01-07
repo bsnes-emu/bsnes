@@ -10,7 +10,7 @@ auto pTreeViewItem::construct() -> void {
       gtk_tree_store_append(parentWidget->gtkTreeStore, &gtkIter, nullptr);
     }
     setChecked(state().checked);
-    setImage(state().image);
+    setIcon(state().icon);
     setText(state().text);
   }
 }
@@ -65,10 +65,10 @@ auto pTreeViewItem::setFocused() -> void {
 auto pTreeViewItem::setForegroundColor(Color color) -> void {
 }
 
-auto pTreeViewItem::setImage(const Image& image) -> void {
+auto pTreeViewItem::setIcon(const image& icon) -> void {
   if(auto parentWidget = _parentWidget()) {
-    if(image) {
-      auto pixbuf = CreatePixbuf(image);
+    if(icon) {
+      auto pixbuf = CreatePixbuf(icon);
       gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 1, pixbuf, -1);
     } else {
       gtk_tree_store_set(parentWidget->gtkTreeStore, &gtkIter, 1, nullptr, -1);

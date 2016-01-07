@@ -1,5 +1,4 @@
-#ifndef NALL_THREAD_HPP
-#define NALL_THREAD_HPP
+#pragma once
 
 //simple thread library
 //primary rationale is that std::thread does not support custom stack sizes
@@ -134,7 +133,5 @@ auto thread::exit() -> void {
 }
 
 }
-
-#endif
 
 #endif

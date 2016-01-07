@@ -99,6 +99,7 @@ auto pCanvas::construct() -> void {
 
 auto pCanvas::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }
@@ -146,7 +147,7 @@ auto pCanvas::setGeometry(Geometry geometry) -> void {
 auto pCanvas::setGradient(Gradient gradient) -> void {
 }
 
-auto pCanvas::setImage(const Image& image) -> void {
+auto pCanvas::setIcon(const image& icon) -> void {
 }
 
 auto pCanvas::update() -> void {

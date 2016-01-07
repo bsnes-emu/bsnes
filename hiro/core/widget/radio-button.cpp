@@ -22,8 +22,8 @@ auto mRadioButton::group() const -> Group {
   return state.group;
 }
 
-auto mRadioButton::image() const -> Image {
-  return state.image;
+auto mRadioButton::icon() const -> image {
+  return state.icon;
 }
 
 auto mRadioButton::onActivate(const function<void ()>& callback) -> type& {
@@ -62,9 +62,9 @@ auto mRadioButton::setGroup(sGroup group) -> type& {
   return *this;
 }
 
-auto mRadioButton::setImage(const Image& image) -> type& {
-  state.image = image;
-  signal(setImage, image);
+auto mRadioButton::setIcon(const image& icon) -> type& {
+  state.icon = icon;
+  signal(setIcon, icon);
   return *this;
 }
 

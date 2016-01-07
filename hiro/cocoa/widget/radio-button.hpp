@@ -18,7 +18,7 @@ struct pRadioButton : pWidget {
   auto setChecked() -> void;
   auto setGeometry(Geometry geometry) -> void override;
   auto setGroup(sGroup group) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setOrientation(Orientation orientation) -> void;
   auto setText(const string& text) -> void;
 

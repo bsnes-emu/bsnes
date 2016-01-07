@@ -59,6 +59,7 @@ auto pTextEdit::construct() -> void {
 
 auto pTextEdit::destruct() -> void {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

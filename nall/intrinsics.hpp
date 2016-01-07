@@ -1,5 +1,4 @@
-#ifndef NALL_INTRINSICS_HPP
-#define NALL_INTRINSICS_HPP
+#pragma once
 
 namespace nall {
   struct Intrinsics {
@@ -155,5 +154,3 @@ namespace nall {
 #endif
 
 }
-
-#endif

@@ -143,7 +143,7 @@ auto pTreeView::_doDataFunc(GtkTreeViewColumn* column, GtkCellRenderer* renderer
   if(renderer == GTK_CELL_RENDERER(gtkCellToggle)) {
     gtk_cell_renderer_set_visible(renderer, item->state.checkable);
   } else if(renderer == GTK_CELL_RENDERER(gtkCellPixbuf)) {
-    gtk_cell_renderer_set_visible(renderer, (bool)item->state.image);
+    gtk_cell_renderer_set_visible(renderer, (bool)item->state.icon);
   } else if(renderer == GTK_CELL_RENDERER(gtkCellText)) {
     auto font = pFont::create(item->font(true));
     g_object_set(G_OBJECT(renderer), "font-desc", font, nullptr);

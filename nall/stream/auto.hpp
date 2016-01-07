@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_AUTO_HPP
-#define NALL_STREAM_AUTO_HPP
+#pragma once
 
 namespace nall {
 
@@ -20,5 +19,3 @@ inline auto makestream(const uint8* data, uint size) -> std::unique_ptr<stream> 
 }
 
 }
-
-#endif

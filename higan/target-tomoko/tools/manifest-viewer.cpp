@@ -1,5 +1,5 @@
 ManifestViewer::ManifestViewer(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Emblem::Text);
+  setIcon(Icon::Emblem::Text);
   setText("Manifest Viewer");
 
   layout.setMargin(5);

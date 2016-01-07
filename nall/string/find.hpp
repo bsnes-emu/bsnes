@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -24,5 +24,3 @@ auto string::findFrom(int offset, rstring source) const -> maybe<uint> { return 
 auto string::ifindFrom(int offset, rstring source) const -> maybe<uint> { return _find<1, 0>(offset, source); }
 
 }
-
-#endif

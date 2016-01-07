@@ -31,7 +31,7 @@ struct pCanvas : pWidget {
   auto setDroppable(bool droppable) -> void;
   auto setGeometry(Geometry geometry) -> void override;
   auto setGradient(Gradient gradient) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto update() -> void;
 
   auto _rasterize() -> void;

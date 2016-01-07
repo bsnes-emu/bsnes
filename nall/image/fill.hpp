@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_FILL_HPP
-#define NALL_IMAGE_FILL_HPP
+#pragma once
 
 namespace nall {
 
@@ -83,5 +82,3 @@ auto image::verticalGradient(uint64_t a, uint64_t b, signed radiusX, signed radi
 }
 
 }
-
-#endif

@@ -36,6 +36,7 @@ void pConsole::constructor() {
 
 void pConsole::destructor() {
   @autoreleasepool {
+    [cocoaView removeFromSuperview];
     [cocoaView release];
   }
 }

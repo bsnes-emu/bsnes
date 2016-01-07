@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 /*
 vector allocator
@@ -80,5 +80,3 @@ string::string() {
 }
 
 }
-
-#endif

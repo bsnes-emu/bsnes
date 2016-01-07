@@ -1,4 +1,4 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 namespace nall {
 
@@ -31,5 +31,3 @@ auto sha256(rstring self) -> string {
 }
 
 }
-
-#endif

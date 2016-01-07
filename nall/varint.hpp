@@ -1,5 +1,4 @@
-#ifndef NALL_VARINT_HPP
-#define NALL_VARINT_HPP
+#pragma once
 
 #include <nall/primitives.hpp>
 #include <nall/serializer.hpp>
@@ -209,5 +208,3 @@ using uint61 = nall::Natural<61>;
 using uint62 = nall::Natural<62>;
 using uint63 = nall::Natural<63>;
 //using uint64 = nall::Natural<64>;
-
-#endif

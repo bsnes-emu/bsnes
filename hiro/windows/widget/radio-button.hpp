@@ -11,7 +11,7 @@ struct pRadioButton : pWidget {
   auto setEnabled(bool enabled) -> void override;
   auto setFont(const Font& font) -> void override;
   auto setGroup(sGroup group) -> void override;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setOrientation(Orientation orientation) -> void;
   auto setText(const string& text) -> void;
   auto setVisible(bool visible) -> void override;

@@ -1,5 +1,4 @@
-#ifndef NALL_MAP_HPP
-#define NALL_MAP_HPP
+#pragma once
 
 #include <nall/set.hpp>
 
@@ -57,5 +56,3 @@ protected:
 };
 
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NALL_STDINT_HPP
-#define NALL_STDINT_HPP
+#pragma once
 
 #if defined(_MSC_VER)
   typedef signed char int8_t;
@@ -68,6 +67,4 @@ using uintptr = uintptr_t;
 #if defined(__SIZEOF_INT128__)
 using int128 = int128_t;
 using uint128 = uint128_t;
-#endif
-
 #endif

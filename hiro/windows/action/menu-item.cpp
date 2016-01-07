@@ -10,7 +10,7 @@ auto pMenuItem::destruct() -> void {
   if(hbitmap) { DeleteObject(hbitmap); hbitmap = nullptr; }
 }
 
-auto pMenuItem::setImage(const Image& image) -> void {
+auto pMenuItem::setIcon(const image& icon) -> void {
   _createBitmap();
   _synchronize();
 }
@@ -26,10 +26,7 @@ auto pMenuItem::onActivate() -> void {
 auto pMenuItem::_createBitmap() -> void {
   if(hbitmap) { DeleteObject(hbitmap); hbitmap = nullptr; }
 
-  if(auto& image = state().image) {
-    nall::image icon;
-    icon.allocate(image.width(), image.height());
-    memory::copy(icon.data(), image.data(), icon.size());
+  if(auto icon = state().icon) {
     icon.alphaBlend(GetSysColor(COLOR_MENU));  //Windows does not alpha blend menu icons properly (leaves black outline)
     icon.scale(GetSystemMetrics(SM_CXMENUCHECK), GetSystemMetrics(SM_CYMENUCHECK), Interpolation::Linear);
     hbitmap = CreateBitmap(icon);

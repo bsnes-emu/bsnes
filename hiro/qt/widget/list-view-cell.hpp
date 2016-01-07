@@ -11,7 +11,7 @@ struct pListViewCell : pObject {
   auto setChecked(bool checked) -> void;
   auto setFont(const string& font) -> void;
   auto setForegroundColor(Color color) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setText(const string& text) -> void;
 
   auto _parent() -> maybe<pListViewItem&>;

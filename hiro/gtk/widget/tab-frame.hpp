@@ -12,7 +12,7 @@ struct pTabFrame : pWidget {
   auto setFont(const Font& font) -> void override;
   auto setGeometry(Geometry geometry) -> void override;
   auto setItemClosable(unsigned position, bool closable) -> void;
-  auto setItemImage(unsigned position, const Image& image) -> void;
+  auto setItemIcon(unsigned position, const image& icon) -> void;
   auto setItemLayout(unsigned position, sLayout layout) -> void;
   auto setItemMovable(unsigned position, bool movable) -> void;
   auto setItemSelected(unsigned position) -> void;

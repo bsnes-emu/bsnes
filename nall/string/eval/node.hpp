@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Eval {
+namespace nall { namespace Eval {
 
 struct Node {
   enum class Type : uint {
@@ -35,7 +34,4 @@ struct Node {
   ~Node() { for(auto& node : link) delete node; }
 };
 
-}
-}
-
-#endif
+}}

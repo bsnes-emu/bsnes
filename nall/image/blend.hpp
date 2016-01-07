@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_BLEND_HPP
-#define NALL_IMAGE_BLEND_HPP
+#pragma once
 
 namespace nall {
 
@@ -71,5 +70,3 @@ auto image::impose(blend mode, unsigned targetX, unsigned targetY, image source,
 }
 
 }
-
-#endif

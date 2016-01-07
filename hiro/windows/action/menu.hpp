@@ -7,7 +7,7 @@ struct pMenu : pAction {
 
   auto append(sAction action) -> void;
   auto remove(sAction action) -> void;
-  auto setImage(const Image& image) -> void;
+  auto setIcon(const image& icon) -> void;
   auto setText(const string& text) -> void;
 
   auto _createBitmap() -> void;

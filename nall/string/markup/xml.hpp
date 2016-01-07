@@ -1,10 +1,9 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
 //XML v1.0 subset parser
 //revision 0.04
 
-namespace nall {
-namespace XML {
+namespace nall { namespace XML {
 
 //metadata:
 //  0 = element
@@ -215,7 +214,4 @@ inline auto unserialize(const string& markup) -> Markup::SharedNode {
   return node;
 }
 
-}
-}
-
-#endif
+}}

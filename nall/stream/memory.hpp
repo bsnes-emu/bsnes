@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_MEMORY_HPP
-#define NALL_STREAM_MEMORY_HPP
+#pragma once
 
 #include <nall/stream/stream.hpp>
 
@@ -47,5 +46,3 @@ protected:
 };
 
 }
-
-#endif

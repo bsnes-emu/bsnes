@@ -1,5 +1,5 @@
 VideoSettings::VideoSettings(TabFrame* parent) : TabFrameItem(parent) {
-  setImage(Icon::Device::Display);
+  setIcon(Icon::Device::Display);
   setText("Video");
 
   layout.setMargin(5);

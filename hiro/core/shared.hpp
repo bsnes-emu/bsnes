@@ -128,10 +128,10 @@ struct Menu : sMenu {
   auto actionCount() const { return self().actionCount(); }
   auto actions() const { return self().actions(); }
   auto append(sAction action) { return self().append(action), *this; }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto remove(sAction action) { return self().remove(action), *this; }
   auto reset() { return self().reset(), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
 };
@@ -150,9 +150,9 @@ struct MenuItem : sMenuItem {
   using internalType = mMenuItem;
 
   auto doActivate() const { return self().doActivate(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto onActivate(const function<void ()>& callback = {}) { return self().onActivate(callback), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
 };
@@ -215,11 +215,11 @@ struct Button : sButton {
 
   auto bordered() const { return self().bordered(); }
   auto doActivate() const { return self().doActivate(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto onActivate(const function<void ()>& callback = {}) { return self().onActivate(callback), *this; }
   auto orientation() const { return self().orientation(); }
   auto setBordered(bool bordered = true) { return self().setBordered(bordered), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setOrientation(Orientation orientation = Orientation::Horizontal) { return self().setOrientation(orientation), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -240,7 +240,7 @@ struct Canvas : sCanvas {
   auto doMousePress(Mouse::Button button) const { return self().doMousePress(button); }
   auto doMouseRelease(Mouse::Button button) const { return self().doMouseRelease(button); }
   auto gradient() const { return self().gradient(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto onDrop(const function<void (lstring)>& callback = {}) { return self().onDrop(callback), *this; }
   auto onMouseLeave(const function<void ()>& callback = {}) { return self().onMouseLeave(callback), *this; }
   auto onMouseMove(const function<void (Position)>& callback = {}) { return self().onMouseMove(callback), *this; }
@@ -249,7 +249,7 @@ struct Canvas : sCanvas {
   auto setColor(Color color) { return self().setColor(color), *this; }
   auto setDroppable(bool droppable = true) { return self().setDroppable(droppable), *this; }
   auto setGradient(Gradient gradient = {}) { return self().setGradient(gradient), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setSize(Size size = {}) { return self().setSize(size), *this; }
   auto update() { return self().update(), *this; }
 };
@@ -263,12 +263,12 @@ struct CheckButton : sCheckButton {
   auto bordered() const { return self().bordered(); }
   auto checked() const { return self().checked(); }
   auto doToggle() const { return self().doToggle(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto onToggle(const function<void ()>& callback = {}) { return self().onToggle(callback), *this; }
   auto orientation() const { return self().orientation(); }
   auto setBordered(bool bordered = true) { return self().setBordered(bordered), *this; }
   auto setChecked(bool checked = true) { return self().setChecked(checked), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setOrientation(Orientation orientation = Orientation::Horizontal) { return self().setOrientation(orientation), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -294,9 +294,9 @@ struct ComboButtonItem : sComboButtonItem {
   DeclareSharedObject(ComboButtonItem)
   using internalType = mComboButtonItem;
 
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto selected() const { return self().selected(); }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setSelected() { return self().setSelected(), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -411,9 +411,9 @@ struct IconViewItem : sIconViewItem {
   DeclareSharedObject(IconViewItem)
   using internalType = mIconViewItem;
 
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto selected() const { return self().selected(); }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setSelected(bool selected = true) { return self().setSelected(selected), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -497,7 +497,7 @@ struct ListViewColumn : sListViewColumn {
   auto expandable() const { return self().expandable(); }
   auto foregroundColor() const { return self().foregroundColor(); }
   auto horizontalAlignment() const { return self().horizontalAlignment(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto resizable() const { return self().resizable(); }
   auto setActive() { return self().setActive(), *this; }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
@@ -505,7 +505,7 @@ struct ListViewColumn : sListViewColumn {
   auto setEditable(bool editable = true) { return self().setEditable(editable), *this; }
   auto setExpandable(bool expandable = true) { return self().setExpandable(expandable), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setResizable(bool resizable = true) { return self().setResizable(resizable), *this; }
   auto setSortable(bool sortable = true) { return self().setSortable(sortable), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
@@ -540,13 +540,13 @@ struct ListViewCell : sListViewCell {
   auto checkable() const { return self().checkable(); }
   auto checked() const { return self().checked(); }
   auto foregroundColor() const { return self().foregroundColor(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto setAlignment(Alignment alignment = {}) { return self().setAlignment(alignment), *this; }
   auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
   auto setCheckable(bool checkable = true) const { return self().setCheckable(checkable), *this; }
   auto setChecked(bool checked = true) const { return self().setChecked(checked), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
 };
@@ -634,12 +634,12 @@ struct RadioButton : sRadioButton {
   auto checked() const { return self().checked(); }
   auto doActivate() const { return self().doActivate(); }
   auto group() const { return self().group(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto onActivate(const function<void ()>& callback = {}) { return self().onActivate(callback), *this; }
   auto orientation() const { return self().orientation(); }
   auto setBordered(bool bordered = true) { return self().setBordered(bordered), *this; }
   auto setChecked() { return self().setChecked(), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setOrientation(Orientation orientation = Orientation::Horizontal) { return self().setOrientation(orientation), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }
@@ -684,14 +684,14 @@ struct TabFrameItem : sTabFrameItem {
 
   auto append(sLayout layout) { return self().append(layout), *this; }
   auto closable() const { return self().closable(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto layout() const { return self().layout(); }
   auto movable() const { return self().movable(); }
   auto remove(sLayout layout) { return self().remove(layout), *this; }
   auto reset() { return self().reset(), *this; }
   auto selected() const { return self().selected(); }
   auto setClosable(bool closable = true) { return self().setClosable(closable), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setMovable(bool movable = true) { return self().setMovable(movable), *this; }
   auto setSelected() { return self().setSelected(), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
@@ -756,7 +756,7 @@ struct TreeViewItem : sTreeViewItem {
   auto checkable() const { return self().checkable(); }
   auto checked() const { return self().checked(); }
   auto foregroundColor() const { return self().foregroundColor(); }
-  auto image() const { return self().image(); }
+  auto icon() const { return self().icon(); }
   auto item(const string& path) const { return self().item(path); }
   auto itemCount() const { return self().itemCount(); }
   auto items() const { return self().items(); }
@@ -768,7 +768,7 @@ struct TreeViewItem : sTreeViewItem {
   auto setChecked(bool checked = true) { return self().setChecked(checked), *this; }
   auto setExpanded(bool expanded = true) { return self().setExpanded(expanded), *this; }
   auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
-  auto setImage(const Image& image = {}) { return self().setImage(image), *this; }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
   auto setSelected() { return self().setSelected(), *this; }
   auto setText(const string& text = "") { return self().setText(text), *this; }
   auto text() const { return self().text(); }

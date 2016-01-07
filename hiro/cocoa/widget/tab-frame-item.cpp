@@ -17,7 +17,7 @@ auto pTabFrameItem::remove(sLayout layout) -> void {
 auto pTabFrameItem::setClosable(bool closable) -> void {
 }
 
-auto pTabFrameItem::setImage(const Image& image) -> void {
+auto pTabFrameItem::setIcon(const image& icon) -> void {
 }
 
 auto pTabFrameItem::setMovable(bool movable) -> void {

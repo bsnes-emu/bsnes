@@ -1,5 +1,4 @@
-#ifndef NALL_DL_HPP
-#define NALL_DL_HPP
+#pragma once
 
 //dynamic linking support
 
@@ -125,5 +124,3 @@ inline auto library::close() -> void {}
 #endif
 
 }
-
-#endif

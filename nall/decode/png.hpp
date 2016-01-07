@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_PNG_HPP
-#define NALL_DECODE_PNG_HPP
+#pragma once
 
 #include <nall/string.hpp>
 #include <nall/decode/inflate.hpp>
@@ -331,5 +330,3 @@ auto PNG::readbits(const uint8*& data) -> uint {
 }
 
 }}
-
-#endif

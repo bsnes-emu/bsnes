@@ -81,9 +81,9 @@ auto pListViewColumn::setFont(const Font& font) -> void {
 auto pListViewColumn::setForegroundColor(Color color) -> void {
 }
 
-auto pListViewColumn::setImage(const Image& image) -> void {
-  if(image) {
-    gtk_image_set_from_pixbuf(GTK_IMAGE(gtkHeaderIcon), CreatePixbuf(image));
+auto pListViewColumn::setIcon(const image& icon) -> void {
+  if(icon) {
+    gtk_image_set_from_pixbuf(GTK_IMAGE(gtkHeaderIcon), CreatePixbuf(icon));
   } else {
     gtk_image_clear(GTK_IMAGE(gtkHeaderIcon));
   }

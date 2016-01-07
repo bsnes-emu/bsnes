@@ -1,5 +1,4 @@
-#ifndef NALL_FILE_HPP
-#define NALL_FILE_HPP
+#pragma once
 
 #include <nall/platform.hpp>
 #include <nall/file-system-object.hpp>
@@ -330,5 +329,3 @@ private:
 };
 
 }
-
-#endif

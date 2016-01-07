@@ -1,5 +1,4 @@
-#ifndef NALL_UTF8_HPP
-#define NALL_UTF8_HPP
+#pragma once
 
 //UTF-8 <> UTF-16 conversion
 //used only for Win32; every other OS uses UTF-8 internally
@@ -85,5 +84,3 @@ namespace nall {
 }
 
 #endif  //if defined(_WIN32)
-
-#endif

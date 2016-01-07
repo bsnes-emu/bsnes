@@ -27,7 +27,7 @@ auto pListViewCell::setForegroundColor(Color color) -> void {
   _repaint();
 }
 
-auto pListViewCell::setImage(const Image& icon) -> void {
+auto pListViewCell::setIcon(const image& icon) -> void {
   _repaint();
 }
 

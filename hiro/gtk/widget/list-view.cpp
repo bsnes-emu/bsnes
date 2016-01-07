@@ -155,8 +155,8 @@ auto pListView::_cellWidth(unsigned _row, unsigned _column) -> unsigned {
       if(cell->state.checkable) {
         width += 24;
       }
-      if(auto& image = cell->state.image) {
-        width += image.width() + 2;
+      if(auto& icon = cell->state.icon) {
+        width += icon.width() + 2;
       }
       if(auto& text = cell->state.text) {
         width += pFont::size(cell->font(true), text).width();
@@ -170,8 +170,8 @@ auto pListView::_columnWidth(unsigned _column) -> unsigned {
   unsigned width = 8;
   if(auto& header = state().header) {
     if(auto column = header->column(_column)) {
-      if(auto& image = column->state.image) {
-        width += image.width() + 2;
+      if(auto& icon = column->state.icon) {
+        width += icon.width() + 2;
       }
       if(auto& text = column->state.text) {
         width += pFont::size(column->font(true), text).width();

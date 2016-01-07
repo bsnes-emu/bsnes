@@ -1,5 +1,4 @@
-#ifndef NALL_STREAM_VECTOR_HPP
-#define NALL_STREAM_VECTOR_HPP
+#pragma once
 
 #include <nall/stream/stream.hpp>
 #include <nall/vector.hpp>
@@ -36,5 +35,3 @@ protected:
 };
 
 }
-
-#endif

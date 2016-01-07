@@ -1,5 +1,4 @@
-#ifndef NALL_IMAGE_LOAD_HPP
-#define NALL_IMAGE_LOAD_HPP
+#pragma once
 
 namespace nall {
 
@@ -96,5 +95,3 @@ auto image::loadPNG(const uint8_t* pngData, unsigned pngSize) -> bool {
 }
 
 }
-
-#endif

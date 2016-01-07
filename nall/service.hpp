@@ -1,5 +1,4 @@
-#ifndef NALL_SERVICE_HPP
-#define NALL_SERVICE_HPP
+#pragma once
 
 //service model template built on top of shared-memory
 
@@ -11,6 +10,4 @@
 
 #if defined(API_WINDOWS)
   #include <nall/windows/service.hpp>
-#endif
-
 #endif

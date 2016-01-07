@@ -1,5 +1,4 @@
-#ifndef NALL_STRING_HPP
-#define NALL_STRING_HPP
+#pragma once
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -25,7 +24,6 @@
 #include <nall/hash/crc32.hpp>
 #include <nall/hash/sha256.hpp>
 
-#define NALL_STRING_INTERNAL_HPP
 #include <nall/string/base.hpp>
 #include <nall/string/view.hpp>
 #include <nall/string/atoi.hpp>
@@ -55,6 +53,3 @@
 #include <nall/string/markup/xml.hpp>
 #include <nall/string/transform/cml.hpp>
 #include <nall/string/transform/dml.hpp>
-#undef NALL_STRING_INTERNAL_HPP
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef NALL_DECODE_INFLATE_HPP
-#define NALL_DECODE_INFLATE_HPP
+#pragma once
 
 #include <setjmp.h>
 
@@ -345,5 +344,3 @@ inline auto puff(
 }
 
 }}
-
-#endif

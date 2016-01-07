@@ -1,7 +1,6 @@
-#ifdef NALL_STRING_INTERNAL_HPP
+#pragma once
 
-namespace nall {
-namespace Eval {
+namespace nall { namespace Eval {
 
 inline auto isLiteral(const char*& s) -> bool {
   char n = s[0];
@@ -97,7 +96,4 @@ inline auto literal(const char*& s) -> string {
   throw "invalid literal";
 }
 
-}
-}
-
-#endif
+}}

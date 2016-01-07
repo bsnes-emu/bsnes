@@ -1,5 +1,4 @@
-#ifndef NALL_SORT_HPP
-#define NALL_SORT_HPP
+#pragma once
 
 #include <algorithm>
 #include <nall/utility.hpp>
@@ -73,5 +72,3 @@ template<typename T> auto sort(T list[], unsigned size) -> void {
 }
 
 }
-
-#endif
