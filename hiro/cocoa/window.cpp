@@ -34,9 +34,17 @@
     [rootMenu addItem:item];
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
-    item = [[[NSMenuItem alloc] initWithTitle:@"Preferences" action:@selector(menuPreferences) keyEquivalent:@""] autorelease];
+    item = [[[NSMenuItem alloc] initWithTitle:@"Preferences ..." action:@selector(menuPreferences) keyEquivalent:@""] autorelease];
     [item setTarget:self];
     [rootMenu addItem:item];
+
+    string result = nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").strip();
+    if(result != "0") {
+      disableGatekeeperAutoRearm = [[[NSMenuItem alloc] initWithTitle:@"Disable Gatekeeper Auto-Rearm" action:@selector(menuDisableGatekeeperAutoRearm) keyEquivalent:@""] autorelease];
+      [disableGatekeeperAutoRearm setTarget:self];
+      [rootMenu addItem:disableGatekeeperAutoRearm];
+    }
+
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
     NSMenu* servicesMenu = [[[NSMenu alloc] initWithTitle:@"Services"] autorelease];
@@ -58,6 +66,7 @@
     item = [[[NSMenuItem alloc] initWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""] autorelease];
     [item setTarget:NSApp];
     [rootMenu addItem:item];
+
     [rootMenu addItem:[NSMenuItem separatorItem]];
 
     item = [[[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"Quit %@", applicationName] action:@selector(menuQuit) keyEquivalent:@""] autorelease];
@@ -130,6 +139,24 @@
   hiro::Application::Cocoa::doPreferences();
 }
 
+-(void) menuDisableGatekeeperAutoRearm {
+  NSAlert* alert = [[[NSAlert alloc] init] autorelease];
+  [alert setMessageText:@"Disable Gatekeeper Auto-Rearm"];
+
+  nall::execute("sudo", "defaults", "write", "/Library/Preferences/com.apple.security", "GKAutoRearm", "-bool", "NO");
+  if(nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").strip() == "0") {
+    [alert setAlertStyle:NSInformationalAlertStyle];
+    [alert setInformativeText:@"Gatekeeper's automatic 30-day rearm behavior has been disabled successfully."];
+    [disableGatekeeperAutoRearm setHidden:YES];
+  } else {
+    [alert setAlertStyle:NSWarningAlertStyle];
+    [alert setInformativeText:@"Error: failed to disable Gatekeeper's automatic rearm behavior."];
+  }
+
+  [alert addButtonWithTitle:@"Ok"];
+  [alert runModal];
+}
+
 -(void) menuQuit {
   hiro::Application::Cocoa::doQuit();
 }
@@ -142,15 +169,15 @@
 
 namespace hiro {
 
-auto pWindow::none() -> Window& {
-  static Window* window = nullptr;
-  if(window == nullptr) window = new Window;
-  return *window;
-}
-
 auto pWindow::construct() -> void {
   @autoreleasepool {
     cocoaWindow = [[CocoaWindow alloc] initWith:self()];
+
+    static bool once = true;
+    if(once) {
+      once = false;
+      [NSApp setMainMenu:[cocoaWindow menuBar]];
+    }
   }
 }
 
@@ -234,14 +261,17 @@ auto pWindow::setFocused() -> void {
 
 auto pWindow::setFullScreen(bool fullScreen) -> void {
   @autoreleasepool {
-    if(fullScreen == true) {
+    if(fullScreen) {
+      windowedGeometry = state().geometry;
       [NSApp setPresentationOptions:NSApplicationPresentationFullScreen];
       [cocoaWindow setCollectionBehavior:NSWindowCollectionBehaviorFullScreenPrimary];
       [cocoaWindow toggleFullScreen:nil];
+      state().geometry = _geometry();
     } else {
       [cocoaWindow toggleFullScreen:nil];
       [cocoaWindow setCollectionBehavior:NSWindowCollectionBehaviorDefault];
       [NSApp setPresentationOptions:NSApplicationPresentationDefault];
+      state().geometry = windowedGeometry;
     }
   }
 }
@@ -363,15 +393,18 @@ auto pWindow::_append(mWidget& widget) -> void {
   }
 }
 
-/*
-auto pWindow::geometry() -> Geometry {
+auto pWindow::_geometry() -> Geometry {
   @autoreleasepool {
     NSRect area = [cocoaWindow contentRectForFrameRect:[cocoaWindow frame]];
     area.size.height -= statusBarHeight();
-    return {area.origin.x, Desktop::size().height - area.origin.y - area.size.height, area.size.width, area.size.height};
+    return {
+      (int)area.origin.x, (int)(Monitor::geometry(Monitor::primary()).height() - area.origin.y - area.size.height),
+      (int)area.size.width, (int)area.size.height
+    };
   }
 }
 
+/*
 auto pWindow::remove(Widget& widget) -> void {
   @autoreleasepool {
     [widget.p.cocoaView removeFromSuperview];

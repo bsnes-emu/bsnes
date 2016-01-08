@@ -115,11 +115,11 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff76) {  //???
-    return 0x00;
+    return 0xff;
   }
 
   if(addr == 0xff77) {  //???
-    return 0x00;
+    return 0xff;
   }
 
   if(addr == 0xffff) {  //IE
@@ -130,7 +130,7 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
          | (status.interrupt_enable_vblank << 0);
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto CPU::mmio_write(uint16 addr, uint8 data) -> void {

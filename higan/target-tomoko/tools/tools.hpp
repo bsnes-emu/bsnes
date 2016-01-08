@@ -11,7 +11,7 @@ struct CheatDatabase : Window {
       Button selectAllButton{&controlLayout, Size{100, 0}};
       Button unselectAllButton{&controlLayout, Size{100, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
-      Button addCodesButton{&controlLayout, Size{80, 0}};
+      Button addCodesButton{&controlLayout, Size{100, 0}};
 };
 
 struct CheatEditor : TabFrameItem {

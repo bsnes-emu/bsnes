@@ -19,6 +19,7 @@ struct pTextEdit : pWidget {
   auto setBackgroundColor(Color color) -> void;
   auto setCursor(Cursor cursor) -> void;
   auto setEditable(bool editable) -> void;
+  auto setEnabled(bool enabled) -> void override;
   auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
   auto setText(const string& text) -> void;

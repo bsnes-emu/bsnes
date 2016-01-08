@@ -16,7 +16,7 @@ struct MMIO {
 };
 
 struct Unmapped : MMIO {
-  auto mmio_read(uint16) -> uint8 { return 0x00; }
+  auto mmio_read(uint16) -> uint8 { return 0xff; }
   auto mmio_write(uint16, uint8) -> void {}
 };
 

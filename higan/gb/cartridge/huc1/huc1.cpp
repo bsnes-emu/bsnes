@@ -11,7 +11,7 @@ auto Cartridge::HuC1::mmio_read(uint16 addr) -> uint8 {
     return cartridge.ram_read((ram_select << 13) | (addr & 0x1fff));
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto Cartridge::HuC1::mmio_write(uint16 addr, uint8 data) -> void {

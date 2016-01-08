@@ -163,6 +163,7 @@
     if(auto listViewCell = listViewItem->cell([view columnAtPoint:frame.origin])) {
       NSColor* backgroundColor = nil;
       if([self isHighlighted]) backgroundColor = [NSColor alternateSelectedControlColor];
+      else if(!listView->enabled(true)) backgroundColor = [NSColor controlBackgroundColor];
       else if(auto color = listViewCell->state.backgroundColor) backgroundColor = NSMakeColor(color);
       else backgroundColor = [NSColor controlBackgroundColor];
 
@@ -195,6 +196,7 @@
         if(listViewCell->state.alignment.horizontal() > 0.666) paragraphStyle.alignment = NSTextAlignmentRight;
         NSColor* foregroundColor = nil;
         if([self isHighlighted]) foregroundColor = [NSColor alternateSelectedControlTextColor];
+        else if(!listView->enabled(true)) foregroundColor = [NSColor disabledControlTextColor];
         else if(auto color = listViewCell->state.foregroundColor) foregroundColor = NSMakeColor(color);
         else foregroundColor = [NSColor textColor];
         NSString* text = [NSString stringWithUTF8String:listViewCell->state.text];
@@ -344,6 +346,13 @@ auto pListView::setBatchable(bool batchable) -> void {
 }
 
 auto pListView::setBordered(bool bordered) -> void {
+}
+
+auto pListView::setEnabled(bool enabled) -> void {
+  pWidget::setEnabled(enabled);
+  @autoreleasepool {
+    [[cocoaView content] setEnabled:enabled];
+  }
 }
 
 auto pListView::setFont(const Font& font) -> void {

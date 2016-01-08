@@ -82,6 +82,13 @@ auto pTextEdit::setEditable(bool editable) -> void {
   }
 }
 
+auto pTextEdit::setEnabled(bool enabled) -> void {
+  pWidget::setEnabled(enabled);
+  @autoreleasepool {
+    [[cocoaView content] setEnabled:enabled];
+  }
+}
+
 auto pTextEdit::setFont(const Font& font) -> void {
   @autoreleasepool {
     [[cocoaView content] setFont:pFont::create(font)];

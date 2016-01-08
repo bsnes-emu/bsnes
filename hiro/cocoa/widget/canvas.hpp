@@ -35,9 +35,10 @@ struct pCanvas : pWidget {
   auto update() -> void;
 
   auto _rasterize() -> void;
-  auto _redraw() -> void;
 
   CocoaCanvas* cocoaCanvas = nullptr;
+  NSImage* surface = nullptr;
+  NSBitmapImageRep* bitmap = nullptr;
   uint surfaceWidth = 0;
   uint surfaceHeight = 0;
 };

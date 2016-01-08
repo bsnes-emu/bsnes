@@ -55,6 +55,7 @@ struct pListView : pWidget {
   auto setBackgroundColor(Color color) -> void;
   auto setBatchable(bool batchable) -> void;
   auto setBordered(bool bordered) -> void;
+  auto setEnabled(bool enabled) -> void override;
   auto setFont(const Font& font) -> void override;
   auto setForegroundColor(Color color) -> void;
 

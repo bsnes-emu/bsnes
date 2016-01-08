@@ -63,6 +63,7 @@ struct InputSettings : TabFrameItem {
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue, bool allowMouseInput = false) -> void;
 
   InputMapping* activeMapping = nullptr;
+  Timer timer;
 
   VerticalLayout layout{this};
     HorizontalLayout selectionLayout{&layout, Size{~0, 0}};
@@ -87,6 +88,7 @@ struct HotkeySettings : TabFrameItem {
   auto inputEvent(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
 
   InputMapping* activeMapping = nullptr;
+  Timer timer;
 
   VerticalLayout layout{this};
     ListView mappingList{&layout, Size{~0, ~0}};

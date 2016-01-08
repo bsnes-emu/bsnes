@@ -13,10 +13,10 @@ auto Cartridge::MMM01::mmio_read(uint16 addr) -> uint8 {
 
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
     if(ram_enable) return cartridge.ram_read((ram_select << 13) + (addr & 0x1fff));
-    return 0x00;
+    return 0xff;
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto Cartridge::MMM01::mmio_write(uint16 addr, uint8 data) -> void {

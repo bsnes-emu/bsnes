@@ -128,7 +128,7 @@ auto Cartridge::rom_write(uint addr, uint8 data) -> void {
 }
 
 auto Cartridge::ram_read(uint addr) -> uint8 {
-  if(ramsize == 0) return 0x00;
+  if(ramsize == 0) return 0xff;
   if(addr >= ramsize) addr %= ramsize;
   return ramdata[addr];
 }
@@ -140,7 +140,7 @@ auto Cartridge::ram_write(uint addr, uint8 data) -> void {
 }
 
 auto Cartridge::mmio_read(uint16 addr) -> uint8 {
-  if(addr == 0xff50) return 0x00;
+  if(addr == 0xff50) return 0xff;
 
   if(bootrom_enable) {
     const uint8* data = nullptr;

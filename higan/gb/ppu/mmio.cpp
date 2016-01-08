@@ -85,7 +85,7 @@ auto PPU::mmio_read(uint16 addr) -> uint8 {
     return obpd[status.obpi];
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto PPU::mmio_write(uint16 addr, uint8 data) -> void {

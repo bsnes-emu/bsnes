@@ -40,6 +40,10 @@ auto mObject::abstract() const -> bool {
   if(dynamic_cast<const mGroup*>(this)) return false;
   #endif
 
+  #if defined(Hiro_Timer)
+  if(dynamic_cast<const mTimer*>(this)) return false;
+  #endif
+
   #if defined(Hiro_Window)
   if(dynamic_cast<const mWindow*>(this)) return false;
   #endif

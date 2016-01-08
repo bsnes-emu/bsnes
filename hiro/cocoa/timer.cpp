@@ -19,15 +19,18 @@
     [instance invalidate];
     instance = nil;
   }
-  if(!timer->enabled()) return;
-  instance = [NSTimer
-    scheduledTimerWithTimeInterval:timer->state.interval / 1000.0
-    target:self selector:@selector(run:) userInfo:nil repeats:YES
-  ];
+  if(timer->enabled()) {
+    instance = [NSTimer
+      scheduledTimerWithTimeInterval:timer->state.interval / 1000.0
+      target:self selector:@selector(run:) userInfo:nil repeats:YES
+    ];
+  }
 }
 
 -(void) run:(NSTimer*)instance {
-  timer->doActivate();
+  if(timer->enabled()) {
+    timer->doActivate();
+  }
 }
 
 @end

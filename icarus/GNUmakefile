@@ -14,6 +14,7 @@ ifeq ($(platform),macosx)
 	@if [ -d out/icarus.app ]; then rm -r out/icarus.app; fi
 	mkdir -p out/icarus.app/Contents/MacOS/
 	mv out/icarus out/icarus.app/Contents/MacOS/
+	cp icarus.plist out/icarus.app/Contents/Info.plist
 endif
 
 obj/hiro.o: ../hiro/hiro.cpp

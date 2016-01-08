@@ -16,7 +16,7 @@
 
 namespace nall {
 
-#if defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
+#if defined(PLATFORM_MACOSX) || defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
 
 template<typename... P> inline auto execute(const string& name, P&&... p) -> string {
   int fd[2];

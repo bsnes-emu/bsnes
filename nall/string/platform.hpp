@@ -24,11 +24,11 @@ auto realpath(rstring name) -> string {
 
 auto programpath() -> string {
   #if defined(PLATFORM_WINDOWS)
-  int argc = 0;
-  wchar_t** argv = CommandLineToArgvW(GetCommandLine(), &argc);
-  string argv0 = (const char*)utf8_t(argv[0]);
-  LocalFree(argv);
-  return realpath(argv0);
+  wchar_t path[PATH_MAX] = L"";
+  GetModuleFileName(nullptr, path, PATH_MAX);
+  string result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  return realpath(result);
   #else
   Dl_info info;
   dladdr((void*)&programpath, &info);

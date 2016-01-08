@@ -49,8 +49,8 @@ auto pCanvas::update() -> void {
 }
 
 auto pCanvas::_rasterize() -> void {
-  signed width = 0;
-  signed height = 0;
+  int width = 0;
+  int height = 0;
 
   if(auto& icon = state().icon) {
     width = icon.width();

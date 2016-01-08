@@ -73,14 +73,6 @@ auto pWidget::setVisible(bool visible) -> void {
   }
 }
 
-/*
-bool pWidget::enabled() {
-  @autoreleasepool {
-    return [cocoaView respondsToSelector:@selector(enabled)] && [cocoaView enabled];
-  }
-}
-*/
-
 }
 
 #endif

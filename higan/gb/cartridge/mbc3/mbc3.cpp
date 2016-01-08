@@ -36,10 +36,10 @@ auto Cartridge::MBC3::mmio_read(uint16 addr) -> uint8 {
       if(ram_select == 0x0b) return rtc_latch_day;
       if(ram_select == 0x0c) return (rtc_latch_day_carry << 7) | (rtc_latch_day >> 8);
     }
-    return 0x00;
+    return 0xff;
   }
 
-  return 0x00;
+  return 0xff;
 }
 
 auto Cartridge::MBC3::mmio_write(uint16 addr, uint8 data) -> void {

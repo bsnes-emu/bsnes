@@ -139,8 +139,12 @@ auto InputSettings::inputEvent(shared_pointer<HID::Device> device, uint group, u
 
   if(activeMapping->bind(device, group, input, oldValue, newValue)) {
     activeMapping = nullptr;
-    settingsManager->statusBar.setText("");
-    settingsManager->layout.setEnabled(true);
+    settingsManager->statusBar.setText("Mapping assigned.");
     refreshMappings();
+    timer.onActivate([&] {
+      timer.setEnabled(false);
+      settingsManager->statusBar.setText();
+      settingsManager->layout.setEnabled();
+    }).setInterval(1000).setEnabled();
   }
 }

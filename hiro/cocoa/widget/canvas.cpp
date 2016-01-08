@@ -27,15 +27,19 @@
 }
 
 -(void) mouseButton:(NSEvent*)event down:(BOOL)isDown {
-/*
-  if(auto& callback = isDown ? canvas->onMousePress : canvas->onMouseRelease) {
+  if(isDown) {
     switch([event buttonNumber]) {
-    case 0: return callback(phoenix::Mouse::Button::Left);
-    case 1: return callback(phoenix::Mouse::Button::Right);
-    case 2: return callback(phoenix::Mouse::Button::Middle);
+    case 0: return canvas->doMousePress(hiro::Mouse::Button::Left);
+    case 1: return canvas->doMousePress(hiro::Mouse::Button::Right);
+    case 2: return canvas->doMousePress(hiro::Mouse::Button::Middle);
+    }
+  } else {
+    switch([event buttonNumber]) {
+    case 0: return canvas->doMouseRelease(hiro::Mouse::Button::Left);
+    case 1: return canvas->doMouseRelease(hiro::Mouse::Button::Right);
+    case 2: return canvas->doMouseRelease(hiro::Mouse::Button::Middle);
     }
   }
-*/
 }
 
 -(void) mouseExited:(NSEvent*)event {
@@ -105,10 +109,12 @@ auto pCanvas::destruct() -> void {
 }
 
 auto pCanvas::minimumSize() const -> Size {
+  if(auto& icon = state().icon) return {(int)icon.width(), (int)icon.height()};
   return {0, 0};
 }
 
 auto pCanvas::setColor(Color color) -> void {
+  update();
 }
 
 auto pCanvas::setDroppable(bool droppable) -> void {
@@ -122,111 +128,78 @@ auto pCanvas::setDroppable(bool droppable) -> void {
 }
 
 auto pCanvas::setGeometry(Geometry geometry) -> void {
-/*
-  if(canvas.state.width == 0 || canvas.state.height == 0) rasterize();
-
-  uint width = canvas.state.width;
-  uint height = canvas.state.height;
-  if(width == 0) width = widget.state.geometry.width;
-  if(height == 0) height = widget.state.geometry.height;
-
-  if(width < geometry.width) {
-    geometry.x += (geometry.width - width) / 2;
-    geometry.width = width;
-  }
-
-  if(height < geometry.height) {
-    geometry.y += (geometry.height - height) / 2;
-    geometry.height = height;
-  }
-*/
-
   pWidget::setGeometry(geometry);
+  update();
 }
 
 auto pCanvas::setGradient(Gradient gradient) -> void {
+  update();
 }
 
 auto pCanvas::setIcon(const image& icon) -> void {
+  update();
 }
 
 auto pCanvas::update() -> void {
+  _rasterize();
+  @autoreleasepool {
+    [cocoaView setNeedsDisplay:YES];
+  }
 }
 
 auto pCanvas::_rasterize() -> void {
-/*
   @autoreleasepool {
-    unsigned width = canvas.state.width;
-    unsigned height = canvas.state.height;
-    if(width == 0) width = widget.state.geometry.width;
-    if(height == 0) height = widget.state.geometry.height;
+    int width = 0;
+    int height = 0;
+
+    if(auto& icon = state().icon) {
+      width = icon.width();
+      height = icon.height();
+    } else {
+      width = pSizable::state().geometry.width();
+      height = pSizable::state().geometry.height();
+    }
+    if(width <= 0 || height <= 0) return;
 
     if(width != surfaceWidth || height != surfaceHeight) {
-      NSImage* image = [[[NSImage alloc] initWithSize:NSMakeSize(width, height)] autorelease];
-      NSBitmapImageRep* bitmap = [[[NSBitmapImageRep alloc]
+      [cocoaView setImage:nil];
+      [surface release];
+      surface = nullptr;
+      bitmap = nullptr;
+    }
+
+    surfaceWidth = width;
+    surfaceHeight = height;
+
+    if(!surface) {
+      surface = [[[NSImage alloc] initWithSize:NSMakeSize(width, height)] autorelease];
+      bitmap = [[[NSBitmapImageRep alloc]
         initWithBitmapDataPlanes:nil
         pixelsWide:width pixelsHigh:height
         bitsPerSample:8 samplesPerPixel:4 hasAlpha:YES
         isPlanar:NO colorSpaceName:NSCalibratedRGBColorSpace
         bitmapFormat:NSAlphaNonpremultipliedBitmapFormat
-        bytesPerRow:width * 4 bitsPerPixel:32
+        bytesPerRow:(width * 4) bitsPerPixel:32
       ] autorelease];
-
-      [image addRepresentation:bitmap];
-      [cocoaView setImage:image];
-
-      surfaceWidth = width;
-      surfaceHeight = height;
+      [surface addRepresentation:bitmap];
+      [cocoaView setImage:surface];
     }
 
-    if(NSBitmapImageRep* bitmap = [[[cocoaView image] representations] objectAtIndex:0]) {
-      uint32_t* target = (uint32_t*)[bitmap bitmapData];
+    auto target = (uint32*)[bitmap bitmapData];
 
-      if(canvas.state.mode == Canvas::Mode::Color) {
-        nall::image image;
-        image.allocate(width, height);
-        image.fill(canvas.state.color.argb());
-        memcpy(target, image.data, image.size);
-      }
-
-      if(canvas.state.mode == Canvas::Mode::Gradient) {
-        nall::image image;
-        image.allocate(width, height);
-        image.gradient(
-          canvas.state.gradient[0].argb(), canvas.state.gradient[1].argb(), canvas.state.gradient[2].argb(), canvas.state.gradient[3].argb()
-        );
-        memcpy(target, image.data, image.size);
-      }
-
-      if(canvas.state.mode == Canvas::Mode::Image) {
-        nall::image image = canvas.state.image;
-        image.scale(width, height);
-        image.transform(0, 32, 255u << 24, 255u << 16, 255u << 8, 255u << 0);
-        memcpy(target, image.data, image.size);
-      }
-
-      if(canvas.state.mode == Canvas::Mode::Data) {
-        if(width == canvas.state.width && height == canvas.state.height) {
-          memcpy(target, canvas.state.data, width * height * sizeof(uint32_t));
-        } else {
-          memset(target, 0x00, width * height * sizeof(uint32_t));
-        }
-      }
-
-     //ARGB -> ABGR transformation
-      for(unsigned n = 0; n < width * height; n++) {
-        uint32_t color = *target;
-        color = (color & 0xff00ff00) | ((color & 0xff0000) >> 16) | ((color & 0x0000ff) << 16);
-        *target++ = color;
-      }
+    if(auto icon = state().icon) {
+      icon.transform();
+      memory::copy(target, icon.data(), icon.size());
+    } else if(auto& gradient = state().gradient) {
+      auto& colors = gradient.state.colors;
+      image fill;
+      fill.allocate(width, height);
+      fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
+      memory::copy(target, fill.data(), fill.size());
+    } else {
+      uint32 color = state().color.value();
+      for(auto n : range(width * height)) target[n] = color;
     }
-  }
-*/
-}
-
-auto pCanvas::_redraw() -> void {
-  @autoreleasepool {
-    [cocoaView setNeedsDisplay:YES];
   }
 }
 

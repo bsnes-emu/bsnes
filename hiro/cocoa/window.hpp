@@ -5,6 +5,7 @@
   hiro::mWindow* window;
   NSMenu* menuBar;
   NSMenu* rootMenu;
+  NSMenuItem* disableGatekeeperAutoRearm;
   NSTextField* statusBar;
 }
 -(id) initWith:(hiro::mWindow&)window;
@@ -19,6 +20,7 @@
 -(NSMenu*) menuBar;
 -(void) menuAbout;
 -(void) menuPreferences;
+-(void) menuDisableGatekeeperAutoRearm;
 -(void) menuQuit;
 -(NSTextField*) statusBar;
 @end
@@ -27,8 +29,6 @@ namespace hiro {
 
 struct pWindow : pObject {
   Declare(Window, Object)
-
-  static auto none() -> Window&;
 
   auto append(sLayout layout) -> void;
   auto append(sMenuBar menuBar) -> void;
@@ -54,8 +54,10 @@ struct pWindow : pObject {
   auto statusBarReposition() -> void;
 
   auto _append(mWidget& widget) -> void;
+  auto _geometry() -> Geometry;
 
   CocoaWindow* cocoaWindow = nullptr;
+  Geometry windowedGeometry;
 };
 
 }

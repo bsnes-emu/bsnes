@@ -20,5 +20,6 @@ Settings::Settings() {
 }
 
 Settings::~Settings() {
+  directory::create({configpath(), "icarus/"});
   file::write(locate({configpath(), "icarus/"}, "settings.bml"), BML::serialize(*this));
 }
