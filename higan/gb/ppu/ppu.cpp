@@ -45,10 +45,12 @@ auto PPU::main() -> void {
 }
 
 auto PPU::add_clocks(uint clocks) -> void {
-  status.lx += clocks;
-  clock += clocks * cpu.frequency;
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
-    co_switch(scheduler.active_thread = cpu.thread);
+  while(clocks--) {
+    status.lx++;
+    clock += cpu.frequency;
+    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
+      co_switch(scheduler.active_thread = cpu.thread);
+    }
   }
 }
 

@@ -39,15 +39,42 @@ auto APU::Master::run() -> void {
   right  >>= 1;
 }
 
-auto APU::Master::write(uint r, uint8 data) -> void {
-  if(r == 0) {  //$ff24  NR50
+auto APU::Master::read(uint16 addr) -> uint8 {
+  if(addr == 0xff24) {  //NR50
+    return left_in_enable << 7 | left_volume << 4 | right_in_enable << 3 | right_volume;
+  }
+
+  if(addr == 0xff25) {  //NR51
+    return channel4_left_enable  << 7
+         | channel3_left_enable  << 6
+         | channel2_left_enable  << 5
+         | channel1_left_enable  << 4
+         | channel4_right_enable << 3
+         | channel3_right_enable << 2
+         | channel2_right_enable << 1
+         | channel1_right_enable << 0;
+  }
+
+  if(addr == 0xff26) {  //NR52
+    return enable << 7 | 0x70
+         | apu.noise.enable   << 3
+         | apu.wave.enable    << 2
+         | apu.square2.enable << 1
+         | apu.square1.enable << 0;
+  }
+
+  return 0xff;
+}
+
+auto APU::Master::write(uint16 addr, uint8 data) -> void {
+  if(addr == 0xff24) {  //NR50
     left_in_enable  = data & 0x80;
     left_volume     = (data >> 4) & 7;
     right_in_enable = data & 0x08;
     right_volume    = (data >> 0) & 7;
   }
 
-  if(r == 1) {  //$ff25  NR51
+  if(addr == 0xff25) {  //NR51
     channel4_left_enable  = data & 0x80;
     channel3_left_enable  = data & 0x40;
     channel2_left_enable  = data & 0x20;
@@ -58,8 +85,15 @@ auto APU::Master::write(uint r, uint8 data) -> void {
     channel1_right_enable = data & 0x01;
   }
 
-  if(r == 2) {  //$ff26  NR52
+  if(addr == 0xff26) {  //NR52
     enable = data & 0x80;
+    if(!enable) {
+      apu.square1.power();
+      apu.square2.power();
+      apu.wave.power();
+      apu.noise.power();
+      power();
+    }
   }
 }
 

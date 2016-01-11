@@ -6,14 +6,16 @@ auto CPU::op_io() -> void {
 auto CPU::op_read(uint16 addr) -> uint8 {
   cycle_edge();
   add_clocks(4);
-  if(oamdma.active && (addr < 0xff80 || addr == 0xffff)) return 0xff;
+  //OAM is inaccessible during OAMDMA transfer
+  if(oamdma.active && oamdma.clock >= 8 && addr >= 0xfe00 && addr <= 0xfe9f) return 0xff;
   return bus.read(addr);
 }
 
 auto CPU::op_write(uint16 addr, uint8 data) -> void {
   cycle_edge();
   add_clocks(4);
-  if(oamdma.active && (addr < 0xff80 || addr == 0xffff)) return;
+  //OAM is inaccessible during OAMDMA transfer
+  if(oamdma.active && oamdma.clock >= 8 && addr >= 0xfe00 && addr <= 0xfe9f) return;
   bus.write(addr, data);
 }
 

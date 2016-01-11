@@ -1,45 +1,73 @@
+auto APU::Wave::get_pattern(uint5 offset) const -> uint4 {
+  return pattern[offset >> 1] >> (offset & 1 ? 0 : 4);
+}
+
 auto APU::Wave::run() -> void {
   if(period && --period == 0) {
     period = 1 * (2048 - frequency);
-    pattern_sample = pattern[++pattern_offset];
+    pattern_sample = get_pattern(++pattern_offset);
   }
 
-  uint4 sample = pattern_sample >> volume_shift;
+  static const uint shift[] = {4, 0, 1, 2};  //0%, 100%, 50%, 25%
+  uint4 sample = pattern_sample >> shift[volume];
   if(enable == false) sample = 0;
 
   output = sample;
 }
 
 auto APU::Wave::clock_length() -> void {
-  if(enable && counter) {
+  if(counter) {
     if(++length == 0) enable = false;
   }
 }
 
-auto APU::Wave::write(uint r, uint8 data) -> void {
-  if(r == 0) {  //$ff1a  NR30
+auto APU::Wave::read(uint16 addr) -> uint8 {
+  if(addr == 0xff1a) {  //NR30
+    return dac_enable << 7 | 0x7f;
+  }
+
+  if(addr == 0xff1b) {  //NR31
+    return 0xff;
+  }
+
+  if(addr == 0xff1c) {  //NR32
+    return 0x80 | volume << 5 | 0x1f;
+  }
+
+  if(addr == 0xff1d) {  //NR33
+    return 0xff;
+  }
+
+  if(addr == 0xff1e) {  //NR34
+    return 0x80 | counter << 6 | 0x3f;
+  }
+
+  if(addr >= 0xff30 && addr <= 0xff3f) {
+    return pattern[addr & 15];
+  }
+
+  return 0xff;
+}
+
+auto APU::Wave::write(uint16 addr, uint8 data) -> void {
+  if(addr == 0xff1a) {  //NR30
     dac_enable = data & 0x80;
     if(dac_enable == false) enable = false;
   }
 
-  if(r == 1) {  //$ff1b  NR31
+  if(addr == 0xff1b) {  //NR31
     length = data;
   }
 
-  if(r == 2) {  //$ff1c  NR32
-    switch((data >> 5) & 3) {
-      case 0: volume_shift = 4; break;  //  0%
-      case 1: volume_shift = 0; break;  //100%
-      case 2: volume_shift = 1; break;  // 50%
-      case 3: volume_shift = 2; break;  // 25%
-    }
+  if(addr == 0xff1c) {  //NR32
+    volume = data >> 5;
   }
 
-  if(r == 3) {  //$ff1d  NR33
+  if(addr == 0xff1d) {  //NR33
     frequency = (frequency & 0x0700) | data;
   }
 
-  if(r == 4) {  //$ff1e  NR34
+  if(addr == 0xff1e) {  //NR34
     bool initialize = data & 0x80;
     counter = data & 0x40;
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
@@ -50,24 +78,19 @@ auto APU::Wave::write(uint r, uint8 data) -> void {
       pattern_offset = 0;
     }
   }
-}
 
-auto APU::Wave::write_pattern(uint p, uint8 data) -> void {
-  p <<= 1;
-  pattern[p + 0] = (data >> 4) & 15;
-  pattern[p + 1] = (data >> 0) & 15;
+  if(addr >= 0xff30 && addr <= 0xff3f) {
+    pattern[addr & 15] = data;
+  }
 }
 
 auto APU::Wave::power() -> void {
   enable = 0;
 
   dac_enable = 0;
-  volume_shift = 0;
+  volume = 0;
   frequency = 0;
   counter = 0;
-
-  LinearFeedbackShiftRegisterGenerator r;
-  for(auto& n : pattern) n = r() & 15;
 
   output = 0;
   length = 0;
@@ -80,7 +103,7 @@ auto APU::Wave::serialize(serializer& s) -> void {
   s.integer(enable);
 
   s.integer(dac_enable);
-  s.integer(volume_shift);
+  s.integer(volume);
   s.integer(frequency);
   s.integer(counter);
   s.array(pattern);

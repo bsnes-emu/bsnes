@@ -81,13 +81,13 @@ auto CPU::interrupt_test() -> void {
 }
 
 auto CPU::interrupt_exec(uint16 pc) -> void {
+  op_io();
+  op_io();
+  op_io();
   r.ime = 0;
   op_write(--r[SP], r[PC] >> 8);
   op_write(--r[SP], r[PC] >> 0);
   r[PC] = pc;
-  op_io();
-  op_io();
-  op_io();
 }
 
 auto CPU::stop() -> bool {
@@ -201,8 +201,8 @@ auto CPU::power() -> void {
   status.interrupt_enable_vblank = 0;
 
   oamdma.active = false;
+  oamdma.clock = 0;
   oamdma.bank = 0;
-  oamdma.offset = 0;
 }
 
 }

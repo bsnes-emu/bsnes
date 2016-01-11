@@ -146,26 +146,14 @@ auto SDD1::mcurom_read(uint addr, uint8) -> uint8 {
 auto SDD1::mcurom_write(uint addr, uint8 data) -> void {
 }
 
+//map address=00-3f,80-bf:6000-7fff mask=0xe000
+//map address=70-7d:0000-7fff mask=0x8000
 auto SDD1::mcuram_read(uint addr, uint8 data) -> uint8 {
-  if((addr & 0x60e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
-    return ram.read(addr & 0x1fff, data);
-  }
-
-  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
-    return ram.read(addr & 0x1fff, data);
-  }
-
-  return data;
+  return ram.read(addr & 0x1fff, data);
 }
 
 auto SDD1::mcuram_write(uint addr, uint8 data) -> void {
-  if((addr & 0x60e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
-    return ram.write(addr & 0x1fff, data);
-  }
-
-  if((addr & 0xf08000) == 0x700000) {  //$70-7f:0000-7fff
-    return ram.write(addr & 0x1fff, data);
-  }
+  return ram.write(addr & 0x1fff, data);
 }
 
 }

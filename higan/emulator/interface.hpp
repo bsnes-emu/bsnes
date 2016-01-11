@@ -1,5 +1,4 @@
-#ifndef EMULATOR_INTERFACE_HPP
-#define EMULATOR_INTERFACE_HPP
+#pragma once
 
 namespace Emulator {
 
@@ -113,5 +112,3 @@ struct Interface {
 };
 
 }
-
-#endif

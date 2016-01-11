@@ -3,37 +3,44 @@
 //  154 scanlines/frame
 
 auto CPU::add_clocks(uint clocks) -> void {
-  if(oamdma.active) {
-    for(uint n = 0; n < 4 * clocks; n++) {
-      bus.write(0xfe00 + oamdma.offset, bus.read((oamdma.bank << 8) + oamdma.offset));
-      if(++oamdma.offset == 160) {
-        oamdma.active = false;
-        break;
+  if(system.sgb()) system.clocks_executed += clocks;
+
+  while(clocks--) {
+    if(oamdma.active) {
+      uint offset = oamdma.clock++;
+      if((offset & 3) == 0) {
+        offset >>= 2;
+        if(offset == 0) {
+          //warm-up
+        } else if(offset == 161) {
+          //cool-down; disable
+          oamdma.active = false;
+        } else {
+          bus.write(0xfe00 + offset - 1, bus.read((oamdma.bank << 8) + offset - 1));
+        }
       }
     }
+
+    if(++status.clock == 0) {
+      cartridge.mbc3.second();
+    }
+
+    //4MHz / N(hz) - 1 = mask
+    status.div++;
+    if((status.div &   15) == 0) timer_262144hz();
+    if((status.div &   63) == 0)  timer_65536hz();
+    if((status.div &  255) == 0)  timer_16384hz();
+    if((status.div &  511) == 0)   timer_8192hz();
+    if((status.div & 1023) == 0)   timer_4096hz();
+
+    ppu.clock -= ppu.frequency;
+    if(ppu.clock < 0) co_switch(scheduler.active_thread = ppu.thread);
+
+    apu.clock -= apu.frequency;
+    if(apu.clock < 0) co_switch(scheduler.active_thread = apu.thread);
   }
 
-  system.clocks_executed += clocks;
   if(system.sgb()) scheduler.exit(Scheduler::ExitReason::StepEvent);
-
-  status.clock += clocks;
-  if(status.clock >= 4 * 1024 * 1024) {
-    status.clock -= 4 * 1024 * 1024;
-    cartridge.mbc3.second();
-  }
-
-  //4MHz / N(hz) - 1 = mask
-  if((status.clock &   15) == 0) timer_262144hz();
-  if((status.clock &   63) == 0)  timer_65536hz();
-  if((status.clock &  255) == 0)  timer_16384hz();
-  if((status.clock &  511) == 0)   timer_8192hz();
-  if((status.clock & 1023) == 0)   timer_4096hz();
-
-  ppu.clock -= clocks * ppu.frequency;
-  if(ppu.clock < 0) co_switch(scheduler.active_thread = ppu.thread);
-
-  apu.clock -= clocks * apu.frequency;
-  if(apu.clock < 0) co_switch(scheduler.active_thread = apu.thread);
 }
 
 auto CPU::timer_262144hz() -> void {
@@ -61,8 +68,6 @@ auto CPU::timer_16384hz() -> void {
       interrupt_raise(Interrupt::Timer);
     }
   }
-
-  status.div++;
 }
 
 auto CPU::timer_8192hz() -> void {

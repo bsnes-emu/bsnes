@@ -103,9 +103,9 @@ auto LR35902::op_ld_sp_hl() {
 }
 
 template<uint x> auto LR35902::op_push_rr() {
+  op_io();
   op_write(--r[SP], r[x] >> 8);
   op_write(--r[SP], r[x] >> 0);
-  op_io();
 }
 
 template<uint x> auto LR35902::op_pop_rr() {
@@ -297,24 +297,24 @@ template<uint x> auto LR35902::op_dec_rr() {
 }
 
 auto LR35902::op_add_sp_n() {
-  op_io();
-  op_io();
   int n = (int8)op_read(r[PC]++);
   r.f.z = 0;
   r.f.n = 0;
   r.f.h = ((r[SP] & 0x0f) + (n & 0x0f)) > 0x0f;
   r.f.c = ((r[SP] & 0xff) + (n & 0xff)) > 0xff;
   r[SP] += n;
+  op_io();
+  op_io();
 }
 
 auto LR35902::op_ld_hl_sp_n() {
-  op_io();
   int n = (int8)op_read(r[PC]++);
   r.f.z = 0;
   r.f.n = 0;
   r.f.h = ((r[SP] & 0x0f) + (n & 0x0f)) > 0x0f;
   r.f.c = ((r[SP] & 0xff) + (n & 0xff)) > 0xff;
   r[HL] = r[SP] + n;
+  op_io();
 }
 
 //rotate/shift commands
@@ -618,20 +618,20 @@ template<uint x, bool y> auto LR35902::op_jr_f_n() {
 auto LR35902::op_call_nn() {
   uint8 lo = op_read(r[PC]++);
   uint8 hi = op_read(r[PC]++);
+  op_io();
   op_write(--r[SP], r[PC] >> 8);
   op_write(--r[SP], r[PC] >> 0);
   r[PC] = (hi << 8) | (lo << 0);
-  op_io();
 }
 
 template<uint x, bool y> auto LR35902::op_call_f_nn() {
   uint8 lo = op_read(r[PC]++);
   uint8 hi = op_read(r[PC]++);
   if(r.f[x] == y) {
+    op_io();
     op_write(--r[SP], r[PC] >> 8);
     op_write(--r[SP], r[PC] >> 0);
     r[PC] = (hi << 8) | (lo << 0);
-    op_io();
   }
 }
 
@@ -661,8 +661,8 @@ auto LR35902::op_reti() {
 }
 
 template<uint n> auto LR35902::op_rst_n() {
+  op_io();
   op_write(--r[SP], r[PC] >> 8);
   op_write(--r[SP], r[PC] >> 0);
   r[PC] = n;
-  op_io();
 }

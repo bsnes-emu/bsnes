@@ -1,5 +1,4 @@
-#ifndef EMULATOR_HPP
-#define EMULATOR_HPP
+#pragma once
 
 #include <nall/nall.hpp>
 #include <nall/dsp.hpp>
@@ -7,7 +6,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "096.03";
+  static const string Version = "096.04";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -55,5 +54,3 @@ template<typename R, typename... P> struct hook<auto (P...) -> R> {
 #endif
 
 using varuint = varuint_t<uint>;
-
-#endif

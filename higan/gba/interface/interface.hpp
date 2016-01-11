@@ -1,6 +1,4 @@
-#ifndef GBA_HPP
 namespace GameBoyAdvance {
-#endif
 
 struct ID {
   enum : uint {
@@ -55,6 +53,4 @@ private:
 
 extern Interface* interface;
 
-#ifndef GBA_HPP
 }
-#endif

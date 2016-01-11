@@ -37,7 +37,7 @@ auto APU::Square1::sweep(bool update) -> void {
 }
 
 auto APU::Square1::clock_length() -> void {
-  if(counter && enable) {
+  if(counter) {
     if(++length == 0) enable = false;
   }
 }
@@ -58,31 +58,55 @@ auto APU::Square1::clock_envelope() -> void {
   }
 }
 
-auto APU::Square1::write(uint r, uint8 data) -> void {
-  if(r == 0) {  //$ff10  NR10
+auto APU::Square1::read(uint16 addr) -> uint8 {
+  if(addr == 0xff10) {  //NR10
+    return 0x80 | sweep_frequency << 4 | sweep_direction << 3 | sweep_shift;
+  }
+
+  if(addr == 0xff11) {  //NR11
+    return duty << 6 | 0x3f;
+  }
+
+  if(addr == 0xff12) {  //NR12
+    return envelope_volume << 4 | envelope_direction << 3 | envelope_frequency;
+  }
+
+  if(addr == 0xff13) {  //NR13
+    return 0xff;
+  }
+
+  if(addr == 0xff14) {  //NR14
+    return 0x80 | counter << 6 | 0x3f;
+  }
+
+  return 0xff;
+}
+
+auto APU::Square1::write(uint16 addr, uint8 data) -> void {
+  if(addr == 0xff10) {  //NR10
     if(sweep_negate && sweep_direction && !(data & 0x08)) enable = false;
     sweep_frequency = (data >> 4) & 7;
     sweep_direction = data & 0x08;
     sweep_shift = data & 0x07;
   }
 
-  if(r == 1) {  //$ff11  NR11
+  if(addr == 0xff11) {  //NR11
     duty = data >> 6;
     length = data & 0x3f;
   }
 
-  if(r == 2) {  //$ff12  NR12
+  if(addr == 0xff12) {  //NR12
     envelope_volume = data >> 4;
     envelope_direction = data & 0x08;
     envelope_frequency = data & 0x07;
     if(dac_enable() == false) enable = false;
   }
 
-  if(r == 3) {  //$ff13  NR13
+  if(addr == 0xff13) {  //NR13
     frequency = (frequency & 0x0700) | data;
   }
 
-  if(r == 4) {  //$ff14  NR14
+  if(addr == 0xff14) {  //NR14
     bool initialize = data & 0x80;
     counter = data & 0x40;
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);

@@ -2,9 +2,14 @@ auto APU::Noise::dac_enable() const -> bool {
   return (envelope_volume || envelope_direction);
 }
 
+auto APU::Noise::get_period() const -> uint {
+  static const uint table[] = {4, 8, 16, 24, 32, 40, 48, 56};
+  return table[divisor] << frequency;
+}
+
 auto APU::Noise::run() -> void {
   if(period && --period == 0) {
-    period = divisor << frequency;
+    period = get_period();
     if(frequency < 14) {
       bool bit = (lfsr ^ (lfsr >> 1)) & 1;
       lfsr = (lfsr >> 1) ^ (bit << (narrow_lfsr ? 6 : 14));
@@ -18,7 +23,7 @@ auto APU::Noise::run() -> void {
 }
 
 auto APU::Noise::clock_length() -> void {
-  if(enable && counter) {
+  if(counter) {
     if(++length == 0) enable = false;
   }
 }
@@ -31,27 +36,50 @@ auto APU::Noise::clock_envelope() -> void {
   }
 }
 
-auto APU::Noise::write(uint r, uint8 data) -> void {
-  if(r == 1) {  //$ff20  NR41
+auto APU::Noise::read(uint16 addr) -> uint8 {
+  if(addr == 0xff1f) {  //NR40
+    return 0xff;
+  }
+
+  if(addr == 0xff20) {  //NR41
+    return 0xff;
+  }
+
+  if(addr == 0xff21) {  //NR42
+    return envelope_volume << 4 | envelope_direction << 3 | envelope_frequency;
+  }
+
+  if(addr == 0xff22) {  //NR43
+    return frequency << 4 | narrow_lfsr << 3 | divisor;
+  }
+
+  if(addr == 0xff23) {  //NR44
+    return 0x80 | counter << 6 | 0x3f;
+  }
+
+  return 0xff;
+}
+
+auto APU::Noise::write(uint16 addr, uint8 data) -> void {
+  if(addr == 0xff20) {  //NR41
     length = data & 0x3f;
   }
 
-  if(r == 2) {  //$ff21  NR42
+  if(addr == 0xff21) {  //NR42
     envelope_volume = data >> 4;
     envelope_direction = data & 0x08;
     envelope_frequency = data & 0x07;
     if(dac_enable() == false) enable = false;
   }
 
-  if(r == 3) {  //$ff22  NR43
+  if(addr == 0xff22) {  //NR43
     frequency = data >> 4;
     narrow_lfsr = data & 0x08;
-    divisor = (data & 0x07) << 3;
-    if(divisor == 0) divisor = 4;
-    period = divisor << frequency;
+    divisor = data & 0x07;
+    period = get_period();
   }
 
-  if(r == 4) {  //$ff34  NR44
+  if(addr == 0xff23) {  //NR44
     bool initialize = data & 0x80;
     counter = data & 0x40;
 

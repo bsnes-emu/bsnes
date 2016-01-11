@@ -1,5 +1,4 @@
-#ifndef SFC_HPP
-#define SFC_HPP
+#pragma once
 
 #include <emulator/emulator.hpp>
 #include <processor/arm/arm.hpp>
@@ -71,10 +70,9 @@ namespace SuperFamicom {
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>
   #include <sfc/cheat/cheat.hpp>
-  #include <sfc/interface/interface.hpp>
 
   #include <sfc/memory/memory-inline.hpp>
   #include <sfc/ppu/counter/counter-inline.hpp>
 }
 
-#endif
+#include <sfc/interface/interface.hpp>

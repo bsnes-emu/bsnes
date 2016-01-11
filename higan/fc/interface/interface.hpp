@@ -1,6 +1,4 @@
-#ifndef FC_HPP
 namespace Famicom {
-#endif
 
 struct ID {
   enum : uint {
@@ -58,6 +56,4 @@ private:
 
 extern Interface* interface;
 
-#ifndef FC_HPP
 }
-#endif

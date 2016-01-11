@@ -1,7 +1,6 @@
 auto APU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
-  s.array(mmio_data);
   s.integer(sequencer_base);
   s.integer(sequencer_step);
 

@@ -65,7 +65,6 @@ auto APU::power() -> void {
   create(Main, 2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
-  for(auto& n : mmio_data) n = 0x00;
   sequencer_base = 0;
   sequencer_step = 0;
 
@@ -74,42 +73,30 @@ auto APU::power() -> void {
   wave.power();
   noise.power();
   master.power();
+
+  LinearFeedbackShiftRegisterGenerator r;
+  for(auto& n : wave.pattern) n = r();
 }
 
 auto APU::mmio_read(uint16 addr) -> uint8 {
-  static const uint8 table[48] = {
-    0x80, 0x3f, 0x00, 0xff, 0xbf,                          //square1
-    0xff, 0x3f, 0x00, 0xff, 0xbf,                          //square2
-    0x7f, 0xff, 0x9f, 0xff, 0xbf,                          //wave
-    0xff, 0xff, 0x00, 0x00, 0xbf,                          //noise
-    0x00, 0x00, 0x70,                                      //master
-    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  //unmapped
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        //wave pattern
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        //wave pattern
-  };
-
-  if(addr == 0xff26) {
-    uint8 data = master.enable << 7;
-    if(square1.enable) data |= 0x01;
-    if(square2.enable) data |= 0x02;
-    if(   wave.enable) data |= 0x04;
-    if(  noise.enable) data |= 0x08;
-    return data | table[addr - 0xff10];
-  }
-
-  if(addr >= 0xff10 && addr <= 0xff3f) return mmio_data[addr - 0xff10] | table[addr - 0xff10];
+//if(!master.enable && addr != 0xff26) return 0xff;
+  if(addr >= 0xff10 && addr <= 0xff14) return square1.read(addr);
+  if(addr >= 0xff15 && addr <= 0xff19) return square2.read(addr);
+  if(addr >= 0xff1a && addr <= 0xff1e) return wave.read(addr);
+  if(addr >= 0xff1f && addr <= 0xff23) return noise.read(addr);
+  if(addr >= 0xff24 && addr <= 0xff26) return master.read(addr);
+  if(addr >= 0xff30 && addr <= 0xff3f) return wave.read(addr);
   return 0xff;
 }
 
 auto APU::mmio_write(uint16 addr, uint8 data) -> void {
-  if(addr >= 0xff10 && addr <= 0xff3f) mmio_data[addr - 0xff10] = data;
-
-  if(addr >= 0xff10 && addr <= 0xff14) return square1.write        (addr - 0xff10, data);
-  if(addr >= 0xff15 && addr <= 0xff19) return square2.write        (addr - 0xff15, data);
-  if(addr >= 0xff1a && addr <= 0xff1e) return    wave.write        (addr - 0xff1a, data);
-  if(addr >= 0xff1f && addr <= 0xff23) return   noise.write        (addr - 0xff1f, data);
-  if(addr >= 0xff24 && addr <= 0xff26) return  master.write        (addr - 0xff24, data);
-  if(addr >= 0xff30 && addr <= 0xff3f) return    wave.write_pattern(addr - 0xff30, data);
+  if(!master.enable && addr != 0xff26) return;
+  if(addr >= 0xff10 && addr <= 0xff14) return square1.write(addr, data);
+  if(addr >= 0xff15 && addr <= 0xff19) return square2.write(addr, data);
+  if(addr >= 0xff1a && addr <= 0xff1e) return wave.write(addr, data);
+  if(addr >= 0xff1f && addr <= 0xff23) return noise.write(addr, data);
+  if(addr >= 0xff24 && addr <= 0xff26) return master.write(addr, data);
+  if(addr >= 0xff30 && addr <= 0xff3f) return wave.write(addr, data);
 }
 
 }

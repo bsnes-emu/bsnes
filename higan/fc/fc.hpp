@@ -1,5 +1,4 @@
-#ifndef FC_HPP
-#define FC_HPP
+#pragma once
 
 #include <emulator/emulator.hpp>
 #include <processor/r6502/r6502.hpp>
@@ -53,7 +52,6 @@ namespace Famicom {
   #include <fc/ppu/ppu.hpp>
   #include <fc/cheat/cheat.hpp>
   #include <fc/video/video.hpp>
-  #include <fc/interface/interface.hpp>
 }
 
-#endif
+#include <fc/interface/interface.hpp>

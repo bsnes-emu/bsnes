@@ -55,6 +55,6 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.interrupt_enable_vblank);
 
   s.integer(oamdma.active);
+  s.integer(oamdma.clock);
   s.integer(oamdma.bank);
-  s.integer(oamdma.offset);
 }

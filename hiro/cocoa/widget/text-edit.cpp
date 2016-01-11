@@ -78,15 +78,13 @@ auto pTextEdit::setCursor(Cursor cursor) -> void {
 
 auto pTextEdit::setEditable(bool editable) -> void {
   @autoreleasepool {
-    [[cocoaView content] setEditable:editable];
+    [[cocoaView content] setEditable:(editable && self().enabled(true))];
   }
 }
 
 auto pTextEdit::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
-  @autoreleasepool {
-    [[cocoaView content] setEnabled:enabled];
-  }
+  setEditable(self().editable);  //Cocoa lacks NSTextView::setEnabled; simulate via setEnabled()
 }
 
 auto pTextEdit::setFont(const Font& font) -> void {

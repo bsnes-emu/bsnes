@@ -1,6 +1,7 @@
 struct Master {
   auto run() -> void;
-  auto write(uint r, uint8 data) -> void;
+  auto read(uint16 addr) -> uint8;
+  auto write(uint16 addr, uint8 data) -> void;
   auto power() -> void;
 
   auto serialize(serializer&) -> void;

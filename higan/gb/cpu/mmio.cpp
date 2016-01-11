@@ -53,7 +53,7 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff04) {  //DIV
-    return status.div;
+    return status.div >> 8;
   }
 
   if(addr == 0xff05) {  //TIMA
@@ -188,8 +188,8 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
 
   if(addr == 0xff46) {  //DMA
     oamdma.active = true;
+    oamdma.clock = 0;
     oamdma.bank = data;
-    oamdma.offset = 0;
     return;
   }
 
@@ -225,7 +225,7 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
 
     if(status.dma_mode == 0) {
       do {
-        for(unsigned n = 0; n < 16; n++) {
+        for(auto n : range(16)) {
           dma_write(status.dma_target++, dma_read(status.dma_source++));
         }
         add_clocks(8 << status.speed_double);

@@ -1,6 +1,4 @@
-#ifndef SFC_HPP
 namespace SuperFamicom {
-#endif
 
 struct ID {
   enum : uint {
@@ -126,6 +124,4 @@ struct Interface : Emulator::Interface {
 
 extern Interface* interface;
 
-#ifndef SFC_HPP
 }
-#endif
