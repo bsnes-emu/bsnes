@@ -1,6 +1,6 @@
 struct KonamiVRC3 : Board {
   KonamiVRC3(Markup::Node& document) : Board(document), vrc3(*this) {
-    settings.mirror = document["cartridge/mirror/mode"].text() == "vertical" ? 1 : 0;
+    settings.mirror = document["board/mirror/mode"].text() == "vertical" ? 1 : 0;
   }
 
   auto main() -> void {

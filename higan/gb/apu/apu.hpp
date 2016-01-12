@@ -15,8 +15,8 @@ struct APU : Thread, MMIO {
   #include "noise/noise.hpp"
   #include "master/master.hpp"
 
-  uint12 sequencer_base;
-  uint3 sequencer_step;
+  uint12 stage;
+  uint3 phase;
 
   Square1 square1;
   Square2 square2;

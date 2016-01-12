@@ -77,15 +77,27 @@ auto PPU::mmio_read(uint16 addr) -> uint8 {
     return status.wx;
   }
 
-  if(addr == 0xff69) { //BGPD
+  if(addr == 0xff4f) {  //VBK
+    return status.vram_bank;
+  }
+
+  if(addr == 0xff68) {  //BGPI
+    return status.bgpi_increment << 7 | status.bgpi;
+  }
+
+  if(addr == 0xff69) {  //BGPD
     return bgpd[status.bgpi];
+  }
+
+  if(addr == 0xff6a) {  //OBPI
+    return status.obpi_increment << 7 | status.obpi;
   }
 
   if(addr == 0xff6b) {  //OBPD
     return obpd[status.obpi];
   }
 
-  return 0xff;
+  return 0xff;  //should never occur
 }
 
 auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
@@ -94,7 +106,13 @@ auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
 
   if(addr == 0xff40) {  //LCDC
     if(status.display_enable == false && (data & 0x80)) {
-      status.lx = 0;  //unverified behavior; fixes Super Mario Land 2 - Tree Zone
+      status.ly = 0;
+      status.lx = 0;
+
+      //restart cothread to begin new frame
+      auto clock = this->clock;
+      create(Main, 4 * 1024 * 1024);
+      this->clock = clock;
     }
 
     status.display_enable = data & 0x80;

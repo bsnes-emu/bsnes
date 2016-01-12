@@ -2,8 +2,6 @@ struct PPU : Thread, MMIO {
   static auto Main() -> void;
   auto main() -> void;
   auto add_clocks(uint clocks) -> void;
-  auto scanline() -> void;
-  auto frame() -> void;
 
   auto hflip(uint data) const -> uint;
 
@@ -38,6 +36,9 @@ struct PPU : Thread, MMIO {
   uint8 obp[2][4];
   uint8 bgpd[64];
   uint8 obpd[64];
+
+  function<auto () -> void> scanline;
+  function<auto () -> void> run;
 
   struct Status {
     uint lx;

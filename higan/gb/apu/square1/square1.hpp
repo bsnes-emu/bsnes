@@ -1,38 +1,38 @@
 struct Square1 {
-  auto dac_enable() const -> bool;
+  auto dacEnable() const -> bool;
 
   auto run() -> void;
   auto sweep(bool update) -> void;
-  auto clock_length() -> void;
-  auto clock_sweep() -> void;
-  auto clock_envelope() -> void;
+  auto clockLength() -> void;
+  auto clockSweep() -> void;
+  auto clockEnvelope() -> void;
   auto read(uint16 addr) -> uint8;
   auto write(uint16 addr, uint8 data) -> void;
-  auto power() -> void;
+  auto power(bool initializeLength = true) -> void;
 
   auto serialize(serializer&) -> void;
 
   bool enable;
 
-  uint3 sweep_frequency;
-  bool sweep_direction;
-  uint3 sweep_shift;
-  bool sweep_negate;
+  uint3 sweepFrequency;
+  bool sweepDirection;
+  uint3 sweepShift;
+  bool sweepNegate;
   uint2 duty;
-  uint6 length;
-  uint4 envelope_volume;
-  bool envelope_direction;
-  uint3 envelope_frequency;
+  uint length;
+  uint4 envelopeVolume;
+  bool envelopeDirection;
+  uint3 envelopeFrequency;
   uint11 frequency;
   bool counter;
 
   int16 output;
-  bool duty_output;
+  bool dutyOutput;
   uint3 phase;
   uint period;
-  uint3 envelope_period;
-  uint3 sweep_period;
-  int frequency_shadow;
-  bool sweep_enable;
+  uint3 envelopePeriod;
+  uint3 sweepPeriod;
+  int frequencyShadow;
+  bool sweepEnable;
   uint4 volume;
 };

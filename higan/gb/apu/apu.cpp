@@ -20,24 +20,24 @@ auto APU::main() -> void {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
-    if(sequencer_base == 0) {  //512hz
-      if(sequencer_step == 0 || sequencer_step == 2 || sequencer_step == 4 || sequencer_step == 6) {  //256hz
-        square1.clock_length();
-        square2.clock_length();
-        wave.clock_length();
-        noise.clock_length();
+    if(stage == 0) {  //512hz
+      if(phase == 0 || phase == 2 || phase == 4 || phase == 6) {  //256hz
+        square1.clockLength();
+        square2.clockLength();
+        wave.clockLength();
+        noise.clockLength();
       }
-      if(sequencer_step == 2 || sequencer_step == 6) {  //128hz
-        square1.clock_sweep();
+      if(phase == 2 || phase == 6) {  //128hz
+        square1.clockSweep();
       }
-      if(sequencer_step == 7) {  //64hz
-        square1.clock_envelope();
-        square2.clock_envelope();
-        noise.clock_envelope();
+      if(phase == 7) {  //64hz
+        square1.clockEnvelope();
+        square2.clockEnvelope();
+        noise.clockEnvelope();
       }
-      sequencer_step++;
+      phase++;
     }
-    sequencer_base++;
+    stage++;
 
     square1.run();
     square2.run();
@@ -45,9 +45,9 @@ auto APU::main() -> void {
     noise.run();
     master.run();
 
-    hipass(master.center, master.center_bias);
-    hipass(master.left, master.left_bias);
-    hipass(master.right, master.right_bias);
+    hipass(master.center, master.centerBias);
+    hipass(master.left, master.leftBias);
+    hipass(master.right, master.rightBias);
 
     interface->audioSample(master.left, master.right);
 
@@ -65,8 +65,8 @@ auto APU::power() -> void {
   create(Main, 2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
-  sequencer_base = 0;
-  sequencer_step = 0;
+  stage = 0;
+  phase = 0;
 
   square1.power();
   square2.power();

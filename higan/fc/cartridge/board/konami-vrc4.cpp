@@ -1,7 +1,7 @@
 struct KonamiVRC4 : Board {
   KonamiVRC4(Markup::Node& document) : Board(document), vrc4(*this) {
-    settings.pinout.a0 = 1 << document["cartridge/chip/pinout/a0"].natural();
-    settings.pinout.a1 = 1 << document["cartridge/chip/pinout/a1"].natural();
+    settings.pinout.a0 = 1 << document["board/chip/pinout/a0"].natural();
+    settings.pinout.a1 = 1 << document["board/chip/pinout/a1"].natural();
   }
 
   auto main() -> void {

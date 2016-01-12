@@ -1,29 +1,29 @@
 struct Noise {
-  auto dac_enable() const -> bool;
-  auto get_period() const -> uint;
+  auto dacEnable() const -> bool;
+  auto getPeriod() const -> uint;
 
   auto run() -> void;
-  auto clock_length() -> void;
-  auto clock_envelope() -> void;
+  auto clockLength() -> void;
+  auto clockEnvelope() -> void;
   auto read(uint16 addr) -> uint8;
   auto write(uint16 addr, uint8 data) -> void;
-  auto power() -> void;
+  auto power(bool initializeLength = true) -> void;
 
   auto serialize(serializer&) -> void;
 
   bool enable;
 
-  uint4 envelope_volume;
-  bool envelope_direction;
-  uint3 envelope_frequency;
+  uint4 envelopeVolume;
+  bool envelopeDirection;
+  uint3 envelopeFrequency;
   uint4 frequency;
-  bool narrow_lfsr;
+  bool narrow;
   uint3 divisor;
   bool counter;
 
   int16 output;
-  uint6 length;
-  uint3 envelope_period;
+  uint length;
+  uint3 envelopePeriod;
   uint4 volume;
   uint period;
   uint15 lfsr;

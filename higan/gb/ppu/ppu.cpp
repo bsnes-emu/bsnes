@@ -24,23 +24,49 @@ auto PPU::main() -> void {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
+    status.lx = 0;
     interface->lcdScanline();  //Super Game Boy notification
 
-    if(status.display_enable && status.ly < 144) {
-      if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
-      add_clocks(92);
-      for(auto n : range(160)) {
-        system.cgb() ? cgb_run() : dmg_run();
-        add_clocks(1);
+    if(status.display_enable) {
+      //LYC of zero triggers on LY==153
+      if((status.lyc && status.ly == status.lyc) || (!status.lyc && status.ly == 153)) {
+        if(status.interrupt_lyc) cpu.interrupt_raise(CPU::Interrupt::Stat);
       }
-      if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
-      cpu.hblank();
-      add_clocks(204);
-    } else {
-      add_clocks(456);
+
+      if(status.ly <= 143) {
+        scanline();
+        if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
+      }
+
+      if(status.ly == 144) {
+        if(status.interrupt_vblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
+        else if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);  //hardware quirk
+        cpu.interrupt_raise(CPU::Interrupt::Vblank);
+      }
     }
 
-    scanline();
+    add_clocks(92);
+
+    if(status.ly <= 143) {
+      for(auto n : range(160)) {
+        if(status.display_enable) run();
+        add_clocks(1);
+      }
+
+      if(status.display_enable) {
+        if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
+        cpu.hblank();
+      }
+    } else {
+      add_clocks(160);
+    }
+
+    add_clocks(204);
+
+    if(++status.ly == 154) {
+      status.ly = 0;
+      scheduler.exit(Scheduler::ExitReason::FrameEvent);
+    }
   }
 }
 
@@ -54,29 +80,6 @@ auto PPU::add_clocks(uint clocks) -> void {
   }
 }
 
-auto PPU::scanline() -> void {
-  status.lx = 0;
-  if(++status.ly == 154) frame();
-
-  if(status.ly < 144) {
-    system.cgb() ? cgb_scanline() : dmg_scanline();
-  }
-
-  if(status.display_enable && status.interrupt_lyc == true) {
-    if(status.ly == status.lyc) cpu.interrupt_raise(CPU::Interrupt::Stat);
-  }
-
-  if(status.display_enable && status.ly == 144) {
-    cpu.interrupt_raise(CPU::Interrupt::Vblank);
-    if(status.interrupt_vblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
-  }
-}
-
-auto PPU::frame() -> void {
-  status.ly = 0;
-  scheduler.exit(Scheduler::ExitReason::FrameEvent);
-}
-
 auto PPU::hflip(uint data) const -> uint {
   return ((data & 0x8080) >> 7) | ((data & 0x4040) >> 5)
        | ((data & 0x2020) >> 3) | ((data & 0x1010) >> 1)
@@ -86,6 +89,14 @@ auto PPU::hflip(uint data) const -> uint {
 
 auto PPU::power() -> void {
   create(Main, 4 * 1024 * 1024);
+
+  if(system.cgb()) {
+    scanline = {&PPU::cgb_scanline, this};
+    run = {&PPU::cgb_run, this};
+  } else {
+    scanline = {&PPU::dmg_scanline, this};
+    run = {&PPU::dmg_run, this};
+  }
 
   for(uint n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
   for(uint n = 0xfe00; n <= 0xfe9f; n++) bus.mmio[n] = this;  //OAM

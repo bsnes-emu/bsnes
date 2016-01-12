@@ -4,7 +4,7 @@ auto APU::Master::run() -> void {
     left   = 0;
     right  = 0;
 
-    center_bias = left_bias = right_bias = 0;
+    centerBias = leftBias = rightBias = 0;
     return;
   }
 
@@ -16,21 +16,21 @@ auto APU::Master::run() -> void {
   center = (sample * 512) - 16384;
 
   sample = 0;
-  if(channel1_left_enable) sample += apu.square1.output;
-  if(channel2_left_enable) sample += apu.square2.output;
-  if(channel3_left_enable) sample +=    apu.wave.output;
-  if(channel4_left_enable) sample +=   apu.noise.output;
+  if(square1.leftEnable) sample += apu.square1.output;
+  if(square2.leftEnable) sample += apu.square2.output;
+  if(   wave.leftEnable) sample +=    apu.wave.output;
+  if(  noise.leftEnable) sample +=   apu.noise.output;
   sample = (sample * 512) - 16384;
-  sample = (sample * (left_volume + 1)) / 8;
+  sample = (sample * (leftVolume + 1)) / 8;
   left = sample;
 
   sample = 0;
-  if(channel1_right_enable) sample += apu.square1.output;
-  if(channel2_right_enable) sample += apu.square2.output;
-  if(channel3_right_enable) sample +=    apu.wave.output;
-  if(channel4_right_enable) sample +=   apu.noise.output;
+  if(square1.rightEnable) sample += apu.square1.output;
+  if(square2.rightEnable) sample += apu.square2.output;
+  if(   wave.rightEnable) sample +=    apu.wave.output;
+  if(  noise.rightEnable) sample +=   apu.noise.output;
   sample = (sample * 512) - 16384;
-  sample = (sample * (right_volume + 1)) / 8;
+  sample = (sample * (rightVolume + 1)) / 8;
   right = sample;
 
   //reduce audio volume
@@ -41,18 +41,18 @@ auto APU::Master::run() -> void {
 
 auto APU::Master::read(uint16 addr) -> uint8 {
   if(addr == 0xff24) {  //NR50
-    return left_in_enable << 7 | left_volume << 4 | right_in_enable << 3 | right_volume;
+    return leftEnable << 7 | leftVolume << 4 | rightEnable << 3 | rightVolume;
   }
 
   if(addr == 0xff25) {  //NR51
-    return channel4_left_enable  << 7
-         | channel3_left_enable  << 6
-         | channel2_left_enable  << 5
-         | channel1_left_enable  << 4
-         | channel4_right_enable << 3
-         | channel3_right_enable << 2
-         | channel2_right_enable << 1
-         | channel1_right_enable << 0;
+    return noise.leftEnable    << 7
+         | wave.leftEnable     << 6
+         | square2.leftEnable  << 5
+         | square1.leftEnable  << 4
+         | noise.rightEnable   << 3
+         | wave.rightEnable    << 2
+         | square2.rightEnable << 1
+         | square1.rightEnable << 0;
   }
 
   if(addr == 0xff26) {  //NR52
@@ -68,79 +68,80 @@ auto APU::Master::read(uint16 addr) -> uint8 {
 
 auto APU::Master::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff24) {  //NR50
-    left_in_enable  = data & 0x80;
-    left_volume     = (data >> 4) & 7;
-    right_in_enable = data & 0x08;
-    right_volume    = (data >> 0) & 7;
+    leftEnable  = data & 0x80;
+    leftVolume  = (data >> 4) & 7;
+    rightEnable = data & 0x08;
+    rightVolume = (data >> 0) & 7;
   }
 
   if(addr == 0xff25) {  //NR51
-    channel4_left_enable  = data & 0x80;
-    channel3_left_enable  = data & 0x40;
-    channel2_left_enable  = data & 0x20;
-    channel1_left_enable  = data & 0x10;
-    channel4_right_enable = data & 0x08;
-    channel3_right_enable = data & 0x04;
-    channel2_right_enable = data & 0x02;
-    channel1_right_enable = data & 0x01;
+    noise.leftEnable    = data & 0x80;
+    wave.leftEnable     = data & 0x40;
+    square2.leftEnable  = data & 0x20;
+    square1.leftEnable  = data & 0x10;
+    noise.rightEnable   = data & 0x08;
+    wave.rightEnable    = data & 0x04;
+    square2.rightEnable = data & 0x02;
+    square1.rightEnable = data & 0x01;
   }
 
   if(addr == 0xff26) {  //NR52
     enable = data & 0x80;
     if(!enable) {
-      apu.square1.power();
-      apu.square2.power();
-      apu.wave.power();
-      apu.noise.power();
+      //power(bool) resets length counters when true (eg for CGB only)
+      apu.square1.power(system.cgb());
+      apu.square2.power(system.cgb());
+      apu.wave.power(system.cgb());
+      apu.noise.power(system.cgb());
       power();
     }
   }
 }
 
 auto APU::Master::power() -> void {
-  left_in_enable = 0;
-  left_volume = 0;
-  right_in_enable = 0;
-  right_volume = 0;
-  channel4_left_enable  = 0;
-  channel3_left_enable  = 0;
-  channel2_left_enable  = 0;
-  channel1_left_enable  = 0;
-  channel4_right_enable = 0;
-  channel3_right_enable = 0;
-  channel2_right_enable = 0;
-  channel1_right_enable = 0;
+  leftEnable = 0;
+  leftVolume = 0;
+  rightEnable = 0;
+  rightVolume = 0;
+  noise.leftEnable = 0;
+  wave.leftEnable = 0;
+  square2.leftEnable = 0;
+  square1.leftEnable = 0;
+  noise.rightEnable = 0;
+  wave.rightEnable = 0;
+  square2.rightEnable = 0;
+  square1.rightEnable = 0;
   enable = 0;
 
   center = 0;
   left   = 0;
   right  = 0;
 
-  center_bias = 0;
-  left_bias = 0;
-  right_bias = 0;
+  centerBias = 0;
+  leftBias = 0;
+  rightBias = 0;
 }
 
 auto APU::Master::serialize(serializer& s) -> void {
-  s.integer(left_in_enable);
-  s.integer(left_volume);
-  s.integer(right_in_enable);
-  s.integer(right_volume);
-  s.integer(channel4_left_enable);
-  s.integer(channel3_left_enable);
-  s.integer(channel2_left_enable);
-  s.integer(channel1_left_enable);
-  s.integer(channel4_right_enable);
-  s.integer(channel3_right_enable);
-  s.integer(channel2_right_enable);
-  s.integer(channel1_right_enable);
+  s.integer(leftEnable);
+  s.integer(leftVolume);
+  s.integer(rightEnable);
+  s.integer(rightVolume);
+  s.integer(noise.leftEnable);
+  s.integer(wave.leftEnable);
+  s.integer(square2.leftEnable);
+  s.integer(square1.leftEnable);
+  s.integer(noise.rightEnable);
+  s.integer(wave.rightEnable);
+  s.integer(square2.rightEnable);
+  s.integer(square1.rightEnable);
   s.integer(enable);
 
   s.integer(center);
   s.integer(left);
   s.integer(right);
 
-  s.integer(center_bias);
-  s.integer(left_bias);
-  s.integer(right_bias);
+  s.integer(centerBias);
+  s.integer(leftBias);
+  s.integer(rightBias);
 }

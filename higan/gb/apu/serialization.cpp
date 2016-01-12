@@ -1,8 +1,8 @@
 auto APU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
-  s.integer(sequencer_base);
-  s.integer(sequencer_step);
+  s.integer(stage);
+  s.integer(phase);
 
   square1.serialize(s);
   square2.serialize(s);
