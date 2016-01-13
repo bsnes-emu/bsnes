@@ -12,14 +12,14 @@ auto Icarus::error() const -> string {
   return errorMessage;
 }
 
-auto Icarus::success() -> bool {
+auto Icarus::success(string location) -> string {
   errorMessage = "";
-  return true;
+  return location;
 }
 
-auto Icarus::failure(string message) -> bool {
+auto Icarus::failure(string message) -> string {
   errorMessage = message;
-  return false;
+  return {};
 }
 
 auto Icarus::manifest(string location) -> string {
@@ -38,7 +38,7 @@ auto Icarus::manifest(string location) -> string {
   return "";
 }
 
-auto Icarus::import(string location) -> bool {
+auto Icarus::import(string location) -> string {
   location.transform("\\", "/").rtrim("/");
   if(!file::exists(location)) return failure("file does not exist");
   if(!file::readable(location)) return failure("file is unreadable");

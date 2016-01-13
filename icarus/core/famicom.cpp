@@ -37,7 +37,7 @@ auto Icarus::famicomManifest(vector<uint8>& buffer, string location, uint* prgro
   return markup;
 }
 
-auto Icarus::famicomImport(vector<uint8>& buffer, string location) -> bool {
+auto Icarus::famicomImport(vector<uint8>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Famicom/", name, ".fc/"};
@@ -52,7 +52,7 @@ auto Icarus::famicomImport(vector<uint8>& buffer, string location) -> bool {
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "ines.rom"}, buffer.data(), 16);
   file::write({target, "program.rom"}, buffer.data() + 16, prgrom);
-  if(!chrrom) return success();
+  if(!chrrom) return success(target);
   file::write({target, "character.rom"}, buffer.data() + 16 + prgrom, chrrom);
-  return success();
+  return success(target);
 }

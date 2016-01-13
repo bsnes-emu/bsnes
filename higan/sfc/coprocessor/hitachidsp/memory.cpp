@@ -1,11 +1,14 @@
 auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
-  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
+  if((addr & 0x40ec00) == 0x006c00) {  //$00-3f,80-bf:6c00-6cff,7c00-7cff
     return dsp_read(addr, 0x00);
+  }
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-6bff,7000-7bff
+    return dram_read(addr, 0x00);
   }
   if((addr & 0x408000) == 0x008000) {  //$00-3f,80-bf:8000-ffff
     if(rom.size() == 0) return 0x00;
     addr = ((addr & 0x3f0000) >> 1) | (addr & 0x7fff);
-    addr = bus.mirror(addr, rom.size());
+    addr = Bus::mirror(addr, rom.size());
     return rom.read(addr, 0);
   }
   if((addr & 0xf88000) == 0x700000) {  //$70-77:0000-7fff
@@ -18,8 +21,11 @@ auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
 }
 
 auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
-  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff
-    return dsp_write(addr & 0x1fff, data);
+  if((addr & 0x40ec00) == 0x006c00) {  //$00-3f,80-bf:6c00-6fff,7c00-7fff
+    return dsp_write(addr, data);
+  }
+  if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-6bff,7000-7bff
+    return dram_write(addr, data);
   }
   if((addr & 0xf88000) == 0x700000) {  //$70-77:0000-7fff
     if(ram.size() == 0) return;
@@ -31,7 +37,7 @@ auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
 
 auto HitachiDSP::rom_read(uint addr, uint8 data) -> uint8 {
   if(co_active() == hitachidsp.thread || regs.halt) {
-    addr = bus.mirror(addr, rom.size());
+    addr = Bus::mirror(addr, rom.size());
   //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
     return rom.read(addr, data);
   }
@@ -44,12 +50,12 @@ auto HitachiDSP::rom_write(uint addr, uint8 data) -> void {
 
 auto HitachiDSP::ram_read(uint addr, uint8 data) -> uint8 {
   if(ram.size() == 0) return 0x00;  //not open bus
-  return ram.read(bus.mirror(addr, ram.size()), data);
+  return ram.read(Bus::mirror(addr, ram.size()), data);
 }
 
 auto HitachiDSP::ram_write(uint addr, uint8 data) -> void {
   if(ram.size() == 0) return;
-  return ram.write(bus.mirror(addr, ram.size()), data);
+  return ram.write(Bus::mirror(addr, ram.size()), data);
 }
 
 auto HitachiDSP::dram_read(uint addr, uint8 data) -> uint8 {

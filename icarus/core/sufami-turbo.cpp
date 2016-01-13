@@ -31,7 +31,7 @@ auto Icarus::sufamiTurboManifest(vector<uint8>& buffer, string location) -> stri
   return markup;
 }
 
-auto Icarus::sufamiTurboImport(vector<uint8>& buffer, string location) -> bool {
+auto Icarus::sufamiTurboImport(vector<uint8>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Sufami Turbo/", name, ".st/"};
@@ -43,5 +43,5 @@ auto Icarus::sufamiTurboImport(vector<uint8>& buffer, string location) -> bool {
 
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "program.rom"}, buffer);
-  return success();
+  return success(target);
 }

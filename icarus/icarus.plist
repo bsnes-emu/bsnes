@@ -2,6 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>CFBundleIdentifier</key>
+  <string>org.byuu.icarus</string>
   <key>CFBundleDisplayName</key>
   <string>icarus</string>
   <key>CFBundleExecutable</key>
@@ -10,5 +12,9 @@
   <key>CFBundleIconFile</key>
   <string>icarus.icns</string>
   -->
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSSupportsAutomaticGraphicsSwitching</key>
+  <true/>
 </dict>
 </plist>

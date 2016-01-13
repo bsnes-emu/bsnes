@@ -31,7 +31,7 @@ auto Icarus::gameBoyColorManifest(vector<uint8>& buffer, string location) -> str
   return markup;
 }
 
-auto Icarus::gameBoyColorImport(vector<uint8>& buffer, string location) -> bool {
+auto Icarus::gameBoyColorImport(vector<uint8>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Game Boy Color/", name, ".gbc/"};
@@ -43,5 +43,5 @@ auto Icarus::gameBoyColorImport(vector<uint8>& buffer, string location) -> bool 
 
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "program.rom"}, buffer);
-  return success();
+  return success(target);
 }

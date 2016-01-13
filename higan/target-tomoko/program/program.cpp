@@ -73,8 +73,13 @@ Program::Program(lstring args) {
       presentation->toggleFullScreen();
     } else {
       auto location = argument;
-      if(file::exists(location)) location = dirname(location);
-      if(directory::exists(location)) loadMedia(location);
+      if(directory::exists(location)) {
+        loadMedia(location);
+      } else if(file::exists(location)) {
+        if(auto result = execute("icarus", "--import", location)) {
+          loadMedia(result.strip());
+        }
+      }
     }
   }
 }

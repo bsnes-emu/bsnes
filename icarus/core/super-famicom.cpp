@@ -45,7 +45,7 @@ auto Icarus::superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node n
   for(auto leaf : node) superFamicomManifestScan(roms, leaf);
 }
 
-auto Icarus::superFamicomImport(vector<uint8>& buffer, string location) -> bool {
+auto Icarus::superFamicomImport(vector<uint8>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Super Famicom/", name, ".sfc/"};
@@ -81,5 +81,5 @@ auto Icarus::superFamicomImport(vector<uint8>& buffer, string location) -> bool 
       file::write({target, name}, firmware);
     }
   }
-  return success();
+  return success(target);
 }

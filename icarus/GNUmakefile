@@ -37,7 +37,7 @@ install:
 ifeq ($(platform),macosx)
 	cp -r out/icarus.app /Applications/icarus.app
 else
-	if [ -f ./icarus ]; then cp ./icarus $(prefix)/bin/icarus; fi
+	if [ -f out/icarus ]; then cp out/icarus $(prefix)/bin/icarus; fi
 endif
 
 uninstall:

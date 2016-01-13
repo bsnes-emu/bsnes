@@ -23,6 +23,19 @@ Presentation::Presentation() {
       loadBootableMedia.append(item);
     }
   }
+  //add icarus menu options -- but only if icarus binary is present
+  if(execute("icarus", "--name").strip() == "icarus") {
+    libraryMenu.append(MenuSeparator());
+    libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
+      audio->clear();
+      if(auto location = execute("icarus", "--import")) {
+        program->loadMedia(location.strip());
+      }
+    }));
+    libraryMenu.append(MenuItem().setText("Import ROM Files ...").onActivate([&] {
+      invoke("icarus");
+    }));
+  }
 
   systemMenu.setText("System").setVisible(false);
   powerSystem.setText("Power").onActivate([&] { program->powerCycle(); });
