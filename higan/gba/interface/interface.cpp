@@ -3,6 +3,7 @@
 namespace GameBoyAdvance {
 
 Interface* interface = nullptr;
+Settings settings;
 
 Interface::Interface() {
   interface = this;
@@ -153,8 +154,22 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::paletteUpdate(PaletteMode mode) -> void {
-  video.generatePalette(mode);
+auto Interface::cap(const string& name) -> bool {
+  if(name == "Blur Emulation") return true;
+  if(name == "Color Emulation") return true;
+  return false;
+}
+
+auto Interface::get(const string& name) -> any {
+  if(name == "Blur Emulation") return settings.blurEmulation;
+  if(name == "Color Emulation") return settings.colorEmulation;
+  return {};
+}
+
+auto Interface::set(const string& name, const any& value) -> bool {
+  if(name == "Blur Emulation" && value.is<bool>()) return settings.blurEmulation = value.get<bool>(), true;
+  if(name == "Color Emulation" && value.is<bool>()) return settings.colorEmulation = value.get<bool>(), true;
+  return false;
 }
 
 }

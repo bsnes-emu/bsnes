@@ -32,7 +32,9 @@ struct Presentation : Window {
         MenuRadioItem videoFilterBlur{&videoFilterMenu};
           Group videoFilters{&videoFilterNone, &videoFilterBlur};
         MenuSeparator videoFilterSeparator{&videoFilterMenu};
+        MenuCheckItem blurEmulation{&videoFilterMenu};
         MenuCheckItem colorEmulation{&videoFilterMenu};
+        MenuCheckItem scanlineEmulation{&videoFilterMenu};
         MenuCheckItem maskOverscan{&videoFilterMenu};
       Menu videoShaderMenu{&settingsMenu};
         MenuRadioItem videoShaderNone{&videoShaderMenu};

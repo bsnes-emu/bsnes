@@ -2,7 +2,7 @@
 Settings settings;
 
 Settings::Settings() {
-  Markup::Node::operator=(BML::unserialize(string::read(locate({configpath(), "tomoko/"}, "settings.bml"))));
+  Markup::Node::operator=(BML::unserialize(string::read(locate({localpath(), "higan/"}, "settings.bml"))));
 
   auto set = [&](const string& name, const string& value) {
     //create node and set to default value only if it does not already exist
@@ -20,7 +20,9 @@ Settings::Settings() {
   set("Video/AspectCorrection", true);
   set("Video/Filter", "Blur");
   set("Video/Shader", "None");
+  set("Video/BlurEmulation", true);
   set("Video/ColorEmulation", true);
+  set("Video/ScanlineEmulation", true);
   set("Video/Saturation", 100);
   set("Video/Gamma", 100);
   set("Video/Luminance", 100);
@@ -45,5 +47,5 @@ Settings::Settings() {
 }
 
 auto Settings::quit() -> void {
-  file::write(locate({configpath(), "tomoko/"}, "settings.bml"), BML::serialize(*this));
+  file::write(locate({localpath(), "higan/"}, "settings.bml"), BML::serialize(*this));
 }

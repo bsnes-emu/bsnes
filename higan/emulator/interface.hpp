@@ -49,8 +49,7 @@ struct Interface {
     virtual auto loadRequest(uint, string, string, bool) -> void {}
     virtual auto loadRequest(uint, string, bool) -> void {}
     virtual auto saveRequest(uint, string) -> void {}
-    virtual auto videoColor(uint, uint16, uint16, uint16, uint16) -> uint32 { return 0u; }
-    virtual auto videoRefresh(const uint32*, const uint32*, uint, uint, uint) -> void {}
+    virtual auto videoRefresh(const uint32*, uint, uint, uint) -> void {}
     virtual auto audioSample(int16, int16) -> void {}
     virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
     virtual auto inputRumble(uint, uint, uint, bool) -> void {}
@@ -64,8 +63,7 @@ struct Interface {
   auto loadRequest(uint id, string name, string type, bool required) -> void { return bind->loadRequest(id, name, type, required); }
   auto loadRequest(uint id, string path, bool required) -> void { return bind->loadRequest(id, path, required); }
   auto saveRequest(uint id, string path) -> void { return bind->saveRequest(id, path); }
-  auto videoColor(uint source, uint16 alpha, uint16 red, uint16 green, uint16 blue) -> uint32 { return bind->videoColor(source, alpha, red, green, blue); }
-  auto videoRefresh(const uint32* palette, const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(palette, data, pitch, width, height); }
+  auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(data, pitch, width, height); }
   auto audioSample(int16 lsample, int16 rsample) -> void { return bind->audioSample(lsample, rsample); }
   auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void { return bind->inputRumble(port, device, input, enable); }
@@ -106,9 +104,10 @@ struct Interface {
   //cheat functions
   virtual auto cheatSet(const lstring& = lstring{}) -> void {}
 
-  //utility functions
-  enum class PaletteMode : uint { Literal, Channel, Standard, Emulation };
-  virtual auto paletteUpdate(PaletteMode mode) -> void {}
+  //settings
+  virtual auto cap(const string& name) -> bool { return false; }
+  virtual auto get(const string& name) -> any { return {}; }
+  virtual auto set(const string& name, const any& value) -> bool { return false; }
 };
 
 }

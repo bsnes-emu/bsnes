@@ -16,13 +16,12 @@ auto Program::loadMedia(string location) -> void {
 auto Program::loadMedia(Emulator::Interface& emulator_, Emulator::Interface::Media& media, const string& location) -> void {
   unloadMedia();
 
-  mediaPaths(0) = locate({settings["Library/Location"].text(), "System/"}, {media.name, ".sys/"});
+  mediaPaths(0) = locate({localpath(), "higan/"}, {media.name, ".sys/"});
   mediaPaths(media.id) = location;
   folderPaths.append(location);
 
   emulator = &emulator_;
   emulator->load(media.id);
-  updateVideoPalette();
   dsp.setFrequency(emulator->audioFrequency());
   emulator->power();
 

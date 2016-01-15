@@ -160,7 +160,7 @@ auto PPU::power() -> void {
   status.obpi_increment = 0;
   status.obpi = 0;
 
-  for(auto& n : screen) n = 0x0000;
+  for(auto& n : screen) n = 0;
 
   bg.color = 0;
   bg.palette = 0;

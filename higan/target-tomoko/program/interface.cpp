@@ -45,39 +45,7 @@ auto Program::saveRequest(uint id, string filename) -> void {
   return emulator->save(id, stream);
 }
 
-auto Program::videoColor(uint source, uint16 a, uint16 r, uint16 g, uint16 b) -> uint32 {
-  if(settings["Video/Saturation"].natural() != 100) {
-    uint16 grayscale = uclamp<16>((r + g + b) / 3);
-    double saturation = settings["Video/Saturation"].natural() * 0.01;
-    double inverse = max(0.0, 1.0 - saturation);
-    r = uclamp<16>(r * saturation + grayscale * inverse);
-    g = uclamp<16>(g * saturation + grayscale * inverse);
-    b = uclamp<16>(b * saturation + grayscale * inverse);
-  }
-
-  if(settings["Video/Gamma"].natural() != 100) {
-    double exponent = settings["Video/Gamma"].natural() * 0.01;
-    double reciprocal = 1.0 / 32767.0;
-    r = r > 32767 ? r : 32767 * pow(r * reciprocal, exponent);
-    g = g > 32767 ? g : 32767 * pow(g * reciprocal, exponent);
-    b = b > 32767 ? b : 32767 * pow(b * reciprocal, exponent);
-  }
-
-  if(settings["Video/Luminance"].natural() != 100) {
-    double luminance = settings["Video/Luminance"].natural() * 0.01;
-    r = r * luminance;
-    g = g * luminance;
-    b = b * luminance;
-  }
-
-  a >>= 8;
-  r >>= 8;
-  g >>= 8;
-  b >>= 8;
-  return a << 24 | r << 16 | g << 8 | b << 0;
-}
-
-auto Program::videoRefresh(const uint32* palette, const uint32* data, uint pitch, uint width, uint height) -> void {
+auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
   uint32* output;
   uint length;
 
@@ -88,7 +56,7 @@ auto Program::videoRefresh(const uint32* palette, const uint32* data, uint pitch
       const uint32* sp = data + y * pitch;
       uint32* dp = output + y * length;
       for(auto x : range(width)) {
-        *dp++ = palette[*sp++];
+        *dp++ = *sp++;
       }
     }
 

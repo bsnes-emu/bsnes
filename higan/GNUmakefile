@@ -35,12 +35,7 @@ ifeq ($(platform),windows)
   link += -Wl,-enable-runtime-pseudo-reloc
 else ifeq ($(platform),macosx)
   flags += -march=native
-else ifeq ($(platform),linux)
-  flags += -march=native -fopenmp
-  link += -fopenmp
-  link += -Wl,-export-dynamic
-  link += -lX11 -lXext
-else ifeq ($(platform),bsd)
+else ifneq ($(filter $(platform),linux bsd),)
   flags += -march=native -fopenmp
   link += -fopenmp
   link += -Wl,-export-dynamic

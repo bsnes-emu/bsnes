@@ -117,11 +117,20 @@ struct Interface : Emulator::Interface {
 
   auto cheatSet(const lstring&) -> void;
 
-  auto paletteUpdate(PaletteMode mode) -> void;
+  auto cap(const string& name) -> bool override;
+  auto get(const string& name) -> any override;
+  auto set(const string& name, const any& value) -> bool override;
 
   vector<Device> device;
 };
 
+struct Settings {
+  bool blurEmulation = true;
+  bool colorEmulation = true;
+  bool scanlineEmulation = true;
+};
+
 extern Interface* interface;
+extern Settings settings;
 
 }

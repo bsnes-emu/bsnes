@@ -20,6 +20,7 @@ auto System::power() -> void {
   ppu.power();
   apu.power();
   cartridge.power();
+  video.power();
   scheduler.power();
 }
 
@@ -39,7 +40,7 @@ auto System::run() -> void {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) break;
   }
-  interface->videoRefresh(video.palette, ppu.output, 4 * 240, 240, 160);
+  video.refresh();
 }
 
 auto System::runtosave() -> void {
@@ -62,7 +63,7 @@ auto System::runthreadtosave() -> void {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      interface->videoRefresh(video.palette, ppu.output, 4 * 240, 240, 160);
+      video.refresh();
     }
   }
 }

@@ -16,7 +16,7 @@ auto System::run() -> void {
 
   scheduler.enter();
   if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-    interface->videoRefresh(video.palette, ppu.screen, 4 * 160, 160, 144);
+    video.refresh();
   }
 }
 
@@ -40,7 +40,7 @@ auto System::runthreadtosave() -> void {
     scheduler.enter();
     if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-      interface->videoRefresh(video.palette, ppu.screen, 4 * 160, 160, 144);
+      video.refresh();
     }
   }
 }
@@ -71,6 +71,7 @@ auto System::power() -> void {
   cpu.power();
   ppu.power();
   apu.power();
+  video.power();
   scheduler.init();
 
   clocks_executed = 0;

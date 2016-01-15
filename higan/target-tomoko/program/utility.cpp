@@ -48,14 +48,6 @@ auto Program::updateVideoFilter() -> void {
   }
 }
 
-auto Program::updateVideoPalette() -> void {
-  if(!emulator) return;
-  emulator->paletteUpdate(settings["Video/ColorEmulation"].boolean()
-  ? Emulator::Interface::PaletteMode::Emulation
-  : Emulator::Interface::PaletteMode::Standard
-  );
-}
-
 auto Program::updateAudio() -> void {
   if(!audio) return;
   audio->clear();

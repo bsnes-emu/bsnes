@@ -1,4 +1,4 @@
-name := tomoko
+name := higan
 
 processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050
 include processor/GNUmakefile
@@ -68,12 +68,12 @@ obj/ui-resource.o:
 build: $(objects)
 	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 ifeq ($(platform),macosx)
-	@if [ -d out/higan.app ]; then rm -r out/higan.app; fi
-	mkdir -p out/higan.app/Contents/MacOS/
-	mkdir -p out/higan.app/Contents/Resources/
-	mv out/$(name) out/higan.app/Contents/MacOS/higan
-	cp data/higan.plist out/higan.app/Contents/Info.plist
-	sips -s format icns data/higan.png --out out/higan.app/Contents/Resources/higan.icns
+	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
+	mkdir -p out/$(name).app/Contents/MacOS/
+	mkdir -p out/$(name).app/Contents/Resources/
+	mv out/$(name) out/$(name).app/Contents/MacOS/$(name)
+	cp data/$(name).plist out/$(name).app/Contents/Info.plist
+	sips -s format icns data/$(name).png --out out/$(name).app/Contents/Resources/$(name).icns
 endif
 
 install:
@@ -83,18 +83,18 @@ else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Emulation/System/
-	cp -R out/higan.app /Applications/higan.app
+	cp -R out/$(name).app /Applications/$(name).app
 	cp data/cheats.bml ~/Library/Application\ Support/$(name)/
-	cp -R profile/* ~/Emulation/System/
-else
+	cp -R profile/* ~/Library/Application\ Support/$(name)/
+else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/icons/
 	mkdir -p $(prefix)/$(name)/
 	mkdir -p ~/Emulation/System/
 	cp out/$(name) $(prefix)/bin/$(name)
-	cp data/higan.png $(prefix)/share/icons/$(name).png
+	cp data/$(name).png $(prefix)/share/icons/$(name).png
 	cp data/cheats.bml $(prefix)/$(name)/cheats.bml
-	cp -R profile/* ~/Emulation/System/
+	cp -R profile/* $(prefix)/$(name)/
 endif
 
 uninstall:
@@ -102,8 +102,8 @@ ifeq ($(shell id -un),root)
 	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),windows)
 else ifeq ($(platform),macosx)
-	if [ -d /Applications/higan.app ]; then rm -r /Applications/higan.app; fi
-else
+	if [ -d /Applications/$(name).app ]; then rm -r /Applications/$(name).app; fi
+else ifneq ($(filter $(platform),linux bsd),)
 	if [ -f $(prefix)/bin/$(name) ]; then rm $(prefix)/bin/$(name); fi
 	if [ -f $(prefix)/share/icons/$(name).png ]; then rm $(prefix)/share/icons/$(name).png; fi
 endif

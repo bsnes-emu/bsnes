@@ -8,7 +8,7 @@ System system;
 auto System::run() -> void {
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-    interface->videoRefresh(video.palette, ppu.buffer, 4 * 256, 256, 240);
+    video.refresh();
   }
 }
 
@@ -36,7 +36,7 @@ auto System::runthreadtosave() -> void {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
     if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      interface->videoRefresh(video.palette, ppu.buffer, 4 * 256, 256, 240);
+      video.refresh();
     }
   }
 }
@@ -65,6 +65,7 @@ auto System::reset() -> void {
   ppu.reset();
   input.reset();
   scheduler.reset();
+  video.reset();
 }
 
 auto System::init() -> void {

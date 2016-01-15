@@ -20,7 +20,7 @@ auto CheatDatabase::findCodes() -> void {
   if(!emulator) return;
   auto sha256 = emulator->sha256();
 
-  auto contents = string::read(locate({localpath(), "tomoko/"}, "cheats.bml"));
+  auto contents = string::read(locate({localpath(), "higan/"}, "cheats.bml"));
   auto document = BML::unserialize(contents);
 
   for(auto cartridge : document.find("cartridge")) {

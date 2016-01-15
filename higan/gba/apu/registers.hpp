@@ -125,7 +125,6 @@ struct Sequencer {
   uint3 rvolume;
   uint1 lenable[4];
   uint1 renable[4];
-  uint1 enable[4];
   uint1 masterenable;
 
   uint12 base;

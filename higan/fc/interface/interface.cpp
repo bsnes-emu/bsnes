@@ -3,6 +3,7 @@
 namespace Famicom {
 
 Interface* interface = nullptr;
+Settings settings;
 
 Interface::Interface() {
   interface = this;
@@ -166,8 +167,19 @@ auto Interface::cheatSet(const lstring& list) -> void {
   }
 }
 
-auto Interface::paletteUpdate(PaletteMode mode) -> void {
-  video.generate_palette(mode);
+auto Interface::cap(const string& name) -> bool {
+  if(name == "Color Emulation") return true;
+  return false;
+}
+
+auto Interface::get(const string& name) -> any {
+  if(name == "Color Emulation") return settings.colorEmulation;
+  return {};
+}
+
+auto Interface::set(const string& name, const any& value) -> bool {
+  if(name == "Color Emulation" && value.is<bool>()) return settings.colorEmulation = value.get<bool>(), true;
+  return false;
 }
 
 }

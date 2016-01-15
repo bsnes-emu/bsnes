@@ -20,10 +20,10 @@ auto APU::runsequencer() -> void {
   }
   r.base++;
 
-  if(r.enable[0]) square1.run();
-  if(r.enable[1]) square2.run();
-  if(r.enable[2])    wave.run();
-  if(r.enable[3])   noise.run();
+  if(square1.enable) square1.run();
+  if(square2.enable) square2.run();
+  if(wave.enable) wave.run();
+  if(noise.enable) noise.run();
 }
 
 auto APU::Sequencer::read(uint addr) const -> uint8 {
@@ -39,7 +39,13 @@ auto APU::Sequencer::read(uint addr) const -> uint8 {
   | (lenable[2] << 6)
   | (lenable[3] << 7)
   );
-  case 2: return (masterenable << 7);
+  case 2: return (
+    (apu.square1.enable << 0)
+  | (apu.square2.enable << 1)
+  | (apu.wave.enable    << 2)
+  | (apu.noise.enable   << 3)
+  | (masterenable       << 7)
+  );
   }
 }
 
@@ -62,10 +68,6 @@ auto APU::Sequencer::write(uint addr, uint8 byte) -> void {
     break;
 
   case 2:  //NR52
-    enable[0]    = byte >> 0;
-    enable[1]    = byte >> 1;
-    enable[2]    = byte >> 2;
-    enable[3]    = byte >> 3;
     masterenable = byte >> 7;
     break;
   }
@@ -76,7 +78,6 @@ auto APU::Sequencer::power() -> void {
   rvolume = 0;
   for(auto& n : lenable) n = 0;
   for(auto& n : renable) n = 0;
-  for(auto& n : enable) n = 0;
   masterenable = 0;
   base = 0;
   step = 0;

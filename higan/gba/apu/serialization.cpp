@@ -86,7 +86,6 @@ auto APU::serialize(serializer& s) -> void {
   s.integer(sequencer.rvolume);
   for(auto& flag : sequencer.lenable) s.integer(flag);
   for(auto& flag : sequencer.renable) s.integer(flag);
-  for(auto& flag : sequencer.enable) s.integer(flag);
   s.integer(sequencer.masterenable);
   s.integer(sequencer.base);
   s.integer(sequencer.step);

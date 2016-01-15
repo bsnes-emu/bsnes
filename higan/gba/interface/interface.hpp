@@ -45,12 +45,20 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;
 
-  auto paletteUpdate(PaletteMode mode) -> void;
+  auto cap(const string& name) -> bool override;
+  auto get(const string& name) -> any override;
+  auto set(const string& name, const any& value) -> bool override;
 
 private:
   vector<Device> device;
 };
 
+struct Settings {
+  bool blurEmulation = true;
+  bool colorEmulation = true;
+};
+
 extern Interface* interface;
+extern Settings settings;
 
 }

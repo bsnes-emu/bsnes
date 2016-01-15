@@ -11,7 +11,7 @@ Program* program = nullptr;
 
 Program::Program(lstring args) {
   program = this;
-  directory::create({configpath(), "tomoko/"});
+  directory::create({localpath(), "tomoko/"});
   Application::onMain({&Program::main, this});
   Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
 
@@ -72,14 +72,27 @@ Program::Program(lstring args) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
     } else {
-      auto location = argument;
-      if(directory::exists(location)) {
-        loadMedia(location);
-      } else if(file::exists(location)) {
-        if(auto result = execute("icarus", "--import", location)) {
-          loadMedia(result.strip());
-        }
+      load(argument);
+    }
+  }
+}
+
+auto Program::load(string location) -> void {
+  if(directory::exists(location)) {
+    loadMedia(location);
+  } else if(file::exists(location)) {
+    //special handling to allow importing the Game Boy Advance BIOS
+    if(file::size(location) == 16384 && file::sha256(location).beginsWith("fd2547724b505f48")) {
+      auto target = locate({localpath(), "higan/"}, "Game Boy Advance.sys/");
+      if(file::copy(location, {target, "bios.rom"})) {
+        MessageDialog().setTitle(Emulator::Name).setText("Game Boy Advance BIOS imported successfully!").information();
       }
+      return;
+    }
+
+    //ask icarus to import the game; and play it upon success
+    if(auto result = execute("icarus", "--import", location)) {
+      loadMedia(result.strip());
     }
   }
 }

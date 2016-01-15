@@ -2,19 +2,6 @@ struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
 
   VerticalLayout layout{this};
-    Label colorAdjustmentLabel{&layout, Size{~0, 0}};
-    HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
-      Label saturationLabel{&saturationLayout, Size{80, 0}};
-      Label saturationValue{&saturationLayout, Size{80, 0}};
-      HorizontalSlider saturationSlider{&saturationLayout, Size{~0, 0}};
-    HorizontalLayout gammaLayout{&layout, Size{~0, 0}};
-      Label gammaLabel{&gammaLayout, Size{80, 0}};
-      Label gammaValue{&gammaLayout, Size{80, 0}};
-      HorizontalSlider gammaSlider{&gammaLayout, Size{~0, 0}};
-    HorizontalLayout luminanceLayout{&layout, Size{~0, 0}};
-      Label luminanceLabel{&luminanceLayout, Size{80, 0}};
-      Label luminanceValue{&luminanceLayout, Size{80, 0}};
-      HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
     Label overscanMaskLabel{&layout, Size{~0, 0}};
     HorizontalLayout horizontalMaskLayout{&layout, Size{~0, 0}};
       Label horizontalMaskLabel{&horizontalMaskLayout, Size{80, 0}};

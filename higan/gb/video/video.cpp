@@ -5,89 +5,84 @@ namespace GameBoy {
 Video video;
 
 Video::Video() {
-  palette = new uint32_t[1 << 15]();
+  output = new uint32[160 * 144];
+  paletteStandard = new uint32[1 << 15];
+  paletteEmulation = new uint32[1 << 15];
 }
 
 Video::~Video() {
-  delete[] palette;
+  delete[] output;
+  delete[] paletteStandard;
+  delete[] paletteEmulation;
 }
 
-auto Video::generate_palette(Emulator::Interface::PaletteMode mode) -> void {
-  this->mode = mode;
-  if(system.dmg()) for(auto n : range(4)) palette[n] = paletteDMG(n);
-  if(system.sgb()) for(auto n : range(4)) palette[n] = paletteSGB(n);
-  if(system.cgb()) for(auto n : range(1 << 15)) palette[n] = paletteCGB(n);
+auto Video::power() -> void {
+  memory::fill(output, 160 * 144 * sizeof(uint32));
+
+  if(system.dmg()) {
+    for(auto color : range(1 << 2)) {
+      uint L = image::normalize(3 - color, 2, 8);
+      uint R = monochrome[color][0] >> 8;
+      uint G = monochrome[color][1] >> 8;
+      uint B = monochrome[color][2] >> 8;
+      paletteStandard[color] = (255 << 24) | (L << 16) | (L << 8) | (L << 0);
+      paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+    }
+  }
+
+  if(system.sgb()) {
+    for(auto color : range(1 << 2)) {
+      paletteStandard[color] = color;
+      paletteEmulation[color] = color;
+    }
+  }
+
+  if(system.cgb()) {
+    for(auto color : range(1 << 15)) {
+      uint r = (uint5)(color >>  0);
+      uint g = (uint5)(color >>  5);
+      uint b = (uint5)(color >> 10);
+
+      { uint R = image::normalize(r, 5, 8);
+        uint G = image::normalize(g, 5, 8);
+        uint B = image::normalize(b, 5, 8);
+        paletteStandard[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+      }
+
+      { uint R = (r * 26 + g *  4 + b *  2);
+        uint G = (         g * 24 + b *  8);
+        uint B = (r *  6 + g *  4 + b * 22);
+        R = min(960, R) >> 2;
+        G = min(960, G) >> 2;
+        B = min(960, B) >> 2;
+        paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+      }
+    }
+  }
 }
 
-auto Video::paletteDMG(uint color) const -> uint {
-  if(mode == Emulator::Interface::PaletteMode::Literal) {
-    return color;
+auto Video::refresh() -> void {
+  auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
+
+  for(uint y = 0; y < 144; y++) {
+    auto source = ppu.screen + y * 160;
+    auto target = output + y * 160;
+
+    if(settings.blurEmulation) {
+      for(uint x = 0; x < 160; x++) {
+        auto a = palette[*source++];
+        auto b = *target;
+        *target++ = (a + b - ((a ^ b) & 0x01010101)) >> 1;
+      }
+    } else {
+      for(uint x = 0; x < 160; x++) {
+        auto color = palette[*source++];
+        *target++ = color;
+      }
+    }
   }
 
-  if(mode == Emulator::Interface::PaletteMode::Channel) {
-    uint L = image::normalize(color, 2, 16);
-    return interface->videoColor(color, 0, 0, 0, L);
-  }
-
-  if(mode == Emulator::Interface::PaletteMode::Standard) {
-    uint L = image::normalize(3 - color, 2, 16);
-    return interface->videoColor(color, 0, L, L, L);
-  }
-
-  if(mode == Emulator::Interface::PaletteMode::Emulation) {
-    uint R = monochrome[color][0];
-    uint G = monochrome[color][1];
-    uint B = monochrome[color][2];
-    return interface->videoColor(color, 0, R, G, B);
-  }
-
-  return 0;
-}
-
-auto Video::paletteSGB(uint color) const -> uint {
-  return color;
-}
-
-auto Video::paletteCGB(uint color) const -> uint {
-  if(mode == Emulator::Interface::PaletteMode::Literal) {
-    return color;
-  }
-
-  uint r = (color >>  0) & 31;
-  uint g = (color >>  5) & 31;
-  uint b = (color >> 10) & 31;
-
-  if(mode == Emulator::Interface::PaletteMode::Channel) {
-    r = image::normalize(r, 5, 16);
-    g = image::normalize(g, 5, 16);
-    b = image::normalize(b, 5, 16);
-    return interface->videoColor(color, 0, r, g, b);
-  }
-
-  if(mode == Emulator::Interface::PaletteMode::Standard) {
-    r = image::normalize(r, 5, 16);
-    g = image::normalize(g, 5, 16);
-    b = image::normalize(b, 5, 16);
-    return interface->videoColor(color, 0, r, g, b);
-  }
-
-  if(mode == Emulator::Interface::PaletteMode::Emulation) {
-    uint R = (r * 26 + g *  4 + b *  2);
-    uint G = (         g * 24 + b *  8);
-    uint B = (r *  6 + g *  4 + b * 22);
-
-    R = min(960, R);
-    G = min(960, G);
-    B = min(960, B);
-
-    R = R << 6 | R >> 4;
-    G = G << 6 | G >> 4;
-    B = B << 6 | B >> 4;
-
-    return interface->videoColor(color, 0, R, G, B);
-  }
-
-  return 0;
+  interface->videoRefresh(output, 4 * 160, 160, 144);
 }
 
 #define DMG_PALETTE_GREEN

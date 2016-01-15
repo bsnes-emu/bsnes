@@ -2,16 +2,15 @@ struct Video {
   Video();
   ~Video();
 
-  auto generate_palette(Emulator::Interface::PaletteMode mode) -> void;
+  auto power() -> void;
+  auto refresh() -> void;
 
-  uint32* palette = nullptr;
+  uint32* output = nullptr;
+  uint32* paletteStandard = nullptr;
+  uint32* paletteEmulation = nullptr;
 
 private:
-  Emulator::Interface::PaletteMode mode;
   static const uint16 monochrome[4][3];
-  auto paletteDMG(uint color) const -> uint;
-  auto paletteSGB(uint color) const -> uint;
-  auto paletteCGB(uint color) const -> uint;
 };
 
 extern Video video;

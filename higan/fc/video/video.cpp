@@ -7,34 +7,41 @@ namespace Famicom {
 Video video;
 
 Video::Video() {
-  palette = new uint32_t[1 << 9]();
+  output = new uint32[256 * 240];
+  paletteStandard = new uint32[1 << 9];
+  paletteEmulation = new uint32[1 << 9];
 }
 
 Video::~Video() {
-  delete[] palette;
+  delete[] output;
+  delete[] paletteStandard;
+  delete[] paletteEmulation;
 }
 
-auto Video::generate_palette(Emulator::Interface::PaletteMode mode) -> void {
+auto Video::reset() -> void {
+  memory::fill(output, 256 * 240);
+
   for(auto color : range(1 << 9)) {
-    if(mode == Emulator::Interface::PaletteMode::Literal) {
-      palette[color] = color;
-    } else if(mode == Emulator::Interface::PaletteMode::Channel) {
-      uint emphasis = (color >> 6) &  7;
-      uint luma     = (color >> 4) &  3;
-      uint chroma   = (color >> 0) & 15;
-      emphasis = image::normalize(emphasis, 3, 16);
-      luma     = image::normalize(luma,     2, 16);
-      chroma   = image::normalize(chroma,   4, 16);
-      palette[color] = interface->videoColor(color, 0, emphasis, luma, chroma);
-    } else if(mode == Emulator::Interface::PaletteMode::Standard) {
-      palette[color] = generate_color(color, 2.0, 0.0, 1.0, 1.0, 2.2);
-    } else if(mode == Emulator::Interface::PaletteMode::Emulation) {
-      palette[color] = generate_color(color, 2.0, 0.0, 1.0, 1.0, 1.8);
-    }
+    paletteStandard[color] = generateColor(color, 2.0, 0.0, 1.0, 1.0, 2.2);
+    paletteEmulation[color] = generateColor(color, 2.0, 0.0, 1.0, 1.0, 1.8);
   }
 }
 
-auto Video::generate_color(
+auto Video::refresh() -> void {
+  auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
+
+  for(uint y = 0; y < 240; y++) {
+    auto source = ppu.buffer + y * 256;
+    auto target = output + y * 256;
+    for(uint x = 0; x < 256; x++) {
+      *target++ = palette[*source++];
+    }
+  }
+
+  interface->videoRefresh(output, 4 * 256, 256, 240);
+}
+
+auto Video::generateColor(
   uint n, double saturation, double hue,
   double contrast, double brightness, double gamma
 ) -> uint32 {
@@ -75,11 +82,11 @@ auto Video::generate_color(
   q *= saturation;
 
   auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : std::pow(f, 2.2 / gamma); };
-  uint r = 65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q);
-  uint g = 65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q);
-  uint b = 65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q);
+  uint r = uclamp<16>(65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q));
+  uint g = uclamp<16>(65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q));
+  uint b = uclamp<16>(65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q));
 
-  return interface->videoColor(n, 0, uclamp<16>(r), uclamp<16>(g), uclamp<16>(b));
+  return (255 << 24) | ((r >> 8) << 16) | ((g >> 8) << 8) | ((b >> 8) << 0);
 }
 
 }

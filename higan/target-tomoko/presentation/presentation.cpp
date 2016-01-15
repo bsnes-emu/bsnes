@@ -74,9 +74,17 @@ Presentation::Presentation() {
     settings["Video/Filter"].setValue("Blur");
     program->updateVideoFilter();
   });
+  blurEmulation.setText("Blur Emulation").setChecked(settings["Video/BlurEmulation"].boolean()).onToggle([&] {
+    settings["Video/BlurEmulation"].setValue(blurEmulation.checked());
+    if(emulator) emulator->set("Blur Emulation", blurEmulation.checked());
+  });
   colorEmulation.setText("Color Emulation").setChecked(settings["Video/ColorEmulation"].boolean()).onToggle([&] {
     settings["Video/ColorEmulation"].setValue(colorEmulation.checked());
-    program->updateVideoPalette();
+    if(emulator) emulator->set("Color Emulation", colorEmulation.checked());
+  });
+  scanlineEmulation.setText("Scanline Emulation").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
+    settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
+    if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });
   maskOverscan.setText("Mask Overscan").setChecked(settings["Video/Overscan/Mask"].boolean()).onToggle([&] {
     settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
@@ -130,6 +138,8 @@ Presentation::Presentation() {
 
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
+
+  viewport.setDroppable().onDrop([&](auto locations) { program->load(locations(0)); });
 
   onClose([&] { program->quit(); });
 
@@ -187,6 +197,10 @@ auto Presentation::updateEmulator() -> void {
   }
 
   systemMenuSeparatorPorts.setVisible(inputPort1.visible() || inputPort2.visible() || inputPort3.visible());
+
+  emulator->set("Blur Emulation", blurEmulation.checked());
+  emulator->set("Color Emulation", colorEmulation.checked());
+  emulator->set("Scanline Emulation", scanlineEmulation.checked());
 }
 
 auto Presentation::resizeViewport() -> void {
@@ -261,7 +275,7 @@ auto Presentation::loadShaders() -> void {
     return;
   }
 
-  auto pathname = locate({localpath(), "tomoko/"}, "Video Shaders/");
+  auto pathname = locate({localpath(), "higan/"}, "Video Shaders/");
   for(auto shader : directory::folders(pathname, "*.shader")) {
     MenuRadioItem item{&videoShaderMenu};
     item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {

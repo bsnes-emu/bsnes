@@ -73,6 +73,6 @@ auto HotkeySettings::inputEvent(shared_pointer<HID::Device> device, uint group, 
       timer.setEnabled(false);
       settingsManager->statusBar.setText();
       settingsManager->layout.setEnabled();
-    }).setInterval(1000).setEnabled();
+    }).setInterval(200).setEnabled();
   }
 }

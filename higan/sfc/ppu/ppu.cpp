@@ -19,12 +19,11 @@ bg4(*this, Background::ID::BG4),
 sprite(*this),
 window(*this),
 screen(*this) {
-  surface = new uint32[512 * 512];
-  output = surface + 16 * 512;
+  output = new uint32[512 * 512];
 }
 
 PPU::~PPU() {
-  delete[] surface;
+  delete[] output;
 }
 
 auto PPU::step(uint clocks) -> void {
@@ -110,7 +109,7 @@ auto PPU::power() -> void {
 auto PPU::reset() -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memory::fill(surface, 512 * 512 * sizeof(uint32));
+  memory::fill(output, 512 * 480 * sizeof(uint32));
 
   mmio_reset();
   bg1.reset();

@@ -48,12 +48,19 @@ struct Interface : Emulator::Interface {
 
   auto cheatSet(const lstring&) -> void;
 
-  auto paletteUpdate(PaletteMode mode) -> void;
+  auto cap(const string& name) -> bool override;
+  auto get(const string& name) -> any override;
+  auto set(const string& name, const any& value) -> bool override;
 
 private:
   vector<Device> device;
 };
 
+struct Settings {
+  bool colorEmulation = true;
+};
+
 extern Interface* interface;
+extern Settings settings;
 
 }

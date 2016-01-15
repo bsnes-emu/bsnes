@@ -1,6 +1,7 @@
 struct Program : Emulator::Interface::Bind {
   //program.cpp
   Program(lstring args);
+  auto load(string) -> void;
   auto main() -> void;
   auto quit() -> void;
 
@@ -8,8 +9,7 @@ struct Program : Emulator::Interface::Bind {
   auto loadRequest(uint id, string name, string type, bool required) -> void override;
   auto loadRequest(uint id, string path, bool required) -> void override;
   auto saveRequest(uint id, string path) -> void override;
-  auto videoColor(uint source, uint16 alpha, uint16 red, uint16 green, uint16 blue) -> uint32 override;
-  auto videoRefresh(const uint32* palette, const uint32* data, uint pitch, uint width, uint height) -> void override;
+  auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(int16 lsample, int16 rsample) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
@@ -33,7 +33,6 @@ struct Program : Emulator::Interface::Bind {
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;
   auto updateVideoFilter() -> void;
-  auto updateVideoPalette() -> void;
   auto updateAudio() -> void;
   auto updateAudioVolume() -> void;
   auto updateDSP() -> void;

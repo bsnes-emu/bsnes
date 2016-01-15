@@ -27,7 +27,6 @@ privileged:
   uint ppu1_version = 1;  //allowed: 1
   uint ppu2_version = 3;  //allowed: 1, 2, 3
 
-  uint32* surface = nullptr;
   uint32* output = nullptr;
 
   struct {

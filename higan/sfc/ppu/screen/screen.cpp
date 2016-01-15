@@ -2,8 +2,8 @@ PPU::Screen::Screen(PPU& self) : self(self) {
 }
 
 auto PPU::Screen::scanline() -> void {
-  output = self.output + self.vcounter() * 1024;
-  if(self.display.interlace && self.field()) output += 512;
+  line = self.output + self.vcounter() * 1024;
+  if(self.display.interlace && self.field()) line += 512;
 
   //the first hires pixel of each scanline is transparent
   //note: exact value initializations are not confirmed on hardware
@@ -19,14 +19,14 @@ auto PPU::Screen::scanline() -> void {
 }
 
 auto PPU::Screen::run() -> void {
-  if(ppu.vcounter() == 0) return;
+  if(self.vcounter() == 0) return;
 
   bool hires   = self.regs.pseudo_hires || self.regs.bgmode == 5 || self.regs.bgmode == 6;
   auto sscolor = get_pixel_sub(hires);
   auto mscolor = get_pixel_main();
 
-  *output++ = (self.regs.display_brightness << 15) | (hires ? sscolor : mscolor);
-  *output++ = (self.regs.display_brightness << 15) | (mscolor);
+  *line++ = (self.regs.display_brightness << 15) | (hires ? sscolor : mscolor);
+  *line++ = (self.regs.display_brightness << 15) | (mscolor);
 }
 
 auto PPU::Screen::get_pixel_sub(bool hires) -> uint16 {
