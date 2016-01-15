@@ -19,9 +19,6 @@ struct System : property<System> {
   auto power() -> void;
   auto reset() -> void;
 
-  auto frame() -> void;
-  auto scanline() -> void;
-
   //return *active* system information (settings are cached upon power-on)
   readonly<Region> region;
   readonly<Device::ID> expansionPort;

@@ -10,7 +10,6 @@ struct PPU : Thread, public PPUcounter {
   auto latch_counters() -> void;
   auto interlace() const -> bool;
   auto overscan() const -> bool;
-  auto hires() const -> bool;
 
   auto enter() -> void;
   auto enable() -> void;

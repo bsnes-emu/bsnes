@@ -139,10 +139,13 @@ auto PPU::scanline() -> void {
   sprite.scanline();
   window.scanline();
   screen.scanline();
+
+  if(vcounter() == 241) {
+    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+  }
 }
 
 auto PPU::frame() -> void {
-  system.frame();
   sprite.frame();
 
   display.interlace = regs.interlace;

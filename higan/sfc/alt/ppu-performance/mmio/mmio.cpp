@@ -6,7 +6,6 @@ auto PPU::latch_counters() -> void {
 
 auto PPU::interlace() const -> bool { return display.interlace; }
 auto PPU::overscan() const -> bool { return display.overscan; }
-auto PPU::hires() const -> bool { return regs.pseudo_hires || regs.bgmode == 5 || regs.bgmode == 6; }
 
 auto PPU::get_vram_addr() -> uint16 {
   uint16 addr = regs.vram_addr;

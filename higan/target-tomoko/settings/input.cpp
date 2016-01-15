@@ -3,6 +3,14 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   setText("Input");
 
   layout.setMargin(5);
+  focusLabel.setText("When Focus is Lost:");
+  pauseEmulation.setText("Pause Emulation").setChecked(settings["Input/FocusLoss/Pause"].boolean()).onToggle([&] {
+    settings["Input/FocusLoss/Pause"].setValue(pauseEmulation.checked());
+    allowInput.setEnabled(!pauseEmulation.checked());
+  }).doToggle();
+  allowInput.setText("Allow Input").setChecked(settings["Input/FocusLoss/AllowInput"].boolean()).onToggle([&] {
+    settings["Input/FocusLoss/AllowInput"].setValue(allowInput.checked());
+  });
   for(auto& emulator : inputManager->emulators) {
     emulatorList.append(ComboButtonItem().setText(emulator.name));
   }
@@ -87,7 +95,7 @@ auto InputSettings::reloadMappings() -> void {
   mappingList.append(ListViewHeader().setVisible()
     .append(ListViewColumn().setText("Name"))
     .append(ListViewColumn().setText("Mapping").setExpandable())
-    .append(ListViewColumn().setText("Device").setForegroundColor({0, 128, 0}))
+    .append(ListViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
   );
   for(auto& mapping : activeDevice().mappings) {
     mappingList.append(ListViewItem()

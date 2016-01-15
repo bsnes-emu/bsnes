@@ -24,7 +24,7 @@ auto Program::updateStatusText() -> void {
     text = statusMessage;
   } else if(!emulator || emulator->loaded() == false) {
     text = "No cartridge loaded";
-  } else if(pause) {
+  } else if(pause || (!presentation->focused() && settings["Input/FocusLoss/Pause"].boolean())) {
     text = "Paused";
   } else {
     text = statusText;
@@ -35,15 +35,16 @@ auto Program::updateStatusText() -> void {
   }
 }
 
-auto Program::updateVideoFilter() -> void {
+auto Program::updateVideoShader() -> void {
   if(settings["Video/Driver"].text() == "OpenGL"
   && settings["Video/Shader"].text() != "None"
+  && settings["Video/Shader"].text() != "Blur"
   && directory::exists(settings["Video/Shader"].text())
   ) {
     video->set(Video::Filter, Video::FilterNearest);
     video->set(Video::Shader, settings["Video/Shader"].text());
   } else {
-    video->set(Video::Filter, settings["Video/Filter"].text() == "Blur" ? Video::FilterLinear : Video::FilterNearest);
+    video->set(Video::Filter, settings["Video/Shader"].text() == "Blur" ? Video::FilterLinear : Video::FilterNearest);
     video->set(Video::Shader, (string)"");
   }
 }

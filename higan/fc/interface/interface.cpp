@@ -169,16 +169,19 @@ auto Interface::cheatSet(const lstring& list) -> void {
 
 auto Interface::cap(const string& name) -> bool {
   if(name == "Color Emulation") return true;
+  if(name == "Scanline Emulation") return true;
   return false;
 }
 
 auto Interface::get(const string& name) -> any {
   if(name == "Color Emulation") return settings.colorEmulation;
+  if(name == "Scanline Emulation") return settings.scanlineEmulation;
   return {};
 }
 
 auto Interface::set(const string& name, const any& value) -> bool {
   if(name == "Color Emulation" && value.is<bool>()) return settings.colorEmulation = value.get<bool>(), true;
+  if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;
   return false;
 }
 

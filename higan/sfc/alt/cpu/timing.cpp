@@ -60,7 +60,6 @@ auto CPU::scanline() -> void {
   synchronizeSMP();
   synchronizePPU();
   synchronizeCoprocessors();
-  system.scanline();
 
   if(vcounter() == 0) hdma_init();
 

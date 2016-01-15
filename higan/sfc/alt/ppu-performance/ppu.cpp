@@ -20,8 +20,8 @@ bg3(*this, Background::ID::BG3),
 bg4(*this, Background::ID::BG4),
 sprite(*this),
 screen(*this) {
-  surface = new uint32[512 * 512];
-  output = surface + 16 * 512;
+  output = new uint32[512 * 512]();
+  output += 16 * 512;  //overscan offset
   display.width = 256;
   display.height = 224;
   display.frameskip = 0;
@@ -29,7 +29,8 @@ screen(*this) {
 }
 
 PPU::~PPU() {
-  delete[] surface;
+  output -= 16 * 512;
+  delete[] output;
 }
 
 auto PPU::step(uint clocks) -> void {
@@ -86,15 +87,18 @@ auto PPU::render_scanline() -> void {
 }
 
 auto PPU::scanline() -> void {
-  display.width = !hires() ? 256 : 512;
+  display.width = 512;
   display.height = !overscan() ? 225 : 240;
   if(vcounter() == 0) frame();
   if(vcounter() == display.height && regs.display_disable == false) sprite.address_reset();
+
+  if(vcounter() == 241) {
+    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+  }
 }
 
 auto PPU::frame() -> void {
   sprite.frame();
-  system.frame();
   display.interlace = regs.interlace;
   display.overscan = regs.overscan;
   display.framecounter = display.frameskip == 0 ? 0 : (display.framecounter + 1) % display.frameskip;
@@ -118,7 +122,7 @@ auto PPU::power() -> void {
 auto PPU::reset() -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint32));
+  memset(output, 0, 512 * 480 * sizeof(uint32));
   mmio_reset();
   display.interlace = false;
   display.overscan = false;

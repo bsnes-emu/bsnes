@@ -29,7 +29,7 @@ auto HotkeySettings::reloadMappings() -> void {
   mappingList.append(ListViewHeader().setVisible()
     .append(ListViewColumn().setText("Name"))
     .append(ListViewColumn().setText("Mapping").setExpandable())
-    .append(ListViewColumn().setText("Device"))
+    .append(ListViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
   );
   for(auto& hotkey : inputManager->hotkeys) {
     mappingList.append(ListViewItem()

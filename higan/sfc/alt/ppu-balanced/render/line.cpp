@@ -85,32 +85,23 @@ inline auto PPU::get_pixel_swap(uint32 x) -> uint16 {
 }
 
 inline auto PPU::render_line_output() -> void {
-  uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
-  uint32 curr, prev;
+  auto ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
 
   if(!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) {
-    for(unsigned x = 0; x < 256; x++) {
-      curr = (regs.display_brightness << 15) | get_pixel_normal(x);
-      *ptr++ = curr;
+    for(uint x = 0; x < 256; x++) {
+      uint color = (regs.display_brightness << 15) | get_pixel_normal(x);
+      *ptr++ = color;
+      *ptr++ = color;
     }
   } else {
-    for(unsigned x = 0, prev = 0; x < 256; x++) {
-      //blending is disabled below, as this should be done via video filtering
-      //blending code is left for reference purposes
-
-      curr = (regs.display_brightness << 15) | get_pixel_swap(x);
-      *ptr++ = curr;  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-      //prev = curr;
-
-      curr = (regs.display_brightness << 15) | get_pixel_normal(x);
-      *ptr++ = curr;  //(prev + curr - ((prev ^ curr) & 0x0421)) >> 1;
-      //prev = curr;
+    for(uint x = 0; x < 256; x++) {
+      *ptr++ = (regs.display_brightness << 15) | get_pixel_swap(x);
+      *ptr++ = (regs.display_brightness << 15) | get_pixel_normal(x);
     }
   }
 }
 
 inline auto PPU::render_line_clear() -> void {
-  uint32* ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
-  uint width = (!regs.pseudo_hires && regs.bg_mode != 5 && regs.bg_mode != 6) ? 256 : 512;
-  memset(ptr, 0, width * 2 * sizeof(uint32));
+  auto ptr = (uint32*)output + (line * 1024) + ((interlace() && field()) ? 512 : 0);
+  memory::fill(ptr, 512 * sizeof(uint32));
 }

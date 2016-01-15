@@ -6,10 +6,6 @@ auto PPU::overscan() const -> bool {
   return display.overscan;
 }
 
-auto PPU::hires() const -> bool {
-  return true;
-}
-
 auto PPU::latch_counters() -> void {
   cpu.synchronizePPU();
   regs.hcounter = hdot();

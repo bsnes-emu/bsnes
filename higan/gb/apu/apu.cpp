@@ -79,7 +79,6 @@ auto APU::power() -> void {
 }
 
 auto APU::mmio_read(uint16 addr) -> uint8 {
-//if(!master.enable && addr != 0xff26) return 0xff;
   if(addr >= 0xff10 && addr <= 0xff14) return square1.read(addr);
   if(addr >= 0xff15 && addr <= 0xff19) return square2.read(addr);
   if(addr >= 0xff1a && addr <= 0xff1e) return wave.read(addr);
@@ -90,7 +89,18 @@ auto APU::mmio_read(uint16 addr) -> uint8 {
 }
 
 auto APU::mmio_write(uint16 addr, uint8 data) -> void {
-  if(!master.enable && addr != 0xff26) return;
+  if(!master.enable) {
+    bool valid = addr == 0xff26;  //NR52
+    if(!system.cgb()) {
+      //NRx1 length is writable only on DMG/SGB; not on CGB
+      if(addr == 0xff11) valid = true, data &= 0x3f;  //NR11; duty is not writable (remains 0)
+      if(addr == 0xff16) valid = true, data &= 0x3f;  //NR21; duty is not writable (remains 0)
+      if(addr == 0xff1b) valid = true;  //NR31
+      if(addr == 0xff20) valid = true;  //NR41
+    }
+    if(!valid) return;
+  }
+
   if(addr >= 0xff10 && addr <= 0xff14) return square1.write(addr, data);
   if(addr >= 0xff15 && addr <= 0xff19) return square2.write(addr, data);
   if(addr >= 0xff1a && addr <= 0xff1e) return wave.write(addr, data);

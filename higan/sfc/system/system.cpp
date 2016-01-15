@@ -89,9 +89,6 @@ auto System::init() -> void {
 
   bsmemory.init();
 
-  video.init();
-  audio.init();
-
   device.connect(0, configuration.controllerPort1);
   device.connect(1, configuration.controllerPort2);
 }
@@ -247,14 +244,6 @@ auto System::reset() -> void {
   scheduler.init();
   device.connect(0, configuration.controllerPort1);
   device.connect(1, configuration.controllerPort2);
-}
-
-auto System::scanline() -> void {
-  video.scanline();
-  if(cpu.vcounter() == 241) scheduler.exit(Scheduler::ExitReason::FrameEvent);
-}
-
-auto System::frame() -> void {
 }
 
 }

@@ -16,7 +16,7 @@ auto APU::Noise::run() -> void {
     }
   }
 
-  uint4 sample = (lfsr & 1) ? (uint4)0 : volume;
+  uint4 sample = lfsr & 1 ? 0 : (uint)volume;
   if(!enable) sample = 0;
 
   output = sample;
@@ -30,7 +30,7 @@ auto APU::Noise::clockLength() -> void {
 
 auto APU::Noise::clockEnvelope() -> void {
   if(enable && envelopeFrequency && --envelopePeriod == 0) {
-    envelopePeriod = envelopeFrequency;
+    envelopePeriod = envelopeFrequency ? (uint)envelopeFrequency : 8;
     if(envelopeDirection == 0 && volume >  0) volume--;
     if(envelopeDirection == 1 && volume < 15) volume++;
   }
@@ -90,7 +90,7 @@ auto APU::Noise::write(uint16 addr, uint8 data) -> void {
     if(initialize) {
       enable = dacEnable();
       lfsr = -1;
-      envelopePeriod = envelopeFrequency;
+      envelopePeriod = envelopeFrequency ? (uint)envelopeFrequency : 8;
       volume = envelopeVolume;
 
       if(!length) {

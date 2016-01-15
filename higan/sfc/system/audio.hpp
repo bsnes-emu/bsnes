@@ -3,7 +3,6 @@ struct Audio {
   auto coprocessor_frequency(double frequency) -> void;
   auto sample(int16 lsample, int16 rsample) -> void;
   auto coprocessor_sample(int16 lsample, int16 rsample) -> void;
-  auto init() -> void;
 
 private:
   auto flush() -> void;

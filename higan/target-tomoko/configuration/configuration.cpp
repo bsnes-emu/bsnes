@@ -41,6 +41,8 @@ Settings::Settings() {
   set("Audio/Resampler", "Sinc");
 
   set("Input/Driver", ruby::Input::optimalDriver());
+  set("Input/FocusLoss/Pause", false);
+  set("Input/FocusLoss/AllowInput", false);
 
   set("Timing/Video", 60.0);
   set("Timing/Audio", 48000.0);

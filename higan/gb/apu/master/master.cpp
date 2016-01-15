@@ -68,10 +68,10 @@ auto APU::Master::read(uint16 addr) -> uint8 {
 
 auto APU::Master::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff24) {  //NR50
-    leftEnable  = data & 0x80;
-    leftVolume  = (data >> 4) & 7;
-    rightEnable = data & 0x08;
-    rightVolume = (data >> 0) & 7;
+    leftEnable  = (uint1)(data >> 7);
+    leftVolume  = (uint3)(data >> 4);
+    rightEnable = (uint1)(data >> 3);
+    rightVolume = (uint3)(data >> 0);
   }
 
   if(addr == 0xff25) {  //NR51
@@ -86,14 +86,19 @@ auto APU::Master::write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff26) {  //NR52
-    enable = data & 0x80;
-    if(!enable) {
-      //power(bool) resets length counters when true (eg for CGB only)
-      apu.square1.power(system.cgb());
-      apu.square2.power(system.cgb());
-      apu.wave.power(system.cgb());
-      apu.noise.power(system.cgb());
-      power();
+    if(enable != (bool)(data & 0x80)) {
+      enable = data & 0x80;
+
+      if(!enable) {
+        //power(bool) resets length counters when true (eg for CGB only)
+        apu.square1.power(system.cgb());
+        apu.square2.power(system.cgb());
+        apu.wave.power(system.cgb());
+        apu.noise.power(system.cgb());
+        power();
+      } else {
+        apu.phase = 0;
+      }
     }
   }
 }

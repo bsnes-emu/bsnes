@@ -11,9 +11,8 @@ Program* program = nullptr;
 
 Program::Program(lstring args) {
   program = this;
-  directory::create({localpath(), "tomoko/"});
+  directory::create({localpath(), "higan/"});
   Application::onMain({&Program::main, this});
-  Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
 
   emulators.append(new Famicom::Interface);
   emulators.append(new SuperFamicom::Interface);
@@ -64,7 +63,7 @@ Program::Program(lstring args) {
 
   presentation->drawSplashScreen();
 
-  updateVideoFilter();
+  updateVideoShader();
   updateAudioVolume();
 
   args.takeFirst();  //ignore program location in argument parsing
@@ -101,7 +100,7 @@ auto Program::main() -> void {
   updateStatusText();
   inputManager->poll();
 
-  if(!emulator || !emulator->loaded() || pause) {
+  if(!emulator || !emulator->loaded() || pause || (!presentation->focused() && settings["Input/FocusLoss/Pause"].boolean())) {
     audio->clear();
     usleep(20 * 1000);
     return;

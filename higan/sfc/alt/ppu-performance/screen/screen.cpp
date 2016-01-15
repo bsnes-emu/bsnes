@@ -56,9 +56,9 @@ auto PPU::Screen::scanline() -> void {
 }
 
 auto PPU::Screen::render_black() -> void {
-  uint32* data = self.output + self.vcounter() * 1024;
+  auto data = self.output + self.vcounter() * 1024;
   if(self.interlace() && self.field()) data += 512;
-  memset(data, 0, self.display.width << 2);
+  memory::fill(data, 512 * sizeof(uint32));
 }
 
 auto PPU::Screen::get_pixel_main(uint x) -> uint16 {
@@ -116,12 +116,14 @@ auto PPU::Screen::get_pixel_sub(uint x) -> uint16 {
 }
 
 auto PPU::Screen::render() -> void {
-  uint32* data = self.output + self.vcounter() * 1024;
+  auto data = self.output + self.vcounter() * 1024;
   if(self.interlace() && self.field()) data += 512;
 
   if(!self.regs.pseudo_hires && self.regs.bgmode != 5 && self.regs.bgmode != 6) {
     for(uint i = 0; i < 256; i++) {
-      data[i] = self.regs.display_brightness << 15 | get_pixel_main(i);
+      uint32 color = self.regs.display_brightness << 15 | get_pixel_main(i);
+      *data++ = color;
+      *data++ = color;
     }
   } else {
     for(uint i = 0; i < 256; i++) {

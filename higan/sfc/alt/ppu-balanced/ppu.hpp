@@ -16,7 +16,6 @@ struct PPU : Thread, public PPUcounter {
 
   alwaysinline auto interlace() const -> bool { return display.interlace; }
   alwaysinline auto overscan()  const -> bool { return display.overscan;  }
-  alwaysinline auto hires()     const -> bool { return (regs.pseudo_hires || regs.bg_mode == 5 || regs.bg_mode == 6); }
 
   auto render_line() -> void;
   auto update_oam_status() -> void;
@@ -42,7 +41,6 @@ struct PPU : Thread, public PPUcounter {
   uint8 oam[544];
   uint8 cgram[512];
 
-  uint32* surface;
   uint32* output;
 
   uint ppu1_version = 1;

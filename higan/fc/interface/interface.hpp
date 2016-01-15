@@ -58,6 +58,7 @@ private:
 
 struct Settings {
   bool colorEmulation = true;
+  bool scanlineEmulation = true;
 };
 
 extern Interface* interface;

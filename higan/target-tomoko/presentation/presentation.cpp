@@ -63,31 +63,32 @@ Presentation::Presentation() {
     settings["Video/AspectCorrection"].setValue(aspectCorrection.checked());
     resizeViewport();
   });
-  videoFilterMenu.setText("Video Filter");
-  if(settings["Video/Filter"].text() == "None") videoFilterNone.setChecked();
-  if(settings["Video/Filter"].text() == "Blur") videoFilterBlur.setChecked();
-  videoFilterNone.setText("None").onActivate([&] {
-    settings["Video/Filter"].setValue("None");
-    program->updateVideoFilter();
-  });
-  videoFilterBlur.setText("Blur").onActivate([&] {
-    settings["Video/Filter"].setValue("Blur");
-    program->updateVideoFilter();
-  });
-  blurEmulation.setText("Blur Emulation").setChecked(settings["Video/BlurEmulation"].boolean()).onToggle([&] {
+  videoEmulationMenu.setText("Video Emulation");
+  blurEmulation.setText("Blurring").setChecked(settings["Video/BlurEmulation"].boolean()).onToggle([&] {
     settings["Video/BlurEmulation"].setValue(blurEmulation.checked());
     if(emulator) emulator->set("Blur Emulation", blurEmulation.checked());
   });
-  colorEmulation.setText("Color Emulation").setChecked(settings["Video/ColorEmulation"].boolean()).onToggle([&] {
+  colorEmulation.setText("Colors").setChecked(settings["Video/ColorEmulation"].boolean()).onToggle([&] {
     settings["Video/ColorEmulation"].setValue(colorEmulation.checked());
     if(emulator) emulator->set("Color Emulation", colorEmulation.checked());
   });
-  scanlineEmulation.setText("Scanline Emulation").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
+  scanlineEmulation.setText("Scanlines").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
     settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
     if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });
   maskOverscan.setText("Mask Overscan").setChecked(settings["Video/Overscan/Mask"].boolean()).onToggle([&] {
     settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
+  });
+  videoShaderMenu.setText("Video Shader");
+  if(settings["Video/Shader"].text() == "None") videoShaderNone.setChecked();
+  if(settings["Video/Shader"].text() == "Blur") videoShaderBlur.setChecked();
+  videoShaderNone.setText("None").onActivate([&] {
+    settings["Video/Shader"].setValue("None");
+    program->updateVideoShader();
+  });
+  videoShaderBlur.setText("Blur").onActivate([&] {
+    settings["Video/Shader"].setValue("Blur");
+    program->updateVideoShader();
   });
   loadShaders();
   synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).onToggle([&] {
@@ -127,6 +128,9 @@ Presentation::Presentation() {
   manifestViewer.setText("Manifest Viewer").onActivate([&] { toolsManager->show(2); });
 
   helpMenu.setText("Help");
+  documentation.setText("Documentation ...").onActivate([&] {
+    invoke("http://doc.byuu.org/higan/");
+  });
   about.setText("About ...").onActivate([&] {
     MessageDialog().setParent(*this).setTitle("About higan ...").setText({
       Emulator::Name, " v", Emulator::Version, " (", Emulator::Profile, ")\n\n",
@@ -149,11 +153,14 @@ Presentation::Presentation() {
   resizeViewport();
   setCentered();
 
+  #if defined(PLATFORM_WINDOWS)
+  Application::Windows::onModalChange([](bool modal) { if(modal && audio) audio->clear(); });
+  #endif
+
   #if defined(PLATFORM_MACOSX)
   showConfigurationSeparator.setVisible(false);
   showConfiguration.setVisible(false);
-  helpMenu.setVisible(false);
-
+  about.setVisible(false);
   Application::Cocoa::onAbout([&] { about.doActivate(); });
   Application::Cocoa::onActivate([&] { setFocused(); });
   Application::Cocoa::onPreferences([&] { showConfiguration.doActivate(); });
@@ -271,31 +278,23 @@ auto Presentation::drawSplashScreen() -> void {
 
 auto Presentation::loadShaders() -> void {
   if(settings["Video/Driver"].text() != "OpenGL") {
-    videoShaderMenu.setVisible(false);
     return;
   }
 
   auto pathname = locate({localpath(), "higan/"}, "Video Shaders/");
   for(auto shader : directory::folders(pathname, "*.shader")) {
+    if(videoShaders.objectCount() == 2) videoShaderMenu.append(MenuSeparator());
     MenuRadioItem item{&videoShaderMenu};
     item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
       settings["Video/Shader"].setValue({pathname, shader});
-      program->updateVideoFilter();
+      program->updateVideoShader();
     });
     videoShaders.append(item);
   }
 
-  videoShaderMenu.setText("Video Shaders");
-  videoShaderNone.setChecked().setText("None").onActivate([=] {
-    settings["Video/Shader"].setValue("None");
-    program->updateVideoFilter();
-  });
-
-  for(auto object : videoShaders.objects()) {
-    if(auto radioItem = dynamic_cast<mMenuRadioItem*>(object.data())) {
-      if(settings["Video/Shader"].text() == string{pathname, radioItem->text(), ".shader/"}) {
-        radioItem->setChecked();
-      }
+  for(auto radioItem : videoShaders.objects<MenuRadioItem>()) {
+    if(settings["Video/Shader"].text() == string{pathname, radioItem.text(), ".shader/"}) {
+      radioItem.setChecked();
     }
   }
 }

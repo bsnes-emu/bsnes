@@ -4,6 +4,10 @@ include ../hiro/GNUmakefile
 flags += -I.. -O3
 link +=
 
+ifeq ($(platform),windows)
+  link += -mwindows
+endif
+
 objects := obj/hiro.o
 objects += obj/icarus.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)

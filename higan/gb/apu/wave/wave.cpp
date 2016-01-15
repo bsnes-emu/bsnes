@@ -10,7 +10,7 @@ auto APU::Wave::run() -> void {
 
   static const uint shift[] = {4, 0, 1, 2};  //0%, 100%, 50%, 25%
   uint4 sample = patternSample >> shift[volume];
-  if(enable == false) sample = 0;
+  if(!enable) sample = 0;
 
   output = sample;
 }

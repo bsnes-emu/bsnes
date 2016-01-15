@@ -32,7 +32,7 @@ struct Program : Emulator::Interface::Bind {
   auto softReset() -> void;
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;
-  auto updateVideoFilter() -> void;
+  auto updateVideoShader() -> void;
   auto updateAudio() -> void;
   auto updateAudioVolume() -> void;
   auto updateDSP() -> void;

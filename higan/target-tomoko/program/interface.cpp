@@ -53,11 +53,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
     pitch >>= 2, length >>= 2;
 
     for(auto y : range(height)) {
-      const uint32* sp = data + y * pitch;
-      uint32* dp = output + y * length;
-      for(auto x : range(width)) {
-        *dp++ = *sp++;
-      }
+      memory::copy(output + y * length, data + y * pitch, width * sizeof(uint32));
     }
 
     if(emulator->information.overscan && settings["Video/Overscan/Mask"].boolean()) {
@@ -101,7 +97,7 @@ auto Program::audioSample(int16 lsample, int16 rsample) -> void {
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
-  if(presentation->focused()) {
+  if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean()) {
     auto guid = emulator->port[port].device[device].input[input].guid;
     auto mapping = (InputMapping*)guid;
     if(mapping) return mapping->poll();
@@ -110,7 +106,7 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
-  if(presentation->focused() || !enable) {
+  if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean() || !enable) {
     auto guid = emulator->port[port].device[device].input[input].guid;
     auto mapping = (InputMapping*)guid;
     if(mapping) return mapping->rumble(enable);

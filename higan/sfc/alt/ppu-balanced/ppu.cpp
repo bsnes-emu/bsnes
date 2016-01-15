@@ -10,8 +10,8 @@ PPU ppu;
 #include "serialization.cpp"
 
 PPU::PPU() {
-  surface = new uint32[512 * 512];
-  output = surface + 16 * 512;
+  output = new uint32[512 * 512]();
+  output += 16 * 512;  //overscan offset
 
   alloc_tiledata_cache();
 
@@ -38,7 +38,8 @@ PPU::PPU() {
 }
 
 PPU::~PPU() {
-  delete[] surface;
+  output -= 16 * 512;
+  delete[] output;
   free_tiledata_cache();
 }
 
@@ -128,6 +129,10 @@ auto PPU::scanline() -> void {
     if(!regs.mosaic_countdown) regs.mosaic_countdown = regs.mosaic_size + 1;
     regs.mosaic_countdown--;
   }
+
+  if(line == 241) {
+    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+  }
 }
 
 auto PPU::render_scanline() -> void {
@@ -139,8 +144,6 @@ auto PPU::render_scanline() -> void {
 }
 
 auto PPU::frame() -> void {
-  system.frame();
-
   if(field() == 0) {
     display.interlace = regs.interlace;
     regs.scanlines = (regs.overscan == false) ? 224 : 239;
@@ -375,7 +378,7 @@ auto PPU::power() -> void {
 auto PPU::reset() -> void {
   create(Enter, system.cpuFrequency());
   PPUcounter::reset();
-  memset(surface, 0, 512 * 512 * sizeof(uint32));
+  memory::fill(output, 512 * 480 * sizeof(uint32));
 
   frame();
 

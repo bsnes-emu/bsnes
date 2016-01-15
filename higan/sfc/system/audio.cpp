@@ -37,9 +37,6 @@ auto Audio::coprocessor_sample(int16 lsample, int16 rsample) -> void {
   }
 }
 
-auto Audio::init() -> void {
-}
-
 auto Audio::flush() -> void {
   while(dsp_length > 0 && cop_length > 0) {
     uint32 dsp_sample = dsp_buffer[dsp_rdoffset];

@@ -7,7 +7,7 @@ namespace Famicom {
 Video video;
 
 Video::Video() {
-  output = new uint32[256 * 240];
+  output = new uint32[256 * 480];
   paletteStandard = new uint32[1 << 9];
   paletteEmulation = new uint32[1 << 9];
 }
@@ -19,7 +19,7 @@ Video::~Video() {
 }
 
 auto Video::reset() -> void {
-  memory::fill(output, 256 * 240);
+  memory::fill(output, 256 * 480);
 
   for(auto color : range(1 << 9)) {
     paletteStandard[color] = generateColor(color, 2.0, 0.0, 1.0, 1.0, 2.2);
@@ -30,15 +30,28 @@ auto Video::reset() -> void {
 auto Video::refresh() -> void {
   auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
 
-  for(uint y = 0; y < 240; y++) {
-    auto source = ppu.buffer + y * 256;
-    auto target = output + y * 256;
-    for(uint x = 0; x < 256; x++) {
-      *target++ = palette[*source++];
+  if(settings.scanlineEmulation) {
+    for(uint y = 0; y < 240; y++) {
+      auto source = ppu.buffer + y * 256;
+      auto targetLo = output + y * 512;
+      auto targetHi = output + y * 512 + 256;
+      for(uint x = 0; x < 256; x++) {
+        auto color = palette[*source++];
+        *targetLo++ = color;
+        *targetHi++ = (255 << 24) | ((color & 0xfefefe) >> 1);
+      }
     }
+    interface->videoRefresh(output, 256 * sizeof(uint32), 256, 480);
+  } else {
+    for(uint y = 0; y < 240; y++) {
+      auto source = ppu.buffer + y * 256;
+      auto target = output + y * 256;
+      for(uint x = 0; x < 256; x++) {
+        *target++ = palette[*source++];
+      }
+    }
+    interface->videoRefresh(output, 256 * sizeof(uint32), 256, 240);
   }
-
-  interface->videoRefresh(output, 4 * 256, 256, 240);
 }
 
 auto Video::generateColor(

@@ -27,18 +27,15 @@ struct Presentation : Window {
           Group videoScales{&videoScaleSmall, &videoScaleMedium, &videoScaleLarge};
         MenuSeparator videoScaleSeparator{&videoScaleMenu};
         MenuCheckItem aspectCorrection{&videoScaleMenu};
-      Menu videoFilterMenu{&settingsMenu};
-        MenuRadioItem videoFilterNone{&videoFilterMenu};
-        MenuRadioItem videoFilterBlur{&videoFilterMenu};
-          Group videoFilters{&videoFilterNone, &videoFilterBlur};
-        MenuSeparator videoFilterSeparator{&videoFilterMenu};
-        MenuCheckItem blurEmulation{&videoFilterMenu};
-        MenuCheckItem colorEmulation{&videoFilterMenu};
-        MenuCheckItem scanlineEmulation{&videoFilterMenu};
-        MenuCheckItem maskOverscan{&videoFilterMenu};
+      Menu videoEmulationMenu{&settingsMenu};
+        MenuCheckItem blurEmulation{&videoEmulationMenu};
+        MenuCheckItem colorEmulation{&videoEmulationMenu};
+        MenuCheckItem scanlineEmulation{&videoEmulationMenu};
+        MenuCheckItem maskOverscan{&videoEmulationMenu};
       Menu videoShaderMenu{&settingsMenu};
         MenuRadioItem videoShaderNone{&videoShaderMenu};
-        Group videoShaders{&videoShaderNone};
+        MenuRadioItem videoShaderBlur{&videoShaderMenu};
+        Group videoShaders{&videoShaderNone, &videoShaderBlur};
       MenuSeparator videoSettingsSeparator{&settingsMenu};
       MenuCheckItem synchronizeVideo{&settingsMenu};
       MenuCheckItem synchronizeAudio{&settingsMenu};
@@ -64,6 +61,7 @@ struct Presentation : Window {
       MenuItem stateManager{&toolsMenu};
       MenuItem manifestViewer{&toolsMenu};
     Menu helpMenu{&menuBar};
+      MenuItem documentation{&helpMenu};
       MenuItem about{&helpMenu};
 
   FixedLayout layout{this};

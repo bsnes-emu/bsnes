@@ -53,6 +53,10 @@ struct InputSettings : TabFrameItem {
   Timer timer;
 
   VerticalLayout layout{this};
+    HorizontalLayout focusLayout{&layout, Size{~0, 0}};
+      Label focusLabel{&focusLayout, Size{0, 0}};
+      CheckLabel pauseEmulation{&focusLayout, Size{0, 0}};
+      CheckLabel allowInput{&focusLayout, Size{0, 0}};
     HorizontalLayout selectionLayout{&layout, Size{~0, 0}};
       ComboButton emulatorList{&selectionLayout, Size{~0, 0}};
       ComboButton portList{&selectionLayout, Size{~0, 0}};

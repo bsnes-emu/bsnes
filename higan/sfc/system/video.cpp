@@ -32,9 +32,9 @@ auto Video::reset() -> void {
       paletteStandard[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
     }
 
-    { uint R = L * gamma_ramp[r];
-      uint G = L * gamma_ramp[g];
-      uint B = L * gamma_ramp[b];
+    { uint R = L * gammaRamp[r];
+      uint G = L * gammaRamp[g];
+      uint B = L * gammaRamp[b];
       paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
     }
   }
@@ -110,36 +110,7 @@ auto Video::refresh() -> void {
 
   drawCursors();
 
-  #if defined(PROFILE_ACCURACY)
   interface->videoRefresh(output - (ppu.overscan() ? 0 : 7 * 1024), 512 * sizeof(uint32), 512, 480);
-  #endif
-
-  #if defined(PROFILE_BALANCED) || defined(PROFILE_PERFORMANCE)
-  if(hires) {
-    //normalize line widths
-    auto data = (uint32*)output;
-    if(ppu.interlace() && ppu.field()) data += 512;
-
-    for(uint y = 0; y < 240; y++) {
-      if(line_width[y] == 512) continue;
-      uint32* buffer = data + y * 1024;
-      for(int x = 255; x >= 0; x--) {
-        buffer[(x * 2) + 0] = buffer[(x * 2) + 1] = buffer[x];
-      }
-    }
-  }
-
-  //overscan: when disabled, shift image down (by scrolling video buffer up) to center image onscreen
-  //(memory before ppu.output is filled with black scanlines)
-  interface->videoRefresh(
-    output - (ppu.overscan() ? 0 : 7 * 1024),
-    4 * (1024 >> ppu.interlace()),
-    256 << hires,
-    240 << ppu.interlace()
-  );
-
-  hires = false;
-  #endif
 }
 
 //internal
@@ -152,7 +123,6 @@ auto Video::drawCursor(uint32 color, int x, int y) -> void {
     int vy = y + cy - 7;
     if(vy <= 0 || vy >= 240) continue;  //do not draw offscreen
 
-    bool hires = (line_width[vy] == 512);
     for(int cx = 0; cx < 15; cx++) {
       int vx = x + cx - 7;
       if(vx < 0 || vx >= 256) continue;  //do not draw offscreen
@@ -160,14 +130,10 @@ auto Video::drawCursor(uint32 color, int x, int y) -> void {
       if(pixel == 0) continue;
       uint32 pixelcolor = pixel == 1 ? 0xff000000 : color;
 
-      if(!hires) {
-        *(data + vy * 1024 + vx) = pixelcolor;
-      } else {
-        *(data + vy * 1024 + vx * 2 + 0) = pixelcolor;
-        *(data + vy * 1024 + vx * 2 + 1) = pixelcolor;
-        *(data + vy * 1024 + 512 + vx * 2 + 0) = pixelcolor;
-        *(data + vy * 1024 + 512 + vx * 2 + 1) = pixelcolor;
-      }
+      *(data + vy * 1024 + vx * 2 + 0) = pixelcolor;
+      *(data + vy * 1024 + vx * 2 + 1) = pixelcolor;
+      *(data + vy * 1024 + 512 + vx * 2 + 0) = pixelcolor;
+      *(data + vy * 1024 + 512 + vx * 2 + 1) = pixelcolor;
     }
   }
 }
@@ -192,21 +158,7 @@ auto Video::drawCursors() -> void {
   }
 }
 
-auto Video::scanline() -> void {
-  uint y = cpu.vcounter();
-  if(y >= 240) return;
-
-  hires |= ppu.hires();
-  uint width = ppu.hires() ? 512 : 256;
-  line_width[y] = width;
-}
-
-auto Video::init() -> void {
-  hires = false;
-  for(auto& n : line_width) n = 256;
-}
-
-const uint8 Video::gamma_ramp[32] = {
+const uint8 Video::gammaRamp[32] = {
   0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
   0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
   0x88, 0x90, 0x98, 0xa0, 0xa8, 0xb0, 0xb8, 0xc0,
