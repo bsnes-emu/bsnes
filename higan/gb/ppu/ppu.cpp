@@ -72,6 +72,22 @@ auto PPU::main() -> void {
 
 auto PPU::add_clocks(uint clocks) -> void {
   while(clocks--) {
+    if(status.dma_active) {
+      uint hi = status.dma_clock++;
+      uint lo = hi & (cpu.status.speed_double ? 1 : 3);
+      hi >>= cpu.status.speed_double ? 1 : 2;
+      if(lo == 0) {
+        if(hi == 0) {
+          //warm-up
+        } else if(hi == 161) {
+          //cool-down; disable
+          status.dma_active = false;
+        } else {
+          oam[hi - 1] = bus.read(status.dma_bank << 8 | hi - 1);
+        }
+      }
+    }
+
     status.lx++;
     clock += cpu.frequency;
     if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
@@ -107,6 +123,7 @@ auto PPU::power() -> void {
   bus.mmio[0xff43] = this;  //SCX
   bus.mmio[0xff44] = this;  //LY
   bus.mmio[0xff45] = this;  //LYC
+  bus.mmio[0xff46] = this;  //DMA
   bus.mmio[0xff47] = this;  //BGP
   bus.mmio[0xff48] = this;  //OBP0
   bus.mmio[0xff49] = this;  //OBP1
@@ -149,6 +166,11 @@ auto PPU::power() -> void {
   status.scx = 0;
   status.ly = 0;
   status.lyc = 0;
+
+  status.dma_active = false;
+  status.dma_clock = 0;
+  status.dma_bank = 0;
+
   status.wy = 0;
   status.wx = 0;
 

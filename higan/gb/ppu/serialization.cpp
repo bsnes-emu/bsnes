@@ -31,6 +31,10 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(status.ly);
   s.integer(status.lyc);
 
+  s.integer(status.dma_active);
+  s.integer(status.dma_clock);
+  s.integer(status.dma_bank);
+
   s.integer(status.wy);
   s.integer(status.wx);
 

@@ -22,4 +22,5 @@ struct Wave {
   uint period;
   uint5 patternOffset;
   uint4 patternSample;
+  uint patternHold;
 };

@@ -117,7 +117,6 @@ auto CPU::power() -> void {
   bus.mmio[0xff06] = this;  //TMA
   bus.mmio[0xff07] = this;  //TAC
   bus.mmio[0xff0f] = this;  //IF
-  bus.mmio[0xff46] = this;  //DMA
   bus.mmio[0xffff] = this;  //IE
 
   if(system.cgb()) {
@@ -199,10 +198,6 @@ auto CPU::power() -> void {
   status.interrupt_enable_timer = 0;
   status.interrupt_enable_stat = 0;
   status.interrupt_enable_vblank = 0;
-
-  oamdma.active = false;
-  oamdma.clock = 0;
-  oamdma.bank = 0;
 }
 
 }

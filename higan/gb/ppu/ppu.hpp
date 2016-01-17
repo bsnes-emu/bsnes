@@ -71,6 +71,11 @@ struct PPU : Thread, MMIO {
     //$ff45  LYC
     uint8 lyc;
 
+    //$ff46  DMA
+    bool dma_active;
+    uint dma_clock;
+    uint8 dma_bank;
+
     //$ff4a  WY
     uint8 wy;
 

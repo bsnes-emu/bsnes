@@ -107,12 +107,6 @@ struct CPU : Processor::LR35902, Thread, MMIO {
     bool interrupt_enable_vblank;
   } status;
 
-  struct OAMDMA {
-    bool active;
-    uint clock;
-    uint8 bank;
-  } oamdma;
-
   uint8 wram[32768];  //GB=8192, GBC=32768
   uint8 hram[128];
 };

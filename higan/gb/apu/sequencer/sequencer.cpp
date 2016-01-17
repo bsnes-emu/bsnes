@@ -1,4 +1,4 @@
-auto APU::Master::run() -> void {
+auto APU::Sequencer::run() -> void {
   if(enable == false) {
     center = 0;
     left   = 0;
@@ -39,7 +39,7 @@ auto APU::Master::run() -> void {
   right  >>= 1;
 }
 
-auto APU::Master::read(uint16 addr) -> uint8 {
+auto APU::Sequencer::read(uint16 addr) -> uint8 {
   if(addr == 0xff24) {  //NR50
     return leftEnable << 7 | leftVolume << 4 | rightEnable << 3 | rightVolume;
   }
@@ -66,7 +66,7 @@ auto APU::Master::read(uint16 addr) -> uint8 {
   return 0xff;
 }
 
-auto APU::Master::write(uint16 addr, uint8 data) -> void {
+auto APU::Sequencer::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff24) {  //NR50
     leftEnable  = (uint1)(data >> 7);
     leftVolume  = (uint3)(data >> 4);
@@ -103,7 +103,7 @@ auto APU::Master::write(uint16 addr, uint8 data) -> void {
   }
 }
 
-auto APU::Master::power() -> void {
+auto APU::Sequencer::power() -> void {
   leftEnable = 0;
   leftVolume = 0;
   rightEnable = 0;
@@ -127,7 +127,7 @@ auto APU::Master::power() -> void {
   rightBias = 0;
 }
 
-auto APU::Master::serialize(serializer& s) -> void {
+auto APU::Sequencer::serialize(serializer& s) -> void {
   s.integer(leftEnable);
   s.integer(leftVolume);
   s.integer(rightEnable);

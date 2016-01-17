@@ -18,11 +18,10 @@ Settings::Settings() {
   set("Video/Synchronize", false);
   set("Video/Scale", "Small");
   set("Video/AspectCorrection", true);
-  set("Video/Filter", "Blur");
-  set("Video/Shader", "None");
+  set("Video/Shader", "Blur");
   set("Video/BlurEmulation", true);
   set("Video/ColorEmulation", true);
-  set("Video/ScanlineEmulation", true);
+  set("Video/ScanlineEmulation", false);
   set("Video/Saturation", 100);
   set("Video/Gamma", 100);
   set("Video/Luminance", 100);

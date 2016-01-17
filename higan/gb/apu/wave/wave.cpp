@@ -3,9 +3,12 @@ auto APU::Wave::getPattern(uint5 offset) const -> uint4 {
 }
 
 auto APU::Wave::run() -> void {
+  if(patternHold) patternHold--;
+
   if(period && --period == 0) {
     period = 1 * (2048 - frequency);
     patternSample = getPattern(++patternOffset);
+    patternHold = 1;
   }
 
   static const uint shift[] = {4, 0, 1, 2};  //0%, 100%, 50%, 25%
@@ -43,7 +46,12 @@ auto APU::Wave::read(uint16 addr) -> uint8 {
   }
 
   if(addr >= 0xff30 && addr <= 0xff3f) {
-    return pattern[addr & 15];
+    if(enable) {
+      if(!system.cgb() && !patternHold) return 0xff;
+      return pattern[patternOffset >> 1];
+    } else {
+      return pattern[addr & 15];
+    }
   }
 
   return 0xff;
@@ -77,9 +85,25 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
     frequency = ((data & 7) << 8) | (frequency & 0x00ff);
 
     if(initialize) {
+      if(!system.cgb() && patternHold) {
+        //DMG,SGB trigger while channel is being read corrupts wave RAM
+        if((patternOffset >> 1) <= 3) {
+          //if current pattern is with 0-3; only byte 0 is corrupted
+          pattern[0] = pattern[patternOffset >> 1];
+        } else {
+          //if current pattern is within 4-15; pattern&~3 is copied to pattern[0-3]
+          pattern[0] = pattern[((patternOffset >> 1) & ~3) + 0];
+          pattern[1] = pattern[((patternOffset >> 1) & ~3) + 1];
+          pattern[2] = pattern[((patternOffset >> 1) & ~3) + 2];
+          pattern[3] = pattern[((patternOffset >> 1) & ~3) + 3];
+        }
+      }
+
       enable = dacEnable;
       period = 1 * (2048 - frequency);
       patternOffset = 0;
+      patternSample = 0;
+      patternHold = 0;
 
       if(!length) {
         length = 256;
@@ -89,7 +113,12 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr >= 0xff30 && addr <= 0xff3f) {
-    pattern[addr & 15] = data;
+    if(enable) {
+      if(!system.cgb() && !patternHold) return;
+      pattern[patternOffset >> 1] = data;
+    } else {
+      pattern[addr & 15] = data;
+    }
   }
 }
 
@@ -105,6 +134,7 @@ auto APU::Wave::power(bool initializeLength) -> void {
   period = 0;
   patternOffset = 0;
   patternSample = 0;
+  patternHold = 0;
 
   if(initializeLength) length = 256;
 }
@@ -123,4 +153,5 @@ auto APU::Wave::serialize(serializer& s) -> void {
   s.integer(period);
   s.integer(patternOffset);
   s.integer(patternSample);
+  s.integer(patternHold);
 }

@@ -80,8 +80,6 @@ Presentation::Presentation() {
     settings["Video/Overscan/Mask"].setValue(maskOverscan.checked());
   });
   videoShaderMenu.setText("Video Shader");
-  if(settings["Video/Shader"].text() == "None") videoShaderNone.setChecked();
-  if(settings["Video/Shader"].text() == "Blur") videoShaderBlur.setChecked();
   videoShaderNone.setText("None").onActivate([&] {
     settings["Video/Shader"].setValue("None");
     program->updateVideoShader();
@@ -277,20 +275,22 @@ auto Presentation::drawSplashScreen() -> void {
 }
 
 auto Presentation::loadShaders() -> void {
-  if(settings["Video/Driver"].text() != "OpenGL") {
-    return;
+  auto pathname = locate({localpath(), "higan/"}, "Video Shaders/");
+
+  if(settings["Video/Driver"].text() == "OpenGL") {
+    for(auto shader : directory::folders(pathname, "*.shader")) {
+      if(videoShaders.objectCount() == 2) videoShaderMenu.append(MenuSeparator());
+      MenuRadioItem item{&videoShaderMenu};
+      item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
+        settings["Video/Shader"].setValue({pathname, shader});
+        program->updateVideoShader();
+      });
+      videoShaders.append(item);
+    }
   }
 
-  auto pathname = locate({localpath(), "higan/"}, "Video Shaders/");
-  for(auto shader : directory::folders(pathname, "*.shader")) {
-    if(videoShaders.objectCount() == 2) videoShaderMenu.append(MenuSeparator());
-    MenuRadioItem item{&videoShaderMenu};
-    item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
-      settings["Video/Shader"].setValue({pathname, shader});
-      program->updateVideoShader();
-    });
-    videoShaders.append(item);
-  }
+  if(settings["Video/Shader"].text() == "None") videoShaderNone.setChecked();
+  if(settings["Video/Shader"].text() == "Blur") videoShaderBlur.setChecked();
 
   for(auto radioItem : videoShaders.objects<MenuRadioItem>()) {
     if(settings["Video/Shader"].text() == string{pathname, radioItem.text(), ".shader/"}) {

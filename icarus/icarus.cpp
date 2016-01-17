@@ -86,7 +86,7 @@ auto nall::main(lstring args) -> void {
   Application::Cocoa::onPreferences([&] {
     scanDialog->settingsButton.doActivate();
   });
-  Application::Cocoa::onQuit({
+  Application::Cocoa::onQuit([&] {
     Application::quit();
   });
   #endif

@@ -186,13 +186,6 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
     return;
   }
 
-  if(addr == 0xff46) {  //DMA
-    oamdma.active = true;
-    oamdma.clock = 0;
-    oamdma.bank = data;
-    return;
-  }
-
   if(addr == 0xff4d) {  //KEY1
     status.speed_switch = data & 0x01;
     return;

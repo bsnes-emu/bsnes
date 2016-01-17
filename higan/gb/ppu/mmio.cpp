@@ -3,8 +3,14 @@ auto PPU::vram_addr(uint16 addr) const -> uint {
 }
 
 auto PPU::mmio_read(uint16 addr) -> uint8 {
-  if(addr >= 0x8000 && addr <= 0x9fff) return vram[vram_addr(addr)];
-  if(addr >= 0xfe00 && addr <= 0xfe9f) return oam[addr & 0xff];
+  if(addr >= 0x8000 && addr <= 0x9fff) {
+    return vram[vram_addr(addr)];
+  }
+
+  if(addr >= 0xfe00 && addr <= 0xfe9f) {
+    if(status.dma_active && status.dma_clock >= 8) return 0xff;
+    return oam[addr & 0xff];
+  }
 
   if(addr == 0xff40) {  //LCDC
     return (status.display_enable << 7)
@@ -101,8 +107,16 @@ auto PPU::mmio_read(uint16 addr) -> uint8 {
 }
 
 auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
-  if(addr >= 0x8000 && addr <= 0x9fff) { vram[vram_addr(addr)] = data; return; }
-  if(addr >= 0xfe00 && addr <= 0xfe9f) { oam[addr & 0xff] = data; return; }
+  if(addr >= 0x8000 && addr <= 0x9fff) {
+    vram[vram_addr(addr)] = data;
+    return;
+  }
+
+  if(addr >= 0xfe00 && addr <= 0xfe9f) {
+    if(status.dma_active && status.dma_clock >= 8) return;
+    oam[addr & 0xff] = data;
+    return;
+  }
 
   if(addr == 0xff40) {  //LCDC
     if(status.display_enable == false && (data & 0x80)) {
@@ -151,6 +165,13 @@ auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
 
   if(addr == 0xff45) {  //LYC
     status.lyc = data;
+    return;
+  }
+
+  if(addr == 0xff46) {  //DMA
+    status.dma_active = true;
+    status.dma_clock = 0;
+    status.dma_bank = data;
     return;
   }
 

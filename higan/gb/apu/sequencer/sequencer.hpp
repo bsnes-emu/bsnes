@@ -1,4 +1,4 @@
-struct Master {
+struct Sequencer {
   auto run() -> void;
   auto read(uint16 addr) -> uint8;
   auto write(uint16 addr, uint8 data) -> void;

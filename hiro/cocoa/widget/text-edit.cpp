@@ -84,7 +84,7 @@ auto pTextEdit::setEditable(bool editable) -> void {
 
 auto pTextEdit::setEnabled(bool enabled) -> void {
   pWidget::setEnabled(enabled);
-  setEditable(self().editable);  //Cocoa lacks NSTextView::setEnabled; simulate via setEnabled()
+  setEditable(state().editable);  //Cocoa lacks NSTextView::setEnabled; simulate via setEnabled()
 }
 
 auto pTextEdit::setFont(const Font& font) -> void {

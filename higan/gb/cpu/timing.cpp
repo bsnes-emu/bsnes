@@ -6,21 +6,6 @@ auto CPU::add_clocks(uint clocks) -> void {
   if(system.sgb()) system.clocks_executed += clocks;
 
   while(clocks--) {
-    if(oamdma.active) {
-      uint offset = oamdma.clock++;
-      if((offset & 3) == 0) {
-        offset >>= 2;
-        if(offset == 0) {
-          //warm-up
-        } else if(offset == 161) {
-          //cool-down; disable
-          oamdma.active = false;
-        } else {
-          bus.write(0xfe00 + offset - 1, bus.read((oamdma.bank << 8) + offset - 1));
-        }
-      }
-    }
-
     if(++status.clock == 0) {
       cartridge.mbc3.second();
     }
