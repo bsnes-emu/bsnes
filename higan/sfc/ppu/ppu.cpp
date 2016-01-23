@@ -10,6 +10,7 @@ PPU ppu;
 #include "sprite/sprite.cpp"
 #include "window/window.cpp"
 #include "serialization.cpp"
+#include "video.cpp"
 
 PPU::PPU() :
 bg1(*this, Background::ID::BG1),
@@ -119,6 +120,7 @@ auto PPU::reset() -> void {
   sprite.reset();
   window.reset();
   screen.reset();
+  video.reset();
 
   frame();
 }
@@ -141,7 +143,7 @@ auto PPU::scanline() -> void {
   screen.scanline();
 
   if(vcounter() == 241) {
-    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+    video.refresh();
   }
 }
 

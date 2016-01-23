@@ -1,22 +1,23 @@
-Video video;
-
-Video::Video() {
+PPU::Video::Video() {
   output = new uint32[512 * 512]();
+  output += 16 * 512;  //overscan padding
+
+  paletteLiteral = new uint32[1 << 19];
   paletteStandard = new uint32[1 << 19];
   paletteEmulation = new uint32[1 << 19];
-
-  output += 16 * 512;  //overscan padding
 }
 
-Video::~Video() {
+PPU::Video::~Video() {
   output -= 16 * 512;
   delete[] output;
+
+  delete[] paletteLiteral;
   delete[] paletteStandard;
   delete[] paletteEmulation;
 }
 
-auto Video::reset() -> void {
-  memory::fill(output, 512 * 480 * sizeof(uint32));  //padding area already cleared
+auto PPU::Video::reset() -> void {
+  memory::fill(output, 512 * 480 * sizeof(uint32));
 
   for(auto color : range(1 << 19)) {
     uint l = (uint4)(color >> 15);
@@ -26,28 +27,31 @@ auto Video::reset() -> void {
 
     double L = (1.0 + l) / 16.0 * (l ? 1.0 : 0.5);
 
-    { uint R = L * image::normalize(r, 5, 8);
-      uint G = L * image::normalize(g, 5, 8);
-      uint B = L * image::normalize(b, 5, 8);
-      paletteStandard[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+    { paletteLiteral[color] = color;
     }
 
-    { uint R = L * gammaRamp[r];
-      uint G = L * gammaRamp[g];
-      uint B = L * gammaRamp[b];
-      paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+    { uint R = L * image::normalize(r, 5, 16);
+      uint G = L * image::normalize(g, 5, 16);
+      uint B = L * image::normalize(b, 5, 16);
+      paletteStandard[color] = interface->videoColor(R, G, B);
     }
-  }
 
-  for(auto color : range(1 << 19)) {
-    uint l = (uint4)(color >> 15);
-    uint b = (uint5)(color >> 10);
-    uint g = (uint5)(color >>  5);
-    uint r = (uint5)(color >>  0);
+    { static const uint8 gammaRamp[32] = {
+        0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
+        0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
+        0x88, 0x90, 0x98, 0xa0, 0xa8, 0xb0, 0xb8, 0xc0,
+        0xc8, 0xd0, 0xd8, 0xe0, 0xe8, 0xf0, 0xf8, 0xff,
+      };
+
+      uint R = L * gammaRamp[r] * 0x0101;
+      uint G = L * gammaRamp[g] * 0x0101;
+      uint B = L * gammaRamp[b] * 0x0101;
+      paletteEmulation[color] = interface->videoColor(R, G, B);
+    }
   }
 }
 
-auto Video::refresh() -> void {
+auto PPU::Video::refresh() -> void {
   auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
 
   if(settings.scanlineEmulation) {
@@ -109,13 +113,29 @@ auto Video::refresh() -> void {
   }
 
   drawCursors();
-
   interface->videoRefresh(output - (ppu.overscan() ? 0 : 7 * 1024), 512 * sizeof(uint32), 512, 480);
+  scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
-//internal
+auto PPU::Video::drawCursor(uint32 color, int x, int y) -> void {
+  static const uint8 cursor[15 * 15] = {
+    0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
+    0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,
+    0,0,0,1,2,2,1,2,1,2,2,1,0,0,0,
+    0,0,1,2,1,1,0,1,0,1,1,2,1,0,0,
+    0,1,2,1,0,0,0,1,0,0,0,1,2,1,0,
+    0,1,2,1,0,0,1,2,1,0,0,1,2,1,0,
+    1,2,1,0,0,1,1,2,1,1,0,0,1,2,1,
+    1,2,2,1,1,2,2,2,2,2,1,1,2,2,1,
+    1,2,1,0,0,1,1,2,1,1,0,0,1,2,1,
+    0,1,2,1,0,0,1,2,1,0,0,1,2,1,0,
+    0,1,2,1,0,0,0,1,0,0,0,1,2,1,0,
+    0,0,1,2,1,1,0,1,0,1,1,2,1,0,0,
+    0,0,0,1,2,2,1,2,1,2,2,1,0,0,0,
+    0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,
+    0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
+  };
 
-auto Video::drawCursor(uint32 color, int x, int y) -> void {
   auto data = (uint32*)output;
   if(ppu.interlace() && ppu.field()) data += 512;
 
@@ -138,8 +158,8 @@ auto Video::drawCursor(uint32 color, int x, int y) -> void {
   }
 }
 
-auto Video::drawCursors() -> void {
-  switch(configuration.controllerPort2) {
+auto PPU::Video::drawCursors() -> void {
+  switch((Device::ID)settings.controllerPort2) {
   case Device::ID::SuperScope:
     if(dynamic_cast<SuperScope*>(device.controllerPort2)) {
       auto& controller = (SuperScope&)*device.controllerPort2;
@@ -157,28 +177,3 @@ auto Video::drawCursors() -> void {
     break;
   }
 }
-
-const uint8 Video::gammaRamp[32] = {
-  0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
-  0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
-  0x88, 0x90, 0x98, 0xa0, 0xa8, 0xb0, 0xb8, 0xc0,
-  0xc8, 0xd0, 0xd8, 0xe0, 0xe8, 0xf0, 0xf8, 0xff,
-};
-
-const uint8 Video::cursor[15 * 15] = {
-  0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
-  0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,
-  0,0,0,1,2,2,1,2,1,2,2,1,0,0,0,
-  0,0,1,2,1,1,0,1,0,1,1,2,1,0,0,
-  0,1,2,1,0,0,0,1,0,0,0,1,2,1,0,
-  0,1,2,1,0,0,1,2,1,0,0,1,2,1,0,
-  1,2,1,0,0,1,1,2,1,1,0,0,1,2,1,
-  1,2,2,1,1,2,2,2,2,2,1,1,2,2,1,
-  1,2,1,0,0,1,1,2,1,1,0,0,1,2,1,
-  0,1,2,1,0,0,1,2,1,0,0,1,2,1,0,
-  0,1,2,1,0,0,0,1,0,0,0,1,2,1,0,
-  0,0,1,2,1,1,0,1,0,1,1,2,1,0,0,
-  0,0,0,1,2,2,1,2,1,2,2,1,0,0,0,
-  0,0,0,0,1,1,2,2,2,1,1,0,0,0,0,
-  0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,
-};

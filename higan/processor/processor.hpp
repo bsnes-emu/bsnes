@@ -1,6 +1,3 @@
-#ifndef PROCESSOR_HPP
-#define PROCESSOR_HPP
+#pragma once
 
 #include <emulator/emulator.hpp>
-
-#endif

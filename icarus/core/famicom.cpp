@@ -47,7 +47,11 @@ auto Icarus::famicomImport(vector<uint8>& buffer, string location) -> string {
   uint chrrom = 0;
   auto markup = famicomManifest(buffer, location, &prgrom, &chrrom);
   if(!markup) return failure("failed to parse ROM image");
+
   if(!directory::create(target)) return failure("library path unwritable");
+  if(file::exists({source, name, ".sav"}) && !file::exists({target, "save.ram"})) {
+    file::copy({source, name, ".sav"}, {target, "save.ram"});
+  }
 
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "ines.rom"}, buffer.data(), 16);

@@ -3,53 +3,46 @@
 namespace SuperFamicom {
 
 System system;
-Configuration configuration;
-Random random;
 
-#include "video.cpp"
-#include "audio.cpp"
 #include "device.cpp"
+#include "random.cpp"
 #include "serialization.cpp"
 
 #include <sfc/scheduler/scheduler.cpp>
 
-System::System() {
-  region = Region::Autodetect;
-  expansionPort = Device::ID::eBoot;
-}
+auto System::region() const -> Region { return _region; }
+auto System::expansionPort() const -> Device::ID { return _expansionPort; }
+auto System::cpuFrequency() const -> uint { return _cpuFrequency; }
+auto System::apuFrequency() const -> uint { return _apuFrequency; }
 
 auto System::run() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::None;
-
   scheduler.enter();
-  if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-    video.refresh();
-  }
 }
 
 auto System::runToSave() -> void {
-  if(CPU::Threaded == true) {
+  if(CPU::Threaded) {
     scheduler.sync = Scheduler::SynchronizeMode::CPU;
     runThreadToSave();
   }
 
-  if(SMP::Threaded == true) {
+  if(SMP::Threaded) {
     scheduler.thread = smp.thread;
     runThreadToSave();
   }
 
-  if(PPU::Threaded == true) {
+  if(PPU::Threaded) {
     scheduler.thread = ppu.thread;
     runThreadToSave();
   }
 
-  if(DSP::Threaded == true) {
+  if(DSP::Threaded) {
     scheduler.thread = dsp.thread;
     runThreadToSave();
   }
 
-  for(unsigned i = 0; i < cpu.coprocessors.size(); i++) {
-    auto& chip = *cpu.coprocessors[i];
+  for(uint n = 0; n < cpu.coprocessors.size(); n++) {
+    auto& chip = *cpu.coprocessors[n];
     scheduler.thread = chip.thread;
     runThreadToSave();
   }
@@ -59,9 +52,6 @@ auto System::runThreadToSave() -> void {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-      video.refresh();
-    }
   }
 }
 
@@ -89,8 +79,9 @@ auto System::init() -> void {
 
   bsmemory.init();
 
-  device.connect(0, configuration.controllerPort1);
-  device.connect(1, configuration.controllerPort2);
+  device.connect(0, (Device::ID)settings.controllerPort1);
+  device.connect(1, (Device::ID)settings.controllerPort2);
+  device.connect(2, (Device::ID)settings.expansionPort);
 }
 
 auto System::term() -> void {
@@ -104,15 +95,10 @@ auto System::load() -> void {
     interface->loadRequest(ID::IPLROM, iplrom, true);
   }
 
-  region = configuration.region;
-  if(region == Region::Autodetect) {
-    region = (cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL);
-  }
-  expansionPort = configuration.expansionPort;
-  cpuFrequency = region() == Region::NTSC ? 21477272 : 21281370;
-  apuFrequency = 24606720;
-
-  audio.coprocessor_enable(false);
+  _region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
+  _expansionPort = (Device::ID)settings.expansionPort;
+  _cpuFrequency = region() == Region::NTSC ? 21477272 : 21281370;
+  _apuFrequency = 24606720;
 
   bus.reset();
   bus.map();
@@ -240,10 +226,10 @@ auto System::reset() -> void {
   if(cartridge.hasSPC7110()) cpu.coprocessors.append(&spc7110);
   if(cartridge.hasMSU1()) cpu.coprocessors.append(&msu1);
 
-  video.reset();
   scheduler.init();
-  device.connect(0, configuration.controllerPort1);
-  device.connect(1, configuration.controllerPort2);
+  device.connect(0, (Device::ID)settings.controllerPort1);
+  device.connect(1, (Device::ID)settings.controllerPort2);
+  device.connect(2, (Device::ID)settings.expansionPort);
 }
 
 }

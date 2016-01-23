@@ -32,12 +32,12 @@ auto Device::connect(uint port, Device::ID id) -> void {
     }
 
     switch(port) {
-    case 0: configuration.controllerPort1 = id; break;
-    case 1: configuration.controllerPort2 = id; break;
+    case 0: settings.controllerPort1 = (uint)id; break;
+    case 1: settings.controllerPort2 = (uint)id; break;
     }
   }
 
   if(port == 2) {
-    configuration.expansionPort = id;
+    settings.expansionPort = (uint)id;
   }
 }

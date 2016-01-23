@@ -1,5 +1,5 @@
 auto System::serialize() -> serializer {
-  serializer s(serializeSize);
+  serializer s(_serializeSize);
 
   uint signature = 0x31545342, version = Info::SerializerVersion;
   char hash[64], description[512], profile[16];
@@ -37,13 +37,11 @@ auto System::unserialize(serializer& s) -> bool {
   return true;
 }
 
-//========
 //internal
-//========
 
 auto System::serialize(serializer& s) -> void {
-  s.integer((uint&)region);
-  s.integer((uint&)expansionPort);
+  s.integer((uint&)_region);
+  s.integer((uint&)_expansionPort);
 }
 
 auto System::serializeAll(serializer& s) -> void {
@@ -89,5 +87,5 @@ auto System::serializeInit() -> void {
   s.array(description);
 
   serializeAll(s);
-  serializeSize = s.size();
+  _serializeSize = s.size();
 }

@@ -21,7 +21,7 @@ auto ICD2::enter() -> void {
       step(GameBoy::system.clocks_executed);
       GameBoy::system.clocks_executed = 0;
     } else {  //DMG halted
-      audio.coprocessor_sample(0x0000, 0x0000);
+      dsp.audio.coprocessorSample(0, 0);
       step(1);
     }
     synchronizeCPU();
@@ -44,8 +44,8 @@ auto ICD2::unload() -> void {
 }
 
 auto ICD2::power() -> void {
-  audio.coprocessor_enable(true);
-  audio.coprocessor_frequency(2 * 1024 * 1024);
+  dsp.audio.coprocessorEnable(true);
+  dsp.audio.coprocessorFrequency(2 * 1024 * 1024);
 }
 
 auto ICD2::reset() -> void {

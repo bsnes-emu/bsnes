@@ -39,7 +39,11 @@ auto Icarus::gameBoyColorImport(vector<uint8>& buffer, string location) -> strin
 
   auto markup = gameBoyColorManifest(buffer, location);
   if(!markup) return failure("failed to parse ROM image");
+
   if(!directory::create(target)) return failure("library path unwritable");
+  if(file::exists({source, name, ".sav"}) && !file::exists({target, "save.ram"})) {
+    file::copy({source, name, ".sav"}, {target, "save.ram"});
+  }
 
   if(settings["icarus/CreateManifests"].boolean()) file::write({target, "manifest.bml"}, markup);
   file::write({target, "program.rom"}, buffer);

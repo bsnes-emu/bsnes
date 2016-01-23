@@ -7,7 +7,6 @@ DSP dsp;
 #define REG(n) state.regs[n]
 #define VREG(n) state.regs[v.vidx + n]
 
-#include "serialization.cpp"
 #include "gaussian.cpp"
 #include "counter.cpp"
 #include "envelope.cpp"
@@ -15,6 +14,8 @@ DSP dsp;
 #include "misc.cpp"
 #include "voice.cpp"
 #include "echo.cpp"
+#include "serialization.cpp"
+#include "audio.cpp"
 
 DSP::DSP() {
   static_assert(sizeof(signed) >= 32 / 8, "signed >= 32-bits");
@@ -283,6 +284,8 @@ auto DSP::power() -> void {
     voice[n].hiddenEnvelope = 0;
     voice[n]._envxOut = 0;
   }
+
+  audio.coprocessorEnable(false);
 }
 
 auto DSP::reset() -> void {

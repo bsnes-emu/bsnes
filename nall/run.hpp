@@ -114,12 +114,9 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     nullptr, nullptr, &si, &pi
   )) return "";
 
-  while(true) {
-    DWORD exitCode;
-    GetExitCodeProcess(pi.hProcess, &exitCode);
-    Sleep(1);
-    if(exitCode != STILL_ACTIVE) break;
-  }
+  if(WaitForSingleObject(pi.hProcess, INFINITE)) return "";
+  CloseHandle(pi.hThread);
+  CloseHandle(pi.hProcess);
 
   string result;
   while(true) {

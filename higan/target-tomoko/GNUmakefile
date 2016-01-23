@@ -3,6 +3,7 @@ name := higan
 processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050
 include processor/GNUmakefile
 
+include emulator/GNUmakefile
 include fc/GNUmakefile
 include sfc/GNUmakefile
 include gb/GNUmakefile
