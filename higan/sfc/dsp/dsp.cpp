@@ -3,6 +3,7 @@
 namespace SuperFamicom {
 
 DSP dsp;
+#include "audio.cpp"
 
 #define REG(n) state.regs[n]
 #define VREG(n) state.regs[v.vidx + n]
@@ -15,7 +16,6 @@ DSP dsp;
 #include "voice.cpp"
 #include "echo.cpp"
 #include "serialization.cpp"
-#include "audio.cpp"
 
 DSP::DSP() {
   static_assert(sizeof(signed) >= 32 / 8, "signed >= 32-bits");

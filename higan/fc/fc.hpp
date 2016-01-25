@@ -51,7 +51,6 @@ namespace Famicom {
   #include <fc/apu/apu.hpp>
   #include <fc/ppu/ppu.hpp>
   #include <fc/cheat/cheat.hpp>
-  #include <fc/video/video.hpp>
 }
 
 #include <fc/interface/interface.hpp>

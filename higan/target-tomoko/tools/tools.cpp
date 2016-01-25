@@ -3,9 +3,8 @@
 #include "cheat-editor.cpp"
 #include "state-manager.cpp"
 #include "manifest-viewer.cpp"
-CheatDatabase* cheatDatabase = nullptr;
-ToolsManager* toolsManager = nullptr;
-ManifestViewer* manifestViewer = nullptr;
+unique_pointer<CheatDatabase> cheatDatabase;
+unique_pointer<ToolsManager> toolsManager;
 
 ToolsManager::ToolsManager() {
   toolsManager = this;
@@ -13,7 +12,7 @@ ToolsManager::ToolsManager() {
   layout.setMargin(5);
 
   setTitle("Tools");
-  setSize({600, 400});
+  setSize({600, 405});
   setAlignment({1.0, 1.0});
 
   onSize([&] {

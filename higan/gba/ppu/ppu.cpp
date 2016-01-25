@@ -12,6 +12,9 @@
 
 namespace GameBoyAdvance {
 
+PPU ppu;
+#include "video.cpp"
+
 #include "registers.cpp"
 #include "background.cpp"
 #include "object.cpp"
@@ -20,7 +23,6 @@ namespace GameBoyAdvance {
 #include "mmio.cpp"
 #include "memory.cpp"
 #include "serialization.cpp"
-PPU ppu;
 
 PPU::PPU() {
   output = new uint32[240 * 160];

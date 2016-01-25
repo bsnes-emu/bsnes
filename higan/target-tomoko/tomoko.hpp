@@ -4,12 +4,12 @@
 using namespace nall;
 using namespace ruby;
 using namespace hiro;
-extern Video* video;
-extern Audio* audio;
-extern Input* input;
+extern unique_pointer<Video> video;
+extern unique_pointer<Audio> audio;
+extern unique_pointer<Input> input;
 
 #include <emulator/emulator.hpp>
-extern Emulator::Interface* emulator;
+extern unique_pointer<Emulator::Interface> emulator;
 
 #include "program/program.hpp"
 #include "configuration/configuration.hpp"
@@ -18,4 +18,4 @@ extern Emulator::Interface* emulator;
 #include "tools/tools.hpp"
 #include "presentation/presentation.hpp"
 
-auto locate(string pathname, string filename) -> string;
+auto locate(string name) -> string;

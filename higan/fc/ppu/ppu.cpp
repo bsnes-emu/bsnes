@@ -2,8 +2,10 @@
 
 namespace Famicom {
 
-#include "serialization.cpp"
 PPU ppu;
+#include "video.cpp"
+
+#include "serialization.cpp"
 
 auto PPU::Main() -> void {
   ppu.main();

@@ -62,4 +62,4 @@ struct InputManager {
   vector<InputHotkey*> hotkeys;
 };
 
-extern InputManager* inputManager;
+extern unique_pointer<InputManager> inputManager;

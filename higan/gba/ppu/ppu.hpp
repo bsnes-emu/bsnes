@@ -1,3 +1,5 @@
+#include "video.hpp"
+
 struct PPU : Thread, MMIO {
   #include "registers.hpp"
   #include "state.hpp"

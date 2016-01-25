@@ -50,4 +50,4 @@ struct Program : Emulator::Interface::Bind {
   time_t statusTime = 0;
 };
 
-extern Program* program;
+extern unique_pointer<Program> program;

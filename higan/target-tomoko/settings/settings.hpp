@@ -142,4 +142,4 @@ struct SettingsManager : Window {
   StatusBar statusBar{this};
 };
 
-extern SettingsManager* settingsManager;
+extern unique_pointer<SettingsManager> settingsManager;

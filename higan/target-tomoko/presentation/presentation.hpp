@@ -70,4 +70,4 @@ struct Presentation : Window {
   StatusBar statusBar{this};
 };
 
-extern Presentation* presentation;
+extern unique_pointer<Presentation> presentation;

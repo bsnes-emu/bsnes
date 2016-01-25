@@ -95,5 +95,5 @@ struct ToolsManager : Window {
       ManifestViewer manifestViewer{&panel};
 };
 
-extern CheatDatabase* cheatDatabase;
-extern ToolsManager* toolsManager;
+extern unique_pointer<CheatDatabase> cheatDatabase;
+extern unique_pointer<ToolsManager> toolsManager;

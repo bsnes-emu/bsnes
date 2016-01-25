@@ -1,6 +1,6 @@
 #include "../tomoko.hpp"
 #include "hotkeys.cpp"
-InputManager* inputManager = nullptr;
+unique_pointer<InputManager> inputManager;
 
 auto InputMapping::bind() -> void {
   auto token = assignment.split("/");
@@ -124,7 +124,10 @@ auto InputMapping::assignmentName() -> string {
   if(!device) return "None";
   string path;
   path.append(device->name());
-  path.append(".", device->group(group).name());
+  if(device->name() != "Keyboard") {
+    //keyboards only have one group; no need to append group name
+    path.append(".", device->group(group).name());
+  }
   path.append(".", device->group(group).input(input).name());
   if(qualifier == Qualifier::Lo) path.append(".Lo");
   if(qualifier == Qualifier::Hi) path.append(".Hi");

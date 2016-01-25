@@ -38,17 +38,19 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
 
   if(addr == 0xff00) {  //JOYP
     mmio_joyp_poll();
-    return (status.p15 << 5)
+    return 0xc0
+         | (status.p15 << 5)
          | (status.p14 << 4)
          | (status.joyp << 0);
   }
 
   if(addr == 0xff01) {  //SB
-    return 0xff;
+    return 0x00;
   }
 
   if(addr == 0xff02) {  //SC
     return (status.serial_transfer << 7)
+         | 0x7e
          | (status.serial_clock << 0);
   }
 
@@ -65,12 +67,14 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff07) {  //TAC
-    return (status.timer_enable << 2)
+    return 0xf8
+         | (status.timer_enable << 2)
          | (status.timer_clock << 0);
   }
 
   if(addr == 0xff0f) {  //IF
-    return (status.interrupt_request_joypad << 4)
+    return 0xe0
+         | (status.interrupt_request_joypad << 4)
          | (status.interrupt_request_serial << 3)
          | (status.interrupt_request_timer << 2)
          | (status.interrupt_request_stat << 1)
@@ -123,7 +127,8 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xffff) {  //IE
-    return (status.interrupt_enable_joypad << 4)
+    return 0xe0
+         | (status.interrupt_enable_joypad << 4)
          | (status.interrupt_enable_serial << 3)
          | (status.interrupt_enable_timer << 2)
          | (status.interrupt_enable_stat << 1)

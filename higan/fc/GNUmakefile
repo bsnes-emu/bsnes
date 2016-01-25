@@ -1,6 +1,6 @@
 fc_objects := fc-interface fc-system fc-scheduler fc-input
 fc_objects += fc-memory fc-cartridge fc-cpu fc-apu fc-ppu
-fc_objects += fc-cheat fc-video
+fc_objects += fc-cheat
 objects += $(fc_objects)
 
 obj/fc-interface.o: $(fc)/interface/interface.cpp $(call rwildcard,$(fc)/interface/)
@@ -13,4 +13,3 @@ obj/fc-cpu.o: $(fc)/cpu/cpu.cpp $(call rwildcard,$(fc)/cpu/)
 obj/fc-apu.o: $(fc)/apu/apu.cpp $(call rwildcard,$(fc)/apu/)
 obj/fc-ppu.o: $(fc)/ppu/ppu.cpp $(call rwildcard,$(fc)/ppu/)
 obj/fc-cheat.o: $(fc)/cheat/cheat.cpp $(call rwildcard,$(fc)/cheat/)
-obj/fc-video.o: $(fc)/video/video.cpp $(call rwildcard,$(fc)/video/)

@@ -3,6 +3,7 @@
 namespace SuperFamicom {
 
 PPU ppu;
+#include "video.cpp"
 
 #include "background/background.cpp"
 #include "mmio/mmio.cpp"
@@ -10,7 +11,6 @@ PPU ppu;
 #include "sprite/sprite.cpp"
 #include "window/window.cpp"
 #include "serialization.cpp"
-#include "video.cpp"
 
 PPU::PPU() :
 bg1(*this, Background::ID::BG1),

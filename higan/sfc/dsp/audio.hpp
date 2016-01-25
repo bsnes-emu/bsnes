@@ -16,3 +16,5 @@ private:
     uint8 write;
   } dsp, mix;
 };
+
+extern Audio audio;

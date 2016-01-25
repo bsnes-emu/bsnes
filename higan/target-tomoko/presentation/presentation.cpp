@@ -1,5 +1,5 @@
 #include "../tomoko.hpp"
-Presentation* presentation = nullptr;
+unique_pointer<Presentation> presentation;
 
 Presentation::Presentation() {
   presentation = this;
@@ -275,7 +275,7 @@ auto Presentation::drawSplashScreen() -> void {
 }
 
 auto Presentation::loadShaders() -> void {
-  auto pathname = locate({localpath(), "higan/"}, "Video Shaders/");
+  auto pathname = locate("Video Shaders/");
 
   if(settings["Video/Driver"].text() == "OpenGL") {
     for(auto shader : directory::folders(pathname, "*.shader")) {

@@ -2,7 +2,7 @@
 #include <windows.h>
 
 struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
-  AudioXAudio2() { term(); }
+  ~AudioXAudio2() { term(); }
 
   IXAudio2* pXAudio2 = nullptr;
   IXAudio2MasteringVoice* pMasterVoice = nullptr;

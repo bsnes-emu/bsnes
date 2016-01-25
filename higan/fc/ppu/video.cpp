@@ -1,34 +1,27 @@
-#include <fc/fc.hpp>
 #include <cmath>
-
-#define VIDEO_CPP
-namespace Famicom {
 
 Video video;
 
 Video::Video() {
   output = new uint32[256 * 480];
+  paletteLiteral = new uint32[1 << 9];
   paletteStandard = new uint32[1 << 9];
   paletteEmulation = new uint32[1 << 9];
 }
 
-Video::~Video() {
-  delete[] output;
-  delete[] paletteStandard;
-  delete[] paletteEmulation;
-}
-
 auto Video::reset() -> void {
-  memory::fill(output, 256 * 480);
+  memory::fill(output(), 256 * 480);
 
   for(auto color : range(1 << 9)) {
+    paletteLiteral[color] = color;
     paletteStandard[color] = generateColor(color, 2.0, 0.0, 1.0, 1.0, 2.2);
     paletteEmulation[color] = generateColor(color, 2.0, 0.0, 1.0, 1.0, 1.8);
   }
 }
 
 auto Video::refresh() -> void {
-  auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
+  auto output = this->output();
+  auto& palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
 
   if(settings.scanlineEmulation) {
     for(uint y = 0; y < 240; y++) {
@@ -99,7 +92,5 @@ auto Video::generateColor(
   uint g = uclamp<16>(65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q));
   uint b = uclamp<16>(65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q));
 
-  return (255 << 24) | ((r >> 8) << 16) | ((g >> 8) << 8) | ((b >> 8) << 0);
-}
-
+  return interface->videoColor(r, g, b);
 }

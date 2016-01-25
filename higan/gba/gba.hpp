@@ -62,7 +62,6 @@ namespace GameBoyAdvance {
   #include <gba/cpu/cpu.hpp>
   #include <gba/ppu/ppu.hpp>
   #include <gba/apu/apu.hpp>
-  #include <gba/video/video.hpp>
 }
 
 #include <gba/interface/interface.hpp>

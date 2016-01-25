@@ -113,6 +113,14 @@ rwildcard = \
     ) \
   )
 
+# function unique(source)
+unique = \
+  $(eval __temp :=) \
+  $(strip \
+    $(foreach s,$1,$(if $(filter $s,$(__temp)),,$(eval __temp += $s))) \
+    $(__temp) \
+  )
+
 # function strtr(source, from, to)
 strtr = \
   $(eval __temp := $1) \

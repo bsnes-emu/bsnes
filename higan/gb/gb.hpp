@@ -50,7 +50,6 @@ namespace GameBoy {
   #include <gb/ppu/ppu.hpp>
   #include <gb/apu/apu.hpp>
   #include <gb/cheat/cheat.hpp>
-  #include <gb/video/video.hpp>
 }
 
 #include <gb/interface/interface.hpp>

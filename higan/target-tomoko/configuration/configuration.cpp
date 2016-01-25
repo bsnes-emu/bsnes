@@ -2,7 +2,7 @@
 Settings settings;
 
 Settings::Settings() {
-  Markup::Node::operator=(BML::unserialize(string::read(locate({localpath(), "higan/"}, "settings.bml"))));
+  Markup::Node::operator=(BML::unserialize(string::read(locate("settings.bml"))));
 
   auto set = [&](const string& name, const string& value) {
     //create node and set to default value only if it does not already exist
@@ -48,5 +48,5 @@ Settings::Settings() {
 }
 
 auto Settings::quit() -> void {
-  file::write(locate({localpath(), "higan/"}, "settings.bml"), BML::serialize(*this));
+  file::write(locate("settings.bml"), BML::serialize(*this));
 }

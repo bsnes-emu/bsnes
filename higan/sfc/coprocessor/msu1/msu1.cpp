@@ -41,7 +41,7 @@ auto MSU1::enter() -> void {
     right = sclamp<16>(rchannel);
     if(dsp.mute()) left = 0, right = 0;
 
-    dsp.audio.coprocessorSample(left, right);
+    audio.coprocessorSample(left, right);
     step(1);
     synchronizeCPU();
   }
@@ -59,8 +59,8 @@ auto MSU1::unload() -> void {
 }
 
 auto MSU1::power() -> void {
-  dsp.audio.coprocessorEnable(true);
-  dsp.audio.coprocessorFrequency(44100.0);
+  audio.coprocessorEnable(true);
+  audio.coprocessorFrequency(44100.0);
 }
 
 auto MSU1::reset() -> void {

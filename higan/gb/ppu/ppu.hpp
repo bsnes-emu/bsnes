@@ -1,3 +1,5 @@
+#include "video.hpp"
+
 struct PPU : Thread, MMIO {
   static auto Main() -> void;
   auto main() -> void;

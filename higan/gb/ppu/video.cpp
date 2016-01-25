@@ -1,37 +1,32 @@
-#include <gb/gb.hpp>
-
-namespace GameBoy {
-
 Video video;
 
 Video::Video() {
   output = new uint32[160 * 144];
+  paletteLiteral = new uint32[1 << 15];
   paletteStandard = new uint32[1 << 15];
   paletteEmulation = new uint32[1 << 15];
 }
 
-Video::~Video() {
-  delete[] output;
-  delete[] paletteStandard;
-  delete[] paletteEmulation;
-}
-
 auto Video::power() -> void {
-  memory::fill(output, 160 * 144 * sizeof(uint32));
+  memory::fill(output(), 160 * 144 * sizeof(uint32));
 
   if(system.dmg()) {
     for(auto color : range(1 << 2)) {
-      uint L = image::normalize(3 - color, 2, 8);
-      uint R = monochrome[color][0] >> 8;
-      uint G = monochrome[color][1] >> 8;
-      uint B = monochrome[color][2] >> 8;
-      paletteStandard[color] = (255 << 24) | (L << 16) | (L << 8) | (L << 0);
-      paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
+      paletteLiteral[color] = color;
+
+      uint L = image::normalize(3 - color, 2, 16);
+      paletteStandard[color] = interface->videoColor(L, L, L);
+
+      uint R = monochrome[color][0];
+      uint G = monochrome[color][1];
+      uint B = monochrome[color][2];
+      paletteEmulation[color] = interface->videoColor(R, G, B);
     }
   }
 
   if(system.sgb()) {
     for(auto color : range(1 << 2)) {
+      paletteLiteral[color] = color;
       paletteStandard[color] = color;
       paletteEmulation[color] = color;
     }
@@ -39,30 +34,31 @@ auto Video::power() -> void {
 
   if(system.cgb()) {
     for(auto color : range(1 << 15)) {
+      paletteLiteral[color] = color;
+
       uint r = (uint5)(color >>  0);
       uint g = (uint5)(color >>  5);
       uint b = (uint5)(color >> 10);
 
-      { uint R = image::normalize(r, 5, 8);
-        uint G = image::normalize(g, 5, 8);
-        uint B = image::normalize(b, 5, 8);
-        paletteStandard[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
-      }
+      uint R = image::normalize(r, 5, 16);
+      uint G = image::normalize(g, 5, 16);
+      uint B = image::normalize(b, 5, 16);
+      paletteStandard[color] = interface->videoColor(R, G, B);
 
-      { uint R = (r * 26 + g *  4 + b *  2);
-        uint G = (         g * 24 + b *  8);
-        uint B = (r *  6 + g *  4 + b * 22);
-        R = min(960, R) >> 2;
-        G = min(960, G) >> 2;
-        B = min(960, B) >> 2;
-        paletteEmulation[color] = (255 << 24) | (R << 16) | (G << 8) | (B << 0);
-      }
+      R = (r * 26 + g *  4 + b *  2);
+      G = (         g * 24 + b *  8);
+      B = (r *  6 + g *  4 + b * 22);
+      R = image::normalize(min(960, R), 10, 16);
+      G = image::normalize(min(960, G), 10, 16);
+      B = image::normalize(min(960, B), 10, 16);
+      paletteEmulation[color] = interface->videoColor(R, G, B);
     }
   }
 }
 
 auto Video::refresh() -> void {
-  auto palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
+  auto output = this->output();
+  auto& palette = settings.colorEmulation ? paletteEmulation : paletteStandard;
 
   for(uint y = 0; y < 144; y++) {
     auto source = ppu.screen + y * 160;
@@ -107,5 +103,3 @@ const uint16 Video::monochrome[4][3] = {
   {0x0000, 0x0000, 0x0000},
   #endif
 };
-
-}

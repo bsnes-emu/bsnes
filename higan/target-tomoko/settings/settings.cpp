@@ -5,7 +5,7 @@
 #include "hotkeys.cpp"
 #include "timing.cpp"
 #include "advanced.cpp"
-SettingsManager* settingsManager = nullptr;
+unique_pointer<SettingsManager> settingsManager;
 
 SettingsManager::SettingsManager() {
   settingsManager = this;
@@ -14,7 +14,7 @@ SettingsManager::SettingsManager() {
   statusBar.setFont(Font().setBold());
 
   setTitle("Configuration Settings");
-  setSize({600, 400});
+  setSize({600, 405});
   setAlignment({0.0, 1.0});
 
   onSize([&] {

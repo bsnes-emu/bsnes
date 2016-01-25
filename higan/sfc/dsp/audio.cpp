@@ -1,17 +1,19 @@
-auto DSP::Audio::coprocessorEnable(bool enable) -> void {
+Audio audio;
+
+auto Audio::coprocessorEnable(bool enable) -> void {
   mixer.clear();
   mixerEnable = enable;
   dsp.read = dsp.write = 0;
   mix.read = mix.write = 0;
 }
 
-auto DSP::Audio::coprocessorFrequency(double frequency) -> void {
+auto Audio::coprocessorFrequency(double frequency) -> void {
   mixer.setFrequency(frequency);
   mixer.setResampler(nall::DSP::ResampleEngine::Sinc);
   mixer.setResamplerFrequency(system.apuFrequency() / 768.0);
 }
 
-auto DSP::Audio::sample(int16 left, int16 right) -> void {
+auto Audio::sample(int16 left, int16 right) -> void {
   if(!mixerEnable) return interface->audioSample(left, right);
 
   dsp.left[dsp.write] = left;
@@ -20,7 +22,7 @@ auto DSP::Audio::sample(int16 left, int16 right) -> void {
   flush();
 }
 
-auto DSP::Audio::coprocessorSample(int16 left, int16 right) -> void {
+auto Audio::coprocessorSample(int16 left, int16 right) -> void {
   int samples[] = {left, right};
   mixer.sample(samples);
   while(mixer.pending()) {
@@ -32,7 +34,7 @@ auto DSP::Audio::coprocessorSample(int16 left, int16 right) -> void {
   }
 }
 
-auto DSP::Audio::flush() -> void {
+auto Audio::flush() -> void {
   while(dsp.read != dsp.write && mix.read != mix.write) {
     interface->audioSample(
       sclamp<16>(dsp.left[dsp.read] + mix.left[mix.read]),

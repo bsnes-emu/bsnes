@@ -8,11 +8,13 @@
 
 namespace GameBoy {
 
+PPU ppu;
+#include "video.cpp"
+
 #include "mmio.cpp"
 #include "dmg.cpp"
 #include "cgb.cpp"
 #include "serialization.cpp"
-PPU ppu;
 
 auto PPU::Main() -> void {
   ppu.main();
@@ -141,8 +143,8 @@ auto PPU::power() -> void {
   for(auto& n : vram) n = 0x00;
   for(auto& n : oam) n = 0x00;
   for(auto& n : bgp) n = 0x00;
-  for(auto& n : obp[0]) n = 0x00;
-  for(auto& n : obp[1]) n = 0x00;
+  for(auto& n : obp[0]) n = 3;
+  for(auto& n : obp[1]) n = 3;
   for(auto& n : bgpd) n = 0x0000;
   for(auto& n : obpd) n = 0x0000;
 

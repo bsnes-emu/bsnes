@@ -1,5 +1,7 @@
 //Sony CXD1222Q-1
 
+#include "audio.hpp"
+
 struct DSP : Thread {
   enum : bool { Threaded = true };
 
@@ -17,9 +19,6 @@ struct DSP : Thread {
   auto reset() -> void;
 
   auto serialize(serializer&) -> void;
-
-  #include "audio.hpp"
-  Audio audio;
 
 privileged:
   #include "modulo-array.hpp"
