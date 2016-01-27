@@ -9,7 +9,7 @@ extern unique_pointer<Audio> audio;
 extern unique_pointer<Input> input;
 
 #include <emulator/emulator.hpp>
-extern unique_pointer<Emulator::Interface> emulator;
+extern Emulator::Interface* emulator;
 
 #include "program/program.hpp"
 #include "configuration/configuration.hpp"

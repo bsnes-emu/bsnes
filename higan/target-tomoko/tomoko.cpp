@@ -2,7 +2,7 @@
 unique_pointer<Video> video;
 unique_pointer<Audio> audio;
 unique_pointer<Input> input;
-unique_pointer<Emulator::Interface> emulator;
+Emulator::Interface* emulator = nullptr;
 
 auto locate(string name) -> string {
   string location = {programpath(), name};

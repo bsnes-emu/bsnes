@@ -7,6 +7,7 @@ processor_objects += $(if $(findstring r6502,$(processors)),processor-r6502)
 processor_objects += $(if $(findstring r65816,$(processors)),processor-r65816)
 processor_objects += $(if $(findstring spc700,$(processors)),processor-spc700)
 processor_objects += $(if $(findstring upd96050,$(processors)),processor-upd96050)
+processor_objects += $(if $(findstring v30mz,$(processors)),processor-v30mz)
 objects += $(processor_objects)
 
 processor := processor
@@ -18,3 +19,4 @@ obj/processor-r6502.o:    $(processor)/r6502/r6502.cpp $(call rwildcard,$(proces
 obj/processor-r65816.o:   $(processor)/r65816/r65816.cpp $(call rwildcard,$(processor)/r65816)
 obj/processor-spc700.o:   $(processor)/spc700/spc700.cpp $(call rwildcard,$(processor)/spc700)
 obj/processor-upd96050.o: $(processor)/upd96050/upd96050.cpp $(call rwildcard,$(processor)/upd96050)
+obj/processor-v30mz.o:    $(processor)/v30mz/v30mz.cpp $(call rwildcard,$(processor)/v30mz)

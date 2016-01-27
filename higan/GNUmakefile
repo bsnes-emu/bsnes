@@ -4,6 +4,7 @@ fc  := fc
 sfc := sfc
 gb  := gb
 gba := gba
+ws  := ws
 
 profile := accuracy
 target := tomoko

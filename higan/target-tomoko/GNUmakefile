@@ -1,6 +1,6 @@
 name := higan
 
-processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050
+processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050 v30mz
 include processor/GNUmakefile
 
 include emulator/GNUmakefile
@@ -8,6 +8,7 @@ include fc/GNUmakefile
 include sfc/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile
+include ws/GNUmakefile
 
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
 ui_objects += ui-settings ui-tools ui-presentation
@@ -90,12 +91,12 @@ else ifeq ($(platform),macosx)
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/icons/
-	mkdir -p $(prefix)/$(name)/
-	mkdir -p ~/Emulation/System/
+	mkdir -p $(prefix)/share/$(name)/
 	cp out/$(name) $(prefix)/bin/$(name)
+	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp data/$(name).png $(prefix)/share/icons/$(name).png
-	cp data/cheats.bml $(prefix)/$(name)/cheats.bml
-	cp -R profile/* $(prefix)/$(name)/
+	cp data/cheats.bml $(prefix)/share/$(name)/cheats.bml
+	cp -R profile/* $(prefix)/share/$(name)/
 endif
 
 uninstall:

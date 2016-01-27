@@ -3,6 +3,7 @@
 #include <sfc/interface/interface.hpp>
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
+#include <ws/interface/interface.hpp>
 #include "interface.cpp"
 #include "media.cpp"
 #include "state.cpp"
@@ -17,6 +18,7 @@ Program::Program(lstring args) {
   emulators.append(new SuperFamicom::Interface);
   emulators.append(new GameBoy::Interface);
   emulators.append(new GameBoyAdvance::Interface);
+  emulators.append(new WonderSwan::Interface);
   for(auto& emulator : emulators) emulator->bind = this;
 
   new InputManager;
