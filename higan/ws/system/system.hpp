@@ -1,9 +1,11 @@
 struct System {
-  enum class Revision : uint { WonderSwan, WonderSwanColor, SwanCrystal };
+  enum class Revision : uint {
+    WonderSwan,       //SW-001  (ASWAN)
+    WonderSwanColor,  //WSC-001 (SPHINX)
+    SwanCrystal,      //SCT-001 (SPHINX2)
+  };
 
   auto revision() const -> Revision;
-  auto monochrome() const -> bool;
-  auto color() const -> bool;
 
   auto init() -> void;
   auto term() -> void;
@@ -16,7 +18,7 @@ struct System {
   } information;
 
 privileged:
-  Revision _revision;
+  Revision _revision = Revision::WonderSwan;
 };
 
 extern System system;

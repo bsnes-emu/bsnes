@@ -9,28 +9,17 @@ Video::Video() {
 auto Video::power() -> void {
   memory::fill(output(), 224 * 224 * sizeof(uint32));
 
-  if(system.monochrome()) {
-    for(auto color : range(16)) {
-      paletteLiteral[color] = color;
+  for(auto color : range(1 << 12)) {
+    paletteLiteral[color] = color;
 
-      uint L = image::normalize(15 - color, 4, 16);
-      paletteStandard[color] = interface->videoColor(L, L, L);
-    }
-  }
+    uint R = (uint4)(color >> 8);
+    uint G = (uint4)(color >> 4);
+    uint B = (uint4)(color >> 0);
 
-  if(system.color()) {
-    for(auto color : range(1 << 12)) {
-      paletteLiteral[color] = color;
-
-      uint R = (uint4)(color >> 8);
-      uint G = (uint4)(color >> 4);
-      uint B = (uint4)(color >> 0);
-
-      R = image::normalize(R, 4, 16);
-      G = image::normalize(G, 4, 16);
-      B = image::normalize(B, 4, 16);
-      paletteStandard[color] = interface->videoColor(R, G, B);
-    }
+    R = image::normalize(R, 4, 16);
+    G = image::normalize(G, 4, 16);
+    B = image::normalize(B, 4, 16);
+    paletteStandard[color] = interface->videoColor(R, G, B);
   }
 }
 

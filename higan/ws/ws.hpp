@@ -49,6 +49,10 @@ namespace WonderSwan {
   #include <ws/cpu/cpu.hpp>
   #include <ws/ppu/ppu.hpp>
   #include <ws/apu/apu.hpp>
+
+  inline auto WS() { return system.revision() == System::Revision::WonderSwan; }
+  inline auto WSC() { return system.revision() == System::Revision::WonderSwanColor; }
+  inline auto SC() { return system.revision() == System::Revision::SwanCrystal; }
 }
 
 #include <ws/interface/interface.hpp>

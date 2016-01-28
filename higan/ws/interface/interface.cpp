@@ -21,24 +21,40 @@ Interface::Interface() {
   media.append({ID::WonderSwan, "WonderSwan", "ws", true});
   media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc", true});
 
-  { Device device{0, ID::Device, "Controller"};
-    device.input.append({ 0, 0, "X1"   });
-    device.input.append({ 1, 0, "X2"   });
-    device.input.append({ 2, 0, "X3"   });
-    device.input.append({ 3, 0, "X4"   });
-    device.input.append({ 4, 0, "Y1"   });
-    device.input.append({ 5, 0, "Y2"   });
-    device.input.append({ 6, 0, "Y3"   });
-    device.input.append({ 7, 0, "Y4"   });
-    device.input.append({ 8, 0, "B"    });
-    device.input.append({ 9, 0, "A"    });
-    device.input.append({10, 0, "Sound"});
-    device.input.append({11, 0, "Start"});
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+  { Device device{0, ID::DeviceHorizontal, "Controller"};
+    device.input.append({ 0, 0, "X1"});
+    device.input.append({ 1, 0, "X2"});
+    device.input.append({ 2, 0, "X3"});
+    device.input.append({ 3, 0, "X4"});
+    device.input.append({ 4, 0, "Y1"});
+    device.input.append({ 5, 0, "Y2"});
+    device.input.append({ 6, 0, "Y3"});
+    device.input.append({ 7, 0, "Y4"});
+    device.input.append({ 8, 0, "B"});
+    device.input.append({ 9, 0, "A"});
+    device.input.append({10, 0, "Start"});
+    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     this->device.append(device);
   }
 
-  port.append({0, "Device", {device[0]}});
+  { Device device{1, ID::DeviceVertical, "Controller"};
+    device.input.append({ 0, 0, "X1"});
+    device.input.append({ 1, 0, "X2"});
+    device.input.append({ 2, 0, "X3"});
+    device.input.append({ 3, 0, "X4"});
+    device.input.append({ 4, 0, "Y1"});
+    device.input.append({ 5, 0, "Y2"});
+    device.input.append({ 6, 0, "Y3"});
+    device.input.append({ 7, 0, "Y4"});
+    device.input.append({ 8, 0, "B"});
+    device.input.append({ 9, 0, "A"});
+    device.input.append({10, 0, "Start"});
+    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    this->device.append(device);
+  }
+
+  port.append({0, "Horizontal Orientation", {device[0]}});
+  port.append({1, "Vertical Orientation", {device[1]}});
 }
 
 auto Interface::manifest() -> string {

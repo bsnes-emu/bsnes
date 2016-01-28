@@ -8,14 +8,6 @@ auto System::revision() const -> Revision {
   return _revision;
 }
 
-auto System::monochrome() const -> bool {
-  return revision() == Revision::WonderSwan;
-}
-
-auto System::color() const -> bool {
-  return revision() != Revision::WonderSwan;
-}
-
 auto System::init() -> void {
 }
 
@@ -27,6 +19,8 @@ auto System::load(Revision revision) -> void {
 
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
+
+  //note: IPLROM is currently undumped; otherwise we'd load it here ...
 
   cartridge.load();
 }

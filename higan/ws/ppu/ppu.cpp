@@ -39,6 +39,8 @@ auto PPU::power() -> void {
 
   status.vclk = 0;
   status.hclk = 0;
+
+  video.power();
 }
 
 }

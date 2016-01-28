@@ -16,7 +16,8 @@ struct ID {
   };
 
   enum : uint {
-    Device = 1,
+    DeviceHorizontal = 1,
+    DeviceVertical   = 2,
   };
 };
 

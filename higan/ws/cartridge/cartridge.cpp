@@ -20,14 +20,16 @@ auto Cartridge::load() -> void {
   if(auto node = document["board/rom"]) {
     rom.name = node["name"].text();
     rom.size = node["size"].natural();
-    if(rom.size) rom.data = new uint8[rom.size]();
+    rom.mask = bit::round(rom.size) - 1;
+    if(rom.size) rom.data = new uint8[rom.mask + 1]();
     if(rom.name) interface->loadRequest(ID::ROM, rom.name, true);
   }
 
   if(auto node = document["board/ram"]) {
     ram.name = node["name"].text();
     ram.size = node["size"].natural();
-    if(ram.size) ram.data = new uint8[ram.size]();
+    ram.mask = bit::round(ram.size) - 1;
+    if(ram.size) ram.data = new uint8[ram.mask + 1]();
     if(ram.name) interface->loadRequest(ID::RAM, ram.name, true);
   }
 
@@ -42,19 +44,21 @@ auto Cartridge::unload() -> void {
   delete[] rom.data;
   rom.data = nullptr;
   rom.size = 0;
+  rom.mask = 0;
   rom.name = "";
 
   delete[] ram.data;
   ram.data = nullptr;
   ram.size = 0;
+  ram.mask = 0;
   ram.name = "";
 }
 
 auto Cartridge::power() -> void {
-  r.bank_rom0 = 0x00;
-  r.bank_rom1 = 0x00;
-  r.bank_rom2 = 0x00;
-  r.bank_sram = 0x00;
+  r.bank_rom0 = 0xff;
+  r.bank_rom1 = 0xff;
+  r.bank_rom2 = 0xff;
+  r.bank_sram = 0xff;
 }
 
 }

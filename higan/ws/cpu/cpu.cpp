@@ -28,12 +28,24 @@ auto CPU::step(uint clocks) -> void {
   if(apu.clock < 0) co_switch(apu.thread);
 }
 
-auto CPU::read(uint32 addr) -> uint8 {
+auto CPU::wait(uint clocks) -> void {
+  step(clocks);
+}
+
+auto CPU::read(uint20 addr) -> uint8 {
   return bus.read(addr);
 }
 
-auto CPU::write(uint32 addr, uint8 data) -> void {
+auto CPU::write(uint20 addr, uint8 data) -> void {
   return bus.write(addr, data);
+}
+
+auto CPU::in(uint16 port) -> uint16 {
+  return iomap[port]->portRead(port);
+}
+
+auto CPU::out(uint16 port, uint16 data) -> void {
+  return iomap[port]->portWrite(port, data);
 }
 
 auto CPU::power() -> void {

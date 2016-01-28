@@ -1,9 +1,16 @@
-auto CPU::ramRead(uint addr) -> uint8 {
-  uint mask = system.monochrome() ? 0x3fff : 0xffff;
-  return iram[addr & mask];
+auto CPU::ramRead(uint16 addr) -> uint8 {
+  if(WS() && addr >= 0x4000) return 0x90;
+  return iram[addr];
 }
 
-auto CPU::ramWrite(uint addr, uint8 data) -> void {
-  uint mask = system.monochrome() ? 0x3fff : 0xffff;
-  iram[addr & mask] = data;
+auto CPU::ramWrite(uint16 addr, uint8 data) -> void {
+  if(WS() && addr >= 0x4000) return;
+  iram[addr] = data;
+}
+
+auto CPU::portRead(uint16 addr) -> uint16 {
+  return 0x0000;
+}
+
+auto CPU::portWrite(uint16 addr, uint16 data) -> void {
 }

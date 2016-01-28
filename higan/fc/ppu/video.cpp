@@ -1,5 +1,3 @@
-#include <cmath>
-
 Video video;
 
 Video::Video() {

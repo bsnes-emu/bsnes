@@ -1,8 +1,8 @@
 struct IO {
   static auto power() -> void;
 
-  virtual auto in(uint8 addr) -> uint8 { return 0x00; }
-  virtual auto out(uint8 addr, uint8 data) -> void {}
+  virtual auto portRead(uint16 addr) -> uint16;
+  virtual auto portWrite(uint16 addr, uint16 data) -> void;
 };
 
 struct Bus {
@@ -11,5 +11,5 @@ struct Bus {
 };
 
 extern uint8 iram[64 * 1024];
-extern IO* io[256];
+extern IO* iomap[64 * 1024];
 extern Bus bus;

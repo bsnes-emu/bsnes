@@ -3,12 +3,21 @@
 namespace WonderSwan {
 
 uint8 iram[64 * 1024] = {0};
-IO* io[256];
+IO* iomap[64 * 1024] = {0};
 Bus bus;
 
 auto IO::power() -> void {
   static IO unmapped;
-  for(auto& n : io) n = &unmapped;
+  for(auto& n : iomap) n = &unmapped;
+}
+
+auto IO::portRead(uint16 addr) -> uint16 {
+  print("[", hex(addr, 4L), "]: port unmapped\n");
+  return 0x0000;
+}
+
+auto IO::portWrite(uint16 addr, uint16 data) -> void {
+  print("[", hex(addr, 4L), "] = ", hex(data, 4L), ": port unmapped\n");
 }
 
 auto Bus::read(uint20 addr) -> uint8 {
