@@ -24,3 +24,45 @@ auto Cartridge::ramWrite(uint addr, uint8 data) -> void {
   if(!ram.data) return;
   ram.data[addr & ram.mask] = data;
 }
+
+auto Cartridge::portRead(uint16 addr) -> uint8 {
+  if(addr == 0x00c0) {
+    return r.bank_rom2;
+  }
+
+  if(addr == 0x00c1) {
+    return r.bank_sram;
+  }
+
+  if(addr == 0x00c2) {
+    return r.bank_rom0;
+  }
+
+  if(addr == 0x00c3) {
+    return r.bank_rom1;
+  }
+
+  return 0x00;
+}
+
+auto Cartridge::portWrite(uint16 addr, uint8 data) -> void {
+  if(addr == 0x00c0) {
+    r.bank_rom2 = data;
+    return;
+  }
+
+  if(addr == 0x00c1) {
+    r.bank_sram = data;
+    return;
+  }
+
+  if(addr == 0x00c2) {
+    r.bank_rom0 = data;
+    return;
+  }
+
+  if(addr == 0x00c3) {
+    r.bank_rom1 = data;
+    return;
+  }
+}

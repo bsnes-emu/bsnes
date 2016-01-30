@@ -9,12 +9,14 @@ Interface::Interface() {
   interface = this;
   hook = nullptr;
 
-  information.name        = "Game Boy";
-  information.width       = 160;
-  information.height      = 144;
-  information.overscan    = false;
-  information.aspectRatio = 1.0;
-  information.resettable  = false;
+  information.manufacturer = "Nintendo";
+  information.name         = "Game Boy";
+  information.width        = 160;
+  information.height       = 144;
+  information.overscan     = false;
+  information.aspectRatio  = 1.0;
+  information.resettable   = false;
+
   information.capability.states = true;
   information.capability.cheats = true;
 

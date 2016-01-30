@@ -13,7 +13,7 @@
   <string>icarus.icns</string>
   -->
   <key>NSHighResolutionCapable</key>
-  <true/>
+  <false/>
   <key>NSSupportsAutomaticGraphicsSwitching</key>
   <true/>
 </dict>

@@ -47,6 +47,16 @@ struct Icarus {
   auto sufamiTurboManifest(vector<uint8>& buffer, string location) -> string;
   auto sufamiTurboImport(vector<uint8>& buffer, string location) -> string;
 
+  //wonderswan.cpp
+  auto wonderSwanManifest(string location) -> string;
+  auto wonderSwanManifest(vector<uint8>& buffer, string location) -> string;
+  auto wonderSwanImport(vector<uint8>& buffer, string location) -> string;
+
+  //wonderswan-color.cpp
+  auto wonderSwanColorManifest(string location) -> string;
+  auto wonderSwanColorManifest(vector<uint8>& buffer, string location) -> string;
+  auto wonderSwanColorImport(vector<uint8>& buffer, string location) -> string;
+
 private:
   string errorMessage;
 
@@ -56,6 +66,8 @@ private:
     Markup::Node gameBoy;
     Markup::Node gameBoyColor;
     Markup::Node gameBoyAdvance;
+    Markup::Node wonderSwan;
+    Markup::Node wonderSwanColor;
     Markup::Node bsMemory;
     Markup::Node sufamiTurbo;
   } database;

@@ -11,13 +11,13 @@ auto IO::power() -> void {
   for(auto& n : iomap) n = &unmapped;
 }
 
-auto IO::portRead(uint16 addr) -> uint16 {
+auto IO::portRead(uint16 addr) -> uint8 {
   print("[", hex(addr, 4L), "]: port unmapped\n");
-  return 0x0000;
+  return 0x00;
 }
 
-auto IO::portWrite(uint16 addr, uint16 data) -> void {
-  print("[", hex(addr, 4L), "] = ", hex(data, 4L), ": port unmapped\n");
+auto IO::portWrite(uint16 addr, uint8 data) -> void {
+  print("[", hex(addr, 4L), "] = ", hex(data, 2L), ": port unmapped\n");
 }
 
 auto Bus::read(uint20 addr) -> uint8 {

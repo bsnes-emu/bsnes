@@ -4,6 +4,7 @@ namespace Emulator {
 
 struct Interface {
   struct Information {
+    string manufacturer;
     string name;
     uint width;
     uint height;

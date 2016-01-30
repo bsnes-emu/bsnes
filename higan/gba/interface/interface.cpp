@@ -8,12 +8,14 @@ Settings settings;
 Interface::Interface() {
   interface = this;
 
-  information.name        = "Game Boy Advance";
-  information.width       = 240;
-  information.height      = 160;
-  information.overscan    = false;
-  information.aspectRatio = 1.0;
-  information.resettable  = false;
+  information.manufacturer = "Nintendo";
+  information.name         = "Game Boy Advance";
+  information.width        = 240;
+  information.height       = 160;
+  information.overscan     = false;
+  information.aspectRatio  = 1.0;
+  information.resettable   = false;
+
   information.capability.states = true;
   information.capability.cheats = false;
 

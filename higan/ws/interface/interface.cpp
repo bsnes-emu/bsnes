@@ -8,12 +8,13 @@ Settings settings;
 Interface::Interface() {
   interface = this;
 
-  information.name        = "WonderSwan";
-  information.width       = 224;  //note: technically 224x144; but screen can be rotated
-  information.height      = 224;  //by using a square size; this can be done in the core
-  information.overscan    = false;
-  information.aspectRatio = 1.0;
-  information.resettable  = false;
+  information.manufacturer = "Bandai";
+  information.name         = "WonderSwan";
+  information.width        = 224;  //note: technically 224x144; but screen can be rotated
+  information.height       = 224;  //by using a square size; this can be done in the core
+  information.overscan     = false;
+  information.aspectRatio  = 1.0;
+  information.resettable   = false;
 
   information.capability.states = false;
   information.capability.cheats = false;

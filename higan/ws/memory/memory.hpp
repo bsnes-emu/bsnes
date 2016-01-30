@@ -1,8 +1,8 @@
 struct IO {
   static auto power() -> void;
 
-  virtual auto portRead(uint16 addr) -> uint16;
-  virtual auto portWrite(uint16 addr, uint16 data) -> void;
+  virtual auto portRead(uint16 addr) -> uint8;
+  virtual auto portWrite(uint16 addr, uint8 data) -> void;
 };
 
 struct Bus {

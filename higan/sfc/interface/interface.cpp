@@ -9,12 +9,14 @@ Interface::Interface() {
   interface = this;
   system.init();
 
-  information.name        = "Super Famicom";
-  information.width       = 256;
-  information.height      = 240;
-  information.overscan    = true;
-  information.aspectRatio = 8.0 / 7.0;
-  information.resettable  = true;
+  information.manufacturer = "Nintendo";
+  information.name         = "Super Famicom";
+  information.width        = 256;
+  information.height       = 240;
+  information.overscan     = true;
+  information.aspectRatio  = 8.0 / 7.0;
+  information.resettable   = true;
+
   information.capability.states = true;
   information.capability.cheats = true;
 

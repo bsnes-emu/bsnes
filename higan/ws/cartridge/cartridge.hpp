@@ -1,4 +1,4 @@
-struct Cartridge {
+struct Cartridge : IO {
   auto loaded() const -> bool;
 
   auto load() -> void;
@@ -10,6 +10,9 @@ struct Cartridge {
 
   auto ramRead(uint addr) -> uint8;
   auto ramWrite(uint addr, uint8 data) -> void;
+
+  auto portRead(uint16 addr) -> uint8 override;
+  auto portWrite(uint16 addr, uint8 data) -> void override;
 
   struct Registers {
     uint8 bank_rom0;

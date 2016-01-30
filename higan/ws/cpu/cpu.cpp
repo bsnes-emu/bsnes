@@ -40,17 +40,19 @@ auto CPU::write(uint20 addr, uint8 data) -> void {
   return bus.write(addr, data);
 }
 
-auto CPU::in(uint16 port) -> uint16 {
+auto CPU::in(uint16 port) -> uint8 {
   return iomap[port]->portRead(port);
 }
 
-auto CPU::out(uint16 port, uint16 data) -> void {
+auto CPU::out(uint16 port, uint8 data) -> void {
   return iomap[port]->portWrite(port, data);
 }
 
 auto CPU::power() -> void {
   V30MZ::power();
   create(CPU::Enter, 3072000);
+
+  iomap[0x00a0] = this;
 }
 
 }

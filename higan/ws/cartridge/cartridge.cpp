@@ -55,6 +55,11 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
+  iomap[0x00c0] = this;
+  iomap[0x00c1] = this;
+  iomap[0x00c2] = this;
+  iomap[0x00c3] = this;
+
   r.bank_rom0 = 0xff;
   r.bank_rom1 = 0xff;
   r.bank_rom2 = 0xff;

@@ -4,23 +4,28 @@ using namespace nall;
 #include <hiro/hiro.hpp>
 using namespace hiro;
 
-//if file already exists in the same path as the binary; use it (portable mode)
-//if not, use default requested path (*nix/user mode)
-auto locate(string pathname, string filename) -> string {
-  string location{programpath(), filename};
+auto locate(string name) -> string {
+  string location = {programpath(), name};
   if(file_system_object::exists(location)) return location;
-  return {pathname, filename};
+
+  location = {configpath(), "icarus/", name};
+  if(file_system_object::exists(location)) return location;
+
+  directory::create({localpath(), "icarus/"});
+  return {localpath(), "icarus/", name};
 }
 
 #include "settings.cpp"
 Settings settings;
 
-#include "heuristics/famicom.hpp"
-#include "heuristics/super-famicom.hpp"
-#include "heuristics/game-boy.hpp"
-#include "heuristics/game-boy-advance.hpp"
-#include "heuristics/bs-memory.hpp"
-#include "heuristics/sufami-turbo.hpp"
+#include "heuristics/famicom.cpp"
+#include "heuristics/super-famicom.cpp"
+#include "heuristics/game-boy.cpp"
+#include "heuristics/game-boy-advance.cpp"
+#include "heuristics/wonderswan.cpp"
+#include "heuristics/wonderswan-color.cpp"
+#include "heuristics/bs-memory.cpp"
+#include "heuristics/sufami-turbo.cpp"
 
 #include "core/core.hpp"
 #include "core/core.cpp"
@@ -29,6 +34,8 @@ Settings settings;
 #include "core/game-boy.cpp"
 #include "core/game-boy-color.cpp"
 #include "core/game-boy-advance.cpp"
+#include "core/wonderswan.cpp"
+#include "core/wonderswan-color.cpp"
 #include "core/bs-memory.cpp"
 #include "core/sufami-turbo.cpp"
 Icarus icarus;
@@ -60,7 +67,7 @@ auto nall::main(lstring args) -> void {
     if(string source = BrowserDialog()
     .setTitle("Load ROM Image")
     .setPath(settings["icarus/Path"].text())
-    .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.gb:*.gbc:*.gba:*.bs:*.st:*.zip")
+    .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.gb:*.gbc:*.gba:*.ws:*.wsc:*.bs:*.st:*.zip")
     .openFile()) {
       if(string target = icarus.import(source)) {
         settings["icarus/Path"].setValue(pathname(source));
