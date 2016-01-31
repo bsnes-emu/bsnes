@@ -1,75 +1,58 @@
-auto V30MZ::readbIP() -> uint8 {
-  return read((r.cs << 4) + r.ip++);
+auto V30MZ::read(Size size, uint16 segment, uint16 address) -> uint16 {
+  uint16 data = read(segment * 16 + address);
+  if(size == Word) data |= read(segment * 16 + ++address) << 8;
+  return data;
 }
 
-auto V30MZ::readwIP() -> uint16 {
-  uint16 word = read((r.cs << 4) + r.ip++) << 0;
-  return word | read((r.cs << 4) + r.ip++) << 8;
+auto V30MZ::write(Size size, uint16 segment, uint16 address, uint16 data) -> void {
+  write(segment * 16 + address, data);
+  if(size == Word) write(segment * 16 + ++address, data >> 8);
+}
+
+//
+
+auto V30MZ::readIP(Size size) -> uint16 {
+  uint16 data = read(size, r.cs, r.ip);
+  return r.ip += size, data;
 }
 
 //
 
 auto V30MZ::readSP() -> uint16 {
-  uint16 word = read((r.ss << 4) + r.sp++) << 0;
-  return word | read((r.ss << 4) + r.sp++) << 8;
+  uint16 data = read(Word, r.ss, r.sp);
+  return r.sp += Word, data;
 }
 
 auto V30MZ::writeSP(uint16 data) -> void {
-  write((r.ss << 4) + --r.sp, data >> 8);
-  write((r.ss << 4) + --r.sp, data >> 0);
+  r.sp -= Word;
+  write(Word, r.ss, r.sp, data);
 }
 
 //
 
-auto V30MZ::readb(uint20 ea) -> uint8 {
-  return read(ea++);
-}
+auto V30MZ::readModRM(uint8 modRM) -> uint32 {
+  if((modRM & 0xc7) == 0x06) return r.ds << 16 | readIP(Word);
 
-auto V30MZ::readw(uint20 ea) -> uint16 {
-  uint16 word = read(ea++) << 0;
-  return word | read(ea++) << 8;
-}
-
-//
-
-auto V30MZ::readb(uint16 rs, uint16 ea) -> uint8 {
-  return read((rs << 4) + ea++);
-}
-
-auto V30MZ::readw(uint16 rs, uint16 ea) -> uint16 {
-  uint16 word = read((rs << 4) + ea++) << 0;
-  return word | read((rs << 4) + ea++) << 8;
-}
-
-//
-
-//todo: return tuple<uint16 seg, uint16 ea>
-auto V30MZ::readModRM(uint8 modRM) -> uint20 {
-  if((modRM & 0xc7) == 0x06) return (r.ds << 4) + (int16)readwIP();
-
-  int16 displacement = 0;
-  if((modRM & 0xc0) == 0x40) displacement = (int8)readbIP();
-  if((modRM & 0xc0) == 0x80) displacement = (int16)readwIP();
+  uint16 s = 0, a = 0;
+  if((modRM & 0xc0) == 0x40) a = (int8)readIP(Byte);
+  if((modRM & 0xc0) == 0x80) a = (int16)readIP(Word);
 
   switch(modRM & 7) {
-  case 0: return (r.ds << 4) + r.bx + r.si + displacement;
-  case 1: return (r.ds << 4) + r.bx + r.di + displacement;
-  case 2: return (r.ss << 4) + r.bp + r.si + displacement;
-  case 3: return (r.ss << 4) + r.bp + r.di + displacement;
-  case 4: return (r.ds << 4) + r.si + displacement;
-  case 5: return (r.ds << 4) + r.di + displacement;
-  case 6: return (r.ss << 4) + r.bp + displacement;
-  case 7: return (r.ds << 4) + r.bx + displacement;
+  case 0: s = r.ds; a += r.bx + r.si; break;
+  case 1: s = r.ds; a += r.bx + r.di; break;
+  case 2: s = r.ss; a += r.bp + r.si; break;
+  case 3: s = r.ss; a += r.bp + r.di; break;
+  case 4: s = r.ds; a += r.si; break;
+  case 5: s = r.ds; a += r.di; break;
+  case 6: s = r.ss; a += r.bp; break;
+  case 7: s = r.ds; a += r.bx; break;
   }
-  unreachable;
+
+  return s << 16 | a;
 }
 
-auto V30MZ::readbModRM(uint8 modRM) -> uint8 {
-  if(modRM >= 0xc0) return regb(modRM);
-  return readb(readModRM(modRM));
-}
-
-auto V30MZ::readwModRM(uint8 modRM) -> uint16 {
-  if(modRM >= 0xc0) return regw(modRM);
-  return readw(readModRM(modRM));
+auto V30MZ::readModRM(Size size, uint8 modRM) -> uint16 {
+  if(modRM >= 0xc0) return getRegister(size, modRM);
+  auto addr = readModRM(modRM);
+  return read(size, addr >> 16, addr);
 }

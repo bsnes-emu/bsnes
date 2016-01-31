@@ -7,24 +7,15 @@ auto V30MZ::parity(uint16 value) const -> bool {
   return !(value & 1);
 }
 
-auto V30MZ::albAnd(uint8 x, uint8 y) -> uint8 {
-  uint8 result = x & y;
+auto V30MZ::alAnd(Size size, uint16 x, uint16 y) -> uint16 {
+  uint16 bits = size == Byte ? 0xff : 0xffff;
+  uint16 mask = size == Byte ? 0x80 : 0x8000;
+  uint16 result = (x & y) & bits;
   r.f.c = 0;
   r.f.p = parity(result);
   r.f.h = 0;
   r.f.z = result == 0;
-  r.f.s = result & 0x80;
-  r.f.v = 0;
-  return result;
-}
-
-auto V30MZ::alwAnd(uint16 x, uint16 y) -> uint16 {
-  uint16 result = x & y;
-  r.f.c = 0;
-  r.f.p = parity(result);
-  r.f.h = 0;
-  r.f.z = result == 0;
-  r.f.s = result & 0x8000;
+  r.f.s = result & mask;
   r.f.v = 0;
   return result;
 }

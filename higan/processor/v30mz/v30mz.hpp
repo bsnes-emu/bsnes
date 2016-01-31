@@ -5,6 +5,10 @@
 namespace Processor {
 
 struct V30MZ {
+  using Size = const uint&;
+  static const uint Byte;
+  static const uint Word;
+
   virtual auto wait(uint clocks = 1) -> void = 0;
   virtual auto read(uint20 addr) -> uint8 = 0;
   virtual auto write(uint20 addr, uint8 data) -> void = 0;
@@ -16,56 +20,46 @@ struct V30MZ {
   auto power() -> void;
 
   //registers.cpp
-  auto regb(uint8) -> uint8&;
-  auto regw(uint8) -> uint16&;
-  auto sreg(uint8) -> uint16&;
+  auto getRegister(Size, uint8) -> uint16;
+  auto setRegister(Size, uint8, uint16) -> void;
+
+  auto getSegment(uint8) -> uint16;
+  auto setSegment(uint8, uint16) -> void;
 
   //memory.cpp
-  auto readbIP() -> uint8;
-  auto readwIP() -> uint16;
+  auto read(Size, uint16, uint16) -> uint16;
+  auto write(Size, uint16, uint16, uint16) -> void;
+
+  auto readIP(Size = Byte) -> uint16;
 
   auto readSP() -> uint16;
   auto writeSP(uint16) -> void;
 
-  auto readb(uint20 ea) -> uint8;
-  auto readw(uint20 ea) -> uint16;
-
-  auto readb(uint16 rs, uint16 ea) -> uint8;
-  auto readw(uint16 rs, uint16 ea) -> uint16;
-
-  auto readModRM(uint8) -> uint20;
-  auto readbModRM(uint8) -> uint8;
-  auto readwModRM(uint8) -> uint16;
+  auto readModRM(uint8) -> uint32;
+  auto readModRM(Size, uint8) -> uint16;
 
   //algorithms.cpp
   auto parity(uint16) const -> bool;
-
-  auto albAnd(uint8, uint8) -> uint8;
-  auto alwAnd(uint16, uint16) -> uint16;
+  auto alAnd(Size, uint16, uint16) -> uint16;
 
   //instructions.cpp
-  auto opbXorRegisterModRM();
-  auto opwXorRegisterModRM();
+  auto opXorRegisterModRM(Size);
   auto opJumpIf(bool);
-  auto opbMoveRegisterModRM();
-  auto opwMoveRegisterModRM();
+  auto opMoveRegisterModRM(Size);
   auto opMoveSegmentRegisterModRM();
   auto opNoOperation();
-  auto opTestAL();
-  auto opTestAX();
-  auto opbMoveRegisterImmediate(uint8&);
-  auto opwMoveRegisterImmediate(uint16&);
+  auto opMoveString(Size);
+  auto opTestAX(Size);
+  auto opMoveRegisterImmediate(uint8&);
+  auto opMoveRegisterImmediate(uint16&);
   auto opReturn();
-  auto opbIn();
-  auto opwIn();
-  auto opbOut();
-  auto opwOut();
+  auto opIn(Size);
+  auto opOut(Size);
   auto opCallNear();
   auto opJumpFar();
-  auto opbInDX();
-  auto opwInDX();
-  auto opbOutDX();
-  auto opwOutDX();
+  auto opInDX(Size);
+  auto opOutDX(Size);
+  auto opRepeat(bool);
   auto opClearFlag(bool&);
   auto opSetFlag(bool&);
 
