@@ -1,7 +1,6 @@
 //Hitachi HG51B169 (HG51BS family/derivative?)
 
-#ifndef PROCESSOR_HG51B_HPP
-#define PROCESSOR_HG51B_HPP
+#pragma once
 
 namespace Processor {
 
@@ -54,5 +53,3 @@ protected:
 };
 
 }
-
-#endif

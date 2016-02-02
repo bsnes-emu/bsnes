@@ -2,8 +2,7 @@
 //NEC uPD7725
 //NEC uPD96050
 
-#ifndef PROCESSOR_UPD96050_HPP
-#define PROCESSOR_UPD96050_HPP
+#pragma once
 
 namespace Processor {
 
@@ -72,5 +71,3 @@ struct uPD96050 {
 };
 
 }
-
-#endif

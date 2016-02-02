@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_ARM_HPP
-#define PROCESSOR_ARM_HPP
+#pragma once
 
 namespace Processor {
 
@@ -65,5 +64,3 @@ struct ARM {
 };
 
 }
-
-#endif

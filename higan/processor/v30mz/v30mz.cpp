@@ -6,6 +6,7 @@ namespace Processor {
 const uint V30MZ::Byte = 1;
 const uint V30MZ::Word = 2;
 #include "registers.cpp"
+#include "modrm.cpp"
 #include "memory.cpp"
 #include "algorithms.cpp"
 #include "instructions.cpp"
@@ -15,7 +16,8 @@ auto V30MZ::exec() -> void {
   if(halt) return wait(1);
 
   #if 1
-  print(disassemble(r.cs, r.ip), "\n");
+  static uint16 cs = 0, ip = 0;
+  if(cs != r.cs || ip != r.ip) print(disassemble(cs = r.cs, ip = r.ip), "\n");
   #endif
 
   execOpcode();
@@ -24,12 +26,94 @@ auto V30MZ::exec() -> void {
 auto V30MZ::execOpcode() -> void {
   executed++;
 
-  auto opcode = readIP();
+  auto opcode = fetch();
   wait(1);
 
   switch(opcode) {
-  case 0x32: return opXorRegisterModRM(Byte);
-  case 0x33: return opXorRegisterModRM(Word);
+  case 0x00: return opAddMemReg(Byte);
+  case 0x01: return opAddMemReg(Word);
+  case 0x02: return opAddRegMem(Byte);
+  case 0x03: return opAddRegMem(Word);
+  case 0x04: return opAddAccImm(Byte);
+  case 0x05: return opAddAccImm(Word);
+  case 0x08: return opOrMemReg(Byte);
+  case 0x09: return opOrMemReg(Word);
+  case 0x0a: return opOrRegMem(Byte);
+  case 0x0b: return opOrRegMem(Word);
+  case 0x0c: return opOrAccImm(Byte);
+  case 0x0d: return opOrAccImm(Word);
+  case 0x10: return opAdcMemReg(Byte);
+  case 0x11: return opAdcMemReg(Word);
+  case 0x12: return opAdcRegMem(Byte);
+  case 0x13: return opAdcRegMem(Word);
+  case 0x14: return opAdcAccImm(Byte);
+  case 0x15: return opAdcAccImm(Word);
+  case 0x18: return opSbbMemReg(Byte);
+  case 0x19: return opSbbMemReg(Word);
+  case 0x1a: return opSbbRegMem(Byte);
+  case 0x1b: return opSbbRegMem(Word);
+  case 0x1c: return opSbbAccImm(Byte);
+  case 0x1d: return opSbbAccImm(Word);
+  case 0x20: return opAndMemReg(Byte);
+  case 0x21: return opAndMemReg(Word);
+  case 0x22: return opAndRegMem(Byte);
+  case 0x23: return opAndRegMem(Word);
+  case 0x24: return opAndAccImm(Byte);
+  case 0x25: return opAndAccImm(Word);
+  case 0x26: return opPrefix(r.es);
+  case 0x28: return opSubMemReg(Byte);
+  case 0x29: return opSubMemReg(Word);
+  case 0x2a: return opSubRegMem(Byte);
+  case 0x2b: return opSubRegMem(Word);
+  case 0x2c: return opSubAccImm(Byte);
+  case 0x2d: return opSubAccImm(Word);
+  case 0x2e: return opPrefix(r.cs);
+  case 0x30: return opXorMemReg(Byte);
+  case 0x31: return opXorMemReg(Word);
+  case 0x32: return opXorRegMem(Byte);
+  case 0x33: return opXorRegMem(Word);
+  case 0x34: return opXorAccImm(Byte);
+  case 0x35: return opXorAccImm(Word);
+  case 0x36: return opPrefix(r.ss);
+  case 0x38: return opCmpMemReg(Byte);
+  case 0x39: return opCmpMemReg(Word);
+  case 0x3a: return opCmpRegMem(Byte);
+  case 0x3b: return opCmpRegMem(Word);
+  case 0x3c: return opCmpAccImm(Byte);
+  case 0x3d: return opCmpAccImm(Word);
+  case 0x3e: return opPrefix(r.ds);
+  case 0x40: return opIncReg(r.ax);
+  case 0x41: return opIncReg(r.cx);
+  case 0x42: return opIncReg(r.dx);
+  case 0x43: return opIncReg(r.bx);
+  case 0x44: return opIncReg(r.sp);
+  case 0x45: return opIncReg(r.bp);
+  case 0x46: return opIncReg(r.si);
+  case 0x47: return opIncReg(r.di);
+  case 0x48: return opDecReg(r.ax);
+  case 0x49: return opDecReg(r.cx);
+  case 0x4a: return opDecReg(r.dx);
+  case 0x4b: return opDecReg(r.bx);
+  case 0x4c: return opDecReg(r.sp);
+  case 0x4d: return opDecReg(r.bp);
+  case 0x4e: return opDecReg(r.si);
+  case 0x4f: return opDecReg(r.di);
+  case 0x50: return opPushReg(r.ax);
+  case 0x51: return opPushReg(r.cx);
+  case 0x52: return opPushReg(r.dx);
+  case 0x53: return opPushReg(r.bx);
+  case 0x54: return opPushReg(r.sp);
+  case 0x55: return opPushReg(r.bp);
+  case 0x56: return opPushReg(r.si);
+  case 0x57: return opPushReg(r.di);
+  case 0x58: return opPopReg(r.ax);
+  case 0x59: return opPopReg(r.cx);
+  case 0x5a: return opPopReg(r.dx);
+  case 0x5b: return opPopReg(r.bx);
+  case 0x5c: return opPopReg(r.sp);
+  case 0x5d: return opPopReg(r.bp);
+  case 0x5e: return opPopReg(r.si);
+  case 0x5f: return opPopReg(r.di);
   case 0x70: return opJumpIf(r.f.v == 1);
   case 0x71: return opJumpIf(r.f.v == 0);
   case 0x72: return opJumpIf(r.f.c == 1);
@@ -46,37 +130,68 @@ auto V30MZ::execOpcode() -> void {
   case 0x7d: return opJumpIf(r.f.s == r.f.v || r.f.z == 1);
   case 0x7e: return opJumpIf(r.f.s != r.f.v || r.f.z == 1);
   case 0x7f: return opJumpIf(r.f.s == r.f.v && r.f.z == 0);
-  case 0x8a: return opMoveRegisterModRM(Byte);
-  case 0x8b: return opMoveRegisterModRM(Word);
-  case 0x8e: return opMoveSegmentRegisterModRM();
-  case 0x90: return opNoOperation();
+  case 0x80: return opGroup1MemImm(Byte, 0);
+  case 0x81: return opGroup1MemImm(Word, 0);
+  case 0x82: return opGroup1MemImm(Byte, 1);
+  case 0x83: return opGroup1MemImm(Word, 1);
+  case 0x88: return opMoveMemReg(Byte);
+  case 0x89: return opMoveMemReg(Word);
+  case 0x8a: return opMoveRegMem(Byte);
+  case 0x8b: return opMoveRegMem(Word);
+  case 0x8e: return opMoveSegMem();
+  case 0x90: return opNop();
+  case 0x9a: return opCallFar();
+  case 0xa0: return opMoveAccMem(Byte);
+  case 0xa1: return opMoveAccMem(Word);
+  case 0xa2: return opMoveMemAcc(Byte);
+  case 0xa3: return opMoveMemAcc(Word);
   case 0xa4: return opMoveString(Byte);
   case 0xa5: return opMoveString(Word);
-  case 0xa8: return opTestAX(Byte);
-  case 0xa9: return opTestAX(Word);
-  case 0xb0: return opMoveRegisterImmediate(r.al);
-  case 0xb1: return opMoveRegisterImmediate(r.cl);
-  case 0xb2: return opMoveRegisterImmediate(r.dl);
-  case 0xb3: return opMoveRegisterImmediate(r.bl);
-  case 0xb4: return opMoveRegisterImmediate(r.ah);
-  case 0xb5: return opMoveRegisterImmediate(r.ch);
-  case 0xb6: return opMoveRegisterImmediate(r.dh);
-  case 0xb7: return opMoveRegisterImmediate(r.bh);
-  case 0xb8: return opMoveRegisterImmediate(r.ax);
-  case 0xb9: return opMoveRegisterImmediate(r.cx);
-  case 0xba: return opMoveRegisterImmediate(r.dx);
-  case 0xbb: return opMoveRegisterImmediate(r.bx);
-  case 0xbc: return opMoveRegisterImmediate(r.sp);
-  case 0xbd: return opMoveRegisterImmediate(r.bp);
-  case 0xbe: return opMoveRegisterImmediate(r.si);
-  case 0xbf: return opMoveRegisterImmediate(r.di);
+  case 0xa8: return opTestAcc(Byte);
+  case 0xa9: return opTestAcc(Word);
+  case 0xaa: return opStoreString(Byte);
+  case 0xab: return opStoreString(Word);
+  case 0xb0: return opMoveRegImm(r.al);
+  case 0xb1: return opMoveRegImm(r.cl);
+  case 0xb2: return opMoveRegImm(r.dl);
+  case 0xb3: return opMoveRegImm(r.bl);
+  case 0xb4: return opMoveRegImm(r.ah);
+  case 0xb5: return opMoveRegImm(r.ch);
+  case 0xb6: return opMoveRegImm(r.dh);
+  case 0xb7: return opMoveRegImm(r.bh);
+  case 0xb8: return opMoveRegImm(r.ax);
+  case 0xb9: return opMoveRegImm(r.cx);
+  case 0xba: return opMoveRegImm(r.dx);
+  case 0xbb: return opMoveRegImm(r.bx);
+  case 0xbc: return opMoveRegImm(r.sp);
+  case 0xbd: return opMoveRegImm(r.bp);
+  case 0xbe: return opMoveRegImm(r.si);
+  case 0xbf: return opMoveRegImm(r.di);
+  case 0xc0: return opGroup2MemImm(Byte);
+  case 0xc1: return opGroup2MemImm(Word);
   case 0xc3: return opReturn();
+  case 0xc6: return opMoveMemImm(Byte);
+  case 0xc7: return opMoveMemImm(Word);
+  case 0xcb: return opRetFar();
+  case 0xd0: return opGroup2MemImm(Byte, 1);
+  case 0xd1: return opGroup2MemImm(Word, 1);
+  case 0xd2: return opGroup2MemImm(Byte, r.cl);
+  case 0xd3: return opGroup2MemImm(Word, r.cl);
+  case 0xd8: return opNop();  //FPO1
+  case 0xd9: return opNop();  //FPO1
+  case 0xda: return opNop();  //FPO1
+  case 0xdb: return opNop();  //FPO1
+  case 0xdc: return opNop();  //FPO1
+  case 0xdd: return opNop();  //FPO1
+  case 0xde: return opNop();  //FPO1
+  case 0xdf: return opNop();  //FPO1
   case 0xe4: return opIn(Byte);
   case 0xe5: return opIn(Word);
   case 0xe6: return opOut(Byte);
   case 0xe7: return opOut(Word);
   case 0xe8: return opCallNear();
   case 0xea: return opJumpFar();
+  case 0xeb: return opJumpShort();
   case 0xec: return opInDX(Byte);
   case 0xed: return opInDX(Word);
   case 0xee: return opOutDX(Byte);

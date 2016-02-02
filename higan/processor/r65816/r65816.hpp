@@ -1,11 +1,10 @@
-#ifndef PROCESSOR_R65816_HPP
-#define PROCESSOR_R65816_HPP
-
-namespace Processor {
-
 //WDC 65C816 CPU core
 //* Ricoh 5A22
 //* Nintendo SA-1
+
+#pragma once
+
+namespace Processor {
 
 struct R65816 {
   #include "registers.hpp"
@@ -227,5 +226,3 @@ struct R65816 {
 };
 
 }
-
-#endif

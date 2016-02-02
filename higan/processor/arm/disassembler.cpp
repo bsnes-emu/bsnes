@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_ARM_HPP
-
 auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
@@ -777,5 +775,3 @@ auto ARM::disassemble_registers() -> string {
   output.append("/", hex(spsr().m, 2L));
   return output;
 }
-
-#endif

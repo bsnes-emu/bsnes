@@ -1,7 +1,6 @@
 //Sharp LR35902 (Game Boy Z80-derivative)
 
-#ifndef PROCESSOR_LR35902_HPP
-#define PROCESSOR_LR35902_HPP
+#pragma once
 
 namespace Processor {
 
@@ -164,5 +163,3 @@ privileged:
 };
 
 }
-
-#endif

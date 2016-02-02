@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_ARM_HPP
-
 auto ARM::thumb_opcode(uint4 opcode, uint4 d, uint4 m) {
   switch(opcode) {
   case  0: r(d) = bit(r(d) & r(m));          break;  //AND
@@ -372,5 +370,3 @@ auto ARM::thumb_op_branch_long_suffix() {
   r(15) = r(14) + (offsetlo * 2);
   r(14) = pipeline.decode.address | 1;
 }
-
-#endif

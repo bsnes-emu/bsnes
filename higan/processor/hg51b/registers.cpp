@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_HG51B_HPP
-
 auto HG51B::reg_read(uint8 addr) const -> uint24 {
   switch(addr) {
   case 0x00: return regs.a;
@@ -74,5 +72,3 @@ auto HG51B::reg_write(uint8 addr, uint24 data) -> void {
   case 0x6f: regs.gpr[15] = data; return;
   }
 }
-
-#endif

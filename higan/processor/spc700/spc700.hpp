@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_SPC700_HPP
-#define PROCESSOR_SPC700_HPP
+#pragma once
 
 namespace Processor {
 
@@ -104,5 +103,3 @@ protected:
 };
 
 }
-
-#endif

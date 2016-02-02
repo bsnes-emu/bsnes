@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_ARM_HPP
-
 auto ARM::arm_opcode(uint32 rm) {
   uint4 opcode = instruction() >> 21;
   uint1 save = instruction() >> 20;
@@ -585,5 +583,3 @@ auto ARM::arm_op_software_interrupt() {
 
   vector(0x00000008, Processor::Mode::SVC);
 }
-
-#endif

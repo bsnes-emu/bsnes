@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_HG51B_HPP
-
 auto HG51B::push() -> void {
   stack[7] = stack[6];
   stack[6] = stack[5];
@@ -352,5 +350,3 @@ auto HG51B::instruction() -> void {
     regs.halt = true;
   }
 }
-
-#endif

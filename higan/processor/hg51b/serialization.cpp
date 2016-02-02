@@ -1,5 +1,3 @@
-#ifdef PROCESSOR_HG51B_HPP
-
 auto HG51B::serialize(serializer& s) -> void {
   s.array(dataRAM);
   for(auto& n : stack) s.integer(n);
@@ -23,5 +21,3 @@ auto HG51B::serialize(serializer& s) -> void {
   s.integer(regs.ramaddr);
   for(auto& n : regs.gpr) s.integer(n);
 }
-
-#endif

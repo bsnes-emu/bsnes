@@ -1,5 +1,4 @@
-#ifndef PROCESSOR_GSU_HPP
-#define PROCESSOR_GSU_HPP
+#pragma once
 
 namespace Processor {
 
@@ -117,5 +116,3 @@ struct GSU {
 };
 
 }
-
-#endif
