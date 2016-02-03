@@ -9,7 +9,7 @@ auto V30MZ::parity(uint16 value) const -> bool {
 
 #define bits (size == Byte ? 8 : 16)
 #define mask (size == Byte ? 0xff : 0xffff)
-#define sign (size == Byte ? 0x80 : 0xffff)
+#define sign (size == Byte ? 0x80 : 0x8000)
 
 auto V30MZ::alAdc(Size size, uint16 x, uint16 y) -> uint16 {
   return alAdd(size, x, y + r.f.c);
@@ -34,6 +34,74 @@ auto V30MZ::alAnd(Size size, uint16 x, uint16 y) -> uint16 {
   r.f.z = result == 0;
   r.f.s = result & sign;
   r.f.v = 0;
+  return result;
+}
+
+auto V30MZ::alDec(Size size, uint16 x) -> uint16 {
+  uint16 result = (x - 1) & mask;
+  r.f.p = parity(result);
+  r.f.h = (x & 0x0f) == 0;
+  r.f.z = result == 0;
+  r.f.s = result & sign;
+  r.f.v = result == sign - 1;
+  return result;
+}
+
+auto V30MZ::alDiv(Size size, uint32 x, uint32 y) -> uint32 {
+  if(y == 0) return 0;  //todo: throw exception
+  uint32 quotient = x / y;
+  uint32 remainder = x % y;
+  return (remainder & mask) << bits | (quotient & mask);
+}
+
+auto V30MZ::alDivi(Size size, int32 x, int32 y) -> uint32 {
+  if(y == 0) return 0;  //todo: throw exception
+  x = size == Byte ? (int8)x : (int16)x;
+  y = size == Byte ? (int8)y : (int16)y;
+  uint32 quotient = x / y;
+  uint32 remainder = x % y;
+  return (remainder & mask) << bits | (quotient & mask);
+}
+
+auto V30MZ::alInc(Size size, uint16 x) -> uint16 {
+  uint16 result = (x + 1) & mask;
+  r.f.p = parity(result);
+  r.f.h = (x & 0x0f) == 0x0f;
+  r.f.z = result == 0;
+  r.f.s = result & sign;
+  r.f.v = result == sign;
+  return result;
+}
+
+auto V30MZ::alMul(Size size, uint16 x, uint16 y) -> uint32 {
+  uint32 result = x * y;
+  r.f.c = result >> bits;
+  r.f.v = result >> bits;
+  return result;
+}
+
+auto V30MZ::alMuli(Size size, int16 x, int16 y) -> uint32 {
+  x = size == Byte ? (int8)x : (int16)x;
+  y = size == Byte ? (int8)y : (int16)y;
+  uint32 result = x * y;
+  r.f.c = result >> bits;
+  r.f.v = result >> bits;
+  return result;
+}
+
+auto V30MZ::alNeg(Size size, uint16 x) -> uint16 {
+  uint16 result = (-x) & mask;
+  r.f.c = x;
+  r.f.p = parity(result);
+  r.f.h = x & 0x0f;
+  r.f.z = result == 0;
+  r.f.s = result & sign;
+  r.f.v = x == sign;
+  return result;
+}
+
+auto V30MZ::alNot(Size size, uint16 x) -> uint16 {
+  uint16 result = (~x) & mask;
   return result;
 }
 

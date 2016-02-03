@@ -98,12 +98,9 @@ auto V30MZ::opSubAccImm(Size size) {
 //2e  cs:
 //36  ss:
 //3e  ds:
-auto V30MZ::opPrefix(uint flag) {
+auto V30MZ::opPrefix(uint16& segment) {
   prefix.hold = true;
-  prefix.es   = flag == 0;
-  prefix.cs   = flag == 1;
-  prefix.ss   = flag == 2;
-  prefix.ds   = flag == 3;
+  prefix.segment = segment;
 }
 
 //27  daa
@@ -200,6 +197,73 @@ auto V30MZ::opPopReg(uint16& reg) {
   reg = pop();
 }
 
+//60  pusha
+auto V30MZ::opPushAll() {
+  wait(8);
+  auto sp = r.sp;
+  push(r.ax);
+  push(r.cx);
+  push(r.dx);
+  push(r.bx);
+  push(sp);
+  push(r.bp);
+  push(r.si);
+  push(r.di);
+}
+
+//61  popa
+auto V30MZ::opPopAll() {
+  wait(7);
+  r.di = pop();
+  r.si = pop();
+  r.bp = pop();
+  auto sp = pop();
+  r.bx = pop();
+  r.dx = pop();
+  r.cx = pop();
+  r.ax = pop();
+  r.sp = sp;
+}
+
+//62  bound reg,mem,mem
+auto V30MZ::opBound() {
+  wait(12);
+  auto modRM = fetch();
+  auto bound = getMem(Long, modRM);
+  auto reg = getReg(Word, modRM);
+  uint16 lo = bound >>  0;
+  uint16 hi = bound >> 16;
+  if(reg < lo || reg > hi) {
+    //todo
+  }
+}
+
+//68  push imm16
+//6a  push imm8s
+auto V30MZ::opPushImm(Size size) {
+  push(size == Word ? fetch(Word) : (int8)fetch(Byte));
+}
+
+auto V30MZ::opMultiplySignedRegMemImm(Size size) {
+  wait(2);
+  auto modRM = fetch();
+  auto mem = getMem(size, modRM);
+  auto imm = size == Word ? fetch(Word) : (int8)fetch(Byte);
+  setReg(size, modRM, alMuli(size, mem, imm));
+}
+
+//9e  sahf
+auto V30MZ::opStoreFlagsAcc() {
+  wait(3);
+  r.f = (r.f & 0xff00) | r.ah;
+}
+
+//9f  lahf
+auto V30MZ::opLoadAccFlags() {
+  wait(1);
+  r.ah = (r.f & 0x00ff);
+}
+
 auto V30MZ::opJumpIf(bool condition) {
   auto offset = (int8)fetch();
   if(condition) r.ip += offset;
@@ -225,6 +289,22 @@ auto V30MZ::opGroup1MemImm(Size size, bool sign) {
   }
 }
 
+auto V30MZ::opTestMemReg(Size size) {
+  auto modRM = fetch();
+  auto mem = getMem(size, modRM);
+  auto reg = getReg(size, modRM);
+  alAnd(size, mem, reg);
+}
+
+auto V30MZ::opExchangeMemReg(Size size) {
+  wait(2);
+  auto modRM = fetch();
+  auto mem = getMem(size, modRM);
+  auto reg = getReg(size, modRM);
+  setMem(size, modRM, reg);
+  setReg(size, modRM, mem);
+}
+
 auto V30MZ::opMoveMemReg(Size size) {
   auto modRM = fetch();
   setMem(size, modRM, getReg(size, modRM));
@@ -235,10 +315,25 @@ auto V30MZ::opMoveRegMem(Size size) {
   setReg(size, modRM, getMem(size, modRM));
 }
 
+auto V30MZ::opLoadEffectiveAddressRegMem() {
+  auto modRM = fetch();
+  setReg(Word, modRM, getMemAddress(modRM));
+}
+
+auto V30MZ::opMoveMemSeg() {
+  auto modRM = fetch();
+  setMem(Word, modRM, getSeg(modRM));
+}
+
 auto V30MZ::opMoveSegMem() {
   wait(1);
   auto modRM = fetch();
   setSeg(modRM, getMem(Word, modRM));
+}
+
+auto V30MZ::opPopMem() {
+  auto modRM = fetch();
+  setMem(Word, modRM, pop());
 }
 
 auto V30MZ::opNop() {
@@ -249,6 +344,16 @@ auto V30MZ::opExchange(uint16& x, uint16& y) {
   uint16 z = x;
   x = y;
   y = z;
+}
+
+//98  cbw
+auto V30MZ::opSignExtendByte() {
+  setAcc(Word, (int8)getAcc(Byte));
+}
+
+//99  cwd
+auto V30MZ::opSignExtendWord() {
+  setAcc(Long, (int16)getAcc(Word));
 }
 
 auto V30MZ::opCallFar() {
@@ -269,29 +374,54 @@ auto V30MZ::opMoveMemAcc(Size size) {
   write(size, r.ds, fetch(Word), getAcc(size));
 }
 
+auto V30MZ::opInString(Size size) {
+  wait(5);
+  auto data = in(size, r.dx);
+  write(size, r.es, r.di, data);
+  r.di += r.f.d ? -size : size;
+
+  if(prefix.repeat && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
+  }
+}
+
+auto V30MZ::opOutString(Size size) {
+  wait(6);
+  auto data = read(size, segment(r.ds), r.si);
+  out(size, r.dx, data);
+  r.si += r.f.d ? -size : size;
+
+  if(prefix.repeat && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
+  }
+}
+
 auto V30MZ::opMoveString(Size size) {
   wait(4);
-  write(size, r.es, r.di, read(size, r.ds, r.si));
+  auto data = read(size, segment(r.ds), r.si);
+  write(size, r.es, r.di, data);
   r.si += r.f.d ? -size : size;
   r.di += r.f.d ? -size : size;
 
-  if(prefix.repnz || prefix.repz) {
-    if(--r.cx) r.ip--, prefix.hold = true;
+  if(prefix.repeat && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
   }
 }
 
 auto V30MZ::opCompareString(Size size) {
   wait(5);
-  auto x = read(size, r.ds, r.si);
+  auto x = read(size, segment(r.ds), r.si);
   auto y = read(size, r.es, r.di);
   r.si += r.f.d ? -size : size;
   r.di += r.f.d ? -size : size;
   alSub(size, x, y);
 
-  if(prefix.repnz || prefix.repz) {
-    if(r.f.z == 1 && prefix.repnz) return;
-    if(r.f.z == 0 && prefix.repz) return;
-    if(--r.cx) r.ip--, prefix.hold = true;
+  if(prefix.repeat && prefix.repeat() == r.f.z && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
   }
 }
 
@@ -304,8 +434,9 @@ auto V30MZ::opStoreString(Size size) {
   write(size, r.es, r.di, getAcc(size));
   r.di += r.f.d ? -size : size;
 
-  if(prefix.repnz || prefix.repz) {
-    if(--r.cx) r.ip--, prefix.hold = true;
+  if(prefix.repeat && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
   }
 }
 
@@ -313,10 +444,11 @@ auto V30MZ::opStoreString(Size size) {
 //ad  lodsw
 auto V30MZ::opLoadString(Size size) {
   wait(2);
-  setAcc(size, read(size, r.ds, r.si));
+  setAcc(size, read(size, segment(r.ds), r.si));
 
-  if(prefix.repnz || prefix.repz) {
-    if(--r.cx) r.ip--, prefix.hold = true;
+  if(prefix.repeat && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
   }
 }
 
@@ -328,10 +460,9 @@ auto V30MZ::opSubtractCompareString(Size size) {
   auto y = read(size, r.es, r.di);
   alSub(size, x, y);
 
-  if(prefix.repnz || prefix.repz) {
-    if(r.f.z == 1 && prefix.repnz) return;
-    if(r.f.z == 0 && prefix.repz) return;
-    if(--r.cx) r.ip--, prefix.hold = true;
+  if(prefix.repeat && prefix.repeat() == r.f.z && --r.cx) {
+    prefix.hold = true;
+    r.ip--;
   }
 }
 
@@ -374,6 +505,24 @@ auto V30MZ::opReturnFar() {
   r.cs = pop();
 }
 
+auto V30MZ::opReturnInt() {
+  wait(9);
+  r.ip = pop();
+  r.cs = pop();
+  r.f = pop();
+}
+
+auto V30MZ::opInto() {
+  wait(5);
+  //todo
+}
+
+auto V30MZ::opLeave() {
+  wait(1);
+  r.sp = r.bp;
+  r.bp = pop();
+}
+
 auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
   auto modRM = fetch();
   if(!imm) {
@@ -396,11 +545,31 @@ auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
 auto V30MZ::opGroup3MemImm(Size size) {
   auto modRM = fetch();
   auto mem = getMem(size, modRM);
+  switch((uint3)(modRM >> 3)) {
+  case 0: alAnd(size, mem, fetch(size)); break;
+  case 1: break;
+  case 2: wait(2); setMem(size, modRM, alNot(size, mem)); break;
+  case 3: wait(2); setMem(size, modRM, alNeg(size, mem)); break;
+  case 4: wait(2); setAcc(size * 2, alMul(size, getAcc(size), mem)); break;
+  case 5: wait(2); setAcc(size * 2, alMuli(size, getAcc(size), mem)); break; break;
+  case 6: wait(size == Byte ? 15 : 23); setAcc(size * 2, alDiv(size, getAcc(size * 2), mem)); break;
+  case 7: wait(size == Byte ? 17 : 24); setAcc(size * 2, alDivi(size, getAcc(size * 2), mem)); break;
+  }
 }
 
 auto V30MZ::opGroup4MemImm(Size size) {
   auto modRM = fetch();
   auto mem = getMem(size, modRM);
+  switch((uint3)(modRM >> 3)) {
+  case 0: wait(2); setMem(size, modRM, alInc(size, mem)); break;
+  case 1: wait(2); setMem(size, modRM, alDec(size, mem)); break;
+  case 2: break;
+  case 3: break;
+  case 4: break;
+  case 5: break;
+  case 6: break;
+  case 7: break;
+  }
 }
 
 auto V30MZ::opLoopWhile(bool value) {
@@ -483,8 +652,19 @@ auto V30MZ::opRepeat(bool flag) {
   wait(4);
   if(r.cx == 0) return;
   prefix.hold  = true;
-  prefix.repnz = flag == 0;
-  prefix.repz  = flag == 1;
+  prefix.repeat = flag;
+}
+
+//f4  halt
+auto V30MZ::opHalt() {
+  wait(8);
+  //todo
+}
+
+//f5  cmc
+auto V30MZ::opComplementCarry() {
+  wait(3);
+  r.f.c = !r.f.c;
 }
 
 auto V30MZ::opClearFlag(bool& flag) {

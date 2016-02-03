@@ -6,8 +6,7 @@ namespace Processor {
 
 struct V30MZ {
   using Size = const uint&;
-  static const uint Byte;  //= 1
-  static const uint Word;  //= 2
+  enum : uint { Byte = 1, Word = 2, Long = 4 };
 
   virtual auto wait(uint clocks = 1) -> void = 0;
   virtual auto read(uint20 addr) -> uint8 = 0;
@@ -20,8 +19,10 @@ struct V30MZ {
   auto power() -> void;
 
   //registers.cpp
-  auto getAcc(Size) -> uint16;
-  auto setAcc(Size, uint16) -> void;
+  auto segment(uint16) -> uint16;
+
+  auto getAcc(Size) -> uint32;
+  auto setAcc(Size, uint32) -> void;
 
   //modrm.cpp
   auto getReg(Size, uint8) -> uint16;
@@ -31,12 +32,15 @@ struct V30MZ {
   auto setSeg(uint8, uint16) -> void;
 
   auto getMemAddress(uint8) -> uint32;
-  auto getMem(Size, uint8) -> uint16;
+  auto getMem(Size, uint8) -> uint32;
   auto setMem(Size, uint8, uint16) -> void;
 
   //memory.cpp
-  auto read(Size, uint16, uint16) -> uint16;
+  auto read(Size, uint16, uint16) -> uint32;
   auto write(Size, uint16, uint16, uint16) -> void;
+
+  auto in(Size, uint16) -> uint16;
+  auto out(Size, uint16, uint16) -> void;
 
   auto fetch(Size = Byte) -> uint16;
   auto pop() -> uint16;
@@ -47,6 +51,14 @@ struct V30MZ {
   auto alAdc(Size, uint16, uint16) -> uint16;
   auto alAdd(Size, uint16, uint16) -> uint16;
   auto alAnd(Size, uint16, uint16) -> uint16;
+  auto alDec(Size, uint16        ) -> uint16;
+  auto alDiv(Size, uint32, uint32) -> uint32;
+  auto alDivi(Size, int32,  int32) -> uint32;
+  auto alInc(Size, uint16        ) -> uint16;
+  auto alMul(Size, uint16, uint16) -> uint32;
+  auto alMuli(Size, int16,  int16) -> uint32;
+  auto alNeg(Size, uint16        ) -> uint16;
+  auto alNot(Size, uint16        ) -> uint16;
   auto alOr (Size, uint16, uint16) -> uint16;
   auto alRcl(Size, uint16, uint5 ) -> uint16;
   auto alRcr(Size, uint16, uint5 ) -> uint16;
@@ -76,7 +88,7 @@ struct V30MZ {
   auto opAndMemReg(Size);
   auto opAndRegMem(Size);
   auto opAndAccImm(Size);
-  auto opPrefix(uint);
+  auto opPrefix(uint16&);
   auto opDecimalAdjust(bool);
   auto opAsciiAdjust(bool);
   auto opSubMemReg(Size);
@@ -92,16 +104,32 @@ struct V30MZ {
   auto opDecReg(uint16&);
   auto opPushReg(uint16&);
   auto opPopReg(uint16&);
+  auto opPushAll();
+  auto opPopAll();
+  auto opBound();
+  auto opPushImm(Size);
+  auto opMultiplySignedRegMemImm(Size);
+  auto opStoreFlagsAcc();
+  auto opLoadAccFlags();
   auto opJumpIf(bool);
   auto opGroup1MemImm(Size, bool);
+  auto opTestMemReg(Size);
+  auto opExchangeMemReg(Size);
   auto opMoveMemReg(Size);
   auto opMoveRegMem(Size);
+  auto opMoveMemSeg();
+  auto opLoadEffectiveAddressRegMem();
   auto opMoveSegMem();
+  auto opPopMem();
   auto opNop();
   auto opExchange(uint16&, uint16&);
+  auto opSignExtendByte();
+  auto opSignExtendWord();
   auto opCallFar();
   auto opMoveAccMem(Size);
   auto opMoveMemAcc(Size);
+  auto opInString(Size);
+  auto opOutString(Size);
   auto opMoveString(Size);
   auto opCompareString(Size);
   auto opTestAcc(Size);
@@ -115,6 +143,9 @@ struct V30MZ {
   auto opMoveMemImm(Size);
   auto opReturnFarImm();
   auto opReturnFar();
+  auto opReturnInt();
+  auto opInto();
+  auto opLeave();
   auto opGroup2MemImm(Size, maybe<uint8> = {});
   auto opGroup3MemImm(Size);
   auto opGroup4MemImm(Size);
@@ -129,6 +160,8 @@ struct V30MZ {
   auto opOutDX(Size);
   auto opLock();
   auto opRepeat(bool);
+  auto opHalt();
+  auto opComplementCarry();
   auto opClearFlag(bool&);
   auto opSetFlag(bool&);
 
@@ -141,8 +174,8 @@ struct V30MZ {
 
   struct Prefix {
     bool hold;
-    bool es, cs, ss, ds;
-    bool repnz, repz;
+    maybe<uint16> segment;
+    maybe<bool> repeat;
   } prefix;
 
   struct Registers {

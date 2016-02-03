@@ -28,6 +28,12 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
     uint16 word = fetch(); word |= fetch() << 8;
     return {"$", hex(ip + (int16)word, 4L)};
   };
+  auto readIndirectByte = [&]() -> string {
+    return {"[", readWord(), "]"};
+  };
+  auto readIndirectWord = [&]() -> string {
+    return {"{", readWord(), "}"};
+  };
   auto readRegByte = [&](bool inc = true) -> string {
     uint8 modRM = fetch(inc);
     static const string reg[] = {"al", "cl", "dl", "bl", "ah", "ch", "dh", "bh"};
@@ -57,11 +63,11 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
     uint8 modRM = fetch(inc);
     static const string reg[] = {"ax", "cx", "dx", "bx", "sp", "bp", "si", "di"};
     if(modRM >= 0xc0) return reg[(uint3)modRM];
-    if((modRM & 0xc7) == 0x06) return {"[", readWord(), "]"};
+    if((modRM & 0xc7) == 0x06) return {"{", readWord(), "}"};
     static const string mem[] = {"bx+si", "bx+di", "bp+si", "bp+di", "si", "di", "bp", "bx"};
-    if((modRM & 0xc0) == 0x40) return {"[", mem[(uint3)modRM], "+", readByte(), "]"};
-    if((modRM & 0xc0) == 0x80) return {"[", mem[(uint3)modRM], "+", readWord(), "]"};
-    return {"[", mem[(uint3)modRM], "]"};
+    if((modRM & 0xc0) == 0x40) return {"{", mem[(uint3)modRM], "+", readByte(), "}"};
+    if((modRM & 0xc0) == 0x80) return {"{", mem[(uint3)modRM], "+", readWord(), "}"};
+    return {"{", mem[(uint3)modRM], "}"};
   };
   auto readGroup = [&](uint group) -> string {
     uint8 modRM = fetch(false);
@@ -71,7 +77,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
       {"test", "??? ", "not ", "neg ", "mul ", "imul", "div ", "idiv"},
       {"inc ", "dec ", "??? ", "??? ", "??? ", "??? ", "??? ", "??? "},
     };
-    return opcode[group - 3][(uint3)(modRM >> 3)];
+    return opcode[group - 1][(uint3)(modRM >> 3)];
   };
 
   auto opcode = fetch();
@@ -172,6 +178,22 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0x5d: s = {"pop    bp"}; break;
   case 0x5e: s = {"pop    si"}; break;
   case 0x5f: s = {"pop    di"}; break;
+  case 0x60: s = {"pusha  "}; break;
+  case 0x61: s = {"popa   "}; break;
+  case 0x62: s = {"bound  {0},{1}", format{readRegWord(0), readMemWord()}}; break;
+//case 0x63:
+//case 0x64:
+//case 0x65:
+//case 0x66:
+//case 0x67:
+  case 0x68: s = {"push   {0}", format{readWord()}}; break;
+  case 0x69: s = {"imul   {0},{1},{2}", format{readRegWord(0), readMemWord(), readWord()}}; break;
+  case 0x6a: s = {"push   {0}", format{readByteSigned()}}; break;
+  case 0x6b: s = {"imul   {0},{1},{2}", format{readRegWord(0), readMemWord(), readByteSigned()}}; break;
+  case 0x6c: s = {"insb   "}; break;
+  case 0x6d: s = {"insw   "}; break;
+  case 0x6e: s = {"outsb  "}; break;
+  case 0x6f: s = {"outsw  "}; break;
   case 0x70: s = {"jo     {0}", format{readRelativeByte()}}; break;
   case 0x71: s = {"jno    {0}", format{readRelativeByte()}}; break;
   case 0x72: s = {"jc     {0}", format{readRelativeByte()}}; break;
@@ -189,14 +211,21 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0x7e: s = {"jle    {0}", format{readRelativeByte()}}; break;
   case 0x7f: s = {"jnle   {0}", format{readRelativeByte()}}; break;
   case 0x80: s =  {"{0}   {1},{2}", format{readGroup(1), readMemByte(), readByte()}}; break;
-  case 0x81: s =  {"{0}w  {1},{2}", format{readGroup(1), readMemWord(), readWord()}}; break;
+  case 0x81: s =  {"{0}   {1},{2}", format{readGroup(1), readMemWord(), readWord()}}; break;
   case 0x82: s =  {"{0}   {1},{2}", format{readGroup(1), readMemByte(), readByteSigned()}}; break;
-  case 0x83: s =  {"{0}w  {1},{2}", format{readGroup(1), readMemWord(), readByteSigned()}}; break;
+  case 0x83: s =  {"{0}   {1},{2}", format{readGroup(1), readMemWord(), readByteSigned()}}; break;
+  case 0x84: s = {"test   {0},{1}", format{readMemByte(0), readRegByte()}}; break;
+  case 0x85: s = {"test   {0},{1}", format{readMemWord(0), readRegWord()}}; break;
+  case 0x86: s = {"xchg   {0},{1}", format{readMemByte(0), readRegByte()}}; break;
+  case 0x87: s = {"xchg   {0},{1}", format{readMemWord(0), readRegWord()}}; break;
   case 0x88: s = {"mov    {0},{1}", format{readMemByte(0), readRegByte()}}; break;
   case 0x89: s = {"mov    {0},{1}", format{readMemWord(0), readRegWord()}}; break;
   case 0x8a: s = {"mov    {0},{1}", format{readRegByte(0), readMemByte()}}; break;
   case 0x8b: s = {"mov    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
+  case 0x8c: s = {"mov    {0},{1}", format{readMemWord(0), readSeg()}}; break;
+  case 0x8d: s = {"lea    {0},{1}", format{readRegWord(0), readMemWord()}}; break;
   case 0x8e: s = {"mov    {0},{1}", format{readSeg(0), readMemWord()}}; break;
+  case 0x8f: s = {"pop    {0}", format{readMemWord()}}; break;
   case 0x90: s = {"nop    "}; break;
   case 0x91: s = {"xchg   ax,cx"}; break;
   case 0x92: s = {"xchg   ax,dx"}; break;
@@ -205,11 +234,15 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0x95: s = {"xchg   ax,bp"}; break;
   case 0x96: s = {"xchg   ax,si"}; break;
   case 0x97: s = {"xchg   ax,di"}; break;
+  case 0x98: s = {"cbw    "}; break;
+  case 0x99: s = {"cwd    "}; break;
   case 0x9a: s = {"call   {1}:{0}", format{readWord(), readWord()}}; break;
-  case 0xa0: s = {"mov    al,[{0}]", format{readWord()}}; break;
-  case 0xa1: s = {"mov    ax,[{0}]", format{readWord()}}; break;
-  case 0xa2: s = {"mov    [{0}],al", format{readWord()}}; break;
-  case 0xa3: s = {"mov    [{0}],ax", format{readWord()}}; break;
+  case 0x9e: s = {"sahf   "}; break;
+  case 0x9f: s = {"lahf   "}; break;
+  case 0xa0: s = {"mov    al,{0}", format{readIndirectByte()}}; break;
+  case 0xa1: s = {"mov    ax,{0}", format{readIndirectWord()}}; break;
+  case 0xa2: s = {"mov    {0},al", format{readIndirectByte()}}; break;
+  case 0xa3: s = {"mov    {0},ax", format{readIndirectWord()}}; break;
   case 0xa4: s = {"movsb  "}; break;
   case 0xa5: s = {"movsw  "}; break;
   case 0xa6: s = {"cmpsb  "}; break;
@@ -239,17 +272,20 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0xbe: s = {"mov    si,{0}", format{readWord()}}; break;
   case 0xbf: s = {"mov    di,{0}", format{readWord()}}; break;
   case 0xc0: s =  {"{0}   {1},{2}", format{readGroup(2), readMemByte(), readByte()}}; break;
-  case 0xc1: s =  {"{0}w  {1},{2}", format{readGroup(2), readMemWord(), readByte()}}; break;
+  case 0xc1: s =  {"{0}   {1},{2}", format{readGroup(2), readMemWord(), readByte()}}; break;
   case 0xc2: s = {"ret    {0}", format{readWord()}}; break;
   case 0xc3: s = {"ret    "}; break;
   case 0xc6: s = {"mov    {0},{1}", format{readMemByte(), readByte()}}; break;
   case 0xc7: s = {"mov    {0},{1}", format{readMemWord(), readWord()}}; break;
+  case 0xc9: s = {"leave  "}; break;
   case 0xca: s = {"retf   {0}", format{readWord()}}; break;
   case 0xcb: s = {"retf   "}; break;
+  case 0xce: s = {"into   "}; break;
+  case 0xcf: s = {"iret   "}; break;
   case 0xd0: s =  {"{0}   {1},1", format{readGroup(2), readMemByte()}}; break;
-  case 0xd1: s =  {"{0}w  {1},1", format{readGroup(2), readMemWord()}}; break;
+  case 0xd1: s =  {"{0}   {1},1", format{readGroup(2), readMemWord()}}; break;
   case 0xd2: s =  {"{0}   {1},cl", format{readGroup(2), readMemByte()}}; break;
-  case 0xd3: s =  {"{0}w  {1},cl", format{readGroup(2), readMemWord()}}; break;
+  case 0xd3: s =  {"{0}   {1},cl", format{readGroup(2), readMemWord()}}; break;
 //case 0xd8:
 //case 0xd9:
 //case 0xda:
@@ -277,8 +313,10 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
 //case 0xf1:
   case 0xf2: s = {"repnz: "}; break;
   case 0xf3: s = {"repz:  "}; break;
+  case 0xf4: s = {"hlt    "}; break;
+  case 0xf5: s = {"cmc    "}; break;
   case 0xf6: s =  {"{0}   {1},{2}", format{readGroup(3), readMemByte(), readByte()}}; break;
-  case 0xf7: s =  {"{0}w  {1},{2}", format{readGroup(3), readMemWord(), readWord()}}; break;
+  case 0xf7: s =  {"{0}   {1},{2}", format{readGroup(3), readMemWord(), readWord()}}; break;
   case 0xf8: s = {"clc    "}; break;
   case 0xf9: s = {"stc    "}; break;
   case 0xfa: s = {"cli    "}; break;
@@ -286,7 +324,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0xfc: s = {"cld    "}; break;
   case 0xfd: s = {"std    "}; break;
   case 0xfe: s =  {"{0}   {1},{2}", format{readGroup(4), readMemByte(), readByte()}}; break;
-  case 0xff: s =  {"{0}w  {1},{2}", format{readGroup(4), readMemWord(), readWord()}}; break;
+  case 0xff: s =  {"{0}   {1},{2}", format{readGroup(4), readMemWord(), readWord()}}; break;
 
   default:
     s = {"??? [", hex(opcode, 2L), "]"};

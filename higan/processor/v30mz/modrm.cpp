@@ -4,9 +4,7 @@
 //d2-d0 => mem
 
 auto V30MZ::getReg(Size size, uint8 modRM) -> uint16 {
-  if(size == Byte) return r.byte(modRM >> 3);
-  if(size == Word) return r.word(modRM >> 3);
-  unreachable;
+  return size == Byte ? r.byte(modRM >> 3) : r.word(modRM >> 3);
 }
 
 auto V30MZ::setReg(Size size, uint8 modRM, uint16 data) -> void {
@@ -44,15 +42,10 @@ auto V30MZ::getMemAddress(uint8 modRM) -> uint32 {
   case 7: s = r.ds; a += r.bx; break;
   }
 
-  if(prefix.es) s = r.es;
-  if(prefix.cs) s = r.cs;
-  if(prefix.ss) s = r.ss;
-  if(prefix.ds) s = r.ds;
-
-  return s << 16 | a;
+  return segment(s) << 16 | a;
 }
 
-auto V30MZ::getMem(Size size, uint8 modRM) -> uint16 {
+auto V30MZ::getMem(Size size, uint8 modRM) -> uint32 {
   if(modRM >= 0xc0) return getReg(size, modRM << 3);
   auto addr = getMemAddress(modRM);
   return read(size, addr >> 16, addr);
