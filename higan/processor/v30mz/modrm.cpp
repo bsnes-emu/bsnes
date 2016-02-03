@@ -44,6 +44,11 @@ auto V30MZ::getMemAddress(uint8 modRM) -> uint32 {
   case 7: s = r.ds; a += r.bx; break;
   }
 
+  if(prefix.es) s = r.es;
+  if(prefix.cs) s = r.cs;
+  if(prefix.ss) s = r.ss;
+  if(prefix.ds) s = r.ds;
+
   return s << 16 | a;
 }
 

@@ -76,7 +76,9 @@ struct V30MZ {
   auto opAndMemReg(Size);
   auto opAndRegMem(Size);
   auto opAndAccImm(Size);
-  auto opPrefix(uint16&);
+  auto opPrefix(uint);
+  auto opDecimalAdjust(bool);
+  auto opAsciiAdjust(bool);
   auto opSubMemReg(Size);
   auto opSubRegMem(Size);
   auto opSubAccImm(Size);
@@ -96,18 +98,28 @@ struct V30MZ {
   auto opMoveRegMem(Size);
   auto opMoveSegMem();
   auto opNop();
+  auto opExchange(uint16&, uint16&);
   auto opCallFar();
   auto opMoveAccMem(Size);
   auto opMoveMemAcc(Size);
   auto opMoveString(Size);
+  auto opCompareString(Size);
   auto opTestAcc(Size);
   auto opStoreString(Size);
+  auto opLoadString(Size);
+  auto opSubtractCompareString(Size);
   auto opMoveRegImm(uint8&);
   auto opMoveRegImm(uint16&);
+  auto opReturnImm();
   auto opReturn();
   auto opMoveMemImm(Size);
-  auto opRetFar();
+  auto opReturnFarImm();
+  auto opReturnFar();
   auto opGroup2MemImm(Size, maybe<uint8> = {});
+  auto opGroup3MemImm(Size);
+  auto opGroup4MemImm(Size);
+  auto opLoopWhile(bool);
+  auto opLoop();
   auto opIn(Size);
   auto opOut(Size);
   auto opCallNear();
@@ -115,6 +127,7 @@ struct V30MZ {
   auto opJumpShort();
   auto opInDX(Size);
   auto opOutDX(Size);
+  auto opLock();
   auto opRepeat(bool);
   auto opClearFlag(bool&);
   auto opSetFlag(bool&);
@@ -125,6 +138,12 @@ struct V30MZ {
   //state
   bool halt = false;
   uint executed = 0;
+
+  struct Prefix {
+    bool hold;
+    bool es, cs, ss, ds;
+    bool repnz, repz;
+  } prefix;
 
   struct Registers {
     //registers.cpp

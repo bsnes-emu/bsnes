@@ -98,8 +98,46 @@ auto V30MZ::opSubAccImm(Size size) {
 //2e  cs:
 //36  ss:
 //3e  ds:
-auto V30MZ::opPrefix(uint16& segment) {
-  //todo
+auto V30MZ::opPrefix(uint flag) {
+  prefix.hold = true;
+  prefix.es   = flag == 0;
+  prefix.cs   = flag == 1;
+  prefix.ss   = flag == 2;
+  prefix.ds   = flag == 3;
+}
+
+//27  daa
+//2f  das
+auto V30MZ::opDecimalAdjust(bool negate) {
+  wait(9);
+  uint8 al = r.al;
+  if(r.f.h || ((al & 0x0f) > 0x09)) {
+    r.al += negate ? -0x06 : 0x06;
+    r.f.h = 1;
+  }
+  if(r.f.c || (al > 0x99)) {
+    r.al += negate ? -0x06 : 0x60;
+    r.f.c = 1;
+  }
+  r.f.s = r.al & 0x80;
+  r.f.z = r.al == 0;
+  r.f.p = parity(r.al);
+}
+
+//37  aaa
+//3f  aas
+auto V30MZ::opAsciiAdjust(bool negate) {
+  wait(8);
+  if(r.f.h || ((r.al & 0x0f) > 0x09)) {
+    r.al += negate ? -0x06 : 0x06;
+    r.ah += negate ? -0x01 : 0x01;
+    r.f.h = 1;
+    r.f.c = 1;
+  } else {
+    r.f.h = 0;
+    r.f.c = 0;
+  }
+  r.al &= 0x0f;
 }
 
 auto V30MZ::opXorMemReg(Size size) {
@@ -206,6 +244,13 @@ auto V30MZ::opMoveSegMem() {
 auto V30MZ::opNop() {
 }
 
+auto V30MZ::opExchange(uint16& x, uint16& y) {
+  wait(2);
+  uint16 z = x;
+  x = y;
+  y = z;
+}
+
 auto V30MZ::opCallFar() {
   wait(9);
   auto ip = fetch(Word);
@@ -229,6 +274,25 @@ auto V30MZ::opMoveString(Size size) {
   write(size, r.es, r.di, read(size, r.ds, r.si));
   r.si += r.f.d ? -size : size;
   r.di += r.f.d ? -size : size;
+
+  if(prefix.repnz || prefix.repz) {
+    if(--r.cx) r.ip--, prefix.hold = true;
+  }
+}
+
+auto V30MZ::opCompareString(Size size) {
+  wait(5);
+  auto x = read(size, r.ds, r.si);
+  auto y = read(size, r.es, r.di);
+  r.si += r.f.d ? -size : size;
+  r.di += r.f.d ? -size : size;
+  alSub(size, x, y);
+
+  if(prefix.repnz || prefix.repz) {
+    if(r.f.z == 1 && prefix.repnz) return;
+    if(r.f.z == 0 && prefix.repz) return;
+    if(--r.cx) r.ip--, prefix.hold = true;
+  }
 }
 
 auto V30MZ::opTestAcc(Size size) {
@@ -239,6 +303,36 @@ auto V30MZ::opStoreString(Size size) {
   wait(2);
   write(size, r.es, r.di, getAcc(size));
   r.di += r.f.d ? -size : size;
+
+  if(prefix.repnz || prefix.repz) {
+    if(--r.cx) r.ip--, prefix.hold = true;
+  }
+}
+
+//ac  lodsb
+//ad  lodsw
+auto V30MZ::opLoadString(Size size) {
+  wait(2);
+  setAcc(size, read(size, r.ds, r.si));
+
+  if(prefix.repnz || prefix.repz) {
+    if(--r.cx) r.ip--, prefix.hold = true;
+  }
+}
+
+//ae  scasb
+//af  scasw
+auto V30MZ::opSubtractCompareString(Size size) {
+  wait(3);
+  auto x = getAcc(size);
+  auto y = read(size, r.es, r.di);
+  alSub(size, x, y);
+
+  if(prefix.repnz || prefix.repz) {
+    if(r.f.z == 1 && prefix.repnz) return;
+    if(r.f.z == 0 && prefix.repz) return;
+    if(--r.cx) r.ip--, prefix.hold = true;
+  }
 }
 
 auto V30MZ::opMoveRegImm(uint8& reg) {
@@ -247,6 +341,13 @@ auto V30MZ::opMoveRegImm(uint8& reg) {
 
 auto V30MZ::opMoveRegImm(uint16& reg) {
   reg = fetch(Word);
+}
+
+auto V30MZ::opReturnImm() {
+  wait(5);
+  auto offset = fetch(Word);
+  r.ip = pop();
+  r.sp += offset;
 }
 
 auto V30MZ::opReturn() {
@@ -259,12 +360,18 @@ auto V30MZ::opMoveMemImm(Size size) {
   setMem(size, modRM, fetch(size));
 }
 
-auto V30MZ::opRetFar() {
+auto V30MZ::opReturnFarImm() {
+  wait(8);
+  auto offset = fetch(Word);
+  r.ip = pop();
+  r.cs = pop();
+  r.sp += offset;
+}
+
+auto V30MZ::opReturnFar() {
   wait(7);
-  auto ip = pop();
-  auto cs = pop();
-  r.cs = cs;
-  r.ip = ip;
+  r.ip = pop();
+  r.cs = pop();
 }
 
 auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
@@ -283,6 +390,34 @@ auto V30MZ::opGroup2MemImm(Size size, maybe<uint8> imm) {
   case 5: setMem(size, modRM, alShr(size, mem, *imm)); break;
   case 6: setMem(size, modRM, alSal(size, mem, *imm)); break;
   case 7: setMem(size, modRM, alSar(size, mem, *imm)); break;
+  }
+}
+
+auto V30MZ::opGroup3MemImm(Size size) {
+  auto modRM = fetch();
+  auto mem = getMem(size, modRM);
+}
+
+auto V30MZ::opGroup4MemImm(Size size) {
+  auto modRM = fetch();
+  auto mem = getMem(size, modRM);
+}
+
+auto V30MZ::opLoopWhile(bool value) {
+  wait(2);
+  auto offset = (int8)fetch();
+  if(--r.cx && r.f.z == value) {
+    wait(3);
+    r.ip += offset;
+  }
+}
+
+auto V30MZ::opLoop() {
+  wait(1);
+  auto offset = (int8)fetch();
+  if(--r.cx) {
+    wait(3);
+    r.ip += offset;
   }
 }
 
@@ -337,24 +472,19 @@ auto V30MZ::opOutDX(Size size) {
   out(r.dx + 1, r.ah);
 }
 
+//f0  lock
+auto V30MZ::opLock() {
+  prefix.hold = true;
+}
+
+//f2  repnz
+//f3  repz
 auto V30MZ::opRepeat(bool flag) {
   wait(4);
-  auto opcode = fetch();
-  if((opcode & 0xfc) != 0x6c && (opcode & 0xfc) != 0xa4
-  && (opcode & 0xfe) != 0xaa && (opcode & 0xfc) != 0xac) {
-    //invalid argument
-    r.ip--;
-    return;
-  }
   if(r.cx == 0) return;
-  r.cx--;
-
-  switch(opcode) {
-  case 0xa4: opMoveString(Byte); r.ip -= 2; break;
-  case 0xa5: opMoveString(Word); r.ip -= 2; break;
-  case 0xaa: opStoreString(Byte); r.ip -= 2; break;
-  case 0xab: opStoreString(Word); r.ip -= 2; break;
-  }
+  prefix.hold  = true;
+  prefix.repnz = flag == 0;
+  prefix.repz  = flag == 1;
 }
 
 auto V30MZ::opClearFlag(bool& flag) {
