@@ -3,22 +3,25 @@
 //36  ss:
 //3e  ds:
 auto V30MZ::opSegment(uint16 segment) {
-  state.prefix = true;
   prefix.segment = segment;
+  state.prefix = true;
+  state.poll = false;
 }
 
-//f2  repnz
-//f3  repz
+//f2  repnz:
+//f3  repz:
 auto V30MZ::opRepeat(bool flag) {
   wait(4);
   if(r.cx == 0) return;
-  state.prefix = true;
   prefix.repeat = flag;
+  state.prefix = true;
+  state.poll = false;
 }
 
-//f0  lock
+//f0  lock:
 auto V30MZ::opLock() {
   state.prefix = true;
+  state.poll = false;
 }
 
 //9b  wait

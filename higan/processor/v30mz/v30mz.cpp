@@ -18,9 +18,11 @@ namespace Processor {
 #include "disassembler.cpp"
 
 auto V30MZ::exec() -> void {
+  state.poll = true;
   if(state.halt) return wait(1);
 
   #if 0
+  static uint counter = 0;
   static uint16 cs = 0, ip = 0;
   if(cs != r.cs || ip != r.ip) print(disassemble(cs = r.cs, ip = r.ip), "\n");
   #endif
@@ -30,8 +32,8 @@ auto V30MZ::exec() -> void {
   if(state.prefix) {
     state.prefix = false;
   } else {
-    prefix.segment = nothing;
     prefix.repeat = nothing;
+    prefix.segment = nothing;
   }
 }
 
@@ -302,8 +304,8 @@ auto V30MZ::instruction() -> void {
 auto V30MZ::interrupt(uint8 vector) -> void {
   state.halt = false;
 
-  auto ip = read(Word, 0x0000, vector * 2 + 0);
-  auto cs = read(Word, 0x0000, vector * 2 + 2);
+  auto ip = read(Word, 0x0000, vector * 4 + 0);
+  auto cs = read(Word, 0x0000, vector * 4 + 2);
 
   push(r.f);
   push(r.cs);
@@ -318,25 +320,26 @@ auto V30MZ::interrupt(uint8 vector) -> void {
 }
 
 auto V30MZ::power() -> void {
-  state.halt = false;
+  state.halt   = false;
+  state.poll   = true;
   state.prefix = false;
 
+  prefix.repeat  = nothing;
   prefix.segment = nothing;
-  prefix.repeat = nothing;
 
-  r.ip = 0x0000;
   r.ax = 0x0000;
-  r.bx = 0x0000;
   r.cx = 0x0000;
   r.dx = 0x0000;
+  r.bx = 0x0000;
+  r.sp = 0x0000;
+  r.bp = 0x0000;
   r.si = 0x0000;
   r.di = 0x0000;
-  r.bp = 0x0000;
-  r.sp = 0x0000;
-  r.cs = 0xffff;
-  r.ds = 0x0000;
   r.es = 0x0000;
+  r.cs = 0xffff;
   r.ss = 0x0000;
+  r.ds = 0x0000;
+  r.ip = 0x0000;
   r.f  = 0x8000;
 }
 

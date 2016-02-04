@@ -24,4 +24,5 @@ auto V30MZ::opClearFlag(bool& flag) {
 auto V30MZ::opSetFlag(bool& flag) {
   wait(3);
   flag = true;
+  if(&flag == &r.f.i) state.poll = false;
 }

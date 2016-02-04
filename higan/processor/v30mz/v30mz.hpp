@@ -7,7 +7,6 @@ namespace Processor {
 struct V30MZ {
   using Size = uint;
   enum : uint { Byte = 1, Word = 2, Long = 4 };
-  struct ModRM;
 
   virtual auto wait(uint clocks = 1) -> void = 0;
   virtual auto read(uint20 addr) -> uint8 = 0;
@@ -197,13 +196,14 @@ struct V30MZ {
   auto disassemble(uint16 cs, uint16 ip, bool registers = true, bool bytes = true) -> string;
 
   struct State {
-    bool halt;
-    bool prefix;
+    bool halt;    //set to true for hlt instruction; blocks execution until next interrupt
+    bool poll;    //set to false to suppress interrupt polling between CPU instructions
+    bool prefix;  //set to true for prefix instructions; prevents flushing of Prefix struct
   } state;
 
   struct Prefix {
-    maybe<uint16> segment;
-    maybe<bool> repeat;
+    maybe<bool> repeat;     //repnz, repz
+    maybe<uint16> segment;  //cs, es, ss, ds
   } prefix;
 
   struct ModRM {
@@ -211,24 +211,24 @@ struct V30MZ {
     uint3 reg;
     uint3 mem;
 
-    uint16 address;
     uint16 segment;
+    uint16 address;
   } modrm;
 
   struct Registers {
-    uint16 ip;
     union { uint16 ax; struct { uint8 order_lsb2(al, ah); }; };
-    union { uint16 bx; struct { uint8 order_lsb2(bl, bh); }; };
     union { uint16 cx; struct { uint8 order_lsb2(cl, ch); }; };
     union { uint16 dx; struct { uint8 order_lsb2(dl, dh); }; };
+    union { uint16 bx; struct { uint8 order_lsb2(bl, bh); }; };
+    uint16 sp;
+    uint16 bp;
     uint16 si;
     uint16 di;
-    uint16 bp;
-    uint16 sp;
-    uint16 cs;
-    uint16 ds;
     uint16 es;
+    uint16 cs;
     uint16 ss;
+    uint16 ds;
+    uint16 ip;
 
     uint8*  b[8]{&al, &cl, &dl, &bl, &ah, &ch, &dh, &bh};
     uint16* w[8]{&ax, &cx, &dx, &bx, &sp, &bp, &si, &di};

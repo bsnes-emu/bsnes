@@ -17,13 +17,22 @@ auto PPU::main() -> void {
     }
 
     step(256);
-
-    status.hclk = 0;
-    if(++status.vclk == 159) {
-      status.vclk = 0;
-      video.refresh();
-    }
+    scanline();
   }
+}
+
+auto PPU::scanline() -> void {
+  status.hclk = 0;
+  status.vclk++;
+  if(status.vclk == 144) {
+    cpu.raise(CPU::Interrupt::Vblank);
+  }
+  if(status.vclk == 159) frame();
+}
+
+auto PPU::frame() -> void {
+  status.vclk = 0;
+  video.refresh();
 }
 
 auto PPU::step(uint clocks) -> void {

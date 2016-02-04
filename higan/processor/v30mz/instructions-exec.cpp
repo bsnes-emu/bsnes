@@ -83,11 +83,13 @@ auto V30MZ::opReturnFarImm() {
   r.sp += offset;
 }
 
+//cf  iret
 auto V30MZ::opReturnInt() {
   wait(9);
   r.ip = pop();
   r.cs = pop();
   r.f = pop();
+  state.poll = false;
 }
 
 auto V30MZ::opInt3() {
@@ -136,6 +138,7 @@ auto V30MZ::opPushReg(uint16& reg) {
 
 auto V30MZ::opPopReg(uint16& reg) {
   reg = pop();
+  if(&reg == &r.ss) state.poll = false;
 }
 
 //9c  pushf
@@ -148,6 +151,7 @@ auto V30MZ::opPushFlags() {
 auto V30MZ::opPopFlags() {
   wait(2);
   r.f = pop();
+  state.poll = false;
 }
 
 //60  pusha

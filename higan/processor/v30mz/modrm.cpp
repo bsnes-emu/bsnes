@@ -20,7 +20,7 @@ auto V30MZ::modRM() -> void {
     case 3: modrm.segment = segment(r.ss); modrm.address = r.bp + r.di; break;
     case 4: modrm.segment = segment(r.ds); modrm.address = r.si; break;
     case 5: modrm.segment = segment(r.ds); modrm.address = r.di; break;
-    case 6: modrm.segment = segment(r.ds); modrm.address = r.bp; break;
+    case 6: modrm.segment = segment(r.ss); modrm.address = r.bp; break;
     case 7: modrm.segment = segment(r.ds); modrm.address = r.bx; break;
     }
     if(modrm.mod == 1) modrm.address += (int8)fetch(Byte);

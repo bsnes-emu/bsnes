@@ -5,6 +5,7 @@ namespace WonderSwan {
 CPU cpu;
 #include "memory.cpp"
 #include "io.cpp"
+#include "interrupt.cpp"
 #include "dma.cpp"
 
 auto CPU::Enter() -> void {
@@ -18,6 +19,7 @@ auto CPU::main() -> void {
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
+    poll();
     exec();
   }
 }
@@ -55,17 +57,24 @@ auto CPU::power() -> void {
   create(CPU::Enter, 3072000);
 
   iomap[0x00a0] = this;
+  iomap[0x00b0] = this;
+  iomap[0x00b2] = this;
+  iomap[0x00b4] = this;
+  iomap[0x00b6] = this;
 
   if(WSC() || SC()) {
     for(uint p = 0x0040; p <= 0x0049; p++) iomap[p] = this;
     iomap[0x0062] = this;
   }
 
-  s.dmaSource = 0x00000;
-  s.dmaTarget = 0x0000;
-  s.dmaLength = 0x0000;
-  s.dmaEnable = false;
-  s.dmaMode   = 0;
+  r.dmaSource = 0x00000;
+  r.dmaTarget = 0x0000;
+  r.dmaLength = 0x0000;
+  r.dmaEnable = false;
+  r.dmaMode = 0;
+  r.interruptBase = 0x00;
+  r.interruptEnable = 0x00;
+  r.interruptStatus = 0x00;
 }
 
 }

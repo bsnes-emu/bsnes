@@ -1,4 +1,15 @@
 struct CPU : Processor::V30MZ, Thread, IO {
+  enum class Interrupt : uint {
+    SerialSend,
+    Input,
+    Cartridge,
+    SerialReceive,
+    LineCompare,
+    VblankTimer,
+    Vblank,
+    HblankTimer,
+  };
+
   static auto Enter() -> void;
 
   auto main() -> void;
@@ -20,23 +31,37 @@ struct CPU : Processor::V30MZ, Thread, IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
+  //interrupt.cpp
+  auto poll() -> void;
+  auto raise(Interrupt) -> void;
+  auto lower(Interrupt) -> void;
+
   //dma.cpp
   auto dmaTransfer() -> void;
 
-  struct State {
-    //$0040-0042 DMA_SRC
+  struct Registers {
+    //$0040-0042  DMA_SRC
     uint20 dmaSource;
 
-    //$0044-0045 DMA_DST
+    //$0044-0045  DMA_DST
     uint16_ dmaTarget;
 
-    //$0046-0047 DMA_LEN
+    //$0046-0047  DMA_LEN
     uint16_ dmaLength;
 
-    //$0048 DMA_CTRL
+    //$0048  DMA_CTRL
     bool dmaEnable;
     bool dmaMode;  //0 = increment; 1 = decrement
-  } s;
+
+    //$00b0  INT_BASE
+    uint8 interruptBase;
+
+    //$00b2  INT_ENABLE
+    uint8 interruptEnable;
+
+    //$00b4  INT_STATUS
+    uint8 interruptStatus;
+  } r;
 };
 
 extern CPU cpu;
