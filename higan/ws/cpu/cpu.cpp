@@ -4,6 +4,8 @@ namespace WonderSwan {
 
 CPU cpu;
 #include "memory.cpp"
+#include "io.cpp"
+#include "dma.cpp"
 
 auto CPU::Enter() -> void {
   cpu.main();
@@ -53,6 +55,17 @@ auto CPU::power() -> void {
   create(CPU::Enter, 3072000);
 
   iomap[0x00a0] = this;
+
+  if(WSC() || SC()) {
+    for(uint p = 0x0040; p <= 0x0049; p++) iomap[p] = this;
+    iomap[0x0062] = this;
+  }
+
+  s.dmaSource = 0x00000;
+  s.dmaTarget = 0x0000;
+  s.dmaLength = 0x0000;
+  s.dmaEnable = false;
+  s.dmaMode   = 0;
 }
 
 }

@@ -7,30 +7,35 @@ namespace Processor {
 #include "modrm.cpp"
 #include "memory.cpp"
 #include "algorithms.cpp"
-#include "instructions.cpp"
+#include "instructions-adjust.cpp"
+#include "instructions-alu.cpp"
+#include "instructions-exec.cpp"
+#include "instructions-flag.cpp"
+#include "instructions-group.cpp"
+#include "instructions-misc.cpp"
+#include "instructions-move.cpp"
+#include "instructions-string.cpp"
 #include "disassembler.cpp"
 
 auto V30MZ::exec() -> void {
-  if(halt) return wait(1);
+  if(state.halt) return wait(1);
 
-  #if 1
+  #if 0
   static uint16 cs = 0, ip = 0;
   if(cs != r.cs || ip != r.ip) print(disassemble(cs = r.cs, ip = r.ip), "\n");
   #endif
 
-  execOpcode();
+  instruction();
 
-  if(prefix.hold) {
-    prefix.hold = false;
+  if(state.prefix) {
+    state.prefix = false;
   } else {
     prefix.segment = nothing;
     prefix.repeat = nothing;
   }
 }
 
-auto V30MZ::execOpcode() -> void {
-  executed++;
-
+auto V30MZ::instruction() -> void {
   auto opcode = fetch();
   wait(1);
 
@@ -66,14 +71,14 @@ auto V30MZ::execOpcode() -> void {
   case 0x1c: return opSbbAccImm(Byte);
   case 0x1d: return opSbbAccImm(Word);
   case 0x1e: return opPushReg(r.ds);
-  case 0x1f: return opPopReg(r.cs);
+  case 0x1f: return opPopReg(r.ds);
   case 0x20: return opAndMemReg(Byte);
   case 0x21: return opAndMemReg(Word);
   case 0x22: return opAndRegMem(Byte);
   case 0x23: return opAndRegMem(Word);
   case 0x24: return opAndAccImm(Byte);
   case 0x25: return opAndAccImm(Word);
-  case 0x26: return opPrefix(r.es);
+  case 0x26: return opSegment(r.es);
   case 0x27: return opDecimalAdjust(0);  //daa
   case 0x28: return opSubMemReg(Byte);
   case 0x29: return opSubMemReg(Word);
@@ -81,7 +86,7 @@ auto V30MZ::execOpcode() -> void {
   case 0x2b: return opSubRegMem(Word);
   case 0x2c: return opSubAccImm(Byte);
   case 0x2d: return opSubAccImm(Word);
-  case 0x2e: return opPrefix(r.cs);
+  case 0x2e: return opSegment(r.cs);
   case 0x2f: return opDecimalAdjust(1);  //das
   case 0x30: return opXorMemReg(Byte);
   case 0x31: return opXorMemReg(Word);
@@ -89,7 +94,7 @@ auto V30MZ::execOpcode() -> void {
   case 0x33: return opXorRegMem(Word);
   case 0x34: return opXorAccImm(Byte);
   case 0x35: return opXorAccImm(Word);
-  case 0x36: return opPrefix(r.ss);
+  case 0x36: return opSegment(r.ss);
   case 0x37: return opAsciiAdjust(0);  //aaa
   case 0x38: return opCmpMemReg(Byte);
   case 0x39: return opCmpMemReg(Word);
@@ -97,7 +102,7 @@ auto V30MZ::execOpcode() -> void {
   case 0x3b: return opCmpRegMem(Word);
   case 0x3c: return opCmpAccImm(Byte);
   case 0x3d: return opCmpAccImm(Word);
-  case 0x3e: return opPrefix(r.ds);
+  case 0x3e: return opSegment(r.ds);
   case 0x3f: return opAsciiAdjust(1);  //aas
   case 0x40: return opIncReg(r.ax);
   case 0x41: return opIncReg(r.cx);
@@ -190,9 +195,9 @@ auto V30MZ::execOpcode() -> void {
   case 0x98: return opSignExtendByte();
   case 0x99: return opSignExtendWord();
   case 0x9a: return opCallFar();
-//9b
-//9c
-//9d
+  case 0x9b: return opWait();
+  case 0x9c: return opPushFlags();
+  case 0x9d: return opPopFlags();
   case 0x9e: return opStoreFlagsAcc();
   case 0x9f: return opLoadAccFlags();
   case 0xa0: return opMoveAccMem(Byte);
@@ -209,8 +214,8 @@ auto V30MZ::execOpcode() -> void {
   case 0xab: return opStoreString(Word);
   case 0xac: return opLoadString(Byte);
   case 0xad: return opLoadString(Word);
-  case 0xae: return opSubtractCompareString(Byte);
-  case 0xaf: return opSubtractCompareString(Word);
+  case 0xae: return opScanString(Byte);
+  case 0xaf: return opScanString(Word);
   case 0xb0: return opMoveRegImm(r.al);
   case 0xb1: return opMoveRegImm(r.cl);
   case 0xb2: return opMoveRegImm(r.dl);
@@ -231,26 +236,26 @@ auto V30MZ::execOpcode() -> void {
   case 0xc1: return opGroup2MemImm(Word);
   case 0xc2: return opReturnImm();
   case 0xc3: return opReturn();
-//c4
-//c5
+  case 0xc4: return opLoadSegmentMem(r.es);
+  case 0xc5: return opLoadSegmentMem(r.ds);
   case 0xc6: return opMoveMemImm(Byte);
   case 0xc7: return opMoveMemImm(Word);
-//c8
+  case 0xc8: return opEnter();
   case 0xc9: return opLeave();
   case 0xca: return opReturnFarImm();
   case 0xcb: return opReturnFar();
-//cc
-//cd
+  case 0xcc: return opInt3();
+  case 0xcd: return opIntImm();
   case 0xce: return opInto();
   case 0xcf: return opReturnInt();
   case 0xd0: return opGroup2MemImm(Byte, 1);
   case 0xd1: return opGroup2MemImm(Word, 1);
   case 0xd2: return opGroup2MemImm(Byte, r.cl);
   case 0xd3: return opGroup2MemImm(Word, r.cl);
-//d4
-//d5
+  case 0xd4: return opAdjustAfterMultiply();
+  case 0xd5: return opAdjustAfterDivide();
   case 0xd6: return;
-//d7
+  case 0xd7: return opTranslate();
   case 0xd8: return;  //fpo1
   case 0xd9: return;  //fpo1
   case 0xda: return;  //fpo1
@@ -268,7 +273,7 @@ auto V30MZ::execOpcode() -> void {
   case 0xe6: return opOut(Byte);
   case 0xe7: return opOut(Word);
   case 0xe8: return opCallNear();
-//e9
+  case 0xe9: return opJumpNear();
   case 0xea: return opJumpFar();
   case 0xeb: return opJumpShort();
   case 0xec: return opInDX(Byte);
@@ -292,17 +297,30 @@ auto V30MZ::execOpcode() -> void {
   case 0xfe: return opGroup4MemImm(Byte);
   case 0xff: return opGroup4MemImm(Word);
   }
+}
 
-  print("error: unknown opcode: ", hex(opcode, 2L), "\n");
-  print("executed: ", --executed, "\n");
-  halt = true;
+auto V30MZ::interrupt(uint8 vector) -> void {
+  state.halt = false;
+
+  auto ip = read(Word, 0x0000, vector * 2 + 0);
+  auto cs = read(Word, 0x0000, vector * 2 + 2);
+
+  push(r.f);
+  push(r.cs);
+  push(r.ip);
+
+  r.f.m = true;
+  r.f.i = false;
+  r.f.b = false;
+
+  r.ip = ip;
+  r.cs = cs;
 }
 
 auto V30MZ::power() -> void {
-  halt = false;
-  executed = 0;
+  state.halt = false;
+  state.prefix = false;
 
-  prefix.hold = false;
   prefix.segment = nothing;
   prefix.repeat = nothing;
 

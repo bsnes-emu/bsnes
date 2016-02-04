@@ -12,12 +12,12 @@ auto IO::power() -> void {
 }
 
 auto IO::portRead(uint16 addr) -> uint8 {
-//print("[", hex(addr, 4L), "]: port unmapped\n");
+  print("[", hex(addr, 4L), "]: port unmapped\n");
   return 0x00;
 }
 
 auto IO::portWrite(uint16 addr, uint8 data) -> void {
-//print("[", hex(addr, 4L), "] = ", hex(data, 2L), ": port unmapped\n");
+  print("[", hex(addr, 4L), "] = ", hex(data, 2L), ": port unmapped\n");
 }
 
 auto Bus::read(uint20 addr) -> uint8 {

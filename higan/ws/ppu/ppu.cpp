@@ -3,6 +3,7 @@
 namespace WonderSwan {
 
 PPU ppu;
+#include "io.cpp"
 #include "video.cpp"
 
 auto PPU::Enter() -> void {
@@ -34,6 +35,12 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::power() -> void {
   create(PPU::Enter, 3072000);
+
+  for(uint n = 0x0000; n <= 0x0001; n++) iomap[n] = this;
+  for(uint n = 0x0004; n <= 0x0007; n++) iomap[n] = this;
+  for(uint n = 0x0010; n <= 0x0015; n++) iomap[n] = this;
+  for(uint n = 0x001c; n <= 0x001f; n++) iomap[n] = this;
+  iomap[0x0060] = this;
 
   for(auto& n : output) n = 0;
 

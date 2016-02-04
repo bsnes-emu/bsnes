@@ -237,6 +237,9 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0x98: s = {"cbw    "}; break;
   case 0x99: s = {"cwd    "}; break;
   case 0x9a: s = {"call   {1}:{0}", format{readWord(), readWord()}}; break;
+  case 0x9b: s = {"wait   "}; break;
+  case 0x9c: s = {"pushf  "}; break;
+  case 0x9d: s = {"popf   "}; break;
   case 0x9e: s = {"sahf   "}; break;
   case 0x9f: s = {"lahf   "}; break;
   case 0xa0: s = {"mov    al,{0}", format{readIndirectByte()}}; break;
@@ -275,17 +278,26 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0xc1: s =  {"{0}   {1},{2}", format{readGroup(2), readMemWord(), readByte()}}; break;
   case 0xc2: s = {"ret    {0}", format{readWord()}}; break;
   case 0xc3: s = {"ret    "}; break;
+  case 0xc4: s = {"les    {0}", format{readMemWord()}}; break;
+  case 0xc5: s = {"lds    {0}", format{readMemWord()}}; break;
   case 0xc6: s = {"mov    {0},{1}", format{readMemByte(), readByte()}}; break;
   case 0xc7: s = {"mov    {0},{1}", format{readMemWord(), readWord()}}; break;
+  case 0xc8: s = {"enter  {0},{1}", format{readWord(), readByte()}}; break;
   case 0xc9: s = {"leave  "}; break;
   case 0xca: s = {"retf   {0}", format{readWord()}}; break;
   case 0xcb: s = {"retf   "}; break;
+  case 0xcc: s = {"int3   "}; break;
+  case 0xcd: s = {"int    ", format{readByte()}}; break;
   case 0xce: s = {"into   "}; break;
   case 0xcf: s = {"iret   "}; break;
   case 0xd0: s =  {"{0}   {1},1", format{readGroup(2), readMemByte()}}; break;
   case 0xd1: s =  {"{0}   {1},1", format{readGroup(2), readMemWord()}}; break;
   case 0xd2: s =  {"{0}   {1},cl", format{readGroup(2), readMemByte()}}; break;
   case 0xd3: s =  {"{0}   {1},cl", format{readGroup(2), readMemWord()}}; break;
+  case 0xd4: s = {"aam    {0}", format{readByte()}}; break;
+  case 0xd5: s = {"aad    {0}", format{readByte()}}; break;
+//case 0xd6:
+  case 0xd7: s = {"xlat   "}; break;
 //case 0xd8:
 //case 0xd9:
 //case 0xda:
@@ -303,6 +315,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0xe6: s = {"out    {0},al", format{readByte()}}; break;
   case 0xe7: s = {"out    {0},ax", format{readByte()}}; break;
   case 0xe8: s = {"call   {0}", format{readRelativeWord()}}; break;
+  case 0xe9: s = {"jmp    {0}", format{readRelativeWord()}}; break;
   case 0xea: s = {"jmp    {1}:{0}", format{readWord(), readWord()}}; break;
   case 0xeb: s = {"jmp    {0}", format{readRelativeByte()}}; break;
   case 0xec: s = {"in     al,dx"}; break;
@@ -325,9 +338,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   case 0xfd: s = {"std    "}; break;
   case 0xfe: s =  {"{0}   {1},{2}", format{readGroup(4), readMemByte(), readByte()}}; break;
   case 0xff: s =  {"{0}   {1},{2}", format{readGroup(4), readMemWord(), readWord()}}; break;
-
-  default:
-    s = {"??? [", hex(opcode, 2L), "]"};
+  default:   s = {"???    {0}", format{hex(opcode, 2L)}}; break;
   }
   while(s.size() < 24) s.append(" ");
 

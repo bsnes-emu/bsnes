@@ -16,41 +16,6 @@ auto V30MZ::setAcc(Size size, uint32 data) -> void {
   if(size == Long) r.ax = data, r.dx = data >> 16;
 }
 
-auto V30MZ::Registers::byte(uint3 r) -> uint8& {
-  switch(r) {
-  case 0: return al;
-  case 1: return cl;
-  case 2: return dl;
-  case 3: return bl;
-  case 4: return ah;
-  case 5: return ch;
-  case 6: return dh;
-  case 7: return bh;
-  } unreachable;
-}
-
-auto V30MZ::Registers::word(uint3 r) -> uint16& {
-  switch(r) {
-  case 0: return ax;
-  case 1: return cx;
-  case 2: return dx;
-  case 3: return bx;
-  case 4: return sp;
-  case 5: return bp;
-  case 6: return si;
-  case 7: return di;
-  } unreachable;
-}
-
-auto V30MZ::Registers::segment(uint2 r) -> uint16& {
-  switch(r) {
-  case 0: return es;
-  case 1: return cs;
-  case 2: return ss;
-  case 3: return ds;
-  } unreachable;
-}
-
 //
 
 V30MZ::Registers::Flags::operator uint16() const {

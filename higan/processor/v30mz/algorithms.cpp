@@ -1,6 +1,5 @@
 //(0 = odd, 1 = even) number of bits set in value
-auto V30MZ::parity(uint16 value) const -> bool {
-  value ^= value >> 8;
+auto V30MZ::parity(uint8 value) const -> bool {
   value ^= value >> 4;
   value ^= value >> 2;
   value ^= value >> 1;
@@ -48,14 +47,14 @@ auto V30MZ::alDec(Size size, uint16 x) -> uint16 {
 }
 
 auto V30MZ::alDiv(Size size, uint32 x, uint32 y) -> uint32 {
-  if(y == 0) return 0;  //todo: throw exception
+  if(y == 0) return interrupt(0), 0;
   uint32 quotient = x / y;
   uint32 remainder = x % y;
   return (remainder & mask) << bits | (quotient & mask);
 }
 
 auto V30MZ::alDivi(Size size, int32 x, int32 y) -> uint32 {
-  if(y == 0) return 0;  //todo: throw exception
+  if(y == 0) return interrupt(0), 0;
   x = size == Byte ? (int8)x : (int16)x;
   y = size == Byte ? (int8)y : (int16)y;
   uint32 quotient = x / y;
