@@ -218,7 +218,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size, bool 
       "    map address=40-7d,c0-ff:0000-7fff mask=0x8000\n"
       "  icd2 revision=1\n"
       "    map address=00-3f,80-bf:6000-67ff,7000-7fff\n"
-      "    brom name=sgb.boot.rom size=0x100\n"
+      "    rom name=sgb.boot.rom size=0x100\n"
     );
   }
 

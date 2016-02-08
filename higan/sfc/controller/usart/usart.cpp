@@ -13,22 +13,11 @@
 //Teensy D5 <> Teensy D7
 
 USART::USART(bool port) : Controller(port) {
-  latched = 0;
-  data1 = 0;
-  data2 = 0;
-  counter = 0;
-
-  rxlength = 0;
-  rxdata = 0;
-
-  txlength = 0;
-  txdata = 0;
-
   string filename{interface->path(ID::SuperFamicom), "usart.so"};
   if(openAbsolute(filename)) {
     init = sym("usart_init");
     main = sym("usart_main");
-    if(init && main) create(Controller::Enter, 10000000);
+    if(init && main) create(Controller::Enter, 10'000'000);
   }
 }
 
@@ -46,9 +35,9 @@ auto USART::enter() -> void {
       {&USART::writable, this},
       {&USART::write, this}
     );
-    main();
+    main({});
   }
-  while(true) step(10000000);
+  while(true) step(10'000'000);
 }
 
 auto USART::quit() -> bool {
@@ -56,8 +45,8 @@ auto USART::quit() -> bool {
   return false;
 }
 
-auto USART::usleep(unsigned milliseconds) -> void {
-  step(10 * milliseconds);
+auto USART::usleep(uint microseconds) -> void {
+  step(10 * microseconds);
 }
 
 auto USART::readable() -> bool {
@@ -91,7 +80,7 @@ auto USART::data() -> uint2 {
   if(iobit()) {
     if(counter >= 16) return 1;
     uint2 result = 0;
-    if(counter < 12) result = interface->inputPoll(port, (unsigned)Device::ID::Gamepad, counter);
+    if(counter < 12) result = interface->inputPoll(port, (uint)Device::ID::Gamepad, counter);
     if(latched == 0) counter++;
     return result;
   }

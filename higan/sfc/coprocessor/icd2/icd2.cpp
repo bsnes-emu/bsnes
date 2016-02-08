@@ -12,14 +12,14 @@ auto ICD2::Enter() -> void { icd2.enter(); }
 auto ICD2::enter() -> void {
   while(true) {
     if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      GameBoy::system.runtosave();
+      GameBoy::system.runToSave();
       scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
     }
 
     if(r6003 & 0x80) {
       GameBoy::system.run();
-      step(GameBoy::system.clocks_executed);
-      GameBoy::system.clocks_executed = 0;
+      step(GameBoy::system._clocksExecuted);
+      GameBoy::system._clocksExecuted = 0;
     } else {  //DMG halted
       audio.coprocessorSample(0, 0);
       step(1);
@@ -36,9 +36,13 @@ auto ICD2::load() -> void {
   hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
   GameBoy::interface->hook = this;
+  interface->loadRequest(ID::GameBoy, "Game Boy", "gb", false);
+  GameBoy::interface->load(GameBoy::ID::SuperGameBoy);
+  cartridge.loadGameBoy();
 }
 
 auto ICD2::unload() -> void {
+  GameBoy::interface->unload();
   GameBoy::interface->bind = bind;
   GameBoy::interface->hook = hook;
 }

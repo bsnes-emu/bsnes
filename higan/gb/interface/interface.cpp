@@ -57,7 +57,7 @@ auto Interface::audioFrequency() -> double {
 }
 
 auto Interface::loaded() -> bool {
-  return cartridge.loaded();
+  return system.loaded();
 }
 
 auto Interface::sha256() -> string {
@@ -74,7 +74,7 @@ auto Interface::group(uint id) -> uint {
   case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
-    switch(system.revision) {
+    switch(system.revision()) {
     case System::Revision::GameBoy: return ID::GameBoy;
     case System::Revision::SuperGameBoy: return ID::SuperGameBoy;
     case System::Revision::GameBoyColor: return ID::GameBoyColor;
@@ -85,9 +85,9 @@ auto Interface::group(uint id) -> uint {
 }
 
 auto Interface::load(uint id) -> void {
-  if(id == ID::GameBoy) cartridge.load(System::Revision::GameBoy);
-  if(id == ID::SuperGameBoy) cartridge.load(System::Revision::SuperGameBoy);
-  if(id == ID::GameBoyColor) cartridge.load(System::Revision::GameBoyColor);
+  if(id == ID::GameBoy) system.load(System::Revision::GameBoy);
+  if(id == ID::SuperGameBoy) system.load(System::Revision::SuperGameBoy);
+  if(id == ID::GameBoyColor) system.load(System::Revision::GameBoyColor);
 }
 
 auto Interface::save() -> void {
@@ -134,7 +134,7 @@ auto Interface::save(uint id, const stream& stream) -> void {
 
 auto Interface::unload() -> void {
   save();
-  cartridge.unload();
+  system.unload();
 }
 
 auto Interface::power() -> void {
@@ -150,7 +150,7 @@ auto Interface::run() -> void {
 }
 
 auto Interface::serialize() -> serializer {
-  system.runtosave();
+  system.runToSave();
   return system.serialize();
 }
 

@@ -1,8 +1,4 @@
 struct Cartridge : MMIO, property<Cartridge> {
-  Cartridge();
-  ~Cartridge();
-
-  auto load_empty(System::Revision revision) -> void;
   auto load(System::Revision revision) -> void;
   auto unload() -> void;
 
@@ -62,7 +58,6 @@ struct Cartridge : MMIO, property<Cartridge> {
   };
   vector<Memory> memory;
 
-  readonly<bool> loaded;
   readonly<string> sha256;
 
   uint8* romdata = nullptr;

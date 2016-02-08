@@ -7,6 +7,8 @@ namespace GameBoyAdvance {
 BIOS bios;
 System system;
 
+auto System::loaded() const -> bool { return _loaded; }
+
 auto System::init() -> void {
 }
 
@@ -32,7 +34,15 @@ auto System::load() -> void {
     interface->loadRequest(ID::BIOS, bios, true);
   }
 
-  serialize_init();
+  cartridge.load();
+  serializeInit();
+  _loaded = true;
+}
+
+auto System::unload() -> void {
+  if(!loaded()) return;
+  cartridge.unload();
+  _loaded = false;
 }
 
 auto System::run() -> void {
@@ -43,22 +53,22 @@ auto System::run() -> void {
   video.refresh();
 }
 
-auto System::runtosave() -> void {
+auto System::runToSave() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::CPU;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.active = ppu.thread;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.active = apu.thread;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 
-auto System::runthreadtosave() -> void {
+auto System::runThreadToSave() -> void {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;

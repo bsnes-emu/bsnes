@@ -154,7 +154,7 @@ auto Interface::audioFrequency() -> double {
 }
 
 auto Interface::loaded() -> bool {
-  return cartridge.loaded();
+  return system.loaded();
 }
 
 auto Interface::sha256() -> string {
@@ -200,6 +200,7 @@ auto Interface::group(uint id) -> uint {
   case ID::SDD1ROM:
   case ID::SDD1RAM:
   case ID::OBC1RAM:
+  case ID::SuperGameBoyManifest:
   case ID::SuperGameBoyBootROM:
   case ID::MCCROM:
   case ID::MCCRAM:
@@ -229,8 +230,7 @@ auto Interface::group(uint id) -> uint {
 }
 
 auto Interface::load(uint id) -> void {
-  if(id == ID::SuperFamicom) cartridge.load();
-  if(id == ID::GameBoy) cartridge.loadGameBoy();
+  if(id == ID::SuperFamicom) system.load();
   if(id == ID::BSMemory) cartridge.loadBSMemory();
   if(id == ID::SufamiTurboSlotA) cartridge.loadSufamiTurboA();
   if(id == ID::SufamiTurboSlotB) cartridge.loadSufamiTurboB();
@@ -327,21 +327,27 @@ auto Interface::load(uint id, const stream& stream) -> void {
 
   if(id == ID::OBC1RAM) obc1.ram.read(stream);
 
-  if(id == ID::SuperGameBoyBootROM) {
-    stream.read(GameBoy::system.bootROM.sgb, min(stream.size(), 256u));
-  }
-
   if(id == ID::MCCROM) mcc.rom.read(stream);
   if(id == ID::MCCRAM) mcc.ram.read(stream);
 
-  if(id == ID::GameBoyManifest) cartridge.information.markup.gameBoy = stream.text();
+  if(id == ID::SuperGameBoyManifest) {
+    GameBoy::interface->load(GameBoy::ID::SystemManifest, stream);
+  }
+
+  if(id == ID::SuperGameBoyBootROM) {
+    GameBoy::interface->load(GameBoy::ID::SuperGameBoyBootROM, stream);
+  }
+
+  if(id == ID::GameBoyManifest) {
+    GameBoy::interface->load(GameBoy::ID::Manifest, stream);
+  }
 
   if(id == ID::GameBoyROM) {
-    stream.read(GameBoy::cartridge.romdata, min(GameBoy::cartridge.romsize, stream.size()));
+    GameBoy::interface->load(GameBoy::ID::ROM, stream);
   }
 
   if(id == ID::GameBoyRAM) {
-    stream.read(GameBoy::cartridge.ramdata, min(GameBoy::cartridge.ramsize, stream.size()));
+    GameBoy::interface->load(GameBoy::ID::RAM, stream);
   }
 
   if(id == ID::BSMemoryManifest) cartridge.information.markup.bsMemory = stream.text();
@@ -395,7 +401,9 @@ auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::SDD1RAM) stream.write(sdd1.ram.data(), sdd1.ram.size());
   if(id == ID::OBC1RAM) stream.write(obc1.ram.data(), obc1.ram.size());
 
-  if(id == ID::GameBoyRAM) stream.write(GameBoy::cartridge.ramdata, GameBoy::cartridge.ramsize);
+  if(id == ID::GameBoyRAM) {
+    GameBoy::interface->save(GameBoy::ID::RAM, stream);
+  }
 
   if(id == ID::MCCRAM) stream.write(mcc.ram.data(), mcc.ram.size());
 
@@ -405,7 +413,7 @@ auto Interface::save(uint id, const stream& stream) -> void {
 
 auto Interface::unload() -> void {
   save();
-  cartridge.unload();
+  system.unload();
 }
 
 auto Interface::connect(uint port, uint device) -> void {

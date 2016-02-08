@@ -92,10 +92,7 @@ auto Cartridge::parseMarkupICD2(Markup::Node root) -> void {
   hasICD2 = true;
   icd2.revision = max(1, root["revision"].natural());
 
-  GameBoy::cartridge.load_empty(GameBoy::System::Revision::SuperGameBoy);
-  interface->loadRequest(ID::GameBoy, "Game Boy", "gb", false);
-
-  interface->loadRequest(ID::SuperGameBoyBootROM, root["brom"]["name"].text(), true);
+  //Game Boy core loads data through ICD2 interface
 
   for(auto node : root.find("map")) {
     parseMarkupMap(node, {&ICD2::read, &icd2}, {&ICD2::write, &icd2});

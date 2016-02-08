@@ -85,8 +85,35 @@ auto ICD2::joypWrite(bool p15, bool p14) -> void {
   packetlock = true;
 }
 
-auto ICD2::videoColor(uint source, uint16 red, uint16 green, uint16 blue) -> uint32 {
-  return source;
+auto ICD2::loadRequest(uint id, string name, string type, bool required) -> void {
+}
+
+auto ICD2::loadRequest(uint id, string name, bool required) -> void {
+  if(id == GameBoy::ID::SystemManifest) {
+    interface->loadRequest(ID::SuperGameBoyManifest, name, required);
+  }
+
+  if(id == GameBoy::ID::SuperGameBoyBootROM) {
+    interface->loadRequest(ID::SuperGameBoyBootROM, name, required);
+  }
+
+  if(id == GameBoy::ID::Manifest) {
+    interface->loadRequest(ID::GameBoyManifest, name, required);
+  }
+
+  if(id == GameBoy::ID::ROM) {
+    interface->loadRequest(ID::GameBoyROM, name, required);
+  }
+
+  if(id == GameBoy::ID::RAM) {
+    interface->loadRequest(ID::GameBoyRAM, name, required);
+  }
+}
+
+auto ICD2::saveRequest(uint id, string name) -> void {
+  if(id == GameBoy::ID::RAM) {
+    interface->saveRequest(ID::GameBoyRAM, name);
+  }
 }
 
 auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {

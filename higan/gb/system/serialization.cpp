@@ -1,5 +1,5 @@
 auto System::serialize() -> serializer {
-  serializer s(serialize_size);
+  serializer s(_serializeSize);
 
   uint signature = 0x31545342, version = Info::SerializerVersion;
   char hash[64], description[512];
@@ -11,7 +11,7 @@ auto System::serialize() -> serializer {
   s.array(hash);
   s.array(description);
 
-  serialize_all(s);
+  serializeAll(s);
   return s;
 }
 
@@ -28,15 +28,15 @@ auto System::unserialize(serializer& s) -> bool {
   if(version != Info::SerializerVersion) return false;
 
   power();
-  serialize_all(s);
+  serializeAll(s);
   return true;
 }
 
 auto System::serialize(serializer& s) -> void {
-  s.integer(clocks_executed);
+  s.integer(_clocksExecuted);
 }
 
-auto System::serialize_all(serializer& s) -> void {
+auto System::serializeAll(serializer& s) -> void {
   cartridge.serialize(s);
   system.serialize(s);
   cpu.serialize(s);
@@ -44,7 +44,7 @@ auto System::serialize_all(serializer& s) -> void {
   apu.serialize(s);
 }
 
-auto System::serialize_init() -> void {
+auto System::serializeInit() -> void {
   serializer s;
 
   uint signature = 0, version = 0, crc32 = 0;
@@ -55,6 +55,6 @@ auto System::serialize_init() -> void {
   s.array(hash);
   s.array(description);
 
-  serialize_all(s);
-  serialize_size = s.size();
+  serializeAll(s);
+  _serializeSize = s.size();
 }

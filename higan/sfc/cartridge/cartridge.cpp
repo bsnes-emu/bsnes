@@ -94,7 +94,7 @@ auto Cartridge::load() -> void {
 
   //Game Boy
   if(cartridge.hasICD2()) {
-    _sha256 = Hash::SHA256(GameBoy::cartridge.romdata, GameBoy::cartridge.romsize).digest();
+    _sha256 = "";  //Game Boy cartridge not loaded yet: set later via loadGameBoy()
   }
 
   //BS Memory
@@ -136,25 +136,13 @@ auto Cartridge::load() -> void {
 
   rom.write_protect(true);
   ram.write_protect(false);
-
-  system.load();
-  _loaded = true;
 }
 
 auto Cartridge::loadGameBoy() -> void {
-  interface->loadRequest(ID::GameBoyManifest, "manifest.bml", true);
-  auto document = BML::unserialize(information.markup.gameBoy);
-  information.title.gameBoy = document["information/title"].text();
-
-  auto rom = document["board/rom"];
-  auto ram = document["board/ram"];
-
-  GameBoy::cartridge.information.markup = information.markup.gameBoy;
-  GameBoy::cartridge.load(GameBoy::System::Revision::SuperGameBoy);
-
-  if(auto name = rom["name"].text()) interface->loadRequest(ID::GameBoyROM, name, true);
-  if(auto name = ram["name"].text()) interface->loadRequest(ID::GameBoyRAM, name, false);
-  if(auto name = ram["name"].text()) memory.append({ID::GameBoyRAM, name});
+  //invoked from ICD2::load()
+  _sha256 = GameBoy::interface->sha256();
+  information.markup.gameBoy = GameBoy::interface->manifest();
+  information.title.gameBoy = GameBoy::interface->title();
 }
 
 auto Cartridge::loadBSMemory() -> void {
@@ -182,13 +170,13 @@ auto Cartridge::loadSufamiTurboA() -> void {
   auto ram = document["board/ram"];
 
   if(rom["name"]) {
-    unsigned size = rom["size"].natural();
+    uint size = rom["size"].natural();
     sufamiturboA.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotAROM, rom["name"].text(), true);
   }
 
   if(ram["name"]) {
-    unsigned size = ram["size"].natural();
+    uint size = ram["size"].natural();
     sufamiturboA.ram.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotARAM, ram["name"].text(), false);
     memory.append({ID::SufamiTurboSlotARAM, ram["name"].text()});
@@ -208,13 +196,13 @@ auto Cartridge::loadSufamiTurboB() -> void {
   auto ram = document["board/ram"];
 
   if(rom["name"]) {
-    unsigned size = rom["size"].natural();
+    uint size = rom["size"].natural();
     sufamiturboB.rom.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotBROM, rom["name"].text(), true);
   }
 
   if(ram["name"]) {
-    unsigned size = ram["size"].natural();
+    uint size = ram["size"].natural();
     sufamiturboB.ram.map(allocate<uint8>(size, 0xff), size);
     interface->loadRequest(ID::SufamiTurboSlotBRAM, ram["name"].text(), false);
     memory.append({ID::SufamiTurboSlotBRAM, ram["name"].text()});
@@ -222,14 +210,9 @@ auto Cartridge::loadSufamiTurboB() -> void {
 }
 
 auto Cartridge::unload() -> void {
-  if(_loaded) {
-    system.unload();
-    rom.reset();
-    ram.reset();
-
-    _loaded = false;
-    memory.reset();
-  }
+  rom.reset();
+  ram.reset();
+  memory.reset();
 }
 
 }

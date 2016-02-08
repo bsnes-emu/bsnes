@@ -13,15 +13,6 @@ namespace GameBoy {
 #include "serialization.cpp"
 Cartridge cartridge;
 
-Cartridge::Cartridge() {
-  loaded = false;
-  sha256 = "";
-}
-
-Cartridge::~Cartridge() {
-  unload();
-}
-
 auto Cartridge::manifest() const -> string {
   return information.markup;
 }
@@ -30,25 +21,9 @@ auto Cartridge::title() const -> string {
   return information.title;
 }
 
-//intended for use with Super Game Boy for when no Game Boy cartridge is inserted
-auto Cartridge::load_empty(System::Revision revision) -> void {
-  unload();
-  romsize = 32768;
-  romdata = allocate<uint8>(romsize, 0xff);
-  ramsize = 0;
-  mapper = &mbc0;
-  sha256 = Hash::SHA256(romdata, romsize).digest();
-  loaded = true;
-  system.load(revision);
-}
-
 auto Cartridge::load(System::Revision revision) -> void {
-  unload();
-
-  system.revision = revision;  //needed for ID::Manifest to return correct group ID
-  if(revision != System::Revision::SuperGameBoy) {
-    interface->loadRequest(ID::Manifest, "manifest.bml", true);
-  }
+  information.markup = "";
+  interface->loadRequest(ID::Manifest, "manifest.bml", !system.sgb());
 
   information.mapper = Mapper::Unknown;
   information.ram = false;
@@ -78,21 +53,18 @@ auto Cartridge::load(System::Revision revision) -> void {
   auto rom = document["board/rom"];
   auto ram = document["board/ram"];
 
-  romsize = rom["size"].natural();
+  romsize = max(32768u, rom["size"].natural());
   romdata = allocate<uint8>(romsize, 0xff);
 
   ramsize = ram["size"].natural();
   ramdata = allocate<uint8>(ramsize, 0xff);
 
-  //Super Game Boy core loads memory from Super Famicom core
-  if(revision != System::Revision::SuperGameBoy) {
-    if(auto name = rom["name"].text()) interface->loadRequest(ID::ROM, name, true);
-    if(auto name = ram["name"].text()) interface->loadRequest(ID::RAM, name, false);
-    if(auto name = ram["name"].text()) memory.append({ID::RAM, name});
-  }
+  if(auto name = rom["name"].text()) interface->loadRequest(ID::ROM, name, !system.sgb());
+  if(auto name = ram["name"].text()) interface->loadRequest(ID::RAM, name, false);
+  if(auto name = ram["name"].text()) memory.append({ID::RAM, name});
 
-  information.romsize = rom["size"].natural();
-  information.ramsize = ram["size"].natural();
+  information.romsize = romsize;
+  information.ramsize = ramsize;
   information.battery = (bool)ram["name"];
 
   switch(information.mapper) { default:
@@ -107,14 +79,11 @@ auto Cartridge::load(System::Revision revision) -> void {
   }
 
   sha256 = Hash::SHA256(romdata, romsize).digest();
-  loaded = true;
-  system.load(revision);
 }
 
 auto Cartridge::unload() -> void {
   if(romdata) { delete[] romdata; romdata = nullptr; romsize = 0; }
   if(ramdata) { delete[] ramdata; ramdata = nullptr; ramsize = 0; }
-  loaded = false;
 }
 
 auto Cartridge::rom_read(uint addr) -> uint8 {
@@ -144,7 +113,7 @@ auto Cartridge::mmio_read(uint16 addr) -> uint8 {
 
   if(bootrom_enable) {
     const uint8* data = nullptr;
-    switch(system.revision) { default:
+    switch(system.revision()) { default:
     case System::Revision::GameBoy: data = system.bootROM.dmg; break;
     case System::Revision::SuperGameBoy: data = system.bootROM.sgb; break;
     case System::Revision::GameBoyColor: data = system.bootROM.cgb; break;

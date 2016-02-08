@@ -60,10 +60,11 @@ struct ID {
 
     OBC1RAM,
 
-    SuperGameBoyBootROM,
-
     MCCROM,
     MCCRAM,
+
+    SuperGameBoyManifest,
+    SuperGameBoyBootROM,
 
     GameBoyManifest,
     GameBoyROM,

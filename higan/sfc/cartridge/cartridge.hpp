@@ -1,10 +1,6 @@
 struct Cartridge : property<Cartridge> {
   enum class Region : unsigned { NTSC, PAL };
 
-  Cartridge() = default;
-  ~Cartridge() { unload(); }
-
-  auto loaded() const -> bool { return _loaded; }
   auto sha256() const -> string { return _sha256; }
   auto region() const -> Region { return _region; }
 
@@ -83,6 +79,7 @@ private:
   auto loadSufamiTurboA() -> void;
   auto loadSufamiTurboB() -> void;
   friend class Interface;
+  friend class ICD2;
 
   //markup.cpp
   auto parseMarkup(const string&) -> void;
@@ -110,7 +107,6 @@ private:
   auto parseMarkupOBC1(Markup::Node) -> void;
   auto parseMarkupMSU1(Markup::Node) -> void;
 
-  bool _loaded = false;
   string _sha256;
   Region _region = Region::NTSC;
 };

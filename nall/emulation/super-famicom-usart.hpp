@@ -8,18 +8,16 @@ using namespace nall;
 #include <sys/resource.h>
 #include <sys/time.h>
 
-#define usartproc dllexport
-
 static function<auto () -> bool> usart_quit;
-static function<auto (uint milliseconds) -> void> usart_usleep;
+static function<auto (uint microseconds) -> void> usart_usleep;
 static function<auto () -> bool> usart_readable;
 static function<auto () -> uint8> usart_read;
 static function<auto () -> bool> usart_writable;
 static function<auto (uint8 data) -> void> usart_write;
 
-extern "C" usartproc auto usart_init(
+extern "C" auto usart_init(
   function<auto () -> bool> quit,
-  function<auto (uint milliseconds) -> void> usleep,
+  function<auto (uint microseconds) -> void> usleep,
   function<auto () -> bool> readable,
   function<auto () -> uint8> read,
   function<auto () -> bool> writable,
@@ -33,7 +31,7 @@ extern "C" usartproc auto usart_init(
   usart_write = write;
 }
 
-extern "C" usartproc auto usart_main(nall::lstring) -> void;
+extern "C" auto usart_main(nall::lstring) -> void;
 
 //
 
@@ -51,8 +49,8 @@ static auto usarthw_quit() -> bool {
   return usart_sigint;
 }
 
-static auto usarthw_usleep(uint milliseconds) -> void {
-  usleep(milliseconds);
+static auto usarthw_usleep(uint microseconds) -> void {
+  usleep(microseconds);
 }
 
 static auto usarthw_readable() -> bool {

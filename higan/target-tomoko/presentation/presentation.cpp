@@ -192,10 +192,8 @@ auto Presentation::updateEmulator() -> void {
     if(devices.objectCount() > 1) {
       auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");
       auto device = settings(path).text();
-      for(auto object : devices.objects()) {
-        if(auto item = object.cast<MenuRadioItem>()) {
-          if(item.text() == device) item.setChecked().doActivate();
-        }
+      for(auto item : devices.objects<MenuRadioItem>()) {
+        if(item.text() == device) item.setChecked();
       }
       menu.setVisible();
     }

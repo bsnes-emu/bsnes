@@ -1,9 +1,12 @@
 struct System {
+  auto loaded() const -> bool;
+
   auto run() -> void;
-  auto runtosave() -> void;
-  auto runthreadtosave() -> void;
+  auto runToSave() -> void;
+  auto runThreadToSave() -> void;
 
   auto load() -> void;
+  auto unload() -> void;
   auto power() -> void;
   auto reset() -> void;
 
@@ -14,14 +17,16 @@ struct System {
   auto unserialize(serializer&) -> bool;
 
   auto serialize(serializer&) -> void;
-  auto serialize_all(serializer&) -> void;
-  auto serialize_init() -> void;
+  auto serializeAll(serializer&) -> void;
+  auto serializeInit() -> void;
 
   struct Information {
     string manifest;
   } information;
 
-  uint serialize_size;
+private:
+  bool _loaded = false;
+  uint _serializeSize = 0;
 };
 
 extern System system;

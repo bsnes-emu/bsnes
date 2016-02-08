@@ -5,10 +5,6 @@ namespace WonderSwan {
 Cartridge cartridge;
 #include "memory.cpp"
 
-auto Cartridge::loaded() const -> bool {
-  return _loaded;
-}
-
 auto Cartridge::load() -> void {
   information.manifest = "";
   information.title = "";
@@ -35,12 +31,9 @@ auto Cartridge::load() -> void {
 
   information.title = document["information/title"].text();
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
-  _loaded = true;
 }
 
 auto Cartridge::unload() -> void {
-  _loaded = false;
-
   delete[] rom.data;
   rom.data = nullptr;
   rom.size = 0;

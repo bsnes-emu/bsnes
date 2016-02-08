@@ -6,23 +6,24 @@ auto Program::loadMedia(string location) -> void {
   string type = suffixname(location).ltrim(".", 1L);
   for(auto& emulator : emulators) {
     for(auto& media : emulator->media) {
-      if(media.bootable == false) continue;
+      if(!media.bootable) continue;
       if(media.type != type) continue;
       return loadMedia(*emulator, media, location);
     }
   }
 }
 
-auto Program::loadMedia(Emulator::Interface& emulator_, Emulator::Interface::Media& media, const string& location) -> void {
+auto Program::loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void {
   unloadMedia();
 
   mediaPaths(0) = locate({media.name, ".sys/"});
   mediaPaths(media.id) = location;
   folderPaths.append(location);
 
-  emulator = &emulator_;
+  emulator = &interface;
+  connectDevices();          //(expansion port) devices must be connected prior to load
   emulator->load(media.id);
-  dsp.setFrequency(emulator->audioFrequency());
+  updateAudio();             //audio must be updated after load (audio frequency varies by region)
   emulator->power();
 
   presentation->resizeViewport();

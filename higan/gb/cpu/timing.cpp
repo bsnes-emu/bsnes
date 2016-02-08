@@ -3,7 +3,7 @@
 //  154 scanlines/frame
 
 auto CPU::add_clocks(uint clocks) -> void {
-  if(system.sgb()) system.clocks_executed += clocks;
+  if(system.sgb()) system._clocksExecuted += clocks;
 
   while(clocks--) {
     if(++status.clock == 0) {

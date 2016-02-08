@@ -6,10 +6,6 @@ namespace Famicom {
 #include "board/board.cpp"
 Cartridge cartridge;
 
-auto Cartridge::loaded() const -> bool {
-  return _loaded;
-}
-
 auto Cartridge::sha256() const -> string {
   return _sha256;
 }
@@ -40,14 +36,9 @@ auto Cartridge::load() -> void {
   sha.data(board->prgrom.data, board->prgrom.size);
   sha.data(board->chrrom.data, board->chrrom.size);
   _sha256 = sha.digest();
-
-  system.load();
-  _loaded = true;
 }
 
 auto Cartridge::unload() -> void {
-  if(!loaded()) return;
-  _loaded = false;
   memory.reset();
 }
 

@@ -18,7 +18,7 @@ auto CPU::mmio_joyp_poll() -> void {
   dpad |= interface->inputPoll(0, 0, (uint)Input::Left) << 1;
   dpad |= interface->inputPoll(0, 0, (uint)Input::Right) << 0;
 
-  if(system.revision != System::Revision::SuperGameBoy) {
+  if(system.revision() != System::Revision::SuperGameBoy) {
     //D-pad pivot makes it impossible to press opposing directions at the same time
     //however, Super Game Boy BIOS is able to set these bits together
     if(dpad & 4) dpad &= ~8;  //disallow up+down

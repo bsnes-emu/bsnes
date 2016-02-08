@@ -4,9 +4,8 @@ namespace WonderSwan {
 
 System system;
 
-auto System::revision() const -> Revision {
-  return _revision;
-}
+auto System::loaded() const -> bool { return _loaded; }
+auto System::revision() const -> Revision { return _revision; }
 
 auto System::init() -> void {
 }
@@ -23,6 +22,13 @@ auto System::load(Revision revision) -> void {
   //note: IPLROM is currently undumped; otherwise we'd load it here ...
 
   cartridge.load();
+  _loaded = true;
+}
+
+auto System::unload() -> void {
+  if(!loaded()) return;
+  cartridge.unload();
+  _loaded = false;
 }
 
 auto System::power() -> void {

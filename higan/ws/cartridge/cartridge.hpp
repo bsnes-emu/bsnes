@@ -1,6 +1,4 @@
 struct Cartridge : IO {
-  auto loaded() const -> bool;
-
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
@@ -33,9 +31,6 @@ struct Cartridge : IO {
     string title;
     string sha256;
   } information;
-
-privileged:
-  bool _loaded = false;
 };
 
 extern Cartridge cartridge;

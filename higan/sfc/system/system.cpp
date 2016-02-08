@@ -10,6 +10,7 @@ System system;
 
 #include <sfc/scheduler/scheduler.cpp>
 
+auto System::loaded() const -> bool { return _loaded; }
 auto System::region() const -> Region { return _region; }
 auto System::expansionPort() const -> Device::ID { return _expansionPort; }
 auto System::cpuFrequency() const -> uint { return _cpuFrequency; }
@@ -95,6 +96,7 @@ auto System::load() -> void {
     interface->loadRequest(ID::IPLROM, iplrom, true);
   }
 
+  cartridge.load();
   _region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
   _expansionPort = (Device::ID)settings.expansionPort;
   _cpuFrequency = region() == Region::NTSC ? 21477272 : 21281370;
@@ -129,9 +131,11 @@ auto System::load() -> void {
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
+  _loaded = true;
 }
 
 auto System::unload() -> void {
+  if(!loaded()) return;
   if(expansionPort() == Device::ID::Satellaview) satellaview.unload();
   if(expansionPort() == Device::ID::eBoot) eboot.unload();
 
@@ -153,6 +157,9 @@ auto System::unload() -> void {
 
   if(cartridge.hasBSMemorySlot()) bsmemory.unload();
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.unload(), sufamiturboB.unload();
+
+  cartridge.unload();
+  _loaded = false;
 }
 
 auto System::power() -> void {

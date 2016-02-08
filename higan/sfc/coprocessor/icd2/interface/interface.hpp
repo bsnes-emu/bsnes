@@ -1,11 +1,14 @@
-auto lcdScanline() -> void;
-auto lcdOutput(uint2 color) -> void;
-auto joypWrite(bool p15, bool p14) -> void;
+auto lcdScanline() -> void override;
+auto lcdOutput(uint2 color) -> void override;
+auto joypWrite(bool p15, bool p14) -> void override;
 
-auto videoColor(uint source, uint16 red, uint16 green, uint16 blue) -> uint32;
-auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void;
-auto audioSample(int16 lsample, int16 rsample) -> void;
-auto inputPoll(uint port, uint device, uint id) -> int16;
+auto loadRequest(uint id, string name, string type, bool required) -> void override;
+auto loadRequest(uint id, string name, bool required) -> void override;
+auto saveRequest(uint id, string name) -> void override;
+
+auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
+auto audioSample(int16 lsample, int16 rsample) -> void override;
+auto inputPoll(uint port, uint device, uint id) -> int16 override;
 
 struct Packet {
   auto operator[](uint addr) -> uint8& { return data[addr & 15]; }

@@ -30,6 +30,7 @@ struct Program : Emulator::Interface::Bind {
   //utility.cpp
   auto powerCycle() -> void;
   auto softReset() -> void;
+  auto connectDevices() -> void;
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;
   auto updateVideoShader() -> void;

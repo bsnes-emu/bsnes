@@ -5,7 +5,7 @@ struct USART : Controller, public library {
   auto enter() -> void;
 
   auto quit() -> bool;
-  auto usleep(unsigned milliseconds) -> void;
+  auto usleep(uint microseconds) -> void;
   auto readable() -> bool;
   auto read() -> uint8;
   auto writable() -> bool;
@@ -15,26 +15,26 @@ struct USART : Controller, public library {
   auto latch(bool data) -> void;
 
 private:
-  bool latched;
-  bool data1;
-  bool data2;
-  unsigned counter;
+  bool latched = 0;
+  bool data1 = 0;
+  bool data2 = 0;
+  uint counter = 0;
 
-  uint8 rxlength;
-  uint8 rxdata;
+  uint8 rxlength = 0;
+  uint8 rxdata = 0;
   vector<uint8> rxbuffer;
 
-  uint8 txlength;
-  uint8 txdata;
+  uint8 txlength = 0;
+  uint8 txdata = 0;
   vector<uint8> txbuffer;
 
   function<void (
-    function<bool ()>,          //quit
-    function<void (unsigned)>,  //usleep
-    function<bool ()>,          //readable
-    function<uint8 ()>,         //read
-    function<bool ()>,          //writable
-    function<void (uint8)>      //write
+    function<bool ()>,      //quit
+    function<void (uint)>,  //usleep
+    function<bool ()>,      //readable
+    function<uint8 ()>,     //read
+    function<bool ()>,      //writable
+    function<void (uint8)>  //write
   )> init;
-  function<void ()> main;
+  function<void (lstring)> main;
 };

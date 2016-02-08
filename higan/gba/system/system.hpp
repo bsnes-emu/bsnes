@@ -15,26 +15,30 @@ struct BIOS : Memory {
 };
 
 struct System {
+  auto loaded() const -> bool;
+
   auto init() -> void;
   auto term() -> void;
   auto load() -> void;
+  auto unload() -> void;
   auto power() -> void;
   auto run() -> void;
-  auto runtosave() -> void;
-  auto runthreadtosave() -> void;
+  auto runToSave() -> void;
+  auto runThreadToSave() -> void;
 
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;
 
   auto serialize(serializer&) -> void;
-  auto serialize_all(serializer&) -> void;
-  auto serialize_init() -> void;
+  auto serializeAll(serializer&) -> void;
+  auto serializeInit() -> void;
 
   struct Information {
     string manifest;
   } information;
 
-  uint serialize_size;
+  bool _loaded = false;
+  uint _serializeSize = 0;
 };
 
 extern BIOS bios;

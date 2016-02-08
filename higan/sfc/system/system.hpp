@@ -5,6 +5,7 @@ struct Interface;
 struct System {
   enum class Region : bool { NTSC = 0, PAL = 1 };
 
+  auto loaded() const -> bool;
   auto region() const -> Region;
   auto expansionPort() const -> Device::ID;
   auto cpuFrequency() const -> uint;
@@ -34,6 +35,7 @@ private:
   auto serializeAll(serializer&) -> void;
   auto serializeInit() -> void;
 
+  bool _loaded = false;
   Region _region = Region::NTSC;
   Device::ID _expansionPort = Device::ID::None;
   uint _cpuFrequency = 0;

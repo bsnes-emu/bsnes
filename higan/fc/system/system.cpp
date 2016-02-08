@@ -5,6 +5,8 @@ namespace Famicom {
 #include "serialization.cpp"
 System system;
 
+auto System::loaded() const -> bool { return _loaded; }
+
 auto System::run() -> void {
   scheduler.enter();
   if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
@@ -12,26 +14,26 @@ auto System::run() -> void {
   }
 }
 
-auto System::runtosave() -> void {
+auto System::runToSave() -> void {
   scheduler.sync = Scheduler::SynchronizeMode::PPU;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.thread = cpu.thread;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.thread = apu.thread;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::All;
   scheduler.thread = cartridge.thread;
-  runthreadtosave();
+  runThreadToSave();
 
   scheduler.sync = Scheduler::SynchronizeMode::None;
 }
 
-auto System::runthreadtosave() -> void {
+auto System::runThreadToSave() -> void {
   while(true) {
     scheduler.enter();
     if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
@@ -44,8 +46,15 @@ auto System::runthreadtosave() -> void {
 auto System::load() -> void {
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
+  cartridge.load();
+  serializeInit();
+  _loaded = true;
+}
 
-  serialize_init();
+auto System::unload() -> void {
+  if(!loaded()) return;
+  cartridge.unload();
+  _loaded = false;
 }
 
 auto System::power() -> void {

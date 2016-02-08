@@ -23,10 +23,6 @@ Cartridge::~Cartridge() {
   delete[] flash.data;
 }
 
-auto Cartridge::loaded() const -> bool {
-  return isLoaded;
-}
-
 auto Cartridge::sha256() const -> string {
   return information.sha256;
 }
@@ -96,16 +92,10 @@ auto Cartridge::load() -> void {
   }
 
   information.sha256 = Hash::SHA256(mrom.data, mrom.size).digest();
-
-  system.load();
-  isLoaded = true;
 }
 
 auto Cartridge::unload() -> void {
-  if(isLoaded) {
-    isLoaded = false;
-    memory.reset();
-  }
+  memory.reset();
 }
 
 auto Cartridge::power() -> void {

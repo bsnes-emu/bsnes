@@ -9,20 +9,25 @@ struct System {
     GameBoy,
     SuperGameBoy,
     GameBoyColor,
-  } revision;
+  };
 
   System();
 
-  inline auto dmg() const { return revision == Revision::GameBoy; }
-  inline auto sgb() const { return revision == Revision::SuperGameBoy; }
-  inline auto cgb() const { return revision == Revision::GameBoyColor; }
+  auto loaded() const -> bool;
+  auto revision() const -> Revision;
+  auto clocksExecuted() const -> uint;
+
+  inline auto dmg() const { return _revision == Revision::GameBoy; }
+  inline auto sgb() const { return _revision == Revision::SuperGameBoy; }
+  inline auto cgb() const { return _revision == Revision::GameBoyColor; }
 
   auto run() -> void;
-  auto runtosave() -> void;
-  auto runthreadtosave() -> void;
+  auto runToSave() -> void;
+  auto runThreadToSave() -> void;
 
   auto init() -> void;
   auto load(Revision) -> void;
+  auto unload() -> void;
   auto power() -> void;
 
   //serialization.cpp
@@ -30,8 +35,8 @@ struct System {
   auto unserialize(serializer&) -> bool;
 
   auto serialize(serializer&) -> void;
-  auto serialize_all(serializer&) -> void;
-  auto serialize_init() -> void;
+  auto serializeAll(serializer&) -> void;
+  auto serializeInit() -> void;
 
   struct BootROM {
     uint8 dmg[ 256];
@@ -43,8 +48,10 @@ struct System {
     string manifest;
   } information;
 
-  uint clocks_executed = 0;
-  uint serialize_size = 0;
+  bool _loaded = false;
+  Revision _revision = Revision::GameBoy;
+  uint _serializeSize = 0;
+  uint _clocksExecuted = 0;
 };
 
 #include <gb/interface/interface.hpp>

@@ -1,7 +1,6 @@
 struct Cartridge {
   #include "memory.hpp"
 
-  auto loaded() const -> bool;
   auto sha256() const -> string;
   auto manifest() const -> string;
   auto title() const -> string;
@@ -31,7 +30,6 @@ struct Cartridge {
   auto serialize(serializer&) -> void;
 
 private:
-  bool isLoaded = false;
   bool hasSRAM = false;
   bool hasEEPROM = false;
   bool hasFLASH = false;
