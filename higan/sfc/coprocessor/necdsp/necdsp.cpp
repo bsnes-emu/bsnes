@@ -5,18 +5,14 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 NECDSP necdsp;
 
-auto NECDSP::Enter() -> void { necdsp.enter(); }
+auto NECDSP::Enter() -> void {
+  while(true) scheduler.synchronize(), necdsp.main();
+}
 
-auto NECDSP::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    exec();
-    step(1);
-    synchronizeCPU();
-  }
+auto NECDSP::main() -> void {
+  exec();
+  step(1);
+  synchronizeCPU();
 }
 
 auto NECDSP::read(uint addr, uint8) -> uint8 {

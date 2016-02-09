@@ -6,45 +6,41 @@ MSU1 msu1;
 
 #include "serialization.cpp"
 
-auto MSU1::Enter() -> void { msu1.enter(); }
+auto MSU1::Enter() -> void {
+  while(true) scheduler.synchronize(), msu1.main();
+}
 
-auto MSU1::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+auto MSU1::main() -> void {
+  int16 left = 0, right = 0;
 
-    int16 left = 0, right = 0;
-
-    if(mmio.audioPlay) {
-      if(audioFile.open()) {
-        if(audioFile.end()) {
-          if(!mmio.audioRepeat) {
-            mmio.audioPlay = false;
-            audioFile.seek(mmio.audioPlayOffset = 8);
-          } else {
-            audioFile.seek(mmio.audioPlayOffset = mmio.audioLoopOffset);
-          }
+  if(mmio.audioPlay) {
+    if(audioFile.open()) {
+      if(audioFile.end()) {
+        if(!mmio.audioRepeat) {
+          mmio.audioPlay = false;
+          audioFile.seek(mmio.audioPlayOffset = 8);
         } else {
-          mmio.audioPlayOffset += 4;
-          left  = audioFile.readl(2);
-          right = audioFile.readl(2);
+          audioFile.seek(mmio.audioPlayOffset = mmio.audioLoopOffset);
         }
       } else {
-        mmio.audioPlay = false;
+        mmio.audioPlayOffset += 4;
+        left  = audioFile.readl(2);
+        right = audioFile.readl(2);
       }
+    } else {
+      mmio.audioPlay = false;
     }
-
-    int lchannel = (double)left  * (double)mmio.audioVolume / 255.0;
-    int rchannel = (double)right * (double)mmio.audioVolume / 255.0;
-    left  = sclamp<16>(lchannel);
-    right = sclamp<16>(rchannel);
-    if(dsp.mute()) left = 0, right = 0;
-
-    audio.coprocessorSample(left, right);
-    step(1);
-    synchronizeCPU();
   }
+
+  int lchannel = (double)left  * (double)mmio.audioVolume / 255.0;
+  int rchannel = (double)right * (double)mmio.audioVolume / 255.0;
+  left  = sclamp<16>(lchannel);
+  right = sclamp<16>(rchannel);
+  if(dsp.mute()) left = 0, right = 0;
+
+  audio.coprocessorSample(left, right);
+  step(1);
+  synchronizeCPU();
 }
 
 auto MSU1::init() -> void {

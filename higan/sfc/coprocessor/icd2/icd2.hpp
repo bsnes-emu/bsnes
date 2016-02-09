@@ -1,6 +1,6 @@
 struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
 
   auto init() -> void;
   auto load() -> void;

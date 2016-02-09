@@ -44,25 +44,19 @@ struct Sunsoft5B : Board {
   } pulse[3];
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    if(irq_counter_enable) {
+      if(--irq_counter == 0xffff) {
+        cpu.set_irq_line(irq_enable);
       }
-
-      if(irq_counter_enable) {
-        if(--irq_counter == 0xffff) {
-          cpu.set_irq_line(irq_enable);
-        }
-      }
-
-      pulse[0].clock();
-      pulse[1].clock();
-      pulse[2].clock();
-      int16 output = dac[pulse[0].output] + dac[pulse[1].output] + dac[pulse[2].output];
-      apu.set_sample(-output);
-
-      tick();
     }
+
+    pulse[0].clock();
+    pulse[1].clock();
+    pulse[2].clock();
+    int16 output = dac[pulse[0].output] + dac[pulse[1].output] + dac[pulse[2].output];
+    apu.set_sample(-output);
+
+    tick();
   }
 
   auto prg_read(uint addr) -> uint8 {

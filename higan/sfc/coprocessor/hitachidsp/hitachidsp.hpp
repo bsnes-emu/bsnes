@@ -5,7 +5,7 @@ struct HitachiDSP : Processor::HG51B, Coprocessor {
   #include "mmio.hpp"
 
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
 
   auto init() -> void;
   auto load() -> void;

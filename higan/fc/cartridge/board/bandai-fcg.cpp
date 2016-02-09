@@ -5,20 +5,14 @@ struct BandaiFCG : Board {
   }
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+    if(irq_counter_enable) {
+      if(--irq_counter == 0xffff) {
+        cpu.set_irq_line(1);
+        irq_counter_enable = false;
       }
-
-      if(irq_counter_enable) {
-        if(--irq_counter == 0xffff) {
-          cpu.set_irq_line(1);
-          irq_counter_enable = false;
-        }
-      }
-
-      tick();
     }
+
+    tick();
   }
 
   auto ciram_addr(uint addr) const -> uint {

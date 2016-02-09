@@ -125,7 +125,7 @@ auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
 
       //restart cothread to begin new frame
       auto clock = this->clock;
-      create(Main, 4 * 1024 * 1024);
+      create(Enter, 4 * 1024 * 1024);
       this->clock = clock;
     }
 

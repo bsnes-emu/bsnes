@@ -15,9 +15,9 @@
 USART::USART(bool port) : Controller(port) {
   string filename{interface->path(ID::SuperFamicom), "usart.so"};
   if(openAbsolute(filename)) {
-    init = sym("usart_init");
-    main = sym("usart_main");
-    if(init && main) create(Controller::Enter, 10'000'000);
+    usart_init = sym("usart_init");
+    usart_main = sym("usart_main");
+    if(usart_init && usart_main) create(Controller::Enter, 10'000'000);
   }
 }
 
@@ -25,9 +25,9 @@ USART::~USART() {
   if(open()) close();
 }
 
-auto USART::enter() -> void {
-  if(init && main) {
-    init(
+auto USART::main() -> void {
+  if(usart_init && usart_main) {
+    usart_init(
       {&USART::quit, this},
       {&USART::usleep, this},
       {&USART::readable, this},
@@ -35,7 +35,7 @@ auto USART::enter() -> void {
       {&USART::writable, this},
       {&USART::write, this}
     );
-    main({});
+    usart_main({});
   }
   while(true) step(10'000'000);
 }

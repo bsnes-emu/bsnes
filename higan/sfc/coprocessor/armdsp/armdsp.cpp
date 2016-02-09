@@ -18,9 +18,12 @@ ArmDSP::~ArmDSP() {
   delete[] programRAM;
 }
 
-auto ArmDSP::Enter() -> void { armdsp.enter(); }
+auto ArmDSP::Enter() -> void {
+  armdsp.boot();
+  while(true) scheduler.synchronize(), armdsp.main();
+}
 
-auto ArmDSP::enter() -> void {
+auto ArmDSP::boot() -> void {
   //reset hold delay
   while(bridge.reset) {
     step(1);
@@ -32,21 +35,17 @@ auto ArmDSP::enter() -> void {
     step(65536);
     bridge.ready = true;
   }
+}
 
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    if(crash) {
-      print(disassemble_arm_instruction(pipeline.execute.address), "\n");
-      print(disassemble_registers(), "\n");
-      print("Executed: ", instructions, "\n");
-      while(true) step(frequency);
-    }
-
-    arm_step();
+auto ArmDSP::main() -> void {
+  if(crash) {
+    print(disassemble_arm_instruction(pipeline.execute.address), "\n");
+    print(disassemble_registers(), "\n");
+    print("Executed: ", instructions, "\n");
+    while(true) step(frequency);
   }
+
+  arm_step();
 }
 
 auto ArmDSP::step(uint clocks) -> void {
@@ -55,7 +54,7 @@ auto ArmDSP::step(uint clocks) -> void {
   synchronizeCPU();
 }
 
-//MMIO: $00-3f|80-bf:3800-38ff
+//MMIO: 00-3f,80-bf:3800-38ff
 //3800-3807 mirrored throughout
 //a0 ignored
 
@@ -119,7 +118,7 @@ auto ArmDSP::reset() -> void {
 }
 
 auto ArmDSP::resetARM() -> void {
-  create(ArmDSP::Enter, 21477272);
+  create(ArmDSP::Enter, 21'477'272);
   ARM::power();
 
   bridge.ready = false;

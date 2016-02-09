@@ -14,7 +14,7 @@ struct DSP : Thread {
   auto read(uint8 addr) -> uint8;
   auto write(uint8 addr, uint8 data) -> void;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto power() -> void;
   auto reset() -> void;
 

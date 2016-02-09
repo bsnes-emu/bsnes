@@ -102,7 +102,6 @@ auto Video::refresh() -> void {
 
   drawCursors();
   interface->videoRefresh(output - (ppu.overscan() ? 0 : 7 * 1024), 512 * sizeof(uint32), 512, 480);
-  scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }
 
 auto Video::drawCursor(uint32 color, int x, int y) -> void {

@@ -39,14 +39,7 @@ CPU::~CPU() {
 }
 
 auto CPU::Enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
-      scheduler.sync = Scheduler::SynchronizeMode::All;
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    cpu.main();
-  }
+  while(true) scheduler.synchronize(), cpu.main();
 }
 
 auto CPU::main() -> void {

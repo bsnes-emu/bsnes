@@ -34,43 +34,37 @@ APU::APU() {
   }
 }
 
-auto APU::Main() -> void {
-  apu.main();
+auto APU::Enter() -> void {
+  while(true) scheduler.synchronize(), apu.main();
 }
 
 auto APU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+  uint pulse_output, triangle_output, noise_output, dmc_output;
 
-    uint pulse_output, triangle_output, noise_output, dmc_output;
+  pulse_output  = pulse[0].clock();
+  pulse_output += pulse[1].clock();
+  triangle_output = triangle.clock();
+  noise_output = noise.clock();
+  dmc_output = dmc.clock();
 
-    pulse_output  = pulse[0].clock();
-    pulse_output += pulse[1].clock();
-    triangle_output = triangle.clock();
-    noise_output = noise.clock();
-    dmc_output = dmc.clock();
+  clock_frame_counter_divider();
 
-    clock_frame_counter_divider();
+  int output = pulse_dac[pulse_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
 
-    int output = pulse_dac[pulse_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
+  output  = filter.run_hipass_strong(output);
+  output += cartridge_sample;
+  output  = filter.run_hipass_weak(output);
+//output  = filter.run_lopass(output);
+  output  = sclamp<16>(output);
 
-    output  = filter.run_hipass_strong(output);
-    output += cartridge_sample;
-    output  = filter.run_hipass_weak(output);
-  //output  = filter.run_lopass(output);
-    output  = sclamp<16>(output);
+  interface->audioSample(output, output);
 
-    interface->audioSample(output, output);
-
-    tick();
-  }
+  tick();
 }
 
 auto APU::tick() -> void {
   clock += 12;
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto APU::set_irq_line() -> void {
@@ -94,7 +88,7 @@ auto APU::power() -> void {
 }
 
 auto APU::reset() -> void {
-  create(APU::Main, 21477272);
+  create(APU::Enter, 21'477'272);
 
   pulse[0].reset();
   pulse[1].reset();

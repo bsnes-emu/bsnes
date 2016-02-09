@@ -1,7 +1,7 @@
 #include "video.hpp"
 
 struct PPU : Thread {
-  static auto Main() -> void;
+  static auto Enter() -> void;
   auto main() -> void;
   auto tick() -> void;
 

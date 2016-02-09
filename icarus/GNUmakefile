@@ -1,6 +1,7 @@
 include ../nall/GNUmakefile
 include ../hiro/GNUmakefile
 
+name := icarus
 flags += -I.. -O3
 link +=
 
@@ -13,12 +14,12 @@ objects += obj/icarus.o
 objects += $(if $(call streq,$(platform),windows),obj/resource.o)
 
 all: $(objects)
-	$(compiler) -o out/icarus $(objects) $(link) $(hirolink)
+	$(call unique,$(compiler) -o out/$(name) $(objects) $(link) $(hirolink))
 ifeq ($(platform),macosx)
-	@if [ -d out/icarus.app ]; then rm -r out/icarus.app; fi
-	mkdir -p out/icarus.app/Contents/MacOS/
-	mv out/icarus out/icarus.app/Contents/MacOS/
-	cp icarus.plist out/icarus.app/Contents/Info.plist
+	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
+	mkdir -p out/$(name).app/Contents/MacOS/
+	mv out/$(name) out/$(name).app/Contents/MacOS/
+	cp $(name).plist out/$(name).app/Contents/Info.plist
 endif
 
 obj/hiro.o: ../hiro/hiro.cpp
@@ -32,21 +33,23 @@ obj/resource.o:
 
 clean:
 ifeq ($(platform),macosx)
-	@if [ -d out/icarus.app ]; then rm out/icarus.app; fi
+	@if [ -d out/$(name).app ]; then rm out/$(name).app; fi
 endif
 	$(call delete,obj/*)
 	$(call delete,out/*)
 
 install:
 ifeq ($(platform),macosx)
-	cp -r out/icarus.app /Applications/icarus.app
-else
-	if [ -f out/icarus ]; then cp out/icarus $(prefix)/bin/icarus; fi
+	cp -R out/$(name).app /Applications/$(name).app
+else ifneq ($(filter $(platform),linux bsd),)
+	mkdir -p $(prefix)/share/$(name)/Database/
+	if [ -f out/$(name) ]; then cp out/$(name) $(prefix)/bin/$(name); fi
+	cp -R Database/ $(prefix)/share/$(name)/Database/
 endif
 
 uninstall:
 ifeq ($(platform),macosx)
-	if [ -d /Applications/icarus.app ]; then rm -r /Applications/icarus.app; fi
-else
-	if [ -f $(prefix)/bin/icarus ]; then rm $(prefix)/bin/icarus; fi
+	if [ -d /Applications/$(name).app ]; then rm -r /Applications/$(name).app; fi
+else ifneq ($(filter $(platform),linux bsd),)
+	if [ -f $(prefix)/bin/$(name) ]; then rm $(prefix)/bin/$(name); fi
 endif

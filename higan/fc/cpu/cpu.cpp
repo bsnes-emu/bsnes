@@ -7,33 +7,23 @@ namespace Famicom {
 CPU cpu;
 
 auto CPU::Enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    cpu.main();
-  }
+  while(true) scheduler.synchronize(), cpu.main();
 }
 
 auto CPU::main() -> void {
-  if(status.interrupt_pending) {
-    interrupt();
-    return;
-  }
-
+  if(status.interrupt_pending) return interrupt();
   exec();
 }
 
 auto CPU::add_clocks(uint clocks) -> void {
   apu.clock -= clocks;
-  if(apu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(apu.thread);
+  if(apu.clock < 0 && !scheduler.synchronizing()) co_switch(apu.thread);
 
   ppu.clock -= clocks;
-  if(ppu.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(ppu.thread);
+  if(ppu.clock < 0 && !scheduler.synchronizing()) co_switch(ppu.thread);
 
   cartridge.clock -= clocks;
-  if(cartridge.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cartridge.thread);
+  if(cartridge.clock < 0 && !scheduler.synchronizing()) co_switch(cartridge.thread);
 }
 
 auto CPU::power() -> void {
@@ -48,7 +38,7 @@ auto CPU::power() -> void {
 
 auto CPU::reset() -> void {
   R6502::reset();
-  create(CPU::Enter, 21477272);
+  create(CPU::Enter, 21'477'272);
 
   regs.pc  = bus.read(0xfffc) << 0;
   regs.pc |= bus.read(0xfffd) << 8;

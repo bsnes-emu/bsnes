@@ -19,13 +19,13 @@ auto CPU::add_clocks(uint clocks) -> void {
     if((status.div & 1023) == 0)   timer_4096hz();
 
     ppu.clock -= ppu.frequency;
-    if(ppu.clock < 0) co_switch(scheduler.active_thread = ppu.thread);
+    if(ppu.clock < 0) co_switch(ppu.thread);
 
     apu.clock -= apu.frequency;
-    if(apu.clock < 0) co_switch(scheduler.active_thread = apu.thread);
+    if(apu.clock < 0) co_switch(apu.thread);
   }
 
-  if(system.sgb()) scheduler.exit(Scheduler::ExitReason::StepEvent);
+  if(system.sgb()) scheduler.exit(Scheduler::Event::Step);
 }
 
 auto CPU::timer_262144hz() -> void {

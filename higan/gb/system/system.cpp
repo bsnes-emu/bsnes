@@ -16,37 +16,13 @@ System::System() {
 }
 
 auto System::run() -> void {
-  scheduler.sync = Scheduler::SynchronizeMode::None;
-
   scheduler.enter();
-  if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-    video.refresh();
-  }
 }
 
 auto System::runToSave() -> void {
-  scheduler.sync = Scheduler::SynchronizeMode::CPU;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.active_thread = ppu.thread;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.active_thread = apu.thread;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::None;
-}
-
-auto System::runThreadToSave() -> void {
-  while(true) {
-    scheduler.enter();
-    if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason == Scheduler::ExitReason::FrameEvent) {
-      video.refresh();
-    }
-  }
+  scheduler.synchronize(cpu.thread);
+  scheduler.synchronize(ppu.thread);
+  scheduler.synchronize(apu.thread);
 }
 
 auto System::init() -> void {
@@ -89,7 +65,7 @@ auto System::power() -> void {
   ppu.power();
   apu.power();
   video.power();
-  scheduler.init();
+  scheduler.power();
 
   _clocksExecuted = 0;
 }

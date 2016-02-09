@@ -1,5 +1,5 @@
 struct APU : Thread, MMIO {
-  static auto Main() -> void;
+  static auto Enter() -> void;
   auto main() -> void;
   auto hipass(int16& sample, int64& bias) -> void;
   auto power() -> void;

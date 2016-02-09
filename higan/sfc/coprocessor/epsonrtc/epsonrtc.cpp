@@ -8,32 +8,26 @@ namespace SuperFamicom {
 EpsonRTC epsonrtc;
 
 auto EpsonRTC::Enter() -> void {
-  epsonrtc.enter();
+  while(true) scheduler.synchronize(), epsonrtc.main();
 }
 
-auto EpsonRTC::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+auto EpsonRTC::main() -> void {
+  if(wait) { if(--wait == 0) ready = 1; }
 
-    if(wait) { if(--wait == 0) ready = 1; }
-
-    clocks++;
-    if((clocks & ~0x00ff) == 0) round_seconds();  //125 microseconds
-    if((clocks & ~0x3fff) == 0) duty();  //1/128th second
-    if((clocks & ~0x7fff) == 0) irq(0);  //1/64th second
-    if(clocks == 0) {  //1 second
-      seconds++;
-      irq(1);
-      if(seconds %   60 == 0) irq(2);  //1 minute
-      if(seconds % 1440 == 0) irq(3), seconds = 0;  //1 hour
-      tick();
-    }
-
-    step(1);
-    synchronizeCPU();
+  clocks++;
+  if((clocks & ~0x00ff) == 0) round_seconds();  //125 microseconds
+  if((clocks & ~0x3fff) == 0) duty();  //1/128th second
+  if((clocks & ~0x7fff) == 0) irq(0);  //1/64th second
+  if(clocks == 0) {  //1 second
+    seconds++;
+    irq(1);
+    if(seconds %   60 == 0) irq(2);  //1 minute
+    if(seconds % 1440 == 0) irq(3), seconds = 0;  //1 hour
+    tick();
   }
+
+  step(1);
+  synchronizeCPU();
 }
 
 auto EpsonRTC::init() -> void {

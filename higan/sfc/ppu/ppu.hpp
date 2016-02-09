@@ -13,7 +13,7 @@ struct PPU : Thread, public PPUcounter {
   auto interlace() const -> bool;
   auto overscan() const -> bool;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;

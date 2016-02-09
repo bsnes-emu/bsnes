@@ -32,56 +32,52 @@ auto PPU::step(uint clocks) -> void {
 }
 
 auto PPU::synchronizeCPU() -> void {
-  if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(CPU::Threaded) {
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 
-auto PPU::Enter() -> void { ppu.enter(); }
+auto PPU::Enter() -> void {
+  while(true) scheduler.synchronize(), ppu.main();
+}
 
-auto PPU::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+auto PPU::main() -> void {
+  scanline();
+  add_clocks(28);
+  bg1.begin();
+  bg2.begin();
+  bg3.begin();
+  bg4.begin();
 
-    scanline();
-    add_clocks(28);
-    bg1.begin();
-    bg2.begin();
-    bg3.begin();
-    bg4.begin();
+  if(vcounter() <= 239) {
+    for(int pixel = -7; pixel <= 255; pixel++) {
+      bg1.run(1);
+      bg2.run(1);
+      bg3.run(1);
+      bg4.run(1);
+      add_clocks(2);
 
-    if(vcounter() <= 239) {
-      for(signed pixel = -7; pixel <= 255; pixel++) {
-        bg1.run(1);
-        bg2.run(1);
-        bg3.run(1);
-        bg4.run(1);
-        add_clocks(2);
-
-        bg1.run(0);
-        bg2.run(0);
-        bg3.run(0);
-        bg4.run(0);
-        if(pixel >= 0) {
-          sprite.run();
-          window.run();
-          screen.run();
-        }
-        add_clocks(2);
+      bg1.run(0);
+      bg2.run(0);
+      bg3.run(0);
+      bg4.run(0);
+      if(pixel >= 0) {
+        sprite.run();
+        window.run();
+        screen.run();
       }
-
-      add_clocks(14);
-      sprite.tilefetch();
-    } else {
-      add_clocks(1052 + 14 + 136);
+      add_clocks(2);
     }
 
-    add_clocks(lineclocks() - 28 - 1052 - 14 - 136);
+    add_clocks(14);
+    sprite.tilefetch();
+  } else {
+    add_clocks(1052 + 14 + 136);
   }
+
+  add_clocks(lineclocks() - 28 - 1052 - 14 - 136);
 }
 
 auto PPU::add_clocks(uint clocks) -> void {
@@ -144,6 +140,7 @@ auto PPU::scanline() -> void {
 
   if(vcounter() == 241) {
     video.refresh();
+    scheduler.exit(Scheduler::Event::Frame);
   }
 }
 

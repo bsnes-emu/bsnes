@@ -14,24 +14,26 @@ Controller::Controller(bool port) : port(port) {
 }
 
 auto Controller::Enter() -> void {
-  if(co_active() == device.controllerPort1->thread) device.controllerPort1->enter();
-  if(co_active() == device.controllerPort2->thread) device.controllerPort2->enter();
+  while(true) {
+    if(co_active() == device.controllerPort1->thread) device.controllerPort1->main();
+    if(co_active() == device.controllerPort2->thread) device.controllerPort2->main();
+  }
 }
 
-auto Controller::enter() -> void {
-  while(true) step(1);
+auto Controller::main() -> void {
+  step(1);
 }
 
-auto Controller::step(unsigned clocks) -> void {
+auto Controller::step(uint clocks) -> void {
   clock += clocks * (uint64)cpu.frequency;
   synchronizeCPU();
 }
 
 auto Controller::synchronizeCPU() -> void {
-  if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(CPU::Threaded) {
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 

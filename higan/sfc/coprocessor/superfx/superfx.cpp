@@ -13,24 +13,15 @@ namespace SuperFamicom {
 SuperFX superfx;
 
 auto SuperFX::Enter() -> void {
-  superfx.enter();
+  while(true) scheduler.synchronize(), superfx.main();
 }
 
-auto SuperFX::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+auto SuperFX::main() -> void {
+  if(regs.sfr.g == 0) return step(6);
 
-    if(regs.sfr.g == 0) {
-      step(6);
-      continue;
-    }
-
-    unsigned opcode = regs.sfr.alt2 << 9 | regs.sfr.alt1 << 8 | peekpipe();
-    (this->*opcode_table[opcode])();
-    if(!r15_modified) regs.r[15]++;
-  }
+  uint opcode = regs.sfr.alt2 << 9 | regs.sfr.alt1 << 8 | peekpipe();
+  (this->*opcode_table[opcode])();
+  if(!r15_modified) regs.r[15]++;
 }
 
 auto SuperFX::init() -> void {

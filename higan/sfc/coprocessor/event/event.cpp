@@ -5,33 +5,27 @@ namespace SuperFamicom {
 Event event;
 
 auto Event::Enter() -> void {
-  event.enter();
+  while(true) scheduler.synchronize(), event.main();
 }
 
-auto Event::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+auto Event::main() -> void {
+  if(scoreActive && scoreSecondsRemaining) {
+    if(--scoreSecondsRemaining == 0) {
+      scoreActive = false;
     }
-
-    if(scoreActive && scoreSecondsRemaining) {
-      if(--scoreSecondsRemaining == 0) {
-        scoreActive = false;
-      }
-    }
-
-    if(timerActive && timerSecondsRemaining) {
-      if(--timerSecondsRemaining == 0) {
-        timerActive = false;
-        status |= 0x02;  //time over
-        scoreActive = true;
-        scoreSecondsRemaining = 5;
-      }
-    }
-
-    step(1);
-    synchronizeCPU();
   }
+
+  if(timerActive && timerSecondsRemaining) {
+    if(--timerSecondsRemaining == 0) {
+      timerActive = false;
+      status |= 0x02;  //time over
+      scoreActive = true;
+      scoreSecondsRemaining = 5;
+    }
+  }
+
+  step(1);
+  synchronizeCPU();
 }
 
 auto Event::init() -> void {

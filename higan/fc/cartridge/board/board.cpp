@@ -80,19 +80,13 @@ auto Board::mirror(uint addr, uint size) -> uint {
 }
 
 auto Board::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    cartridge.clock += 12 * 4095;
-    tick();
-  }
+  cartridge.clock += 12 * 4095;
+  tick();
 }
 
 auto Board::tick() -> void {
   cartridge.clock += 12;
-  if(cartridge.clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(cartridge.clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto Board::chr_read(uint addr) -> uint8 {

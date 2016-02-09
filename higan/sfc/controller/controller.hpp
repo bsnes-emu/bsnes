@@ -17,9 +17,9 @@ struct Controller : Thread {
   Controller(bool port);
 
   static auto Enter() -> void;
-  virtual auto enter() -> void;
+  virtual auto main() -> void;
 
-  auto step(unsigned clocks) -> void;
+  auto step(uint clocks) -> void;
   auto synchronizeCPU() -> void;
 
   auto iobit() -> bool;

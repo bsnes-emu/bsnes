@@ -5,7 +5,7 @@ struct SPC7110 : Coprocessor {
   ~SPC7110();
 
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;

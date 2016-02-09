@@ -16,7 +16,7 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
   auto joylatch() -> bool;
   alwaysinline auto interrupt_pending() -> bool { return status.interrupt_pending; }
 
-  auto enter() -> void;
+  auto main() -> void;
   auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;

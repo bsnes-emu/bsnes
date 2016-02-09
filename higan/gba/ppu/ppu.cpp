@@ -38,13 +38,7 @@ PPU::~PPU() {
 }
 
 auto PPU::Enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    ppu.main();
-  }
+  while(true) scheduler.synchronize(), ppu.main();
 }
 
 auto PPU::main() -> void {
@@ -53,11 +47,11 @@ auto PPU::main() -> void {
 
 auto PPU::step(uint clocks) -> void {
   clock += clocks;
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto PPU::power() -> void {
-  create(PPU::Enter, 16777216);
+  create(PPU::Enter, 16'777'216);
 
   for(uint n = 0; n < 240 * 160; n++) output[n] = 0;
 
@@ -165,7 +159,8 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   player.frame();
-  scheduler.exit(Scheduler::ExitReason::FrameEvent);
+  video.refresh();
+  scheduler.exit(Scheduler::Event::Frame);
 }
 
 }

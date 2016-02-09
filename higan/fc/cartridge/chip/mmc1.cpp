@@ -4,14 +4,8 @@ struct MMC1 : Chip {
   }
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-      }
-
-      if(writedelay) writedelay--;
-      tick();
-    }
+    if(writedelay) writedelay--;
+    tick();
   }
 
   auto prg_addr(uint addr) -> uint {

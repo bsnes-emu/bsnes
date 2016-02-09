@@ -7,25 +7,24 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 ICD2 icd2;
 
-auto ICD2::Enter() -> void { icd2.enter(); }
-
-auto ICD2::enter() -> void {
+auto ICD2::Enter() -> void {
   while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      GameBoy::system.runToSave();
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    if(r6003 & 0x80) {
-      GameBoy::system.run();
-      step(GameBoy::system._clocksExecuted);
-      GameBoy::system._clocksExecuted = 0;
-    } else {  //DMG halted
-      audio.coprocessorSample(0, 0);
-      step(1);
-    }
-    synchronizeCPU();
+    if(scheduler.synchronizing()) GameBoy::system.runToSave();
+    scheduler.synchronize();
+    icd2.main();
   }
+}
+
+auto ICD2::main() -> void {
+  if(r6003 & 0x80) {
+    GameBoy::system.run();
+    step(GameBoy::system._clocksExecuted);
+    GameBoy::system._clocksExecuted = 0;
+  } else {  //DMG halted
+    audio.coprocessorSample(0, 0);
+    step(1);
+  }
+  synchronizeCPU();
 }
 
 auto ICD2::init() -> void {

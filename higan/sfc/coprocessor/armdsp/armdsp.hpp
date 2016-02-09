@@ -7,7 +7,8 @@ struct ArmDSP : Processor::ARM, Coprocessor {
   ~ArmDSP();
 
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto boot() -> void;
+  auto main() -> void;
 
   auto step(uint clocks) -> void override;
   auto bus_idle() -> void override;

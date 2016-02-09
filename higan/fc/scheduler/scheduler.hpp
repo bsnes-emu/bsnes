@@ -1,16 +1,28 @@
-struct Scheduler : property<Scheduler> {
-  enum class SynchronizeMode : uint { None, PPU, All } sync;
-  enum class ExitReason : uint { UnknownEvent, FrameEvent, SynchronizeEvent };
+struct Scheduler {
+  enum class Mode : uint {
+    Run,
+    SynchronizePPU,
+    SynchronizeAll,
+  };
 
-  auto enter() -> void;
-  auto exit(ExitReason) -> void;
+  enum class Event : uint {
+    Unknown,
+    Frame,
+    Synchronize,
+  };
 
-  auto power() -> void;
   auto reset() -> void;
+  auto enter(Mode = Mode::Run) -> Event;
+  auto exit(Event) -> void;
+  auto synchronize(cothread_t) -> void;
+  auto synchronize() -> void;
+  auto synchronizing() const -> bool;
 
-  cothread_t host_thread;  //program thread (used to exit emulation)
-  cothread_t thread;       //active emulation thread (used to enter emulation)
-  readonly<ExitReason> exit_reason;
+private:
+  cothread_t host = nullptr;
+  cothread_t resume = nullptr;
+  Mode mode = Mode::Run;
+  Event event = Event::Unknown;
 };
 
 extern Scheduler scheduler;

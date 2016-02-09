@@ -85,7 +85,7 @@ private:
   auto parseMarkup(const string&) -> void;
   auto parseMarkupMap(Markup::Node, SuperFamicom::Memory&) -> void;
   auto parseMarkupMap(Markup::Node, const function<uint8 (uint, uint8)>&, const function<void (uint, uint8)>&) -> void;
-  auto parseMarkupMemory(MappedRAM&, Markup::Node, unsigned id, bool writable) -> void;
+  auto parseMarkupMemory(MappedRAM&, Markup::Node, uint id, bool writable) -> void;
 
   auto parseMarkupROM(Markup::Node) -> void;
   auto parseMarkupRAM(Markup::Node) -> void;

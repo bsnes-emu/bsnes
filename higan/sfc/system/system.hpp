@@ -29,8 +29,6 @@ struct System {
   } information;
 
 private:
-  auto runThreadToSave() -> void;
-
   auto serialize(serializer&) -> void;
   auto serializeAll(serializer&) -> void;
   auto serializeInit() -> void;
@@ -47,8 +45,6 @@ private:
 };
 
 extern System system;
-
-#include <sfc/scheduler/scheduler.hpp>
 
 struct Random {
   auto seed(uint seed) -> void;

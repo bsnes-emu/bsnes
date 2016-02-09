@@ -11,7 +11,6 @@ struct CPU : Processor::V30MZ, Thread, IO {
   };
 
   static auto Enter() -> void;
-
   auto main() -> void;
   auto step(uint clocks) -> void;
 

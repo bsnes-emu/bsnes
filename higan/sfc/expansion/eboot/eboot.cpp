@@ -11,7 +11,7 @@ auto eBoot::load() -> void {
   resetVector  = bus.read(0xfffc, 0x00) << 0;
   resetVector |= bus.read(0xfffd, 0x00) << 8;
 
-  for(auto& byte : ram) byte = 0xdb;
+  for(auto& byte : ram) byte = 0xdb;  //stp
   ram[0] = 0x6c;  //jmp ($fffc)
   ram[1] = 0xfc;
   ram[2] = 0xff;

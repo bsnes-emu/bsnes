@@ -1,4 +1,4 @@
-sfc_objects := sfc-interface sfc-system sfc-controller
+sfc_objects := sfc-interface sfc-system sfc-scheduler sfc-controller
 sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
 sfc_objects += sfc-satellaview sfc-eboot
@@ -35,6 +35,7 @@ endif
 
 obj/sfc-interface.o:   $(sfc)/interface/interface.cpp $(call rwildcard,$(sfc)/interface)
 obj/sfc-system.o:      $(sfc)/system/system.cpp $(call rwildcard,$(sfc)/system/)
+obj/sfc-scheduler.o:   $(sfc)/scheduler/scheduler.cpp $(call rwildcard,$(sfc)/scheduler/)
 obj/sfc-controller.o:  $(sfc)/controller/controller.cpp $(call rwildcard,$(sfc)/controller/)
 obj/sfc-cartridge.o:   $(sfc)/cartridge/cartridge.cpp $(call rwildcard,$(sfc)/cartridge/)
 obj/sfc-cheat.o:       $(sfc)/cheat/cheat.cpp $(call rwildcard,$(sfc)/cheat/)

@@ -1,6 +1,6 @@
 struct NECDSP : Processor::uPD96050, Coprocessor {
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
 
   auto read(uint addr, uint8 data) -> uint8;
   auto write(uint addr, uint8 data) -> void;

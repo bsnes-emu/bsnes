@@ -3,31 +3,25 @@ struct VRC3 : Chip {
   }
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-      }
-
-      if(irq_enable) {
-        if(irq_mode == 0) {  //16-bit
-          if(++irq_counter.w == 0) {
-            irq_line = 1;
-            irq_enable = irq_acknowledge;
-            irq_counter.w = irq_latch;
-          }
-        }
-        if(irq_mode == 1) {  //8-bit
-          if(++irq_counter.l == 0) {
-            irq_line = 1;
-            irq_enable = irq_acknowledge;
-            irq_counter.l = irq_latch;
-          }
+    if(irq_enable) {
+      if(irq_mode == 0) {  //16-bit
+        if(++irq_counter.w == 0) {
+          irq_line = 1;
+          irq_enable = irq_acknowledge;
+          irq_counter.w = irq_latch;
         }
       }
-
-      cpu.set_irq_line(irq_line);
-      tick();
+      if(irq_mode == 1) {  //8-bit
+        if(++irq_counter.l == 0) {
+          irq_line = 1;
+          irq_enable = irq_acknowledge;
+          irq_counter.l = irq_latch;
+        }
+      }
     }
+
+    cpu.set_irq_line(irq_line);
+    tick();
   }
 
   auto prg_addr(uint addr) const -> uint {

@@ -7,6 +7,7 @@ device(chained == false ? (unsigned)Device::ID::Justifier : (unsigned)Device::ID
   latched = 0;
   counter = 0;
   active = 0;
+  prev = 0;
 
   player1.x = 256 / 2;
   player1.y = 240 / 2;
@@ -27,44 +28,41 @@ device(chained == false ? (unsigned)Device::ID::Justifier : (unsigned)Device::ID
   }
 }
 
-auto Justifier::enter() -> void {
-  unsigned prev = 0;
-  while(true) {
-    unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
+auto Justifier::main() -> void {
+  unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
 
-    signed x = (active == 0 ? player1.x : player2.x), y = (active == 0 ? player1.y : player2.y);
-    bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+  signed x = (active == 0 ? player1.x : player2.x), y = (active == 0 ? player1.y : player2.y);
+  bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
 
-    if(offscreen == false) {
-      unsigned target = y * 1364 + (x + 24) * 4;
-      if(next >= target && prev < target) {
-        //CRT raster detected, toggle iobit to latch counters
-        iobit(0);
-        iobit(1);
-      }
+  if(offscreen == false) {
+    unsigned target = y * 1364 + (x + 24) * 4;
+    if(next >= target && prev < target) {
+      //CRT raster detected, toggle iobit to latch counters
+      iobit(0);
+      iobit(1);
     }
-
-    if(next < prev) {
-      int nx1 = interface->inputPoll(port, device, 0 + X);
-      int ny1 = interface->inputPoll(port, device, 0 + Y);
-      nx1 += player1.x;
-      ny1 += player1.y;
-      player1.x = max(-16, min(256 + 16, nx1));
-      player1.y = max(-16, min(240 + 16, ny1));
-    }
-
-    if(next < prev && chained) {
-      int nx2 = interface->inputPoll(port, device, 4 + X);
-      int ny2 = interface->inputPoll(port, device, 4 + Y);
-      nx2 += player2.x;
-      ny2 += player2.y;
-      player2.x = max(-16, min(256 + 16, nx2));
-      player2.y = max(-16, min(240 + 16, ny2));
-    }
-
-    prev = next;
-    step(2);
   }
+
+  if(next < prev) {
+    int nx1 = interface->inputPoll(port, device, 0 + X);
+    int ny1 = interface->inputPoll(port, device, 0 + Y);
+    nx1 += player1.x;
+    ny1 += player1.y;
+    player1.x = max(-16, min(256 + 16, nx1));
+    player1.y = max(-16, min(240 + 16, ny1));
+  }
+
+  if(next < prev && chained) {
+    int nx2 = interface->inputPoll(port, device, 4 + X);
+    int ny2 = interface->inputPoll(port, device, 4 + Y);
+    nx2 += player2.x;
+    ny2 += player2.y;
+    player2.x = max(-16, min(256 + 16, nx2));
+    player2.y = max(-16, min(240 + 16, ny2));
+  }
+
+  prev = next;
+  step(2);
 }
 
 auto Justifier::data() -> uint2 {

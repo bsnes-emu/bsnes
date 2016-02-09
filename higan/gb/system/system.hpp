@@ -23,7 +23,6 @@ struct System {
 
   auto run() -> void;
   auto runToSave() -> void;
-  auto runThreadToSave() -> void;
 
   auto init() -> void;
   auto load(Revision) -> void;

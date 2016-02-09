@@ -1,7 +1,7 @@
 #include "video.hpp"
 
 struct PPU : Thread, MMIO {
-  static auto Main() -> void;
+  static auto Enter() -> void;
   auto main() -> void;
   auto add_clocks(uint clocks) -> void;
 

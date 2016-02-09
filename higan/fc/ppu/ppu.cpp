@@ -7,18 +7,12 @@ PPU ppu;
 
 #include "serialization.cpp"
 
-auto PPU::Main() -> void {
-  ppu.main();
+auto PPU::Enter() -> void {
+  while(true) scheduler.synchronize(), ppu.main();
 }
 
 auto PPU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::PPU) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    raster_scanline();
-  }
+  raster_scanline();
 }
 
 auto PPU::tick() -> void {
@@ -49,14 +43,15 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   status.field ^= 1;
-  scheduler.exit(Scheduler::ExitReason::FrameEvent);
+  video.refresh();
+  scheduler.exit(Scheduler::Event::Frame);
 }
 
 auto PPU::power() -> void {
 }
 
 auto PPU::reset() -> void {
-  create(PPU::Main, 21477272);
+  create(PPU::Enter, 21'477'272);
 
   status.mdr = 0x00;
   status.field = 0;

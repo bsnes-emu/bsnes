@@ -8,20 +8,13 @@ namespace GameBoy {
 #include "serialization.cpp"
 CPU cpu;
 
-auto CPU::Main() -> void {
-  cpu.main();
+auto CPU::Enter() -> void {
+  while(true) scheduler.synchronize(), cpu.main();
 }
 
 auto CPU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
-      scheduler.sync = Scheduler::SynchronizeMode::All;
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    interrupt_test();
-    exec();
-  }
+  interrupt_test();
+  exec();
 }
 
 auto CPU::interrupt_raise(CPU::Interrupt id) -> void {
@@ -102,7 +95,7 @@ auto CPU::stop() -> bool {
 }
 
 auto CPU::power() -> void {
-  create(Main, 4 * 1024 * 1024);
+  create(Enter, 4 * 1024 * 1024);
   LR35902::power();
 
   for(uint n = 0xc000; n <= 0xdfff; n++) bus.mmio[n] = this;  //WRAM

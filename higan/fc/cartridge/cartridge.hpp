@@ -2,7 +2,7 @@
 #include "board/board.hpp"
 
 struct Cartridge : Thread {
-  static auto Main() -> void;
+  static auto Enter() -> void;
   auto main() -> void;
 
   auto sha256() const -> string;

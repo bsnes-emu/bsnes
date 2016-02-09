@@ -11,7 +11,6 @@ struct CPU : Processor::ARM, Thread, MMIO {
   ~CPU();
 
   static auto Enter() -> void;
-
   auto main() -> void;
 
   auto step(uint clocks) -> void override;

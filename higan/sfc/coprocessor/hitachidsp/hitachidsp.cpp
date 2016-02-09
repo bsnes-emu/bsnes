@@ -6,27 +6,23 @@ namespace SuperFamicom {
 #include "serialization.cpp"
 HitachiDSP hitachidsp;
 
-auto HitachiDSP::Enter() -> void { hitachidsp.enter(); }
+auto HitachiDSP::Enter() -> void {
+  while(true) scheduler.synchronize(), hitachidsp.main();
+}
 
-auto HitachiDSP::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+auto HitachiDSP::main() -> void {
+  if(mmio.dma) {
+    for(auto n : range(mmio.dma_length)) {
+      bus_write(mmio.dma_target + n, bus_read(mmio.dma_source + n));
+      step(2);
     }
-
-    if(mmio.dma) {
-      for(auto n : range(mmio.dma_length)) {
-        bus_write(mmio.dma_target + n, bus_read(mmio.dma_source + n));
-        step(2);
-      }
-      mmio.dma = false;
-    }
-
-    exec(mmio.program_offset);
-    step(1);
-
-    synchronizeCPU();
+    mmio.dma = false;
   }
+
+  exec(mmio.program_offset);
+  step(1);
+
+  synchronizeCPU();
 }
 
 auto HitachiDSP::init() -> void {

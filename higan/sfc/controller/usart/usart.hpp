@@ -2,7 +2,7 @@ struct USART : Controller, public library {
   USART(bool port);
   ~USART();
 
-  auto enter() -> void;
+  auto main() -> void;
 
   auto quit() -> bool;
   auto usleep(uint microseconds) -> void;
@@ -35,6 +35,6 @@ private:
     function<uint8 ()>,     //read
     function<bool ()>,      //writable
     function<void (uint8)>  //write
-  )> init;
-  function<void (lstring)> main;
+  )> usart_init;
+  function<void (lstring)> usart_main;
 };

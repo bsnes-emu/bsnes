@@ -8,8 +8,6 @@ System system;
 #include "random.cpp"
 #include "serialization.cpp"
 
-#include <sfc/scheduler/scheduler.cpp>
-
 auto System::loaded() const -> bool { return _loaded; }
 auto System::region() const -> Region { return _region; }
 auto System::expansionPort() const -> Device::ID { return _expansionPort; }
@@ -17,42 +15,16 @@ auto System::cpuFrequency() const -> uint { return _cpuFrequency; }
 auto System::apuFrequency() const -> uint { return _apuFrequency; }
 
 auto System::run() -> void {
-  scheduler.sync = Scheduler::SynchronizeMode::None;
   scheduler.enter();
 }
 
 auto System::runToSave() -> void {
-  if(CPU::Threaded) {
-    scheduler.sync = Scheduler::SynchronizeMode::CPU;
-    runThreadToSave();
-  }
-
-  if(SMP::Threaded) {
-    scheduler.thread = smp.thread;
-    runThreadToSave();
-  }
-
-  if(PPU::Threaded) {
-    scheduler.thread = ppu.thread;
-    runThreadToSave();
-  }
-
-  if(DSP::Threaded) {
-    scheduler.thread = dsp.thread;
-    runThreadToSave();
-  }
-
-  for(uint n = 0; n < cpu.coprocessors.size(); n++) {
-    auto& chip = *cpu.coprocessors[n];
-    scheduler.thread = chip.thread;
-    runThreadToSave();
-  }
-}
-
-auto System::runThreadToSave() -> void {
-  while(true) {
-    scheduler.enter();
-    if(scheduler.exit_reason == Scheduler::ExitReason::SynchronizeEvent) break;
+  if(CPU::Threaded) scheduler.synchronize(cpu.thread);
+  if(SMP::Threaded) scheduler.synchronize(smp.thread);
+  if(PPU::Threaded) scheduler.synchronize(ppu.thread);
+  if(DSP::Threaded) scheduler.synchronize(dsp.thread);
+  for(auto chip : cpu.coprocessors) {
+    scheduler.synchronize(chip->thread);
   }
 }
 
@@ -99,8 +71,8 @@ auto System::load() -> void {
   cartridge.load();
   _region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
   _expansionPort = (Device::ID)settings.expansionPort;
-  _cpuFrequency = region() == Region::NTSC ? 21477272 : 21281370;
-  _apuFrequency = 24606720;
+  _cpuFrequency = region() == Region::NTSC ? 21'477'272 : 21'281'370;
+  _apuFrequency = 24'606'720;
 
   bus.reset();
   bus.map();
@@ -233,7 +205,7 @@ auto System::reset() -> void {
   if(cartridge.hasSPC7110()) cpu.coprocessors.append(&spc7110);
   if(cartridge.hasMSU1()) cpu.coprocessors.append(&msu1);
 
-  scheduler.init();
+  scheduler.reset();
   device.connect(0, (Device::ID)settings.controllerPort1);
   device.connect(1, (Device::ID)settings.controllerPort2);
   device.connect(2, (Device::ID)settings.expansionPort);

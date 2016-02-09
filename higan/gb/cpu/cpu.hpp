@@ -1,7 +1,7 @@
 struct CPU : Processor::LR35902, Thread, MMIO {
   enum class Interrupt : uint { Vblank, Stat, Timer, Serial, Joypad };
 
-  static auto Main() -> void;
+  static auto Enter() -> void;
   auto main() -> void;
   auto interrupt_raise(Interrupt id) -> void;
   auto interrupt_test() -> void;

@@ -15,31 +15,27 @@ auto SMP::step(uint clocks) -> void {
 
 auto SMP::synchronizeCPU() -> void {
   if(CPU::Threaded) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 
 auto SMP::synchronizeDSP() -> void {
   if(DSP::Threaded) {
-    if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
+    if(dsp.clock < 0 && !scheduler.synchronizing()) co_switch(dsp.thread);
   } else {
-    while(dsp.clock < 0) dsp.enter();
+    while(dsp.clock < 0) dsp.main();
   }
 }
 
-auto SMP::Enter() -> void { smp.enter(); }
+auto SMP::Enter() -> void {
+  while(true) scheduler.synchronize(), smp.main();
+}
 
-auto SMP::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    debugger.op_exec(regs.pc);
-    op_step();
-  }
+auto SMP::main() -> void {
+  debugger.op_exec(regs.pc);
+  op_step();
 }
 
 auto SMP::power() -> void {

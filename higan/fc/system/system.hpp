@@ -3,7 +3,6 @@ struct System {
 
   auto run() -> void;
   auto runToSave() -> void;
-  auto runThreadToSave() -> void;
 
   auto load() -> void;
   auto unload() -> void;

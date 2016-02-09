@@ -3,15 +3,9 @@ struct MMC3 : Chip {
   }
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-      }
-
-      if(irq_delay) irq_delay--;
-      cpu.set_irq_line(irq_line);
-      tick();
-    }
+    if(irq_delay) irq_delay--;
+    cpu.set_irq_line(irq_line);
+    tick();
   }
 
   auto irq_test(uint addr) -> void {

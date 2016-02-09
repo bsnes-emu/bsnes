@@ -41,10 +41,7 @@ auto System::power() -> void {
 }
 
 auto System::run() -> void {
-  while(true) {
-    scheduler.enter();
-    if(scheduler.exitReason == Scheduler::ExitReason::FrameEvent) break;
-  }
+  while(scheduler.enter() != Scheduler::Event::Frame);
 }
 
 }

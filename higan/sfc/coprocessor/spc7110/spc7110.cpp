@@ -16,20 +16,15 @@ SPC7110::~SPC7110() {
   delete decompressor;
 }
 
-auto SPC7110::Enter() -> void { spc7110.enter(); }
+auto SPC7110::Enter() -> void {
+  while(true) scheduler.synchronize(), spc7110.main();
+}
 
-auto SPC7110::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    if(dcu_pending) { dcu_pending = 0; dcu_begin_transfer(); }
-    if(mul_pending) { mul_pending = 0; alu_multiply(); }
-    if(div_pending) { div_pending = 0; alu_divide(); }
-
-    add_clocks(1);
-  }
+auto SPC7110::main() -> void {
+  if(dcu_pending) { dcu_pending = 0; dcu_begin_transfer(); }
+  if(mul_pending) { mul_pending = 0; alu_multiply(); }
+  if(div_pending) { div_pending = 0; alu_divide(); }
+  add_clocks(1);
 }
 
 auto SPC7110::add_clocks(uint clocks) -> void {

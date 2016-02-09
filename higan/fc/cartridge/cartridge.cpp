@@ -18,8 +18,8 @@ auto Cartridge::title() const -> string {
   return information.title;
 }
 
-auto Cartridge::Main() -> void {
-  cartridge.main();
+auto Cartridge::Enter() -> void {
+  while(true) scheduler.synchronize(), cartridge.main();
 }
 
 auto Cartridge::main() -> void {
@@ -47,7 +47,7 @@ auto Cartridge::power() -> void {
 }
 
 auto Cartridge::reset() -> void {
-  create(Cartridge::Main, 21477272);
+  create(Cartridge::Enter, 21'477'272);
   board->reset();
 }
 

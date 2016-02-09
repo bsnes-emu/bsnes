@@ -1,15 +1,28 @@
-struct Scheduler : property<Scheduler> {
-  enum class SynchronizeMode : uint { None, CPU, All } sync;
-  enum class ExitReason : uint { UnknownEvent, FrameEvent, SynchronizeEvent };
-  readonly<ExitReason> exit_reason;
+struct Scheduler {
+  enum class Mode : uint {
+    Run,
+    SynchronizeCPU,
+    SynchronizeAll,
+  };
 
-  cothread_t host;
-  cothread_t active;
+  enum class Event : uint {
+    Unknown,
+    Frame,
+    Synchronize,
+  };
 
-  Scheduler();
-  auto enter() -> void;
-  auto exit(ExitReason) -> void;
   auto power() -> void;
+  auto enter(Mode = Mode::Run) -> Event;
+  auto exit(Event) -> void;
+  auto synchronize(cothread_t) -> void;
+  auto synchronize() -> void;
+  auto synchronizing() const -> bool;
+
+private:
+  cothread_t host = nullptr;
+  cothread_t resume = nullptr;
+  Mode mode = Mode::Run;
+  Event event = Event::Unknown;
 };
 
 extern Scheduler scheduler;

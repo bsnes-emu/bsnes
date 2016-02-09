@@ -28,36 +28,35 @@ SuperScope::SuperScope(bool port) : Controller(port) {
   turbolock   = false;
   triggerlock = false;
   pauselock   = false;
+
+  prev = 0;
 }
 
-auto SuperScope::enter() -> void {
-  unsigned prev = 0;
-  while(true) {
-    unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
+auto SuperScope::main() -> void {
+  unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
 
-    if(offscreen == false) {
-      unsigned target = y * 1364 + (x + 24) * 4;
-      if(next >= target && prev < target) {
-        //CRT raster detected, toggle iobit to latch counters
-        iobit(0);
-        iobit(1);
-      }
+  if(offscreen == false) {
+    unsigned target = y * 1364 + (x + 24) * 4;
+    if(next >= target && prev < target) {
+      //CRT raster detected, toggle iobit to latch counters
+      iobit(0);
+      iobit(1);
     }
-
-    if(next < prev) {
-      //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
-      int nx = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, X);
-      int ny = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Y);
-      nx += x;
-      ny += y;
-      x = max(-16, min(256 + 16, nx));
-      y = max(-16, min(240 + 16, ny));
-      offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
-    }
-
-    prev = next;
-    step(2);
   }
+
+  if(next < prev) {
+    //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
+    int nx = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, X);
+    int ny = interface->inputPoll(port, (unsigned)Device::ID::SuperScope, Y);
+    nx += x;
+    ny += y;
+    x = max(-16, min(256 + 16, nx));
+    y = max(-16, min(240 + 16, ny));
+    offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+  }
+
+  prev = next;
+  step(2);
 }
 
 auto SuperScope::data() -> uint2 {

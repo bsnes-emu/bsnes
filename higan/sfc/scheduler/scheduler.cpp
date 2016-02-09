@@ -1,22 +1,43 @@
+#include <sfc/sfc.hpp>
+
+namespace SuperFamicom {
+
 Scheduler scheduler;
 
-auto Scheduler::init() -> void {
-  host_thread = co_active();
-  thread = cpu.thread;
-  sync = SynchronizeMode::None;
+auto Scheduler::reset() -> void {
+  host = co_active();
+  resume = cpu.thread;
 }
 
-auto Scheduler::enter() -> void {
-  host_thread = co_active();
-  co_switch(thread);
+auto Scheduler::enter(Mode mode_) -> Event {
+  mode = mode_;
+  host = co_active();
+  co_switch(resume);
+  return event;
 }
 
-auto Scheduler::exit(ExitReason reason) -> void {
-  exit_reason = reason;
-  thread = co_active();
-  co_switch(host_thread);
+auto Scheduler::exit(Event event_) -> void {
+  event = event_;
+  resume = co_active();
+  co_switch(host);
 }
 
-auto Scheduler::debug() -> void {
-  exit(ExitReason::DebuggerEvent);
+auto Scheduler::synchronize(cothread_t thread) -> void {
+  if(thread == cpu.thread) {
+    while(enter(Mode::SynchronizeCPU) != Event::Synchronize);
+  } else {
+    resume = thread;
+    while(enter(Mode::SynchronizeAll) != Event::Synchronize);
+  }
+}
+
+auto Scheduler::synchronize() -> void {
+  if(co_active() == cpu.thread && mode == Mode::SynchronizeCPU) return exit(Event::Synchronize);
+  if(co_active() != cpu.thread && mode == Mode::SynchronizeAll) return exit(Event::Synchronize);
+}
+
+auto Scheduler::synchronizing() const -> bool {
+  return mode == Mode::SynchronizeAll;
+}
+
 }

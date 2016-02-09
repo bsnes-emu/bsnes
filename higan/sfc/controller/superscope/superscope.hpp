@@ -5,7 +5,7 @@ struct SuperScope : Controller {
 
   SuperScope(bool port);
 
-  auto enter() -> void;
+  auto main() -> void;
   auto data() -> uint2;
   auto latch(bool data) -> void;
 
@@ -24,4 +24,6 @@ struct SuperScope : Controller {
   bool turbolock;
   bool triggerlock;
   bool pauselock;
+
+  unsigned prev;
 };

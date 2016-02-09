@@ -10,52 +10,44 @@ namespace GameBoy {
 #include "serialization.cpp"
 APU apu;
 
-auto APU::Main() -> void {
-  apu.main();
+auto APU::Enter() -> void {
+  while(true) scheduler.synchronize(), apu.main();
 }
 
 auto APU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+  square1.run();
+  square2.run();
+  wave.run();
+  noise.run();
+  sequencer.run();
+
+  hipass(sequencer.center, sequencer.centerBias);
+  hipass(sequencer.left, sequencer.leftBias);
+  hipass(sequencer.right, sequencer.rightBias);
+
+  interface->audioSample(sequencer.left, sequencer.right);
+
+  if(cycle == 0) {  //512hz
+    if(phase == 0 || phase == 2 || phase == 4 || phase == 6) {  //256hz
+      square1.clockLength();
+      square2.clockLength();
+      wave.clockLength();
+      noise.clockLength();
     }
-
-    square1.run();
-    square2.run();
-    wave.run();
-    noise.run();
-    sequencer.run();
-
-    hipass(sequencer.center, sequencer.centerBias);
-    hipass(sequencer.left, sequencer.leftBias);
-    hipass(sequencer.right, sequencer.rightBias);
-
-    interface->audioSample(sequencer.left, sequencer.right);
-
-    if(cycle == 0) {  //512hz
-      if(phase == 0 || phase == 2 || phase == 4 || phase == 6) {  //256hz
-        square1.clockLength();
-        square2.clockLength();
-        wave.clockLength();
-        noise.clockLength();
-      }
-      if(phase == 2 || phase == 6) {  //128hz
-        square1.clockSweep();
-      }
-      if(phase == 7) {  //64hz
-        square1.clockEnvelope();
-        square2.clockEnvelope();
-        noise.clockEnvelope();
-      }
-      phase++;
+    if(phase == 2 || phase == 6) {  //128hz
+      square1.clockSweep();
     }
-    cycle++;
-
-    clock += cpu.frequency;
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) {
-      co_switch(scheduler.active_thread = cpu.thread);
+    if(phase == 7) {  //64hz
+      square1.clockEnvelope();
+      square2.clockEnvelope();
+      noise.clockEnvelope();
     }
+    phase++;
   }
+  cycle++;
+
+  clock += cpu.frequency;
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 //filter to remove DC bias
@@ -65,7 +57,7 @@ auto APU::hipass(int16& sample, int64& bias) -> void {
 }
 
 auto APU::power() -> void {
-  create(Main, 2 * 1024 * 1024);
+  create(Enter, 2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   square1.power();

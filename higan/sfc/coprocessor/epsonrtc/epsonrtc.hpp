@@ -2,7 +2,7 @@
 
 struct EpsonRTC : Coprocessor {
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
 
   auto init() -> void;
   auto load() -> void;

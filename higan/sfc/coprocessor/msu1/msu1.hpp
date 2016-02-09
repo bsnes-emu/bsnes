@@ -1,7 +1,6 @@
 struct MSU1 : Coprocessor {
   static auto Enter() -> void;
-
-  auto enter() -> void;
+  auto main() -> void;
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;

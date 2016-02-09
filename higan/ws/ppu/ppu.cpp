@@ -7,18 +7,12 @@ PPU ppu;
 #include "video.cpp"
 
 auto PPU::Enter() -> void {
-  ppu.main();
+  while(true) scheduler.synchronize(), ppu.main();
 }
 
 auto PPU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    step(256);
-    scanline();
-  }
+  step(256);
+  scanline();
 }
 
 auto PPU::scanline() -> void {
@@ -33,17 +27,18 @@ auto PPU::scanline() -> void {
 auto PPU::frame() -> void {
   status.vclk = 0;
   video.refresh();
+  scheduler.exit(Scheduler::Event::Frame);
 }
 
 auto PPU::step(uint clocks) -> void {
   status.hclk += clocks;
 
   clock += clocks;
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto PPU::power() -> void {
-  create(PPU::Enter, 3072000);
+  create(PPU::Enter, 3'072'000);
 
   for(uint n = 0x0000; n <= 0x0001; n++) iomap[n] = this;
   for(uint n = 0x0004; n <= 0x0007; n++) iomap[n] = this;

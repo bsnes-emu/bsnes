@@ -9,38 +9,13 @@ auto System::loaded() const -> bool { return _loaded; }
 
 auto System::run() -> void {
   scheduler.enter();
-  if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-    video.refresh();
-  }
 }
 
 auto System::runToSave() -> void {
-  scheduler.sync = Scheduler::SynchronizeMode::PPU;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.thread = cpu.thread;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.thread = apu.thread;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::All;
-  scheduler.thread = cartridge.thread;
-  runThreadToSave();
-
-  scheduler.sync = Scheduler::SynchronizeMode::None;
-}
-
-auto System::runThreadToSave() -> void {
-  while(true) {
-    scheduler.enter();
-    if(scheduler.exit_reason() == Scheduler::ExitReason::SynchronizeEvent) break;
-    if(scheduler.exit_reason() == Scheduler::ExitReason::FrameEvent) {
-      video.refresh();
-    }
-  }
+  scheduler.synchronize(ppu.thread);
+  scheduler.synchronize(cpu.thread);
+  scheduler.synchronize(apu.thread);
+  scheduler.synchronize(cartridge.thread);
 }
 
 auto System::load() -> void {
@@ -63,7 +38,6 @@ auto System::power() -> void {
   apu.power();
   ppu.power();
   input.reset();
-  scheduler.power();
   reset();
 }
 
@@ -78,7 +52,7 @@ auto System::reset() -> void {
 }
 
 auto System::init() -> void {
-  assert(interface != 0);
+  assert(interface != nullptr);
   input.connect(0, Input::Device::Joypad);
   input.connect(1, Input::Device::None);
 }

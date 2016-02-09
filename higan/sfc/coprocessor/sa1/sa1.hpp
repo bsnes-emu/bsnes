@@ -15,7 +15,7 @@ struct SA1 : Processor::R65816, public Coprocessor {
   } status;
 
   static auto Enter() -> void;
-  auto enter() -> void;
+  auto main() -> void;
   auto tick() -> void;
   auto op_irq() -> void;
 

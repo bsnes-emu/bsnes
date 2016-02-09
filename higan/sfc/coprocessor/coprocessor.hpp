@@ -29,5 +29,5 @@ auto Coprocessor::step(uint clocks) -> void {
 }
 
 auto Coprocessor::synchronizeCPU() -> void {
-  if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }

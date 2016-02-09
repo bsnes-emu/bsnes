@@ -34,5 +34,4 @@ auto Video::refresh() -> void {
   }
 
   interface->videoRefresh(output(), 224 * sizeof(uint32), 224, 224);
-  scheduler.exit(Scheduler::ExitReason::FrameEvent);
 }

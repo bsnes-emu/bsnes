@@ -6,26 +6,11 @@ struct VRC7 : Chip {
   }
 
   auto main() -> void {
-    while(true) {
-      if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-        scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-      }
-
-      if(irq_enable) {
-        if(irq_mode == 0) {
-          irq_scalar -= 3;
-          if(irq_scalar <= 0) {
-            irq_scalar += 341;
-            if(irq_counter == 0xff) {
-              irq_counter = irq_latch;
-              irq_line = 1;
-            } else {
-              irq_counter++;
-            }
-          }
-        }
-
-        if(irq_mode == 1) {
+    if(irq_enable) {
+      if(irq_mode == 0) {
+        irq_scalar -= 3;
+        if(irq_scalar <= 0) {
+          irq_scalar += 341;
           if(irq_counter == 0xff) {
             irq_counter = irq_latch;
             irq_line = 1;
@@ -34,10 +19,19 @@ struct VRC7 : Chip {
           }
         }
       }
-      cpu.set_irq_line(irq_line);
 
-      tick();
+      if(irq_mode == 1) {
+        if(irq_counter == 0xff) {
+          irq_counter = irq_latch;
+          irq_line = 1;
+        } else {
+          irq_counter++;
+        }
+      }
     }
+    cpu.set_irq_line(irq_line);
+
+    tick();
   }
 
   auto reg_write(uint addr, uint8 data) -> void {

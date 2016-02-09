@@ -10,7 +10,7 @@ struct SMP : Processor::SPC700, Thread {
   auto portRead(uint2 port) const -> uint8;
   auto portWrite(uint2 port, uint8 data) -> void;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto power() -> void;
   auto reset() -> void;
 

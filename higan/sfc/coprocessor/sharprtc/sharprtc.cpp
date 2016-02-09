@@ -8,20 +8,14 @@ namespace SuperFamicom {
 SharpRTC sharprtc;
 
 auto SharpRTC::Enter() -> void {
-  sharprtc.enter();
+  while(true) scheduler.synchronize(), sharprtc.main();
 }
 
-auto SharpRTC::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
+auto SharpRTC::main() -> void {
+  tick_second();
 
-    tick_second();
-
-    step(1);
-    synchronizeCPU();
-  }
+  step(1);
+  synchronizeCPU();
 }
 
 auto SharpRTC::init() -> void {

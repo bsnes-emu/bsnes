@@ -11,8 +11,7 @@ struct SuperFX : Processor::GSU, Coprocessor {
 
   //superfx.cpp
   static auto Enter() -> void;
-
-  auto enter() -> void;
+  auto main() -> void;
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;

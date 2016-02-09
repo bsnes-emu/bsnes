@@ -10,29 +10,25 @@ SA1 sa1;
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"
 
-auto SA1::Enter() -> void { sa1.enter(); }
+auto SA1::Enter() -> void {
+  while(true) scheduler.synchronize(), sa1.main();
+}
 
-auto SA1::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    if(mmio.sa1_rdyb || mmio.sa1_resb) {
-      //SA-1 co-processor is asleep
-      tick();
-      synchronizeCPU();
-      continue;
-    }
-
-    if(status.interrupt_pending) {
-      status.interrupt_pending = false;
-      op_irq();
-      continue;
-    }
-
-    op_exec();
+auto SA1::main() -> void {
+  if(mmio.sa1_rdyb || mmio.sa1_resb) {
+    //SA-1 co-processor is asleep
+    tick();
+    synchronizeCPU();
+    return;
   }
+
+  if(status.interrupt_pending) {
+    status.interrupt_pending = false;
+    op_irq();
+    return;
+  }
+
+  op_exec();
 }
 
 auto SA1::op_irq() -> void {

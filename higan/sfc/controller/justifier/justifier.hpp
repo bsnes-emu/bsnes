@@ -5,7 +5,7 @@ struct Justifier : Controller {
 
   Justifier(bool port, bool chained);
 
-  auto enter() -> void;
+  auto main() -> void;
   auto data() -> uint2;
   auto latch(bool data) -> void;
 
@@ -14,6 +14,7 @@ struct Justifier : Controller {
   const unsigned device;
   bool latched;
   unsigned counter;
+  unsigned prev;
 
   bool active;
   struct Player {

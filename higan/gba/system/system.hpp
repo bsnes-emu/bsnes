@@ -24,7 +24,6 @@ struct System {
   auto power() -> void;
   auto run() -> void;
   auto runToSave() -> void;
-  auto runThreadToSave() -> void;
 
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;

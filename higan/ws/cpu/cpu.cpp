@@ -9,19 +9,12 @@ CPU cpu;
 #include "dma.cpp"
 
 auto CPU::Enter() -> void {
-  cpu.main();
+  while(true) scheduler.synchronize(), cpu.main();
 }
 
 auto CPU::main() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
-      scheduler.sync = Scheduler::SynchronizeMode::All;
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    poll();
-    exec();
-  }
+  poll();
+  exec();
 }
 
 auto CPU::step(uint clocks) -> void {
@@ -54,7 +47,7 @@ auto CPU::out(uint16 port, uint8 data) -> void {
 
 auto CPU::power() -> void {
   V30MZ::power();
-  create(CPU::Enter, 3072000);
+  create(CPU::Enter, 3'072'000);
 
   iomap[0x00a0] = this;
   iomap[0x00b0] = this;
