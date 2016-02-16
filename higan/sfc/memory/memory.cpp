@@ -15,8 +15,8 @@ Bus::~Bus() {
 }
 
 auto Bus::reset() -> void {
-  function<auto (uint, uint8) -> uint8> reader = [](uint, uint8 data) { return data; };
-  function<auto (uint, uint8) -> void> writer = [](uint, uint8) {};
+  function<auto (uint24, uint8) -> uint8> reader = [](uint24, uint8 data) { return data; };
+  function<auto (uint24, uint8) -> void> writer = [](uint24, uint8) {};
 
   idcount = 0;
   map(reader, writer, 0x00, 0xff, 0x0000, 0xffff);
@@ -42,13 +42,13 @@ auto Bus::map() -> void {
 }
 
 auto Bus::map(
-  const function<uint8 (uint, uint8)>& reader,
-  const function<void (uint, uint8)>& writer,
-  uint banklo, uint bankhi, uint addrlo, uint addrhi,
+  const function<uint8 (uint24, uint8)>& reader,
+  const function<void (uint24, uint8)>& writer,
+  uint8 banklo, uint8 bankhi, uint16 addrlo, uint16 addrhi,
   uint size, uint base, uint mask
 ) -> void {
-  assert(banklo <= bankhi && bankhi <= 0xff);
-  assert(addrlo <= addrhi && addrhi <= 0xffff);
+  assert(banklo <= bankhi);
+  assert(addrlo <= addrhi);
   assert(idcount < 255);
 
   uint id = idcount++;

@@ -59,7 +59,7 @@ auto APU::Wave::read(uint16 addr) -> uint8 {
 
 auto APU::Wave::write(uint16 addr, uint8 data) -> void {
   if(addr == 0xff1a) {  //NR30
-    dacEnable = data & 0x80;
+    dacEnable = data.bit(7);
     if(!dacEnable) enable = false;
   }
 
@@ -68,23 +68,22 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff1c) {  //NR32
-    volume = data >> 5;
+    volume = data.bits(6,5);
   }
 
   if(addr == 0xff1d) {  //NR33
-    frequency = (frequency & 0x0700) | data;
+    frequency.bits(7,0) = data;
   }
 
   if(addr == 0xff1e) {  //NR34
-    if((apu.phase & 1) && !counter && (data & 0x40)) {
+    if(apu.phase.bit(0) && !counter && data.bit(6)) {
       if(length && --length == 0) enable = false;
     }
 
-    bool initialize = data & 0x80;
-    counter = data & 0x40;
-    frequency = ((data & 7) << 8) | (frequency & 0x00ff);
+    counter = data.bit(6);
+    frequency.bits(10,8) = data.bits(2,0);
 
-    if(initialize) {
+    if(data.bit(7)) {
       if(!system.cgb() && patternHold) {
         //DMG,SGB trigger while channel is being read corrupts wave RAM
         if((patternOffset >> 1) <= 3) {
@@ -107,7 +106,7 @@ auto APU::Wave::write(uint16 addr, uint8 data) -> void {
 
       if(!length) {
         length = 256;
-        if((apu.phase & 1) && counter) length--;
+        if(apu.phase.bit(0) && counter) length--;
       }
     }
   }

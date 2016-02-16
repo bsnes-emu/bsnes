@@ -1,4 +1,4 @@
-auto SA1::bus_read(uint addr, uint8 data) -> uint8 {
+auto SA1::bus_read(uint24 addr, uint8 data) -> uint8 {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f,80-bf:2200-23ff
     return mmio_read(addr, data);
   }
@@ -40,7 +40,7 @@ auto SA1::bus_read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SA1::bus_write(uint addr, uint8 data) -> void {
+auto SA1::bus_write(uint24 addr, uint8 data) -> void {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f,80-bf:2200-23ff
     return mmio_write(addr, data);
   }
@@ -74,7 +74,7 @@ auto SA1::bus_write(uint addr, uint8 data) -> void {
 //this is used both to keep VBR-reads from accessing MMIO registers, and
 //to avoid syncing the S-CPU and SA-1*; as both chips are able to access
 //these ports.
-auto SA1::vbr_read(uint addr, uint8 data) -> uint8 {
+auto SA1::vbr_read(uint24 addr, uint8 data) -> uint8 {
   if((addr & 0x408000) == 0x008000) {  //$00-3f,80-bf:8000-ffff
     addr = ((addr & 0x800000) >> 2) | ((addr & 0x3f0000) >> 1) | (addr & 0x7fff);
     return mmcrom_read(addr, data);
@@ -112,13 +112,13 @@ auto SA1::op_io() -> void {
   tick();
 }
 
-auto SA1::op_read(uint32 addr) -> uint8 {
+auto SA1::op_read(uint24 addr) -> uint8 {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   return bus_read(addr, regs.mdr);
 }
 
-auto SA1::op_write(uint32 addr, uint8 data) -> void {
+auto SA1::op_write(uint24 addr, uint8 data) -> void {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   bus_write(addr, regs.mdr = data);
@@ -127,7 +127,7 @@ auto SA1::op_write(uint32 addr, uint8 data) -> void {
 //note: addresses are translated prior to invoking this function:
 //$00-3f,80-bf:8000-ffff mask=0x408000 => $00-3f:0000-ffff
 //$c0-ff:0000-ffff mask=0
-auto SA1::mmcrom_read(uint addr, uint8) -> uint8 {
+auto SA1::mmcrom_read(uint24 addr, uint8) -> uint8 {
   //reset vector overrides
   if((addr & 0xffffe0) == 0x007fe0) {  //$00:ffe0-ffef
     if(addr == 0x7fea && sa1.mmio.cpu_nvsw) return sa1.mmio.snv >> 0;
@@ -166,10 +166,10 @@ auto SA1::mmcrom_read(uint addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto SA1::mmcrom_write(uint addr, uint8 data) -> void {
+auto SA1::mmcrom_write(uint24 addr, uint8 data) -> void {
 }
 
-auto SA1::mmcbwram_read(uint addr, uint8 data) -> uint8 {
+auto SA1::mmcbwram_read(uint24 addr, uint8 data) -> uint8 {
   if(addr < 0x2000) {  //$00-3f,80-bf:6000-7fff
     cpu.synchronizeCoprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
@@ -183,7 +183,7 @@ auto SA1::mmcbwram_read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SA1::mmcbwram_write(uint addr, uint8 data) -> void {
+auto SA1::mmcbwram_write(uint24 addr, uint8 data) -> void {
   if(addr < 0x2000) {  //$00-3f,80-bf:6000-7fff
     cpu.synchronizeCoprocessors();
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());

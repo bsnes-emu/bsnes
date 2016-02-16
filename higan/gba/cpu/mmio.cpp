@@ -65,8 +65,8 @@ auto CPU::read(uint32 addr) -> uint8 {
   case 0x04000130:
     if(auto result = player.keyinput()) return result() >> 0;
     for(unsigned n = 0; n < 8; n++) result |= interface->inputPoll(0, 0, n) << n;
-    if((result & 0xc0) == 0xc0) result &= ~0xc0;  //up+down cannot be pressed simultaneously
-    if((result & 0x30) == 0x30) result &= ~0x30;  //left+right cannot be pressed simultaneously
+    if((result & 0xc0) == 0xc0) result &= (uint8)~0xc0;  //up+down cannot be pressed simultaneously
+    if((result & 0x30) == 0x30) result &= (uint8)~0x30;  //left+right cannot be pressed simultaneously
     return result ^ 0xff;
   case 0x04000131:
     if(auto result = player.keyinput()) return result() >> 8;

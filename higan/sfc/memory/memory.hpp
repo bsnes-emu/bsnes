@@ -1,7 +1,7 @@
 struct Memory {
   virtual inline auto size() const -> uint;
-  virtual auto read(uint addr, uint8 data = 0) -> uint8 = 0;
-  virtual auto write(uint addr, uint8 data) -> void = 0;
+  virtual auto read(uint24 addr, uint8 data = 0) -> uint8 = 0;
+  virtual auto write(uint24 addr, uint8 data) -> void = 0;
 };
 
 struct StaticRAM : Memory {
@@ -11,10 +11,10 @@ struct StaticRAM : Memory {
   inline auto data() -> uint8*;
   inline auto size() const -> uint;
 
-  inline auto read(uint addr, uint8 data = 0) -> uint8;
-  inline auto write(uint addr, uint8 data) -> void;
-  inline auto operator[](uint addr) -> uint8&;
-  inline auto operator[](uint addr) const -> const uint8&;
+  inline auto read(uint24 addr, uint8 data = 0) -> uint8;
+  inline auto write(uint24 addr, uint8 data) -> void;
+  inline auto operator[](uint24 addr) -> uint8&;
+  inline auto operator[](uint24 addr) const -> const uint8&;
 
 private:
   uint8* data_ = nullptr;
@@ -31,9 +31,9 @@ struct MappedRAM : Memory {
   inline auto data() -> uint8*;
   inline auto size() const -> uint;
 
-  inline auto read(uint addr, uint8 data = 0) -> uint8;
-  inline auto write(uint addr, uint8 data) -> void;
-  inline auto operator[](uint addr) const -> const uint8&;
+  inline auto read(uint24 addr, uint8 data = 0) -> uint8;
+  inline auto write(uint24 addr, uint8 data) -> void;
+  inline auto operator[](uint24 addr) const -> const uint8&;
 
 private:
   uint8* data_ = nullptr;
@@ -48,15 +48,15 @@ struct Bus {
   Bus();
   ~Bus();
 
-  alwaysinline auto read(uint addr, uint8 data) -> uint8;
-  alwaysinline auto write(uint addr, uint8 data) -> void;
+  alwaysinline auto read(uint24 addr, uint8 data) -> uint8;
+  alwaysinline auto write(uint24 addr, uint8 data) -> void;
 
   auto reset() -> void;
   auto map() -> void;
   auto map(
-    const function<uint8 (uint, uint8)>& reader,
-    const function<void (uint, uint8)>& writer,
-    uint banklo, uint bankhi, uint addrlo, uint addrhi,
+    const function<uint8 (uint24, uint8)>& reader,
+    const function<void (uint24, uint8)>& writer,
+    uint8 banklo, uint8 bankhi, uint16 addrlo, uint16 addrhi,
     uint size = 0, uint base = 0, uint mask = 0
   ) -> void;
 
@@ -64,8 +64,8 @@ struct Bus {
   uint32* target = nullptr;
 
   uint idcount = 0;
-  function<auto (uint, uint8) -> uint8> reader[256];
-  function<auto (uint, uint8) -> void> writer[256];
+  function<auto (uint24, uint8) -> uint8> reader[256];
+  function<auto (uint24, uint8) -> void> writer[256];
 };
 
 extern Bus bus;

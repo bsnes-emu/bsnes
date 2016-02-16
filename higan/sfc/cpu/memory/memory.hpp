@@ -1,6 +1,6 @@
-auto op_io() -> void;
-auto op_read(uint32 addr) -> uint8;
-auto op_write(uint32 addr, uint8 data) -> void;
-alwaysinline auto speed(uint addr) const -> uint;
+auto op_io() -> void override;
+auto op_read(uint24 addr) -> uint8 override;
+auto op_write(uint24 addr, uint8 data) -> void override;
+alwaysinline auto speed(uint24 addr) const -> uint;
 
-auto disassembler_read(uint32 addr) -> uint8;
+auto disassembler_read(uint24 addr) -> uint8 override;

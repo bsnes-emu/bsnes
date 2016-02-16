@@ -6,8 +6,8 @@ struct NSS {
   auto reset() -> void;
 
   auto set_dip(uint16 dip) -> void;
-  auto read(uint addr, uint8 data) -> uint8;
-  auto write(uint addr, uint8 data) -> void;
+  auto read(uint24 addr, uint8 data) -> uint8;
+  auto write(uint24 addr, uint8 data) -> void;
 
   uint8 dip = 0x00;
 };

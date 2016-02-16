@@ -3,7 +3,7 @@ Cartridge::Mapping::Mapping(SuperFamicom::Memory& memory) {
   this->writer = {&SuperFamicom::Memory::write, &memory};
 }
 
-Cartridge::Mapping::Mapping(const function<uint8 (uint, uint8)>& reader, const function<void (uint, uint8)>& writer) {
+Cartridge::Mapping::Mapping(const function<uint8 (uint24, uint8)>& reader, const function<void (uint24, uint8)>& writer) {
   this->reader = reader;
   this->writer = writer;
 }
@@ -51,8 +51,8 @@ auto Cartridge::parseMarkupMap(Markup::Node map, SuperFamicom::Memory& memory) -
 
 auto Cartridge::parseMarkupMap(
   Markup::Node map,
-  const function<uint8 (uint, uint8)>& reader,
-  const function<void (uint, uint8)>& writer
+  const function<uint8 (uint24, uint8)>& reader,
+  const function<void (uint24, uint8)>& writer
 ) -> void {
   Mapping m{reader, writer};
   m.addr = map["address"].text();

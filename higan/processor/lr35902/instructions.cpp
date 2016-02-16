@@ -537,7 +537,7 @@ template<uint b, uint x> auto LR35902::op_res_n_r() {
 }
 
 template<uint b> auto LR35902::op_res_n_hl() {
-  uint8 n = op_read(r[HL]);
+  uint n = op_read(r[HL]);
   n &= ~(1 << b);
   op_write(r[HL], n);
 }

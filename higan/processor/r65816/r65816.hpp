@@ -14,13 +14,13 @@ struct R65816 {
   using fp = auto (R65816::*)() -> void;
 
   virtual auto op_io() -> void = 0;
-  virtual auto op_read(uint32 addr) -> uint8 = 0;
-  virtual auto op_write(uint32 addr, uint8 data) -> void = 0;
+  virtual auto op_read(uint24 addr) -> uint8 = 0;
+  virtual auto op_write(uint24 addr, uint8 data) -> void = 0;
   virtual auto last_cycle() -> void = 0;
   virtual auto interrupt_pending() -> bool = 0;
   virtual auto op_irq() -> void;
 
-  virtual auto disassembler_read(uint32 addr) -> uint8 { return 0u; }
+  virtual auto disassembler_read(uint24 addr) -> uint8 { return 0u; }
 
   //r65816.cpp
   alwaysinline auto op_io_irq() -> void;

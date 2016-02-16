@@ -1,5 +1,5 @@
-auto mmio_read(uint addr, uint8 data) -> uint8;
-auto mmio_write(uint addr, uint8 data) -> void;
+auto mmio_read(uint24 addr, uint8 data) -> uint8;
+auto mmio_write(uint24 addr, uint8 data) -> void;
 
 struct MMIO {
   //$2200 CCNT

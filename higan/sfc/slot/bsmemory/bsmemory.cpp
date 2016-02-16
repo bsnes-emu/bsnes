@@ -35,7 +35,7 @@ auto BSMemory::size() const -> uint {
   return memory.size();
 }
 
-auto BSMemory::read(uint addr, uint8 data) -> uint8 {
+auto BSMemory::read(uint24 addr, uint8 data) -> uint8 {
   if(readonly) {
     return memory.read(bus.mirror(addr, memory.size()), data);
   }
@@ -66,7 +66,7 @@ auto BSMemory::read(uint addr, uint8 data) -> uint8 {
   return memory.read(addr, data);
 }
 
-auto BSMemory::write(uint addr, uint8 data) -> void {
+auto BSMemory::write(uint24 addr, uint8 data) -> void {
   if(readonly) {
     return;
   }

@@ -13,7 +13,7 @@ auto CPU::op_io() -> void {
   alu_edge();
 }
 
-auto CPU::op_read(uint32 addr) -> uint8 {
+auto CPU::op_read(uint24 addr) -> uint8 {
   status.clock_count = speed(addr);
   dma_edge();
   add_clocks(status.clock_count - 4);
@@ -24,7 +24,7 @@ auto CPU::op_read(uint32 addr) -> uint8 {
   return regs.mdr;
 }
 
-auto CPU::op_write(uint32 addr, uint8 data) -> void {
+auto CPU::op_write(uint24 addr, uint8 data) -> void {
   alu_edge();
   status.clock_count = speed(addr);
   dma_edge();
@@ -33,7 +33,7 @@ auto CPU::op_write(uint32 addr, uint8 data) -> void {
   debugger.op_write(addr, regs.mdr);
 }
 
-auto CPU::speed(uint addr) const -> uint {
+auto CPU::speed(uint24 addr) const -> uint {
   if(addr & 0x408000) {
     if(addr & 0x800000) return status.rom_speed;
     return 8;
@@ -43,6 +43,6 @@ auto CPU::speed(uint addr) const -> uint {
   return 12;
 }
 
-auto CPU::disassembler_read(uint32 addr) -> uint8 {
+auto CPU::disassembler_read(uint24 addr) -> uint8 {
   return bus.read(addr, regs.mdr);
 }

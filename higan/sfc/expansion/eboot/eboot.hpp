@@ -5,13 +5,13 @@ struct eBoot : Memory {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(uint addr, uint8 data) -> uint8;
-  auto write(uint addr, uint8 data) -> void;
+  auto read(uint24 addr, uint8 data) -> uint8;
+  auto write(uint24 addr, uint8 data) -> void;
 
 private:
   bool booted = false;
-  uint16 resetVector = 0;
-  uint8 ram[124] = {0};
+  uint16 resetVector;
+  uint8 ram[124];
 };
 
 extern eBoot eboot;

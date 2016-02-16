@@ -26,7 +26,7 @@ auto MCC::reset() -> void {
   commit();
 }
 
-auto MCC::memory_access(bool write, Memory& memory, uint addr, uint8 data) -> uint8 {
+auto MCC::memory_access(bool write, Memory& memory, uint24 addr, uint8 data) -> uint8 {
   addr = bus.mirror(addr, memory.size());
   if(!write) {
     return memory.read(addr, data);
@@ -37,7 +37,7 @@ auto MCC::memory_access(bool write, Memory& memory, uint addr, uint8 data) -> ui
 
 //map address=00-3f,80-bf:8000-ffff mask=0x408000
 //map address=40-7d,c0-ff:0000-ffff
-auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
+auto MCC::mcu_access(bool write, uint24 addr, uint8 data) -> uint8 {
   if(addr < 0x400000) {
     //note: manifest maps 00-3f,80-bf:8000-ffff mask=0x408000 => 00-3f:0000-ffff
     //the intention is consistency in pre-decoding as much as possible
@@ -88,15 +88,15 @@ auto MCC::mcu_access(bool write, uint addr, uint8 data) -> uint8 {
   return 0x00;
 }
 
-auto MCC::mcu_read(uint addr, uint8 data) -> uint8 {
+auto MCC::mcu_read(uint24 addr, uint8 data) -> uint8 {
   return mcu_access(false, addr, data);
 }
 
-auto MCC::mcu_write(uint addr, uint8 data) -> void {
+auto MCC::mcu_write(uint24 addr, uint8 data) -> void {
   mcu_access(true, addr, data);
 }
 
-auto MCC::read(uint addr, uint8 data) -> uint8 {
+auto MCC::read(uint24 addr, uint8 data) -> uint8 {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     return r[n];
@@ -105,7 +105,7 @@ auto MCC::read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto MCC::write(uint addr, uint8 data) -> void {
+auto MCC::write(uint24 addr, uint8 data) -> void {
   if((addr & 0xf0ffff) == 0x005000) {  //$00-0f:5000
     uint8 n = (addr >> 16) & 15;
     r[n] = data;

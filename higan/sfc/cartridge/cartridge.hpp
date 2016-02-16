@@ -36,15 +36,15 @@ struct Cartridge : property<Cartridge> {
   MappedRAM ram;
 
   struct Mapping {
-    function<auto (uint, uint8) -> uint8> reader;
-    function<auto (uint, uint8) -> void> writer;
+    function<auto (uint24, uint8) -> uint8> reader;
+    function<auto (uint24, uint8) -> void> writer;
     string addr;
     uint size = 0;
     uint base = 0;
     uint mask = 0;
 
     Mapping() = default;
-    Mapping(const function<uint8 (uint, uint8)>&, const function<void (uint, uint8)>&);
+    Mapping(const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&);
     Mapping(SuperFamicom::Memory&);
   };
   vector<Mapping> mapping;
@@ -84,7 +84,7 @@ private:
   //markup.cpp
   auto parseMarkup(const string&) -> void;
   auto parseMarkupMap(Markup::Node, SuperFamicom::Memory&) -> void;
-  auto parseMarkupMap(Markup::Node, const function<uint8 (uint, uint8)>&, const function<void (uint, uint8)>&) -> void;
+  auto parseMarkupMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
   auto parseMarkupMemory(MappedRAM&, Markup::Node, uint id, bool writable) -> void;
 
   auto parseMarkupROM(Markup::Node) -> void;

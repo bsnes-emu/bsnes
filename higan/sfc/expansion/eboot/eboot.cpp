@@ -8,8 +8,8 @@ auto eBoot::init() -> void {
 }
 
 auto eBoot::load() -> void {
-  resetVector  = bus.read(0xfffc, 0x00) << 0;
-  resetVector |= bus.read(0xfffd, 0x00) << 8;
+  resetVector.byte(0) = bus.read(0xfffc, 0x00);
+  resetVector.byte(1) = bus.read(0xfffd, 0x00);
 
   for(auto& byte : ram) byte = 0xdb;  //stp
   ram[0] = 0x6c;  //jmp ($fffc)
@@ -35,15 +35,15 @@ auto eBoot::reset() -> void {
   booted = false;
 }
 
-auto eBoot::read(uint addr, uint8 data) -> uint8 {
+auto eBoot::read(uint24 addr, uint8 data) -> uint8 {
   addr &= 0x40ffff;
-  if(addr == 0xfffc) return booted ? resetVector >> 0 : 0x84;
-  if(addr == 0xfffd) return booted ? resetVector >> 8 : (booted = true, 0x21);
+  if(addr == 0xfffc) return booted ? resetVector.byte(0) : (uint8)0x84;
+  if(addr == 0xfffd) return booted ? resetVector.byte(1) : (booted = true, (uint8)0x21);
   if(addr >= 0x2184 && addr <= 0x21ff) return ram[addr - 0x2184];
   return data;
 }
 
-auto eBoot::write(uint addr, uint8 data) -> void {
+auto eBoot::write(uint24 addr, uint8 data) -> void {
 }
 
 }

@@ -14,6 +14,7 @@ struct Boolean {
 
   inline auto serialize(serializer& s) { s(data); }
 
+private:
   bool data;
 };
 
@@ -28,32 +29,32 @@ template<uint Bits> struct Natural {
   enum : type { Mask = ~0ull >> (64 - Bits) };
 
   inline Natural() : data(0) {}
-  template<typename T> inline Natural(const T& value) : data(clip(value)) {}
+  template<typename T> inline Natural(const T& value) { assign(value); }
 
   inline operator type() const { return data; }
-  template<typename T> inline auto& operator=(const T& value) { data = clip(value); return *this; }
+  template<typename T> inline auto& operator=(const T& value) { assign(value); return *this; }
 
-  inline auto operator++(int) { type value = data; data = clip(data + 1); return value; }
-  inline auto operator--(int) { type value = data; data = clip(data - 1); return value; }
+  inline auto operator++(int) { type value = data; assign(data + 1); return value; }
+  inline auto operator--(int) { type value = data; assign(data - 1); return value; }
 
-  inline auto& operator++() { data = clip(data + 1); return *this; }
-  inline auto& operator--() { data = clip(data - 1); return *this; }
+  inline auto& operator++() { assign(data + 1); return *this; }
+  inline auto& operator--() { assign(data - 1); return *this; }
 
-  inline auto& operator &=(const type value) { data = clip(data  & value); return *this; }
-  inline auto& operator |=(const type value) { data = clip(data  | value); return *this; }
-  inline auto& operator ^=(const type value) { data = clip(data  ^ value); return *this; }
-  inline auto& operator<<=(const type value) { data = clip(data << value); return *this; }
-  inline auto& operator>>=(const type value) { data = clip(data >> value); return *this; }
-  inline auto& operator +=(const type value) { data = clip(data  + value); return *this; }
-  inline auto& operator -=(const type value) { data = clip(data  - value); return *this; }
-  inline auto& operator *=(const type value) { data = clip(data  * value); return *this; }
-  inline auto& operator /=(const type value) { data = clip(data  / value); return *this; }
-  inline auto& operator %=(const type value) { data = clip(data  % value); return *this; }
+  inline auto& operator &=(const type value) { assign(data  & value); return *this; }
+  inline auto& operator |=(const type value) { assign(data  | value); return *this; }
+  inline auto& operator ^=(const type value) { assign(data  ^ value); return *this; }
+  inline auto& operator<<=(const type value) { assign(data << value); return *this; }
+  inline auto& operator>>=(const type value) { assign(data >> value); return *this; }
+  inline auto& operator +=(const type value) { assign(data  + value); return *this; }
+  inline auto& operator -=(const type value) { assign(data  - value); return *this; }
+  inline auto& operator *=(const type value) { assign(data  * value); return *this; }
+  inline auto& operator /=(const type value) { assign(data  / value); return *this; }
+  inline auto& operator %=(const type value) { assign(data  % value); return *this; }
 
   inline auto serialize(serializer& s) { s(data); }
 
   struct Reference {
-    inline Reference(Natural& source, uint Lo, uint Hi) : source(source), Lo(Lo), Hi(Hi) {}
+    inline Reference(Natural& source, uint lo, uint hi) : source(source), Lo(lo), Hi(hi) {}
 
     inline operator type() const {
       const type RangeBits = Hi - Lo + 1;
@@ -70,55 +71,32 @@ template<uint Bits> struct Natural {
 
   private:
     Natural& source;
-    const uint Lo;
-    const uint Hi;
+    const type Lo;
+    const type Hi;
   };
 
-  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo, hi}; }
+  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
-  template<uint Lo, uint Hi> struct Range {
-    enum : type { RangeBits = Hi - Lo + 1, RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask };
+  inline auto clamp(uint bits) -> uintmax {
+    const uintmax b = 1ull << (bits - 1);
+    const uintmax m = b * 2 - 1;
+    return data < m ? data : m;
+  }
 
-    inline operator type() const {
-      return (self() & RangeMask) >> Lo;
-    }
-
-    inline auto& operator=(const type value) {
-      self() = (self() & ~RangeMask) | ((value << Lo) & RangeMask);
-      return *this;
-    }
-
-  private:
-    inline auto self() const -> type& { return *(type*)this; }
-  };
-
-  union {
-    type data;
-
-    Range< 0,  7> b0;
-    Range< 8, 15> b1;
-    Range<16, 23> b2;
-    Range<24, 31> b3;
-    Range<32, 39> b4;
-    Range<40, 47> b5;
-    Range<48, 55> b6;
-    Range<56, 63> b7;
-
-    Range< 0, 15> h0;
-    Range<16, 31> h1;
-    Range<32, 47> h2;
-    Range<48, 63> h3;
-
-    Range< 0, 31> w0;
-    Range<32, 63> w1;
-  };
+  inline auto clip(uint bits) -> uintmax {
+    const uintmax b = 1ull << (bits - 1);
+    const uintmax m = b * 2 - 1;
+    return data & m;
+  }
 
 private:
-  auto clip(type value) const -> type {
-    return value & Mask;
+  auto assign(type value) -> void {
+    data = value & Mask;
   }
+
+  type data;
 };
 
 template<uint Bits> struct Integer {
@@ -133,32 +111,32 @@ template<uint Bits> struct Integer {
   enum : utype { Mask = ~0ull >> (64 - Bits), Sign = 1ull << (Bits - 1) };
 
   inline Integer() : data(0) {}
-  template<typename T> inline Integer(const T& value) : data(clip(value)) {}
+  template<typename T> inline Integer(const T& value) { assign(value); }
 
   inline operator type() const { return data; }
-  template<typename T> inline auto& operator=(const T& value) { data = clip(value); return *this; }
+  template<typename T> inline auto& operator=(const T& value) { assign(value); return *this; }
 
-  inline auto operator++(int) { type value = data; data = clip(data + 1); return value; }
-  inline auto operator--(int) { type value = data; data = clip(data - 1); return value; }
+  inline auto operator++(int) { type value = data; assign(data + 1); return value; }
+  inline auto operator--(int) { type value = data; assign(data - 1); return value; }
 
-  inline auto& operator++() { data = clip(data + 1); return *this; }
-  inline auto& operator--() { data = clip(data - 1); return *this; }
+  inline auto& operator++() { assign(data + 1); return *this; }
+  inline auto& operator--() { assign(data - 1); return *this; }
 
-  inline auto& operator &=(const type value) { data = clip(data  & value); return *this; }
-  inline auto& operator |=(const type value) { data = clip(data  | value); return *this; }
-  inline auto& operator ^=(const type value) { data = clip(data  ^ value); return *this; }
-  inline auto& operator<<=(const type value) { data = clip(data << value); return *this; }
-  inline auto& operator>>=(const type value) { data = clip(data >> value); return *this; }
-  inline auto& operator +=(const type value) { data = clip(data  + value); return *this; }
-  inline auto& operator -=(const type value) { data = clip(data  - value); return *this; }
-  inline auto& operator *=(const type value) { data = clip(data  * value); return *this; }
-  inline auto& operator /=(const type value) { data = clip(data  / value); return *this; }
-  inline auto& operator %=(const type value) { data = clip(data  % value); return *this; }
+  inline auto& operator &=(const type value) { assign(data  & value); return *this; }
+  inline auto& operator |=(const type value) { assign(data  | value); return *this; }
+  inline auto& operator ^=(const type value) { assign(data  ^ value); return *this; }
+  inline auto& operator<<=(const type value) { assign(data << value); return *this; }
+  inline auto& operator>>=(const type value) { assign(data >> value); return *this; }
+  inline auto& operator +=(const type value) { assign(data  + value); return *this; }
+  inline auto& operator -=(const type value) { assign(data  - value); return *this; }
+  inline auto& operator *=(const type value) { assign(data  * value); return *this; }
+  inline auto& operator /=(const type value) { assign(data  / value); return *this; }
+  inline auto& operator %=(const type value) { assign(data  % value); return *this; }
 
   inline auto serialize(serializer& s) { s(data); }
 
   struct Reference {
-    inline Reference(Integer& source, uint Lo, uint Hi) : source(source), Lo(Lo), Hi(Hi) {}
+    inline Reference(Integer& source, uint lo, uint hi) : source(source), Lo(lo), Hi(hi) {}
 
     inline operator utype() const {
       const type RangeBits = Hi - Lo + 1;
@@ -175,55 +153,32 @@ template<uint Bits> struct Integer {
 
   private:
     Integer& source;
-    uint Lo;
-    uint Hi;
+    const uint Lo;
+    const uint Hi;
   };
 
   inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo, hi}; }
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
-  template<uint Lo, uint Hi> struct Range {
-    enum : utype { RangeBits = Hi - Lo + 1, RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask };
+  inline auto clamp(uint bits) -> intmax {
+    const intmax b = 1ull << (bits - 1);
+    const intmax m = b - 1;
+    return data > m ? m : data < -b ? -b : data;
+  }
 
-    inline operator utype() const {
-      return ((utype)self() & RangeMask) >> Lo;
-    }
-
-    inline auto& operator=(const utype value) {
-      self() = ((((utype)self() & ~RangeMask) | ((value << Lo) & RangeMask)) ^ Sign) - Sign;
-      return *this;
-    }
-
-  private:
-    inline auto self() const -> utype& { return *(utype*)this; }
-  };
-
-  union {
-    type data;
-
-    Range< 0,  7> b0;
-    Range< 8, 15> b1;
-    Range<16, 23> b2;
-    Range<24, 31> b3;
-    Range<32, 39> b4;
-    Range<40, 47> b5;
-    Range<48, 55> b6;
-    Range<56, 63> b7;
-
-    Range< 0, 15> h0;
-    Range<16, 31> h1;
-    Range<32, 47> h2;
-    Range<48, 63> h3;
-
-    Range< 0, 31> w0;
-    Range<32, 63> w1;
-  };
+  inline auto clip(uint bits) -> intmax {
+    const uintmax b = 1ull << (bits - 1);
+    const uintmax m = b * 2 - 1;
+    return ((data & m) ^ b) - b;
+  }
 
 private:
-  auto clip(type value) const -> type {
-    return ((value & Mask) ^ Sign) - Sign;
+  auto assign(type value) -> void {
+    data = ((value & Mask) ^ Sign) - Sign;
   }
+
+  type data;
 };
 
 template<uint Bits> struct Real {

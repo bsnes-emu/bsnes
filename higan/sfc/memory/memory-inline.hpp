@@ -10,10 +10,10 @@ StaticRAM::~StaticRAM() { delete[] data_; }
 auto StaticRAM::data() -> uint8* { return data_; }
 auto StaticRAM::size() const -> uint { return size_; }
 
-auto StaticRAM::read(uint addr, uint8) -> uint8 { return data_[addr]; }
-auto StaticRAM::write(uint addr, uint8 data) -> void { data_[addr] = data; }
-auto StaticRAM::operator[](uint addr) -> uint8& { return data_[addr]; }
-auto StaticRAM::operator[](uint addr) const -> const uint8& { return data_[addr]; }
+auto StaticRAM::read(uint24 addr, uint8) -> uint8 { return data_[addr]; }
+auto StaticRAM::write(uint24 addr, uint8 data) -> void { data_[addr] = data; }
+auto StaticRAM::operator[](uint24 addr) -> uint8& { return data_[addr]; }
+auto StaticRAM::operator[](uint24 addr) const -> const uint8& { return data_[addr]; }
 
 //MappedRAM
 
@@ -48,9 +48,9 @@ auto MappedRAM::write_protect(bool status) -> void { write_protect_ = status; }
 auto MappedRAM::data() -> uint8* { return data_; }
 auto MappedRAM::size() const -> uint { return size_; }
 
-auto MappedRAM::read(uint addr, uint8) -> uint8 { return data_[addr]; }
-auto MappedRAM::write(uint addr, uint8 data) -> void { if(!write_protect_) data_[addr] = data; }
-auto MappedRAM::operator[](uint addr) const -> const uint8& { return data_[addr]; }
+auto MappedRAM::read(uint24 addr, uint8) -> uint8 { return data_[addr]; }
+auto MappedRAM::write(uint24 addr, uint8 data) -> void { if(!write_protect_) data_[addr] = data; }
+auto MappedRAM::operator[](uint24 addr) const -> const uint8& { return data_[addr]; }
 
 //Bus
 
@@ -79,16 +79,14 @@ auto Bus::reduce(uint addr, uint mask) -> uint {
   return addr;
 }
 
-auto Bus::read(uint addr, uint8 data) -> uint8 {
+auto Bus::read(uint24 addr, uint8 data) -> uint8 {
   data = reader[lookup[addr]](target[addr], data);
-
   if(cheat.enable()) {
     if(auto result = cheat.find(addr, data)) return result();
   }
-
   return data;
 }
 
-auto Bus::write(uint addr, uint8 data) -> void {
+auto Bus::write(uint24 addr, uint8 data) -> void {
   return writer[lookup[addr]](target[addr], data);
 }

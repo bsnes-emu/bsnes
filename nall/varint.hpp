@@ -79,6 +79,8 @@ private:
 
 }
 
+using boolean = nall::Boolean;
+
 using  int1 = nall::Integer< 1>;
 using  int2 = nall::Integer< 2>;
 using  int3 = nall::Integer< 3>;

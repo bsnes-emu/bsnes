@@ -41,7 +41,7 @@ auto SDD1::reset() -> void {
   }
 }
 
-auto SDD1::read(uint addr, uint8 data) -> uint8 {
+auto SDD1::read(uint24 addr, uint8 data) -> uint8 {
   addr = 0x4800 | (addr & 7);
 
   switch(addr) {
@@ -54,7 +54,7 @@ auto SDD1::read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SDD1::write(uint addr, uint8 data) -> void {
+auto SDD1::write(uint24 addr, uint8 data) -> void {
   addr = 0x4800 | (addr & 7);
 
   switch(addr) {
@@ -68,11 +68,11 @@ auto SDD1::write(uint addr, uint8 data) -> void {
   }
 }
 
-auto SDD1::dma_read(uint addr, uint8 data) -> uint8 {
+auto SDD1::dma_read(uint24 addr, uint8 data) -> uint8 {
   return cpu.mmio_read(addr, data);
 }
 
-auto SDD1::dma_write(uint addr, uint8 data) -> void {
+auto SDD1::dma_write(uint24 addr, uint8 data) -> void {
   uint channel = (addr >> 4) & 7;
   switch(addr & 15) {
   case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
@@ -85,7 +85,7 @@ auto SDD1::dma_write(uint addr, uint8 data) -> void {
   return cpu.mmio_write(addr, data);
 }
 
-auto SDD1::mmc_read(uint addr) -> uint8 {
+auto SDD1::mmc_read(uint24 addr) -> uint8 {
   return rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
 }
 
@@ -107,7 +107,7 @@ auto SDD1::mmc_read(uint addr) -> uint8 {
 //
 //the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
 //one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-auto SDD1::mcurom_read(uint addr, uint8) -> uint8 {
+auto SDD1::mcurom_read(uint24 addr, uint8) -> uint8 {
   //map address=00-3f,80-bf:8000-ffff mask=0x808000 => 00-1f:0000-ffff
   if(addr < 0x200000) {
     return rom.read(addr);
@@ -143,16 +143,16 @@ auto SDD1::mcurom_read(uint addr, uint8) -> uint8 {
   return mmc_read(addr);
 }
 
-auto SDD1::mcurom_write(uint addr, uint8 data) -> void {
+auto SDD1::mcurom_write(uint24 addr, uint8 data) -> void {
 }
 
 //map address=00-3f,80-bf:6000-7fff mask=0xe000
 //map address=70-7d:0000-7fff mask=0x8000
-auto SDD1::mcuram_read(uint addr, uint8 data) -> uint8 {
+auto SDD1::mcuram_read(uint24 addr, uint8 data) -> uint8 {
   return ram.read(addr & 0x1fff, data);
 }
 
-auto SDD1::mcuram_write(uint addr, uint8 data) -> void {
+auto SDD1::mcuram_write(uint24 addr, uint8 data) -> void {
   return ram.write(addr & 0x1fff, data);
 }
 

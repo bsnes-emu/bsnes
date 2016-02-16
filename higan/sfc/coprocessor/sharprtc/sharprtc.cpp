@@ -59,7 +59,7 @@ auto SharpRTC::sync() -> void {
   weekday = timeinfo->tm_wday;
 }
 
-auto SharpRTC::read(uint addr, uint8 data) -> uint8 {
+auto SharpRTC::read(uint24 addr, uint8 data) -> uint8 {
   addr &= 1;
 
   if(addr == 0) {
@@ -79,7 +79,7 @@ auto SharpRTC::read(uint addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto SharpRTC::write(uint addr, uint8 data) -> void {
+auto SharpRTC::write(uint24 addr, uint8 data) -> void {
   addr &= 1, data &= 15;
 
   if(addr == 1) {
