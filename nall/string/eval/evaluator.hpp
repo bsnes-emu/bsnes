@@ -36,7 +36,7 @@ inline auto evaluateExpression(Node* node) -> string {
   throw "invalid operator";
 }
 
-inline auto evaluateInteger(Node* node) -> int64 {
+inline auto evaluateInteger(Node* node) -> int64_t {
   if(node->type == Node::Type::Literal) return nall::integer(node->literal);
 
   #define p(n) evaluateInteger(node->link[n])
@@ -85,7 +85,7 @@ inline auto evaluateInteger(Node* node) -> int64 {
   throw "invalid operator";
 }
 
-inline auto integer(const string& expression) -> maybe<int64> {
+inline auto integer(const string& expression) -> maybe<int64_t> {
   try {
     auto tree = new Node;
     const char* p = expression;

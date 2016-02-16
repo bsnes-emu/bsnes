@@ -10,8 +10,8 @@ struct PNG {
   inline ~PNG();
 
   inline auto load(const string& filename) -> bool;
-  inline auto load(const uint8* sourceData, uint sourceSize) -> bool;
-  inline auto readbits(const uint8*& data) -> uint;
+  inline auto load(const uint8_t* sourceData, uint sourceSize) -> bool;
+  inline auto readbits(const uint8_t*& data) -> uint;
 
   struct Info {
     uint width;
@@ -31,10 +31,10 @@ struct PNG {
     uint bytesPerPixel;
     uint pitch;
 
-    uint8 palette[256][3];
+    uint8_t palette[256][3];
   } info;
 
-  uint8* data = nullptr;
+  uint8_t* data = nullptr;
   uint size = 0;
 
   uint bitpos = 0;
@@ -49,9 +49,9 @@ protected:
 
   inline auto interlace(uint pass, uint index) -> uint;
   inline auto inflateSize() -> uint;
-  inline auto deinterlace(const uint8*& inputData, uint pass) -> bool;
-  inline auto filter(uint8* outputData, const uint8* inputData, uint width, uint height) -> bool;
-  inline auto read(const uint8* data, uint length) -> uint;
+  inline auto deinterlace(const uint8_t*& inputData, uint pass) -> bool;
+  inline auto filter(uint8_t* outputData, const uint8_t* inputData, uint width, uint height) -> bool;
+  inline auto read(const uint8_t* data, uint length) -> uint;
 };
 
 PNG::PNG() {
@@ -68,12 +68,12 @@ auto PNG::load(const string& filename) -> bool {
   return false;
 }
 
-auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
+auto PNG::load(const uint8_t* sourceData, uint sourceSize) -> bool {
   if(sourceSize < 8) return false;
   if(read(sourceData + 0, 4) != 0x89504e47) return false;
   if(read(sourceData + 4, 4) != 0x0d0a1a0a) return false;
 
-  uint8* compressedData = nullptr;
+  uint8_t* compressedData = nullptr;
   uint compressedSize = 0;
 
   uint offset = 8;
@@ -125,7 +125,7 @@ auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
     }
 
     if(fourCC == (uint)FourCC::IDAT) {
-      compressedData = (uint8*)realloc(compressedData, compressedSize + length);
+      compressedData = (uint8_t*)realloc(compressedData, compressedSize + length);
       memcpy(compressedData + compressedSize, sourceData + offset + 8, length);
       compressedSize += length;
     }
@@ -138,7 +138,7 @@ auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
   }
 
   uint interlacedSize = inflateSize();
-  uint8 *interlacedData = new uint8[interlacedSize];
+  auto interlacedData = new uint8_t[interlacedSize];
 
   bool result = inflate(interlacedData, interlacedSize, compressedData + 2, compressedSize - 6);
   free(compressedData);
@@ -149,7 +149,7 @@ auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
   }
 
   size = info.width * info.height * info.bytesPerPixel;
-  data = new uint8[size];
+  data = new uint8_t[size];
 
   if(info.interlaceMethod == 0) {
     if(filter(data, interlacedData, info.width, info.height) == false) {
@@ -159,7 +159,7 @@ auto PNG::load(const uint8* sourceData, uint sourceSize) -> bool {
       return false;
     }
   } else {
-    const uint8* passData = interlacedData;
+    const uint8_t* passData = interlacedData;
     for(uint pass = 0; pass < 7; pass++) {
       if(deinterlace(passData, pass) == false) {
         delete[] interlacedData;
@@ -205,7 +205,7 @@ auto PNG::inflateSize() -> uint {
   return size;
 }
 
-auto PNG::deinterlace(const uint8*& inputData, uint pass) -> bool {
+auto PNG::deinterlace(const uint8_t*& inputData, uint pass) -> bool {
   uint xd = interlace(pass, 0), yd = interlace(pass, 1);
   uint xo = interlace(pass, 2), yo = interlace(pass, 3);
   uint width  = (info.width  + (xd - xo - 1)) / xd;
@@ -213,12 +213,12 @@ auto PNG::deinterlace(const uint8*& inputData, uint pass) -> bool {
   if(width == 0 || height == 0) return true;
 
   uint outputSize = width * height * info.bytesPerPixel;
-  uint8* outputData = new uint8[outputSize];
+  auto outputData = new uint8_t[outputSize];
   bool result = filter(outputData, inputData, width, height);
 
-  const uint8* rd = outputData;
+  const uint8_t* rd = outputData;
   for(uint y = yo; y < info.height; y += yd) {
-    uint8* wr = data + y * info.pitch;
+    uint8_t* wr = data + y * info.pitch;
     for(uint x = xo; x < info.width; x += xd) {
       for(uint b = 0; b < info.bytesPerPixel; b++) {
         wr[x * info.bytesPerPixel + b] = *rd++;
@@ -231,12 +231,12 @@ auto PNG::deinterlace(const uint8*& inputData, uint pass) -> bool {
   return result;
 }
 
-auto PNG::filter(uint8* outputData, const uint8* inputData, uint width, uint height) -> bool {
-  uint8* wr = outputData;
-  const uint8* rd = inputData;
+auto PNG::filter(uint8_t* outputData, const uint8_t* inputData, uint width, uint height) -> bool {
+  uint8_t* wr = outputData;
+  const uint8_t* rd = inputData;
   int bpp = info.bytesPerPixel, pitch = width * bpp;
   for(int y = 0; y < height; y++) {
-    uint8 filter = *rd++;
+    uint8_t filter = *rd++;
 
     switch(filter) {
     case 0x00:  //None
@@ -262,7 +262,7 @@ auto PNG::filter(uint8* outputData, const uint8* inputData, uint width, uint hei
         short a = x - bpp < 0 ? 0 : wr[x - bpp];
         short b = y - 1 < 0 ? 0 : wr[x - pitch];
 
-        wr[x] = rd[x] + (uint8)((a + b) / 2);
+        wr[x] = rd[x] + (uint8_t)((a + b) / 2);
       }
       break;
 
@@ -277,7 +277,7 @@ auto PNG::filter(uint8* outputData, const uint8* inputData, uint width, uint hei
         short pb = p > b ? p - b : b - p;
         short pc = p > c ? p - c : c - p;
 
-        uint8 paeth = (uint8)((pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c);
+        auto paeth = (uint8_t)((pa <= pb && pa <= pc) ? a : (pb <= pc) ? b : c);
 
         wr[x] = rd[x] + paeth;
       }
@@ -294,13 +294,13 @@ auto PNG::filter(uint8* outputData, const uint8* inputData, uint width, uint hei
   return true;
 }
 
-auto PNG::read(const uint8* data, uint length) -> uint {
+auto PNG::read(const uint8_t* data, uint length) -> uint {
   uint result = 0;
   while(length--) result = (result << 8) | (*data++);
   return result;
 }
 
-auto PNG::readbits(const uint8*& data) -> uint {
+auto PNG::readbits(const uint8_t*& data) -> uint {
   uint result = 0;
   switch(info.bitDepth) {
   case 1:

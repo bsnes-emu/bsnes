@@ -1,5 +1,5 @@
 struct FamicomCartridge {
-  FamicomCartridge(const uint8* data, uint size);
+  FamicomCartridge(const uint8_t* data, uint size);
 
   string markup;
 
@@ -12,7 +12,7 @@ struct FamicomCartridge {
   uint chrram;
 };
 
-FamicomCartridge::FamicomCartridge(const uint8* data, uint size) {
+FamicomCartridge::FamicomCartridge(const uint8_t* data, uint size) {
   if(size < 16) return;
   if(data[0] != 'N') return;
   if(data[1] != 'E') return;

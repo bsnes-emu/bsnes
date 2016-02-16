@@ -14,8 +14,8 @@ struct R65816 {
   using fp = auto (R65816::*)() -> void;
 
   virtual auto op_io() -> void = 0;
-  virtual auto op_read(uint32_t addr) -> uint8_t = 0;
-  virtual auto op_write(uint32_t addr, uint8_t data) -> void = 0;
+  virtual auto op_read(uint32 addr) -> uint8 = 0;
+  virtual auto op_write(uint32 addr, uint8 data) -> void = 0;
   virtual auto last_cycle() -> void = 0;
   virtual auto interrupt_pending() -> bool = 0;
   virtual auto op_irq() -> void;

@@ -14,16 +14,16 @@ struct stream {
   virtual auto writable() const -> bool = 0;
   virtual auto randomaccess() const -> bool = 0;
 
-  virtual auto data() const -> uint8* { return nullptr; }
+  virtual auto data() const -> uint8_t* { return nullptr; }
   virtual auto size() const -> uint = 0;
   virtual auto offset() const -> uint = 0;
-  virtual auto seek(unsigned offset) const -> void = 0;
+  virtual auto seek(uint offset) const -> void = 0;
 
-  virtual auto read() const -> uint8 = 0;
+  virtual auto read() const -> uint8_t = 0;
   virtual auto write(uint8_t data) const -> void = 0;
 
-  virtual auto read(uint) const -> uint8 { return 0; }
-  virtual auto write(uint, uint8) const -> void {}
+  virtual auto read(uint) const -> uint8_t { return 0; }
+  virtual auto write(uint, uint8_t) const -> void {}
 
   explicit operator bool() const {
     return size();
@@ -49,7 +49,7 @@ struct stream {
     return data;
   }
 
-  auto read(uint8* data, uint length) const -> void {
+  auto read(uint8_t* data, uint length) const -> void {
     while(length--) *data++ = read();
   }
 
@@ -57,7 +57,7 @@ struct stream {
     string buffer;
     buffer.resize(size());
     seek(0);
-    read((uint8*)buffer.get(), size());
+    read((uint8_t*)buffer.get(), size());
     return buffer;
   }
 
@@ -76,13 +76,13 @@ struct stream {
     }
   }
 
-  auto write(const uint8* data, uint length) const -> void {
+  auto write(const uint8_t* data, uint length) const -> void {
     while(length--) write(*data++);
   }
 
   struct byte {
     byte(const stream& s, uint offset) : s(s), offset(offset) {}
-    operator uint8() const { return s.read(offset); }
+    operator uint8_t() const { return s.read(offset); }
     auto operator=(uint8_t data) -> byte& { s.write(offset, data); return *this; }
 
   private:

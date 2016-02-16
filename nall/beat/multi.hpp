@@ -46,7 +46,7 @@ struct bpsmulti {
         Hash::CRC32 cksum;
 
         for(uint n = 0; n < sp.size(); n++) {
-          uint8 byte = sp.read();
+          uint8_t byte = sp.read();
           if(identical && byte != dp.read()) identical = false;
           cksum.data(byte);
         }
@@ -118,13 +118,13 @@ struct bpsmulti {
         fp.open({targetPath, targetName}, file::mode::write);
         auto fileSize = readNumber();
         while(fileSize--) fp.write(read());
-        uint32 cksum = readChecksum();
+        uint32_t cksum = readChecksum();
       } else if(action == ModifyFile) {
         auto encoding = readNumber();
         string originPath = encoding & 1 ? targetPath : sourcePath;
         string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
         auto patchSize = readNumber();
-        vector<uint8> buffer;
+        vector<uint8_t> buffer;
         buffer.resize(patchSize);
         for(uint n = 0; n < patchSize; n++) buffer[n] = read();
         bpspatch patch;
@@ -137,15 +137,15 @@ struct bpsmulti {
         string originPath = encoding & 1 ? targetPath : sourcePath;
         string sourceName = (encoding >> 1) == 0 ? targetName : readString(encoding >> 1);
         file::copy({originPath, sourceName}, {targetPath, targetName});
-        uint32 cksum = readChecksum();
+        uint32_t cksum = readChecksum();
       }
     }
 
-    uint32 cksum = checksum.value();
-    if(read() != (uint8)(cksum >>  0)) return false;
-    if(read() != (uint8)(cksum >>  8)) return false;
-    if(read() != (uint8)(cksum >> 16)) return false;
-    if(read() != (uint8)(cksum >> 24)) return false;
+    uint32_t cksum = checksum.value();
+    if(read() != (uint8_t)(cksum >>  0)) return false;
+    if(read() != (uint8_t)(cksum >>  8)) return false;
+    if(read() != (uint8_t)(cksum >> 16)) return false;
+    if(read() != (uint8_t)(cksum >> 24)) return false;
 
     fp.close();
     return true;
@@ -169,14 +169,14 @@ protected:
     }
   }
 
-  auto write(uint8 data) -> void {
+  auto write(uint8_t data) -> void {
     fp.write(data);
     checksum.data(data);
   }
 
-  auto writeNumber(uint64 data) -> void {
+  auto writeNumber(uint64_t data) -> void {
     while(true) {
-      uint64 x = data & 0x7f;
+      uint64_t x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -192,7 +192,7 @@ protected:
     for(uint n = 0; n < length; n++) write(text[n]);
   }
 
-  auto writeChecksum(uint32 cksum) -> void {
+  auto writeChecksum(uint32_t cksum) -> void {
     write(cksum >>  0);
     write(cksum >>  8);
     write(cksum >> 16);
@@ -200,16 +200,16 @@ protected:
   }
 
   //apply() functions
-  auto read() -> uint8 {
-    uint8 data = fp.read();
+  auto read() -> uint8_t {
+    uint8_t data = fp.read();
     checksum.data(data);
     return data;
   }
 
-  auto readNumber() -> uint64 {
-    uint64 data = 0, shift = 1;
+  auto readNumber() -> uint64_t {
+    uint64_t data = 0, shift = 1;
     while(true) {
-      uint8 x = read();
+      uint8_t x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -226,8 +226,8 @@ protected:
     return text;
   }
 
-  auto readChecksum() -> uint32 {
-    uint32 checksum = 0;
+  auto readChecksum() -> uint32_t {
+    uint32_t checksum = 0;
     checksum |= read() <<  0;
     checksum |= read() <<  8;
     checksum |= read() << 16;

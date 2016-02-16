@@ -48,7 +48,7 @@ struct InputManager {
   InputManager();
   auto bind() -> void;
   auto poll() -> void;
-  auto onChange(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void;
+  auto onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void;
   auto quit() -> void;
 
   auto findMouse() -> shared_pointer<HID::Device>;

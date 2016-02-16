@@ -185,7 +185,7 @@ auto V30MZ::opPopAll() {
 //68  push imm16
 //6a  push imm8s
 auto V30MZ::opPushImm(Size size) {
-  push(size == Word ? fetch(Word) : (int8)fetch(Byte));
+  push(size == Word ? fetch(Word) : (int8_t)fetch(Byte));
 }
 
 auto V30MZ::opPopMem() {

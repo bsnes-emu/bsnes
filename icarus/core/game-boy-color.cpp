@@ -1,10 +1,10 @@
 auto Icarus::gameBoyColorManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
   return gameBoyColorManifest(buffer, location);
 }
 
-auto Icarus::gameBoyColorManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::gameBoyColorManifest(vector<uint8_t>& buffer, string location) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -31,7 +31,7 @@ auto Icarus::gameBoyColorManifest(vector<uint8>& buffer, string location) -> str
   return markup;
 }
 
-auto Icarus::gameBoyColorImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::gameBoyColorImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Game Boy Color/", name, ".gbc/"};

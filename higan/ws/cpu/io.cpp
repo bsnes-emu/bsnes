@@ -81,7 +81,7 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //INT_BASE
   if(addr == 0x00b0) {
-    r.interruptBase = WS() ? (data & ~7) : (data & ~1);
+    r.interruptBase = WS() ? data & ~7 : data & ~1;
     return;
   }
 

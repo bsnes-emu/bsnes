@@ -5,7 +5,7 @@
 auto V30MZ::opGroup1MemImm(Size size, bool sign) {
   modRM();
   auto mem = getMem(size);
-  auto imm = sign ? (int8)fetch() : size == Byte ? fetch() : fetch(Word);
+  auto imm = sign ? (int8_t)fetch() : size == Byte ? fetch() : fetch(Word);
   switch(modrm.reg) {
   case 0: setMem(size, alAdd(size, mem, imm)); break;
   case 1: setMem(size, alOr (size, mem, imm)); break;

@@ -26,9 +26,9 @@ struct filestream : stream {
 
   auto size() const -> uint { return pfile.size(); }
   auto offset() const -> uint { return pfile.offset(); }
-  auto seek(unsigned offset) const -> void { pfile.seek(offset); }
+  auto seek(uint offset) const -> void { pfile.seek(offset); }
 
-  auto read() const -> uint8 { return pfile.read(); }
+  auto read() const -> uint8_t { return pfile.read(); }
   auto write(uint8_t data) const -> void { pfile.write(data); }
 
 private:

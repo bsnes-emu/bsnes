@@ -4,9 +4,27 @@
 #include <nall/dsp.hpp>
 using namespace nall;
 
+//todo: update code to support Natural<8,16,32>
+//using int8 = Integer<8>;
+//using int16 = Integer<16>;
+//using int32 = Integer<32>;
+//using int64 = Integer<64>;
+//using uint32 = Natural<32>;
+//using uint64 = Natural<64>;
+
+using int8 = int8_t;
+using int16 = int16_t;
+using int32 = int32_t;
+using int64 = int64_t;
+using uint8 = uint8_t;
+using uint16 = uint16_t;
+using uint32 = uint32_t;
+using uint64 = uint64_t;
+using varuint = varuint_t<uint>;
+
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "097.13";
+  static const string Version = "097.14";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -52,5 +70,3 @@ template<typename R, typename... P> struct hook<auto (P...) -> R> {
 #else
   #define privileged private
 #endif
-
-using varuint = varuint_t<uint>;

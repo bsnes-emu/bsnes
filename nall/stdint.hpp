@@ -49,22 +49,22 @@ static_assert(sizeof(float)       >=  4, "float32_t is not of the correct size")
 static_assert(sizeof(double)      >=  8, "float64_t is not of the correct size");
 static_assert(sizeof(long double) >= 10, "float80_t is not of the correct size");
 
-using int8 = int8_t;
-using int16 = int16_t;
-using int32 = int32_t;
-using int64 = int64_t;
+//using int8 = int8_t;
+//using int16 = int16_t;
+//using int32 = int32_t;
+//using int64 = int64_t;
 using intmax = intmax_t;
 using intptr = intptr_t;
 
 using uint = unsigned int;
-using uint8 = uint8_t;
-using uint16 = uint16_t;
-using uint32 = uint32_t;
-using uint64 = uint64_t;
+//using uint8 = uint8_t;
+//using uint16 = uint16_t;
+//using uint32 = uint32_t;
+//using uint64 = uint64_t;
 using uintmax = uintmax_t;
 using uintptr = uintptr_t;
 
 #if defined(__SIZEOF_INT128__)
-using int128 = int128_t;
-using uint128 = uint128_t;
+//using int128 = int128_t;
+//using uint128 = uint128_t;
 #endif

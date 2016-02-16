@@ -10,7 +10,7 @@ struct gzipstream : memorystream {
 
   gzipstream(const stream& stream) {
     uint size = stream.size();
-    auto data = new uint8[size];
+    auto data = new uint8_t[size];
     stream.read(data, size);
 
     Decode::GZIP archive;

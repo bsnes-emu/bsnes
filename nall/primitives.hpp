@@ -7,10 +7,10 @@ namespace nall {
 
 struct Boolean {
   inline Boolean() : data(false) {}
-  inline Boolean(bool value) : data(value) {}
+  template<typename T> inline Boolean(const T& value) : data(value) {}
 
   inline operator bool() const { return data; }
-  inline auto& operator=(const bool value) { data = value; return *this; }
+  template<typename T> inline auto& operator=(const T& value) { data = value; return *this; }
 
   inline auto serialize(serializer& s) { s(data); }
 
@@ -28,12 +28,10 @@ template<uint Bits> struct Natural {
   enum : type { Mask = ~0ull >> (64 - Bits) };
 
   inline Natural() : data(0) {}
-  inline Natural(const type value) : data(clip(value)) {}
-  template<uint B> inline Natural(const Natural<B> value) : data(clip(value)) {}
+  template<typename T> inline Natural(const T& value) : data(clip(value)) {}
 
   inline operator type() const { return data; }
-  inline auto& operator=(const type value) { data = clip(value); return *this; }
-  template<uint B> inline auto& operator=(const Natural<B> value) { data = clip(value); return *this; }
+  template<typename T> inline auto& operator=(const T& value) { data = clip(value); return *this; }
 
   inline auto operator++(int) { type value = data; data = clip(data + 1); return value; }
   inline auto operator--(int) { type value = data; data = clip(data - 1); return value; }
@@ -53,6 +51,32 @@ template<uint Bits> struct Natural {
   inline auto& operator %=(const type value) { data = clip(data  % value); return *this; }
 
   inline auto serialize(serializer& s) { s(data); }
+
+  struct Reference {
+    inline Reference(Natural& source, uint Lo, uint Hi) : source(source), Lo(Lo), Hi(Hi) {}
+
+    inline operator type() const {
+      const type RangeBits = Hi - Lo + 1;
+      const type RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask;
+      return (source & RangeMask) >> Lo;
+    }
+
+    inline auto& operator=(const type value) {
+      const type RangeBits = Hi - Lo + 1;
+      const type RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask;
+      source = (source & ~RangeMask) | ((value << Lo) & RangeMask);
+      return *this;
+    }
+
+  private:
+    Natural& source;
+    const uint Lo;
+    const uint Hi;
+  };
+
+  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo, hi}; }
+  inline auto bit(uint index) -> Reference { return {*this, index, index}; }
+  inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
   template<uint Lo, uint Hi> struct Range {
     enum : type { RangeBits = Hi - Lo + 1, RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask };
@@ -109,12 +133,10 @@ template<uint Bits> struct Integer {
   enum : utype { Mask = ~0ull >> (64 - Bits), Sign = 1ull << (Bits - 1) };
 
   inline Integer() : data(0) {}
-  inline Integer(const type value) : data(clip(value)) {}
-  template<uint B> inline Integer(const Integer<B> value) : data(clip(value)) {}
+  template<typename T> inline Integer(const T& value) : data(clip(value)) {}
 
   inline operator type() const { return data; }
-  inline auto& operator=(const type value) { data = clip(value); return *this; }
-  template<uint B> inline auto& operator=(const Integer<B> value) { data = clip(value); return *this; }
+  template<typename T> inline auto& operator=(const T& value) { data = clip(value); return *this; }
 
   inline auto operator++(int) { type value = data; data = clip(data + 1); return value; }
   inline auto operator--(int) { type value = data; data = clip(data - 1); return value; }
@@ -135,15 +157,41 @@ template<uint Bits> struct Integer {
 
   inline auto serialize(serializer& s) { s(data); }
 
+  struct Reference {
+    inline Reference(Integer& source, uint Lo, uint Hi) : source(source), Lo(Lo), Hi(Hi) {}
+
+    inline operator utype() const {
+      const type RangeBits = Hi - Lo + 1;
+      const type RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask;
+      return ((utype)source & RangeMask) >> Lo;
+    }
+
+    inline auto& operator=(const utype value) {
+      const type RangeBits = Hi - Lo + 1;
+      const type RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask;
+      source = ((utype)source & ~RangeMask) | ((value << Lo) & RangeMask);
+      return *this;
+    }
+
+  private:
+    Integer& source;
+    uint Lo;
+    uint Hi;
+  };
+
+  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo, hi}; }
+  inline auto bit(uint index) -> Reference { return {*this, index, index}; }
+  inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
+
   template<uint Lo, uint Hi> struct Range {
     enum : utype { RangeBits = Hi - Lo + 1, RangeMask = (((1ull << RangeBits) - 1) << Lo) & Mask };
 
     inline operator utype() const {
-      return (self() & RangeMask) >> Lo;
+      return ((utype)self() & RangeMask) >> Lo;
     }
 
     inline auto& operator=(const utype value) {
-      self() = (((self() & ~RangeMask) | ((value << Lo) & RangeMask)) ^ Sign) - Sign;
+      self() = ((((utype)self() & ~RangeMask) | ((value << Lo) & RangeMask)) ^ Sign) - Sign;
       return *this;
     }
 
@@ -186,12 +234,10 @@ template<uint Bits> struct Real {
     void>>>;
 
   inline Real() : data(0.0) {}
-  inline Real(const type value) : data(value) {}
-  template<uint B> inline Real(const Real<B> value) : data((type)value) {}
+  template<typename T> inline Real(const T& value) : data((type)value) {}
 
   inline operator type() const { return data; }
-  inline auto& operator=(const type value) { data = value; return *this; }
-  template<uint B> inline auto& operator=(const Real<B> value) { data = (type)value; return *this; }
+  template<typename T> inline auto& operator=(const T& value) { data = (type)value; return *this; }
 
   inline auto operator++(int) { type value = data; ++data; return value; }
   inline auto operator--(int) { type value = data; --data; return value; }

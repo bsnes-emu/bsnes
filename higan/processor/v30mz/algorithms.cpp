@@ -55,8 +55,8 @@ auto V30MZ::alDiv(Size size, uint32 x, uint32 y) -> uint32 {
 
 auto V30MZ::alDivi(Size size, int32 x, int32 y) -> uint32 {
   if(y == 0) return interrupt(0), 0;
-  x = size == Byte ? (int8)x : (int16)x;
-  y = size == Byte ? (int8)y : (int16)y;
+  x = size == Byte ? (int8_t)x : (int16_t)x;
+  y = size == Byte ? (int8_t)y : (int16_t)y;
   uint32 quotient = x / y;
   uint32 remainder = x % y;
   return (remainder & mask) << bits | (quotient & mask);
@@ -80,8 +80,8 @@ auto V30MZ::alMul(Size size, uint16 x, uint16 y) -> uint32 {
 }
 
 auto V30MZ::alMuli(Size size, int16 x, int16 y) -> uint32 {
-  x = size == Byte ? (int8)x : (int16)x;
-  y = size == Byte ? (int8)y : (int16)y;
+  x = size == Byte ? (int8_t)x : (int16_t)x;
+  y = size == Byte ? (int8_t)y : (int16_t)y;
   uint32 result = x * y;
   r.f.c = result >> bits;
   r.f.v = result >> bits;

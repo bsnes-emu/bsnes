@@ -1,12 +1,12 @@
 struct SuperFamicomCartridge {
-  SuperFamicomCartridge(const uint8* data, uint size, bool has_msu1 = false);
+  SuperFamicomCartridge(const uint8_t* data, uint size, bool has_msu1 = false);
 
   string markup;
 
 //private:
-  auto readHeader(const uint8* data, uint size) -> void;
-  auto findHeader(const uint8* data, uint size) -> uint;
-  auto scoreHeader(const uint8* data, uint size, uint addr) -> uint;
+  auto readHeader(const uint8_t* data, uint size) -> void;
+  auto findHeader(const uint8_t* data, uint size) -> uint;
+  auto scoreHeader(const uint8_t* data, uint size, uint addr) -> uint;
 
   enum HeaderField : uint {
     CartName    = 0x00,
@@ -86,7 +86,7 @@ struct SuperFamicomCartridge {
   bool has_st018 = false;
 };
 
-SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size, bool has_msu1) {
+SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, bool has_msu1) {
   //skip copier header
   if((size & 0x7fff) == 512) data += 512, size -= 512;
 
@@ -534,7 +534,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8* data, uint size, bool 
   }
 }
 
-auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
+auto SuperFamicomCartridge::readHeader(const uint8_t* data, uint size) -> void {
   //detect Game Boy carts
   if(size >= 0x0140) {
     if(data[0x0104] == 0xce && data[0x0105] == 0xed && data[0x0106] == 0x66 && data[0x0107] == 0x66
@@ -545,14 +545,14 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   }
 
   const uint index = findHeader(data, size);
-  const uint8 mapperid = data[index + Mapper];
-  const uint8 rom_type = data[index + RomType];
-  const uint8 rom_size = data[index + RomSize];
-  const uint8 company  = data[index + Company];
-  const uint8 regionid = data[index + CartRegion] & 0x7f;
+  const uint8_t mapperid = data[index + Mapper];
+  const uint8_t rom_type = data[index + RomType];
+  const uint8_t rom_size = data[index + RomSize];
+  const uint8_t company  = data[index + Company];
+  const uint8_t regionid = data[index + CartRegion] & 0x7f;
 
-  const uint16 complement = data[index + Complement] | data[index + Complement + 1] << 8;
-  const uint16 checksum   = data[index + Checksum] | data[index + Checksum + 1] << 8;
+  const uint16_t complement = data[index + Complement] | data[index + Complement + 1] << 8;
+  const uint16_t checksum   = data[index + Checksum] | data[index + Checksum + 1] << 8;
 
   this->rom_size = size;
   ram_size = 1024 << (data[index + RamSize] & 7);
@@ -565,7 +565,7 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   //detect BS-X flash carts
   if(data[index + 0x13] == 0x00 || data[index + 0x13] == 0xff) {
     if(data[index + 0x14] == 0x00) {
-      const uint8 n15 = data[index + 0x15];
+      const uint8_t n15 = data[index + 0x15];
       if(n15 == 0x00 || n15 == 0x80 || n15 == 0x84 || n15 == 0x9c || n15 == 0xbc || n15 == 0xfc) {
         if(data[index + 0x1a] == 0x33 || data[index + 0x1a] == 0xff) {
           type = Type::Satellaview;
@@ -620,7 +620,7 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   //detect presence of BS-X flash cartridge connector (reads extended header information)
   if(data[index - 14] == 'Z') {
     if(data[index - 11] == 'J') {
-      uint8 n13 = data[index - 13];
+      uint8_t n13 = data[index - 13];
       if((n13 >= 'A' && n13 <= 'Z') || (n13 >= '0' && n13 <= '9')) {
         if(company == 0x33 || (data[index - 10] == 0x00 && data[index - 4] == 0x00)) {
           has_bsx_slot = true;
@@ -737,7 +737,7 @@ auto SuperFamicomCartridge::readHeader(const uint8* data, uint size) -> void {
   }
 }
 
-auto SuperFamicomCartridge::findHeader(const uint8* data, uint size) -> uint {
+auto SuperFamicomCartridge::findHeader(const uint8_t* data, uint size) -> uint {
   uint score_lo = scoreHeader(data, size, 0x007fc0);
   uint score_hi = scoreHeader(data, size, 0x00ffc0);
   uint score_ex = scoreHeader(data, size, 0x40ffc0);
@@ -752,16 +752,16 @@ auto SuperFamicomCartridge::findHeader(const uint8* data, uint size) -> uint {
   }
 }
 
-auto SuperFamicomCartridge::scoreHeader(const uint8* data, uint size, uint addr) -> uint {
+auto SuperFamicomCartridge::scoreHeader(const uint8_t* data, uint size, uint addr) -> uint {
   if(size < addr + 64) return 0;  //image too small to contain header at this location?
   int score = 0;
 
-  uint16 resetvector = data[addr + ResetVector] | (data[addr + ResetVector + 1] << 8);
-  uint16 checksum    = data[addr + Checksum   ] | (data[addr + Checksum    + 1] << 8);
-  uint16 complement  = data[addr + Complement ] | (data[addr + Complement  + 1] << 8);
+  uint16_t resetvector = data[addr + ResetVector] | (data[addr + ResetVector + 1] << 8);
+  uint16_t checksum    = data[addr + Checksum   ] | (data[addr + Checksum    + 1] << 8);
+  uint16_t complement  = data[addr + Complement ] | (data[addr + Complement  + 1] << 8);
 
-  uint8 resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)];  //first opcode executed upon reset
-  uint8 mapper  = data[addr + Mapper] & ~0x10;                      //mask off irrelevent FastROM-capable bit
+  uint8_t resetop = data[(addr & ~0x7fff) | (resetvector & 0x7fff)];  //first opcode executed upon reset
+  uint8_t mapper  = data[addr + Mapper] & ~0x10;                      //mask off irrelevent FastROM-capable bit
 
   //$00:[000-7fff] contains uninitialized RAM and MMIO.
   //reset vector must point to ROM at $00:[8000-ffff] to be considered valid.

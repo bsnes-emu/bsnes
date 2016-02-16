@@ -7,13 +7,13 @@ struct bitstream {
     close();
   }
 
-  auto read(uint64 addr) const -> bool {
+  auto read(uint64_t addr) const -> bool {
     if(data == nullptr || (addr >> 3) >= size) return 0;
     uint mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     return data[addr >> 3] & mask;
   }
 
-  auto write(uint64 addr, bool value) -> void {
+  auto write(uint64_t addr, bool value) -> void {
     if(data == nullptr || readonly == true || (addr >> 3) >= size) return;
     uint mask = endian == 0 ? (0x01 << (addr & 7)) : (0x80 >> (addr & 7));
     if(value == 0) data[addr >> 3] &= ~mask;
@@ -39,7 +39,7 @@ struct bitstream {
   }
 
   filemap fp;
-  uint8* data = nullptr;
+  uint8_t* data = nullptr;
   uint size = 0;
   bool readonly = false;
   bool endian = 1;

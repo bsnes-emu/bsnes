@@ -24,10 +24,10 @@ auto bpsmetadata::load(const string& filename) -> bool {
     return sourceFile.read();
   };
 
-  auto decode = [&]() -> uint64 {
-    uint64 data = 0, shift = 1;
+  auto decode = [&]() -> uint64_t {
+    uint64_t data = 0, shift = 1;
     while(true) {
-      uint8 x = read();
+      uint8_t x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -57,14 +57,14 @@ auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
   if(sourceFile.open() == false) return false;
   sourceFile.seek(0);
 
-  auto read = [&]() -> uint8 {
+  auto read = [&]() -> uint8_t {
     return sourceFile.read();
   };
 
-  auto decode = [&]() -> uint64 {
-    uint64 data = 0, shift = 1;
+  auto decode = [&]() -> uint64_t {
+    uint64_t data = 0, shift = 1;
     while(true) {
-      uint8 x = read();
+      uint8_t x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -75,14 +75,14 @@ auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
 
   Hash::CRC32 checksum;
 
-  auto write = [&](uint8 data) {
+  auto write = [&](uint8_t data) {
     targetFile.write(data);
     checksum.data(data);
   };
 
-  auto encode = [&](uint64 data) {
+  auto encode = [&](uint64_t data) {
     while(true) {
-      uint64 x = data & 0x7f;
+      uint64_t x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -103,7 +103,7 @@ auto bpsmetadata::save(const string& filename, const string& metadata) -> bool {
   for(uint n = 0; n < targetLength; n++) write(metadata[n]);
   uint length = sourceFile.size() - sourceFile.offset() - 4;
   for(uint n = 0; n < length; n++) write(read());
-  uint32 outputChecksum = checksum.value();
+  uint32_t outputChecksum = checksum.value();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   targetFile.close();

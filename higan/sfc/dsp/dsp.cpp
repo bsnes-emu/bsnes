@@ -18,11 +18,11 @@ DSP dsp;
 #include "serialization.cpp"
 
 DSP::DSP() {
-  static_assert(sizeof(signed) >= 32 / 8, "signed >= 32-bits");
-  static_assert((int8)0x80 == -0x80,      "8-bit sign extension");
-  static_assert((int16)0x8000 == -0x8000, "16-bit sign extension");
-  static_assert((uint16)0xffff0000 == 0,  "16-bit unsigned clip");
-  static_assert((-1 >> 1) == -1,          "arithmetic shift right");
+  static_assert(sizeof(int) >= 32 / 8,      "int >= 32-bits");
+  static_assert((int8_t)0x80 == -0x80,      "8-bit sign extension");
+  static_assert((int16_t)0x8000 == -0x8000, "16-bit sign extension");
+  static_assert((uint16_t)0xffff0000 == 0,  "16-bit unsigned clip");
+  static_assert((-1 >> 1) == -1,            "arithmetic shift right");
 
   //-0x8000 <= n <= +0x7fff
   assert(sclamp<16>(+0x8000) == +0x7fff);

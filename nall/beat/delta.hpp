@@ -8,8 +8,8 @@
 namespace nall {
 
 struct bpsdelta {
-  inline auto source(const uint8* data, uint size) -> void;
-  inline auto target(const uint8* data, uint size) -> void;
+  inline auto source(const uint8_t* data, uint size) -> void;
+  inline auto target(const uint8_t* data, uint size) -> void;
 
   inline auto source(const string& filename) -> bool;
   inline auto target(const string& filename) -> bool;
@@ -27,20 +27,20 @@ protected:
   };
 
   filemap sourceFile;
-  const uint8* sourceData;
+  const uint8_t* sourceData;
   uint sourceSize;
 
   filemap targetFile;
-  const uint8* targetData;
+  const uint8_t* targetData;
   uint targetSize;
 };
 
-auto bpsdelta::source(const uint8* data, uint size) -> void {
+auto bpsdelta::source(const uint8_t* data, uint size) -> void {
   sourceData = data;
   sourceSize = size;
 }
 
-auto bpsdelta::target(const uint8* data, uint size) -> void {
+auto bpsdelta::target(const uint8_t* data, uint size) -> void {
   targetData = data;
   targetSize = size;
 }
@@ -64,14 +64,14 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
   Hash::CRC32 sourceChecksum, modifyChecksum;
   uint sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
-  auto write = [&](uint8 data) {
+  auto write = [&](uint8_t data) {
     modifyFile.write(data);
     modifyChecksum.data(data);
   };
 
-  auto encode = [&](uint64 data) {
+  auto encode = [&](uint64_t data) {
     while(true) {
-      uint64 x = data & 0x7f;
+      uint64_t x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -100,7 +100,7 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
 
   //source tree creation
   for(uint offset = 0; offset < sourceSize; offset++) {
-    uint16 symbol = sourceData[offset + 0];
+    uint16_t symbol = sourceData[offset + 0];
     sourceChecksum.data(symbol);
     if(offset < sourceSize - 1) symbol |= sourceData[offset + 1] << 8;
     Node *node = new Node;
@@ -122,7 +122,7 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
   while(outputOffset < targetSize) {
     uint maxLength = 0, maxOffset = 0, mode = TargetRead;
 
-    uint16 symbol = targetData[outputOffset + 0];
+    uint16_t symbol = targetData[outputOffset + 0];
     if(outputOffset < targetSize - 1) symbol |= targetData[outputOffset + 1] << 8;
 
     { //source read
@@ -198,9 +198,9 @@ auto bpsdelta::create(const string& filename, const string& metadata) -> bool {
   targetReadFlush();
 
   for(uint n = 0; n < 32; n += 8) write(sourceChecksum.value() >> n);
-  uint32 targetChecksum = Hash::CRC32(targetData, targetSize).value();
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
   for(uint n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32 outputChecksum = modifyChecksum.value();
+  uint32_t outputChecksum = modifyChecksum.value();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

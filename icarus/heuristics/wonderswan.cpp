@@ -1,5 +1,5 @@
 struct WonderSwanCartridge {
-  WonderSwanCartridge(uint8* data, uint size);
+  WonderSwanCartridge(uint8_t* data, uint size);
 
   string manifest;
 
@@ -8,7 +8,7 @@ struct WonderSwanCartridge {
   } information;
 };
 
-WonderSwanCartridge::WonderSwanCartridge(uint8* data, uint size) {
+WonderSwanCartridge::WonderSwanCartridge(uint8_t* data, uint size) {
   if(size < 0x10000) return;
 
   manifest.append("board\n");

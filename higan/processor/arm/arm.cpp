@@ -44,12 +44,12 @@ auto ARM::load(unsigned mode, uint32 addr) -> uint32 {
 
   if(mode & Half) {
     addr &= 1;
-    word = mode & Signed ? (int16)word : (uint16)word;
+    word = mode & Signed ? (int16_t)word : (uint16_t)word;
   }
 
   if(mode & Byte) {
     addr &= 0;
-    word = mode & Signed ? (int8)word : (uint8)word;
+    word = mode & Signed ? (int8_t)word : (uint8_t)word;
   }
 
   if(mode & Signed) {

@@ -33,7 +33,7 @@ struct serializer {
     return _mode;
   }
 
-  auto data() const -> const uint8* {
+  auto data() const -> const uint8_t* {
     return _data;
   }
 
@@ -49,7 +49,7 @@ struct serializer {
     enum { size = sizeof(T) };
     //this is rather dangerous, and not cross-platform safe;
     //but there is no standardized way to export FP-values
-    auto p = (uint8*)&value;
+    auto p = (uint8_t*)&value;
     if(_mode == Save) {
       for(uint n = 0; n < size; n++) _data[_size++] = p[n];
     } else if(_mode == Load) {
@@ -93,7 +93,7 @@ struct serializer {
     if(_data) delete[] _data;
 
     _mode = s._mode;
-    _data = new uint8[s._capacity];
+    _data = new uint8_t[s._capacity];
     _size = s._size;
     _capacity = s._capacity;
 
@@ -119,14 +119,14 @@ struct serializer {
 
   serializer(uint capacity) {
     _mode = Save;
-    _data = new uint8[capacity]();
+    _data = new uint8_t[capacity]();
     _size = 0;
     _capacity = capacity;
   }
 
-  serializer(const uint8* data, uint capacity) {
+  serializer(const uint8_t* data, uint capacity) {
     _mode = Load;
-    _data = new uint8[capacity];
+    _data = new uint8_t[capacity];
     _size = 0;
     _capacity = capacity;
     memcpy(_data, data, capacity);
@@ -138,7 +138,7 @@ struct serializer {
 
 private:
   Mode _mode = Size;
-  uint8* _data = nullptr;
+  uint8_t* _data = nullptr;
   uint _size = 0;
   uint _capacity = 0;
 };

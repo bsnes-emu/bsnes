@@ -46,7 +46,7 @@ auto Program::saveRequest(uint id, string filename) -> void {
 }
 
 auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
-  uint32* output;
+  uint32_t* output;
   uint length;
 
   if(video->lock(output, length, width, height)) {

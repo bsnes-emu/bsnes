@@ -260,11 +260,11 @@ auto Presentation::toggleFullScreen() -> void {
 
 auto Presentation::drawSplashScreen() -> void {
   if(!video) return;
-  uint32* output;
+  uint32_t* output;
   uint length;
   if(video->lock(output, length, 256, 240)) {
     for(auto y : range(240)) {
-      uint32* dp = output + y * (length >> 2);
+      auto dp = output + y * (length >> 2);
       for(auto x : range(256)) *dp++ = 0xff000000;
     }
     video->unlock();

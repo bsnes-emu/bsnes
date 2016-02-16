@@ -19,7 +19,7 @@ struct GameBoyCartridge {
   } info;
 };
 
-GameBoyCartridge::GameBoyCartridge(uint8_t *romdata, unsigned romsize) {
+GameBoyCartridge::GameBoyCartridge(uint8_t* romdata, unsigned romsize) {
   if(romsize < 0x4000) return;
 
   info.mapper = "unknown";

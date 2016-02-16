@@ -8,8 +8,8 @@
 namespace nall {
 
 struct bpslinear {
-  inline auto source(const uint8* data, uint size) -> void;
-  inline auto target(const uint8* data, uint size) -> void;
+  inline auto source(const uint8_t* data, uint size) -> void;
+  inline auto target(const uint8_t* data, uint size) -> void;
 
   inline auto source(const string& filename) -> bool;
   inline auto target(const string& filename) -> bool;
@@ -20,20 +20,20 @@ protected:
   enum : uint { Granularity = 1 };
 
   filemap sourceFile;
-  const uint8* sourceData;
+  const uint8_t* sourceData;
   uint sourceSize;
 
   filemap targetFile;
-  const uint8* targetData;
+  const uint8_t* targetData;
   uint targetSize;
 };
 
-auto bpslinear::source(const uint8* data, uint size) -> void {
+auto bpslinear::source(const uint8_t* data, uint size) -> void {
   sourceData = data;
   sourceSize = size;
 }
 
-auto bpslinear::target(const uint8* data, uint size) -> void {
+auto bpslinear::target(const uint8_t* data, uint size) -> void {
   targetData = data;
   targetSize = size;
 }
@@ -57,14 +57,14 @@ auto bpslinear::create(const string& filename, const string& metadata) -> bool {
   Hash::CRC32 modifyChecksum;
   uint targetRelativeOffset = 0, outputOffset = 0;
 
-  auto write = [&](uint8 data) {
+  auto write = [&](uint8_t data) {
     modifyFile.write(data);
     modifyChecksum.data(data);
   };
 
-  auto encode = [&](uint64 data) {
+  auto encode = [&](uint64_t data) {
     while(true) {
-      uint64 x = data & 0x7f;
+      uint64_t x = data & 0x7f;
       data >>= 7;
       if(data == 0) {
         write(0x80 | x);
@@ -134,11 +134,11 @@ auto bpslinear::create(const string& filename, const string& metadata) -> bool {
 
   targetReadFlush();
 
-  uint32 sourceChecksum = Hash::CRC32(sourceData, sourceSize).value();
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, sourceSize).value();
   for(uint n = 0; n < 32; n += 8) write(sourceChecksum >> n);
-  uint32 targetChecksum = Hash::CRC32(targetData, targetSize).value();
+  uint32_t targetChecksum = Hash::CRC32(targetData, targetSize).value();
   for(uint n = 0; n < 32; n += 8) write(targetChecksum >> n);
-  uint32 outputChecksum = modifyChecksum.value();
+  uint32_t outputChecksum = modifyChecksum.value();
   for(uint n = 0; n < 32; n += 8) write(outputChecksum >> n);
 
   modifyFile.close();

@@ -1,10 +1,10 @@
 auto Icarus::sufamiTurboManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
   return sufamiTurboManifest(buffer, location);
 }
 
-auto Icarus::sufamiTurboManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::sufamiTurboManifest(vector<uint8_t>& buffer, string location) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -31,7 +31,7 @@ auto Icarus::sufamiTurboManifest(vector<uint8>& buffer, string location) -> stri
   return markup;
 }
 
-auto Icarus::sufamiTurboImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::sufamiTurboImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Sufami Turbo/", name, ".st/"};

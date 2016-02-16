@@ -1,10 +1,10 @@
 auto Icarus::bsMemoryManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
   return bsMemoryManifest(buffer, location);
 }
 
-auto Icarus::bsMemoryManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -31,7 +31,7 @@ auto Icarus::bsMemoryManifest(vector<uint8>& buffer, string location) -> string 
   return markup;
 }
 
-auto Icarus::bsMemoryImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::bsMemoryImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "BS Memory/", name, ".bs/"};

@@ -26,11 +26,11 @@ struct Buffer {
   }
 
   inline auto read(uint channel, int offset = 0) -> double& {
-    return sample[channel][(uint16)(rdoffset + offset)];
+    return sample[channel][(uint16_t)(rdoffset + offset)];
   }
 
   inline auto write(uint channel, int offset = 0) -> double& {
-    return sample[channel][(uint16)(wroffset + offset)];
+    return sample[channel][(uint16_t)(wroffset + offset)];
   }
 
   inline auto clear() -> void {
@@ -44,7 +44,7 @@ struct Buffer {
   }
 
   double** sample = nullptr;
-  uint16 rdoffset = 0;
-  uint16 wroffset = 0;
+  uint16_t rdoffset = 0;
+  uint16_t wroffset = 0;
   uint channels = 0;
 };

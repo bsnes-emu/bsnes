@@ -56,7 +56,7 @@ struct InputXlib : Input {
     return devices;
   }
 
-  auto rumble(uint64 id, bool enable) -> bool {
+  auto rumble(uint64_t id, bool enable) -> bool {
     return false;
   }
 

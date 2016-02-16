@@ -1,10 +1,10 @@
 auto Icarus::wonderSwanManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
   return wonderSwanManifest(buffer, location);
 }
 
-auto Icarus::wonderSwanManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::wonderSwanManifest(vector<uint8_t>& buffer, string location) -> string {
   string manifest;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -31,7 +31,7 @@ auto Icarus::wonderSwanManifest(vector<uint8>& buffer, string location) -> strin
   return manifest;
 }
 
-auto Icarus::wonderSwanImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::wonderSwanImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "WonderSwan/", name, ".ws/"};

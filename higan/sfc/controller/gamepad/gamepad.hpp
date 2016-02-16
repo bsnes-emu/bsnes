@@ -10,7 +10,7 @@ struct Gamepad : Controller {
 
 private:
   bool latched;
-  unsigned counter;
+  uint counter;
 
   bool b, y, select, start;
   bool up, down, left, right;

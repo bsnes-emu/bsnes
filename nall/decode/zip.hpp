@@ -10,7 +10,7 @@ namespace nall { namespace Decode {
 struct ZIP {
   struct File {
     string name;
-    const uint8* data;
+    const uint8_t* data;
     uint size;
     uint csize;
     uint cmode;  //0 = uncompressed, 8 = deflate
@@ -31,7 +31,7 @@ struct ZIP {
     return true;
   }
 
-  auto open(const uint8* data, uint size) -> bool {
+  auto open(const uint8_t* data, uint size) -> bool {
     if(size < 22) return false;
 
     filedata = data;
@@ -39,7 +39,7 @@ struct ZIP {
 
     file.reset();
 
-    const uint8* footer = data + size - 22;
+    const uint8_t* footer = data + size - 22;
     while(true) {
       if(footer <= data + 22) return false;
       if(read(footer, 4) == 0x06054b50) {
@@ -48,7 +48,7 @@ struct ZIP {
       }
       footer--;
     }
-    const uint8* directory = data + read(footer + 16, 4);
+    const uint8_t* directory = data + read(footer + 16, 4);
 
     while(true) {
       uint signature = read(directory + 0, 4);
@@ -83,8 +83,8 @@ struct ZIP {
     return true;
   }
 
-  auto extract(File& file) -> vector<uint8> {
-    vector<uint8> buffer;
+  auto extract(File& file) -> vector<uint8_t> {
+    vector<uint8_t> buffer;
 
     if(file.cmode == 0) {
       buffer.resize(file.size);
@@ -107,10 +107,10 @@ struct ZIP {
 
 protected:
   filemap fm;
-  const uint8* filedata;
+  const uint8_t* filedata;
   uint filesize;
 
-  auto read(const uint8* data, uint size) -> uint {
+  auto read(const uint8_t* data, uint size) -> uint {
     uint result = 0, shift = 0;
     while(size--) { result |= *data++ << shift; shift += 8; }
     return result;

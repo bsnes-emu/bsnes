@@ -1,10 +1,10 @@
 auto Icarus::gameBoyManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "program.rom"});
   return gameBoyManifest(buffer, location);
 }
 
-auto Icarus::gameBoyManifest(vector<uint8>& buffer, string location) -> string {
+auto Icarus::gameBoyManifest(vector<uint8_t>& buffer, string location) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -31,7 +31,7 @@ auto Icarus::gameBoyManifest(vector<uint8>& buffer, string location) -> string {
   return markup;
 }
 
-auto Icarus::gameBoyImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::gameBoyImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Game Boy/", name, ".gb/"};

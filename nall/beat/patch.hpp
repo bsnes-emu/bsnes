@@ -8,9 +8,9 @@
 namespace nall {
 
 struct bpspatch {
-  inline auto modify(const uint8* data, uint size) -> bool;
-  inline auto source(const uint8* data, uint size) -> void;
-  inline auto target(uint8* data, uint size) -> void;
+  inline auto modify(const uint8_t* data, uint size) -> bool;
+  inline auto source(const uint8_t* data, uint size) -> void;
+  inline auto target(uint8_t* data, uint size) -> void;
 
   inline auto modify(const string& filename) -> bool;
   inline auto source(const string& filename) -> bool;
@@ -37,15 +37,15 @@ protected:
   enum : uint { SourceRead, TargetRead, SourceCopy, TargetCopy };
 
   filemap modifyFile;
-  const uint8* modifyData;
+  const uint8_t* modifyData;
   uint modifySize;
 
   filemap sourceFile;
-  const uint8* sourceData;
+  const uint8_t* sourceData;
   uint sourceSize;
 
   filemap targetFile;
-  uint8* targetData;
+  uint8_t* targetData;
   uint targetSize;
 
   uint modifySourceSize;
@@ -54,16 +54,16 @@ protected:
   string metadataString;
 };
 
-auto bpspatch::modify(const uint8* data, uint size) -> bool {
+auto bpspatch::modify(const uint8_t* data, uint size) -> bool {
   if(size < 19) return false;
   modifyData = data;
   modifySize = size;
 
   uint offset = 4;
-  auto decode = [&]() -> uint64 {
-    uint64 data = 0, shift = 1;
+  auto decode = [&]() -> uint64_t {
+    uint64_t data = 0, shift = 1;
     while(true) {
-      uint8 x = modifyData[offset++];
+      uint8_t x = modifyData[offset++];
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -84,12 +84,12 @@ auto bpspatch::modify(const uint8* data, uint size) -> bool {
   return true;
 }
 
-auto bpspatch::source(const uint8* data, uint size) -> void {
+auto bpspatch::source(const uint8_t* data, uint size) -> void {
   sourceData = data;
   sourceSize = size;
 }
 
-auto bpspatch::target(uint8* data, uint size) -> void {
+auto bpspatch::target(uint8_t* data, uint size) -> void {
   targetData = data;
   targetSize = size;
 }
@@ -130,16 +130,16 @@ auto bpspatch::apply() -> result {
   Hash::CRC32 modifyChecksum, targetChecksum;
   uint modifyOffset = 0, sourceRelativeOffset = 0, targetRelativeOffset = 0, outputOffset = 0;
 
-  auto read = [&]() -> uint8 {
-    uint8 data = modifyData[modifyOffset++];
+  auto read = [&]() -> uint8_t {
+    uint8_t data = modifyData[modifyOffset++];
     modifyChecksum.data(data);
     return data;
   };
 
-  auto decode = [&]() -> uint64 {
-    uint64 data = 0, shift = 1;
+  auto decode = [&]() -> uint64_t {
+    uint64_t data = 0, shift = 1;
     while(true) {
-      uint8 x = read();
+      uint8_t x = read();
       data += (x & 0x7f) * shift;
       if(x & 0x80) break;
       shift <<= 7;
@@ -148,7 +148,7 @@ auto bpspatch::apply() -> result {
     return data;
   };
 
-  auto write = [&](uint8 data) {
+  auto write = [&](uint8_t data) {
     targetData[outputOffset++] = data;
     targetChecksum.data(data);
   };
@@ -196,13 +196,13 @@ auto bpspatch::apply() -> result {
     }
   }
 
-  uint32 modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
+  uint32_t modifySourceChecksum = 0, modifyTargetChecksum = 0, modifyModifyChecksum = 0;
   for(uint n = 0; n < 32; n += 8) modifySourceChecksum |= read() << n;
   for(uint n = 0; n < 32; n += 8) modifyTargetChecksum |= read() << n;
-  uint32 checksum = modifyChecksum.value();
+  uint32_t checksum = modifyChecksum.value();
   for(uint n = 0; n < 32; n += 8) modifyModifyChecksum |= read() << n;
 
-  uint32 sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
+  uint32_t sourceChecksum = Hash::CRC32(sourceData, modifySourceSize).value();
 
   if(sourceChecksum != modifySourceChecksum) return result::source_checksum_invalid;
   if(targetChecksum.value() != modifyTargetChecksum) return result::target_checksum_invalid;

@@ -156,7 +156,7 @@ auto pCanvas::_rasterize() -> void {
   auto buffer = (uint32_t*)gdk_pixbuf_get_pixels(surface);
 
   if(auto& icon = state().icon) {
-    memory::copy(buffer, state().icon.data(), width * height * sizeof(uint32));
+    memory::copy(buffer, state().icon.data(), width * height * sizeof(uint32_t));
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
     image fill;
@@ -164,13 +164,13 @@ auto pCanvas::_rasterize() -> void {
     fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
     memory::copy(buffer, fill.data(), fill.size());
   } else {
-    uint32 color = state().color.value();
+    uint32_t color = state().color.value();
     for(auto n : range(width * height)) buffer[n] = color;
   }
 
   //ARGB -> ABGR conversion
   for(auto n : range(width * height)) {
-    uint32 color = *buffer;
+    uint32_t color = *buffer;
     color = (color & 0xff00ff00) | ((color & 0xff0000) >> 16) | ((color & 0x0000ff) << 16);
     *buffer++ = color;
   }

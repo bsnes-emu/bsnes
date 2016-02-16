@@ -15,7 +15,7 @@ struct MessageDialog {
 private:
   struct State {
     lstring buttons;
-    vector<uint8> icon;
+    vector<uint8_t> icon;
     sWindow parent;
     string response;
     string text;

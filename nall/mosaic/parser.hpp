@@ -4,7 +4,7 @@ namespace nall { namespace mosaic {
 
 struct parser {
   //export from bitstream to canvas
-  auto load(bitstream& stream, uint64 offset, context& ctx, uint width, uint height) -> void {
+  auto load(bitstream& stream, uint64_t offset, context& ctx, uint width, uint height) -> void {
     canvas.allocate(width, height);
     canvas.fill(ctx.paddingColor);
     parse(1, stream, offset, ctx, width, height);
@@ -18,21 +18,21 @@ struct parser {
   }
 
 private:
-  auto read(uint x, uint y) const -> uint32 {
+  auto read(uint x, uint y) const -> uint32_t {
     uint addr = y * canvas.width() + x;
     if(addr >= canvas.width() * canvas.height()) return 0u;
-    auto buffer = (uint32*)canvas.data();
+    auto buffer = (uint32_t*)canvas.data();
     return buffer[addr];
   }
 
   auto write(uint x, uint y, uint32_t data) -> void {
     uint addr = y * canvas.width() + x;
     if(addr >= canvas.width() * canvas.height()) return;
-    auto buffer = (uint32*)canvas.data();
+    auto buffer = (uint32_t*)canvas.data();
     buffer[addr] = data;
   }
 
-  auto parse(bool load, bitstream& stream, uint64 offset, context& ctx, uint width, uint height) -> void {
+  auto parse(bool load, bitstream& stream, uint64_t offset, context& ctx, uint width, uint height) -> void {
     stream.endian = ctx.endian;
     uint canvasWidth = width / (ctx.mosaicWidth * ctx.tileWidth * ctx.blockWidth + ctx.paddingWidth);
     uint canvasHeight = height / (ctx.mosaicHeight * ctx.tileHeight * ctx.blockHeight + ctx.paddingHeight);

@@ -210,7 +210,7 @@ auto InputManager::poll() -> void {
   if(presentation && presentation->focused()) pollHotkeys();
 }
 
-auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16 oldValue, int16 newValue) -> void {
+auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {
   if(settingsManager->focused()) {
     settingsManager->input.inputEvent(device, group, input, oldValue, newValue);
     settingsManager->hotkeys.inputEvent(device, group, input, oldValue, newValue);

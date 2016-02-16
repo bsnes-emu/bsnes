@@ -23,17 +23,17 @@ struct mmapstream : stream {
 
   auto size() const -> uint { return pmmap.size(); }
   auto offset() const -> uint { return poffset; }
-  auto seek(unsigned offset) const -> void { poffset = offset; }
+  auto seek(uint offset) const -> void { poffset = offset; }
 
-  auto read() const -> uint8 { return pdata[poffset++]; }
-  auto write(uint8 data) const -> void { pdata[poffset++] = data; }
+  auto read() const -> uint8_t { return pdata[poffset++]; }
+  auto write(uint8_t data) const -> void { pdata[poffset++] = data; }
 
-  auto read(uint offset) const -> uint8 { return pdata[offset]; }
-  auto write(uint offset, uint8 data) const -> void { pdata[offset] = data; }
+  auto read(uint offset) const -> uint8_t { return pdata[offset]; }
+  auto write(uint offset, uint8_t data) const -> void { pdata[offset] = data; }
 
 private:
   mutable filemap pmmap;
-  mutable uint8* pdata = nullptr;
+  mutable uint8_t* pdata = nullptr;
   mutable uint poffset = 0;
   mutable bool pwritable = false;
 };

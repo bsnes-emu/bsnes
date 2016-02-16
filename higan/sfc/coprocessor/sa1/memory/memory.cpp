@@ -112,13 +112,13 @@ auto SA1::op_io() -> void {
   tick();
 }
 
-auto SA1::op_read(uint addr) -> uint8 {
+auto SA1::op_read(uint32 addr) -> uint8 {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   return bus_read(addr, regs.mdr);
 }
 
-auto SA1::op_write(uint addr, uint8 data) -> void {
+auto SA1::op_write(uint32 addr, uint8 data) -> void {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
   bus_write(addr, regs.mdr = data);

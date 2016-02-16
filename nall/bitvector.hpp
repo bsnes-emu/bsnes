@@ -13,7 +13,7 @@ struct bitvector {
 
   auto operator=(const bitvector& source) -> bitvector& {
     bits = source.bits;
-    pool = (uint8*)memory::resize(pool, bytes());
+    pool = (uint8_t*)memory::resize(pool, bytes());
     memory::copy(pool, source.pool, bytes());
     return *this;
   }
@@ -30,8 +30,8 @@ struct bitvector {
   auto empty() const -> bool { return bits == 0; }
   auto size() const -> uint { return bits; }
   auto bytes() const -> uint { return (bits + 7) / 8; }
-  auto data() -> uint8* { return pool; }
-  auto data() const -> const uint8* { return pool; }
+  auto data() -> uint8_t* { return pool; }
+  auto data() const -> const uint8_t* { return pool; }
 
   auto reset() -> void {
     if(pool) free(pool);
@@ -43,7 +43,7 @@ struct bitvector {
     uint from = bits;
     bits = size;
     for(uint n = size; n < from; n++) clear(n);  //on reduce
-    pool = (uint8*)memory::resize(pool, bytes());
+    pool = (uint8_t*)memory::resize(pool, bytes());
     for(uint n = from; n < size; n++) clear(n);  //on expand
   }
 
@@ -109,7 +109,7 @@ struct bitvector {
   auto end() -> iterator { return iterator(*this, bits); }
 
 protected:
-  uint8* pool = nullptr;
+  uint8_t* pool = nullptr;
   uint bits = 0;
 };
 

@@ -1,11 +1,11 @@
 struct GameBoyAdvanceCartridge {
-  GameBoyAdvanceCartridge(const uint8_t *data, unsigned size);
+  GameBoyAdvanceCartridge(const uint8_t* data, unsigned size);
 
   string markup;
   string identifiers;
 };
 
-GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t *data, unsigned size) {
+GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t* data, unsigned size) {
   struct Identifier {
     string name;
     unsigned size;

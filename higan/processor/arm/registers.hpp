@@ -1,30 +1,30 @@
 struct GPR {
-  inline operator uint32() const { return data; }
-  inline auto operator=(uint32 n) { data = n; if(modify) modify(); return *this; }
+  inline operator uint32_t() const { return data; }
+  inline auto operator=(uint32_t n) { data = n; if(modify) modify(); return *this; }
   inline auto operator=(const GPR& source) { return operator=(source.data); }
 
-  inline auto operator &=(uint32 n) { return operator=(data  & n); }
-  inline auto operator |=(uint32 n) { return operator=(data  | n); }
-  inline auto operator ^=(uint32 n) { return operator=(data  ^ n); }
-  inline auto operator +=(uint32 n) { return operator=(data  + n); }
-  inline auto operator -=(uint32 n) { return operator=(data  - n); }
-  inline auto operator *=(uint32 n) { return operator=(data  * n); }
-  inline auto operator /=(uint32 n) { return operator=(data  / n); }
-  inline auto operator %=(uint32 n) { return operator=(data  % n); }
-  inline auto operator<<=(uint32 n) { return operator=(data << n); }
-  inline auto operator>>=(uint32 n) { return operator=(data >> n); }
+  inline auto operator &=(uint32_t n) { return operator=(data  & n); }
+  inline auto operator |=(uint32_t n) { return operator=(data  | n); }
+  inline auto operator ^=(uint32_t n) { return operator=(data  ^ n); }
+  inline auto operator +=(uint32_t n) { return operator=(data  + n); }
+  inline auto operator -=(uint32_t n) { return operator=(data  - n); }
+  inline auto operator *=(uint32_t n) { return operator=(data  * n); }
+  inline auto operator /=(uint32_t n) { return operator=(data  / n); }
+  inline auto operator %=(uint32_t n) { return operator=(data  % n); }
+  inline auto operator<<=(uint32_t n) { return operator=(data << n); }
+  inline auto operator>>=(uint32_t n) { return operator=(data >> n); }
 
-  uint32 data = 0;
+  uint32_t data = 0;
   function<auto () -> void> modify;
 };
 
 struct PSR {
-  inline operator uint32() const {
+  inline operator uint32_t() const {
     return (n << 31) + (z << 30) + (c << 29) + (v << 28)
          + (i <<  7) + (f <<  6) + (t <<  5) + (m <<  0);
   }
 
-  inline auto operator=(uint32 d) {
+  inline auto operator=(uint32_t d) {
     n = d & (1 << 31);
     z = d & (1 << 30);
     c = d & (1 << 29);
@@ -45,7 +45,7 @@ struct PSR {
   bool i = false;  //irq
   bool f = false;  //fiq
   bool t = false;  //thumb
-  unsigned m = 0;  //mode
+  uint m = 0;      //mode
 };
 
 struct Pipeline {
@@ -120,7 +120,7 @@ Processor processor;
 Pipeline pipeline;
 bool crash = false;
 
-alwaysinline auto r(unsigned n) -> GPR& { return *processor.r[n]; }
+alwaysinline auto r(uint n) -> GPR& { return *processor.r[n]; }
 alwaysinline auto cpsr() -> PSR& { return processor.cpsr; }
 alwaysinline auto spsr() -> PSR& { return *processor.spsr; }
 alwaysinline auto carryout() -> bool& { return processor.carryout; }

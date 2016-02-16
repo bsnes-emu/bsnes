@@ -10,8 +10,8 @@ auto mCanvas::color() const -> Color {
   return state.color;
 }
 
-auto mCanvas::data() -> uint32* {
-  return (uint32*)state.icon.data();
+auto mCanvas::data() -> uint32_t* {
+  return (uint32_t*)state.icon.data();
 }
 
 auto mCanvas::droppable() const -> bool {

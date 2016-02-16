@@ -9,10 +9,10 @@ struct GZIP {
   inline ~GZIP();
 
   inline auto decompress(const string& filename) -> bool;
-  inline auto decompress(const uint8* data, uint size) -> bool;
+  inline auto decompress(const uint8_t* data, uint size) -> bool;
 
   string filename;
-  uint8* data = nullptr;
+  uint8_t* data = nullptr;
   uint size = 0;
 };
 
@@ -27,7 +27,7 @@ auto GZIP::decompress(const string& filename) -> bool {
   return false;
 }
 
-auto GZIP::decompress(const uint8* data, uint size) -> bool {
+auto GZIP::decompress(const uint8_t* data, uint size) -> bool {
   if(size < 18) return false;
   if(data[0] != 0x1f) return false;
   if(data[1] != 0x8b) return false;

@@ -1,12 +1,12 @@
 auto Icarus::famicomManifest(string location) -> string {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   concatenate(buffer, {location, "ines.rom"});
   concatenate(buffer, {location, "program.rom"});
   concatenate(buffer, {location, "character.rom"});
   return famicomManifest(buffer, location);
 }
 
-auto Icarus::famicomManifest(vector<uint8>& buffer, string location, uint* prgrom, uint* chrrom) -> string {
+auto Icarus::famicomManifest(vector<uint8_t>& buffer, string location, uint* prgrom, uint* chrrom) -> string {
   string markup;
   string digest = Hash::SHA256(buffer.data(), buffer.size()).digest();
 
@@ -37,7 +37,7 @@ auto Icarus::famicomManifest(vector<uint8>& buffer, string location, uint* prgro
   return markup;
 }
 
-auto Icarus::famicomImport(vector<uint8>& buffer, string location) -> string {
+auto Icarus::famicomImport(vector<uint8_t>& buffer, string location) -> string {
   auto name = prefixname(location);
   auto source = pathname(location);
   string target{settings["Library/Location"].text(), "Famicom/", name, ".fc/"};

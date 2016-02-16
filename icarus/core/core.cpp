@@ -77,7 +77,7 @@ auto Icarus::import(string location) -> string {
   return failure("unrecognized file extension");
 }
 
-auto Icarus::concatenate(vector<uint8>& output, string location) -> void {
+auto Icarus::concatenate(vector<uint8_t>& output, string location) -> void {
   if(auto input = file::read(location)) {
     auto size = output.size();
     output.resize(size + input.size());

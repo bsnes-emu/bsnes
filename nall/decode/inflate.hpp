@@ -12,8 +12,8 @@ namespace puff {
 }
 
 inline auto inflate(
-  uint8* target, uint targetLength,
-  const uint8* source, uint sourceLength
+  uint8_t* target, uint targetLength,
+  const uint8_t* source, uint sourceLength
 ) -> bool {
   unsigned long tl = targetLength, sl = sourceLength;
   int result = puff::puff((unsigned char*)target, &tl, (unsigned char*)source, &sl);
