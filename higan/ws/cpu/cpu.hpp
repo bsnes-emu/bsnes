@@ -43,10 +43,10 @@ struct CPU : Processor::V30MZ, Thread, IO {
     uint20 dmaSource;
 
     //$0044-0045  DMA_DST
-    uint16_ dmaTarget;
+    uint16 dmaTarget;
 
     //$0046-0047  DMA_LEN
-    uint16_ dmaLength;
+    uint16 dmaLength;
 
     //$0048  DMA_CTRL
     bool dmaEnable;

@@ -24,8 +24,8 @@ struct {
 
   //$43x5-$43x6
   union {
-    uint16 transfer_size;
-    uint16 indirect_addr;
+    uint16_t transfer_size;
+    uint16_t indirect_addr;
   };
 
   //$43x7

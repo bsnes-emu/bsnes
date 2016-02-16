@@ -46,7 +46,7 @@ auto SPC7110::dcu_read() -> uint8 {
         break;
       }
 
-      uint seek = r480b & 1 ? r4807 : 1;
+      uint seek = r480b & 1 ? r4807 : (uint8)1;
       while(seek--) decompressor->decode();
     }
   }

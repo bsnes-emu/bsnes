@@ -84,8 +84,8 @@ struct VRC3 : Chip {
   uint16 irq_latch;
   struct {
     union {
-      uint16 w;
-      struct { uint8 order_lsb2(l, h); };
+      uint16_t w;
+      struct { uint8_t order_lsb2(l, h); };
     };
   } irq_counter;
   bool irq_line;

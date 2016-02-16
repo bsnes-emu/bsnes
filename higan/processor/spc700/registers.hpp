@@ -35,17 +35,17 @@ struct Word {
   inline auto operator&=(uint data) -> uint { return w &= data; }
 
   union {
-    uint16 w;
-    struct { uint8 order_lsb2(l, h); };
+    uint16_t w;
+    struct { uint8_t order_lsb2(l, h); };
   };
 };
 
 struct Regs {
   Word pc;
   union {
-    uint16 ya;
-    struct { uint8 order_lsb2(a, y); };
+    uint16_t ya;
+    struct { uint8_t order_lsb2(a, y); };
   };
-  uint8 x, s;
+  uint8_t x, s;
   Flag p;
 };

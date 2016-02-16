@@ -16,13 +16,13 @@ auto Memory::operator[](uint addr) -> uint8& {
 auto Memory::allocate(uint size_) -> void {
   free();
   size = size_;
-  data = new uint8_t[size]();
+  data = new uint8[size];
 }
 
-auto Memory::copy(const uint8_t* data_, unsigned size_) -> void {
+auto Memory::copy(const uint8* data_, unsigned size_) -> void {
   free();
   size = size_;
-  data = new uint8_t[size];
+  data = new uint8[size];
   memcpy(data, data_, size);
 }
 

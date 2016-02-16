@@ -11,7 +11,7 @@ struct PPU : Thread, IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
-  uint16 output[224 * 144] = {0};
+  uint16_t output[224 * 144] = {0};
 
   struct Status {
     uint vclk;

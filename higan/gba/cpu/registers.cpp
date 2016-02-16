@@ -1,4 +1,4 @@
-CPU::Registers::DMAControl::operator uint16() const {
+CPU::Registers::DMAControl::operator uint16_t() const {
   return (
     (targetmode <<  5)
   | (sourcemode <<  7)
@@ -20,10 +20,10 @@ auto CPU::Registers::DMAControl::operator=(uint16 source) -> uint16 {
   timingmode = source >> 12;
   irq        = source >> 14;
   enable     = source >> 15;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::TimerControl::operator uint16() const {
+CPU::Registers::TimerControl::operator uint16_t() const {
   return (
     (frequency << 0)
   | (cascade   << 2)
@@ -37,10 +37,10 @@ auto CPU::Registers::TimerControl::operator=(uint16 source) -> uint16 {
   cascade   = source >> 2;
   irq       = source >> 6;
   enable    = source >> 7;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::SerialControl::operator uint16() const {
+CPU::Registers::SerialControl::operator uint16_t() const {
   return (
     (shiftclockselect      <<  0)
   | (shiftclockfrequency   <<  1)
@@ -60,10 +60,10 @@ auto CPU::Registers::SerialControl::operator=(uint16 source) -> uint16 {
   startbit              = source >>  7;
   transferlength        = source >> 12;
   irqenable             = source >> 14;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::KeypadControl::operator uint16() const {
+CPU::Registers::KeypadControl::operator uint16_t() const {
   return (
     (flag[0]   <<  0)
   | (flag[1]   <<  1)
@@ -93,10 +93,10 @@ auto CPU::Registers::KeypadControl::operator=(uint16 source) -> uint16 {
   flag[9]   = source >>  9;
   enable    = source >> 14;
   condition = source >> 15;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::JoybusSettings::operator uint16() const {
+CPU::Registers::JoybusSettings::operator uint16_t() const {
   return (
     (sc        <<  0)
   | (sd        <<  1)
@@ -122,10 +122,10 @@ auto CPU::Registers::JoybusSettings::operator=(uint16 source) -> uint16 {
   somode    = source >>  7;
   irqenable = source >>  8;
   mode      = source >> 14;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::JoybusControl::operator uint16() const {
+CPU::Registers::JoybusControl::operator uint16_t() const {
   return (
     (resetsignal     << 0)
   | (receivecomplete << 1)
@@ -139,10 +139,10 @@ auto CPU::Registers::JoybusControl::operator=(uint16 source) -> uint16 {
   receivecomplete = source >> 1;
   sendcomplete    = source >> 2;
   irqenable       = source >> 6;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::JoybusStatus::operator uint16() const {
+CPU::Registers::JoybusStatus::operator uint16_t() const {
   return (
     (receiveflag << 1)
   | (sendflag    << 3)
@@ -154,10 +154,10 @@ auto CPU::Registers::JoybusStatus::operator=(uint16 source) -> uint16 {
   receiveflag = source >> 1;
   sendflag    = source >> 3;
   generalflag = source >> 4;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::Interrupt::operator uint16() const {
+CPU::Registers::Interrupt::operator uint16_t() const {
   return (
     (vblank       <<  0)
   | (hblank       <<  1)
@@ -191,10 +191,10 @@ auto CPU::Registers::Interrupt::operator=(uint16 source) -> uint16 {
   dma[3]       = source >> 11;
   keypad       = source >> 12;
   cartridge    = source >> 13;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::WaitControl::operator uint16() const {
+CPU::Registers::WaitControl::operator uint16_t() const {
   return (
     (nwait[3] <<  0)
   | (nwait[0] <<  2)
@@ -221,10 +221,10 @@ auto CPU::Registers::WaitControl::operator=(uint16 source) -> uint16 {
   prefetch = (source >> 14) & 1;
   gametype = (source >> 15) & 1;
   swait[3] = nwait[3];
-  return operator uint16();
+  return operator uint16_t();
 }
 
-CPU::Registers::MemoryControl::operator uint32() const {
+CPU::Registers::MemoryControl::operator uint32_t() const {
   return (
     (disable   <<  0)
   | (unknown1  <<  1)
@@ -240,5 +240,5 @@ auto CPU::Registers::MemoryControl::operator=(uint32 source) -> uint32 {
   ewram     = source >>  5;
   ewramwait = source >> 24;
   unknown2  = source >> 28;
-  return operator uint32();
+  return operator uint32_t();
 }

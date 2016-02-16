@@ -132,11 +132,11 @@ auto V30MZ::opLeave() {
   r.bp = pop();
 }
 
-auto V30MZ::opPushReg(uint16& reg) {
+auto V30MZ::opPushReg(uint16_t& reg) {
   push(reg);
 }
 
-auto V30MZ::opPopReg(uint16& reg) {
+auto V30MZ::opPopReg(uint16_t& reg) {
   reg = pop();
   if(&reg == &r.ss) state.poll = false;
 }
@@ -185,7 +185,8 @@ auto V30MZ::opPopAll() {
 //68  push imm16
 //6a  push imm8s
 auto V30MZ::opPushImm(Size size) {
-  push(size == Word ? fetch(Word) : (int8_t)fetch(Byte));
+  if(size == Byte) push((int8)fetch(Byte));
+  if(size == Word) push(fetch(Word));
 }
 
 auto V30MZ::opPopMem() {

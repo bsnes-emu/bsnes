@@ -145,7 +145,7 @@ auto V30MZ::opMultiplySignedRegMemImm(Size size) {
 //45  inc bp
 //46  inc si
 //47  inc di
-auto V30MZ::opIncReg(uint16& reg) {
+auto V30MZ::opIncReg(uint16_t& reg) {
   reg++;
 }
 
@@ -157,7 +157,7 @@ auto V30MZ::opIncReg(uint16& reg) {
 //4d  dec bp
 //4e  dec si
 //4f  dec di
-auto V30MZ::opDecReg(uint16& reg) {
+auto V30MZ::opDecReg(uint16_t& reg) {
   reg--;
 }
 

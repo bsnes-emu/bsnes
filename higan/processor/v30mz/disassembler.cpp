@@ -18,7 +18,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   };
   auto readByteSigned = [&]() -> string {
     uint8 byte = fetch();
-    return {"$", byte & 0x80 ? "-" : "+", hex(byte & 0x80 ? 256 - byte : byte, 2L)};
+    return {"$", byte & 0x80 ? "-" : "+", hex(byte & 0x80 ? uint8(256 - byte) : byte, 2L)};
   };
   auto readRelativeByte = [&]() -> string {
     uint8 byte = fetch();

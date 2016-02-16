@@ -18,14 +18,14 @@ auto V30MZ::setAcc(Size size, uint32 data) -> void {
 
 //
 
-V30MZ::Registers::Flags::operator uint16() const {
+V30MZ::Registers::Flags::operator uint16_t() const {
   return m << 15 | 1 << 14 | 1 << 13 | 1 << 12
        | v << 11 | d << 10 | i <<  9 | b <<  8
        | s <<  7 | z <<  6 | h <<  4 | p <<  2
        | 1 <<  1 | c <<  0;
 }
 
-auto V30MZ::Registers::Flags::operator=(uint16 data) {
+auto V30MZ::Registers::Flags::operator=(uint16_t data) {
   m = (uint1)(data >> 15);
   v = (uint1)(data >> 11);
   d = (uint1)(data >> 10);

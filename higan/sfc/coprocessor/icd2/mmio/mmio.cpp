@@ -3,7 +3,7 @@ auto ICD2::read(uint addr, uint8 data) -> uint8 {
 
   //LY counter
   if(addr == 0x6000) {
-    uint y = min(143u, GameBoy::ppu.status.ly);
+    uint y = min((uint8)143, GameBoy::ppu.status.ly);
     return (y & ~7) | write_bank;
   }
 

@@ -60,10 +60,10 @@ auto PPU::Screen::get_pixel_sub(bool hires) -> uint16 {
   if(math.transparent = (priority == 0)) math.sub.color = get_color(0);
 
   if(!hires) return 0;
-  if(!math.sub.color_enable) return math.main.color_enable ? math.sub.color : 0;
+  if(!math.sub.color_enable) return math.main.color_enable ? math.sub.color : (uint16)0;
 
   return addsub(
-    math.main.color_enable ? math.sub.color : 0,
+    math.main.color_enable ? math.sub.color : (uint16)0,
     math.addsub_mode ? math.main.color : fixed_color()
   );
 }
@@ -108,7 +108,7 @@ auto PPU::Screen::get_pixel_main() -> uint16 {
 
   if(!self.window.output.sub.color_enable) math.sub.color_enable = false;
   math.main.color_enable = self.window.output.main.color_enable;
-  if(!math.sub.color_enable) return math.main.color_enable ? math.main.color : 0;
+  if(!math.sub.color_enable) return math.main.color_enable ? math.main.color : (uint16)0;
 
   if(regs.addsub_mode && math.transparent) {
     math.addsub_mode = false;
@@ -119,7 +119,7 @@ auto PPU::Screen::get_pixel_main() -> uint16 {
   }
 
   return addsub(
-    math.main.color_enable ? math.main.color : 0,
+    math.main.color_enable ? math.main.color : (uint16)0,
     math.addsub_mode ? math.sub.color : fixed_color()
   );
 }

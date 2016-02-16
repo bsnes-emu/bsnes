@@ -119,17 +119,17 @@ auto Interface::load(uint id, const stream& stream) -> void {
   }
 
   if(id == ID::ROM) {
-    stream.read(cartridge.rom.data, min(cartridge.rom.size, stream.size()));
+    stream.read((uint8_t*)cartridge.rom.data, min(cartridge.rom.size, stream.size()));
   }
 
   if(id == ID::RAM) {
-    stream.read(cartridge.ram.data, min(cartridge.ram.size, stream.size()));
+    stream.read((uint8_t*)cartridge.ram.data, min(cartridge.ram.size, stream.size()));
   }
 }
 
 auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::RAM) {
-    stream.write(cartridge.ram.data, cartridge.ram.size);
+    stream.write((uint8_t*)cartridge.ram.data, cartridge.ram.size);
   }
 }
 

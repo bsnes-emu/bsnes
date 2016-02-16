@@ -59,9 +59,9 @@ auto Player::frame() -> void {
 auto Player::keyinput() -> maybe<uint16> {
   if(status.logoDetected) {
     switch(status.logoCounter) {
-    case 0: return 0x03ff;
-    case 1: return 0x03ff;
-    case 2: return 0x030f;
+    case 0: return {0x03ff};
+    case 1: return {0x03ff};
+    case 2: return {0x030f};
     }
   }
   return nothing;

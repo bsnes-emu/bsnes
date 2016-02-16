@@ -47,8 +47,8 @@ auto ARM::arm_step() -> void {
   if(condition(instruction() >> 28) == false) return;
 
   #define decode(pattern, execute) if( \
-    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
-    == std::integral_constant<uint32, bit::test(pattern)>::value \
+    (instruction() & std::integral_constant<uint32_t, bit::mask(pattern)>::value) \
+    == std::integral_constant<uint32_t, bit::test(pattern)>::value \
   ) return arm_op_ ## execute()
 
   decode("???? 0001 0010 ++++ ++++ ++++ 0001 ????", branch_exchange_register);
@@ -102,8 +102,8 @@ auto ARM::thumb_step() -> void {
   }
 
   #define decode(pattern, execute) if( \
-    (instruction() & std::integral_constant<uint32, bit::mask(pattern)>::value) \
-    == std::integral_constant<uint32, bit::test(pattern)>::value \
+    (instruction() & std::integral_constant<uint32_t, bit::mask(pattern)>::value) \
+    == std::integral_constant<uint32_t, bit::test(pattern)>::value \
   ) return thumb_op_ ## execute()
 
   decode("0001 10?? ???? ????", adjust_register);

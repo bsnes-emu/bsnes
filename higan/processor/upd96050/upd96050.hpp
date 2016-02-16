@@ -48,23 +48,23 @@ struct uPD96050 {
   };
 
   struct Regs {
-    uint16 stack[16];  //LIFO
-    varuint pc;        //program counter
-    varuint rp;        //ROM pointer
-    varuint dp;        //data pointer
-    uint4 sp;          //stack pointer
+    uint16 stack[16];    //LIFO
+    varuint_t<uint> pc;  //program counter
+    varuint_t<uint> rp;  //ROM pointer
+    varuint_t<uint> dp;  //data pointer
+    uint4 sp;            //stack pointer
     int16 k;
     int16 l;
     int16 m;
     int16 n;
-    int16 a;           //accumulator
-    int16 b;           //accumulator
+    int16 a;             //accumulator
+    int16 b;             //accumulator
     Flag flaga;
     Flag flagb;
-    uint16 tr;         //temporary register
-    uint16 trb;        //temporary register
-    Status sr;         //status register
-    uint16 dr;         //data register
+    uint16 tr;           //temporary register
+    uint16 trb;          //temporary register
+    Status sr;           //status register
+    uint16 dr;           //data register
     uint16 si;
     uint16 so;
   } regs;

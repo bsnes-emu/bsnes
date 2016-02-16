@@ -21,8 +21,8 @@ struct Registers {
 
 struct Register16 {
   union {
-    uint16 w;
-    struct { uint8 order_lsb2(l, h); };
+    uint16_t w;
+    struct { uint8_t order_lsb2(l, h); };
   };
 } abs, iabs;
 

@@ -26,7 +26,7 @@ StateManager::StateManager(TabFrame* parent) : TabFrameItem(parent) {
 }
 
 auto StateManager::doUpdateControls() -> void {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   if(auto item = stateList.selected()) {
     buffer = file::read(program->stateName(1 + item.offset(), true));
   }
@@ -43,7 +43,7 @@ auto StateManager::doUpdateControls() -> void {
 }
 
 auto StateManager::doChangeSelected() -> void {
-  vector<uint8> buffer;
+  vector<uint8_t> buffer;
   if(auto item = stateList.selected()) {
     buffer = file::read(program->stateName(1 + item.offset(), true));
     if(buffer.size() >= 584) {

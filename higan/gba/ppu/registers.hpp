@@ -12,7 +12,7 @@ struct Registers {
     uint1 enable[5];
     uint1 enablewindow[3];
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const Control&) -> Control& = delete;
   } control;
@@ -28,7 +28,7 @@ struct Registers {
     uint1 irqvcoincidence;
     uint8 vcompare;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const Status&) -> Status& = delete;
   } status;
@@ -45,7 +45,7 @@ struct Registers {
     uint1 affinewrap;  //BG2,3 only
     uint2 screensize;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const BackgroundControl&) -> BackgroundControl& = delete;
   };
@@ -69,7 +69,7 @@ struct Registers {
   struct WindowFlags {
     uint1 enable[6];
 
-    operator uint8() const;
+    operator uint8_t() const;
     auto operator=(uint8 source) -> uint8;
     auto operator=(const WindowFlags&) -> WindowFlags& = delete;
   };
@@ -93,7 +93,7 @@ struct Registers {
     uint1 below[6];
     uint2 mode;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const BlendControl&) -> BlendControl& = delete;
   };

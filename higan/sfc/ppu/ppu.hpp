@@ -20,9 +20,9 @@ struct PPU : Thread, public PPUcounter {
 
   auto serialize(serializer&) -> void;
 
-  uint8 vram[64 * 1024] = {0};
-  uint8 oam[544] = {0};
-  uint8 cgram[512] = {0};
+  uint8 vram[64 * 1024];
+  uint8 oam[544];
+  uint8 cgram[512];
 
 privileged:
   uint ppu1_version = 1;  //allowed: 1

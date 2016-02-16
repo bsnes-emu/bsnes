@@ -36,10 +36,10 @@ Board::Board(Markup::Node& document) {
   chrrom.size = crom["size"].natural();
   chrram.size = cram["size"].natural();
 
-  if(prgrom.size) prgrom.data = new uint8[prgrom.size]();
-  if(prgram.size) prgram.data = new uint8[prgram.size]();
-  if(chrrom.size) chrrom.data = new uint8[chrrom.size]();
-  if(chrram.size) chrram.data = new uint8[chrram.size]();
+  if(prgrom.size) prgrom.data = new uint8_t[prgrom.size]();
+  if(prgram.size) prgram.data = new uint8_t[prgram.size]();
+  if(chrrom.size) chrrom.data = new uint8_t[chrrom.size]();
+  if(chrram.size) chrram.data = new uint8_t[chrram.size]();
 
   if(auto name = prom["name"].text()) interface->loadRequest(ID::ProgramROM, name, true);
   if(auto name = pram["name"].text()) interface->loadRequest(ID::ProgramRAM, name, false);

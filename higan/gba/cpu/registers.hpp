@@ -9,24 +9,24 @@ struct Registers {
     uint1 irq;
     uint1 enable;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const DMAControl&) -> DMAControl& = delete;
   };
 
   struct DMA {
-    varuint source;
-    varuint target;
-    varuint length;
+    varuint_t<uint> source;
+    varuint_t<uint> target;
+    varuint_t<uint> length;
     uint32 data;
     DMAControl control;
 
     //internal
     bool pending;
     struct Run {
-      varuint target;
-      varuint source;
-      varuint length;
+      varuint_t<uint> target;
+      varuint_t<uint> source;
+      varuint_t<uint> length;
     } run;
   } dma[4];
 
@@ -36,7 +36,7 @@ struct Registers {
     uint1 irq;
     uint1 enable;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const TimerControl&) -> TimerControl& = delete;
   };
@@ -57,7 +57,7 @@ struct Registers {
     uint1 transferlength;
     uint1 irqenable;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const SerialControl&) -> SerialControl& = delete;
   };
@@ -73,7 +73,7 @@ struct Registers {
     uint1 enable;
     uint1 condition;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const KeypadControl&) -> KeypadControl& = delete;
   };
@@ -94,7 +94,7 @@ struct Registers {
     uint1 irqenable;
     uint2 mode;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const JoybusSettings&) -> JoybusSettings& = delete;
   };
@@ -105,7 +105,7 @@ struct Registers {
     uint1 sendcomplete;
     uint1 irqenable;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const JoybusControl&) -> JoybusControl& = delete;
   };
@@ -115,7 +115,7 @@ struct Registers {
     uint1 sendflag;
     uint2 generalflag;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const JoybusStatus&) -> JoybusStatus& = delete;
   };
@@ -140,7 +140,7 @@ struct Registers {
     uint1 keypad;
     uint1 cartridge;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const Interrupt&) -> Interrupt& = delete;
   };
@@ -157,7 +157,7 @@ struct Registers {
     uint1 prefetch;
     uint1 gametype;
 
-    operator uint16() const;
+    operator uint16_t() const;
     auto operator=(uint16 source) -> uint16;
     auto operator=(const WaitControl&) -> WaitControl& = delete;
   };
@@ -173,7 +173,7 @@ struct Registers {
     uint4 ewramwait;
     uint4 unknown2;
 
-    operator uint32() const;
+    operator uint32_t() const;
     auto operator=(uint32 source) -> uint32;
     auto operator=(const MemoryControl&) -> MemoryControl& = delete;
   };

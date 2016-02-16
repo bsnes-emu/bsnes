@@ -20,7 +20,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
   if(filename == "manifest.bml" && pathname && !pathname.find(".sys/")) {
     if(!file::exists(location) || settings["Library/IgnoreManifests"].boolean()) {
       if(auto manifest = execute("icarus", "--manifest", pathname)) {
-        memorystream stream{(const uint8*)manifest.data(), manifest.size()};
+        memorystream stream{(const uint8_t*)manifest.data(), manifest.size()};
         return emulator->load(id, stream);
       }
     }

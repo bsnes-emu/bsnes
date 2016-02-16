@@ -108,8 +108,8 @@ struct V30MZ {
   auto opTestMemReg(Size);
   auto opTestAcc(Size);
   auto opMultiplySignedRegMemImm(Size);
-  auto opIncReg(uint16&);
-  auto opDecReg(uint16&);
+  auto opIncReg(uint16_t&);
+  auto opDecReg(uint16_t&);
   auto opSignExtendByte();
   auto opSignExtendWord();
 
@@ -132,8 +132,8 @@ struct V30MZ {
   auto opInto();
   auto opEnter();
   auto opLeave();
-  auto opPushReg(uint16&);
-  auto opPopReg(uint16&);
+  auto opPushReg(uint16_t&);
+  auto opPopReg(uint16_t&);
   auto opPushFlags();
   auto opPopFlags();
   auto opPushAll();
@@ -175,13 +175,13 @@ struct V30MZ {
   auto opMoveSegMem();
   auto opMoveAccMem(Size);
   auto opMoveMemAcc(Size);
-  auto opMoveRegImm(uint8&);
-  auto opMoveRegImm(uint16&);
+  auto opMoveRegImm(uint8_t&);
+  auto opMoveRegImm(uint16_t&);
   auto opMoveMemImm(Size);
-  auto opExchange(uint16&, uint16&);
+  auto opExchange(uint16_t&, uint16_t&);
   auto opExchangeMemReg(Size);
   auto opLoadEffectiveAddressRegMem();
-  auto opLoadSegmentMem(uint16&);
+  auto opLoadSegmentMem(uint16_t&);
 
   //instructions-string.cpp
   auto opInString(Size);
@@ -216,28 +216,28 @@ struct V30MZ {
   } modrm;
 
   struct Registers {
-    union { uint16 ax; struct { uint8 order_lsb2(al, ah); }; };
-    union { uint16 cx; struct { uint8 order_lsb2(cl, ch); }; };
-    union { uint16 dx; struct { uint8 order_lsb2(dl, dh); }; };
-    union { uint16 bx; struct { uint8 order_lsb2(bl, bh); }; };
-    uint16 sp;
-    uint16 bp;
-    uint16 si;
-    uint16 di;
-    uint16 es;
-    uint16 cs;
-    uint16 ss;
-    uint16 ds;
-    uint16 ip;
+    union { uint16_t ax; struct { uint8_t order_lsb2(al, ah); }; };
+    union { uint16_t cx; struct { uint8_t order_lsb2(cl, ch); }; };
+    union { uint16_t dx; struct { uint8_t order_lsb2(dl, dh); }; };
+    union { uint16_t bx; struct { uint8_t order_lsb2(bl, bh); }; };
+    uint16_t sp;
+    uint16_t bp;
+    uint16_t si;
+    uint16_t di;
+    uint16_t es;
+    uint16_t cs;
+    uint16_t ss;
+    uint16_t ds;
+    uint16_t ip;
 
-    uint8*  b[8]{&al, &cl, &dl, &bl, &ah, &ch, &dh, &bh};
-    uint16* w[8]{&ax, &cx, &dx, &bx, &sp, &bp, &si, &di};
-    uint16* s[8]{&es, &cs, &ss, &ds, &es, &cs, &ss, &ds};
+    uint8_t*  b[8]{&al, &cl, &dl, &bl, &ah, &ch, &dh, &bh};
+    uint16_t* w[8]{&ax, &cx, &dx, &bx, &sp, &bp, &si, &di};
+    uint16_t* s[8]{&es, &cs, &ss, &ds, &es, &cs, &ss, &ds};
 
     struct Flags {
       //registers.cpp
-      operator uint16() const;
-      auto operator=(uint16 data);
+      operator uint16_t() const;
+      auto operator=(uint16_t data);
 
       bool m;  //mode
       bool v;  //overflow

@@ -23,7 +23,7 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
 
   auto serialize(serializer&) -> void;
 
-  uint8 wram[128 * 1024] = {0};
+  uint8 wram[128 * 1024];
   vector<Thread*> coprocessors;
 
 privileged:

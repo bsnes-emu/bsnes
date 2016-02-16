@@ -1,4 +1,4 @@
-PPU::Registers::Control::operator uint16() const {
+PPU::Registers::Control::operator uint16_t() const {
   return (
     (bgmode            <<  0)
   | (cgbmode           <<  3)
@@ -32,10 +32,10 @@ auto PPU::Registers::Control::operator=(uint16 source) -> uint16 {
   enablewindow[In0] = source >> 13;
   enablewindow[In1] = source >> 14;
   enablewindow[Obj] = source >> 15;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-PPU::Registers::Status::operator uint16() const {
+PPU::Registers::Status::operator uint16_t() const {
   return (
     (vblank          << 0)
   | (hblank          << 1)
@@ -55,10 +55,10 @@ auto PPU::Registers::Status::operator=(uint16 source) -> uint16 {
   irqhblank       = source >> 4;
   irqvcoincidence = source >> 5;
   vcompare        = source >> 8;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-PPU::Registers::BackgroundControl::operator uint16() const {
+PPU::Registers::BackgroundControl::operator uint16_t() const {
   return (
     (priority           <<  0)
   | (characterbaseblock <<  2)
@@ -80,10 +80,10 @@ auto PPU::Registers::BackgroundControl::operator=(uint16 source) -> uint16 {
   screenbaseblock    = source >>  8;
   affinewrap         = source >> 13;
   screensize         = source >> 14;
-  return operator uint16();
+  return operator uint16_t();
 }
 
-PPU::Registers::WindowFlags::operator uint8() const {
+PPU::Registers::WindowFlags::operator uint8_t() const {
   return (
     (enable[BG0] << 0)
   | (enable[BG1] << 1)
@@ -101,10 +101,10 @@ auto PPU::Registers::WindowFlags::operator=(uint8 source) -> uint8 {
   enable[BG3] = source >> 3;
   enable[OBJ] = source >> 4;
   enable[SFX] = source >> 5;
-  return operator uint8();
+  return operator uint8_t();
 }
 
-PPU::Registers::BlendControl::operator uint16() const {
+PPU::Registers::BlendControl::operator uint16_t() const {
   return (
     (above[BG0] <<  0)
   | (above[BG1] <<  1)
@@ -136,5 +136,5 @@ auto PPU::Registers::BlendControl::operator=(uint16 source) -> uint16 {
   below[BG3] = source >> 11;
   below[OBJ] = source >> 12;
   below[SFX] = source >> 13;
-  return operator uint16();
+  return operator uint16_t();
 }

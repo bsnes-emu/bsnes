@@ -1,16 +1,16 @@
 auto CPU::portRead(uint16 addr) -> uint8 {
   //DMA_SRC
-  if(addr == 0x0040) return r.dmaSource.b0;
-  if(addr == 0x0041) return r.dmaSource.b1;
-  if(addr == 0x0042) return r.dmaSource.b2;
+  if(addr == 0x0040) return r.dmaSource.byte(0);
+  if(addr == 0x0041) return r.dmaSource.byte(1);
+  if(addr == 0x0042) return r.dmaSource.byte(2);
 
   //DMA_DST
-  if(addr == 0x0044) return r.dmaTarget.b0;
-  if(addr == 0x0045) return r.dmaTarget.b1;
+  if(addr == 0x0044) return r.dmaTarget.byte(0);
+  if(addr == 0x0045) return r.dmaTarget.byte(1);
 
   //DMA_LEN
-  if(addr == 0x0046) return r.dmaLength.b0;
-  if(addr == 0x0047) return r.dmaLength.b1;
+  if(addr == 0x0046) return r.dmaLength.byte(0);
+  if(addr == 0x0047) return r.dmaLength.byte(1);
 
   //DMA_CTRL
   if(addr == 0x0048) return r.dmaEnable << 7 | r.dmaMode << 0;
@@ -47,22 +47,22 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
 auto CPU::portWrite(uint16 addr, uint8 data) -> void {
   //DMA_SRC
-  if(addr == 0x0040) { r.dmaSource.b0 = data & ~1; return; }
-  if(addr == 0x0041) { r.dmaSource.b1 = data; return; }
-  if(addr == 0x0042) { r.dmaSource.b2 = data; return; }
+  if(addr == 0x0040) { r.dmaSource.byte(0) = data & ~1; return; }
+  if(addr == 0x0041) { r.dmaSource.byte(1) = data; return; }
+  if(addr == 0x0042) { r.dmaSource.byte(2) = data; return; }
 
   //DMA_DST
-  if(addr == 0x0044) { r.dmaTarget.b0 = data & ~1; return; }
-  if(addr == 0x0045) { r.dmaTarget.b1 = data; return; }
+  if(addr == 0x0044) { r.dmaTarget.byte(0) = data & ~1; return; }
+  if(addr == 0x0045) { r.dmaTarget.byte(1) = data; return; }
 
   //DMA_LEN
-  if(addr == 0x0046) { r.dmaLength.b0 = data & ~1; return; }
-  if(addr == 0x0047) { r.dmaLength.b1 = data; return; }
+  if(addr == 0x0046) { r.dmaLength.byte(0) = data & ~1; return; }
+  if(addr == 0x0047) { r.dmaLength.byte(1) = data; return; }
 
   //DMA_CTRL
   if(addr == 0x0048) {
-    r.dmaEnable = (uint1)(data >> 7);
-    r.dmaMode   = (uint1)(data >> 0);
+    r.dmaEnable = data.bit(7);
+    r.dmaMode   = data.bit(0);
     if(r.dmaEnable) dmaTransfer();
     return;
   }

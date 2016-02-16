@@ -22,8 +22,8 @@ struct flag_t {
 
 struct reg16_t {
   union {
-    uint16 w = 0;
-    struct { uint8 order_lsb2(l, h); };
+    uint16_t w = 0;
+    struct { uint8_t order_lsb2(l, h); };
   };
 
   inline operator unsigned() const { return w; }
@@ -42,9 +42,9 @@ struct reg16_t {
 
 struct reg24_t {
   union {
-    uint32 d = 0;
-    struct { uint16 order_lsb2(w, wh); };
-    struct { uint8  order_lsb4(l, h, b, bh); };
+    uint32_t d = 0;
+    struct { uint16_t order_lsb2(w, wh); };
+    struct { uint8_t  order_lsb4(l, h, b, bh); };
   };
 
   inline operator unsigned() const { return d; }

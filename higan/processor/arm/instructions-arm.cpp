@@ -354,8 +354,8 @@ auto ARM::arm_op_data_immediate_shift() {
   carryout() = cpsr().c;
 
   if(mode == 0) rm = lsl(rm, rs);
-  if(mode == 1) rm = lsr(rm, rs ? rs : 32);
-  if(mode == 2) rm = asr(rm, rs ? rs : 32);
+  if(mode == 1) rm = lsr(rm, rs ? rs : (uint32)32);
+  if(mode == 2) rm = asr(rm, rs ? rs : (uint32)32);
   if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
   arm_opcode(rm);
@@ -383,9 +383,9 @@ auto ARM::arm_op_data_register_shift() {
   uint32 rm = r(m) + (m == 15 ? 4 : 0);
   carryout() = cpsr().c;
 
-  if(mode == 0      ) rm = lsl(rm, rs < 33 ? rs : 33);
-  if(mode == 1      ) rm = lsr(rm, rs < 33 ? rs : 33);
-  if(mode == 2      ) rm = asr(rm, rs < 32 ? rs : 32);
+  if(mode == 0      ) rm = lsl(rm, rs < 33 ? rs : (uint8)33);
+  if(mode == 1      ) rm = lsr(rm, rs < 33 ? rs : (uint8)33);
+  if(mode == 2      ) rm = asr(rm, rs < 32 ? rs : (uint8)32);
   if(mode == 3 && rs) rm = ror(rm, rs & 31 == 0 ? 32 : rs & 31);
 
   arm_opcode(rm);
@@ -482,8 +482,8 @@ auto ARM::arm_op_move_register_offset() {
   bool c = cpsr().c;
 
   if(mode == 0) rm = lsl(rm, rs);
-  if(mode == 1) rm = lsr(rm, rs ? rs : 32);
-  if(mode == 2) rm = asr(rm, rs ? rs : 32);
+  if(mode == 1) rm = lsr(rm, rs ? rs : (uint32)32);
+  if(mode == 2) rm = asr(rm, rs ? rs : (uint32)32);
   if(mode == 3) rm = rs ? ror(rm, rs) : rrx(rm);
 
   if(pre == 1) rn = up ? rn + rm : rn - rm;

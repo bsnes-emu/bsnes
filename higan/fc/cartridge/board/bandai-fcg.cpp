@@ -27,7 +27,7 @@ struct BandaiFCG : Board {
   auto prg_read(uint addr) -> uint8 {
     if(addr & 0x8000) {
       bool region = addr & 0x4000;
-      uint bank = (region == 0 ? prg_bank : 0x0f);
+      uint bank = (region == 0 ? prg_bank : (uint8)0x0f);
       return prgrom.read((bank << 14) | (addr & 0x3fff));
     }
     return cpu.mdr();

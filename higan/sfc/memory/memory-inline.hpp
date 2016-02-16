@@ -37,11 +37,11 @@ auto MappedRAM::copy(const stream& memory) -> void {
   //round size up to multiple of 256-bytes
   size_ = (memory.size() & ~255) + ((bool)(memory.size() & 255) << 8);
   data_ = new uint8[size_]();
-  memory.read(data_, memory.size());
+  memory.read((uint8_t*)data_, memory.size());
 }
 
 auto MappedRAM::read(const stream& memory) -> void {
-  memory.read(data_, min(memory.size(), size_));
+  memory.read((uint8_t*)data_, min(memory.size(), size_));
 }
 
 auto MappedRAM::write_protect(bool status) -> void { write_protect_ = status; }
