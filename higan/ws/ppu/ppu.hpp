@@ -11,7 +11,7 @@ struct PPU : Thread, IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
-  uint16_t output[224 * 144] = {0};
+  uint16 output[224 * 144];
 
   struct Status {
     uint vclk;
@@ -31,6 +31,9 @@ struct PPU : Thread, IO {
     uint4 backColorIndex;
     uint4 backColorPalette;
 
+    //$0003  LINE_CMP
+    uint8 lineCompare;
+
     //$0004  SPR_BASE
     uint6 spriteBase;
 
@@ -43,6 +46,30 @@ struct PPU : Thread, IO {
     //$0007  MAP_BASE
     uint4 screenTwoMapBase;
     uint4 screenOneMapBase;
+
+    //$0008  SCR2_WIN_X0
+    uint8 screenTwoWindowX0;
+
+    //$0009  SCR2_WIN_Y0
+    uint8 screenTwoWindowY0;
+
+    //$000a  SCR2_WIN_X1
+    uint8 screenTwoWindowX1;
+
+    //$000b  SCR2_WIN_Y1
+    uint8 screenTwoWindowY1;
+
+    //$000c  SPR_WIN_X0
+    uint8 spriteWindowX0;
+
+    //$000d  SPR_WIN_Y0
+    uint8 spriteWindowY0;
+
+    //$000e  SPR_WIN_X1
+    uint8 spriteWindowX1;
+
+    //$000f  SPR_WIN_Y1
+    uint8 spriteWindowY1;
 
     //$0010  SCR1_X
     uint8 scrollOneX;
@@ -67,8 +94,19 @@ struct PPU : Thread, IO {
     bool iconVertical;
     bool iconSleep;
 
+    //$0016  LCD_VTOTAL
+    uint8 vtotal;
+
+    //$0017  LCD_VBLANK
+    uint8 vblank;
+
     //$001c-001f  PALMONO_POOL
-    uint4 monoPool[8];
+    uint4 pool[8];
+
+    //$0020-003f  PALMONO
+    struct Palette {
+      uint3 color[4];
+    } palette[16];
 
     //$0060  DISP_MODE
     bool bpp;

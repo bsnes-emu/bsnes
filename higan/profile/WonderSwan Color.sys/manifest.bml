@@ -1,1 +1,2 @@
 system name:WonderSwan Color
+  eeprom name=internal.rom size=2048

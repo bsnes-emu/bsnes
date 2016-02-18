@@ -1,38 +1,38 @@
 auto PPU::Sprite::update(uint addr, uint8 data) -> void {
   if(addr < 0x0200) {
-    uint n = addr >> 2;
+    uint n = addr >> 2;  //sprite#
     addr &= 3;
     if(addr == 0) {
-      list[n].x = (list[n].x & 0x100) | data;
+      list[n].x.bits(0,7) = data;
     } else if(addr == 1) {
       list[n].y = data;
     } else if(addr == 2) {
       list[n].character = data;
     } else {  //(addr == 3)
-      list[n].vflip = data & 0x80;
-      list[n].hflip = data & 0x40;
-      list[n].priority = (data >> 4) & 3;
-      list[n].palette = (data >> 1) & 7;
-      list[n].nameselect = data & 1;
+      list[n].vflip      = data.bit (7);
+      list[n].hflip      = data.bit (6);
+      list[n].priority   = data.bits(5,4);
+      list[n].palette    = data.bits(3,1);
+      list[n].nameselect = data.bit (0);
     }
   } else {
-    uint n = (addr & 0x1f) << 2;
-    list[n + 0].x = ((data & 0x01) << 8) | (list[n + 0].x & 0xff);
-    list[n + 0].size = data & 0x02;
-    list[n + 1].x = ((data & 0x04) << 6) | (list[n + 1].x & 0xff);
-    list[n + 1].size = data & 0x08;
-    list[n + 2].x = ((data & 0x10) << 4) | (list[n + 2].x & 0xff);
-    list[n + 2].size = data & 0x20;
-    list[n + 3].x = ((data & 0x40) << 2) | (list[n + 3].x & 0xff);
-    list[n + 3].size = data & 0x80;
+    uint n = (addr & 0x1f) << 2;  //sprite#
+    list[n + 0].x.bit(8) = data.bit(0);
+    list[n + 0].size     = data.bit(1);
+    list[n + 1].x.bit(8) = data.bit(2);
+    list[n + 1].size     = data.bit(3);
+    list[n + 2].x.bit(8) = data.bit(4);
+    list[n + 2].size     = data.bit(5);
+    list[n + 3].x.bit(8) = data.bit(6);
+    list[n + 3].size     = data.bit(7);
   }
 }
 
 auto PPU::Sprite::synchronize() -> void {
-  for(uint n = 0; n < 544; n++) update(n, ppu.oam[n]);
+  for(auto n : range(544)) update(n, ppu.oam[n]);
 }
 
-auto PPU::Sprite::SpriteItem::width() const -> uint{
+auto PPU::Sprite::Object::width() const -> uint{
   if(size == 0) {
     static uint width[] = { 8,  8,  8, 16, 16, 32, 16, 16};
     return width[ppu.sprite.regs.base_size];
@@ -42,7 +42,7 @@ auto PPU::Sprite::SpriteItem::width() const -> uint{
   }
 }
 
-auto PPU::Sprite::SpriteItem::height() const -> uint {
+auto PPU::Sprite::Object::height() const -> uint {
   if(size == 0) {
     if(ppu.sprite.regs.interlace && ppu.sprite.regs.base_size >= 6) return 16;
     static uint height[] = { 8,  8,  8, 16, 16, 32, 32, 32};

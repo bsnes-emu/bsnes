@@ -42,9 +42,10 @@ namespace WonderSwan {
     int64 clock = 0;
   };
 
+  #include <ws/memory/memory.hpp>
+  #include <ws/eeprom/eeprom.hpp>
   #include <ws/system/system.hpp>
   #include <ws/scheduler/scheduler.hpp>
-  #include <ws/memory/memory.hpp>
   #include <ws/cartridge/cartridge.hpp>
   #include <ws/cpu/cpu.hpp>
   #include <ws/ppu/ppu.hpp>

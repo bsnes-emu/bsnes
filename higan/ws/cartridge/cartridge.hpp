@@ -26,6 +26,8 @@ struct Cartridge : IO {
     string name;
   } rom, ram;
 
+  EEPROM eeprom;
+
   struct Information {
     string manifest;
     string title;

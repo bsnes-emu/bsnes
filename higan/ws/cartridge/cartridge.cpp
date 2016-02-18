@@ -4,6 +4,7 @@ namespace WonderSwan {
 
 Cartridge cartridge;
 #include "memory.cpp"
+#include "io.cpp"
 
 auto Cartridge::load() -> void {
   information.manifest = "";
@@ -26,7 +27,14 @@ auto Cartridge::load() -> void {
     ram.size = node["size"].natural();
     ram.mask = bit::round(ram.size) - 1;
     if(ram.size) ram.data = new uint8[ram.mask + 1]();
-    if(ram.name) interface->loadRequest(ID::RAM, ram.name, true);
+    if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
+  }
+
+  if(auto node = document["board/eeprom"]) {
+    eeprom.setName(node["name"].text());
+    eeprom.setSize(node["size"].natural() / sizeof(uint16));
+    eeprom.erase();
+    if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
   }
 
   information.title = document["information/title"].text();
@@ -48,10 +56,9 @@ auto Cartridge::unload() -> void {
 }
 
 auto Cartridge::power() -> void {
-  iomap[0x00c0] = this;
-  iomap[0x00c1] = this;
-  iomap[0x00c2] = this;
-  iomap[0x00c3] = this;
+  eeprom.power();
+
+  for(uint n = 0x00c0; n <= 0x00c8; n++) iomap[n] = this;
 
   r.bank_rom0 = 0xff;
   r.bank_rom1 = 0xff;

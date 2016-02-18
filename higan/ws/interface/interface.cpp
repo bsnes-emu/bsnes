@@ -85,10 +85,13 @@ auto Interface::sha256() -> string {
 auto Interface::group(uint id) -> uint {
   switch(id) {
   case ID::SystemManifest:
+  case ID::SystemIPLROM:
+  case ID::SystemEEPROM:
     return 0;
   case ID::Manifest:
   case ID::ROM:
   case ID::RAM:
+  case ID::EEPROM:
     switch(system.revision()) {
     case System::Revision::WonderSwan:
       return ID::WonderSwan;
@@ -106,12 +109,18 @@ auto Interface::load(uint id) -> void {
 }
 
 auto Interface::save() -> void {
-  if(cartridge.ram.name) interface->saveRequest(ID::RAM, cartridge.ram.name);
+  if(auto name = system.eeprom.name()) interface->saveRequest(ID::SystemEEPROM, name);
+  if(auto name = cartridge.ram.name) interface->saveRequest(ID::RAM, name);
+  if(auto name = cartridge.eeprom.name()) interface->saveRequest(ID::EEPROM, name);
 }
 
 auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::SystemManifest) {
     system.information.manifest = stream.text();
+  }
+
+  if(id == ID::SystemEEPROM) {
+    stream.read((uint8_t*)system.eeprom.data(), min(system.eeprom.size() * sizeof(uint16), stream.size()));
   }
 
   if(id == ID::Manifest) {
@@ -125,11 +134,23 @@ auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::RAM) {
     stream.read((uint8_t*)cartridge.ram.data, min(cartridge.ram.size, stream.size()));
   }
+
+  if(id == ID::EEPROM) {
+    stream.read((uint8_t*)cartridge.eeprom.data(), min(cartridge.eeprom.size() * sizeof(uint16), stream.size()));
+  }
 }
 
 auto Interface::save(uint id, const stream& stream) -> void {
+  if(id == ID::SystemEEPROM) {
+    stream.write((uint8_t*)system.eeprom.data(), system.eeprom.size() * sizeof(uint16));
+  }
+
   if(id == ID::RAM) {
     stream.write((uint8_t*)cartridge.ram.data, cartridge.ram.size);
+  }
+
+  if(id == ID::EEPROM) {
+    stream.write((uint8_t*)cartridge.eeprom.data(), cartridge.eeprom.size() * sizeof(uint16));
   }
 }
 

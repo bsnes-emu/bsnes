@@ -137,16 +137,16 @@ auto PPU::Background::serialize(serializer& s) -> void {
 }
 
 auto PPU::Sprite::serialize(serializer& s) -> void {
-  for(unsigned i = 0; i < 128; i++) {
-    s.integer(list[i].x);
-    s.integer(list[i].y);
-    s.integer(list[i].character);
-    s.integer(list[i].nameselect);
-    s.integer(list[i].vflip);
-    s.integer(list[i].hflip);
-    s.integer(list[i].priority);
-    s.integer(list[i].palette);
-    s.integer(list[i].size);
+  for(auto n : range(128)) {
+    s.integer(list[n].x);
+    s.integer(list[n].y);
+    s.integer(list[n].character);
+    s.integer(list[n].nameselect);
+    s.integer(list[n].vflip);
+    s.integer(list[n].hflip);
+    s.integer(list[n].priority);
+    s.integer(list[n].palette);
+    s.integer(list[n].size);
   }
 
   s.integer(t.x);
@@ -156,17 +156,21 @@ auto PPU::Sprite::serialize(serializer& s) -> void {
   s.integer(t.tile_count);
 
   s.integer(t.active);
-  for(unsigned n = 0; n < 2; n++) {
-    s.array(t.item[n]);
-    for(unsigned i = 0; i < 34; i++) {
-      s.integer(t.tile[n][i].x);
-      s.integer(t.tile[n][i].priority);
-      s.integer(t.tile[n][i].palette);
-      s.integer(t.tile[n][i].hflip);
-      s.integer(t.tile[n][i].d0);
-      s.integer(t.tile[n][i].d1);
-      s.integer(t.tile[n][i].d2);
-      s.integer(t.tile[n][i].d3);
+  for(auto p : range(2)) {
+    for(auto n : range(32)) {
+      s.integer(t.item[p][n].valid);
+      s.integer(t.item[p][n].index);
+    }
+    for(auto n : range(34)) {
+      s.integer(t.tile[p][n].valid);
+      s.integer(t.tile[p][n].x);
+      s.integer(t.tile[p][n].priority);
+      s.integer(t.tile[p][n].palette);
+      s.integer(t.tile[p][n].hflip);
+      s.integer(t.tile[p][n].d0);
+      s.integer(t.tile[p][n].d1);
+      s.integer(t.tile[p][n].d2);
+      s.integer(t.tile[p][n].d3);
     }
   }
 

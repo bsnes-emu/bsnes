@@ -1,22 +1,28 @@
 struct Sprite {
-  struct SpriteItem {
-    uint16 x;
-    uint16 y;
+  struct Object {
+    uint9 x;
+    uint8 y;
     uint8 character;
     bool nameselect;
     bool vflip;
     bool hflip;
-    uint8 priority;
-    uint8 palette;
+    uint2 priority;
+    uint3 palette;
     bool size;
     alwaysinline auto width() const -> uint;
     alwaysinline auto height() const -> uint;
   } list[128];
 
-  struct TileItem {
-    uint16 x;
-    uint16 priority;
-    uint16 palette;
+  struct Item {
+    bool valid;
+    uint7 index;
+  };
+
+  struct Tile {
+    bool valid;
+    uint9 x;
+    uint2 priority;
+    uint8 palette;
     bool hflip;
     uint8 d0, d1, d2, d3;
   };
@@ -29,8 +35,8 @@ struct Sprite {
     uint tile_count;
 
     bool active;
-    uint8 item[2][32];
-    TileItem tile[2][34];
+    Item item[2][32];
+    Tile tile[2][34];
   } t;
 
   struct Regs {
@@ -41,7 +47,7 @@ struct Sprite {
     uint3 base_size;
     uint2 nameselect;
     uint16 tiledata_addr;
-    uint8 first_sprite;
+    uint7 first_sprite;
 
     uint priority0;
     uint priority1;
@@ -54,7 +60,7 @@ struct Sprite {
 
   struct Output {
     struct Pixel {
-      uint priority;  //0 = none (transparent)
+      uint2 priority;  //0 = none (transparent)
       uint8 palette;
     } main, sub;
   } output;
@@ -74,7 +80,7 @@ struct Sprite {
   auto tilefetch() -> void;
   auto reset() -> void;
 
-  auto on_scanline(SpriteItem&) -> bool;
+  auto on_scanline(Object&) -> bool;
 
   auto serialize(serializer&) -> void;
 

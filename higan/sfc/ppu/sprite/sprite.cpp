@@ -9,7 +9,7 @@ auto PPU::Sprite::address_reset() -> void {
 }
 
 auto PPU::Sprite::set_first_sprite() -> void {
-  regs.first_sprite = (self.regs.oam_priority == false ? 0 : (self.regs.oam_addr >> 2) & 127);
+  regs.first_sprite = !self.regs.oam_priority ? 0 : self.regs.oam_addr >> 2;
 }
 
 auto PPU::Sprite::frame() -> void {
@@ -28,27 +28,27 @@ auto PPU::Sprite::scanline() -> void {
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
 
-  if(t.y == (!self.regs.overscan ? 225 : 240) && self.regs.display_disable == false) address_reset();
+  if(t.y == (!self.regs.overscan ? 225 : 240) && !self.regs.display_disable) address_reset();
   if(t.y >= (!self.regs.overscan ? 224 : 239)) return;
 
-  memset(oam_item, 0xff, 32);  //default to invalid
-  for(unsigned i = 0; i < 34; i++) oam_tile[i].x = 0xffff;  //default to invalid
+  for(auto n : range(32)) oam_item[n].valid = false;  //default to invalid
+  for(auto n : range(34)) oam_tile[n].valid = false;  //default to invalid
 
-  for(unsigned i = 0; i < 128; i++) {
-    unsigned sprite = (regs.first_sprite + i) & 127;
-    if(on_scanline(list[sprite]) == false) continue;
+  for(auto n : range(128)) {
+    uint7 sprite = regs.first_sprite + n;
+    if(!on_scanline(list[sprite])) continue;
     if(t.item_count++ >= 32) break;
-    oam_item[t.item_count - 1] = sprite;
+    oam_item[t.item_count - 1] = {true, sprite};
   }
 
-  if(t.item_count > 0 && oam_item[t.item_count - 1] != 0xff) {
-    ppu.regs.oam_iaddr = 0x0200 + (oam_item[t.item_count - 1] >> 2);
+  if(t.item_count > 0 && oam_item[t.item_count - 1].valid) {
+    ppu.regs.oam_iaddr = 0x0200 + (oam_item[t.item_count - 1].index >> 2);
   }
 }
 
-auto PPU::Sprite::on_scanline(SpriteItem& sprite) -> bool {
+auto PPU::Sprite::on_scanline(Object& sprite) -> bool {
   if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
-  signed height = (regs.interlace == false ? sprite.height() : (sprite.height() >> 1));
+  int height = sprite.height() >> regs.interlace;
   if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
   if((sprite.y + height) >= 256 && t.y < ((sprite.y + height) & 255)) return true;
   return false;
@@ -59,18 +59,18 @@ auto PPU::Sprite::run() -> void {
   output.sub.priority = 0;
 
   auto oam_tile = t.tile[!t.active];
-  unsigned priority_table[] = { regs.priority0, regs.priority1, regs.priority2, regs.priority3 };
-  unsigned x = t.x++;
+  uint priority_table[] = {regs.priority0, regs.priority1, regs.priority2, regs.priority3};
+  uint x = t.x++;
 
-  for(unsigned n = 0; n < 34; n++) {
+  for(auto n : range(34)) {
     auto tile = oam_tile[n];
-    if(tile.x == 0xffff) break;
+    if(!tile.valid) break;
 
     int px = x - sclip<9>(tile.x);
     if(px & ~7) continue;
 
-    unsigned mask = 0x80 >> (tile.hflip == false ? px : 7 - px);
-    unsigned color;
+    uint mask = 0x80 >> (!tile.hflip ? px : 7 - px);
+    uint color;
     color  = ((bool)(tile.d0 & mask)) << 0;
     color |= ((bool)(tile.d1 & mask)) << 1;
     color |= ((bool)(tile.d2 & mask)) << 2;
@@ -94,13 +94,13 @@ auto PPU::Sprite::tilefetch() -> void {
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
 
-  for(signed i = 31; i >= 0; i--) {
-    if(oam_item[i] == 0xff) continue;
-    auto sprite = list[oam_item[i]];
+  for(int i = 31; i >= 0; i--) {
+    if(!oam_item[i].valid) continue;
+    auto sprite = list[oam_item[i].index];
 
-    unsigned tile_width = sprite.width() >> 3;
-    signed x = sprite.x;
-    signed y = (t.y - sprite.y) & 0xff;
+    uint tile_width = sprite.width() >> 3;
+    int x = sprite.x;
+    int y = (t.y - sprite.y) & 0xff;
     if(regs.interlace) y <<= 1;
 
     if(sprite.vflip) {
@@ -114,7 +114,7 @@ auto PPU::Sprite::tilefetch() -> void {
     }
 
     if(regs.interlace) {
-      y = (sprite.vflip == false ? y + self.field() : y - self.field());
+      y = !sprite.vflip ? y + self.field() : y - self.field();
     }
 
     x &= 511;
@@ -130,19 +130,20 @@ auto PPU::Sprite::tilefetch() -> void {
     chry  &= 15;
     chry <<= 4;
 
-    for(unsigned tx = 0; tx < tile_width; tx++) {
-      unsigned sx = (x + (tx << 3)) & 511;
+    for(uint tx = 0; tx < tile_width; tx++) {
+      uint sx = (x + (tx << 3)) & 511;
       if(x != 256 && sx >= 256 && (sx + 7) < 512) continue;
       if(t.tile_count++ >= 34) break;
 
-      unsigned n = t.tile_count - 1;
+      uint n = t.tile_count - 1;
+      oam_tile[n].valid = true;
       oam_tile[n].x = sx;
       oam_tile[n].priority = sprite.priority;
       oam_tile[n].palette = 128 + (sprite.palette << 4);
       oam_tile[n].hflip = sprite.hflip;
 
-      unsigned mx = (sprite.hflip == false) ? tx : ((tile_width - 1) - tx);
-      unsigned pos = tiledata_addr + ((chry + ((chrx + mx) & 15)) << 5);
+      uint mx = !sprite.hflip ? tx : (tile_width - 1) - tx;
+      uint pos = tiledata_addr + ((chry + ((chrx + mx) & 15)) << 5);
       uint16 addr = (pos & 0xffe0) + ((y & 7) * 2);
 
       oam_tile[n].d0 = ppu.vram[addr +  0];
@@ -161,16 +162,16 @@ auto PPU::Sprite::tilefetch() -> void {
 }
 
 auto PPU::Sprite::reset() -> void {
-  for(unsigned i = 0; i < 128; i++) {
-    list[i].x = 0;
-    list[i].y = 0;
-    list[i].character = 0;
-    list[i].nameselect = 0;
-    list[i].vflip = 0;
-    list[i].hflip = 0;
-    list[i].priority = 0;
-    list[i].palette = 0;
-    list[i].size = 0;
+  for(auto n : range(128)) {
+    list[n].x = 0;
+    list[n].y = 0;
+    list[n].character = 0;
+    list[n].nameselect = 0;
+    list[n].vflip = 0;
+    list[n].hflip = 0;
+    list[n].priority = 0;
+    list[n].palette = 0;
+    list[n].size = 0;
   }
   synchronize();
 
@@ -181,17 +182,21 @@ auto PPU::Sprite::reset() -> void {
   t.tile_count = 0;
 
   t.active = 0;
-  for(unsigned n = 0; n < 2; n++) {
-    memset(t.item[n], 0, 32);
-    for(unsigned i = 0; i < 34; i++) {
-      t.tile[n][i].x = 0;
-      t.tile[n][i].priority = 0;
-      t.tile[n][i].palette = 0;
-      t.tile[n][i].hflip = 0;
-      t.tile[n][i].d0 = 0;
-      t.tile[n][i].d1 = 0;
-      t.tile[n][i].d2 = 0;
-      t.tile[n][i].d3 = 0;
+  for(auto p : range(2)) {
+    for(auto n : range(32)) {
+      t.item[p][n].valid = false;
+      t.item[p][n].index = 0;
+    }
+    for(auto n : range(34)) {
+      t.tile[p][n].valid = false;
+      t.tile[p][n].x = 0;
+      t.tile[p][n].priority = 0;
+      t.tile[p][n].palette = 0;
+      t.tile[p][n].hflip = 0;
+      t.tile[p][n].d0 = 0;
+      t.tile[p][n].d1 = 0;
+      t.tile[p][n].d2 = 0;
+      t.tile[p][n].d3 = 0;
     }
   }
 

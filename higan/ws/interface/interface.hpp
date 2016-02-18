@@ -9,10 +9,13 @@ struct ID {
 
   enum : uint {
     SystemManifest,
+    SystemIPLROM,
+    SystemEEPROM,
 
     Manifest,
     ROM,
     RAM,
+    EEPROM,
   };
 
   enum : uint {

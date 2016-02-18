@@ -6,7 +6,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "097.15";
+  static const string Version = "097.16";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -17,8 +17,6 @@ namespace Emulator {
   static const string Profile = "Balanced";
   #elif defined(PROFILE_PERFORMANCE)
   static const string Profile = "Performance";
-  #else
-  static const string Profile = "Accuracy";
   #endif
 }
 

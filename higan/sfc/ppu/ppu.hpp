@@ -62,12 +62,12 @@ privileged:
   friend class Video;
 
   struct Debugger {
-    hook<void (uint16, uint8)> vram_read;
-    hook<void (uint16, uint8)> oam_read;
-    hook<void (uint16, uint8)> cgram_read;
-    hook<void (uint16, uint8)> vram_write;
-    hook<void (uint16, uint8)> oam_write;
-    hook<void (uint16, uint8)> cgram_write;
+    hook<auto (uint16, uint8) -> void> vram_read;
+    hook<auto (uint16, uint8) -> void> oam_read;
+    hook<auto (uint16, uint8) -> void> cgram_read;
+    hook<auto (uint16, uint8) -> void> vram_write;
+    hook<auto (uint16, uint8) -> void> oam_write;
+    hook<auto (uint16, uint8) -> void> cgram_write;
   } debugger;
 };
 
