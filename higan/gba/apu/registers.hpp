@@ -2,10 +2,6 @@ struct Registers {
   struct SoundBias {
     uint10 level;
     uint2 amplitude;
-
-    operator uint16_t() const;
-    auto operator=(uint16 source) -> uint16;
-    auto operator=(const SoundBias&) -> SoundBias& = delete;
   } bias;
 
   uint clock;

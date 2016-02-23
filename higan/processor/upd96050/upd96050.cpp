@@ -11,15 +11,15 @@ namespace Processor {
 
 auto uPD96050::power() -> void {
   if(revision == Revision::uPD7725) {
-    regs.pc.bits(11);
-    regs.rp.bits(10);
-    regs.dp.bits( 8);
+    regs.pc.resize(11);
+    regs.rp.resize(10);
+    regs.dp.resize( 8);
   }
 
   if(revision == Revision::uPD96050) {
-    regs.pc.bits(14);
-    regs.rp.bits(11);
-    regs.dp.bits(11);
+    regs.pc.resize(14);
+    regs.rp.resize(11);
+    regs.dp.resize(11);
   }
 
   for(auto n : range(16)) regs.stack[n] = 0x0000;

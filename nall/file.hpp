@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nall/platform.hpp>
-#include <nall/file-system-object.hpp>
+#include <nall/inode.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
@@ -11,7 +11,7 @@
 
 namespace nall {
 
-struct file : file_system_object, varint {
+struct file : inode, varint {
   enum class mode : uint { read, write, modify, append, readwrite = modify, writeread = append };
   enum class index : uint { absolute, relative };
 

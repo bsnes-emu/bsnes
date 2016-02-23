@@ -113,12 +113,12 @@ auto PPU::scanline() -> void {
   }
 
   if(regs.vcounter == 160) {
-    if(regs.status.irqvblank) cpu.regs.irq.flag.vblank = 1;
+    if(regs.status.irqvblank) cpu.regs.irq.flag |= CPU::Interrupt::VBlank;
     cpu.dma_vblank();
   }
 
   if(regs.status.irqvcoincidence) {
-    if(regs.status.vcoincidence) cpu.regs.irq.flag.vcoincidence = 1;
+    if(regs.status.vcoincidence) cpu.regs.irq.flag |= CPU::Interrupt::VCoincidence;
   }
 
   if(regs.vcounter < 160) {
@@ -146,7 +146,7 @@ auto PPU::scanline() -> void {
 
   step(960);
   regs.status.hblank = 1;
-  if(regs.status.irqhblank) cpu.regs.irq.flag.hblank = 1;
+  if(regs.status.irqhblank) cpu.regs.irq.flag |= CPU::Interrupt::HBlank;
   if(regs.vcounter < 160) cpu.dma_hblank();
 
   step(240);

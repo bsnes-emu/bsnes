@@ -6,10 +6,10 @@ Emulator::Interface* emulator = nullptr;
 
 auto locate(string name) -> string {
   string location = {programpath(), name};
-  if(file_system_object::exists(location)) return location;
+  if(inode::exists(location)) return location;
 
   location = {configpath(), "higan/", name};
-  if(file_system_object::exists(location)) return location;
+  if(inode::exists(location)) return location;
 
   directory::create({localpath(), "higan/"});
   return {localpath(), "higan/", name};

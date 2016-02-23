@@ -72,23 +72,8 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.integer(regs.ime);
 
-  s.integer(regs.irq.enable.vblank);
-  s.integer(regs.irq.enable.hblank);
-  s.integer(regs.irq.enable.vcoincidence);
-  for(auto& flag : regs.irq.enable.timer) s.integer(flag);
-  s.integer(regs.irq.enable.serial);
-  for(auto& flag : regs.irq.enable.dma) s.integer(flag);
-  s.integer(regs.irq.enable.keypad);
-  s.integer(regs.irq.enable.cartridge);
-
-  s.integer(regs.irq.flag.vblank);
-  s.integer(regs.irq.flag.hblank);
-  s.integer(regs.irq.flag.vcoincidence);
-  for(auto& flag : regs.irq.flag.timer) s.integer(flag);
-  s.integer(regs.irq.flag.serial);
-  for(auto& flag : regs.irq.flag.dma) s.integer(flag);
-  s.integer(regs.irq.flag.keypad);
-  s.integer(regs.irq.flag.cartridge);
+  s.integer(regs.irq.enable);
+  s.integer(regs.irq.flag);
 
   for(auto& flag : regs.wait.control.nwait) s.integer(flag);
   for(auto& flag : regs.wait.control.swait) s.integer(flag);

@@ -9,8 +9,11 @@
 #define UNICODE
 #undef  NOMINMAX
 #define NOMINMAX
+
+#define boolean WindowsBoolean
 #include <winsock2.h>
 #include <windows.h>
+#undef boolean
 #undef interface
 
 #if !defined(PATH_MAX)

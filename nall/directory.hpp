@@ -1,7 +1,7 @@
 #pragma once
 
 #include <nall/file.hpp>
-#include <nall/file-system-object.hpp>
+#include <nall/inode.hpp>
 #include <nall/intrinsics.hpp>
 #include <nall/sort.hpp>
 #include <nall/string.hpp>
@@ -17,7 +17,7 @@
 
 namespace nall {
 
-struct directory : file_system_object {
+struct directory : inode {
   static auto create(const string& pathname, unsigned permissions = 0755) -> bool;  //recursive
   static auto remove(const string& pathname) -> bool;  //recursive
   static auto exists(const string& pathname) -> bool;

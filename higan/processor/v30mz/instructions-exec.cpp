@@ -179,7 +179,7 @@ auto V30MZ::opPopAll() {
   r.dx = pop();
   r.cx = pop();
   r.ax = pop();
-  r.sp = sp;
+  //r.sp is not restored
 }
 
 //68  push imm16

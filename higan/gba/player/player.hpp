@@ -16,7 +16,7 @@ struct Player {
 
   auto keyinput() -> maybe<uint16>;
   auto read() -> maybe<uint32>;
-  auto write(uint8 byte, uint2 addr) -> void;
+  auto write(uint2 addr, uint8 byte) -> void;
 
   auto serialize(serializer& s) -> void;
 };

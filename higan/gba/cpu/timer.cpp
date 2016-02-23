@@ -28,7 +28,7 @@ auto CPU::timer_increment(uint n) -> void {
   if(++timer.period == 0) {
     timer.period = timer.reload;
 
-    if(timer.control.irq) regs.irq.flag.timer[n] = 1;
+    if(timer.control.irq) regs.irq.flag |= Interrupt::Timer0 << n;
 
     if(apu.fifo[0].timer == n) timer_fifo_run(0);
     if(apu.fifo[1].timer == n) timer_fifo_run(1);

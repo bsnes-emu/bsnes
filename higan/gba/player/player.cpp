@@ -31,7 +31,26 @@ auto Player::frame() -> void {
 
   if(!status.enable) return;
 
-  if(cpu.regs.joybus.settings == 0x0000 && cpu.regs.serial.control == 0x5088) {
+  //todo: verify which settings are actually required
+  //values were taken from observing GBP-compatible games
+  if(!cpu.regs.joybus.settings.sc
+  && !cpu.regs.joybus.settings.sd
+  && !cpu.regs.joybus.settings.si
+  && !cpu.regs.joybus.settings.so
+  && !cpu.regs.joybus.settings.scmode
+  && !cpu.regs.joybus.settings.sdmode
+  && !cpu.regs.joybus.settings.simode
+  && !cpu.regs.joybus.settings.somode
+  && !cpu.regs.joybus.settings.irqenable
+  && !cpu.regs.joybus.settings.mode
+  && !cpu.regs.serial.control.shiftclockselect
+  && !cpu.regs.serial.control.shiftclockfrequency
+  && !cpu.regs.serial.control.transferenablereceive
+  &&  cpu.regs.serial.control.transferenablesend
+  &&  cpu.regs.serial.control.startbit
+  &&  cpu.regs.serial.control.transferlength
+  &&  cpu.regs.serial.control.irqenable
+  ) {
     status.packet = (status.packet + 1) % 17;
     switch(status.packet) {
     case  0: status.send = 0x0000494e; break;
@@ -52,7 +71,7 @@ auto Player::frame() -> void {
     case 15: status.send = 0x30000003; break;
     case 16: status.send = 0x30000003; break;
     }
-    cpu.regs.irq.flag.serial = true;
+    cpu.regs.irq.flag |= CPU::Interrupt::Serial;
   }
 }
 
@@ -72,7 +91,7 @@ auto Player::read() -> maybe<uint32> {
   return nothing;
 }
 
-auto Player::write(uint8 byte, uint2 addr) -> void {
+auto Player::write(uint2 addr, uint8 byte) -> void {
   if(!status.enable) return;
 
   uint shift = addr << 3;

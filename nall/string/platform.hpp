@@ -36,6 +36,20 @@ auto programpath() -> string {
   #endif
 }
 
+// /
+// c:/
+auto rootpath() -> string {
+  #if defined(PLATFORM_WINDOWS)
+  wchar_t path[PATH_MAX] = L"";
+  SHGetFolderPathW(nullptr, CSIDL_WINDOWS | CSIDL_FLAG_CREATE, nullptr, 0, path);
+  string result = (const char*)utf8_t(path);
+  result.transform("\\", "/");
+  return result.slice(0, 3);
+  #else
+  return "/";
+  #endif
+}
+
 // /home/username/
 // c:/users/username/
 auto userpath() -> string {

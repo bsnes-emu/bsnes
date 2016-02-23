@@ -6,10 +6,10 @@ using namespace hiro;
 
 auto locate(string name) -> string {
   string location = {programpath(), name};
-  if(file_system_object::exists(location)) return location;
+  if(inode::exists(location)) return location;
 
   location = {configpath(), "icarus/", name};
-  if(file_system_object::exists(location)) return location;
+  if(inode::exists(location)) return location;
 
   directory::create({localpath(), "icarus/"});
   return {localpath(), "icarus/", name};

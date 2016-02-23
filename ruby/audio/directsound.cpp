@@ -10,22 +10,22 @@ struct AudioDS : Audio {
   WAVEFORMATEX wfx;
 
   struct {
-    unsigned rings = 0;
-    unsigned latency = 0;
+    uint rings = 0;
+    uint latency = 0;
 
     uint32_t* buffer = nullptr;
-    unsigned bufferoffset = 0;
+    uint bufferoffset = 0;
 
-    unsigned readring = 0;
-    unsigned writering = 0;
+    uint readring = 0;
+    uint writering = 0;
     int distance = 0;
   } device;
 
   struct {
     HWND handle = nullptr;
     bool synchronize = false;
-    unsigned frequency = 22050;
-    unsigned latency = 120;
+    uint frequency = 22050;
+    uint latency = 120;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -56,15 +56,15 @@ struct AudioDS : Audio {
       return true;
     }
 
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
+    if(name == Audio::Frequency && value.is<uint>()) {
+      settings.frequency = value.get<uint>();
       if(ds) init();
       return true;
     }
 
-    if(name == Audio::Latency && value.is<unsigned>()) {
+    if(name == Audio::Latency && value.is<uint>()) {
       //latency settings below 40ms causes DirectSound to hang
-      settings.latency = max(40u, value.get<unsigned>());
+      settings.latency = max(40u, value.get<uint>());
       if(ds) init();
       return true;
     }
@@ -84,7 +84,7 @@ struct AudioDS : Audio {
       //wait until playback buffer has an empty ring to write new audio data to
       while(device.distance >= device.rings - 1) {
         dsb_b->GetCurrentPosition(&pos, 0);
-        unsigned activering = pos / (device.latency * 4);
+        uint activering = pos / (device.latency * 4);
         if(activering == device.readring) continue;
 
         //subtract number of played rings from ring distance counter
@@ -138,17 +138,17 @@ struct AudioDS : Audio {
     device.buffer  = new uint32_t[device.latency * device.rings];
     device.bufferoffset = 0;
 
-    DirectSoundCreate(0, &ds, 0);
+    if(DirectSoundCreate(0, &ds, 0) != DS_OK) return term(), false;
     ds->SetCooperativeLevel((HWND)settings.handle, DSSCL_PRIORITY);
 
-    memset(&dsbd, 0, sizeof(dsbd));
+    memory::fill(&dsbd, sizeof(dsbd));
     dsbd.dwSize        = sizeof(dsbd);
     dsbd.dwFlags       = DSBCAPS_PRIMARYBUFFER;
     dsbd.dwBufferBytes = 0;
     dsbd.lpwfxFormat   = 0;
     ds->CreateSoundBuffer(&dsbd, &dsb_p, 0);
 
-    memset(&wfx, 0, sizeof(wfx));
+    memory::fill(&wfx, sizeof(wfx));
     wfx.wFormatTag      = WAVE_FORMAT_PCM;
     wfx.nChannels       = 2;
     wfx.nSamplesPerSec  = settings.frequency;
@@ -157,7 +157,7 @@ struct AudioDS : Audio {
     wfx.nAvgBytesPerSec = wfx.nSamplesPerSec * wfx.nBlockAlign;
     dsb_p->SetFormat(&wfx);
 
-    memset(&dsbd, 0, sizeof(dsbd));
+    memory::fill(&dsbd, sizeof(dsbd));
     dsbd.dwSize  = sizeof(dsbd);
     dsbd.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLFREQUENCY | DSBCAPS_GLOBALFOCUS | DSBCAPS_LOCSOFTWARE;
     dsbd.dwBufferBytes   = device.latency * device.rings * sizeof(uint32_t);
@@ -174,11 +174,11 @@ struct AudioDS : Audio {
   auto term() -> void {
     if(device.buffer) {
       delete[] device.buffer;
-      device.buffer = 0;
+      device.buffer = nullptr;
     }
 
-    if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = 0; }
-    if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = 0; }
-    if(ds) { ds->Release(); ds = 0; }
+    if(dsb_b) { dsb_b->Stop(); dsb_b->Release(); dsb_b = nullptr; }
+    if(dsb_p) { dsb_p->Stop(); dsb_p->Release(); dsb_p = nullptr; }
+    if(ds) { ds->Release(); ds = nullptr; }
   }
 };

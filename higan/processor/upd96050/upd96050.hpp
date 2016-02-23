@@ -49,9 +49,9 @@ struct uPD96050 {
 
   struct Regs {
     uint16 stack[16];    //LIFO
-    varuint_t<uint> pc;  //program counter
-    varuint_t<uint> rp;  //ROM pointer
-    varuint_t<uint> dp;  //data pointer
+    VariadicNatural pc;  //program counter
+    VariadicNatural rp;  //ROM pointer
+    VariadicNatural dp;  //data pointer
     uint4 sp;            //stack pointer
     int16 k;
     int16 l;

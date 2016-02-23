@@ -51,6 +51,7 @@ inline auto suffixname(rstring self) -> string;
 inline auto activepath() -> string;
 inline auto realpath(rstring name) -> string;
 inline auto programpath() -> string;
+inline auto rootpath() -> string;
 inline auto userpath() -> string;
 inline auto configpath() -> string;
 inline auto localpath() -> string;

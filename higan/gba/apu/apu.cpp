@@ -2,7 +2,6 @@
 
 namespace GameBoyAdvance {
 
-#include "registers.cpp"
 #include "mmio.cpp"
 #include "square.cpp"
 #include "square1.cpp"
@@ -84,7 +83,8 @@ auto APU::power() -> void {
   fifo[0].power();
   fifo[1].power();
 
-  regs.bias = 0x0200;
+  regs.bias.amplitude = 0;
+  regs.bias.level = 0x200;
 
   for(uint n = 0x060; n <= 0x0a7; n++) bus.mmio[n] = this;
 }

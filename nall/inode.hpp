@@ -8,7 +8,7 @@
 
 namespace nall {
 
-struct file_system_object {
+struct inode {
   enum class time : unsigned { access, modify };
 
   static auto exists(const string& name) -> bool {
@@ -70,8 +70,13 @@ struct file_system_object {
 
   //returns false if 'name' is a directory that is not empty
   static auto remove(const string& name) -> bool {
+    #if defined(PLATFORM_WINDOWS)
+    if(name.endsWith("/")) return _wrmdir(utf16_t(name)) == 0;
+    return _wunlink(utf16_t(name)) == 0;
+    #else
     if(name.endsWith("/")) return rmdir(name) == 0;
     return unlink(name) == 0;
+    #endif
   }
 };
 

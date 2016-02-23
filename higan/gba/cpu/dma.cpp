@@ -7,8 +7,8 @@ auto CPU::dma_run() -> void {
       auto& dma = regs.dma[n];
       if(dma.pending) {
         dma_exec(dma);
-        if(dma.control.irq) regs.irq.flag.dma[n] = 1;
-        if(dma.control.drq && n == 3) regs.irq.flag.cartridge = 1;
+        if(dma.control.irq) regs.irq.flag |= Interrupt::DMA0 << n;
+        if(dma.control.drq && n == 3) regs.irq.flag |= Interrupt::Cartridge;
         transferred = true;
         break;
       }

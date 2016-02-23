@@ -29,9 +29,9 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
   for(auto& name : contents) {
     string location{pathname, name};
     bool directory = name.endsWith("/");
-    bool writable = file_system_object::writable(location);
-    bool executable = file_system_object::executable(location);
-    unsigned info = directory << 0 | writable << 1 | executable << 2 | (name.rtrim("/").size() - 1) << 3;
+    bool writable = inode::writable(location);
+    bool executable = inode::executable(location);
+    uint info = directory << 0 | writable << 1 | executable << 2 | (name.rtrim("/").size() - 1) << 3;
 
     beat.writevu(info);
     beat.writes(name);
