@@ -11,10 +11,6 @@ struct Registers {
     uint1 forceblank;
     uint1 enable[5];
     uint1 enablewindow[3];
-
-    operator uint16_t() const;
-    auto operator=(uint16 source) -> uint16;
-    auto operator=(const Control&) -> Control& = delete;
   } control;
 
   uint1 greenswap;
@@ -27,31 +23,21 @@ struct Registers {
     uint1 irqhblank;
     uint1 irqvcoincidence;
     uint8 vcompare;
-
-    operator uint16_t() const;
-    auto operator=(uint16 source) -> uint16;
-    auto operator=(const Status&) -> Status& = delete;
   } status;
 
   uint16 vcounter;
 
-  struct BackgroundControl {
-    uint2 priority;
-    uint2 characterbaseblock;
-    uint2 unused;
-    uint1 mosaic;
-    uint1 colormode;
-    uint5 screenbaseblock;
-    uint1 affinewrap;  //BG2,3 only
-    uint2 screensize;
-
-    operator uint16_t() const;
-    auto operator=(uint16 source) -> uint16;
-    auto operator=(const BackgroundControl&) -> BackgroundControl& = delete;
-  };
-
   struct Background {
-    BackgroundControl control;
+    struct Control {
+      uint2 priority;
+      uint2 characterbaseblock;
+      uint2 unused;
+      uint1 mosaic;
+      uint1 colormode;
+      uint5 screenbaseblock;
+      uint1 affinewrap;  //BG2,3 only
+      uint2 screensize;
+    } control;
     uint9 hoffset;
     uint9 voffset;
 
@@ -66,20 +52,14 @@ struct Registers {
     uint id;
   } bg[4];
 
-  struct WindowFlags {
-    uint1 enable[6];
-
-    operator uint8_t() const;
-    auto operator=(uint8 source) -> uint8;
-    auto operator=(const WindowFlags&) -> WindowFlags& = delete;
-  };
-
   struct Window {
     uint8 x1, x2;
     uint8 y1, y2;
   } window[2];
 
-  WindowFlags windowflags[4];
+  struct WindowFlags {
+    uint1 enable[6];
+  } windowflags[4];
 
   struct Mosaic {
     uint4 bghsize;
@@ -88,18 +68,12 @@ struct Registers {
     uint4 objvsize;
   } mosaic;
 
-  struct BlendControl {
-    uint1 above[6];
-    uint1 below[6];
-    uint2 mode;
-
-    operator uint16_t() const;
-    auto operator=(uint16 source) -> uint16;
-    auto operator=(const BlendControl&) -> BlendControl& = delete;
-  };
-
   struct Blend {
-    BlendControl control;
+    struct Control {
+      uint1 above[6];
+      uint2 mode;
+      uint1 below[6];
+    } control;
     uint5 eva;
     uint5 evb;
     uint5 evy;

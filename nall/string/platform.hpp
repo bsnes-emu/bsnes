@@ -44,7 +44,7 @@ auto rootpath() -> string {
   SHGetFolderPathW(nullptr, CSIDL_WINDOWS | CSIDL_FLAG_CREATE, nullptr, 0, path);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  return result.slice(0, 3);
+  return slice(result, 0, 3);
   #else
   return "/";
   #endif

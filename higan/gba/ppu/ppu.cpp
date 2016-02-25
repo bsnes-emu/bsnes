@@ -15,7 +15,6 @@ namespace GameBoyAdvance {
 PPU ppu;
 #include "video.cpp"
 
-#include "registers.cpp"
 #include "background.cpp"
 #include "object.cpp"
 #include "mosaic.cpp"
@@ -58,12 +57,32 @@ auto PPU::power() -> void {
   for(uint n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
   for(uint n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
 
-  regs.control = 0;
+  regs.control.bgmode = 0;
+  regs.control.cgbmode = 0;
+  regs.control.frame = 0;
+  regs.control.hblank = 0;
+  regs.control.objmapping = 0;
+  regs.control.forceblank = 0;
+  for(auto& enable : regs.control.enable) enable = 0;
+  for(auto& enablewindow : regs.control.enablewindow) enablewindow = 0;
   regs.greenswap = 0;
-  regs.status = 0;
+  regs.status.vblank = 0;
+  regs.status.hblank = 0;
+  regs.status.vcoincidence = 0;
+  regs.status.irqvblank = 0;
+  regs.status.irqhblank = 0;
+  regs.status.irqvcoincidence = 0;
+  regs.status.vcompare = 0;
   regs.vcounter = 0;
   for(auto& bg : regs.bg) {
-    bg.control = 0;
+    bg.control.priority = 0;
+    bg.control.characterbaseblock = 0;
+    bg.control.unused = 0;
+    bg.control.mosaic = 0;
+    bg.control.colormode = 0;
+    bg.control.screenbaseblock = 0;
+    bg.control.affinewrap = 0;
+    bg.control.screensize = 0;
     bg.hoffset = 0;
     bg.voffset = 0;
     bg.pa = 0;
@@ -81,14 +100,16 @@ auto PPU::power() -> void {
     w.y1 = 0;
     w.y2 = 0;
   }
-  for(auto& f : regs.windowflags) {
-    f = 0;
+  for(auto& flags : regs.windowflags) {
+    for(auto& enable : flags.enable) enable = 0;
   }
   regs.mosaic.bghsize = 0;
   regs.mosaic.bgvsize = 0;
   regs.mosaic.objhsize = 0;
   regs.mosaic.objvsize = 0;
-  regs.blend.control = 0;
+  for(auto& above : regs.blend.control.above) above = 0;
+  regs.blend.control.mode = 0;
+  for(auto& below : regs.blend.control.below) below = 0;
   regs.blend.eva = 0;
   regs.blend.evb = 0;
   regs.blend.evy = 0;

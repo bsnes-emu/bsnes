@@ -139,10 +139,12 @@ auto Cartridge::load() -> void {
 }
 
 auto Cartridge::loadGameBoy() -> void {
+  #if defined(SFC_SUPERGAMEBOY)
   //invoked from ICD2::load()
   _sha256 = GameBoy::interface->sha256();
   information.markup.gameBoy = GameBoy::interface->manifest();
   information.title.gameBoy = GameBoy::interface->title();
+  #endif
 }
 
 auto Cartridge::loadBSMemory() -> void {

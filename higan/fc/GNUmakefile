@@ -1,3 +1,5 @@
+processors += r6502
+
 fc_objects := fc-interface fc-system fc-scheduler fc-input
 fc_objects += fc-memory fc-cartridge fc-cpu fc-apu fc-ppu
 fc_objects += fc-cheat

@@ -2,10 +2,13 @@
 
 namespace SuperFamicom {
 
+ICD2 icd2;
+
+#if defined(SFC_SUPERGAMEBOY)
+
 #include "interface/interface.cpp"
 #include "mmio/mmio.cpp"
 #include "serialization.cpp"
-ICD2 icd2;
 
 auto ICD2::Enter() -> void {
   while(true) {
@@ -77,5 +80,7 @@ auto ICD2::reset() -> void {
   GameBoy::system.init();
   GameBoy::system.power();
 }
+
+#endif
 
 }

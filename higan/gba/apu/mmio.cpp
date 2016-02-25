@@ -5,19 +5,19 @@ auto APU::read(uint32 addr) -> uint8 {
   case 0x0400'0060: return square1.read(0);
   case 0x0400'0061: return 0;
 
-  //NR11 + NR12
+  //NR11, NR12
   case 0x0400'0062: return square1.read(1);
   case 0x0400'0063: return square1.read(2);
 
-  //NR13 + NR14
+  //NR13, NR14
   case 0x0400'0064: return square1.read(3);
   case 0x0400'0065: return square1.read(4);
 
-  //NR21 + NR22
+  //NR21, NR22
   case 0x0400'0068: return square2.read(1);
   case 0x0400'0069: return square2.read(2);
 
-  //NR23 + NR24
+  //NR23, NR24
   case 0x0400'006c: return square2.read(3);
   case 0x0400'006d: return square2.read(4);
 
@@ -25,23 +25,23 @@ auto APU::read(uint32 addr) -> uint8 {
   case 0x0400'0070: return wave.read(0);
   case 0x0400'0071: return 0;
 
-  //NR31 + NR32
+  //NR31, NR32
   case 0x0400'0072: return wave.read(1);
   case 0x0400'0073: return wave.read(2);
 
-  //NR33 + NR34
+  //NR33, NR34
   case 0x0400'0074: return wave.read(3);
   case 0x0400'0075: return wave.read(4);
 
-  //NR41 + NR42
+  //NR41, NR42
   case 0x0400'0078: return noise.read(1);
   case 0x0400'0079: return noise.read(2);
 
-  //NR43 + NR44
+  //NR43, NR44
   case 0x0400'007c: return noise.read(3);
   case 0x0400'007d: return noise.read(4);
 
-  //NR50 + NR51
+  //NR50, NR51
   case 0x0400'0080: return sequencer.read(0);
   case 0x0400'0081: return sequencer.read(1);
 
@@ -70,8 +70,8 @@ auto APU::read(uint32 addr) -> uint8 {
     regs.bias.level.bits(0,7)
   );
   case 0x0400'0089: return (
-    regs.bias.level.bits(8,9)
-  | regs.bias.amplitude << 6
+    regs.bias.level.bits(8,9) << 0
+  | regs.bias.amplitude       << 6
   );
 
   //WAVE_RAM0_L
@@ -108,7 +108,7 @@ auto APU::read(uint32 addr) -> uint8 {
 
   }
 
-  return 0u;
+  return 0;
 }
 
 auto APU::write(uint32 addr, uint8 data) -> void {
@@ -118,19 +118,19 @@ auto APU::write(uint32 addr, uint8 data) -> void {
   case 0x0400'0060: return square1.write(0, data);
   case 0x0400'0061: return;
 
-  //NR11 + NR12
+  //NR11, NR12
   case 0x0400'0062: return square1.write(1, data);
   case 0x0400'0063: return square1.write(2, data);
 
-  //NR13 + NR14
+  //NR13, NR14
   case 0x0400'0064: return square1.write(3, data);
   case 0x0400'0065: return square1.write(4, data);
 
-  //NR21 + NR22
+  //NR21, NR22
   case 0x0400'0068: return square2.write(1, data);
   case 0x0400'0069: return square2.write(2, data);
 
-  //NR23 + NR24
+  //NR23, NR24
   case 0x0400'006c: return square2.write(3, data);
   case 0x0400'006d: return square2.write(4, data);
 
@@ -138,23 +138,23 @@ auto APU::write(uint32 addr, uint8 data) -> void {
   case 0x0400'0070: return wave.write(0, data);
   case 0x0400'0071: return;
 
-  //NR31 + NR32
+  //NR31, NR32
   case 0x0400'0072: return wave.write(1, data);
   case 0x0400'0073: return wave.write(2, data);
 
-  //NR33 + NR34
+  //NR33, NR34
   case 0x0400'0074: return wave.write(3, data);
   case 0x0400'0075: return wave.write(4, data);
 
-  //NR41 + NR42
+  //NR41, NR42
   case 0x0400'0078: return noise.write(1, data);
   case 0x0400'0079: return noise.write(2, data);
 
-  //NR43 + NR44
+  //NR43, NR44
   case 0x0400'007c: return noise.write(3, data);
   case 0x0400'007d: return noise.write(4, data);
 
-  //NR50 + NR51
+  //NR50, NR51
   case 0x0400'0080: return sequencer.write(0, data);
   case 0x0400'0081: return sequencer.write(1, data);
 
@@ -185,7 +185,7 @@ auto APU::write(uint32 addr, uint8 data) -> void {
     return;
   case 0x0400'0089:
     regs.bias.level.bits(8,9) = data.bits(0,1);
-    regs.bias.amplitude = data.bits(6,7);
+    regs.bias.amplitude       = data.bits(6,7);
     return;
 
   //WAVE_RAM0_L

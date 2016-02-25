@@ -3,27 +3,27 @@ struct Sprite {
     uint9 x;
     uint8 y;
     uint8 character;
-    bool nameselect;
-    bool vflip;
-    bool hflip;
+    uint1 nameselect;
+    uint1 vflip;
+    uint1 hflip;
     uint2 priority;
     uint3 palette;
-    bool size;
+    uint1 size;
     alwaysinline auto width() const -> uint;
     alwaysinline auto height() const -> uint;
   } list[128];
 
   struct Item {
-    bool valid;
+    bool  valid;
     uint7 index;
   };
 
   struct Tile {
-    bool valid;
+    bool  valid;
     uint9 x;
     uint2 priority;
     uint8 palette;
-    bool hflip;
+    uint1 hflip;
     uint8 d0, d1, d2, d3;
   };
 
@@ -44,10 +44,10 @@ struct Sprite {
     bool sub_enable;
     bool interlace;
 
-    uint3 base_size;
-    uint2 nameselect;
+    uint3  base_size;
+    uint2  nameselect;
     uint16 tiledata_addr;
-    uint7 first_sprite;
+    uint7  first_sprite;
 
     uint priority0;
     uint priority1;
@@ -60,7 +60,7 @@ struct Sprite {
 
   struct Output {
     struct Pixel {
-      uint2 priority;  //0 = none (transparent)
+      uint  priority;  //0 = none (transparent)
       uint8 palette;
     } main, sub;
   } output;
@@ -68,7 +68,7 @@ struct Sprite {
   Sprite(PPU& self);
 
   //list.cpp
-  auto update(uint addr, uint8 data) -> void;
+  auto update(uint10 addr, uint8 data) -> void;
   auto synchronize() -> void;
 
   //sprite.cpp

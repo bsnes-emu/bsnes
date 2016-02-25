@@ -330,6 +330,7 @@ auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::MCCROM) mcc.rom.read(stream);
   if(id == ID::MCCRAM) mcc.ram.read(stream);
 
+  #if defined(SFC_SUPERGAMEBOY)
   if(id == ID::SuperGameBoyManifest) {
     GameBoy::interface->load(GameBoy::ID::SystemManifest, stream);
   }
@@ -349,6 +350,7 @@ auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::GameBoyRAM) {
     GameBoy::interface->load(GameBoy::ID::RAM, stream);
   }
+  #endif
 
   if(id == ID::BSMemoryManifest) cartridge.information.markup.bsMemory = stream.text();
   if(id == ID::BSMemoryROM) bsmemory.memory.read(stream);
@@ -401,9 +403,11 @@ auto Interface::save(uint id, const stream& stream) -> void {
   if(id == ID::SDD1RAM) stream.write((uint8_t*)sdd1.ram.data(), sdd1.ram.size());
   if(id == ID::OBC1RAM) stream.write((uint8_t*)obc1.ram.data(), obc1.ram.size());
 
+  #if defined(SFC_SUPERGAMEBOY)
   if(id == ID::GameBoyRAM) {
     GameBoy::interface->save(GameBoy::ID::RAM, stream);
   }
+  #endif
 
   if(id == ID::MCCRAM) stream.write((uint8_t*)mcc.ram.data(), mcc.ram.size());
 
@@ -455,7 +459,7 @@ auto Interface::unserialize(serializer& s) -> bool {
 auto Interface::cheatSet(const lstring& list) -> void {
   cheat.reset();
 
-  //Super Game Boy
+  #if defined(SFC_SUPERGAMEBOY)
   if(cartridge.hasICD2()) {
     GameBoy::cheat.reset();
     for(auto& codeset : list) {
@@ -468,8 +472,8 @@ auto Interface::cheatSet(const lstring& list) -> void {
     }
     return;
   }
+  #endif
 
-  //Super Famicom, Broadcast Satellaview, Sufami Turbo
   for(auto& codeset : list) {
     lstring codes = codeset.split("+");
     for(auto& code : codes) {

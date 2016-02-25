@@ -1,14 +1,15 @@
 name := higan
+flags += -DSFC_SUPERGAMEBOY
 
-processors := arm gsu hg51b lr35902 r6502 r65816 spc700 upd96050 v30mz
-include processor/GNUmakefile
-
-include emulator/GNUmakefile
 include fc/GNUmakefile
 include sfc/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile
 include ws/GNUmakefile
+
+processors := $(call unique,$(processors))
+include processor/GNUmakefile
+include emulator/GNUmakefile
 
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
 ui_objects += ui-settings ui-tools ui-presentation

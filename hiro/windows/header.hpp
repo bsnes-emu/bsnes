@@ -5,6 +5,7 @@
 #define __MSVCRT_VERSION__ WINVER
 #define NOMINMAX
 
+#include <nall/windows/guard.hpp>
 #include <winsock2.h>
 #include <windows.h>
 #include <windowsx.h>
@@ -14,6 +15,7 @@
 #include <shlobj.h>
 #include <nall/windows/registry.hpp>
 #include <nall/windows/utf8.hpp>
+#include <nall/windows/guard.hpp>
 
 //MinGW/32-bit has painfully outdated platform headers ...
 

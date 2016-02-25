@@ -1,3 +1,5 @@
+processors += v30mz
+
 ws_objects := ws-interface ws-system ws-scheduler
 ws_objects += ws-memory ws-eeprom ws-cartridge
 ws_objects += ws-cpu ws-ppu ws-apu

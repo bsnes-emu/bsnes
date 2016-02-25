@@ -14,14 +14,19 @@ auto PPU::render_screen() -> void {
 
   for(auto x : range(240)) {
     Registers::WindowFlags flags;
-    flags = ~0;  //enable all layers if no windows are enabled
+    flags.enable[BG0] = true;  //enable all layers if no windows are enabled
+    flags.enable[BG1] = true;
+    flags.enable[BG2] = true;
+    flags.enable[BG3] = true;
+    flags.enable[OBJ] = true;
+    flags.enable[SFX] = true;
 
     //determine active window
     if(regs.control.enablewindow[In0] || regs.control.enablewindow[In1] || regs.control.enablewindow[Obj]) {
-      flags = (uint8)regs.windowflags[Out];
-      if(regs.control.enablewindow[Obj] && windowmask[Obj][x]) flags = (uint8)regs.windowflags[Obj];
-      if(regs.control.enablewindow[In1] && windowmask[In1][x]) flags = (uint8)regs.windowflags[In1];
-      if(regs.control.enablewindow[In0] && windowmask[In0][x]) flags = (uint8)regs.windowflags[In0];
+      flags = regs.windowflags[Out];
+      if(regs.control.enablewindow[Obj] && windowmask[Obj][x]) flags = regs.windowflags[Obj];
+      if(regs.control.enablewindow[In1] && windowmask[In1][x]) flags = regs.windowflags[In1];
+      if(regs.control.enablewindow[In0] && windowmask[In0][x]) flags = regs.windowflags[In0];
     }
 
     //priority sorting: find topmost two pixels
@@ -40,9 +45,9 @@ auto PPU::render_screen() -> void {
     bool blendabove = regs.blend.control.above[a];
     bool blendbelow = regs.blend.control.below[b];
     uint color = above[x].color;
-    auto eva = min(16u, (unsigned)regs.blend.eva);
-    auto evb = min(16u, (unsigned)regs.blend.evb);
-    auto evy = min(16u, (unsigned)regs.blend.evy);
+    auto eva = min(16u, (uint)regs.blend.eva);
+    auto evb = min(16u, (uint)regs.blend.evb);
+    auto evy = min(16u, (uint)regs.blend.evy);
 
     //perform blending, if needed
     if(flags.enable[SFX] == false) {

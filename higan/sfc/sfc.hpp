@@ -23,7 +23,10 @@ namespace SuperFamicom {
 */
 
 #include <libco/libco.h>
-#include <gb/gb.hpp>
+
+#if defined(SFC_SUPERGAMEBOY)
+  #include <gb/gb.hpp>
+#endif
 
 #if defined(PROFILE_PERFORMANCE)
   #include <nall/priority-queue.hpp>

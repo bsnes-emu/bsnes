@@ -1,3 +1,5 @@
+processors += arm
+
 gba_objects := gba-memory gba-interface gba-scheduler gba-system
 gba_objects += gba-cartridge gba-player
 gba_objects += gba-cpu gba-ppu gba-apu

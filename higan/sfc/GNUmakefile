@@ -1,3 +1,5 @@
+processors += r65816 spc700 arm gsu hg51b upd96050
+
 sfc_objects := sfc-interface sfc-system sfc-scheduler sfc-controller
 sfc_objects += sfc-cartridge sfc-cheat
 sfc_objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
