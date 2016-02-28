@@ -1,4 +1,6 @@
 #include "../loki.hpp"
+#include "interface.cpp"
+#include "media.cpp"
 unique_pointer<Program> program;
 
 Program::Program(lstring args) {
@@ -29,15 +31,28 @@ Program::Program(lstring args) {
   if(!input->init()) input = Input::create("None");
 
   presentation->drawSplashScreen();
-}
 
-auto Program::load(string location) -> void {
+  string location = args(1, "");
+  if(!directory::exists(location)) location = {  //quick testing hack
+    userpath(), "Emulation/Super Famicom/",
+    "Legend of Zelda - A Link to the Past, The (USA) (1.0).sfc/"
+  };
+
+  if(directory::exists(location)) loadMedia(location);
 }
 
 auto Program::main() -> void {
+  if(!emulator->loaded()) {
+    usleep(20 * 1000);
+    return;
+  }
+
+  devices = input->poll();
+  emulator->run();
 }
 
 auto Program::quit() -> void {
+  unloadMedia();
   video.reset();
   audio.reset();
   input.reset();

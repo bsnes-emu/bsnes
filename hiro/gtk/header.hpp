@@ -7,6 +7,7 @@
   #define NOMINMAX
   #define TBS_TRANSPARENTBKGND 0x1000
 
+  #include <nall/windows/guard.hpp>
   #include <winsock2.h>
   #include <windows.h>
   #include <windowsx.h>
@@ -24,6 +25,7 @@
     #include <gtksourceview/gtksourcelanguagemanager.h>
     #include <gtksourceview/gtksourcestyleschememanager.h>
   #endif
+  #include <nall/windows/guard.hpp>
   #include <nall/windows/registry.hpp>
   #include <nall/windows/utf8.hpp>
 #endif

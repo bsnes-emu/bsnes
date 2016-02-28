@@ -6,8 +6,6 @@ include sfc/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile
 include ws/GNUmakefile
-
-processors := $(call unique,$(processors))
 include processor/GNUmakefile
 include emulator/GNUmakefile
 

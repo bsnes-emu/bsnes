@@ -1,4 +1,10 @@
 struct Device {
+  enum class Port : uint {
+    Controller1,
+    Controller2,
+    Expansion,
+  };
+
   enum class ID : uint {
     None,
 

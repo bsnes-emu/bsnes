@@ -3,7 +3,7 @@ auto Program::loadRequest(uint id, string name, string type, bool required) -> v
   string location = BrowserDialog()
   .setTitle({"Load ", name})
   .setPath({settings["Library/Location"].text(), name})
-  .setFilters({string{name, "|*.", type}})
+  .setFilters({string{name, "|*.", type}, "All|*.*"})
   .openFolder();
   if(!directory::exists(location)) return;
 
@@ -17,7 +17,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
 
-  if(filename == "manifest.bml" && pathname && !pathname.find(".sys/")) {
+  if(filename == "manifest.bml" && pathname && !pathname.endsWith(".sys/")) {
     if(!file::exists(location) || settings["Library/IgnoreManifests"].boolean()) {
       if(auto manifest = execute("icarus", "--manifest", pathname)) {
         memorystream stream{(const uint8_t*)manifest.data(), manifest.size()};
@@ -41,6 +41,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
 auto Program::saveRequest(uint id, string filename) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
+
   filestream stream{location, file::mode::write};
   return emulator->save(id, stream);
 }
@@ -114,6 +115,7 @@ auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> vo
 }
 
 auto Program::dipSettings(const Markup::Node& node) -> uint {
+  return 0;
 }
 
 auto Program::path(uint group) -> string {

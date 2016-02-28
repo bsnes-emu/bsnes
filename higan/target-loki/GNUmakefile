@@ -1,4 +1,5 @@
 name := loki
+flags += -DDEBUGGER
 
 include sfc/GNUmakefile
 include processor/GNUmakefile

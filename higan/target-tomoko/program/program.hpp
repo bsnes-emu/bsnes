@@ -19,7 +19,7 @@ struct Program : Emulator::Interface::Bind {
 
   //media.cpp
   auto loadMedia(string location) -> void;
-  auto loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void;
+  auto loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, string location) -> void;
   auto unloadMedia() -> void;
 
   //state.cpp

@@ -13,7 +13,7 @@ auto Program::loadMedia(string location) -> void {
   }
 }
 
-auto Program::loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, const string& location) -> void {
+auto Program::loadMedia(Emulator::Interface& interface, Emulator::Interface::Media& media, string location) -> void {
   unloadMedia();
 
   mediaPaths(0) = locate({media.name, ".sys/"});

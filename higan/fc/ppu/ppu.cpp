@@ -110,7 +110,6 @@ auto PPU::read(uint16 addr) -> uint8 {
     break;
   case 4:  //OAMDATA
     result = oam[status.oam_addr];
-    if((status.oam_addr & 3) == 3) result &= 0xe3;
     break;
   case 7:  //PPUDATA
     if(raster_enable() && (status.ly <= 240 || status.ly == 261)) return 0x00;
@@ -161,6 +160,7 @@ auto PPU::write(uint16 addr, uint8 data) -> void {
     status.oam_addr = data;
     return;
   case 4:  //OAMDATA
+    if(status.oam_addr.bits(0,1) == 2) data.bits(2,4) = 0;  //clear non-existent bits (always read back as 0)
     oam[status.oam_addr++] = data;
     return;
   case 5:  //PPUSCROLL

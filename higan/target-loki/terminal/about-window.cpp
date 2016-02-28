@@ -6,7 +6,7 @@ AboutWindow::AboutWindow() {
   layout.setMargin(5);
   canvas.setIcon({locate("loki.png")});
   information.setFont(Font().setFamily(Font::Sans).setBold()).setAlignment(0.5).setText({
-    "loki v", Emulator::Version, "\n\n"
+    Emulator::Name, "/loki v", Emulator::Version, "\n\n"
     "Author: ", Emulator::Author, "\n",
     "License: ", Emulator::License, "\n",
     "Website: ", Emulator::Website
