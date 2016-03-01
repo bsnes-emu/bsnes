@@ -3,7 +3,7 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   if(addr == 0x0000) {
     return (
       r.screenTwoWindowEnable << 5
-    | r.screenTwoWindowMode   << 4
+    | r.screenTwoWindowInvert << 4
     | r.spriteWindowEnable    << 3
     | r.spriteEnable          << 2
     | r.screenTwoEnable       << 1
@@ -122,7 +122,7 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
   //DISP_CTRL
   if(addr == 0x0000) {
     r.screenTwoWindowEnable = data.bit(5);
-    r.screenTwoWindowMode   = data.bit(4);
+    r.screenTwoWindowInvert = data.bit(4);
     r.spriteWindowEnable    = data.bit(3);
     r.spriteEnable          = data.bit(2);
     r.screenTwoEnable       = data.bit(1);
@@ -292,8 +292,8 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //PALMONO
   if(addr >= 0x0020 && addr <= 0x003f) {
-    r.palette[addr.bits(3,1)].color[addr.bit(0) * 2 + 1] = data.bits(6,4);
-    r.palette[addr.bits(3,1)].color[addr.bit(0) * 2 + 0] = data.bits(2,0);
+    r.palette[addr.bits(4,1)].color[addr.bit(0) * 2 + 1] = data.bits(6,4);
+    r.palette[addr.bits(4,1)].color[addr.bit(0) * 2 + 0] = data.bits(2,0);
     return;
   }
 

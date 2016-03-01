@@ -3,9 +3,10 @@ auto CPU::poll() -> void {
   state.halt = false;
   if(!V30MZ::r.f.i) return;
 
+  //find and execute first pending interrupt in order of priority (7-0)
   for(int n = 7; n >= 0; n--) {
     if(r.interruptStatus & r.interruptEnable & (1 << n)) {
-      interrupt(r.interruptBase + n);
+      return interrupt(r.interruptBase + n);
     }
   }
 }

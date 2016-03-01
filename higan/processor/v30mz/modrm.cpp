@@ -1,19 +1,14 @@
-//ModRM functions
-//d7-d6 => mod
-//d5-d3 => reg
-//d2-d0 => mem
-
 auto V30MZ::modRM() -> void {
-  auto byte = fetch();
-  modrm.mod = byte >> 6;
-  modrm.reg = byte >> 3;
-  modrm.mem = byte >> 0;
+  auto data = fetch();
+  modrm.mem = data.bits(0,2);
+  modrm.reg = data.bits(3,5);
+  modrm.mod = data.bits(6,7);
 
   if(modrm.mod == 0 && modrm.mem == 6) {
     modrm.segment = segment(r.ds);
     modrm.address = fetch(Word);
   } else {
-    switch(modrm.reg) {
+    switch(modrm.mem) {
     case 0: modrm.segment = segment(r.ds); modrm.address = r.bx + r.si; break;
     case 1: modrm.segment = segment(r.ds); modrm.address = r.bx + r.di; break;
     case 2: modrm.segment = segment(r.ss); modrm.address = r.bp + r.si; break;

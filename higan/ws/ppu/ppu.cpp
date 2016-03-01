@@ -4,6 +4,7 @@ namespace WonderSwan {
 
 PPU ppu;
 #include "io.cpp"
+#include "render.cpp"
 #include "video.cpp"
 
 auto PPU::Enter() -> void {
@@ -11,7 +12,21 @@ auto PPU::Enter() -> void {
 }
 
 auto PPU::main() -> void {
-  step(256);
+  if(status.vclk < 144) {
+    for(uint x = 0; x < 224; x++) {
+      pixel = {Pixel::Source::None, 0xfff};
+      renderScreenOne();
+      renderScreenTwo();
+      renderSprite();
+      output[status.vclk * 224 + status.hclk] = pixel.color;
+      step(1);
+    }
+    for(uint x = 224; x < 256; x++) {
+      step(1);
+    }
+  } else {
+    step(256);
+  }
   scanline();
 }
 

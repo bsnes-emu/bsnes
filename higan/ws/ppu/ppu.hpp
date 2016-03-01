@@ -8,20 +8,33 @@ struct PPU : Thread, IO {
   auto step(uint clocks) -> void;
   auto power() -> void;
 
+  //io.cpp
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
-  uint16 output[224 * 144];
+  //render.cpp
+  auto renderScreenOne() -> void;
+  auto renderScreenTwo() -> void;
+  auto renderSprite() -> void;
+
+  //state
+  uint12 output[224 * 144];
 
   struct Status {
     uint vclk;
     uint hclk;
   } status;
 
+  struct Pixel {
+    enum class Source : uint { None, ScreenOne, ScreenTwo, Sprite };
+    Source source;
+    uint12 color;
+  } pixel;
+
   struct Registers {
     //$0000  DISP_CTRL
     bool screenTwoWindowEnable;
-    bool screenTwoWindowMode;
+    bool screenTwoWindowInvert;
     bool spriteWindowEnable;
     bool spriteEnable;
     bool screenTwoEnable;
