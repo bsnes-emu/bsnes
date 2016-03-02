@@ -18,7 +18,7 @@ auto Icarus::wonderSwanColorManifest(vector<uint8_t>& buffer, string location) -
   }
 
   if(settings["icarus/UseHeuristics"].boolean() && !manifest) {
-    WonderSwanColorCartridge cartridge{buffer.data(), buffer.size()};
+    WonderSwanCartridge cartridge{buffer.data(), buffer.size()};
     if(manifest = cartridge.manifest) {
       manifest.append("\n");
       manifest.append("information\n");

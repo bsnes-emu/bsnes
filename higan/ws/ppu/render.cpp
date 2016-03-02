@@ -1,3 +1,8 @@
+auto PPU::renderBack() -> void {
+  uint4 poolColor = 15 - r.pool[r.backColorIndex];
+  pixel = {Pixel::Source::Back, poolColor << 0 | poolColor << 4 | poolColor << 8};
+}
+
 auto PPU::renderScreenOne() -> void {
   if(!r.screenOneEnable) return;
 
@@ -81,7 +86,7 @@ auto PPU::renderSprite() -> void {
   uint14 spriteBase = r.spriteBase << 9;
 
   uint7 spriteIndex = r.spriteFirst;
-  uint8 spriteCount = max(128, (uint)r.spriteCount);
+  uint8 spriteCount = min(128, (uint)r.spriteCount);
   while(spriteCount--) {
     uint32 sprite;
     sprite.byte(0) = iram[spriteBase + (spriteIndex << 2) + 0];
@@ -91,7 +96,6 @@ auto PPU::renderSprite() -> void {
     spriteIndex++;
 
     if(r.spriteWindowEnable && sprite.bit(12) && !windowInside) continue;
-    if(pixel.source == Pixel::Source::ScreenTwo && !sprite.bit(13)) continue;
 
     uint8 spriteY = sprite.bits(16,23);
     uint8 spriteX = sprite.bits(24,31);
@@ -112,6 +116,7 @@ auto PPU::renderSprite() -> void {
     uint2 tileColor = (d0 & tileMask ? 1 : 0) | (d1 & tileMask ? 2 : 0);
 
     if(sprite.bit(11) && tileColor == 0) continue;
+    if(!sprite.bit(13) && pixel.source == Pixel::Source::ScreenTwo) continue;
     uint3 paletteColor = r.palette[8 + sprite.bits(9,11)].color[tileColor];
     uint4 poolColor = 15 - r.pool[paletteColor];
 

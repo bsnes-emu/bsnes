@@ -2,8 +2,8 @@
 
 namespace WonderSwan {
 
-uint8 iram[64 * 1024] = {0};
-IO* iomap[64 * 1024] = {0};
+uint8 iram[64 * 1024];
+IO* iomap[64 * 1024] = {nullptr};
 Bus bus;
 
 auto IO::power() -> void {
@@ -21,15 +21,16 @@ auto IO::portWrite(uint16 addr, uint8 data) -> void {
 }
 
 auto Bus::read(uint20 addr) -> uint8 {
-  if(addr < 0x10000) return cpu.ramRead(addr);
-  if(addr < 0x20000) return cartridge.ramRead(addr);
-  return cartridge.romRead(addr);
+  if(addr.bits(16,19) == 0) return cpu.ramRead(addr);
+  if(addr.bits(16,19) == 1) return cartridge.ramRead(addr);
+  if(addr.bits(16,19) >= 2) return cartridge.romRead(addr);
+  unreachable;
 }
 
 auto Bus::write(uint20 addr, uint8 data) -> void {
-  if(addr < 0x10000) return cpu.ramWrite(addr, data);
-  if(addr < 0x20000) return cartridge.ramWrite(addr, data);
-  return cartridge.romWrite(addr, data);
+  if(addr.bits(16,19) == 0) return cpu.ramWrite(addr, data);
+  if(addr.bits(16,19) == 1) return cartridge.ramWrite(addr, data);
+  if(addr.bits(16,19) >= 2) return cartridge.romWrite(addr, data);
 }
 
 }

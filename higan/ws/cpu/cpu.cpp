@@ -53,6 +53,7 @@ auto CPU::power() -> void {
   iomap[0x00b0] = this;
   iomap[0x00b2] = this;
   iomap[0x00b4] = this;
+  iomap[0x00b5] = this;
   iomap[0x00b6] = this;
 
   if(WSC() || SC()) {

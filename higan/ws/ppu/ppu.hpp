@@ -13,6 +13,7 @@ struct PPU : Thread, IO {
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
   //render.cpp
+  auto renderBack() -> void;
   auto renderScreenOne() -> void;
   auto renderScreenTwo() -> void;
   auto renderSprite() -> void;
@@ -26,7 +27,7 @@ struct PPU : Thread, IO {
   } status;
 
   struct Pixel {
-    enum class Source : uint { None, ScreenOne, ScreenTwo, Sprite };
+    enum class Source : uint { Back, ScreenOne, ScreenTwo, Sprite };
     Source source;
     uint12 color;
   } pixel;

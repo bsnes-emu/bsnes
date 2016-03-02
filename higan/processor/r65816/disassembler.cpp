@@ -410,8 +410,8 @@ auto R65816::disassemble_opcode(char* output, uint32 addr, bool e, bool m, bool 
   strcat(s, t);
   strcat(s, " ");
 
-  sprintf(t, "A:%.4x X:%.4x Y:%.4x S:%.4x D:%.4x DB:%.2x ",
-    regs.a.w, regs.x.w, regs.y.w, regs.s.w, regs.d.w, regs.db);
+  sprintf(t, "A:%.4x X:%.4x Y:%.4x S:%.4x D:%.4x B:%.2x ",
+    regs.a.w, regs.x.w, regs.y.w, regs.s.w, regs.d.w, (uint8_t)regs.db);
   strcat(s, t);
 
   if(regs.e) {

@@ -41,6 +41,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
 auto Program::saveRequest(uint id, string filename) -> void {
   string pathname = mediaPaths(emulator->group(id));
   string location = {pathname, filename};
+  if(!pathname) return;  //should never occur
 
   filestream stream{location, file::mode::write};
   return emulator->save(id, stream);

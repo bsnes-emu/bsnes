@@ -23,7 +23,6 @@ Settings settings;
 #include "heuristics/game-boy.cpp"
 #include "heuristics/game-boy-advance.cpp"
 #include "heuristics/wonderswan.cpp"
-#include "heuristics/wonderswan-color.cpp"
 #include "heuristics/bs-memory.cpp"
 #include "heuristics/sufami-turbo.cpp"
 

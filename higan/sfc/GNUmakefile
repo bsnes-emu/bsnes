@@ -3,7 +3,7 @@ processors += r65816 spc700 arm gsu hg51b upd96050
 objects += sfc-interface sfc-system sfc-scheduler sfc-controller
 objects += sfc-cartridge sfc-cheat
 objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
-objects += sfc-satellaview sfc-eboot
+objects += sfc-satellaview sfc-superdisc sfc-eboot
 objects += sfc-icd2 sfc-mcc sfc-nss sfc-event
 objects += sfc-sa1 sfc-superfx
 objects += sfc-armdsp sfc-hitachidsp sfc-necdsp
@@ -47,6 +47,7 @@ obj/sfc-dsp.o:         sfc/$(sfcdsp)/dsp.cpp $(call rwildcard,sfc/$(sfcdsp)/)
 obj/sfc-ppu.o:         sfc/$(sfcppu)/ppu.cpp $(call rwildcard,sfc/$(sfcppu)/)
 
 obj/sfc-satellaview.o: sfc/expansion/satellaview/satellaview.cpp $(call rwildcard,sfc/expansion/satellaview/)
+obj/sfc-superdisc.o:   sfc/expansion/superdisc/superdisc.cpp $(call rwildcard,sfc/expansion/superdisc/)
 obj/sfc-eboot.o:       sfc/expansion/eboot/eboot.cpp $(call rwildcard,sfc/expansion/eboot/)
 
 obj/sfc-icd2.o:        sfc/coprocessor/icd2/icd2.cpp $(call rwildcard,sfc/coprocessor/icd2/)

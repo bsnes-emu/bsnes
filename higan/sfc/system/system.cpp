@@ -32,6 +32,7 @@ auto System::init() -> void {
   assert(interface != nullptr);
 
   satellaview.init();
+  superdisc.init();
   eboot.init();
 
   icd2.init();
@@ -81,6 +82,7 @@ auto System::load() -> void {
   ppu.enable();
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.load();
+  if(expansionPort() == Device::ID::SuperDisc) superdisc.load();
   if(expansionPort() == Device::ID::eBoot) eboot.load();
 
   if(cartridge.hasICD2()) icd2.load();
@@ -109,6 +111,7 @@ auto System::load() -> void {
 auto System::unload() -> void {
   if(!loaded()) return;
   if(expansionPort() == Device::ID::Satellaview) satellaview.unload();
+  if(expansionPort() == Device::ID::SuperDisc) superdisc.unload();
   if(expansionPort() == Device::ID::eBoot) eboot.unload();
 
   if(cartridge.hasICD2()) icd2.unload();
@@ -143,6 +146,7 @@ auto System::power() -> void {
   ppu.power();
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.power();
+  if(expansionPort() == Device::ID::SuperDisc) superdisc.power();
   if(expansionPort() == Device::ID::eBoot) eboot.power();
 
   if(cartridge.hasICD2()) icd2.power();
@@ -173,6 +177,7 @@ auto System::reset() -> void {
   ppu.reset();
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.reset();
+  if(expansionPort() == Device::ID::SuperDisc) superdisc.reset();
   if(expansionPort() == Device::ID::eBoot) eboot.reset();
 
   if(cartridge.hasICD2()) icd2.reset();

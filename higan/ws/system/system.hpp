@@ -1,3 +1,9 @@
+enum class Keypad : uint {
+  Y1, Y2, Y3, Y4,
+  X1, X2, X3, X4,
+  B, A, Start,
+};
+
 struct System : IO {
   enum class Revision : uint {
     WonderSwan,       //SW-001  (ASWAN)

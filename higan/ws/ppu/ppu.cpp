@@ -14,7 +14,7 @@ auto PPU::Enter() -> void {
 auto PPU::main() -> void {
   if(status.vclk < 144) {
     for(uint x = 0; x < 224; x++) {
-      pixel = {Pixel::Source::None, 0xfff};
+      renderBack();
       renderScreenOne();
       renderScreenTwo();
       renderSprite();

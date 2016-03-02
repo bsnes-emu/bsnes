@@ -23,18 +23,20 @@ auto Cartridge::load() -> void {
   }
 
   if(auto node = document["board/ram"]) {
-    ram.name = node["name"].text();
-    ram.size = node["size"].natural();
-    ram.mask = bit::round(ram.size) - 1;
-    if(ram.size) ram.data = new uint8[ram.mask + 1]();
-    if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
-  }
+    if(node["type"].text() == "sram") {
+      ram.name = node["name"].text();
+      ram.size = node["size"].natural();
+      ram.mask = bit::round(ram.size) - 1;
+      if(ram.size) ram.data = new uint8[ram.mask + 1]();
+      if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
+    }
 
-  if(auto node = document["board/eeprom"]) {
-    eeprom.setName(node["name"].text());
-    eeprom.setSize(node["size"].natural() / sizeof(uint16));
-    eeprom.erase();
-    if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
+    if(node["type"].text() == "eeprom") {
+      eeprom.setName(node["name"].text());
+      eeprom.setSize(node["size"].natural() / sizeof(uint16));
+      eeprom.erase();
+      if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
+    }
   }
 
   information.title = document["information/title"].text();

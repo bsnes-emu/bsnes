@@ -1,3 +1,30 @@
+auto CPU::keypadRead() -> uint4 {
+  uint1 orientation = 1;
+  uint4 data = 0;
+
+  if(r.ypadEnable) {
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y1) << 0;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y2) << 1;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y3) << 2;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y4) << 3;
+  }
+
+  if(r.xpadEnable) {
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X1) << 0;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X2) << 1;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X3) << 2;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X4) << 3;
+  }
+
+  if(r.buttonEnable) {
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Start) << 1;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::A)     << 2;
+    data |= interface->inputPoll(orientation, 0, (uint)Keypad::B)     << 3;
+  }
+
+  return data;
+}
+
 auto CPU::portRead(uint16 addr) -> uint8 {
   //DMA_SRC
   if(addr == 0x0040) return r.dmaSource.byte(0);
@@ -41,6 +68,14 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
   //INT_STATUS
   if(addr == 0x00b4) return r.interruptStatus;
+
+  //KEYPAD
+  if(addr == 0x00b5) return (
+    keypadRead()   << 0
+  | r.ypadEnable   << 4
+  | r.xpadEnable   << 5
+  | r.buttonEnable << 6
+  );
 
   return 0x00;
 }
@@ -88,6 +123,14 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
   //INT_ENABLE
   if(addr == 0x00b2) {
     r.interruptEnable = data;
+    return;
+  }
+
+  //KEYPAD
+  if(addr == 0x00b5) {
+    r.ypadEnable   = data.bit(4);
+    r.xpadEnable   = data.bit(5);
+    r.buttonEnable = data.bit(6);
     return;
   }
 

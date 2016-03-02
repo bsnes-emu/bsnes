@@ -3,11 +3,11 @@ struct Cartridge : IO {
   auto unload() -> void;
   auto power() -> void;
 
-  auto romRead(uint addr) -> uint8;
-  auto romWrite(uint addr, uint8 data) -> void;
+  auto romRead(uint20 addr) -> uint8;
+  auto romWrite(uint20 addr, uint8 data) -> void;
 
-  auto ramRead(uint addr) -> uint8;
-  auto ramWrite(uint addr, uint8 data) -> void;
+  auto ramRead(uint20 addr) -> uint8;
+  auto ramWrite(uint20 addr, uint8 data) -> void;
 
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;

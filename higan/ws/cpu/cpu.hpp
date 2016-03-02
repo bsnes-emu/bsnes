@@ -27,6 +27,7 @@ struct CPU : Processor::V30MZ, Thread, IO {
   auto ramWrite(uint16 addr, uint8 data) -> void;
 
   //io.cpp
+  auto keypadRead() -> uint4;
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
@@ -49,8 +50,8 @@ struct CPU : Processor::V30MZ, Thread, IO {
     uint16 dmaLength;
 
     //$0048  DMA_CTRL
-    bool dmaEnable;
-    bool dmaMode;  //0 = increment; 1 = decrement
+    uint1 dmaEnable;
+    uint1 dmaMode;  //0 = increment; 1 = decrement
 
     //$00b0  INT_BASE
     uint8 interruptBase;
@@ -60,6 +61,11 @@ struct CPU : Processor::V30MZ, Thread, IO {
 
     //$00b4  INT_STATUS
     uint8 interruptStatus;
+
+    //$00b5  KEYPAD
+    uint1 ypadEnable;
+    uint1 xpadEnable;
+    uint1 buttonEnable;
   } r;
 };
 
