@@ -22,10 +22,6 @@ struct CPU : Processor::V30MZ, Thread, IO {
 
   auto power() -> void;
 
-  //memory.cpp
-  auto ramRead(uint16 addr) -> uint8;
-  auto ramWrite(uint16 addr, uint8 data) -> void;
-
   //io.cpp
   auto keypadRead() -> uint4;
   auto portRead(uint16 addr) -> uint8 override;

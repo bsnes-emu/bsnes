@@ -5,18 +5,21 @@ enum class Keypad : uint {
 };
 
 struct System : IO {
-  enum class Revision : uint {
+  enum class Model : uint {
     WonderSwan,       //SW-001  (ASWAN)
     WonderSwanColor,  //WSC-001 (SPHINX)
     SwanCrystal,      //SCT-001 (SPHINX2)
   };
 
   auto loaded() const -> bool;
-  auto revision() const -> Revision;
+  auto model() const -> Model;
+  auto color() const -> bool;
+  auto planar() const -> bool;
+  auto packed() const -> bool;
 
   auto init() -> void;
   auto term() -> void;
-  auto load(Revision) -> void;
+  auto load(Model) -> void;
   auto unload() -> void;
   auto power() -> void;
   auto run() -> void;
@@ -30,9 +33,17 @@ struct System : IO {
 
   EEPROM eeprom;
 
+  struct Registers {
+    //$0060  DISP_MODE
+    uint1 depth;
+    uint1 color;
+    uint1 format;
+    uint5 unknown;
+  } r;
+
 privileged:
   bool _loaded = false;
-  Revision _revision = Revision::WonderSwan;
+  Model _model = Model::WonderSwan;
 };
 
 extern System system;

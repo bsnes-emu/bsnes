@@ -69,8 +69,8 @@ namespace SuperFamicom {
   #include <sfc/controller/controller.hpp>
   #include <sfc/system/system.hpp>
   #include <sfc/scheduler/scheduler.hpp>
-  #include <sfc/expansion/expansion.hpp>
   #include <sfc/coprocessor/coprocessor.hpp>
+  #include <sfc/expansion/expansion.hpp>
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>
   #include <sfc/cheat/cheat.hpp>

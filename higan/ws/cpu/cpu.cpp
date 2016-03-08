@@ -3,7 +3,6 @@
 namespace WonderSwan {
 
 CPU cpu;
-#include "memory.cpp"
 #include "io.cpp"
 #include "interrupt.cpp"
 #include "dma.cpp"
@@ -61,14 +60,17 @@ auto CPU::power() -> void {
     iomap[0x0062] = this;
   }
 
-  r.dmaSource = 0x00000;
-  r.dmaTarget = 0x0000;
-  r.dmaLength = 0x0000;
-  r.dmaEnable = false;
+  r.dmaSource = 0;
+  r.dmaTarget = 0;
+  r.dmaLength = 0;
+  r.dmaEnable = 0;
   r.dmaMode = 0;
-  r.interruptBase = 0x00;
-  r.interruptEnable = 0x00;
-  r.interruptStatus = 0x00;
+  r.interruptBase = 0;
+  r.interruptEnable = 0;
+  r.interruptStatus = 0;
+  r.ypadEnable = 0;
+  r.xpadEnable = 0;
+  r.buttonEnable = 0;
 }
 
 }

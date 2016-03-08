@@ -65,6 +65,7 @@ auto V30MZ::opStoreString(Size size) {
 auto V30MZ::opLoadString(Size size) {
   wait(2);
   setAcc(size, read(size, segment(r.ds), r.si));
+  r.si += r.f.d ? -size : size;
 
   if(prefix.repeat && --r.cx) {
     state.prefix = true;
@@ -78,6 +79,7 @@ auto V30MZ::opScanString(Size size) {
   wait(3);
   auto x = getAcc(size);
   auto y = read(size, r.es, r.di);
+  r.di += r.f.d ? -size : size;
   alSub(size, x, y);
 
   if(prefix.repeat && prefix.repeat() == r.f.z && --r.cx) {

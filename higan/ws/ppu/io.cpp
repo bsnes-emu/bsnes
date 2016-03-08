@@ -12,7 +12,7 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   }
 
   //BACK_COLOR
-  if(addr == 0x0001) return r.backColorPalette << 4 | r.backColorIndex << 0;
+  if(addr == 0x0001) return r.backColor;
 
   //LINE_CUR
   if(addr == 0x0002) return status.vclk;
@@ -105,16 +105,6 @@ auto PPU::portRead(uint16 addr) -> uint8 {
     );
   }
 
-  //DISP_MODE
-  if(addr == 0x0060) {
-    return (
-      r.bpp    << 7
-    | r.color  << 6
-    | r.format << 5
-    | r.u0060  << 0
-    );
-  }
-
   return 0x00;
 }
 
@@ -133,11 +123,9 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
   //BACK_COLOR
   if(addr == 0x0001) {
     if(WS()) {
-      r.backColorPalette = 0;
-      r.backColorIndex   = data.bits(2,0);
+      r.backColor = data.bits(0,2);
     } else {
-      r.backColorPalette = data.bits(7,4);
-      r.backColorIndex   = data.bits(3,0);
+      r.backColor = data.bits(0,7);
     }
     return;
   }
@@ -294,15 +282,6 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
   if(addr >= 0x0020 && addr <= 0x003f) {
     r.palette[addr.bits(4,1)].color[addr.bit(0) * 2 + 1] = data.bits(6,4);
     r.palette[addr.bits(4,1)].color[addr.bit(0) * 2 + 0] = data.bits(2,0);
-    return;
-  }
-
-  //DISP_MODE
-  if(addr == 0x0060) {
-    r.bpp    = data.bit(7);
-    r.color  = data.bit(6);
-    r.format = data.bit(5);
-    r.u0060  = data & 0b1011;
     return;
   }
 }

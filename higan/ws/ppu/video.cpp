@@ -28,8 +28,8 @@ auto Video::refresh() -> void {
     auto source = ppu.output + y * 224;
     for(uint x = 0; x < 224; x++) {
       auto color = paletteStandard[*source++];
-    //*(output() + y * 224 + x) = color;
-      *(output() + (223 - x) * 224 + 40 + y) = color;
+      *(output() + (y + 40) * 224 + x) = color;
+    //*(output() + (223 - x) * 224 + 40 + y) = color;
     }
   }
 

@@ -92,11 +92,11 @@ auto Interface::group(uint id) -> uint {
   case ID::ROM:
   case ID::RAM:
   case ID::EEPROM:
-    switch(system.revision()) {
-    case System::Revision::WonderSwan:
+    switch(system.model()) {
+    case System::Model::WonderSwan:
       return ID::WonderSwan;
-    case System::Revision::WonderSwanColor:
-    case System::Revision::SwanCrystal:
+    case System::Model::WonderSwanColor:
+    case System::Model::SwanCrystal:
       return ID::WonderSwanColor;
     }
   }
@@ -104,8 +104,8 @@ auto Interface::group(uint id) -> uint {
 }
 
 auto Interface::load(uint id) -> void {
-  if(id == ID::WonderSwan) system.load(System::Revision::WonderSwan);
-  if(id == ID::WonderSwanColor) system.load(System::Revision::WonderSwanColor);
+  if(id == ID::WonderSwan) system.load(System::Model::WonderSwan);
+  if(id == ID::WonderSwanColor) system.load(System::Model::WonderSwanColor);
 }
 
 auto Interface::save() -> void {

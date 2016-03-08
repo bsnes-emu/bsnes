@@ -12,11 +12,19 @@ struct PPU : Thread, IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
-  //render.cpp
-  auto renderBack() -> void;
-  auto renderScreenOne() -> void;
-  auto renderScreenTwo() -> void;
-  auto renderSprite() -> void;
+  //render-mono.cpp
+  auto renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2;
+  auto renderMonoBack() -> void;
+  auto renderMonoScreenOne() -> void;
+  auto renderMonoScreenTwo() -> void;
+  auto renderMonoSprite() -> void;
+
+  //render-color.cpp
+  auto renderColorFetch(uint16 offset, uint3 y, uint3 x) -> uint4;
+  auto renderColorBack() -> void;
+  auto renderColorScreenOne() -> void;
+  auto renderColorScreenTwo() -> void;
+  auto renderColorSprite() -> void;
 
   //state
   uint12 output[224 * 144];
@@ -34,16 +42,15 @@ struct PPU : Thread, IO {
 
   struct Registers {
     //$0000  DISP_CTRL
-    bool screenTwoWindowEnable;
-    bool screenTwoWindowInvert;
-    bool spriteWindowEnable;
-    bool spriteEnable;
-    bool screenTwoEnable;
-    bool screenOneEnable;
+    uint1 screenTwoWindowEnable;
+    uint1 screenTwoWindowInvert;
+    uint1 spriteWindowEnable;
+    uint1 spriteEnable;
+    uint1 screenTwoEnable;
+    uint1 screenOneEnable;
 
     //$0001  BACK_COLOR
-    uint4 backColorIndex;
-    uint4 backColorPalette;
+    uint8 backColor;
 
     //$0003  LINE_CMP
     uint8 lineCompare;
@@ -101,12 +108,12 @@ struct PPU : Thread, IO {
     uint8 control;
 
     //$0015  LCD_ICON
-    bool iconAux3;
-    bool iconAux2;
-    bool iconAux1;
-    bool iconHorizontal;
-    bool iconVertical;
-    bool iconSleep;
+    uint1 iconAux3;
+    uint1 iconAux2;
+    uint1 iconAux1;
+    uint1 iconHorizontal;
+    uint1 iconVertical;
+    uint1 iconSleep;
 
     //$0016  LCD_VTOTAL
     uint8 vtotal;
@@ -121,12 +128,6 @@ struct PPU : Thread, IO {
     struct Palette {
       uint3 color[4];
     } palette[16];
-
-    //$0060  DISP_MODE
-    bool bpp;
-    bool color;
-    bool format;
-    uint5 u0060;  //unknown purpose
   } r;
 };
 

@@ -17,6 +17,10 @@ namespace Processor {
 #include "instructions-string.cpp"
 #include "disassembler.cpp"
 
+auto V30MZ::debug(string text) -> void {
+  print(text, "\n");
+}
+
 auto V30MZ::exec() -> void {
   state.poll = true;
   if(state.halt) return wait(1);

@@ -209,6 +209,7 @@ auto System::reset() -> void {
   if(cartridge.hasSharpRTC()) cpu.coprocessors.append(&sharprtc);
   if(cartridge.hasSPC7110()) cpu.coprocessors.append(&spc7110);
   if(cartridge.hasMSU1()) cpu.coprocessors.append(&msu1);
+  if(expansionPort() == Device::ID::SuperDisc) cpu.coprocessors.append(&superdisc);
 
   scheduler.reset();
   device.connect(0, (Device::ID)settings.controllerPort1);

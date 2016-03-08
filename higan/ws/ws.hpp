@@ -42,6 +42,8 @@ namespace WonderSwan {
     int64 clock = 0;
   };
 
+  enum : uint { Byte = 1, Word = 2, Long = 4 };
+
   #include <ws/memory/memory.hpp>
   #include <ws/eeprom/eeprom.hpp>
   #include <ws/system/system.hpp>
@@ -51,9 +53,9 @@ namespace WonderSwan {
   #include <ws/ppu/ppu.hpp>
   #include <ws/apu/apu.hpp>
 
-  inline auto WS() { return system.revision() == System::Revision::WonderSwan; }
-  inline auto WSC() { return system.revision() == System::Revision::WonderSwanColor; }
-  inline auto SC() { return system.revision() == System::Revision::SwanCrystal; }
+  inline auto WS() { return system.model() == System::Model::WonderSwan; }
+  inline auto WSC() { return system.model() == System::Model::WonderSwanColor; }
+  inline auto SC() { return system.model() == System::Model::SwanCrystal; }
 }
 
 #include <ws/interface/interface.hpp>
