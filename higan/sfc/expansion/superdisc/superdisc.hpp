@@ -11,13 +11,33 @@ struct SuperDisc : Coprocessor, Memory {
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
 
+  //nec.cpp
+  auto necPollIRQ() -> uint8;
+  auto necReadData() -> uint8;
+  auto necWriteCommand(uint4 data) -> void;
+
+  //sony.cpp
+  auto sonyPollIRQ() -> uint8;
+  auto sonyReadData() -> uint8;
+  auto sonyWriteCommand(uint8 data) -> void;
+  auto sonyWriteData(uint8 data) -> void;
+
 private:
-  uint8 r21e0;
-  uint8 r21e1;
-  uint8 r21e2;
-  uint8 r21e3;
-  uint8 r21e4;
-  uint8 r21e5;
+  struct Registers {
+    uint8 irqEnable;
+  } r;
+
+  //NEC
+  struct NEC {
+    vector<uint4> command;
+    uint8 data;
+  } nec;
+
+  //Sony
+  struct Sony {
+    uint8 command;
+    uint8 data;
+  } sony;
 };
 
 extern SuperDisc superdisc;

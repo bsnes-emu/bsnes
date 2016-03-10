@@ -65,8 +65,9 @@ auto V30MZ::opLoadEffectiveAddressRegMem() {
   setReg(Word, modrm.address);
 }
 
-auto V30MZ::opLoadSegmentMem(uint16_t& reg) {
+auto V30MZ::opLoadSegmentMem(uint16_t& segment) {
   wait(5);
   modRM();
-  reg = getMem(Word);
+  setReg(Word, getMem(Word));
+  segment = getMem(Word, 2);
 }

@@ -1,5 +1,5 @@
 auto CPU::keypadRead() -> uint4 {
-  uint1 orientation = 1;
+  uint1 orientation = 0;
   uint4 data = 0;
 
   if(r.ypadEnable) {

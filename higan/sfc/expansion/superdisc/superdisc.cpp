@@ -3,18 +3,24 @@
 namespace SuperFamicom {
 
 SuperDisc superdisc;
+#include "nec.cpp"
+#include "sony.cpp"
 
 auto SuperDisc::Enter() -> void {
   while(true) scheduler.synchronize(), superdisc.main();
 }
 
 auto SuperDisc::main() -> void {
-  if(r21e4 & 0x04) {
+  cpu.regs.irq = 0;
+
+  if(r.irqEnable.bit(3)) {
     cpu.regs.irq = 1;
-    r21e1 = 0x81;
-  } else {
-    cpu.regs.irq = 0;
-    r21e1 = 0x00;
+    nec.data = necPollIRQ();
+  }
+
+  if(r.irqEnable.bit(2)) {
+    cpu.regs.irq = 1;
+    sony.data = sonyPollIRQ();
   }
 
   step(1);
@@ -37,41 +43,42 @@ auto SuperDisc::power() -> void {
 }
 
 auto SuperDisc::reset() -> void {
-  r21e0 = 0x00;
-  r21e1 = 0x00;
-  r21e2 = 0x00;
-  r21e3 = 0x00;
-  r21e4 = 0x00;
-  r21e5 = 0x00;
+  r.irqEnable = 0x00;
+
+  nec.command.reset();
+  nec.data = 0x00;
+
+  sony.command = 0x00;
+  sony.data = 0x00;
 }
 
 auto SuperDisc::read(uint24 addr, uint8 data) -> uint8 {
   addr = 0x21e0 | (addr & 7);
 
   if(addr == 0x21e0) {
-    data = r21e0;
+    data = 0x00;
   }
 
   if(addr == 0x21e1) {
-    data = r21e1;
+    cpu.regs.irq = 0;
+    data = necReadData();
   }
 
   if(addr == 0x21e2) {
-    data = r21e2;
+    data = 0x00;
   }
 
   if(addr == 0x21e3) {
-    if(r21e2 == 0x01) data = 0x10;
-    else data = 0x00;
-    r21e2++;
+    cpu.regs.irq = 0;
+    data = sonyReadData();
   }
 
   if(addr == 0x21e4) {
-    data = r21e4;
+    data = r.irqEnable;
   }
 
   if(addr == 0x21e5) {
-    data = r21e5;
+    data = 0x00;
   }
 
   return data;
@@ -81,28 +88,25 @@ auto SuperDisc::write(uint24 addr, uint8 data) -> void {
   addr = 0x21e0 | (addr & 7);
 
   if(addr == 0x21e0) {
-    r21e0 = data;
   }
 
   if(addr == 0x21e1) {
-    r21e1 = data;
+    necWriteCommand(data.bits(0,3));
   }
 
   if(addr == 0x21e2) {
-    r21e2 = data;
+    sonyWriteCommand(data);
   }
 
   if(addr == 0x21e3) {
-    r21e2++;
-    r21e3 = data;
+    sonyWriteData(data);
   }
 
   if(addr == 0x21e4) {
-    r21e4 = data;
+    r.irqEnable = data;
   }
 
   if(addr == 0x21e5) {
-    r21e5 = data;
   }
 }
 

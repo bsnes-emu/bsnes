@@ -146,7 +146,7 @@ auto V30MZ::opMultiplySignedRegMemImm(Size size) {
 //46  inc si
 //47  inc di
 auto V30MZ::opIncReg(uint16_t& reg) {
-  reg++;
+  reg = alInc(Word, reg);
 }
 
 //48  dec ax
@@ -158,7 +158,7 @@ auto V30MZ::opIncReg(uint16_t& reg) {
 //4e  dec si
 //4f  dec di
 auto V30MZ::opDecReg(uint16_t& reg) {
-  reg--;
+  reg = alDec(Word, reg);
 }
 
 //98  cbw
