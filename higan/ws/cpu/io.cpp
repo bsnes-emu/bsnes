@@ -1,25 +1,24 @@
 auto CPU::keypadRead() -> uint4 {
-  uint1 orientation = 0;
   uint4 data = 0;
 
   if(r.ypadEnable) {
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y1) << 0;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y2) << 1;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y3) << 2;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Y4) << 3;
+    data |= system.keypad.y1 << 0;
+    data |= system.keypad.y2 << 1;
+    data |= system.keypad.y3 << 2;
+    data |= system.keypad.y4 << 3;
   }
 
   if(r.xpadEnable) {
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X1) << 0;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X2) << 1;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X3) << 2;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::X4) << 3;
+    data |= system.keypad.x1 << 0;
+    data |= system.keypad.x2 << 1;
+    data |= system.keypad.x3 << 2;
+    data |= system.keypad.x4 << 3;
   }
 
   if(r.buttonEnable) {
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::Start) << 1;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::A)     << 2;
-    data |= interface->inputPoll(orientation, 0, (uint)Keypad::B)     << 3;
+    data |= system.keypad.start << 1;
+    data |= system.keypad.a     << 2;
+    data |= system.keypad.b     << 3;
   }
 
   return data;
@@ -44,22 +43,23 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
   //WSC_SYSTEM
   if(addr == 0x0062) {
-    return SC() << 7;
+    return (system.model() == Model::SwanCrystal) << 7;
   }
 
   //HW_FLAGS
   if(addr == 0x00a0) {
+    bool model = system.model() != Model::WonderSwan;
     return (
       1 << 7      //1 = built-in self-test passed
     | 1 << 2      //0 = 8-bit bus width; 1 = 16-bit bus width
-    | !WS() << 1  //0 = WonderSwan; 1 = WonderSwan Color or SwanCrystal
+    | model << 1  //0 = WonderSwan; 1 = WonderSwan Color or SwanCrystal
     | 1 << 0      //0 = BIOS mapped; 1 = cartridge mapped
     );
   }
 
   //INT_BASE
   if(addr == 0x00b0) {
-    if(WS()) return r.interruptBase | 3;
+    if(system.model() == Model::WonderSwan) return r.interruptBase | 3;
     return r.interruptBase;
   }
 
@@ -116,7 +116,7 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //INT_BASE
   if(addr == 0x00b0) {
-    r.interruptBase = WS() ? data & ~7 : data & ~1;
+    r.interruptBase = (system.model() == Model::WonderSwan) ? data & ~7 : data & ~1;
     return;
   }
 

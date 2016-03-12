@@ -20,6 +20,14 @@ namespace WonderSwan {
 #include <libco/libco.h>
 
 namespace WonderSwan {
+  enum class Model : uint {
+    WonderSwan,       //SW-001  (ASWAN)
+    WonderSwanColor,  //WSC-001 (SPHINX)
+    SwanCrystal,      //SCT-001 (SPHINX2)
+  };
+
+  enum : uint { Byte = 1, Word = 2, Long = 4 };
+
   struct Thread {
     ~Thread() {
       if(thread) co_delete(thread);
@@ -42,8 +50,6 @@ namespace WonderSwan {
     int64 clock = 0;
   };
 
-  enum : uint { Byte = 1, Word = 2, Long = 4 };
-
   #include <ws/memory/memory.hpp>
   #include <ws/eeprom/eeprom.hpp>
   #include <ws/system/system.hpp>
@@ -52,10 +58,6 @@ namespace WonderSwan {
   #include <ws/cpu/cpu.hpp>
   #include <ws/ppu/ppu.hpp>
   #include <ws/apu/apu.hpp>
-
-  inline auto WS() { return system.model() == System::Model::WonderSwan; }
-  inline auto WSC() { return system.model() == System::Model::WonderSwanColor; }
-  inline auto SC() { return system.model() == System::Model::SwanCrystal; }
 }
 
 #include <ws/interface/interface.hpp>

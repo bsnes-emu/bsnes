@@ -55,7 +55,7 @@ auto CPU::power() -> void {
   iomap[0x00b5] = this;
   iomap[0x00b6] = this;
 
-  if(WSC() || SC()) {
+  if(system.model() != Model::WonderSwan) {
     for(uint p = 0x0040; p <= 0x0049; p++) iomap[p] = this;
     iomap[0x0062] = this;
   }

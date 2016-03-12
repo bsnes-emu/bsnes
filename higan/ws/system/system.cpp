@@ -7,9 +7,11 @@ System system;
 
 auto System::loaded() const -> bool { return _loaded; }
 auto System::model() const -> Model { return _model; }
+auto System::orientation() const -> bool { return _orientation; }
 auto System::color() const -> bool { return r.color; }
 auto System::planar() const -> bool { return r.format == 0; }
 auto System::packed() const -> bool { return r.format == 1; }
+auto System::depth() const -> bool { return r.depth == 1; }
 
 auto System::init() -> void {
 }
@@ -19,6 +21,7 @@ auto System::term() -> void {
 
 auto System::load(Model model) -> void {
   _model = model;
+  _orientation = 0;
 
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
@@ -67,6 +70,24 @@ auto System::power() -> void {
 
 auto System::run() -> void {
   while(scheduler.enter() != Scheduler::Event::Frame);
+
+  bool rotate = keypad.rotate;
+  keypad.y1 = interface->inputPoll(_orientation, 0, 0);
+  keypad.y2 = interface->inputPoll(_orientation, 0, 1);
+  keypad.y3 = interface->inputPoll(_orientation, 0, 2);
+  keypad.y4 = interface->inputPoll(_orientation, 0, 3);
+  keypad.x1 = interface->inputPoll(_orientation, 0, 4);
+  keypad.x2 = interface->inputPoll(_orientation, 0, 5);
+  keypad.x3 = interface->inputPoll(_orientation, 0, 6);
+  keypad.x4 = interface->inputPoll(_orientation, 0, 7);
+  keypad.b = interface->inputPoll(_orientation, 0, 8);
+  keypad.a = interface->inputPoll(_orientation, 0, 9);
+  keypad.start = interface->inputPoll(_orientation, 0, 10);
+  keypad.rotate = interface->inputPoll(_orientation, 0, 11);
+
+  if(!rotate && keypad.rotate) {
+    _orientation = !_orientation;
+  }
 }
 
 }

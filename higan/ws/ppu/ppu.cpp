@@ -4,6 +4,7 @@ namespace WonderSwan {
 
 PPU ppu;
 #include "io.cpp"
+#include "render-sprite.cpp"
 #include "render-mono.cpp"
 #include "render-color.cpp"
 #include "video.cpp"
@@ -14,6 +15,7 @@ auto PPU::Enter() -> void {
 
 auto PPU::main() -> void {
   if(status.vclk < 144) {
+    renderSpriteDecode();
     for(uint x = 0; x < 224; x++) {
       if(!system.color()) {
         renderMonoBack();

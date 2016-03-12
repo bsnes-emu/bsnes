@@ -34,7 +34,8 @@ Interface::Interface() {
     device.input.append({ 8, 0, "B"});
     device.input.append({ 9, 0, "A"});
     device.input.append({10, 0, "Start"});
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    device.input.append({11, 0, "Rotate"});
+    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     this->device.append(device);
   }
 
@@ -50,7 +51,8 @@ Interface::Interface() {
     device.input.append({ 8, 0, "B"});
     device.input.append({ 9, 0, "A"});
     device.input.append({10, 0, "Start"});
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    device.input.append({11, 0, "Rotate"});
+    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     this->device.append(device);
   }
 
@@ -93,10 +95,10 @@ auto Interface::group(uint id) -> uint {
   case ID::RAM:
   case ID::EEPROM:
     switch(system.model()) {
-    case System::Model::WonderSwan:
+    case Model::WonderSwan:
       return ID::WonderSwan;
-    case System::Model::WonderSwanColor:
-    case System::Model::SwanCrystal:
+    case Model::WonderSwanColor:
+    case Model::SwanCrystal:
       return ID::WonderSwanColor;
     }
   }
@@ -104,8 +106,8 @@ auto Interface::group(uint id) -> uint {
 }
 
 auto Interface::load(uint id) -> void {
-  if(id == ID::WonderSwan) system.load(System::Model::WonderSwan);
-  if(id == ID::WonderSwanColor) system.load(System::Model::WonderSwanColor);
+  if(id == ID::WonderSwan) system.load(Model::WonderSwan);
+  if(id == ID::WonderSwanColor) system.load(Model::WonderSwanColor);
 }
 
 auto Interface::save() -> void {

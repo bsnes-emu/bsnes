@@ -12,7 +12,13 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   }
 
   //BACK_COLOR
-  if(addr == 0x0001) return r.backColor;
+  if(addr == 0x0001) {
+    if(!system.depth()) {
+      return r.backColor.bits(0,2);
+    } else {
+      return r.backColor.bits(0,7);
+    }
+  }
 
   //LINE_CUR
   if(addr == 0x0002) return status.vclk;
@@ -21,7 +27,13 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   if(addr == 0x0003) return r.lineCompare;
 
   //SPR_BASE
-  if(addr == 0x0004) return r.spriteBase;
+  if(addr == 0x0004) {
+    if(!system.depth()) {
+      return r.spriteBase.bits(0,4);
+    } else {
+      return r.spriteBase.bits(0,5);
+    }
+  }
 
   //SPR_FIRST
   if(addr == 0x0005) return r.spriteFirst;
@@ -30,7 +42,13 @@ auto PPU::portRead(uint16 addr) -> uint8 {
   if(addr == 0x0006) return r.spriteCount;
 
   //MAP_BASE
-  if(addr == 0x0007) return r.screenTwoMapBase << 4 | r.screenOneMapBase << 0;
+  if(addr == 0x0007) {
+    if(!system.depth()) {
+      return r.screenTwoMapBase.bits(0,2) << 4 | r.screenOneMapBase.bits(0,2) << 0;
+    } else {
+      return r.screenTwoMapBase.bits(0,3) << 4 | r.screenOneMapBase.bits(0,3) << 0;
+    }
+  }
 
   //SCR2_WIN_X0
   if(addr == 0x0008) return r.screenTwoWindowX0;
@@ -122,11 +140,7 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //BACK_COLOR
   if(addr == 0x0001) {
-    if(WS()) {
-      r.backColor = data.bits(0,2);
-    } else {
-      r.backColor = data.bits(0,7);
-    }
+    r.backColor = data;
     return;
   }
 
@@ -138,11 +152,7 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //SPR_BASE
   if(addr == 0x0004) {
-    if(WS()) {
-      r.spriteBase = data.bits(4,0);
-    } else {
-      r.spriteBase = data.bits(5,0);
-    }
+    r.spriteBase = data.bits(0,5);
     return;
   }
 
@@ -160,13 +170,8 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
 
   //MAP_BASE
   if(addr == 0x0007) {
-    if(WS()) {
-      r.screenTwoMapBase = data.bits(6,4);
-      r.screenOneMapBase = data.bits(2,0);
-    } else {
-      r.screenTwoMapBase = data.bits(7,4);
-      r.screenOneMapBase = data.bits(3,0);
-    }
+    r.screenOneMapBase = data.bits(0,3);
+    r.screenTwoMapBase = data.bits(4,7);
     return;
   }
 

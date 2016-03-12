@@ -21,28 +21,67 @@ auto V30MZ::debug(string text) -> void {
   print(text, "\n");
 }
 
+auto V30MZ::power() -> void {
+  state.halt   = false;
+  state.poll   = true;
+  state.prefix = false;
+  prefixes.reset();
+
+  r.ax = 0x0000;
+  r.cx = 0x0000;
+  r.dx = 0x0000;
+  r.bx = 0x0000;
+  r.sp = 0x0000;
+  r.bp = 0x0000;
+  r.si = 0x0000;
+  r.di = 0x0000;
+  r.es = 0x0000;
+  r.cs = 0xffff;
+  r.ss = 0x0000;
+  r.ds = 0x0000;
+  r.ip = 0x0000;
+  r.f  = 0x8000;
+}
+
 auto V30MZ::exec() -> void {
   state.poll = true;
+  state.prefix = false;
   if(state.halt) return wait(1);
 
-  #if 0
-  static uint counter = 0;
-  static uint16 cs = 0, ip = 0;
-  if(cs != r.cs || ip != r.ip) print(disassemble(cs = r.cs, ip = r.ip), "\n");
-  #endif
-
   instruction();
+  if(!state.prefix) prefixes.reset();
+}
 
-  if(state.prefix) {
-    state.prefix = false;
-  } else {
-    prefix.repeat = nothing;
-    prefix.segment = nothing;
+auto V30MZ::interrupt(uint8 vector) -> void {
+  state.halt = false;
+  state.poll = true;
+  state.prefix = false;
+
+  //if an IRQ fires during a rep string instruction;
+  //flush prefix queue and seek back to first prefix.
+  //this allows the transfer to resume after the IRQ.
+  if(prefixes) {
+    r.ip -= prefixes.size();
+    prefixes.reset();
   }
+
+  auto ip = read(Word, 0x0000, vector * 4 + 0);
+  auto cs = read(Word, 0x0000, vector * 4 + 2);
+
+  push(r.f);
+  push(r.cs);
+  push(r.ip);
+
+  r.f.m = true;
+  r.f.i = false;
+  r.f.b = false;
+
+  r.ip = ip;
+  r.cs = cs;
 }
 
 auto V30MZ::instruction() -> void {
-  auto opcode = fetch();
+  opcode = fetch();
   wait(1);
 
   switch(opcode) {
@@ -303,48 +342,6 @@ auto V30MZ::instruction() -> void {
   case 0xfe: return opGroup4MemImm(Byte);
   case 0xff: return opGroup4MemImm(Word);
   }
-}
-
-auto V30MZ::interrupt(uint8 vector) -> void {
-  state.halt = false;
-
-  auto ip = read(Word, 0x0000, vector * 4 + 0);
-  auto cs = read(Word, 0x0000, vector * 4 + 2);
-
-  push(r.f);
-  push(r.cs);
-  push(r.ip);
-
-  r.f.m = true;
-  r.f.i = false;
-  r.f.b = false;
-
-  r.ip = ip;
-  r.cs = cs;
-}
-
-auto V30MZ::power() -> void {
-  state.halt   = false;
-  state.poll   = true;
-  state.prefix = false;
-
-  prefix.repeat  = nothing;
-  prefix.segment = nothing;
-
-  r.ax = 0x0000;
-  r.cx = 0x0000;
-  r.dx = 0x0000;
-  r.bx = 0x0000;
-  r.sp = 0x0000;
-  r.bp = 0x0000;
-  r.si = 0x0000;
-  r.di = 0x0000;
-  r.es = 0x0000;
-  r.cs = 0xffff;
-  r.ss = 0x0000;
-  r.ds = 0x0000;
-  r.ip = 0x0000;
-  r.f  = 0x8000;
 }
 
 }

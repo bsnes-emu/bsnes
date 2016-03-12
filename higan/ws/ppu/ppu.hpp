@@ -12,6 +12,9 @@ struct PPU : Thread, IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
+  //render-sprite.cpp
+  auto renderSpriteDecode() -> void;
+
   //render-mono.cpp
   auto renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2;
   auto renderMonoBack() -> void;
@@ -33,6 +36,18 @@ struct PPU : Thread, IO {
     uint vclk;
     uint hclk;
   } status;
+
+  struct Sprite {
+    uint8 x;
+    uint8 y;
+    uint1 vflip;
+    uint1 hflip;
+    uint1 priority;
+    uint1 window;
+    uint4 palette;  //renderSpriteDecode() always sets bit3
+    uint9 tile;
+  };
+  vector<Sprite> sprites;
 
   struct Pixel {
     enum class Source : uint { Back, ScreenOne, ScreenTwo, Sprite };

@@ -7,6 +7,15 @@ namespace Processor {
 struct V30MZ {
   using Size = uint;
   enum : uint { Byte = 1, Word = 2, Long = 4 };
+  enum : uint {
+    SegmentOverrideES  = 0x26,
+    SegmentOverrideCS  = 0x2e,
+    SegmentOverrideSS  = 0x36,
+    SegmentOverrideDS  = 0x3e,
+    Lock               = 0xf0,
+    RepeatWhileNotZero = 0xf2,
+    RepeatWhileZero    = 0xf3,
+  };
 
   virtual auto wait(uint clocks = 1) -> void = 0;
   virtual auto read(uint20 addr) -> uint8 = 0;
@@ -15,12 +24,13 @@ struct V30MZ {
   virtual auto out(uint16 port, uint8 data) -> void = 0;
 
   auto debug(string text) -> void;
-  auto exec() -> void;
-  auto instruction() -> void;
-  auto interrupt(uint8 vector) -> void;
   auto power() -> void;
+  auto exec() -> void;
+  auto interrupt(uint8 vector) -> void;
+  auto instruction() -> void;
 
   //registers.cpp
+  auto repeat() -> uint8;
   auto segment(uint16) -> uint16;
 
   auto getAcc(Size) -> uint32;
@@ -202,10 +212,8 @@ struct V30MZ {
     bool prefix;  //set to true for prefix instructions; prevents flushing of Prefix struct
   } state;
 
-  struct Prefix {
-    maybe<bool> repeat;     //repnz, repz
-    maybe<uint16> segment;  //cs, es, ss, ds
-  } prefix;
+  uint8 opcode;
+  vector<uint8> prefixes;
 
   struct ModRM {
     uint2 mod;
