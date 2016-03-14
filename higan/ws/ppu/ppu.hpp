@@ -143,6 +143,24 @@ struct PPU : Thread, IO {
     struct Palette {
       uint3 color[4];
     } palette[16];
+
+    //$00a2  TMR_CTRL
+    uint1 htimerEnable;
+    uint1 htimerRepeat;
+    uint1 vtimerEnable;
+    uint1 vtimerRepeat;
+
+    //$00a4,$00a5  HTMR_FREQ
+    uint16 htimerFrequency;
+
+    //$00a6,$00a7  VTMR_FREQ
+    uint16 vtimerFrequency;
+
+    //$00a8,$00a9  HTMR_CTR
+    uint16 htimerCounter;
+
+    //$00aa,$00ab  VTMR_CTR
+    uint16 vtimerCounter;
   } r;
 };
 

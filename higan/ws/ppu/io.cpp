@@ -123,6 +123,30 @@ auto PPU::portRead(uint16 addr) -> uint8 {
     );
   }
 
+  //TMR_CTRL
+  if(addr == 0x00a2) return (
+    r.htimerEnable << 0
+  | r.htimerRepeat << 1
+  | r.vtimerEnable << 2
+  | r.vtimerRepeat << 3
+  );
+
+  //HTMR_FREQ
+  if(addr == 0x00a4) return r.htimerFrequency.byte(0);
+  if(addr == 0x00a5) return r.htimerFrequency.byte(1);
+
+  //VTMR_FREQ
+  if(addr == 0x00a6) return r.vtimerFrequency.byte(0);
+  if(addr == 0x00a7) return r.vtimerFrequency.byte(1);
+
+  //HTMR_CTR
+  if(addr == 0x00a8) return r.htimerCounter.byte(0);
+  if(addr == 0x00a9) return r.htimerCounter.byte(1);
+
+  //VTMR_CTR
+  if(addr == 0x00aa) return r.vtimerCounter.byte(0);
+  if(addr == 0x00ab) return r.vtimerCounter.byte(1);
+
   return 0x00;
 }
 
@@ -289,4 +313,20 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
     r.palette[addr.bits(4,1)].color[addr.bit(0) * 2 + 0] = data.bits(2,0);
     return;
   }
+
+  //TMR_CTRL
+  if(addr == 0x00a2) {
+    r.htimerEnable = data.bit(0);
+    r.htimerRepeat = data.bit(1);
+    r.vtimerEnable = data.bit(2);
+    r.vtimerRepeat = data.bit(3);
+  }
+
+  //HTMR_FREQ
+  if(addr == 0x00a4) r.htimerFrequency.byte(0) = data;
+  if(addr == 0x00a5) r.htimerFrequency.byte(1) = data;
+
+  //VTMR_FREQ
+  if(addr == 0x00a6) r.vtimerFrequency.byte(0) = data;
+  if(addr == 0x00a7) r.vtimerFrequency.byte(1) = data;
 }

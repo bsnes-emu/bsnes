@@ -22,8 +22,8 @@ auto V30MZ::debug(string text) -> void {
 }
 
 auto V30MZ::power() -> void {
-  state.halt   = false;
-  state.poll   = true;
+  state.halt = false;
+  state.poll = true;
   state.prefix = false;
   prefixes.reset();
 

@@ -31,13 +31,21 @@ auto PPU::main() -> void {
       output[status.vclk * 224 + status.hclk] = pixel.color;
       step(1);
     }
-    for(uint x = 224; x < 256; x++) {
-      step(1);
-    }
+    step(32);
   } else {
     step(256);
   }
   scanline();
+  if(r.htimerEnable && r.htimerCounter < r.htimerFrequency) {
+    if(++r.htimerCounter == r.htimerFrequency) {
+      if(r.htimerRepeat) {
+        r.htimerCounter = 0;
+      } else {
+        r.htimerEnable = false;
+      }
+      cpu.raise(CPU::Interrupt::HblankTimer);
+    }
+  }
 }
 
 auto PPU::scanline() -> void {
@@ -48,6 +56,16 @@ auto PPU::scanline() -> void {
   }
   if(status.vclk == 144) {
     cpu.raise(CPU::Interrupt::Vblank);
+    if(r.vtimerEnable && r.vtimerCounter < r.vtimerFrequency) {
+      if(++r.vtimerCounter == r.vtimerFrequency) {
+        if(r.vtimerRepeat) {
+          r.vtimerCounter = 0;
+        } else {
+          r.vtimerEnable = false;
+        }
+        cpu.raise(CPU::Interrupt::VblankTimer);
+      }
+    }
   }
   if(status.vclk == 159) frame();
 }
@@ -70,6 +88,8 @@ auto PPU::power() -> void {
 
   for(uint n = 0x0000; n <= 0x0017; n++) iomap[n] = this;
   for(uint n = 0x001c; n <= 0x003f; n++) iomap[n] = this;
+  iomap[0x00a2] = this;
+  for(uint n = 0x00a4; n <= 0x00ab; n++) iomap[n] = this;
 
   for(auto& n : output) n = 0;
 
@@ -110,6 +130,14 @@ auto PPU::power() -> void {
   r.iconSleep = 0;
   r.vtotal = 158;
   r.vblank = 155;
+  r.htimerEnable = 0;
+  r.htimerRepeat = 0;
+  r.vtimerEnable = 0;
+  r.vtimerRepeat = 0;
+  r.htimerFrequency = 0;
+  r.vtimerFrequency = 0;
+  r.htimerCounter = 0;
+  r.vtimerCounter = 0;
   for(auto& color : r.pool) color = 0;
   for(auto& p : r.palette) for(auto& color : p.color) color = 0;
 
