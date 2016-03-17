@@ -15,8 +15,9 @@ auto PPU::Enter() -> void {
 
 auto PPU::main() -> void {
   if(status.vclk < 144) {
+    renderSpriteFetch();
     renderSpriteDecode();
-    for(uint x = 0; x < 224; x++) {
+    for(auto x : range(256)) {
       if(!system.color()) {
         renderMonoBack();
         renderMonoScreenOne();
@@ -86,12 +87,13 @@ auto PPU::step(uint clocks) -> void {
 auto PPU::power() -> void {
   create(PPU::Enter, 3'072'000);
 
-  for(uint n = 0x0000; n <= 0x0017; n++) iomap[n] = this;
-  for(uint n = 0x001c; n <= 0x003f; n++) iomap[n] = this;
-  iomap[0x00a2] = this;
-  for(uint n = 0x00a4; n <= 0x00ab; n++) iomap[n] = this;
+  bus.map(this, 0x0000, 0x0017);
+  bus.map(this, 0x001c, 0x003f);
+  bus.map(this, 0x00a2);
+  bus.map(this, 0x00a4, 0x00ab);
 
   for(auto& n : output) n = 0;
+  for(auto& n : oam) n = 0;
 
   status.vclk = 0;
   status.hclk = 0;

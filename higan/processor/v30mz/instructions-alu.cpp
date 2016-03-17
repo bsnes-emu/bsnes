@@ -134,7 +134,7 @@ auto V30MZ::opTestMemReg(Size size) {
 auto V30MZ::opMultiplySignedRegMemImm(Size size) {
   wait(2);
   modRM();
-  setReg(size, alMuli(size, getMem(size), size == Word ? (int16_t)fetch(Word) : (int8_t)fetch(Byte)));
+  setReg(Word, alMuli(Word, getMem(Word), size == Word ? (int16_t)fetch(Word) : (int8_t)fetch(Byte)));
 }
 
 //40  inc ax

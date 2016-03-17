@@ -1,11 +1,27 @@
-APU::Channel4::Channel4() : Channel(4) {
+auto APU::Channel4::noiseSample() -> uint4 {
+  return s.noiseOutput ? 0xf : 0x0;
 }
 
 auto APU::Channel4::run() -> void {
-  int16 sample = s.data << 8;
-  if(r.scale != 3) sample >>= r.volume;
-  if(r.scale == 1) sample |= 0x70000 >> r.volume;
+  if(--s.period == r.pitch) {
+    s.period = 0;
 
-  o.left = r.leftEnable ? sample : (int16)0;
-  o.right = r.rightEnable ? sample : (int16)0;
+    auto output = r.noise ? noiseSample() : apu.sample(4, s.sampleOffset++);
+    o.left = output * r.volumeLeft;
+    o.right = output * r.volumeRight;
+
+    if(r.noiseReset) {
+      r.noiseReset = 0;
+      s.noiseLFSR = 0;
+      s.noiseOutput = 0;
+    }
+
+    if(r.noiseUpdate) {
+      static const int taps[8] = {14, 10, 13, 4, 8, 6, 9, 11};
+      auto tap = taps[r.noiseMode];
+
+      s.noiseOutput = (1 ^ (s.noiseLFSR >> 7) ^ (s.noiseLFSR >> tap)) & 1;
+      s.noiseLFSR = s.noiseLFSR << 1 | s.noiseOutput;
+    }
+  }
 }

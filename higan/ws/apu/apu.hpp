@@ -1,6 +1,7 @@
 struct APU : Thread, IO {
   static auto Enter() -> void;
   auto main() -> void;
+  auto sample(uint channel, uint5 index) -> uint4;
   auto dacRun() -> void;
   auto step(uint clocks) -> void;
   auto power() -> void;
@@ -13,7 +14,47 @@ struct APU : Thread, IO {
     uint13 clock;
   } s;
 
+  struct DMA {
+    auto run() -> void;
+
+    struct State {
+      uint clock;
+      uint20 source;
+      uint20 length;
+    } s;
+
+    struct Registers {
+      //$004a-$004c  SDMA_SRC
+      uint20 source;
+
+      //$004e-$0050  SDMA_LEN
+      uint20 length;
+
+      //$0052  SDMA_CTRL
+      uint2 rate;
+      uint1 unknown;
+      uint1 loop;
+      uint1 target;
+      uint1 direction;
+      uint1 enable;
+    } r;
+  } dma;
+
   struct Registers {
+    //$004a-$004c  SDMA_SRC
+    uint20 dmaSource;
+
+    //$004e-$0050  SDMA_LEN
+    uint20 dmaLength;
+
+    //$0052  SDMA_CTRL
+    uint2 dmaRate;
+    uint1 dmaUnknown;
+    uint1 dmaLoop;
+    uint1 dmaTarget;
+    uint1 dmaDirection;
+    uint1 dmaEnable;
+
     //$008f  SND_WAVE_BASE
     uint8 waveBase;
 
@@ -23,21 +64,13 @@ struct APU : Thread, IO {
     uint1 headphoneEnable;
   } r;
 
-  struct Channel {
-    Channel(uint id);
-    auto sample(uint5 index) -> uint4;
-
-    const uint id;
+  struct Channel1 {
+    auto run() -> void;
 
     struct Output {
-      int16 left;
-      int16 right;
+      uint8 left;
+      uint8 right;
     } o;
-  };
-
-  struct Channel0 : Channel {
-    Channel0();
-    auto run() -> void;
 
     struct State {
       uint11 period;
@@ -45,21 +78,25 @@ struct APU : Thread, IO {
     } s;
 
     struct Registers {
-      //$0080-0081  SND_CH0_PITCH
+      //$0080-0081  SND_CH1_PITCH
       uint11 pitch;
 
-      //$0088  SND_CH0_VOL
+      //$0088  SND_CH1_VOL
       uint4 volumeLeft;
       uint4 volumeRight;
 
       //$0090  SND_CTRL
       uint1 enable;
     } r;
-  } channel0;
+  } channel1;
 
-  struct Channel1 : Channel {
-    Channel1();
+  struct Channel2 {
     auto run() -> void;
+
+    struct Output {
+      uint8 left;
+      uint8 right;
+    } o;
 
     struct State {
       uint11 period;
@@ -67,10 +104,10 @@ struct APU : Thread, IO {
     } s;
 
     struct Registers {
-      //$0082-0083  SND_CH1_PITCH
+      //$0082-0083  SND_CH2_PITCH
       uint11 pitch;
 
-      //$0089  SND_CH1_VOL
+      //$0089  SND_CH2_VOL
       uint4 volumeLeft;
       uint4 volumeRight;
 
@@ -78,16 +115,20 @@ struct APU : Thread, IO {
       uint1 enable;
       uint1 voice;
 
-      //$0092  SND_VOICE_CTRL
+      //$0094  SND_VOICE_CTRL
       uint2 voiceEnableLeft;
       uint2 voiceEnableRight;
     } r;
-  } channel1;
+  } channel2;
 
-  struct Channel2 : Channel {
-    Channel2();
+  struct Channel3 {
     auto sweep() -> void;
     auto run() -> void;
+
+    struct Output {
+      uint8 left;
+      uint8 right;
+    } o;
 
     struct State {
       uint11 period;
@@ -97,10 +138,10 @@ struct APU : Thread, IO {
     } s;
 
     struct Registers {
-      //$0084-0085  SND_CH2_PITCH
+      //$0084-0085  SND_CH3_PITCH
       uint11 pitch;
 
-      //$008a  SND_CH2_VOL
+      //$008a  SND_CH3_VOL
       uint4 volumeLeft;
       uint4 volumeRight;
 
@@ -114,12 +155,16 @@ struct APU : Thread, IO {
       uint1 enable;
       uint1 sweep;
     } r;
-  } channel2;
+  } channel3;
 
-  struct Channel3 : Channel {
-    Channel3();
+  struct Channel4 {
     auto noiseSample() -> uint4;
     auto run() -> void;
+
+    struct Output {
+      uint8 left;
+      uint8 right;
+    } o;
 
     struct State {
       uint11 period;
@@ -130,10 +175,10 @@ struct APU : Thread, IO {
     } s;
 
     struct Registers {
-      //$0086-0087  SND_CH3_PITCH
+      //$0086-0087  SND_CH4_PITCH
       uint11 pitch;
 
-      //$008b  SND_CH3_VOL
+      //$008b  SND_CH4_VOL
       uint4 volumeLeft;
       uint4 volumeRight;
 
@@ -146,14 +191,19 @@ struct APU : Thread, IO {
       uint1 enable;
       uint1 noise;
     } r;
-  } channel3;
+  } channel4;
 
-  struct Channel4 : Channel {
-    Channel4();
+  struct Channel5 {
     auto run() -> void;
 
+    struct Output {
+      uint11 left;
+      uint11 right;
+    } o;
+
     struct State {
-      int8 data;
+      uint clock;
+      uint8 data;
     } s;
 
     struct Registers {
@@ -168,7 +218,7 @@ struct APU : Thread, IO {
       uint1 leftEnable;
       uint1 rightEnable;
     } r;
-  } channel4;
+  } channel5;
 };
 
 extern APU apu;

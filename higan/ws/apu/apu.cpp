@@ -4,56 +4,54 @@ namespace WonderSwan {
 
 APU apu;
 #include "io.cpp"
-#include "channel.cpp"
-#include "channel0.cpp"
+#include "dma.cpp"
 #include "channel1.cpp"
 #include "channel2.cpp"
 #include "channel3.cpp"
 #include "channel4.cpp"
+#include "channel5.cpp"
 
 auto APU::Enter() -> void {
   while(true) scheduler.synchronize(), apu.main();
 }
 
 auto APU::main() -> void {
-  channel0.run();
+  dma.run();
   channel1.run();
   channel2.run();
   channel3.run();
-
-  if(s.clock.bits(0,12) == 0) {
-    channel2.sweep();
-  }
-
-  if(s.clock.bits(0,6) == 0) {
-    channel4.run();
-    dacRun();
-  }
-
+  channel4.run();
+  channel5.run();
+  if(s.clock.bits(0,12) == 0) channel3.sweep();
+  if(s.clock.bits(0, 6) == 0) dacRun();
   s.clock++;
   step(1);
 }
 
+auto APU::sample(uint channel, uint5 index) -> uint4 {
+  uint8 data = iram.read((r.waveBase << 6) + (--channel << 4) + (index >> 1));
+  if(index.bit(0) == 0) return data.bits(0,3);
+  if(index.bit(0) == 1) return data.bits(4,7);
+}
+
 auto APU::dacRun() -> void {
   int left = 0;
-  if(channel0.r.enable) left += channel0.o.left;
   if(channel1.r.enable) left += channel1.o.left;
   if(channel2.r.enable) left += channel2.o.left;
   if(channel3.r.enable) left += channel3.o.left;
-  left = (left >> r.speakerShift) << 5;
   if(channel4.r.enable) left += channel4.o.left;
-  left = sclamp<16>(left << 3);
+  if(channel5.r.enable) left += (int11)channel5.o.left >> 3;
+  left = sclamp<16>(left << 5);
 
   int right = 0;
-  if(channel0.r.enable) right += channel0.o.right;
   if(channel1.r.enable) right += channel1.o.right;
   if(channel2.r.enable) right += channel2.o.right;
   if(channel3.r.enable) right += channel3.o.right;
-  right = (right >> r.speakerShift) << 5;
   if(channel4.r.enable) right += channel4.o.right;
-  right = sclamp<16>(right << 3);
+  if(channel5.r.enable) right += (int11)channel5.o.right >> 3;
+  right = sclamp<16>(right << 5);
 
-  if(!r.speakerEnable) {
+  if(!r.headphoneEnable) {
     left = 0;
     right = 0;
   }
@@ -69,8 +67,11 @@ auto APU::step(uint clocks) -> void {
 auto APU::power() -> void {
   create(APU::Enter, 3'072'000);
 
-  for(uint n = 0x006a; n <= 0x006b; n++) iomap[n] = this;
-  for(uint n = 0x0080; n <= 0x0094; n++) iomap[n] = this;
+  bus.map(this, 0x004a, 0x004c);
+  bus.map(this, 0x004e, 0x0050);
+  bus.map(this, 0x0052);
+  bus.map(this, 0x006a, 0x006b);
+  bus.map(this, 0x0080, 0x0095);
 
   s.clock = 0;
   r.waveBase = 0;
@@ -78,14 +79,17 @@ auto APU::power() -> void {
   r.speakerShift = 0;
   r.headphoneEnable = 0;
 
-  channel0.o.left = 0;
-  channel0.o.right = 0;
-  channel0.s.period = 0;
-  channel0.s.sampleOffset = 0;
-  channel0.r.pitch = 0;
-  channel0.r.volumeLeft = 0;
-  channel0.r.volumeRight = 0;
-  channel0.r.enable = 0;
+  dma.s.clock = 0;
+  dma.s.source = 0;
+  dma.s.length = 0;
+  dma.r.source = 0;
+  dma.r.length = 0;
+  dma.r.rate = 0;
+  dma.r.unknown = 0;
+  dma.r.loop = 0;
+  dma.r.target = 0;
+  dma.r.direction = 0;
+  dma.r.enable = 0;
 
   channel1.o.left = 0;
   channel1.o.right = 0;
@@ -95,48 +99,58 @@ auto APU::power() -> void {
   channel1.r.volumeLeft = 0;
   channel1.r.volumeRight = 0;
   channel1.r.enable = 0;
-  channel1.r.voice = 0;
-  channel1.r.voiceEnableLeft = 0;
-  channel1.r.voiceEnableRight = 0;
 
   channel2.o.left = 0;
   channel2.o.right = 0;
   channel2.s.period = 0;
   channel2.s.sampleOffset = 0;
-  channel2.s.sweepCounter = 0;
   channel2.r.pitch = 0;
   channel2.r.volumeLeft = 0;
   channel2.r.volumeRight = 0;
-  channel2.r.sweepValue = 0;
-  channel2.r.sweepTime = 0;
   channel2.r.enable = 0;
-  channel2.r.sweep = 0;
+  channel2.r.voice = 0;
+  channel2.r.voiceEnableLeft = 0;
+  channel2.r.voiceEnableRight = 0;
 
   channel3.o.left = 0;
   channel3.o.right = 0;
   channel3.s.period = 0;
   channel3.s.sampleOffset = 0;
-  channel3.s.noiseOutput = 0;
-  channel3.s.noiseLFSR = 0;
+  channel3.s.sweepCounter = 0;
   channel3.r.pitch = 0;
   channel3.r.volumeLeft = 0;
   channel3.r.volumeRight = 0;
-  channel3.r.noiseMode = 0;
-  channel3.r.noiseReset = 0;
-  channel3.r.noiseUpdate = 0;
+  channel3.r.sweepValue = 0;
+  channel3.r.sweepTime = 0;
   channel3.r.enable = 0;
-  channel3.r.noise = 0;
+  channel3.r.sweep = 0;
 
   channel4.o.left = 0;
   channel4.o.right = 0;
-  channel4.s.data = 0;
-  channel4.r.volume = 0;
-  channel4.r.scale = 0;
-  channel4.r.speed = 0;
+  channel4.s.period = 0;
+  channel4.s.sampleOffset = 0;
+  channel4.s.noiseOutput = 0;
+  channel4.s.noiseLFSR = 0;
+  channel4.r.pitch = 0;
+  channel4.r.volumeLeft = 0;
+  channel4.r.volumeRight = 0;
+  channel4.r.noiseMode = 0;
+  channel4.r.noiseReset = 0;
+  channel4.r.noiseUpdate = 0;
   channel4.r.enable = 0;
-  channel4.r.unknown = 0;
-  channel4.r.leftEnable = 0;
-  channel4.r.rightEnable = 0;
+  channel4.r.noise = 0;
+
+  channel5.o.left = 0;
+  channel5.o.right = 0;
+  channel5.s.clock = 0;
+  channel5.s.data = 0;
+  channel5.r.volume = 0;
+  channel5.r.scale = 0;
+  channel5.r.speed = 0;
+  channel5.r.enable = 0;
+  channel5.r.unknown = 0;
+  channel5.r.leftEnable = 0;
+  channel5.r.rightEnable = 0;
 }
 
 }

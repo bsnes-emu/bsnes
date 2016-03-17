@@ -37,27 +37,27 @@ auto CPU::write(uint20 addr, uint8 data) -> void {
 }
 
 auto CPU::in(uint16 port) -> uint8 {
-  return iomap[port]->portRead(port);
+  return bus.portRead(port);
 }
 
 auto CPU::out(uint16 port, uint8 data) -> void {
-  return iomap[port]->portWrite(port, data);
+  return bus.portWrite(port, data);
 }
 
 auto CPU::power() -> void {
   V30MZ::power();
   create(CPU::Enter, 3'072'000);
 
-  iomap[0x00a0] = this;
-  iomap[0x00b0] = this;
-  iomap[0x00b2] = this;
-  iomap[0x00b4] = this;
-  iomap[0x00b5] = this;
-  iomap[0x00b6] = this;
+  bus.map(this, 0x00a0);
+  bus.map(this, 0x00b0);
+  bus.map(this, 0x00b2);
+  bus.map(this, 0x00b4);
+  bus.map(this, 0x00b5);
+  bus.map(this, 0x00b6);
 
   if(system.model() != Model::WonderSwan) {
-    for(uint p = 0x0040; p <= 0x0049; p++) iomap[p] = this;
-    iomap[0x0062] = this;
+    bus.map(this, 0x0040, 0x0049);
+    bus.map(this, 0x0062);
   }
 
   r.dmaSource = 0;

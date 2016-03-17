@@ -13,10 +13,12 @@ struct PPU : Thread, IO {
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
   //render-sprite.cpp
+  auto renderSpriteFetch() -> void;
   auto renderSpriteDecode() -> void;
 
   //render-mono.cpp
   auto renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2;
+  auto renderMonoPalette(uint4 palette, uint2 index) -> uint12;
   auto renderMonoBack() -> void;
   auto renderMonoScreenOne() -> void;
   auto renderMonoScreenTwo() -> void;
@@ -24,6 +26,7 @@ struct PPU : Thread, IO {
 
   //render-color.cpp
   auto renderColorFetch(uint16 offset, uint3 y, uint3 x) -> uint4;
+  auto renderColorPalette(uint4 palette, uint4 index) -> uint12;
   auto renderColorBack() -> void;
   auto renderColorScreenOne() -> void;
   auto renderColorScreenTwo() -> void;
@@ -31,6 +34,7 @@ struct PPU : Thread, IO {
 
   //state
   uint12 output[224 * 144];
+  uint32 oam[128];
 
   struct Status {
     uint vclk;

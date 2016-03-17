@@ -50,7 +50,7 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
-  IO::power();
+  bus.power();
   iram.power();
   eeprom.power();
   cpu.power();
@@ -59,8 +59,8 @@ auto System::power() -> void {
   cartridge.power();
   scheduler.power();
 
-  iomap[0x0060] = this;
-  for(uint n = 0x00ba; n <= 0x00be; n++) iomap[n] = this;
+  bus.map(this, 0x0060);
+  bus.map(this, 0x00ba, 0x00be);
 
   r.depth = 0;
   r.color = 0;

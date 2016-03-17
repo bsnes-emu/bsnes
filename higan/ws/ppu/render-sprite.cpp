@@ -1,3 +1,10 @@
+auto PPU::renderSpriteFetch() -> void {
+  uint16 spriteBase = r.spriteBase.bits(0, 4 + system.depth()) << 9;
+  for(auto spriteIndex : range(128)) {
+    oam[spriteIndex] = iram.read(spriteBase + (spriteIndex << 2), Long);
+  }
+}
+
 auto PPU::renderSpriteDecode() -> void {
   sprites.reset();
   sprites.reserve(32);
@@ -9,7 +16,7 @@ auto PPU::renderSpriteDecode() -> void {
   uint7 spriteIndex = r.spriteFirst;
   uint8 spriteCount = min(128, (uint)r.spriteCount);
   while(spriteCount--) {
-    uint32 attributes = iram.read(spriteBase + (spriteIndex++ << 2), Long);
+    uint32 attributes = oam[spriteIndex++];
 
     Sprite sprite;
     sprite.x = attributes.bits(24,31);

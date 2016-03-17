@@ -119,7 +119,7 @@ auto V30MZ::alRcl(Size size, uint16 x, uint5 y) -> uint16 {
   uint16 result = x;
   for(uint n = 0; n < y; n++) {
     bool carry = result & sign;
-    result = (result << 1) | carry;
+    result = (result << 1) | r.f.c;
     r.f.c = carry;
   }
   r.f.v = (x ^ result) & sign;
@@ -130,7 +130,7 @@ auto V30MZ::alRcr(Size size, uint16 x, uint5 y) -> uint16 {
   uint16 result = x;
   for(uint n = 0; n < y; n++) {
     bool carry = result & 1;
-    result = (carry ? sign : 0) | (result >> 1);
+    result = (r.f.c ? sign : 0) | (result >> 1);
     r.f.c = carry;
   }
   r.f.v = (x ^ result) & sign;

@@ -18,7 +18,7 @@ namespace Processor {
 #include "disassembler.cpp"
 
 auto V30MZ::debug(string text) -> void {
-  print(text, "\n");
+//print(text, "\n");
 }
 
 auto V30MZ::power() -> void {

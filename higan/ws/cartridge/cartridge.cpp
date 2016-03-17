@@ -60,7 +60,7 @@ auto Cartridge::unload() -> void {
 auto Cartridge::power() -> void {
   eeprom.power();
 
-  for(uint n = 0x00c0; n <= 0x00c8; n++) iomap[n] = this;
+  bus.map(this, 0x00c0, 0x00c8);
 
   r.bank_rom0 = 0xff;
   r.bank_rom1 = 0xff;

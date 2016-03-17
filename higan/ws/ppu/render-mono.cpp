@@ -15,6 +15,12 @@ auto PPU::renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2 {
   return color;
 }
 
+auto PPU::renderMonoPalette(uint4 palette, uint2 index) -> uint12 {
+  uint3 paletteColor = r.palette[palette].color[index];
+  uint4 poolColor = 15 - r.pool[paletteColor];
+  return poolColor << 0 | poolColor << 4 | poolColor << 8;
+}
+
 auto PPU::renderMonoBack() -> void {
   uint4 poolColor = 15 - r.pool[r.backColor.bits(0,2)];
   pixel = {Pixel::Source::Back, poolColor << 0 | poolColor << 4 | poolColor << 8};
@@ -37,9 +43,7 @@ auto PPU::renderMonoScreenOne() -> void {
   uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
   if(tile.bit(11) && tileColor == 0) return;
 
-  uint3 paletteColor = r.palette[tile.bits(9,12)].color[tileColor];
-  uint4 poolColor = 15 - r.pool[paletteColor];
-  pixel = {Pixel::Source::ScreenOne, poolColor << 0 | poolColor << 4 | poolColor << 8};
+  pixel = {Pixel::Source::ScreenOne, renderMonoPalette(tile.bits(9,12), tileColor)};
 }
 
 auto PPU::renderMonoScreenTwo() -> void {
@@ -50,8 +54,8 @@ auto PPU::renderMonoScreenTwo() -> void {
   windowInside ^= r.screenTwoWindowInvert;
   if(r.screenTwoWindowEnable && !windowInside) return;
 
-  uint8 scrollX = status.hclk + r.scrollTwoX;
   uint8 scrollY = status.vclk + r.scrollTwoY;
+  uint8 scrollX = status.hclk + r.scrollTwoX;
 
   uint14 tilemapOffset = r.screenTwoMapBase.bits(0,2) << 11;
   tilemapOffset += (scrollY >> 3) << 6;
@@ -64,9 +68,7 @@ auto PPU::renderMonoScreenTwo() -> void {
   uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
   if(tile.bit(11) && tileColor == 0) return;
 
-  uint3 paletteColor = r.palette[tile.bits(9,12)].color[tileColor];
-  uint4 poolColor = 15 - r.pool[paletteColor];
-  pixel = {Pixel::Source::ScreenTwo, poolColor << 0 | poolColor << 4 | poolColor << 8};
+  pixel = {Pixel::Source::ScreenTwo, renderMonoPalette(tile.bits(9,12), tileColor)};
 }
 
 auto PPU::renderMonoSprite() -> void {
@@ -85,9 +87,7 @@ auto PPU::renderMonoSprite() -> void {
     if(sprite.palette.bit(2) && tileColor == 0) continue;
     if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;
 
-    uint3 paletteColor = r.palette[sprite.palette].color[tileColor];
-    uint4 poolColor = 15 - r.pool[paletteColor];
-    pixel = {Pixel::Source::Sprite, poolColor << 0 | poolColor << 4 | poolColor << 8};
+    pixel = {Pixel::Source::Sprite, renderMonoPalette(sprite.palette, tileColor)};
     break;
   }
 }

@@ -1,2 +1,2 @@
 system name:WonderSwan
-  eeprom name=internal.rom size=128
+  eeprom name=internal.ram size=128

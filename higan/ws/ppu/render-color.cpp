@@ -17,6 +17,10 @@ auto PPU::renderColorFetch(uint16 offset, uint3 y, uint3 x) -> uint4 {
   return color;
 }
 
+auto PPU::renderColorPalette(uint4 palette, uint4 index) -> uint12 {
+  return iram.read(0xfe00 + (palette << 5) + (index << 1), Word);
+}
+
 auto PPU::renderColorBack() -> void {
   uint12 color = iram.read(0xfe00 + (r.backColor << 1), Word);
   pixel = {Pixel::Source::Back, color};
@@ -39,8 +43,7 @@ auto PPU::renderColorScreenOne() -> void {
   uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
   if(tileColor == 0) return;
 
-  uint12 color = iram.read(0xfe00 + (tile.bits(9, 12) << 5) + (tileColor << 1), Word);
-  pixel = {Pixel::Source::ScreenOne, color};
+  pixel = {Pixel::Source::ScreenOne, renderColorPalette(tile.bits(9, 12), tileColor)};
 }
 
 auto PPU::renderColorScreenTwo() -> void {
@@ -65,8 +68,7 @@ auto PPU::renderColorScreenTwo() -> void {
   uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
   if(tileColor == 0) return;
 
-  uint12 color = iram.read(0xfe00 + (tile.bits(9,12) << 5) + (tileColor << 1), Word);
-  pixel = {Pixel::Source::ScreenTwo, color};
+  pixel = {Pixel::Source::ScreenTwo, renderColorPalette(tile.bits(9, 12), tileColor)};
 }
 
 auto PPU::renderColorSprite() -> void {
@@ -85,8 +87,7 @@ auto PPU::renderColorSprite() -> void {
     if(tileColor == 0) continue;
     if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;
 
-    uint12 color = iram.read(0xfe00 + (sprite.palette << 5) + (tileColor << 1), Word);
-    pixel = {Pixel::Source::Sprite, color};
+    pixel = {Pixel::Source::Sprite, renderColorPalette(sprite.palette, tileColor)};
     break;
   }
 }
