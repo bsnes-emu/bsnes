@@ -56,6 +56,8 @@ private:
 };
 
 struct Settings {
+  bool blurEmulation = true;
+  bool colorEmulation = true;
 };
 
 extern Interface* interface;

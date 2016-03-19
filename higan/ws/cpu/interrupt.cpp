@@ -1,10 +1,12 @@
 auto CPU::poll() -> void {
-  if(!V30MZ::r.f.i || !state.poll) return;
+  if(!state.poll) return;
 
   for(int n = 7; n >= 0; n--) {
     if(!r.interruptEnable.bit(n)) continue;
     if(!r.interruptStatus.bit(n)) continue;
-    return interrupt(r.interruptBase + n);
+    state.halt = false;
+    if(V30MZ::r.f.i) interrupt(r.interruptBase + n);
+    return;
   }
 }
 

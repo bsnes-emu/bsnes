@@ -11,7 +11,7 @@ struct APU : Thread, IO {
   auto portWrite(uint16 addr, uint8 data) -> void;
 
   struct State {
-    uint13 clock;
+    uint13 sweepClock;
   } s;
 
   struct DMA {
@@ -146,7 +146,7 @@ struct APU : Thread, IO {
       uint4 volumeRight;
 
       //$008c  SND_SWEEP_VALUE
-      uint8 sweepValue;
+      int8 sweepValue;
 
       //$008d  SND_SWEEP_TIME
       uint5 sweepTime;
@@ -197,13 +197,13 @@ struct APU : Thread, IO {
     auto run() -> void;
 
     struct Output {
-      uint11 left;
-      uint11 right;
+      int11 left;
+      int11 right;
     } o;
 
     struct State {
       uint clock;
-      uint8 data;
+      int8 data;
     } s;
 
     struct Registers {

@@ -31,6 +31,7 @@ struct Cartridge : IO {
   struct Information {
     string manifest;
     string title;
+    bool orientation;  //0 = horizontal; 1 = vertical
     string sha256;
   } information;
 };

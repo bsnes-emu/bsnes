@@ -40,6 +40,7 @@ auto Cartridge::load() -> void {
   }
 
   information.title = document["information/title"].text();
+  information.orientation = document["information/orientation"].text() == "vertical";
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
 }
 

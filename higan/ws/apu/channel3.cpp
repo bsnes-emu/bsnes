@@ -1,7 +1,7 @@
 auto APU::Channel3::sweep() -> void {
   if(r.sweep && --s.sweepCounter < 0) {
     s.sweepCounter = r.sweepTime;
-    r.pitch += r.sweepTime;
+    r.pitch += r.sweepValue;
   }
 }
 

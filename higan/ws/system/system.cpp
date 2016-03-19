@@ -21,7 +21,6 @@ auto System::term() -> void {
 
 auto System::load(Model model) -> void {
   _model = model;
-  _orientation = 0;
 
   interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
   auto document = BML::unserialize(information.manifest);
@@ -37,6 +36,7 @@ auto System::load(Model model) -> void {
 
   cartridge.load();
   _loaded = true;
+  _orientation = cartridge.information.orientation;
 }
 
 auto System::unload() -> void {
@@ -84,6 +84,13 @@ auto System::run() -> void {
   keypad.a = interface->inputPoll(_orientation, 0, 9);
   keypad.start = interface->inputPoll(_orientation, 0, 10);
   keypad.rotate = interface->inputPoll(_orientation, 0, 11);
+
+  if(keypad.y1 || keypad.y2 || keypad.y3 || keypad.y4
+  || keypad.x1 || keypad.x2 || keypad.x3 || keypad.x4
+  || keypad.b || keypad.a || keypad.start
+  ) {
+    cpu.raise(CPU::Interrupt::Input);
+  }
 
   if(!rotate && keypad.rotate) {
     _orientation = !_orientation;

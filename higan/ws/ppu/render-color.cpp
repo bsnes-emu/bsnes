@@ -22,17 +22,17 @@ auto PPU::renderColorPalette(uint4 palette, uint4 index) -> uint12 {
 }
 
 auto PPU::renderColorBack() -> void {
-  uint12 color = iram.read(0xfe00 + (r.backColor << 1), Word);
+  uint12 color = iram.read(0xfe00 + (l.backColor << 1), Word);
   pixel = {Pixel::Source::Back, color};
 }
 
 auto PPU::renderColorScreenOne() -> void {
-  if(!r.screenOneEnable) return;
+  if(!l.screenOneEnable) return;
 
-  uint8 scrollY = status.vclk + r.scrollOneY;
-  uint8 scrollX = status.hclk + r.scrollOneX;
+  uint8 scrollY = s.vclk + l.scrollOneY;
+  uint8 scrollX = s.hclk + l.scrollOneX;
 
-  uint16 tilemapOffset = r.screenOneMapBase << 11;
+  uint16 tilemapOffset = l.screenOneMapBase << 11;
   tilemapOffset += (scrollY >> 3) << 6;
   tilemapOffset += (scrollX >> 3) << 1;
 
@@ -47,17 +47,17 @@ auto PPU::renderColorScreenOne() -> void {
 }
 
 auto PPU::renderColorScreenTwo() -> void {
-  if(!r.screenTwoEnable) return;
+  if(!l.screenTwoEnable) return;
 
-  bool windowInside = status.vclk >= r.screenTwoWindowY0 && status.vclk <= r.screenTwoWindowY1
-                   && status.hclk >= r.screenTwoWindowX0 && status.hclk <= r.screenTwoWindowX1;
-  windowInside ^= r.screenTwoWindowInvert;
-  if(r.screenTwoWindowEnable && !windowInside) return;
+  bool windowInside = s.vclk >= l.screenTwoWindowY0 && s.vclk <= l.screenTwoWindowY1
+                   && s.hclk >= l.screenTwoWindowX0 && s.hclk <= l.screenTwoWindowX1;
+  windowInside ^= l.screenTwoWindowInvert;
+  if(l.screenTwoWindowEnable && !windowInside) return;
 
-  uint8 scrollY = status.vclk + r.scrollTwoY;
-  uint8 scrollX = status.hclk + r.scrollTwoX;
+  uint8 scrollY = s.vclk + l.scrollTwoY;
+  uint8 scrollX = s.hclk + l.scrollTwoX;
 
-  uint16 tilemapOffset = r.screenTwoMapBase << 11;
+  uint16 tilemapOffset = l.screenTwoMapBase << 11;
   tilemapOffset += (scrollY >> 3) << 6;
   tilemapOffset += (scrollX >> 3) << 1;
 
@@ -72,17 +72,16 @@ auto PPU::renderColorScreenTwo() -> void {
 }
 
 auto PPU::renderColorSprite() -> void {
-  if(!r.spriteEnable) return;
+  if(!l.spriteEnable) return;
 
-  bool windowInside = status.hclk >= r.spriteWindowX0 && status.hclk <= r.spriteWindowX1;
+  bool windowInside = s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowX1;
   for(auto& sprite : sprites) {
-    if(r.spriteWindowEnable && sprite.window && !windowInside) continue;
-    if(status.hclk < sprite.x) continue;
-    if(status.hclk > sprite.x + 7) continue;
+    if(l.spriteWindowEnable && sprite.window == windowInside) continue;
+    if((uint8)(s.hclk - sprite.x) > 7) continue;
 
     uint16 tileOffset = 0x4000 + (sprite.tile << 5);
-    uint3 tileY = (uint8)(status.vclk - sprite.y) ^ (sprite.vflip ? 7 : 0);
-    uint3 tileX = (uint8)(status.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
+    uint3 tileY = (uint8)(s.vclk - sprite.y) ^ (sprite.vflip ? 7 : 0);
+    uint3 tileX = (uint8)(s.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
     uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
     if(tileColor == 0) continue;
     if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;

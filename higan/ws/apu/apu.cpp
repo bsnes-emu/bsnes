@@ -22,9 +22,8 @@ auto APU::main() -> void {
   channel3.run();
   channel4.run();
   channel5.run();
-  if(s.clock.bits(0,12) == 0) channel3.sweep();
-  if(s.clock.bits(0, 6) == 0) dacRun();
-  s.clock++;
+  dacRun();
+  if(++s.sweepClock == 0) channel3.sweep();
   step(1);
 }
 
@@ -40,7 +39,7 @@ auto APU::dacRun() -> void {
   if(channel2.r.enable) left += channel2.o.left;
   if(channel3.r.enable) left += channel3.o.left;
   if(channel4.r.enable) left += channel4.o.left;
-  if(channel5.r.enable) left += (int11)channel5.o.left >> 3;
+  if(channel5.r.enable) left += channel5.o.left;
   left = sclamp<16>(left << 5);
 
   int right = 0;
@@ -48,7 +47,7 @@ auto APU::dacRun() -> void {
   if(channel2.r.enable) right += channel2.o.right;
   if(channel3.r.enable) right += channel3.o.right;
   if(channel4.r.enable) right += channel4.o.right;
-  if(channel5.r.enable) right += (int11)channel5.o.right >> 3;
+  if(channel5.r.enable) right += channel5.o.right;
   right = sclamp<16>(right << 5);
 
   if(!r.headphoneEnable) {
@@ -73,7 +72,7 @@ auto APU::power() -> void {
   bus.map(this, 0x006a, 0x006b);
   bus.map(this, 0x0080, 0x0095);
 
-  s.clock = 0;
+  s.sweepClock = 0;
   r.waveBase = 0;
   r.speakerEnable = 0;
   r.speakerShift = 0;

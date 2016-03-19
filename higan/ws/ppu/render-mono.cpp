@@ -22,17 +22,17 @@ auto PPU::renderMonoPalette(uint4 palette, uint2 index) -> uint12 {
 }
 
 auto PPU::renderMonoBack() -> void {
-  uint4 poolColor = 15 - r.pool[r.backColor.bits(0,2)];
+  uint4 poolColor = 15 - r.pool[l.backColor.bits(0,2)];
   pixel = {Pixel::Source::Back, poolColor << 0 | poolColor << 4 | poolColor << 8};
 }
 
 auto PPU::renderMonoScreenOne() -> void {
-  if(!r.screenOneEnable) return;
+  if(!l.screenOneEnable) return;
 
-  uint8 scrollY = status.vclk + r.scrollOneY;
-  uint8 scrollX = status.hclk + r.scrollOneX;
+  uint8 scrollY = s.vclk + l.scrollOneY;
+  uint8 scrollX = s.hclk + l.scrollOneX;
 
-  uint14 tilemapOffset = r.screenOneMapBase.bits(0,2) << 11;
+  uint14 tilemapOffset = l.screenOneMapBase.bits(0,2) << 11;
   tilemapOffset += (scrollY >> 3) << 6;
   tilemapOffset += (scrollX >> 3) << 1;
 
@@ -47,17 +47,17 @@ auto PPU::renderMonoScreenOne() -> void {
 }
 
 auto PPU::renderMonoScreenTwo() -> void {
-  if(!r.screenTwoEnable) return;
+  if(!l.screenTwoEnable) return;
 
-  bool windowInside = status.vclk >= r.screenTwoWindowY0 && status.vclk <= r.screenTwoWindowY1
-                   && status.hclk >= r.screenTwoWindowX0 && status.hclk <= r.screenTwoWindowX1;
-  windowInside ^= r.screenTwoWindowInvert;
-  if(r.screenTwoWindowEnable && !windowInside) return;
+  bool windowInside = s.vclk >= l.screenTwoWindowY0 && s.vclk <= l.screenTwoWindowY1
+                   && s.hclk >= l.screenTwoWindowX0 && s.hclk <= l.screenTwoWindowX1;
+  windowInside ^= l.screenTwoWindowInvert;
+  if(l.screenTwoWindowEnable && !windowInside) return;
 
-  uint8 scrollY = status.vclk + r.scrollTwoY;
-  uint8 scrollX = status.hclk + r.scrollTwoX;
+  uint8 scrollY = s.vclk + l.scrollTwoY;
+  uint8 scrollX = s.hclk + l.scrollTwoX;
 
-  uint14 tilemapOffset = r.screenTwoMapBase.bits(0,2) << 11;
+  uint14 tilemapOffset = l.screenTwoMapBase.bits(0,2) << 11;
   tilemapOffset += (scrollY >> 3) << 6;
   tilemapOffset += (scrollX >> 3) << 1;
 
@@ -72,17 +72,16 @@ auto PPU::renderMonoScreenTwo() -> void {
 }
 
 auto PPU::renderMonoSprite() -> void {
-  if(!r.spriteEnable) return;
+  if(!l.spriteEnable) return;
 
-  bool windowInside = status.hclk >= r.spriteWindowX0 && status.hclk <= r.spriteWindowX1;
+  bool windowInside = s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowX1;
   for(auto& sprite : sprites) {
-    if(r.spriteWindowEnable && sprite.window && !windowInside) continue;
-    if(status.hclk < sprite.x) continue;
-    if(status.hclk > sprite.x + 7) continue;
+    if(l.spriteWindowEnable && sprite.window == windowInside) continue;
+    if((uint8)(s.hclk - sprite.x) > 7) continue;
 
     uint14 tileOffset = 0x2000 + (sprite.tile << 4);
-    uint3 tileY = (uint8)(status.vclk - sprite.y) ^ (sprite.vflip ? 7 : 0);
-    uint3 tileX = (uint8)(status.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
+    uint3 tileY = (uint8)(s.vclk - sprite.y) ^ (sprite.vflip ? 7 : 0);
+    uint3 tileX = (uint8)(s.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
     uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
     if(sprite.palette.bit(2) && tileColor == 0) continue;
     if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;
