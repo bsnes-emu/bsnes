@@ -13,9 +13,19 @@ struct System : IO {
   auto unload() -> void;
   auto power() -> void;
   auto run() -> void;
+  auto runToSave() -> void;
+  auto pollKeypad() -> void;
 
+  //io.cpp
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
+
+  //serialization.cpp
+  auto serializeInit() -> void;
+  auto serialize() -> serializer;
+  auto unserialize(serializer&) -> bool;
+  auto serializeAll(serializer&) -> void;
+  auto serialize(serializer&) -> void;
 
   struct Information {
     string manifest;
@@ -42,6 +52,7 @@ privileged:
   bool _loaded = false;
   Model _model = Model::WonderSwan;
   bool _orientation = 0;  //0 = horizontal, 1 = vertical
+  uint _serializeSize = 0;
 };
 
 extern System system;

@@ -4,6 +4,7 @@ namespace WonderSwan {
 
 System system;
 #include "io.cpp"
+#include "serialization.cpp"
 
 auto System::loaded() const -> bool { return _loaded; }
 auto System::model() const -> Model { return _model; }
@@ -14,6 +15,7 @@ auto System::packed() const -> bool { return r.format == 1; }
 auto System::depth() const -> bool { return r.depth == 1; }
 
 auto System::init() -> void {
+  assert(interface != nullptr);
 }
 
 auto System::term() -> void {
@@ -37,6 +39,7 @@ auto System::load(Model model) -> void {
   cartridge.load();
   _loaded = true;
   _orientation = cartridge.information.orientation;
+  serializeInit();
 }
 
 auto System::unload() -> void {
@@ -69,8 +72,18 @@ auto System::power() -> void {
 }
 
 auto System::run() -> void {
-  while(scheduler.enter() != Scheduler::Event::Frame);
+  scheduler.enter();
+  pollKeypad();
+}
 
+auto System::runToSave() -> void {
+  scheduler.synchronize(cpu.thread);
+  scheduler.synchronize(ppu.thread);
+  scheduler.synchronize(apu.thread);
+  scheduler.synchronize(cartridge.thread);
+}
+
+auto System::pollKeypad() -> void {
   bool rotate = keypad.rotate;
   keypad.y1 = interface->inputPoll(_orientation, 0, 0);
   keypad.y2 = interface->inputPoll(_orientation, 0, 1);

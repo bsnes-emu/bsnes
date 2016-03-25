@@ -10,6 +10,7 @@ struct WonderSwanCartridge {
     string ramType;
     uint ramSize;
     bool orientation;  //0 = horizontal; 1 = vertical
+    bool hasRTC;
   } information;
 };
 
@@ -34,10 +35,14 @@ WonderSwanCartridge::WonderSwanCartridge(string location, uint8_t* data, uint si
 
   information.orientation = metadata[12] & 1;
 
+  information.hasRTC = metadata[13] & 1;
+
   manifest.append("board\n");
   manifest.append("  rom name=program.rom size=0x", hex(size), "\n");
   if(information.ramType && information.ramSize)
   manifest.append("  ram name=save.ram type=", information.ramType, " size=0x", hex(information.ramSize), "\n");
+  if(information.hasRTC)
+  manifest.append("  rtc name=rtc.ram size=16\n");
   manifest.append("\n");
   manifest.append("information\n");
   manifest.append("  title:       ", prefixname(location), "\n");

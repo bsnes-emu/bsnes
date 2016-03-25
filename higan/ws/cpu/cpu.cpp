@@ -6,6 +6,7 @@ CPU cpu;
 #include "io.cpp"
 #include "interrupt.cpp"
 #include "dma.cpp"
+#include "serialization.cpp"
 
 auto CPU::Enter() -> void {
   while(true) scheduler.synchronize(), cpu.main();
@@ -22,6 +23,9 @@ auto CPU::step(uint clocks) -> void {
 
   apu.clock -= clocks;
   if(apu.clock < 0) co_switch(apu.thread);
+
+  cartridge.clock -= clocks;
+  if(cartridge.clock < 0) co_switch(cartridge.thread);
 }
 
 auto CPU::wait(uint clocks) -> void {
@@ -51,9 +55,7 @@ auto CPU::power() -> void {
   bus.map(this, 0x00a0);
   bus.map(this, 0x00b0);
   bus.map(this, 0x00b2);
-  bus.map(this, 0x00b4);
-  bus.map(this, 0x00b5);
-  bus.map(this, 0x00b6);
+  bus.map(this, 0x00b4, 0x00b6);
 
   if(system.model() != Model::WonderSwan) {
     bus.map(this, 0x0040, 0x0049);

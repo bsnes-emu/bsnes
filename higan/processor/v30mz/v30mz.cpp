@@ -15,6 +15,7 @@ namespace Processor {
 #include "instructions-misc.cpp"
 #include "instructions-move.cpp"
 #include "instructions-string.cpp"
+#include "serialization.cpp"
 #include "disassembler.cpp"
 
 auto V30MZ::debug(string text) -> void {
@@ -53,6 +54,8 @@ auto V30MZ::exec() -> void {
 }
 
 auto V30MZ::interrupt(uint8 vector) -> void {
+  wait(32);
+
   state.halt = false;
   state.poll = true;
   state.prefix = false;
@@ -81,10 +84,7 @@ auto V30MZ::interrupt(uint8 vector) -> void {
 }
 
 auto V30MZ::instruction() -> void {
-  opcode = fetch();
-  wait(1);
-
-  switch(opcode) {
+  switch(opcode = fetch()) {
   case 0x00: return opAddMemReg(Byte);
   case 0x01: return opAddMemReg(Word);
   case 0x02: return opAddRegMem(Byte);

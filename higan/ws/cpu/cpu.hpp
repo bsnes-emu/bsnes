@@ -35,6 +35,9 @@ struct CPU : Processor::V30MZ, Thread, IO {
   //dma.cpp
   auto dmaTransfer() -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct Registers {
     //$0040-0042  DMA_SRC
     uint20 dmaSource;

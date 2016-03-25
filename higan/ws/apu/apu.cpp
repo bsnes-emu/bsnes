@@ -10,6 +10,7 @@ APU apu;
 #include "channel3.cpp"
 #include "channel4.cpp"
 #include "channel5.cpp"
+#include "serialization.cpp"
 
 auto APU::Enter() -> void {
   while(true) scheduler.synchronize(), apu.main();

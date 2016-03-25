@@ -23,7 +23,7 @@ auto PPU::renderMonoPalette(uint4 palette, uint2 index) -> uint12 {
 
 auto PPU::renderMonoBack() -> void {
   uint4 poolColor = 15 - r.pool[l.backColor.bits(0,2)];
-  pixel = {Pixel::Source::Back, poolColor << 0 | poolColor << 4 | poolColor << 8};
+  s.pixel = {Pixel::Source::Back, poolColor << 0 | poolColor << 4 | poolColor << 8};
 }
 
 auto PPU::renderMonoScreenOne() -> void {
@@ -43,7 +43,7 @@ auto PPU::renderMonoScreenOne() -> void {
   uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
   if(tile.bit(11) && tileColor == 0) return;
 
-  pixel = {Pixel::Source::ScreenOne, renderMonoPalette(tile.bits(9,12), tileColor)};
+  s.pixel = {Pixel::Source::ScreenOne, renderMonoPalette(tile.bits(9,12), tileColor)};
 }
 
 auto PPU::renderMonoScreenTwo() -> void {
@@ -68,14 +68,15 @@ auto PPU::renderMonoScreenTwo() -> void {
   uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
   if(tile.bit(11) && tileColor == 0) return;
 
-  pixel = {Pixel::Source::ScreenTwo, renderMonoPalette(tile.bits(9,12), tileColor)};
+  s.pixel = {Pixel::Source::ScreenTwo, renderMonoPalette(tile.bits(9,12), tileColor)};
 }
 
 auto PPU::renderMonoSprite() -> void {
   if(!l.spriteEnable) return;
 
   bool windowInside = s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowX1;
-  for(auto& sprite : sprites) {
+  for(auto index : range(l.spriteCount)) {
+    auto& sprite = l.sprite[index];
     if(l.spriteWindowEnable && sprite.window == windowInside) continue;
     if((uint8)(s.hclk - sprite.x) > 7) continue;
 
@@ -84,9 +85,9 @@ auto PPU::renderMonoSprite() -> void {
     uint3 tileX = (uint8)(s.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
     uint2 tileColor = renderMonoFetch(tileOffset, tileY, tileX);
     if(sprite.palette.bit(2) && tileColor == 0) continue;
-    if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;
+    if(!sprite.priority && s.pixel.source == Pixel::Source::ScreenTwo) continue;
 
-    pixel = {Pixel::Source::Sprite, renderMonoPalette(sprite.palette, tileColor)};
+    s.pixel = {Pixel::Source::Sprite, renderMonoPalette(sprite.palette, tileColor)};
     break;
   }
 }

@@ -58,6 +58,7 @@ namespace WonderSwan {
   #include <ws/cpu/cpu.hpp>
   #include <ws/ppu/ppu.hpp>
   #include <ws/apu/apu.hpp>
+  #include <ws/cheat/cheat.hpp>
 }
 
 #include <ws/interface/interface.hpp>

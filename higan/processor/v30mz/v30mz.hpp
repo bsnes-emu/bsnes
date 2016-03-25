@@ -203,6 +203,9 @@ struct V30MZ {
   auto opLoadString(Size);
   auto opScanString(Size);
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   //disassembler.cpp
   auto disassemble(uint16 cs, uint16 ip, bool registers = true, bool bytes = true) -> string;
 

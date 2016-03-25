@@ -16,6 +16,7 @@ struct ID {
     ROM,
     RAM,
     EEPROM,
+    RTC,
   };
 
   enum : uint {
@@ -46,6 +47,8 @@ struct Interface : Emulator::Interface {
 
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
+
+  auto cheatSet(const lstring&) -> void;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;

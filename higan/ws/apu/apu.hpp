@@ -10,9 +10,22 @@ struct APU : Thread, IO {
   auto portRead(uint16 addr) -> uint8;
   auto portWrite(uint16 addr, uint8 data) -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct State {
     uint13 sweepClock;
   } s;
+
+  struct Registers {
+    //$008f  SND_WAVE_BASE
+    uint8 waveBase;
+
+    //$0091  SND_OUTPUT
+    uint1 speakerEnable;
+    uint2 speakerShift;
+    uint1 headphoneEnable;
+  } r;
 
   struct DMA {
     auto run() -> void;
@@ -39,30 +52,6 @@ struct APU : Thread, IO {
       uint1 enable;
     } r;
   } dma;
-
-  struct Registers {
-    //$004a-$004c  SDMA_SRC
-    uint20 dmaSource;
-
-    //$004e-$0050  SDMA_LEN
-    uint20 dmaLength;
-
-    //$0052  SDMA_CTRL
-    uint2 dmaRate;
-    uint1 dmaUnknown;
-    uint1 dmaLoop;
-    uint1 dmaTarget;
-    uint1 dmaDirection;
-    uint1 dmaEnable;
-
-    //$008f  SND_WAVE_BASE
-    uint8 waveBase;
-
-    //$0091  SND_OUTPUT
-    uint1 speakerEnable;
-    uint2 speakerShift;
-    uint1 headphoneEnable;
-  } r;
 
   struct Channel1 {
     auto run() -> void;

@@ -21,10 +21,12 @@ auto SharpRTC::tick_hour() -> void {
 auto SharpRTC::tick_day() -> void {
   uint days = daysinmonth[month % 12];
 
-  //add one day for leap years
-       if(year % 400 == 0) days++;
-  else if(year % 100 == 0);
-  else if(year %   4 == 0) days++;
+  //add one day in February for leap years
+  if(month == 1) {
+         if(year % 400 == 0) days++;
+    else if(year % 100 == 0);
+    else if(year %   4 == 0) days++;
+  }
 
   if(day++ < days) return;
   day = 1;

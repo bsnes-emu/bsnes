@@ -1,32 +1,35 @@
 auto V30MZ::read(Size size, uint16 segment, uint16 address) -> uint32 {
-  uint32 data = read(segment * 16 + address);
-  if(size == Word) data |= read(segment * 16 + ++address) << 8;
-  if(size == Long) data |= read(segment * 16 + ++address) << 16;
-  if(size == Long) data |= read(segment * 16 + ++address) << 24;
+  uint32 data;
+  if(size >= Byte) data.byte(0) = read(segment * 16 + address++);
+  if(size >= Word) data.byte(1) = read(segment * 16 + address++);
+  if(size >= Long) data.byte(2) = read(segment * 16 + address++);
+  if(size >= Long) data.byte(3) = read(segment * 16 + address++);
   return data;
 }
 
 auto V30MZ::write(Size size, uint16 segment, uint16 address, uint16 data) -> void {
-  write(segment * 16 + address, data);
-  if(size == Word) write(segment * 16 + ++address, data >> 8);
+  if(size >= Byte) write(segment * 16 + address++, data.byte(0));
+  if(size >= Word) write(segment * 16 + address++, data.byte(1));
 }
 
 //
 
 auto V30MZ::in(Size size, uint16 address) -> uint16 {
-  uint16 data = in(address);
-  if(size == Word) data |= in(++address) << 8;
+  uint16 data;
+  if(size >= Byte) data.byte(0) = in(address++);
+  if(size >= Word) data.byte(1) = in(address++);
   return data;
 }
 
 auto V30MZ::out(Size size, uint16 address, uint16 data) -> void {
-  out(address, data);
-  if(size == Word) out(++address, data >> 8);
+  if(size >= Byte) out(address++, data.byte(0));
+  if(size >= Word) out(address++, data.byte(1));
 }
 
 //
 
 auto V30MZ::fetch(Size size) -> uint16 {
+  wait(size);
   uint16 data = read(size, r.cs, r.ip);
   return r.ip += size, data;
 }

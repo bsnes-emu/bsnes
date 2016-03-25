@@ -4,7 +4,39 @@ namespace WonderSwan {
 
 Cartridge cartridge;
 #include "memory.cpp"
+#include "rtc.cpp"
 #include "io.cpp"
+#include "serialization.cpp"
+
+auto Cartridge::Enter() -> void {
+  while(true) scheduler.synchronize(), cartridge.main();
+}
+
+auto Cartridge::main() -> void {
+  if(rtc.data) {
+    rtcTickSecond();
+    rtcCheckAlarm();
+  }
+  step(3'072'000);
+}
+
+auto Cartridge::step(uint clocks) -> void {
+  clock += clocks;
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+}
+
+auto Cartridge::power() -> void {
+  create(Cartridge::Enter, 3'072'000);
+  eeprom.power();
+
+  bus.map(this, 0x00c0, 0x00c8);
+  if(rtc.data) bus.map(this, 0x00ca, 0x00cb);
+
+  r.romBank0 = 0xff;
+  r.romBank1 = 0xff;
+  r.romBank2 = 0xff;
+  r.sramBank = 0xff;
+}
 
 auto Cartridge::load() -> void {
   information.manifest = "";
@@ -39,6 +71,14 @@ auto Cartridge::load() -> void {
     }
   }
 
+  if(auto node = document["board/rtc"]) {
+    rtc.name = node["name"].text();
+    rtc.size = node["size"].natural();
+    rtc.mask = bit::round(rtc.size) - 1;
+    if(rtc.size) rtc.data = new uint8[rtc.mask + 1]();
+    if(rtc.name) interface->loadRequest(ID::RTC, rtc.name, false);
+  }
+
   information.title = document["information/title"].text();
   information.orientation = document["information/orientation"].text() == "vertical";
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
@@ -56,17 +96,12 @@ auto Cartridge::unload() -> void {
   ram.size = 0;
   ram.mask = 0;
   ram.name = "";
-}
 
-auto Cartridge::power() -> void {
-  eeprom.power();
-
-  bus.map(this, 0x00c0, 0x00c8);
-
-  r.bank_rom0 = 0xff;
-  r.bank_rom1 = 0xff;
-  r.bank_rom2 = 0xff;
-  r.bank_sram = 0xff;
+  delete[] rtc.data;
+  rtc.data = nullptr;
+  rtc.size = 0;
+  rtc.mask = 0;
+  rtc.name = "";
 }
 
 }

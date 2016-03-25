@@ -6,16 +6,16 @@ struct PPU : Thread, IO {
   auto scanline() -> void;
   auto frame() -> void;
   auto step(uint clocks) -> void;
-  auto latchRegisters() -> void;
   auto power() -> void;
 
   //io.cpp
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
-  //render-sprite.cpp
-  auto renderSpriteFetch() -> void;
-  auto renderSpriteDecode() -> void;
+  //latch.cpp
+  auto latchRegisters() -> void;
+  auto latchSprites() -> void;
+  auto latchOAM() -> void;
 
   //render-mono.cpp
   auto renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2;
@@ -33,9 +33,15 @@ struct PPU : Thread, IO {
   auto renderColorScreenTwo() -> void;
   auto renderColorSprite() -> void;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   //state
-  uint12 output[224 * 144];
-  uint32 oam[2][128];
+  struct Pixel {
+    enum class Source : uint { Back, ScreenOne, ScreenTwo, Sprite };
+    Source source;
+    uint12 color;
+  };
 
   struct Sprite {
     uint8 x;
@@ -44,24 +50,21 @@ struct PPU : Thread, IO {
     uint1 hflip;
     uint1 priority;
     uint1 window;
-    uint4 palette;  //renderSpriteDecode() always sets bit3
+    uint4 palette;  //latchSprites() always sets bit3
     uint9 tile;
   };
-  vector<Sprite> sprites;
 
-  struct Pixel {
-    enum class Source : uint { Back, ScreenOne, ScreenTwo, Sprite };
-    Source source;
-    uint12 color;
-  } pixel;
+  uint12 output[224 * 144];
 
   struct State {
     bool field;
     uint vclk;
     uint hclk;
+    Pixel pixel;
   } s;
 
   struct Latches {
+    //latchRegisters()
     uint8 backColor;
 
     uint1 screenOneEnable;
@@ -81,14 +84,19 @@ struct PPU : Thread, IO {
     uint8 screenTwoWindowY1;
 
     uint1 spriteEnable;
-    uint6 spriteBase;
-    uint7 spriteFirst;
-    uint8 spriteCount;
     uint1 spriteWindowEnable;
     uint8 spriteWindowX0;
     uint8 spriteWindowY0;
     uint8 spriteWindowX1;
     uint8 spriteWindowY1;
+
+    //latchSprites()
+    Sprite sprite[32];
+    uint spriteCount;
+
+    //latchOAM()
+    uint32 oam[2][128];
+    uint oamCount;
   } l;
 
   struct Registers {

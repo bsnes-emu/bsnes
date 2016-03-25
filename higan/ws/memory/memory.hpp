@@ -5,6 +5,7 @@ struct IO {
 
 struct InternalRAM {
   auto power() -> void;
+  auto serialize(serializer&) -> void;
 
   auto read(uint16 addr, uint size = Byte) -> uint32;
   auto write(uint16 addr, uint8 data) -> void;

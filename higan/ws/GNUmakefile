@@ -3,6 +3,7 @@ processors += v30mz
 objects += ws-interface ws-system ws-scheduler
 objects += ws-memory ws-eeprom ws-cartridge
 objects += ws-cpu ws-ppu ws-apu
+objects += ws-cheat
 
 obj/ws-interface.o: ws/interface/interface.cpp $(call rwildcard,ws/interface/)
 obj/ws-system.o:    ws/system/system.cpp $(call rwildcard,ws/system/)
@@ -13,3 +14,4 @@ obj/ws-cartridge.o: ws/cartridge/cartridge.cpp $(call rwildcard,ws/cartridge/)
 obj/ws-cpu.o:       ws/cpu/cpu.cpp $(call rwildcard,ws/cpu/)
 obj/ws-ppu.o:       ws/ppu/ppu.cpp $(call rwildcard,ws/ppu/)
 obj/ws-apu.o:       ws/apu/apu.cpp $(call rwildcard,ws/apu/)
+obj/ws-cheat.o:     ws/cheat/cheat.cpp $(call rwildcard,ws/cheat/)

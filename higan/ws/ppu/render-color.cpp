@@ -23,7 +23,7 @@ auto PPU::renderColorPalette(uint4 palette, uint4 index) -> uint12 {
 
 auto PPU::renderColorBack() -> void {
   uint12 color = iram.read(0xfe00 + (l.backColor << 1), Word);
-  pixel = {Pixel::Source::Back, color};
+  s.pixel = {Pixel::Source::Back, color};
 }
 
 auto PPU::renderColorScreenOne() -> void {
@@ -43,7 +43,7 @@ auto PPU::renderColorScreenOne() -> void {
   uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
   if(tileColor == 0) return;
 
-  pixel = {Pixel::Source::ScreenOne, renderColorPalette(tile.bits(9, 12), tileColor)};
+  s.pixel = {Pixel::Source::ScreenOne, renderColorPalette(tile.bits(9, 12), tileColor)};
 }
 
 auto PPU::renderColorScreenTwo() -> void {
@@ -68,14 +68,15 @@ auto PPU::renderColorScreenTwo() -> void {
   uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
   if(tileColor == 0) return;
 
-  pixel = {Pixel::Source::ScreenTwo, renderColorPalette(tile.bits(9, 12), tileColor)};
+  s.pixel = {Pixel::Source::ScreenTwo, renderColorPalette(tile.bits(9, 12), tileColor)};
 }
 
 auto PPU::renderColorSprite() -> void {
   if(!l.spriteEnable) return;
 
   bool windowInside = s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowX1;
-  for(auto& sprite : sprites) {
+  for(auto index : range(l.spriteCount)) {
+    auto& sprite = l.sprite[index];
     if(l.spriteWindowEnable && sprite.window == windowInside) continue;
     if((uint8)(s.hclk - sprite.x) > 7) continue;
 
@@ -84,9 +85,9 @@ auto PPU::renderColorSprite() -> void {
     uint3 tileX = (uint8)(s.hclk - sprite.x) ^ (sprite.hflip ? 7 : 0);
     uint4 tileColor = renderColorFetch(tileOffset, tileY, tileX);
     if(tileColor == 0) continue;
-    if(!sprite.priority && pixel.source == Pixel::Source::ScreenTwo) continue;
+    if(!sprite.priority && s.pixel.source == Pixel::Source::ScreenTwo) continue;
 
-    pixel = {Pixel::Source::Sprite, renderColorPalette(sprite.palette, tileColor)};
+    s.pixel = {Pixel::Source::Sprite, renderColorPalette(sprite.palette, tileColor)};
     break;
   }
 }

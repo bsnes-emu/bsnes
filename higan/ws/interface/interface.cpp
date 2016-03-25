@@ -16,8 +16,8 @@ Interface::Interface() {
   information.aspectRatio  = 1.0;
   information.resettable   = false;
 
-  information.capability.states = false;
-  information.capability.cheats = false;
+  information.capability.states = true;
+  information.capability.cheats = true;
 
   media.append({ID::WonderSwan, "WonderSwan", "ws", true});
   media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc", true});
@@ -94,6 +94,7 @@ auto Interface::group(uint id) -> uint {
   case ID::ROM:
   case ID::RAM:
   case ID::EEPROM:
+  case ID::RTC:
     switch(system.model()) {
     case Model::WonderSwan:
       return ID::WonderSwan;
@@ -114,6 +115,7 @@ auto Interface::save() -> void {
   if(auto name = system.eeprom.name()) interface->saveRequest(ID::SystemEEPROM, name);
   if(auto name = cartridge.ram.name) interface->saveRequest(ID::RAM, name);
   if(auto name = cartridge.eeprom.name()) interface->saveRequest(ID::EEPROM, name);
+  if(auto name = cartridge.rtc.name) interface->saveRequest(ID::RTC, name);
 }
 
 auto Interface::load(uint id, const stream& stream) -> void {
@@ -140,6 +142,11 @@ auto Interface::load(uint id, const stream& stream) -> void {
   if(id == ID::EEPROM) {
     stream.read((uint8_t*)cartridge.eeprom.data(), min(cartridge.eeprom.size() * sizeof(uint16), stream.size()));
   }
+
+  if(id == ID::RTC) {
+    stream.read((uint8_t*)cartridge.rtc.data, min(cartridge.rtc.size, stream.size()));
+    cartridge.rtcLoad();
+  }
 }
 
 auto Interface::save(uint id, const stream& stream) -> void {
@@ -153,6 +160,11 @@ auto Interface::save(uint id, const stream& stream) -> void {
 
   if(id == ID::EEPROM) {
     stream.write((uint8_t*)cartridge.eeprom.data(), cartridge.eeprom.size() * sizeof(uint16));
+  }
+
+  if(id == ID::RTC) {
+    cartridge.rtcSave();
+    stream.write((uint8_t*)cartridge.rtc.data, cartridge.rtc.size);
   }
 }
 
@@ -169,11 +181,24 @@ auto Interface::run() -> void {
 }
 
 auto Interface::serialize() -> serializer {
-  return {};
+  system.runToSave();
+  return system.serialize();
 }
 
 auto Interface::unserialize(serializer& s) -> bool {
-  return false;
+  return system.unserialize(s);
+}
+
+auto Interface::cheatSet(const lstring& list) -> void {
+  cheat.reset();
+  for(auto& codeset : list) {
+    lstring codes = codeset.split("+");
+    for(auto& code : codes) {
+      lstring part = code.split("/");
+      if(part.size() == 2) cheat.append(hex(part[0]), hex(part[1]));
+      if(part.size() == 3) cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
+    }
+  }
 }
 
 auto Interface::cap(const string& name) -> bool {

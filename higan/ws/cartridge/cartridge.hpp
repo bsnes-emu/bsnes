@@ -1,22 +1,41 @@
-struct Cartridge : IO {
-  auto load() -> void;
-  auto unload() -> void;
+struct Cartridge : Thread, IO {
+  static auto Enter() -> void;
+  auto main() -> void;
+  auto step(uint clocks) -> void;
   auto power() -> void;
 
+  auto load() -> void;
+  auto unload() -> void;
+
+  //memory.cpp
   auto romRead(uint20 addr) -> uint8;
   auto romWrite(uint20 addr, uint8 data) -> void;
 
   auto ramRead(uint20 addr) -> uint8;
   auto ramWrite(uint20 addr, uint8 data) -> void;
 
+  //rtc.cpp
+  auto rtcLoad() -> void;
+  auto rtcSave() -> void;
+  auto rtcTickSecond() -> void;
+  auto rtcCheckAlarm() -> void;
+  auto rtcStatus() -> uint8;
+  auto rtcCommand(uint8 data) -> void;
+  auto rtcRead() -> uint8;
+  auto rtcWrite(uint8 data) -> void;
+
+  //io.cpp
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
+  //serialization.cpp
+  auto serialize(serializer&) -> void;
+
   struct Registers {
-    uint8 bank_rom0;
-    uint8 bank_rom1;
-    uint8 bank_rom2;
-    uint8 bank_sram;
+    uint8 romBank0;
+    uint8 romBank1;
+    uint8 romBank2;
+    uint8 sramBank;
   } r;
 
   struct Memory {
@@ -24,9 +43,29 @@ struct Cartridge : IO {
     uint size = 0;
     uint mask = 0;
     string name;
-  } rom, ram;
+  };
 
+  struct RTC : Memory {
+    uint8 command;
+    uint4 index;
+
+    uint8 alarm;
+    uint8 alarmHour;
+    uint8 alarmMinute;
+
+    auto year()    -> uint8& { return data[0]; }
+    auto month()   -> uint8& { return data[1]; }
+    auto day()     -> uint8& { return data[2]; }
+    auto weekday() -> uint8& { return data[3]; }
+    auto hour()    -> uint8& { return data[4]; }
+    auto minute()  -> uint8& { return data[5]; }
+    auto second()  -> uint8& { return data[6]; }
+  };
+
+  Memory rom;
+  Memory ram;
   EEPROM eeprom;
+  RTC rtc;
 
   struct Information {
     string manifest;
