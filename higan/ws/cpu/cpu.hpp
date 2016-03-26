@@ -55,8 +55,15 @@ struct CPU : Processor::V30MZ, Thread, IO {
     //$00b0  INT_BASE
     uint8 interruptBase;
 
+    //$00b1  SER_DATA
+    uint8 serialData;
+
     //$00b2  INT_ENABLE
     uint8 interruptEnable;
+
+    //$00b3  SER_STATUS
+    uint1 serialBaudRate;  //0 = 9600; 1 = 38400
+    uint1 serialEnable;
 
     //$00b4  INT_STATUS
     uint8 interruptStatus;

@@ -1,4 +1,4 @@
-enum : unsigned {
+enum : uint {
   OPTYPE_DP = 0,    //dp
   OPTYPE_DPX,       //dp,x
   OPTYPE_DPY,       //dp,y
@@ -22,9 +22,9 @@ enum : unsigned {
   OPTYPE_RELW,      //relw
 };
 
-auto disassemble_opcode(char* output) -> void;
-auto disassemble_opcode(char* output, uint32 addr, bool e, bool m, bool x) -> void;
-auto dreadb(uint32 addr) -> uint8;
-auto dreadw(uint32 addr) -> uint16;
-auto dreadl(uint32 addr) -> uint32;
-auto decode(uint8 offset_type, uint32 addr) -> uint32;
+auto disassemble() -> string;
+auto disassemble(uint24 addr, bool e, bool m, bool x) -> string;
+auto dreadb(uint24 addr) -> uint8;
+auto dreadw(uint24 addr) -> uint16;
+auto dreadl(uint24 addr) -> uint24;
+auto decode(uint8 mode, uint24 addr) -> uint24;

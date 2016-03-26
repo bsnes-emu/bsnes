@@ -1,8 +1,8 @@
-unsigned rom_mask;  //rom_size - 1
-unsigned ram_mask;  //ram_size - 1
+uint rom_mask;  //rom_size - 1
+uint ram_mask;  //ram_size - 1
 
-auto bus_read(unsigned addr) -> uint8;
-auto bus_write(unsigned addr, uint8 data) -> void;
+auto bus_read(uint24 addr, uint8 data = 0x00) -> uint8 override;
+auto bus_write(uint24 addr, uint8 data) -> void override;
 
 auto op_read(uint16 addr) -> uint8;
 alwaysinline auto peekpipe() -> uint8;

@@ -63,8 +63,18 @@ auto CPU::portRead(uint16 addr) -> uint8 {
     return r.interruptBase;
   }
 
+  //SER_DATA
+  if(addr == 0x00b1) return r.serialData;
+
   //INT_ENABLE
   if(addr == 0x00b2) return r.interruptEnable;
+
+  //SER_STATUS
+  if(addr == 0x00b3) return (
+    1                << 2  //hack: always report send buffer as empty
+  | r.serialBaudRate << 6
+  | r.serialEnable   << 7
+  );
 
   //INT_STATUS
   if(addr == 0x00b4) return r.interruptStatus;
@@ -120,10 +130,19 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
     return;
   }
 
+  //SER_DATA
+  if(addr == 0x00b1) r.serialData = data;
+
   //INT_ENABLE
   if(addr == 0x00b2) {
     r.interruptEnable = data;
     return;
+  }
+
+  //SER_STATUS
+  if(addr == 0x00b3) {
+    r.serialBaudRate = data.bit(6);
+    r.serialEnable   = data.bit(7);
   }
 
   //KEYPAD
@@ -131,12 +150,12 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
     r.ypadEnable   = data.bit(4);
     r.xpadEnable   = data.bit(5);
     r.buttonEnable = data.bit(6);
-    return;
   }
 
   //INT_ACK
   if(addr == 0x00b6) {
-    r.interruptStatus &= ~data;
+    //acknowledge only edge-sensitive interrupts
+    r.interruptStatus &= ~(data & 0b11110010);
     return;
   }
 }

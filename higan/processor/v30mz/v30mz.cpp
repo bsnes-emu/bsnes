@@ -32,7 +32,7 @@ auto V30MZ::power() -> void {
   r.cx = 0x0000;
   r.dx = 0x0000;
   r.bx = 0x0000;
-  r.sp = 0x0000;
+  r.sp = 0x2000;
   r.bp = 0x0000;
   r.si = 0x0000;
   r.di = 0x0000;

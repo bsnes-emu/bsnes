@@ -8,7 +8,6 @@ namespace SuperFamicom {
 #include "memory/memory.cpp"
 #include "mmio/mmio.cpp"
 #include "timing/timing.cpp"
-#include "disassembler/disassembler.cpp"
 
 SuperFX superfx;
 

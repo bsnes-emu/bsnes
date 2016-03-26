@@ -1,4 +1,6 @@
 auto APU::serialize(serializer& s) -> void {
+  Thread::serialize(s);
+
   s.integer(this->s.sweepClock);
   s.integer(r.waveBase);
   s.integer(r.speakerEnable);

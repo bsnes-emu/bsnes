@@ -1,275 +1,275 @@
 auto R65816::op_read_const_b(fp op) {
-L rd.l = op_readpc();
+L rd.l = readpc();
   call(op);
 }
 
 auto R65816::op_read_const_w(fp op) {
-  rd.l = op_readpc();
-L rd.h = op_readpc();
+  rd.l = readpc();
+L rd.h = readpc();
   call(op);
 }
 
 auto R65816::op_read_bit_const_b() {
-L rd.l = op_readpc();
+L rd.l = readpc();
   regs.p.z = ((rd.l & regs.a.l) == 0);
 }
 
 auto R65816::op_read_bit_const_w() {
-  rd.l = op_readpc();
-L rd.h = op_readpc();
+  rd.l = readpc();
+L rd.h = readpc();
   regs.p.z = ((rd.w & regs.a.w) == 0);
 }
 
 auto R65816::op_read_addr_b(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-L rd.l = op_readdbr(aa.w);
+  aa.l = readpc();
+  aa.h = readpc();
+L rd.l = readdbr(aa.w);
   call(op);
 }
 
 auto R65816::op_read_addr_w(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  rd.l = op_readdbr(aa.w + 0);
-L rd.h = op_readdbr(aa.w + 1);
+  aa.l = readpc();
+  aa.h = readpc();
+  rd.l = readdbr(aa.w + 0);
+L rd.h = readdbr(aa.w + 1);
   call(op);
 }
 
 auto R65816::op_read_addrx_b(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.x.w);
-L rd.l = op_readdbr(aa.w + regs.x.w);
+  aa.l = readpc();
+  aa.h = readpc();
+  io4(aa.w, aa.w + regs.x.w);
+L rd.l = readdbr(aa.w + regs.x.w);
   call(op);
 }
 
 auto R65816::op_read_addrx_w(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.x.w);
-  rd.l = op_readdbr(aa.w + regs.x.w + 0);
-L rd.h = op_readdbr(aa.w + regs.x.w + 1);
+  aa.l = readpc();
+  aa.h = readpc();
+  io4(aa.w, aa.w + regs.x.w);
+  rd.l = readdbr(aa.w + regs.x.w + 0);
+L rd.h = readdbr(aa.w + regs.x.w + 1);
   call(op);
 }
 
 auto R65816::op_read_addry_b(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.y.w);
-L rd.l = op_readdbr(aa.w + regs.y.w);
+  aa.l = readpc();
+  aa.h = readpc();
+  io4(aa.w, aa.w + regs.y.w);
+L rd.l = readdbr(aa.w + regs.y.w);
   call(op);
 }
 
 auto R65816::op_read_addry_w(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  op_io_cond4(aa.w, aa.w + regs.y.w);
-  rd.l = op_readdbr(aa.w + regs.y.w + 0);
-L rd.h = op_readdbr(aa.w + regs.y.w + 1);
+  aa.l = readpc();
+  aa.h = readpc();
+  io4(aa.w, aa.w + regs.y.w);
+  rd.l = readdbr(aa.w + regs.y.w + 0);
+L rd.h = readdbr(aa.w + regs.y.w + 1);
   call(op);
 }
 
 auto R65816::op_read_long_b(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  aa.b = op_readpc();
-L rd.l = op_readlong(aa.d);
+  aa.l = readpc();
+  aa.h = readpc();
+  aa.b = readpc();
+L rd.l = readlong(aa.d);
   call(op);
 }
 
 auto R65816::op_read_long_w(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  aa.b = op_readpc();
-  rd.l = op_readlong(aa.d + 0);
-L rd.h = op_readlong(aa.d + 1);
+  aa.l = readpc();
+  aa.h = readpc();
+  aa.b = readpc();
+  rd.l = readlong(aa.d + 0);
+L rd.h = readlong(aa.d + 1);
   call(op);
 }
 
 auto R65816::op_read_longx_b(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  aa.b = op_readpc();
-L rd.l = op_readlong(aa.d + regs.x.w);
+  aa.l = readpc();
+  aa.h = readpc();
+  aa.b = readpc();
+L rd.l = readlong(aa.d + regs.x.w);
   call(op);
 }
 
 auto R65816::op_read_longx_w(fp op) {
-  aa.l = op_readpc();
-  aa.h = op_readpc();
-  aa.b = op_readpc();
-  rd.l = op_readlong(aa.d + regs.x.w + 0);
-L rd.h = op_readlong(aa.d + regs.x.w + 1);
+  aa.l = readpc();
+  aa.h = readpc();
+  aa.b = readpc();
+  rd.l = readlong(aa.d + regs.x.w + 0);
+L rd.h = readlong(aa.d + regs.x.w + 1);
   call(op);
 }
 
 auto R65816::op_read_dp_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-L rd.l = op_readdp(dp);
+  dp = readpc();
+  io2();
+L rd.l = readdp(dp);
   call(op);
 }
 
 auto R65816::op_read_dp_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  rd.l = op_readdp(dp + 0);
-L rd.h = op_readdp(dp + 1);
+  dp = readpc();
+  io2();
+  rd.l = readdp(dp + 0);
+L rd.h = readdp(dp + 1);
   call(op);
 }
 
 auto R65816::op_read_dpr_b(fp op, reg16_t& reg) {
-  dp = op_readpc();
-  op_io_cond2();
-  op_io();
-L rd.l = op_readdp(dp + reg.w);
+  dp = readpc();
+  io2();
+  io();
+L rd.l = readdp(dp + reg.w);
   call(op);
 }
 
 auto R65816::op_read_dpr_w(fp op, reg16_t& reg) {
-  dp = op_readpc();
-  op_io_cond2();
-  op_io();
-  rd.l = op_readdp(dp + reg.w + 0);
-L rd.h = op_readdp(dp + reg.w + 1);
+  dp = readpc();
+  io2();
+  io();
+  rd.l = readdp(dp + reg.w + 0);
+L rd.h = readdp(dp + reg.w + 1);
   call(op);
 }
 
 auto R65816::op_read_idp_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-L rd.l = op_readdbr(aa.w);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+L rd.l = readdbr(aa.w);
   call(op);
 }
 
 auto R65816::op_read_idp_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  rd.l = op_readdbr(aa.w + 0);
-L rd.h = op_readdbr(aa.w + 1);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  rd.l = readdbr(aa.w + 0);
+L rd.h = readdbr(aa.w + 1);
   call(op);
 }
 
 auto R65816::op_read_idpx_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  op_io();
-  aa.l = op_readdp(dp + regs.x.w + 0);
-  aa.h = op_readdp(dp + regs.x.w + 1);
-L rd.l = op_readdbr(aa.w);
+  dp = readpc();
+  io2();
+  io();
+  aa.l = readdp(dp + regs.x.w + 0);
+  aa.h = readdp(dp + regs.x.w + 1);
+L rd.l = readdbr(aa.w);
   call(op);
 }
 
 auto R65816::op_read_idpx_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  op_io();
-  aa.l = op_readdp(dp + regs.x.w + 0);
-  aa.h = op_readdp(dp + regs.x.w + 1);
-  rd.l = op_readdbr(aa.w + 0);
-L rd.h = op_readdbr(aa.w + 1);
+  dp = readpc();
+  io2();
+  io();
+  aa.l = readdp(dp + regs.x.w + 0);
+  aa.h = readdp(dp + regs.x.w + 1);
+  rd.l = readdbr(aa.w + 0);
+L rd.h = readdbr(aa.w + 1);
   call(op);
 }
 
 auto R65816::op_read_idpy_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  op_io_cond4(aa.w, aa.w + regs.y.w);
-L rd.l = op_readdbr(aa.w + regs.y.w);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  io4(aa.w, aa.w + regs.y.w);
+L rd.l = readdbr(aa.w + regs.y.w);
   call(op);
 }
 
 auto R65816::op_read_idpy_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  op_io_cond4(aa.w, aa.w + regs.y.w);
-  rd.l = op_readdbr(aa.w + regs.y.w + 0);
-L rd.h = op_readdbr(aa.w + regs.y.w + 1);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  io4(aa.w, aa.w + regs.y.w);
+  rd.l = readdbr(aa.w + regs.y.w + 0);
+L rd.h = readdbr(aa.w + regs.y.w + 1);
   call(op);
 }
 
 auto R65816::op_read_ildp_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  aa.b = op_readdp(dp + 2);
-L rd.l = op_readlong(aa.d);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  aa.b = readdp(dp + 2);
+L rd.l = readlong(aa.d);
   call(op);
 }
 
 auto R65816::op_read_ildp_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  aa.b = op_readdp(dp + 2);
-  rd.l = op_readlong(aa.d + 0);
-L rd.h = op_readlong(aa.d + 1);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  aa.b = readdp(dp + 2);
+  rd.l = readlong(aa.d + 0);
+L rd.h = readlong(aa.d + 1);
   call(op);
 }
 
 auto R65816::op_read_ildpy_b(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  aa.b = op_readdp(dp + 2);
-L rd.l = op_readlong(aa.d + regs.y.w);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  aa.b = readdp(dp + 2);
+L rd.l = readlong(aa.d + regs.y.w);
   call(op);
 }
 
 auto R65816::op_read_ildpy_w(fp op) {
-  dp = op_readpc();
-  op_io_cond2();
-  aa.l = op_readdp(dp + 0);
-  aa.h = op_readdp(dp + 1);
-  aa.b = op_readdp(dp + 2);
-  rd.l = op_readlong(aa.d + regs.y.w + 0);
-L rd.h = op_readlong(aa.d + regs.y.w + 1);
+  dp = readpc();
+  io2();
+  aa.l = readdp(dp + 0);
+  aa.h = readdp(dp + 1);
+  aa.b = readdp(dp + 2);
+  rd.l = readlong(aa.d + regs.y.w + 0);
+L rd.h = readlong(aa.d + regs.y.w + 1);
   call(op);
 }
 
 auto R65816::op_read_sr_b(fp op) {
-  sp = op_readpc();
-  op_io();
-L rd.l = op_readsp(sp);
+  sp = readpc();
+  io();
+L rd.l = readsp(sp);
   call(op);
 }
 
 auto R65816::op_read_sr_w(fp op) {
-  sp = op_readpc();
-  op_io();
-  rd.l = op_readsp(sp + 0);
-L rd.h = op_readsp(sp + 1);
+  sp = readpc();
+  io();
+  rd.l = readsp(sp + 0);
+L rd.h = readsp(sp + 1);
   call(op);
 }
 
 auto R65816::op_read_isry_b(fp op) {
-  sp = op_readpc();
-  op_io();
-  aa.l = op_readsp(sp + 0);
-  aa.h = op_readsp(sp + 1);
-  op_io();
-L rd.l = op_readdbr(aa.w + regs.y.w);
+  sp = readpc();
+  io();
+  aa.l = readsp(sp + 0);
+  aa.h = readsp(sp + 1);
+  io();
+L rd.l = readdbr(aa.w + regs.y.w);
   call(op);
 }
 
 auto R65816::op_read_isry_w(fp op) {
-  sp = op_readpc();
-  op_io();
-  aa.l = op_readsp(sp + 0);
-  aa.h = op_readsp(sp + 1);
-  op_io();
-  rd.l = op_readdbr(aa.w + regs.y.w + 0);
-L rd.h = op_readdbr(aa.w + regs.y.w + 1);
+  sp = readpc();
+  io();
+  aa.l = readsp(sp + 0);
+  aa.h = readsp(sp + 1);
+  io();
+  rd.l = readdbr(aa.w + regs.y.w + 0);
+L rd.h = readdbr(aa.w + regs.y.w + 1);
   call(op);
 }

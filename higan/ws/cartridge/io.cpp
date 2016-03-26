@@ -28,6 +28,12 @@ auto Cartridge::portRead(uint16 addr) -> uint8 {
   //RTC_DATA
   if(addr == 0x00cb) return rtcRead();
 
+  //GPO_EN
+  if(addr == 0x00cc) return r.gpoEnable;
+
+  //GPO_DATA
+  if(addr == 0x00cd) return r.gpoData;
+
   return 0x00;
 }
 
@@ -60,4 +66,10 @@ auto Cartridge::portWrite(uint16 addr, uint8 data) -> void {
 
   //RTC_DATA
   if(addr == 0x00cb) rtcWrite(data);
+
+  //GPO_EN
+  if(addr == 0x00cc) r.gpoEnable = data;
+
+  //GPO_DATA
+  if(addr == 0x00cd) r.gpoData = data;
 }

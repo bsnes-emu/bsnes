@@ -20,6 +20,9 @@ struct GSU {
   virtual auto rambuffer_write(uint16 addr, uint8 data) -> void = 0;
   virtual auto cache_flush() -> void = 0;
 
+  virtual auto bus_read(uint24 addr, uint8 data = 0x00) -> uint8 = 0;
+  virtual auto bus_write(uint24 addr, uint8 data) -> void = 0;
+
   //gsu.cpp
   auto power() -> void;
   auto reset() -> void;
@@ -113,6 +116,13 @@ struct GSU {
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
+
+  //disassembler.cpp
+  auto disassemble_opcode(char* output) -> void;
+  auto disassemble_alt0(char* output) -> void;
+  auto disassemble_alt1(char* output) -> void;
+  auto disassemble_alt2(char* output) -> void;
+  auto disassemble_alt3(char* output) -> void;
 };
 
 }

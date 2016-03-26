@@ -53,26 +53,14 @@ auto CPU::power() -> void {
   create(CPU::Enter, 3'072'000);
 
   bus.map(this, 0x00a0);
-  bus.map(this, 0x00b0);
-  bus.map(this, 0x00b2);
-  bus.map(this, 0x00b4, 0x00b6);
+  bus.map(this, 0x00b0, 0x00b6);
 
   if(system.model() != Model::WonderSwan) {
     bus.map(this, 0x0040, 0x0049);
     bus.map(this, 0x0062);
   }
 
-  r.dmaSource = 0;
-  r.dmaTarget = 0;
-  r.dmaLength = 0;
-  r.dmaEnable = 0;
-  r.dmaMode = 0;
-  r.interruptBase = 0;
-  r.interruptEnable = 0;
-  r.interruptStatus = 0;
-  r.ypadEnable = 0;
-  r.xpadEnable = 0;
-  r.buttonEnable = 0;
+  memory::fill(&r, sizeof(Registers));
 }
 
 }

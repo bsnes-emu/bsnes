@@ -1,3 +1,4 @@
+//todo: this is horribly broken in many cases; needs a total rewrite
 auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> string {
   string s;
   uint20 ea = cs * 16 + ip;

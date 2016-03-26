@@ -1,4 +1,6 @@
 auto Cartridge::serialize(serializer& s) -> void {
+  Thread::serialize(s);
+
   if(ram.size) s.array(ram.data, ram.size);
   if(eeprom.size()) eeprom.serialize(s);
   if(rtc.size) s.array(rtc.data, rtc.size);
@@ -15,4 +17,6 @@ auto Cartridge::serialize(serializer& s) -> void {
   s.integer(r.romBank1);
   s.integer(r.romBank2);
   s.integer(r.sramBank);
+  s.integer(r.gpoEnable);
+  s.integer(r.gpoData);
 }

@@ -10,6 +10,7 @@ namespace Processor {
 #include "instructions.cpp"
 #include "table.cpp"
 #include "serialization.cpp"
+#include "disassembler.cpp"
 
 auto GSU::power() -> void {
 }

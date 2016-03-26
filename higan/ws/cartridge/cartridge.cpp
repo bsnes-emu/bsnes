@@ -31,6 +31,9 @@ auto Cartridge::power() -> void {
 
   bus.map(this, 0x00c0, 0x00c8);
   if(rtc.data) bus.map(this, 0x00ca, 0x00cb);
+  bus.map(this, 0x00cc, 0x00cd);
+
+  memory::fill(&r, sizeof(Registers));
 
   r.romBank0 = 0xff;
   r.romBank1 = 0xff;
@@ -50,8 +53,11 @@ auto Cartridge::load() -> void {
     rom.name = node["name"].text();
     rom.size = node["size"].natural();
     rom.mask = bit::round(rom.size) - 1;
-    if(rom.size) rom.data = new uint8[rom.mask + 1]();
-    if(rom.name) interface->loadRequest(ID::ROM, rom.name, true);
+    if(rom.size) {
+      rom.data = new uint8[rom.mask + 1];
+      memory::fill(rom.data, rom.mask + 1, 0xff);
+      if(rom.name) interface->loadRequest(ID::ROM, rom.name, true);
+    }
   }
 
   if(auto node = document["board/ram"]) {
@@ -59,15 +65,20 @@ auto Cartridge::load() -> void {
       ram.name = node["name"].text();
       ram.size = node["size"].natural();
       ram.mask = bit::round(ram.size) - 1;
-      if(ram.size) ram.data = new uint8[ram.mask + 1]();
-      if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
+      if(ram.size) {
+        ram.data = new uint8[ram.mask + 1];
+        memory::fill(ram.data, ram.mask + 1, 0xff);
+        if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
+      }
     }
 
     if(node["type"].text() == "eeprom") {
       eeprom.setName(node["name"].text());
       eeprom.setSize(node["size"].natural() / sizeof(uint16));
-      eeprom.erase();
-      if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
+      if(eeprom.size()) {
+        eeprom.erase();
+        if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
+      }
     }
   }
 
@@ -75,8 +86,11 @@ auto Cartridge::load() -> void {
     rtc.name = node["name"].text();
     rtc.size = node["size"].natural();
     rtc.mask = bit::round(rtc.size) - 1;
-    if(rtc.size) rtc.data = new uint8[rtc.mask + 1]();
-    if(rtc.name) interface->loadRequest(ID::RTC, rtc.name, false);
+    if(rtc.size) {
+      rtc.data = new uint8[rtc.mask + 1];
+      memory::fill(rtc.data, rtc.mask + 1, 0x00);
+      if(rtc.name) interface->loadRequest(ID::RTC, rtc.name, false);
+    }
   }
 
   information.title = document["information/title"].text();

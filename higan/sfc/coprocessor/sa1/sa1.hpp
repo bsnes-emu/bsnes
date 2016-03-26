@@ -17,11 +17,11 @@ struct SA1 : Processor::R65816, public Coprocessor {
   static auto Enter() -> void;
   auto main() -> void;
   auto tick() -> void;
-  auto op_irq() -> void override;
+  auto interrupt() -> void override;
 
   alwaysinline auto trigger_irq() -> void;
-  alwaysinline auto last_cycle() -> void override;
-  alwaysinline auto interrupt_pending() -> bool override;
+  alwaysinline auto lastCycle() -> void override;
+  alwaysinline auto interruptPending() const -> bool override;
 
   auto init() -> void;
   auto load() -> void;

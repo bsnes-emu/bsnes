@@ -26,9 +26,9 @@ auto EEPROM::power() -> void {
   r.unknown = false;
   r.writeRequested = false;
   r.readRequested = false;
-  r.writeCompleted = false;
-  r.readCompleted = false;
-  r.writeProtect = false;
+  r.writeCompleted = true;  //hack: should require time to complete reads/writes
+  r.readCompleted = true;   //instead; leave bits always set so games don't lock
+  r.writeProtect = true;
 }
 
 auto EEPROM::read(uint port) -> uint8 {
@@ -132,6 +132,10 @@ auto EEPROM::execute() -> void {
     r.writeRequested = false;
     r.writeCompleted = true;
   }
+}
+
+auto EEPROM::operator[](uint10 addr) -> uint16& {
+  return _data[addr];
 }
 
 }

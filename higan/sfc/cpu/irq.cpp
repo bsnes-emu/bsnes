@@ -3,7 +3,7 @@
 //
 //ppu.(vh)counter(n) returns the value of said counters n-clocks before current time;
 //it is used to emulate hardware communication delay between opcode and interrupt units.
-auto CPU::poll_interrupts() -> void {
+auto CPU::pollInterrupts() -> void {
   //NMI hold
   if(status.nmi_hold) {
     status.nmi_hold = false;
@@ -44,7 +44,7 @@ auto CPU::poll_interrupts() -> void {
   status.irq_valid = irq_valid;
 }
 
-auto CPU::nmitimen_update(uint8 data) -> void {
+auto CPU::nmitimenUpdate(uint8 data) -> void {
   bool nmi_enabled  = status.nmi_enabled;
   bool virq_enabled = status.virq_enabled;
   bool hirq_enabled = status.hirq_enabled;
@@ -87,14 +87,14 @@ auto CPU::timeup() -> bool {
   return result;
 }
 
-auto CPU::nmi_test() -> bool {
+auto CPU::nmiTest() -> bool {
   if(!status.nmi_transition) return false;
   status.nmi_transition = false;
   regs.wai = false;
   return true;
 }
 
-auto CPU::irq_test() -> bool {
+auto CPU::irqTest() -> bool {
   if(!status.irq_transition && !regs.irq) return false;
   status.irq_transition = false;
   regs.wai = false;

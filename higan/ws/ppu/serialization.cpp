@@ -1,4 +1,6 @@
 auto PPU::serialize(serializer& s) -> void {
+  Thread::serialize(s);
+
   s.integer(this->s.field);
   s.integer(this->s.vclk);
   s.integer(this->s.hclk);

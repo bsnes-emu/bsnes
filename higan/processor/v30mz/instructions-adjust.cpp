@@ -8,7 +8,7 @@ auto V30MZ::opDecimalAdjust(bool negate) {
     r.f.h = 1;
   }
   if(r.f.c || (al > 0x99)) {
-    r.al += negate ? -0x06 : 0x60;
+    r.al += negate ? -0x60 : 0x60;
     r.f.c = 1;
   }
   r.f.s = r.al & 0x80;

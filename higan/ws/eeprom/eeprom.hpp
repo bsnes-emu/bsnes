@@ -26,6 +26,8 @@ struct EEPROM {
   auto read(uint) -> uint8;
   auto write(uint, uint8) -> void;
 
+  auto operator[](uint10 addr) -> uint16&;
+
   //serialization.cpp
   auto serialize(serializer&) -> void;
 

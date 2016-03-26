@@ -24,27 +24,27 @@ auto SA1::main() -> void {
 
   if(status.interrupt_pending) {
     status.interrupt_pending = false;
-    op_irq();
+    interrupt();
     return;
   }
 
-  op_exec();
+  instruction();
 }
 
-auto SA1::op_irq() -> void {
-  op_read(regs.pc.d);
-  op_io();
-  if(!regs.e) op_writestack(regs.pc.b);
-  op_writestack(regs.pc.h);
-  op_writestack(regs.pc.l);
-  op_writestack(regs.e ? (regs.p & ~0x10) : regs.p);
+auto SA1::interrupt() -> void {
+  read(regs.pc.d);
+  io();
+  if(!regs.e) writestack(regs.pc.b);
+  writestack(regs.pc.h);
+  writestack(regs.pc.l);
+  writestack(regs.e ? (regs.p & ~0x10) : regs.p);
   regs.pc.w = regs.vector;
   regs.pc.b = 0x00;
   regs.p.i = 1;
   regs.p.d = 0;
 }
 
-auto SA1::last_cycle() -> void {
+auto SA1::lastCycle() -> void {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
     status.interrupt_pending = true;
     regs.vector = mmio.cnv;
@@ -71,7 +71,7 @@ auto SA1::last_cycle() -> void {
   }
 }
 
-auto SA1::interrupt_pending() -> bool {
+auto SA1::interruptPending() const -> bool {
   return status.interrupt_pending;
 }
 

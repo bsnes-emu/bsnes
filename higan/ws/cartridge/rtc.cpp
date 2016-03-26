@@ -122,6 +122,7 @@ auto Cartridge::rtcWrite(uint8 data) -> void {
   if(rtc.command == 0x12) {
     if(data.bit(6)) rtc.alarm = data;  //todo: is bit6 really required to be set?
     rtc.command = 0;
+    rtcCheckAlarm();
   }
 
   //SET_DATETIME

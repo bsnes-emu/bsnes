@@ -6,7 +6,7 @@
 namespace WonderSwan {
   namespace Info {
     static const string Name = "bws";
-    static const uint SerializerVersion = 0;
+    static const uint SerializerVersion = 1;
   }
 }
 

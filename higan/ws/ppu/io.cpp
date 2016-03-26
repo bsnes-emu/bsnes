@@ -262,19 +262,17 @@ auto PPU::portWrite(uint16 addr, uint8 data) -> void {
   if(addr == 0x00a4) r.htimerFrequency.byte(0) = data;
   if(addr == 0x00a5) r.htimerFrequency.byte(1) = data;
 
-  //VTMR_FREQ
-  if(addr == 0x00a6) r.vtimerFrequency.byte(0) = data;
-  if(addr == 0x00a7) r.vtimerFrequency.byte(1) = data;
-
-  //todo: is this correct?
-  if(addr == 0x00a5) {
+  if(addr == 0x00a4 || addr == 0x00a5) {
     r.htimerEnable = true;
     r.htimerRepeat = true;
     r.htimerCounter = 0;
   }
 
-  //todo: is this correct?
-  if(addr == 0x00a7) {
+  //VTMR_FREQ
+  if(addr == 0x00a6) r.vtimerFrequency.byte(0) = data;
+  if(addr == 0x00a7) r.vtimerFrequency.byte(1) = data;
+
+  if(addr == 0x00a6 || addr == 0x00a7) {
     r.vtimerEnable = true;
     r.vtimerRepeat = true;
     r.vtimerCounter = 0;

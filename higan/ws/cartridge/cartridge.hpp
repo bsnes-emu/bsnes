@@ -31,11 +31,31 @@ struct Cartridge : Thread, IO {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
+  struct Information {
+    string manifest;
+    string title;
+    bool orientation;  //0 = horizontal; 1 = vertical
+    string sha256;
+  } information;
+
   struct Registers {
-    uint8 romBank0;
-    uint8 romBank1;
+    //$00c0  BANK_ROM2
     uint8 romBank2;
+
+    //$00c1  BANK_SRAM
     uint8 sramBank;
+
+    //$00c2  BANK_ROM0
+    uint8 romBank0;
+
+    //$00c3  BANK_ROM1
+    uint8 romBank1;
+
+    //$00cc  GPO_EN
+    uint8 gpoEnable;
+
+    //$00cd  GPO_DATA
+    uint8 gpoData;
   } r;
 
   struct Memory {
@@ -66,13 +86,6 @@ struct Cartridge : Thread, IO {
   Memory ram;
   EEPROM eeprom;
   RTC rtc;
-
-  struct Information {
-    string manifest;
-    string title;
-    bool orientation;  //0 = horizontal; 1 = vertical
-    string sha256;
-  } information;
 };
 
 extern Cartridge cartridge;

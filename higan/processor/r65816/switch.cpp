@@ -1,4 +1,4 @@
-auto R65816::op_exec() -> void {
+auto R65816::instruction() -> void {
   #define opA(  n, o      ) case n: return op_##o();
   #define opAII(n, o, i, j) case n: return op_##o(i, j);
   #define opE(  n, o      ) case n: return regs.e ? op_##o##_e() : op_##o##_n();
@@ -15,7 +15,7 @@ auto R65816::op_exec() -> void {
   #define opXI( n, o, i   ) case n: return regs.p.x ? op_##o##_b(i) : op_##o##_w(i);
   #define opXII(n, o, i, j) case n: return regs.p.x ? op_##o##_b(i, j) : op_##o##_w(i, j);
 
-  switch(op_readpc()) {
+  switch(readpc()) {
   opEII(0x00, interrupt, 0xfffe, 0xffe6)
   opMF (0x01, read_idpx, ora)
   opEII(0x02, interrupt, 0xfff4, 0xffe4)

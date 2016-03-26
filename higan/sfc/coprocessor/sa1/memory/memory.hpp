@@ -2,9 +2,9 @@ auto bus_read(uint24 addr, uint8 data) -> uint8;
 auto bus_write(uint24 addr, uint8 data) -> void;
 auto vbr_read(uint24 addr, uint8 data = 0) -> uint8;
 
-alwaysinline auto op_io() -> void override;
-alwaysinline auto op_read(uint24 addr) -> uint8 override;
-alwaysinline auto op_write(uint24 addr, uint8 data) -> void override;
+alwaysinline auto io() -> void override;
+alwaysinline auto read(uint24 addr) -> uint8 override;
+alwaysinline auto write(uint24 addr, uint8 data) -> void override;
 
 auto mmcrom_read(uint24 addr, uint8 data) -> uint8;
 auto mmcrom_write(uint24 addr, uint8 data) -> void;
