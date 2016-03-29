@@ -96,19 +96,20 @@ auto PPU::renderScreenTwo() -> void {
 }
 
 auto PPU::renderSprite() -> void {
-  bool windowInside = s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowY0;
+  bool windowInside = s.vclk >= l.spriteWindowY0 && s.vclk <= l.spriteWindowY1
+                   && s.hclk >= l.spriteWindowX0 && s.hclk <= l.spriteWindowX1;
   for(auto index : range(l.spriteCount)) {
-    auto& sprite = l.sprite[index];
-    if(l.spriteWindowEnable && !sprite.window && !windowInside) continue;
-    if((uint8)(s.hclk - sprite.x) > 7) continue;
+    auto sprite = l.sprite[index];
+    if(l.spriteWindowEnable && sprite.bit(12) == windowInside) continue;
+    if((uint8)(s.hclk - sprite.bits(24,31)) > 7) continue;
 
-    uint3 tileY = (s.vclk - sprite.y) ^ sprite.vflip * 7;
-    uint3 tileX = (s.hclk - sprite.x) ^ sprite.hflip * 7;
-    uint4 tileColor = renderFetch(sprite.tile, tileY, tileX);
-    if(renderTransparent(sprite.palette.bit(2), tileColor)) continue;
-    if(!sprite.priority && s.pixel.source == Pixel::Source::ScreenTwo) continue;
+    uint3 tileY = (s.vclk - sprite.bits(16,23)) ^ sprite.bit(15) * 7;
+    uint3 tileX = (s.hclk - sprite.bits(24,31)) ^ sprite.bit(14) * 7;
+    uint4 tileColor = renderFetch(sprite.bits(0,8), tileY, tileX);
+    if(renderTransparent(sprite.bit(11), tileColor)) continue;
+    if(!sprite.bit(13) && s.pixel.source == Pixel::Source::ScreenTwo) continue;
 
-    s.pixel = {Pixel::Source::Sprite, renderPalette(sprite.palette, tileColor)};
+    s.pixel = {Pixel::Source::Sprite, renderPalette(8 + sprite.bits(9,11), tileColor)};
     break;
   }
 }

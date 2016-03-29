@@ -1,14 +1,14 @@
-template<typename T, unsigned size>
+template<typename T, uint size>
 struct ModuloArray {
-  inline auto operator[](signed index) const -> T {
+  inline auto operator[](int index) const -> T {
     return buffer[size + index];
   }
 
-  inline auto read(signed index) const -> T {
+  inline auto read(int index) const -> T {
     return buffer[size + index];
   }
 
-  inline auto write(unsigned index, const T value) -> void {
+  inline auto write(uint index, const T value) -> void {
     buffer[index] =
     buffer[index + size] =
     buffer[index + size + size] = value;

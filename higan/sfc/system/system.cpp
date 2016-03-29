@@ -33,7 +33,7 @@ auto System::init() -> void {
 
   satellaview.init();
   superdisc.init();
-  eboot.init();
+  s21fx.init();
 
   icd2.init();
   mcc.init();
@@ -83,7 +83,7 @@ auto System::load() -> void {
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.load();
   if(expansionPort() == Device::ID::SuperDisc) superdisc.load();
-  if(expansionPort() == Device::ID::eBoot) eboot.load();
+  if(expansionPort() == Device::ID::S21FX) s21fx.load();
 
   if(cartridge.hasICD2()) icd2.load();
   if(cartridge.hasMCC()) mcc.load();
@@ -112,7 +112,7 @@ auto System::unload() -> void {
   if(!loaded()) return;
   if(expansionPort() == Device::ID::Satellaview) satellaview.unload();
   if(expansionPort() == Device::ID::SuperDisc) superdisc.unload();
-  if(expansionPort() == Device::ID::eBoot) eboot.unload();
+  if(expansionPort() == Device::ID::S21FX) s21fx.unload();
 
   if(cartridge.hasICD2()) icd2.unload();
   if(cartridge.hasMCC()) mcc.unload();
@@ -147,7 +147,7 @@ auto System::power() -> void {
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.power();
   if(expansionPort() == Device::ID::SuperDisc) superdisc.power();
-  if(expansionPort() == Device::ID::eBoot) eboot.power();
+  if(expansionPort() == Device::ID::S21FX) s21fx.power();
 
   if(cartridge.hasICD2()) icd2.power();
   if(cartridge.hasMCC()) mcc.power();
@@ -178,7 +178,7 @@ auto System::reset() -> void {
 
   if(expansionPort() == Device::ID::Satellaview) satellaview.reset();
   if(expansionPort() == Device::ID::SuperDisc) superdisc.reset();
-  if(expansionPort() == Device::ID::eBoot) eboot.reset();
+  if(expansionPort() == Device::ID::S21FX) s21fx.reset();
 
   if(cartridge.hasICD2()) icd2.reset();
   if(cartridge.hasMCC()) mcc.reset();
@@ -210,6 +210,7 @@ auto System::reset() -> void {
   if(cartridge.hasSPC7110()) cpu.coprocessors.append(&spc7110);
   if(cartridge.hasMSU1()) cpu.coprocessors.append(&msu1);
   if(expansionPort() == Device::ID::SuperDisc) cpu.coprocessors.append(&superdisc);
+  if(expansionPort() == Device::ID::S21FX) cpu.coprocessors.append(&s21fx);
 
   scheduler.reset();
   device.connect(0, (Device::ID)settings.controllerPort1);

@@ -25,7 +25,7 @@ auto DSP::misc30() -> void {
 
   //noise
   if(counterPoll(REG(FLG) & 0x1f)) {
-    signed feedback = (state.noise << 13) ^ (state.noise << 14);
+    int feedback = (state.noise << 13) ^ (state.noise << 14);
     state.noise = (feedback & 0x4000) ^ (state.noise >> 1);
   }
 }

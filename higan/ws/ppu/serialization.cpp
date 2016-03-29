@@ -29,21 +29,10 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(l.spriteWindowX1);
   s.integer(l.spriteWindowY1);
 
-  for(uint n : range(32)) {
-    s.integer(l.sprite[n].x);
-    s.integer(l.sprite[n].y);
-    s.integer(l.sprite[n].vflip);
-    s.integer(l.sprite[n].hflip);
-    s.integer(l.sprite[n].priority);
-    s.integer(l.sprite[n].window);
-    s.integer(l.sprite[n].palette);
-    s.integer(l.sprite[n].tile);
-  }
+  s.array(l.sprite);
   s.integer(l.spriteCount);
 
-  for(uint n : range(2)) {
-    s.array(l.oam[n]);
-  }
+  for(uint n : range(2)) s.array(l.oam[n]);
   s.integer(l.oamCount);
 
   s.integer(r.screenOneEnable);
@@ -83,9 +72,7 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(r.vtotal);
   s.integer(r.vblank);
   s.array(r.pool);
-  for(uint n : range(16)) {
-    s.array(r.palette[n].color);
-  }
+  for(uint n : range(16)) s.array(r.palette[n].color);
   s.integer(r.htimerEnable);
   s.integer(r.htimerRepeat);
   s.integer(r.vtimerEnable);

@@ -121,7 +121,7 @@ Interface::Interface() {
     this->device.append(device);
   }
 
-  { Device device{10, ID::ExpansionPort, "eBoot"};
+  { Device device{10, ID::ExpansionPort, "21fx"};
     this->device.append(device);
   }
 

@@ -28,25 +28,10 @@ auto PPU::latchRegisters() -> void {
 auto PPU::latchSprites() -> void {
   l.spriteCount = 0;
   if(!l.spriteEnable) return;
-
-  uint offset = 0;
-  bool windowInside = s.vclk >= l.spriteWindowY0 && s.vclk <= l.spriteWindowY1;
   for(auto index : range(l.oamCount)) {
     uint32 attributes = l.oam[!s.field][index];
-
-    auto& sprite = l.sprite[l.spriteCount];
-    sprite.x = attributes.bits(24,31);
-    if(sprite.x > 224 && sprite.x < 249) continue;
-    sprite.y = attributes.bits(16,23);
-    if((uint8)(s.vclk - sprite.y) > 7) continue;
-    sprite.vflip = attributes.bit(15);
-    sprite.hflip = attributes.bit(14);
-    sprite.priority = attributes.bit(13);
-    sprite.window = attributes.bit(12);
-    if(l.spriteWindowEnable && !sprite.window && !windowInside) continue;
-    sprite.palette = 8 + attributes.bits(9,11);
-    sprite.tile = attributes.bits(0,8);
-
+    if((uint8)(s.vclk - attributes.bits(16,23)) > 7) continue;
+    l.sprite[l.spriteCount] = attributes;
     if(++l.spriteCount >= 32) break;
   }
 }

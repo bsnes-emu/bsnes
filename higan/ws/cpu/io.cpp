@@ -50,18 +50,17 @@ auto CPU::portRead(uint16 addr) -> uint8 {
   if(addr == 0x00a0) {
     bool model = system.model() != Model::WonderSwan;
     return (
-      1 << 7      //1 = built-in self-test passed
-    | 1 << 2      //0 = 8-bit bus width; 1 = 16-bit bus width
+      1     << 0  //0 = BIOS mapped; 1 = cartridge mapped
     | model << 1  //0 = WonderSwan; 1 = WonderSwan Color or SwanCrystal
-    | 1 << 0      //0 = BIOS mapped; 1 = cartridge mapped
+    | 1     << 2  //0 = 8-bit bus width; 1 = 16-bit bus width
+    | 1     << 7  //1 = built-in self-test passed
     );
   }
 
   //INT_BASE
-  if(addr == 0x00b0) {
-    if(system.model() == Model::WonderSwan) return r.interruptBase | 3;
-    return r.interruptBase;
-  }
+  if(addr == 0x00b0) return (
+    r.interruptBase | (system.model() == Model::WonderSwan ? 3 : 0)
+  );
 
   //SER_DATA
   if(addr == 0x00b1) return r.serialData;
@@ -92,42 +91,38 @@ auto CPU::portRead(uint16 addr) -> uint8 {
 
 auto CPU::portWrite(uint16 addr, uint8 data) -> void {
   //DMA_SRC
-  if(addr == 0x0040) { r.dmaSource.byte(0) = data & ~1; return; }
-  if(addr == 0x0041) { r.dmaSource.byte(1) = data; return; }
-  if(addr == 0x0042) { r.dmaSource.byte(2) = data; return; }
+  if(addr == 0x0040) r.dmaSource.byte(0) = data & ~1;
+  if(addr == 0x0041) r.dmaSource.byte(1) = data;
+  if(addr == 0x0042) r.dmaSource.byte(2) = data;
 
   //DMA_DST
-  if(addr == 0x0044) { r.dmaTarget.byte(0) = data & ~1; return; }
-  if(addr == 0x0045) { r.dmaTarget.byte(1) = data; return; }
+  if(addr == 0x0044) r.dmaTarget.byte(0) = data & ~1;
+  if(addr == 0x0045) r.dmaTarget.byte(1) = data;
 
   //DMA_LEN
-  if(addr == 0x0046) { r.dmaLength.byte(0) = data & ~1; return; }
-  if(addr == 0x0047) { r.dmaLength.byte(1) = data; return; }
+  if(addr == 0x0046) r.dmaLength.byte(0) = data & ~1;
+  if(addr == 0x0047) r.dmaLength.byte(1) = data;
 
   //DMA_CTRL
   if(addr == 0x0048) {
-    r.dmaEnable = data.bit(7);
     r.dmaMode   = data.bit(0);
+    r.dmaEnable = data.bit(7);
     if(r.dmaEnable) dmaTransfer();
-    return;
   }
 
   //WSC_SYSTEM
   if(addr == 0x0062) {
     //todo: d0 = 1 powers off system
-    return;
   }
 
   //HW_FLAGS
   if(addr == 0x00a0) {
     //todo: d2 (bus width) bit is writable; but ... it will do very bad things
-    return;
   }
 
   //INT_BASE
   if(addr == 0x00b0) {
     r.interruptBase = (system.model() == Model::WonderSwan) ? data & ~7 : data & ~1;
-    return;
   }
 
   //SER_DATA
@@ -136,7 +131,7 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
   //INT_ENABLE
   if(addr == 0x00b2) {
     r.interruptEnable = data;
-    return;
+    r.interruptStatus &= ~r.interruptEnable;
   }
 
   //SER_STATUS
@@ -156,6 +151,5 @@ auto CPU::portWrite(uint16 addr, uint8 data) -> void {
   if(addr == 0x00b6) {
     //acknowledge only edge-sensitive interrupts
     r.interruptStatus &= ~(data & 0b11110010);
-    return;
   }
 }

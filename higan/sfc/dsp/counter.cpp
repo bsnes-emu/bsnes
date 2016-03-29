@@ -42,7 +42,7 @@ inline auto DSP::counterTick() -> void {
 
 //return true if counter event should trigger
 
-inline auto DSP::counterPoll(unsigned rate) -> bool {
+inline auto DSP::counterPoll(uint rate) -> bool {
   if(rate == 0) return false;
-  return (((unsigned)state.counter + CounterOffset[rate]) % CounterRate[rate]) == 0;
+  return (((uint)state.counter + CounterOffset[rate]) % CounterRate[rate]) == 0;
 }

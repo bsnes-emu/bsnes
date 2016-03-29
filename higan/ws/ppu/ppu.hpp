@@ -36,17 +36,6 @@ struct PPU : Thread, IO {
     uint12 color;
   };
 
-  struct Sprite {
-    uint8 x;
-    uint8 y;
-    uint1 vflip;
-    uint1 hflip;
-    uint1 priority;
-    uint1 window;
-    uint4 palette;  //latchSprites() always sets bit3
-    uint9 tile;
-  };
-
   uint12 output[224 * 144];
 
   struct State {
@@ -84,7 +73,7 @@ struct PPU : Thread, IO {
     uint8 spriteWindowY1;
 
     //latchSprites()
-    Sprite sprite[32];
+    uint32 sprite[32];
     uint spriteCount;
 
     //latchOAM()

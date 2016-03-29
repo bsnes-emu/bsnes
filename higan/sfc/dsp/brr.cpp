@@ -1,15 +1,15 @@
 auto DSP::brrDecode(Voice& v) -> void {
   //state.t_brr_byte = ram[v.brr_addr + v.brr_offset] cached from previous clock cycle
-  signed nybbles = (state._brrByte << 8) + smp.apuram[(uint16)(v.brrAddress + v.brrOffset + 1)];
+  int nybbles = (state._brrByte << 8) + smp.apuram[(uint16)(v.brrAddress + v.brrOffset + 1)];
 
-  const signed filter = (state._brrHeader >> 2) & 3;
-  const signed scale  = (state._brrHeader >> 4);
+  const int filter = (state._brrHeader >> 2) & 3;
+  const int scale  = (state._brrHeader >> 4);
 
   //decode four samples
   for(auto n : range(4)) {
     //bits 12-15 = current nybble; sign extend, then shift right to 4-bit precision
     //result: s = 4-bit sign-extended sample value
-    signed s = (int16)nybbles >> 12;
+    int s = (int16)nybbles >> 12;
     nybbles <<= 4; //slide nybble so that on next loop iteration, bits 12-15 = current nybble
 
     if(scale <= 12) {
@@ -20,8 +20,8 @@ auto DSP::brrDecode(Voice& v) -> void {
     }
 
     //apply IIR filter (2 is the most commonly used)
-    const signed p1 = v.buffer[v.bufferOffset - 1];
-    const signed p2 = v.buffer[v.bufferOffset - 2] >> 1;
+    const int p1 = v.buffer[v.bufferOffset - 1];
+    const int p2 = v.buffer[v.bufferOffset - 2] >> 1;
 
     switch(filter) {
     case 0:

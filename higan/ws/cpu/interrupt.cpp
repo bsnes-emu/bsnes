@@ -11,6 +11,7 @@ auto CPU::poll() -> void {
 }
 
 auto CPU::raise(Interrupt irq) -> void {
+  if(!r.interruptEnable.bit((uint)irq)) return;
   r.interruptStatus.bit((uint)irq) = 1;
 }
 

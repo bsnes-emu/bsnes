@@ -1,6 +1,6 @@
 inline auto DSP::voiceOutput(Voice& v, bool channel) -> void {
   //apply left/right volume
-  signed amp = (state._output * (int8)VREG(VOLL + channel)) >> 7;
+  int amp = (state._output * (int8)VREG(VOLL + channel)) >> 7;
 
   //add to output total
   state._mainOut[channel] += amp;
@@ -77,7 +77,7 @@ auto DSP::voice3c(Voice& v) -> void {
   }
 
   //gaussian interpolation
-  signed output = gaussianInterpolate(v);
+  int output = gaussianInterpolate(v);
 
   //noise
   if(state._non & v.vbit) {

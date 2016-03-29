@@ -1,5 +1,5 @@
 auto DSP::envelopeRun(Voice& v) -> void {
-  signed envelope = v.envelope;
+  int envelope = v.envelope;
 
   if(v.envelopeMode == EnvelopeRelease) {  //60%
     envelope -= 0x8;
@@ -8,8 +8,8 @@ auto DSP::envelopeRun(Voice& v) -> void {
     return;
   }
 
-  signed rate;
-  signed envelopeData = VREG(ADSR1);
+  int rate;
+  int envelopeData = VREG(ADSR1);
   if(state._adsr0 & 0x80) {  //99% ADSR
     if(v.envelopeMode >= EnvelopeDecay) {  //99%
       envelope--;
@@ -24,7 +24,7 @@ auto DSP::envelopeRun(Voice& v) -> void {
     }
   } else {  //GAIN
     envelopeData = VREG(GAIN);
-    signed mode = envelopeData >> 5;
+    int mode = envelopeData >> 5;
     if(mode < 4) {  //direct
       envelope = envelopeData << 4;
       rate = 31;
@@ -37,7 +37,7 @@ auto DSP::envelopeRun(Voice& v) -> void {
         envelope -= envelope >> 8;
       } else {  //6, 7: linear increase
         envelope += 0x20;
-        if(mode > 6 && (unsigned)v.hiddenEnvelope >= 0x600) {
+        if(mode > 6 && (uint)v.hiddenEnvelope >= 0x600) {
           envelope += 0x8 - 0x20;  //7: two-slope linear increase
         }
       }
@@ -48,8 +48,8 @@ auto DSP::envelopeRun(Voice& v) -> void {
   if((envelope >> 8) == (envelopeData >> 5) && v.envelopeMode == EnvelopeDecay) v.envelopeMode = EnvelopeSustain;
   v.hiddenEnvelope = envelope;
 
-  //unsigned cast because linear decrease underflowing also triggers this
-  if((unsigned)envelope > 0x7ff) {
+  //uint cast because linear decrease underflowing also triggers this
+  if((uint)envelope > 0x7ff) {
     envelope = (envelope < 0 ? 0 : 0x7ff);
     if(v.envelopeMode == EnvelopeAttack) v.envelopeMode = EnvelopeDecay;
   }
