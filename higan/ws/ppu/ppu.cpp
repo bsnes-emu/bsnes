@@ -5,8 +5,7 @@ namespace WonderSwan {
 PPU ppu;
 #include "io.cpp"
 #include "latch.cpp"
-#include "render-mono.cpp"
-#include "render-color.cpp"
+#include "render.cpp"
 #include "video.cpp"
 #include "serialization.cpp"
 
@@ -23,18 +22,12 @@ auto PPU::main() -> void {
     latchRegisters();
     latchSprites();
     for(auto x : range(224)) {
-      if(!r.lcdEnable) {
-        s.pixel = {Pixel::Source::Back, 0x000};
-      } else if(!system.color()) {
-        renderMonoBack();
-        renderMonoScreenOne();
-        renderMonoScreenTwo();
-        renderMonoSprite();
-      } else {
-        renderColorBack();
-        renderColorScreenOne();
-        renderColorScreenTwo();
-        renderColorSprite();
+      s.pixel = {Pixel::Source::Back, 0x000};
+      if(r.lcdEnable) {
+        renderBack();
+        if(l.screenOneEnable) renderScreenOne();
+        if(l.screenTwoEnable) renderScreenTwo();
+        if(l.spriteEnable) renderSprite();
       }
       output[s.vclk * 224 + s.hclk] = s.pixel.color;
       step(1);

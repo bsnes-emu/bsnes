@@ -17,21 +17,14 @@ struct PPU : Thread, IO {
   auto latchSprites() -> void;
   auto latchOAM() -> void;
 
-  //render-mono.cpp
-  auto renderMonoFetch(uint14 offset, uint3 y, uint3 x) -> uint2;
-  auto renderMonoPalette(uint4 palette, uint2 index) -> uint12;
-  auto renderMonoBack() -> void;
-  auto renderMonoScreenOne() -> void;
-  auto renderMonoScreenTwo() -> void;
-  auto renderMonoSprite() -> void;
-
-  //render-color.cpp
-  auto renderColorFetch(uint16 offset, uint3 y, uint3 x) -> uint4;
-  auto renderColorPalette(uint4 palette, uint4 index) -> uint12;
-  auto renderColorBack() -> void;
-  auto renderColorScreenOne() -> void;
-  auto renderColorScreenTwo() -> void;
-  auto renderColorSprite() -> void;
+  //render.cpp
+  auto renderFetch(uint10 tile, uint3 y, uint3 x) -> uint4;
+  auto renderTransparent(bool palette, uint4 color) -> bool;
+  auto renderPalette(uint4 palette, uint4 color) -> uint12;
+  auto renderBack() -> void;
+  auto renderScreenOne() -> void;
+  auto renderScreenTwo() -> void;
+  auto renderSprite() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

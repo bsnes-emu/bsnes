@@ -40,15 +40,15 @@ struct System : IO {
     bool rotate;
   } keypad;
 
+privileged:
   struct Registers {
     //$0060  DISP_MODE
+    uint5 unknown;
+    uint1 format;
     uint1 depth;
     uint1 color;
-    uint1 format;
-    uint5 unknown;
   } r;
 
-privileged:
   bool _loaded = false;
   Model _model = Model::WonderSwan;
   bool _orientation = 0;  //0 = horizontal, 1 = vertical

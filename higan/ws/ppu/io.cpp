@@ -11,7 +11,7 @@ auto PPU::portRead(uint16 addr) -> uint8 {
 
   //BACK_COLOR
   if(addr == 0x0001) return (
-    r.backColor.bits(0, !system.depth() ? 2 : 7)
+    r.backColor.bits(0, !system.color() ? 2 : 7)
   );
 
   //LINE_CUR

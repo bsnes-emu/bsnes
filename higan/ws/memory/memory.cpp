@@ -17,12 +17,12 @@ auto InternalRAM::read(uint16 addr, uint size) -> uint32 {
   if(size == Long) return read(addr + 0, Word) << 0 | read(addr + 2, Word) << 16;
   if(size == Word) return read(addr + 0, Byte) << 0 | read(addr + 1, Byte) <<  8;
 
-  if(addr >= 0x4000 && !system.r.depth) return 0x90;
+  if(addr >= 0x4000 && !system.color()) return 0x90;
   return memory[addr];
 }
 
 auto InternalRAM::write(uint16 addr, uint8 data) -> void {
-  if(addr >= 0x4000 && !system.r.depth) return;
+  if(addr >= 0x4000 && !system.color()) return;
   memory[addr] = data;
 }
 

@@ -43,7 +43,7 @@ auto PPU::latchSprites() -> void {
     sprite.hflip = attributes.bit(14);
     sprite.priority = attributes.bit(13);
     sprite.window = attributes.bit(12);
-    if(l.spriteWindowEnable && sprite.window == windowInside) continue;
+    if(l.spriteWindowEnable && !sprite.window && !windowInside) continue;
     sprite.palette = 8 + attributes.bits(9,11);
     sprite.tile = attributes.bits(0,8);
 

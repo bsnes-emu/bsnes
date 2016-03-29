@@ -12,7 +12,7 @@ auto System::orientation() const -> bool { return _orientation; }
 auto System::color() const -> bool { return r.color; }
 auto System::planar() const -> bool { return r.format == 0; }
 auto System::packed() const -> bool { return r.format == 1; }
-auto System::depth() const -> bool { return r.depth == 1; }
+auto System::depth() const -> bool { return r.color && r.depth == 1; }
 
 auto System::init() -> void {
   assert(interface != nullptr);
@@ -67,10 +67,10 @@ auto System::power() -> void {
   bus.map(this, 0x0060);
   bus.map(this, 0x00ba, 0x00be);
 
+  r.unknown = 0;
+  r.format = 0;
   r.depth = 0;
   r.color = 0;
-  r.format = 0;
-  r.unknown = 0;
 }
 
 auto System::run() -> void {

@@ -39,12 +39,12 @@ auto CPU::portRead(uint16 addr) -> uint8 {
   if(addr == 0x0047) return r.dmaLength.byte(1);
 
   //DMA_CTRL
-  if(addr == 0x0048) return r.dmaEnable << 7 | r.dmaMode << 0;
+  if(addr == 0x0048) return r.dmaMode << 0 | r.dmaEnable << 7;
 
   //WSC_SYSTEM
-  if(addr == 0x0062) {
-    return (system.model() == Model::SwanCrystal) << 7;
-  }
+  if(addr == 0x0062) return (
+    (system.model() == Model::SwanCrystal) << 7
+  );
 
   //HW_FLAGS
   if(addr == 0x00a0) {

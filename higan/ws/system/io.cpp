@@ -3,8 +3,8 @@ auto System::portRead(uint16 addr) -> uint8 {
   if(addr == 0x0060) return (
     r.unknown << 0
   | r.format  << 5
-  | r.color   << 6
-  | r.depth   << 7
+  | r.depth   << 6
+  | r.color   << 7
   );
 
   //IEEP_DATA
@@ -24,8 +24,8 @@ auto System::portWrite(uint16 addr, uint8 data) -> void {
   if(addr == 0x0060) {
     r.unknown = data.bits(0,4) & 0b01011;
     r.format  = data.bit (5);
-    r.color   = data.bit (6);
-    r.depth   = data.bit (7);
+    r.depth   = data.bit (6);
+    r.color   = data.bit (7);
     return;
   }
 
