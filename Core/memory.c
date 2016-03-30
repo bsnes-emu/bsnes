@@ -234,6 +234,10 @@ static void write_mbc(GB_gameboy_t *gb, unsigned short addr, unsigned char value
             }
             else {
                 gb->mbc_ram_bank = value;
+                /* Some games assume banks wrap around. We can do this if RAM size is a power of two */
+                if (gb->mbc_ram_bank >= gb->mbc_ram_size / 0x2000 && (gb->mbc_ram_size & (gb->mbc_ram_size - 1)) == 0 && gb->mbc_ram_size != 0) {
+                    gb->mbc_ram_bank %= gb->mbc_ram_size / 0x2000;
+                }
             }
             break;
         case 6:
