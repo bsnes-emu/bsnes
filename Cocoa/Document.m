@@ -10,6 +10,8 @@
      reasonable alternative to this. */
     unsigned long pendingLogLines;
     bool tooMuchLogs;
+    
+    NSString *lastConsoleInput;
 }
 
 @property AudioClient *audioClient;
@@ -307,7 +309,13 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 
 - (IBAction)consoleInput:(NSTextField *)sender {
     NSString *line = [sender stringValue];
-    if (!line) {
+    if ([line isEqualToString:@""]) {
+        line = lastConsoleInput;
+    }
+    else if (line) {
+        lastConsoleInput = line;
+    }
+    else {
         line = @"";
     }
     [self log:[line UTF8String]];
