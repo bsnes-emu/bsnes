@@ -265,6 +265,7 @@ void display_run(GB_gameboy_t *gb)
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         /* LCD is disabled, do nothing */
         gb->io_registers[GB_IO_STAT] &= ~3;
+        gb->io_registers[GB_IO_LY] = 0;
         return;
     }
 
