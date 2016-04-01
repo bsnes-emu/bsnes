@@ -134,6 +134,10 @@ int main(int argc, char **argv)
     GB_gameboy_t gb;
     bool dmg = false;
 
+#define str(x) #x
+#define xstr(x) str(x)
+    fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
+
     if (argc == 1 || argc > 3) {
 usage:
         fprintf(stderr, "Usage: %s [--dmg] rom\n", argv[0]);

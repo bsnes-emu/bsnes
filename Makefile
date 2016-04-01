@@ -4,6 +4,8 @@ else
 default: sdl
 endif
 
+VERSION := 0.1
+
 BIN := build/bin
 OBJ := build/obj
 
@@ -15,7 +17,7 @@ LDFLAGS += -lc -lm
 CONF ?= debug
 
 ifeq ($(shell uname -s),Darwin)
-CFLAGS += -F/Library/Frameworks
+CFLAGS += -F/Library/Frameworks -DVERSION="$(VERSION)"
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit
 SDL_LDFLAGS := -framework SDL
@@ -67,15 +69,15 @@ $(OBJ)/%.m.o: %.m
 
 $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(shell echo Cocoa/*.icns) \
-					$(shell echo Cocoa/info.plist) \
+					Cocoa/License.html \
+					Cocoa/info.plist \
 					$(BIN)/BootROMs/dmg_boot.bin \
 					$(BIN)/BootROMs/cgb_boot.bin \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Document.nib \
-					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
-					Cocoa/License.html
+					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib
 	mkdir -p $(BIN)/Sameboy.app/Contents/Resources
 	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
-	cp Cocoa/info.plist $(BIN)/Sameboy.app/Contents/
+	sed s/@VERSION/$(VERSION)/ < Cocoa/info.plist > $(BIN)/Sameboy.app/Contents/info.plist
 	cp Cocoa/License.html $(BIN)/Sameboy.app/Contents/Resources/Credits.html
 
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
