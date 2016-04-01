@@ -30,7 +30,7 @@ $(error Invalid value for CONF: $(CONF). Use "debug" or "release")
 endif
 
 cocoa: $(BIN)/Sameboy.app
-sdl: $(BIN)/sdl/sameboy $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin
+sdl: $(BIN)/sdl/sameboy $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 
 CORE_SOURCES := $(shell echo Core/*.c)
@@ -100,6 +100,9 @@ $(BIN)/sdl/%.bin: $(BIN)/BootROMs/%.bin
 	-@mkdir -p $(dir $@)
 	cp -f $^ $@
 	
+$(BIN)/sdl/LICENSE: LICENSE
+	cp -f $^ $@
+
 clean:
 	rm -rf build
 	
