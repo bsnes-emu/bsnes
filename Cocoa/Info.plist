@@ -65,6 +65,8 @@
 	<string>10.9</string>
 	<key>NSMainNibFile</key>
 	<string>MainMenu</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2015-2016 Lior Halphon</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 </dict>

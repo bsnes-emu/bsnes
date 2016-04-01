@@ -62,10 +62,12 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(BIN)/BootROMs/dmg_boot.bin \
 					$(BIN)/BootROMs/cgb_boot.bin \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Document.nib \
-					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib
+					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
+					Cocoa/License.html
 	mkdir -p $(BIN)/Sameboy.app/Contents/Resources
 	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
 	cp Cocoa/info.plist $(BIN)/Sameboy.app/Contents/
+	cp Cocoa/License.html $(BIN)/Sameboy.app/Contents/Resources/Credits.html
 
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@mkdir -p $(dir $@)
