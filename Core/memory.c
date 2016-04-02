@@ -94,8 +94,9 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
 
     if (addr < 0xFF80) {
         switch (addr & 0xFF) {
-            case GB_IO_JOYP:
             case GB_IO_IF:
+                return gb->io_registers[GB_IO_IF] | 0xE0;
+            case GB_IO_JOYP:
             case GB_IO_DIV:
             case GB_IO_TIMA:
             case GB_IO_TMA:
@@ -473,7 +474,7 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
 
     if (addr == 0xFFFF) {
         /* Interrupt mask */
-        gb->interrupt_enable = value;
+        gb->interrupt_enable = value & 0x1F;
         return;
     }
     
