@@ -242,23 +242,19 @@ void palette_changed(GB_gameboy_t *gb, bool background_palette, unsigned char in
 
 void display_run(GB_gameboy_t *gb)
 {
-    /* 
+    /*
+       Display controller bug: For some reason, the OAM STAT interrupt is called, as expected, for LY = 0..143.
+       However, it is also called from LY = 144.
 
-       <del>Display controller bug: For some reason, the OAM STAT interrupt is called, as expected, for LY = 0..143.
-       However, it is also called from LY = 151! (The last LY is 153! Wonder why is it 151...).</del>
-
-       Todo: This discussion in NESDev proves this theory incorrect:
-       http://forums.nesdev.com/viewtopic.php?f=20&t=13727
-       Seems like there was a bug in one of my test ROMs.
-       This behavior needs to be corrected.
+       See http://forums.nesdev.com/viewtopic.php?f=20&t=13727
     */
     unsigned char last_mode = gb->io_registers[GB_IO_STAT] & 3;
 
     if (gb->display_cycles >= LCDC_PERIOD) {
         /* VBlank! */
         gb->display_cycles -= LCDC_PERIOD;
-        gb->ly151_bug_oam = false;
-        gb->ly151_bug_hblank = false;
+        gb->ly144_bug_oam = false;
+        gb->ly144_bug_hblank = false;
         display_vblank(gb);
     }
 
@@ -310,22 +306,25 @@ void display_run(GB_gameboy_t *gb)
             gb->io_registers[GB_IO_IF] |= 1;
         }
 
-        // LY = 151 interrupt bug
-        if (gb->io_registers[GB_IO_LY] == 151) {
+        // LY = 144 interrupt bug
+        if (gb->io_registers[GB_IO_LY] == 144) {
             if (gb->display_cycles % 456 < 80) { // Mode 2
-                if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->ly151_bug_oam) { /* User requests an interrupt on Mode 2 */
+                if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->ly144_bug_oam) { /* User requests an interrupt on Mode 2 */
                     gb->io_registers[GB_IO_IF] |= 2;
                 }
-                gb->ly151_bug_oam = true;
+                gb->ly144_bug_oam = true;
             }
             if (gb->display_cycles % 456 < 80 + 172) { /* Mode 3 */
                 // Nothing to do
             }
             else { /* Mode 0 */
-                if (gb->io_registers[GB_IO_STAT] & 8 && !gb->ly151_bug_hblank) { /* User requests an interrupt on Mode 0 */
+                if (gb->io_registers[GB_IO_STAT] & 8 && !gb->ly144_bug_hblank) { /* User requests an interrupt on Mode 0 */
+                    /*
+                    Todo: Verify if this actually happens.
                     gb->io_registers[GB_IO_IF] |= 2;
+                    */
                 }
-                gb->ly151_bug_hblank = true;
+                gb->ly144_bug_hblank = true;
             }
         }
 
