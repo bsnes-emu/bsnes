@@ -1,6 +1,7 @@
 #include "gb.h"
 #include "timing.h"
 #include "memory.h"
+#include "display.h"
 
 void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
 {
@@ -25,6 +26,7 @@ void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
     hdma_run(gb);
     timers_run(gb);
     apu_run(gb);
+    display_run(gb);
 }
 
 void timers_run(GB_gameboy_t *gb)

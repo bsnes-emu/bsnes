@@ -404,7 +404,6 @@ void gb_run(GB_gameboy_t *gb)
     update_joyp(gb);
     debugger_run(gb);
     cpu_run(gb);
-    display_run(gb);
 }
 
 void gb_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
