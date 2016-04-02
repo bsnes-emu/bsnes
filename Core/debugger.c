@@ -321,7 +321,7 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
 void debugger_run(GB_gameboy_t *gb)
 {
     char *input = NULL;
-    if (gb->debug_next_command && gb->debug_call_depth == 0) {
+    if (gb->debug_next_command && gb->debug_call_depth <= 0) {
         gb->debug_stopped = true;
     }
     if (gb->debug_fin_command && gb->debug_call_depth == -1) {
