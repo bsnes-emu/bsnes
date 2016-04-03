@@ -1,3 +1,11 @@
+auto CPU::dmaPortRead(uint24 addr, uint8 data) -> uint8 {
+  return mmio_read(addr, data);
+}
+
+auto CPU::dmaPortWrite(uint24 addr, uint8 data) -> void {
+  return mmio_write(addr, data);
+}
+
 auto CPU::mmio_read(uint addr, uint8 data) -> uint8 {
   if((addr & 0xffc0) == 0x2140) {
     synchronizeSMP();
@@ -186,7 +194,7 @@ auto CPU::mmio_write(uint addr, uint8 data) -> void {
     case 0x4206: {
       status.wrdivb = data;
       status.rddiv = status.wrdivb ? status.wrdiva / status.wrdivb : 0xffff;
-      status.rdmpy = status.wrdivb ? status.wrdiva % status.wrdivb : status.wrdiva;
+      status.rdmpy = status.wrdivb ? status.wrdiva % status.wrdivb : (uint)status.wrdiva;
       return;
     }
 

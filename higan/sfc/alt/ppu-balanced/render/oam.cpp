@@ -69,7 +69,7 @@ auto PPU::is_sprite_on_scanline() -> bool {
   sprite_item* spr = &sprite_list[active_sprite];
   if(spr->x > 256 && (spr->x + spr->width - 1) < 512) return false;
 
-  int spr_height = (regs.oam_interlace == false) ? (spr->height) : (spr->height >> 1);
+  int spr_height = (regs.oam_interlace == false) ? ((uint)spr->height) : (spr->height >> 1);
   if(line >= spr->y && line < (spr->y + spr_height)) return true;
   if((spr->y + spr_height) >= 256 && line < ((spr->y + spr_height) & 255)) return true;
   return false;

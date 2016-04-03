@@ -1,3 +1,5 @@
+#include <sfc/ppu/video.hpp>
+
 struct PPU : Thread, public PPUcounter {
   enum : bool { Threaded = true };
 
@@ -23,7 +25,7 @@ struct PPU : Thread, public PPUcounter {
   auto scanline() -> void;
   auto render_scanline() -> void;
   auto frame() -> void;
-  auto enter() -> void;
+  auto main() -> void;
   auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;

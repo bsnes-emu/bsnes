@@ -66,16 +66,21 @@ auto CPU::main() -> void {
     status.interrupt_pending = false;
     if(status.nmi_pending) {
       status.nmi_pending = false;
-      regs.vector = (regs.e == false ? 0xffea : 0xfffa);
+      regs.vector = !regs.e ? 0xffea : 0xfffa;
       interrupt();
       debugger.op_nmi();
     } else if(status.irq_pending) {
       status.irq_pending = false;
-      regs.vector = (regs.e == false ? 0xffee : 0xfffe);
+      regs.vector = !regs.e ? 0xffee : 0xfffe;
       interrupt();
       debugger.op_irq();
     } else if(status.reset_pending) {
       status.reset_pending = false;
+      addClocks(132);
+      regs.vector = 0xfffc;
+      interrupt();
+    } else if(status.power_pending) {
+      status.power_pending = false;
       addClocks(186);
       regs.pc.l = bus.read(0xfffc, regs.mdr);
       regs.pc.h = bus.read(0xfffd, regs.mdr);
@@ -146,6 +151,9 @@ auto CPU::power() -> void {
     channel.line_counter = 0xff;
     channel.unknown = 0xff;
   }
+
+  status.power_pending = true;
+  status.interrupt_pending = true;
 }
 
 auto CPU::reset() -> void {
@@ -255,7 +263,7 @@ auto CPU::reset() -> void {
   status.irq_pending    = false;
   status.irq_hold       = false;
 
-  status.reset_pending     = true;
+  status.reset_pending = !status.power_pending;
   status.interrupt_pending = true;
 
   status.dma_active   = false;

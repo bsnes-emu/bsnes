@@ -123,6 +123,7 @@ privileged:
     bool irq_pending;
     bool irq_hold;
 
+    bool power_pending;
     bool reset_pending;
 
     //DMA

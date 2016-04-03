@@ -11,17 +11,19 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
 
   auto pio() -> uint8;
   auto joylatch() -> bool;
-  auto interrupt_pending() -> bool;
+  auto interruptPending() const -> bool;
   auto port_read(uint8 port) -> uint8;
   auto port_write(uint8 port, uint8 data) -> void;
+  auto dmaPortRead(uint24 addr, uint8 data) -> uint8;
+  auto dmaPortWrite(uint24 addr, uint8 data) -> void;
   auto mmio_read(uint addr, uint8 data) -> uint8;
   auto mmio_write(uint addr, uint8 data) -> void;
 
-  auto op_io() -> void;
-  auto op_read(uint addr) -> uint8;
-  auto op_write(uint addr, uint8 data) -> void;
+  auto io() -> void;
+  auto read(uint24 addr) -> uint8;
+  auto write(uint24 addr, uint8 data) -> void;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;
@@ -37,7 +39,7 @@ private:
 
   //timing
   auto queue_event(uint id) -> void;
-  auto last_cycle() -> void;
+  auto lastCycle() -> void;
   auto add_clocks(uint clocks) -> void;
   auto scanline() -> void;
   auto run_auto_joypad_poll() -> void;
@@ -89,8 +91,8 @@ private:
     uint8 source_bank;
 
     union {
-      uint16 transfer_size;
-      uint16 indirect_addr;
+      uint16_t transfer_size;
+      uint16_t indirect_addr;
     };
 
     uint8 indirect_bank;

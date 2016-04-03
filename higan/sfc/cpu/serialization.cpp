@@ -35,6 +35,7 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.irq_pending);
   s.integer(status.irq_hold);
 
+  s.integer(status.power_pending);
   s.integer(status.reset_pending);
 
   s.integer(status.dma_active);

@@ -1,3 +1,5 @@
+#include <sfc/ppu/video.hpp>
+
 struct PPU : Thread, public PPUcounter {
   enum : bool { Threaded = true };
 
@@ -11,7 +13,7 @@ struct PPU : Thread, public PPUcounter {
   auto interlace() const -> bool;
   auto overscan() const -> bool;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;

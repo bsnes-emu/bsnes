@@ -111,7 +111,7 @@ auto PPU::Background::render() -> void {
   hscroll = regs.hoffset;
   vscroll = regs.voffset;
 
-  uint y = (regs.mosaic == 0 ? self.vcounter() : mosaic_voffset);
+  uint y = (regs.mosaic == 0 ? (uint)self.vcounter() : mosaic_voffset);
   if(hires) {
     hscroll <<= 1;
     if(self.regs.interlace) y = (y << 1) + self.field();

@@ -14,7 +14,7 @@ auto PPU::Background::render_mode7() -> void {
   int hofs = sclip<13>(self.regs.mode7_hoffset);
   int vofs = sclip<13>(self.regs.mode7_voffset);
 
-  int y = (self.regs.mode7_vflip == false ? self.vcounter() : 255 - self.vcounter());
+  int y = (self.regs.mode7_vflip == false ? (uint)self.vcounter() : 255 - self.vcounter());
 
   uint16* mosaic_x;
   uint16* mosaic_y;

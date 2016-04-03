@@ -5,7 +5,7 @@ auto CPU::queue_event(uint id) -> void {
   }
 }
 
-auto CPU::last_cycle() -> void {
+auto CPU::lastCycle() -> void {
   if(status.irq_lock) {
     status.irq_lock = false;
     return;

@@ -5,7 +5,7 @@ auto PPU::update_bg_info() -> void {
 
   for(unsigned bg = 0; bg < 4; bg++) {
     bg_info[bg].th = (regs.bg_tilesize[bg] ? 4 : 3);
-    bg_info[bg].tw = (hires ? 4 : bg_info[bg].th);
+    bg_info[bg].tw = (hires ? 4 : (uint)bg_info[bg].th);
 
     bg_info[bg].mx = (bg_info[bg].th == 4 ? (width << 1) : width);
     bg_info[bg].my = bg_info[bg].mx;
@@ -96,7 +96,7 @@ auto PPU::render_line_bg(uint8 pri0_pos, uint8 pri1_pos) -> void {
   bool   mirror_x, mirror_y;
 
   const uint8*  tile_ptr;
-  const uint16* mtable = mosaic_table[regs.mosaic_enabled[bg] ? regs.mosaic_size : 0];
+  const uint16* mtable = mosaic_table[regs.mosaic_enabled[bg] ? (uint)regs.mosaic_size : 0];
   const bool    is_opt_mode = (mode == 2 || mode == 4 || mode == 6);
   const bool    is_direct_color_mode = (regs.direct_color == true && bg == BG1 && (mode == 3 || mode == 4));
 

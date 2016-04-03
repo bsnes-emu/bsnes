@@ -2,6 +2,7 @@
 
 namespace SuperFamicom {
 
+#include <sfc/ppu/video.cpp>
 PPU ppu;
 
 #include "mmio/mmio.cpp"
@@ -39,28 +40,24 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 
-auto PPU::Enter() -> void { ppu.enter(); }
+auto PPU::Enter() -> void {
+  while(true) scheduler.synchronize(), ppu.main();
+}
 
-auto PPU::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    scanline();
-    if(vcounter() < display.height && vcounter()) {
-      add_clocks(512);
-      render_scanline();
-      add_clocks(lineclocks() - 512);
-    } else {
-      add_clocks(lineclocks());
-    }
+auto PPU::main() -> void {
+  scanline();
+  if(vcounter() < display.height && vcounter()) {
+    add_clocks(512);
+    render_scanline();
+    add_clocks(lineclocks() - 512);
+  } else {
+    add_clocks(lineclocks());
   }
 }
 
@@ -93,7 +90,8 @@ auto PPU::scanline() -> void {
   if(vcounter() == display.height && regs.display_disable == false) sprite.address_reset();
 
   if(vcounter() == 241) {
-    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+    video.refresh();
+    scheduler.exit(Scheduler::Event::Frame);
   }
 }
 
@@ -126,6 +124,7 @@ auto PPU::reset() -> void {
   mmio_reset();
   display.interlace = false;
   display.overscan = false;
+  video.reset();
 }
 
 auto PPU::layer_enable(uint layer, uint priority, bool enable) -> void {

@@ -30,7 +30,7 @@ auto CPU::synchronizeSMP() -> void {
   if(SMP::Threaded == true) {
     if(smp.clock < 0) co_switch(smp.thread);
   } else {
-    while(smp.clock < 0) smp.enter();
+    while(smp.clock < 0) smp.main();
   }
 }
 
@@ -38,7 +38,7 @@ auto CPU::synchronizePPU() -> void {
   if(PPU::Threaded == true) {
     if(ppu.clock < 0) co_switch(ppu.thread);
   } else {
-    while(ppu.clock < 0) ppu.enter();
+    while(ppu.clock < 0) ppu.main();
   }
 }
 
@@ -54,29 +54,24 @@ auto CPU::synchronizeDevices() -> void {
   if(device.controllerPort2->clock < 0) co_switch(device.controllerPort2->thread);
 }
 
-auto CPU::Enter() -> void { cpu.enter(); }
+auto CPU::Enter() -> void {
+  while(true) scheduler.synchronize(), cpu.main();
+}
 
-auto CPU::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::CPU) {
-      scheduler.sync = Scheduler::SynchronizeMode::All;
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
-    }
-
-    if(status.nmi_pending) {
-      status.nmi_pending = false;
-      regs.vector = (regs.e == false ? 0xffea : 0xfffa);
-      op_irq();
-    }
-
-    if(status.irq_pending) {
-      status.irq_pending = false;
-      regs.vector = (regs.e == false ? 0xffee : 0xfffe);
-      op_irq();
-    }
-
-    op_exec();
+auto CPU::main() -> void {
+  if(status.nmi_pending) {
+    status.nmi_pending = false;
+    regs.vector = (regs.e == false ? 0xffea : 0xfffa);
+    interrupt();
   }
+
+  if(status.irq_pending) {
+    status.irq_pending = false;
+    regs.vector = (regs.e == false ? 0xffee : 0xfffe);
+    interrupt();
+  }
+
+  instruction();
 }
 
 auto CPU::enable() -> void {

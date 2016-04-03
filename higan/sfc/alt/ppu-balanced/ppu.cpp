@@ -2,6 +2,7 @@
 
 namespace SuperFamicom {
 
+#include <sfc/ppu/video.cpp>
 PPU ppu;
 
 #include "memory/memory.cpp"
@@ -49,55 +50,50 @@ auto PPU::step(uint clocks) -> void {
 
 auto PPU::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
-    if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 
-auto PPU::Enter() -> void { ppu.enter(); }
+auto PPU::Enter() -> void {
+  while(true) scheduler.synchronize(), ppu.main();
+}
 
-auto PPU::enter() -> void {
-  while(true) {
-    if(scheduler.sync == Scheduler::SynchronizeMode::All) {
-      scheduler.exit(Scheduler::ExitReason::SynchronizeEvent);
+auto PPU::main() -> void {
+  //H =    0 (initialize)
+  scanline();
+  add_clocks(10);
+
+  //H =   10 (cache mode7 registers + OAM address reset)
+  cache.m7_hofs = regs.m7_hofs;
+  cache.m7_vofs = regs.m7_vofs;
+  cache.m7a = regs.m7a;
+  cache.m7b = regs.m7b;
+  cache.m7c = regs.m7c;
+  cache.m7d = regs.m7d;
+  cache.m7x = regs.m7x;
+  cache.m7y = regs.m7y;
+  if(vcounter() == (!overscan() ? 225 : 240)) {
+    if(regs.display_disabled == false) {
+      regs.oam_addr = regs.oam_baseaddr << 1;
+      regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
     }
-
-    //H =    0 (initialize)
-    scanline();
-    add_clocks(10);
-
-    //H =   10 (cache mode7 registers + OAM address reset)
-    cache.m7_hofs = regs.m7_hofs;
-    cache.m7_vofs = regs.m7_vofs;
-    cache.m7a = regs.m7a;
-    cache.m7b = regs.m7b;
-    cache.m7c = regs.m7c;
-    cache.m7d = regs.m7d;
-    cache.m7x = regs.m7x;
-    cache.m7y = regs.m7y;
-    if(vcounter() == (!overscan() ? 225 : 240)) {
-      if(regs.display_disabled == false) {
-        regs.oam_addr = regs.oam_baseaddr << 1;
-        regs.oam_firstsprite = (regs.oam_priority == false) ? 0 : (regs.oam_addr >> 2) & 127;
-      }
-    }
-    add_clocks(502);
-
-    //H =  512 (render)
-    render_scanline();
-    add_clocks(640);
-
-    //H = 1152 (cache OBSEL)
-    if(cache.oam_basesize != regs.oam_basesize) {
-      cache.oam_basesize = regs.oam_basesize;
-      sprite_list_valid = false;
-    }
-    cache.oam_nameselect = regs.oam_nameselect;
-    cache.oam_tdaddr = regs.oam_tdaddr;
-    add_clocks(lineclocks() - 1152);  //seek to start of next scanline
-
   }
+  add_clocks(502);
+
+  //H =  512 (render)
+  render_scanline();
+  add_clocks(640);
+
+  //H = 1152 (cache OBSEL)
+  if(cache.oam_basesize != regs.oam_basesize) {
+    cache.oam_basesize = regs.oam_basesize;
+    sprite_list_valid = false;
+  }
+  cache.oam_nameselect = regs.oam_nameselect;
+  cache.oam_tdaddr = regs.oam_tdaddr;
+  add_clocks(lineclocks() - 1152);  //seek to start of next scanline
 }
 
 auto PPU::add_clocks(uint clocks) -> void {
@@ -131,7 +127,8 @@ auto PPU::scanline() -> void {
   }
 
   if(line == 241) {
-    scheduler.exit(Scheduler::ExitReason::FrameEvent);
+    video.refresh();
+    scheduler.exit(Scheduler::Event::Frame);
   }
 }
 
@@ -401,6 +398,8 @@ auto PPU::reset() -> void {
   regs.bg_y[1] = 0;
   regs.bg_y[2] = 0;
   regs.bg_y[3] = 0;
+
+  video.reset();
 }
 
 auto PPU::layer_enable(uint layer, uint priority, bool enable) -> void {

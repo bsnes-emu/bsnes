@@ -44,13 +44,13 @@ auto PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) -> void {
   uint16* mtable_x;
   uint16* mtable_y;
   if(bg == BG1) {
-    mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
-    mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
+    mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? (uint)regs.mosaic_size : 0];
+    mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? (uint)regs.mosaic_size : 0];
   } else {  //bg == BG2
     //Mode7 EXTBG BG2 uses BG1 mosaic enable to control vertical mosaic,
     //and BG2 mosaic enable to control horizontal mosaic...
-    mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG2] == true) ? regs.mosaic_size : 0];
-    mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? regs.mosaic_size : 0];
+    mtable_x = (uint16*)mosaic_table[(regs.mosaic_enabled[BG2] == true) ? (uint)regs.mosaic_size : 0];
+    mtable_y = (uint16*)mosaic_table[(regs.mosaic_enabled[BG1] == true) ? (uint)regs.mosaic_size : 0];
   }
 
   int32 psx = ((a * CLIP(hofs - cx)) & ~63) + ((b * CLIP(vofs - cy)) & ~63) + ((b * mtable_y[y]) & ~63) + (cx << 8);
@@ -108,7 +108,7 @@ auto PPU::render_line_mode7(uint8 pri0_pos, uint8 pri1_pos) -> void {
 
     if(!palette) continue;
 
-    _x = (regs.mode7_hflip == false) ? (x) : (255 - x);
+    _x = (regs.mode7_hflip == false) ? ((uint)x) : (255 - x);
 
     uint32 col;
     if(regs.direct_color == true && bg == BG1) {

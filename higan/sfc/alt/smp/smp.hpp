@@ -12,7 +12,7 @@ struct SMP : Thread {
   auto mmio_read(uint addr) -> uint;
   auto mmio_write(uint addr, uint data) -> void;
 
-  auto enter() -> void;
+  auto main() -> void;
   auto power() -> void;
   auto reset() -> void;
 
@@ -69,8 +69,8 @@ struct SMP : Thread {
     uint16 pc;
     uint8 sp;
     union {
-      uint16 ya;
-      struct { uint8 order_lsb2(a, y); };
+      uint16_t ya;
+      struct { uint8_t order_lsb2(a, y); };
     };
     uint8 x;
     Flags p;

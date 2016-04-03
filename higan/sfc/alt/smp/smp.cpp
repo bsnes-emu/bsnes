@@ -21,7 +21,7 @@ auto SMP::synchronizeCPU() -> void {
   if(CPU::Threaded == true) {
   //if(clock >= 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(cpu.thread);
   } else {
-    while(clock >= 0) cpu.enter();
+    while(clock >= 0) cpu.main();
   }
 }
 
@@ -29,11 +29,11 @@ auto SMP::synchronizeDSP() -> void {
   if(DSP::Threaded == true) {
   //if(dsp.clock < 0 && scheduler.sync != Scheduler::SynchronizeMode::All) co_switch(dsp.thread);
   } else {
-    while(dsp.clock < 0) dsp.enter();
+    while(dsp.clock < 0) dsp.main();
   }
 }
 
-auto SMP::enter() -> void {
+auto SMP::main() -> void {
   while(clock < 0) op_step();
 }
 
