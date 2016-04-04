@@ -96,13 +96,15 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
         switch (addr & 0xFF) {
             case GB_IO_IF:
                 return gb->io_registers[GB_IO_IF] | 0xE0;
+            case GB_IO_TAC:
+                return gb->io_registers[GB_IO_TAC] | 0xF8;
+            case GB_IO_STAT:
+                return gb->io_registers[GB_IO_STAT] | 0x80;
             case GB_IO_JOYP:
             case GB_IO_DIV:
             case GB_IO_TIMA:
             case GB_IO_TMA:
-            case GB_IO_TAC:
             case GB_IO_LCDC:
-            case GB_IO_STAT:
             case GB_IO_SCY:
             case GB_IO_SCX:
             case GB_IO_LY:
