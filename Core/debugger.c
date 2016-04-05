@@ -315,6 +315,177 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
     return literal;
 }
 
+typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments);
+
+typedef struct {
+    const char *command;
+    unsigned char min_length;
+    debugger_command_imp_t *implementation;
+    const char *help_string; // Null if should not appear in help
+} debugger_command_t;
+
+static const char *lstrip(const char *str)
+{
+    while (*str == ' ' || *str == '\t') {
+        str++;
+    }
+    return str;
+}
+
+static bool cont(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: continue\n");
+        return true;
+    }
+    gb->debug_stopped = false;
+    return false;
+}
+
+static bool next(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: next\n");
+        return true;
+    }
+    
+    gb->debug_stopped = false;
+    gb->debug_next_command = true;
+    gb->debug_call_depth = 0;
+    return false;
+}
+
+static bool step(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: step\n");
+        return true;
+    }
+
+    return false;
+}
+
+static bool finish(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: finish\n");
+        return true;
+    }
+
+    gb->debug_stopped = false;
+    gb->debug_fin_command = true;
+    gb->debug_call_depth = 0;
+    return false;
+}
+
+static bool registers(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: registers\n");
+        return true;
+    }
+
+    gb_log(gb, "AF = %04x\n", gb->registers[GB_REGISTER_AF]);
+    gb_log(gb, "BC = %04x\n", gb->registers[GB_REGISTER_BC]);
+    gb_log(gb, "DE = %04x\n", gb->registers[GB_REGISTER_DE]);
+    gb_log(gb, "HL = %04x\n", gb->registers[GB_REGISTER_HL]);
+    gb_log(gb, "SP = %04x\n", gb->registers[GB_REGISTER_SP]);
+    gb_log(gb, "PC = %04x\n", gb->pc);
+    gb_log(gb, "TIMA = %d/%lu\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
+    gb_log(gb, "Display Controller: LY = %d/%lu\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
+    return true;
+}
+
+static bool breakpoint(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments)) == 0) {
+        gb_log(gb, "Usage: breakpoint <expression>\n");
+        return true;
+    }
+
+    bool error;
+    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    if (!error) {
+        gb_log(gb, "Breakpoint moved to %04x\n", gb->breakpoint = result);
+    }
+    return true;
+}
+
+static bool print(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments)) == 0) {
+        gb_log(gb, "Usage: print <expression>\n");
+        return true;
+    }
+
+    bool error;
+    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    if (!error) {
+        gb_log(gb, "=%04x\n", result);
+    }
+    return true;
+}
+
+static bool examine(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments)) == 0) {
+        gb_log(gb, "Usage: examine <expression>\n");
+        return true;
+    }
+
+    bool error;
+    unsigned short addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    if (!error) {
+        gb_log(gb, "%4x: ", addr);
+        for (int i = 0; i < 16; i++) {
+            gb_log(gb, "%02x ", read_memory(gb, addr + i));
+        }
+        gb_log(gb, "\n");
+    }
+    return true;
+}
+
+static bool help(GB_gameboy_t *gb, char *arguments);
+static const debugger_command_t commands[] = {
+    {"continue", 1, cont, "Continue running until next stop"},
+    {"next", 1, next, "Run the next instruction, skipping over function calls"},
+    {"step", 1, step, "Run the next instruction, stepping into function calls"},
+    {"finish", 1, finish, "Run until the current function returns"},
+    {"registers", 1, registers, "Print values of processor registers and other important registers"},
+    {"breakpoint", 1, breakpoint, "Move the breakpoint to a new position"},
+    {"print", 1, print, "Evaluate and print an expression"},
+    {"eval", 2, print, NULL},
+    {"examine", 2, examine, "Examine values at address"},
+    {"x", 1, examine, NULL},
+    {"help", 1, help, "List available commands"},
+};
+
+static bool help(GB_gameboy_t *gb, char *arguments)
+{
+    /* Todo: command specific help */
+    const debugger_command_t *command = commands;
+    for (size_t i = sizeof(commands) / sizeof(*command); i--; command++) {
+        if (command->help_string) {
+            gb_attributed_log(gb, GB_LOG_BOLD, "%s", command->command);
+            gb_log(gb, ": %s\n", command->help_string);
+        }
+    }
+    return true;
+}
+
+static const debugger_command_t *find_command(const char *string)
+{
+    const debugger_command_t *command = commands;
+    size_t length = strlen(string);
+    for (size_t i = sizeof(commands) / sizeof(*command); i--; command++) {
+        if (command->min_length > length) continue;
+        if (memcmp(command->command, string, length) == 0) { /* Is a substring? */
+            return command;
+        }
+    }
+
+    return NULL;
+}
 
 /* The debugger interface is quite primitive. One letter commands with a single parameter maximum.
    Only one breakpoint is allowed at a time. More features will be added later. */
@@ -343,68 +514,31 @@ next_command:
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
         input = gb->input_callback(gb);
-        switch (*input) {
-            case 'c':
-                gb->debug_stopped = false;
-                break;
-            case 'n':
-                gb->debug_stopped = false;
-                gb->debug_next_command = true;
-                gb->debug_call_depth = 0;
-                break;
-            case 'f':
-                gb->debug_stopped = false;
-                gb->debug_fin_command = true;
-                gb->debug_call_depth = 0;
-                break;
-            case 's':
-                break;
-            case 'r':
-                gb_log(gb, "AF = %04x\n", gb->registers[GB_REGISTER_AF]);
-                gb_log(gb, "BC = %04x\n", gb->registers[GB_REGISTER_BC]);
-                gb_log(gb, "DE = %04x\n", gb->registers[GB_REGISTER_DE]);
-                gb_log(gb, "HL = %04x\n", gb->registers[GB_REGISTER_HL]);
-                gb_log(gb, "SP = %04x\n", gb->registers[GB_REGISTER_SP]);
-                gb_log(gb, "PC = %04x\n", gb->pc);
-                gb_log(gb, "TIMA = %d/%lu\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
-                gb_log(gb, "Display Controller: LY = %d/%lu\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
-                goto next_command;
-            case 'x':
-            {
-                bool error;
-                unsigned short addr = debugger_evaluate(gb, input + 1, (unsigned int)strlen(input + 1), &error);
-                if (!error) {
-                    gb_log(gb, "%4x: ", addr);
-                    for (int i = 0; i < 16; i++) {
-                        gb_log(gb, "%02x ", read_memory(gb, addr + i));
-                    }
-                    gb_log(gb, "\n");
-                }
-                goto next_command;
-            }
-            case 'b':
-            {
-                bool error;
-                unsigned short result = debugger_evaluate(gb, input + 1, (unsigned int)strlen(input + 1), &error);
-                if (!error) {
-                    gb_log(gb, "Breakpoint moved to %04x\n", gb->breakpoint = result);
-                }
-                goto next_command;
-            }
 
-            case 'p':
-            {
-                bool error;
-                unsigned short result = debugger_evaluate(gb, input + 1, (unsigned int)strlen(input + 1), &error);
-                if (!error) {
-                    gb_log(gb, "=%04x\n", result);
-                }
-                goto next_command;
-            }
-
-            default:
-                goto next_command;
+        char *command_string = input;
+        char *arguments = strchr(input, ' ');
+        if (arguments) {
+            /* Actually "split" the string. */
+            arguments[0] = 0;
+            arguments++;
         }
+        else {
+            arguments = "";
+        }
+
+        const debugger_command_t *command = find_command(command_string);
+        if (command) {
+            if (command->implementation(gb, arguments)) {
+                goto next_command;
+            }
+        }
+        else {
+            gb_log(gb, "%s: no such command.\n", command_string);
+            goto next_command;
+        }
+
+        /* Split to arguments and command */
+
         free(input);
     }
 }
