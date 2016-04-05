@@ -100,6 +100,8 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
                 return gb->io_registers[GB_IO_TAC] | 0xF8;
             case GB_IO_STAT:
                 return gb->io_registers[GB_IO_STAT] | 0x80;
+            case GB_IO_DMG_EMULATION_INDICATION:
+                return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
             case GB_IO_JOYP:
             case GB_IO_DIV:
             case GB_IO_TIMA:
@@ -155,7 +157,7 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
             }
 
             case GB_IO_KEY1:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode) {
                     return 0xFF;
                 }
                 return (gb->io_registers[GB_IO_KEY1] & 0x7F) | (gb->cgb_double_speed? 0xFE : 0x7E);
@@ -349,6 +351,7 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
             case GB_IO_HDMA3:
             case GB_IO_HDMA4:
             case GB_IO_SB:
+            case GB_IO_DMG_EMULATION_INDICATION:
                 gb->io_registers[addr & 0xFF] = value;
                 return;
 
@@ -382,8 +385,9 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
                 return;
 
             case GB_IO_DMG_EMULATION:
-                // Todo: Can it be disabled? What about values other than 1?
-                gb->cgb_mode = false;
+                if (gb->is_cgb && !gb->bios_finished) {
+                    gb->cgb_mode = value != 4; /* The real "contents" of this register aren't quite known yet. */
+                }
                 return;
 
             case GB_IO_DMA:

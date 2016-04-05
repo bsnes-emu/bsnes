@@ -88,8 +88,11 @@ enum {
     GB_IO_OBP1       = 0x49, // Object Palette 1 Data (R/W) - Non CGB Mode Only
     GB_IO_WY         = 0x4a, // Window Y Position (R/W)
     GB_IO_WX         = 0x4b, // Window X Position minus 7 (R/W)
-
-    /* Missing */
+    // Has some undocumented compatibility flags written at boot.
+    // Unfortunately it is not readable or writable after boot has finished, so research of this
+    // register is quite limited. The value written to this register, however, can be controlled
+    // in some cases.
+    GB_IO_DMG_EMULATION = 0x4c,
 
     /* General CGB features */
     GB_IO_KEY1       = 0x4d, // CGB Mode Only - Prepare Speed Switch
@@ -117,7 +120,8 @@ enum {
     GB_IO_OBPI       = 0x6a, // CGB Mode Only - Sprite Palette Index
     GB_IO_OBPD       = 0x6b, // CGB Mode Only - Sprite Palette Data
 
-    GB_IO_DMG_EMULATION   = 0x6c, // (FEh) Bit 0 (Read/Write) - CGB Mode Only
+    // 1 is written for DMG ROMs on a CGB. Does not appear to have an effect.
+    GB_IO_DMG_EMULATION_INDICATION   = 0x6c, // (FEh) Bit 0 (Read/Write)
 
     /* Missing */
 
