@@ -126,12 +126,18 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, unsigned char r, unsigned char g, u
     return SDL_MapRGB(screen->format, r, g, b);
 }
 
+GB_gameboy_t gb;
+
+static void debugger_interrupt(int ignore)
+{
+    gb.debug_stopped = true;
+}
+
 #ifdef __APPLE__
 extern void cocoa_disable_filtering(void);
 #endif
 int main(int argc, char **argv)
 {
-    GB_gameboy_t gb;
     bool dmg = false;
 
 #define str(x) #x
@@ -174,6 +180,9 @@ usage:
         exit(1);
     }
     
+
+    signal(SIGINT, debugger_interrupt);
+
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode(160, 144, 32, SDL_SWSURFACE );
 #ifdef __APPLE__
