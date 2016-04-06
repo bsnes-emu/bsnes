@@ -97,8 +97,14 @@ static char *default_input_callback(GB_gameboy_t *gb)
     size_t size = 0;
     printf(">");
     getline(&expression, &size, stdin);
+
     if (!expression) {
         return strdup("");
+    }
+
+    size_t length = strlen(expression);
+    if (expression[length - 1] == '\n') {
+        expression[length - 1] = 0;
     }
     return expression;
 }
