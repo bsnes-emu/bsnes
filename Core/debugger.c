@@ -396,6 +396,27 @@ static bool registers(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
+/* Find the index of the closest breakpoint equal or greater to addr */
+static unsigned short find_breakpoint(GB_gameboy_t *gb, unsigned short addr)
+{
+    if (!gb->breakpoints) {
+        return 0;
+    }
+    int min = 0;
+    int max = gb->n_breakpoints;
+    while (min < max) {
+        unsigned short pivot = (min + max) / 2;
+        if (gb->breakpoints[pivot] == addr) return pivot;
+        if (gb->breakpoints[pivot] > addr) {
+            max = pivot - 1;
+        }
+        else {
+            min = pivot + 1;
+        }
+    }
+    return (unsigned short) min;
+}
+
 static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
@@ -405,10 +426,83 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 
     bool error;
     unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
-    if (!error) {
-        gb_log(gb, "Breakpoint moved to %04x\n", gb->breakpoint = result);
+
+    if (error) return true;
+
+    unsigned short index = find_breakpoint(gb, result);
+    if (index < gb->n_breakpoints && gb->breakpoints[index] == result) {
+        gb_log(gb, "Breakpoint already set at %04x\n", result);
+        return true;
     }
+
+    gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
+    memmove(&gb->breakpoints[index + 1], &gb->breakpoints[index], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
+    gb->breakpoints[index] = result;
+    gb->n_breakpoints++;
+
+    gb_log(gb, "Breakpoint set at %04x\n", result);
     return true;
+}
+
+static bool delete(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments)) == 0) {
+        gb_log(gb, "Delete all breakpoints? ");
+        char *answer = gb->input_callback(gb);
+        if (answer[0] == 'Y' || answer[0] == 'y') {
+            free(gb->breakpoints);
+            gb->breakpoints = NULL;
+            gb->n_breakpoints = 0;
+        }
+        return true;
+    }
+
+    bool error;
+    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+
+    if (error) return true;
+
+    unsigned short index = find_breakpoint(gb, result);
+    if (index >= gb->n_breakpoints || gb->breakpoints[index] != result) {
+        gb_log(gb, "No breakpoint set at %04x\n", result);
+        return true;
+    }
+
+    gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
+    memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
+    gb->n_breakpoints--;
+
+    gb_log(gb, "Breakpoint removed from %04x\n", result);
+    return true;
+}
+
+static bool list(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: list\n");
+        return true;
+    }
+
+    if (gb->n_breakpoints == 0) {
+        gb_log(gb, "No breakpoints set.\n");
+        return true;
+    }
+
+    gb_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
+    for (unsigned short i = 0; i < gb->n_breakpoints; i++) {
+        gb_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i]);
+    }
+
+    return true;
+}
+
+static bool should_break(GB_gameboy_t *gb, unsigned short addr)
+{
+    unsigned short index = find_breakpoint(gb, addr);
+    if (index < gb->n_breakpoints && gb->breakpoints[index] == addr) {
+        return true;
+    }
+    return false;
 }
 
 static bool print(GB_gameboy_t *gb, char *arguments)
@@ -453,6 +547,8 @@ static const debugger_command_t commands[] = {
     {"finish", 1, finish, "Run until the current function returns"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"breakpoint", 1, breakpoint, "Move the breakpoint to a new position"},
+    {"list", 1, list, "List all set breakpoints"},
+    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints"},
     {"print", 1, print, "Evaluate and print an expression"},
     {"eval", 2, print, NULL},
     {"examine", 2, examine, "Examine values at address"},
@@ -505,7 +601,7 @@ next_command:
     if (input) {
         free(input);
     }
-    if (gb->pc == gb->breakpoint && !gb->debug_stopped) {
+    if (!gb->debug_stopped && should_break(gb, gb->pc)) {
         gb->debug_stopped = true;
         gb_log(gb, "Breakpoint: PC = %04x\n", gb->pc);
         cpu_disassemble(gb, gb->pc, 5);

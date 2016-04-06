@@ -270,13 +270,14 @@ typedef struct GB_gameboy_s{
     struct {} first_unsaved_data;
     bool turbo;
     bool debug_stopped;
-    unsigned short breakpoint;
     GB_log_callback_t log_callback;
     GB_input_callback_t input_callback;
     GB_rgb_encode_callback_t rgb_encode_callback;
     void *user_data;
     int debug_call_depth;
     bool debug_fin_command, debug_next_command;
+    unsigned short n_breakpoints;
+    unsigned short *breakpoints;
 
 } GB_gameboy_t;
 

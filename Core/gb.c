@@ -124,7 +124,6 @@ void gb_init(GB_gameboy_t *gb)
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
     gb->last_vblank = clock();
-    gb->breakpoint = 0xFFFF;
     gb->cgb_ram_bank = 1;
 
     /* Todo: this bypasses the rgb encoder because it is not set yet. */
@@ -152,7 +151,6 @@ void gb_init_cgb(GB_gameboy_t *gb)
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
     gb->last_vblank = clock();
-    gb->breakpoint = 0xFFFF;
     gb->cgb_ram_bank = 1;
     gb->input_callback = default_input_callback;
     gb->cartridge_type = &cart_defs[0]; // Default cartridge type
@@ -174,6 +172,9 @@ void gb_free(GB_gameboy_t *gb)
     }
     if (gb->audio_buffer) {
         free(gb->audio_buffer);
+    }
+    if (gb->breakpoints) {
+        free(gb->breakpoints);
     }
 }
 
