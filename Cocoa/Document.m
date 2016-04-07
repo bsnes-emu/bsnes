@@ -309,7 +309,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 
 - (IBAction)consoleInput:(NSTextField *)sender {
     NSString *line = [sender stringValue];
-    if ([line isEqualToString:@""]) {
+    if ([line isEqualToString:@""] && lastConsoleInput) {
         line = lastConsoleInput;
     }
     else if (line) {

@@ -610,6 +610,9 @@ next_command:
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
         input = gb->input_callback(gb);
+        if (!input[0]) {
+            goto next_command;
+        }
 
         char *command_string = input;
         char *arguments = strchr(input, ' ');
