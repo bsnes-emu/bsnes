@@ -58,7 +58,12 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     if (self) {
         has_debugger_input = [[NSConditionLock alloc] initWithCondition:0];
         debugger_input_queue = [[NSMutableArray alloc] init];
-        [self initCGB];
+        if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
+            [self initDMG];
+        }
+        else {
+            [self initCGB];
+        }
     }
     return self;
 }
@@ -142,6 +147,10 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     else {
         [self initDMG];
     }
+    if ([sender tag] != 0) {
+        /* User explictly selected a model, save the preference */
+        [[NSUserDefaults standardUserDefaults] setBool:!gb.is_cgb forKey:@"EmulateDMG"];
+    }
     [self readFromFile:self.fileName ofType:@"gb"];
     [self start];
 }
@@ -165,6 +174,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     [super windowControllerDidLoadNib:aController];
     self.consoleOutput.textContainerInset = NSMakeSize(4, 4);
     [self.view becomeFirstResponder];
+    self.view.shouldBlendFrameWithPrevious = ![[NSUserDefaults standardUserDefaults] boolForKey:@"DisableFrameBlending"];
     [self start];
 
 }
@@ -216,6 +226,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 - (IBAction)toggleBlend:(id)sender
 {
     self.view.shouldBlendFrameWithPrevious ^= YES;
+    [[NSUserDefaults standardUserDefaults] setBool:!self.view.shouldBlendFrameWithPrevious forKey:@"DisableFrameBlending"];
 }
 
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
