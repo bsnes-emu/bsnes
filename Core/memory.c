@@ -264,6 +264,11 @@ static void write_mbc(GB_gameboy_t *gb, unsigned short addr, unsigned char value
             break;
     }
 
+    /* Some games assume banks wrap around. We can do this if ROM size is a power of two */
+    if (gb->mbc_rom_bank >= gb->rom_size / 0x4000 && (gb->rom_size & (gb->rom_size - 1)) == 0 && gb->rom_size != 0) {
+        gb->mbc_rom_bank %= gb->rom_size / 0x4000;
+    }
+
     if (gb->cartridge_type->mbc_type != MBC5 && !gb->mbc_rom_bank) {
         gb->mbc_rom_bank = 1;
     }
