@@ -539,6 +539,50 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
+static bool mbc(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: mbc\n");
+        return true;
+    }
+
+    const GB_cartridge_t *cartridge = gb->cartridge_type;
+
+    if (cartridge->has_ram) {
+        gb_log(gb, "Cartrdige includes%s RAM: %zx\n", cartridge->has_battery? "battery-backed ": "", gb->mbc_ram_size);
+    }
+    else {
+        gb_log(gb, "No cartridge RAM\n");
+    }
+
+    if (cartridge->mbc_type) {
+        gb_log(gb, "MBC%d\n", cartridge->mbc_type);
+        gb_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
+        if (cartridge->has_ram) {
+            gb_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
+            gb_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+        }
+        if (cartridge->mbc_type == MBC1) {
+            gb_log(gb, "MBC1 banking mode is %s\n", gb->mbc_ram_banking? "RAM" : "ROM");
+        }
+
+    }
+    else {
+        gb_log(gb, "No MBC\n");
+    }
+
+    if (cartridge->has_rumble) {
+        gb_log(gb, "Cart contains a rumble pak\n");
+    }
+
+    if (cartridge->has_rtc) {
+        gb_log(gb, "Cart contains a real time clock\n");
+    }
+
+
+    return true;
+}
+
 static bool help(GB_gameboy_t *gb, char *arguments);
 static const debugger_command_t commands[] = {
     {"continue", 1, cont, "Continue running until next stop"},
@@ -546,6 +590,8 @@ static const debugger_command_t commands[] = {
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
+    {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
+    {"mbc", 3, mbc, NULL},
     {"breakpoint", 1, breakpoint, "Move the breakpoint to a new position"},
     {"list", 1, list, "List all set breakpoints"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints"},
