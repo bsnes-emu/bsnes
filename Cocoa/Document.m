@@ -1,6 +1,7 @@
 #include <CoreAudio/CoreAudio.h>
 #include "AudioClient.h"
-#import "Document.h"
+#include "Document.h"
+#include "AppDelegate.h"
 #include "gb.h"
 
 @interface Document ()
@@ -234,14 +235,19 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     if([anItem action] == @selector(mute:)) {
         [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
     }
-    if ([anItem action] == @selector(togglePause:)) {
+    else if ([anItem action] == @selector(togglePause:)) {
         [(NSMenuItem*)anItem setState:!running];
     }
-    if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
+    else if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
         [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !gb.is_cgb) || (anItem.tag == 2 && gb.is_cgb)];
     }
-    if([anItem action] == @selector(toggleBlend:)) {
+    else if ([anItem action] == @selector(toggleBlend:)) {
         [(NSMenuItem*)anItem setState:self.view.shouldBlendFrameWithPrevious];
+    }
+    else if ([anItem action] == @selector(interrupt:)) {
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
+            return false;
+        }
     }
     return [super validateUserInterfaceItem:anItem];
 }
@@ -307,7 +313,9 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
                 [self log:"[...]\n"];
             }
             [self.consoleOutput scrollToEndOfDocument:nil];
-            [self.consoleWindow orderBack:nil];
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
+                [self.consoleWindow orderBack:nil];
+            }
         }
         pendingLogLines--;
     });

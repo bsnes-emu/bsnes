@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1509" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8191"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -342,6 +342,13 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Developer" id="UVb-cc-at0">
                         <items>
+                            <menuItem title="Developer Mode" id="Qx6-Tt-zZR">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleDeveloperMode:" target="Voe-Tx-rLC" id="PIc-o3-bzb"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="66c-T0-8pW"/>
                             <menuItem title="Show Console" id="Wse-UY-Y9l">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -353,6 +360,7 @@
                                     <action selector="clearConsole:" target="-1" id="1UW-8J-Uwl"/>
                                 </connections>
                             </menuItem>
+                            <menuItem isSeparatorItem="YES" id="3If-Yf-U7B"/>
                             <menuItem title="Break Debugger" keyEquivalent="c" id="uBD-GY-Doi">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                                 <connections>
