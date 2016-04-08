@@ -194,6 +194,11 @@ usage:
     gb_set_pixels_output(&gb, screen->pixels);
     gb_set_rgb_encode_callback(&gb, rgb_encode);
 
+    /* Despite sound not being supported in the SDL port, registers PCM_12 and PCM_34 require
+       a sample rate to be set in order to operate. This also means PCM_XX emulation is not
+       really accurate yet, as it depends on the sample rate. */
+    gb_set_sample_rate(&gb, 96000);
+
     while (true) {
         gb_run(&gb);
     }
