@@ -59,7 +59,7 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
     uint8 r = (regs.mdr & 0x3e);
     if(status.auto_joypad_active) r |= 0x01;
     if(hcounter() <= 2 || hcounter() >= 1096) r |= 0x40;  //hblank
-    if(vcounter() >= (ppu.overscan() == false ? 225 : 240)) r |= 0x80;  //vblank
+    if(vcounter() >= ppu.vdisp()) r |= 0x80;  //vblank
     return r;
   }
 
@@ -195,7 +195,7 @@ auto CPU::cpuPortWrite(uint24 addr, uint8 data) -> void {
 
   //WRIO
   if(addr == 0x4201) {
-    if(status.pio.bit(7) && !data.bit(7)) ppu.latch_counters();
+    if(status.pio.bit(7) && !data.bit(7)) ppu.latchCounters();
     status.pio = data;
   }
 

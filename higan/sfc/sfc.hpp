@@ -1,5 +1,8 @@
 #pragma once
 
+//license: GPLv3
+//started: 2004-10-14
+
 #include <emulator/emulator.hpp>
 #include <processor/arm/arm.hpp>
 #include <processor/gsu/gsu.hpp>
@@ -10,17 +13,9 @@
 
 namespace SuperFamicom {
   namespace Info {
-    static const string Name = "bsnes";
     static const uint SerializerVersion = 30;
   }
 }
-
-/*
-  bsnes - Super Famicom emulator
-  author: byuu
-  license: GPLv3
-  project started: 2004-10-14
-*/
 
 #include <libco/libco.h>
 

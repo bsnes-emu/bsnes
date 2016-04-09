@@ -1,21 +1,16 @@
 #pragma once
 
+//license: GPLv3
+//started: 2012-03-19
+
 #include <emulator/emulator.hpp>
 #include <processor/arm/arm.hpp>
 
 namespace GameBoyAdvance {
   namespace Info {
-    static const string Name = "bgba";
     static const uint SerializerVersion = 3;
   }
 }
-
-/*
-  bgba - Game Boy Advance emulator
-  authors: byuu, Cydrak
-  license: GPLv3
-  project started: 2012-03-19
-*/
 
 #include <libco/libco.h>
 

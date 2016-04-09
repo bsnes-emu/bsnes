@@ -1,21 +1,16 @@
 #pragma once
 
+//license: GPLv3
+//started: 2016-01-26
+
 #include <emulator/emulator.hpp>
 #include <processor/v30mz/v30mz.hpp>
 
 namespace WonderSwan {
   namespace Info {
-    static const string Name = "bws";
     static const uint SerializerVersion = 1;
   }
 }
-
-/*
-  bws - WonderSwan, WonderSwan Color, and SwanCrystal emulator
-  author: byuu
-  license: GPLv3
-  project started: 2016-01-26
-*/
 
 #include <libco/libco.h>
 

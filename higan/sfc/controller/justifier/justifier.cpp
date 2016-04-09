@@ -32,7 +32,7 @@ auto Justifier::main() -> void {
   unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
 
   signed x = (active == 0 ? player1.x : player2.x), y = (active == 0 ? player1.y : player2.y);
-  bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+  bool offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
 
   if(offscreen == false) {
     unsigned target = y * 1364 + (x + 24) * 4;

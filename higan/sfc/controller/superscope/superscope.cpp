@@ -52,7 +52,7 @@ auto SuperScope::main() -> void {
     ny += y;
     x = max(-16, min(256 + 16, nx));
     y = max(-16, min(240 + 16, ny));
-    offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+    offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
   }
 
   prev = next;
@@ -96,7 +96,7 @@ auto SuperScope::data() -> uint2 {
       pauselock = false;
     }
 
-    offscreen = (x < 0 || y < 0 || x >= 256 || y >= (ppu.overscan() ? 240 : 225));
+    offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
   }
 
   switch(counter++) {

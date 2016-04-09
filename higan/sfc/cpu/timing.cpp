@@ -53,7 +53,7 @@ auto CPU::scanline() -> void {
   status.dram_refreshed = false;
 
   //HDMA triggers once every visible scanline
-  if(vcounter() <= (ppu.overscan() == false ? 224 : 239)) {
+  if(vcounter() < ppu.vdisp()) {
     status.hdma_position = 1104;
     status.hdma_triggered = false;
   }

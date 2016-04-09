@@ -1,21 +1,16 @@
 #pragma once
 
+//license: GPLv3
+//started: 2010-12-27
+
 #include <emulator/emulator.hpp>
 #include <processor/lr35902/lr35902.hpp>
 
 namespace GameBoy {
   namespace Info {
-    static const string Name = "bgb";
     static const uint SerializerVersion = 4;
   }
 }
-
-/*
-  bgb - Game Boy, Super Game Boy, and Game Boy Color emulator
-  author: byuu
-  license: GPLv3
-  project started: 2010-12-27
-*/
 
 #include <libco/libco.h>
 

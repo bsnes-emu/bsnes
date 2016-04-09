@@ -1,21 +1,16 @@
 #pragma once
 
+//license: GPLv3
+//started: 2011-09-05
+
 #include <emulator/emulator.hpp>
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
   namespace Info {
-    static const string Name = "bnes";
     static const uint SerializerVersion = 2;
   }
 }
-
-/*
-  bnes - Famicom emulator
-  authors: byuu, Ryphecha
-  license: GPLv3
-  project started: 2011-09-05
-*/
 
 #include <libco/libco.h>
 

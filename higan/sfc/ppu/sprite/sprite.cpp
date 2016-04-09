@@ -28,8 +28,8 @@ auto PPU::Sprite::scanline() -> void {
   auto oam_item = t.item[t.active];
   auto oam_tile = t.tile[t.active];
 
-  if(t.y == (!self.regs.overscan ? 225 : 240) && !self.regs.display_disable) address_reset();
-  if(t.y >= (!self.regs.overscan ? 224 : 239)) return;
+  if(t.y == self.vdisp() && !self.regs.display_disable) address_reset();
+  if(t.y >= self.vdisp() - 1) return;
 
   for(auto n : range(32)) oam_item[n].valid = false;  //default to invalid
   for(auto n : range(34)) oam_tile[n].valid = false;  //default to invalid
@@ -148,15 +148,15 @@ auto PPU::Sprite::tilefetch() -> void {
 
       oam_tile[n].d0 = ppu.vram[addr +  0];
       oam_tile[n].d1 = ppu.vram[addr +  1];
-      self.add_clocks(2);
+      self.addClocks(2);
 
       oam_tile[n].d2 = ppu.vram[addr + 16];
       oam_tile[n].d3 = ppu.vram[addr + 17];
-      self.add_clocks(2);
+      self.addClocks(2);
     }
   }
 
-  if(t.tile_count < 34) self.add_clocks((34 - t.tile_count) * 4);
+  if(t.tile_count < 34) self.addClocks((34 - t.tile_count) * 4);
   regs.time_over  |= (t.tile_count > 34);
   regs.range_over |= (t.item_count > 32);
 }

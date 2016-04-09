@@ -11,7 +11,7 @@ auto CPU::pollInterrupts() -> void {
   }
 
   //NMI test
-  bool nmi_valid = (vcounter(2) >= (!ppu.overscan() ? 225 : 240));
+  bool nmi_valid = vcounter(2) >= ppu.vdisp();
   if(!status.nmi_valid && nmi_valid) {
     //0->1 edge sensitive transition
     status.nmi_line = true;
@@ -29,7 +29,7 @@ auto CPU::pollInterrupts() -> void {
   }
 
   //IRQ test
-  bool irq_valid = (status.virq_enabled || status.hirq_enabled);
+  bool irq_valid = status.virq_enabled || status.hirq_enabled;
   if(irq_valid) {
     if((status.virq_enabled && vcounter(10) != (status.virq_pos))
     || (status.hirq_enabled && hcounter(10) != (status.hirq_pos + 1) * 4)
