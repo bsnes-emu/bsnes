@@ -1,7 +1,7 @@
 Justifier::Justifier(bool port, bool chained):
 Controller(port),
 chained(chained),
-device(chained == false ? (unsigned)Device::ID::Justifier : (unsigned)Device::ID::Justifiers)
+device(chained == false ? Device::Justifier : Device::Justifiers)
 {
   create(Controller::Enter, 21477272);
   latched = 0;

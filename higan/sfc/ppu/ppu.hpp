@@ -13,7 +13,6 @@ struct PPU : Thread, PPUcounter {
 
   static auto Enter() -> void;
   auto main() -> void;
-  auto enable() -> void;
   auto power() -> void;
   auto reset() -> void;
 

@@ -7,14 +7,14 @@ auto CPU::stepAutoJoypadPoll() -> void {
 
     if(status.auto_joypad_active && status.auto_joypad_latch) {
       if(status.auto_joypad_counter == 0) {
-        device.controllerPort1->latch(1);
-        device.controllerPort2->latch(1);
-        device.controllerPort1->latch(0);
-        device.controllerPort2->latch(0);
+        SuperFamicom::peripherals.controllerPort1->latch(1);
+        SuperFamicom::peripherals.controllerPort2->latch(1);
+        SuperFamicom::peripherals.controllerPort1->latch(0);
+        SuperFamicom::peripherals.controllerPort2->latch(0);
       }
 
-      uint2 port0 = device.controllerPort1->data();
-      uint2 port1 = device.controllerPort2->data();
+      uint2 port0 = SuperFamicom::peripherals.controllerPort1->data();
+      uint2 port1 = SuperFamicom::peripherals.controllerPort2->data();
 
       status.joy1 = status.joy1 << 1 | port0.bit(0);
       status.joy2 = status.joy2 << 1 | port1.bit(0);

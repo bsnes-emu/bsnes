@@ -425,7 +425,7 @@ auto Interface::unload() -> void {
 }
 
 auto Interface::connect(uint port, uint device) -> void {
-  SuperFamicom::device.connect(port, (SuperFamicom::Device::ID)device);
+  SuperFamicom::peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

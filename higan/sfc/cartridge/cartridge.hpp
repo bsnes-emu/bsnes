@@ -35,20 +35,6 @@ struct Cartridge : property<Cartridge> {
   MappedRAM rom;
   MappedRAM ram;
 
-  struct Mapping {
-    function<auto (uint24, uint8) -> uint8> reader;
-    function<auto (uint24, uint8) -> void> writer;
-    string addr;
-    uint size = 0;
-    uint base = 0;
-    uint mask = 0;
-
-    Mapping() = default;
-    Mapping(const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&);
-    Mapping(SuperFamicom::Memory&);
-  };
-  vector<Mapping> mapping;
-
   struct Memory {
     unsigned id;
     string name;

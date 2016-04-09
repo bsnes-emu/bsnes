@@ -39,7 +39,6 @@ auto System::unserialize(serializer& s) -> bool {
 
 auto System::serialize(serializer& s) -> void {
   s.integer((uint&)_region);
-  s.integer((uint&)_expansionPort);
 }
 
 auto System::serializeAll(serializer& s) -> void {

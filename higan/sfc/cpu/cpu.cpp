@@ -85,38 +85,6 @@ auto CPU::main() -> void {
   instruction();
 }
 
-auto CPU::enable() -> void {
-  function<auto (uint24, uint8) -> uint8> reader;
-  function<auto (uint24, uint8) -> void> writer;
-
-  reader = {&CPU::apuPortRead, this};
-  writer = {&CPU::apuPortWrite, this};
-  bus.map(reader, writer, 0x00, 0x3f, 0x2140, 0x217f);
-  bus.map(reader, writer, 0x80, 0xbf, 0x2140, 0x217f);
-
-  reader = {&CPU::cpuPortRead, this};
-  writer = {&CPU::cpuPortWrite, this};
-  bus.map(reader, writer, 0x00, 0x3f, 0x2180, 0x2183);
-  bus.map(reader, writer, 0x80, 0xbf, 0x2180, 0x2183);
-
-  bus.map(reader, writer, 0x00, 0x3f, 0x4016, 0x4017);
-  bus.map(reader, writer, 0x80, 0xbf, 0x4016, 0x4017);
-
-  bus.map(reader, writer, 0x00, 0x3f, 0x4200, 0x421f);
-  bus.map(reader, writer, 0x80, 0xbf, 0x4200, 0x421f);
-
-  reader = {&CPU::dmaPortRead, this};
-  writer = {&CPU::dmaPortWrite, this};
-  bus.map(reader, writer, 0x00, 0x3f, 0x4300, 0x437f);
-  bus.map(reader, writer, 0x80, 0xbf, 0x4300, 0x437f);
-
-  reader = [](uint24 addr, uint8) -> uint8 { return cpu.wram[addr]; };
-  writer = [](uint24 addr, uint8 data) -> void { cpu.wram[addr] = data; };
-  bus.map(reader, writer, 0x00, 0x3f, 0x0000, 0x1fff, 0x002000);
-  bus.map(reader, writer, 0x80, 0xbf, 0x0000, 0x1fff, 0x002000);
-  bus.map(reader, writer, 0x7e, 0x7f, 0x0000, 0xffff, 0x020000);
-}
-
 auto CPU::power() -> void {
   for(auto& byte : wram) byte = random(0x55);
 
@@ -154,6 +122,26 @@ auto CPU::reset() -> void {
   create(Enter, system.cpuFrequency());
   coprocessors.reset();
   PPUcounter::reset();
+
+  function<auto (uint24, uint8) -> uint8> reader;
+  function<auto (uint24, uint8) -> void> writer;
+
+  reader = {&CPU::apuPortRead, this};
+  writer = {&CPU::apuPortWrite, this};
+  bus.map(reader, writer, "00-3f,80-bf:2140-217f");
+
+  reader = {&CPU::cpuPortRead, this};
+  writer = {&CPU::cpuPortWrite, this};
+  bus.map(reader, writer, "00-3f,80-bf:2180-2183,4016-4017,4200-421f");
+
+  reader = {&CPU::dmaPortRead, this};
+  writer = {&CPU::dmaPortWrite, this};
+  bus.map(reader, writer, "00-3f,80-bf:4300-437f");
+
+  reader = [](uint24 addr, uint8) -> uint8 { return cpu.wram[addr]; };
+  writer = [](uint24 addr, uint8 data) -> void { cpu.wram[addr] = data; };
+  bus.map(reader, writer, "00-3f,80-bf:0000-1fff", 0x2000);
+  bus.map(reader, writer, "7e-7f:0000-ffff", 0x20000);
 
   //CPU
   regs.pc     = 0x000000;

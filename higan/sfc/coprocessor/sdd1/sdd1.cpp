@@ -11,10 +11,6 @@ auto SDD1::init() -> void {
 }
 
 void SDD1::load() {
-  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
-  //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, 0x00, 0x3f, 0x4300, 0x437f);
-  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, 0x80, 0xbf, 0x4300, 0x437f);
 }
 
 auto SDD1::unload() -> void {
@@ -26,6 +22,10 @@ auto SDD1::power() -> void {
 }
 
 auto SDD1::reset() -> void {
+  //hook S-CPU DMA MMIO registers to gather information for struct dma[];
+  //buffer address and transfer size information for use in SDD1::mcu_read()
+  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, "00-3f,80-bf:4300-437f");
+
   sdd1_enable = 0x00;
   xfer_enable = 0x00;
   dma_ready = false;

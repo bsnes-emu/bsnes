@@ -2,10 +2,56 @@
 
 namespace SuperFamicom {
 
-S21FX s21fx;
+S21FX::S21FX() {
+  create(S21FX::Enter, 10'000'000);
+
+  resetVector.byte(0) = bus.read(0xfffc, 0x00);
+  resetVector.byte(1) = bus.read(0xfffd, 0x00);
+
+  bus.map({&S21FX::read, this}, {&S21FX::write, this}, "00-3f,80-bf:2184-21ff");
+  bus.map({&S21FX::read, this}, {&S21FX::write, this}, "00:fffc-fffd");
+
+  booted = false;
+
+  for(auto& byte : ram) byte = 0xdb;  //stp
+  ram[0] = 0x6c;  //jmp ($fffc)
+  ram[1] = 0xfc;
+  ram[2] = 0xff;
+
+  if(auto buffer = file::read({interface->path(ID::System), "21fx.rom"})) {
+    memory::copy(ram, sizeof(ram), buffer.data(), buffer.size());
+  }
+
+  string filename{interface->path(ID::SuperFamicom), "21fx.so"};
+  if(link.openAbsolute(filename)) {
+    linkInit = link.sym("fx_init");
+    linkMain = link.sym("fx_main");
+  }
+}
+
+S21FX::~S21FX() {
+  bus.unmap("00-3f,80-bf:2184-21ff");
+  bus.unmap("00:fffc-fffd");
+
+  //note: this is an awful hack ...
+  //since the bus maps are lambdas, we can't safely restore the original reset vector handler
+  //as such, we install a basic read-only lambda that simply returns the known reset vector
+  //the downside is that if 00:fffc-fffd were anything but ROM; it will now only act as ROM
+  //given that this is the only device that hooks the reset vector like this,
+  //it's not worth the added complexity to support some form of reversible bus mapping hooks
+  uint vector = resetVector;
+  bus.map([vector](uint24 addr, uint8) -> uint8 {
+    return vector >> addr * 8;
+  }, [](uint24, uint8) -> void {
+  }, "00:fffc-fffd", 2);
+
+  if(link.open()) link.close();
+  linkInit.reset();
+  linkMain.reset();
+}
 
 auto S21FX::Enter() -> void {
-  while(true) scheduler.synchronize(), s21fx.main();
+  while(true) scheduler.synchronize(), peripherals.expansionPort->main();
 }
 
 auto S21FX::main() -> void {
@@ -19,47 +65,6 @@ auto S21FX::main() -> void {
   );
   if(linkMain) linkMain({});
   while(true) step(10'000'000);
-}
-
-auto S21FX::init() -> void {
-}
-
-auto S21FX::load() -> void {
-  resetVector.byte(0) = bus.read(0xfffc, 0x00);
-  resetVector.byte(1) = bus.read(0xfffd, 0x00);
-
-  for(auto& byte : ram) byte = 0xdb;  //stp
-  ram[0] = 0x6c;  //jmp ($fffc)
-  ram[1] = 0xfc;
-  ram[2] = 0xff;
-
-  bus.map({&S21FX::read, &s21fx}, {&S21FX::write, &s21fx}, 0x00, 0x00, 0xfffc, 0xfffd);
-  bus.map({&S21FX::read, &s21fx}, {&S21FX::write, &s21fx}, 0x00, 0x3f, 0x2184, 0x21ff);
-  bus.map({&S21FX::read, &s21fx}, {&S21FX::write, &s21fx}, 0x80, 0xbf, 0x2184, 0x21ff);
-
-  if(auto buffer = file::read({interface->path(ID::System), "21fx.rom"})) {
-    memory::copy(ram, sizeof(ram), buffer.data(), buffer.size());
-  }
-
-  string filename{interface->path(ID::SuperFamicom), "21fx.so"};
-  if(link.openAbsolute(filename)) {
-    linkInit = link.sym("fx_init");
-    linkMain = link.sym("fx_main");
-  }
-}
-
-auto S21FX::unload() -> void {
-  if(link.open()) link.close();
-  linkInit.reset();
-  linkMain.reset();
-}
-
-auto S21FX::power() -> void {
-}
-
-auto S21FX::reset() -> void {
-  create(S21FX::Enter, 10'000'000);
-  booted = false;
 }
 
 auto S21FX::read(uint24 addr, uint8 data) -> uint8 {

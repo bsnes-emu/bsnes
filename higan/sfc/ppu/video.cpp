@@ -144,17 +144,17 @@ auto Video::drawCursor(uint32 color, int x, int y) -> void {
 }
 
 auto Video::drawCursors() -> void {
-  switch((Device::ID)settings.controllerPort2) {
-  case Device::ID::SuperScope:
-    if(dynamic_cast<SuperScope*>(device.controllerPort2)) {
-      auto& controller = (SuperScope&)*device.controllerPort2;
+  switch(settings.controllerPort2) {
+  case Device::SuperScope:
+    if(dynamic_cast<SuperScope*>(peripherals.controllerPort2)) {
+      auto& controller = (SuperScope&)*peripherals.controllerPort2;
       drawCursor(0xff0000ff, controller.x, controller.y);
     }
     break;
-  case Device::ID::Justifier:
-  case Device::ID::Justifiers:
-    if(dynamic_cast<Justifier*>(device.controllerPort2)) {
-      auto& controller = (Justifier&)*device.controllerPort2;
+  case Device::Justifier:
+  case Device::Justifiers:
+    if(dynamic_cast<Justifier*>(peripherals.controllerPort2)) {
+      auto& controller = (Justifier&)*peripherals.controllerPort2;
       drawCursor(0xffff0000, controller.player1.x, controller.player1.y);
       if(!controller.chained) break;
       drawCursor(0xff00bf00, controller.player2.x, controller.player2.y);

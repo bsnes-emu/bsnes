@@ -16,7 +16,7 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
   //1-0 = Joypad serial data
   if(addr == 0x4016) {
     uint8 r = regs.mdr & 0xfc;
-    r |= device.controllerPort1->data();
+    r |= SuperFamicom::peripherals.controllerPort1->data();
     return r;
   }
 
@@ -26,7 +26,7 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
     //4-2 = Always 1 (pins are connected to GND)
     //1-0 = Joypad serial data
     uint8 r = (regs.mdr & 0xe0) | 0x1c;
-    r |= device.controllerPort2->data();
+    r |= SuperFamicom::peripherals.controllerPort2->data();
     return r;
   }
 
@@ -183,8 +183,8 @@ auto CPU::cpuPortWrite(uint24 addr, uint8 data) -> void {
     //bit 0 is shared between JOYSER0 and JOYSER1, therefore
     //strobing $4016.d0 affects both controller port latches.
     //$4017 bit 0 writes are ignored.
-    device.controllerPort1->latch(data.bit(0));
-    device.controllerPort2->latch(data.bit(0));
+    SuperFamicom::peripherals.controllerPort1->latch(data.bit(0));
+    SuperFamicom::peripherals.controllerPort2->latch(data.bit(0));
   }
 
   //NMITIMEN

@@ -80,7 +80,7 @@ auto USART::data() -> uint2 {
   if(iobit()) {
     if(counter >= 16) return 1;
     uint2 result = 0;
-    if(counter < 12) result = interface->inputPoll(port, (uint)Device::ID::Gamepad, counter);
+    if(counter < 12) result = interface->inputPoll(port, Device::Gamepad, counter);
     if(latched == 0) counter++;
     return result;
   }

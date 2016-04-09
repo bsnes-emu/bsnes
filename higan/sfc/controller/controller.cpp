@@ -15,8 +15,9 @@ Controller::Controller(bool port) : port(port) {
 
 auto Controller::Enter() -> void {
   while(true) {
-    if(co_active() == device.controllerPort1->thread) device.controllerPort1->main();
-    if(co_active() == device.controllerPort2->thread) device.controllerPort2->main();
+    scheduler.synchronize();
+    if(co_active() == peripherals.controllerPort1->thread) peripherals.controllerPort1->main();
+    if(co_active() == peripherals.controllerPort2->thread) peripherals.controllerPort2->main();
   }
 }
 

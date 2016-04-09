@@ -2,12 +2,29 @@
 
 namespace SuperFamicom {
 
-SuperDisc superdisc;
 #include "nec.cpp"
 #include "sony.cpp"
 
+SuperDisc::SuperDisc() {
+  create(&SuperDisc::Enter, 75);
+
+  bus.map({&SuperDisc::read, this}, {&SuperDisc::write, this}, "00-3f,80-bf:21e0-21e5");
+
+  r.irqEnable = 0x00;
+
+  nec.command.reset();
+  nec.data = 0x00;
+
+  sony.command = 0x00;
+  sony.data = 0x00;
+}
+
+SuperDisc::~SuperDisc() {
+  bus.unmap("00-3f,80-bf:21e0-21e5");
+}
+
 auto SuperDisc::Enter() -> void {
-  while(true) scheduler.synchronize(), superdisc.main();
+  while(true) scheduler.synchronize(), peripherals.expansionPort->main();
 }
 
 auto SuperDisc::main() -> void {
@@ -25,31 +42,6 @@ auto SuperDisc::main() -> void {
 
   step(1);
   synchronizeCPU();
-}
-
-auto SuperDisc::init() -> void {
-}
-
-auto SuperDisc::load() -> void {
-  bus.map({&SuperDisc::read, &superdisc}, {&SuperDisc::write, &superdisc}, 0x00, 0x3f, 0x21e0, 0x21e5);
-  bus.map({&SuperDisc::read, &superdisc}, {&SuperDisc::write, &superdisc}, 0x80, 0xbf, 0x21e0, 0x21e5);
-}
-
-auto SuperDisc::unload() -> void {
-}
-
-auto SuperDisc::power() -> void {
-  create(&SuperDisc::Enter, 75);
-}
-
-auto SuperDisc::reset() -> void {
-  r.irqEnable = 0x00;
-
-  nec.command.reset();
-  nec.data = 0x00;
-
-  sony.command = 0x00;
-  sony.data = 0x00;
 }
 
 auto SuperDisc::read(uint24 addr, uint8 data) -> uint8 {

@@ -1,13 +1,3 @@
-Cartridge::Mapping::Mapping(SuperFamicom::Memory& memory) {
-  this->reader = {&SuperFamicom::Memory::read,  &memory};
-  this->writer = {&SuperFamicom::Memory::write, &memory};
-}
-
-Cartridge::Mapping::Mapping(const function<uint8 (uint24, uint8)>& reader, const function<void (uint24, uint8)>& writer) {
-  this->reader = reader;
-  this->writer = writer;
-}
-
 auto Cartridge::parseMarkup(const string& markup) -> void {
   auto document = BML::unserialize(markup);
   auto information = document["information"];
@@ -16,7 +6,6 @@ auto Cartridge::parseMarkup(const string& markup) -> void {
   this->information.title.cartridge = information["title"].text();
   _region = board["region"].text() == "pal" ? Region::PAL : Region::NTSC;
 
-  mapping.reset();
   if(auto node = board["rom"]) parseMarkupROM(node);
   if(auto node = board["ram"]) parseMarkupRAM(node);
   if(auto node = board["icd2"]) parseMarkupICD2(node);
@@ -40,13 +29,13 @@ auto Cartridge::parseMarkup(const string& markup) -> void {
 }
 
 auto Cartridge::parseMarkupMap(Markup::Node map, SuperFamicom::Memory& memory) -> void {
-  Mapping m{memory};
-  m.addr = map["address"].text();
-  m.size = map["size"].natural();
-  m.base = map["base"].natural();
-  m.mask = map["mask"].natural();
-  if(m.size == 0) m.size = memory.size();
-  if(m.size != 0) mapping.append(m);
+  auto addr = map["address"].text();
+  auto size = map["size"].natural();
+  auto base = map["base"].natural();
+  auto mask = map["mask"].natural();
+  if(size == 0) size = memory.size();
+  if(size == 0) return;
+  bus.map({&SuperFamicom::Memory::read, &memory}, {&SuperFamicom::Memory::write, &memory}, addr, size, base, mask);
 }
 
 auto Cartridge::parseMarkupMap(
@@ -54,12 +43,11 @@ auto Cartridge::parseMarkupMap(
   const function<uint8 (uint24, uint8)>& reader,
   const function<void (uint24, uint8)>& writer
 ) -> void {
-  Mapping m{reader, writer};
-  m.addr = map["address"].text();
-  m.size = map["size"].natural();
-  m.base = map["base"].natural();
-  m.mask = map["mask"].natural();
-  mapping.append(m);
+  auto addr = map["address"].text();
+  auto size = map["size"].natural();
+  auto base = map["base"].natural();
+  auto mask = map["mask"].natural();
+  bus.map(reader, writer, addr, size, base, mask);
 }
 
 auto Cartridge::parseMarkupMemory(MappedRAM& ram, Markup::Node node, uint id, bool writable) -> void {

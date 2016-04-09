@@ -20,10 +20,11 @@ auto Program::loadMedia(Emulator::Interface& interface, Emulator::Interface::Med
   mediaPaths(media.id) = location;
   folderPaths.append(location);
 
+  //note: the order of operations in this block of code is critical
   emulator = &interface;
-  connectDevices();          //(expansion port) devices must be connected prior to load
+  connectDevices();
   emulator->load(media.id);
-  updateAudio();             //audio must be updated after load (audio frequency varies by region)
+  updateAudio();
   emulator->power();
 
   presentation->resizeViewport();

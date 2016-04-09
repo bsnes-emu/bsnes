@@ -4,63 +4,98 @@ namespace SuperFamicom {
 
 Bus bus;
 
-Bus::Bus() {
-  lookup = new uint8 [16 * 1024 * 1024];
-  target = new uint32[16 * 1024 * 1024];
-}
-
 Bus::~Bus() {
-  delete[] lookup;
-  delete[] target;
+  if(lookup) delete[] lookup;
+  if(target) delete[] target;
 }
 
 auto Bus::reset() -> void {
-  function<auto (uint24, uint8) -> uint8> reader = [](uint24, uint8 data) { return data; };
-  function<auto (uint24, uint8) -> void> writer = [](uint24, uint8) {};
+  for(auto id : range(256)) {
+    reader[id].reset();
+    writer[id].reset();
+    counter[id] = 0;
+  }
 
-  idcount = 0;
-  map(reader, writer, 0x00, 0xff, 0x0000, 0xffff);
+  if(lookup) delete[] lookup;
+  if(target) delete[] target;
+
+  lookup = new uint8 [16 * 1024 * 1024]();
+  target = new uint32[16 * 1024 * 1024]();
+
+  reader[0] = [](uint24, uint8 data) -> uint8 { return data; };
+  writer[0] = [](uint24, uint8) -> void {};
 }
 
-auto Bus::map() -> void {
-  for(auto& m : cartridge.mapping) {
-    lstring part = m.addr.split(":", 1L);
-    lstring banks = part(0).split(",");
-    lstring addrs = part(1).split(",");
-    for(auto& bank : banks) {
-      for(auto& addr : addrs) {
-        lstring bankpart = bank.split("-", 1L);
-        lstring addrpart = addr.split("-", 1L);
-        uint banklo = hex(bankpart(0));
-        uint bankhi = hex(bankpart(1, bankpart(0)));
-        uint addrlo = hex(addrpart(0));
-        uint addrhi = hex(addrpart(1, addrpart(0)));
-        map(m.reader, m.writer, banklo, bankhi, addrlo, addrhi, m.size, m.base, m.mask);
+auto Bus::map(
+  const function<uint8 (uint24, uint8)>& read,
+  const function<void (uint24, uint8)>& write,
+  const string& addr, uint size, uint base, uint mask
+) -> void {
+  uint id = 1;
+  while(counter[id]) {
+    if(++id >= 256) return print("SFC error: bus map exhausted\n");
+  }
+//print("map[", hex(id, 2), "] => ", addr, "\n");
+
+  reader[id] = read;
+  writer[id] = write;
+
+  auto p = addr.split(":", 1L);
+  auto banks = p(0).split(",");
+  auto addrs = p(1).split(",");
+  for(auto& bank : banks) {
+    for(auto& addr : addrs) {
+      auto bankRange = bank.split("-", 1L);
+      auto addrRange = addr.split("-", 1L);
+      uint bankLo = hex(bankRange(0));
+      uint bankHi = hex(bankRange(1, bankRange(0)));
+      uint addrLo = hex(addrRange(0));
+      uint addrHi = hex(addrRange(1, addrRange(0)));
+
+      for(uint bank = bankLo; bank <= bankHi; bank++) {
+        for(uint addr = addrLo; addr <= addrHi; addr++) {
+          uint pid = lookup[bank << 16 | addr];
+          if(pid && --counter[pid] == 0) {
+            reader[pid].reset();
+            writer[pid].reset();
+          }
+
+          uint offset = reduce(bank << 16 | addr, mask);
+          if(size) offset = base + mirror(offset, size - base);
+          lookup[bank << 16 | addr] = id;
+          target[bank << 16 | addr] = offset;
+          counter[id]++;
+        }
       }
     }
   }
 }
 
-auto Bus::map(
-  const function<uint8 (uint24, uint8)>& reader,
-  const function<void (uint24, uint8)>& writer,
-  uint8 banklo, uint8 bankhi, uint16 addrlo, uint16 addrhi,
-  uint size, uint base, uint mask
-) -> void {
-  assert(banklo <= bankhi);
-  assert(addrlo <= addrhi);
-  assert(idcount < 255);
+auto Bus::unmap(const string& addr) -> void {
+  auto p = addr.split(":", 1L);
+  auto banks = p(0).split(",");
+  auto addrs = p(1).split(",");
+  for(auto& bank : banks) {
+    for(auto& addr : addrs) {
+      auto bankRange = bank.split("-", 1L);
+      auto addrRange = addr.split("-", 1L);
+      uint bankLo = hex(bankRange(0));
+      uint bankHi = hex(bankRange(1, bankRange(0)));
+      uint addrLo = hex(addrRange(0));
+      uint addrHi = hex(addrRange(1, addrRange(1)));
 
-  uint id = idcount++;
-  this->reader[id] = reader;
-  this->writer[id] = writer;
+      for(uint bank = bankLo; bank <= bankHi; bank++) {
+        for(uint addr = addrLo; addr <= addrHi; addr++) {
+          uint pid = lookup[bank << 16 | addr];
+          if(pid && --counter[pid] == 0) {
+            reader[pid].reset();
+            writer[pid].reset();
+          }
 
-  for(uint bank = banklo; bank <= bankhi; bank++) {
-    for(uint addr = addrlo; addr <= addrhi; addr++) {
-      uint offset = reduce(bank << 16 | addr, mask);
-      if(size) offset = base + mirror(offset, size - base);
-      lookup[bank << 16 | addr] = id;
-      target[bank << 16 | addr] = offset;
+          lookup[bank << 16 | addr] = 0;
+          target[bank << 16 | addr] = 0;
+        }
+      }
     }
   }
 }

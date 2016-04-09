@@ -36,7 +36,9 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     close(fd[0]);
     close(fd[1]);
     execvp(name, (char* const*)argv);
-    exit(0);
+    //this is called only if execvp fails:
+    //use _exit instead of exit, to avoid destroying key shared file descriptors
+    _exit(0);
   } else {
     close(fd[1]);
 

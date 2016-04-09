@@ -1,13 +1,12 @@
 struct Interface;
 
-#include "device.hpp"
+#include "peripherals.hpp"
 
 struct System {
   enum class Region : bool { NTSC = 0, PAL = 1 };
 
   auto loaded() const -> bool;
   auto region() const -> Region;
-  auto expansionPort() const -> Device::ID;
   auto cpuFrequency() const -> uint;
   auto apuFrequency() const -> uint;
 
@@ -35,7 +34,6 @@ private:
 
   bool _loaded = false;
   Region _region = Region::NTSC;
-  Device::ID _expansionPort = Device::ID::None;
   uint _cpuFrequency = 0;
   uint _apuFrequency = 0;
   uint _serializeSize = 0;
