@@ -13,6 +13,9 @@ void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
         gb->dma_cycles = 0;
     }
 
+    gb->div_cycles += cycles;
+    gb->tima_cycles += cycles;
+
     if (gb->cgb_double_speed) {
         cycles >>=1;
     }
@@ -20,8 +23,6 @@ void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
     // Not affected by speed boost
     gb->hdma_cycles += cycles;
     gb->display_cycles += cycles;
-    gb->div_cycles += cycles;
-    gb->tima_cycles += cycles;
     gb->apu_cycles += cycles;
     hdma_run(gb);
     timers_run(gb);
