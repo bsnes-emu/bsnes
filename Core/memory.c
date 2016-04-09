@@ -396,11 +396,12 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
                 return;
 
             case GB_IO_DMA:
-                if (value <= 0xD0) {
+                if (value <= 0xF1) { /* According to Pan Docs */
                     for (unsigned char i = 0xA0; i--;) {
                         gb->oam[i] = read_memory(gb, (value << 8) + i);
                     }
                 }
+                /* else { what? } */
                 /* Todo: measure this value */
                 gb->dma_cycles = 640;
                 return;
