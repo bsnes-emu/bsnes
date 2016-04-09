@@ -1,8 +1,6 @@
 //Sony CXP1100Q-1
 
 struct SMP : Processor::SPC700, Thread {
-  enum : bool { Threaded = true };
-
   alwaysinline auto step(uint clocks) -> void;
   alwaysinline auto synchronizeCPU() -> void;
   alwaysinline auto synchronizeDSP() -> void;

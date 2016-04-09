@@ -11,7 +11,7 @@
 namespace SuperFamicom {
   namespace Info {
     static const string Name = "bsnes";
-    static const uint SerializerVersion = 29;
+    static const uint SerializerVersion = 30;
   }
 }
 
@@ -26,10 +26,6 @@ namespace SuperFamicom {
 
 #if defined(SFC_SUPERGAMEBOY)
   #include <gb/gb.hpp>
-#endif
-
-#if defined(PROFILE_PERFORMANCE)
-  #include <nall/priority-queue.hpp>
 #endif
 
 namespace SuperFamicom {
@@ -55,16 +51,19 @@ namespace SuperFamicom {
     int64 clock = 0;
   };
 
+  //dynamic thread bound to CPU (coprocessors and peripherals)
+  struct Cothread : Thread {
+    auto step(uint clocks) -> void;
+    auto synchronizeCPU() -> void;
+  };
+
   #include <sfc/memory/memory.hpp>
   #include <sfc/ppu/counter/counter.hpp>
 
-  #if defined(PROFILE_ACCURACY)
-  #include "profile-accuracy.hpp"
-  #elif defined(PROFILE_BALANCED)
-  #include "profile-balanced.hpp"
-  #elif defined(PROFILE_PERFORMANCE)
-  #include "profile-performance.hpp"
-  #endif
+  #include <sfc/cpu/cpu.hpp>
+  #include <sfc/smp/smp.hpp>
+  #include <sfc/dsp/dsp.hpp>
+  #include <sfc/ppu/ppu.hpp>
 
   #include <sfc/controller/controller.hpp>
   #include <sfc/system/system.hpp>
@@ -77,6 +76,15 @@ namespace SuperFamicom {
 
   #include <sfc/memory/memory-inline.hpp>
   #include <sfc/ppu/counter/counter-inline.hpp>
+
+  inline auto Cothread::step(uint clocks) -> void {
+    clock += clocks * (uint64)cpu.frequency;
+    synchronizeCPU();
+  }
+
+  inline auto Cothread::synchronizeCPU() -> void {
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  }
 }
 
 #include <sfc/interface/interface.hpp>

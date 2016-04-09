@@ -24,7 +24,7 @@ struct AudioDS : Audio {
   struct {
     HWND handle = nullptr;
     bool synchronize = false;
-    uint frequency = 22050;
+    uint frequency = 48000;
     uint latency = 120;
   } settings;
 

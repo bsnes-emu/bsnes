@@ -32,11 +32,7 @@ auto PPU::step(uint clocks) -> void {
 }
 
 auto PPU::synchronizeCPU() -> void {
-  if(CPU::Threaded) {
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
-  } else {
-    while(clock >= 0) cpu.main();
-  }
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto PPU::Enter() -> void {

@@ -3,8 +3,6 @@
 #include "audio.hpp"
 
 struct DSP : Thread {
-  enum : bool { Threaded = true };
-
   DSP();
 
   alwaysinline auto step(uint clocks) -> void;

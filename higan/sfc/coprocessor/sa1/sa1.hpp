@@ -1,4 +1,4 @@
-struct SA1 : Processor::R65816, public Coprocessor {
+struct SA1 : Processor::R65816, Cothread {
   #include "bus/bus.hpp"
   #include "dma/dma.hpp"
   #include "memory/memory.hpp"

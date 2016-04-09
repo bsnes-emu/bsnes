@@ -1,6 +1,6 @@
 #if defined(SFC_SUPERGAMEBOY)
 
-struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Coprocessor {
+struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   static auto Enter() -> void;
   auto main() -> void;
 

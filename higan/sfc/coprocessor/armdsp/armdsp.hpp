@@ -1,6 +1,6 @@
 //ARMv3 (ARM60)
 
-struct ArmDSP : Processor::ARM, Coprocessor {
+struct ArmDSP : Processor::ARM, Cothread {
   #include "registers.hpp"
 
   ArmDSP();

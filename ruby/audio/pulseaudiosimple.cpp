@@ -15,7 +15,7 @@ struct AudioPulseAudioSimple : Audio {
   } buffer;
 
   struct {
-    unsigned frequency = 22050;
+    unsigned frequency = 48000;
   } settings;
 
   auto cap(const string& name) -> bool {

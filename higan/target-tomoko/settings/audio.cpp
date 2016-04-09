@@ -5,17 +5,9 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   layout.setMargin(5);
 
   frequencyLabel.setText("Frequency:");
-  frequencyCombo.append(ComboButtonItem().setText("32000hz"));
-  frequencyCombo.append(ComboButtonItem().setText("44100hz"));
-  frequencyCombo.append(ComboButtonItem().setText("48000hz"));
-  frequencyCombo.append(ComboButtonItem().setText("96000hz"));
-  switch(settings["Audio/Frequency"].natural()) {
-  case 32000: frequencyCombo.item(0)->setSelected(); break;
-  case 44100: frequencyCombo.item(1)->setSelected(); break;
-  case 48000: frequencyCombo.item(2)->setSelected(); break;
-  case 96000: frequencyCombo.item(3)->setSelected(); break;
-  }
-  frequencyCombo.onChange([&] { update(); });
+  auto frequencyValue = audio->get(Audio::Frequency).get<uint>();
+  frequencyCombo.append(ComboButtonItem().setText({frequencyValue, "hz"}));
+  frequencyCombo.setEnabled(false);  //not user configurable
 
   latencyLabel.setText("Latency:");
   latencyCombo.append(ComboButtonItem().setText("20ms"));
@@ -48,14 +40,6 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 }
 
 auto AudioSettings::update() -> void {
-  if(auto item = frequencyCombo.selected()) {
-    uint frequency = 48000;
-    if(item->offset() == 0) frequency = 32000;
-    if(item->offset() == 1) frequency = 44100;
-    if(item->offset() == 2) frequency = 48000;
-    if(item->offset() == 3) frequency = 96000;
-    settings["Audio/Frequency"].setValue(frequency);
-  }
   if(auto item = latencyCombo.selected()) {
     uint latency = 60;
     if(item->offset() == 0) latency =  20;

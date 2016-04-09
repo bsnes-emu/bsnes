@@ -1,4 +1,4 @@
-struct NECDSP : Processor::uPD96050, Coprocessor {
+struct NECDSP : Processor::uPD96050, Cothread {
   static auto Enter() -> void;
   auto main() -> void;
 

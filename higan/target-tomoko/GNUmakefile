@@ -7,7 +7,6 @@ include gb/GNUmakefile
 include gba/GNUmakefile
 include ws/GNUmakefile
 include processor/GNUmakefile
-include emulator/GNUmakefile
 
 ui_objects := ui-tomoko ui-program ui-configuration ui-input
 ui_objects += ui-settings ui-tools ui-presentation
@@ -44,8 +43,6 @@ link += $(hirolink)
 # rules
 objects := $(ui_objects) $(objects)
 objects := $(patsubst %,obj/%.o,$(objects))
-
-obj/libco.o: ../libco/libco.c $(call rwildcard,../libco/)
 
 obj/ruby.o: ../ruby/ruby.cpp $(call rwildcard,../ruby/)
 	$(compiler) $(rubyflags) -c $< -o $@

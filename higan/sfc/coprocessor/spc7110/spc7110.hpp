@@ -1,6 +1,6 @@
 struct Decompressor;
 
-struct SPC7110 : Coprocessor {
+struct SPC7110 : Cothread {
   SPC7110();
   ~SPC7110();
 

@@ -89,22 +89,6 @@ struct HotkeySettings : TabFrameItem {
       Button eraseButton{&controlLayout, Size{80, 0}};
 };
 
-struct TimingSettings : TabFrameItem {
-  TimingSettings(TabFrame*);
-
-  VerticalLayout layout{this};
-    HorizontalLayout videoLayout{&layout, Size{~0, 0}};
-      Label videoLabel{&videoLayout, Size{40, 0}};
-      LineEdit videoValue{&videoLayout, Size{80, 0}};
-      Button videoAssign{&videoLayout, Size{80, 0}};
-    HorizontalLayout audioLayout{&layout, Size{~0, 0}};
-      Label audioLabel{&audioLayout, Size{40, 0}};
-      LineEdit audioValue{&audioLayout, Size{80, 0}};
-      Button audioAssign{&audioLayout, Size{80, 0}};
-
-  auto update() -> void;
-};
-
 struct AdvancedSettings : TabFrameItem {
   AdvancedSettings(TabFrame*);
 
@@ -136,7 +120,6 @@ struct SettingsManager : Window {
       AudioSettings audio{&panel};
       InputSettings input{&panel};
       HotkeySettings hotkeys{&panel};
-      TimingSettings timing{&panel};
       AdvancedSettings advanced{&panel};
 
   StatusBar statusBar{this};

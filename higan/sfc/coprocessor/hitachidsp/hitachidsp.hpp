@@ -1,4 +1,4 @@
-struct HitachiDSP : Processor::HG51B, Coprocessor {
+struct HitachiDSP : Processor::HG51B, Cothread {
   MappedRAM rom;
   MappedRAM ram;
 

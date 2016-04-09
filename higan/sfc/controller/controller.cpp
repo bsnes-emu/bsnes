@@ -24,19 +24,6 @@ auto Controller::main() -> void {
   step(1);
 }
 
-auto Controller::step(uint clocks) -> void {
-  clock += clocks * (uint64)cpu.frequency;
-  synchronizeCPU();
-}
-
-auto Controller::synchronizeCPU() -> void {
-  if(CPU::Threaded) {
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
-  } else {
-    while(clock >= 0) cpu.main();
-  }
-}
-
 auto Controller::iobit() -> bool {
   switch(port) {
   case Controller::Port1: return cpu.pio() & 0x40;

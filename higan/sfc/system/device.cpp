@@ -40,4 +40,8 @@ auto Device::connect(uint port, Device::ID id) -> void {
   if(port == 2) {
     settings.expansionPort = (uint)id;
   }
+
+  cpu.peripherals.reset();
+  cpu.peripherals.append(controllerPort1);
+  cpu.peripherals.append(controllerPort2);
 }

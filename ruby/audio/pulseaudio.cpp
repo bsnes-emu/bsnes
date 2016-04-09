@@ -20,7 +20,7 @@ struct AudioPulseAudio : Audio {
 
   struct {
     bool synchronize = false;
-    unsigned frequency = 22050;
+    unsigned frequency = 48000;
     unsigned latency = 60;
   } settings;
 

@@ -3,7 +3,6 @@
 #include "audio.cpp"
 #include "input.cpp"
 #include "hotkeys.cpp"
-#include "timing.cpp"
 #include "advanced.cpp"
 unique_pointer<SettingsManager> settingsManager;
 

@@ -50,7 +50,7 @@ auto ArmDSP::main() -> void {
 
 auto ArmDSP::step(uint clocks) -> void {
   if(bridge.timer && --bridge.timer == 0);
-  Coprocessor::step(clocks);
+  Cothread::step(clocks);
   synchronizeCPU();
 }
 

@@ -19,12 +19,15 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  if(CPU::Threaded) scheduler.synchronize(cpu.thread);
-  if(SMP::Threaded) scheduler.synchronize(smp.thread);
-  if(PPU::Threaded) scheduler.synchronize(ppu.thread);
-  if(DSP::Threaded) scheduler.synchronize(dsp.thread);
-  for(auto chip : cpu.coprocessors) {
-    scheduler.synchronize(chip->thread);
+  scheduler.synchronize(cpu.thread);
+  scheduler.synchronize(smp.thread);
+  scheduler.synchronize(ppu.thread);
+  scheduler.synchronize(dsp.thread);
+  for(auto coprocessor : cpu.coprocessors) {
+    scheduler.synchronize(coprocessor->thread);
+  }
+  for(auto peripheral : cpu.peripherals) {
+    scheduler.synchronize(peripheral->thread);
   }
 }
 

@@ -1,6 +1,4 @@
 struct CPU : Processor::R65816, Thread, public PPUcounter {
-  enum : bool { Threaded = true };
-
   auto interruptPending() const -> bool override;
   auto pio() const -> uint8;
   auto joylatch() const -> bool;
@@ -11,7 +9,7 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
   alwaysinline auto synchronizeSMP() -> void;
   auto synchronizePPU() -> void;
   auto synchronizeCoprocessors() -> void;
-  auto synchronizeDevices() -> void;
+  auto synchronizePeripherals() -> void;
 
   auto portRead(uint2 port) const -> uint8;
   auto portWrite(uint2 port, uint8 data) -> void;
@@ -89,6 +87,7 @@ struct CPU : Processor::R65816, Thread, public PPUcounter {
 
   uint8 wram[128 * 1024];
   vector<Thread*> coprocessors;
+  vector<Thread*> peripherals;
 
 privileged:
   uint cpu_version = 2;  //allowed: 1, 2

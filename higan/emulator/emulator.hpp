@@ -1,23 +1,16 @@
 #pragma once
 
 #include <nall/nall.hpp>
-#include <nall/dsp.hpp>
 using namespace nall;
+
+#include <audio/audio.hpp>
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "098";
+  static const string Version = "098.01";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
-
-  #if defined(PROFILE_ACCURACY)
-  static const string Profile = "Accuracy";
-  #elif defined(PROFILE_BALANCED)
-  static const string Profile = "Balanced";
-  #elif defined(PROFILE_PERFORMANCE)
-  static const string Profile = "Performance";
-  #endif
 }
 
 #include "interface.hpp"

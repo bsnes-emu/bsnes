@@ -36,11 +36,7 @@ auto DSP::step(uint clocks) -> void {
 }
 
 auto DSP::synchronizeSMP() -> void {
-  if(SMP::Threaded) {
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(smp.thread);
-  } else {
-    while(clock >= 0) smp.main();
-  }
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(smp.thread);
 }
 
 auto DSP::Enter() -> void {

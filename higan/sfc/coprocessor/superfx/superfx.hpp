@@ -1,4 +1,4 @@
-struct SuperFX : Processor::GSU, Coprocessor {
+struct SuperFX : Processor::GSU, Cothread {
   MappedRAM rom;
   MappedRAM ram;
 

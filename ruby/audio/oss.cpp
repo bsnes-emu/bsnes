@@ -11,26 +11,26 @@
 //Failing that, one can disable OSS4 ioctl calls inside init() and remove the below defines
 
 #ifndef SNDCTL_DSP_COOKEDMODE
-  #define SNDCTL_DSP_COOKEDMODE _IOW('P', 30, signed)
+  #define SNDCTL_DSP_COOKEDMODE _IOW('P', 30, int)
 #endif
 
 #ifndef SNDCTL_DSP_POLICY
-  #define SNDCTL_DSP_POLICY _IOW('P', 45, signed)
+  #define SNDCTL_DSP_POLICY _IOW('P', 45, int)
 #endif
 
 struct AudioOSS : Audio {
   ~AudioOSS() { term(); }
 
   struct {
-    signed fd = -1;
-    signed format = AFMT_S16_LE;
-    signed channels = 2;
+    int fd = -1;
+    int format = AFMT_S16_LE;
+    int channels = 2;
   } device;
 
   struct {
     string device = "/dev/dsp";
     bool synchronize = true;
-    unsigned frequency = 22050;
+    uint frequency = 48000;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -60,8 +60,8 @@ struct AudioOSS : Audio {
       return true;
     }
 
-    if(name == Audio::Frequency && value.is<unsigned>()) {
-      settings.frequency = value.get<unsigned>();
+    if(name == Audio::Frequency && value.is<uint>()) {
+      settings.frequency = value.get<uint>();
       if(device.fd >= 0) init();
       return true;
     }
@@ -84,14 +84,14 @@ struct AudioOSS : Audio {
     #if 1 //SOUND_VERSION >= 0x040000
     //attempt to enable OSS4-specific features regardless of version
     //OSS3 ioctl calls will silently fail, but sound will still work
-    signed cooked = 1, policy = 4; //policy should be 0 - 10, lower = less latency, more CPU usage
+    int cooked = 1, policy = 4; //policy should be 0 - 10, lower = less latency, more CPU usage
     ioctl(device.fd, SNDCTL_DSP_COOKEDMODE, &cooked);
     ioctl(device.fd, SNDCTL_DSP_POLICY, &policy);
     #endif
-    signed freq = settings.frequency;
+    int frequency = settings.frequency;
     ioctl(device.fd, SNDCTL_DSP_CHANNELS, &device.channels);
     ioctl(device.fd, SNDCTL_DSP_SETFMT, &device.format);
-    ioctl(device.fd, SNDCTL_DSP_SPEED, &freq);
+    ioctl(device.fd, SNDCTL_DSP_SPEED, &frequency);
 
     updateSynchronization();
     return true;

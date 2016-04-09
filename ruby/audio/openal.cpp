@@ -26,7 +26,7 @@ struct AudioOpenAL : Audio {
 
   struct {
     bool synchronize = true;
-    unsigned frequency = 22050;
+    unsigned frequency = 48000;
     unsigned latency = 40;
   } settings;
 

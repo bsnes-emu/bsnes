@@ -1,6 +1,6 @@
 //Epson RTC-4513 Real-Time Clock
 
-struct EpsonRTC : Coprocessor {
+struct EpsonRTC : Cothread {
   static auto Enter() -> void;
   auto main() -> void;
 

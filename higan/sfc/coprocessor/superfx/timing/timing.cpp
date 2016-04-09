@@ -14,7 +14,7 @@ auto SuperFX::step(unsigned clocks) -> void {
     }
   }
 
-  Coprocessor::step(clocks);
+  Cothread::step(clocks);
   synchronizeCPU();
 }
 

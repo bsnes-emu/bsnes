@@ -29,7 +29,7 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
 
   struct {
     bool synchronize = false;
-    unsigned frequency = 22050;
+    unsigned frequency = 48000;
     unsigned latency = 120;
   } settings;
 

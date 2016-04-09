@@ -22,39 +22,33 @@ CPU::CPU() {
 auto CPU::step(uint clocks) -> void {
   smp.clock -= clocks * (uint64)smp.frequency;
   ppu.clock -= clocks;
-  for(auto chip : coprocessors) {
-    chip->clock -= clocks * (uint64)chip->frequency;
+  for(auto coprocessor : coprocessors) {
+    coprocessor->clock -= clocks * (uint64)coprocessor->frequency;
   }
-  device.controllerPort1->clock -= clocks * (uint64)device.controllerPort1->frequency;
-  device.controllerPort2->clock -= clocks * (uint64)device.controllerPort2->frequency;
-  synchronizeDevices();
+  for(auto peripheral : peripherals) {
+    peripheral->clock -= clocks * (uint64)peripheral->frequency;
+  }
+  synchronizePeripherals();
 }
 
 auto CPU::synchronizeSMP() -> void {
-  if(SMP::Threaded) {
-    if(smp.clock < 0) co_switch(smp.thread);
-  } else {
-    while(smp.clock < 0) smp.main();
-  }
+  if(smp.clock < 0) co_switch(smp.thread);
 }
 
 auto CPU::synchronizePPU() -> void {
-  if(PPU::Threaded) {
-    if(ppu.clock < 0) co_switch(ppu.thread);
-  } else {
-    while(ppu.clock < 0) ppu.main();
-  }
+  if(ppu.clock < 0) co_switch(ppu.thread);
 }
 
 auto CPU::synchronizeCoprocessors() -> void {
-  for(auto chip : coprocessors) {
-    if(chip->clock < 0) co_switch(chip->thread);
+  for(auto coprocessor : coprocessors) {
+    if(coprocessor->clock < 0) co_switch(coprocessor->thread);
   }
 }
 
-auto CPU::synchronizeDevices() -> void {
-  if(device.controllerPort1->clock < 0) co_switch(device.controllerPort1->thread);
-  if(device.controllerPort2->clock < 0) co_switch(device.controllerPort2->thread);
+auto CPU::synchronizePeripherals() -> void {
+  for(auto peripheral : peripherals) {
+    if(peripheral->clock < 0) co_switch(peripheral->thread);
+  }
 }
 
 auto CPU::Enter() -> void {

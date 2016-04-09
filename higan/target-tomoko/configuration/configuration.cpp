@@ -22,9 +22,6 @@ Settings::Settings() {
   set("Video/BlurEmulation", true);
   set("Video/ColorEmulation", true);
   set("Video/ScanlineEmulation", false);
-  set("Video/Saturation", 100);
-  set("Video/Gamma", 100);
-  set("Video/Luminance", 100);
 
   set("Video/Overscan/Mask", false);
   set("Video/Overscan/Horizontal", 8);
@@ -35,16 +32,12 @@ Settings::Settings() {
   set("Audio/Synchronize", true);
   set("Audio/Mute", false);
   set("Audio/Volume", 100);
-  set("Audio/Frequency", 48000);
   set("Audio/Latency", 60);
   set("Audio/Resampler", "Sinc");
 
   set("Input/Driver", ruby::Input::optimalDriver());
   set("Input/FocusLoss/Pause", false);
   set("Input/FocusLoss/AllowInput", false);
-
-  set("Timing/Video", 60.0);
-  set("Timing/Audio", 48000.0);
 }
 
 auto Settings::quit() -> void {

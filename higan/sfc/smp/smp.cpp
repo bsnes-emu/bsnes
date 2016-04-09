@@ -14,19 +14,11 @@ auto SMP::step(uint clocks) -> void {
 }
 
 auto SMP::synchronizeCPU() -> void {
-  if(CPU::Threaded) {
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
-  } else {
-    while(clock >= 0) cpu.main();
-  }
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
 auto SMP::synchronizeDSP() -> void {
-  if(DSP::Threaded) {
-    if(dsp.clock < 0 && !scheduler.synchronizing()) co_switch(dsp.thread);
-  } else {
-    while(dsp.clock < 0) dsp.main();
-  }
+  if(dsp.clock < 0 && !scheduler.synchronizing()) co_switch(dsp.thread);
 }
 
 auto SMP::Enter() -> void {

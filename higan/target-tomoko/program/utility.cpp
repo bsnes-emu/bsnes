@@ -66,12 +66,11 @@ auto Program::updateVideoShader() -> void {
 auto Program::updateAudio() -> void {
   if(!audio) return;
   audio->clear();
-  audio->set(Audio::Frequency, (uint)settings["Audio/Frequency"].natural());
   audio->set(Audio::Latency, (uint)settings["Audio/Latency"].natural());
   if(settings["Audio/Resampler"].text() == "Linear" ) dsp.setResampler(DSP::ResampleEngine::Linear);
   if(settings["Audio/Resampler"].text() == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);
   if(settings["Audio/Resampler"].text() == "Sinc"   ) dsp.setResampler(DSP::ResampleEngine::Sinc);
-  dsp.setResamplerFrequency(settings["Audio/Frequency"].natural());
+  dsp.setResamplerFrequency(audio->get(Audio::Frequency).get<uint>());
   updateAudioVolume();
   updateDSP();
 }
@@ -82,10 +81,5 @@ auto Program::updateAudioVolume() -> void {
 
 auto Program::updateDSP() -> void {
   if(!emulator) return;
-  if(!settings["Video/Synchronize"].boolean()) return dsp.setFrequency(emulator->audioFrequency());
-
-  double inputRatio = emulator->audioFrequency() / emulator->videoFrequency();
-  double outputRatio = settings["Timing/Audio"].real() / settings["Timing/Video"].real();
-
-  dsp.setFrequency(inputRatio / outputRatio * settings["Audio/Frequency"].natural());
+  return dsp.setFrequency(emulator->audioFrequency());
 }

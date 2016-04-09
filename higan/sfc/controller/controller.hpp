@@ -11,17 +11,13 @@
 //  6:    iobit    $4201.d6 write; $4213.d6 read    $4201.d7 write; $4213.d7 read
 //  7:    gnd
 
-struct Controller : Thread {
+struct Controller : Cothread {
   enum : bool { Port1 = 0, Port2 = 1 };
 
   Controller(bool port);
-
   static auto Enter() -> void;
+
   virtual auto main() -> void;
-
-  auto step(uint clocks) -> void;
-  auto synchronizeCPU() -> void;
-
   auto iobit() -> bool;
   auto iobit(bool data) -> void;
   virtual auto data() -> uint2 { return 0; }

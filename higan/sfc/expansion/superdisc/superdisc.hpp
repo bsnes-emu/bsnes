@@ -1,4 +1,4 @@
-struct SuperDisc : Coprocessor, Memory {
+struct SuperDisc : Cothread, Memory {
   static auto Enter() -> void;
   auto main() -> void;
 

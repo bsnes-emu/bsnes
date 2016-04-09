@@ -1,36 +1,34 @@
 auto System::serialize() -> serializer {
   serializer s(_serializeSize);
 
-  uint signature = 0x31545342, version = Info::SerializerVersion;
-  char hash[64], description[512], profile[16];
-  memcpy(&hash, (const char*)cartridge.sha256(), 64);
-  memset(&description, 0, sizeof description);
-  memset(&profile, 0, sizeof profile);
-  strcpy(profile, Emulator::Profile);
+  uint signature = 0x31545342;
+  uint version = Info::SerializerVersion;
+  char hash[64] = {0};
+  char description[512] = {0};
+  memory::copy(&hash, (const char*)cartridge.sha256(), 64);
 
   s.integer(signature);
   s.integer(version);
   s.array(hash);
   s.array(description);
-  s.array(profile);
 
   serializeAll(s);
   return s;
 }
 
 auto System::unserialize(serializer& s) -> bool {
-  uint signature, version;
-  char hash[64], description[512], profile[16];
+  uint signature = 0;
+  uint version = 0;
+  char hash[64] = {0};
+  char description[512] = {0};
 
   s.integer(signature);
   s.integer(version);
   s.array(hash);
   s.array(description);
-  s.array(profile);
 
   if(signature != 0x31545342) return false;
   if(version != Info::SerializerVersion) return false;
-  if(strcmp(profile, Emulator::Profile)) return false;
 
   power();
   serializeAll(s);
@@ -77,13 +75,14 @@ auto System::serializeAll(serializer& s) -> void {
 auto System::serializeInit() -> void {
   serializer s;
 
-  uint signature = 0, version = 0;
-  char hash[64], profile[16], description[512];
+  uint signature = 0;
+  uint version = 0;
+  char hash[64] = {0};
+  char description[512] = {0};
 
   s.integer(signature);
   s.integer(version);
   s.array(hash);
-  s.array(profile);
   s.array(description);
 
   serializeAll(s);

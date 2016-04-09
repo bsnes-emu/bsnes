@@ -1,4 +1,4 @@
-struct MSU1 : Coprocessor {
+struct MSU1 : Cothread {
   static auto Enter() -> void;
   auto main() -> void;
   auto init() -> void;

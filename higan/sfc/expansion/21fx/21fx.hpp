@@ -1,7 +1,6 @@
-struct S21FX : Thread, Memory {
+struct S21FX : Cothread, Memory {
   static auto Enter() -> void;
   auto main() -> void;
-  auto step(uint clocks) -> void;
   auto init() -> void;
   auto load() -> void;
   auto unload() -> void;

@@ -13,7 +13,7 @@ struct AudioWASAPI : Audio {
   struct {
     bool exclusive = false;
     bool synchronize = false;
-    uint frequency = 44100;
+    uint frequency = 48000;
   } settings;
 
   auto cap(const string& name) -> bool {
