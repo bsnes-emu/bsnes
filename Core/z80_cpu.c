@@ -3,6 +3,7 @@
 #include "z80_cpu.h"
 #include "timing.h"
 #include "memory.h"
+#include "debugger.h"
 #include "gb.h"
 
 
@@ -698,11 +699,11 @@ static void halt(GB_gameboy_t *gb, unsigned char opcode)
 static void ret_cc(GB_gameboy_t *gb, unsigned char opcode)
 {
     if (condition_code(gb, read_memory(gb, gb->pc++))) {
+        debugger_ret_hook(gb);
         advance_cycles(gb, 20);
         gb->pc = read_memory(gb, gb->registers[GB_REGISTER_SP]) |
         (read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
         gb->registers[GB_REGISTER_SP] += 2;
-        gb->debug_call_depth--;
     }
     else {
         advance_cycles(gb, 8);
@@ -749,7 +750,7 @@ static void call_cc_a16(GB_gameboy_t *gb, unsigned char opcode)
         write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
         write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 2) >> 8);
         gb->pc = read_memory(gb, gb->pc) | (read_memory(gb, gb->pc + 1) << 8);
-        gb->debug_call_depth++;
+        debugger_call_hook(gb);
     }
     else {
         advance_cycles(gb, 12);
@@ -914,15 +915,16 @@ static void rst(GB_gameboy_t *gb, unsigned char opcode)
     write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 1) & 0xFF);
     write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 1) >> 8);
     gb->pc = opcode ^ 0xC7;
+    debugger_call_hook(gb);
 }
 
 static void ret(GB_gameboy_t *gb, unsigned char opcode)
 {
+    debugger_ret_hook(gb);
     advance_cycles(gb, 16);
     gb->pc = read_memory(gb, gb->registers[GB_REGISTER_SP]) |
     (read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
     gb->registers[GB_REGISTER_SP] += 2;
-    gb->debug_call_depth--;
 }
 
 static void reti(GB_gameboy_t *gb, unsigned char opcode)
@@ -939,7 +941,7 @@ static void call_a16(GB_gameboy_t *gb, unsigned char opcode)
     write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
     write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 2) >> 8);
     gb->pc = read_memory(gb, gb->pc) | (read_memory(gb, gb->pc + 1) << 8);
-    gb->debug_call_depth++;
+    debugger_call_hook(gb);
 }
 
 static void ld_da8_a(GB_gameboy_t *gb, unsigned char opcode)

@@ -629,6 +629,18 @@ static const debugger_command_t *find_command(const char *string)
     return NULL;
 }
 
+void debugger_call_hook(GB_gameboy_t *gb)
+{
+    /* Called just after the CPU calls a function/enters an interrupt/etc... */
+    gb->debug_call_depth++;
+}
+
+void debugger_ret_hook(GB_gameboy_t *gb)
+{
+    /* Called just before the CPU runs ret/reti */
+    gb->debug_call_depth--;
+}
+
 /* The debugger interface is quite primitive. One letter commands with a single parameter maximum.
    Only one breakpoint is allowed at a time. More features will be added later. */
 void debugger_run(GB_gameboy_t *gb)
