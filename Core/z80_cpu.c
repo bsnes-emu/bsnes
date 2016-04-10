@@ -929,7 +929,6 @@ static void reti(GB_gameboy_t *gb, unsigned char opcode)
 {
     ret(gb, opcode);
     gb->ime = true;
-    gb->debug_call_depth--;
 }
 
 static void call_a16(GB_gameboy_t *gb, unsigned char opcode)
