@@ -279,6 +279,10 @@ typedef struct GB_gameboy_s{
     unsigned short n_breakpoints;
     unsigned short *breakpoints;
 
+    bool stack_leak_detection;
+    unsigned short sp_for_call_depth[0x200]; /* Should be much more than enough */
+    unsigned short addr_for_call_depth[0x200];
+
 } GB_gameboy_t;
 
 #ifndef __printflike

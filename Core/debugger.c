@@ -378,6 +378,19 @@ static bool finish(GB_gameboy_t *gb, char *arguments)
     return false;
 }
 
+static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        gb_log(gb, "Usage: sld\n");
+        return true;
+    }
+
+    gb->debug_stopped = false;
+    gb->stack_leak_detection = true;
+    gb->debug_call_depth = 0;
+    return false;
+}
+
 static bool registers(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
@@ -589,6 +602,7 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
+    {"sld", 3, stack_leak_detection, "Run until the current function returns, or a stack leak is detected (Experimental)"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, mbc, NULL},
@@ -632,13 +646,41 @@ static const debugger_command_t *find_command(const char *string)
 void debugger_call_hook(GB_gameboy_t *gb)
 {
     /* Called just after the CPU calls a function/enters an interrupt/etc... */
+
+    if (gb->stack_leak_detection) {
+        if (gb->debug_call_depth >= sizeof(gb->sp_for_call_depth) / sizeof(gb->sp_for_call_depth[0])) {
+            gb_log(gb, "Potential stack overflow detected (Functions nest too much). \n");
+            gb->debug_stopped = true;
+        }
+        else {
+            gb->sp_for_call_depth[gb->debug_call_depth] = gb->registers[GB_REGISTER_SP];
+            gb->addr_for_call_depth[gb->debug_call_depth] = gb->pc;
+        }
+    }
+
     gb->debug_call_depth++;
 }
 
 void debugger_ret_hook(GB_gameboy_t *gb)
 {
     /* Called just before the CPU runs ret/reti */
+
     gb->debug_call_depth--;
+
+    if (gb->stack_leak_detection) {
+        if (gb->debug_call_depth < 0) {
+            gb_log(gb, "Function finished without a stack leak.\n");
+            gb->debug_stopped = true;
+        }
+        else {
+            if (gb->registers[GB_REGISTER_SP] != gb->sp_for_call_depth[gb->debug_call_depth]) {
+                gb_log(gb, "Stack leak detected for function %04x!\n", gb->addr_for_call_depth[gb->debug_call_depth]);
+                gb_log(gb, "SP is %04x, should be %04x.\n", gb->registers[GB_REGISTER_SP],
+                                                            gb->sp_for_call_depth[gb->debug_call_depth]);
+                gb->debug_stopped = true;
+            }
+        }
+    }
 }
 
 /* The debugger interface is quite primitive. One letter commands with a single parameter maximum.
@@ -667,6 +709,7 @@ next_command:
     if (gb->debug_stopped) {
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
+        gb->stack_leak_detection = false;
         input = gb->input_callback(gb);
         if (!input[0]) {
             goto next_command;
