@@ -1,42 +1,5 @@
-Video video;
-
-Video::Video() {
-  output = new uint32[512 * 512];
-  paletteLiteral = new uint32[1 << 19];
-  paletteStandard = new uint32[1 << 19];
-  paletteEmulation = new uint32[1 << 19];
-}
-
-auto Video::reset() -> void {
-  memory::fill(output(), 512 * 512 * sizeof(uint32));
-
-  for(auto color : range(1 << 19)) {
-    uint l = (uint4)(color >> 15);
-    uint b = (uint5)(color >> 10);
-    uint g = (uint5)(color >>  5);
-    uint r = (uint5)(color >>  0);
-
-    paletteLiteral[color] = color;
-
-    double L = (1.0 + l) / 16.0 * (l ? 1.0 : 0.5);
-    uint R = L * image::normalize(r, 5, 16);
-    uint G = L * image::normalize(g, 5, 16);
-    uint B = L * image::normalize(b, 5, 16);
-    paletteStandard[color] = interface->videoColor(R, G, B);
-
-    static const uint8 gammaRamp[32] = {
-      0x00, 0x01, 0x03, 0x06, 0x0a, 0x0f, 0x15, 0x1c,
-      0x24, 0x2d, 0x37, 0x42, 0x4e, 0x5b, 0x69, 0x78,
-      0x88, 0x90, 0x98, 0xa0, 0xa8, 0xb0, 0xb8, 0xc0,
-      0xc8, 0xd0, 0xd8, 0xe0, 0xe8, 0xf0, 0xf8, 0xff,
-    };
-
-    R = L * gammaRamp[r] * 0x0101;
-    G = L * gammaRamp[g] * 0x0101;
-    B = L * gammaRamp[b] * 0x0101;
-    paletteEmulation[color] = interface->videoColor(R, G, B);
-  }
-}
+//note: this source file is currently unused
+//saved temporarily only for reference
 
 auto Video::refresh() -> void {
   auto output = this->output() + 16 * 512;  //add offset for overscan

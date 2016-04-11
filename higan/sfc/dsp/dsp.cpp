@@ -230,51 +230,13 @@ auto DSP::write(uint8 addr, uint8 data) -> void {
 /* initialization */
 
 auto DSP::power() -> void {
-  for(auto& r : state.regs) r = 0;
-  state.echoHistoryOffset = 0;
-  state.everyOtherSample = false;
-  state.kon = 0;
-  state.noise = 0;
-  state.counter = 0;
-  state.echoOffset = 0;
-  state.echoLength = 0;
-  state.konBuffer = 0;
-  state.endxBuffer = 0;
-  state.envxBuffer = 0;
-  state.outxBuffer = 0;
-  state._pmon = 0;
-  state._non = 0;
-  state._eon = 0;
-  state._dir = 0;
-  state._koff = 0;
-  state._brrNextAddress = 0;
-  state._adsr0 = 0;
-  state._brrHeader = 0;
-  state._brrByte = 0;
-  state._srcn = 0;
-  state._esa = 0;
-  state._echoDisabled = 0;
-  state._dirAddress = 0;
-  state._pitch = 0;
-  state._output = 0;
-  state._looped = 0;
-  state._echoPointer = 0;
-  state._mainOut[0] = state._mainOut[1] = 0;
-  state._echoOut[0] = state._echoOut[1] = 0;
-  state._echoIn[0] = state._echoIn[1] = 0;
+  memory::fill(&state, sizeof(State));
 
   for(auto n : range(8)) {
-    voice[n].bufferOffset = 0;
-    voice[n].gaussianOffset = 0;
-    voice[n].brrAddress = 0;
+    memory::fill(&voice[n], sizeof(Voice));
     voice[n].brrOffset = 1;
     voice[n].vbit = 1 << n;
     voice[n].vidx = n * 0x10;
-    voice[n].konDelay = 0;
-    voice[n].envelopeMode = EnvelopeRelease;
-    voice[n].envelope = 0;
-    voice[n].hiddenEnvelope = 0;
-    voice[n]._envxOut = 0;
   }
 
   audio.coprocessorEnable(false);

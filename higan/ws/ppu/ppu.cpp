@@ -6,7 +6,6 @@ PPU ppu;
 #include "io.cpp"
 #include "latch.cpp"
 #include "render.cpp"
-#include "video.cpp"
 #include "serialization.cpp"
 
 auto PPU::Enter() -> void {
@@ -73,7 +72,7 @@ auto PPU::scanline() -> void {
 auto PPU::frame() -> void {
   s.field = !s.field;
   s.vclk = 0;
-  video.refresh();
+  Emulator::video.refresh(output, 224 * sizeof(uint32), 224, 144);
   scheduler.exit(Scheduler::Event::Frame);
 }
 
@@ -100,8 +99,6 @@ auto PPU::power() -> void {
   r.lcdEnable = 1;
   r.vtotal = 158;
   r.vblank = 155;
-
-  video.power();
 }
 
 }

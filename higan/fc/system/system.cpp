@@ -2,6 +2,7 @@
 
 namespace Famicom {
 
+#include "video.cpp"
 #include "serialization.cpp"
 System system;
 
@@ -23,6 +24,7 @@ auto System::load() -> void {
   auto document = BML::unserialize(information.manifest);
   cartridge.load();
   serializeInit();
+  configureVideo();
   _loaded = true;
 }
 
@@ -48,7 +50,6 @@ auto System::reset() -> void {
   ppu.reset();
   input.reset();
   scheduler.reset();
-  video.reset();
 }
 
 auto System::init() -> void {

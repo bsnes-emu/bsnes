@@ -2,8 +2,8 @@ void DSP::serialize(serializer& s) {
   Thread::serialize(s);
 
   s.array(state.regs, 128);
-  state.echoHistory[0].serialize(s);
-  state.echoHistory[1].serialize(s);
+  s.array(state.echoHistory[0]);
+  s.array(state.echoHistory[1]);
   s.integer(state.echoHistoryOffset);
 
   s.integer(state.everyOtherSample);
@@ -43,7 +43,7 @@ void DSP::serialize(serializer& s) {
   s.array(state._echoIn, 2);
 
   for(auto n : range(8)) {
-    voice[n].buffer.serialize(s);
+    s.array(voice[n].buffer);
     s.integer(voice[n].bufferOffset);
     s.integer(voice[n].gaussianOffset);
     s.integer(voice[n].brrAddress);

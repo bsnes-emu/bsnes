@@ -182,7 +182,11 @@ auto Interface::get(const string& name) -> any {
 }
 
 auto Interface::set(const string& name, const any& value) -> bool {
-  if(name == "Color Emulation" && value.is<bool>()) return settings.colorEmulation = value.get<bool>(), true;
+  if(name == "Color Emulation" && value.is<bool>()) {
+    settings.colorEmulation = value.get<bool>();
+    system.configureVideoPalette();
+    return true;
+  }
   if(name == "Scanline Emulation" && value.is<bool>()) return settings.scanlineEmulation = value.get<bool>(), true;
   return false;
 }

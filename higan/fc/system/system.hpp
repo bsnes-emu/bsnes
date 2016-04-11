@@ -12,6 +12,11 @@ struct System {
   auto init() -> void;
   auto term() -> void;
 
+  //video.cpp
+  auto configureVideo() -> void;
+  auto configureVideoPalette() -> void;
+
+  //serialization.cpp
   auto serialize() -> serializer;
   auto unserialize(serializer&) -> bool;
 

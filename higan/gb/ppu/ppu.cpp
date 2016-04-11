@@ -9,8 +9,6 @@
 namespace GameBoy {
 
 PPU ppu;
-#include "video.cpp"
-
 #include "mmio.cpp"
 #include "dmg.cpp"
 #include "cgb.cpp"
@@ -62,7 +60,7 @@ auto PPU::main() -> void {
 
   if(++status.ly == 154) {
     status.ly = 0;
-    video.refresh();
+    if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
     scheduler.exit(Scheduler::Event::Frame);
   }
 }

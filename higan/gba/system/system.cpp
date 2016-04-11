@@ -3,6 +3,7 @@
 namespace GameBoyAdvance {
 
 #include "bios.cpp"
+#include "video.cpp"
 #include "serialization.cpp"
 BIOS bios;
 System system;
@@ -22,7 +23,6 @@ auto System::power() -> void {
   ppu.power();
   apu.power();
   cartridge.power();
-  video.power();
   scheduler.power();
 }
 
@@ -36,6 +36,7 @@ auto System::load() -> void {
 
   cartridge.load();
   serializeInit();
+  configureVideo();
   _loaded = true;
 }
 

@@ -2,6 +2,7 @@
 
 namespace GameBoy {
 
+#include "video.cpp"
 #include "serialization.cpp"
 System system;
 
@@ -49,6 +50,7 @@ auto System::load(Revision revision) -> void {
 
   cartridge.load(revision);
   serializeInit();
+  configureVideo();
   _loaded = true;
 }
 
@@ -64,7 +66,6 @@ auto System::power() -> void {
   cpu.power();
   ppu.power();
   apu.power();
-  video.power();
   scheduler.power();
 
   _clocksExecuted = 0;

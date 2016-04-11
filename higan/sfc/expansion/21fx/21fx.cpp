@@ -75,15 +75,15 @@ auto S21FX::read(uint24 addr, uint8 data) -> uint8 {
 
   if(addr >= 0x2184 && addr <= 0x21fd) return ram[addr - 0x2184];
 
-  if(addr == 0x21fe) return (
-    (linkBuffer.size() >     0) << 7  //1 = readable
-  | (snesBuffer.size() < 65536) << 6  //1 = writable
-  | (link.open())               << 5  //1 = connected
+  if(addr == 0x21fe) return !link.open() ? 0 : (
+    (linkBuffer.size() >    0) << 7  //1 = readable
+  | (snesBuffer.size() < 1024) << 6  //1 = writable
+  | (link.open())              << 5  //1 = connected
   );
 
   if(addr == 0x21ff) {
     if(linkBuffer.size() > 0) {
-      data = linkBuffer.takeFirst();
+      return linkBuffer.takeFirst();
     }
   }
 
@@ -94,7 +94,7 @@ auto S21FX::write(uint24 addr, uint8 data) -> void {
   addr &= 0x40ffff;
 
   if(addr == 0x21ff) {
-    if(snesBuffer.size() < 65536) {
+    if(snesBuffer.size() < 1024) {
       snesBuffer.append(data);
     }
   }
@@ -116,7 +116,7 @@ auto S21FX::readable() -> bool {
 
 auto S21FX::writable() -> bool {
   step(1);
-  return linkBuffer.size() < 65536;
+  return linkBuffer.size() < 1024;
 }
 
 //SNES -> Link
@@ -131,7 +131,7 @@ auto S21FX::read() -> uint8 {
 //Link -> SNES
 auto S21FX::write(uint8 data) -> void {
   step(1);
-  if(linkBuffer.size() < 65536) {
+  if(linkBuffer.size() < 1024) {
     linkBuffer.append(data);
   }
 }

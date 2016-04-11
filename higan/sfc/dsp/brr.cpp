@@ -20,8 +20,8 @@ auto DSP::brrDecode(Voice& v) -> void {
     }
 
     //apply IIR filter (2 is the most commonly used)
-    const int p1 = v.buffer[v.bufferOffset - 1];
-    const int p2 = v.buffer[v.bufferOffset - 2] >> 1;
+    const int p1 = v.buffer[12 + v.bufferOffset - 1];
+    const int p2 = v.buffer[12 + v.bufferOffset - 2] >> 1;
 
     switch(filter) {
     case 0:
@@ -50,10 +50,12 @@ auto DSP::brrDecode(Voice& v) -> void {
       break;
     }
 
-    //adjust and write sample
+    //adjust and write sample (mirror the written sample for wrapping)
     s = sclamp<16>(s);
     s = (int16)(s << 1);
-    v.buffer.write(v.bufferOffset++, s);
-    if(v.bufferOffset >= BrrBufferSize) v.bufferOffset = 0;
+    v.buffer[v.bufferOffset +  0] = s;
+    v.buffer[v.bufferOffset + 12] = s;
+    v.buffer[v.bufferOffset + 24] = s;
+    if(++v.bufferOffset >= 12) v.bufferOffset = 0;
   }
 }

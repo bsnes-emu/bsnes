@@ -1,5 +1,3 @@
-#include "video.hpp"
-
 struct PPU : Thread, IO {
   static auto Enter() -> void;
   auto main() -> void;
@@ -36,7 +34,7 @@ struct PPU : Thread, IO {
     uint12 color;
   };
 
-  uint12 output[224 * 144];
+  uint32 output[224 * 144];
 
   struct State {
     bool field;

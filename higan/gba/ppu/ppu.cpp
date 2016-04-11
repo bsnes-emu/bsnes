@@ -13,8 +13,6 @@
 namespace GameBoyAdvance {
 
 PPU ppu;
-#include "video.cpp"
-
 #include "background.cpp"
 #include "object.cpp"
 #include "mosaic.cpp"
@@ -180,7 +178,7 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   player.frame();
-  video.refresh();
+  Emulator::video.refresh(output, 240 * sizeof(uint32), 240, 160);
   scheduler.exit(Scheduler::Event::Frame);
 }
 

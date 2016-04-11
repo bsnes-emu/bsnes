@@ -4,6 +4,7 @@ namespace WonderSwan {
 
 System system;
 #include "io.cpp"
+#include "video.cpp"
 #include "serialization.cpp"
 
 auto System::loaded() const -> bool { return _loaded; }
@@ -39,9 +40,10 @@ auto System::load(Model model) -> void {
   }
 
   cartridge.load();
-  _loaded = true;
-  _orientation = cartridge.information.orientation;
   serializeInit();
+  configureVideo();
+  _orientation = cartridge.information.orientation;
+  _loaded = true;
 }
 
 auto System::unload() -> void {

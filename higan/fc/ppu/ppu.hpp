@@ -1,5 +1,3 @@
-#include "video.hpp"
-
 struct PPU : Thread {
   static auto Enter() -> void;
   auto main() -> void;

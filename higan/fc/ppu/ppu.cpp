@@ -3,7 +3,6 @@
 namespace Famicom {
 
 PPU ppu;
-#include "video.cpp"
 
 #include "serialization.cpp"
 
@@ -43,7 +42,7 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   status.field ^= 1;
-  video.refresh();
+  Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
   scheduler.exit(Scheduler::Event::Frame);
 }
 

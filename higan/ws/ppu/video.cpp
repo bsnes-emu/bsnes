@@ -1,38 +1,5 @@
-Video video;
-
-Video::Video() {
-  output = new uint32[224 * 224];
-  paletteLiteral = new uint32[1 << 12];
-  paletteStandard = new uint32[1 << 12];
-  paletteEmulation = new uint32[1 << 12];
-}
-
-auto Video::power() -> void {
-  memory::fill(output(), 224 * 224 * sizeof(uint32));
-
-  for(uint12 color : range(1 << 12)) {
-    paletteLiteral[color] = color;
-
-    uint b = color.bits(0, 3);
-    uint g = color.bits(4, 7);
-    uint r = color.bits(8,11);
-
-    uint R = image::normalize(r, 4, 16);
-    uint G = image::normalize(g, 4, 16);
-    uint B = image::normalize(b, 4, 16);
-    paletteStandard[color] = interface->videoColor(R, G, B);
-
-    //todo: this uses the Game Boy Advance color emulation algorithm
-    //need to determine proper color emulation for WonderSwan systems
-    R = (r * 26 + g *  4 + b *  2);
-    G = (         g * 24 + b *  8);
-    B = (r *  6 + g *  4 + b * 22);
-    R = image::normalize(min(480, R), 9, 16);
-    G = image::normalize(min(480, G), 9, 16);
-    B = image::normalize(min(480, B), 9, 16);
-    paletteEmulation[color] = interface->videoColor(R, G, B);
-  }
-}
+//note: this file is currently not compiled into higan
+//it is temporarily only used as a reference
 
 auto Video::refresh() -> void {
   auto& palette = settings.colorEmulation ? paletteEmulation : paletteStandard;

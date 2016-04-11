@@ -16,11 +16,10 @@ struct DSP : Thread {
   auto power() -> void;
   auto reset() -> void;
 
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
 privileged:
-  #include "modulo-array.hpp"
-
   enum GlobalRegister : uint {
     MVOLL = 0x0c, MVOLR = 0x1c,
     EVOLL = 0x2c, EVOLR = 0x3c,
@@ -48,8 +47,6 @@ privileged:
   };
 
   enum : uint {
-    EchoHistorySize = 8,
-    BrrBufferSize = 12,
     BrrBlockSize = 9,
     CounterRange = 2048 * 5 * 3,  //30720 (0x7800)
   };
@@ -57,8 +54,8 @@ privileged:
   struct State {
     uint8 regs[128];
 
-    ModuloArray<int, EchoHistorySize> echoHistory[2];  //echo history keeps most recent 8 samples
-    int echoHistoryOffset;
+    int echoHistory[2][8];  //echo history keeps most recent 8 stereo samples
+    uint3 echoHistoryOffset;
 
     bool everyOtherSample;  //toggles every sample
     int kon;                //KON value when last checked
@@ -105,7 +102,7 @@ privileged:
   } state;
 
   struct Voice {
-    ModuloArray<int, BrrBufferSize> buffer;  //decoded samples
+    int buffer[12 * 3];  //12 decoded samples (mirrored for wrapping)
     int bufferOffset;    //place in buffer where next samples will be decoded
     int gaussianOffset;  //relative fractional position in sample (0x1000 = 1.0)
     int brrAddress;      //address of current BRR block
@@ -119,29 +116,29 @@ privileged:
     int _envxOut;
   } voice[8];
 
-  //gaussian
+  //gaussian.cpp
   static const int16 GaussianTable[512];
   auto gaussianInterpolate(const Voice& v) -> int;
 
-  //counter
+  //counter.cpp
   static const uint16 CounterRate[32];
   static const uint16 CounterOffset[32];
   auto counterTick() -> void;
   auto counterPoll(uint rate) -> bool;
 
-  //envelope
+  //envelope.cpp
   auto envelopeRun(Voice& v) -> void;
 
-  //brr
+  //brr.cpp
   auto brrDecode(Voice& v) -> void;
 
-  //misc
+  //misc.cpp
   auto misc27() -> void;
   auto misc28() -> void;
   auto misc29() -> void;
   auto misc30() -> void;
 
-  //voice
+  //voice.cpp
   auto voiceOutput(Voice& v, bool channel) -> void;
   auto voice1 (Voice& v) -> void;
   auto voice2 (Voice& v) -> void;
@@ -156,8 +153,8 @@ privileged:
   auto voice8 (Voice& v) -> void;
   auto voice9 (Voice& v) -> void;
 
-  //echo
-  auto calculateFIR(int i, bool channel) -> int;
+  //echo.cpp
+  auto calculateFIR(bool channel, int index) -> int;
   auto echoOutput(bool channel) -> int;
   auto echoRead(bool channel) -> void;
   auto echoWrite(bool channel) -> void;
@@ -171,7 +168,7 @@ privileged:
   auto echo29() -> void;
   auto echo30() -> void;
 
-  //dsp
+  //dsp.cpp
   static auto Enter() -> void;
   auto tick() -> void;
 };

@@ -1,3 +1,6 @@
+struct Coprocessor : Cothread {
+};
+
 #include <sfc/coprocessor/icd2/icd2.hpp>
 #include <sfc/coprocessor/mcc/mcc.hpp>
 #include <sfc/coprocessor/nss/nss.hpp>

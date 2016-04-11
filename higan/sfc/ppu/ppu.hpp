@@ -1,5 +1,3 @@
-#include "video.hpp"
-
 struct PPU : Thread, PPUcounter {
   alwaysinline auto interlace() const -> bool { return display.interlace; }
   alwaysinline auto overscan() const -> bool { return display.overscan; }

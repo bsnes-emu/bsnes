@@ -3,7 +3,6 @@
 namespace SuperFamicom {
 
 PPU ppu;
-#include "video.cpp"
 
 #include "memory.cpp"
 #include "mmio.cpp"
@@ -22,9 +21,11 @@ sprite(*this),
 window(*this),
 screen(*this) {
   output = new uint32[512 * 512];
+  output += 16 * 512;  //overscan offset
 }
 
 PPU::~PPU() {
+  output -= 16 * 512;
   delete[] output;
 }
 
@@ -190,7 +191,6 @@ auto PPU::reset() -> void {
   sprite.reset();
   window.reset();
   screen.reset();
-  video.reset();
 
   frame();
 }
@@ -213,7 +213,12 @@ auto PPU::scanline() -> void {
   screen.scanline();
 
   if(vcounter() == 241) {
-    video.refresh();
+    auto output = this->output;
+    if(!overscan()) output -= 14 * 512;
+    auto pitch = 1024 >> interlace();
+    auto width = 512;
+    auto height = !interlace() ? 240 : 480;
+    Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
     scheduler.exit(Scheduler::Event::Frame);
   }
 }

@@ -4,6 +4,7 @@ namespace SuperFamicom {
 
 System system;
 
+#include "video.cpp"
 #include "peripherals.cpp"
 #include "random.cpp"
 #include "serialization.cpp"
@@ -90,6 +91,7 @@ auto System::load() -> void {
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
+  configureVideo();
   _loaded = true;
 }
 

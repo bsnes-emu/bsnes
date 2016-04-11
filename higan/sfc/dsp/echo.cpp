@@ -1,6 +1,6 @@
-auto DSP::calculateFIR(int i, bool channel) -> int {
-  int s = state.echoHistory[channel][state.echoHistoryOffset + i + 1];
-  return (s * (int8)REG(FIR + i * 0x10)) >> 6;
+auto DSP::calculateFIR(bool channel, int index) -> int {
+  int sample = state.echoHistory[channel][(uint3)(state.echoHistoryOffset + index + 1)];
+  return (sample * (int8)REG(FIR + index * 0x10)) >> 6;
 }
 
 auto DSP::echoOutput(bool channel) -> int {
@@ -14,7 +14,7 @@ auto DSP::echoRead(bool channel) -> void {
   uint8 lo = smp.apuram[(uint16)(addr + 0)];
   uint8 hi = smp.apuram[(uint16)(addr + 1)];
   int s = (int16)((hi << 8) + lo);
-  state.echoHistory[channel].write(state.echoHistoryOffset, s >> 1);
+  state.echoHistory[channel][state.echoHistoryOffset] = s >> 1;
 }
 
 auto DSP::echoWrite(bool channel) -> void {
@@ -31,22 +31,21 @@ auto DSP::echoWrite(bool channel) -> void {
 auto DSP::echo22() -> void {
   //history
   state.echoHistoryOffset++;
-  if(state.echoHistoryOffset >= EchoHistorySize) state.echoHistoryOffset = 0;
 
   state._echoPointer = (uint16)((state._esa << 8) + state.echoOffset);
   echoRead(0);
 
   //FIR
   int l = calculateFIR(0, 0);
-  int r = calculateFIR(0, 1);
+  int r = calculateFIR(1, 0);
 
   state._echoIn[0] = l;
   state._echoIn[1] = r;
 }
 
 auto DSP::echo23() -> void {
-  int l = calculateFIR(1, 0) + calculateFIR(2, 0);
-  int r = calculateFIR(1, 1) + calculateFIR(2, 1);
+  int l = calculateFIR(0, 1) + calculateFIR(0, 2);
+  int r = calculateFIR(1, 1) + calculateFIR(1, 2);
 
   state._echoIn[0] += l;
   state._echoIn[1] += r;
@@ -55,22 +54,22 @@ auto DSP::echo23() -> void {
 }
 
 auto DSP::echo24() -> void {
-  int l = calculateFIR(3, 0) + calculateFIR(4, 0) + calculateFIR(5, 0);
-  int r = calculateFIR(3, 1) + calculateFIR(4, 1) + calculateFIR(5, 1);
+  int l = calculateFIR(0, 3) + calculateFIR(0, 4) + calculateFIR(0, 5);
+  int r = calculateFIR(1, 3) + calculateFIR(1, 4) + calculateFIR(1, 5);
 
   state._echoIn[0] += l;
   state._echoIn[1] += r;
 }
 
 auto DSP::echo25() -> void {
-  int l = state._echoIn[0] + calculateFIR(6, 0);
-  int r = state._echoIn[1] + calculateFIR(6, 1);
+  int l = state._echoIn[0] + calculateFIR(0, 6);
+  int r = state._echoIn[1] + calculateFIR(1, 6);
 
   l = (int16)l;
   r = (int16)r;
 
-  l += (int16)calculateFIR(7, 0);
-  r += (int16)calculateFIR(7, 1);
+  l += (int16)calculateFIR(0, 7);
+  r += (int16)calculateFIR(1, 7);
 
   state._echoIn[0] = sclamp<16>(l) & ~1;
   state._echoIn[1] = sclamp<16>(r) & ~1;

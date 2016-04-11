@@ -20,6 +20,11 @@ struct System : IO {
   auto portRead(uint16 addr) -> uint8 override;
   auto portWrite(uint16 addr, uint8 data) -> void override;
 
+  //video.cpp
+  auto configureVideo() -> void;
+  auto configureVideoPalette() -> void;
+  auto configureVideoEffects() -> void;
+
   //serialization.cpp
   auto serializeInit() -> void;
   auto serialize() -> serializer;
