@@ -5,6 +5,28 @@
 @end
 
 @implementation AppDelegate
+{
+    NSWindow *preferences_window;
+}
+
+- (void) applicationDidFinishLaunching:(NSNotification *)notification
+{
+#define KEY(x) ({unichar __x = x; [NSString stringWithCharacters:&(__x) length:1];})
+    [[NSUserDefaults standardUserDefaults] registerDefaults:@{
+                                                              @"GBRight": KEY(NSRightArrowFunctionKey),
+                                                              @"GBLeft": KEY(NSLeftArrowFunctionKey),
+                                                              @"GBUp": KEY(NSUpArrowFunctionKey),
+                                                              @"GBDown": KEY(NSDownArrowFunctionKey),
+
+                                                              @"GBA": @"x",
+                                                              @"GBB": @"z",
+                                                              @"GBSelect": @"\x7f",
+                                                              @"GBStart": @"\r",
+
+                                                              @"GBTurbo": @" ",
+                                                              }];
+#undef KEY
+}
 
 - (IBAction)toggleDeveloperMode:(id)sender {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -15,10 +37,17 @@
 {
     if ([anItem action] == @selector(toggleDeveloperMode:)) {
         [(NSMenuItem*)anItem setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]];
-        return true;
     }
 
-    return false;
+    return true;
 }
 
+- (IBAction) showPreferences: (id) sender
+{
+    NSArray *objects;
+    if (!_preferencesWindow) {
+        [[NSBundle mainBundle] loadNibNamed:@"Preferences" owner:self topLevelObjects:&objects];
+    }
+    [_preferencesWindow makeKeyAndOrderFront:self];
+}
 @end

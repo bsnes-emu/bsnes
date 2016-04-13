@@ -74,7 +74,8 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(BIN)/BootROMs/dmg_boot.bin \
 					$(BIN)/BootROMs/cgb_boot.bin \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Document.nib \
-					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib
+					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
+					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Preferences.nib
 	mkdir -p $(BIN)/Sameboy.app/Contents/Resources
 	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/info.plist > $(BIN)/Sameboy.app/Contents/info.plist

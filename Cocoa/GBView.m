@@ -1,6 +1,7 @@
-#import <Carbon/Carbon.h>
 #import <OpenGL/gl.h>
 #import "GBView.h"
+#import "GBButtons.h"
+#import "NSString+StringForKey.h"
 
 @implementation GBView
 {
@@ -76,77 +77,51 @@
 
 -(void)keyDown:(NSEvent *)theEvent
 {
-    unsigned short key = theEvent.keyCode;
-    switch (key) {
-        case kVK_RightArrow:
-            _gb->keys[0] = true;
-            break;
-        case kVK_LeftArrow:
-            _gb->keys[1] = true;
-            break;
-        case kVK_UpArrow:
-            _gb->keys[2] = true;
-            break;
-        case kVK_DownArrow:
-            _gb->keys[3] = true;
-            break;
-        case kVK_ANSI_X:
-            _gb->keys[4] = true;
-            break;
-        case kVK_ANSI_Z:
-            _gb->keys[5] = true;
-            break;
-        case kVK_Delete:
-            _gb->keys[6] = true;
-            break;
-        case kVK_Return:
-            _gb->keys[7] = true;
-            break;
-        case kVK_Space:
-            _gb->turbo = true;
-            break;
+    bool handled = false;
 
-        default:
-            [super keyDown:theEvent];
-            break;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    for (GBButton i = 0; i < GBButtonCount; i++) {
+        if ([[defaults stringForKey:button_to_preference_name(i)] isEqualToString:theEvent.charactersIgnoringModifiers]) {
+            handled = true;
+            switch (i) {
+                case GBTurbo:
+                    _gb->turbo = true;
+                    break;
+                    
+                default:
+                    _gb->keys[i] = true;
+                    break;
+            }
+        }
+    }
+
+    if (!handled) {
+        [super keyDown:theEvent];
     }
 }
 
 -(void)keyUp:(NSEvent *)theEvent
 {
-    unsigned short key = theEvent.keyCode;
-    switch (key) {
-        case kVK_RightArrow:
-            _gb->keys[0] = false;
-            break;
-        case kVK_LeftArrow:
-            _gb->keys[1] = false;
-            break;
-        case kVK_UpArrow:
-            _gb->keys[2] = false;
-            break;
-        case kVK_DownArrow:
-            _gb->keys[3] = false;
-            break;
-        case kVK_ANSI_X:
-            _gb->keys[4] = false;
-            break;
-        case kVK_ANSI_Z:
-            _gb->keys[5] = false;
-            break;
-        case kVK_Delete:
-            _gb->keys[6] = false;
-            break;
-        case kVK_Return:
-            _gb->keys[7] = false;
-            break;
-        case kVK_Space:
-            _gb->turbo = false;
-            break;
+    bool handled = false;
 
-        default:
-            [super keyUp:theEvent];
-            break;
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    for (GBButton i = 0; i < GBButtonCount; i++) {
+        if ([[defaults stringForKey:button_to_preference_name(i)] isEqualToString:theEvent.charactersIgnoringModifiers]) {
+            handled = true;
+            switch (i) {
+                case GBTurbo:
+                    _gb->turbo = false;
+                    break;
+
+                default:
+                    _gb->keys[i] = false;
+                    break;
+            }
+        }
+    }
+
+    if (!handled) {
+        [super keyUp:theEvent];
     }
 }
 
