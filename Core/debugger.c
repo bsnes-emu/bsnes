@@ -606,7 +606,7 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, mbc, NULL},
-    {"breakpoint", 1, breakpoint, "Move the breakpoint to a new position"},
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression"},
     {"list", 1, list, "List all set breakpoints"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints"},
     {"print", 1, print, "Evaluate and print an expression"},
