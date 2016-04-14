@@ -125,7 +125,7 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
             case GB_IO_SB:
                 return gb->io_registers[addr & 0xFF];
             case GB_IO_HDMA5:
-                return gb->io_registers[GB_IO_HDMA5] | 0x7F;
+                return (gb->io_registers[GB_IO_HDMA5] & 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
                     return 0xFF;
