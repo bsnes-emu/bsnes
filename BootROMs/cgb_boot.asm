@@ -38,7 +38,7 @@ Start:
   ld a, $77
   ldh [$24], a
 
-  ld hl, $30
+  ld hl, $FF30
 ; Init waveform
   xor a
   ld c, $10
