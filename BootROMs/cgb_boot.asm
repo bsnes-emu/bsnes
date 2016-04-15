@@ -1,4 +1,4 @@
-; Sameboy DMG bootstrap ROM
+; Sameboy CGB bootstrap ROM
 ; Todo: use friendly names for HW registers instead of magic numbers
 ; Todo: add support for games that assume DMG boot logo (Such as X), like the
 ;       original boot ROM.
@@ -255,7 +255,7 @@ TitleChecksums:
   db $A2 ; STAR WARS-NOA
   db $49 ;
   db $4E ; WAVERACE
-  db $43 ;
+  db $43 | $80 ;
   db $68 ; LOLO2
   db $E0 ; YOSHI'S COOKIE
   db $8B ; MYSTIC QUEST
@@ -313,6 +313,7 @@ FirstChecksumWithDuplicate:
 ChecksumsEnd:
 
 PalettePerChecksum:
+; | $80 means game requires DMG boot tilemap
   db 0 	; Default Palette
   db 4 	; ALLEY WAY
   db 5 	; YAKUMAN
@@ -325,7 +326,7 @@ PalettePerChecksum:
   db 5 	; F1RACE
   db 19 	; YOSSY NO TAMAGO
   db 36 	;
-  db 7 	; X
+  db 7 | $80 ; X
   db 37 	; MARIOLAND2
   db 30 	; YOSSY NO COOKIE
   db 44 	; ZELDA
@@ -747,6 +748,11 @@ Preboot:
 EmulateDMG:
   ld a, 1
   ldh [$6C], a ; DMG Emulation
+  call GetPaletteIndex
+  bit 7, a
+  call nz, LoadDMGTilemap
+  and $7F
+  ld b, a
   ld a, [InputPalette]
   and a
   jr z, .nothingDown
@@ -757,7 +763,7 @@ EmulateDMG:
   ld a, [hl]
   jr .paletteFromKeys
 .nothingDown
-  call GetPaletteIndex
+  ld a, b
 .paletteFromKeys
   call WaitFrame
   call LoadPalettesFromIndex
@@ -1074,6 +1080,25 @@ ReplaceColorInAllPalettes:
   add hl, de
   dec c
   jr nz, .loop
+  ret
+  
+LoadDMGTilemap:
+  push af
+  call WaitFrame
+  ld a,$19      ; Trademark symbol
+  ld [$9910], a ; ... put in the superscript position
+  ld hl,$992f   ; Bottom right corner of the logo
+  ld c,$c       ; Tiles in a logo row
+.tilemapLoop
+  dec a
+  jr z, .tilemapDone
+  ldd [hl], a
+  dec c
+  jr nz, .tilemapLoop
+  ld l,$0f ; Jump to top row
+  jr .tilemapLoop
+.tilemapDone
+  pop af
   ret
 
 SECTION "ROMMax", ROM0[$900]
