@@ -361,6 +361,9 @@ void apu_write(GB_gameboy_t *gb, unsigned char reg, unsigned char value)
             break;
         case GB_IO_NR32:
             gb->apu.wave_shift = ((value >> 5) + 3) & 3;
+            if (gb->apu.wave_shift == 3) {
+                gb->apu.wave_shift = 4;
+            }
             break;
         case GB_IO_NR43:
         {

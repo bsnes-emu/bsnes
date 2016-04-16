@@ -57,7 +57,6 @@ enum {
     GB_IO_NR31       = 0x1b, // Channel 3 Sound Length
     GB_IO_NR32       = 0x1c, // Channel 3 Select output level (R/W)
     GB_IO_NR33       = 0x1d, // Channel 3 Frequency's lower data (W)
-
     GB_IO_NR34       = 0x1e, // Channel 3 Frequency's higher data (R/W)
 
     /* Missing */
