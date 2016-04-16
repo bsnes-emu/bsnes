@@ -341,6 +341,7 @@ int gb_load_state(GB_gameboy_t *gb, const char *path)
 int gb_save_battery(GB_gameboy_t *gb, const char *path)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
+    if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
     FILE *f = fopen(path, "w");
     if (!f) {
         return errno;
