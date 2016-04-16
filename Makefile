@@ -4,7 +4,7 @@ else
 default: sdl
 endif
 
-VERSION := 0.2
+VERSION := 0.3
 
 BIN := build/bin
 OBJ := build/obj
