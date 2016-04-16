@@ -562,7 +562,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments)
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        gb_log(gb, "Cartrdige includes%s RAM: %zx\n", cartridge->has_battery? "battery-backed ": "", gb->mbc_ram_size);
+        gb_log(gb, "Cartrdige includes%s RAM: %zx\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
         gb_log(gb, "No cartridge RAM\n");
