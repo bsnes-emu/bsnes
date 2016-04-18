@@ -35,6 +35,7 @@ struct Program : Emulator::Interface::Bind {
   auto updateStatusText() -> void;
   auto updateVideoShader() -> void;
   auto updateAudio() -> void;
+  auto updateAudioMode() -> void;
   auto updateAudioVolume() -> void;
   auto updateDSP() -> void;
 

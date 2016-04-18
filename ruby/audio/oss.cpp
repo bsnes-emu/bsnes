@@ -69,8 +69,8 @@ struct AudioOSS : Audio {
     return false;
   }
 
-  auto sample(uint16_t left, uint16_t right) -> void {
-    uint32_t sample = left << 0 | right << 16;
+  auto sample(int16_t left, int16_t right) -> void {
+    uint32_t sample = (uint16_t)left << 0 | (uint16_t)right << 16;
     auto unused = write(device.fd, &sample, 4);
   }
 

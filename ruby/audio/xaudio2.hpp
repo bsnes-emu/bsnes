@@ -1,12 +1,6 @@
-/*
-  xaudio2.hpp (2010-08-14)
-  author: OV2
-  
-  ruby-specific header to provide mingw-friendly xaudio2 interfaces
-*/
+#pragma once
 
-#ifndef XAUDIO2_RUBY_H
-#define XAUDIO2_RUBY_H
+//ruby-specific header to provide mingw-friendly xaudio2 interfaces
 
 //64-bit GCC fix
 #define GUID_EXT EXTERN_C
@@ -33,20 +27,6 @@ DECLARE_INTERFACE(IXAudio2Voice);
 #define XAUDIO2_DEFAULT_FREQ_RATIO      4.0f
 #define XAUDIO2_DEBUG_ENGINE            0x0001
 #define XAUDIO2_VOICE_NOSRC             0x0004
-
-typedef struct
-{
-    WAVEFORMATEX Format;
-    union
-    {
-        WORD wValidBitsPerSample;
-        WORD wSamplesPerBlock;
-        WORD wReserved;
-    } Samples;
-    DWORD dwChannelMask;
-    GUID SubFormat;
-} WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE, *LPPWAVEFORMATEXTENSIBLE;
-typedef const WAVEFORMATEXTENSIBLE* LPCWAVEFORMATEXTENSIBLE;
 
 typedef enum XAUDIO2_DEVICE_ROLE
 {
@@ -337,4 +317,3 @@ __inline HRESULT XAudio2Create(IXAudio2** ppXAudio2, UINT32 Flags X2DEFAULT(0),
         }
     return hr;
 }
-#endif

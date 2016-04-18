@@ -71,8 +71,13 @@ auto Program::updateAudio() -> void {
   if(settings["Audio/Resampler"].text() == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);
   if(settings["Audio/Resampler"].text() == "Sinc"   ) dsp.setResampler(DSP::ResampleEngine::Sinc);
   dsp.setResamplerFrequency(audio->get(Audio::Frequency).get<uint>());
+  updateAudioMode();
   updateAudioVolume();
   updateDSP();
+}
+
+auto Program::updateAudioMode() -> void {
+  audio->set(Audio::Exclusive, settings["Audio/Exclusive"].boolean());
 }
 
 auto Program::updateAudioVolume() -> void {

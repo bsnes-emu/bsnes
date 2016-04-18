@@ -64,9 +64,9 @@ struct AudioPulseAudio : Audio {
     return false;
   }
 
-  auto sample(uint16_t left, uint16_t right) -> void {
+  auto sample(int16_t left, int16_t right) -> void {
     pa_stream_begin_write(device.stream, (void**)&buffer.data, &buffer.size);
-    buffer.data[buffer.offset++] = left + (right << 16);
+    buffer.data[buffer.offset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
     if((buffer.offset + 1) * pa_frame_size(&device.spec) <= buffer.size) return;
 
     while(true) {

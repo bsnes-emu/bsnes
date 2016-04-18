@@ -16,7 +16,7 @@ ui_objects += $(if $(call streq,$(platform),windows),ui-resource)
 # platform
 ifeq ($(platform),windows)
   ruby += video.direct3d video.wgl video.directdraw video.gdi
-  ruby += audio.xaudio2 audio.directsound
+  ruby += audio.wasapi audio.xaudio2 audio.directsound
   ruby += input.windows
 else ifeq ($(platform),macosx)
   ruby += video.cgl

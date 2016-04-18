@@ -30,8 +30,10 @@ struct AudioSettings : TabFrameItem {
       Label volumeLabel{&volumeLayout, Size{80, 0}};
       Label volumeValue{&volumeLayout, Size{80, 0}};
       HorizontalSlider volumeSlider{&volumeLayout, Size{~0, 0}};
+    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
 
   auto update() -> void;
+  auto updateMode() -> void;
   auto updateVolume() -> void;
 };
 

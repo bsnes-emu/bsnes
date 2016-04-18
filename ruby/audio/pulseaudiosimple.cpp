@@ -38,10 +38,10 @@ struct AudioPulseAudioSimple : Audio {
     return false;
   }
 
-  auto sample(uint16_t left, uint16_t right) -> void {
+  auto sample(int16_t left, int16_t right) -> void {
     if(!device.handle) return;
 
-    buffer.data[buffer.offset++] = left + (right << 16);
+    buffer.data[buffer.offset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
     if(buffer.offset >= 64) {
       int error;
       pa_simple_write(device.handle, (const void*)buffer.data, buffer.offset * sizeof(uint32_t), &error);

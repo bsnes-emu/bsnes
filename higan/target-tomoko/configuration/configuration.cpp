@@ -29,6 +29,7 @@ Settings::Settings() {
 
   set("Audio/Driver", ruby::Audio::optimalDriver());
   set("Audio/Device", "");
+  set("Audio/Exclusive", false);
   set("Audio/Synchronize", true);
   set("Audio/Mute", false);
   set("Audio/Volume", 100);

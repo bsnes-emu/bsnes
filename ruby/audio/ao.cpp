@@ -31,8 +31,8 @@ struct AudioAO : Audio {
     return false;
   }
 
-  auto sample(uint16_t l_sample, uint16_t r_sample) -> void {
-    uint32_t samp = (l_sample << 0) + (r_sample << 16);
+  auto sample(int16_t left, int16_t right) -> void {
+    uint32_t samp = (uint16_t)left << 0 | (uint16_t)right << 0;
     ao_play(audio_device, (char*)&samp, 4); //This may need to be byte swapped for Big Endian
   }
 

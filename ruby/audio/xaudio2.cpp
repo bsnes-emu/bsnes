@@ -78,8 +78,8 @@ struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
     pSourceVoice->SubmitSourceBuffer(&xa2buffer);
   }
 
-  auto sample(uint16_t left, uint16_t right) -> void {
-    device.buffer[device.writebuffer * device.latency + device.bufferoffset++] = left + (right << 16);
+  auto sample(int16_t left, int16_t right) -> void {
+    device.buffer[device.writebuffer * device.latency + device.bufferoffset++] = (uint16_t)left << 0 | (uint16_t)right << 16;
     if(device.bufferoffset < device.latency) return;
     device.bufferoffset = 0;
 

@@ -43,7 +43,7 @@ Program::Program(lstring args) {
 
   dsp.setPrecision(16);
   dsp.setBalance(0.0);
-  dsp.setFrequency(32040);
+  dsp.setFrequency(44100);
   dsp.setResampler(DSP::ResampleEngine::Sinc);
   dsp.setResamplerFrequency(audio->get(Audio::Frequency).get<uint>());
 
@@ -55,7 +55,7 @@ Program::Program(lstring args) {
   new ToolsManager;
 
   updateVideoShader();
-  updateAudioVolume();
+  updateAudio();
 
   args.takeFirst();  //ignore program location in argument parsing
   for(auto& argument : args) {

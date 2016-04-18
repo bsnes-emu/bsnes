@@ -66,8 +66,8 @@ struct AudioOpenAL : Audio {
     return false;
   }
 
-  auto sample(uint16_t left, uint16_t right) -> void {
-    buffer.data[buffer.length++] = left << 0 | right << 16;
+  auto sample(int16_t left, int16_t right) -> void {
+    buffer.data[buffer.length++] = (uint16_t)left << 0 | (uint16_t)right << 16;
     if(buffer.length < buffer.size) return;
 
     ALuint albuffer = 0;
