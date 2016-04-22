@@ -99,7 +99,7 @@ Presentation::Presentation() {
   });
   muteAudio.setText("Mute Audio").setChecked(settings["Audio/Mute"].boolean()).onToggle([&] {
     settings["Audio/Mute"].setValue(muteAudio.checked());
-    program->updateAudioVolume();
+    program->updateAudioEffects();
   });
   showStatusBar.setText("Show Status Bar").setChecked(settings["UserInterface/ShowStatusBar"].boolean()).onToggle([&] {
     settings["UserInterface/ShowStatusBar"].setValue(showStatusBar.checked());

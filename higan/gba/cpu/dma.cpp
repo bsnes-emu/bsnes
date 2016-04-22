@@ -39,7 +39,7 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
     uint32 addr = dma.run.source;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    dma.data = bus_read(mode, addr);
+    dma.data = busRead(mode, addr);
   }
 
   if(dma.run.target < 0x0200'0000) {
@@ -48,7 +48,7 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
     uint32 addr = dma.run.target;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    bus_write(mode, addr, dma.data);
+    busWrite(mode, addr, dma.data);
   }
 
   switch(dma.control.sourcemode) {

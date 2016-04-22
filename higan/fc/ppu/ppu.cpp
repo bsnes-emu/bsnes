@@ -42,8 +42,11 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   status.field ^= 1;
-  Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
   scheduler.exit(Scheduler::Event::Frame);
+}
+
+auto PPU::refresh() -> void {
+  Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
 }
 
 auto PPU::power() -> void {

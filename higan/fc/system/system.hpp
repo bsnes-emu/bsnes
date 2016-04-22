@@ -13,8 +13,8 @@ struct System {
   auto term() -> void;
 
   //video.cpp
-  auto configureVideo() -> void;
   auto configureVideoPalette() -> void;
+  auto configureVideoEffects() -> void;
 
   //serialization.cpp
   auto serialize() -> serializer;

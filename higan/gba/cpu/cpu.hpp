@@ -39,10 +39,10 @@ struct CPU : Processor::ARM, Thread, MMIO {
   auto power() -> void;
 
   //bus.cpp
-  auto bus_idle() -> void override;
-  auto bus_read(uint mode, uint32 addr) -> uint32 override;
-  auto bus_write(uint mode, uint32 addr, uint32 word) -> void override;
-  auto bus_wait(uint mode, uint32 addr) -> uint;
+  auto busIdle() -> void override;
+  auto busRead(uint mode, uint32 addr) -> uint32 override;
+  auto busWrite(uint mode, uint32 addr, uint32 word) -> void override;
+  auto busWait(uint mode, uint32 addr) -> uint;
 
   //mmio.cpp
   auto read(uint32 addr) -> uint8;

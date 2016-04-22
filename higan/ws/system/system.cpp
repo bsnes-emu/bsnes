@@ -41,7 +41,6 @@ auto System::load(Model model) -> void {
 
   cartridge.load();
   serializeInit();
-  configureVideo();
   _orientation = cartridge.information.orientation;
   _loaded = true;
 }
@@ -57,6 +56,14 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
+  Emulator::video.reset();
+  Emulator::video.setInterface(interface);
+  configureVideoPalette();
+  configureVideoEffects();
+
+  Emulator::audio.reset();
+  Emulator::audio.setInterface(interface);
+
   bus.power();
   iram.power();
   eeprom.power();

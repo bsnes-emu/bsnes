@@ -26,7 +26,7 @@ auto MCC::reset() -> void {
   commit();
 }
 
-auto MCC::memory_access(bool write, Memory& memory, uint24 addr, uint8 data) -> uint8 {
+auto MCC::memoryAccess(bool write, Memory& memory, uint24 addr, uint8 data) -> uint8 {
   addr = bus.mirror(addr, memory.size());
   if(!write) {
     return memory.read(addr, data);
@@ -37,7 +37,7 @@ auto MCC::memory_access(bool write, Memory& memory, uint24 addr, uint8 data) -> 
 
 //map address=00-3f,80-bf:8000-ffff mask=0x408000
 //map address=40-7d,c0-ff:0000-ffff
-auto MCC::mcu_access(bool write, uint24 addr, uint8 data) -> uint8 {
+auto MCC::mcuAccess(bool write, uint24 addr, uint8 data) -> uint8 {
   if(addr < 0x400000) {
     //note: manifest maps 00-3f,80-bf:8000-ffff mask=0x408000 => 00-3f:0000-ffff
     //the intention is consistency in pre-decoding as much as possible
@@ -50,31 +50,31 @@ auto MCC::mcu_access(bool write, uint24 addr, uint8 data) -> uint8 {
   if((addr & 0xe08000) == 0x008000) {  //$00-1f:8000-ffff
     if(r07 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memory_access(write, rom, addr, data);
+      return memoryAccess(write, rom, addr, data);
     }
   }
 
   if((addr & 0xe08000) == 0x808000) {  //$80-9f:8000-ffff
     if(r08 == 1) {
       addr = ((addr & 0x1f0000) >> 1) | (addr & 0x7fff);
-      return memory_access(write, rom, addr, data);
+      return memoryAccess(write, rom, addr, data);
     }
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    if(r05 == 0) return memory_access(write, ram, addr & 0x0fffff, data);
+    if(r05 == 0) return memoryAccess(write, ram, addr & 0x0fffff, data);
   }
 
   if((addr & 0xf00000) == 0x500000) {  //$50-5f:0000-ffff
-    if(r06 == 0) return memory_access(write, ram, addr & 0x0fffff, data);
+    if(r06 == 0) return memoryAccess(write, ram, addr & 0x0fffff, data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    if(r03 == 1) return memory_access(write, ram, addr & 0x0fffff, data);
+    if(r03 == 1) return memoryAccess(write, ram, addr & 0x0fffff, data);
   }
 
   if((addr & 0xf80000) == 0x700000) {  //$70-77:0000-ffff
-    return memory_access(write, ram, addr & 0x07ffff, data);
+    return memoryAccess(write, ram, addr & 0x07ffff, data);
   }
 
   if(((addr & 0x408000) == 0x008000)  //$00-3f,80-bf:8000-ffff
@@ -82,18 +82,18 @@ auto MCC::mcu_access(bool write, uint24 addr, uint8 data) -> uint8 {
   ) {
     if(r02 == 0) addr = ((addr & 0x7f0000) >> 1) | (addr & 0x7fff);
     Memory& memory = (r01 == 0 ? (Memory&)bsmemory : (Memory&)ram);
-    return memory_access(write, memory, addr & 0x7fffff, data);
+    return memoryAccess(write, memory, addr & 0x7fffff, data);
   }
 
   return 0x00;
 }
 
-auto MCC::mcu_read(uint24 addr, uint8 data) -> uint8 {
-  return mcu_access(false, addr, data);
+auto MCC::mcuRead(uint24 addr, uint8 data) -> uint8 {
+  return mcuAccess(false, addr, data);
 }
 
-auto MCC::mcu_write(uint24 addr, uint8 data) -> void {
-  mcu_access(true, addr, data);
+auto MCC::mcuWrite(uint24 addr, uint8 data) -> void {
+  mcuAccess(true, addr, data);
 }
 
 auto MCC::read(uint24 addr, uint8 data) -> uint8 {

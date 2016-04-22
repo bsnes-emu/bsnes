@@ -213,12 +213,6 @@ auto PPU::scanline() -> void {
   screen.scanline();
 
   if(vcounter() == 241) {
-    auto output = this->output;
-    if(!overscan()) output -= 14 * 512;
-    auto pitch = 1024 >> interlace();
-    auto width = 512;
-    auto height = !interlace() ? 240 : 480;
-    Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
     scheduler.exit(Scheduler::Event::Frame);
   }
 }
@@ -228,6 +222,15 @@ auto PPU::frame() -> void {
 
   display.interlace = regs.interlace;
   display.overscan = regs.overscan;
+}
+
+auto PPU::refresh() -> void {
+  auto output = this->output;
+  if(!overscan()) output -= 14 * 512;
+  auto pitch = 1024 >> interlace();
+  auto width = 512;
+  auto height = !interlace() ? 240 : 480;
+  Emulator::video.refresh(output, pitch * sizeof(uint32), width, height);
 }
 
 }

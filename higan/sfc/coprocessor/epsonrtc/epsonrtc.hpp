@@ -67,9 +67,9 @@ struct EpsonRTC : Cothread {
   uint1 test;
 
   //memory.cpp
-  auto rtc_reset() -> void;
-  auto rtc_read(uint4 addr) -> uint4;
-  auto rtc_write(uint4 addr, uint4 data) -> void;
+  auto rtcReset() -> void;
+  auto rtcRead(uint4 addr) -> uint4;
+  auto rtcWrite(uint4 addr, uint4 data) -> void;
 
   auto load(const uint8* data) -> void;
   auto save(uint8* data) -> void;
@@ -77,15 +77,15 @@ struct EpsonRTC : Cothread {
   //time.cpp
   auto irq(uint2 period) -> void;
   auto duty() -> void;
-  auto round_seconds() -> void;
+  auto roundSeconds() -> void;
   auto tick() -> void;
 
-  auto tick_second() -> void;
-  auto tick_minute() -> void;
-  auto tick_hour() -> void;
-  auto tick_day() -> void;
-  auto tick_month() -> void;
-  auto tick_year() -> void;
+  auto tickSecond() -> void;
+  auto tickMinute() -> void;
+  auto tickHour() -> void;
+  auto tickDay() -> void;
+  auto tickMonth() -> void;
+  auto tickYear() -> void;
 };
 
 extern EpsonRTC epsonrtc;

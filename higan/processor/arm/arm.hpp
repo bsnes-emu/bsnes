@@ -25,9 +25,9 @@ struct ARM {
   #include "disassembler.hpp"
 
   virtual auto step(unsigned clocks) -> void = 0;
-  virtual auto bus_idle() -> void = 0;
-  virtual auto bus_read(unsigned mode, uint32 addr) -> uint32 = 0;
-  virtual auto bus_write(unsigned mode, uint32 addr, uint32 word) -> void = 0;
+  virtual auto busIdle() -> void = 0;
+  virtual auto busRead(unsigned mode, uint32 addr) -> uint32 = 0;
+  virtual auto busWrite(unsigned mode, uint32 addr, uint32 word) -> void = 0;
 
   //arm.cpp
   auto power() -> void;

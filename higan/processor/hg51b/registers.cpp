@@ -1,4 +1,4 @@
-auto HG51B::reg_read(uint8 addr) const -> uint24 {
+auto HG51B::regRead(uint8 addr) const -> uint24 {
   switch(addr) {
   case 0x00: return regs.a;
   case 0x01: return regs.acch;
@@ -44,7 +44,7 @@ auto HG51B::reg_read(uint8 addr) const -> uint24 {
   return 0x000000;
 }
 
-auto HG51B::reg_write(uint8 addr, uint24 data) -> void {
+auto HG51B::regWrite(uint8 addr, uint24 data) -> void {
   switch(addr) {
   case 0x00: regs.a = data; return;
   case 0x01: regs.acch = data; return;

@@ -16,6 +16,7 @@ struct Cartridge : MMIO, property<Cartridge> {
 
   #include "mbc0/mbc0.hpp"
   #include "mbc1/mbc1.hpp"
+  #include "mbc1m/mbc1m.hpp"
   #include "mbc2/mbc2.hpp"
   #include "mbc3/mbc3.hpp"
   #include "mbc5/mbc5.hpp"
@@ -26,6 +27,7 @@ struct Cartridge : MMIO, property<Cartridge> {
   enum Mapper : uint {
     MBC0,
     MBC1,
+    MBC1M,
     MBC2,
     MBC3,
     MBC5,

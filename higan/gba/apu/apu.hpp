@@ -1,4 +1,6 @@
 struct APU : Thread, MMIO {
+  shared_pointer<Emulator::Stream> stream;
+
   #include "registers.hpp"
 
   static auto Enter() -> void;

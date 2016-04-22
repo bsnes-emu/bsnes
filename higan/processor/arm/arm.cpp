@@ -31,16 +31,16 @@ auto ARM::exec() -> void {
 
 auto ARM::idle() -> void {
   pipeline.nonsequential = true;
-  return bus_idle();
+  return busIdle();
 }
 
 auto ARM::read(unsigned mode, uint32 addr) -> uint32 {
-  return bus_read(mode, addr);
+  return busRead(mode, addr);
 }
 
 auto ARM::load(unsigned mode, uint32 addr) -> uint32 {
   pipeline.nonsequential = true;
-  uint32 word = bus_read(Load | mode, addr);
+  uint32 word = busRead(Load | mode, addr);
 
   if(mode & Half) {
     addr &= 1;
@@ -64,7 +64,7 @@ auto ARM::load(unsigned mode, uint32 addr) -> uint32 {
 
 auto ARM::write(unsigned mode, uint32 addr, uint32 word) -> void {
   pipeline.nonsequential = true;
-  return bus_write(mode, addr, word);
+  return busWrite(mode, addr, word);
 }
 
 auto ARM::store(unsigned mode, uint32 addr, uint32 word) -> void {
@@ -73,7 +73,7 @@ auto ARM::store(unsigned mode, uint32 addr, uint32 word) -> void {
   if(mode & Half) { word &= 0xffff; word |= word << 16; }
   if(mode & Byte) { word &= 0xff; word |= word << 8; word |= word << 16; }
 
-  return bus_write(Store | mode, addr, word);
+  return busWrite(Store | mode, addr, word);
 }
 
 auto ARM::vector(uint32 addr, Processor::Mode mode) -> void {

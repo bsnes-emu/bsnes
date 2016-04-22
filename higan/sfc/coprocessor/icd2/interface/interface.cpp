@@ -120,7 +120,7 @@ auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height)
 }
 
 auto ICD2::audioSample(int16 left, int16 right) -> void {
-  audio.coprocessorSample(left, right);
+  stream->sample(left, right);
 }
 
 auto ICD2::inputPoll(uint port, uint device, uint id) -> int16 {

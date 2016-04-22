@@ -90,12 +90,13 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 }
 
 auto Program::audioSample(int16 lsample, int16 rsample) -> void {
-  int samples[] = {lsample, rsample};
-  dsp.sample(samples);
-  while(dsp.pending()) {
-    dsp.read(samples);
-    audio->sample(samples[0], samples[1]);
-  }
+  audio->sample(lsample, rsample);
+//int samples[] = {lsample, rsample};
+//dsp.sample(samples);
+//while(dsp.pending()) {
+//  dsp.read(samples);
+//  audio->sample(samples[0], samples[1]);
+//}
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {

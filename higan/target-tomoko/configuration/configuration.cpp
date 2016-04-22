@@ -23,6 +23,10 @@ Settings::Settings() {
   set("Video/ColorEmulation", true);
   set("Video/ScanlineEmulation", false);
 
+  set("Video/Saturation", 100);
+  set("Video/Gamma", 100);
+  set("Video/Luminance", 100);
+
   set("Video/Overscan/Mask", false);
   set("Video/Overscan/Horizontal", 8);
   set("Video/Overscan/Vertical", 8);
@@ -33,6 +37,9 @@ Settings::Settings() {
   set("Audio/Synchronize", true);
   set("Audio/Mute", false);
   set("Audio/Volume", 100);
+  set("Audio/Balance", 50);
+  set("Audio/Reverb/Delay", 0);
+  set("Audio/Reverb/Level", 0);
   set("Audio/Latency", 60);
   set("Audio/Resampler", "Sinc");
 

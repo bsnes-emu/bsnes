@@ -1,11 +1,11 @@
 //note: timings are completely unverified
 //due to the ST018 chip design (on-die ROM), testing is nearly impossible
 
-auto ArmDSP::bus_idle() -> void {
+auto ArmDSP::busIdle() -> void {
   step(1);
 }
 
-auto ArmDSP::bus_read(unsigned mode, uint32 addr) -> uint32 {
+auto ArmDSP::busRead(uint mode, uint32 addr) -> uint32 {
   step(1);
 
   static auto memory = [&](const uint8* memory, uint mode, uint32 addr) -> uint32 {
@@ -19,34 +19,34 @@ auto ArmDSP::bus_read(unsigned mode, uint32 addr) -> uint32 {
     }
   };
 
-  switch(addr & 0xe0000000) {
-  case 0x00000000: return memory(programROM, mode, addr & 0x1ffff);
-  case 0x20000000: return pipeline.fetch.instruction;
-  case 0x40000000: break;
-  case 0x60000000: return 0x40404001;
-  case 0x80000000: return pipeline.fetch.instruction;
-  case 0xa0000000: return memory(dataROM, mode, addr & 0x7fff);
-  case 0xc0000000: return pipeline.fetch.instruction;
-  case 0xe0000000: return memory(programRAM, mode, addr & 0x3fff);
+  switch(addr & 0xe000'0000) {
+  case 0x0000'0000: return memory(programROM, mode, addr & 0x1ffff);
+  case 0x2000'0000: return pipeline.fetch.instruction;
+  case 0x4000'0000: break;
+  case 0x6000'0000: return 0x40404001;
+  case 0x8000'0000: return pipeline.fetch.instruction;
+  case 0xa000'0000: return memory(dataROM, mode, addr & 0x7fff);
+  case 0xc000'0000: return pipeline.fetch.instruction;
+  case 0xe000'0000: return memory(programRAM, mode, addr & 0x3fff);
   }
 
-  addr &= 0xe000003f;
+  addr &= 0xe000'003f;
 
-  if(addr == 0x40000010) {
+  if(addr == 0x4000'0010) {
     if(bridge.cputoarm.ready) {
       bridge.cputoarm.ready = false;
       return bridge.cputoarm.data;
     }
   }
 
-  if(addr == 0x40000020) {
+  if(addr == 0x4000'0020) {
     return bridge.status();
   }
 
   return 0;
 }
 
-auto ArmDSP::bus_write(uint mode, uint32 addr, uint32 word) -> void {
+auto ArmDSP::busWrite(uint mode, uint32 addr, uint32 word) -> void {
   step(1);
 
   static auto memory = [](uint8* memory, uint mode, uint32 addr, uint32 word) {
@@ -62,37 +62,30 @@ auto ArmDSP::bus_write(uint mode, uint32 addr, uint32 word) -> void {
     }
   };
 
-  switch(addr & 0xe0000000) {
-  case 0x00000000: return;
-  case 0x20000000: return;
-  case 0x40000000: break;
-  case 0x60000000: return;
-  case 0x80000000: return;
-  case 0xa0000000: return;
-  case 0xc0000000: return;
-  case 0xe0000000: return memory(programRAM, mode, addr & 0x3fff, word);
+  switch(addr & 0xe000'0000) {
+  case 0x0000'0000: return;
+  case 0x2000'0000: return;
+  case 0x4000'0000: break;
+  case 0x6000'0000: return;
+  case 0x8000'0000: return;
+  case 0xa000'0000: return;
+  case 0xc000'0000: return;
+  case 0xe000'0000: return memory(programRAM, mode, addr & 0x3fff, word);
   }
 
-  addr &= 0xe000003f;
-  word &= 0x000000ff;
+  addr &= 0xe000'003f;
+  word &= 0x0000'00ff;
 
-  if(addr == 0x40000000) {
+  if(addr == 0x4000'0000) {
     bridge.armtocpu.ready = true;
     bridge.armtocpu.data = word;
-    return;
   }
 
-  if(addr == 0x40000010) {
-    bridge.signal = true;
-    return;
-  }
+  if(addr == 0x4000'0010) bridge.signal = true;
 
-  if(addr == 0x40000020) { bridge.timerlatch = (bridge.timerlatch & 0xffff00) | (word <<  0); return; }
-  if(addr == 0x40000024) { bridge.timerlatch = (bridge.timerlatch & 0xff00ff) | (word <<  8); return; }
-  if(addr == 0x40000028) { bridge.timerlatch = (bridge.timerlatch & 0x00ffff) | (word << 16); return; }
+  if(addr == 0x4000'0020) bridge.timerlatch.byte(0) = word;
+  if(addr == 0x4000'0024) bridge.timerlatch.byte(1) = word;
+  if(addr == 0x4000'0028) bridge.timerlatch.byte(2) = word;
 
-  if(addr == 0x4000002c) {
-    bridge.timer = bridge.timerlatch;
-    return;
-  }
+  if(addr == 0x4000'002c) bridge.timer = bridge.timerlatch;
 }

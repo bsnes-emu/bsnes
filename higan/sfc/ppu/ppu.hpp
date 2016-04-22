@@ -50,6 +50,7 @@ privileged:
 
   auto scanline() -> void;
   auto frame() -> void;
+  auto refresh() -> void;
 
   struct Registers {
     uint8 ppu1_mdr;
@@ -152,7 +153,7 @@ privileged:
   friend class PPU::Sprite;
   friend class PPU::Window;
   friend class PPU::Screen;
-  friend class Video;
+  friend class Scheduler;
 
   struct Debugger {
     hook<auto (uint16, uint8) -> void> vram_read;

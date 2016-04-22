@@ -5,6 +5,7 @@ struct PPU : Thread {
 
   auto scanline() -> void;
   auto frame() -> void;
+  auto refresh() -> void;
 
   auto power() -> void;
   auto reset() -> void;

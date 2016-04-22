@@ -31,6 +31,8 @@ struct Interface : Emulator::Interface {
   auto manifest() -> string override;
   auto title() -> string override;
   auto videoFrequency() -> double override;
+  auto videoColors() -> uint32;
+  auto videoColor(uint32 color) -> uint64;
   auto audioFrequency() -> double override;
 
   auto loaded() -> bool override;

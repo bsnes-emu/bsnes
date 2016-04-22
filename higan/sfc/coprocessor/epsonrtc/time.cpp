@@ -8,11 +8,11 @@ auto EpsonRTC::duty() -> void {
   if(irqduty) irqflag = 0;
 }
 
-auto EpsonRTC::round_seconds() -> void {
+auto EpsonRTC::roundSeconds() -> void {
   if(roundseconds == 0) return;
   roundseconds = 0;
 
-  if(secondhi >= 3) tick_minute();
+  if(secondhi >= 3) tickMinute();
   secondlo = 0;
   secondhi = 0;
 }
@@ -26,13 +26,13 @@ auto EpsonRTC::tick() -> void {
   }
 
   resync = 1;
-  tick_second();
+  tickSecond();
 }
 
 //below code provides bit-perfect emulation of invalid BCD values on the RTC-4513
 //code makes extensive use of variable-length integers (see epsonrtc.hpp for sizes)
 
-auto EpsonRTC::tick_second() -> void {
+auto EpsonRTC::tickSecond() -> void {
   if(secondlo <= 8 || secondlo == 12) {
     secondlo++;
   } else {
@@ -41,12 +41,12 @@ auto EpsonRTC::tick_second() -> void {
       secondhi++;
     } else {
       secondhi = 0;
-      tick_minute();
+      tickMinute();
     }
   }
 }
 
-auto EpsonRTC::tick_minute() -> void {
+auto EpsonRTC::tickMinute() -> void {
   if(minutelo <= 8 || minutelo == 12) {
     minutelo++;
   } else {
@@ -55,12 +55,12 @@ auto EpsonRTC::tick_minute() -> void {
       minutehi++;
     } else {
       minutehi = 0;
-      tick_hour();
+      tickHour();
     }
   }
 }
 
-auto EpsonRTC::tick_hour() -> void {
+auto EpsonRTC::tickHour() -> void {
   if(atime) {
     if(hourhi < 2) {
       if(hourlo <= 8 || hourlo == 12) {
@@ -80,7 +80,7 @@ auto EpsonRTC::tick_hour() -> void {
       } else {
         hourlo = !(hourlo & 1);
         hourhi = 0;
-        tick_day();
+        tickDay();
       }
     }
   } else {
@@ -99,12 +99,12 @@ auto EpsonRTC::tick_hour() -> void {
         hourlo = !(hourlo & 1);
         hourhi ^= 1;
       }
-      if(meridian == 0 && !(hourlo & 1)) tick_day();
+      if(meridian == 0 && !(hourlo & 1)) tickDay();
     }
   }
 }
 
-auto EpsonRTC::tick_day() -> void {
+auto EpsonRTC::tickDay() -> void {
   if(calendar == 0) return;
   weekday = (weekday + 1) + (weekday == 6);
 
@@ -124,25 +124,25 @@ auto EpsonRTC::tick_day() -> void {
   if(days == 28 && (dayhi == 3 || (dayhi == 2 && daylo >= 8))) {
     daylo = 1;
     dayhi = 0;
-    return tick_month();
+    return tickMonth();
   }
 
   if(days == 29 && (dayhi == 3 || (dayhi == 2 && (daylo > 8 && daylo != 12)))) {
     daylo = 1;
     dayhi = 0;
-    return tick_month();
+    return tickMonth();
   }
 
   if(days == 30 && (dayhi == 3 || (dayhi == 2 && (daylo == 10 || daylo == 14)))) {
     daylo = 1;
     dayhi = 0;
-    return tick_month();
+    return tickMonth();
   }
 
   if(days == 31 && (dayhi == 3 && (daylo & 3))) {
     daylo = 1;
     dayhi = 0;
-    return tick_month();
+    return tickMonth();
   }
 
   if(daylo <= 8 || daylo == 12) {
@@ -153,7 +153,7 @@ auto EpsonRTC::tick_day() -> void {
   }
 }
 
-auto EpsonRTC::tick_month() -> void {
+auto EpsonRTC::tickMonth() -> void {
   if(monthhi == 0 || !(monthlo & 2)) {
     if(monthlo <= 8 || monthlo == 12) {
       monthlo++;
@@ -164,11 +164,11 @@ auto EpsonRTC::tick_month() -> void {
   } else {
     monthlo = !(monthlo & 1);
     monthhi = 0;
-    tick_year();
+    tickYear();
   }
 }
 
-auto EpsonRTC::tick_year() -> void {
+auto EpsonRTC::tickYear() -> void {
   if(yearlo <= 8 || yearlo == 12) {
     yearlo++;
   } else {

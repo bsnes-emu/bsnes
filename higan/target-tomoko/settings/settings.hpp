@@ -2,39 +2,66 @@ struct VideoSettings : TabFrameItem {
   VideoSettings(TabFrame*);
 
   VerticalLayout layout{this};
+    Label colorAdjustmentLabel{&layout, Size{~0, 0}};
+    HorizontalLayout saturationLayout{&layout, Size{~0, 0}};
+      Label saturationLabel{&saturationLayout, Size{80, 0}};
+      Label saturationValue{&saturationLayout, Size{50, 0}};
+      HorizontalSlider saturationSlider{&saturationLayout, Size{~0, 0}};
+    HorizontalLayout gammaLayout{&layout, Size{~0, 0}};
+      Label gammaLabel{&gammaLayout, Size{80, 0}};
+      Label gammaValue{&gammaLayout, Size{50, 0}};
+      HorizontalSlider gammaSlider{&gammaLayout, Size{~0, 0}};
+    HorizontalLayout luminanceLayout{&layout, Size{~0, 0}};
+      Label luminanceLabel{&luminanceLayout, Size{80, 0}};
+      Label luminanceValue{&luminanceLayout, Size{50, 0}};
+      HorizontalSlider luminanceSlider{&luminanceLayout, Size{~0, 0}};
     Label overscanMaskLabel{&layout, Size{~0, 0}};
     HorizontalLayout horizontalMaskLayout{&layout, Size{~0, 0}};
       Label horizontalMaskLabel{&horizontalMaskLayout, Size{80, 0}};
-      Label horizontalMaskValue{&horizontalMaskLayout, Size{80, 0}};
+      Label horizontalMaskValue{&horizontalMaskLayout, Size{50, 0}};
       HorizontalSlider horizontalMaskSlider{&horizontalMaskLayout, Size{~0, 0}};
     HorizontalLayout verticalMaskLayout{&layout, Size{~0, 0}};
       Label verticalMaskLabel{&verticalMaskLayout, Size{80, 0}};
-      Label verticalMaskValue{&verticalMaskLayout, Size{80, 0}};
+      Label verticalMaskValue{&verticalMaskLayout, Size{50, 0}};
       HorizontalSlider verticalMaskSlider{&verticalMaskLayout, Size{~0, 0}};
 
-  auto update() -> void;
+  auto updateColor() -> void;
+  auto updateOverscan() -> void;
 };
 
 struct AudioSettings : TabFrameItem {
   AudioSettings(TabFrame*);
 
   VerticalLayout layout{this};
+    Label driverLabel{&layout, Size{~0, 0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
-      Label frequencyLabel{&controlLayout, Size{0, 0}};
-      ComboButton frequencyCombo{&controlLayout, Size{~0, 0}};
       Label latencyLabel{&controlLayout, Size{0, 0}};
       ComboButton latencyCombo{&controlLayout, Size{~0, 0}};
+      Label frequencyLabel{&controlLayout, Size{0, 0}};
+      ComboButton frequencyCombo{&controlLayout, Size{~0, 0}};
       Label resamplerLabel{&controlLayout, Size{0, 0}};
       ComboButton resamplerCombo{&controlLayout, Size{~0, 0}};
+    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
+    Label effectsLabel{&layout, Size{~0, 0}};
     HorizontalLayout volumeLayout{&layout, Size{~0, 0}};
       Label volumeLabel{&volumeLayout, Size{80, 0}};
-      Label volumeValue{&volumeLayout, Size{80, 0}};
+      Label volumeValue{&volumeLayout, Size{50, 0}};
       HorizontalSlider volumeSlider{&volumeLayout, Size{~0, 0}};
-    CheckLabel exclusiveMode{&layout, Size{~0, 0}};
+    HorizontalLayout balanceLayout{&layout, Size{~0, 0}};
+      Label balanceLabel{&balanceLayout, Size{80, 0}};
+      Label balanceValue{&balanceLayout, Size{50, 0}};
+      HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
+    HorizontalLayout reverbDelayLayout{&layout, Size{~0, 0}};
+      Label reverbDelayLabel{&reverbDelayLayout, Size{80, 0}};
+      Label reverbDelayValue{&reverbDelayLayout, Size{50, 0}};
+      HorizontalSlider reverbDelaySlider{&reverbDelayLayout, Size{~0, 0}};
+    HorizontalLayout reverbLevelLayout{&layout, Size{~0, 0}};
+      Label reverbLevelLabel{&reverbLevelLayout, Size{80, 0}};
+      Label reverbLevelValue{&reverbLevelLayout, Size{50, 0}};
+      HorizontalSlider reverbLevelSlider{&reverbLevelLayout, Size{~0, 0}};
 
-  auto update() -> void;
-  auto updateMode() -> void;
-  auto updateVolume() -> void;
+  auto updateDriver() -> void;
+  auto updateEffects() -> void;
 };
 
 struct InputSettings : TabFrameItem {

@@ -1,10 +1,10 @@
-auto CPU::bus_idle() -> void {
+auto CPU::busIdle() -> void {
   prefetch_step(1);
 }
 
-auto CPU::bus_read(unsigned mode, uint32 addr) -> uint32 {
-  unsigned wait = bus_wait(mode, addr);
-  unsigned word = pipeline.fetch.instruction;
+auto CPU::busRead(uint mode, uint32 addr) -> uint32 {
+  uint wait = busWait(mode, addr);
+  uint word = pipeline.fetch.instruction;
 
   if(addr >= 0x1000'0000) {
     prefetch_step(wait);
@@ -35,8 +35,8 @@ auto CPU::bus_read(unsigned mode, uint32 addr) -> uint32 {
   return word;
 }
 
-auto CPU::bus_write(unsigned mode, uint32 addr, uint32 word) -> void {
-  unsigned wait = bus_wait(mode, addr);
+auto CPU::busWrite(uint mode, uint32 addr, uint32 word) -> void {
+  uint wait = busWait(mode, addr);
 
   if(addr >= 0x1000'0000) {
     prefetch_step(wait);
@@ -57,7 +57,7 @@ auto CPU::bus_write(unsigned mode, uint32 addr, uint32 word) -> void {
   }
 }
 
-auto CPU::bus_wait(unsigned mode, uint32 addr) -> unsigned {
+auto CPU::busWait(uint mode, uint32 addr) -> uint {
   if(addr >= 0x1000'0000) return 1;  //unmapped
   if(addr <  0x0200'0000) return 1;
   if(addr <  0x0300'0000) return (16 - regs.memory.control.ewramwait) * (mode & Word ? 2 : 1);
@@ -65,9 +65,9 @@ auto CPU::bus_wait(unsigned mode, uint32 addr) -> unsigned {
   if(addr <  0x0700'0000) return mode & Word ? 2 : 1;
   if(addr <  0x0800'0000) return 1;
 
-  static unsigned timings[] = {5, 4, 3, 9};
-  unsigned n = timings[regs.wait.control.nwait[addr >> 25 & 3]];
-  unsigned s = regs.wait.control.swait[addr >> 25 & 3];
+  static uint timings[] = {5, 4, 3, 9};
+  uint n = timings[regs.wait.control.nwait[addr >> 25 & 3]];
+  uint s = regs.wait.control.swait[addr >> 25 & 3];
 
   switch(addr & 0x0e00'0000) {
   case 0x0800'0000: s = s ? 2 : 3; break;
@@ -79,7 +79,7 @@ auto CPU::bus_wait(unsigned mode, uint32 addr) -> unsigned {
   bool sequential = (mode & Sequential);
   if((addr & 0x1fffe) == 0) sequential = false;  //N cycle on 16-bit ROM crossing 128KB page boundary (RAM S==N)
 
-  unsigned clocks = sequential ? s : n;
+  uint clocks = sequential ? s : n;
   if(mode & Word) clocks += s;  //16-bit bus requires two transfers for words
   return clocks;
 }

@@ -98,7 +98,7 @@ auto Cartridge::parseMarkupMCC(Markup::Node root) -> void {
 
   for(auto node : root.find("map")) {
     if(node.text() == "mcu") {
-      parseMarkupMap(node, {&MCC::mcu_read, &mcc}, {&MCC::mcu_write, &mcc});
+      parseMarkupMap(node, {&MCC::mcuRead, &mcc}, {&MCC::mcuWrite, &mcc});
     } else {
       parseMarkupMap(node, {&MCC::read, &mcc}, {&MCC::write, &mcc});
     }
@@ -231,7 +231,7 @@ auto Cartridge::parseMarkupARMDSP(Markup::Node root) -> void {
   memory.append({ID::ArmDSPRAM, root["dram"]["name"].text()});
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&ArmDSP::mmio_read, &armdsp}, {&ArmDSP::mmio_write, &armdsp});
+    parseMarkupMap(node, {&ArmDSP::read, &armdsp}, {&ArmDSP::write, &armdsp});
   }
 }
 
@@ -252,19 +252,19 @@ auto Cartridge::parseMarkupHitachiDSP(Markup::Node root, uint roms) -> void {
   parseMarkupMemory(hitachidsp.ram, root["ram"], ID::HitachiDSPRAM, true);
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&HitachiDSP::dsp_read, &hitachidsp}, {&HitachiDSP::dsp_write, &hitachidsp});
+    parseMarkupMap(node, {&HitachiDSP::dspRead, &hitachidsp}, {&HitachiDSP::dspWrite, &hitachidsp});
   }
 
   for(auto node : root["rom"].find("map")) {
-    parseMarkupMap(node, {&HitachiDSP::rom_read, &hitachidsp}, {&HitachiDSP::rom_write, &hitachidsp});
+    parseMarkupMap(node, {&HitachiDSP::romRead, &hitachidsp}, {&HitachiDSP::romWrite, &hitachidsp});
   }
 
   for(auto node : root["ram"].find("map")) {
-    parseMarkupMap(node, {&HitachiDSP::ram_read, &hitachidsp}, {&HitachiDSP::ram_write, &hitachidsp});
+    parseMarkupMap(node, {&HitachiDSP::ramRead, &hitachidsp}, {&HitachiDSP::ramWrite, &hitachidsp});
   }
 
   for(auto node : root["dram"].find("map")) {
-    parseMarkupMap(node, {&HitachiDSP::dram_read, &hitachidsp}, {&HitachiDSP::dram_write, &hitachidsp});
+    parseMarkupMap(node, {&HitachiDSP::dramRead, &hitachidsp}, {&HitachiDSP::dramWrite, &hitachidsp});
   }
 }
 
@@ -380,6 +380,6 @@ auto Cartridge::parseMarkupMSU1(Markup::Node root) -> void {
   hasMSU1 = true;
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&MSU1::mmioRead, &msu1}, {&MSU1::mmioWrite, &msu1});
+    parseMarkupMap(node, {&MSU1::read, &msu1}, {&MSU1::write, &msu1});
   }
 }

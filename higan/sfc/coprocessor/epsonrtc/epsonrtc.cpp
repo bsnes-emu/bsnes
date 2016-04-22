@@ -15,7 +15,7 @@ auto EpsonRTC::main() -> void {
   if(wait) { if(--wait == 0) ready = 1; }
 
   clocks++;
-  if((clocks & ~0x00ff) == 0) round_seconds();  //125 microseconds
+  if((clocks & ~0x00ff) == 0) roundSeconds();  //125 microseconds
   if((clocks & ~0x3fff) == 0) duty();  //1/128th second
   if((clocks & ~0x7fff) == 0) irq(0);  //1/64th second
   if(clocks == 0) {  //1 second
@@ -81,7 +81,7 @@ auto EpsonRTC::power() -> void {
 }
 
 auto EpsonRTC::reset() -> void {
-  create(EpsonRTC::Enter, 32768 * 64);
+  create(EpsonRTC::Enter, 32'768 * 64);
 
   clocks = 0;
   seconds = 0;
@@ -150,7 +150,7 @@ auto EpsonRTC::read(uint24 addr, uint8 data) -> uint8 {
     if(state != State::Read) return 0;
     ready = 0;
     wait = 8;
-    return rtc_read(offset++);
+    return rtcRead(offset++);
   }
 
   if(addr == 2) {
@@ -166,7 +166,7 @@ auto EpsonRTC::write(uint24 addr, uint8 data) -> void {
 
   if(addr == 0) {
     chipselect = data;
-    if(chipselect != 1) rtc_reset();
+    if(chipselect != 1) rtcReset();
     ready = 1;
   }
 
@@ -192,7 +192,7 @@ auto EpsonRTC::write(uint24 addr, uint8 data) -> void {
     }
 
     else if(state == State::Write) {
-      rtc_write(offset++, data);
+      rtcWrite(offset++, data);
       ready = 0;
       wait = 8;
       mdr = data;

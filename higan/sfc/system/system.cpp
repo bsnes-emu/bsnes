@@ -91,7 +91,6 @@ auto System::load() -> void {
   if(cartridge.hasSufamiTurboSlots()) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
-  configureVideo();
   _loaded = true;
 }
 
@@ -152,6 +151,14 @@ auto System::power() -> void {
 }
 
 auto System::reset() -> void {
+  Emulator::video.reset();
+  Emulator::video.setInterface(interface);
+  configureVideoPalette();
+  configureVideoEffects();
+
+  Emulator::audio.reset();
+  Emulator::audio.setInterface(interface);
+
   cpu.reset();
   smp.reset();
   dsp.reset();

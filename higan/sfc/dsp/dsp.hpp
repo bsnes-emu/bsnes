@@ -1,8 +1,8 @@
 //Sony CXD1222Q-1
 
-#include "audio.hpp"
-
 struct DSP : Thread {
+  shared_pointer<Emulator::Stream> stream;
+
   DSP();
 
   alwaysinline auto step(uint clocks) -> void;

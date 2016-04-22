@@ -94,6 +94,8 @@ struct Interface : Emulator::Interface {
   auto manifest() -> string;
   auto title() -> string;
   auto videoFrequency() -> double;
+  auto videoColors() -> uint32;
+  auto videoColor(uint32 color) -> uint64;
   auto audioFrequency() -> double;
 
   auto loaded() -> bool;

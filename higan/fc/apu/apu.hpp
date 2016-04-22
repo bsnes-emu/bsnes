@@ -1,4 +1,6 @@
 struct APU : Thread {
+  shared_pointer<Emulator::Stream> stream;
+
   APU();
 
   static auto Enter() -> void;

@@ -7,6 +7,9 @@ auto Cartridge::serialize(serializer& s) -> void {
   s.integer(mbc1.ram_select);
   s.integer(mbc1.mode_select);
 
+  s.integer(mbc1m.romLo);
+  s.integer(mbc1m.romHi);
+
   s.integer(mbc2.ram_enable);
   s.integer(mbc2.rom_select);
 

@@ -24,7 +24,6 @@ auto System::load() -> void {
   auto document = BML::unserialize(information.manifest);
   cartridge.load();
   serializeInit();
-  configureVideo();
   _loaded = true;
 }
 
@@ -44,6 +43,14 @@ auto System::power() -> void {
 }
 
 auto System::reset() -> void {
+  Emulator::video.reset();
+  Emulator::video.setInterface(interface);
+  configureVideoPalette();
+  configureVideoEffects();
+
+  Emulator::audio.reset();
+  Emulator::audio.setInterface(interface);
+
   cartridge.reset();
   cpu.reset();
   apu.reset();

@@ -49,6 +49,16 @@ auto Program::updateStatusText() -> void {
   }
 }
 
+auto Program::updateVideoPalette() -> void {
+  double saturation = settings["Video/Saturation"].natural() / 100.0;
+  double gamma = settings["Video/Gamma"].natural() / 100.0;
+  double luminance = settings["Video/Luminance"].natural() / 100.0;
+  Emulator::video.setSaturation(saturation);
+  Emulator::video.setGamma(gamma);
+  Emulator::video.setLuminance(luminance);
+  Emulator::video.setPalette();
+}
+
 auto Program::updateVideoShader() -> void {
   if(settings["Video/Driver"].text() == "OpenGL"
   && settings["Video/Shader"].text() != "None"
@@ -63,28 +73,23 @@ auto Program::updateVideoShader() -> void {
   }
 }
 
-auto Program::updateAudio() -> void {
+auto Program::updateAudioDriver() -> void {
   if(!audio) return;
   audio->clear();
-  audio->set(Audio::Latency, (uint)settings["Audio/Latency"].natural());
-  if(settings["Audio/Resampler"].text() == "Linear" ) dsp.setResampler(DSP::ResampleEngine::Linear);
-  if(settings["Audio/Resampler"].text() == "Hermite") dsp.setResampler(DSP::ResampleEngine::Hermite);
-  if(settings["Audio/Resampler"].text() == "Sinc"   ) dsp.setResampler(DSP::ResampleEngine::Sinc);
-  dsp.setResamplerFrequency(audio->get(Audio::Frequency).get<uint>());
-  updateAudioMode();
-  updateAudioVolume();
-  updateDSP();
-}
-
-auto Program::updateAudioMode() -> void {
   audio->set(Audio::Exclusive, settings["Audio/Exclusive"].boolean());
+  audio->set(Audio::Latency, (uint)settings["Audio/Latency"].natural());
 }
 
-auto Program::updateAudioVolume() -> void {
-  dsp.setVolume(settings["Audio/Mute"].boolean() ? 0.0 : settings["Audio/Volume"].natural() * 0.01);
-}
+auto Program::updateAudioEffects() -> void {
+  auto volume = settings["Audio/Mute"].boolean() ? 0.0 : settings["Audio/Volume"].natural() * 0.01;
+  Emulator::audio.setVolume(volume);
 
-auto Program::updateDSP() -> void {
-  if(!emulator) return;
-  return dsp.setFrequency(emulator->audioFrequency());
+  auto balance = max(-1.0, min(1.0, (settings["Audio/Balance"].integer() - 50) / 50.0));
+  Emulator::audio.setBalance(balance);
+
+  auto reverbDelay = settings["Audio/Reverb/Delay"].natural();
+  Emulator::audio.setReverbDelay(reverbDelay);
+
+  auto reverbLevel = settings["Audio/Reverb/Level"].natural() / 100.0;
+  Emulator::audio.setReverbLevel(reverbLevel);
 }

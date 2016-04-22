@@ -12,6 +12,7 @@ struct PPU : Thread, MMIO {
   auto power() -> void;
   auto scanline() -> void;
   auto frame() -> void;
+  auto refresh() -> void;
 
   auto read(uint32 addr) -> uint8;
   auto write(uint32 addr, uint8 byte) -> void;

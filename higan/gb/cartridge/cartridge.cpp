@@ -4,6 +4,7 @@ namespace GameBoy {
 
 #include "mbc0/mbc0.cpp"
 #include "mbc1/mbc1.cpp"
+#include "mbc1m/mbc1m.cpp"
 #include "mbc2/mbc2.cpp"
 #include "mbc3/mbc3.cpp"
 #include "mbc5/mbc5.cpp"
@@ -40,6 +41,7 @@ auto Cartridge::load(System::Revision revision) -> void {
   auto mapperid = document["board/mapper"].text();
   if(mapperid == "none" ) information.mapper = Mapper::MBC0;
   if(mapperid == "MBC1" ) information.mapper = Mapper::MBC1;
+  if(mapperid == "MBC1M") information.mapper = Mapper::MBC1M;
   if(mapperid == "MBC2" ) information.mapper = Mapper::MBC2;
   if(mapperid == "MBC3" ) information.mapper = Mapper::MBC3;
   if(mapperid == "MBC5" ) information.mapper = Mapper::MBC5;
@@ -70,6 +72,7 @@ auto Cartridge::load(System::Revision revision) -> void {
   switch(information.mapper) { default:
   case Mapper::MBC0:  mapper = &mbc0;  break;
   case Mapper::MBC1:  mapper = &mbc1;  break;
+  case Mapper::MBC1M: mapper = &mbc1m; break;
   case Mapper::MBC2:  mapper = &mbc2;  break;
   case Mapper::MBC3:  mapper = &mbc3;  break;
   case Mapper::MBC5:  mapper = &mbc5;  break;
@@ -139,6 +142,7 @@ auto Cartridge::power() -> void {
 
   mbc0.power();
   mbc1.power();
+  mbc1m.power();
   mbc2.power();
   mbc3.power();
   mbc5.power();

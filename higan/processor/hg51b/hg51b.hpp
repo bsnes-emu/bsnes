@@ -1,13 +1,13 @@
-//Hitachi HG51B169 (HG51BS family/derivative?)
-
 #pragma once
+
+//Hitachi HG51B169 (HG51BS family/derivative?)
 
 namespace Processor {
 
 struct HG51B {
   auto exec(uint24 addr) -> void;
-  virtual auto bus_read(uint24 addr) -> uint8 = 0;
-  virtual auto bus_write(uint24 addr, uint8 data) -> void = 0;
+  virtual auto read(uint24 addr) -> uint8 = 0;
+  virtual auto write(uint24 addr, uint8 data) -> void = 0;
 
   auto power() -> void;
   auto serialize(serializer&) -> void;
@@ -25,8 +25,8 @@ protected:
   auto instruction() -> void;
 
   //registers.cpp
-  auto reg_read(uint8 addr) const -> uint24;
-  auto reg_write(uint8 addr, uint24 data) -> void;
+  auto regRead(uint8 addr) const -> uint24;
+  auto regWrite(uint8 addr, uint24 data) -> void;
 
   struct Registers {
     bool halt;

@@ -25,7 +25,11 @@ auto APU::main() -> void {
   hipass(sequencer.left, sequencer.leftBias);
   hipass(sequencer.right, sequencer.rightBias);
 
-  interface->audioSample(sequencer.left, sequencer.right);
+  if(!system.sgb()) {
+    stream->sample(sequencer.left, sequencer.right);
+  } else {
+    interface->audioSample(sequencer.left, sequencer.right);
+  }
 
   if(cycle == 0) {  //512hz
     if(phase == 0 || phase == 2 || phase == 4 || phase == 6) {  //256hz
@@ -58,6 +62,7 @@ auto APU::hipass(int16& sample, int64& bias) -> void {
 
 auto APU::power() -> void {
   create(Enter, 2 * 1024 * 1024);
+  if(!system.sgb()) stream = Emulator::audio.createStream(2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   square1.power();

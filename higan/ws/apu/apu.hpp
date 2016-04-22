@@ -1,4 +1,6 @@
 struct APU : Thread, IO {
+  shared_pointer<Emulator::Stream> stream;
+
   static auto Enter() -> void;
   auto main() -> void;
   auto sample(uint channel, uint5 index) -> uint4;

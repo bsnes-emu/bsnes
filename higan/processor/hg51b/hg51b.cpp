@@ -10,8 +10,8 @@ namespace Processor {
 auto HG51B::exec(uint24 addr) -> void {
   if(regs.halt) return;
   addr = addr + regs.pc * 2;
-  opcode  = bus_read(addr++) << 0;
-  opcode |= bus_read(addr++) << 8;
+  opcode  = read(addr++) << 0;
+  opcode |= read(addr++) << 8;
   regs.pc = (regs.pc & 0xffff00) | ((regs.pc + 1) & 0x0000ff);
   instruction();
 }

@@ -1,9 +1,9 @@
-auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
+auto HitachiDSP::read(uint24 addr) -> uint8 {
   if((addr & 0x40ec00) == 0x006c00) {  //$00-3f,80-bf:6c00-6cff,7c00-7cff
-    return dsp_read(addr, 0x00);
+    return dspRead(addr, 0x00);
   }
   if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-6bff,7000-7bff
-    return dram_read(addr, 0x00);
+    return dramRead(addr, 0x00);
   }
   if((addr & 0x408000) == 0x008000) {  //$00-3f,80-bf:8000-ffff
     if(rom.size() == 0) return 0x00;
@@ -20,12 +20,12 @@ auto HitachiDSP::bus_read(uint24 addr) -> uint8 {
   return 0x00;
 }
 
-auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
+auto HitachiDSP::write(uint24 addr, uint8 data) -> void {
   if((addr & 0x40ec00) == 0x006c00) {  //$00-3f,80-bf:6c00-6fff,7c00-7fff
-    return dsp_write(addr, data);
+    return dspWrite(addr, data);
   }
   if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-6bff,7000-7bff
-    return dram_write(addr, data);
+    return dramWrite(addr, data);
   }
   if((addr & 0xf88000) == 0x700000) {  //$70-77:0000-7fff
     if(ram.size() == 0) return;
@@ -35,7 +35,7 @@ auto HitachiDSP::bus_write(uint24 addr, uint8 data) -> void {
   }
 }
 
-auto HitachiDSP::rom_read(uint24 addr, uint8 data) -> uint8 {
+auto HitachiDSP::romRead(uint24 addr, uint8 data) -> uint8 {
   if(co_active() == hitachidsp.thread || regs.halt) {
     addr = Bus::mirror(addr, rom.size());
   //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
@@ -45,32 +45,32 @@ auto HitachiDSP::rom_read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto HitachiDSP::rom_write(uint24 addr, uint8 data) -> void {
+auto HitachiDSP::romWrite(uint24 addr, uint8 data) -> void {
 }
 
-auto HitachiDSP::ram_read(uint24 addr, uint8 data) -> uint8 {
+auto HitachiDSP::ramRead(uint24 addr, uint8 data) -> uint8 {
   if(ram.size() == 0) return 0x00;  //not open bus
   return ram.read(Bus::mirror(addr, ram.size()), data);
 }
 
-auto HitachiDSP::ram_write(uint24 addr, uint8 data) -> void {
+auto HitachiDSP::ramWrite(uint24 addr, uint8 data) -> void {
   if(ram.size() == 0) return;
   return ram.write(Bus::mirror(addr, ram.size()), data);
 }
 
-auto HitachiDSP::dram_read(uint24 addr, uint8 data) -> uint8 {
+auto HitachiDSP::dramRead(uint24 addr, uint8 data) -> uint8 {
   addr &= 0xfff;
   if(addr >= 0xc00) return data;
   return dataRAM[addr];
 }
 
-auto HitachiDSP::dram_write(uint24 addr, uint8 data) -> void {
+auto HitachiDSP::dramWrite(uint24 addr, uint8 data) -> void {
   addr &= 0xfff;
   if(addr >= 0xc00) return;
   dataRAM[addr] = data;
 }
 
-auto HitachiDSP::dsp_read(uint24 addr, uint8) -> uint8 {
+auto HitachiDSP::dspRead(uint24 addr, uint8) -> uint8 {
   addr = 0x7c00 | (addr & 0x03ff);
 
   //MMIO
@@ -115,7 +115,7 @@ auto HitachiDSP::dsp_read(uint24 addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto HitachiDSP::dsp_write(uint24 addr, uint8 data) -> void {
+auto HitachiDSP::dspWrite(uint24 addr, uint8 data) -> void {
   addr = 0x7c00 | (addr & 0x03ff);
 
   //MMIO

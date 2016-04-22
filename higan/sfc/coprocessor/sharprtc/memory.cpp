@@ -1,4 +1,4 @@
-auto SharpRTC::rtc_read(uint4 addr) -> uint4 {
+auto SharpRTC::rtcRead(uint4 addr) -> uint4 {
   switch(addr) {
   case  0: return second % 10;
   case  1: return second / 10;
@@ -17,7 +17,7 @@ auto SharpRTC::rtc_read(uint4 addr) -> uint4 {
   }
 }
 
-auto SharpRTC::rtc_write(uint4 addr, uint4 data) -> void {
+auto SharpRTC::rtcWrite(uint4 addr, uint4 data) -> void {
   switch(addr) {
   case  0: second = second / 10 * 10 + data; break;
   case  1: second = data * 10 + second % 10; break;
@@ -37,8 +37,8 @@ auto SharpRTC::rtc_write(uint4 addr, uint4 data) -> void {
 
 auto SharpRTC::load(const uint8* data) -> void {
   for(auto byte : range(8)) {
-    rtc_write(byte * 2 + 0, data[byte] >> 0);
-    rtc_write(byte * 2 + 1, data[byte] >> 4);
+    rtcWrite(byte * 2 + 0, data[byte] >> 0);
+    rtcWrite(byte * 2 + 1, data[byte] >> 4);
   }
 
   uint64 timestamp = 0;
@@ -47,16 +47,16 @@ auto SharpRTC::load(const uint8* data) -> void {
   }
 
   uint64 diff = (uint64)time(0) - timestamp;
-  while(diff >= 60 * 60 * 24) { tick_day(); diff -= 60 * 60 * 24; }
-  while(diff >= 60 * 60) { tick_hour(); diff -= 60 * 60; }
-  while(diff >= 60) { tick_minute(); diff -= 60; }
-  while(diff--) tick_second();
+  while(diff >= 60 * 60 * 24) { tickDay(); diff -= 60 * 60 * 24; }
+  while(diff >= 60 * 60) { tickHour(); diff -= 60 * 60; }
+  while(diff >= 60) { tickMinute(); diff -= 60; }
+  while(diff--) tickSecond();
 }
 
 auto SharpRTC::save(uint8* data) -> void {
   for(auto byte : range(8)) {
-    data[byte]  = rtc_read(byte * 2 + 0) << 0;
-    data[byte] |= rtc_read(byte * 2 + 1) << 4;
+    data[byte]  = rtcRead(byte * 2 + 0) << 0;
+    data[byte] |= rtcRead(byte * 2 + 1) << 4;
   }
 
   uint64 timestamp = (uint64)time(nullptr);

@@ -60,9 +60,12 @@ auto PPU::main() -> void {
 
   if(++status.ly == 154) {
     status.ly = 0;
-    if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
     scheduler.exit(Scheduler::Event::Frame);
   }
+}
+
+auto PPU::refresh() -> void {
+  if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
 }
 
 auto PPU::add_clocks(uint clocks) -> void {

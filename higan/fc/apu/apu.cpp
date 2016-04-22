@@ -57,7 +57,7 @@ auto APU::main() -> void {
 //output  = filter.run_lopass(output);
   output  = sclamp<16>(output);
 
-  interface->audioSample(output, output);
+  stream->sample(output, output);
 
   tick();
 }
@@ -89,6 +89,7 @@ auto APU::power() -> void {
 
 auto APU::reset() -> void {
   create(APU::Enter, 21'477'272);
+  stream = Emulator::audio.createStream(21'477'272.0 / 12.0);
 
   pulse[0].reset();
   pulse[1].reset();

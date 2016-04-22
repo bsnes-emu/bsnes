@@ -13,6 +13,7 @@ auto Scheduler::enter(Mode mode_) -> Event {
   mode = mode_;
   host = co_active();
   co_switch(resume);
+  if(event == Event::Frame) ppu.refresh();
   return event;
 }
 

@@ -1,4 +1,6 @@
 struct MSU1 : Cothread {
+  shared_pointer<Emulator::Stream> stream;
+
   static auto Enter() -> void;
   auto main() -> void;
   auto init() -> void;
@@ -10,8 +12,8 @@ struct MSU1 : Cothread {
   auto dataOpen() -> void;
   auto audioOpen() -> void;
 
-  auto mmioRead(uint24 addr, uint8 data) -> uint8;
-  auto mmioWrite(uint24 addr, uint8 data) -> void;
+  auto read(uint24 addr, uint8 data) -> uint8;
+  auto write(uint24 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 

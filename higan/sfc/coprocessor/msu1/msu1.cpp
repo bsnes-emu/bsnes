@@ -38,7 +38,7 @@ auto MSU1::main() -> void {
   right = sclamp<16>(rchannel);
   if(dsp.mute()) left = 0, right = 0;
 
-  audio.coprocessorSample(left, right);
+  stream->sample(left, right);
   step(1);
   synchronizeCPU();
 }
@@ -55,12 +55,11 @@ auto MSU1::unload() -> void {
 }
 
 auto MSU1::power() -> void {
-  audio.coprocessorEnable(true);
-  audio.coprocessorFrequency(44100.0);
 }
 
 auto MSU1::reset() -> void {
   create(MSU1::Enter, 44100);
+  stream = Emulator::audio.createStream(44100.0);
 
   mmio.dataSeekOffset = 0;
   mmio.dataReadOffset = 0;
@@ -119,7 +118,7 @@ auto MSU1::audioOpen() -> void {
   mmio.audioError = true;
 }
 
-auto MSU1::mmioRead(uint24 addr, uint8) -> uint8 {
+auto MSU1::read(uint24 addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 
@@ -147,7 +146,7 @@ auto MSU1::mmioRead(uint24 addr, uint8) -> uint8 {
   }
 }
 
-auto MSU1::mmioWrite(uint24 addr, uint8 data) -> void {
+auto MSU1::write(uint24 addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 

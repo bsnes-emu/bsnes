@@ -32,7 +32,7 @@ auto ArmDSP::boot() -> void {
 
   //reset sequence delay
   if(bridge.ready == false) {
-    step(65536);
+    step(65'536);
     bridge.ready = true;
   }
 }
@@ -58,7 +58,7 @@ auto ArmDSP::step(uint clocks) -> void {
 //3800-3807 mirrored throughout
 //a0 ignored
 
-auto ArmDSP::mmio_read(uint24 addr, uint8) -> uint8 {
+auto ArmDSP::read(uint24 addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
 
   uint8 data = 0x00;
@@ -82,7 +82,7 @@ auto ArmDSP::mmio_read(uint24 addr, uint8) -> uint8 {
   return data;
 }
 
-auto ArmDSP::mmio_write(uint24 addr, uint8 data) -> void {
+auto ArmDSP::write(uint24 addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
 
   addr &= 0xff06;

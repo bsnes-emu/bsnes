@@ -50,7 +50,6 @@ auto System::load(Revision revision) -> void {
 
   cartridge.load(revision);
   serializeInit();
-  configureVideo();
   _loaded = true;
 }
 
@@ -61,6 +60,16 @@ auto System::unload() -> void {
 }
 
 auto System::power() -> void {
+  if(!system.sgb()) {
+    Emulator::video.reset();
+    Emulator::video.setInterface(interface);
+    configureVideoPalette();
+    configureVideoEffects();
+
+    Emulator::audio.reset();
+    Emulator::audio.setInterface(interface);
+  }
+
   bus.power();
   cartridge.power();
   cpu.power();

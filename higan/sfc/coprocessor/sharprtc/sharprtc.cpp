@@ -12,7 +12,7 @@ auto SharpRTC::Enter() -> void {
 }
 
 auto SharpRTC::main() -> void {
-  tick_second();
+  tickSecond();
 
   step(1);
   synchronizeCPU();
@@ -42,8 +42,8 @@ auto SharpRTC::power() -> void {
 auto SharpRTC::reset() -> void {
   create(SharpRTC::Enter, 1);
 
-  rtc_state = State::Read;
-  rtc_index = -1;
+  state = State::Read;
+  index = -1;
 }
 
 auto SharpRTC::sync() -> void {
@@ -63,16 +63,16 @@ auto SharpRTC::read(uint24 addr, uint8 data) -> uint8 {
   addr &= 1;
 
   if(addr == 0) {
-    if(rtc_state != State::Read) return 0;
+    if(state != State::Read) return 0;
 
-    if(rtc_index < 0) {
-      rtc_index++;
+    if(index < 0) {
+      index++;
       return 15;
-    } else if(rtc_index > 12) {
-      rtc_index = -1;
+    } else if(index > 12) {
+      index = -1;
       return 15;
     } else {
-      return rtc_read(rtc_index++);
+      return rtcRead(index++);
     }
   }
 
@@ -84,25 +84,25 @@ auto SharpRTC::write(uint24 addr, uint8 data) -> void {
 
   if(addr == 1) {
     if(data == 0x0d) {
-      rtc_state = State::Read;
-      rtc_index = -1;
+      state = State::Read;
+      index = -1;
       return;
     }
 
     if(data == 0x0e) {
-      rtc_state = State::Command;
+      state = State::Command;
       return;
     }
 
     if(data == 0x0f) return;  //unknown behavior
 
-    if(rtc_state == State::Command) {
+    if(state == State::Command) {
       if(data == 0) {
-        rtc_state = State::Write;
-        rtc_index = 0;
+        state = State::Write;
+        index = 0;
       } else if(data == 4) {
-        rtc_state = State::Ready;
-        rtc_index = -1;
+        state = State::Ready;
+        index = -1;
         //reset time
         second = 0;
         minute = 0;
@@ -113,17 +113,17 @@ auto SharpRTC::write(uint24 addr, uint8 data) -> void {
         weekday = 0;
       } else {
         //unknown behavior
-        rtc_state = State::Ready;
+        state = State::Ready;
       }
       return;
     }
 
-    if(rtc_state == State::Write) {
-      if(rtc_index >= 0 && rtc_index < 12) {
-        rtc_write(rtc_index++, data);
-        if(rtc_index == 12) {
+    if(state == State::Write) {
+      if(index >= 0 && index < 12) {
+        rtcWrite(index++, data);
+        if(index == 12) {
           //day of week is automatically calculated and written
-          weekday = calculate_weekday(1000 + year, month, day);
+          weekday = calculateWeekday(1000 + year, month, day);
         }
       }
       return;

@@ -22,7 +22,7 @@ namespace GameBoy {
 
     auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
       if(thread) co_delete(thread);
-      thread = co_create(262'144 * sizeof(void*), entrypoint);
+      thread = co_create(65'536 * sizeof(void*), entrypoint);
       this->frequency = frequency;
       clock = 0;
     }

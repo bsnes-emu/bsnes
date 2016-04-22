@@ -1,6 +1,8 @@
 #if defined(SFC_SUPERGAMEBOY)
 
 struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
+  shared_pointer<Emulator::Stream> stream;
+
   static auto Enter() -> void;
   auto main() -> void;
 
@@ -8,7 +10,7 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   auto load() -> void;
   auto unload() -> void;
   auto power() -> void;
-  auto reset() -> void;
+  auto reset(bool soft = false) -> void;
 
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;

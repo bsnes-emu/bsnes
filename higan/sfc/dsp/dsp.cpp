@@ -3,7 +3,6 @@
 namespace SuperFamicom {
 
 DSP dsp;
-#include "audio.cpp"
 
 #define REG(n) state.regs[n]
 #define VREG(n) state.regs[v.vidx + n]
@@ -238,12 +237,11 @@ auto DSP::power() -> void {
     voice[n].vbit = 1 << n;
     voice[n].vidx = n * 0x10;
   }
-
-  audio.coprocessorEnable(false);
 }
 
 auto DSP::reset() -> void {
   create(Enter, system.apuFrequency());
+  stream = Emulator::audio.createStream(system.apuFrequency() / 768.0);
 
   REG(FLG) = 0xe0;
   state.noise = 0x4000;

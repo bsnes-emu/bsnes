@@ -75,12 +75,15 @@ auto PPU::scanline() -> void {
 auto PPU::frame() -> void {
   s.field = !s.field;
   s.vclk = 0;
-  Emulator::video.refresh(output, 224 * sizeof(uint32), 224, 224);
+  scheduler.exit(Scheduler::Event::Frame);
   if(l.orientation != system.orientation()) {
     l.orientation = system.orientation();
     memory::fill(output, 224 * 224 * sizeof(uint32));
   }
-  scheduler.exit(Scheduler::Event::Frame);
+}
+
+auto PPU::refresh() -> void {
+  Emulator::video.refresh(output, 224 * sizeof(uint32), 224, 224);
 }
 
 auto PPU::step(uint clocks) -> void {

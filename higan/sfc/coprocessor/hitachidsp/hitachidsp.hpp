@@ -14,24 +14,24 @@ struct HitachiDSP : Processor::HG51B, Cothread {
   auto reset() -> void;
 
   //HG51B read/write
-  auto bus_read(uint24 addr) -> uint8;
-  auto bus_write(uint24 addr, uint8 data) -> void;
+  auto read(uint24 addr) -> uint8 override;
+  auto write(uint24 addr, uint8 data) -> void override;
 
   //CPU ROM read/write
-  auto rom_read(uint24 addr, uint8 data) -> uint8;
-  auto rom_write(uint24 addr, uint8 data) -> void;
+  auto romRead(uint24 addr, uint8 data) -> uint8;
+  auto romWrite(uint24 addr, uint8 data) -> void;
 
   //CPU RAM read/write
-  auto ram_read(uint24 addr, uint8 data) -> uint8;
-  auto ram_write(uint24 addr, uint8 data) -> void;
+  auto ramRead(uint24 addr, uint8 data) -> uint8;
+  auto ramWrite(uint24 addr, uint8 data) -> void;
 
   //HG51B data RAM read/write
-  auto dram_read(uint24 addr, uint8 data) -> uint8;
-  auto dram_write(uint24 addr, uint8 data) -> void;
+  auto dramRead(uint24 addr, uint8 data) -> uint8;
+  auto dramWrite(uint24 addr, uint8 data) -> void;
 
   //CPU MMIO read/write
-  auto dsp_read(uint24 addr, uint8 data) -> uint8;
-  auto dsp_write(uint24 addr, uint8 data) -> void;
+  auto dspRead(uint24 addr, uint8 data) -> uint8;
+  auto dspWrite(uint24 addr, uint8 data) -> void;
 
   auto firmware() const -> vector<uint8>;
   auto serialize(serializer&) -> void;

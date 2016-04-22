@@ -14,8 +14,8 @@ struct SharpRTC : Cothread {
 
   auto serialize(serializer&) -> void;
 
-  enum class State : uint { Ready, Command, Read, Write } rtc_state;
-  int rtc_index;
+  enum class State : uint { Ready, Command, Read, Write } state;
+  int index;
 
   uint second;
   uint minute;
@@ -26,22 +26,22 @@ struct SharpRTC : Cothread {
   uint weekday;
 
   //memory.cpp
-  auto rtc_read(uint4 addr) -> uint4;
-  auto rtc_write(uint4 addr, uint4 data) -> void;
+  auto rtcRead(uint4 addr) -> uint4;
+  auto rtcWrite(uint4 addr, uint4 data) -> void;
 
   auto load(const uint8* data) -> void;
   auto save(uint8* data) -> void;
 
   //time.cpp
-  static const uint daysinmonth[12];
-  auto tick_second() -> void;
-  auto tick_minute() -> void;
-  auto tick_hour() -> void;
-  auto tick_day() -> void;
-  auto tick_month() -> void;
-  auto tick_year() -> void;
+  static const uint daysInMonth[12];
+  auto tickSecond() -> void;
+  auto tickMinute() -> void;
+  auto tickHour() -> void;
+  auto tickDay() -> void;
+  auto tickMonth() -> void;
+  auto tickYear() -> void;
 
-  auto calculate_weekday(uint year, uint month, uint day) -> uint;
+  auto calculateWeekday(uint year, uint month, uint day) -> uint;
 };
 
 extern SharpRTC sharprtc;

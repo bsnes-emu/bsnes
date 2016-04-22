@@ -4,10 +4,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   layout.setMargin(5);
 
-  frequencyLabel.setText("Frequency:");
-  auto frequencyValue = audio->get(Audio::Frequency).get<uint>();
-  frequencyCombo.append(ComboButtonItem().setText({frequencyValue, "hz"}));
-  frequencyCombo.setEnabled(false);  //not user configurable
+  driverLabel.setFont(Font().setBold()).setText("Driver Settings");
 
   latencyLabel.setText("Latency:");
   latencyCombo.append(ComboButtonItem().setText("0ms"));
@@ -24,27 +21,44 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   case  80: latencyCombo.item(4)->setSelected(); break;
   case 100: latencyCombo.item(5)->setSelected(); break;
   }
-  latencyCombo.onChange([&] { update(); });
+  latencyCombo.onChange([&] { updateDriver(); });
+
+  frequencyLabel.setText("Frequency:");
+  auto frequencyValue = audio->get(Audio::Frequency).get<uint>();
+  frequencyCombo.append(ComboButtonItem().setText({frequencyValue, "hz"}));
+  frequencyCombo.setEnabled(false);
 
   resamplerLabel.setText("Resampler:");
-  resamplerCombo.append(ComboButtonItem().setText("Linear"));
-  resamplerCombo.append(ComboButtonItem().setText("Hermite"));
   resamplerCombo.append(ComboButtonItem().setText("Sinc"));
-  if(settings["Audio/Resampler"].text() == "Linear" ) resamplerCombo.item(0)->setSelected();
-  if(settings["Audio/Resampler"].text() == "Hermite") resamplerCombo.item(1)->setSelected();
-  if(settings["Audio/Resampler"].text() == "Sinc"   ) resamplerCombo.item(2)->setSelected();
-  resamplerCombo.onChange([&] { update(); });
+  resamplerCombo.setEnabled(false);
+
+  exclusiveMode.setText("Exclusive Mode");
+  exclusiveMode.setChecked(settings["Audio/Exclusive"].boolean()).onToggle([&] { updateDriver(); });
+  if(!audio->cap(Audio::Exclusive)) exclusiveMode.remove();
+
+  effectsLabel.setFont(Font().setBold()).setText("Effects");
 
   volumeLabel.setText("Volume:");
-  volumeSlider.setLength(201).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateVolume(); });
+  volumeValue.setAlignment(0.5);
+  volumeSlider.setLength(201).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateEffects(); });
 
-  exclusiveMode.setText("Exclusive Mode").setVisible(audio->cap(Audio::Exclusive));
-  exclusiveMode.setChecked(settings["Audio/Exclusive"].boolean()).onToggle([&] { updateMode(); });
+  balanceLabel.setText("Balance:");
+  balanceValue.setAlignment(0.5);
+  balanceSlider.setLength(101).setPosition(settings["Audio/Balance"].natural()).onChange([&] { updateEffects(); });
 
-  update();
+  reverbDelayLabel.setText("Reverb Delay:");
+  reverbDelayValue.setAlignment(0.5);
+  reverbDelaySlider.setLength(201).setPosition(settings["Audio/Reverb/Delay"].natural()).onChange([&] { updateEffects(); });
+
+  reverbLevelLabel.setText("Reverb Level:");
+  reverbLevelValue.setAlignment(0.5);
+  reverbLevelSlider.setLength(101).setPosition(settings["Audio/Reverb/Level"].natural()).onChange([&] { updateEffects(); });
+
+  updateDriver();
+  updateEffects();
 }
 
-auto AudioSettings::update() -> void {
+auto AudioSettings::updateDriver() -> void {
   if(auto item = latencyCombo.selected()) {
     uint latency = 60;
     if(item->offset() == 0) latency =   0;
@@ -55,24 +69,23 @@ auto AudioSettings::update() -> void {
     if(item->offset() == 5) latency = 100;
     settings["Audio/Latency"].setValue(latency);
   }
-  if(auto item = resamplerCombo.selected()) {
-    string resampler = "Sinc";
-    if(item->offset() == 0) resampler = "Linear";
-    if(item->offset() == 1) resampler = "Hermite";
-    if(item->offset() == 2) resampler = "Sinc";
-    settings["Audio/Resampler"].setValue(resampler);
-  }
-  updateVolume();
-  updateMode();
-}
 
-auto AudioSettings::updateMode() -> void {
   settings["Audio/Exclusive"].setValue(exclusiveMode.checked());
-  program->updateAudioMode();
+  program->updateAudioDriver();
 }
 
-auto AudioSettings::updateVolume() -> void {
+auto AudioSettings::updateEffects() -> void {
   settings["Audio/Volume"].setValue(volumeSlider.position());
   volumeValue.setText({volumeSlider.position(), "%"});
-  program->updateAudioVolume();
+
+  settings["Audio/Balance"].setValue(balanceSlider.position());
+  balanceValue.setText({balanceSlider.position(), "%"});
+
+  settings["Audio/Reverb/Delay"].setValue(reverbDelaySlider.position());
+  reverbDelayValue.setText({reverbDelaySlider.position(), "ms"});
+
+  settings["Audio/Reverb/Level"].setValue(reverbLevelSlider.position());
+  reverbLevelValue.setText({reverbLevelSlider.position(), "%"});
+
+  program->updateAudioEffects();
 }

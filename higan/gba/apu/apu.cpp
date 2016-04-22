@@ -63,7 +63,7 @@ auto APU::main() -> void {
   if(regs.bias.amplitude == 3) lsample &= ~15, rsample &= ~15;
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
-  interface->audioSample(sclamp<16>(lsample << 6), sclamp<16>(rsample << 6));  //should be <<5, use <<6 for added volume
+  stream->sample(sclamp<16>(lsample << 6), sclamp<16>(rsample << 6));  //should be <<5; use <<6 for added volume
   step(512);
 }
 
@@ -74,6 +74,7 @@ auto APU::step(uint clocks) -> void {
 
 auto APU::power() -> void {
   create(APU::Enter, 16'777'216);
+  stream = Emulator::audio.createStream(16'777'216.0 / 512.0);
 
   square1.power();
   square2.power();

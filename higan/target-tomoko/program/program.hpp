@@ -33,13 +33,11 @@ struct Program : Emulator::Interface::Bind {
   auto connectDevices() -> void;
   auto showMessage(const string& text) -> void;
   auto updateStatusText() -> void;
+  auto updateVideoPalette() -> void;
   auto updateVideoShader() -> void;
-  auto updateAudio() -> void;
-  auto updateAudioMode() -> void;
-  auto updateAudioVolume() -> void;
-  auto updateDSP() -> void;
+  auto updateAudioDriver() -> void;
+  auto updateAudioEffects() -> void;
 
-  DSP dsp;
   bool pause = false;
 
   vector<Emulator::Interface*> emulators;

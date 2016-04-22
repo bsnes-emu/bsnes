@@ -19,7 +19,7 @@ auto NSS::power() -> void {
 auto NSS::reset() -> void {
 }
 
-auto NSS::set_dip(uint16 dip) -> void {
+auto NSS::setDip(uint16 dip) -> void {
   this->dip = dip;
 }
 

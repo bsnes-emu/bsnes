@@ -21,10 +21,13 @@ auto Program::loadMedia(Emulator::Interface& interface, Emulator::Interface::Med
   folderPaths.append(location);
 
   //note: the order of operations in this block of code is critical
+  Emulator::audio.reset();
+  Emulator::audio.setFrequency(audio->get(Audio::Frequency).get<uint>());
   emulator = &interface;
   connectDevices();
   emulator->load(media.id);
-  updateAudio();
+  updateAudioDriver();
+  updateAudioEffects();
   emulator->power();
 
   presentation->resizeViewport();

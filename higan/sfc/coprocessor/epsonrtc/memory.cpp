@@ -1,4 +1,4 @@
-auto EpsonRTC::rtc_reset() -> void {
+auto EpsonRTC::rtcReset() -> void {
   state = State::Mode;
   offset = 0;
 
@@ -7,7 +7,7 @@ auto EpsonRTC::rtc_reset() -> void {
   test = 0;
 }
 
-auto EpsonRTC::rtc_read(uint4 addr) -> uint4 {
+auto EpsonRTC::rtcRead(uint4 addr) -> uint4 {
   switch(addr) { default:
   case  0: return secondlo;
   case  1: return secondhi | batteryfailure << 3;
@@ -32,7 +32,7 @@ auto EpsonRTC::rtc_read(uint4 addr) -> uint4 {
   }
 }
 
-auto EpsonRTC::rtc_write(uint4 addr, uint4 data) -> void {
+auto EpsonRTC::rtcWrite(uint4 addr, uint4 data) -> void {
   switch(addr) {
   case 0:
     secondlo = data;
@@ -87,7 +87,7 @@ auto EpsonRTC::rtc_write(uint4 addr, uint4 data) -> void {
     if(held == 1 && hold == 0 && holdtick == 1) {
       //if a second has passed during hold, increment one second upon resuming
       holdtick = 0;
-      tick_second();
+      tickSecond();
     }
   } break;
   case 14:
@@ -156,10 +156,10 @@ auto EpsonRTC::load(const uint8* data) -> void {
   }
 
   uint64 diff = (uint64)time(0) - timestamp;
-  while(diff >= 60 * 60 * 24) { tick_day(); diff -= 60 * 60 * 24; }
-  while(diff >= 60 * 60) { tick_hour(); diff -= 60 * 60; }
-  while(diff >= 60) { tick_minute(); diff -= 60; }
-  while(diff--) tick_second();
+  while(diff >= 60 * 60 * 24) { tickDay(); diff -= 60 * 60 * 24; }
+  while(diff >= 60 * 60) { tickHour(); diff -= 60 * 60; }
+  while(diff >= 60) { tickMinute(); diff -= 60; }
+  while(diff--) tickSecond();
 }
 
 auto EpsonRTC::save(uint8* data) -> void {

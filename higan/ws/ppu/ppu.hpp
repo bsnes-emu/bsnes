@@ -3,6 +3,7 @@ struct PPU : Thread, IO {
   auto main() -> void;
   auto scanline() -> void;
   auto frame() -> void;
+  auto refresh() -> void;
   auto step(uint clocks) -> void;
   auto power() -> void;
 
