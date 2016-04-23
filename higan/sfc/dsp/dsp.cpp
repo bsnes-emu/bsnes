@@ -241,7 +241,7 @@ auto DSP::power() -> void {
 
 auto DSP::reset() -> void {
   create(Enter, system.apuFrequency());
-  stream = Emulator::audio.createStream(system.apuFrequency() / 768.0);
+  stream = Emulator::audio.createStream(2, system.apuFrequency() / 768.0);
 
   REG(FLG) = 0xe0;
   state.noise = 0x4000;

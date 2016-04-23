@@ -54,7 +54,7 @@ auto ICD2::power() -> void {
 
 auto ICD2::reset(bool soft) -> void {
   create(ICD2::Enter, cpu.frequency / 5);
-  if(!soft) stream = Emulator::audio.createStream(4194304.0 / 2.0);
+  if(!soft) stream = Emulator::audio.createStream(2, 4194304.0 / 2.0);
 
   r6003 = 0x00;
   r6004 = 0xff;

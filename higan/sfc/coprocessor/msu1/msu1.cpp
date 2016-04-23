@@ -59,7 +59,7 @@ auto MSU1::power() -> void {
 
 auto MSU1::reset() -> void {
   create(MSU1::Enter, 44100);
-  stream = Emulator::audio.createStream(44100.0);
+  stream = Emulator::audio.createStream(2, 44100.0);
 
   mmio.dataSeekOffset = 0;
   mmio.dataReadOffset = 0;

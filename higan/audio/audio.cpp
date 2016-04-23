@@ -2,25 +2,8 @@
 
 namespace Emulator {
 
+#include "stream.cpp"
 Audio audio;
-
-Stream::Stream(double inputFrequency, double outputFrequency, double volume, double balance) {
-  dsp.setChannels(2);
-  dsp.setPrecision(16);
-  dsp.setFrequency(inputFrequency);
-  dsp.setResampler(DSP::ResampleEngine::Sinc);
-  dsp.setResamplerFrequency(outputFrequency);
-  dsp.setVolume(volume);
-  dsp.setBalance(balance);
-}
-
-auto Stream::sample(int16 left, int16 right) -> void {
-  int samples[] = {left, right};
-  dsp.sample(samples);
-  audio.poll();
-}
-
-//
 
 auto Audio::reset() -> void {
   streams.reset();
@@ -33,17 +16,15 @@ auto Audio::setInterface(Interface* interface) -> void {
 
 auto Audio::setFrequency(double frequency) -> void {
   this->frequency = frequency;
-  for(auto& stream : streams) stream->dsp.setResamplerFrequency(frequency);
+  for(auto& stream : streams) stream->setFrequency(frequency);
 }
 
 auto Audio::setVolume(double volume) -> void {
   this->volume = volume;
-  for(auto& stream : streams) stream->dsp.setVolume(volume);
 }
 
 auto Audio::setBalance(double balance) -> void {
   this->balance = balance;
-  for(auto& stream : streams) stream->dsp.setBalance(balance);
 }
 
 auto Audio::setReverbDelay(uint reverbDelay) -> void {
@@ -58,8 +39,9 @@ auto Audio::setReverbLevel(double reverbLevel) -> void {
   this->reverbLevel = reverbLevel;
 }
 
-auto Audio::createStream(double frequency) -> shared_pointer<Stream> {
-  shared_pointer<Stream> stream = new Stream{frequency, this->frequency, volume, balance};
+auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stream> {
+  shared_pointer<Stream> stream = new Stream{channels, frequency};
+  stream->setFrequency(this->frequency);
   streams.append(stream);
   return stream;
 }
@@ -68,25 +50,37 @@ auto Audio::createStream(double frequency) -> shared_pointer<Stream> {
 auto Audio::poll() -> void {
   while(true) {
     for(auto& stream : streams) {
-      if(!stream->dsp.pending()) return;
+      if(!stream->pending()) return;
     }
 
-    int left = 0, right = 0;
+    double left = 0.0, right = 0.0;
     for(auto& stream : streams) {
-      int samples[2];
-      stream->dsp.read(samples);
-      left += samples[0];
+      double samples[2];
+      stream->read(samples);
+      left  += samples[0];
       right += samples[1];
     }
+    left  /= streams.size();
+    right /= streams.size();
+
+    if(balance < 0.0) right *= 1.0 + balance;
+    if(balance > 0.0) left  *= 1.0 - balance;
+
+    //todo: apply volume, reverb before denormalization?
+    int ileft  = (left  * 65535.0) - 32768.0;
+    int iright = (right * 65535.0) - 32768.0;
+
+    ileft  *= volume;
+    iright *= volume;
 
     if(reverbDelay) {
-      reverbLeft.append(left);
-      reverbRight.append(right);
-      left += reverbLeft.takeFirst() * reverbLevel;
-      right += reverbRight.takeFirst() * reverbLevel;
+      reverbLeft.append(ileft);
+      reverbRight.append(iright);
+      ileft  += reverbLeft.takeFirst()  * reverbLevel;
+      iright += reverbRight.takeFirst() * reverbLevel;
     }
 
-    interface->audioSample(sclamp<16>(left), sclamp<16>(right));
+    interface->audioSample(sclamp<16>(ileft), sclamp<16>(iright));
   }
 }
 

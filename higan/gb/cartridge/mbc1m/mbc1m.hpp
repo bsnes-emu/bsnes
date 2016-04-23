@@ -5,4 +5,5 @@ struct MBC1M : MMIO {
 
   uint4 romLo;
   uint2 romHi;
+  uint1 modeSelect;
 } mbc1m;

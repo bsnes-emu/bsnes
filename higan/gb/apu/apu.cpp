@@ -62,7 +62,7 @@ auto APU::hipass(int16& sample, int64& bias) -> void {
 
 auto APU::power() -> void {
   create(Enter, 2 * 1024 * 1024);
-  if(!system.sgb()) stream = Emulator::audio.createStream(2 * 1024 * 1024);
+  if(!system.sgb()) stream = Emulator::audio.createStream(2, 2 * 1024 * 1024);
   for(uint n = 0xff10; n <= 0xff3f; n++) bus.mmio[n] = this;
 
   square1.power();
