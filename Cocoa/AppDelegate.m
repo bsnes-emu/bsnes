@@ -24,6 +24,8 @@
                                                               @"GBStart": @"\r",
 
                                                               @"GBTurbo": @" ",
+
+                                                              @"GBFilter": @"NearestNeighbor",
                                                               }];
 #undef KEY
 }

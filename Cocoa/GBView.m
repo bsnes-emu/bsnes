@@ -3,6 +3,8 @@
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
 
+static GBShader *shader = nil;
+
 @implementation GBView
 {
     uint32_t *image_buffers[3];
@@ -15,6 +17,12 @@
     image_buffers[1] = malloc(160 * 144 * 4);
     image_buffers[2] = malloc(160 * 144 * 4);
     _shouldBlendFrameWithPrevious = 1;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterChanged) name:@"GBFilterChanged" object:nil];
+}
+
+- (void) filterChanged
+{
+    self.shader = nil;
 }
 
 - (unsigned char) numberOfBuffers
@@ -27,6 +35,7 @@
     free(image_buffers[0]);
     free(image_buffers[1]);
     free(image_buffers[2]);
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
@@ -49,16 +58,21 @@
 }
 
 - (void)drawRect:(NSRect)dirtyRect {
+    if (!self.shader) {
+        self.shader = [[GBShader alloc] initWithName:[[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"]];
+    }
     double scale = self.window.backingScaleFactor;
-    glRasterPos2d(-1, 1);
-    glPixelZoom(self.bounds.size.width / 160 * scale, self.bounds.size.height / -144 * scale);
-    glDrawPixels(160, 144, GL_ABGR_EXT, GL_UNSIGNED_BYTE, image_buffers[current_buffer]);
     if (_shouldBlendFrameWithPrevious) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_CONSTANT_ALPHA, GL_ONE_MINUS_CONSTANT_ALPHA);
-        glBlendColor(1, 1, 1, 0.5);
-        glDrawPixels(160, 144, GL_ABGR_EXT, GL_UNSIGNED_BYTE, image_buffers[(current_buffer + 2) % self.numberOfBuffers]);
-        glDisable(GL_BLEND);
+        [self.shader renderBitmap:image_buffers[current_buffer]
+                         previous:image_buffers[(current_buffer + 2) % self.numberOfBuffers]
+                           inSize:self.bounds.size
+                            scale:scale];
+    }
+    else {
+        [self.shader renderBitmap:image_buffers[current_buffer]
+                         previous:NULL
+                           inSize:self.bounds.size
+                            scale:scale];
     }
     glFlush();
 }

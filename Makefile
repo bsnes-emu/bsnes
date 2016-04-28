@@ -67,6 +67,8 @@ $(OBJ)/%.m.o: %.m
 
 # Cocoa Port
 
+Shaders:$(shell echo Shaders/*.fsh)
+
 $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(shell echo Cocoa/*.icns) \
 					Cocoa/License.html \
@@ -75,11 +77,14 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(BIN)/BootROMs/cgb_boot.bin \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Document.nib \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
-					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Preferences.nib
+					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Preferences.nib \
+					Shaders
 	mkdir -p $(BIN)/Sameboy.app/Contents/Resources
 	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/info.plist > $(BIN)/Sameboy.app/Contents/info.plist
 	cp Cocoa/License.html $(BIN)/Sameboy.app/Contents/Resources/Credits.html
+	mkdir -p $(BIN)/Sameboy.app/Contents/Resources/Shaders
+	cp Shaders/*.fsh $(BIN)/Sameboy.app/Contents/Resources/Shaders
 
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@mkdir -p $(dir $@)

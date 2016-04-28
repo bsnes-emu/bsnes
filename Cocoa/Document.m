@@ -41,7 +41,7 @@ static char *consoleInput(GB_gameboy_t *gb)
 
 static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, unsigned char b)
 {
-    return (r << 24) | (g << 16) | (b << 8);
+    return (r << 0) | (g << 8) | (b << 16);
 }
 
 @implementation Document

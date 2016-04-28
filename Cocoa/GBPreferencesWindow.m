@@ -6,6 +6,38 @@
 {
     bool is_button_being_modified;
     NSInteger button_being_modified;
+
+    NSPopUpButton *_graphicsFilterPopupButton;
+}
+
++ (NSArray *)filterList
+{
+    /* The filter list as ordered in the popup button */
+    static NSArray * filters = nil;
+    if (!filters) {
+        filters = @[
+                    @"NearestNeighbor",
+                    @"Bilinear",
+                    @"SmoothBilinear",
+                    @"Scale2x",
+                    @"Scale4x",
+                    @"AAScale2x",
+                    @"AAScale4x",
+                    ];
+    }
+    return filters;
+}
+
+- (NSPopUpButton *)graphicsFilterPopupButton
+{
+    return _graphicsFilterPopupButton;
+}
+
+- (void)setGraphicsFilterPopupButton:(NSPopUpButton *)graphicsFilterPopupButton
+{
+    _graphicsFilterPopupButton = graphicsFilterPopupButton;
+    NSString *filter = [[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"];
+    [_graphicsFilterPopupButton selectItemAtIndex:[[[self class] filterList] indexOfObject:filter]];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
@@ -55,6 +87,13 @@
     self.controlsTableView.enabled = YES;
     [self.controlsTableView reloadData];
     [self makeFirstResponder:self.controlsTableView];
+}
+- (IBAction)graphicFilterChanged:(NSPopUpButton *)sender
+{
+
+    [[NSUserDefaults standardUserDefaults] setObject:[[self class] filterList][[sender indexOfSelectedItem]]
+                                              forKey:@"GBFilter"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
 }
 
 @end
