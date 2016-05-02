@@ -16,17 +16,12 @@
 namespace nall {
 
 struct serial {
-  serial() {
-    port = -1;
-    port_open = false;
-  }
-
   ~serial() {
     close();
   }
 
   auto readable() -> bool {
-    if(port_open == false) return false;
+    if(!opened) return false;
     fd_set fdset;
     FD_ZERO(&fdset);
     FD_SET(port, &fdset);
@@ -40,12 +35,12 @@ struct serial {
 
   //-1 on error, otherwise return bytes read
   auto read(uint8_t* data, uint length) -> int {
-    if(port_open == false) return -1;
+    if(!opened) return -1;
     return ::read(port, (void*)data, length);
   }
 
   auto writable() -> bool {
-    if(port_open == false) return false;
+    if(!opened) return false;
     fd_set fdset;
     FD_ZERO(&fdset);
     FD_SET(port, &fdset);
@@ -59,14 +54,17 @@ struct serial {
 
   //-1 on error, otherwise return bytes written
   auto write(const uint8_t* data, uint length) -> int {
-    if(port_open == false) return -1;
+    if(!opened) return -1;
     return ::write(port, (void*)data, length);
   }
 
-  auto open(const string& portname, uint rate, bool flowcontrol) -> bool {
+  //rate==0: use flow control (synchronous mode)
+  //rate!=0: baud-rate (asynchronous mode)
+  auto open(string device, uint rate = 0) -> bool {
     close();
 
-    port = ::open(portname, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
+    if(!device) device = "/dev/ttyU0";  //note: default device name is for FreeBSD 10+
+    port = ::open(device, O_RDWR | O_NOCTTY | O_NDELAY | O_NONBLOCK);
     if(port == -1) return false;
 
     if(ioctl(port, TIOCEXCL) == -1) { close(); return false; }
@@ -75,7 +73,7 @@ struct serial {
 
     termios attr = original_attr;
     cfmakeraw(&attr);
-    cfsetspeed(&attr, rate);
+    cfsetspeed(&attr, rate ? rate : 57600);  //rate value has no effect in synchronous mode
 
     attr.c_lflag &=~ (ECHO | ECHONL | ISIG | ICANON | IEXTEN);
     attr.c_iflag &=~ (BRKINT | PARMRK | INPCK | ISTRIP | INLCR | IGNCR | ICRNL | IXON | IXOFF | IXANY);
@@ -83,7 +81,7 @@ struct serial {
     attr.c_oflag &=~ (OPOST);
     attr.c_cflag &=~ (CSIZE | CSTOPB | PARENB | CLOCAL);
     attr.c_cflag |=  (CS8 | CREAD);
-    if(flowcontrol == false) {
+    if(rate) {
       attr.c_cflag &= ~CRTSCTS;
     } else {
       attr.c_cflag |=  CRTSCTS;
@@ -91,15 +89,15 @@ struct serial {
     attr.c_cc[VTIME] = attr.c_cc[VMIN] = 0;
 
     if(tcsetattr(port, TCSANOW, &attr) == -1) { close(); return false; }
-    return port_open = true;
+    return opened = true;
   }
 
   auto close() -> void {
     if(port != -1) {
       tcdrain(port);
-      if(port_open == true) {
+      if(opened) {
         tcsetattr(port, TCSANOW, &original_attr);
-        port_open = false;
+        opened = false;
       }
       ::close(port);
       port = -1;
@@ -107,8 +105,8 @@ struct serial {
   }
 
 private:
-  int port;
-  bool port_open;
+  int port = -1;
+  bool opened = false;
   termios original_attr;
 };
 

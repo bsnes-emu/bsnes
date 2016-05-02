@@ -57,7 +57,7 @@ struct Node {
 
   auto find(const string& path) -> maybe<Node&> {
     auto p = path.split("/");
-    auto name = p.takeFirst();
+    auto name = p.takeLeft();
     for(auto& child : children) {
       if(child.name == name) {
         if(p.size() == 0) return child;

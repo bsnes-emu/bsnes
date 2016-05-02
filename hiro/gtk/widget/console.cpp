@@ -83,7 +83,7 @@ auto pConsole::_keyPress(unsigned scancode, unsigned mask) -> bool {
     gtk_text_buffer_insert(textBuffer, &end, string{"\n", state().prompt}, -1);
     self().doActivate(s);
     if(s) history.prepend(s);
-    if(history.size() > 128) history.removeLast();
+    if(history.size() > 128) history.removeRight();
     historyOffset = 0;
     _seekToEnd();
     return true;

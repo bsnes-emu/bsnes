@@ -26,7 +26,7 @@ auto mHorizontalLayout::minimumSize() const -> Size {
     } else {
       width += child.width;
     }
-    if(&child != &properties.last()) width += child.spacing;
+    if(&child != &properties.right()) width += child.spacing;
   }
 
   for(auto n : range(sizableCount())) {
@@ -94,7 +94,7 @@ auto mHorizontalLayout::setGeometry(Geometry containerGeometry) -> type& {
   for(auto& child : properties) {
     if(child.width == Size::Maximum) maximumWidthCounter++;
     if(child.width != Size::Maximum) minimumWidth += child.width;
-    if(&child != &properties.last()) minimumWidth += child.spacing;
+    if(&child != &properties.right()) minimumWidth += child.spacing;
   }
 
   for(auto& child : properties) {

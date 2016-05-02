@@ -48,7 +48,7 @@ auto mMenu::remove(sAction action) -> type& {
 }
 
 auto mMenu::reset() -> type& {
-  while(state.actions) remove(state.actions.last());
+  while(state.actions) remove(state.actions.right());
   return *this;
 }
 

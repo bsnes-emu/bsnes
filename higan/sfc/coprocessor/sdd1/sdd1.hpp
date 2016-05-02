@@ -8,16 +8,16 @@ struct SDD1 {
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
 
-  auto dma_read(uint24 addr, uint8 data) -> uint8;
-  auto dma_write(uint24 addr, uint8 data) -> void;
+  auto dmaRead(uint24 addr, uint8 data) -> uint8;
+  auto dmaWrite(uint24 addr, uint8 data) -> void;
 
-  auto mmc_read(uint24 addr) -> uint8;
+  auto mmcRead(uint24 addr) -> uint8;
 
-  auto mcurom_read(uint24 addr, uint8 data) -> uint8;
-  auto mcurom_write(uint24 addr, uint8 data) -> void;
+  auto mcuromRead(uint24 addr, uint8 data) -> uint8;
+  auto mcuromWrite(uint24 addr, uint8 data) -> void;
 
-  auto mcuram_read(uint24 addr, uint8 data) -> uint8;
-  auto mcuram_write(uint24 addr, uint8 data) -> void;
+  auto mcuramRead(uint24 addr, uint8 data) -> uint8;
+  auto mcuramWrite(uint24 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 
@@ -25,19 +25,22 @@ struct SDD1 {
   MappedRAM ram;
 
 private:
-  uint8 sdd1_enable;  //channel bit-mask
-  uint8 xfer_enable;  //channel bit-mask
-  bool dma_ready;     //used to initialize decompression module
-  uint mmc[4];        //memory map controller ROM indices
+  uint8 r4800;  //hard enable
+  uint8 r4801;  //soft enable
+  uint8 r4804;  //MMC bank 0
+  uint8 r4805;  //MMC bank 1
+  uint8 r4806;  //MMC bank 2
+  uint8 r4807;  //MMC bank 3
 
-  struct {
-    uint addr;        //$43x2-$43x4 -- DMA transfer address
-    uint16 size;      //$43x5-$43x6 -- DMA transfer size
+  struct DMA {
+    uint24 addr;  //$43x2-$43x4 -- DMA transfer address
+    uint16 size;  //$43x5-$43x6 -- DMA transfer size
   } dma[8];
+  bool dmaReady;  //used to initialize decompression module
 
 public:
-  #include "decomp.hpp"
-  Decomp decomp;
+  #include "decompressor.hpp"
+  Decompressor decompressor;
 };
 
 extern SDD1 sdd1;

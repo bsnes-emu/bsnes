@@ -70,7 +70,7 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
 
 auto Request::setHead() -> bool {
   lstring headers = _head.split("\n");
-  string request = headers.takeFirst().rtrim("\r", 1L);
+  string request = headers.takeLeft().rtrim("\r", 1L);
   string requestHost;
 
        if(request.iendsWith(" HTTP/1.0")) request.irtrim(" HTTP/1.0", 1L);
@@ -146,7 +146,7 @@ auto Request::setBody() -> bool {
       auto boundary = contentType.iltrim("multipart/form-data; boundary=", 1L).trim("\"", "\"", 1L);
       auto blocks = _body.split({"--", boundary}, 1024L);  //limit blocks to prevent memory exhaustion
       for(auto& block : blocks) block.trim("\r\n", "\r\n", 1L);
-      if(blocks.size() < 2 || (blocks.takeFirst(), !blocks.takeLast().beginsWith("--"))) return false;
+      if(blocks.size() < 2 || (blocks.takeLeft(), !blocks.takeRight().beginsWith("--"))) return false;
       for(auto& block : blocks) {
         string name;
         string filename;

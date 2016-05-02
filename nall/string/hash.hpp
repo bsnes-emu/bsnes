@@ -3,12 +3,16 @@
 namespace nall {
 
 namespace Hash {
-  auto CRC16::digest() -> string {
+  auto CRC16::digest() const -> string {
     return hex(value(), 4L);
   }
 
-  auto CRC32::digest() -> string {
+  auto CRC32::digest() const -> string {
     return hex(value(), 8L);
+  }
+
+  auto CRC64::digest() const -> string {
+    return hex(value(), 16L);
   }
 
   auto SHA256::digest() const -> string {
@@ -24,6 +28,10 @@ auto crc16(rstring self) -> string {
 
 auto crc32(rstring self) -> string {
   return Hash::CRC32(self.data(), self.size()).digest();
+}
+
+auto crc64(rstring self) -> string {
+  return Hash::CRC64(self.data(), self.size()).digest();
 }
 
 auto sha256(rstring self) -> string {

@@ -2,13 +2,14 @@
 
 #include <nall/range.hpp>
 
-namespace nall {
-struct string;
-namespace Hash {
+namespace nall { struct string; }
+
+namespace nall { namespace Hash {
 
 struct SHA256 {
   SHA256() { reset(); }
-  SHA256(const void* values, unsigned size) : SHA256() { data(values, size); }
+  SHA256(const void* values, uint size) : SHA256() { data(values, size); }
+  SHA256(const vector<uint8_t>& values) : SHA256() { data(values); }
 
   auto reset() -> void {
     for(auto n : input) n = 0;
@@ -22,10 +23,14 @@ struct SHA256 {
     length++;
   }
 
-  auto data(const void* values, unsigned size) -> void {
+  auto data(const void* values, uint size) -> void {
     length += size;
     auto p = (const uint8_t*)values;
     while(size--) byte(*p++);
+  }
+
+  auto data(const vector<uint8_t>& values) -> void {
+    for(auto value : values) data(value);
   }
 
   auto value() const -> vector<uint8_t> {
@@ -77,14 +82,14 @@ private:
     return (x >> n) | (x << 32 - n);
   }
 
-  auto square(unsigned n) -> uint32_t {
+  auto square(uint n) -> uint32_t {
     static const uint32_t value[8] = {
       0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19,
     };
     return value[n];
   }
 
-  auto cube(unsigned n) -> uint32_t {
+  auto cube(uint n) -> uint32_t {
     static const uint32_t value[64] = {
       0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
       0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,

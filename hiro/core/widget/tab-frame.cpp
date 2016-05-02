@@ -77,7 +77,7 @@ auto mTabFrame::remove(sTabFrameItem item) -> type& {
 }
 
 auto mTabFrame::reset() -> type& {
-  while(state.items) remove(state.items.last());
+  while(state.items) remove(state.items.right());
   return *this;
 }
 

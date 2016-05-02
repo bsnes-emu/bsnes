@@ -76,8 +76,8 @@ auto Audio::poll() -> void {
     if(reverbDelay) {
       reverbLeft.append(ileft);
       reverbRight.append(iright);
-      ileft  += reverbLeft.takeFirst()  * reverbLevel;
-      iright += reverbRight.takeFirst() * reverbLevel;
+      ileft  += reverbLeft.takeLeft()  * reverbLevel;
+      iright += reverbRight.takeLeft() * reverbLevel;
     }
 
     interface->audioSample(sclamp<16>(ileft), sclamp<16>(iright));

@@ -82,7 +82,7 @@ static auto Window_drop(GtkWidget* widget, GdkDragContext* context, signed x, si
 GtkSelectionData* data, unsigned type, unsigned timestamp, pWindow* p) -> void {
   if(!p->state().droppable) return;
   lstring paths = DropPaths(data);
-  if(paths.empty()) return;
+  if(!paths) return;
   p->self().doDrop(paths);
 }
 

@@ -7,18 +7,11 @@
 Stream::Stream(uint channels, double inputFrequency) : channels(channels), inputFrequency(inputFrequency) {
 }
 
-Stream::~Stream() {
-  reset();
-}
-
 auto Stream::reset() -> void {
-  if(tap) delete[] tap, tap = nullptr;
-  if(input) for(auto c : range(channels)) delete[] input[c];
-  delete[] input, input = nullptr;
-  if(queue) for(auto c : range(channels)) delete[] queue[c];
-  delete[] queue, queue = nullptr;
-  if(output) for(auto c : range(channels)) delete[] output[c];
-  delete[] output, output = nullptr;
+  taps.reset();
+  input.reset();
+  queue.reset();
+  output.reset();
 }
 
 auto Stream::setFrequency(double outputFrequency_) -> void {
@@ -34,45 +27,43 @@ auto Stream::setFrequency(double outputFrequency_) -> void {
   cutoffFrequency = outputFrequency / inputFrequency;
   if(cutoffFrequency < 0.5) {
     double transitionBandwidth = 0.008;  //lower = higher quality; more taps (slower)
-    taps = (uint)ceil(4.0 / transitionBandwidth) | 1;
-    tap = new double[taps];
+    taps.resize((uint)ceil(4.0 / transitionBandwidth) | 1);
 
     double sum = 0.0;
     for(uint t : range(taps)) {
       //sinc filter
-      double s = sinc(2.0 * cutoffFrequency * (t - (taps - 1) / 2.0));
+      double s = sinc(2.0 * cutoffFrequency * (t - (taps.size() - 1) / 2.0));
 
       //blackman window
-      double b = 0.42 - 0.5 * cos(2.0 * pi * t / (taps - 1)) + 0.08 * cos(4.0 * pi * t / (taps - 1));
+      double b = 0.42 - 0.5 * cos(2.0 * pi * t / (taps.size() - 1)) + 0.08 * cos(4.0 * pi * t / (taps.size() - 1));
 
-      tap[t] = s * b;
-      sum += tap[t];
+      taps[t] = s * b;
+      sum += taps[t];
     }
 
     //normalize so that the sum of all coefficients is 1.0
-    for(auto t : range(taps)) tap[t] /= sum;
+    for(auto& tap : taps) tap /= sum;
   } else {
-    taps = 1;
-    tap = new double[taps];
-    tap[0] = 1.0;
+    taps.resize(1);
+    taps[0] = 1.0;
   }
 
   decimationRate = max(1, (uint)floor(inputFrequency / outputFrequency));
   decimationOffset = 0;
 
-  input = new double*[channels];
-  for(auto c : range(channels)) input[c] = new double[taps * 2]();
+  input.resize(channels);
+  for(auto c : range(channels)) input[c].resize(taps.size() * 2);
   inputOffset = 0;
 
   resamplerFrequency = inputFrequency / decimationRate;
   resamplerFraction = 0.0;
   resamplerStep = resamplerFrequency / outputFrequency;
-  queue = new double*[channels];
-  for(auto c : range(channels)) queue[c] = new double[4]();
+  queue.resize(channels);
+  for(auto c : range(channels)) queue[c].resize(4);
 
-  output = new double*[channels];
+  output.resize(channels);
   outputs = inputFrequency * 0.02;
-  for(auto c : range(channels)) output[c] = new double[outputs]();
+  for(auto c : range(channels)) output[c].resize(outputs);
   outputReadOffset = 0;
   outputWriteOffset = 0;
 }
@@ -90,10 +81,10 @@ auto Stream::read(double* samples) -> void {
 }
 
 auto Stream::write(int16* samples) -> void {
-  inputOffset = !inputOffset ? taps - 1 : inputOffset - 1;
+  inputOffset = !inputOffset ? taps.size() - 1 : inputOffset - 1;
   for(auto c : range(channels)) {
     auto sample = (samples[c] + 32768.0) / 65535.0;  //normalize
-    input[c][inputOffset] = input[c][inputOffset + taps] = sample;
+    input[c][inputOffset] = input[c][inputOffset + taps.size()] = sample;
   }
 
   if(++decimationOffset >= decimationRate) {
@@ -101,7 +92,7 @@ auto Stream::write(int16* samples) -> void {
 
     for(auto c : range(channels)) {
       double sample = 0.0;
-      for(auto t : range(taps)) sample += input[c][inputOffset + t] * tap[t];
+      for(auto t : range(taps)) sample += input[c][inputOffset + t] * taps[t];
 
       auto& q = queue[c];
       q[0] = q[1];

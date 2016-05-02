@@ -167,7 +167,7 @@ auto OpenGL::refresh() -> void {
   render(sources[0].width, sources[0].height, outputWidth, outputHeight);
 
   if(history.size() > 0) {
-    OpenGLTexture frame = history.takeLast();
+    OpenGLTexture frame = history.takeRight();
 
     glBindTexture(GL_TEXTURE_2D, frame.texture);
     if(width == frame.width && height == frame.height) {

@@ -59,9 +59,9 @@ auto mTreeViewItem::icon() const -> image {
 auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
   if(path.empty()) return {};
   auto paths = path.split("/");
-  unsigned position = paths.takeFirst().natural();
+  unsigned position = paths.takeLeft().natural();
   if(position >= itemCount()) return {};
-  if(paths.empty()) return state.items[position];
+  if(!paths) return state.items[position];
   return state.items[position]->item(paths.merge("/"));
 }
 

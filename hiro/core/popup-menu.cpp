@@ -45,7 +45,7 @@ auto mPopupMenu::remove(sAction action) -> type& {
 }
 
 auto mPopupMenu::reset() -> type& {
-  while(state.actions) remove(state.actions.last());
+  while(state.actions) remove(state.actions.right());
   return *this;
 }
 

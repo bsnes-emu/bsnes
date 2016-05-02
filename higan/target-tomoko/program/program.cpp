@@ -52,7 +52,7 @@ Program::Program(lstring args) {
   updateAudioDriver();
   updateAudioEffects();
 
-  args.takeFirst();  //ignore program location in argument parsing
+  args.takeLeft();  //ignore program location in argument parsing
   for(auto& argument : args) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();

@@ -1,13 +1,16 @@
 auto SDD1::serialize(serializer& s) -> void {
   s.array(ram.data(), ram.size());
 
-  s.integer(sdd1_enable);
-  s.integer(xfer_enable);
-  s.integer(dma_ready);
-  s.array(mmc);
+  s.integer(r4800);
+  s.integer(r4801);
+  s.integer(r4804);
+  s.integer(r4805);
+  s.integer(r4806);
+  s.integer(r4807);
 
   for(auto n : range(8)) {
     s.integer(dma[n].addr);
     s.integer(dma[n].size);
   }
+  s.integer(dmaReady);
 }

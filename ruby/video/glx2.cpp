@@ -163,7 +163,6 @@ struct VideoGLX2 : Video {
     glxcontext = glXCreateContext(display, vi, 0, GL_TRUE);
     glXMakeCurrent(display, glxwindow = xwindow, glxcontext);
 
-                         glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalEXT");
     if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
     if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
 

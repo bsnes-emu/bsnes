@@ -20,7 +20,7 @@ struct Group : vector<Input> {
 
   auto name() const -> string { return _name; }
   auto input(unsigned id) -> Input& { return operator[](id); }
-  auto append(const string& name) -> void { vector::append({name}); }
+  auto append(const string& name) -> void { vector::append(Input{name}); }
 
   auto find(const string& name) const -> maybe<unsigned> {
     for(auto id : range(size())) {
@@ -51,7 +51,7 @@ struct Device : vector<Group> {
   auto id() const -> uint64_t { return _id; }
   auto setID(uint64_t id) -> void { _id = id; }
   auto group(unsigned id) -> Group& { return operator[](id); }
-  auto append(const string& name) -> void { vector::append({name}); }
+  auto append(const string& name) -> void { vector::append(Group{name}); }
 
   auto find(const string& name) const -> maybe<unsigned> {
     for(auto id : range(size())) {

@@ -64,6 +64,7 @@
 #include <nall/encode/url.hpp>
 #include <nall/hash/crc16.hpp>
 #include <nall/hash/crc32.hpp>
+#include <nall/hash/crc64.hpp>
 #include <nall/hash/sha256.hpp>
 
 #if defined(PLATFORM_WINDOWS)

@@ -3,7 +3,7 @@
 //36  ss:
 //3e  ds:
 auto V30MZ::opSegment(uint16 segment) {
-  if(prefixes.size() >= 7) prefixes.removeLast();
+  if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   state.prefix = true;
   state.poll = false;
@@ -12,7 +12,7 @@ auto V30MZ::opSegment(uint16 segment) {
 //f2  repnz:
 //f3  repz:
 auto V30MZ::opRepeat(bool flag) {
-  if(prefixes.size() >= 7) prefixes.removeLast();
+  if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   wait(4);
   state.prefix = true;
@@ -21,7 +21,7 @@ auto V30MZ::opRepeat(bool flag) {
 
 //f0  lock:
 auto V30MZ::opLock() {
-  if(prefixes.size() >= 7) prefixes.removeLast();
+  if(prefixes.size() >= 7) prefixes.removeRight();
   prefixes.prepend(opcode);
   state.prefix = true;
   state.poll = false;

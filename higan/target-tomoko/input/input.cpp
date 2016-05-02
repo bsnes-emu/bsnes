@@ -147,21 +147,21 @@ InputManager::InputManager() {
 
   for(auto& emulator : program->emulators) {
     emulators.append(InputEmulator());
-    auto& inputEmulator = emulators.last();
+    auto& inputEmulator = emulators.right();
     inputEmulator.name = emulator->information.name;
 
     for(auto& port : emulator->port) {
       inputEmulator.ports.append(InputPort());
-      auto& inputPort = inputEmulator.ports.last();
+      auto& inputPort = inputEmulator.ports.right();
       inputPort.name = port.name;
       for(auto& device : port.device) {
         inputPort.devices.append(InputDevice());
-        auto& inputDevice = inputPort.devices.last();
+        auto& inputDevice = inputPort.devices.right();
         inputDevice.name = device.name;
         for(auto number : device.order) {
           auto& input = device.input[number];
           inputDevice.mappings.append(new InputMapping());
-          auto& inputMapping = inputDevice.mappings.last();
+          auto& inputMapping = inputDevice.mappings.right();
           inputMapping->name = input.name;
           inputMapping->link = &input;
           input.guid = (uintptr)inputMapping;

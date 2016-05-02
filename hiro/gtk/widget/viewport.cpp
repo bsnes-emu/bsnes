@@ -6,7 +6,7 @@ static auto Viewport_dropEvent(GtkWidget* widget, GdkDragContext* context, signe
 GtkSelectionData* data, unsigned type, unsigned timestamp, pViewport* p) -> void {
   if(!p->state().droppable) return;
   lstring paths = DropPaths(data);
-  if(paths.empty()) return;
+  if(!paths) return;
   p->self().doDrop(paths);
 }
 

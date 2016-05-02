@@ -36,7 +36,6 @@ private:
 
 struct Stream {
   Stream(uint channels, double inputFrequency);
-  ~Stream();
 
   auto reset() -> void;
   auto setFrequency(double outputFrequency) -> void;
@@ -56,21 +55,20 @@ private:
   double outputFrequency = 0.0;
   double cutoffFrequency = 0.0;
 
-  double* tap = nullptr;
-  uint taps = 0;
+  vector<double> taps;
 
   uint decimationRate = 0;
   uint decimationOffset = 0;
 
-  double** input = nullptr;
+  vector<vector<double>> input;
   uint inputOffset = 0;
 
   double resamplerFrequency = 0.0;
   double resamplerFraction = 0.0;
   double resamplerStep = 0.0;
-  double** queue = nullptr;
+  vector<vector<double>> queue;
 
-  double** output = nullptr;
+  vector<vector<double>> output;
   uint outputs = 0;
   uint outputReadOffset = 0;
   uint outputWriteOffset = 0;

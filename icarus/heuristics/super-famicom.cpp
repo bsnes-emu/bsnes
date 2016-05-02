@@ -253,15 +253,15 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, boo
   else if(has_sdd1) {
     markup.append(
       "  sdd1\n"
-      "    map address=00-3f,80-bf:4800-4807\n"
+      "    map address=00-3f,80-bf:4800-480f\n"
       "    rom name=program.rom size=0x", hex(rom_size), "\n"
-      "      map address=00-3f,80-bf:8000-ffff mask=0x808000\n"
+      "      map address=00-3f,80-bf:8000-ffff\n"
       "      map address=c0-ff:0000-ffff\n"
     );
     if(ram_size > 0) markup.append(
       "    ram name=save.ram size=0x", hex(ram_size), "\n"
-      "      map address=20-3f,a0-bf:6000-7fff mask=0xe000\n"
-      "      map address=70-7d:0000-7fff mask=0x8000\n"
+      "      map address=00-3f,80-bf:6000-7fff mask=0xe000\n"
+      "      map address=70-73:0000-ffff mask=0x8000\n"
     );
   }
 

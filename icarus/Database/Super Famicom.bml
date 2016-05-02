@@ -7376,9 +7376,9 @@ cartridge sha256:b4626cf0c876a124b50f9421c48a7d762e9ed808ad336c799d543d60b484897
 cartridge sha256:910a29f834199c63c22beddc749baba746da9922196a553255deade59f4fc127
   :board region=ntsc
   :  sdd1
-  :    map address=00-3f,80-bf:4800-4807
+  :    map address=00-3f,80-bf:4800-480f
   :    rom name=program.rom size=0x400000
-  :      map address=00-3f,80-bf:8000-ffff mask=0x808000
+  :      map address=00-3f,80-bf:8000-ffff
   :      map address=c0-ff:0000-ffff
   :
   :information

@@ -32,6 +32,7 @@ inline auto real(long double value) -> string;
 //hash.hpp
 inline auto crc16(rstring self) -> string;
 inline auto crc32(rstring self) -> string;
+inline auto crc64(rstring self) -> string;
 inline auto sha256(rstring self) -> string;
 
 //match.hpp

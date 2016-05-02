@@ -45,7 +45,7 @@ inline auto parse(Node*& node, const char*& s, uint depth) -> void {
   while(whitespace(s[0])) s++;
   if(!s[0]) return;
 
-  if(s[0] == '(' && node->link.empty()) {
+  if(s[0] == '(' && !node->link) {
     parse(node, s += 1, 1);
     if(*s++ != ')') throw "mismatched group";
   }
@@ -55,7 +55,7 @@ inline auto parse(Node*& node, const char*& s, uint depth) -> void {
     node->literal = literal(s);
   }
 
-  #define p() (node->literal.empty() && node->link.empty())
+  #define p() (!node->literal && !node->link)
   while(true) {
     while(whitespace(s[0])) s++;
     if(!s[0]) return;

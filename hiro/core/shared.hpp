@@ -86,7 +86,7 @@ struct Group : sGroup {
   template<typename T = Object> auto objects() const -> vector<T> {
     vector<T> objects;
     for(auto object : self().objects()) {
-      if(auto cast = object.cast<T>()) objects.append(cast);
+      if(auto casted = object.cast<T>()) objects.append(casted);
     }
     return objects;
   }

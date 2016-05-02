@@ -88,7 +88,7 @@ auto Response::head(const function<bool (const uint8_t*, unsigned)>& callback) c
 
 auto Response::setHead() -> bool {
   lstring headers = _head.split("\n");
-  string response = headers.takeFirst().rtrim("\r");
+  string response = headers.takeLeft().rtrim("\r");
 
        if(response.ibeginsWith("HTTP/1.0 ")) response.iltrim("HTTP/1.0 ", 1L);
   else if(response.ibeginsWith("HTTP/1.1 ")) response.iltrim("HTTP/1.1 ", 1L);

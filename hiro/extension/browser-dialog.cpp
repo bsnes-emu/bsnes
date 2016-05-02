@@ -35,7 +35,7 @@ auto BrowserDialogWindow::accept() -> void {
   auto batched = view.batched();
 
   if(state.action == "openFile" && batched) {
-    string name = batched.first()->cell(0)->text();
+    string name = batched.left()->cell(0)->text();
     if(isFolder(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name});
   }
@@ -48,14 +48,14 @@ auto BrowserDialogWindow::accept() -> void {
   }
 
   if(state.action == "openFolder" && batched) {
-    string name = batched.first()->cell(0)->text();
+    string name = batched.left()->cell(0)->text();
     if(!isMatch(name)) return setPath({state.path, name});
     state.response.append(string{state.path, name, "/"});
   }
 
   if(state.action == "saveFile") {
     string name = fileName.text();
-    if(!name && batched) name = batched.first()->cell(0)->text();
+    if(!name && batched) name = batched.left()->cell(0)->text();
     if(!name || isFolder(name)) return;
     if(file::exists({state.path, name})) {
       if(MessageDialog("File already exists; overwrite it?").question() != "Yes") return;
@@ -64,7 +64,7 @@ auto BrowserDialogWindow::accept() -> void {
   }
 
   if(state.action == "selectFolder" && batched) {
-    string name = batched.first()->cell(0)->text();
+    string name = batched.left()->cell(0)->text();
     if(isFolder(name)) state.response.append(string{state.path, name, "/"});
   }
 
@@ -125,7 +125,7 @@ auto BrowserDialogWindow::run() -> lstring {
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
     auto part = filter.split("|", 1L);
-    filterList.append(ComboButtonItem().setText(part.first()));
+    filterList.append(ComboButtonItem().setText(part.left()));
   }
   fileName.setVisible(state.action == "saveFile").onActivate([&] { accept(); });
   acceptButton.onActivate([&] { accept(); });
@@ -137,7 +137,7 @@ auto BrowserDialogWindow::run() -> lstring {
   if(!state.filters) state.filters.append("All|*");
   for(auto& filter : state.filters) {
     auto part = filter.split("|", 1L);
-    filters.append(part.last().split(":"));
+    filters.append(part.right().split(":"));
   }
 
   setPath(state.path);
@@ -201,7 +201,7 @@ BrowserDialog::BrowserDialog() {
 auto BrowserDialog::openFile() -> string {
   state.action = "openFile";
   if(!state.title) state.title = "Open File";
-  if(auto result = _run()) return result.first();
+  if(auto result = _run()) return result.left();
   return {};
 }
 
@@ -215,21 +215,21 @@ auto BrowserDialog::openFiles() -> lstring {
 auto BrowserDialog::openFolder() -> string {
   state.action = "openFolder";
   if(!state.title) state.title = "Open Folder";
-  if(auto result = _run()) return result.first();
+  if(auto result = _run()) return result.left();
   return {};
 }
 
 auto BrowserDialog::saveFile() -> string {
   state.action = "saveFile";
   if(!state.title) state.title = "Save File";
-  if(auto result = _run()) return result.first();
+  if(auto result = _run()) return result.left();
   return {};
 }
 
 auto BrowserDialog::selectFolder() -> string {
   state.action = "selectFolder";
   if(!state.title) state.title = "Select Folder";
-  if(auto result = _run()) return result.first();
+  if(auto result = _run()) return result.left();
   return {};
 }
 

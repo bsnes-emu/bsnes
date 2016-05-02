@@ -60,8 +60,8 @@ Interface::Interface() {
       device.input.append({n +  9, 0, {"Port ", p, " - ", "X"     }});
       device.input.append({n + 10, 0, {"Port ", p, " - ", "L"     }});
       device.input.append({n + 11, 0, {"Port ", p, " - ", "R"     }});
-      device.order.append(n + 4, n + 5, n +  6, n +  7, n + 0, n + 8);
-      device.order.append(n + 1, n + 9, n + 10, n + 11, n + 2, n + 3);
+      device.order.append({n + 4, n + 5, n +  6, n +  7, n + 0, n + 8});
+      device.order.append({n + 1, n + 9, n + 10, n + 11, n + 2, n + 3});
     }
     this->device.append(device);
   }
@@ -100,12 +100,12 @@ Interface::Interface() {
     device.input.append({1, 1, "Port 1 - Y-axis" });
     device.input.append({2, 0, "Port 1 - Trigger"});
     device.input.append({3, 0, "Port 1 - Start"  });
-    device.order.append(0, 1, 2, 3);
+    device.order.append({0, 1, 2, 3});
     device.input.append({4, 1, "Port 2 - X-axis" });
     device.input.append({5, 1, "Port 2 - Y-axis" });
     device.input.append({6, 0, "Port 2 - Trigger"});
     device.input.append({7, 0, "Port 2 - Start"  });
-    device.order.append(4, 5, 6, 7);
+    device.order.append({4, 5, 6, 7});
     this->device.append(device);
   }
 

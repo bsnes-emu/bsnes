@@ -85,7 +85,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(state.sections++) state.output.append("</section>");
       state.output.append("<section>");
     }
-    auto content = lines.takeFirst().ltrim("# ", 1L).split(" => ", 1L);
+    auto content = lines.takeLeft().ltrim("# ", 1L).split(" => ", 1L);
     auto data = markup(content[0]);
     auto name = escape(content(1, crc32(data)));
     state.output.append("<header id=\"", name, "\">", data);
@@ -98,7 +98,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
 
   //header
   else if(auto depth = count(block, '=')) {
-    auto content = slice(lines.takeFirst(), depth + 1).split(" => ", 1L);
+    auto content = slice(lines.takeLeft(), depth + 1).split(" => ", 1L);
     auto data = markup(content[0]);
     auto name = escape(content(1, crc32(data)));
     if(depth <= 6) {

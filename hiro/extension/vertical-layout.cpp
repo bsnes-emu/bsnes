@@ -35,7 +35,7 @@ auto mVerticalLayout::minimumSize() const -> Size {
     } else {
       height += child.height;
     }
-    if(&child != &properties.last()) height += child.spacing;
+    if(&child != &properties.right()) height += child.spacing;
   }
 
   return {settings.margin * 2 + width, settings.margin * 2 + height};
@@ -94,7 +94,7 @@ auto mVerticalLayout::setGeometry(Geometry containerGeometry) -> type& {
   for(auto& child : properties) {
     if(child.height == Size::Maximum) maximumHeightCounter++;
     if(child.height != Size::Maximum) minimumHeight += child.height;
-    if(&child != &properties.last()) minimumHeight += child.spacing;
+    if(&child != &properties.right()) minimumHeight += child.spacing;
   }
 
   for(auto& child : properties) {

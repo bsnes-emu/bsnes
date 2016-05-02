@@ -41,7 +41,7 @@ auto mLayout::remove(sSizable sizable) -> type& {
 }
 
 auto mLayout::reset() -> type& {
-  while(state.sizables) remove(state.sizables.last());
+  while(state.sizables) remove(state.sizables.right());
   return *this;
 }
 

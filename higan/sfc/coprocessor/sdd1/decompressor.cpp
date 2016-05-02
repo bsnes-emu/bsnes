@@ -8,20 +8,20 @@
 
 //input manager
 
-auto SDD1::Decomp::IM::init(uint offset_) -> void {
+auto SDD1::Decompressor::IM::init(uint offset_) -> void {
   offset = offset_;
   bit_count = 4;
 }
 
-auto SDD1::Decomp::IM::get_codeword(uint8 code_length) -> uint8 {
+auto SDD1::Decompressor::IM::get_codeword(uint8 code_length) -> uint8 {
   uint8 codeword;
   uint8 comp_count;
 
-  codeword = sdd1.mmc_read(offset) << bit_count;
+  codeword = sdd1.mmcRead(offset) << bit_count;
   bit_count++;
 
   if(codeword & 0x80) {
-    codeword |= sdd1.mmc_read(offset + 1) >> (9 - bit_count);
+    codeword |= sdd1.mmcRead(offset + 1) >> (9 - bit_count);
     bit_count += code_length;
   }
 
@@ -35,7 +35,7 @@ auto SDD1::Decomp::IM::get_codeword(uint8 code_length) -> uint8 {
 
 //golomb-code decoder
 
-const uint8 SDD1::Decomp::GCD::run_count[] = {
+const uint8 SDD1::Decompressor::GCD::run_count[] = {
   0x00, 0x00, 0x01, 0x00, 0x03, 0x01, 0x02, 0x00,
   0x07, 0x03, 0x05, 0x01, 0x06, 0x02, 0x04, 0x00,
   0x0f, 0x07, 0x0b, 0x03, 0x0d, 0x05, 0x09, 0x01,
@@ -70,7 +70,7 @@ const uint8 SDD1::Decomp::GCD::run_count[] = {
   0x70, 0x30, 0x50, 0x10, 0x60, 0x20, 0x40, 0x00,
 };
 
-auto SDD1::Decomp::GCD::get_run_count(uint8 code_number, uint8& mps_count, bool& lps_index) -> void {
+auto SDD1::Decompressor::GCD::get_run_count(uint8 code_number, uint8& mps_count, bool& lps_index) -> void {
   uint8 codeword = self.im.get_codeword(code_number);
 
   if(codeword & 0x80) {
@@ -83,12 +83,12 @@ auto SDD1::Decomp::GCD::get_run_count(uint8 code_number, uint8& mps_count, bool&
 
 //bits generator
 
-auto SDD1::Decomp::BG::init() -> void {
+auto SDD1::Decompressor::BG::init() -> void {
   mps_count = 0;
   lps_index = 0;
 }
 
-auto SDD1::Decomp::BG::get_bit(bool& end_of_run) -> uint8 {
+auto SDD1::Decompressor::BG::get_bit(bool& end_of_run) -> uint8 {
   if(!(mps_count || lps_index)) self.gcd.get_run_count(code_number, mps_count, lps_index);
 
   uint8 bit;
@@ -106,7 +106,7 @@ auto SDD1::Decomp::BG::get_bit(bool& end_of_run) -> uint8 {
 
 //probability estimation module
 
-const SDD1::Decomp::PEM::State SDD1::Decomp::PEM::evolution_table[33] = {
+const SDD1::Decompressor::PEM::State SDD1::Decompressor::PEM::evolution_table[33] = {
   {0, 25, 25},
   {0,  2,  1},
   {0,  3,  1},
@@ -142,18 +142,18 @@ const SDD1::Decomp::PEM::State SDD1::Decomp::PEM::evolution_table[33] = {
   {7, 24, 22},
 };
 
-auto SDD1::Decomp::PEM::init() -> void {
+auto SDD1::Decompressor::PEM::init() -> void {
   for(auto n : range(32)) {
     context_info[n].status = 0;
     context_info[n].mps = 0;
   }
 }
 
-auto SDD1::Decomp::PEM::get_bit(uint8 context) -> uint8 {
+auto SDD1::Decompressor::PEM::get_bit(uint8 context) -> uint8 {
   ContextInfo& info = context_info[context];
   uint8 current_status = info.status;
   uint8 current_mps = info.mps;
-  const State& s = SDD1::Decomp::PEM::evolution_table[current_status];
+  const State& s = SDD1::Decompressor::PEM::evolution_table[current_status];
 
   uint8 bit;
   bool end_of_run;
@@ -182,9 +182,9 @@ auto SDD1::Decomp::PEM::get_bit(uint8 context) -> uint8 {
 
 //context model
 
-auto SDD1::Decomp::CM::init(uint offset) -> void {
-  bitplanes_info = sdd1.mmc_read(offset) & 0xc0;
-  context_bits_info = sdd1.mmc_read(offset) & 0x30;
+auto SDD1::Decompressor::CM::init(uint offset) -> void {
+  bitplanes_info = sdd1.mmcRead(offset) & 0xc0;
+  context_bits_info = sdd1.mmcRead(offset) & 0x30;
   bit_number = 0;
   for(auto n : range(8)) previous_bitplane_bits[n] = 0;
   switch(bitplanes_info) {
@@ -194,7 +194,7 @@ auto SDD1::Decomp::CM::init(uint offset) -> void {
   }
 }
 
-auto SDD1::Decomp::CM::get_bit() -> uint8 {
+auto SDD1::Decompressor::CM::get_bit() -> uint8 {
   switch(bitplanes_info) {
   case 0x00:
     current_bitplane ^= 0x01;
@@ -230,12 +230,12 @@ auto SDD1::Decomp::CM::get_bit() -> uint8 {
 
 //output logic
 
-auto SDD1::Decomp::OL::init(uint offset) -> void {
-  bitplanes_info = sdd1.mmc_read(offset) & 0xc0;
+auto SDD1::Decompressor::OL::init(uint offset) -> void {
+  bitplanes_info = sdd1.mmcRead(offset) & 0xc0;
   r0 = 0x01;
 }
 
-auto SDD1::Decomp::OL::decompress() -> uint8 {
+auto SDD1::Decompressor::OL::decompress() -> uint8 {
   switch(bitplanes_info) {
   case 0x00: case 0x40: case 0x80:
     if(r0 == 0) {
@@ -257,14 +257,14 @@ auto SDD1::Decomp::OL::decompress() -> uint8 {
 
 //core
 
-SDD1::Decomp::Decomp():
+SDD1::Decompressor::Decompressor():
 im(*this), gcd(*this),
 bg0(*this, 0), bg1(*this, 1), bg2(*this, 2), bg3(*this, 3),
 bg4(*this, 4), bg5(*this, 5), bg6(*this, 6), bg7(*this, 7),
 pem(*this), cm(*this), ol(*this) {
 }
 
-auto SDD1::Decomp::init(uint offset) -> void {
+auto SDD1::Decompressor::init(uint offset) -> void {
   im.init(offset);
   bg0.init();
   bg1.init();
@@ -279,6 +279,6 @@ auto SDD1::Decomp::init(uint offset) -> void {
   ol.init(offset);
 }
 
-auto SDD1::Decomp::read() -> uint8 {
+auto SDD1::Decompressor::read() -> uint8 {
   return ol.decompress();
 }

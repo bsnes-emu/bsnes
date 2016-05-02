@@ -358,11 +358,11 @@ auto Cartridge::parseMarkupSDD1(Markup::Node root) -> void {
   }
 
   for(auto node : root["rom"].find("map")) {
-    parseMarkupMap(node, {&SDD1::mcurom_read, &sdd1}, {&SDD1::mcurom_write, &sdd1});
+    parseMarkupMap(node, {&SDD1::mcuromRead, &sdd1}, {&SDD1::mcuromWrite, &sdd1});
   }
 
   for(auto node : root["ram"].find("map")) {
-    parseMarkupMap(node, {&SDD1::mcuram_read, &sdd1}, {&SDD1::mcuram_write, &sdd1});
+    parseMarkupMap(node, {&SDD1::mcuramRead, &sdd1}, {&SDD1::mcuramWrite, &sdd1});
   }
 }
 

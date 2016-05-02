@@ -16,7 +16,7 @@ auto lstring::operator!=(const lstring& source) const -> bool {
 }
 
 auto lstring::isort() -> lstring& {
-  nall::sort(pool, objectsize, [](const string& x, const string& y) {
+  sort([](const string& x, const string& y) {
     return memory::icompare(x.data(), x.size(), y.data(), y.size()) < 0;
   });
   return *this;

@@ -4,7 +4,7 @@ namespace SuperFamicom {
 
 SDD1 sdd1;
 
-#include "decomp.cpp"
+#include "decompressor.cpp"
 #include "serialization.cpp"
 
 auto SDD1::init() -> void {
@@ -24,113 +24,106 @@ auto SDD1::power() -> void {
 auto SDD1::reset() -> void {
   //hook S-CPU DMA MMIO registers to gather information for struct dma[];
   //buffer address and transfer size information for use in SDD1::mcu_read()
-  bus.map({&SDD1::dma_read, &sdd1}, {&SDD1::dma_write, &sdd1}, "00-3f,80-bf:4300-437f");
+  bus.map({&SDD1::dmaRead, &sdd1}, {&SDD1::dmaWrite, &sdd1}, "00-3f,80-bf:4300-437f");
 
-  sdd1_enable = 0x00;
-  xfer_enable = 0x00;
-  dma_ready = false;
-
-  mmc[0] = 0 << 20;
-  mmc[1] = 1 << 20;
-  mmc[2] = 2 << 20;
-  mmc[3] = 3 << 20;
+  r4800 = 0x00;
+  r4801 = 0x00;
+  r4804 = 0x00;
+  r4805 = 0x01;
+  r4806 = 0x02;
+  r4807 = 0x03;
 
   for(auto n : range(8)) {
     dma[n].addr = 0;
     dma[n].size = 0;
   }
+  dmaReady = false;
 }
 
 auto SDD1::read(uint24 addr, uint8 data) -> uint8 {
-  addr = 0x4800 | (addr & 7);
+  addr = 0x4800 | addr.bits(0,3);
 
   switch(addr) {
-  case 0x4804: return mmc[0] >> 20;
-  case 0x4805: return mmc[1] >> 20;
-  case 0x4806: return mmc[2] >> 20;
-  case 0x4807: return mmc[3] >> 20;
+  case 0x4800: return r4800;
+  case 0x4801: return r4801;
+  case 0x4804: return r4804;
+  case 0x4805: return r4805;
+  case 0x4806: return r4806;
+  case 0x4807: return r4807;
   }
 
-  return data;
+  //00-3f,80-bf:4802-4803,4808-480f falls through to ROM
+  return rom.read(addr);
 }
 
 auto SDD1::write(uint24 addr, uint8 data) -> void {
-  addr = 0x4800 | (addr & 7);
+  addr = 0x4800 | addr.bits(0,3);
 
   switch(addr) {
-  case 0x4800: sdd1_enable = data; break;
-  case 0x4801: xfer_enable = data; break;
-
-  case 0x4804: mmc[0] = data << 20; break;
-  case 0x4805: mmc[1] = data << 20; break;
-  case 0x4806: mmc[2] = data << 20; break;
-  case 0x4807: mmc[3] = data << 20; break;
+  case 0x4800: r4800 = data; break;
+  case 0x4801: r4801 = data; break;
+  case 0x4804: r4804 = data & 0x8f; break;
+  case 0x4805: r4805 = data & 0x8f; break;
+  case 0x4806: r4806 = data & 0x8f; break;
+  case 0x4807: r4807 = data & 0x8f; break;
   }
 }
 
-auto SDD1::dma_read(uint24 addr, uint8 data) -> uint8 {
+auto SDD1::dmaRead(uint24 addr, uint8 data) -> uint8 {
   return cpu.dmaPortRead(addr, data);
 }
 
-auto SDD1::dma_write(uint24 addr, uint8 data) -> void {
-  uint channel = (addr >> 4) & 7;
-  switch(addr & 15) {
-  case 2: dma[channel].addr = (dma[channel].addr & 0xffff00) + (data <<  0); break;
-  case 3: dma[channel].addr = (dma[channel].addr & 0xff00ff) + (data <<  8); break;
-  case 4: dma[channel].addr = (dma[channel].addr & 0x00ffff) + (data << 16); break;
-
-  case 5: dma[channel].size = (dma[channel].size &   0xff00) + (data <<  0); break;
-  case 6: dma[channel].size = (dma[channel].size &   0x00ff) + (data <<  8); break;
+auto SDD1::dmaWrite(uint24 addr, uint8 data) -> void {
+  uint channel = addr.bits(4,6);
+  switch(addr.bits(0,3)) {
+  case 2: dma[channel].addr.byte(0) = data; break;
+  case 3: dma[channel].addr.byte(1) = data; break;
+  case 4: dma[channel].addr.byte(2) = data; break;
+  case 5: dma[channel].size.byte(0) = data; break;
+  case 6: dma[channel].size.byte(1) = data; break;
   }
   return cpu.dmaPortWrite(addr, data);
 }
 
-auto SDD1::mmc_read(uint24 addr) -> uint8 {
-  return rom.read(mmc[(addr >> 20) & 3] + (addr & 0x0fffff));
+auto SDD1::mmcRead(uint24 addr) -> uint8 {
+  switch(addr.bits(20,21)) {
+  case 0: return rom.read(r4804.bits(0,3) << 20 | addr.bits(0,19));  //c0-cf:0000-ffff
+  case 1: return rom.read(r4805.bits(0,3) << 20 | addr.bits(0,19));  //d0-df:0000-ffff
+  case 2: return rom.read(r4806.bits(0,3) << 20 | addr.bits(0,19));  //e0-ef:0000-ffff
+  case 3: return rom.read(r4807.bits(0,3) << 20 | addr.bits(0,19));  //f0-ff:0000-ffff
+  }
+  unreachable;
 }
 
-//SDD1::mcu_read() is mapped to $c0-ff:0000-ffff
-//the design is meant to be as close to the hardware design as possible, thus this code
-//avoids adding S-DD1 hooks inside S-CPU::DMA emulation.
-//
-//the real S-DD1 cannot see $420b (DMA enable) writes, as they are not placed on the bus.
-//however, $43x0-$43xf writes (DMAx channel settings) most likely do appear on the bus.
-//the S-DD1 also requires fixed addresses for transfers, which wouldn't be necessary if
-//it could see $420b writes (eg it would know when the transfer should begin.)
-//
-//the hardware needs a way to distinguish program code after $4801 writes from DMA
-//decompression that follows soon after.
-//
-//the only plausible design for hardware would be for the S-DD1 to spy on DMAx settings,
-//and begin spooling decompression on writes to $4801 that activate a channel. after that,
-//it feeds decompressed data only when the ROM read address matches the DMA channel address.
-//
-//the actual S-DD1 transfer can occur on any channel, but it is most likely limited to
-//one transfer per $420b write (for spooling purposes). however, this is not known for certain.
-auto SDD1::mcurom_read(uint24 addr, uint8) -> uint8 {
+//map address=00-3f,80-bf:8000-ffff
+//map address=c0-ff:0000-ffff
+auto SDD1::mcuromRead(uint24 addr, uint8 data) -> uint8 {
   //map address=00-3f,80-bf:8000-ffff mask=0x808000 => 00-1f:0000-ffff
-  if(addr < 0x200000) {
+  if(!addr.bit(22)) {
+    if(!addr.bit(23) && addr.bit(21) && r4805.bit(7)) addr.bit(21) = 0;  //20-3f:8000-ffff
+    if( addr.bit(23) && addr.bit(21) && r4807.bit(7)) addr.bit(21) = 0;  //a0-bf:8000-ffff
+    addr = addr.bits(16,21) << 15 | addr.bits(0,14);
     return rom.read(addr);
   }
 
   //map address=c0-ff:0000-ffff
-  if(sdd1_enable & xfer_enable) {
+  if(r4800 & r4801) {
     //at least one channel has S-DD1 decompression enabled ...
     for(auto n : range(8)) {
-      if(sdd1_enable & xfer_enable & (1 << n)) {
+      if(r4800.bit(n) && r4801.bit(n)) {
         //S-DD1 always uses fixed transfer mode, so address will not change during transfer
         if(addr == dma[n].addr) {
-          if(!dma_ready) {
+          if(!dmaReady) {
             //prepare streaming decompression
-            decomp.init(addr);
-            dma_ready = true;
+            decompressor.init(addr);
+            dmaReady = true;
           }
 
           //fetch a decompressed byte; once finished, disable channel and invalidate buffer
-          uint8 data = decomp.read();
+          data = decompressor.read();
           if(--dma[n].size == 0) {
-            dma_ready = false;
-            xfer_enable &= ~(1 << n);
+            dmaReady = false;
+            r4801.bit(n) = 0;
           }
 
           return data;
@@ -140,20 +133,20 @@ auto SDD1::mcurom_read(uint24 addr, uint8) -> uint8 {
   }  //S-DD1 decompressor enabled
 
   //S-DD1 decompression mode inactive; return ROM data
-  return mmc_read(addr);
+  return mmcRead(addr);
 }
 
-auto SDD1::mcurom_write(uint24 addr, uint8 data) -> void {
+auto SDD1::mcuromWrite(uint24 addr, uint8 data) -> void {
 }
 
 //map address=00-3f,80-bf:6000-7fff mask=0xe000
-//map address=70-7d:0000-7fff mask=0x8000
-auto SDD1::mcuram_read(uint24 addr, uint8 data) -> uint8 {
-  return ram.read(addr & 0x1fff, data);
+//map address=70-73:0000-ffff mask=0x8000
+auto SDD1::mcuramRead(uint24 addr, uint8 data) -> uint8 {
+  return ram.read(addr.bits(0,12), data);
 }
 
-auto SDD1::mcuram_write(uint24 addr, uint8 data) -> void {
-  return ram.write(addr & 0x1fff, data);
+auto SDD1::mcuramWrite(uint24 addr, uint8 data) -> void {
+  return ram.write(addr.bits(0,12), data);
 }
 
 }

@@ -30,7 +30,7 @@ GameBoyAdvanceCartridge::GameBoyAdvanceCartridge(const uint8_t* data, unsigned s
           char text[16];
           memcpy(text, data + n, id.size + 3);
           text[id.size + 3] = 0;
-          list.appendOnce(text);
+          if(!list.find(text)) list.append(text);
         }
       }
     }

@@ -376,7 +376,7 @@ auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> str
   if(bytes) {
     b = "  ";
     while(bytesRead) {
-      b.append(hex(bytesRead.takeFirst(), 2L), " ");
+      b.append(hex(bytesRead.takeLeft(), 2L), " ");
     }
     b.rstrip();
   }

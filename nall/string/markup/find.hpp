@@ -119,13 +119,13 @@ auto ManagedNode::_create(const string& path) -> Node {
       }
     }
     _children.append(new ManagedNode(name));
-    return _children.last()->_create(slice(path, *position + 1));
+    return _children.right()->_create(slice(path, *position + 1));
   }
   for(auto& node : _children) {
     if(path == node->_name) return node;
   }
   _children.append(new ManagedNode(path));
-  return _children.last();
+  return _children.right();
 }
 
 }}

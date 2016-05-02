@@ -83,7 +83,7 @@ auto S21FX::read(uint24 addr, uint8 data) -> uint8 {
 
   if(addr == 0x21ff) {
     if(linkBuffer.size() > 0) {
-      return linkBuffer.takeFirst();
+      return linkBuffer.takeLeft();
     }
   }
 
@@ -123,7 +123,7 @@ auto S21FX::writable() -> bool {
 auto S21FX::read() -> uint8 {
   step(1);
   if(snesBuffer.size() > 0) {
-    return snesBuffer.takeFirst();
+    return snesBuffer.takeLeft();
   }
   return 0x00;
 }

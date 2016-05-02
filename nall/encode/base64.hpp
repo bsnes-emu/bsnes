@@ -34,14 +34,14 @@ inline auto Base64(const uint8_t* data, unsigned size, const string& format = "M
 
     case 1:
       buffer |= data[i] >> 4;
-      result.last() = lookup[buffer];
+      result.right() = lookup[buffer];
       buffer = (data[i] & 15) << 2;
       result.append(lookup[buffer]);
       break;
 
     case 2:
       buffer |= data[i] >> 6;
-      result.last() = lookup[buffer];
+      result.right() = lookup[buffer];
       buffer = (data[i] & 63);
       result.append(lookup[buffer]);
       break;

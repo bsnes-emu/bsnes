@@ -182,7 +182,6 @@ struct VideoGLX : Video, OpenGL {
 
     //glXSwapInterval is used to toggle Vsync
     //note that the ordering is very important! MESA declares SGI, but the SGI function does nothing
-                         glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalEXT");
     if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalMESA");
     if(!glXSwapInterval) glXSwapInterval = (signed (*)(signed))glGetProcAddress("glXSwapIntervalSGI");
 
