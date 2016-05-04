@@ -62,12 +62,12 @@
 #define Hiro_IconView
 #define Hiro_Label
 #define Hiro_LineEdit
-#define Hiro_ListView
 #define Hiro_ProgressBar
 #define Hiro_RadioButton
 #define Hiro_RadioLabel
 #define Hiro_SourceEdit
 #define Hiro_TabFrame
+#define Hiro_TableView
 #define Hiro_TextEdit
 #define Hiro_TreeView
 #define Hiro_VerticalScrollBar
@@ -89,10 +89,14 @@
   #undef Hiro_HexEdit
 #endif
 
+#if defined(Hiro_TableView)
+  #define Hiro_ListView
+#endif
+
 #if defined(Hiro_Button) && defined(Hiro_Canvas) && defined(Hiro_Label)
   #define Hiro_MessageDialog
 #endif
 
-#if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_ListView) && defined(Hiro_MessageDialog)
+#if defined(Hiro_Button) && defined(Hiro_ComboButton) && defined(Hiro_LineEdit) && defined(Hiro_TableView) && defined(Hiro_MessageDialog)
   #define Hiro_BrowserDialog
 #endif

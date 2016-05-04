@@ -298,31 +298,31 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     auto object = (mObject*)GetWindowLongPtr((HWND)header->hwndFrom, GWLP_USERDATA);
     if(!object) break;
 
-    #if defined(Hiro_ListView)
-    if(auto listView = dynamic_cast<mListView*>(object)) {
+    #if defined(Hiro_TableView)
+    if(auto tableView = dynamic_cast<mTableView*>(object)) {
       if(header->code == LVN_ITEMACTIVATE) {
-        listView->self()->onActivate(lparam);
+        tableView->self()->onActivate(lparam);
         break;
       }
       if(header->code == LVN_ITEMCHANGED) {
-        listView->self()->onChange(lparam);
+        tableView->self()->onChange(lparam);
         break;
       }
       if(header->code == LVN_COLUMNCLICK) {
-        if(isWindowCallback) listView->self()->onSort(lparam);
+        if(isWindowCallback) tableView->self()->onSort(lparam);
         break;
       }
       if(header->code == NM_CLICK || header->code == NM_DBLCLK) {
-        //onToggle performs the test to ensure the ListViewItem clicked was checkable
-        if(isWindowCallback) listView->self()->onToggle(lparam);
+        //onToggle performs the test to ensure the TableViewItem clicked was checkable
+        if(isWindowCallback) tableView->self()->onToggle(lparam);
         break;
       }
       if(header->code == NM_RCLICK) {
-        if(isWindowCallback) listView->self()->onContext(lparam);
+        if(isWindowCallback) tableView->self()->onContext(lparam);
         break;
       }
       if(header->code == NM_CUSTOMDRAW) {
-        return listView->self()->onCustomDraw(lparam);
+        return tableView->self()->onCustomDraw(lparam);
       }
     }
     #endif
@@ -339,21 +339,21 @@ static auto CALLBACK Shared_windowProc(WindowProc windowProc, HWND hwnd, UINT ms
     break;
   }
 
-  #if defined(Hiro_ListView)
-  case AppMessage::ListView_doPaint: {
-    if(auto listView = (mListView*)lparam) {
-      if(auto self = listView->self()) InvalidateRect(self->hwnd, nullptr, true);
+  #if defined(Hiro_TableView)
+  case AppMessage::TableView_doPaint: {
+    if(auto tableView = (mTableView*)lparam) {
+      if(auto self = tableView->self()) InvalidateRect(self->hwnd, nullptr, true);
     }
     break;
   }
 
-  case AppMessage::ListView_onActivate: {
-    if(auto listView = (mListView*)lparam) listView->doActivate();
+  case AppMessage::TableView_onActivate: {
+    if(auto tableView = (mTableView*)lparam) tableView->doActivate();
     break;
   }
 
-  case AppMessage::ListView_onChange: {
-    if(auto listView = (mListView*)lparam) listView->doChange();
+  case AppMessage::TableView_onChange: {
+    if(auto tableView = (mTableView*)lparam) tableView->doChange();
   }
   #endif
 

@@ -10,9 +10,9 @@ struct pWidget;
 struct AppMessage {
   enum : unsigned {
     None = WM_APP,
-    ListView_doPaint,
-    ListView_onActivate,
-    ListView_onChange,
+    TableView_doPaint,
+    TableView_onActivate,
+    TableView_onChange,
   };
 };
 
@@ -70,16 +70,16 @@ static vector<wObject> windows;
 #include "widget/horizontal-slider.hpp"
 #include "widget/label.hpp"
 #include "widget/line-edit.hpp"
-#include "widget/list-view.hpp"
-#include "widget/list-view-header.hpp"
-#include "widget/list-view-column.hpp"
-#include "widget/list-view-item.hpp"
-#include "widget/list-view-cell.hpp"
 #include "widget/progress-bar.hpp"
 #include "widget/radio-button.hpp"
 #include "widget/radio-label.hpp"
 #include "widget/tab-frame.hpp"
 #include "widget/tab-frame-item.hpp"
+#include "widget/table-view.hpp"
+#include "widget/table-view-header.hpp"
+#include "widget/table-view-column.hpp"
+#include "widget/table-view-item.hpp"
+#include "widget/table-view-cell.hpp"
 #include "widget/text-edit.hpp"
 #include "widget/vertical-scroll-bar.hpp"
 #include "widget/vertical-slider.hpp"

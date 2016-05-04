@@ -63,12 +63,12 @@ struct AudioWASAPI : Audio {
 
     if(!available() && queuedFrames.size() >= bufferSize) {
       if(settings.synchronize) while(!available());  //wait for free sample slot
-      else queuedFrames.takeFirst();                 //drop sample (run ahead)
+      else queuedFrames.takeLeft();                  //drop sample (run ahead)
     }
 
     uint32_t cachedFrame = 0;
     for(auto n : range(available())) {
-      if(queuedFrames) cachedFrame = queuedFrames.takeFirst();
+      if(queuedFrames) cachedFrame = queuedFrames.takeLeft();
       write(cachedFrame >> 0, cachedFrame >> 16);
     }
   }

@@ -18,7 +18,7 @@ private:
         Button pathRefresh{&pathLayout, Size{0, 0}, 0};
         Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathUp{&pathLayout, Size{0, 0}, 0};
-      ListView view{&layout, Size{~0, ~0}, 5};
+      TableView view{&layout, Size{~0, ~0}, 5};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
         ComboButton filterList{&controlLayout, Size{120, 0}, 5};
         LineEdit fileName{&controlLayout, Size{~0, 0}, 5};
@@ -30,7 +30,7 @@ private:
 };
 
 //accept button clicked, or enter pressed on file name line edit
-//also called by list view activate after special case handling
+//also called by table view activate after special case handling
 auto BrowserDialogWindow::accept() -> void {
   auto batched = view.batched();
 
@@ -71,7 +71,7 @@ auto BrowserDialogWindow::accept() -> void {
   if(state.response) window.setModal(false);
 }
 
-//list view item double-clicked, or enter pressed on selected list view item
+//table view item double-clicked, or enter pressed on selected table view item
 auto BrowserDialogWindow::activate() -> void {
   auto selectedItem = view.selected();
 
@@ -89,7 +89,7 @@ auto BrowserDialogWindow::activate() -> void {
   accept();
 }
 
-//list view item changed
+//table view item changed
 auto BrowserDialogWindow::change() -> void {
   fileName.setText("");
   if(state.action == "saveFile") {
@@ -162,8 +162,8 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   pathName.setText(state.path = path);
 
   view.reset();
-  view.append(ListViewHeader().setVisible(false)
-    .append(ListViewColumn().setExpandable())
+  view.append(TableViewHeader().setVisible(false)
+    .append(TableViewColumn().setExpandable())
   );
 
   auto contents = directory::icontents(path);
@@ -174,8 +174,8 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     content.rtrim("/");
     if(folderMode && isMatch(content)) continue;
 
-    view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setIcon(Icon::Emblem::Folder))
+    view.append(TableViewItem()
+      .append(TableViewCell().setText(content).setIcon(Icon::Emblem::Folder))
     );
   }
 
@@ -184,8 +184,8 @@ auto BrowserDialogWindow::setPath(string path) -> void {
     content.rtrim("/");
     if(!isMatch(content)) continue;
 
-    view.append(ListViewItem()
-      .append(ListViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
+    view.append(TableViewItem()
+      .append(TableViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
     );
   }
 

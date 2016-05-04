@@ -163,10 +163,10 @@ static auto Application_keyboardProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM 
   if(msg == WM_KEYDOWN) {
     if(0);
 
-    #if defined(Hiro_ListView)
-    else if(auto listView = dynamic_cast<mListView*>(object)) {
+    #if defined(Hiro_TableView)
+    else if(auto tableView = dynamic_cast<mTableView*>(object)) {
       if(wparam == VK_RETURN) {
-        if(listView->selected()) return true;  //returning true generates LVN_ITEMACTIVATE message
+        if(tableView->selected()) return true;  //returning true generates LVN_ITEMACTIVATE message
       }
     }
     #endif

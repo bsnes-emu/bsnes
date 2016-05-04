@@ -19,12 +19,12 @@ ScanDialog::ScanDialog() {
   scanList.onActivate([&] { activate(); });
   selectAllButton.setText("Select All").onActivate([&] {
     for(auto& item : scanList.items()) {
-      if(item.cell(0).checkable()) item.cell(0).setChecked(true);
+      if(item.checkable()) item.setChecked(true);
     }
   });
   unselectAllButton.setText("Unselect All").onActivate([&] {
     for(auto& item : scanList.items()) {
-      if(item.cell(0).checkable()) item.cell(0).setChecked(false);
+      if(item.checkable()) item.setChecked(false);
     }
   });
   settingsButton.setText("Settings ...").onActivate([&] {
@@ -47,7 +47,6 @@ auto ScanDialog::show() -> void {
 
 auto ScanDialog::refresh() -> void {
   scanList.reset();
-  scanList.append(ListViewHeader().setVisible(false).append(ListViewColumn().setExpandable()));
 
   auto pathname = pathEdit.text().transform("\\", "/").rtrim("/").append("/");
   if(!directory::exists(pathname)) return;
@@ -59,23 +58,22 @@ auto ScanDialog::refresh() -> void {
   for(auto& name : contents) {
     if(!name.endsWith("/")) continue;
     if(gamePakType(suffixname(name))) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setIcon(Icon::Emblem::Folder).setText(name.rtrim("/"))));
+    scanList.append(ListViewItem().setIcon(Icon::Emblem::Folder).setText(name.rtrim("/")));
   }
 
   for(auto& name : contents) {
     if(name.endsWith("/")) continue;
     if(!gameRomType(suffixname(name).downcase())) continue;
-    scanList.append(ListViewItem().append(ListViewCell().setCheckable().setIcon(Icon::Emblem::File).setText(name)));
+    scanList.append(ListViewItem().setCheckable().setIcon(Icon::Emblem::File).setText(name));
   }
 
   Application::processEvents();
-  scanList.resizeColumns();
   scanList.setFocused();
 }
 
 auto ScanDialog::activate() -> void {
   if(auto item = scanList.selected()) {
-    string location{settings["icarus/Path"].text(), item.cell(0).text()};
+    string location{settings["icarus/Path"].text(), item.text()};
     if(directory::exists(location) && !gamePakType(suffixname(location))) {
       pathEdit.setText(location);
       refresh();
@@ -86,8 +84,8 @@ auto ScanDialog::activate() -> void {
 auto ScanDialog::import() -> void {
   lstring filenames;
   for(auto& item : scanList.items()) {
-    if(item.cell(0).checked()) {
-      filenames.append(string{settings["icarus/Path"].text(), item.cell(0).text()});
+    if(item.checked()) {
+      filenames.append(string{settings["icarus/Path"].text(), item.text()});
     }
   }
 

@@ -1,3 +1,5 @@
+//moc-qt4 -i -o qt.moc qt.hpp
+
 /*
   Qt requires moc in order to bind callbacks, which causes many complications.
 
@@ -194,30 +196,6 @@ public slots:
 };
 #endif
 
-#if defined(Hiro_ListView)
-struct QtListView : public QTreeWidget {
-  Q_OBJECT
-public:
-  QtListView(pListView& p) : p(p) {}
-  auto mousePressEvent(QMouseEvent*) -> void override;
-  auto resizeEvent(QResizeEvent*) -> void override;
-  auto showEvent(QShowEvent*) -> void override;
-  pListView& p;
-public slots:
-  void onActivate();
-  void onChange();
-  void onContext();
-  void onSort(int column);
-  void onToggle(QTreeWidgetItem* item, int column);
-};
-
-struct QtListViewDelegate : public QStyledItemDelegate {
-  QtListViewDelegate(pListView& p);
-  auto paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const -> void;
-  pListView& p;
-};
-#endif
-
 #if defined(Hiro_RadioLabel)
 struct QtRadioLabel : public QRadioButton {
   Q_OBJECT
@@ -249,6 +227,30 @@ public:
   auto showEvent(QShowEvent*) -> void override;
 public slots:
   void onChange(int selection);
+};
+#endif
+
+#if defined(Hiro_TableView)
+struct QtTableView : public QTreeWidget {
+  Q_OBJECT
+public:
+  QtTableView(pTableView& p) : p(p) {}
+  auto mousePressEvent(QMouseEvent*) -> void override;
+  auto resizeEvent(QResizeEvent*) -> void override;
+  auto showEvent(QShowEvent*) -> void override;
+  pTableView& p;
+public slots:
+  void onActivate();
+  void onChange();
+  void onContext();
+  void onSort(int column);
+  void onToggle(QTreeWidgetItem* item, int column);
+};
+
+struct QtTableViewDelegate : public QStyledItemDelegate {
+  QtTableViewDelegate(pTableView& p);
+  auto paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const -> void;
+  pTableView& p;
 };
 #endif
 

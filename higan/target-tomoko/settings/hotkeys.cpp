@@ -15,7 +15,7 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   eraseButton.setText("Erase").onActivate([&] {
     if(auto item = mappingList.selected()) {
-      inputManager->hotkeys[item->offset()]->unbind();
+      inputManager->hotkeys[item.offset()]->unbind();
       refreshMappings();
     }
   });
@@ -26,16 +26,16 @@ HotkeySettings::HotkeySettings(TabFrame* parent) : TabFrameItem(parent) {
 
 auto HotkeySettings::reloadMappings() -> void {
   mappingList.reset();
-  mappingList.append(ListViewHeader().setVisible()
-    .append(ListViewColumn().setText("Name"))
-    .append(ListViewColumn().setText("Mapping").setExpandable())
-    .append(ListViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
+  mappingList.append(TableViewHeader().setVisible()
+    .append(TableViewColumn().setText("Name"))
+    .append(TableViewColumn().setText("Mapping").setExpandable())
+    .append(TableViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
   );
   for(auto& hotkey : inputManager->hotkeys) {
-    mappingList.append(ListViewItem()
-      .append(ListViewCell().setText(hotkey->name))
-      .append(ListViewCell())
-      .append(ListViewCell())
+    mappingList.append(TableViewItem()
+      .append(TableViewCell().setText(hotkey->name))
+      .append(TableViewCell())
+      .append(TableViewCell())
     );
   }
   mappingList.resizeColumns();
@@ -44,8 +44,8 @@ auto HotkeySettings::reloadMappings() -> void {
 auto HotkeySettings::refreshMappings() -> void {
   uint position = 0;
   for(auto& hotkey : inputManager->hotkeys) {
-    mappingList.item(position)->cell(1)->setText(hotkey->assignmentName());
-    mappingList.item(position)->cell(2)->setText(hotkey->deviceName());
+    mappingList.item(position).cell(1).setText(hotkey->assignmentName());
+    mappingList.item(position).cell(2).setText(hotkey->deviceName());
     position++;
   }
   mappingList.resizeColumns();
@@ -55,7 +55,7 @@ auto HotkeySettings::assignMapping() -> void {
   inputManager->poll();  //clear any pending events first
 
   if(auto item = mappingList.selected()) {
-    activeMapping = inputManager->hotkeys[item->offset()];
+    activeMapping = inputManager->hotkeys[item.offset()];
     settingsManager->layout.setEnabled(false);
     settingsManager->statusBar.setText({"Press a key or button to map [", activeMapping->name, "] ..."});
   }

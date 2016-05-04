@@ -90,7 +90,7 @@ struct InputSettings : TabFrameItem {
       ComboButton emulatorList{&selectionLayout, Size{~0, 0}};
       ComboButton portList{&selectionLayout, Size{~0, 0}};
       ComboButton deviceList{&selectionLayout, Size{~0, 0}};
-    ListView mappingList{&layout, Size{~0, ~0}};
+    TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Button assignMouse1{&controlLayout, Size{100, 0}};
       Button assignMouse2{&controlLayout, Size{100, 0}};
@@ -111,7 +111,7 @@ struct HotkeySettings : TabFrameItem {
   Timer timer;
 
   VerticalLayout layout{this};
-    ListView mappingList{&layout, Size{~0, ~0}};
+    TableView mappingList{&layout, Size{~0, ~0}};
     HorizontalLayout controlLayout{&layout, Size{~0, 0}};
       Widget spacer{&controlLayout, Size{~0, 0}};
       Button resetButton{&controlLayout, Size{80, 0}};

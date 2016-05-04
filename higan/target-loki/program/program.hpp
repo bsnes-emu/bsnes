@@ -21,7 +21,6 @@ struct Program : Emulator::Interface::Bind {
   auto path(uint group) -> string override;
   auto notify(string text) -> void override;
 
-  DSP dsp;
   vector<shared_pointer<HID::Device>> devices;
   vector<string> mediaPaths;
   vector<string> folderPaths;

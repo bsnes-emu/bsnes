@@ -30,7 +30,7 @@ InputSettings::InputSettings(TabFrame* parent) : TabFrameItem(parent) {
   });
   eraseButton.setText("Erase").onActivate([&] {
     if(auto mapping = mappingList.selected()) {
-      activeDevice().mappings[mapping->offset()]->unbind();
+      activeDevice().mappings[mapping.offset()]->unbind();
       refreshMappings();
     }
   });
@@ -45,7 +45,7 @@ auto InputSettings::updateControls() -> void {
   assignMouse3.setVisible(false);
 
   if(auto mapping = mappingList.selected()) {
-    auto input = activeDevice().mappings[mapping->offset()];
+    auto input = activeDevice().mappings[mapping.offset()];
 
     if(input->isDigital()) {
       assignMouse1.setVisible().setText("Mouse Left");
@@ -92,16 +92,16 @@ auto InputSettings::reloadDevices() -> void {
 auto InputSettings::reloadMappings() -> void {
   eraseButton.setEnabled(false);
   mappingList.reset();
-  mappingList.append(ListViewHeader().setVisible()
-    .append(ListViewColumn().setText("Name"))
-    .append(ListViewColumn().setText("Mapping").setExpandable())
-    .append(ListViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
+  mappingList.append(TableViewHeader().setVisible()
+    .append(TableViewColumn().setText("Name"))
+    .append(TableViewColumn().setText("Mapping").setExpandable())
+    .append(TableViewColumn().setText("Device").setAlignment(1.0).setForegroundColor({0, 128, 0}))
   );
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.append(ListViewItem()
-      .append(ListViewCell().setText(mapping->name))
-      .append(ListViewCell())
-      .append(ListViewCell())
+    mappingList.append(TableViewItem()
+      .append(TableViewCell().setText(mapping->name))
+      .append(TableViewCell())
+      .append(TableViewCell())
     );
   }
   refreshMappings();
@@ -110,8 +110,8 @@ auto InputSettings::reloadMappings() -> void {
 auto InputSettings::refreshMappings() -> void {
   uint position = 0;
   for(auto& mapping : activeDevice().mappings) {
-    mappingList.item(position)->cell(1)->setText(mapping->assignmentName());
-    mappingList.item(position)->cell(2)->setText(mapping->deviceName());
+    mappingList.item(position).cell(1).setText(mapping->assignmentName());
+    mappingList.item(position).cell(2).setText(mapping->deviceName());
     position++;
   }
   mappingList.resizeColumns();

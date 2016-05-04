@@ -98,7 +98,7 @@ auto SDD1::mmcRead(uint24 addr) -> uint8 {
 //map address=00-3f,80-bf:8000-ffff
 //map address=c0-ff:0000-ffff
 auto SDD1::mcuromRead(uint24 addr, uint8 data) -> uint8 {
-  //map address=00-3f,80-bf:8000-ffff mask=0x808000 => 00-1f:0000-ffff
+  //map address=00-3f,80-bf:8000-ffff
   if(!addr.bit(22)) {
     if(!addr.bit(23) && addr.bit(21) && r4805.bit(7)) addr.bit(21) = 0;  //20-3f:8000-ffff
     if( addr.bit(23) && addr.bit(21) && r4807.bit(7)) addr.bit(21) = 0;  //a0-bf:8000-ffff

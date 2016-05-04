@@ -3,20 +3,20 @@ CheatEditor::CheatEditor(TabFrame* parent) : TabFrameItem(parent) {
   setText("Cheat Editor");
 
   layout.setMargin(5);
-  cheatList.append(ListViewHeader().setVisible()
-    .append(ListViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
-    .append(ListViewColumn().setText("Code(s)"))
-    .append(ListViewColumn().setText("Description").setExpandable())
+  cheatList.append(TableViewHeader().setVisible()
+    .append(TableViewColumn().setText("Slot").setForegroundColor({0, 128, 0}).setAlignment(1.0))
+    .append(TableViewColumn().setText("Code(s)"))
+    .append(TableViewColumn().setText("Description").setExpandable())
   );
   for(auto slot : range(Slots)) {
-    cheatList.append(ListViewItem()
-      .append(ListViewCell().setCheckable().setText(1 + slot))
-      .append(ListViewCell())
-      .append(ListViewCell())
+    cheatList.append(TableViewItem()
+      .append(TableViewCell().setCheckable().setText(1 + slot))
+      .append(TableViewCell())
+      .append(TableViewCell())
     );
   }
   cheatList.onChange([&] { doChangeSelected(); });
-  cheatList.onToggle([&](ListViewCell cell) {
+  cheatList.onToggle([&](TableViewCell cell) {
     cheats[cell.parent().offset()].enabled = cell.checked();
     synchronizeCodes();
   });

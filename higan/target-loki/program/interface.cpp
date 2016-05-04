@@ -60,12 +60,7 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
 }
 
 auto Program::audioSample(int16 left, int16 right) -> void {
-  int samples[] = {left, right};
-  dsp.sample(samples);
-  while(dsp.pending()) {
-    dsp.read(samples);
-    audio->sample(samples[0], samples[1]);
-  }
+  audio->sample(left, right);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
@@ -79,8 +74,8 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
     }
   }
 
-  if(port == (uint)SFC::Device::Port::Controller1) {
-    if(device == (uint)SFC::Device::ID::Gamepad) {
+  if(port == (uint)SFC::Port::Controller1) {
+    if(device == (uint)SFC::Device::Gamepad) {
       #define map(id, name) \
         case id: \
           if(auto code = keyboard->buttons().find(name)) { \

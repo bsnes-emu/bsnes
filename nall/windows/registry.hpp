@@ -25,8 +25,8 @@ namespace nall {
 struct registry {
   static auto exists(const string& name) -> bool {
     lstring part = name.split("/");
-    HKEY handle, rootKey = root(part.take(0));
-    string node = part.take();
+    HKEY handle, rootKey = root(part.takeLeft());
+    string node = part.takeRight();
     string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
@@ -40,8 +40,8 @@ struct registry {
 
   static auto read(const string& name) -> string {
     lstring part = name.split("/");
-    HKEY handle, rootKey = root(part.take(0));
-    string node = part.take();
+    HKEY handle, rootKey = root(part.takeLeft());
+    string node = part.takeRight();
     string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       wchar_t data[NWR_SIZE] = L"";
@@ -55,8 +55,8 @@ struct registry {
 
   static auto write(const string& name, const string& data = "") -> void {
     lstring part = name.split("/");
-    HKEY handle, rootKey = root(part.take(0));
-    string node = part.take(), path;
+    HKEY handle, rootKey = root(part.takeLeft());
+    string node = part.takeRight(), path;
     DWORD disposition;
     for(uint n = 0; n < part.size(); n++) {
       path.append(part[n]);
@@ -72,8 +72,8 @@ struct registry {
 
   static auto remove(const string& name) -> bool {
     lstring part = name.split("/");
-    HKEY rootKey = root(part.take(0));
-    string node = part.take();
+    HKEY rootKey = root(part.takeLeft());
+    string node = part.takeRight();
     string path = part.merge("\\");
     if(node.empty()) return SHDeleteKeyW(rootKey, utf16_t(path)) == ERROR_SUCCESS;
     return SHDeleteValueW(rootKey, utf16_t(path), utf16_t(node)) == ERROR_SUCCESS;
@@ -81,8 +81,8 @@ struct registry {
 
   static auto contents(const string& name) -> lstring {
     lstring part = name.split("/"), result;
-    HKEY handle, rootKey = root(part.take(0));
-    part.remove();
+    HKEY handle, rootKey = root(part.takeLeft());
+    part.removeRight();
     string path = part.merge("\\");
     if(RegOpenKeyExW(rootKey, utf16_t(path), 0, NWR_FLAGS | KEY_READ, &handle) == ERROR_SUCCESS) {
       DWORD folders, nodes;

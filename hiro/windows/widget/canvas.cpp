@@ -151,7 +151,8 @@ auto pCanvas::_rasterize() -> void {
   }
   if(width <= 0 || height <= 0) return;
 
-  pixels.reallocate(width * height);
+  pixels.reset();
+  pixels.resize(width * height);
 
   if(auto& icon = state().icon) {
     memory::copy(pixels.data(), icon.data(), width * height * sizeof(uint32));

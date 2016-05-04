@@ -36,7 +36,7 @@ struct CheatEditor : TabFrameItem {
   Cheat cheats[Slots];
 
   VerticalLayout layout{this};
-    ListView cheatList{&layout, Size{~0, ~0}};
+    TableView cheatList{&layout, Size{~0, ~0}};
     HorizontalLayout codeLayout{&layout, Size{~0, 0}};
       Label codeLabel{&codeLayout, Size{70, 0}};
       LineEdit codeValue{&codeLayout, Size{~0, 0}};
@@ -64,7 +64,7 @@ struct StateManager : TabFrameItem {
   auto doErase() -> void;
 
   VerticalLayout layout{this};
-    ListView stateList{&layout, Size{~0, ~0}};
+    TableView stateList{&layout, Size{~0, ~0}};
     HorizontalLayout descriptionLayout{&layout, Size{~0, 0}};
       Label descriptionLabel{&descriptionLayout, Size{70, 0}};
       LineEdit descriptionValue{&descriptionLayout, Size{~0, 0}};

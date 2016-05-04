@@ -27,7 +27,7 @@ template<typename T> auto vector<T>::reserveLeft(uint capacity) -> bool {
   if(_size + _left >= capacity) return false;
 
   uint left = bit::round(capacity);
-  auto pool = (T*)memory::allocate(sizeof(T) * (left + _right)) + left;
+  auto pool = (T*)memory::allocate(sizeof(T) * (left + _right)) + (left - _size);
   for(uint n : range(_size)) new(pool + n) T(move(_pool[n]));
   memory::free(_pool - _left);
 
@@ -72,14 +72,14 @@ template<typename T> auto vector<T>::resizeLeft(uint size, const T& value) -> bo
 
 template<typename T> auto vector<T>::resizeRight(uint size, const T& value) -> bool {
   if(size < _size) {  //shrink
-    for(uint n = size; n < _size; n++) _pool[n].~T();
+    for(uint n : range(size, _size)) _pool[n].~T();
     _right += _size - size;
     _size = size;
     return true;
   }
   if(size > _size) {  //grow
     reserveRight(size);
-    for(uint n = _size; n < size; n++) new(_pool + n) T(value);
+    for(uint n : range(_size, size)) new(_pool + n) T(value);
     _right -= size - _size;
     _size = size;
     return true;

@@ -177,8 +177,7 @@ auto pWindow::onClose() -> void {
 
 auto pWindow::onDrop(WPARAM wparam) -> void {
   lstring paths = DropPaths(wparam);
-  if(paths.empty()) return;
-  self().doDrop(paths);
+  if(paths) self().doDrop(paths);
 }
 
 auto pWindow::onEraseBackground() -> bool {
