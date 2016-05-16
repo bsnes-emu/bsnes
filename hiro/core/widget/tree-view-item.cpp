@@ -57,7 +57,7 @@ auto mTreeViewItem::icon() const -> image {
 }
 
 auto mTreeViewItem::item(const string& path) const -> TreeViewItem {
-  if(path.empty()) return {};
+  if(!path) return {};
   auto paths = path.split("/");
   unsigned position = paths.takeLeft().natural();
   if(position >= itemCount()) return {};

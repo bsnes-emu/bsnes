@@ -34,7 +34,7 @@ Program::Program(lstring args) {
 
   string location = args(1, "");
   if(!directory::exists(location)) location = {  //quick testing hack
-    userpath(), "Emulation/Super Famicom/",
+    Path::user(), "Emulation/Super Famicom/",
     "Legend of Zelda - A Link to the Past, The (USA) (1.0).sfc/"
   };
 

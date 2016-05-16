@@ -3,6 +3,7 @@
 //dynamic linking support
 
 #include <nall/intrinsics.hpp>
+#include <nall/path.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/utility.hpp>
@@ -38,7 +39,7 @@ private:
 inline auto library::open(const string& name, const string& path) -> bool {
   if(handle) close();
   if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".so"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string(userpath(), ".local/lib/lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr_t)dlopen(string(Path::user(), ".local/lib/lib", name, ".so"), RTLD_LAZY);
   if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".so"), RTLD_LAZY);
   if(!handle) handle = (uintptr_t)dlopen(string("lib", name, ".so"), RTLD_LAZY);
   return handle;

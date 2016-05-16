@@ -82,14 +82,14 @@ struct VideoGLX : Video, OpenGL {
 
     if(name == Video::Filter && value.is<unsigned>()) {
       settings.filter = value.get<unsigned>();
-      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 
     if(name == Video::Shader && value.is<string>()) {
       settings.shader = value.get<string>();
       OpenGL::shader(settings.shader);
-      if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+      if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
       return true;
     }
 

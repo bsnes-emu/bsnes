@@ -13,7 +13,8 @@ struct FX {
   auto write(uint8_t data) -> void;
 
   auto read(uint offset, uint length) -> vector<uint8_t>;
-  auto write(uint offset, const vector<uint8_t>& buffer) -> void;
+  auto write(uint offset, const void* buffer, uint length) -> void;
+  auto write(uint offset, const vector<uint8_t>& buffer) -> void { write(offset, buffer.data(), buffer.size()); }
   auto execute(uint offset) -> void;
 
   auto read(uint offset) -> uint8_t;
@@ -27,7 +28,7 @@ auto FX::open(lstring& args) -> bool {
   string name;
   for(uint n : range(args)) {
     if(args[n].beginsWith("--device=")) {
-      name = args.take(n).ltrim("--device=", 1L);
+      name = args.take(n).trimLeft("--device=", 1L);
       break;
     }
   }
@@ -84,8 +85,8 @@ auto FX::read(uint offset, uint length) -> vector<uint8_t> {
   write(offset >>  8);
   write(offset >>  0);
   write(0x01);
-  write(length >> 8);
-  write(length >> 0);
+  write(length >>  8);
+  write(length >>  0);
   write(0x00);
 
   vector<uint8_t> buffer;
@@ -93,9 +94,7 @@ auto FX::read(uint offset, uint length) -> vector<uint8_t> {
   return buffer;
 }
 
-auto FX::write(uint offset, const vector<uint8_t>& buffer) -> void {
-  auto length = buffer.size();
-
+auto FX::write(uint offset, const void* data, uint length) -> void {
   write(0x21);
   write(0x66);
   write(0x78);
@@ -103,11 +102,12 @@ auto FX::write(uint offset, const vector<uint8_t>& buffer) -> void {
   write(offset >>  8);
   write(offset >>  0);
   write(0x01);
-  write(buffer.size() >> 8);
-  write(buffer.size() >> 0);
+  write(length >>  8);
+  write(length >>  0);
   write(0x01);
 
-  for(auto data : buffer) write(data);
+  auto buffer = (uint8_t*)data;
+  for(auto n : range(length)) write(buffer[n]);
   write(0x00);
 }
 

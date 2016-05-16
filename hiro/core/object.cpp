@@ -100,6 +100,16 @@ auto mObject::parentComboButton(bool recursive) const -> mComboButton* {
 }
 #endif
 
+#if defined(Hiro_ComboEdit)
+auto mObject::parentComboEdit(bool recursive) const -> mComboEdit* {
+  if(auto comboEdit = dynamic_cast<mComboEdit*>(parent())) return comboEdit;
+  if(recursive) {
+    if(auto object = parent()) return object->parentComboEdit(true);
+  }
+  return nullptr;
+}
+#endif
+
 #if defined(Hiro_Frame)
 auto mObject::parentFrame(bool recursive) const -> mFrame* {
   if(auto frame = dynamic_cast<mFrame*>(parent())) return frame;

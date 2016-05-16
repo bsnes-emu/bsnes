@@ -1,7 +1,7 @@
 auto Program::loadRequest(uint id, string name, string type, bool required) -> void {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
-  .setPath({userpath(), "Emulation/", name})
+  .setPath({Path::user(), "Emulation/", name})
   .setFilters({string{name, "|*.", type}})
   .openFolder();
   if(!directory::exists(location)) return;
@@ -18,7 +18,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
   if(filename == "manifest.bml" && pathname && !pathname.endsWith("sys/")) {
     if(!file::exists(location)) {
       if(auto manifest = execute("icarus", "--manifest", pathname)) {
-        memorystream stream{(const uint8_t*)manifest.data(), manifest.size()};
+        memorystream stream{manifest.output.data<uint8_t>(), manifest.output.size()};
         return emulator->load(id, stream);
       }
     }

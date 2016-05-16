@@ -16,7 +16,7 @@
 namespace nall {
 
 auto string::operator[](int position) const -> const char& {
-  if(position > size() + 1) throw exception_out_of_bounds{};
+//if(position > size() + 1) throw;
   return data()[position];
 }
 
@@ -43,10 +43,6 @@ template<typename T> auto string::_append(const stringify<T>& source) -> string&
   resize(size() + source.size());
   memory::copy(get() + size() - source.size(), source.data(), source.size());
   return *this;
-}
-
-auto string::empty() const -> bool {
-  return size() == 0;
 }
 
 auto string::length() const -> uint {

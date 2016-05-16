@@ -406,7 +406,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     output.append(load ? "ldm" : "stm", conditions[condition], indices[index], " ");
     output.append(registers[rn], writeback ? "!" : "", ",{");
     for(unsigned n = 0; n < 16; n++) if(list & (1 << n)) output.append(registers[n], ",");
-    output.rtrim(",");
+    output.trimRight(",", 1L);
     output.append("}", s ? "^" : "");
 
     return output;
@@ -679,7 +679,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
       if(list & (1 << l)) output.append(registers[l], ",");
     }
     if(branch) output.append(load == 0 ? "lr," : "pc,");
-    output.rtrim(",");
+    output.trimRight(",", 1L);
     output.append("}");
 
     return output;
@@ -696,7 +696,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
     for(unsigned l = 0; l < 8; l++) {
       if(list & (1 << l)) output.append(registers[l], ",");
     }
-    output.rtrim(",");
+    output.trimRight(",", 1L);
     output.append("}");
 
     return output;

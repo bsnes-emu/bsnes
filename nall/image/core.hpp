@@ -86,7 +86,7 @@ auto image::operator=(image&& source) -> image& {
 }
 
 image::operator bool() const {
-  return !empty();
+  return _data && _width && _height;
 }
 
 auto image::operator==(const image& source) const -> bool {
@@ -135,10 +135,6 @@ auto image::write(uint8_t* data, uint64_t value) const -> void {
 auto image::free() -> void {
   if(_data) delete[] _data;
   _data = nullptr;
-}
-
-auto image::empty() const -> bool {
-  return !_data || !_width || !_height;
 }
 
 auto image::load(const string& filename) -> bool {

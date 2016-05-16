@@ -14,9 +14,7 @@ struct Node {
   void* data = nullptr;
   vector<Node> children;
 
-  auto empty() const -> bool {
-    return data == nullptr;
-  }
+  explicit operator bool() const { return data; }
 
   auto get() const -> string {
     switch(type) {
@@ -70,7 +68,7 @@ struct Node {
   auto load(Markup::Node path) -> void {
     for(auto& child : children) {
       if(auto leaf = path[child.name]) {
-        if(!child.empty()) child.set(leaf.text());
+        if(child) child.set(leaf.text());
         child.load(leaf);
       }
     }
@@ -84,7 +82,7 @@ struct Node {
       }
       for(auto n : range(depth)) fp.print("  ");
       fp.print(child.name);
-      if(!child.empty()) fp.print(": ", child.get());
+      if(child) fp.print(": ", child.get());
       fp.print("\n");
       child.save(fp, depth + 1);
       if(depth == 0) fp.print("\n");

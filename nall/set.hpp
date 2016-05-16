@@ -49,8 +49,8 @@ template<typename T> struct set {
     return *this;
   }
 
+  explicit operator bool() const { return nodes; }
   auto size() const -> unsigned { return nodes; }
-  auto empty() const -> bool { return nodes == 0; }
 
   auto reset() -> void {
     reset(root);
@@ -100,13 +100,13 @@ template<typename T> struct set {
     auto operator++() -> base_iterator& {
       if(++position >= source.size()) { position = source.size(); return *this; }
 
-      if(stack.last()->link[1]) {
-        stack.append(stack.last()->link[1]);
-        while(stack.last()->link[0]) stack.append(stack.last()->link[0]);
+      if(stack.right()->link[1]) {
+        stack.append(stack.right()->link[1]);
+        while(stack.right()->link[0]) stack.append(stack.right()->link[0]);
       } else {
         node_t* child;
-        do child = stack.take();
-        while(child == stack.last()->link[1]);
+        do child = stack.takeRight();
+        while(child == stack.right()->link[1]);
       }
 
       return *this;
@@ -128,7 +128,7 @@ template<typename T> struct set {
 
   struct iterator : base_iterator {
     iterator(const set& source, unsigned position) : base_iterator(source, position) {}
-    auto operator*() const -> T& { return base_iterator::stack.last()->value; }
+    auto operator*() const -> T& { return base_iterator::stack.right()->value; }
   };
 
   auto begin() -> iterator { return iterator(*this, 0); }
@@ -136,7 +136,7 @@ template<typename T> struct set {
 
   struct const_iterator : base_iterator {
     const_iterator(const set& source, unsigned position) : base_iterator(source, position) {}
-    auto operator*() const -> const T& { return base_iterator::stack.last()->value; }
+    auto operator*() const -> const T& { return base_iterator::stack.right()->value; }
   };
 
   auto begin() const -> const const_iterator { return const_iterator(*this, 0); }

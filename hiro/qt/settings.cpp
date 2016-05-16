@@ -13,12 +13,12 @@ Settings::Settings() {
 }
 
 auto Settings::load() -> void {
-  string path{configpath(), "hiro/"};
+  string path{Path::config(), "hiro/"};
   Configuration::Document::load({path, "qt.bml"});
 }
 
 auto Settings::save() -> void {
-  string path{configpath(), "hiro/"};
+  string path{Path::config(), "hiro/"};
   directory::create(path, 0755);
   Configuration::Document::save({path, "qt.bml"});
 }

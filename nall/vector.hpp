@@ -88,7 +88,7 @@ struct vector {
   auto end() const { return vector_iterator_const<T>{*this, size()}; }
 
   //utility.hpp
-  auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = {}) -> void;
+  auto sort(const function<bool (const T& lhs, const T& rhs)>& comparator = [](auto& lhs, auto& rhs) { return lhs < rhs; }) -> void;
   auto find(const T& value) const -> maybe<uint>;
 
 private:

@@ -425,7 +425,7 @@ auto pTableView::autoSizeColumns() -> void {
       unsigned minimumWidth = pFont::size([[tableColumn headerCell] font], tableView.state.headerText(column)).width + 4;
       for(unsigned row = 0; row < tableView.state.text.size(); row++) {
         unsigned width = pFont::size([cocoaView font], tableView.state.text(row)(column)).width + 2;
-        if(tableView.state.image(row)(height).empty() == false) width += height + 2;
+        if(tableView.state.image(row)(height)) width += height + 2;
         if(width > minimumWidth) minimumWidth = width;
       }
       [tableColumn setWidth:minimumWidth];

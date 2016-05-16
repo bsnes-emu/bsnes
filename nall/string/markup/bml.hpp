@@ -74,7 +74,7 @@ protected:
       if(length == 0) throw "Invalid attribute name";
       node->_name = slice(p, 0, length);
       node->parseData(p += length);
-      node->_value.rtrim("\n", 1L);
+      node->_value.trimRight("\n", 1L);
       _children.append(node);
     }
   }
@@ -101,7 +101,7 @@ protected:
       _children.append(node);
     }
 
-    _value.rtrim("\n", 1L);
+    _value.trimRight("\n", 1L);
   }
 
   //read top-level nodes
@@ -127,7 +127,7 @@ protected:
       memory::move(output, origin, p - origin);
       output += p - origin;
     }
-    document.resize(document.size() - (p - output)).rtrim("\n");
+    document.resize(document.size() - (p - output)).trimRight("\n");
     if(document.size() == 0) return;  //empty document
 
     auto text = document.split("\n");

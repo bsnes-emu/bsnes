@@ -18,10 +18,6 @@ struct shared_memory {
     return _mode != mode::inactive;
   }
 
-  auto empty() const -> bool {
-    return _mode == mode::inactive;
-  }
-
   auto size() const -> unsigned {
     return _size;
   }

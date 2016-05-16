@@ -28,7 +28,7 @@ inline auto evaluateExpression(Node* node) -> string {
     for(auto& link : node->link) {
       result.append(evaluateExpression(link), ", ");
     }
-    return result.rtrim(", ", 1L).append(")");
+    return result.trimRight(", ", 1L).append(")");
   }
   }
   #undef p

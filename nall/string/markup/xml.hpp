@@ -125,7 +125,7 @@ protected:
     while(isName(*p)) p++;
     const char* nameEnd = p;
     copy(_name, nameStart, nameEnd - nameStart);
-    if(_name.empty()) throw "missing element name";
+    if(!_name) throw "missing element name";
 
     //parse attributes
     while(*p) {
@@ -141,7 +141,7 @@ protected:
       while(isName(*p)) p++;
       const char* nameEnd = p;
       copy(attribute->_name, nameStart, nameEnd - nameStart);
-      if(attribute->_name.empty()) throw "missing attribute name";
+      if(!attribute->_name) throw "missing attribute name";
 
       //parse attribute data
       if(*p++ != '=') throw "missing attribute value";

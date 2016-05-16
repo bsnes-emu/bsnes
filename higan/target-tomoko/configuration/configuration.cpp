@@ -11,7 +11,7 @@ Settings::Settings() {
 
   set("UserInterface/ShowStatusBar", true);
 
-  set("Library/Location", {userpath(), "Emulation/"});
+  set("Library/Location", {Path::user(), "Emulation/"});
   set("Library/IgnoreManifests", false);
 
   set("Video/Driver", ruby::Video::optimalDriver());

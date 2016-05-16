@@ -16,7 +16,7 @@ inline auto literalNumber(const char*& s) -> string {
 
   //binary
   if(p[0] == '%' || (p[0] == '0' && p[1] == 'b')) {
-    unsigned prefix = 1 + (p[0] == '0');
+    uint prefix = 1 + (p[0] == '0');
     p += prefix;
     while(p[0] == '\'' || p[0] == '0' || p[0] == '1') p++;
     if(p - s <= prefix) throw "invalid binary literal";
@@ -27,7 +27,7 @@ inline auto literalNumber(const char*& s) -> string {
 
   //octal
   if(p[0] == '0' && p[1] == 'o') {
-    unsigned prefix = 1 + (p[0] == '0');
+    uint prefix = 1 + (p[0] == '0');
     p += prefix;
     while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '7')) p++;
     if(p - s <= prefix) throw "invalid octal literal";
@@ -38,7 +38,7 @@ inline auto literalNumber(const char*& s) -> string {
 
   //hex
   if(p[0] == '$' || (p[0] == '0' && p[1] == 'x')) {
-    unsigned prefix = 1 + (p[0] == '0');
+    uint prefix = 1 + (p[0] == '0');
     p += prefix;
     while(p[0] == '\'' || (p[0] >= '0' && p[0] <= '9') || (p[0] >= 'A' && p[0] <= 'F') || (p[0] >= 'a' && p[0] <= 'f')) p++;
     if(p - s <= prefix) throw "invalid hex literal";

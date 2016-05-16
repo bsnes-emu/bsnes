@@ -31,7 +31,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
     }
 
     string data = string{_value}.strip();
-    if(side(0).empty() == false) {
+    if(side(0)) {
       auto result = _find(side(0));
       if(result.size() == 0) return false;
       data = result[0].value();
@@ -60,19 +60,19 @@ auto ManagedNode::_find(const string& query) const -> vector<Node> {
   uint lo = 0u, hi = ~0u;
 
   if(name.match("*[*]")) {
-    auto p = name.rtrim("]", 1L).split("[", 1L);
+    auto p = name.trimRight("]", 1L).split("[", 1L);
     name = p(0);
     if(p(1).find("-")) {
       p = p(1).split("-", 1L);
-      lo = p(0).empty() ?  0u : p(0).natural();
-      hi = p(1).empty() ? ~0u : p(1).natural();
+      lo = !p(0) ?  0u : p(0).natural();
+      hi = !p(1) ? ~0u : p(1).natural();
     } else {
       lo = hi = p(1).natural();
     }
   }
 
   if(name.match("*(*)")) {
-    auto p = name.rtrim(")", 1L).split("(", 1L);
+    auto p = name.trimRight(")", 1L).split("(", 1L);
     name = p(0);
     rule = p(1);
   }

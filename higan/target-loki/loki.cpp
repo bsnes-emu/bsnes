@@ -5,14 +5,14 @@ unique_pointer<Input> input;
 Emulator::Interface* emulator = nullptr;
 
 auto locate(string name) -> string {
-  string location = {programpath(), name};
+  string location = {Path::program(), name};
   if(inode::exists(location)) return location;
 
-  location = {configpath(), "loki/", name};
+  location = {Path::config(), "loki/", name};
   if(inode::exists(location)) return location;
 
-  directory::create({localpath(), "loki/"});
-  return {localpath(), "loki/", name};
+  directory::create({Path::local(), "loki/"});
+  return {Path::local(), "loki/", name};
 }
 
 #include <nall/main.hpp>

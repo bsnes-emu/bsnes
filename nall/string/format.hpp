@@ -10,11 +10,11 @@ auto string::format(const nall::format& params) -> type& {
   auto data = (char*)memory::allocate(size);
   memory::copy(data, this->data(), size);
 
-  signed x = 0;
+  int x = 0;
   while(x < size - 2) {  //2 = minimum tag length
     if(data[x] != '{') { x++; continue; }
 
-    signed y = x + 1;
+    int y = x + 1;
     while(y < size - 1) {  //-1 avoids going out of bounds on test after this loop
       if(data[y] != '}') { y++; continue; }
       break;
@@ -70,7 +70,12 @@ auto format::append() -> format& {
 
 template<typename... P> auto print(P&&... p) -> void {
   string s{forward<P>(p)...};
-  fputs(s.data(), stdout);
+  fwrite(s.data(), 1, s.size(), stdout);
+}
+
+template<typename... P> auto print(FILE* fp, P&&... p) -> void {
+  string s{forward<P>(p)...};
+  fwrite(s.data(), 1, s.size(), fp);
 }
 
 auto integer(intmax value, long precision, char padchar) -> string {

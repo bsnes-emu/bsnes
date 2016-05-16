@@ -170,11 +170,7 @@ struct shared_pointer {
   }
 
   explicit operator bool() const {
-    return !empty();
-  }
-
-  auto empty() const -> bool {
-    return !manager || !manager->strong;
+    return manager && manager->strong;
   }
 
   auto unique() const -> bool {
@@ -242,11 +238,7 @@ struct shared_pointer_weak {
   }
 
   explicit operator bool() const {
-    return !empty();
-  }
-
-  auto empty() const -> bool {
-    return !manager || !manager->strong;
+    return manager && manager->strong;
   }
 
   auto acquire() const -> shared_pointer<T> {

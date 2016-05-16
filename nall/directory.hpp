@@ -73,7 +73,7 @@ private:
 #if defined(PLATFORM_WINDOWS)
   inline auto directory::create(const string& pathname, unsigned permissions) -> bool {
     string path;
-    lstring list = string{pathname}.transform("\\", "/").rtrim("/").split("/");
+    lstring list = string{pathname}.transform("\\", "/").trimRight("/").split("/");
     bool result = true;
     for(auto& part : list) {
       path.append(part, "/");
@@ -168,7 +168,7 @@ private:
 
   inline auto directory::create(const string& pathname, unsigned permissions) -> bool {
     string path;
-    lstring list = string{pathname}.rtrim("/").split("/");
+    lstring list = string{pathname}.trimRight("/").split("/");
     bool result = true;
     for(auto& part : list) {
       path.append(part, "/");

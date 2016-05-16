@@ -3,7 +3,7 @@ auto Program::loadMedia(string location) -> void {
   if(!location.endsWith("/")) location.append("/");
   if(!directory::exists(location)) return;
 
-  string type = suffixname(location).ltrim(".", 1L);
+  string type = suffixname(location).trimLeft(".", 1L);
   for(auto& emulator : emulators) {
     for(auto& media : emulator->media) {
       if(!media.bootable) continue;

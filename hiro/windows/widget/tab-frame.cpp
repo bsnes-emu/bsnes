@@ -135,7 +135,7 @@ auto pTabFrame::onDrawItem(LPARAM lparam) -> void {
     string text = tabFrame.state.text[selection];
     Size size = pFont::size(hfont, text);
     unsigned width = item->rcItem.right - item->rcItem.left + 1;
-    if(!tabFrame.state.image[selection].empty()) {
+    if(tabFrame.state.image[selection]) {
       width += size.height + 2;
       ImageList_Draw(imageList, selection, item->hDC, item->rcItem.left + (width - size.width) / 2 - (size.height + 3), item->rcItem.top + 2, ILD_NORMAL);
     }

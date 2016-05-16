@@ -4,9 +4,9 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
   modulo = glrModulo(node["modulo"].integer());
 
   string w = node["width"].text(), h = node["height"].text();
-  if(w.endsWith("%")) relativeWidth = real(w.rtrim("%", 1L)) / 100.0;
+  if(w.endsWith("%")) relativeWidth = real(w.trimRight("%", 1L)) / 100.0;
   else absoluteWidth = w.natural();
-  if(h.endsWith("%")) relativeHeight = real(h.rtrim("%", 1L)) / 100.0;
+  if(h.endsWith("%")) relativeHeight = real(h.trimRight("%", 1L)) / 100.0;
   else absoluteHeight = h.natural();
 
   format = glrFormat(node["format"].text());
@@ -41,8 +41,8 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
   for(auto& leaf : node.find("pixmap")) {
     nall::image image({pathname, leaf.text()});
+    if(!image) continue;
     image.transform();
-    if(image.empty()) continue;
 
     GLuint texture;
     glGenTextures(1, &texture);
@@ -78,7 +78,7 @@ auto OpenGLProgram::parse(OpenGL* instance, string& source) -> void {
     if(auto position = s.find("//")) s.resize(position());  //strip comments
     s.strip();  //remove extraneous whitespace
     if(s.match("#in ?*")) {
-      s.ltrim("#in ", 1L).strip();
+      s.trimLeft("#in ", 1L).strip();
       if(auto setting = instance->settings.find({s})) {
         line = {"#define ", setting().name, " ", setting().value};
       } else {

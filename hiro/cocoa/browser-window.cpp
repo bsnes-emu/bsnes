@@ -26,8 +26,8 @@ auto pBrowserWindow::open(BrowserWindow::State& state) -> string {
   @autoreleasepool {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
     for(auto& rule : state.filters) {
-      string pattern = rule.split("(", 1L)(1).rtrim(")", 1L);
-      if(!pattern.empty()) [filters addObject:[NSString stringWithUTF8String:pattern]];
+      string pattern = rule.split("(", 1L)(1).trimRight(")", 1L);
+      if(pattern) [filters addObject:[NSString stringWithUTF8String:pattern]];
     }
     NSOpenPanel* panel = [NSOpenPanel openPanel];
     if(state.title) [panel setTitle:[NSString stringWithUTF8String:state.title]];
@@ -51,8 +51,8 @@ auto pBrowserWindow::save(BrowserWindow::State& state) -> string {
   @autoreleasepool {
     NSMutableArray* filters = [[NSMutableArray alloc] init];
     for(auto& rule : state.filters) {
-      string pattern = rule.split("(", 1L)(1).rtrim(")", 1L);
-      if(!pattern.empty()) [filters addObject:[NSString stringWithUTF8String:pattern]];
+      string pattern = rule.split("(", 1L)(1).trimRight(")", 1L);
+      if(pattern) [filters addObject:[NSString stringWithUTF8String:pattern]];
     }
     NSSavePanel* panel = [NSSavePanel savePanel];
     if(state.title) [panel setTitle:[NSString stringWithUTF8String:state.title]];

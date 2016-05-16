@@ -29,10 +29,6 @@ struct stream {
     return size();
   }
 
-  auto empty() const -> bool {
-    return size() == 0;
-  }
-
   auto end() const -> bool {
     return offset() >= size();
   }

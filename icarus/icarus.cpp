@@ -5,14 +5,14 @@ using namespace nall;
 using namespace hiro;
 
 auto locate(string name) -> string {
-  string location = {programpath(), name};
+  string location = {Path::program(), name};
   if(inode::exists(location)) return location;
 
-  location = {configpath(), "icarus/", name};
+  location = {Path::config(), "icarus/", name};
   if(inode::exists(location)) return location;
 
-  directory::create({localpath(), "icarus/"});
-  return {localpath(), "icarus/", name};
+  directory::create({Path::local(), "icarus/"});
+  return {Path::local(), "icarus/", name};
 }
 
 #include "settings.cpp"

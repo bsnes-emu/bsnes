@@ -16,11 +16,21 @@
 
 namespace nall {
 
+struct execute_result_t {
+  explicit operator bool() const { return code == EXIT_SUCCESS; }
+
+  int code = EXIT_FAILURE;
+  string output;
+  string error;
+};
+
 #if defined(PLATFORM_MACOSX) || defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
 
-template<typename... P> inline auto execute(const string& name, P&&... p) -> string {
-  int fd[2];
-  if(pipe(fd) == -1) return "";
+template<typename... P> inline auto execute(const string& name, P&&... p) -> execute_result_t {
+  int fdout[2];
+  int fderr[2];
+  if(pipe(fdout) == -1) return {};
+  if(pipe(fderr) == -1) return {};
 
   pid_t pid = fork();
   if(pid == 0) {
@@ -31,30 +41,48 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     for(auto& arg : argl) *argp++ = (const char*)arg;
     *argp++ = nullptr;
 
-    dup2(fd[1], STDOUT_FILENO);
-    dup2(fd[1], STDERR_FILENO);
-    close(fd[0]);
-    close(fd[1]);
+    dup2(fdout[1], STDOUT_FILENO);
+    dup2(fderr[1], STDERR_FILENO);
+    close(fdout[0]);
+    close(fderr[0]);
+    close(fdout[1]);
+    close(fderr[1]);
     execvp(name, (char* const*)argv);
     //this is called only if execvp fails:
     //use _exit instead of exit, to avoid destroying key shared file descriptors
-    _exit(0);
+    _exit(EXIT_FAILURE);
   } else {
-    close(fd[1]);
+    close(fdout[1]);
+    close(fderr[1]);
 
-    string result;
+    char buffer[256];
+    execute_result_t result;
+
     while(true) {
-      char buffer[256];
-      auto size = read(fd[0], buffer, sizeof(buffer));
+      auto size = read(fdout[0], buffer, sizeof(buffer));
       if(size <= 0) break;
 
-      auto offset = result.size();
-      result.resize(offset + size);
-      memory::copy(result.get() + offset, buffer, size);
+      auto offset = result.output.size();
+      result.output.resize(offset + size);
+      memory::copy(result.output.get() + offset, buffer, size);
     }
 
-    close(fd[0]);
-    wait(nullptr);
+    while(true) {
+      auto size = read(fderr[0], buffer, sizeof(buffer));
+      if(size <= 0) break;
+
+      auto offset = result.error.size();
+      result.error.resize(offset + size);
+      memory::copy(result.error.get() + offset, buffer, size);
+    }
+
+    close(fdout[0]);
+    close(fderr[0]);
+
+    int status = 0;
+    waitpid(pid, &status, 0);
+    if(!WIFEXITED(status)) return {};
+    result.code = WEXITSTATUS(status);
     return result;
   }
 }
@@ -78,7 +106,7 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
 
 #elif defined(PLATFORM_WINDOWS)
 
-template<typename... P> inline auto execute(const string& name, P&&... p) -> string {
+template<typename... P> inline auto execute(const string& name, P&&... p) -> execute_result_t {
   lstring argl(name, forward<P>(p)...);
   for(auto& arg : argl) if(arg.find(" ")) arg = {"\"", arg, "\""};
   string arguments = argl.merge(" ");
@@ -91,19 +119,24 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
 
   HANDLE stdoutRead;
   HANDLE stdoutWrite;
-  if(!CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0)) return "";
-  if(!SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0)) return "";
+  if(!CreatePipe(&stdoutRead, &stdoutWrite, &sa, 0)) return {};
+  if(!SetHandleInformation(stdoutRead, HANDLE_FLAG_INHERIT, 0)) return {};
+
+  HANDLE stderrRead;
+  HANDLE stderrWrite;
+  if(!CreatePipe(&stderrRead, &stderrWrite, &sa, 0)) return {};
+  if(!SetHandleInformation(stderrRead, HANDLE_FLAG_INHERIT, 0)) return {};
 
   HANDLE stdinRead;
   HANDLE stdinWrite;
-  if(!CreatePipe(&stdinRead, &stdinWrite, &sa, 0)) return "";
-  if(!SetHandleInformation(stdinWrite, HANDLE_FLAG_INHERIT, 0)) return "";
+  if(!CreatePipe(&stdinRead, &stdinWrite, &sa, 0)) return {};
+  if(!SetHandleInformation(stdinWrite, HANDLE_FLAG_INHERIT, 0)) return {};
 
   STARTUPINFO si;
   ZeroMemory(&si, sizeof(STARTUPINFO));
   si.cb = sizeof(STARTUPINFO);
-  si.hStdError = stdoutWrite;
   si.hStdOutput = stdoutWrite;
+  si.hStdError = stderrWrite;
   si.hStdInput = stdinRead;
   si.dwFlags = STARTF_USESTDHANDLES;
 
@@ -114,15 +147,19 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     nullptr, utf16_t(arguments),
     nullptr, nullptr, true, CREATE_NO_WINDOW,
     nullptr, nullptr, &si, &pi
-  )) return "";
+  )) return {};
 
-  if(WaitForSingleObject(pi.hProcess, INFINITE)) return "";
+  DWORD exitCode = EXIT_FAILURE;
+  if(WaitForSingleObject(pi.hProcess, INFINITE)) return {};
+  if(!GetExitCodeProcess(pi.hProcess, &exitCode)) return {};
   CloseHandle(pi.hThread);
   CloseHandle(pi.hProcess);
 
-  string result;
+  char buffer[256];
+  execute_result_t result;
+  result.code = exitCode;
+
   while(true) {
-    char buffer[256];
     DWORD read, available, remaining;
     if(!PeekNamedPipe(stdoutRead, nullptr, sizeof(buffer), &read, &available, &remaining)) break;
     if(read == 0) break;
@@ -130,9 +167,22 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> str
     if(!ReadFile(stdoutRead, buffer, sizeof(buffer), &read, nullptr)) break;
     if(read == 0) break;
 
-    auto offset = result.size();
-    result.resize(offset + read);
-    memory::copy(result.get() + offset, buffer, read);
+    auto offset = result.output.size();
+    result.output.resize(offset + read);
+    memory::copy(result.output.get() + offset, buffer, read);
+  }
+
+  while(true) {
+    DWORD read, available, remaining;
+    if(!PeekNamedPipe(stderrRead, nullptr, sizeof(buffer), &read, &available, &remaining)) break;
+    if(read == 0) break;
+
+    if(!ReadFile(stderrRead, buffer, sizeof(buffer), &read, nullptr)) break;
+    if(read == 0) break;
+
+    auto offset = result.error.size();
+    result.error.resize(offset + read);
+    memory::copy(result.error.get() + offset, buffer, read);
   }
 
   return result;

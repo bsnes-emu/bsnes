@@ -1,8 +1,7 @@
 #pragma once
 
 #include <nall/range.hpp>
-
-namespace nall { struct string; }
+#include <nall/string.hpp>
 
 namespace nall { namespace Hash {
 
@@ -10,6 +9,7 @@ struct SHA256 {
   SHA256() { reset(); }
   SHA256(const void* values, uint size) : SHA256() { data(values, size); }
   SHA256(const vector<uint8_t>& values) : SHA256() { data(values); }
+  SHA256(const string& values) : SHA256() { data(values); }
 
   auto reset() -> void {
     for(auto n : input) n = 0;
@@ -33,6 +33,10 @@ struct SHA256 {
     for(auto value : values) data(value);
   }
 
+  auto data(const string& values) -> void {
+    for(auto value : values) data(value);
+  }
+
   auto value() const -> vector<uint8_t> {
     SHA256 self(*this);
     self.finish();
@@ -41,7 +45,11 @@ struct SHA256 {
     return result;
   }
 
-  inline auto digest() const -> nall::string;
+  inline auto digest() const -> string {
+    string result;
+    for(auto n : value()) result.append(hex(n, 2L));
+    return result;
+  }
 
 private:
   auto byte(uint8_t value) -> void {

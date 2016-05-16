@@ -75,7 +75,7 @@ struct registry {
     HKEY rootKey = root(part.takeLeft());
     string node = part.takeRight();
     string path = part.merge("\\");
-    if(node.empty()) return SHDeleteKeyW(rootKey, utf16_t(path)) == ERROR_SUCCESS;
+    if(!node) return SHDeleteKeyW(rootKey, utf16_t(path)) == ERROR_SUCCESS;
     return SHDeleteValueW(rootKey, utf16_t(path), utf16_t(node)) == ERROR_SUCCESS;
   }
 

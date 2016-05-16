@@ -11,6 +11,9 @@ namespace nall {
     CoInitialize(0);
     WSAData wsaData{0};
     WSAStartup(MAKEWORD(2, 2), &wsaData);
+    _setmode(_fileno(stdin), O_BINARY);
+    _setmode(_fileno(stdout), O_BINARY);
+    _setmode(_fileno(stderr), O_BINARY);
     utf8_args(argc, argv);
     #endif
 

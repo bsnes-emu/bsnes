@@ -9,7 +9,7 @@ ScanDialog::ScanDialog() {
     refresh();
   });
   homeButton.setIcon(Icon::Go::Home).setBordered(false).onActivate([&] {
-    pathEdit.setText(userpath());
+    pathEdit.setText(Path::user());
     refresh();
   });
   upButton.setIcon(Icon::Go::Up).setBordered(false).onActivate([&] {
@@ -48,7 +48,7 @@ auto ScanDialog::show() -> void {
 auto ScanDialog::refresh() -> void {
   scanList.reset();
 
-  auto pathname = pathEdit.text().transform("\\", "/").rtrim("/").append("/");
+  auto pathname = pathEdit.text().transform("\\", "/").trimRight("/").append("/");
   if(!directory::exists(pathname)) return;
 
   settings["icarus/Path"].setValue(pathname);
@@ -58,7 +58,7 @@ auto ScanDialog::refresh() -> void {
   for(auto& name : contents) {
     if(!name.endsWith("/")) continue;
     if(gamePakType(suffixname(name))) continue;
-    scanList.append(ListViewItem().setIcon(Icon::Emblem::Folder).setText(name.rtrim("/")));
+    scanList.append(ListViewItem().setIcon(Icon::Emblem::Folder).setText(name.trimRight("/")));
   }
 
   for(auto& name : contents) {

@@ -4,7 +4,7 @@ namespace nall {
 
 //todo: these functions are not binary-safe
 
-auto string::match(rstring source) const -> bool {
+auto string::match(string_view source) const -> bool {
   const char* s = data();
   const char* p = source.data();
 
@@ -28,7 +28,7 @@ auto string::match(rstring source) const -> bool {
   return !*p;
 }
 
-auto string::imatch(rstring source) const -> bool {
+auto string::imatch(string_view source) const -> bool {
   static auto chrlower = [](char c) -> char {
     return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
   };

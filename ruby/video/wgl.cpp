@@ -48,7 +48,7 @@ struct VideoWGL : Video, OpenGL {
         if(wglcontext) {
           init();
           OpenGL::shader(settings.shader);
-          if(settings.shader.empty()) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
+          if(!settings.shader) OpenGL::filter = settings.filter ? GL_LINEAR : GL_NEAREST;
         }
       }
     }

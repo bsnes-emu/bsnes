@@ -8,8 +8,8 @@ auto pWindow::construct() -> void {
 
   //if program was given a name, try and set the window taskbar icon to a matching pixmap image
   if(auto name = Application::state.name) {
-    if(file::exists({userpath(), ".local/share/icons/", name, ".png"})) {
-      qtWindow->setWindowIcon(QIcon(QString::fromUtf8(string{userpath(), ".local/share/icons/", name, ".png"})));
+    if(file::exists({Path::user(), ".local/share/icons/", name, ".png"})) {
+      qtWindow->setWindowIcon(QIcon(QString::fromUtf8(string{Path::user(), ".local/share/icons/", name, ".png"})));
     } else if(file::exists({"/usr/local/share/pixmaps/", name, ".png"})) {
       qtWindow->setWindowIcon(QIcon(QString::fromUtf8(string{"/usr/local/share/pixmaps/", name, ".png"})));
     } else if(file::exists({"/usr/share/pixmaps/", name, ".png"})) {
@@ -195,10 +195,10 @@ auto pWindow::setVisible(bool visible) -> void {
 }
 
 /*
-  if(widget.font().empty() && !window.state.widgetFont.empty()) {
+  if(!widget.font() && window.state.widgetFont) {
     widget.setFont(window.state.widgetFont);
   }
-  if(widget.font().empty()) widget.p.setFont(Font::sans(8));
+  if(!widget.font()) widget.p.setFont(Font::sans(8));
   if(GetParentWidget(&widget)) {
     widget.p.qtWidget->setParent(GetParentWidget(&widget)->p.container(widget));
   } else {

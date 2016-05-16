@@ -22,15 +22,17 @@ namespace nall {
 string::string() : _data(nullptr), _capacity(SSO - 1), _size(0) {
 }
 
-auto string::get() -> char* {
-  if(_capacity < SSO) return _text;
+template<typename T>
+auto string::get() -> T* {
+  if(_capacity < SSO) return (T*)_text;
   if(*_refs > 1) _copy();
-  return _data;
+  return (T*)_data;
 }
 
-auto string::data() const -> const char* {
-  if(_capacity < SSO) return _text;
-  return _data;
+template<typename T>
+auto string::data() const -> const T* {
+  if(_capacity < SSO) return (const T*)_text;
+  return (const T*)_data;
 }
 
 auto string::reset() -> type& {

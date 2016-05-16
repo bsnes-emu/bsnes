@@ -3,7 +3,6 @@
 namespace nall {
 
 template<typename T> auto vector<T>::sort(const function<bool (const T& lhs, const T& rhs)>& comparator) -> void {
-  if(!comparator) return nall::sort(_pool, _size, [](const T& lhs, const T& rhs) { return lhs < rhs; });
   nall::sort(_pool, _size, comparator);
 }
 

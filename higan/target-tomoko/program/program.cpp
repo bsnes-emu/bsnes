@@ -77,7 +77,7 @@ auto Program::load(string location) -> void {
 
     //ask icarus to import the game; and play it upon success
     if(auto result = execute("icarus", "--import", location)) {
-      loadMedia(result.strip());
+      loadMedia(result.output.strip());
     }
   }
 }

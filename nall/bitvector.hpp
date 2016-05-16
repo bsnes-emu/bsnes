@@ -27,7 +27,6 @@ struct bitvector {
   }
 
   explicit operator bool() const { return bits > 0; }
-  auto empty() const -> bool { return bits == 0; }
   auto size() const -> uint { return bits; }
   auto bytes() const -> uint { return (bits + 7) / 8; }
   auto data() -> uint8_t* { return pool; }

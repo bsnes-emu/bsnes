@@ -46,6 +46,8 @@ namespace hiro {
 #include "widget/check-label.hpp"
 #include "widget/combo-button.hpp"
 #include "widget/combo-button-item.hpp"
+#include "widget/combo-edit.hpp"
+#include "widget/combo-edit-item.hpp"
 #include "widget/console.hpp"
 #include "widget/frame.hpp"
 #include "widget/hex-edit.hpp"

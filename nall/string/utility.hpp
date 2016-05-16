@@ -2,7 +2,7 @@
 
 namespace nall {
 
-auto string::read(rstring filename) -> string {
+auto string::read(string_view filename) -> string {
   #if !defined(_WIN32)
   FILE* fp = fopen(filename, "rb");
   #else
@@ -22,7 +22,7 @@ auto string::read(rstring filename) -> string {
   return fclose(fp), result;
 }
 
-auto string::repeat(rstring pattern, uint times) -> string {
+auto string::repeat(string_view pattern, uint times) -> string {
   string result;
   while(times--) result.append(pattern.data());
   return result;
@@ -33,7 +33,7 @@ auto string::fill(char fill) -> string& {
   return *this;
 }
 
-auto string::hash() const -> unsigned {
+auto string::hash() const -> uint {
   const char* p = data();
   uint length = size();
   uint result = 5381;
@@ -82,7 +82,7 @@ auto string::size(int length, char fill) -> string& {
   return *this;
 }
 
-auto slice(rstring self, int offset, int length) -> string {
+auto slice(string_view self, int offset, int length) -> string {
   string result;
   if(offset < self.size()) {
     if(length < 0) length = self.size() - offset;

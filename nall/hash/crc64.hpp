@@ -1,8 +1,7 @@
 #pragma once
 
 #include <nall/range.hpp>
-
-namespace nall { struct string; }
+#include <nall/string.hpp>
 
 namespace nall { namespace Hash {
 
@@ -10,6 +9,7 @@ struct CRC64 {
   CRC64() { reset(); }
   CRC64(const void* values, uint size) : CRC64() { data(values, size); }
   CRC64(const vector<uint8_t>& values) : CRC64() { data(values); }
+  CRC64(const string& values) : CRC64() { data(values); }
 
   auto reset() -> void {
     checksum = ~0;
@@ -28,11 +28,17 @@ struct CRC64 {
     for(auto value : values) data(value);
   }
 
+  auto data(const string& values) -> void {
+    for(auto value : values) data(value);
+  }
+
   auto value() const -> uint64_t {
     return ~checksum;
   }
 
-  inline auto digest() const -> string;
+  inline auto digest() const -> string {
+    return hex(value(), 16L);
+  }
 
 private:
   static auto table(uint8_t index) -> uint64_t {

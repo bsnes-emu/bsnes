@@ -321,6 +321,42 @@ struct ComboButton : sComboButton {
 };
 #endif
 
+#if defined(Hiro_ComboEdit)
+struct ComboEditItem : sComboEditItem {
+  DeclareSharedObject(ComboEditItem)
+  using internalType = mComboEditItem;
+
+  auto icon() const { return self().icon(); }
+  auto setIcon(const image& icon = {}) { return self().setIcon(icon), *this; }
+  auto setText(const string& text = "") { return self().setText(text), *this; }
+  auto text() const { return self().text(); }
+};
+#endif
+
+#if defined(Hiro_ComboEdit)
+struct ComboEdit : sComboEdit {
+  DeclareSharedWidget(ComboEdit)
+  using internalType = mComboEdit;
+
+  auto append(sComboEditItem item) { return self().append(item), *this; }
+  auto backgroundColor() const { return self().backgroundColor(); }
+  auto doActivate() const { return self().doActivate(); }
+  auto doChange() const { return self().doChange(); }
+  auto foregroundColor() const { return self().foregroundColor(); }
+  auto item(uint position) const { return self().item(position); }
+  auto itemCount() const { return self().itemCount(); }
+  auto items() const { return self().items(); }
+  auto onActivate(const function<void ()>& callback = {}) { return self().onActivate(callback), *this; }
+  auto onChange(const function<void ()>& callback = {}) { return self().onChange(callback), *this; }
+  auto remove(sComboEditItem item) { return self().remove(item), *this; }
+  auto reset() { return self().reset(), *this; }
+  auto setBackgroundColor(Color color = {}) { return self().setBackgroundColor(color), *this; }
+  auto setForegroundColor(Color color = {}) { return self().setForegroundColor(color), *this; }
+  auto setText(const string& text = "") { return self().setText(text), *this; }
+  auto text() const { return self().text(); }
+};
+#endif
+
 #if defined(Hiro_Console)
 struct Console : sConsole {
   DeclareSharedWidget(Console)

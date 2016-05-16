@@ -61,7 +61,7 @@ auto DML::parseDocument(const string& filedata, const string& pathname, uint dep
 }
 
 auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool {
-  if(block.rstrip().empty()) return true;
+  if(!block.stripRight()) return true;
   auto lines = block.split("\n");
 
   //include
@@ -75,7 +75,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
   else if(block.beginsWith("<html>\n") && settings.allowHTML) {
     for(auto n : range(lines)) {
       if(n == 0 || !lines[n].beginsWith("  ")) continue;
-      state.output.append(lines[n].ltrim("  ", 1L), "\n");
+      state.output.append(lines[n].trimLeft("  ", 1L), "\n");
     }
   }
 
@@ -85,13 +85,13 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(state.sections++) state.output.append("</section>");
       state.output.append("<section>");
     }
-    auto content = lines.takeLeft().ltrim("# ", 1L).split(" => ", 1L);
+    auto content = lines.takeLeft().trimLeft("# ", 1L).split(" => ", 1L);
     auto data = markup(content[0]);
-    auto name = escape(content(1, crc32(data)));
+    auto name = escape(content(1, data.hash()));
     state.output.append("<header id=\"", name, "\">", data);
     for(auto& line : lines) {
       if(!line.beginsWith("# ")) continue;
-      state.output.append("<span>", line.ltrim("# ", 1L), "</span>");
+      state.output.append("<span>", line.trimLeft("# ", 1L), "</span>");
     }
     state.output.append("</header>\n");
   }
@@ -100,7 +100,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
   else if(auto depth = count(block, '=')) {
     auto content = slice(lines.takeLeft(), depth + 1).split(" => ", 1L);
     auto data = markup(content[0]);
-    auto name = escape(content(1, crc32(data)));
+    auto name = escape(content(1, data.hash()));
     if(depth <= 6) {
       state.output.append("<h", depth, " id=\"", name, "\">", data);
       for(auto& line : lines) {
@@ -121,7 +121,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
         while(level > depth) level--, state.output.append("</ul>\n");
         auto content = slice(line, depth + 1).split(" => ", 1L);
         auto data = markup(content[0]);
-        auto name = escape(content(1, crc32(data)));
+        auto name = escape(content(1, data.hash()));
         state.output.append("<li><a href=\"#", name, "\">", data, "</a></li>\n");
       }
     }
@@ -162,9 +162,9 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
     state.output.append("<pre>");
     for(auto& line : lines) {
       if(!line.beginsWith("  ")) continue;
-      state.output.append(escape(line.ltrim("  ", 1L)), "\n");
+      state.output.append(escape(line.trimLeft("  ", 1L)), "\n");
     }
-    state.output.rtrim("\n", 1L).append("</pre>\n");
+    state.output.trimRight("\n", 1L).append("</pre>\n");
   }
 
   //divider

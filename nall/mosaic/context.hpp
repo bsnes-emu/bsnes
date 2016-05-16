@@ -69,7 +69,7 @@ struct context {
     for(auto& item : list) {
       item.strip();
       if(item.match("f(?*) ?*")) {
-        item.ltrim("f(", 1L);
+        item.trimLeft("f(", 1L);
         lstring part = item.split(") ", 1L);
         lstring args = part[0].split(";", 3L).strip();
 
@@ -90,9 +90,9 @@ struct context {
         }
       } else if(item.match("base64*")) {
         uint offset = 0;
-        item.ltrim("base64", 1L);
+        item.trimLeft("base64", 1L);
         if(item.match("(?*) *")) {
-          item.ltrim("(", 1L);
+          item.trimLeft("(", 1L);
           lstring part = item.split(") ", 1L);
           offset = eval(part[0]);
           item = part(1, "");
@@ -106,10 +106,10 @@ struct context {
           if(c == '_') buffer.append(offset + 63);
         }
       } else if(item.match("file *")) {
-        item.ltrim("file ", 1L);
+        item.trimLeft("file ", 1L);
         item.strip();
         //...
-      } else if(item.empty() == false) {
+      } else if(item) {
         buffer.append(eval(item));
       }
     }

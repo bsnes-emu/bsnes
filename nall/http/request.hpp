@@ -50,7 +50,7 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
     for(auto& variable : get) {
       request.append(Encode::URL(variable.name()), "=", Encode::URL(variable.value()), "&");
     }
-    request.rtrim("&", 1L);
+    request.trimRight("&", 1L);
   }
 
   switch(requestType()) {
@@ -65,25 +65,25 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
   }
   output.append("\r\n");
 
-  return callback(output.binary(), output.size());
+  return callback(output.data<uint8_t>(), output.size());
 }
 
 auto Request::setHead() -> bool {
   lstring headers = _head.split("\n");
-  string request = headers.takeLeft().rtrim("\r", 1L);
+  string request = headers.takeLeft().trimRight("\r", 1L);
   string requestHost;
 
-       if(request.iendsWith(" HTTP/1.0")) request.irtrim(" HTTP/1.0", 1L);
-  else if(request.iendsWith(" HTTP/1.1")) request.irtrim(" HTTP/1.1", 1L);
+       if(request.iendsWith(" HTTP/1.0")) request.itrimRight(" HTTP/1.0", 1L);
+  else if(request.iendsWith(" HTTP/1.1")) request.itrimRight(" HTTP/1.1", 1L);
   else return false;
 
-       if(request.ibeginsWith("HEAD ")) request.iltrim("HEAD ", 1L), setRequestType(RequestType::Head);
-  else if(request.ibeginsWith("GET " )) request.iltrim("GET ",  1L), setRequestType(RequestType::Get );
-  else if(request.ibeginsWith("POST ")) request.iltrim("POST ", 1L), setRequestType(RequestType::Post);
+       if(request.ibeginsWith("HEAD ")) request.itrimLeft("HEAD ", 1L), setRequestType(RequestType::Head);
+  else if(request.ibeginsWith("GET " )) request.itrimLeft("GET ",  1L), setRequestType(RequestType::Get );
+  else if(request.ibeginsWith("POST ")) request.itrimLeft("POST ", 1L), setRequestType(RequestType::Post);
   else return false;
 
   //decode absolute URIs
-  request.strip().iltrim("http://", 1L);
+  request.strip().itrimLeft("http://", 1L);
   if(!request.beginsWith("/")) {
     lstring components = request.split("/", 1L);
     requestHost = components(0);
@@ -126,7 +126,7 @@ auto Request::body(const function<bool (const uint8_t*, unsigned)>& callback) co
   if(!callback) return false;
 
   if(_body) {
-    return callback(_body.binary(), _body.size());
+    return callback(_body.data<uint8_t>(), _body.size());
   }
 
   return true;
@@ -137,13 +137,13 @@ auto Request::setBody() -> bool {
     auto contentType = header["Content-Type"].value();
     if(contentType.iequals("application/x-www-form-urlencoded")) {
       for(auto& block : _body.split("&")) {
-        auto p = block.rtrim("\r").split("=", 1L);
+        auto p = block.trimRight("\r").split("=", 1L);
         auto name = Decode::URL(p(0));
         auto value = Decode::URL(p(1));
         if(name) post.append(name, value);
       }
     } else if(contentType.imatch("multipart/form-data; boundary=?*")) {
-      auto boundary = contentType.iltrim("multipart/form-data; boundary=", 1L).trim("\"", "\"", 1L);
+      auto boundary = contentType.itrimLeft("multipart/form-data; boundary=", 1L).trim("\"", "\"", 1L);
       auto blocks = _body.split({"--", boundary}, 1024L);  //limit blocks to prevent memory exhaustion
       for(auto& block : blocks) block.trim("\r\n", "\r\n", 1L);
       if(blocks.size() < 2 || (blocks.takeLeft(), !blocks.takeRight().beginsWith("--"))) return false;

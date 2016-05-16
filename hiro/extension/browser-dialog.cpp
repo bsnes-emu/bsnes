@@ -18,7 +18,7 @@ private:
         Button pathRefresh{&pathLayout, Size{0, 0}, 0};
         Button pathHome{&pathLayout, Size{0, 0}, 0};
         Button pathUp{&pathLayout, Size{0, 0}, 0};
-      TableView view{&layout, Size{~0, ~0}, 5};
+      ListView view{&layout, Size{~0, ~0}, 5};
       HorizontalLayout controlLayout{&layout, Size{~0, 0}};
         ComboButton filterList{&controlLayout, Size{120, 0}, 5};
         LineEdit fileName{&controlLayout, Size{~0, 0}, 5};
@@ -119,7 +119,7 @@ auto BrowserDialogWindow::run() -> lstring {
   layout.setMargin(5);
   pathName.onActivate([&] { setPath(pathName.text()); });
   pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
-  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(userpath()); });
+  pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(Path::user()); });
   pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(dirname(state.path)); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
@@ -143,12 +143,10 @@ auto BrowserDialogWindow::run() -> lstring {
   setPath(state.path);
 
   window.onClose([&] { window.setModal(false); });
-  window.onSize([&] { view.resizeColumns(); });
   window.setTitle(state.title);
   window.setSize({640, 480});
   window.setCentered(state.parent);
   window.setVisible();
-  view.resizeColumns();
   view.setFocused();
   window.setModal();
   window.setVisible(false);
@@ -162,35 +160,28 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   pathName.setText(state.path = path);
 
   view.reset();
-  view.append(TableViewHeader().setVisible(false)
-    .append(TableViewColumn().setExpandable())
-  );
 
   auto contents = directory::icontents(path);
   bool folderMode = state.action == "openFolder";
 
   for(auto content : contents) {
     if(!content.endsWith("/")) continue;
-    content.rtrim("/");
+    content.trimRight("/");
     if(folderMode && isMatch(content)) continue;
 
-    view.append(TableViewItem()
-      .append(TableViewCell().setText(content).setIcon(Icon::Emblem::Folder))
-    );
+    view.append(ListViewItem().setText(content).setIcon(Icon::Emblem::Folder));
   }
 
   for(auto content : contents) {
     if(content.endsWith("/") != folderMode) continue;  //file mode shows files; folder mode shows folders
-    content.rtrim("/");
+    content.trimRight("/");
     if(!isMatch(content)) continue;
 
-    view.append(TableViewItem()
-      .append(TableViewCell().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File))
-    );
+    view.append(ListViewItem().setText(content).setIcon(folderMode ? Icon::Action::Open : Icon::Emblem::File));
   }
 
   Application::processEvents();
-  view.resizeColumns().setFocused().doChange();
+  view.setFocused().doChange();
 }
 
 //
@@ -254,7 +245,7 @@ auto BrowserDialog::setTitle(const string& title) -> type& {
 }
 
 auto BrowserDialog::_run() -> lstring {
-  if(!state.path) state.path = userpath();
+  if(!state.path) state.path = Path::user();
   return BrowserDialogWindow(state).run();
 }
 

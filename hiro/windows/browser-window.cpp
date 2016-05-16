@@ -21,7 +21,7 @@ static auto BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) -> 
   for(auto& filter : state.filters) {
     lstring part = filter.split("(");
     if(part.size() != 2) continue;
-    part[1].rtrim(")", 1L);
+    part[1].trimRight(")", 1L);
     part[1].replace(" ", "");
     part[1].transform(",", ";");
     filters.append(filter, "\t", part[1], "\t");
@@ -38,7 +38,7 @@ static auto BrowserWindow_fileDialog(bool save, BrowserWindow::State& state) -> 
     p++;
   }
 
-  if(path.empty() == false) {
+  if(path) {
     //clear COMDLG32 MRU (most recently used) file list
     //this is required in order for lpstrInitialDir to be honored in Windows 7 and above
     registry::remove("HKCU/Software/Microsoft/Windows/CurrentVersion/Explorer/ComDlg32/LastVisitedPidlMRU/");

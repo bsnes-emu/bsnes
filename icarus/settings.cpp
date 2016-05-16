@@ -11,9 +11,9 @@ Settings::Settings() {
     if(!operator[](name)) operator()(name).setValue(value);
   };
 
-  set("Library/Location", {userpath(), "Emulation/"});
+  set("Library/Location", {Path::user(), "Emulation/"});
 
-  set("icarus/Path", userpath());
+  set("icarus/Path", Path::user());
   set("icarus/CreateManifests", false);
   set("icarus/UseDatabase", true);
   set("icarus/UseHeuristics", true);

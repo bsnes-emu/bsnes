@@ -24,12 +24,12 @@ Presentation::Presentation() {
     }
   }
   //add icarus menu options -- but only if icarus binary is present
-  if(execute("icarus", "--name").strip() == "icarus") {
+  if(execute("icarus", "--name").output.strip() == "icarus") {
     libraryMenu.append(MenuSeparator());
     libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {
-        program->loadMedia(location.strip());
+        program->loadMedia(location.output.strip());
       }
     }));
     libraryMenu.append(MenuItem().setText("Import ROM Files ...").onActivate([&] {
@@ -279,7 +279,7 @@ auto Presentation::loadShaders() -> void {
     for(auto shader : directory::folders(pathname, "*.shader")) {
       if(videoShaders.objectCount() == 2) videoShaderMenu.append(MenuSeparator());
       MenuRadioItem item{&videoShaderMenu};
-      item.setText(string{shader}.rtrim(".shader/", 1L)).onActivate([=] {
+      item.setText(string{shader}.trimRight(".shader/", 1L)).onActivate([=] {
         settings["Video/Shader"].setValue({pathname, shader});
         program->updateVideoShader();
       });

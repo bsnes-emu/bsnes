@@ -4,6 +4,7 @@
 #include <nall/function.hpp>
 #include <nall/image.hpp>
 #include <nall/maybe.hpp>
+#include <nall/path.hpp>
 #include <nall/range.hpp>
 #include <nall/set.hpp>
 #include <nall/shared-pointer.hpp>
@@ -58,6 +59,8 @@ Declare(CheckButton)
 Declare(CheckLabel)
 Declare(ComboButton)
 Declare(ComboButtonItem)
+Declare(ComboEdit)
+Declare(ComboEditItem)
 Declare(Console)
 Declare(Frame)
 Declare(HexEdit)
@@ -572,6 +575,7 @@ struct mObject {
   auto offset() const -> signed;
   auto parent() const -> mObject*;
   auto parentComboButton(bool recursive = false) const -> mComboButton*;
+  auto parentComboEdit(bool recursive = false) const -> mComboEdit*;
   auto parentFrame(bool recursive = false) const -> mFrame*;
   auto parentIconView(bool recursive = false) const -> mIconView*;
   auto parentLayout(bool recursive = false) const -> mLayout*;
@@ -1111,6 +1115,61 @@ struct mComboButtonItem : mObject {
   struct State {
     image icon;
     bool selected = false;
+    string text;
+  } state;
+};
+#endif
+
+#if defined(Hiro_ComboEdit)
+struct mComboEdit : mWidget {
+  Declare(ComboEdit)
+  using mObject::remove;
+
+  auto append(sComboEditItem item) -> type&;
+  auto backgroundColor() const -> Color;
+  auto doActivate() const -> void;
+  auto doChange() const -> void;
+  auto foregroundColor() const -> Color;
+  auto item(uint position) const -> ComboEditItem;
+  auto itemCount() const -> uint;
+  auto items() const -> vector<ComboEditItem>;
+  auto onActivate(const function<void ()>& callback = {}) -> type&;
+  auto onChange(const function<void ()>& callback = {}) -> type&;
+  auto remove(sComboEditItem item) -> type&;
+  auto reset() -> type&;
+  auto setBackgroundColor(Color color = {}) -> type&;
+  auto setForegroundColor(Color color = {}) -> type&;
+  auto setParent(mObject* parent = nullptr, int offset = -1) -> type& override;
+  auto setText(const string& text = "") -> type&;
+  auto text() const -> string;
+
+//private:
+  struct State {
+    Color backgroundColor;
+    Color foregroundColor;
+    vector<sComboEditItem> items;
+    function<void ()> onActivate;
+    function<void ()> onChange;
+    string text;
+  } state;
+
+  auto destruct() -> void override;
+};
+#endif
+
+#if defined(Hiro_ComboEdit)
+struct mComboEditItem : mObject {
+  Declare(ComboEditItem)
+
+  auto icon() const -> image;
+  auto remove() -> type& override;
+  auto setIcon(const image& icon = {}) -> type&;
+  auto setText(const string& text = "") -> type&;
+  auto text() const -> string;
+
+//private:
+  struct State {
+    image icon;
     string text;
   } state;
 };

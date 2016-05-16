@@ -54,7 +54,6 @@ struct image {
   inline auto write(uint8_t* data, uint64_t value) const -> void;
 
   inline auto free() -> void;
-  inline auto empty() const -> bool;
   inline auto load(const string& filename) -> bool;
   inline auto allocate(unsigned width, unsigned height) -> void;
 

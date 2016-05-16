@@ -2,7 +2,8 @@
 
 namespace nall { namespace Encode {
 
-inline auto Base64(const uint8_t* data, unsigned size, const string& format = "MIME") -> string {
+inline auto Base64(const void* vdata, unsigned size, const string& format = "MIME") -> string {
+  auto data = (const uint8_t*)vdata;
   vector<uint8_t> result;
 
   char lookup[65];
@@ -61,7 +62,7 @@ inline auto Base64(const vector<uint8_t>& buffer, const string& format = "MIME")
 }
 
 inline auto Base64(const string& text, const string& format = "MIME") -> string {
-  return Base64(text.binary(), text.size(), format);
+  return Base64(text.data(), text.size(), format);
 }
 
 }}

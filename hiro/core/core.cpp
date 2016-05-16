@@ -77,6 +77,8 @@ namespace hiro {
   #include "widget/check-label.cpp"
   #include "widget/combo-button.cpp"
   #include "widget/combo-button-item.cpp"
+  #include "widget/combo-edit.cpp"
+  #include "widget/combo-edit-item.cpp"
   #include "widget/console.cpp"
   #include "widget/frame.cpp"
   #include "widget/hex-edit.cpp"

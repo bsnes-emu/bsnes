@@ -13,7 +13,6 @@ struct any {
   ~any() { reset(); }
 
   explicit operator bool() const { return container; }
-  auto empty() const -> bool { return !container; }
   auto reset() -> void { if(container) { delete container; container = nullptr; } }
 
   auto type() const -> const std::type_info& {

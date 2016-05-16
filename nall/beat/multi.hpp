@@ -34,7 +34,7 @@ struct bpsmulti {
 
     for(auto& targetName : targetList) {
       if(targetName.endsWith("/")) {
-        targetName.rtrim("/");
+        targetName.trimRight("/");
         writeNumber(CreatePath | ((targetName.length() - 1) << 2));
         writeString(targetName);
       } else if(auto position = sourceList.find(targetName)) {  //if sourceName == targetName
@@ -65,15 +65,15 @@ struct bpsmulti {
             bpslinear patch;
             patch.source({sourcePath, targetName});
             patch.target({targetPath, targetName});
-            patch.create({temppath(), "temp.bps"});
+            patch.create({Path::temp(), "temp.bps"});
           } else {
             bpsdelta patch;
             patch.source({sourcePath, targetName});
             patch.target({targetPath, targetName});
-            patch.create({temppath(), "temp.bps"});
+            patch.create({Path::temp(), "temp.bps"});
           }
 
-          auto buffer = file::read({temppath(), "temp.bps"});
+          auto buffer = file::read({Path::temp(), "temp.bps"});
           writeNumber(buffer.size());
           for(auto &byte : buffer) write(byte);
         }
@@ -159,13 +159,13 @@ protected:
   auto ls(lstring& list, const string& path, const string& basepath) -> void {
     lstring paths = directory::folders(path);
     for(auto& pathname : paths) {
-      list.append(string{path, pathname}.ltrim(basepath, 1L));
+      list.append(string{path, pathname}.trimLeft(basepath, 1L));
       ls(list, {path, pathname}, basepath);
     }
 
     lstring files = directory::files(path);
     for(auto& filename : files) {
-      list.append(string{path, filename}.ltrim(basepath, 1L));
+      list.append(string{path, filename}.trimLeft(basepath, 1L));
     }
   }
 

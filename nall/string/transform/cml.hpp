@@ -54,11 +54,11 @@ auto CML::parseDocument(const string& filedata, const string& pathname, uint dep
   };
 
   for(auto& block : filedata.split("\n\n")) {
-    lstring lines = block.rstrip().split("\n");
+    lstring lines = block.stripRight().split("\n");
     string name = lines.takeLeft();
 
     if(name.beginsWith("include ")) {
-      name.ltrim("include ", 1L);
+      name.trimLeft("include ", 1L);
       string filename{pathname, name};
       string document = settings.reader ? settings.reader(filename) : string::read(filename);
       parseDocument(document, nall::pathname(filename), depth + 1);

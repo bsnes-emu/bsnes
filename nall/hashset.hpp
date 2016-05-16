@@ -41,9 +41,9 @@ struct hashset {
     return *this;
   }
 
+  explicit operator bool() const { return count; }
   auto capacity() const -> unsigned { return length; }
   auto size() const -> unsigned { return count; }
-  auto empty() const -> bool { return count == 0; }
 
   auto reset() -> void {
     if(pool) {

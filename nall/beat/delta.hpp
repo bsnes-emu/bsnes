@@ -4,6 +4,7 @@
 #include <nall/filemap.hpp>
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
+#include <nall/hash/crc32.hpp>
 
 namespace nall {
 

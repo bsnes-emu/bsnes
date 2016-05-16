@@ -31,7 +31,7 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
     bool directory = name.endsWith("/");
     bool writable = inode::writable(location);
     bool executable = inode::executable(location);
-    uint info = directory << 0 | writable << 1 | executable << 2 | (name.rtrim("/").size() - 1) << 3;
+    uint info = directory << 0 | writable << 1 | executable << 2 | (name.trimRight("/").size() - 1) << 3;
 
     beat.writevu(info);
     beat.writes(name);
@@ -123,7 +123,7 @@ auto Archive::extract(const string& beatname, const string& filename) -> vector<
 
 auto Archive::scan(lstring& result, const string& basename, const string& pathname) -> void {
   for(auto& name : directory::contents(pathname)) {
-    result.append(string{pathname, name}.ltrim(basename, 1L));
+    result.append(string{pathname, name}.trimLeft(basename, 1L));
     if(name.endsWith("/")) scan(result, basename, {pathname, name});
   }
 }
