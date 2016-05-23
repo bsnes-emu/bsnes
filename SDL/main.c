@@ -133,6 +133,12 @@ static void debugger_interrupt(int ignore)
     gb.debug_stopped = true;
 }
 
+
+static void audio_callback(void *gb, Uint8 *stream, int len)
+{
+    apu_copy_buffer(gb, (int16_t *) stream, len / sizeof(int16_t));
+}
+
 #ifdef __APPLE__
 extern void cocoa_disable_filtering(void);
 #endif
@@ -188,21 +194,35 @@ usage:
 #ifdef __APPLE__
     cocoa_disable_filtering();
 #endif
+    /* Configure Screen */
     SDL_LockSurface(screen);
     gb_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     gb.user_data = screen;
     gb_set_pixels_output(&gb, screen->pixels);
     gb_set_rgb_encode_callback(&gb, rgb_encode);
 
-    /* Despite sound not being supported in the SDL port, registers PCM_12 and PCM_34 require
-       a sample rate to be set in order to operate. This also means PCM_XX emulation is not
-       really accurate yet, as it depends on the sample rate. */
+    /* Configure Audio */
+    SDL_AudioSpec want, have;
+    SDL_memset(&want, 0, sizeof(want));
+    want.freq = 96000;
+    want.format = AUDIO_S16SYS;
+    want.channels = 1;
+    want.samples = 512;
+    want.callback = audio_callback;
+    want.userdata = &gb;
+    SDL_OpenAudio(&want, &have);
     gb_set_sample_rate(&gb, 96000);
+    
+    /* Start Audio */
+    SDL_PauseAudio(0);
 
+    /* Run emulation */
     while (true) {
         gb_run(&gb);
     }
     
+    /* Won't run unless we change the condition for the above loop */
+    SDL_CloseAudio();
     return 0;
 }
 
