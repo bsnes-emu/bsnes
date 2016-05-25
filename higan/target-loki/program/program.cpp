@@ -1,6 +1,6 @@
 #include "../loki.hpp"
 #include "interface.cpp"
-#include "media.cpp"
+#include "medium.cpp"
 unique_pointer<Program> program;
 
 Program::Program(lstring args) {
@@ -38,7 +38,7 @@ Program::Program(lstring args) {
     "Legend of Zelda - A Link to the Past, The (USA) (1.0).sfc/"
   };
 
-  if(directory::exists(location)) loadMedia(location);
+  if(directory::exists(location)) loadMedium(location);
 }
 
 auto Program::main() -> void {
@@ -52,7 +52,7 @@ auto Program::main() -> void {
 }
 
 auto Program::quit() -> void {
-  unloadMedia();
+  unloadMedium();
   video.reset();
   audio.reset();
   input.reset();

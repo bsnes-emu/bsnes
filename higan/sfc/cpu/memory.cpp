@@ -17,11 +17,11 @@ auto CPU::read(uint24 addr) -> uint8 {
   status.clock_count = speed(addr);
   dmaEdge();
   addClocks(status.clock_count - 4);
-  regs.mdr = bus.read(addr, regs.mdr);
+  r.mdr = bus.read(addr, r.mdr);
   addClocks(4);
   aluEdge();
-  debugger.op_read(addr, regs.mdr);
-  return regs.mdr;
+  debugger.op_read(addr, r.mdr);
+  return r.mdr;
 }
 
 auto CPU::write(uint24 addr, uint8 data) -> void {
@@ -29,8 +29,8 @@ auto CPU::write(uint24 addr, uint8 data) -> void {
   status.clock_count = speed(addr);
   dmaEdge();
   addClocks(status.clock_count);
-  bus.write(addr, regs.mdr = data);
-  debugger.op_write(addr, regs.mdr);
+  bus.write(addr, r.mdr = data);
+  debugger.op_write(addr, r.mdr);
 }
 
 auto CPU::speed(uint24 addr) const -> uint {
@@ -44,5 +44,5 @@ auto CPU::speed(uint24 addr) const -> uint {
 }
 
 auto CPU::disassemblerRead(uint24 addr) -> uint8 {
-  return bus.read(addr, regs.mdr);
+  return bus.read(addr, r.mdr);
 }

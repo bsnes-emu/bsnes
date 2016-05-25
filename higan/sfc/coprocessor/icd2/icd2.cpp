@@ -25,7 +25,7 @@ auto ICD2::main() -> void {
     GameBoy::system._clocksExecuted = 0;
   } else {  //DMG halted
     stream->sample(0, 0);
-    step(1);
+    step(2);  //two clocks per audio sample
   }
   synchronizeCPU();
 }
@@ -54,7 +54,7 @@ auto ICD2::power() -> void {
 
 auto ICD2::reset(bool soft) -> void {
   create(ICD2::Enter, cpu.frequency / 5);
-  if(!soft) stream = Emulator::audio.createStream(2, 4194304.0 / 2.0);
+  if(!soft) stream = Emulator::audio.createStream(2, cpu.frequency / 10);
 
   r6003 = 0x00;
   r6004 = 0xff;

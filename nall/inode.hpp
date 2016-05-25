@@ -9,7 +9,7 @@
 namespace nall {
 
 struct inode {
-  enum class time : unsigned { access, modify };
+  enum class time : uint { access, modify };
 
   static auto exists(const string& name) -> bool {
     return access(name, F_OK) == 0;
@@ -27,19 +27,19 @@ struct inode {
     return access(name, X_OK) == 0;
   }
 
-  static auto uid(const string& name) -> unsigned {
+  static auto uid(const string& name) -> uint {
     struct stat data{0};
     stat(name, &data);
     return data.st_uid;
   }
 
-  static auto gid(const string& name) -> unsigned {
+  static auto gid(const string& name) -> uint {
     struct stat data{0};
     stat(name, &data);
     return data.st_gid;
   }
 
-  static auto mode(const string& name) -> unsigned {
+  static auto mode(const string& name) -> uint {
     struct stat data{0};
     stat(name, &data);
     return data.st_mode;
@@ -55,7 +55,7 @@ struct inode {
   }
 
   //returns true if 'name' already exists
-  static auto create(const string& name, unsigned permissions = 0755) -> bool {
+  static auto create(const string& name, uint permissions = 0755) -> bool {
     if(exists(name)) return true;
     if(name.endsWith("/")) return mkdir(name, permissions) == 0;
     int fd = open(name, O_CREAT | O_EXCL, permissions);

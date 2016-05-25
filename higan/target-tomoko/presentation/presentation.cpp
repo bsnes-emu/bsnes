@@ -17,7 +17,7 @@ Presentation::Presentation() {
         .setFilters(string{media.name, "|*.", media.type})
         .openFolder();
         if(directory::exists(location)) {
-          program->loadMedia(location);
+          program->loadMedium(location);
         }
       });
       loadBootableMedia.append(item);
@@ -29,7 +29,7 @@ Presentation::Presentation() {
     libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {
-        program->loadMedia(location.output.strip());
+        program->loadMedium(location.output.strip());
       }
     }));
     libraryMenu.append(MenuItem().setText("Import ROM Files ...").onActivate([&] {
@@ -40,7 +40,7 @@ Presentation::Presentation() {
   systemMenu.setText("System").setVisible(false);
   powerSystem.setText("Power").onActivate([&] { program->powerCycle(); });
   resetSystem.setText("Reset").onActivate([&] { program->softReset(); });
-  unloadSystem.setText("Unload").onActivate([&] { program->unloadMedia(); drawSplashScreen(); });
+  unloadSystem.setText("Unload").onActivate([&] { program->unloadMedium(); drawSplashScreen(); });
 
   settingsMenu.setText("Settings");
   videoScaleMenu.setText("Video Scale");
@@ -173,14 +173,14 @@ auto Presentation::updateEmulator() -> void {
   inputPort2.setVisible(false).reset();
   inputPort3.setVisible(false).reset();
 
-  for(auto n : range(emulator->port)) {
+  for(auto n : range(emulator->ports)) {
     if(n >= 3) break;
-    auto& port = emulator->port[n];
+    auto& port = emulator->ports[n];
     auto& menu = (n == 0 ? inputPort1 : n == 1 ? inputPort2 : inputPort3);
     menu.setText(port.name);
 
     Group devices;
-    for(auto& device : port.device) {
+    for(auto& device : port.devices) {
       MenuRadioItem item{&menu};
       item.setText(device.name).onActivate([=] {
         auto path = string{emulator->information.name, "/", port.name}.replace(" ", "");

@@ -7,7 +7,7 @@
 //remove: O(1) average; O(n) worst
 //
 //requirements:
-//  auto T::hash() const -> unsigned;
+//  auto T::hash() const -> uint;
 //  auto T::operator==(const T&) const -> bool;
 
 namespace nall {
@@ -15,7 +15,7 @@ namespace nall {
 template<typename T>
 struct hashset {
   hashset() = default;
-  hashset(unsigned length) : length(bit::round(length)) {}
+  hashset(uint length) : length(bit::round(length)) {}
   hashset(const hashset& source) { operator=(source); }
   hashset(hashset&& source) { operator=(move(source)); }
   ~hashset() { reset(); }
@@ -23,7 +23,7 @@ struct hashset {
   auto operator=(const hashset& source) -> hashset& {
     reset();
     if(source.pool) {
-      for(unsigned n = 0; n < source.count; n++) {
+      for(uint n : range(source.count)) {
         insert(*source.pool[n]);
       }
     }
@@ -42,12 +42,12 @@ struct hashset {
   }
 
   explicit operator bool() const { return count; }
-  auto capacity() const -> unsigned { return length; }
-  auto size() const -> unsigned { return count; }
+  auto capacity() const -> uint { return length; }
+  auto size() const -> uint { return count; }
 
   auto reset() -> void {
     if(pool) {
-      for(unsigned n = 0; n < length; n++) {
+      for(uint n : range(length)) {
         if(pool[n]) {
           delete pool[n];
           pool[n] = nullptr;
@@ -60,15 +60,15 @@ struct hashset {
     count = 0;
   }
 
-  auto reserve(unsigned size) -> void {
+  auto reserve(uint size) -> void {
     //ensure all items will fit into pool (with <= 50% load) and amortize growth
     size = bit::round(max(size, count << 1));
     T** copy = new T*[size]();
 
     if(pool) {
-      for(unsigned n = 0; n < length; n++) {
+      for(uint n : range(length)) {
         if(pool[n]) {
-          unsigned hash = (*pool[n]).hash() & (size - 1);
+          uint hash = (*pool[n]).hash() & (size - 1);
           while(copy[hash]) if(++hash >= size) hash = 0;
           copy[hash] = pool[n];
           pool[n] = nullptr;
@@ -84,7 +84,7 @@ struct hashset {
   auto find(const T& value) -> maybe<T&> {
     if(!pool) return nothing;
 
-    unsigned hash = value.hash() & (length - 1);
+    uint hash = value.hash() & (length - 1);
     while(pool[hash]) {
       if(value == *pool[hash]) return *pool[hash];
       if(++hash >= length) hash = 0;
@@ -100,7 +100,7 @@ struct hashset {
     if(count >= (length >> 1)) reserve(length << 1);
     count++;
 
-    unsigned hash = value.hash() & (length - 1);
+    uint hash = value.hash() & (length - 1);
     while(pool[hash]) if(++hash >= length) hash = 0;
     pool[hash] = new T(value);
 
@@ -110,7 +110,7 @@ struct hashset {
   auto remove(const T& value) -> bool {
     if(!pool) return false;
 
-    unsigned hash = value.hash() & (length - 1);
+    uint hash = value.hash() & (length - 1);
     while(pool[hash]) {
       if(value == *pool[hash]) {
         delete pool[hash];
@@ -126,8 +126,8 @@ struct hashset {
 
 protected:
   T** pool = nullptr;
-  unsigned length = 8;  //length of pool
-  unsigned count = 0;   //number of objects inside of the pool
+  uint length = 8;  //length of pool
+  uint count = 0;   //number of objects inside of the pool
 };
 
 }

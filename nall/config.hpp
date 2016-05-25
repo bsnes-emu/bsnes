@@ -10,7 +10,7 @@ namespace Configuration {
 struct Node {
   string name;
   string desc;
-  enum class Type : unsigned { Null, Boolean, Integer, Natural, Double, String } type = Type::Null;
+  enum class Type : uint { Null, Boolean, Integer, Natural, Double, String } type = Type::Null;
   void* data = nullptr;
   vector<Node> children;
 
@@ -74,7 +74,7 @@ struct Node {
     }
   }
 
-  auto save(file& fp, unsigned depth = 0) -> void {
+  auto save(file& fp, uint depth = 0) -> void {
     for(auto& child : children) {
       if(child.desc) {
         for(auto n : range(depth)) fp.print("  ");

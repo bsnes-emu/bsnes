@@ -1,28 +1,28 @@
 auto R65816::serialize(serializer& s) -> void {
-  s.integer(regs.pc.d);
+  s.integer(r.pc.d);
 
-  s.integer(regs.a.w);
-  s.integer(regs.x.w);
-  s.integer(regs.y.w);
-  s.integer(regs.z.w);
-  s.integer(regs.s.w);
-  s.integer(regs.d.w);
+  s.integer(r.a.w);
+  s.integer(r.x.w);
+  s.integer(r.y.w);
+  s.integer(r.z.w);
+  s.integer(r.s.w);
+  s.integer(r.d.w);
 
-  s.integer(regs.p.n);
-  s.integer(regs.p.v);
-  s.integer(regs.p.m);
-  s.integer(regs.p.x);
-  s.integer(regs.p.d);
-  s.integer(regs.p.i);
-  s.integer(regs.p.z);
-  s.integer(regs.p.c);
+  s.integer(r.p.n);
+  s.integer(r.p.v);
+  s.integer(r.p.m);
+  s.integer(r.p.x);
+  s.integer(r.p.d);
+  s.integer(r.p.i);
+  s.integer(r.p.z);
+  s.integer(r.p.c);
 
-  s.integer(regs.db);
-  s.integer(regs.e);
-  s.integer(regs.irq);
-  s.integer(regs.wai);
-  s.integer(regs.mdr);
-  s.integer(regs.vector);
+  s.integer(r.db);
+  s.integer(r.e);
+  s.integer(r.irq);
+  s.integer(r.wai);
+  s.integer(r.mdr);
+  s.integer(r.vector);
 
   s.integer(aa.d);
   s.integer(rd.d);

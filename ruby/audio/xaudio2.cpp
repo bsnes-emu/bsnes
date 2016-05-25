@@ -1,6 +1,5 @@
 #include "xaudio2.hpp"
 #include <windows.h>
-#include <audioclient.h>
 
 struct AudioXAudio2 : Audio, public IXAudio2VoiceCallback {
   ~AudioXAudio2() { term(); }

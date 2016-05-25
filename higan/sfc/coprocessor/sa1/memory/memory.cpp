@@ -115,13 +115,13 @@ auto SA1::io() -> void {
 auto SA1::read(uint24 addr) -> uint8 {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  return bus_read(addr, regs.mdr);
+  return bus_read(addr, r.mdr);
 }
 
 auto SA1::write(uint24 addr, uint8 data) -> void {
   tick();
   if(((addr & 0x40e000) == 0x006000) || ((addr & 0xd00000) == 0x400000)) tick();
-  bus_write(addr, regs.mdr = data);
+  bus_write(addr, r.mdr = data);
 }
 
 //note: addresses are translated prior to invoking this function:

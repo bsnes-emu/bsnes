@@ -1,5 +1,5 @@
 auto SuperFX::stop() -> void {
-  cpu.regs.irq = 1;
+  cpu.r.irq = 1;
 }
 
 auto SuperFX::color(uint8 source) -> uint8 {

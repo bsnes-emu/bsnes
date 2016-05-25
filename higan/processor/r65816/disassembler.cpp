@@ -23,93 +23,93 @@ auto R65816::dreadl(uint24 addr) -> uint24 {
 }
 
 auto R65816::decode(uint8 mode, uint24 addr) -> uint24 {
-  uint24 r = 0;
+  uint24 a = 0;
 
   switch(mode) {
   case OPTYPE_DP:
-    r = (regs.d + (addr & 0xffff)) & 0xffff;
+    a = (r.d + (addr & 0xffff)) & 0xffff;
     break;
   case OPTYPE_DPX:
-    r = (regs.d + regs.x + (addr & 0xffff)) & 0xffff;
+    a = (r.d + r.x + (addr & 0xffff)) & 0xffff;
     break;
   case OPTYPE_DPY:
-    r = (regs.d + regs.y + (addr & 0xffff)) & 0xffff;
+    a = (r.d + r.y + (addr & 0xffff)) & 0xffff;
     break;
   case OPTYPE_IDP:
-    addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + dreadw(addr);
+    addr = (r.d + (addr & 0xffff)) & 0xffff;
+    a = (r.db << 16) + dreadw(addr);
     break;
   case OPTYPE_IDPX:
-    addr = (regs.d + regs.x + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + dreadw(addr);
+    addr = (r.d + r.x + (addr & 0xffff)) & 0xffff;
+    a = (r.db << 16) + dreadw(addr);
     break;
   case OPTYPE_IDPY:
-    addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = (regs.db << 16) + dreadw(addr) + regs.y;
+    addr = (r.d + (addr & 0xffff)) & 0xffff;
+    a = (r.db << 16) + dreadw(addr) + r.y;
     break;
   case OPTYPE_ILDP:
-    addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = dreadl(addr);
+    addr = (r.d + (addr & 0xffff)) & 0xffff;
+    a = dreadl(addr);
     break;
   case OPTYPE_ILDPY:
-    addr = (regs.d + (addr & 0xffff)) & 0xffff;
-    r = dreadl(addr) + regs.y;
+    addr = (r.d + (addr & 0xffff)) & 0xffff;
+    a = dreadl(addr) + r.y;
     break;
   case OPTYPE_ADDR:
-    r = (regs.db << 16) + (addr & 0xffff);
+    a = (r.db << 16) + (addr & 0xffff);
     break;
   case OPTYPE_ADDR_PC:
-    r = (regs.pc.b << 16) + (addr & 0xffff);
+    a = (r.pc.b << 16) + (addr & 0xffff);
     break;
   case OPTYPE_ADDRX:
-    r = (regs.db << 16) + (addr & 0xffff) + regs.x;
+    a = (r.db << 16) + (addr & 0xffff) + r.x;
     break;
   case OPTYPE_ADDRY:
-    r = (regs.db << 16) + (addr & 0xffff) + regs.y;
+    a = (r.db << 16) + (addr & 0xffff) + r.y;
     break;
   case OPTYPE_IADDR_PC:
-    r = (regs.pc.b << 16) + (addr & 0xffff);
+    a = (r.pc.b << 16) + (addr & 0xffff);
     break;
   case OPTYPE_IADDRX:
-    r = (regs.pc.b << 16) + ((addr + regs.x) & 0xffff);
+    a = (r.pc.b << 16) + ((addr + r.x) & 0xffff);
     break;
   case OPTYPE_ILADDR:
-    r = addr;
+    a = addr;
     break;
   case OPTYPE_LONG:
-    r = addr;
+    a = addr;
     break;
   case OPTYPE_LONGX:
-    r = (addr + regs.x);
+    a = (addr + r.x);
     break;
   case OPTYPE_SR:
-    r = (regs.s + (addr & 0xff)) & 0xffff;
+    a = (r.s + (addr & 0xff)) & 0xffff;
     break;
   case OPTYPE_ISRY:
-    addr = (regs.s + (addr & 0xff)) & 0xffff;
-    r = (regs.db << 16) + dreadw(addr) + regs.y;
+    addr = (r.s + (addr & 0xff)) & 0xffff;
+    a = (r.db << 16) + dreadw(addr) + r.y;
     break;
   case OPTYPE_RELB:
-    r  = (regs.pc.b << 16) + ((regs.pc.w + 2) & 0xffff);
-    r += int8(addr);
+    a  = (r.pc.b << 16) + ((r.pc.w + 2) & 0xffff);
+    a += int8(addr);
     break;
   case OPTYPE_RELW:
-    r  = (regs.pc.b << 16) + ((regs.pc.w + 3) & 0xffff);
-    r += (int16)addr;
+    a  = (r.pc.b << 16) + ((r.pc.w + 3) & 0xffff);
+    a += (int16)addr;
     break;
   }
 
-  return r;
+  return a;
 }
 
 auto R65816::disassemble() -> string {
-  return disassemble(regs.pc.d, regs.e, regs.p.m, regs.p.x);
+  return disassemble(r.pc.d, r.e, r.p.m, r.p.x);
 }
 
 auto R65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   string s;
 
-  reg24_t pc;
+  reg24 pc;
   pc.d = addr;
   s = {hex(pc, 6), " "};
 
@@ -403,23 +403,23 @@ auto R65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   #undef x8
 
   s.append(t, " A:{0} X:{1} Y:{2} S:{3} D:{4} B:{5} ", format{
-    hex(regs.a.w, 4), hex(regs.x.w, 4), hex(regs.y.w, 4),
-    hex(regs.s.w, 4), hex(regs.d.w, 4), hex(regs.db,  2)
+    hex(r.a.w, 4), hex(r.x.w, 4), hex(r.y.w, 4),
+    hex(r.s.w, 4), hex(r.d.w, 4), hex(r.db,  2)
   });
 
-  if(regs.e) {
+  if(r.e) {
     s.append(
-      regs.p.n ? 'N' : 'n', regs.p.v ? 'V' : 'v',
-      regs.p.m ? '1' : '0', regs.p.x ? 'B' : 'b',
-      regs.p.d ? 'D' : 'd', regs.p.i ? 'I' : 'i',
-      regs.p.z ? 'Z' : 'z', regs.p.c ? 'C' : 'c'
+      r.p.n ? 'N' : 'n', r.p.v ? 'V' : 'v',
+      r.p.m ? '1' : '0', r.p.x ? 'B' : 'b',
+      r.p.d ? 'D' : 'd', r.p.i ? 'I' : 'i',
+      r.p.z ? 'Z' : 'z', r.p.c ? 'C' : 'c'
     );
   } else {
     s.append(
-      regs.p.n ? 'N' : 'n', regs.p.v ? 'V' : 'v',
-      regs.p.m ? 'M' : 'm', regs.p.x ? 'X' : 'x',
-      regs.p.d ? 'D' : 'd', regs.p.i ? 'I' : 'i',
-      regs.p.z ? 'Z' : 'z', regs.p.c ? 'C' : 'c'
+      r.p.n ? 'N' : 'n', r.p.v ? 'V' : 'v',
+      r.p.m ? 'M' : 'm', r.p.x ? 'X' : 'x',
+      r.p.d ? 'D' : 'd', r.p.i ? 'I' : 'i',
+      r.p.z ? 'Z' : 'z', r.p.c ? 'C' : 'c'
     );
   }
 

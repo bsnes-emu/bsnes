@@ -1,195 +1,195 @@
-auto R65816::op_write_addr_b(reg16_t& reg) {
-  aa.l = readpc();
-  aa.h = readpc();
-L writedbr(aa.w, reg);
+auto R65816::op_write_addr_b(reg16& reg) {
+  aa.l = readPC();
+  aa.h = readPC();
+L writeDB(aa.w, reg);
 }
 
-auto R65816::op_write_addr_w(reg16_t& reg) {
-  aa.l = readpc();
-  aa.h = readpc();
-  writedbr(aa.w + 0, reg >> 0);
-L writedbr(aa.w + 1, reg >> 8);
+auto R65816::op_write_addr_w(reg16& reg) {
+  aa.l = readPC();
+  aa.h = readPC();
+  writeDB(aa.w + 0, reg >> 0);
+L writeDB(aa.w + 1, reg >> 8);
 }
 
-auto R65816::op_write_addrr_b(reg16_t& reg, reg16_t& idx) {
-  aa.l = readpc();
-  aa.h = readpc();
+auto R65816::op_write_addrr_b(reg16& reg, reg16& idx) {
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-L writedbr(aa.w + idx, reg);
+L writeDB(aa.w + idx, reg);
 }
 
-auto R65816::op_write_addrr_w(reg16_t& reg, reg16_t& idx) {
-  aa.l = readpc();
-  aa.h = readpc();
+auto R65816::op_write_addrr_w(reg16& reg, reg16& idx) {
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  writedbr(aa.w + idx + 0, reg >> 0);
-L writedbr(aa.w + idx + 1, reg >> 8);
+  writeDB(aa.w + idx + 0, reg >> 0);
+L writeDB(aa.w + idx + 1, reg >> 8);
 }
 
-auto R65816::op_write_longr_b(reg16_t& idx) {
-  aa.l = readpc();
-  aa.h = readpc();
-  aa.b = readpc();
-L writelong(aa.d + idx, regs.a.l);
+auto R65816::op_write_longr_b(reg16& idx) {
+  aa.l = readPC();
+  aa.h = readPC();
+  aa.b = readPC();
+L writeLong(aa.d + idx, r.a.l);
 }
 
-auto R65816::op_write_longr_w(reg16_t& idx) {
-  aa.l = readpc();
-  aa.h = readpc();
-  aa.b = readpc();
-  writelong(aa.d + idx + 0, regs.a.l);
-L writelong(aa.d + idx + 1, regs.a.h);
+auto R65816::op_write_longr_w(reg16& idx) {
+  aa.l = readPC();
+  aa.h = readPC();
+  aa.b = readPC();
+  writeLong(aa.d + idx + 0, r.a.l);
+L writeLong(aa.d + idx + 1, r.a.h);
 }
 
-auto R65816::op_write_dp_b(reg16_t& reg) {
-  dp = readpc();
+auto R65816::op_write_dp_b(reg16& reg) {
+  dp = readPC();
   io2();
-L writedp(dp, reg);
+L writeDP(dp, reg);
 }
 
-auto R65816::op_write_dp_w(reg16_t& reg) {
-  dp = readpc();
+auto R65816::op_write_dp_w(reg16& reg) {
+  dp = readPC();
   io2();
-  writedp(dp + 0, reg >> 0);
-L writedp(dp + 1, reg >> 8);
+  writeDP(dp + 0, reg >> 0);
+L writeDP(dp + 1, reg >> 8);
 }
 
-auto R65816::op_write_dpr_b(reg16_t& reg, reg16_t& idx) {
-  dp = readpc();
-  io2();
-  io();
-L writedp(dp + idx, reg);
-}
-
-auto R65816::op_write_dpr_w(reg16_t& reg, reg16_t& idx) {
-  dp = readpc();
+auto R65816::op_write_dpr_b(reg16& reg, reg16& idx) {
+  dp = readPC();
   io2();
   io();
-  writedp(dp + idx + 0, reg >> 0);
-L writedp(dp + idx + 1, reg >> 8);
+L writeDP(dp + idx, reg);
+}
+
+auto R65816::op_write_dpr_w(reg16& reg, reg16& idx) {
+  dp = readPC();
+  io2();
+  io();
+  writeDP(dp + idx + 0, reg >> 0);
+L writeDP(dp + idx + 1, reg >> 8);
 }
 
 auto R65816::op_sta_idp_b() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-L writedbr(aa.w, regs.a.l);
+  aa.l = readDP(dp + 0);
+  aa.h = readDP(dp + 1);
+L writeDB(aa.w, r.a.l);
 }
 
 auto R65816::op_sta_idp_w() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  writedbr(aa.w + 0, regs.a.l);
-L writedbr(aa.w + 1, regs.a.h);
+  aa.l = readDP(dp + 0);
+  aa.h = readDP(dp + 1);
+  writeDB(aa.w + 0, r.a.l);
+L writeDB(aa.w + 1, r.a.h);
 }
 
 auto R65816::op_sta_ildp_b() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  aa.b = readdp(dp + 2);
-L writelong(aa.d, regs.a.l);
+  aa.l = readDPn(dp + 0);
+  aa.h = readDPn(dp + 1);
+  aa.b = readDPn(dp + 2);
+L writeLong(aa.d, r.a.l);
 }
 
 auto R65816::op_sta_ildp_w() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  aa.b = readdp(dp + 2);
-  writelong(aa.d + 0, regs.a.l);
-L writelong(aa.d + 1, regs.a.h);
+  aa.l = readDPn(dp + 0);
+  aa.h = readDPn(dp + 1);
+  aa.b = readDPn(dp + 2);
+  writeLong(aa.d + 0, r.a.l);
+L writeLong(aa.d + 1, r.a.h);
 }
 
 auto R65816::op_sta_idpx_b() {
-  dp = readpc();
+  dp = readPC();
   io2();
   io();
-  aa.l = readdp(dp + regs.x.w + 0);
-  aa.h = readdp(dp + regs.x.w + 1);
-L writedbr(aa.w, regs.a.l);
+  aa.l = readDP(dp + r.x.w + 0);
+  aa.h = readDP(dp + r.x.w + 1);
+L writeDB(aa.w, r.a.l);
 }
 
 auto R65816::op_sta_idpx_w() {
-  dp = readpc();
+  dp = readPC();
   io2();
   io();
-  aa.l = readdp(dp + regs.x.w + 0);
-  aa.h = readdp(dp + regs.x.w + 1);
-  writedbr(aa.w + 0, regs.a.l);
-L writedbr(aa.w + 1, regs.a.h);
+  aa.l = readDP(dp + r.x.w + 0);
+  aa.h = readDP(dp + r.x.w + 1);
+  writeDB(aa.w + 0, r.a.l);
+L writeDB(aa.w + 1, r.a.h);
 }
 
 auto R65816::op_sta_idpy_b() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
+  aa.l = readDP(dp + 0);
+  aa.h = readDP(dp + 1);
   io();
-L writedbr(aa.w + regs.y.w, regs.a.l);
+L writeDB(aa.w + r.y.w, r.a.l);
 }
 
 auto R65816::op_sta_idpy_w() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
+  aa.l = readDP(dp + 0);
+  aa.h = readDP(dp + 1);
   io();
-  writedbr(aa.w + regs.y.w + 0, regs.a.l);
-L writedbr(aa.w + regs.y.w + 1, regs.a.h);
+  writeDB(aa.w + r.y.w + 0, r.a.l);
+L writeDB(aa.w + r.y.w + 1, r.a.h);
 }
 
 auto R65816::op_sta_ildpy_b() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  aa.b = readdp(dp + 2);
-L writelong(aa.d + regs.y.w, regs.a.l);
+  aa.l = readDPn(dp + 0);
+  aa.h = readDPn(dp + 1);
+  aa.b = readDPn(dp + 2);
+L writeLong(aa.d + r.y.w, r.a.l);
 }
 
 auto R65816::op_sta_ildpy_w() {
-  dp = readpc();
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  aa.b = readdp(dp + 2);
-  writelong(aa.d + regs.y.w + 0, regs.a.l);
-L writelong(aa.d + regs.y.w + 1, regs.a.h);
+  aa.l = readDPn(dp + 0);
+  aa.h = readDPn(dp + 1);
+  aa.b = readDPn(dp + 2);
+  writeLong(aa.d + r.y.w + 0, r.a.l);
+L writeLong(aa.d + r.y.w + 1, r.a.h);
 }
 
 auto R65816::op_sta_sr_b() {
-  sp = readpc();
+  sp = readPC();
   io();
-L writesp(sp, regs.a.l);
+L writeSP(sp, r.a.l);
 }
 
 auto R65816::op_sta_sr_w() {
-  sp = readpc();
+  sp = readPC();
   io();
-  writesp(sp + 0, regs.a.l);
-L writesp(sp + 1, regs.a.h);
+  writeSP(sp + 0, r.a.l);
+L writeSP(sp + 1, r.a.h);
 }
 
 auto R65816::op_sta_isry_b() {
-  sp = readpc();
+  sp = readPC();
   io();
-  aa.l = readsp(sp + 0);
-  aa.h = readsp(sp + 1);
+  aa.l = readSP(sp + 0);
+  aa.h = readSP(sp + 1);
   io();
-L writedbr(aa.w + regs.y.w, regs.a.l);
+L writeDB(aa.w + r.y.w, r.a.l);
 }
 
 auto R65816::op_sta_isry_w() {
-  sp = readpc();
+  sp = readPC();
   io();
-  aa.l = readsp(sp + 0);
-  aa.h = readsp(sp + 1);
+  aa.l = readSP(sp + 0);
+  aa.h = readSP(sp + 1);
   io();
-  writedbr(aa.w + regs.y.w + 0, regs.a.l);
-L writedbr(aa.w + regs.y.w + 1, regs.a.h);
+  writeDB(aa.w + r.y.w + 0, r.a.l);
+L writeDB(aa.w + r.y.w + 1, r.a.h);
 }

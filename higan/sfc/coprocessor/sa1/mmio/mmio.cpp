@@ -2,8 +2,8 @@
 auto SA1::mmio_w2200(uint8 data) -> void {
   if(mmio.sa1_resb && !(data & 0x80)) {
     //reset SA-1 CPU
-    regs.pc.w = mmio.crv;
-    regs.pc.b = 0x00;
+    r.pc.w = mmio.crv;
+    r.pc.b = 0x00;
   }
 
   mmio.sa1_irq  = (data & 0x80);
@@ -28,14 +28,14 @@ auto SA1::mmio_w2201(uint8 data) -> void {
   if(!mmio.cpu_irqen && (data & 0x80)) {
     if(mmio.cpu_irqfl) {
       mmio.cpu_irqcl = 0;
-      cpu.regs.irq = 1;
+      cpu.r.irq = 1;
     }
   }
 
   if(!mmio.chdma_irqen && (data & 0x20)) {
     if(mmio.chdma_irqfl) {
       mmio.chdma_irqcl = 0;
-      cpu.regs.irq = 1;
+      cpu.r.irq = 1;
     }
   }
 
@@ -51,7 +51,7 @@ auto SA1::mmio_w2202(uint8 data) -> void {
   if(mmio.cpu_irqcl  ) mmio.cpu_irqfl   = false;
   if(mmio.chdma_irqcl) mmio.chdma_irqfl = false;
 
-  if(!mmio.cpu_irqfl && !mmio.chdma_irqfl) cpu.regs.irq = 0;
+  if(!mmio.cpu_irqfl && !mmio.chdma_irqfl) cpu.r.irq = 0;
 }
 
 //(CRV) SA-1 reset vector
@@ -77,7 +77,7 @@ auto SA1::mmio_w2209(uint8 data) -> void {
     mmio.cpu_irqfl = true;
     if(mmio.cpu_irqen) {
       mmio.cpu_irqcl = 0;
-      cpu.regs.irq = 1;
+      cpu.r.irq = 1;
     }
   }
 }

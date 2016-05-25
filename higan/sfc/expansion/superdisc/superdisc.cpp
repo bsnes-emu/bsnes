@@ -28,15 +28,15 @@ auto SuperDisc::Enter() -> void {
 }
 
 auto SuperDisc::main() -> void {
-  cpu.regs.irq = 0;
+  cpu.r.irq = 0;
 
   if(r.irqEnable.bit(3)) {
-    cpu.regs.irq = 1;
+    cpu.r.irq = 1;
     nec.data = necPollIRQ();
   }
 
   if(r.irqEnable.bit(2)) {
-    cpu.regs.irq = 1;
+    cpu.r.irq = 1;
     sony.data = sonyPollIRQ();
   }
 
@@ -52,7 +52,7 @@ auto SuperDisc::read(uint24 addr, uint8 data) -> uint8 {
   }
 
   if(addr == 0x21e1) {
-    cpu.regs.irq = 0;
+    cpu.r.irq = 0;
     data = necReadData();
   }
 
@@ -61,7 +61,7 @@ auto SuperDisc::read(uint24 addr, uint8 data) -> uint8 {
   }
 
   if(addr == 0x21e3) {
-    cpu.regs.irq = 0;
+    cpu.r.irq = 0;
     data = sonyReadData();
   }
 

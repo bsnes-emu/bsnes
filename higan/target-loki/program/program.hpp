@@ -5,9 +5,9 @@ struct Program : Emulator::Interface::Bind {
   auto quit() -> void;
 
   //media.cpp
-  auto loadMedia(string location) -> void;
-  auto loadMedia(Emulator::Interface::Media& media, string location) -> void;
-  auto unloadMedia() -> void;
+  auto loadMedium(string location) -> void;
+  auto loadMedium(Emulator::Interface::Medium& medium, string location) -> void;
+  auto unloadMedium() -> void;
 
   //interface.cpp
   auto loadRequest(uint id, string name, string type, bool required) -> void override;
@@ -22,7 +22,7 @@ struct Program : Emulator::Interface::Bind {
   auto notify(string text) -> void override;
 
   vector<shared_pointer<HID::Device>> devices;
-  vector<string> mediaPaths;
+  vector<string> mediumPaths;
   vector<string> folderPaths;
 };
 

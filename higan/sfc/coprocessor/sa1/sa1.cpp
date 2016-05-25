@@ -32,41 +32,41 @@ auto SA1::main() -> void {
 }
 
 auto SA1::interrupt() -> void {
-  read(regs.pc.d);
+  read(r.pc.d);
   io();
-  if(!regs.e) writestack(regs.pc.b);
-  writestack(regs.pc.h);
-  writestack(regs.pc.l);
-  writestack(regs.e ? (regs.p & ~0x10) : regs.p);
-  regs.pc.w = regs.vector;
-  regs.pc.b = 0x00;
-  regs.p.i = 1;
-  regs.p.d = 0;
+  if(!r.e) writeSP(r.pc.b);
+  writeSP(r.pc.h);
+  writeSP(r.pc.l);
+  writeSP(r.e ? (r.p & ~0x10) : r.p);
+  r.pc.w = r.vector;
+  r.pc.b = 0x00;
+  r.p.i = 1;
+  r.p.d = 0;
 }
 
 auto SA1::lastCycle() -> void {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
     status.interrupt_pending = true;
-    regs.vector = mmio.cnv;
+    r.vector = mmio.cnv;
     mmio.sa1_nmifl = true;
     mmio.sa1_nmicl = 1;
-    regs.wai = false;
-  } else if(!regs.p.i) {
+    r.wai = false;
+  } else if(!r.p.i) {
     if(mmio.timer_irqen && !mmio.timer_irqcl) {
       status.interrupt_pending = true;
-      regs.vector = mmio.civ;
+      r.vector = mmio.civ;
       mmio.timer_irqfl = true;
-      regs.wai = false;
+      r.wai = false;
     } else if(mmio.dma_irqen && !mmio.dma_irqcl) {
       status.interrupt_pending = true;
-      regs.vector = mmio.civ;
+      r.vector = mmio.civ;
       mmio.dma_irqfl = true;
-      regs.wai = false;
+      r.wai = false;
     } else if(mmio.sa1_irq && !mmio.sa1_irqcl) {
       status.interrupt_pending = true;
-      regs.vector = mmio.civ;
+      r.vector = mmio.civ;
       mmio.sa1_irqfl = true;
-      regs.wai = false;
+      r.wai = false;
     }
   }
 }
@@ -124,8 +124,10 @@ auto SA1::unload() -> void {
 }
 
 auto SA1::power() -> void {
-  regs.a = regs.x = regs.y = 0x0000;
-  regs.s = 0x01ff;
+  r.a = 0x0000;
+  r.x = 0x0000;
+  r.y = 0x0000;
+  r.s = 0x01ff;
 }
 
 auto SA1::reset() -> void {
@@ -136,17 +138,17 @@ auto SA1::reset() -> void {
     iram.write(addr, 0x00);
   }
 
-  regs.pc.d   = 0x000000;
-  regs.x.h    = 0x00;
-  regs.y.h    = 0x00;
-  regs.s.h    = 0x01;
-  regs.d      = 0x0000;
-  regs.db     = 0x00;
-  regs.p      = 0x34;
-  regs.e      = 1;
-  regs.mdr    = 0x00;
-  regs.wai    = false;
-  regs.vector = 0x0000;
+  r.pc.d   = 0x000000;
+  r.x.h    = 0x00;
+  r.y.h    = 0x00;
+  r.s.h    = 0x01;
+  r.d      = 0x0000;
+  r.db     = 0x00;
+  r.p      = 0x34;
+  r.e      = 1;
+  r.mdr    = 0x00;
+  r.wai    = false;
+  r.vector = 0x0000;
 
   status.tick_counter = 0;
 

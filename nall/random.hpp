@@ -15,11 +15,11 @@ struct RandomNumberGenerator {
 struct LinearFeedbackShiftRegisterGenerator : RandomNumberGenerator {
   auto seed(uint64_t seed) -> void {
     lfsr = seed;
-    for(unsigned n = 0; n < 8; n++) operator()();
+    for(uint n = 0; n < 8; n++) operator()();
   }
 
   auto operator()() -> uint64_t {
-    return lfsr = (lfsr >> 1) ^ (-(lfsr & 1) & crc64jones);
+    return lfsr = (lfsr >> 1) ^ (-(lfsr & 1) & crc64);
   }
 
   auto serialize(serializer& s) -> void {
@@ -27,9 +27,8 @@ struct LinearFeedbackShiftRegisterGenerator : RandomNumberGenerator {
   }
 
 private:
-  static const uint64_t crc64ecma  = 0x42f0e1eba9ea3693;
-  static const uint64_t crc64jones = 0xad93d23594c935a9;
-  uint64_t lfsr = crc64ecma;
+  static const uint64_t crc64 = 0xc96c'5795'd787'0f42;
+  uint64_t lfsr = crc64;
 };
 
 inline auto random() -> uint64_t {

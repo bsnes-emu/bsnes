@@ -13,21 +13,21 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //MPYL
   case 0x2134: {
-    unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
+    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
     regs.ppu1_mdr = (result >>  0);
     return regs.ppu1_mdr;
   }
 
   //MPYM
   case 0x2135: {
-    unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
+    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
     regs.ppu1_mdr = (result >>  8);
     return regs.ppu1_mdr;
   }
 
   //MPYH
   case 0x2136: {
-    unsigned result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
+    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
     regs.ppu1_mdr = (result >> 16);
     return regs.ppu1_mdr;
   }
@@ -35,7 +35,7 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
   //SLHV
   case 0x2137: {
     if(cpu.pio() & 0x80) latchCounters();
-    return cpu.regs.mdr;
+    return cpu.r.mdr;
   }
 
   //OAMDATAREAD

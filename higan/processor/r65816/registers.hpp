@@ -1,4 +1,4 @@
-struct flag_t {
+struct Flags {
   bool n{0};
   bool v{0};
   bool m{0};
@@ -8,68 +8,68 @@ struct flag_t {
   bool z{0};
   bool c{0};
 
-  inline operator unsigned() const {
+  inline operator uint() const {
     return (n << 7) + (v << 6) + (m << 5) + (x << 4)
          + (d << 3) + (i << 2) + (z << 1) + (c << 0);
   }
 
-  inline auto operator=(uint8 data) -> unsigned {
+  inline auto operator=(uint8 data) -> uint {
     n = data & 0x80; v = data & 0x40; m = data & 0x20; x = data & 0x10;
     d = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
     return data;
   }
 };
 
-struct reg16_t {
+struct reg16 {
   union {
     uint16_t w = 0;
     struct { uint8_t order_lsb2(l, h); };
   };
 
-  inline operator unsigned() const { return w; }
-  inline auto operator   = (unsigned i) -> unsigned { return w   = i; }
-  inline auto operator  |= (unsigned i) -> unsigned { return w  |= i; }
-  inline auto operator  ^= (unsigned i) -> unsigned { return w  ^= i; }
-  inline auto operator  &= (unsigned i) -> unsigned { return w  &= i; }
-  inline auto operator <<= (unsigned i) -> unsigned { return w <<= i; }
-  inline auto operator >>= (unsigned i) -> unsigned { return w >>= i; }
-  inline auto operator  += (unsigned i) -> unsigned { return w  += i; }
-  inline auto operator  -= (unsigned i) -> unsigned { return w  -= i; }
-  inline auto operator  *= (unsigned i) -> unsigned { return w  *= i; }
-  inline auto operator  /= (unsigned i) -> unsigned { return w  /= i; }
-  inline auto operator  %= (unsigned i) -> unsigned { return w  %= i; }
+  inline operator uint() const { return w; }
+  inline auto operator  =(uint i) -> uint { return w   = i; }
+  inline auto operator |=(uint i) -> uint { return w  |= i; }
+  inline auto operator ^=(uint i) -> uint { return w  ^= i; }
+  inline auto operator &=(uint i) -> uint { return w  &= i; }
+  inline auto operator<<=(uint i) -> uint { return w <<= i; }
+  inline auto operator>>=(uint i) -> uint { return w >>= i; }
+  inline auto operator +=(uint i) -> uint { return w  += i; }
+  inline auto operator -=(uint i) -> uint { return w  -= i; }
+  inline auto operator *=(uint i) -> uint { return w  *= i; }
+  inline auto operator /=(uint i) -> uint { return w  /= i; }
+  inline auto operator %=(uint i) -> uint { return w  %= i; }
 };
 
-struct reg24_t {
+struct reg24 {
   union {
     uint32_t d = 0;
     struct { uint16_t order_lsb2(w, wh); };
     struct { uint8_t  order_lsb4(l, h, b, bh); };
   };
 
-  inline operator unsigned() const { return d; }
-  inline auto operator   = (unsigned i) -> unsigned { return d = uclip<24>(i); }
-  inline auto operator  |= (unsigned i) -> unsigned { return d = uclip<24>(d  | i); }
-  inline auto operator  ^= (unsigned i) -> unsigned { return d = uclip<24>(d  ^ i); }
-  inline auto operator  &= (unsigned i) -> unsigned { return d = uclip<24>(d  & i); }
-  inline auto operator <<= (unsigned i) -> unsigned { return d = uclip<24>(d << i); }
-  inline auto operator >>= (unsigned i) -> unsigned { return d = uclip<24>(d >> i); }
-  inline auto operator  += (unsigned i) -> unsigned { return d = uclip<24>(d  + i); }
-  inline auto operator  -= (unsigned i) -> unsigned { return d = uclip<24>(d  - i); }
-  inline auto operator  *= (unsigned i) -> unsigned { return d = uclip<24>(d  * i); }
-  inline auto operator  /= (unsigned i) -> unsigned { return d = uclip<24>(d  / i); }
-  inline auto operator  %= (unsigned i) -> unsigned { return d = uclip<24>(d  % i); }
+  inline operator uint() const { return d; }
+  inline auto operator  =(uint i) -> uint { return d = uclip<24>(i); }
+  inline auto operator |=(uint i) -> uint { return d = uclip<24>(d  | i); }
+  inline auto operator ^=(uint i) -> uint { return d = uclip<24>(d  ^ i); }
+  inline auto operator &=(uint i) -> uint { return d = uclip<24>(d  & i); }
+  inline auto operator<<=(uint i) -> uint { return d = uclip<24>(d << i); }
+  inline auto operator>>=(uint i) -> uint { return d = uclip<24>(d >> i); }
+  inline auto operator +=(uint i) -> uint { return d = uclip<24>(d  + i); }
+  inline auto operator -=(uint i) -> uint { return d = uclip<24>(d  - i); }
+  inline auto operator *=(uint i) -> uint { return d = uclip<24>(d  * i); }
+  inline auto operator /=(uint i) -> uint { return d = uclip<24>(d  / i); }
+  inline auto operator %=(uint i) -> uint { return d = uclip<24>(d  % i); }
 };
 
-struct regs_t {
-  reg24_t pc;
-  reg16_t a;
-  reg16_t x;
-  reg16_t y;
-  reg16_t z;  //pseudo-register (zero register)
-  reg16_t s;
-  reg16_t d;
-  flag_t p;
+struct Registers {
+  reg24 pc;
+  reg16 a;
+  reg16 x;
+  reg16 y;
+  reg16 z;  //pseudo-register (zero register)
+  reg16 s;
+  reg16 d;
+  Flags p;
   uint8 db{0};
   bool e{0};
 

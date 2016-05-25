@@ -7,14 +7,14 @@ auto Program::loadRequest(uint id, string name, string type, bool required) -> v
   .openFolder();
   if(!directory::exists(location)) return;
 
-  mediaPaths(id) = location;
+  mediumPaths(id) = location;
   folderPaths.append(location);
   emulator->load(id);
 }
 
 //request from emulation core to load non-volatile media file
 auto Program::loadRequest(uint id, string filename, bool required) -> void {
-  string pathname = mediaPaths(emulator->group(id));
+  string pathname = mediumPaths(emulator->group(id));
   string location = {pathname, filename};
 
   if(filename == "manifest.bml" && pathname && !pathname.endsWith(".sys/")) {
@@ -39,7 +39,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
 
 //request from emulation core to save non-volatile media file
 auto Program::saveRequest(uint id, string filename) -> void {
-  string pathname = mediaPaths(emulator->group(id));
+  string pathname = mediumPaths(emulator->group(id));
   string location = {pathname, filename};
   if(!pathname) return;  //should never occur
 
@@ -89,19 +89,13 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   }
 }
 
-auto Program::audioSample(int16 lsample, int16 rsample) -> void {
-  audio->sample(lsample, rsample);
-//int samples[] = {lsample, rsample};
-//dsp.sample(samples);
-//while(dsp.pending()) {
-//  dsp.read(samples);
-//  audio->sample(samples[0], samples[1]);
-//}
+auto Program::audioSample(int16 left, int16 right) -> void {
+  audio->sample(left, right);
 }
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
   if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean()) {
-    auto guid = emulator->port[port].device[device].input[input].guid;
+    auto guid = emulator->ports[port].devices[device].inputs[input].guid;
     auto mapping = (InputMapping*)guid;
     if(mapping) return mapping->poll();
   }
@@ -110,7 +104,7 @@ auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
   if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean() || !enable) {
-    auto guid = emulator->port[port].device[device].input[input].guid;
+    auto guid = emulator->ports[port].devices[device].inputs[input].guid;
     auto mapping = (InputMapping*)guid;
     if(mapping) return mapping->rumble(enable);
   }
@@ -121,7 +115,7 @@ auto Program::dipSettings(const Markup::Node& node) -> uint {
 }
 
 auto Program::path(uint group) -> string {
-  return mediaPaths(group);
+  return mediumPaths(group);
 }
 
 auto Program::notify(string text) -> void {

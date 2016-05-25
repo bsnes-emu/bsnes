@@ -26,113 +26,105 @@ Interface::Interface() {
   media.append({ID::SuperFamicom, "Sufami Turbo",  "st",  false});
 
   { Device device{0, ID::ControllerPort1 | ID::ControllerPort2 | ID::ExpansionPort, "None"};
-    this->device.append(device);
+    devices.append(device);
   }
 
   { Device device{1, ID::ControllerPort1 | ID::ControllerPort2, "Gamepad"};
-    device.input.append({ 0, 0, "B"     });
-    device.input.append({ 1, 0, "Y"     });
-    device.input.append({ 2, 0, "Select"});
-    device.input.append({ 3, 0, "Start" });
-    device.input.append({ 4, 0, "Up"    });
-    device.input.append({ 5, 0, "Down"  });
-    device.input.append({ 6, 0, "Left"  });
-    device.input.append({ 7, 0, "Right" });
-    device.input.append({ 8, 0, "A"     });
-    device.input.append({ 9, 0, "X"     });
-    device.input.append({10, 0, "L"     });
-    device.input.append({11, 0, "R"     });
-    device.order = {4, 5, 6, 7, 0, 8, 1, 9, 10, 11, 2, 3};
-    this->device.append(device);
+    device.inputs.append({ 0, 0, "Up"    });
+    device.inputs.append({ 1, 0, "Down"  });
+    device.inputs.append({ 2, 0, "Left"  });
+    device.inputs.append({ 3, 0, "Right" });
+    device.inputs.append({ 4, 0, "B"     });
+    device.inputs.append({ 5, 0, "A"     });
+    device.inputs.append({ 6, 0, "Y"     });
+    device.inputs.append({ 7, 0, "X"     });
+    device.inputs.append({ 8, 0, "L"     });
+    device.inputs.append({ 9, 0, "R"     });
+    device.inputs.append({10, 0, "Select"});
+    device.inputs.append({11, 0, "Start" });
+    devices.append(device);
   }
 
   { Device device{2, ID::ControllerPort1 | ID::ControllerPort2, "Multitap"};
     for(uint p = 1, n = 0; p <= 4; p++, n += 12) {
-      device.input.append({n +  0, 0, {"Port ", p, " - ", "B"     }});
-      device.input.append({n +  1, 0, {"Port ", p, " - ", "Y"     }});
-      device.input.append({n +  2, 0, {"Port ", p, " - ", "Select"}});
-      device.input.append({n +  3, 0, {"Port ", p, " - ", "Start" }});
-      device.input.append({n +  4, 0, {"Port ", p, " - ", "Up"    }});
-      device.input.append({n +  5, 0, {"Port ", p, " - ", "Down"  }});
-      device.input.append({n +  6, 0, {"Port ", p, " - ", "Left"  }});
-      device.input.append({n +  7, 0, {"Port ", p, " - ", "Right" }});
-      device.input.append({n +  8, 0, {"Port ", p, " - ", "A"     }});
-      device.input.append({n +  9, 0, {"Port ", p, " - ", "X"     }});
-      device.input.append({n + 10, 0, {"Port ", p, " - ", "L"     }});
-      device.input.append({n + 11, 0, {"Port ", p, " - ", "R"     }});
-      device.order.append({n + 4, n + 5, n +  6, n +  7, n + 0, n + 8});
-      device.order.append({n + 1, n + 9, n + 10, n + 11, n + 2, n + 3});
+      device.inputs.append({n +  0, 0, {"Port ", p, " - ", "Up"    }});
+      device.inputs.append({n +  1, 0, {"Port ", p, " - ", "Down"  }});
+      device.inputs.append({n +  2, 0, {"Port ", p, " - ", "Left"  }});
+      device.inputs.append({n +  3, 0, {"Port ", p, " - ", "Right" }});
+      device.inputs.append({n +  4, 0, {"Port ", p, " - ", "B"     }});
+      device.inputs.append({n +  5, 0, {"Port ", p, " - ", "A"     }});
+      device.inputs.append({n +  6, 0, {"Port ", p, " - ", "Y"     }});
+      device.inputs.append({n +  7, 0, {"Port ", p, " - ", "X"     }});
+      device.inputs.append({n +  8, 0, {"Port ", p, " - ", "L"     }});
+      device.inputs.append({n +  9, 0, {"Port ", p, " - ", "R"     }});
+      device.inputs.append({n + 10, 0, {"Port ", p, " - ", "Select"}});
+      device.inputs.append({n + 11, 0, {"Port ", p, " - ", "Start" }});
     }
-    this->device.append(device);
+    devices.append(device);
   }
 
   { Device device{3, ID::ControllerPort1 | ID::ControllerPort2, "Mouse"};
-    device.input.append({0, 1, "X-axis"});
-    device.input.append({1, 1, "Y-axis"});
-    device.input.append({2, 0, "Left"  });
-    device.input.append({3, 0, "Right" });
-    device.order = {0, 1, 2, 3};
-    this->device.append(device);
+    device.inputs.append({0, 1, "X-axis"});
+    device.inputs.append({1, 1, "Y-axis"});
+    device.inputs.append({2, 0, "Left"  });
+    device.inputs.append({3, 0, "Right" });
+    devices.append(device);
   }
 
   { Device device{4, ID::ControllerPort2, "Super Scope"};
-    device.input.append({0, 1, "X-axis" });
-    device.input.append({1, 1, "Y-axis" });
-    device.input.append({2, 0, "Trigger"});
-    device.input.append({3, 0, "Cursor" });
-    device.input.append({4, 0, "Turbo"  });
-    device.input.append({5, 0, "Pause"  });
-    device.order = {0, 1, 2, 3, 4, 5};
-    this->device.append(device);
+    device.inputs.append({0, 1, "X-axis" });
+    device.inputs.append({1, 1, "Y-axis" });
+    device.inputs.append({2, 0, "Trigger"});
+    device.inputs.append({3, 0, "Cursor" });
+    device.inputs.append({4, 0, "Turbo"  });
+    device.inputs.append({5, 0, "Pause"  });
+    devices.append(device);
   }
 
   { Device device{5, ID::ControllerPort2, "Justifier"};
-    device.input.append({0, 1, "X-axis" });
-    device.input.append({1, 1, "Y-axis" });
-    device.input.append({2, 0, "Trigger"});
-    device.input.append({3, 0, "Start"  });
-    device.order = {0, 1, 2, 3};
-    this->device.append(device);
+    device.inputs.append({0, 1, "X-axis" });
+    device.inputs.append({1, 1, "Y-axis" });
+    device.inputs.append({2, 0, "Trigger"});
+    device.inputs.append({3, 0, "Start"  });
+    devices.append(device);
   }
 
   { Device device{6, ID::ControllerPort2, "Justifiers"};
-    device.input.append({0, 1, "Port 1 - X-axis" });
-    device.input.append({1, 1, "Port 1 - Y-axis" });
-    device.input.append({2, 0, "Port 1 - Trigger"});
-    device.input.append({3, 0, "Port 1 - Start"  });
-    device.order.append({0, 1, 2, 3});
-    device.input.append({4, 1, "Port 2 - X-axis" });
-    device.input.append({5, 1, "Port 2 - Y-axis" });
-    device.input.append({6, 0, "Port 2 - Trigger"});
-    device.input.append({7, 0, "Port 2 - Start"  });
-    device.order.append({4, 5, 6, 7});
-    this->device.append(device);
+    device.inputs.append({0, 1, "Port 1 - X-axis" });
+    device.inputs.append({1, 1, "Port 1 - Y-axis" });
+    device.inputs.append({2, 0, "Port 1 - Trigger"});
+    device.inputs.append({3, 0, "Port 1 - Start"  });
+    device.inputs.append({4, 1, "Port 2 - X-axis" });
+    device.inputs.append({5, 1, "Port 2 - Y-axis" });
+    device.inputs.append({6, 0, "Port 2 - Trigger"});
+    device.inputs.append({7, 0, "Port 2 - Start"  });
+    devices.append(device);
   }
 
   { Device device{7, ID::ControllerPort1, "Serial USART"};
-    this->device.append(device);
+    devices.append(device);
   }
 
   { Device device{8, ID::ExpansionPort, "Satellaview"};
-    this->device.append(device);
+    devices.append(device);
   }
 
   { Device device{9, ID::ExpansionPort, "Super Disc"};
-    this->device.append(device);
+    devices.append(device);
   }
 
   { Device device{10, ID::ExpansionPort, "21fx"};
-    this->device.append(device);
+    devices.append(device);
   }
 
-  port.append({0, "Controller Port 1"});
-  port.append({1, "Controller Port 2"});
-  port.append({2, "Expansion Port"});
+  ports.append({0, "Controller Port 1"});
+  ports.append({1, "Controller Port 2"});
+  ports.append({2, "Expansion Port"});
 
-  for(auto& device : this->device) {
-    for(auto& port : this->port) {
+  for(auto& device : devices) {
+    for(auto& port : ports) {
       if(device.portmask & (1 << port.id)) {
-        port.device.append(device);
+        port.devices.append(device);
       }
     }
   }

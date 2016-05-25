@@ -77,7 +77,7 @@ namespace nall {
 
   inline auto utf8_args(int& argc, char**& argv) -> void {
     wchar_t** wargv = CommandLineToArgvW(GetCommandLineW(), &argc);
-    argv = new char*[argc];
+    argv = new char*[argc + 1]();
     for(uint i = 0; i < argc; i++) {
       argv[i] = new char[PATH_MAX];
       strcpy(argv[i], nall::utf8_t(wargv[i]));

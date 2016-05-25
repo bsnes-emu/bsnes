@@ -60,28 +60,28 @@ auto CPU::main() -> void {
     status.interrupt_pending = false;
     if(status.nmi_pending) {
       status.nmi_pending = false;
-      regs.vector = !regs.e ? 0xffea : 0xfffa;
+      r.vector = r.e ? 0xfffa : 0xffea;
       interrupt();
       debugger.op_nmi();
     } else if(status.irq_pending) {
       status.irq_pending = false;
-      regs.vector = !regs.e ? 0xffee : 0xfffe;
+      r.vector = r.e ? 0xfffe : 0xffee;
       interrupt();
       debugger.op_irq();
     } else if(status.reset_pending) {
       status.reset_pending = false;
       addClocks(132);
-      regs.vector = 0xfffc;
+      r.vector = 0xfffc;
       interrupt();
     } else if(status.power_pending) {
       status.power_pending = false;
       addClocks(186);
-      regs.pc.l = bus.read(0xfffc, regs.mdr);
-      regs.pc.h = bus.read(0xfffd, regs.mdr);
+      r.pc.l = bus.read(0xfffc, r.mdr);
+      r.pc.h = bus.read(0xfffd, r.mdr);
     }
   }
 
-  debugger.op_exec(regs.pc.d);
+  debugger.op_exec(r.pc.d);
   instruction();
 }
 
@@ -89,8 +89,10 @@ auto CPU::power() -> void {
   for(auto& byte : wram) byte = random(0x55);
 
   //CPU
-  regs.a = regs.x = regs.y = 0x0000;
-  regs.s = 0x01ff;
+  r.a = 0x0000;
+  r.x = 0x0000;
+  r.y = 0x0000;
+  r.s = 0x01ff;
 
   //DMA
   for(auto& channel : this->channel) {
@@ -144,17 +146,17 @@ auto CPU::reset() -> void {
   bus.map(reader, writer, "7e-7f:0000-ffff", 0x20000);
 
   //CPU
-  regs.pc     = 0x000000;
-  regs.x.h    = 0x00;
-  regs.y.h    = 0x00;
-  regs.s.h    = 0x01;
-  regs.d      = 0x0000;
-  regs.db     = 0x00;
-  regs.p      = 0x34;
-  regs.e      = 1;
-  regs.mdr    = 0x00;
-  regs.wai    = false;
-  regs.vector = 0xfffc;  //reset vector address
+  r.pc     = 0x000000;
+  r.x.h    = 0x00;
+  r.y.h    = 0x00;
+  r.s.h    = 0x01;
+  r.d      = 0x0000;
+  r.db     = 0x00;
+  r.p      = 0x34;
+  r.e      = 1;
+  r.mdr    = 0x00;
+  r.wai    = false;
+  r.vector = 0xfffc;  //reset vector address
 
   //$2140-217f
   for(auto& port : status.port) port = 0x00;

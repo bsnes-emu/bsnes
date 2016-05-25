@@ -8,16 +8,16 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
 
   //WMDATA
   if(addr == 0x2180) {
-    return bus.read(0x7e0000 | status.wram_addr++, regs.mdr);
+    return bus.read(0x7e0000 | status.wram_addr++, r.mdr);
   }
 
   //JOYSER0
   //7-2 = MDR
   //1-0 = Joypad serial data
   if(addr == 0x4016) {
-    uint8 r = regs.mdr & 0xfc;
-    r |= SuperFamicom::peripherals.controllerPort1->data();
-    return r;
+    uint8 v = r.mdr & 0xfc;
+    v |= SuperFamicom::peripherals.controllerPort1->data();
+    return v;
   }
 
   //JOYSER1
@@ -25,9 +25,9 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
     //7-5 = MDR
     //4-2 = Always 1 (pins are connected to GND)
     //1-0 = Joypad serial data
-    uint8 r = (regs.mdr & 0xe0) | 0x1c;
-    r |= SuperFamicom::peripherals.controllerPort2->data();
-    return r;
+    uint8 v = (r.mdr & 0xe0) | 0x1c;
+    v |= SuperFamicom::peripherals.controllerPort2->data();
+    return v;
   }
 
   //RDNMI
@@ -35,19 +35,19 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
     //7   = NMI acknowledge
     //6-4 = MDR
     //3-0 = CPU (5a22) version
-    uint8 r = (regs.mdr & 0x70);
-    r |= (uint8)(rdnmi()) << 7;
-    r |= (cpu_version & 0x0f);
-    return r;
+    uint8 v = (r.mdr & 0x70);
+    v |= (uint8)(rdnmi()) << 7;
+    v |= (cpu_version & 0x0f);
+    return v;
   }
 
   //TIMEUP
   if(addr == 0x4211) {
     //7   = IRQ acknowledge
     //6-0 = MDR
-    uint8 r = (regs.mdr & 0x7f);
-    r |= (uint8)(timeup()) << 7;
-    return r;
+    uint8 v = (r.mdr & 0x7f);
+    v |= (uint8)(timeup()) << 7;
+    return v;
   }
 
   //HVBJOY
@@ -56,11 +56,11 @@ auto CPU::cpuPortRead(uint24 addr, uint8 data) -> uint8 {
     //6   = HBLANK acknowledge
     //5-1 = MDR
     //0   = JOYPAD acknowledge
-    uint8 r = (regs.mdr & 0x3e);
-    if(status.auto_joypad_active) r |= 0x01;
-    if(hcounter() <= 2 || hcounter() >= 1096) r |= 0x40;  //hblank
-    if(vcounter() >= ppu.vdisp()) r |= 0x80;  //vblank
-    return r;
+    uint8 v = (r.mdr & 0x3e);
+    if(status.auto_joypad_active) v |= 0x01;
+    if(hcounter() <= 2 || hcounter() >= 1096) v |= 0x40;  //hblank
+    if(vcounter() >= ppu.vdisp()) v |= 0x80;  //vblank
+    return v;
   }
 
   //RDIO

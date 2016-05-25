@@ -1,21 +1,21 @@
-auto Program::loadMedia(string location) -> void {
+auto Program::loadMedium(string location) -> void {
   location.transform("\\", "/");
   if(!location.endsWith("/")) location.append("/");
   if(!directory::exists(location)) return;
 
   string type = suffixname(location).trimLeft(".", 1L);
-  for(auto& media : emulator->media) {
-    if(!media.bootable) continue;
-    if(media.type != type) continue;
-    return loadMedia(media, location);
+  for(auto& medium : emulator->media) {
+    if(!medium.bootable) continue;
+    if(medium.type != type) continue;
+    return loadMedium(medium, location);
   }
 }
 
-auto Program::loadMedia(Emulator::Interface::Media& media, string location) -> void {
-  unloadMedia();
+auto Program::loadMedium(Emulator::Interface::Medium& medium, string location) -> void {
+  unloadMedium();
 
-  mediaPaths(0) = locate({media.name, ".sys/"});
-  mediaPaths(media.id) = location;
+  mediumPaths(0) = locate({medium.name, ".sys/"});
+  mediumPaths(medium.id) = location;
   folderPaths.append(location);
 
   emulator->set("Blur Emulation", false);
@@ -28,17 +28,17 @@ auto Program::loadMedia(Emulator::Interface::Media& media, string location) -> v
   emulator->connect((uint)SFC::Port::Controller2, (uint)SFC::Device::None);
   emulator->connect((uint)SFC::Port::Expansion,   (uint)SFC::Device::None);
 
-  emulator->load(media.id);
+  emulator->load(medium.id);
   emulator->power();
 
   presentation->setTitle(emulator->title());
 }
 
-auto Program::unloadMedia() -> void {
+auto Program::unloadMedium() -> void {
   if(!emulator->loaded()) return;
 
   emulator->unload();
-  mediaPaths.reset();
+  mediumPaths.reset();
   folderPaths.reset();
 
   presentation->setTitle("");

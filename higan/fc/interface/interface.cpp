@@ -22,25 +22,24 @@ Interface::Interface() {
   media.append({ID::Famicom, "Famicom", "fc", true});
 
   { Device device{0, ID::Port1 | ID::Port2, "Controller"};
-    device.input.append({0, 0, "A"     });
-    device.input.append({1, 0, "B"     });
-    device.input.append({2, 0, "Select"});
-    device.input.append({3, 0, "Start" });
-    device.input.append({4, 0, "Up"    });
-    device.input.append({5, 0, "Down"  });
-    device.input.append({6, 0, "Left"  });
-    device.input.append({7, 0, "Right" });
-    device.order = {4, 5, 6, 7, 1, 0, 2, 3};
-    this->device.append(device);
+    device.inputs.append({0, 0, "Up"    });
+    device.inputs.append({1, 0, "Down"  });
+    device.inputs.append({2, 0, "Left"  });
+    device.inputs.append({3, 0, "Right" });
+    device.inputs.append({4, 0, "B"     });
+    device.inputs.append({5, 0, "A"     });
+    device.inputs.append({6, 0, "Select"});
+    device.inputs.append({7, 0, "Start" });
+    devices.append(device);
   }
 
-  port.append({0, "Port 1"});
-  port.append({1, "Port 2"});
+  ports.append({0, "Port 1"});
+  ports.append({1, "Port 2"});
 
-  for(auto& device : this->device) {
-    for(auto& port : this->port) {
+  for(auto& device : devices) {
+    for(auto& port : ports) {
       if(device.portmask & (1 << port.id)) {
-        port.device.append(device);
+        port.devices.append(device);
       }
     }
   }
@@ -98,14 +97,14 @@ auto Interface::videoColor(uint32 n) -> uint64 {
     v *= brightness / 12.0;
 
     y += v;
-    i += v * std::cos((3.141592653 / 6.0) * (p + hue));
-    q += v * std::sin((3.141592653 / 6.0) * (p + hue));
+    i += v * cos((3.141592653 / 6.0) * (p + hue));
+    q += v * sin((3.141592653 / 6.0) * (p + hue));
   }
 
   i *= saturation;
   q *= saturation;
 
-  auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : std::pow(f, 2.2 / gamma); };
+  auto gammaAdjust = [=](double f) { return f < 0.0 ? 0.0 : pow(f, 2.2 / gamma); };
   uint64 r = uclamp<16>(65535.0 * gammaAdjust(y +  0.946882 * i +  0.623557 * q));
   uint64 g = uclamp<16>(65535.0 * gammaAdjust(y + -0.274788 * i + -0.635691 * q));
   uint64 b = uclamp<16>(65535.0 * gammaAdjust(y + -1.108545 * i +  1.709007 * q));

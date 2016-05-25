@@ -91,12 +91,15 @@ auto CPU::sync_step(uint clocks) -> void {
 }
 
 auto CPU::keypad_run() -> void {
-  if(regs.keypad.control.enable == false) return;
+  //lookup table to convert button indexes to Emulator::Interface indexes
+  static const uint lookup[] = {5, 4, 8, 9, 3, 2, 0, 1, 7, 6};
+
+  if(!regs.keypad.control.enable) return;
 
   bool test = regs.keypad.control.condition;  //0 = OR, 1 = AND
   for(auto n : range(10)) {
-    if(regs.keypad.control.flag[n] == false) continue;
-    bool input = interface->inputPoll(0, 0, n);
+    if(!regs.keypad.control.flag[n]) continue;
+    bool input = interface->inputPoll(0, 0, lookup[n]);
     if(regs.keypad.control.condition == 0) test |= input;
     if(regs.keypad.control.condition == 1) test &= input;
   }

@@ -4,7 +4,7 @@
 
 auto SA1::dma_normal() -> void {
   while(mmio.dtc--) {
-    uint8 data = regs.mdr;
+    uint8 data = r.mdr;
     uint32 dsa = mmio.dsa++;
     uint32 dda = mmio.dda++;
 
@@ -61,7 +61,7 @@ auto SA1::dma_cc1() -> void {
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
     mmio.chdma_irqcl = 0;
-    cpu.regs.irq = 1;
+    cpu.r.irq = 1;
   }
 }
 

@@ -23,41 +23,39 @@ Interface::Interface() {
   media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc", true});
 
   { Device device{0, ID::DeviceHorizontal, "Controller"};
-    device.input.append({ 0, 0, "Y1"});
-    device.input.append({ 1, 0, "Y2"});
-    device.input.append({ 2, 0, "Y3"});
-    device.input.append({ 3, 0, "Y4"});
-    device.input.append({ 4, 0, "X1"});
-    device.input.append({ 5, 0, "X2"});
-    device.input.append({ 6, 0, "X3"});
-    device.input.append({ 7, 0, "X4"});
-    device.input.append({ 8, 0, "B"});
-    device.input.append({ 9, 0, "A"});
-    device.input.append({10, 0, "Start"});
-    device.input.append({11, 0, "Rotate"});
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    this->device.append(device);
+    device.inputs.append({ 0, 0, "Y1"});
+    device.inputs.append({ 1, 0, "Y2"});
+    device.inputs.append({ 2, 0, "Y3"});
+    device.inputs.append({ 3, 0, "Y4"});
+    device.inputs.append({ 4, 0, "X1"});
+    device.inputs.append({ 5, 0, "X2"});
+    device.inputs.append({ 6, 0, "X3"});
+    device.inputs.append({ 7, 0, "X4"});
+    device.inputs.append({ 8, 0, "B"});
+    device.inputs.append({ 9, 0, "A"});
+    device.inputs.append({10, 0, "Start"});
+    device.inputs.append({11, 0, "Rotate"});
+    devices.append(device);
   }
 
   { Device device{1, ID::DeviceVertical, "Controller"};
-    device.input.append({ 0, 0, "Y1"});
-    device.input.append({ 1, 0, "Y2"});
-    device.input.append({ 2, 0, "Y3"});
-    device.input.append({ 3, 0, "Y4"});
-    device.input.append({ 4, 0, "X1"});
-    device.input.append({ 5, 0, "X2"});
-    device.input.append({ 6, 0, "X3"});
-    device.input.append({ 7, 0, "X4"});
-    device.input.append({ 8, 0, "B"});
-    device.input.append({ 9, 0, "A"});
-    device.input.append({10, 0, "Start"});
-    device.input.append({11, 0, "Rotate"});
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    this->device.append(device);
+    device.inputs.append({ 0, 0, "Y1"});
+    device.inputs.append({ 1, 0, "Y2"});
+    device.inputs.append({ 2, 0, "Y3"});
+    device.inputs.append({ 3, 0, "Y4"});
+    device.inputs.append({ 4, 0, "X1"});
+    device.inputs.append({ 5, 0, "X2"});
+    device.inputs.append({ 6, 0, "X3"});
+    device.inputs.append({ 7, 0, "X4"});
+    device.inputs.append({ 8, 0, "B"});
+    device.inputs.append({ 9, 0, "A"});
+    device.inputs.append({10, 0, "Start"});
+    device.inputs.append({11, 0, "Rotate"});
+    devices.append(device);
   }
 
-  port.append({0, "Horizontal Orientation", {device[0]}});
-  port.append({1, "Vertical Orientation", {device[1]}});
+  ports.append({0, "Horizontal Orientation", {devices[0]}});
+  ports.append({1, "Vertical Orientation", {devices[1]}});
 }
 
 auto Interface::manifest() -> string {

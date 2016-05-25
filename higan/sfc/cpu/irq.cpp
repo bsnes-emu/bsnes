@@ -90,13 +90,13 @@ auto CPU::timeup() -> bool {
 auto CPU::nmiTest() -> bool {
   if(!status.nmi_transition) return false;
   status.nmi_transition = false;
-  regs.wai = false;
+  r.wai = false;
   return true;
 }
 
 auto CPU::irqTest() -> bool {
-  if(!status.irq_transition && !regs.irq) return false;
+  if(!status.irq_transition && !r.irq) return false;
   status.irq_transition = false;
-  regs.wai = false;
-  return !regs.p.i;
+  r.wai = false;
+  return !r.p.i;
 }

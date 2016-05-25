@@ -19,10 +19,10 @@ struct Group : vector<Input> {
   Group(const string& name) : _name(name) {}
 
   auto name() const -> string { return _name; }
-  auto input(unsigned id) -> Input& { return operator[](id); }
+  auto input(uint id) -> Input& { return operator[](id); }
   auto append(const string& name) -> void { vector::append(Input{name}); }
 
-  auto find(const string& name) const -> maybe<unsigned> {
+  auto find(const string& name) const -> maybe<uint> {
     for(auto id : range(size())) {
       if(operator[](id)._name == name) return id;
     }
@@ -50,10 +50,10 @@ struct Device : vector<Group> {
   auto name() const -> string { return _name; }
   auto id() const -> uint64_t { return _id; }
   auto setID(uint64_t id) -> void { _id = id; }
-  auto group(unsigned id) -> Group& { return operator[](id); }
+  auto group(uint id) -> Group& { return operator[](id); }
   auto append(const string& name) -> void { vector::append(Group{name}); }
 
-  auto find(const string& name) const -> maybe<unsigned> {
+  auto find(const string& name) const -> maybe<uint> {
     for(auto id : range(size())) {
       if(operator[](id)._name == name) return id;
     }
@@ -71,7 +71,7 @@ struct Null : Device {
 };
 
 struct Keyboard : Device {
-  enum GroupID : unsigned { Button };
+  enum GroupID : uint { Button };
 
   Keyboard() : Device("Keyboard") { append("Button"); }
   auto isKeyboard() const -> bool { return true; }
@@ -79,7 +79,7 @@ struct Keyboard : Device {
 };
 
 struct Mouse : Device {
-  enum GroupID : unsigned { Axis, Button };
+  enum GroupID : uint { Axis, Button };
 
   Mouse() : Device("Mouse") { append("Axis"), append("Button"); }
   auto isMouse() const -> bool { return true; }
@@ -88,7 +88,7 @@ struct Mouse : Device {
 };
 
 struct Joypad : Device {
-  enum GroupID : unsigned { Axis, Hat, Trigger, Button };
+  enum GroupID : uint { Axis, Hat, Trigger, Button };
 
   Joypad() : Device("Joypad") { append("Axis"), append("Hat"), append("Trigger"), append("Button"); }
   auto isJoypad() const -> bool { return true; }

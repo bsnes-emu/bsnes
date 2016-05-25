@@ -30,11 +30,11 @@ inline auto program() -> string {
   GetModuleFileName(nullptr, path, PATH_MAX);
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
-  return real(result);
+  return Path::real(result);
   #else
   Dl_info info;
   dladdr((void*)&program, &info);
-  return real(info.dli_fname);
+  return Path::real(info.dli_fname);
   #endif
 }
 
@@ -78,9 +78,9 @@ inline auto config() -> string {
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #elif defined(PLATFORM_MACOSX)
-  string result = {user(), "Library/Application Support/"};
+  string result = {Path::user(), "Library/Application Support/"};
   #else
-  string result = {user(), ".config/"};
+  string result = {Path::user(), ".config/"};
   #endif
   if(!result) result = ".";
   if(!result.endsWith("/")) result.append("/");
@@ -96,9 +96,9 @@ inline auto local() -> string {
   string result = (const char*)utf8_t(path);
   result.transform("\\", "/");
   #elif defined(PLATFORM_MACOSX)
-  string result = {user(), "Library/Application Support/"};
+  string result = {Path::user(), "Library/Application Support/"};
   #else
-  string result = {user(), ".local/share/"};
+  string result = {Path::user(), ".local/share/"};
   #endif
   if(!result) result = ".";
   if(!result.endsWith("/")) result.append("/");

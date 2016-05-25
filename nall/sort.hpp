@@ -19,13 +19,13 @@
 
 namespace nall {
 
-template<typename T, typename Comparator> auto sort(T list[], unsigned size, const Comparator& lessthan) -> void {
+template<typename T, typename Comparator> auto sort(T list[], uint size, const Comparator& lessthan) -> void {
   if(size <= 1) return;  //nothing to sort
 
   //use insertion sort to quickly sort smaller blocks
   if(size < 64) {
     #if defined(NALL_SORT_INSERTION)
-    for(signed i = 1, j; i < size; i++) {
+    for(int i = 1, j; i < size; i++) {
       T copy = std::move(list[i]);
       for(j = i - 1; j >= 0; j--) {
         if(!lessthan(copy, list[j])) break;
@@ -34,9 +34,9 @@ template<typename T, typename Comparator> auto sort(T list[], unsigned size, con
       list[j + 1] = std::move(copy);
     }
     #elif defined(NALL_SORT_SELECTION)
-    for(unsigned i = 0; i < size; i++) {
-      unsigned min = i;
-      for(unsigned j = i + 1; j < size; j++) {
+    for(uint i = 0; i < size; i++) {
+      uint min = i;
+      for(uint j = i + 1; j < size; j++) {
         if(lessthan(list[j], list[min])) min = j;
       }
       if(min != i) std::swap(list[i], list[min]);
@@ -46,13 +46,13 @@ template<typename T, typename Comparator> auto sort(T list[], unsigned size, con
   }
 
   //split list in half and recursively sort both
-  unsigned middle = size / 2;
+  uint middle = size / 2;
   sort(list, middle, lessthan);
   sort(list + middle, size - middle, lessthan);
 
   //left and right are sorted here; perform merge sort
   T* buffer = new T[size];
-  unsigned offset = 0, left = 0, right = middle;
+  uint offset = 0, left = 0, right = middle;
   while(left < middle && right < size) {
     if(!lessthan(list[right], list[left])) {
       buffer[offset++] = std::move(list[left++]);
@@ -63,11 +63,11 @@ template<typename T, typename Comparator> auto sort(T list[], unsigned size, con
   while(left < middle) buffer[offset++] = std::move(list[left++]);
   while(right < size)  buffer[offset++] = std::move(list[right++]);
 
-  for(unsigned i = 0; i < size; i++) list[i] = std::move(buffer[i]);
+  for(uint i = 0; i < size; i++) list[i] = std::move(buffer[i]);
   delete[] buffer;
 }
 
-template<typename T> auto sort(T list[], unsigned size) -> void {
+template<typename T> auto sort(T list[], uint size) -> void {
   return sort(list, size, [](const T& l, const T& r) { return l < r; });
 }
 

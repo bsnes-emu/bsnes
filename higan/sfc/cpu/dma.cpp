@@ -24,7 +24,7 @@ auto CPU::dmaAddressValid(uint24 abus) -> bool {
 
 auto CPU::dmaRead(uint24 abus) -> uint8 {
   if(!dmaAddressValid(abus)) return 0x00;
-  return bus.read(abus, regs.mdr);
+  return bus.read(abus, r.mdr);
 }
 
 //simulate two-stage pipeline for DMA transfers; example:
@@ -42,14 +42,14 @@ auto CPU::dmaWrite(bool valid, uint addr, uint8 data) -> void {
 auto CPU::dmaTransfer(bool direction, uint8 bbus, uint24 abus) -> void {
   if(direction == 0) {
     dmaAddClocks(4);
-    regs.mdr = dmaRead(abus);
+    r.mdr = dmaRead(abus);
     dmaAddClocks(4);
-    dmaWrite(dmaTransferValid(bbus, abus), 0x2100 | bbus, regs.mdr);
+    dmaWrite(dmaTransferValid(bbus, abus), 0x2100 | bbus, r.mdr);
   } else {
     dmaAddClocks(4);
-    regs.mdr = dmaTransferValid(bbus, abus) ? bus.read(0x2100 | bbus, regs.mdr) : (uint8)0x00;
+    r.mdr = dmaTransferValid(bbus, abus) ? bus.read(0x2100 | bbus, r.mdr) : (uint8)0x00;
     dmaAddClocks(4);
-    dmaWrite(dmaAddressValid(abus), abus, regs.mdr);
+    dmaWrite(dmaAddressValid(abus), abus, r.mdr);
   }
 }
 
@@ -155,12 +155,12 @@ auto CPU::dmaRun() -> void {
 
 auto CPU::hdmaUpdate(uint n) -> void {
   dmaAddClocks(4);
-  regs.mdr = dmaRead(channel[n].source_bank << 16 | channel[n].hdma_addr);
+  r.mdr = dmaRead(channel[n].source_bank << 16 | channel[n].hdma_addr);
   dmaAddClocks(4);
   dmaWrite(false);
 
   if((channel[n].line_counter & 0x7f) == 0) {
-    channel[n].line_counter = regs.mdr;
+    channel[n].line_counter = r.mdr;
     channel[n].hdma_addr++;
 
     channel[n].hdma_completed = channel[n].line_counter == 0;
@@ -168,16 +168,16 @@ auto CPU::hdmaUpdate(uint n) -> void {
 
     if(channel[n].indirect) {
       dmaAddClocks(4);
-      regs.mdr = dmaRead(hdmaAddress(n));
-      channel[n].indirect_addr = regs.mdr << 8;
+      r.mdr = dmaRead(hdmaAddress(n));
+      channel[n].indirect_addr = r.mdr << 8;
       dmaAddClocks(4);
       dmaWrite(false);
 
       if(!channel[n].hdma_completed || hdmaActiveAfter(n)) {
         dmaAddClocks(4);
-        regs.mdr = dmaRead(hdmaAddress(n));
+        r.mdr = dmaRead(hdmaAddress(n));
         channel[n].indirect_addr >>= 8;
-        channel[n].indirect_addr |= regs.mdr << 8;
+        channel[n].indirect_addr |= r.mdr << 8;
         dmaAddClocks(4);
         dmaWrite(false);
       }

@@ -6,13 +6,13 @@ auto Program::loadRequest(uint id, string name, string type, bool required) -> v
   .openFolder();
   if(!directory::exists(location)) return;
 
-  mediaPaths(id) = location;
+  mediumPaths(id) = location;
   folderPaths.append(location);
   emulator->load(id);
 }
 
 auto Program::loadRequest(uint id, string filename, bool required) -> void {
-  string pathname = mediaPaths(emulator->group(id));
+  string pathname = mediumPaths(emulator->group(id));
   string location = {pathname, filename};
 
   if(filename == "manifest.bml" && pathname && !pathname.endsWith("sys/")) {
@@ -36,7 +36,7 @@ auto Program::loadRequest(uint id, string filename, bool required) -> void {
 }
 
 auto Program::saveRequest(uint id, string filename) -> void {
-  string pathname = mediaPaths(emulator->group(id));
+  string pathname = mediumPaths(emulator->group(id));
   string location = {pathname, filename};
 
 //filestream stream{location, file::mode::write};
@@ -113,7 +113,7 @@ auto Program::dipSettings(const Markup::Node& node) -> uint {
 }
 
 auto Program::path(uint group) -> string {
-  return mediaPaths(group);
+  return mediumPaths(group);
 }
 
 auto Program::notify(string text) -> void {

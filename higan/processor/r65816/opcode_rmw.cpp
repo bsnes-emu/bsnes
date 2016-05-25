@@ -1,165 +1,165 @@
-auto R65816::op_adjust_imm_b(reg16_t& reg, signed adjust) {
+auto R65816::op_adjust_imm_b(reg16& reg, int adjust) {
 L ioIRQ();
   reg.l += adjust;
-  regs.p.n = (reg.l & 0x80);
-  regs.p.z = (reg.l == 0);
+  r.p.n = (reg.l & 0x80);
+  r.p.z = (reg.l == 0);
 }
 
-auto R65816::op_adjust_imm_w(reg16_t& reg, signed adjust) {
+auto R65816::op_adjust_imm_w(reg16& reg, int adjust) {
 L ioIRQ();
   reg.w += adjust;
-  regs.p.n = (reg.w & 0x8000);
-  regs.p.z = (reg.w == 0);
+  r.p.n = (reg.w & 0x8000);
+  r.p.z = (reg.w == 0);
 }
 
 auto R65816::op_asl_imm_b() {
 L ioIRQ();
-  regs.p.c = (regs.a.l & 0x80);
-  regs.a.l <<= 1;
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
+  r.p.c = (r.a.l & 0x80);
+  r.a.l <<= 1;
+  r.p.n = (r.a.l & 0x80);
+  r.p.z = (r.a.l == 0);
 }
 
 auto R65816::op_asl_imm_w() {
 L ioIRQ();
-  regs.p.c = (regs.a.w & 0x8000);
-  regs.a.w <<= 1;
-  regs.p.n = (regs.a.w & 0x8000);
-  regs.p.z = (regs.a.w == 0);
+  r.p.c = (r.a.w & 0x8000);
+  r.a.w <<= 1;
+  r.p.n = (r.a.w & 0x8000);
+  r.p.z = (r.a.w == 0);
 }
 
 auto R65816::op_lsr_imm_b() {
 L ioIRQ();
-  regs.p.c = (regs.a.l & 0x01);
-  regs.a.l >>= 1;
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
+  r.p.c = (r.a.l & 0x01);
+  r.a.l >>= 1;
+  r.p.n = (r.a.l & 0x80);
+  r.p.z = (r.a.l == 0);
 }
 
 auto R65816::op_lsr_imm_w() {
 L ioIRQ();
-  regs.p.c = (regs.a.w & 0x0001);
-  regs.a.w >>= 1;
-  regs.p.n = (regs.a.w & 0x8000);
-  regs.p.z = (regs.a.w == 0);
+  r.p.c = (r.a.w & 0x0001);
+  r.a.w >>= 1;
+  r.p.n = (r.a.w & 0x8000);
+  r.p.z = (r.a.w == 0);
 }
 
 auto R65816::op_rol_imm_b() {
 L ioIRQ();
-  bool carry = regs.p.c;
-  regs.p.c = (regs.a.l & 0x80);
-  regs.a.l = (regs.a.l << 1) | carry;
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
+  bool carry = r.p.c;
+  r.p.c = (r.a.l & 0x80);
+  r.a.l = (r.a.l << 1) | carry;
+  r.p.n = (r.a.l & 0x80);
+  r.p.z = (r.a.l == 0);
 }
 
 auto R65816::op_rol_imm_w() {
 L ioIRQ();
-  bool carry = regs.p.c;
-  regs.p.c = (regs.a.w & 0x8000);
-  regs.a.w = (regs.a.w << 1) | carry;
-  regs.p.n = (regs.a.w & 0x8000);
-  regs.p.z = (regs.a.w == 0);
+  bool carry = r.p.c;
+  r.p.c = (r.a.w & 0x8000);
+  r.a.w = (r.a.w << 1) | carry;
+  r.p.n = (r.a.w & 0x8000);
+  r.p.z = (r.a.w == 0);
 }
 
 auto R65816::op_ror_imm_b() {
 L ioIRQ();
-  bool carry = regs.p.c;
-  regs.p.c = (regs.a.l & 0x01);
-  regs.a.l = (carry << 7) | (regs.a.l >> 1);
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
+  bool carry = r.p.c;
+  r.p.c = (r.a.l & 0x01);
+  r.a.l = (carry << 7) | (r.a.l >> 1);
+  r.p.n = (r.a.l & 0x80);
+  r.p.z = (r.a.l == 0);
 }
 
 auto R65816::op_ror_imm_w() {
 L ioIRQ();
-  bool carry = regs.p.c;
-  regs.p.c = (regs.a.w & 0x0001);
-  regs.a.w = (carry << 15) | (regs.a.w >> 1);
-  regs.p.n = (regs.a.w & 0x8000);
-  regs.p.z = (regs.a.w == 0);
+  bool carry = r.p.c;
+  r.p.c = (r.a.w & 0x0001);
+  r.a.w = (carry << 15) | (r.a.w >> 1);
+  r.p.n = (r.a.w & 0x8000);
+  r.p.z = (r.a.w == 0);
 }
 
 auto R65816::op_adjust_addr_b(fp op) {
-  aa.l = readpc();
-  aa.h = readpc();
-  rd.l = readdbr(aa.w);
+  aa.l = readPC();
+  aa.h = readPC();
+  rd.l = readDB(aa.w);
   io();
   call(op);
-L writedbr(aa.w, rd.l);
+L writeDB(aa.w, rd.l);
 }
 
 auto R65816::op_adjust_addr_w(fp op) {
-  aa.l = readpc();
-  aa.h = readpc();
-  rd.l = readdbr(aa.w + 0);
-  rd.h = readdbr(aa.w + 1);
+  aa.l = readPC();
+  aa.h = readPC();
+  rd.l = readDB(aa.w + 0);
+  rd.h = readDB(aa.w + 1);
   io();
   call(op);
-  writedbr(aa.w + 1, rd.h);
-L writedbr(aa.w + 0, rd.l);
+  writeDB(aa.w + 1, rd.h);
+L writeDB(aa.w + 0, rd.l);
 }
 
 auto R65816::op_adjust_addrx_b(fp op) {
-  aa.l = readpc();
-  aa.h = readpc();
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  rd.l = readdbr(aa.w + regs.x.w);
+  rd.l = readDB(aa.w + r.x.w);
   io();
   call(op);
-L writedbr(aa.w + regs.x.w, rd.l);
+L writeDB(aa.w + r.x.w, rd.l);
 }
 
 auto R65816::op_adjust_addrx_w(fp op) {
-  aa.l = readpc();
-  aa.h = readpc();
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  rd.l = readdbr(aa.w + regs.x.w + 0);
-  rd.h = readdbr(aa.w + regs.x.w + 1);
+  rd.l = readDB(aa.w + r.x.w + 0);
+  rd.h = readDB(aa.w + r.x.w + 1);
   io();
   call(op);
-  writedbr(aa.w + regs.x.w + 1, rd.h);
-L writedbr(aa.w + regs.x.w + 0, rd.l);
+  writeDB(aa.w + r.x.w + 1, rd.h);
+L writeDB(aa.w + r.x.w + 0, rd.l);
 }
 
 auto R65816::op_adjust_dp_b(fp op) {
-  dp = readpc();
+  dp = readPC();
   io2();
-  rd.l = readdp(dp);
+  rd.l = readDP(dp);
   io();
   call(op);
-L writedp(dp, rd.l);
+L writeDP(dp, rd.l);
 }
 
 auto R65816::op_adjust_dp_w(fp op) {
-  dp = readpc();
+  dp = readPC();
   io2();
-  rd.l = readdp(dp + 0);
-  rd.h = readdp(dp + 1);
+  rd.l = readDP(dp + 0);
+  rd.h = readDP(dp + 1);
   io();
   call(op);
-  writedp(dp + 1, rd.h);
-L writedp(dp + 0, rd.l);
+  writeDP(dp + 1, rd.h);
+L writeDP(dp + 0, rd.l);
 }
 
 auto R65816::op_adjust_dpx_b(fp op) {
-  dp = readpc();
+  dp = readPC();
   io2();
   io();
-  rd.l = readdp(dp + regs.x.w);
+  rd.l = readDP(dp + r.x.w);
   io();
   call(op);
-L writedp(dp + regs.x.w, rd.l);
+L writeDP(dp + r.x.w, rd.l);
 }
 
 auto R65816::op_adjust_dpx_w(fp op) {
-  dp = readpc();
+  dp = readPC();
   io2();
   io();
-  rd.l = readdp(dp + regs.x.w + 0);
-  rd.h = readdp(dp + regs.x.w + 1);
+  rd.l = readDP(dp + r.x.w + 0);
+  rd.h = readDP(dp + r.x.w + 1);
   io();
   call(op);
-  writedp(dp + regs.x.w + 1, rd.h);
-L writedp(dp + regs.x.w + 0, rd.l);
+  writeDP(dp + r.x.w + 1, rd.h);
+L writeDP(dp + r.x.w + 0, rd.l);
 }

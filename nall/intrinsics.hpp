@@ -1,13 +1,15 @@
 #pragma once
 
 namespace nall {
+  using uint = unsigned;
+
   struct Intrinsics {
-    enum class Compiler : unsigned { Clang, GCC, VisualCPP, Unknown };
-    enum class Platform : unsigned { Windows, MacOSX, Linux, BSD, Unknown };
-    enum class API : unsigned { Windows, Posix, Unknown };
-    enum class Display : unsigned { Windows, Quartz, Xorg, Unknown };
-    enum class Processor : unsigned { x86, amd64, ARM, PPC32, PPC64, Unknown };
-    enum class Endian : unsigned { LSB, MSB, Unknown };
+    enum class Compiler : uint { Clang, GCC, VisualCPP, Unknown };
+    enum class Platform : uint { Windows, MacOSX, Linux, BSD, Unknown };
+    enum class API : uint { Windows, Posix, Unknown };
+    enum class Display : uint { Windows, Quartz, Xorg, Unknown };
+    enum class Processor : uint { x86, amd64, ARM, PPC32, PPC64, Unknown };
+    enum class Endian : uint { LSB, MSB, Unknown };
 
     static inline auto compiler() -> Compiler;
     static inline auto platform() -> Platform;

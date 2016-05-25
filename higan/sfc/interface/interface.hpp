@@ -124,7 +124,7 @@ struct Interface : Emulator::Interface {
   auto get(const string& name) -> any override;
   auto set(const string& name, const any& value) -> bool override;
 
-  vector<Device> device;
+  vector<Device> devices;
 };
 
 struct Settings {

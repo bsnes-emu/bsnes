@@ -1,176 +1,138 @@
 auto R65816::op_branch(bool flag, bool value) {
   if(flag != value) {
-L   rd.l = readpc();
+L   rd.l = readPC();
   } else {
-    rd.l = readpc();
-    aa.w = regs.pc.d + (int8)rd.l;
+    rd.l = readPC();
+    aa.w = r.pc.d + (int8)rd.l;
     io6(aa.w);
 L   io();
-    regs.pc.w = aa.w;
+    r.pc.w = aa.w;
   }
 }
 
 auto R65816::op_bra() {
-  rd.l = readpc();
-  aa.w = regs.pc.d + (int8)rd.l;
+  rd.l = readPC();
+  aa.w = r.pc.d + (int8)rd.l;
   io6(aa.w);
 L io();
-  regs.pc.w = aa.w;
+  r.pc.w = aa.w;
 }
 
 auto R65816::op_brl() {
-  rd.l = readpc();
-  rd.h = readpc();
+  rd.l = readPC();
+  rd.h = readPC();
 L io();
-  regs.pc.w = regs.pc.d + (int16)rd.w;
+  r.pc.w = r.pc.d + (int16)rd.w;
 }
 
 auto R65816::op_jmp_addr() {
-  rd.l = readpc();
-L rd.h = readpc();
-  regs.pc.w = rd.w;
+  rd.l = readPC();
+L rd.h = readPC();
+  r.pc.w = rd.w;
 }
 
 auto R65816::op_jmp_long() {
-  rd.l = readpc();
-  rd.h = readpc();
-L rd.b = readpc();
-  regs.pc.d = rd.d & 0xffffff;
+  rd.l = readPC();
+  rd.h = readPC();
+L rd.b = readPC();
+  r.pc.d = rd.d;
 }
 
 auto R65816::op_jmp_iaddr() {
-  aa.l = readpc();
-  aa.h = readpc();
-  rd.l = readaddr(aa.w + 0);
-L rd.h = readaddr(aa.w + 1);
-  regs.pc.w = rd.w;
+  aa.l = readPC();
+  aa.h = readPC();
+  rd.l = readAddr(aa.w + 0);
+L rd.h = readAddr(aa.w + 1);
+  r.pc.w = rd.w;
 }
 
 auto R65816::op_jmp_iaddrx() {
-  aa.l = readpc();
-  aa.h = readpc();
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  rd.l = readpbr(aa.w + regs.x.w + 0);
-L rd.h = readpbr(aa.w + regs.x.w + 1);
-  regs.pc.w = rd.w;
+  rd.l = readPB(aa.w + r.x.w + 0);
+L rd.h = readPB(aa.w + r.x.w + 1);
+  r.pc.w = rd.w;
 }
 
 auto R65816::op_jmp_iladdr() {
-  aa.l = readpc();
-  aa.h = readpc();
-  rd.l = readaddr(aa.w + 0);
-  rd.h = readaddr(aa.w + 1);
-L rd.b = readaddr(aa.w + 2);
-  regs.pc.d = rd.d & 0xffffff;
+  aa.l = readPC();
+  aa.h = readPC();
+  rd.l = readAddr(aa.w + 0);
+  rd.h = readAddr(aa.w + 1);
+L rd.b = readAddr(aa.w + 2);
+  r.pc.d = rd.d;
 }
 
 auto R65816::op_jsr_addr() {
-  aa.l = readpc();
-  aa.h = readpc();
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  regs.pc.w--;
-  writestack(regs.pc.h);
-L writestack(regs.pc.l);
-  regs.pc.w = aa.w;
+  r.pc.w--;
+  writeSP(r.pc.h);
+L writeSP(r.pc.l);
+  r.pc.w = aa.w;
 }
 
-auto R65816::op_jsr_long_e() {
-  aa.l = readpc();
-  aa.h = readpc();
-  writestackn(regs.pc.b);
+auto R65816::op_jsr_long() {
+  aa.l = readPC();
+  aa.h = readPC();
+  writeSPn(r.pc.b);
   io();
-  aa.b = readpc();
-  regs.pc.w--;
-  writestackn(regs.pc.h);
-L writestackn(regs.pc.l);
-  regs.pc.d = aa.d & 0xffffff;
-  regs.s.h = 0x01;
+  aa.b = readPC();
+  r.pc.w--;
+  writeSPn(r.pc.h);
+L writeSPn(r.pc.l);
+  r.pc.d = aa.d;
+E r.s.h = 0x01;
 }
 
-auto R65816::op_jsr_long_n() {
-  aa.l = readpc();
-  aa.h = readpc();
-  writestackn(regs.pc.b);
+auto R65816::op_jsr_iaddrx() {
+  aa.l = readPC();
+  writeSPn(r.pc.h);
+  writeSPn(r.pc.l);
+  aa.h = readPC();
   io();
-  aa.b = readpc();
-  regs.pc.w--;
-  writestackn(regs.pc.h);
-L writestackn(regs.pc.l);
-  regs.pc.d = aa.d & 0xffffff;
+  rd.l = readPB(aa.w + r.x.w + 0);
+L rd.h = readPB(aa.w + r.x.w + 1);
+  r.pc.w = rd.w;
+E r.s.h = 0x01;
 }
 
-auto R65816::op_jsr_iaddrx_e() {
-  aa.l = readpc();
-  writestackn(regs.pc.h);
-  writestackn(regs.pc.l);
-  aa.h = readpc();
-  io();
-  rd.l = readpbr(aa.w + regs.x.w + 0);
-L rd.h = readpbr(aa.w + regs.x.w + 1);
-  regs.pc.w = rd.w;
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_jsr_iaddrx_n() {
-  aa.l = readpc();
-  writestackn(regs.pc.h);
-  writestackn(regs.pc.l);
-  aa.h = readpc();
-  io();
-  rd.l = readpbr(aa.w + regs.x.w + 0);
-L rd.h = readpbr(aa.w + regs.x.w + 1);
-  regs.pc.w = rd.w;
-}
-
-auto R65816::op_rti_e() {
+auto R65816::op_rti() {
   io();
   io();
-  regs.p = readstack() | 0x30;
-  rd.l = readstack();
-L rd.h = readstack();
-  regs.pc.w = rd.w;
-}
-
-auto R65816::op_rti_n() {
-  io();
-  io();
-  regs.p = readstack();
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
+  r.p = readSP();
+E r.p.m = 1, r.p.x = 1;
+  if(r.p.x) {
+    r.x.h = 0x00;
+    r.y.h = 0x00;
   }
-  rd.l = readstack();
-  rd.h = readstack();
-L rd.b = readstack();
-  regs.pc.d = rd.d & 0xffffff;
+  r.pc.l = readSP();
+  if(r.e) {
+  L r.pc.h = readSP();
+  } else {
+    r.pc.h = readSP();
+  L r.pc.b = readSP();
+  }
 }
 
 auto R65816::op_rts() {
   io();
   io();
-  rd.l = readstack();
-  rd.h = readstack();
+  rd.l = readSP();
+  rd.h = readSP();
 L io();
-  regs.pc.w = ++rd.w;
+  r.pc.w = ++rd.w;
 }
 
-auto R65816::op_rtl_e() {
+auto R65816::op_rtl() {
   io();
   io();
-  rd.l = readstackn();
-  rd.h = readstackn();
-L rd.b = readstackn();
-  regs.pc.b = rd.b;
-  regs.pc.w = ++rd.w;
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_rtl_n() {
-  io();
-  io();
-  rd.l = readstackn();
-  rd.h = readstackn();
-L rd.b = readstackn();
-  regs.pc.b = rd.b;
-  regs.pc.w = ++rd.w;
+  rd.l = readSPn();
+  rd.h = readSPn();
+L rd.b = readSPn();
+  r.pc.b = rd.b;
+  r.pc.w = ++rd.w;
+E r.s.h = 0x01;
 }

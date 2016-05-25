@@ -25,19 +25,18 @@ Interface::Interface() {
 
   {
     Device device{0, ID::Device, "Controller"};
-    device.input.append({0, 0, "Up"    });
-    device.input.append({1, 0, "Down"  });
-    device.input.append({2, 0, "Left"  });
-    device.input.append({3, 0, "Right" });
-    device.input.append({4, 0, "B"     });
-    device.input.append({5, 0, "A"     });
-    device.input.append({6, 0, "Select"});
-    device.input.append({7, 0, "Start" });
-    device.order = {0, 1, 2, 3, 4, 5, 6, 7};
-    this->device.append(device);
+    device.inputs.append({0, 0, "Up"    });
+    device.inputs.append({1, 0, "Down"  });
+    device.inputs.append({2, 0, "Left"  });
+    device.inputs.append({3, 0, "Right" });
+    device.inputs.append({4, 0, "B"     });
+    device.inputs.append({5, 0, "A"     });
+    device.inputs.append({6, 0, "Select"});
+    device.inputs.append({7, 0, "Start" });
+    devices.append(device);
   }
 
-  port.append({0, "Device", {device[0]}});
+  ports.append({0, "Device", {devices[0]}});
 }
 
 auto Interface::manifest() -> string {

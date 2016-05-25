@@ -26,7 +26,7 @@ template<typename T> struct set {
   };
 
   node_t* root = nullptr;
-  unsigned nodes = 0;
+  uint nodes = 0;
 
   set() = default;
   set(const set& source) { operator=(source); }
@@ -50,7 +50,7 @@ template<typename T> struct set {
   }
 
   explicit operator bool() const { return nodes; }
-  auto size() const -> unsigned { return nodes; }
+  auto size() const -> uint { return nodes; }
 
   auto reset() -> void {
     reset(root);
@@ -68,7 +68,7 @@ template<typename T> struct set {
   }
 
   auto insert(const T& value) -> maybe<T&> {
-    unsigned count = size();
+    uint count = size();
     node_t* v = insert(root, value);
     root->red = 0;
     if(size() == count) return nothing;
@@ -82,7 +82,7 @@ template<typename T> struct set {
   }
 
   auto remove(const T& value) -> bool {
-    unsigned count = size();
+    uint count = size();
     bool done = 0;
     remove(root, &value, done);
     if(root) root->red = 0;
@@ -112,7 +112,7 @@ template<typename T> struct set {
       return *this;
     }
 
-    base_iterator(const set& source, unsigned position) : source(source), position(position) {
+    base_iterator(const set& source, uint position) : source(source), position(position) {
       node_t* node = source.root;
       while(node) {
         stack.append(node);
@@ -122,12 +122,12 @@ template<typename T> struct set {
 
   protected:
     const set& source;
-    unsigned position;
+    uint position;
     vector<node_t*> stack;
   };
 
   struct iterator : base_iterator {
-    iterator(const set& source, unsigned position) : base_iterator(source, position) {}
+    iterator(const set& source, uint position) : base_iterator(source, position) {}
     auto operator*() const -> T& { return base_iterator::stack.right()->value; }
   };
 
@@ -135,7 +135,7 @@ template<typename T> struct set {
   auto end() -> iterator { return iterator(*this, size()); }
 
   struct const_iterator : base_iterator {
-    const_iterator(const set& source, unsigned position) : base_iterator(source, position) {}
+    const_iterator(const set& source, uint position) : base_iterator(source, position) {}
     auto operator*() const -> const T& { return base_iterator::stack.right()->value; }
   };
 

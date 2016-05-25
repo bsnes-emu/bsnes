@@ -18,14 +18,14 @@
 namespace nall {
 
 struct SMTP {
-  enum class Format : unsigned { Plain, HTML };
+  enum class Format : uint { Plain, HTML };
 
   inline auto server(string server, uint16_t port = 25) -> void;
   inline auto from(string mail, string name = "") -> void;
   inline auto to(string mail, string name = "") -> void;
   inline auto cc(string mail, string name = "") -> void;
   inline auto bcc(string mail, string name = "") -> void;
-  inline auto attachment(const uint8_t* data, unsigned size, string name) -> void;
+  inline auto attachment(const uint8_t* data, uint size, string name) -> void;
   inline auto attachment(string filename, string name = "") -> bool;
   inline auto subject(string subject) -> void;
   inline auto body(string body, Format format = Format::Plain) -> void;
@@ -94,7 +94,7 @@ auto SMTP::bcc(string mail, string name) -> void {
   info.bcc.append({mail, name});
 }
 
-auto SMTP::attachment(const uint8_t* data, unsigned size, string name) -> void {
+auto SMTP::attachment(const uint8_t* data, uint size, string name) -> void {
   vector<uint8_t> buffer;
   buffer.resize(size);
   memcpy(buffer.data(), data, size);
@@ -223,7 +223,7 @@ auto SMTP::response() -> string {
 
 auto SMTP::send(int sock, const string& text) -> bool {
   const char* data = text.data();
-  unsigned size = text.size();
+  uint size = text.size();
   while(size) {
     int length = ::send(sock, (const char*)data, size, 0);
     if(length == -1) return false;
@@ -249,7 +249,7 @@ auto SMTP::boundary() -> string {
   random_lfsr random;
   random.seed(time(0));
   string boundary;
-  for(unsigned n = 0; n < 16; n++) boundary.append(hex<2>(random()));
+  for(uint n = 0; n < 16; n++) boundary.append(hex<2>(random()));
   return boundary;
 }
 
@@ -279,9 +279,9 @@ auto SMTP::contacts(const vector<Information::Contact>& contacts) -> string {
 auto SMTP::split(const string& text) -> string {
   string result;
 
-  unsigned offset = 0;
+  uint offset = 0;
   while(offset < text.size()) {
-    unsigned length = min(76, text.size() - offset);
+    uint length = min(76, text.size() - offset);
     if(length < 76) {
       result.append(text.slice(offset));
     } else {

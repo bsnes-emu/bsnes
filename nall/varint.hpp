@@ -10,8 +10,8 @@ struct varint {
   virtual auto read() -> uint8_t = 0;
   virtual auto write(uint8_t) -> void = 0;
 
-  auto readvu() -> uintmax_t {
-    uintmax_t data = 0, shift = 1;
+  auto readvu() -> uintmax {
+    uintmax data = 0, shift = 1;
     while(true) {
       uint8_t x = read();
       data += (x & 0x7f) * shift;
@@ -22,15 +22,15 @@ struct varint {
     return data;
   }
 
-  auto readvs() -> intmax_t {
-    uintmax_t data = readvu();
+  auto readvs() -> intmax {
+    uintmax data = readvu();
     bool negate = data & 1;
     data >>= 1;
     if(negate) data = ~data;
     return data;
   }
 
-  auto writevu(uintmax_t data) -> void {
+  auto writevu(uintmax data) -> void {
     while(true) {
       uint8_t x = data & 0x7f;
       data >>= 7;
@@ -40,7 +40,7 @@ struct varint {
     }
   }
 
-  auto writevs(intmax_t data) -> void {
+  auto writevs(intmax data) -> void {
     bool negate = data < 0;
     if(negate) data = ~data;
     data = (data << 1) | negate;

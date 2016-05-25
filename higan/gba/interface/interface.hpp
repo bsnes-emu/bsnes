@@ -52,7 +52,7 @@ struct Interface : Emulator::Interface {
   auto set(const string& name, const any& value) -> bool override;
 
 private:
-  vector<Device> device;
+  vector<Device> devices;
 };
 
 struct Settings {

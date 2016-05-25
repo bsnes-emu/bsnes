@@ -69,7 +69,7 @@ struct Interface : Emulator::Interface {
   auto joypWrite(bool p15, bool p14) -> void;
 
 private:
-  vector<Device> device;
+  vector<Device> devices;
 };
 
 struct Settings {

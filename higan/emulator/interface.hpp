@@ -17,13 +17,13 @@ struct Interface {
     } capability;
   } information;
 
-  struct Media {
+  struct Medium {
     uint id;
     string name;
     string type;
     bool bootable;  //false for cartridge slots (eg Sufami Turbo cartridges)
   };
-  vector<Media> media;
+  vector<Medium> media;
 
   struct Device {
     uint id;
@@ -35,16 +35,15 @@ struct Interface {
       string name;
       uintptr guid;  //user data field
     };
-    vector<Input> input;
-    vector<uint> order;
+    vector<Input> inputs;
   };
 
   struct Port {
     uint id;
     string name;
-    vector<Device> device;
+    vector<Device> devices;
   };
-  vector<Port> port;
+  vector<Port> ports;
 
   struct Bind {
     virtual auto loadRequest(uint, string, string, bool) -> void {}

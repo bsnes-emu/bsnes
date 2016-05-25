@@ -3,81 +3,65 @@ L ioIRQ();
 }
 
 auto R65816::op_wdm() {
-L readpc();
+L readPC();
 }
 
 auto R65816::op_xba() {
   io();
 L io();
-  regs.a.l ^= regs.a.h;
-  regs.a.h ^= regs.a.l;
-  regs.a.l ^= regs.a.h;
-  regs.p.n = (regs.a.l & 0x80);
-  regs.p.z = (regs.a.l == 0);
+  swap(r.a.l, r.a.h);
+  r.p.n = (r.a.l & 0x80);
+  r.p.z = (r.a.l == 0);
 }
 
-auto R65816::op_move_b(signed adjust) {
-  dp = readpc();
-  sp = readpc();
-  regs.db = dp;
-  rd.l = readlong((sp << 16) | regs.x.w);
-  writelong((dp << 16) | regs.y.w, rd.l);
+auto R65816::op_move_b(int adjust) {
+  dp = readPC();
+  sp = readPC();
+  r.db = dp;
+  rd.l = readLong(sp << 16 | r.x.w);
+  writeLong(dp << 16 | r.y.w, rd.l);
   io();
-  regs.x.l += adjust;
-  regs.y.l += adjust;
+  r.x.l += adjust;
+  r.y.l += adjust;
 L io();
-  if(regs.a.w--) regs.pc.w -= 3;
+  if(r.a.w--) r.pc.w -= 3;
 }
 
-auto R65816::op_move_w(signed adjust) {
-  dp = readpc();
-  sp = readpc();
-  regs.db = dp;
-  rd.l = readlong((sp << 16) | regs.x.w);
-  writelong((dp << 16) | regs.y.w, rd.l);
+auto R65816::op_move_w(int adjust) {
+  dp = readPC();
+  sp = readPC();
+  r.db = dp;
+  rd.l = readLong(sp << 16 | r.x.w);
+  writeLong(dp << 16 | r.y.w, rd.l);
   io();
-  regs.x.w += adjust;
-  regs.y.w += adjust;
+  r.x.w += adjust;
+  r.y.w += adjust;
 L io();
-  if(regs.a.w--) regs.pc.w -= 3;
+  if(r.a.w--) r.pc.w -= 3;
 }
 
-auto R65816::op_interrupt_e(uint16 vector) {
-  readpc();
-  writestack(regs.pc.h);
-  writestack(regs.pc.l);
-  writestack(regs.p);
-  rd.l = readlong(vector + 0);
-  regs.pc.b = 0;
-  regs.p.i = 1;
-  regs.p.d = 0;
-L rd.h = readlong(vector + 1);
-  regs.pc.w = rd.w;
-}
-
-auto R65816::op_interrupt_n(uint16 vector) {
-  readpc();
-  writestack(regs.pc.b);
-  writestack(regs.pc.h);
-  writestack(regs.pc.l);
-  writestack(regs.p);
-  rd.l = readlong(vector + 0);
-  regs.pc.b = 0x00;
-  regs.p.i = 1;
-  regs.p.d = 0;
-L rd.h = readlong(vector + 1);
-  regs.pc.w = rd.w;
+auto R65816::op_interrupt(uint16 vector) {
+  readPC();
+N writeSP(r.pc.b);
+  writeSP(r.pc.h);
+  writeSP(r.pc.l);
+  writeSP(r.p);
+  r.pc.l = readLong(vector + 0);
+  r.p.i = 1;
+  r.p.d = 0;
+L r.pc.h = readLong(vector + 1);
+  r.pc.b = 0x00;
 }
 
 auto R65816::op_stp() {
-  while(regs.wai = true) {
+  while(r.wai = true) {
 L   io();
   }
 }
 
 auto R65816::op_wai() {
-  regs.wai = true;
-  while(regs.wai) {
+  r.wai = true;
+  while(r.wai) {
 L   io();
   }
   io();
@@ -85,15 +69,15 @@ L   io();
 
 auto R65816::op_xce() {
 L ioIRQ();
-  bool carry = regs.p.c;
-  regs.p.c = regs.e;
-  regs.e = carry;
-  if(regs.e) {
-    regs.p.m = 1;
-    regs.p.x = 1;
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
-    regs.s.h = 0x01;
+  bool carry = r.p.c;
+  r.p.c = r.e;
+  r.e = carry;
+  if(r.e) {
+    r.p.m = 1;
+    r.p.x = 1;
+    r.x.h = 0x00;
+    r.y.h = 0x00;
+    r.s.h = 0x01;
   }
 }
 
@@ -102,226 +86,160 @@ L ioIRQ();
   flag = value;
 }
 
-auto R65816::op_pflag_e(bool mode) {
-  rd.l = readpc();
+auto R65816::op_pflag(bool mode) {
+  rd.l = readPC();
 L io();
-  regs.p = (mode ? regs.p | rd.l : regs.p & ~rd.l);
-  regs.p.m = 1;
-  regs.p.x = 1;
-  regs.x.h = 0x00;
-  regs.y.h = 0x00;
-}
-
-auto R65816::op_pflag_n(bool mode) {
-  rd.l = readpc();
-L io();
-  regs.p = (mode ? regs.p | rd.l : regs.p & ~rd.l);
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
+  r.p = (mode ? r.p | rd.l : r.p & ~rd.l);
+E r.p.m = 1, r.p.x = 1;
+  if(r.p.x) {
+    r.x.h = 0x00;
+    r.y.h = 0x00;
   }
 }
 
-auto R65816::op_transfer_b(reg16_t& from, reg16_t& to) {
+auto R65816::op_transfer_b(reg16& from, reg16& to) {
 L ioIRQ();
   to.l = from.l;
-  regs.p.n = (to.l & 0x80);
-  regs.p.z = (to.l == 0);
+  r.p.n = (to.l & 0x80);
+  r.p.z = (to.l == 0);
 }
 
-auto R65816::op_transfer_w(reg16_t& from, reg16_t& to) {
+auto R65816::op_transfer_w(reg16& from, reg16& to) {
 L ioIRQ();
   to.w = from.w;
-  regs.p.n = (to.w & 0x8000);
-  regs.p.z = (to.w == 0);
+  r.p.n = (to.w & 0x8000);
+  r.p.z = (to.w == 0);
 }
 
-auto R65816::op_tcs_e() {
+auto R65816::op_tcs() {
 L ioIRQ();
-  regs.s.l = regs.a.l;
-}
-
-auto R65816::op_tcs_n() {
-L ioIRQ();
-  regs.s.w = regs.a.w;
+  r.s.w = r.a.w;
+E r.s.h = 0x01;
 }
 
 auto R65816::op_tsx_b() {
 L ioIRQ();
-  regs.x.l = regs.s.l;
-  regs.p.n = (regs.x.l & 0x80);
-  regs.p.z = (regs.x.l == 0);
+  r.x.l = r.s.l;
+  r.p.n = (r.x.l & 0x80);
+  r.p.z = (r.x.l == 0);
 }
 
 auto R65816::op_tsx_w() {
 L ioIRQ();
-  regs.x.w = regs.s.w;
-  regs.p.n = (regs.x.w & 0x8000);
-  regs.p.z = (regs.x.w == 0);
+  r.x.w = r.s.w;
+  r.p.n = (r.x.w & 0x8000);
+  r.p.z = (r.x.w == 0);
 }
 
-auto R65816::op_txs_e() {
+auto R65816::op_txs() {
 L ioIRQ();
-  regs.s.l = regs.x.l;
+E r.s.l = r.x.l;
+N r.s.w = r.x.w;
 }
 
-auto R65816::op_txs_n() {
-L ioIRQ();
-  regs.s.w = regs.x.w;
-}
-
-auto R65816::op_push_b(reg16_t& reg) {
+auto R65816::op_push_b(reg16& reg) {
   io();
-L writestack(reg.l);
+L writeSP(reg.l);
 }
 
-auto R65816::op_push_w(reg16_t& reg) {
+auto R65816::op_push_w(reg16& reg) {
   io();
-  writestack(reg.h);
-L writestack(reg.l);
+  writeSP(reg.h);
+L writeSP(reg.l);
 }
 
-auto R65816::op_phd_e() {
+auto R65816::op_phd() {
   io();
-  writestackn(regs.d.h);
-L writestackn(regs.d.l);
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_phd_n() {
-  io();
-  writestackn(regs.d.h);
-L writestackn(regs.d.l);
+  writeSPn(r.d.h);
+L writeSPn(r.d.l);
+E r.s.h = 0x01;
 }
 
 auto R65816::op_phb() {
   io();
-L writestack(regs.db);
+L writeSP(r.db);
 }
 
 auto R65816::op_phk() {
   io();
-L writestack(regs.pc.b);
+L writeSP(r.pc.b);
 }
 
 auto R65816::op_php() {
   io();
-L writestack(regs.p);
+L writeSP(r.p);
 }
 
-auto R65816::op_pull_b(reg16_t& reg) {
+auto R65816::op_pull_b(reg16& reg) {
   io();
   io();
-L reg.l = readstack();
-  regs.p.n = (reg.l & 0x80);
-  regs.p.z = (reg.l == 0);
+L reg.l = readSP();
+  r.p.n = (reg.l & 0x80);
+  r.p.z = (reg.l == 0);
 }
 
-auto R65816::op_pull_w(reg16_t& reg) {
+auto R65816::op_pull_w(reg16& reg) {
   io();
   io();
-  reg.l = readstack();
-L reg.h = readstack();
-  regs.p.n = (reg.w & 0x8000);
-  regs.p.z = (reg.w == 0);
+  reg.l = readSP();
+L reg.h = readSP();
+  r.p.n = (reg.w & 0x8000);
+  r.p.z = (reg.w == 0);
 }
 
-auto R65816::op_pld_e() {
+auto R65816::op_pld() {
   io();
   io();
-  regs.d.l = readstackn();
-L regs.d.h = readstackn();
-  regs.p.n = (regs.d.w & 0x8000);
-  regs.p.z = (regs.d.w == 0);
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_pld_n() {
-  io();
-  io();
-  regs.d.l = readstackn();
-L regs.d.h = readstackn();
-  regs.p.n = (regs.d.w & 0x8000);
-  regs.p.z = (regs.d.w == 0);
+  r.d.l = readSPn();
+L r.d.h = readSPn();
+  r.p.n = (r.d.w & 0x8000);
+  r.p.z = (r.d.w == 0);
+E r.s.h = 0x01;
 }
 
 auto R65816::op_plb() {
   io();
   io();
-L regs.db = readstack();
-  regs.p.n = (regs.db & 0x80);
-  regs.p.z = (regs.db == 0);
+L r.db = readSP();
+  r.p.n = (r.db & 0x80);
+  r.p.z = (r.db == 0);
 }
 
-auto R65816::op_plp_e() {
+auto R65816::op_plp() {
   io();
   io();
-L regs.p = readstack() | 0x30;
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
+L r.p = readSP();
+E r.p.m = 1, r.p.x = 1;
+  if(r.p.x) {
+    r.x.h = 0x00;
+    r.y.h = 0x00;
   }
 }
 
-auto R65816::op_plp_n() {
-  io();
-  io();
-L regs.p = readstack();
-  if(regs.p.x) {
-    regs.x.h = 0x00;
-    regs.y.h = 0x00;
-  }
+auto R65816::op_pea() {
+  aa.l = readPC();
+  aa.h = readPC();
+  writeSPn(aa.h);
+L writeSPn(aa.l);
+E r.s.h = 0x01;
 }
 
-auto R65816::op_pea_e() {
-  aa.l = readpc();
-  aa.h = readpc();
-  writestackn(aa.h);
-L writestackn(aa.l);
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_pea_n() {
-  aa.l = readpc();
-  aa.h = readpc();
-  writestackn(aa.h);
-L writestackn(aa.l);
-}
-
-auto R65816::op_pei_e() {
-  dp = readpc();
+auto R65816::op_pei() {
+  dp = readPC();
   io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  writestackn(aa.h);
-L writestackn(aa.l);
-  regs.s.h = 0x01;
+  aa.l = readDPn(dp + 0);
+  aa.h = readDPn(dp + 1);
+  writeSPn(aa.h);
+L writeSPn(aa.l);
+E r.s.h = 0x01;
 }
 
-auto R65816::op_pei_n() {
-  dp = readpc();
-  io2();
-  aa.l = readdp(dp + 0);
-  aa.h = readdp(dp + 1);
-  writestackn(aa.h);
-L writestackn(aa.l);
-}
-
-auto R65816::op_per_e() {
-  aa.l = readpc();
-  aa.h = readpc();
+auto R65816::op_per() {
+  aa.l = readPC();
+  aa.h = readPC();
   io();
-  rd.w = regs.pc.d + (int16)aa.w;
-  writestackn(rd.h);
-L writestackn(rd.l);
-  regs.s.h = 0x01;
-}
-
-auto R65816::op_per_n() {
-  aa.l = readpc();
-  aa.h = readpc();
-  io();
-  rd.w = regs.pc.d + (int16)aa.w;
-  writestackn(rd.h);
-L writestackn(rd.l);
+  rd.w = r.pc.d + (int16)aa.w;
+  writeSPn(rd.h);
+L writeSPn(rd.l);
+E r.s.h = 0x01;
 }
