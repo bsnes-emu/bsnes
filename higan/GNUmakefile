@@ -5,7 +5,7 @@ target := tomoko
 # console := true
 
 flags += -I. -I.. -O3
-objects := libco audio video
+objects := libco audio video resource
 
 # profile-guided optimization mode
 # pgo := instrument
@@ -56,6 +56,7 @@ all: build;
 obj/libco.o: ../libco/libco.c $(call rwildcard,../libco/)
 obj/audio.o: audio/audio.cpp $(call rwildcard,audio/)
 obj/video.o: video/video.cpp $(call rwildcard,video/)
+obj/resource.o: resource/resource.cpp $(call rwildcard,resource/)
 
 ui := target-$(target)
 include $(ui)/GNUmakefile

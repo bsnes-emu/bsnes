@@ -11,7 +11,10 @@
 //Note that no commercial game ever utilizes a Super Scope in port 1.
 
 SuperScope::SuperScope(bool port) : Controller(port) {
-  create(Controller::Enter, 21477272);
+  create(Controller::Enter, 21'477'272);
+  sprite = Emulator::video.createSprite(32, 32);
+  sprite->setPixels(Resource::Sprite::CrosshairGreen);
+
   latched = 0;
   counter = 0;
 
@@ -25,18 +28,22 @@ SuperScope::SuperScope(bool port) : Controller(port) {
   pause     = false;
   offscreen = false;
 
-  turbolock   = false;
+  oldturbo    = false;
   triggerlock = false;
   pauselock   = false;
 
   prev = 0;
 }
 
-auto SuperScope::main() -> void {
-  unsigned next = cpu.vcounter() * 1364 + cpu.hcounter();
+SuperScope::~SuperScope() {
+  Emulator::video.removeSprite(sprite);
+}
 
-  if(offscreen == false) {
-    unsigned target = y * 1364 + (x + 24) * 4;
+auto SuperScope::main() -> void {
+  uint next = cpu.vcounter() * 1364 + cpu.hcounter();
+
+  if(!offscreen) {
+    uint target = y * 1364 + (x + 24) * 4;
     if(next >= target && prev < target) {
       //CRT raster detected, toggle iobit to latch counters
       iobit(0);
@@ -53,6 +60,8 @@ auto SuperScope::main() -> void {
     x = max(-16, min(256 + 16, nx));
     y = max(-16, min(240 + 16, ny));
     offscreen = (x < 0 || y < 0 || x >= 256 || y >= ppu.vdisp());
+    sprite->setPosition(x * 2 - 16, y * 2 - 16);
+    sprite->setVisible(true);
   }
 
   prev = next;
@@ -65,12 +74,11 @@ auto SuperScope::data() -> uint2 {
   if(counter == 0) {
     //turbo is a switch; toggle is edge sensitive
     bool newturbo = interface->inputPoll(port, Device::SuperScope, Turbo);
-    if(newturbo && !turbo) {
+    if(newturbo && !oldturbo) {
       turbo = !turbo;  //toggle state
-      turbolock = true;
-    } else {
-      turbolock = false;
+      sprite->setPixels(turbo ? Resource::Sprite::CrosshairRed : Resource::Sprite::CrosshairGreen);
     }
+    oldturbo = newturbo;
 
     //trigger is a button
     //if turbo is active, trigger is level sensitive; otherwise, it is edge sensitive

@@ -13,6 +13,9 @@ Controller::Controller(bool port) : port(port) {
   if(!thread) create(Controller::Enter, 1);
 }
 
+Controller::~Controller() {
+}
+
 auto Controller::Enter() -> void {
   while(true) {
     scheduler.synchronize();

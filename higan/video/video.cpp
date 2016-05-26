@@ -2,6 +2,7 @@
 
 namespace Emulator {
 
+#include "sprite.cpp"
 Video video;
 
 Video::~Video() {
@@ -10,6 +11,7 @@ Video::~Video() {
 
 auto Video::reset() -> void {
   interface = nullptr;
+  sprites.reset();
   delete output;
   output = nullptr;
   delete palette;
@@ -85,6 +87,22 @@ auto Video::setEffect(Effect effect, const any& value) -> void {
   }
 }
 
+auto Video::createSprite(uint width, uint height) -> shared_pointer<Sprite> {
+  shared_pointer<Sprite> sprite = new Sprite{width, height};
+  sprites.append(sprite);
+  return sprite;
+}
+
+auto Video::removeSprite(shared_pointer<Sprite> sprite) -> bool {
+  for(uint n : range(sprites)) {
+    if(sprite == sprites[n]) {
+      sprites.remove(n);
+      return true;
+    }
+  }
+  return false;
+}
+
 auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void {
   if(this->width != width || this->height != height) {
     delete output;
@@ -119,6 +137,23 @@ auto Video::refresh(uint32* input, uint pitch, uint width, uint height) -> void 
         auto a = target[x];
         auto b = target[x + (x != width - 1)];
         target[x] = (a + b - ((a ^ b) & 0x01010101)) >> 1;
+      }
+    }
+  }
+
+  for(auto& sprite : sprites) {
+    if(!sprite->visible) continue;
+
+    for(int y : range(sprite->height)) {
+      for(int x : range(sprite->width)) {
+        int pixelY = sprite->y + y;
+        if(pixelY < 0 || pixelY >= height) continue;
+
+        int pixelX = sprite->x + x;
+        if(pixelX < 0 || pixelX >= width) continue;
+
+        auto pixel = sprite->pixels[y * sprite->width + x];
+        if(pixel) output[pixelY * width + pixelX] = 0xff000000 | pixel;
       }
     }
   }

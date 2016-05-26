@@ -15,6 +15,7 @@ struct Controller : Cothread {
   enum : bool { Port1 = 0, Port2 = 1 };
 
   Controller(bool port);
+  virtual ~Controller();
   static auto Enter() -> void;
 
   virtual auto main() -> void;

@@ -4,6 +4,7 @@ struct Justifier : Controller {
   };
 
   Justifier(bool port, bool chained);
+  ~Justifier();
 
   auto main() -> void;
   auto data() -> uint2;
@@ -11,14 +12,17 @@ struct Justifier : Controller {
 
 //private:
   const bool chained;  //true if the second justifier is attached to the first
-  const unsigned device;
+  const uint device;
   bool latched;
-  unsigned counter;
-  unsigned prev;
+  uint counter;
+  uint prev;
 
   bool active;
   struct Player {
-    signed x, y;
-    bool trigger, start;
+    shared_pointer<Emulator::Sprite> sprite;
+    int x;
+    int y;
+    bool trigger;
+    bool start;
   } player1, player2;
 };

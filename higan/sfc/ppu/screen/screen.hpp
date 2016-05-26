@@ -1,5 +1,6 @@
 struct Screen {
-  uint32* line;
+  uint32* lineA;
+  uint32* lineB;
 
   struct Regs {
     bool addsub_mode;

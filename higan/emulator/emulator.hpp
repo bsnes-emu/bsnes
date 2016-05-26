@@ -5,10 +5,11 @@ using namespace nall;
 
 #include <audio/audio.hpp>
 #include <video/video.hpp>
+#include <resource/resource.hpp>
 
 namespace Emulator {
   static const string Name = "higan";
-  static const string Version = "098.11";
+  static const string Version = "098.12";
   static const string Author = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
