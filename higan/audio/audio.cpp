@@ -7,7 +7,18 @@ Audio audio;
 
 auto Audio::reset() -> void {
   streams.reset();
-  setReverbDelay(reverbDelay);
+  reverb.reset();
+  reverb.resize(2);
+  for(auto c : range(2)) {
+    reverb[c].resize(7);
+    reverb[c][0].resize(1229);
+    reverb[c][1].resize(1559);
+    reverb[c][2].resize(1907);
+    reverb[c][3].resize(4057);
+    reverb[c][4].resize(8117);
+    reverb[c][5].resize(8311);
+    reverb[c][6].resize(9931);
+  }
 }
 
 auto Audio::setInterface(Interface* interface) -> void {
@@ -27,16 +38,8 @@ auto Audio::setBalance(double balance) -> void {
   this->balance = balance;
 }
 
-auto Audio::setReverbDelay(uint reverbDelay) -> void {
-  this->reverbDelay = reverbDelay;
-  reverbLeft.resize(frequency * reverbDelay / 1000.0);
-  reverbRight.resize(frequency * reverbDelay / 1000.0);
-  memory::fill(reverbLeft.data(), reverbLeft.size() * sizeof(int16));
-  memory::fill(reverbRight.data(), reverbRight.size() * sizeof(int16));
-}
-
-auto Audio::setReverbLevel(double reverbLevel) -> void {
-  this->reverbLevel = reverbLevel;
+auto Audio::setReverb(bool enabled) -> void {
+  this->reverbEnable = enabled;
 }
 
 auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stream> {
@@ -70,15 +73,20 @@ auto Audio::poll() -> void {
     int ileft  = (left  * 65535.0) - 32768.0;
     int iright = (right * 65535.0) - 32768.0;
 
+    if(reverbEnable) {
+      ileft *= 0.125;
+      for(auto n : range(7)) ileft += 0.125 * reverb[0][n].last();
+      for(auto n : range(7)) reverb[0][n].write(ileft);
+      ileft *= 8.000;
+
+      iright *= 0.125;
+      for(auto n : range(7)) iright += 0.125 * reverb[1][n].last();
+      for(auto n : range(7)) reverb[1][n].write(iright);
+      iright *= 8.000;
+    }
+
     ileft  *= volume;
     iright *= volume;
-
-    if(reverbDelay) {
-      reverbLeft.append(ileft);
-      reverbRight.append(iright);
-      ileft  += reverbLeft.takeLeft()  * reverbLevel;
-      iright += reverbRight.takeLeft() * reverbLevel;
-    }
 
     interface->audioSample(sclamp<16>(ileft), sclamp<16>(iright));
   }

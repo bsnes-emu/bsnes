@@ -87,9 +87,6 @@ auto Program::updateAudioEffects() -> void {
   auto balance = max(-1.0, min(1.0, (settings["Audio/Balance"].integer() - 50) / 50.0));
   Emulator::audio.setBalance(balance);
 
-  auto reverbDelay = settings["Audio/Reverb/Delay"].natural();
-  Emulator::audio.setReverbDelay(reverbDelay);
-
-  auto reverbLevel = settings["Audio/Reverb/Level"].natural() / 100.0;
-  Emulator::audio.setReverbLevel(reverbLevel);
+  auto reverbEnable = settings["Audio/Reverb/Enable"].boolean();
+  Emulator::audio.setReverb(reverbEnable);
 }

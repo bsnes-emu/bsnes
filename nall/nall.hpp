@@ -38,6 +38,7 @@
 #include <nall/path.hpp>
 #include <nall/primitives.hpp>
 #include <nall/property.hpp>
+#include <nall/queue.hpp>
 #include <nall/random.hpp>
 #include <nall/range.hpp>
 #include <nall/run.hpp>

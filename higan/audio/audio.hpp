@@ -1,5 +1,8 @@
 #pragma once
 
+#include <nall/dsp/iir/biquad.hpp>
+#include <nall/dsp/resampler/cubic.hpp>
+
 namespace Emulator {
 
 struct Interface;
@@ -13,8 +16,7 @@ struct Audio {
   auto setFrequency(double frequency) -> void;
   auto setVolume(double volume) -> void;
   auto setBalance(double balance) -> void;
-  auto setReverbDelay(uint milliseconds) -> void;
-  auto setReverbLevel(double level) -> void;
+  auto setReverb(bool enabled) -> void;
 
   auto createStream(uint channels, double frequency) -> shared_pointer<Stream>;
 
@@ -26,10 +28,9 @@ private:
   double frequency = 0.0;
   double volume = 1.0;
   double balance = 0.0;
-  uint reverbDelay = 0;  //0 = disabled
-  double reverbLevel = 0.0;
-  vector<int16> reverbLeft;
-  vector<int16> reverbRight;
+
+  bool reverbEnable = false;
+  vector<vector<queue<int16>>> reverb;
 
   friend class Stream;
 };
@@ -55,23 +56,9 @@ private:
   double outputFrequency = 0.0;
   double cutoffFrequency = 0.0;
 
-  vector<double> taps;
-
-  uint decimationRate = 0;
-  uint decimationOffset = 0;
-
-  vector<vector<double>> input;
-  uint inputOffset = 0;
-
-  double resamplerFrequency = 0.0;
-  double resamplerFraction = 0.0;
-  double resamplerStep = 0.0;
-  vector<vector<double>> queue;
-
-  vector<vector<double>> output;
-  uint outputs = 0;
-  uint outputReadOffset = 0;
-  uint outputWriteOffset = 0;
+  const uint iirPasses = 3;  //6th-order filter
+  vector<vector<DSP::IIR::Biquad>> iir;
+  vector<DSP::Resampler::Cubic> resampler;
 
   friend class Audio;
 };

@@ -51,14 +51,7 @@ struct AudioSettings : TabFrameItem {
       Label balanceLabel{&balanceLayout, Size{80, 0}};
       Label balanceValue{&balanceLayout, Size{50, 0}};
       HorizontalSlider balanceSlider{&balanceLayout, Size{~0, 0}};
-    HorizontalLayout reverbDelayLayout{&layout, Size{~0, 0}};
-      Label reverbDelayLabel{&reverbDelayLayout, Size{80, 0}};
-      Label reverbDelayValue{&reverbDelayLayout, Size{50, 0}};
-      HorizontalSlider reverbDelaySlider{&reverbDelayLayout, Size{~0, 0}};
-    HorizontalLayout reverbLevelLayout{&layout, Size{~0, 0}};
-      Label reverbLevelLabel{&reverbLevelLayout, Size{80, 0}};
-      Label reverbLevelValue{&reverbLevelLayout, Size{50, 0}};
-      HorizontalSlider reverbLevelSlider{&reverbLevelLayout, Size{~0, 0}};
+    CheckLabel reverbEnable{&layout, Size{~0, 0}};
 
   auto updateDriver() -> void;
   auto updateEffects() -> void;

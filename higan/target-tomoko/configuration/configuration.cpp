@@ -38,8 +38,7 @@ Settings::Settings() {
   set("Audio/Mute", false);
   set("Audio/Volume", 100);
   set("Audio/Balance", 50);
-  set("Audio/Reverb/Delay", 0);
-  set("Audio/Reverb/Level", 0);
+  set("Audio/Reverb/Enable", false);
   set("Audio/Latency", 60);
   set("Audio/Resampler", "Sinc");
 
