@@ -24,7 +24,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   latencyCombo.onChange([&] { updateDriver(); });
 
   frequencyLabel.setText("Frequency:");
-  auto frequencyValue = audio->get(Audio::Frequency).get<uint>();
+  auto frequencyValue = audio->get(Audio::Frequency).get<uint>(44100);
   frequencyCombo.append(ComboButtonItem().setText({frequencyValue, "hz"}));
   frequencyCombo.setEnabled(false);
 
@@ -40,7 +40,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
 
   volumeLabel.setText("Volume:");
   volumeValue.setAlignment(0.5);
-  volumeSlider.setLength(201).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateEffects(); });
+  volumeSlider.setLength(501).setPosition(settings["Audio/Volume"].natural()).onChange([&] { updateEffects(); });
 
   balanceLabel.setText("Balance:");
   balanceValue.setAlignment(0.5);

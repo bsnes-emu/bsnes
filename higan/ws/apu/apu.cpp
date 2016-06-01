@@ -56,7 +56,7 @@ auto APU::dacRun() -> void {
     right = 0;
   }
 
-  stream->sample(left, right);
+  stream->sample(left / 32768.0, right / 32768.0);
 }
 
 auto APU::step(uint clocks) -> void {

@@ -63,7 +63,7 @@ auto APU::main() -> void {
   if(regs.bias.amplitude == 3) lsample &= ~15, rsample &= ~15;
 
   if(cpu.regs.mode == CPU::Registers::Mode::Stop) lsample = 0, rsample = 0;
-  stream->sample(sclamp<16>(lsample << 6), sclamp<16>(rsample << 6));  //should be <<5; use <<6 for added volume
+  stream->sample(sclamp<16>(lsample << 6) / 32768.0, sclamp<16>(rsample << 6) / 32768.0);  //should be <<5; use <<6 for added volume
   step(512);
 }
 

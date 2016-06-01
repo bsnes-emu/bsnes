@@ -103,7 +103,7 @@ auto DSP::echo27() -> void {
   }
 
   //output sample to DAC
-  stream->sample(outl, outr);
+  stream->sample(outl / 32768.0, outr / 32768.0);
 }
 
 auto DSP::echo28() -> void {

@@ -1,49 +1,35 @@
-Stream::Stream(uint channels, double inputFrequency) : channels(channels), inputFrequency(inputFrequency) {
-}
+auto Stream::reset(uint channels_, double inputFrequency, double outputFrequency) -> void {
+  channels.reset();
+  channels.resize(channels_);
 
-auto Stream::reset() -> void {
-  iir.reset();
-  resampler.reset();
-}
-
-auto Stream::setFrequency(double outputFrequency_) -> void {
-  reset();
-
-  outputFrequency = outputFrequency_;
-  cutoffFrequency = outputFrequency / inputFrequency;
-  iir.resize(channels);
-
-  if(cutoffFrequency <= 0.5) {
-    for(auto c : range(channels)) {
-      iir[c].resize(iirPasses);
-      for(auto p : range(iirPasses)) {
-        //attenuates frequencies that exceed the limits of human hearing (20KHz) to prevent aliasing
-        iir[c][p].reset(DSP::IIR::Biquad::Type::LowPass, 20000.0 / inputFrequency);
+  for(auto& channel : channels) {
+    if(outputFrequency / inputFrequency <= 0.5) {
+      channel.iir.resize(order / 2);
+      for(auto phase : range(order / 2)) {
+        double q = DSP::IIR::Biquad::butterworth(order, phase);
+        channel.iir[phase].reset(DSP::IIR::Biquad::Type::LowPass, 20000.0 / inputFrequency, q);
       }
     }
-  }
 
-  resampler.resize(channels);
-  for(auto c : range(channels)) {
-    resampler[c].reset(inputFrequency, outputFrequency);
+    channel.resampler.reset(inputFrequency, outputFrequency);
   }
 }
 
 auto Stream::pending() const -> bool {
-  return resampler && resampler[0].pending();
+  return channels && channels[0].resampler.pending();
 }
 
-auto Stream::read(double* samples) -> void {
-  for(auto c : range(channels)) samples[c] = resampler[c].read();
-  if(channels == 1) samples[1] = samples[0];  //monaural->stereo hack
+auto Stream::read(double* samples) -> uint {
+  for(auto c : range(channels)) samples[c] = channels[c].resampler.read();
+  return channels.size();
 }
 
-auto Stream::write(int16* samples) -> void {
+auto Stream::write(const double* samples) -> void {
   for(auto c : range(channels)) {
-    double sample = (samples[c] + 32768.0) / 65535.0;  //normalize
-    for(auto& p : iir[c]) sample = p.process(sample);
-    resampler[c].write(sample);
+    double sample = samples[c] + 1e-25;  //constant offset used to suppress denormals
+    for(auto& iir : channels[c].iir) sample = iir.process(sample);
+    channels[c].resampler.write(sample);
   }
 
-  audio.poll();
+  audio.process();
 }

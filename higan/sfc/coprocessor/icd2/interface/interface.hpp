@@ -7,7 +7,7 @@ auto loadRequest(uint id, string name, bool required) -> void override;
 auto saveRequest(uint id, string name) -> void override;
 
 auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
-auto audioSample(int16 lsample, int16 rsample) -> void override;
+auto audioSample(const double* samples, uint channels) -> void override;
 auto inputPoll(uint port, uint device, uint id) -> int16 override;
 
 struct Packet {

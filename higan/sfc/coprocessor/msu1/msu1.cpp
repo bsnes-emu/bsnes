@@ -38,7 +38,7 @@ auto MSU1::main() -> void {
   right = sclamp<16>(rchannel);
   if(dsp.mute()) left = 0, right = 0;
 
-  stream->sample(left, right);
+  stream->sample(left / 32768.0, right / 32768.0);
   step(1);
   synchronizeCPU();
 }

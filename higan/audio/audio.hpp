@@ -10,55 +10,52 @@ struct Audio;
 struct Stream;
 
 struct Audio {
-  auto reset() -> void;
+  auto reset(maybe<uint> channels = nothing, maybe<double> frequency = nothing) -> void;
   auto setInterface(Interface*) -> void;
 
-  auto setFrequency(double frequency) -> void;
   auto setVolume(double volume) -> void;
   auto setBalance(double balance) -> void;
   auto setReverb(bool enabled) -> void;
 
   auto createStream(uint channels, double frequency) -> shared_pointer<Stream>;
 
-  auto poll() -> void;
-
 private:
+  auto process() -> void;
+
   Interface* interface = nullptr;
   vector<shared_pointer<Stream>> streams;
+
+  uint channels = 0;
   double frequency = 0.0;
+
   double volume = 1.0;
   double balance = 0.0;
 
   bool reverbEnable = false;
-  vector<vector<queue<int16>>> reverb;
+  vector<vector<queue<double>>> reverb;
 
   friend class Stream;
 };
 
 struct Stream {
-  Stream(uint channels, double inputFrequency);
-
-  auto reset() -> void;
-  auto setFrequency(double outputFrequency) -> void;
+  auto reset(uint channels, double inputFrequency, double outputFrequency) -> void;
 
   auto pending() const -> bool;
-  auto read(double* samples) -> void;
-  auto write(int16* samples) -> void;
+  auto read(double* samples) -> uint;
+  auto write(const double* samples) -> void;
 
   template<typename... P> auto sample(P&&... p) -> void {
-    int16 samples[sizeof...(P)] = {forward<P>(p)...};
+    double samples[sizeof...(P)] = {forward<P>(p)...};
     write(samples);
   }
 
 private:
-  const uint channels;
-  const double inputFrequency;
-  double outputFrequency = 0.0;
-  double cutoffFrequency = 0.0;
-
-  const uint iirPasses = 3;  //6th-order filter
-  vector<vector<DSP::IIR::Biquad>> iir;
-  vector<DSP::Resampler::Cubic> resampler;
+  const uint order = 6;  //Nth-order filter (must be an even number)
+  struct Channel {
+    vector<DSP::IIR::Biquad> iir;
+    DSP::Resampler::Cubic resampler;
+  };
+  vector<Channel> channels;
 
   friend class Audio;
 };

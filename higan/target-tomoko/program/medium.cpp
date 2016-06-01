@@ -21,8 +21,7 @@ auto Program::loadMedium(Emulator::Interface& interface, Emulator::Interface::Me
   folderPaths.append(location);
 
   //note: the order of operations in this block of code is critical
-  Emulator::audio.reset();
-  Emulator::audio.setFrequency(audio->get(Audio::Frequency).get<uint>());
+  Emulator::audio.reset(2, audio->get(Audio::Frequency).get<uint>(44100));
   emulator = &interface;
   connectDevices();
   emulator->load(medium.id);

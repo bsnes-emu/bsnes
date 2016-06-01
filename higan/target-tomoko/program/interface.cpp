@@ -89,7 +89,9 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   }
 }
 
-auto Program::audioSample(int16 left, int16 right) -> void {
+auto Program::audioSample(const double* samples, uint channels) -> void {
+  int16 left  = sclamp<16>(samples[0] * 32768.0);
+  int16 right = sclamp<16>(samples[1] * 32768.0);
   audio->sample(left, right);
 }
 

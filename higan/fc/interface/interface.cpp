@@ -97,8 +97,8 @@ auto Interface::videoColor(uint32 n) -> uint64 {
     v *= brightness / 12.0;
 
     y += v;
-    i += v * cos((3.141592653 / 6.0) * (p + hue));
-    q += v * sin((3.141592653 / 6.0) * (p + hue));
+    i += v * cos((Math::Pi / 6.0) * (p + hue));
+    q += v * sin((Math::Pi / 6.0) * (p + hue));
   }
 
   i *= saturation;

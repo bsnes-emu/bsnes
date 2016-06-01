@@ -5,11 +5,15 @@ namespace Emulator {
 #include "stream.cpp"
 Audio audio;
 
-auto Audio::reset() -> void {
+auto Audio::reset(maybe<uint> channels_, maybe<double> frequency_) -> void {
+  if(channels_) channels = channels_();
+  if(frequency_) frequency = frequency_();
+
   streams.reset();
   reverb.reset();
-  reverb.resize(2);
-  for(auto c : range(2)) {
+
+  reverb.resize(channels);
+  for(auto c : range(channels)) {
     reverb[c].resize(7);
     reverb[c][0].resize(1229);
     reverb[c][1].resize(1559);
@@ -25,11 +29,6 @@ auto Audio::setInterface(Interface* interface) -> void {
   this->interface = interface;
 }
 
-auto Audio::setFrequency(double frequency) -> void {
-  this->frequency = frequency;
-  for(auto& stream : streams) stream->setFrequency(frequency);
-}
-
 auto Audio::setVolume(double volume) -> void {
   this->volume = volume;
 }
@@ -43,52 +42,48 @@ auto Audio::setReverb(bool enabled) -> void {
 }
 
 auto Audio::createStream(uint channels, double frequency) -> shared_pointer<Stream> {
-  shared_pointer<Stream> stream = new Stream{channels, frequency};
-  stream->setFrequency(this->frequency);
+  shared_pointer<Stream> stream = new Stream;
+  stream->reset(channels, frequency, this->frequency);
   streams.append(stream);
   return stream;
 }
 
-//audio mixer
-auto Audio::poll() -> void {
+auto Audio::process() -> void {
   while(true) {
     for(auto& stream : streams) {
       if(!stream->pending()) return;
     }
 
-    double left = 0.0, right = 0.0;
+    double samples[channels] = {0};
     for(auto& stream : streams) {
-      double samples[2];
-      stream->read(samples);
-      left  += samples[0];
-      right += samples[1];
-    }
-    left  /= streams.size();
-    right /= streams.size();
+      double buffer[16];
+      uint length = stream->read(buffer), offset = 0;
 
-    if(balance < 0.0) right *= 1.0 + balance;
-    if(balance > 0.0) left  *= 1.0 - balance;
-
-    //todo: apply volume, reverb before denormalization?
-    int ileft  = (left  * 65535.0) - 32768.0;
-    int iright = (right * 65535.0) - 32768.0;
-
-    if(reverbEnable) {
-      ileft *= 0.125;
-      for(auto n : range(7)) ileft += 0.125 * reverb[0][n].last();
-      for(auto n : range(7)) reverb[0][n].write(ileft);
-      ileft *= 8.000;
-
-      iright *= 0.125;
-      for(auto n : range(7)) iright += 0.125 * reverb[1][n].last();
-      for(auto n : range(7)) reverb[1][n].write(iright);
-      iright *= 8.000;
+      for(auto c : range(channels)) {
+        samples[c] += buffer[offset];
+        if(++offset >= length) offset = 0;
+      }
     }
 
-    ileft  *= volume;
-    iright *= volume;
+    for(auto c : range(channels)) {
+      samples[c] /= streams.size();
 
-    interface->audioSample(sclamp<16>(ileft), sclamp<16>(iright));
+      if(reverbEnable) {
+        samples[c] *= 0.125;
+        for(auto n : range(7)) samples[c] += 0.125 * reverb[c][n].last();
+        for(auto n : range(7)) reverb[c][n].write(samples[c]);
+        samples[c] *= 8.000;
+      }
+
+      samples[c] *= volume;
+    }
+
+    if(channels == 2) {
+      if(balance < 0.0) samples[1] *= 1.0 + balance;
+      if(balance > 0.0) samples[0] *= 1.0 - balance;
+    }
+
+    interface->audioSample(samples, channels);
   }
 }
 

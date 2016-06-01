@@ -119,8 +119,8 @@ auto ICD2::saveRequest(uint id, string name) -> void {
 auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
 }
 
-auto ICD2::audioSample(int16 left, int16 right) -> void {
-  stream->sample(left, right);
+auto ICD2::audioSample(const double* samples, uint channels) -> void {
+  stream->write(samples);
 }
 
 auto ICD2::inputPoll(uint port, uint device, uint id) -> int16 {

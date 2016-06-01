@@ -19,7 +19,7 @@ struct Interpolation {
   }
 
   static inline auto Cosine(double mu, double a, double b, double c, double d) -> double {
-    mu = (1.0 - cos(mu * 3.14159265)) / 2.0;
+    mu = (1.0 - cos(mu * Math::Pi)) / 2.0;
     return b * (1.0 - mu) + c * mu;
   }
 

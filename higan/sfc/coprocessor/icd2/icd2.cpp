@@ -24,7 +24,7 @@ auto ICD2::main() -> void {
     step(GameBoy::system._clocksExecuted);
     GameBoy::system._clocksExecuted = 0;
   } else {  //DMG halted
-    stream->sample(0, 0);
+    stream->sample(0.0, 0.0);
     step(2);  //two clocks per audio sample
   }
   synchronizeCPU();

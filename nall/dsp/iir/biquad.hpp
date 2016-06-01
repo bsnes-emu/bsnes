@@ -1,6 +1,6 @@
 #pragma once
 
-//transposed direct form II biquadratic second-order IIR filter (butterworth)
+//transposed direct form II biquadratic second-order IIR filter
 
 namespace nall { namespace DSP { namespace IIR {
 
@@ -15,8 +15,10 @@ struct Biquad {
     HighShelf,
   };
 
-  inline auto reset(Type type, double cutoff, double quality = 0.707107, double gain = 0.0) -> void;
-  inline auto process(double in) -> double;  //normalized sample
+  inline auto reset(Type type, double cutoff, double quality, double gain = 0.0) -> void;
+  inline auto process(double in) -> double;  //normalized sample (-1.0 to +1.0)
+
+  inline static auto butterworth(uint order, uint phase) -> double;
 
 private:
   Type type;                  //filter type
@@ -37,7 +39,7 @@ auto Biquad::reset(Type type, double cutoff, double quality, double gain) -> voi
   z2 = 0.0;
 
   double v = pow(10, fabs(gain) / 20.0);
-  double k = tan(3.141592 * cutoff);
+  double k = tan(Math::Pi * cutoff);
   double q = quality;
   double n = 0.0;
 
@@ -141,6 +143,11 @@ auto Biquad::process(double in) -> double {
   z1 = in * a1 + z2 - b1 * out;
   z2 = in * a2 - b2 * out;
   return out;
+}
+
+//compute Q values for N-order butterworth filtering
+auto Biquad::butterworth(uint order, uint phase) -> double {
+  return -0.5 / cos(Math::Pi / 2.0 * (1.0 + (1.0 + (2.0 * phase + 1.0) / order)));
 }
 
 }}}
