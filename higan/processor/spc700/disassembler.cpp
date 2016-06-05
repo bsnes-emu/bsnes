@@ -1,6 +1,6 @@
 auto SPC700::disassemble(uint16 addr, bool p) -> string {
   auto read = [&](uint16 addr) -> uint8 {
-    return disassembler_read(addr);
+    return disassemblerRead(addr);
   };
 
   auto relative = [&](uint length, int8 offset) -> uint16 {

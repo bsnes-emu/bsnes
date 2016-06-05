@@ -147,7 +147,7 @@ auto Biquad::process(double in) -> double {
 
 //compute Q values for N-order butterworth filtering
 auto Biquad::butterworth(uint order, uint phase) -> double {
-  return -0.5 / cos(Math::Pi / 2.0 * (1.0 + (1.0 + (2.0 * phase + 1.0) / order)));
+  return -0.5 / cos(Math::Pi * (phase + order + 0.5) / order);
 }
 
 }}}

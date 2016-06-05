@@ -14,9 +14,9 @@ auto R65816::instruction() -> void {
   #define opXII(n, o, i, j) case n: return r.p.x ? op_##o##_b(i, j) : op_##o##_w(i, j);
 
   switch(readPC()) {
-  opAI (0x00, interrupt, r.e ? 0xffe6 : 0xfffe)
+  opAI (0x00, interrupt, r.e ? 0xfffe : 0xffe6)  //emulation mode lacks BRK vector; uses IRQ vector instead
   opMF (0x01, read_idpx, ora)
-  opAI (0x02, interrupt, r.e ? 0xffe4 : 0xfff4)
+  opAI (0x02, interrupt, r.e ? 0xfff4 : 0xffe4)
   opMF (0x03, read_sr, ora)
   opMF (0x04, adjust_dp, tsb)
   opMF (0x05, read_dp, ora)

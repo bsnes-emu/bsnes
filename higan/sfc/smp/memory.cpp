@@ -173,12 +173,12 @@ auto SMP::busWrite(uint16 addr, uint8 data) -> void {
   ramWrite(addr, data);  //all writes, even to MMIO registers, appear on bus
 }
 
-auto SMP::op_io() -> void {
+auto SMP::io() -> void {
   addClocks(24);
   cycleEdge();
 }
 
-auto SMP::op_read(uint16 addr) -> uint8 {
+auto SMP::read(uint16 addr) -> uint8 {
   addClocks(12);
   uint8 data = busRead(addr);
   addClocks(12);
@@ -187,14 +187,14 @@ auto SMP::op_read(uint16 addr) -> uint8 {
   return data;
 }
 
-auto SMP::op_write(uint16 addr, uint8 data) -> void {
+auto SMP::write(uint16 addr, uint8 data) -> void {
   addClocks(24);
   busWrite(addr, data);
   cycleEdge();
   debugger.op_write(addr, data);
 }
 
-auto SMP::disassembler_read(uint16 addr) -> uint8 {
+auto SMP::disassemblerRead(uint16 addr) -> uint8 {
   if((addr & 0xfff0) == 0x00f0) return 0x00;
   if((addr & 0xffc0) == 0xffc0 && status.iplromEnable) return iplrom[addr & 0x3f];
   return apuram[addr];

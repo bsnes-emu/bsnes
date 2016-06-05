@@ -9,7 +9,7 @@ auto Cartridge::HuC3::mmio_read(uint16 addr) -> uint8 {
 
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
     if(ram_enable) return cartridge.ram_read((ram_select << 13) | (addr & 0x1fff));
-    return 0xff;
+    return 0x01;  //does not return open collection
   }
 
   return 0xff;

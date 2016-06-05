@@ -3,12 +3,12 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto op_io() -> void = 0;
-  virtual auto op_read(uint16 addr) -> uint8 = 0;
-  virtual auto op_write(uint16 addr, uint8 data) -> void = 0;
-  virtual auto disassembler_read(uint16 addr) -> uint8 = 0;
+  virtual auto io() -> void = 0;
+  virtual auto read(uint16 addr) -> uint8 = 0;
+  virtual auto write(uint16 addr, uint8 data) -> void = 0;
+  virtual auto disassemblerRead(uint16 addr) -> uint8 = 0;
 
-  auto op_step() -> void;
+  auto instruction() -> void;
 
   auto serialize(serializer&) -> void;
 
@@ -22,6 +22,10 @@ struct SPC700 {
   uint8 opcode;
 
 protected:
+  using fps = auto (SPC700::*)(uint8) -> uint8;
+  using fpb = auto (SPC700::*)(uint8, uint8) -> uint8;
+  using fpw = auto (SPC700::*)(uint16, uint16) -> uint16;
+
   auto op_adc(uint8, uint8) -> uint8;
   auto op_and(uint8, uint8) -> uint8;
   auto op_asl(uint8) -> uint8;
@@ -41,24 +45,24 @@ protected:
   auto op_ldw(uint16, uint16) -> uint16;
   auto op_sbw(uint16, uint16) -> uint16;
 
-  template<auto (SPC700::*op)(uint8) -> uint8> auto op_adjust(uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8) -> uint8> auto op_adjust_addr() -> void;
-  template<auto (SPC700::*op)(uint8) -> uint8> auto op_adjust_dp() -> void;
+  auto op_adjust(fps, uint8_t&) -> void;
+  auto op_adjust_addr(fps) -> void;
+  auto op_adjust_dp(fps) -> void;
   auto op_adjust_dpw(int) -> void;
-  template<auto (SPC700::*op)(uint8) -> uint8> auto op_adjust_dpx() -> void;
+  auto op_adjust_dpx(fps) -> void;
   auto op_branch(bool) -> void;
   auto op_branch_bit() -> void;
   auto op_pull(uint8_t&) -> void;
   auto op_push(uint8) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_addr(uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_addri(uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_const(uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_dp(uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_dpi(uint8_t&, uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint16, uint16) -> uint16> auto op_read_dpw() -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_idpx() -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_idpy() -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_read_ix() -> void;
+  auto op_read_addr(fpb, uint8_t&) -> void;
+  auto op_read_addri(fpb, uint8_t&) -> void;
+  auto op_read_const(fpb, uint8_t&) -> void;
+  auto op_read_dp(fpb, uint8_t&) -> void;
+  auto op_read_dpi(fpb, uint8_t&, uint8_t&) -> void;
+  auto op_read_dpw(fpw) -> void;
+  auto op_read_idpx(fpb) -> void;
+  auto op_read_idpy(fpb) -> void;
+  auto op_read_ix(fpb) -> void;
   auto op_set_addr_bit() -> void;
   auto op_set_bit() -> void;
   auto op_set_flag(bool&, bool) -> void;
@@ -68,9 +72,9 @@ protected:
   auto op_write_addri(uint8_t&) -> void;
   auto op_write_dp(uint8_t&) -> void;
   auto op_write_dpi(uint8_t&, uint8_t&) -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_write_dp_const() -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_write_dp_dp() -> void;
-  template<auto (SPC700::*op)(uint8, uint8) -> uint8> auto op_write_ix_iy() -> void;
+  auto op_write_dp_const(fpb) -> void;
+  auto op_write_dp_dp(fpb) -> void;
+  auto op_write_ix_iy(fpb) -> void;
 
   auto op_bne_dp() -> void;
   auto op_bne_dpdec() -> void;

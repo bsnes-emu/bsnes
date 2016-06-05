@@ -46,9 +46,9 @@ privileged:
   static auto Enter() -> void;
 
   struct Debugger {
-    hook<void (uint16)> op_exec;
-    hook<void (uint16, uint8)> op_read;
-    hook<void (uint16, uint8)> op_write;
+    hook<auto (uint16) -> void> op_exec;
+    hook<auto (uint16, uint8) -> void> op_read;
+    hook<auto (uint16, uint8) -> void> op_write;
   } debugger;
 
   //memory.cpp
@@ -58,14 +58,14 @@ privileged:
   auto busRead(uint16 addr) -> uint8;
   auto busWrite(uint16 addr, uint8 data) -> void;
 
-  auto op_io() -> void;
-  auto op_read(uint16 addr) -> uint8;
-  auto op_write(uint16 addr, uint8 data) -> void;
+  auto io() -> void override;
+  auto read(uint16 addr) -> uint8 override;
+  auto write(uint16 addr, uint8 data) -> void override;
 
-  auto disassembler_read(uint16 addr) -> uint8;
+  auto disassemblerRead(uint16 addr) -> uint8 override;
 
   //timing.cpp
-  template<unsigned Frequency>
+  template<uint Frequency>
   struct Timer {
     uint8 stage0;
     uint8 stage1;
