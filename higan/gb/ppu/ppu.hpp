@@ -1,7 +1,10 @@
 struct PPU : Thread, MMIO {
+  auto enabled() const -> bool;
+
   static auto Enter() -> void;
   auto main() -> void;
   auto mode(uint) -> void;
+  auto stat() -> void;
   auto coincidence() -> bool;
   auto refresh() -> void;
   auto wait(uint clocks) -> void;

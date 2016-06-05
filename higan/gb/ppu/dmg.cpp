@@ -19,6 +19,7 @@ auto PPU::dmg_read_tile(bool select, uint x, uint y, uint& data) -> void {
 
 auto PPU::dmg_scanline() -> void {
   px = 0;
+  if(!enabled()) return;
 
   const uint Height = (status.ob_size == 0 ? 8 : 16);
   sprites = 0;
@@ -59,7 +60,7 @@ auto PPU::dmg_run() -> void {
   ob.palette = 0;
 
   uint color = 0;
-  if(status.display_enable) {
+  if(enabled()) {
     if(status.bg_enable) dmg_run_bg();
     if(status.window_display_enable) dmg_run_window();
     if(status.ob_enable) dmg_run_ob();

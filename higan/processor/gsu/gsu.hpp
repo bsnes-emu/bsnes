@@ -13,15 +13,15 @@ struct GSU {
   virtual auto rpix(uint8 x, uint8 y) -> uint8 = 0;
 
   virtual auto pipe() -> uint8 = 0;
-  virtual auto rombuffer_sync() -> void = 0;
-  virtual auto rombuffer_read() -> uint8 = 0;
-  virtual auto rambuffer_sync() -> void = 0;
-  virtual auto rambuffer_read(uint16 addr) -> uint8 = 0;
-  virtual auto rambuffer_write(uint16 addr, uint8 data) -> void = 0;
-  virtual auto cache_flush() -> void = 0;
+  virtual auto syncROMBuffer() -> void = 0;
+  virtual auto readROMBuffer() -> uint8 = 0;
+  virtual auto syncRAMBuffer() -> void = 0;
+  virtual auto readRAMBuffer(uint16 addr) -> uint8 = 0;
+  virtual auto writeRAMBuffer(uint16 addr, uint8 data) -> void = 0;
+  virtual auto flushCache() -> void = 0;
 
-  virtual auto bus_read(uint24 addr, uint8 data = 0x00) -> uint8 = 0;
-  virtual auto bus_write(uint24 addr, uint8 data) -> void = 0;
+  virtual auto read(uint24 addr, uint8 data = 0x00) -> uint8 = 0;
+  virtual auto write(uint24 addr, uint8 data) -> void = 0;
 
   //gsu.cpp
   auto power() -> void;
@@ -76,11 +76,11 @@ struct GSU {
   auto serialize(serializer&) -> void;
 
   //disassembler.cpp
-  auto disassemble_opcode(char* output) -> void;
-  auto disassemble_alt0(char* output) -> void;
-  auto disassemble_alt1(char* output) -> void;
-  auto disassemble_alt2(char* output) -> void;
-  auto disassemble_alt3(char* output) -> void;
+  auto disassembleOpcode(char* output) -> void;
+  auto disassembleAlt0(char* output) -> void;
+  auto disassembleAlt1(char* output) -> void;
+  auto disassembleAlt2(char* output) -> void;
+  auto disassembleAlt3(char* output) -> void;
 };
 
 }

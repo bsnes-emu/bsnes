@@ -29,7 +29,7 @@ auto CPU::mmio_joyp_poll() -> void {
   if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
   if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
-  if(status.joyp != 0x0f) interrupt_raise(Interrupt::Joypad);
+  if(status.joyp != 0x0f) raise(Interrupt::Joypad);
 }
 
 auto CPU::mmio_read(uint16 addr) -> uint8 {

@@ -14,10 +14,10 @@ auto CPU::Enter() -> void {
 
 auto CPU::main() -> void {
   interrupt_test();
-  exec();
+  instruction();
 }
 
-auto CPU::interrupt_raise(CPU::Interrupt id) -> void {
+auto CPU::raise(CPU::Interrupt id) -> void {
   if(id == Interrupt::Vblank) {
     status.interrupt_request_vblank = 1;
     if(status.interrupt_enable_vblank) r.halt = false;
@@ -44,49 +44,33 @@ auto CPU::interrupt_raise(CPU::Interrupt id) -> void {
   }
 }
 
-auto CPU::interrupt_lower(CPU::Interrupt id) -> void {
-  if(id == Interrupt::Stat) {
-    status.interrupt_request_stat = 0;
-  }
-}
-
 auto CPU::interrupt_test() -> void {
   if(!r.ime) return;
 
   if(status.interrupt_request_vblank && status.interrupt_enable_vblank) {
     status.interrupt_request_vblank = 0;
-    return interrupt_exec(0x0040);
+    return interrupt(0x0040);
   }
 
   if(status.interrupt_request_stat && status.interrupt_enable_stat) {
     status.interrupt_request_stat = 0;
-    return interrupt_exec(0x0048);
+    return interrupt(0x0048);
   }
 
   if(status.interrupt_request_timer && status.interrupt_enable_timer) {
     status.interrupt_request_timer = 0;
-    return interrupt_exec(0x0050);
+    return interrupt(0x0050);
   }
 
   if(status.interrupt_request_serial && status.interrupt_enable_serial) {
     status.interrupt_request_serial = 0;
-    return interrupt_exec(0x0058);
+    return interrupt(0x0058);
   }
 
   if(status.interrupt_request_joypad && status.interrupt_enable_joypad) {
     status.interrupt_request_joypad = 0;
-    return interrupt_exec(0x0060);
+    return interrupt(0x0060);
   }
-}
-
-auto CPU::interrupt_exec(uint16 pc) -> void {
-  op_io();
-  op_io();
-  op_io();
-  r.ime = 0;
-  op_write(--r[SP], r[PC] >> 8);
-  op_write(--r[SP], r[PC] >> 0);
-  r[PC] = pc;
 }
 
 auto CPU::stop() -> bool {

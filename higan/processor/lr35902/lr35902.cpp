@@ -14,9 +14,18 @@ auto LR35902::power() -> void {
   r.ime = false;
 }
 
-auto LR35902::exec() -> void {
-  uint8 opcode = op_read(r[PC]++);
-  switch(opcode) {
+auto LR35902::interrupt(uint16 vector) -> void {
+  io();
+  io();
+  io();
+  r.ime = 0;
+  write(--r[SP], r[PC] >> 8);
+  write(--r[SP], r[PC] >> 0);
+  r[PC] = vector;
+}
+
+auto LR35902::instruction() -> void {
+  switch(auto opcode = read(r[PC]++)) {
   case 0x00: return op_nop();
   case 0x01: return op_ld_rr_nn(BC);
   case 0x02: return op_ld_rr_a(BC);
@@ -276,9 +285,8 @@ auto LR35902::exec() -> void {
   }
 }
 
-auto LR35902::execCB() -> void {
-  uint8 opcode = op_read(r[PC]++);
-  switch(opcode) {
+auto LR35902::instructionCB() -> void {
+  switch(auto opcode = read(r[PC]++)) {
   case 0x00: return op_rlc_r(B);
   case 0x01: return op_rlc_r(C);
   case 0x02: return op_rlc_r(D);

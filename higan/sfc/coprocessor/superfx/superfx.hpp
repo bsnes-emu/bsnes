@@ -25,45 +25,39 @@ struct SuperFX : Processor::GSU, Cothread {
   };
 
   //core.cpp
-  auto stop() -> void;
-  auto color(uint8 source) -> uint8;
-  auto plot(uint8 x, uint8 y) -> void;
-  auto rpix(uint8 x, uint8 y) -> uint8;
-  auto pixelcache_flush(pixelcache_t& cache) -> void;
+  auto stop() -> void override;
+  auto color(uint8 source) -> uint8 override;
+  auto plot(uint8 x, uint8 y) -> void override;
+  auto rpix(uint8 x, uint8 y) -> uint8 override;
+
+  auto flushPixelCache(PixelCache& cache) -> void;
 
   //memory.cpp
-  auto bus_read(uint24 addr, uint8 data = 0x00) -> uint8 override;
-  auto bus_write(uint24 addr, uint8 data) -> void override;
+  auto read(uint24 addr, uint8 data = 0x00) -> uint8 override;
+  auto write(uint24 addr, uint8 data) -> void override;
 
-  auto op_read(uint16 addr) -> uint8;
+  auto readOpcode(uint16 addr) -> uint8;
   alwaysinline auto peekpipe() -> uint8;
-  alwaysinline auto pipe() -> uint8;
+  alwaysinline auto pipe() -> uint8 override;
 
-  auto cache_flush() -> void;
-  auto cache_mmio_read(uint16 addr) -> uint8;
-  auto cache_mmio_write(uint16 addr, uint8 data) -> void;
-
-  auto memory_reset() -> void;
+  auto flushCache() -> void override;
+  auto readCache(uint16 addr) -> uint8;
+  auto writeCache(uint16 addr, uint8 data) -> void;
 
   //mmio.cpp
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
 
   //timing.cpp
-  auto step(uint clocks) -> void;
+  auto step(uint clocks) -> void override;
 
-  auto rombuffer_sync() -> void;
-  auto rombuffer_update() -> void;
-  auto rombuffer_read() -> uint8;
+  auto syncROMBuffer() -> void override;
+  auto readROMBuffer() -> uint8 override;
+  auto updateROMBuffer() -> void;
 
-  auto rambuffer_sync() -> void;
-  auto rambuffer_read(uint16 addr) -> uint8;
-  auto rambuffer_write(uint16 addr, uint8 data) -> void;
-
-  auto r14_modify(uint16) -> void;
-  auto r15_modify(uint16) -> void;
-
-  auto timing_reset() -> void;
+  auto syncRAMBuffer() -> void override;
+  auto readRAMBuffer(uint16 addr) -> uint8 override;
+  auto writeRAMBuffer(uint16 addr, uint8 data) -> void override;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;
@@ -72,10 +66,8 @@ struct SuperFX : Processor::GSU, Cothread {
   CPURAM cpuram;
 
 private:
-  uint rom_mask;  //rom_size - 1
-  uint ram_mask;  //ram_size - 1
-
-  bool r15_modified = false;
+  uint romMask;
+  uint ramMask;
 };
 
 extern SuperFX superfx;

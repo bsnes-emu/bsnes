@@ -1,21 +1,14 @@
-auto GSU::disassemble_opcode(char* output) -> void {
+auto GSU::disassembleOpcode(char* output) -> void {
   *output = 0;
 
-  if(!regs.sfr.alt2) {
-    if(!regs.sfr.alt1) {
-      disassemble_alt0(output);
-    } else {
-      disassemble_alt1(output);
-    }
-  } else {
-    if(!regs.sfr.alt1) {
-      disassemble_alt2(output);
-    } else {
-      disassemble_alt3(output);
-    }
+  switch(regs.sfr.alt2 << 1 | regs.sfr.alt1 << 0) {
+  case 0: disassembleAlt0(output); break;
+  case 1: disassembleAlt1(output); break;
+  case 2: disassembleAlt2(output); break;
+  case 3: disassembleAlt3(output); break;
   }
 
-  unsigned length = strlen(output);
+  uint length = strlen(output);
   while(length++ < 20) strcat(output, " ");
 }
 
@@ -34,10 +27,10 @@ auto GSU::disassemble_opcode(char* output) -> void {
   case id+ 8: case id+ 9: case id+10: case id+11: case id+12: case id+13: case id+14: case id+15
 
 #define op0 regs.pipeline
-#define op1 bus_read((regs.pbr << 16) + regs.r[15] + 0)
-#define op2 bus_read((regs.pbr << 16) + regs.r[15] + 1)
+#define op1 read((regs.pbr << 16) + regs.r[15] + 0)
+#define op2 read((regs.pbr << 16) + regs.r[15] + 1)
 
-auto GSU::disassemble_alt0(char* output) -> void {
+auto GSU::disassembleAlt0(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -94,7 +87,7 @@ auto GSU::disassemble_alt0(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassemble_alt1(char* output) -> void {
+auto GSU::disassembleAlt1(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -151,7 +144,7 @@ auto GSU::disassemble_alt1(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassemble_alt2(char* output) -> void {
+auto GSU::disassembleAlt2(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;
@@ -208,7 +201,7 @@ auto GSU::disassemble_alt2(char* output) -> void {
   strcat(output, t);
 }
 
-auto GSU::disassemble_alt3(char* output) -> void {
+auto GSU::disassembleAlt3(char* output) -> void {
   char t[256] = "";
   switch(op0) {
     case  (0x00): sprintf(t, "stop"); break;

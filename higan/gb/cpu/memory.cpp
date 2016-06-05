@@ -1,15 +1,15 @@
-auto CPU::op_io() -> void {
+auto CPU::io() -> void {
   cycle_edge();
   add_clocks(4);
 }
 
-auto CPU::op_read(uint16 addr) -> uint8 {
+auto CPU::read(uint16 addr) -> uint8 {
   cycle_edge();
   add_clocks(4);
   return bus.read(addr);
 }
 
-auto CPU::op_write(uint16 addr, uint8 data) -> void {
+auto CPU::write(uint16 addr, uint8 data) -> void {
   cycle_edge();
   add_clocks(4);
   bus.write(addr, data);

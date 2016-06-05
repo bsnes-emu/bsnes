@@ -37,6 +37,7 @@ auto PPU::cgb_read_tile(bool select, uint x, uint y, uint& attr, uint& data) -> 
 
 auto PPU::cgb_scanline() -> void {
   px = 0;
+  if(!enabled()) return;
 
   const uint Height = (status.ob_size == 0 ? 8 : 16);
   sprites = 0;
@@ -68,7 +69,7 @@ auto PPU::cgb_run() -> void {
   ob.priority = 0;
 
   uint color = 0x7fff;
-  if(status.display_enable) {
+  if(enabled()) {
     cgb_run_bg();
     if(status.window_display_enable) cgb_run_window();
     if(status.ob_enable) cgb_run_ob();

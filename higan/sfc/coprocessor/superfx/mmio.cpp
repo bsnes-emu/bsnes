@@ -3,7 +3,7 @@ auto SuperFX::readIO(uint24 addr, uint8) -> uint8 {
   addr = 0x3000 | addr.bits(0,9);
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
-    return cache_mmio_read(addr - 0x3100);
+    return readCache(addr - 0x3100);
   }
 
   if(addr >= 0x3000 && addr <= 0x301f) {
@@ -55,7 +55,7 @@ auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
   addr = 0x3000 | addr.bits(0,9);
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
-    return cache_mmio_write(addr - 0x3100, data);
+    return writeCache(addr - 0x3100, data);
   }
 
   if(addr >= 0x3000 && addr <= 0x301f) {
@@ -65,6 +65,7 @@ auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
     } else {
       regs.r[n] = (data << 8) | (regs.r[n] & 0xff);
     }
+    if(n == 14) updateROMBuffer();
 
     if(addr == 0x301f) regs.sfr.g = 1;
     return;
@@ -76,7 +77,7 @@ auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
     regs.sfr = (regs.sfr & 0xff00) | (data << 0);
     if(g == 1 && regs.sfr.g == 0) {
       regs.cbr = 0x0000;
-      cache_flush();
+      flushCache();
     }
   } break;
 
@@ -90,7 +91,7 @@ auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
 
   case 0x3034: {
     regs.pbr = data & 0x7f;
-    cache_flush();
+    flushCache();
   } break;
 
   case 0x3037: {

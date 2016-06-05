@@ -3,10 +3,8 @@ struct CPU : Processor::LR35902, Thread, MMIO {
 
   static auto Enter() -> void;
   auto main() -> void;
-  auto interrupt_raise(Interrupt id) -> void;
-  auto interrupt_lower(Interrupt id) -> void;
+  auto raise(Interrupt id) -> void;
   auto interrupt_test() -> void;
-  auto interrupt_exec(uint16 pc) -> void;
   auto stop() -> bool;
   auto power() -> void;
 
@@ -19,9 +17,9 @@ struct CPU : Processor::LR35902, Thread, MMIO {
   auto mmio_write(uint16 addr, uint8 data) -> void;
 
   //memory.cpp
-  auto op_io() -> void;
-  auto op_read(uint16 addr) -> uint8;
-  auto op_write(uint16 addr, uint8 data) -> void;
+  auto io() -> void override;
+  auto read(uint16 addr) -> uint8 override;
+  auto write(uint16 addr, uint8 data) -> void override;
   auto cycle_edge() -> void;
   auto dma_read(uint16 addr) -> uint8;
   auto dma_write(uint16 addr, uint8 data) -> void;

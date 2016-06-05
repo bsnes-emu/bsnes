@@ -3,9 +3,7 @@
 //  154 scanlines/frame
 
 auto CPU::add_clocks(uint clocks) -> void {
-  if(system.sgb()) system._clocksExecuted += clocks;
-
-  while(clocks--) {
+  for(auto n : range(clocks)) {
     if(++status.clock == 0) {
       cartridge.mbc3.second();
     }
@@ -25,14 +23,17 @@ auto CPU::add_clocks(uint clocks) -> void {
     if(apu.clock < 0) co_switch(apu.thread);
   }
 
-  if(system.sgb()) scheduler.exit(Scheduler::Event::Step);
+  if(system.sgb()) {
+    system._clocksExecuted += clocks;
+    scheduler.exit(Scheduler::Event::Step);
+  }
 }
 
 auto CPU::timer_262144hz() -> void {
   if(status.timer_enable && status.timer_clock == 1) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      interrupt_raise(Interrupt::Timer);
+      raise(Interrupt::Timer);
     }
   }
 }
@@ -41,7 +42,7 @@ auto CPU::timer_65536hz() -> void {
   if(status.timer_enable && status.timer_clock == 2) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      interrupt_raise(Interrupt::Timer);
+      raise(Interrupt::Timer);
     }
   }
 }
@@ -50,7 +51,7 @@ auto CPU::timer_16384hz() -> void {
   if(status.timer_enable && status.timer_clock == 3) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      interrupt_raise(Interrupt::Timer);
+      raise(Interrupt::Timer);
     }
   }
 }
@@ -59,7 +60,7 @@ auto CPU::timer_8192hz() -> void {
   if(status.serial_transfer && status.serial_clock) {
     if(--status.serial_bits == 0) {
       status.serial_transfer = 0;
-      interrupt_raise(Interrupt::Serial);
+      raise(Interrupt::Serial);
     }
   }
 }
@@ -68,7 +69,7 @@ auto CPU::timer_4096hz() -> void {
   if(status.timer_enable && status.timer_clock == 0) {
     if(++status.tima == 0) {
       status.tima = status.tma;
-      interrupt_raise(Interrupt::Timer);
+      raise(Interrupt::Timer);
     }
   }
 }

@@ -18,7 +18,7 @@ auto GSU::op_nop() {
 auto GSU::op_cache() {
   if(regs.cbr != (regs.r[15] & 0xfff0)) {
     regs.cbr = regs.r[15] & 0xfff0;
-    cache_flush();
+    flushCache();
   }
   regs.reset();
 }
@@ -80,8 +80,8 @@ auto GSU::op_with(uint n) {
 //$30-3b(alt1) stb (rN)
 auto GSU::op_store(uint n) {
   regs.ramaddr = regs.r[n];
-  rambuffer_write(regs.ramaddr, regs.sr());
-  if(!regs.sfr.alt1) rambuffer_write(regs.ramaddr ^ 1, regs.sr() >> 8);
+  writeRAMBuffer(regs.ramaddr, regs.sr());
+  if(!regs.sfr.alt1) writeRAMBuffer(regs.ramaddr ^ 1, regs.sr() >> 8);
   regs.reset();
 }
 
@@ -117,8 +117,8 @@ auto GSU::op_alt3() {
 //$40-4b(alt1) ldb (rN)
 auto GSU::op_load(uint n) {
   regs.ramaddr = regs.r[n];
-  regs.dr() = rambuffer_read(regs.ramaddr);
-  if(!regs.sfr.alt1) regs.dr() |= rambuffer_read(regs.ramaddr ^ 1) << 8;
+  regs.dr() = readRAMBuffer(regs.ramaddr);
+  if(!regs.sfr.alt1) regs.dr() |= readRAMBuffer(regs.ramaddr ^ 1) << 8;
   regs.reset();
 }
 
@@ -230,8 +230,8 @@ auto GSU::op_mult_umult(uint n) {
 
 //$90 sbk
 auto GSU::op_sbk() {
-  rambuffer_write(regs.ramaddr ^ 0, regs.sr() >> 0);
-  rambuffer_write(regs.ramaddr ^ 1, regs.sr() >> 8);
+  writeRAMBuffer(regs.ramaddr ^ 0, regs.sr() >> 0);
+  writeRAMBuffer(regs.ramaddr ^ 1, regs.sr() >> 8);
   regs.reset();
 }
 
@@ -278,7 +278,7 @@ auto GSU::op_jmp_ljmp(uint n) {
     regs.pbr = regs.r[n] & 0x7f;
     regs.r[15] = regs.sr();
     regs.cbr = regs.r[15] & 0xfff0;
-    cache_flush();
+    flushCache();
   }
   regs.reset();
 }
@@ -310,12 +310,12 @@ auto GSU::op_fmult_lmult() {
 auto GSU::op_ibt_lms_sms(uint n) {
   if(regs.sfr.alt1) {
     regs.ramaddr = pipe() << 1;
-    uint8 lo  = rambuffer_read(regs.ramaddr ^ 0) << 0;
-    regs.r[n] = rambuffer_read(regs.ramaddr ^ 1) << 8 | lo;
+    uint8 lo  = readRAMBuffer(regs.ramaddr ^ 0) << 0;
+    regs.r[n] = readRAMBuffer(regs.ramaddr ^ 1) << 8 | lo;
   } else if(regs.sfr.alt2) {
     regs.ramaddr = pipe() << 1;
-    rambuffer_write(regs.ramaddr ^ 0, regs.r[n] >> 0);
-    rambuffer_write(regs.ramaddr ^ 1, regs.r[n] >> 8);
+    writeRAMBuffer(regs.ramaddr ^ 0, regs.r[n] >> 0);
+    writeRAMBuffer(regs.ramaddr ^ 1, regs.r[n] >> 8);
   } else {
     regs.r[n] = (int8)pipe();
   }
@@ -369,12 +369,12 @@ auto GSU::op_inc(uint n) {
 //$df(alt3) romb
 auto GSU::op_getc_ramb_romb() {
   if(!regs.sfr.alt2) {
-    regs.colr = color(rombuffer_read());
+    regs.colr = color(readROMBuffer());
   } else if(!regs.sfr.alt1) {
-    rambuffer_sync();
+    syncRAMBuffer();
     regs.rambr = regs.sr() & 0x01;
   } else {
-    rombuffer_sync();
+    syncROMBuffer();
     regs.rombr = regs.sr() & 0x7f;
   }
   regs.reset();
@@ -394,10 +394,10 @@ auto GSU::op_dec(uint n) {
 //$ef(alt3) getbs
 auto GSU::op_getb() {
   switch(regs.sfr.alt2 << 1 | regs.sfr.alt1 << 0) {
-  case 0: regs.dr() = rombuffer_read(); break;
-  case 1: regs.dr() = rombuffer_read() << 8 | (uint8)regs.sr(); break;
-  case 2: regs.dr() = (regs.sr() & 0xff00) | rombuffer_read(); break;
-  case 3: regs.dr() = (int8)rombuffer_read(); break;
+  case 0: regs.dr() = readROMBuffer(); break;
+  case 1: regs.dr() = readROMBuffer() << 8 | (uint8)regs.sr(); break;
+  case 2: regs.dr() = (regs.sr() & 0xff00) | readROMBuffer(); break;
+  case 3: regs.dr() = (int8)readROMBuffer(); break;
   }
   regs.reset();
 }
@@ -409,13 +409,13 @@ auto GSU::op_iwt_lm_sm(uint n) {
   if(regs.sfr.alt1) {
     regs.ramaddr  = pipe() << 0;
     regs.ramaddr |= pipe() << 8;
-    uint8 lo  = rambuffer_read(regs.ramaddr ^ 0) << 0;
-    regs.r[n] = rambuffer_read(regs.ramaddr ^ 1) << 8 | lo;
+    uint8 lo  = readRAMBuffer(regs.ramaddr ^ 0) << 0;
+    regs.r[n] = readRAMBuffer(regs.ramaddr ^ 1) << 8 | lo;
   } else if(regs.sfr.alt2) {
     regs.ramaddr  = pipe() << 0;
     regs.ramaddr |= pipe() << 8;
-    rambuffer_write(regs.ramaddr ^ 0, regs.r[n] >> 0);
-    rambuffer_write(regs.ramaddr ^ 1, regs.r[n] >> 8);
+    writeRAMBuffer(regs.ramaddr ^ 0, regs.r[n] >> 0);
+    writeRAMBuffer(regs.ramaddr ^ 1, regs.r[n] >> 8);
   } else {
     uint8 lo  = pipe();
     regs.r[n] = pipe() << 8 | lo;

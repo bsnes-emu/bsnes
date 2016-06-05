@@ -5,15 +5,16 @@
 namespace Processor {
 
 struct LR35902 {
-  virtual auto op_io() -> void = 0;
-  virtual auto op_read(uint16 addr) -> uint8 = 0;
-  virtual auto op_write(uint16 addr, uint8 data) -> void = 0;
+  virtual auto io() -> void = 0;
+  virtual auto read(uint16 addr) -> uint8 = 0;
+  virtual auto write(uint16 addr, uint8 data) -> void = 0;
   virtual auto stop() -> bool = 0;
-  virtual auto debugger_read(uint16 addr) -> uint8 { return 0; }
+  virtual auto debuggerRead(uint16 addr) -> uint8 { return 0; }
 
   auto power() -> void;
-  auto exec() -> void;
-  auto execCB() -> void;
+  auto interrupt(uint16 vector) -> void;
+  auto instruction() -> void;
+  auto instructionCB() -> void;
 
   auto serialize(serializer&) -> void;
 

@@ -8,6 +8,8 @@ PPU ppu;
 #include "cgb.cpp"
 #include "serialization.cpp"
 
+auto PPU::enabled() const -> bool { return status.display_enable; }
+
 auto PPU::Enter() -> void {
   while(true) scheduler.synchronize(), ppu.main();
 }
@@ -16,7 +18,7 @@ auto PPU::main() -> void {
   status.lx = 0;
   interface->lcdScanline();  //Super Game Boy notification
 
-  if(status.display_enable && status.ly <= 143) {
+  if(status.ly <= 143) {
     mode(2);
     scanline();
     wait(92);
@@ -28,7 +30,7 @@ auto PPU::main() -> void {
     }
 
     mode(0);
-    cpu.hblank();
+    if(enabled()) cpu.hblank();
     wait(204);
   } else {
     mode(1);
@@ -38,7 +40,7 @@ auto PPU::main() -> void {
   status.ly++;
 
   if(status.ly == 144) {
-    cpu.interrupt_raise(CPU::Interrupt::Vblank);
+    if(enabled()) cpu.raise(CPU::Interrupt::Vblank);
     scheduler.exit(Scheduler::Event::Frame);
   }
 
@@ -48,35 +50,25 @@ auto PPU::main() -> void {
 }
 
 auto PPU::mode(uint mode) -> void {
+  if(!enabled()) mode = 1;  //force blank
   status.mode = mode;
+}
+
+auto PPU::stat() -> void {
   bool irq = status.irq;
 
-  if(status.mode == 0) {  //hblank
-    status.irq = status.interrupt_hblank;
-  }
+  status.irq  = status.interrupt_hblank && status.mode == 0;
+  status.irq |= status.interrupt_vblank && status.mode == 1;
+  status.irq |= status.interrupt_oam    && status.mode == 2;
+  status.irq |= status.interrupt_lyc    && coincidence();
 
-  if(status.mode == 1) {  //vblank
-    status.irq = status.interrupt_vblank || (status.interrupt_lyc && coincidence());
-  }
-
-  if(status.mode == 2) {  //oam
-    status.irq = status.interrupt_oam || (status.interrupt_lyc && coincidence());
-  }
-
-  if(status.mode == 3) {  //render
-    status.irq = false;
-  }
-
-  if(!irq && status.irq) {
-    cpu.interrupt_raise(CPU::Interrupt::Stat);
-  } else if(!status.irq) {
-    cpu.interrupt_lower(CPU::Interrupt::Stat);
-  }
+  if(!irq && status.irq) cpu.raise(CPU::Interrupt::Stat);
 }
 
 auto PPU::coincidence() -> bool {
-  //LYC of zero triggers on LYC=153
-  return (status.lyc && status.ly == status.lyc) || (!status.lyc && status.ly == 153);
+  uint ly = status.ly;
+  if(ly == 153 && status.lx >= 92) ly = 0;  //LYC=0 triggers early during LY=153
+  return ly == status.lyc;
 }
 
 auto PPU::refresh() -> void {
@@ -85,6 +77,7 @@ auto PPU::refresh() -> void {
 
 auto PPU::wait(uint clocks) -> void {
   while(clocks--) {
+    stat();
     if(status.dma_active) {
       uint hi = status.dma_clock++;
       uint lo = hi & (cpu.status.speed_double ? 1 : 3);

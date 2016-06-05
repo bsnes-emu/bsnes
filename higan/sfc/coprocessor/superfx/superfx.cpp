@@ -16,13 +16,22 @@ auto SuperFX::Enter() -> void {
 
 auto SuperFX::main() -> void {
   if(regs.sfr.g == 0) return step(6);
+
   instruction(peekpipe());
-  if(!r15_modified) regs.r[15]++;
+
+  if(regs.r[14].modified) {
+    regs.r[14].modified = false;
+    updateROMBuffer();
+  }
+
+  if(regs.r[15].modified) {
+    regs.r[15].modified = false;
+  } else {
+    regs.r[15]++;
+  }
 }
 
 auto SuperFX::init() -> void {
-  regs.r[14].modify = {&SuperFX::r14_modify, this};
-  regs.r[15].modify = {&SuperFX::r15_modify, this};
 }
 
 auto SuperFX::load() -> void {
@@ -40,8 +49,23 @@ auto SuperFX::power() -> void {
 auto SuperFX::reset() -> void {
   GSU::reset();
   create(SuperFX::Enter, system.cpuFrequency());
-  memory_reset();
-  timing_reset();
+
+  romMask = rom.size() - 1;
+  ramMask = ram.size() - 1;
+
+  for(uint n : range(512)) cache.buffer[n] = 0x00;
+  for(uint n : range(32)) cache.valid[n] = false;
+  for(uint n : range(2)) {
+    pixelcache[n].offset = ~0;
+    pixelcache[n].bitpend = 0x00;
+  }
+
+  regs.romcl = 0;
+  regs.romdr = 0;
+
+  regs.ramcl = 0;
+  regs.ramar = 0;
+  regs.ramdr = 0;
 }
 
 }
