@@ -1,11 +1,5 @@
 #include <gb/gb.hpp>
 
-//LY     =   0-153
-//Raster =   0-143
-//Vblank = 144-153
-
-//LX     =   0-455
-
 namespace GameBoy {
 
 PPU ppu;
@@ -22,53 +16,74 @@ auto PPU::main() -> void {
   status.lx = 0;
   interface->lcdScanline();  //Super Game Boy notification
 
-  if(status.display_enable) {
-    //LYC of zero triggers on LY==153
-    if((status.lyc && status.ly == status.lyc) || (!status.lyc && status.ly == 153)) {
-      if(status.interrupt_lyc) cpu.interrupt_raise(CPU::Interrupt::Stat);
-    }
+  if(status.display_enable && status.ly <= 143) {
+    mode(2);
+    scanline();
+    wait(92);
 
-    if(status.ly <= 143) {
-      scanline();
-      if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);
-    }
-
-    if(status.ly == 144) {
-      if(status.interrupt_vblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
-      else if(status.interrupt_oam) cpu.interrupt_raise(CPU::Interrupt::Stat);  //hardware quirk
-      cpu.interrupt_raise(CPU::Interrupt::Vblank);
-    }
-  }
-
-  add_clocks(92);
-
-  if(status.ly <= 143) {
+    mode(3);
     for(auto n : range(160)) {
-      if(status.display_enable) run();
-      add_clocks(1);
+      run();
+      wait(1);
     }
 
-    if(status.display_enable) {
-      if(status.interrupt_hblank) cpu.interrupt_raise(CPU::Interrupt::Stat);
-      cpu.hblank();
-    }
+    mode(0);
+    cpu.hblank();
+    wait(204);
   } else {
-    add_clocks(160);
+    mode(1);
+    wait(456);
   }
 
-  add_clocks(204);
+  status.ly++;
 
-  if(++status.ly == 154) {
-    status.ly = 0;
+  if(status.ly == 144) {
+    cpu.interrupt_raise(CPU::Interrupt::Vblank);
     scheduler.exit(Scheduler::Event::Frame);
   }
+
+  if(status.ly == 154) {
+    status.ly = 0;
+  }
+}
+
+auto PPU::mode(uint mode) -> void {
+  status.mode = mode;
+  bool irq = status.irq;
+
+  if(status.mode == 0) {  //hblank
+    status.irq = status.interrupt_hblank;
+  }
+
+  if(status.mode == 1) {  //vblank
+    status.irq = status.interrupt_vblank || (status.interrupt_lyc && coincidence());
+  }
+
+  if(status.mode == 2) {  //oam
+    status.irq = status.interrupt_oam || (status.interrupt_lyc && coincidence());
+  }
+
+  if(status.mode == 3) {  //render
+    status.irq = false;
+  }
+
+  if(!irq && status.irq) {
+    cpu.interrupt_raise(CPU::Interrupt::Stat);
+  } else if(!status.irq) {
+    cpu.interrupt_lower(CPU::Interrupt::Stat);
+  }
+}
+
+auto PPU::coincidence() -> bool {
+  //LYC of zero triggers on LYC=153
+  return (status.lyc && status.ly == status.lyc) || (!status.lyc && status.ly == 153);
 }
 
 auto PPU::refresh() -> void {
   if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
 }
 
-auto PPU::add_clocks(uint clocks) -> void {
+auto PPU::wait(uint clocks) -> void {
   while(clocks--) {
     if(status.dma_active) {
       uint hi = status.dma_clock++;
@@ -93,10 +108,10 @@ auto PPU::add_clocks(uint clocks) -> void {
 }
 
 auto PPU::hflip(uint data) const -> uint {
-  return ((data & 0x8080) >> 7) | ((data & 0x4040) >> 5)
-       | ((data & 0x2020) >> 3) | ((data & 0x1010) >> 1)
-       | ((data & 0x0808) << 1) | ((data & 0x0404) << 3)
-       | ((data & 0x0202) << 5) | ((data & 0x0101) << 7);
+  return (data & 0x8080) >> 7 | (data & 0x4040) >> 5
+       | (data & 0x2020) >> 3 | (data & 0x1010) >> 1
+       | (data & 0x0808) << 1 | (data & 0x0404) << 3
+       | (data & 0x0202) << 5 | (data & 0x0101) << 7;
 }
 
 auto PPU::power() -> void {
@@ -142,6 +157,7 @@ auto PPU::power() -> void {
   for(auto& n : bgpd) n = 0x0000;
   for(auto& n : obpd) n = 0x0000;
 
+  status.irq = false;
   status.lx = 0;
 
   status.display_enable = 0;
@@ -157,6 +173,7 @@ auto PPU::power() -> void {
   status.interrupt_oam = 0;
   status.interrupt_vblank = 0;
   status.interrupt_hblank = 0;
+  status.mode = 0;
 
   status.scy = 0;
   status.scx = 0;

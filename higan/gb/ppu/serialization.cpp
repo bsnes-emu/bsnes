@@ -9,6 +9,7 @@ auto PPU::serialize(serializer& s) -> void {
   s.array(bgpd);
   s.array(obpd);
 
+  s.integer(status.irq);
   s.integer(status.lx);
 
   s.integer(status.display_enable);
@@ -24,6 +25,7 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(status.interrupt_oam);
   s.integer(status.interrupt_vblank);
   s.integer(status.interrupt_hblank);
+  s.integer(status.mode);
 
   s.integer(status.scy);
   s.integer(status.scx);

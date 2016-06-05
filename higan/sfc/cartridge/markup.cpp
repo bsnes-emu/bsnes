@@ -187,7 +187,7 @@ auto Cartridge::parseMarkupSA1(Markup::Node root) -> void {
   parseMarkupMemory(sa1.iram, root["iram"], ID::SA1IRAM, true);
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&SA1::mmio_read, &sa1}, {&SA1::mmio_write, &sa1});
+    parseMarkupMap(node, {&SA1::readIO, &sa1}, {&SA1::writeIO, &sa1});
   }
 
   for(auto node : root["rom"].find("map")) {
@@ -210,7 +210,7 @@ auto Cartridge::parseMarkupSuperFX(Markup::Node root) -> void {
   parseMarkupMemory(superfx.ram, root["ram"], ID::SuperFXRAM, true);
 
   for(auto node : root.find("map")) {
-    parseMarkupMap(node, {&SuperFX::mmio_read, &superfx}, {&SuperFX::mmio_write, &superfx});
+    parseMarkupMap(node, {&SuperFX::readIO, &superfx}, {&SuperFX::writeIO, &superfx});
   }
 
   for(auto node : root["rom"].find("map")) {

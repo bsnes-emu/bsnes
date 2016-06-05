@@ -366,115 +366,102 @@ auto SA1::mmio_w2259(uint8 data) -> void { mmio.va = (mmio.va & 0xffff00) | (dat
 auto SA1::mmio_w225a(uint8 data) -> void { mmio.va = (mmio.va & 0xff00ff) | (data <<  8); }
 auto SA1::mmio_w225b(uint8 data) -> void { mmio.va = (mmio.va & 0x00ffff) | (data << 16); mmio.vbit = 0; }
 
-//(SFR) S-CPU flag read
-auto SA1::mmio_r2300() -> uint8 {
-  uint8 data;
-  data  = mmio.cpu_irqfl   << 7;
-  data |= mmio.cpu_ivsw    << 6;
-  data |= mmio.chdma_irqfl << 5;
-  data |= mmio.cpu_nvsw    << 4;
-  data |= mmio.cmeg;
-  return data;
-}
+auto SA1::readIO(uint24 addr, uint8) -> uint8 {
+  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronizeCPU());
 
-//(CFR) SA-1 flag read
-auto SA1::mmio_r2301() -> uint8 {
-  uint8 data;
-  data  = mmio.sa1_irqfl   << 7;
-  data |= mmio.timer_irqfl << 6;
-  data |= mmio.dma_irqfl   << 5;
-  data |= mmio.sa1_nmifl   << 4;
-  data |= mmio.smeg;
-  return data;
-}
+  switch(0x2300 | addr.bits(0,7)) {
 
-//(HCR) hcounter read
-auto SA1::mmio_r2302() -> uint8 {
-  //latch counters
-  mmio.hcr = status.hcounter >> 2;
-  mmio.vcr = status.vcounter;
-  return mmio.hcr >> 0;
-}
-
-auto SA1::mmio_r2303() -> uint8 {
-  return mmio.hcr >> 8;
-}
-
-//(VCR) vcounter read
-auto SA1::mmio_r2304() -> uint8 { return mmio.vcr >> 0; }
-auto SA1::mmio_r2305() -> uint8 { return mmio.vcr >> 8; }
-
-//(MR) arithmetic result
-auto SA1::mmio_r2306() -> uint8 { return mmio.mr >>  0; }
-auto SA1::mmio_r2307() -> uint8 { return mmio.mr >>  8; }
-auto SA1::mmio_r2308() -> uint8 { return mmio.mr >> 16; }
-auto SA1::mmio_r2309() -> uint8 { return mmio.mr >> 24; }
-auto SA1::mmio_r230a() -> uint8 { return mmio.mr >> 32; }
-
-//(OF) arithmetic overflow flag
-auto SA1::mmio_r230b() -> uint8 { return mmio.overflow << 7; }
-
-//(VDPL) variable-length data read port low
-auto SA1::mmio_r230c() -> uint8 {
-  uint32 data = (vbr_read(mmio.va + 0) <<  0)
-              | (vbr_read(mmio.va + 1) <<  8)
-              | (vbr_read(mmio.va + 2) << 16);
-  data >>= mmio.vbit;
-  return data >> 0;
-}
-
-//(VDPH) variable-length data read port high
-auto SA1::mmio_r230d() -> uint8 {
-  uint32 data = (vbr_read(mmio.va + 0) <<  0)
-              | (vbr_read(mmio.va + 1) <<  8)
-              | (vbr_read(mmio.va + 2) << 16);
-  data >>= mmio.vbit;
-
-  if(mmio.hl == 1) {
-    //auto-increment mode
-    mmio.vbit += mmio.vb;
-    mmio.va += (mmio.vbit >> 3);
-    mmio.vbit &= 7;
+  //(SFR) S-CPU flag read
+  case 0x2300: {
+    uint8 data;
+    data  = mmio.cpu_irqfl   << 7;
+    data |= mmio.cpu_ivsw    << 6;
+    data |= mmio.chdma_irqfl << 5;
+    data |= mmio.cpu_nvsw    << 4;
+    data |= mmio.cmeg;
+    return data;
   }
 
-  return data >> 8;
-}
+  //(CFR) SA-1 flag read
+  case 0x2301: {
+    uint8 data;
+    data  = mmio.sa1_irqfl   << 7;
+    data |= mmio.timer_irqfl << 6;
+    data |= mmio.dma_irqfl   << 5;
+    data |= mmio.sa1_nmifl   << 4;
+    data |= mmio.smeg;
+    return data;
+  }
 
-//(VC) version code register
-auto SA1::mmio_r230e() -> uint8 {
-  return 0x01;  //true value unknown
-}
+  //(HCR) hcounter read
+  case 0x2302: {
+    //latch counters
+    mmio.hcr = status.hcounter >> 2;
+    mmio.vcr = status.vcounter;
+    return mmio.hcr >> 0;
+  }
 
-auto SA1::mmio_read(uint24 addr, uint8) -> uint8 {
-  (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronizeCPU());
-  addr &= 0xffff;
+  case 0x2303: {
+    return mmio.hcr >> 8;
+  }
 
-  switch(addr) {
-  case 0x2300: return mmio_r2300();
-  case 0x2301: return mmio_r2301();
-  case 0x2302: return mmio_r2302();
-  case 0x2303: return mmio_r2303();
-  case 0x2304: return mmio_r2304();
-  case 0x2305: return mmio_r2305();
-  case 0x2306: return mmio_r2306();
-  case 0x2307: return mmio_r2307();
-  case 0x2308: return mmio_r2308();
-  case 0x2309: return mmio_r2309();
-  case 0x230a: return mmio_r230a();
-  case 0x230b: return mmio_r230b();
-  case 0x230c: return mmio_r230c();
-  case 0x230d: return mmio_r230d();
-  case 0x230e: return mmio_r230e();
+  //(VCR) vcounter read
+  case 0x2304: return mmio.vcr >> 0;
+  case 0x2305: return mmio.vcr >> 8;
+
+  //(MR) arithmetic result
+  case 0x2306: return mmio.mr >>  0;
+  case 0x2307: return mmio.mr >>  8;
+  case 0x2308: return mmio.mr >> 16;
+  case 0x2309: return mmio.mr >> 24;
+  case 0x230a: return mmio.mr >> 32;
+
+  //(OF) arithmetic overflow flag
+  case 0x230b: return mmio.overflow << 7;
+
+  //(VDPL) variable-length data read port low
+  case 0x230c: {
+    uint24 data;
+    data.byte(0) = vbr_read(mmio.va + 0);
+    data.byte(1) = vbr_read(mmio.va + 1);
+    data.byte(2) = vbr_read(mmio.va + 2);
+    data >>= mmio.vbit;
+
+    return data >> 0;
+  }
+
+  //(VDPH) variable-length data read port high
+  case 0x230d: {
+    uint24 data;
+    data.byte(0) = vbr_read(mmio.va + 0);
+    data.byte(1) = vbr_read(mmio.va + 1);
+    data.byte(2) = vbr_read(mmio.va + 2);
+    data >>= mmio.vbit;
+
+    if(mmio.hl == 1) {
+      //auto-increment mode
+      mmio.vbit += mmio.vb;
+      mmio.va += (mmio.vbit >> 3);
+      mmio.vbit &= 7;
+    }
+
+    return data >> 8;
+  }
+
+  //(VC) version code register
+  case 0x230e: {
+    return 0x01;  //true value unknown
+  }
+
   }
 
   return 0x00;
 }
 
-auto SA1::mmio_write(uint24 addr, uint8 data) -> void {
+auto SA1::writeIO(uint24 addr, uint8 data) -> void {
   (co_active() == cpu.thread ? cpu.synchronizeCoprocessors() : synchronizeCPU());
-  addr &= 0xffff;
 
-  switch(addr) {
+  switch(0x2200 | addr.bits(0,7)) {
   case 0x2200: return mmio_w2200(data);
   case 0x2201: return mmio_w2201(data);
   case 0x2202: return mmio_w2202(data);

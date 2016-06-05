@@ -1,8 +1,10 @@
 struct PPU : Thread, MMIO {
   static auto Enter() -> void;
   auto main() -> void;
+  auto mode(uint) -> void;
+  auto coincidence() -> bool;
   auto refresh() -> void;
-  auto add_clocks(uint clocks) -> void;
+  auto wait(uint clocks) -> void;
 
   auto hflip(uint data) const -> uint;
 
@@ -42,6 +44,7 @@ struct PPU : Thread, MMIO {
   function<auto () -> void> run;
 
   struct Status {
+    bool irq;  //STAT IRQ line
     uint lx;
 
     //$ff40  LCDC
@@ -59,6 +62,7 @@ struct PPU : Thread, MMIO {
     bool interrupt_oam;
     bool interrupt_vblank;
     bool interrupt_hblank;
+    uint2 mode;
 
     //$ff42  SCY
     uint8 scy;

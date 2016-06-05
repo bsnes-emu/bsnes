@@ -2,13 +2,12 @@
 
 namespace SuperFamicom {
 
-SA1 sa1;
-
+#include "bus.cpp"
+#include "dma.cpp"
+#include "memory.cpp"
+#include "mmio.cpp"
 #include "serialization.cpp"
-#include "bus/bus.cpp"
-#include "dma/dma.cpp"
-#include "memory/memory.cpp"
-#include "mmio/mmio.cpp"
+SA1 sa1;
 
 auto SA1::Enter() -> void {
   while(true) scheduler.synchronize(), sa1.main();
@@ -22,8 +21,8 @@ auto SA1::main() -> void {
     return;
   }
 
-  if(status.interrupt_pending) {
-    status.interrupt_pending = false;
+  if(status.interruptPending) {
+    status.interruptPending = false;
     interrupt();
     return;
   }
@@ -46,24 +45,24 @@ auto SA1::interrupt() -> void {
 
 auto SA1::lastCycle() -> void {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
-    status.interrupt_pending = true;
+    status.interruptPending = true;
     r.vector = mmio.cnv;
     mmio.sa1_nmifl = true;
     mmio.sa1_nmicl = 1;
     r.wai = false;
   } else if(!r.p.i) {
     if(mmio.timer_irqen && !mmio.timer_irqcl) {
-      status.interrupt_pending = true;
+      status.interruptPending = true;
       r.vector = mmio.civ;
       mmio.timer_irqfl = true;
       r.wai = false;
     } else if(mmio.dma_irqen && !mmio.dma_irqcl) {
-      status.interrupt_pending = true;
+      status.interruptPending = true;
       r.vector = mmio.civ;
       mmio.dma_irqfl = true;
       r.wai = false;
     } else if(mmio.sa1_irq && !mmio.sa1_irqcl) {
-      status.interrupt_pending = true;
+      status.interruptPending = true;
       r.vector = mmio.civ;
       mmio.sa1_irqfl = true;
       r.wai = false;
@@ -72,12 +71,12 @@ auto SA1::lastCycle() -> void {
 }
 
 auto SA1::interruptPending() const -> bool {
-  return status.interrupt_pending;
+  return status.interruptPending;
 }
 
 auto SA1::tick() -> void {
   step(2);
-  if(++status.tick_counter == 0) synchronizeCPU();
+  if(++status.counter == 0) synchronizeCPU();
 
   //adjust counters:
   //note that internally, status counters are in clocks;
@@ -100,13 +99,13 @@ auto SA1::tick() -> void {
   //test counters for timer IRQ
   switch((mmio.ven << 1) + (mmio.hen << 0)) {
   case 0: break;
-  case 1: if(status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
-  case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) trigger_irq(); break;
-  case 3: if(status.vcounter == mmio.vcnt && status.hcounter == (mmio.hcnt << 2)) trigger_irq(); break;
+  case 1: if(status.hcounter == (mmio.hcnt << 2)) triggerIRQ(); break;
+  case 2: if(status.vcounter == mmio.vcnt && status.hcounter == 0) triggerIRQ(); break;
+  case 3: if(status.vcounter == mmio.vcnt && status.hcounter == (mmio.hcnt << 2)) triggerIRQ(); break;
   }
 }
 
-auto SA1::trigger_irq() -> void {
+auto SA1::triggerIRQ() -> void {
   mmio.timer_irqfl = true;
   if(mmio.timer_irqen) mmio.timer_irqcl = 0;
 }
@@ -150,9 +149,9 @@ auto SA1::reset() -> void {
   r.wai    = false;
   r.vector = 0x0000;
 
-  status.tick_counter = 0;
+  status.counter = 0;
 
-  status.interrupt_pending = false;
+  status.interruptPending = false;
 
   status.scanlines = (system.region() == System::Region::NTSC ? 262 : 312);
   status.vcounter  = 0;
@@ -278,9 +277,7 @@ auto SA1::reset() -> void {
   mmio.bbf = 0;
 
   //$2240-$224f BRF
-  for(unsigned i = 0; i < 16; i++) {
-    mmio.brf[i] = 0x00;
-  }
+  for(auto& n : mmio.brf) n = 0x00;
 
   //$2250 MCNT
   mmio.acm = 0;

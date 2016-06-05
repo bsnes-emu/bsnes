@@ -64,7 +64,7 @@ obj/ui-resource.o:
 
 # targets
 build: $(objects)
-	$(call unique,$(compiler) -o out/$(name) $(objects) $(link))
+	$(strip $(compiler) -o out/$(name) $(objects) $(link))
 ifeq ($(platform),macosx)
 	@if [ -d out/$(name).app ]; then rm -r out/$(name).app; fi
 	mkdir -p out/$(name).app/Contents/MacOS/

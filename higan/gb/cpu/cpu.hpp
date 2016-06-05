@@ -4,6 +4,7 @@ struct CPU : Processor::LR35902, Thread, MMIO {
   static auto Enter() -> void;
   auto main() -> void;
   auto interrupt_raise(Interrupt id) -> void;
+  auto interrupt_lower(Interrupt id) -> void;
   auto interrupt_test() -> void;
   auto interrupt_exec(uint16 pc) -> void;
   auto stop() -> bool;

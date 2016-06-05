@@ -6,9 +6,9 @@ auto SA1::serialize(serializer& s) -> void {
   s.array(bwram.data(), bwram.size());
 
   //sa1.hpp
-  s.integer(status.tick_counter);
+  s.integer(status.counter);
 
-  s.integer(status.interrupt_pending);
+  s.integer(status.interruptPending);
 
   s.integer(status.scanlines);
   s.integer(status.vcounter);

@@ -1,6 +1,6 @@
 auto SA1::bus_read(uint24 addr, uint8 data) -> uint8 {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f,80-bf:2200-23ff
-    return mmio_read(addr, data);
+    return readIO(addr, data);
   }
 
   if((addr & 0x408000) == 0x008000) {  //$00-3f,80-bf:8000-ffff
@@ -42,7 +42,7 @@ auto SA1::bus_read(uint24 addr, uint8 data) -> uint8 {
 
 auto SA1::bus_write(uint24 addr, uint8 data) -> void {
   if((addr & 0x40fe00) == 0x002200) {  //$00-3f,80-bf:2200-23ff
-    return mmio_write(addr, data);
+    return writeIO(addr, data);
   }
 
   if((addr & 0x40e000) == 0x006000) {  //$00-3f,80-bf:6000-7fff

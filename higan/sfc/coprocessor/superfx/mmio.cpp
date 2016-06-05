@@ -1,6 +1,6 @@
-auto SuperFX::mmio_read(uint24 addr, uint8) -> uint8 {
+auto SuperFX::readIO(uint24 addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
-  addr &= 0xffff;
+  addr = 0x3000 | addr.bits(0,9);
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
     return cache_mmio_read(addr - 0x3100);
@@ -50,9 +50,9 @@ auto SuperFX::mmio_read(uint24 addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto SuperFX::mmio_write(uint24 addr, uint8 data) -> void {
+auto SuperFX::writeIO(uint24 addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
-  addr &= 0xffff;
+  addr = 0x3000 | addr.bits(0,9);
 
   if(addr >= 0x3100 && addr <= 0x32ff) {
     return cache_mmio_write(addr - 0x3100, data);

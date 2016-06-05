@@ -2,13 +2,12 @@
 
 namespace SuperFamicom {
 
+#include "bus.cpp"
+#include "core.cpp"
+#include "memory.cpp"
+#include "mmio.cpp"
+#include "timing.cpp"
 #include "serialization.cpp"
-#include "bus/bus.cpp"
-#include "core/core.cpp"
-#include "memory/memory.cpp"
-#include "mmio/mmio.cpp"
-#include "timing/timing.cpp"
-
 SuperFX superfx;
 
 auto SuperFX::Enter() -> void {

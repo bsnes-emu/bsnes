@@ -1,4 +1,4 @@
-auto SuperFX::step(unsigned clocks) -> void {
+auto SuperFX::step(uint clocks) -> void {
   if(regs.romcl) {
     regs.romcl -= min(clocks, regs.romcl);
     if(regs.romcl == 0) {

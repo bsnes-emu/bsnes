@@ -24,18 +24,12 @@ auto PPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff41) {  //STAT
-    uint mode;
-    if(status.ly >= 144) mode = 1;  //Vblank
-    else if(status.lx < 80) mode = 2;  //OAM
-    else if(status.lx < 252) mode = 3;  //LCD
-    else mode = 0;  //Hblank
-
     return (status.interrupt_lyc << 6)
          | (status.interrupt_oam << 5)
          | (status.interrupt_vblank << 4)
          | (status.interrupt_hblank << 3)
          | ((status.ly == status.lyc) << 2)
-         | (mode << 0);
+         | (status.mode << 0);
   }
 
   if(addr == 0xff42) {  //SCY
