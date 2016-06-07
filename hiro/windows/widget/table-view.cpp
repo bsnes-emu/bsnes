@@ -46,6 +46,7 @@ auto pTableView::destruct() -> void {
 }
 
 auto pTableView::append(sTableViewHeader header) -> void {
+  resizeColumns();
 }
 
 auto pTableView::append(sTableViewItem item) -> void {

@@ -9,7 +9,9 @@ L readPC();
 auto R65816::op_xba() {
   io();
 L io();
-  swap(r.a.l, r.a.h);
+  r.a.l ^= r.a.h;
+  r.a.h ^= r.a.l;
+  r.a.l ^= r.a.h;
   r.p.n = (r.a.l & 0x80);
   r.p.z = (r.a.l == 0);
 }

@@ -49,12 +49,12 @@ namespace bit {
   }
 
   //clear_lowest(0b1110) == 0b1100
-  constexpr inline auto clear_lowest(const uintmax x) -> uintmax {
+  constexpr inline auto clearLowest(const uintmax x) -> uintmax {
     return x & (x - 1);
   }
 
   //set_lowest(0b0101) == 0b0111
-  constexpr inline auto set_lowest(const uintmax x) -> uintmax {
+  constexpr inline auto setLowest(const uintmax x) -> uintmax {
     return x | (x + 1);
   }
 

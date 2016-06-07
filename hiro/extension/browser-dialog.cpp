@@ -181,6 +181,7 @@ auto BrowserDialogWindow::setPath(string path) -> void {
   }
 
   Application::processEvents();
+  view->resizeColumns();  //todo: on Windows, adding items may add vertical scrollbar; this hack corrects column width
   view.setFocused().doChange();
 }
 

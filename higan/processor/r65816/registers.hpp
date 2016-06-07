@@ -23,6 +23,8 @@ struct Flags {
 struct reg16 {
   union {
     uint16_t w = 0;
+  //BitField<uint16_t, 0,  7> l;
+  //BitField<uint16_t, 8, 15> h;
     struct { uint8_t order_lsb2(l, h); };
   };
 
@@ -43,6 +45,12 @@ struct reg16 {
 struct reg24 {
   union {
     uint32_t d = 0;
+  //BitField<uint32_t,  0, 15> w;
+  //BitField<uint32_t, 16, 31> wh;
+  //BitField<uint32_t,  0,  7> l;
+  //BitField<uint32_t,  8, 15> h;
+  //BitField<uint32_t, 16, 23> b;
+  //BitField<uint32_t, 24, 31> bh;
     struct { uint16_t order_lsb2(w, wh); };
     struct { uint8_t  order_lsb4(l, h, b, bh); };
   };
