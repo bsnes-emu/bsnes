@@ -60,7 +60,7 @@ struct R6502 {
   using fp = auto (R6502::*)() -> void;
 
   auto opi_branch(bool condition);
-  auto opi_clear_flag(bool& flag);
+  auto opi_clear_flag(uint bit);
   auto opi_decrement(uint8& r);
   auto opi_increment(uint8& r);
   auto opi_pull(uint8& r);
@@ -78,7 +78,7 @@ struct R6502 {
   auto opi_rmw_absolute_x(fp);
   auto opi_rmw_zero_page(fp);
   auto opi_rmw_zero_page_x(fp);
-  auto opi_set_flag(bool& flag);
+  auto opi_set_flag(uint bit);
   auto opi_shift(fp);
   auto opi_store_absolute(uint8& r);
   auto opi_store_absolute_x(uint8& r);

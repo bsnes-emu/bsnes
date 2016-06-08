@@ -1,24 +1,24 @@
-auto R65816::op_write_addr_b(reg16& reg) {
+auto R65816::op_write_addr_b(Reg16& reg) {
   aa.l = readPC();
   aa.h = readPC();
 L writeDB(aa.w, reg);
 }
 
-auto R65816::op_write_addr_w(reg16& reg) {
+auto R65816::op_write_addr_w(Reg16& reg) {
   aa.l = readPC();
   aa.h = readPC();
   writeDB(aa.w + 0, reg >> 0);
 L writeDB(aa.w + 1, reg >> 8);
 }
 
-auto R65816::op_write_addrr_b(reg16& reg, reg16& idx) {
+auto R65816::op_write_addrr_b(Reg16& reg, Reg16& idx) {
   aa.l = readPC();
   aa.h = readPC();
   io();
 L writeDB(aa.w + idx, reg);
 }
 
-auto R65816::op_write_addrr_w(reg16& reg, reg16& idx) {
+auto R65816::op_write_addrr_w(Reg16& reg, Reg16& idx) {
   aa.l = readPC();
   aa.h = readPC();
   io();
@@ -26,14 +26,14 @@ auto R65816::op_write_addrr_w(reg16& reg, reg16& idx) {
 L writeDB(aa.w + idx + 1, reg >> 8);
 }
 
-auto R65816::op_write_longr_b(reg16& idx) {
+auto R65816::op_write_longr_b(Reg16& idx) {
   aa.l = readPC();
   aa.h = readPC();
   aa.b = readPC();
 L writeLong(aa.d + idx, r.a.l);
 }
 
-auto R65816::op_write_longr_w(reg16& idx) {
+auto R65816::op_write_longr_w(Reg16& idx) {
   aa.l = readPC();
   aa.h = readPC();
   aa.b = readPC();
@@ -41,27 +41,27 @@ auto R65816::op_write_longr_w(reg16& idx) {
 L writeLong(aa.d + idx + 1, r.a.h);
 }
 
-auto R65816::op_write_dp_b(reg16& reg) {
+auto R65816::op_write_dp_b(Reg16& reg) {
   dp = readPC();
   io2();
 L writeDP(dp, reg);
 }
 
-auto R65816::op_write_dp_w(reg16& reg) {
+auto R65816::op_write_dp_w(Reg16& reg) {
   dp = readPC();
   io2();
   writeDP(dp + 0, reg >> 0);
 L writeDP(dp + 1, reg >> 8);
 }
 
-auto R65816::op_write_dpr_b(reg16& reg, reg16& idx) {
+auto R65816::op_write_dpr_b(Reg16& reg, Reg16& idx) {
   dp = readPC();
   io2();
   io();
 L writeDP(dp + idx, reg);
 }
 
-auto R65816::op_write_dpr_w(reg16& reg, reg16& idx) {
+auto R65816::op_write_dpr_w(Reg16& reg, Reg16& idx) {
   dp = readPC();
   io2();
   io();

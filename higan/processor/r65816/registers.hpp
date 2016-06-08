@@ -1,88 +1,80 @@
 struct Flags {
-  bool n{0};
-  bool v{0};
-  bool m{0};
-  bool x{0};
-  bool d{0};
-  bool i{0};
-  bool z{0};
-  bool c{0};
+  union {
+    uint8_t b = 0;
+    BitField<uint8_t, 7> n;
+    BitField<uint8_t, 6> v;
+    BitField<uint8_t, 5> m;
+    BitField<uint8_t, 4> x;
+    BitField<uint8_t, 3> d;
+    BitField<uint8_t, 2> i;
+    BitField<uint8_t, 1> z;
+    BitField<uint8_t, 0> c;
+  };
 
-  inline operator uint() const {
-    return (n << 7) + (v << 6) + (m << 5) + (x << 4)
-         + (d << 3) + (i << 2) + (z << 1) + (c << 0);
-  }
-
-  inline auto operator=(uint8 data) -> uint {
-    n = data & 0x80; v = data & 0x40; m = data & 0x20; x = data & 0x10;
-    d = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
-    return data;
-  }
+  inline operator uint() const { return b; }
+  inline auto operator =(uint value) -> uint { return b  = value; }
+  inline auto operator&=(uint value) -> uint { return b &= value; }
+  inline auto operator|=(uint value) -> uint { return b |= value; }
 };
 
-struct reg16 {
+struct Reg16 {
   union {
     uint16_t w = 0;
-  //BitField<uint16_t, 0,  7> l;
-  //BitField<uint16_t, 8, 15> h;
-    struct { uint8_t order_lsb2(l, h); };
+    BitField<uint16_t, 0,  7> l;
+    BitField<uint16_t, 8, 15> h;
   };
 
   inline operator uint() const { return w; }
-  inline auto operator  =(uint i) -> uint { return w   = i; }
-  inline auto operator |=(uint i) -> uint { return w  |= i; }
-  inline auto operator ^=(uint i) -> uint { return w  ^= i; }
-  inline auto operator &=(uint i) -> uint { return w  &= i; }
-  inline auto operator<<=(uint i) -> uint { return w <<= i; }
-  inline auto operator>>=(uint i) -> uint { return w >>= i; }
-  inline auto operator +=(uint i) -> uint { return w  += i; }
-  inline auto operator -=(uint i) -> uint { return w  -= i; }
-  inline auto operator *=(uint i) -> uint { return w  *= i; }
-  inline auto operator /=(uint i) -> uint { return w  /= i; }
-  inline auto operator %=(uint i) -> uint { return w  %= i; }
+  inline auto operator  =(uint value) -> uint { return w   = value; }
+  inline auto operator |=(uint value) -> uint { return w  |= value; }
+  inline auto operator ^=(uint value) -> uint { return w  ^= value; }
+  inline auto operator &=(uint value) -> uint { return w  &= value; }
+  inline auto operator<<=(uint value) -> uint { return w <<= value; }
+  inline auto operator>>=(uint value) -> uint { return w >>= value; }
+  inline auto operator +=(uint value) -> uint { return w  += value; }
+  inline auto operator -=(uint value) -> uint { return w  -= value; }
+  inline auto operator *=(uint value) -> uint { return w  *= value; }
+  inline auto operator /=(uint value) -> uint { return w  /= value; }
+  inline auto operator %=(uint value) -> uint { return w  %= value; }
 };
 
-struct reg24 {
+struct Reg24 {
   union {
     uint32_t d = 0;
-  //BitField<uint32_t,  0, 15> w;
-  //BitField<uint32_t, 16, 31> wh;
-  //BitField<uint32_t,  0,  7> l;
-  //BitField<uint32_t,  8, 15> h;
-  //BitField<uint32_t, 16, 23> b;
-  //BitField<uint32_t, 24, 31> bh;
-    struct { uint16_t order_lsb2(w, wh); };
-    struct { uint8_t  order_lsb4(l, h, b, bh); };
+    BitField<uint32_t,  0,  7> l;
+    BitField<uint32_t,  8, 15> h;
+    BitField<uint32_t, 16, 23> b;
+    BitField<uint32_t,  0, 15> w;
   };
 
   inline operator uint() const { return d; }
-  inline auto operator  =(uint i) -> uint { return d = uclip<24>(i); }
-  inline auto operator |=(uint i) -> uint { return d = uclip<24>(d  | i); }
-  inline auto operator ^=(uint i) -> uint { return d = uclip<24>(d  ^ i); }
-  inline auto operator &=(uint i) -> uint { return d = uclip<24>(d  & i); }
-  inline auto operator<<=(uint i) -> uint { return d = uclip<24>(d << i); }
-  inline auto operator>>=(uint i) -> uint { return d = uclip<24>(d >> i); }
-  inline auto operator +=(uint i) -> uint { return d = uclip<24>(d  + i); }
-  inline auto operator -=(uint i) -> uint { return d = uclip<24>(d  - i); }
-  inline auto operator *=(uint i) -> uint { return d = uclip<24>(d  * i); }
-  inline auto operator /=(uint i) -> uint { return d = uclip<24>(d  / i); }
-  inline auto operator %=(uint i) -> uint { return d = uclip<24>(d  % i); }
+  inline auto operator  =(uint value) -> uint { return d = uint24(     value); }
+  inline auto operator |=(uint value) -> uint { return d = uint24(d  | value); }
+  inline auto operator ^=(uint value) -> uint { return d = uint24(d  ^ value); }
+  inline auto operator &=(uint value) -> uint { return d = uint24(d  & value); }
+  inline auto operator<<=(uint value) -> uint { return d = uint24(d << value); }
+  inline auto operator>>=(uint value) -> uint { return d = uint24(d >> value); }
+  inline auto operator +=(uint value) -> uint { return d = uint24(d  + value); }
+  inline auto operator -=(uint value) -> uint { return d = uint24(d  - value); }
+  inline auto operator *=(uint value) -> uint { return d = uint24(d  * value); }
+  inline auto operator /=(uint value) -> uint { return d = uint24(d  / value); }
+  inline auto operator %=(uint value) -> uint { return d = uint24(d  % value); }
 };
 
 struct Registers {
-  reg24 pc;
-  reg16 a;
-  reg16 x;
-  reg16 y;
-  reg16 z;  //pseudo-register (zero register)
-  reg16 s;
-  reg16 d;
+  Reg24 pc;
+  Reg16 a;
+  Reg16 x;
+  Reg16 y;
+  Reg16 z;  //pseudo-register (zero register)
+  Reg16 s;
+  Reg16 d;
   Flags p;
-  uint8 db{0};
-  bool e{0};
+  uint8 db = 0;
+  bool e = false;
 
-  bool irq{0};       //IRQ pin (0 = low, 1 = trigger)
-  bool wai{0};       //raised during wai, cleared after interrupt triggered
-  uint8 mdr{0};      //memory data register
-  uint16 vector{0};  //interrupt vector address
+  bool irq = false;   //IRQ pin (0 = low, 1 = trigger)
+  bool wai = false;   //raised during wai, cleared after interrupt triggered
+  uint8 mdr = 0;      //memory data register
+  uint16 vector = 0;  //interrupt vector address
 };

@@ -27,7 +27,7 @@ auto ARM::arm_opcode(uint32 rm) {
 
   if(exceptionMode() && d == 15 && save) {
     cpsr() = spsr();
-    processor.setMode((Processor::Mode)cpsr().m);
+    processor.setMode((Processor::Mode)(uint)cpsr().m);
   }
 }
 
@@ -48,7 +48,7 @@ auto ARM::arm_move_to_status(uint32 rm) {
       psr.f = rm & 0x00000040;
       psr.t = rm & 0x00000020;
       psr.m = rm & 0x0000001f;
-      if(source == 0) processor.setMode((Processor::Mode)psr.m);
+      if(source == 0) processor.setMode((Processor::Mode)(uint)psr.m);
     }
   }
 
@@ -548,7 +548,7 @@ auto ARM::arm_op_move_multiple() {
     if(s && (list & 0x8000)) {
       if(mode() != Processor::Mode::USR && mode() != Processor::Mode::SYS) {
         cpsr() = spsr();
-        processor.setMode((Processor::Mode)cpsr().m);
+        processor.setMode((Processor::Mode)(uint)cpsr().m);
       }
     }
   } else {

@@ -333,12 +333,12 @@ auto V30MZ::instruction() -> void {
   case 0xf5: return opComplementCarry();
   case 0xf6: return opGroup3MemImm(Byte);
   case 0xf7: return opGroup3MemImm(Word);
-  case 0xf8: return opClearFlag(r.f.c);
-  case 0xf9: return opSetFlag(r.f.c);
-  case 0xfa: return opClearFlag(r.f.i);
-  case 0xfb: return opSetFlag(r.f.i);
-  case 0xfc: return opClearFlag(r.f.d);
-  case 0xfd: return opSetFlag(r.f.d);
+  case 0xf8: return opClearFlag(r.f.c.bit);
+  case 0xf9: return opSetFlag(r.f.c.bit);
+  case 0xfa: return opClearFlag(r.f.i.bit);
+  case 0xfb: return opSetFlag(r.f.i.bit);
+  case 0xfc: return opClearFlag(r.f.d.bit);
+  case 0xfd: return opSetFlag(r.f.d.bit);
   case 0xfe: return opGroup4MemImm(Byte);
   case 0xff: return opGroup4MemImm(Word);
   }

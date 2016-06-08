@@ -3,7 +3,6 @@
 
 namespace Processor {
 
-#include "registers.cpp"
 #include "instructions.cpp"
 #include "memory.cpp"
 #include "disassembler.cpp"

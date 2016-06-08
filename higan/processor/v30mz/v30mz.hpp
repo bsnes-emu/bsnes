@@ -156,8 +156,8 @@ struct V30MZ {
   auto opStoreFlagsAcc();
   auto opLoadAccFlags();
   auto opComplementCarry();
-  auto opClearFlag(bool&);
-  auto opSetFlag(bool&);
+  auto opClearFlag(uint);
+  auto opSetFlag(uint);
 
   //instructions-group.cpp
   auto opGroup1MemImm(Size, bool);
@@ -247,20 +247,25 @@ struct V30MZ {
     uint16_t* s[8]{&es, &cs, &ss, &ds, &es, &cs, &ss, &ds};
 
     struct Flags {
-      //registers.cpp
-      operator uint16_t() const;
-      auto operator=(uint16_t data);
+      union {
+        uint16_t data = 0;
+        BitField<uint16_t, 15> m;  //mode
+        BitField<uint16_t, 11> v;  //overflow
+        BitField<uint16_t, 10> d;  //direction
+        BitField<uint16_t,  9> i;  //interrupt
+        BitField<uint16_t,  8> b;  //break
+        BitField<uint16_t,  7> s;  //sign
+        BitField<uint16_t,  6> z;  //zero
+        BitField<uint16_t,  4> h;  //half-carry
+        BitField<uint16_t,  2> p;  //parity
+        BitField<uint16_t,  0> c;  //carry
+      };
 
-      bool m;  //mode
-      bool v;  //overflow
-      bool d;  //direction
-      bool i;  //interrupt
-      bool b;  //break
-      bool s;  //sign
-      bool z;  //zero
-      bool h;  //half-carry
-      bool p;  //parity
-      bool c;  //carry
+      operator uint() const { return data & 0x8fd5 | 0x7002; }
+      auto& operator =(uint value) { return data  = value, *this; }
+      auto& operator&=(uint value) { return data &= value, *this; }
+      auto& operator|=(uint value) { return data |= value, *this; }
+      auto& operator^=(uint value) { return data ^= value, *this; }
     } f;
   } r;
 };

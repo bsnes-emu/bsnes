@@ -5,52 +5,6 @@
 
 namespace nall {
 
-template<typename Type, uint Lo, uint Hi> struct BitField {
-  static_assert(Lo <= Hi, "");
-  static_assert(Hi < sizeof(Type) * 8, "");
-
-  inline BitField() = default;
-  inline BitField(const BitField& value) { set(value.data); }
-  template<typename T> inline BitField(const T& value) { set(value << Lo); }
-
-//inline explicit operator bool() const { return data & Mask; }
-  inline operator Type() const { return get(); }
-
-  inline auto& operator=(const BitField& value) { return set(value.data); }
-  template<typename T> inline auto& operator=(const T& value) { return set(value << Lo); }
-
-  inline auto operator++(int) { Type value = get(); set(data + (1 << Lo)); return value; }
-  inline auto operator--(int) { Type value = get(); set(data - (1 << Lo)); return value; }
-
-  inline auto& operator++() { return set(data + (1 << Lo)); }
-  inline auto& operator--() { return set(data - (1 << Lo)); }
-
-  inline auto& operator &=(const Type value) { return set(data  & (value << Lo)); }
-  inline auto& operator |=(const Type value) { return set(data  | (value << Lo)); }
-  inline auto& operator ^=(const Type value) { return set(data  ^ (value << Lo)); }
-  inline auto& operator<<=(const Type value) { return set(data << value); }
-  inline auto& operator>>=(const Type value) { return set(data >> value); }
-  inline auto& operator +=(const Type value) { return set(data  + (value << Lo)); }
-  inline auto& operator -=(const Type value) { return set(data  - (value << Lo)); }
-  inline auto& operator *=(const Type value) { return set((get() * value) << Lo); }
-  inline auto& operator /=(const Type value) { return set((get() / value) << Lo); }
-  inline auto& operator %=(const Type value) { return set((get() % value) << Lo); }
-
-private:
-  enum : uint { Bits = Hi - Lo + 1 };
-  enum : uint { Mask = ((1ull << Bits) - 1) << Lo };
-  Type data;
-
-  inline auto get() const -> Type {
-    return (data & Mask) >> Lo;
-  }
-
-  inline auto set(Type value) -> BitField& {
-    data = (data & ~Mask) | (value & Mask);
-    return *this;
-  }
-};
-
 struct Boolean {
   inline Boolean() : data(false) {}
   template<typename T> inline Boolean(const T& value) : data(value) {}

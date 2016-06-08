@@ -1,11 +1,11 @@
-auto R65816::op_adjust_imm_b(reg16& reg, int adjust) {
+auto R65816::op_adjust_imm_b(Reg16& reg, int adjust) {
 L ioIRQ();
   reg.l += adjust;
   r.p.n = (reg.l & 0x80);
   r.p.z = (reg.l == 0);
 }
 
-auto R65816::op_adjust_imm_w(reg16& reg, int adjust) {
+auto R65816::op_adjust_imm_w(Reg16& reg, int adjust) {
 L ioIRQ();
   reg.w += adjust;
   r.p.n = (reg.w & 0x8000);

@@ -38,14 +38,5 @@ auto V30MZ::serialize(serializer& s) -> void {
   s.integer(r.ss);
   s.integer(r.ds);
   s.integer(r.ip);
-  s.integer(r.f.m);
-  s.integer(r.f.v);
-  s.integer(r.f.d);
-  s.integer(r.f.i);
-  s.integer(r.f.b);
-  s.integer(r.f.s);
-  s.integer(r.f.z);
-  s.integer(r.f.h);
-  s.integer(r.f.p);
-  s.integer(r.f.c);
+  s.integer(r.f.data);
 }

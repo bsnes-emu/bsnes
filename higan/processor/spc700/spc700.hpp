@@ -17,14 +17,15 @@ struct SPC700 {
   #include "registers.hpp"
   #include "memory.hpp"
 
-  Regs regs;
-  Word dp, sp, rd, wr, bit, ya;
+  Registers regs;
+  Register dp, sp, rd, wr, bit, ya;
   uint8 opcode;
 
 protected:
   using fps = auto (SPC700::*)(uint8) -> uint8;
   using fpb = auto (SPC700::*)(uint8, uint8) -> uint8;
   using fpw = auto (SPC700::*)(uint16, uint16) -> uint16;
+  using reg = uint8_t&;
 
   auto op_adc(uint8, uint8) -> uint8;
   auto op_and(uint8, uint8) -> uint8;
@@ -45,33 +46,33 @@ protected:
   auto op_ldw(uint16, uint16) -> uint16;
   auto op_sbw(uint16, uint16) -> uint16;
 
-  auto op_adjust(fps, uint8_t&);
+  auto op_adjust(fps, reg);
   auto op_adjust_addr(fps);
   auto op_adjust_dp(fps);
   auto op_adjust_dpw(int);
   auto op_adjust_dpx(fps);
   auto op_branch(bool);
   auto op_branch_bit();
-  auto op_pull(uint8_t&);
+  auto op_pull(reg);
   auto op_push(uint8);
-  auto op_read_addr(fpb, uint8_t&);
-  auto op_read_addri(fpb, uint8_t&);
-  auto op_read_const(fpb, uint8_t&);
-  auto op_read_dp(fpb, uint8_t&);
-  auto op_read_dpi(fpb, uint8_t&, uint8_t&);
+  auto op_read_addr(fpb, reg);
+  auto op_read_addri(fpb, reg);
+  auto op_read_const(fpb, reg);
+  auto op_read_dp(fpb, reg);
+  auto op_read_dpi(fpb, reg, reg);
   auto op_read_dpw(fpw);
   auto op_read_idpx(fpb);
   auto op_read_idpy(fpb);
   auto op_read_ix(fpb);
   auto op_set_addr_bit();
   auto op_set_bit();
-  auto op_set_flag(bool&, bool);
+  auto op_set_flag(uint, bool);
   auto op_test_addr(bool);
-  auto op_transfer(uint8_t&, uint8_t&);
-  auto op_write_addr(uint8_t&);
-  auto op_write_addri(uint8_t&);
-  auto op_write_dp(uint8_t&);
-  auto op_write_dpi(uint8_t&, uint8_t&);
+  auto op_transfer(reg, reg);
+  auto op_write_addr(reg);
+  auto op_write_addri(reg);
+  auto op_write_dp(reg);
+  auto op_write_dpi(reg, reg);
   auto op_write_dp_const(fpb);
   auto op_write_dp_dp(fpb);
   auto op_write_ix_iy(fpb);

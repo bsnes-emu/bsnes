@@ -88,8 +88,8 @@ struct R65816 {
   auto op_read_longx_w(fp);
   auto op_read_dp_b(fp);
   auto op_read_dp_w(fp);
-  auto op_read_dpr_b(fp, reg16&);
-  auto op_read_dpr_w(fp, reg16&);
+  auto op_read_dpr_b(fp, Reg16&);
+  auto op_read_dpr_w(fp, Reg16&);
   auto op_read_idp_b(fp);
   auto op_read_idp_w(fp);
   auto op_read_idpx_b(fp);
@@ -106,16 +106,16 @@ struct R65816 {
   auto op_read_isry_w(fp);
 
   //opcode_write.cpp
-  auto op_write_addr_b(reg16&);
-  auto op_write_addr_w(reg16&);
-  auto op_write_addrr_b(reg16&, reg16&);
-  auto op_write_addrr_w(reg16&, reg16&);
-  auto op_write_longr_b(reg16&);
-  auto op_write_longr_w(reg16&);
-  auto op_write_dp_b(reg16&);
-  auto op_write_dp_w(reg16&);
-  auto op_write_dpr_b(reg16&, reg16&);
-  auto op_write_dpr_w(reg16&, reg16&);
+  auto op_write_addr_b(Reg16&);
+  auto op_write_addr_w(Reg16&);
+  auto op_write_addrr_b(Reg16&, Reg16&);
+  auto op_write_addrr_w(Reg16&, Reg16&);
+  auto op_write_longr_b(Reg16&);
+  auto op_write_longr_w(Reg16&);
+  auto op_write_dp_b(Reg16&);
+  auto op_write_dp_w(Reg16&);
+  auto op_write_dpr_b(Reg16&, Reg16&);
+  auto op_write_dpr_w(Reg16&, Reg16&);
   auto op_sta_idp_b();
   auto op_sta_idp_w();
   auto op_sta_ildp_b();
@@ -132,8 +132,8 @@ struct R65816 {
   auto op_sta_isry_w();
 
   //opcode_rmw.cpp
-  auto op_adjust_imm_b(reg16&, int);
-  auto op_adjust_imm_w(reg16&, int);
+  auto op_adjust_imm_b(Reg16&, int);
+  auto op_adjust_imm_w(Reg16&, int);
   auto op_asl_imm_b();
   auto op_asl_imm_w();
   auto op_lsr_imm_b();
@@ -177,22 +177,23 @@ struct R65816 {
   auto op_stp();
   auto op_wai();
   auto op_xce();
-  auto op_flag(bool& flag, bool value);
+  auto op_set_flag(uint bit);
+  auto op_clear_flag(uint bit);
   auto op_pflag(bool);
-  auto op_transfer_b(reg16&, reg16&);
-  auto op_transfer_w(reg16&, reg16&);
+  auto op_transfer_b(Reg16&, Reg16&);
+  auto op_transfer_w(Reg16&, Reg16&);
   auto op_tcs();
   auto op_tsx_b();
   auto op_tsx_w();
   auto op_txs();
-  auto op_push_b(reg16&);
-  auto op_push_w(reg16&);
+  auto op_push_b(Reg16&);
+  auto op_push_w(Reg16&);
   auto op_phd();
   auto op_phb();
   auto op_phk();
   auto op_php();
-  auto op_pull_b(reg16&);
-  auto op_pull_w(reg16&);
+  auto op_pull_b(Reg16&);
+  auto op_pull_w(Reg16&);
   auto op_pld();
   auto op_plb();
   auto op_plp();
@@ -207,7 +208,7 @@ struct R65816 {
   auto serialize(serializer&) -> void;
 
   Registers r;
-  reg24 aa, rd;
+  Reg24 aa, rd;
   uint8 sp, dp;
 };
 

@@ -1,51 +1,53 @@
-struct Flag {
-  inline operator uint() const {
-    return (n << 7) | (v << 6) | (p << 5) | (b << 4)
-         | (h << 3) | (i << 2) | (z << 1) | (c << 0);
-  }
-
-  inline auto operator=(uint data) -> uint {
-    n = data & 0x80; v = data & 0x40; p = data & 0x20; b = data & 0x10;
-    h = data & 0x08; i = data & 0x04; z = data & 0x02; c = data & 0x01;
-    return data;
-  }
-
-  inline auto operator|=(uint data) -> uint { return operator=(operator uint() | data); }
-  inline auto operator^=(uint data) -> uint { return operator=(operator uint() ^ data); }
-  inline auto operator&=(uint data) -> uint { return operator=(operator uint() & data); }
-
-  bool n, v, p, b, h, i, z, c;
-};
-
-struct Word {
-  inline operator uint() const { return w; }
-  inline auto operator=(uint data) -> uint { return w = data; }
-
-  inline auto operator++() -> uint { return ++w; }
-  inline auto operator--() -> uint { return --w; }
-
-  inline auto operator++(int) -> uint { uint data = w++; return data; }
-  inline auto operator--(int) -> uint { uint data = w--; return data; }
-
-  inline auto operator+=(uint data) -> uint { return w += data;; }
-  inline auto operator-=(uint data) -> uint { return w -= data;; }
-
-  inline auto operator|=(uint data) -> uint { return w |= data; }
-  inline auto operator^=(uint data) -> uint { return w ^= data; }
-  inline auto operator&=(uint data) -> uint { return w &= data; }
-
+struct Flags {
   union {
-    uint16_t w;
-    struct { uint8_t order_lsb2(l, h); };
+    uint8_t data = 0;
+    BitField<uint8_t, 7> n;
+    BitField<uint8_t, 6> v;
+    BitField<uint8_t, 5> p;
+    BitField<uint8_t, 4> b;
+    BitField<uint8_t, 3> h;
+    BitField<uint8_t, 2> i;
+    BitField<uint8_t, 1> z;
+    BitField<uint8_t, 0> c;
   };
+
+  inline operator uint() const { return data; }
+  inline auto& operator =(uint value) { return data  = value, *this; }
+  inline auto& operator&=(uint value) { return data &= value, *this; }
+  inline auto& operator|=(uint value) { return data |= value, *this; }
+  inline auto& operator^=(uint value) { return data ^= value, *this; }
 };
 
-struct Regs {
-  Word pc;
+struct Register {
+  union {
+    uint16_t w = 0;
+    BitField<uint16_t, 0,  7> l;
+    BitField<uint16_t, 8, 15> h;
+  };
+
+  inline operator uint() const { return w; }
+  inline auto operator=(const Register& value) { w = value.w; }
+
+  inline auto operator++(int) { uint value = w++; return value; }
+  inline auto operator--(int) { uint value = w--; return value; }
+
+  inline auto& operator++() { return ++w, *this; }
+  inline auto& operator--() { return --w, *this; }
+
+  inline auto& operator =(uint value) { return w  = value, *this; }
+  inline auto& operator&=(uint value) { return w &= value, *this; }
+  inline auto& operator|=(uint value) { return w |= value, *this; }
+  inline auto& operator^=(uint value) { return w ^= value, *this; }
+  inline auto& operator+=(uint value) { return w += value, *this; }
+  inline auto& operator-=(uint value) { return w -= value, *this; }
+};
+
+struct Registers {
+  Register pc;
   union {
     uint16_t ya;
     struct { uint8_t order_lsb2(a, y); };
   };
   uint8_t x, s;
-  Flag p;
+  Flags p;
 };

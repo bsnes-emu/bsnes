@@ -165,9 +165,9 @@ L   op_readpc();
   }
 }
 
-auto R6502::opi_clear_flag(bool& flag) {
+auto R6502::opi_clear_flag(uint bit) {
 L op_readpc();
-  flag = 0;
+  regs.p &= ~(1 << bit);
 }
 
 auto R6502::opi_decrement(uint8& r) {
@@ -299,9 +299,9 @@ auto R6502::opi_rmw_zero_page_x(fp op) {
 L op_writezp(zp + regs.x, rd);
 }
 
-auto R6502::opi_set_flag(bool& flag) {
+auto R6502::opi_set_flag(uint bit) {
 L op_readpc();
-  flag = 1;
+  regs.p |= 1 << bit;
 }
 
 auto R6502::opi_shift(fp op) {

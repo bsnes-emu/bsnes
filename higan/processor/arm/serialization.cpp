@@ -1,14 +1,3 @@
-auto ARM::PSR::serialize(serializer& s) -> void {
-  s.integer(n);
-  s.integer(z);
-  s.integer(c);
-  s.integer(v);
-  s.integer(i);
-  s.integer(f);
-  s.integer(t);
-  s.integer(m);
-}
-
 auto ARM::serialize(serializer& s) -> void {
   s.integer(processor.r0.data);
   s.integer(processor.r1.data);
@@ -34,26 +23,26 @@ auto ARM::serialize(serializer& s) -> void {
   s.integer(processor.fiq.r12.data);
   s.integer(processor.fiq.sp.data);
   s.integer(processor.fiq.lr.data);
-  processor.fiq.spsr.serialize(s);
+  s.integer(processor.fiq.spsr.data);
 
   s.integer(processor.irq.sp.data);
   s.integer(processor.irq.lr.data);
-  processor.irq.spsr.serialize(s);
+  s.integer(processor.irq.spsr.data);
 
   s.integer(processor.svc.sp.data);
   s.integer(processor.svc.lr.data);
-  processor.svc.spsr.serialize(s);
+  s.integer(processor.svc.spsr.data);
 
   s.integer(processor.abt.sp.data);
   s.integer(processor.abt.lr.data);
-  processor.abt.spsr.serialize(s);
+  s.integer(processor.abt.spsr.data);
 
   s.integer(processor.und.sp.data);
   s.integer(processor.und.lr.data);
-  processor.und.spsr.serialize(s);
+  s.integer(processor.und.spsr.data);
 
   s.integer(processor.pc.data);
-  processor.cpsr.serialize(s);
+  s.integer(processor.cpsr.data);
   s.integer(processor.carryout);
   s.integer(processor.irqline);
 
@@ -68,5 +57,5 @@ auto ARM::serialize(serializer& s) -> void {
 
   s.integer(crash);
 
-  processor.setMode((Processor::Mode)cpsr().m);
+  processor.setMode((Processor::Mode)(uint)cpsr().m);
 }

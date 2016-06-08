@@ -16,13 +16,13 @@ auto V30MZ::opComplementCarry() {
   r.f.c = !r.f.c;
 }
 
-auto V30MZ::opClearFlag(bool& flag) {
+auto V30MZ::opClearFlag(uint bit) {
   wait(3);
-  flag = false;
+  r.f &= ~(1 << bit);
 }
 
-auto V30MZ::opSetFlag(bool& flag) {
+auto V30MZ::opSetFlag(uint bit) {
   wait(3);
-  flag = true;
-  if(&flag == &r.f.i) state.poll = false;
+  r.f |= 1 << bit;
+  if(bit == r.f.i.bit) state.poll = false;
 }

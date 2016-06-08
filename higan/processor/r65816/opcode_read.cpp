@@ -118,7 +118,7 @@ L rd.h = readDP(dp + 1);
   call(op);
 }
 
-auto R65816::op_read_dpr_b(fp op, reg16& reg) {
+auto R65816::op_read_dpr_b(fp op, Reg16& reg) {
   dp = readPC();
   io2();
   io();
@@ -126,7 +126,7 @@ L rd.l = readDP(dp + reg.w);
   call(op);
 }
 
-auto R65816::op_read_dpr_w(fp op, reg16& reg) {
+auto R65816::op_read_dpr_w(fp op, Reg16& reg) {
   dp = readPC();
   io2();
   io();

@@ -19,33 +19,24 @@ struct GPR {
 };
 
 struct PSR {
-  inline operator uint32_t() const {
-    return (n << 31) + (z << 30) + (c << 29) + (v << 28)
-         + (i <<  7) + (f <<  6) + (t <<  5) + (m <<  0);
-  }
+  union {
+    uint32_t data = 0;
+    BitField<uint32_t, 31>    n;  //negative
+    BitField<uint32_t, 30>    z;  //zero
+    BitField<uint32_t, 29>    c;  //carry
+    BitField<uint32_t, 28>    v;  //overflow
+    BitField<uint32_t,  7>    i;  //irq
+    BitField<uint32_t,  6>    f;  //fiq
+    BitField<uint32_t,  5>    t;  //thumb
+    BitField<uint32_t,  4, 0> m;  //mode
+  };
 
-  inline auto operator=(uint32_t d) {
-    n = d & (1 << 31);
-    z = d & (1 << 30);
-    c = d & (1 << 29);
-    v = d & (1 << 28);
-    i = d & (1 <<  7);
-    f = d & (1 <<  6);
-    t = d & (1 <<  5);
-    m = d & 31;
-    return *this;
-  }
+  PSR() = default;
+  PSR(const PSR& value) { data = value.data; }
 
-  auto serialize(serializer&) -> void;
-
-  bool n = false;  //negative
-  bool z = false;  //zero
-  bool c = false;  //carry
-  bool v = false;  //overflow
-  bool i = false;  //irq
-  bool f = false;  //fiq
-  bool t = false;  //thumb
-  uint m = 0;      //mode
+  inline operator uint() const { return data & 0xf00000ff; }
+  inline auto& operator=(uint value) { return data = value, *this; }
+  inline auto& operator=(const PSR& value) { return data = value.data, *this; }
 };
 
 struct Pipeline {
@@ -125,6 +116,6 @@ alwaysinline auto cpsr() -> PSR& { return processor.cpsr; }
 alwaysinline auto spsr() -> PSR& { return *processor.spsr; }
 alwaysinline auto carryout() -> bool& { return processor.carryout; }
 alwaysinline auto instruction() -> uint32 { return pipeline.execute.instruction; }
-alwaysinline auto mode() -> Processor::Mode { return (Processor::Mode)processor.cpsr.m; }
-alwaysinline auto privilegedMode() const -> bool { return (Processor::Mode)processor.cpsr.m != Processor::Mode::USR; }
-alwaysinline auto exceptionMode() const -> bool { return privilegedMode() && (Processor::Mode)processor.cpsr.m != Processor::Mode::SYS; }
+alwaysinline auto mode() -> Processor::Mode { return (Processor::Mode)(uint)processor.cpsr.m; }
+alwaysinline auto privilegedMode() const -> bool { return (Processor::Mode)(uint)processor.cpsr.m != Processor::Mode::USR; }
+alwaysinline auto exceptionMode() const -> bool { return privilegedMode() && (Processor::Mode)(uint)processor.cpsr.m != Processor::Mode::SYS; }

@@ -8,14 +8,7 @@ auto R65816::serialize(serializer& s) -> void {
   s.integer(r.s.w);
   s.integer(r.d.w);
 
-  s.integer(r.p.n);
-  s.integer(r.p.v);
-  s.integer(r.p.m);
-  s.integer(r.p.x);
-  s.integer(r.p.d);
-  s.integer(r.p.i);
-  s.integer(r.p.z);
-  s.integer(r.p.c);
+  s.integer(r.p.b);
 
   s.integer(r.db);
   s.integer(r.e);

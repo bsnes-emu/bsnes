@@ -109,7 +109,7 @@ auto R65816::disassemble() -> string {
 auto R65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   string s;
 
-  reg24 pc;
+  Reg24 pc;
   pc.d = addr;
   s = {hex(pc, 6), " "};
 
