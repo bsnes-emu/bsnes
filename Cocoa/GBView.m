@@ -1,4 +1,5 @@
 #import <OpenGL/gl.h>
+#import <Carbon/Carbon.h>
 #import "GBView.h"
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
@@ -150,6 +151,27 @@ static GBShader *shader = nil;
 {
     double scale = self.window.backingScaleFactor;
     glViewport(0, 0, self.bounds.size.width * scale, self.bounds.size.height * scale);
+}
+
+- (BOOL)becomeFirstResponder
+{
+    /* Non-Roman keyboard layouts breaks user input. */
+    TSMDocumentID document = TSMGetActiveDocument();
+
+    CFArrayRef inpu_sources = TISCreateASCIICapableInputSourceList();
+    TSMSetDocumentProperty(document, kTSMDocumentEnabledInputSourcesPropertyTag,
+                           sizeof(CFArrayRef), &inpu_sources);
+    CFRelease(inpu_sources);
+
+    return [super becomeFirstResponder];
+}
+
+- (BOOL)resignFirstResponder
+{
+    TSMDocumentID document = TSMGetActiveDocument();
+    TSMRemoveDocumentProperty(document, kTSMDocumentEnabledInputSourcesPropertyTag);
+
+    return [super resignFirstResponder];
 }
 
 - (BOOL)acceptsFirstResponder
