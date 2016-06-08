@@ -22,7 +22,14 @@ static GBShader *shader = nil;
 
 - (void) filterChanged
 {
+    [self setNeedsDisplay:YES];
     self.shader = nil;
+}
+
+- (void) setShouldBlendFrameWithPrevious:(BOOL)shouldBlendFrameWithPrevious
+{
+    _shouldBlendFrameWithPrevious = shouldBlendFrameWithPrevious;
+    [self setNeedsDisplay:YES];
 }
 
 - (unsigned char) numberOfBuffers

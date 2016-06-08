@@ -6,6 +6,6 @@
 - (void) flip;
 - (uint32_t *) pixels;
 @property GB_gameboy_t *gb;
-@property BOOL shouldBlendFrameWithPrevious;
+@property (nonatomic) BOOL shouldBlendFrameWithPrevious;
 @property GBShader *shader;
 @end

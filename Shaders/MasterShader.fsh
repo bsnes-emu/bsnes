@@ -5,6 +5,7 @@ uniform bool uMixPrevious;
 uniform vec2 uResolution;
 const vec2 textureDimensions = vec2(160, 144);
 
+#line 1
 {filter}
 
 void main() {

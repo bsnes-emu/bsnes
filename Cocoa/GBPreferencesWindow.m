@@ -23,6 +23,8 @@
                     @"Scale4x",
                     @"AAScale2x",
                     @"AAScale4x",
+                    @"OmniScale",
+                    @"AAOmniScale",
                     ];
     }
     return filters;

@@ -2,7 +2,7 @@ vec4 filter(sampler2D image)
 {
     vec2 texCoord = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uResolution;
 
-    vec2 pixel = texCoord * textureDimensions;
+    vec2 pixel = texCoord * textureDimensions - vec2(0.5, 0.5);
 
     vec4 q11 = texture2D(image, vec2(floor(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
     vec4 q12 = texture2D(image, vec2(floor(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));

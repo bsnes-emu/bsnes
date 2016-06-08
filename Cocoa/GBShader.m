@@ -41,7 +41,6 @@ void main(void) {\n\
     if (self) {
         // Program
         NSString *fragment_shader = [[self class] shaderSourceForName:@"MasterShader"];
-        fragment_shader = [fragment_shader stringByReplacingOccurrencesOfString:@"\n" withString:@""];
         fragment_shader = [fragment_shader stringByReplacingOccurrencesOfString:@"{filter}"
                                                                      withString:[[self class] shaderSourceForName:shaderName]];
         program = [[self class] programWithVertexShader:vertex_shader fragmentShader:fragment_shader];

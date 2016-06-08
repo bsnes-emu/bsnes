@@ -25,6 +25,7 @@ Features currently supported only with the Cocoa version:
  * Battery save support
  * Save states
  * Optional frame blending
+ * Several [scaling algorithms](SCALING.md) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
 
 ## Compatibility
 While SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), some games fail to run correctly. SameBoy is still relatively early in its development and accuracy and compatibility will be improved.
