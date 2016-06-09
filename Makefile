@@ -19,7 +19,7 @@ CONF ?= debug
 ifeq ($(shell uname -s),Darwin)
 CFLAGS += -F/Library/Frameworks -DVERSION="$(VERSION)"
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
-LDFLAGS += -framework AppKit
+LDFLAGS += -framework AppKit -framework Carbon
 SDL_LDFLAGS := -framework SDL
 endif
 
