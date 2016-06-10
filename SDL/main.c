@@ -7,6 +7,8 @@
 
 #include "gb.h"
 
+static bool running = false;
+
 void update_keys_status(GB_gameboy_t *gb)
 {
     static bool ctrl = false;
@@ -15,7 +17,7 @@ void update_keys_status(GB_gameboy_t *gb)
     {
         switch( event.type ){
             case SDL_QUIT:
-                exit(0);
+                running = false;
             case SDL_KEYDOWN:
             case SDL_KEYUP:
                 gb->stopped = false;
@@ -201,6 +203,25 @@ usage:
     gb_set_pixels_output(&gb, screen->pixels);
     gb_set_rgb_encode_callback(&gb, rgb_encode);
 
+    /* Configure battery */
+    size_t path_length = strlen(argv[argc - 1]);
+    char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
+    memcpy(battery_save_path, argv[argc - 1], path_length);
+
+    /* Remove extension */
+    for (size_t i = path_length; i--;) {
+        if (battery_save_path[i] == '/') break;
+        if (battery_save_path[i] == '.') {
+            battery_save_path[i] = 0;
+            break;
+        }
+    }
+
+    /* Add .sav */
+    strcat(battery_save_path, ".sav");
+
+    gb_load_battery(&gb, battery_save_path);
+
     /* Configure Audio */
     SDL_AudioSpec want, have;
     SDL_memset(&want, 0, sizeof(want));
@@ -217,12 +238,13 @@ usage:
     SDL_PauseAudio(0);
 
     /* Run emulation */
-    while (true) {
+    running = true;
+    while (running) {
         gb_run(&gb);
     }
-    
-    /* Won't run unless we change the condition for the above loop */
     SDL_CloseAudio();
+
+    gb_save_battery(&gb, battery_save_path);
     return 0;
 }
 
