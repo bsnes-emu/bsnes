@@ -288,7 +288,10 @@ void display_run(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_STAT] &= ~4;
     if (gb->io_registers[GB_IO_LY] == gb->io_registers[GB_IO_LYC]) {
         gb->io_registers[GB_IO_STAT] |= 4;
-        gb->stat_interrupt_line = true;
+        if (gb->io_registers[GB_IO_STAT] & 0x40) {
+            /* User requests LYC interrupt. */
+            gb->stat_interrupt_line = true;
+        }
     }
 
     /* Todo: This behavior is seen in BGB and it fixes some ROMs with delicate timing, such as Hitman's 8bit.
