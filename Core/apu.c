@@ -89,6 +89,7 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
             gb->io_registers[GB_IO_PCM_12] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
         }
 
+        if (gb->apu.wave_enable)
         {
             int16_t sample = generate_wave(gb->apu.wave_channels[2].phase,
                                            MAX_CH_AMP,
