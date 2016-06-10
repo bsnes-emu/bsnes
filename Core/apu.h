@@ -11,6 +11,12 @@
 struct GB_gameboy_s;
 typedef struct GB_gameboy_s GB_gameboy_t;
 
+typedef struct
+{
+    int16_t left;
+    int16_t right;
+} GB_sample_t;
+
 /* Not all used on all channels */
 typedef struct
 {
@@ -48,12 +54,11 @@ typedef struct
     bool global_enable;
 } GB_apu_t;
 
-void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_samples, int16_t *samples);
-void apu_copy_buffer(GB_gameboy_t *gb, int16_t *dest, unsigned int count);
+void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_samples, GB_sample_t *samples);
+void apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count);
 void apu_write(GB_gameboy_t *gb, unsigned char reg, unsigned char value);
 unsigned char apu_read(GB_gameboy_t *gb, unsigned char reg);
 void apu_init(GB_gameboy_t *gb);
-void apu_copy_buffer(GB_gameboy_t *gb, int16_t *dest, unsigned int count);
 void apu_run(GB_gameboy_t *gb);
 
 #endif /* apu_h */

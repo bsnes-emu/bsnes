@@ -60,10 +60,10 @@ static int16_t step_lfsr(uint16_t lfsr, bool uses_7_bit)
 /* General Todo: The APU emulation seems to fail many accuracy tests. It might require a rewrite with
    these tests in mind. */
 
-void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_samples, int16_t *samples)
+void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_samples, GB_sample_t *samples)
 {
     for (; n_samples--; samples++) {
-        *samples = 0;
+        samples->left = samples->right = 0;
         if (!gb->apu.global_enable) {
             continue;
         }
@@ -71,39 +71,45 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
         gb->io_registers[GB_IO_PCM_12] = 0;
         gb->io_registers[GB_IO_PCM_34] = 0;
 
-        // Todo: Stereo support
-
-        if (gb->apu.left_on[0] || gb->apu.right_on[0]) {
+        {
             int16_t sample = generate_square(gb->apu.wave_channels[0].phase,
                                              gb->apu.wave_channels[0].amplitude,
                                              gb->apu.wave_channels[0].duty);
-            *samples += sample;
+            if (gb->apu.left_on [0]) samples->left  += sample;
+            if (gb->apu.right_on[0]) samples->right += sample;
             gb->io_registers[GB_IO_PCM_12] = ((int)sample) * 0xF / MAX_CH_AMP;
         }
-        if (gb->apu.left_on[1] || gb->apu.right_on[1]) {
+
+        {
             int16_t sample = generate_square(gb->apu.wave_channels[1].phase,
                                              gb->apu.wave_channels[1].amplitude,
                                              gb->apu.wave_channels[1].duty);
-            *samples += sample;
+            if (gb->apu.left_on [1]) samples->left  += sample;
+            if (gb->apu.right_on[1]) samples->right += sample;
             gb->io_registers[GB_IO_PCM_12] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
         }
-        if (gb->apu.wave_enable && (gb->apu.left_on[2] || gb->apu.right_on[2])) {
+
+        {
             int16_t sample = generate_wave(gb->apu.wave_channels[2].phase,
                                            MAX_CH_AMP,
                                            gb->apu.wave_form,
                                            gb->apu.wave_shift);
-            *samples += sample;
+            if (gb->apu.left_on [2]) samples->left  += sample;
+            if (gb->apu.right_on[2]) samples->right += sample;
             gb->io_registers[GB_IO_PCM_34] = ((int)sample) * 0xF / MAX_CH_AMP;
         }
-        if (gb->apu.left_on[3] || gb->apu.right_on[3]) {
+
+        {
             int16_t sample = generate_noise(gb->apu.wave_channels[3].phase,
                                             gb->apu.wave_channels[3].amplitude,
                                             gb->apu.lfsr);
-            *samples += sample;
+            if (gb->apu.left_on [3]) samples->left  += sample;
+            if (gb->apu.right_on[3]) samples->right += sample;
             gb->io_registers[GB_IO_PCM_34] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
         }
 
-        *samples *= gb->apu.left_volume;
+        samples->left *= gb->apu.left_volume;
+        samples->right *= gb->apu.right_volume;
 
         for (unsigned char i = 0; i < 4; i++) {
             /* Phase */
@@ -168,7 +174,7 @@ void apu_run(GB_gameboy_t *gb)
     while (gb->audio_copy_in_progress);
     double ticks_per_sample = (double) CPU_FREQUENCY / gb->sample_rate;
     while (gb->apu_cycles > ticks_per_sample) {
-        int16_t sample = 0;
+        GB_sample_t sample = {0, };
         apu_render(gb, gb->sample_rate, 1, &sample);
         gb->apu_cycles -= ticks_per_sample;
         if (gb->audio_position == gb->buffer_size) {
@@ -186,7 +192,7 @@ void apu_run(GB_gameboy_t *gb)
     }
 }
 
-void apu_copy_buffer(GB_gameboy_t *gb, int16_t *dest, unsigned int count)
+void apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
 {
     gb->audio_copy_in_progress = true;
 
@@ -198,11 +204,11 @@ void apu_copy_buffer(GB_gameboy_t *gb, int16_t *dest, unsigned int count)
 
     if (count > gb->audio_position) {
         // gb_log(gb, "Audio underflow: %d\n", count - gb->audio_position);
-        memset(dest + gb->audio_position, 0, (count - gb->audio_position) * 2);
+        memset(dest + gb->audio_position, 0, (count - gb->audio_position) * sizeof(*gb->audio_buffer));
         count = gb->audio_position;
     }
-    memcpy(dest, gb->audio_buffer, count * 2);
-    memmove(gb->audio_buffer, gb->audio_buffer + count, (gb->audio_position - count) * 2);
+    memcpy(dest, gb->audio_buffer, count * sizeof(*gb->audio_buffer));
+    memmove(gb->audio_buffer, gb->audio_buffer + count, (gb->audio_position - count) * sizeof(*gb->audio_buffer));
     gb->audio_position -= count;
 
     gb->audio_copy_in_progress = false;

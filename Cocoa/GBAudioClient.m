@@ -1,9 +1,9 @@
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
-#import "AudioClient.h"
+#import "GBAudioClient.h"
 
 static OSStatus render(
-                    AudioClient *self,
+                    GBAudioClient *self,
                     AudioUnitRenderActionFlags *ioActionFlags,
                     const AudioTimeStamp *inTimeStamp,
                     UInt32 inBusNumber,
@@ -11,23 +11,19 @@ static OSStatus render(
                     AudioBufferList *ioData)
 
 {
-    // This is a mono tone generator so we only need the first buffer
-    const int channel = 0;
-    SInt16 *buffer = (SInt16 *)ioData->mBuffers[channel].mData;
-
+    GB_sample_t *buffer = (GB_sample_t *)ioData->mBuffers[0].mData;
 
     self.renderBlock(self.rate, inNumberFrames, buffer);
-
     
     return noErr;
 }
 
-@implementation AudioClient
+@implementation GBAudioClient
 {
     AudioComponentInstance audioUnit;
 }
 
--(id) initWithRendererBlock:(void (^)(UInt32 sampleRate, UInt32 nFrames, SInt16 *buffer)) block
+-(id) initWithRendererBlock:(void (^)(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer)) block
               andSampleRate:(UInt32) rate
 {
     if(!(self = [super init]))
@@ -70,10 +66,10 @@ static OSStatus render(
     streamFormat.mFormatID = kAudioFormatLinearPCM;
     streamFormat.mFormatFlags =
     kAudioFormatFlagIsSignedInteger | kAudioFormatFlagIsPacked | kAudioFormatFlagsNativeEndian;
-    streamFormat.mBytesPerPacket = 2;
+    streamFormat.mBytesPerPacket = 4;
     streamFormat.mFramesPerPacket = 1;
-    streamFormat.mBytesPerFrame = 2;
-    streamFormat.mChannelsPerFrame = 1;
+    streamFormat.mBytesPerFrame = 4;
+    streamFormat.mChannelsPerFrame = 2;
     streamFormat.mBitsPerChannel = 2 * 8;
     err = AudioUnitSetProperty (audioUnit,
                                 kAudioUnitProperty_StreamFormat,

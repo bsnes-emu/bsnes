@@ -136,7 +136,7 @@ static void debugger_interrupt(int ignore)
 
 static void audio_callback(void *gb, Uint8 *stream, int len)
 {
-    apu_copy_buffer(gb, (int16_t *) stream, len / sizeof(int16_t));
+    apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
 }
 
 #ifdef __APPLE__
@@ -206,7 +206,7 @@ usage:
     SDL_memset(&want, 0, sizeof(want));
     want.freq = 96000;
     want.format = AUDIO_S16SYS;
-    want.channels = 1;
+    want.channels = 2;
     want.samples = 512;
     want.callback = audio_callback;
     want.userdata = &gb;

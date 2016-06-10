@@ -239,7 +239,7 @@ typedef struct GB_gameboy_s{
 
     /* APU */
     GB_apu_t apu;
-    int16_t *audio_buffer;
+    GB_sample_t *audio_buffer;
     unsigned int buffer_size;
     unsigned int sample_rate;
     unsigned int audio_position;

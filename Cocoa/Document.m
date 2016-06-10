@@ -1,5 +1,5 @@
 #include <CoreAudio/CoreAudio.h>
-#include "AudioClient.h"
+#include "GBAudioClient.h"
 #include "Document.h"
 #include "AppDelegate.h"
 #include "gb.h"
@@ -15,7 +15,7 @@
     NSString *lastConsoleInput;
 }
 
-@property AudioClient *audioClient;
+@property GBAudioClient *audioClient;
 - (void) vblank;
 - (void) log: (const char *) log withAttributes: (gb_log_attributes) attributes;
 - (const char *) getDebuggerInput;
@@ -103,8 +103,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     gb_set_pixels_output(&gb, self.view.pixels);
     self.view.gb = &gb;
     gb_set_sample_rate(&gb, 96000);
-    self.audioClient = [[AudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, SInt16 *buffer) {
-        //apu_render(&gb, sampleRate, nFrames, buffer);
+    self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         apu_copy_buffer(&gb, buffer, nFrames);
     } andSampleRate:96000];
     [self.audioClient start];
