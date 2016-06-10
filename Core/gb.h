@@ -6,7 +6,7 @@
 #include <time.h>
 #include "apu.h"
 
-#define GB_STRUCT_VERSION 6
+#define GB_STRUCT_VERSION 7
 
 enum {
     GB_REGISTER_AF,
@@ -225,6 +225,7 @@ typedef struct GB_gameboy_s{
     signed short line_x_bias;
     bool effective_window_enabled;
     unsigned char effective_window_y;
+    bool stat_interrupt_line;
 
     unsigned char bios[0x900];
     bool bios_finished;

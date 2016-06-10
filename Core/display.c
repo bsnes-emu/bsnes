@@ -250,6 +250,13 @@ void display_run(GB_gameboy_t *gb)
     */
     unsigned char last_mode = gb->io_registers[GB_IO_STAT] & 3;
 
+    /*
+        STAT interrupt is implemented based on this finding:
+        http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
+     */
+    unsigned char previous_stat_interrupt_line = gb->stat_interrupt_line;
+    gb->stat_interrupt_line = false;
+
     if (gb->display_cycles >= LCDC_PERIOD) {
         /* VBlank! */
         gb->display_cycles -= LCDC_PERIOD;
@@ -278,14 +285,10 @@ void display_run(GB_gameboy_t *gb)
 
     gb->io_registers[GB_IO_LY] = gb->display_cycles / 456;
 
-    bool previous_coincidence_flag = gb->io_registers[GB_IO_STAT] & 4;
-    
     gb->io_registers[GB_IO_STAT] &= ~4;
     if (gb->io_registers[GB_IO_LY] == gb->io_registers[GB_IO_LYC]) {
         gb->io_registers[GB_IO_STAT] |= 4;
-        if ((gb->io_registers[GB_IO_STAT] & 0x40) && !previous_coincidence_flag) { /* User requests an interrupt on coincidence*/
-            gb->io_registers[GB_IO_IF] |= 2;
-        }
+        gb->stat_interrupt_line = true;
     }
 
     /* Todo: This behavior is seen in BGB and it fixes some ROMs with delicate timing, such as Hitman's 8bit.
@@ -299,10 +302,10 @@ void display_run(GB_gameboy_t *gb)
         gb->effective_window_enabled = false;
         gb->effective_window_y = 0xFF;
 
+        if (gb->io_registers[GB_IO_STAT] & 16) { /* User requests an interrupt on VBlank*/
+            gb->stat_interrupt_line = true;
+        }
         if (last_mode != 1) {
-            if (gb->io_registers[GB_IO_STAT] & 16) { /* User requests an interrupt on VBlank*/
-                gb->io_registers[GB_IO_IF] |= 2;
-            }
             gb->io_registers[GB_IO_IF] |= 1;
         }
 
@@ -328,7 +331,7 @@ void display_run(GB_gameboy_t *gb)
             }
         }
 
-        return;
+        goto updateSTAT;
     }
 
     // Todo: verify this window behavior. It is assumed from the expected behavior of 007 - The World Is Not Enough.
@@ -338,16 +341,11 @@ void display_run(GB_gameboy_t *gb)
 
     if (gb->display_cycles % 456 < 80) { /* Mode 2 */
         gb->io_registers[GB_IO_STAT] |= 2; /* Set mode to 2 */
-        if (last_mode != 2) {
-            if (gb->io_registers[GB_IO_STAT] & 0x20) { /* User requests an interrupt on Mode 2 */
-                gb->io_registers[GB_IO_IF] |= 2;
-            }
 
-            /* User requests an interrupt on LY=LYC*/
-            if (gb->io_registers[GB_IO_STAT] & 64 && gb->io_registers[GB_IO_STAT] & 4) {
-                gb->io_registers[GB_IO_IF] |= 2;
-            }
+        if (gb->io_registers[GB_IO_STAT] & 0x20) { /* User requests an interrupt on Mode 2 */
+            gb->stat_interrupt_line = true;
         }
+
         /* See above comment about window behavior. */
         if (gb->effective_window_enabled && gb->effective_window_y == 0xFF) {
             gb->effective_window_y =  gb->io_registers[GB_IO_LY];
@@ -355,7 +353,7 @@ void display_run(GB_gameboy_t *gb)
         /* Todo: Figure out how the Gameboy handles in-line changes to SCX */
         gb->line_x_bias = - (gb->io_registers[GB_IO_SCX] & 0x7);
         gb->previous_lcdc_x = gb->line_x_bias;
-        return;
+        goto updateSTAT;
     }
 
     signed short current_lcdc_x = ((gb->display_cycles % 456 - 80) & ~7) + gb->line_x_bias;
@@ -372,19 +370,23 @@ void display_run(GB_gameboy_t *gb)
 
     if (gb->display_cycles % 456 < 80 + 172) { /* Mode 3 */
         gb->io_registers[GB_IO_STAT] |= 3; /* Set mode to 3 */
-        return;
+        goto updateSTAT;
     }
 
     /* if (gb->display_cycles % 456 < 80 + 172 + 204) */ { /* Mode 0*/
+        if (gb->io_registers[GB_IO_STAT] & 8) { /* User requests an interrupt on Mode 0 */
+            gb->stat_interrupt_line = true;
+        }
         if (last_mode != 0) {
-            if (gb->io_registers[GB_IO_STAT] & 8) { /* User requests an interrupt on Mode 0 */
-                gb->io_registers[GB_IO_IF] |= 2;
-            }
             if (gb->hdma_on_hblank) {
                 gb->hdma_on = true;
                 gb->hdma_cycles = 0;
             }
         }
-        return;
+    }
+
+updateSTAT:
+    if (gb->stat_interrupt_line && !previous_stat_interrupt_line) {
+        gb->io_registers[GB_IO_IF] |= 2;
     }
 }
