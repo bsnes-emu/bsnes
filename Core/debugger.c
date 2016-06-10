@@ -448,7 +448,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
         return true;
     }
 
-    gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
+    gb->breakpoints = realloc(gb->breakpoints, (gb->n_breakpoints + 1) * sizeof(gb->breakpoints[0]));
     memmove(&gb->breakpoints[index + 1], &gb->breakpoints[index], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
     gb->breakpoints[index] = result;
     gb->n_breakpoints++;
@@ -481,9 +481,9 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
         return true;
     }
 
-    gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
     memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
     gb->n_breakpoints--;
+    gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
 
     gb_log(gb, "Breakpoint removed from %04x\n", result);
     return true;
