@@ -1,5 +1,22 @@
 # Change Log
 
+## Version 0.4
+This version is not compatible with save states of older versions.
+
+### New/Improved Features
+ * Cocoa port now includes several scaling algorithms, including a beta of the exclusive OmniScale algorithm
+ * SDL port now includes sound support
+ * SDL port now includes battery save support
+
+### Accuracy Improvements/Fixes
+ * APU emulation now includes stereo support
+ * Improved PCM registers emulation
+ * More accurate STAT interrupt emulation. This fixes Altered Space.
+ 
+### Bug Fixes
+ * The Cocoa port ignored some key presses if the user keyboard layout included non-ASCII characters
+ * Fixed a bug that could cause a crash when adding or removing a breakpoint
+
 ## Version 0.3
 ### New/Improved Features
  * New debugger command: cartridge (alias: mbc) shows information about the cartridge and the current status of the MBC
@@ -18,7 +35,7 @@
 ### Bug Fixes
  * Debugger's finish command now behaves correctly when interrupts are involved
  * Corrected the description for the breakpoint command
- * Sameboy will not create save files for ROMs without cartridge RAM or RTC, even if they report having a battery, preventing 0-bytes save files
+ * SameBoy will not create save files for ROMs without cartridge RAM or RTC, even if they report having a battery, preventing 0-bytes save files
 
 ## Version 0.2
 ### New/Improved Features
