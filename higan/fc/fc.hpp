@@ -8,7 +8,7 @@
 
 namespace Famicom {
   namespace Info {
-    static const uint SerializerVersion = 2;
+    static const uint SerializerVersion = 3;
   }
 }
 

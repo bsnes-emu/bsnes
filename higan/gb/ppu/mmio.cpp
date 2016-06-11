@@ -140,8 +140,9 @@ auto PPU::mmio_write(uint16 addr, uint8 data) -> void {
     status.interrupt_vblank = data & 0x10;
     status.interrupt_hblank = data & 0x08;
 
-    //hardware bug: writes to STAT on DMG,SGB during blanking triggers STAT IRQ
-    if(!system.cgb() && status.mode < 2) {
+    //hardware bug: writes to STAT on DMG,SGB during vblank triggers STAT IRQ
+    //note: this behavior isn't entirely correct; more research is needed ...
+    if(!system.cgb() && status.mode == 1) {
       cpu.raise(CPU::Interrupt::Stat);
     }
 
