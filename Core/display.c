@@ -99,7 +99,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, unsigned char x, unsigned char y)
         y -= gb->effective_window_y;
     }
     else {
-        x += gb->io_registers[GB_IO_SCX];
+        x += gb->effective_scx;
         y += gb->io_registers[GB_IO_SCY];
     }
     if (gb->io_registers[GB_IO_LCDC] & 0x08 && !in_window) {
@@ -353,13 +353,13 @@ void display_run(GB_gameboy_t *gb)
         if (gb->effective_window_enabled && gb->effective_window_y == 0xFF) {
             gb->effective_window_y =  gb->io_registers[GB_IO_LY];
         }
-        /* Todo: Figure out how the Gameboy handles in-line changes to SCX */
-        gb->line_x_bias = - (gb->io_registers[GB_IO_SCX] & 0x7);
-        gb->previous_lcdc_x = gb->line_x_bias;
+
+        gb->effective_scx = gb->io_registers[GB_IO_SCX];
+        gb->previous_lcdc_x = - (gb->effective_scx & 0x7);
         goto updateSTAT;
     }
 
-    signed short current_lcdc_x = ((gb->display_cycles % 456 - 80) & ~7) + gb->line_x_bias;
+    signed short current_lcdc_x = ((gb->display_cycles % 456 - 80) & ~7) - (gb->effective_scx & 0x7);
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= 160) {
             continue;

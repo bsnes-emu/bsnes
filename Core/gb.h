@@ -268,7 +268,7 @@ typedef struct GB_gameboy_s {
         bool effective_window_enabled;
         unsigned char effective_window_y;
         bool stat_interrupt_line;
-        signed char line_x_bias;
+        unsigned char effective_scx;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
