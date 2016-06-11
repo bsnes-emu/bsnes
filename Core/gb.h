@@ -5,8 +5,10 @@
 #include <stdio.h>
 #include <time.h>
 #include "apu.h"
+#include "save_struct.h"
 
-#define GB_STRUCT_VERSION 7
+
+#define GB_STRUCT_VERSION 8
 
 enum {
     GB_REGISTER_AF,
@@ -168,120 +170,152 @@ typedef struct {
     bool has_rumble;
 } GB_cartridge_t;
 
-typedef struct GB_gameboy_s{
-    uintptr_t magic; // States are currently platform dependent
-    int version; // and version dependent
-    /* Registers */
-    unsigned short pc;
-    unsigned short registers[GB_REGISTERS_16_BIT];
-    bool ime;
-    unsigned char interrupt_enable;
+/* When state saving, each section is dumped independently of other sections.
+   This allows adding data to the end of the section without worrying about future compatibility.
+   Some other changes might be "safe" as well. */
 
-    /* CPU and General Hardware Flags*/
-    bool cgb_mode;
-    bool is_cgb;
-    bool cgb_double_speed;
-    bool halted;
-    bool stopped;
+typedef struct GB_gameboy_s {
+    GB_SECTION(header,
+        uintptr_t magic; // States are currently platform dependent
+        int version; // and version dependent
+    );
+
+    GB_SECTION(core_state,
+        /* Registers */
+        unsigned short pc;
+        unsigned short registers[GB_REGISTERS_16_BIT];
+        bool ime;
+        unsigned char interrupt_enable;
+        unsigned char cgb_ram_bank;
+
+        /* CPU and General Hardware Flags*/
+        bool cgb_mode;
+        bool is_cgb;
+        bool cgb_double_speed;
+        bool halted;
+        bool stopped;
+        bool bios_finished;
+    );
 
     /* HDMA */
-    bool hdma_on;
-    bool hdma_on_hblank;
-    unsigned char hdma_steps_left;
-    unsigned short hdma_cycles;
-    unsigned short hdma_current_src, hdma_current_dest;
+    GB_SECTION(hdma,
+        bool hdma_on;
+        bool hdma_on_hblank;
+        unsigned char hdma_steps_left;
+        unsigned short hdma_cycles;
+        unsigned short hdma_current_src, hdma_current_dest;
+    );
+    
+    /* MBC */
+    GB_SECTION(mbc,
+        unsigned short mbc_rom_bank;
+        unsigned char mbc_ram_bank;
+        size_t mbc_ram_size;
+        bool mbc_ram_enable;
+        bool mbc_ram_banking;
+    );
 
-    /* Memory */
-    unsigned char *rom;
-    size_t rom_size;
-    unsigned short mbc_rom_bank;
 
-    const GB_cartridge_t *cartridge_type;
-    unsigned char *mbc_ram;
-    unsigned char mbc_ram_bank;
-    size_t mbc_ram_size;
-    bool mbc_ram_enable;
-    bool mbc_ram_banking;
-
-    unsigned char *ram;
-    unsigned long ram_size; // Different between CGB and DMG
-    unsigned char cgb_ram_bank;
-
-    unsigned char hram[0xFFFF - 0xFF80];
-    unsigned char io_registers[0x80];
-
-    /* Video Display */
-    unsigned char *vram;
-    unsigned long vram_size; // Different between CGB and DMG
-    unsigned char cgb_vram_bank;
-    unsigned char oam[0xA0];
-    unsigned char background_palletes_data[0x40];
-    unsigned char sprite_palletes_data[0x40];
-    uint32_t background_palletes_rgb[0x20];
-    uint32_t sprite_palletes_rgb[0x20];
-    bool ly144_bug_oam;
-    bool ly144_bug_hblank;
-    signed short previous_lcdc_x;
-    signed short line_x_bias;
-    bool effective_window_enabled;
-    unsigned char effective_window_y;
-    bool stat_interrupt_line;
-
-    unsigned char bios[0x900];
-    bool bios_finished;
+    /* HRAM and HW Registers */
+    GB_SECTION(hram,
+        unsigned char hram[0xFFFF - 0xFF80];
+        unsigned char io_registers[0x80];
+    );
 
     /* Timing */
-    signed long last_vblank;
-    unsigned long display_cycles;
-    unsigned long div_cycles;
-    unsigned long tima_cycles;
-    unsigned long dma_cycles;
-    double apu_cycles;
+    GB_SECTION(timing,
+        signed long last_vblank;
+        unsigned long display_cycles;
+        unsigned long div_cycles;
+        unsigned long tima_cycles;
+        unsigned long dma_cycles;
+        double apu_cycles;
+    );
 
     /* APU */
-    GB_apu_t apu;
+    GB_SECTION(apu,
+        GB_apu_t apu;
+    );
+
+    /* RTC */
+    GB_SECTION(rtc,
+        union {
+            struct {
+                unsigned char rtc_seconds;
+                unsigned char rtc_minutes;
+                unsigned char rtc_hours;
+                unsigned char rtc_days;
+                unsigned char rtc_high;
+            };
+            unsigned char rtc_data[5];
+        };
+        time_t last_rtc_second;
+    );
+
+    /* Video Display */
+    GB_SECTION(video,
+        unsigned long vram_size; // Different between CGB and DMG
+        unsigned char cgb_vram_bank;
+        unsigned char oam[0xA0];
+        unsigned char background_palletes_data[0x40];
+        unsigned char sprite_palletes_data[0x40];
+        uint32_t background_palletes_rgb[0x20];
+        uint32_t sprite_palletes_rgb[0x20];
+        bool ly144_bug_oam;
+        bool ly144_bug_hblank;
+        signed short previous_lcdc_x;
+        unsigned char padding;
+        bool effective_window_enabled;
+        unsigned char effective_window_y;
+        bool stat_interrupt_line;
+        signed char line_x_bias;
+    );
+
+    /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
+
+    /* ROM */
+    unsigned char *rom;
+    size_t rom_size;
+    const GB_cartridge_t *cartridge_type;
+
+    /* Various RAMs */
+    unsigned char *ram;
+    unsigned char *vram;
+    unsigned char *mbc_ram;
+
+    /* I/O */
+    uint32_t *screen;
     GB_sample_t *audio_buffer;
+    bool keys[8];
+
+    /* Audio Specific */
     unsigned int buffer_size;
     unsigned int sample_rate;
     unsigned int audio_position;
-    volatile bool audio_copy_in_progress;
     bool audio_stream_started; // detects first copy request to minimize lag
-    
-    /* I/O */
-    uint32_t *screen;
-    GB_vblank_callback_t vblank_callback;
+    volatile bool audio_copy_in_progress;
 
-    bool keys[8];
-
-    /* RTC */
-    union {
-        struct {
-            unsigned char rtc_seconds;
-            unsigned char rtc_minutes;
-            unsigned char rtc_hours;
-            unsigned char rtc_days;
-            unsigned char rtc_high;
-        };
-        unsigned char rtc_data[5];
-    };
-    time_t last_rtc_second;
-
-    /* Unsaved User */
-    struct {} first_unsaved_data;
-    bool turbo;
-    bool debug_stopped;
+    /* Callbacks */
+    void *user_data;
     GB_log_callback_t log_callback;
     GB_input_callback_t input_callback;
     GB_rgb_encode_callback_t rgb_encode_callback;
-    void *user_data;
+    GB_vblank_callback_t vblank_callback;
+
+    /* Debugger */
     int debug_call_depth;
     bool debug_fin_command, debug_next_command;
     unsigned short n_breakpoints;
     unsigned short *breakpoints;
-
     bool stack_leak_detection;
     unsigned short sp_for_call_depth[0x200]; /* Should be much more than enough */
     unsigned short addr_for_call_depth[0x200];
+    bool debug_stopped;
+
+    /* Misc */
+    bool turbo;
+    unsigned long ram_size; // Different between CGB and DMG
+    unsigned char bios[0x900];
 
 } GB_gameboy_t;
 

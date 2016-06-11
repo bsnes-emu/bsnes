@@ -208,113 +208,134 @@ int gb_load_rom(GB_gameboy_t *gb, const char *path)
     return 0;
 }
 
+static bool dump_section(FILE *f, const void *src, uint32_t size)
+{
+    if (fwrite(&size, 1, sizeof(size), f) != sizeof(size)) {
+        return false;
+    }
+
+    if (fwrite(src, 1, size, f) != size) {
+        return false;
+    }
+
+    return true;
+}
+
+#define DUMP_SECTION(gb, f, section) dump_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
+
 /* Todo: we need a sane and protable save state format. */
 int gb_save_state(GB_gameboy_t *gb, const char *path)
 {
-    GB_gameboy_t save;
-    memcpy(&save, gb, offsetof(GB_gameboy_t, first_unsaved_data));
-    save.cartridge_type = NULL; // Kept from load_rom
-    save.rom = NULL; // Kept from load_rom
-    save.rom_size = 0; // Kept from load_rom
-    save.mbc_ram = NULL;
-    save.ram = NULL;
-    save.vram = NULL;
-    save.screen = NULL; // Kept from user
-    save.audio_buffer = NULL; // Kept from user
-    save.buffer_size = 0; // Kept from user
-    save.sample_rate = 0; // Kept from user
-    save.audio_position = 0; // Kept from previous state
-    save.vblank_callback = NULL;
-    save.user_data = NULL;
-    memset(save.keys, 0, sizeof(save.keys)); // Kept from user
-
     FILE *f = fopen(path, "w");
     if (!f) {
         return errno;
     }
 
-    if (fwrite(&save, 1, offsetof(GB_gameboy_t, first_unsaved_data), f) != offsetof(GB_gameboy_t, first_unsaved_data)) {
-        fclose(f);
-        return EIO;
-    }
+    if (fwrite(GB_GET_SECTION(gb, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+    if (!DUMP_SECTION(gb, f, core_state)) goto error;
+    if (!DUMP_SECTION(gb, f, hdma      )) goto error;
+    if (!DUMP_SECTION(gb, f, mbc       )) goto error;
+    if (!DUMP_SECTION(gb, f, hram      )) goto error;
+    if (!DUMP_SECTION(gb, f, timing    )) goto error;
+    if (!DUMP_SECTION(gb, f, apu       )) goto error;
+    if (!DUMP_SECTION(gb, f, rtc       )) goto error;
+    if (!DUMP_SECTION(gb, f, video     )) goto error;
+
 
     if (fwrite(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
-        fclose(f);
-        return EIO;
+        goto error;
     }
 
     if (fwrite(gb->ram, 1, gb->ram_size, f) != gb->ram_size) {
-        fclose(f);
-        return EIO;
+        goto error;
     }
 
     if (fwrite(gb->vram, 1, gb->vram_size, f) != gb->vram_size) {
-        fclose(f);
-        return EIO;
+        goto error;
     }
 
     errno = 0;
+
+error:
     fclose(f);
     return errno;
 }
 
+/* Best-effort read function for maximum future compatibility. */
+static bool read_section(FILE *f, void *dest, uint32_t size)
+{
+    uint32_t saved_size = 0;
+    if (fread(&saved_size, 1, sizeof(size), f) != sizeof(size)) {
+        return false;
+    }
+
+    if (saved_size <= size) {
+        if (fread(dest, 1, saved_size, f) != saved_size) {
+            return false;
+        }
+    }
+    else {
+        if (fread(dest, 1, size, f) != size) {
+            return false;
+        }
+        fseek(f, saved_size - size, SEEK_CUR);
+    }
+
+    return true;
+}
+
+#define READ_SECTION(gb, f, section) read_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
+
 int gb_load_state(GB_gameboy_t *gb, const char *path)
 {
     GB_gameboy_t save;
+
+    /* Every unread value should be kept the same. */
+    memcpy(&save, gb, sizeof(save));
 
     FILE *f = fopen(path, "r");
     if (!f) {
         return errno;
     }
 
-    if (fread(&save, 1, offsetof(GB_gameboy_t, first_unsaved_data), f) != offsetof(GB_gameboy_t, first_unsaved_data)) {
-        fclose(f);
-        return EIO;
-    }
-
-    save.cartridge_type = gb->cartridge_type;
-    save.rom = gb->rom;
-    save.rom_size = gb->rom_size;
-    save.mbc_ram = gb->mbc_ram;
-    save.ram = gb->ram;
-    save.vram = gb->vram;
-    save.screen = gb->screen;
-    save.audio_buffer = gb->audio_buffer;
-    save.buffer_size = gb->buffer_size;
-    save.sample_rate = gb->sample_rate;
-    save.audio_position = gb->audio_position;
-    save.vblank_callback = gb->vblank_callback;
-    save.user_data = gb->user_data;
-    memcpy(save.keys, gb->keys, sizeof(save.keys));
+    if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
+    if (!READ_SECTION(&save, f, core_state)) goto error;
+    if (!READ_SECTION(&save, f, hdma      )) goto error;
+    if (!READ_SECTION(&save, f, mbc       )) goto error;
+    if (!READ_SECTION(&save, f, hram      )) goto error;
+    if (!READ_SECTION(&save, f, timing    )) goto error;
+    if (!READ_SECTION(&save, f, apu       )) goto error;
+    if (!READ_SECTION(&save, f, rtc       )) goto error;
+    if (!READ_SECTION(&save, f, video     )) goto error;
 
     if (gb->magic != save.magic) {
         gb_log(gb, "File is not a save state, or is from an incompatible operating system.\n");
-        fclose(f);
-        return -1;
+        errno = -1;
+        goto error;
     }
 
     if (gb->version != save.version) {
         gb_log(gb, "Save state is for a different version of SameBoy.\n");
-        fclose(f);
-        return -1;
+        errno = -1;
+        goto error;
     }
 
     if (gb->mbc_ram_size != save.mbc_ram_size) {
         gb_log(gb, "Save state has non-matching MBC RAM size.\n");
-        fclose(f);
-        return -1;
+        errno = -1;
+        goto error;
     }
 
     if (gb->ram_size != save.ram_size) {
         gb_log(gb, "Save state has non-matching RAM size. Try changing emulated model.\n");
-        fclose(f);
-        return -1;
+        errno = -1;
+        goto error;
     }
 
     if (gb->vram_size != save.vram_size) {
         gb_log(gb, "Save state has non-matching VRAM size. Try changing emulated model.\n");
-        fclose(f);
-        return -1;
+        errno = -1;
+        goto error;
     }
 
     if (fread(gb->mbc_ram, 1, gb->mbc_ram_size, f) != gb->mbc_ram_size) {
@@ -332,8 +353,9 @@ int gb_load_state(GB_gameboy_t *gb, const char *path)
         return EIO;
     }
 
-    memcpy(gb, &save, offsetof(GB_gameboy_t, first_unsaved_data));
+    memcpy(gb, &save, sizeof(save));
     errno = 0;
+error:
     fclose(f);
     return errno;
 }
