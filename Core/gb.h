@@ -261,8 +261,8 @@ typedef struct GB_gameboy_s {
         unsigned char sprite_palletes_data[0x40];
         uint32_t background_palletes_rgb[0x20];
         uint32_t sprite_palletes_rgb[0x20];
-        bool ly144_bug_oam;
-        bool ly144_bug_hblank;
+        GB_PADDING(bool, ly144_bug_oam);
+        GB_PADDING(bool, ly144_bug_hblank);
         signed short previous_lcdc_x;
         unsigned char padding;
         bool effective_window_enabled;

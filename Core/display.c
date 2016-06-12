@@ -240,6 +240,23 @@ void palette_changed(GB_gameboy_t *gb, bool background_palette, unsigned char in
     (background_palette? gb->background_palletes_rgb : gb->sprite_palletes_rgb)[index / 2] = gb->rgb_encode_callback(gb, r, g, b);
 }
 
+
+/*
+ Each line is 456 cycles, approximately:
+ Mode 2 - 80  cycles / OAM Transfer
+ Mode 3 - 172 cycles / Rendering
+ Mode 0 - 204 cycles / HBlank
+ 
+ Mode 1 is VBlank
+
+ Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
+ */
+
+#define MODE2_LENGTH 80
+#define MODE3_LENGTH 172
+#define MODE1_LENGTH 204
+#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE1_LENGTH) // = 456
+
 void display_run(GB_gameboy_t *gb)
 {
     /*
@@ -248,42 +265,43 @@ void display_run(GB_gameboy_t *gb)
 
        See http://forums.nesdev.com/viewtopic.php?f=20&t=13727
     */
-    unsigned char last_mode = gb->io_registers[GB_IO_STAT] & 3;
 
     /*
         STAT interrupt is implemented based on this finding:
         http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
      */
+
     unsigned char previous_stat_interrupt_line = gb->stat_interrupt_line;
     gb->stat_interrupt_line = false;
+
+    unsigned char last_mode = gb->io_registers[GB_IO_STAT] & 3;
+    gb->io_registers[GB_IO_STAT] &= ~3;
 
     if (gb->display_cycles >= LCDC_PERIOD) {
         /* VBlank! */
         gb->display_cycles -= LCDC_PERIOD;
-        gb->ly144_bug_oam = false;
-        gb->ly144_bug_hblank = false;
         display_vblank(gb);
     }
 
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         /* LCD is disabled, do nothing */
-        gb->io_registers[GB_IO_STAT] &= ~3;
+
+        /* Some games expect LY to be zero when the LCD is off.
+           Todo: Verify this behavior.
+         Keep in mind that this only affects the value being read from the Gameboy, not the actualy display state. 
+         This also explains why the coincidence interrupt triggers when LYC = 0 and LY = 153. */
         gb->io_registers[GB_IO_LY] = 0;
         return;
     }
 
-    gb->io_registers[GB_IO_STAT] &= ~3;
 
-    /*
-     Each line is 456 cycles, approximately:
-     Mode 2 - 80 cycles
-     Mode 3 - 172 cycles
-     Mode 0 - 204 cycles
-     
-     Todo: Mode lengths are not constants???
-     */
+    gb->io_registers[GB_IO_LY] = gb->display_cycles / LINE_LENGTH;
 
-    gb->io_registers[GB_IO_LY] = gb->display_cycles / 456;
+    /* Todo: This behavior is seen in BGB and it fixes some ROMs with delicate timing, such as Hitman's 8bit.
+       This should be verified to be correct on a real gameboy. */
+    if (gb->io_registers[GB_IO_LY] == 153 && gb->display_cycles % LINE_LENGTH > 8) {
+        gb->io_registers[GB_IO_LY] = 0;
+    }
 
     gb->io_registers[GB_IO_STAT] &= ~4;
     if (gb->io_registers[GB_IO_LY] == gb->io_registers[GB_IO_LYC]) {
@@ -294,13 +312,7 @@ void display_run(GB_gameboy_t *gb)
         }
     }
 
-    /* Todo: This behavior is seen in BGB and it fixes some ROMs with delicate timing, such as Hitman's 8bit.
-       This should be verified to be correct on a real gameboy. */
-    if (gb->io_registers[GB_IO_LY] == 153 && gb->display_cycles % 456 > 8) {
-        gb->io_registers[GB_IO_LY] = 0;
-    }
-
-    if (gb->display_cycles >= 456 * 144) { /* VBlank */
+    if (gb->display_cycles >= LINE_LENGTH * 144) { /* VBlank */
         gb->io_registers[GB_IO_STAT] |= 1; /* Set mode to 1 */
         gb->effective_window_enabled = false;
         gb->effective_window_y = 0xFF;
@@ -314,23 +326,9 @@ void display_run(GB_gameboy_t *gb)
 
         // LY = 144 interrupt bug
         if (gb->io_registers[GB_IO_LY] == 144) {
-            if (gb->display_cycles % 456 < 80) { // Mode 2
-                if (gb->io_registers[GB_IO_STAT] & 0x20 && !gb->ly144_bug_oam) { /* User requests an interrupt on Mode 2 */
-                    gb->io_registers[GB_IO_IF] |= 2;
-                }
-                gb->ly144_bug_oam = true;
-            }
-            if (gb->display_cycles % 456 < 80 + 172) { /* Mode 3 */
-                // Nothing to do
-            }
-            else { /* Mode 0 */
-                if (gb->io_registers[GB_IO_STAT] & 8 && !gb->ly144_bug_hblank) { /* User requests an interrupt on Mode 0 */
-                    /*
-                    Todo: Verify if this actually happens.
-                    gb->io_registers[GB_IO_IF] |= 2;
-                    */
-                }
-                gb->ly144_bug_hblank = true;
+            /* User requests an interrupt on Mode 2 */
+            if (gb->display_cycles % LINE_LENGTH < 92 && gb->io_registers[GB_IO_STAT] & 0x20) { // Mode 2
+                gb->stat_interrupt_line = true;
             }
         }
 
@@ -342,7 +340,7 @@ void display_run(GB_gameboy_t *gb)
         gb->effective_window_enabled = true;
     }
 
-    if (gb->display_cycles % 456 < 80) { /* Mode 2 */
+    if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH) { /* Mode 2 */
         gb->io_registers[GB_IO_STAT] |= 2; /* Set mode to 2 */
 
         if (gb->io_registers[GB_IO_STAT] & 0x20) { /* User requests an interrupt on Mode 2 */
@@ -359,32 +357,34 @@ void display_run(GB_gameboy_t *gb)
         goto updateSTAT;
     }
 
-    signed short current_lcdc_x = ((gb->display_cycles % 456 - 80) & ~7) - (gb->effective_scx & 0x7);
-    for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
-        if (gb->previous_lcdc_x >= 160) {
-            continue;
+    if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH + MODE3_LENGTH) { /* Mode 3 */
+        if (last_mode != 3) {
+            
         }
-        if (gb->previous_lcdc_x < 0) {
-            continue;
+        signed short current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+        for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
+            if (gb->previous_lcdc_x >= 160) {
+                continue;
+            }
+            if (gb->previous_lcdc_x < 0) {
+                continue;
+            }
+            gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
+            get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
         }
-        gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
-        get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
-    }
-
-    if (gb->display_cycles % 456 < 80 + 172) { /* Mode 3 */
         gb->io_registers[GB_IO_STAT] |= 3; /* Set mode to 3 */
         goto updateSTAT;
     }
 
-    /* if (gb->display_cycles % 456 < 80 + 172 + 204) */ { /* Mode 0*/
-        if (gb->io_registers[GB_IO_STAT] & 8) { /* User requests an interrupt on Mode 0 */
-            gb->stat_interrupt_line = true;
-        }
-        if (last_mode != 0) {
-            if (gb->hdma_on_hblank) {
-                gb->hdma_on = true;
-                gb->hdma_cycles = 0;
-            }
+     /* Mode 0*/
+    if (gb->io_registers[GB_IO_STAT] & 8) { /* User requests an interrupt on Mode 0 */
+        gb->stat_interrupt_line = true;
+    }
+
+    if (last_mode != 0) {
+        if (gb->hdma_on_hblank) {
+            gb->hdma_on = true;
+            gb->hdma_cycles = 0;
         }
     }
 

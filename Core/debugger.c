@@ -683,8 +683,6 @@ void debugger_ret_hook(GB_gameboy_t *gb)
     }
 }
 
-/* The debugger interface is quite primitive. One letter commands with a single parameter maximum.
-   Only one breakpoint is allowed at a time. More features will be added later. */
 void debugger_run(GB_gameboy_t *gb)
 {
     char *input = NULL;
