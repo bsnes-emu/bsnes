@@ -198,7 +198,7 @@ void display_vblank(GB_gameboy_t *gb)
     frames++;
      */
 
-    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+    if (!(gb->io_registers[GB_IO_LCDC] & 0x80) || gb->stopped) {
         /* LCD is off, memset screen to white */
         memset(gb->screen, 0xFF, 160 * 144 * 4);
     }

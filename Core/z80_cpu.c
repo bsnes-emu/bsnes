@@ -1333,7 +1333,7 @@ void cpu_run(GB_gameboy_t *gb)
         /* Run pseudo instructions rst 40-60*/
         rst(gb, 0x87 + interrupt_bit * 8);
     }
-    else if(!gb->halted) {
+    else if(!gb->halted && !gb->stopped) {
         unsigned char opcode = read_memory(gb, gb->pc);
         opcodes[opcode](gb, opcode);
     }
