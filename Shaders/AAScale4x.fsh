@@ -6,15 +6,15 @@ vec4 scale2x(sampler2D image, vec2 texCoord)
     // A B C
     // D E F
     // G H I
-    vec4 A = texture2D(image, texCoord + vec2( -o.x,  o.y));
-    vec4 B = texture2D(image, texCoord + vec2(    0,  o.y));
-    vec4 C = texture2D(image, texCoord + vec2(  o.x,  o.y));
-    vec4 D = texture2D(image, texCoord + vec2( -o.x,    0));
-    vec4 E = texture2D(image, texCoord + vec2(    0,    0));
-    vec4 F = texture2D(image, texCoord + vec2(  o.x,    0));
-    vec4 G = texture2D(image, texCoord + vec2( -o.x, -o.y));
-    vec4 H = texture2D(image, texCoord + vec2(    0, -o.y));
-    vec4 I = texture2D(image, texCoord + vec2(  o.x, -o.y));
+    vec4 A = texture(image, texCoord + vec2( -o.x,  o.y));
+    vec4 B = texture(image, texCoord + vec2(    0,  o.y));
+    vec4 C = texture(image, texCoord + vec2(  o.x,  o.y));
+    vec4 D = texture(image, texCoord + vec2( -o.x,    0));
+    vec4 E = texture(image, texCoord + vec2(    0,    0));
+    vec4 F = texture(image, texCoord + vec2(  o.x,    0));
+    vec4 G = texture(image, texCoord + vec2( -o.x, -o.y));
+    vec4 H = texture(image, texCoord + vec2(    0, -o.y));
+    vec4 I = texture(image, texCoord + vec2(  o.x, -o.y));
     vec2 p = texCoord * textureDimensions;
     // p = the position within a pixel [0...1]
     p = fract(p);
@@ -39,10 +39,10 @@ vec4 scale2x(sampler2D image, vec2 texCoord)
 
 vec4 aaScale2x(sampler2D image, vec2 texCoord)
 {
-    return mix(texture2D(image, texCoord), scale2x(image, texCoord), 0.5);
+    return mix(texture(image, texCoord), scale2x(image, texCoord), 0.5);
 }
 
-vec4 filter(sampler2D image)
+vec4 scale(sampler2D image)
 {
     // o = offset, the width of a pixel
     vec2 o = 1.0 / (textureDimensions * 2.);

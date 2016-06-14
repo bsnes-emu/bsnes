@@ -1,15 +1,18 @@
 #import "GBShader.h"
-#import <OpenGL/gl.h>
+#import <OpenGL/gl3.h>
 
 /*
  Loosely based of https://www.raywenderlich.com/70208/opengl-es-pixel-shaders-tutorial
+ 
+ This code probably makes no sense after I upgraded it to OpenGL 3, since OpenGL makes aboslute no sense and has zero
+ helpful documentation.
  */
 
 static NSString * const vertex_shader = @"\n\
-attribute vec2 aPosition;\n\
-\n\
+#version 150 \n\
+in vec4 aPosition;\n\
 void main(void) {\n\
-    gl_Position = vec4(aPosition, 0., 1.);\n\
+    gl_Position = aPosition;\n\
 }\n\
 ";
 
@@ -69,8 +72,9 @@ void main(void) {\n\
 
         mix_previous_uniform = glGetUniformLocation(program, "uMixPrevious");
 
-        // Configure OpenGL ES
-        [self configureOpenGLES];
+        // Configure OpenGL
+        [self configureOpenGL];
+
     }
     return self;
 }
@@ -90,23 +94,38 @@ void main(void) {\n\
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 160, 144, 0, GL_RGBA, GL_UNSIGNED_BYTE, previous);
         glUniform1i(previous_texture_uniform, 1);
     }
+    glBindFragDataLocation(program, 0, "frag_color");
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-- (void)configureOpenGLES
+- (void)configureOpenGL
 {
     // Program
+
     glUseProgram(program);
 
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+
     // Attributes
-    glEnableVertexAttribArray(position_attribute);
-    static GLfloat const quad[8] = {
-        -1.f, -1.f,
-        -1.f, +1.f,
-        +1.f, -1.f,
-        +1.f, +1.f,
+
+
+    static GLfloat const quad[16] = {
+        -1.f, -1.f, 0, 1,
+        -1.f, +1.f, 0, 1,
+        +1.f, -1.f, 0, 1,
+        +1.f, +1.f, 0, 1,
     };
-    glVertexAttribPointer(position_attribute, 2, GL_FLOAT, GL_FALSE, 0, quad);
+
+
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quad), quad, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(position_attribute);
+    glVertexAttribPointer(position_attribute, 4, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 + (GLuint)programWithVertexShader:(NSString*)vsh fragmentShader:(NSString*)fsh
@@ -129,7 +148,6 @@ void main(void) {\n\
         glGetProgramInfoLog(program, sizeof(messages), 0, &messages[0]);
         NSLog(@"%@:- GLSL Program Error: %s", self, messages);
     }
-
     // Delete shaders
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
@@ -162,7 +180,6 @@ void main(void) {\n\
         glGetShaderInfoLog(shader, sizeof(messages), 0, &messages[0]);
         NSLog(@"%@:- GLSL Shader Error: %s", self, messages);
     }
-
     return shader;
 }
 

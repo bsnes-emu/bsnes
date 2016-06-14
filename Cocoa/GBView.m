@@ -12,6 +12,30 @@ static GBShader *shader = nil;
     unsigned char current_buffer;
 }
 
+- (void) awakeFromNib
+{
+    NSOpenGLPixelFormatAttribute attrs[] =
+    {
+        NSOpenGLPFAOpenGLProfile,
+        NSOpenGLProfileVersion3_2Core,
+        0
+    };
+
+    NSOpenGLPixelFormat *pf = [[NSOpenGLPixelFormat alloc] initWithAttributes:attrs] ;
+
+    if (!pf)
+    {
+        NSLog(@"No OpenGL pixel format");
+    }
+
+    NSOpenGLContext* context = [[NSOpenGLContext alloc] initWithFormat:pf shareContext:nil] ;
+
+    [self setPixelFormat:pf];
+
+    [self setOpenGLContext:context];
+}
+
+
 - (void) _init
 {
     image_buffers[0] = malloc(160 * 144 * 4);

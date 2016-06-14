@@ -23,6 +23,7 @@
                     @"Scale4x",
                     @"AAScale2x",
                     @"AAScale4x",
+                    @"HQ2x",
                     @"OmniScale",
                     @"AAOmniScale",
                     ];

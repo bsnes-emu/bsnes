@@ -38,7 +38,7 @@
                     </textField>
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6pP-kK-EEC">
                         <rect key="frame" x="30" y="223" width="245" height="26"/>
-                        <popUpButtonCell key="cell" type="push" title="Nearest Neighbor (Pixelated)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="neN-eo-LA7" id="I1w-05-lGl">
+                        <popUpButtonCell key="cell" type="push" title="HQ2x" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="gxB-Uj-wp2" id="I1w-05-lGl">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
                             <menu key="menu" id="xDC-0T-Qg9">
@@ -54,6 +54,7 @@
                                     <menuItem title="Anti-aliased Scale4x" id="zJR-ER-Ygo">
                                         <modifierMask key="keyEquivalentModifierMask"/>
                                     </menuItem>
+                                    <menuItem title="HQ2x" state="on" id="gxB-Uj-wp2"/>
                                     <menuItem title="OmniScale (Beta, any factor)" id="doe-kf-quG">
                                         <modifierMask key="keyEquivalentModifierMask"/>
                                     </menuItem>

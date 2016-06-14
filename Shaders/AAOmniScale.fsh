@@ -8,10 +8,10 @@ vec4 omniScale(sampler2D image, vec2 texCoord)
 {
     vec2 pixel = texCoord * textureDimensions - vec2(0.5, 0.5);
 
-    vec4 q11 = texture2D(image, vec2(floor(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
-    vec4 q12 = texture2D(image, vec2(floor(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));
-    vec4 q21 = texture2D(image, vec2(ceil(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
-    vec4 q22 = texture2D(image, vec2(ceil(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));
+    vec4 q11 = texture(image, vec2(floor(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
+    vec4 q12 = texture(image, vec2(floor(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));
+    vec4 q21 = texture(image, vec2(ceil(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
+    vec4 q22 = texture(image, vec2(ceil(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));
 
     vec2 pos = fract(pixel);
 
@@ -25,7 +25,7 @@ vec4 omniScale(sampler2D image, vec2 texCoord)
         int diagonalBias = 0;
         for (float y = -1.0; y < 3.0; y++) {
             for (float x = -1.0; x < 3.0; x++) {
-                vec4 color = texture2D(image, (pixel + vec2(x, y)) / textureDimensions);
+                vec4 color = texture(image, (pixel + vec2(x, y)) / textureDimensions);
                 if (color == q11) diagonalBias++;
                 if (color == q12) diagonalBias--;
             }
@@ -104,7 +104,7 @@ vec4 omniScale(sampler2D image, vec2 texCoord)
     return q22;
 }
 
-vec4 filter(sampler2D image)
+vec4 scale(sampler2D image)
 {
     vec2 texCoord = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uResolution;
     vec2 pixel = vec2(1.0, 1.0) / uResolution;
