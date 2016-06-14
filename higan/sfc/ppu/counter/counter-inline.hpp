@@ -1,10 +1,10 @@
 //this should only be called by CPU::PPUcounter::tick();
 //keeps track of previous counter positions in history table
-void PPUcounter::tick() {
+auto PPUcounter::tick() -> void {
   status.hcounter += 2;  //increment by smallest unit of time
   if(status.hcounter >= 1360 && status.hcounter == lineclocks()) {
     status.hcounter = 0;
-    vcounter_tick();
+    vcounterTick();
   }
 
   history.index = (history.index + 1) & 2047;
@@ -15,16 +15,16 @@ void PPUcounter::tick() {
 
 //this should only be called by PPU::PPUcounter::tick(n);
 //allows stepping by more than the smallest unit of time
-void PPUcounter::tick(unsigned clocks) {
+auto PPUcounter::tick(uint clocks) -> void {
   status.hcounter += clocks;
   if(status.hcounter >= lineclocks()) {
     status.hcounter -= lineclocks();
-    vcounter_tick();
+    vcounterTick();
   }
 }
 
 //internal
-void PPUcounter::vcounter_tick() {
+auto PPUcounter::vcounterTick() -> void {
   if(++status.vcounter == 128) status.interlace = ppu.interlace();
 
   if((system.region() == System::Region::NTSC && status.interlace == false && status.vcounter == 262)
@@ -40,13 +40,13 @@ void PPUcounter::vcounter_tick() {
   if(scanline) scanline();
 }
 
-bool   PPUcounter::field   () const { return status.field; }
-uint16 PPUcounter::vcounter() const { return status.vcounter; }
-uint16 PPUcounter::hcounter() const { return status.hcounter; }
+auto PPUcounter::field() const -> bool { return status.field; }
+auto PPUcounter::vcounter() const -> uint16 { return status.vcounter; }
+auto PPUcounter::hcounter() const -> uint16 { return status.hcounter; }
 
-bool   PPUcounter::field   (unsigned offset) const { return history.field   [(history.index - (offset >> 1)) & 2047]; }
-uint16 PPUcounter::vcounter(unsigned offset) const { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
-uint16 PPUcounter::hcounter(unsigned offset) const { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
+auto PPUcounter::field(uint offset) const -> bool { return history.field[(history.index - (offset >> 1)) & 2047]; }
+auto PPUcounter::vcounter(uint offset) const -> uint16 { return history.vcounter[(history.index - (offset >> 1)) & 2047]; }
+auto PPUcounter::hcounter(uint offset) const -> uint16 { return history.hcounter[(history.index - (offset >> 1)) & 2047]; }
 
 //one PPU dot = 4 CPU clocks
 //
@@ -54,10 +54,10 @@ uint16 PPUcounter::hcounter(unsigned offset) const { return history.hcounter[(hi
 //this does not apply to NTSC non-interlace scanline 240 on odd fields. this is
 //because the PPU skips one dot to alter the color burst phase of the video signal.
 //
-//dot 323 range = { 1292, 1294, 1296 }
-//dot 327 range = { 1310, 1312, 1314 }
+//dot 323 range = {1292, 1294, 1296}
+//dot 327 range = {1310, 1312, 1314}
 
-uint16 PPUcounter::hdot() const {
+auto PPUcounter::hdot() const -> uint16 {
   if(system.region() == System::Region::NTSC && status.interlace == false && vcounter() == 240 && field() == 1) {
     return (hcounter() >> 2);
   } else {
@@ -65,21 +65,21 @@ uint16 PPUcounter::hdot() const {
   }
 }
 
-uint16 PPUcounter::lineclocks() const {
+auto PPUcounter::lineclocks() const -> uint16 {
   if(system.region() == System::Region::NTSC && status.interlace == false &&  vcounter() == 240 &&  field() == 1) return 1360;
   return 1364;
 }
 
-void PPUcounter::reset() {
+auto PPUcounter::reset() -> void {
   status.interlace = false;
   status.field     = 0;
   status.vcounter  = 0;
   status.hcounter  = 0;
   history.index    = 0;
 
-  for(unsigned i = 0; i < 2048; i++) {
-    history.field   [i] = 0;
-    history.vcounter[i] = 0;
-    history.hcounter[i] = 0;
+  for(auto n : range(2048)) {
+    history.field   [n] = 0;
+    history.vcounter[n] = 0;
+    history.hcounter[n] = 0;
   }
 }

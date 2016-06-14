@@ -9,11 +9,6 @@ System system;
 #include "random.cpp"
 #include "serialization.cpp"
 
-auto System::loaded() const -> bool { return _loaded; }
-auto System::region() const -> Region { return _region; }
-auto System::cpuFrequency() const -> uint { return _cpuFrequency; }
-auto System::apuFrequency() const -> uint { return _apuFrequency; }
-
 auto System::run() -> void {
   scheduler.enter();
 }

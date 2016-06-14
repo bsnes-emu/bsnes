@@ -4,54 +4,54 @@ auto PPU::Background::clip(int n) -> int {
 }
 
 //H = 28
-auto PPU::Background::begin_mode7() -> void {
-  cache.hoffset = self.regs.mode7_hoffset;
-  cache.voffset = self.regs.mode7_voffset;
+auto PPU::Background::beginMode7() -> void {
+  latch.hoffset = ppu.r.hoffsetMode7;
+  latch.voffset = ppu.r.voffsetMode7;
 }
 
-auto PPU::Background::run_mode7() -> void {
-  signed a = sclip<16>(self.regs.m7a);
-  signed b = sclip<16>(self.regs.m7b);
-  signed c = sclip<16>(self.regs.m7c);
-  signed d = sclip<16>(self.regs.m7d);
+auto PPU::Background::runMode7() -> void {
+  int a = (int16)ppu.r.m7a;
+  int b = (int16)ppu.r.m7b;
+  int c = (int16)ppu.r.m7c;
+  int d = (int16)ppu.r.m7d;
 
-  signed cx = sclip<13>(self.regs.m7x);
-  signed cy = sclip<13>(self.regs.m7y);
-  signed hoffset = sclip<13>(cache.hoffset);
-  signed voffset = sclip<13>(cache.voffset);
+  int cx = (int13)ppu.r.m7x;
+  int cy = (int13)ppu.r.m7y;
+  int hoffset = (int13)latch.hoffset;
+  int voffset = (int13)latch.voffset;
 
   if(Background::x++ & ~255) return;
-  unsigned x = mosaic.hoffset;
-  unsigned y = self.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
+  uint x = mosaic.hoffset;
+  uint y = ppu.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
   if(--mosaic.hcounter == 0) {
-    mosaic.hcounter = regs.mosaic + 1;
-    mosaic.hoffset += regs.mosaic + 1;
+    mosaic.hcounter = r.mosaic + 1;
+    mosaic.hoffset += r.mosaic + 1;
   }
 
-  if(self.regs.mode7_hflip) x = 255 - x;
-  if(self.regs.mode7_vflip) y = 255 - y;
+  if(ppu.r.hflipMode7) x = 255 - x;
+  if(ppu.r.vflipMode7) y = 255 - y;
 
-  signed psx = ((a * clip(hoffset - cx)) & ~63) + ((b * clip(voffset - cy)) & ~63) + ((b * y) & ~63) + (cx << 8);
-  signed psy = ((c * clip(hoffset - cx)) & ~63) + ((d * clip(voffset - cy)) & ~63) + ((d * y) & ~63) + (cy << 8);
+  int psx = ((a * clip(hoffset - cx)) & ~63) + ((b * clip(voffset - cy)) & ~63) + ((b * y) & ~63) + (cx << 8);
+  int psy = ((c * clip(hoffset - cx)) & ~63) + ((d * clip(voffset - cy)) & ~63) + ((d * y) & ~63) + (cy << 8);
 
-  signed px = psx + (a * x);
-  signed py = psy + (c * x);
+  int px = psx + (a * x);
+  int py = psy + (c * x);
 
   //mask pseudo-FP bits
   px >>= 8;
   py >>= 8;
 
-  unsigned tile;
-  unsigned palette;
-  switch(self.regs.mode7_repeat) {
+  uint tile;
+  uint palette;
+  switch(ppu.r.repeatMode7) {
   //screen repetition outside of screen area
   case 0:
   case 1:
     px &= 1023;
     py &= 1023;
-    tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    tile = ppu.memory.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+    palette = ppu.memory.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
     break;
 
   //palette color 0 outside of screen area
@@ -61,8 +61,8 @@ auto PPU::Background::run_mode7() -> void {
     } else {
       px &= 1023;
       py &= 1023;
-      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      tile = ppu.memory.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+      palette = ppu.memory.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
     }
     break;
 
@@ -73,31 +73,31 @@ auto PPU::Background::run_mode7() -> void {
     } else {
       px &= 1023;
       py &= 1023;
-      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+      tile = ppu.memory.vram[((py >> 3) * 128 + (px >> 3)) << 1];
     }
-    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    palette = ppu.memory.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
     break;
   }
 
-  unsigned priority;
+  uint priority;
   if(id == ID::BG1) {
-    priority = regs.priority0;
+    priority = r.priority[0];
   } else if(id == ID::BG2) {
-    priority = (palette & 0x80 ? regs.priority1 : regs.priority0);
+    priority = r.priority[bool(palette & 0x80)];
     palette &= 0x7f;
   }
 
   if(palette == 0) return;
 
-  if(regs.main_enable) {
-    output.main.palette = palette;
-    output.main.priority = priority;
-    output.main.tile = 0;
+  if(r.aboveEnable) {
+    output.above.palette = palette;
+    output.above.priority = priority;
+    output.above.tile = 0;
   }
 
-  if(regs.sub_enable) {
-    output.sub.palette = palette;
-    output.sub.priority = priority;
-    output.sub.tile = 0;
+  if(r.belowEnable) {
+    output.below.palette = palette;
+    output.below.priority = priority;
+    output.below.tile = 0;
   }
 }

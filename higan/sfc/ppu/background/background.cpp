@@ -1,16 +1,13 @@
 #include "mode7.cpp"
 
-PPU::Background::Background(PPU &self, uint id) : self(self), id(id) {
+auto PPU::Background::voffset() const -> uint16 {
+  if(r.mosaic) return latch.voffset;
+  return r.voffset;
 }
 
-auto PPU::Background::voffset() const -> uint {
-  if(regs.mosaic) return cache.voffset;
-  return regs.voffset;
-}
-
-auto PPU::Background::hoffset() const -> uint {
-  if(regs.mosaic) return cache.hoffset;
-  return regs.hoffset;
+auto PPU::Background::hoffset() const -> uint16 {
+  if(r.mosaic) return latch.hoffset;
+  return r.hoffset;
 }
 
 //V = 0, H = 0
@@ -23,88 +20,88 @@ auto PPU::Background::scanline() -> void {
 
 //H = 28
 auto PPU::Background::begin() -> void {
-  bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
+  bool hires = (ppu.r.bgMode == 5 || ppu.r.bgMode == 6);
   x = -7;
-  y = self.vcounter();
+  y = ppu.vcounter();
 
   if(y == 1) {
-    mosaic.vcounter = regs.mosaic + 1;
+    mosaic.vcounter = r.mosaic + 1;
     mosaic.voffset = 1;
-    cache.hoffset = regs.hoffset;
-    cache.voffset = regs.voffset;
+    latch.hoffset = r.hoffset;
+    latch.voffset = r.voffset;
   } else if(--mosaic.vcounter == 0) {
-    mosaic.vcounter = regs.mosaic + 1;
-    mosaic.voffset += regs.mosaic + 1;
-    cache.hoffset = regs.hoffset;
-    cache.voffset = regs.voffset;
+    mosaic.vcounter = r.mosaic + 1;
+    mosaic.voffset += r.mosaic + 1;
+    latch.hoffset = r.hoffset;
+    latch.voffset = r.voffset;
   }
 
-  tile_counter = (7 - (cache.hoffset & 7)) << hires;
-  for(unsigned n = 0; n < 8; n++) data[n] = 0;
+  tileCounter = (7 - (latch.hoffset & 7)) << hires;
+  for(auto& d : data) d = 0;
 
-  mosaic.hcounter = regs.mosaic + 1;
+  mosaic.hcounter = r.mosaic + 1;
   mosaic.hoffset = 0;
 
-  if(regs.mode == Mode::Mode7) return begin_mode7();
-  if(regs.mosaic == 0) {
-    cache.hoffset = regs.hoffset;
-    cache.voffset = regs.voffset;
+  if(r.mode == Mode::Mode7) return beginMode7();
+  if(r.mosaic == 0) {
+    latch.hoffset = r.hoffset;
+    latch.voffset = r.voffset;
   }
 }
 
-auto PPU::Background::get_tile() -> void {
-  bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
+auto PPU::Background::getTile() -> void {
+  bool hires = (ppu.r.bgMode == 5 || ppu.r.bgMode == 6);
 
-  unsigned color_depth = (regs.mode == Mode::BPP2 ? 0 : regs.mode == Mode::BPP4 ? 1 : 2);
-  unsigned palette_offset = (self.regs.bgmode == 0 ? id << 5 : 0);
-  unsigned palette_size = 2 << color_depth;
-  unsigned tile_mask = 0x0fff >> color_depth;
-  unsigned tiledata_index = regs.tiledata_addr >> (4 + color_depth);
+  uint colorDepth = (r.mode == Mode::BPP2 ? 0 : r.mode == Mode::BPP4 ? 1 : 2);
+  uint paletteOffset = (ppu.r.bgMode == 0 ? id << 5 : 0);
+  uint paletteSize = 2 << colorDepth;
+  uint tileMask = 0x0fff >> colorDepth;
+  uint tiledataIndex = r.tiledataAddress >> (4 + colorDepth);
 
-  unsigned tile_height = (regs.tile_size == TileSize::Size8x8 ? 3 : 4);
-  unsigned tile_width = (!hires ? tile_height : 4);
+  uint tileHeight = (r.tileSize == TileSize::Size8x8 ? 3 : 4);
+  uint tileWidth = (!hires ? tileHeight : 4);
 
-  unsigned width = 256 << hires;
+  uint width = 256 << hires;
 
-  unsigned hmask = (tile_height == 3 ? width : width << 1);
-  unsigned vmask = hmask;
-  if(regs.screen_size & 1) hmask <<= 1;
-  if(regs.screen_size & 2) vmask <<= 1;
+  uint hmask = (tileHeight == 3 ? width : width << 1);
+  uint vmask = hmask;
+  if(r.screenSize & 1) hmask <<= 1;
+  if(r.screenSize & 2) vmask <<= 1;
   hmask--;
   vmask--;
 
-  unsigned px = x << hires;
-  unsigned py = (regs.mosaic == 0 ? y : mosaic.voffset);
+  uint px = x << hires;
+  uint py = (r.mosaic == 0 ? y : mosaic.voffset);
 
-  unsigned hscroll = hoffset();
-  unsigned vscroll = voffset();
+  uint hscroll = hoffset();
+  uint vscroll = voffset();
   if(hires) {
     hscroll <<= 1;
-    if(self.regs.interlace) py = (py << 1) + self.field();
+    if(ppu.r.interlace) py = (py << 1) + ppu.field();
   }
 
-  unsigned hoffset = hscroll + px;
-  unsigned voffset = vscroll + py;
+  uint hoffset = hscroll + px;
+  uint voffset = vscroll + py;
 
-  if(self.regs.bgmode == 2 || self.regs.bgmode == 4 || self.regs.bgmode == 6) {
-    uint16 offset_x = (x + (hscroll & 7));
+  if(ppu.r.bgMode == 2 || ppu.r.bgMode == 4 || ppu.r.bgMode == 6) {
+    uint16 offsetX = (x + (hscroll & 7));
 
-    if(offset_x >= 8) {
-      unsigned hval = self.bg3.get_tile((offset_x - 8) + (self.bg3.hoffset() & ~7), self.bg3.voffset() + 0);
-      unsigned vval = self.bg3.get_tile((offset_x - 8) + (self.bg3.hoffset() & ~7), self.bg3.voffset() + 8);
-      unsigned valid_mask = (id == ID::BG1 ? 0x2000 : 0x4000);
+    if(offsetX >= 8) {
+      uint hval = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 0);
+      uint vval = ppu.bg3.getTile((offsetX - 8) + (ppu.bg3.hoffset() & ~7), ppu.bg3.voffset() + 8);
+      uint validMask = (id == ID::BG1 ? 0x2000 : 0x4000);
 
-      if(self.regs.bgmode == 4) {
-        if(hval & valid_mask) {
+      if(ppu.r.bgMode == 4) {
+        if(hval & validMask) {
           if((hval & 0x8000) == 0) {
-            hoffset = offset_x + (hval & ~7);
+            hoffset = offsetX + (hval & ~7);
           } else {
             voffset = y + hval;
           }
         }
       } else {
-        if(hval & valid_mask) hoffset = offset_x + (hval & ~7);
-        if(vval & valid_mask) voffset = y + vval;
+        if(hval & validMask) hoffset = offsetX + (hval & ~7);
+        if(vval & validMask) voffset = y + vval;
       }
     }
   }
@@ -112,127 +109,127 @@ auto PPU::Background::get_tile() -> void {
   hoffset &= hmask;
   voffset &= vmask;
 
-  unsigned screen_x = (regs.screen_size & 1 ? 32 << 5 : 0);
-  unsigned screen_y = (regs.screen_size & 2 ? 32 << 5 : 0);
-  if(regs.screen_size == 3) screen_y <<= 1;
+  uint screenX = (r.screenSize & 1 ? 32 << 5 : 0);
+  uint screenY = (r.screenSize & 2 ? 32 << 5 : 0);
+  if(r.screenSize == 3) screenY <<= 1;
 
-  unsigned tx = hoffset >> tile_width;
-  unsigned ty = voffset >> tile_height;
+  uint tx = hoffset >> tileWidth;
+  uint ty = voffset >> tileHeight;
 
   uint16 offset = ((ty & 0x1f) << 5) + (tx & 0x1f);
-  if(tx & 0x20) offset += screen_x;
-  if(ty & 0x20) offset += screen_y;
+  if(tx & 0x20) offset += screenX;
+  if(ty & 0x20) offset += screenY;
 
-  uint16 addr = regs.screen_addr + (offset << 1);
-  tile = (ppu.vram[addr + 0] << 0) + (ppu.vram[addr + 1] << 8);
-  bool mirror_y = tile & 0x8000;
-  bool mirror_x = tile & 0x4000;
-  priority = (tile & 0x2000 ? regs.priority1 : regs.priority0);
-  palette_number = (tile >> 10) & 7;
-  palette_index = palette_offset + (palette_number << palette_size);
+  uint16 address = r.screenAddress + (offset << 1);
+  tile = (ppu.memory.vram[address + 0] << 0) + (ppu.memory.vram[address + 1] << 8);
+  bool mirrorY = tile & 0x8000;
+  bool mirrorX = tile & 0x4000;
+  priority = r.priority[bool(tile & 0x2000)];
+  paletteNumber = (tile >> 10) & 7;
+  paletteIndex = paletteOffset + (paletteNumber << paletteSize);
 
-  if(tile_width   == 4 && (bool)(hoffset & 8) != mirror_x) tile +=  1;
-  if(tile_height  == 4 && (bool)(voffset & 8) != mirror_y) tile += 16;
-  uint16 character = ((tile & 0x03ff) + tiledata_index) & tile_mask;
+  if(tileWidth   == 4 && (bool)(hoffset & 8) != mirrorX) tile +=  1;
+  if(tileHeight  == 4 && (bool)(voffset & 8) != mirrorY) tile += 16;
+  uint16 character = ((tile & 0x03ff) + tiledataIndex) & tileMask;
 
-  if(mirror_y) voffset ^= 7;
-  offset = (character << (4 + color_depth)) + ((voffset & 7) << 1);
+  if(mirrorY) voffset ^= 7;
+  offset = (character << (4 + colorDepth)) + ((voffset & 7) << 1);
 
-  switch(regs.mode) {
+  switch(r.mode) {
   case Mode::BPP8:
-    data[7] = ppu.vram[offset + 49];
-    data[6] = ppu.vram[offset + 48];
-    data[5] = ppu.vram[offset + 33];
-    data[4] = ppu.vram[offset + 32];
+    data[1].byte(3) = ppu.memory.vram[offset + 49];
+    data[1].byte(2) = ppu.memory.vram[offset + 48];
+    data[1].byte(1) = ppu.memory.vram[offset + 33];
+    data[1].byte(0) = ppu.memory.vram[offset + 32];
   case Mode::BPP4:
-    data[3] = ppu.vram[offset + 17];
-    data[2] = ppu.vram[offset + 16];
+    data[0].byte(3) = ppu.memory.vram[offset + 17];
+    data[0].byte(2) = ppu.memory.vram[offset + 16];
   case Mode::BPP2:
-    data[1] = ppu.vram[offset +  1];
-    data[0] = ppu.vram[offset +  0];
+    data[0].byte(1) = ppu.memory.vram[offset +  1];
+    data[0].byte(0) = ppu.memory.vram[offset +  0];
   }
 
-  if(mirror_x) for(unsigned n = 0; n < 8; n++) {
-    //reverse data bits in data[n]: 01234567 -> 76543210
-    data[n] = ((data[n] >> 4) & 0x0f) | ((data[n] << 4) & 0xf0);
-    data[n] = ((data[n] >> 2) & 0x33) | ((data[n] << 2) & 0xcc);
-    data[n] = ((data[n] >> 1) & 0x55) | ((data[n] << 1) & 0xaa);
+  if(mirrorX) for(auto n : range(2)) {
+    data[n] = ((data[n] >> 4) & 0x0f0f0f0f) | ((data[n] << 4) & 0xf0f0f0f0);
+    data[n] = ((data[n] >> 2) & 0x33333333) | ((data[n] << 2) & 0xcccccccc);
+    data[n] = ((data[n] >> 1) & 0x55555555) | ((data[n] << 1) & 0xaaaaaaaa);
   }
 }
 
 auto PPU::Background::run(bool screen) -> void {
-  if(self.vcounter() == 0) return;
-  bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
+  if(ppu.vcounter() == 0) return;
+  bool hires = (ppu.r.bgMode == 5 || ppu.r.bgMode == 6);
 
-  if(screen == Screen::Sub) {
-    output.main.priority = 0;
-    output.sub.priority = 0;
-    if(hires == false) return;
+  if(screen == Screen::Below) {
+    output.above.priority = 0;
+    output.below.priority = 0;
+    if(!hires) return;
   }
 
-  if(tile_counter-- == 0) {
-    tile_counter = 7;
-    get_tile();
+  if(tileCounter-- == 0) {
+    tileCounter = 7;
+    getTile();
   }
 
-  if(regs.mode == Mode::Mode7) return run_mode7();
+  if(r.mode == Mode::Mode7) return runMode7();
 
-  uint8 palette = get_tile_color();
+  uint8 palette = getTileColor();
   if(x == 0) mosaic.hcounter = 1;
   if(x >= 0 && --mosaic.hcounter == 0) {
-    mosaic.hcounter = regs.mosaic + 1;
+    mosaic.hcounter = r.mosaic + 1;
     mosaic.priority = priority;
-    mosaic.palette = palette ? palette_index + palette : 0;
+    mosaic.palette = palette ? paletteIndex + palette : 0;
     mosaic.tile = tile;
   }
-  if(screen == Screen::Main) x++;
+  if(screen == Screen::Above) x++;
   if(mosaic.palette == 0) return;
 
-  if(hires == false || screen == Screen::Main) if(regs.main_enable) output.main = mosaic;
-  if(hires == false || screen == Screen::Sub ) if(regs.sub_enable ) output.sub  = mosaic;
+  if(!hires || screen == Screen::Above) if(r.aboveEnable) output.above = mosaic;
+  if(!hires || screen == Screen::Below) if(r.belowEnable) output.below = mosaic;
 }
 
-auto PPU::Background::get_tile_color() -> uint {
-  unsigned color = 0;
+auto PPU::Background::getTileColor() -> uint {
+  uint color = 0;
 
-  switch(regs.mode) {
+  switch(r.mode) {
   case Mode::BPP8:
-    color += (data[7] >> 0) & 0x80; data[7] <<= 1;
-    color += (data[6] >> 1) & 0x40; data[6] <<= 1;
-    color += (data[5] >> 2) & 0x20; data[5] <<= 1;
-    color += (data[4] >> 3) & 0x10; data[4] <<= 1;
+    color += data[1] >> 28 & 0x80;
+    color += data[1] >> 21 & 0x40;
+    color += data[1] >> 14 & 0x20;
+    color += data[1] >>  7 & 0x10;
+    data[1] <<= 1;
   case Mode::BPP4:
-    color += (data[3] >> 4) & 0x08; data[3] <<= 1;
-    color += (data[2] >> 5) & 0x04; data[2] <<= 1;
+    color += data[0] >> 28 & 0x08;
+    color += data[0] >> 21 & 0x04;
   case Mode::BPP2:
-    color += (data[1] >> 6) & 0x02; data[1] <<= 1;
-    color += (data[0] >> 7) & 0x01; data[0] <<= 1;
+    color += data[0] >> 14 & 0x02;
+    color += data[0] >>  7 & 0x01;
+    data[0] <<= 1;
   }
 
   return color;
 }
 
 auto PPU::Background::reset() -> void {
-  regs.tiledata_addr = (random(0x0000) & 0x07) << 13;
-  regs.screen_addr = (random(0x0000) & 0x7c) << 9;
-  regs.screen_size = random(0);
-  regs.mosaic = random(0);
-  regs.tile_size = random(0);
-  regs.mode = 0;
-  regs.priority0 = 0;
-  regs.priority1 = 0;
-  regs.main_enable = random(0);
-  regs.sub_enable = random(0);
-  regs.hoffset = random(0x0000);
-  regs.voffset = random(0x0000);
+  r.tiledataAddress = (random(0x0000) & 0x07) << 13;
+  r.screenAddress = (random(0x0000) & 0x7c) << 9;
+  r.screenSize = random(0);
+  r.mosaic = random(0);
+  r.tileSize = random(0);
+  r.mode = 0;
+  for(auto& p : r.priority) p = 0;
+  r.aboveEnable = random(0);
+  r.belowEnable = random(0);
+  r.hoffset = random(0x0000);
+  r.voffset = random(0x0000);
 
-  cache.hoffset = 0;
-  cache.voffset = 0;
+  latch.hoffset = 0;
+  latch.voffset = 0;
 
-  output.main.palette = 0;
-  output.main.priority = 0;
-  output.sub.palette = 0;
-  output.sub.priority = 0;
+  output.above.palette = 0;
+  output.above.priority = 0;
+  output.below.palette = 0;
+  output.below.priority = 0;
 
   mosaic.priority = 0;
   mosaic.palette = 0;
@@ -246,37 +243,37 @@ auto PPU::Background::reset() -> void {
   x = 0;
   y = 0;
 
-  tile_counter = 0;
+  tileCounter = 0;
   tile = 0;
   priority = 0;
-  palette_number = 0;
-  palette_index = 0;
-  for(unsigned n = 0; n < 8; n++) data[n] = 0;
+  paletteNumber = 0;
+  paletteIndex = 0;
+  for(auto& d : data) d = 0;
 }
 
-auto PPU::Background::get_tile(uint x, uint y) -> uint {
-  bool hires = (self.regs.bgmode == 5 || self.regs.bgmode == 6);
-  unsigned tile_height = (regs.tile_size == TileSize::Size8x8 ? 3 : 4);
-  unsigned tile_width = (!hires ? tile_height : 4);
-  unsigned width = (!hires ? 256 : 512);
-  unsigned mask_x = (tile_height == 3 ? width : width << 1);
-  unsigned mask_y = mask_x;
-  if(regs.screen_size & 1) mask_x <<= 1;
-  if(regs.screen_size & 2) mask_y <<= 1;
-  mask_x--;
-  mask_y--;
+auto PPU::Background::getTile(uint x, uint y) -> uint {
+  bool hires = (ppu.r.bgMode == 5 || ppu.r.bgMode == 6);
+  uint tileHeight = (r.tileSize == TileSize::Size8x8 ? 3 : 4);
+  uint tileWidth = (!hires ? tileHeight : 4);
+  uint width = (!hires ? 256 : 512);
+  uint maskX = (tileHeight == 3 ? width : width << 1);
+  uint maskY = maskX;
+  if(r.screenSize & 1) maskX <<= 1;
+  if(r.screenSize & 2) maskY <<= 1;
+  maskX--;
+  maskY--;
 
-  unsigned screen_x = (regs.screen_size & 1 ? 32 << 5 : 0);
-  unsigned screen_y = (regs.screen_size & 2 ? 32 << 5 : 0);
-  if(regs.screen_size == 3) screen_y <<= 1;
+  uint screenX = (r.screenSize & 1 ? 32 << 5 : 0);
+  uint screenY = (r.screenSize & 2 ? 32 << 5 : 0);
+  if(r.screenSize == 3) screenY <<= 1;
 
-  x = (x & mask_x) >> tile_width;
-  y = (y & mask_y) >> tile_height;
+  x = (x & maskX) >> tileWidth;
+  y = (y & maskY) >> tileHeight;
 
   uint16 offset = ((y & 0x1f) << 5) + (x & 0x1f);
-  if(x & 0x20) offset += screen_x;
-  if(y & 0x20) offset += screen_y;
+  if(x & 0x20) offset += screenX;
+  if(y & 0x20) offset += screenY;
 
-  uint16 addr = regs.screen_addr + (offset << 1);
-  return (ppu.vram[addr + 0] << 0) + (ppu.vram[addr + 1] << 8);
+  uint16 address = r.screenAddress + (offset << 1);
+  return (ppu.memory.vram[address + 0] << 0) + (ppu.memory.vram[address + 1] << 8);
 }

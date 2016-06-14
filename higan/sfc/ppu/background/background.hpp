@@ -1,46 +1,60 @@
 struct Background {
+  Background(uint id) : id(id) {}
+
+  alwaysinline auto voffset() const -> uint16;
+  alwaysinline auto hoffset() const -> uint16;
+
+  auto frame() -> void;
+  auto scanline() -> void;
+  auto begin() -> void;
+  auto run(bool screen) -> void;
+  auto reset() -> void;
+
+  auto getTile() -> void;
+  auto getTileColor() -> uint;
+  auto getTile(uint x, uint y) -> uint;
+  alwaysinline auto clip(int n) -> int;
+  auto beginMode7() -> void;
+  auto runMode7() -> void;
+
+  auto serialize(serializer&) -> void;
+
   struct ID { enum : uint { BG1, BG2, BG3, BG4 }; };
   const uint id;
 
   struct Mode { enum : uint { BPP2, BPP4, BPP8, Mode7, Inactive }; };
   struct ScreenSize { enum : uint { Size32x32, Size32x64, Size64x32, Size64x64 }; };
   struct TileSize { enum : uint { Size8x8, Size16x16 }; };
-  struct Screen { enum : uint { Main, Sub }; };
+  struct Screen { enum : uint { Above, Below }; };
 
-  Background(PPU& self, uint id);
-
-  struct Regs {
-    uint16 tiledata_addr;
-    uint16 screen_addr;
-    uint2 screen_size;
+  struct Registers {
+    uint16 tiledataAddress;
+    uint16 screenAddress;
+    uint2 screenSize;
     uint4 mosaic;
-    bool tile_size;
+    bool tileSize;
 
     uint mode;
-    uint priority0;
-    uint priority1;
+    uint priority[2];
 
-    bool main_enable;
-    bool sub_enable;
+    bool aboveEnable;
+    bool belowEnable;
 
     uint16 hoffset;
     uint16 voffset;
-  } regs;
+  } r;
 
-  struct Cache {
+  struct Latch {
     uint16 hoffset;
     uint16 voffset;
-  } cache;
-
-  alwaysinline auto voffset() const -> uint;
-  alwaysinline auto hoffset() const -> uint;
+  } latch;
 
   struct Output {
     struct Pixel {
       uint priority;  //0 = none (transparent)
       uint8 palette;
       uint16 tile;
-    } main, sub;
+    } above, below;
   } output;
 
   struct Mosaic : Output::Pixel {
@@ -54,29 +68,13 @@ struct Background {
     int x;
     int y;
 
-    uint tile_counter;
+    uint tileCounter;
     uint tile;
     uint priority;
-    uint palette_number;
-    uint palette_index;
-    uint8 data[8];
+    uint paletteNumber;
+    uint paletteIndex;
+    uint32 data[2];
   };
 
-  auto frame() -> void;
-  auto scanline() -> void;
-  auto begin() -> void;
-  auto run(bool screen) -> void;
-  auto reset() -> void;
-
-  auto get_tile() -> void;
-  auto get_tile_color() -> uint;
-  auto get_tile(uint x, uint y) -> uint;
-  alwaysinline auto clip(int n) -> int;
-  auto begin_mode7() -> void;
-  auto run_mode7() -> void;
-
-  auto serialize(serializer&) -> void;
-
-  PPU& self;
   friend class PPU;
 };

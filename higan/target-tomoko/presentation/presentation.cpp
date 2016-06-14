@@ -72,7 +72,7 @@ Presentation::Presentation() {
     settings["Video/ColorEmulation"].setValue(colorEmulation.checked());
     if(emulator) emulator->set("Color Emulation", colorEmulation.checked());
   });
-  scanlineEmulation.setText("Scanlines").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
+  scanlineEmulation.setVisible(false).setText("Scanlines").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
     settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
     if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });

@@ -1,35 +1,35 @@
 auto PPU::read(uint24 addr, uint8 data) -> uint8 {
   cpu.synchronizePPU();
 
-  switch(addr & 0xffff) {
+  switch((uint16)addr) {
 
   case 0x2104: case 0x2105: case 0x2106: case 0x2108:
   case 0x2109: case 0x210a: case 0x2114: case 0x2115:
   case 0x2116: case 0x2118: case 0x2119: case 0x211a:
   case 0x2124: case 0x2125: case 0x2126: case 0x2128:
   case 0x2129: case 0x212a: {
-    return regs.ppu1_mdr;
+    return ppu1.mdr;
   }
 
   //MPYL
   case 0x2134: {
-    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-    regs.ppu1_mdr = (result >>  0);
-    return regs.ppu1_mdr;
+    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    ppu1.mdr = (result >>  0);
+    return ppu1.mdr;
   }
 
   //MPYM
   case 0x2135: {
-    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-    regs.ppu1_mdr = (result >>  8);
-    return regs.ppu1_mdr;
+    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    ppu1.mdr = (result >>  8);
+    return ppu1.mdr;
   }
 
   //MPYH
   case 0x2136: {
-    uint result = ((int16)regs.m7a * (int8)(regs.m7b >> 8));
-    regs.ppu1_mdr = (result >> 16);
-    return regs.ppu1_mdr;
+    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    ppu1.mdr = (result >> 16);
+    return ppu1.mdr;
   }
 
   //SLHV
@@ -40,108 +40,108 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //OAMDATAREAD
   case 0x2138: {
-    uint10 addr = regs.oam_addr++;
-    if(!regs.display_disable && vcounter() < vdisp()) addr = regs.oam_iaddr;
+    uint10 addr = r.oamAddress++;
+    if(!r.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
     if(addr & 0x0200) addr &= 0x021f;
 
-    regs.ppu1_mdr = oamRead(addr);
-    sprite.set_first_sprite();
-    return regs.ppu1_mdr;
+    ppu1.mdr = oamRead(addr);
+    oam.setFirstSprite();
+    return ppu1.mdr;
   }
 
   //VMDATALREAD
   case 0x2139: {
-    uint16 addr = getVramAddress() + 0;
-    regs.ppu1_mdr = regs.vram_readbuffer >> 0;
-    if(regs.vram_incmode == 0) {
+    uint16 address = getVramAddress() + 0;
+    ppu1.mdr = latch.vram >> 0;
+    if(r.vramIncrementMode == 0) {
       addr &= ~1;
-      regs.vram_readbuffer  = vramRead(addr + 0) << 0;
-      regs.vram_readbuffer |= vramRead(addr + 1) << 8;
-      regs.vram_addr += regs.vram_incsize;
+      latch.vram.byte(0) = vramRead(address + 0);
+      latch.vram.byte(1) = vramRead(address + 1);
+      r.vramAddress += r.vramIncrementSize;
     }
-    return regs.ppu1_mdr;
+    return ppu1.mdr;
   }
 
   //VMDATAHREAD
   case 0x213a: {
-    uint16 addr = getVramAddress() + 1;
-    regs.ppu1_mdr = regs.vram_readbuffer >> 8;
-    if(regs.vram_incmode == 1) {
+    uint16 address = getVramAddress() + 1;
+    ppu1.mdr = latch.vram >> 8;
+    if(r.vramIncrementMode == 1) {
       addr &= ~1;
-      regs.vram_readbuffer  = vramRead(addr + 0) << 0;
-      regs.vram_readbuffer |= vramRead(addr + 1) << 8;
-      regs.vram_addr += regs.vram_incsize;
+      latch.vram.byte(0) = vramRead(address + 0);
+      latch.vram.byte(1) = vramRead(address + 1);
+      r.vramAddress += r.vramIncrementSize;
     }
-    return regs.ppu1_mdr;
+    return ppu1.mdr;
   }
 
   //CGDATAREAD
   case 0x213b: {
-    bool latch = regs.cgram_addr & 1;
-    uint9 addr = regs.cgram_addr++;
-    if(!regs.display_disable
+    bool l = r.cgramAddress & 1;
+    uint9 address = r.cgramAddress++;
+    if(!r.displayDisable
     && vcounter() > 0 && vcounter() < vdisp()
     && hcounter() >= 88 && hcounter() < 1096
-    ) addr = regs.cgram_iaddr;
+    ) address = latch.cgramAddress;
 
-    if(latch == 0) {
-      regs.ppu2_mdr  = cgramRead(addr);
+    if(l == 0) {
+      ppu2.mdr  = cgramRead(address);
     } else {
-      regs.ppu2_mdr &= 0x80;
-      regs.ppu2_mdr |= cgramRead(addr);
+      ppu2.mdr &= 0x80;
+      ppu2.mdr |= cgramRead(address);
     }
-    return regs.ppu2_mdr;
+    return ppu2.mdr;
   }
 
   //OPHCT
   case 0x213c: {
-    if(regs.latch_hcounter == 0) {
-      regs.ppu2_mdr  = (regs.hcounter >> 0);
+    if(latch.hcounter == 0) {
+      ppu2.mdr  = (r.hcounter >> 0);
     } else {
-      regs.ppu2_mdr &= 0xfe;
-      regs.ppu2_mdr |= (regs.hcounter >> 8) & 1;
+      ppu2.mdr &= 0xfe;
+      ppu2.mdr |= (r.hcounter >> 8) & 1;
     }
-    regs.latch_hcounter ^= 1;
-    return regs.ppu2_mdr;
+    latch.hcounter ^= 1;
+    return ppu2.mdr;
   }
 
   //OPVCT
   case 0x213d: {
-    if(regs.latch_vcounter == 0) {
-      regs.ppu2_mdr  = (regs.vcounter >> 0);
+    if(latch.vcounter == 0) {
+      ppu2.mdr  = (r.vcounter >> 0);
     } else {
-      regs.ppu2_mdr &= 0xfe;
-      regs.ppu2_mdr |= (regs.vcounter >> 8) & 1;
+      ppu2.mdr &= 0xfe;
+      ppu2.mdr |= (r.vcounter >> 8) & 1;
     }
-    regs.latch_vcounter ^= 1;
-    return regs.ppu2_mdr;
+    latch.vcounter ^= 1;
+    return ppu2.mdr;
   }
 
   //STAT77
   case 0x213e: {
-    regs.ppu1_mdr &= 0x10;
-    regs.ppu1_mdr |= sprite.regs.time_over << 7;
-    regs.ppu1_mdr |= sprite.regs.range_over << 6;
-    regs.ppu1_mdr |= ppu1_version & 0x0f;
-    return regs.ppu1_mdr;
+    ppu1.mdr &= 0x10;
+    ppu1.mdr |= oam.r.timeOver << 7;
+    ppu1.mdr |= oam.r.rangeOver << 6;
+    ppu1.mdr |= ppu1.version & 0x0f;
+    return ppu1.mdr;
   }
 
   //STAT78
   case 0x213f: {
-    regs.latch_hcounter = 0;
-    regs.latch_vcounter = 0;
+    latch.hcounter = 0;
+    latch.vcounter = 0;
 
-    regs.ppu2_mdr &= 0x20;
-    regs.ppu2_mdr |= field() << 7;
+    ppu2.mdr &= 0x20;
+    ppu2.mdr |= field() << 7;
     if((cpu.pio() & 0x80) == 0) {
-      regs.ppu2_mdr |= 0x40;
-    } else if(regs.counters_latched) {
-      regs.ppu2_mdr |= 0x40;
-      regs.counters_latched = false;
+      ppu2.mdr |= 0x40;
+    } else if(latch.counters) {
+      ppu2.mdr |= 0x40;
+      latch.counters = false;
     }
-    regs.ppu2_mdr |= (system.region() == System::Region::NTSC ? 0 : 1) << 4;
-    regs.ppu2_mdr |= ppu2_version & 0x0f;
-    return regs.ppu2_mdr;
+    ppu2.mdr |= (system.region() == System::Region::NTSC ? 0 : 1) << 4;
+    ppu2.mdr |= ppu2.version & 0x0f;
+    return ppu2.mdr;
   }
 
   }
@@ -152,462 +152,462 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 auto PPU::write(uint24 addr, uint8 data) -> void {
   cpu.synchronizePPU();
 
-  switch(addr & 0xffff) {
+  switch((uint16)addr) {
 
   //INIDISP
   case 0x2100: {
-    if(regs.display_disable && vcounter() == vdisp()) sprite.address_reset();
-    regs.display_disable = data & 0x80;
-    regs.display_brightness = data & 0x0f;
+    if(r.displayDisable && vcounter() == vdisp()) oam.addressReset();
+    r.displayBrightness = data.bits(0,3);
+    r.displayDisable    = data.bit (7);
     return;
   }
 
   //OBSEL
   case 0x2101: {
-    sprite.regs.base_size = (data >> 5) & 7;
-    sprite.regs.nameselect = (data >> 3) & 3;
-    sprite.regs.tiledata_addr = (data & 3) << 14;
+    oam.r.tiledataAddress = data.bits(0,1) << 14;
+    oam.r.nameSelect      = data.bits(3,4);
+    oam.r.baseSize        = data.bits(5,7);
     return;
   }
 
   //OAMADDL
   case 0x2102: {
-    regs.oam_baseaddr = (regs.oam_baseaddr & 0x0200) | (data << 1);
-    sprite.address_reset();
+    r.oamBaseAddress = (r.oamBaseAddress & 0x0200) | (data << 1);
+    oam.addressReset();
     return;
   }
 
   //OAMADDH
   case 0x2103: {
-    regs.oam_priority = data & 0x80;
-    regs.oam_baseaddr = ((data & 0x01) << 9) | (regs.oam_baseaddr & 0x01fe);
-    sprite.address_reset();
+    r.oamPriority = data & 0x80;
+    r.oamBaseAddress = ((data & 0x01) << 9) | (r.oamBaseAddress & 0x01fe);
+    oam.addressReset();
     return;
   }
 
   //OAMDATA
   case 0x2104: {
-    bool latch = regs.oam_addr & 1;
-    uint10 addr = regs.oam_addr++;
-    if(!regs.display_disable && vcounter() < vdisp()) addr = regs.oam_iaddr;
+    bool l = r.oamAddress & 1;
+    uint10 addr = r.oamAddress++;
+    if(!r.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
     if(addr & 0x0200) addr &= 0x021f;
 
-    if(latch == 0) regs.oam_latchdata = data;
+    if(l == 0) latch.oam = data;
     if(addr & 0x0200) {
       oamWrite(addr, data);
-    } else if(latch == 1) {
-      oamWrite((addr & ~1) + 0, regs.oam_latchdata);
+    } else if(l == 1) {
+      oamWrite((addr & ~1) + 0, latch.oam);
       oamWrite((addr & ~1) + 1, data);
     }
-    sprite.set_first_sprite();
+    oam.setFirstSprite();
     return;
   }
 
   //BGMODE
   case 0x2105: {
-    bg4.regs.tile_size = (data & 0x80);
-    bg3.regs.tile_size = (data & 0x40);
-    bg2.regs.tile_size = (data & 0x20);
-    bg1.regs.tile_size = (data & 0x10);
-    regs.bg3_priority = (data & 0x08);
-    regs.bgmode = (data & 0x07);
+    r.bgMode       = data.bits(0,2);
+    r.bgPriority   = data.bit (3);
+    bg1.r.tileSize = data.bit (4);
+    bg2.r.tileSize = data.bit (5);
+    bg3.r.tileSize = data.bit (6);
+    bg4.r.tileSize = data.bit (7);
     updateVideoMode();
     return;
   }
 
   //MOSAIC
   case 0x2106: {
-    unsigned mosaic_size = (data >> 4) & 15;
-    bg4.regs.mosaic = (data & 0x08 ? mosaic_size : 0);
-    bg3.regs.mosaic = (data & 0x04 ? mosaic_size : 0);
-    bg2.regs.mosaic = (data & 0x02 ? mosaic_size : 0);
-    bg1.regs.mosaic = (data & 0x01 ? mosaic_size : 0);
+    uint mosaicSize = data.bits(4,7);
+    bg1.r.mosaic = data.bit(0) ? mosaicSize : 0;
+    bg2.r.mosaic = data.bit(1) ? mosaicSize : 0;
+    bg3.r.mosaic = data.bit(2) ? mosaicSize : 0;
+    bg4.r.mosaic = data.bit(3) ? mosaicSize : 0;
     return;
   }
 
   //BG1SC
   case 0x2107: {
-    bg1.regs.screen_addr = (data & 0x7c) << 9;
-    bg1.regs.screen_size = data & 3;
+    bg1.r.screenSize    = data.bits(0,1);
+    bg1.r.screenAddress = data.bits(2,6) << 11;
     return;
   }
 
   //BG2SC
   case 0x2108: {
-    bg2.regs.screen_addr = (data & 0x7c) << 9;
-    bg2.regs.screen_size = data & 3;
+    bg2.r.screenSize    = data.bits(0,1);
+    bg2.r.screenAddress = data.bits(2,6) << 11;
     return;
   }
 
   //BG3SC
   case 0x2109: {
-    bg3.regs.screen_addr = (data & 0x7c) << 9;
-    bg3.regs.screen_size = data & 3;
+    bg3.r.screenSize    = data.bits(0,1);
+    bg3.r.screenAddress = data.bits(2,6) << 11;
     return;
   }
 
   //BG4SC
   case 0x210a: {
-    bg4.regs.screen_addr = (data & 0x7c) << 9;
-    bg4.regs.screen_size = data & 3;
+    bg4.r.screenSize    = data.bits(0,1);
+    bg4.r.screenAddress = data.bits(2,6) << 11;
     return;
   }
 
   //BG12NBA
   case 0x210b: {
-    bg1.regs.tiledata_addr = (data & 0x07) << 13;
-    bg2.regs.tiledata_addr = (data & 0x70) <<  9;
+    bg1.r.tiledataAddress = data.bits(0,2) << 13;
+    bg2.r.tiledataAddress = data.bits(4,6) << 13;
     return;
   }
 
   //BG34NBA
   case 0x210c: {
-    bg3.regs.tiledata_addr = (data & 0x07) << 13;
-    bg4.regs.tiledata_addr = (data & 0x70) <<  9;
+    bg3.r.tiledataAddress = data.bits(0,2) << 13;
+    bg4.r.tiledataAddress = data.bits(4,6) << 13;
     return;
   }
 
   //BG1HOFS
   case 0x210d: {
-    regs.mode7_hoffset = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.hoffsetMode7 = (data << 8) | latch.mode7;
+    latch.mode7 = data;
 
-    bg1.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg1.regs.hoffset >> 8) & 7);
-    regs.bgofs_latchdata = data;
+    bg1.r.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg1.r.hoffset >> 8) & 7);
+    latch.bgofs = data;
     return;
   }
 
   //BG1VOFS
   case 0x210e: {
-    regs.mode7_voffset = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.voffsetMode7 = (data << 8) | latch.mode7;
+    latch.mode7 = data;
 
-    bg1.regs.voffset = (data << 8) | regs.bgofs_latchdata;
-    regs.bgofs_latchdata = data;
+    bg1.r.voffset = (data << 8) | latch.bgofs;
+    latch.bgofs = data;
     return;
   }
 
   //BG2HOFS
   case 0x210f: {
-    bg2.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg2.regs.hoffset >> 8) & 7);
-    regs.bgofs_latchdata = data;
+    bg2.r.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg2.r.hoffset >> 8) & 7);
+    latch.bgofs = data;
     return;
   }
 
   //BG2VOFS
   case 0x2110: {
-    bg2.regs.voffset = (data << 8) | regs.bgofs_latchdata;
-    regs.bgofs_latchdata = data;
+    bg2.r.voffset = (data << 8) | latch.bgofs;
+    latch.bgofs = data;
     return;
   }
 
   //BG3HOFS
   case 0x2111: {
-    bg3.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg3.regs.hoffset >> 8) & 7);
-    regs.bgofs_latchdata = data;
+    bg3.r.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg3.r.hoffset >> 8) & 7);
+    latch.bgofs = data;
     return;
   }
 
   //BG3VOFS
   case 0x2112: {
-    bg3.regs.voffset = (data << 8) | regs.bgofs_latchdata;
-    regs.bgofs_latchdata = data;
+    bg3.r.voffset = (data << 8) | latch.bgofs;
+    latch.bgofs = data;
     return;
   }
 
   //BG4HOFS
   case 0x2113: {
-    bg4.regs.hoffset = (data << 8) | (regs.bgofs_latchdata & ~7) | ((bg4.regs.hoffset >> 8) & 7);
-    regs.bgofs_latchdata = data;
+    bg4.r.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg4.r.hoffset >> 8) & 7);
+    latch.bgofs = data;
     return;
   }
 
   //BG4VOFS
   case 0x2114: {
-    bg4.regs.voffset = (data << 8) | regs.bgofs_latchdata;
-    regs.bgofs_latchdata = data;
+    bg4.r.voffset = (data << 8) | latch.bgofs;
+    latch.bgofs = data;
     return;
   }
 
   //VMAIN
   case 0x2115: {
-    regs.vram_incmode = data & 0x80;
-    regs.vram_mapping = (data >> 2) & 3;
+    r.vramIncrementMode = data & 0x80;
+    r.vramMapping = (data >> 2) & 3;
     switch(data & 3) {
-    case 0: regs.vram_incsize =   1; break;
-    case 1: regs.vram_incsize =  32; break;
-    case 2: regs.vram_incsize = 128; break;
-    case 3: regs.vram_incsize = 128; break;
+    case 0: r.vramIncrementSize =   1; break;
+    case 1: r.vramIncrementSize =  32; break;
+    case 2: r.vramIncrementSize = 128; break;
+    case 3: r.vramIncrementSize = 128; break;
     }
     return;
   }
 
   //VMADDL
   case 0x2116: {
-    regs.vram_addr &= 0xff00;
-    regs.vram_addr |= (data << 0);
-    uint16 addr = getVramAddress();
-    regs.vram_readbuffer  = vramRead(addr + 0) << 0;
-    regs.vram_readbuffer |= vramRead(addr + 1) << 8;
+    r.vramAddress &= 0xff00;
+    r.vramAddress |= (data << 0);
+    uint16 address = getVramAddress();
+    latch.vram.byte(0) = vramRead(address + 0);
+    latch.vram.byte(1) = vramRead(address + 1);
     return;
   }
 
   //VMADDH
   case 0x2117: {
-    regs.vram_addr &= 0x00ff;
-    regs.vram_addr |= (data << 8);
-    uint16 addr = getVramAddress();
-    regs.vram_readbuffer  = vramRead(addr + 0) << 0;
-    regs.vram_readbuffer |= vramRead(addr + 1) << 8;
+    r.vramAddress &= 0x00ff;
+    r.vramAddress |= (data << 8);
+    uint16 address = getVramAddress();
+    latch.vram.byte(0) = vramRead(address + 0);
+    latch.vram.byte(1) = vramRead(address + 1);
     return;
   }
 
   //VMDATAL
   case 0x2118: {
-    uint16 addr = getVramAddress() + 0;
-    vramWrite(addr, data);
-    if(regs.vram_incmode == 0) regs.vram_addr += regs.vram_incsize;
+    uint16 address = getVramAddress() + 0;
+    vramWrite(address, data);
+    if(r.vramIncrementMode == 0) r.vramAddress += r.vramIncrementSize;
     return;
   }
 
   //VMDATAH
   case 0x2119: {
-    uint16 addr = getVramAddress() + 1;
-    vramWrite(addr, data);
-    if(regs.vram_incmode == 1) regs.vram_addr += regs.vram_incsize;
+    uint16 address = getVramAddress() + 1;
+    vramWrite(address, data);
+    if(r.vramIncrementMode == 1) r.vramAddress += r.vramIncrementSize;
     return;
   }
 
   //M7SEL
   case 0x211a: {
-    regs.mode7_repeat = (data >> 6) & 3;
-    regs.mode7_vflip = data & 0x02;
-    regs.mode7_hflip = data & 0x01;
+    r.hflipMode7  = data.bit (0);
+    r.vflipMode7  = data.bit (1);
+    r.repeatMode7 = data.bits(6,7);
     return;
   }
 
   //M7A
   case 0x211b: {
-    regs.m7a = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7a = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //M7B
   case 0x211c: {
-    regs.m7b = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7b = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //M7C
   case 0x211d: {
-    regs.m7c = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7c = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //M7D
   case 0x211e: {
-    regs.m7d = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7d = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //M7X
   case 0x211f: {
-    regs.m7x = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7x = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //M7Y
   case 0x2120: {
-    regs.m7y = (data << 8) | regs.mode7_latchdata;
-    regs.mode7_latchdata = data;
+    r.m7y = data << 8 | latch.mode7;
+    latch.mode7 = data;
     return;
   }
 
   //CGADD
   case 0x2121: {
-    regs.cgram_addr = data << 1;
+    r.cgramAddress = data << 1;
     return;
   }
 
   //CGDATA
   case 0x2122: {
-    bool latch = regs.cgram_addr & 1;
-    uint9 addr = regs.cgram_addr++;
-    if(!regs.display_disable
+    bool l = r.cgramAddress & 1;
+    uint9 address = r.cgramAddress++;
+    if(!r.displayDisable
     && vcounter() > 0 && vcounter() < vdisp()
     && hcounter() >= 88 && hcounter() < 1096
-    ) addr = regs.cgram_iaddr;
+    ) address = latch.cgramAddress;
 
-    if(latch == 0) {
-      regs.cgram_latchdata = data;
+    if(l == 0) {
+      latch.cgram = data;
     } else {
-      cgramWrite((addr & ~1) + 0, regs.cgram_latchdata);
-      cgramWrite((addr & ~1) + 1, data & 0x7f);
+      cgramWrite((address & ~1) + 0, latch.cgram);
+      cgramWrite((address & ~1) + 1, data & 0x7f);
     }
     return;
   }
 
   //W12SEL
   case 0x2123: {
-    window.regs.bg2_two_enable = data & 0x80;
-    window.regs.bg2_two_invert = data & 0x40;
-    window.regs.bg2_one_enable = data & 0x20;
-    window.regs.bg2_one_invert = data & 0x10;
-    window.regs.bg1_two_enable = data & 0x08;
-    window.regs.bg1_two_invert = data & 0x04;
-    window.regs.bg1_one_enable = data & 0x02;
-    window.regs.bg1_one_invert = data & 0x01;
+    window.r.bg1.oneInvert = data.bit(0);
+    window.r.bg1.oneEnable = data.bit(1);
+    window.r.bg1.twoInvert = data.bit(2);
+    window.r.bg1.twoEnable = data.bit(3);
+    window.r.bg2.oneInvert = data.bit(4);
+    window.r.bg2.oneEnable = data.bit(5);
+    window.r.bg2.twoInvert = data.bit(6);
+    window.r.bg2.twoEnable = data.bit(7);
     return;
   }
 
   //W34SEL
   case 0x2124: {
-    window.regs.bg4_two_enable = data & 0x80;
-    window.regs.bg4_two_invert = data & 0x40;
-    window.regs.bg4_one_enable = data & 0x20;
-    window.regs.bg4_one_invert = data & 0x10;
-    window.regs.bg3_two_enable = data & 0x08;
-    window.regs.bg3_two_invert = data & 0x04;
-    window.regs.bg3_one_enable = data & 0x02;
-    window.regs.bg3_one_invert = data & 0x01;
+    window.r.bg3.oneInvert = data.bit(0);
+    window.r.bg3.oneEnable = data.bit(1);
+    window.r.bg3.twoInvert = data.bit(2);
+    window.r.bg3.twoEnable = data.bit(3);
+    window.r.bg4.oneInvert = data.bit(4);
+    window.r.bg4.oneEnable = data.bit(5);
+    window.r.bg4.twoInvert = data.bit(6);
+    window.r.bg4.twoEnable = data.bit(7);
     return;
   }
 
   //WOBJSEL
   case 0x2125: {
-    window.regs.col_two_enable = data & 0x80;
-    window.regs.col_two_invert = data & 0x40;
-    window.regs.col_one_enable = data & 0x20;
-    window.regs.col_one_invert = data & 0x10;
-    window.regs.oam_two_enable = data & 0x08;
-    window.regs.oam_two_invert = data & 0x04;
-    window.regs.oam_one_enable = data & 0x02;
-    window.regs.oam_one_invert = data & 0x01;
+    window.r.oam.oneInvert = data.bit(0);
+    window.r.oam.oneEnable = data.bit(1);
+    window.r.oam.twoInvert = data.bit(2);
+    window.r.oam.twoEnable = data.bit(3);
+    window.r.col.oneInvert = data.bit(4);
+    window.r.col.oneEnable = data.bit(5);
+    window.r.col.twoInvert = data.bit(6);
+    window.r.col.twoEnable = data.bit(7);
     return;
   }
 
   //WH0
   case 0x2126: {
-    window.regs.one_left = data;
+    window.r.oneLeft = data;
     return;
   }
 
   //WH1
   case 0x2127: {
-    window.regs.one_right = data;
+    window.r.oneRight = data;
     return;
   }
 
   //WH2
   case 0x2128: {
-    window.regs.two_left = data;
+    window.r.twoLeft = data;
     return;
   }
 
   //WH3
   case 0x2129: {
-    window.regs.two_right = data;
+    window.r.twoRight = data;
     return;
   }
 
   //WBGLOG
   case 0x212a: {
-    window.regs.bg4_mask = (data >> 6) & 3;
-    window.regs.bg3_mask = (data >> 4) & 3;
-    window.regs.bg2_mask = (data >> 2) & 3;
-    window.regs.bg1_mask = (data >> 0) & 3;
+    window.r.bg1.mask = data.bits(0,1);
+    window.r.bg2.mask = data.bits(2,3);
+    window.r.bg3.mask = data.bits(4,5);
+    window.r.bg4.mask = data.bits(6,7);
     return;
   }
 
   //WOBJLOG
   case 0x212b: {
-    window.regs.col_mask = (data >> 2) & 3;
-    window.regs.oam_mask = (data >> 0) & 3;
+    window.r.oam.mask = data.bits(0,1);
+    window.r.col.mask = data.bits(2,3);
     return;
   }
 
   //TM
   case 0x212c: {
-    sprite.regs.main_enable = data & 0x10;
-    bg4.regs.main_enable = data & 0x08;
-    bg3.regs.main_enable = data & 0x04;
-    bg2.regs.main_enable = data & 0x02;
-    bg1.regs.main_enable = data & 0x01;
+    bg1.r.aboveEnable = data.bit(0);
+    bg2.r.aboveEnable = data.bit(1);
+    bg3.r.aboveEnable = data.bit(2);
+    bg4.r.aboveEnable = data.bit(3);
+    oam.r.aboveEnable = data.bit(4);
     return;
   }
 
   //TS
   case 0x212d: {
-    sprite.regs.sub_enable = data & 0x10;
-    bg4.regs.sub_enable = data & 0x08;
-    bg3.regs.sub_enable = data & 0x04;
-    bg2.regs.sub_enable = data & 0x02;
-    bg1.regs.sub_enable = data & 0x01;
+    bg1.r.belowEnable = data.bit(0);
+    bg2.r.belowEnable = data.bit(1);
+    bg3.r.belowEnable = data.bit(2);
+    bg4.r.belowEnable = data.bit(3);
+    oam.r.belowEnable = data.bit(4);
     return;
   }
 
   //TMW
   case 0x212e: {
-    window.regs.oam_main_enable = data & 0x10;
-    window.regs.bg4_main_enable = data & 0x08;
-    window.regs.bg3_main_enable = data & 0x04;
-    window.regs.bg2_main_enable = data & 0x02;
-    window.regs.bg1_main_enable = data & 0x01;
+    window.r.bg1.aboveEnable = data.bit(0);
+    window.r.bg2.aboveEnable = data.bit(1);
+    window.r.bg3.aboveEnable = data.bit(2);
+    window.r.bg4.aboveEnable = data.bit(3);
+    window.r.oam.aboveEnable = data.bit(4);
     return;
   }
 
   //TSW
   case 0x212f: {
-    window.regs.oam_sub_enable = data & 0x10;
-    window.regs.bg4_sub_enable = data & 0x08;
-    window.regs.bg3_sub_enable = data & 0x04;
-    window.regs.bg2_sub_enable = data & 0x02;
-    window.regs.bg1_sub_enable = data & 0x01;
+    window.r.bg1.belowEnable = data.bit(0);
+    window.r.bg2.belowEnable = data.bit(1);
+    window.r.bg3.belowEnable = data.bit(2);
+    window.r.bg4.belowEnable = data.bit(3);
+    window.r.oam.belowEnable = data.bit(4);
     return;
   }
 
   //CGWSEL
   case 0x2130: {
-    window.regs.col_main_mask = (data >> 6) & 3;
-    window.regs.col_sub_mask = (data >> 4) & 3;
-    screen.regs.addsub_mode = data & 0x02;
-    screen.regs.direct_color = data & 0x01;
+    screen.r.directColor   = data.bit (0);
+    screen.r.blendMode     = data.bit (1);
+    window.r.col.belowMask = data.bits(4,5);
+    window.r.col.aboveMask = data.bits(6,7);
     return;
   }
 
   //CGADDSUB
   case 0x2131: {
-    screen.regs.color_mode = data & 0x80;
-    screen.regs.color_halve = data & 0x40;
-    screen.regs.back_color_enable = data & 0x20;
-    screen.regs.oam_color_enable = data & 0x10;
-    screen.regs.bg4_color_enable = data & 0x08;
-    screen.regs.bg3_color_enable = data & 0x04;
-    screen.regs.bg2_color_enable = data & 0x02;
-    screen.regs.bg1_color_enable = data & 0x01;
+    screen.r.bg1.colorEnable  = data.bit(0);
+    screen.r.bg2.colorEnable  = data.bit(1);
+    screen.r.bg3.colorEnable  = data.bit(2);
+    screen.r.bg4.colorEnable  = data.bit(3);
+    screen.r.oam.colorEnable  = data.bit(4);
+    screen.r.back.colorEnable = data.bit(5);
+    screen.r.colorHalve       = data.bit(6);
+    screen.r.colorMode        = data.bit(7);
     return;
   }
 
   //COLDATA
   case 0x2132: {
-    if(data & 0x80) screen.regs.color_b = data & 0x1f;
-    if(data & 0x40) screen.regs.color_g = data & 0x1f;
-    if(data & 0x20) screen.regs.color_r = data & 0x1f;
+    if(data.bit(5)) screen.r.colorRed   = data.bits(0,4);
+    if(data.bit(6)) screen.r.colorGreen = data.bits(0,4);
+    if(data.bit(7)) screen.r.colorBlue  = data.bits(0,4);
     return;
   }
 
   //SETINI
   case 0x2133: {
-    regs.mode7_extbg = data & 0x40;
-    regs.pseudo_hires = data & 0x08;
-    regs.overscan = data & 0x04;
-    sprite.regs.interlace = data & 0x02;
-    regs.interlace = data & 0x01;
+    r.interlace     = data.bit(0);
+    oam.r.interlace = data.bit(1);
+    r.overscan      = data.bit(2);
+    r.pseudoHires   = data.bit(3);
+    r.extbg         = data.bit(6);
     updateVideoMode();
     return;
   }
@@ -617,104 +617,108 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
 auto PPU::latchCounters() -> void {
   cpu.synchronizePPU();
-  regs.hcounter = hdot();
-  regs.vcounter = vcounter();
-  regs.counters_latched = true;
+  r.hcounter = hdot();
+  r.vcounter = vcounter();
+  latch.counters = true;
 }
 
 auto PPU::updateVideoMode() -> void {
-  switch(regs.bgmode) {
+  switch(r.bgMode) {
   case 0:
-    bg1.regs.mode = Background::Mode::BPP2; bg1.regs.priority0 = 8; bg1.regs.priority1 = 11;
-    bg2.regs.mode = Background::Mode::BPP2; bg2.regs.priority0 = 7; bg2.regs.priority1 = 10;
-    bg3.regs.mode = Background::Mode::BPP2; bg3.regs.priority0 = 2; bg3.regs.priority1 =  5;
-    bg4.regs.mode = Background::Mode::BPP2; bg4.regs.priority0 = 1; bg4.regs.priority1 =  4;
-    sprite.regs.priority0 = 3; sprite.regs.priority1 = 6; sprite.regs.priority2 = 9; sprite.regs.priority3 = 12;
+    bg1.r.mode = Background::Mode::BPP2;
+    bg2.r.mode = Background::Mode::BPP2;
+    bg3.r.mode = Background::Mode::BPP2;
+    bg4.r.mode = Background::Mode::BPP2;
+    memory::assign(bg1.r.priority, 8, 11);
+    memory::assign(bg2.r.priority, 7, 10);
+    memory::assign(bg3.r.priority, 2,  5);
+    memory::assign(bg4.r.priority, 1,  4);
+    memory::assign(oam.r.priority, 3,  6, 9, 12);
     break;
 
   case 1:
-    bg1.regs.mode = Background::Mode::BPP4;
-    bg2.regs.mode = Background::Mode::BPP4;
-    bg3.regs.mode = Background::Mode::BPP2;
-    bg4.regs.mode = Background::Mode::Inactive;
-    if(regs.bg3_priority) {
-      bg1.regs.priority0 = 5; bg1.regs.priority1 =  8;
-      bg2.regs.priority0 = 4; bg2.regs.priority1 =  7;
-      bg3.regs.priority0 = 1; bg3.regs.priority1 = 10;
-      sprite.regs.priority0 = 2; sprite.regs.priority1 = 3; sprite.regs.priority2 = 6; sprite.regs.priority3 = 9;
+    bg1.r.mode = Background::Mode::BPP4;
+    bg2.r.mode = Background::Mode::BPP4;
+    bg3.r.mode = Background::Mode::BPP2;
+    bg4.r.mode = Background::Mode::Inactive;
+    if(r.bgPriority) {
+      memory::assign(bg1.r.priority, 5,  8);
+      memory::assign(bg2.r.priority, 4,  7);
+      memory::assign(bg3.r.priority, 1, 10);
+      memory::assign(oam.r.priority, 2,  3, 6, 9);
     } else {
-      bg1.regs.priority0 = 6; bg1.regs.priority1 =  9;
-      bg2.regs.priority0 = 5; bg2.regs.priority1 =  8;
-      bg3.regs.priority0 = 1; bg3.regs.priority1 =  3;
-      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 7; sprite.regs.priority3 = 10;
+      memory::assign(bg1.r.priority, 6,  9);
+      memory::assign(bg2.r.priority, 5,  8);
+      memory::assign(bg3.r.priority, 1,  3);
+      memory::assign(oam.r.priority, 2,  4, 7, 10);
     }
     break;
 
   case 2:
-    bg1.regs.mode = Background::Mode::BPP4;
-    bg2.regs.mode = Background::Mode::BPP4;
-    bg3.regs.mode = Background::Mode::Inactive;
-    bg4.regs.mode = Background::Mode::Inactive;
-    bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
-    bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-    sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
+    bg1.r.mode = Background::Mode::BPP4;
+    bg2.r.mode = Background::Mode::BPP4;
+    bg3.r.mode = Background::Mode::Inactive;
+    bg4.r.mode = Background::Mode::Inactive;
+    memory::assign(bg1.r.priority, 3, 7);
+    memory::assign(bg2.r.priority, 1, 5);
+    memory::assign(oam.r.priority, 2, 4, 6, 8);
     break;
 
   case 3:
-    bg1.regs.mode = Background::Mode::BPP8;
-    bg2.regs.mode = Background::Mode::BPP4;
-    bg3.regs.mode = Background::Mode::Inactive;
-    bg4.regs.mode = Background::Mode::Inactive;
-    bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
-    bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-    sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
+    bg1.r.mode = Background::Mode::BPP8;
+    bg2.r.mode = Background::Mode::BPP4;
+    bg3.r.mode = Background::Mode::Inactive;
+    bg4.r.mode = Background::Mode::Inactive;
+    memory::assign(bg1.r.priority, 3, 7);
+    memory::assign(bg2.r.priority, 1, 5);
+    memory::assign(oam.r.priority, 2, 4, 6, 8);
     break;
 
   case 4:
-    bg1.regs.mode = Background::Mode::BPP8;
-    bg2.regs.mode = Background::Mode::BPP2;
-    bg3.regs.mode = Background::Mode::Inactive;
-    bg4.regs.mode = Background::Mode::Inactive;
-    bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
-    bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-    sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
+    bg1.r.mode = Background::Mode::BPP8;
+    bg2.r.mode = Background::Mode::BPP2;
+    bg3.r.mode = Background::Mode::Inactive;
+    bg4.r.mode = Background::Mode::Inactive;
+    memory::assign(bg1.r.priority, 3, 7);
+    memory::assign(bg2.r.priority, 1, 5);
+    memory::assign(oam.r.priority, 2, 4, 6, 8);
     break;
 
   case 5:
-    bg1.regs.mode = Background::Mode::BPP4;
-    bg2.regs.mode = Background::Mode::BPP2;
-    bg3.regs.mode = Background::Mode::Inactive;
-    bg4.regs.mode = Background::Mode::Inactive;
-    bg1.regs.priority0 = 3; bg1.regs.priority1 = 7;
-    bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-    sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 8;
+    bg1.r.mode = Background::Mode::BPP4;
+    bg2.r.mode = Background::Mode::BPP2;
+    bg3.r.mode = Background::Mode::Inactive;
+    bg4.r.mode = Background::Mode::Inactive;
+    memory::assign(bg1.r.priority, 3, 7);
+    memory::assign(bg2.r.priority, 1, 5);
+    memory::assign(oam.r.priority, 2, 4, 6, 8);
     break;
 
   case 6:
-    bg1.regs.mode = Background::Mode::BPP4;
-    bg2.regs.mode = Background::Mode::Inactive;
-    bg3.regs.mode = Background::Mode::Inactive;
-    bg4.regs.mode = Background::Mode::Inactive;
-    bg1.regs.priority0 = 2; bg1.regs.priority1 = 5;
-    sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 6;
+    bg1.r.mode = Background::Mode::BPP4;
+    bg2.r.mode = Background::Mode::Inactive;
+    bg3.r.mode = Background::Mode::Inactive;
+    bg4.r.mode = Background::Mode::Inactive;
+    memory::assign(bg1.r.priority, 2, 5);
+    memory::assign(oam.r.priority, 1, 3, 4, 6);
     break;
 
   case 7:
-    if(regs.mode7_extbg == false) {
-      bg1.regs.mode = Background::Mode::Mode7;
-      bg2.regs.mode = Background::Mode::Inactive;
-      bg3.regs.mode = Background::Mode::Inactive;
-      bg4.regs.mode = Background::Mode::Inactive;
-      bg1.regs.priority0 = 2; bg1.regs.priority1 = 2;
-      sprite.regs.priority0 = 1; sprite.regs.priority1 = 3; sprite.regs.priority2 = 4; sprite.regs.priority3 = 5;
+    if(!r.extbg) {
+      bg1.r.mode = Background::Mode::Mode7;
+      bg2.r.mode = Background::Mode::Inactive;
+      bg3.r.mode = Background::Mode::Inactive;
+      bg4.r.mode = Background::Mode::Inactive;
+      memory::assign(bg1.r.priority, 2);
+      memory::assign(oam.r.priority, 1, 3, 4, 5);
     } else {
-      bg1.regs.mode = Background::Mode::Mode7;
-      bg2.regs.mode = Background::Mode::Mode7;
-      bg3.regs.mode = Background::Mode::Inactive;
-      bg4.regs.mode = Background::Mode::Inactive;
-      bg1.regs.priority0 = 3; bg1.regs.priority1 = 3;
-      bg2.regs.priority0 = 1; bg2.regs.priority1 = 5;
-      sprite.regs.priority0 = 2; sprite.regs.priority1 = 4; sprite.regs.priority2 = 6; sprite.regs.priority3 = 7;
+      bg1.r.mode = Background::Mode::Mode7;
+      bg2.r.mode = Background::Mode::Mode7;
+      bg3.r.mode = Background::Mode::Inactive;
+      bg4.r.mode = Background::Mode::Inactive;
+      memory::assign(bg1.r.priority, 3);
+      memory::assign(bg2.r.priority, 1, 5);
+      memory::assign(oam.r.priority, 2, 4, 6, 7);
     }
     break;
   }

@@ -13,13 +13,13 @@ PPU ppu;
 #include "serialization.cpp"
 
 PPU::PPU() :
-bg1(*this, Background::ID::BG1),
-bg2(*this, Background::ID::BG2),
-bg3(*this, Background::ID::BG3),
-bg4(*this, Background::ID::BG4),
-sprite(*this),
-window(*this),
-screen(*this) {
+bg1(Background::ID::BG1),
+bg2(Background::ID::BG2),
+bg3(Background::ID::BG3),
+bg4(Background::ID::BG4) {
+  ppu1.version = 1;  //allowed values: 1
+  ppu2.version = 3;  //allowed values: 1, 2, 3
+
   output = new uint32[512 * 512];
   output += 16 * 512;  //overscan offset
 }
@@ -62,7 +62,7 @@ auto PPU::main() -> void {
       bg3.run(0);
       bg4.run(0);
       if(pixel >= 0) {
-        sprite.run();
+        oam.run();
         window.run();
         screen.run();
       }
@@ -70,7 +70,7 @@ auto PPU::main() -> void {
     }
 
     addClocks(14);
-    sprite.tilefetch();
+    oam.tilefetch();
   } else {
     addClocks(1052 + 14 + 136);
   }
@@ -88,9 +88,9 @@ auto PPU::addClocks(uint clocks) -> void {
 }
 
 auto PPU::power() -> void {
-  for(auto& n : vram) n = random(0x00);
-  for(auto& n : oam) n = random(0x00);
-  for(auto& n : cgram) n = random(0x00);
+  for(auto& n : memory.vram) n = random(0x00);
+  for(auto& n : memory.oam) n = random(0x00);
+  for(auto& n : memory.cgram) n = random(0x00);
 }
 
 auto PPU::reset() -> void {
@@ -102,93 +102,93 @@ auto PPU::reset() -> void {
   function<auto (uint24, uint8) -> void> writer{&PPU::write, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
-  regs.ppu1_mdr = random(0xff);
-  regs.ppu2_mdr = random(0xff);
+  ppu1.mdr = random(0xff);
+  ppu2.mdr = random(0xff);
 
-  regs.vram_readbuffer = random(0x0000);
-  regs.oam_latchdata = random(0x00);
-  regs.cgram_latchdata = random(0x00);
-  regs.bgofs_latchdata = random(0x00);
-  regs.mode7_latchdata = random(0x00);
-  regs.counters_latched = false;
-  regs.latch_hcounter = 0;
-  regs.latch_vcounter = 0;
+  latch.vram = random(0x0000);
+  latch.oam = random(0x00);
+  latch.cgram = random(0x00);
+  latch.bgofs = random(0x00);
+  latch.mode7 = random(0x00);
+  latch.counters = false;
+  latch.hcounter = 0;
+  latch.vcounter = 0;
 
-  regs.oam_iaddr = 0x0000;
-  regs.cgram_iaddr = 0x00;
+  latch.oamAddress = 0x0000;
+  latch.cgramAddress = 0x00;
 
   //$2100  INIDISP
-  regs.display_disable = true;
-  regs.display_brightness = 0;
+  r.displayDisable = true;
+  r.displayBrightness = 0;
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  regs.oam_baseaddr = random(0x0000);
-  regs.oam_addr = random(0x0000);
-  regs.oam_priority = random(false);
+  r.oamBaseAddress = random(0x0000);
+  r.oamAddress = random(0x0000);
+  r.oamPriority = random(false);
 
   //$2105  BGMODE
-  regs.bg3_priority = false;
-  regs.bgmode = 0;
+  r.bgPriority = false;
+  r.bgMode = 0;
 
   //$210d  BG1HOFS
-  regs.mode7_hoffset = random(0x0000);
+  r.hoffsetMode7 = random(0x0000);
 
   //$210e  BG1VOFS
-  regs.mode7_voffset = random(0x0000);
+  r.voffsetMode7 = random(0x0000);
 
   //$2115  VMAIN
-  regs.vram_incmode = random(1);
-  regs.vram_mapping = random(0);
-  regs.vram_incsize = 1;
+  r.vramIncrementMode = random(1);
+  r.vramMapping = random(0);
+  r.vramIncrementSize = 1;
 
   //$2116  VMADDL
   //$2117  VMADDH
-  regs.vram_addr = random(0x0000);
+  r.vramAddress = random(0x0000);
 
   //$211a  M7SEL
-  regs.mode7_repeat = random(0);
-  regs.mode7_vflip = random(false);
-  regs.mode7_hflip = random(false);
+  r.repeatMode7 = random(0);
+  r.vflipMode7 = random(false);
+  r.hflipMode7 = random(false);
 
   //$211b  M7A
-  regs.m7a = random(0x0000);
+  r.m7a = random(0x0000);
 
   //$211c  M7B
-  regs.m7b = random(0x0000);
+  r.m7b = random(0x0000);
 
   //$211d  M7C
-  regs.m7c = random(0x0000);
+  r.m7c = random(0x0000);
 
   //$211e  M7D
-  regs.m7d = random(0x0000);
+  r.m7d = random(0x0000);
 
   //$211f  M7X
-  regs.m7x = random(0x0000);
+  r.m7x = random(0x0000);
 
   //$2120  M7Y
-  regs.m7y = random(0x0000);
+  r.m7y = random(0x0000);
 
   //$2121  CGADD
-  regs.cgram_addr = random(0x0000);
+  r.cgramAddress = random(0x0000);
 
   //$2133  SETINI
-  regs.mode7_extbg = random(false);
-  regs.pseudo_hires = random(false);
-  regs.overscan = false;
-  regs.interlace = false;
+  r.extbg = random(false);
+  r.pseudoHires = random(false);
+  r.overscan = false;
+  r.interlace = false;
 
   //$213c  OPHCT
-  regs.hcounter = 0;
+  r.hcounter = 0;
 
   //$213d  OPVCT
-  regs.vcounter = 0;
+  r.vcounter = 0;
 
   bg1.reset();
   bg2.reset();
   bg3.reset();
   bg4.reset();
-  sprite.reset();
+  oam.reset();
   window.reset();
   screen.reset();
 
@@ -208,7 +208,7 @@ auto PPU::scanline() -> void {
   bg2.scanline();
   bg3.scanline();
   bg4.scanline();
-  sprite.scanline();
+  oam.scanline();
   window.scanline();
   screen.scanline();
 
@@ -218,10 +218,9 @@ auto PPU::scanline() -> void {
 }
 
 auto PPU::frame() -> void {
-  sprite.frame();
-
-  display.interlace = regs.interlace;
-  display.overscan = regs.overscan;
+  oam.frame();
+  display.interlace = r.interlace;
+  display.overscan = r.overscan;
 }
 
 auto PPU::refresh() -> void {

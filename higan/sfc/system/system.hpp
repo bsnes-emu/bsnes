@@ -5,10 +5,10 @@ struct Interface;
 struct System {
   enum class Region : bool { NTSC = 0, PAL = 1 };
 
-  auto loaded() const -> bool;
-  auto region() const -> Region;
-  auto cpuFrequency() const -> uint;
-  auto apuFrequency() const -> uint;
+  inline auto loaded() const -> bool { return _loaded; }
+  inline auto region() const -> Region { return _region; }
+  inline auto cpuFrequency() const -> uint { return _cpuFrequency; }
+  inline auto apuFrequency() const -> uint { return _apuFrequency; }
 
   auto run() -> void;
   auto runToSave() -> void;

@@ -10,27 +10,27 @@
 //point before this in the frame, which is handled internally by this class at
 //V=128.
 
-class PPUcounter {
-public:
-  alwaysinline void tick();
-  alwaysinline void tick(unsigned clocks);
+struct PPUcounter {
+  alwaysinline auto tick() -> void;
+  alwaysinline auto tick(uint clocks) -> void;
 
-  alwaysinline bool   field   () const;
-  alwaysinline uint16 vcounter() const;
-  alwaysinline uint16 hcounter() const;
-  inline uint16 hdot() const;
-  inline uint16 lineclocks() const;
+  alwaysinline auto field() const -> bool;
+  alwaysinline auto vcounter() const -> uint16;
+  alwaysinline auto hcounter() const -> uint16;
+  inline auto hdot() const -> uint16;
+  inline auto lineclocks() const -> uint16;
 
-  alwaysinline bool   field   (unsigned offset) const;
-  alwaysinline uint16 vcounter(unsigned offset) const;
-  alwaysinline uint16 hcounter(unsigned offset) const;
+  alwaysinline auto field(uint offset) const -> bool;
+  alwaysinline auto vcounter(uint offset) const -> uint16;
+  alwaysinline auto hcounter(uint offset) const -> uint16;
 
-  inline void reset();
-  function<void ()> scanline;
-  void serialize(serializer&);
+  inline auto reset() -> void;
+  auto serialize(serializer&) -> void;
+
+  function<auto () -> void> scanline;
 
 private:
-  inline void vcounter_tick();
+  inline auto vcounterTick() -> void;
 
   struct {
     bool interlace;
