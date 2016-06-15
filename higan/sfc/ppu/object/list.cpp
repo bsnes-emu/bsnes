@@ -1,4 +1,4 @@
-auto PPU::OAM::update(uint10 addr, uint8 data) -> void {
+auto PPU::Object::update(uint10 addr, uint8 data) -> void {
   if(!addr.bit(9)) {
     uint n = addr >> 2;  //sprite#
     addr &= 3;
@@ -28,27 +28,27 @@ auto PPU::OAM::update(uint10 addr, uint8 data) -> void {
   }
 }
 
-auto PPU::OAM::synchronize() -> void {
-  for(auto n : range(544)) update(n, ppu.memory.oam[n]);
+auto PPU::Object::synchronize() -> void {
+  for(auto n : range(544)) update(n, ppu.oam[n]);
 }
 
-auto PPU::OAM::Object::width() const -> uint{
+auto PPU::Object::Sprite::width() const -> uint{
   if(size == 0) {
     static const uint width[] = { 8,  8,  8, 16, 16, 32, 16, 16};
-    return width[ppu.oam.r.baseSize];
+    return width[ppu.obj.r.baseSize];
   } else {
     static const uint width[] = {16, 32, 64, 32, 64, 64, 32, 32};
-    return width[ppu.oam.r.baseSize];
+    return width[ppu.obj.r.baseSize];
   }
 }
 
-auto PPU::OAM::Object::height() const -> uint {
+auto PPU::Object::Sprite::height() const -> uint {
   if(size == 0) {
-    if(ppu.oam.r.interlace && ppu.oam.r.baseSize >= 6) return 16;  //hardware quirk
+    if(ppu.obj.r.interlace && ppu.obj.r.baseSize >= 6) return 16;  //hardware quirk
     static const uint height[] = { 8,  8,  8, 16, 16, 32, 32, 32};
-    return height[ppu.oam.r.baseSize];
+    return height[ppu.obj.r.baseSize];
   } else {
     static const uint height[] = {16, 32, 64, 32, 64, 64, 64, 32};
-    return height[ppu.oam.r.baseSize];
+    return height[ppu.obj.r.baseSize];
   }
 }

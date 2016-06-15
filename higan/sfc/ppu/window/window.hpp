@@ -15,7 +15,7 @@ struct Window {
       uint2 mask;
       bool aboveEnable;
       bool belowEnable;
-    } bg1, bg2, bg3, bg4, oam;
+    } bg1, bg2, bg3, bg4, obj;
 
     struct Color {
       bool oneEnable;

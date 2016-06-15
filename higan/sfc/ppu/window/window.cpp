@@ -27,9 +27,9 @@ auto PPU::Window::run() -> void {
     if(r.bg4.belowEnable) ppu.bg4.output.below.priority = 0;
   }
 
-  if(test(r.oam.oneEnable, one ^ r.oam.oneInvert, r.oam.twoEnable, two ^ r.oam.twoInvert, r.oam.mask)) {
-    if(r.oam.aboveEnable) ppu.oam.output.above.priority = 0;
-    if(r.oam.belowEnable) ppu.oam.output.below.priority = 0;
+  if(test(r.obj.oneEnable, one ^ r.obj.oneInvert, r.obj.twoEnable, two ^ r.obj.twoInvert, r.obj.mask)) {
+    if(r.obj.aboveEnable) ppu.obj.output.above.priority = 0;
+    if(r.obj.belowEnable) ppu.obj.output.below.priority = 0;
   }
 
   bool value = test(r.col.oneEnable, one ^ r.col.oneInvert, r.col.twoEnable, two ^ r.col.twoInvert, r.col.mask);
@@ -79,13 +79,13 @@ auto PPU::Window::reset() -> void {
   r.bg4.aboveEnable = random(false);
   r.bg4.belowEnable = random(false);
 
-  r.oam.oneEnable = random(false);
-  r.oam.oneInvert = random(false);
-  r.oam.twoEnable = random(false);
-  r.oam.twoInvert = random(false);
-  r.oam.mask = random(0);
-  r.oam.aboveEnable = random(false);
-  r.oam.belowEnable = random(false);
+  r.obj.oneEnable = random(false);
+  r.obj.oneInvert = random(false);
+  r.obj.twoEnable = random(false);
+  r.obj.twoInvert = random(false);
+  r.obj.mask = random(0);
+  r.obj.aboveEnable = random(false);
+  r.obj.belowEnable = random(false);
 
   r.col.oneEnable = random(false);
   r.col.oneInvert = random(false);

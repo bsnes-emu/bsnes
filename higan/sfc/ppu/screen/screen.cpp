@@ -51,9 +51,9 @@ auto PPU::Screen::below(bool hires) -> uint16 {
     priority = ppu.bg4.output.below.priority;
     math.below.color = paletteColor(ppu.bg4.output.below.palette);
   }
-  if(ppu.oam.output.below.priority > priority) {
-    priority = ppu.oam.output.below.priority;
-    math.below.color = paletteColor(ppu.oam.output.below.palette);
+  if(ppu.obj.output.below.priority > priority) {
+    priority = ppu.obj.output.below.priority;
+    math.below.color = paletteColor(ppu.obj.output.below.palette);
   }
   if(math.transparent = (priority == 0)) math.below.color = paletteColor(0);
 
@@ -94,10 +94,10 @@ auto PPU::Screen::above() -> uint16 {
     math.above.color = paletteColor(ppu.bg4.output.above.palette);
     math.below.colorEnable = r.bg4.colorEnable;
   }
-  if(ppu.oam.output.above.priority > priority) {
-    priority = ppu.oam.output.above.priority;
-    math.above.color = paletteColor(ppu.oam.output.above.palette);
-    math.below.colorEnable = r.oam.colorEnable && ppu.oam.output.above.palette >= 192;
+  if(ppu.obj.output.above.priority > priority) {
+    priority = ppu.obj.output.above.priority;
+    math.above.color = paletteColor(ppu.obj.output.above.palette);
+    math.below.colorEnable = r.obj.colorEnable && ppu.obj.output.above.palette >= 192;
   }
   if(priority == 0) {
     math.above.color = paletteColor(0);
@@ -145,7 +145,7 @@ auto PPU::Screen::blend(uint x, uint y) const -> uint16 {
 auto PPU::Screen::paletteColor(uint palette) const -> uint16 {
   palette <<= 1;
   ppu.latch.cgramAddress = palette;
-  return ppu.memory.cgram[palette + 0] + (ppu.memory.cgram[palette + 1] << 8);
+  return ppu.cgram[palette + 0] << 0 | ppu.cgram[palette + 1] << 8;
 }
 
 auto PPU::Screen::directColor(uint palette, uint tile) const -> uint16 {
@@ -170,7 +170,7 @@ auto PPU::Screen::reset() -> void {
   r.bg2.colorEnable = random(false);
   r.bg3.colorEnable = random(false);
   r.bg4.colorEnable = random(false);
-  r.oam.colorEnable = random(false);
+  r.obj.colorEnable = random(false);
   r.back.colorEnable = random(false);
   r.colorBlue = random(0);
   r.colorGreen = random(0);

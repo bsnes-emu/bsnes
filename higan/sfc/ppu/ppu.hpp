@@ -31,13 +31,11 @@ struct PPU : Thread, PPUcounter {
   auto latchCounters() -> void;
   auto updateVideoMode() -> void;
 
-  struct {
-    uint8 vram[64 * 1024];
-    uint8 oam[544];
-    uint8 cgram[512];
-  } memory;
-
 privileged:
+  uint8 vram[64 * 1024];
+  uint8 oam[544];
+  uint8 cgram[512];
+
   uint32* output = nullptr;
 
   struct {
@@ -140,20 +138,20 @@ privileged:
   } r;
 
   #include "background/background.hpp"
-  #include "screen/screen.hpp"
-  #include "sprite/sprite.hpp"
+  #include "object/object.hpp"
   #include "window/window.hpp"
+  #include "screen/screen.hpp"
 
   Background bg1;
   Background bg2;
   Background bg3;
   Background bg4;
-  OAM oam;
+  Object obj;
   Window window;
   Screen screen;
 
   friend class PPU::Background;
-  friend class PPU::OAM;
+  friend class PPU::Object;
   friend class PPU::Window;
   friend class PPU::Screen;
   friend class Scheduler;

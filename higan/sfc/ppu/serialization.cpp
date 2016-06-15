@@ -14,9 +14,9 @@ auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
   PPUcounter::serialize(s);
 
-  s.array(memory.vram);
-  s.array(memory.oam);
-  s.array(memory.cgram);
+  s.array(vram);
+  s.array(oam);
+  s.array(cgram);
 
   s.integer(ppu1.version);
   s.integer(ppu1.mdr);
@@ -83,7 +83,7 @@ auto PPU::serialize(serializer& s) -> void {
   bg2.serialize(s);
   bg3.serialize(s);
   bg4.serialize(s);
-  oam.serialize(s);
+  obj.serialize(s);
   window.serialize(s);
   screen.serialize(s);
 }
@@ -135,7 +135,7 @@ auto PPU::Background::serialize(serializer& s) -> void {
   s.array(data);
 }
 
-auto PPU::OAM::serialize(serializer& s) -> void {
+auto PPU::Object::serialize(serializer& s) -> void {
   s.integer(r.aboveEnable);
   s.integer(r.belowEnable);
   s.integer(r.interlace);
@@ -224,13 +224,13 @@ auto PPU::Window::serialize(serializer& s) -> void {
   s.integer(r.bg4.aboveEnable);
   s.integer(r.bg4.belowEnable);
 
-  s.integer(r.oam.oneEnable);
-  s.integer(r.oam.oneInvert);
-  s.integer(r.oam.twoEnable);
-  s.integer(r.oam.twoInvert);
-  s.integer(r.oam.mask);
-  s.integer(r.oam.aboveEnable);
-  s.integer(r.oam.belowEnable);
+  s.integer(r.obj.oneEnable);
+  s.integer(r.obj.oneInvert);
+  s.integer(r.obj.twoEnable);
+  s.integer(r.obj.twoInvert);
+  s.integer(r.obj.mask);
+  s.integer(r.obj.aboveEnable);
+  s.integer(r.obj.belowEnable);
 
   s.integer(r.col.oneEnable);
   s.integer(r.col.oneInvert);
@@ -261,7 +261,7 @@ auto PPU::Screen::serialize(serializer& s) -> void {
   s.integer(r.bg2.colorEnable);
   s.integer(r.bg3.colorEnable);
   s.integer(r.bg4.colorEnable);
-  s.integer(r.oam.colorEnable);
+  s.integer(r.obj.colorEnable);
   s.integer(r.back.colorEnable);
 
   s.integer(r.colorBlue);

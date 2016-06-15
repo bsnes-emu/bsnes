@@ -121,7 +121,7 @@ auto PPU::Background::getTile() -> void {
   if(ty & 0x20) offset += screenY;
 
   uint16 address = r.screenAddress + (offset << 1);
-  tile = (ppu.memory.vram[address + 0] << 0) + (ppu.memory.vram[address + 1] << 8);
+  tile = (ppu.vram[address + 0] << 0) + (ppu.vram[address + 1] << 8);
   bool mirrorY = tile & 0x8000;
   bool mirrorX = tile & 0x4000;
   priority = r.priority[bool(tile & 0x2000)];
@@ -137,16 +137,16 @@ auto PPU::Background::getTile() -> void {
 
   switch(r.mode) {
   case Mode::BPP8:
-    data[1].byte(3) = ppu.memory.vram[offset + 49];
-    data[1].byte(2) = ppu.memory.vram[offset + 48];
-    data[1].byte(1) = ppu.memory.vram[offset + 33];
-    data[1].byte(0) = ppu.memory.vram[offset + 32];
+    data[1].byte(3) = ppu.vram[offset + 49];
+    data[1].byte(2) = ppu.vram[offset + 48];
+    data[1].byte(1) = ppu.vram[offset + 33];
+    data[1].byte(0) = ppu.vram[offset + 32];
   case Mode::BPP4:
-    data[0].byte(3) = ppu.memory.vram[offset + 17];
-    data[0].byte(2) = ppu.memory.vram[offset + 16];
+    data[0].byte(3) = ppu.vram[offset + 17];
+    data[0].byte(2) = ppu.vram[offset + 16];
   case Mode::BPP2:
-    data[0].byte(1) = ppu.memory.vram[offset +  1];
-    data[0].byte(0) = ppu.memory.vram[offset +  0];
+    data[0].byte(1) = ppu.vram[offset +  1];
+    data[0].byte(0) = ppu.vram[offset +  0];
   }
 
   if(mirrorX) for(auto n : range(2)) {
@@ -193,10 +193,10 @@ auto PPU::Background::getTileColor() -> uint {
 
   switch(r.mode) {
   case Mode::BPP8:
-    color += data[1] >> 28 & 0x80;
-    color += data[1] >> 21 & 0x40;
-    color += data[1] >> 14 & 0x20;
-    color += data[1] >>  7 & 0x10;
+    color += data[1] >> 24 & 0x80;
+    color += data[1] >> 17 & 0x40;
+    color += data[1] >> 10 & 0x20;
+    color += data[1] >>  3 & 0x10;
     data[1] <<= 1;
   case Mode::BPP4:
     color += data[0] >> 28 & 0x08;
@@ -275,5 +275,5 @@ auto PPU::Background::getTile(uint x, uint y) -> uint {
   if(y & 0x20) offset += screenY;
 
   uint16 address = r.screenAddress + (offset << 1);
-  return (ppu.memory.vram[address + 0] << 0) + (ppu.memory.vram[address + 1] << 8);
+  return (ppu.vram[address + 0] << 0) + (ppu.vram[address + 1] << 8);
 }

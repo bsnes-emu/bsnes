@@ -24,7 +24,7 @@ struct Screen {
     bool colorHalve;
     struct Layer {
       bool colorEnable;
-    } bg1, bg2, bg3, bg4, oam, back;
+    } bg1, bg2, bg3, bg4, obj, back;
 
     uint5 colorBlue;
     uint5 colorGreen;

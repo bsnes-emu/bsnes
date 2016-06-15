@@ -13,21 +13,21 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //MPYL
   case 0x2134: {
-    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    uint result = (int16)r.m7a * (int8)(r.m7b >> 8);
     ppu1.mdr = (result >>  0);
     return ppu1.mdr;
   }
 
   //MPYM
   case 0x2135: {
-    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    uint result = (int16)r.m7a * (int8)(r.m7b >> 8);
     ppu1.mdr = (result >>  8);
     return ppu1.mdr;
   }
 
   //MPYH
   case 0x2136: {
-    uint result = ((int16)r.m7a * (int8)(r.m7b >> 8));
+    uint result = (int16)r.m7a * (int8)(r.m7b >> 8);
     ppu1.mdr = (result >> 16);
     return ppu1.mdr;
   }
@@ -40,12 +40,12 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //OAMDATAREAD
   case 0x2138: {
-    uint10 addr = r.oamAddress++;
-    if(!r.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
-    if(addr & 0x0200) addr &= 0x021f;
+    uint10 address = r.oamAddress++;
+    if(!r.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
+    if(address & 0x0200) address &= 0x021f;
 
-    ppu1.mdr = oamRead(addr);
-    oam.setFirstSprite();
+    ppu1.mdr = oamRead(address);
+    obj.setFirstSprite();
     return ppu1.mdr;
   }
 
@@ -54,7 +54,7 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
     uint16 address = getVramAddress() + 0;
     ppu1.mdr = latch.vram >> 0;
     if(r.vramIncrementMode == 0) {
-      addr &= ~1;
+      address.bit(0) = 0;
       latch.vram.byte(0) = vramRead(address + 0);
       latch.vram.byte(1) = vramRead(address + 1);
       r.vramAddress += r.vramIncrementSize;
@@ -67,7 +67,7 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
     uint16 address = getVramAddress() + 1;
     ppu1.mdr = latch.vram >> 8;
     if(r.vramIncrementMode == 1) {
-      addr &= ~1;
+      address.bit(0) = 0;
       latch.vram.byte(0) = vramRead(address + 0);
       latch.vram.byte(1) = vramRead(address + 1);
       r.vramAddress += r.vramIncrementSize;
@@ -120,8 +120,8 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
   //STAT77
   case 0x213e: {
     ppu1.mdr &= 0x10;
-    ppu1.mdr |= oam.r.timeOver << 7;
-    ppu1.mdr |= oam.r.rangeOver << 6;
+    ppu1.mdr |= obj.r.timeOver << 7;
+    ppu1.mdr |= obj.r.rangeOver << 6;
     ppu1.mdr |= ppu1.version & 0x0f;
     return ppu1.mdr;
   }
@@ -156,7 +156,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //INIDISP
   case 0x2100: {
-    if(r.displayDisable && vcounter() == vdisp()) oam.addressReset();
+    if(r.displayDisable && vcounter() == vdisp()) obj.addressReset();
     r.displayBrightness = data.bits(0,3);
     r.displayDisable    = data.bit (7);
     return;
@@ -164,16 +164,16 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //OBSEL
   case 0x2101: {
-    oam.r.tiledataAddress = data.bits(0,1) << 14;
-    oam.r.nameSelect      = data.bits(3,4);
-    oam.r.baseSize        = data.bits(5,7);
+    obj.r.tiledataAddress = data.bits(0,1) << 14;
+    obj.r.nameSelect      = data.bits(3,4);
+    obj.r.baseSize        = data.bits(5,7);
     return;
   }
 
   //OAMADDL
   case 0x2102: {
     r.oamBaseAddress = (r.oamBaseAddress & 0x0200) | (data << 1);
-    oam.addressReset();
+    obj.addressReset();
     return;
   }
 
@@ -181,25 +181,25 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
   case 0x2103: {
     r.oamPriority = data & 0x80;
     r.oamBaseAddress = ((data & 0x01) << 9) | (r.oamBaseAddress & 0x01fe);
-    oam.addressReset();
+    obj.addressReset();
     return;
   }
 
   //OAMDATA
   case 0x2104: {
     bool l = r.oamAddress & 1;
-    uint10 addr = r.oamAddress++;
-    if(!r.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
-    if(addr & 0x0200) addr &= 0x021f;
+    uint10 address = r.oamAddress++;
+    if(!r.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
+    if(address & 0x0200) address &= 0x021f;
 
     if(l == 0) latch.oam = data;
-    if(addr & 0x0200) {
-      oamWrite(addr, data);
+    if(address & 0x0200) {
+      oamWrite(address, data);
     } else if(l == 1) {
-      oamWrite((addr & ~1) + 0, latch.oam);
-      oamWrite((addr & ~1) + 1, data);
+      oamWrite((address & ~1) + 0, latch.oam);
+      oamWrite((address & ~1) + 1, data);
     }
-    oam.setFirstSprite();
+    obj.setFirstSprite();
     return;
   }
 
@@ -480,10 +480,10 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //WOBJSEL
   case 0x2125: {
-    window.r.oam.oneInvert = data.bit(0);
-    window.r.oam.oneEnable = data.bit(1);
-    window.r.oam.twoInvert = data.bit(2);
-    window.r.oam.twoEnable = data.bit(3);
+    window.r.obj.oneInvert = data.bit(0);
+    window.r.obj.oneEnable = data.bit(1);
+    window.r.obj.twoInvert = data.bit(2);
+    window.r.obj.twoEnable = data.bit(3);
     window.r.col.oneInvert = data.bit(4);
     window.r.col.oneEnable = data.bit(5);
     window.r.col.twoInvert = data.bit(6);
@@ -526,7 +526,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //WOBJLOG
   case 0x212b: {
-    window.r.oam.mask = data.bits(0,1);
+    window.r.obj.mask = data.bits(0,1);
     window.r.col.mask = data.bits(2,3);
     return;
   }
@@ -537,7 +537,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
     bg2.r.aboveEnable = data.bit(1);
     bg3.r.aboveEnable = data.bit(2);
     bg4.r.aboveEnable = data.bit(3);
-    oam.r.aboveEnable = data.bit(4);
+    obj.r.aboveEnable = data.bit(4);
     return;
   }
 
@@ -547,7 +547,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
     bg2.r.belowEnable = data.bit(1);
     bg3.r.belowEnable = data.bit(2);
     bg4.r.belowEnable = data.bit(3);
-    oam.r.belowEnable = data.bit(4);
+    obj.r.belowEnable = data.bit(4);
     return;
   }
 
@@ -557,7 +557,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
     window.r.bg2.aboveEnable = data.bit(1);
     window.r.bg3.aboveEnable = data.bit(2);
     window.r.bg4.aboveEnable = data.bit(3);
-    window.r.oam.aboveEnable = data.bit(4);
+    window.r.obj.aboveEnable = data.bit(4);
     return;
   }
 
@@ -567,7 +567,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
     window.r.bg2.belowEnable = data.bit(1);
     window.r.bg3.belowEnable = data.bit(2);
     window.r.bg4.belowEnable = data.bit(3);
-    window.r.oam.belowEnable = data.bit(4);
+    window.r.obj.belowEnable = data.bit(4);
     return;
   }
 
@@ -586,7 +586,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
     screen.r.bg2.colorEnable  = data.bit(1);
     screen.r.bg3.colorEnable  = data.bit(2);
     screen.r.bg4.colorEnable  = data.bit(3);
-    screen.r.oam.colorEnable  = data.bit(4);
+    screen.r.obj.colorEnable  = data.bit(4);
     screen.r.back.colorEnable = data.bit(5);
     screen.r.colorHalve       = data.bit(6);
     screen.r.colorMode        = data.bit(7);
@@ -604,7 +604,7 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
   //SETINI
   case 0x2133: {
     r.interlace     = data.bit(0);
-    oam.r.interlace = data.bit(1);
+    obj.r.interlace = data.bit(1);
     r.overscan      = data.bit(2);
     r.pseudoHires   = data.bit(3);
     r.extbg         = data.bit(6);
@@ -633,7 +633,7 @@ auto PPU::updateVideoMode() -> void {
     memory::assign(bg2.r.priority, 7, 10);
     memory::assign(bg3.r.priority, 2,  5);
     memory::assign(bg4.r.priority, 1,  4);
-    memory::assign(oam.r.priority, 3,  6, 9, 12);
+    memory::assign(obj.r.priority, 3,  6, 9, 12);
     break;
 
   case 1:
@@ -645,12 +645,12 @@ auto PPU::updateVideoMode() -> void {
       memory::assign(bg1.r.priority, 5,  8);
       memory::assign(bg2.r.priority, 4,  7);
       memory::assign(bg3.r.priority, 1, 10);
-      memory::assign(oam.r.priority, 2,  3, 6, 9);
+      memory::assign(obj.r.priority, 2,  3, 6, 9);
     } else {
       memory::assign(bg1.r.priority, 6,  9);
       memory::assign(bg2.r.priority, 5,  8);
       memory::assign(bg3.r.priority, 1,  3);
-      memory::assign(oam.r.priority, 2,  4, 7, 10);
+      memory::assign(obj.r.priority, 2,  4, 7, 10);
     }
     break;
 
@@ -661,7 +661,7 @@ auto PPU::updateVideoMode() -> void {
     bg4.r.mode = Background::Mode::Inactive;
     memory::assign(bg1.r.priority, 3, 7);
     memory::assign(bg2.r.priority, 1, 5);
-    memory::assign(oam.r.priority, 2, 4, 6, 8);
+    memory::assign(obj.r.priority, 2, 4, 6, 8);
     break;
 
   case 3:
@@ -671,7 +671,7 @@ auto PPU::updateVideoMode() -> void {
     bg4.r.mode = Background::Mode::Inactive;
     memory::assign(bg1.r.priority, 3, 7);
     memory::assign(bg2.r.priority, 1, 5);
-    memory::assign(oam.r.priority, 2, 4, 6, 8);
+    memory::assign(obj.r.priority, 2, 4, 6, 8);
     break;
 
   case 4:
@@ -681,7 +681,7 @@ auto PPU::updateVideoMode() -> void {
     bg4.r.mode = Background::Mode::Inactive;
     memory::assign(bg1.r.priority, 3, 7);
     memory::assign(bg2.r.priority, 1, 5);
-    memory::assign(oam.r.priority, 2, 4, 6, 8);
+    memory::assign(obj.r.priority, 2, 4, 6, 8);
     break;
 
   case 5:
@@ -691,7 +691,7 @@ auto PPU::updateVideoMode() -> void {
     bg4.r.mode = Background::Mode::Inactive;
     memory::assign(bg1.r.priority, 3, 7);
     memory::assign(bg2.r.priority, 1, 5);
-    memory::assign(oam.r.priority, 2, 4, 6, 8);
+    memory::assign(obj.r.priority, 2, 4, 6, 8);
     break;
 
   case 6:
@@ -700,7 +700,7 @@ auto PPU::updateVideoMode() -> void {
     bg3.r.mode = Background::Mode::Inactive;
     bg4.r.mode = Background::Mode::Inactive;
     memory::assign(bg1.r.priority, 2, 5);
-    memory::assign(oam.r.priority, 1, 3, 4, 6);
+    memory::assign(obj.r.priority, 1, 3, 4, 6);
     break;
 
   case 7:
@@ -710,7 +710,7 @@ auto PPU::updateVideoMode() -> void {
       bg3.r.mode = Background::Mode::Inactive;
       bg4.r.mode = Background::Mode::Inactive;
       memory::assign(bg1.r.priority, 2);
-      memory::assign(oam.r.priority, 1, 3, 4, 5);
+      memory::assign(obj.r.priority, 1, 3, 4, 5);
     } else {
       bg1.r.mode = Background::Mode::Mode7;
       bg2.r.mode = Background::Mode::Mode7;
@@ -718,7 +718,7 @@ auto PPU::updateVideoMode() -> void {
       bg4.r.mode = Background::Mode::Inactive;
       memory::assign(bg1.r.priority, 3);
       memory::assign(bg2.r.priority, 1, 5);
-      memory::assign(oam.r.priority, 2, 4, 6, 7);
+      memory::assign(obj.r.priority, 2, 4, 6, 7);
     }
     break;
   }

@@ -7,9 +7,9 @@ PPU ppu;
 #include "memory.cpp"
 #include "mmio.cpp"
 #include "background/background.cpp"
-#include "screen/screen.cpp"
-#include "sprite/sprite.cpp"
+#include "object/object.cpp"
 #include "window/window.cpp"
+#include "screen/screen.cpp"
 #include "serialization.cpp"
 
 PPU::PPU() :
@@ -62,7 +62,7 @@ auto PPU::main() -> void {
       bg3.run(0);
       bg4.run(0);
       if(pixel >= 0) {
-        oam.run();
+        obj.run();
         window.run();
         screen.run();
       }
@@ -70,7 +70,7 @@ auto PPU::main() -> void {
     }
 
     addClocks(14);
-    oam.tilefetch();
+    obj.tilefetch();
   } else {
     addClocks(1052 + 14 + 136);
   }
@@ -88,9 +88,9 @@ auto PPU::addClocks(uint clocks) -> void {
 }
 
 auto PPU::power() -> void {
-  for(auto& n : memory.vram) n = random(0x00);
-  for(auto& n : memory.oam) n = random(0x00);
-  for(auto& n : memory.cgram) n = random(0x00);
+  for(auto& n : vram) n = random(0x00);
+  for(auto& n : oam) n = random(0x00);
+  for(auto& n : cgram) n = random(0x00);
 }
 
 auto PPU::reset() -> void {
@@ -188,7 +188,7 @@ auto PPU::reset() -> void {
   bg2.reset();
   bg3.reset();
   bg4.reset();
-  oam.reset();
+  obj.reset();
   window.reset();
   screen.reset();
 
@@ -208,7 +208,7 @@ auto PPU::scanline() -> void {
   bg2.scanline();
   bg3.scanline();
   bg4.scanline();
-  oam.scanline();
+  obj.scanline();
   window.scanline();
   screen.scanline();
 
@@ -218,7 +218,7 @@ auto PPU::scanline() -> void {
 }
 
 auto PPU::frame() -> void {
-  oam.frame();
+  obj.frame();
   display.interlace = r.interlace;
   display.overscan = r.overscan;
 }

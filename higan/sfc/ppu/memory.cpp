@@ -12,7 +12,7 @@ auto PPU::getVramAddress() -> uint16 {
 auto PPU::vramRead(uint addr) -> uint8 {
   uint8 data = 0x00;
   if(r.displayDisable || vcounter() >= vdisp()) {
-    data = memory.vram[addr];
+    data = vram[addr];
     debugger.vramRead(addr, data);
   }
   return data;
@@ -20,30 +20,30 @@ auto PPU::vramRead(uint addr) -> uint8 {
 
 auto PPU::vramWrite(uint addr, uint8 data) -> void {
   if(r.displayDisable || vcounter() >= vdisp()) {
-    memory.vram[addr] = data;
+    vram[addr] = data;
     debugger.vramWrite(addr, data);
   }
 }
 
 auto PPU::oamRead(uint addr) -> uint8 {
-  uint8 data = memory.oam[addr];
+  uint8 data = oam[addr];
   debugger.oamRead(addr, data);
   return data;
 }
 
 auto PPU::oamWrite(uint addr, uint8 data) -> void {
-  memory.oam[addr] = data;
-  oam.update(addr, data);
+  oam[addr] = data;
+  obj.update(addr, data);
   debugger.oamWrite(addr, data);
 }
 
 auto PPU::cgramRead(uint addr) -> uint8 {
-  uint8 data = memory.cgram[addr];
+  uint8 data = cgram[addr];
   debugger.cgramRead(addr, data);
   return data;
 }
 
 auto PPU::cgramWrite(uint addr, uint8 data) -> void {
-  memory.cgram[addr] = data;
+  cgram[addr] = data;
   debugger.cgramWrite(addr, data);
 }

@@ -1,20 +1,20 @@
 #include "list.cpp"
 
-auto PPU::OAM::addressReset() -> void {
+auto PPU::Object::addressReset() -> void {
   ppu.r.oamAddress = ppu.r.oamBaseAddress;
   setFirstSprite();
 }
 
-auto PPU::OAM::setFirstSprite() -> void {
+auto PPU::Object::setFirstSprite() -> void {
   r.firstSprite = !ppu.r.oamPriority ? 0 : ppu.r.oamAddress >> 2;
 }
 
-auto PPU::OAM::frame() -> void {
+auto PPU::Object::frame() -> void {
   r.timeOver = false;
   r.rangeOver = false;
 }
 
-auto PPU::OAM::scanline() -> void {
+auto PPU::Object::scanline() -> void {
   t.x = 0;
   t.y = ppu.vcounter();
 
@@ -43,7 +43,7 @@ auto PPU::OAM::scanline() -> void {
   }
 }
 
-auto PPU::OAM::onScanline(Object& sprite) -> bool {
+auto PPU::Object::onScanline(Sprite& sprite) -> bool {
   if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
   int height = sprite.height() >> r.interlace;
   if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
@@ -51,7 +51,7 @@ auto PPU::OAM::onScanline(Object& sprite) -> bool {
   return false;
 }
 
-auto PPU::OAM::run() -> void {
+auto PPU::Object::run() -> void {
   output.above.priority = 0;
   output.below.priority = 0;
 
@@ -85,7 +85,7 @@ auto PPU::OAM::run() -> void {
   }
 }
 
-auto PPU::OAM::tilefetch() -> void {
+auto PPU::Object::tilefetch() -> void {
   auto oamItem = t.item[t.active];
   auto oamTile = t.tile[t.active];
 
@@ -141,12 +141,12 @@ auto PPU::OAM::tilefetch() -> void {
       uint pos = tiledataAddress + ((chry + ((chrx + mx) & 15)) << 5);
       uint16 addr = (pos & 0xffe0) + ((y & 7) * 2);
 
-      oamTile[n].data.byte(0) = ppu.memory.vram[addr +  0];
-      oamTile[n].data.byte(1) = ppu.memory.vram[addr +  1];
+      oamTile[n].data.byte(0) = ppu.vram[addr +  0];
+      oamTile[n].data.byte(1) = ppu.vram[addr +  1];
       ppu.addClocks(2);
 
-      oamTile[n].data.byte(2) = ppu.memory.vram[addr + 16];
-      oamTile[n].data.byte(3) = ppu.memory.vram[addr + 17];
+      oamTile[n].data.byte(2) = ppu.vram[addr + 16];
+      oamTile[n].data.byte(3) = ppu.vram[addr + 17];
       ppu.addClocks(2);
     }
   }
@@ -156,7 +156,7 @@ auto PPU::OAM::tilefetch() -> void {
   r.rangeOver |= (t.itemCount > 32);
 }
 
-auto PPU::OAM::reset() -> void {
+auto PPU::Object::reset() -> void {
   for(auto n : range(128)) {
     list[n].x = 0;
     list[n].y = 0;

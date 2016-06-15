@@ -1,4 +1,4 @@
-struct OAM {
+struct Object {
   alwaysinline auto addressReset() -> void;
   alwaysinline auto setFirstSprite() -> void;
   auto frame() -> void;
@@ -7,8 +7,8 @@ struct OAM {
   auto tilefetch() -> void;
   auto reset() -> void;
 
-  struct Object;
-  auto onScanline(Object&) -> bool;
+  struct Sprite;
+  auto onScanline(Sprite&) -> bool;
 
   //list.cpp
   auto update(uint10 addr, uint8 data) -> void;
@@ -65,7 +65,7 @@ struct OAM {
     } above, below;
   } output;
 
-  struct Object {
+  struct Sprite {
     alwaysinline auto width() const -> uint;
     alwaysinline auto height() const -> uint;
 
