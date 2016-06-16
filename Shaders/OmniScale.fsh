@@ -1,107 +1,177 @@
+/* OmniScale is derived from the pattern based design of HQnx, but with the following general differences:
+    - The actual output calculating was completely redesigned as resolution independent graphic generator. This allows
+      scaling to any factor.
+    - HQnx approximations that were good enough for a 2x/3x/4x factor were refined, creating smoother gradients.
+    - "Quarters" can be interpolated in more ways than in the HQnx filters 
+    - If a pattern does not provide enough information to determine the suitable scaling interpolation, up to 16 pixels 
+      per quarter are sampled (in contrast to the usual 9) in order to determine the best interpolation. 
+ */
 
-float quickDistance(vec4 a, vec4 b)
+vec3 rgb_to_yuv(vec4 rgb)
 {
-    return abs(a.x - b.x) + abs(a.y - b.y) + abs(a.z - b.z);
+    return vec3( 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b,
+                -0.147 * rgb.r - 0.289 * rgb.g + 0.436 * rgb.b,
+                 0.615 * rgb.r + 0.515 * rgb.g - 0.100 * rgb.b);
 }
+
+bool is_different(vec4 a, vec4 b)
+{
+    vec3 diff = abs(rgb_to_yuv(a) - rgb_to_yuv(b));
+    return diff.x > 0.188 || diff.y > 0.027 || diff.z > 0.031;
+}
+
+#define P(m, r) ((pattern & (m)) == (r))
 
 vec4 scale(sampler2D image)
 {
+    // o = offset, the width of a pixel
+    vec2 o = 1.0 / textureDimensions;
     vec2 texCoord = vec2(gl_FragCoord.x, uResolution.y - gl_FragCoord.y) / uResolution;
 
-    vec2 pixel = texCoord * textureDimensions - vec2(0.5, 0.5);
+    /* We always calculate the top left quarter.  If we need a different quarter, we flip our co-ordinates */
 
-    vec4 q11 = texture(image, (pixel                 ) / textureDimensions);
-    vec4 q12 = texture(image, (pixel + vec2(0.0, 1.0)) / textureDimensions);
-    vec4 q21 = texture(image, (pixel + vec2(1.0, 0.0)) / textureDimensions);
-    vec4 q22 = texture(image, (pixel + vec2(1.0, 1.0)) / textureDimensions);
+    // p = the position within a pixel [0...1]
+    vec2 p = fract(texCoord * textureDimensions);
 
-    vec2 pos = fract(pixel);
-
-    /* Special handling for diaonals */
-    bool hasDownDiagonal = false;
-    bool hasUpDiagonal = false;
-    if (q12 == q21 && q11 != q22) hasUpDiagonal = true;
-    else if (q12 != q21 && q11 == q22) hasDownDiagonal = true;
-    else if (q12 == q21 && q11 == q22) {
-        if (q11 == q12) return q11;
-        int diagonalBias = 0;
-        for (float y = -1.0; y < 3.0; y++) {
-            for (float x = -1.0; x < 3.0; x++) {
-                vec4 color = texture(image, (pixel + vec2(x, y)) / textureDimensions);
-                if (color == q11) diagonalBias++;
-                if (color == q12) diagonalBias--;
-            }
-        }
-        if (diagonalBias <= 0) {
-            hasDownDiagonal = true;
-        }
-        if (diagonalBias >= 0) {
-            hasUpDiagonal = true;
-        }
+    if (p.x > 0.5) {
+        o.x = -o.x;
+        p.x = 1.0 - p.x;
+    }
+    if (p.y > 0.5) {
+        o.y = -o.y;
+        p.y = 1.0 - p.y;
     }
 
-    if (hasUpDiagonal || hasDownDiagonal) {
-        vec4 downDiagonalResult, upDiagonalResult;
 
-        if (hasUpDiagonal) {
-            float diagonalPos = pos.x + pos.y;
 
-            if (diagonalPos < 0.5) {
-                upDiagonalResult = q11;
-            }
-            else if (diagonalPos > 1.5) {
-                upDiagonalResult = q22;
-            }
-            else {
-                upDiagonalResult = q12;
-            }
+    vec4 w0 = texture(image, texCoord + vec2( -o.x, -o.y));
+    vec4 w1 = texture(image, texCoord + vec2(    0, -o.y));
+    vec4 w2 = texture(image, texCoord + vec2(  o.x, -o.y));
+    vec4 w3 = texture(image, texCoord + vec2( -o.x,    0));
+    vec4 w4 = texture(image, texCoord + vec2(    0,    0));
+    vec4 w5 = texture(image, texCoord + vec2(  o.x,    0));
+    vec4 w6 = texture(image, texCoord + vec2( -o.x,  o.y));
+    vec4 w7 = texture(image, texCoord + vec2(    0,  o.y));
+    vec4 w8 = texture(image, texCoord + vec2(  o.x,  o.y));
+
+    int pattern = 0;
+    if (is_different(w0, w4)) pattern |= 1 << 0;
+    if (is_different(w1, w4)) pattern |= 1 << 1;
+    if (is_different(w2, w4)) pattern |= 1 << 2;
+    if (is_different(w3, w4)) pattern |= 1 << 3;
+    if (is_different(w5, w4)) pattern |= 1 << 4;
+    if (is_different(w6, w4)) pattern |= 1 << 5;
+    if (is_different(w7, w4)) pattern |= 1 << 6;
+    if (is_different(w8, w4)) pattern |= 1 << 7;
+
+    if ((P(0xbf,0x37) || P(0xdb,0x13)) && is_different(w1, w5))
+        return mix(w4, w3, 0.5 - p.x);
+    if ((P(0xdb,0x49) || P(0xef,0x6d)) && is_different(w7, w3))
+        return mix(w4, w1, 0.5 - p.y);
+    if ((P(0x0b,0x0b) || P(0xfe,0x4a) || P(0xfe,0x1a)) && is_different(w3, w1))
+        return w4;
+    if ((P(0x6f,0x2a) || P(0x5b,0x0a) || P(0xbf,0x3a) || P(0xdf,0x5a) ||
+         P(0x9f,0x8a) || P(0xcf,0x8a) || P(0xef,0x4e) || P(0x3f,0x0e) ||
+         P(0xfb,0x5a) || P(0xbb,0x8a) || P(0x7f,0x5a) || P(0xaf,0x8a) ||
+         P(0xeb,0x8a)) && is_different(w3, w1))
+        return mix(w4, mix(w4, w0, 0.5 - p.x), 0.5 - p.y);
+    if (P(0x0b,0x08))
+        return mix(mix(w0 * 0.375 + w1 * 0.25 + w4 * 0.375, w4 * 0.5 + w1 * 0.5, p.x * 2.0), w4, p.y * 2.0);
+    if (P(0x0b,0x02))
+        return mix(mix(w0 * 0.375 + w3 * 0.25 + w4 * 0.375, w4 * 0.5 + w3 * 0.5, p.y * 2.0), w4, p.x * 2.0);
+    if (P(0x2f,0x2f)) {
+        if (length(p - vec2(0.5)) < 0.5) {
+            return w4;
         }
-
-        if (hasDownDiagonal) {
-            float diagonalPos = 1.0 - pos.x + pos.y;
-
-            if (diagonalPos < 0.5) {
-                downDiagonalResult = q21;
-            }
-            else if (diagonalPos > 1.5) {
-                downDiagonalResult = q12;
-            }
-            else {
-                downDiagonalResult = q11;
-            }
+        if (is_different(w0, w1) || is_different(w0, w3)) {
+            return mix(w1, w3, p.y - p.x + 0.5);
         }
-
-        if (!hasUpDiagonal) return downDiagonalResult;
-        if (!hasDownDiagonal) return upDiagonalResult;
-        return mix(downDiagonalResult, upDiagonalResult, 0.5);
+        return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+    }
+    if (P(0xbf,0x37) || P(0xdb,0x13)) {
+        if (p.x - 2.0 * p.y > 0) {
+            return w1;
+        }
+        return mix(w3, w4, p.x + 0.5);
+    }
+    if (P(0xdb,0x49) || P(0xef,0x6d)) {
+        if (p.y - 2.0 * p.x > 0) {
+            return w3;
+        }
+        return mix(w1, w4, p.x * 2);
+    }
+    if ( P(0xbf,0x8f) || P(0x7e,0x0e)) {
+        if (p.x + 2.0 * p.y < 1.0) {
+            if (is_different(w0, w1) || is_different(w0, w3)) {
+                return mix(w1, w3, p.y - p.x + 0.5);
+            }
+            return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+        return w4;
+    }
+    if (P(0x7e,0x2a) || P(0xef,0xab)) {
+        if (p.y + 2.0 * p.x < 1.0) {
+            if (is_different(w0, w1) || is_different(w0, w3)) {
+                return mix(w1, w3, p.y - p.x + 0.5);
+            }
+            return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+        return w4;
+    }
+    if (P(0x1b,0x03) || P(0x4f,0x43) || P(0x8b,0x83) || P(0x6b,0x43))
+        return mix(w4, w3, 0.5 - p.x);
+    if (P(0x4b,0x09) || P(0x8b,0x89) || P(0x1f,0x19) || P(0x3b,0x19))
+        return mix(w4, w1, 0.5 - p.y);
+    if (P(0xfb,0x6a) || P(0x6f,0x6e) || P(0x3f,0x3e) || P(0xfb,0xfa) ||
+        P(0xdf,0xde) || P(0xdf,0x1e))
+        return mix(w4, w0, (1.0 - p.x - p.y) / 2.0);
+    if (P(0x4f,0x4b) || P(0x9f,0x1b) || P(0x2f,0x0b) ||
+        P(0xbe,0x0a) || P(0xee,0x0a) || P(0x7e,0x0a) || P(0xeb,0x4b) ||
+        P(0x3b,0x1b)) {
+        if (p.x + p.y > 0.5) {
+            return w4;
+        }
+        if (is_different(w0, w1) || is_different(w0, w3)) {
+            return mix(w1, w3, p.y - p.x + 0.5);
+        }
+        return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
     }
 
-    vec4 r1 = mix(q11, q21, fract(pos.x));
-    vec4 r2 = mix(q12, q22, fract(pos.x));
+    if (P(0x0b,0x01))
+        //return vec4(1,0,0,0);
+        return mix(mix(w4, w3, 0.5 - p.x), mix(w1, (w1 + w3) / 2.0, 0.5 - p.x), 0.5 - p.y);
+
+    if (P(0x0b,0x00))
+        return mix(mix(w4, w3, 0.5 - p.x), mix(w1, w0, 0.5 - p.x), 0.5 - p.y);
+
+    if (p.x + p.y > 0.5)
+        return w4;
+
+    /* We need more samples to "solve" this diagonal */
+    vec4 x0 = texture(image, texCoord + vec2( -o.x * 2.0, -o.y * 2.0));
+    vec4 x1 = texture(image, texCoord + vec2( -o.x      , -o.y * 2.0));
+    vec4 x2 = texture(image, texCoord + vec2(  0.0      , -o.y * 2.0));
+    vec4 x3 = texture(image, texCoord + vec2(  o.x      , -o.y * 2.0));
+    vec4 x4 = texture(image, texCoord + vec2( -o.x * 2.0, -o.y      ));
+    vec4 x5 = texture(image, texCoord + vec2( -o.x * 2.0,  0.0      ));
+    vec4 x6 = texture(image, texCoord + vec2( -o.x * 2.0,  o.y      ));
+
+    if (is_different(x0, w4)) pattern |= 1 << 8;
+    if (is_different(x1, w4)) pattern |= 1 << 9;
+    if (is_different(x2, w4)) pattern |= 1 << 10;
+    if (is_different(x3, w4)) pattern |= 1 << 11;
+    if (is_different(x4, w4)) pattern |= 1 << 12;
+    if (is_different(x5, w4)) pattern |= 1 << 13;
+    if (is_different(x6, w4)) pattern |= 1 << 14;
+
+    int diagonal_bias = -7;
+    while (pattern != 0) {
+        diagonal_bias += pattern & 1;
+        pattern >>= 1;
+    }
+
+    if (diagonal_bias <=  0)
+        return mix(w1, w3, p.y - p.x + 0.5);
     
-    vec4 unqunatized = mix(r1, r2, fract(pos.y));
-
-    float q11d = quickDistance(unqunatized, q11);
-    float q21d = quickDistance(unqunatized, q21);
-    float q12d = quickDistance(unqunatized, q12);
-    float q22d = quickDistance(unqunatized, q22);
-
-    float best = min(q11d,
-                     min(q21d,
-                         min(q12d,
-                             q22d)));
-
-    if (q11d == best) {
-        return q11;
-    }
-
-    if (q21d == best) {
-        return q21;
-    }
-
-    if (q12d == best) {
-        return q12;
-    }
-
-    return q22;
+    return w4;
 }

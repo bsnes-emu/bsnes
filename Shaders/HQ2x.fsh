@@ -1,9 +1,16 @@
 /* Based on this (really good) article: http://blog.pkh.me/p/19-butchering-hqx-scaling-filters.html */
 
-/* Todo: Add the real YUV difference from HQ2x*/
+vec3 rgb_to_yuv(vec4 rgb)
+{
+    return vec3( 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b,
+                -0.147 * rgb.r - 0.289 * rgb.g + 0.436 * rgb.b,
+                0.615 * rgb.r + 0.515 * rgb.g - 0.100 * rgb.b);
+}
+
 bool is_different(vec4 a, vec4 b)
 {
-    return length(a - b) > 0.15;
+    vec3 diff = abs(rgb_to_yuv(a) - rgb_to_yuv(b));
+    return diff.x > 0.188 || diff.y > 0.027 || diff.z > 0.031;
 }
 
 #define P(m, r) ((pattern & (m)) == (r))

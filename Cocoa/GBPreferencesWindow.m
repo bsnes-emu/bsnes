@@ -25,7 +25,8 @@
                     @"AAScale4x",
                     @"HQ2x",
                     @"OmniScale",
-                    @"AAOmniScale",
+                    @"OmniScaleLegacy",
+                    @"AAOmniScaleLegacy",
                     ];
     }
     return filters;
