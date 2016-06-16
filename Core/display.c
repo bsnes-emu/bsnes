@@ -327,7 +327,7 @@ void display_run(GB_gameboy_t *gb)
         // LY = 144 interrupt bug
         if (gb->io_registers[GB_IO_LY] == 144) {
             /* User requests an interrupt on Mode 2 */
-            if (gb->display_cycles % LINE_LENGTH < 92 && gb->io_registers[GB_IO_STAT] & 0x20) { // Mode 2
+            if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH && gb->io_registers[GB_IO_STAT] & 0x20) { // Mode 2
                 gb->stat_interrupt_line = true;
             }
         }
@@ -357,21 +357,22 @@ void display_run(GB_gameboy_t *gb)
         goto updateSTAT;
     }
 
+
+    /* Render. This  chunk is outside the Mode 3 if, because otherwise we might not render some pixels, since this
+       function only runs between atomic CPU changes, and not every clock. */
+    signed short current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+    for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
+        if (gb->previous_lcdc_x >= 160) {
+            continue;
+        }
+        if (gb->previous_lcdc_x < 0) {
+            continue;
+        }
+        gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
+        get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
+    }
+
     if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH + MODE3_LENGTH) { /* Mode 3 */
-        if (last_mode != 3) {
-            
-        }
-        signed short current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
-        for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
-            if (gb->previous_lcdc_x >= 160) {
-                continue;
-            }
-            if (gb->previous_lcdc_x < 0) {
-                continue;
-            }
-            gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
-            get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
-        }
         gb->io_registers[GB_IO_STAT] |= 3; /* Set mode to 3 */
         goto updateSTAT;
     }
