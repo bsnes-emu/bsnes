@@ -9,10 +9,10 @@ vec4 scale(sampler2D image)
     vec4 q21 = texture(image, vec2(ceil(pixel.x) / textureDimensions.x, floor(pixel.y) / textureDimensions.y));
     vec4 q22 = texture(image, vec2(ceil(pixel.x) / textureDimensions.x, ceil(pixel.y) / textureDimensions.y));
 
-    vec2 smooth = smoothstep(0., 1., fract(pixel));
+    vec2 s = smoothstep(0., 1., fract(pixel));
 
-    vec4 r1 = mix(q11, q21, fract(smooth.x));
-    vec4 r2 = mix(q12, q22, fract(smooth.x));
+    vec4 r1 = mix(q11, q21, fract(s.x));
+    vec4 r2 = mix(q12, q22, fract(s.x));
 
-    return mix (r1, r2, fract(smooth.y));
+    return mix (r1, r2, fract(s.y));
 }
