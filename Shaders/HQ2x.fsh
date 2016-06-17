@@ -1,15 +1,17 @@
 /* Based on this (really good) article: http://blog.pkh.me/p/19-butchering-hqx-scaling-filters.html */
 
-vec3 rgb_to_yuv(vec4 rgb)
+/* The colorspace used by the HQnx filters is not really YUV, despite the algorithm description claims it is. It is
+   also not normalized. Therefore, we shall call the colorspace used by HQnx "HQ Colorspace" to avoid confusion. */
+vec3 rgb_to_hq_colospace(vec4 rgb)
 {
-    return vec3( 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b,
-                -0.147 * rgb.r - 0.289 * rgb.g + 0.436 * rgb.b,
-                0.615 * rgb.r + 0.515 * rgb.g - 0.100 * rgb.b);
+    return vec3( 0.250 * rgb.r + 0.250 * rgb.g + 0.250 * rgb.b,
+                 0.250 * rgb.r - 0.000 * rgb.g - 0.250 * rgb.b,
+                -0.125 * rgb.r + 0.250 * rgb.g - 0.125 * rgb.b);
 }
 
 bool is_different(vec4 a, vec4 b)
 {
-    vec3 diff = abs(rgb_to_yuv(a) - rgb_to_yuv(b));
+    vec3 diff = abs(rgb_to_hq_colospace(a) - rgb_to_hq_colospace(b));
     return diff.x > 0.188 || diff.y > 0.027 || diff.z > 0.031;
 }
 

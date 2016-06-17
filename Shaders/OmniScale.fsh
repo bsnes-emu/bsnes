@@ -7,17 +7,19 @@
       per quarter are sampled (in contrast to the usual 9) in order to determine the best interpolation. 
  */
 
-vec3 rgb_to_yuv(vec4 rgb)
+/* We use the same colorspace as the HQ algorithms. */
+vec3 rgb_to_hq_colospace(vec4 rgb)
 {
-    return vec3( 0.299 * rgb.r + 0.587 * rgb.g + 0.114 * rgb.b,
-                -0.147 * rgb.r - 0.289 * rgb.g + 0.436 * rgb.b,
-                 0.615 * rgb.r + 0.515 * rgb.g - 0.100 * rgb.b);
+    return vec3( 0.250 * rgb.r + 0.250 * rgb.g + 0.250 * rgb.b,
+                 0.250 * rgb.r - 0.000 * rgb.g - 0.250 * rgb.b,
+                -0.125 * rgb.r + 0.250 * rgb.g - 0.125 * rgb.b);
 }
+
 
 bool is_different(vec4 a, vec4 b)
 {
-    vec3 diff = abs(rgb_to_yuv(a) - rgb_to_yuv(b));
-    return diff.x > 0.188 || diff.y > 0.027 || diff.z > 0.031;
+    vec3 diff = abs(rgb_to_hq_colospace(a) - rgb_to_hq_colospace(b));
+    return diff.x > 0.125 || diff.y > 0.027 || diff.z > 0.031;
 }
 
 #define P(m, r) ((pattern & (m)) == (r))
@@ -80,71 +82,141 @@ vec4 scale(sampler2D image)
     if (P(0x0b,0x02))
         return mix(mix(w0 * 0.375 + w3 * 0.25 + w4 * 0.375, w4 * 0.5 + w3 * 0.5, p.y * 2.0), w4, p.x * 2.0);
     if (P(0x2f,0x2f)) {
-        if (length(p - vec2(0.5)) < 0.5) {
+        float dist = length(p - vec2(0.5));
+        float pixel_size = length(1.0 / (uResolution / textureDimensions));
+        if (dist < 0.5 - pixel_size / 2) {
             return w4;
         }
+        vec4 r;
         if (is_different(w0, w1) || is_different(w0, w3)) {
-            return mix(w1, w3, p.y - p.x + 0.5);
+            r = mix(w1, w3, p.y - p.x + 0.5);
         }
-        return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        else {
+            r = mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+
+        if (dist > 0.5 + pixel_size / 2) {
+            return r;
+        }
+        return mix(w4, r, (dist - 0.5 + pixel_size / 2) / pixel_size);
     }
     if (P(0xbf,0x37) || P(0xdb,0x13)) {
-        if (p.x - 2.0 * p.y > 0) {
+        float dist = p.x - 2.0 * p.y;
+        float pixel_size = length(1.0 / (uResolution / textureDimensions)) * sqrt(5);
+        if (dist > pixel_size / 2) {
             return w1;
         }
-        return mix(w3, w4, p.x + 0.5);
+        vec4 r = mix(w3, w4, p.x + 0.5);
+        if (dist < -pixel_size / 2) {
+            return r;
+        }
+        return mix(r, w1, (dist + pixel_size / 2) / pixel_size);
     }
     if (P(0xdb,0x49) || P(0xef,0x6d)) {
-        if (p.y - 2.0 * p.x > 0) {
+        float dist = p.y - 2.0 * p.x;
+        float pixel_size = length(1.0 / (uResolution / textureDimensions)) * sqrt(5);
+        if (p.y - 2.0 * p.x > pixel_size / 2) {
             return w3;
         }
-        return mix(w1, w4, p.x * 2);
-    }
-    if ( P(0xbf,0x8f) || P(0x7e,0x0e)) {
-        if (p.x + 2.0 * p.y < 1.0) {
-            if (is_different(w0, w1) || is_different(w0, w3)) {
-                return mix(w1, w3, p.y - p.x + 0.5);
-            }
-            return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        vec4 r = mix(w1, w4, p.x + 0.5);
+        if (dist < -pixel_size / 2) {
+            return r;
         }
-        return w4;
+        return mix(r, w3, (dist + pixel_size / 2) / pixel_size);
     }
+    if (P(0xbf,0x8f) || P(0x7e,0x0e)) {
+        float dist = p.x + 2.0 * p.y;
+        float pixel_size = length(1.0 / (uResolution / textureDimensions)) * sqrt(5);
+
+        if (dist > 1.0 + pixel_size / 2) {
+            return w4;
+        }
+
+        vec4 r;
+        if (is_different(w0, w1) || is_different(w0, w3)) {
+            r = mix(w1, w3, p.y - p.x + 0.5);
+        }
+        else {
+            r = mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+
+        if (dist < 1.0 - pixel_size / 2) {
+            return r;
+        }
+
+        return mix(r, w4, (dist + pixel_size / 2 - 1.0) / pixel_size);
+
+    }
+
     if (P(0x7e,0x2a) || P(0xef,0xab)) {
-        if (p.y + 2.0 * p.x < 1.0) {
-            if (is_different(w0, w1) || is_different(w0, w3)) {
-                return mix(w1, w3, p.y - p.x + 0.5);
-            }
-            return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        float dist = p.y + 2.0 * p.x;
+        float pixel_size = length(1.0 / (uResolution / textureDimensions)) * sqrt(5);
+
+        if (p.y + 2.0 * p.x > 1.0 + pixel_size / 2) {
+            return w4;
         }
-        return w4;
+
+        vec4 r;
+
+        if (is_different(w0, w1) || is_different(w0, w3)) {
+            r = mix(w1, w3, p.y - p.x + 0.5);
+        }
+        else {
+            r = mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+
+        if (dist < 1.0 - pixel_size / 2) {
+            return r;
+        }
+
+        return mix(r, w4, (dist + pixel_size / 2 - 1.0) / pixel_size);
     }
+
     if (P(0x1b,0x03) || P(0x4f,0x43) || P(0x8b,0x83) || P(0x6b,0x43))
         return mix(w4, w3, 0.5 - p.x);
+
     if (P(0x4b,0x09) || P(0x8b,0x89) || P(0x1f,0x19) || P(0x3b,0x19))
         return mix(w4, w1, 0.5 - p.y);
+
     if (P(0xfb,0x6a) || P(0x6f,0x6e) || P(0x3f,0x3e) || P(0xfb,0xfa) ||
         P(0xdf,0xde) || P(0xdf,0x1e))
         return mix(w4, w0, (1.0 - p.x - p.y) / 2.0);
+
     if (P(0x4f,0x4b) || P(0x9f,0x1b) || P(0x2f,0x0b) ||
         P(0xbe,0x0a) || P(0xee,0x0a) || P(0x7e,0x0a) || P(0xeb,0x4b) ||
         P(0x3b,0x1b)) {
-        if (p.x + p.y > 0.5) {
+        float dist = p.x + p.y;
+        float pixel_size = length(1.0 / (uResolution / textureDimensions));
+
+        if (dist > 0.5 + pixel_size / 2) {
             return w4;
         }
+
+        vec4 r;
         if (is_different(w0, w1) || is_different(w0, w3)) {
-            return mix(w1, w3, p.y - p.x + 0.5);
+            r = mix(w1, w3, p.y - p.x + 0.5);
         }
-        return mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        else {
+            r = mix(mix(w1 * 0.375 + w0 * 0.25 + w3 * 0.375, w3, p.y * 2.0), w1, p.x * 2.0);
+        }
+
+        if (dist < 0.5 - pixel_size / 2) {
+            return r;
+        }
+
+        return mix(r, w4, (dist + pixel_size / 2 - 0.5) / pixel_size);
     }
 
     if (P(0x0b,0x01))
-        //return vec4(1,0,0,0);
         return mix(mix(w4, w3, 0.5 - p.x), mix(w1, (w1 + w3) / 2.0, 0.5 - p.x), 0.5 - p.y);
 
     if (P(0x0b,0x00))
         return mix(mix(w4, w3, 0.5 - p.x), mix(w1, w0, 0.5 - p.x), 0.5 - p.y);
 
-    if (p.x + p.y > 0.5)
+    float dist = p.x + p.y;
+    float pixel_size = length(1.0 / (uResolution / textureDimensions));
+
+    if (dist > 0.5 + pixel_size / 2)
         return w4;
 
     /* We need more samples to "solve" this diagonal */
@@ -170,8 +242,13 @@ vec4 scale(sampler2D image)
         pattern >>= 1;
     }
 
-    if (diagonal_bias <=  0)
-        return mix(w1, w3, p.y - p.x + 0.5);
+    if (diagonal_bias <=  0) {
+        vec4 r = mix(w1, w3, p.y - p.x + 0.5);
+        if (dist < 0.5 - pixel_size / 2) {
+            return r;
+        }
+        return mix(r, w4, (dist + pixel_size / 2 - 0.5) / pixel_size);
+    }
     
     return w4;
 }
