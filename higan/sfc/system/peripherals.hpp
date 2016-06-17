@@ -14,7 +14,6 @@ struct Device { enum : uint {
   SuperScope,
   Justifier,
   Justifiers,
-  USART,
 
   //expansion port peripherals
   Satellaview,

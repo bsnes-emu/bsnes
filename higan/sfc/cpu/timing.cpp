@@ -1,9 +1,9 @@
 auto CPU::dmaCounter() const -> uint {
-  return (status.dma_counter + hcounter()) & 7;
+  return (status.dmaCounter + hcounter()) & 7;
 }
 
 auto CPU::addClocks(uint clocks) -> void {
-  status.irq_lock = false;
+  status.irqLock = false;
   uint ticks = clocks >> 1;
   while(ticks--) {
     tick();
@@ -12,14 +12,14 @@ auto CPU::addClocks(uint clocks) -> void {
 
   step(clocks);
 
-  status.auto_joypad_clock += clocks;
-  if(status.auto_joypad_clock >= 256) {
-    status.auto_joypad_clock -= 256;
+  status.autoJoypadClock += clocks;
+  if(status.autoJoypadClock >= 256) {
+    status.autoJoypadClock -= 256;
     stepAutoJoypadPoll();
   }
 
-  if(!status.dram_refreshed && hcounter() >= status.dram_refresh_position) {
-    status.dram_refreshed = true;
+  if(!status.dramRefreshed && hcounter() >= status.dramRefreshPosition) {
+    status.dramRefreshed = true;
     addClocks(40);
   }
 
@@ -32,8 +32,8 @@ auto CPU::addClocks(uint clocks) -> void {
 
 //called by ppu.tick() when Hcounter=0
 auto CPU::scanline() -> void {
-  status.dma_counter = (status.dma_counter + status.line_clocks) & 7;
-  status.line_clocks = lineclocks();
+  status.dmaCounter = (status.dmaCounter + status.lineClocks) & 7;
+  status.lineClocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
   synchronizeSMP();
@@ -42,20 +42,20 @@ auto CPU::scanline() -> void {
 
   if(vcounter() == 0) {
     //HDMA init triggers once every frame
-    status.hdma_init_position = (cpu_version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
-    status.hdma_init_triggered = false;
+    status.hdmaInitPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
+    status.hdmaInitTriggered = false;
 
-    status.auto_joypad_counter = 0;
+    status.autoJoypadCounter = 0;
   }
 
   //DRAM refresh occurs once every scanline
-  if(cpu_version == 2) status.dram_refresh_position = 530 + 8 - dmaCounter();
-  status.dram_refreshed = false;
+  if(version == 2) status.dramRefreshPosition = 530 + 8 - dmaCounter();
+  status.dramRefreshed = false;
 
   //HDMA triggers once every visible scanline
   if(vcounter() < ppu.vdisp()) {
-    status.hdma_position = 1104;
-    status.hdma_triggered = false;
+    status.hdmaPosition = 1104;
+    status.hdmaTriggered = false;
   }
 }
 
@@ -87,53 +87,53 @@ auto CPU::dmaEdge() -> void {
   //.. Run one bus CPU cycle
   //.. CPU sync
 
-  if(status.dma_active == true) {
-    if(status.hdma_pending) {
-      status.hdma_pending = false;
+  if(status.dmaActive) {
+    if(status.hdmaPending) {
+      status.hdmaPending = false;
       if(hdmaEnabledChannels()) {
         if(!dmaEnabledChannels()) {
           dmaAddClocks(8 - dmaCounter());
         }
-        status.hdma_mode == 0 ? hdmaInit() : hdmaRun();
+        status.hdmaMode == 0 ? hdmaInit() : hdmaRun();
         if(!dmaEnabledChannels()) {
-          addClocks(status.clock_count - (status.dma_clocks % status.clock_count));
-          status.dma_active = false;
+          addClocks(status.clockCount - (status.dmaClocks % status.clockCount));
+          status.dmaActive = false;
         }
       }
     }
 
-    if(status.dma_pending) {
-      status.dma_pending = false;
+    if(status.dmaPending) {
+      status.dmaPending = false;
       if(dmaEnabledChannels()) {
         dmaAddClocks(8 - dmaCounter());
         dmaRun();
-        addClocks(status.clock_count - (status.dma_clocks % status.clock_count));
-        status.dma_active = false;
+        addClocks(status.clockCount - (status.dmaClocks % status.clockCount));
+        status.dmaActive = false;
       }
     }
   }
 
-  if(status.hdma_init_triggered == false && hcounter() >= status.hdma_init_position) {
-    status.hdma_init_triggered = true;
+  if(!status.hdmaInitTriggered && hcounter() >= status.hdmaInitPosition) {
+    status.hdmaInitTriggered = true;
     hdmaInitReset();
     if(hdmaEnabledChannels()) {
-      status.hdma_pending = true;
-      status.hdma_mode = 0;
+      status.hdmaPending = true;
+      status.hdmaMode = 0;
     }
   }
 
-  if(status.hdma_triggered == false && hcounter() >= status.hdma_position) {
-    status.hdma_triggered = true;
+  if(!status.hdmaTriggered && hcounter() >= status.hdmaPosition) {
+    status.hdmaTriggered = true;
     if(hdmaActiveChannels()) {
-      status.hdma_pending = true;
-      status.hdma_mode = 1;
+      status.hdmaPending = true;
+      status.hdmaMode = 1;
     }
   }
 
-  if(status.dma_active == false) {
-    if(status.dma_pending || status.hdma_pending) {
-      status.dma_clocks = 0;
-      status.dma_active = true;
+  if(!status.dmaActive) {
+    if(status.dmaPending || status.hdmaPending) {
+      status.dmaClocks = 0;
+      status.dmaActive = true;
     }
   }
 }
@@ -144,9 +144,9 @@ auto CPU::dmaEdge() -> void {
 //status.irq_lock is used to simulate hardware delay before interrupts can
 //trigger during certain events (immediately after DMA, writes to $4200, etc)
 auto CPU::lastCycle() -> void {
-  if(!status.irq_lock) {
-    status.nmi_pending |= nmiTest();
-    status.irq_pending |= irqTest();
-    status.interrupt_pending = (status.nmi_pending || status.irq_pending);
+  if(!status.irqLock) {
+    status.nmiPending |= nmiTest();
+    status.irqPending |= irqTest();
+    status.interruptPending = (status.nmiPending || status.irqPending);
   }
 }

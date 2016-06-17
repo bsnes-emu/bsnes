@@ -7,35 +7,35 @@ auto CPU::portWrite(uint2 port, uint8 data) -> void {
 }
 
 auto CPU::io() -> void {
-  status.clock_count = 6;
+  status.clockCount = 6;
   dmaEdge();
   addClocks(6);
   aluEdge();
 }
 
 auto CPU::read(uint24 addr) -> uint8 {
-  status.clock_count = speed(addr);
+  status.clockCount = speed(addr);
   dmaEdge();
-  addClocks(status.clock_count - 4);
+  addClocks(status.clockCount - 4);
   r.mdr = bus.read(addr, r.mdr);
   addClocks(4);
   aluEdge();
-  debugger.op_read(addr, r.mdr);
+  debugger.read(addr, r.mdr);
   return r.mdr;
 }
 
 auto CPU::write(uint24 addr, uint8 data) -> void {
   aluEdge();
-  status.clock_count = speed(addr);
+  status.clockCount = speed(addr);
   dmaEdge();
-  addClocks(status.clock_count);
+  addClocks(status.clockCount);
   bus.write(addr, r.mdr = data);
-  debugger.op_write(addr, r.mdr);
+  debugger.write(addr, r.mdr);
 }
 
 auto CPU::speed(uint24 addr) const -> uint {
   if(addr & 0x408000) {
-    if(addr & 0x800000) return status.rom_speed;
+    if(addr & 0x800000) return status.romSpeed;
     return 8;
   }
   if((addr + 0x6000) & 0x4000) return 8;

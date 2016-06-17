@@ -72,7 +72,7 @@ Presentation::Presentation() {
     settings["Video/ColorEmulation"].setValue(colorEmulation.checked());
     if(emulator) emulator->set("Color Emulation", colorEmulation.checked());
   });
-  scanlineEmulation.setVisible(false).setText("Scanlines").setChecked(settings["Video/ScanlineEmulation"].boolean()).onToggle([&] {
+  scanlineEmulation.setText("Scanlines").setChecked(settings["Video/ScanlineEmulation"].boolean()).setVisible(false).onToggle([&] {
     settings["Video/ScanlineEmulation"].setValue(scanlineEmulation.checked());
     if(emulator) emulator->set("Scanline Emulation", scanlineEmulation.checked());
   });
@@ -89,7 +89,7 @@ Presentation::Presentation() {
     program->updateVideoShader();
   });
   loadShaders();
-  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).onToggle([&] {
+  synchronizeVideo.setText("Synchronize Video").setChecked(settings["Video/Synchronize"].boolean()).setVisible(false).onToggle([&] {
     settings["Video/Synchronize"].setValue(synchronizeVideo.checked());
     video->set(Video::Synchronize, synchronizeVideo.checked());
   });

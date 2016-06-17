@@ -62,19 +62,19 @@ auto ICD2::reset(bool soft) -> void {
   r6006 = 0xff;
   r6007 = 0xff;
   for(auto& r : r7000) r = 0x00;
-  mlt_req = 0;
+  mltReq = 0;
 
   for(auto& n : output) n = 0xff;
-  read_bank = 0;
-  read_addr = 0;
-  write_bank = 0;
-  write_addr = 0;
+  readBank = 0;
+  readAddress = 0;
+  writeBank = 0;
+  writeAddress = 0;
 
-  packetsize = 0;
-  joyp_id = 3;
-  joyp15lock = 0;
-  joyp14lock = 0;
-  pulselock = true;
+  packetSize = 0;
+  joypID = 3;
+  joyp15Lock = 0;
+  joyp14Lock = 0;
+  pulseLock = true;
 
   GameBoy::system.init();
   GameBoy::system.power();

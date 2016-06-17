@@ -22,13 +22,13 @@ auto BSMemory::power() -> void {
 
 auto BSMemory::reset() -> void {
   regs.command   = 0;
-  regs.write_old = 0x00;
-  regs.write_new = 0x00;
+  regs.writeOld = 0x00;
+  regs.writeNew = 0x00;
 
-  regs.flash_enable = false;
-  regs.read_enable  = false;
-  regs.write_enable = false;
-  memory.write_protect(!regs.write_enable);
+  regs.flashEnable = false;
+  regs.readEnable  = false;
+  regs.writeEnable = false;
+  memory.writeProtect(!regs.writeEnable);
 }
 
 auto BSMemory::size() const -> uint {
@@ -41,14 +41,14 @@ auto BSMemory::read(uint24 addr, uint8 data) -> uint8 {
   }
 
   if(addr == 0x0002) {
-    if(regs.flash_enable) return 0x80;
+    if(regs.flashEnable) return 0x80;
   }
 
   if(addr == 0x5555) {
-    if(regs.flash_enable) return 0x80;
+    if(regs.flashEnable) return 0x80;
   }
 
-  if(regs.read_enable && addr >= 0xff00 && addr <= 0xff13) {
+  if(regs.readEnable && addr >= 0xff00 && addr <= 0xff13) {
     //read flash cartridge vendor information
     switch(addr - 0xff00) {
     case 0x00: return 0x4d;
@@ -72,14 +72,14 @@ auto BSMemory::write(uint24 addr, uint8 data) -> void {
   }
 
   if((addr & 0xff0000) == 0) {
-    regs.write_old = regs.write_new;
-    regs.write_new = data;
+    regs.writeOld = regs.writeNew;
+    regs.writeNew = data;
 
-    if(regs.write_enable && regs.write_old == regs.write_new) {
+    if(regs.writeEnable && regs.writeOld == regs.writeNew) {
       return memory.write(addr, data);
     }
   } else {
-    if(regs.write_enable) {
+    if(regs.writeEnable) {
       return memory.write(addr, data);
     }
   }
@@ -89,8 +89,8 @@ auto BSMemory::write(uint24 addr, uint8 data) -> void {
     regs.command  |= data;
 
     if((regs.command & 0xffff) == 0x38d0) {
-      regs.flash_enable = true;
-      regs.read_enable  = true;
+      regs.flashEnable = true;
+      regs.readEnable  = true;
     }
   }
 
@@ -104,23 +104,23 @@ auto BSMemory::write(uint24 addr, uint8 data) -> void {
     regs.command  |= data;
 
     if((regs.command & 0xffffff) == 0xaa5570) {
-      regs.write_enable = false;
+      regs.writeEnable = false;
     }
 
     if((regs.command & 0xffffff) == 0xaa55a0) {
-      regs.write_old = 0x00;
-      regs.write_new = 0x00;
-      regs.flash_enable = true;
-      regs.write_enable = true;
+      regs.writeOld = 0x00;
+      regs.writeNew = 0x00;
+      regs.flashEnable = true;
+      regs.writeEnable = true;
     }
 
     if((regs.command & 0xffffff) == 0xaa55f0) {
-      regs.flash_enable = false;
-      regs.read_enable  = false;
-      regs.write_enable = false;
+      regs.flashEnable = false;
+      regs.readEnable  = false;
+      regs.writeEnable = false;
     }
 
-    memory.write_protect(!regs.write_enable);
+    memory.writeProtect(!regs.writeEnable);
   }
 }
 

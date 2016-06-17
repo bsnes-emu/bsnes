@@ -8,7 +8,7 @@ struct Decompressor {
   Decompressor(SPC7110& spc7110) : spc7110(spc7110) {}
 
   auto read() -> uint8 {
-    return spc7110.datarom_read(offset++);
+    return spc7110.dataromRead(offset++);
   }
 
   //inverse morton code transform: unpack big-endian packed pixels

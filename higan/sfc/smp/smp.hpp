@@ -46,9 +46,9 @@ privileged:
   static auto Enter() -> void;
 
   struct Debugger {
-    hook<auto (uint16) -> void> op_exec;
-    hook<auto (uint16, uint8) -> void> op_read;
-    hook<auto (uint16, uint8) -> void> op_write;
+    hook<auto (uint16) -> void> execute;
+    hook<auto (uint16, uint8) -> void> read;
+    hook<auto (uint16, uint8) -> void> write;
   } debugger;
 
   //memory.cpp

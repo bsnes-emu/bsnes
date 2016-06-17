@@ -5,63 +5,63 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.array(wram);
 
-  s.integer(cpu_version);
+  s.integer(version);
 
-  s.integer(status.interrupt_pending);
+  s.integer(status.interruptPending);
 
-  s.integer(status.clock_count);
-  s.integer(status.line_clocks);
+  s.integer(status.clockCount);
+  s.integer(status.lineClocks);
 
-  s.integer(status.irq_lock);
+  s.integer(status.irqLock);
 
-  s.integer(status.dram_refresh_position);
-  s.integer(status.dram_refreshed);
+  s.integer(status.dramRefreshPosition);
+  s.integer(status.dramRefreshed);
 
-  s.integer(status.hdma_init_position);
-  s.integer(status.hdma_init_triggered);
+  s.integer(status.hdmaInitPosition);
+  s.integer(status.hdmaInitTriggered);
 
-  s.integer(status.hdma_position);
-  s.integer(status.hdma_triggered);
+  s.integer(status.hdmaPosition);
+  s.integer(status.hdmaTriggered);
 
-  s.integer(status.nmi_valid);
-  s.integer(status.nmi_line);
-  s.integer(status.nmi_transition);
-  s.integer(status.nmi_pending);
-  s.integer(status.nmi_hold);
+  s.integer(status.nmiValid);
+  s.integer(status.nmiLine);
+  s.integer(status.nmiTransition);
+  s.integer(status.nmiPending);
+  s.integer(status.nmiHold);
 
-  s.integer(status.irq_valid);
-  s.integer(status.irq_line);
-  s.integer(status.irq_transition);
-  s.integer(status.irq_pending);
-  s.integer(status.irq_hold);
+  s.integer(status.irqValid);
+  s.integer(status.irqLine);
+  s.integer(status.irqTransition);
+  s.integer(status.irqPending);
+  s.integer(status.irqHold);
 
-  s.integer(status.power_pending);
-  s.integer(status.reset_pending);
+  s.integer(status.powerPending);
+  s.integer(status.resetPending);
 
-  s.integer(status.dma_active);
-  s.integer(status.dma_counter);
-  s.integer(status.dma_clocks);
-  s.integer(status.dma_pending);
-  s.integer(status.hdma_pending);
-  s.integer(status.hdma_mode);
+  s.integer(status.dmaActive);
+  s.integer(status.dmaCounter);
+  s.integer(status.dmaClocks);
+  s.integer(status.dmaPending);
+  s.integer(status.hdmaPending);
+  s.integer(status.hdmaMode);
 
-  s.integer(status.auto_joypad_active);
-  s.integer(status.auto_joypad_latch);
-  s.integer(status.auto_joypad_counter);
-  s.integer(status.auto_joypad_clock);
+  s.integer(status.autoJoypadActive);
+  s.integer(status.autoJoypadLatch);
+  s.integer(status.autoJoypadCounter);
+  s.integer(status.autoJoypadClock);
 
   s.array(status.port);
 
-  s.integer(status.wram_addr);
+  s.integer(status.wramAddress);
 
-  s.integer(status.joypad_strobe_latch);
+  s.integer(status.joypadStrobeLatch);
   s.integer(status.joypad1_bits);
   s.integer(status.joypad2_bits);
 
-  s.integer(status.nmi_enabled);
-  s.integer(status.hirq_enabled);
-  s.integer(status.virq_enabled);
-  s.integer(status.auto_joypad_poll);
+  s.integer(status.nmiEnabled);
+  s.integer(status.hirqEnabled);
+  s.integer(status.virqEnabled);
+  s.integer(status.autoJoypadPoll);
 
   s.integer(status.pio);
 
@@ -71,10 +71,10 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.wrdiva);
   s.integer(status.wrdivb);
 
-  s.integer(status.hirq_pos);
-  s.integer(status.virq_pos);
+  s.integer(status.hirqPos);
+  s.integer(status.virqPos);
 
-  s.integer(status.rom_speed);
+  s.integer(status.romSpeed);
 
   s.integer(status.rddiv);
   s.integer(status.rdmpy);
@@ -88,25 +88,25 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(alu.divctr);
   s.integer(alu.shift);
 
-  for(uint i = 0; i < 8; i++) {
-    s.integer(channel[i].dma_enabled);
-    s.integer(channel[i].hdma_enabled);
-    s.integer(channel[i].direction);
-    s.integer(channel[i].indirect);
-    s.integer(channel[i].unused);
-    s.integer(channel[i].reverse_transfer);
-    s.integer(channel[i].fixed_transfer);
-    s.integer(channel[i].transfer_mode);
-    s.integer(channel[i].dest_addr);
-    s.integer(channel[i].source_addr);
-    s.integer(channel[i].source_bank);
-    s.integer(channel[i].transfer_size);
-    s.integer(channel[i].indirect_bank);
-    s.integer(channel[i].hdma_addr);
-    s.integer(channel[i].line_counter);
-    s.integer(channel[i].unknown);
-    s.integer(channel[i].hdma_completed);
-    s.integer(channel[i].hdma_do_transfer);
+  for(uint n : range(8)) {
+    s.integer(channel[n].dmaEnabled);
+    s.integer(channel[n].hdmaEnabled);
+    s.integer(channel[n].direction);
+    s.integer(channel[n].indirect);
+    s.integer(channel[n].unused);
+    s.integer(channel[n].reverseTransfer);
+    s.integer(channel[n].fixedTransfer);
+    s.integer(channel[n].transferMode);
+    s.integer(channel[n].targetAddress);
+    s.integer(channel[n].sourceAddress);
+    s.integer(channel[n].sourceBank);
+    s.integer(channel[n].transferSize);
+    s.integer(channel[n].indirectBank);
+    s.integer(channel[n].hdmaAddress);
+    s.integer(channel[n].lineCounter);
+    s.integer(channel[n].unknown);
+    s.integer(channel[n].hdmaCompleted);
+    s.integer(channel[n].hdmaDoTransfer);
   }
 
   s.integer(pipe.valid);

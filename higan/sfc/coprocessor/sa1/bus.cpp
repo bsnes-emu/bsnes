@@ -20,7 +20,7 @@ auto SA1::CPUBWRAM::size() const -> uint {
 
 auto SA1::CPUBWRAM::read(uint24 addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
-  if(dma) return sa1.dma_cc1_read(addr);
+  if(dma) return sa1.dmaCC1Read(addr);
   return sa1.bwram.read(addr);
 }
 

@@ -1,28 +1,8 @@
-struct Cartridge : property<Cartridge> {
-  enum class Region : unsigned { NTSC, PAL };
+struct Cartridge {
+  enum class Region : uint { NTSC, PAL };
 
   auto sha256() const -> string { return _sha256; }
   auto region() const -> Region { return _region; }
-
-  readonly<bool> hasICD2;
-  readonly<bool> hasMCC;
-  readonly<bool> hasNSSDIP;
-  readonly<bool> hasEvent;
-  readonly<bool> hasSA1;
-  readonly<bool> hasSuperFX;
-  readonly<bool> hasARMDSP;
-  readonly<bool> hasHitachiDSP;
-  readonly<bool> hasNECDSP;
-  readonly<bool> hasEpsonRTC;
-  readonly<bool> hasSharpRTC;
-  readonly<bool> hasSPC7110;
-  readonly<bool> hasSDD1;
-  readonly<bool> hasOBC1;
-  readonly<bool> hasMSU1;
-
-  readonly<bool> hasGameBoySlot;
-  readonly<bool> hasBSMemorySlot;
-  readonly<bool> hasSufamiTurboSlots;
 
   auto manifest() -> string;
   auto title() -> string;
@@ -58,6 +38,26 @@ struct Cartridge : property<Cartridge> {
       string sufamiTurboB;
     } title;
   } information;
+
+  bool hasICD2;
+  bool hasMCC;
+  bool hasNSSDIP;
+  bool hasEvent;
+  bool hasSA1;
+  bool hasSuperFX;
+  bool hasARMDSP;
+  bool hasHitachiDSP;
+  bool hasNECDSP;
+  bool hasEpsonRTC;
+  bool hasSharpRTC;
+  bool hasSPC7110;
+  bool hasSDD1;
+  bool hasOBC1;
+  bool hasMSU1;
+
+  bool hasGameBoySlot;
+  bool hasBSMemorySlot;
+  bool hasSufamiTurboSlots;
 
 private:
   auto loadGameBoy() -> void;

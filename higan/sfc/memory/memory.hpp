@@ -17,8 +17,8 @@ struct StaticRAM : Memory {
   inline auto operator[](uint24 addr) const -> const uint8&;
 
 private:
-  uint8* data_ = nullptr;
-  uint size_ = 0;
+  uint8* _data = nullptr;
+  uint _size = 0;
 };
 
 struct MappedRAM : Memory {
@@ -27,7 +27,7 @@ struct MappedRAM : Memory {
   inline auto copy(const stream& memory) -> void;
   inline auto read(const stream& memory) -> void;
 
-  inline auto write_protect(bool status) -> void;
+  inline auto writeProtect(bool writeProtect) -> void;
   inline auto data() -> uint8*;
   inline auto size() const -> uint;
 
@@ -36,9 +36,9 @@ struct MappedRAM : Memory {
   inline auto operator[](uint24 addr) const -> const uint8&;
 
 private:
-  uint8* data_ = nullptr;
-  uint size_ = 0;
-  bool write_protect_ = false;
+  uint8* _data = nullptr;
+  uint _size = 0;
+  bool _writeProtect = false;
 };
 
 struct Bus {

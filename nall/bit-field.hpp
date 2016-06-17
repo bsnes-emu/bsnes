@@ -47,7 +47,7 @@ private:
   }
 };
 
-template<typename type, uint Lo, uint Hi = ~0> struct BitField {
+template<typename type, uint Lo, uint Hi = ~0U> struct BitField {
   enum : uint { lo = Lo <= Hi ? Lo : Hi };
   enum : uint { hi = Hi >= Lo ? Hi : Lo };
   enum : uint { bits = hi - lo + 1 };
@@ -94,7 +94,7 @@ private:
   }
 };
 
-template<typename type, uint Bit> struct BitField<type, Bit, ~0> {
+template<typename type, uint Bit> struct BitField<type, Bit, ~0U> {
   enum : uint { bit = Bit };
   enum : uint { mask = 1ull << bit };
   static_assert(bit < sizeof(type) * 8, "");

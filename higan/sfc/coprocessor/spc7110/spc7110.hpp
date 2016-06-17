@@ -12,48 +12,48 @@ struct SPC7110 : Cothread {
   auto power() -> void;
   auto reset() -> void;
 
-  auto add_clocks(uint clocks) -> void;
+  auto addClocks(uint clocks) -> void;
 
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
 
-  auto mcurom_read(uint24 addr, uint8 data) -> uint8;
-  auto mcurom_write(uint24 addr, uint8 data) -> void;
+  auto mcuromRead(uint24 addr, uint8 data) -> uint8;
+  auto mcuromWrite(uint24 addr, uint8 data) -> void;
 
-  auto mcuram_read(uint24 addr, uint8 data) -> uint8;
-  auto mcuram_write(uint24 addr, uint8 data) -> void;
+  auto mcuramRead(uint24 addr, uint8 data) -> uint8;
+  auto mcuramWrite(uint24 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 
   //dcu.cpp
-  auto dcu_load_address() -> void;
-  auto dcu_begin_transfer() -> void;
-  auto dcu_read() -> uint8;
+  auto dcuLoadAddress() -> void;
+  auto dcuBeginTransfer() -> void;
+  auto dcuRead() -> uint8;
 
-  auto deinterleave_1bpp(uint length) -> void;
-  auto deinterleave_2bpp(uint length) -> void;
-  auto deinterleave_4bpp(uint length) -> void;
+  auto deinterleave1bpp(uint length) -> void;
+  auto deinterleave2bpp(uint length) -> void;
+  auto deinterleave4bpp(uint length) -> void;
 
   //data.cpp
-  auto datarom_read(uint addr) -> uint8;
+  auto dataromRead(uint addr) -> uint8;
 
-  auto data_offset() -> uint;
-  auto data_adjust() -> uint;
-  auto data_stride() -> uint;
+  auto dataOffset() -> uint;
+  auto dataAdjust() -> uint;
+  auto dataStride() -> uint;
 
-  auto set_data_offset(uint addr) -> void;
-  auto set_data_adjust(uint addr) -> void;
+  auto setDataOffset(uint addr) -> void;
+  auto setDataAdjust(uint addr) -> void;
 
-  auto data_port_read() -> void;
+  auto dataPortRead() -> void;
 
-  auto data_port_increment_4810() -> void;
-  auto data_port_increment_4814() -> void;
-  auto data_port_increment_4815() -> void;
-  auto data_port_increment_481a() -> void;
+  auto dataPortIncrement4810() -> void;
+  auto dataPortIncrement4814() -> void;
+  auto dataPortIncrement4815() -> void;
+  auto dataPortIncrement481a() -> void;
 
   //alu.cpp
-  auto alu_multiply() -> void;
-  auto alu_divide() -> void;
+  auto aluMultiply() -> void;
+  auto aluDivide() -> void;
 
   MappedRAM prom;  //program ROM
   MappedRAM drom;  //data ROM
@@ -73,11 +73,11 @@ private:
   uint8 r480b;  //decompression settings
   uint8 r480c;  //decompression status
 
-  bool dcu_pending;
-  uint2 dcu_mode;
-  uint23 dcu_addr;
-  uint dcu_offset;
-  uint8 dcu_tile[32];
+  bool dcuPending;
+  uint2 dcuMode;
+  uint23 dcuAddress;
+  uint dcuOffset;
+  uint8 dcuTile[32];
   Decompressor* decompressor;
 
   //data port unit
@@ -110,8 +110,8 @@ private:
   uint8 r482e;  //math settings
   uint8 r482f;  //math status
 
-  bool mul_pending;
-  bool div_pending;
+  bool mulPending;
+  bool divPending;
 
   //memory control unit
   uint8 r4830;  //bank 0 mapping + SRAM write enable

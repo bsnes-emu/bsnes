@@ -37,106 +37,35 @@ struct SA1 : Processor::R65816, Cothread {
     uint line;
   };
 
-  auto dma_normal() -> void;
-  auto dma_cc1() -> void;
-  auto dma_cc1_read(uint addr) -> uint8;
-  auto dma_cc2() -> void;
+  auto dmaNormal() -> void;
+  auto dmaCC1() -> void;
+  auto dmaCC1Read(uint addr) -> uint8;
+  auto dmaCC2() -> void;
 
   //memory.cpp
-  auto bus_read(uint24 addr, uint8 data) -> uint8;
-  auto bus_write(uint24 addr, uint8 data) -> void;
-  auto vbr_read(uint24 addr, uint8 data = 0) -> uint8;
+  auto busRead(uint24 addr, uint8 data) -> uint8;
+  auto busWrite(uint24 addr, uint8 data) -> void;
+  auto vbrRead(uint24 addr, uint8 data = 0) -> uint8;
 
   alwaysinline auto io() -> void override;
   alwaysinline auto read(uint24 addr) -> uint8 override;
   alwaysinline auto write(uint24 addr, uint8 data) -> void override;
 
-  auto mmcrom_read(uint24 addr, uint8 data) -> uint8;
-  auto mmcrom_write(uint24 addr, uint8 data) -> void;
+  auto mmcromRead(uint24 addr, uint8 data) -> uint8;
+  auto mmcromWrite(uint24 addr, uint8 data) -> void;
 
-  auto mmcbwram_read(uint24 addr, uint8 data) -> uint8;
-  auto mmcbwram_write(uint24 addr, uint8 data) -> void;
+  auto mmcbwramRead(uint24 addr, uint8 data) -> uint8;
+  auto mmcbwramWrite(uint24 addr, uint8 data) -> void;
 
-  auto mmc_sa1_read(uint addr, uint8 data) -> uint8;
-  auto mmc_sa1_write(uint addr, uint8 data) -> void;
+  auto mmcSA1Read(uint addr, uint8 data) -> uint8;
+  auto mmcSA1Write(uint addr, uint8 data) -> void;
 
-  auto bitmap_read(uint addr, uint8 data) -> uint8;
-  auto bitmap_write(uint addr, uint8 data) -> void;
+  auto bitmapRead(uint addr, uint8 data) -> uint8;
+  auto bitmapWrite(uint addr, uint8 data) -> void;
 
   //mmio.cpp
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
-
-  //todo: merge these functions into writeIO()
-  auto mmio_w2200(uint8) -> void;  //CCNT
-  auto mmio_w2201(uint8) -> void;  //SIE
-  auto mmio_w2202(uint8) -> void;  //SIC
-  auto mmio_w2203(uint8) -> void;  //CRVL
-  auto mmio_w2204(uint8) -> void;  //CRVH
-  auto mmio_w2205(uint8) -> void;  //CNVL
-  auto mmio_w2206(uint8) -> void;  //CNVH
-  auto mmio_w2207(uint8) -> void;  //CIVL
-  auto mmio_w2208(uint8) -> void;  //CIVH
-  auto mmio_w2209(uint8) -> void;  //SCNT
-  auto mmio_w220a(uint8) -> void;  //CIE
-  auto mmio_w220b(uint8) -> void;  //CIC
-  auto mmio_w220c(uint8) -> void;  //SNVL
-  auto mmio_w220d(uint8) -> void;  //SNVH
-  auto mmio_w220e(uint8) -> void;  //SIVL
-  auto mmio_w220f(uint8) -> void;  //SIVH
-  auto mmio_w2210(uint8) -> void;  //TMC
-  auto mmio_w2211(uint8) -> void;  //CTR
-  auto mmio_w2212(uint8) -> void;  //HCNTL
-  auto mmio_w2213(uint8) -> void;  //HCNTH
-  auto mmio_w2214(uint8) -> void;  //VCNTL
-  auto mmio_w2215(uint8) -> void;  //VCNTH
-  auto mmio_w2220(uint8) -> void;  //CXB
-  auto mmio_w2221(uint8) -> void;  //DXB
-  auto mmio_w2222(uint8) -> void;  //EXB
-  auto mmio_w2223(uint8) -> void;  //FXB
-  auto mmio_w2224(uint8) -> void;  //BMAPS
-  auto mmio_w2225(uint8) -> void;  //BMAP
-  auto mmio_w2226(uint8) -> void;  //SBWE
-  auto mmio_w2227(uint8) -> void;  //CBWE
-  auto mmio_w2228(uint8) -> void;  //BWPA
-  auto mmio_w2229(uint8) -> void;  //SIWP
-  auto mmio_w222a(uint8) -> void;  //CIWP
-  auto mmio_w2230(uint8) -> void;  //DCNT
-  auto mmio_w2231(uint8) -> void;  //CDMA
-  auto mmio_w2232(uint8) -> void;  //SDAL
-  auto mmio_w2233(uint8) -> void;  //SDAH
-  auto mmio_w2234(uint8) -> void;  //SDAB
-  auto mmio_w2235(uint8) -> void;  //DDAL
-  auto mmio_w2236(uint8) -> void;  //DDAH
-  auto mmio_w2237(uint8) -> void;  //DDAB
-  auto mmio_w2238(uint8) -> void;  //DTCL
-  auto mmio_w2239(uint8) -> void;  //DTCH
-  auto mmio_w223f(uint8) -> void;  //BBF
-  auto mmio_w2240(uint8) -> void;  //BRF0
-  auto mmio_w2241(uint8) -> void;  //BRF1
-  auto mmio_w2242(uint8) -> void;  //BRF2
-  auto mmio_w2243(uint8) -> void;  //BRF3
-  auto mmio_w2244(uint8) -> void;  //BRF4
-  auto mmio_w2245(uint8) -> void;  //BRF5
-  auto mmio_w2246(uint8) -> void;  //BRF6
-  auto mmio_w2247(uint8) -> void;  //BRF7
-  auto mmio_w2248(uint8) -> void;  //BRF8
-  auto mmio_w2249(uint8) -> void;  //BRF9
-  auto mmio_w224a(uint8) -> void;  //BRFA
-  auto mmio_w224b(uint8) -> void;  //BRFB
-  auto mmio_w224c(uint8) -> void;  //BRFC
-  auto mmio_w224d(uint8) -> void;  //BRFD
-  auto mmio_w224e(uint8) -> void;  //BRFE
-  auto mmio_w224f(uint8) -> void;  //BRFF
-  auto mmio_w2250(uint8) -> void;  //MCNT
-  auto mmio_w2251(uint8) -> void;  //MAL
-  auto mmio_w2252(uint8) -> void;  //MAH
-  auto mmio_w2253(uint8) -> void;  //MBL
-  auto mmio_w2254(uint8) -> void;  //MBH
-  auto mmio_w2258(uint8) -> void;  //VBD
-  auto mmio_w2259(uint8) -> void;  //VDAL
-  auto mmio_w225a(uint8) -> void;  //VDAH
-  auto mmio_w225b(uint8) -> void;  //VDAB
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

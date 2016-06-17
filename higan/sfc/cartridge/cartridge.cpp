@@ -93,17 +93,17 @@ auto Cartridge::load() -> void {
   parseMarkup(information.markup.cartridge);
 
   //Game Boy
-  if(cartridge.hasICD2()) {
+  if(cartridge.hasICD2) {
     _sha256 = "";  //Game Boy cartridge not loaded yet: set later via loadGameBoy()
   }
 
   //BS Memory
-  else if(cartridge.hasMCC() && cartridge.hasBSMemorySlot()) {
+  else if(cartridge.hasMCC && cartridge.hasBSMemorySlot) {
     _sha256 = Hash::SHA256(bsmemory.memory.data(), bsmemory.memory.size()).digest();
   }
 
   //Sufami Turbo
-  else if(cartridge.hasSufamiTurboSlots()) {
+  else if(cartridge.hasSufamiTurboSlots) {
     Hash::SHA256 sha;
     sha.data(sufamiturboA.rom.data(), sufamiturboA.rom.size());
     sha.data(sufamiturboB.rom.data(), sufamiturboB.rom.size());
@@ -134,8 +134,8 @@ auto Cartridge::load() -> void {
     _sha256 = sha.digest();
   }
 
-  rom.write_protect(true);
-  ram.write_protect(false);
+  rom.writeProtect(true);
+  ram.writeProtect(false);
 }
 
 auto Cartridge::loadGameBoy() -> void {

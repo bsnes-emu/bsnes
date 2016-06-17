@@ -70,7 +70,7 @@ auto SDD1::write(uint24 addr, uint8 data) -> void {
 }
 
 auto SDD1::dmaRead(uint24 addr, uint8 data) -> uint8 {
-  return cpu.dmaPortRead(addr, data);
+  return cpu.readDMA(addr, data);
 }
 
 auto SDD1::dmaWrite(uint24 addr, uint8 data) -> void {
@@ -82,7 +82,7 @@ auto SDD1::dmaWrite(uint24 addr, uint8 data) -> void {
   case 5: dma[channel].size.byte(0) = data; break;
   case 6: dma[channel].size.byte(1) = data; break;
   }
-  return cpu.dmaPortWrite(addr, data);
+  return cpu.writeDMA(addr, data);
 }
 
 auto SDD1::mmcRead(uint24 addr) -> uint8 {

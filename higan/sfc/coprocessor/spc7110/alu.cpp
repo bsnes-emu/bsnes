@@ -1,5 +1,5 @@
-auto SPC7110::alu_multiply() -> void {
-  add_clocks(30);
+auto SPC7110::aluMultiply() -> void {
+  addClocks(30);
 
   if(r482e & 1) {
     //signed 16-bit x 16-bit multiplication
@@ -26,8 +26,8 @@ auto SPC7110::alu_multiply() -> void {
   r482f &= 0x7f;
 }
 
-auto SPC7110::alu_divide() -> void {
-  add_clocks(40);
+auto SPC7110::aluDivide() -> void {
+  addClocks(40);
 
   if(r482e & 1) {
     //signed 32-bit x 16-bit division

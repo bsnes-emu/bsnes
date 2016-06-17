@@ -26,7 +26,6 @@ auto Peripherals::connect(uint port, uint id) -> void {
     case Device::Gamepad:  controllerPort1 = new Gamepad(0); break;
     case Device::Multitap: controllerPort1 = new Multitap(0); break;
     case Device::Mouse:    controllerPort1 = new Mouse(0); break;
-    case Device::USART:    controllerPort1 = new USART(0); break;
     }
   }
 

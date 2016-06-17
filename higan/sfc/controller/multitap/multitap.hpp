@@ -6,6 +6,6 @@ struct Multitap : Controller {
 
 private:
   bool latched;
-  unsigned counter1;
-  unsigned counter2;
+  uint counter1;
+  uint counter2;
 };

@@ -15,12 +15,12 @@ struct BSMemory : Memory {
 private:
   struct {
     uint command;
-    uint8 write_old;
-    uint8 write_new;
+    uint8 writeOld;
+    uint8 writeNew;
 
-    bool flash_enable;
-    bool read_enable;
-    bool write_enable;
+    bool flashEnable;
+    bool readEnable;
+    bool writeEnable;
   } regs;
 };
 

@@ -11,9 +11,9 @@ CPU cpu;
 #include "joypad.cpp"
 #include "serialization.cpp"
 
-auto CPU::interruptPending() const -> bool { return status.interrupt_pending; }
+auto CPU::interruptPending() const -> bool { return status.interruptPending; }
 auto CPU::pio() const -> uint8 { return status.pio; }
-auto CPU::joylatch() const -> bool { return status.joypad_strobe_latch; }
+auto CPU::joylatch() const -> bool { return status.joypadStrobeLatch; }
 
 CPU::CPU() {
   PPUcounter::scanline = {&CPU::scanline, this};
@@ -56,32 +56,32 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  if(status.interrupt_pending) {
-    status.interrupt_pending = false;
-    if(status.nmi_pending) {
-      status.nmi_pending = false;
+  if(status.interruptPending) {
+    status.interruptPending = false;
+    if(status.nmiPending) {
+      status.nmiPending = false;
       r.vector = r.e ? 0xfffa : 0xffea;
       interrupt();
-      debugger.op_nmi();
-    } else if(status.irq_pending) {
-      status.irq_pending = false;
+      debugger.nmi();
+    } else if(status.irqPending) {
+      status.irqPending = false;
       r.vector = r.e ? 0xfffe : 0xffee;
       interrupt();
-      debugger.op_irq();
-    } else if(status.reset_pending) {
-      status.reset_pending = false;
+      debugger.irq();
+    } else if(status.resetPending) {
+      status.resetPending = false;
       addClocks(132);
       r.vector = 0xfffc;
       interrupt();
-    } else if(status.power_pending) {
-      status.power_pending = false;
+    } else if(status.powerPending) {
+      status.powerPending = false;
       addClocks(186);
       r.pc.l = bus.read(0xfffc, r.mdr);
       r.pc.h = bus.read(0xfffd, r.mdr);
     }
   }
 
-  debugger.op_exec(r.pc.d);
+  debugger.execute(r.pc.d);
   instruction();
 }
 
@@ -99,25 +99,25 @@ auto CPU::power() -> void {
     channel.direction = 1;
     channel.indirect = true;
     channel.unused = true;
-    channel.reverse_transfer = true;
-    channel.fixed_transfer = true;
-    channel.transfer_mode = 7;
+    channel.reverseTransfer = true;
+    channel.fixedTransfer = true;
+    channel.transferMode = 7;
 
-    channel.dest_addr = 0xff;
+    channel.targetAddress = 0xff;
 
-    channel.source_addr = 0xffff;
-    channel.source_bank = 0xff;
+    channel.sourceAddress = 0xffff;
+    channel.sourceBank = 0xff;
 
-    channel.transfer_size = 0xffff;
-    channel.indirect_bank = 0xff;
+    channel.transferSize = 0xffff;
+    channel.indirectBank = 0xff;
 
-    channel.hdma_addr = 0xffff;
-    channel.line_counter = 0xff;
+    channel.hdmaAddress = 0xffff;
+    channel.lineCounter = 0xff;
     channel.unknown = 0xff;
   }
 
-  status.power_pending = true;
-  status.interrupt_pending = true;
+  status.powerPending = true;
+  status.interruptPending = true;
 }
 
 auto CPU::reset() -> void {
@@ -128,16 +128,16 @@ auto CPU::reset() -> void {
   function<auto (uint24, uint8) -> uint8> reader;
   function<auto (uint24, uint8) -> void> writer;
 
-  reader = {&CPU::apuPortRead, this};
-  writer = {&CPU::apuPortWrite, this};
+  reader = {&CPU::readAPU, this};
+  writer = {&CPU::writeAPU, this};
   bus.map(reader, writer, "00-3f,80-bf:2140-217f");
 
-  reader = {&CPU::cpuPortRead, this};
-  writer = {&CPU::cpuPortWrite, this};
+  reader = {&CPU::readCPU, this};
+  writer = {&CPU::writeCPU, this};
   bus.map(reader, writer, "00-3f,80-bf:2180-2183,4016-4017,4200-421f");
 
-  reader = {&CPU::dmaPortRead, this};
-  writer = {&CPU::dmaPortWrite, this};
+  reader = {&CPU::readDMA, this};
+  writer = {&CPU::writeDMA, this};
   bus.map(reader, writer, "00-3f,80-bf:4300-437f");
 
   reader = [](uint24 addr, uint8) -> uint8 { return cpu.wram[addr]; };
@@ -162,18 +162,18 @@ auto CPU::reset() -> void {
   for(auto& port : status.port) port = 0x00;
 
   //$2181-$2183
-  status.wram_addr = 0x000000;
+  status.wramAddress = 0x000000;
 
   //$4016-$4017
-  status.joypad_strobe_latch = 0;
+  status.joypadStrobeLatch = 0;
   status.joypad1_bits = ~0;
   status.joypad2_bits = ~0;
 
   //$4200
-  status.nmi_enabled = false;
-  status.hirq_enabled = false;
-  status.virq_enabled = false;
-  status.auto_joypad_poll = false;
+  status.nmiEnabled = false;
+  status.hirqEnabled = false;
+  status.virqEnabled = false;
+  status.autoJoypadPoll = false;
 
   //$4201
   status.pio = 0xff;
@@ -187,11 +187,11 @@ auto CPU::reset() -> void {
   status.wrdivb = 0xff;
 
   //$4207-$420a
-  status.hirq_pos = 0x01ff;
-  status.virq_pos = 0x01ff;
+  status.hirqPos = 0x01ff;
+  status.virqPos = 0x01ff;
 
   //$420d
-  status.rom_speed = 8;
+  status.romSpeed = 8;
 
   //$4214-$4217
   status.rddiv = 0x0000;
@@ -210,11 +210,11 @@ auto CPU::reset() -> void {
 
   //DMA
   for(auto& channel : this->channel) {
-    channel.dma_enabled = false;
-    channel.hdma_enabled = false;
+    channel.dmaEnabled = false;
+    channel.hdmaEnabled = false;
 
-    channel.hdma_completed = false;
-    channel.hdma_do_transfer = false;
+    channel.hdmaCompleted = false;
+    channel.hdmaDoTransfer = false;
   }
 
   pipe.valid = false;
@@ -222,45 +222,45 @@ auto CPU::reset() -> void {
   pipe.data = 0;
 
   //Timing
-  status.clock_count = 0;
-  status.line_clocks = lineclocks();
+  status.clockCount = 0;
+  status.lineClocks = lineclocks();
 
-  status.irq_lock = false;
-  status.dram_refresh_position = (cpu_version == 1 ? 530 : 538);
-  status.dram_refreshed = false;
+  status.irqLock = false;
+  status.dramRefreshPosition = (version == 1 ? 530 : 538);
+  status.dramRefreshed = false;
 
-  status.hdma_init_position = (cpu_version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
-  status.hdma_init_triggered = false;
+  status.hdmaInitPosition = (version == 1 ? 12 + 8 - dmaCounter() : 12 + dmaCounter());
+  status.hdmaInitTriggered = false;
 
-  status.hdma_position = 1104;
-  status.hdma_triggered = false;
+  status.hdmaPosition = 1104;
+  status.hdmaTriggered = false;
 
-  status.nmi_valid      = false;
-  status.nmi_line       = false;
-  status.nmi_transition = false;
-  status.nmi_pending    = false;
-  status.nmi_hold       = false;
+  status.nmiValid      = false;
+  status.nmiLine       = false;
+  status.nmiTransition = false;
+  status.nmiPending    = false;
+  status.nmiHold       = false;
 
-  status.irq_valid      = false;
-  status.irq_line       = false;
-  status.irq_transition = false;
-  status.irq_pending    = false;
-  status.irq_hold       = false;
+  status.irqValid      = false;
+  status.irqLine       = false;
+  status.irqTransition = false;
+  status.irqPending    = false;
+  status.irqHold       = false;
 
-  status.reset_pending = !status.power_pending;
-  status.interrupt_pending = true;
+  status.resetPending = !status.powerPending;
+  status.interruptPending = true;
 
-  status.dma_active   = false;
-  status.dma_counter  = 0;
-  status.dma_clocks   = 0;
-  status.dma_pending  = false;
-  status.hdma_pending = false;
-  status.hdma_mode    = 0;
+  status.dmaActive   = false;
+  status.dmaCounter  = 0;
+  status.dmaClocks   = 0;
+  status.dmaPending  = false;
+  status.hdmaPending = false;
+  status.hdmaMode    = 0;
 
-  status.auto_joypad_active  = false;
-  status.auto_joypad_latch   = false;
-  status.auto_joypad_counter = 0;
-  status.auto_joypad_clock   = 0;
+  status.autoJoypadActive  = false;
+  status.autoJoypadLatch   = false;
+  status.autoJoypadCounter = 0;
+  status.autoJoypadClock   = 0;
 }
 
 }

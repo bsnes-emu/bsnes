@@ -101,19 +101,15 @@ Interface::Interface() {
     devices.append(device);
   }
 
-  { Device device{7, ID::ControllerPort1, "Serial USART"};
+  { Device device{7, ID::ExpansionPort, "Satellaview"};
     devices.append(device);
   }
 
-  { Device device{8, ID::ExpansionPort, "Satellaview"};
+  { Device device{8, ID::ExpansionPort, "Super Disc"};
     devices.append(device);
   }
 
-  { Device device{9, ID::ExpansionPort, "Super Disc"};
-    devices.append(device);
-  }
-
-  { Device device{10, ID::ExpansionPort, "21fx"};
+  { Device device{9, ID::ExpansionPort, "21fx"};
     devices.append(device);
   }
 
@@ -463,14 +459,14 @@ auto Interface::run() -> void {
 }
 
 auto Interface::rtc() -> bool {
-  if(cartridge.hasEpsonRTC()) return true;
-  if(cartridge.hasSharpRTC()) return true;
+  if(cartridge.hasEpsonRTC) return true;
+  if(cartridge.hasSharpRTC) return true;
   return false;
 }
 
 auto Interface::rtcsync() -> void {
-  if(cartridge.hasEpsonRTC()) epsonrtc.sync();
-  if(cartridge.hasSharpRTC()) sharprtc.sync();
+  if(cartridge.hasEpsonRTC) epsonrtc.sync();
+  if(cartridge.hasSharpRTC) sharprtc.sync();
 }
 
 auto Interface::serialize() -> serializer {
@@ -486,7 +482,7 @@ auto Interface::cheatSet(const lstring& list) -> void {
   cheat.reset();
 
   #if defined(SFC_SUPERGAMEBOY)
-  if(cartridge.hasICD2()) {
+  if(cartridge.hasICD2) {
     GameBoy::cheat.reset();
     for(auto& codeset : list) {
       lstring codes = codeset.split("+");

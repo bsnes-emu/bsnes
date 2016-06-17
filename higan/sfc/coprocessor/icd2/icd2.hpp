@@ -43,17 +43,17 @@ private:
     uint8 data[16];
   };
   Packet packet[64];
-  uint packetsize;
+  uint packetSize;
 
-  uint joyp_id;
-  bool joyp15lock;
-  bool joyp14lock;
-  bool pulselock;
-  bool strobelock;
-  bool packetlock;
-  Packet joyp_packet;
-  uint8 packetoffset;
-  uint8 bitdata, bitoffset;
+  uint joypID;
+  bool joyp15Lock;
+  bool joyp14Lock;
+  bool pulseLock;
+  bool strobeLock;
+  bool packetLock;
+  Packet joypPacket;
+  uint8 packetOffset;
+  uint8 bitData, bitOffset;
 
   uint8 r6003;      //control port
   uint8 r6004;      //joypad 1
@@ -61,13 +61,13 @@ private:
   uint8 r6006;      //joypad 3
   uint8 r6007;      //joypad 4
   uint8 r7000[16];  //JOYP packet data
-  uint8 mlt_req;    //number of active joypads
+  uint8 mltReq;     //number of active joypads
 
   uint8 output[4 * 512];
-  uint read_bank;
-  uint read_addr;
-  uint write_bank;
-  uint write_addr;
+  uint readBank;
+  uint readAddress;
+  uint writeBank;
+  uint writeAddress;
 };
 
 #else

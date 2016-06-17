@@ -7,7 +7,6 @@ namespace SuperFamicom {
 #include "mouse/mouse.cpp"
 #include "superscope/superscope.cpp"
 #include "justifier/justifier.cpp"
-#include "usart/usart.cpp"
 
 Controller::Controller(bool port) : port(port) {
   if(!thread) create(Controller::Enter, 1);

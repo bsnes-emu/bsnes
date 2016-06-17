@@ -6,7 +6,7 @@ Multitap::Multitap(bool port) : Controller(port) {
 
 auto Multitap::data() -> uint2 {
   if(latched) return 2;  //multitap detection
-  unsigned index, port1, port2;
+  uint index, port1, port2;
 
   if(iobit()) {
     index = counter1;

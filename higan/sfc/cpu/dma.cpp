@@ -1,5 +1,5 @@
 auto CPU::dmaAddClocks(uint clocks) -> void {
-  status.dma_clocks += clocks;
+  status.dmaClocks += clocks;
   addClocks(clocks);
 }
 
@@ -58,38 +58,39 @@ auto CPU::dmaTransfer(bool direction, uint8 bbus, uint24 abus) -> void {
 //===================
 
 auto CPU::dmaAddressB(uint n, uint index) -> uint8 {
-  switch(channel[n].transfer_mode) { default:
-  case 0: return (channel[n].dest_addr);                       //0
-  case 1: return (channel[n].dest_addr + (index & 1));         //0,1
-  case 2: return (channel[n].dest_addr);                       //0,0
-  case 3: return (channel[n].dest_addr + ((index >> 1) & 1));  //0,0,1,1
-  case 4: return (channel[n].dest_addr + (index & 3));         //0,1,2,3
-  case 5: return (channel[n].dest_addr + (index & 1));         //0,1,0,1
-  case 6: return (channel[n].dest_addr);                       //0,0     [2]
-  case 7: return (channel[n].dest_addr + ((index >> 1) & 1));  //0,0,1,1 [3]
+  switch(channel[n].transferMode) {
+  case 0: return (channel[n].targetAddress);                       //0
+  case 1: return (channel[n].targetAddress + (index & 1));         //0,1
+  case 2: return (channel[n].targetAddress);                       //0,0
+  case 3: return (channel[n].targetAddress + ((index >> 1) & 1));  //0,0,1,1
+  case 4: return (channel[n].targetAddress + (index & 3));         //0,1,2,3
+  case 5: return (channel[n].targetAddress + (index & 1));         //0,1,0,1
+  case 6: return (channel[n].targetAddress);                       //0,0     [2]
+  case 7: return (channel[n].targetAddress + ((index >> 1) & 1));  //0,0,1,1 [3]
   }
+  unreachable;
 }
 
-inline auto CPU::dmaAddress(uint n) -> uint24 {
-  uint24 addr = channel[n].source_bank << 16 | channel[n].source_addr;
+auto CPU::dmaAddress(uint n) -> uint24 {
+  uint24 addr = channel[n].sourceBank << 16 | channel[n].sourceAddress;
 
-  if(!channel[n].fixed_transfer) {
-    if(!channel[n].reverse_transfer) {
-      channel[n].source_addr++;
+  if(!channel[n].fixedTransfer) {
+    if(!channel[n].reverseTransfer) {
+      channel[n].sourceAddress++;
     } else {
-      channel[n].source_addr--;
+      channel[n].sourceAddress--;
     }
   }
 
   return addr;
 }
 
-inline auto CPU::hdmaAddress(uint n) -> uint24 {
-  return channel[n].source_bank << 16 | channel[n].hdma_addr++;
+auto CPU::hdmaAddress(uint n) -> uint24 {
+  return channel[n].sourceBank << 16 | channel[n].hdmaAddress++;
 }
 
-inline auto CPU::hdmaIndirectAddress(uint n) -> uint24 {
-  return channel[n].indirect_bank << 16 | channel[n].indirect_addr++;
+auto CPU::hdmaIndirectAddress(uint n) -> uint24 {
+  return channel[n].indirectBank << 16 | channel[n].indirectAddress++;
 }
 
 //==============
@@ -98,28 +99,28 @@ inline auto CPU::hdmaIndirectAddress(uint n) -> uint24 {
 
 auto CPU::dmaEnabledChannels() -> uint {
   uint count = 0;
-  for(auto n : range(8)) count += channel[n].dma_enabled;
+  for(auto n : range(8)) count += channel[n].dmaEnabled;
   return count;
 }
 
-inline auto CPU::hdmaActive(uint n) -> bool {
-  return channel[n].hdma_enabled && !channel[n].hdma_completed;
+auto CPU::hdmaActive(uint n) -> bool {
+  return channel[n].hdmaEnabled && !channel[n].hdmaCompleted;
 }
 
-inline auto CPU::hdmaActiveAfter(uint s) -> bool {
+auto CPU::hdmaActiveAfter(uint s) -> bool {
   for(uint n = s + 1; n < 8; n++) {
     if(hdmaActive(n)) return true;
   }
   return false;
 }
 
-inline auto CPU::hdmaEnabledChannels() -> uint {
+auto CPU::hdmaEnabledChannels() -> uint {
   uint count = 0;
-  for(auto n : range(8)) count += channel[n].hdma_enabled;
+  for(auto n : range(8)) count += channel[n].hdmaEnabled;
   return count;
 }
 
-inline auto CPU::hdmaActiveChannels() -> uint {
+auto CPU::hdmaActiveChannels() -> uint {
   uint count = 0;
   for(auto n : range(8)) count += hdmaActive(n);
   return count;
@@ -135,49 +136,49 @@ auto CPU::dmaRun() -> void {
   dmaEdge();
 
   for(auto n : range(8)) {
-    if(!channel[n].dma_enabled) continue;
+    if(!channel[n].dmaEnabled) continue;
 
     uint index = 0;
     do {
       dmaTransfer(channel[n].direction, dmaAddressB(n, index++), dmaAddress(n));
       dmaEdge();
-    } while(channel[n].dma_enabled && --channel[n].transfer_size);
+    } while(channel[n].dmaEnabled && --channel[n].transferSize);
 
     dmaAddClocks(8);
     dmaWrite(false);
     dmaEdge();
 
-    channel[n].dma_enabled = false;
+    channel[n].dmaEnabled = false;
   }
 
-  status.irq_lock = true;
+  status.irqLock = true;
 }
 
 auto CPU::hdmaUpdate(uint n) -> void {
   dmaAddClocks(4);
-  r.mdr = dmaRead(channel[n].source_bank << 16 | channel[n].hdma_addr);
+  r.mdr = dmaRead(channel[n].sourceBank << 16 | channel[n].hdmaAddress);
   dmaAddClocks(4);
   dmaWrite(false);
 
-  if((channel[n].line_counter & 0x7f) == 0) {
-    channel[n].line_counter = r.mdr;
-    channel[n].hdma_addr++;
+  if((channel[n].lineCounter & 0x7f) == 0) {
+    channel[n].lineCounter = r.mdr;
+    channel[n].hdmaAddress++;
 
-    channel[n].hdma_completed = channel[n].line_counter == 0;
-    channel[n].hdma_do_transfer = !channel[n].hdma_completed;
+    channel[n].hdmaCompleted = channel[n].lineCounter == 0;
+    channel[n].hdmaDoTransfer = !channel[n].hdmaCompleted;
 
     if(channel[n].indirect) {
       dmaAddClocks(4);
       r.mdr = dmaRead(hdmaAddress(n));
-      channel[n].indirect_addr = r.mdr << 8;
+      channel[n].indirectAddress = r.mdr << 8;
       dmaAddClocks(4);
       dmaWrite(false);
 
-      if(!channel[n].hdma_completed || hdmaActiveAfter(n)) {
+      if(!channel[n].hdmaCompleted || hdmaActiveAfter(n)) {
         dmaAddClocks(4);
         r.mdr = dmaRead(hdmaAddress(n));
-        channel[n].indirect_addr >>= 8;
-        channel[n].indirect_addr |= r.mdr << 8;
+        channel[n].indirectAddress >>= 8;
+        channel[n].indirectAddress |= r.mdr << 8;
         dmaAddClocks(4);
         dmaWrite(false);
       }
@@ -191,11 +192,11 @@ auto CPU::hdmaRun() -> void {
 
   for(auto n : range(8)) {
     if(!hdmaActive(n)) continue;
-    channel[n].dma_enabled = false;  //HDMA run during DMA will stop DMA mid-transfer
+    channel[n].dmaEnabled = false;  //HDMA run during DMA will stop DMA mid-transfer
 
-    if(channel[n].hdma_do_transfer) {
+    if(channel[n].hdmaDoTransfer) {
       static const uint transferLength[8] = {1, 2, 2, 4, 4, 4, 2, 4};
-      uint length = transferLength[channel[n].transfer_mode];
+      uint length = transferLength[channel[n].transferMode];
       for(auto index : range(length)) {
         uint addr = !channel[n].indirect ? hdmaAddress(n) : hdmaIndirectAddress(n);
         dmaTransfer(channel[n].direction, dmaAddressB(n, index), addr);
@@ -206,18 +207,18 @@ auto CPU::hdmaRun() -> void {
   for(auto n : range(8)) {
     if(!hdmaActive(n)) continue;
 
-    channel[n].line_counter--;
-    channel[n].hdma_do_transfer = channel[n].line_counter & 0x80;
+    channel[n].lineCounter--;
+    channel[n].hdmaDoTransfer = channel[n].lineCounter & 0x80;
     hdmaUpdate(n);
   }
 
-  status.irq_lock = true;
+  status.irqLock = true;
 }
 
 auto CPU::hdmaInitReset() -> void {
   for(auto n : range(8)) {
-    channel[n].hdma_completed = false;
-    channel[n].hdma_do_transfer = false;
+    channel[n].hdmaCompleted = false;
+    channel[n].hdmaDoTransfer = false;
   }
 }
 
@@ -226,13 +227,13 @@ auto CPU::hdmaInit() -> void {
   dmaWrite(false);
 
   for(auto n : range(8)) {
-    if(!channel[n].hdma_enabled) continue;
-    channel[n].dma_enabled = false;  //HDMA init during DMA will stop DMA mid-transfer
+    if(!channel[n].hdmaEnabled) continue;
+    channel[n].dmaEnabled = false;  //HDMA init during DMA will stop DMA mid-transfer
 
-    channel[n].hdma_addr = channel[n].source_addr;
-    channel[n].line_counter = 0;
+    channel[n].hdmaAddress = channel[n].sourceAddress;
+    channel[n].lineCounter = 0;
     hdmaUpdate(n);
   }
 
-  status.irq_lock = true;
+  status.irqLock = true;
 }

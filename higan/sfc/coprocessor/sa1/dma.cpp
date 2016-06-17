@@ -2,7 +2,7 @@
 //direct data transfer
 //====================
 
-auto SA1::dma_normal() -> void {
+auto SA1::dmaNormal() -> void {
   while(mmio.dtc--) {
     uint8 data = r.mdr;
     uint32 dsa = mmio.dsa++;
@@ -15,13 +15,13 @@ auto SA1::dma_normal() -> void {
     switch(mmio.sd) {
     case DMA::SourceROM:
       if((dsa & 0x408000) == 0x008000 || (dsa & 0xc00000) == 0xc00000) {
-        data = bus_read(dsa, data);
+        data = busRead(dsa, data);
       }
       break;
 
     case DMA::SourceBWRAM:
       if((dsa & 0x40e000) == 0x006000 || (dsa & 0xf00000) == 0x400000) {
-        data = bus_read(dsa, data);
+        data = busRead(dsa, data);
       }
       break;
 
@@ -33,7 +33,7 @@ auto SA1::dma_normal() -> void {
     switch(mmio.dd) {
     case DMA::DestBWRAM:
       if((dda & 0x40e000) == 0x006000 || (dda & 0xf00000) == 0x400000) {
-        bus_write(dda, data);
+        busWrite(dda, data);
       }
       break;
 
@@ -56,7 +56,7 @@ auto SA1::dma_normal() -> void {
 //type-1 character conversion
 //===========================
 
-auto SA1::dma_cc1() -> void {
+auto SA1::dmaCC1() -> void {
   cpubwram.dma = true;
   mmio.chdma_irqfl = true;
   if(mmio.chdma_irqen) {
@@ -65,7 +65,7 @@ auto SA1::dma_cc1() -> void {
   }
 }
 
-auto SA1::dma_cc1_read(uint addr) -> uint8 {
+auto SA1::dmaCC1Read(uint addr) -> uint8 {
   //16 bytes/char (2bpp); 32 bytes/char (4bpp); 64 bytes/char (8bpp)
   uint charmask = (1 << (6 - mmio.dmacb)) - 1;
 
@@ -114,7 +114,7 @@ auto SA1::dma_cc1_read(uint addr) -> uint8 {
 //type-2 character conversion
 //===========================
 
-auto SA1::dma_cc2() -> void {
+auto SA1::dmaCC2() -> void {
   //select register file index (0-7 or 8-15)
   const uint8* brf = &mmio.brf[(dma.line & 1) << 3];
   uint bpp = 2 << (2 - mmio.dmacb);

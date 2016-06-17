@@ -21,13 +21,13 @@ auto SPC7110::Enter() -> void {
 }
 
 auto SPC7110::main() -> void {
-  if(dcu_pending) { dcu_pending = 0; dcu_begin_transfer(); }
-  if(mul_pending) { mul_pending = 0; alu_multiply(); }
-  if(div_pending) { div_pending = 0; alu_divide(); }
-  add_clocks(1);
+  if(dcuPending) { dcuPending = 0; dcuBeginTransfer(); }
+  if(mulPending) { mulPending = 0; aluMultiply(); }
+  if(divPending) { divPending = 0; aluDivide(); }
+  addClocks(1);
 }
 
-auto SPC7110::add_clocks(uint clocks) -> void {
+auto SPC7110::addClocks(uint clocks) -> void {
   step(clocks);
   synchronizeCPU();
 }
@@ -62,9 +62,9 @@ auto SPC7110::reset() -> void {
   r480b = 0x00;
   r480c = 0x00;
 
-  dcu_pending = 0;
-  dcu_mode = 0;
-  dcu_addr = 0;
+  dcuPending = 0;
+  dcuMode = 0;
+  dcuAddress = 0;
 
   r4810 = 0x00;
   r4811 = 0x00;
@@ -94,8 +94,8 @@ auto SPC7110::reset() -> void {
   r482e = 0x00;
   r482f = 0x00;
 
-  mul_pending = 0;
-  div_pending = 0;
+  mulPending = 0;
+  divPending = 0;
 
   r4830 = 0x00;
   r4831 = 0x00;
@@ -119,7 +119,7 @@ auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
     counter--;
     r4809 = counter >> 0;
     r480a = counter >> 8;
-    return dcu_read();
+    return dcuRead();
   }
   case 0x4801: return r4801;
   case 0x4802: return r4802;
@@ -139,7 +139,7 @@ auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
   //==============
   case 0x4810: {
     data = r4810;
-    data_port_increment_4810();
+    dataPortIncrement4810();
     return data;
   }
   case 0x4811: return r4811;
@@ -151,7 +151,7 @@ auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
   case 0x4817: return r4817;
   case 0x4818: return r4818;
   case 0x481a: {
-    data_port_increment_481a();
+    dataPortIncrement481a();
     return 0x00;
   }
 
@@ -201,9 +201,9 @@ auto SPC7110::write(uint24 addr, uint8 data) -> void {
   case 0x4801: r4801 = data; break;
   case 0x4802: r4802 = data; break;
   case 0x4803: r4803 = data; break;
-  case 0x4804: r4804 = data; dcu_load_address(); break;
+  case 0x4804: r4804 = data; dcuLoadAddress(); break;
   case 0x4805: r4805 = data; break;
-  case 0x4806: r4806 = data; r480c &= 0x7f; dcu_pending = 1; break;
+  case 0x4806: r4806 = data; r480c &= 0x7f; dcuPending = 1; break;
   case 0x4807: r4807 = data; break;
   case 0x4808: break;
   case 0x4809: r4809 = data; break;
@@ -215,12 +215,12 @@ auto SPC7110::write(uint24 addr, uint8 data) -> void {
   //==============
   case 0x4811: r4811 = data; break;
   case 0x4812: r4812 = data; break;
-  case 0x4813: r4813 = data; data_port_read(); break;
-  case 0x4814: r4814 = data; data_port_increment_4814(); break;
-  case 0x4815: r4815 = data; if(r4818 & 2) data_port_read(); data_port_increment_4815(); break;
+  case 0x4813: r4813 = data; dataPortRead(); break;
+  case 0x4814: r4814 = data; dataPortIncrement4814(); break;
+  case 0x4815: r4815 = data; if(r4818 & 2) dataPortRead(); dataPortIncrement4815(); break;
   case 0x4816: r4816 = data; break;
   case 0x4817: r4817 = data; break;
-  case 0x4818: r4818 = data & 0x7f; data_port_read(); break;
+  case 0x4818: r4818 = data & 0x7f; dataPortRead(); break;
 
   //=====================
   //arithmetic logic unit
@@ -230,9 +230,9 @@ auto SPC7110::write(uint24 addr, uint8 data) -> void {
   case 0x4822: r4822 = data; break;
   case 0x4823: r4823 = data; break;
   case 0x4824: r4824 = data; break;
-  case 0x4825: r4825 = data; r482f |= 0x81; mul_pending = 1; break;
+  case 0x4825: r4825 = data; r482f |= 0x81; mulPending = 1; break;
   case 0x4826: r4826 = data; break;
-  case 0x4827: r4827 = data; r482f |= 0x80; div_pending = 1; break;
+  case 0x4827: r4827 = data; r482f |= 0x80; divPending = 1; break;
   case 0x482e: r482e = data & 0x01; break;
 
   //===================
@@ -252,7 +252,7 @@ auto SPC7110::write(uint24 addr, uint8 data) -> void {
 
 //map address=00-3f,80-bf:8000-ffff mask=0x800000 => 00-3f:8000-ffff
 //map address=c0-ff:0000-ffff mask=0xc00000 => c0-ff:0000-ffff
-auto SPC7110::mcurom_read(uint24 addr, uint8 data) -> uint8 {
+auto SPC7110::mcuromRead(uint24 addr, uint8 data) -> uint8 {
   uint mask = (1 << (r4834 & 3)) - 1;  //8mbit, 16mbit, 32mbit, 64mbit DROM
 
   if(addr < 0x100000) {  //$00-0f,80-8f:8000-ffff; $c0-cf:0000-ffff
@@ -261,7 +261,7 @@ auto SPC7110::mcurom_read(uint24 addr, uint8 data) -> uint8 {
       return prom.read(bus.mirror(0x000000 + addr, prom.size()));
     }
     addr |= 0x100000 * (r4830 & 7);
-    return datarom_read(addr);
+    return dataromRead(addr);
   }
 
   if(addr < 0x200000) {  //$10-1f,90-9f:8000-ffff; $d0-df:0000-ffff
@@ -270,25 +270,25 @@ auto SPC7110::mcurom_read(uint24 addr, uint8 data) -> uint8 {
       return prom.read(bus.mirror(0x100000 + addr, prom.size()));
     }
     addr |= 0x100000 * (r4831 & 7);
-    return datarom_read(addr);
+    return dataromRead(addr);
   }
 
   if(addr < 0x300000) {  //$20-2f,a0-af:8000-ffff; $e0-ef:0000-ffff
     addr &= 0x0fffff;
     addr |= 0x100000 * (r4832 & 7);
-    return datarom_read(addr);
+    return dataromRead(addr);
   }
 
   if(addr < 0x400000) {  //$30-3f,b0-bf:8000-ffff; $f0-ff:0000-ffff
     addr &= 0x0fffff;
     addr |= 0x100000 * (r4833 & 7);
-    return datarom_read(addr);
+    return dataromRead(addr);
   }
 
   return data;
 }
 
-auto SPC7110::mcurom_write(uint24 addr, uint8 data) -> void {
+auto SPC7110::mcuromWrite(uint24 addr, uint8 data) -> void {
 }
 
 //===============
@@ -296,7 +296,7 @@ auto SPC7110::mcurom_write(uint24 addr, uint8 data) -> void {
 //===============
 
 //map address=00-3f,80-bf:6000-7fff mask=0x80e000 => 00-07:0000-ffff
-auto SPC7110::mcuram_read(uint24 addr, uint8) -> uint8 {
+auto SPC7110::mcuramRead(uint24 addr, uint8) -> uint8 {
   if(r4830 & 0x80) {
     addr = bus.mirror(addr, ram.size());
     return ram.read(addr);
@@ -304,7 +304,7 @@ auto SPC7110::mcuram_read(uint24 addr, uint8) -> uint8 {
   return 0x00;
 }
 
-auto SPC7110::mcuram_write(uint24 addr, uint8 data) -> void {
+auto SPC7110::mcuramWrite(uint24 addr, uint8 data) -> void {
   if(r4830 & 0x80) {
     addr = bus.mirror(addr, ram.size());
     ram.write(addr, data);

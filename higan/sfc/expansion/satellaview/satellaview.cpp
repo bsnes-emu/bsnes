@@ -22,17 +22,17 @@ auto Satellaview::read(uint24 addr, uint8 data) -> uint8 {
   case 0x2190: return regs.r2190;
 
   case 0x2192: {
-    uint counter = regs.r2192_counter++;
-    if(regs.r2192_counter >= 18) regs.r2192_counter = 0;
+    uint counter = regs.rtcCounter++;
+    if(regs.rtcCounter >= 18) regs.rtcCounter = 0;
 
     if(counter == 0) {
       time_t rawtime;
       time(&rawtime);
       tm* t = localtime(&rawtime);
 
-      regs.r2192_hour   = t->tm_hour;
-      regs.r2192_minute = t->tm_min;
-      regs.r2192_second = t->tm_sec;
+      regs.rtcHour   = t->tm_hour;
+      regs.rtcMinute = t->tm_min;
+      regs.rtcSecond = t->tm_sec;
     }
 
     switch(counter) {
@@ -46,9 +46,9 @@ auto Satellaview::read(uint24 addr, uint8 data) -> uint8 {
     case  7: return 0x00;
     case  8: return 0x00;
     case  9: return 0x00;
-    case 10: return regs.r2192_second;
-    case 11: return regs.r2192_minute;
-    case 12: return regs.r2192_hour;
+    case 10: return regs.rtcSecond;
+    case 11: return regs.rtcMinute;
+    case 12: return regs.rtcHour;
     case 13: return 0x00;  //???
     case 14: return 0x00;  //???
     case 15: return 0x00;  //???
@@ -101,7 +101,7 @@ auto Satellaview::write(uint24 addr, uint8 data) -> void {
 
   case 0x2191: {
     regs.r2191 = data;
-    regs.r2192_counter = 0;
+    regs.rtcCounter = 0;
   } break;
 
   case 0x2192: {

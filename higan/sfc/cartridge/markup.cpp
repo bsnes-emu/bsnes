@@ -191,11 +191,11 @@ auto Cartridge::parseMarkupSA1(Markup::Node root) -> void {
   }
 
   for(auto node : root["rom"].find("map")) {
-    parseMarkupMap(node, {&SA1::mmcrom_read, &sa1}, {&SA1::mmcrom_write, &sa1});
+    parseMarkupMap(node, {&SA1::mmcromRead, &sa1}, {&SA1::mmcromWrite, &sa1});
   }
 
   for(auto node : root["bwram"].find("map")) {
-    parseMarkupMap(node, {&SA1::mmcbwram_read, &sa1}, {&SA1::mmcbwram_write, &sa1});
+    parseMarkupMap(node, {&SA1::mmcbwramRead, &sa1}, {&SA1::mmcbwramWrite, &sa1});
   }
 
   for(auto node : root["iram"].find("map")) {
@@ -336,14 +336,14 @@ auto Cartridge::parseMarkupSPC7110(Markup::Node root) -> void {
 
   for(auto node : root.find("map")) {
     if(node.text() == "mcu") {
-      parseMarkupMap(node, {&SPC7110::mcurom_read, &spc7110}, {&SPC7110::mcurom_write, &spc7110});
+      parseMarkupMap(node, {&SPC7110::mcuromRead, &spc7110}, {&SPC7110::mcuromWrite, &spc7110});
     } else {
       parseMarkupMap(node, {&SPC7110::read, &spc7110}, {&SPC7110::write, &spc7110});
     }
   }
 
   for(auto node : root["ram"].find("map")) {
-    parseMarkupMap(node, {&SPC7110::mcuram_read, &spc7110}, {&SPC7110::mcuram_write, &spc7110});
+    parseMarkupMap(node, {&SPC7110::mcuramRead, &spc7110}, {&SPC7110::mcuramWrite, &spc7110});
   }
 }
 

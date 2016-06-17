@@ -75,22 +75,22 @@ auto HitachiDSP::dspRead(uint24 addr, uint8) -> uint8 {
 
   //MMIO
   switch(addr) {
-  case 0x7f40: return mmio.dma_source >>  0;
-  case 0x7f41: return mmio.dma_source >>  8;
-  case 0x7f42: return mmio.dma_source >> 16;
-  case 0x7f43: return mmio.dma_length >>  0;
-  case 0x7f44: return mmio.dma_length >>  8;
-  case 0x7f45: return mmio.dma_target >>  0;
-  case 0x7f46: return mmio.dma_target >>  8;
-  case 0x7f47: return mmio.dma_target >> 16;
+  case 0x7f40: return mmio.dmaSource >>  0;
+  case 0x7f41: return mmio.dmaSource >>  8;
+  case 0x7f42: return mmio.dmaSource >> 16;
+  case 0x7f43: return mmio.dmaLength >>  0;
+  case 0x7f44: return mmio.dmaLength >>  8;
+  case 0x7f45: return mmio.dmaTarget >>  0;
+  case 0x7f46: return mmio.dmaTarget >>  8;
+  case 0x7f47: return mmio.dmaTarget >> 16;
   case 0x7f48: return mmio.r1f48;
-  case 0x7f49: return mmio.program_offset >>  0;
-  case 0x7f4a: return mmio.program_offset >>  8;
-  case 0x7f4b: return mmio.program_offset >> 16;
+  case 0x7f49: return mmio.programOffset >>  0;
+  case 0x7f4a: return mmio.programOffset >>  8;
+  case 0x7f4b: return mmio.programOffset >> 16;
   case 0x7f4c: return mmio.r1f4c;
-  case 0x7f4d: return mmio.page_number >> 0;
-  case 0x7f4e: return mmio.page_number >> 8;
-  case 0x7f4f: return mmio.program_counter;
+  case 0x7f4d: return mmio.pageNumber >> 0;
+  case 0x7f4e: return mmio.pageNumber >> 8;
+  case 0x7f4f: return mmio.programCounter;
   case 0x7f50: return mmio.r1f50;
   case 0x7f51: return mmio.r1f51;
   case 0x7f52: return mmio.r1f52;
@@ -120,26 +120,26 @@ auto HitachiDSP::dspWrite(uint24 addr, uint8 data) -> void {
 
   //MMIO
   switch(addr) {
-  case 0x7f40: mmio.dma_source = (mmio.dma_source & 0xffff00) | (data <<  0); return;
-  case 0x7f41: mmio.dma_source = (mmio.dma_source & 0xff00ff) | (data <<  8); return;
-  case 0x7f42: mmio.dma_source = (mmio.dma_source & 0x00ffff) | (data << 16); return;
-  case 0x7f43: mmio.dma_length = (mmio.dma_length &   0xff00) | (data <<  0); return;
-  case 0x7f44: mmio.dma_length = (mmio.dma_length &   0x00ff) | (data <<  8); return;
-  case 0x7f45: mmio.dma_target = (mmio.dma_target & 0xffff00) | (data <<  0); return;
-  case 0x7f46: mmio.dma_target = (mmio.dma_target & 0xff00ff) | (data <<  8); return;
-  case 0x7f47: mmio.dma_target = (mmio.dma_target & 0x00ffff) | (data << 16);
+  case 0x7f40: mmio.dmaSource = (mmio.dmaSource & 0xffff00) | (data <<  0); return;
+  case 0x7f41: mmio.dmaSource = (mmio.dmaSource & 0xff00ff) | (data <<  8); return;
+  case 0x7f42: mmio.dmaSource = (mmio.dmaSource & 0x00ffff) | (data << 16); return;
+  case 0x7f43: mmio.dmaLength = (mmio.dmaLength &   0xff00) | (data <<  0); return;
+  case 0x7f44: mmio.dmaLength = (mmio.dmaLength &   0x00ff) | (data <<  8); return;
+  case 0x7f45: mmio.dmaTarget = (mmio.dmaTarget & 0xffff00) | (data <<  0); return;
+  case 0x7f46: mmio.dmaTarget = (mmio.dmaTarget & 0xff00ff) | (data <<  8); return;
+  case 0x7f47: mmio.dmaTarget = (mmio.dmaTarget & 0x00ffff) | (data << 16);
     if(regs.halt) mmio.dma = true;
     return;
   case 0x7f48: mmio.r1f48 = data & 0x01; return;
-  case 0x7f49: mmio.program_offset = (mmio.program_offset & 0xffff00) | (data <<  0); return;
-  case 0x7f4a: mmio.program_offset = (mmio.program_offset & 0xff00ff) | (data <<  8); return;
-  case 0x7f4b: mmio.program_offset = (mmio.program_offset & 0x00ffff) | (data << 16); return;
+  case 0x7f49: mmio.programOffset = (mmio.programOffset & 0xffff00) | (data <<  0); return;
+  case 0x7f4a: mmio.programOffset = (mmio.programOffset & 0xff00ff) | (data <<  8); return;
+  case 0x7f4b: mmio.programOffset = (mmio.programOffset & 0x00ffff) | (data << 16); return;
   case 0x7f4c: mmio.r1f4c = data & 0x03; return;
-  case 0x7f4d: mmio.page_number = (mmio.page_number & 0x7f00) | ((data & 0xff) << 0); return;
-  case 0x7f4e: mmio.page_number = (mmio.page_number & 0x00ff) | ((data & 0x7f) << 8); return;
-  case 0x7f4f: mmio.program_counter = data;
+  case 0x7f4d: mmio.pageNumber = (mmio.pageNumber & 0x7f00) | ((data & 0xff) << 0); return;
+  case 0x7f4e: mmio.pageNumber = (mmio.pageNumber & 0x00ff) | ((data & 0x7f) << 8); return;
+  case 0x7f4f: mmio.programCounter = data;
     if(regs.halt) {
-      regs.pc = mmio.page_number * 256 + mmio.program_counter;
+      regs.pc = mmio.pageNumber * 256 + mmio.programCounter;
       regs.halt = false;
     }
     return;

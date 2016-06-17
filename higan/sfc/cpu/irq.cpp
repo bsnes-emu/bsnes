@@ -5,98 +5,98 @@
 //it is used to emulate hardware communication delay between opcode and interrupt units.
 auto CPU::pollInterrupts() -> void {
   //NMI hold
-  if(status.nmi_hold) {
-    status.nmi_hold = false;
-    if(status.nmi_enabled) status.nmi_transition = true;
+  if(status.nmiHold) {
+    status.nmiHold = false;
+    if(status.nmiEnabled) status.nmiTransition = true;
   }
 
   //NMI test
-  bool nmi_valid = vcounter(2) >= ppu.vdisp();
-  if(!status.nmi_valid && nmi_valid) {
+  bool nmiValid = vcounter(2) >= ppu.vdisp();
+  if(!status.nmiValid && nmiValid) {
     //0->1 edge sensitive transition
-    status.nmi_line = true;
-    status.nmi_hold = true;  //hold /NMI for four cycles
-  } else if(status.nmi_valid && !nmi_valid) {
+    status.nmiLine = true;
+    status.nmiHold = true;  //hold /NMI for four cycles
+  } else if(status.nmiValid && !nmiValid) {
     //1->0 edge sensitive transition
-    status.nmi_line = false;
+    status.nmiLine = false;
   }
-  status.nmi_valid = nmi_valid;
+  status.nmiValid = nmiValid;
 
   //IRQ hold
-  status.irq_hold = false;
-  if(status.irq_line) {
-    if(status.virq_enabled || status.hirq_enabled) status.irq_transition = true;
+  status.irqHold = false;
+  if(status.irqLine) {
+    if(status.virqEnabled || status.hirqEnabled) status.irqTransition = true;
   }
 
   //IRQ test
-  bool irq_valid = status.virq_enabled || status.hirq_enabled;
-  if(irq_valid) {
-    if((status.virq_enabled && vcounter(10) != (status.virq_pos))
-    || (status.hirq_enabled && hcounter(10) != (status.hirq_pos + 1) * 4)
-    || (status.virq_pos && vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
-    ) irq_valid = false;
+  bool irqValid = status.virqEnabled || status.hirqEnabled;
+  if(irqValid) {
+    if((status.virqEnabled && vcounter(10) != (status.virqPos))
+    || (status.hirqEnabled && hcounter(10) != (status.hirqPos + 1) * 4)
+    || (status.virqPos && vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
+    ) irqValid = false;
   }
-  if(!status.irq_valid && irq_valid) {
+  if(!status.irqValid && irqValid) {
     //0->1 edge sensitive transition
-    status.irq_line = true;
-    status.irq_hold = true;  //hold /IRQ for four cycles
+    status.irqLine = true;
+    status.irqHold = true;  //hold /IRQ for four cycles
   }
-  status.irq_valid = irq_valid;
+  status.irqValid = irqValid;
 }
 
 auto CPU::nmitimenUpdate(uint8 data) -> void {
-  bool nmi_enabled  = status.nmi_enabled;
-  bool virq_enabled = status.virq_enabled;
-  bool hirq_enabled = status.hirq_enabled;
-  status.nmi_enabled  = data & 0x80;
-  status.virq_enabled = data & 0x20;
-  status.hirq_enabled = data & 0x10;
+  bool nmiEnabled  = status.nmiEnabled;
+  bool virqEnabled = status.virqEnabled;
+  bool hirqEnabled = status.hirqEnabled;
+  status.nmiEnabled  = data & 0x80;
+  status.virqEnabled = data & 0x20;
+  status.hirqEnabled = data & 0x10;
 
   //0->1 edge sensitive transition
-  if(!nmi_enabled && status.nmi_enabled && status.nmi_line) {
-    status.nmi_transition = true;
+  if(!nmiEnabled && status.nmiEnabled && status.nmiLine) {
+    status.nmiTransition = true;
   }
 
   //?->1 level sensitive transition
-  if(status.virq_enabled && !status.hirq_enabled && status.irq_line) {
-    status.irq_transition = true;
+  if(status.virqEnabled && !status.hirqEnabled && status.irqLine) {
+    status.irqTransition = true;
   }
 
-  if(!status.virq_enabled && !status.hirq_enabled) {
-    status.irq_line = false;
-    status.irq_transition = false;
+  if(!status.virqEnabled && !status.hirqEnabled) {
+    status.irqLine = false;
+    status.irqTransition = false;
   }
 
-  status.irq_lock = true;
+  status.irqLock = true;
 }
 
 auto CPU::rdnmi() -> bool {
-  bool result = status.nmi_line;
-  if(!status.nmi_hold) {
-    status.nmi_line = false;
+  bool result = status.nmiLine;
+  if(!status.nmiHold) {
+    status.nmiLine = false;
   }
   return result;
 }
 
 auto CPU::timeup() -> bool {
-  bool result = status.irq_line;
-  if(!status.irq_hold) {
-    status.irq_line = false;
-    status.irq_transition = false;
+  bool result = status.irqLine;
+  if(!status.irqHold) {
+    status.irqLine = false;
+    status.irqTransition = false;
   }
   return result;
 }
 
 auto CPU::nmiTest() -> bool {
-  if(!status.nmi_transition) return false;
-  status.nmi_transition = false;
+  if(!status.nmiTransition) return false;
+  status.nmiTransition = false;
   r.wai = false;
   return true;
 }
 
 auto CPU::irqTest() -> bool {
-  if(!status.irq_transition && !r.irq) return false;
-  status.irq_transition = false;
+  if(!status.irqTransition && !r.irq) return false;
+  status.irqTransition = false;
   r.wai = false;
   return !r.p.i;
 }
