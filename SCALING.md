@@ -29,11 +29,20 @@ A variant of Scale2x exclusive to SameBoy that blends the Scale2x output with th
 ### Anti-aliased Scale4x
 Another exclusive algorithm that works by applying the Anti-aliased Scale2x algorithm twice
 
-## The OmniScale Family (beta)
-OmniScale is an exclusive algorithm developed for SameBoy. It combines pattern-based rules with a unique locally paletted bilinear filtering technique to scale an image by any factor, including non-integer factors. The algorithm is currently in beta, and its pattern-based rule do not currently detect 30- and 60-degree diagonals, making them look jaggy.
+## The HQnx Family
+A relatively modern family of scaling algorithms that makes an extensive use of lookup tables to create scaled anti-aliased output. The HQnx family includes several scaling factors and variants.
 
-### OmniScale
+### HQ2x
+Currently HQ2x is the only HQnx algorithm in SameBoy. As the name implies, it scales the image by a factor of 2.
+
+### The OmniScale algorithm
+OmniScale is an exclusive algorithm developed for SameBoy. It is inspired by HQnx's lookup tables, but improves on them by handling more cases. OmniScale can scale an image by any factor, including non-integer factors, and produces high quality anti-aliased output.
+
+## The OmniScale Legacy Family (beta)
+An old prototype of the OmniScale algorithm. It combines pattern-based rules with a unique locally paletted bilinear filtering technique to scale an image by any factor, including non-integer factors. Its pattern-based rule do not currently detect 30- and 60-degree diagonals, making them look jaggy. The output OmniScale Legacy produces is quite unique, as it tends to produce non-trivial patterns.
+
+### OmniScale Legacy
 The base version of the algorithm, which generates aliased output with very few new colors introduced.
 
-### Anti-aliased OmniScale
+### Anti-aliased OmniScale Legacy
 A variant of OmniScale that produces anti-aliased output using 2x super-sampling.
