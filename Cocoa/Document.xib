@@ -9,6 +9,7 @@
                 <outlet property="consoleInput" destination="l22-S8-uji" id="Heu-am-YgB"/>
                 <outlet property="consoleOutput" destination="doS-dM-hnl" id="Gn5-ju-Wb0"/>
                 <outlet property="consoleWindow" destination="21F-Ah-yHX" id="eQ4-ug-LsT"/>
+                <outlet property="mainWindow" destination="xOd-HO-29H" id="h8M-YB-vcC"/>
                 <outlet property="view" destination="uqf-pe-VAF" id="HMP-rf-Yqk"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>

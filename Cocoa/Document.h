@@ -6,6 +6,7 @@
 @property (strong) IBOutlet NSTextView *consoleOutput;
 @property (strong) IBOutlet NSPanel *consoleWindow;
 @property (strong) IBOutlet NSTextField *consoleInput;
+@property (strong) IBOutlet NSWindow *mainWindow;
 
 
 @end
