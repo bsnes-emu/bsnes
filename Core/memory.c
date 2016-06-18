@@ -461,6 +461,10 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
                 gb->hdma_current_src = (gb->io_registers[GB_IO_HDMA1] << 8) | (gb->io_registers[GB_IO_HDMA2] & 0xF0);
                 gb->hdma_current_dest = (gb->io_registers[GB_IO_HDMA3] << 8) | (gb->io_registers[GB_IO_HDMA4] & 0xF0);
                 gb->hdma_steps_left = (gb->io_registers[GB_IO_HDMA5] & 0x7F) + 1;
+                /* Todo: Verify this. Gambatte's DMA tests require this. */
+                if (gb->hdma_current_dest + (gb->hdma_steps_left << 4) > 0xFFFF) {
+                    gb->hdma_steps_left = (0x10000 - gb->hdma_current_dest) >> 4;
+                }
                 gb->hdma_cycles = 0;
                 return;
 
