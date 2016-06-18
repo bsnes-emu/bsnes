@@ -118,9 +118,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 - (void) start
 {
     if (running) return;
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [self run];
-    });
+    [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
 
 - (void) stop
