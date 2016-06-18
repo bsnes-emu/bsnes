@@ -4,8 +4,6 @@
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
 
-static GBShader *shader = nil;
-
 @implementation GBView
 {
     uint32_t *image_buffers[3];
@@ -93,7 +91,10 @@ static GBShader *shader = nil;
     if (!self.shader) {
         self.shader = [[GBShader alloc] initWithName:[[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"]];
     }
+
     double scale = self.window.backingScaleFactor;
+    glViewport(0, 0, self.bounds.size.width * scale, self.bounds.size.height * scale);
+
     if (_shouldBlendFrameWithPrevious) {
         [self.shader renderBitmap:image_buffers[current_buffer]
                          previous:image_buffers[(current_buffer + 2) % self.numberOfBuffers]
@@ -169,12 +170,6 @@ static GBShader *shader = nil;
     if (!handled) {
         [super keyUp:theEvent];
     }
-}
-
--(void)reshape
-{
-    double scale = self.window.backingScaleFactor;
-    glViewport(0, 0, self.bounds.size.width * scale, self.bounds.size.height * scale);
 }
 
 - (BOOL)becomeFirstResponder
