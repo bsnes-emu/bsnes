@@ -27,7 +27,7 @@ struct VRC4 : Chip {
       }
     }
 
-    cpu.set_irq_line(irq_line);
+    cpu.irqLine(irq_line);
     tick();
   }
 

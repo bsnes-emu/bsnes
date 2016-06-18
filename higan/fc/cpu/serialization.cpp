@@ -4,20 +4,16 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.array(ram);
 
-  s.integer(status.interrupt_pending);
-  s.integer(status.nmi_pending);
-  s.integer(status.nmi_line);
-  s.integer(status.irq_line);
-  s.integer(status.irq_apu_line);
+  s.integer(io.interruptPending);
+  s.integer(io.nmiPending);
+  s.integer(io.nmiLine);
+  s.integer(io.irqLine);
+  s.integer(io.apuLine);
 
-  s.integer(status.rdy_line);
-  s.integer(status.rdy_addr_valid);
-  s.integer(status.rdy_addr_value);
+  s.integer(io.rdyLine);
+  s.integer(io.rdyAddrValid);
+  s.integer(io.rdyAddrValue);
 
-  s.integer(status.oam_dma_pending);
-  s.integer(status.oam_dma_page);
-
-  s.integer(status.controller_latch);
-  s.integer(status.controller_port0);
-  s.integer(status.controller_port1);
+  s.integer(io.oamdmaPending);
+  s.integer(io.oamdmaPage);
 }

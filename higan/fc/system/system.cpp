@@ -2,21 +2,23 @@
 
 namespace Famicom {
 
+#include "peripherals.cpp"
 #include "video.cpp"
 #include "serialization.cpp"
 System system;
-
-auto System::loaded() const -> bool { return _loaded; }
 
 auto System::run() -> void {
   scheduler.enter();
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(ppu.thread);
   scheduler.synchronize(cpu.thread);
   scheduler.synchronize(apu.thread);
+  scheduler.synchronize(ppu.thread);
   scheduler.synchronize(cartridge.thread);
+  for(auto peripheral : cpu.peripherals) {
+    scheduler.synchronize(peripheral->thread);
+  }
 }
 
 auto System::load() -> void {
@@ -29,6 +31,7 @@ auto System::load() -> void {
 
 auto System::unload() -> void {
   if(!loaded()) return;
+  peripherals.unload();
   cartridge.unload();
   _loaded = false;
 }
@@ -38,7 +41,6 @@ auto System::power() -> void {
   cpu.power();
   apu.power();
   ppu.power();
-  input.reset();
   reset();
 }
 
@@ -55,14 +57,12 @@ auto System::reset() -> void {
   cpu.reset();
   apu.reset();
   ppu.reset();
-  input.reset();
   scheduler.reset();
+  peripherals.reset();
 }
 
 auto System::init() -> void {
   assert(interface != nullptr);
-  input.connect(0, Input::Device::Joypad);
-  input.connect(1, Input::Device::None);
 }
 
 auto System::term() -> void {

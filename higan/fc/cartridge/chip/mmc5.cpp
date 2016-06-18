@@ -7,7 +7,7 @@ struct MMC5 : Chip {
     //scanline() resets this; if no scanlines detected, enter video blanking period
     if(++cpu_cycle_counter >= 200) blank();  //113-114 normal; ~2500 across Vblank period
 
-    cpu.set_irq_line(irq_enable && irq_pending);
+    cpu.irqLine(irq_enable && irq_pending);
     tick();
   }
 

@@ -68,7 +68,7 @@ auto APU::tick() -> void {
 }
 
 auto APU::set_irq_line() -> void {
-  cpu.set_irq_apu_line(frame.irq_pending || dmc.irq_pending);
+  cpu.apuLine(frame.irq_pending || dmc.irq_pending);
 }
 
 auto APU::set_sample(int16 sample) -> void {
@@ -109,8 +109,10 @@ auto APU::reset() -> void {
   set_irq_line();
 }
 
-auto APU::read(uint16 addr) -> uint8 {
-  if(addr == 0x4015) {
+auto APU::readIO(uint16 addr) -> uint8 {
+  switch(addr) {
+
+  case 0x4015: {
     uint8 result = 0x00;
     result |= pulse[0].length_counter ? 0x01 : 0;
     result |= pulse[1].length_counter ? 0x02 : 0;
@@ -126,34 +128,40 @@ auto APU::read(uint16 addr) -> uint8 {
     return result;
   }
 
+  }
+
   return cpu.mdr();
 }
 
-auto APU::write(uint16 addr, uint8 data) -> void {
+auto APU::writeIO(uint16 addr, uint8 data) -> void {
   const uint n = (addr >> 2) & 1;  //pulse#
 
   switch(addr) {
-  case 0x4000: case 0x4004:
+
+  case 0x4000: case 0x4004: {
     pulse[n].duty = data >> 6;
     pulse[n].envelope.loop_mode = data & 0x20;
     pulse[n].envelope.use_speed_as_volume = data & 0x10;
     pulse[n].envelope.speed = data & 0x0f;
-    break;
+    return;
+  }
 
-  case 0x4001: case 0x4005:
+  case 0x4001: case 0x4005: {
     pulse[n].sweep.enable = data & 0x80;
     pulse[n].sweep.period = (data & 0x70) >> 4;
     pulse[n].sweep.decrement = data & 0x08;
     pulse[n].sweep.shift = data & 0x07;
     pulse[n].sweep.reload = true;
-    break;
+    return;
+  }
 
-  case 0x4002: case 0x4006:
+  case 0x4002: case 0x4006: {
     pulse[n].period = (pulse[n].period & 0x0700) | (data << 0);
     pulse[n].sweep.pulse_period = (pulse[n].sweep.pulse_period & 0x0700) | (data << 0);
-    break;
+    return;
+  }
 
-  case 0x4003: case 0x4007:
+  case 0x4003: case 0x4007: {
     pulse[n].period = (pulse[n].period & 0x00ff) | (data << 8);
     pulse[n].sweep.pulse_period = (pulse[n].sweep.pulse_period & 0x00ff) | (data << 8);
 
@@ -163,18 +171,21 @@ auto APU::write(uint16 addr, uint8 data) -> void {
     if(enabled_channels & (1 << n)) {
       pulse[n].length_counter = length_counter_table[(data >> 3) & 0x1f];
     }
-    break;
+    return;
+  }
 
-  case 0x4008:
+  case 0x4008: {
     triangle.halt_length_counter = data & 0x80;
     triangle.linear_length = data & 0x7f;
-    break;
+    return;
+  }
 
-  case 0x400a:
+  case 0x400a: {
     triangle.period = (triangle.period & 0x0700) | (data << 0);
-    break;
+    return;
+  }
 
-  case 0x400b:
+  case 0x400b: {
     triangle.period = (triangle.period & 0x00ff) | (data << 8);
 
     triangle.reload_linear = true;
@@ -182,49 +193,57 @@ auto APU::write(uint16 addr, uint8 data) -> void {
     if(enabled_channels & (1 << 2)) {
       triangle.length_counter = length_counter_table[(data >> 3) & 0x1f];
     }
-    break;
+    return;
+  }
 
-  case 0x400c:
+  case 0x400c: {
     noise.envelope.loop_mode = data & 0x20;
     noise.envelope.use_speed_as_volume = data & 0x10;
     noise.envelope.speed = data & 0x0f;
-    break;
+    return;
+  }
 
-  case 0x400e:
+  case 0x400e: {
     noise.short_mode = data & 0x80;
     noise.period = data & 0x0f;
-    break;
+    return;
+  }
 
-  case 0x400f:
+  case 0x400f: {
     noise.envelope.reload_decay = true;
 
     if(enabled_channels & (1 << 3)) {
       noise.length_counter = length_counter_table[(data >> 3) & 0x1f];
     }
-    break;
+    return;
+  }
 
-  case 0x4010:
+  case 0x4010: {
     dmc.irq_enable = data & 0x80;
     dmc.loop_mode = data & 0x40;
     dmc.period = data & 0x0f;
 
     dmc.irq_pending = dmc.irq_pending && dmc.irq_enable && !dmc.loop_mode;
     set_irq_line();
-    break;
+    return;
+  }
 
-  case 0x4011:
+  case 0x4011: {
     dmc.dac_latch = data & 0x7f;
-    break;
+    return;
+  }
 
-  case 0x4012:
+  case 0x4012: {
     dmc.addr_latch = data;
-    break;
+    return;
+  }
 
-  case 0x4013:
+  case 0x4013: {
     dmc.length_latch = data;
-    break;
+    return;
+  }
 
-  case 0x4015:
+  case 0x4015: {
     if((data & 0x01) == 0) pulse[0].length_counter = 0;
     if((data & 0x02) == 0) pulse[1].length_counter = 0;
     if((data & 0x04) == 0) triangle.length_counter = 0;
@@ -235,9 +254,10 @@ auto APU::write(uint16 addr, uint8 data) -> void {
 
     set_irq_line();
     enabled_channels = data & 0x1f;
-    break;
+    return;
+  }
 
-  case 0x4017:
+  case 0x4017: {
     frame.mode = data >> 6;
 
     frame.counter = 0;
@@ -247,7 +267,9 @@ auto APU::write(uint16 addr, uint8 data) -> void {
       set_irq_line();
     }
     frame.divider = FrameCounter::NtscPeriod;
-    break;
+    return;
+  }
+
   }
 }
 

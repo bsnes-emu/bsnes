@@ -12,8 +12,8 @@ struct APU : Thread {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(uint16 addr) -> uint8;
-  auto write(uint16 addr, uint8 data) -> void;
+  auto readIO(uint16 addr) -> uint8;
+  auto writeIO(uint16 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 

@@ -8,8 +8,8 @@ auto APU::DMC::start() -> void {
 auto APU::DMC::stop() -> void {
   length_counter = 0;
   dma_delay_counter = 0;
-  cpu.set_rdy_line(1);
-  cpu.set_rdy_addr(false);
+  cpu.rdyLine(1);
+  cpu.rdyAddr(false);
 }
 
 auto APU::DMC::clock() -> uint8 {
@@ -19,10 +19,10 @@ auto APU::DMC::clock() -> uint8 {
     dma_delay_counter--;
 
     if(dma_delay_counter == 1) {
-      cpu.set_rdy_addr(true, 0x8000 | read_addr);
+      cpu.rdyAddr(true, 0x8000 | read_addr);
     } else if(dma_delay_counter == 0) {
-      cpu.set_rdy_line(1);
-      cpu.set_rdy_addr(false);
+      cpu.rdyLine(1);
+      cpu.rdyAddr(false);
 
       dma_buffer = cpu.mdr();
       have_dma_buffer = true;
@@ -61,7 +61,7 @@ auto APU::DMC::clock() -> uint8 {
   }
 
   if(length_counter > 0 && have_dma_buffer == false && dma_delay_counter == 0) {
-    cpu.set_rdy_line(0);
+    cpu.rdyLine(0);
     dma_delay_counter = 4;
   }
 

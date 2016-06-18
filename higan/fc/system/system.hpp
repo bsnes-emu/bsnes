@@ -1,5 +1,7 @@
+#include "peripherals.hpp"
+
 struct System {
-  auto loaded() const -> bool;
+  auto loaded() const -> bool { return _loaded; }
 
   auto run() -> void;
   auto runToSave() -> void;

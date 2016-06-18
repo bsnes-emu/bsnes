@@ -37,7 +37,6 @@ auto System::serialize(serializer& s) -> void {
 
 auto System::serializeAll(serializer& s) -> void {
   system.serialize(s);
-  input.serialize(s);
   cartridge.serialize(s);
   cpu.serialize(s);
   apu.serialize(s);

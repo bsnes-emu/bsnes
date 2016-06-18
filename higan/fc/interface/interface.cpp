@@ -21,7 +21,11 @@ Interface::Interface() {
 
   media.append({ID::Famicom, "Famicom", "fc", true});
 
-  { Device device{0, ID::Port1 | ID::Port2, "Controller"};
+  { Device device{0, ID::ControllerPort1 | ID::ControllerPort2, "None"};
+    devices.append(device);
+  }
+
+  { Device device{1, ID::ControllerPort1 | ID::ControllerPort2, "Gamepad"};
     device.inputs.append({0, 0, "Up"    });
     device.inputs.append({1, 0, "Down"  });
     device.inputs.append({2, 0, "Left"  });
@@ -188,6 +192,10 @@ auto Interface::save(uint id, const stream& stream) -> void {
 auto Interface::unload() -> void {
   save();
   system.unload();
+}
+
+auto Interface::connect(uint port, uint device) -> void {
+  Famicom::peripherals.connect(port, device);
 }
 
 auto Interface::power() -> void {

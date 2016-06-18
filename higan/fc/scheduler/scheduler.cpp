@@ -24,8 +24,8 @@ auto Scheduler::exit(Event event_) -> void {
 }
 
 auto Scheduler::synchronize(cothread_t thread) -> void {
-  if(thread == ppu.thread) {
-    while(enter(Mode::SynchronizePPU) != Event::Synchronize);
+  if(thread == cpu.thread) {
+    while(enter(Mode::SynchronizeCPU) != Event::Synchronize);
   } else {
     resume = thread;
     while(enter(Mode::SynchronizeAll) != Event::Synchronize);
@@ -33,8 +33,8 @@ auto Scheduler::synchronize(cothread_t thread) -> void {
 }
 
 auto Scheduler::synchronize() -> void {
-  if(co_active() == ppu.thread && mode == Mode::SynchronizePPU) return exit(Event::Synchronize);
-  if(co_active() != ppu.thread && mode == Mode::SynchronizeAll) return exit(Event::Synchronize);
+  if(co_active() == cpu.thread && mode == Mode::SynchronizeCPU) return exit(Event::Synchronize);
+  if(co_active() != cpu.thread && mode == Mode::SynchronizeAll) return exit(Event::Synchronize);
 }
 
 auto Scheduler::synchronizing() const -> bool {

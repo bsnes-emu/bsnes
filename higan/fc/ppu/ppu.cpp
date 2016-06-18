@@ -17,16 +17,16 @@ auto PPU::main() -> void {
 auto PPU::tick() -> void {
   if(status.ly == 240 && status.lx == 340) status.nmi_hold = 1;
   if(status.ly == 241 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
-  if(status.ly == 241 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
+  if(status.ly == 241 && status.lx ==   2) cpu.nmiLine(status.nmi_enable && status.nmi_flag);
 
   if(status.ly == 260 && status.lx == 340) status.sprite_zero_hit = 0, status.sprite_overflow = 0;
 
   if(status.ly == 260 && status.lx == 340) status.nmi_hold = 0;
   if(status.ly == 261 && status.lx ==   0) status.nmi_flag = status.nmi_hold;
-  if(status.ly == 261 && status.lx ==   2) cpu.set_nmi_line(status.nmi_enable && status.nmi_flag);
+  if(status.ly == 261 && status.lx ==   2) cpu.nmiLine(status.nmi_enable && status.nmi_flag);
 
   clock += 4;
-  if(clock >= 0) co_switch(cpu.thread);
+  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 
   status.lx++;
 }
@@ -97,7 +97,7 @@ auto PPU::reset() -> void {
   for(auto& n : oam   ) n = 0;
 }
 
-auto PPU::read(uint16 addr) -> uint8 {
+auto PPU::readIO(uint16 addr) -> uint8 {
   uint8 result = 0x00;
 
   switch(addr & 7) {
@@ -108,7 +108,7 @@ auto PPU::read(uint16 addr) -> uint8 {
     result |= status.mdr & 0x1f;
     status.address_latch = 0;
     status.nmi_hold = 0;
-    cpu.set_nmi_line(status.nmi_flag = 0);
+    cpu.nmiLine(status.nmi_flag = 0);
     break;
   case 4:  //OAMDATA
     result = oam[status.oam_addr];
@@ -134,7 +134,7 @@ auto PPU::read(uint16 addr) -> uint8 {
   return result;
 }
 
-auto PPU::write(uint16 addr, uint8 data) -> void {
+auto PPU::writeIO(uint16 addr, uint8 data) -> void {
   status.mdr = data;
 
   switch(addr & 7) {
@@ -146,7 +146,7 @@ auto PPU::write(uint16 addr, uint8 data) -> void {
     status.sprite_addr = (data & 0x08) ? 0x1000 : 0x0000;
     status.vram_increment = (data & 0x04) ? 32 : 1;
     status.taddr = (status.taddr & 0x73ff) | ((data & 0x03) << 10);
-    cpu.set_nmi_line(status.nmi_enable && status.nmi_hold && status.nmi_flag);
+    cpu.nmiLine(status.nmi_enable && status.nmi_hold && status.nmi_flag);
     return;
   case 1:  //PPUMASK
     status.emphasis = data >> 5;

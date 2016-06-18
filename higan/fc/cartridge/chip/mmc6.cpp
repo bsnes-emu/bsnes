@@ -4,7 +4,7 @@ struct MMC6 : Chip {
 
   auto main() -> void {
     if(irq_delay) irq_delay--;
-    cpu.set_irq_line(irq_line);
+    cpu.irqLine(irq_line);
     tick();
   }
 

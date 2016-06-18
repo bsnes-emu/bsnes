@@ -16,9 +16,10 @@ struct ID {
     CharacterRAM,
   };
 
-  enum : uint {
-    Port1 = 1,
-    Port2 = 2,
+  enum : uint {  //bitmasks
+    ControllerPort1 = 1,
+    ControllerPort2 = 2,
+    ExpansionPort   = 4,
   };
 };
 
@@ -41,6 +42,7 @@ struct Interface : Emulator::Interface {
   auto save(uint id, const stream& stream) -> void;
   auto unload() -> void;
 
+  auto connect(uint port, uint device) -> void;
   auto power() -> void;
   auto reset() -> void;
   auto run() -> void;
@@ -61,6 +63,10 @@ private:
 struct Settings {
   bool colorEmulation = true;
   bool scanlineEmulation = true;
+
+  uint controllerPort1 = 0;
+  uint controllerPort2 = 0;
+  uint expansionPort = 0;
 };
 
 extern Interface* interface;

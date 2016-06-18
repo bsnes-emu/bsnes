@@ -1,7 +1,7 @@
 struct Scheduler {
   enum class Mode : uint {
     Run,
-    SynchronizePPU,
+    SynchronizeCPU,
     SynchronizeAll,
   };
 

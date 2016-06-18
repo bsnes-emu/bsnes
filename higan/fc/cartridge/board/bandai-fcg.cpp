@@ -7,7 +7,7 @@ struct BandaiFCG : Board {
   auto main() -> void {
     if(irq_counter_enable) {
       if(--irq_counter == 0xffff) {
-        cpu.set_irq_line(1);
+        cpu.irqLine(1);
         irq_counter_enable = false;
       }
     }
@@ -47,7 +47,7 @@ struct BandaiFCG : Board {
         mirror = data & 0x03;
         break;
       case 0x0a:
-        cpu.set_irq_line(0);
+        cpu.irqLine(0);
         irq_counter_enable = data & 0x01;
         irq_counter = irq_latch;
         break;
@@ -58,7 +58,7 @@ struct BandaiFCG : Board {
         irq_latch = (irq_latch & 0x00ff) | (data << 8);
         break;
       case 0x0d:
-        //TODO: serial EEPROM support
+        //todo: serial EEPROM support
         break;
       }
     }
