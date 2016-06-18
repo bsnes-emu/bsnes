@@ -15,17 +15,17 @@ typedef struct {
         LVALUE_REG_L,
     } kind;
     union {
-        unsigned short *register_address;
-        unsigned short memory_address;
+        uint16_t *register_address;
+        uint16_t memory_address;
     };
 } lvalue_t;
 
-static unsigned short read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
+static uint16_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
 {
     /* Not used until we add support for operators like += */
     switch (lvalue.kind) {
         case LVALUE_MEMORY:
-            return read_memory(gb, lvalue.memory_address);
+            return GB_read_memory(gb, lvalue.memory_address);
 
         case LVALUE_REG16:
             return *lvalue.register_address;
@@ -38,11 +38,11 @@ static unsigned short read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
     }
 }
 
-static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, unsigned short value)
+static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
 {
     switch (lvalue.kind) {
         case LVALUE_MEMORY:
-            write_memory(gb, lvalue.memory_address, value);
+            GB_write_memory(gb, lvalue.memory_address, value);
             return;
 
         case LVALUE_REG16:
@@ -61,27 +61,27 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, unsigned short value
     }
 }
 
-static unsigned short add(unsigned short a, unsigned short b) {return  a + b;};
-static unsigned short sub(unsigned short a, unsigned short b) {return  a - b;};
-static unsigned short mul(unsigned short a, unsigned short b) {return  a * b;};
-static unsigned short _div(unsigned short a, unsigned short b) {
+static uint16_t add(uint16_t a, uint16_t b) {return  a + b;};
+static uint16_t sub(uint16_t a, uint16_t b) {return  a - b;};
+static uint16_t mul(uint16_t a, uint16_t b) {return  a * b;};
+static uint16_t _div(uint16_t a, uint16_t b) {
     if (b == 0) {
         return 0;
     }
     return  a / b;
 };
-static unsigned short mod(unsigned short a, unsigned short b) {
+static uint16_t mod(uint16_t a, uint16_t b) {
     if (b == 0) {
         return 0;
     }
     return  a % b;
 };
-static unsigned short and(unsigned short a, unsigned short b) {return  a & b;};
-static unsigned short or(unsigned short a, unsigned short b) {return  a | b;};
-static unsigned short xor(unsigned short a, unsigned short b) {return  a ^ b;};
-static unsigned short shleft(unsigned short a, unsigned short b) {return  a << b;};
-static unsigned short shright(unsigned short a, unsigned short b) {return  a >> b;};
-static unsigned short assign(GB_gameboy_t *gb, lvalue_t a, unsigned short b)
+static uint16_t and(uint16_t a, uint16_t b) {return  a & b;};
+static uint16_t or(uint16_t a, uint16_t b) {return  a | b;};
+static uint16_t xor(uint16_t a, uint16_t b) {return  a ^ b;};
+static uint16_t shleft(uint16_t a, uint16_t b) {return  a << b;};
+static uint16_t shright(uint16_t a, uint16_t b) {return  a >> b;};
+static uint16_t assign(GB_gameboy_t *gb, lvalue_t a, uint16_t b)
 {
     write_lvalue(gb, a, b);
     return read_lvalue(gb, a);
@@ -90,8 +90,8 @@ static unsigned short assign(GB_gameboy_t *gb, lvalue_t a, unsigned short b)
 static struct {
     const char *string;
     char priority;
-    unsigned short (*operator)(unsigned short, unsigned short);
-    unsigned short (*lvalue_operator)(GB_gameboy_t *, lvalue_t, unsigned short);
+    uint16_t (*operator)(uint16_t, uint16_t);
+    uint16_t (*lvalue_operator)(GB_gameboy_t *, lvalue_t, uint16_t);
 } operators[] =
 {
     // Yes. This is not C-like. But it makes much more sense.
@@ -109,7 +109,7 @@ static struct {
     {"=", 2, NULL, assign},
 };
 
-unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error);
+uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error);
 
 static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error)
 {
@@ -124,7 +124,7 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string, u
     }
     if (length == 0)
     {
-        gb_log(gb, "Expected expression.\n");
+        GB_log(gb, "Expected expression.\n");
         *error = true;
         return (lvalue_t){0,};
     }
@@ -183,17 +183,17 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string, u
                 case 'p': if (string[2] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
             }
         }
-        gb_log(gb, "Unknown register: %.*s\n", length, string);
+        GB_log(gb, "Unknown register: %.*s\n", length, string);
         *error = true;
         return (lvalue_t){0,};
     }
 
-    gb_log(gb, "Expression is not an lvalue: %.*s\n", length, string);
+    GB_log(gb, "Expression is not an lvalue: %.*s\n", length, string);
     *error = true;
     return (lvalue_t){0,};
 }
 
-unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error)
+uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error)
 {
     *error = false;
     // Strip whitespace
@@ -206,7 +206,7 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
     }
     if (length == 0)
     {
-        gb_log(gb, "Expected expression.\n");
+        GB_log(gb, "Expected expression.\n");
         *error = true;
         return -1;
     }
@@ -236,7 +236,7 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
             }
             if (string[i] == ']') depth--;
         }
-        if (depth == 0) return read_memory(gb, debugger_evaluate(gb, string + 1, length - 2, error));
+        if (depth == 0) return GB_read_memory(gb, debugger_evaluate(gb, string + 1, length - 2, error));
     }
     // Search for lowest priority operator
     signed int depth = 0;
@@ -262,14 +262,14 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
     }
     if (operator_index != -1) {
         unsigned int right_start = (unsigned int)(operator_pos + strlen(operators[operator_index].string));
-        unsigned short right = debugger_evaluate(gb, string + right_start, length - right_start, error);
+        uint16_t right = debugger_evaluate(gb, string + right_start, length - right_start, error);
         if (*error) return  -1;
         if (operators[operator_index].lvalue_operator) {
             lvalue_t left = debugger_evaluate_lvalue(gb, string, operator_pos, error);
             if (*error) return  -1;
             return operators[operator_index].lvalue_operator(gb, left, right);
         }
-        unsigned short left = debugger_evaluate(gb, string, operator_pos, error);
+        uint16_t left = debugger_evaluate(gb, string, operator_pos, error);
         if (*error) return  -1;
         return operators[operator_index].operator(left, right);
     }
@@ -300,15 +300,15 @@ unsigned short debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned 
                 case 'p': if (string[2] == 'c') return gb->pc;
             }
         }
-        gb_log(gb, "Unknown register: %.*s\n", length, string);
+        GB_log(gb, "Unknown register: %.*s\n", length, string);
         *error = true;
         return -1;
     }
 
     char *end;
-    unsigned short literal = (unsigned short) (strtol(string, &end, 16));
+    uint16_t literal = (uint16_t) (strtol(string, &end, 16));
     if (end != string + length) {
-        gb_log(gb, "Failed to parse: %.*s\n", length, string);
+        GB_log(gb, "Failed to parse: %.*s\n", length, string);
         *error = true;
         return -1;
     }
@@ -319,7 +319,7 @@ typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments);
 
 typedef struct {
     const char *command;
-    unsigned char min_length;
+    uint8_t min_length;
     debugger_command_imp_t *implementation;
     const char *help_string; // Null if should not appear in help
 } debugger_command_t;
@@ -335,7 +335,7 @@ static const char *lstrip(const char *str)
 static bool cont(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: continue\n");
+        GB_log(gb, "Usage: continue\n");
         return true;
     }
     gb->debug_stopped = false;
@@ -345,7 +345,7 @@ static bool cont(GB_gameboy_t *gb, char *arguments)
 static bool next(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: next\n");
+        GB_log(gb, "Usage: next\n");
         return true;
     }
     
@@ -358,7 +358,7 @@ static bool next(GB_gameboy_t *gb, char *arguments)
 static bool step(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: step\n");
+        GB_log(gb, "Usage: step\n");
         return true;
     }
 
@@ -368,7 +368,7 @@ static bool step(GB_gameboy_t *gb, char *arguments)
 static bool finish(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: finish\n");
+        GB_log(gb, "Usage: finish\n");
         return true;
     }
 
@@ -381,7 +381,7 @@ static bool finish(GB_gameboy_t *gb, char *arguments)
 static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: sld\n");
+        GB_log(gb, "Usage: sld\n");
         return true;
     }
 
@@ -394,23 +394,23 @@ static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
 static bool registers(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: registers\n");
+        GB_log(gb, "Usage: registers\n");
         return true;
     }
 
-    gb_log(gb, "AF = %04x\n", gb->registers[GB_REGISTER_AF]);
-    gb_log(gb, "BC = %04x\n", gb->registers[GB_REGISTER_BC]);
-    gb_log(gb, "DE = %04x\n", gb->registers[GB_REGISTER_DE]);
-    gb_log(gb, "HL = %04x\n", gb->registers[GB_REGISTER_HL]);
-    gb_log(gb, "SP = %04x\n", gb->registers[GB_REGISTER_SP]);
-    gb_log(gb, "PC = %04x\n", gb->pc);
-    gb_log(gb, "TIMA = %d/%lu\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
-    gb_log(gb, "Display Controller: LY = %d/%lu\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
+    GB_log(gb, "AF = %04x\n", gb->registers[GB_REGISTER_AF]);
+    GB_log(gb, "BC = %04x\n", gb->registers[GB_REGISTER_BC]);
+    GB_log(gb, "DE = %04x\n", gb->registers[GB_REGISTER_DE]);
+    GB_log(gb, "HL = %04x\n", gb->registers[GB_REGISTER_HL]);
+    GB_log(gb, "SP = %04x\n", gb->registers[GB_REGISTER_SP]);
+    GB_log(gb, "PC = %04x\n", gb->pc);
+    GB_log(gb, "TIMA = %d/%u\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
+    GB_log(gb, "Display Controller: LY = %d/%u\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
     return true;
 }
 
 /* Find the index of the closest breakpoint equal or greater to addr */
-static unsigned short find_breakpoint(GB_gameboy_t *gb, unsigned short addr)
+static uint16_t find_breakpoint(GB_gameboy_t *gb, uint16_t addr)
 {
     if (!gb->breakpoints) {
         return 0;
@@ -418,7 +418,7 @@ static unsigned short find_breakpoint(GB_gameboy_t *gb, unsigned short addr)
     int min = 0;
     int max = gb->n_breakpoints;
     while (min < max) {
-        unsigned short pivot = (min + max) / 2;
+        uint16_t pivot = (min + max) / 2;
         if (gb->breakpoints[pivot] == addr) return pivot;
         if (gb->breakpoints[pivot] > addr) {
             max = pivot - 1;
@@ -427,24 +427,24 @@ static unsigned short find_breakpoint(GB_gameboy_t *gb, unsigned short addr)
             min = pivot + 1;
         }
     }
-    return (unsigned short) min;
+    return (uint16_t) min;
 }
 
 static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        gb_log(gb, "Usage: breakpoint <expression>\n");
+        GB_log(gb, "Usage: breakpoint <expression>\n");
         return true;
     }
 
     bool error;
-    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
 
     if (error) return true;
 
-    unsigned short index = find_breakpoint(gb, result);
+    uint16_t index = find_breakpoint(gb, result);
     if (index < gb->n_breakpoints && gb->breakpoints[index] == result) {
-        gb_log(gb, "Breakpoint already set at %04x\n", result);
+        GB_log(gb, "Breakpoint already set at %04x\n", result);
         return true;
     }
 
@@ -453,14 +453,14 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     gb->breakpoints[index] = result;
     gb->n_breakpoints++;
 
-    gb_log(gb, "Breakpoint set at %04x\n", result);
+    GB_log(gb, "Breakpoint set at %04x\n", result);
     return true;
 }
 
 static bool delete(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        gb_log(gb, "Delete all breakpoints? ");
+        GB_log(gb, "Delete all breakpoints? ");
         char *answer = gb->input_callback(gb);
         if (answer[0] == 'Y' || answer[0] == 'y') {
             free(gb->breakpoints);
@@ -471,13 +471,13 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
 
     if (error) return true;
 
-    unsigned short index = find_breakpoint(gb, result);
+    uint16_t index = find_breakpoint(gb, result);
     if (index >= gb->n_breakpoints || gb->breakpoints[index] != result) {
-        gb_log(gb, "No breakpoint set at %04x\n", result);
+        GB_log(gb, "No breakpoint set at %04x\n", result);
         return true;
     }
 
@@ -485,33 +485,33 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     gb->n_breakpoints--;
     gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
 
-    gb_log(gb, "Breakpoint removed from %04x\n", result);
+    GB_log(gb, "Breakpoint removed from %04x\n", result);
     return true;
 }
 
 static bool list(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: list\n");
+        GB_log(gb, "Usage: list\n");
         return true;
     }
 
     if (gb->n_breakpoints == 0) {
-        gb_log(gb, "No breakpoints set.\n");
+        GB_log(gb, "No breakpoints set.\n");
         return true;
     }
 
-    gb_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
-    for (unsigned short i = 0; i < gb->n_breakpoints; i++) {
-        gb_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i]);
+    GB_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
+    for (uint16_t i = 0; i < gb->n_breakpoints; i++) {
+        GB_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i]);
     }
 
     return true;
 }
 
-static bool should_break(GB_gameboy_t *gb, unsigned short addr)
+static bool should_break(GB_gameboy_t *gb, uint16_t addr)
 {
-    unsigned short index = find_breakpoint(gb, addr);
+    uint16_t index = find_breakpoint(gb, addr);
     if (index < gb->n_breakpoints && gb->breakpoints[index] == addr) {
         return true;
     }
@@ -521,14 +521,14 @@ static bool should_break(GB_gameboy_t *gb, unsigned short addr)
 static bool print(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        gb_log(gb, "Usage: print <expression>\n");
+        GB_log(gb, "Usage: print <expression>\n");
         return true;
     }
 
     bool error;
-    unsigned short result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
     if (!error) {
-        gb_log(gb, "=%04x\n", result);
+        GB_log(gb, "=%04x\n", result);
     }
     return true;
 }
@@ -536,18 +536,18 @@ static bool print(GB_gameboy_t *gb, char *arguments)
 static bool examine(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        gb_log(gb, "Usage: examine <expression>\n");
+        GB_log(gb, "Usage: examine <expression>\n");
         return true;
     }
 
     bool error;
-    unsigned short addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+    uint16_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
     if (!error) {
-        gb_log(gb, "%4x: ", addr);
+        GB_log(gb, "%4x: ", addr);
         for (int i = 0; i < 16; i++) {
-            gb_log(gb, "%02x ", read_memory(gb, addr + i));
+            GB_log(gb, "%02x ", GB_read_memory(gb, addr + i));
         }
-        gb_log(gb, "\n");
+        GB_log(gb, "\n");
     }
     return true;
 }
@@ -555,41 +555,41 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
 static bool mbc(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments))) {
-        gb_log(gb, "Usage: mbc\n");
+        GB_log(gb, "Usage: mbc\n");
         return true;
     }
 
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        gb_log(gb, "Cartrdige includes%s RAM: %zx\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
+        GB_log(gb, "Cartrdige includes%s RAM: %x\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
-        gb_log(gb, "No cartridge RAM\n");
+        GB_log(gb, "No cartridge RAM\n");
     }
 
     if (cartridge->mbc_type) {
-        gb_log(gb, "MBC%d\n", cartridge->mbc_type);
-        gb_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
+        GB_log(gb, "MBC%d\n", cartridge->mbc_type);
+        GB_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
         if (cartridge->has_ram) {
-            gb_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
-            gb_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+            GB_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
+            GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
         }
         if (cartridge->mbc_type == MBC1) {
-            gb_log(gb, "MBC1 banking mode is %s\n", gb->mbc_ram_banking? "RAM" : "ROM");
+            GB_log(gb, "MBC1 banking mode is %s\n", gb->mbc_ram_banking? "RAM" : "ROM");
         }
 
     }
     else {
-        gb_log(gb, "No MBC\n");
+        GB_log(gb, "No MBC\n");
     }
 
     if (cartridge->has_rumble) {
-        gb_log(gb, "Cart contains a rumble pak\n");
+        GB_log(gb, "Cart contains a rumble pak\n");
     }
 
     if (cartridge->has_rtc) {
-        gb_log(gb, "Cart contains a real time clock\n");
+        GB_log(gb, "Cart contains a real time clock\n");
     }
 
 
@@ -622,8 +622,8 @@ static bool help(GB_gameboy_t *gb, char *arguments)
     const debugger_command_t *command = commands;
     for (size_t i = sizeof(commands) / sizeof(*command); i--; command++) {
         if (command->help_string) {
-            gb_attributed_log(gb, GB_LOG_BOLD, "%s", command->command);
-            gb_log(gb, ": %s\n", command->help_string);
+            GB_attributed_log(gb, GB_LOG_BOLD, "%s", command->command);
+            GB_log(gb, ": %s\n", command->help_string);
         }
     }
     return true;
@@ -643,13 +643,13 @@ static const debugger_command_t *find_command(const char *string)
     return NULL;
 }
 
-void debugger_call_hook(GB_gameboy_t *gb)
+void GB_debugger_call_hook(GB_gameboy_t *gb)
 {
     /* Called just after the CPU calls a function/enters an interrupt/etc... */
 
     if (gb->stack_leak_detection) {
         if (gb->debug_call_depth >= sizeof(gb->sp_for_call_depth) / sizeof(gb->sp_for_call_depth[0])) {
-            gb_log(gb, "Potential stack overflow detected (Functions nest too much). \n");
+            GB_log(gb, "Potential stack overflow detected (Functions nest too much). \n");
             gb->debug_stopped = true;
         }
         else {
@@ -661,7 +661,7 @@ void debugger_call_hook(GB_gameboy_t *gb)
     gb->debug_call_depth++;
 }
 
-void debugger_ret_hook(GB_gameboy_t *gb)
+void GB_debugger_ret_hook(GB_gameboy_t *gb)
 {
     /* Called just before the CPU runs ret/reti */
 
@@ -669,13 +669,13 @@ void debugger_ret_hook(GB_gameboy_t *gb)
 
     if (gb->stack_leak_detection) {
         if (gb->debug_call_depth < 0) {
-            gb_log(gb, "Function finished without a stack leak.\n");
+            GB_log(gb, "Function finished without a stack leak.\n");
             gb->debug_stopped = true;
         }
         else {
             if (gb->registers[GB_REGISTER_SP] != gb->sp_for_call_depth[gb->debug_call_depth]) {
-                gb_log(gb, "Stack leak detected for function %04x!\n", gb->addr_for_call_depth[gb->debug_call_depth]);
-                gb_log(gb, "SP is %04x, should be %04x.\n", gb->registers[GB_REGISTER_SP],
+                GB_log(gb, "Stack leak detected for function %04x!\n", gb->addr_for_call_depth[gb->debug_call_depth]);
+                GB_log(gb, "SP is %04x, should be %04x.\n", gb->registers[GB_REGISTER_SP],
                                                             gb->sp_for_call_depth[gb->debug_call_depth]);
                 gb->debug_stopped = true;
             }
@@ -683,7 +683,7 @@ void debugger_ret_hook(GB_gameboy_t *gb)
     }
 }
 
-void debugger_run(GB_gameboy_t *gb)
+void GB_debugger_run(GB_gameboy_t *gb)
 {
     char *input = NULL;
     if (gb->debug_next_command && gb->debug_call_depth <= 0) {
@@ -693,7 +693,7 @@ void debugger_run(GB_gameboy_t *gb)
         gb->debug_stopped = true;
     }
     if (gb->debug_stopped) {
-        cpu_disassemble(gb, gb->pc, 5);
+        GB_cpu_disassemble(gb, gb->pc, 5);
     }
 next_command:
     if (input) {
@@ -701,8 +701,8 @@ next_command:
     }
     if (!gb->debug_stopped && should_break(gb, gb->pc)) {
         gb->debug_stopped = true;
-        gb_log(gb, "Breakpoint: PC = %04x\n", gb->pc);
-        cpu_disassemble(gb, gb->pc, 5);
+        GB_log(gb, "Breakpoint: PC = %04x\n", gb->pc);
+        GB_cpu_disassemble(gb, gb->pc, 5);
     }
     if (gb->debug_stopped) {
         gb->debug_next_command = false;
@@ -731,7 +731,7 @@ next_command:
             }
         }
         else {
-            gb_log(gb, "%s: no such command.\n", command_string);
+            GB_log(gb, "%s: no such command.\n", command_string);
             goto next_command;
         }
 

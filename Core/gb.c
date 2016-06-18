@@ -59,7 +59,7 @@ static const GB_cartridge_t cart_defs[256] = {
     {  NO_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
 };
 
-void gb_attributed_logv(GB_gameboy_t *gb, gb_log_attributes attributes, const char *fmt, va_list args)
+void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
     vasprintf(&string, fmt, args);
@@ -75,19 +75,19 @@ void gb_attributed_logv(GB_gameboy_t *gb, gb_log_attributes attributes, const ch
     free(string);
 }
 
-void gb_attributed_log(GB_gameboy_t *gb, gb_log_attributes attributes, const char *fmt, ...)
+void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    gb_attributed_logv(gb, attributes, fmt, args);
+    GB_attributed_logv(gb, attributes, fmt, args);
     va_end(args);
 }
 
-void gb_log(GB_gameboy_t *gb,const char *fmt, ...)
+void GB_log(GB_gameboy_t *gb,const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
-    gb_attributed_logv(gb, 0, fmt, args);
+    GB_attributed_logv(gb, 0, fmt, args);
     va_end(args);
 }
 
@@ -109,7 +109,7 @@ static char *default_input_callback(GB_gameboy_t *gb)
     return expression;
 }
 
-void gb_init(GB_gameboy_t *gb)
+void GB_init(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
     gb->magic = (uintptr_t)'SAME';
@@ -136,7 +136,7 @@ void gb_init(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
 
-void gb_init_cgb(GB_gameboy_t *gb)
+void GB_init_cgb(GB_gameboy_t *gb)
 {
     memset(gb, 0, sizeof(*gb));
     gb->magic = (uintptr_t)'SAME';
@@ -160,7 +160,7 @@ void gb_init_cgb(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
 
-void gb_free(GB_gameboy_t *gb)
+void GB_free(GB_gameboy_t *gb)
 {
     if (gb->ram) {
         free(gb->ram);
@@ -182,16 +182,16 @@ void gb_free(GB_gameboy_t *gb)
     }
 }
 
-int gb_load_bios(GB_gameboy_t *gb, const char *path)
+int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "r");
     if (!f) return errno;
-    fread(gb->bios, sizeof(gb->bios), 1, f);
+    fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f);
     fclose(f);
     return 0;
 }
 
-int gb_load_rom(GB_gameboy_t *gb, const char *path)
+int GB_load_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "r");
     if (!f) return errno;
@@ -228,7 +228,7 @@ static bool dump_section(FILE *f, const void *src, uint32_t size)
 #define DUMP_SECTION(gb, f, section) dump_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
 
 /* Todo: we need a sane and protable save state format. */
-int gb_save_state(GB_gameboy_t *gb, const char *path)
+int GB_save_state(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "w");
     if (!f) {
@@ -290,7 +290,7 @@ static bool read_section(FILE *f, void *dest, uint32_t size)
 
 #define READ_SECTION(gb, f, section) read_section(f, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
 
-int gb_load_state(GB_gameboy_t *gb, const char *path)
+int GB_load_state(GB_gameboy_t *gb, const char *path)
 {
     GB_gameboy_t save;
 
@@ -313,31 +313,31 @@ int gb_load_state(GB_gameboy_t *gb, const char *path)
     if (!READ_SECTION(&save, f, video     )) goto error;
 
     if (gb->magic != save.magic) {
-        gb_log(gb, "File is not a save state, or is from an incompatible operating system.\n");
+        GB_log(gb, "File is not a save state, or is from an incompatible operating system.\n");
         errno = -1;
         goto error;
     }
 
     if (gb->version != save.version) {
-        gb_log(gb, "Save state is for a different version of SameBoy.\n");
+        GB_log(gb, "Save state is for a different version of SameBoy.\n");
         errno = -1;
         goto error;
     }
 
     if (gb->mbc_ram_size != save.mbc_ram_size) {
-        gb_log(gb, "Save state has non-matching MBC RAM size.\n");
+        GB_log(gb, "Save state has non-matching MBC RAM size.\n");
         errno = -1;
         goto error;
     }
 
     if (gb->ram_size != save.ram_size) {
-        gb_log(gb, "Save state has non-matching RAM size. Try changing emulated model.\n");
+        GB_log(gb, "Save state has non-matching RAM size. Try changing emulated model.\n");
         errno = -1;
         goto error;
     }
 
     if (gb->vram_size != save.vram_size) {
-        gb_log(gb, "Save state has non-matching VRAM size. Try changing emulated model.\n");
+        GB_log(gb, "Save state has non-matching VRAM size. Try changing emulated model.\n");
         errno = -1;
         goto error;
     }
@@ -364,7 +364,7 @@ error:
     return errno;
 }
 
-int gb_save_battery(GB_gameboy_t *gb, const char *path)
+int GB_save_battery(GB_gameboy_t *gb, const char *path)
 {
     if (!gb->cartridge_type->has_battery) return 0; // Nothing to save.
     if (gb->mbc_ram_size == 0 && !gb->cartridge_type->has_rtc) return 0; /* Claims to have battery, but has no RAM or RTC */
@@ -395,7 +395,7 @@ int gb_save_battery(GB_gameboy_t *gb, const char *path)
 }
 
 /* Loading will silently stop if the format is incomplete */
-void gb_load_battery(GB_gameboy_t *gb, const char *path)
+void GB_load_battery(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "r");
     if (!f) {
@@ -433,39 +433,39 @@ exit:
     return;
 }
 
-void gb_run(GB_gameboy_t *gb)
+void GB_run(GB_gameboy_t *gb)
 {
-    update_joyp(gb);
-    debugger_run(gb);
-    cpu_run(gb);
+    GB_update_joyp(gb);
+    GB_debugger_run(gb);
+    GB_cpu_run(gb);
 }
 
-void gb_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
+void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
 {
     gb->screen = output;
 }
 
-void gb_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback)
+void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback)
 {
     gb->vblank_callback = callback;
 }
 
-void gb_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback)
+void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback)
 {
     gb->log_callback = callback;
 }
 
-void gb_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
+void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
     gb->input_callback = callback;
 }
 
-void gb_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
+void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
     gb->rgb_encode_callback = callback;
 }
 
-void gb_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
 {
     if (gb->audio_buffer) {
         free(gb->audio_buffer);

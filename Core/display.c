@@ -9,14 +9,14 @@
 
 #pragma pack(push, 1)
 typedef struct {
-    unsigned char y;
-    unsigned char x;
-    unsigned char tile;
-    unsigned char flags;
+    uint8_t y;
+    uint8_t x;
+    uint8_t tile;
+    uint8_t flags;
 } GB_sprite_t;
 #pragma pack(pop)
 
-static uint32_t get_pixel(GB_gameboy_t *gb, unsigned char x, unsigned char y)
+static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
     /*
      Bit 7 - LCD Display Enable             (0=Off, 1=On)
@@ -28,17 +28,17 @@ static uint32_t get_pixel(GB_gameboy_t *gb, unsigned char x, unsigned char y)
      Bit 1 - OBJ (Sprite) Display Enable    (0=Off, 1=On)
      Bit 0 - BG Display (for CGB see below) (0=Off, 1=On)
      */
-    unsigned short map = 0x1800;
-    unsigned char tile = 0;
-    unsigned char attributes = 0;
-    unsigned char sprite_palette = 0;
-    unsigned short tile_address = 0;
-    unsigned char background_pixel = 0, sprite_pixel = 0;
+    uint16_t map = 0x1800;
+    uint8_t tile = 0;
+    uint8_t attributes = 0;
+    uint8_t sprite_palette = 0;
+    uint16_t tile_address = 0;
+    uint8_t background_pixel = 0, sprite_pixel = 0;
     GB_sprite_t *sprite = (GB_sprite_t *) &gb->oam;
-    unsigned char sprites_in_line = 0;
+    uint8_t sprites_in_line = 0;
     bool lcd_8_16_mode = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
     bool sprites_enabled = (gb->io_registers[GB_IO_LCDC] & 2) != 0;
-    unsigned char lowest_sprite_x = 0xFF;
+    uint8_t lowest_sprite_x = 0xFF;
     bool use_obp1 = false, priority = false;
     bool in_window = false;
     if (gb->effective_window_enabled && (gb->io_registers[GB_IO_LCDC] & 0x20)) { /* Window Enabled */
@@ -49,13 +49,13 @@ static uint32_t get_pixel(GB_gameboy_t *gb, unsigned char x, unsigned char y)
 
     if (sprites_enabled) {
         // Loop all sprites
-        for (unsigned char i = 40; i--; sprite++) {
+        for (uint8_t i = 40; i--; sprite++) {
             int sprite_y = sprite->y - 16;
             int sprite_x = sprite->x - 8;
             // Is sprite in our line?
             if (sprite_y <= y && sprite_y + (lcd_8_16_mode? 16:8) > y) {
-                unsigned char tile_x, tile_y, current_sprite_pixel;
-                unsigned short line_address;
+                uint8_t tile_x, tile_y, current_sprite_pixel;
+                uint16_t line_address;
                 // Limit to 10 sprites in one scan line.
                 if (++sprites_in_line == 11) break;
                 // Does not overlap our pixel.
@@ -129,7 +129,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, unsigned char x, unsigned char y)
         tile_address = tile * 0x10;
     }
     else {
-        tile_address = (signed char) tile * 0x10 + 0x1000;
+        tile_address = (int8_t) tile * 0x10 + 0x1000;
     }
     if (attributes & 0x8) {
         tile_address += 0x2000;
@@ -171,7 +171,7 @@ void display_vblank(GB_gameboy_t *gb)
     if (gb->turbo) {
         struct timeval now;
         gettimeofday(&now, NULL);
-        signed long nanoseconds = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
+        int64_t nanoseconds = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
         if (nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
             return;
         }
@@ -209,7 +209,7 @@ void display_vblank(GB_gameboy_t *gb)
         struct timespec sleep = {0,};
         gettimeofday(&now, NULL);
         signed long nanoseconds = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
-        if (labs(nanoseconds - gb->last_vblank) < FRAME_LENGTH ) {
+        if (labs((signed long)(nanoseconds - gb->last_vblank)) < FRAME_LENGTH ) {
             sleep.tv_nsec = (FRAME_LENGTH  + gb->last_vblank - nanoseconds);
             nanosleep(&sleep, NULL);
 
@@ -221,21 +221,21 @@ void display_vblank(GB_gameboy_t *gb)
     }
 }
 
-static inline unsigned char scale_channel(unsigned char x)
+static inline uint8_t scale_channel(uint8_t x)
 {
     x &= 0x1f;
     return (x << 3) | (x >> 2);
 }
 
-void palette_changed(GB_gameboy_t *gb, bool background_palette, unsigned char index)
+void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index)
 {
-    unsigned char *palette_data = background_palette? gb->background_palletes_data : gb->sprite_palletes_data;
-    unsigned short color = palette_data[index & ~1] | (palette_data[index | 1] << 8);
+    uint8_t *palette_data = background_palette? gb->background_palletes_data : gb->sprite_palletes_data;
+    uint16_t color = palette_data[index & ~1] | (palette_data[index | 1] << 8);
 
     // No need to &, scale channel does that.
-    unsigned char r = scale_channel(color);
-    unsigned char g = scale_channel(color >> 5);
-    unsigned char b = scale_channel(color >> 10);
+    uint8_t r = scale_channel(color);
+    uint8_t g = scale_channel(color >> 5);
+    uint8_t b = scale_channel(color >> 10);
     assert (gb->rgb_encode_callback);
     (background_palette? gb->background_palletes_rgb : gb->sprite_palletes_rgb)[index / 2] = gb->rgb_encode_callback(gb, r, g, b);
 }
@@ -257,7 +257,7 @@ void palette_changed(GB_gameboy_t *gb, bool background_palette, unsigned char in
 #define MODE1_LENGTH 204
 #define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE1_LENGTH) // = 456
 
-void display_run(GB_gameboy_t *gb)
+void GB_display_run(GB_gameboy_t *gb)
 {
     /*
        Display controller bug: For some reason, the OAM STAT interrupt is called, as expected, for LY = 0..143.
@@ -271,10 +271,10 @@ void display_run(GB_gameboy_t *gb)
         http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
      */
 
-    unsigned char previous_stat_interrupt_line = gb->stat_interrupt_line;
+    uint8_t previous_stat_interrupt_line = gb->stat_interrupt_line;
     gb->stat_interrupt_line = false;
 
-    unsigned char last_mode = gb->io_registers[GB_IO_STAT] & 3;
+    uint8_t last_mode = gb->io_registers[GB_IO_STAT] & 3;
     gb->io_registers[GB_IO_STAT] &= ~3;
 
     if (gb->display_cycles >= LCDC_PERIOD) {
@@ -360,7 +360,7 @@ void display_run(GB_gameboy_t *gb)
 
     /* Render. This  chunk is outside the Mode 3 if, because otherwise we might not render some pixels, since this
        function only runs between atomic CPU changes, and not every clock. */
-    signed short current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+    int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
     for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
         if (gb->previous_lcdc_x >= 160) {
             continue;

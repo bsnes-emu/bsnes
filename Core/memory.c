@@ -5,17 +5,17 @@
 #include "display.h"
 #include "memory.h"
 
-typedef unsigned char GB_read_function_t(GB_gameboy_t *gb, unsigned short addr);
-typedef void GB_write_function_t(GB_gameboy_t *gb, unsigned short addr, unsigned char value);
+typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
+typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 
-static unsigned char read_rom(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (addr < 0x100 && !gb->bios_finished) {
-        return gb->bios[addr];
+    if (addr < 0x100 && !gb->boot_rom_finished) {
+        return gb->boot_rom[addr];
     }
 
-    if (addr >= 0x200 && addr < 0x900 && gb->is_cgb && !gb->bios_finished) {
-        return gb->bios[addr];
+    if (addr >= 0x200 && addr < 0x900 && gb->is_cgb && !gb->boot_rom_finished) {
+        return gb->boot_rom[addr];
     }
 
     if (!gb->rom_size) {
@@ -24,7 +24,7 @@ static unsigned char read_rom(GB_gameboy_t *gb, unsigned short addr)
     return gb->rom[addr];
 }
 
-static unsigned char read_mbc_rom(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_mbc_rom(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->mbc_rom_bank >= gb->rom_size / 0x4000) {
         return 0xFF;
@@ -32,15 +32,15 @@ static unsigned char read_mbc_rom(GB_gameboy_t *gb, unsigned short addr)
     return gb->rom[(addr & 0x3FFF) + gb->mbc_rom_bank * 0x4000];
 }
 
-static unsigned char read_vram(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 {
     if ((gb->io_registers[GB_IO_STAT] & 0x3) == 3) {
         return 0xFF;
     }
-    return gb->vram[(addr & 0x1FFF) + (unsigned short) gb->cgb_vram_bank * 0x2000];
+    return gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000];
 }
 
-static unsigned char read_mbc_ram(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
@@ -50,27 +50,27 @@ static unsigned char read_mbc_ram(GB_gameboy_t *gb, unsigned short addr)
     unsigned int ram_index = (addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000;
     if (!gb->mbc_ram_enable)
     {
-        gb_log(gb, "Read from %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
+        GB_log(gb, "Read from %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
         return 0xFF;
     }
     if (ram_index >= gb->mbc_ram_size) {
-        gb_log(gb, "Read from %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
+        GB_log(gb, "Read from %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
         return 0xFF;
     }
     return gb->mbc_ram[(addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000];
 }
 
-static unsigned char read_ram(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_ram(GB_gameboy_t *gb, uint16_t addr)
 {
     return gb->ram[addr & 0x0FFF];
 }
 
-static unsigned char read_banked_ram(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_banked_ram(GB_gameboy_t *gb, uint16_t addr)
 {
     return gb->ram[(addr & 0x0FFF) + gb->cgb_ram_bank * 0x1000];
 }
 
-static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
+static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 {
 
     if (addr < 0xFE00) {
@@ -150,7 +150,7 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
                 if (!gb->is_cgb) {
                     return 0xFF;
                 }
-                unsigned char index_reg = (addr & 0xFF) - 1;
+                uint8_t index_reg = (addr & 0xFF) - 1;
                 return ((addr & 0xFF) == GB_IO_BGPD?
                        gb->background_palletes_data :
                        gb->sprite_palletes_data)[gb->io_registers[index_reg] & 0x3F];
@@ -165,7 +165,7 @@ static unsigned char read_high_memory(GB_gameboy_t *gb, unsigned short addr)
 
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
-                    return apu_read(gb, addr & 0xFF);
+                    return GB_apu_read(gb, addr & 0xFF);
                 }
                 return 0xFF;
         }
@@ -192,7 +192,7 @@ static GB_read_function_t * const read_map[] =
     read_high_memory, read_high_memory,                             /* EXXX FXXX */
 };
 
-unsigned char read_memory(GB_gameboy_t *gb, unsigned short addr)
+uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
     if (addr < 0xFF00 && gb->dma_cycles) {
         /* Todo: can we access IO registers during DMA? */
@@ -201,7 +201,7 @@ unsigned char read_memory(GB_gameboy_t *gb, unsigned short addr)
     return read_map[addr >> 12](gb, addr);
 }
 
-static void write_mbc(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (gb->cartridge_type->mbc_type == NO_MBC) return;
     switch (addr >> 12) {
@@ -223,7 +223,7 @@ static void write_mbc(GB_gameboy_t *gb, unsigned short addr, unsigned char value
         case 3:
             if (gb->cartridge_type->mbc_type != MBC5) goto bank_low;
             if (value > 1) {
-                gb_log(gb, "Bank overflow: [%x] <- %d\n", addr, value);
+                GB_log(gb, "Bank overflow: [%x] <- %d\n", addr, value);
             }
             gb->mbc_rom_bank = (gb->mbc_rom_bank & 0xFF) | value << 8;
             break;
@@ -274,16 +274,16 @@ static void write_mbc(GB_gameboy_t *gb, unsigned short addr, unsigned char value
     }
 }
 
-static void write_vram(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if ((gb->io_registers[GB_IO_STAT] & 0x3) == 3) {
-        //gb_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
+        //GB_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
         return;
     }
-    gb->vram[(addr & 0x1FFF) + (unsigned short) gb->cgb_vram_bank * 0x2000] = value;
+    gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000] = value;
 }
 
-static void write_mbc_ram(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC write*/
@@ -294,30 +294,30 @@ static void write_mbc_ram(GB_gameboy_t *gb, unsigned short addr, unsigned char v
     unsigned int ram_index = (addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000;
     if (!gb->mbc_ram_enable)
     {
-        gb_log(gb, "Write to %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
+        GB_log(gb, "Write to %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
         return;
     }
     if (ram_index >= gb->mbc_ram_size) {
-        gb_log(gb, "Write to %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
+        GB_log(gb, "Write to %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
         return;
     }
     gb->mbc_ram[(addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000] = value;
 }
 
-static void write_ram(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     gb->ram[addr & 0x0FFF] = value;
 }
 
-static void write_banked_ram(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_banked_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     gb->ram[(addr & 0x0FFF) + gb->cgb_ram_bank * 0x1000] = value;
 }
 
-static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (addr < 0xFE00) {
-        gb_log(gb, "Wrote %02x to %04x (RAM Mirror)\n", value, addr);
+        GB_log(gb, "Wrote %02x to %04x (RAM Mirror)\n", value, addr);
         gb->ram[addr & 0x0FFF] = value;
         return;
     }
@@ -331,7 +331,7 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
     }
 
     if (addr < 0xFF00) {
-        gb_log(gb, "Wrote %02x to %04x (Unused)\n", value, addr);
+        GB_log(gb, "Wrote %02x to %04x (Unused)\n", value, addr);
         return;
     }
 
@@ -386,19 +386,19 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
                 return;
 
             case GB_IO_BIOS:
-                gb->bios_finished = true;
+                gb->boot_rom_finished = true;
                 return;
 
             case GB_IO_DMG_EMULATION:
-                if (gb->is_cgb && !gb->bios_finished) {
+                if (gb->is_cgb && !gb->boot_rom_finished) {
                     gb->cgb_mode = value != 4; /* The real "contents" of this register aren't quite known yet. */
                 }
                 return;
 
             case GB_IO_DMA:
                 if (value <= 0xF1) { /* According to Pan Docs */
-                    for (unsigned char i = 0xA0; i--;) {
-                        gb->oam[i] = read_memory(gb, (value << 8) + i);
+                    for (uint8_t i = 0xA0; i--;) {
+                        gb->oam[i] = GB_read_memory(gb, (value << 8) + i);
                     }
                 }
                 /* else { what? } */
@@ -433,11 +433,11 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
                 if (!gb->is_cgb) {
                     return;
                 }
-                unsigned char index_reg = (addr & 0xFF) - 1;
+                uint8_t index_reg = (addr & 0xFF) - 1;
                 ((addr & 0xFF) == GB_IO_BGPD?
                  gb->background_palletes_data :
                  gb->sprite_palletes_data)[gb->io_registers[index_reg] & 0x3F] = value;
-                palette_changed(gb, (addr & 0xFF) == GB_IO_BGPD, gb->io_registers[index_reg] & 0x3F);
+                GB_palette_changed(gb, (addr & 0xFF) == GB_IO_BGPD, gb->io_registers[index_reg] & 0x3F);
                 if (gb->io_registers[index_reg] & 0x80) {
                     gb->io_registers[index_reg]++;
                     gb->io_registers[index_reg] |= 0x80;
@@ -477,11 +477,11 @@ static void write_high_memory(GB_gameboy_t *gb, unsigned short addr, unsigned ch
 
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
-                    apu_write(gb, addr & 0xFF, value);
+                    GB_apu_write(gb, addr & 0xFF, value);
                     return;
                 }
                 if (gb->io_registers[addr & 0xFF] != 0x37) {
-                    gb_log(gb, "Wrote %02x to %04x (HW Register)\n", value, addr);
+                    GB_log(gb, "Wrote %02x to %04x (HW Register)\n", value, addr);
                 }
                 gb->io_registers[addr & 0xFF] = 0x37;
                 return;
@@ -510,7 +510,7 @@ static GB_write_function_t * const write_map[] =
     write_high_memory, write_high_memory,                      /* EXXX FXXX */
 };
 
-void write_memory(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
+void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (addr < 0xFF00 && gb->dma_cycles) {
         /* Todo: can we access IO registers during DMA? */
@@ -519,18 +519,18 @@ void write_memory(GB_gameboy_t *gb, unsigned short addr, unsigned char value)
     write_map[addr >> 12](gb, addr, value);
 }
 
-void hdma_run(GB_gameboy_t *gb)
+void GB_hdma_run(GB_gameboy_t *gb)
 {
     if (!gb->hdma_on) return;
     while (gb->hdma_cycles >= 8) {
         gb->hdma_cycles -= 8;
-        // The CGB bios uses the dest in "absolute" space, while some games use it relative to VRAM.
+        // The CGB boot rom uses the dest in "absolute" space, while some games use it relative to VRAM.
         // This "normalizes" the dest to the CGB address space.
         gb->hdma_current_dest &= 0x1fff;
         gb->hdma_current_dest |= 0x8000;
         if ((gb->hdma_current_src < 0x8000 || (gb->hdma_current_src >= 0xa000 &&  gb->hdma_current_src < 0xe000))) {
-            for (unsigned char i = 0; i < 0x10; i++) {
-                write_memory(gb, gb->hdma_current_dest + i, read_memory(gb, gb->hdma_current_src + i));
+            for (uint8_t i = 0; i < 0x10; i++) {
+                GB_write_memory(gb, gb->hdma_current_dest + i, GB_read_memory(gb, gb->hdma_current_src + i));
             }
         }
         else {

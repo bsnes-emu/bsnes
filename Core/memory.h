@@ -2,8 +2,8 @@
 #define memory_h
 #include "gb.h"
 
-unsigned char read_memory(GB_gameboy_t *gb, unsigned short addr);
-void write_memory(GB_gameboy_t *gb, unsigned short addr, unsigned char value);
-void hdma_run(GB_gameboy_t *gb);
+uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr);
+void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
+void GB_hdma_run(GB_gameboy_t *gb);
 
 #endif /* memory_h */

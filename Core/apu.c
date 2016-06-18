@@ -27,7 +27,7 @@ static int16_t generate_square(double phase, int16_t amplitude, double duty)
     return 0;
 }
 
-static int16_t generate_wave(double phase, int16_t amplitude, signed char *wave, unsigned char shift)
+static int16_t generate_wave(double phase, int16_t amplitude, int8_t *wave, uint8_t shift)
 {
     phase = fmod(phase, 2 * M_PI);
     return ((wave[(int)(phase / (2 * M_PI) * 32)]) >> shift) * (int)amplitude / 0xF;
@@ -60,7 +60,7 @@ static int16_t step_lfsr(uint16_t lfsr, bool uses_7_bit)
 /* General Todo: The APU emulation seems to fail many accuracy tests. It might require a rewrite with
    these tests in mind. */
 
-void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_samples, GB_sample_t *samples)
+void GB_apu_render(GB_gameboy_t *gb, unsigned int sample_rate, unsigned int n_samples, GB_sample_t *samples)
 {
     for (; n_samples--; samples++) {
         samples->left = samples->right = 0;
@@ -112,7 +112,7 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
         samples->left *= gb->apu.left_volume;
         samples->right *= gb->apu.right_volume;
 
-        for (unsigned char i = 0; i < 4; i++) {
+        for (uint8_t i = 0; i < 4; i++) {
             /* Phase */
             gb->apu.wave_channels[i].phase += 2 * M_PI * gb->apu.wave_channels[i].frequency / sample_rate;
             while (gb->apu.wave_channels[i].phase >= 2 * M_PI) {
@@ -137,7 +137,7 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
         gb->apu.envelope_step_timer += 1.0 / sample_rate;
         if (gb->apu.envelope_step_timer >= 1.0 / 64) {
             gb->apu.envelope_step_timer -= 1.0 / 64;
-            for (unsigned char i = 0; i < 4; i++) {
+            for (uint8_t i = 0; i < 4; i++) {
                 if (gb->apu.wave_channels[i].envelope_steps && !--gb->apu.wave_channels[i].cur_envelope_steps) {
                     gb->apu.wave_channels[i].amplitude = min(max(gb->apu.wave_channels[i].amplitude + gb->apu.wave_channels[i].envelope_direction * CH_STEP, 0), MAX_CH_AMP);
                     gb->apu.wave_channels[i].cur_envelope_steps = gb->apu.wave_channels[i].envelope_steps;
@@ -151,7 +151,7 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
             if (gb->apu.wave_channels[0].sweep_steps && !--gb->apu.wave_channels[0].cur_sweep_steps) {
 
                 // Convert back to GB format
-                unsigned short temp = (unsigned short) (2048 - 131072 / gb->apu.wave_channels[0].frequency);
+                uint16_t temp = (uint16_t) (2048 - 131072 / gb->apu.wave_channels[0].frequency);
 
                 // Apply sweep
                 temp = temp + gb->apu.wave_channels[0].sweep_direction *
@@ -169,19 +169,19 @@ void apu_render(GB_gameboy_t *gb, unsigned long sample_rate, unsigned long n_sam
     }
 }
 
-void apu_run(GB_gameboy_t *gb)
+void GB_apu_run(GB_gameboy_t *gb)
 {
     static bool should_log_overflow = true;
     while (gb->audio_copy_in_progress);
     double ticks_per_sample = (double) CPU_FREQUENCY / gb->sample_rate;
     while (gb->apu_cycles > ticks_per_sample) {
         GB_sample_t sample = {0, };
-        apu_render(gb, gb->sample_rate, 1, &sample);
+        GB_apu_render(gb, gb->sample_rate, 1, &sample);
         gb->apu_cycles -= ticks_per_sample;
         if (gb->audio_position == gb->buffer_size) {
             /*
              if (should_log_overflow && !gb->turbo) {
-                gb_log(gb, "Audio overflow\n");
+                GB_log(gb, "Audio overflow\n");
                 should_log_overflow = false;
             }
              */
@@ -193,7 +193,7 @@ void apu_run(GB_gameboy_t *gb)
     }
 }
 
-void apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
+void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
 {
     gb->audio_copy_in_progress = true;
 
@@ -204,7 +204,7 @@ void apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
     }
 
     if (count > gb->audio_position) {
-        // gb_log(gb, "Audio underflow: %d\n", count - gb->audio_position);
+        // GB_log(gb, "Audio underflow: %d\n", count - gb->audio_position);
         memset(dest + gb->audio_position, 0, (count - gb->audio_position) * sizeof(*gb->audio_buffer));
         count = gb->audio_position;
     }
@@ -215,7 +215,7 @@ void apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
     gb->audio_copy_in_progress = false;
 }
 
-void apu_init(GB_gameboy_t *gb)
+void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
     gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 0.5;
@@ -227,12 +227,12 @@ void apu_init(GB_gameboy_t *gb)
     }
 }
 
-unsigned char apu_read(GB_gameboy_t *gb, unsigned char reg)
+uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 {
     /* Todo: what happens when reading from the wave from while it's playing? */
 
     if (reg == GB_IO_NR52) {
-        unsigned char value = 0;
+        uint8_t value = 0;
         for (int i = 0; i < 4; i++) {
             value >>= 1;
             if (gb->apu.wave_channels[i].is_playing) {
@@ -260,17 +260,17 @@ unsigned char apu_read(GB_gameboy_t *gb, unsigned char reg)
     };
 
     if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END && gb->apu.wave_channels[2].is_playing) {
-        return (unsigned char)((gb->display_cycles * 22695477 * reg) >> 8); // Semi-random but deterministic
+        return (uint8_t)((gb->display_cycles * 22695477 * reg) >> 8); // Semi-random but deterministic
     }
 
     return gb->io_registers[reg] | read_mask[reg - GB_IO_NR10];
 }
 
-void apu_write(GB_gameboy_t *gb, unsigned char reg, unsigned char value)
+void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
     static const double duties[] = {0.125, 0.25, 0.5, 0.75};
     static uint16_t NRX3_X4_temp[3] = {0};
-    unsigned char channel = 0;
+    uint8_t channel = 0;
 
     if (!gb->apu.global_enable && reg != GB_IO_NR52) {
         return;
@@ -376,7 +376,7 @@ void apu_write(GB_gameboy_t *gb, unsigned char reg, unsigned char value)
         {
             double r = value & 0x7;
             if (r == 0) r = 0.5;
-            unsigned char s = value >> 4;
+            uint8_t s = value >> 4;
             gb->apu.wave_channels[3].frequency =  524288.0 / r / (1 << (s + 1));
             gb->apu.lfsr_7_bit = value & 0x8;
             break;
@@ -406,7 +406,7 @@ void apu_write(GB_gameboy_t *gb, unsigned char reg, unsigned char value)
         case GB_IO_NR52:
 
             if ((value & 0x80) && !gb->apu.global_enable) {
-                apu_init(gb);
+                GB_apu_init(gb);
                 gb->apu.global_enable = true;
             }
             else if (!(value & 0x80) && gb->apu.global_enable)  {

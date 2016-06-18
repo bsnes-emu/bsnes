@@ -17,7 +17,7 @@
 
 @property GBAudioClient *audioClient;
 - (void) vblank;
-- (void) log: (const char *) log withAttributes: (gb_log_attributes) attributes;
+- (void) log: (const char *) log withAttributes: (GB_log_attributes) attributes;
 - (const char *) getDebuggerInput;
 @end
 
@@ -27,7 +27,7 @@ static void vblank(GB_gameboy_t *gb)
     [self vblank];
 }
 
-static void consoleLog(GB_gameboy_t *gb, const char *string, gb_log_attributes attributes)
+static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
 {
     Document *self = (__bridge Document *)(gb->user_data);
     [self log:string withAttributes: attributes];
@@ -39,7 +39,7 @@ static char *consoleInput(GB_gameboy_t *gb)
     return strdup([self getDebuggerInput]);
 }
 
-static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, unsigned char b)
+static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return (r << 0) | (g << 8) | (b << 16);
 }
@@ -71,47 +71,47 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 
 - (void) initDMG
 {
-    gb_init(&gb);
-    gb_load_bios(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
-    gb_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    gb_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
-    gb_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
-    gb_set_rgb_encode_callback(&gb, rgbEncode);
+    GB_init(&gb);
+    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
+    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
+    GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
+    GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
+    GB_set_rgb_encode_callback(&gb, rgbEncode);
     gb.user_data = (__bridge void *)(self);
 }
 
 - (void) initCGB
 {
-    gb_init_cgb(&gb);
-    gb_load_bios(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
-    gb_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    gb_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
-    gb_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
-    gb_set_rgb_encode_callback(&gb, rgbEncode);
+    GB_init_cgb(&gb);
+    GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
+    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
+    GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
+    GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
+    GB_set_rgb_encode_callback(&gb, rgbEncode);
     gb.user_data = (__bridge void *)(self);
 }
 
 - (void) vblank
 {
     [self.view flip];
-    gb_set_pixels_output(&gb, self.view.pixels);
+    GB_set_pixels_output(&gb, self.view.pixels);
 }
 
 - (void) run
 {
     running = true;
-    gb_set_pixels_output(&gb, self.view.pixels);
+    GB_set_pixels_output(&gb, self.view.pixels);
     self.view.gb = &gb;
-    gb_set_sample_rate(&gb, 96000);
+    GB_set_sample_rate(&gb, 96000);
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
-        apu_copy_buffer(&gb, buffer, nFrames);
+        GB_apu_copy_buffer(&gb, buffer, nFrames);
     } andSampleRate:96000];
     [self.audioClient start];
     while (running) {
-        gb_run(&gb);
+        GB_run(&gb);
     }
     [self.audioClient stop];
-    gb_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     stopping = false;
 }
 
@@ -137,7 +137,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 {
     bool was_cgb = gb.is_cgb;
     [self stop];
-    gb_free(&gb);
+    GB_free(&gb);
     is_inited = false;
     if (([sender tag] == 0 && was_cgb) || [sender tag] == 2) {
         [self initCGB];
@@ -165,7 +165,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
 
 - (void)dealloc
 {
-    gb_free(&gb);
+    GB_free(&gb);
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
@@ -198,8 +198,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     if (is_inited++) {
         return YES;
     }
-    gb_load_rom(&gb, [fileName UTF8String]);
-    gb_load_battery(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_load_rom(&gb, [fileName UTF8String]);
+    GB_load_battery(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     return YES;
 }
 
@@ -283,7 +283,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     return rect;
 }
 
-- (void) log: (const char *) string withAttributes: (gb_log_attributes) attributes
+- (void) log: (const char *) string withAttributes: (GB_log_attributes) attributes
 {
     if (pendingLogLines > 128) {
         /* The ROM causes so many errors in such a short time, and we can't handle it. */
@@ -367,7 +367,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     if (!gb.debug_stopped) {
         [self stop];
     }
-    gb_save_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
+    GB_save_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
     if (was_running) {
         [self start];
     }
@@ -379,7 +379,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, unsigned char r, unsigned char g, un
     if (!gb.debug_stopped) {
         [self stop];
     }
-    gb_load_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
+    GB_load_state(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]] UTF8String]);
     if (was_running) {
         [self start];
     }

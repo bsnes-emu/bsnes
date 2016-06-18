@@ -2,10 +2,10 @@
 #include "gb.h"
 #include "joypad.h"
 
-void update_joyp(GB_gameboy_t *gb)
+void GB_update_joyp(GB_gameboy_t *gb)
 {
-    unsigned char key_selection = 0;
-    unsigned char previous_state = 0;
+    uint8_t key_selection = 0;
+    uint8_t previous_state = 0;
 
     /* Todo: add delay to key selection */
     previous_state = gb->io_registers[GB_IO_JOYP] & 0xF;
@@ -19,21 +19,21 @@ void update_joyp(GB_gameboy_t *gb)
 
         case 2:
             /* Direction keys */
-            for (unsigned char i = 0; i < 4; i++) {
+            for (uint8_t i = 0; i < 4; i++) {
                 gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i]) << i;
             }
             break;
 
         case 1:
             /* Other keys */
-            for (unsigned char i = 0; i < 4; i++) {
+            for (uint8_t i = 0; i < 4; i++) {
                 gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i + 4]) << i;
             }
             break;
 
         case 0:
             /* Todo: verifiy this is correct */
-            for (unsigned char i = 0; i < 4; i++) {
+            for (uint8_t i = 0; i < 4; i++) {
                 gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i]) << i;
                 gb->io_registers[GB_IO_JOYP] |= (!gb->keys[i + 4]) << i;
             }

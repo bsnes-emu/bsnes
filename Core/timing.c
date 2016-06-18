@@ -3,7 +3,7 @@
 #include "memory.h"
 #include "display.h"
 
-void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
+void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
     if (gb->dma_cycles > cycles){
@@ -24,16 +24,16 @@ void advance_cycles(GB_gameboy_t *gb, unsigned char cycles)
     gb->hdma_cycles += cycles;
     gb->display_cycles += cycles;
     gb->apu_cycles += cycles;
-    hdma_run(gb);
-    timers_run(gb);
-    apu_run(gb);
-    display_run(gb);
+    GB_hdma_run(gb);
+    GB_timers_run(gb);
+    GB_apu_run(gb);
+    GB_display_run(gb);
 }
 
-void timers_run(GB_gameboy_t *gb)
+void GB_timers_run(GB_gameboy_t *gb)
 {
     /* Standard Timers */
-    static const unsigned long GB_TAC_RATIOS[] = {1024, 16, 64, 256};
+    static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
 
     if (gb->div_cycles >= DIV_CYCLES) {
         gb->div_cycles -= DIV_CYCLES;

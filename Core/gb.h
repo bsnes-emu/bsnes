@@ -1,5 +1,5 @@
-#ifndef gb_h
-#define gb_h
+#ifndef GB_h
+#define GB_h
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include "save_struct.h"
 
 
-#define GB_STRUCT_VERSION 8
+#define GB_STRUCT_VERSION 9
 
 enum {
     GB_REGISTER_AF,
@@ -146,14 +146,14 @@ typedef enum {
     GB_LOG_DASHED_UNDERLINE = 2,
     GB_LOG_UNDERLINE = 4,
     GB_LOG_UNDERLINE_MASK =  GB_LOG_DASHED_UNDERLINE | GB_LOG_UNDERLINE
-} gb_log_attributes;
+} GB_log_attributes;
 
 struct GB_gameboy_s;
 typedef struct GB_gameboy_s GB_gameboy_t;
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
-typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, gb_log_attributes attributes);
+typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
-typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, unsigned char r, unsigned char g, unsigned char b);
+typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 
 typedef struct {
     enum {
@@ -172,21 +172,32 @@ typedef struct {
 
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
-   Some other changes might be "safe" as well. */
+   Some other changes might be "safe" as well.
+   This struct is not packed, but dumped sections exclusively use types that have the same alignment in both 32 and 64
+   bit platforms. */
+
+/* We make sure bool is 1 for cross-platform save state compatibility. */
+/* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
+_Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
 typedef struct GB_gameboy_s {
     GB_SECTION(header,
-        uintptr_t magic; // States are currently platform dependent
-        int version; // and version dependent
+        /* The magic makes sure a state file is:
+            - Indeed a SameBoy state file.
+            - Has the same endianess has the current platform. */
+        uint32_t magic;
+        /* The version field makes sure we don't load save state files with a completely different structure.
+           This happens when struct fields are removed/resized in an backward incompatible manner. */
+        uint32_t version;
     );
 
     GB_SECTION(core_state,
         /* Registers */
-        unsigned short pc;
-        unsigned short registers[GB_REGISTERS_16_BIT];
+        uint16_t pc;
+        uint16_t registers[GB_REGISTERS_16_BIT];
         bool ime;
-        unsigned char interrupt_enable;
-        unsigned char cgb_ram_bank;
+        uint8_t interrupt_enable;
+        uint8_t cgb_ram_bank;
 
         /* CPU and General Hardware Flags*/
         bool cgb_mode;
@@ -194,23 +205,23 @@ typedef struct GB_gameboy_s {
         bool cgb_double_speed;
         bool halted;
         bool stopped;
-        bool bios_finished;
+        bool boot_rom_finished;
     );
 
     /* HDMA */
     GB_SECTION(hdma,
         bool hdma_on;
         bool hdma_on_hblank;
-        unsigned char hdma_steps_left;
-        unsigned short hdma_cycles;
-        unsigned short hdma_current_src, hdma_current_dest;
+        uint8_t hdma_steps_left;
+        uint16_t hdma_cycles;
+        uint16_t hdma_current_src, hdma_current_dest;
     );
     
     /* MBC */
     GB_SECTION(mbc,
-        unsigned short mbc_rom_bank;
-        unsigned char mbc_ram_bank;
-        size_t mbc_ram_size;
+        uint16_t mbc_rom_bank;
+        uint8_t mbc_ram_bank;
+        uint32_t mbc_ram_size;
         bool mbc_ram_enable;
         bool mbc_ram_banking;
     );
@@ -218,18 +229,18 @@ typedef struct GB_gameboy_s {
 
     /* HRAM and HW Registers */
     GB_SECTION(hram,
-        unsigned char hram[0xFFFF - 0xFF80];
-        unsigned char io_registers[0x80];
+        uint8_t hram[0xFFFF - 0xFF80];
+        uint8_t io_registers[0x80];
     );
 
     /* Timing */
     GB_SECTION(timing,
-        signed long last_vblank;
-        unsigned long display_cycles;
-        unsigned long div_cycles;
-        unsigned long tima_cycles;
-        unsigned long dma_cycles;
-        double apu_cycles;
+        int64_t last_vblank;
+        uint32_t display_cycles;
+        uint32_t div_cycles;
+        uint32_t tima_cycles;
+        uint32_t dma_cycles;
+        GB_aligned_double apu_cycles;
     );
 
     /* APU */
@@ -241,47 +252,45 @@ typedef struct GB_gameboy_s {
     GB_SECTION(rtc,
         union {
             struct {
-                unsigned char rtc_seconds;
-                unsigned char rtc_minutes;
-                unsigned char rtc_hours;
-                unsigned char rtc_days;
-                unsigned char rtc_high;
+                uint8_t rtc_seconds;
+                uint8_t rtc_minutes;
+                uint8_t rtc_hours;
+                uint8_t rtc_days;
+                uint8_t rtc_high;
             };
-            unsigned char rtc_data[5];
+            uint8_t rtc_data[5];
         };
         time_t last_rtc_second;
     );
 
     /* Video Display */
     GB_SECTION(video,
-        unsigned long vram_size; // Different between CGB and DMG
-        unsigned char cgb_vram_bank;
-        unsigned char oam[0xA0];
-        unsigned char background_palletes_data[0x40];
-        unsigned char sprite_palletes_data[0x40];
+        uint32_t vram_size; // Different between CGB and DMG
+        uint8_t cgb_vram_bank;
+        uint8_t oam[0xA0];
+        uint8_t background_palletes_data[0x40];
+        uint8_t sprite_palletes_data[0x40];
         uint32_t background_palletes_rgb[0x20];
         uint32_t sprite_palletes_rgb[0x20];
-        GB_PADDING(bool, ly144_bug_oam);
-        GB_PADDING(bool, ly144_bug_hblank);
-        signed short previous_lcdc_x;
-        unsigned char padding;
+        int16_t previous_lcdc_x;
+        uint8_t padding;
         bool effective_window_enabled;
-        unsigned char effective_window_y;
+        uint8_t effective_window_y;
         bool stat_interrupt_line;
-        unsigned char effective_scx;
+        uint8_t effective_scx;
     );
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
 
     /* ROM */
-    unsigned char *rom;
-    size_t rom_size;
+    uint8_t *rom;
+    uint32_t rom_size;
     const GB_cartridge_t *cartridge_type;
 
     /* Various RAMs */
-    unsigned char *ram;
-    unsigned char *vram;
-    unsigned char *mbc_ram;
+    uint8_t *ram;
+    uint8_t *vram;
+    uint8_t *mbc_ram;
 
     /* I/O */
     uint32_t *screen;
@@ -305,17 +314,17 @@ typedef struct GB_gameboy_s {
     /* Debugger */
     int debug_call_depth;
     bool debug_fin_command, debug_next_command;
-    unsigned short n_breakpoints;
-    unsigned short *breakpoints;
+    uint16_t n_breakpoints;
+    uint16_t *breakpoints;
     bool stack_leak_detection;
-    unsigned short sp_for_call_depth[0x200]; /* Should be much more than enough */
-    unsigned short addr_for_call_depth[0x200];
+    uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
+    uint16_t addr_for_call_depth[0x200];
     bool debug_stopped;
 
     /* Misc */
     bool turbo;
-    unsigned long ram_size; // Different between CGB and DMG
-    unsigned char bios[0x900];
+    uint32_t ram_size; // Different between CGB and DMG
+    uint8_t boot_rom[0x900];
 
 } GB_gameboy_t;
 
@@ -325,23 +334,23 @@ typedef struct GB_gameboy_s {
 __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 #endif
 
-void gb_init(GB_gameboy_t *gb);
-void gb_init_cgb(GB_gameboy_t *gb);
-void gb_free(GB_gameboy_t *gb);
-int gb_load_bios(GB_gameboy_t *gb, const char *path);
-int gb_load_rom(GB_gameboy_t *gb, const char *path);
-int gb_save_battery(GB_gameboy_t *gb, const char *path);
-void gb_load_battery(GB_gameboy_t *gb, const char *path);
-int gb_save_state(GB_gameboy_t *gb, const char *path);
-int gb_load_state(GB_gameboy_t *gb, const char *path);
-void gb_run(GB_gameboy_t *gb);
-void gb_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
-void gb_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
-void gb_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
-void gb_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
-void gb_attributed_log(GB_gameboy_t *gb, gb_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
-void gb_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
-void gb_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
-void gb_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
+void GB_init(GB_gameboy_t *gb);
+void GB_init_cgb(GB_gameboy_t *gb);
+void GB_free(GB_gameboy_t *gb);
+int GB_load_boot_rom(GB_gameboy_t *gb, const char *path);
+int GB_load_rom(GB_gameboy_t *gb, const char *path);
+int GB_save_battery(GB_gameboy_t *gb, const char *path);
+void GB_load_battery(GB_gameboy_t *gb, const char *path);
+int GB_save_state(GB_gameboy_t *gb, const char *path);
+int GB_load_state(GB_gameboy_t *gb, const char *path);
+void GB_run(GB_gameboy_t *gb);
+void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
+void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
+void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
+void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
+void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
+void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
+void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 
-#endif /* gb_h */
+#endif /* GB_h */

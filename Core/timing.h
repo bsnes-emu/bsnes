@@ -2,6 +2,6 @@
 #define timing_h
 #include "gb.h"
 
-void advance_cycles(GB_gameboy_t *gb, unsigned char cycles);
-void timers_run(GB_gameboy_t *gb);
+void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles);
+void GB_timers_run(GB_gameboy_t *gb);
 #endif /* timing_h */

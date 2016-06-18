@@ -9,7 +9,7 @@
 
 static bool running = false;
 
-void update_keys_status(GB_gameboy_t *gb)
+void GB_update_keys_status(GB_gameboy_t *gb)
 {
     static bool ctrl = false;
     SDL_Event event;
@@ -74,9 +74,9 @@ void vblank(GB_gameboy_t *gb)
 {
     SDL_Surface *screen = gb->user_data;
     SDL_Flip(screen);
-    update_keys_status(gb);
+    GB_update_keys_status(gb);
 
-    gb_set_pixels_output(gb, screen->pixels);
+    GB_set_pixels_output(gb, screen->pixels);
 }
 
 #ifdef __APPLE__
@@ -123,7 +123,7 @@ static char *executable_relative_path(const char *filename)
 }
 
 static SDL_Surface *screen = NULL;
-static uint32_t rgb_encode(GB_gameboy_t *gb, unsigned char r, unsigned char g, unsigned char b)
+static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return SDL_MapRGB(screen->format, r, g, b);
 }
@@ -138,7 +138,7 @@ static void debugger_interrupt(int ignore)
 
 static void audio_callback(void *gb, Uint8 *stream, int len)
 {
-    apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
+    GB_apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
 }
 
 #ifdef __APPLE__
@@ -169,21 +169,21 @@ usage:
 
 
     if (dmg) {
-        gb_init(&gb);
-        if (gb_load_bios(&gb, executable_relative_path("dmg_boot.bin"))) {
+        GB_init(&gb);
+        if (GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"))) {
             perror("Failed to load boot ROM");
             exit(1);
         }
     }
     else {
-        gb_init_cgb(&gb);
-        if (gb_load_bios(&gb, executable_relative_path("cgb_boot.bin"))) {
+        GB_init_cgb(&gb);
+        if (GB_load_boot_rom(&gb, executable_relative_path("cgb_boot.bin"))) {
             perror("Failed to load boot ROM");
             exit(1);
         }
     }
 
-    if (gb_load_rom(&gb, argv[argc - 1])) {
+    if (GB_load_rom(&gb, argv[argc - 1])) {
         perror("Failed to load ROM");
         exit(1);
     }
@@ -198,10 +198,10 @@ usage:
 #endif
     /* Configure Screen */
     SDL_LockSurface(screen);
-    gb_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
+    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     gb.user_data = screen;
-    gb_set_pixels_output(&gb, screen->pixels);
-    gb_set_rgb_encode_callback(&gb, rgb_encode);
+    GB_set_pixels_output(&gb, screen->pixels);
+    GB_set_rgb_encode_callback(&gb, rgb_encode);
 
     /* Configure battery */
     size_t path_length = strlen(argv[argc - 1]);
@@ -220,7 +220,7 @@ usage:
     /* Add .sav */
     strcat(battery_save_path, ".sav");
 
-    gb_load_battery(&gb, battery_save_path);
+    GB_load_battery(&gb, battery_save_path);
 
     /* Configure Audio */
     SDL_AudioSpec want, have;
@@ -232,7 +232,7 @@ usage:
     want.callback = audio_callback;
     want.userdata = &gb;
     SDL_OpenAudio(&want, &have);
-    gb_set_sample_rate(&gb, 96000);
+    GB_set_sample_rate(&gb, 96000);
     
     /* Start Audio */
     SDL_PauseAudio(0);
@@ -240,11 +240,11 @@ usage:
     /* Run emulation */
     running = true;
     while (running) {
-        gb_run(&gb);
+        GB_run(&gb);
     }
     SDL_CloseAudio();
 
-    gb_save_battery(&gb, battery_save_path);
+    GB_save_battery(&gb, battery_save_path);
     return 0;
 }
 
