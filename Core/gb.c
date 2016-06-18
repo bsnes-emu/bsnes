@@ -132,6 +132,8 @@ void gb_init(GB_gameboy_t *gb)
     gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] = 0x55555555;
     gb->input_callback = default_input_callback;
     gb->cartridge_type = &cart_defs[0]; // Default cartridge type
+
+    gb->io_registers[GB_IO_JOYP] = 0xF;
 }
 
 void gb_init_cgb(GB_gameboy_t *gb)
@@ -154,6 +156,8 @@ void gb_init_cgb(GB_gameboy_t *gb)
     gb->cgb_ram_bank = 1;
     gb->input_callback = default_input_callback;
     gb->cartridge_type = &cart_defs[0]; // Default cartridge type
+
+    gb->io_registers[GB_IO_JOYP] = 0xF;
 }
 
 void gb_free(GB_gameboy_t *gb)
