@@ -6,6 +6,8 @@ struct Program : Emulator::Interface::Bind {
   auto quit() -> void;
 
   //interface.cpp
+  auto path(uint id) -> string override;
+  auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
   auto loadRequest(uint id, string name, string type, bool required) -> void override;
   auto loadRequest(uint id, string path, bool required) -> void override;
   auto saveRequest(uint id, string path) -> void override;
@@ -14,7 +16,6 @@ struct Program : Emulator::Interface::Bind {
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
   auto dipSettings(const Markup::Node& node) -> uint override;
-  auto path(uint group) -> string override;
   auto notify(string text) -> void override;
 
   //medium.cpp

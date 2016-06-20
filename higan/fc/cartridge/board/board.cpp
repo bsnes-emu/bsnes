@@ -41,16 +41,43 @@ Board::Board(Markup::Node& document) {
   if(chrrom.size) chrrom.data = new uint8_t[chrrom.size]();
   if(chrram.size) chrram.data = new uint8_t[chrram.size]();
 
-  if(auto name = prom["name"].text()) interface->loadRequest(ID::ProgramROM, name, true);
-  if(auto name = pram["name"].text()) interface->loadRequest(ID::ProgramRAM, name, false);
-  if(auto name = crom["name"].text()) interface->loadRequest(ID::CharacterROM, name, true);
-  if(auto name = cram["name"].text()) interface->loadRequest(ID::CharacterRAM, name, false);
-
-  if(auto name = pram["name"].text()) Famicom::cartridge.memory.append({ID::ProgramRAM, name});
-  if(auto name = cram["name"].text()) Famicom::cartridge.memory.append({ID::CharacterRAM, name});
+  if(prgrom.name = prom["name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, prgrom.name, vfs::file::mode::read, true)) {
+      fp->read(prgrom.data, min(prgrom.size, fp->size()));
+    }
+  }
+  if(prgram.name = pram["name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, prgram.name, vfs::file::mode::read)) {
+      fp->read(prgram.data, min(prgram.size, fp->size()));
+    }
+  }
+  if(chrrom.name = crom["name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, chrrom.name, vfs::file::mode::read, true)) {
+      fp->read(chrrom.data, min(chrrom.size, fp->size()));
+    }
+  }
+  if(chrram.name = cram["name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, chrram.name, vfs::file::mode::read)) {
+      fp->read(chrram.data, min(chrram.size, fp->size()));
+    }
+  }
 
   prgram.writable = true;
   chrram.writable = true;
+}
+
+auto Board::save() -> void {
+  if(auto name = prgram.name) {
+    if(auto fp = interface->open(ID::Famicom, name, vfs::file::mode::write)) {
+      fp->write(prgram.data, prgram.size);
+    }
+  }
+
+  if(auto name = chrram.name) {
+    if(auto fp = interface->open(ID::Famicom, name, vfs::file::mode::write)) {
+      fp->write(chrram.data, chrram.size);
+    }
+  }
 }
 
 auto Board::Memory::read(uint addr) const -> uint8 {

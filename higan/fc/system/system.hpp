@@ -6,7 +6,8 @@ struct System {
   auto run() -> void;
   auto runToSave() -> void;
 
-  auto load() -> void;
+  auto load() -> bool;
+  auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
   auto reset() -> void;

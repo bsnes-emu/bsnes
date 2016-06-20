@@ -26,20 +26,30 @@ auto Cartridge::main() -> void {
   board->main();
 }
 
-auto Cartridge::load() -> void {
-  interface->loadRequest(ID::Manifest, "manifest.bml", true);
+auto Cartridge::load() -> bool {
+  if(auto fp = interface->open(ID::Famicom, "manifest.bml", vfs::file::mode::read, true)) {
+    fp->reads(information.markup);
+  } else {
+    return false;
+  }
 
   Board::load(information.markup);  //this call will set Cartridge::board if successful
-  if(!board) return;
+  if(!board) return false;
 
   Hash::SHA256 sha;
   sha.data(board->prgrom.data, board->prgrom.size);
   sha.data(board->chrrom.data, board->chrrom.size);
   _sha256 = sha.digest();
+  return true;
+}
+
+auto Cartridge::save() -> void {
+  board->save();
 }
 
 auto Cartridge::unload() -> void {
-  memory.reset();
+  delete board;
+  board = nullptr;
 }
 
 auto Cartridge::power() -> void {

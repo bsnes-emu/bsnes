@@ -128,65 +128,12 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::group(uint id) -> uint {
-  switch(id) {
-  case ID::SystemManifest:
-    return 0;
-  case ID::Manifest:
-  case ID::ProgramROM:
-  case ID::ProgramRAM:
-  case ID::CharacterROM:
-  case ID::CharacterRAM:
-    return 1;
-  }
-
-  throw;
-}
-
 auto Interface::load(uint id) -> void {
   system.load();
 }
 
 auto Interface::save() -> void {
-  for(auto& memory : cartridge.memory) {
-    saveRequest(memory.id, memory.name);
-  }
-}
-
-auto Interface::load(uint id, const stream& stream) -> void {
-  if(id == ID::SystemManifest) {
-    system.information.manifest = stream.text();
-  }
-
-  if(id == ID::Manifest) {
-    cartridge.information.markup = stream.text();
-  }
-
-  if(id == ID::ProgramROM) {
-    stream.read(cartridge.board->prgrom.data, min(cartridge.board->prgrom.size, stream.size()));
-  }
-
-  if(id == ID::ProgramRAM) {
-    stream.read(cartridge.board->prgram.data, min(cartridge.board->prgram.size, stream.size()));
-  }
-
-  if(id == ID::CharacterROM) {
-    stream.read(cartridge.board->chrrom.data, min(cartridge.board->chrrom.size, stream.size()));
-  }
-
-  if(id == ID::CharacterRAM) {
-    stream.read(cartridge.board->chrram.data, min(cartridge.board->chrram.size, stream.size()));
-  }
-}
-
-auto Interface::save(uint id, const stream& stream) -> void {
-  if(id == ID::ProgramRAM) {
-    stream.write(cartridge.board->prgram.data, cartridge.board->prgram.size);
-  }
-
-  if(id == ID::CharacterRAM) {
-    stream.write(cartridge.board->chrram.data, cartridge.board->chrram.size);
-  }
+  system.save();
 }
 
 auto Interface::unload() -> void {

@@ -7,15 +7,18 @@ struct Board {
     inline auto read(uint addr) const -> uint8;
     inline auto write(uint addr, uint8 data) -> void;
 
-    uint8_t* data;
-    uint size;
-    bool writable;
+    string name;
+    uint8_t* data = nullptr;
+    uint size = 0;
+    bool writable = false;
   };
 
-  Board(Markup::Node& document);
   virtual ~Board() = default;
 
   static auto mirror(uint addr, uint size) -> uint;
+
+  Board(Markup::Node& document);
+  auto save() -> void;
 
   virtual auto main() -> void;
   virtual auto tick() -> void;

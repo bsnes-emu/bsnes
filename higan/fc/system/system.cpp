@@ -21,12 +21,20 @@ auto System::runToSave() -> void {
   }
 }
 
-auto System::load() -> void {
-  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+auto System::load() -> bool {
+  if(auto fp = interface->open(ID::System, "manifest.bml", vfs::file::mode::read, true)) {
+    fp->reads(information.manifest);
+  } else {
+    return false;
+  }
   auto document = BML::unserialize(information.manifest);
   cartridge.load();
   serializeInit();
-  _loaded = true;
+  return _loaded = true;
+}
+
+auto System::save() -> void {
+  cartridge.save();
 }
 
 auto System::unload() -> void {

@@ -9,7 +9,8 @@ struct Cartridge : Thread {
   auto manifest() const -> string;
   auto title() const -> string;
 
-  auto load() -> void;
+  auto load() -> bool;
+  auto save() -> void;
   auto unload() -> void;
 
   auto power() -> void;
@@ -21,12 +22,6 @@ struct Cartridge : Thread {
     string markup;
     string title;
   } information;
-
-  struct Memory {
-    unsigned id;
-    string name;
-  };
-  vector<Memory> memory;
 
 //privileged:
   Board* board = nullptr;

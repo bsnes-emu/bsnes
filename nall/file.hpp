@@ -239,7 +239,7 @@ struct file : inode, varint {
     #endif
   }
 
-  auto end() -> bool {
+  auto end() const -> bool {
     if(!fp) return true;  //file not open
     return file_offset >= file_size;
   }
