@@ -28,7 +28,7 @@ auto Cartridge::main() -> void {
 
 auto Cartridge::load() -> bool {
   if(auto fp = interface->open(ID::Famicom, "manifest.bml", vfs::file::mode::read, true)) {
-    fp->reads(information.markup);
+    information.markup = fp->reads();
   } else {
     return false;
   }

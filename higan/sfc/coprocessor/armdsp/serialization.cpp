@@ -1,6 +1,6 @@
 auto ArmDSP::firmware() const -> nall::vector<uint8> {
   nall::vector<uint8> buffer;
-  if(!cartridge.hasARMDSP) return buffer;
+  if(!cartridge.has.ARMDSP) return buffer;
   buffer.reserve(128 * 1024 + 32 * 1024);
   for(auto n : range(128 * 1024)) buffer.append(programROM[n]);
   for(auto n : range( 32 * 1024)) buffer.append(dataROM[n]);

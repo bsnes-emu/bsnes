@@ -50,22 +50,22 @@ auto System::serializeAll(serializer& s) -> void {
   ppu.serialize(s);
   dsp.serialize(s);
 
-  if(cartridge.hasICD2) icd2.serialize(s);
-  if(cartridge.hasMCC) mcc.serialize(s);
-  if(cartridge.hasEvent) event.serialize(s);
-  if(cartridge.hasSA1) sa1.serialize(s);
-  if(cartridge.hasSuperFX) superfx.serialize(s);
-  if(cartridge.hasARMDSP) armdsp.serialize(s);
-  if(cartridge.hasHitachiDSP) hitachidsp.serialize(s);
-  if(cartridge.hasNECDSP) necdsp.serialize(s);
-  if(cartridge.hasEpsonRTC) epsonrtc.serialize(s);
-  if(cartridge.hasSharpRTC) sharprtc.serialize(s);
-  if(cartridge.hasSPC7110) spc7110.serialize(s);
-  if(cartridge.hasSDD1) sdd1.serialize(s);
-  if(cartridge.hasOBC1) obc1.serialize(s);
-  if(cartridge.hasMSU1) msu1.serialize(s);
+  if(cartridge.has.ICD2) icd2.serialize(s);
+  if(cartridge.has.MCC) mcc.serialize(s);
+  if(cartridge.has.Event) event.serialize(s);
+  if(cartridge.has.SA1) sa1.serialize(s);
+  if(cartridge.has.SuperFX) superfx.serialize(s);
+  if(cartridge.has.ARMDSP) armdsp.serialize(s);
+  if(cartridge.has.HitachiDSP) hitachidsp.serialize(s);
+  if(cartridge.has.NECDSP) necdsp.serialize(s);
+  if(cartridge.has.EpsonRTC) epsonrtc.serialize(s);
+  if(cartridge.has.SharpRTC) sharprtc.serialize(s);
+  if(cartridge.has.SPC7110) spc7110.serialize(s);
+  if(cartridge.has.SDD1) sdd1.serialize(s);
+  if(cartridge.has.OBC1) obc1.serialize(s);
+  if(cartridge.has.MSU1) msu1.serialize(s);
 
-  if(cartridge.hasSufamiTurboSlots) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
+  if(cartridge.has.SufamiTurboSlots) sufamiturboA.serialize(s), sufamiturboB.serialize(s);
 }
 
 //perform dry-run state save:

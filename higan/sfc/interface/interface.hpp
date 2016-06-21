@@ -2,85 +2,23 @@ namespace SuperFamicom {
 
 struct ID {
   enum : uint {
-    //cartridges (folders)
     System,
     SuperFamicom,
     GameBoy,
     BSMemory,
-    SufamiTurboSlotA,
-    SufamiTurboSlotB,
+    SufamiTurboA,
+    SufamiTurboB,
 
-    //memory (files)
-    SystemManifest,
-    IPLROM,
-
-    Manifest,
-    ROM,
-    RAM,
-
-    EventROM0,
-    EventROM1,
-    EventROM2,
-    EventROM3,
-    EventRAM,
-
-    SA1ROM,
-    SA1IRAM,
-    SA1BWRAM,
-
-    SuperFXROM,
-    SuperFXRAM,
-
-    ArmDSPPROM,
-    ArmDSPDROM,
-    ArmDSPRAM,
-
-    HitachiDSPROM,
-    HitachiDSPRAM,
-    HitachiDSPDROM,
-    HitachiDSPDRAM,
-
-    Nec7725DSPPROM,
-    Nec7725DSPDROM,
-    Nec7725DSPRAM,
-
-    Nec96050DSPPROM,
-    Nec96050DSPDROM,
-    Nec96050DSPRAM,
-
-    EpsonRTC,
-    SharpRTC,
-
-    SPC7110PROM,
-    SPC7110DROM,
-    SPC7110RAM,
-
-    SDD1ROM,
-    SDD1RAM,
-
-    OBC1RAM,
-
-    MCCROM,
-    MCCRAM,
-
+    //deprecated
     SuperGameBoyManifest,
     SuperGameBoyBootROM,
 
     GameBoyManifest,
     GameBoyROM,
     GameBoyRAM,
+  };
 
-    BSMemoryManifest,
-    BSMemoryROM,
-
-    SufamiTurboSlotAManifest,
-    SufamiTurboSlotAROM,
-    SufamiTurboSlotARAM,
-
-    SufamiTurboSlotBManifest,
-    SufamiTurboSlotBROM,
-    SufamiTurboSlotBRAM,
-
+  enum : uint {
     //device ports (bitmask)
     ControllerPort1 = 1,
     ControllerPort2 = 2,

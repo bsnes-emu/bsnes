@@ -23,7 +23,7 @@ auto System::runToSave() -> void {
 
 auto System::load() -> bool {
   if(auto fp = interface->open(ID::System, "manifest.bml", vfs::file::mode::read, true)) {
-    fp->reads(information.manifest);
+    information.manifest = fp->reads();
   } else {
     return false;
   }

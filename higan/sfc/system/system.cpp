@@ -51,14 +51,19 @@ auto System::init() -> void {
 auto System::term() -> void {
 }
 
-auto System::load() -> void {
+auto System::load() -> bool {
   bus.reset();
 
-  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
+
   auto document = BML::unserialize(information.manifest);
 
   if(auto iplrom = document["system/smp/rom/name"].text()) {
-    interface->loadRequest(ID::IPLROM, iplrom, true);
+    if(auto fp = interface->open(ID::System, iplrom, File::Read, File::Required)) {
+      fp->read(smp.iplrom, 64);
+    } else return false;
   }
 
   cartridge.load();
@@ -66,51 +71,56 @@ auto System::load() -> void {
   _cpuFrequency = region() == Region::NTSC ? 21'477'272 : 21'281'370;
   _apuFrequency = 24'606'720;
 
-  if(cartridge.hasICD2) icd2.load();
-  if(cartridge.hasMCC) mcc.load();
-  if(cartridge.hasNSSDIP) nss.load();
-  if(cartridge.hasEvent) event.load();
-  if(cartridge.hasSA1) sa1.load();
-  if(cartridge.hasSuperFX) superfx.load();
-  if(cartridge.hasARMDSP) armdsp.load();
-  if(cartridge.hasHitachiDSP) hitachidsp.load();
-  if(cartridge.hasNECDSP) necdsp.load();
-  if(cartridge.hasEpsonRTC) epsonrtc.load();
-  if(cartridge.hasSharpRTC) sharprtc.load();
-  if(cartridge.hasSPC7110) spc7110.load();
-  if(cartridge.hasSDD1) sdd1.load();
-  if(cartridge.hasOBC1) obc1.load();
-  if(cartridge.hasMSU1) msu1.load();
+  if(cartridge.has.ICD2) icd2.load();
+  if(cartridge.has.MCC) mcc.load();
+  if(cartridge.has.NSSDIP) nss.load();
+  if(cartridge.has.Event) event.load();
+  if(cartridge.has.SA1) sa1.load();
+  if(cartridge.has.SuperFX) superfx.load();
+  if(cartridge.has.ARMDSP) armdsp.load();
+  if(cartridge.has.HitachiDSP) hitachidsp.load();
+  if(cartridge.has.NECDSP) necdsp.load();
+  if(cartridge.has.EpsonRTC) epsonrtc.load();
+  if(cartridge.has.SharpRTC) sharprtc.load();
+  if(cartridge.has.SPC7110) spc7110.load();
+  if(cartridge.has.SDD1) sdd1.load();
+  if(cartridge.has.OBC1) obc1.load();
+  if(cartridge.has.MSU1) msu1.load();
 
-  if(cartridge.hasBSMemorySlot) bsmemory.load();
-  if(cartridge.hasSufamiTurboSlots) sufamiturboA.load(), sufamiturboB.load();
+  if(cartridge.has.BSMemorySlot) bsmemory.load();
+  if(cartridge.has.SufamiTurboSlots) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
-  _loaded = true;
+  return _loaded = true;
+}
+
+auto System::save() -> void {
+  if(!loaded()) return;
+  cartridge.save();
 }
 
 auto System::unload() -> void {
   if(!loaded()) return;
   peripherals.unload();
 
-  if(cartridge.hasICD2) icd2.unload();
-  if(cartridge.hasMCC) mcc.unload();
-  if(cartridge.hasNSSDIP) nss.unload();
-  if(cartridge.hasEvent) event.unload();
-  if(cartridge.hasSA1) sa1.unload();
-  if(cartridge.hasSuperFX) superfx.unload();
-  if(cartridge.hasARMDSP) armdsp.unload();
-  if(cartridge.hasHitachiDSP) hitachidsp.unload();
-  if(cartridge.hasNECDSP) necdsp.unload();
-  if(cartridge.hasEpsonRTC) epsonrtc.unload();
-  if(cartridge.hasSharpRTC) sharprtc.unload();
-  if(cartridge.hasSPC7110) spc7110.unload();
-  if(cartridge.hasSDD1) sdd1.unload();
-  if(cartridge.hasOBC1) obc1.unload();
-  if(cartridge.hasMSU1) msu1.unload();
+  if(cartridge.has.ICD2) icd2.unload();
+  if(cartridge.has.MCC) mcc.unload();
+  if(cartridge.has.NSSDIP) nss.unload();
+  if(cartridge.has.Event) event.unload();
+  if(cartridge.has.SA1) sa1.unload();
+  if(cartridge.has.SuperFX) superfx.unload();
+  if(cartridge.has.ARMDSP) armdsp.unload();
+  if(cartridge.has.HitachiDSP) hitachidsp.unload();
+  if(cartridge.has.NECDSP) necdsp.unload();
+  if(cartridge.has.EpsonRTC) epsonrtc.unload();
+  if(cartridge.has.SharpRTC) sharprtc.unload();
+  if(cartridge.has.SPC7110) spc7110.unload();
+  if(cartridge.has.SDD1) sdd1.unload();
+  if(cartridge.has.OBC1) obc1.unload();
+  if(cartridge.has.MSU1) msu1.unload();
 
-  if(cartridge.hasBSMemorySlot) bsmemory.unload();
-  if(cartridge.hasSufamiTurboSlots) sufamiturboA.unload(), sufamiturboB.unload();
+  if(cartridge.has.BSMemorySlot) bsmemory.unload();
+  if(cartridge.has.SufamiTurboSlots) sufamiturboA.unload(), sufamiturboB.unload();
 
   cartridge.unload();
   _loaded = false;
@@ -124,23 +134,23 @@ auto System::power() -> void {
   dsp.power();
   ppu.power();
 
-  if(cartridge.hasICD2) icd2.power();
-  if(cartridge.hasMCC) mcc.power();
-  if(cartridge.hasNSSDIP) nss.power();
-  if(cartridge.hasEvent) event.power();
-  if(cartridge.hasSA1) sa1.power();
-  if(cartridge.hasSuperFX) superfx.power();
-  if(cartridge.hasARMDSP) armdsp.power();
-  if(cartridge.hasHitachiDSP) hitachidsp.power();
-  if(cartridge.hasNECDSP) necdsp.power();
-  if(cartridge.hasEpsonRTC) epsonrtc.power();
-  if(cartridge.hasSharpRTC) sharprtc.power();
-  if(cartridge.hasSPC7110) spc7110.power();
-  if(cartridge.hasSDD1) sdd1.power();
-  if(cartridge.hasOBC1) obc1.power();
-  if(cartridge.hasMSU1) msu1.power();
+  if(cartridge.has.ICD2) icd2.power();
+  if(cartridge.has.MCC) mcc.power();
+  if(cartridge.has.NSSDIP) nss.power();
+  if(cartridge.has.Event) event.power();
+  if(cartridge.has.SA1) sa1.power();
+  if(cartridge.has.SuperFX) superfx.power();
+  if(cartridge.has.ARMDSP) armdsp.power();
+  if(cartridge.has.HitachiDSP) hitachidsp.power();
+  if(cartridge.has.NECDSP) necdsp.power();
+  if(cartridge.has.EpsonRTC) epsonrtc.power();
+  if(cartridge.has.SharpRTC) sharprtc.power();
+  if(cartridge.has.SPC7110) spc7110.power();
+  if(cartridge.has.SDD1) sdd1.power();
+  if(cartridge.has.OBC1) obc1.power();
+  if(cartridge.has.MSU1) msu1.power();
 
-  if(cartridge.hasBSMemorySlot) bsmemory.power();
+  if(cartridge.has.BSMemorySlot) bsmemory.power();
 
   reset();
 }
@@ -159,35 +169,35 @@ auto System::reset() -> void {
   dsp.reset();
   ppu.reset();
 
-  if(cartridge.hasICD2) icd2.reset();
-  if(cartridge.hasMCC) mcc.reset();
-  if(cartridge.hasNSSDIP) nss.reset();
-  if(cartridge.hasEvent) event.reset();
-  if(cartridge.hasSA1) sa1.reset();
-  if(cartridge.hasSuperFX) superfx.reset();
-  if(cartridge.hasARMDSP) armdsp.reset();
-  if(cartridge.hasHitachiDSP) hitachidsp.reset();
-  if(cartridge.hasNECDSP) necdsp.reset();
-  if(cartridge.hasEpsonRTC) epsonrtc.reset();
-  if(cartridge.hasSharpRTC) sharprtc.reset();
-  if(cartridge.hasSPC7110) spc7110.reset();
-  if(cartridge.hasSDD1) sdd1.reset();
-  if(cartridge.hasOBC1) obc1.reset();
-  if(cartridge.hasMSU1) msu1.reset();
+  if(cartridge.has.ICD2) icd2.reset();
+  if(cartridge.has.MCC) mcc.reset();
+  if(cartridge.has.NSSDIP) nss.reset();
+  if(cartridge.has.Event) event.reset();
+  if(cartridge.has.SA1) sa1.reset();
+  if(cartridge.has.SuperFX) superfx.reset();
+  if(cartridge.has.ARMDSP) armdsp.reset();
+  if(cartridge.has.HitachiDSP) hitachidsp.reset();
+  if(cartridge.has.NECDSP) necdsp.reset();
+  if(cartridge.has.EpsonRTC) epsonrtc.reset();
+  if(cartridge.has.SharpRTC) sharprtc.reset();
+  if(cartridge.has.SPC7110) spc7110.reset();
+  if(cartridge.has.SDD1) sdd1.reset();
+  if(cartridge.has.OBC1) obc1.reset();
+  if(cartridge.has.MSU1) msu1.reset();
 
-  if(cartridge.hasBSMemorySlot) bsmemory.reset();
+  if(cartridge.has.BSMemorySlot) bsmemory.reset();
 
-  if(cartridge.hasICD2) cpu.coprocessors.append(&icd2);
-  if(cartridge.hasEvent) cpu.coprocessors.append(&event);
-  if(cartridge.hasSA1) cpu.coprocessors.append(&sa1);
-  if(cartridge.hasSuperFX) cpu.coprocessors.append(&superfx);
-  if(cartridge.hasARMDSP) cpu.coprocessors.append(&armdsp);
-  if(cartridge.hasHitachiDSP) cpu.coprocessors.append(&hitachidsp);
-  if(cartridge.hasNECDSP) cpu.coprocessors.append(&necdsp);
-  if(cartridge.hasEpsonRTC) cpu.coprocessors.append(&epsonrtc);
-  if(cartridge.hasSharpRTC) cpu.coprocessors.append(&sharprtc);
-  if(cartridge.hasSPC7110) cpu.coprocessors.append(&spc7110);
-  if(cartridge.hasMSU1) cpu.coprocessors.append(&msu1);
+  if(cartridge.has.ICD2) cpu.coprocessors.append(&icd2);
+  if(cartridge.has.Event) cpu.coprocessors.append(&event);
+  if(cartridge.has.SA1) cpu.coprocessors.append(&sa1);
+  if(cartridge.has.SuperFX) cpu.coprocessors.append(&superfx);
+  if(cartridge.has.ARMDSP) cpu.coprocessors.append(&armdsp);
+  if(cartridge.has.HitachiDSP) cpu.coprocessors.append(&hitachidsp);
+  if(cartridge.has.NECDSP) cpu.coprocessors.append(&necdsp);
+  if(cartridge.has.EpsonRTC) cpu.coprocessors.append(&epsonrtc);
+  if(cartridge.has.SharpRTC) cpu.coprocessors.append(&sharprtc);
+  if(cartridge.has.SPC7110) cpu.coprocessors.append(&spc7110);
+  if(cartridge.has.MSU1) cpu.coprocessors.append(&msu1);
 
   scheduler.reset();
   peripherals.reset();

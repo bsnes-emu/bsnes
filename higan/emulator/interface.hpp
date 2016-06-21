@@ -79,8 +79,8 @@ struct Interface {
 
   //video information
   virtual auto videoFrequency() -> double = 0;
-  virtual auto videoColors() -> uint32 { return 1 << 19; }
-  virtual auto videoColor(uint32 color) -> uint64 { return 0; }
+  virtual auto videoColors() -> uint32 = 0;
+  virtual auto videoColor(uint32 color) -> uint64 = 0;
 
   //audio information
   virtual auto audioFrequency() -> double = 0;

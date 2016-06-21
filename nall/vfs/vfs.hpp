@@ -23,7 +23,8 @@ struct file {
     return offset() >= size();
   }
 
-  auto read(uint8_t* data, uintmax bytes) -> void {
+  auto read(void* vdata, uintmax bytes) -> void {
+    auto data = (uint8_t*)vdata;
     while(bytes--) *data++ = read();
   }
 
@@ -39,12 +40,15 @@ struct file {
     return data;
   }
 
-  auto reads(string& s) -> void {
+  auto reads() -> string {
+    string s;
     s.resize(size());
     read(s.get<uint8_t>(), s.size());
+    return s;
   }
 
-  auto write(const uint8_t* data, uintmax bytes) -> void {
+  auto write(const void* vdata, uintmax bytes) -> void {
+    auto data = (const uint8_t*)vdata;
     while(bytes--) write(*data++);
   }
 

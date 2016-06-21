@@ -1,6 +1,6 @@
 auto HitachiDSP::firmware() const -> vector<uint8> {
   vector<uint8> buffer;
-  if(!cartridge.hasHitachiDSP) return buffer;
+  if(!cartridge.has.HitachiDSP) return buffer;
   buffer.reserve(1024 * 3);
   for(auto n : range(1024)) {
     buffer.append(dataROM[n] >>  0);

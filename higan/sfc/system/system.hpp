@@ -15,7 +15,8 @@ struct System {
 
   auto init() -> void;
   auto term() -> void;
-  auto load() -> void;
+  auto load() -> bool;
+  auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
   auto reset() -> void;
