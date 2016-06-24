@@ -17,9 +17,7 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   auto lcdOutput(uint2 color) -> void override;
   auto joypWrite(bool p15, bool p14) -> void override;
 
-  auto loadRequest(uint id, string name, string type, bool required) -> void override;
-  auto loadRequest(uint id, string name, bool required) -> void override;
-  auto saveRequest(uint id, string name) -> void override;
+  auto load(uint id, string name, string type, bool required) -> void override;
 
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(const double* samples, uint channels) -> void override;

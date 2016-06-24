@@ -18,8 +18,8 @@ struct PPU : Thread, PPUcounter {
 
   //memory.cpp
   alwaysinline auto getVramAddress() -> uint16;
-  alwaysinline auto vramRead(uint addr) -> uint8;
-  alwaysinline auto vramWrite(uint addr, uint8 data) -> void;
+  alwaysinline auto vramRead(bool chip, uint15 addr) -> uint8;
+  alwaysinline auto vramWrite(bool chip, uint15 addr, uint8 data) -> void;
   alwaysinline auto oamRead(uint addr) -> uint8;
   alwaysinline auto oamWrite(uint addr, uint8 data) -> void;
   alwaysinline auto cgramRead(uint addr) -> uint8;
@@ -32,7 +32,7 @@ struct PPU : Thread, PPUcounter {
   auto updateVideoMode() -> void;
 
 privileged:
-  uint8 vram[64 * 1024];
+  uint16 vram[32 * 1024];
   uint8 oam[544];
   uint8 cgram[512];
 

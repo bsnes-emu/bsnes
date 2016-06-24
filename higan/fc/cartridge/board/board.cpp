@@ -42,22 +42,22 @@ Board::Board(Markup::Node& document) {
   if(chrram.size) chrram.data = new uint8_t[chrram.size]();
 
   if(prgrom.name = prom["name"].text()) {
-    if(auto fp = interface->open(ID::Famicom, prgrom.name, vfs::file::mode::read, true)) {
+    if(auto fp = interface->open(ID::Famicom, prgrom.name, File::Read, File::Required)) {
       fp->read(prgrom.data, min(prgrom.size, fp->size()));
     }
   }
   if(prgram.name = pram["name"].text()) {
-    if(auto fp = interface->open(ID::Famicom, prgram.name, vfs::file::mode::read)) {
+    if(auto fp = interface->open(ID::Famicom, prgram.name, File::Read)) {
       fp->read(prgram.data, min(prgram.size, fp->size()));
     }
   }
   if(chrrom.name = crom["name"].text()) {
-    if(auto fp = interface->open(ID::Famicom, chrrom.name, vfs::file::mode::read, true)) {
+    if(auto fp = interface->open(ID::Famicom, chrrom.name, File::Read, File::Required)) {
       fp->read(chrrom.data, min(chrrom.size, fp->size()));
     }
   }
   if(chrram.name = cram["name"].text()) {
-    if(auto fp = interface->open(ID::Famicom, chrram.name, vfs::file::mode::read)) {
+    if(auto fp = interface->open(ID::Famicom, chrram.name, File::Read)) {
       fp->read(chrram.data, min(chrram.size, fp->size()));
     }
   }
@@ -67,14 +67,16 @@ Board::Board(Markup::Node& document) {
 }
 
 auto Board::save() -> void {
-  if(auto name = prgram.name) {
-    if(auto fp = interface->open(ID::Famicom, name, vfs::file::mode::write)) {
+  auto document = BML::unserialize(cartridge.manifest());
+
+  if(auto name = document["board/prg/ram/name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, name, File::Write)) {
       fp->write(prgram.data, prgram.size);
     }
   }
 
-  if(auto name = chrram.name) {
-    if(auto fp = interface->open(ID::Famicom, name, vfs::file::mode::write)) {
+  if(auto name = document["board/chr/ram/name"].text()) {
+    if(auto fp = interface->open(ID::Famicom, name, File::Write)) {
       fp->write(chrram.data, chrram.size);
     }
   }

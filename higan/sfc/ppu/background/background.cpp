@@ -56,7 +56,7 @@ auto PPU::Background::getTile() -> void {
   uint paletteOffset = (ppu.r.bgMode == 0 ? id << 5 : 0);
   uint paletteSize = 2 << colorDepth;
   uint tileMask = 0x0fff >> colorDepth;
-  uint tiledataIndex = r.tiledataAddress >> (4 + colorDepth);
+  uint tiledataIndex = r.tiledataAddress >> (3 + colorDepth);
 
   uint tileHeight = (r.tileSize == TileSize::Size8x8 ? 3 : 4);
   uint tileWidth = (!hires ? tileHeight : 4);
@@ -116,12 +116,12 @@ auto PPU::Background::getTile() -> void {
   uint tx = hoffset >> tileWidth;
   uint ty = voffset >> tileHeight;
 
-  uint16 offset = ((ty & 0x1f) << 5) + (tx & 0x1f);
+  uint15 offset = ((ty & 0x1f) << 5) + (tx & 0x1f);
   if(tx & 0x20) offset += screenX;
   if(ty & 0x20) offset += screenY;
 
-  uint16 address = r.screenAddress + (offset << 1);
-  tile = (ppu.vram[address + 0] << 0) + (ppu.vram[address + 1] << 8);
+  uint15 address = r.screenAddress + offset;
+  tile = ppu.vram[address];
   bool mirrorY = tile & 0x8000;
   bool mirrorX = tile & 0x4000;
   priority = r.priority[bool(tile & 0x2000)];
@@ -133,20 +133,16 @@ auto PPU::Background::getTile() -> void {
   uint16 character = ((tile & 0x03ff) + tiledataIndex) & tileMask;
 
   if(mirrorY) voffset ^= 7;
-  offset = (character << (4 + colorDepth)) + ((voffset & 7) << 1);
+  offset = (character << (3 + colorDepth)) + (voffset & 7);
 
   switch(r.mode) {
   case Mode::BPP8:
-    data[1].byte(3) = ppu.vram[offset + 49];
-    data[1].byte(2) = ppu.vram[offset + 48];
-    data[1].byte(1) = ppu.vram[offset + 33];
-    data[1].byte(0) = ppu.vram[offset + 32];
+    data[1].bits(16,31) = ppu.vram[offset + 24];
+    data[1].bits( 0,15) = ppu.vram[offset + 16];
   case Mode::BPP4:
-    data[0].byte(3) = ppu.vram[offset + 17];
-    data[0].byte(2) = ppu.vram[offset + 16];
+    data[0].bits(16,31) = ppu.vram[offset +  8];
   case Mode::BPP2:
-    data[0].byte(1) = ppu.vram[offset +  1];
-    data[0].byte(0) = ppu.vram[offset +  0];
+    data[0].bits( 0,15) = ppu.vram[offset +  0];
   }
 
   if(mirrorX) for(auto n : range(2)) {
@@ -211,8 +207,8 @@ auto PPU::Background::getTileColor() -> uint {
 }
 
 auto PPU::Background::reset() -> void {
-  r.tiledataAddress = (random(0x0000) & 0x07) << 13;
-  r.screenAddress = (random(0x0000) & 0x7c) << 9;
+  r.tiledataAddress = (random(0x0000) & 0x07) << 12;
+  r.screenAddress = (random(0x0000) & 0x7c) << 8;
   r.screenSize = random(0);
   r.mosaic = random(0);
   r.tileSize = random(0);
@@ -274,6 +270,6 @@ auto PPU::Background::getTile(uint x, uint y) -> uint {
   if(x & 0x20) offset += screenX;
   if(y & 0x20) offset += screenY;
 
-  uint16 address = r.screenAddress + (offset << 1);
-  return (ppu.vram[address + 0] << 0) + (ppu.vram[address + 1] << 8);
+  uint15 address = r.screenAddress + offset;
+  return ppu.vram[address];
 }

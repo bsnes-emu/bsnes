@@ -88,7 +88,7 @@ auto PPU::addClocks(uint clocks) -> void {
 }
 
 auto PPU::power() -> void {
-  for(auto& n : vram) n = random(0x00);
+  for(auto& n : vram) n = random(0x0000);
   for(auto& n : oam) n = random(0x00);
   for(auto& n : cgram) n = random(0x00);
 }

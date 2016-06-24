@@ -37,11 +37,8 @@ struct Interface : Emulator::Interface {
 
   auto loaded() -> bool override;
   auto sha256() -> string override;
-  auto group(uint id) -> uint override;
   auto load(uint id) -> void override;
   auto save() -> void override;
-  auto load(uint id, const stream& stream) -> void override;
-  auto save(uint id, const stream& stream) -> void override;
   auto unload() -> void override;
 
   auto power() -> void override;

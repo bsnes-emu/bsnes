@@ -5,9 +5,9 @@ struct Cartridge : Thread {
   static auto Enter() -> void;
   auto main() -> void;
 
-  auto sha256() const -> string;
-  auto manifest() const -> string;
-  auto title() const -> string;
+  auto sha256() const -> string { return information.sha256; }
+  auto manifest() const -> string { return information.manifest; }
+  auto title() const -> string { return information.title; }
 
   auto load() -> bool;
   auto save() -> void;
@@ -19,13 +19,13 @@ struct Cartridge : Thread {
   auto serialize(serializer&) -> void;
 
   struct Information {
-    string markup;
+    string sha256;
+    string manifest;
     string title;
   } information;
 
 //privileged:
   Board* board = nullptr;
-  string _sha256;
 
   auto prg_read(uint addr) -> uint8;
   auto prg_write(uint addr, uint8 data) -> void;

@@ -23,62 +23,57 @@ Cartridge::~Cartridge() {
   delete[] flash.data;
 }
 
-auto Cartridge::sha256() const -> string {
-  return information.sha256;
-}
+auto Cartridge::load() -> bool {
+  information = Information();
 
-auto Cartridge::manifest() const -> string {
-  return information.markup;
-}
+  if(auto fp = interface->open(ID::GameBoyAdvance, "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
 
-auto Cartridge::title() const -> string {
-  return information.title;
-}
-
-auto Cartridge::load() -> void {
-  interface->loadRequest(ID::Manifest, "manifest.bml", true);
-
-  auto document = BML::unserialize(information.markup);
+  auto document = BML::unserialize(information.manifest);
   information.title = document["information/title"].text();
 
   hasSRAM   = false;
   hasEEPROM = false;
   hasFLASH  = false;
 
-  if(auto info = document["board/rom"]) {
-    mrom.size = min(32 * 1024 * 1024, info["size"].natural());
-
-    interface->loadRequest(ID::MROM, info["name"].text(), true);
+  if(auto node = document["board/rom"]) {
+    mrom.size = min(32 * 1024 * 1024, node["size"].natural());
+    if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read, File::Required)) {
+      fp->read(mrom.data, mrom.size);
+    }
   }
 
-  if(auto info = document["board/ram"]) {
-    if(info["type"].text() == "sram") {
+  if(auto node = document["board/ram"]) {
+    if(node["type"].text() == "sram") {
       hasSRAM = true;
-      sram.size = min(32 * 1024, info["size"].natural());
+      sram.size = min(32 * 1024, node["size"].natural());
       sram.mask = sram.size - 1;
       for(auto n : range(sram.size)) sram.data[n] = 0xff;
 
-      interface->loadRequest(ID::SRAM, info["name"].text(), false);
-      memory.append({ID::SRAM, info["name"].text()});
+      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+        fp->read(sram.data, sram.size);
+      }
     }
 
-    if(info["type"].text() == "eeprom") {
+    if(node["type"].text() == "eeprom") {
       hasEEPROM = true;
-      eeprom.size = min(8 * 1024, info["size"].natural());
+      eeprom.size = min(8 * 1024, node["size"].natural());
       eeprom.bits = eeprom.size <= 512 ? 6 : 14;
       if(eeprom.size == 0) eeprom.size = 8192, eeprom.bits = 0;  //auto-detect size
       eeprom.mask = mrom.size > 16 * 1024 * 1024 ? 0x0fffff00 : 0x0f000000;
       eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
       for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
 
-      interface->loadRequest(ID::EEPROM, info["name"].text(), false);
-      memory.append({ID::EEPROM, info["name"].text()});
+      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+        fp->read(eeprom.data, eeprom.size);
+      }
     }
 
-    if(info["type"].text() == "flash") {
+    if(node["type"].text() == "flash") {
       hasFLASH = true;
-      flash.id = info["id"].natural();
-      flash.size = min(128 * 1024, info["size"].natural());
+      flash.id = node["id"].natural();
+      flash.size = min(128 * 1024, node["size"].natural());
       for(auto n : range(flash.size)) flash.data[n] = 0xff;
 
       //if flash ID not provided; guess that it's a Macronix chip
@@ -86,16 +81,28 @@ auto Cartridge::load() -> void {
       if(!flash.id && flash.size ==  64 * 1024) flash.id = 0x1cc2;
       if(!flash.id && flash.size == 128 * 1024) flash.id = 0x09c2;
 
-      interface->loadRequest(ID::FLASH, info["name"].text(), false);
-      memory.append({ID::FLASH, info["name"].text()});
+      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+        fp->read(flash.data, flash.size);
+      }
     }
   }
 
   information.sha256 = Hash::SHA256(mrom.data, mrom.size).digest();
+  return true;
+}
+
+auto Cartridge::save() -> void {
+  auto document = BML::unserialize(information.manifest);
+  if(auto node = document["board/ram"]) {
+    if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Write)) {
+      if(node["type"].text() == "sram") fp->write(sram.data, sram.size);
+      if(node["type"].text() == "eeprom") fp->write(eeprom.data, eeprom.size);
+      if(node["type"].text() == "flash") fp->write(flash.data, flash.size);
+    }
+  }
 }
 
 auto Cartridge::unload() -> void {
-  memory.reset();
 }
 
 auto Cartridge::power() -> void {

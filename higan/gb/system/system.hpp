@@ -1,4 +1,4 @@
-class Interface;
+struct Interface;
 
 enum class Input : uint {
   Up, Down, Left, Right, B, A, Select, Start,
@@ -11,11 +11,9 @@ struct System {
     GameBoyColor,
   };
 
-  System();
-
-  auto loaded() const -> bool;
-  auto revision() const -> Revision;
-  auto clocksExecuted() const -> uint;
+  auto loaded() const -> bool { return _loaded; }
+  auto revision() const -> Revision { return _revision; }
+  auto clocksExecuted() const -> uint { return _clocksExecuted; }
 
   inline auto dmg() const { return _revision == Revision::GameBoy; }
   inline auto sgb() const { return _revision == Revision::SuperGameBoy; }
@@ -25,7 +23,8 @@ struct System {
   auto runToSave() -> void;
 
   auto init() -> void;
-  auto load(Revision) -> void;
+  auto load(Revision) -> bool;
+  auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
 

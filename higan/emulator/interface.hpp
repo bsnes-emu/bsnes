@@ -48,9 +48,7 @@ struct Interface {
   struct Bind {
     virtual auto path(uint) -> string { return ""; }
     virtual auto open(uint, string, vfs::file::mode, bool) -> vfs::shared::file { return {}; }
-    virtual auto loadRequest(uint, string, string, bool) -> void {}
-    virtual auto loadRequest(uint, string, bool) -> void {}
-    virtual auto saveRequest(uint, string) -> void {}
+    virtual auto load(uint, string, string, bool) -> void {}
     virtual auto videoRefresh(const uint32*, uint, uint, uint) -> void {}
     virtual auto audioSample(const double*, uint) -> void {}
     virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
@@ -63,9 +61,7 @@ struct Interface {
   //callback bindings (provided by user interface)
   auto path(uint id) -> string { return bind->path(id); }
   auto open(uint id, string name, vfs::file::mode mode, bool required = false) -> vfs::shared::file { return bind->open(id, name, mode, required); }
-  auto loadRequest(uint id, string name, string type, bool required) -> void { return bind->loadRequest(id, name, type, required); }
-  auto loadRequest(uint id, string path, bool required) -> void { return bind->loadRequest(id, path, required); }
-  auto saveRequest(uint id, string path) -> void { return bind->saveRequest(id, path); }
+  auto load(uint id, string name, string type, bool required = false) -> void { return bind->load(id, name, type, required); }
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(data, pitch, width, height); }
   auto audioSample(const double* samples, uint channels) -> void { return bind->audioSample(samples, channels); }
   auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }
@@ -88,11 +84,8 @@ struct Interface {
   //media interface
   virtual auto loaded() -> bool { return false; }
   virtual auto sha256() -> string { return ""; }
-  virtual auto group(uint id) -> uint { return 0; }
   virtual auto load(uint id) -> void {}
   virtual auto save() -> void {}
-  virtual auto load(uint id, const stream& memory) -> void {}
-  virtual auto save(uint id, const stream& memory) -> void {}
   virtual auto unload() -> void {}
 
   //system interface

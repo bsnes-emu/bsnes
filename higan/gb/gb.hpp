@@ -7,14 +7,13 @@
 #include <processor/lr35902/lr35902.hpp>
 
 namespace GameBoy {
-  namespace Info {
-    static const uint SerializerVersion = 5;
-  }
-}
+  struct File {
+    static const auto Read = vfs::file::mode::read;
+    static const auto Write = vfs::file::mode::write;
+    static const auto Optional = false;
+    static const auto Required = true;
+  };
 
-#include <libco/libco.h>
-
-namespace GameBoy {
   struct Thread {
     ~Thread() {
       if(thread) co_delete(thread);

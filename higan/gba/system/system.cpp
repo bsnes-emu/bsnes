@@ -8,8 +8,6 @@ namespace GameBoyAdvance {
 BIOS bios;
 System system;
 
-auto System::loaded() const -> bool { return _loaded; }
-
 auto System::init() -> void {
 }
 
@@ -34,17 +32,26 @@ auto System::power() -> void {
   scheduler.power();
 }
 
-auto System::load() -> void {
-  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+auto System::load() -> bool {
+  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
   auto document = BML::unserialize(information.manifest);
 
-  if(auto bios = document["system/cpu/rom/name"].text()) {
-    interface->loadRequest(ID::BIOS, bios, true);
+  if(auto name = document["system/cpu/rom/name"].text()) {
+    if(auto fp = interface->open(ID::System, name, File::Read, File::Required)) {
+      fp->read(bios.data, bios.size);
+    }
   }
 
   cartridge.load();
   serializeInit();
-  _loaded = true;
+  return _loaded = true;
+}
+
+auto System::save() -> void {
+  if(!loaded()) return;
+  cartridge.save();
 }
 
 auto System::unload() -> void {

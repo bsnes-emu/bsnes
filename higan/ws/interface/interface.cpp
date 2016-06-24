@@ -107,88 +107,13 @@ auto Interface::sha256() -> string {
   return cartridge.information.sha256;
 }
 
-auto Interface::group(uint id) -> uint {
-  switch(id) {
-  case ID::SystemManifest:
-  case ID::SystemIPLROM:
-  case ID::SystemEEPROM:
-    return 0;
-  case ID::Manifest:
-  case ID::ROM:
-  case ID::RAM:
-  case ID::EEPROM:
-  case ID::RTC:
-    switch(system.model()) {
-    case Model::WonderSwan:
-      return ID::WonderSwan;
-    case Model::WonderSwanColor:
-    case Model::SwanCrystal:
-      return ID::WonderSwanColor;
-    }
-  }
-  throw;
-}
-
 auto Interface::load(uint id) -> void {
   if(id == ID::WonderSwan) system.load(Model::WonderSwan);
   if(id == ID::WonderSwanColor) system.load(Model::WonderSwanColor);
 }
 
 auto Interface::save() -> void {
-  if(auto name = system.eeprom.name()) interface->saveRequest(ID::SystemEEPROM, name);
-  if(auto name = cartridge.ram.name) interface->saveRequest(ID::RAM, name);
-  if(auto name = cartridge.eeprom.name()) interface->saveRequest(ID::EEPROM, name);
-  if(auto name = cartridge.rtc.name) interface->saveRequest(ID::RTC, name);
-}
-
-auto Interface::load(uint id, const stream& stream) -> void {
-  if(id == ID::SystemManifest) {
-    system.information.manifest = stream.text();
-  }
-
-  if(id == ID::SystemEEPROM) {
-    stream.read((uint8_t*)system.eeprom.data(), min(system.eeprom.size() * sizeof(uint16), stream.size()));
-  }
-
-  if(id == ID::Manifest) {
-    cartridge.information.manifest = stream.text();
-  }
-
-  if(id == ID::ROM) {
-    stream.read((uint8_t*)cartridge.rom.data, min(cartridge.rom.size, stream.size()));
-  }
-
-  if(id == ID::RAM) {
-    stream.read((uint8_t*)cartridge.ram.data, min(cartridge.ram.size, stream.size()));
-  }
-
-  if(id == ID::EEPROM) {
-    stream.read((uint8_t*)cartridge.eeprom.data(), min(cartridge.eeprom.size() * sizeof(uint16), stream.size()));
-  }
-
-  if(id == ID::RTC) {
-    stream.read((uint8_t*)cartridge.rtc.data, min(cartridge.rtc.size, stream.size()));
-    cartridge.rtcLoad();
-  }
-}
-
-auto Interface::save(uint id, const stream& stream) -> void {
-  if(id == ID::SystemEEPROM) {
-    stream.write((uint8_t*)system.eeprom.data(), system.eeprom.size() * sizeof(uint16));
-  }
-
-  if(id == ID::RAM) {
-    stream.write((uint8_t*)cartridge.ram.data, cartridge.ram.size);
-  }
-
-  if(id == ID::EEPROM) {
-    stream.write((uint8_t*)cartridge.eeprom.data(), cartridge.eeprom.size() * sizeof(uint16));
-  }
-
-  if(id == ID::RTC) {
-    cartridge.rtcSave();
-    stream.write((uint8_t*)cartridge.rtc.data, cartridge.rtc.size);
-  }
+  system.save();
 }
 
 auto Interface::unload() -> void {

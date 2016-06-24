@@ -38,7 +38,7 @@ auto ICD2::load() -> void {
   hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
   GameBoy::interface->hook = this;
-  interface->loadRequest(ID::GameBoy, "Game Boy", "gb", false);
+  interface->load(ID::GameBoy, "Game Boy", "gb");
   GameBoy::interface->load(GameBoy::ID::SuperGameBoy);
   cartridge.loadGameBoy();
 }

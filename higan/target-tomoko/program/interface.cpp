@@ -12,8 +12,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
   return {};
 }
 
-//request from emulation core to load non-volatile media folder
-auto Program::loadRequest(uint id, string name, string type, bool required) -> void {
+auto Program::load(uint id, string name, string type, bool required) -> void {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
   .setPath({settings["Library/Location"].text(), name})
@@ -24,41 +23,6 @@ auto Program::loadRequest(uint id, string name, string type, bool required) -> v
   mediumPaths(id) = location;
   folderPaths.append(location);
   emulator->load(id);
-}
-
-//request from emulation core to load non-volatile media file
-auto Program::loadRequest(uint id, string filename, bool required) -> void {
-  string pathname = mediumPaths(emulator->group(id));
-  string location = {pathname, filename};
-
-  if(filename == "manifest.bml" && pathname && !pathname.endsWith(".sys/")) {
-    if(!file::exists(location) || settings["Library/IgnoreManifests"].boolean()) {
-      if(auto manifest = execute("icarus", "--manifest", pathname)) {
-        memorystream stream{manifest.output.data<uint8_t>(), manifest.output.size()};
-        return emulator->load(id, stream);
-      }
-    }
-  }
-
-  if(file::exists(location)) {
-    mmapstream stream{location};
-    return emulator->load(id, stream);
-  }
-
-  if(required) MessageDialog().setTitle("higan").setText({
-    "Missing required file: ", nall::filename(location), "\n\n",
-    "From location:\n", nall::pathname(location)
-  }).error();
-}
-
-//request from emulation core to save non-volatile media file
-auto Program::saveRequest(uint id, string filename) -> void {
-  string pathname = mediumPaths(emulator->group(id));
-  string location = {pathname, filename};
-  if(!pathname) return;  //should never occur
-
-  filestream stream{location, file::mode::write};
-  return emulator->save(id, stream);
 }
 
 auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {

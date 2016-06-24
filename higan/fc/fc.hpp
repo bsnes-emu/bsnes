@@ -7,14 +7,13 @@
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
-  namespace Info {
-    static const uint SerializerVersion = 3;
-  }
-}
+  struct File {
+    static const auto Read = vfs::file::mode::read;
+    static const auto Write = vfs::file::mode::write;
+    static const auto Optional = false;
+    static const auto Required = true;
+  };
 
-#include <libco/libco.h>
-
-namespace Famicom {
   struct Thread {
     ~Thread() {
       if(thread) co_delete(thread);

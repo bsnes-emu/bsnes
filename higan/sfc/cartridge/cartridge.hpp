@@ -89,7 +89,7 @@ private:
   auto loadOBC1(Markup::Node) -> void;
   auto loadMSU1(Markup::Node) -> void;
 
-  auto loadMemory(MappedRAM&, Markup::Node, bool writable, uint id = 1) -> void;
+  auto loadMemory(MappedRAM&, Markup::Node, bool required, uint id = 1) -> void;
   auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
   auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
 

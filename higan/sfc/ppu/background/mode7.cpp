@@ -50,8 +50,8 @@ auto PPU::Background::runMode7() -> void {
   case 1:
     px &= 1023;
     py &= 1023;
-    tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    tile = ppu.vram[(py >> 3) * 128 + (px >> 3)].byte(0);
+    palette = ppu.vram[(tile << 6) + ((py & 7) << 3) + (px & 7)].byte(1);
     break;
 
   //palette color 0 outside of screen area
@@ -61,8 +61,8 @@ auto PPU::Background::runMode7() -> void {
     } else {
       px &= 1023;
       py &= 1023;
-      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
-      palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+      tile = ppu.vram[(py >> 3) * 128 + (px >> 3)].byte(0);
+      palette = ppu.vram[(tile << 6) + ((py & 7) << 3) + (px & 7)].byte(1);
     }
     break;
 
@@ -73,9 +73,9 @@ auto PPU::Background::runMode7() -> void {
     } else {
       px &= 1023;
       py &= 1023;
-      tile = ppu.vram[((py >> 3) * 128 + (px >> 3)) << 1];
+      tile = ppu.vram[(py >> 3) * 128 + (px >> 3)].byte(0);
     }
-    palette = ppu.vram[(((tile << 6) + ((py & 7) << 3) + (px & 7)) << 1) + 1];
+    palette = ppu.vram[(tile << 6) + ((py & 7) << 3) + (px & 7)].byte(1);
     break;
   }
 

@@ -7,14 +7,6 @@ System system;
 #include "video.cpp"
 #include "serialization.cpp"
 
-auto System::loaded() const -> bool { return _loaded; }
-auto System::model() const -> Model { return _model; }
-auto System::orientation() const -> bool { return _orientation; }
-auto System::color() const -> bool { return r.color; }
-auto System::planar() const -> bool { return r.format == 0; }
-auto System::packed() const -> bool { return r.format == 1; }
-auto System::depth() const -> bool { return r.color && r.depth == 1; }
-
 auto System::init() -> void {
   assert(interface != nullptr);
 }
@@ -22,10 +14,13 @@ auto System::init() -> void {
 auto System::term() -> void {
 }
 
-auto System::load(Model model) -> void {
+auto System::load(Model model) -> bool {
   _model = model;
 
-  interface->loadRequest(ID::SystemManifest, "manifest.bml", true);
+  if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
+
   auto document = BML::unserialize(information.manifest);
 
   //note: IPLROM is currently undumped; otherwise we'd load it here ...
@@ -36,13 +31,21 @@ auto System::load(Model model) -> void {
     eeprom.erase();
     //initialize user-data section
     for(uint addr = 0x0030; addr <= 0x003a; addr++) eeprom[addr] = 0x0000;
-    interface->loadRequest(ID::SystemEEPROM, eeprom.name(), false);
+    if(auto fp = interface->open(ID::System, eeprom.name(), File::Read)) {
+      fp->read(eeprom.data(), eeprom.size());
+    }
   }
 
   cartridge.load();
   serializeInit();
   _orientation = cartridge.information.orientation;
-  _loaded = true;
+  return _loaded = true;
+}
+
+auto System::save() -> void {
+  if(!loaded()) return;
+
+  cartridge.save();
 }
 
 auto System::unload() -> void {

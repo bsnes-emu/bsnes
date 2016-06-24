@@ -119,7 +119,7 @@ auto PPU::Object::tilefetch() -> void {
     uint16 chrx = (sprite.character >> 0) & 15;
     uint16 chry = (sprite.character >> 4) & 15;
     if(sprite.nameSelect) {
-      tiledataAddress += (256 * 32) + (r.nameSelect << 13);
+      tiledataAddress += (256 * 16) + (r.nameSelect << 12);
     }
     chry  += (y >> 3);
     chry  &= 15;
@@ -138,15 +138,13 @@ auto PPU::Object::tilefetch() -> void {
       oamTile[n].hflip = sprite.hflip;
 
       uint mx = !sprite.hflip ? tx : (tileWidth - 1) - tx;
-      uint pos = tiledataAddress + ((chry + ((chrx + mx) & 15)) << 5);
-      uint16 addr = (pos & 0xffe0) + ((y & 7) * 2);
+      uint pos = tiledataAddress + ((chry + ((chrx + mx) & 15)) << 4);
+      uint15 addr = (pos & 0x7ff0) + (y & 7);
 
-      oamTile[n].data.byte(0) = ppu.vram[addr +  0];
-      oamTile[n].data.byte(1) = ppu.vram[addr +  1];
+      oamTile[n].data.bits( 0,15) = ppu.vram[addr + 0];
       ppu.addClocks(2);
 
-      oamTile[n].data.byte(2) = ppu.vram[addr + 16];
-      oamTile[n].data.byte(3) = ppu.vram[addr + 17];
+      oamTile[n].data.bits(16,31) = ppu.vram[addr + 8];
       ppu.addClocks(2);
     }
   }
@@ -198,7 +196,7 @@ auto PPU::Object::reset() -> void {
 
   r.baseSize = random(0);
   r.nameSelect = random(0);
-  r.tiledataAddress = (random(0x0000) & 3) << 14;
+  r.tiledataAddress = (random(0x0000) & 3) << 13;
   r.firstSprite = 0;
 
   for(auto& p : r.priority) p = 0;

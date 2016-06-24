@@ -24,9 +24,6 @@ private:
 struct MappedRAM : Memory {
   inline auto reset() -> void;
   inline auto allocate(uint) -> void;
-  inline auto map(uint8*, uint) -> void;
-  inline auto copy(const stream& memory) -> void;
-  inline auto read(const stream& memory) -> void;
 
   inline auto writeProtect(bool writeProtect) -> void;
   inline auto data() -> uint8*;

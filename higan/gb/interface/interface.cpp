@@ -124,26 +124,6 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::group(uint id) -> uint {
-  switch(id) {
-  case ID::SystemManifest:
-  case ID::GameBoyBootROM:
-  case ID::SuperGameBoyBootROM:
-  case ID::GameBoyColorBootROM:
-    return 0;
-  case ID::Manifest:
-  case ID::ROM:
-  case ID::RAM:
-    switch(system.revision()) {
-    case System::Revision::GameBoy: return ID::GameBoy;
-    case System::Revision::SuperGameBoy: return ID::SuperGameBoy;
-    case System::Revision::GameBoyColor: return ID::GameBoyColor;
-    }
-    throw;
-  }
-  throw;
-}
-
 auto Interface::load(uint id) -> void {
   if(id == ID::GameBoy) system.load(System::Revision::GameBoy);
   if(id == ID::SuperGameBoy) system.load(System::Revision::SuperGameBoy);
@@ -151,45 +131,7 @@ auto Interface::load(uint id) -> void {
 }
 
 auto Interface::save() -> void {
-  for(auto& memory : cartridge.memory) {
-    interface->saveRequest(memory.id, memory.name);
-  }
-}
-
-auto Interface::load(uint id, const stream& stream) -> void {
-  if(id == ID::SystemManifest) {
-    system.information.manifest = stream.text();
-  }
-
-  if(id == ID::GameBoyBootROM) {
-    stream.read((uint8_t*)system.bootROM.dmg, min( 256u, stream.size()));
-  }
-
-  if(id == ID::SuperGameBoyBootROM) {
-    stream.read((uint8_t*)system.bootROM.sgb, min( 256u, stream.size()));
-  }
-
-  if(id == ID::GameBoyColorBootROM) {
-    stream.read((uint8_t*)system.bootROM.cgb, min(2048u, stream.size()));
-  }
-
-  if(id == ID::Manifest) {
-    cartridge.information.markup = stream.text();
-  }
-
-  if(id == ID::ROM) {
-    stream.read((uint8_t*)cartridge.romdata, min(cartridge.romsize, stream.size()));
-  }
-
-  if(id == ID::RAM) {
-    stream.read((uint8_t*)cartridge.ramdata, min(stream.size(), cartridge.ramsize));
-  }
-}
-
-auto Interface::save(uint id, const stream& stream) -> void {
-  if(id == ID::RAM) {
-    stream.write((uint8_t*)cartridge.ramdata, cartridge.ramsize);
-  }
+  system.save();
 }
 
 auto Interface::unload() -> void {

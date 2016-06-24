@@ -41,12 +41,17 @@ auto Cartridge::power() -> void {
   r.sramBank = 0xff;
 }
 
-auto Cartridge::load() -> void {
-  information.manifest = "";
-  information.title = "";
-  information.sha256 = "";
+auto Cartridge::mode() const -> uint {
+  return system.model() == Model::WonderSwan ? ID::WonderSwan : ID::WonderSwanColor;
+}
 
-  interface->loadRequest(ID::Manifest, "manifest.bml", true);
+auto Cartridge::load() -> bool {
+  information = Information();
+
+  if(auto fp = interface->open(mode(), "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
+  } else return false;
+
   auto document = BML::unserialize(information.manifest);
 
   if(auto node = document["board/rom"]) {
@@ -56,7 +61,9 @@ auto Cartridge::load() -> void {
     if(rom.size) {
       rom.data = new uint8[rom.mask + 1];
       memory::fill(rom.data, rom.mask + 1, 0xff);
-      if(rom.name) interface->loadRequest(ID::ROM, rom.name, true);
+      if(rom.name) if(auto fp = interface->open(mode(), rom.name, File::Read, File::Required)) {
+        fp->read(rom.data, rom.size);
+      }
     }
   }
 
@@ -68,7 +75,9 @@ auto Cartridge::load() -> void {
       if(ram.size) {
         ram.data = new uint8[ram.mask + 1];
         memory::fill(ram.data, ram.mask + 1, 0xff);
-        if(ram.name) interface->loadRequest(ID::RAM, ram.name, false);
+        if(ram.name) if(auto fp = interface->open(mode(), ram.name, File::Read)) {
+          fp->read(ram.data, ram.size);
+        }
       }
     }
 
@@ -77,7 +86,9 @@ auto Cartridge::load() -> void {
       eeprom.setSize(node["size"].natural() / sizeof(uint16));
       if(eeprom.size()) {
         eeprom.erase();
-        if(eeprom.name()) interface->loadRequest(ID::EEPROM, eeprom.name(), false);
+        if(eeprom.name()) if(auto fp = interface->open(mode(), eeprom.name(), File::Read)) {
+          fp->read(eeprom.data(), eeprom.size());
+        }
       }
     }
   }
@@ -89,13 +100,38 @@ auto Cartridge::load() -> void {
     if(rtc.size) {
       rtc.data = new uint8[rtc.mask + 1];
       memory::fill(rtc.data, rtc.mask + 1, 0x00);
-      if(rtc.name) interface->loadRequest(ID::RTC, rtc.name, false);
+      if(rtc.name) if(auto fp = interface->open(mode(), rtc.name, File::Read)) {
+        fp->read(rtc.data, rtc.size);
+      }
     }
   }
 
   information.title = document["information/title"].text();
   information.orientation = document["information/orientation"].text() == "vertical";
   information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
+  return true;
+}
+
+auto Cartridge::save() -> void {
+  auto document = BML::unserialize(information.manifest);
+
+  if(auto name = document["board/ram/name"].text()) {
+    if(auto fp = interface->open(mode(), name, File::Write)) {
+      fp->write(ram.data, ram.size);
+    }
+  }
+
+  if(auto name = document["board/eeprom/name"].text()) {
+    if(auto fp = interface->open(mode(), name, File::Write)) {
+      fp->write(eeprom.data(), eeprom.size());
+    }
+  }
+
+  if(auto name = document["board/rtc/name"].text()) {
+    if(auto fp = interface->open(mode(), name, File::Write)) {
+      fp->write(rtc.data, rtc.size);
+    }
+  }
 }
 
 auto Cartridge::unload() -> void {

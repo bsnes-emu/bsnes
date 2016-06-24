@@ -30,24 +30,6 @@ auto MappedRAM::allocate(uint size) -> void {
   memory::fill(_data, _size, 0xff);
 }
 
-auto MappedRAM::map(uint8* source, uint length) -> void {
-  reset();
-  _data = source;
-  _size = _data ? length : 0;
-}
-
-auto MappedRAM::copy(const stream& memory) -> void {
-  if(_data) delete[] _data;
-  //round size up to multiple of 256-bytes
-  _size = (memory.size() & ~255) + ((bool)(memory.size() & 255) << 8);
-  _data = new uint8[_size]();
-  memory.read((uint8_t*)_data, memory.size());
-}
-
-auto MappedRAM::read(const stream& memory) -> void {
-  memory.read((uint8_t*)_data, min(memory.size(), _size));
-}
-
 auto MappedRAM::writeProtect(bool writeProtect) -> void { _writeProtect = writeProtect; }
 auto MappedRAM::data() -> uint8* { return _data; }
 auto MappedRAM::size() const -> uint { return _size; }

@@ -27,6 +27,8 @@ struct ID {
 };
 
 struct Interface : Emulator::Interface {
+  using Emulator::Interface::load;
+
   Interface();
 
   auto manifest() -> string;
@@ -38,11 +40,8 @@ struct Interface : Emulator::Interface {
 
   auto loaded() -> bool;
   auto sha256() -> string;
-  auto group(uint id) -> uint;
   auto load(uint id) -> void;
   auto save() -> void;
-  auto load(uint id, const stream& stream) -> void;
-  auto save(uint id, const stream& stream) -> void;
   auto unload() -> void;
 
   auto connect(uint port, uint device) -> void;

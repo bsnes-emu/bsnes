@@ -2,13 +2,14 @@ auto System::serialize() -> serializer {
   serializer s(_serializeSize);
 
   uint signature = 0x31545342;
-  uint version = Info::SerializerVersion;
+  char version[16] = {0};
   char hash[64] = {0};
   char description[512] = {0};
+  memory::copy(&version, (const char*)Emulator::SerializerVersion, Emulator::SerializerVersion.size());
   memory::copy(&hash, (const char*)cartridge.sha256(), 64);
 
   s.integer(signature);
-  s.integer(version);
+  s.array(version);
   s.array(hash);
   s.array(description);
 
@@ -18,17 +19,17 @@ auto System::serialize() -> serializer {
 
 auto System::unserialize(serializer& s) -> bool {
   uint signature = 0;
-  uint version = 0;
+  char version[16] = {0};
   char hash[64] = {0};
   char description[512] = {0};
 
   s.integer(signature);
-  s.integer(version);
+  s.array(version);
   s.array(hash);
   s.array(description);
 
   if(signature != 0x31545342) return false;
-  if(version != Info::SerializerVersion) return false;
+  if(string{version} != Emulator::SerializerVersion) return false;
 
   power();
   serializeAll(s);
@@ -75,12 +76,12 @@ auto System::serializeInit() -> void {
   serializer s;
 
   uint signature = 0;
-  uint version = 0;
+  char version[16] = {0};
   char hash[64] = {0};
   char description[512] = {0};
 
   s.integer(signature);
-  s.integer(version);
+  s.array(version);
   s.array(hash);
   s.array(description);
 

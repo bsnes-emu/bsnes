@@ -85,9 +85,10 @@ auto ICD2::joypWrite(bool p15, bool p14) -> void {
   packetLock = true;
 }
 
-auto ICD2::loadRequest(uint id, string name, string type, bool required) -> void {
+auto ICD2::load(uint id, string name, string type, bool required) -> void {
 }
 
+/*
 auto ICD2::loadRequest(uint id, string name, bool required) -> void {
   if(id == GameBoy::ID::SystemManifest) {
     interface->loadRequest(ID::SuperGameBoyManifest, name, required);
@@ -115,6 +116,7 @@ auto ICD2::saveRequest(uint id, string name) -> void {
     interface->saveRequest(ID::GameBoyRAM, name);
   }
 }
+*/
 
 auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
 }

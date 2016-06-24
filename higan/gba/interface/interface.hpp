@@ -7,17 +7,6 @@ struct ID {
   };
 
   enum : uint {
-    SystemManifest,
-    BIOS,
-
-    Manifest,
-    MROM,
-    SRAM,
-    EEPROM,
-    FLASH,
-  };
-
-  enum : uint {
     Device = 1,
   };
 };
@@ -33,11 +22,8 @@ struct Interface : Emulator::Interface {
   auto audioFrequency() -> double;
 
   auto loaded() -> bool;
-  auto group(uint id) -> uint;
   auto load(uint id) -> void;
   auto save() -> void;
-  auto load(uint id, const stream& stream) -> void;
-  auto save(uint id, const stream& stream) -> void;
   auto unload() -> void;
 
   auto power() -> void;

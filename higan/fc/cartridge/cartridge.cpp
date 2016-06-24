@@ -6,18 +6,6 @@ namespace Famicom {
 #include "board/board.cpp"
 Cartridge cartridge;
 
-auto Cartridge::sha256() const -> string {
-  return _sha256;
-}
-
-auto Cartridge::manifest() const -> string {
-  return information.markup;
-}
-
-auto Cartridge::title() const -> string {
-  return information.title;
-}
-
 auto Cartridge::Enter() -> void {
   while(true) scheduler.synchronize(), cartridge.main();
 }
@@ -27,19 +15,19 @@ auto Cartridge::main() -> void {
 }
 
 auto Cartridge::load() -> bool {
-  if(auto fp = interface->open(ID::Famicom, "manifest.bml", vfs::file::mode::read, true)) {
-    information.markup = fp->reads();
+  if(auto fp = interface->open(ID::Famicom, "manifest.bml", File::Read, File::Required)) {
+    information.manifest = fp->reads();
   } else {
     return false;
   }
 
-  Board::load(information.markup);  //this call will set Cartridge::board if successful
+  Board::load(information.manifest);  //this call will set Cartridge::board if successful
   if(!board) return false;
 
   Hash::SHA256 sha;
   sha.data(board->prgrom.data, board->prgrom.size);
   sha.data(board->chrrom.data, board->chrrom.size);
-  _sha256 = sha.digest();
+  information.sha256 = sha.digest();
   return true;
 }
 

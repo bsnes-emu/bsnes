@@ -1,27 +1,27 @@
 auto PPU::getVramAddress() -> uint16 {
   uint16 address = r.vramAddress;
   switch(r.vramMapping) {
-  case 0: break;  //direct mapping
-  case 1: address = (address & 0xff00) | ((address & 0x001f) << 3) | ((address >> 5) & 7); break;
-  case 2: address = (address & 0xfe00) | ((address & 0x003f) << 3) | ((address >> 6) & 7); break;
-  case 3: address = (address & 0xfc00) | ((address & 0x007f) << 3) | ((address >> 7) & 7); break;
+  case 0: return (address);
+  case 1: return (address & 0xff00) | ((address & 0x001f) << 3) | ((address >> 5) & 7);
+  case 2: return (address & 0xfe00) | ((address & 0x003f) << 3) | ((address >> 6) & 7);
+  case 3: return (address & 0xfc00) | ((address & 0x007f) << 3) | ((address >> 7) & 7);
   }
-  return address << 1;
+  unreachable;
 }
 
-auto PPU::vramRead(uint addr) -> uint8 {
+auto PPU::vramRead(bool chip, uint15 addr) -> uint8 {
   uint8 data = 0x00;
   if(r.displayDisable || vcounter() >= vdisp()) {
-    data = vram[addr];
-    debugger.vramRead(addr, data);
+    data = vram[addr].byte(chip);
+    debugger.vramRead(addr << 1 | chip, data);
   }
   return data;
 }
 
-auto PPU::vramWrite(uint addr, uint8 data) -> void {
+auto PPU::vramWrite(bool chip, uint15 addr, uint8 data) -> void {
   if(r.displayDisable || vcounter() >= vdisp()) {
-    vram[addr] = data;
-    debugger.vramWrite(addr, data);
+    vram[addr].byte(chip) = data;
+    debugger.vramWrite(addr << 1 | chip, data);
   }
 }
 

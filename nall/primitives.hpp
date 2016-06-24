@@ -215,6 +215,9 @@ private:
 }
 
 using boolean = nall::Boolean;
+//note: these conflict with nall/atoi.hpp functions
+//using integer = nall::Integer<sizeof( int) * 8>;
+//using natural = nall::Natural<sizeof(uint) * 8>;
 
 using  int1 = nall::Integer< 1>;
 using  int2 = nall::Integer< 2>;

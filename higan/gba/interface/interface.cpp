@@ -85,74 +85,12 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::group(uint id) -> uint {
-  switch(id) {
-  case ID::SystemManifest:
-  case ID::BIOS:
-    return ID::System;
-  case ID::Manifest:
-  case ID::MROM:
-  case ID::SRAM:
-  case ID::EEPROM:
-  case ID::FLASH:
-    return ID::GameBoyAdvance;
-  }
-
-  throw;
-}
-
 auto Interface::load(uint id) -> void {
   system.load();
 }
 
 auto Interface::save() -> void {
-  for(auto& memory : cartridge.memory) {
-    interface->saveRequest(memory.id, memory.name);
-  }
-}
-
-auto Interface::load(uint id, const stream& stream) -> void {
-  if(id == ID::SystemManifest) {
-    system.information.manifest = stream.text();
-  }
-
-  if(id == ID::BIOS) {
-    stream.read((uint8_t*)bios.data, min(bios.size, stream.size()));
-  }
-
-  if(id == ID::Manifest) {
-    cartridge.information.markup = stream.text();
-  }
-
-  if(id == ID::MROM) {
-    stream.read((uint8_t*)cartridge.mrom.data, min(cartridge.mrom.size, stream.size()));
-  }
-
-  if(id == ID::SRAM) {
-    stream.read((uint8_t*)cartridge.sram.data, min(cartridge.sram.size, stream.size()));
-  }
-
-  if(id == ID::EEPROM) {
-    stream.read((uint8_t*)cartridge.eeprom.data, min(cartridge.eeprom.size, stream.size()));
-  }
-
-  if(id == ID::FLASH) {
-    stream.read((uint8_t*)cartridge.flash.data, min(cartridge.flash.size, stream.size()));
-  }
-}
-
-auto Interface::save(uint id, const stream& stream) -> void {
-  if(id == ID::SRAM) {
-    stream.write((uint8_t*)cartridge.sram.data, cartridge.sram.size);
-  }
-
-  if(id == ID::EEPROM) {
-    stream.write((uint8_t*)cartridge.eeprom.data, cartridge.eeprom.size);
-  }
-
-  if(id == ID::FLASH) {
-    stream.write((uint8_t*)cartridge.flash.data, cartridge.flash.size);
-  }
+  system.save();
 }
 
 auto Interface::unload() -> void {

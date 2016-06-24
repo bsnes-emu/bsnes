@@ -7,7 +7,6 @@
 #include <nall/utility.hpp>
 #include <nall/varint.hpp>
 #include <nall/hash/sha256.hpp>
-#include <nall/stream/memory.hpp>
 
 namespace nall {
 

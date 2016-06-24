@@ -11,23 +11,16 @@
 #include <processor/spc700/spc700.hpp>
 #include <processor/upd96050/upd96050.hpp>
 
-namespace SuperFamicom {
-  namespace Info {
-    static const uint SerializerVersion = 30;
-  }
-}
-
-#include <libco/libco.h>
-
 #if defined(SFC_SUPERGAMEBOY)
   #include <gb/gb.hpp>
 #endif
 
 namespace SuperFamicom {
   struct File {
-    static const vfs::file::mode Read = vfs::file::mode::read;
-    static const vfs::file::mode Write = vfs::file::mode::write;
-    static const bool Required = true;
+    static const auto Read = vfs::file::mode::read;
+    static const auto Write = vfs::file::mode::write;
+    static const auto Optional = false;
+    static const auto Required = true;
   };
 
   struct Thread {

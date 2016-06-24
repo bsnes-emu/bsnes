@@ -9,7 +9,7 @@ auto BSMemory::init() -> void {
 
 auto BSMemory::load() -> void {
   if(memory.size() == 0) {
-    memory.map(allocate<uint8>(1024 * 1024, 0xff), 1024 * 1024);
+    memory.allocate(1024 * 1024);
   }
 }
 

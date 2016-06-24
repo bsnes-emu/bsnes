@@ -1,5 +1,10 @@
 struct Cartridge : MMIO, property<Cartridge> {
-  auto load(System::Revision revision) -> void;
+  auto manifest() const -> string { return information.manifest; }
+  auto title() const -> string { return information.title; }
+  auto mode() const -> uint { return information.mode; }
+
+  auto load(System::Revision revision) -> bool;
+  auto save() -> void;
   auto unload() -> void;
 
   auto rom_read(uint addr) -> uint8;
@@ -38,27 +43,19 @@ struct Cartridge : MMIO, property<Cartridge> {
   };
 
   struct Information {
-    string markup;
+    string manifest;
     string title;
+    uint mode = 0;
 
-    Mapper mapper;
-    bool ram;
-    bool battery;
-    bool rtc;
-    bool rumble;
+    Mapper mapper = Mapper::Unknown;
+    boolean ram;
+    boolean battery;
+    boolean rtc;
+    boolean rumble;
 
-    uint romsize;
-    uint ramsize;
+    uint romsize = 0;
+    uint ramsize = 0;
   } information;
-
-  auto manifest() const -> string;
-  auto title() const -> string;
-
-  struct Memory {
-    uint id;
-    string name;
-  };
-  vector<Memory> memory;
 
   readonly<string> sha256;
 

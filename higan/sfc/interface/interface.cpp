@@ -183,20 +183,6 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-//deprecated
-auto Interface::group(uint id) -> uint {
-  switch(id) {
-  case ID::SuperGameBoyManifest:
-  case ID::SuperGameBoyBootROM:
-    return 1;
-  case ID::GameBoyManifest:
-  case ID::GameBoyROM:
-  case ID::GameBoyRAM:
-    return 2;
-  }
-  throw;
-}
-
 auto Interface::load(uint id) -> void {
   if(id == ID::SuperFamicom) system.load();
   if(id == ID::BSMemory) cartridge.loadBSMemory();
@@ -206,40 +192,6 @@ auto Interface::load(uint id) -> void {
 
 auto Interface::save() -> void {
   system.save();
-}
-
-//deprecated
-auto Interface::load(uint id, const stream& stream) -> void {
-  #if defined(SFC_SUPERGAMEBOY)
-  if(id == ID::SuperGameBoyManifest) {
-    GameBoy::interface->load(GameBoy::ID::SystemManifest, stream);
-  }
-
-  if(id == ID::SuperGameBoyBootROM) {
-    GameBoy::interface->load(GameBoy::ID::SuperGameBoyBootROM, stream);
-  }
-
-  if(id == ID::GameBoyManifest) {
-    GameBoy::interface->load(GameBoy::ID::Manifest, stream);
-  }
-
-  if(id == ID::GameBoyROM) {
-    GameBoy::interface->load(GameBoy::ID::ROM, stream);
-  }
-
-  if(id == ID::GameBoyRAM) {
-    GameBoy::interface->load(GameBoy::ID::RAM, stream);
-  }
-  #endif
-}
-
-//deprecated
-auto Interface::save(uint id, const stream& stream) -> void {
-  #if defined(SFC_SUPERGAMEBOY)
-  if(id == ID::GameBoyRAM) {
-    GameBoy::interface->save(GameBoy::ID::RAM, stream);
-  }
-  #endif
 }
 
 auto Interface::unload() -> void {

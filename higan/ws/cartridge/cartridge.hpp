@@ -4,7 +4,9 @@ struct Cartridge : Thread, IO {
   auto step(uint clocks) -> void;
   auto power() -> void;
 
-  auto load() -> void;
+  auto mode() const -> uint;
+  auto load() -> bool;
+  auto save() -> void;
   auto unload() -> void;
 
   //memory.cpp
@@ -32,10 +34,10 @@ struct Cartridge : Thread, IO {
   auto serialize(serializer&) -> void;
 
   struct Information {
+    string sha256;
     string manifest;
     string title;
     bool orientation;  //0 = horizontal; 1 = vertical
-    string sha256;
   } information;
 
   struct Registers {

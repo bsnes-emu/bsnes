@@ -1,15 +1,16 @@
 struct System : IO {
-  auto loaded() const -> bool;
-  auto model() const -> Model;
-  auto orientation() const -> bool;
-  auto color() const -> bool;
-  auto planar() const -> bool;
-  auto packed() const -> bool;
-  auto depth() const -> bool;
+  auto loaded() const -> bool { return _loaded; }
+  auto model() const -> Model { return _model; }
+  auto orientation() const -> bool { return _orientation; }
+  auto color() const -> bool { return r.color; }
+  auto planar() const -> bool { return r.format == 0; }
+  auto packed() const -> bool { return r.format == 1; }
+  auto depth() const -> bool { return r.color && r.depth == 1; }
 
   auto init() -> void;
   auto term() -> void;
-  auto load(Model) -> void;
+  auto load(Model) -> bool;
+  auto save() -> void;
   auto unload() -> void;
   auto power() -> void;
   auto run() -> void;
