@@ -7,25 +7,19 @@ struct ID {
     WonderSwanColor,
   };
 
-  enum : uint {
-    SystemManifest,
-    SystemIPLROM,
-    SystemEEPROM,
+  struct Device { enum : uint {
+    HorizontalControls,
+    VerticalControls,
+  };};
 
-    Manifest,
-    ROM,
-    RAM,
-    EEPROM,
-    RTC,
-  };
-
-  enum : uint {
-    DeviceHorizontal = 1,
-    DeviceVertical   = 2,
-  };
+  struct Port { enum : uint {
+    Hardware,
+  };};
 };
 
 struct Interface : Emulator::Interface {
+  using Emulator::Interface::load;
+
   Interface();
 
   auto manifest() -> string override;
@@ -37,7 +31,7 @@ struct Interface : Emulator::Interface {
 
   auto loaded() -> bool override;
   auto sha256() -> string override;
-  auto load(uint id) -> void override;
+  auto load(uint id) -> bool override;
   auto save() -> void override;
   auto unload() -> void override;
 
@@ -47,14 +41,11 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const lstring&) -> void;
+  auto cheatSet(const lstring&) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;
   auto set(const string& name, const any& value) -> bool override;
-
-private:
-  vector<Device> devices;
 };
 
 struct Settings {

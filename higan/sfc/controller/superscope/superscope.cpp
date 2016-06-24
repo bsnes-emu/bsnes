@@ -53,8 +53,8 @@ auto SuperScope::main() -> void {
 
   if(next < prev) {
     //Vcounter wrapped back to zero; update cursor coordinates for start of new frame
-    int nx = interface->inputPoll(port, Device::SuperScope, X);
-    int ny = interface->inputPoll(port, Device::SuperScope, Y);
+    int nx = interface->inputPoll(port, ID::Device::SuperScope, X);
+    int ny = interface->inputPoll(port, ID::Device::SuperScope, Y);
     nx += x;
     ny += y;
     x = max(-16, min(256 + 16, nx));
@@ -73,7 +73,7 @@ auto SuperScope::data() -> uint2 {
 
   if(counter == 0) {
     //turbo is a switch; toggle is edge sensitive
-    bool newturbo = interface->inputPoll(port, Device::SuperScope, Turbo);
+    bool newturbo = interface->inputPoll(port, ID::Device::SuperScope, Turbo);
     if(newturbo && !oldturbo) {
       turbo = !turbo;  //toggle state
       sprite->setPixels(turbo ? Resource::Sprite::CrosshairRed : Resource::Sprite::CrosshairGreen);
@@ -83,7 +83,7 @@ auto SuperScope::data() -> uint2 {
     //trigger is a button
     //if turbo is active, trigger is level sensitive; otherwise, it is edge sensitive
     trigger = false;
-    bool newtrigger = interface->inputPoll(port, Device::SuperScope, Trigger);
+    bool newtrigger = interface->inputPoll(port, ID::Device::SuperScope, Trigger);
     if(newtrigger && (turbo || !triggerlock)) {
       trigger = true;
       triggerlock = true;
@@ -92,11 +92,11 @@ auto SuperScope::data() -> uint2 {
     }
 
     //cursor is a button; it is always level sensitive
-    cursor = interface->inputPoll(port, Device::SuperScope, Cursor);
+    cursor = interface->inputPoll(port, ID::Device::SuperScope, Cursor);
 
     //pause is a button; it is always edge sensitive
     pause = false;
-    bool newpause = interface->inputPoll(port, Device::SuperScope, Pause);
+    bool newpause = interface->inputPoll(port, ID::Device::SuperScope, Pause);
     if(newpause && !pauselock) {
       pause = true;
       pauselock = true;

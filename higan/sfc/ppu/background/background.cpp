@@ -116,11 +116,11 @@ auto PPU::Background::getTile() -> void {
   uint tx = hoffset >> tileWidth;
   uint ty = voffset >> tileHeight;
 
-  uint15 offset = ((ty & 0x1f) << 5) + (tx & 0x1f);
+  uint16 offset = ((ty & 0x1f) << 5) + (tx & 0x1f);
   if(tx & 0x20) offset += screenX;
   if(ty & 0x20) offset += screenY;
 
-  uint15 address = r.screenAddress + offset;
+  uint16 address = r.screenAddress + offset;
   tile = ppu.vram[address];
   bool mirrorY = tile & 0x8000;
   bool mirrorX = tile & 0x4000;
@@ -270,6 +270,6 @@ auto PPU::Background::getTile(uint x, uint y) -> uint {
   if(x & 0x20) offset += screenX;
   if(y & 0x20) offset += screenY;
 
-  uint15 address = r.screenAddress + offset;
+  uint16 address = r.screenAddress + offset;
   return ppu.vram[address];
 }

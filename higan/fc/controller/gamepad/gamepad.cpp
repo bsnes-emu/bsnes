@@ -3,7 +3,7 @@ Gamepad::Gamepad(bool port) : Controller(port) {
 
 auto Gamepad::data() -> uint3 {
   if(counter >= 8) return 1;
-  if(latched == 1) return interface->inputPoll(port, Device::Gamepad, A);
+  if(latched == 1) return interface->inputPoll(port, ID::Device::Gamepad, A);
 
   switch(counter++) {
   case 0: return a;
@@ -24,7 +24,7 @@ auto Gamepad::latch(bool data) -> void {
   counter = 0;
 
   if(latched == 0) {
-    auto id = Device::Gamepad;
+    auto id = ID::Device::Gamepad;
     a      = interface->inputPoll(port, id, A);
     b      = interface->inputPoll(port, id, B);
     select = interface->inputPoll(port, id, Select);

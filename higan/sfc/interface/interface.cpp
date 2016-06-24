@@ -25,105 +25,106 @@ Interface::Interface() {
   media.append({ID::SuperFamicom, "BS Memory",     "bs",  false});
   media.append({ID::SuperFamicom, "Sufami Turbo",  "st",  false});
 
-  { Device device{0, ID::ControllerPort1 | ID::ControllerPort2 | ID::ExpansionPort, "None"};
-    devices.append(device);
+  Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
+  Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
+  Port expansionPort{ID::Port::Expansion, "Expansion Port"};
+
+  { Device device{ID::Device::None, "None"};
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
+    expansionPort.devices.append(device);
   }
 
-  { Device device{1, ID::ControllerPort1 | ID::ControllerPort2, "Gamepad"};
-    device.inputs.append({ 0, 0, "Up"    });
-    device.inputs.append({ 1, 0, "Down"  });
-    device.inputs.append({ 2, 0, "Left"  });
-    device.inputs.append({ 3, 0, "Right" });
-    device.inputs.append({ 4, 0, "B"     });
-    device.inputs.append({ 5, 0, "A"     });
-    device.inputs.append({ 6, 0, "Y"     });
-    device.inputs.append({ 7, 0, "X"     });
-    device.inputs.append({ 8, 0, "L"     });
-    device.inputs.append({ 9, 0, "R"     });
-    device.inputs.append({10, 0, "Select"});
-    device.inputs.append({11, 0, "Start" });
-    devices.append(device);
+  { Device device{ID::Device::Gamepad, "Gamepad"};
+    device.inputs.append({0, "Up"    });
+    device.inputs.append({0, "Down"  });
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    device.inputs.append({0, "B"     });
+    device.inputs.append({0, "A"     });
+    device.inputs.append({0, "Y"     });
+    device.inputs.append({0, "X"     });
+    device.inputs.append({0, "L"     });
+    device.inputs.append({0, "R"     });
+    device.inputs.append({0, "Select"});
+    device.inputs.append({0, "Start" });
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{2, ID::ControllerPort1 | ID::ControllerPort2, "Multitap"};
+  { Device device{ID::Device::Multitap, "Multitap"};
     for(uint p = 1, n = 0; p <= 4; p++, n += 12) {
-      device.inputs.append({n +  0, 0, {"Port ", p, " - ", "Up"    }});
-      device.inputs.append({n +  1, 0, {"Port ", p, " - ", "Down"  }});
-      device.inputs.append({n +  2, 0, {"Port ", p, " - ", "Left"  }});
-      device.inputs.append({n +  3, 0, {"Port ", p, " - ", "Right" }});
-      device.inputs.append({n +  4, 0, {"Port ", p, " - ", "B"     }});
-      device.inputs.append({n +  5, 0, {"Port ", p, " - ", "A"     }});
-      device.inputs.append({n +  6, 0, {"Port ", p, " - ", "Y"     }});
-      device.inputs.append({n +  7, 0, {"Port ", p, " - ", "X"     }});
-      device.inputs.append({n +  8, 0, {"Port ", p, " - ", "L"     }});
-      device.inputs.append({n +  9, 0, {"Port ", p, " - ", "R"     }});
-      device.inputs.append({n + 10, 0, {"Port ", p, " - ", "Select"}});
-      device.inputs.append({n + 11, 0, {"Port ", p, " - ", "Start" }});
+      device.inputs.append({0, {"Port ", p, " - ", "Up"    }});
+      device.inputs.append({0, {"Port ", p, " - ", "Down"  }});
+      device.inputs.append({0, {"Port ", p, " - ", "Left"  }});
+      device.inputs.append({0, {"Port ", p, " - ", "Right" }});
+      device.inputs.append({0, {"Port ", p, " - ", "B"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "A"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "Y"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "X"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "L"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "R"     }});
+      device.inputs.append({0, {"Port ", p, " - ", "Select"}});
+      device.inputs.append({0, {"Port ", p, " - ", "Start" }});
     }
-    devices.append(device);
+  //controllerPort1.devices.append(device);  //not used by any commercial software (only homebrew)
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{3, ID::ControllerPort1 | ID::ControllerPort2, "Mouse"};
-    device.inputs.append({0, 1, "X-axis"});
-    device.inputs.append({1, 1, "Y-axis"});
-    device.inputs.append({2, 0, "Left"  });
-    device.inputs.append({3, 0, "Right" });
-    devices.append(device);
+  { Device device{ID::Device::Mouse, "Mouse"};
+    device.inputs.append({1, "X-axis"});
+    device.inputs.append({1, "Y-axis"});
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{4, ID::ControllerPort2, "Super Scope"};
-    device.inputs.append({0, 1, "X-axis" });
-    device.inputs.append({1, 1, "Y-axis" });
-    device.inputs.append({2, 0, "Trigger"});
-    device.inputs.append({3, 0, "Cursor" });
-    device.inputs.append({4, 0, "Turbo"  });
-    device.inputs.append({5, 0, "Pause"  });
-    devices.append(device);
+  { Device device{ID::Device::SuperScope, "Super Scope"};
+    device.inputs.append({1, "X-axis" });
+    device.inputs.append({1, "Y-axis" });
+    device.inputs.append({0, "Trigger"});
+    device.inputs.append({0, "Cursor" });
+    device.inputs.append({0, "Turbo"  });
+    device.inputs.append({0, "Pause"  });
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{5, ID::ControllerPort2, "Justifier"};
-    device.inputs.append({0, 1, "X-axis" });
-    device.inputs.append({1, 1, "Y-axis" });
-    device.inputs.append({2, 0, "Trigger"});
-    device.inputs.append({3, 0, "Start"  });
-    devices.append(device);
+  { Device device{ID::Device::Justifier, "Justifier"};
+    device.inputs.append({1, "X-axis" });
+    device.inputs.append({1, "Y-axis" });
+    device.inputs.append({0, "Trigger"});
+    device.inputs.append({0, "Start"  });
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{6, ID::ControllerPort2, "Justifiers"};
-    device.inputs.append({0, 1, "Port 1 - X-axis" });
-    device.inputs.append({1, 1, "Port 1 - Y-axis" });
-    device.inputs.append({2, 0, "Port 1 - Trigger"});
-    device.inputs.append({3, 0, "Port 1 - Start"  });
-    device.inputs.append({4, 1, "Port 2 - X-axis" });
-    device.inputs.append({5, 1, "Port 2 - Y-axis" });
-    device.inputs.append({6, 0, "Port 2 - Trigger"});
-    device.inputs.append({7, 0, "Port 2 - Start"  });
-    devices.append(device);
+  { Device device{ID::Device::Justifiers, "Justifiers"};
+    device.inputs.append({1, "Port 1 - X-axis" });
+    device.inputs.append({1, "Port 1 - Y-axis" });
+    device.inputs.append({0, "Port 1 - Trigger"});
+    device.inputs.append({0, "Port 1 - Start"  });
+    device.inputs.append({1, "Port 2 - X-axis" });
+    device.inputs.append({1, "Port 2 - Y-axis" });
+    device.inputs.append({0, "Port 2 - Trigger"});
+    device.inputs.append({0, "Port 2 - Start"  });
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{7, ID::ExpansionPort, "Satellaview"};
-    devices.append(device);
+  { Device device{ID::Device::Satellaview, "Satellaview"};
+    expansionPort.devices.append(device);
   }
 
-  { Device device{8, ID::ExpansionPort, "Super Disc"};
-    devices.append(device);
+  { Device device{ID::Device::SuperDisc, "Super Disc"};
+    expansionPort.devices.append(device);
   }
 
-  { Device device{9, ID::ExpansionPort, "21fx"};
-    devices.append(device);
+  { Device device{ID::Device::S21FX, "21fx"};
+    expansionPort.devices.append(device);
   }
 
-  ports.append({0, "Controller Port 1"});
-  ports.append({1, "Controller Port 2"});
-  ports.append({2, "Expansion Port"});
-
-  for(auto& device : devices) {
-    for(auto& port : ports) {
-      if(device.portmask & (1 << port.id)) {
-        port.devices.append(device);
-      }
-    }
-  }
+  ports.append(move(controllerPort1));
+  ports.append(move(controllerPort2));
+  ports.append(move(expansionPort));
 }
 
 auto Interface::manifest() -> string {
@@ -183,11 +184,12 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::load(uint id) -> void {
-  if(id == ID::SuperFamicom) system.load();
-  if(id == ID::BSMemory) cartridge.loadBSMemory();
-  if(id == ID::SufamiTurboA) cartridge.loadSufamiTurboA();
-  if(id == ID::SufamiTurboB) cartridge.loadSufamiTurboB();
+auto Interface::load(uint id) -> bool {
+  if(id == ID::SuperFamicom) return system.load();
+  if(id == ID::BSMemory) return cartridge.loadBSMemory();
+  if(id == ID::SufamiTurboA) return cartridge.loadSufamiTurboA();
+  if(id == ID::SufamiTurboB) return cartridge.loadSufamiTurboB();
+  return false;
 }
 
 auto Interface::save() -> void {

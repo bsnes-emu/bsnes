@@ -28,8 +28,10 @@ auto Cartridge::title() const -> string {
 auto Cartridge::load() -> bool {
   information = Information();
   has = Has();
-  _sha256 = "";
-  _region = Region::NTSC;
+
+  if(auto pathID = interface->load(ID::SuperFamicom, "Super Famicom", "sfc", File::Required)) {
+    information.pathID = pathID();
+  } else return false;
 
   if(auto fp = interface->open(ID::SuperFamicom, "manifest.bml", File::Read, File::Required)) {
     information.manifest.cartridge = fp->reads();
@@ -39,12 +41,12 @@ auto Cartridge::load() -> bool {
 
   //Game Boy
   if(cartridge.has.ICD2) {
-    _sha256 = "";  //Game Boy cartridge not loaded yet: set later via loadGameBoy()
+    information.sha256 = "";  //Game Boy cartridge not loaded yet: set later via loadGameBoy()
   }
 
   //BS Memory
   else if(cartridge.has.MCC && cartridge.has.BSMemorySlot) {
-    _sha256 = Hash::SHA256(bsmemory.memory.data(), bsmemory.memory.size()).digest();
+    information.sha256 = Hash::SHA256(bsmemory.memory.data(), bsmemory.memory.size()).digest();
   }
 
   //Sufami Turbo
@@ -52,7 +54,7 @@ auto Cartridge::load() -> bool {
     Hash::SHA256 sha;
     sha.data(sufamiturboA.rom.data(), sufamiturboA.rom.size());
     sha.data(sufamiturboB.rom.data(), sufamiturboB.rom.size());
-    _sha256 = sha.digest();
+    information.sha256 = sha.digest();
   }
 
   //Super Famicom
@@ -76,7 +78,7 @@ auto Cartridge::load() -> bool {
     buffer = necdsp.firmware();
     sha.data(buffer.data(), buffer.size());
     //finalize hash
-    _sha256 = sha.digest();
+    information.sha256 = sha.digest();
   }
 
   rom.writeProtect(true);
@@ -84,35 +86,40 @@ auto Cartridge::load() -> bool {
   return true;
 }
 
-auto Cartridge::loadGameBoy() -> void {
+auto Cartridge::loadGameBoy() -> bool {
   #if defined(SFC_SUPERGAMEBOY)
   //invoked from ICD2::load()
-  _sha256 = GameBoy::interface->sha256();
+  information.sha256 = GameBoy::interface->sha256();
   information.manifest.gameBoy = GameBoy::interface->manifest();
   information.title.gameBoy = GameBoy::interface->title();
-  #endif
   loadGameBoy(BML::unserialize(information.manifest.gameBoy));
+  return true;
+  #endif
+  return false;
 }
 
-auto Cartridge::loadBSMemory() -> void {
+auto Cartridge::loadBSMemory() -> bool {
   if(auto fp = interface->open(ID::BSMemory, "manifest.bml", File::Read, File::Required)) {
     information.manifest.bsMemory = fp->reads();
-  } else return;
+  } else return false;
   loadBSMemory(BML::unserialize(information.manifest.bsMemory));
+  return true;
 }
 
-auto Cartridge::loadSufamiTurboA() -> void {
+auto Cartridge::loadSufamiTurboA() -> bool {
   if(auto fp = interface->open(ID::SufamiTurboA, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboA = fp->reads();
-  } else return;
+  } else return false;
   loadSufamiTurboA(BML::unserialize(information.manifest.sufamiTurboA));
+  return true;
 }
 
-auto Cartridge::loadSufamiTurboB() -> void {
+auto Cartridge::loadSufamiTurboB() -> bool {
   if(auto fp = interface->open(ID::SufamiTurboB, "manifest.bml", File::Read, File::Required)) {
     information.manifest.sufamiTurboB = fp->reads();
-  } else return;
+  } else return false;
   loadSufamiTurboB(BML::unserialize(information.manifest.sufamiTurboB));
+  return true;
 }
 
 auto Cartridge::save() -> void {

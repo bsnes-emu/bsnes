@@ -9,6 +9,7 @@ struct BSMemory : Memory {
   auto read(uint24 addr, uint8) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;
 
+  uint pathID = 0;
   MappedRAM memory;
   bool readonly;
 

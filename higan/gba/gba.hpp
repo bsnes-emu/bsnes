@@ -7,6 +7,8 @@
 #include <processor/arm/arm.hpp>
 
 namespace GameBoyAdvance {
+  using File = Emulator::File;
+
   enum : uint {           //mode flags for bus read, write:
     Nonsequential =   1,  //N cycle
     Sequential    =   2,  //S cycle
@@ -17,13 +19,6 @@ namespace GameBoyAdvance {
     Load          =  64,  //load operation
     Store         = 128,  //store operation
     Signed        = 256,  //sign extended
-  };
-
-  struct File {
-    static const auto Read = vfs::file::mode::read;
-    static const auto Write = vfs::file::mode::write;
-    static const auto Optional = false;
-    static const auto Required = true;
   };
 
   struct Thread {

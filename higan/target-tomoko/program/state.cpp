@@ -1,6 +1,6 @@
 auto Program::stateName(uint slot, bool manager) -> string {
   return {
-    folderPaths[0], "higan/states/",
+    mediumPaths(1), "higan/states/",
     manager ? "managed/" : "quick/",
     "slot-", natural(slot, 2L), ".bst"
   };

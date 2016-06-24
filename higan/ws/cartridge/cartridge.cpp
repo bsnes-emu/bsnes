@@ -41,14 +41,24 @@ auto Cartridge::power() -> void {
   r.sramBank = 0xff;
 }
 
-auto Cartridge::mode() const -> uint {
-  return system.model() == Model::WonderSwan ? ID::WonderSwan : ID::WonderSwanColor;
-}
-
 auto Cartridge::load() -> bool {
   information = Information();
 
-  if(auto fp = interface->open(mode(), "manifest.bml", File::Read, File::Required)) {
+  switch(system.model()) {
+  case Model::WonderSwan:
+    if(auto pathID = interface->load(ID::WonderSwan, "WonderSwan", "ws", File::Required)) {
+      information.pathID = pathID();
+    } else return false;
+    break;
+  case Model::WonderSwanColor:
+  case Model::SwanCrystal:
+    if(auto pathID = interface->load(ID::WonderSwanColor, "WonderSwan Color", "wsc", File::Required)) {
+      information.pathID = pathID();
+    } else return false;
+    break;
+  }
+
+  if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -61,7 +71,7 @@ auto Cartridge::load() -> bool {
     if(rom.size) {
       rom.data = new uint8[rom.mask + 1];
       memory::fill(rom.data, rom.mask + 1, 0xff);
-      if(rom.name) if(auto fp = interface->open(mode(), rom.name, File::Read, File::Required)) {
+      if(rom.name) if(auto fp = interface->open(pathID(), rom.name, File::Read, File::Required)) {
         fp->read(rom.data, rom.size);
       }
     }
@@ -75,7 +85,7 @@ auto Cartridge::load() -> bool {
       if(ram.size) {
         ram.data = new uint8[ram.mask + 1];
         memory::fill(ram.data, ram.mask + 1, 0xff);
-        if(ram.name) if(auto fp = interface->open(mode(), ram.name, File::Read)) {
+        if(ram.name) if(auto fp = interface->open(pathID(), ram.name, File::Read)) {
           fp->read(ram.data, ram.size);
         }
       }
@@ -86,7 +96,7 @@ auto Cartridge::load() -> bool {
       eeprom.setSize(node["size"].natural() / sizeof(uint16));
       if(eeprom.size()) {
         eeprom.erase();
-        if(eeprom.name()) if(auto fp = interface->open(mode(), eeprom.name(), File::Read)) {
+        if(eeprom.name()) if(auto fp = interface->open(pathID(), eeprom.name(), File::Read)) {
           fp->read(eeprom.data(), eeprom.size());
         }
       }
@@ -100,7 +110,7 @@ auto Cartridge::load() -> bool {
     if(rtc.size) {
       rtc.data = new uint8[rtc.mask + 1];
       memory::fill(rtc.data, rtc.mask + 1, 0x00);
-      if(rtc.name) if(auto fp = interface->open(mode(), rtc.name, File::Read)) {
+      if(rtc.name) if(auto fp = interface->open(pathID(), rtc.name, File::Read)) {
         fp->read(rtc.data, rtc.size);
       }
     }
@@ -116,19 +126,19 @@ auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
   if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Write)) {
+    if(auto fp = interface->open(pathID(), name, File::Write)) {
       fp->write(ram.data, ram.size);
     }
   }
 
   if(auto name = document["board/eeprom/name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Write)) {
+    if(auto fp = interface->open(pathID(), name, File::Write)) {
       fp->write(eeprom.data(), eeprom.size());
     }
   }
 
   if(auto name = document["board/rtc/name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Write)) {
+    if(auto fp = interface->open(pathID(), name, File::Write)) {
       fp->write(rtc.data, rtc.size);
     }
   }

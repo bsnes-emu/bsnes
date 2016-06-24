@@ -1,30 +1,16 @@
-auto Program::loadMedium(string location) -> void {
-  location.transform("\\", "/");
-  if(!location.endsWith("/")) location.append("/");
-  if(!directory::exists(location)) return;
-
-  string type = suffixname(location).trimLeft(".", 1L);
-  for(auto& emulator : emulators) {
-    for(auto& medium : emulator->media) {
-      if(!medium.bootable) continue;
-      if(medium.type != type) continue;
-      return loadMedium(*emulator, medium, location);
-    }
-  }
-}
-
-auto Program::loadMedium(Emulator::Interface& interface, Emulator::Interface::Medium& medium, string location) -> void {
+auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void {
   unloadMedium();
 
-  mediumPaths(0) = locate({medium.name, ".sys/"});
-  mediumPaths(medium.id) = location;
-  folderPaths.append(location);
+  mediumPaths.append(locate({medium.name, ".sys/"}));
 
-  //note: the order of operations in this block of code is critical
   Emulator::audio.reset(2, audio->get(Audio::Frequency).get<uint>(44100));
   emulator = &interface;
   connectDevices();
-  emulator->load(medium.id);
+  if(!emulator->load(medium.id)) {
+    emulator = nullptr;
+    mediumPaths.reset();
+    return;
+  }
   updateAudioDriver();
   updateAudioEffects();
   emulator->power();
@@ -45,10 +31,9 @@ auto Program::unloadMedium() -> void {
   toolsManager->cheatEditor.saveCheats();
   emulator->unload();
   emulator = nullptr;
-
   mediumPaths.reset();
-  folderPaths.reset();
 
+  presentation->drawSplashScreen();
   presentation->setTitle({"higan v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
   presentation->toolsMenu.setVisible(false);

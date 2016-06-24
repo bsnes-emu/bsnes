@@ -1,8 +1,9 @@
 struct Cartridge {
   enum class Region : uint { NTSC, PAL };
 
-  auto sha256() const -> string { return _sha256; }
-  auto region() const -> Region { return _region; }
+  auto pathID() const -> uint { return information.pathID; }
+  auto sha256() const -> string { return information.sha256; }
+  auto region() const -> Region { return information.region; }
   auto manifest() const -> string;
   auto title() const -> string;
 
@@ -16,6 +17,10 @@ struct Cartridge {
   MappedRAM ram;
 
   struct Information {
+    uint pathID = 0;
+    string sha256;
+    Region region = Region::NTSC;
+
     struct Manifest {
       string cartridge;
       string gameBoy;
@@ -57,10 +62,10 @@ struct Cartridge {
 
 private:
   //cartridge.cpp
-  auto loadGameBoy() -> void;
-  auto loadBSMemory() -> void;
-  auto loadSufamiTurboA() -> void;
-  auto loadSufamiTurboB() -> void;
+  auto loadGameBoy() -> bool;
+  auto loadBSMemory() -> bool;
+  auto loadSufamiTurboA() -> bool;
+  auto loadSufamiTurboB() -> bool;
 
   //load.cpp
   auto loadCartridge(Markup::Node) -> void;
@@ -89,7 +94,7 @@ private:
   auto loadOBC1(Markup::Node) -> void;
   auto loadMSU1(Markup::Node) -> void;
 
-  auto loadMemory(MappedRAM&, Markup::Node, bool required, uint id = 1) -> void;
+  auto loadMemory(MappedRAM&, Markup::Node, bool required, maybe<uint> id = nothing) -> void;
   auto loadMap(Markup::Node, SuperFamicom::Memory&) -> void;
   auto loadMap(Markup::Node, const function<uint8 (uint24, uint8)>&, const function<void (uint24, uint8)>&) -> void;
 
@@ -114,10 +119,7 @@ private:
   auto saveSDD1(Markup::Node) -> void;
   auto saveOBC1(Markup::Node) -> void;
 
-  auto saveMemory(MappedRAM&, Markup::Node, uint = 1) -> void;
-
-  string _sha256;
-  Region _region = Region::NTSC;
+  auto saveMemory(MappedRAM&, Markup::Node, maybe<uint> = nothing) -> void;
 
   friend class Interface;
   friend class ICD2;

@@ -1,7 +1,7 @@
 struct Cartridge : MMIO, property<Cartridge> {
+  auto pathID() const -> uint { return information.pathID; }
   auto manifest() const -> string { return information.manifest; }
   auto title() const -> string { return information.title; }
-  auto mode() const -> uint { return information.mode; }
 
   auto load(System::Revision revision) -> bool;
   auto save() -> void;
@@ -43,9 +43,9 @@ struct Cartridge : MMIO, property<Cartridge> {
   };
 
   struct Information {
+    uint pathID = 0;
     string manifest;
     string title;
-    uint mode = 0;
 
     Mapper mapper = Mapper::Unknown;
     boolean ram;
@@ -57,6 +57,7 @@ struct Cartridge : MMIO, property<Cartridge> {
     uint ramsize = 0;
   } information;
 
+  uint _pathID = 0;
   readonly<string> sha256;
 
   uint8* romdata = nullptr;

@@ -9,7 +9,7 @@ auto PPU::getVramAddress() -> uint16 {
   unreachable;
 }
 
-auto PPU::vramRead(bool chip, uint15 addr) -> uint8 {
+auto PPU::vramRead(bool chip, uint addr) -> uint8 {
   uint8 data = 0x00;
   if(r.displayDisable || vcounter() >= vdisp()) {
     data = vram[addr].byte(chip);
@@ -18,7 +18,7 @@ auto PPU::vramRead(bool chip, uint15 addr) -> uint8 {
   return data;
 }
 
-auto PPU::vramWrite(bool chip, uint15 addr, uint8 data) -> void {
+auto PPU::vramWrite(bool chip, uint addr, uint8 data) -> void {
   if(r.displayDisable || vcounter() >= vdisp()) {
     vram[addr].byte(chip) = data;
     debugger.vramWrite(addr << 1 | chip, data);

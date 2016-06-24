@@ -36,7 +36,7 @@ auto System::load(Model model) -> bool {
     }
   }
 
-  cartridge.load();
+  if(!cartridge.load()) return false;
   serializeInit();
   _orientation = cartridge.information.orientation;
   return _loaded = true;
@@ -98,19 +98,22 @@ auto System::runToSave() -> void {
 }
 
 auto System::pollKeypad() -> void {
+  uint port = ID::Port::Hardware;
+  uint device = !_orientation ? ID::Device::HorizontalControls : ID::Device::VerticalControls;
   bool rotate = keypad.rotate;
-  keypad.y1 = interface->inputPoll(_orientation, 0, 0);
-  keypad.y2 = interface->inputPoll(_orientation, 0, 1);
-  keypad.y3 = interface->inputPoll(_orientation, 0, 2);
-  keypad.y4 = interface->inputPoll(_orientation, 0, 3);
-  keypad.x1 = interface->inputPoll(_orientation, 0, 4);
-  keypad.x2 = interface->inputPoll(_orientation, 0, 5);
-  keypad.x3 = interface->inputPoll(_orientation, 0, 6);
-  keypad.x4 = interface->inputPoll(_orientation, 0, 7);
-  keypad.b = interface->inputPoll(_orientation, 0, 8);
-  keypad.a = interface->inputPoll(_orientation, 0, 9);
-  keypad.start = interface->inputPoll(_orientation, 0, 10);
-  keypad.rotate = interface->inputPoll(_orientation, 0, 11);
+
+  keypad.y1 = interface->inputPoll(port, device, 0);
+  keypad.y2 = interface->inputPoll(port, device, 1);
+  keypad.y3 = interface->inputPoll(port, device, 2);
+  keypad.y4 = interface->inputPoll(port, device, 3);
+  keypad.x1 = interface->inputPoll(port, device, 4);
+  keypad.x2 = interface->inputPoll(port, device, 5);
+  keypad.x3 = interface->inputPoll(port, device, 6);
+  keypad.x4 = interface->inputPoll(port, device, 7);
+  keypad.b = interface->inputPoll(port, device, 8);
+  keypad.a = interface->inputPoll(port, device, 9);
+  keypad.start = interface->inputPoll(port, device, 10);
+  keypad.rotate = interface->inputPoll(port, device, 11);
 
   if(keypad.y1 || keypad.y2 || keypad.y3 || keypad.y4
   || keypad.x1 || keypad.x2 || keypad.x3 || keypad.x4

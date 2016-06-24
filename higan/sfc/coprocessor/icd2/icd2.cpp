@@ -33,14 +33,13 @@ auto ICD2::main() -> void {
 auto ICD2::init() -> void {
 }
 
-auto ICD2::load() -> void {
+auto ICD2::load() -> bool {
   bind = GameBoy::interface->bind;
   hook = GameBoy::interface->hook;
   GameBoy::interface->bind = this;
   GameBoy::interface->hook = this;
-  interface->load(ID::GameBoy, "Game Boy", "gb");
   GameBoy::interface->load(GameBoy::ID::SuperGameBoy);
-  cartridge.loadGameBoy();
+  return cartridge.loadGameBoy();
 }
 
 auto ICD2::unload() -> void {

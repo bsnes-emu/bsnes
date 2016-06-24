@@ -66,7 +66,7 @@ auto System::load() -> bool {
     } else return false;
   }
 
-  cartridge.load();
+  if(!cartridge.load()) return false;
   _region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
   _cpuFrequency = region() == Region::NTSC ? 21'477'272 : 21'281'370;
   _apuFrequency = 24'606'720;

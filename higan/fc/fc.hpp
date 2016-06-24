@@ -7,12 +7,7 @@
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
-  struct File {
-    static const auto Read = vfs::file::mode::read;
-    static const auto Write = vfs::file::mode::write;
-    static const auto Optional = false;
-    static const auto Required = true;
-  };
+  using File = Emulator::File;
 
   struct Thread {
     ~Thread() {

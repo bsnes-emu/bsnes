@@ -39,7 +39,7 @@ auto System::load(Revision revision) -> bool {
     }
   }
 
-  cartridge.load(revision);
+  if(!cartridge.load(revision)) return false;
   serializeInit();
   return _loaded = true;
 }

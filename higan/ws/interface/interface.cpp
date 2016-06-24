@@ -19,43 +19,44 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::WonderSwan, "WonderSwan", "ws", true});
+  media.append({ID::WonderSwan,      "WonderSwan",       "ws",  true});
   media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc", true});
 
-  { Device device{0, ID::DeviceHorizontal, "Controller"};
-    device.inputs.append({ 0, 0, "Y1"});
-    device.inputs.append({ 1, 0, "Y2"});
-    device.inputs.append({ 2, 0, "Y3"});
-    device.inputs.append({ 3, 0, "Y4"});
-    device.inputs.append({ 4, 0, "X1"});
-    device.inputs.append({ 5, 0, "X2"});
-    device.inputs.append({ 6, 0, "X3"});
-    device.inputs.append({ 7, 0, "X4"});
-    device.inputs.append({ 8, 0, "B"});
-    device.inputs.append({ 9, 0, "A"});
-    device.inputs.append({10, 0, "Start"});
-    device.inputs.append({11, 0, "Rotate"});
-    devices.append(device);
+  Port hardwarePort{ID::Port::Hardware, "Hardware"};
+
+  { Device device{ID::Device::HorizontalControls, "Horizontal Controls"};
+    device.inputs.append({0, "Y1"});
+    device.inputs.append({0, "Y2"});
+    device.inputs.append({0, "Y3"});
+    device.inputs.append({0, "Y4"});
+    device.inputs.append({0, "X1"});
+    device.inputs.append({0, "X2"});
+    device.inputs.append({0, "X3"});
+    device.inputs.append({0, "X4"});
+    device.inputs.append({0, "B"});
+    device.inputs.append({0, "A"});
+    device.inputs.append({0, "Start"});
+    device.inputs.append({0, "Rotate"});
+    hardwarePort.devices.append(device);
   }
 
-  { Device device{1, ID::DeviceVertical, "Controller"};
-    device.inputs.append({ 0, 0, "Y1"});
-    device.inputs.append({ 1, 0, "Y2"});
-    device.inputs.append({ 2, 0, "Y3"});
-    device.inputs.append({ 3, 0, "Y4"});
-    device.inputs.append({ 4, 0, "X1"});
-    device.inputs.append({ 5, 0, "X2"});
-    device.inputs.append({ 6, 0, "X3"});
-    device.inputs.append({ 7, 0, "X4"});
-    device.inputs.append({ 8, 0, "B"});
-    device.inputs.append({ 9, 0, "A"});
-    device.inputs.append({10, 0, "Start"});
-    device.inputs.append({11, 0, "Rotate"});
-    devices.append(device);
+  { Device device{ID::Device::VerticalControls, "Vertical Controls"};
+    device.inputs.append({0, "Y1"});
+    device.inputs.append({0, "Y2"});
+    device.inputs.append({0, "Y3"});
+    device.inputs.append({0, "Y4"});
+    device.inputs.append({0, "X1"});
+    device.inputs.append({0, "X2"});
+    device.inputs.append({0, "X3"});
+    device.inputs.append({0, "X4"});
+    device.inputs.append({0, "B"});
+    device.inputs.append({0, "A"});
+    device.inputs.append({0, "Start"});
+    device.inputs.append({0, "Rotate"});
+    hardwarePort.devices.append(device);
   }
 
-  ports.append({0, "Horizontal Orientation", {devices[0]}});
-  ports.append({1, "Vertical Orientation", {devices[1]}});
+  ports.append(move(hardwarePort));
 }
 
 auto Interface::manifest() -> string {
@@ -107,9 +108,10 @@ auto Interface::sha256() -> string {
   return cartridge.information.sha256;
 }
 
-auto Interface::load(uint id) -> void {
-  if(id == ID::WonderSwan) system.load(Model::WonderSwan);
-  if(id == ID::WonderSwanColor) system.load(Model::WonderSwanColor);
+auto Interface::load(uint id) -> bool {
+  if(id == ID::WonderSwan) return system.load(Model::WonderSwan);
+  if(id == ID::WonderSwanColor) return system.load(Model::WonderSwanColor);
+  return false;
 }
 
 auto Interface::save() -> void {
@@ -118,6 +120,7 @@ auto Interface::save() -> void {
 
 auto Interface::unload() -> void {
   save();
+  system.unload();
 }
 
 auto Interface::power() -> void {

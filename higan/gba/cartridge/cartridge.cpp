@@ -26,7 +26,11 @@ Cartridge::~Cartridge() {
 auto Cartridge::load() -> bool {
   information = Information();
 
-  if(auto fp = interface->open(ID::GameBoyAdvance, "manifest.bml", File::Read, File::Required)) {
+  if(auto pathID = interface->load(ID::GameBoyAdvance, "Game Boy Advance", "gba", File::Required)) {
+    information.pathID = pathID();
+  } else return false;
+
+  if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -39,7 +43,7 @@ auto Cartridge::load() -> bool {
 
   if(auto node = document["board/rom"]) {
     mrom.size = min(32 * 1024 * 1024, node["size"].natural());
-    if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read, File::Required)) {
+    if(auto fp = interface->open(pathID(), node["name"].text(), File::Read, File::Required)) {
       fp->read(mrom.data, mrom.size);
     }
   }
@@ -51,7 +55,7 @@ auto Cartridge::load() -> bool {
       sram.mask = sram.size - 1;
       for(auto n : range(sram.size)) sram.data[n] = 0xff;
 
-      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+      if(auto fp = interface->open(pathID(), node["name"].text(), File::Read)) {
         fp->read(sram.data, sram.size);
       }
     }
@@ -65,7 +69,7 @@ auto Cartridge::load() -> bool {
       eeprom.test = mrom.size > 16 * 1024 * 1024 ? 0x0dffff00 : 0x0d000000;
       for(auto n : range(eeprom.size)) eeprom.data[n] = 0xff;
 
-      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+      if(auto fp = interface->open(pathID(), node["name"].text(), File::Read)) {
         fp->read(eeprom.data, eeprom.size);
       }
     }
@@ -81,7 +85,7 @@ auto Cartridge::load() -> bool {
       if(!flash.id && flash.size ==  64 * 1024) flash.id = 0x1cc2;
       if(!flash.id && flash.size == 128 * 1024) flash.id = 0x09c2;
 
-      if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Read)) {
+      if(auto fp = interface->open(pathID(), node["name"].text(), File::Read)) {
         fp->read(flash.data, flash.size);
       }
     }
@@ -94,7 +98,7 @@ auto Cartridge::load() -> bool {
 auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
   if(auto node = document["board/ram"]) {
-    if(auto fp = interface->open(ID::GameBoyAdvance, node["name"].text(), File::Write)) {
+    if(auto fp = interface->open(pathID(), node["name"].text(), File::Write)) {
       if(node["type"].text() == "sram") fp->write(sram.data, sram.size);
       if(node["type"].text() == "eeprom") fp->write(eeprom.data, eeprom.size);
       if(node["type"].text() == "flash") fp->write(flash.data, flash.size);

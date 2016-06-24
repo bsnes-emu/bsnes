@@ -44,7 +44,7 @@ auto System::load() -> bool {
     }
   }
 
-  cartridge.load();
+  if(!cartridge.load()) return false;
   serializeInit();
   return _loaded = true;
 }

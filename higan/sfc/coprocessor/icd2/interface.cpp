@@ -85,38 +85,16 @@ auto ICD2::joypWrite(bool p15, bool p14) -> void {
   packetLock = true;
 }
 
-auto ICD2::load(uint id, string name, string type, bool required) -> void {
+auto ICD2::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
+  //redirect system folder to cartridge folder:
+  //expects "GameBoy.sys"; but this would be "Super Famicom.sys"; redirect to "Super Game Boy.sfc/"
+  if(id == ID::System) id = cartridge.pathID();
+  return interface->open(id, name, mode, required);
 }
 
-/*
-auto ICD2::loadRequest(uint id, string name, bool required) -> void {
-  if(id == GameBoy::ID::SystemManifest) {
-    interface->loadRequest(ID::SuperGameBoyManifest, name, required);
-  }
-
-  if(id == GameBoy::ID::SuperGameBoyBootROM) {
-    interface->loadRequest(ID::SuperGameBoyBootROM, name, required);
-  }
-
-  if(id == GameBoy::ID::Manifest) {
-    interface->loadRequest(ID::GameBoyManifest, name, required);
-  }
-
-  if(id == GameBoy::ID::ROM) {
-    interface->loadRequest(ID::GameBoyROM, name, required);
-  }
-
-  if(id == GameBoy::ID::RAM) {
-    interface->loadRequest(ID::GameBoyRAM, name, required);
-  }
+auto ICD2::load(uint id, string name, string type, bool required) -> maybe<uint> {
+  return interface->load(id, name, type, required);
 }
-
-auto ICD2::saveRequest(uint id, string name) -> void {
-  if(id == GameBoy::ID::RAM) {
-    interface->saveRequest(ID::GameBoyRAM, name);
-  }
-}
-*/
 
 auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {
 }

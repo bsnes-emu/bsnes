@@ -28,7 +28,7 @@ auto System::load() -> bool {
     return false;
   }
   auto document = BML::unserialize(information.manifest);
-  cartridge.load();
+  if(!cartridge.load()) return false;
   serializeInit();
   return _loaded = true;
 }

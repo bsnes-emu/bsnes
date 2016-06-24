@@ -1,7 +1,6 @@
 include ../nall/GNUmakefile
 
 target := tomoko
-# target := loki
 # console := true
 
 flags += -I. -I.. -O3

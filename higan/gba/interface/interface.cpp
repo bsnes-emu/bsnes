@@ -21,22 +21,24 @@ Interface::Interface() {
 
   media.append({ID::GameBoyAdvance, "Game Boy Advance", "gba", true});
 
-  { Device device{0, ID::Device, "Controller"};
-    device.inputs.append({ 0, 0, "Up"    });
-    device.inputs.append({ 1, 0, "Down"  });
-    device.inputs.append({ 2, 0, "Left"  });
-    device.inputs.append({ 3, 0, "Right" });
-    device.inputs.append({ 4, 0, "B"     });
-    device.inputs.append({ 5, 0, "A"     });
-    device.inputs.append({ 6, 0, "L"     });
-    device.inputs.append({ 7, 0, "R"     });
-    device.inputs.append({ 8, 0, "Select"});
-    device.inputs.append({ 9, 0, "Start" });
-    device.inputs.append({10, 2, "Rumble"});
-    devices.append(device);
+  Port hardwarePort{ID::Port::Hardware, "Hardware"};
+
+  { Device device{ID::Device::Controls, "Controls"};
+    device.inputs.append({0, "Up"    });
+    device.inputs.append({0, "Down"  });
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    device.inputs.append({0, "B"     });
+    device.inputs.append({0, "A"     });
+    device.inputs.append({0, "L"     });
+    device.inputs.append({0, "R"     });
+    device.inputs.append({0, "Select"});
+    device.inputs.append({0, "Start" });
+    device.inputs.append({2, "Rumble"});
+    hardwarePort.devices.append(device);
   }
 
-  ports.append({0, "Device", {devices[0]}});
+  ports.append(move(hardwarePort));
 }
 
 auto Interface::manifest() -> string {
@@ -85,8 +87,8 @@ auto Interface::loaded() -> bool {
   return system.loaded();
 }
 
-auto Interface::load(uint id) -> void {
-  system.load();
+auto Interface::load(uint id) -> bool {
+  return system.load();
 }
 
 auto Interface::save() -> void {

@@ -16,11 +16,26 @@ Cartridge cartridge;
 
 auto Cartridge::load(System::Revision revision) -> bool {
   information = Information();
-  if(revision == System::Revision::GameBoy) information.mode = ID::GameBoy;
-  if(revision == System::Revision::SuperGameBoy) information.mode = ID::SuperGameBoy;
-  if(revision == System::Revision::GameBoyColor) information.mode = ID::GameBoyColor;
 
-  if(auto fp = interface->open(mode(), "manifest.bml", File::Read, File::Required)) {
+  switch(revision) {
+  case System::Revision::GameBoy:
+    if(auto pathID = interface->load(ID::GameBoy, "Game Boy", "gb", true)) {
+      information.pathID = pathID();
+    } else return false;
+    break;
+  case System::Revision::SuperGameBoy:
+    if(auto pathID = interface->load(ID::SuperGameBoy, "Game Boy", "gb", true)) {
+      information.pathID = pathID();
+    } else return false;
+    break;
+  case System::Revision::GameBoyColor:
+    if(auto pathID = interface->load(ID::GameBoyColor, "Game Boy Color", "gbc", true)) {
+      information.pathID = pathID();
+    } else return false;
+    break;
+  }
+
+  if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
@@ -51,12 +66,12 @@ auto Cartridge::load(System::Revision revision) -> bool {
   ramdata = allocate<uint8>(ramsize, 0xff);
 
   if(auto name = rom["name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Read, File::Required)) {
+    if(auto fp = interface->open(pathID(), name, File::Read, File::Required)) {
       fp->read(romdata, min(romsize, fp->size()));
     }
   }
   if(auto name = ram["name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Read, File::Optional)) {
+    if(auto fp = interface->open(pathID(), name, File::Read, File::Optional)) {
       fp->read(ramdata, min(ramsize, fp->size()));
     }
   }
@@ -85,7 +100,7 @@ auto Cartridge::save() -> void {
   auto document = BML::unserialize(information.manifest);
 
   if(auto name = document["board/ram/name"].text()) {
-    if(auto fp = interface->open(mode(), name, File::Write)) {
+    if(auto fp = interface->open(pathID(), name, File::Write)) {
       fp->write(ramdata, ramsize);
     }
   }

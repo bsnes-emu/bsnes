@@ -1,10 +1,18 @@
 auto Cartridge::loadCartridge(Markup::Node node) -> void {
   information.title.cartridge = node["information/title"].text();
   auto board = node["board"];
-  _region = board["region"].text() == "pal" ? Region::PAL : Region::NTSC;
+  information.region = board["region"].text() == "pal" ? Region::PAL : Region::NTSC;
 
-  if(board["mcc"] || board["bsmemory"]) interface->load(ID::BSMemory, "BS Memory", "bs");
-  if(board["sufamiturbo"]) interface->load(ID::SufamiTurboA, "Sufami Turbo", "st");
+  if(board["mcc"] || board["bsmemory"]) {
+    if(auto pathID = interface->load(ID::BSMemory, "BS Memory", "bs")) {
+      bsmemory.pathID = pathID();
+    }
+  }
+  if(board["sufamiturbo"]) {
+    if(auto pathID = interface->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
+      sufamiturboA.pathID = pathID();
+    }
+  }
 
   if(auto node = board["rom"]) loadROM(node);
   if(auto node = board["ram"]) loadRAM(node);
@@ -35,23 +43,27 @@ auto Cartridge::loadBSMemory(Markup::Node node) -> void {
   information.title.bsMemory = node["information/title"].text();
   bsmemory.readonly = (node["board/rom/type"].text() == "mrom");
 
-  loadMemory(bsmemory.memory, node["board/rom"], File::Required, ID::BSMemory);
+  loadMemory(bsmemory.memory, node["board/rom"], File::Required, bsmemory.pathID);
 }
 
 auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   information.title.sufamiTurboA = node["information/title"].text();
 
-  loadMemory(sufamiturboA.rom, node["board/rom"], File::Required, ID::SufamiTurboA);
-  loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, ID::SufamiTurboA);
+  loadMemory(sufamiturboA.rom, node["board/rom"], File::Required, sufamiturboA.pathID);
+  loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, sufamiturboA.pathID);
 
-  if(node["board/linkable"]) interface->load(ID::SufamiTurboB, "Sufami Turbo", "st");
+  if(node["board/linkable"]) {
+    if(auto pathID = interface->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
+      sufamiturboB.pathID = pathID();
+    }
+  }
 }
 
 auto Cartridge::loadSufamiTurboB(Markup::Node node) -> void {
   information.title.sufamiTurboB = node["information/title"].text();
 
-  loadMemory(sufamiturboB.rom, node["board/rom"], File::Required, ID::SufamiTurboB);
-  loadMemory(sufamiturboB.ram, node["board/ram"], File::Optional, ID::SufamiTurboB);
+  loadMemory(sufamiturboB.rom, node["board/rom"], File::Required, sufamiturboB.pathID);
+  loadMemory(sufamiturboB.ram, node["board/ram"], File::Optional, sufamiturboB.pathID);
 }
 
 //
@@ -302,11 +314,12 @@ auto Cartridge::loadMSU1(Markup::Node node) -> void {
 
 //
 
-auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, uint id) -> void {
+auto Cartridge::loadMemory(MappedRAM& ram, Markup::Node node, bool required, maybe<uint> id) -> void {
+  if(!id) id = pathID();
   auto name = node["name"].text();
   auto size = node["size"].natural();
   ram.allocate(size);
-  if(auto fp = interface->open(id, name, File::Read, required)) {
+  if(auto fp = interface->open(id(), name, File::Read, required)) {
     fp->read(ram.data(), ram.size());
   }
 }

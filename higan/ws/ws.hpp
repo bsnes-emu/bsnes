@@ -7,6 +7,8 @@
 #include <processor/v30mz/v30mz.hpp>
 
 namespace WonderSwan {
+  using File = Emulator::File;
+
   enum class Model : uint {
     WonderSwan,       //SW-001  (ASWAN)
     WonderSwanColor,  //WSC-001 (SPHINX)
@@ -14,13 +16,6 @@ namespace WonderSwan {
   };
 
   enum : uint { Byte = 1, Word = 2, Long = 4 };
-
-  struct File {
-    static const auto Read = vfs::file::mode::read;
-    static const auto Write = vfs::file::mode::write;
-    static const auto Optional = false;
-    static const auto Required = true;
-  };
 
   struct Thread {
     ~Thread() {

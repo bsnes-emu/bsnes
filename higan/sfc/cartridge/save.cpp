@@ -23,11 +23,11 @@ auto Cartridge::saveBSMemory(Markup::Node node) -> void {
 }
 
 auto Cartridge::saveSufamiTurboA(Markup::Node node) -> void {
-  saveMemory(sufamiturboA.ram, node["board/ram"], ID::SufamiTurboA);
+  saveMemory(sufamiturboA.ram, node["board/ram"], sufamiturboA.pathID);
 }
 
 auto Cartridge::saveSufamiTurboB(Markup::Node node) -> void {
-  saveMemory(sufamiturboB.ram, node["board/ram"], ID::SufamiTurboB);
+  saveMemory(sufamiturboB.ram, node["board/ram"], sufamiturboB.pathID);
 }
 
 //
@@ -113,11 +113,12 @@ auto Cartridge::saveOBC1(Markup::Node node) -> void {
 
 //
 
-auto Cartridge::saveMemory(MappedRAM& memory, Markup::Node node, uint id) -> void {
+auto Cartridge::saveMemory(MappedRAM& memory, Markup::Node node, maybe<uint> id) -> void {
+  if(!id) id = pathID();
   if(!node || node["volatile"]) return;
   auto name = node["name"].text();
   auto size = node["size"].natural();
-  if(auto fp = interface->open(id, name, File::Write)) {
+  if(auto fp = interface->open(id(), name, File::Write)) {
     fp->write(memory.data(), memory.size());
   }
 }

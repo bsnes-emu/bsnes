@@ -23,20 +23,21 @@ Interface::Interface() {
   media.append({ID::GameBoy,      "Game Boy",       "gb" , true});
   media.append({ID::GameBoyColor, "Game Boy Color", "gbc", true});
 
-  {
-    Device device{0, ID::Device, "Controller"};
-    device.inputs.append({0, 0, "Up"    });
-    device.inputs.append({1, 0, "Down"  });
-    device.inputs.append({2, 0, "Left"  });
-    device.inputs.append({3, 0, "Right" });
-    device.inputs.append({4, 0, "B"     });
-    device.inputs.append({5, 0, "A"     });
-    device.inputs.append({6, 0, "Select"});
-    device.inputs.append({7, 0, "Start" });
-    devices.append(device);
+  Port hardwarePort{ID::Port::Hardware, "Hardware"};
+
+  { Device device{ID::Device::Controls, "Controls"};
+    device.inputs.append({0, "Up"    });
+    device.inputs.append({0, "Down"  });
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    device.inputs.append({0, "B"     });
+    device.inputs.append({0, "A"     });
+    device.inputs.append({0, "Select"});
+    device.inputs.append({0, "Start" });
+    hardwarePort.devices.append(device);
   }
 
-  ports.append({0, "Device", {devices[0]}});
+  ports.append(move(hardwarePort));
 }
 
 auto Interface::manifest() -> string {
@@ -124,10 +125,11 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::load(uint id) -> void {
-  if(id == ID::GameBoy) system.load(System::Revision::GameBoy);
-  if(id == ID::SuperGameBoy) system.load(System::Revision::SuperGameBoy);
-  if(id == ID::GameBoyColor) system.load(System::Revision::GameBoyColor);
+auto Interface::load(uint id) -> bool {
+  if(id == ID::GameBoy) return system.load(System::Revision::GameBoy);
+  if(id == ID::SuperGameBoy) return system.load(System::Revision::SuperGameBoy);
+  if(id == ID::GameBoyColor) return system.load(System::Revision::GameBoyColor);
+  return false;
 }
 
 auto Interface::save() -> void {

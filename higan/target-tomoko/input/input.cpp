@@ -163,7 +163,7 @@ InputManager::InputManager() {
           auto& inputMapping = inputDevice.mappings.right();
           inputMapping->name = input.name;
           inputMapping->link = &input;
-          input.guid = (uintptr)inputMapping;
+          input.userData = (uintptr)inputMapping;
 
           inputMapping->path = string{inputEmulator.name, "/", inputPort.name, "/", inputDevice.name, "/", inputMapping->name}.replace(" ", "");
           inputMapping->assignment = settings(inputMapping->path).text();

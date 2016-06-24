@@ -24,9 +24,9 @@ auto Multitap::data() -> uint2 {
     port2 = 3;  //controller 4
   }
 
-  bool data1 = interface->inputPoll(port, Device::Multitap, port1 * 12 + index);
-  bool data2 = interface->inputPoll(port, Device::Multitap, port2 * 12 + index);
-  return (data2 << 1) | (data1 << 0);
+  bool data1 = interface->inputPoll(port, ID::Device::Multitap, port1 * 12 + index);
+  bool data2 = interface->inputPoll(port, ID::Device::Multitap, port2 * 12 + index);
+  return data2 << 1 | data1 << 0;
 }
 
 auto Multitap::latch(bool data) -> void {

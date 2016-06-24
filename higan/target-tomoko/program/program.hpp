@@ -1,14 +1,13 @@
 struct Program : Emulator::Interface::Bind {
   //program.cpp
   Program(lstring args);
-  auto load(string) -> void;
   auto main() -> void;
   auto quit() -> void;
 
   //interface.cpp
   auto path(uint id) -> string override;
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
-  auto load(uint id, string name, string type, bool required) -> void override;
+  auto load(uint id, string name, string type, bool required) -> maybe<uint> override;
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
@@ -17,8 +16,7 @@ struct Program : Emulator::Interface::Bind {
   auto notify(string text) -> void override;
 
   //medium.cpp
-  auto loadMedium(string location) -> void;
-  auto loadMedium(Emulator::Interface& interface, Emulator::Interface::Medium& medium, string location) -> void;
+  auto loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void;
   auto unloadMedium() -> void;
 
   //state.cpp
@@ -42,7 +40,6 @@ struct Program : Emulator::Interface::Bind {
   vector<Emulator::Interface*> emulators;
 
   vector<string> mediumPaths;
-  vector<string> folderPaths;
 
   string statusText;
   string statusMessage;

@@ -8,34 +8,34 @@ auto Peripherals::unload() -> void {
 }
 
 auto Peripherals::reset() -> void {
-  connect(Port::Controller1, settings.controllerPort1);
-  connect(Port::Controller2, settings.controllerPort2);
+  connect(ID::Port::Controller1, settings.controllerPort1);
+  connect(ID::Port::Controller2, settings.controllerPort2);
 }
 
 auto Peripherals::connect(uint port, uint device) -> void {
-  if(port == Port::Controller1) {
+  if(port == ID::Port::Controller1) {
     settings.controllerPort1 = device;
     if(!system.loaded()) return;
 
     delete controllerPort1;
     switch(device) { default:
-    case Device::None: controllerPort1 = new Controller(0); break;
-    case Device::Gamepad: controllerPort1 = new Gamepad(0); break;
+    case ID::Device::None: controllerPort1 = new Controller(0); break;
+    case ID::Device::Gamepad: controllerPort1 = new Gamepad(0); break;
     }
   }
 
-  if(port == Port::Controller2) {
+  if(port == ID::Port::Controller2) {
     settings.controllerPort2 = device;
     if(!system.loaded()) return;
 
     delete controllerPort2;
     switch(device) { default:
-    case Device::None: controllerPort2 = new Controller(1); break;
-    case Device::Gamepad: controllerPort2 = new Gamepad(1); break;
+    case ID::Device::None: controllerPort2 = new Controller(1); break;
+    case ID::Device::Gamepad: controllerPort2 = new Gamepad(1); break;
     }
   }
 
-  if(port == Port::Expansion) {
+  if(port == ID::Port::Expansion) {
     settings.expansionPort = device;
     if(!system.loaded()) return;
   }

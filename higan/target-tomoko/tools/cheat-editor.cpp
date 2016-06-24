@@ -128,7 +128,7 @@ auto CheatEditor::addCode(const string& code, const string& description, bool en
 
 auto CheatEditor::loadCheats() -> void {
   doReset(true);
-  auto contents = string::read({program->folderPaths[0], "cheats.bml"});
+  auto contents = string::read({program->mediumPaths(1), "cheats.bml"});
   auto document = BML::unserialize(contents);
   for(auto cheat : document["cartridge"].find("cheat")) {
     if(!addCode(cheat["code"].text(), cheat["description"].text(), (bool)cheat["enabled"])) break;
@@ -149,9 +149,9 @@ auto CheatEditor::saveCheats() -> void {
     count++;
   }
   if(count) {
-    file::write({program->folderPaths[0], "cheats.bml"}, document);
+    file::write({program->mediumPaths(0), "cheats.bml"}, document);
   } else {
-    file::remove({program->folderPaths[0], "cheats.bml"});
+    file::remove({program->mediumPaths(0), "cheats.bml"});
   }
   doReset(true);
 }

@@ -21,32 +21,29 @@ Interface::Interface() {
 
   media.append({ID::Famicom, "Famicom", "fc", true});
 
-  { Device device{0, ID::ControllerPort1 | ID::ControllerPort2, "None"};
-    devices.append(device);
+  Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
+  Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
+
+  { Device device{ID::Device::None, "None"};
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
   }
 
-  { Device device{1, ID::ControllerPort1 | ID::ControllerPort2, "Gamepad"};
-    device.inputs.append({0, 0, "Up"    });
-    device.inputs.append({1, 0, "Down"  });
-    device.inputs.append({2, 0, "Left"  });
-    device.inputs.append({3, 0, "Right" });
-    device.inputs.append({4, 0, "B"     });
-    device.inputs.append({5, 0, "A"     });
-    device.inputs.append({6, 0, "Select"});
-    device.inputs.append({7, 0, "Start" });
-    devices.append(device);
+  { Device device{ID::Device::Gamepad, "Gamepad"};
+    device.inputs.append({0, "Up"    });
+    device.inputs.append({0, "Down"  });
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    device.inputs.append({0, "B"     });
+    device.inputs.append({0, "A"     });
+    device.inputs.append({0, "Select"});
+    device.inputs.append({0, "Start" });
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
   }
 
-  ports.append({0, "Port 1"});
-  ports.append({1, "Port 2"});
-
-  for(auto& device : devices) {
-    for(auto& port : ports) {
-      if(device.portmask & (1 << port.id)) {
-        port.devices.append(device);
-      }
-    }
-  }
+  ports.append(move(controllerPort1));
+  ports.append(move(controllerPort2));
 }
 
 auto Interface::manifest() -> string {
@@ -128,8 +125,8 @@ auto Interface::sha256() -> string {
   return cartridge.sha256();
 }
 
-auto Interface::load(uint id) -> void {
-  system.load();
+auto Interface::load(uint id) -> bool {
+  return system.load();
 }
 
 auto Interface::save() -> void {

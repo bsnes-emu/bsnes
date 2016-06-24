@@ -27,13 +27,11 @@ struct Interface {
 
   struct Device {
     uint id;
-    uint portmask;
     string name;
     struct Input {
-      uint id;
       uint type;  //0 = digital, 1 = analog (relative), 2 = rumble
       string name;
-      uintptr guid;  //user data field
+      uintptr userData;
     };
     vector<Input> inputs;
   };
@@ -48,7 +46,7 @@ struct Interface {
   struct Bind {
     virtual auto path(uint) -> string { return ""; }
     virtual auto open(uint, string, vfs::file::mode, bool) -> vfs::shared::file { return {}; }
-    virtual auto load(uint, string, string, bool) -> void {}
+    virtual auto load(uint, string, string, bool) -> maybe<uint> { return nothing; }
     virtual auto videoRefresh(const uint32*, uint, uint, uint) -> void {}
     virtual auto audioSample(const double*, uint) -> void {}
     virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
@@ -61,7 +59,7 @@ struct Interface {
   //callback bindings (provided by user interface)
   auto path(uint id) -> string { return bind->path(id); }
   auto open(uint id, string name, vfs::file::mode mode, bool required = false) -> vfs::shared::file { return bind->open(id, name, mode, required); }
-  auto load(uint id, string name, string type, bool required = false) -> void { return bind->load(id, name, type, required); }
+  auto load(uint id, string name, string type, bool required = false) -> maybe<uint> { return bind->load(id, name, type, required); }
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(data, pitch, width, height); }
   auto audioSample(const double* samples, uint channels) -> void { return bind->audioSample(samples, channels); }
   auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }
@@ -84,7 +82,7 @@ struct Interface {
   //media interface
   virtual auto loaded() -> bool { return false; }
   virtual auto sha256() -> string { return ""; }
-  virtual auto load(uint id) -> void {}
+  virtual auto load(uint id) -> bool { return false; }
   virtual auto save() -> void {}
   virtual auto unload() -> void {}
 
@@ -112,6 +110,14 @@ struct Interface {
 
   //shared functions
   auto videoColor(uint16 r, uint16 g, uint16 b) -> uint32;
+};
+
+//nall/vfs shorthand constants for open(), load()
+struct File {
+  static const auto Read = vfs::file::mode::read;
+  static const auto Write = vfs::file::mode::write;
+  static const auto Optional = false;
+  static const auto Required = true;
 };
 
 }

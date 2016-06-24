@@ -7,7 +7,7 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   auto main() -> void;
 
   auto init() -> void;
-  auto load() -> void;
+  auto load() -> bool;
   auto unload() -> void;
   auto power() -> void;
   auto reset(bool soft = false) -> void;
@@ -17,7 +17,8 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   auto lcdOutput(uint2 color) -> void override;
   auto joypWrite(bool p15, bool p14) -> void override;
 
-  auto load(uint id, string name, string type, bool required) -> void override;
+  auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
+  auto load(uint id, string name, string type, bool required) -> maybe<uint> override;
 
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(const double* samples, uint channels) -> void override;
