@@ -7,7 +7,7 @@ struct Program : Emulator::Interface::Bind {
   //interface.cpp
   auto path(uint id) -> string override;
   auto open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file override;
-  auto load(uint id, string name, string type, bool required) -> maybe<uint> override;
+  auto load(uint id, string name, string type) -> maybe<uint> override;
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void override;
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;

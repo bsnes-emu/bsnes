@@ -16,6 +16,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
 
   static auto Enter() -> void;
   auto main() -> void;
+  auto load(Markup::Node) -> bool;
   auto power() -> void;
   auto reset() -> void;
 

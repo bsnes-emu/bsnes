@@ -26,7 +26,7 @@ Cartridge::~Cartridge() {
 auto Cartridge::load() -> bool {
   information = Information();
 
-  if(auto pathID = interface->load(ID::GameBoyAdvance, "Game Boy Advance", "gba", File::Required)) {
+  if(auto pathID = interface->load(ID::GameBoyAdvance, "Game Boy Advance", "gba")) {
     information.pathID = pathID();
   } else return false;
 

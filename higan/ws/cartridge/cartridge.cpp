@@ -46,13 +46,13 @@ auto Cartridge::load() -> bool {
 
   switch(system.model()) {
   case Model::WonderSwan:
-    if(auto pathID = interface->load(ID::WonderSwan, "WonderSwan", "ws", File::Required)) {
+    if(auto pathID = interface->load(ID::WonderSwan, "WonderSwan", "ws")) {
       information.pathID = pathID();
     } else return false;
     break;
   case Model::WonderSwanColor:
   case Model::SwanCrystal:
-    if(auto pathID = interface->load(ID::WonderSwanColor, "WonderSwan Color", "wsc", File::Required)) {
+    if(auto pathID = interface->load(ID::WonderSwanColor, "WonderSwan Color", "wsc")) {
       information.pathID = pathID();
     } else return false;
     break;

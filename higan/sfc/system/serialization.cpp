@@ -1,5 +1,5 @@
 auto System::serialize() -> serializer {
-  serializer s(_serializeSize);
+  serializer s(serializeSize);
 
   uint signature = 0x31545342;
   char version[16] = {0};
@@ -39,7 +39,7 @@ auto System::unserialize(serializer& s) -> bool {
 //internal
 
 auto System::serialize(serializer& s) -> void {
-  s.integer((uint&)_region);
+  s.integer((uint&)information.region);
 }
 
 auto System::serializeAll(serializer& s) -> void {
@@ -86,5 +86,5 @@ auto System::serializeInit() -> void {
   s.array(description);
 
   serializeAll(s);
-  _serializeSize = s.size();
+  serializeSize = s.size();
 }

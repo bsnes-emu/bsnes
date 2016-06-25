@@ -13,6 +13,7 @@ struct DSP : Thread {
   auto write(uint8 addr, uint8 data) -> void;
 
   auto main() -> void;
+  auto load(Markup::Node) -> bool;
   auto power() -> void;
   auto reset() -> void;
 

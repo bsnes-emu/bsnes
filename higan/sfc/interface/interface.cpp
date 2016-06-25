@@ -20,10 +20,7 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::SuperFamicom, "Super Famicom", "sfc", true });
-  media.append({ID::SuperFamicom, "Game Boy",      "gb",  false});
-  media.append({ID::SuperFamicom, "BS Memory",     "bs",  false});
-  media.append({ID::SuperFamicom, "Sufami Turbo",  "st",  false});
+  media.append({ID::SuperFamicom, "Super Famicom", "sfc"});
 
   Port controllerPort1{ID::Port::Controller1, "Controller Port 1"};
   Port controllerPort2{ID::Port::Controller2, "Controller Port 2"};
@@ -53,7 +50,7 @@ Interface::Interface() {
   }
 
   { Device device{ID::Device::Multitap, "Multitap"};
-    for(uint p = 1, n = 0; p <= 4; p++, n += 12) {
+    for(uint p = 1; p <= 4; p++) {
       device.inputs.append({0, {"Port ", p, " - ", "Up"    }});
       device.inputs.append({0, {"Port ", p, " - ", "Down"  }});
       device.inputs.append({0, {"Port ", p, " - ", "Left"  }});

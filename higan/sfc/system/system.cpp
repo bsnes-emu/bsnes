@@ -52,24 +52,28 @@ auto System::term() -> void {
 }
 
 auto System::load() -> bool {
-  bus.reset();
+  information = Information();
 
   if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
+  auto system = document["system"];
 
-  if(auto iplrom = document["system/smp/rom/name"].text()) {
-    if(auto fp = interface->open(ID::System, iplrom, File::Read, File::Required)) {
-      fp->read(smp.iplrom, 64);
-    } else return false;
-  }
-
+  bus.reset();
+  if(!cpu.load(system)) return false;
+  if(!smp.load(system)) return false;
+  if(!ppu.load(system)) return false;
+  if(!dsp.load(system)) return false;
   if(!cartridge.load()) return false;
-  _region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
-  _cpuFrequency = region() == Region::NTSC ? 21'477'272 : 21'281'370;
-  _apuFrequency = 24'606'720;
+
+  information.region = cartridge.region() == Cartridge::Region::NTSC ? Region::NTSC : Region::PAL;
+  if(system["region"].text() == "NTSC") information.region = Region::NTSC;
+  if(system["region"].text() == "PAL" ) information.region = Region::PAL;
+
+  information.cpuFrequency = region() == Region::NTSC ? 21'477'272 : 21'281'370;
+  information.apuFrequency = 24'606'720;
 
   if(cartridge.has.ICD2) icd2.load();
   if(cartridge.has.MCC) mcc.load();
@@ -91,7 +95,7 @@ auto System::load() -> bool {
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.load(), sufamiturboB.load();
 
   serializeInit();
-  return _loaded = true;
+  return information.loaded = true;
 }
 
 auto System::save() -> void {
@@ -123,7 +127,7 @@ auto System::unload() -> void {
   if(cartridge.has.SufamiTurboSlots) sufamiturboA.unload(), sufamiturboB.unload();
 
   cartridge.unload();
-  _loaded = false;
+  information.loaded = false;
 }
 
 auto System::power() -> void {

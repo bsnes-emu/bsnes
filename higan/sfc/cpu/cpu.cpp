@@ -85,6 +85,11 @@ auto CPU::main() -> void {
   instruction();
 }
 
+auto CPU::load(Markup::Node node) -> bool {
+  version = max(1, min(2, node["cpu/version"].natural()));
+  return true;
+}
+
 auto CPU::power() -> void {
   for(auto& byte : wram) byte = random(0x55);
 

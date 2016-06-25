@@ -9,7 +9,7 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
     }
   }
   if(board["sufamiturbo"]) {
-    if(auto pathID = interface->load(ID::SufamiTurboA, "Sufami Turbo", "st")) {
+    if(auto pathID = interface->load(ID::SufamiTurboA, "Sufami Turbo - Slot A", "st")) {
       sufamiturboA.pathID = pathID();
     }
   }
@@ -53,7 +53,7 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   loadMemory(sufamiturboA.ram, node["board/ram"], File::Optional, sufamiturboA.pathID);
 
   if(node["board/linkable"]) {
-    if(auto pathID = interface->load(ID::SufamiTurboB, "Sufami Turbo", "st")) {
+    if(auto pathID = interface->load(ID::SufamiTurboB, "Sufami Turbo - Slot B", "st")) {
       sufamiturboB.pathID = pathID();
     }
   }

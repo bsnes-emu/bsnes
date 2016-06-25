@@ -149,9 +149,9 @@ auto CheatEditor::saveCheats() -> void {
     count++;
   }
   if(count) {
-    file::write({program->mediumPaths(0), "cheats.bml"}, document);
+    file::write({program->mediumPaths(1), "cheats.bml"}, document);
   } else {
-    file::remove({program->mediumPaths(0), "cheats.bml"});
+    file::remove({program->mediumPaths(1), "cheats.bml"});
   }
   doReset(true);
 }

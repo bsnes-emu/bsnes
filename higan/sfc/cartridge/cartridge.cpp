@@ -29,7 +29,7 @@ auto Cartridge::load() -> bool {
   information = Information();
   has = Has();
 
-  if(auto pathID = interface->load(ID::SuperFamicom, "Super Famicom", "sfc", File::Required)) {
+  if(auto pathID = interface->load(ID::SuperFamicom, "Super Famicom", "sfc")) {
     information.pathID = pathID();
   } else return false;
 

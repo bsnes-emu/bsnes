@@ -24,14 +24,13 @@ auto Gamepad::latch(bool data) -> void {
   counter = 0;
 
   if(latched == 0) {
-    auto id = ID::Device::Gamepad;
-    a      = interface->inputPoll(port, id, A);
-    b      = interface->inputPoll(port, id, B);
-    select = interface->inputPoll(port, id, Select);
-    start  = interface->inputPoll(port, id, Start);
-    up     = interface->inputPoll(port, id, Up);
-    down   = interface->inputPoll(port, id, Down);
-    left   = interface->inputPoll(port, id, Left);
-    right  = interface->inputPoll(port, id, Right);
+    a      = interface->inputPoll(port, ID::Device::Gamepad, A);
+    b      = interface->inputPoll(port, ID::Device::Gamepad, B);
+    select = interface->inputPoll(port, ID::Device::Gamepad, Select);
+    start  = interface->inputPoll(port, ID::Device::Gamepad, Start);
+    up     = interface->inputPoll(port, ID::Device::Gamepad, Up);
+    down   = interface->inputPoll(port, ID::Device::Gamepad, Down);
+    left   = interface->inputPoll(port, ID::Device::Gamepad, Left);
+    right  = interface->inputPoll(port, ID::Device::Gamepad, Right);
   }
 }

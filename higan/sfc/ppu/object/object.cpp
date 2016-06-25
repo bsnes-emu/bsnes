@@ -139,7 +139,7 @@ auto PPU::Object::tilefetch() -> void {
 
       uint mx = !sprite.hflip ? tx : (tileWidth - 1) - tx;
       uint pos = tiledataAddress + ((chry + ((chrx + mx) & 15)) << 4);
-      uint15 addr = (pos & 0x7ff0) + (y & 7);
+      uint16 addr = (pos & 0xfff0) + (y & 7);
 
       oamTile[n].data.bits( 0,15) = ppu.vram[addr + 0];
       ppu.addClocks(2);

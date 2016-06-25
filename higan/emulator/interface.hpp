@@ -20,8 +20,7 @@ struct Interface {
   struct Medium {
     uint id;
     string name;
-    string type;
-    bool bootable;  //false for cartridge slots (eg Sufami Turbo cartridges)
+    string type;  //extension
   };
   vector<Medium> media;
 
@@ -46,7 +45,7 @@ struct Interface {
   struct Bind {
     virtual auto path(uint) -> string { return ""; }
     virtual auto open(uint, string, vfs::file::mode, bool) -> vfs::shared::file { return {}; }
-    virtual auto load(uint, string, string, bool) -> maybe<uint> { return nothing; }
+    virtual auto load(uint, string, string) -> maybe<uint> { return nothing; }
     virtual auto videoRefresh(const uint32*, uint, uint, uint) -> void {}
     virtual auto audioSample(const double*, uint) -> void {}
     virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
@@ -59,7 +58,7 @@ struct Interface {
   //callback bindings (provided by user interface)
   auto path(uint id) -> string { return bind->path(id); }
   auto open(uint id, string name, vfs::file::mode mode, bool required = false) -> vfs::shared::file { return bind->open(id, name, mode, required); }
-  auto load(uint id, string name, string type, bool required = false) -> maybe<uint> { return bind->load(id, name, type, required); }
+  auto load(uint id, string name, string type) -> maybe<uint> { return bind->load(id, name, type); }
   auto videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void { return bind->videoRefresh(data, pitch, width, height); }
   auto audioSample(const double* samples, uint channels) -> void { return bind->audioSample(samples, channels); }
   auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }

@@ -19,8 +19,8 @@ Interface::Interface() {
   information.capability.states = true;
   information.capability.cheats = true;
 
-  media.append({ID::WonderSwan,      "WonderSwan",       "ws",  true});
-  media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc", true});
+  media.append({ID::WonderSwan,      "WonderSwan",       "ws" });
+  media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc"});
 
   Port hardwarePort{ID::Port::Hardware, "Hardware"};
 

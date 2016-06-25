@@ -15,7 +15,7 @@ auto Cartridge::main() -> void {
 }
 
 auto Cartridge::load() -> bool {
-  if(auto pathID = interface->load(ID::Famicom, "Famicom", "fc", File::Required)) {
+  if(auto pathID = interface->load(ID::Famicom, "Famicom", "fc")) {
     information.pathID = pathID();
   }
 

@@ -11,6 +11,7 @@ struct PPU : Thread, PPUcounter {
 
   static auto Enter() -> void;
   auto main() -> void;
+  auto load(Markup::Node) -> bool;
   auto power() -> void;
   auto reset() -> void;
 
@@ -33,9 +34,9 @@ struct PPU : Thread, PPUcounter {
 
 privileged:
   struct VRAM {
-    auto& operator[](uint offset) { return data[offset & size - 1]; }
+    auto& operator[](uint offset) { return data[offset & mask]; }
     uint16 data[64 * 1024];
-    uint size = 0x8000;
+    uint mask = 0x7fff;
   } vram;
   uint8 oam[544];
   uint8 cgram[512];

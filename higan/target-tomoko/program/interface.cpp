@@ -9,10 +9,16 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
       return vfs::memory::file::open(manifest.output.data<uint8_t>(), manifest.output.size());
     }
   }
+  if(required) {
+    MessageDialog()
+    .setTitle({"Error"})
+    .setText({"Error: missing required file:\n\n", path(id), name})
+    .error();
+  }
   return {};
 }
 
-auto Program::load(uint id, string name, string type, bool required) -> maybe<uint> {
+auto Program::load(uint id, string name, string type) -> maybe<uint> {
   string location = BrowserDialog()
   .setTitle({"Load ", name})
   .setPath({settings["Library/Location"].text(), name})

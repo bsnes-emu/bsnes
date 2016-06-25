@@ -19,17 +19,17 @@ auto Cartridge::load(System::Revision revision) -> bool {
 
   switch(revision) {
   case System::Revision::GameBoy:
-    if(auto pathID = interface->load(ID::GameBoy, "Game Boy", "gb", true)) {
+    if(auto pathID = interface->load(ID::GameBoy, "Game Boy", "gb")) {
       information.pathID = pathID();
     } else return false;
     break;
   case System::Revision::SuperGameBoy:
-    if(auto pathID = interface->load(ID::SuperGameBoy, "Game Boy", "gb", true)) {
+    if(auto pathID = interface->load(ID::SuperGameBoy, "Game Boy", "gb")) {
       information.pathID = pathID();
     } else return false;
     break;
   case System::Revision::GameBoyColor:
-    if(auto pathID = interface->load(ID::GameBoyColor, "Game Boy Color", "gbc", true)) {
+    if(auto pathID = interface->load(ID::GameBoyColor, "Game Boy Color", "gbc")) {
       information.pathID = pathID();
     } else return false;
     break;
@@ -92,7 +92,7 @@ auto Cartridge::load(System::Revision revision) -> bool {
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  sha256 = Hash::SHA256(romdata, romsize).digest();
+  information.sha256 = Hash::SHA256(romdata, romsize).digest();
   return true;
 }
 

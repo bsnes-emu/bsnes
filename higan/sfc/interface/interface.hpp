@@ -10,6 +10,12 @@ struct ID {
     SufamiTurboB,
   };
 
+  struct Port { enum : uint {
+    Controller1,
+    Controller2,
+    Expansion,
+  };};
+
   struct Device { enum : uint {
     None,
     Gamepad,
@@ -22,12 +28,6 @@ struct ID {
     Satellaview,
     SuperDisc,
     S21FX,
-  };};
-
-  struct Port { enum : uint {
-    Controller1,
-    Controller2,
-    Expansion,
   };};
 };
 

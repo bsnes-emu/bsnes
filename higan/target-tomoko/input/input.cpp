@@ -151,16 +151,15 @@ InputManager::InputManager() {
     inputEmulator.name = emulator->information.name;
 
     for(auto& port : emulator->ports) {
-      inputEmulator.ports.append(InputPort());
-      auto& inputPort = inputEmulator.ports.right();
+      auto& inputPort = inputEmulator.ports(port.id);
       inputPort.name = port.name;
       for(auto& device : port.devices) {
-        inputPort.devices.append(InputDevice());
-        auto& inputDevice = inputPort.devices.right();
+        auto& inputDevice = inputPort.devices(device.id);
         inputDevice.name = device.name;
         for(auto& input : device.inputs) {
-          inputDevice.mappings.append(new InputMapping());
-          auto& inputMapping = inputDevice.mappings.right();
+          auto inputMapping = new InputMapping;
+          inputDevice.mappings.append(inputMapping);
+
           inputMapping->name = input.name;
           inputMapping->link = &input;
           input.userData = (uintptr)inputMapping;

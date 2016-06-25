@@ -92,8 +92,8 @@ auto ICD2::open(uint id, string name, vfs::file::mode mode, bool required) -> vf
   return interface->open(id, name, mode, required);
 }
 
-auto ICD2::load(uint id, string name, string type, bool required) -> maybe<uint> {
-  return interface->load(id, name, type, required);
+auto ICD2::load(uint id, string name, string type) -> maybe<uint> {
+  return interface->load(id, name, type);
 }
 
 auto ICD2::videoRefresh(const uint32* data, uint pitch, uint width, uint height) -> void {

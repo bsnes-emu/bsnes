@@ -30,6 +30,16 @@ auto SMP::main() -> void {
   instruction();
 }
 
+auto SMP::load(Markup::Node node) -> bool {
+  if(auto name = node["smp/rom/name"].text()) {
+    if(auto fp = interface->open(ID::System, name, File::Read, File::Required)) {
+      fp->read(iplrom, 64);
+      return true;
+    }
+  }
+  return false;
+}
+
 auto SMP::power() -> void {
   //targets not initialized/changed upon reset
   timer0.target = 0;

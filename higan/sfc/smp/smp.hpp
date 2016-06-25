@@ -9,6 +9,7 @@ struct SMP : Processor::SPC700, Thread {
   auto portWrite(uint2 port, uint8 data) -> void;
 
   auto main() -> void;
+  auto load(Markup::Node) -> bool;
   auto power() -> void;
   auto reset() -> void;
 

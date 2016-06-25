@@ -1,3 +1,12 @@
-system name:Super Famicom
+system region=auto name:Super Famicom
+  cpu version=2
+    ram name=work.ram size=0x20000 volatile
   smp
     rom name=ipl.rom size=64
+  ppu1 version=1
+    ram name=video.ram size=0x8000 volatile
+    ram name=object.ram size=544 volatile
+  ppu2 version=3
+    ram name=palette.ram size=512 volatile
+  dsp
+    ram name=apu.ram size=0x20000 volatile
