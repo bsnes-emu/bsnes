@@ -56,8 +56,11 @@ Program::Program(lstring args) {
   for(auto& argument : args) {
     if(argument == "--fullscreen") {
       presentation->toggleFullScreen();
+    } else if(directory::exists(argument)) {
+      mediumQueue.append(argument);
     }
   }
+  loadMedium();
 }
 
 auto Program::main() -> void {

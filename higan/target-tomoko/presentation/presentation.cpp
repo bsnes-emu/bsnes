@@ -131,6 +131,12 @@ Presentation::Presentation() {
   statusBar.setFont(Font().setBold());
   statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
 
+  viewport.setDroppable().onDrop([&](auto locations) {
+    if(!directory::exists(locations(0))) return;
+    program->mediumQueue.append(locations(0));
+    program->loadMedium();
+  });
+
   onClose([&] { program->quit(); });
 
   setTitle({"higan v", Emulator::Version});

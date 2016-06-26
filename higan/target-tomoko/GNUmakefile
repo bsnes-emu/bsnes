@@ -83,7 +83,7 @@ else ifeq ($(platform),macosx)
 	mkdir -p ~/Emulation/System/
 	cp -R out/$(name).app /Applications/$(name).app
 	cp data/cheats.bml ~/Library/Application\ Support/$(name)/
-	cp -R profile/* ~/Library/Application\ Support/$(name)/
+	cp -R systems/* ~/Library/Application\ Support/$(name)/
 else ifneq ($(filter $(platform),linux bsd),)
 	mkdir -p $(prefix)/bin/
 	mkdir -p $(prefix)/share/icons/
@@ -92,7 +92,7 @@ else ifneq ($(filter $(platform),linux bsd),)
 	cp data/$(name).desktop $(prefix)/share/applications/$(name).desktop
 	cp data/$(name).png $(prefix)/share/icons/$(name).png
 	cp data/cheats.bml $(prefix)/share/$(name)/cheats.bml
-	cp -R profile/* $(prefix)/share/$(name)/
+	cp -R systems/* $(prefix)/share/$(name)/
 endif
 
 uninstall:

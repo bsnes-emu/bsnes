@@ -65,13 +65,13 @@ struct BandaiFCG : Board {
   }
 
   auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.ciram_read(ciram_addr(addr));
+    if(addr & 0x2000) return ppu.readCIRAM(ciram_addr(addr));
     addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
     return Board::chr_read(addr);
   }
 
   auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.ciram_write(ciram_addr(addr), data);
+    if(addr & 0x2000) return ppu.writeCIRAM(ciram_addr(addr), data);
     addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
     return Board::chr_write(addr, data);
   }

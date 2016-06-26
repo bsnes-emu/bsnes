@@ -18,16 +18,16 @@ struct MSU1 : Cothread {
   auto serialize(serializer&) -> void;
 
 private:
-  file dataFile;
-  file audioFile;
+  vfs::shared::file dataFile;
+  vfs::shared::file audioFile;
 
   enum Flag : uint {
-    DataBusy       = 0x80,
-    AudioBusy      = 0x40,
-    AudioRepeating = 0x20,
-    AudioPlaying   = 0x10,
+    Revision       = 0x02,  //max: 0x07
     AudioError     = 0x08,
-    Revision       = 0x02,
+    AudioPlaying   = 0x10,
+    AudioRepeating = 0x20,
+    AudioBusy      = 0x40,
+    DataBusy       = 0x80,
   };
 
   struct MMIO {
@@ -43,11 +43,11 @@ private:
     uint32 audioResumeTrack;
     uint32 audioResumeOffset;
 
-    bool dataBusy;
-    bool audioBusy;
-    bool audioRepeat;
-    bool audioPlay;
     bool audioError;
+    bool audioPlay;
+    bool audioRepeat;
+    bool audioBusy;
+    bool dataBusy;
   } mmio;
 };
 

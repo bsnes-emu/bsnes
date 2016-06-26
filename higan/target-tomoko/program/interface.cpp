@@ -3,28 +3,39 @@ auto Program::path(uint id) -> string {
 }
 
 auto Program::open(uint id, string name, vfs::file::mode mode, bool required) -> vfs::shared::file {
-  if(auto result = vfs::fs::file::open({path(id), name}, mode)) return result;
-  if(name == "manifest.bml") {
-    if(auto manifest = execute("icarus", "--manifest", path(id))) {
-      return vfs::memory::file::open(manifest.output.data<uint8_t>(), manifest.output.size());
+  if(name == "manifest.bml" && !path(id).endsWith(".sys/")) {
+    if(!file::exists({path(id), name}) || settings["Library/IgnoreManifests"].boolean()) {
+      if(auto manifest = execute("icarus", "--manifest", path(id))) {
+        return vfs::memory::file::open(manifest.output.data<uint8_t>(), manifest.output.size());
+      }
     }
   }
+
+  if(auto result = vfs::fs::file::open({path(id), name}, mode)) return result;
+
   if(required) {
     MessageDialog()
     .setTitle({"Error"})
     .setText({"Error: missing required file:\n\n", path(id), name})
     .error();
   }
+
   return {};
 }
 
 auto Program::load(uint id, string name, string type) -> maybe<uint> {
-  string location = BrowserDialog()
-  .setTitle({"Load ", name})
-  .setPath({settings["Library/Location"].text(), name})
-  .setFilters({string{name, "|*.", type}, "All|*.*"})
-  .openFolder();
-  if(!directory::exists(location)) return nothing;
+  string location;
+  if(mediumQueue) {
+    location = mediumQueue.takeLeft().transform("\\", "/");
+    if(!location.endsWith("/")) location.append("/");
+  } else {
+    location = BrowserDialog()
+    .setTitle({"Load ", name})
+    .setPath({settings["Library/Location"].text(), name})
+    .setFilters({string{name, "|*.", type}, "All|*.*"})
+    .openFolder();
+  }
+  if(!directory::exists(location)) return mediumQueue.reset(), nothing;
 
   uint pathID = mediumPaths.size();
   mediumPaths.append(location);
@@ -81,18 +92,16 @@ auto Program::audioSample(const double* samples, uint channels) -> void {
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
   if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean()) {
-    auto userData = emulator->ports[port].devices[device].inputs[input].userData;
-    auto mapping = (InputMapping*)userData;
-    if(mapping) return mapping->poll();
+    auto& mapping = inputManager->emulator->ports[port].devices[device].mappings[input];
+    return mapping.poll();
   }
   return 0;
 }
 
 auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> void {
   if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean() || !enable) {
-    auto userData = emulator->ports[port].devices[device].inputs[input].userData;
-    auto mapping = (InputMapping*)userData;
-    if(mapping) return mapping->rumble(enable);
+    auto& mapping = inputManager->emulator->ports[port].devices[device].mappings[input];
+    return mapping.rumble(enable);
   }
 }
 

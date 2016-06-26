@@ -16,6 +16,7 @@ struct Program : Emulator::Interface::Bind {
   auto notify(string text) -> void override;
 
   //medium.cpp
+  auto loadMedium() -> void;
   auto loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void;
   auto unloadMedium() -> void;
 
@@ -39,7 +40,8 @@ struct Program : Emulator::Interface::Bind {
 
   vector<Emulator::Interface*> emulators;
 
-  vector<string> mediumPaths;
+  vector<string> mediumQueue;  //for command-line and drag-and-drop loading
+  vector<string> mediumPaths;  //for keeping track of loaded folder locations
 
   string statusText;
   string statusMessage;

@@ -20,13 +20,13 @@ struct NES_TxROM : Board {
 
   auto chr_read(uint addr) -> uint8 {
     mmc3.irq_test(addr);
-    if(addr & 0x2000) return ppu.ciram_read(mmc3.ciram_addr(addr));
+    if(addr & 0x2000) return ppu.readCIRAM(mmc3.ciram_addr(addr));
     return Board::chr_read(mmc3.chr_addr(addr));
   }
 
   auto chr_write(uint addr, uint8 data) -> void {
     mmc3.irq_test(addr);
-    if(addr & 0x2000) return ppu.ciram_write(mmc3.ciram_addr(addr), data);
+    if(addr & 0x2000) return ppu.writeCIRAM(mmc3.ciram_addr(addr), data);
     return Board::chr_write(mmc3.chr_addr(addr), data);
   }
 

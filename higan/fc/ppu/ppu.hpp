@@ -10,99 +10,109 @@ struct PPU : Thread {
   auto power() -> void;
   auto reset() -> void;
 
+  //memory.cpp
+  auto readCIRAM(uint11 addr) -> uint8;
+  auto writeCIRAM(uint11 addr, uint8 data) -> void;
+
+  auto readCGRAM(uint5 addr) -> uint8;
+  auto writeCGRAM(uint5 addr, uint8 data) -> void;
+
   auto readIO(uint16 addr) -> uint8;
   auto writeIO(uint16 addr, uint8 data) -> void;
 
-  auto ciram_read(uint16 addr) -> uint8;
-  auto ciram_write(uint16 addr, uint8 data) -> void;
+  //render.cpp
+  auto enable() const -> bool;
+  auto nametableAddress() const -> uint;
+  auto scrollX() const -> uint;
+  auto scrollY() const -> uint;
 
-  auto cgram_read(uint16 addr) -> uint8;
-  auto cgram_write(uint16 addr, uint8 data) -> void;
+  auto loadCHR(uint16 addr) -> uint8;
 
-  auto raster_enable() const -> bool;
-  auto nametable_addr() const -> uint;
-  auto scrollx() const -> uint;
-  auto scrolly() const -> uint;
-  auto sprite_height() const -> uint;
+  auto scrollX_increment() -> void;
+  auto scrollY_increment() -> void;
 
-  auto chr_load(uint16 addr) -> uint8;
+  auto renderPixel() -> void;
+  auto renderSprite() -> void;
+  auto renderScanline() -> void;
 
-  auto scrollx_increment() -> void;
-  auto scrolly_increment() -> void;
-
-  auto raster_pixel() -> void;
-  auto raster_sprite() -> void;
-  auto raster_scanline() -> void;
-
+  //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  struct Status {
+  struct Registers {
+    //internal
     uint8 mdr;
 
     bool field;
     uint lx;
     uint ly;
 
-    uint8 bus_data;
+    uint8 busData;
 
-    bool address_latch;
+    bool addressLatch;
 
     uint15 vaddr;
     uint15 taddr;
     uint8 xaddr;
 
-    bool nmi_hold;
-    bool nmi_flag;
+    bool nmiHold;
+    bool nmiFlag;
 
     //$2000
-    bool nmi_enable;
-    bool master_select;
-    bool sprite_size;
-    uint bg_addr;
-    uint sprite_addr;
-    uint vram_increment;
+    bool nmiEnable;
+    bool masterSelect;
+    uint spriteHeight;
+    uint bgAddress;
+    uint spriteAddress;
+    uint vramIncrement;
 
     //$2001
     uint3 emphasis;
-    bool sprite_enable;
-    bool bg_enable;
-    bool sprite_edge_enable;
-    bool bg_edge_enable;
+    bool spriteEnable;
+    bool bgEnable;
+    bool spriteEdgeEnable;
+    bool bgEdgeEnable;
     bool grayscale;
 
     //$2002
-    bool sprite_zero_hit;
-    bool sprite_overflow;
+    bool spriteZeroHit;
+    bool spriteOverflow;
 
     //$2003
-    uint8 oam_addr;
-  } status;
+    uint8 oamAddress;
+  } r;
 
-  struct Raster {
+  struct OAM {
+    //serialization.cpp
+    auto serialize(serializer&) -> void;
+
+    uint8 id = 64;
+    uint8 y = 0xff;
+    uint8 tile = 0xff;
+    uint8 attr = 0xff;
+    uint8 x = 0xff;
+
+    uint8 tiledataLo = 0;
+    uint8 tiledataHi = 0;
+  };
+
+  struct Latches {
     uint16 nametable;
     uint16 attribute;
-    uint16 tiledatalo;
-    uint16 tiledatahi;
+    uint16 tiledataLo;
+    uint16 tiledataHi;
 
-    uint oam_iterator;
-    uint oam_counter;
+    uint oamIterator;
+    uint oamCounter;
 
-    struct OAM {
-      uint8 id;
-      uint8 y;
-      uint8 tile;
-      uint8 attr;
-      uint8 x;
+    OAM oam[8];   //primary
+    OAM soam[8];  //secondary
+  } l;
 
-      uint8 tiledatalo;
-      uint8 tiledatahi;
-    } oam[8], soam[8];
-  } raster;
-
-  uint32 buffer[256 * 262];
   uint8 ciram[2048];
   uint8 cgram[32];
   uint8 oam[256];
+
+  uint32 buffer[256 * 262];
 };
 
 extern PPU ppu;

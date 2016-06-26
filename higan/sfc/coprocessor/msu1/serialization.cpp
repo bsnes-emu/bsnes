@@ -13,11 +13,11 @@ auto MSU1::serialize(serializer& s) -> void {
   s.integer(mmio.audioResumeTrack);
   s.integer(mmio.audioResumeOffset);
 
-  s.integer(mmio.dataBusy);
-  s.integer(mmio.audioBusy);
-  s.integer(mmio.audioRepeat);
-  s.integer(mmio.audioPlay);
   s.integer(mmio.audioError);
+  s.integer(mmio.audioPlay);
+  s.integer(mmio.audioRepeat);
+  s.integer(mmio.audioBusy);
+  s.integer(mmio.dataBusy);
 
   dataOpen();
   audioOpen();

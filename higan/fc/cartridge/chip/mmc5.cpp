@@ -269,8 +269,8 @@ struct MMC5 : Chip {
     if(vs_fetch && (hcounter & 2) != 0) return exram[vs_vpos / 32 * 8 + vs_hpos / 32 + 0x03c0];
 
     switch(nametable_mode[(addr >> 10) & 3]) {
-    case 0: return ppu.ciram_read(0x0000 | (addr & 0x03ff));
-    case 1: return ppu.ciram_read(0x0400 | (addr & 0x03ff));
+    case 0: return ppu.readCIRAM(0x0000 | (addr & 0x03ff));
+    case 1: return ppu.readCIRAM(0x0400 | (addr & 0x03ff));
     case 2: return exram_mode < 2 ? exram[addr & 0x03ff] : (uint8)0x00;
     case 3: return (hcounter & 2) == 0 ? fillmode_tile : fillmode_color;
     }
@@ -327,8 +327,8 @@ struct MMC5 : Chip {
   auto chr_write(uint addr, uint8 data) -> void {
     if(addr & 0x2000) {
       switch(nametable_mode[(addr >> 10) & 3]) {
-      case 0: return ppu.ciram_write(0x0000 | (addr & 0x03ff), data);
-      case 1: return ppu.ciram_write(0x0400 | (addr & 0x03ff), data);
+      case 0: return ppu.writeCIRAM(0x0000 | (addr & 0x03ff), data);
+      case 1: return ppu.writeCIRAM(0x0400 | (addr & 0x03ff), data);
       case 2: exram[addr & 0x03ff] = data; break;
       }
     }

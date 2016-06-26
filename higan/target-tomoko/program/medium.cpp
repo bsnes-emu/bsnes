@@ -1,10 +1,26 @@
+auto Program::loadMedium() -> void {
+  if(!mediumQueue) return;
+
+  string location = mediumQueue.left();
+  string type = suffixname(location).trimLeft(".", 1L);
+
+  for(auto& emulator : emulators) {
+    for(auto& medium : emulator->media) {
+      if(medium.type != type) continue;
+      return loadMedium(*emulator, medium);
+    }
+  }
+
+  mediumQueue.reset();
+}
+
 auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interface::Medium& medium) -> void {
   unloadMedium();
 
   mediumPaths.append(locate({medium.name, ".sys/"}));
 
   Emulator::audio.reset(2, audio->get(Audio::Frequency).get<uint>(44100));
-  emulator = &interface;
+  inputManager->bind(emulator = &interface);
   connectDevices();
   if(!emulator->load(medium.id)) {
     emulator = nullptr;

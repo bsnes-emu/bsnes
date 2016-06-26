@@ -19,13 +19,13 @@ struct NES_HKROM : Board {
 
   auto chr_read(uint addr) -> uint8 {
     mmc6.irq_test(addr);
-    if(addr & 0x2000) return ppu.ciram_read(mmc6.ciram_addr(addr));
+    if(addr & 0x2000) return ppu.readCIRAM(mmc6.ciram_addr(addr));
     return Board::chr_read(mmc6.chr_addr(addr));
   }
 
   auto chr_write(uint addr, uint8 data) -> void {
     mmc6.irq_test(addr);
-    if(addr & 0x2000) return ppu.ciram_write(mmc6.ciram_addr(addr), data);
+    if(addr & 0x2000) return ppu.writeCIRAM(mmc6.ciram_addr(addr), data);
     return Board::chr_write(mmc6.chr_addr(addr), data);
   }
 

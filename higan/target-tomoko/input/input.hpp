@@ -5,17 +5,17 @@ struct InputMapping {
   auto rumble(bool enable) -> void;
   auto unbind() -> void;
 
-  auto isDigital() const -> bool { return !link || link->type == 0; }
-  auto isAnalog() const -> bool { return link && link->type == 1; }
-  auto isRumble() const -> bool { return link && link->type == 2; }
+  auto isDigital() const -> bool { return type == 0; }
+  auto isAnalog() const -> bool { return type == 1; }
+  auto isRumble() const -> bool { return type == 2; }
 
   auto assignmentName() -> string;
   auto deviceName() -> string;
 
   string path;  //configuration file key path
   string name;  //input name (human readable)
+  uint type = 0;
   string assignment = "None";
-  Emulator::Interface::Device::Input* link = nullptr;
   shared_pointer<HID::Device> device;
   uint group = 0;
   uint input = 0;
@@ -31,7 +31,7 @@ struct InputHotkey : InputMapping {
 
 struct InputDevice {
   string name;
-  vector<InputMapping*> mappings;  //pointers used so that addresses do not change when arrays are resized
+  vector<InputMapping> mappings;
 };
 
 struct InputPort {
@@ -40,12 +40,14 @@ struct InputPort {
 };
 
 struct InputEmulator {
+  Emulator::Interface* interface = nullptr;
   string name;
   vector<InputPort> ports;
 };
 
 struct InputManager {
   InputManager();
+  auto bind(Emulator::Interface*) -> void;
   auto bind() -> void;
   auto poll() -> void;
   auto onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void;
@@ -60,6 +62,8 @@ struct InputManager {
   vector<shared_pointer<HID::Device>> devices;
   vector<InputEmulator> emulators;
   vector<InputHotkey*> hotkeys;
+
+  InputEmulator* emulator = nullptr;  //points to InputEmulator that represents the currently active emulator
 };
 
 extern unique_pointer<InputManager> inputManager;

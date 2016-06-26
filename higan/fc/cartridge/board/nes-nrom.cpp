@@ -17,7 +17,7 @@ struct NES_NROM : Board {
   auto chr_read(uint addr) -> uint8 {
     if(addr & 0x2000) {
       if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-      return ppu.ciram_read(addr & 0x07ff);
+      return ppu.readCIRAM(addr & 0x07ff);
     }
     if(chrram.size) return chrram.read(addr);
     return chrrom.read(addr);
@@ -26,7 +26,7 @@ struct NES_NROM : Board {
   auto chr_write(uint addr, uint8 data) -> void {
     if(addr & 0x2000) {
       if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
-      return ppu.ciram_write(addr & 0x07ff, data);
+      return ppu.writeCIRAM(addr & 0x07ff, data);
     }
     if(chrram.size) return chrram.write(addr, data);
   }

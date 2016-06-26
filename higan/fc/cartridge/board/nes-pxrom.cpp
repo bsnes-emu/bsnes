@@ -40,7 +40,7 @@ struct NES_PxROM : Board {
   }
 
   auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.ciram_read(ciram_addr(addr));
+    if(addr & 0x2000) return ppu.readCIRAM(ciram_addr(addr));
     bool region = addr & 0x1000;
     uint bank = chr_bank[region][latch[region]];
     if((addr & 0x0ff8) == 0x0fd8) latch[region] = 0;
@@ -49,7 +49,7 @@ struct NES_PxROM : Board {
   }
 
   auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.ciram_write(ciram_addr(addr), data);
+    if(addr & 0x2000) return ppu.writeCIRAM(ciram_addr(addr), data);
     bool region = addr & 0x1000;
     uint bank = chr_bank[region][latch[region]];
     if((addr & 0x0ff8) == 0x0fd8) latch[region] = 0;
