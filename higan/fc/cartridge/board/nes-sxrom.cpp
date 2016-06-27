@@ -7,27 +7,27 @@ struct NES_SxROM : Board {
     return mmc1.main();
   }
 
-  auto ram_addr(uint addr) -> uint {
+  auto addrRAM(uint addr) -> uint {
     uint bank = 0;
-    if(revision == Revision::SOROM) bank = (mmc1.chr_bank[0] & 0x08) >> 3;
-    if(revision == Revision::SUROM) bank = (mmc1.chr_bank[0] & 0x0c) >> 2;
-    if(revision == Revision::SXROM) bank = (mmc1.chr_bank[0] & 0x0c) >> 2;
+    if(revision == Revision::SOROM) bank = (mmc1.chrBank[0] & 0x08) >> 3;
+    if(revision == Revision::SUROM) bank = (mmc1.chrBank[0] & 0x0c) >> 2;
+    if(revision == Revision::SXROM) bank = (mmc1.chrBank[0] & 0x0c) >> 2;
     return (bank << 13) | (addr & 0x1fff);
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if((addr & 0xe000) == 0x6000) {
       if(revision == Revision::SNROM) {
-        if(mmc1.chr_bank[0] & 0x10) return cpu.mdr();
+        if(mmc1.chrBank[0] & 0x10) return cpu.mdr();
       }
-      if(mmc1.ram_disable) return 0x00;
-      return prgram.read(ram_addr(addr));
+      if(mmc1.ramDisable) return 0x00;
+      return prgram.read(addrRAM(addr));
     }
 
     if(addr & 0x8000) {
-      addr = mmc1.prg_addr(addr);
+      addr = mmc1.addrPRG(addr);
       if(revision == Revision::SXROM) {
-        addr |= ((mmc1.chr_bank[0] & 0x10) >> 4) << 18;
+        addr |= ((mmc1.chrBank[0] & 0x10) >> 4) << 18;
       }
       return prgrom.read(addr);
     }
@@ -35,26 +35,26 @@ struct NES_SxROM : Board {
     return cpu.mdr();
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
     if((addr & 0xe000) == 0x6000) {
       if(revision == Revision::SNROM) {
-        if(mmc1.chr_bank[0] & 0x10) return;
+        if(mmc1.chrBank[0] & 0x10) return;
       }
-      if(mmc1.ram_disable) return;
-      return prgram.write(ram_addr(addr), data);
+      if(mmc1.ramDisable) return;
+      return prgram.write(addrRAM(addr), data);
     }
 
-    if(addr & 0x8000) return mmc1.mmio_write(addr, data);
+    if(addr & 0x8000) return mmc1.writeIO(addr, data);
   }
 
-  auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.readCIRAM(mmc1.ciram_addr(addr));
-    return Board::chr_read(mmc1.chr_addr(addr));
+  auto readCHR(uint addr) -> uint8 {
+    if(addr & 0x2000) return ppu.readCIRAM(mmc1.addrCIRAM(addr));
+    return Board::readCHR(mmc1.addrCHR(addr));
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.writeCIRAM(mmc1.ciram_addr(addr), data);
-    return Board::chr_write(mmc1.chr_addr(addr), data);
+  auto writeCHR(uint addr, uint8 data) -> void {
+    if(addr & 0x2000) return ppu.writeCIRAM(mmc1.addrCIRAM(addr), data);
+    return Board::writeCHR(mmc1.addrCHR(addr), data);
   }
 
   auto power() -> void {

@@ -4,31 +4,31 @@ struct KonamiVRC2 : Board {
     settings.pinout.a1 = 1 << document["board/chip/pinout/a1"].natural();
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if(addr < 0x6000) return cpu.mdr();
-    if(addr < 0x8000) return vrc2.ram_read(addr);
-    return prgrom.read(vrc2.prg_addr(addr));
+    if(addr < 0x8000) return vrc2.readRAM(addr);
+    return prgrom.read(vrc2.addrPRG(addr));
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
     if(addr < 0x6000) return;
-    if(addr < 0x8000) return vrc2.ram_write(addr, data);
+    if(addr < 0x8000) return vrc2.writeRAM(addr, data);
 
     bool a0 = (addr & settings.pinout.a0);
     bool a1 = (addr & settings.pinout.a1);
     addr &= 0xfff0;
     addr |= (a0 << 0) | (a1 << 1);
-    return vrc2.reg_write(addr, data);
+    return vrc2.writeIO(addr, data);
   }
 
-  auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.readCIRAM(vrc2.ciram_addr(addr));
-    return Board::chr_read(vrc2.chr_addr(addr));
+  auto readCHR(uint addr) -> uint8 {
+    if(addr & 0x2000) return ppu.readCIRAM(vrc2.addrCIRAM(addr));
+    return Board::readCHR(vrc2.addrCHR(addr));
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.writeCIRAM(vrc2.ciram_addr(addr), data);
-    return Board::chr_write(vrc2.chr_addr(addr), data);
+  auto writeCHR(uint addr, uint8 data) -> void {
+    if(addr & 0x2000) return ppu.writeCIRAM(vrc2.addrCIRAM(addr), data);
+    return Board::writeCHR(vrc2.addrCHR(addr), data);
   }
 
   auto power() -> void {

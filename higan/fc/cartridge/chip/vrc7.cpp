@@ -6,90 +6,90 @@ struct VRC7 : Chip {
   }
 
   auto main() -> void {
-    if(irq_enable) {
-      if(irq_mode == 0) {
-        irq_scalar -= 3;
-        if(irq_scalar <= 0) {
-          irq_scalar += 341;
-          if(irq_counter == 0xff) {
-            irq_counter = irq_latch;
-            irq_line = 1;
+    if(irqEnable) {
+      if(irqMode == 0) {
+        irqScalar -= 3;
+        if(irqScalar <= 0) {
+          irqScalar += 341;
+          if(irqCounter == 0xff) {
+            irqCounter = irqLatch;
+            irqLine = 1;
           } else {
-            irq_counter++;
+            irqCounter++;
           }
         }
       }
 
-      if(irq_mode == 1) {
-        if(irq_counter == 0xff) {
-          irq_counter = irq_latch;
-          irq_line = 1;
+      if(irqMode == 1) {
+        if(irqCounter == 0xff) {
+          irqCounter = irqLatch;
+          irqLine = 1;
         } else {
-          irq_counter++;
+          irqCounter++;
         }
       }
     }
-    cpu.irqLine(irq_line);
+    cpu.irqLine(irqLine);
 
     tick();
   }
 
-  auto reg_write(uint addr, uint8 data) -> void {
+  auto writeIO(uint addr, uint8 data) -> void {
     switch(addr) {
-    case 0x8000: prg_bank[0] = data; break;
-    case 0x8010: prg_bank[1] = data; break;
-    case 0x9000: prg_bank[2] = data; break;
+    case 0x8000: prgBank[0] = data; break;
+    case 0x8010: prgBank[1] = data; break;
+    case 0x9000: prgBank[2] = data; break;
     case 0x9010: break;  //APU addr port
     case 0x9030: break;  //APU data port
-    case 0xa000: chr_bank[0] = data; break;
-    case 0xa010: chr_bank[1] = data; break;
-    case 0xb000: chr_bank[2] = data; break;
-    case 0xb010: chr_bank[3] = data; break;
-    case 0xc000: chr_bank[4] = data; break;
-    case 0xc010: chr_bank[5] = data; break;
-    case 0xd000: chr_bank[6] = data; break;
-    case 0xd010: chr_bank[7] = data; break;
+    case 0xa000: chrBank[0] = data; break;
+    case 0xa010: chrBank[1] = data; break;
+    case 0xb000: chrBank[2] = data; break;
+    case 0xb010: chrBank[3] = data; break;
+    case 0xc000: chrBank[4] = data; break;
+    case 0xc010: chrBank[5] = data; break;
+    case 0xd000: chrBank[6] = data; break;
+    case 0xd010: chrBank[7] = data; break;
     case 0xe000: mirror = data & 0x03; break;
 
     case 0xe010:
-      irq_latch = data;
+      irqLatch = data;
       break;
 
     case 0xf000:
-      irq_mode = data & 0x04;
-      irq_enable = data & 0x02;
-      irq_acknowledge = data & 0x01;
-      if(irq_enable) {
-        irq_counter = irq_latch;
-        irq_scalar = 341;
+      irqMode = data & 0x04;
+      irqEnable = data & 0x02;
+      irqAcknowledge = data & 0x01;
+      if(irqEnable) {
+        irqCounter = irqLatch;
+        irqScalar = 341;
       }
-      irq_line = 0;
+      irqLine = 0;
       break;
 
     case 0xf010:
-      irq_enable = irq_acknowledge;
-      irq_line = 0;
+      irqEnable = irqAcknowledge;
+      irqLine = 0;
       break;
     }
   }
 
-  auto prg_addr(uint addr) const -> uint {
+  auto addrPRG(uint addr) const -> uint {
     uint bank = 0;
     switch(addr & 0xe000) {
-    case 0x8000: bank = prg_bank[0]; break;
-    case 0xa000: bank = prg_bank[1]; break;
-    case 0xc000: bank = prg_bank[2]; break;
+    case 0x8000: bank = prgBank[0]; break;
+    case 0xa000: bank = prgBank[1]; break;
+    case 0xc000: bank = prgBank[2]; break;
     case 0xe000: bank = 0xff; break;
     }
     return (bank * 0x2000) + (addr & 0x1fff);
   }
 
-  auto chr_addr(uint addr) const -> uint {
-    uint bank = chr_bank[addr / 0x0400];
+  auto addrCHR(uint addr) const -> uint {
+    uint bank = chrBank[addr / 0x0400];
     return (bank * 0x0400) + (addr & 0x03ff);
   }
 
-  auto ciram_addr(uint addr) const -> uint {
+  auto addrCIRAM(uint addr) const -> uint {
     switch(mirror) {
     case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
     case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
@@ -102,45 +102,45 @@ struct VRC7 : Chip {
   }
 
   auto reset() -> void {
-    for(auto& n : prg_bank) n = 0;
-    for(auto& n : chr_bank) n = 0;
+    for(auto& n : prgBank) n = 0;
+    for(auto& n : chrBank) n = 0;
     mirror = 0;
 
-    irq_latch = 0;
-    irq_mode = 0;
-    irq_enable = 0;
-    irq_acknowledge = 0;
+    irqLatch = 0;
+    irqMode = 0;
+    irqEnable = 0;
+    irqAcknowledge = 0;
 
-    irq_counter = 0;
-    irq_scalar = 0;
-    irq_line = 0;
+    irqCounter = 0;
+    irqScalar = 0;
+    irqLine = 0;
   }
 
   auto serialize(serializer& s) -> void {
-    s.array(prg_bank);
-    s.array(chr_bank);
+    s.array(prgBank);
+    s.array(chrBank);
     s.integer(mirror);
 
-    s.integer(irq_latch);
-    s.integer(irq_mode);
-    s.integer(irq_enable);
-    s.integer(irq_acknowledge);
+    s.integer(irqLatch);
+    s.integer(irqMode);
+    s.integer(irqEnable);
+    s.integer(irqAcknowledge);
 
-    s.integer(irq_counter);
-    s.integer(irq_scalar);
-    s.integer(irq_line);
+    s.integer(irqCounter);
+    s.integer(irqScalar);
+    s.integer(irqLine);
   }
 
-  uint8 prg_bank[3];
-  uint8 chr_bank[8];
+  uint8 prgBank[3];
+  uint8 chrBank[8];
   uint2 mirror;
 
-  uint8 irq_latch;
-  bool irq_mode;
-  bool irq_enable;
-  bool irq_acknowledge;
+  uint8 irqLatch;
+  bool irqMode;
+  bool irqEnable;
+  bool irqAcknowledge;
 
-  uint8 irq_counter;
-  int irq_scalar;
-  bool irq_line;
+  uint8 irqCounter;
+  int irqScalar;
+  bool irqLine;
 };

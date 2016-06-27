@@ -6,15 +6,15 @@ struct NES_NROM : Board {
     settings.mirror = document["board/mirror/mode"].text() == "vertical" ? 1 : 0;
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if(addr & 0x8000) return prgrom.read(addr);
     return cpu.mdr();
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
   }
 
-  auto chr_read(uint addr) -> uint8 {
+  auto readCHR(uint addr) -> uint8 {
     if(addr & 0x2000) {
       if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
       return ppu.readCIRAM(addr & 0x07ff);
@@ -23,7 +23,7 @@ struct NES_NROM : Board {
     return chrrom.read(addr);
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
+  auto writeCHR(uint addr, uint8 data) -> void {
     if(addr & 0x2000) {
       if(settings.mirror == 0) addr = ((addr & 0x0800) >> 1) | (addr & 0x03ff);
       return ppu.writeCIRAM(addr & 0x07ff, data);

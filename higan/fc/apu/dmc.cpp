@@ -1,68 +1,68 @@
 auto APU::DMC::start() -> void {
-  if(length_counter == 0) {
-    read_addr = 0x4000 + (addr_latch << 6);
-    length_counter = (length_latch << 4) + 1;
+  if(lengthCounter == 0) {
+    readAddr = 0x4000 + (addrLatch << 6);
+    lengthCounter = (lengthLatch << 4) + 1;
   }
 }
 
 auto APU::DMC::stop() -> void {
-  length_counter = 0;
-  dma_delay_counter = 0;
+  lengthCounter = 0;
+  dmaDelayCounter = 0;
   cpu.rdyLine(1);
   cpu.rdyAddr(false);
 }
 
 auto APU::DMC::clock() -> uint8 {
-  uint8 result = dac_latch;
+  uint8 result = dacLatch;
 
-  if(dma_delay_counter > 0) {
-    dma_delay_counter--;
+  if(dmaDelayCounter > 0) {
+    dmaDelayCounter--;
 
-    if(dma_delay_counter == 1) {
-      cpu.rdyAddr(true, 0x8000 | read_addr);
-    } else if(dma_delay_counter == 0) {
+    if(dmaDelayCounter == 1) {
+      cpu.rdyAddr(true, 0x8000 | readAddr);
+    } else if(dmaDelayCounter == 0) {
       cpu.rdyLine(1);
       cpu.rdyAddr(false);
 
-      dma_buffer = cpu.mdr();
-      have_dma_buffer = true;
-      length_counter--;
-      read_addr++;
+      dmaBuffer = cpu.mdr();
+      dmaBufferValid = true;
+      lengthCounter--;
+      readAddr++;
 
-      if(length_counter == 0) {
-        if(loop_mode) {
+      if(lengthCounter == 0) {
+        if(loopMode) {
           start();
-        } else if(irq_enable) {
-          irq_pending = true;
-          apu.set_irq_line();
+        } else if(irqEnable) {
+          irqPending = true;
+          apu.setIRQ();
         }
       }
     }
   }
 
-  if(--period_counter == 0) {
-    if(have_sample) {
-      int delta = (((sample >> bit_counter) & 1) << 2) - 2;
-      uint data = dac_latch + delta;
-      if((data & 0x80) == 0) dac_latch = data;
+  if(--periodCounter == 0) {
+    if(sampleValid) {
+      int delta = (((sample >> bitCounter) & 1) << 2) - 2;
+      uint data = dacLatch + delta;
+      if((data & 0x80) == 0) dacLatch = data;
     }
 
-    if(++bit_counter == 0) {
-      if(have_dma_buffer) {
-        have_sample = true;
-        sample = dma_buffer;
-        have_dma_buffer = false;
+    if(++bitCounter == 0) {
+      if(dmaBufferValid) {
+        sampleValid = true;
+        sample = dmaBuffer;
+        dmaBufferValid = false;
       } else {
-        have_sample = false;
+        sampleValid = false;
       }
     }
 
-    period_counter = ntsc_dmc_period_table[period];
+    periodCounter = dmcPeriodTableNTSC[period];
   }
 
-  if(length_counter > 0 && have_dma_buffer == false && dma_delay_counter == 0) {
+  if(lengthCounter > 0 && !dmaBufferValid && dmaDelayCounter == 0) {
     cpu.rdyLine(0);
-    dma_delay_counter = 4;
+    dmaDelayCounter = 4;
   }
 
   return result;
@@ -72,46 +72,21 @@ auto APU::DMC::power() -> void {
 }
 
 auto APU::DMC::reset() -> void {
-  length_counter = 0;
-  irq_pending = 0;
+  lengthCounter = 0;
+  irqPending = 0;
 
   period = 0;
-  period_counter = ntsc_dmc_period_table[0];
-  irq_enable = 0;
-  loop_mode = 0;
-  dac_latch = 0;
-  addr_latch = 0;
-  length_latch = 0;
-  read_addr = 0;
-  dma_delay_counter = 0;
-  bit_counter = 0;
-  have_dma_buffer = 0;
-  dma_buffer = 0;
-  have_sample = 0;
+  periodCounter = dmcPeriodTableNTSC[0];
+  irqEnable = 0;
+  loopMode = 0;
+  dacLatch = 0;
+  addrLatch = 0;
+  lengthLatch = 0;
+  readAddr = 0;
+  dmaDelayCounter = 0;
+  bitCounter = 0;
+  dmaBufferValid = 0;
+  dmaBuffer = 0;
+  sampleValid = 0;
   sample = 0;
-}
-
-auto APU::DMC::serialize(serializer& s) -> void {
-  s.integer(length_counter);
-  s.integer(irq_pending);
-
-  s.integer(period);
-  s.integer(period_counter);
-
-  s.integer(irq_enable);
-  s.integer(loop_mode);
-
-  s.integer(dac_latch);
-  s.integer(addr_latch);
-  s.integer(length_latch);
-
-  s.integer(read_addr);
-  s.integer(dma_delay_counter);
-
-  s.integer(bit_counter);
-  s.integer(have_dma_buffer);
-  s.integer(dma_buffer);
-
-  s.integer(have_sample);
-  s.integer(sample);
 }

@@ -5,17 +5,17 @@ struct BandaiFCG : Board {
   }
 
   auto main() -> void {
-    if(irq_counter_enable) {
-      if(--irq_counter == 0xffff) {
+    if(irqCounterEnable) {
+      if(--irqCounter == 0xffff) {
         cpu.irqLine(1);
-        irq_counter_enable = false;
+        irqCounterEnable = false;
       }
     }
 
     tick();
   }
 
-  auto ciram_addr(uint addr) const -> uint {
+  auto addrCIRAM(uint addr) const -> uint {
     switch(mirror) {
     case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
     case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
@@ -24,38 +24,38 @@ struct BandaiFCG : Board {
     }
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if(addr & 0x8000) {
       bool region = addr & 0x4000;
-      uint bank = (region == 0 ? prg_bank : (uint8)0x0f);
+      uint bank = (region == 0 ? prgBank : (uint8)0x0f);
       return prgrom.read((bank << 14) | (addr & 0x3fff));
     }
     return cpu.mdr();
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
     if(addr >= 0x6000) {
       switch(addr & 15) {
       case 0x00: case 0x01: case 0x02: case 0x03:
       case 0x04: case 0x05: case 0x06: case 0x07:
-        chr_bank[addr & 7] = data;
+        chrBank[addr & 7] = data;
         break;
       case 0x08:
-        prg_bank = data & 0x0f;
+        prgBank = data & 0x0f;
         break;
       case 0x09:
         mirror = data & 0x03;
         break;
       case 0x0a:
         cpu.irqLine(0);
-        irq_counter_enable = data & 0x01;
-        irq_counter = irq_latch;
+        irqCounterEnable = data & 0x01;
+        irqCounter = irqLatch;
         break;
       case 0x0b:
-        irq_latch = (irq_latch & 0xff00) | (data << 0);
+        irqLatch = (irqLatch & 0xff00) | (data << 0);
         break;
       case 0x0c:
-        irq_latch = (irq_latch & 0x00ff) | (data << 8);
+        irqLatch = (irqLatch & 0x00ff) | (data << 8);
         break;
       case 0x0d:
         //todo: serial EEPROM support
@@ -64,16 +64,16 @@ struct BandaiFCG : Board {
     }
   }
 
-  auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.readCIRAM(ciram_addr(addr));
-    addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
-    return Board::chr_read(addr);
+  auto readCHR(uint addr) -> uint8 {
+    if(addr & 0x2000) return ppu.readCIRAM(addrCIRAM(addr));
+    addr = (chrBank[addr >> 10] << 10) | (addr & 0x03ff);
+    return Board::readCHR(addr);
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.writeCIRAM(ciram_addr(addr), data);
-    addr = (chr_bank[addr >> 10] << 10) | (addr & 0x03ff);
-    return Board::chr_write(addr, data);
+  auto writeCHR(uint addr, uint8 data) -> void {
+    if(addr & 0x2000) return ppu.writeCIRAM(addrCIRAM(addr), data);
+    addr = (chrBank[addr >> 10] << 10) | (addr & 0x03ff);
+    return Board::writeCHR(addr, data);
   }
 
   auto power() -> void {
@@ -81,29 +81,29 @@ struct BandaiFCG : Board {
   }
 
   auto reset() -> void {
-    for(auto &n : chr_bank) n = 0;
-    prg_bank = 0;
+    for(auto& n : chrBank) n = 0;
+    prgBank = 0;
     mirror = 0;
-    irq_counter_enable = 0;
-    irq_counter = 0;
-    irq_latch = 0;
+    irqCounterEnable = 0;
+    irqCounter = 0;
+    irqLatch = 0;
   }
 
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
 
-    s.array(chr_bank);
-    s.integer(prg_bank);
+    s.array(chrBank);
+    s.integer(prgBank);
     s.integer(mirror);
-    s.integer(irq_counter_enable);
-    s.integer(irq_counter);
-    s.integer(irq_latch);
+    s.integer(irqCounterEnable);
+    s.integer(irqCounter);
+    s.integer(irqLatch);
   }
 
-  uint8 chr_bank[8];
-  uint8 prg_bank;
+  uint8 chrBank[8];
+  uint8 prgBank;
   uint2 mirror;
-  bool irq_counter_enable;
-  uint16 irq_counter;
-  uint16 irq_latch;
+  bool irqCounterEnable;
+  uint16 irqCounter;
+  uint16 irqLatch;
 };

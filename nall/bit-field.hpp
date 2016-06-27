@@ -113,6 +113,8 @@ template<typename type, uint Bit> struct BitField<type, Bit, ~0U> {
   inline auto& operator|=(const bool value) { return set(get() | value); }
   inline auto& operator^=(const bool value) { return set(get() ^ value); }
 
+  inline auto& invert() { return set(get() ^ 1); }
+
 private:
   type data;
 

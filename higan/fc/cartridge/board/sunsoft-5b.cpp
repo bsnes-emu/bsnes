@@ -44,9 +44,9 @@ struct Sunsoft5B : Board {
   } pulse[3];
 
   auto main() -> void {
-    if(irq_counter_enable) {
-      if(--irq_counter == 0xffff) {
-        cpu.irqLine(irq_enable);
+    if(irqCounterEnable) {
+      if(--irqCounter == 0xffff) {
+        cpu.irqLine(irqEnable);
       }
     }
 
@@ -54,26 +54,26 @@ struct Sunsoft5B : Board {
     pulse[1].clock();
     pulse[2].clock();
     int16 output = dac[pulse[0].output] + dac[pulse[1].output] + dac[pulse[2].output];
-    apu.set_sample(-output);
+    apu.setSample(-output);
 
     tick();
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if(addr < 0x6000) return cpu.mdr();
 
     uint8 bank = 0x3f;  //((addr & 0xe000) == 0xe000
-    if((addr & 0xe000) == 0x6000) bank = prg_bank[0];
-    if((addr & 0xe000) == 0x8000) bank = prg_bank[1];
-    if((addr & 0xe000) == 0xa000) bank = prg_bank[2];
-    if((addr & 0xe000) == 0xc000) bank = prg_bank[3];
+    if((addr & 0xe000) == 0x6000) bank = prgBank[0];
+    if((addr & 0xe000) == 0x8000) bank = prgBank[1];
+    if((addr & 0xe000) == 0xa000) bank = prgBank[2];
+    if((addr & 0xe000) == 0xc000) bank = prgBank[3];
 
-    bool ram_enable = bank & 0x80;
-    bool ram_select = bank & 0x40;
+    bool ramEnable = bank & 0x80;
+    bool ramSelect = bank & 0x40;
     bank &= 0x3f;
 
-    if(ram_select) {
-      if(ram_enable == false) return cpu.mdr();
+    if(ramSelect) {
+      if(!ramEnable) return cpu.mdr();
       return prgram.data[addr & 0x1fff];
     }
 
@@ -81,46 +81,46 @@ struct Sunsoft5B : Board {
     return prgrom.read(addr);
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
     if((addr & 0xe000) == 0x6000) {
       prgram.data[addr & 0x1fff] = data;
     }
 
     if(addr == 0x8000) {
-      mmu_port = data & 0x0f;
+      mmuPort = data & 0x0f;
     }
 
     if(addr == 0xa000) {
-      switch(mmu_port) {
-      case  0: chr_bank[0] = data; break;
-      case  1: chr_bank[1] = data; break;
-      case  2: chr_bank[2] = data; break;
-      case  3: chr_bank[3] = data; break;
-      case  4: chr_bank[4] = data; break;
-      case  5: chr_bank[5] = data; break;
-      case  6: chr_bank[6] = data; break;
-      case  7: chr_bank[7] = data; break;
-      case  8: prg_bank[0] = data; break;
-      case  9: prg_bank[1] = data; break;
-      case 10: prg_bank[2] = data; break;
-      case 11: prg_bank[3] = data; break;
+      switch(mmuPort) {
+      case  0: chrBank[0] = data; break;
+      case  1: chrBank[1] = data; break;
+      case  2: chrBank[2] = data; break;
+      case  3: chrBank[3] = data; break;
+      case  4: chrBank[4] = data; break;
+      case  5: chrBank[5] = data; break;
+      case  6: chrBank[6] = data; break;
+      case  7: chrBank[7] = data; break;
+      case  8: prgBank[0] = data; break;
+      case  9: prgBank[1] = data; break;
+      case 10: prgBank[2] = data; break;
+      case 11: prgBank[3] = data; break;
       case 12: mirror = data & 3; break;
       case 13:
-        irq_enable = data & 0x80;
-        irq_counter_enable = data & 0x01;
-        if(irq_enable == 0) cpu.irqLine(0);
+        irqEnable = data & 0x80;
+        irqCounterEnable = data & 0x01;
+        if(irqEnable == 0) cpu.irqLine(0);
         break;
-      case 14: irq_counter = (irq_counter & 0xff00) | (data << 0); break;
-      case 15: irq_counter = (irq_counter & 0x00ff) | (data << 8); break;
+      case 14: irqCounter = (irqCounter & 0xff00) | (data << 0); break;
+      case 15: irqCounter = (irqCounter & 0x00ff) | (data << 8); break;
       }
     }
 
     if(addr == 0xc000) {
-      apu_port = data & 0x0f;
+      apuPort = data & 0x0f;
     }
 
     if(addr == 0xe000) {
-      switch(apu_port) {
+      switch(apuPort) {
       case  0: pulse[0].frequency = (pulse[0].frequency & 0xff00) | (data << 0); break;
       case  1: pulse[0].frequency = (pulse[0].frequency & 0x00ff) | (data << 8); break;
       case  2: pulse[1].frequency = (pulse[1].frequency & 0xff00) | (data << 0); break;
@@ -139,12 +139,12 @@ struct Sunsoft5B : Board {
     }
   }
 
-  auto chr_addr(uint addr) -> uint {
+  auto addrCHR(uint addr) -> uint {
     uint8 bank = (addr >> 10) & 7;
-    return (chr_bank[bank] << 10) | (addr & 0x03ff);
+    return (chrBank[bank] << 10) | (addr & 0x03ff);
   }
 
-  auto ciram_addr(uint addr) -> uint {
+  auto addrCIRAM(uint addr) -> uint {
     switch(mirror) {
     case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical
     case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal
@@ -153,14 +153,14 @@ struct Sunsoft5B : Board {
     }
   }
 
-  auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.readCIRAM(ciram_addr(addr));
-    return Board::chr_read(chr_addr(addr));
+  auto readCHR(uint addr) -> uint8 {
+    if(addr & 0x2000) return ppu.readCIRAM(addrCIRAM(addr));
+    return Board::readCHR(addrCHR(addr));
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.writeCIRAM(ciram_addr(addr), data);
-    return Board::chr_write(chr_addr(addr), data);
+  auto writeCHR(uint addr, uint8 data) -> void {
+    if(addr & 0x2000) return ppu.writeCIRAM(addrCIRAM(addr), data);
+    return Board::writeCHR(addrCHR(addr), data);
   }
 
   auto power() -> void {
@@ -171,15 +171,15 @@ struct Sunsoft5B : Board {
   }
 
   auto reset() -> void {
-    mmu_port = 0;
-    apu_port = 0;
+    mmuPort = 0;
+    apuPort = 0;
 
-    for(auto& n : prg_bank) n = 0;
-    for(auto& n : chr_bank) n = 0;
+    for(auto& n : prgBank) n = 0;
+    for(auto& n : chrBank) n = 0;
     mirror = 0;
-    irq_enable = 0;
-    irq_counter_enable = 0;
-    irq_counter = 0;
+    irqEnable = 0;
+    irqCounterEnable = 0;
+    irqCounter = 0;
 
     pulse[0].reset();
     pulse[1].reset();
@@ -189,30 +189,30 @@ struct Sunsoft5B : Board {
   auto serialize(serializer& s) -> void {
     Board::serialize(s);
 
-    s.integer(mmu_port);
-    s.integer(apu_port);
+    s.integer(mmuPort);
+    s.integer(apuPort);
 
-    s.array(prg_bank);
-    s.array(chr_bank);
+    s.array(prgBank);
+    s.array(chrBank);
     s.integer(mirror);
-    s.integer(irq_enable);
-    s.integer(irq_counter_enable);
-    s.integer(irq_counter);
+    s.integer(irqEnable);
+    s.integer(irqCounterEnable);
+    s.integer(irqCounter);
 
     pulse[0].serialize(s);
     pulse[1].serialize(s);
     pulse[2].serialize(s);
   }
 
-  uint4 mmu_port;
-  uint4 apu_port;
+  uint4 mmuPort;
+  uint4 apuPort;
 
-  uint8 prg_bank[4];
-  uint8 chr_bank[8];
+  uint8 prgBank[4];
+  uint8 chrBank[8];
   uint2 mirror;
-  bool irq_enable;
-  bool irq_counter_enable;
-  uint16 irq_counter;
+  bool irqEnable;
+  bool irqCounterEnable;
+  uint16 irqCounter;
 
   int16 dac[16];
 };

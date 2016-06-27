@@ -30,7 +30,6 @@ struct maybe {
     if(this == &source) return *this;
     reset();
     if(_valid = source._valid) new(&_value.t) T(move(source.get()));
-    source._valid = false;
     return *this;
   }
 

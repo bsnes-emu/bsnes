@@ -15,21 +15,23 @@ auto PPU::main() -> void {
   renderScanline();
 }
 
-auto PPU::tick() -> void {
-  if(r.ly == 240 && r.lx == 340) r.nmiHold = 1;
-  if(r.ly == 241 && r.lx ==   0) r.nmiFlag = r.nmiHold;
-  if(r.ly == 241 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
+auto PPU::step(uint clocks) -> void {
+  while(clocks--) {
+    if(r.ly == 240 && r.lx == 340) r.nmiHold = 1;
+    if(r.ly == 241 && r.lx ==   0) r.nmiFlag = r.nmiHold;
+    if(r.ly == 241 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
 
-  if(r.ly == 260 && r.lx == 340) r.spriteZeroHit = 0, r.spriteOverflow = 0;
+    if(r.ly == 260 && r.lx == 340) r.spriteZeroHit = 0, r.spriteOverflow = 0;
 
-  if(r.ly == 260 && r.lx == 340) r.nmiHold = 0;
-  if(r.ly == 261 && r.lx ==   0) r.nmiFlag = r.nmiHold;
-  if(r.ly == 261 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
+    if(r.ly == 260 && r.lx == 340) r.nmiHold = 0;
+    if(r.ly == 261 && r.lx ==   0) r.nmiFlag = r.nmiHold;
+    if(r.ly == 261 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
 
-  clock += 4;
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+    clock += 4;
+    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 
-  r.lx++;
+    r.lx++;
+  }
 }
 
 auto PPU::scanline() -> void {

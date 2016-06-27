@@ -3,90 +3,90 @@ struct MMC3 : Chip {
   }
 
   auto main() -> void {
-    if(irq_delay) irq_delay--;
-    cpu.irqLine(irq_line);
+    if(irqDelay) irqDelay--;
+    cpu.irqLine(irqLine);
     tick();
   }
 
-  auto irq_test(uint addr) -> void {
-    if(!(chr_abus & 0x1000) && (addr & 0x1000)) {
-      if(irq_delay == 0) {
-        if(irq_counter == 0) {
-          irq_counter = irq_latch;
-        } else if(--irq_counter == 0) {
-          if(irq_enable) irq_line = 1;
+  auto irqTest(uint addr) -> void {
+    if(!(chrAbus & 0x1000) && (addr & 0x1000)) {
+      if(irqDelay == 0) {
+        if(irqCounter == 0) {
+          irqCounter = irqLatch;
+        } else if(--irqCounter == 0) {
+          if(irqEnable) irqLine = 1;
         }
       }
-      irq_delay = 6;
+      irqDelay = 6;
     }
-    chr_abus = addr;
+    chrAbus = addr;
   }
 
-  auto prg_addr(uint addr) const -> uint {
+  auto addrPRG(uint addr) const -> uint {
     switch((addr >> 13) & 3) {
     case 0:
-      if(prg_mode == 1) return (0x3e << 13) | (addr & 0x1fff);
-      return (prg_bank[0] << 13) | (addr & 0x1fff);
+      if(prgMode == 1) return (0x3e << 13) | (addr & 0x1fff);
+      return (prgBank[0] << 13) | (addr & 0x1fff);
     case 1:
-      return (prg_bank[1] << 13) | (addr & 0x1fff);
+      return (prgBank[1] << 13) | (addr & 0x1fff);
     case 2:
-      if(prg_mode == 0) return (0x3e << 13) | (addr & 0x1fff);
-      return (prg_bank[0] << 13) | (addr & 0x1fff);
+      if(prgMode == 0) return (0x3e << 13) | (addr & 0x1fff);
+      return (prgBank[0] << 13) | (addr & 0x1fff);
     case 3:
       return (0x3f << 13) | (addr & 0x1fff);
     }
   }
 
-  auto chr_addr(uint addr) const -> uint {
-    if(chr_mode == 0) {
-      if(addr <= 0x07ff) return (chr_bank[0] << 10) | (addr & 0x07ff);
-      if(addr <= 0x0fff) return (chr_bank[1] << 10) | (addr & 0x07ff);
-      if(addr <= 0x13ff) return (chr_bank[2] << 10) | (addr & 0x03ff);
-      if(addr <= 0x17ff) return (chr_bank[3] << 10) | (addr & 0x03ff);
-      if(addr <= 0x1bff) return (chr_bank[4] << 10) | (addr & 0x03ff);
-      if(addr <= 0x1fff) return (chr_bank[5] << 10) | (addr & 0x03ff);
+  auto addrCHR(uint addr) const -> uint {
+    if(chrMode == 0) {
+      if(addr <= 0x07ff) return (chrBank[0] << 10) | (addr & 0x07ff);
+      if(addr <= 0x0fff) return (chrBank[1] << 10) | (addr & 0x07ff);
+      if(addr <= 0x13ff) return (chrBank[2] << 10) | (addr & 0x03ff);
+      if(addr <= 0x17ff) return (chrBank[3] << 10) | (addr & 0x03ff);
+      if(addr <= 0x1bff) return (chrBank[4] << 10) | (addr & 0x03ff);
+      if(addr <= 0x1fff) return (chrBank[5] << 10) | (addr & 0x03ff);
     } else {
-      if(addr <= 0x03ff) return (chr_bank[2] << 10) | (addr & 0x03ff);
-      if(addr <= 0x07ff) return (chr_bank[3] << 10) | (addr & 0x03ff);
-      if(addr <= 0x0bff) return (chr_bank[4] << 10) | (addr & 0x03ff);
-      if(addr <= 0x0fff) return (chr_bank[5] << 10) | (addr & 0x03ff);
-      if(addr <= 0x17ff) return (chr_bank[0] << 10) | (addr & 0x07ff);
-      if(addr <= 0x1fff) return (chr_bank[1] << 10) | (addr & 0x07ff);
+      if(addr <= 0x03ff) return (chrBank[2] << 10) | (addr & 0x03ff);
+      if(addr <= 0x07ff) return (chrBank[3] << 10) | (addr & 0x03ff);
+      if(addr <= 0x0bff) return (chrBank[4] << 10) | (addr & 0x03ff);
+      if(addr <= 0x0fff) return (chrBank[5] << 10) | (addr & 0x03ff);
+      if(addr <= 0x17ff) return (chrBank[0] << 10) | (addr & 0x07ff);
+      if(addr <= 0x1fff) return (chrBank[1] << 10) | (addr & 0x07ff);
     }
   }
 
-  auto ciram_addr(uint addr) const -> uint {
+  auto addrCIRAM(uint addr) const -> uint {
     if(mirror == 0) return ((addr & 0x0400) >> 0) | (addr & 0x03ff);
     if(mirror == 1) return ((addr & 0x0800) >> 1) | (addr & 0x03ff);
   }
 
-  auto ram_read(uint addr) -> uint8 {
-    if(ram_enable) return board.prgram.data[addr & 0x1fff];
+  auto readRAM(uint addr) -> uint8 {
+    if(ramEnable) return board.prgram.data[addr & 0x1fff];
     return 0x00;
   }
 
-  auto ram_write(uint addr, uint8 data) -> void {
-    if(ram_enable && !ram_write_protect) board.prgram.data[addr & 0x1fff] = data;
+  auto writeRAM(uint addr, uint8 data) -> void {
+    if(ramEnable && !ramWriteProtect) board.prgram.data[addr & 0x1fff] = data;
   }
 
-  auto reg_write(uint addr, uint8 data) -> void {
+  auto writeIO(uint addr, uint8 data) -> void {
     switch(addr & 0xe001) {
     case 0x8000:
-      chr_mode = data & 0x80;
-      prg_mode = data & 0x40;
-      bank_select = data & 0x07;
+      chrMode = data & 0x80;
+      prgMode = data & 0x40;
+      bankSelect = data & 0x07;
       break;
 
     case 0x8001:
-      switch(bank_select) {
-      case 0: chr_bank[0] = data & ~1; break;
-      case 1: chr_bank[1] = data & ~1; break;
-      case 2: chr_bank[2] = data; break;
-      case 3: chr_bank[3] = data; break;
-      case 4: chr_bank[4] = data; break;
-      case 5: chr_bank[5] = data; break;
-      case 6: prg_bank[0] = data & 0x3f; break;
-      case 7: prg_bank[1] = data & 0x3f; break;
+      switch(bankSelect) {
+      case 0: chrBank[0] = data & ~1; break;
+      case 1: chrBank[1] = data & ~1; break;
+      case 2: chrBank[2] = data; break;
+      case 3: chrBank[3] = data; break;
+      case 4: chrBank[4] = data; break;
+      case 5: chrBank[5] = data; break;
+      case 6: prgBank[0] = data & 0x3f; break;
+      case 7: prgBank[1] = data & 0x3f; break;
       }
       break;
 
@@ -95,25 +95,25 @@ struct MMC3 : Chip {
       break;
 
     case 0xa001:
-      ram_enable = data & 0x80;
-      ram_write_protect = data & 0x40;
+      ramEnable = data & 0x80;
+      ramWriteProtect = data & 0x40;
       break;
 
     case 0xc000:
-      irq_latch = data;
+      irqLatch = data;
       break;
 
     case 0xc001:
-      irq_counter = 0;
+      irqCounter = 0;
       break;
 
     case 0xe000:
-      irq_enable = false;
-      irq_line = 0;
+      irqEnable = false;
+      irqLine = 0;
       break;
 
     case 0xe001:
-      irq_enable = true;
+      irqEnable = true;
       break;
     }
   }
@@ -122,60 +122,60 @@ struct MMC3 : Chip {
   }
 
   auto reset() -> void {
-    chr_mode = 0;
-    prg_mode = 0;
-    bank_select = 0;
-    prg_bank[0] = 0;
-    prg_bank[1] = 0;
-    chr_bank[0] = 0;
-    chr_bank[1] = 0;
-    chr_bank[2] = 0;
-    chr_bank[3] = 0;
-    chr_bank[4] = 0;
-    chr_bank[5] = 0;
+    chrMode = 0;
+    prgMode = 0;
+    bankSelect = 0;
+    prgBank[0] = 0;
+    prgBank[1] = 0;
+    chrBank[0] = 0;
+    chrBank[1] = 0;
+    chrBank[2] = 0;
+    chrBank[3] = 0;
+    chrBank[4] = 0;
+    chrBank[5] = 0;
     mirror = 0;
-    ram_enable = 1;
-    ram_write_protect = 0;
-    irq_latch = 0;
-    irq_counter = 0;
-    irq_enable = false;
-    irq_delay = 0;
-    irq_line = 0;
+    ramEnable = 1;
+    ramWriteProtect = 0;
+    irqLatch = 0;
+    irqCounter = 0;
+    irqEnable = false;
+    irqDelay = 0;
+    irqLine = 0;
 
-    chr_abus = 0;
+    chrAbus = 0;
   }
 
   auto serialize(serializer& s) -> void {
-    s.integer(chr_mode);
-    s.integer(prg_mode);
-    s.integer(bank_select);
-    s.array(prg_bank);
-    s.array(chr_bank);
+    s.integer(chrMode);
+    s.integer(prgMode);
+    s.integer(bankSelect);
+    s.array(prgBank);
+    s.array(chrBank);
     s.integer(mirror);
-    s.integer(ram_enable);
-    s.integer(ram_write_protect);
-    s.integer(irq_latch);
-    s.integer(irq_counter);
-    s.integer(irq_enable);
-    s.integer(irq_delay);
-    s.integer(irq_line);
+    s.integer(ramEnable);
+    s.integer(ramWriteProtect);
+    s.integer(irqLatch);
+    s.integer(irqCounter);
+    s.integer(irqEnable);
+    s.integer(irqDelay);
+    s.integer(irqLine);
 
-    s.integer(chr_abus);
+    s.integer(chrAbus);
   }
 
-  bool chr_mode;
-  bool prg_mode;
-  uint3 bank_select;
-  uint8 prg_bank[2];
-  uint8 chr_bank[6];
+  bool chrMode;
+  bool prgMode;
+  uint3 bankSelect;
+  uint8 prgBank[2];
+  uint8 chrBank[6];
   bool mirror;
-  bool ram_enable;
-  bool ram_write_protect;
-  uint8 irq_latch;
-  uint8 irq_counter;
-  bool irq_enable;
-  uint irq_delay;
-  bool irq_line;
+  bool ramEnable;
+  bool ramWriteProtect;
+  uint8 irqLatch;
+  uint8 irqCounter;
+  bool irqEnable;
+  uint irqDelay;
+  bool irqLine;
 
-  uint16 chr_abus;
+  uint16 chrAbus;
 };

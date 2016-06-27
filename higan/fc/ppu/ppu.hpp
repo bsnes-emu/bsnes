@@ -1,7 +1,7 @@
 struct PPU : Thread {
   static auto Enter() -> void;
   auto main() -> void;
-  auto tick() -> void;
+  auto step(uint clocks) -> void;
 
   auto scanline() -> void;
   auto frame() -> void;
@@ -22,14 +22,7 @@ struct PPU : Thread {
 
   //render.cpp
   auto enable() const -> bool;
-  auto nametableAddress() const -> uint;
-  auto scrollX() const -> uint;
-  auto scrollY() const -> uint;
-
   auto loadCHR(uint16 addr) -> uint8;
-
-  auto scrollX_increment() -> void;
-  auto scrollY_increment() -> void;
 
   auto renderPixel() -> void;
   auto renderSprite() -> void;
@@ -48,34 +41,43 @@ struct PPU : Thread {
 
     uint8 busData;
 
-    bool addressLatch;
-
-    uint15 vaddr;
-    uint15 taddr;
-    uint8 xaddr;
+    union {
+      uint value;
+      BitField<uint, 0, 4> tileX;
+      BitField<uint, 5, 9> tileY;
+      BitField<uint,10,11> nametable;
+      BitField<uint,   10> nametableX;
+      BitField<uint,   11> nametableY;
+      BitField<uint,12,14> fineY;
+      BitField<uint, 0,14> address;
+      BitField<uint, 0, 7> addressLo;
+      BitField<uint, 8,14> addressHi;
+      BitField<uint,   15> latch;
+      BitField<uint,16,18> fineX;
+    } v, t;
 
     bool nmiHold;
     bool nmiFlag;
 
     //$2000
-    bool nmiEnable;
-    bool masterSelect;
-    uint spriteHeight;
-    uint bgAddress;
-    uint spriteAddress;
     uint vramIncrement;
+    uint spriteAddress;
+    uint bgAddress;
+    uint spriteHeight;
+    bool masterSelect;
+    bool nmiEnable;
 
     //$2001
-    uint3 emphasis;
-    bool spriteEnable;
-    bool bgEnable;
-    bool spriteEdgeEnable;
-    bool bgEdgeEnable;
     bool grayscale;
+    bool bgEdgeEnable;
+    bool spriteEdgeEnable;
+    bool bgEnable;
+    bool spriteEnable;
+    uint3 emphasis;
 
     //$2002
-    bool spriteZeroHit;
     bool spriteOverflow;
+    bool spriteZeroHit;
 
     //$2003
     uint8 oamAddress;

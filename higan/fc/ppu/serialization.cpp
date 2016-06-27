@@ -9,31 +9,28 @@ auto PPU::serialize(serializer& s) -> void {
 
   s.integer(r.busData);
 
-  s.integer(r.addressLatch);
-
-  s.integer(r.vaddr);
-  s.integer(r.taddr);
-  s.integer(r.xaddr);
+  s.integer(r.v.value);
+  s.integer(r.t.value);
 
   s.integer(r.nmiHold);
   s.integer(r.nmiFlag);
 
-  s.integer(r.nmiEnable);
-  s.integer(r.masterSelect);
-  s.integer(r.spriteHeight);
-  s.integer(r.bgAddress);
-  s.integer(r.spriteAddress);
   s.integer(r.vramIncrement);
+  s.integer(r.spriteAddress);
+  s.integer(r.bgAddress);
+  s.integer(r.spriteHeight);
+  s.integer(r.masterSelect);
+  s.integer(r.nmiEnable);
 
-  s.integer(r.emphasis);
-  s.integer(r.spriteEnable);
-  s.integer(r.bgEnable);
-  s.integer(r.spriteEdgeEnable);
-  s.integer(r.bgEdgeEnable);
   s.integer(r.grayscale);
+  s.integer(r.bgEdgeEnable);
+  s.integer(r.spriteEdgeEnable);
+  s.integer(r.bgEnable);
+  s.integer(r.spriteEnable);
+  s.integer(r.emphasis);
 
-  s.integer(r.spriteZeroHit);
   s.integer(r.spriteOverflow);
+  s.integer(r.spriteZeroHit);
 
   s.integer(r.oamAddress);
 

@@ -6,26 +6,26 @@ struct KonamiVRC7 : Board {
     return vrc7.main();
   }
 
-  auto prg_read(uint addr) -> uint8 {
+  auto readPRG(uint addr) -> uint8 {
     if(addr < 0x6000) return cpu.mdr();
     if(addr < 0x8000) return prgram.read(addr);
-    return prgrom.read(vrc7.prg_addr(addr));
+    return prgrom.read(vrc7.addrPRG(addr));
   }
 
-  auto prg_write(uint addr, uint8 data) -> void {
+  auto writePRG(uint addr, uint8 data) -> void {
     if(addr < 0x6000) return;
     if(addr < 0x8000) return prgram.write(addr, data);
-    return vrc7.reg_write(addr, data);
+    return vrc7.writeIO(addr, data);
   }
 
-  auto chr_read(uint addr) -> uint8 {
-    if(addr & 0x2000) return ppu.readCIRAM(vrc7.ciram_addr(addr));
-    return chrram.read(vrc7.chr_addr(addr));
+  auto readCHR(uint addr) -> uint8 {
+    if(addr & 0x2000) return ppu.readCIRAM(vrc7.addrCIRAM(addr));
+    return chrram.read(vrc7.addrCHR(addr));
   }
 
   auto chr_write(uint addr, uint8 data) -> void {
-    if(addr & 0x2000) return ppu.writeCIRAM(vrc7.ciram_addr(addr), data);
-    return chrram.write(vrc7.chr_addr(addr), data);
+    if(addr & 0x2000) return ppu.writeCIRAM(vrc7.addrCIRAM(addr), data);
+    return chrram.write(vrc7.addrCHR(addr), data);
   }
 
   auto power() -> void {

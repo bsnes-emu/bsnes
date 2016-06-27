@@ -1,66 +1,22 @@
-//vaddr = 0yyy VHYY  YYYX XXXX
-//yyy = fine Yscroll (y:d0-d2)
-//V = V nametable (y:d8)
-//H = H nametable (x:d8)
-//YYYYY = Y nametable (y:d3-d7)
-//XXXXX = X nametable (x:d3-d7)
-
 auto PPU::enable() const -> bool {
   return r.bgEnable || r.spriteEnable;
 }
 
-auto PPU::nametableAddress() const -> uint {
-  return 0x2000 + (r.vaddr & 0x0c00);
-}
-
-auto PPU::scrollX() const -> uint {
-  return ((r.vaddr & 0x1f) << 3) | r.xaddr;
-}
-
-auto PPU::scrollY() const -> uint {
-  return (((r.vaddr >> 5) & 0x1f) << 3) | ((r.vaddr >> 12) & 7);
-}
-
-//
-
 auto PPU::loadCHR(uint16 addr) -> uint8 {
-  if(!enable()) return 0x00;
-  return cartridge.readCHR(addr);
+  return enable() ? cartridge.readCHR(addr) : (uint8)0x00;
 }
-
-//
-
-auto PPU::scrollX_increment() -> void {
-  if(!enable()) return;
-  r.vaddr = (r.vaddr & 0x7fe0) | ((r.vaddr + 0x0001) & 0x001f);
-  if((r.vaddr & 0x001f) == 0x0000) {
-    r.vaddr ^= 0x0400;
-  }
-}
-
-auto PPU::scrollY_increment() -> void {
-  if(!enable()) return;
-  r.vaddr = (r.vaddr & 0x0fff) | ((r.vaddr + 0x1000) & 0x7000);
-  if((r.vaddr & 0x7000) == 0x0000) {
-    r.vaddr = (r.vaddr & 0x7c1f) | ((r.vaddr + 0x0020) & 0x03e0);
-    if((r.vaddr & 0x03e0) == 0x03c0) {  //0x03c0 == 30 << 5; 30 * 8 = 240
-      r.vaddr &= 0x7c1f;
-      r.vaddr ^= 0x0800;
-    }
-  }
-}
-
-//
 
 auto PPU::renderPixel() -> void {
   uint32* output = buffer + r.ly * 256;
 
-  uint mask = 0x8000 >> (r.xaddr + (r.lx & 7));
+  uint x = r.lx - 1;
+  uint mask = 0x8000 >> (r.v.fineX + (x & 7));
   uint palette = 0;
   uint objectPalette = 0;
   bool objectPriority = 0;
-  palette |= (l.tiledataLo & mask) ? 1 : 0;
-  palette |= (l.tiledataHi & mask) ? 2 : 0;
+
+  palette |= l.tiledataLo & mask ? 1 : 0;
+  palette |= l.tiledataHi & mask ? 2 : 0;
   if(palette) {
     uint attr = l.attribute;
     if(mask >= 256) attr >>= 2;
@@ -68,24 +24,24 @@ auto PPU::renderPixel() -> void {
   }
 
   if(!r.bgEnable) palette = 0;
-  if(!r.bgEdgeEnable && r.lx < 8) palette = 0;
+  if(!r.bgEdgeEnable && x < 8) palette = 0;
 
   if(r.spriteEnable)
   for(int sprite = 7; sprite >= 0; sprite--) {
-    if(!r.spriteEdgeEnable && r.lx < 8) continue;
+    if(!r.spriteEdgeEnable && x < 8) continue;
     if(l.oam[sprite].id == 64) continue;
 
-    uint spriteX = r.lx - l.oam[sprite].x;
+    uint spriteX = x - l.oam[sprite].x;
     if(spriteX >= 8) continue;
 
     if(l.oam[sprite].attr & 0x40) spriteX ^= 7;
     uint mask = 0x80 >> spriteX;
     uint spritePalette = 0;
-    spritePalette |= (l.oam[sprite].tiledataLo & mask) ? 1 : 0;
-    spritePalette |= (l.oam[sprite].tiledataHi & mask) ? 2 : 0;
+    spritePalette |= l.oam[sprite].tiledataLo & mask ? 1 : 0;
+    spritePalette |= l.oam[sprite].tiledataHi & mask ? 2 : 0;
     if(spritePalette == 0) continue;
 
-    if(l.oam[sprite].id == 0 && palette && r.lx != 255) r.spriteZeroHit = 1;
+    if(l.oam[sprite].id == 0 && palette && x != 255) r.spriteZeroHit = 1;
     spritePalette |= (l.oam[sprite].attr & 3) << 2;
 
     objectPriority = l.oam[sprite].attr & 0x20;
@@ -97,15 +53,15 @@ auto PPU::renderPixel() -> void {
   }
 
   if(!enable()) palette = 0;
-  output[r.lx] = r.emphasis << 6 | readCGRAM(palette);
+  output[x] = r.emphasis << 6 | readCGRAM(palette);
 }
 
 auto PPU::renderSprite() -> void {
   if(!enable()) return;
 
   uint n = l.oamIterator++;
-  int ly = (r.ly == 261 ? -1 : r.ly);
-  uint y = ly - oam[(n * 4) + 0];
+  int ly = r.ly == 261 ? -1 : r.ly;
+  uint y = ly - oam[n * 4 + 0];
 
   if(y >= r.spriteHeight) return;
   if(l.oamCounter == 8) {
@@ -115,58 +71,60 @@ auto PPU::renderSprite() -> void {
 
   auto& o = l.soam[l.oamCounter++];
   o.id   = n;
-  o.y    = oam[(n * 4) + 0];
-  o.tile = oam[(n * 4) + 1];
-  o.attr = oam[(n * 4) + 2];
-  o.x    = oam[(n * 4) + 3];
+  o.y    = oam[n * 4 + 0];
+  o.tile = oam[n * 4 + 1];
+  o.attr = oam[n * 4 + 2];
+  o.x    = oam[n * 4 + 3];
 }
 
 auto PPU::renderScanline() -> void {
-  if(r.ly >= 240 && r.ly <= 260) {
-    for(auto x : range(341)) tick();
-    return scanline();
-  }
+  //Vblank
+  if(r.ly >= 240 && r.ly <= 260) return step(341), scanline();
 
   l.oamIterator = 0;
   l.oamCounter = 0;
 
   for(auto n : range(8)) l.soam[n] = {};
 
-  for(uint tile : range(32)) {  //  0-255
-    uint nametable = loadCHR(0x2000 | (r.vaddr & 0x0fff));
-    uint tileaddr = r.bgAddress + (nametable << 4) + (scrollY() & 7);
+  //  0
+  step(1);
+
+  //  1-256
+  for(uint tile : range(32)) {
+    uint nametable = loadCHR(0x2000 | (uint12)r.v.address);
+    uint tileaddr = r.bgAddress | nametable << 4 | r.v.fineY;
     renderPixel();
-    tick();
+    step(1);
 
     renderPixel();
-    tick();
+    step(1);
 
-    uint attribute = loadCHR(0x23c0 | (r.vaddr & 0x0fc0) | ((scrollY() >> 5) << 3) | (scrollX() >> 5));
-    if(scrollY() & 16) attribute >>= 4;
-    if(scrollX() & 16) attribute >>= 2;
+    uint attribute = loadCHR(0x23c0 | r.v.nametable << 10 | (r.v.tileY >> 2) << 3 | r.v.tileX >> 2);
+    if(r.v.tileY & 2) attribute >>= 4;
+    if(r.v.tileX & 2) attribute >>= 2;
     renderPixel();
-    tick();
+    step(1);
 
-    scrollX_increment();
-    if(tile == 31) scrollY_increment();
+    if(enable() && ++r.v.tileX == 0) r.v.nametableX ^= 1;
+    if(enable() && tile == 31 && ++r.v.fineY == 0 && ++r.v.tileY == 30) r.v.nametableY ^= 1, r.v.tileY = 0;
     renderPixel();
     renderSprite();
-    tick();
+    step(1);
 
     uint tiledataLo = loadCHR(tileaddr + 0);
     renderPixel();
-    tick();
+    step(1);
 
     renderPixel();
-    tick();
+    step(1);
 
     uint tiledataHi = loadCHR(tileaddr + 8);
     renderPixel();
-    tick();
+    step(1);
 
     renderPixel();
     renderSprite();
-    tick();
+    step(1);
 
     l.nametable = l.nametable << 8 | nametable;
     l.attribute = l.attribute << 2 | (attribute & 3);
@@ -176,56 +134,59 @@ auto PPU::renderScanline() -> void {
 
   for(auto n : range(8)) l.oam[n] = l.soam[n];
 
-  for(uint sprite : range(8)) {  //256-319
-    uint nametable = loadCHR(0x2000 | (r.vaddr & 0x0fff));
-    tick();
+  //257-320
+  for(uint sprite : range(8)) {
+    uint nametable = loadCHR(0x2000 | (uint12)r.v.address);
+    step(1);
 
-    if(enable() && sprite == 0) r.vaddr = (r.vaddr & 0x7be0) | (r.taddr & 0x041f);  //257
-    tick();
+    if(enable() && sprite == 0) {
+      //258
+      r.v.nametableX = r.t.nametableX;
+      r.v.tileX = r.t.tileX;
+    }
+    step(1);
 
-    uint attribute = loadCHR(0x23c0 | (r.vaddr & 0x0fc0) | ((scrollY() >> 5) << 3) | (scrollX() >> 5));
-    uint tileaddr = (r.spriteHeight == 8)
+    uint attribute = loadCHR(0x23c0 | r.v.nametable << 10 | (r.v.tileY >> 2) << 3 | r.v.tileX >> 2);
+    uint tileaddr = r.spriteHeight == 8
     ? r.spriteAddress + l.oam[sprite].tile * 16
-    : ((l.oam[sprite].tile & ~1) * 16) + ((l.oam[sprite].tile & 1) * 0x1000);
-    tick();
-    tick();
+    : (l.oam[sprite].tile & ~1) * 16 + (l.oam[sprite].tile & 1) * 0x1000;
+    step(2);
 
     uint spriteY = (r.ly - l.oam[sprite].y) & (r.spriteHeight - 1);
-    if(l.oam[sprite].attr & 0x80) spriteY ^= (r.spriteHeight - 1);
+    if(l.oam[sprite].attr & 0x80) spriteY ^= r.spriteHeight - 1;
     tileaddr += spriteY + (spriteY & 8);
 
     l.oam[sprite].tiledataLo = loadCHR(tileaddr + 0);
-    tick();
-    tick();
+    step(2);
 
     l.oam[sprite].tiledataHi = loadCHR(tileaddr + 8);
-    tick();
-    tick();
+    step(2);
 
-    if(enable() && sprite == 6 && r.ly == 261) r.vaddr = r.taddr;  //304
+    if(enable() && sprite == 6 && r.ly == 261) {
+      //305
+      r.v.address = r.t.address;
+    }
   }
 
-  for(uint tile : range(2)) {  //320-335
-    uint nametable = loadCHR(0x2000 | (r.vaddr & 0x0fff));
-    uint tileaddr = r.bgAddress + (nametable << 4) + (scrollY() & 7);
-    tick();
-    tick();
+  //321-336
+  for(uint tile : range(2)) {
+    uint nametable = loadCHR(0x2000 | (uint12)r.v.address);
+    uint tileaddr = r.bgAddress | nametable << 4 | r.v.fineY;
+    step(2);
 
-    uint attribute = loadCHR(0x23c0 | (r.vaddr & 0x0fc0) | ((scrollY() >> 5) << 3) | (scrollX() >> 5));
-    if(scrollY() & 16) attribute >>= 4;
-    if(scrollX() & 16) attribute >>= 2;
-    tick();
+    uint attribute = loadCHR(0x23c0 | r.v.nametable << 10 | (r.v.tileY >> 2) << 3 | r.v.tileX >> 2);
+    if(r.v.tileY & 2) attribute >>= 4;
+    if(r.v.tileX & 2) attribute >>= 2;
+    step(1);
 
-    scrollX_increment();
-    tick();
+    if(enable() && ++r.v.tileX == 0) r.v.nametableX ^= 1;
+    step(1);
 
     uint tiledataLo = loadCHR(tileaddr + 0);
-    tick();
-    tick();
+    step(2);
 
     uint tiledataHi = loadCHR(tileaddr + 8);
-    tick();
-    tick();
+    step(2);
 
     l.nametable = l.nametable << 8 | nametable;
     l.attribute = l.attribute << 2 | (attribute & 3);
@@ -233,18 +194,18 @@ auto PPU::renderScanline() -> void {
     l.tiledataHi = l.tiledataHi << 8 | tiledataHi;
   }
 
-  //336-339
-  loadCHR(0x2000 | (r.vaddr & 0x0fff));
-  tick();
+  //337-338
+  loadCHR(0x2000 | (uint12)r.v.address);
+  step(1);
   bool skip = enable() && r.field == 1 && r.ly == 261;
-  tick();
+  step(1);
 
-  loadCHR(0x2000 | (r.vaddr & 0x0fff));
-  tick();
-  tick();
+  //339
+  loadCHR(0x2000 | (uint12)r.v.address);
+  step(1);
 
   //340
-  if(!skip) tick();
+  if(!skip) step(1);
 
   return scanline();
 }

@@ -23,11 +23,11 @@ struct Board {
   virtual auto main() -> void;
   virtual auto tick() -> void;
 
-  virtual auto prg_read(uint addr) -> uint8 = 0;
-  virtual auto prg_write(uint addr, uint8 data) -> void = 0;
+  virtual auto readPRG(uint addr) -> uint8 = 0;
+  virtual auto writePRG(uint addr, uint8 data) -> void = 0;
 
-  virtual auto chr_read(uint addr) -> uint8;
-  virtual auto chr_write(uint addr, uint8 data) -> void;
+  virtual auto readCHR(uint addr) -> uint8;
+  virtual auto writeCHR(uint addr, uint8 data) -> void;
 
   virtual inline auto scanline(uint y) -> void {}
 

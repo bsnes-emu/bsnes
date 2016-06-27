@@ -118,13 +118,13 @@ auto Board::tick() -> void {
   if(cartridge.clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
-auto Board::chr_read(uint addr) -> uint8 {
+auto Board::readCHR(uint addr) -> uint8 {
   if(chrram.size) return chrram.data[mirror(addr, chrram.size)];
   if(chrrom.size) return chrrom.data[mirror(addr, chrrom.size)];
   return 0u;
 }
 
-auto Board::chr_write(uint addr, uint8 data) -> void {
+auto Board::writeCHR(uint addr, uint8 data) -> void {
   if(chrram.size) chrram.data[mirror(addr, chrram.size)] = data;
 }
 

@@ -77,52 +77,52 @@ struct VRC6 : Chip {
   } sawtooth;
 
   auto main() -> void {
-    if(irq_enable) {
-      if(irq_mode == 0) {
-        irq_scalar -= 3;
-        if(irq_scalar <= 0) {
-          irq_scalar += 341;
-          if(irq_counter == 0xff) {
-            irq_counter = irq_latch;
-            irq_line = 1;
+    if(irqEnable) {
+      if(irqMode == 0) {
+        irqScalar -= 3;
+        if(irqScalar <= 0) {
+          irqScalar += 341;
+          if(irqCounter == 0xff) {
+            irqCounter = irqLatch;
+            irqLine = 1;
           } else {
-            irq_counter++;
+            irqCounter++;
           }
         }
       }
 
-      if(irq_mode == 1) {
-        if(irq_counter == 0xff) {
-          irq_counter = irq_latch;
-          irq_line = 1;
+      if(irqMode == 1) {
+        if(irqCounter == 0xff) {
+          irqCounter = irqLatch;
+          irqLine = 1;
         } else {
-          irq_counter++;
+          irqCounter++;
         }
       }
     }
-    cpu.irqLine(irq_line);
+    cpu.irqLine(irqLine);
 
     pulse1.clock();
     pulse2.clock();
     sawtooth.clock();
     int output = (pulse1.output + pulse2.output + sawtooth.output) << 7;
-    apu.set_sample(-output);
+    apu.setSample(-output);
 
     tick();
   }
 
-  auto prg_addr(uint addr) const -> uint {
-    if((addr & 0xc000) == 0x8000) return (prg_bank[0] << 14) | (addr & 0x3fff);
-    if((addr & 0xe000) == 0xc000) return (prg_bank[1] << 13) | (addr & 0x1fff);
-    if((addr & 0xe000) == 0xe000) return (       0xff << 13) | (addr & 0x1fff);
+  auto addrPRG(uint addr) const -> uint {
+    if((addr & 0xc000) == 0x8000) return (prgBank[0] << 14) | (addr & 0x3fff);
+    if((addr & 0xe000) == 0xc000) return (prgBank[1] << 13) | (addr & 0x1fff);
+    if((addr & 0xe000) == 0xe000) return (      0xff << 13) | (addr & 0x1fff);
   }
 
-  auto chr_addr(uint addr) const -> uint {
-    uint bank = chr_bank[(addr >> 10) & 7];
+  auto addrCHR(uint addr) const -> uint {
+    uint bank = chrBank[(addr >> 10) & 7];
     return (bank << 10) | (addr & 0x03ff);
   }
 
-  auto ciram_addr(uint addr) const -> uint {
+  auto addrCIRAM(uint addr) const -> uint {
     switch(mirror) {
     case 0: return ((addr & 0x0400) >> 0) | (addr & 0x03ff);  //vertical mirroring
     case 1: return ((addr & 0x0800) >> 1) | (addr & 0x03ff);  //horizontal mirroring
@@ -131,18 +131,18 @@ struct VRC6 : Chip {
     }
   }
 
-  auto ram_read(uint addr) -> uint8 {
+  auto readRAM(uint addr) -> uint8 {
     return board.prgram.data[addr & 0x1fff];
   }
 
-  auto ram_write(uint addr, uint8 data) -> void {
+  auto writeRAM(uint addr, uint8 data) -> void {
     board.prgram.data[addr & 0x1fff] = data;
   }
 
-  auto reg_write(uint addr, uint8 data) -> void {
+  auto writeIO(uint addr, uint8 data) -> void {
     switch(addr) {
     case 0x8000: case 0x8001: case 0x8002: case 0x8003:
-      prg_bank[0] = data;
+      prgBank[0] = data;
       break;
 
     case 0x9000:
@@ -193,35 +193,35 @@ struct VRC6 : Chip {
       break;
 
     case 0xc000: case 0xc001: case 0xc002: case 0xc003:
-      prg_bank[1] = data;
+      prgBank[1] = data;
       break;
 
     case 0xd000: case 0xd001: case 0xd002: case 0xd003:
-      chr_bank[0 + (addr & 3)] = data;
+      chrBank[0 + (addr & 3)] = data;
       break;
 
     case 0xe000: case 0xe001: case 0xe002: case 0xe003:
-      chr_bank[4 + (addr & 3)] = data;
+      chrBank[4 + (addr & 3)] = data;
       break;
 
     case 0xf000:
-      irq_latch = data;
+      irqLatch = data;
       break;
 
     case 0xf001:
-      irq_mode = data & 0x04;
-      irq_enable = data & 0x02;
-      irq_acknowledge = data & 0x01;
-      if(irq_enable) {
-        irq_counter = irq_latch;
-        irq_scalar = 341;
+      irqMode = data & 0x04;
+      irqEnable = data & 0x02;
+      irqAcknowledge = data & 0x01;
+      if(irqEnable) {
+        irqCounter = irqLatch;
+        irqScalar = 341;
       }
-      irq_line = 0;
+      irqLine = 0;
       break;
 
     case 0xf002:
-      irq_enable = irq_acknowledge;
-      irq_line = 0;
+      irqEnable = irqAcknowledge;
+      irqLine = 0;
       break;
     }
   }
@@ -230,25 +230,25 @@ struct VRC6 : Chip {
   }
 
   auto reset() -> void {
-    prg_bank[0] = 0;
-    prg_bank[1] = 0;
-    chr_bank[0] = 0;
-    chr_bank[1] = 0;
-    chr_bank[2] = 0;
-    chr_bank[3] = 0;
-    chr_bank[4] = 0;
-    chr_bank[5] = 0;
-    chr_bank[6] = 0;
-    chr_bank[7] = 0;
+    prgBank[0] = 0;
+    prgBank[1] = 0;
+    chrBank[0] = 0;
+    chrBank[1] = 0;
+    chrBank[2] = 0;
+    chrBank[3] = 0;
+    chrBank[4] = 0;
+    chrBank[5] = 0;
+    chrBank[6] = 0;
+    chrBank[7] = 0;
     mirror = 0;
-    irq_latch = 0;
-    irq_mode = 0;
-    irq_enable = 0;
-    irq_acknowledge = 0;
+    irqLatch = 0;
+    irqMode = 0;
+    irqEnable = 0;
+    irqAcknowledge = 0;
 
-    irq_counter = 0;
-    irq_scalar = 0;
-    irq_line = 0;
+    irqCounter = 0;
+    irqScalar = 0;
+    irqLine = 0;
 
     pulse1.mode = 0;
     pulse1.duty = 0;
@@ -286,28 +286,28 @@ struct VRC6 : Chip {
     pulse2.serialize(s);
     sawtooth.serialize(s);
 
-    s.array(prg_bank);
-    s.array(chr_bank);
+    s.array(prgBank);
+    s.array(chrBank);
     s.integer(mirror);
-    s.integer(irq_latch);
-    s.integer(irq_mode);
-    s.integer(irq_enable);
-    s.integer(irq_acknowledge);
+    s.integer(irqLatch);
+    s.integer(irqMode);
+    s.integer(irqEnable);
+    s.integer(irqAcknowledge);
 
-    s.integer(irq_counter);
-    s.integer(irq_scalar);
-    s.integer(irq_line);
+    s.integer(irqCounter);
+    s.integer(irqScalar);
+    s.integer(irqLine);
   }
 
-  uint8 prg_bank[2];
-  uint8 chr_bank[8];
+  uint8 prgBank[2];
+  uint8 chrBank[8];
   uint2 mirror;
-  uint8 irq_latch;
-  bool irq_mode;
-  bool irq_enable;
-  bool irq_acknowledge;
+  uint8 irqLatch;
+  bool irqMode;
+  bool irqEnable;
+  bool irqAcknowledge;
 
-  uint8 irq_counter;
-  int irq_scalar;
-  bool irq_line;
+  uint8 irqCounter;
+  int irqScalar;
+  bool irqLine;
 };

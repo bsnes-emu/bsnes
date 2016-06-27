@@ -22,6 +22,7 @@ auto System::runToSave() -> void {
 }
 
 auto System::load() -> bool {
+  information = Information();
   if(auto fp = interface->open(ID::System, "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();
   } else {
@@ -30,7 +31,7 @@ auto System::load() -> bool {
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
   serializeInit();
-  return _loaded = true;
+  return information.loaded = true;
 }
 
 auto System::save() -> void {
@@ -41,7 +42,7 @@ auto System::unload() -> void {
   if(!loaded()) return;
   peripherals.unload();
   cartridge.unload();
-  _loaded = false;
+  information.loaded = false;
 }
 
 auto System::power() -> void {

@@ -1,7 +1,5 @@
-#include "peripherals.hpp"
-
 struct System {
-  auto loaded() const -> bool { return _loaded; }
+  auto loaded() const -> bool { return information.loaded; }
 
   auto run() -> void;
   auto runToSave() -> void;
@@ -28,12 +26,22 @@ struct System {
   auto serializeInit() -> void;
 
   struct Information {
+    bool loaded = false;
     string manifest;
   } information;
 
 private:
-  bool _loaded = false;
   uint _serializeSize = 0;
 };
 
+struct Peripherals {
+  auto unload() -> void;
+  auto reset() -> void;
+  auto connect(uint port, uint device) -> void;
+
+  Controller* controllerPort1 = nullptr;
+  Controller* controllerPort2 = nullptr;
+};
+
 extern System system;
+extern Peripherals peripherals;

@@ -14,9 +14,9 @@ APU apu;
 APU::APU() {
   for(uint amp : range(32)) {
     if(amp == 0) {
-      pulse_dac[amp] = 0;
+      pulseDAC[amp] = 0;
     } else {
-      pulse_dac[amp] = 16384.0 * 95.88 / (8128.0 / amp + 100.0);
+      pulseDAC[amp] = 16384.0 * 95.88 / (8128.0 / amp + 100.0);
     }
   }
 
@@ -24,9 +24,9 @@ APU::APU() {
     for(uint triangle_amp : range(16)) {
       for(uint noise_amp : range(16)) {
         if(dmc_amp == 0 && triangle_amp == 0 && noise_amp == 0) {
-          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp] = 0;
+          dmcTriangleNoiseDAC[dmc_amp][triangle_amp][noise_amp] = 0;
         } else {
-          dmc_triangle_noise_dac[dmc_amp][triangle_amp][noise_amp]
+          dmcTriangleNoiseDAC[dmc_amp][triangle_amp][noise_amp]
           = 16384.0 * 159.79 / (100.0 + 1.0 / (triangle_amp / 8227.0 + noise_amp / 12241.0 + dmc_amp / 22638.0));
         }
       }
@@ -47,14 +47,14 @@ auto APU::main() -> void {
   noise_output = noise.clock();
   dmc_output = dmc.clock();
 
-  clock_frame_counter_divider();
+  clockFrameCounterDivider();
 
-  int output = pulse_dac[pulse_output] + dmc_triangle_noise_dac[dmc_output][triangle_output][noise_output];
+  int output = pulseDAC[pulse_output] + dmcTriangleNoiseDAC[dmc_output][triangle_output][noise_output];
 
-  output  = filter.run_hipass_strong(output);
-  output += cartridge_sample;
-  output  = filter.run_hipass_weak(output);
-//output  = filter.run_lopass(output);
+  output  = filter.runHipassStrong(output);
+  output += cartridgeSample;
+  output  = filter.runHipassWeak(output);
+//output  = filter.runLopass(output);
   output  = sclamp<16>(output);
 
   stream->sample(output / 32768.0);
@@ -67,17 +67,17 @@ auto APU::tick() -> void {
   if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
 
-auto APU::set_irq_line() -> void {
-  cpu.apuLine(frame.irq_pending || dmc.irq_pending);
+auto APU::setIRQ() -> void {
+  cpu.apuLine(frame.irqPending || dmc.irqPending);
 }
 
-auto APU::set_sample(int16 sample) -> void {
-  cartridge_sample = sample;
+auto APU::setSample(int16 sample) -> void {
+  cartridgeSample = sample;
 }
 
 auto APU::power() -> void {
-  filter.hipass_strong = 0;
-  filter.hipass_weak = 0;
+  filter.hipassStrong = 0;
+  filter.hipassWeak = 0;
   filter.lopass = 0;
 
   pulse[0].power();
@@ -97,16 +97,16 @@ auto APU::reset() -> void {
   noise.reset();
   dmc.reset();
 
-  frame.irq_pending = 0;
+  frame.irqPending = 0;
 
   frame.mode = 0;
   frame.counter = 0;
   frame.divider = 1;
 
-  enabled_channels = 0;
-  cartridge_sample = 0;
+  enabledChannels = 0;
+  cartridgeSample = 0;
 
-  set_irq_line();
+  setIRQ();
 }
 
 auto APU::readIO(uint16 addr) -> uint8 {
@@ -114,16 +114,16 @@ auto APU::readIO(uint16 addr) -> uint8 {
 
   case 0x4015: {
     uint8 result = 0x00;
-    result |= pulse[0].length_counter ? 0x01 : 0;
-    result |= pulse[1].length_counter ? 0x02 : 0;
-    result |= triangle.length_counter ? 0x04 : 0;
-    result |=    noise.length_counter ? 0x08 : 0;
-    result |=      dmc.length_counter ? 0x10 : 0;
-    result |=       frame.irq_pending ? 0x40 : 0;
-    result |=         dmc.irq_pending ? 0x80 : 0;
+    result |= pulse[0].lengthCounter ? 0x01 : 0;
+    result |= pulse[1].lengthCounter ? 0x02 : 0;
+    result |= triangle.lengthCounter ? 0x04 : 0;
+    result |=    noise.lengthCounter ? 0x08 : 0;
+    result |=      dmc.lengthCounter ? 0x10 : 0;
+    result |=       frame.irqPending ? 0x40 : 0;
+    result |=         dmc.irqPending ? 0x80 : 0;
 
-    frame.irq_pending = false;
-    set_irq_line();
+    frame.irqPending = false;
+    setIRQ();
 
     return result;
   }
@@ -140,8 +140,8 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
 
   case 0x4000: case 0x4004: {
     pulse[n].duty = data >> 6;
-    pulse[n].envelope.loop_mode = data & 0x20;
-    pulse[n].envelope.use_speed_as_volume = data & 0x10;
+    pulse[n].envelope.loopMode = data & 0x20;
+    pulse[n].envelope.useSpeedAsVolume = data & 0x10;
     pulse[n].envelope.speed = data & 0x0f;
     return;
   }
@@ -157,26 +157,26 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
 
   case 0x4002: case 0x4006: {
     pulse[n].period = (pulse[n].period & 0x0700) | (data << 0);
-    pulse[n].sweep.pulse_period = (pulse[n].sweep.pulse_period & 0x0700) | (data << 0);
+    pulse[n].sweep.pulsePeriod = (pulse[n].sweep.pulsePeriod & 0x0700) | (data << 0);
     return;
   }
 
   case 0x4003: case 0x4007: {
     pulse[n].period = (pulse[n].period & 0x00ff) | (data << 8);
-    pulse[n].sweep.pulse_period = (pulse[n].sweep.pulse_period & 0x00ff) | (data << 8);
+    pulse[n].sweep.pulsePeriod = (pulse[n].sweep.pulsePeriod & 0x00ff) | (data << 8);
 
-    pulse[n].duty_counter = 7;
-    pulse[n].envelope.reload_decay = true;
+    pulse[n].dutyCounter = 7;
+    pulse[n].envelope.reloadDecay = true;
 
-    if(enabled_channels & (1 << n)) {
-      pulse[n].length_counter = length_counter_table[(data >> 3) & 0x1f];
+    if(enabledChannels & (1 << n)) {
+      pulse[n].lengthCounter = lengthCounterTable[(data >> 3) & 0x1f];
     }
     return;
   }
 
   case 0x4008: {
-    triangle.halt_length_counter = data & 0x80;
-    triangle.linear_length = data & 0x7f;
+    triangle.haltLengthCounter = data & 0x80;
+    triangle.linearLength = data & 0x7f;
     return;
   }
 
@@ -188,72 +188,72 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
   case 0x400b: {
     triangle.period = (triangle.period & 0x00ff) | (data << 8);
 
-    triangle.reload_linear = true;
+    triangle.reloadLinear = true;
 
-    if(enabled_channels & (1 << 2)) {
-      triangle.length_counter = length_counter_table[(data >> 3) & 0x1f];
+    if(enabledChannels & (1 << 2)) {
+      triangle.lengthCounter = lengthCounterTable[(data >> 3) & 0x1f];
     }
     return;
   }
 
   case 0x400c: {
-    noise.envelope.loop_mode = data & 0x20;
-    noise.envelope.use_speed_as_volume = data & 0x10;
+    noise.envelope.loopMode = data & 0x20;
+    noise.envelope.useSpeedAsVolume = data & 0x10;
     noise.envelope.speed = data & 0x0f;
     return;
   }
 
   case 0x400e: {
-    noise.short_mode = data & 0x80;
+    noise.shortMode = data & 0x80;
     noise.period = data & 0x0f;
     return;
   }
 
   case 0x400f: {
-    noise.envelope.reload_decay = true;
+    noise.envelope.reloadDecay = true;
 
-    if(enabled_channels & (1 << 3)) {
-      noise.length_counter = length_counter_table[(data >> 3) & 0x1f];
+    if(enabledChannels & (1 << 3)) {
+      noise.lengthCounter = lengthCounterTable[(data >> 3) & 0x1f];
     }
     return;
   }
 
   case 0x4010: {
-    dmc.irq_enable = data & 0x80;
-    dmc.loop_mode = data & 0x40;
+    dmc.irqEnable = data & 0x80;
+    dmc.loopMode = data & 0x40;
     dmc.period = data & 0x0f;
 
-    dmc.irq_pending = dmc.irq_pending && dmc.irq_enable && !dmc.loop_mode;
-    set_irq_line();
+    dmc.irqPending = dmc.irqPending && dmc.irqEnable && !dmc.loopMode;
+    setIRQ();
     return;
   }
 
   case 0x4011: {
-    dmc.dac_latch = data & 0x7f;
+    dmc.dacLatch = data & 0x7f;
     return;
   }
 
   case 0x4012: {
-    dmc.addr_latch = data;
+    dmc.addrLatch = data;
     return;
   }
 
   case 0x4013: {
-    dmc.length_latch = data;
+    dmc.lengthLatch = data;
     return;
   }
 
   case 0x4015: {
-    if((data & 0x01) == 0) pulse[0].length_counter = 0;
-    if((data & 0x02) == 0) pulse[1].length_counter = 0;
-    if((data & 0x04) == 0) triangle.length_counter = 0;
-    if((data & 0x08) == 0)    noise.length_counter = 0;
+    if((data & 0x01) == 0) pulse[0].lengthCounter = 0;
+    if((data & 0x02) == 0) pulse[1].lengthCounter = 0;
+    if((data & 0x04) == 0) triangle.lengthCounter = 0;
+    if((data & 0x08) == 0)    noise.lengthCounter = 0;
 
     (data & 0x10) ? dmc.start() : dmc.stop();
-    dmc.irq_pending = false;
+    dmc.irqPending = false;
 
-    set_irq_line();
-    enabled_channels = data & 0x1f;
+    setIRQ();
+    enabledChannels = data & 0x1f;
     return;
   }
 
@@ -261,10 +261,10 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
     frame.mode = data >> 6;
 
     frame.counter = 0;
-    if(frame.mode & 2) clock_frame_counter();
+    if(frame.mode & 2) clockFrameCounter();
     if(frame.mode & 1) {
-      frame.irq_pending = false;
-      set_irq_line();
+      frame.irqPending = false;
+      setIRQ();
     }
     frame.divider = FrameCounter::NtscPeriod;
     return;
@@ -273,73 +273,73 @@ auto APU::writeIO(uint16 addr, uint8 data) -> void {
   }
 }
 
-auto APU::Filter::run_hipass_strong(int sample) -> int {
-  hipass_strong += ((((int64)sample << 16) - (hipass_strong >> 16)) * HiPassStrong) >> 16;
-  return sample - (hipass_strong >> 32);
+auto APU::Filter::runHipassStrong(int sample) -> int {
+  hipassStrong += ((((int64)sample << 16) - (hipassStrong >> 16)) * HiPassStrong) >> 16;
+  return sample - (hipassStrong >> 32);
 }
 
-auto APU::Filter::run_hipass_weak(int sample) -> int {
-  hipass_weak += ((((int64)sample << 16) - (hipass_weak >> 16)) * HiPassWeak) >> 16;
-  return sample - (hipass_weak >> 32);
+auto APU::Filter::runHipassWeak(int sample) -> int {
+  hipassWeak += ((((int64)sample << 16) - (hipassWeak >> 16)) * HiPassWeak) >> 16;
+  return sample - (hipassWeak >> 32);
 }
 
-auto APU::Filter::run_lopass(int sample) -> int {
+auto APU::Filter::runLopass(int sample) -> int {
   lopass += ((((int64)sample << 16) - (lopass >> 16)) * LoPass) >> 16;
   return (lopass >> 32);
 }
 
-auto APU::clock_frame_counter() -> void {
+auto APU::clockFrameCounter() -> void {
   frame.counter++;
 
   if(frame.counter & 1) {
-    pulse[0].clock_length();
+    pulse[0].clockLength();
     pulse[0].sweep.clock(0);
-    pulse[1].clock_length();
+    pulse[1].clockLength();
     pulse[1].sweep.clock(1);
-    triangle.clock_length();
-    noise.clock_length();
+    triangle.clockLength();
+    noise.clockLength();
   }
 
   pulse[0].envelope.clock();
   pulse[1].envelope.clock();
-  triangle.clock_linear_length();
+  triangle.clockLinearLength();
   noise.envelope.clock();
 
   if(frame.counter == 0) {
     if(frame.mode & 2) frame.divider += FrameCounter::NtscPeriod;
     if(frame.mode == 0) {
-      frame.irq_pending = true;
-      set_irq_line();
+      frame.irqPending = true;
+      setIRQ();
     }
   }
 }
 
-auto APU::clock_frame_counter_divider() -> void {
+auto APU::clockFrameCounterDivider() -> void {
   frame.divider -= 2;
   if(frame.divider <= 0) {
-    clock_frame_counter();
+    clockFrameCounter();
     frame.divider += FrameCounter::NtscPeriod;
   }
 }
 
-const uint8 APU::length_counter_table[32] = {
+const uint8 APU::lengthCounterTable[32] = {
   0x0a, 0xfe, 0x14, 0x02, 0x28, 0x04, 0x50, 0x06, 0xa0, 0x08, 0x3c, 0x0a, 0x0e, 0x0c, 0x1a, 0x0e,
   0x0c, 0x10, 0x18, 0x12, 0x30, 0x14, 0x60, 0x16, 0xc0, 0x18, 0x48, 0x1a, 0x10, 0x1c, 0x20, 0x1e,
 };
 
-const uint16 APU::ntsc_noise_period_table[16] = {
+const uint16 APU::noisePeriodTableNTSC[16] = {
   4, 8, 16, 32, 64, 96, 128, 160, 202, 254, 380, 508, 762, 1016, 2034, 4068,
 };
 
-const uint16 APU::pal_noise_period_table[16] = {
+const uint16 APU::noisePeriodTablePAL[16] = {
   4, 7, 14, 30, 60, 88, 118, 148, 188, 236, 354, 472, 708,  944, 1890, 3778,
 };
 
-const uint16 APU::ntsc_dmc_period_table[16] = {
+const uint16 APU::dmcPeriodTableNTSC[16] = {
   428, 380, 340, 320, 286, 254, 226, 214, 190, 160, 142, 128, 106, 84, 72, 54,
 };
 
-const uint16 APU::pal_dmc_period_table[16] = {
+const uint16 APU::dmcPeriodTablePAL[16] = {
   398, 354, 316, 298, 276, 236, 210, 198, 176, 148, 132, 118,  98, 78, 66, 50,
 };
 
