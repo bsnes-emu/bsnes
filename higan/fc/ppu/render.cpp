@@ -105,8 +105,8 @@ auto PPU::renderScanline() -> void {
     renderPixel();
     step(1);
 
-    if(enable() && ++r.v.tileX == 0) r.v.nametableX ^= 1;
-    if(enable() && tile == 31 && ++r.v.fineY == 0 && ++r.v.tileY == 30) r.v.nametableY ^= 1, r.v.tileY = 0;
+    if(enable() && ++r.v.tileX == 0) r.v.nametableX++;
+    if(enable() && tile == 31 && ++r.v.fineY == 0 && ++r.v.tileY == 30) r.v.nametableY++, r.v.tileY = 0;
     renderPixel();
     renderSprite();
     step(1);
@@ -179,7 +179,7 @@ auto PPU::renderScanline() -> void {
     if(r.v.tileX & 2) attribute >>= 2;
     step(1);
 
-    if(enable() && ++r.v.tileX == 0) r.v.nametableX ^= 1;
+    if(enable() && ++r.v.tileX == 0) r.v.nametableX++;
     step(1);
 
     uint tiledataLo = loadCHR(tileaddr + 0);

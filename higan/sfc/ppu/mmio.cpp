@@ -1,4 +1,24 @@
-auto PPU::read(uint24 addr, uint8 data) -> uint8 {
+auto PPU::getVramAddress() -> uint16 {
+  uint16 address = r.vramAddress;
+  switch(r.vramMapping) {
+  case 0: return (address);
+  case 1: return (address & 0xff00) | ((address & 0x001f) << 3) | ((address >> 5) & 7);
+  case 2: return (address & 0xfe00) | ((address & 0x003f) << 3) | ((address >> 6) & 7);
+  case 3: return (address & 0xfc00) | ((address & 0x007f) << 3) | ((address >> 7) & 7);
+  }
+  unreachable;
+}
+
+auto PPU::vramAccessible() const -> bool {
+  return r.displayDisable || vcounter() >= vdisp();
+}
+
+auto PPU::oamWrite(uint addr, uint8 data) -> void {
+  oam[addr] = data;
+  obj.update(addr, data);
+}
+
+auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
   cpu.synchronizePPU();
 
   switch((uint16)addr) {
@@ -44,18 +64,16 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
     if(!r.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
     if(address & 0x0200) address &= 0x021f;
 
-    ppu1.mdr = oamRead(address);
+    ppu1.mdr = oam[address];
     obj.setFirstSprite();
     return ppu1.mdr;
   }
 
   //VMDATALREAD
   case 0x2139: {
-    auto address = getVramAddress();
     ppu1.mdr = latch.vram >> 0;
     if(r.vramIncrementMode == 0) {
-      latch.vram.byte(0) = vramRead(0, address);
-      latch.vram.byte(1) = vramRead(1, address);
+      latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
       r.vramAddress += r.vramIncrementSize;
     }
     return ppu1.mdr;
@@ -63,11 +81,9 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //VMDATAHREAD
   case 0x213a: {
-    uint16 address = getVramAddress();
     ppu1.mdr = latch.vram >> 8;
     if(r.vramIncrementMode == 1) {
-      latch.vram.byte(0) = vramRead(0, address);
-      latch.vram.byte(1) = vramRead(1, address);
+      latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
       r.vramAddress += r.vramIncrementSize;
     }
     return ppu1.mdr;
@@ -75,18 +91,17 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
 
   //CGDATAREAD
   case 0x213b: {
-    bool l = r.cgramAddress & 1;
-    uint9 address = r.cgramAddress++;
+    auto address = r.cgramAddress;
     if(!r.displayDisable
     && vcounter() > 0 && vcounter() < vdisp()
     && hcounter() >= 88 && hcounter() < 1096
     ) address = latch.cgramAddress;
 
-    if(l == 0) {
-      ppu2.mdr  = cgramRead(address);
+    if(r.cgramAddressLatch++) {
+      ppu2.mdr  = cgram[address].byte(0);
     } else {
       ppu2.mdr &= 0x80;
-      ppu2.mdr |= cgramRead(address);
+      ppu2.mdr |= cgram[address].byte(1);
     }
     return ppu2.mdr;
   }
@@ -147,7 +162,7 @@ auto PPU::read(uint24 addr, uint8 data) -> uint8 {
   return data;
 }
 
-auto PPU::write(uint24 addr, uint8 data) -> void {
+auto PPU::writeIO(uint24 addr, uint8 data) -> void {
   cpu.synchronizePPU();
 
   switch((uint16)addr) {
@@ -342,36 +357,28 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //VMADDL
   case 0x2116: {
-    r.vramAddress &= 0xff00;
-    r.vramAddress |= (data << 0);
-    auto address = getVramAddress();
-    latch.vram.byte(0) = vramRead(0, address);
-    latch.vram.byte(1) = vramRead(1, address);
+    r.vramAddress.byte(0) = data;
+    latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
     return;
   }
 
   //VMADDH
   case 0x2117: {
-    r.vramAddress &= 0x00ff;
-    r.vramAddress |= (data << 8);
-    auto address = getVramAddress();
-    latch.vram.byte(0) = vramRead(0, address);
-    latch.vram.byte(1) = vramRead(1, address);
+    r.vramAddress.byte(1) = data;
+    latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
     return;
   }
 
   //VMDATAL
   case 0x2118: {
-    auto address = getVramAddress();
-    vramWrite(0, address, data);
+    if(vramAccessible()) vram[getVramAddress()].byte(0) = data;
     if(r.vramIncrementMode == 0) r.vramAddress += r.vramIncrementSize;
     return;
   }
 
   //VMDATAH
   case 0x2119: {
-    auto address = getVramAddress();
-    vramWrite(1, address, data);
+    if(vramAccessible()) vram[getVramAddress()].byte(1) = data;
     if(r.vramIncrementMode == 1) r.vramAddress += r.vramIncrementSize;
     return;
   }
@@ -428,24 +435,24 @@ auto PPU::write(uint24 addr, uint8 data) -> void {
 
   //CGADD
   case 0x2121: {
-    r.cgramAddress = data << 1;
+    r.cgramAddress = data;
+    r.cgramAddressLatch = 0;
     return;
   }
 
   //CGDATA
   case 0x2122: {
-    bool l = r.cgramAddress & 1;
-    uint9 address = r.cgramAddress++;
+    auto address = r.cgramAddress;
     if(!r.displayDisable
     && vcounter() > 0 && vcounter() < vdisp()
     && hcounter() >= 88 && hcounter() < 1096
     ) address = latch.cgramAddress;
 
-    if(l == 0) {
+    if(r.cgramAddressLatch++ == 0) {
       latch.cgram = data;
     } else {
-      cgramWrite((address & ~1) + 0, latch.cgram);
-      cgramWrite((address & ~1) + 1, data & 0x7f);
+      cgram[address] = data.bits(0,6) << 8 | latch.cgram;
+      r.cgramAddress++;
     }
     return;
   }

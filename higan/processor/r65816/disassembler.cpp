@@ -4,7 +4,7 @@ auto R65816::dreadb(uint24 addr) -> uint8 {
     //do not read MMIO registers within debugger
     return 0x00;
   }
-  return disassemblerRead(addr);
+  return readDisassembler(addr);
 }
 
 auto R65816::dreadw(uint24 addr) -> uint16 {

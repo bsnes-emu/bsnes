@@ -50,7 +50,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   auto read(uint24 addr) -> uint8 override;
   auto write(uint24 addr, uint8 data) -> void override;
   alwaysinline auto speed(uint24 addr) const -> uint;
-  auto disassemblerRead(uint24 addr) -> uint8 override;
+  auto readDisassembler(uint24 addr) -> uint8 override;
 
   //mmio.cpp
   auto readAPU(uint24 addr, uint8 data) -> uint8;
@@ -244,14 +244,6 @@ privileged:
     uint addr;
     uint8 data;
   } pipe;
-
-  struct Debugger {
-    hook<auto (uint24) -> void> execute;
-    hook<auto (uint24, uint8) -> void> read;
-    hook<auto (uint24, uint8) -> void> write;
-    hook<auto () -> void> nmi;
-    hook<auto () -> void> irq;
-  } debugger;
 };
 
 extern CPU cpu;

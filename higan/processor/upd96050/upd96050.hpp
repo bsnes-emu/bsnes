@@ -35,12 +35,12 @@ struct uPD96050 {
   struct Flag {
     union {
       uint8_t data = 0;
-      BitField<uint8_t, 5> s1;
-      BitField<uint8_t, 4> s0;
-      BitField<uint8_t, 3> c;
-      BitField<uint8_t, 2> z;
-      BitField<uint8_t, 1> ov1;
-      BitField<uint8_t, 0> ov0;
+      BooleanBitField<uint8_t, 5> s1;
+      BooleanBitField<uint8_t, 4> s0;
+      BooleanBitField<uint8_t, 3> c;
+      BooleanBitField<uint8_t, 2> z;
+      BooleanBitField<uint8_t, 1> ov1;
+      BooleanBitField<uint8_t, 0> ov0;
     };
 
     inline operator uint() const { return data & 0x3f; }
@@ -51,17 +51,17 @@ struct uPD96050 {
   struct Status {
     union {
       uint16_t data = 0;
-      BitField<uint16_t, 15> rqm;
-      BitField<uint16_t, 14> usf1;
-      BitField<uint16_t, 13> usf0;
-      BitField<uint16_t, 12> drs;
-      BitField<uint16_t, 11> dma;
-      BitField<uint16_t, 10> drc;
-      BitField<uint16_t,  9> soc;
-      BitField<uint16_t,  8> sic;
-      BitField<uint16_t,  7> ei;
-      BitField<uint16_t,  1> p1;
-      BitField<uint16_t,  0> p0;
+      BooleanBitField<uint16_t, 15> rqm;
+      BooleanBitField<uint16_t, 14> usf1;
+      BooleanBitField<uint16_t, 13> usf0;
+      BooleanBitField<uint16_t, 12> drs;
+      BooleanBitField<uint16_t, 11> dma;
+      BooleanBitField<uint16_t, 10> drc;
+      BooleanBitField<uint16_t,  9> soc;
+      BooleanBitField<uint16_t,  8> sic;
+      BooleanBitField<uint16_t,  7> ei;
+      BooleanBitField<uint16_t,  1> p1;
+      BooleanBitField<uint16_t,  0> p0;
     };
 
     inline operator uint() const { return data & 0xff83; }

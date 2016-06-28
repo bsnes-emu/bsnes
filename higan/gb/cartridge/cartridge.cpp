@@ -40,6 +40,7 @@ auto Cartridge::load(System::Revision revision) -> bool {
   } else return false;
 
   auto document = BML::unserialize(information.manifest);
+  auto board = document["board"];
   information.title = document["information/title"].text();
 
   auto mapperid = document["board/mapper"].text();
@@ -56,29 +57,24 @@ auto Cartridge::load(System::Revision revision) -> bool {
   information.rtc = false;
   information.rumble = false;
 
-  auto rom = document["board/rom"];
-  auto ram = document["board/ram"];
+  rom.size = max(32768u, board["rom/size"].natural());
+  rom.data = (uint8*)memory::allocate(rom.size, 0xff);
 
-  romsize = max(32768u, rom["size"].natural());
-  romdata = allocate<uint8>(romsize, 0xff);
+  ram.size = board["ram/size"].natural();
+  ram.data = (uint8*)memory::allocate(ram.size, 0xff);
 
-  ramsize = ram["size"].natural();
-  ramdata = allocate<uint8>(ramsize, 0xff);
-
-  if(auto name = rom["name"].text()) {
+  if(auto name = board["rom/name"].text()) {
     if(auto fp = interface->open(pathID(), name, File::Read, File::Required)) {
-      fp->read(romdata, min(romsize, fp->size()));
+      fp->read(rom.data, min(rom.size, fp->size()));
     }
   }
-  if(auto name = ram["name"].text()) {
+  if(auto name = board["ram/name"].text()) {
     if(auto fp = interface->open(pathID(), name, File::Read, File::Optional)) {
-      fp->read(ramdata, min(ramsize, fp->size()));
+      fp->read(ram.data, min(ram.size, fp->size()));
     }
   }
 
-  information.romsize = romsize;
-  information.ramsize = ramsize;
-  information.battery = (bool)ram["name"];
+  information.battery = (bool)board["ram/name"];
 
   switch(information.mapper) { default:
   case Mapper::MBC0:  mapper = &mbc0;  break;
@@ -92,7 +88,7 @@ auto Cartridge::load(System::Revision revision) -> bool {
   case Mapper::HuC3:  mapper = &huc3;  break;
   }
 
-  information.sha256 = Hash::SHA256(romdata, romsize).digest();
+  information.sha256 = Hash::SHA256(rom.data, rom.size).digest();
   return true;
 }
 
@@ -101,42 +97,44 @@ auto Cartridge::save() -> void {
 
   if(auto name = document["board/ram/name"].text()) {
     if(auto fp = interface->open(pathID(), name, File::Write)) {
-      fp->write(ramdata, ramsize);
+      fp->write(ram.data, ram.size);
     }
   }
 }
 
 auto Cartridge::unload() -> void {
-  if(romdata) { delete[] romdata; romdata = nullptr; romsize = 0; }
-  if(ramdata) { delete[] ramdata; ramdata = nullptr; ramsize = 0; }
+  delete[] rom.data;
+  delete[] ram.data;
+  rom = {};
+  ram = {};
 }
 
-auto Cartridge::rom_read(uint addr) -> uint8 {
-  if(addr >= romsize) addr %= romsize;
-  return romdata[addr];
+auto Cartridge::readROM(uint addr) -> uint8 {
+  if(addr >= rom.size) addr %= rom.size;
+  return rom.data[addr];
 }
 
-auto Cartridge::rom_write(uint addr, uint8 data) -> void {
-  if(addr >= romsize) addr %= romsize;
-  romdata[addr] = data;
+auto Cartridge::writeROM(uint addr, uint8 data) -> void {
+  if(addr >= rom.size) addr %= rom.size;
+  rom.data[addr] = data;
 }
 
-auto Cartridge::ram_read(uint addr) -> uint8 {
-  if(ramsize == 0) return 0xff;
-  if(addr >= ramsize) addr %= ramsize;
-  return ramdata[addr];
+auto Cartridge::readRAM(uint addr) -> uint8 {
+  if(ram.size == 0) return 0xff;
+  if(addr >= ram.size) addr %= ram.size;
+  return ram.data[addr];
 }
 
-auto Cartridge::ram_write(uint addr, uint8 data) -> void {
-  if(ramsize == 0) return;
-  if(addr >= ramsize) addr %= ramsize;
-  ramdata[addr] = data;
+auto Cartridge::writeRAM(uint addr, uint8 data) -> void {
+  if(ram.size == 0) return;
+  if(addr >= ram.size) addr %= ram.size;
+  ram.data[addr] = data;
 }
 
-auto Cartridge::mmio_read(uint16 addr) -> uint8 {
+auto Cartridge::readIO(uint16 addr) -> uint8 {
   if(addr == 0xff50) return 0xff;
 
-  if(bootrom_enable) {
+  if(bootromEnable) {
     const uint8* data = nullptr;
     switch(system.revision()) { default:
     case System::Revision::GameBoy: data = system.bootROM.dmg; break;
@@ -147,20 +145,20 @@ auto Cartridge::mmio_read(uint16 addr) -> uint8 {
     if(addr >= 0x0200 && addr <= 0x08ff && system.cgb()) return data[addr - 256];
   }
 
-  return mapper->mmio_read(addr);
+  return mapper->readIO(addr);
 }
 
-auto Cartridge::mmio_write(uint16 addr, uint8 data) -> void {
-  if(bootrom_enable && addr == 0xff50) {
-    bootrom_enable = false;
+auto Cartridge::writeIO(uint16 addr, uint8 data) -> void {
+  if(bootromEnable && addr == 0xff50) {
+    bootromEnable = false;
     return;
   }
 
-  mapper->mmio_write(addr, data);
+  mapper->writeIO(addr, data);
 }
 
 auto Cartridge::power() -> void {
-  bootrom_enable = true;
+  bootromEnable = true;
 
   mbc0.power();
   mbc1.power();

@@ -20,7 +20,7 @@ struct R65816 {
   virtual auto interruptPending() const -> bool = 0;
   virtual auto interrupt() -> void;
 
-  virtual auto disassemblerRead(uint24 addr) -> uint8 { return 0; }
+  virtual auto readDisassembler(uint24 addr) -> uint8 { return 0; }
 
   //r65816.cpp
   alwaysinline auto ioIRQ() -> void;

@@ -13,8 +13,8 @@ struct PPU : Thread, MMIO {
 
   //mmio.cpp
   auto vram_addr(uint16 addr) const -> uint;
-  auto mmio_read(uint16 addr) -> uint8;
-  auto mmio_write(uint16 addr, uint8 data) -> void;
+  auto readIO(uint16 addr) -> uint8;
+  auto writeIO(uint16 addr, uint8 data) -> void;
 
   //dmg.cpp
   auto dmg_read_tile(bool select, uint x, uint y, uint& data) -> void;

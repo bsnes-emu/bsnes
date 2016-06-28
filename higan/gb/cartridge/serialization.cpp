@@ -1,54 +1,51 @@
 auto Cartridge::serialize(serializer& s) -> void {
-  if(information.battery) s.array(ramdata, ramsize);
-  s.integer(bootrom_enable);
+  if(information.battery) s.array(ram.data, ram.size);
+  s.integer(bootromEnable);
 
-  s.integer(mbc1.ram_enable);
-  s.integer(mbc1.rom_select);
-  s.integer(mbc1.ram_select);
-  s.integer(mbc1.mode_select);
+  s.integer(mbc1.rom.select);
+  s.integer(mbc1.ram.enable);
+  s.integer(mbc1.ram.select);
+  s.integer(mbc1.mode);
 
-  s.integer(mbc1m.romLo);
-  s.integer(mbc1m.romHi);
-  s.integer(mbc1m.modeSelect);
+  s.integer(mbc1m.rom.lo);
+  s.integer(mbc1m.rom.hi);
+  s.integer(mbc1m.mode);
 
-  s.integer(mbc2.ram_enable);
-  s.integer(mbc2.rom_select);
+  s.integer(mbc2.rom.select);
+  s.integer(mbc2.ram.enable);
 
-  s.integer(mbc3.ram_enable);
-  s.integer(mbc3.rom_select);
-  s.integer(mbc3.ram_select);
-  s.integer(mbc3.rtc_latch);
+  s.integer(mbc3.rom.select);
+  s.integer(mbc3.ram.enable);
+  s.integer(mbc3.ram.select);
+  s.integer(mbc3.rtc.latch);
+  s.integer(mbc3.rtc.halt);
+  s.integer(mbc3.rtc.second);
+  s.integer(mbc3.rtc.minute);
+  s.integer(mbc3.rtc.hour);
+  s.integer(mbc3.rtc.day);
+  s.integer(mbc3.rtc.dayCarry);
+  s.integer(mbc3.rtc.latchSecond);
+  s.integer(mbc3.rtc.latchMinute);
+  s.integer(mbc3.rtc.latchHour);
+  s.integer(mbc3.rtc.latchDay);
+  s.integer(mbc3.rtc.latchDayCarry);
 
-  s.integer(mbc3.rtc_halt);
-  s.integer(mbc3.rtc_second);
-  s.integer(mbc3.rtc_minute);
-  s.integer(mbc3.rtc_hour);
-  s.integer(mbc3.rtc_day);
-  s.integer(mbc3.rtc_day_carry);
+  s.integer(mbc5.rom.select);
+  s.integer(mbc5.ram.enable);
+  s.integer(mbc5.ram.select);
 
-  s.integer(mbc3.rtc_latch_second);
-  s.integer(mbc3.rtc_latch_minute);
-  s.integer(mbc3.rtc_latch_hour);
-  s.integer(mbc3.rtc_latch_day);
-  s.integer(mbc3.rtc_latch_day_carry);
+  s.integer(mmm01.rom.base);
+  s.integer(mmm01.rom.select);
+  s.integer(mmm01.ram.enable);
+  s.integer(mmm01.ram.select);
+  s.integer(mmm01.mode);
 
-  s.integer(mbc5.ram_enable);
-  s.integer(mbc5.rom_select);
-  s.integer(mbc5.ram_select);
-
-  s.integer(mmm01.rom_mode);
-  s.integer(mmm01.rom_base);
-
-  s.integer(mmm01.ram_enable);
-  s.integer(mmm01.rom_select);
-  s.integer(mmm01.ram_select);
-
-  s.integer(huc1.ram_writable);
-  s.integer(huc1.rom_select);
-  s.integer(huc1.ram_select);
+  s.integer(huc1.rom.select);
+  s.integer(huc1.ram.writable);
+  s.integer(huc1.ram.select);
   s.integer(huc1.model);
 
-  s.integer(huc3.ram_enable);
-  s.integer(huc3.rom_select);
-  s.integer(huc3.ram_select);
+  s.integer(huc3.rom.select);
+  s.integer(huc3.ram.enable);
+  s.integer(huc3.ram.select);
 }

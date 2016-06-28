@@ -35,7 +35,7 @@ struct PPU : Thread {
     //internal
     uint8 mdr;
 
-    bool field;
+    uint1 field;
     uint lx;
     uint ly;
 
@@ -43,17 +43,17 @@ struct PPU : Thread {
 
     union {
       uint value;
-      BitField<uint, 0, 4> tileX;
-      BitField<uint, 5, 9> tileY;
-      BitField<uint,10,11> nametable;
-      BitField<uint,   10> nametableX;
-      BitField<uint,   11> nametableY;
-      BitField<uint,12,14> fineY;
-      BitField<uint, 0,14> address;
-      BitField<uint, 0, 7> addressLo;
-      BitField<uint, 8,14> addressHi;
-      BitField<uint,   15> latch;
-      BitField<uint,16,18> fineX;
+      NaturalBitField<uint, 0, 4> tileX;
+      NaturalBitField<uint, 5, 9> tileY;
+      NaturalBitField<uint,10,11> nametable;
+      NaturalBitField<uint,10,10> nametableX;
+      NaturalBitField<uint,11,11> nametableY;
+      NaturalBitField<uint,12,14> fineY;
+      NaturalBitField<uint, 0,14> address;
+      NaturalBitField<uint, 0, 7> addressLo;
+      NaturalBitField<uint, 8,14> addressHi;
+      NaturalBitField<uint,15,15> latch;
+      NaturalBitField<uint,16,18> fineX;
     } v, t;
 
     bool nmiHold;

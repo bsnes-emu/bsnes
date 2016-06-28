@@ -79,8 +79,8 @@ auto PPU::wait(uint clocks) -> void {
     stat();
     if(status.dma_active) {
       uint hi = status.dma_clock++;
-      uint lo = hi & (cpu.status.speed_double ? 1 : 3);
-      hi >>= cpu.status.speed_double ? 1 : 2;
+      uint lo = hi & (cpu.status.speedDouble ? 1 : 3);
+      hi >>= cpu.status.speedDouble ? 1 : 2;
       if(lo == 0) {
         if(hi == 0) {
           //warm-up

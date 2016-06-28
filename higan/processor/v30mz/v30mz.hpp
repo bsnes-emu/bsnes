@@ -249,16 +249,16 @@ struct V30MZ {
     struct Flags {
       union {
         uint16_t data = 0;
-        BitField<uint16_t, 15> m;  //mode
-        BitField<uint16_t, 11> v;  //overflow
-        BitField<uint16_t, 10> d;  //direction
-        BitField<uint16_t,  9> i;  //interrupt
-        BitField<uint16_t,  8> b;  //break
-        BitField<uint16_t,  7> s;  //sign
-        BitField<uint16_t,  6> z;  //zero
-        BitField<uint16_t,  4> h;  //half-carry
-        BitField<uint16_t,  2> p;  //parity
-        BitField<uint16_t,  0> c;  //carry
+        BooleanBitField<uint16_t, 15> m;  //mode
+        BooleanBitField<uint16_t, 11> v;  //overflow
+        BooleanBitField<uint16_t, 10> d;  //direction
+        BooleanBitField<uint16_t,  9> i;  //interrupt
+        BooleanBitField<uint16_t,  8> b;  //break
+        BooleanBitField<uint16_t,  7> s;  //sign
+        BooleanBitField<uint16_t,  6> z;  //zero
+        BooleanBitField<uint16_t,  4> h;  //half-carry
+        BooleanBitField<uint16_t,  2> p;  //parity
+        BooleanBitField<uint16_t,  0> c;  //carry
       };
 
       operator uint() const { return data & 0x8fd5 | 0x7002; }

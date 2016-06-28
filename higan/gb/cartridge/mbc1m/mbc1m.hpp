@@ -1,9 +1,11 @@
 struct MBC1M : MMIO {
-  auto mmio_read(uint16 addr) -> uint8;
-  auto mmio_write(uint16 addr, uint8 data) -> void;
+  auto readIO(uint16 addr) -> uint8;
+  auto writeIO(uint16 addr, uint8 data) -> void;
   auto power() -> void;
 
-  uint4 romLo;
-  uint2 romHi;
-  uint1 modeSelect;
+  struct ROM {
+    uint4 lo;
+    uint2 hi;
+  } rom;
+  uint1 mode;
 } mbc1m;

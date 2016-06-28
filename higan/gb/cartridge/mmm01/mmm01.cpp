@@ -1,44 +1,44 @@
-auto Cartridge::MMM01::mmio_read(uint16 addr) -> uint8 {
+auto Cartridge::MMM01::readIO(uint16 addr) -> uint8 {
   if((addr & 0x8000) == 0x0000) {  //$0000-7fff
-    if(rom_mode == 0) return cartridge.rom_read(addr);
+    if(mode == 0) return cartridge.readROM(addr);
   }
 
   if((addr & 0xc000) == 0x0000) {  //$0000-3fff
-    return cartridge.rom_read(0x8000 + (rom_base << 14) + (addr & 0x3fff));
+    return cartridge.readROM(0x8000 + (rom.base << 14) + (uint14)addr);
   }
 
   if((addr & 0xc000) == 0x4000) {  //$4000-7fff
-    return cartridge.rom_read(0x8000 + (rom_base << 14) + (rom_select << 14) + (addr & 0x3fff));
+    return cartridge.readROM(0x8000 + (rom.base << 14) + (rom.select<< 14) + (uint14)addr);
   }
 
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    if(ram_enable) return cartridge.ram_read((ram_select << 13) + (addr & 0x1fff));
+    if(ram.enable) return cartridge.readRAM(ram.select << 13 | (uint13)addr);
     return 0xff;
   }
 
   return 0xff;
 }
 
-auto Cartridge::MMM01::mmio_write(uint16 addr, uint8 data) -> void {
+auto Cartridge::MMM01::writeIO(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0x0000) {  //$0000-1fff
-    if(rom_mode == 0) {
-      rom_mode = 1;
+    if(mode == 0) {
+      mode = 1;
     } else {
-      ram_enable = (data & 0x0f) == 0x0a;
+      ram.enable= data.bits(0,3) == 0x0a;
     }
   }
 
   if((addr & 0xe000) == 0x2000) {  //$2000-3fff
-    if(rom_mode == 0) {
-      rom_base = data & 0x3f;
+    if(mode == 0) {
+      rom.base = data.bits(0,5);
     } else {
-      rom_select = data;
+      rom.select = data;
     }
   }
 
   if((addr & 0xe000) == 0x4000) {  //$4000-5fff
-    if(rom_mode == 1) {
-      ram_select = data;
+    if(mode == 1) {
+      ram.select = data;
     }
   }
 
@@ -47,15 +47,14 @@ auto Cartridge::MMM01::mmio_write(uint16 addr, uint8 data) -> void {
   }
 
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    if(ram_enable) cartridge.ram_write((ram_select << 13) + (addr & 0x1fff), data);
+    if(ram.enable) cartridge.writeRAM(ram.select << 13 | (uint13)addr, data);
   }
 }
 
 auto Cartridge::MMM01::power() -> void {
-  rom_mode = 0;
-  rom_base = 0;
-
-  ram_enable = false;
-  rom_select = 0x01;
-  ram_select = 0x00;
+  rom.base = 0x00;
+  rom.select = 0x01;
+  ram.enable = false;
+  ram.select = 0x00;
+  mode = 0;
 }

@@ -23,7 +23,7 @@ struct KonamiVRC7 : Board {
     return chrram.read(vrc7.addrCHR(addr));
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
+  auto writeCHR(uint addr, uint8 data) -> void {
     if(addr & 0x2000) return ppu.writeCIRAM(vrc7.addrCIRAM(addr), data);
     return chrram.write(vrc7.addrCHR(addr), data);
   }

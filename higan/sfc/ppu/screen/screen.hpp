@@ -6,10 +6,10 @@ struct Screen {
   auto below(bool hires) -> uint16;
   auto above() -> uint16;
 
-  auto blend(uint x, uint y) const -> uint16;
-  alwaysinline auto paletteColor(uint palette) const -> uint16;
-  alwaysinline auto directColor(uint palette, uint tile) const -> uint16;
-  alwaysinline auto fixedColor() const -> uint16;
+  auto blend(uint x, uint y) const -> uint15;
+  alwaysinline auto paletteColor(uint8 palette) const -> uint15;
+  alwaysinline auto directColor(uint palette, uint tile) const -> uint15;
+  alwaysinline auto fixedColor() const -> uint15;
 
   auto serialize(serializer&) -> void;
 
@@ -33,7 +33,7 @@ struct Screen {
 
   struct Math {
     struct Screen {
-      uint16 color;
+      uint15 color;
       bool colorEnable;
     } above, below;
     bool transparent;

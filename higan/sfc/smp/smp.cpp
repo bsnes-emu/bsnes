@@ -26,7 +26,6 @@ auto SMP::Enter() -> void {
 }
 
 auto SMP::main() -> void {
-  debugger.execute(regs.pc);
   instruction();
 }
 

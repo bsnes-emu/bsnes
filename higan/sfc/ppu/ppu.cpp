@@ -4,7 +4,6 @@ namespace SuperFamicom {
 
 PPU ppu;
 
-#include "memory.cpp"
 #include "mmio.cpp"
 #include "background/background.cpp"
 #include "object/object.cpp"
@@ -97,8 +96,8 @@ auto PPU::load(Markup::Node node) -> bool {
 
 auto PPU::power() -> void {
   for(auto& n : vram.data) n = random(0x0000);
-  for(auto& n : oam) n = random(0x00);
-  for(auto& n : cgram) n = random(0x00);
+  for(auto& n : oam.data) n = random(0x00);
+  for(auto& n : cgram.data) n = random(0x0000);
 }
 
 auto PPU::reset() -> void {
@@ -106,8 +105,8 @@ auto PPU::reset() -> void {
   PPUcounter::reset();
   memory::fill(output, 512 * 480 * sizeof(uint32));
 
-  function<auto (uint24, uint8) -> uint8> reader{&PPU::read, this};
-  function<auto (uint24, uint8) -> void> writer{&PPU::write, this};
+  function<auto (uint24, uint8) -> uint8> reader{&PPU::readIO, this};
+  function<auto (uint24, uint8) -> void> writer{&PPU::writeIO, this};
   bus.map(reader, writer, "00-3f,80-bf:2100-213f");
 
   ppu1.mdr = random(0xff);
@@ -178,7 +177,8 @@ auto PPU::reset() -> void {
   r.m7y = random(0x0000);
 
   //$2121  CGADD
-  r.cgramAddress = random(0x0000);
+  r.cgramAddress = random(0x00);
+  r.cgramAddressLatch = random(0);
 
   //$2133  SETINI
   r.extbg = random(false);

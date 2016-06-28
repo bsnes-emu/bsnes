@@ -36,7 +36,7 @@ auto Memory::free() -> void {
 //
 
 auto Bus::read(uint16 addr) -> uint8 {
-  uint8 data = mmio[addr]->mmio_read(addr);
+  uint8 data = mmio[addr]->readIO(addr);
 
   if(cheat.enable()) {
     if(auto result = cheat.find(addr, data)) return result();
@@ -46,7 +46,7 @@ auto Bus::read(uint16 addr) -> uint8 {
 }
 
 auto Bus::write(uint16 addr, uint8 data) -> void {
-  mmio[addr]->mmio_write(addr, data);
+  mmio[addr]->writeIO(addr, data);
 }
 
 auto Bus::power() -> void {

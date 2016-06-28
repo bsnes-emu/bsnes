@@ -10,47 +10,47 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.p15);
   s.integer(status.p14);
   s.integer(status.joyp);
-  s.integer(status.mlt_req);
+  s.integer(status.mltReq);
 
-  s.integer(status.serial_data);
-  s.integer(status.serial_bits);
+  s.integer(status.serialData);
+  s.integer(status.serialBits);
 
-  s.integer(status.serial_transfer);
-  s.integer(status.serial_clock);
+  s.integer(status.serialTransfer);
+  s.integer(status.serialClock);
 
   s.integer(status.div);
   s.integer(status.tima);
   s.integer(status.tma);
-  s.integer(status.timer_enable);
-  s.integer(status.timer_clock);
+  s.integer(status.timerEnable);
+  s.integer(status.timerClock);
 
-  s.integer(status.interrupt_request_joypad);
-  s.integer(status.interrupt_request_serial);
-  s.integer(status.interrupt_request_timer);
-  s.integer(status.interrupt_request_stat);
-  s.integer(status.interrupt_request_vblank);
+  s.integer(status.interruptRequestJoypad);
+  s.integer(status.interruptRequestSerial);
+  s.integer(status.interruptRequestTimer);
+  s.integer(status.interruptRequestStat);
+  s.integer(status.interruptRequestVblank);
 
-  s.integer(status.speed_double);
-  s.integer(status.speed_switch);
+  s.integer(status.speedDouble);
+  s.integer(status.speedSwitch);
 
-  s.integer(status.dma_source);
-  s.integer(status.dma_target);
-  s.integer(status.dma_mode);
-  s.integer(status.dma_length);
-  s.integer(status.dma_completed);
+  s.integer(status.dmaSource);
+  s.integer(status.dmaTarget);
+  s.integer(status.dmaMode);
+  s.integer(status.dmaLength);
+  s.integer(status.dmaCompleted);
 
   s.integer(status.ff6c);
 
-  s.integer(status.wram_bank);
+  s.integer(status.wramBank);
 
   s.integer(status.ff72);
   s.integer(status.ff73);
   s.integer(status.ff74);
   s.integer(status.ff75);
 
-  s.integer(status.interrupt_enable_joypad);
-  s.integer(status.interrupt_enable_serial);
-  s.integer(status.interrupt_enable_timer);
-  s.integer(status.interrupt_enable_stat);
-  s.integer(status.interrupt_enable_vblank);
+  s.integer(status.interruptEnableJoypad);
+  s.integer(status.interruptEnableSerial);
+  s.integer(status.interruptEnableTimer);
+  s.integer(status.interruptEnableStat);
+  s.integer(status.interruptEnableVblank);
 }

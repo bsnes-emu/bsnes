@@ -58,10 +58,10 @@ auto PPU::Screen::below(bool hires) -> uint16 {
   if(math.transparent = (priority == 0)) math.below.color = paletteColor(0);
 
   if(!hires) return 0;
-  if(!math.below.colorEnable) return math.above.colorEnable ? math.below.color : (uint16)0;
+  if(!math.below.colorEnable) return math.above.colorEnable ? math.below.color : (uint15)0;
 
   return blend(
-    math.above.colorEnable ? math.below.color : (uint16)0,
+    math.above.colorEnable ? math.below.color : (uint15)0,
     math.blendMode ? math.above.color : fixedColor()
   );
 }
@@ -106,7 +106,7 @@ auto PPU::Screen::above() -> uint16 {
 
   if(!ppu.window.output.below.colorEnable) math.below.colorEnable = false;
   math.above.colorEnable = ppu.window.output.above.colorEnable;
-  if(!math.below.colorEnable) return math.above.colorEnable ? math.above.color : (uint16)0;
+  if(!math.below.colorEnable) return math.above.colorEnable ? math.above.color : (uint15)0;
 
   if(r.blendMode && math.transparent) {
     math.blendMode  = false;
@@ -117,12 +117,12 @@ auto PPU::Screen::above() -> uint16 {
   }
 
   return blend(
-    math.above.colorEnable ? math.above.color : (uint16)0,
+    math.above.colorEnable ? math.above.color : (uint15)0,
     math.blendMode ? math.below.color : fixedColor()
   );
 }
 
-auto PPU::Screen::blend(uint x, uint y) const -> uint16 {
+auto PPU::Screen::blend(uint x, uint y) const -> uint15 {
   if(!r.colorMode) {
     if(!math.colorHalve) {
       uint sum = x + y;
@@ -142,13 +142,12 @@ auto PPU::Screen::blend(uint x, uint y) const -> uint16 {
   }
 }
 
-auto PPU::Screen::paletteColor(uint palette) const -> uint16 {
-  palette <<= 1;
+auto PPU::Screen::paletteColor(uint8 palette) const -> uint15 {
   ppu.latch.cgramAddress = palette;
-  return ppu.cgram[palette + 0] << 0 | ppu.cgram[palette + 1] << 8;
+  return ppu.cgram[palette];
 }
 
-auto PPU::Screen::directColor(uint palette, uint tile) const -> uint16 {
+auto PPU::Screen::directColor(uint palette, uint tile) const -> uint15 {
   //palette = -------- BBGGGRRR
   //tile    = ---bgr-- --------
   //output  = 0BBb00GG Gg0RRRr0
@@ -157,7 +156,7 @@ auto PPU::Screen::directColor(uint palette, uint tile) const -> uint16 {
        + ((palette << 2) & 0x001c) + ((tile >> 9) & 0x0002);
 }
 
-auto PPU::Screen::fixedColor() const -> uint16 {
+auto PPU::Screen::fixedColor() const -> uint15 {
   return r.colorBlue << 10 | r.colorGreen << 5 | r.colorRed << 0;
 }
 

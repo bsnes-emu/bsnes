@@ -5,8 +5,8 @@ struct SMP : Processor::SPC700, Thread {
   alwaysinline auto synchronizeCPU() -> void;
   alwaysinline auto synchronizeDSP() -> void;
 
-  auto portRead(uint2 port) const -> uint8;
-  auto portWrite(uint2 port, uint8 data) -> void;
+  auto readPort(uint2 port) const -> uint8;
+  auto writePort(uint2 port, uint8 data) -> void;
 
   auto main() -> void;
   auto load(Markup::Node) -> bool;
@@ -46,24 +46,18 @@ privileged:
 
   static auto Enter() -> void;
 
-  struct Debugger {
-    hook<auto (uint16) -> void> execute;
-    hook<auto (uint16, uint8) -> void> read;
-    hook<auto (uint16, uint8) -> void> write;
-  } debugger;
-
   //memory.cpp
-  auto ramRead(uint16 addr) -> uint8;
-  auto ramWrite(uint16 addr, uint8 data) -> void;
+  auto readRAM(uint16 addr) -> uint8;
+  auto writeRAM(uint16 addr, uint8 data) -> void;
 
-  auto busRead(uint16 addr) -> uint8;
-  auto busWrite(uint16 addr, uint8 data) -> void;
+  auto readBus(uint16 addr) -> uint8;
+  auto writeBus(uint16 addr, uint8 data) -> void;
 
   auto io() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
 
-  auto disassemblerRead(uint16 addr) -> uint8 override;
+  auto readDisassembler(uint16 addr) -> uint8 override;
 
   //timing.cpp
   template<uint Frequency>

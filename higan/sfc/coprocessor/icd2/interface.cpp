@@ -104,7 +104,7 @@ auto ICD2::audioSample(const double* samples, uint channels) -> void {
 }
 
 auto ICD2::inputPoll(uint port, uint device, uint id) -> int16 {
-  GameBoy::cpu.status.mlt_req = joypID & mltReq;
+  GameBoy::cpu.status.mltReq = joypID & mltReq;
 
   uint data = 0x00;
   switch(joypID & mltReq) {

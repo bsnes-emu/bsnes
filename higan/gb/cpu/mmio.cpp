@@ -1,11 +1,11 @@
-auto CPU::wram_addr(uint16 addr) const -> uint {
+auto CPU::wramAddress(uint16 addr) const -> uint {
   addr &= 0x1fff;
   if(addr < 0x1000) return addr;
-  auto bank = status.wram_bank + (status.wram_bank == 0);
+  auto bank = status.wramBank + (status.wramBank == 0);
   return (bank * 0x1000) + (addr & 0x0fff);
 }
 
-auto CPU::mmio_joyp_poll() -> void {
+auto CPU::joypPoll() -> void {
   uint button = 0, dpad = 0;
 
   button |= interface->inputPoll(0, 0, (uint)Input::Start) << 3;
@@ -26,18 +26,18 @@ auto CPU::mmio_joyp_poll() -> void {
   }
 
   status.joyp = 0x0f;
-  if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mlt_req;
+  if(status.p15 == 1 && status.p14 == 1) status.joyp -= status.mltReq;
   if(status.p15 == 0) status.joyp &= button ^ 0x0f;
   if(status.p14 == 0) status.joyp &= dpad ^ 0x0f;
   if(status.joyp != 0x0f) raise(Interrupt::Joypad);
 }
 
-auto CPU::mmio_read(uint16 addr) -> uint8 {
-  if(addr >= 0xc000 && addr <= 0xfdff) return wram[wram_addr(addr)];
+auto CPU::readIO(uint16 addr) -> uint8 {
+  if(addr >= 0xc000 && addr <= 0xfdff) return wram[wramAddress(addr)];
   if(addr >= 0xff80 && addr <= 0xfffe) return hram[addr & 0x7f];
 
   if(addr == 0xff00) {  //JOYP
-    mmio_joyp_poll();
+    joypPoll();
     return 0xc0
          | (status.p15 << 5)
          | (status.p14 << 4)
@@ -49,9 +49,9 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff02) {  //SC
-    return (status.serial_transfer << 7)
+    return (status.serialTransfer << 7)
          | 0x7e
-         | (status.serial_clock << 0);
+         | (status.serialClock << 0);
   }
 
   if(addr == 0xff04) {  //DIV
@@ -68,26 +68,26 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
 
   if(addr == 0xff07) {  //TAC
     return 0xf8
-         | (status.timer_enable << 2)
-         | (status.timer_clock << 0);
+         | (status.timerEnable << 2)
+         | (status.timerClock << 0);
   }
 
   if(addr == 0xff0f) {  //IF
     return 0xe0
-         | (status.interrupt_request_joypad << 4)
-         | (status.interrupt_request_serial << 3)
-         | (status.interrupt_request_timer << 2)
-         | (status.interrupt_request_stat << 1)
-         | (status.interrupt_request_vblank << 0);
+         | (status.interruptRequestJoypad << 4)
+         | (status.interruptRequestSerial << 3)
+         | (status.interruptRequestTimer << 2)
+         | (status.interruptRequestStat << 1)
+         | (status.interruptRequestVblank << 0);
   }
 
   if(addr == 0xff4d) {  //KEY1
-    return (status.speed_double << 7);
+    return (status.speedDouble << 7);
   }
 
   if(addr == 0xff55) {  //HDMA5
-    return (status.dma_completed << 7)
-         | (((status.dma_length / 16) - 1) & 0x7f);
+    return (status.dmaCompleted << 7)
+         | (((status.dmaLength / 16) - 1) & 0x7f);
   }
 
   if(addr == 0xff56) {  //RP
@@ -99,7 +99,7 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff70) {  //SVBK
-    return status.wram_bank;
+    return status.wramBank;
   }
 
   if(addr == 0xff72) {  //???
@@ -128,18 +128,18 @@ auto CPU::mmio_read(uint16 addr) -> uint8 {
 
   if(addr == 0xffff) {  //IE
     return 0xe0
-         | (status.interrupt_enable_joypad << 4)
-         | (status.interrupt_enable_serial << 3)
-         | (status.interrupt_enable_timer << 2)
-         | (status.interrupt_enable_stat << 1)
-         | (status.interrupt_enable_vblank << 0);
+         | (status.interruptEnableJoypad << 4)
+         | (status.interruptEnableSerial << 3)
+         | (status.interruptEnableTimer << 2)
+         | (status.interruptEnableStat << 1)
+         | (status.interruptEnableVblank << 0);
   }
 
   return 0xff;
 }
 
-auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
-  if(addr >= 0xc000 && addr <= 0xfdff) { wram[wram_addr(addr)] = data; return; }
+auto CPU::writeIO(uint16 addr, uint8 data) -> void {
+  if(addr >= 0xc000 && addr <= 0xfdff) { wram[wramAddress(addr)] = data; return; }
   if(addr >= 0xff80 && addr <= 0xfffe) { hram[addr & 0x7f] = data; return; }
 
   if(addr == 0xff00) {  //JOYP
@@ -150,14 +150,14 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff01) {  //SB
-    status.serial_data = data;
+    status.serialData = data;
     return;
   }
 
   if(addr == 0xff02) {  //SC
-    status.serial_transfer = data & 0x80;
-    status.serial_clock = data & 0x01;
-    if(status.serial_transfer) status.serial_bits = 8;
+    status.serialTransfer = data & 0x80;
+    status.serialClock = data & 0x01;
+    if(status.serialTransfer) status.serialBits = 8;
     return;
   }
 
@@ -177,58 +177,58 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff07) {  //TAC
-    status.timer_enable = data & 0x04;
-    status.timer_clock = data & 0x03;
+    status.timerEnable = data & 0x04;
+    status.timerClock = data & 0x03;
     return;
   }
 
   if(addr == 0xff0f) {  //IF
-    status.interrupt_request_joypad = data & 0x10;
-    status.interrupt_request_serial = data & 0x08;
-    status.interrupt_request_timer = data & 0x04;
-    status.interrupt_request_stat = data & 0x02;
-    status.interrupt_request_vblank = data & 0x01;
+    status.interruptRequestJoypad = data & 0x10;
+    status.interruptRequestSerial = data & 0x08;
+    status.interruptRequestTimer = data & 0x04;
+    status.interruptRequestStat = data & 0x02;
+    status.interruptRequestVblank = data & 0x01;
     return;
   }
 
   if(addr == 0xff4d) {  //KEY1
-    status.speed_switch = data & 0x01;
+    status.speedSwitch = data & 0x01;
     return;
   }
 
   if(addr == 0xff51) {  //HDMA1
-    status.dma_source = (status.dma_source & 0x00ff) | (data << 8);
+    status.dmaSource = (status.dmaSource & 0x00ff) | (data << 8);
     return;
   }
 
   if(addr == 0xff52) {  //HDMA2
-    status.dma_source = (status.dma_source & 0xff00) | (data & 0xf0);
+    status.dmaSource = (status.dmaSource & 0xff00) | (data & 0xf0);
     return;
   }
 
   if(addr == 0xff53) {  //HDMA3
-    status.dma_target = (status.dma_target & 0x00ff) | (data << 8);
+    status.dmaTarget = (status.dmaTarget & 0x00ff) | (data << 8);
     return;
   }
 
   if(addr == 0xff54) {  //HDMA4
-    status.dma_target = (status.dma_target & 0xff00) | (data & 0xf0);
+    status.dmaTarget = (status.dmaTarget & 0xff00) | (data & 0xf0);
     return;
   }
 
   if(addr == 0xff55) {  //HDMA5
-    status.dma_mode = data & 0x80;
-    status.dma_length = ((data & 0x7f) + 1) * 16;
-    status.dma_completed = !status.dma_mode;
+    status.dmaMode = data & 0x80;
+    status.dmaLength = ((data & 0x7f) + 1) * 16;
+    status.dmaCompleted = !status.dmaMode;
 
-    if(status.dma_mode == 0) {
+    if(status.dmaMode == 0) {
       do {
         for(auto n : range(16)) {
-          dma_write(status.dma_target++, dma_read(status.dma_source++));
+          writeDMA(status.dmaTarget++, readDMA(status.dmaSource++));
         }
-        add_clocks(8 << status.speed_double);
-        status.dma_length -= 16;
-      } while(status.dma_length);
+        step(8 << status.speedDouble);
+        status.dmaLength -= 16;
+      } while(status.dmaLength);
     }
     return;
   }
@@ -263,16 +263,16 @@ auto CPU::mmio_write(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff70) {  //SVBK
-    status.wram_bank = data & 0x07;
+    status.wramBank = data & 0x07;
     return;
   }
 
   if(addr == 0xffff) {  //IE
-    status.interrupt_enable_joypad = data & 0x10;
-    status.interrupt_enable_serial = data & 0x08;
-    status.interrupt_enable_timer = data & 0x04;
-    status.interrupt_enable_stat = data & 0x02;
-    status.interrupt_enable_vblank = data & 0x01;
+    status.interruptEnableJoypad = data & 0x10;
+    status.interruptEnableSerial = data & 0x08;
+    status.interruptEnableTimer = data & 0x04;
+    status.interruptEnableStat = data & 0x02;
+    status.interruptEnableVblank = data & 0x01;
     return;
   }
 }

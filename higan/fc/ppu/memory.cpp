@@ -106,25 +106,23 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
 
   //PPUSCROLL
   case 5:
-    if(!r.v.latch) {
+    if(r.v.latch++ == 0) {
       r.v.fineX = data.bits(0,2);
       r.t.tileX = data.bits(3,7);
     } else {
       r.t.fineY = data.bits(0,2);
       r.t.tileY = data.bits(3,7);
     }
-    r.v.latch ^= 1;
     break;
 
   //PPUADDR
   case 6:
-    if(!r.v.latch) {
+    if(r.v.latch++ == 0) {
       r.t.addressHi = data.bits(0,5);
     } else {
       r.t.addressLo = data.bits(0,7);
       r.v.address = r.t.address;
     }
-    r.v.latch ^= 1;
     break;
 
   //PPUDATA

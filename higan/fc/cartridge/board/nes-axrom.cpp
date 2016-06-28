@@ -24,7 +24,7 @@ struct NES_AxROM : Board {
     return Board::readCHR(addr);
   }
 
-  auto chr_write(uint addr, uint8 data) -> void {
+  auto writeCHR(uint addr, uint8 data) -> void {
     if(addr & 0x2000) return ppu.writeCIRAM((mirrorSelect << 10) | (addr & 0x03ff), data);
     return Board::writeCHR(addr, data);
   }

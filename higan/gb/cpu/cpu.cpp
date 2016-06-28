@@ -13,72 +13,72 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::main() -> void {
-  interrupt_test();
+  interruptTest();
   instruction();
 }
 
 auto CPU::raise(CPU::Interrupt id) -> void {
   if(id == Interrupt::Vblank) {
-    status.interrupt_request_vblank = 1;
-    if(status.interrupt_enable_vblank) r.halt = false;
+    status.interruptRequestVblank = 1;
+    if(status.interruptEnableVblank) r.halt = false;
   }
 
   if(id == Interrupt::Stat) {
-    status.interrupt_request_stat = 1;
-    if(status.interrupt_enable_stat) r.halt = false;
+    status.interruptRequestStat = 1;
+    if(status.interruptEnableStat) r.halt = false;
   }
 
   if(id == Interrupt::Timer) {
-    status.interrupt_request_timer = 1;
-    if(status.interrupt_enable_timer) r.halt = false;
+    status.interruptRequestTimer = 1;
+    if(status.interruptEnableTimer) r.halt = false;
   }
 
   if(id == Interrupt::Serial) {
-    status.interrupt_request_serial = 1;
-    if(status.interrupt_enable_serial) r.halt = false;
+    status.interruptRequestSerial = 1;
+    if(status.interruptEnableSerial) r.halt = false;
   }
 
   if(id == Interrupt::Joypad) {
-    status.interrupt_request_joypad = 1;
-    if(status.interrupt_enable_joypad) r.halt = r.stop = false;
+    status.interruptRequestJoypad = 1;
+    if(status.interruptEnableJoypad) r.halt = r.stop = false;
   }
 }
 
-auto CPU::interrupt_test() -> void {
+auto CPU::interruptTest() -> void {
   if(!r.ime) return;
 
-  if(status.interrupt_request_vblank && status.interrupt_enable_vblank) {
-    status.interrupt_request_vblank = 0;
+  if(status.interruptRequestVblank && status.interruptEnableVblank) {
+    status.interruptRequestVblank = 0;
     return interrupt(0x0040);
   }
 
-  if(status.interrupt_request_stat && status.interrupt_enable_stat) {
-    status.interrupt_request_stat = 0;
+  if(status.interruptRequestStat && status.interruptEnableStat) {
+    status.interruptRequestStat = 0;
     return interrupt(0x0048);
   }
 
-  if(status.interrupt_request_timer && status.interrupt_enable_timer) {
-    status.interrupt_request_timer = 0;
+  if(status.interruptRequestTimer && status.interruptEnableTimer) {
+    status.interruptRequestTimer = 0;
     return interrupt(0x0050);
   }
 
-  if(status.interrupt_request_serial && status.interrupt_enable_serial) {
-    status.interrupt_request_serial = 0;
+  if(status.interruptRequestSerial && status.interruptEnableSerial) {
+    status.interruptRequestSerial = 0;
     return interrupt(0x0058);
   }
 
-  if(status.interrupt_request_joypad && status.interrupt_enable_joypad) {
-    status.interrupt_request_joypad = 0;
+  if(status.interruptRequestJoypad && status.interruptEnableJoypad) {
+    status.interruptRequestJoypad = 0;
     return interrupt(0x0060);
   }
 }
 
 auto CPU::stop() -> bool {
-  if(status.speed_switch) {
-    status.speed_switch = 0;
-    status.speed_double ^= 1;
-    if(status.speed_double == 0) frequency = 4 * 1024 * 1024;
-    if(status.speed_double == 1) frequency = 8 * 1024 * 1024;
+  if(status.speedSwitch) {
+    status.speedSwitch = 0;
+    status.speedDouble ^= 1;
+    if(status.speedDouble == 0) frequency = 4 * 1024 * 1024;
+    if(status.speedDouble == 1) frequency = 8 * 1024 * 1024;
     return true;
   }
   return false;
@@ -130,57 +130,9 @@ auto CPU::power() -> void {
   r[DE] = 0x0000;
   r[HL] = 0x0000;
 
-  status.clock = 0;
-
-  status.p15 = 0;
-  status.p14 = 0;
-  status.joyp = 0;
-  status.mlt_req = 0;
-
-  status.serial_data = 0;
-  status.serial_bits = 0;
-
-  status.serial_transfer = 0;
-  status.serial_clock = 0;
-
-  status.div = 0;
-
-  status.tima = 0;
-
-  status.tma = 0;
-
-  status.timer_enable = 0;
-  status.timer_clock = 0;
-
-  status.interrupt_request_joypad = 0;
-  status.interrupt_request_serial = 0;
-  status.interrupt_request_timer = 0;
-  status.interrupt_request_stat = 0;
-  status.interrupt_request_vblank = 0;
-
-  status.speed_double = 0;
-  status.speed_switch = 0;
-
-  status.dma_source = 0;
-  status.dma_target = 0;
-
-  status.dma_mode = 0;
-  status.dma_length = 0;
-  status.dma_completed = true;
-
-  status.ff6c = 0;
-  status.ff72 = 0;
-  status.ff73 = 0;
-  status.ff74 = 0;
-  status.ff75 = 0;
-
-  status.wram_bank = 1;
-
-  status.interrupt_enable_joypad = 0;
-  status.interrupt_enable_serial = 0;
-  status.interrupt_enable_timer = 0;
-  status.interrupt_enable_stat = 0;
-  status.interrupt_enable_vblank = 0;
+  memory::fill(&status, sizeof(Status));
+  status.dmaCompleted = true;
+  status.wramBank = 1;
 }
 
 }

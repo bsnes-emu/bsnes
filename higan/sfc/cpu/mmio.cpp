@@ -1,6 +1,6 @@
 auto CPU::readAPU(uint24 addr, uint8 data) -> uint8 {
   synchronizeSMP();
-  return smp.portRead(addr.bits(0,1));
+  return smp.readPort(addr.bits(0,1));
 }
 
 auto CPU::readCPU(uint24 addr, uint8 data) -> uint8 {

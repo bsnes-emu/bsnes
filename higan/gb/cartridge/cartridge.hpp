@@ -8,13 +8,14 @@ struct Cartridge : MMIO {
   auto save() -> void;
   auto unload() -> void;
 
-  auto rom_read(uint addr) -> uint8;
-  auto rom_write(uint addr, uint8 data) -> void;
-  auto ram_read(uint addr) -> uint8;
-  auto ram_write(uint addr, uint8 data) -> void;
+  auto readROM(uint addr) -> uint8;
+  auto writeROM(uint addr, uint8 data) -> void;
 
-  auto mmio_read(uint16 addr) -> uint8;
-  auto mmio_write(uint16 addr, uint8 data) -> void;
+  auto readRAM(uint addr) -> uint8;
+  auto writeRAM(uint addr, uint8 data) -> void;
+
+  auto readIO(uint16 addr) -> uint8;
+  auto writeIO(uint16 addr, uint8 data) -> void;
 
   auto power() -> void;
 
@@ -54,19 +55,15 @@ struct Cartridge : MMIO {
     boolean battery;
     boolean rtc;
     boolean rumble;
-
-    uint romsize = 0;
-    uint ramsize = 0;
   } information;
 
-  uint8* romdata = nullptr;
-  uint romsize = 0;
-
-  uint8* ramdata = nullptr;
-  uint ramsize = 0;
+  struct Memory {
+    uint8* data = nullptr;
+    uint size = 0;
+  } rom, ram;
 
   MMIO* mapper = nullptr;
-  bool bootrom_enable = true;
+  bool bootromEnable = true;
 };
 
 extern Cartridge cartridge;

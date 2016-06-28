@@ -21,14 +21,14 @@ struct GPR {
 struct PSR {
   union {
     uint32_t data = 0;
-    BitField<uint32_t, 31>    n;  //negative
-    BitField<uint32_t, 30>    z;  //zero
-    BitField<uint32_t, 29>    c;  //carry
-    BitField<uint32_t, 28>    v;  //overflow
-    BitField<uint32_t,  7>    i;  //irq
-    BitField<uint32_t,  6>    f;  //fiq
-    BitField<uint32_t,  5>    t;  //thumb
-    BitField<uint32_t,  4, 0> m;  //mode
+    BooleanBitField<uint32_t, 31>    n;  //negative
+    BooleanBitField<uint32_t, 30>    z;  //zero
+    BooleanBitField<uint32_t, 29>    c;  //carry
+    BooleanBitField<uint32_t, 28>    v;  //overflow
+    BooleanBitField<uint32_t,  7>    i;  //irq
+    BooleanBitField<uint32_t,  6>    f;  //fiq
+    BooleanBitField<uint32_t,  5>    t;  //thumb
+    NaturalBitField<uint32_t,  4, 0> m;  //mode
   };
 
   PSR() = default;

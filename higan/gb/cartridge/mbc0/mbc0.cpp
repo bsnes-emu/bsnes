@@ -1,18 +1,18 @@
-auto Cartridge::MBC0::mmio_read(uint16 addr) -> uint8 {
+auto Cartridge::MBC0::readIO(uint16 addr) -> uint8 {
   if((addr & 0x8000) == 0x0000) {  //$0000-7fff
-    return cartridge.rom_read(addr);
+    return cartridge.readROM(addr);
   }
 
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    return cartridge.ram_read(addr & 0x1fff);
+    return cartridge.readRAM((uint13)addr);
   }
 
   return 0xff;
 }
 
-auto Cartridge::MBC0::mmio_write(uint16 addr, uint8 data) -> void {
+auto Cartridge::MBC0::writeIO(uint16 addr, uint8 data) -> void {
   if((addr & 0xe000) == 0xa000) {  //$a000-bfff
-    cartridge.ram_write(addr & 0x1fff, data);
+    cartridge.writeRAM((uint13)addr, data);
     return;
   }
 }
