@@ -1,4 +1,4 @@
-auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
+auto ARM::disassembleInstructionARM(uint32 pc) -> string {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -24,9 +24,9 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     "da", "ia", "db", "ib",
   };
 
-  static auto is_move = [](uint4 opcode) { return opcode == 13 || opcode == 15; };
-  static auto is_comp = [](uint4 opcode) { return opcode >= 8 && opcode <= 11; };
-  static auto is_math = [](uint4 opcode) { return opcode < 8 || opcode == 12 || opcode == 14; };
+  static auto isMove = [](uint4 opcode) { return opcode == 13 || opcode == 15; };
+  static auto isComp = [](uint4 opcode) { return opcode >= 8 && opcode <= 11; };
+  static auto isMath = [](uint4 opcode) { return opcode < 8 || opcode == 12 || opcode == 14; };
 
   string output{hex(pc, 8L), "  "};
 
@@ -272,13 +272,13 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     uint4 rm = instruction;
 
     output.append(opcodes[opcode], conditions[condition]);
-    if(is_move(opcode)) output.append(save ? "s " : " ", registers[rd]);
-    if(is_comp(opcode)) output.append(" ", registers[rn]);
-    if(is_math(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn]);
+    if(isMove(opcode)) output.append(save ? "s " : " ", registers[rd]);
+    if(isComp(opcode)) output.append(" ", registers[rn]);
+    if(isMath(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn]);
     output.append(",", registers[rm]);
     if(op == 0 && shift != 0) output.append(" lsl #", shift);
-    if(op == 1) output.append(" lsr #", shift == 0 ? 32u : (unsigned)shift);
-    if(op == 2) output.append(" asr #", shift == 0 ? 32u : (unsigned)shift);
+    if(op == 1) output.append(" lsr #", shift == 0 ? 32u : (uint)shift);
+    if(op == 2) output.append(" asr #", shift == 0 ? 32u : (uint)shift);
     if(op == 3 && shift != 0) output.append(" ror #", shift);
     if(op == 3 && shift == 0) output.append(" rrx");
 
@@ -300,9 +300,9 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     uint4 rm = instruction;
 
     output.append(opcodes[opcode], conditions[condition]);
-    if(is_move(opcode)) output.append(save ? "s " : " ", registers[rd], ",");
-    if(is_comp(opcode)) output.append(registers[rn], ",");
-    if(is_math(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn], ",");
+    if(isMove(opcode)) output.append(save ? "s " : " ", registers[rd], ",");
+    if(isComp(opcode)) output.append(registers[rn], ",");
+    if(isMath(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn], ",");
     output.append(registers[rm]);
     if(mode == 0) output.append(" lsl ");
     if(mode == 1) output.append(" lsr ");
@@ -328,9 +328,9 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
 
     uint32 rm = (immediate >> (rotate << 1)) | (immediate << (32 - (rotate << 1)));
     output.append(opcodes[opcode], conditions[condition]);
-    if(is_move(opcode)) output.append(save ? "s " : " ", registers[rd]);
-    if(is_comp(opcode)) output.append(" ", registers[rn]);
-    if(is_math(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn]);
+    if(isMove(opcode)) output.append(save ? "s " : " ", registers[rd]);
+    if(isComp(opcode)) output.append(" ", registers[rn]);
+    if(isMath(opcode)) output.append(save ? "s " : " ", registers[rd], ",", registers[rn]);
     output.append(",#0x", hex(rm, 8L));
 
     return output;
@@ -382,8 +382,8 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
     if(pre == 0) output.append("]");
     output.append(",", up ? "+" : "-", registers[rm]);
     if(mode == 0 && shift != 0) output.append(" lsl #", shift);
-    if(mode == 1) output.append(" lsr #", shift == 0 ? 32u : (unsigned)shift);
-    if(mode == 2) output.append(" asr #", shift == 0 ? 32u : (unsigned)shift);
+    if(mode == 1) output.append(" lsr #", shift == 0 ? 32u : (uint)shift);
+    if(mode == 2) output.append(" asr #", shift == 0 ? 32u : (uint)shift);
     if(mode == 3 && shift != 0) output.append(" ror #", shift);
     if(mode == 3 && shift == 0) output.append(" rrx");
     if(pre == 1) output.append("]");
@@ -405,7 +405,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
 
     output.append(load ? "ldm" : "stm", conditions[condition], indices[index], " ");
     output.append(registers[rn], writeback ? "!" : "", ",{");
-    for(unsigned n = 0; n < 16; n++) if(list & (1 << n)) output.append(registers[n], ",");
+    for(uint n : range(16)) if(list & (1 << n)) output.append(registers[n], ",");
     output.trimRight(",", 1L);
     output.append("}", s ? "^" : "");
 
@@ -438,7 +438,7 @@ auto ARM::disassemble_arm_instruction(uint32 pc) -> string {
   return output;
 }
 
-auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
+auto ARM::disassembleInstructionTHUMB(uint32 pc) -> string {
   static string conditions[] = {
     "eq", "ne", "cs", "cc",
     "mi", "pl", "vs", "vc",
@@ -567,7 +567,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
     uint3 rd = instruction >> 8;
     uint8 displacement = instruction;
 
-    unsigned rm = ((pc + 4) & ~3) + displacement * 4;
+    uint rm = ((pc + 4) & ~3) + displacement * 4;
     output.append("ldr ", registers[rd], ",[pc,#0x", hex(rm, 3L), "]");
     output.append(" =0x", hex(read(Word | Nonsequential, rm), 8L));
 
@@ -675,7 +675,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
     uint8 list = instruction;
 
     output.append(load == 0 ? "push" : "pop", " {");
-    for(unsigned l = 0; l < 8; l++) {
+    for(uint l : range(8)) {
       if(list & (1 << l)) output.append(registers[l], ",");
     }
     if(branch) output.append(load == 0 ? "lr," : "pc,");
@@ -693,7 +693,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
     uint8 list = instruction;
 
     output.append(load ? "ldmia " : "stmia ", registers[rn], "!,{");
-    for(unsigned l = 0; l < 8; l++) {
+    for(uint l : range(8)) {
       if(list & (1 << l)) output.append(registers[l], ",");
     }
     output.trimRight(",", 1L);
@@ -759,7 +759,7 @@ auto ARM::disassemble_thumb_instruction(uint32 pc) -> string {
   return output;
 }
 
-auto ARM::disassemble_registers() -> string {
+auto ARM::disassembleRegisters() -> string {
   string output;
   output.append( "r0:", hex(r( 0), 8L), " r1:", hex(r( 1), 8L), "  r2:", hex(r( 2), 8L), "  r3:", hex(r( 3), 8L), "  ");
   output.append( "r4:", hex(r( 4), 8L), " r5:", hex(r( 5), 8L),  " r6:", hex(r( 6), 8L),  " r7:", hex(r( 7), 8L), " ");

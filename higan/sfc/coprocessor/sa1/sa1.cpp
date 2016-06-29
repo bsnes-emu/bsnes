@@ -5,7 +5,7 @@ namespace SuperFamicom {
 #include "bus.cpp"
 #include "dma.cpp"
 #include "memory.cpp"
-#include "mmio.cpp"
+#include "io.cpp"
 #include "serialization.cpp"
 SA1 sa1;
 

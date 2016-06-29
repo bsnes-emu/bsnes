@@ -1,4 +1,4 @@
-auto PPU::vram_read(uint mode, uint32 addr) -> uint32 {
+auto PPU::readVRAM(uint mode, uint32 addr) -> uint32 {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
   if(mode & Word) {
@@ -14,7 +14,7 @@ auto PPU::vram_read(uint mode, uint32 addr) -> uint32 {
   return 0;  //should never occur
 }
 
-auto PPU::vram_write(uint mode, uint32 addr, uint32 word) -> void {
+auto PPU::writeVRAM(uint mode, uint32 addr, uint32 word) -> void {
   addr &= (addr & 0x10000) ? 0x17fff : 0x0ffff;
 
   if(mode & Word) {
@@ -38,30 +38,30 @@ auto PPU::vram_write(uint mode, uint32 addr, uint32 word) -> void {
   }
 }
 
-auto PPU::pram_read(uint mode, uint32 addr) -> uint32 {
-  if(mode & Word) return pram_read(Half, addr & ~2) << 0 | pram_read(Half, addr | 2) << 16;
-  if(mode & Byte) return pram_read(Half, addr) >> ((addr & 1) * 8);
+auto PPU::readPRAM(uint mode, uint32 addr) -> uint32 {
+  if(mode & Word) return readPRAM(Half, addr & ~2) << 0 | readPRAM(Half, addr | 2) << 16;
+  if(mode & Byte) return readPRAM(Half, addr) >> ((addr & 1) * 8);
   return pram[addr >> 1 & 511];
 }
 
-auto PPU::pram_write(uint mode, uint32 addr, uint32 word) -> void {
+auto PPU::writePRAM(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Word) {
-    pram_write(Half, addr & ~2, word >>  0);
-    pram_write(Half, addr |  2, word >> 16);
+    writePRAM(Half, addr & ~2, word >>  0);
+    writePRAM(Half, addr |  2, word >> 16);
     return;
   }
 
   if(mode & Byte) {
     word = (uint8)word;
-    return pram_write(Half, addr, word << 8 | word << 0);
+    return writePRAM(Half, addr, word << 8 | word << 0);
   }
 
   pram[addr >> 1 & 511] = (uint16)word;
 }
 
-auto PPU::oam_read(uint mode, uint32 addr) -> uint32 {
-  if(mode & Word) return oam_read(Half, addr & ~2) << 0 | oam_read(Half, addr | 2) << 16;
-  if(mode & Byte) return oam_read(Half, addr) >> ((addr & 1) * 8);
+auto PPU::readOAM(uint mode, uint32 addr) -> uint32 {
+  if(mode & Word) return readOAM(Half, addr & ~2) << 0 | readOAM(Half, addr | 2) << 16;
+  if(mode & Byte) return readOAM(Half, addr) >> ((addr & 1) * 8);
 
   auto& obj = object[addr >> 3 & 127];
   auto& par = objectparam[addr >> 5 & 31];
@@ -103,10 +103,10 @@ auto PPU::oam_read(uint mode, uint32 addr) -> uint32 {
   }
 }
 
-auto PPU::oam_write(uint mode, uint32 addr, uint32 word) -> void {
+auto PPU::writeOAM(uint mode, uint32 addr, uint32 word) -> void {
   if(mode & Word) {
-    oam_write(Half, addr & ~2, word >>  0);
-    oam_write(Half, addr |  2, word >> 16);
+    writeOAM(Half, addr & ~2, word >>  0);
+    writeOAM(Half, addr |  2, word >> 16);
     return;
   }
 

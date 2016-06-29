@@ -2,7 +2,7 @@
 
 namespace GameBoy {
 
-#include "mmio.cpp"
+#include "io.cpp"
 #include "memory.cpp"
 #include "timing.cpp"
 #include "serialization.cpp"

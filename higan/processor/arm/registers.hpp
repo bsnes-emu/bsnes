@@ -54,7 +54,7 @@ struct Pipeline {
 };
 
 struct Processor {
-  enum class Mode : unsigned {
+  enum class Mode : uint {
     USR = 0x10,  //user
     FIQ = 0x11,  //fast interrupt request
     IRQ = 0x12,  //interrupt request

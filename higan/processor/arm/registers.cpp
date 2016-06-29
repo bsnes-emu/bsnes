@@ -32,7 +32,7 @@ auto ARM::Processor::power() -> void {
 }
 
 auto ARM::Processor::setMode(Mode mode) -> void {
-  cpsr.m = 0x10 | (unsigned)mode;
+  cpsr.m = 0x10 | (uint)mode;
 
   if(mode == Mode::FIQ) {
     r[ 8] = &fiq.r8;

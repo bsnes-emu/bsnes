@@ -1,4 +1,4 @@
-auto PPU::read(uint32 addr) -> uint8 {
+auto PPU::readIO(uint32 addr) -> uint8 {
   auto bgcnt = [&]() -> Registers::Background::Control& { return regs.bg[addr.bits(1,2)].control; };
   auto wf = [&]() -> Registers::WindowFlags& {
     static uint id[] = {In0, In1, Out, Obj};
@@ -102,7 +102,7 @@ auto PPU::read(uint32 addr) -> uint8 {
   return 0;
 }
 
-auto PPU::write(uint32 addr, uint8 data) -> void {
+auto PPU::writeIO(uint32 addr, uint8 data) -> void {
   auto bgcnt = [&]() -> Registers::Background::Control& { return regs.bg[addr.bits(1,2)].control; };
   auto bgofs = [&]() -> Registers::Background& { return regs.bg[addr.bits(2,3)]; };
   auto bg = [&]() -> Registers::Background& { return regs.bg[addr.bits(4,5)]; };

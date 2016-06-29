@@ -17,34 +17,34 @@ auto PPU::main() -> void {
 
 auto PPU::step(uint clocks) -> void {
   while(clocks--) {
-    if(r.ly == 240 && r.lx == 340) r.nmiHold = 1;
-    if(r.ly == 241 && r.lx ==   0) r.nmiFlag = r.nmiHold;
-    if(r.ly == 241 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
+    if(io.ly == 240 && io.lx == 340) io.nmiHold = 1;
+    if(io.ly == 241 && io.lx ==   0) io.nmiFlag = io.nmiHold;
+    if(io.ly == 241 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
-    if(r.ly == 260 && r.lx == 340) r.spriteZeroHit = 0, r.spriteOverflow = 0;
+    if(io.ly == 260 && io.lx == 340) io.spriteZeroHit = 0, io.spriteOverflow = 0;
 
-    if(r.ly == 260 && r.lx == 340) r.nmiHold = 0;
-    if(r.ly == 261 && r.lx ==   0) r.nmiFlag = r.nmiHold;
-    if(r.ly == 261 && r.lx ==   2) cpu.nmiLine(r.nmiEnable && r.nmiFlag);
+    if(io.ly == 260 && io.lx == 340) io.nmiHold = 0;
+    if(io.ly == 261 && io.lx ==   0) io.nmiFlag = io.nmiHold;
+    if(io.ly == 261 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
     clock += 4;
     if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 
-    r.lx++;
+    io.lx++;
   }
 }
 
 auto PPU::scanline() -> void {
-  r.lx = 0;
-  if(++r.ly == 262) {
-    r.ly = 0;
+  io.lx = 0;
+  if(++io.ly == 262) {
+    io.ly = 0;
     frame();
   }
-  cartridge.scanline(r.ly);
+  cartridge.scanline(io.ly);
 }
 
 auto PPU::frame() -> void {
-  r.field++;
+  io.field++;
   scheduler.exit(Scheduler::Event::Frame);
 }
 
@@ -58,9 +58,9 @@ auto PPU::power() -> void {
 auto PPU::reset() -> void {
   create(PPU::Enter, 21'477'272);
 
-  memory::fill(&r, sizeof(Registers));
-  memory::fill(&l, sizeof(Latches));
-  r.vramIncrement = 1;
+  memory::fill(&io, sizeof(IO));
+  memory::fill(&latch, sizeof(Latches));
+  io.vramIncrement = 1;
 
   for(auto& n : ciram ) n = 0;
   for(auto& n : cgram ) n = 0;

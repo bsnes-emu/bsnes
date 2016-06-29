@@ -17,9 +17,11 @@ Presentation::Presentation() {
   //add icarus menu options -- but only if icarus binary is present
   if(execute("icarus", "--name").output.strip() == "icarus") {
     libraryMenu.append(MenuSeparator());
-    libraryMenu.append(MenuItem().setText("Import ROM File ...").onActivate([&] {
+    libraryMenu.append(MenuItem().setText("Load ROM File ...").onActivate([&] {
       audio->clear();
       if(auto location = execute("icarus", "--import")) {
+        program->mediumQueue.append(location.output.strip());
+        program->loadMedium();
       }
     }));
     libraryMenu.append(MenuItem().setText("Import ROM Files ...").onActivate([&] {

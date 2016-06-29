@@ -1,63 +1,63 @@
-auto CPU::busIdle() -> void {
-  prefetch_step(1);
+auto CPU::_idle() -> void {
+  prefetchStep(1);
 }
 
-auto CPU::busRead(uint mode, uint32 addr) -> uint32 {
-  uint wait = busWait(mode, addr);
+auto CPU::_read(uint mode, uint32 addr) -> uint32 {
+  uint wait = this->wait(mode, addr);
   uint word = pipeline.fetch.instruction;
 
   if(addr >= 0x1000'0000) {
-    prefetch_step(wait);
+    prefetchStep(wait);
   } else if(addr & 0x0800'0000) {
     if(mode & Prefetch && regs.wait.control.prefetch) {
-      prefetch_sync(addr);
-      word = prefetch_read();
-      if(mode & Word) word |= prefetch_read() << 16;
+      prefetchSync(addr);
+      word = prefetchRead();
+      if(mode & Word) word |= prefetchRead() << 16;
     } else {
-      if(!active.dma) prefetch_wait();
+      if(!active.dma) prefetchWait();
       step(wait - 1);
       word = cartridge.read(mode, addr);
       step(1);
     }
   } else {
-    prefetch_step(wait - 1);
+    prefetchStep(wait - 1);
          if(addr <  0x0200'0000) word = bios.read(mode, addr);
-    else if(addr <  0x0300'0000) word = ewram_read(mode, addr);
-    else if(addr <  0x0400'0000) word = iwram_read(mode, addr);
-    else if(addr >= 0x0700'0000) word = ppu.oam_read(mode, addr);
-    else if(addr >= 0x0600'0000) word = ppu.vram_read(mode, addr);
-    else if(addr >= 0x0500'0000) word = ppu.pram_read(mode, addr);
-    else if((addr & 0xffff'fc00) == 0x0400'0000) word = bus.mmio[addr & 0x3ff]->read(mode, addr);
-    else if((addr & 0xff00'ffff) == 0x0400'0800) word = ((MMIO*)this)->read(mode, 0x0400'0800 | (addr & 3));
-    prefetch_step(1);
+    else if(addr <  0x0300'0000) word = readEWRAM(mode, addr);
+    else if(addr <  0x0400'0000) word = readIWRAM(mode, addr);
+    else if(addr >= 0x0700'0000) word = ppu.readOAM(mode, addr);
+    else if(addr >= 0x0600'0000) word = ppu.readVRAM(mode, addr);
+    else if(addr >= 0x0500'0000) word = ppu.readPRAM(mode, addr);
+    else if((addr & 0xffff'fc00) == 0x0400'0000) word = bus.io[addr & 0x3ff]->readIO(mode, addr);
+    else if((addr & 0xff00'ffff) == 0x0400'0800) word = ((IO*)this)->readIO(mode, 0x0400'0800 | (addr & 3));
+    prefetchStep(1);
   }
 
   return word;
 }
 
-auto CPU::busWrite(uint mode, uint32 addr, uint32 word) -> void {
-  uint wait = busWait(mode, addr);
+auto CPU::_write(uint mode, uint32 addr, uint32 word) -> void {
+  uint wait = this->wait(mode, addr);
 
   if(addr >= 0x1000'0000) {
-    prefetch_step(wait);
+    prefetchStep(wait);
   } else if(addr & 0x0800'0000) {
-    if(!active.dma) prefetch_wait();
+    if(!active.dma) prefetchWait();
     step(wait);
     cartridge.write(mode, addr, word);
   } else {
-    prefetch_step(wait);
+    prefetchStep(wait);
          if(addr  < 0x0200'0000);
-    else if(addr  < 0x0300'0000) ewram_write(mode, addr, word);
-    else if(addr  < 0x0400'0000) iwram_write(mode, addr, word);
-    else if(addr >= 0x0700'0000) ppu.oam_write(mode, addr, word);
-    else if(addr >= 0x0600'0000) ppu.vram_write(mode, addr, word);
-    else if(addr >= 0x0500'0000) ppu.pram_write(mode, addr, word);
-    else if((addr & 0xffff'fc00) == 0x0400'0000) bus.mmio[addr & 0x3ff]->write(mode, addr, word);
-    else if((addr & 0xff00'ffff) == 0x0400'0800) ((MMIO*)this)->write(mode, 0x0400'0800 | (addr & 3), word);
+    else if(addr  < 0x0300'0000) writeEWRAM(mode, addr, word);
+    else if(addr  < 0x0400'0000) writeIWRAM(mode, addr, word);
+    else if(addr >= 0x0700'0000) ppu.writeOAM(mode, addr, word);
+    else if(addr >= 0x0600'0000) ppu.writeVRAM(mode, addr, word);
+    else if(addr >= 0x0500'0000) ppu.writePRAM(mode, addr, word);
+    else if((addr & 0xffff'fc00) == 0x0400'0000) bus.io[addr & 0x3ff]->writeIO(mode, addr, word);
+    else if((addr & 0xff00'ffff) == 0x0400'0800) ((IO*)this)->writeIO(mode, 0x0400'0800 | (addr & 3), word);
   }
 }
 
-auto CPU::busWait(uint mode, uint32 addr) -> uint {
+auto CPU::wait(uint mode, uint32 addr) -> uint {
   if(addr >= 0x1000'0000) return 1;  //unmapped
   if(addr <  0x0200'0000) return 1;
   if(addr <  0x0300'0000) return (16 - regs.memory.control.ewramwait) * (mode & Word ? 2 : 1);

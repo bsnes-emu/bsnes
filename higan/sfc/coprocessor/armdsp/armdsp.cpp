@@ -39,13 +39,13 @@ auto ArmDSP::boot() -> void {
 
 auto ArmDSP::main() -> void {
   if(crash) {
-    print(disassemble_arm_instruction(pipeline.execute.address), "\n");
-    print(disassemble_registers(), "\n");
+    print(disassembleRegisters(), "\n");
+    print(disassembleInstructionARM(pipeline.execute.address), "\n");
     print("Executed: ", instructions, "\n");
     while(true) step(frequency);
   }
 
-  arm_step();
+  stepARM();
 }
 
 auto ArmDSP::step(uint clocks) -> void {

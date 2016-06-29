@@ -12,7 +12,7 @@
 //0x08: VRAM bank#
 //0x07: palette#
 
-auto PPU::cgb_read_tile(bool select, uint x, uint y, uint& attr, uint& data) -> void {
+auto PPU::readTileCGB(bool select, uint x, uint y, uint& attr, uint& data) -> void {
   uint tmaddr = 0x1800 + (select << 10);
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
 
@@ -20,7 +20,7 @@ auto PPU::cgb_read_tile(bool select, uint x, uint y, uint& attr, uint& data) -> 
   attr = vram[0x2000 + tmaddr];
 
   uint tdaddr = attr & 0x08 ? 0x2000 : 0x0000;
-  if(status.bg_tiledata_select == 0) {
+  if(status.bgTiledataSelect == 0) {
     tdaddr += 0x1000 + ((int8)tile << 4);
   } else {
     tdaddr += 0x0000 + (tile << 4);
@@ -35,11 +35,11 @@ auto PPU::cgb_read_tile(bool select, uint x, uint y, uint& attr, uint& data) -> 
   if(attr & 0x20) data = hflip(data);
 }
 
-auto PPU::cgb_scanline() -> void {
+auto PPU::scanlineCGB() -> void {
   px = 0;
   if(!enabled()) return;
 
-  const uint Height = (status.ob_size == 0 ? 8 : 16);
+  const uint Height = (status.obSize == 0 ? 8 : 16);
   sprites = 0;
 
   //find first ten sprites on this scanline
@@ -47,7 +47,7 @@ auto PPU::cgb_scanline() -> void {
     Sprite& s = sprite[sprites];
     s.y = oam[n + 0] - 16;
     s.x = oam[n + 1] -  8;
-    s.tile = oam[n + 2] & ~status.ob_size;
+    s.tile = oam[n + 2] & ~status.obSize;
     s.attr = oam[n + 3];
 
     s.y = status.ly - s.y;
@@ -63,22 +63,22 @@ auto PPU::cgb_scanline() -> void {
   }
 }
 
-auto PPU::cgb_run() -> void {
+auto PPU::runCGB() -> void {
   ob.color = 0;
   ob.palette = 0;
   ob.priority = 0;
 
   uint color = 0x7fff;
   if(enabled()) {
-    cgb_run_bg();
-    if(status.window_display_enable) cgb_run_window();
-    if(status.ob_enable) cgb_run_ob();
+    runBackgroundCGB();
+    if(status.windowDisplayEnable) runWindowCGB();
+    if(status.obEnable) runObjectsCGB();
 
     if(ob.palette == 0) {
       color = bg.color;
     } else if(bg.palette == 0) {
       color = ob.color;
-    } else if(status.bg_enable == 0) {
+    } else if(status.bgEnable == 0) {
       color = ob.color;
     } else if(bg.priority) {
       color = bg.color;
@@ -93,11 +93,11 @@ auto PPU::cgb_run() -> void {
   *output = color;
 }
 
-auto PPU::cgb_run_bg() -> void {
+auto PPU::runBackgroundCGB() -> void {
   uint scrolly = (status.ly + status.scy) & 255;
   uint scrollx = (px + status.scx) & 255;
   uint tx = scrollx & 7;
-  if(tx == 0 || px == 0) cgb_read_tile(status.bg_tilemap_select, scrollx, scrolly, background.attr, background.data);
+  if(tx == 0 || px == 0) readTileCGB(status.bgTilemapSelect, scrollx, scrolly, background.attr, background.data);
 
   uint index = 0;
   index |= (background.data & (0x0080 >> tx)) ? 1 : 0;
@@ -113,13 +113,13 @@ auto PPU::cgb_run_bg() -> void {
   bg.priority = background.attr & 0x80;
 }
 
-auto PPU::cgb_run_window() -> void {
+auto PPU::runWindowCGB() -> void {
   uint scrolly = status.ly - status.wy;
   uint scrollx = px + 7 - status.wx;
   if(scrolly >= 144u) return;  //also matches underflow (scrolly < 0)
   if(scrollx >= 160u) return;  //also matches underflow (scrollx < 0)
   uint tx = scrollx & 7;
-  if(tx == 0 || px == 0) cgb_read_tile(status.window_tilemap_select, scrollx, scrolly, window.attr, window.data);
+  if(tx == 0 || px == 0) readTileCGB(status.windowTilemapSelect, scrollx, scrolly, window.attr, window.data);
 
   uint index = 0;
   index |= (window.data & (0x0080 >> tx)) ? 1 : 0;
@@ -135,7 +135,7 @@ auto PPU::cgb_run_window() -> void {
   bg.priority = window.attr & 0x80;
 }
 
-auto PPU::cgb_run_ob() -> void {
+auto PPU::runObjectsCGB() -> void {
   //render backwards, so that first sprite has priority
   for(int n = sprites - 1; n >= 0; n--) {
     Sprite& s = sprite[n];

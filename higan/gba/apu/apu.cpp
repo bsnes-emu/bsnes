@@ -2,7 +2,7 @@
 
 namespace GameBoyAdvance {
 
-#include "mmio.cpp"
+#include "io.cpp"
 #include "square.cpp"
 #include "square1.cpp"
 #include "square2.cpp"
@@ -87,7 +87,7 @@ auto APU::power() -> void {
   regs.bias.amplitude = 0;
   regs.bias.level = 0x200;
 
-  for(uint n = 0x060; n <= 0x0a7; n++) bus.mmio[n] = this;
+  for(uint n = 0x060; n <= 0x0a7; n++) bus.io[n] = this;
 }
 
 }

@@ -52,7 +52,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   alwaysinline auto speed(uint24 addr) const -> uint;
   auto readDisassembler(uint24 addr) -> uint8 override;
 
-  //mmio.cpp
+  //io.cpp
   auto readAPU(uint24 addr, uint8 data) -> uint8;
   auto readCPU(uint24 addr, uint8 data) -> uint8;
   auto readDMA(uint24 addr, uint8 data) -> uint8;

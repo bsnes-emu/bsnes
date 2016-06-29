@@ -4,10 +4,10 @@
 //0x20: horizontal flip
 //0x10: palette#
 
-auto PPU::dmg_read_tile(bool select, uint x, uint y, uint& data) -> void {
+auto PPU::readTileDMG(bool select, uint x, uint y, uint& data) -> void {
   uint tmaddr = 0x1800 + (select << 10), tdaddr;
   tmaddr += (((y >> 3) << 5) + (x >> 3)) & 0x03ff;
-  if(status.bg_tiledata_select == 0) {
+  if(status.bgTiledataSelect == 0) {
     tdaddr = 0x1000 + ((int8)vram[tmaddr] << 4);
   } else {
     tdaddr = 0x0000 + (vram[tmaddr] << 4);
@@ -17,11 +17,11 @@ auto PPU::dmg_read_tile(bool select, uint x, uint y, uint& data) -> void {
   data |= vram[tdaddr + 1] << 8;
 }
 
-auto PPU::dmg_scanline() -> void {
+auto PPU::scanlineDMG() -> void {
   px = 0;
   if(!enabled()) return;
 
-  const uint Height = (status.ob_size == 0 ? 8 : 16);
+  const uint Height = (status.obSize == 0 ? 8 : 16);
   sprites = 0;
 
   //find first ten sprites on this scanline
@@ -29,7 +29,7 @@ auto PPU::dmg_scanline() -> void {
     Sprite& s = sprite[sprites];
     s.y = oam[n + 0] - 16;
     s.x = oam[n + 1] -  8;
-    s.tile = oam[n + 2] & ~status.ob_size;
+    s.tile = oam[n + 2] & ~status.obSize;
     s.attr = oam[n + 3];
 
     s.y = status.ly - s.y;
@@ -52,7 +52,7 @@ auto PPU::dmg_scanline() -> void {
   }
 }
 
-auto PPU::dmg_run() -> void {
+auto PPU::runDMG() -> void {
   bg.color = 0;
   bg.palette = 0;
 
@@ -61,9 +61,9 @@ auto PPU::dmg_run() -> void {
 
   uint color = 0;
   if(enabled()) {
-    if(status.bg_enable) dmg_run_bg();
-    if(status.window_display_enable) dmg_run_window();
-    if(status.ob_enable) dmg_run_ob();
+    if(status.bgEnable) runBackgroundDMG();
+    if(status.windowDisplayEnable) runWindowDMG();
+    if(status.obEnable) runObjectsDMG();
 
     if(ob.palette == 0) {
       color = bg.color;
@@ -81,11 +81,11 @@ auto PPU::dmg_run() -> void {
   interface->lcdOutput(color);  //Super Game Boy notification
 }
 
-auto PPU::dmg_run_bg() -> void {
+auto PPU::runBackgroundDMG() -> void {
   uint scrolly = (status.ly + status.scy) & 255;
   uint scrollx = (px + status.scx) & 255;
   uint tx = scrollx & 7;
-  if(tx == 0 || px == 0) dmg_read_tile(status.bg_tilemap_select, scrollx, scrolly, background.data);
+  if(tx == 0 || px == 0) readTileDMG(status.bgTilemapSelect, scrollx, scrolly, background.data);
 
   uint index = 0;
   index |= (background.data & (0x0080 >> tx)) ? 1 : 0;
@@ -95,13 +95,13 @@ auto PPU::dmg_run_bg() -> void {
   bg.palette = index;
 }
 
-auto PPU::dmg_run_window() -> void {
+auto PPU::runWindowDMG() -> void {
   uint scrolly = status.ly - status.wy;
   uint scrollx = px + 7 - status.wx;
   if(scrolly >= 144u) return;  //also matches underflow (scrolly < 0)
   if(scrollx >= 160u) return;  //also matches underflow (scrollx < 0)
   uint tx = scrollx & 7;
-  if(tx == 0 || px == 0) dmg_read_tile(status.window_tilemap_select, scrollx, scrolly, window.data);
+  if(tx == 0 || px == 0) readTileDMG(status.windowTilemapSelect, scrollx, scrolly, window.data);
 
   uint index = 0;
   index |= (window.data & (0x0080 >> tx)) ? 1 : 0;
@@ -111,7 +111,7 @@ auto PPU::dmg_run_window() -> void {
   bg.palette = index;
 }
 
-auto PPU::dmg_run_ob() -> void {
+auto PPU::runObjectsDMG() -> void {
   //render backwards, so that first sprite has priority
   for(int n = sprites - 1; n >= 0; n--) {
     Sprite& s = sprite[n];

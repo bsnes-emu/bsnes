@@ -1,16 +1,16 @@
-auto PPU::render_forceblank() -> void {
+auto PPU::renderForceBlank() -> void {
   uint32* line = output + regs.vcounter * 240;
   for(auto x : range(240)) line[x] = 0x7fff;
 }
 
-auto PPU::render_screen() -> void {
+auto PPU::renderScreen() -> void {
   uint32* line = output + regs.vcounter * 240;
 
-  if(regs.bg[0].control.mosaic) render_mosaic_background(BG0);
-  if(regs.bg[1].control.mosaic) render_mosaic_background(BG1);
-  if(regs.bg[2].control.mosaic) render_mosaic_background(BG2);
-  if(regs.bg[3].control.mosaic) render_mosaic_background(BG3);
-  render_mosaic_object();
+  if(regs.bg[0].control.mosaic) renderMosaicBackground(BG0);
+  if(regs.bg[1].control.mosaic) renderMosaicBackground(BG1);
+  if(regs.bg[2].control.mosaic) renderMosaicBackground(BG2);
+  if(regs.bg[3].control.mosaic) renderMosaicBackground(BG3);
+  renderMosaicObject();
 
   for(auto x : range(240)) {
     Registers::WindowFlags flags;
@@ -66,7 +66,7 @@ auto PPU::render_screen() -> void {
   }
 }
 
-auto PPU::render_window(uint w) -> void {
+auto PPU::renderWindow(uint w) -> void {
   uint y = regs.vcounter;
 
   uint y1 = regs.window[w].y1, y2 = regs.window[w].y2;

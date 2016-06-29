@@ -17,7 +17,7 @@ struct PPU : Thread, PPUcounter {
 
   auto serialize(serializer&) -> void;
 
-  //mmio.cpp
+  //io.cpp
   alwaysinline auto getVramAddress() -> uint16;
   alwaysinline auto vramAccessible() const -> bool;
   alwaysinline auto oamWrite(uint addr, uint8 data) -> void;

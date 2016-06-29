@@ -5,7 +5,7 @@ namespace SuperFamicom {
 CPU cpu;
 #include "dma.cpp"
 #include "memory.cpp"
-#include "mmio.cpp"
+#include "io.cpp"
 #include "timing.cpp"
 #include "irq.cpp"
 #include "joypad.cpp"

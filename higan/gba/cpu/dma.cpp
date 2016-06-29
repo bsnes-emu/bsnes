@@ -1,4 +1,4 @@
-auto CPU::dma_run() -> void {
+auto CPU::dmaRun() -> void {
   active.dma = true;
 
   while(true) {
@@ -6,7 +6,7 @@ auto CPU::dma_run() -> void {
     for(auto n : range(4)) {
       auto& dma = regs.dma[n];
       if(dma.pending) {
-        dma_exec(dma);
+        dmaExecute(dma);
         if(dma.control.irq) regs.irq.flag |= Interrupt::DMA0 << n;
         if(dma.control.drq && n == 3) regs.irq.flag |= Interrupt::Cartridge;
         transferred = true;
@@ -19,7 +19,7 @@ auto CPU::dma_run() -> void {
   active.dma = false;
 }
 
-auto CPU::dma_exec(Registers::DMA& dma) -> void {
+auto CPU::dmaExecute(Registers::DMA& dma) -> void {
   uint seek = dma.control.size ? 4 : 2;
   uint mode = dma.control.size ? Word : Half;
   mode |= dma.run.length == dma.length ? Nonsequential : Sequential;
@@ -39,7 +39,7 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
     uint32 addr = dma.run.source;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    dma.data = busRead(mode, addr);
+    dma.data = _read(mode, addr);
   }
 
   if(dma.run.target < 0x0200'0000) {
@@ -48,7 +48,7 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
     uint32 addr = dma.run.target;
     if(mode & Word) addr &= ~3;
     if(mode & Half) addr &= ~1;
-    busWrite(mode, addr, dma.data);
+    _write(mode, addr, dma.data);
   }
 
   switch(dma.control.sourcemode) {
@@ -70,19 +70,19 @@ auto CPU::dma_exec(Registers::DMA& dma) -> void {
   }
 }
 
-auto CPU::dma_vblank() -> void {
+auto CPU::dmaVblank() -> void {
   for(auto& dma : regs.dma) {
     if(dma.control.enable && dma.control.timingmode == 1) dma.pending = true;
   }
 }
 
-auto CPU::dma_hblank() -> void {
+auto CPU::dmaHblank() -> void {
   for(auto& dma : regs.dma) {
     if(dma.control.enable && dma.control.timingmode == 2) dma.pending = true;
   }
 }
 
-auto CPU::dma_hdma() -> void {
+auto CPU::dmaHDMA() -> void {
   auto& dma = regs.dma[3];
   if(dma.control.enable && dma.control.timingmode == 3) dma.pending = true;
 }

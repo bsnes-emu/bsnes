@@ -1,8 +1,8 @@
-auto ARM::pipeline_step() -> void {
+auto ARM::stepPipeline() -> void {
   pipeline.execute = pipeline.decode;
   pipeline.decode = pipeline.fetch;
 
-  unsigned sequential = Sequential;
+  uint sequential = Sequential;
   if(pipeline.nonsequential) {
     pipeline.nonsequential = false;
     sequential = Nonsequential;
@@ -19,7 +19,7 @@ auto ARM::pipeline_step() -> void {
   }
 }
 
-auto ARM::arm_step() -> void {
+auto ARM::stepARM() -> void {
   if(pipeline.reload) {
     pipeline.reload = false;
     r(15).data &= ~3;
@@ -27,10 +27,10 @@ auto ARM::arm_step() -> void {
     pipeline.fetch.address = r(15) & ~3;
     pipeline.fetch.instruction = read(Prefetch | Word | Nonsequential, pipeline.fetch.address);
 
-    pipeline_step();
+    stepPipeline();
   }
 
-  pipeline_step();
+  stepPipeline();
 
   if(processor.irqline && cpsr().i == 0) {
     vector(0x00000018, Processor::Mode::IRQ);
@@ -39,8 +39,8 @@ auto ARM::arm_step() -> void {
 
   instructions++;
   if(trace) {
-    print(disassemble_registers(), "\n");
-    print(disassemble_arm_instruction(pipeline.execute.address), "\n");
+    print(disassembleRegisters(), "\n");
+    print(disassembleInstructionARM(pipeline.execute.address), "\n");
     usleep(100000);
   }
 
@@ -76,7 +76,7 @@ auto ARM::arm_step() -> void {
   crash = true;
 }
 
-auto ARM::thumb_step() -> void {
+auto ARM::stepTHUMB() -> void {
   if(pipeline.reload) {
     pipeline.reload = false;
     r(15).data &= ~1;
@@ -84,10 +84,10 @@ auto ARM::thumb_step() -> void {
     pipeline.fetch.address = r(15) & ~1;
     pipeline.fetch.instruction = read(Prefetch | Half | Nonsequential, pipeline.fetch.address);
 
-    pipeline_step();
+    stepPipeline();
   }
 
-  pipeline_step();
+  stepPipeline();
 
   if(processor.irqline && cpsr().i == 0) {
     vector(0x00000018, Processor::Mode::IRQ);
@@ -97,8 +97,8 @@ auto ARM::thumb_step() -> void {
 
   instructions++;
   if(trace) {
-    print(disassemble_registers(), "\n");
-    print(disassemble_thumb_instruction(pipeline.execute.address), "\n");
+    print(disassembleRegisters(), "\n");
+    print(disassembleInstructionTHUMB(pipeline.execute.address), "\n");
   }
 
   #define decode(pattern, execute) if( \

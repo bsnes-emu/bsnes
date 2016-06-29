@@ -3,12 +3,12 @@
 namespace GameBoy {
 
 PPU ppu;
-#include "mmio.cpp"
+#include "io.cpp"
 #include "dmg.cpp"
 #include "cgb.cpp"
 #include "serialization.cpp"
 
-auto PPU::enabled() const -> bool { return status.display_enable; }
+auto PPU::enabled() const -> bool { return status.displayEnable; }
 
 auto PPU::Enter() -> void {
   while(true) scheduler.synchronize(), ppu.main();
@@ -21,20 +21,20 @@ auto PPU::main() -> void {
   if(status.ly <= 143) {
     mode(2);
     scanline();
-    wait(92);
+    step(92);
 
     mode(3);
     for(auto n : range(160)) {
       run();
-      wait(1);
+      step(1);
     }
 
     mode(0);
     if(enabled()) cpu.hblank();
-    wait(204);
+    step(204);
   } else {
     mode(1);
-    wait(456);
+    step(456);
   }
 
   status.ly++;
@@ -56,10 +56,10 @@ auto PPU::mode(uint mode) -> void {
 auto PPU::stat() -> void {
   bool irq = status.irq;
 
-  status.irq  = status.interrupt_hblank && status.mode == 0;
-  status.irq |= status.interrupt_vblank && status.mode == 1;
-  status.irq |= status.interrupt_oam    && status.mode == 2;
-  status.irq |= status.interrupt_lyc    && coincidence();
+  status.irq  = status.interruptHblank && status.mode == 0;
+  status.irq |= status.interruptVblank && status.mode == 1;
+  status.irq |= status.interruptOAM    && status.mode == 2;
+  status.irq |= status.interruptLYC    && coincidence();
 
   if(!irq && status.irq) cpu.raise(CPU::Interrupt::Stat);
 }
@@ -74,11 +74,11 @@ auto PPU::refresh() -> void {
   if(!system.sgb()) Emulator::video.refresh(screen, 160 * sizeof(uint32), 160, 144);
 }
 
-auto PPU::wait(uint clocks) -> void {
+auto PPU::step(uint clocks) -> void {
   while(clocks--) {
     stat();
-    if(status.dma_active) {
-      uint hi = status.dma_clock++;
+    if(status.dmaActive) {
+      uint hi = status.dmaClock++;
       uint lo = hi & (cpu.status.speedDouble ? 1 : 3);
       hi >>= cpu.status.speedDouble ? 1 : 2;
       if(lo == 0) {
@@ -86,9 +86,9 @@ auto PPU::wait(uint clocks) -> void {
           //warm-up
         } else if(hi == 161) {
           //cool-down; disable
-          status.dma_active = false;
+          status.dmaActive = false;
         } else {
-          oam[hi - 1] = bus.read(status.dma_bank << 8 | hi - 1);
+          oam[hi - 1] = bus.read(status.dmaBank << 8 | hi - 1);
         }
       }
     }
@@ -110,11 +110,11 @@ auto PPU::power() -> void {
   create(Enter, 4 * 1024 * 1024);
 
   if(system.cgb()) {
-    scanline = {&PPU::cgb_scanline, this};
-    run = {&PPU::cgb_run, this};
+    scanline = {&PPU::scanlineCGB, this};
+    run = {&PPU::runCGB, this};
   } else {
-    scanline = {&PPU::dmg_scanline, this};
-    run = {&PPU::dmg_run, this};
+    scanline = {&PPU::scanlineDMG, this};
+    run = {&PPU::runDMG, this};
   }
 
   for(uint n = 0x8000; n <= 0x9fff; n++) bus.mmio[n] = this;  //VRAM
@@ -149,43 +149,7 @@ auto PPU::power() -> void {
   for(auto& n : bgpd) n = 0x0000;
   for(auto& n : obpd) n = 0x0000;
 
-  status.irq = false;
-  status.lx = 0;
-
-  status.display_enable = 0;
-  status.window_tilemap_select = 0;
-  status.window_display_enable = 0;
-  status.bg_tiledata_select = 0;
-  status.bg_tilemap_select = 0;
-  status.ob_size = 0;
-  status.ob_enable = 0;
-  status.bg_enable = 0;
-
-  status.interrupt_lyc = 0;
-  status.interrupt_oam = 0;
-  status.interrupt_vblank = 0;
-  status.interrupt_hblank = 0;
-  status.mode = 0;
-
-  status.scy = 0;
-  status.scx = 0;
-  status.ly = 0;
-  status.lyc = 0;
-
-  status.dma_active = false;
-  status.dma_clock = 0;
-  status.dma_bank = 0;
-
-  status.wy = 0;
-  status.wx = 0;
-
-  status.vram_bank = 0;
-
-  status.bgpi_increment = 0;
-  status.bgpi = 0;
-
-  status.obpi_increment = 0;
-  status.obpi = 0;
+  memory::fill(&status, sizeof(Status));
 
   for(auto& n : screen) n = 0;
 

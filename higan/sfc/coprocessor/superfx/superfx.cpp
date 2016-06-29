@@ -5,7 +5,7 @@ namespace SuperFamicom {
 #include "bus.cpp"
 #include "core.cpp"
 #include "memory.cpp"
-#include "mmio.cpp"
+#include "io.cpp"
 #include "timing.cpp"
 #include "serialization.cpp"
 SuperFX superfx;

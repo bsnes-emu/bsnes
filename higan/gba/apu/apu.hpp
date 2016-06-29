@@ -1,4 +1,4 @@
-struct APU : Thread, MMIO {
+struct APU : Thread, IO {
   shared_pointer<Emulator::Stream> stream;
 
   #include "registers.hpp"
@@ -7,8 +7,8 @@ struct APU : Thread, MMIO {
   auto main() -> void;
   auto step(uint clocks) -> void;
 
-  auto read(uint32 addr) -> uint8;
-  auto write(uint32 addr, uint8 byte) -> void;
+  auto readIO(uint32 addr) -> uint8;
+  auto writeIO(uint32 addr, uint8 byte) -> void;
   auto power() -> void;
 
   auto runsequencer() -> void;

@@ -1,4 +1,4 @@
-auto CPU::read(uint32 addr) -> uint8 {
+auto CPU::readIO(uint32 addr) -> uint8 {
   auto dma = [&]() -> Registers::DMA& { return regs.dma[addr / 12 & 3]; };
   auto timer = [&]() -> Registers::Timer& { return regs.timer[addr.bits(2,3)]; };
 
@@ -196,7 +196,7 @@ auto CPU::read(uint32 addr) -> uint8 {
   return 0;
 }
 
-auto CPU::write(uint32 addr, uint8 data) -> void {
+auto CPU::writeIO(uint32 addr, uint8 data) -> void {
   auto dma = [&]() -> Registers::DMA& { return regs.dma[addr / 12 & 3]; };
   auto timer = [&]() -> Registers::Timer& { return regs.timer[addr.bits(2,3)]; };
 

@@ -17,7 +17,7 @@ auto Cartridge::main() -> void {
 auto Cartridge::load() -> bool {
   if(auto pathID = interface->load(ID::Famicom, "Famicom", "fc")) {
     information.pathID = pathID();
-  }
+  } else return false;
 
   if(auto fp = interface->open(pathID(), "manifest.bml", File::Read, File::Required)) {
     information.manifest = fp->reads();

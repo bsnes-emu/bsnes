@@ -1,27 +1,27 @@
-auto PPU::render_backgrounds() -> void {
+auto PPU::renderBackgrounds() -> void {
   switch(regs.control.bgmode) {
   case 0:
-    render_background_linear(regs.bg[3]);
-    render_background_linear(regs.bg[2]);
-    render_background_linear(regs.bg[1]);
-    render_background_linear(regs.bg[0]);
+    renderBackgroundLinear(regs.bg[3]);
+    renderBackgroundLinear(regs.bg[2]);
+    renderBackgroundLinear(regs.bg[1]);
+    renderBackgroundLinear(regs.bg[0]);
     break;
   case 1:
-    render_background_affine(regs.bg[2]);
-    render_background_linear(regs.bg[1]);
-    render_background_linear(regs.bg[0]);
+    renderBackgroundAffine(regs.bg[2]);
+    renderBackgroundLinear(regs.bg[1]);
+    renderBackgroundLinear(regs.bg[0]);
     break;
   case 2:
-    render_background_affine(regs.bg[3]);
-    render_background_affine(regs.bg[2]);
+    renderBackgroundAffine(regs.bg[3]);
+    renderBackgroundAffine(regs.bg[2]);
     break;
   case 3: case 4: case 5:
-    render_background_bitmap(regs.bg[2]);
+    renderBackgroundBitmap(regs.bg[2]);
     break;
   }
 }
 
-auto PPU::render_background_linear(Registers::Background& bg) -> void {
+auto PPU::renderBackgroundLinear(Registers::Background& bg) -> void {
   if(regs.control.enable[bg.id] == false) return;
   auto& output = layer[bg.id];
 
@@ -48,7 +48,7 @@ auto PPU::render_background_linear(Registers::Background& bg) -> void {
       if(bg.control.screensize & 1) if(tx & 32) offset += 32 * 32;
       if(bg.control.screensize & 2) if(ty & 32) offset += 32 * 32 * (1 + (bg.control.screensize & 1));
       offset = basemap + offset * 2;
-      uint16 mapdata = vram_read(Half, offset);
+      uint16 mapdata = readVRAM(Half, offset);
 
       tile.character = mapdata >>  0;
       tile.hflip     = mapdata >> 10;
@@ -57,12 +57,12 @@ auto PPU::render_background_linear(Registers::Background& bg) -> void {
 
       if(bg.control.colormode == 0) {
         offset = basechr + tile.character * 32 + (py ^ (tile.vflip ? 7 : 0)) * 4;
-        uint32 word = vram_read(Word, offset);
+        uint32 word = readVRAM(Word, offset);
         for(auto n : range(8)) data[n] = (word >> (n * 4)) & 15;
       } else {
         offset = basechr + tile.character * 64 + (py ^ (tile.vflip ? 7 : 0)) * 8;
-        uint32 wordlo = vram_read(Word, offset + 0);
-        uint32 wordhi = vram_read(Word, offset + 4);
+        uint32 wordlo = readVRAM(Word, offset + 0);
+        uint32 wordhi = readVRAM(Word, offset + 4);
         for(auto n : range(4)) data[0 + n] = (wordlo >> (n * 8)) & 255;
         for(auto n : range(4)) data[4 + n] = (wordhi >> (n * 8)) & 255;
       }
@@ -78,7 +78,7 @@ auto PPU::render_background_linear(Registers::Background& bg) -> void {
   }
 }
 
-auto PPU::render_background_affine(Registers::Background& bg) -> void {
+auto PPU::renderBackgroundAffine(Registers::Background& bg) -> void {
   if(regs.control.enable[bg.id] == false) return;
   auto& output = layer[bg.id];
 
@@ -113,7 +113,7 @@ auto PPU::render_background_affine(Registers::Background& bg) -> void {
   bg.ly += bg.pd;
 }
 
-auto PPU::render_background_bitmap(Registers::Background& bg) -> void {
+auto PPU::renderBackgroundBitmap(Registers::Background& bg) -> void {
   if(regs.control.enable[bg.id] == false) return;
   auto& output = layer[bg.id];
 
@@ -138,7 +138,7 @@ auto PPU::render_background_bitmap(Registers::Background& bg) -> void {
 
     if(px < width && py < height) {
       uint offset = py * width + px;
-      uint color  = vram_read(mode, basemap + (offset << depth));
+      uint color  = readVRAM(mode, basemap + (offset << depth));
 
       if(depth || color) {  //8bpp color 0 is transparent; 15bpp color is always opaque
         if(depth == 0) color = pram[color];

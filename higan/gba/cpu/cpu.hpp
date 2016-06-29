@@ -1,4 +1,4 @@
-struct CPU : Processor::ARM, Thread, MMIO {
+struct CPU : Processor::ARM, Thread, IO {
   using ARM::read;
   using ARM::write;
 
@@ -34,37 +34,37 @@ struct CPU : Processor::ARM, Thread, MMIO {
 
   auto step(uint clocks) -> void override;
 
-  auto sync_step(uint clocks) -> void;
-  auto keypad_run() -> void;
+  auto syncStep(uint clocks) -> void;
+  auto keypadRun() -> void;
   auto power() -> void;
 
   //bus.cpp
-  auto busIdle() -> void override;
-  auto busRead(uint mode, uint32 addr) -> uint32 override;
-  auto busWrite(uint mode, uint32 addr, uint32 word) -> void override;
-  auto busWait(uint mode, uint32 addr) -> uint;
+  auto _idle() -> void override;
+  auto _read(uint mode, uint32 addr) -> uint32 override;
+  auto _write(uint mode, uint32 addr, uint32 word) -> void override;
+  auto wait(uint mode, uint32 addr) -> uint;
 
-  //mmio.cpp
-  auto read(uint32 addr) -> uint8;
-  auto write(uint32 addr, uint8 byte) -> void;
+  //io.cpp
+  auto readIO(uint32 addr) -> uint8;
+  auto writeIO(uint32 addr, uint8 byte) -> void;
 
-  auto iwram_read(uint mode, uint32 addr) -> uint32;
-  auto iwram_write(uint mode, uint32 addr, uint32 word) -> void;
+  auto readIWRAM(uint mode, uint32 addr) -> uint32;
+  auto writeIWRAM(uint mode, uint32 addr, uint32 word) -> void;
 
-  auto ewram_read(uint mode, uint32 addr) -> uint32;
-  auto ewram_write(uint mode, uint32 addr, uint32 word) -> void;
+  auto readEWRAM(uint mode, uint32 addr) -> uint32;
+  auto writeEWRAM(uint mode, uint32 addr, uint32 word) -> void;
 
   //dma.cpp
-  auto dma_run() -> void;
-  auto dma_exec(Registers::DMA& dma) -> void;
-  auto dma_vblank() -> void;
-  auto dma_hblank() -> void;
-  auto dma_hdma() -> void;
+  auto dmaRun() -> void;
+  auto dmaExecute(Registers::DMA& dma) -> void;
+  auto dmaVblank() -> void;
+  auto dmaHblank() -> void;
+  auto dmaHDMA() -> void;
 
   //timer.cpp
-  auto timer_step(uint clocks) -> void;
-  auto timer_increment(uint n) -> void;
-  auto timer_fifo_run(uint n) -> void;
+  auto timerStep(uint clocks) -> void;
+  auto timerIncrement(uint n) -> void;
+  auto timerRunFIFO(uint n) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

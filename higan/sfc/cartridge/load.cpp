@@ -84,7 +84,7 @@ auto Cartridge::loadICD2(Markup::Node node) -> void {
   icd2.revision = max(1, node["revision"].natural());
 
   //Game Boy core loads data through ICD2 interface
-  for(auto leaf : node.find("map")) loadMap(leaf, {&ICD2::read, &icd2}, {&ICD2::write, &icd2});
+  for(auto leaf : node.find("map")) loadMap(leaf, {&ICD2::readIO, &icd2}, {&ICD2::writeIO, &icd2});
 }
 
 auto Cartridge::loadMCC(Markup::Node node) -> void {

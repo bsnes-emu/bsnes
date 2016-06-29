@@ -2,12 +2,12 @@ enum class Input : uint {
   A, B, Select, Start, Right, Left, Up, Down, R, L,
 };
 
-struct BIOS : Memory {
+struct BIOS {
   BIOS();
   ~BIOS();
 
-  auto read(uint mode, uint32 addr) -> uint32 override;
-  auto write(uint mode, uint32 addr, uint32 word) -> void override;
+  auto read(uint mode, uint32 addr) -> uint32;
+  auto write(uint mode, uint32 addr, uint32 word) -> void;
 
   uint8* data = nullptr;
   uint size = 0;

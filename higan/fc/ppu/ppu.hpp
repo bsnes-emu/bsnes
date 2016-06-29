@@ -31,7 +31,7 @@ struct PPU : Thread {
   //serialization.cpp
   auto serialize(serializer&) -> void;
 
-  struct Registers {
+  struct IO {
     //internal
     uint8 mdr;
 
@@ -81,7 +81,7 @@ struct PPU : Thread {
 
     //$2003
     uint8 oamAddress;
-  } r;
+  } io;
 
   struct OAM {
     //serialization.cpp
@@ -108,7 +108,7 @@ struct PPU : Thread {
 
     OAM oam[8];   //primary
     OAM soam[8];  //secondary
-  } l;
+  } latch;
 
   uint8 ciram[2048];
   uint8 cgram[32];

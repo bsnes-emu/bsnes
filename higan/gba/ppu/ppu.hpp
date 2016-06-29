@@ -1,4 +1,4 @@
-struct PPU : Thread, MMIO {
+struct PPU : Thread, IO {
   #include "registers.hpp"
   #include "state.hpp"
 
@@ -14,33 +14,33 @@ struct PPU : Thread, MMIO {
   auto frame() -> void;
   auto refresh() -> void;
 
-  auto read(uint32 addr) -> uint8;
-  auto write(uint32 addr, uint8 byte) -> void;
+  auto readIO(uint32 addr) -> uint8;
+  auto writeIO(uint32 addr, uint8 byte) -> void;
 
-  auto vram_read(uint mode, uint32 addr) -> uint32;
-  auto vram_write(uint mode, uint32 addr, uint32 word) -> void;
+  auto readVRAM(uint mode, uint32 addr) -> uint32;
+  auto writeVRAM(uint mode, uint32 addr, uint32 word) -> void;
 
-  auto pram_read(uint mode, uint32 addr) -> uint32;
-  auto pram_write(uint mode, uint32 addr, uint32 word) -> void;
+  auto readPRAM(uint mode, uint32 addr) -> uint32;
+  auto writePRAM(uint mode, uint32 addr, uint32 word) -> void;
 
-  auto oam_read(uint mode, uint32 addr) -> uint32;
-  auto oam_write(uint mode, uint32 addr, uint32 word) -> void;
+  auto readOAM(uint mode, uint32 addr) -> uint32;
+  auto writeOAM(uint mode, uint32 addr, uint32 word) -> void;
 
-  auto render_backgrounds() -> void;
-  auto render_background_linear(Registers::Background&) -> void;
-  auto render_background_affine(Registers::Background&) -> void;
-  auto render_background_bitmap(Registers::Background&) -> void;
+  auto renderBackgrounds() -> void;
+  auto renderBackgroundLinear(Registers::Background&) -> void;
+  auto renderBackgroundAffine(Registers::Background&) -> void;
+  auto renderBackgroundBitmap(Registers::Background&) -> void;
 
-  auto render_objects() -> void;
-  auto render_object(Object&) -> void;
-  auto object_vram_read(uint addr) const -> uint8;
+  auto renderObjects() -> void;
+  auto renderObject(Object&) -> void;
+  auto readObjectVRAM(uint addr) const -> uint8;
 
-  auto render_mosaic_background(uint id) -> void;
-  auto render_mosaic_object() -> void;
+  auto renderMosaicBackground(uint id) -> void;
+  auto renderMosaicObject() -> void;
 
-  auto render_forceblank() -> void;
-  auto render_screen() -> void;
-  auto render_window(uint window) -> void;
+  auto renderForceBlank() -> void;
+  auto renderScreen() -> void;
+  auto renderWindow(uint window) -> void;
   auto blend(uint above, uint eva, uint below, uint evb) -> uint;
 
   auto serialize(serializer&) -> void;

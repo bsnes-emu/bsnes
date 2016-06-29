@@ -7,7 +7,7 @@ ICD2 icd2;
 #if defined(SFC_SUPERGAMEBOY)
 
 #include "interface.cpp"
-#include "mmio.cpp"
+#include "io.cpp"
 #include "serialization.cpp"
 
 auto ICD2::Enter() -> void {

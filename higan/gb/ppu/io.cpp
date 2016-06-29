@@ -1,33 +1,33 @@
-auto PPU::vram_addr(uint16 addr) const -> uint {
-  return (status.vram_bank * 0x2000) + (addr & 0x1fff);
+auto PPU::vramAddress(uint16 addr) const -> uint {
+  return status.vramBank << 13 | (uint13)addr;
 }
 
 auto PPU::readIO(uint16 addr) -> uint8 {
   if(addr >= 0x8000 && addr <= 0x9fff) {
-    return vram[vram_addr(addr)];
+    return vram[vramAddress(addr)];
   }
 
   if(addr >= 0xfe00 && addr <= 0xfe9f) {
-    if(status.dma_active && status.dma_clock >= 8) return 0xff;
+    if(status.dmaActive && status.dmaClock >= 8) return 0xff;
     return oam[addr & 0xff];
   }
 
   if(addr == 0xff40) {  //LCDC
-    return (status.display_enable << 7)
-         | (status.window_tilemap_select << 6)
-         | (status.window_display_enable << 5)
-         | (status.bg_tiledata_select << 4)
-         | (status.bg_tilemap_select << 3)
-         | (status.ob_size << 2)
-         | (status.ob_enable << 1)
-         | (status.bg_enable << 0);
+    return (status.displayEnable << 7)
+         | (status.windowTilemapSelect << 6)
+         | (status.windowDisplayEnable << 5)
+         | (status.bgTiledataSelect << 4)
+         | (status.bgTilemapSelect << 3)
+         | (status.obSize << 2)
+         | (status.obEnable << 1)
+         | (status.bgEnable << 0);
   }
 
   if(addr == 0xff41) {  //STAT
-    return (status.interrupt_lyc << 6)
-         | (status.interrupt_oam << 5)
-         | (status.interrupt_vblank << 4)
-         | (status.interrupt_hblank << 3)
+    return (status.interruptLYC << 6)
+         | (status.interruptOAM << 5)
+         | (status.interruptVblank << 4)
+         | (status.interruptHblank << 3)
          | ((status.ly == status.lyc) << 2)
          | (status.mode << 0);
   }
@@ -78,11 +78,11 @@ auto PPU::readIO(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff4f) {  //VBK
-    return status.vram_bank;
+    return status.vramBank;
   }
 
   if(addr == 0xff68) {  //BGPI
-    return status.bgpi_increment << 7 | status.bgpi;
+    return status.bgpiIncrement << 7 | status.bgpi;
   }
 
   if(addr == 0xff69) {  //BGPD
@@ -90,7 +90,7 @@ auto PPU::readIO(uint16 addr) -> uint8 {
   }
 
   if(addr == 0xff6a) {  //OBPI
-    return status.obpi_increment << 7 | status.obpi;
+    return status.obpiIncrement << 7 | status.obpi;
   }
 
   if(addr == 0xff6b) {  //OBPD
@@ -102,18 +102,18 @@ auto PPU::readIO(uint16 addr) -> uint8 {
 
 auto PPU::writeIO(uint16 addr, uint8 data) -> void {
   if(addr >= 0x8000 && addr <= 0x9fff) {
-    vram[vram_addr(addr)] = data;
+    vram[vramAddress(addr)] = data;
     return;
   }
 
   if(addr >= 0xfe00 && addr <= 0xfe9f) {
-    if(status.dma_active && status.dma_clock >= 8) return;
+    if(status.dmaActive && status.dmaClock >= 8) return;
     oam[addr & 0xff] = data;
     return;
   }
 
   if(addr == 0xff40) {  //LCDC
-    if(status.display_enable == false && (data & 0x80)) {
+    if(!status.displayEnable && (data & 0x80)) {
       status.ly = 0;
       status.lx = 0;
 
@@ -123,22 +123,22 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
       this->clock = clock;
     }
 
-    status.display_enable = data & 0x80;
-    status.window_tilemap_select = data & 0x40;
-    status.window_display_enable = data & 0x20;
-    status.bg_tiledata_select = data & 0x10;
-    status.bg_tilemap_select = data & 0x08;
-    status.ob_size = data & 0x04;
-    status.ob_enable = data & 0x02;
-    status.bg_enable = data & 0x01;
+    status.displayEnable = data & 0x80;
+    status.windowTilemapSelect = data & 0x40;
+    status.windowDisplayEnable = data & 0x20;
+    status.bgTiledataSelect = data & 0x10;
+    status.bgTilemapSelect = data & 0x08;
+    status.obSize = data & 0x04;
+    status.obEnable = data & 0x02;
+    status.bgEnable = data & 0x01;
     return;
   }
 
   if(addr == 0xff41) {  //STAT
-    status.interrupt_lyc = data & 0x40;
-    status.interrupt_oam = data & 0x20;
-    status.interrupt_vblank = data & 0x10;
-    status.interrupt_hblank = data & 0x08;
+    status.interruptLYC = data & 0x40;
+    status.interruptOAM = data & 0x20;
+    status.interruptVblank = data & 0x10;
+    status.interruptHblank = data & 0x08;
 
     //hardware bug: writes to STAT on DMG,SGB during vblank triggers STAT IRQ
     //note: this behavior isn't entirely correct; more research is needed ...
@@ -170,9 +170,9 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff46) {  //DMA
-    status.dma_active = true;
-    status.dma_clock = 0;
-    status.dma_bank = data;
+    status.dmaActive = true;
+    status.dmaClock = 0;
+    status.dmaBank = data;
     return;
   }
 
@@ -211,29 +211,29 @@ auto PPU::writeIO(uint16 addr, uint8 data) -> void {
   }
 
   if(addr == 0xff4f) {  //VBK
-    status.vram_bank = data & 1;
+    status.vramBank = data & 1;
     return;
   }
 
   if(addr == 0xff68) {  //BGPI
-    status.bgpi_increment = data & 0x80;
+    status.bgpiIncrement = data & 0x80;
     status.bgpi = data & 0x3f;
     return;
   }
 
   if(addr == 0xff69) {  //BGPD
     bgpd[status.bgpi] = data;
-    if(status.bgpi_increment) status.bgpi++;
+    if(status.bgpiIncrement) status.bgpi++;
     return;
   }
 
   if(addr == 0xff6a) {  //OBPI
-    status.obpi_increment = data & 0x80;
+    status.obpiIncrement = data & 0x80;
     status.obpi = data & 0x3f;
   }
 
   if(addr == 0xff6b) {  //OBPD
     obpd[status.obpi] = data;
-    if(status.obpi_increment) status.obpi++;
+    if(status.obpiIncrement) status.obpi++;
   }
 }

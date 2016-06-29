@@ -2,11 +2,11 @@
 
 namespace GameBoy {
 
-#include "sequencer/sequencer.cpp"
-#include "square1/square1.cpp"
-#include "square2/square2.cpp"
-#include "wave/wave.cpp"
-#include "noise/noise.cpp"
+#include "sequencer.cpp"
+#include "square1.cpp"
+#include "square2.cpp"
+#include "wave.cpp"
+#include "noise.cpp"
 #include "serialization.cpp"
 APU apu;
 

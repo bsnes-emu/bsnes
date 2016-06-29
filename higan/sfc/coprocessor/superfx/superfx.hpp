@@ -44,7 +44,7 @@ struct SuperFX : Processor::GSU, Cothread {
   auto readCache(uint16 addr) -> uint8;
   auto writeCache(uint16 addr, uint8 data) -> void;
 
-  //mmio.cpp
+  //io.cpp
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
 

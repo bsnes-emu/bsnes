@@ -17,7 +17,7 @@ PPU ppu;
 #include "object.cpp"
 #include "mosaic.cpp"
 #include "screen.cpp"
-#include "mmio.cpp"
+#include "io.cpp"
 #include "memory.cpp"
 #include "serialization.cpp"
 
@@ -52,8 +52,8 @@ auto PPU::power() -> void {
 
   for(uint n = 0; n < 240 * 160; n++) output[n] = 0;
 
-  for(uint n = 0; n < 1024; n += 2) pram_write(n, Half, 0x0000);
-  for(uint n = 0; n < 1024; n += 2)  oam_write(n, Half, 0x0000);
+  for(uint n = 0; n < 1024; n += 2) writePRAM(n, Half, 0x0000);
+  for(uint n = 0; n < 1024; n += 2) writeOAM(n, Half, 0x0000);
 
   regs.control.bgmode = 0;
   regs.control.cgbmode = 0;
@@ -112,11 +112,11 @@ auto PPU::power() -> void {
   regs.blend.evb = 0;
   regs.blend.evy = 0;
 
-  for(uint n = 0x000; n <= 0x055; n++) bus.mmio[n] = this;
+  for(uint n = 0x000; n <= 0x055; n++) bus.io[n] = this;
 }
 
 auto PPU::scanline() -> void {
-  cpu.keypad_run();
+  cpu.keypadRun();
 
   regs.status.vblank = regs.vcounter >= 160 && regs.vcounter <= 226;
   regs.status.vcoincidence = regs.vcounter == regs.status.vcompare;
@@ -133,7 +133,7 @@ auto PPU::scanline() -> void {
 
   if(regs.vcounter == 160) {
     if(regs.status.irqvblank) cpu.regs.irq.flag |= CPU::Interrupt::VBlank;
-    cpu.dma_vblank();
+    cpu.dmaVblank();
   }
 
   if(regs.status.irqvcoincidence) {
@@ -142,7 +142,7 @@ auto PPU::scanline() -> void {
 
   if(regs.vcounter < 160) {
     if(regs.control.forceblank || cpu.regs.mode == CPU::Registers::Mode::Stop) {
-      render_forceblank();
+      renderForceBlank();
     } else {
       for(auto x : range(240)) {
         windowmask[0][x] = false;
@@ -155,22 +155,22 @@ auto PPU::scanline() -> void {
         layer[BG3][x].write(false);
         layer[SFX][x].write(true, 3, pram[0]);
       }
-      render_window(0);
-      render_window(1);
-      render_objects();
-      render_backgrounds();
-      render_screen();
+      renderWindow(0);
+      renderWindow(1);
+      renderObjects();
+      renderBackgrounds();
+      renderScreen();
     }
   }
 
   step(960);
   regs.status.hblank = 1;
   if(regs.status.irqhblank) cpu.regs.irq.flag |= CPU::Interrupt::HBlank;
-  if(regs.vcounter < 160) cpu.dma_hblank();
+  if(regs.vcounter < 160) cpu.dmaHblank();
 
   step(240);
   regs.status.hblank = 0;
-  if(regs.vcounter < 160) cpu.dma_hdma();
+  if(regs.vcounter < 160) cpu.dmaHDMA();
 
   step(32);
   if(++regs.vcounter == 228) regs.vcounter = 0;

@@ -12,19 +12,19 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(status.irq);
   s.integer(status.lx);
 
-  s.integer(status.display_enable);
-  s.integer(status.window_tilemap_select);
-  s.integer(status.window_display_enable);
-  s.integer(status.bg_tiledata_select);
-  s.integer(status.bg_tilemap_select);
-  s.integer(status.ob_size);
-  s.integer(status.ob_enable);
-  s.integer(status.bg_enable);
+  s.integer(status.displayEnable);
+  s.integer(status.windowTilemapSelect);
+  s.integer(status.windowDisplayEnable);
+  s.integer(status.bgTiledataSelect);
+  s.integer(status.bgTilemapSelect);
+  s.integer(status.obSize);
+  s.integer(status.obEnable);
+  s.integer(status.bgEnable);
 
-  s.integer(status.interrupt_lyc);
-  s.integer(status.interrupt_oam);
-  s.integer(status.interrupt_vblank);
-  s.integer(status.interrupt_hblank);
+  s.integer(status.interruptLYC);
+  s.integer(status.interruptOAM);
+  s.integer(status.interruptVblank);
+  s.integer(status.interruptHblank);
   s.integer(status.mode);
 
   s.integer(status.scy);
@@ -33,19 +33,19 @@ auto PPU::serialize(serializer& s) -> void {
   s.integer(status.ly);
   s.integer(status.lyc);
 
-  s.integer(status.dma_active);
-  s.integer(status.dma_clock);
-  s.integer(status.dma_bank);
+  s.integer(status.dmaActive);
+  s.integer(status.dmaClock);
+  s.integer(status.dmaBank);
 
   s.integer(status.wy);
   s.integer(status.wx);
 
-  s.integer(status.vram_bank);
+  s.integer(status.vramBank);
 
-  s.integer(status.bgpi_increment);
+  s.integer(status.bgpiIncrement);
   s.integer(status.bgpi);
 
-  s.integer(status.obpi_increment);
+  s.integer(status.obpiIncrement);
   s.integer(status.obpi);
 
   s.array(screen);

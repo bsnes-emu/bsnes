@@ -42,7 +42,7 @@ auto Cartridge::FLASH::write(uint16 addr, uint8 byte) -> void {
     if(byte == 0x10 && addr == 0x5555) {
       if(erasemode) {
         erasemode = false;
-        for(unsigned n = 0; n < size; n++) data[n] = 0xff;
+        for(uint n : range(size)) data[n] = 0xff;
       }
     }
 
@@ -50,8 +50,8 @@ auto Cartridge::FLASH::write(uint16 addr, uint8 byte) -> void {
       //command only valid for non-Atmel chips
       if(erasemode && id != 0x3d1f) {
         erasemode = false;
-        unsigned offset = bank << 16 | (addr & ~4095);
-        for(unsigned n = 0; n < 4096; n++) data[offset++] = 0xff;
+        uint offset = bank << 16 | (addr & ~4095);
+        for(uint n : range(4096)) data[offset++] = 0xff;
       }
     }
 

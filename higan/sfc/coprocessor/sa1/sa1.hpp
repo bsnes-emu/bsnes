@@ -63,7 +63,7 @@ struct SA1 : Processor::R65816, Cothread {
   auto bitmapRead(uint addr, uint8 data) -> uint8;
   auto bitmapWrite(uint addr, uint8 data) -> void;
 
-  //mmio.cpp
+  //io.cpp
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
 

@@ -1,3 +1,3 @@
-auto disassemble_arm_instruction(uint32 pc) -> string;
-auto disassemble_thumb_instruction(uint32 pc) -> string;
-auto disassemble_registers() -> string;
+auto disassembleInstructionARM(uint32 pc) -> string;
+auto disassembleInstructionTHUMB(uint32 pc) -> string;
+auto disassembleRegisters() -> string;

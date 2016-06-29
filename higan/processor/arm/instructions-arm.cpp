@@ -531,8 +531,8 @@ auto ARM::arm_op_move_multiple() {
   if(s && l == 0) usr = true;
   if(usr) processor.setMode(Processor::Mode::USR);
 
-  unsigned sequential = Nonsequential;
-  for(unsigned m = 0; m < 16; m++) {
+  uint sequential = Nonsequential;
+  for(uint m : range(16)) {
     if(list & 1 << m) {
       if(l == 1) r(m) = read(Word | sequential, rn);
       if(l == 0) write(Word | sequential, rn, r(m));

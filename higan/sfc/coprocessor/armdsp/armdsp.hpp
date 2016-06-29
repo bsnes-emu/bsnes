@@ -11,9 +11,9 @@ struct ArmDSP : Processor::ARM, Cothread {
   auto main() -> void;
 
   auto step(uint clocks) -> void override;
-  auto busIdle() -> void override;
-  auto busRead(uint mode, uint32 addr) -> uint32 override;
-  auto busWrite(uint mode, uint32 addr, uint32 word) -> void override;
+  auto _idle() -> void override;
+  auto _read(uint mode, uint32 addr) -> uint32 override;
+  auto _write(uint mode, uint32 addr, uint32 word) -> void override;
 
   auto read(uint24 addr, uint8 data) -> uint8;
   auto write(uint24 addr, uint8 data) -> void;

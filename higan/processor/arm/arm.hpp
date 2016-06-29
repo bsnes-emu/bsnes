@@ -7,7 +7,7 @@ namespace Processor {
 //* ARMv4T (ARM7TDMI)
 
 struct ARM {
-  enum : unsigned {       //mode flags for bus_read, bus_write:
+  enum : uint {       //mode flags for bus_read, bus_write:
     Nonsequential =   1,  //N cycle
     Sequential    =   2,  //S cycle
     Prefetch      =   4,  //instruction fetch (eligible for prefetch)
@@ -24,19 +24,19 @@ struct ARM {
   #include "instructions-thumb.hpp"
   #include "disassembler.hpp"
 
-  virtual auto step(unsigned clocks) -> void = 0;
-  virtual auto busIdle() -> void = 0;
-  virtual auto busRead(unsigned mode, uint32 addr) -> uint32 = 0;
-  virtual auto busWrite(unsigned mode, uint32 addr, uint32 word) -> void = 0;
+  virtual auto step(uint clocks) -> void = 0;
+  virtual auto _idle() -> void = 0;
+  virtual auto _read(uint mode, uint32 addr) -> uint32 = 0;
+  virtual auto _write(uint mode, uint32 addr, uint32 word) -> void = 0;
 
   //arm.cpp
   auto power() -> void;
   auto exec() -> void;
   auto idle() -> void;
-  auto read(unsigned mode, uint32 addr) -> uint32;
-  auto load(unsigned mode, uint32 addr) -> uint32;
-  auto write(unsigned mode, uint32 addr, uint32 word) -> void;
-  auto store(unsigned mode, uint32 addr, uint32 word) -> void;
+  auto read(uint mode, uint32 addr) -> uint32;
+  auto load(uint mode, uint32 addr) -> uint32;
+  auto write(uint mode, uint32 addr, uint32 word) -> void;
+  auto store(uint mode, uint32 addr, uint32 word) -> void;
   auto vector(uint32 addr, Processor::Mode mode) -> void;
 
   //algorithms.cpp
@@ -52,9 +52,9 @@ struct ARM {
   auto rrx(uint32 source) -> uint32;
 
   //step.cpp
-  auto pipeline_step() -> void;
-  auto arm_step() -> void;
-  auto thumb_step() -> void;
+  auto stepPipeline() -> void;
+  auto stepARM() -> void;
+  auto stepTHUMB() -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

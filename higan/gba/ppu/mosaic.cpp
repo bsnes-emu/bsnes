@@ -1,4 +1,4 @@
-auto PPU::render_mosaic_background(uint id) -> void {
+auto PPU::renderMosaicBackground(uint id) -> void {
   if(regs.mosaic.bghsize == 0) return;
   uint width = 1 + regs.mosaic.bghsize;
   auto& buffer = layer[id];
@@ -12,7 +12,7 @@ auto PPU::render_mosaic_background(uint id) -> void {
   }
 }
 
-auto PPU::render_mosaic_object() -> void {
+auto PPU::renderMosaicObject() -> void {
   if(regs.mosaic.objhsize == 0) return;
   uint width = 1 + regs.mosaic.objhsize;
   auto& buffer = layer[OBJ];

@@ -24,9 +24,9 @@ struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint id) -> int16 override;
 
-  //mmio.cpp
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  //io.cpp
+  auto readIO(uint24 addr, uint8 data) -> uint8;
+  auto writeIO(uint24 addr, uint8 data) -> void;
 
   //serialization.cpp
   auto serialize(serializer&) -> void;

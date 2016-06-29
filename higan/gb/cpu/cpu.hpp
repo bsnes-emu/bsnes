@@ -10,7 +10,7 @@ struct CPU : Processor::LR35902, Thread, MMIO {
 
   auto serialize(serializer&) -> void;
 
-  //mmio.cpp
+  //io.cpp
   auto wramAddress(uint16 addr) const -> uint;
   auto joypPoll() -> void;
   auto readIO(uint16 addr) -> uint8;

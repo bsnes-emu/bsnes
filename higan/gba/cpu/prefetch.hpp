@@ -8,7 +8,7 @@ struct {
   auto full() const { return load - addr == 16; }
 } prefetch;
 
-auto prefetch_sync(uint32 addr) -> void;
-auto prefetch_step(uint clocks) -> void;
-auto prefetch_wait() -> void;
-auto prefetch_read() -> uint16;
+auto prefetchSync(uint32 addr) -> void;
+auto prefetchStep(uint clocks) -> void;
+auto prefetchWait() -> void;
+auto prefetchRead() -> uint16;

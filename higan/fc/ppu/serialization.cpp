@@ -1,49 +1,49 @@
 auto PPU::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
-  s.integer(r.mdr);
+  s.integer(io.mdr);
 
-  s.integer(r.field);
-  s.integer(r.lx);
-  s.integer(r.ly);
+  s.integer(io.field);
+  s.integer(io.lx);
+  s.integer(io.ly);
 
-  s.integer(r.busData);
+  s.integer(io.busData);
 
-  s.integer(r.v.value);
-  s.integer(r.t.value);
+  s.integer(io.v.value);
+  s.integer(io.t.value);
 
-  s.integer(r.nmiHold);
-  s.integer(r.nmiFlag);
+  s.integer(io.nmiHold);
+  s.integer(io.nmiFlag);
 
-  s.integer(r.vramIncrement);
-  s.integer(r.spriteAddress);
-  s.integer(r.bgAddress);
-  s.integer(r.spriteHeight);
-  s.integer(r.masterSelect);
-  s.integer(r.nmiEnable);
+  s.integer(io.vramIncrement);
+  s.integer(io.spriteAddress);
+  s.integer(io.bgAddress);
+  s.integer(io.spriteHeight);
+  s.integer(io.masterSelect);
+  s.integer(io.nmiEnable);
 
-  s.integer(r.grayscale);
-  s.integer(r.bgEdgeEnable);
-  s.integer(r.spriteEdgeEnable);
-  s.integer(r.bgEnable);
-  s.integer(r.spriteEnable);
-  s.integer(r.emphasis);
+  s.integer(io.grayscale);
+  s.integer(io.bgEdgeEnable);
+  s.integer(io.spriteEdgeEnable);
+  s.integer(io.bgEnable);
+  s.integer(io.spriteEnable);
+  s.integer(io.emphasis);
 
-  s.integer(r.spriteOverflow);
-  s.integer(r.spriteZeroHit);
+  s.integer(io.spriteOverflow);
+  s.integer(io.spriteZeroHit);
 
-  s.integer(r.oamAddress);
+  s.integer(io.oamAddress);
 
-  s.integer(l.nametable);
-  s.integer(l.attribute);
-  s.integer(l.tiledataLo);
-  s.integer(l.tiledataHi);
+  s.integer(latch.nametable);
+  s.integer(latch.attribute);
+  s.integer(latch.tiledataLo);
+  s.integer(latch.tiledataHi);
 
-  s.integer(l.oamIterator);
-  s.integer(l.oamCounter);
+  s.integer(latch.oamIterator);
+  s.integer(latch.oamCounter);
 
-  for(auto& o : l.oam) o.serialize(s);
-  for(auto& o : l.soam) o.serialize(s);
+  for(auto& o : latch.oam) o.serialize(s);
+  for(auto& o : latch.soam) o.serialize(s);
 
   s.array(ciram);
   s.array(cgram);
