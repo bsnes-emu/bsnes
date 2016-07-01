@@ -123,7 +123,7 @@ Presentation::Presentation() {
   });
   about.setText("About ...").onActivate([&] {
     MessageDialog().setParent(*this).setTitle("About higan ...").setText({
-      Emulator::Name, "/tomoko v", Emulator::Version, "\n\n",
+      Emulator::Name, " v", Emulator::Version, "\n\n",
       "Author: ", Emulator::Author, "\n",
       "License: ", Emulator::License, "\n",
       "Website: ", Emulator::Website

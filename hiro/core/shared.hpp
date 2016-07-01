@@ -234,14 +234,14 @@ struct Canvas : sCanvas {
   auto color() const { return self().color(); }
   auto data() { return self().data(); }
   auto droppable() const { return self().droppable(); }
-  auto doDrop(lstring names) { return self().doDrop(names); }
+  auto doDrop(string_vector names) { return self().doDrop(names); }
   auto doMouseLeave() const { return self().doMouseLeave(); }
   auto doMouseMove(Position position) const { return self().doMouseMove(position); }
   auto doMousePress(Mouse::Button button) const { return self().doMousePress(button); }
   auto doMouseRelease(Mouse::Button button) const { return self().doMouseRelease(button); }
   auto gradient() const { return self().gradient(); }
   auto icon() const { return self().icon(); }
-  auto onDrop(const function<void (lstring)>& callback = {}) { return self().onDrop(callback), *this; }
+  auto onDrop(const function<void (string_vector)>& callback = {}) { return self().onDrop(callback), *this; }
   auto onMouseLeave(const function<void ()>& callback = {}) { return self().onMouseLeave(callback), *this; }
   auto onMouseMove(const function<void (Position)>& callback = {}) { return self().onMouseMove(callback), *this; }
   auto onMousePress(const function<void (Mouse::Button)>& callback = {}) { return self().onMousePress(callback), *this; }
@@ -873,14 +873,14 @@ struct Viewport : sViewport {
   DeclareSharedWidget(Viewport)
   using internalType = mViewport;
 
-  auto doDrop(lstring names) const { return self().doDrop(names); }
+  auto doDrop(string_vector names) const { return self().doDrop(names); }
   auto doMouseLeave() const { return self().doMouseLeave(); }
   auto doMouseMove(Position position) const { return self().doMouseMove(position); }
   auto doMousePress(Mouse::Button button) const { return self().doMousePress(button); }
   auto doMouseRelease(Mouse::Button button) const { return self().doMouseRelease(button); }
   auto droppable() const { return self().droppable(); }
   auto handle() const { return self().handle(); }
-  auto onDrop(const function<void (lstring)>& callback = {}) { return self().onDrop(callback), *this; }
+  auto onDrop(const function<void (string_vector)>& callback = {}) { return self().onDrop(callback), *this; }
   auto onMouseLeave(const function<void ()>& callback = {}) { return self().onMouseLeave(callback), *this; }
   auto onMouseMove(const function<void (Position)>& callback = {}) { return self().onMouseMove(callback), *this; }
   auto onMousePress(const function<void (Mouse::Button)>& callback = {}) { return self().onMousePress(callback), *this; }
@@ -937,7 +937,7 @@ struct Window : sWindow {
   auto append(sStatusBar statusBar) { return self().append(statusBar), *this; }
   auto backgroundColor() const { return self().backgroundColor(); }
   auto doClose() const { return self().doClose(); }
-  auto doDrop(lstring names) const { return self().doDrop(names); }
+  auto doDrop(string_vector names) const { return self().doDrop(names); }
   auto doKeyPress(signed key) const { return self().doKeyPress(key); }
   auto doKeyRelease(signed key) const { return self().doKeyRelease(key); }
   auto doMove() const { return self().doMove(); }
@@ -950,7 +950,7 @@ struct Window : sWindow {
   auto menuBar() const { return self().menuBar(); }
   auto modal() const { return self().modal(); }
   auto onClose(const function<void ()>& callback = {}) { return self().onClose(callback), *this; }
-  auto onDrop(const function<void (lstring)>& callback = {}) { return self().onDrop(callback), *this; }
+  auto onDrop(const function<void (string_vector)>& callback = {}) { return self().onDrop(callback), *this; }
   auto onKeyPress(const function<void (signed)>& callback = {}) { return self().onKeyPress(callback), *this; }
   auto onKeyRelease(const function<void (signed)>& callback = {}) { return self().onKeyRelease(callback), *this; }
   auto onMove(const function<void ()>& callback = {}) { return self().onMove(callback), *this; }

@@ -12,7 +12,7 @@ auto BrowserWindow::save() -> string {
   return pBrowserWindow::save(state);
 }
 
-auto BrowserWindow::setFilters(const lstring& filters) -> type& {
+auto BrowserWindow::setFilters(const string_vector& filters) -> type& {
   state.filters = filters;
   return *this;
 }

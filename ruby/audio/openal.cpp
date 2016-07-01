@@ -172,8 +172,8 @@ struct AudioOpenAL : Audio {
   }
 
 private:
-  auto queryDevices() -> lstring {
-    lstring result;
+  auto queryDevices() -> string_vector {
+    string_vector result;
 
     const char* buffer = alcGetString(nullptr, ALC_DEVICE_SPECIFIER);
     if(!buffer) return result;

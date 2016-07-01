@@ -44,7 +44,7 @@ struct Interface : Emulator::Interface {
   auto serialize() -> serializer override;
   auto unserialize(serializer&) -> bool override;
 
-  auto cheatSet(const lstring&) -> void override;
+  auto cheatSet(const string_vector&) -> void override;
 
   auto cap(const string& name) -> bool override;
   auto get(const string& name) -> any override;

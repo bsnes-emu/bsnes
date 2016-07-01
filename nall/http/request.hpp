@@ -69,7 +69,7 @@ auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) co
 }
 
 auto Request::setHead() -> bool {
-  lstring headers = _head.split("\n");
+  auto headers = _head.split("\n");
   string request = headers.takeLeft().trimRight("\r", 1L);
   string requestHost;
 
@@ -85,12 +85,12 @@ auto Request::setHead() -> bool {
   //decode absolute URIs
   request.strip().itrimLeft("http://", 1L);
   if(!request.beginsWith("/")) {
-    lstring components = request.split("/", 1L);
+    auto components = request.split("/", 1L);
     requestHost = components(0);
     request = {"/", components(1)};
   }
 
-  lstring components = request.split("?", 1L);
+  auto components = request.split("?", 1L);
   setPath(components(0));
 
   if(auto queryString = components(1)) {

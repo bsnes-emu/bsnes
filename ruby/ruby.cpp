@@ -179,7 +179,7 @@ auto Video::safestDriver() -> string {
   #endif
 }
 
-auto Video::availableDrivers() -> lstring {
+auto Video::availableDrivers() -> string_vector {
   return {
 
   #if defined(VIDEO_WGL)
@@ -364,7 +364,7 @@ auto Audio::safestDriver() -> string {
   #endif
 }
 
-auto Audio::availableDrivers() -> lstring {
+auto Audio::availableDrivers() -> string_vector {
   return {
 
   #if defined(AUDIO_WASAPI)
@@ -508,7 +508,7 @@ auto Input::safestDriver() -> string {
   #endif
 }
 
-auto Input::availableDrivers() -> lstring {
+auto Input::availableDrivers() -> string_vector {
   return {
 
   #if defined(INPUT_WINDOWS)

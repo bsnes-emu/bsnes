@@ -5,7 +5,7 @@
 using namespace nall;
 
 struct FX {
-  auto open(lstring& args) -> bool;
+  auto open(string_vector& args) -> bool;
   auto close() -> void;
   auto readable() -> bool;
   auto read() -> uint8_t;
@@ -23,7 +23,7 @@ struct FX {
   serial device;
 };
 
-auto FX::open(lstring& args) -> bool {
+auto FX::open(string_vector& args) -> bool {
   //device name override support
   string name;
   for(uint n : range(args)) {

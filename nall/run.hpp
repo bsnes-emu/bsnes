@@ -36,7 +36,7 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> exe
   if(pid == 0) {
     const char* argv[1 + sizeof...(p) + 1];
     const char** argp = argv;
-    lstring argl(forward<P>(p)...);
+    string_vector argl(forward<P>(p)...);
     *argp++ = (const char*)name;
     for(auto& arg : argl) *argp++ = (const char*)arg;
     *argp++ = nullptr;
@@ -92,7 +92,7 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
   if(pid == 0) {
     const char* argv[1 + sizeof...(p) + 1];
     const char** argp = argv;
-    lstring argl(forward<P>(p)...);
+    string_vector argl(forward<P>(p)...);
     *argp++ = (const char*)name;
     for(auto& arg : argl) *argp++ = (const char*)arg;
     *argp++ = nullptr;
@@ -107,7 +107,7 @@ template<typename... P> inline auto invoke(const string& name, P&&... p) -> void
 #elif defined(PLATFORM_WINDOWS)
 
 template<typename... P> inline auto execute(const string& name, P&&... p) -> execute_result_t {
-  lstring argl(name, forward<P>(p)...);
+  string_vector argl(name, forward<P>(p)...);
   for(auto& arg : argl) if(arg.find(" ")) arg = {"\"", arg, "\""};
   string arguments = argl.merge(" ");
 
@@ -189,7 +189,7 @@ template<typename... P> inline auto execute(const string& name, P&&... p) -> exe
 }
 
 template<typename... P> inline auto invoke(const string& name, P&&... p) -> void {
-  lstring argl(forward<P>(p)...);
+  string_vector argl(forward<P>(p)...);
   for(auto& arg : argl) if(arg.find(" ")) arg = {"\"", arg, "\""};
   string arguments = argl.merge(" ");
   ShellExecute(nullptr, nullptr, utf16_t(name), utf16_t(arguments), nullptr, SW_SHOWNORMAL);

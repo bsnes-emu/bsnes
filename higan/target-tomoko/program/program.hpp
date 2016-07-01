@@ -1,6 +1,6 @@
 struct Program : Emulator::Interface::Bind {
   //program.cpp
-  Program(lstring args);
+  Program(string_vector args);
   auto main() -> void;
   auto quit() -> void;
 

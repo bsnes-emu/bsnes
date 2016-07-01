@@ -20,7 +20,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
       return false;
     }
 
-    lstring side;
+    string_vector side;
     switch(comparator) {
     case Comparator::EQ: side = rule.split ("=", 1L); break;
     case Comparator::NE: side = rule.split("!=", 1L); break;
@@ -55,7 +55,7 @@ auto ManagedNode::_evaluate(string query) const -> bool {
 auto ManagedNode::_find(const string& query) const -> vector<Node> {
   vector<Node> result;
 
-  lstring path = query.split("/");
+  auto path = query.split("/");
   string name = path.take(0), rule;
   uint lo = 0u, hi = ~0u;
 

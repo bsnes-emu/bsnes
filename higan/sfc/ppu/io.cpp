@@ -1,4 +1,4 @@
-auto PPU::getVramAddress() -> uint16 {
+auto PPU::addressVRAM() const -> uint16 {
   uint16 address = io.vramAddress;
   switch(io.vramMapping) {
   case 0: return (address);
@@ -9,12 +9,40 @@ auto PPU::getVramAddress() -> uint16 {
   unreachable;
 }
 
-auto PPU::vramAccessible() const -> bool {
-  return io.displayDisable || vcounter() >= vdisp();
+auto PPU::readVRAM() -> uint16 {
+  if(!io.displayDisable && vcounter() < vdisp()) return 0x0000;
+  return vram[addressVRAM()];
 }
 
-auto PPU::oamWrite(uint addr, uint8 data) -> void {
+auto PPU::writeVRAM(bool byte, uint8 data) -> void {
+  if(!io.displayDisable && vcounter() < vdisp()) return;
+  vram[addressVRAM()].byte(byte) = data;
+}
+
+auto PPU::readOAM(uint10 addr) -> uint8 {
+  if(!io.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
+  return obj.oam.read(addr);
+}
+
+auto PPU::writeOAM(uint10 addr, uint8 data) -> void {
+  if(!io.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
   obj.oam.write(addr, data);
+}
+
+auto PPU::readCGRAM(bool byte, uint8 addr) -> uint8 {
+  if(!io.displayDisable
+  && vcounter() > 0 && vcounter() < vdisp()
+  && hcounter() >= 88 && hcounter() < 1096
+  ) addr = latch.cgramAddress;
+  return screen.cgram[addr].byte(byte);
+}
+
+auto PPU::writeCGRAM(uint8 addr, uint16 data) -> void {
+  if(!io.displayDisable
+  && vcounter() > 0 && vcounter() < vdisp()
+  && hcounter() >= 88 && hcounter() < 1096
+  ) addr = latch.cgramAddress;
+  screen.cgram[addr] = data;
 }
 
 auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
@@ -32,47 +60,40 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //MPYL
   case 0x2134: {
-    uint result = (int16)io.m7a * (int8)(io.m7b >> 8);
-    ppu1.mdr = (result >>  0);
-    return ppu1.mdr;
+    uint24 result = (int16)io.m7a * (int8)(io.m7b >> 8);
+    return ppu1.mdr = result.byte(0);
   }
 
   //MPYM
   case 0x2135: {
-    uint result = (int16)io.m7a * (int8)(io.m7b >> 8);
-    ppu1.mdr = (result >>  8);
-    return ppu1.mdr;
+    uint24 result = (int16)io.m7a * (int8)(io.m7b >> 8);
+    return ppu1.mdr = result.byte(1);
   }
 
   //MPYH
   case 0x2136: {
-    uint result = (int16)io.m7a * (int8)(io.m7b >> 8);
-    ppu1.mdr = (result >> 16);
-    return ppu1.mdr;
+    uint24 result = (int16)io.m7a * (int8)(io.m7b >> 8);
+    return ppu1.mdr = result.byte(2);
   }
 
   //SLHV
   case 0x2137: {
-    if(cpu.pio() & 0x80) latchCounters();
+    if(cpu.pio().bit(7)) latchCounters();
     return data;  //CPU MDR
   }
 
   //OAMDATAREAD
   case 0x2138: {
-    uint10 address = io.oamAddress++;
-    if(!io.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
-    if(address & 0x0200) address &= 0x021f;
-
-    ppu1.mdr = obj.oam.read(address);
+    ppu1.mdr = readOAM(io.oamAddress++);
     obj.setFirstSprite();
     return ppu1.mdr;
   }
 
   //VMDATALREAD
   case 0x2139: {
-    ppu1.mdr = latch.vram >> 0;
+    ppu1.mdr = latch.vram.byte(0);
     if(io.vramIncrementMode == 0) {
-      latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
+      latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
     }
     return ppu1.mdr;
@@ -80,9 +101,9 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //VMDATAHREAD
   case 0x213a: {
-    ppu1.mdr = latch.vram >> 8;
+    ppu1.mdr = latch.vram.byte(1);
     if(io.vramIncrementMode == 1) {
-      latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
+      latch.vram = readVRAM();
       io.vramAddress += io.vramIncrementSize;
     }
     return ppu1.mdr;
@@ -90,51 +111,40 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
 
   //CGDATAREAD
   case 0x213b: {
-    auto address = io.cgramAddress;
-    if(!io.displayDisable
-    && vcounter() > 0 && vcounter() < vdisp()
-    && hcounter() >= 88 && hcounter() < 1096
-    ) address = latch.cgramAddress;
-
-    if(io.cgramAddressLatch++) {
-      ppu2.mdr  = screen.cgram[address].byte(0);
+    if(io.cgramAddressLatch++ == 0) {
+      ppu2.mdr.bits(0,7) = readCGRAM(0, io.cgramAddress);
     } else {
-      ppu2.mdr &= 0x80;
-      ppu2.mdr |= screen.cgram[address].byte(1);
+      ppu2.mdr.bits(0,6) = readCGRAM(1, io.cgramAddress++);
     }
     return ppu2.mdr;
   }
 
   //OPHCT
   case 0x213c: {
-    if(latch.hcounter == 0) {
-      ppu2.mdr  = (io.hcounter >> 0);
+    if(latch.hcounter++ == 0) {
+      ppu2.mdr.bits(0,7) = io.hcounter.bits(0,7);
     } else {
-      ppu2.mdr &= 0xfe;
-      ppu2.mdr |= (io.hcounter >> 8) & 1;
+      ppu2.mdr.bit (0  ) = io.hcounter.bit (  8);
     }
-    latch.hcounter ^= 1;
     return ppu2.mdr;
   }
 
   //OPVCT
   case 0x213d: {
-    if(latch.vcounter == 0) {
-      ppu2.mdr  = (io.vcounter >> 0);
+    if(latch.vcounter++ == 0) {
+      ppu2.mdr.bits(0,7) = io.vcounter.bits(0,7);
     } else {
-      ppu2.mdr &= 0xfe;
-      ppu2.mdr |= (io.vcounter >> 8) & 1;
+      ppu2.mdr.bit (0  ) = io.vcounter.bit (  8);
     }
-    latch.vcounter ^= 1;
     return ppu2.mdr;
   }
 
   //STAT77
   case 0x213e: {
-    ppu1.mdr &= 0x10;
-    ppu1.mdr |= obj.io.timeOver << 7;
-    ppu1.mdr |= obj.io.rangeOver << 6;
-    ppu1.mdr |= ppu1.version & 0x0f;
+    ppu1.mdr.bits(0,3) = ppu1.version;
+    ppu1.mdr.bit (  5) = 0;
+    ppu1.mdr.bit (  6) = obj.io.rangeOver;
+    ppu1.mdr.bit (  7) = obj.io.timeOver;
     return ppu1.mdr;
   }
 
@@ -143,16 +153,15 @@ auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {
     latch.hcounter = 0;
     latch.vcounter = 0;
 
-    ppu2.mdr &= 0x20;
-    ppu2.mdr |= field() << 7;
-    if((cpu.pio() & 0x80) == 0) {
-      ppu2.mdr |= 0x40;
-    } else if(latch.counters) {
-      ppu2.mdr |= 0x40;
-      latch.counters = false;
+    ppu2.mdr.bits(0,3) = ppu2.version;
+    ppu2.mdr.bit (  4) = system.region() == System::Region::PAL;  //0 = NTSC
+    if(!cpu.pio().bit(7)) {
+      ppu2.mdr.bit( 6) = 1;
+    } else {
+      ppu2.mdr.bit( 6) = latch.counters;
+      latch.counters = 0;
     }
-    ppu2.mdr |= (system.region() == System::Region::NTSC ? 0 : 1) << 4;
-    ppu2.mdr |= ppu2.version & 0x0f;
+    ppu2.mdr.bit (  7) = field();
     return ppu2.mdr;
   }
 
@@ -191,25 +200,23 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //OAMADDH
   case 0x2103: {
-    io.oamPriority = data & 0x80;
-    io.oamBaseAddress = ((data & 0x01) << 9) | (io.oamBaseAddress & 0x01fe);
+    io.oamBaseAddress = data.bit(0) << 9 | (io.oamBaseAddress & 0x01fe);
+    io.oamPriority = data.bit(7);
     obj.addressReset();
     return;
   }
 
   //OAMDATA
   case 0x2104: {
-    bool l = io.oamAddress & 1;
+    bool latchBit = io.oamAddress & 1;
     uint10 address = io.oamAddress++;
-    if(!io.displayDisable && vcounter() < vdisp()) address = latch.oamAddress;
-    if(address & 0x0200) address &= 0x021f;
 
-    if(l == 0) latch.oam = data;
-    if(address & 0x0200) {
-      oamWrite(address, data);
-    } else if(l == 1) {
-      oamWrite((address & ~1) + 0, latch.oam);
-      oamWrite((address & ~1) + 1, data);
+    if(latchBit == 0) latch.oam = data;
+    if(address.bit(9)) {
+      writeOAM(address, data);
+    } else if(latchBit == 1) {
+      writeOAM((address & ~1) + 0, latch.oam);
+      writeOAM((address & ~1) + 1, data);
     }
     obj.setFirstSprite();
     return;
@@ -218,11 +225,11 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
   //BGMODE
   case 0x2105: {
     io.bgMode       = data.bits(0,2);
-    io.bgPriority   = data.bit (3);
-    bg1.io.tileSize = data.bit (4);
-    bg2.io.tileSize = data.bit (5);
-    bg3.io.tileSize = data.bit (6);
-    bg4.io.tileSize = data.bit (7);
+    io.bgPriority   = data.bit (  3);
+    bg1.io.tileSize = data.bit (  4);
+    bg2.io.tileSize = data.bit (  5);
+    bg3.io.tileSize = data.bit (  6);
+    bg4.io.tileSize = data.bit (  7);
     updateVideoMode();
     return;
   }
@@ -281,62 +288,62 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //BG1HOFS
   case 0x210d: {
-    io.hoffsetMode7 = (data << 8) | latch.mode7;
+    io.hoffsetMode7 = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    bg1.io.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg1.io.hoffset >> 8) & 7);
+    bg1.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg1.io.hoffset >> 8 & 7);
     latch.bgofs = data;
     return;
   }
 
   //BG1VOFS
   case 0x210e: {
-    io.voffsetMode7 = (data << 8) | latch.mode7;
+    io.voffsetMode7 = data << 8 | latch.mode7;
     latch.mode7 = data;
 
-    bg1.io.voffset = (data << 8) | latch.bgofs;
+    bg1.io.voffset = data << 8 | latch.bgofs;
     latch.bgofs = data;
     return;
   }
 
   //BG2HOFS
   case 0x210f: {
-    bg2.io.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg2.io.hoffset >> 8) & 7);
+    bg2.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg2.io.hoffset >> 8 & 7);
     latch.bgofs = data;
     return;
   }
 
   //BG2VOFS
   case 0x2110: {
-    bg2.io.voffset = (data << 8) | latch.bgofs;
+    bg2.io.voffset = data << 8 | latch.bgofs;
     latch.bgofs = data;
     return;
   }
 
   //BG3HOFS
   case 0x2111: {
-    bg3.io.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg3.io.hoffset >> 8) & 7);
+    bg3.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg3.io.hoffset >> 8 & 7);
     latch.bgofs = data;
     return;
   }
 
   //BG3VOFS
   case 0x2112: {
-    bg3.io.voffset = (data << 8) | latch.bgofs;
+    bg3.io.voffset = data << 8 | latch.bgofs;
     latch.bgofs = data;
     return;
   }
 
   //BG4HOFS
   case 0x2113: {
-    bg4.io.hoffset = (data << 8) | (latch.bgofs & ~7) | ((bg4.io.hoffset >> 8) & 7);
+    bg4.io.hoffset = data << 8 | (latch.bgofs & ~7) | (bg4.io.hoffset >> 8 & 7);
     latch.bgofs = data;
     return;
   }
 
   //BG4VOFS
   case 0x2114: {
-    bg4.io.voffset = (data << 8) | latch.bgofs;
+    bg4.io.voffset = data << 8 | latch.bgofs;
     latch.bgofs = data;
     return;
   }
@@ -346,42 +353,42 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
     static const uint size[4] = {1, 32, 128, 128};
     io.vramIncrementSize = size[data.bits(0,1)];
     io.vramMapping       = data.bits(2,3);
-    io.vramIncrementMode = data.bit (7);
+    io.vramIncrementMode = data.bit (  7);
     return;
   }
 
   //VMADDL
   case 0x2116: {
     io.vramAddress.byte(0) = data;
-    latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
+    latch.vram = readVRAM();
     return;
   }
 
   //VMADDH
   case 0x2117: {
     io.vramAddress.byte(1) = data;
-    latch.vram = vramAccessible() ? vram[getVramAddress()] : (uint16)0;
+    latch.vram = readVRAM();
     return;
   }
 
   //VMDATAL
   case 0x2118: {
-    if(vramAccessible()) vram[getVramAddress()].byte(0) = data;
+    writeVRAM(0, data);
     if(io.vramIncrementMode == 0) io.vramAddress += io.vramIncrementSize;
     return;
   }
 
   //VMDATAH
   case 0x2119: {
-    if(vramAccessible()) vram[getVramAddress()].byte(1) = data;
+    writeVRAM(1, data);
     if(io.vramIncrementMode == 1) io.vramAddress += io.vramIncrementSize;
     return;
   }
 
   //M7SEL
   case 0x211a: {
-    io.hflipMode7  = data.bit (0);
-    io.vflipMode7  = data.bit (1);
+    io.hflipMode7  = data.bit (  0);
+    io.vflipMode7  = data.bit (  1);
     io.repeatMode7 = data.bits(6,7);
     return;
   }
@@ -437,17 +444,10 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //CGDATA
   case 0x2122: {
-    auto address = io.cgramAddress;
-    if(!io.displayDisable
-    && vcounter() > 0 && vcounter() < vdisp()
-    && hcounter() >= 88 && hcounter() < 1096
-    ) address = latch.cgramAddress;
-
     if(io.cgramAddressLatch++ == 0) {
       latch.cgram = data;
     } else {
-      screen.cgram[address] = data.bits(0,6) << 8 | latch.cgram;
-      io.cgramAddress++;
+      writeCGRAM(io.cgramAddress++, data.bits(0,6) << 8 | latch.cgram);
     }
     return;
   }
@@ -573,8 +573,8 @@ auto PPU::writeIO(uint24 addr, uint8 data) -> void {
 
   //CGWSEL
   case 0x2130: {
-    screen.io.directColor   = data.bit (0);
-    screen.io.blendMode     = data.bit (1);
+    screen.io.directColor   = data.bit (  0);
+    screen.io.blendMode     = data.bit (  1);
     window.io.col.belowMask = data.bits(4,5);
     window.io.col.aboveMask = data.bits(6,7);
     return;
@@ -619,7 +619,7 @@ auto PPU::latchCounters() -> void {
   cpu.synchronizePPU();
   io.hcounter = hdot();
   io.vcounter = vcounter();
-  latch.counters = true;
+  latch.counters = 1;
 }
 
 auto PPU::updateVideoMode() -> void {

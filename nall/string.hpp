@@ -28,9 +28,6 @@ struct string_view;
 struct string_vector;
 struct string_format;
 
-//legacy naming convention
-using lstring = string_vector;
-
 struct string_view {
   inline string_view();
   inline string_view(const string_view& source);
@@ -66,14 +63,11 @@ template<typename T> struct stringify;
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
 template<typename T> inline auto numeral(T value, long precision = 0, char padchar = '0') -> string;
-//inline auto integer(intmax_t value, long precision = 0, char padchar = '0') -> string;
-//inline auto natural(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
 inline auto pointer(uintptr_t value, long precision = 0) -> string;
-//inline auto real(long double value) -> string;
 
 //match.hpp
 inline auto tokenize(const char* s, const char* p) -> bool;

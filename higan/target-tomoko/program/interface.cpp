@@ -26,8 +26,7 @@ auto Program::open(uint id, string name, vfs::file::mode mode, bool required) ->
 auto Program::load(uint id, string name, string type) -> maybe<uint> {
   string location;
   if(mediumQueue) {
-    location = mediumQueue.takeLeft().transform("\\", "/");
-    if(!location.endsWith("/")) location.append("/");
+    location = mediumQueue.takeLeft();
   } else {
     location = BrowserDialog()
     .setTitle({"Load ", name})

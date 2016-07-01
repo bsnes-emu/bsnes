@@ -18,7 +18,7 @@ auto mCanvas::droppable() const -> bool {
   return state.droppable;
 }
 
-auto mCanvas::doDrop(lstring names) const -> void {
+auto mCanvas::doDrop(string_vector names) const -> void {
   if(state.onDrop) return state.onDrop(names);
 }
 
@@ -46,7 +46,7 @@ auto mCanvas::icon() const -> image {
   return state.icon;
 }
 
-auto mCanvas::onDrop(const function<void (lstring)>& callback) -> type& {
+auto mCanvas::onDrop(const function<void (string_vector)>& callback) -> type& {
   state.onDrop = callback;
   return *this;
 }

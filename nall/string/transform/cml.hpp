@@ -54,8 +54,8 @@ auto CML::parseDocument(const string& filedata, const string& pathname, uint dep
   };
 
   for(auto& block : filedata.split("\n\n")) {
-    lstring lines = block.stripRight().split("\n");
-    string name = lines.takeLeft();
+    auto lines = block.stripRight().split("\n");
+    auto name = lines.takeLeft();
 
     if(name.beginsWith("include ")) {
       name.trimLeft("include ", 1L);

@@ -33,8 +33,8 @@ auto DropPathsOperation(id<NSDraggingInfo> sender) -> NSDragOperation {
   return NSDragOperationNone;
 }
 
-auto DropPaths(id<NSDraggingInfo> sender) -> lstring {
-  lstring paths;
+auto DropPaths(id<NSDraggingInfo> sender) -> string_vector {
+  string_vector paths;
   NSPasteboard* pboard = [sender draggingPasteboard];
   if([[pboard types] containsObject:NSFilenamesPboardType]) {
     NSArray* files = [pboard propertyListForType:NSFilenamesPboardType];

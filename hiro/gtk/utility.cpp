@@ -36,11 +36,11 @@ static auto CreateImage(const image& icon, bool scale = false) -> GtkImage* {
   return gtkIcon;
 }
 
-static auto DropPaths(GtkSelectionData* data) -> lstring {
+static auto DropPaths(GtkSelectionData* data) -> string_vector {
   gchar** uris = gtk_selection_data_get_uris(data);
   if(uris == nullptr) return {};
 
-  lstring paths;
+  string_vector paths;
   for(unsigned n = 0; uris[n] != nullptr; n++) {
     gchar* pathname = g_filename_from_uri(uris[n], nullptr, nullptr);
     if(pathname == nullptr) continue;

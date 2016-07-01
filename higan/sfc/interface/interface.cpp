@@ -49,8 +49,17 @@ Interface::Interface() {
     controllerPort2.devices.append(device);
   }
 
-  { Device device{ID::Device::Multitap, "Multitap"};
-    for(uint p = 1; p <= 4; p++) {
+  { Device device{ID::Device::Mouse, "Mouse"};
+    device.inputs.append({1, "X-axis"});
+    device.inputs.append({1, "Y-axis"});
+    device.inputs.append({0, "Left"  });
+    device.inputs.append({0, "Right" });
+    controllerPort1.devices.append(device);
+    controllerPort2.devices.append(device);
+  }
+
+  { Device device{ID::Device::SuperMultitap, "Super Multitap"};
+    for(uint p = 2; p <= 5; p++) {
       device.inputs.append({0, {"Port ", p, " - ", "Up"    }});
       device.inputs.append({0, {"Port ", p, " - ", "Down"  }});
       device.inputs.append({0, {"Port ", p, " - ", "Left"  }});
@@ -64,16 +73,6 @@ Interface::Interface() {
       device.inputs.append({0, {"Port ", p, " - ", "Select"}});
       device.inputs.append({0, {"Port ", p, " - ", "Start" }});
     }
-  //controllerPort1.devices.append(device);  //not used by any commercial software (only homebrew)
-    controllerPort2.devices.append(device);
-  }
-
-  { Device device{ID::Device::Mouse, "Mouse"};
-    device.inputs.append({1, "X-axis"});
-    device.inputs.append({1, "Y-axis"});
-    device.inputs.append({0, "Left"  });
-    device.inputs.append({0, "Right" });
-    controllerPort1.devices.append(device);
     controllerPort2.devices.append(device);
   }
 
@@ -234,16 +233,16 @@ auto Interface::unserialize(serializer& s) -> bool {
   return system.unserialize(s);
 }
 
-auto Interface::cheatSet(const lstring& list) -> void {
+auto Interface::cheatSet(const string_vector& list) -> void {
   cheat.reset();
 
   #if defined(SFC_SUPERGAMEBOY)
   if(cartridge.has.ICD2) {
     GameBoy::cheat.reset();
     for(auto& codeset : list) {
-      lstring codes = codeset.split("+");
+      auto codes = codeset.split("+");
       for(auto& code : codes) {
-        lstring part = code.split("/");
+        auto part = code.split("/");
         if(part.size() == 2) GameBoy::cheat.append(part[0].hex(), part[1].hex());
         if(part.size() == 3) GameBoy::cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
       }
@@ -253,9 +252,9 @@ auto Interface::cheatSet(const lstring& list) -> void {
   #endif
 
   for(auto& codeset : list) {
-    lstring codes = codeset.split("+");
+    auto codes = codeset.split("+");
     for(auto& code : codes) {
-      lstring part = code.split("/");
+      auto part = code.split("/");
       if(part.size() == 2) cheat.append(part[0].hex(), part[1].hex());
       if(part.size() == 3) cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
     }

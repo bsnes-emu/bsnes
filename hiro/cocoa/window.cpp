@@ -121,7 +121,7 @@
 }
 
 -(BOOL) performDragOperation:(id<NSDraggingInfo>)sender {
-  lstring paths = DropPaths(sender);
+  auto paths = DropPaths(sender);
   if(!paths) return NO;
   window->doDrop(paths);
   return YES;

@@ -99,7 +99,7 @@ struct Interface {
   virtual auto unserialize(serializer&) -> bool = 0;
 
   //cheat functions
-  virtual auto cheatSet(const lstring& = lstring{}) -> void {}
+  virtual auto cheatSet(const string_vector& = {}) -> void {}
 
   //settings
   virtual auto cap(const string& name) -> bool { return false; }

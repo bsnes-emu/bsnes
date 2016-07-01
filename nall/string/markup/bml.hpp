@@ -80,7 +80,7 @@ protected:
   }
 
   //read a node and all of its child nodes
-  auto parseNode(const lstring& text, uint& y) -> void {
+  auto parseNode(const string_vector& text, uint& y) -> void {
     const char* p = text[y++];
     _metadata = parseDepth(p);
     parseName(p);
@@ -166,7 +166,7 @@ inline auto serialize(const Markup::Node& node, uint depth = 0) -> string {
   padding.resize(depth * 2);
   for(auto& byte : padding) byte = ' ';
 
-  lstring lines;
+  string_vector lines;
   if(auto value = node.value()) lines = value.split("\n");
 
   string result;

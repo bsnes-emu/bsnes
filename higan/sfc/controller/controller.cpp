@@ -3,9 +3,9 @@
 namespace SuperFamicom {
 
 #include "gamepad/gamepad.cpp"
-#include "multitap/multitap.cpp"
 #include "mouse/mouse.cpp"
-#include "superscope/superscope.cpp"
+#include "super-multitap/super-multitap.cpp"
+#include "super-scope/super-scope.cpp"
 #include "justifier/justifier.cpp"
 
 Controller::Controller(bool port) : port(port) {

@@ -18,9 +18,13 @@ struct PPU : Thread, PPUcounter {
   auto serialize(serializer&) -> void;
 
   //io.cpp
-  alwaysinline auto getVramAddress() -> uint16;
-  alwaysinline auto vramAccessible() const -> bool;
-  alwaysinline auto oamWrite(uint addr, uint8 data) -> void;
+  alwaysinline auto addressVRAM() const -> uint16;
+  alwaysinline auto readVRAM() -> uint16;
+  alwaysinline auto writeVRAM(bool byte, uint8 data) -> void;
+  alwaysinline auto readOAM(uint10 addr) -> uint8;
+  alwaysinline auto writeOAM(uint10 addr, uint8 data) -> void;
+  alwaysinline auto readCGRAM(bool byte, uint8 addr) -> uint8;
+  alwaysinline auto writeCGRAM(uint8 addr, uint16 data) -> void;
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
   auto latchCounters() -> void;
@@ -28,7 +32,7 @@ struct PPU : Thread, PPUcounter {
 
 privileged:
   struct VRAM {
-    auto& operator[](uint offset) { return data[offset & mask]; }
+    auto& operator[](uint addr) { return data[addr & mask]; }
     uint16 data[64 * 1024];
     uint mask = 0x7fff;
   } vram;
@@ -55,9 +59,9 @@ privileged:
     uint8 cgram;
     uint8 bgofs;
     uint8 mode7;
-    bool counters;
-    bool hcounter;
-    bool vcounter;
+    uint1 counters;
+    uint1 hcounter;
+    uint1 vcounter;
 
     uint10 oamAddress;
     uint8 cgramAddress;

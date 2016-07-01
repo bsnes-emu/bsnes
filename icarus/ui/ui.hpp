@@ -38,10 +38,10 @@ struct SettingsDialog : Window {
 
 struct ImportDialog : Window {
   ImportDialog();
-  auto run(lstring locations) -> void;
+  auto run(string_vector locations) -> void;
 
   bool abort;
-  lstring errors;
+  string_vector errors;
 
   VerticalLayout layout{this};
     Label statusLabel{&layout, Size{~0, 0}};

@@ -33,7 +33,7 @@ void pListView::setCheckedNone() {
 void pListView::setForegroundColor(Color color) {
 }
 
-void pListView::setHeaderText(const lstring& text) {
+void pListView::setHeaderText(const string_vector& text) {
 }
 
 void pListView::setHeaderVisible(bool visible) {

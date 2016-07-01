@@ -56,7 +56,7 @@ auto CheatEditor::doRefresh() -> void {
   for(auto slot : range(Slots)) {
     auto& cheat = cheats[slot];
     if(cheat.code || cheat.description) {
-      lstring codes = cheat.code.split("+");
+      auto codes = cheat.code.split("+");
       if(codes.size() > 1) codes[0].append("+...");
       cheatList.item(slot).cell(0).setChecked(cheat.enabled);
       cheatList.item(slot).cell(1).setText(codes[0]);
@@ -103,7 +103,7 @@ auto CheatEditor::doErase() -> void {
 auto CheatEditor::synchronizeCodes() -> void {
   if(!emulator) return;
 
-  lstring codes;
+  string_vector codes;
   for(auto& cheat : cheats) {
     if(!cheat.enabled || !cheat.code) continue;
     codes.append(cheat.code);

@@ -1,9 +1,9 @@
-struct Multitap : Controller {
+struct SuperMultitap : Controller {
   enum : uint {
     Up, Down, Left, Right, B, A, Y, X, L, R, Select, Start,
   };
 
-  Multitap(bool port);
+  SuperMultitap(bool port);
 
   auto data() -> uint2;
   auto latch(bool data) -> void;

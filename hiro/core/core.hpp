@@ -16,13 +16,13 @@
 
 using nall::function;
 using nall::image;
-using nall::lstring;
 using nall::maybe;
 using nall::nothing;
 using nall::set;
 using nall::shared_pointer;
 using nall::shared_pointer_weak;
 using nall::string;
+using nall::string_vector;
 using nall::vector;
 
 namespace hiro {
@@ -477,14 +477,14 @@ struct BrowserWindow {
   auto directory() -> string;
   auto open() -> string;
   auto save() -> string;
-  auto setFilters(const lstring& filters = {"*"}) -> type&;
+  auto setFilters(const string_vector& filters = {"*"}) -> type&;
   auto setParent(sWindow parent) -> type&;
   auto setPath(const string& path = "") -> type&;
   auto setTitle(const string& title = "") -> type&;
 
 //private:
   struct State {
-    lstring filters;
+    string_vector filters;
     sWindow parent;
     string path;
     string title;
@@ -667,7 +667,7 @@ struct mWindow : mObject {
   auto append(sStatusBar statusBar) -> type&;
   auto backgroundColor() const -> Color;
   auto doClose() const -> void;
-  auto doDrop(lstring) const -> void;
+  auto doDrop(string_vector) const -> void;
   auto doKeyPress(signed) const -> void;
   auto doKeyRelease(signed) const -> void;
   auto doMove() const -> void;
@@ -680,7 +680,7 @@ struct mWindow : mObject {
   auto menuBar() const -> MenuBar;
   auto modal() const -> bool;
   auto onClose(const function<void ()>& callback = {}) -> type&;
-  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onDrop(const function<void (string_vector)>& callback = {}) -> type&;
   auto onKeyPress(const function<void (signed)>& callback = {}) -> type&;
   auto onKeyRelease(const function<void (signed)>& callback = {}) -> type&;
   auto onMove(const function<void ()>& callback = {}) -> type&;
@@ -717,7 +717,7 @@ struct mWindow : mObject {
     sMenuBar menuBar;
     bool modal = false;
     function<void ()> onClose;
-    function<void (lstring)> onDrop;
+    function<void (string_vector)> onDrop;
     function<void (signed)> onKeyPress;
     function<void (signed)> onKeyRelease;
     function<void ()> onMove;
@@ -989,14 +989,14 @@ struct mCanvas : mWidget {
   auto color() const -> Color;
   auto data() -> uint32_t*;
   auto droppable() const -> bool;
-  auto doDrop(lstring names) const -> void;
+  auto doDrop(string_vector names) const -> void;
   auto doMouseLeave() const -> void;
   auto doMouseMove(Position position) const -> void;
   auto doMousePress(Mouse::Button button) const -> void;
   auto doMouseRelease(Mouse::Button button) const -> void;
   auto gradient() const -> Gradient;
   auto icon() const -> image;
-  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onDrop(const function<void (string_vector)>& callback = {}) -> type&;
   auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
   auto onMouseMove(const function<void (Position)>& callback = {}) -> type&;
   auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
@@ -1015,7 +1015,7 @@ struct mCanvas : mWidget {
     bool droppable = false;
     Gradient gradient;
     image icon;
-    function<void (lstring)> onDrop;
+    function<void (string_vector)> onDrop;
     function<void ()> onMouseLeave;
     function<void (Position)> onMouseMove;
     function<void (Mouse::Button)> onMousePress;
@@ -1944,14 +1944,14 @@ struct mVerticalSlider : mWidget {
 struct mViewport : mWidget {
   Declare(Viewport)
 
-  auto doDrop(lstring names) const -> void;
+  auto doDrop(string_vector names) const -> void;
   auto doMouseLeave() const -> void;
   auto doMouseMove(Position position) const -> void;
   auto doMousePress(Mouse::Button button) const -> void;
   auto doMouseRelease(Mouse::Button button) const -> void;
   auto droppable() const -> bool;
   auto handle() const -> uintptr_t;
-  auto onDrop(const function<void (lstring)>& callback = {}) -> type&;
+  auto onDrop(const function<void (string_vector)>& callback = {}) -> type&;
   auto onMouseLeave(const function<void ()>& callback = {}) -> type&;
   auto onMouseMove(const function<void (Position position)>& callback = {}) -> type&;
   auto onMousePress(const function<void (Mouse::Button)>& callback = {}) -> type&;
@@ -1961,7 +1961,7 @@ struct mViewport : mWidget {
 //private:
   struct State {
     bool droppable = false;
-    function<void (lstring)> onDrop;
+    function<void (string_vector)> onDrop;
     function<void ()> onMouseLeave;
     function<void (Position)> onMouseMove;
     function<void (Mouse::Button)> onMousePress;

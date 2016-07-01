@@ -2,11 +2,11 @@
 
 namespace hiro {
 
-static auto BrowserWindow_addFilters(GtkWidget* dialog, lstring filters) -> void {
+static auto BrowserWindow_addFilters(GtkWidget* dialog, string_vector filters) -> void {
   for(auto& filter : filters) {
     GtkFileFilter* gtkFilter = gtk_file_filter_new();
     gtk_file_filter_set_name(gtkFilter, filter);
-    lstring patterns = filter.split("(", 1L)(1).trimRight(")", 1L).split(",").strip();
+    auto patterns = filter.split("(", 1L)(1).trimRight(")", 1L).split(",").strip();
     for(auto& pattern : patterns) gtk_file_filter_add_pattern(gtkFilter, pattern);
     gtk_file_chooser_add_filter(GTK_FILE_CHOOSER(dialog), gtkFilter);
   }

@@ -6,7 +6,7 @@ auto mViewport::allocate() -> pObject* {
 
 //
 
-auto mViewport::doDrop(lstring names) const -> void {
+auto mViewport::doDrop(string_vector names) const -> void {
   if(state.onDrop) return state.onDrop(names);
 }
 
@@ -34,7 +34,7 @@ auto mViewport::handle() const -> uintptr_t {
   return signal(handle);
 }
 
-auto mViewport::onDrop(const function<void (lstring)>& callback) -> type& {
+auto mViewport::onDrop(const function<void (string_vector)>& callback) -> type& {
   state.onDrop = callback;
   return *this;
 }

@@ -46,7 +46,7 @@ Icarus icarus;
 #include "ui/error-dialog.cpp"
 
 #include <nall/main.hpp>
-auto nall::main(lstring args) -> void {
+auto nall::main(string_vector args) -> void {
   if(args.size() == 2 && args[1] == "--name") {
     return print("icarus");
   }

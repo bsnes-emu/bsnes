@@ -217,6 +217,7 @@ private:
 using boolean = nall::Boolean;
 using integer = nall::Integer<sizeof( int) * 8>;
 using natural = nall::Natural<sizeof(uint) * 8>;
+using real    = nall::Real<sizeof(double) * 8>;
 
 using  int1 = nall::Integer< 1>;
 using  int2 = nall::Integer< 2>;
@@ -348,6 +349,6 @@ using uint62 = nall::Natural<62>;
 using uint63 = nall::Natural<63>;
 using uint64 = nall::Natural<64>;
 
-using float32 = nall::Real<32>;
-using float64 = nall::Real<64>;
-//using float80 = nall::Real<80>;
+using real32 = nall::Real<32>;
+using real64 = nall::Real<64>;
+//using real80 = nall::Real<80>;

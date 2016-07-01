@@ -47,7 +47,7 @@ auto mWindow::doClose() const -> void {
   if(state.onClose) return state.onClose();
 }
 
-auto mWindow::doDrop(lstring names) const -> void {
+auto mWindow::doDrop(string_vector names) const -> void {
   if(state.onDrop) return state.onDrop(names);
 }
 
@@ -104,7 +104,7 @@ auto mWindow::onClose(const function<void ()>& callback) -> type& {
   return *this;
 }
 
-auto mWindow::onDrop(const function<void (lstring)>& callback) -> type& {
+auto mWindow::onDrop(const function<void (string_vector)>& callback) -> type& {
   state.onDrop = callback;
   return *this;
 }

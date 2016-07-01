@@ -82,7 +82,7 @@ auto ScanDialog::activate() -> void {
 }
 
 auto ScanDialog::import() -> void {
-  lstring filenames;
+  string_vector filenames;
   for(auto& item : scanList.items()) {
     if(item.checked()) {
       filenames.append(string{settings["icarus/Path"].text(), item.text()});

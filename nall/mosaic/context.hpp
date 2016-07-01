@@ -65,13 +65,13 @@ struct context {
       if(c == ',' && function == true) c = ';';
     }
 
-    lstring list = expression.split(",");
+    auto list = expression.split(",");
     for(auto& item : list) {
       item.strip();
       if(item.match("f(?*) ?*")) {
         item.trimLeft("f(", 1L);
-        lstring part = item.split(") ", 1L);
-        lstring args = part[0].split(";", 3L).strip();
+        auto part = item.split(") ", 1L);
+        auto args = part[0].split(";", 3L).strip();
 
         uint length = eval(args(0, "0"));
         uint offset = eval(args(1, "0"));
@@ -93,7 +93,7 @@ struct context {
         item.trimLeft("base64", 1L);
         if(item.match("(?*) *")) {
           item.trimLeft("(", 1L);
-          lstring part = item.split(") ", 1L);
+          auto part = item.split(") ", 1L);
           offset = eval(part[0]);
           item = part(1, "");
         }
@@ -118,9 +118,9 @@ struct context {
   auto parse(const string& data) -> void {
     reset();
 
-    lstring lines = data.split("\n");
+    auto lines = data.split("\n");
     for(auto& line : lines) {
-      lstring part = line.split(":", 1L).strip();
+      auto part = line.split(":", 1L).strip();
       if(part.size() != 2) continue;
 
       if(part[0] == "offset") offset = eval(part[1]);

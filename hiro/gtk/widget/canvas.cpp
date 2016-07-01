@@ -5,7 +5,7 @@ namespace hiro {
 static auto Canvas_drop(GtkWidget* widget, GdkDragContext* context, signed x, signed y,
 GtkSelectionData* data, unsigned type, unsigned timestamp, pCanvas* p) -> void {
   if(!p->state().droppable) return;
-  lstring paths = DropPaths(data);
+  auto paths = DropPaths(data);
   if(!paths) return;
   p->self().doDrop(paths);
 }

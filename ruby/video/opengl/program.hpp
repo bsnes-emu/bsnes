@@ -72,7 +72,7 @@ auto OpenGLProgram::bind(OpenGL* instance, const Markup::Node& node, const strin
 
 //apply manifest settings to shader source #in tags
 auto OpenGLProgram::parse(OpenGL* instance, string& source) -> void {
-  lstring lines = source.split("\n");
+  auto lines = source.split("\n");
   for(auto& line : lines) {
     string s = line;
     if(auto position = s.find("//")) s.resize(position());  //strip comments

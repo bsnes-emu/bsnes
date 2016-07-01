@@ -4,19 +4,19 @@ MessageDialog::MessageDialog(const string& text) {
   state.text = text;
 }
 
-auto MessageDialog::error(const lstring& buttons) -> string {
+auto MessageDialog::error(const string_vector& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Error;
   return _run();
 }
 
-auto MessageDialog::information(const lstring& buttons) -> string {
+auto MessageDialog::information(const string_vector& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Information;
   return _run();
 }
 
-auto MessageDialog::question(const lstring& buttons) -> string {
+auto MessageDialog::question(const string_vector& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Question;
   return _run();
@@ -37,7 +37,7 @@ auto MessageDialog::setTitle(const string& title) -> type& {
   return *this;
 }
 
-auto MessageDialog::warning(const lstring& buttons) -> string {
+auto MessageDialog::warning(const string_vector& buttons) -> string {
   state.buttons = buttons;
   state.icon = Icon::Prompt::Warning;
   return _run();

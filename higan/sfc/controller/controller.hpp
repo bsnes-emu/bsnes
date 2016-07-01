@@ -28,7 +28,7 @@ struct Controller : Cothread {
 };
 
 #include "gamepad/gamepad.hpp"
-#include "multitap/multitap.hpp"
 #include "mouse/mouse.hpp"
-#include "superscope/superscope.hpp"
+#include "super-multitap/super-multitap.hpp"
+#include "super-scope/super-scope.hpp"
 #include "justifier/justifier.hpp"

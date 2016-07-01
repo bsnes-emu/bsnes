@@ -10,7 +10,7 @@ struct Archive {
   static auto extract(const string& beatname, const string& pathname) -> vector<uint8_t>;
 
 private:
-  static auto scan(lstring& result, const string& basename, const string& pathname) -> void;
+  static auto scan(string_vector& result, const string& basename, const string& pathname) -> void;
 };
 
 auto Archive::create(const string& beatname, const string& pathname, const string& metadata) -> bool {
@@ -23,7 +23,7 @@ auto Archive::create(const string& beatname, const string& pathname, const strin
   beat.writevu(metadata.size());
   beat.writes(metadata);
 
-  lstring contents;
+  string_vector contents;
   scan(contents, pathname, pathname);
 
   for(auto& name : contents) {
@@ -121,7 +121,7 @@ auto Archive::extract(const string& beatname, const string& filename) -> vector<
   return {};
 }
 
-auto Archive::scan(lstring& result, const string& basename, const string& pathname) -> void {
+auto Archive::scan(string_vector& result, const string& basename, const string& pathname) -> void {
   for(auto& name : directory::contents(pathname)) {
     result.append(string{pathname, name}.trimLeft(basename, 1L));
     if(name.endsWith("/")) scan(result, basename, {pathname, name});

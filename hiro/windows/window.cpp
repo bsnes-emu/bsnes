@@ -176,7 +176,7 @@ auto pWindow::onClose() -> void {
 }
 
 auto pWindow::onDrop(WPARAM wparam) -> void {
-  lstring paths = DropPaths(wparam);
+  auto paths = DropPaths(wparam);
   if(paths) self().doDrop(paths);
 }
 
