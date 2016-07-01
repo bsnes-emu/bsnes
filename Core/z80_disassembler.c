@@ -253,10 +253,9 @@ static const char *get_src_name(uint8_t opcode)
     uint8_t src_register_id;
     uint8_t src_low;
     src_register_id = ((opcode >> 1) + 1) & 3;
-    src_low = !(opcode & 1);
-    if (src_register_id == GB_REGISTER_AF && src_low) {
-
-        return "[hl]";
+    src_low = (opcode & 1);
+    if (src_register_id == GB_REGISTER_AF) {
+        return src_low? "a": "[hl]";
     }
     if (src_low) {
         return register_names[src_register_id] + 1;
@@ -271,9 +270,8 @@ static const char *get_dst_name(uint8_t opcode)
     uint8_t dst_low;
     dst_register_id = ((opcode >> 4) + 1) & 3;
     dst_low = opcode & 8;
-    if (dst_register_id == GB_REGISTER_AF && dst_low) {
-
-        return "[hl]";
+    if (dst_register_id == GB_REGISTER_AF) {
+        return dst_low? "a": "[hl]";
     }
     if (dst_low) {
         return register_names[dst_register_id] + 1;
