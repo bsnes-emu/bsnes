@@ -87,6 +87,14 @@ static uint16_t assign(GB_gameboy_t *gb, lvalue_t a, uint16_t b)
     return read_lvalue(gb, a);
 }
 
+static uint16_t bool_and(uint16_t a, uint16_t b) {return  a && b;};
+static uint16_t bool_or(uint16_t a, uint16_t b) {return  a || b;};
+static uint16_t equals(uint16_t a, uint16_t b) {return  a == b;};
+static uint16_t lower(uint16_t a, uint16_t b) {return  a < b;};
+static uint16_t greater(uint16_t a, uint16_t b) {return  a > b;};
+static uint16_t lower_equals(uint16_t a, uint16_t b) {return  a <= b;};
+static uint16_t greater_equals(uint16_t a, uint16_t b) {return  a >= b;};
+
 static struct {
     const char *string;
     char priority;
@@ -98,15 +106,22 @@ static struct {
     // Deal with it.
     {"+", 0, add},
     {"-", 0, sub},
+    {"||", 0, bool_or},
     {"|", 0, or},
     {"*", 1, mul},
     {"/", 1, _div},
     {"%", 1, mod},
+    {"&&", 1, bool_and},
     {"&", 1, and},
     {"^", 1, xor},
     {"<<", 2, shleft},
+    {"<=", 3, lower_equals},
+    {"<", 3, lower},
     {">>", 2, shright},
-    {"=", 2, NULL, assign},
+    {">=", 3, greater_equals},
+    {">", 3, greater},
+    {"==", 3, equals},
+    {"=", 4, NULL, assign},
 };
 
 uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int length, bool *error);
@@ -252,10 +267,14 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string, unsigned int le
                 if (strlen(operators[j].string) > length - i) continue; // Operator too big.
                  // Priority higher than what we already have.
                 if (operator_index != -1 && operators[operator_index].priority > operators[j].priority) continue;
-                if (memcmp(string + i, operators[j].string, strlen(operators[j].string)) == 0) {
+                unsigned long operator_length = strlen(operators[j].string);
+                if (memcmp(string + i, operators[j].string, operator_length) == 0) {
                     // Found an operator!
                     operator_pos = i;
                     operator_index = j;
+                    /* for supporting = vs ==, etc*/
+                    i += operator_length - 1;
+                    break;
                 }
             }
         }
