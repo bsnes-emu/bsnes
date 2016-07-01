@@ -1,5 +1,34 @@
 # Change Log
 
+## Version 0.5
+This version is not compatible with save states of older versions.
+
+### New/Improved Features
+ * Updated save state format, should now be much more future compatible
+ * Save state compatibility between 32 and 64 bit versions of SameBoy
+ * Cocoa version is now using OpenGL 3
+ * HQ2x filter added (Cocoa only)
+ * A new, redesigned OmniScale filter; old filter is renamed to OmniScale Legacy (Cocoa only)
+ * Cocoa port now "remembers" the last window size
+ * Added boolean operators to the debugger
+ * Added conditional breakpoints
+
+### Accuracy Improvements/Fixes
+ * Better emulation of certain behaviors of the SCX register
+ * Fixed emulation of the STOP instruction
+ * Minor fix to the accuracy of the JOYPAD register
+ * Minor improvements to HDMA accuracy
+ 
+
+### Bug Fixes
+ * Improved concurrency in the Cocoa port
+ * Fixed a bug where an emulator window in the Cocoa port will freeze until resized
+ * Fixed incorrect disassembler outputs
+ * Fixed a potential crash when deleting a breakpoint
+ 
+### Misc Internal Changes
+ * Large code refactoring, getting ready to stabilize API
+
 ## Version 0.4
 This version is not compatible with save states of older versions.
 
