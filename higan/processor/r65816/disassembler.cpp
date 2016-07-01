@@ -402,7 +402,7 @@ auto R65816::disassemble(uint24 addr, bool e, bool m, bool x) -> string {
   #undef a8
   #undef x8
 
-  s.append(t, " A:{0} X:{1} Y:{2} S:{3} D:{4} B:{5} ", format{
+  s.append(t, " A:{0} X:{1} Y:{2} S:{3} D:{4} B:{5} ", string_format{
     hex(r.a.w, 4), hex(r.x.w, 4), hex(r.y.w, 4),
     hex(r.s.w, 4), hex(r.d.w, 4), hex(r.db,  2)
   });

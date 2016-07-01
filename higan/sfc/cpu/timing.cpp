@@ -2,7 +2,7 @@ auto CPU::dmaCounter() const -> uint {
   return (status.dmaCounter + hcounter()) & 7;
 }
 
-auto CPU::addClocks(uint clocks) -> void {
+auto CPU::step(uint clocks) -> void {
   status.irqLock = false;
   uint ticks = clocks >> 1;
   while(ticks--) {
@@ -10,7 +10,15 @@ auto CPU::addClocks(uint clocks) -> void {
     if(hcounter() & 2) pollInterrupts();
   }
 
-  step(clocks);
+  smp.clock -= clocks * (uint64)smp.frequency;
+  ppu.clock -= clocks;
+  for(auto coprocessor : coprocessors) {
+    coprocessor->clock -= clocks * (uint64)coprocessor->frequency;
+  }
+  for(auto peripheral : peripherals) {
+    peripheral->clock -= clocks * (uint64)peripheral->frequency;
+  }
+  synchronizePeripherals();
 
   status.autoJoypadClock += clocks;
   if(status.autoJoypadClock >= 256) {
@@ -20,7 +28,7 @@ auto CPU::addClocks(uint clocks) -> void {
 
   if(!status.dramRefreshed && hcounter() >= status.dramRefreshPosition) {
     status.dramRefreshed = true;
-    addClocks(40);
+    step(40);
   }
 
   #if defined(DEBUGGER)
@@ -62,18 +70,18 @@ auto CPU::scanline() -> void {
 auto CPU::aluEdge() -> void {
   if(alu.mpyctr) {
     alu.mpyctr--;
-    if(status.rddiv & 1) status.rdmpy += alu.shift;
-    status.rddiv >>= 1;
+    if(io.rddiv & 1) io.rdmpy += alu.shift;
+    io.rddiv >>= 1;
     alu.shift <<= 1;
   }
 
   if(alu.divctr) {
     alu.divctr--;
-    status.rddiv <<= 1;
+    io.rddiv <<= 1;
     alu.shift >>= 1;
-    if(status.rdmpy >= alu.shift) {
-      status.rdmpy -= alu.shift;
-      status.rddiv |= 1;
+    if(io.rdmpy >= alu.shift) {
+      io.rdmpy -= alu.shift;
+      io.rddiv |= 1;
     }
   }
 }
@@ -92,11 +100,11 @@ auto CPU::dmaEdge() -> void {
       status.hdmaPending = false;
       if(hdmaEnabledChannels()) {
         if(!dmaEnabledChannels()) {
-          dmaAddClocks(8 - dmaCounter());
+          dmaStep(8 - dmaCounter());
         }
         status.hdmaMode == 0 ? hdmaInit() : hdmaRun();
         if(!dmaEnabledChannels()) {
-          addClocks(status.clockCount - (status.dmaClocks % status.clockCount));
+          step(status.clockCount - (status.dmaClocks % status.clockCount));
           status.dmaActive = false;
         }
       }
@@ -105,9 +113,9 @@ auto CPU::dmaEdge() -> void {
     if(status.dmaPending) {
       status.dmaPending = false;
       if(dmaEnabledChannels()) {
-        dmaAddClocks(8 - dmaCounter());
+        dmaStep(8 - dmaCounter());
         dmaRun();
-        addClocks(status.clockCount - (status.dmaClocks % status.clockCount));
+        step(status.clockCount - (status.dmaClocks % status.clockCount));
         status.dmaActive = false;
       }
     }

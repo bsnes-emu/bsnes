@@ -101,7 +101,7 @@ auto Role::download(signed fd, Message& message) -> bool {
 
       if(chunk.endsWith("\r\n") || chunk.endsWith("\n")) {
         chunkReceived = true;
-        chunkLength = hex(chunk);
+        chunkLength = chunk.hex();
         if(chunkLength == 0) break;
         chunk.reset();
       }

@@ -27,7 +27,7 @@ struct Background {
   struct TileSize { enum : uint { Size8x8, Size16x16 }; };
   struct Screen { enum : uint { Above, Below }; };
 
-  struct Registers {
+  struct IO {
     uint16 tiledataAddress;
     uint16 screenAddress;
     uint2 screenSize;
@@ -42,7 +42,7 @@ struct Background {
 
     uint16 hoffset;
     uint16 voffset;
-  } r;
+  } io;
 
   struct Latch {
     uint16 hoffset;

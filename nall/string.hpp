@@ -24,8 +24,12 @@
 namespace nall {
 
 struct string;
-struct format;
-struct lstring;
+struct string_view;
+struct string_vector;
+struct string_format;
+
+//legacy naming convention
+using lstring = string_vector;
 
 struct string_view {
   inline string_view();
@@ -61,18 +65,19 @@ template<typename T> struct stringify;
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
-inline auto integer(intmax value, long precision = 0, char padchar = '0') -> string;
-inline auto natural(uintmax value, long precision = 0, char padchar = '0') -> string;
-inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
-inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
-inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto numeral(T value, long precision = 0, char padchar = '0') -> string;
+//inline auto integer(intmax_t value, long precision = 0, char padchar = '0') -> string;
+//inline auto natural(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
-inline auto pointer(uintptr value, long precision = 0) -> string;
-inline auto real(long double value) -> string;
+inline auto pointer(uintptr_t value, long precision = 0) -> string;
+//inline auto real(long double value) -> string;
 
 //match.hpp
 inline auto tokenize(const char* s, const char* p) -> bool;
-inline auto tokenize(lstring& list, const char* s, const char* p) -> bool;
+inline auto tokenize(string_vector& list, const char* s, const char* p) -> bool;
 
 //path.hpp
 inline auto pathname(string_view self) -> string;
@@ -85,10 +90,9 @@ inline auto suffixname(string_view self) -> string;
 
 //utility.hpp
 inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
-
-inline auto integer(char* result, intmax value) -> char*;
-inline auto natural(char* result, uintmax value) -> char*;
-inline auto real(char* str, long double value) -> uint;
+inline auto fromInteger(char* result, intmax_t value) -> char*;
+inline auto fromNatural(char* result, uintmax_t value) -> char*;
+inline auto fromReal(char* str, long double value) -> uint;
 
 struct string {
   using type = string;
@@ -179,15 +183,16 @@ public:
   auto end() const -> const char* { return &data()[size()]; }
 
   //atoi.hpp
-  inline auto integer() const -> intmax;
-  inline auto natural() const -> uintmax;
+  inline auto integer() const -> intmax_t;
+  inline auto natural() const -> uintmax_t;
+  inline auto hex() const -> uintmax_t;
   inline auto real() const -> double;
 
   //core.hpp
   inline auto operator[](int) const -> const char&;
   template<typename... P> inline auto assign(P&&...) -> type&;
   template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
-  template<typename... P> inline auto append(const nall::format&, P&&...) -> type&;
+  template<typename... P> inline auto append(const nall::string_format&, P&&...) -> type&;
   inline auto append() -> type&;
   template<typename T> inline auto _append(const stringify<T>&) -> string&;
   inline auto length() const -> uint;
@@ -209,7 +214,7 @@ public:
   inline auto ifindFrom(int offset, string_view source) const -> maybe<uint>;
 
   //format.hpp
-  inline auto format(const nall::format& params) -> type&;
+  inline auto format(const nall::string_format& params) -> type&;
 
   //compare.hpp
   template<bool> inline static auto _compare(const char*, uint, const char*, uint) -> int;
@@ -250,10 +255,10 @@ public:
   inline auto iqreplace(string_view from, string_view to, long limit = LONG_MAX) -> type&;
 
   //split.hpp
-  inline auto split(string_view key, long limit = LONG_MAX) const -> lstring;
-  inline auto isplit(string_view key, long limit = LONG_MAX) const -> lstring;
-  inline auto qsplit(string_view key, long limit = LONG_MAX) const -> lstring;
-  inline auto iqsplit(string_view key, long limit = LONG_MAX) const -> lstring;
+  inline auto split(string_view key, long limit = LONG_MAX) const -> string_vector;
+  inline auto isplit(string_view key, long limit = LONG_MAX) const -> string_vector;
+  inline auto qsplit(string_view key, long limit = LONG_MAX) const -> string_vector;
+  inline auto iqsplit(string_view key, long limit = LONG_MAX) const -> string_vector;
 
   //trim.hpp
   inline auto trim(string_view lhs, string_view rhs, long limit = LONG_MAX) -> type&;
@@ -278,21 +283,21 @@ public:
   inline auto size(int length, char fill = ' ') -> type&;
 };
 
-struct lstring : vector<string> {
-  using type = lstring;
+struct string_vector : vector<string> {
+  using type = string_vector;
 
-  lstring(const lstring& source) { vector::operator=(source); }
-  lstring(lstring& source) { vector::operator=(source); }
-  lstring(lstring&& source) { vector::operator=(move(source)); }
-  template<typename... P> lstring(P&&... p) { append(forward<P>(p)...); }
+  string_vector(const string_vector& source) { vector::operator=(source); }
+  string_vector(string_vector& source) { vector::operator=(source); }
+  string_vector(string_vector&& source) { vector::operator=(move(source)); }
+  template<typename... P> string_vector(P&&... p) { append(forward<P>(p)...); }
 
   //list.hpp
-  inline auto operator==(const lstring&) const -> bool;
-  inline auto operator!=(const lstring&) const -> bool;
+  inline auto operator==(const string_vector&) const -> bool;
+  inline auto operator!=(const string_vector&) const -> bool;
 
-  inline auto operator=(const lstring& source) -> type& { return vector::operator=(source), *this; }
-  inline auto operator=(lstring& source) -> type& { return vector::operator=(source), *this; }
-  inline auto operator=(lstring&& source) -> type& { return vector::operator=(move(source)), *this; }
+  inline auto operator=(const string_vector& source) -> type& { return vector::operator=(source), *this; }
+  inline auto operator=(string_vector& source) -> type& { return vector::operator=(source), *this; }
+  inline auto operator=(string_vector&& source) -> type& { return vector::operator=(move(source)), *this; }
 
   inline auto isort() -> type&;
 
@@ -301,18 +306,18 @@ struct lstring : vector<string> {
 
   inline auto find(string_view source) const -> maybe<uint>;
   inline auto ifind(string_view source) const -> maybe<uint>;
-  inline auto match(string_view pattern) const -> lstring;
+  inline auto match(string_view pattern) const -> string_vector;
   inline auto merge(string_view separator) const -> string;
   inline auto strip() -> type&;
 
   //split.hpp
-  template<bool, bool> inline auto _split(string_view, string_view, long) -> lstring&;
+  template<bool, bool> inline auto _split(string_view, string_view, long) -> type&;
 };
 
-struct format : vector<string> {
-  using type = format;
+struct string_format : vector<string> {
+  using type = string_format;
 
-  template<typename... P> format(P&&... p) { reserve(sizeof...(p)); append(forward<P>(p)...); }
+  template<typename... P> string_format(P&&... p) { reserve(sizeof...(p)); append(forward<P>(p)...); }
   template<typename T, typename... P> inline auto append(const T&, P&&... p) -> type&;
   inline auto append() -> type&;
 };

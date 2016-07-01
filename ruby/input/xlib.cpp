@@ -14,7 +14,7 @@ struct InputXlib : Input {
   ~InputXlib() { term(); }
 
   struct Settings {
-    uintptr handle = 0;
+    uintptr_t handle = 0;
   } settings;
 
   auto cap(const string& name) -> bool {
@@ -29,8 +29,8 @@ struct InputXlib : Input {
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Input::Handle && value.is<uintptr>()) {
-      settings.handle = value.get<uintptr>();
+    if(name == Input::Handle && value.is<uintptr_t>()) {
+      settings.handle = value.get<uintptr_t>();
       return true;
     }
 

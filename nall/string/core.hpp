@@ -30,7 +30,7 @@ template<typename T, typename... P> auto string::append(const T& value, P&&... p
   return append(forward<P>(p)...);
 }
 
-template<typename... P> auto string::append(const nall::format& value, P&&... p) -> string& {
+template<typename... P> auto string::append(const nall::string_format& value, P&&... p) -> string& {
   format(value);
   return append(forward<P>(p)...);
 }

@@ -37,7 +37,7 @@ inline auto evaluateExpression(Node* node) -> string {
 }
 
 inline auto evaluateInteger(Node* node) -> int64_t {
-  if(node->type == Node::Type::Literal) return nall::integer(node->literal);
+  if(node->type == Node::Type::Literal) return toInteger(node->literal);
 
   #define p(n) evaluateInteger(node->link[n])
   switch(node->type) {
@@ -99,7 +99,7 @@ inline auto integer(const string& expression) -> maybe<int64_t> {
 }
 
 inline auto evaluateReal(Node* node) -> long double {
-  if(node->type == Node::Type::Literal) return nall::real(node->literal);
+  if(node->type == Node::Type::Literal) return toReal(node->literal);
 
   #define p(n) evaluateReal(node->link[n])
   switch(node->type) {

@@ -8,11 +8,6 @@ SMP smp;
 #include "timing.cpp"
 #include "serialization.cpp"
 
-auto SMP::step(uint clocks) -> void {
-  clock += clocks * (uint64)cpu.frequency;
-  dsp.clock -= clocks;
-}
-
 auto SMP::synchronizeCPU() -> void {
   if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
 }
@@ -63,27 +58,27 @@ auto SMP::reset() -> void {
   apuram[0x00f6] = 0x00;
   apuram[0x00f7] = 0x00;
 
-  status.clockCounter = 0;
-  status.dspCounter = 0;
-  status.timerStep = 3;
+  io.clockCounter = 0;
+  io.dspCounter = 0;
+  io.timerStep = 3;
 
   //$00f0
-  status.clockSpeed = 0;
-  status.timerSpeed = 0;
-  status.timersEnable = true;
-  status.ramDisable = false;
-  status.ramWritable = true;
-  status.timersDisable = false;
+  io.clockSpeed = 0;
+  io.timerSpeed = 0;
+  io.timersEnable = true;
+  io.ramDisable = false;
+  io.ramWritable = true;
+  io.timersDisable = false;
 
   //$00f1
-  status.iplromEnable = true;
+  io.iplromEnable = true;
 
   //$00f2
-  status.dspAddr = 0x00;
+  io.dspAddr = 0x00;
 
   //$00f8,$00f9
-  status.ram00f8 = 0x00;
-  status.ram00f9 = 0x00;
+  io.ram00f8 = 0x00;
+  io.ram00f9 = 0x00;
 
   timer0.stage0 = 0;
   timer1.stage0 = 0;

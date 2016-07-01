@@ -12,7 +12,7 @@ struct Program : Emulator::Interface::Bind {
   auto audioSample(const double* samples, uint channels) -> void override;
   auto inputPoll(uint port, uint device, uint input) -> int16 override;
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void override;
-  auto dipSettings(const Markup::Node& node) -> uint override;
+  auto dipSettings(Markup::Node node) -> uint override;
   auto notify(string text) -> void override;
 
   //medium.cpp

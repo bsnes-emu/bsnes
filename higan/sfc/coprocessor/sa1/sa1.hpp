@@ -3,7 +3,6 @@ struct SA1 : Processor::R65816, Cothread {
   static auto Enter() -> void;
   auto main() -> void;
   auto tick() -> void;
-  auto interrupt() -> void override;
 
   alwaysinline auto triggerIRQ() -> void;
   alwaysinline auto lastCycle() -> void override;
@@ -47,7 +46,7 @@ struct SA1 : Processor::R65816, Cothread {
   auto busWrite(uint24 addr, uint8 data) -> void;
   auto vbrRead(uint24 addr, uint8 data = 0) -> uint8;
 
-  alwaysinline auto io() -> void override;
+  alwaysinline auto idle() -> void override;
   alwaysinline auto read(uint24 addr) -> uint8 override;
   alwaysinline auto write(uint24 addr, uint8 data) -> void override;
 

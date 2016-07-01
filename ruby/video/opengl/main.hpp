@@ -28,11 +28,11 @@ auto OpenGL::shader(const string& pathname) -> void {
     for(auto node : document["output"]) {
       string text = node.text();
       if(node.name() == "width") {
-        if(text.endsWith("%")) relativeWidth = real(text.trimRight("%", 1L)) / 100.0;
+        if(text.endsWith("%")) relativeWidth = toReal(text.trimRight("%", 1L)) / 100.0;
         else absoluteWidth = text.natural();
       }
       if(node.name() == "height") {
-        if(text.endsWith("%")) relativeHeight = real(text.trimRight("%", 1L)) / 100.0;
+        if(text.endsWith("%")) relativeHeight = toReal(text.trimRight("%", 1L)) / 100.0;
         else absoluteHeight = text.natural();
       }
     }

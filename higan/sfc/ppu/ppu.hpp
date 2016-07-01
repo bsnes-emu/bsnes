@@ -1,7 +1,7 @@
 struct PPU : Thread, PPUcounter {
   alwaysinline auto interlace() const -> bool { return display.interlace; }
   alwaysinline auto overscan() const -> bool { return display.overscan; }
-  alwaysinline auto vdisp() const -> uint { return r.overscan ? 240 : 225; }
+  alwaysinline auto vdisp() const -> uint { return io.overscan ? 240 : 225; }
 
   PPU();
   ~PPU();
@@ -33,24 +33,12 @@ privileged:
     uint mask = 0x7fff;
   } vram;
 
-  struct OAM {
-    auto& operator[](uint offset) { return data[offset]; }
-    uint8 data[544];
-  } oam;
-
-  struct CGRAM {
-    auto& operator[](uint8 offset) { return data[offset]; }
-    uint15 data[256];
-  } cgram;
-
   uint32* output = nullptr;
 
   struct {
     bool interlace;
     bool overscan;
   } display;
-
-  alwaysinline auto addClocks(uint) -> void;
 
   auto scanline() -> void;
   auto frame() -> void;
@@ -75,7 +63,7 @@ privileged:
     uint8 cgramAddress;
   } latch;
 
-  struct Registers {
+  struct IO {
     //$2100  INIDISP
     bool displayDisable;
     uint4 displayBrightness;
@@ -143,7 +131,7 @@ privileged:
 
     //$213d  OPVCT
     uint16 vcounter;
-  } r;
+  } io;
 
   #include "background/background.hpp"
   #include "object/object.hpp"

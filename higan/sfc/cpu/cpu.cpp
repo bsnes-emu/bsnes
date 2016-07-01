@@ -12,23 +12,11 @@ CPU cpu;
 #include "serialization.cpp"
 
 auto CPU::interruptPending() const -> bool { return status.interruptPending; }
-auto CPU::pio() const -> uint8 { return status.pio; }
-auto CPU::joylatch() const -> bool { return status.joypadStrobeLatch; }
+auto CPU::pio() const -> uint8 { return io.pio; }
+auto CPU::joylatch() const -> bool { return io.joypadStrobeLatch; }
 
 CPU::CPU() {
   PPUcounter::scanline = {&CPU::scanline, this};
-}
-
-auto CPU::step(uint clocks) -> void {
-  smp.clock -= clocks * (uint64)smp.frequency;
-  ppu.clock -= clocks;
-  for(auto coprocessor : coprocessors) {
-    coprocessor->clock -= clocks * (uint64)coprocessor->frequency;
-  }
-  for(auto peripheral : peripherals) {
-    peripheral->clock -= clocks * (uint64)peripheral->frequency;
-  }
-  synchronizePeripherals();
 }
 
 auto CPU::synchronizeSMP() -> void {
@@ -68,12 +56,12 @@ auto CPU::main() -> void {
       interrupt();
     } else if(status.resetPending) {
       status.resetPending = false;
-      addClocks(132);
+      step(132);
       r.vector = 0xfffc;
       interrupt();
     } else if(status.powerPending) {
       status.powerPending = false;
-      addClocks(186);
+      step(186);
       r.pc.l = bus.read(0xfffc, r.mdr);
       r.pc.h = bus.read(0xfffd, r.mdr);
     }
@@ -161,49 +149,47 @@ auto CPU::reset() -> void {
   r.vector = 0xfffc;  //reset vector address
 
   //$2140-217f
-  for(auto& port : status.port) port = 0x00;
+  for(auto& port : io.port) port = 0x00;
 
   //$2181-$2183
-  status.wramAddress = 0x000000;
+  io.wramAddress = 0x000000;
 
   //$4016-$4017
-  status.joypadStrobeLatch = 0;
-  status.joypad1_bits = ~0;
-  status.joypad2_bits = ~0;
+  io.joypadStrobeLatch = 0;
 
   //$4200
-  status.nmiEnabled = false;
-  status.hirqEnabled = false;
-  status.virqEnabled = false;
-  status.autoJoypadPoll = false;
+  io.nmiEnabled = false;
+  io.hirqEnabled = false;
+  io.virqEnabled = false;
+  io.autoJoypadPoll = false;
 
   //$4201
-  status.pio = 0xff;
+  io.pio = 0xff;
 
   //$4202-$4203
-  status.wrmpya = 0xff;
-  status.wrmpyb = 0xff;
+  io.wrmpya = 0xff;
+  io.wrmpyb = 0xff;
 
   //$4204-$4206
-  status.wrdiva = 0xffff;
-  status.wrdivb = 0xff;
+  io.wrdiva = 0xffff;
+  io.wrdivb = 0xff;
 
   //$4207-$420a
-  status.hirqPos = 0x01ff;
-  status.virqPos = 0x01ff;
+  io.hirqPos = 0x01ff;
+  io.virqPos = 0x01ff;
 
   //$420d
-  status.romSpeed = 8;
+  io.romSpeed = 8;
 
   //$4214-$4217
-  status.rddiv = 0x0000;
-  status.rdmpy = 0x0000;
+  io.rddiv = 0x0000;
+  io.rdmpy = 0x0000;
 
   //$4218-$421f
-  status.joy1 = 0x0000;
-  status.joy2 = 0x0000;
-  status.joy3 = 0x0000;
-  status.joy4 = 0x0000;
+  io.joy1 = 0x0000;
+  io.joy2 = 0x0000;
+  io.joy3 = 0x0000;
+  io.joy4 = 0x0000;
 
   //ALU
   alu.mpyctr = 0;

@@ -68,7 +68,7 @@ auto tokenize(const char* s, const char* p) -> bool {
   return !*p;
 }
 
-auto tokenize(lstring& list, const char* s, const char* p) -> bool {
+auto tokenize(string_vector& list, const char* s, const char* p) -> bool {
   while(*s) {
     if(*p == '*') {
       const char* b = s;

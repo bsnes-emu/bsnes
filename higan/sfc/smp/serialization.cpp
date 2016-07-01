@@ -4,23 +4,23 @@ auto SMP::serialize(serializer& s) -> void {
 
   s.array(apuram);
 
-  s.integer(status.clockCounter);
-  s.integer(status.dspCounter);
-  s.integer(status.timerStep);
+  s.integer(io.clockCounter);
+  s.integer(io.dspCounter);
+  s.integer(io.timerStep);
 
-  s.integer(status.clockSpeed);
-  s.integer(status.timerSpeed);
-  s.integer(status.timersEnable);
-  s.integer(status.ramDisable);
-  s.integer(status.ramWritable);
-  s.integer(status.timersDisable);
+  s.integer(io.clockSpeed);
+  s.integer(io.timerSpeed);
+  s.integer(io.timersEnable);
+  s.integer(io.ramDisable);
+  s.integer(io.ramWritable);
+  s.integer(io.timersDisable);
 
-  s.integer(status.iplromEnable);
+  s.integer(io.iplromEnable);
 
-  s.integer(status.dspAddr);
+  s.integer(io.dspAddr);
 
-  s.integer(status.ram00f8);
-  s.integer(status.ram00f9);
+  s.integer(io.ram00f8);
+  s.integer(io.ram00f9);
 
   s.integer(timer0.stage0);
   s.integer(timer0.stage1);

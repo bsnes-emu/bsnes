@@ -1,7 +1,6 @@
 //Sony CXP1100Q-1
 
 struct SMP : Processor::SPC700, Thread {
-  alwaysinline auto step(uint clocks) -> void;
   alwaysinline auto synchronizeCPU() -> void;
   alwaysinline auto synchronizeDSP() -> void;
 
@@ -19,7 +18,7 @@ struct SMP : Processor::SPC700, Thread {
   uint8 apuram[64 * 1024];
 
 privileged:
-  struct {
+  struct IO {
     //timing
     uint clockCounter;
     uint dspCounter;
@@ -42,7 +41,7 @@ privileged:
     //$00f8,$00f9
     uint8 ram00f8;
     uint8 ram00f9;
-  } status;
+  } io;
 
   static auto Enter() -> void;
 
@@ -53,15 +52,14 @@ privileged:
   auto readBus(uint16 addr) -> uint8;
   auto writeBus(uint16 addr, uint8 data) -> void;
 
-  auto io() -> void override;
+  auto idle() -> void override;
   auto read(uint16 addr) -> uint8 override;
   auto write(uint16 addr, uint8 data) -> void override;
 
   auto readDisassembler(uint16 addr) -> uint8 override;
 
   //timing.cpp
-  template<uint Frequency>
-  struct Timer {
+  template<uint Frequency> struct Timer {
     uint8 stage0;
     uint8 stage1;
     uint8 stage2;
@@ -78,7 +76,7 @@ privileged:
   Timer<192> timer1;
   Timer< 24> timer2;
 
-  alwaysinline auto addClocks(uint clocks) -> void;
+  alwaysinline auto step(uint clocks) -> void;
   alwaysinline auto cycleEdge() -> void;
 };
 

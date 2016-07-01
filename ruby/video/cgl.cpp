@@ -32,15 +32,15 @@ struct VideoCGL : Video, OpenGL {
   }
 
   auto get(const string& name) -> any {
-    if(name == Video::Handle) return (uintptr)settings.handle;
+    if(name == Video::Handle) return (uintptr_t)settings.handle;
     if(name == Video::Synchronize) return settings.synchronize;
     if(name == Video::Filter) return settings.filter;
     return {};
   }
 
   auto set(const string& name, const any& value) -> bool {
-    if(name == Video::Handle && value.is<uintptr>()) {
-      settings.handle = (NSView*)value.get<uintptr>();
+    if(name == Video::Handle && value.is<uintptr_t>()) {
+      settings.handle = (NSView*)value.get<uintptr_t>();
       return true;
     }
 

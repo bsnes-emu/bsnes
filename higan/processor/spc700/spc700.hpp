@@ -3,7 +3,7 @@
 namespace Processor {
 
 struct SPC700 {
-  virtual auto io() -> void = 0;
+  virtual auto idle() -> void = 0;
   virtual auto read(uint16 addr) -> uint8 = 0;
   virtual auto write(uint16 addr, uint8 data) -> void = 0;
   virtual auto readDisassembler(uint16 addr) -> uint8 = 0;

@@ -8,7 +8,7 @@ auto CPU::readCPU(uint24 addr, uint8 data) -> uint8 {
 
   //WMDATA
   case 0x2180: {
-    return bus.read(0x7e0000 | status.wramAddress++, r.mdr);
+    return bus.read(0x7e0000 | io.wramAddress++, r.mdr);
   }
 
   //JOYSER0
@@ -65,37 +65,37 @@ auto CPU::readCPU(uint24 addr, uint8 data) -> uint8 {
 
   //RDIO
   case 0x4213: {
-    return status.pio;
+    return io.pio;
   }
 
   //RDDIVL
   case 0x4214: {
-    return status.rddiv.byte(0);
+    return io.rddiv.byte(0);
   }
 
   //RDDIVH
   case 0x4215: {
-    return status.rddiv.byte(1);
+    return io.rddiv.byte(1);
   }
 
   //RDMPYL
   case 0x4216: {
-    return status.rdmpy.byte(0);
+    return io.rdmpy.byte(0);
   }
 
   //RDMPYH
   case 0x4217: {
-    return status.rdmpy.byte(1);
+    return io.rdmpy.byte(1);
   }
 
-  case 0x4218: return status.joy1.byte(0);  //JOY1L
-  case 0x4219: return status.joy1.byte(1);  //JOY1H
-  case 0x421a: return status.joy2.byte(0);  //JOY2L
-  case 0x421b: return status.joy2.byte(1);  //JOY2H
-  case 0x421c: return status.joy3.byte(0);  //JOY3L
-  case 0x421d: return status.joy3.byte(1);  //JOY3H
-  case 0x421e: return status.joy4.byte(0);  //JOY4L
-  case 0x421f: return status.joy4.byte(1);  //JOY4H
+  case 0x4218: return io.joy1.byte(0);  //JOY1L
+  case 0x4219: return io.joy1.byte(1);  //JOY1H
+  case 0x421a: return io.joy2.byte(0);  //JOY2L
+  case 0x421b: return io.joy2.byte(1);  //JOY2H
+  case 0x421c: return io.joy3.byte(0);  //JOY3L
+  case 0x421d: return io.joy3.byte(1);  //JOY3H
+  case 0x421e: return io.joy4.byte(0);  //JOY4L
+  case 0x421f: return io.joy4.byte(1);  //JOY4H
 
   }
 
@@ -158,7 +158,7 @@ auto CPU::readDMA(uint24 addr, uint8 data) -> uint8 {
 
 auto CPU::writeAPU(uint24 addr, uint8 data) -> void {
   synchronizeSMP();
-  return portWrite(addr.bits(0,1), data);
+  return writePort(addr.bits(0,1), data);
 }
 
 auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
@@ -166,12 +166,12 @@ auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
 
   //WMDATA
   case 0x2180: {
-    return bus.write(0x7e0000 | status.wramAddress++, data);
+    return bus.write(0x7e0000 | io.wramAddress++, data);
   }
 
-  case 0x2181: status.wramAddress.bits( 0, 7) = data;        return;  //WMADDL
-  case 0x2182: status.wramAddress.bits( 8,15) = data;        return;  //WMADDM
-  case 0x2183: status.wramAddress.bit (16   ) = data.bit(0); return;  //WMADDH
+  case 0x2181: io.wramAddress.bits( 0, 7) = data;        return;  //WMADDL
+  case 0x2182: io.wramAddress.bits( 8,15) = data;        return;  //WMADDM
+  case 0x2183: io.wramAddress.bit (16   ) = data.bit(0); return;  //WMADDH
 
   //JOYSER0
   case 0x4016: {
@@ -185,54 +185,54 @@ auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
 
   //NMITIMEN
   case 0x4200: {
-    status.autoJoypadPoll = data.bit(0);
+    io.autoJoypadPoll = data.bit(0);
     nmitimenUpdate(data);
     return;
   }
 
   //WRIO
   case 0x4201: {
-    if(status.pio.bit(7) && !data.bit(7)) ppu.latchCounters();
-    status.pio = data;
+    if(io.pio.bit(7) && !data.bit(7)) ppu.latchCounters();
+    io.pio = data;
     return;
   }
 
   //WRMPYA
-  case 0x4202: status.wrmpya = data; return;
+  case 0x4202: io.wrmpya = data; return;
 
   //WRMPYB
   case 0x4203: {
-    status.rdmpy = 0;
+    io.rdmpy = 0;
     if(alu.mpyctr || alu.divctr) return;
 
-    status.wrmpyb = data;
-    status.rddiv = (status.wrmpyb << 8) | status.wrmpya;
+    io.wrmpyb = data;
+    io.rddiv = (io.wrmpyb << 8) | io.wrmpya;
 
     alu.mpyctr = 8;  //perform multiplication over the next eight cycles
-    alu.shift = status.wrmpyb;
+    alu.shift = io.wrmpyb;
     return;
   }
 
-  case 0x4204: { status.wrdiva.byte(0) = data; return; }  //WRDIVL
-  case 0x4205: { status.wrdiva.byte(1) = data; return; }  //WRDIVH
+  case 0x4204: { io.wrdiva.byte(0) = data; return; }  //WRDIVL
+  case 0x4205: { io.wrdiva.byte(1) = data; return; }  //WRDIVH
 
   //WRDIVB
   case 0x4206: {
-    status.rdmpy = status.wrdiva;
+    io.rdmpy = io.wrdiva;
     if(alu.mpyctr || alu.divctr) return;
 
-    status.wrdivb = data;
+    io.wrdivb = data;
 
     alu.divctr = 16;  //perform division over the next sixteen cycles
-    alu.shift = status.wrdivb << 16;
+    alu.shift = io.wrdivb << 16;
     return;
   }
 
-  case 0x4207: status.hirqPos.bits(0,7) = data;        return;  //HTIMEL
-  case 0x4208: status.hirqPos.bit (8  ) = data.bit(0); return;  //HTIMEH
+  case 0x4207: io.hirqPos.bits(0,7) = data;        return;  //HTIMEL
+  case 0x4208: io.hirqPos.bit (8  ) = data.bit(0); return;  //HTIMEH
 
-  case 0x4209: status.virqPos.bits(0,7) = data;        return;  //VTIMEL
-  case 0x420a: status.virqPos.bit (8  ) = data.bit(0); return;  //VTIMEH
+  case 0x4209: io.virqPos.bits(0,7) = data;        return;  //VTIMEL
+  case 0x420a: io.virqPos.bit (8  ) = data.bit(0); return;  //VTIMEH
 
   //DMAEN
   case 0x420b: {
@@ -249,7 +249,7 @@ auto CPU::writeCPU(uint24 addr, uint8 data) -> void {
 
   //MEMSEL
   case 0x420d: {
-    status.romSpeed = data.bit(0) ? 6 : 8;
+    io.romSpeed = data.bit(0) ? 6 : 8;
     return;
   }
 

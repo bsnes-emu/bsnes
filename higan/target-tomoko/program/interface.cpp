@@ -105,7 +105,7 @@ auto Program::inputRumble(uint port, uint device, uint input, bool enable) -> vo
   }
 }
 
-auto Program::dipSettings(const Markup::Node& node) -> uint {
+auto Program::dipSettings(Markup::Node node) -> uint {
   return 0;
 }
 

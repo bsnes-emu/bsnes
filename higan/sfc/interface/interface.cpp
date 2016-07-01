@@ -244,8 +244,8 @@ auto Interface::cheatSet(const lstring& list) -> void {
       lstring codes = codeset.split("+");
       for(auto& code : codes) {
         lstring part = code.split("/");
-        if(part.size() == 2) GameBoy::cheat.append(hex(part[0]), hex(part[1]));
-        if(part.size() == 3) GameBoy::cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
+        if(part.size() == 2) GameBoy::cheat.append(part[0].hex(), part[1].hex());
+        if(part.size() == 3) GameBoy::cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
       }
     }
     return;
@@ -256,8 +256,8 @@ auto Interface::cheatSet(const lstring& list) -> void {
     lstring codes = codeset.split("+");
     for(auto& code : codes) {
       lstring part = code.split("/");
-      if(part.size() == 2) cheat.append(hex(part[0]), hex(part[1]));
-      if(part.size() == 3) cheat.append(hex(part[0]), hex(part[1]), hex(part[2]));
+      if(part.size() == 2) cheat.append(part[0].hex(), part[1].hex());
+      if(part.size() == 3) cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
     }
   }
 }

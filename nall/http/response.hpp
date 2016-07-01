@@ -94,7 +94,7 @@ auto Response::setHead() -> bool {
   else if(response.ibeginsWith("HTTP/1.1 ")) response.itrimLeft("HTTP/1.1 ", 1L);
   else return false;
 
-  setResponseType(natural(response));
+  setResponseType(response.natural());
 
   for(auto& header : headers) {
     if(header.beginsWith(" ") || header.beginsWith("\t")) continue;

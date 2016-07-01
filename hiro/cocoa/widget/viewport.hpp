@@ -18,7 +18,7 @@ namespace hiro {
 struct pViewport : pWidget {
   Declare(Viewport, Widget)
 
-  auto handle() const -> uintptr;
+  auto handle() const -> uintptr_t;
   auto setDroppable(bool droppable) -> void;
 
   CocoaViewport* cocoaViewport = nullptr;

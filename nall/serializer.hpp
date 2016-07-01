@@ -63,10 +63,10 @@ struct serializer {
   template<typename T> auto integer(T& value) -> serializer& {
     enum { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
     if(_mode == Save) {
-      for(uint n = 0; n < size; n++) _data[_size++] = (uintmax)value >> (n << 3);
+      for(uint n = 0; n < size; n++) _data[_size++] = (uintmax_t)value >> (n << 3);
     } else if(_mode == Load) {
       value = 0;
-      for(uint n = 0; n < size; n++) value |= (uintmax)_data[_size++] << (n << 3);
+      for(uint n = 0; n < size; n++) value |= (uintmax_t)_data[_size++] << (n << 3);
     } else if(_mode == Size) {
       _size += size;
     }

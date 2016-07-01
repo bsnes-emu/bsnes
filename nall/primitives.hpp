@@ -79,15 +79,15 @@ template<uint Bits> struct Natural {
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
-  inline auto clamp(uint bits) -> uintmax {
-    const uintmax b = 1ull << (bits - 1);
-    const uintmax m = b * 2 - 1;
+  inline auto clamp(uint bits) -> uintmax_t {
+    const uintmax_t b = 1ull << (bits - 1);
+    const uintmax_t m = b * 2 - 1;
     return data < m ? data : m;
   }
 
-  inline auto clip(uint bits) -> uintmax {
-    const uintmax b = 1ull << (bits - 1);
-    const uintmax m = b * 2 - 1;
+  inline auto clip(uint bits) -> uintmax_t {
+    const uintmax_t b = 1ull << (bits - 1);
+    const uintmax_t m = b * 2 - 1;
     return data & m;
   }
 
@@ -161,15 +161,15 @@ template<uint Bits> struct Integer {
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
-  inline auto clamp(uint bits) -> intmax {
-    const intmax b = 1ull << (bits - 1);
-    const intmax m = b - 1;
+  inline auto clamp(uint bits) -> intmax_t {
+    const intmax_t b = 1ull << (bits - 1);
+    const intmax_t m = b - 1;
     return data > m ? m : data < -b ? -b : data;
   }
 
-  inline auto clip(uint bits) -> intmax {
-    const uintmax b = 1ull << (bits - 1);
-    const uintmax m = b * 2 - 1;
+  inline auto clip(uint bits) -> intmax_t {
+    const uintmax_t b = 1ull << (bits - 1);
+    const uintmax_t m = b * 2 - 1;
     return ((data & m) ^ b) - b;
   }
 
@@ -185,8 +185,8 @@ template<uint Bits> struct Real {
   using type =
     type_if<expression<Bits == 32>, float32_t,
     type_if<expression<Bits == 64>, float64_t,
-    type_if<expression<Bits == 80>, float80_t,
-    void>>>;
+  //type_if<expression<Bits == 80>, float80_t,
+    void>>;
 
   inline Real() : data(0.0) {}
   template<typename T> inline Real(const T& value) : data((type)value) {}
@@ -215,9 +215,8 @@ private:
 }
 
 using boolean = nall::Boolean;
-//note: these conflict with nall/atoi.hpp functions
-//using integer = nall::Integer<sizeof( int) * 8>;
-//using natural = nall::Natural<sizeof(uint) * 8>;
+using integer = nall::Integer<sizeof( int) * 8>;
+using natural = nall::Natural<sizeof(uint) * 8>;
 
 using  int1 = nall::Integer< 1>;
 using  int2 = nall::Integer< 2>;
@@ -351,4 +350,4 @@ using uint64 = nall::Natural<64>;
 
 using float32 = nall::Real<32>;
 using float64 = nall::Real<64>;
-using float80 = nall::Real<80>;
+//using float80 = nall::Real<80>;

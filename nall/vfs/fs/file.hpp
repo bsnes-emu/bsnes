@@ -11,15 +11,15 @@ struct file : vfs::file {
     return instance;
   }
 
-  auto size() const -> uintmax override {
+  auto size() const -> uintmax_t override {
     return _fp.size();
   }
 
-  auto offset() const -> uintmax override {
+  auto offset() const -> uintmax_t override {
     return _fp.offset();
   }
 
-  auto seek(intmax offset_, index index_) -> void override {
+  auto seek(intmax_t offset_, index index_) -> void override {
     _fp.seek(offset_, (nall::file::index)index_);
   }
 

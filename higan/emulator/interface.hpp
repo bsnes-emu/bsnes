@@ -49,7 +49,7 @@ struct Interface {
     virtual auto audioSample(const double*, uint) -> void {}
     virtual auto inputPoll(uint, uint, uint) -> int16 { return 0; }
     virtual auto inputRumble(uint, uint, uint, bool) -> void {}
-    virtual auto dipSettings(const Markup::Node&) -> uint { return 0; }
+    virtual auto dipSettings(Markup::Node) -> uint { return 0; }
     virtual auto notify(string text) -> void { print(text, "\n"); }
   };
   Bind* bind = nullptr;
@@ -62,7 +62,7 @@ struct Interface {
   auto audioSample(const double* samples, uint channels) -> void { return bind->audioSample(samples, channels); }
   auto inputPoll(uint port, uint device, uint input) -> int16 { return bind->inputPoll(port, device, input); }
   auto inputRumble(uint port, uint device, uint input, bool enable) -> void { return bind->inputRumble(port, device, input, enable); }
-  auto dipSettings(const Markup::Node& node) -> uint { return bind->dipSettings(node); }
+  auto dipSettings(Markup::Node node) -> uint { return bind->dipSettings(node); }
   template<typename... P> auto notify(P&&... p) -> void { return bind->notify({forward<P>(p)...}); }
 
   //information

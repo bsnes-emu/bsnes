@@ -218,7 +218,7 @@ auto pTableView::_doContext() -> void {
 
 auto pTableView::_doDataFunc(GtkTreeViewColumn* gtkColumn, GtkCellRenderer* renderer, GtkTreeIter* iter) -> void {
   auto path = gtk_tree_model_get_string_from_iter(gtkTreeModel, iter);
-  auto row = natural(path);
+  auto row = toNatural(path);
   g_free(path);
 
   if(auto& header = state().header) {
@@ -271,7 +271,7 @@ auto pTableView::_doEdit(GtkCellRendererText* gtkCellRendererText, const char* p
     for(auto& column : header->state.columns) {
       if(auto delegate = column->self()) {
         if(gtkCellRendererText == GTK_CELL_RENDERER_TEXT(delegate->gtkCellText)) {
-          auto row = natural(path);
+          auto row = toNatural(path);
           if(auto item = self().item(row)) {
             if(auto cell = item->cell(column->offset())) {
               if(string{text} != cell->state.text) {
@@ -343,7 +343,7 @@ auto pTableView::_doToggle(GtkCellRendererToggle* gtkCellRendererToggle, const c
     for(auto& column : header->state.columns) {
       if(auto delegate = column->self()) {
         if(gtkCellRendererToggle == GTK_CELL_RENDERER_TOGGLE(delegate->gtkCellToggle)) {
-          auto row = natural(path);
+          auto row = toNatural(path);
           if(auto item = self().item(row)) {
             if(auto cell = item->cell(column->offset())) {
               cell->setChecked(!cell->checked());
@@ -371,7 +371,7 @@ auto pTableView::_updateSelected() -> void {
     GtkTreeIter iter;
     if(gtk_tree_model_get_iter(gtkTreeModel, &iter, (GtkTreePath*)p->data)) {
       char* pathname = gtk_tree_model_get_string_from_iter(gtkTreeModel, &iter);
-      unsigned selection = natural(pathname);
+      unsigned selection = toNatural(pathname);
       g_free(pathname);
       selected.append(selection);
     }

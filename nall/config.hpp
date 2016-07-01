@@ -30,9 +30,9 @@ struct Node {
   auto set(const string& value) -> void {
     switch(type) {
     case Type::Boolean: *(bool*)data = (value != "false"); break;
-    case Type::Integer: *(int*)data = integer(value); break;
-    case Type::Natural: *(uint*)data = natural(value); break;
-    case Type::Double: *(double*)data = real(value); break;
+    case Type::Integer: *(int*)data = toInteger(value); break;
+    case Type::Natural: *(uint*)data = toNatural(value); break;
+    case Type::Double: *(double*)data = toReal(value); break;
     case Type::String: *(string*)data = value; break;
     }
   }

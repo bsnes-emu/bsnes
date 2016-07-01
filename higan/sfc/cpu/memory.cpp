@@ -1,24 +1,24 @@
-auto CPU::portRead(uint2 port) const -> uint8 {
-  return status.port[port];
+auto CPU::readPort(uint2 port) const -> uint8 {
+  return io.port[port];
 }
 
-auto CPU::portWrite(uint2 port, uint8 data) -> void {
-  status.port[port] = data;
+auto CPU::writePort(uint2 port, uint8 data) -> void {
+  io.port[port] = data;
 }
 
-auto CPU::io() -> void {
+auto CPU::idle() -> void {
   status.clockCount = 6;
   dmaEdge();
-  addClocks(6);
+  step(6);
   aluEdge();
 }
 
 auto CPU::read(uint24 addr) -> uint8 {
   status.clockCount = speed(addr);
   dmaEdge();
-  addClocks(status.clockCount - 4);
+  step(status.clockCount - 4);
   r.mdr = bus.read(addr, r.mdr);
-  addClocks(4);
+  step(4);
   aluEdge();
   return r.mdr;
 }
@@ -27,15 +27,12 @@ auto CPU::write(uint24 addr, uint8 data) -> void {
   aluEdge();
   status.clockCount = speed(addr);
   dmaEdge();
-  addClocks(status.clockCount);
+  step(status.clockCount);
   bus.write(addr, r.mdr = data);
 }
 
 auto CPU::speed(uint24 addr) const -> uint {
-  if(addr & 0x408000) {
-    if(addr & 0x800000) return status.romSpeed;
-    return 8;
-  }
+  if(addr & 0x408000) return addr & 0x800000 ? io.romSpeed : 8;
   if((addr + 0x6000) & 0x4000) return 8;
   if((addr - 0x4000) & 0x7e00) return 6;
   return 12;

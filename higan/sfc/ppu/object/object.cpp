@@ -1,17 +1,17 @@
-#include "list.cpp"
+#include "oam.cpp"
 
 auto PPU::Object::addressReset() -> void {
-  ppu.r.oamAddress = ppu.r.oamBaseAddress;
+  ppu.io.oamAddress = ppu.io.oamBaseAddress;
   setFirstSprite();
 }
 
 auto PPU::Object::setFirstSprite() -> void {
-  r.firstSprite = !ppu.r.oamPriority ? 0 : ppu.r.oamAddress >> 2;
+  io.firstSprite = !ppu.io.oamPriority ? 0 : ppu.io.oamAddress >> 2;
 }
 
 auto PPU::Object::frame() -> void {
-  r.timeOver = false;
-  r.rangeOver = false;
+  io.timeOver = false;
+  io.rangeOver = false;
 }
 
 auto PPU::Object::scanline() -> void {
@@ -25,15 +25,15 @@ auto PPU::Object::scanline() -> void {
   auto oamItem = t.item[t.active];
   auto oamTile = t.tile[t.active];
 
-  if(t.y == ppu.vdisp() && !ppu.r.displayDisable) addressReset();
+  if(t.y == ppu.vdisp() && !ppu.io.displayDisable) addressReset();
   if(t.y >= ppu.vdisp() - 1) return;
 
   for(auto n : range(32)) oamItem[n].valid = false;  //default to invalid
   for(auto n : range(34)) oamTile[n].valid = false;  //default to invalid
 
   for(auto n : range(128)) {
-    uint7 sprite = r.firstSprite + n;
-    if(!onScanline(list[sprite])) continue;
+    uint7 sprite = io.firstSprite + n;
+    if(!onScanline(oam.object[sprite])) continue;
     if(t.itemCount++ >= 32) break;
     oamItem[t.itemCount - 1] = {true, sprite};
   }
@@ -43,9 +43,9 @@ auto PPU::Object::scanline() -> void {
   }
 }
 
-auto PPU::Object::onScanline(Sprite& sprite) -> bool {
+auto PPU::Object::onScanline(PPU::OAM::Object& sprite) -> bool {
   if(sprite.x > 256 && (sprite.x + sprite.width() - 1) < 512) return false;
-  int height = sprite.height() >> r.interlace;
+  int height = sprite.height() >> io.interlace;
   if(t.y >= sprite.y && t.y < (sprite.y + height)) return true;
   if((sprite.y + height) >= 256 && t.y < ((sprite.y + height) & 255)) return true;
   return false;
@@ -72,14 +72,14 @@ auto PPU::Object::run() -> void {
     color += tile.data >> (shift + 21) & 8;
 
     if(color) {
-      if(r.aboveEnable) {
+      if(io.aboveEnable) {
         output.above.palette = tile.palette + color;
-        output.above.priority = r.priority[tile.priority];
+        output.above.priority = io.priority[tile.priority];
       }
 
-      if(r.belowEnable) {
+      if(io.belowEnable) {
         output.below.palette = tile.palette + color;
-        output.below.priority = r.priority[tile.priority];
+        output.below.priority = io.priority[tile.priority];
       }
     }
   }
@@ -91,12 +91,12 @@ auto PPU::Object::tilefetch() -> void {
 
   for(int i = 31; i >= 0; i--) {
     if(!oamItem[i].valid) continue;
-    const auto& sprite = list[oamItem[i].index];
+    const auto& sprite = oam.object[oamItem[i].index];
 
     uint tileWidth = sprite.width() >> 3;
     int x = sprite.x;
     int y = (t.y - sprite.y) & 0xff;
-    if(r.interlace) y <<= 1;
+    if(io.interlace) y <<= 1;
 
     if(sprite.vflip) {
       if(sprite.width() == sprite.height()) {
@@ -108,18 +108,18 @@ auto PPU::Object::tilefetch() -> void {
       }
     }
 
-    if(r.interlace) {
+    if(io.interlace) {
       y = !sprite.vflip ? y + ppu.field() : y - ppu.field();
     }
 
     x &= 511;
     y &= 255;
 
-    uint16 tiledataAddress = r.tiledataAddress;
+    uint16 tiledataAddress = io.tiledataAddress;
     uint16 chrx = (sprite.character >> 0) & 15;
     uint16 chry = (sprite.character >> 4) & 15;
-    if(sprite.nameSelect) {
-      tiledataAddress += (256 * 16) + (r.nameSelect << 12);
+    if(sprite.nameselect) {
+      tiledataAddress += (256 * 16) + (io.nameselect << 12);
     }
     chry  += (y >> 3);
     chry  &= 15;
@@ -142,31 +142,30 @@ auto PPU::Object::tilefetch() -> void {
       uint16 addr = (pos & 0xfff0) + (y & 7);
 
       oamTile[n].data.bits( 0,15) = ppu.vram[addr + 0];
-      ppu.addClocks(2);
+      ppu.step(2);
 
       oamTile[n].data.bits(16,31) = ppu.vram[addr + 8];
-      ppu.addClocks(2);
+      ppu.step(2);
     }
   }
 
-  if(t.tileCount < 34) ppu.addClocks((34 - t.tileCount) * 4);
-  r.timeOver  |= (t.tileCount > 34);
-  r.rangeOver |= (t.itemCount > 32);
+  if(t.tileCount < 34) ppu.step((34 - t.tileCount) * 4);
+  io.timeOver  |= (t.tileCount > 34);
+  io.rangeOver |= (t.itemCount > 32);
 }
 
 auto PPU::Object::reset() -> void {
-  for(auto n : range(128)) {
-    list[n].x = 0;
-    list[n].y = 0;
-    list[n].character = 0;
-    list[n].nameSelect = 0;
-    list[n].vflip = 0;
-    list[n].hflip = 0;
-    list[n].priority = 0;
-    list[n].palette = 0;
-    list[n].size = 0;
+  for(auto& object : oam.object) {
+    object.x = 0;
+    object.y = 0;
+    object.character = 0;
+    object.nameselect = 0;
+    object.vflip = 0;
+    object.hflip = 0;
+    object.priority = 0;
+    object.palette = 0;
+    object.size = 0;
   }
-  synchronize();
 
   t.x = 0;
   t.y = 0;
@@ -190,19 +189,19 @@ auto PPU::Object::reset() -> void {
     }
   }
 
-  r.aboveEnable = random(false);
-  r.belowEnable = random(false);
-  r.interlace = random(false);
+  io.aboveEnable = random(false);
+  io.belowEnable = random(false);
+  io.interlace = random(false);
 
-  r.baseSize = random(0);
-  r.nameSelect = random(0);
-  r.tiledataAddress = (random(0x0000) & 3) << 13;
-  r.firstSprite = 0;
+  io.baseSize = random(0);
+  io.nameselect = random(0);
+  io.tiledataAddress = (random(0x0000) & 7) << 13;
+  io.firstSprite = 0;
 
-  for(auto& p : r.priority) p = 0;
+  for(auto& p : io.priority) p = 0;
 
-  r.timeOver = false;
-  r.rangeOver = false;
+  io.timeOver = false;
+  io.rangeOver = false;
 
   output.above.palette = 0;
   output.above.priority = 0;

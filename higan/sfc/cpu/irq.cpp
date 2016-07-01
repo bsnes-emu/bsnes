@@ -7,7 +7,7 @@ auto CPU::pollInterrupts() -> void {
   //NMI hold
   if(status.nmiHold) {
     status.nmiHold = false;
-    if(status.nmiEnabled) status.nmiTransition = true;
+    if(io.nmiEnabled) status.nmiTransition = true;
   }
 
   //NMI test
@@ -25,15 +25,15 @@ auto CPU::pollInterrupts() -> void {
   //IRQ hold
   status.irqHold = false;
   if(status.irqLine) {
-    if(status.virqEnabled || status.hirqEnabled) status.irqTransition = true;
+    if(io.virqEnabled || io.hirqEnabled) status.irqTransition = true;
   }
 
   //IRQ test
-  bool irqValid = status.virqEnabled || status.hirqEnabled;
+  bool irqValid = io.virqEnabled || io.hirqEnabled;
   if(irqValid) {
-    if((status.virqEnabled && vcounter(10) != (status.virqPos))
-    || (status.hirqEnabled && hcounter(10) != (status.hirqPos + 1) * 4)
-    || (status.virqPos && vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
+    if((io.virqEnabled && vcounter(10) != (io.virqPos))
+    || (io.hirqEnabled && hcounter(10) != (io.hirqPos + 1) * 4)
+    || (io.virqPos && vcounter(6) == 0)  //IRQs cannot trigger on last dot of field
     ) irqValid = false;
   }
   if(!status.irqValid && irqValid) {
@@ -45,24 +45,24 @@ auto CPU::pollInterrupts() -> void {
 }
 
 auto CPU::nmitimenUpdate(uint8 data) -> void {
-  bool nmiEnabled  = status.nmiEnabled;
-  bool virqEnabled = status.virqEnabled;
-  bool hirqEnabled = status.hirqEnabled;
-  status.nmiEnabled  = data & 0x80;
-  status.virqEnabled = data & 0x20;
-  status.hirqEnabled = data & 0x10;
+  bool nmiEnabled  = io.nmiEnabled;
+  bool virqEnabled = io.virqEnabled;
+  bool hirqEnabled = io.hirqEnabled;
+  io.nmiEnabled  = data & 0x80;
+  io.virqEnabled = data & 0x20;
+  io.hirqEnabled = data & 0x10;
 
   //0->1 edge sensitive transition
-  if(!nmiEnabled && status.nmiEnabled && status.nmiLine) {
+  if(!nmiEnabled && io.nmiEnabled && status.nmiLine) {
     status.nmiTransition = true;
   }
 
   //?->1 level sensitive transition
-  if(status.virqEnabled && !status.hirqEnabled && status.irqLine) {
+  if(io.virqEnabled && !io.hirqEnabled && status.irqLine) {
     status.irqTransition = true;
   }
 
-  if(!status.virqEnabled && !status.hirqEnabled) {
+  if(!io.virqEnabled && !io.hirqEnabled) {
     status.irqLine = false;
     status.irqTransition = false;
   }

@@ -1,6 +1,6 @@
-auto CPU::dmaAddClocks(uint clocks) -> void {
+auto CPU::dmaStep(uint clocks) -> void {
   status.dmaClocks += clocks;
-  addClocks(clocks);
+  step(clocks);
 }
 
 //=============
@@ -41,14 +41,14 @@ auto CPU::dmaWrite(bool valid, uint addr, uint8 data) -> void {
 
 auto CPU::dmaTransfer(bool direction, uint8 bbus, uint24 abus) -> void {
   if(direction == 0) {
-    dmaAddClocks(4);
+    dmaStep(4);
     r.mdr = dmaRead(abus);
-    dmaAddClocks(4);
+    dmaStep(4);
     dmaWrite(dmaTransferValid(bbus, abus), 0x2100 | bbus, r.mdr);
   } else {
-    dmaAddClocks(4);
+    dmaStep(4);
     r.mdr = dmaTransferValid(bbus, abus) ? bus.read(0x2100 | bbus, r.mdr) : (uint8)0x00;
-    dmaAddClocks(4);
+    dmaStep(4);
     dmaWrite(dmaAddressValid(abus), abus, r.mdr);
   }
 }
@@ -131,7 +131,7 @@ auto CPU::hdmaActiveChannels() -> uint {
 //==============
 
 auto CPU::dmaRun() -> void {
-  dmaAddClocks(8);
+  dmaStep(8);
   dmaWrite(false);
   dmaEdge();
 
@@ -144,7 +144,7 @@ auto CPU::dmaRun() -> void {
       dmaEdge();
     } while(channel[n].dmaEnabled && --channel[n].transferSize);
 
-    dmaAddClocks(8);
+    dmaStep(8);
     dmaWrite(false);
     dmaEdge();
 
@@ -155,9 +155,9 @@ auto CPU::dmaRun() -> void {
 }
 
 auto CPU::hdmaUpdate(uint n) -> void {
-  dmaAddClocks(4);
+  dmaStep(4);
   r.mdr = dmaRead(channel[n].sourceBank << 16 | channel[n].hdmaAddress);
-  dmaAddClocks(4);
+  dmaStep(4);
   dmaWrite(false);
 
   if((channel[n].lineCounter & 0x7f) == 0) {
@@ -168,18 +168,18 @@ auto CPU::hdmaUpdate(uint n) -> void {
     channel[n].hdmaDoTransfer = !channel[n].hdmaCompleted;
 
     if(channel[n].indirect) {
-      dmaAddClocks(4);
+      dmaStep(4);
       r.mdr = dmaRead(hdmaAddress(n));
       channel[n].indirectAddress = r.mdr << 8;
-      dmaAddClocks(4);
+      dmaStep(4);
       dmaWrite(false);
 
       if(!channel[n].hdmaCompleted || hdmaActiveAfter(n)) {
-        dmaAddClocks(4);
+        dmaStep(4);
         r.mdr = dmaRead(hdmaAddress(n));
         channel[n].indirectAddress >>= 8;
         channel[n].indirectAddress |= r.mdr << 8;
-        dmaAddClocks(4);
+        dmaStep(4);
         dmaWrite(false);
       }
     }
@@ -187,7 +187,7 @@ auto CPU::hdmaUpdate(uint n) -> void {
 }
 
 auto CPU::hdmaRun() -> void {
-  dmaAddClocks(8);
+  dmaStep(8);
   dmaWrite(false);
 
   for(auto n : range(8)) {
@@ -223,7 +223,7 @@ auto CPU::hdmaInitReset() -> void {
 }
 
 auto CPU::hdmaInit() -> void {
-  dmaAddClocks(8);
+  dmaStep(8);
   dmaWrite(false);
 
   for(auto n : range(8)) {

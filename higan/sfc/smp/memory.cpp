@@ -1,12 +1,12 @@
 alwaysinline auto SMP::readRAM(uint16 addr) -> uint8 {
-  if(addr >= 0xffc0 && status.iplromEnable) return iplrom[addr & 0x3f];
-  if(status.ramDisable) return 0x5a;  //0xff on mini-SNES
+  if(addr >= 0xffc0 && io.iplromEnable) return iplrom[addr & 0x3f];
+  if(io.ramDisable) return 0x5a;  //0xff on mini-SNES
   return apuram[addr];
 }
 
 alwaysinline auto SMP::writeRAM(uint16 addr, uint8 data) -> void {
   //writes to $ffc0-$ffff always go to apuram, even if the iplrom is enabled
-  if(status.ramWritable && !status.ramDisable) apuram[addr] = data;
+  if(io.ramWritable && !io.ramDisable) apuram[addr] = data;
 }
 
 auto SMP::readPort(uint2 port) const -> uint8 {
@@ -28,24 +28,24 @@ auto SMP::readBus(uint16 addr) -> uint8 {
     return 0x00;
 
   case 0xf2:  //DSPADDR
-    return status.dspAddr;
+    return io.dspAddr;
 
   case 0xf3:  //DSPDATA
     //0x80-0xff are read-only mirrors of 0x00-0x7f
-    return dsp.read(status.dspAddr & 0x7f);
+    return dsp.read(io.dspAddr & 0x7f);
 
   case 0xf4:  //CPUIO0
   case 0xf5:  //CPUIO1
   case 0xf6:  //CPUIO2
   case 0xf7:  //CPUIO3
     synchronizeCPU();
-    return cpu.portRead(addr);
+    return cpu.readPort(addr);
 
   case 0xf8:  //RAM0
-    return status.ram00f8;
+    return io.ram00f8;
 
   case 0xf9:  //RAM1
-    return status.ram00f9;
+    return io.ram00f9;
 
   case 0xfa:  //T0TARGET
   case 0xfb:  //T1TARGET
@@ -76,14 +76,14 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   case 0xf0:  //TEST
     if(regs.p.p) break;  //writes only valid when P flag is clear
 
-    status.clockSpeed    = (data >> 6) & 3;
-    status.timerSpeed    = (data >> 4) & 3;
-    status.timersEnable  = data & 0x08;
-    status.ramDisable    = data & 0x04;
-    status.ramWritable   = data & 0x02;
-    status.timersDisable = data & 0x01;
+    io.clockSpeed    = (data >> 6) & 3;
+    io.timerSpeed    = (data >> 4) & 3;
+    io.timersEnable  = data & 0x08;
+    io.ramDisable    = data & 0x04;
+    io.ramWritable   = data & 0x02;
+    io.timersDisable = data & 0x01;
 
-    status.timerStep = (1 << status.clockSpeed) + (2 << status.timerSpeed);
+    io.timerStep = (1 << io.clockSpeed) + (2 << io.timerSpeed);
 
     timer0.synchronizeStage1();
     timer1.synchronizeStage1();
@@ -91,19 +91,19 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
     break;
 
   case 0xf1:  //CONTROL
-    status.iplromEnable = data & 0x80;
+    io.iplromEnable = data & 0x80;
 
     if(data & 0x30) {
       //one-time clearing of APU port read registers,
       //emulated by simulating CPU writes of 0x00
       synchronizeCPU();
       if(data & 0x20) {
-        cpu.portWrite(2, 0x00);
-        cpu.portWrite(3, 0x00);
+        cpu.writePort(2, 0x00);
+        cpu.writePort(3, 0x00);
       }
       if(data & 0x10) {
-        cpu.portWrite(0, 0x00);
-        cpu.portWrite(1, 0x00);
+        cpu.writePort(0, 0x00);
+        cpu.writePort(1, 0x00);
       }
     }
 
@@ -128,12 +128,12 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
     break;
 
   case 0xf2:  //DSPADDR
-    status.dspAddr = data;
+    io.dspAddr = data;
     break;
 
   case 0xf3:  //DSPDATA
-    if(status.dspAddr & 0x80) break;  //0x80-0xff are read-only mirrors of 0x00-0x7f
-    dsp.write(status.dspAddr & 0x7f, data);
+    if(io.dspAddr & 0x80) break;  //0x80-0xff are read-only mirrors of 0x00-0x7f
+    dsp.write(io.dspAddr & 0x7f, data);
     break;
 
   case 0xf4:  //CPUIO0
@@ -145,11 +145,11 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
     break;
 
   case 0xf8:  //RAM0
-    status.ram00f8 = data;
+    io.ram00f8 = data;
     break;
 
   case 0xf9:  //RAM1
-    status.ram00f9 = data;
+    io.ram00f9 = data;
     break;
 
   case 0xfa:  //T0TARGET
@@ -173,27 +173,27 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   writeRAM(addr, data);  //all writes, even to MMIO registers, appear on bus
 }
 
-auto SMP::io() -> void {
-  addClocks(24);
+auto SMP::idle() -> void {
+  step(24);
   cycleEdge();
 }
 
 auto SMP::read(uint16 addr) -> uint8 {
-  addClocks(12);
+  step(12);
   uint8 data = readBus(addr);
-  addClocks(12);
+  step(12);
   cycleEdge();
   return data;
 }
 
 auto SMP::write(uint16 addr, uint8 data) -> void {
-  addClocks(24);
+  step(24);
   writeBus(addr, data);
   cycleEdge();
 }
 
 auto SMP::readDisassembler(uint16 addr) -> uint8 {
   if((addr & 0xfff0) == 0x00f0) return 0x00;
-  if((addr & 0xffc0) == 0xffc0 && status.iplromEnable) return iplrom[addr & 0x3f];
+  if((addr & 0xffc0) == 0xffc0 && io.iplromEnable) return iplrom[addr & 0x3f];
   return apuram[addr];
 }

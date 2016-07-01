@@ -1,3 +1,5 @@
+using format = string_format;
+
 //todo: this is horribly broken in many cases; needs a total rewrite
 auto V30MZ::disassemble(uint16 cs, uint16 ip, bool registers, bool bytes) -> string {
   string s;

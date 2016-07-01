@@ -2,7 +2,7 @@
 auto CPU::stepAutoJoypadPoll() -> void {
   if(vcounter() >= ppu.vdisp()) {
     //cache enable state at first iteration
-    if(status.autoJoypadCounter == 0) status.autoJoypadLatch = status.autoJoypadPoll;
+    if(status.autoJoypadCounter == 0) status.autoJoypadLatch = io.autoJoypadPoll;
     status.autoJoypadActive = status.autoJoypadCounter <= 15;
 
     if(status.autoJoypadActive && status.autoJoypadLatch) {
@@ -16,10 +16,10 @@ auto CPU::stepAutoJoypadPoll() -> void {
       uint2 port0 = SuperFamicom::peripherals.controllerPort1->data();
       uint2 port1 = SuperFamicom::peripherals.controllerPort2->data();
 
-      status.joy1 = status.joy1 << 1 | port0.bit(0);
-      status.joy2 = status.joy2 << 1 | port1.bit(0);
-      status.joy3 = status.joy3 << 1 | port0.bit(1);
-      status.joy4 = status.joy4 << 1 | port1.bit(1);
+      io.joy1 = io.joy1 << 1 | port0.bit(0);
+      io.joy2 = io.joy2 << 1 | port1.bit(0);
+      io.joy3 = io.joy3 << 1 | port0.bit(1);
+      io.joy4 = io.joy4 << 1 | port1.bit(1);
     }
 
     status.autoJoypadCounter++;

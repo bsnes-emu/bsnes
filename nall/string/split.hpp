@@ -3,7 +3,7 @@
 namespace nall {
 
 template<bool Insensitive, bool Quoted>
-auto lstring::_split(string_view source, string_view find, long limit) -> lstring& {
+auto string_vector::_split(string_view source, string_view find, long limit) -> string_vector& {
   reset();
   if(limit <= 0 || find.size() == 0) return *this;
 
@@ -33,9 +33,9 @@ auto lstring::_split(string_view source, string_view find, long limit) -> lstrin
   return *this;
 }
 
-auto string::split(string_view on, long limit) const -> lstring { return lstring()._split<0, 0>(*this, on, limit); }
-auto string::isplit(string_view on, long limit) const -> lstring { return lstring()._split<1, 0>(*this, on, limit); }
-auto string::qsplit(string_view on, long limit) const -> lstring { return lstring()._split<0, 1>(*this, on, limit); }
-auto string::iqsplit(string_view on, long limit) const -> lstring { return lstring()._split<1, 1>(*this, on, limit); }
+auto string::split(string_view on, long limit) const -> string_vector { return string_vector()._split<0, 0>(*this, on, limit); }
+auto string::isplit(string_view on, long limit) const -> string_vector { return string_vector()._split<1, 0>(*this, on, limit); }
+auto string::qsplit(string_view on, long limit) const -> string_vector { return string_vector()._split<0, 1>(*this, on, limit); }
+auto string::iqsplit(string_view on, long limit) const -> string_vector { return string_vector()._split<1, 1>(*this, on, limit); }
 
 }

@@ -1,5 +1,5 @@
 auto R65816::op_nop() {
-L ioIRQ();
+L idleIRQ();
 }
 
 auto R65816::op_wdm() {
@@ -7,11 +7,9 @@ L readPC();
 }
 
 auto R65816::op_xba() {
-  io();
-L io();
-  r.a.l ^= r.a.h;
-  r.a.h ^= r.a.l;
-  r.a.l ^= r.a.h;
+  idle();
+L idle();
+  r.a.w = r.a.w >> 8 | r.a.w << 8;
   r.p.n = (r.a.l & 0x80);
   r.p.z = (r.a.l == 0);
 }
@@ -22,10 +20,10 @@ auto R65816::op_move_b(int adjust) {
   r.db = dp;
   rd.l = readLong(sp << 16 | r.x.w);
   writeLong(dp << 16 | r.y.w, rd.l);
-  io();
+  idle();
   r.x.l += adjust;
   r.y.l += adjust;
-L io();
+L idle();
   if(r.a.w--) r.pc.w -= 3;
 }
 
@@ -35,10 +33,10 @@ auto R65816::op_move_w(int adjust) {
   r.db = dp;
   rd.l = readLong(sp << 16 | r.x.w);
   writeLong(dp << 16 | r.y.w, rd.l);
-  io();
+  idle();
   r.x.w += adjust;
   r.y.w += adjust;
-L io();
+L idle();
   if(r.a.w--) r.pc.w -= 3;
 }
 
@@ -57,20 +55,20 @@ L r.pc.h = readLong(vector + 1);
 
 auto R65816::op_stp() {
   while(r.wai = true) {
-L   io();
+L   idle();
   }
 }
 
 auto R65816::op_wai() {
   r.wai = true;
   while(r.wai) {
-L   io();
+L   idle();
   }
-  io();
+  idle();
 }
 
 auto R65816::op_xce() {
-L ioIRQ();
+L idleIRQ();
   bool carry = r.p.c;
   r.p.c = r.e;
   r.e = carry;
@@ -83,24 +81,19 @@ L ioIRQ();
   }
 }
 
-//auto R65816::op_flag(bool& flag, bool value) {
-//L ioIRQ();
-//  flag = value;
-//}
-
 auto R65816::op_set_flag(uint bit) {
-L ioIRQ();
+L idleIRQ();
   r.p |= 1 << bit;
 }
 
 auto R65816::op_clear_flag(uint bit) {
-L ioIRQ();
+L idleIRQ();
   r.p &= ~(1 << bit);
 }
 
 auto R65816::op_pflag(bool mode) {
   rd.l = readPC();
-L io();
+L idle();
   r.p = (mode ? r.p | rd.l : r.p & ~rd.l);
 E r.p.m = 1, r.p.x = 1;
   if(r.p.x) {
@@ -110,89 +103,89 @@ E r.p.m = 1, r.p.x = 1;
 }
 
 auto R65816::op_transfer_b(Reg16& from, Reg16& to) {
-L ioIRQ();
+L idleIRQ();
   to.l = from.l;
   r.p.n = (to.l & 0x80);
   r.p.z = (to.l == 0);
 }
 
 auto R65816::op_transfer_w(Reg16& from, Reg16& to) {
-L ioIRQ();
+L idleIRQ();
   to.w = from.w;
   r.p.n = (to.w & 0x8000);
   r.p.z = (to.w == 0);
 }
 
 auto R65816::op_tcs() {
-L ioIRQ();
+L idleIRQ();
   r.s.w = r.a.w;
 E r.s.h = 0x01;
 }
 
 auto R65816::op_tsx_b() {
-L ioIRQ();
+L idleIRQ();
   r.x.l = r.s.l;
   r.p.n = (r.x.l & 0x80);
   r.p.z = (r.x.l == 0);
 }
 
 auto R65816::op_tsx_w() {
-L ioIRQ();
+L idleIRQ();
   r.x.w = r.s.w;
   r.p.n = (r.x.w & 0x8000);
   r.p.z = (r.x.w == 0);
 }
 
 auto R65816::op_txs() {
-L ioIRQ();
+L idleIRQ();
 E r.s.l = r.x.l;
 N r.s.w = r.x.w;
 }
 
 auto R65816::op_push_b(Reg16& reg) {
-  io();
+  idle();
 L writeSP(reg.l);
 }
 
 auto R65816::op_push_w(Reg16& reg) {
-  io();
+  idle();
   writeSP(reg.h);
 L writeSP(reg.l);
 }
 
 auto R65816::op_phd() {
-  io();
+  idle();
   writeSPn(r.d.h);
 L writeSPn(r.d.l);
 E r.s.h = 0x01;
 }
 
 auto R65816::op_phb() {
-  io();
+  idle();
 L writeSP(r.db);
 }
 
 auto R65816::op_phk() {
-  io();
+  idle();
 L writeSP(r.pc.b);
 }
 
 auto R65816::op_php() {
-  io();
+  idle();
 L writeSP(r.p);
 }
 
 auto R65816::op_pull_b(Reg16& reg) {
-  io();
-  io();
+  idle();
+  idle();
 L reg.l = readSP();
   r.p.n = (reg.l & 0x80);
   r.p.z = (reg.l == 0);
 }
 
 auto R65816::op_pull_w(Reg16& reg) {
-  io();
-  io();
+  idle();
+  idle();
   reg.l = readSP();
 L reg.h = readSP();
   r.p.n = (reg.w & 0x8000);
@@ -200,8 +193,8 @@ L reg.h = readSP();
 }
 
 auto R65816::op_pld() {
-  io();
-  io();
+  idle();
+  idle();
   r.d.l = readSPn();
 L r.d.h = readSPn();
   r.p.n = (r.d.w & 0x8000);
@@ -210,16 +203,16 @@ E r.s.h = 0x01;
 }
 
 auto R65816::op_plb() {
-  io();
-  io();
+  idle();
+  idle();
 L r.db = readSP();
   r.p.n = (r.db & 0x80);
   r.p.z = (r.db == 0);
 }
 
 auto R65816::op_plp() {
-  io();
-  io();
+  idle();
+  idle();
 L r.p = readSP();
 E r.p.m = 1, r.p.x = 1;
   if(r.p.x) {
@@ -238,7 +231,7 @@ E r.s.h = 0x01;
 
 auto R65816::op_pei() {
   dp = readPC();
-  io2();
+  idle2();
   aa.l = readDPn(dp + 0);
   aa.h = readDPn(dp + 1);
   writeSPn(aa.h);
@@ -249,7 +242,7 @@ E r.s.h = 0x01;
 auto R65816::op_per() {
   aa.l = readPC();
   aa.h = readPC();
-  io();
+  idle();
   rd.w = r.pc.d + (int16)aa.w;
   writeSPn(rd.h);
 L writeSPn(rd.l);

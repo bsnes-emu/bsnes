@@ -16,7 +16,9 @@ struct Screen {
   uint32* lineA;
   uint32* lineB;
 
-  struct Registers {
+  uint15 cgram[256];
+
+  struct IO {
     bool blendMode;
     bool directColor;
 
@@ -29,7 +31,7 @@ struct Screen {
     uint5 colorBlue;
     uint5 colorGreen;
     uint5 colorRed;
-  } r;
+  } io;
 
   struct Math {
     struct Screen {

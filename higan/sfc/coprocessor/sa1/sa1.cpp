@@ -30,19 +30,6 @@ auto SA1::main() -> void {
   instruction();
 }
 
-auto SA1::interrupt() -> void {
-  read(r.pc.d);
-  io();
-  if(!r.e) writeSP(r.pc.b);
-  writeSP(r.pc.h);
-  writeSP(r.pc.l);
-  writeSP(r.e ? (r.p & ~0x10) : r.p);
-  r.pc.w = r.vector;
-  r.pc.b = 0x00;
-  r.p.i = 1;
-  r.p.d = 0;
-}
-
 auto SA1::lastCycle() -> void {
   if(mmio.sa1_nmi && !mmio.sa1_nmicl) {
     status.interruptPending = true;

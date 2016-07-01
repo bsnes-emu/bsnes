@@ -35,7 +35,6 @@ auto Bus::map(
   while(counter[id]) {
     if(++id >= 256) return print("SFC error: bus map exhausted\n");
   }
-//print("map[", hex(id, 2), "] => ", addr, "\n");
 
   reader[id] = read;
   writer[id] = write;
@@ -47,10 +46,10 @@ auto Bus::map(
     for(auto& addr : addrs) {
       auto bankRange = bank.split("-", 1L);
       auto addrRange = addr.split("-", 1L);
-      uint bankLo = hex(bankRange(0));
-      uint bankHi = hex(bankRange(1, bankRange(0)));
-      uint addrLo = hex(addrRange(0));
-      uint addrHi = hex(addrRange(1, addrRange(0)));
+      uint bankLo = bankRange(0).hex();
+      uint bankHi = bankRange(1, bankRange(0)).hex();
+      uint addrLo = addrRange(0).hex();
+      uint addrHi = addrRange(1, addrRange(0)).hex();
 
       for(uint bank = bankLo; bank <= bankHi; bank++) {
         for(uint addr = addrLo; addr <= addrHi; addr++) {
@@ -79,10 +78,10 @@ auto Bus::unmap(const string& addr) -> void {
     for(auto& addr : addrs) {
       auto bankRange = bank.split("-", 1L);
       auto addrRange = addr.split("-", 1L);
-      uint bankLo = hex(bankRange(0));
-      uint bankHi = hex(bankRange(1, bankRange(0)));
-      uint addrLo = hex(addrRange(0));
-      uint addrHi = hex(addrRange(1, addrRange(1)));
+      uint bankLo = bankRange(0).hex();
+      uint bankHi = bankRange(1, bankRange(0)).hex();
+      uint addrLo = addrRange(0).hex();
+      uint addrHi = addrRange(1, addrRange(1)).hex();
 
       for(uint bank = bankLo; bank <= bankHi; bank++) {
         for(uint addr = addrLo; addr <= addrHi; addr++) {

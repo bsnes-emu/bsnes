@@ -19,13 +19,13 @@ namespace nall {
 struct thread {
   inline auto join() -> void;
 
-  static inline auto create(const function<void (uintptr)>& callback, uintptr parameter = 0, uint stacksize = 0) -> thread;
+  static inline auto create(const function<void (uintptr_t)>& callback, uintptr_t parameter = 0, uint stacksize = 0) -> thread;
   static inline auto detach() -> void;
   static inline auto exit() -> void;
 
   struct context {
-    function<auto (uintptr) -> void> callback;
-    uintptr parameter = 0;
+    function<auto (uintptr_t) -> void> callback;
+    uintptr_t parameter = 0;
   };
 
 private:
@@ -43,7 +43,7 @@ auto thread::join() -> void {
   pthread_join(handle, nullptr);
 }
 
-auto thread::create(const function<void (uintptr)>& callback, uintptr parameter, uint stacksize) -> thread {
+auto thread::create(const function<void (uintptr_t)>& callback, uintptr_t parameter, uint stacksize) -> thread {
   thread instance;
 
   auto context = new thread::context;
@@ -76,13 +76,13 @@ struct thread {
   inline ~thread();
   inline auto join() -> void;
 
-  static inline auto create(const function<void (uintptr)>& callback, uintptr parameter = 0, uint stacksize = 0) -> thread;
+  static inline auto create(const function<void (uintptr_t)>& callback, uintptr_t parameter = 0, uint stacksize = 0) -> thread;
   static inline auto detach() -> void;
   static inline auto exit() -> void;
 
   struct context {
-    function<auto (uintptr) -> void> callback;
-    uintptr parameter = 0;
+    function<auto (uintptr_t) -> void> callback;
+    uintptr_t parameter = 0;
   };
 
 private:
@@ -111,7 +111,7 @@ auto thread::join() -> void {
   }
 }
 
-auto thread::create(const function<void (uintptr)>& callback, uintptr parameter, uint stacksize) -> thread {
+auto thread::create(const function<void (uintptr_t)>& callback, uintptr_t parameter, uint stacksize) -> thread {
   thread instance;
 
   auto context = new thread::context;

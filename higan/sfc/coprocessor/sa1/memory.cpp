@@ -108,7 +108,7 @@ auto SA1::vbrRead(uint24 addr, uint8 data) -> uint8 {
 //tick() == 2 clock ticks
 //note: bus conflict delays are not emulated at this time
 
-auto SA1::io() -> void {
+auto SA1::idle() -> void {
   tick();
 }
 

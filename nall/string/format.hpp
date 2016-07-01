@@ -5,7 +5,7 @@ namespace nall {
 //nall::format is a vector<string> of parameters that can be applied to a string
 //each {#} token will be replaced with its appropriate format parameter
 
-auto string::format(const nall::format& params) -> type& {
+auto string::format(const nall::string_format& params) -> type& {
   auto size = (int)this->size();
   auto data = (char*)memory::allocate(size);
   memory::copy(data, this->data(), size);
@@ -32,7 +32,7 @@ auto string::format(const nall::format& params) -> type& {
     };
     if(!isNumeric(&data[x + 1], &data[y - 1])) { x++; continue; }
 
-    uint index = nall::natural(&data[x + 1]);
+    uint index = toNatural(&data[x + 1]);
     if(index >= params.size()) { x++; continue; }
 
     uint sourceSize = y - x;
@@ -59,12 +59,12 @@ auto string::format(const nall::format& params) -> type& {
   return *this;
 }
 
-template<typename T, typename... P> auto format::append(const T& value, P&&... p) -> format& {
+template<typename T, typename... P> auto string_format::append(const T& value, P&&... p) -> string_format& {
   vector<string>::append(value);
   return append(forward<P>(p)...);
 }
 
-auto format::append() -> format& {
+auto string_format::append() -> string_format& {
   return *this;
 }
 
@@ -78,9 +78,10 @@ template<typename... P> auto print(FILE* fp, P&&... p) -> void {
   fwrite(s.data(), 1, s.size(), fp);
 }
 
-auto integer(intmax value, long precision, char padchar) -> string {
+/*
+auto integer(intmax_t value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(1 + sizeof(intmax) * 3);
+  buffer.resize(1 + sizeof(intmax_t) * 3);
   char* p = buffer.get();
 
   bool negative = value < 0;
@@ -97,9 +98,9 @@ auto integer(intmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto natural(uintmax value, long precision, char padchar) -> string {
+auto natural(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 3);
+  buffer.resize(sizeof(uintmax_t) * 3);
   char* p = buffer.get();
 
   uint size = 0;
@@ -112,10 +113,17 @@ auto natural(uintmax value, long precision, char padchar) -> string {
   if(precision) buffer.size(precision, padchar);
   return buffer;
 }
+*/
 
-auto hex(uintmax value, long precision, char padchar) -> string {
+template<typename T> auto numeral(T value, long precision, char padchar) -> string {
+  string buffer{value};
+  if(precision) buffer.size(precision, padchar);
+  return buffer;
+}
+
+auto hex(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 2);
+  buffer.resize(sizeof(uintmax_t) * 2);
   char* p = buffer.get();
 
   uint size = 0;
@@ -130,9 +138,9 @@ auto hex(uintmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto octal(uintmax value, long precision, char padchar) -> string {
+auto octal(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 3);
+  buffer.resize(sizeof(uintmax_t) * 3);
   char* p = buffer.get();
 
   uint size = 0;
@@ -146,9 +154,9 @@ auto octal(uintmax value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto binary(uintmax value, long precision, char padchar) -> string {
+auto binary(uintmax_t value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax) * 8);
+  buffer.resize(sizeof(uintmax_t) * 8);
   char* p = buffer.get();
 
   uint size = 0;
@@ -164,19 +172,21 @@ auto binary(uintmax value, long precision, char padchar) -> string {
 
 template<typename T> auto pointer(const T* value, long precision) -> string {
   if(value == nullptr) return "(nullptr)";
-  return {"0x", hex((uintptr)value, precision)};
+  return {"0x", hex((uintptr_t)value, precision)};
 }
 
-auto pointer(uintptr value, long precision) -> string {
+auto pointer(uintptr_t value, long precision) -> string {
   if(value == 0) return "(nullptr)";
   return {"0x", hex(value, precision)};
 }
 
+/*
 auto real(long double value) -> string {
   string temp;
-  temp.resize(real(nullptr, value));
-  real(temp.get(), value);
+  temp.resize(fromReal(nullptr, value));
+  fromReal(temp.get(), value);
   return temp;
 }
+*/
 
 }

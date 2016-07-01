@@ -1,3 +1,23 @@
+struct OAM {
+  auto read(uint10 addr) -> uint8;
+  auto write(uint10 addr, uint8 data) -> void;
+
+  struct Object {
+    alwaysinline auto width() const -> uint;
+    alwaysinline auto height() const -> uint;
+
+    uint9 x;
+    uint8 y;
+    uint8 character;
+    uint1 nameselect;
+    uint1 vflip;
+    uint1 hflip;
+    uint2 priority;
+    uint3 palette;
+    uint1 size;
+  } object[128];
+};
+
 struct Object {
   alwaysinline auto addressReset() -> void;
   alwaysinline auto setFirstSprite() -> void;
@@ -7,22 +27,19 @@ struct Object {
   auto tilefetch() -> void;
   auto reset() -> void;
 
-  struct Sprite;
-  auto onScanline(Sprite&) -> bool;
-
-  //list.cpp
-  auto update(uint10 addr, uint8 data) -> void;
-  auto synchronize() -> void;
+  auto onScanline(PPU::OAM::Object&) -> bool;
 
   auto serialize(serializer&) -> void;
 
-  struct Registers {
+  OAM oam;
+
+  struct IO {
     bool aboveEnable;
     bool belowEnable;
     bool interlace;
 
     uint3  baseSize;
-    uint2  nameSelect;
+    uint2  nameselect;
     uint16 tiledataAddress;
     uint7  firstSprite;
 
@@ -30,7 +47,7 @@ struct Object {
 
     bool timeOver;
     bool rangeOver;
-  } r;
+  } io;
 
   struct Item {
     bool  valid;
@@ -64,21 +81,6 @@ struct Object {
       uint8 palette;
     } above, below;
   } output;
-
-  struct Sprite {
-    alwaysinline auto width() const -> uint;
-    alwaysinline auto height() const -> uint;
-
-    uint9 x;
-    uint8 y;
-    uint8 character;
-    uint1 nameSelect;
-    uint1 vflip;
-    uint1 hflip;
-    uint2 priority;
-    uint3 palette;
-    uint1 size;
-  } list[128];
 
   friend class PPU;
 };

@@ -29,7 +29,12 @@ PPU::~PPU() {
 }
 
 auto PPU::step(uint clocks) -> void {
-  clock += clocks;
+  clocks >>= 1;
+  while(clocks--) {
+    tick(2);
+    clock += 2;
+    synchronizeCPU();
+  }
 }
 
 auto PPU::synchronizeCPU() -> void {
@@ -42,7 +47,7 @@ auto PPU::Enter() -> void {
 
 auto PPU::main() -> void {
   scanline();
-  addClocks(28);
+  step(28);
   bg1.begin();
   bg2.begin();
   bg3.begin();
@@ -54,7 +59,7 @@ auto PPU::main() -> void {
       bg2.run(1);
       bg3.run(1);
       bg4.run(1);
-      addClocks(2);
+      step(2);
 
       bg1.run(0);
       bg2.run(0);
@@ -65,25 +70,16 @@ auto PPU::main() -> void {
         window.run();
         screen.run();
       }
-      addClocks(2);
+      step(2);
     }
 
-    addClocks(14);
+    step(14);
     obj.tilefetch();
   } else {
-    addClocks(1052 + 14 + 136);
+    step(1052 + 14 + 136);
   }
 
-  addClocks(lineclocks() - 28 - 1052 - 14 - 136);
-}
-
-auto PPU::addClocks(uint clocks) -> void {
-  clocks >>= 1;
-  while(clocks--) {
-    tick(2);
-    step(2);
-    synchronizeCPU();
-  }
+  step(lineclocks() - 28 - 1052 - 14 - 136);
 }
 
 auto PPU::load(Markup::Node node) -> bool {
@@ -96,8 +92,6 @@ auto PPU::load(Markup::Node node) -> bool {
 
 auto PPU::power() -> void {
   for(auto& n : vram.data) n = random(0x0000);
-  for(auto& n : oam.data) n = random(0x00);
-  for(auto& n : cgram.data) n = random(0x0000);
 }
 
 auto PPU::reset() -> void {
@@ -125,72 +119,72 @@ auto PPU::reset() -> void {
   latch.cgramAddress = 0x00;
 
   //$2100  INIDISP
-  r.displayDisable = true;
-  r.displayBrightness = 0;
+  io.displayDisable = true;
+  io.displayBrightness = 0;
 
   //$2102  OAMADDL
   //$2103  OAMADDH
-  r.oamBaseAddress = random(0x0000);
-  r.oamAddress = random(0x0000);
-  r.oamPriority = random(false);
+  io.oamBaseAddress = random(0x0000);
+  io.oamAddress = random(0x0000);
+  io.oamPriority = random(false);
 
   //$2105  BGMODE
-  r.bgPriority = false;
-  r.bgMode = 0;
+  io.bgPriority = false;
+  io.bgMode = 0;
 
   //$210d  BG1HOFS
-  r.hoffsetMode7 = random(0x0000);
+  io.hoffsetMode7 = random(0x0000);
 
   //$210e  BG1VOFS
-  r.voffsetMode7 = random(0x0000);
+  io.voffsetMode7 = random(0x0000);
 
   //$2115  VMAIN
-  r.vramIncrementMode = random(1);
-  r.vramMapping = random(0);
-  r.vramIncrementSize = 1;
+  io.vramIncrementMode = random(1);
+  io.vramMapping = random(0);
+  io.vramIncrementSize = 1;
 
   //$2116  VMADDL
   //$2117  VMADDH
-  r.vramAddress = random(0x0000);
+  io.vramAddress = random(0x0000);
 
   //$211a  M7SEL
-  r.repeatMode7 = random(0);
-  r.vflipMode7 = random(false);
-  r.hflipMode7 = random(false);
+  io.repeatMode7 = random(0);
+  io.vflipMode7 = random(false);
+  io.hflipMode7 = random(false);
 
   //$211b  M7A
-  r.m7a = random(0x0000);
+  io.m7a = random(0x0000);
 
   //$211c  M7B
-  r.m7b = random(0x0000);
+  io.m7b = random(0x0000);
 
   //$211d  M7C
-  r.m7c = random(0x0000);
+  io.m7c = random(0x0000);
 
   //$211e  M7D
-  r.m7d = random(0x0000);
+  io.m7d = random(0x0000);
 
   //$211f  M7X
-  r.m7x = random(0x0000);
+  io.m7x = random(0x0000);
 
   //$2120  M7Y
-  r.m7y = random(0x0000);
+  io.m7y = random(0x0000);
 
   //$2121  CGADD
-  r.cgramAddress = random(0x00);
-  r.cgramAddressLatch = random(0);
+  io.cgramAddress = random(0x00);
+  io.cgramAddressLatch = random(0);
 
   //$2133  SETINI
-  r.extbg = random(false);
-  r.pseudoHires = random(false);
-  r.overscan = false;
-  r.interlace = false;
+  io.extbg = random(false);
+  io.pseudoHires = random(false);
+  io.overscan = false;
+  io.interlace = false;
 
   //$213c  OPHCT
-  r.hcounter = 0;
+  io.hcounter = 0;
 
   //$213d  OPVCT
-  r.vcounter = 0;
+  io.vcounter = 0;
 
   bg1.reset();
   bg2.reset();
@@ -227,8 +221,8 @@ auto PPU::scanline() -> void {
 
 auto PPU::frame() -> void {
   obj.frame();
-  display.interlace = r.interlace;
-  display.overscan = r.overscan;
+  display.interlace = io.interlace;
+  display.overscan = io.overscan;
 }
 
 auto PPU::refresh() -> void {

@@ -5,14 +5,13 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
 
   CPU();
 
-  alwaysinline auto step(uint clocks) -> void;
-  alwaysinline auto synchronizeSMP() -> void;
+  auto synchronizeSMP() -> void;
   auto synchronizePPU() -> void;
   auto synchronizeCoprocessors() -> void;
   auto synchronizePeripherals() -> void;
 
-  auto portRead(uint2 port) const -> uint8;
-  auto portWrite(uint2 port, uint8 data) -> void;
+  auto readPort(uint2 port) const -> uint8;
+  auto writePort(uint2 port, uint8 data) -> void;
 
   static auto Enter() -> void;
   auto main() -> void;
@@ -21,7 +20,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   auto reset() -> void;
 
   //dma.cpp
-  auto dmaAddClocks(uint clocks) -> void;
+  auto dmaStep(uint clocks) -> void;
   auto dmaTransferValid(uint8 bbus, uint24 abus) -> bool;
   auto dmaAddressValid(uint24 abus) -> bool;
   auto dmaRead(uint24 abus) -> uint8;
@@ -46,7 +45,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   auto hdmaInit() -> void;
 
   //memory.cpp
-  auto io() -> void override;
+  auto idle() -> void override;
   auto read(uint24 addr) -> uint8 override;
   auto write(uint24 addr, uint8 data) -> void override;
   alwaysinline auto speed(uint24 addr) const -> uint;
@@ -63,7 +62,7 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
   //timing.cpp
   auto dmaCounter() const -> uint;
 
-  auto addClocks(uint clocks) -> void;
+  auto step(uint clocks) -> void;
   auto scanline() -> void;
 
   alwaysinline auto aluEdge() -> void;
@@ -138,8 +137,9 @@ privileged:
     bool autoJoypadLatch;
     uint autoJoypadCounter;
     uint autoJoypadClock;
+  } status;
 
-    //MMIO
+  struct IO {
     //$2140-217f
     uint8 port[4];
 
@@ -148,8 +148,6 @@ privileged:
 
     //$4016-$4017
     bool joypadStrobeLatch;
-    uint32 joypad1_bits;
-    uint32 joypad2_bits;
 
     //$4200
     bool nmiEnabled;
@@ -184,7 +182,7 @@ privileged:
     uint16 joy2;
     uint16 joy3;
     uint16 joy4;
-  } status;
+  } io;
 
   struct ALU {
     uint mpyctr;
@@ -218,8 +216,8 @@ privileged:
 
     //$43x5-$43x6
     union {
-      uint16 transferSize = 0;
-      uint16_t indirectAddress;
+      uint16 transferSize;
+      uint16 indirectAddress;
     };
 
     //$43x7
@@ -237,6 +235,8 @@ privileged:
     //internal state
     bool hdmaCompleted;
     bool hdmaDoTransfer;
+
+    Channel() : transferSize(0) {}
   } channel[8];
 
   struct Pipe {

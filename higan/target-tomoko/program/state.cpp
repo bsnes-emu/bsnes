@@ -2,7 +2,7 @@ auto Program::stateName(uint slot, bool manager) -> string {
   return {
     mediumPaths(1), "higan/states/",
     manager ? "managed/" : "quick/",
-    "slot-", natural(slot, 2L), ".bst"
+    "slot-", numeral(slot, 2L), ".bst"
   };
 }
 

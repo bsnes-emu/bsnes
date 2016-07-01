@@ -13,20 +13,20 @@ struct R65816 {
 
   using fp = auto (R65816::*)() -> void;
 
-  virtual auto io() -> void = 0;
+  virtual auto idle() -> void = 0;
   virtual auto read(uint24 addr) -> uint8 = 0;
   virtual auto write(uint24 addr, uint8 data) -> void = 0;
   virtual auto lastCycle() -> void = 0;
   virtual auto interruptPending() const -> bool = 0;
-  virtual auto interrupt() -> void;
 
   virtual auto readDisassembler(uint24 addr) -> uint8 { return 0; }
 
   //r65816.cpp
-  alwaysinline auto ioIRQ() -> void;
-  alwaysinline auto io2() -> void;
-  alwaysinline auto io4(uint16 x, uint16 y) -> void;
-  alwaysinline auto io6(uint16 addr) -> void;
+  alwaysinline auto idleIRQ() -> void;
+  alwaysinline auto idle2() -> void;
+  alwaysinline auto idle4(uint16 x, uint16 y) -> void;
+  alwaysinline auto idle6(uint16 addr) -> void;
+  auto interrupt() -> void;
 
   //algorithms.cpp
   auto op_adc_b();

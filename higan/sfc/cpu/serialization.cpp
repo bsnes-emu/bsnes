@@ -50,39 +50,37 @@ auto CPU::serialize(serializer& s) -> void {
   s.integer(status.autoJoypadCounter);
   s.integer(status.autoJoypadClock);
 
-  s.array(status.port);
+  s.array(io.port);
 
-  s.integer(status.wramAddress);
+  s.integer(io.wramAddress);
 
-  s.integer(status.joypadStrobeLatch);
-  s.integer(status.joypad1_bits);
-  s.integer(status.joypad2_bits);
+  s.integer(io.joypadStrobeLatch);
 
-  s.integer(status.nmiEnabled);
-  s.integer(status.hirqEnabled);
-  s.integer(status.virqEnabled);
-  s.integer(status.autoJoypadPoll);
+  s.integer(io.nmiEnabled);
+  s.integer(io.hirqEnabled);
+  s.integer(io.virqEnabled);
+  s.integer(io.autoJoypadPoll);
 
-  s.integer(status.pio);
+  s.integer(io.pio);
 
-  s.integer(status.wrmpya);
-  s.integer(status.wrmpyb);
+  s.integer(io.wrmpya);
+  s.integer(io.wrmpyb);
 
-  s.integer(status.wrdiva);
-  s.integer(status.wrdivb);
+  s.integer(io.wrdiva);
+  s.integer(io.wrdivb);
 
-  s.integer(status.hirqPos);
-  s.integer(status.virqPos);
+  s.integer(io.hirqPos);
+  s.integer(io.virqPos);
 
-  s.integer(status.romSpeed);
+  s.integer(io.romSpeed);
 
-  s.integer(status.rddiv);
-  s.integer(status.rdmpy);
+  s.integer(io.rddiv);
+  s.integer(io.rdmpy);
 
-  s.integer(status.joy1);
-  s.integer(status.joy2);
-  s.integer(status.joy3);
-  s.integer(status.joy4);
+  s.integer(io.joy1);
+  s.integer(io.joy2);
+  s.integer(io.joy3);
+  s.integer(io.joy4);
 
   s.integer(alu.mpyctr);
   s.integer(alu.divctr);

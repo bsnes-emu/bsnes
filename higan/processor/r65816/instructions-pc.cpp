@@ -4,8 +4,8 @@ L   rd.l = readPC();
   } else {
     rd.l = readPC();
     aa.w = r.pc.d + (int8)rd.l;
-    io6(aa.w);
-L   io();
+    idle6(aa.w);
+L   idle();
     r.pc.w = aa.w;
   }
 }
@@ -13,15 +13,15 @@ L   io();
 auto R65816::op_bra() {
   rd.l = readPC();
   aa.w = r.pc.d + (int8)rd.l;
-  io6(aa.w);
-L io();
+  idle6(aa.w);
+L idle();
   r.pc.w = aa.w;
 }
 
 auto R65816::op_brl() {
   rd.l = readPC();
   rd.h = readPC();
-L io();
+L idle();
   r.pc.w = r.pc.d + (int16)rd.w;
 }
 
@@ -49,7 +49,7 @@ L rd.h = readAddr(aa.w + 1);
 auto R65816::op_jmp_iaddrx() {
   aa.l = readPC();
   aa.h = readPC();
-  io();
+  idle();
   rd.l = readPB(aa.w + r.x.w + 0);
 L rd.h = readPB(aa.w + r.x.w + 1);
   r.pc.w = rd.w;
@@ -67,7 +67,7 @@ L rd.b = readAddr(aa.w + 2);
 auto R65816::op_jsr_addr() {
   aa.l = readPC();
   aa.h = readPC();
-  io();
+  idle();
   r.pc.w--;
   writeSP(r.pc.h);
 L writeSP(r.pc.l);
@@ -78,7 +78,7 @@ auto R65816::op_jsr_long() {
   aa.l = readPC();
   aa.h = readPC();
   writeSPn(r.pc.b);
-  io();
+  idle();
   aa.b = readPC();
   r.pc.w--;
   writeSPn(r.pc.h);
@@ -92,7 +92,7 @@ auto R65816::op_jsr_iaddrx() {
   writeSPn(r.pc.h);
   writeSPn(r.pc.l);
   aa.h = readPC();
-  io();
+  idle();
   rd.l = readPB(aa.w + r.x.w + 0);
 L rd.h = readPB(aa.w + r.x.w + 1);
   r.pc.w = rd.w;
@@ -100,8 +100,8 @@ E r.s.h = 0x01;
 }
 
 auto R65816::op_rti() {
-  io();
-  io();
+  idle();
+  idle();
   r.p = readSP();
 E r.p.m = 1, r.p.x = 1;
   if(r.p.x) {
@@ -118,17 +118,17 @@ E r.p.m = 1, r.p.x = 1;
 }
 
 auto R65816::op_rts() {
-  io();
-  io();
+  idle();
+  idle();
   rd.l = readSP();
   rd.h = readSP();
-L io();
+L idle();
   r.pc.w = ++rd.w;
 }
 
 auto R65816::op_rtl() {
-  io();
-  io();
+  idle();
+  idle();
   rd.l = readSPn();
   rd.h = readSPn();
 L rd.b = readSPn();

@@ -5,18 +5,18 @@ auto PPU::Background::clip(int n) -> int {
 
 //H = 28
 auto PPU::Background::beginMode7() -> void {
-  latch.hoffset = ppu.r.hoffsetMode7;
-  latch.voffset = ppu.r.voffsetMode7;
+  latch.hoffset = ppu.io.hoffsetMode7;
+  latch.voffset = ppu.io.voffsetMode7;
 }
 
 auto PPU::Background::runMode7() -> void {
-  int a = (int16)ppu.r.m7a;
-  int b = (int16)ppu.r.m7b;
-  int c = (int16)ppu.r.m7c;
-  int d = (int16)ppu.r.m7d;
+  int a = (int16)ppu.io.m7a;
+  int b = (int16)ppu.io.m7b;
+  int c = (int16)ppu.io.m7c;
+  int d = (int16)ppu.io.m7d;
 
-  int cx = (int13)ppu.r.m7x;
-  int cy = (int13)ppu.r.m7y;
+  int cx = (int13)ppu.io.m7x;
+  int cy = (int13)ppu.io.m7y;
   int hoffset = (int13)latch.hoffset;
   int voffset = (int13)latch.voffset;
 
@@ -25,12 +25,12 @@ auto PPU::Background::runMode7() -> void {
   uint y = ppu.bg1.mosaic.voffset;  //BG2 vertical mosaic uses BG1 mosaic size
 
   if(--mosaic.hcounter == 0) {
-    mosaic.hcounter = r.mosaic + 1;
-    mosaic.hoffset += r.mosaic + 1;
+    mosaic.hcounter = io.mosaic + 1;
+    mosaic.hoffset += io.mosaic + 1;
   }
 
-  if(ppu.r.hflipMode7) x = 255 - x;
-  if(ppu.r.vflipMode7) y = 255 - y;
+  if(ppu.io.hflipMode7) x = 255 - x;
+  if(ppu.io.vflipMode7) y = 255 - y;
 
   int psx = ((a * clip(hoffset - cx)) & ~63) + ((b * clip(voffset - cy)) & ~63) + ((b * y) & ~63) + (cx << 8);
   int psy = ((c * clip(hoffset - cx)) & ~63) + ((d * clip(voffset - cy)) & ~63) + ((d * y) & ~63) + (cy << 8);
@@ -44,7 +44,7 @@ auto PPU::Background::runMode7() -> void {
 
   uint tile;
   uint palette;
-  switch(ppu.r.repeatMode7) {
+  switch(ppu.io.repeatMode7) {
   //screen repetition outside of screen area
   case 0:
   case 1:
@@ -81,21 +81,21 @@ auto PPU::Background::runMode7() -> void {
 
   uint priority;
   if(id == ID::BG1) {
-    priority = r.priority[0];
+    priority = io.priority[0];
   } else if(id == ID::BG2) {
-    priority = r.priority[bool(palette & 0x80)];
+    priority = io.priority[bool(palette & 0x80)];
     palette &= 0x7f;
   }
 
   if(palette == 0) return;
 
-  if(r.aboveEnable) {
+  if(io.aboveEnable) {
     output.above.palette = palette;
     output.above.priority = priority;
     output.above.tile = 0;
   }
 
-  if(r.belowEnable) {
+  if(io.belowEnable) {
     output.below.palette = palette;
     output.below.priority = priority;
     output.below.tile = 0;
