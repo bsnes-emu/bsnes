@@ -20,6 +20,11 @@ typedef struct {
     };
 } lvalue_t;
 
+struct GB_breakpoint_s {
+    uint16_t addr;
+    char *condition;
+};
+
 static uint16_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
 {
     /* Not used until we add support for operators like += */
@@ -438,8 +443,8 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, uint16_t addr)
     int max = gb->n_breakpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
-        if (gb->breakpoints[pivot] == addr) return pivot;
-        if (gb->breakpoints[pivot] > addr) {
+        if (gb->breakpoints[pivot].addr == addr) return pivot;
+        if (gb->breakpoints[pivot].addr > addr) {
             max = pivot - 1;
         }
         else {
@@ -452,8 +457,19 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, uint16_t addr)
 static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Usage: breakpoint <expression>\n");
+        GB_log(gb, "Usage: breakpoint <expression>[ if <condition expression>]\n");
         return true;
+    }
+
+    char *condition = NULL;
+    if ((condition = strstr(arguments, " if "))) {
+        *condition = 0;
+        condition += strlen(" if ");
+        /* Verify condition is sane (Todo: This might have side effects!) */
+        bool error;
+        debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error);
+        if (error) return true;
+
     }
 
     bool error;
@@ -462,14 +478,34 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     if (error) return true;
 
     uint16_t index = find_breakpoint(gb, result);
-    if (index < gb->n_breakpoints && gb->breakpoints[index] == result) {
+    if (index < gb->n_breakpoints && gb->breakpoints[index].addr == result) {
         GB_log(gb, "Breakpoint already set at %04x\n", result);
+        if (!gb->breakpoints[index].condition && condition) {
+            GB_log(gb, "Added condition to breakpoint\n");
+            gb->breakpoints[index].condition = strdup(condition);
+        }
+        else if (gb->breakpoints[index].condition && condition) {
+            GB_log(gb, "Replaced breakpoint condition\n");
+            free(gb->breakpoints[index].condition);
+            gb->breakpoints[index].condition = strdup(condition);
+        }
+        else if (gb->breakpoints[index].condition && !condition) {
+            GB_log(gb, "Removed breakpoint condition\n");
+            free(gb->breakpoints[index].condition);
+            gb->breakpoints[index].condition = NULL;
+        }
         return true;
     }
 
     gb->breakpoints = realloc(gb->breakpoints, (gb->n_breakpoints + 1) * sizeof(gb->breakpoints[0]));
     memmove(&gb->breakpoints[index + 1], &gb->breakpoints[index], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
-    gb->breakpoints[index] = result;
+    gb->breakpoints[index].addr = result;
+    if (condition) {
+        gb->breakpoints[index].condition = strdup(condition);
+    }
+    else {
+        gb->breakpoints[index].condition = NULL;
+    }
     gb->n_breakpoints++;
 
     GB_log(gb, "Breakpoint set at %04x\n", result);
@@ -482,6 +518,11 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
         GB_log(gb, "Delete all breakpoints? ");
         char *answer = gb->input_callback(gb);
         if (answer[0] == 'Y' || answer[0] == 'y') {
+            for (unsigned i = gb->n_breakpoints; i--;) {
+                if (gb->breakpoints[i].condition) {
+                    free(gb->breakpoints[i].condition);
+                }
+            }
             free(gb->breakpoints);
             gb->breakpoints = NULL;
             gb->n_breakpoints = 0;
@@ -495,12 +536,16 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     if (error) return true;
 
     uint16_t index = find_breakpoint(gb, result);
-    if (index >= gb->n_breakpoints || gb->breakpoints[index] != result) {
+    if (index >= gb->n_breakpoints || gb->breakpoints[index].addr != result) {
         GB_log(gb, "No breakpoint set at %04x\n", result);
         return true;
     }
 
-    memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
+    if (gb->breakpoints[index].condition) {
+        free(gb->breakpoints[index].condition);
+    }
+
+    memmove(&gb->breakpoints[index], &gb->breakpoints[index + 1], (gb->n_breakpoints - index - 1) * sizeof(gb->breakpoints[0]));
     gb->n_breakpoints--;
     gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
 
@@ -522,7 +567,12 @@ static bool list(GB_gameboy_t *gb, char *arguments)
 
     GB_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
     for (uint16_t i = 0; i < gb->n_breakpoints; i++) {
-        GB_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i]);
+        if (gb->breakpoints[i].condition) {
+            GB_log(gb, " %d. %04x (Condition: %s)\n", i + 1, gb->breakpoints[i].addr, gb->breakpoints[i].condition);
+        }
+        else {
+            GB_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i].addr);
+        }
     }
 
     return true;
@@ -531,8 +581,19 @@ static bool list(GB_gameboy_t *gb, char *arguments)
 static bool should_break(GB_gameboy_t *gb, uint16_t addr)
 {
     uint16_t index = find_breakpoint(gb, addr);
-    if (index < gb->n_breakpoints && gb->breakpoints[index] == addr) {
-        return true;
+    if (index < gb->n_breakpoints && gb->breakpoints[index].addr == addr) {
+        if (!gb->breakpoints[index].condition) {
+            return true;
+        }
+        bool error;
+        bool condition = debugger_evaluate(gb, gb->breakpoints[index].condition,
+                                           (unsigned int)strlen(gb->breakpoints[index].condition), &error);
+        if (error) {
+            /* Should never happen */
+            GB_log(gb, "An internal error has occured\n");
+            return true;
+        }
+        return condition;
     }
     return false;
 }
@@ -611,7 +672,6 @@ static bool mbc(GB_gameboy_t *gb, char *arguments)
         GB_log(gb, "Cart contains a real time clock\n");
     }
 
-
     return true;
 }
 
@@ -625,7 +685,7 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, mbc, NULL},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression"},
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression. Can also modify the condition of existing breakpoints."},
     {"list", 1, list, "List all set breakpoints"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints"},
     {"print", 1, print, "Evaluate and print an expression"},

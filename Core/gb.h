@@ -180,6 +180,8 @@ typedef struct {
 /* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
 _Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
+struct GB_breakpoint_s;
+
 typedef struct GB_gameboy_s {
     GB_SECTION(header,
         /* The magic makes sure a state file is:
@@ -315,7 +317,7 @@ typedef struct GB_gameboy_s {
     int debug_call_depth;
     bool debug_fin_command, debug_next_command;
     uint16_t n_breakpoints;
-    uint16_t *breakpoints;
+    struct GB_breakpoint_s *breakpoints;
     bool stack_leak_detection;
     uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
     uint16_t addr_for_call_depth[0x200];
