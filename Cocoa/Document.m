@@ -216,6 +216,9 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     [self log:"^C\n"];
     gb.debug_stopped = true;
+    if (!running) {
+        [self start];
+    }
     [self.consoleInput becomeFirstResponder];
 }
 
@@ -241,7 +244,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
         [(NSMenuItem*)anItem setState:!self.audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
-        [(NSMenuItem*)anItem setState:!running];
+        [(NSMenuItem*)anItem setState:(!running) || (gb.debug_stopped)];
+        return !gb.debug_stopped;
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != 0) {
         [(NSMenuItem*)anItem setState:(anItem.tag == 1 && !gb.is_cgb) || (anItem.tag == 2 && gb.is_cgb)];
