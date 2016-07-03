@@ -11,7 +11,8 @@
      reasonable alternative to this. */
     unsigned long pendingLogLines;
     bool tooMuchLogs;
-    
+    bool fullScreen;
+
     NSString *lastConsoleInput;
 }
 
@@ -262,8 +263,21 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 }
 
 
+- (void) windowWillEnterFullScreen:(NSNotification *)notification
+{
+    fullScreen = true;
+}
+
+- (void) windowWillExitFullScreen:(NSNotification *)notification
+{
+    fullScreen = false;
+}
+
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame
 {
+    if (fullScreen) {
+        return newFrame;
+    }
     NSRect rect = window.contentView.frame;
 
     int titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
