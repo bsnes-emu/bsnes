@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="8191" systemVersion="14F27" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="9531" systemVersion="14F1713" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" customObjectInstantitationMethod="direct">
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="8191"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="9531"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="Document">
@@ -26,10 +26,16 @@
                 <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <openGLView colorSize="5bit_RGB_8bit_Alpha" useAuxiliaryDepthBufferStencil="NO" allowOffline="YES" wantsBestResolutionOpenGLSurface="YES" id="uqf-pe-VAF" customClass="GBView">
+                    <customView id="KTk-4M-J7t" customClass="GBBorderView">
                         <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                    </openGLView>
+                        <subviews>
+                            <openGLView colorSize="5bit_RGB_8bit_Alpha" useAuxiliaryDepthBufferStencil="NO" allowOffline="YES" wantsBestResolutionOpenGLSurface="YES" id="uqf-pe-VAF" customClass="GBView">
+                                <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
+                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            </openGLView>
+                        </subviews>
+                    </customView>
                 </subviews>
             </view>
             <connections>

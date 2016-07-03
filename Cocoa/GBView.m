@@ -87,6 +87,25 @@
     return self;
 }
 
+- (void)setFrame:(NSRect)frame
+{
+    frame = self.superview.frame;
+    double ratio = frame.size.width / frame.size.height;
+    if (ratio >= 160.0/144.0) {
+        double new_width = round(frame.size.height / 144.0 * 160.0);
+        frame.origin.x = floor((frame.size.width - new_width) / 2);
+        frame.size.width = new_width;
+        frame.origin.y = 0;
+    }
+    else {
+        double new_height = round(frame.size.width / 160.0 * 144.0);
+        frame.origin.y = floor((frame.size.height - new_height) / 2);
+        frame.size.height = new_height;
+        frame.origin.x = 0;
+    }
+    [super setFrame:frame];
+}
+
 - (void)drawRect:(NSRect)dirtyRect {
     if (!self.shader) {
         self.shader = [[GBShader alloc] initWithName:[[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"]];
@@ -109,7 +128,6 @@
     }
     glFlush();
 }
-
 
 - (void) flip
 {
