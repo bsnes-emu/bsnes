@@ -101,7 +101,19 @@ private:
   }
 
   inline auto directory::ufolders(const string& pathname, const string& pattern) -> string_vector {
-    auto list;
+    if(!pathname) {
+      //special root pseudo-folder (return list of drives)
+      wchar_t drives[PATH_MAX] = {0};
+      GetLogicalDriveStrings(PATH_MAX, drives);
+      wchar_t* p = drives;
+      while(*p || *(p + 1)) {
+        if(!*p) *p = ';';
+        *p++;
+      }
+      return string{(const char*)utf8_t(drives)}.replace("\\", "/").split(";");
+    }
+
+    string_vector list;
     string path = pathname;
     path.transform("/", "\\");
     if(!path.endsWith("\\")) path.append("\\");
@@ -131,6 +143,8 @@ private:
   }
 
   inline auto directory::ufiles(const string& pathname, const string& pattern) -> string_vector {
+    if(!pathname) return {};
+
     string_vector list;
     string path = pathname;
     path.transform("/", "\\");
@@ -194,6 +208,8 @@ private:
   }
 
   inline auto directory::ufolders(const string& pathname, const string& pattern) -> string_vector {
+    if(!pathname) return string_vector{"/"};
+
     string_vector list;
     DIR* dp;
     struct dirent* ep;
@@ -213,6 +229,8 @@ private:
   }
 
   inline auto directory::ufiles(const string& pathname, const string& pattern) -> string_vector {
+    if(!pathname) return {};
+
     string_vector list;
     DIR* dp;
     struct dirent* ep;

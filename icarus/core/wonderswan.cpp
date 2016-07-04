@@ -26,8 +26,8 @@ auto Icarus::wonderSwanManifest(vector<uint8_t>& buffer, string location) -> str
 }
 
 auto Icarus::wonderSwanImport(vector<uint8_t>& buffer, string location) -> string {
-  auto name = prefixname(location);
-  auto source = pathname(location);
+  auto name = Location::prefix(location);
+  auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "WonderSwan/", name, ".ws/"};
 //if(directory::exists(target)) return failure("game already exists");
 

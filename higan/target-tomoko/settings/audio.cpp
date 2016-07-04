@@ -29,7 +29,7 @@ AudioSettings::AudioSettings(TabFrame* parent) : TabFrameItem(parent) {
   frequencyCombo.setEnabled(false);
 
   resamplerLabel.setText("Resampler:");
-  resamplerCombo.append(ComboButtonItem().setText("Sinc"));
+  resamplerCombo.append(ComboButtonItem().setText("IIR - Biquad"));
   resamplerCombo.setEnabled(false);
 
   exclusiveMode.setText("Exclusive Mode");

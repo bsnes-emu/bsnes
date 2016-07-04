@@ -24,7 +24,7 @@ struct PPU : Thread, PPUcounter {
   alwaysinline auto readOAM(uint10 addr) -> uint8;
   alwaysinline auto writeOAM(uint10 addr, uint8 data) -> void;
   alwaysinline auto readCGRAM(bool byte, uint8 addr) -> uint8;
-  alwaysinline auto writeCGRAM(uint8 addr, uint16 data) -> void;
+  alwaysinline auto writeCGRAM(uint8 addr, uint15 data) -> void;
   auto readIO(uint24 addr, uint8 data) -> uint8;
   auto writeIO(uint24 addr, uint8 data) -> void;
   auto latchCounters() -> void;

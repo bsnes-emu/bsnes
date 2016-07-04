@@ -32,6 +32,7 @@
 #include <nall/inode.hpp>
 #include <nall/interpolation.hpp>
 #include <nall/intrinsics.hpp>
+#include <nall/location.hpp>
 #include <nall/map.hpp>
 #include <nall/matrix.hpp>
 #include <nall/maybe.hpp>

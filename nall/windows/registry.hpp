@@ -80,7 +80,8 @@ struct registry {
   }
 
   static auto contents(const string& name) -> string_vector {
-    auto part = name.split("/"), result;
+    string_vector result;
+    auto part = name.split("/");
     HKEY handle, rootKey = root(part.takeLeft());
     part.removeRight();
     string path = part.merge("\\");

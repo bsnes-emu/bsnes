@@ -20,11 +20,11 @@ alwaysinline auto readLong(uint addr) -> uint8 {
 }
 
 alwaysinline auto readDB(uint addr) -> uint8 {
-  return read(r.db << 16 | uint16(addr));
+  return read(uint24((r.db << 16) + addr));  //DB can cross page boundaries
 }
 
 alwaysinline auto readPB(uint addr) -> uint8 {
-  return read(r.pc.b << 16 | uint16(addr));
+  return read(r.pc.b << 16 | uint16(addr));  //PB cannot cross page boundaries
 }
 
 alwaysinline auto readDP(uint addr) -> uint8 {
@@ -61,7 +61,7 @@ alwaysinline auto writeLong(uint addr, uint8 data) -> void {
 }
 
 alwaysinline auto writeDB(uint addr, uint8 data) -> void {
-  write(r.db << 16 | uint16(addr), data);
+  write(uint24((r.db << 16) + addr), data);
 }
 
 alwaysinline auto writePB(uint addr, uint8 data) -> void {

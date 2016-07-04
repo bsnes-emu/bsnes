@@ -45,7 +45,7 @@ WonderSwanCartridge::WonderSwanCartridge(string location, uint8_t* data, uint si
   manifest.append("  rtc name=rtc.ram size=16\n");
   manifest.append("\n");
   manifest.append("information\n");
-  manifest.append("  title:       ", prefixname(location), "\n");
+  manifest.append("  title:       ", Location::prefix(location), "\n");
   manifest.append("  orientation: ", !information.orientation ? "horizontal" : "vertical", "\n");
   manifest.append("  sha256:      ", Hash::SHA256(data, size).digest(), "\n");
   manifest.append("\n");

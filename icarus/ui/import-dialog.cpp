@@ -20,7 +20,7 @@ auto ImportDialog::run(string_vector locations) -> void {
 
   setVisible(true);
   for(auto& location : locations) {
-    auto name = nall::basename(location);
+    auto name = Location::base(location);
 
     if(abort) {
       errors.append(string{"[", name, "] aborted"});

@@ -73,15 +73,6 @@ inline auto pointer(uintptr_t value, long precision = 0) -> string;
 inline auto tokenize(const char* s, const char* p) -> bool;
 inline auto tokenize(string_vector& list, const char* s, const char* p) -> bool;
 
-//path.hpp
-inline auto pathname(string_view self) -> string;
-inline auto filename(string_view self) -> string;
-
-inline auto dirname(string_view self) -> string;
-inline auto basename(string_view self) -> string;
-inline auto prefixname(string_view self) -> string;
-inline auto suffixname(string_view self) -> string;
-
 //utility.hpp
 inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
 inline auto fromInteger(char* result, intmax_t value) -> char*;
@@ -329,7 +320,6 @@ struct string_format : vector<string> {
 #include <nall/string/format.hpp>
 #include <nall/string/list.hpp>
 #include <nall/string/match.hpp>
-#include <nall/string/path.hpp>
 #include <nall/string/replace.hpp>
 #include <nall/string/split.hpp>
 #include <nall/string/trim.hpp>

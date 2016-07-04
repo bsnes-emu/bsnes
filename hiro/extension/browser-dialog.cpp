@@ -120,7 +120,7 @@ auto BrowserDialogWindow::run() -> string_vector {
   pathName.onActivate([&] { setPath(pathName.text()); });
   pathRefresh.setBordered(false).setIcon(Icon::Action::Refresh).onActivate([&] { setPath(state.path); });
   pathHome.setBordered(false).setIcon(Icon::Go::Home).onActivate([&] { setPath(Path::user()); });
-  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(dirname(state.path)); });
+  pathUp.setBordered(false).setIcon(Icon::Go::Up).onActivate([&] { setPath(Location::dir(state.path)); });
   view.setBatchable(state.action == "openFiles").onActivate([&] { activate(); }).onChange([&] { change(); });
   filterList.setVisible(state.action != "selectFolder").onChange([&] { setPath(state.path); });
   for(auto& filter : state.filters) {
@@ -156,7 +156,7 @@ auto BrowserDialogWindow::run() -> string_vector {
 
 auto BrowserDialogWindow::setPath(string path) -> void {
   path.transform("\\", "/");
-  if(!path.endsWith("/")) path.append("/");
+  if((path || Path::root() == "/") && !path.endsWith("/")) path.append("/");
   pathName.setText(state.path = path);
 
   view.reset();

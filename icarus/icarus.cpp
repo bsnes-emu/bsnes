@@ -69,7 +69,7 @@ auto nall::main(string_vector args) -> void {
     .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.gb:*.gbc:*.gba:*.ws:*.wsc:*.bs:*.st:*.zip")
     .openFile()) {
       if(string target = icarus.import(source)) {
-        settings["icarus/Path"].setValue(pathname(source));
+        settings["icarus/Path"].setValue(Location::path(source));
         return print(target, "\n");
       }
     }

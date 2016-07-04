@@ -1,10 +1,10 @@
 auto PPU::addressVRAM() const -> uint16 {
   uint16 address = io.vramAddress;
   switch(io.vramMapping) {
-  case 0: return (address);
-  case 1: return (address & 0xff00) | ((address & 0x001f) << 3) | ((address >> 5) & 7);
-  case 2: return (address & 0xfe00) | ((address & 0x003f) << 3) | ((address >> 6) & 7);
-  case 3: return (address & 0xfc00) | ((address & 0x007f) << 3) | ((address >> 7) & 7);
+  case 0: return address;
+  case 1: return address.bits( 8,15) <<  8 | address.bits(0,4) << 3 | address.bits(5,7);
+  case 2: return address.bits( 9,15) <<  9 | address.bits(0,5) << 3 | address.bits(6,8);
+  case 3: return address.bits(10,15) << 10 | address.bits(0,6) << 3 | address.bits(7,9);
   }
   unreachable;
 }
@@ -37,7 +37,7 @@ auto PPU::readCGRAM(bool byte, uint8 addr) -> uint8 {
   return screen.cgram[addr].byte(byte);
 }
 
-auto PPU::writeCGRAM(uint8 addr, uint16 data) -> void {
+auto PPU::writeCGRAM(uint8 addr, uint15 data) -> void {
   if(!io.displayDisable
   && vcounter() > 0 && vcounter() < vdisp()
   && hcounter() >= 88 && hcounter() < 1096

@@ -4,6 +4,8 @@
  * revision 0.03
  */
 
+#include <nall/location.hpp>
+
 namespace nall { namespace {
 
 struct DML {
@@ -45,7 +47,7 @@ auto DML::parse(const string& filedata, const string& pathname) -> string {
 }
 
 auto DML::parse(const string& filename) -> string {
-  if(!settings.path) settings.path = pathname(filename);
+  if(!settings.path) settings.path = Location::path(filename);
   string document = settings.reader ? settings.reader(filename) : string::read(filename);
   parseDocument(document, settings.path, 0);
   return state.output;
@@ -68,7 +70,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
   if(block.beginsWith("<include ") && block.endsWith(">")) {
     string filename{pathname, block.trim("<include ", ">", 1L).strip()};
     string document = settings.reader ? settings.reader(filename) : string::read(filename);
-    parseDocument(document, nall::pathname(filename), depth + 1);
+    parseDocument(document, Location::path(filename), depth + 1);
   }
 
   //html

@@ -2,7 +2,7 @@ auto Program::loadMedium() -> void {
   if(!mediumQueue) return;
 
   string location = mediumQueue.left();
-  string type = suffixname(location).trimLeft(".", 1L);
+  string type = Location::suffix(location).trimLeft(".", 1L);
 
   for(auto& emulator : emulators) {
     for(auto& medium : emulator->media) {

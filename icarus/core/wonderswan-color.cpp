@@ -26,8 +26,8 @@ auto Icarus::wonderSwanColorManifest(vector<uint8_t>& buffer, string location) -
 }
 
 auto Icarus::wonderSwanColorImport(vector<uint8_t>& buffer, string location) -> string {
-  auto name = prefixname(location);
-  auto source = pathname(location);
+  auto name = Location::prefix(location);
+  auto source = Location::path(location);
   string target{settings["Library/Location"].text(), "WonderSwan Color/", name, ".wsc/"};
 //if(directory::exists(target)) return failure("game already exists");
 

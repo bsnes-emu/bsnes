@@ -1,10 +1,10 @@
 #pragma once
 
-namespace nall {
+namespace nall { namespace Location {
 
 // (/parent/child.type/)
 // (/parent/child.type/)name.type
-auto pathname(string_view self) -> string {
+inline auto path(string_view self) -> string {
   const char* p = self.data() + self.size() - 1;
   for(int offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/') return slice(self, 0, offset + 1);
@@ -14,7 +14,7 @@ auto pathname(string_view self) -> string {
 
 // /parent/child.type/()
 // /parent/child.type/(name.type)
-auto filename(string_view self) -> string {
+inline auto file(string_view self) -> string {
   const char* p = self.data() + self.size() - 1;
   for(int offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/') return slice(self, offset + 1);
@@ -24,7 +24,7 @@ auto filename(string_view self) -> string {
 
 // (/parent/)child.type/
 // (/parent/child.type/)name.type
-auto dirname(string_view self) -> string {
+inline auto dir(string_view self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(int offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -35,7 +35,7 @@ auto dirname(string_view self) -> string {
 
 // /parent/(child.type/)
 // /parent/child.type/(name.type)
-auto basename(string_view self) -> string {
+inline auto base(string_view self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(int offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -46,7 +46,7 @@ auto basename(string_view self) -> string {
 
 // /parent/(child).type/
 // /parent/child.type/(name).type
-auto prefixname(string_view self) -> string {
+inline auto prefix(string_view self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(int offset = self.size() - 1, suffix = -1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -59,7 +59,7 @@ auto prefixname(string_view self) -> string {
 
 // /parent/child(.type)/
 // /parent/child.type/name(.type)
-auto suffixname(string_view self) -> string {
+inline auto suffix(string_view self) -> string {
   const char* p = self.data() + self.size() - 1, *last = p;
   for(int offset = self.size() - 1; offset >= 0; offset--, p--) {
     if(*p == '/' && p == last) continue;
@@ -69,4 +69,4 @@ auto suffixname(string_view self) -> string {
   return "";  //no suffix found
 }
 
-}
+}}

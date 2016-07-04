@@ -29,6 +29,8 @@ Program::Program(string_vector args) {
   video->set(Video::Synchronize, settings["Video/Synchronize"].boolean());
   if(!video->init()) video = Video::create("None");
 
+  presentation->drawSplashScreen();
+
   audio = Audio::create(settings["Audio/Driver"].text());
   audio->set(Audio::Device, settings["Audio/Device"].text());
   audio->set(Audio::Handle, presentation->viewport.handle());
@@ -41,12 +43,12 @@ Program::Program(string_vector args) {
   input->onChange({&InputManager::onChange, &inputManager()});
   if(!input->init()) input = Input::create("None");
 
-  presentation->drawSplashScreen();
-
   new InputManager;
   new SettingsManager;
   new CheatDatabase;
   new ToolsManager;
+
+  presentation->setFocused();
 
   updateVideoShader();
   updateAudioDriver();
@@ -58,6 +60,10 @@ Program::Program(string_vector args) {
       presentation->toggleFullScreen();
     } else if(directory::exists(argument)) {
       mediumQueue.append(argument);
+    } else if(file::exists(argument)) {
+      if(auto result = execute("icarus", "--import", argument)) {
+        mediumQueue.append(result.output.strip());
+      }
     }
   }
   loadMedium();

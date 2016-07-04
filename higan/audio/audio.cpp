@@ -66,7 +66,7 @@ auto Audio::process() -> void {
     }
 
     for(auto c : range(channels)) {
-      samples[c] /= streams.size();
+      samples[c] = max(-1.0, min(+1.0, samples[c] * volume));
 
       if(reverbEnable) {
         samples[c] *= 0.125;
@@ -74,8 +74,6 @@ auto Audio::process() -> void {
         for(auto n : range(7)) reverb[c][n].write(samples[c]);
         samples[c] *= 8.000;
       }
-
-      samples[c] *= volume;
     }
 
     if(channels == 2) {

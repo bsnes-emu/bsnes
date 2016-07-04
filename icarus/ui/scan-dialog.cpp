@@ -13,7 +13,7 @@ ScanDialog::ScanDialog() {
     refresh();
   });
   upButton.setIcon(Icon::Go::Up).setBordered(false).onActivate([&] {
-    pathEdit.setText(dirname(settings["icarus/Path"].text()));
+    pathEdit.setText(Location::dir(settings["icarus/Path"].text()));
     refresh();
   });
   scanList.onActivate([&] { activate(); });
@@ -57,13 +57,13 @@ auto ScanDialog::refresh() -> void {
 
   for(auto& name : contents) {
     if(!name.endsWith("/")) continue;
-    if(gamePakType(suffixname(name))) continue;
+    if(gamePakType(Location::suffix(name))) continue;
     scanList.append(ListViewItem().setIcon(Icon::Emblem::Folder).setText(name.trimRight("/")));
   }
 
   for(auto& name : contents) {
     if(name.endsWith("/")) continue;
-    if(!gameRomType(suffixname(name).downcase())) continue;
+    if(!gameRomType(Location::suffix(name).downcase())) continue;
     scanList.append(ListViewItem().setCheckable().setIcon(Icon::Emblem::File).setText(name));
   }
 
@@ -74,7 +74,7 @@ auto ScanDialog::refresh() -> void {
 auto ScanDialog::activate() -> void {
   if(auto item = scanList.selected()) {
     string location{settings["icarus/Path"].text(), item.text()};
-    if(directory::exists(location) && !gamePakType(suffixname(location))) {
+    if(directory::exists(location) && !gamePakType(Location::suffix(location))) {
       pathEdit.setText(location);
       refresh();
     }
