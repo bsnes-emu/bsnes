@@ -8,4 +8,5 @@
 @property GB_gameboy_t *gb;
 @property (nonatomic) BOOL shouldBlendFrameWithPrevious;
 @property GBShader *shader;
+@property (getter=isMouseHidingEnabled) BOOL mouseHidingEnabled;
 @end

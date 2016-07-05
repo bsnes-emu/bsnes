@@ -94,6 +94,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 - (void) vblank
 {
+    self.view.mouseHidingEnabled = YES;
     [self.view flip];
     GB_set_pixels_output(&gb, self.view.pixels);
 }
@@ -107,11 +108,13 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         GB_apu_copy_buffer(&gb, buffer, nFrames);
     } andSampleRate:96000];
+    self.view.mouseHidingEnabled = YES;
     [self.audioClient start];
     while (running) {
         GB_run(&gb);
     }
     [self.audioClient stop];
+    self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     stopping = false;
 }
@@ -309,6 +312,10 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
         return;
     }
     pendingLogLines++;
+
+    /* Make sure mouse is not hidden while debugging */
+    self.view.mouseHidingEnabled = NO;
+
     NSString *nsstring = @(string); // For ref-counting
     dispatch_async(dispatch_get_main_queue(), ^{
         NSFont *font = [NSFont userFixedPitchFontOfSize:12];

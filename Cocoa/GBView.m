@@ -8,6 +8,9 @@
 {
     uint32_t *image_buffers[3];
     unsigned char current_buffer;
+    BOOL mouse_hidden;
+    NSTrackingArea *tracking_area;
+    BOOL _mouseHidingEnabled;
 }
 
 - (void) awakeFromNib
@@ -42,6 +45,11 @@
     _shouldBlendFrameWithPrevious = 1;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterChanged) name:@"GBFilterChanged" object:nil];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
+    tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
+                                                  options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect
+                                                    owner:self
+                                                 userInfo:nil];
+    [self addTrackingArea:tracking_area];
 }
 
 - (void) filterChanged
@@ -71,6 +79,10 @@
     free(image_buffers[0]);
     free(image_buffers[1]);
     free(image_buffers[2]);
+    if (mouse_hidden) {
+        mouse_hidden = false;
+        [NSCursor unhide];
+    }
     [[NSNotificationCenter defaultCenter] removeObserver:self];
 }
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -111,6 +123,7 @@
             frame.origin.x = 0;
         }
     }
+
     [super setFrame:frame];
 }
 
@@ -222,5 +235,47 @@
 - (BOOL)acceptsFirstResponder
 {
     return YES;
+}
+
+- (void)mouseEntered:(NSEvent *)theEvent
+{
+    if (!mouse_hidden) {
+        mouse_hidden = true;
+        if (_mouseHidingEnabled) {
+            [NSCursor hide];
+        }
+    }
+    [super mouseEntered:theEvent];
+}
+
+- (void)mouseExited:(NSEvent *)theEvent
+{
+    if (mouse_hidden) {
+        mouse_hidden = false;
+        if (_mouseHidingEnabled) {
+            [NSCursor unhide];
+        }
+    }
+    [super mouseExited:theEvent];
+}
+
+- (void)setMouseHidingEnabled:(BOOL)mouseHidingEnabled
+{
+    if (mouseHidingEnabled == _mouseHidingEnabled) return;
+
+    _mouseHidingEnabled = mouseHidingEnabled;
+    
+    if (mouse_hidden && _mouseHidingEnabled) {
+        [NSCursor hide];
+    }
+
+    if (mouse_hidden && !_mouseHidingEnabled) {
+        [NSCursor unhide];
+    }
+}
+
+- (BOOL)isMouseHidingEnabled
+{
+    return _mouseHidingEnabled;
 }
 @end
