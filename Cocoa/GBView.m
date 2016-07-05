@@ -41,12 +41,18 @@
     image_buffers[2] = malloc(160 * 144 * 4);
     _shouldBlendFrameWithPrevious = 1;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterChanged) name:@"GBFilterChanged" object:nil];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
 }
 
 - (void) filterChanged
 {
     [self setNeedsDisplay:YES];
     self.shader = nil;
+}
+
+- (void) ratioKeepingChanged
+{
+    [self setFrame:self.superview.frame];
 }
 
 - (void) setShouldBlendFrameWithPrevious:(BOOL)shouldBlendFrameWithPrevious
@@ -90,18 +96,20 @@
 - (void)setFrame:(NSRect)frame
 {
     frame = self.superview.frame;
-    double ratio = frame.size.width / frame.size.height;
-    if (ratio >= 160.0/144.0) {
-        double new_width = round(frame.size.height / 144.0 * 160.0);
-        frame.origin.x = floor((frame.size.width - new_width) / 2);
-        frame.size.width = new_width;
-        frame.origin.y = 0;
-    }
-    else {
-        double new_height = round(frame.size.width / 160.0 * 144.0);
-        frame.origin.y = floor((frame.size.height - new_height) / 2);
-        frame.size.height = new_height;
-        frame.origin.x = 0;
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]) {
+        double ratio = frame.size.width / frame.size.height;
+        if (ratio >= 160.0/144.0) {
+            double new_width = round(frame.size.height / 144.0 * 160.0);
+            frame.origin.x = floor((frame.size.width - new_width) / 2);
+            frame.size.width = new_width;
+            frame.origin.y = 0;
+        }
+        else {
+            double new_height = round(frame.size.width / 160.0 * 144.0);
+            frame.origin.y = floor((frame.size.height - new_height) / 2);
+            frame.size.height = new_height;
+            frame.origin.x = 0;
+        }
     }
     [super setFrame:frame];
 }

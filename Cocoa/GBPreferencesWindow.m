@@ -8,6 +8,7 @@
     NSInteger button_being_modified;
 
     NSPopUpButton *_graphicsFilterPopupButton;
+    NSButton *_aspectRatioCheckbox;
 }
 
 + (NSArray *)filterList
@@ -98,6 +99,24 @@
     [[NSUserDefaults standardUserDefaults] setObject:[[self class] filterList][[sender indexOfSelectedItem]]
                                               forKey:@"GBFilter"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
+}
+
+- (IBAction)changeAspectRatio:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
+                                            forKey:@"GBAspectRatioUnkept"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBAspectChanged" object:nil];
+}
+
+- (NSButton *)aspectRatioCheckbox
+{
+    return _aspectRatioCheckbox;
+}
+
+- (void)setAspectRatioCheckbox:(NSButton *)aspectRatioCheckbox
+{
+    _aspectRatioCheckbox = aspectRatioCheckbox;
+    [_aspectRatioCheckbox setState: ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]];
 }
 
 @end
