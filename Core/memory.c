@@ -4,6 +4,7 @@
 #include "joypad.h"
 #include "display.h"
 #include "memory.h"
+#include "debugger.h"
 
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
@@ -194,6 +195,7 @@ static GB_read_function_t * const read_map[] =
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
+    GB_debugger_test_read_watchpoint(gb, addr);
     if (addr < 0xFF00 && gb->dma_cycles) {
         /* Todo: can we access IO registers during DMA? */
         return 0xFF;
@@ -512,6 +514,7 @@ static GB_write_function_t * const write_map[] =
 
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    GB_debugger_test_write_watchpoint(gb, addr, value);
     if (addr < 0xFF00 && gb->dma_cycles) {
         /* Todo: can we access IO registers during DMA? */
         return;

@@ -170,6 +170,9 @@ typedef struct {
     bool has_rumble;
 } GB_cartridge_t;
 
+struct GB_breakpoint_s;
+struct GB_watchpoint_s;
+
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
    Some other changes might be "safe" as well.
@@ -179,8 +182,6 @@ typedef struct {
 /* We make sure bool is 1 for cross-platform save state compatibility. */
 /* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
 _Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
-
-struct GB_breakpoint_s;
 
 typedef struct GB_gameboy_s {
     GB_SECTION(header,
@@ -313,15 +314,24 @@ typedef struct GB_gameboy_s {
     GB_rgb_encode_callback_t rgb_encode_callback;
     GB_vblank_callback_t vblank_callback;
 
-    /* Debugger */
-    int debug_call_depth;
+    /*** Debugger ***/
+    bool debug_stopped;
     bool debug_fin_command, debug_next_command;
+
+    /* Breakpoints */
     uint16_t n_breakpoints;
     struct GB_breakpoint_s *breakpoints;
+
+    /* SLD */
     bool stack_leak_detection;
+    int debug_call_depth;
     uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
     uint16_t addr_for_call_depth[0x200];
-    bool debug_stopped;
+
+    /* Watchpoints */
+    uint16_t n_watchpoints;
+    struct GB_watchpoint_s *watchpoints;
+
 
     /* Misc */
     bool turbo;
