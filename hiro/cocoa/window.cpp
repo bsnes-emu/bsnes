@@ -38,7 +38,7 @@
     [item setTarget:self];
     [rootMenu addItem:item];
 
-    string result = nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").strip();
+    string result = nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").output.strip();
     if(result != "0") {
       disableGatekeeperAutoRearm = [[[NSMenuItem alloc] initWithTitle:@"Disable Gatekeeper Auto-Rearm" action:@selector(menuDisableGatekeeperAutoRearm) keyEquivalent:@""] autorelease];
       [disableGatekeeperAutoRearm setTarget:self];
@@ -144,7 +144,7 @@
   [alert setMessageText:@"Disable Gatekeeper Auto-Rearm"];
 
   nall::execute("sudo", "defaults", "write", "/Library/Preferences/com.apple.security", "GKAutoRearm", "-bool", "NO");
-  if(nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").strip() == "0") {
+  if(nall::execute("defaults", "read", "/Library/Preferences/com.apple.security", "GKAutoRearm").output.strip() == "0") {
     [alert setAlertStyle:NSInformationalAlertStyle];
     [alert setInformativeText:@"Gatekeeper's automatic 30-day rearm behavior has been disabled successfully."];
     [disableGatekeeperAutoRearm setHidden:YES];

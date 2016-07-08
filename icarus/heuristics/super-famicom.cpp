@@ -521,7 +521,7 @@ SuperFamicomCartridge::SuperFamicomCartridge(const uint8_t* data, uint size, boo
       "    map address=00-3f,80-bf:3800-38ff\n"
       "    prom name=st018.program.rom size=0x20000\n"
       "    drom name=st018.data.rom size=0x8000\n"
-      "    dram name=save.ram size=0x4000\n"
+      "    ram name=save.ram size=0x4000\n"
     );
   }
 

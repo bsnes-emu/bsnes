@@ -78,7 +78,7 @@ struct VideoCGL : Video, OpenGL {
     return false;
   }
 
-  auto lock(uint32*& data, uint& pitch, uint width, uint height) -> bool {
+  auto lock(uint32_t*& data, uint& pitch, uint width, uint height) -> bool {
     OpenGL::size(width, height);
     return OpenGL::lock(data, pitch);
   }

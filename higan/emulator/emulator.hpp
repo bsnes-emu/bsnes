@@ -10,14 +10,14 @@ using namespace nall;
 #include <resource/resource.hpp>
 
 namespace Emulator {
-  static const string Name = "higan";
-  static const string Version = "099.16";
-  static const string Author = "byuu";
+  static const string Name    = "higan";
+  static const string Version = "100";
+  static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
 
   //incremented only when serialization format changes
-  static const string SerializerVersion = "099.14";
+  static const string SerializerVersion = "100";
 }
 
 #include "interface.hpp"

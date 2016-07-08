@@ -12,8 +12,8 @@ struct MSU1 : Cothread {
   auto dataOpen() -> void;
   auto audioOpen() -> void;
 
-  auto read(uint24 addr, uint8 data) -> uint8;
-  auto write(uint24 addr, uint8 data) -> void;
+  auto readIO(uint24 addr, uint8 data) -> uint8;
+  auto writeIO(uint24 addr, uint8 data) -> void;
 
   auto serialize(serializer&) -> void;
 
@@ -30,7 +30,7 @@ private:
     DataBusy       = 0x80,
   };
 
-  struct MMIO {
+  struct IO {
     uint32 dataSeekOffset;
     uint32 dataReadOffset;
 
@@ -48,7 +48,7 @@ private:
     bool audioRepeat;
     bool audioBusy;
     bool dataBusy;
-  } mmio;
+  } io;
 };
 
 extern MSU1 msu1;

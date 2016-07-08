@@ -78,8 +78,8 @@ struct ICD2 : Coprocessor {
   auto power() -> void {}
   auto reset() -> void {}
 
-  auto read(uint24, uint8) -> uint8 { return 0; }
-  auto write(uint24, uint8) -> void { return; }
+  auto readIO(uint24, uint8) -> uint8 { return 0; }
+  auto writeIO(uint24, uint8) -> void { return; }
 
   auto serialize(serializer&) -> void {}
 

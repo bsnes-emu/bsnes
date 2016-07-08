@@ -1,23 +1,23 @@
 auto MSU1::serialize(serializer& s) -> void {
   Thread::serialize(s);
 
-  s.integer(mmio.dataSeekOffset);
-  s.integer(mmio.dataReadOffset);
+  s.integer(io.dataSeekOffset);
+  s.integer(io.dataReadOffset);
 
-  s.integer(mmio.audioPlayOffset);
-  s.integer(mmio.audioLoopOffset);
+  s.integer(io.audioPlayOffset);
+  s.integer(io.audioLoopOffset);
 
-  s.integer(mmio.audioTrack);
-  s.integer(mmio.audioVolume);
+  s.integer(io.audioTrack);
+  s.integer(io.audioVolume);
 
-  s.integer(mmio.audioResumeTrack);
-  s.integer(mmio.audioResumeOffset);
+  s.integer(io.audioResumeTrack);
+  s.integer(io.audioResumeOffset);
 
-  s.integer(mmio.audioError);
-  s.integer(mmio.audioPlay);
-  s.integer(mmio.audioRepeat);
-  s.integer(mmio.audioBusy);
-  s.integer(mmio.dataBusy);
+  s.integer(io.audioError);
+  s.integer(io.audioPlay);
+  s.integer(io.audioRepeat);
+  s.integer(io.audioBusy);
+  s.integer(io.dataBusy);
 
   dataOpen();
   audioOpen();

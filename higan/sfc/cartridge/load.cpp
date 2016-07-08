@@ -6,11 +6,13 @@ auto Cartridge::loadCartridge(Markup::Node node) -> void {
   if(board["mcc"] || board["bsmemory"]) {
     if(auto pathID = interface->load(ID::BSMemory, "BS Memory", "bs")) {
       bsmemory.pathID = pathID();
+      loadBSMemory();
     }
   }
   if(board["sufamiturbo"]) {
     if(auto pathID = interface->load(ID::SufamiTurboA, "Sufami Turbo - Slot A", "st")) {
       sufamiturboA.pathID = pathID();
+      loadSufamiTurboA();
     }
   }
 
@@ -55,6 +57,7 @@ auto Cartridge::loadSufamiTurboA(Markup::Node node) -> void {
   if(node["board/linkable"]) {
     if(auto pathID = interface->load(ID::SufamiTurboB, "Sufami Turbo - Slot B", "st")) {
       sufamiturboB.pathID = pathID();
+      loadSufamiTurboB();
     }
   }
 }
@@ -309,7 +312,7 @@ auto Cartridge::loadOBC1(Markup::Node node) -> void {
 auto Cartridge::loadMSU1(Markup::Node node) -> void {
   has.MSU1 = true;
 
-  for(auto leaf : node.find("map")) loadMap(leaf, {&MSU1::read, &msu1}, {&MSU1::write, &msu1});
+  for(auto leaf : node.find("map")) loadMap(leaf, {&MSU1::readIO, &msu1}, {&MSU1::writeIO, &msu1});
 }
 
 //

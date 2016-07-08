@@ -14,23 +14,23 @@ auto MSU1::main() -> void {
   double left = 0.0;
   double right = 0.0;
 
-  if(mmio.audioPlay) {
+  if(io.audioPlay) {
     if(audioFile) {
       if(audioFile->end()) {
-        if(!mmio.audioRepeat) {
-          mmio.audioPlay = false;
-          audioFile->seek(mmio.audioPlayOffset = 8);
+        if(!io.audioRepeat) {
+          io.audioPlay = false;
+          audioFile->seek(io.audioPlayOffset = 8);
         } else {
-          audioFile->seek(mmio.audioPlayOffset = mmio.audioLoopOffset);
+          audioFile->seek(io.audioPlayOffset = io.audioLoopOffset);
         }
       } else {
-        mmio.audioPlayOffset += 4;
-        left  = (double)audioFile->readl(2) / 32768.0 * (double)mmio.audioVolume / 255.0;
-        right = (double)audioFile->readl(2) / 32768.0 * (double)mmio.audioVolume / 255.0;
+        io.audioPlayOffset += 4;
+        left  = (double)(int16)audioFile->readl(2) / 32768.0 * (double)io.audioVolume / 255.0;
+        right = (double)(int16)audioFile->readl(2) / 32768.0 * (double)io.audioVolume / 255.0;
         if(dsp.mute()) left = 0, right = 0;
       }
     } else {
-      mmio.audioPlay = false;
+      io.audioPlay = false;
     }
   }
 
@@ -57,23 +57,23 @@ auto MSU1::reset() -> void {
   create(MSU1::Enter, 44100);
   stream = Emulator::audio.createStream(2, 44100.0);
 
-  mmio.dataSeekOffset = 0;
-  mmio.dataReadOffset = 0;
+  io.dataSeekOffset = 0;
+  io.dataReadOffset = 0;
 
-  mmio.audioPlayOffset = 0;
-  mmio.audioLoopOffset = 0;
+  io.audioPlayOffset = 0;
+  io.audioLoopOffset = 0;
 
-  mmio.audioTrack = 0;
-  mmio.audioVolume = 0;
+  io.audioTrack = 0;
+  io.audioVolume = 0;
 
-  mmio.audioResumeTrack = ~0;  //no resume
-  mmio.audioResumeOffset = 0;
+  io.audioResumeTrack = ~0;  //no resume
+  io.audioResumeOffset = 0;
 
-  mmio.audioError = false;
-  mmio.audioPlay = false;
-  mmio.audioRepeat = false;
-  mmio.audioBusy = false;
-  mmio.dataBusy = false;
+  io.audioError = false;
+  io.audioPlay = false;
+  io.audioRepeat = false;
+  io.audioBusy = false;
+  io.dataBusy = false;
 
   dataOpen();
   audioOpen();
@@ -85,16 +85,16 @@ auto MSU1::dataOpen() -> void {
   string name = document["board/msu1/rom/name"].text();
   if(!name) name = "msu1.rom";
   if(dataFile = interface->open(ID::SuperFamicom, name, File::Read)) {
-    dataFile->seek(mmio.dataReadOffset);
+    dataFile->seek(io.dataReadOffset);
   }
 }
 
 auto MSU1::audioOpen() -> void {
   audioFile.reset();
   auto document = BML::unserialize(cartridge.information.manifest.cartridge);
-  string name = {"track-", mmio.audioTrack, ".pcm"};
+  string name = {"track-", io.audioTrack, ".pcm"};
   for(auto track : document.find("board/msu1/track")) {
-    if(track["number"].natural() != mmio.audioTrack) continue;
+    if(track["number"].natural() != io.audioTrack) continue;
     name = track["name"].text();
     break;
   }
@@ -102,37 +102,37 @@ auto MSU1::audioOpen() -> void {
     if(audioFile->size() >= 8) {
       uint32 header = audioFile->readm(4);
       if(header == 0x4d535531) {  //"MSU1"
-        mmio.audioLoopOffset = 8 + audioFile->readl(4) * 4;
-        if(mmio.audioLoopOffset > audioFile->size()) mmio.audioLoopOffset = 8;
-        mmio.audioError = false;
-        audioFile->seek(mmio.audioPlayOffset);
+        io.audioLoopOffset = 8 + audioFile->readl(4) * 4;
+        if(io.audioLoopOffset > audioFile->size()) io.audioLoopOffset = 8;
+        io.audioError = false;
+        audioFile->seek(io.audioPlayOffset);
         return;
       }
     }
     audioFile.reset();
   }
-  mmio.audioError = true;
+  io.audioError = true;
 }
 
-auto MSU1::read(uint24 addr, uint8) -> uint8 {
+auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 
   switch(addr) {
   case 0x2000:
     return (
-      Revision         << 0
-    | mmio.audioError  << 3
-    | mmio.audioPlay   << 4
-    | mmio.audioRepeat << 5
-    | mmio.audioBusy   << 6
-    | mmio.dataBusy    << 7
+      Revision       << 0
+    | io.audioError  << 3
+    | io.audioPlay   << 4
+    | io.audioRepeat << 5
+    | io.audioBusy   << 6
+    | io.dataBusy    << 7
     );
   case 0x2001:
-    if(mmio.dataBusy) return 0x00;
+    if(io.dataBusy) return 0x00;
     if(!dataFile) return 0x00;
     if(dataFile->end()) return 0x00;
-    mmio.dataReadOffset++;
+    io.dataReadOffset++;
     return dataFile->read();
   case 0x2002: return 'S';
   case 0x2003: return '-';
@@ -143,40 +143,40 @@ auto MSU1::read(uint24 addr, uint8) -> uint8 {
   }
 }
 
-auto MSU1::write(uint24 addr, uint8 data) -> void {
+auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
   cpu.synchronizeCoprocessors();
   addr = 0x2000 | (addr & 7);
 
   switch(addr) {
-  case 0x2000: mmio.dataSeekOffset.byte(0) = data; break;
-  case 0x2001: mmio.dataSeekOffset.byte(1) = data; break;
-  case 0x2002: mmio.dataSeekOffset.byte(2) = data; break;
-  case 0x2003: mmio.dataSeekOffset.byte(3) = data;
-    mmio.dataReadOffset = mmio.dataSeekOffset;
-    if(dataFile) dataFile->seek(mmio.dataReadOffset);
+  case 0x2000: io.dataSeekOffset.byte(0) = data; break;
+  case 0x2001: io.dataSeekOffset.byte(1) = data; break;
+  case 0x2002: io.dataSeekOffset.byte(2) = data; break;
+  case 0x2003: io.dataSeekOffset.byte(3) = data;
+    io.dataReadOffset = io.dataSeekOffset;
+    if(dataFile) dataFile->seek(io.dataReadOffset);
     break;
-  case 0x2004: mmio.audioTrack.byte(0) = data; break;
-  case 0x2005: mmio.audioTrack.byte(1) = data;
-    mmio.audioPlayOffset = 8;
-    if(mmio.audioTrack == mmio.audioResumeTrack) {
-      mmio.audioPlayOffset = mmio.audioResumeOffset;
-      mmio.audioResumeTrack = ~0;  //erase resume track
-      mmio.audioResumeOffset = 0;
+  case 0x2004: io.audioTrack.byte(0) = data; break;
+  case 0x2005: io.audioTrack.byte(1) = data;
+    io.audioPlayOffset = 8;
+    if(io.audioTrack == io.audioResumeTrack) {
+      io.audioPlayOffset = io.audioResumeOffset;
+      io.audioResumeTrack = ~0;  //erase resume track
+      io.audioResumeOffset = 0;
     }
     audioOpen();
     break;
   case 0x2006:
-    mmio.audioVolume = data;
+    io.audioVolume = data;
     break;
   case 0x2007:
-    if(mmio.audioBusy) break;
-    if(mmio.audioError) break;
-    mmio.audioPlay   = data.bit(0);
-    mmio.audioRepeat = data.bit(1);
+    if(io.audioBusy) break;
+    if(io.audioError) break;
+    io.audioPlay   = data.bit(0);
+    io.audioRepeat = data.bit(1);
     bool audioResume = data.bit(2);
-    if(!mmio.audioPlay && audioResume) {
-      mmio.audioResumeTrack = mmio.audioTrack;
-      mmio.audioResumeOffset = mmio.audioPlayOffset;
+    if(!io.audioPlay && audioResume) {
+      io.audioResumeTrack = io.audioTrack;
+      io.audioResumeOffset = io.audioPlayOffset;
     }
     break;
   }
