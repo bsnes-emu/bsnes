@@ -11,7 +11,7 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "100";
+  static const string Version = "100.01";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
@@ -21,9 +21,4 @@ namespace Emulator {
 }
 
 #include "interface.hpp"
-
-#if defined(DEBUGGER)
-  #define privileged public
-#else
-  #define privileged private
-#endif
+#include "debugger.hpp"

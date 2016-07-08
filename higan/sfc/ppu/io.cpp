@@ -11,22 +11,31 @@ auto PPU::addressVRAM() const -> uint16 {
 
 auto PPU::readVRAM() -> uint16 {
   if(!io.displayDisable && vcounter() < vdisp()) return 0x0000;
-  return vram[addressVRAM()];
+  auto addr = addressVRAM();
+  auto data = vram[addr];
+  debug(ppu.vram.read, addr << 1 | 0, data.byte(0));
+  debug(ppu.vram.read, addr << 1 | 1, data.byte(1));
+  return data;
 }
 
 auto PPU::writeVRAM(bool byte, uint8 data) -> void {
   if(!io.displayDisable && vcounter() < vdisp()) return;
-  vram[addressVRAM()].byte(byte) = data;
+  auto addr = addressVRAM();
+  vram[addr].byte(byte) = data;
+  debug(ppu.vram.write, addr << 1 | byte, data);
 }
 
 auto PPU::readOAM(uint10 addr) -> uint8 {
   if(!io.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
-  return obj.oam.read(addr);
+  auto data = obj.oam.read(addr);
+  debug(ppu.oam.read, addr, data);
+  return data;
 }
 
 auto PPU::writeOAM(uint10 addr, uint8 data) -> void {
   if(!io.displayDisable && vcounter() < vdisp()) addr = latch.oamAddress;
   obj.oam.write(addr, data);
+  debug(ppu.oam.write, addr, data);
 }
 
 auto PPU::readCGRAM(bool byte, uint8 addr) -> uint8 {
@@ -34,7 +43,9 @@ auto PPU::readCGRAM(bool byte, uint8 addr) -> uint8 {
   && vcounter() > 0 && vcounter() < vdisp()
   && hcounter() >= 88 && hcounter() < 1096
   ) addr = latch.cgramAddress;
-  return screen.cgram[addr].byte(byte);
+  auto data = screen.cgram[addr].byte(byte);
+  debug(ppu.cgram.read, addr << 1 | byte, data);
+  return data;
 }
 
 auto PPU::writeCGRAM(uint8 addr, uint15 data) -> void {
@@ -43,6 +54,8 @@ auto PPU::writeCGRAM(uint8 addr, uint15 data) -> void {
   && hcounter() >= 88 && hcounter() < 1096
   ) addr = latch.cgramAddress;
   screen.cgram[addr] = data;
+  debug(ppu.cgram.write, addr << 1 | 0, data.byte(0));
+  debug(ppu.cgram.write, addr << 1 | 1, data.byte(1));
 }
 
 auto PPU::readIO(uint24 addr, uint8 data) -> uint8 {

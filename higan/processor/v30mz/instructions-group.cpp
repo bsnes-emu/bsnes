@@ -53,7 +53,7 @@ auto V30MZ::opGroup3MemImm(Size size) {
   auto mem = getMem(size);
   switch(modrm.reg) {
   case 0: alAnd(size, mem, fetch(size)); break;
-  case 1: debug("[V30MZ] GRP3.1"); break;
+  case 1: warning("[V30MZ] GRP3.1"); break;
   case 2: wait(2); setMem(size, alNot(size, mem)); break;
   case 3: wait(2); setMem(size, alNeg(size, mem)); break;
   case 4: wait(2); setAcc(size * 2, alMul(size, getAcc(size), mem)); break;
@@ -77,13 +77,13 @@ auto V30MZ::opGroup4MemImm(Size size) {
     setMem(size, alDec(size, getMem(size)));
     break;
   case 2:
-    if(size == Byte) { debug("[V30MZ] GRP4.2"); break; }
+    if(size == Byte) { warning("[V30MZ] GRP4.2"); break; }
     wait(5);
     push(r.ip);
     r.ip = getMem(Word);
     break;
   case 3:
-    if(size == Byte) { debug("[V30MZ] GRP4.3"); break; }
+    if(size == Byte) { warning("[V30MZ] GRP4.3"); break; }
     wait(11);
     push(r.cs);
     push(r.ip);
@@ -91,23 +91,23 @@ auto V30MZ::opGroup4MemImm(Size size) {
     r.cs = getMem(Word, 2);
     break;
   case 4:
-    if(size == Byte) { debug("[V30MZ] GRP4.4"); break; }
+    if(size == Byte) { warning("[V30MZ] GRP4.4"); break; }
     wait(4);
     r.ip = getMem(Word);
     break;
   case 5:
-    if(size == Byte) { debug("[V30MZ] GRP4.5"); break; }
+    if(size == Byte) { warning("[V30MZ] GRP4.5"); break; }
     wait(9);
     r.ip = getMem(Word, 0);
     r.cs = getMem(Word, 2);
     break;
   case 6:
-    if(size == Byte) { debug("[V30MZ] GRP4.6"); break; }
+    if(size == Byte) { warning("[V30MZ] GRP4.6"); break; }
     wait(1);
     push(getMem(Word));
     break;
   case 7:
-    debug("[V30MZ] GRP4.7");
+    warning("[V30MZ] GRP4.7");
     break;
   }
 }

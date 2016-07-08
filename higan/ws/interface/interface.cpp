@@ -22,9 +22,10 @@ Interface::Interface() {
   media.append({ID::WonderSwan,      "WonderSwan",       "ws" });
   media.append({ID::WonderSwanColor, "WonderSwan Color", "wsc"});
 
-  Port hardwarePort{ID::Port::Hardware, "Hardware"};
+  Port hardwareHorizontalPort{ID::Port::HardwareHorizontal, "Hardware - Horizontal"};
+  Port hardwareVerticalPort{ID::Port::HardwareVertical, "Hardware - Vertical"};
 
-  { Device device{ID::Device::HorizontalControls, "Horizontal Controls"};
+  { Device device{ID::Device::Controls, "Controls"};
     device.inputs.append({0, "Y1"});
     device.inputs.append({0, "Y2"});
     device.inputs.append({0, "Y3"});
@@ -37,26 +38,12 @@ Interface::Interface() {
     device.inputs.append({0, "A"});
     device.inputs.append({0, "Start"});
     device.inputs.append({0, "Rotate"});
-    hardwarePort.devices.append(device);
+    hardwareHorizontalPort.devices.append(device);
+    hardwareVerticalPort.devices.append(device);
   }
 
-  { Device device{ID::Device::VerticalControls, "Vertical Controls"};
-    device.inputs.append({0, "Y1"});
-    device.inputs.append({0, "Y2"});
-    device.inputs.append({0, "Y3"});
-    device.inputs.append({0, "Y4"});
-    device.inputs.append({0, "X1"});
-    device.inputs.append({0, "X2"});
-    device.inputs.append({0, "X3"});
-    device.inputs.append({0, "X4"});
-    device.inputs.append({0, "B"});
-    device.inputs.append({0, "A"});
-    device.inputs.append({0, "Start"});
-    device.inputs.append({0, "Rotate"});
-    hardwarePort.devices.append(device);
-  }
-
-  ports.append(move(hardwarePort));
+  ports.append(move(hardwareHorizontalPort));
+  ports.append(move(hardwareVerticalPort));
 }
 
 auto Interface::manifest() -> string {

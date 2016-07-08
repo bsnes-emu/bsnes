@@ -23,7 +23,7 @@ struct V30MZ {
   virtual auto in(uint16 port) -> uint8 = 0;
   virtual auto out(uint16 port, uint8 data) -> void = 0;
 
-  auto debug(string text) -> void;
+  auto warning(string text) -> void;
   auto power() -> void;
   auto exec() -> void;
   auto interrupt(uint8 vector) -> void;

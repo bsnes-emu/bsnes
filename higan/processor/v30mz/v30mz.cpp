@@ -18,7 +18,7 @@ namespace Processor {
 #include "serialization.cpp"
 #include "disassembler.cpp"
 
-auto V30MZ::debug(string text) -> void {
+auto V30MZ::warning(string text) -> void {
 //print(text, "\n");
 }
 

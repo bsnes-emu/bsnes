@@ -7,13 +7,13 @@ struct ID {
     WonderSwanColor,
   };
 
-  struct Device { enum : uint {
-    HorizontalControls,
-    VerticalControls,
+  struct Port { enum : uint {
+    HardwareHorizontal,
+    HardwareVertical,
   };};
 
-  struct Port { enum : uint {
-    Hardware,
+  struct Device { enum : uint {
+    Controls,
   };};
 };
 

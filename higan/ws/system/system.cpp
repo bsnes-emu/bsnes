@@ -98,8 +98,8 @@ auto System::runToSave() -> void {
 }
 
 auto System::pollKeypad() -> void {
-  uint port = ID::Port::Hardware;
-  uint device = !_orientation ? ID::Device::HorizontalControls : ID::Device::VerticalControls;
+  uint port = !_orientation ? ID::Port::HardwareHorizontal : ID::Port::HardwareVertical;
+  uint device = ID::Device::Controls;
   bool rotate = keypad.rotate;
 
   keypad.y1 = interface->inputPoll(port, device, 0);
