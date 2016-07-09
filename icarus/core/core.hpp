@@ -22,6 +22,11 @@ struct Icarus {
   auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //mega-drive.cpp
+  auto megaDriveManifest(string location) -> string;
+  auto megaDriveManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto megaDriveImport(vector<uint8_t>& buffer, string location) -> string;
+
   //game-boy.cpp
   auto gameBoyManifest(string location) -> string;
   auto gameBoyManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -63,6 +68,7 @@ private:
   struct {
     Markup::Node famicom;
     Markup::Node superFamicom;
+    Markup::Node megaDrive;
     Markup::Node gameBoy;
     Markup::Node gameBoyColor;
     Markup::Node gameBoyAdvance;
