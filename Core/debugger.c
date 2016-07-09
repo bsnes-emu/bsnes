@@ -965,7 +965,7 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
 
 void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    uint16_t index = find_breakpoint(gb, addr);
+    uint16_t index = find_watchpoint(gb, addr);
     if (index < gb->n_watchpoints && gb->watchpoints[index].addr == addr) {
         if (!(gb->watchpoints[index].flags & GB_WATCHPOINT_W)) {
             return;
