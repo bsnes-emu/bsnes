@@ -226,7 +226,30 @@ typedef struct GB_gameboy_s {
         uint8_t mbc_ram_bank;
         uint32_t mbc_ram_size;
         bool mbc_ram_enable;
-        bool mbc_ram_banking;
+        union {
+            struct {
+                uint8_t bank_low:5;
+                uint8_t bank_high:3;
+                uint8_t mode:1;
+            } mbc1;
+
+            struct {
+                uint8_t rom_bank:4;
+            } mbc2;
+
+            struct {
+                uint8_t rom_bank:7;
+                uint8_t padding:1;
+                uint8_t ram_bank:4;
+            } mbc3;
+
+            struct {
+                uint8_t rom_bank_low;
+                uint8_t rom_bank_high:1;
+                uint8_t ram_bank:4;
+            } mbc5;
+        };
+        uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
     );
 
 

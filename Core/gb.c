@@ -14,50 +14,7 @@
 #include "joypad.h"
 #include "display.h"
 #include "debugger.h"
-
-static const GB_cartridge_t cart_defs[256] = {
-    // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type
-    /* MBC        RAM    BAT.   RTC    RUMB.    */
-    {  GB_NO_MBC, false, false, false, false}, // 00h  ROM ONLY
-    {  GB_MBC1  , false, false, false, false}, // 01h  MBC1
-    {  GB_MBC1  , true , false, false, false}, // 02h  MBC1+RAM
-    {  GB_MBC1  , true , true , false, false}, // 03h  MBC1+RAM+BATTERY
-    [5] =
-    {  GB_MBC2  , true , false, false, false}, // 05h  MBC2
-    {  GB_MBC2  , true , true , false, false}, // 06h  MBC2+BATTERY
-    [8] =
-    {  GB_NO_MBC, true , false, false, false}, // 08h  ROM+RAM
-    {  GB_NO_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
-    [0xB] =
-    // Todo: What are these?
-    {  GB_NO_MBC, false, false, false, false}, // 0Bh  MMM01
-    {  GB_NO_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
-    {  GB_NO_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
-    [0xF] =
-    {  GB_MBC3  , false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
-    {  GB_MBC3  , true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
-    {  GB_MBC3  , false, false, false, false}, // 11h  MBC3
-    {  GB_MBC3  , true , false, false, false}, // 12h  MBC3+RAM
-    {  GB_MBC3  , true , true , false, false}, // 13h  MBC3+RAM+BATTERY
-    [0x15] =
-    // Todo: Do these exist?
-    {  GB_MBC4  , false, false, false, false}, // 15h  MBC4
-    {  GB_MBC4  , true , false, false, false}, // 16h  MBC4+RAM
-    {  GB_MBC4  , true , true , false, false}, // 17h  MBC4+RAM+BATTERY
-    [0x19] =
-    {  GB_MBC5  , false, false, false, false}, // 19h  MBC5
-    {  GB_MBC5  , true , false, false, false}, // 1Ah  MBC5+RAM
-    {  GB_MBC5  , true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
-    {  GB_MBC5  , false, false, false, true }, // 1Ch  MBC5+RUMBLE
-    {  GB_MBC5  , true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
-    {  GB_MBC5  , true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
-    [0xFC] =
-    // Todo: What are these?
-    {  GB_NO_MBC, false, false, false, false}, // FCh  POCKET CAMERA
-    {  GB_NO_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
-    {  GB_NO_MBC, false, false, false, false}, // FEh  HuC3
-    {  GB_NO_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
-};
+#include "mbc.h"
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
@@ -131,7 +88,7 @@ void GB_init(GB_gameboy_t *gb)
     gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] = 0xAAAAAAAA;
     gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] = 0x55555555;
     gb->input_callback = default_input_callback;
-    gb->cartridge_type = &cart_defs[0]; // Default cartridge type
+    gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
@@ -155,7 +112,7 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->last_vblank = clock();
     gb->cgb_ram_bank = 1;
     gb->input_callback = default_input_callback;
-    gb->cartridge_type = &cart_defs[0]; // Default cartridge type
+    gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
@@ -197,12 +154,18 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     if (!f) return errno;
     fseek(f, 0, SEEK_END);
     gb->rom_size = (ftell(f) + 0x3FFF) & ~0x3FFF; /* Round to bank */
+    /* And then round to a power of two */
+    while (gb->rom_size & (gb->rom_size - 1)) {
+        /* I promise this works. */
+        gb->rom_size |= gb->rom_size >> 1;
+        gb->rom_size++;
+    }
     fseek(f, 0, SEEK_SET);
     gb->rom = malloc(gb->rom_size);
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
     fread(gb->rom, gb->rom_size, 1, f);
     fclose(f);
-    gb->cartridge_type = &cart_defs[gb->rom[0x147]];
+    gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
     if (gb->cartridge_type->has_ram) {
         static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
         gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];

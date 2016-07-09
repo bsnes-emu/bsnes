@@ -855,7 +855,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments)
             GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
         }
         if (cartridge->mbc_type == GB_MBC1) {
-            GB_log(gb, "MBC1 banking mode is %s\n", gb->mbc_ram_banking? "RAM" : "ROM");
+            GB_log(gb, "MBC1 banking mode is %s\n", gb->mbc1.mode == 1 ? "RAM" : "ROM");
         }
 
     }

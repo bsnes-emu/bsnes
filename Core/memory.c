@@ -5,6 +5,7 @@
 #include "display.h"
 #include "memory.h"
 #include "debugger.h"
+#include "mbc.h"
 
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
@@ -22,15 +23,14 @@ static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
     if (!gb->rom_size) {
         return 0xFF;
     }
-    return gb->rom[addr];
+    unsigned int effective_address = (addr & 0x3FFF) + gb->mbc_rom0_bank * 0x4000;
+    return gb->rom[effective_address & (gb->rom_size - 1)];
 }
 
 static uint8_t read_mbc_rom(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (gb->mbc_rom_bank >= gb->rom_size / 0x4000) {
-        return 0xFF;
-    }
-    return gb->rom[(addr & 0x3FFF) + gb->mbc_rom_bank * 0x4000];
+    unsigned int effective_address = (addr & 0x3FFF) + gb->mbc_rom_bank * 0x4000;
+    return gb->rom[effective_address & (gb->rom_size - 1)];
 }
 
 static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
@@ -43,22 +43,19 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
+    if (!gb->mbc_ram_enable) return 0xFF;
+    
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
         gb->rtc_high |= ~0xC1; /* Not all bytes in RTC high are used. */
         return gb->rtc_data[gb->mbc_ram_bank - 8];
     }
-    unsigned int ram_index = (addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000;
-    if (!gb->mbc_ram_enable)
-    {
-        GB_log(gb, "Read from %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
+
+    if (!gb->mbc_ram) {
         return 0xFF;
     }
-    if (ram_index >= gb->mbc_ram_size) {
-        GB_log(gb, "Read from %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
-        return 0xFF;
-    }
-    return gb->mbc_ram[(addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000];
+
+    return gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)];
 }
 
 static uint8_t read_ram(GB_gameboy_t *gb, uint16_t addr)
@@ -205,75 +202,41 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 
 static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (gb->cartridge_type->mbc_type == GB_NO_MBC) return;
-    switch (addr >> 12) {
-        case 0:
-        case 1:
-            gb->mbc_ram_enable = value == 0x0a;
-            break;
-        case 2:
-        bank_low:
-            /* Bank number, lower bits */
-            if (gb->cartridge_type->mbc_type == GB_MBC1) {
-                value &= 0x1F;
-            }
-            if (gb->cartridge_type->mbc_type != GB_MBC5 && !value) {
-                value++;
-            }
-            gb->mbc_rom_bank = (gb->mbc_rom_bank & 0x100) | value;
-            break;
-        case 3:
-            if (gb->cartridge_type->mbc_type != GB_MBC5) goto bank_low;
-            if (value > 1) {
-                GB_log(gb, "Bank overflow: [%x] <- %d\n", addr, value);
-            }
-            gb->mbc_rom_bank = (gb->mbc_rom_bank & 0xFF) | value << 8;
-            break;
-        case 4:
-        case 5:
-            if (gb->cartridge_type->mbc_type == GB_MBC1) {
-                if (gb->mbc_ram_banking) {
-                    gb->mbc_ram_bank = value & 0x3;
-                }
-                else {
-                    gb->mbc_rom_bank = (gb->mbc_rom_bank & 0x1F) | ((value & 0x3) << 5);
-                }
-            }
-            else {
-                gb->mbc_ram_bank = value;
-                /* Some games assume banks wrap around. We can do this if RAM size is a power of two */
-                if (gb->mbc_ram_bank >= gb->mbc_ram_size / 0x2000 && (gb->mbc_ram_size & (gb->mbc_ram_size - 1)) == 0 && gb->mbc_ram_size != 0) {
-                    gb->mbc_ram_bank %= gb->mbc_ram_size / 0x2000;
-                }
+    switch (gb->cartridge_type->mbc_type) {
+        case GB_NO_MBC: case GB_MBC4: return;
+        case GB_MBC1:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x2000: case 0x3000: gb->mbc1.bank_low  = value; break;
+                case 0x4000: case 0x5000: gb->mbc1.bank_high = value; break;
+                case 0x6000: case 0x7000: gb->mbc1.mode      = value; break;
             }
             break;
-        case 6:
-        case 7:
-            if (gb->cartridge_type->mbc_type == GB_MBC1) {
-                value &= 1;
-
-                if (value & !gb->mbc_ram_banking) {
-                    gb->mbc_ram_bank = gb->mbc_rom_bank >> 5;
-                    gb->mbc_rom_bank &= 0x1F;
-                }
-                else if (value & !gb->mbc_ram_banking) {
-                    gb->mbc_rom_bank = gb->mbc_rom_bank | (gb->mbc_ram_bank << 5);
-                    gb->mbc_ram_bank = 0;
-                }
-
-                gb->mbc_ram_banking = value;
+        case GB_MBC2:
+            switch (addr & 0xF000) {
+                /* Todo: is this correct? */
+                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value & 0x1; break;
+                case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
+            }
+            break;
+        case GB_MBC3:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x2000: case 0x3000: gb->mbc3.rom_bank  = value; break;
+                case 0x4000: case 0x5000: gb->mbc3.ram_bank  = value; break;
+                case 0x6000: case 0x7000: /* Todo: Clock latching support */ break;
+            }
+            break;
+        case GB_MBC5:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable      = (value & 0xF) == 0xA; break;
+                case 0x2000:              gb->mbc5.rom_bank_low   = value; break;
+                case 0x3000:              gb->mbc5.rom_bank_high  = value; break;
+                case 0x4000: case 0x5000: gb->mbc5.ram_bank       = value; break;
             }
             break;
     }
-
-    /* Some games assume banks wrap around. We can do this if ROM size is a power of two */
-    if (gb->mbc_rom_bank >= gb->rom_size / 0x4000 && (gb->rom_size & (gb->rom_size - 1)) == 0 && gb->rom_size != 0) {
-        gb->mbc_rom_bank %= gb->rom_size / 0x4000;
-    }
-
-    if (gb->cartridge_type->mbc_type != GB_MBC5 && !gb->mbc_rom_bank) {
-        gb->mbc_rom_bank = 1;
-    }
+    GB_update_mbc_mappings(gb);
 }
 
 static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
@@ -287,23 +250,23 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
-        /* RTC write*/
+    if (!gb->mbc_ram_enable) return;
+
+    if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
+        /* RTC read */
         gb->rtc_data[gb->mbc_ram_bank - 8] = value;
         gb->rtc_high |= ~0xC1; /* Not all bytes in RTC high are used. */
+    }
+
+    if (gb->cartridge_type->mbc_type == GB_MBC2) {
+        value &= 0xF;
+    }
+
+    if (!gb->mbc_ram) {
         return;
     }
-    unsigned int ram_index = (addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000;
-    if (!gb->mbc_ram_enable)
-    {
-        GB_log(gb, "Write to %02x:%04x (%06x) (Disabled MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
-        return;
-    }
-    if (ram_index >= gb->mbc_ram_size) {
-        GB_log(gb, "Write to %02x:%04x (%06x) (Unmapped MBC RAM)\n", gb->mbc_ram_bank, addr, ram_index);
-        return;
-    }
-    gb->mbc_ram[(addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000] = value;
+
+    gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)] = value;
 }
 
 static void write_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
