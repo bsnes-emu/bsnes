@@ -165,12 +165,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
     memset(gb->rom, 0xFF, gb->rom_size); /* Pad with 0xFFs */
     fread(gb->rom, gb->rom_size, 1, f);
     fclose(f);
-    gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
-    if (gb->cartridge_type->has_ram) {
-        static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
-        gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
-        gb->mbc_ram = malloc(gb->mbc_ram_size);
-    }
+    GB_configure_cart(gb);
 
     return 0;
 }

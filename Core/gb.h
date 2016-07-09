@@ -312,6 +312,10 @@ typedef struct GB_gameboy_s {
     uint8_t *rom;
     uint32_t rom_size;
     const GB_cartridge_t *cartridge_type;
+    enum {
+        GB_STANDARD_MBC1_WIRING,
+        GB_MBC1M_WIRING,
+    } mbc1_wiring;
 
     /* Various RAMs */
     uint8_t *ram;

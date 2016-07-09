@@ -1,4 +1,6 @@
 #include <stdbool.h>
+#include <stdlib.h>
+#include <string.h>
 #include "gb.h"
 
 const GB_cartridge_t GB_cart_defs[256] = {
@@ -50,14 +52,32 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
     switch (gb->cartridge_type->mbc_type) {
         case GB_NO_MBC: case GB_MBC4: return;
         case GB_MBC1:
-            /* Standard MBC1 wiring: */
+            /* Todo: some obscure behaviors of MBC1 are not supported. See http://forums.nesdev.com/viewtopic.php?f=20&t=14099 */
             if (gb->mbc1.mode == 0) {
-                gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
-                gb->mbc_ram_bank = 0;
+                switch (gb->mbc1_wiring) {
+                    case GB_STANDARD_MBC1_WIRING:
+                        gb->mbc_rom_bank = gb->mbc1.bank_low | (gb->mbc1.bank_high << 5);
+                        gb->mbc_ram_bank = 0;
+                        break;
+
+                    case GB_MBC1M_WIRING:
+                        gb->mbc_rom_bank = (gb->mbc1.bank_low & 0xF) | (gb->mbc1.bank_high << 4);
+                        gb->mbc_ram_bank = 0;
+                        gb->mbc_rom0_bank = 0;
+                }
             }
             else {
-                gb->mbc_rom_bank = gb->mbc1.bank_low;
-                gb->mbc_ram_bank = gb->mbc1.bank_high;
+                switch (gb->mbc1_wiring) {
+                    case GB_STANDARD_MBC1_WIRING:
+                        gb->mbc_rom_bank = gb->mbc1.bank_low;
+                        gb->mbc_ram_bank = gb->mbc1.bank_high;
+                        break;
+                        
+                    case GB_MBC1M_WIRING:
+                        gb->mbc_rom_bank = (gb->mbc1.bank_low & 0xF) | (gb->mbc1.bank_high << 4);
+                        gb->mbc_rom0_bank = gb->mbc1.bank_high << 4;
+                        gb->mbc_ram_bank = 0;
+                }
             }
             break;
         case GB_MBC2:
@@ -74,5 +94,26 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
     }
     if (gb->mbc_rom_bank == 0 && gb->cartridge_type->mbc_type != GB_MBC5) {
         gb->mbc_rom_bank = 1;
+    }
+}
+
+void GB_configure_cart(GB_gameboy_t *gb)
+{
+    gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
+
+    if (gb->cartridge_type->has_ram) {
+        static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
+        gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
+        gb->mbc_ram = malloc(gb->mbc_ram_size);
+    }
+
+    /* MBC1 has at least 3 types of wiring (We currently support two (Standard and 4bit-MBC1M) of these).
+       See http://forums.nesdev.com/viewtopic.php?f=20&t=14099 */
+
+    /* Attempt to "guess" wiring */
+    if (gb->cartridge_type->mbc_type == GB_MBC1) {
+        if (gb->rom_size >= 0x44000 && memcmp(gb->rom + 0x104, gb->rom + 0x40104, 0x30) == 0) {
+            gb->mbc1_wiring = GB_MBC1M_WIRING;
+        }
     }
 }
