@@ -205,7 +205,7 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 
 static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (gb->cartridge_type->mbc_type == NO_MBC) return;
+    if (gb->cartridge_type->mbc_type == GB_NO_MBC) return;
     switch (addr >> 12) {
         case 0:
         case 1:
@@ -214,16 +214,16 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case 2:
         bank_low:
             /* Bank number, lower bits */
-            if (gb->cartridge_type->mbc_type == MBC1) {
+            if (gb->cartridge_type->mbc_type == GB_MBC1) {
                 value &= 0x1F;
             }
-            if (gb->cartridge_type->mbc_type != MBC5 && !value) {
+            if (gb->cartridge_type->mbc_type != GB_MBC5 && !value) {
                 value++;
             }
             gb->mbc_rom_bank = (gb->mbc_rom_bank & 0x100) | value;
             break;
         case 3:
-            if (gb->cartridge_type->mbc_type != MBC5) goto bank_low;
+            if (gb->cartridge_type->mbc_type != GB_MBC5) goto bank_low;
             if (value > 1) {
                 GB_log(gb, "Bank overflow: [%x] <- %d\n", addr, value);
             }
@@ -231,7 +231,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case 4:
         case 5:
-            if (gb->cartridge_type->mbc_type == MBC1) {
+            if (gb->cartridge_type->mbc_type == GB_MBC1) {
                 if (gb->mbc_ram_banking) {
                     gb->mbc_ram_bank = value & 0x3;
                 }
@@ -249,7 +249,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case 6:
         case 7:
-            if (gb->cartridge_type->mbc_type == MBC1) {
+            if (gb->cartridge_type->mbc_type == GB_MBC1) {
                 value &= 1;
 
                 if (value & !gb->mbc_ram_banking) {
@@ -271,7 +271,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         gb->mbc_rom_bank %= gb->rom_size / 0x4000;
     }
 
-    if (gb->cartridge_type->mbc_type != MBC5 && !gb->mbc_rom_bank) {
+    if (gb->cartridge_type->mbc_type != GB_MBC5 && !gb->mbc_rom_bank) {
         gb->mbc_rom_bank = 1;
     }
 }

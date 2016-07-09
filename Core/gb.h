@@ -157,12 +157,12 @@ typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_
 
 typedef struct {
     enum {
-        NO_MBC,
-        MBC1,
-        MBC2,
-        MBC3,
-        MBC4, // Does this exist???
-        MBC5,
+        GB_NO_MBC,
+        GB_MBC1,
+        GB_MBC2,
+        GB_MBC3,
+        GB_MBC4, // Does this exist???
+        GB_MBC5,
     } mbc_type;
     bool has_ram;
     bool has_battery;

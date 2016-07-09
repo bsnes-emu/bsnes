@@ -17,46 +17,46 @@
 
 static const GB_cartridge_t cart_defs[256] = {
     // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type
-    /* MBC     RAM    BAT.   RTC    RUMB.    */
-    {  NO_MBC, false, false, false, false}, // 00h  ROM ONLY
-    {  MBC1  , false, false, false, false}, // 01h  MBC1
-    {  MBC1  , true , false, false, false}, // 02h  MBC1+RAM
-    {  MBC1  , true , true , false, false}, // 03h  MBC1+RAM+BATTERY
+    /* MBC        RAM    BAT.   RTC    RUMB.    */
+    {  GB_NO_MBC, false, false, false, false}, // 00h  ROM ONLY
+    {  GB_MBC1  , false, false, false, false}, // 01h  MBC1
+    {  GB_MBC1  , true , false, false, false}, // 02h  MBC1+RAM
+    {  GB_MBC1  , true , true , false, false}, // 03h  MBC1+RAM+BATTERY
     [5] =
-    {  MBC2  , true , false, false, false}, // 05h  MBC2
-    {  MBC2  , true , true , false, false}, // 06h  MBC2+BATTERY
+    {  GB_MBC2  , true , false, false, false}, // 05h  MBC2
+    {  GB_MBC2  , true , true , false, false}, // 06h  MBC2+BATTERY
     [8] =
-    {  NO_MBC, true , false, false, false}, // 08h  ROM+RAM
-    {  NO_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
+    {  GB_NO_MBC, true , false, false, false}, // 08h  ROM+RAM
+    {  GB_NO_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
     [0xB] =
     // Todo: What are these?
-    {  NO_MBC, false, false, false, false}, // 0Bh  MMM01
-    {  NO_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
-    {  NO_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
+    {  GB_NO_MBC, false, false, false, false}, // 0Bh  MMM01
+    {  GB_NO_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
+    {  GB_NO_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
     [0xF] =
-    {  MBC3  , false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
-    {  MBC3  , true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
-    {  MBC3  , false, false, false, false}, // 11h  MBC3
-    {  MBC3  , true , false, false, false}, // 12h  MBC3+RAM
-    {  MBC3  , true , true , false, false}, // 13h  MBC3+RAM+BATTERY
+    {  GB_MBC3  , false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
+    {  GB_MBC3  , true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
+    {  GB_MBC3  , false, false, false, false}, // 11h  MBC3
+    {  GB_MBC3  , true , false, false, false}, // 12h  MBC3+RAM
+    {  GB_MBC3  , true , true , false, false}, // 13h  MBC3+RAM+BATTERY
     [0x15] =
     // Todo: Do these exist?
-    {  MBC4  , false, false, false, false}, // 15h  MBC4
-    {  MBC4  , true , false, false, false}, // 16h  MBC4+RAM
-    {  MBC4  , true , true , false, false}, // 17h  MBC4+RAM+BATTERY
+    {  GB_MBC4  , false, false, false, false}, // 15h  MBC4
+    {  GB_MBC4  , true , false, false, false}, // 16h  MBC4+RAM
+    {  GB_MBC4  , true , true , false, false}, // 17h  MBC4+RAM+BATTERY
     [0x19] =
-    {  MBC5  , false, false, false, false}, // 19h  MBC5
-    {  MBC5  , true , false, false, false}, // 1Ah  MBC5+RAM
-    {  MBC5  , true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
-    {  MBC5  , false, false, false, true }, // 1Ch  MBC5+RUMBLE
-    {  MBC5  , true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
-    {  MBC5  , true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
+    {  GB_MBC5  , false, false, false, false}, // 19h  MBC5
+    {  GB_MBC5  , true , false, false, false}, // 1Ah  MBC5+RAM
+    {  GB_MBC5  , true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
+    {  GB_MBC5  , false, false, false, true }, // 1Ch  MBC5+RUMBLE
+    {  GB_MBC5  , true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
+    {  GB_MBC5  , true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
     [0xFC] =
     // Todo: What are these?
-    {  NO_MBC, false, false, false, false}, // FCh  POCKET CAMERA
-    {  NO_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
-    {  NO_MBC, false, false, false, false}, // FEh  HuC3
-    {  NO_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
+    {  GB_NO_MBC, false, false, false, false}, // FCh  POCKET CAMERA
+    {  GB_NO_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
+    {  GB_NO_MBC, false, false, false, false}, // FEh  HuC3
+    {  GB_NO_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
 };
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
