@@ -114,7 +114,7 @@ auto CPU::power() -> void {
 }
 
 auto CPU::reset() -> void {
-  create(Enter, system.cpuFrequency());
+  create(Enter, system.colorburst() * 6.0);
   coprocessors.reset();
   PPUcounter::reset();
 

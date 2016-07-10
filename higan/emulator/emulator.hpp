@@ -11,13 +11,20 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "100.02";
+  static const string Version = "100.03";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
 
   //incremented only when serialization format changes
   static const string SerializerVersion = "100";
+
+  namespace Constants {
+    namespace Colorburst {
+      static constexpr double NTSC = 315.0 / 88.0 * 1'000'000.0;
+      static constexpr double PAL  = 283.75 * 15'625.0 + 25.0;
+    }
+  }
 }
 
 #include "interface.hpp"

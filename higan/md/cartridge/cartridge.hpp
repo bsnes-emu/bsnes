@@ -10,12 +10,24 @@ struct Cartridge {
   auto power() -> void;
   auto reset() -> void;
 
+  auto read(uint24 addr) -> uint8;
+  auto write(uint24 addr, uint8 data) -> void;
+
   struct Information {
     uint pathID = 0;
     string sha256;
     string manifest;
     string title;
   } information;
+
+  struct Memory {
+    uint8* data = nullptr;
+    uint size = 0;
+    uint mask = 0;
+  };
+
+  Memory rom;
+  Memory ram;
 };
 
 extern Cartridge cartridge;

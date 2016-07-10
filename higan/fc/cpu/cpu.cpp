@@ -44,7 +44,7 @@ auto CPU::power() -> void {
 
 auto CPU::reset() -> void {
   R6502::reset();
-  create(CPU::Enter, 21'477'272);
+  create(CPU::Enter, system.colorburst() * 6.0);
 
   regs.pc  = bus.read(0xfffc) << 0;
   regs.pc |= bus.read(0xfffd) << 8;

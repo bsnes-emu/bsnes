@@ -117,7 +117,7 @@ auto SA1::power() -> void {
 }
 
 auto SA1::reset() -> void {
-  create(SA1::Enter, system.cpuFrequency());
+  create(SA1::Enter, system.colorburst() * 6.0);
 
   cpubwram.dma = false;
   for(auto addr : range(iram.size())) {

@@ -154,7 +154,7 @@ privileged:
   friend class PPU::Object;
   friend class PPU::Window;
   friend class PPU::Screen;
-  friend class Scheduler;
+  friend class System;
 };
 
 extern PPU ppu;

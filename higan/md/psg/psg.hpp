@@ -1,6 +1,6 @@
-//Zilog Z80
+//TI SN76489
 
-struct APU : Processor::Z80, Thread {
+struct PSG : Thread {
   static auto Enter() -> void;
   auto main() -> void;
   auto step(uint clocks) -> void;
@@ -9,4 +9,4 @@ struct APU : Processor::Z80, Thread {
   auto reset() -> void;
 };
 
-extern APU apu;
+extern PSG psg;

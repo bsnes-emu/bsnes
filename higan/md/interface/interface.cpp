@@ -81,8 +81,7 @@ auto Interface::loaded() -> bool {
 }
 
 auto Interface::load(uint id) -> bool {
-  system.load();
-  return false;
+  return system.load();
 }
 
 auto Interface::save() -> void {

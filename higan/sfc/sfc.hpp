@@ -4,6 +4,10 @@
 //started: 2004-10-14
 
 #include <emulator/emulator.hpp>
+#include <emulator/thread.hpp>
+#include <emulator/scheduler.hpp>
+#include <emulator/cheat.hpp>
+
 #include <processor/arm/arm.hpp>
 #include <processor/gsu/gsu.hpp>
 #include <processor/hg51b/hg51b.hpp>
@@ -17,28 +21,11 @@
 
 namespace SuperFamicom {
   using File = Emulator::File;
-
-  struct Thread {
-    virtual ~Thread() {
-      if(thread) co_delete(thread);
-    }
-
-    auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
-      if(thread) co_delete(thread);
-      thread = co_create(65'536 * sizeof(void*), entrypoint);
-      this->frequency = frequency;
-      clock = 0;
-    }
-
-    auto serialize(serializer& s) -> void {
-      s.integer(frequency);
-      s.integer(clock);
-    }
-
-    cothread_t thread = nullptr;
-    uint frequency = 0;
-    int64 clock = 0;
-  };
+  using Thread = Emulator::Thread;
+  using Scheduler = Emulator::Scheduler;
+  using Cheat = Emulator::Cheat;
+  extern Scheduler scheduler;
+  extern Cheat cheat;
 
   //dynamic thread bound to CPU (coprocessors and peripherals)
   struct Cothread : Thread {
@@ -57,11 +44,9 @@ namespace SuperFamicom {
   #include <sfc/controller/controller.hpp>
   #include <sfc/expansion/expansion.hpp>
   #include <sfc/system/system.hpp>
-  #include <sfc/scheduler/scheduler.hpp>
   #include <sfc/coprocessor/coprocessor.hpp>
   #include <sfc/slot/slot.hpp>
   #include <sfc/cartridge/cartridge.hpp>
-  #include <sfc/cheat/cheat.hpp>
 
   #include <sfc/memory/memory-inline.hpp>
   #include <sfc/ppu/counter/counter-inline.hpp>

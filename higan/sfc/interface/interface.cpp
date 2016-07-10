@@ -134,8 +134,8 @@ auto Interface::title() -> string {
 
 auto Interface::videoFrequency() -> double {
   switch(system.region()) { default:
-  case System::Region::NTSC: return system.cpuFrequency() / (262.0 * 1364.0 - 4.0);
-  case System::Region::PAL:  return system.cpuFrequency() / (312.0 * 1364.0);
+  case System::Region::NTSC: return (system.colorburst() * 6.0) / (262.0 * 1364.0 - 4.0);
+  case System::Region::PAL:  return (system.colorburst() * 6.0) / (312.0 * 1364.0);
   }
 }
 
@@ -170,7 +170,7 @@ auto Interface::videoColor(uint32 color) -> uint64 {
 }
 
 auto Interface::audioFrequency() -> double {
-  return system.apuFrequency() / 768.0;
+  return 32040.0;
 }
 
 auto Interface::loaded() -> bool {
@@ -236,30 +236,10 @@ auto Interface::unserialize(serializer& s) -> bool {
 
 auto Interface::cheatSet(const string_vector& list) -> void {
   cheat.reset();
-
   #if defined(SFC_SUPERGAMEBOY)
-  if(cartridge.has.ICD2) {
-    GameBoy::cheat.reset();
-    for(auto& codeset : list) {
-      auto codes = codeset.split("+");
-      for(auto& code : codes) {
-        auto part = code.split("/");
-        if(part.size() == 2) GameBoy::cheat.append(part[0].hex(), part[1].hex());
-        if(part.size() == 3) GameBoy::cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
-      }
-    }
-    return;
-  }
+  if(cartridge.has.ICD2) return GameBoy::cheat.assign(list);
   #endif
-
-  for(auto& codeset : list) {
-    auto codes = codeset.split("+");
-    for(auto& code : codes) {
-      auto part = code.split("/");
-      if(part.size() == 2) cheat.append(part[0].hex(), part[1].hex());
-      if(part.size() == 3) cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
-    }
-  }
+  cheat.assign(list);
 }
 
 auto Interface::cap(const string& name) -> bool {

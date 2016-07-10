@@ -22,4 +22,4 @@ obj/processor-r65816.o:   processor/r65816/r65816.cpp $(call rwildcard,processor
 obj/processor-spc700.o:   processor/spc700/spc700.cpp $(call rwildcard,processor/spc700)
 obj/processor-upd96050.o: processor/upd96050/upd96050.cpp $(call rwildcard,processor/upd96050)
 obj/processor-v30mz.o:    processor/v30mz/v30mz.cpp $(call rwildcard,processor/v30mz)
-obj/processor-z80.o:      processor/z80/z80.cpp $(call rwildcard,z80)
+obj/processor-z80.o:      processor/z80/z80.cpp $(call rwildcard,processor/z80)

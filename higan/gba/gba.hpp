@@ -4,10 +4,16 @@
 //started: 2012-03-19
 
 #include <emulator/emulator.hpp>
+#include <emulator/thread.hpp>
+#include <emulator/scheduler.hpp>
+
 #include <processor/arm/arm.hpp>
 
 namespace GameBoyAdvance {
   using File = Emulator::File;
+  using Thread = Emulator::Thread;
+  using Scheduler = Emulator::Scheduler;
+  extern Scheduler scheduler;
 
   enum : uint {           //mode flags for bus read, write:
     Nonsequential =   1,  //N cycle
@@ -21,30 +27,7 @@ namespace GameBoyAdvance {
     Signed        = 256,  //sign extended
   };
 
-  struct Thread {
-    ~Thread() {
-      if(thread) co_delete(thread);
-    }
-
-    auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
-      if(thread) co_delete(thread);
-      thread = co_create(65'536 * sizeof(void*), entrypoint);
-      this->frequency = frequency;
-      clock = 0;
-    }
-
-    auto serialize(serializer& s) -> void {
-      s.integer(frequency);
-      s.integer(clock);
-    }
-
-    cothread_t thread = nullptr;
-    uint frequency = 0;
-    int clock = 0;
-  };
-
   #include <gba/memory/memory.hpp>
-  #include <gba/scheduler/scheduler.hpp>
   #include <gba/system/system.hpp>
   #include <gba/cartridge/cartridge.hpp>
   #include <gba/player/player.hpp>

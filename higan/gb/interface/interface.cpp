@@ -163,15 +163,7 @@ auto Interface::unserialize(serializer& s) -> bool {
 }
 
 auto Interface::cheatSet(const string_vector& list) -> void {
-  cheat.reset();
-  for(auto& codeset : list) {
-    auto codes = codeset.split("+");
-    for(auto& code : codes) {
-      auto part = code.split("/");
-      if(part.size() == 2) cheat.append(part[0].hex(), part[1].hex());
-      if(part.size() == 3) cheat.append(part[0].hex(), part[1].hex(), part[2].hex());
-    }
-  }
+  cheat.assign(list);
 }
 
 auto Interface::lcdScanline() -> void {

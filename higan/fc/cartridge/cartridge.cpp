@@ -49,7 +49,7 @@ auto Cartridge::power() -> void {
 }
 
 auto Cartridge::reset() -> void {
-  create(Cartridge::Enter, 21'477'272);
+  create(Cartridge::Enter, system.colorburst() * 6.0);
   board->reset();
 }
 

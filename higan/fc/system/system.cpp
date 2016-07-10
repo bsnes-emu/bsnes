@@ -6,9 +6,11 @@ namespace Famicom {
 #include "video.cpp"
 #include "serialization.cpp"
 System system;
+Scheduler scheduler;
+Cheat cheat;
 
 auto System::run() -> void {
-  scheduler.enter();
+  if(scheduler.enter() == Scheduler::Event::Frame) ppu.refresh();
 }
 
 auto System::runToSave() -> void {
@@ -30,6 +32,7 @@ auto System::load() -> bool {
   }
   auto document = BML::unserialize(information.manifest);
   if(!cartridge.load()) return false;
+  information.colorburst = Emulator::Constants::Colorburst::NTSC;
   serializeInit();
   return information.loaded = true;
 }
@@ -66,7 +69,7 @@ auto System::reset() -> void {
   cpu.reset();
   apu.reset();
   ppu.reset();
-  scheduler.reset();
+  scheduler.reset(cpu.thread);
   peripherals.reset();
 }
 

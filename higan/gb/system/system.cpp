@@ -5,9 +5,11 @@ namespace GameBoy {
 #include "video.cpp"
 #include "serialization.cpp"
 System system;
+Scheduler scheduler;
+Cheat cheat;
 
 auto System::run() -> void {
-  scheduler.enter();
+  if(scheduler.enter() == Scheduler::Event::Frame) ppu.refresh();
 }
 
 auto System::runToSave() -> void {
@@ -71,7 +73,7 @@ auto System::power() -> void {
   cpu.power();
   ppu.power();
   apu.power();
-  scheduler.power();
+  scheduler.reset(cpu.thread);
 
   _clocksExecuted = 0;
 }

@@ -5,8 +5,7 @@ struct System {
 
   inline auto loaded() const -> bool { return information.loaded; }
   inline auto region() const -> Region { return information.region; }
-  inline auto cpuFrequency() const -> uint { return information.cpuFrequency; }
-  inline auto apuFrequency() const -> uint { return information.apuFrequency; }
+  inline auto colorburst() const -> double { return information.colorburst; }
 
   auto run() -> void;
   auto runToSave() -> void;
@@ -32,8 +31,7 @@ private:
     string manifest;
     bool loaded = false;
     Region region = Region::NTSC;
-    uint cpuFrequency = 0;
-    uint apuFrequency = 0;
+    double colorburst = 0.0;
   } information;
 
   uint serializeSize = 0;

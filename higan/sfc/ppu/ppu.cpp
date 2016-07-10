@@ -95,7 +95,7 @@ auto PPU::power() -> void {
 }
 
 auto PPU::reset() -> void {
-  create(Enter, system.cpuFrequency());
+  create(Enter, system.colorburst() * 6.0);
   PPUcounter::reset();
   memory::fill(output, 512 * 480 * sizeof(uint32));
 

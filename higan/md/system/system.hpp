@@ -1,5 +1,6 @@
 struct System {
-  auto loaded() const { return information.manifest; }
+  auto loaded() const -> bool { return information.loaded; }
+  auto colorburst() const -> double { return information.colorburst; }
 
   auto run() -> void;
 
@@ -12,6 +13,7 @@ struct System {
   struct Information {
     bool loaded = false;
     string manifest;
+    double colorburst = 0.0;
   } information;
 };
 

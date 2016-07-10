@@ -68,7 +68,7 @@ auto Icarus::import(string location) -> string {
 
   if(type == ".fc" || type == ".nes") return famicomImport(buffer, location);
   if(type == ".sfc" || type == ".smc") return superFamicomImport(buffer, location);
-  if(type == ".smd") return megaDriveImport(buffer, location);
+  if(type == ".md") return megaDriveImport(buffer, location);
   if(type == ".gb") return gameBoyImport(buffer, location);
   if(type == ".gbc") return gameBoyColorImport(buffer, location);
   if(type == ".gba") return gameBoyAdvanceImport(buffer, location);

@@ -56,7 +56,7 @@ auto PPU::power() -> void {
 }
 
 auto PPU::reset() -> void {
-  create(PPU::Enter, 21'477'272);
+  create(PPU::Enter, system.colorburst() * 6.0);
 
   memory::fill(&io, sizeof(IO));
   memory::fill(&latch, sizeof(Latches));

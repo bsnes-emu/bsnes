@@ -35,7 +35,7 @@ auto Bus::read(uint20 addr) -> uint8 {
   if(addr.bits(16,19) == 0) data = iram.read(addr);
   if(addr.bits(16,19) == 1) data = cartridge.ramRead(addr);
   if(addr.bits(16,19) >= 2) data = cartridge.romRead(addr);
-  if(cheat.enable()) {
+  if(cheat) {
     if(auto result = cheat.find(addr, data)) data = result();
   }
   return data;

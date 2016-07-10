@@ -4,39 +4,25 @@
 //started: 2011-09-05
 
 #include <emulator/emulator.hpp>
+#include <emulator/thread.hpp>
+#include <emulator/scheduler.hpp>
+#include <emulator/cheat.hpp>
+
 #include <processor/r6502/r6502.hpp>
 
 namespace Famicom {
   using File = Emulator::File;
-
-  struct Thread {
-    ~Thread() {
-      if(thread) co_delete(thread);
-    }
-
-    auto create(auto (*entrypoint)() -> void, uint frequency) -> void {
-      if(thread) co_delete(thread);
-      thread = co_create(65'536 * sizeof(void*), entrypoint);
-      this->frequency = frequency;
-      clock = 0;
-    }
-
-    auto serialize(serializer& s) -> void {
-      s.integer(frequency);
-      s.integer(clock);
-    }
-
-    cothread_t thread = nullptr;
-    uint frequency = 0;
-    int64 clock = 0;
-  };
+  using Thread = Emulator::Thread;
+  using Scheduler = Emulator::Scheduler;
+  using Cheat = Emulator::Cheat;
+  extern Scheduler scheduler;
+  extern Cheat cheat;
 
   struct Cothread : Thread {
     auto step(uint clocks) -> void;
     auto synchronizeCPU() -> void;
   };
 
-  #include <fc/scheduler/scheduler.hpp>
   #include <fc/controller/controller.hpp>
   #include <fc/system/system.hpp>
   #include <fc/memory/memory.hpp>
@@ -44,7 +30,6 @@ namespace Famicom {
   #include <fc/cpu/cpu.hpp>
   #include <fc/apu/apu.hpp>
   #include <fc/ppu/ppu.hpp>
-  #include <fc/cheat/cheat.hpp>
 
   inline auto Cothread::step(uint clocks) -> void {
     clock += clocks * (uint64)cpu.frequency;

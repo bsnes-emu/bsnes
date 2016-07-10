@@ -43,7 +43,7 @@ auto SMP::power() -> void {
 }
 
 auto SMP::reset() -> void {
-  create(Enter, system.apuFrequency());
+  create(Enter, 32040.0 * 768.0);
 
   regs.pc.l = iplrom[62];
   regs.pc.h = iplrom[63];

@@ -68,7 +68,7 @@ auto nall::main(string_vector args) -> void {
     if(string source = BrowserDialog()
     .setTitle("Load ROM Image")
     .setPath(settings["icarus/Path"].text())
-    .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.smd:*.gb:*.gbc:*.gba:*.ws:*.wsc:*.bs:*.st:*.zip")
+    .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.md:*.gb:*.gbc:*.gba:*.ws:*.wsc:*.bs:*.st:*.zip")
     .openFile()) {
       if(string target = icarus.import(source)) {
         settings["icarus/Path"].setValue(Location::path(source));

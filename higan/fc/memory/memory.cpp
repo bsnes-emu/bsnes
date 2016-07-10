@@ -17,7 +17,7 @@ auto Bus::read(uint16 addr) -> uint8 {
   else if(addr <= 0x3fff) data = ppu.readIO(addr);
   else if(addr <= 0x4017) data = cpu.readIO(addr);
 
-  if(cheat.enable()) {
+  if(cheat) {
     if(auto result = cheat.find(addr, data)) return result();
   }
 

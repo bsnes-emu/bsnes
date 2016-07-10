@@ -1,8 +1,8 @@
 processors += r65816 spc700 arm gsu hg51b upd96050
 
-objects += sfc-interface sfc-system sfc-scheduler sfc-controller
-objects += sfc-cartridge sfc-cheat
-objects += sfc-memory sfc-cpu sfc-smp sfc-dsp sfc-ppu
+objects += sfc-interface sfc-system sfc-controller
+objects += sfc-cartridge sfc-memory
+objects += sfc-cpu sfc-smp sfc-dsp sfc-ppu
 objects += sfc-expansion sfc-satellaview sfc-superdisc
 objects += sfc-21fx
 objects += sfc-icd2 sfc-mcc sfc-nss sfc-event
@@ -15,10 +15,8 @@ objects += sfc-bsmemory sfc-sufamiturbo
 
 obj/sfc-interface.o:   sfc/interface/interface.cpp $(call rwildcard,sfc/interface)
 obj/sfc-system.o:      sfc/system/system.cpp $(call rwildcard,sfc/system/)
-obj/sfc-scheduler.o:   sfc/scheduler/scheduler.cpp $(call rwildcard,sfc/scheduler/)
 obj/sfc-controller.o:  sfc/controller/controller.cpp $(call rwildcard,sfc/controller/)
 obj/sfc-cartridge.o:   sfc/cartridge/cartridge.cpp $(call rwildcard,sfc/cartridge/)
-obj/sfc-cheat.o:       sfc/cheat/cheat.cpp $(call rwildcard,sfc/cheat/)
 obj/sfc-memory.o:      sfc/memory/memory.cpp $(call rwildcard,sfc/memory/)
 
 obj/sfc-cpu.o:         sfc/cpu/cpu.cpp $(call rwildcard,sfc/cpu/)

@@ -88,8 +88,8 @@ auto APU::power() -> void {
 }
 
 auto APU::reset() -> void {
-  create(APU::Enter, 21'477'272);
-  stream = Emulator::audio.createStream(1, 21'477'272.0 / 12.0);
+  create(APU::Enter, system.colorburst() * 6.0);
+  stream = Emulator::audio.createStream(1, system.colorburst() / 2.0);
 
   pulse[0].reset();
   pulse[1].reset();
