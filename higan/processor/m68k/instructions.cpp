@@ -34,14 +34,22 @@ auto M68K::instructionBCC(uint4 condition, uint8 displacementByte) -> void {
   }
 }
 
+auto M68K::instructionLEA(uint3 wr, EA ea) -> void {
+  r.a(wr) = address(ea);
+}
+
+auto M68K::instructionMOVEM(uint1 direction, EA ea) -> void {
+  auto list = readWordPC();
+}
+
 auto M68K::instructionNOP() -> void {
 }
 
-auto M68K::instructionTST(uint2 size, uint3 rdMode, uint3 rdReg) -> void {
-  auto data = readEA(size, rdMode, rdReg);
+auto M68K::instructionTST(EA ea) -> void {
+  auto data = read(ea);
 
   r.c = 0;
   r.v = 0;
   r.z = data == 0;
-  r.n = signExtend(size, data) < 0;
+  r.n = signExtend(ea.size, data) < 0;
 }

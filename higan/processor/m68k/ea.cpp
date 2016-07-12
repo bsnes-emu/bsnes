@@ -5,21 +5,30 @@ auto M68K::signExtend(uint2 size, uint32 data) -> int32 {
   return 0;
 }
 
-auto M68K::readEA(uint2 size, uint3 mode, uint3 reg) -> uint32 {
-  if(mode == 7) {
-    if(reg == 0) {
-      uint32 addr = (int16)readWordPC();
-      return readAbsolute(size, addr);
-    }
+//
 
-    if(reg == 1) {
-      uint32 addr = readLongPC();
-      return readAbsolute(size, addr);
-    }
+auto M68K::address(EA& ea) -> uint32 {
+  if(ea.valid) return ea.address;
+  ea.valid = true;
+
+  if(ea.mode == 0) return ea.address = r.d(ea.reg);
+  if(ea.mode == 1) return ea.address = r.a(ea.reg);
+
+  if(ea.mode == 7) {
+    if(ea.reg == 0) return ea.address = (int16)readWordPC();
+    if(ea.reg == 1) return ea.address = readLongPC();
+    if(ea.reg == 2) return ea.address = r.pc, ea.address += (int16)readWordPC();
   }
 
-  return 0;
+  return ea.address = 0;
 }
 
-auto M68K::writeEA(uint2 size, uint3 mode, uint3 reg, uint32 data) -> void {
+auto M68K::read(EA& ea) -> uint32 {
+  address(ea);
+  if(ea.mode < 2 || (ea.mode == 7 && ea.reg == 4)) return ea.address;
+  return readAbsolute(ea.size, ea.address);
+}
+
+auto M68K::write(EA& ea, uint32 data) -> void {
+  address(ea);
 }

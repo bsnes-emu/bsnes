@@ -35,8 +35,8 @@ auto CPU::write(uint24 addr, uint8 data) -> void {
 
 auto CPU::speed(uint24 addr) const -> uint {
   if(addr & 0x408000) return addr & 0x800000 ? io.romSpeed : 8;
-  if((addr + 0x6000) & 0x4000) return 8;
-  if((addr - 0x4000) & 0x7e00) return 6;
+  if(addr + 0x6000 & 0x4000) return 8;
+  if(addr - 0x4000 & 0x7e00) return 6;
   return 12;
 }
 

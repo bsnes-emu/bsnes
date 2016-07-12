@@ -79,6 +79,10 @@ template<uint Bits> struct Natural {
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
 
+  inline auto bits(uint lo, uint hi) const -> const Reference { return {(Natural&)*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
+  inline auto bit(uint index) const -> const Reference { return {(Natural&)*this, index, index}; }
+  inline auto byte(uint index) const -> const Reference { return {(Natural&)*this, index * 8 + 0, index * 8 + 7}; }
+
   inline auto clamp(uint bits) -> uintmax_t {
     const uintmax_t b = 1ull << (bits - 1);
     const uintmax_t m = b * 2 - 1;
@@ -157,9 +161,13 @@ template<uint Bits> struct Integer {
     const uint Hi;
   };
 
-  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo, hi}; }
+  inline auto bits(uint lo, uint hi) -> Reference { return {*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
   inline auto bit(uint index) -> Reference { return {*this, index, index}; }
   inline auto byte(uint index) -> Reference { return {*this, index * 8 + 0, index * 8 + 7}; }
+
+  inline auto bits(uint lo, uint hi) const -> const Reference { return {(Integer&)*this, lo < hi ? lo : hi, hi > lo ? hi : lo}; }
+  inline auto bit(uint index) const -> const Reference { return {(Integer&)*this, index, index}; }
+  inline auto byte(uint index) const -> const Reference { return {(Integer&)*this, index * 8 + 0, index * 8 + 7}; }
 
   inline auto clamp(uint bits) -> intmax_t {
     const intmax_t b = 1ull << (bits - 1);
