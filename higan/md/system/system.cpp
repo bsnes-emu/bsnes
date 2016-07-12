@@ -7,8 +7,8 @@ Scheduler scheduler;
 
 auto System::run() -> void {
   if(scheduler.enter() == Scheduler::Event::Frame) {
-    static uint32 output[1280 * 480] = {0};
-    Emulator::video.refresh(output, 1280 * sizeof(uint32), 1280, 480);
+    static uint32 output[320 * 240] = {0};
+    Emulator::video.refresh(output, 320 * sizeof(uint32), 320, 240);
   }
 }
 

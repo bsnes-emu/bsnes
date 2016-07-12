@@ -10,8 +10,8 @@ Interface::Interface() {
 
   information.manufacturer = "Sega";
   information.name         = "Mega Drive";
-  information.width        = 1280;
-  information.height       =  480;
+  information.width        = 320;  //1280
+  information.height       = 240;  // 480
   information.overscan     = true;
   information.aspectRatio  = 4.0 / 3.0;
   information.resettable   = true;

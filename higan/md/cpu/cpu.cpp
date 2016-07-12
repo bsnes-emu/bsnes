@@ -10,8 +10,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::boot() -> void {
-  r.sp = readLong(0);
-  r.pc = readLong(4);
+  r.ssp = readLong(0);
+  r.pc  = readLong(4);
 }
 
 auto CPU::main() -> void {
@@ -20,8 +20,8 @@ auto CPU::main() -> void {
 
 auto CPU::step(uint clocks) -> void {
   clock += clocks;
-  while(clock >= frequency) {
-    clock -= frequency;
+  if(clock >= frequency / 60) {
+    clock -= frequency / 60;
     scheduler.exit(Scheduler::Event::Frame);
   }
 }
