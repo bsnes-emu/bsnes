@@ -9,7 +9,7 @@ typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);
 
 static void ill(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
-    GB_log(gb, ".BYTE %02x\n", opcode);
+    GB_log(gb, ".BYTE $%02x\n", opcode);
     (*pc)++;
 }
 
@@ -34,7 +34,7 @@ static void ld_rr_d16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     register_id = (GB_read_memory(gb, (*pc)++) >> 4) + 1;
     value = GB_read_memory(gb, (*pc)++);
     value |= GB_read_memory(gb, (*pc)++) << 8;
-    GB_log(gb, "LD %s, %04x\n", register_names[register_id], value);
+    GB_log(gb, "LD %s, $%04x\n", register_names[register_id], value);
 }
 
 static void ld_drr_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -72,7 +72,7 @@ static void ld_hr_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     uint8_t register_id;
     (*pc)++;
     register_id = ((opcode >> 4) + 1) & 0x03;
-    GB_log(gb, "LD %c, %02x\n", register_names[register_id][0], GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "LD %c, $%02x\n", register_names[register_id][0], GB_read_memory(gb, (*pc)++));
 }
 
 static void rlca(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -92,7 +92,7 @@ static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc){
     (*pc)++;
     addr = GB_read_memory(gb, (*pc)++);
     addr |= GB_read_memory(gb, (*pc)++) << 8;
-    GB_log(gb, "LD [%04x], sp\n", addr);
+    GB_log(gb, "LD [$%04x], sp\n", addr);
 }
 
 static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -137,7 +137,7 @@ static void ld_lr_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     uint8_t register_id;
     register_id = (GB_read_memory(gb, (*pc)++) >> 4) + 1;
 
-    GB_log(gb, "LD %c, %02x\n", register_names[register_id][1], GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "LD %c, $%02x\n", register_names[register_id][1], GB_read_memory(gb, (*pc)++));
 }
 
 static void rrca(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -155,7 +155,7 @@ static void rra(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void jr_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_attributed_log(gb, GB_LOG_UNDERLINE, "JR %04x\n", *pc + (int8_t) GB_read_memory(gb, (*pc)) + 1);
+    GB_attributed_log(gb, GB_LOG_UNDERLINE, "JR $%04x\n", *pc + (int8_t) GB_read_memory(gb, (*pc)) + 1);
     (*pc)++;
 }
 
@@ -178,7 +178,7 @@ static const char *condition_code(uint8_t opcode)
 static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-   GB_attributed_log(gb,  GB_LOG_DASHED_UNDERLINE, "JR %s, %04x\n", condition_code(opcode), *pc + (int8_t)GB_read_memory(gb, (*pc)) + 1);
+   GB_attributed_log(gb,  GB_LOG_DASHED_UNDERLINE, "JR %s, $%04x\n", condition_code(opcode), *pc + (int8_t)GB_read_memory(gb, (*pc)) + 1);
     (*pc)++;
 }
 
@@ -245,7 +245,7 @@ static void dec_dhl(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void ld_dhl_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LD [hl], %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "LD [hl], $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static const char *get_src_name(uint8_t opcode)
@@ -356,21 +356,21 @@ static void pop_rr(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_attributed_log(gb, GB_LOG_DASHED_UNDERLINE, "JP %s, %04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_attributed_log(gb, GB_LOG_DASHED_UNDERLINE, "JP %s, $%04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
 static void jp_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "JP %04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_log(gb, "JP $%04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
 static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "CALL %s, %04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_log(gb, "CALL %s, $%04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
@@ -384,55 +384,55 @@ static void push_rr(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void add_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "ADD %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "ADD $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void adc_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "ADC %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "ADC $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void sub_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "SUB %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "SUB $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LBC %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "LBC $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void and_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "AND %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "AND $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void xor_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "XOR %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "XOR $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void or_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "OR %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "OR $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void cp_a_d8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "CP %02x\n", GB_read_memory(gb, (*pc)++));
+    GB_log(gb, "CP $%02x\n", GB_read_memory(gb, (*pc)++));
 }
 
 static void rst(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "RST %02x\n", opcode ^ 0xC7);
+    GB_log(gb, "RST $%02x\n", opcode ^ 0xC7);
 
 }
 
@@ -451,7 +451,7 @@ static void reti(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void call_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "CALL %04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_log(gb, "CALL $%04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
@@ -459,14 +459,14 @@ static void ld_da8_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
     uint8_t temp = GB_read_memory(gb, (*pc)++);
-    GB_log(gb, "LDH [%02x], a\n", temp);
+    GB_log(gb, "LDH [$%02x], a\n", temp);
 }
 
 static void ld_a_da8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
     uint8_t temp = GB_read_memory(gb, (*pc)++);
-    GB_log(gb, "LDH a, [%02x]\n", temp);
+    GB_log(gb, "LDH a, [$%02x]\n", temp);
 }
 
 static void ld_dc_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -485,7 +485,7 @@ static void add_sp_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
     int8_t temp = GB_read_memory(gb, (*pc)++);
-    GB_log(gb, "ADD SP, %s%02x\n", temp < 0? "-" : "", temp < 0? -temp : temp);
+    GB_log(gb, "ADD SP, %s$%02x\n", temp < 0? "-" : "", temp < 0? -temp : temp);
 }
 
 static void jp_hl(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -497,14 +497,14 @@ static void jp_hl(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void ld_da16_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LD [%04x], a\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_log(gb, "LD [$%04x], a\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
 static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LD a, [%04x]\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    GB_log(gb, "LD a, [$%04x]\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
     (*pc) += 2;
 }
 
@@ -524,7 +524,7 @@ static void ld_hl_sp_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
     int8_t temp = GB_read_memory(gb, (*pc)++);
-    GB_log(gb, "LD hl, sp, %s%02x\n", temp < 0? "-" : "", temp < 0? -temp : temp);
+    GB_log(gb, "LD hl, sp, %s$%02x\n", temp < 0? "-" : "", temp < 0? -temp : temp);
 }
 
 static void ld_sp_hl(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)

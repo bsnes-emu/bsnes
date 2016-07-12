@@ -195,9 +195,9 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     }
 
     // Registers
-    if (string[0] == '$') {
-        if (length == 2) {
-            switch (string[1]) {
+    if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
+        if (length == 1) {
+            switch (string[0]) {
                 case 'a': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_AF]};
                 case 'f': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_AF]};
                 case 'b': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_BC]};
@@ -208,14 +208,14 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
                 case 'l': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_HL]};
             }
         }
-        else if (length == 3) {
-            switch (string[1]) {
-                case 'a': if (string[2] == 'f') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_AF]};
-                case 'b': if (string[2] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_BC]};
-                case 'd': if (string[2] == 'e') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_DE]};
-                case 'h': if (string[2] == 'l') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_HL]};
-                case 's': if (string[2] == 'p') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_SP]};
-                case 'p': if (string[2] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
+        else if (length == 2) {
+            switch (string[0]) {
+                case 'a': if (string[1] == 'f') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_AF]};
+                case 'b': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_BC]};
+                case 'd': if (string[1] == 'e') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_DE]};
+                case 'h': if (string[1] == 'l') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_HL]};
+                case 's': if (string[1] == 'p') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_SP]};
+                case 'p': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
             }
         }
         GB_log(gb, "Unknown register: %.*s\n", length, string);
@@ -318,9 +318,9 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     // Not an expression - must be a register or a literal
 
     // Registers
-    if (string[0] == '$') {
-        if (length == 2) {
-            switch (string[1]) {
+    if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
+        if (length == 1) {
+            switch (string[0]) {
                 case 'a': return gb->registers[GB_REGISTER_AF] >> 8;
                 case 'f': return gb->registers[GB_REGISTER_AF] & 0xFF;
                 case 'b': return gb->registers[GB_REGISTER_BC] >> 8;
@@ -331,27 +331,27 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                 case 'l': return gb->registers[GB_REGISTER_HL] & 0xFF;
             }
         }
-        else if (length == 3) {
-            switch (string[1]) {
-                case 'a': if (string[2] == 'f') return gb->registers[GB_REGISTER_AF];
-                case 'b': if (string[2] == 'c') return gb->registers[GB_REGISTER_BC];
-                case 'd': if (string[2] == 'e') return gb->registers[GB_REGISTER_DE];
-                case 'h': if (string[2] == 'l') return gb->registers[GB_REGISTER_HL];
-                case 's': if (string[2] == 'p') return gb->registers[GB_REGISTER_SP];
-                case 'p': if (string[2] == 'c') return gb->pc;
+        else if (length == 2) {
+            switch (string[0]) {
+                case 'a': if (string[1] == 'f') return gb->registers[GB_REGISTER_AF];
+                case 'b': if (string[1] == 'c') return gb->registers[GB_REGISTER_BC];
+                case 'd': if (string[1] == 'e') return gb->registers[GB_REGISTER_DE];
+                case 'h': if (string[1] == 'l') return gb->registers[GB_REGISTER_HL];
+                case 's': if (string[1] == 'p') return gb->registers[GB_REGISTER_SP];
+                case 'p': if (string[1] == 'c') return gb->pc;
             }
         }
-        else if (length == 4) {
-            if (watchpoint_address && memcmp(string, "$old", 4) == 0) {
+        else if (length == 3) {
+            if (watchpoint_address && memcmp(string, "old", 3) == 0) {
                 return GB_read_memory(gb, *watchpoint_address);
             }
 
-            if (watchpoint_new_value && memcmp(string, "$new", 4) == 0) {
+            if (watchpoint_new_value && memcmp(string, "new", 3) == 0) {
                 return *watchpoint_new_value;
             }
 
             /* $new is identical to $old in read conditions */
-            if (watchpoint_address && memcmp(string, "$new", 4) == 0) {
+            if (watchpoint_address && memcmp(string, "new", 3) == 0) {
                 return GB_read_memory(gb, *watchpoint_address);
             }
         }
@@ -361,7 +361,13 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
 
     char *end;
-    uint16_t literal = (uint16_t) (strtol(string, &end, 16));
+    int base = 10;
+    if (string[0] == '$') {
+        string++;
+        base = 16;
+        length--;
+    }
+    uint16_t literal = (uint16_t) (strtol(string, &end, base));
     if (end != string + length) {
         GB_log(gb, "Failed to parse: %.*s\n", length, string);
         *error = true;
@@ -453,12 +459,12 @@ static bool registers(GB_gameboy_t *gb, char *arguments)
         return true;
     }
 
-    GB_log(gb, "AF = %04x\n", gb->registers[GB_REGISTER_AF]);
-    GB_log(gb, "BC = %04x\n", gb->registers[GB_REGISTER_BC]);
-    GB_log(gb, "DE = %04x\n", gb->registers[GB_REGISTER_DE]);
-    GB_log(gb, "HL = %04x\n", gb->registers[GB_REGISTER_HL]);
-    GB_log(gb, "SP = %04x\n", gb->registers[GB_REGISTER_SP]);
-    GB_log(gb, "PC = %04x\n", gb->pc);
+    GB_log(gb, "AF = $%04x\n", gb->registers[GB_REGISTER_AF]);
+    GB_log(gb, "BC = $%04x\n", gb->registers[GB_REGISTER_BC]);
+    GB_log(gb, "DE = $%04x\n", gb->registers[GB_REGISTER_DE]);
+    GB_log(gb, "HL = $%04x\n", gb->registers[GB_REGISTER_HL]);
+    GB_log(gb, "SP = $%04x\n", gb->registers[GB_REGISTER_SP]);
+    GB_log(gb, "PC = $%04x\n", gb->pc);
     GB_log(gb, "TIMA = %d/%u\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
     GB_log(gb, "Display Controller: LY = %d/%u\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
     return true;
@@ -510,7 +516,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 
     uint16_t index = find_breakpoint(gb, result);
     if (index < gb->n_breakpoints && gb->breakpoints[index].addr == result) {
-        GB_log(gb, "Breakpoint already set at %04x\n", result);
+        GB_log(gb, "Breakpoint already set at $%04x\n", result);
         if (!gb->breakpoints[index].condition && condition) {
             GB_log(gb, "Added condition to breakpoint\n");
             gb->breakpoints[index].condition = strdup(condition);
@@ -539,7 +545,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     }
     gb->n_breakpoints++;
 
-    GB_log(gb, "Breakpoint set at %04x\n", result);
+    GB_log(gb, "Breakpoint set at $%04x\n", result);
     return true;
 }
 
@@ -568,7 +574,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
 
     uint16_t index = find_breakpoint(gb, result);
     if (index >= gb->n_breakpoints || gb->breakpoints[index].addr != result) {
-        GB_log(gb, "No breakpoint set at %04x\n", result);
+        GB_log(gb, "No breakpoint set at $%04x\n", result);
         return true;
     }
 
@@ -580,7 +586,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     gb->n_breakpoints--;
     gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
 
-    GB_log(gb, "Breakpoint removed from %04x\n", result);
+    GB_log(gb, "Breakpoint removed from $%04x\n", result);
     return true;
 }
 
@@ -653,7 +659,7 @@ print_usage:
 
     uint16_t index = find_watchpoint(gb, result);
     if (index < gb->n_watchpoints && gb->watchpoints[index].addr == result) {
-        GB_log(gb, "Watchpoint already set at %04x\n", result);
+        GB_log(gb, "Watchpoint already set at $%04x\n", result);
         if (!gb->watchpoints[index].flags != flags) {
             GB_log(gb, "Modified watchpoint type\n");
             gb->watchpoints[index].flags = flags;
@@ -687,7 +693,7 @@ print_usage:
     }
     gb->n_watchpoints++;
 
-    GB_log(gb, "Watchpoint set at %04x\n", result);
+    GB_log(gb, "Watchpoint set at $%04x\n", result);
     return true;
 }
 
@@ -716,7 +722,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
 
     uint16_t index = find_watchpoint(gb, result);
     if (index >= gb->n_watchpoints || gb->watchpoints[index].addr != result) {
-        GB_log(gb, "No watchpoint set at %04x\n", result);
+        GB_log(gb, "No watchpoint set at $%04x\n", result);
         return true;
     }
 
@@ -728,7 +734,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
     gb->n_watchpoints--;
     gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints* sizeof(gb->watchpoints[0]));
 
-    GB_log(gb, "Watchpoint removed from %04x\n", result);
+    GB_log(gb, "Watchpoint removed from $%04x\n", result);
     return true;
 }
 
@@ -746,10 +752,10 @@ static bool list(GB_gameboy_t *gb, char *arguments)
         GB_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
         for (uint16_t i = 0; i < gb->n_breakpoints; i++) {
             if (gb->breakpoints[i].condition) {
-                GB_log(gb, " %d. %04x (Condition: %s)\n", i + 1, gb->breakpoints[i].addr, gb->breakpoints[i].condition);
+                GB_log(gb, " %d. $%04x (Condition: %s)\n", i + 1, gb->breakpoints[i].addr, gb->breakpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %04x\n", i + 1, gb->breakpoints[i].addr);
+                GB_log(gb, " %d. $%04x\n", i + 1, gb->breakpoints[i].addr);
             }
         }
     }
@@ -761,13 +767,13 @@ static bool list(GB_gameboy_t *gb, char *arguments)
         GB_log(gb, "%d watchpoint(s) set:\n", gb->n_watchpoints);
         for (uint16_t i = 0; i < gb->n_watchpoints; i++) {
             if (gb->watchpoints[i].condition) {
-                GB_log(gb, " %d. %04x (%c%c, Condition: %s)\n", i + 1, gb->watchpoints[i].addr,
+                GB_log(gb, " %d. $%04x (%c%c, Condition: %s)\n", i + 1, gb->watchpoints[i].addr,
                                                                 (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                                 (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-',
                                                                 gb->watchpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %04x (%c%c)\n", i + 1, gb->watchpoints[i].addr,
+                GB_log(gb, " %d. $%04x (%c%c)\n", i + 1, gb->watchpoints[i].addr,
                                                  (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                  (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-');
             }
@@ -807,7 +813,7 @@ static bool print(GB_gameboy_t *gb, char *arguments)
     bool error;
     uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
     if (!error) {
-        GB_log(gb, "=%04x\n", result);
+        GB_log(gb, "=$%04x\n", result);
     }
     return true;
 }
@@ -959,8 +965,8 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
         }
         else {
             if (gb->registers[GB_REGISTER_SP] != gb->sp_for_call_depth[gb->debug_call_depth]) {
-                GB_log(gb, "Stack leak detected for function %04x!\n", gb->addr_for_call_depth[gb->debug_call_depth]);
-                GB_log(gb, "SP is %04x, should be %04x.\n", gb->registers[GB_REGISTER_SP],
+                GB_log(gb, "Stack leak detected for function $%04x!\n", gb->addr_for_call_depth[gb->debug_call_depth]);
+                GB_log(gb, "SP is $%04x, should be $%04x.\n", gb->registers[GB_REGISTER_SP],
                                                             gb->sp_for_call_depth[gb->debug_call_depth]);
                 gb->debug_stopped = true;
             }
@@ -977,7 +983,7 @@ void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t 
         }
         if (!gb->watchpoints[index].condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%04x] = %02x\n", addr, value);
+            GB_log(gb, "Watchpoint: [$%04x] = $%02x\n", addr, value);
             return;
         }
         bool error;
@@ -990,7 +996,7 @@ void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t 
         }
         if (condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%04x] = %02x\n", addr, value);
+            GB_log(gb, "Watchpoint: [$%04x] = $%02x\n", addr, value);
         }
     }
 }
@@ -1004,7 +1010,7 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
         }
         if (!gb->watchpoints[index].condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%04x]\n", addr);
+            GB_log(gb, "Watchpoint: [$%04x]\n", addr);
             return;
         }
         bool error;
@@ -1017,7 +1023,7 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
         }
         if (condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%04x]\n", addr);
+            GB_log(gb, "Watchpoint: [$%04x]\n", addr);
         }
     }
 }
@@ -1040,7 +1046,7 @@ next_command:
     }
     if (!gb->debug_stopped && should_break(gb, gb->pc)) {
         gb->debug_stopped = true;
-        GB_log(gb, "Breakpoint: PC = %04x\n", gb->pc);
+        GB_log(gb, "Breakpoint: PC = $%04x\n", gb->pc);
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
     if (gb->debug_stopped) {
