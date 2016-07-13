@@ -35,6 +35,7 @@ void GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name)
 
 const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr)
 {
+    if (!map) return NULL;
     size_t index = GB_map_find_symbol_index(map, addr);
     if (index < map->n_symbols && map->symbols[index].addr != addr) {
         index--;
