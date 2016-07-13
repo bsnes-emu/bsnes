@@ -44,6 +44,11 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
         symbol = NULL;
     }
 
+    /* Avoid overflow */
+    if (strlen(symbol->name) > 240) {
+        symbol = NULL;
+    }
+
     if (!symbol) {
         sprintf(output, "$%04x", value);
     }
