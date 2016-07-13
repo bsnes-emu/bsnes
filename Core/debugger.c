@@ -45,7 +45,7 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
     }
 
     /* Avoid overflow */
-    if (strlen(symbol->name) > 240) {
+    if (symbol && strlen(symbol->name) > 240) {
         symbol = NULL;
     }
 
