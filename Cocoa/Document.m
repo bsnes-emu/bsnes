@@ -3,6 +3,7 @@
 #include "Document.h"
 #include "AppDelegate.h"
 #include "gb.h"
+#include "debugger.h"
 
 @interface Document ()
 {
@@ -204,6 +205,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     }
     GB_load_rom(&gb, [fileName UTF8String]);
     GB_load_battery(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
+    GB_debugger_load_symbol_file(&gb, [[[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"] UTF8String]);
+
     return YES;
 }
 

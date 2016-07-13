@@ -6,6 +6,7 @@
 #include <time.h>
 #include "apu.h"
 #include "save_struct.h"
+#include "symbol_hash.h"
 
 
 #define GB_STRUCT_VERSION 9
@@ -359,6 +360,8 @@ typedef struct GB_gameboy_s {
     uint16_t n_watchpoints;
     struct GB_watchpoint_s *watchpoints;
 
+    /* Symbol table */
+    GB_symbol_map_t *bank_symbols[0x100];
 
     /* Misc */
     bool turbo;

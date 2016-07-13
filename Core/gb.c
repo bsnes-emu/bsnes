@@ -137,6 +137,11 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
+    for (unsigned char i = 0; i--;) {
+        if (gb->bank_symbols[i]) {
+            GB_map_free(gb->bank_symbols[i]);
+        }
+    }
 }
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)

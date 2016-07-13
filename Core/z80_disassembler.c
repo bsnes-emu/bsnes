@@ -3,6 +3,7 @@
 #include "z80_cpu.h"
 #include "memory.h"
 #include "gb.h"
+#include "debugger.h"
 
 
 typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);
@@ -34,7 +35,13 @@ static void ld_rr_d16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     register_id = (GB_read_memory(gb, (*pc)++) >> 4) + 1;
     value = GB_read_memory(gb, (*pc)++);
     value |= GB_read_memory(gb, (*pc)++) << 8;
-    GB_log(gb, "LD %s, $%04x\n", register_names[register_id], value);
+    const char *symbol = GB_debugger_name_for_address(gb, value);
+    if (symbol) {
+        GB_log(gb, "LD %s, %s ; =$%04x\n", register_names[register_id], symbol, value);
+    }
+    else {
+        GB_log(gb, "LD %s, $%04x\n", register_names[register_id], value);
+    }
 }
 
 static void ld_drr_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -92,7 +99,13 @@ static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc){
     (*pc)++;
     addr = GB_read_memory(gb, (*pc)++);
     addr |= GB_read_memory(gb, (*pc)++) << 8;
-    GB_log(gb, "LD [$%04x], sp\n", addr);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "LD [%s], sp ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_log(gb, "LD [$%04x], sp\n", addr);
+    }
 }
 
 static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
@@ -155,7 +168,14 @@ static void rra(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void jr_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_attributed_log(gb, GB_LOG_UNDERLINE, "JR $%04x\n", *pc + (int8_t) GB_read_memory(gb, (*pc)) + 1);
+    uint16_t addr = *pc + (int8_t) GB_read_memory(gb, (*pc)) + 1;
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_attributed_log(gb, GB_LOG_UNDERLINE, "JR %s ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_attributed_log(gb, GB_LOG_UNDERLINE, "JR $%04x\n", addr);
+    }
     (*pc)++;
 }
 
@@ -178,7 +198,14 @@ static const char *condition_code(uint8_t opcode)
 static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-   GB_attributed_log(gb,  GB_LOG_DASHED_UNDERLINE, "JR %s, $%04x\n", condition_code(opcode), *pc + (int8_t)GB_read_memory(gb, (*pc)) + 1);
+    uint16_t addr = *pc + (int8_t) GB_read_memory(gb, (*pc)) + 1;
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_attributed_log(gb,  GB_LOG_DASHED_UNDERLINE, "JR %s, %s ; =$%04x\n", condition_code(opcode), symbol, addr);
+    }
+    else {
+        GB_attributed_log(gb,  GB_LOG_DASHED_UNDERLINE, "JR %s, $%04x\n", condition_code(opcode), addr);
+    }
     (*pc)++;
 }
 
@@ -356,21 +383,42 @@ static void pop_rr(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_attributed_log(gb, GB_LOG_DASHED_UNDERLINE, "JP %s, $%04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_attributed_log(gb, GB_LOG_DASHED_UNDERLINE, "JP %s, %s ; =$%04x\n", condition_code(opcode), symbol, addr);
+    }
+    else {
+        GB_attributed_log(gb, GB_LOG_DASHED_UNDERLINE, "JP %s, $%04x\n", condition_code(opcode), addr);
+    }
     (*pc) += 2;
 }
 
 static void jp_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "JP $%04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "JP %s ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_log(gb, "JP $%04x\n", addr);
+    }
     (*pc) += 2;
 }
 
 static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "CALL %s, $%04x\n", condition_code(opcode), GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "CALL %s, %s ; =$%04x\n", condition_code(opcode), symbol, addr);
+    }
+    else {
+        GB_log(gb, "CALL %s, $%04x\n", condition_code(opcode), addr);
+    }
     (*pc) += 2;
 }
 
@@ -451,7 +499,14 @@ static void reti(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void call_a16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "CALL $%04x\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "CALL %s ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_log(gb, "CALL $%04x\n", addr);
+    }
     (*pc) += 2;
 }
 
@@ -497,14 +552,28 @@ static void jp_hl(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 static void ld_da16_a(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LD [$%04x], a\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "LD [%s], a ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_log(gb, "LD [$%04x], a\n", addr);
+    }
     (*pc) += 2;
 }
 
 static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
     (*pc)++;
-    GB_log(gb, "LD a, [$%04x]\n", GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8));
+    uint16_t addr = GB_read_memory(gb, *pc) | (GB_read_memory(gb, *pc + 1) << 8);
+    const char *symbol = GB_debugger_name_for_address(gb, addr);
+    if (symbol) {
+        GB_log(gb, "LD a, [%s] ; =$%04x\n", symbol, addr);
+    }
+    else {
+        GB_log(gb, "LD a, [$%04x]\n", addr);
+    }
     (*pc) += 2;
 }
 
@@ -668,10 +737,36 @@ static GB_opcode_t *opcodes[256] = {
     ld_hl_sp_r8,ld_sp_hl,   ld_a_da16,  ei,         ill,        ill,        cp_a_d8,    rst,
 };
 
+
+
 void GB_cpu_disassemble(GB_gameboy_t *gb, uint16_t pc, uint16_t count)
 {
+    const GB_bank_symbol_t *function_symbol = GB_debugger_find_symbol(gb, pc);
+
+    if (function_symbol && pc - function_symbol->addr > 0x1000) {
+        function_symbol = NULL;
+    }
+
+    if (function_symbol && pc != function_symbol->addr) {
+        GB_log(gb, "%s:\n", function_symbol->name);
+    }
+
+    uint16_t current_function = function_symbol? function_symbol->addr : 0;
+
     while (count--) {
-        GB_log(gb, "%s%04x: ", pc == gb->pc? "->  ": "    ", pc);
+        function_symbol = GB_debugger_find_symbol(gb, pc);
+        if (function_symbol && function_symbol->addr == pc) {
+            if (current_function != function_symbol->addr) {
+                GB_log(gb, "\n");
+            }
+            GB_log(gb, "%s:\n", function_symbol->name);
+        }
+        if (function_symbol) {
+            GB_log(gb, "%s%04x <+%03x>: ", pc == gb->pc? "  ->": "    ", pc, pc - function_symbol->addr);
+        }
+        else {
+            GB_log(gb, "%s%04x: ", pc == gb->pc? "  ->": "    ", pc);
+        }
         uint8_t opcode = GB_read_memory(gb, pc);
         opcodes[opcode](gb, opcode, &pc);
     }
