@@ -175,7 +175,7 @@ static struct {
     {">=", 3, greater_equals},
     {">", 3, greater},
     {"==", 3, equals},
-    {"=", 4, NULL, assign},
+    {"=", -1, NULL, assign},
     {"!=", 3, different},
 };
 
@@ -327,7 +327,7 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             for (int j = 0; j < sizeof(operators) / sizeof(operators[0]); j++) {
                 if (strlen(operators[j].string) > length - i) continue; // Operator too big.
                  // Priority higher than what we already have.
-                if (operator_index != -1 && operators[operator_index].priority > operators[j].priority) continue;
+                if (operator_index != -1 && operators[operator_index].priority < operators[j].priority) continue;
                 unsigned long operator_length = strlen(operators[j].string);
                 if (memcmp(string + i, operators[j].string, operator_length) == 0) {
                     // Found an operator!
