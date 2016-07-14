@@ -29,19 +29,55 @@ typedef struct {
 #define VALUE_16(x) ((value_t){false, 0, (x)})
 
 struct GB_breakpoint_s {
-    uint16_t addr;
+    union {
+        struct {
+        uint16_t addr;
+        uint16_t bank; /* -1 = any bank*/
+        };
+        uint32_t key; /* For sorting and comparing */
+    };
     char *condition;
 };
+
+#define BP_KEY(x) (((struct GB_breakpoint_s){.addr = ((x).value), .bank = (x).has_bank? (x).bank : -1 }).key)
 
 #define GB_WATCHPOINT_R (1)
 #define GB_WATCHPOINT_W (2)
 
 struct GB_watchpoint_s {
-    uint16_t addr;
+    union {
+        struct {
+            uint16_t addr;
+            uint16_t bank; /* -1 = any bank*/
+        };
+        uint32_t key; /* For sorting and comparing */
+    };
     char *condition;
     uint8_t flags;
 };
 
+#define WP_KEY(x) (((struct GB_watchpoint_s){.addr = ((x).value), .bank = (x).has_bank? (x).bank : -1 }).key)
+
+static uint16_t bank_for_addr(GB_gameboy_t *gb, uint16_t addr)
+{
+    if (addr < 0x4000) {
+        return gb->mbc_rom0_bank;
+    }
+
+    if (addr < 0x8000) {
+        return gb->mbc_rom_bank;
+    }
+
+    if (addr < 0xD000) {
+        return 0;
+    }
+
+    if (addr < 0xE000) {
+        return gb->cgb_ram_bank;
+    }
+
+    return 0;
+}
 
 static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer_name)
 {
@@ -579,18 +615,21 @@ static bool registers(GB_gameboy_t *gb, char *arguments)
 }
 
 /* Find the index of the closest breakpoint equal or greater to addr */
-static uint16_t find_breakpoint(GB_gameboy_t *gb, uint16_t addr)
+static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
 {
     if (!gb->breakpoints) {
         return 0;
     }
+
+    uint32_t key = BP_KEY(addr);
+
     int min = 0;
     int max = gb->n_breakpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
-        if (gb->breakpoints[pivot].addr == addr) return pivot;
-        if (gb->breakpoints[pivot].addr > addr) {
-            max = pivot - 1;
+        if (gb->breakpoints[pivot].key == key) return pivot;
+        if (gb->breakpoints[pivot].key > key) {
+            max = pivot;
         }
         else {
             min = pivot + 1;
@@ -606,6 +645,11 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
         return true;
     }
 
+    if (gb->n_breakpoints == (typeof(gb->n_breakpoints)) -1) {
+        GB_log(gb, "Too many breakpoints set\n");
+        return true;
+    }
+
     char *condition = NULL;
     if ((condition = strstr(arguments, " if "))) {
         *condition = 0;
@@ -618,13 +662,14 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
+    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint32_t key = BP_KEY(result);
 
     if (error) return true;
 
     uint16_t index = find_breakpoint(gb, result);
-    if (index < gb->n_breakpoints && gb->breakpoints[index].addr == result) {
-        GB_log(gb, "Breakpoint already set at %s\n", value_to_string(gb, result, true));
+    if (index < gb->n_breakpoints && gb->breakpoints[index].key == key) {
+        GB_log(gb, "Breakpoint already set at %s\n", debugger_value_to_string(gb, result, true));
         if (!gb->breakpoints[index].condition && condition) {
             GB_log(gb, "Added condition to breakpoint\n");
             gb->breakpoints[index].condition = strdup(condition);
@@ -644,7 +689,8 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
 
     gb->breakpoints = realloc(gb->breakpoints, (gb->n_breakpoints + 1) * sizeof(gb->breakpoints[0]));
     memmove(&gb->breakpoints[index + 1], &gb->breakpoints[index], (gb->n_breakpoints - index) * sizeof(gb->breakpoints[0]));
-    gb->breakpoints[index].addr = result;
+    gb->breakpoints[index].key = key;
+
     if (condition) {
         gb->breakpoints[index].condition = strdup(condition);
     }
@@ -653,7 +699,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     }
     gb->n_breakpoints++;
 
-    GB_log(gb, "Breakpoint set at %s\n", value_to_string(gb, result, true));
+    GB_log(gb, "Breakpoint set at %s\n", debugger_value_to_string(gb, result, true));
     return true;
 }
 
@@ -676,13 +722,14 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
+    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint32_t key = BP_KEY(result);
 
     if (error) return true;
 
     uint16_t index = find_breakpoint(gb, result);
-    if (index >= gb->n_breakpoints || gb->breakpoints[index].addr != result) {
-        GB_log(gb, "No breakpoint set at %s\n", value_to_string(gb, result, true));
+    if (index >= gb->n_breakpoints || gb->breakpoints[index].key != key) {
+        GB_log(gb, "No breakpoint set at %s\n", debugger_value_to_string(gb, result, true));
         return true;
     }
 
@@ -694,23 +741,24 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     gb->n_breakpoints--;
     gb->breakpoints = realloc(gb->breakpoints, gb->n_breakpoints * sizeof(gb->breakpoints[0]));
 
-    GB_log(gb, "Breakpoint removed from %s\n", value_to_string(gb, result, true));
+    GB_log(gb, "Breakpoint removed from %s\n", debugger_value_to_string(gb, result, true));
     return true;
 }
 
 /* Find the index of the closest watchpoint equal or greater to addr */
-static uint16_t find_watchpoint(GB_gameboy_t *gb, uint16_t addr)
+static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
 {
     if (!gb->watchpoints) {
         return 0;
     }
+    uint32_t key = WP_KEY(addr);
     int min = 0;
     int max = gb->n_watchpoints;
     while (min < max) {
         uint16_t pivot = (min + max) / 2;
-        if (gb->watchpoints[pivot].addr == addr) return pivot;
-        if (gb->watchpoints[pivot].addr > addr) {
-            max = pivot - 1;
+        if (gb->watchpoints[pivot].key == key) return pivot;
+        if (gb->watchpoints[pivot].key > key) {
+            max = pivot;
         }
         else {
             min = pivot + 1;
@@ -724,6 +772,11 @@ static bool watch(GB_gameboy_t *gb, char *arguments)
     if (strlen(lstrip(arguments)) == 0) {
 print_usage:
         GB_log(gb, "Usage: watch (r|w|rw) <expression>[ if <condition expression>]\n");
+        return true;
+    }
+
+    if (gb->n_watchpoints == (typeof(gb->n_watchpoints)) -1) {
+        GB_log(gb, "Too many watchpoints set\n");
         return true;
     }
 
@@ -761,13 +814,14 @@ print_usage:
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
+    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint32_t key = WP_KEY(result);
 
     if (error) return true;
 
     uint16_t index = find_watchpoint(gb, result);
-    if (index < gb->n_watchpoints && gb->watchpoints[index].addr == result) {
-        GB_log(gb, "Watchpoint already set at %s\n", value_to_string(gb, result, true));
+    if (index < gb->n_watchpoints && gb->watchpoints[index].key == key) {
+        GB_log(gb, "Watchpoint already set at %s\n", debugger_value_to_string(gb, result, true));
         if (!gb->watchpoints[index].flags != flags) {
             GB_log(gb, "Modified watchpoint type\n");
             gb->watchpoints[index].flags = flags;
@@ -791,7 +845,7 @@ print_usage:
 
     gb->watchpoints = realloc(gb->watchpoints, (gb->n_watchpoints + 1) * sizeof(gb->watchpoints[0]));
     memmove(&gb->watchpoints[index + 1], &gb->watchpoints[index], (gb->n_watchpoints - index) * sizeof(gb->watchpoints[0]));
-    gb->watchpoints[index].addr = result;
+    gb->watchpoints[index].key = key;
     gb->watchpoints[index].flags = flags;
     if (condition) {
         gb->watchpoints[index].condition = strdup(condition);
@@ -801,7 +855,7 @@ print_usage:
     }
     gb->n_watchpoints++;
 
-    GB_log(gb, "Watchpoint set at %s\n", value_to_string(gb, result, true));
+    GB_log(gb, "Watchpoint set at %s\n", debugger_value_to_string(gb, result, true));
     return true;
 }
 
@@ -824,13 +878,14 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
+    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint32_t key = WP_KEY(result);
 
     if (error) return true;
 
     uint16_t index = find_watchpoint(gb, result);
-    if (index >= gb->n_watchpoints || gb->watchpoints[index].addr != result) {
-        GB_log(gb, "No watchpoint set at %s\n", value_to_string(gb, result, true));
+    if (index >= gb->n_watchpoints || gb->watchpoints[index].key != key) {
+        GB_log(gb, "No watchpoint set at %s\n", debugger_value_to_string(gb, result, true));
         return true;
     }
 
@@ -842,7 +897,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
     gb->n_watchpoints--;
     gb->watchpoints = realloc(gb->watchpoints, gb->n_watchpoints* sizeof(gb->watchpoints[0]));
 
-    GB_log(gb, "Watchpoint removed from %s\n", value_to_string(gb, result, true));
+    GB_log(gb, "Watchpoint removed from %s\n", debugger_value_to_string(gb, result, true));
     return true;
 }
 
@@ -859,13 +914,14 @@ static bool list(GB_gameboy_t *gb, char *arguments)
     else {
         GB_log(gb, "%d breakpoint(s) set:\n", gb->n_breakpoints);
         for (uint16_t i = 0; i < gb->n_breakpoints; i++) {
+            value_t addr = (value_t){gb->breakpoints[i].bank != (uint16_t)-1, gb->breakpoints[i].bank, gb->breakpoints[i].addr};
             if (gb->breakpoints[i].condition) {
                 GB_log(gb, " %d. %s (Condition: %s)\n", i + 1,
-                                                        value_to_string(gb, gb->breakpoints[i].addr, true),
+                                                        debugger_value_to_string(gb, addr, addr.has_bank),
                                                         gb->breakpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s\n", i + 1, value_to_string(gb, gb->breakpoints[i].addr, true));
+                GB_log(gb, " %d. %s\n", i + 1, debugger_value_to_string(gb, addr, addr.has_bank));
             }
         }
     }
@@ -876,14 +932,15 @@ static bool list(GB_gameboy_t *gb, char *arguments)
     else {
         GB_log(gb, "%d watchpoint(s) set:\n", gb->n_watchpoints);
         for (uint16_t i = 0; i < gb->n_watchpoints; i++) {
+            value_t addr = (value_t){gb->watchpoints[i].bank != (uint16_t)-1, gb->watchpoints[i].bank, gb->watchpoints[i].addr};
             if (gb->watchpoints[i].condition) {
-                GB_log(gb, " %d. %s (%c%c, Condition: %s)\n", i + 1, value_to_string(gb, gb->watchpoints[i].addr, true),
+                GB_log(gb, " %d. %s (%c%c, Condition: %s)\n", i + 1, debugger_value_to_string(gb, addr, addr.has_bank),
                                                               (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                               (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-',
                                                               gb->watchpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s (%c%c)\n", i + 1, value_to_string(gb, gb->watchpoints[i].addr, true),
+                GB_log(gb, " %d. %s (%c%c)\n", i + 1, debugger_value_to_string(gb,addr, addr.has_bank),
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_R)? 'r' : '-',
                                                (gb->watchpoints[i].flags & GB_WATCHPOINT_W)? 'w' : '-');
             }
@@ -893,10 +950,12 @@ static bool list(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool should_break(GB_gameboy_t *gb, uint16_t addr)
+static bool _should_break(GB_gameboy_t *gb, value_t addr)
 {
     uint16_t index = find_breakpoint(gb, addr);
-    if (index < gb->n_breakpoints && gb->breakpoints[index].addr == addr) {
+    uint32_t key = BP_KEY(addr);
+
+    if (index < gb->n_breakpoints && gb->breakpoints[index].key == key) {
         if (!gb->breakpoints[index].condition) {
             return true;
         }
@@ -911,6 +970,18 @@ static bool should_break(GB_gameboy_t *gb, uint16_t addr)
         return condition;
     }
     return false;
+}
+
+static bool should_break(GB_gameboy_t *gb, uint16_t addr)
+{
+    /* Try any-bank breakpoint */
+    value_t full_addr = (VALUE_16(addr));
+    if (_should_break(gb, full_addr)) return true;
+
+    /* Try bank-specific breakpoint */
+    full_addr.has_bank = true;
+    full_addr.bank = bank_for_addr(gb, addr);
+    return _should_break(gb, full_addr);
 }
 
 static bool print(GB_gameboy_t *gb, char *arguments)
@@ -1116,58 +1187,94 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
     }
 }
 
-void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
+static bool _GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, value_t addr, uint8_t value)
 {
     uint16_t index = find_watchpoint(gb, addr);
-    if (index < gb->n_watchpoints && gb->watchpoints[index].addr == addr) {
+    uint32_t key = WP_KEY(addr);
+
+    if (index < gb->n_watchpoints && gb->watchpoints[index].key == key) {
         if (!(gb->watchpoints[index].flags & GB_WATCHPOINT_W)) {
-            return;
+            return false;
         }
         if (!gb->watchpoints[index].condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%s] = $%02x\n", value_to_string(gb, addr, true), value);
-            return;
+            GB_log(gb, "Watchpoint: [%s] = $%02x\n", debugger_value_to_string(gb, addr, true), value);
+            return true;
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, &value).value;
+                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr.value, &value).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
-            return;
+            return false;
         }
         if (condition) {
             gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%s] = $%02x\n", value_to_string(gb, addr, true), value);
+            GB_log(gb, "Watchpoint: [%s] = $%02x\n", debugger_value_to_string(gb, addr, true), value);
+            return true;
         }
     }
+    return false;
+}
+
+void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
+{
+    if (gb->debug_stopped) return;
+
+    /* Try any-bank breakpoint */
+    value_t full_addr = (VALUE_16(addr));
+    if (_GB_debugger_test_write_watchpoint(gb, full_addr, value)) return;
+
+    /* Try bank-specific breakpoint */
+    full_addr.has_bank = true;
+    full_addr.bank = bank_for_addr(gb, addr);
+    _GB_debugger_test_write_watchpoint(gb, full_addr, value);
+}
+
+static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
+{
+    uint16_t index = find_breakpoint(gb, addr);
+    uint32_t key = WP_KEY(addr);
+
+    if (index < gb->n_watchpoints && gb->watchpoints[index].key == key) {
+        if (!(gb->watchpoints[index].flags & GB_WATCHPOINT_R)) {
+            return false;
+        }
+        if (!gb->watchpoints[index].condition) {
+            gb->debug_stopped = true;
+            GB_log(gb, "Watchpoint: [%s]\n", debugger_value_to_string(gb, addr, true));
+            return true;
+        }
+        bool error;
+        bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
+                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr.value, NULL).value;
+        if (error) {
+            /* Should never happen */
+            GB_log(gb, "An internal error has occured\n");
+            return false;
+        }
+        if (condition) {
+            gb->debug_stopped = true;
+            GB_log(gb, "Watchpoint: [%s]\n", debugger_value_to_string(gb, addr, true));
+            return true;
+        }
+    }
+    return false;
 }
 
 void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
 {
-    uint16_t index = find_breakpoint(gb, addr);
-    if (index < gb->n_watchpoints && gb->watchpoints[index].addr == addr) {
-        if (!(gb->watchpoints[index].flags & GB_WATCHPOINT_R)) {
-            return;
-        }
-        if (!gb->watchpoints[index].condition) {
-            gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%s]\n", value_to_string(gb, addr, true));
-            return;
-        }
-        bool error;
-        bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, NULL).value;
-        if (error) {
-            /* Should never happen */
-            GB_log(gb, "An internal error has occured\n");
-            return;
-        }
-        if (condition) {
-            gb->debug_stopped = true;
-            GB_log(gb, "Watchpoint: [%s]\n", value_to_string(gb, addr, true));
-        }
-    }
+    if (gb->debug_stopped) return;
+
+    /* Try any-bank breakpoint */
+    value_t full_addr = (VALUE_16(addr));
+    if (_GB_debugger_test_read_watchpoint(gb, full_addr)) return;
+
+    /* Try bank-specific breakpoint */
+    full_addr.has_bank = true;
+    full_addr.bank = bank_for_addr(gb, addr);
+    _GB_debugger_test_read_watchpoint(gb, full_addr);
 }
 
 void GB_debugger_run(GB_gameboy_t *gb)
@@ -1263,22 +1370,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr)
 {
-    uint16_t bank = 0;
-    if (addr < 0x4000) {
-        bank = gb->mbc_rom0_bank;
-    }
-    else if (addr < 0x8000) {
-        bank = gb->mbc_rom_bank;
-    }
-
-    else if (addr < 0xD000) {
-        bank = 0;
-    }
-    else if (addr < 0xE000) {
-        bank = gb->cgb_ram_bank;
-    }
-
-    if (bank > 0x1FF)  return NULL;
+    uint16_t bank = bank_for_addr(gb, addr);
 
     const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[bank], addr);
     if (symbol) return symbol;
