@@ -936,13 +936,45 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
+    value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
     if (!error) {
-        GB_log(gb, "%4x: ", addr);
-        for (int i = 0; i < 16; i++) {
-            GB_log(gb, "%02x ", GB_read_memory(gb, addr + i));
+        if (addr.has_bank) {
+            uint16_t old_rom0_bank = gb->mbc_rom0_bank;
+            uint16_t old_rom_bank = gb->mbc_rom_bank;
+            uint8_t old_mbc_ram_bank = gb->mbc_ram_bank;
+            bool old_mbc_ram_enable = gb->mbc_ram_enable;
+            uint8_t old_ram_bank = gb->cgb_ram_bank;
+            uint8_t old_vram_bank = gb->cgb_vram_bank;
+
+            gb->mbc_rom0_bank = addr.bank;
+            gb->mbc_rom_bank = addr.bank;
+            gb->mbc_ram_bank = addr.bank;
+            gb->mbc_ram_enable = true;
+            if (gb->is_cgb) {
+                gb->cgb_ram_bank = addr.bank & 7;
+                gb->cgb_vram_bank = addr.bank & 1;
+            }
+
+            GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
+            for (int i = 0; i < 16; i++) {
+                GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+            }
+            GB_log(gb, "\n");
+
+            gb->mbc_rom0_bank = old_rom0_bank;
+            gb->mbc_rom_bank = old_rom_bank;
+            gb->mbc_ram_bank = old_mbc_ram_bank;
+            gb->mbc_ram_enable = old_mbc_ram_enable;
+            gb->cgb_ram_bank = old_ram_bank;
+            gb->cgb_vram_bank = old_vram_bank;
         }
-        GB_log(gb, "\n");
+        else {
+            GB_log(gb, "%04x: ", addr.value);
+            for (int i = 0; i < 16; i++) {
+                GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+            }
+            GB_log(gb, "\n");
+        }
     }
     return true;
 }
