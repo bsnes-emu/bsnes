@@ -361,7 +361,7 @@ typedef struct GB_gameboy_s {
     struct GB_watchpoint_s *watchpoints;
 
     /* Symbol table */
-    GB_symbol_map_t *bank_symbols[0x100];
+    GB_symbol_map_t *bank_symbols[0x200];
 
     /* Misc */
     bool turbo;

@@ -20,6 +20,14 @@ typedef struct {
     };
 } lvalue_t;
 
+typedef struct {
+    bool has_bank;
+    uint16_t bank:9;
+    uint16_t value;
+} value_t;
+
+#define VALUE_16(x) ((value_t){false, 0, (x)})
+
 struct GB_breakpoint_s {
     uint16_t addr;
     char *condition;
@@ -73,21 +81,61 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
     return output;
 }
 
-static uint16_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
+static const char *debugger_value_to_string(GB_gameboy_t *gb, value_t value, bool prefer_name)
+{
+    if (!value.has_bank) return value_to_string(gb, value.value, prefer_name);
+
+    static __thread char output[256];
+    const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[value.bank], value.value);
+
+    if (symbol && (value.value - symbol->addr > 0x1000 || symbol->addr == 0) ) {
+        symbol = NULL;
+    }
+
+    /* Avoid overflow */
+    if (symbol && strlen(symbol->name) > 240) {
+        symbol = NULL;
+    }
+
+    if (!symbol) {
+        sprintf(output, "$%02x:$%04x", value.bank, value.value);
+    }
+
+    else if (symbol->addr == value.value) {
+        if (prefer_name) {
+            sprintf(output, "%s ($%02x:$%04x)", symbol->name, value.bank, value.value);
+        }
+        else {
+            sprintf(output, "$%02x:$%04x (%s)", value.bank, value.value, symbol->name);
+        }
+    }
+
+    else {
+        if (prefer_name) {
+            sprintf(output, "%s+$%03x ($%02x:$%04x)", symbol->name, value.value - symbol->addr, value.bank, value.value);
+        }
+        else {
+            sprintf(output, "$%02x:$%04x (%s+$%03x)", value.bank, value.value, symbol->name, value.value - symbol->addr);
+        }
+    }
+    return output;
+}
+
+static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
 {
     /* Not used until we add support for operators like += */
     switch (lvalue.kind) {
         case LVALUE_MEMORY:
-            return GB_read_memory(gb, lvalue.memory_address);
+            return VALUE_16(GB_read_memory(gb, lvalue.memory_address));
 
         case LVALUE_REG16:
-            return *lvalue.register_address;
+            return VALUE_16(*lvalue.register_address);
 
         case LVALUE_REG_L:
-            return *lvalue.register_address & 0x00FF;
+            return VALUE_16(*lvalue.register_address & 0x00FF);
 
         case LVALUE_REG_H:
-            return *lvalue.register_address >> 8;
+            return VALUE_16(*lvalue.register_address >> 8);
     }
 }
 
@@ -114,46 +162,57 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
     }
 }
 
-static uint16_t add(uint16_t a, uint16_t b) {return  a + b;};
-static uint16_t sub(uint16_t a, uint16_t b) {return  a - b;};
-static uint16_t mul(uint16_t a, uint16_t b) {return  a * b;};
-static uint16_t _div(uint16_t a, uint16_t b) {
-    if (b == 0) {
-        return 0;
+/* 16 bit value   <op> 16 bit value   = 16 bit value
+   25 bit address <op> 16 bit value   = 25 bit address
+   16 bit value   <op> 25 bit address = 25 bit address
+   25 bit address <op> 25 bit address = 16 bit value (since adding pointers, for examples, makes no sense)
+ 
+   Boolean operators always return a 16-bit value
+   */
+#define FIX_BANK(x) ((value_t){a.has_bank ^ b.has_bank, a.has_bank? a.bank : b.bank, (x)})
+
+static value_t add(value_t a, value_t b) {return FIX_BANK(a.value + b.value);}
+static value_t sub(value_t a, value_t b) {return FIX_BANK(a.value - b.value);}
+static value_t mul(value_t a, value_t b) {return FIX_BANK(a.value * b.value);}
+static value_t _div(value_t a, value_t b) {
+    if (b.value == 0) {
+        return FIX_BANK(0);
     }
-    return  a / b;
+    return FIX_BANK(a.value / b.value);
 };
-static uint16_t mod(uint16_t a, uint16_t b) {
-    if (b == 0) {
-        return 0;
+static value_t mod(value_t a, value_t b) {
+    if (b.value == 0) {
+        return FIX_BANK(0);
     }
-    return  a % b;
+    return FIX_BANK(a.value % b.value);
 };
-static uint16_t and(uint16_t a, uint16_t b) {return  a & b;};
-static uint16_t or(uint16_t a, uint16_t b) {return  a | b;};
-static uint16_t xor(uint16_t a, uint16_t b) {return  a ^ b;};
-static uint16_t shleft(uint16_t a, uint16_t b) {return  a << b;};
-static uint16_t shright(uint16_t a, uint16_t b) {return  a >> b;};
-static uint16_t assign(GB_gameboy_t *gb, lvalue_t a, uint16_t b)
+static value_t and(value_t a, value_t b) {return FIX_BANK(a.value & b.value);}
+static value_t or(value_t a, value_t b) {return FIX_BANK(a.value | b.value);}
+static value_t xor(value_t a, value_t b) {return FIX_BANK(a.value ^ b.value);}
+static value_t shleft(value_t a, value_t b) {return FIX_BANK(a.value << b.value);}
+static value_t shright(value_t a, value_t b) {return FIX_BANK(a.value >> b.value);}
+static value_t assign(GB_gameboy_t *gb, lvalue_t a, uint16_t b)
 {
     write_lvalue(gb, a, b);
     return read_lvalue(gb, a);
 }
 
-static uint16_t bool_and(uint16_t a, uint16_t b) {return  a && b;};
-static uint16_t bool_or(uint16_t a, uint16_t b) {return  a || b;};
-static uint16_t equals(uint16_t a, uint16_t b) {return  a == b;};
-static uint16_t different(uint16_t a, uint16_t b) {return  a != b;};
-static uint16_t lower(uint16_t a, uint16_t b) {return  a < b;};
-static uint16_t greater(uint16_t a, uint16_t b) {return  a > b;};
-static uint16_t lower_equals(uint16_t a, uint16_t b) {return  a <= b;};
-static uint16_t greater_equals(uint16_t a, uint16_t b) {return  a >= b;};
+static value_t bool_and(value_t a, value_t b) {return VALUE_16(a.value && b.value);}
+static value_t bool_or(value_t a, value_t b) {return VALUE_16(a.value || b.value);}
+static value_t equals(value_t a, value_t b) {return VALUE_16(a.value == b.value);}
+static value_t different(value_t a, value_t b) {return VALUE_16(a.value != b.value);}
+static value_t lower(value_t a, value_t b) {return VALUE_16(a.value < b.value);}
+static value_t greater(value_t a, value_t b) {return VALUE_16(a.value > b.value);}
+static value_t lower_equals(value_t a, value_t b) {return VALUE_16(a.value <= b.value);}
+static value_t greater_equals(value_t a, value_t b) {return VALUE_16(a.value >= b.value);}
+static value_t bank(value_t a, value_t b) {return (value_t) {true, a.value, b.value};}
+
 
 static struct {
     const char *string;
     char priority;
-    uint16_t (*operator)(uint16_t, uint16_t);
-    uint16_t (*lvalue_operator)(GB_gameboy_t *, lvalue_t, uint16_t);
+    value_t (*operator)(value_t, value_t);
+    value_t (*lvalue_operator)(GB_gameboy_t *, lvalue_t, uint16_t);
 } operators[] =
 {
     // Yes. This is not C-like. But it makes much more sense.
@@ -177,9 +236,10 @@ static struct {
     {"==", 3, equals},
     {"=", -1, NULL, assign},
     {"!=", 3, different},
+    {":", 4, bank},
 };
 
-uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
+value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                            unsigned int length, bool *error,
                            uint16_t *watchpoint_address, uint8_t *watchpoint_new_value);
 
@@ -229,7 +289,8 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
             if (string[i] == ']') depth--;
         }
         if (depth == 0) {
-            return (lvalue_t){LVALUE_MEMORY, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value)};
+            /* Todo: Warn the user when dereferencing a specific bank, but it's not mapped */
+            return (lvalue_t){LVALUE_MEMORY, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value).value};
         }
     }
 
@@ -267,9 +328,10 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     return (lvalue_t){0,};
 }
 
-uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
-                           unsigned int length, bool *error,
-                           uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
+#define ERROR ((value_t){0,})
+value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
+                          unsigned int length, bool *error,
+                          uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
 {
     *error = false;
     // Strip whitespace
@@ -284,7 +346,7 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     {
         GB_log(gb, "Expected expression.\n");
         *error = true;
-        return -1;
+        return ERROR;
     }
     if (string[0] == '(' && string[length - 1] == ')') {
         // Attempt to strip parentheses
@@ -312,7 +374,13 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             }
             if (string[i] == ']') depth--;
         }
-        if (depth == 0) return GB_read_memory(gb, debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value));
+        /* Todo: Warn the user when dereferencing a specific bank, but it's not mapped */
+        if (depth == 0)
+            return VALUE_16(
+                       GB_read_memory(gb,
+                           debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value).value
+                       )
+                   );
     }
     // Search for lowest priority operator
     signed int depth = 0;
@@ -342,15 +410,15 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     if (operator_index != -1) {
         unsigned int right_start = (unsigned int)(operator_pos + strlen(operators[operator_index].string));
-        uint16_t right = debugger_evaluate(gb, string + right_start, length - right_start, error, watchpoint_address, watchpoint_new_value);
-        if (*error) return  -1;
+        value_t right = debugger_evaluate(gb, string + right_start, length - right_start, error, watchpoint_address, watchpoint_new_value);
+        if (*error) return ERROR;
         if (operators[operator_index].lvalue_operator) {
             lvalue_t left = debugger_evaluate_lvalue(gb, string, operator_pos, error, watchpoint_address, watchpoint_new_value);
-            if (*error) return  -1;
-            return operators[operator_index].lvalue_operator(gb, left, right);
+            if (*error) return ERROR;
+            return operators[operator_index].lvalue_operator(gb, left, right.value);
         }
-        uint16_t left = debugger_evaluate(gb, string, operator_pos, error, watchpoint_address, watchpoint_new_value);
-        if (*error) return  -1;
+        value_t left = debugger_evaluate(gb, string, operator_pos, error, watchpoint_address, watchpoint_new_value);
+        if (*error) return ERROR;
         return operators[operator_index].operator(left, right);
     }
 
@@ -360,43 +428,43 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
         if (length == 1) {
             switch (string[0]) {
-                case 'a': return gb->registers[GB_REGISTER_AF] >> 8;
-                case 'f': return gb->registers[GB_REGISTER_AF] & 0xFF;
-                case 'b': return gb->registers[GB_REGISTER_BC] >> 8;
-                case 'c': return gb->registers[GB_REGISTER_BC] & 0xFF;
-                case 'd': return gb->registers[GB_REGISTER_DE] >> 8;
-                case 'e': return gb->registers[GB_REGISTER_DE] & 0xFF;
-                case 'h': return gb->registers[GB_REGISTER_HL] >> 8;
-                case 'l': return gb->registers[GB_REGISTER_HL] & 0xFF;
+                case 'a': return VALUE_16(gb->registers[GB_REGISTER_AF] >> 8);
+                case 'f': return VALUE_16(gb->registers[GB_REGISTER_AF] & 0xFF);
+                case 'b': return VALUE_16(gb->registers[GB_REGISTER_BC] >> 8);
+                case 'c': return VALUE_16(gb->registers[GB_REGISTER_BC] & 0xFF);
+                case 'd': return VALUE_16(gb->registers[GB_REGISTER_DE] >> 8);
+                case 'e': return VALUE_16(gb->registers[GB_REGISTER_DE] & 0xFF);
+                case 'h': return VALUE_16(gb->registers[GB_REGISTER_HL] >> 8);
+                case 'l': return VALUE_16(gb->registers[GB_REGISTER_HL] & 0xFF);
             }
         }
         else if (length == 2) {
             switch (string[0]) {
-                case 'a': if (string[1] == 'f') return gb->registers[GB_REGISTER_AF];
-                case 'b': if (string[1] == 'c') return gb->registers[GB_REGISTER_BC];
-                case 'd': if (string[1] == 'e') return gb->registers[GB_REGISTER_DE];
-                case 'h': if (string[1] == 'l') return gb->registers[GB_REGISTER_HL];
-                case 's': if (string[1] == 'p') return gb->registers[GB_REGISTER_SP];
-                case 'p': if (string[1] == 'c') return gb->pc;
+                case 'a': if (string[1] == 'f') return VALUE_16(gb->registers[GB_REGISTER_AF]);
+                case 'b': if (string[1] == 'c') return VALUE_16(gb->registers[GB_REGISTER_BC]);
+                case 'd': if (string[1] == 'e') return VALUE_16(gb->registers[GB_REGISTER_DE]);
+                case 'h': if (string[1] == 'l') return VALUE_16(gb->registers[GB_REGISTER_HL]);
+                case 's': if (string[1] == 'p') return VALUE_16(gb->registers[GB_REGISTER_SP]);
+                case 'p': if (string[1] == 'c') return VALUE_16(gb->pc);
             }
         }
         else if (length == 3) {
             if (watchpoint_address && memcmp(string, "old", 3) == 0) {
-                return GB_read_memory(gb, *watchpoint_address);
+                return VALUE_16(GB_read_memory(gb, *watchpoint_address));
             }
 
             if (watchpoint_new_value && memcmp(string, "new", 3) == 0) {
-                return *watchpoint_new_value;
+                return VALUE_16(*watchpoint_new_value);
             }
 
             /* $new is identical to $old in read conditions */
             if (watchpoint_address && memcmp(string, "new", 3) == 0) {
-                return GB_read_memory(gb, *watchpoint_address);
+                return VALUE_16(GB_read_memory(gb, *watchpoint_address));
             }
         }
         GB_log(gb, "Unknown register: %.*s\n", length, string);
         *error = true;
-        return -1;
+        return ERROR;
     }
 
     char *end;
@@ -410,9 +478,9 @@ uint16_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (end != string + length) {
         GB_log(gb, "Failed to parse: %.*s\n", length, string);
         *error = true;
-        return -1;
+        return ERROR;
     }
-    return literal;
+    return VALUE_16(literal);
 }
 
 typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments);
@@ -550,7 +618,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
 
     if (error) return true;
 
@@ -608,7 +676,7 @@ static bool delete(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
 
     if (error) return true;
 
@@ -693,7 +761,7 @@ print_usage:
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
 
     if (error) return true;
 
@@ -756,7 +824,7 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
 
     if (error) return true;
 
@@ -834,7 +902,7 @@ static bool should_break(GB_gameboy_t *gb, uint16_t addr)
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->breakpoints[index].condition,
-                                           (unsigned int)strlen(gb->breakpoints[index].condition), &error, NULL, NULL);
+                                           (unsigned int)strlen(gb->breakpoints[index].condition), &error, NULL, NULL).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -853,9 +921,9 @@ static bool print(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
     if (!error) {
-        GB_log(gb, "=%s\n", value_to_string(gb, result, false));
+        GB_log(gb, "=%s\n", debugger_value_to_string(gb, result, false));
     }
     return true;
 }
@@ -868,7 +936,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
     }
 
     bool error;
-    uint16_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL).value;
     if (!error) {
         GB_log(gb, "%4x: ", addr);
         for (int i = 0; i < 16; i++) {
@@ -1030,7 +1098,7 @@ void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t 
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, &value);
+                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, &value).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -1057,7 +1125,7 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
         }
         bool error;
         bool condition = debugger_evaluate(gb, gb->watchpoints[index].condition,
-                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, NULL);
+                                           (unsigned int)strlen(gb->watchpoints[index].condition), &error, &addr, NULL).value;
         if (error) {
             /* Should never happen */
             GB_log(gb, "An internal error has occured\n");
@@ -1150,6 +1218,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
         char symbol[length];
 
         if (sscanf(line, "%02x:%04x %s", &bank, &address, symbol) == 3) {
+            bank &= 0x1FF;
             if (!gb->bank_symbols[bank]) {
                 gb->bank_symbols[bank] = GB_map_alloc();
             }
@@ -1162,7 +1231,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr)
 {
-    unsigned char bank = 0;
+    uint16_t bank = 0;
     if (addr < 0x4000) {
         bank = gb->mbc_rom0_bank;
     }
@@ -1177,9 +1246,12 @@ const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr)
         bank = gb->cgb_ram_bank;
     }
 
+    if (bank > 0x1FF)  return NULL;
+
     const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[bank], addr);
     if (symbol) return symbol;
-    if (bank != 0) GB_map_find_symbol(gb->bank_symbols[0], addr); /* Maybe the symbol incorrectly uses bank 0? */
+    if (bank != 0) return GB_map_find_symbol(gb->bank_symbols[0], addr); /* Maybe the symbol incorrectly uses bank 0? */
+
     return NULL;
 }
 

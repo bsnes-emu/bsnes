@@ -137,7 +137,7 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
-    for (unsigned char i = 0; i--;) {
+    for (int i = 0x200; i--;) {
         if (gb->bank_symbols[i]) {
             GB_map_free(gb->bank_symbols[i]);
         }
