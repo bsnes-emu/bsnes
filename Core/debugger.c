@@ -481,7 +481,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                 case 'd': if (string[1] == 'e') return VALUE_16(gb->registers[GB_REGISTER_DE]);
                 case 'h': if (string[1] == 'l') return VALUE_16(gb->registers[GB_REGISTER_HL]);
                 case 's': if (string[1] == 'p') return VALUE_16(gb->registers[GB_REGISTER_SP]);
-                case 'p': if (string[1] == 'c') return VALUE_16(gb->pc);
+                case 'p': if (string[1] == 'c') return (value_t){true, bank_for_addr(gb, gb->pc), gb->pc};
             }
         }
         else if (length == 3) {
