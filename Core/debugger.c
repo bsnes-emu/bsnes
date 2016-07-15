@@ -6,6 +6,11 @@
 #include "z80_cpu.h"
 #include "gb.h"
 
+typedef struct {
+    bool has_bank;
+    uint16_t bank:9;
+    uint16_t value;
+} value_t;
 
 typedef struct {
     enum {
@@ -16,15 +21,9 @@ typedef struct {
     } kind;
     union {
         uint16_t *register_address;
-        uint16_t memory_address;
+        value_t memory_address;
     };
 } lvalue_t;
-
-typedef struct {
-    bool has_bank;
-    uint16_t bank:9;
-    uint16_t value;
-} value_t;
 
 #define VALUE_16(x) ((value_t){false, 0, (x)})
 
@@ -77,6 +76,48 @@ static uint16_t bank_for_addr(GB_gameboy_t *gb, uint16_t addr)
     }
 
     return 0;
+}
+
+typedef struct {
+    uint16_t rom0_bank;
+    uint16_t rom_bank;
+    uint8_t mbc_ram_bank;
+    bool mbc_ram_enable;
+    uint8_t ram_bank;
+    uint8_t vram_bank;
+} banking_state_t;
+
+static inline void save_banking_state(GB_gameboy_t *gb, banking_state_t *state)
+{
+    state->rom0_bank = gb->mbc_rom0_bank;
+    state->rom_bank = gb->mbc_rom_bank;
+    state->mbc_ram_bank = gb->mbc_ram_bank;
+    state->mbc_ram_enable = gb->mbc_ram_enable;
+    state->ram_bank = gb->cgb_ram_bank;
+    state->vram_bank = gb->cgb_vram_bank;
+}
+
+static inline void restore_banking_state(GB_gameboy_t *gb, banking_state_t *state)
+{
+
+    gb->mbc_rom0_bank = state->rom0_bank;
+    gb->mbc_rom_bank = state->rom_bank;
+    gb->mbc_ram_bank = state->mbc_ram_bank;
+    gb->mbc_ram_enable = state->mbc_ram_enable;
+    gb->cgb_ram_bank = state->ram_bank;
+    gb->cgb_vram_bank = state->vram_bank;
+}
+
+static inline void switch_banking_state(GB_gameboy_t *gb, uint16_t bank)
+{
+    gb->mbc_rom0_bank = bank;
+    gb->mbc_rom_bank = bank;
+    gb->mbc_ram_bank = bank;
+    gb->mbc_ram_enable = true;
+    if (gb->is_cgb) {
+        gb->cgb_ram_bank = bank & 7;
+        gb->cgb_vram_bank = bank & 1;
+    }
 }
 
 static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer_name)
@@ -162,7 +203,15 @@ static value_t read_lvalue(GB_gameboy_t *gb, lvalue_t lvalue)
     /* Not used until we add support for operators like += */
     switch (lvalue.kind) {
         case LVALUE_MEMORY:
-            return VALUE_16(GB_read_memory(gb, lvalue.memory_address));
+            if (lvalue.memory_address.has_bank) {
+                banking_state_t state;
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, lvalue.memory_address.bank);
+                value_t r = VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
+                restore_banking_state(gb, &state);
+                return r;
+            }
+            return VALUE_16(GB_read_memory(gb, lvalue.memory_address.value));
 
         case LVALUE_REG16:
             return VALUE_16(*lvalue.register_address);
@@ -179,7 +228,15 @@ static void write_lvalue(GB_gameboy_t *gb, lvalue_t lvalue, uint16_t value)
 {
     switch (lvalue.kind) {
         case LVALUE_MEMORY:
-            GB_write_memory(gb, lvalue.memory_address, value);
+            if (lvalue.memory_address.has_bank) {
+                banking_state_t state;
+                save_banking_state(gb, &state);
+                switch_banking_state(gb, lvalue.memory_address.bank);
+                GB_write_memory(gb, lvalue.memory_address.value, value);
+                restore_banking_state(gb, &state);
+                return;
+            }
+            GB_write_memory(gb, lvalue.memory_address.value, value);
             return;
 
         case LVALUE_REG16:
@@ -325,8 +382,7 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
             if (string[i] == ']') depth--;
         }
         if (depth == 0) {
-            /* Todo: Warn the user when dereferencing a specific bank, but it's not mapped */
-            return (lvalue_t){LVALUE_MEMORY, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value).value};
+            return (lvalue_t){LVALUE_MEMORY, .memory_address = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value)};
         }
     }
 
@@ -410,13 +466,17 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             }
             if (string[i] == ']') depth--;
         }
-        /* Todo: Warn the user when dereferencing a specific bank, but it's not mapped */
-        if (depth == 0)
-            return VALUE_16(
-                       GB_read_memory(gb,
-                           debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value).value
-                       )
-                   );
+
+        if (depth == 0) {
+            value_t addr = debugger_evaluate(gb, string + 1, length - 2, error, watchpoint_address, watchpoint_new_value);
+            banking_state_t state;
+            save_banking_state(gb, &state);
+            switch_banking_state(gb, addr.bank);
+            value_t r = VALUE_16(GB_read_memory(gb, addr.value));
+            restore_banking_state(gb, &state);
+            return r;
+        }
+
     }
     // Search for lowest priority operator
     signed int depth = 0;
@@ -1019,21 +1079,9 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
     value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
     if (!error) {
         if (addr.has_bank) {
-            uint16_t old_rom0_bank = gb->mbc_rom0_bank;
-            uint16_t old_rom_bank = gb->mbc_rom_bank;
-            uint8_t old_mbc_ram_bank = gb->mbc_ram_bank;
-            bool old_mbc_ram_enable = gb->mbc_ram_enable;
-            uint8_t old_ram_bank = gb->cgb_ram_bank;
-            uint8_t old_vram_bank = gb->cgb_vram_bank;
-
-            gb->mbc_rom0_bank = addr.bank;
-            gb->mbc_rom_bank = addr.bank;
-            gb->mbc_ram_bank = addr.bank;
-            gb->mbc_ram_enable = true;
-            if (gb->is_cgb) {
-                gb->cgb_ram_bank = addr.bank & 7;
-                gb->cgb_vram_bank = addr.bank & 1;
-            }
+            banking_state_t old_state;
+            save_banking_state(gb, &old_state);
+            switch_banking_state(gb, addr.bank);
 
             GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
             for (int i = 0; i < 16; i++) {
@@ -1041,12 +1089,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
             }
             GB_log(gb, "\n");
 
-            gb->mbc_rom0_bank = old_rom0_bank;
-            gb->mbc_rom_bank = old_rom_bank;
-            gb->mbc_ram_bank = old_mbc_ram_bank;
-            gb->mbc_ram_enable = old_mbc_ram_enable;
-            gb->cgb_ram_bank = old_ram_bank;
-            gb->cgb_vram_bank = old_vram_bank;
+            restore_banking_state(gb, &old_state);
         }
         else {
             GB_log(gb, "%04x: ", addr.value);
