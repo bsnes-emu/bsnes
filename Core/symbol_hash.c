@@ -56,7 +56,7 @@ GB_symbol_map_t *GB_map_alloc(void)
 
 void GB_map_free(GB_symbol_map_t *map)
 {
-    for (unsigned char i = 0; i < map->n_symbols; i++) {
+    for (unsigned i = 0; i < map->n_symbols; i++) {
         free(map->symbols[i].name);
     }
 
