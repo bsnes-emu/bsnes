@@ -142,6 +142,13 @@ void GB_free(GB_gameboy_t *gb)
             GB_map_free(gb->bank_symbols[i]);
         }
     }
+    for (int i = 0x400; i--;) {
+        if (gb->reversed_symbol_map.buckets[i]) {
+            GB_symbol_t *next = gb->reversed_symbol_map.buckets[i]->next;
+            free(gb->reversed_symbol_map.buckets[i]);
+            gb->reversed_symbol_map.buckets[i] = next;
+        }
+    }
 }
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)

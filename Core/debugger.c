@@ -498,7 +498,16 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
                 return VALUE_16(GB_read_memory(gb, *watchpoint_address));
             }
         }
-        GB_log(gb, "Unknown register: %.*s\n", length, string);
+
+        char symbol_name[length + 1];
+        memcpy(symbol_name, string, length);
+        symbol_name[length] = 0;
+        const GB_symbol_t *symbol = GB_reversed_map_find_symbol(&gb->reversed_symbol_map, symbol_name);
+        if (symbol) {
+            return (value_t){true, symbol->bank, symbol->addr};
+        }
+
+        GB_log(gb, "Unknown register or symbol: %.*s\n", length, string);
         *error = true;
         return ERROR;
     }
@@ -1361,7 +1370,10 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
             if (!gb->bank_symbols[bank]) {
                 gb->bank_symbols[bank] = GB_map_alloc();
             }
-            GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
+            GB_bank_symbol_t *allocated_symbol = GB_map_add_symbol(gb->bank_symbols[bank], address, symbol);
+            if (allocated_symbol) {
+                GB_reversed_map_add_symbol(&gb->reversed_symbol_map, bank, allocated_symbol);
+            }
         }
     }
     free(line);

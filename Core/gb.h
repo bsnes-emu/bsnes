@@ -360,8 +360,9 @@ typedef struct GB_gameboy_s {
     uint16_t n_watchpoints;
     struct GB_watchpoint_s *watchpoints;
 
-    /* Symbol table */
+    /* Symbol tables */
     GB_symbol_map_t *bank_symbols[0x200];
+    GB_reversed_symbol_map_t reversed_symbol_map;
 
     /* Misc */
     bool turbo;
