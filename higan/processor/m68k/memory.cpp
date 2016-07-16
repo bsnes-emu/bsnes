@@ -16,22 +16,19 @@ auto M68K::readLong(uint32 addr) -> uint32 {
 
 //
 
-auto M68K::readWordPC() -> uint16 {
-  uint16 data = readWord(r.pc);
+auto M68K::read(uint size, uint32 addr) -> uint32 {
+  if(size == Byte) return readByte(addr);
+  if(size == Word) return readWord(addr);
+  if(size == Long) return readLong(addr);
+  return 0;
+}
+
+auto M68K::readPC(uint size) -> uint32 {
+  uint32 data = readWord(r.pc);
+  r.pc += 2;
+  if(size == Byte) return (uint8)data;
+  if(size == Word) return data;
+  data = data << 16 | readWord(r.pc);
   r.pc += 2;
   return data;
-}
-
-auto M68K::readLongPC() -> uint32 {
-  uint32 data  = readWordPC() << 16;
-  return data |= readWordPC() <<  0;
-}
-
-//
-
-auto M68K::readAbsolute(uint2 size, uint32 addr) -> uint32 {
-  if(size == 0) return readByte(addr);
-  if(size == 1) return readWord(addr);
-  if(size == 2) return readLong(addr);
-  return 0;
 }
