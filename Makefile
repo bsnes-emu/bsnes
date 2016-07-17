@@ -11,13 +11,13 @@ OBJ := build/obj
 
 CC := clang
 
-CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE
+CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)"
 SDL_LDFLAGS := -lSDL
 LDFLAGS += -lc -lm
 CONF ?= debug
 
 ifeq ($(shell uname -s),Darwin)
-CFLAGS += -F/Library/Frameworks -DVERSION="$(VERSION)"
+CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework Carbon
 SDL_LDFLAGS := -framework SDL

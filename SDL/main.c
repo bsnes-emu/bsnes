@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+#include <signal.h>
 #include <SDL/SDL.h>
 
 #include "gb.h"
