@@ -7,6 +7,7 @@
 #include <SDL/SDL.h>
 
 #include "gb.h"
+#include "debugger.h"
 
 static bool running = false;
 
@@ -142,6 +143,24 @@ static void audio_callback(void *gb, Uint8 *stream, int len)
     GB_apu_copy_buffer(gb, (GB_sample_t *) stream, len / sizeof(GB_sample_t));
 }
 
+static void replace_extension(const char *src, size_t length, char *dest, const char *ext)
+{
+    memcpy(dest, src, length);
+    dest[length] = 0;
+
+    /* Remove extension */
+    for (size_t i = length; i--;) {
+        if (dest[i] == '/') break;
+        if (dest[i] == '.') {
+            dest[i] = 0;
+            break;
+        }
+    }
+
+    /* Add new extension */
+    strcat(dest, ext);
+}
+
 #ifdef __APPLE__
 extern void cocoa_disable_filtering(void);
 #endif
@@ -204,24 +223,17 @@ usage:
     GB_set_pixels_output(&gb, screen->pixels);
     GB_set_rgb_encode_callback(&gb, rgb_encode);
 
-    /* Configure battery */
     size_t path_length = strlen(argv[argc - 1]);
+
+    /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
-    memcpy(battery_save_path, argv[argc - 1], path_length);
-
-    /* Remove extension */
-    for (size_t i = path_length; i--;) {
-        if (battery_save_path[i] == '/') break;
-        if (battery_save_path[i] == '.') {
-            battery_save_path[i] = 0;
-            break;
-        }
-    }
-
-    /* Add .sav */
-    strcat(battery_save_path, ".sav");
-
+    replace_extension(argv[argc - 1], path_length, battery_save_path, ".sav");
     GB_load_battery(&gb, battery_save_path);
+
+    /* Configure symbols */
+    char symbols_path[path_length + 5];
+    replace_extension(argv[argc - 1], path_length, symbols_path, ".sym");
+    GB_debugger_load_symbol_file(&gb, symbols_path);
 
     /* Configure Audio */
     SDL_AudioSpec want, have;
