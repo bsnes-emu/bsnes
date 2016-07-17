@@ -13,6 +13,7 @@
     unsigned long pendingLogLines;
     bool tooMuchLogs;
     bool fullScreen;
+    bool in_sync_input;
 
     NSString *lastConsoleInput;
 }
@@ -21,6 +22,7 @@
 - (void) vblank;
 - (void) log: (const char *) log withAttributes: (GB_log_attributes) attributes;
 - (const char *) getDebuggerInput;
+- (const char *) getAsyncDebuggerInput;
 @end
 
 static void vblank(GB_gameboy_t *gb)
@@ -39,6 +41,13 @@ static char *consoleInput(GB_gameboy_t *gb)
 {
     Document *self = (__bridge Document *)(gb->user_data);
     return strdup([self getDebuggerInput]);
+}
+
+static char *asyncConsoleInput(GB_gameboy_t *gb)
+{
+    Document *self = (__bridge Document *)(gb->user_data);
+    const char *ret = [self getAsyncDebuggerInput];
+    return ret? strdup(ret) : NULL;
 }
 
 static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
@@ -78,6 +87,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
+    GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     gb.user_data = (__bridge void *)(self);
 }
@@ -89,6 +99,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
+    GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_rgb_encode_callback(&gb, rgbEncode);
     gb.user_data = (__bridge void *)(self);
 }
@@ -370,6 +381,10 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     else {
         line = @"";
     }
+
+    if (!in_sync_input) {
+        [self log:">"];
+    }
     [self log:[line UTF8String]];
     [self log:"\n"];
     [has_debugger_input lock];
@@ -382,9 +397,22 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (const char *) getDebuggerInput
 {
     [self log:">"];
+    in_sync_input = true;
     [has_debugger_input lockWhenCondition:1];
     NSString *input = [debugger_input_queue firstObject];
     [debugger_input_queue removeObjectAtIndex:0];
+    [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
+    in_sync_input = false;
+    return [input UTF8String];
+}
+
+- (const char *) getAsyncDebuggerInput
+{
+    [has_debugger_input lock];
+    NSString *input = [debugger_input_queue firstObject];
+    if (input) {
+        [debugger_input_queue removeObjectAtIndex:0];
+    }
     [has_debugger_input unlockWithCondition:[debugger_input_queue count] != 0];
     return [input UTF8String];
 }

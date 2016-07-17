@@ -1309,6 +1309,7 @@ static GB_opcode_t *opcodes[256] = {
 
 void GB_cpu_run(GB_gameboy_t *gb)
 {
+    gb->vblank_just_occured = false;
     bool interrupt = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
     if (interrupt) {
         gb->halted = false;
@@ -1339,5 +1340,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     else {
         GB_advance_cycles(gb, 4);
+    }
+
+    if (gb->vblank_just_occured) {
+        GB_rtc_run(gb);
+        GB_debugger_handle_async_commands(gb);
     }
 }

@@ -430,6 +430,11 @@ void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
     gb->input_callback = callback;
 }
 
+void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
+{
+    gb->async_input_callback = callback;
+}
+
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
     gb->rgb_encode_callback = callback;

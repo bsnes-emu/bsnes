@@ -339,6 +339,7 @@ typedef struct GB_gameboy_s {
     void *user_data;
     GB_log_callback_t log_callback;
     GB_input_callback_t input_callback;
+    GB_input_callback_t async_input_callback;
     GB_rgb_encode_callback_t rgb_encode_callback;
     GB_vblank_callback_t vblank_callback;
 
@@ -368,6 +369,7 @@ typedef struct GB_gameboy_s {
     bool turbo;
     uint32_t ram_size; // Different between CGB and DMG
     uint8_t boot_rom[0x900];
+    bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
 
 } GB_gameboy_t;
 
@@ -393,6 +395,7 @@ void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
 void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 

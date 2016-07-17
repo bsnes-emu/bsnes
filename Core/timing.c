@@ -50,31 +50,30 @@ void GB_timers_run(GB_gameboy_t *gb)
             }
         }
     }
+}
 
-    /* RTC */
-    if (gb->display_cycles >= LCDC_PERIOD) { /* Time is a syscall and therefore is slow, so we update the RTC 
-                                                only during vblanks. */
-        if ((gb->rtc_high & 0x40) == 0) { /* is timer running? */
-            time_t current_time = time(NULL);
-            while (gb->last_rtc_second < current_time) {
-                gb->last_rtc_second++;
-                if (++gb->rtc_seconds == 60)
+void GB_rtc_run(GB_gameboy_t *gb)
+{
+    if ((gb->rtc_high & 0x40) == 0) { /* is timer running? */
+        time_t current_time = time(NULL);
+        while (gb->last_rtc_second < current_time) {
+            gb->last_rtc_second++;
+            if (++gb->rtc_seconds == 60)
+            {
+                gb->rtc_seconds = 0;
+                if (++gb->rtc_minutes == 60)
                 {
-                    gb->rtc_seconds = 0;
-                    if (++gb->rtc_minutes == 60)
+                    gb->rtc_minutes = 0;
+                    if (++gb->rtc_hours == 24)
                     {
-                        gb->rtc_minutes = 0;
-                        if (++gb->rtc_hours == 24)
+                        gb->rtc_hours = 0;
+                        if (++gb->rtc_days == 0)
                         {
-                            gb->rtc_hours = 0;
-                            if (++gb->rtc_days == 0)
+                            if (gb->rtc_high & 1) /* Bit 8 of days*/
                             {
-                                if (gb->rtc_high & 1) /* Bit 8 of days*/
-                                {
-                                    gb->rtc_high |= 0x80; /* Overflow bit */
-                                }
-                                gb->rtc_high ^= 1;
+                                gb->rtc_high |= 0x80; /* Overflow bit */
                             }
+                            gb->rtc_high ^= 1;
                         }
                     }
                 }

@@ -605,18 +605,29 @@ static const char *lstrip(const char *str)
     return str;
 }
 
+#define STOPPED_ONLY \
+if (!gb->debug_stopped) { \
+GB_log(gb, "Program is running. \n"); \
+return false; \
+}
+
 static bool cont(GB_gameboy_t *gb, char *arguments)
 {
+    STOPPED_ONLY
+
     if (strlen(lstrip(arguments))) {
         GB_log(gb, "Usage: continue\n");
         return true;
     }
+
     gb->debug_stopped = false;
     return false;
 }
 
 static bool next(GB_gameboy_t *gb, char *arguments)
 {
+    STOPPED_ONLY
+
     if (strlen(lstrip(arguments))) {
         GB_log(gb, "Usage: next\n");
         return true;
@@ -630,6 +641,8 @@ static bool next(GB_gameboy_t *gb, char *arguments)
 
 static bool step(GB_gameboy_t *gb, char *arguments)
 {
+    STOPPED_ONLY
+
     if (strlen(lstrip(arguments))) {
         GB_log(gb, "Usage: step\n");
         return true;
@@ -640,6 +653,8 @@ static bool step(GB_gameboy_t *gb, char *arguments)
 
 static bool finish(GB_gameboy_t *gb, char *arguments)
 {
+    STOPPED_ONLY
+
     if (strlen(lstrip(arguments))) {
         GB_log(gb, "Usage: finish\n");
         return true;
@@ -653,6 +668,8 @@ static bool finish(GB_gameboy_t *gb, char *arguments)
 
 static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
 {
+    STOPPED_ONLY
+    
     if (strlen(lstrip(arguments))) {
         GB_log(gb, "Usage: sld\n");
         return true;
@@ -1329,6 +1346,34 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
     _GB_debugger_test_read_watchpoint(gb, full_addr);
 }
 
+/* Returns true if debugger waits for more commands */
+bool GB_debugger_do_command(GB_gameboy_t *gb, char *input)
+{
+    if (!input[0]) {
+        return true;
+    }
+
+    char *command_string = input;
+    char *arguments = strchr(input, ' ');
+    if (arguments) {
+        /* Actually "split" the string. */
+        arguments[0] = 0;
+        arguments++;
+    }
+    else {
+        arguments = "";
+    }
+
+    const debugger_command_t *command = find_command(command_string);
+    if (command) {
+        return command->implementation(gb, arguments);
+    }
+    else {
+        GB_log(gb, "%s: no such command.\n", command_string);
+        return true;
+    }
+}
+
 void GB_debugger_run(GB_gameboy_t *gb)
 {
     char *input = NULL;
@@ -1355,34 +1400,22 @@ next_command:
         gb->debug_fin_command = false;
         gb->stack_leak_detection = false;
         input = gb->input_callback(gb);
-        if (!input[0]) {
+
+        if (GB_debugger_do_command(gb, input)) {
             goto next_command;
         }
 
-        char *command_string = input;
-        char *arguments = strchr(input, ' ');
-        if (arguments) {
-            /* Actually "split" the string. */
-            arguments[0] = 0;
-            arguments++;
-        }
-        else {
-            arguments = "";
-        }
+        free(input);
+    }
+}
 
-        const debugger_command_t *command = find_command(command_string);
-        if (command) {
-            if (command->implementation(gb, arguments)) {
-                goto next_command;
-            }
-        }
-        else {
-            GB_log(gb, "%s: no such command.\n", command_string);
-            goto next_command;
-        }
+void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
+{
+    if (!gb->async_input_callback) return;
+    char *input = NULL;
 
-        /* Split to arguments and command */
-
+    while ((input = gb->async_input_callback(gb))) {
+        GB_debugger_do_command(gb, input);
         free(input);
     }
 }

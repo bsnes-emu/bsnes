@@ -3,6 +3,7 @@
 #include "gb.h"
 
 void GB_debugger_run(GB_gameboy_t *gb);
+void GB_debugger_handle_async_commands(GB_gameboy_t *gb);
 void GB_debugger_call_hook(GB_gameboy_t *gb);
 void GB_debugger_ret_hook(GB_gameboy_t *gb);
 void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value);

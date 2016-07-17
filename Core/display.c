@@ -219,6 +219,8 @@ void display_vblank(GB_gameboy_t *gb)
             gb->last_vblank = nanoseconds;
         }
     }
+
+    gb->vblank_just_occured = true;
 }
 
 static inline uint8_t scale_channel(uint8_t x)
