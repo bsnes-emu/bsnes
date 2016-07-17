@@ -9,8 +9,8 @@ struct CPU : Processor::M68K, Thread {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(uint32 addr) -> uint8 override;
-  auto write(uint32 addr, uint8 data) -> void override;
+  auto read(bool word, uint24 addr) -> uint16 override;
+  auto write(bool word, uint24 addr, uint16 data) -> void override;
 };
 
 extern CPU cpu;

@@ -5,39 +5,49 @@
 namespace Processor {
 
 struct M68K {
-  enum : uint { Byte = 1, Word = 2, Long = 4 };
+  enum : uint { Byte = 1, Word = 2, Long = 3 };
 
   M68K();
 
   virtual auto step(uint clocks) -> void = 0;
-  virtual auto read(uint32 addr) -> uint8 = 0;
-  virtual auto write(uint32 addr, uint8 data) -> void = 0;
+  virtual auto read(bool word, uint24 addr) -> uint16 = 0;
+  virtual auto write(bool word, uint24 addr, uint16 data) -> void = 0;
 
   auto power() -> void;
   auto reset() -> void;
 
-  //memory.cpp
-  auto readByte(uint32 addr) -> uint8;
-  auto readWord(uint32 addr) -> uint16;
-  auto readLong(uint32 addr) -> uint32;
+  auto sign(uint2 size, uint32 data) -> int32;
 
-  auto read(uint size, uint32 addr) -> uint32;
-  auto readPC(uint size = Word) -> uint32;
+  //memory.cpp
+  auto readAbsolute(uint2 size, uint32 addr) -> uint32;
+  auto writeAbsolute(uint2 size, uint32 addr, uint32 data) -> void;
+
+  auto readPC(uint2 size = Word) -> uint32;
 
   //ea.cpp
   struct EA {
-    uint mode;
-    uint reg;
+    EA(M68K* self, uint2 size, uint3 mode, uint3 reg);
+    ~EA();
 
-    boolean valid;
+    auto pc() -> uint32&;
+    auto d(uint3 reg) -> uint32&;
+    auto a(uint3 reg) -> uint32&;
+    auto readPC(uint2 size) -> uint32;
+    auto read(uint32 addr) -> uint32;
+    auto write(uint32 addr, uint32 data) -> void;
+
+    auto fetch() -> uint32;
+    auto read() -> uint32;
+    auto write(uint32 data) -> void;
+    auto flush() -> void;
+
+    uint2 size;
+    uint4 mode;
+    uint3 reg;
+
     uint32 address;
+    M68K* self;
   };
-
-  auto sign(uint size, uint32 data) -> int32;
-
-  auto address(uint size, EA& ea) -> uint32;
-  auto read(uint size, EA& ea) -> uint32;
-  auto write(uint size, EA& ea, uint32 data) -> void;
 
   //instruction.cpp
   auto trap() -> void;
@@ -46,16 +56,16 @@ struct M68K {
   //instructions.cpp
   auto testCondition(uint4 condition) -> bool;
 
-  auto instructionANDI(uint size, EA modify) -> void;
-  auto instructionBCC(uint condition, uint displacement) -> void;
-  auto instructionLEA(uint target, EA source) -> void;
-  auto instructionMOVE(uint size, EA target, EA source) -> void;
-  auto instructionMOVEA(uint size, uint target, EA source) -> void;
-  auto instructionMOVEM(uint direction, uint size, EA source) -> void;
-  auto instructionMOVEQ(uint target, uint immediate) -> void;
-  auto instructionMOVE_USP(uint direction, uint reg) -> void;
+  auto instructionANDI(uint2 size, uint3 mode, uint3 reg) -> void;
+  auto instructionBCC(uint4 condition, uint8 displacement) -> void;
+  auto instructionLEA(uint3 target, uint3 mode, uint3 reg) -> void;
+  auto instructionMOVE(uint2 size, uint3 targetReg, uint3 targetMode, uint3 sourceMode, uint3 sourceReg) -> void;
+  auto instructionMOVEA(uint2 size, uint3 target, uint3 mode, uint3 reg) -> void;
+  auto instructionMOVEM(uint1 direction, uint2 size, uint3 mode, uint3 reg) -> void;
+  auto instructionMOVEQ(uint3 target, uint8 immediate) -> void;
+  auto instructionMOVE_USP(uint1 direction, uint3 reg) -> void;
   auto instructionNOP() -> void;
-  auto instructionTST(uint size, EA source) -> void;
+  auto instructionTST(uint2 size, uint3 mode, uint3 reg) -> void;
 
   //disassembler.cpp
   auto disassemble(uint32 pc) -> string;
@@ -91,28 +101,28 @@ struct M68K {
 
 private:
   //disassembler.cpp
-  auto disassembleANDI(uint size, EA modify) -> string;
-  auto disassembleBCC(uint condition, uint displacement) -> string;
-  auto disassembleLEA(uint target, EA source) -> string;
-  auto disassembleMOVE(uint size, EA target, EA source) -> string;
-  auto disassembleMOVEA(uint size, uint target, EA source) -> string;
-  auto disassembleMOVEM(uint direction, uint size, EA source) -> string;
-  auto disassembleMOVEQ(uint target, uint immediate) -> string;
-  auto disassembleMOVE_USP(uint direction, uint reg) -> string;
+  auto disassembleANDI(uint2 size, uint3 mode, uint3 reg) -> string;
+  auto disassembleBCC(uint4 condition, uint8 displacement) -> string;
+  auto disassembleLEA(uint3 target, uint3 mode, uint3 reg) -> string;
+  auto disassembleMOVE(uint2 size, uint3 targetReg, uint3 targetMode, uint3 sourceMode, uint3 sourceReg) -> string;
+  auto disassembleMOVEA(uint2 size, uint3 target, uint3 mode, uint3 reg) -> string;
+  auto disassembleMOVEM(uint1 direction, uint2 size, uint3 mode, uint3 reg) -> string;
+  auto disassembleMOVEQ(uint3 target, uint8 immediate) -> string;
+  auto disassembleMOVE_USP(uint1 direction, uint3 reg) -> string;
   auto disassembleNOP() -> string;
-  auto disassembleTST(uint size, EA source) -> string;
+  auto disassembleTST(uint2 size, uint3 mode, uint3 reg) -> string;
 
   auto _readByte(uint32 addr) -> uint8;
   auto _readWord(uint32 addr) -> uint16;
   auto _readLong(uint32 addr) -> uint32;
   auto _readPC(uint size = Word) -> uint32;
   auto _immediate(uint size) -> string;
-  auto _address(uint size, EA& ea) -> string;
-  auto _read(uint size, EA& ea) -> string;
-  auto _write(uint size, EA& ea) -> string;
-  auto _branch(uint displacement) -> string;
+  auto _address(uint2 size, uint3 mode, uint3 reg) -> string;
+  auto _read(uint2 size, uint3 mode, uint3 reg) -> string;
+  auto _write(uint2 size, uint3 mode, uint3 reg) -> string;
+  auto _branch(uint8 displacement) -> string;
   auto _suffix(uint size) -> string;
-  auto _condition(uint condition) -> string;
+  auto _condition(uint4 condition) -> string;
 
   uint32 _pc;
   function<string ()> disassembleTable[65536];

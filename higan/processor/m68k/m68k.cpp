@@ -24,4 +24,11 @@ auto M68K::reset() -> void {
   r.sr = 0x2000;
 }
 
+auto M68K::sign(uint2 size, uint32 data) -> int32 {
+  if(size == Byte) return  (int8)data;
+  if(size == Word) return (int16)data;
+  if(size == Long) return (int32)data;
+  return 0;
+}
+
 }

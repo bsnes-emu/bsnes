@@ -10,8 +10,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::boot() -> void {
-  r.ssp = readLong(0);
-  r.pc  = readLong(4);
+  r.ssp = readAbsolute(Long, 0);
+  r.pc  = readAbsolute(Long, 4);
 }
 
 auto CPU::main() -> void {
@@ -35,17 +35,13 @@ auto CPU::reset() -> void {
   create(CPU::Enter, system.colorburst() * 15.0 / 7.0);
 }
 
-auto CPU::read(uint32 addr) -> uint8 {
-  addr = (uint24)addr;
-
-  if(addr < 0x400000) return cartridge.read(addr);
-  return 0x00;
+auto CPU::read(bool word, uint24 addr) -> uint16 {
+  if(addr < 0x400000) return cartridge.read(word, addr);
+  return 0x0000;
 }
 
-auto CPU::write(uint32 addr, uint8 data) -> void {
-  addr = (uint24)addr;
-
-  if(addr < 0x400000) return cartridge.write(addr, data);
+auto CPU::write(bool word, uint24 addr, uint16 data) -> void {
+  if(addr < 0x400000) return cartridge.write(word, addr, data);
 }
 
 }

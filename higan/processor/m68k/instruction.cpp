@@ -31,20 +31,20 @@ M68K::M68K() {
 
     //ANDI
     match("0000 0010 ---- ----") {
-      auto size = bits(7,6);
-      auto mode = bits(5,3);
-      auto reg = bits(2,0);
+      uint2 size = bits(7,6);
+      uint3 mode = bits(5,3);
+      uint3 reg = bits(2,0);
 
       size = size == 0 ? Byte : size == 1 ? Word : size == 2 ? Long : 0;
       if(size && mode != 1) {
-        bind(ANDI, size, {mode, reg});
+        bind(ANDI, size, mode, reg);
       }
     }
 
     //BCC
     match("0110 ---- ---- ----") {
-      auto condition = bits(11,8);
-      auto displacement = bits(7,0);
+      uint4 condition = bits(11,8);
+      uint8 displacement = bits(7,0);
 
       if(true) {
         bind(BCC, condition, displacement);
@@ -53,60 +53,60 @@ M68K::M68K() {
 
     //LEA
     match("0100 ---1 11-- ----") {
-      auto target = bits(11,9);
-      auto mode = bits(5,3);
-      auto reg = bits(2,0);
+      uint3 target = bits(11,9);
+      uint3 mode = bits(5,3);
+      uint3 reg = bits(2,0);
 
       if(mode == 2 || mode == 5 || mode == 6 || (mode == 7 && reg <= 4)) {
-        bind(LEA, target, {mode, reg});
+        bind(LEA, target, mode, reg);
       }
     }
 
     //MOVE
     match("00-- ---- ---- ----") {
-      auto size = bits(13,12);
-      auto targetReg = bits(11,9);
-      auto targetMode = bits(8,6);
-      auto sourceMode = bits(5,3);
-      auto sourceReg = bits(2,0);
+      uint2 size = bits(13,12);
+      uint3 targetReg = bits(11,9);
+      uint3 targetMode = bits(8,6);
+      uint3 sourceMode = bits(5,3);
+      uint3 sourceReg = bits(2,0);
 
       size = size == 1 ? Byte : size == 3 ? Word : size == 2 ? Long : 0;
       if(size && targetMode != 1) {
-        bind(MOVE, size, {targetMode, targetReg}, {sourceMode, sourceReg});
+        bind(MOVE, size, targetReg, targetMode, sourceMode, sourceReg);
       }
     }
 
     //MOVEA
     match("00-- ---0 01-- ----") {
-      auto size = bits(13,12);
-      auto target = bits(11,9);
-      auto sourceMode = bits(5,3);
-      auto sourceReg = bits(2,0);
+      uint2 size = bits(13,12);
+      uint3 target = bits(11,9);
+      uint3 mode = bits(5,3);
+      uint3 reg = bits(2,0);
 
       size = size == 3 ? Word : size == 2 ? Long : 0;
       if(size) {
-        bind(MOVEA, size, target, {sourceMode, sourceReg});
+        bind(MOVEA, size, target, mode, reg);
       }
     }
 
     //MOVEM
     match("0100 1-00 1--- ----") {
-      auto direction = bit(10);
-      auto size = bit(6);
-      auto mode = bits(5,3);
-      auto reg = bits(2,0);
+      uint1 direction = bit(10);
+      uint2 size = bit(6);
+      uint3 mode = bits(5,3);
+      uint3 reg = bits(2,0);
 
       size = size == 0 ? Word : size == 1 ? Long : 0;
       if((direction == 0 && (mode == 2 || mode == 4 || mode == 5 || mode == 6 || (mode == 7 && reg <= 3)))
       || (direction == 1 && (mode == 2 || mode == 3 || mode == 5 || mode == 6 || (mode == 7 && reg <= 3)))) {
-        bind(MOVEM, direction, size, {mode, reg});
+        bind(MOVEM, direction, size, mode, reg);
       }
     }
 
     //MOVEQ
     match("0111 ---0 ---- ----") {
-      auto target = bits(11,9);
-      auto immediate = bits(7,0);
+      uint3 target = bits(11,9);
+      uint8 immediate = bits(7,0);
 
       if(true) {
         bind(MOVEQ, target, immediate);
@@ -115,8 +115,8 @@ M68K::M68K() {
 
     //MOVE_USP
     match("0100 1110 0110 ----") {
-      auto direction = bit(3);
-      auto reg = bits(2,0);
+      uint1 direction = bit(3);
+      uint3 reg = bits(2,0);
 
       if(true) {
         bind(MOVE_USP, direction, reg);
@@ -132,13 +132,13 @@ M68K::M68K() {
 
     //TST
     match("0100 1010 ---- ----") {
-      auto size = bits(7,6);
-      auto mode = bits(5,3);
-      auto reg = bits(2,0);
+      uint2 size = bits(7,6);
+      uint3 mode = bits(5,3);
+      uint3 reg = bits(2,0);
 
       size = size == 0 ? Byte : size == 1 ? Word : size == 2 ? Long : 0;
       if(size) {
-        bind(TST, size, {mode, reg});
+        bind(TST, size, mode, reg);
       }
     }
 

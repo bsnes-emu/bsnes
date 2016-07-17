@@ -3,6 +3,7 @@ struct SA1 : Processor::R65816, Cothread {
   static auto Enter() -> void;
   auto main() -> void;
   auto tick() -> void;
+  auto interrupt() -> void override;
 
   alwaysinline auto triggerIRQ() -> void;
   alwaysinline auto lastCycle() -> void override;
