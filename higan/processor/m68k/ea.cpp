@@ -1,137 +1,423 @@
-M68K::EA::EA(M68K* self, uint2 size, uint3 mode, uint3 reg) : self(self), size(size), mode(mode), reg(reg) {
-  if(this->mode == 7) this->mode += this->reg;  //speed hack: convert cases {7; 0-4} to {8-12} for switch jump table
-  address = fetch();
-}
+//effective addressing
 
-M68K::EA::~EA() {
-  flush();
-}
+//encoding:
+//  d7-d5: mode
+//  d4-d2: register
+//  d1-d0: size (0 = byte, 1 = word, 2 = long)
 
-auto M68K::EA::pc() -> uint32& { return self->r.pc; }
-auto M68K::EA::d(uint3 reg) -> uint32& { return self->r.d(reg); }
-auto M68K::EA::a(uint3 reg) -> uint32& { return self->r.a(reg); }
-auto M68K::EA::readPC(uint2 size) -> uint32 { return self->readPC(size); }
-auto M68K::EA::read(uint32 addr) -> uint32 { return self->readAbsolute(size, addr); }
-auto M68K::EA::write(uint32 addr, uint32 data) -> void { return self->writeAbsolute(size, addr, data); }
-
-auto M68K::EA::fetch() -> uint32 {
-  switch(mode) {
+auto M68K::address(uint8 ea) -> uint32 {
+  switch(ea) {
 
   //data register direct
-  case 0: return d(reg);
+  case 0b000'000'00 ... 0b000'111'11:
+    return r.d(ea >> 2);
 
   //address register direct
-  case 1: return a(reg);
+  case 0b001'000'00 ... 0b001'111'11:
+    return r.a(ea >> 2);
 
   //address register indirect
-  case 2: return a(reg);
+  case 0b010'000'00 ... 0b010'111'11:
+    return r.a(ea >> 2);
 
   //address register indirect with post-increment
-  case 3: return a(reg);
+  case 0b011'000'00 ... 0b011'111'11:
+    return r.a(ea >> 2);
 
   //address register indirect with pre-decrement
-  case 4: return a(reg);
+  case 0b100'000'00 ... 0b100'111'11:
+    return r.a(ea >> 2);
 
-  //address register with displacement
-  case 5: return a(reg) + (int16)readPC(Word);
+  //address register indirect with displacement
+  case 0b101'000'00 ... 0b101'111'11:
+    return r.a(ea >> 2) + (int16)readPC();
 
-  //address register with index
-  case 6: {
-    auto word = readPC(Word);
-    auto index = word & 0x8000 ? a(word >> 12) : d(word >> 12);
+  //address register indirect with index
+  case 0b110'000'00 ... 0b110'111'11: {
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
     if(word & 0x800) index = (int16)index;
-    return a(reg) + index + (int8)word;
+    return r.a(ea >> 2) + index + (int8)word;
   }
 
-  //absolute short
-  case 7: return (int16)readPC(Word);
+  //absolute short indirect
+  case 0b111'000'00 ... 0b111'000'11:
+    return (int16)readPC();
 
-  //absolute long
-  case 8: return readPC(Long);
-
-  //program counter with displacement
-  case 9: {
-    auto base = pc();
-    return base + (int16)readPC(Word);
+  //absolute long indirect
+  case 0b111'001'00 ... 0b111'001'11: {
+    uint32 address = readPC() << 16;
+    return address | readPC() <<  0;
   }
 
-  //program counter with index
-  case 10: {
-    auto base = pc();
-    auto word = readPC(Word);
-    auto index = word & 0x8000 ? a(word >> 12) : d(word >> 12);
+  //program counter indirect with displacement
+  case 0b111'010'00 ... 0b111'010'11: {
+    auto base = r.pc;
+    return base + (int16)readPC();
+  }
+
+  //program counter indirect with index
+  case 0b111'011'00 ... 0b111'011'11: {
+    auto base = r.pc;
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
     if(word & 0x800) index = (int16)index;
     return base + index + (int8)word;
   }
 
-  //immediate
-  case 11: {
-    if(size == Byte) return (uint8)readPC(Word);
-    if(size == Word) return readPC(Word);
-    if(size == Long) return readPC(Long);
+  //immediate byte
+  case 0b111'100'00:
+    return (uint8)readPC();
+
+  //immediate word
+  case 0b111'100'01:
+    return readPC();
+
+  //immediate long
+  case 0b111'100'10: {
+    uint32 address = readPC() << 16;
+    return address | readPC() <<  0;
   }
 
-  }
+  //invalid
+  default:
+    return 0;
 
-  return 0;
+  }
 }
 
-auto M68K::EA::read() -> uint32 {
-  switch(mode) {
-  case  0: return address;
-  case  1: return address;
-  case  2: return read(address);
-  case  3: {
-    auto data = read(address);
-    address += size == Long ? 4 : 2;
+template<uint Size> auto M68K::read(EA ea) -> uint32 {
+  switch(ea.mode) {
+
+  case 0: {  //data register direct
+    return clip<Size>(r.d(ea.reg));
+  }
+
+  case 1: {  //address register direct
+    return clip<Size>(r.a(ea.reg));
+  }
+
+  case 2: {  //address register indirect
+    auto& address = r.a(ea.reg);
+    return read<Size>(address);
+  }
+
+  case 3: {  //address register indirect with post-increment
+    auto& address = r.a(ea.reg);
+    auto data = read<Size>(address);
+    address += Size == Long ? 4 : 2;
     return data;
   }
-  case  4: {
-    address -= size == Long ? 4 : 2;
-    return read(address);
-  }
-  case  5: return read(address);
-  case  6: return read(address);
-  case  7: return read(address);
-  case  8: return read(address);
-  case  9: return read(address);
-  case 10: return read(address);
-  case 11: return address;
+
+  case 4: {  //address register indirect with pre-decrement
+    auto& address = r.a(ea.reg);
+    address -= Size == Long ? 4 : 2;
+    return read<Size>(address);
   }
 
-  return 0;
+  }
 }
 
-auto M68K::EA::write(uint32 data) -> void {
-  switch(mode) {
-  case  0: address = data; return;
-  case  1: address = data; return;
-  case  2: return write(address, data);
-  case  3: {
-    write(address, data);
-    address += size == Long ? 4 : 2;
+template<uint Size> auto M68K::write(EA ea, uint32 data) -> void {
+  switch(ea.mode) {
+
+  case 0: {  //data register direct
+    r.d(ea.reg) = data;
     return;
   }
-  case  4: {
-    address -= size == Long ? 4 : 2;
-    return write(address, data);
+
+  case 1: {  //address register direct
+    r.a(ea.reg) = data;
+    return;
   }
-  case  5: return write(address, data);
-  case  6: return write(address, data);
-  case  7: return write(address, data);
-  case  8: return write(address, data);
-  case  9: return write(address, data);
-  case 10: return write(address, data);
-  case 11: address = data; return;
+
   }
 }
 
-auto M68K::EA::flush() -> void {
+auto M68K::read(uint8 ea) -> uint32 {
+  switch(ea) {
+
+  //data register direct
+  case 0b000'000'00 ... 0b000'111'11:
+    return r.d(ea >> 2);
+
+  //address register direct
+  case 0b001'000'00 ... 0b001'111'11:
+    return r.a(ea >> 2);
+
+  //address register indirect
+  case 0b010'000'00 ... 0b010'111'11: {
+    auto address = r.a(ea >> 2);
+    return readAbsolute(ea, address);
+  }
+
   //address register indirect with post-increment
-  if(mode == 3) a(reg) = address;
+  case 0b011'000'00 ... 0b011'111'11: {
+    auto& address = r.a(ea >> 2);
+    auto data = readAbsolute(ea, address);
+    address += 2 + (ea & 2);
+    return data;
+  }
 
   //address register indirect with pre-decrement
-  if(mode == 4) a(reg) = address;
+  case 0b100'000'00 ... 0b100'111'11: {
+    auto& address = r.a(ea >> 2);
+    address -= 2 + (ea & 2);
+    return readAbsolute(ea, address);
+  }
 
-  mode = 15;
+  //address register indirect with displacement
+  case 0b101'000'00 ... 0b101'111'11:
+    return readAbsolute(ea, r.a(ea >> 2) + (int16)readPC());
+
+  //address register indirect with index
+  case 0b110'000'00 ... 0b110'111'11: {
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x800) index = (int16)index;
+    return readAbsolute(ea, r.a(ea >> 2) + index + (int8)word);
+  }
+
+  //absolute short indirect
+  case 0b111'000'00 ... 0b111'000'11:
+    return readAbsolute(ea, (int16)readPC());
+
+  //absolute long indirect
+  case 0b111'001'00 ... 0b111'001'11: {
+    uint32 address = readPC() << 16;
+    return readAbsolute(ea, address | readPC());
+  }
+
+  //program counter indirect with displacement
+  case 0b111'010'00 ... 0b111'010'11: {
+    auto base = r.pc;
+    return readAbsolute(ea, base + (int16)readPC());
+  }
+
+  //program counter indirect with index
+  case 0b111'011'00 ... 0b111'011'11: {
+    auto base = r.pc;
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x800) index = (int16)index;
+    return readAbsolute(ea, base + index + (int8)word);
+  }
+
+  //immediate byte
+  case 0b111'100'00:
+    return (uint8)readPC();
+
+  //immediate word
+  case 0b111'100'01:
+    return readPC();
+
+  //immediate long
+  case 0b111'100'10: {
+    uint32 address = readPC() << 16;
+    return address | readPC() <<  0;
+  }
+
+  //invalid
+  default:
+    return 0;
+
+  }
+}
+
+auto M68K::write(uint8 ea, uint32 data) -> void {
+  switch(ea) {
+
+  //data register direct
+  case 0b000'000'00 ... 0b000'111'11:
+    r.d(ea >> 2) = data;
+    return;
+
+  //address register direct
+  case 0b001'000'00 ... 0b001'111'11:
+    r.a(ea >> 2) = data;
+    return;
+
+  //address register indirect
+  case 0b010'000'00 ... 0b010'111'11: {
+    auto address = r.a(ea >> 2);
+    return writeAbsolute(ea, address, data);
+  }
+
+  //address register indirect with post-increment
+  case 0b011'000'00 ... 0b011'111'11: {
+    auto& address = r.a(ea >> 2);
+    writeAbsolute(ea, address, data);
+    address += 2 + (ea & 2);
+    return;
+  }
+
+  //address register indirect with pre-decrement
+  case 0b100'000'00 ... 0b100'111'11: {
+    auto& address = r.a(ea >> 2);
+    address -= 2 + (ea & 2);
+    return writeAbsolute(ea, address, data);
+  }
+
+  //address register indirect with displacement
+  case 0b101'000'00 ... 0b101'111'11:
+    return writeAbsolute(ea, r.a(ea >> 2) + (int16)readPC(), data);
+
+  //address register indirect with index
+  case 0b110'000'00 ... 0b110'111'11: {
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x800) index = (int16)index;
+    return writeAbsolute(ea, r.a(ea >> 2) + index + (int8)word, data);
+  }
+
+  //absolute short indirect
+  case 0b111'000'00 ... 0b111'000'11:
+    return writeAbsolute(ea, (int16)readPC(), data);
+
+  //absolute long indirect
+  case 0b111'001'00 ... 0b111'001'11: {
+    uint32 address = readPC() << 16;
+    return writeAbsolute(ea, address | readPC(), data);
+  }
+
+  //program counter indirect with displacement
+  case 0b111'010'00 ... 0b111'010'11: {
+    auto base = r.pc;
+    return writeAbsolute(ea, base + (int16)readPC(), data);
+  }
+
+  //program counter indirect with index
+  case 0b111'011'00 ... 0b111'011'11: {
+    auto base = r.pc;
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x800) index = (int16)index;
+    return writeAbsolute(ea, base + index + (int8)word, data);
+  }
+
+  }
+}
+
+auto M68K::modify(uint8 ea, uint32 data, const function<uint32 (uint32, uint32)>& op) -> uint32 {
+  switch(ea) {
+
+  //data register direct
+  case 0b000'000'00 ... 0b000'111'11: {
+    auto& address = r.d(ea >> 2);
+    return address = op(address, data);
+  }
+
+  //address register direct
+  case 0b001'000'00 ... 0b001'111'11: {
+    auto& address = r.a(ea >> 2);
+    return address = op(address, data);
+  }
+
+  //address register indirect
+  case 0b010'000'00 ... 0b010'111'11: {
+    auto address = r.a(ea >> 2);
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //address register indirect with post-increment
+  case 0b011'000'00 ... 0b011'111'11: {
+    auto& address = r.a(ea >> 2);
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    address += 2 + (ea & 2);
+    return memory;
+  }
+
+  //address register indirect with pre-decrement
+  case 0b100'000'00 ... 0b100'111'11: {
+    auto& address = r.a(ea >> 2);
+    address -= 2 + (ea & 2);
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //address register indirect with displacement
+  case 0b101'000'00 ... 0b101'111'11: {
+    auto address = r.a(ea >> 2) + (int16)readPC();
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //address register indirect with index
+  case 0b110'000'00 ... 0b110'111'11: {
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x800) index = (int16)index;
+    auto address = r.a(ea >> 2) + index + (int8)word;
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //absolute short indirect
+  case 0b111'000'00 ... 0b111'000'11: {
+    auto address = (int16)readPC();
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //absolute long indirect
+  case 0b111'001'00 ... 0b111'001'11: {
+    auto word = readPC();
+    uint32 address = word << 16 | readPC();
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //program counter indirect with displacement
+  case 0b111'010'00 ... 0b111'010'11: {
+    auto address = r.pc;
+    address += (int16)readPC();
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //program counter indirect with index
+  case 0b111'011'00 ... 0b111'011'11: {
+    auto address = r.pc;
+    auto word = readPC();
+    auto index = word & 0x8000 ? r.a(word >> 12) : r.d(word >> 12);
+    if(word & 0x8000) index = (int16)index;
+    address += index + (int8)word;
+    auto memory = readAbsolute(ea, address);
+    writeAbsolute(ea, address, memory = op(memory, data));
+    return memory;
+  }
+
+  //immediate byte
+  case 0b111'100'00:
+    return op((uint8)readPC(), data);
+
+  //immediate word
+  case 0b111'100'01:
+    return op(readPC(), data);
+
+  //immediate long
+  case 0b111'100'10: {
+    uint32 immediate = readPC() << 16;
+    immediate |= readPC();
+    return op(immediate, data);
+  }
+
+  }
+}
+
+auto M68K::flush(uint8 ea, uint32 address) -> void {
+  //address register indirect with post-increment
+  //address register indirect with pre-decrement
+  if(ea >= 0b011'000'00 && ea <= 0b100'111'11) {
+    r.a(ea >> 2) = address;
+  }
 }

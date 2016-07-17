@@ -30,3 +30,22 @@ auto M68K::readPC(uint2 size) -> uint32 {
   r.pc += 2;
   return data;
 }
+
+//
+
+template<> auto M68K::read<Byte>(uint32 addr) -> uint32 {
+  step(4);
+  return read(0, addr);
+}
+
+template<> auto M68K::read<Word>(uint32 addr) -> uint32 {
+  step(4);
+  return read(1, addr);
+}
+
+template<> auto M68K::read<Long>(uint32 addr) -> uint32 {
+  step(4);
+  uint32 data = read(1, addr + 0) << 16;
+  step(4);
+  return data | read(1, addr + 2) <<  0;
+}

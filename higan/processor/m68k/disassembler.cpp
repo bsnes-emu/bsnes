@@ -11,7 +11,7 @@ auto M68K::_readLong(uint32 addr) -> uint32 {
   return data |= _readWord(addr + 2) <<  0;
 }
 
-auto M68K::_readPC(uint size) -> uint32 {
+auto M68K::_readPC(uint2 size) -> uint32 {
   uint32 data = _readWord(_pc);
   _pc += 2;
   if(size == Byte) return (uint8)data;
@@ -21,21 +21,29 @@ auto M68K::_readPC(uint size) -> uint32 {
   return data;
 }
 
-auto M68K::_immediate(uint size) -> string {
+auto M68K::_immediate(uint2 size) -> string {
   if(size == Byte) return {"#$", hex(_readPC(Byte), 2L)};
   if(size == Word) return {"#$", hex(_readPC(Word), 4L)};
   if(size == Long) return {"#$", hex(_readPC(Long), 8L)};
   return "#???";
 }
 
-auto M68K::_address(uint2 size, uint3 mode, uint3 reg) -> string {
+auto M68K::_address(uint8 ea) -> string {
+  uint3 mode = ea >> 5;
+  uint3 reg  = ea >> 2;
+  uint2 size = ea >> 0;
+
   if(mode == 7) {
     if(reg == 2) return {"$", hex(_pc + (int16)_readPC(Word), 6L)};
   }
   return "???";
 }
 
-auto M68K::_read(uint2 size, uint3 mode, uint3 reg) -> string {
+auto M68K::_read(uint8 ea) -> string {
+  uint3 mode = ea >> 5;
+  uint3 reg  = ea >> 2;
+  uint2 size = ea >> 0;
+
   if(mode == 0) return {"d", reg};
   if(mode == 1) return {"a", reg};
   if(mode == 2) return {"(a", reg, ")"};
@@ -53,8 +61,8 @@ auto M68K::_read(uint2 size, uint3 mode, uint3 reg) -> string {
   return "???";
 }
 
-auto M68K::_write(uint2 size, uint3 mode, uint3 reg) -> string {
-  return _read(size, mode, reg);
+auto M68K::_write(uint8 ea) -> string {
+  return _read(ea);
 }
 
 auto M68K::_branch(uint8 displacement) -> string {
@@ -64,7 +72,7 @@ auto M68K::_branch(uint8 displacement) -> string {
   return {"$", hex(_pc + displacement, 6L)};
 }
 
-auto M68K::_suffix(uint size) -> string {
+auto M68K::_suffix(uint2 size) -> string {
   if(size == Byte) return ".b";
   if(size == Word) return ".w";
   if(size == Long) return ".l";
@@ -103,28 +111,39 @@ auto M68K::disassembleRegisters() -> string {
 
 //
 
-auto M68K::disassembleANDI(uint2 size, uint3 mode, uint3 reg) -> string {
-  return {"andi", _suffix(size), "  ", _immediate(size), ",", _read(size, mode, reg)};
+template<uint Size> auto M68K::disassembleADD(uint3 reg, uint1 direction, EA ea) -> string {
+  string op{"add", _suffix(ea.reg), "   "};
+return op;
+
+  if(direction == 0) {
+//    return {op, _read(ea), ",d", reg};
+  } else {
+//    return {op, "d", reg, ",", _read(ea)};
+  }
+}
+
+auto M68K::disassembleANDI(uint8 ea) -> string {
+  return {"andi", _suffix(ea), "  ", _immediate(ea), ",", _read(ea)};
 }
 
 auto M68K::disassembleBCC(uint4 condition, uint8 displacement) -> string {
   return {"b", _condition(condition), "     ", _branch(displacement)};
 }
 
-auto M68K::disassembleLEA(uint3 target, uint3 mode, uint3 reg) -> string {
-  return {"lea     ", _address(Long, mode, reg), ",a", target};
+auto M68K::disassembleLEA(uint3 to, uint8 ea) -> string {
+  return {"lea     ", _address(ea), ",a", to};
 }
 
-auto M68K::disassembleMOVE(uint2 size, uint3 targetReg, uint3 targetMode, uint3 sourceMode, uint3 sourceReg) -> string {
-  return {"move", _suffix(size), "  ", _read(size, sourceMode, sourceReg), ",", _write(size, targetMode, targetReg)};
+auto M68K::disassembleMOVE(uint8 to, uint8 from) -> string {
+  return {"move", _suffix(from), "  ", _read(from), ",", _write(to)};
 }
 
-auto M68K::disassembleMOVEA(uint2 size, uint3 target, uint3 mode, uint3 reg) -> string {
-  return {"movea   ", _read(size, mode, reg), ",a", target};
+auto M68K::disassembleMOVEA(uint3 to, uint8 from) -> string {
+  return {"movea   ", _read(from), ",a", to};
 }
 
-auto M68K::disassembleMOVEM(uint1 direction, uint2 size, uint3 mode, uint3 reg) -> string {
-  string op{"movem", _suffix(size), " "};
+auto M68K::disassembleMOVEM(uint1 direction, uint8 ea) -> string {
+  string op{"movem", _suffix(ea), " "};
 
   uint16 list = _readPC();
   string regs;
@@ -135,9 +154,9 @@ auto M68K::disassembleMOVEM(uint1 direction, uint2 size, uint3 mode, uint3 reg) 
   regs.trimRight(",");
 
   if(direction == 0) {
-    return {op, regs, ",", _read(size, mode, reg)};
+    return {op, regs, ",", _read(ea)};
   } else {
-    return {op, _read(size, mode, reg), ",", regs};
+    return {op, _read(ea), ",", regs};
   }
 }
 
@@ -157,6 +176,6 @@ auto M68K::disassembleNOP() -> string {
   return {"nop     "};
 }
 
-auto M68K::disassembleTST(uint2 size, uint3 mode, uint3 reg) -> string {
-  return {"tst", _suffix(size), "   ", _read(size, mode, reg)};
+auto M68K::disassembleTST(uint8 ea) -> string {
+  return {"tst", _suffix(ea), "   ", _read(ea)};
 }

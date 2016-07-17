@@ -14,7 +14,7 @@ template<typename R, typename... P> struct function<auto (P...) -> R> {
     static constexpr bool value = decltype(exists<L>(0))::value;
   };
 
-  function() = default;
+  function() {}
   function(const function& source) { operator=(source); }
   function(void* function) { if(function) callback = new global((auto (*)(P...) -> R)function); }
   function(auto (*function)(P...) -> R) { callback = new global(function); }

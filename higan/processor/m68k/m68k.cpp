@@ -3,6 +3,8 @@
 
 namespace Processor {
 
+enum : uint { Byte, Word, Long };
+
 #include "registers.cpp"
 #include "memory.cpp"
 #include "ea.cpp"
@@ -22,13 +24,6 @@ auto M68K::reset() -> void {
   r.usp = 0;
   r.pc = 0;
   r.sr = 0x2000;
-}
-
-auto M68K::sign(uint2 size, uint32 data) -> int32 {
-  if(size == Byte) return  (int8)data;
-  if(size == Word) return (int16)data;
-  if(size == Long) return (int32)data;
-  return 0;
 }
 
 }
