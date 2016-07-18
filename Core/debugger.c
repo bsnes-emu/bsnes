@@ -1411,10 +1411,9 @@ next_command:
 
 void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
 {
-    if (!gb->async_input_callback) return;
     char *input = NULL;
 
-    while ((input = gb->async_input_callback(gb))) {
+    while (gb->async_input_callback && (input = gb->async_input_callback(gb))) {
         GB_debugger_do_command(gb, input);
         free(input);
     }
