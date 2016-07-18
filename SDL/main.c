@@ -134,6 +134,10 @@ GB_gameboy_t gb;
 
 static void debugger_interrupt(int ignore)
 {
+    /* ^C twice to exit */
+    if (gb.debug_stopped) {
+        exit(0);
+    }
     gb.debug_stopped = true;
 }
 

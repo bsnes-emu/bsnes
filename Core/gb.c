@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <sys/time.h>
+#include <sys/select.h>
 #include "gb.h"
 #include "memory.h"
 #include "timing.h"
@@ -52,8 +53,12 @@ static char *default_input_callback(GB_gameboy_t *gb)
 {
     char *expression = NULL;
     size_t size = 0;
-    printf(">");
-    getline(&expression, &size, stdin);
+
+    if (getline(&expression, &size, stdin) == -1) {
+        /* The user doesn't have STDIN or used ^D. We make sure the program keeps running. */
+        GB_set_async_input_callback(gb, NULL); /* Disable async input */
+        return strdup("c");
+    }
 
     if (!expression) {
         return strdup("");
@@ -64,6 +69,22 @@ static char *default_input_callback(GB_gameboy_t *gb)
         expression[length - 1] = 0;
     }
     return expression;
+}
+
+static char *default_async_input_callback(GB_gameboy_t *gb)
+{
+    fd_set set;
+    FD_ZERO(&set);
+    FD_SET(STDIN_FILENO, &set);
+    struct timeval time = {0,};
+    if (select(1, &set, NULL, NULL, &time) == 1) {
+        if (feof(stdin)) {
+            GB_set_async_input_callback(gb, NULL); /* Disable async input */
+            return NULL;
+        }
+        return default_input_callback(gb);
+    }
+    return NULL;
 }
 
 void GB_init(GB_gameboy_t *gb)
@@ -88,6 +109,7 @@ void GB_init(GB_gameboy_t *gb)
     gb->sprite_palletes_rgb[5] = gb->sprite_palletes_rgb[1] = gb->background_palletes_rgb[1] = 0xAAAAAAAA;
     gb->sprite_palletes_rgb[6] = gb->sprite_palletes_rgb[2] = gb->background_palletes_rgb[2] = 0x55555555;
     gb->input_callback = default_input_callback;
+    gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_JOYP] = 0xF;
@@ -112,6 +134,7 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->last_vblank = clock();
     gb->cgb_ram_bank = 1;
     gb->input_callback = default_input_callback;
+    gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_JOYP] = 0xF;
@@ -427,6 +450,9 @@ void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback)
 
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 {
+    if (gb->input_callback == default_input_callback) {
+        gb->async_input_callback = NULL;
+    }
     gb->input_callback = callback;
 }
 
