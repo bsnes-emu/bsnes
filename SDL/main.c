@@ -10,10 +10,17 @@
 #include "debugger.h"
 
 static bool running = false;
+static char *filename;
+static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
+GB_gameboy_t gb;
 
 void GB_update_keys_status(GB_gameboy_t *gb)
 {
     static bool ctrl = false;
+    static bool shift = false;
+#ifdef __APPLE__
+    static bool cmd = false;
+#endif
     SDL_Event event;
     while (SDL_PollEvent(&event))
     {
@@ -52,8 +59,20 @@ void GB_update_keys_status(GB_gameboy_t *gb)
                         gb->turbo = event.type == SDL_KEYDOWN;
                         break;
                     case SDLK_LCTRL:
+                    case SDLK_RCTRL:
                         ctrl = event.type == SDL_KEYDOWN;
                         break;
+                    case SDLK_LSHIFT:
+                    case SDLK_RSHIFT:
+                        shift = event.type == SDL_KEYDOWN;
+                        break;
+#ifdef __APPLE__
+                    case SDLK_LMETA:
+                    case SDLK_RMETA:
+                        cmd = event.type == SDL_KEYDOWN;
+                        break;
+#endif
+
                     case SDLK_c:
                         if (ctrl && event.type == SDL_KEYDOWN) {
                             ctrl = false;
@@ -63,6 +82,26 @@ void GB_update_keys_status(GB_gameboy_t *gb)
                         break;
 
                     default:
+                        /* Save states */
+                        if (event.key.keysym.sym >= SDLK_0 && event.key.keysym.sym <= SDLK_9) {
+#ifdef __APPLE__
+                            if (cmd) {
+#else
+                            if (ctrl) {
+#endif
+                                char save_path[strlen(filename) + 4];
+                                char save_extension[] =".s0";
+                                save_extension[2] += event.key.keysym.sym - SDLK_0;
+                                replace_extension(filename, strlen(filename), save_path, save_extension);
+
+                                if (shift) {
+                                    GB_load_state(gb, save_path);
+                                }
+                                else {
+                                    GB_save_state(gb, save_path);
+                                }
+                            }
+                        }
                         break;
                 }
                 break;
@@ -129,8 +168,6 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     return SDL_MapRGB(screen->format, r, g, b);
 }
-
-GB_gameboy_t gb;
 
 static void debugger_interrupt(int ignore)
 {
@@ -207,7 +244,9 @@ usage:
         }
     }
 
-    if (GB_load_rom(&gb, argv[argc - 1])) {
+    filename = argv[argc - 1];
+
+    if (GB_load_rom(&gb, filename)) {
         perror("Failed to load ROM");
         exit(1);
     }
@@ -227,16 +266,16 @@ usage:
     GB_set_pixels_output(&gb, screen->pixels);
     GB_set_rgb_encode_callback(&gb, rgb_encode);
 
-    size_t path_length = strlen(argv[argc - 1]);
+    size_t path_length = strlen(filename);
 
     /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
-    replace_extension(argv[argc - 1], path_length, battery_save_path, ".sav");
+    replace_extension(filename, path_length, battery_save_path, ".sav");
     GB_load_battery(&gb, battery_save_path);
 
     /* Configure symbols */
     char symbols_path[path_length + 5];
-    replace_extension(argv[argc - 1], path_length, symbols_path, ".sym");
+    replace_extension(filename, path_length, symbols_path, ".sym");
     GB_debugger_load_symbol_file(&gb, symbols_path);
 
     /* Configure Audio */
