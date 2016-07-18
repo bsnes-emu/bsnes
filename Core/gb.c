@@ -466,6 +466,16 @@ void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callb
     gb->rgb_encode_callback = callback;
 }
 
+void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback)
+{
+    gb->infrared_callback = callback;
+}
+
+void GB_set_infrared_input(GB_gameboy_t *gb, bool state)
+{
+    gb->infrared_input = state;
+}
+
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
 {
     if (gb->audio_buffer) {

@@ -160,7 +160,16 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return (gb->io_registers[GB_IO_KEY1] & 0x7F) | (gb->cgb_double_speed? 0xFE : 0x7E);
 
-
+            case GB_IO_RP: {
+                if (!gb->is_cgb) return 0xFF;
+                /* You will read your own IR LED if it's on. */
+                bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1);
+                uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
+                if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && read_value) {
+                    ret |= read_value;
+                }
+                return ret;
+            }
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
                     return GB_apu_read(gb, addr & 0xFF);
@@ -439,6 +448,19 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->io_registers[GB_IO_IF] |= 0x8;
                 }
                 return;
+
+            case GB_IO_RP: {
+                if (!gb->is_cgb) {
+                    return;
+                }
+                if ((value & 1) != (gb->io_registers[GB_IO_RP] & 1)) {
+                    if (gb->infrared_callback) {
+                        gb->infrared_callback(gb, value & 1);
+                    }
+                }
+                gb->io_registers[GB_IO_RP] = value;
+                return;
+            }
 
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {

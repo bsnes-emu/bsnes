@@ -155,6 +155,7 @@ typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
+typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 
 typedef struct {
     enum {
@@ -210,6 +211,10 @@ typedef struct GB_gameboy_s {
         bool halted;
         bool stopped;
         bool boot_rom_finished;
+
+        /* Misc state*/
+        /* IR */
+        bool infrared_input;
     );
 
     /* HDMA */
@@ -342,6 +347,7 @@ typedef struct GB_gameboy_s {
     GB_input_callback_t async_input_callback;
     GB_rgb_encode_callback_t rgb_encode_callback;
     GB_vblank_callback_t vblank_callback;
+    GB_infrared_callback_t infrared_callback;
 
     /*** Debugger ***/
     bool debug_stopped;
@@ -398,5 +404,6 @@ void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
-
+void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
+void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 #endif /* GB_h */
