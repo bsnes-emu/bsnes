@@ -46,30 +46,20 @@ template<uint Size> auto M68K::negative(uint32 result) -> bool {
   return sign<Size>(result) < 0;
 }
 
-auto M68K::zero(uint2 size, uint32 result) -> bool {
-  static const uint32 mask[4] = {0xff, 0xffff, 0xffffffff};
-  return (result & mask[size]) == 0;
-}
-
-auto M68K::negative(uint2 size, uint32 result) -> bool {
-  static const uint32 mask[4] = {0x80, 0x8000, 0x80000000};
-  return result & mask[size];
-}
-
 //
 
-template<uint Size> auto M68K::instructionADD(uint3 reg, uint1 direction, EA ea) -> void {
+template<uint Size> auto M68K::instructionADD(Register rd, uint1 direction, EA ea) -> void {
   uint32 source;
   uint32 target;
   uint32 result;
 
   if(direction == 0) {
     source = read<Size>(ea);
-    target = r.d(reg);
+    target = read<Size>(rd);
     result = source + target;
-    r.d(reg) = result;
+    write<Size>(rd, result);
   } else {
-    source = r.d(reg);
+    source = read<Size>(rd);
     target = read<Size>(ea);
     result = source + target;
     write<Size>(ea, result);
@@ -82,95 +72,86 @@ template<uint Size> auto M68K::instructionADD(uint3 reg, uint1 direction, EA ea)
   r.x = r.c;
 }
 
-auto M68K::instructionANDI(uint8 ea) -> void {
-  auto result = modify(ea, readPC(ea), [&](auto x, auto y) -> uint32 {
-    return x & y;
-  });
+template<uint Size> auto M68K::instructionANDI(EA ea) -> void {
+  auto source = readPC<Size>();
+  auto target = read<Size, NoUpdate>(ea);
+  auto result = target & source;
+  write<Size>(ea, result);
 
   r.c = 0;
   r.v = 0;
-  r.z = zero(ea, result);
-  r.n = negative(ea, result);
+  r.z = zero<Size>(result);
+  r.n = negative<Size>(result);
 }
 
 auto M68K::instructionBCC(uint4 condition, uint8 displacement) -> void {
-  auto word = readPC();
-  if(displacement) displacement = (int8)displacement, r.pc -= 2;
-  else displacement = (int16)word;
-  if(condition == 1) {
-    condition = 0;
-  //pushLong(r.pc);
-  }
-  if(testCondition(condition)) r.pc += displacement;
+  auto extension = readPC();
+  if(condition == 1);  //push<Long>(r.pc);
+  r.pc -= 2;
+  if(!testCondition(condition == 1 ? (uint4)0 : condition)) return;
+  r.pc += displacement ? sign<Byte>(displacement) : sign<Word>(extension);
 }
 
-auto M68K::instructionLEA(uint3 target, uint8 ea) -> void {
-  r.a(target) = address(ea);
+auto M68K::instructionLEA(Register ra, EA ea) -> void {
+  write<Long>(ra, fetch<Long>(ea));
 }
 
-auto M68K::instructionMOVE(uint8 to, uint8 from) -> void {
-  auto data = read(from);
-  write(to, data);
+template<uint Size> auto M68K::instructionMOVE(EA to, EA from) -> void {
+  auto data = read<Size>(from);
+  write<Size>(to, data);
 
   r.c = 0;
   r.v = 0;
-  r.z = zero(from, data);
-  r.n = negative(from, data);
+  r.z = zero<Size>(data);
+  r.n = negative<Size>(data);
 }
 
-auto M68K::instructionMOVEA(uint3 to, uint8 from) -> void {
-  auto data = read(from);
-  if(from & 1) data = (int16)data;
-  r.a(to) = data;
+template<uint Size> auto M68K::instructionMOVEA(Register ra, EA ea) -> void {
+  auto data = read<Size>(ea);
+  if(Size == Word) data = (int16)data;
+  write<Size>(ra, data);
 }
 
-auto M68K::instructionMOVEM(uint1 direction, uint8 ea) -> void {
+template<uint Size> auto M68K::instructionMOVEM(uint1 direction, EA ea) -> void {
   auto list = readPC();
-  auto addr = address(ea);
+  auto addr = fetch<Size>(ea);
 
-  for(uint n : range(8)) {
-    if(list.bit(0 + n)) {
-      r.d(n) = readAbsolute(ea, addr);
-      addr += 2 + (ea & 2);
+  for(uint rn : range(16)) {
+    if(list.bit(rn)) {
+      write<Size>(Register{rn}, read<Size>(addr));
+      addr += Size == Long ? 4 : 2;
     }
   }
 
-  for(uint n : range(8)) {
-    if(list.bit(8 + n)) {
-      r.a(n) = readAbsolute(ea, addr);
-      addr += 2 + (ea & 2);
-    }
-  }
-
-  flush(ea, addr);
+  flush<Size>(ea, addr);
 }
 
-auto M68K::instructionMOVEQ(uint3 target, uint8 immediate) -> void {
-  r.d(target) = immediate;
+auto M68K::instructionMOVEQ(Register rd, uint8 immediate) -> void {
+  write<Byte>(rd, immediate);
 
   r.c = 0;
   r.v = 0;
-  r.z = immediate == 0;
-  r.n = negative(Byte, immediate);
+  r.z = zero<Byte>(immediate);
+  r.n = negative<Byte>(immediate);
 }
 
-auto M68K::instructionMOVE_USP(uint1 direction, uint3 reg) -> void {
+auto M68K::instructionMOVE_USP(uint1 direction, Register ra) -> void {
   if(!r.s) trap();  //todo: proper trap
   if(direction == 0) {
-    r.usp = r.a(reg);
+    r.usp = read<Long>(ra);
   } else {
-    r.a(reg) = r.usp;
+    write<Long>(ra, r.usp);
   }
 }
 
 auto M68K::instructionNOP() -> void {
 }
 
-auto M68K::instructionTST(uint8 ea) -> void {
-  auto data = read(ea);
+template<uint Size> auto M68K::instructionTST(EA ea) -> void {
+  auto data = read<Size>(ea);
 
   r.c = 0;
   r.v = 0;
-  r.z = zero(ea, data);
-  r.n = negative(ea, data);
+  r.z = zero<Size>(data);
+  r.n = negative<Size>(data);
 }

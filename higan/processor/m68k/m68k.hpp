@@ -6,6 +6,7 @@ namespace Processor {
 
 struct M68K {
   enum : uint { Byte, Word, Long };
+  enum : bool { NoUpdate = 0 };
 
   M68K();
 
@@ -16,32 +17,39 @@ struct M68K {
   auto power() -> void;
   auto reset() -> void;
 
+  //registers.cpp
+  struct Register {
+    Register(uint number) : number(number) {}
+
+    uint4 number;
+  };
+
+  template<uint Size = Long> auto read(Register reg) -> uint32;
+  template<uint Size = Long> auto write(Register reg, uint32 value) -> void;
+
   //memory.cpp
-  auto readAbsolute(uint2 size, uint32 addr) -> uint32;
-  auto writeAbsolute(uint2 size, uint32 addr, uint32 data) -> void;
-
-  auto readPC(uint2 size = Word) -> uint32;
-
   template<uint Size> auto read(uint32 addr) -> uint32;
+  template<uint Size> auto write(uint32 addr, uint32 data) -> void;
+  template<uint Size = Word> auto readPC() -> uint32;
 
   //ea.cpp
   struct EA {
-    EA(uint3 mode, uint3 reg) : mode(mode), reg(reg) {
-      if(mode == 7) mode += reg;  //optimization: convert modes {7; 0-4} to {8-11}
+    EA(uint mode_, uint reg_) : mode(mode_), reg(reg_) {
+      if(mode == 7) mode += reg.number;  //optimization: convert modes {7; 0-4} to {8-11}
+      if(mode != 0) reg.number += 8;     //optimization: linear index to all registers: d0-d7; a0-a7
     }
 
     uint4 mode;
-    uint3 reg;
+    Register reg;
+
+    boolean valid;
+    uint32 address;
   };
 
-  template<uint Size> auto read(EA ea) -> uint32;
-  template<uint Size> auto write(EA ea, uint32 data) -> void;
-
-  auto address(uint8 ea) -> uint32;
-  auto read(uint8 ea) -> uint32;
-  auto write(uint8 ea, uint32 data) -> void;
-  auto modify(uint8 ea, uint32 data, const function<uint32 (uint32, uint32)>& op) -> uint32;
-  auto flush(uint8 ea, uint32 address) -> void;
+  template<uint Size> auto fetch(EA& ea) -> uint32;
+  template<uint Size, bool Update = 1> auto read(EA& ea) -> uint32;
+  template<uint Size, bool Update = 1> auto write(EA& ea, uint32 data) -> void;
+  template<uint Size> auto flush(EA& ea, uint32 data) -> void;
 
   //instruction.cpp
   auto trap() -> void;
@@ -57,29 +65,24 @@ struct M68K {
   template<uint Size> auto overflow(uint32 result, uint32 source, uint32 target) -> bool;
   template<uint Size> auto zero(uint32 result) -> bool;
   template<uint Size> auto negative(uint32 result) -> bool;
-  auto zero(uint2 size, uint32 result) -> bool;
-  auto negative(uint2 size, uint32 result) -> bool;
 
-  template<uint Size> auto instructionADD(uint3 reg, uint1 direction, EA ea) -> void;
-  auto instructionANDI(uint8 ea) -> void;
-  auto instructionBCC(uint4 condition, uint8 displacement) -> void;
-  auto instructionLEA(uint3 target, uint8 source) -> void;
-  auto instructionMOVE(uint8 to, uint8 from) -> void;
-  auto instructionMOVEA(uint3 to, uint8 ea) -> void;
-  auto instructionMOVEM(uint1 direction, uint8 ea) -> void;
-  auto instructionMOVEQ(uint3 target, uint8 immediate) -> void;
-  auto instructionMOVE_USP(uint1 direction, uint3 reg) -> void;
-  auto instructionNOP() -> void;
-  auto instructionTST(uint8 ea) -> void;
+  template<uint Size> auto instructionADD(Register rd, uint1 direction, EA ea) -> void;
+  template<uint Size> auto instructionANDI(EA ea) -> void;
+                      auto instructionBCC(uint4 condition, uint8 displacement) -> void;
+                      auto instructionLEA(Register ra, EA ea) -> void;
+  template<uint Size> auto instructionMOVE(EA to, EA from) -> void;
+  template<uint Size> auto instructionMOVEA(Register ra, EA ea) -> void;
+  template<uint Size> auto instructionMOVEM(uint1 direction, EA ea) -> void;
+                      auto instructionMOVEQ(Register rd, uint8 immediate) -> void;
+                      auto instructionMOVE_USP(uint1 direction, Register ra) -> void;
+                      auto instructionNOP() -> void;
+  template<uint Size> auto instructionTST(EA ea) -> void;
 
   //disassembler.cpp
   auto disassemble(uint32 pc) -> string;
   auto disassembleRegisters() -> string;
 
   struct Registers {
-    auto d(uint3 r) -> uint32&;
-    auto a(uint3 r) -> uint32&;
-
     uint32 d0, d1, d2, d3, d4, d5, d6, d7;
     uint32 a0, a1, a2, a3, a4, a5, a6, ssp, usp;
     uint32 pc;
@@ -106,28 +109,27 @@ struct M68K {
 
 private:
   //disassembler.cpp
-  template<uint Size> auto disassembleADD(uint3 reg, uint1 direction, EA ea) -> string;
-  auto disassembleANDI(uint8 ea) -> string;
-  auto disassembleBCC(uint4 condition, uint8 displacement) -> string;
-  auto disassembleLEA(uint3 target, uint8 ea) -> string;
-  auto disassembleMOVE(uint8 to, uint8 from) -> string;
-  auto disassembleMOVEA(uint3 to, uint8 from) -> string;
-  auto disassembleMOVEM(uint1 direction, uint8 ea) -> string;
-  auto disassembleMOVEQ(uint3 target, uint8 immediate) -> string;
-  auto disassembleMOVE_USP(uint1 direction, uint3 reg) -> string;
-  auto disassembleNOP() -> string;
-  auto disassembleTST(uint8 ea) -> string;
+  template<uint Size> auto disassembleADD(Register rd, uint1 direction, EA ea) -> string;
+  template<uint Size> auto disassembleANDI(EA ea) -> string;
+                      auto disassembleBCC(uint4 condition, uint8 displacement) -> string;
+                      auto disassembleLEA(Register ra, EA ea) -> string;
+  template<uint Size> auto disassembleMOVE(EA to, EA from) -> string;
+  template<uint Size> auto disassembleMOVEA(Register ra, EA ea) -> string;
+  template<uint Size> auto disassembleMOVEM(uint1 direction, EA ea) -> string;
+                      auto disassembleMOVEQ(Register rd, uint8 immediate) -> string;
+                      auto disassembleMOVE_USP(uint1 direction, Register ra) -> string;
+                      auto disassembleNOP() -> string;
+  template<uint Size> auto disassembleTST(EA ea) -> string;
 
-  auto _readByte(uint32 addr) -> uint8;
-  auto _readWord(uint32 addr) -> uint16;
-  auto _readLong(uint32 addr) -> uint32;
-  auto _readPC(uint2 size = Word) -> uint32;
-  auto _immediate(uint2 size) -> string;
-  auto _address(uint8 ea) -> string;
-  auto _read(uint8 ea) -> string;
-  auto _write(uint8 ea) -> string;
+  template<uint Size> auto _read(uint32 addr) -> uint32;
+  template<uint Size = Word> auto _readPC() -> uint32;
+  auto _register(Register r) -> string;
+  template<uint Size> auto _immediate() -> string;
+  template<uint Size> auto _address(EA ea) -> string;
+  template<uint Size> auto _read(EA ea) -> string;
+  template<uint Size> auto _write(EA ea) -> string;
   auto _branch(uint8 displacement) -> string;
-  auto _suffix(uint2 size) -> string;
+  template<uint Size> auto _suffix() -> string;
   auto _condition(uint4 condition) -> string;
 
   uint32 _pc;

@@ -18,8 +18,7 @@ auto M68K::power() -> void {
 auto M68K::reset() -> void {
   instructionsExecuted = 0;
 
-  for(uint n : range(8)) r.d(n) = 0;
-  for(uint n : range(7)) r.a(n) = 0;
+  for(uint rn : range(15)) write<Long>(Register{rn}, 0);
   r.ssp = 0;
   r.usp = 0;
   r.pc = 0;

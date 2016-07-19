@@ -8,7 +8,9 @@ auto M68K::trap() -> void {
 
 auto M68K::instruction() -> void {
   instructionsExecuted++;
-  print(disassembleRegisters(), "\n", disassemble(r.pc), "\n\n");
+  print(disassembleRegisters(), "\n");
+  print(disassemble(r.pc), "\n");
+  print("\n");
 
   opcode = readPC();
   return instructionTable[opcode]();
@@ -18,180 +20,141 @@ M68K::M68K() {
   #define bind(id, name, ...) \
     assert(!instructionTable[id]); \
     instructionTable[id] = [=] { return instruction##name(__VA_ARGS__); }; \
-    disassembleTable[id] = [=] { return disassemble##name(__VA_ARGS__); }; \
+    disassembleTable[id] = [=] { return disassemble##name(__VA_ARGS__); };
+
+  #define pattern(s) \
+    std::integral_constant<uint16_t, bit::test(s)>::value
 
   //ADD
-  for(uint3 d         : range(8))
+  for(uint3 dreg      : range(8))
   for(uint1 direction : range(2))
   for(uint3 mode      : range(8))
   for(uint3 reg       : range(8)) {
-    auto opcode = 0b1101'0000'0000'0000 | d << 9 | direction << 8 | mode << 3 | reg << 0;
+    auto opcode = pattern("1101 ---- ++-- ----") | dreg << 9 | direction << 8 | mode << 3 | reg << 0;
     if(direction == 1 && (mode == 0 || mode == 1 || (mode == 7 && reg >= 2))) continue;
 
+    Register rd{0u + dreg};
     EA ea{mode, reg};
-    bind(opcode | 0 << 6, ADD<Byte>, d, direction, ea);
-    bind(opcode | 1 << 6, ADD<Word>, d, direction, ea);
-    bind(opcode | 2 << 6, ADD<Long>, d, direction, ea);
+    bind(opcode | 0 << 6, ADD<Byte>, rd, direction, ea);
+    bind(opcode | 1 << 6, ADD<Word>, rd, direction, ea);
+    bind(opcode | 2 << 6, ADD<Long>, rd, direction, ea);
+  }
+
+  //ANDI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 0010 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 4)) continue;
+
+    EA ea{mode, reg};
+    bind(opcode | 0 << 6, ANDI<Byte>, ea);
+    bind(opcode | 1 << 6, ANDI<Word>, ea);
+    bind(opcode | 2 << 6, ANDI<Long>, ea);
+  }
+
+  //BCC
+  for(uint4 condition    : range( 16))
+  for(uint8 displacement : range(256)) {
+    auto opcode = pattern("0110 ---- ---- ----") | condition << 8 | displacement << 0;
+
+    bind(opcode, BCC, condition, displacement);
+  }
+
+  //LEA
+  for(uint3 areg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 ---1 11-- ----") | areg << 9 | mode << 3 | reg << 0;
+    if(mode <= 1 || mode == 3 || mode == 4 || (mode == 7 && reg >= 4)) continue;
+
+    Register ra{8u + areg};
+    EA ea{mode, reg};
+    bind(opcode, LEA, ra, ea);
+  }
+
+  //MOVE
+  for(uint3 toReg    : range(8))
+  for(uint3 toMode   : range(8))
+  for(uint3 fromMode : range(8))
+  for(uint3 fromReg  : range(8)) {
+    auto opcode = pattern("00++ ---- ---- ----") | toReg << 9 | toMode << 6 | fromMode << 3 | fromReg << 0;
+    if(toMode == 1 || (toMode == 7 && toReg >= 4)) continue;
+
+    EA to{toMode, toReg};
+    EA from{fromMode, fromReg};
+    bind(opcode | 1 << 12, MOVE<Byte>, to, from);
+    bind(opcode | 3 << 12, MOVE<Word>, to, from);
+    bind(opcode | 2 << 12, MOVE<Long>, to, from);
+  }
+
+  //MOVEA
+  for(uint3 areg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("00++ ---0 01-- ----") | areg << 9 | mode << 3 | reg << 0;
+
+    Register ra{8u + areg};
+    EA ea{mode, reg};
+    bind(opcode | 3 << 12, MOVEA<Word>, ra, ea);
+    bind(opcode | 2 << 12, MOVEA<Long>, ra, ea);
+  }
+
+  //MOVEM
+  for(uint1 direction : range(2))
+  for(uint3 mode      : range(8))
+  for(uint3 reg       : range(8)) {
+    auto opcode = pattern("0100 1-00 1+-- ----") | direction << 10 | mode << 3 | reg << 0;
+    if(mode <= 1 || mode == 3 || (mode == 7 && reg >= 4));
+
+    EA ea{mode, reg};
+    bind(opcode | 0 << 6, MOVEM<Word>, direction, ea);
+    bind(opcode | 1 << 6, MOVEM<Long>, direction, ea);
+  }
+
+  //MOVEQ
+  for(uint3 dreg      : range(  8))
+  for(uint8 immediate : range(256)) {
+    auto opcode = pattern("0111 ---0 ---- ----") | dreg << 9 | immediate << 0;
+
+    Register rd{0u + dreg};
+    bind(opcode, MOVEQ, rd, immediate);
+  }
+
+  //MOVE_USP
+  for(uint1 direction : range(2))
+  for(uint3 areg      : range(8)) {
+    auto opcode = pattern("0100 1110 0110 ----") | direction << 3 | areg << 0;
+
+    Register ra{8u + areg};
+    bind(opcode, MOVE_USP, direction, ra);
+  }
+
+  //NOP
+  { auto opcode = pattern("0100 1110 0111 0001");
+
+    bind(opcode, NOP);
+  }
+
+  //TST
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 1010 ++-- ----") | mode << 3 | reg << 0;
+
+    EA ea{mode, reg};
+    bind(opcode | 0 << 6, TST<Byte>, ea);
+    bind(opcode | 1 << 6, TST<Word>, ea);
+    bind(opcode | 2 << 6, TST<Long>, ea);
   }
 
   #undef bind
+  #undef pattern
 
-  #define match(pattern) if( \
-    (opcode & std::integral_constant<uint16_t, bit::mask(pattern)>::value) \
-    == std::integral_constant<uint16_t, bit::test(pattern)>::value \
-  )
-
-  #define bind(name, ...) \
-    assert(!instructionTable[opcode]); \
-    instructionTable[opcode] = [=] { return instruction##name(__VA_ARGS__); }; \
-    disassembleTable[opcode] = [=] { return disassemble##name(__VA_ARGS__); }; \
-
-  #define bit(x) (uint)opcode.bit(x)
-  #define bits(x, y) (uint)opcode.bits(x, y)
-
-  for(uint16 opcode : range(65536)) {
-
-/*
-    //ADD
-    match("1101 ---- ---- ----") {
-      uint3 r = bits(11,9);
-      uint1 direction = bit(8);
-      uint2 size = bits(7,6);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if(size != 3 && (direction == 0 || (mode == 2 || mode == 3 || mode == 4 || mode == 5 || mode == 6 || (mode == 7 && reg <= 1)))) {
-        uint8 ea = mode << 5 | reg << 2 | size;
-        bind(ADD, r, direction, ea);
-      }
-    }
-*/
-
-    //ANDI
-    match("0000 0010 ---- ----") {
-      uint2 size = bits(7,6);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if(size != 3 && mode != 1) {
-        uint8 ea = mode << 5 | reg << 2 | size;
-        bind(ANDI, ea);
-      }
-    }
-
-    //BCC
-    match("0110 ---- ---- ----") {
-      uint4 condition = bits(11,8);
-      uint8 displacement = bits(7,0);
-
-      if(true) {
-        bind(BCC, condition, displacement);
-      }
-    }
-
-    //LEA
-    match("0100 ---1 11-- ----") {
-      uint3 target = bits(11,9);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if(mode == 2 || mode == 5 || mode == 6 || (mode == 7 && reg <= 4)) {
-        uint8 ea = mode << 5 | reg << 2 | Long;
-        bind(LEA, target, ea);
-      }
-    }
-
-    //MOVE
-    match("00-- ---- ---- ----") {
-      uint2 size = bits(13,12) == 1 ? Byte : bits(13,12) == 3 ? Word : bits(13,12) == 2 ? Long : 3;
-      uint3 targetReg = bits(11,9);
-      uint3 targetMode = bits(8,6);
-      uint3 sourceMode = bits(5,3);
-      uint3 sourceReg = bits(2,0);
-
-      if(size != 3 && targetMode != 1) {
-        uint8 to = targetMode << 5 | targetReg << 2 | size;
-        uint8 from = sourceMode << 5 | sourceReg << 2 | size;
-        bind(MOVE, to, from);
-      }
-    }
-
-    //MOVEA
-    match("00-- ---0 01-- ----") {
-      uint2 size = bits(13,12) == 3 ? Word : bits(13,12) == 2 ? Long : 3;
-      uint3 to = bits(11,9);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if(size != 3) {
-        uint8 from = mode << 5 | reg << 2 | size;
-        bind(MOVEA, to, from);
-      }
-    }
-
-    //MOVEM
-    match("0100 1-00 1--- ----") {
-      uint1 direction = bit(10);
-      uint2 size = 1 + bit(6);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if((direction == 0 && (mode == 2 || mode == 4 || mode == 5 || mode == 6 || (mode == 7 && reg <= 3)))
-      || (direction == 1 && (mode == 2 || mode == 3 || mode == 5 || mode == 6 || (mode == 7 && reg <= 3)))) {
-        uint8 ea = mode << 5 | reg << 2 | size;
-        bind(MOVEM, direction, ea);
-      }
-    }
-
-    //MOVEQ
-    match("0111 ---0 ---- ----") {
-      uint3 target = bits(11,9);
-      uint8 immediate = bits(7,0);
-
-      if(true) {
-        bind(MOVEQ, target, immediate);
-      }
-    }
-
-    //MOVE_USP
-    match("0100 1110 0110 ----") {
-      uint1 direction = bit(3);
-      uint3 reg = bits(2,0);
-
-      if(true) {
-        bind(MOVE_USP, direction, reg);
-      }
-    }
-
-    //NOP
-    match("0100 1110 0111 0001") {
-      if(true) {
-        bind(NOP);
-      }
-    }
-
-    //TST
-    match("0100 1010 ---- ----") {
-      uint2 size = bits(7,6);
-      uint3 mode = bits(5,3);
-      uint3 reg = bits(2,0);
-
-      if(size != 3) {
-        uint8 ea = mode << 5 | reg << 2 | size << 0;
-        bind(TST, ea);
-      }
-    }
-
-  }
-
-  #undef match
-  #undef bind
-  #undef bit
-  #undef bits
-
+  uint unimplemented = 0;
   for(uint16 opcode : range(65536)) {
     if(instructionTable[opcode]) continue;
     instructionTable[opcode] = [=] { trap(); };
     disassembleTable[opcode] = [=] { return string{"???"}; };
+    unimplemented++;
   }
+//print("[M68K] unimplemented opcodes: ", unimplemented, "\n");
 }
