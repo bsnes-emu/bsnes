@@ -160,6 +160,10 @@ void main(void) {\n\
     glDeleteProgram(program);
     glDeleteTextures(1, &texture);
     glDeleteTextures(1, &previous_texture);
+
+    /* OpenGL is black magic. Closing one view causes others to be completely black unless we reload their shaders */
+    /* We're probably not freeing thing in the right place. */
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
 }
 
 + (GLuint)shaderWithContents:(NSString*)contents type:(GLenum)type

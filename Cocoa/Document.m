@@ -126,6 +126,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
         GB_run(&gb);
     }
     [self.audioClient stop];
+    self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
     GB_save_battery(&gb, [[[self.fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sav"] UTF8String]);
     stopping = false;
