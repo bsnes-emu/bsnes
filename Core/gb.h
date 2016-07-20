@@ -28,6 +28,8 @@ enum {
     GB_ZERO_FLAG = 128,
 };
 
+#define GB_MAX_IR_QUEUE 256
+
 enum {
     /* Joypad and Serial */
     GB_IO_JOYP       = 0x00, // Joypad (R/W)
@@ -155,7 +157,7 @@ typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
-typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
+typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
 
 typedef struct {
     enum {
@@ -171,6 +173,11 @@ typedef struct {
     bool has_rtc;
     bool has_rumble;
 } GB_cartridge_t;
+
+typedef struct {
+    bool state;
+    long delay;
+} GB_ir_queue_item_t;
 
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
@@ -349,6 +356,12 @@ typedef struct GB_gameboy_s {
     GB_vblank_callback_t vblank_callback;
     GB_infrared_callback_t infrared_callback;
 
+    /* IR */
+    long cycles_since_ir_change;
+    long cycles_since_input_ir_change;
+    GB_ir_queue_item_t ir_queue[GB_MAX_IR_QUEUE];
+    size_t ir_queue_length;
+
     /*** Debugger ***/
     bool debug_stopped;
     bool debug_fin_command, debug_next_command;
@@ -406,4 +419,5 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate);
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
+void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change);
 #endif /* GB_h */

@@ -166,7 +166,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 bool read_value = gb->infrared_input || (gb->io_registers[GB_IO_RP] & 1);
                 uint8_t ret = (gb->io_registers[GB_IO_RP] & 0xC1) | 0x3C;
                 if ((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && read_value) {
-                    ret |= read_value;
+                    ret |= 2;
                 }
                 return ret;
             }
@@ -455,7 +455,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 if ((value & 1) != (gb->io_registers[GB_IO_RP] & 1)) {
                     if (gb->infrared_callback) {
-                        gb->infrared_callback(gb, value & 1);
+                        gb->infrared_callback(gb, value & 1, gb->cycles_since_ir_change);
+                        gb->cycles_since_ir_change = 0;
                     }
                 }
                 gb->io_registers[GB_IO_RP] = value;

@@ -3,6 +3,17 @@
 #include "memory.h"
 #include "display.h"
 
+static void GB_ir_run(GB_gameboy_t *gb)
+{
+    if (gb->ir_queue_length == 0) return;
+    if (gb->cycles_since_input_ir_change >= gb->ir_queue[0].delay) {
+        gb->cycles_since_input_ir_change -= gb->ir_queue[0].delay;
+        gb->infrared_input = gb->ir_queue[0].state;
+        gb->ir_queue_length--;
+        memmove(&gb->ir_queue[0], &gb->ir_queue[1], sizeof(gb->ir_queue[0]) * (gb->ir_queue_length));
+    }
+}
+
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
@@ -24,10 +35,13 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->hdma_cycles += cycles;
     gb->display_cycles += cycles;
     gb->apu_cycles += cycles;
+    gb->cycles_since_ir_change += cycles;
+    gb->cycles_since_input_ir_change += cycles;
     GB_hdma_run(gb);
     GB_timers_run(gb);
     GB_apu_run(gb);
     GB_display_run(gb);
+    GB_ir_run(gb);
 }
 
 void GB_timers_run(GB_gameboy_t *gb)
