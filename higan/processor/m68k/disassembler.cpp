@@ -63,7 +63,7 @@ template<uint Size> auto M68K::_suffix() -> string {
 
 auto M68K::_condition(uint4 condition) -> string {
   static const string conditions[16] = {
-    "ra", "sr", "hi", "ls", "cc", "cs", "ne", "eq",
+    "t ", "f ", "hi", "ls", "cc", "cs", "ne", "eq",
     "vc", "vs", "pl", "mi", "ge", "lt", "gt", "le",
   };
   return conditions[condition];
@@ -76,8 +76,8 @@ auto M68K::disassemble(uint32 pc) -> string {
 
 auto M68K::disassembleRegisters() -> string {
   return {
-    hex(r.d0, 8L), " ", hex(r.d1, 8L), " ", hex(r.d2, 8L), " ", hex(r.d3, 8L), " ",
-    hex(r.d4, 8L), " ", hex(r.d5, 8L), " ", hex(r.d6, 8L), " ", hex(r.d7, 8L), " ",
+    hex(r.da[D0], 8L), " ", hex(r.da[D1], 8L), " ", hex(r.da[D2], 8L), " ", hex(r.da[D3], 8L), " ",
+    hex(r.da[D4], 8L), " ", hex(r.da[D5], 8L), " ", hex(r.da[D6], 8L), " ", hex(r.da[D7], 8L), " ",
     r.t ? "T" : "t",
     r.s ? "S" : "s",
     (uint)r.i,
@@ -86,8 +86,8 @@ auto M68K::disassembleRegisters() -> string {
     r.z ? "Z" : "z",
     r.n ? "N" : "n",
     r.x ? "X" : "x", "\n",
-    hex(r.a0, 8L), " ", hex(r.a1, 8L), " ", hex(r.a2, 8L), " ", hex(r.a3, 8L), " ",
-    hex(r.a4, 8L), " ", hex(r.a5, 8L), " ", hex(r.a6, 8L), " ", hex(r.ssp, 8L), " ", hex(r.usp, 8L)
+    hex(r.da[A0], 8L), " ", hex(r.da[A1], 8L), " ", hex(r.da[A2], 8L), " ", hex(r.da[A3], 8L), " ",
+    hex(r.da[A4], 8L), " ", hex(r.da[A5], 8L), " ", hex(r.da[A6], 8L), " ", hex(r.da[A7], 8L), " ", hex(r.sp, 8L)
   };
 }
 
@@ -108,7 +108,32 @@ template<uint Size> auto M68K::disassembleANDI(EA ea) -> string {
 }
 
 auto M68K::disassembleBCC(uint4 condition, uint8 displacement) -> string {
-  return {"b", _condition(condition), "     ", _branch(displacement)};
+  auto cc = _condition(condition);
+  if(condition == 0) cc = "ra";
+  if(condition == 1) cc = "sr";
+  return {"b", cc, "     ", _branch(displacement)};
+}
+
+template<uint Size> auto M68K::disassembleBTST(Register rd, EA ea) -> string {
+  return {"btst    ", _register(rd), ",", _read<Size>(ea)};
+}
+
+template<uint Size> auto M68K::disassembleBTST(EA ea) -> string {
+  return {"btst    ", _immediate<Byte>(), ",", _read<Size>(ea)};
+}
+
+template<uint Size> auto M68K::disassembleCLR(EA ea) -> string {
+  return {"clr", _suffix<Size>(), "   ", _read<Size>(ea)};
+}
+
+template<uint Size> auto M68K::disassembleCMP(Register rd, EA ea) -> string {
+  return {"cmp", _suffix<Size>(), "   ", _read<Word>(ea), ",", _register(rd)};
+}
+
+auto M68K::disassembleDBCC(uint4 condition, Register rd) -> string {
+  auto base = _pc;
+  auto displacement = (int16)_readPC();
+  return {"db", _condition(condition), "    ", _register(rd), ",$", hex(base + displacement, 6L)};
 }
 
 auto M68K::disassembleLEA(Register ra, EA ea) -> string {
@@ -142,6 +167,14 @@ auto M68K::disassembleMOVEQ(Register rd, uint8 immediate) -> string {
   return {"moveq   #$", hex(immediate, 2L), ",", _register(rd)};
 }
 
+auto M68K::disassembleMOVE_FROM_SR(EA ea) -> string {
+  return {"move    sr,", _read<Word>(ea)};
+}
+
+auto M68K::disassembleMOVE_TO_SR(EA ea) -> string {
+  return {"move    ", _read<Word>(ea), ",sr"};
+}
+
 auto M68K::disassembleMOVE_USP(uint1 direction, Register ra) -> string {
   if(direction == 0) {
     return {"move    ", _register(ra), ",usp"};
@@ -152,6 +185,10 @@ auto M68K::disassembleMOVE_USP(uint1 direction, Register ra) -> string {
 
 auto M68K::disassembleNOP() -> string {
   return {"nop     "};
+}
+
+auto M68K::disassembleRTS() -> string {
+  return {"rts     "};
 }
 
 template<uint Size> auto M68K::disassembleTST(EA ea) -> string {

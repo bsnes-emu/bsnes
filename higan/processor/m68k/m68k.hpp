@@ -5,8 +5,25 @@
 namespace Processor {
 
 struct M68K {
+  enum : bool { User, Supervisor };
   enum : uint { Byte, Word, Long };
-  enum : bool { NoUpdate = 0 };
+  enum : bool { NoUpdate = 0, Reverse = 1 };
+  enum : uint { D0, D1, D2, D3, D4, D5, D6, D7, A0, A1, A2, A3, A4, A5, A6, A7 };
+
+  enum : uint {
+    DataRegisterDirect,
+    AddressRegisterDirect,
+    AddressRegisterIndirect,
+    AddressRegisterIndirectWithPostIncrement,
+    AddressRegisterIndirectWithPreDecrement,
+    AddressRegisterIndirectWithDisplacement,
+    AddressRegisterIndirectWithIndex,
+    AbsoluteShortIndirect,
+    AbsoluteLongIndirect,
+    ProgramCounterIndirectWithDisplacement,
+    ProgramCounterIndirectWithIndex,
+    Immediate,
+  };
 
   M68K();
 
@@ -16,25 +33,29 @@ struct M68K {
 
   auto power() -> void;
   auto reset() -> void;
+  auto supervisor() -> bool;
 
   //registers.cpp
   struct Register {
-    Register(uint number) : number(number) {}
+    explicit Register(uint number_) : number(number_) {}
 
     uint4 number;
   };
 
   template<uint Size = Long> auto read(Register reg) -> uint32;
   template<uint Size = Long> auto write(Register reg, uint32 value) -> void;
+  auto setSR(uint16 sr) -> void;
 
   //memory.cpp
   template<uint Size> auto read(uint32 addr) -> uint32;
-  template<uint Size> auto write(uint32 addr, uint32 data) -> void;
+  template<uint Size, bool Order = 0> auto write(uint32 addr, uint32 data) -> void;
   template<uint Size = Word> auto readPC() -> uint32;
+  template<uint Size> auto pop() -> uint32;
+  template<uint Size> auto push(uint32 data) -> void;
 
   //ea.cpp
   struct EA {
-    EA(uint mode_, uint reg_) : mode(mode_), reg(reg_) {
+    explicit EA(uint mode_, uint reg_) : mode(mode_), reg(reg_) {
       if(mode == 7) mode += reg.number;  //optimization: convert modes {7; 0-4} to {8-11}
       if(mode != 0) reg.number += 8;     //optimization: linear index to all registers: d0-d7; a0-a7
     }
@@ -58,6 +79,8 @@ struct M68K {
   //instructions.cpp
   auto testCondition(uint4 condition) -> bool;
 
+  template<uint Size> auto bits() -> uint;
+  template<uint Size> auto mask() -> uint32;
   template<uint Size> auto clip(uint32 data) -> uint32;
   template<uint Size> auto sign(uint32 data) -> int32;
 
@@ -69,13 +92,21 @@ struct M68K {
   template<uint Size> auto instructionADD(Register rd, uint1 direction, EA ea) -> void;
   template<uint Size> auto instructionANDI(EA ea) -> void;
                       auto instructionBCC(uint4 condition, uint8 displacement) -> void;
+  template<uint Size> auto instructionBTST(Register rd, EA ea) -> void;
+  template<uint Size> auto instructionBTST(EA ea) -> void;
+  template<uint Size> auto instructionCLR(EA ea) -> void;
+  template<uint Size> auto instructionCMP(Register rd, EA ea) -> void;
+                      auto instructionDBCC(uint4 condition, Register rd) -> void;
                       auto instructionLEA(Register ra, EA ea) -> void;
   template<uint Size> auto instructionMOVE(EA to, EA from) -> void;
   template<uint Size> auto instructionMOVEA(Register ra, EA ea) -> void;
   template<uint Size> auto instructionMOVEM(uint1 direction, EA ea) -> void;
                       auto instructionMOVEQ(Register rd, uint8 immediate) -> void;
+                      auto instructionMOVE_FROM_SR(EA ea) -> void;
+                      auto instructionMOVE_TO_SR(EA ea) -> void;
                       auto instructionMOVE_USP(uint1 direction, Register ra) -> void;
                       auto instructionNOP() -> void;
+                      auto instructionRTS() -> void;
   template<uint Size> auto instructionTST(EA ea) -> void;
 
   //disassembler.cpp
@@ -83,8 +114,8 @@ struct M68K {
   auto disassembleRegisters() -> string;
 
   struct Registers {
-    uint32 d0, d1, d2, d3, d4, d5, d6, d7;
-    uint32 a0, a1, a2, a3, a4, a5, a6, ssp, usp;
+    uint32 da[16];  //a7 = primary stack pointer
+    uint32 sp;      //sp = secondary stack pointer
     uint32 pc;
 
     union {
@@ -112,13 +143,21 @@ private:
   template<uint Size> auto disassembleADD(Register rd, uint1 direction, EA ea) -> string;
   template<uint Size> auto disassembleANDI(EA ea) -> string;
                       auto disassembleBCC(uint4 condition, uint8 displacement) -> string;
+  template<uint Size> auto disassembleBTST(Register rd, EA ea) -> string;
+  template<uint Size> auto disassembleBTST(EA ea) -> string;
+  template<uint Size> auto disassembleCLR(EA ea) -> string;
+  template<uint Size> auto disassembleCMP(Register rd, EA ea) -> string;
+                      auto disassembleDBCC(uint4 condition, Register rd) -> string;
                       auto disassembleLEA(Register ra, EA ea) -> string;
   template<uint Size> auto disassembleMOVE(EA to, EA from) -> string;
   template<uint Size> auto disassembleMOVEA(Register ra, EA ea) -> string;
   template<uint Size> auto disassembleMOVEM(uint1 direction, EA ea) -> string;
                       auto disassembleMOVEQ(Register rd, uint8 immediate) -> string;
+                      auto disassembleMOVE_FROM_SR(EA ea) -> string;
+                      auto disassembleMOVE_TO_SR(EA ea) -> string;
                       auto disassembleMOVE_USP(uint1 direction, Register ra) -> string;
                       auto disassembleNOP() -> string;
+                      auto disassembleRTS() -> string;
   template<uint Size> auto disassembleTST(EA ea) -> string;
 
   template<uint Size> auto _read(uint32 addr) -> uint32;
