@@ -56,18 +56,18 @@ template<uint Size> auto M68K::negative(uint32 result) -> bool {
 
 //
 
-template<uint Size> auto M68K::instructionADD(Register rd, uint1 direction, EA ea) -> void {
+template<uint Size> auto M68K::instructionADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> void {
   uint32 source;
   uint32 target;
   uint32 result;
 
   if(direction == 0) {
     source = read<Size>(ea);
-    target = read<Size>(rd);
+    target = read<Size>(dr);
     result = source + target;
-    write<Size>(rd, result);
+    write<Size>(dr, result);
   } else {
-    source = read<Size>(rd);
+    source = read<Size>(dr);
     target = read<Size>(ea);
     result = source + target;
     write<Size>(ea, result);
@@ -80,7 +80,7 @@ template<uint Size> auto M68K::instructionADD(Register rd, uint1 direction, EA e
   r.x = r.c;
 }
 
-template<uint Size> auto M68K::instructionANDI(EA ea) -> void {
+template<uint Size> auto M68K::instructionANDI(EffectiveAddress ea) -> void {
   auto source = readPC<Size>();
   auto target = read<Size, NoUpdate>(ea);
   auto result = target & source;
@@ -92,6 +92,18 @@ template<uint Size> auto M68K::instructionANDI(EA ea) -> void {
   r.n = negative<Size>(result);
 }
 
+auto M68K::instructionANDI_TO_CCR() -> void {
+  auto data = readPC<Word>();
+  writeCCR(readCCR() & data);
+}
+
+auto M68K::instructionANDI_TO_SR() -> void {
+  if(!supervisor()) return;
+
+  auto data = readPC<Word>();
+  writeSR(readSR() & data);
+}
+
 auto M68K::instructionBCC(uint4 condition, uint8 displacement) -> void {
   auto extension = readPC();
   if(condition == 1) push<Long>(r.pc);
@@ -100,15 +112,15 @@ auto M68K::instructionBCC(uint4 condition, uint8 displacement) -> void {
   r.pc += displacement ? sign<Byte>(displacement) : sign<Word>(extension);
 }
 
-template<uint Size> auto M68K::instructionBTST(Register rd, EA ea) -> void {
-  auto bit = read<Size>(rd);
+template<uint Size> auto M68K::instructionBTST(DataRegister dr, EffectiveAddress ea) -> void {
+  auto bit = read<Size>(dr);
   auto test = read<Size>(ea);
   bit &= bits<Size>() - 1;
 
   r.z = test.bit(bit) == 0;
 }
 
-template<uint Size> auto M68K::instructionBTST(EA ea) -> void {
+template<uint Size> auto M68K::instructionBTST(EffectiveAddress ea) -> void {
   auto bit = (uint8)readPC<Word>();
   auto test = read<Size>(ea);
   bit &= bits<Size>() - 1;
@@ -116,7 +128,7 @@ template<uint Size> auto M68K::instructionBTST(EA ea) -> void {
   r.z = test.bit(bit) == 0;
 }
 
-template<uint Size> auto M68K::instructionCLR(EA ea) -> void {
+template<uint Size> auto M68K::instructionCLR(EffectiveAddress ea) -> void {
   read<Size>(ea);
   write<Size>(ea, 0);
 
@@ -126,9 +138,9 @@ template<uint Size> auto M68K::instructionCLR(EA ea) -> void {
   r.n = 0;
 }
 
-template<uint Size> auto M68K::instructionCMP(Register rd, EA ea) -> void {
+template<uint Size> auto M68K::instructionCMP(DataRegister dr, EffectiveAddress ea) -> void {
   auto source = read<Size>(ea);
-  auto target = read<Size>(rd);
+  auto target = read<Size>(dr);
   auto result = target - source;
 
   r.c = carry<Size>(result, source);
@@ -137,20 +149,32 @@ template<uint Size> auto M68K::instructionCMP(Register rd, EA ea) -> void {
   r.n = negative<Size>(result);
 }
 
-auto M68K::instructionDBCC(uint4 condition, Register rd) -> void {
+auto M68K::instructionDBCC(uint4 condition, DataRegister dr) -> void {
   auto displacement = (int16)readPC();
   if(!testCondition(condition)) {
-    uint16 result = read<Word>(rd);
-    write<Word>(rd, result - 1);
+    uint16 result = read<Word>(dr);
+    write<Word>(dr, result - 1);
     if(result) r.pc -= 2, r.pc += displacement;
   }
 }
 
-auto M68K::instructionLEA(Register ra, EA ea) -> void {
-  write<Long>(ra, fetch<Long>(ea));
+auto M68K::instructionEORI_TO_CCR() -> void {
+  auto data = readPC<Word>();
+  writeCCR(readCCR() ^ data);
 }
 
-template<uint Size> auto M68K::instructionMOVE(EA to, EA from) -> void {
+auto M68K::instructionEORI_TO_SR() -> void {
+  if(!supervisor()) return;
+
+  auto data = readPC<Word>();
+  writeSR(readSR() ^ data);
+}
+
+auto M68K::instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void {
+  write<Long>(ar, fetch<Long>(ea));
+}
+
+template<uint Size> auto M68K::instructionMOVE(EffectiveAddress to, EffectiveAddress from) -> void {
   auto data = read<Size>(from);
   write<Size>(to, data);
 
@@ -160,28 +184,32 @@ template<uint Size> auto M68K::instructionMOVE(EA to, EA from) -> void {
   r.n = negative<Size>(data);
 }
 
-template<uint Size> auto M68K::instructionMOVEA(Register ra, EA ea) -> void {
+template<uint Size> auto M68K::instructionMOVEA(AddressRegister ar, EffectiveAddress ea) -> void {
   auto data = read<Size>(ea);
-  if(Size == Word) data = (int16)data;
-  write<Long>(ra, data);
+  write<Long>(ar, data);
 }
 
-template<uint Size> auto M68K::instructionMOVEM(uint1 direction, EA ea) -> void {
+template<uint Size> auto M68K::instructionMOVEM(uint1 direction, EffectiveAddress ea) -> void {
   auto list = readPC();
   auto addr = fetch<Size>(ea);
 
-  for(uint rn : range(16)) {
-    if(list.bit(rn)) {
-      write<Size>(Register{rn}, read<Size>(addr));
-      addr += Size == Long ? 4 : 2;
-    }
+  for(uint n : range(8)) {
+    if(!list.bit(0 + n)) continue;
+    write<Size>(DataRegister{n}, read<Size>(addr));
+    addr += Size == Long ? 4 : 2;
+  }
+
+  for(uint n : range(8)) {
+    if(!list.bit(8 + n)) continue;
+    write<Size>(AddressRegister{n}, read<Size>(addr));
+    addr += Size == Long ? 4 : 2;
   }
 
   flush<Size>(ea, addr);
 }
 
-auto M68K::instructionMOVEQ(Register rd, uint8 immediate) -> void {
-  write<Byte>(rd, immediate);
+auto M68K::instructionMOVEQ(DataRegister dr, uint8 immediate) -> void {
+  write<Byte>(dr, immediate);
 
   r.c = 0;
   r.v = 0;
@@ -189,34 +217,53 @@ auto M68K::instructionMOVEQ(Register rd, uint8 immediate) -> void {
   r.n = negative<Byte>(immediate);
 }
 
-auto M68K::instructionMOVE_FROM_SR(EA ea) -> void {
-  write<Word>(ea, r.sr);
+auto M68K::instructionMOVE_FROM_SR(EffectiveAddress ea) -> void {
+  auto data = readSR();
+  write<Word>(ea, data);
 }
 
-auto M68K::instructionMOVE_TO_SR(EA ea) -> void {
+auto M68K::instructionMOVE_TO_CCR(EffectiveAddress ea) -> void {
+  auto data = read<Byte>(ea);
+  writeCCR(data);
+}
+
+auto M68K::instructionMOVE_TO_SR(EffectiveAddress ea) -> void {
   if(!supervisor()) return;
 
-  setSR(read<Word>(ea));
+  auto data = read<Word>(ea);
+  writeSR(data);
 }
 
-auto M68K::instructionMOVE_USP(uint1 direction, Register ra) -> void {
+auto M68K::instructionMOVE_USP(uint1 direction, AddressRegister ar) -> void {
   if(!supervisor()) return;
 
   if(direction == 0) {
-    r.sp = read<Long>(ra);
+    r.sp = read<Long>(ar);
   } else {
-    write<Long>(ra, r.sp);
+    write<Long>(ar, r.sp);
   }
 }
 
 auto M68K::instructionNOP() -> void {
 }
 
+auto M68K::instructionORI_TO_CCR() -> void {
+  auto data = readPC<Word>();
+  writeCCR(readCCR() | data);
+}
+
+auto M68K::instructionORI_TO_SR() -> void {
+  if(!supervisor()) return;
+
+  auto data = readPC<Word>();
+  writeSR(readSR() | data);
+}
+
 auto M68K::instructionRTS() -> void {
   r.pc = pop<Long>();
 }
 
-template<uint Size> auto M68K::instructionTST(EA ea) -> void {
+template<uint Size> auto M68K::instructionTST(EffectiveAddress ea) -> void {
   auto data = read<Size>(ea);
 
   r.c = 0;

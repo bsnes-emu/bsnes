@@ -17,36 +17,36 @@ template<uint Size> auto M68K::_readPC() -> uint32 {
   return clip<Size>(data);
 }
 
-auto M68K::_register(Register r) -> string {
-  static const string registers[16] = {
-    "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7",
-    "a0", "a1", "a2", "a3", "a4", "a5", "a6", "a7",
-  };
-  return registers[r.number];
+auto M68K::_register(DataRegister dr) -> string {
+  return {"d", dr.number};
+}
+
+auto M68K::_register(AddressRegister ar) -> string {
+  return {"a", ar.number};
 }
 
 template<uint Size> auto M68K::_immediate() -> string {
   return {"#$", hex(_readPC<Size>(), 2 << Size)};
 }
 
-template<uint Size> auto M68K::_address(EA ea) -> string {
+template<uint Size> auto M68K::_address(EffectiveAddress& ea) -> string {
   if(ea.mode == 9) return {"$", hex(_pc + (int16)_readPC(), 6L)};
   return "???";
 }
 
-template<uint Size> auto M68K::_read(EA ea) -> string {
-  if(ea.mode ==  0) return {_register(ea.reg)};
-  if(ea.mode ==  1) return {_register(ea.reg)};
-  if(ea.mode ==  2) return {"(", _register(ea.reg), ")"};
-  if(ea.mode ==  3) return {"(", _register(ea.reg), ")+"};
-  if(ea.mode ==  4) return {"-(", _register(ea.reg), ")"};
-  if(ea.mode ==  5) return {"($", hex(read(ea.reg) + (int16)_readPC(), 6L), ")"};
+template<uint Size> auto M68K::_read(EffectiveAddress& ea) -> string {
+  if(ea.mode ==  0) return {_register(DataRegister{ea.reg})};
+  if(ea.mode ==  1) return {_register(AddressRegister{ea.reg})};
+  if(ea.mode ==  2) return {"(", _register(AddressRegister{ea.reg}), ")"};
+  if(ea.mode ==  3) return {"(", _register(AddressRegister{ea.reg}), ")+"};
+  if(ea.mode ==  4) return {"-(", _register(AddressRegister{ea.reg}), ")"};
+  if(ea.mode ==  5) return {"($", hex(read(AddressRegister{ea.reg}) + (int16)_readPC(), 6L), ")"};
   if(ea.mode ==  8) return {"($", hex(_readPC<Long>(), 6L), ")"};
   if(ea.mode == 11) return {"#$", hex(_readPC<Size>(), 2 << Size)};
   return "???";
 }
 
-template<uint Size> auto M68K::_write(EA ea) -> string {
+template<uint Size> auto M68K::_write(EffectiveAddress& ea) -> string {
   return _read<Size>(ea);
 }
 
@@ -76,8 +76,8 @@ auto M68K::disassemble(uint32 pc) -> string {
 
 auto M68K::disassembleRegisters() -> string {
   return {
-    hex(r.da[D0], 8L), " ", hex(r.da[D1], 8L), " ", hex(r.da[D2], 8L), " ", hex(r.da[D3], 8L), " ",
-    hex(r.da[D4], 8L), " ", hex(r.da[D5], 8L), " ", hex(r.da[D6], 8L), " ", hex(r.da[D7], 8L), " ",
+    hex(r.d[0], 8L), " ", hex(r.d[1], 8L), " ", hex(r.d[2], 8L), " ", hex(r.d[3], 8L), " ",
+    hex(r.d[4], 8L), " ", hex(r.d[5], 8L), " ", hex(r.d[6], 8L), " ", hex(r.d[7], 8L), " ",
     r.t ? "T" : "t",
     r.s ? "S" : "s",
     (uint)r.i,
@@ -86,25 +86,33 @@ auto M68K::disassembleRegisters() -> string {
     r.z ? "Z" : "z",
     r.n ? "N" : "n",
     r.x ? "X" : "x", "\n",
-    hex(r.da[A0], 8L), " ", hex(r.da[A1], 8L), " ", hex(r.da[A2], 8L), " ", hex(r.da[A3], 8L), " ",
-    hex(r.da[A4], 8L), " ", hex(r.da[A5], 8L), " ", hex(r.da[A6], 8L), " ", hex(r.da[A7], 8L), " ", hex(r.sp, 8L)
+    hex(r.a[0], 8L), " ", hex(r.a[1], 8L), " ", hex(r.a[2], 8L), " ", hex(r.a[3], 8L), " ",
+    hex(r.a[4], 8L), " ", hex(r.a[5], 8L), " ", hex(r.a[6], 8L), " ", hex(r.a[7], 8L), " ", hex(r.sp, 8L)
   };
 }
 
 //
 
-template<uint Size> auto M68K::disassembleADD(Register rd, uint1 direction, EA ea) -> string {
+template<uint Size> auto M68K::disassembleADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> string {
   string op{"add", _suffix<Size>(), "   "};
 
   if(direction == 0) {
-    return {op, _read<Size>(ea), ",", _register(rd)};
+    return {op, _read<Size>(ea), ",", _register(dr)};
   } else {
-    return {op, "", _register(rd), ",", _read<Size>(ea)};
+    return {op, "", _register(dr), ",", _read<Size>(ea)};
   }
 }
 
-template<uint Size> auto M68K::disassembleANDI(EA ea) -> string {
+template<uint Size> auto M68K::disassembleANDI(EffectiveAddress ea) -> string {
   return {"andi", _suffix<Size>(), "  ", _immediate<Size>(), ",", _read<Size>(ea)};
+}
+
+auto M68K::disassembleANDI_TO_CCR() -> string {
+  return {"andi    ", _immediate<Byte>(), ",ccr"};
+}
+
+auto M68K::disassembleANDI_TO_SR() -> string {
+  return {"andi    ", _immediate<Word>(), ",sr"};
 }
 
 auto M68K::disassembleBCC(uint4 condition, uint8 displacement) -> string {
@@ -114,46 +122,57 @@ auto M68K::disassembleBCC(uint4 condition, uint8 displacement) -> string {
   return {"b", cc, "     ", _branch(displacement)};
 }
 
-template<uint Size> auto M68K::disassembleBTST(Register rd, EA ea) -> string {
-  return {"btst    ", _register(rd), ",", _read<Size>(ea)};
+template<uint Size> auto M68K::disassembleBTST(DataRegister dr, EffectiveAddress ea) -> string {
+  return {"btst    ", _register(dr), ",", _read<Size>(ea)};
 }
 
-template<uint Size> auto M68K::disassembleBTST(EA ea) -> string {
+template<uint Size> auto M68K::disassembleBTST(EffectiveAddress ea) -> string {
   return {"btst    ", _immediate<Byte>(), ",", _read<Size>(ea)};
 }
 
-template<uint Size> auto M68K::disassembleCLR(EA ea) -> string {
+template<uint Size> auto M68K::disassembleCLR(EffectiveAddress ea) -> string {
   return {"clr", _suffix<Size>(), "   ", _read<Size>(ea)};
 }
 
-template<uint Size> auto M68K::disassembleCMP(Register rd, EA ea) -> string {
-  return {"cmp", _suffix<Size>(), "   ", _read<Word>(ea), ",", _register(rd)};
+template<uint Size> auto M68K::disassembleCMP(DataRegister dr, EffectiveAddress ea) -> string {
+  return {"cmp", _suffix<Size>(), "   ", _read<Word>(ea), ",", _register(dr)};
 }
 
-auto M68K::disassembleDBCC(uint4 condition, Register rd) -> string {
+auto M68K::disassembleDBCC(uint4 condition, DataRegister dr) -> string {
   auto base = _pc;
   auto displacement = (int16)_readPC();
-  return {"db", _condition(condition), "    ", _register(rd), ",$", hex(base + displacement, 6L)};
+  return {"db", _condition(condition), "    ", _register(dr), ",$", hex(base + displacement, 6L)};
 }
 
-auto M68K::disassembleLEA(Register ra, EA ea) -> string {
-  return {"lea     ", _address<Long>(ea), ",", _register(ra)};
+auto M68K::disassembleEORI_TO_CCR() -> string {
+  return {"eori    ", _immediate<Byte>(), ",ccr"};
 }
 
-template<uint Size> auto M68K::disassembleMOVE(EA to, EA from) -> string {
+auto M68K::disassembleEORI_TO_SR() -> string {
+  return {"eori    ", _immediate<Word>(), ",sr"};
+}
+
+auto M68K::disassembleLEA(AddressRegister ar, EffectiveAddress ea) -> string {
+  return {"lea     ", _address<Long>(ea), ",", _register(ar)};
+}
+
+template<uint Size> auto M68K::disassembleMOVE(EffectiveAddress to, EffectiveAddress from) -> string {
   return {"move", _suffix<Size>(), "  ", _read<Size>(from), ",", _write<Size>(to)};
 }
 
-template<uint Size> auto M68K::disassembleMOVEA(Register ra, EA ea) -> string {
-  return {"movea   ", _read<Size>(ea), ",", _register(ra)};
+template<uint Size> auto M68K::disassembleMOVEA(AddressRegister ar, EffectiveAddress ea) -> string {
+  return {"movea   ", _read<Size>(ea), ",", _register(ar)};
 }
 
-template<uint Size> auto M68K::disassembleMOVEM(uint1 direction, EA ea) -> string {
+template<uint Size> auto M68K::disassembleMOVEM(uint1 direction, EffectiveAddress ea) -> string {
   string op{"movem", _suffix<Size>(), " "};
 
   uint16 list = _readPC();
   string regs;
-  for(uint rn : range(16)) if(list.bit(rn)) regs.append(_register(Register{rn}), ",");
+  for(uint n : range(8)) if(list.bit(0 + n)) regs.append(_register(DataRegister{n}), ",");
+  regs.trimRight(",");
+  if(regs && list >> 8) regs.append("/");
+  for(uint n : range(8)) if(list.bit(8 + n)) regs.append(_register(AddressRegister{n}), ",");
   regs.trimRight(",");
 
   if(direction == 0) {
@@ -163,23 +182,27 @@ template<uint Size> auto M68K::disassembleMOVEM(uint1 direction, EA ea) -> strin
   }
 }
 
-auto M68K::disassembleMOVEQ(Register rd, uint8 immediate) -> string {
-  return {"moveq   #$", hex(immediate, 2L), ",", _register(rd)};
+auto M68K::disassembleMOVEQ(DataRegister dr, uint8 immediate) -> string {
+  return {"moveq   #$", hex(immediate, 2L), ",", _register(dr)};
 }
 
-auto M68K::disassembleMOVE_FROM_SR(EA ea) -> string {
+auto M68K::disassembleMOVE_FROM_SR(EffectiveAddress ea) -> string {
   return {"move    sr,", _read<Word>(ea)};
 }
 
-auto M68K::disassembleMOVE_TO_SR(EA ea) -> string {
+auto M68K::disassembleMOVE_TO_CCR(EffectiveAddress ea) -> string {
+  return {"move    ", _read<Byte>(ea), ",ccr"};
+}
+
+auto M68K::disassembleMOVE_TO_SR(EffectiveAddress ea) -> string {
   return {"move    ", _read<Word>(ea), ",sr"};
 }
 
-auto M68K::disassembleMOVE_USP(uint1 direction, Register ra) -> string {
+auto M68K::disassembleMOVE_USP(uint1 direction, AddressRegister ar) -> string {
   if(direction == 0) {
-    return {"move    ", _register(ra), ",usp"};
+    return {"move    ", _register(ar), ",usp"};
   } else {
-    return {"move    usp,", _register(ra)};
+    return {"move    usp,", _register(ar)};
   }
 }
 
@@ -187,10 +210,18 @@ auto M68K::disassembleNOP() -> string {
   return {"nop     "};
 }
 
+auto M68K::disassembleORI_TO_CCR() -> string {
+  return {"ori     ", _immediate<Byte>(), ",ccr"};
+}
+
+auto M68K::disassembleORI_TO_SR() -> string {
+  return {"ori     ", _immediate<Word>(), ",sr"};
+}
+
 auto M68K::disassembleRTS() -> string {
   return {"rts     "};
 }
 
-template<uint Size> auto M68K::disassembleTST(EA ea) -> string {
+template<uint Size> auto M68K::disassembleTST(EffectiveAddress ea) -> string {
   return {"tst", _suffix<Size>(), "   ", _read<Size>(ea)};
 }

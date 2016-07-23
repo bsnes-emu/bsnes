@@ -10,8 +10,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::boot() -> void {
-  r.da[A7] = read(1, 0) << 16 | read(1, 2) << 0;
-  r.pc     = read(1, 4) << 16 | read(1, 6) << 0;
+  r.a[7] = read(1, 0) << 16 | read(1, 2) << 0;
+  r.pc   = read(1, 4) << 16 | read(1, 6) << 0;
 }
 
 auto CPU::main() -> void {
