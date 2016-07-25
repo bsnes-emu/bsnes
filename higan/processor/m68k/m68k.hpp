@@ -86,13 +86,14 @@ struct M68K {
   //instructions.cpp
   auto testCondition(uint4 condition) -> bool;
 
+  template<uint Size> auto bytes() -> uint;
   template<uint Size> auto bits() -> uint;
+  template<uint Size> auto lsb() -> uint32;
+  template<uint Size> auto msb() -> uint32;
   template<uint Size> auto mask() -> uint32;
   template<uint Size> auto clip(uint32 data) -> uint32;
   template<uint Size> auto sign(uint32 data) -> int32;
 
-  template<uint Size> auto carry(uint32 result, uint32 source) -> bool;
-  template<uint Size> auto overflow(uint32 result, uint32 source, uint32 target) -> bool;
   template<uint Size> auto zero(uint32 result) -> bool;
   template<uint Size> auto negative(uint32 result) -> bool;
 
@@ -100,6 +101,14 @@ struct M68K {
   template<uint Size> auto instructionANDI(EffectiveAddress ea) -> void;
                       auto instructionANDI_TO_CCR() -> void;
                       auto instructionANDI_TO_SR() -> void;
+  template<uint Size> auto ASL(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionASL(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionASL(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionASL(EffectiveAddress modify) -> void;
+  template<uint Size> auto ASR(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionASR(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionASR(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionASR(EffectiveAddress modify) -> void;
                       auto instructionBCC(uint4 condition, uint8 displacement) -> void;
   template<uint Size> auto instructionBTST(DataRegister dr, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionBTST(EffectiveAddress ea) -> void;
@@ -109,6 +118,14 @@ struct M68K {
                       auto instructionEORI_TO_CCR() -> void;
                       auto instructionEORI_TO_SR() -> void;
                       auto instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void;
+  template<uint Size> auto LSL(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionLSL(uint4 immediate, DataRegister dr) -> void;
+  template<uint Size> auto instructionLSL(DataRegister sr, DataRegister dr) -> void;
+                      auto instructionLSL(EffectiveAddress ea) -> void;
+  template<uint Size> auto LSR(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionLSR(uint4 immediate, DataRegister dr) -> void;
+  template<uint Size> auto instructionLSR(DataRegister shift, DataRegister dr) -> void;
+                      auto instructionLSR(EffectiveAddress ea) -> void;
   template<uint Size> auto instructionMOVE(EffectiveAddress to, EffectiveAddress from) -> void;
   template<uint Size> auto instructionMOVEA(AddressRegister ar, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionMOVEM(uint1 direction, EffectiveAddress ea) -> void;
@@ -120,7 +137,24 @@ struct M68K {
                       auto instructionNOP() -> void;
                       auto instructionORI_TO_CCR() -> void;
                       auto instructionORI_TO_SR() -> void;
+  template<uint Size> auto ROL(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionROL(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionROL(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionROL(EffectiveAddress modify) -> void;
+  template<uint Size> auto ROR(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionROR(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionROR(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionROR(EffectiveAddress modify) -> void;
+  template<uint Size> auto ROXL(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionROXL(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionROXL(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionROXL(EffectiveAddress modify) -> void;
+  template<uint Size> auto ROXR(uint32 result, uint shift) -> uint32;
+  template<uint Size> auto instructionROXR(uint4 shift, DataRegister modify) -> void;
+  template<uint Size> auto instructionROXR(DataRegister shift, DataRegister modify) -> void;
+                      auto instructionROXR(EffectiveAddress modify) -> void;
                       auto instructionRTS() -> void;
+  template<uint Size> auto instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionTST(EffectiveAddress ea) -> void;
 
   //disassembler.cpp
@@ -154,6 +188,12 @@ private:
   template<uint Size> auto disassembleANDI(EffectiveAddress ea) -> string;
                       auto disassembleANDI_TO_CCR() -> string;
                       auto disassembleANDI_TO_SR() -> string;
+  template<uint Size> auto disassembleASL(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleASL(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleASL(EffectiveAddress modify) -> string;
+  template<uint Size> auto disassembleASR(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleASR(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleASR(EffectiveAddress modify) -> string;
                       auto disassembleBCC(uint4 condition, uint8 displacement) -> string;
   template<uint Size> auto disassembleBTST(DataRegister dr, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleBTST(EffectiveAddress ea) -> string;
@@ -163,6 +203,12 @@ private:
                       auto disassembleEORI_TO_CCR() -> string;
                       auto disassembleEORI_TO_SR() -> string;
                       auto disassembleLEA(AddressRegister ar, EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleLSL(uint4 immediate, DataRegister dr) -> string;
+  template<uint Size> auto disassembleLSL(DataRegister sr, DataRegister dr) -> string;
+                      auto disassembleLSL(EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleLSR(uint4 immediate, DataRegister dr) -> string;
+  template<uint Size> auto disassembleLSR(DataRegister shift, DataRegister dr) -> string;
+                      auto disassembleLSR(EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleMOVE(EffectiveAddress to, EffectiveAddress from) -> string;
   template<uint Size> auto disassembleMOVEA(AddressRegister ar, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleMOVEM(uint1 direction, EffectiveAddress ea) -> string;
@@ -174,17 +220,29 @@ private:
                       auto disassembleNOP() -> string;
                       auto disassembleORI_TO_CCR() -> string;
                       auto disassembleORI_TO_SR() -> string;
+  template<uint Size> auto disassembleROL(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleROL(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleROL(EffectiveAddress modify) -> string;
+  template<uint Size> auto disassembleROR(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleROR(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleROR(EffectiveAddress modify) -> string;
+  template<uint Size> auto disassembleROXL(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleROXL(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleROXL(EffectiveAddress modify) -> string;
+  template<uint Size> auto disassembleROXR(uint4 shift, DataRegister modify) -> string;
+  template<uint Size> auto disassembleROXR(DataRegister shift, DataRegister modify) -> string;
+                      auto disassembleROXR(EffectiveAddress modify) -> string;
                       auto disassembleRTS() -> string;
+  template<uint Size> auto disassembleSUBQ(uint4 immediate, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleTST(EffectiveAddress ea) -> string;
 
   template<uint Size> auto _read(uint32 addr) -> uint32;
   template<uint Size = Word> auto _readPC() -> uint32;
-  auto _register(DataRegister dr) -> string;
-  auto _register(AddressRegister ar) -> string;
+  auto _dataRegister(DataRegister dr) -> string;
+  auto _addressRegister(AddressRegister ar) -> string;
   template<uint Size> auto _immediate() -> string;
   template<uint Size> auto _address(EffectiveAddress& ea) -> string;
-  template<uint Size> auto _read(EffectiveAddress& ea) -> string;
-  template<uint Size> auto _write(EffectiveAddress& ea) -> string;
+  template<uint Size> auto _effectiveAddress(EffectiveAddress& ea) -> string;
   auto _branch(uint8 displacement) -> string;
   template<uint Size> auto _suffix() -> string;
   auto _condition(uint4 condition) -> string;

@@ -29,7 +29,7 @@ auto M68K::reset() -> void {
   r.z = 0;
   r.n = 0;
   r.x = 0;
-  r.i = 0;
+  r.i = 7;
   r.s = 1;
   r.t = 0;
 }

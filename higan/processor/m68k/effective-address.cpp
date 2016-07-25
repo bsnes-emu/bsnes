@@ -87,13 +87,13 @@ template<uint Size, bool Update> auto M68K::read(EffectiveAddress& ea) -> uint32
 
   case AddressRegisterIndirectWithPostIncrement: {
     auto data = read<Size>(ea.address);
-    if(Update) write(AddressRegister{ea.reg}, ea.address += (Size == Long ? 4 : 2));
+    if(Update) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
     return data;
   }
 
   case AddressRegisterIndirectWithPreDecrement: {
-    auto data = read<Size>(ea.address - (Size == Long ? 4 : 2));
-    if(Update) write(AddressRegister{ea.reg}, ea.address -= (Size == Long ? 4 : 2));
+    auto data = read<Size>(ea.address - bytes<Size>());
+    if(Update) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
     return data;
   }
 
@@ -149,13 +149,13 @@ template<uint Size, bool Update> auto M68K::write(EffectiveAddress& ea, uint32 d
 
   case AddressRegisterIndirectWithPostIncrement: {
     write<Size>(ea.address, data);
-    if(Update) write(AddressRegister{ea.reg}, ea.address += (Size == Long ? 4 : 2));
+    if(Update) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
     return;
   }
 
   case AddressRegisterIndirectWithPreDecrement: {
-    write<Size, Reverse>(ea.address - (Size == Long ? 4 : 2), data);
-    if(Update) write(AddressRegister{ea.reg}, ea.address -= (Size == Long ? 4 : 2));
+    write<Size, Reverse>(ea.address - bytes<Size>(), data);
+    if(Update) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
     return;
   }
 

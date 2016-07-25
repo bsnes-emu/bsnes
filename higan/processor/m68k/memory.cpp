@@ -81,11 +81,11 @@ template<> auto M68K::readPC<Long>() -> uint32 {
 
 template<uint Size> auto M68K::pop() -> uint32 {
   auto data = read<Size>((uint32)r.a[7]);
-  r.a[7] += Size == Long ? 4 : 2;
+  r.a[7] += bytes<Size>();
   return data;
 }
 
 template<uint Size> auto M68K::push(uint32 data) -> void {
-  r.a[7] -= Size == Long ? 4 : 2;
+  r.a[7] -= bytes<Size>();
   return write<Size, Reverse>((uint32)r.a[7], data);
 }

@@ -28,6 +28,8 @@ auto CPU::step(uint clocks) -> void {
 
 auto CPU::power() -> void {
   M68K::power();
+
+  for(auto& byte : ram) byte = 0x00;
 }
 
 auto CPU::reset() -> void {
@@ -37,11 +39,23 @@ auto CPU::reset() -> void {
 
 auto CPU::read(bool word, uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.read(word, addr);
-  return 0x0000;
+  if(addr < 0xe00000) return 0x0000;
+
+  uint16 data = ram[addr & 65535];
+  if(word) data = data << 8 | ram[addr + 1 & 65535];
+  return data;
 }
 
 auto CPU::write(bool word, uint24 addr, uint16 data) -> void {
   if(addr < 0x400000) return cartridge.write(word, addr, data);
+  if(addr < 0xe00000) return;
+
+  if(!word) {
+    ram[addr & 65535] = data;
+  } else {
+    ram[addr + 0 & 65535] = data >> 8;
+    ram[addr + 1 & 65535] = data >> 0;
+  }
 }
 
 }
