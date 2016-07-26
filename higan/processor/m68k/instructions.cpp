@@ -58,26 +58,50 @@ template<uint Size> auto M68K::negative(uint32 result) -> bool {
 
 //
 
-template<uint Size> auto M68K::instructionADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> void {
-  uint64 source, target, result;
-
-  if(direction == 0) {
-    source = read<Size>(ea);
-    target = read<Size>(dr);
-    result = source + target;
-    write<Size>(dr, result);
-  } else {
-    source = read<Size>(dr);
-    target = read<Size>(ea);
-    result = source + target;
-    write<Size>(ea, result);
-  }
+template<uint Size> auto M68K::ADD(uint32 source, uint32 target) -> uint32 {
+  uint64 result = (uint64)source + (uint64)target;
 
   r.c = sign<Size>(result >> 1) < 0;
   r.v = sign<Size>(~(target ^ source) & (target ^ result)) < 0;
   r.z = clip<Size>(result) == 0;
   r.n = sign<Size>(result) < 0;
   r.x = r.c;
+
+  return clip<Size>(result);
+}
+
+template<uint Size> auto M68K::instructionADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> void {
+  if(direction == 0) {
+    auto source = read<Size>(ea);
+    auto target = read<Size>(dr);
+    auto result = ADD<Size>(source, target);
+    write<Size>(dr, result);
+  } else {
+    auto source = read<Size>(dr);
+    auto target = read<Size>(ea);
+    auto result = ADD<Size>(source, target);
+    write<Size>(ea, result);
+  }
+}
+
+template<uint Size> auto M68K::instructionADDI(EffectiveAddress modify) -> void {
+  auto source = readPC<Size>();
+  auto target = read<Size>(modify);
+  auto result = ADD<Size>(source, target);
+  write<Size>(modify, result);
+}
+
+template<uint Size> auto M68K::instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void {
+  auto source = read<Size>(ea);
+  auto target = read<Size>(ar);
+  write<Long>(ar, source + target);
+}
+
+template<uint Size> auto M68K::instructionADDQ(uint4 immediate, EffectiveAddress modify) -> void {
+  auto source = read<Size>(modify);
+  auto target = immediate;
+  auto result = ADD<Size>(source, target);
+  write<Size>(modify, result);
 }
 
 template<uint Size> auto M68K::instructionANDI(EffectiveAddress ea) -> void {
@@ -211,15 +235,39 @@ template<uint Size> auto M68K::instructionCLR(EffectiveAddress ea) -> void {
   r.n = 0;
 }
 
-template<uint Size> auto M68K::instructionCMP(DataRegister dr, EffectiveAddress ea) -> void {
-  uint64 source = read<Size>(ea);
-  uint64 target = read<Size>(dr);
-  uint64 result = target - source;
+template<uint Size> auto M68K::CMP(uint32 source, uint32 target) -> uint32 {
+  uint64 result = (uint64)target - (uint64)source;
 
   r.c = sign<Size>(result >> 1) < 0;
   r.v = sign<Size>((target ^ source) & (target ^ result)) < 0;
   r.z = clip<Size>(result) == 0;
   r.n = sign<Size>(result) < 0;
+
+  return clip<Size>(result);
+}
+
+template<uint Size> auto M68K::instructionCMP(DataRegister dr, EffectiveAddress ea) -> void {
+  auto source = read<Size>(ea);
+  auto target = read<Size>(dr);
+  CMP<Size>(source, target);
+}
+
+template<uint Size> auto M68K::instructionCMPA(AddressRegister ar, EffectiveAddress ea) -> void {
+  auto source = read<Size>(ea);
+  auto target = read<Size>(ar);
+  CMP<Size>(source, target);
+}
+
+template<uint Size> auto M68K::instructionCMPI(EffectiveAddress ea) -> void {
+  auto source = readPC<Size>();
+  auto target = read<Size>(ea);
+  CMP<Size>(source, target);
+}
+
+template<uint Size> auto M68K::instructionCMPM(EffectiveAddress ax, EffectiveAddress ay) -> void {
+  auto source = read<Size>(ay);
+  auto target = read<Size>(ax);
+  CMP<Size>(source, target);
 }
 
 auto M68K::instructionDBCC(uint4 condition, DataRegister dr) -> void {
@@ -241,6 +289,11 @@ auto M68K::instructionEORI_TO_SR() -> void {
 
   auto data = readPC<Word>();
   writeSR(readSR() ^ data);
+}
+
+auto M68K::instructionJSR(EffectiveAddress target) -> void {
+  push<Long>(r.pc);
+  r.pc = fetch<Long>(target);
 }
 
 auto M68K::instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void {

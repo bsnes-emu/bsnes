@@ -41,6 +41,7 @@ template<uint Size> auto M68K::_effectiveAddress(EffectiveAddress& ea) -> string
   if(ea.mode ==  3) return {"(", _addressRegister(AddressRegister{ea.reg}), ")+"};
   if(ea.mode ==  4) return {"-(", _addressRegister(AddressRegister{ea.reg}), ")"};
   if(ea.mode ==  5) return {"($", hex(read(AddressRegister{ea.reg}) + (int16)_readPC(), 6L), ")"};
+  if(ea.mode ==  7) return {"($", hex((int16)_readPC<Word>(), 6L), ")"};
   if(ea.mode ==  8) return {"($", hex(_readPC<Long>(), 6L), ")"};
   if(ea.mode == 11) return {"#$", hex(_readPC<Size>(), 2 << Size)};
   return "???";
@@ -99,6 +100,18 @@ template<uint Size> auto M68K::disassembleADD(DataRegister dr, uint1 direction, 
   }
 }
 
+template<uint Size> auto M68K::disassembleADDA(AddressRegister ar, EffectiveAddress ea) -> string {
+  return {"adda", _suffix<Size>(), "  ", _effectiveAddress<Size>(ea), ",", _addressRegister(ar)};
+}
+
+template<uint Size> auto M68K::disassembleADDI(EffectiveAddress ea) -> string {
+  return {"addi", _suffix<Size>(), "  ", _immediate<Size>(), ",", _effectiveAddress<Size>(ea)};
+}
+
+template<uint Size> auto M68K::disassembleADDQ(uint4 immediate, EffectiveAddress modify) -> string {
+  return {"addq", _suffix<Size>(), "  #", immediate, ",", _effectiveAddress<Size>(modify)};
+}
+
 template<uint Size> auto M68K::disassembleANDI(EffectiveAddress ea) -> string {
   return {"andi", _suffix<Size>(), "  ", _immediate<Size>(), ",", _effectiveAddress<Size>(ea)};
 }
@@ -155,7 +168,19 @@ template<uint Size> auto M68K::disassembleCLR(EffectiveAddress ea) -> string {
 }
 
 template<uint Size> auto M68K::disassembleCMP(DataRegister dr, EffectiveAddress ea) -> string {
-  return {"cmp", _suffix<Size>(), "   ", _effectiveAddress<Word>(ea), ",", _dataRegister(dr)};
+  return {"cmp", _suffix<Size>(), "   ", _effectiveAddress<Size>(ea), ",", _dataRegister(dr)};
+}
+
+template<uint Size> auto M68K::disassembleCMPA(AddressRegister ar, EffectiveAddress ea) -> string {
+  return {"cmpa", _suffix<Size>(), "  ", _effectiveAddress<Size>(ea), ",", _addressRegister(ar)};
+}
+
+template<uint Size> auto M68K::disassembleCMPI(EffectiveAddress ea) -> string {
+  return {"cmpi", _suffix<Size>(), "  ", _immediate<Size>(), ",", _effectiveAddress<Size>(ea)};
+}
+
+template<uint Size> auto M68K::disassembleCMPM(EffectiveAddress ax, EffectiveAddress ay) -> string {
+  return {"cmpm", _suffix<Size>(), "  ", _effectiveAddress<Size>(ay), ",", _effectiveAddress<Size>(ax)};
 }
 
 auto M68K::disassembleDBCC(uint4 condition, DataRegister dr) -> string {
@@ -170,6 +195,10 @@ auto M68K::disassembleEORI_TO_CCR() -> string {
 
 auto M68K::disassembleEORI_TO_SR() -> string {
   return {"eori    ", _immediate<Word>(), ",sr"};
+}
+
+auto M68K::disassembleJSR(EffectiveAddress target) -> string {
+  return {"jsr     ", _effectiveAddress<Long>(target)};
 }
 
 auto M68K::disassembleLEA(AddressRegister ar, EffectiveAddress ea) -> string {

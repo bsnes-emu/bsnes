@@ -9,13 +9,13 @@ auto M68K::trap() -> void {
 auto M68K::instruction() -> void {
   instructionsExecuted++;
 
-//  if(instructionsExecuted >= 851570) trap();
+//if(instructionsExecuted >= 2000010) trap();
 
-//  if(instructionsExecuted >= 851530) {
-//    print(disassembleRegisters(), "\n");
-//    print(disassemble(r.pc), "\n");
-//    print("\n");
-//  }
+//if(instructionsExecuted >= 2000000) {
+//  print(disassembleRegisters(), "\n");
+//  print(disassemble(r.pc), "\n");
+//  print("\n");
+//}
 
   opcode = readPC();
   return instructionTable[opcode]();
@@ -51,6 +51,47 @@ M68K::M68K() {
     bind(opcode | 2 << 6, ADD<Long>, dr, direction, ea);
 
     if(direction == 0 && mode == 1) unbind(opcode | 0 << 6);
+  }
+
+  //ADDA
+  for(uint3 areg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1101 ---+ 11-- ----") | areg << 9 | mode << 3 | reg << 0;
+    if(mode == 7 && reg >= 5) continue;
+
+    AddressRegister ar{areg};
+    EffectiveAddress ea{mode, reg};
+    bind(opcode | 0 << 8, ADDA<Word>, ar, ea);
+    bind(opcode | 1 << 8, ADDA<Long>, ar, ea);
+  }
+
+  //ADDI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 0110 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress modify{mode, reg};
+    bind(opcode | 0 << 6, ADDI<Byte>, modify);
+    bind(opcode | 1 << 6, ADDI<Word>, modify);
+    bind(opcode | 2 << 6, ADDI<Long>, modify);
+  }
+
+  //ADDQ
+  for(uint3 data : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0101 ---0 ++-- ----") | data << 9 | mode << 3 | reg << 0;
+    if(mode == 7 && reg >= 2) continue;
+
+    uint4 immediate = data ? (uint4)data : (uint4)8;
+    EffectiveAddress modify{mode, reg};
+    bind(opcode | 0 << 6, ADDQ<Byte>, immediate, modify);
+    bind(opcode | 1 << 6, ADDQ<Word>, immediate, modify);
+    bind(opcode | 2 << 6, ADDQ<Long>, immediate, modify);
+
+    if(mode == 1) unbind(opcode | 0 << 6);
   }
 
   //ANDI
@@ -205,6 +246,42 @@ M68K::M68K() {
     if(mode == 1) unbind(opcode | 0 << 6);
   }
 
+  //CMPA
+  for(uint3 areg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1011 ---+ 11-- ----") | areg << 9 | mode << 3 | reg << 0;
+
+    AddressRegister ar{areg};
+    EffectiveAddress ea{mode, reg};
+    bind(opcode | 0 << 8, CMPA<Word>, ar, ea);
+    bind(opcode | 1 << 8, CMPA<Long>, ar, ea);
+  }
+
+  //CMPI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 1100 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress ea{mode, reg};
+    bind(opcode | 0 << 6, CMPI<Byte>, ea);
+    bind(opcode | 1 << 6, CMPI<Word>, ea);
+    bind(opcode | 2 << 6, CMPI<Long>, ea);
+  }
+
+  //CMPM
+  for(uint3 xreg : range(8))
+  for(uint3 yreg : range(8)) {
+    auto opcode = pattern("1011 ---1 ++00 1---") | xreg << 9 | yreg << 0;
+
+    EffectiveAddress ax{AddressRegisterIndirectWithPostIncrement, xreg};
+    EffectiveAddress ay{AddressRegisterIndirectWithPostIncrement, yreg};
+    bind(opcode | 0 << 6, CMPM<Byte>, ax, ay);
+    bind(opcode | 1 << 6, CMPM<Word>, ax, ay);
+    bind(opcode | 2 << 6, CMPM<Long>, ax, ay);
+  }
+
   //DBCC
   for(uint4 condition : range(16))
   for(uint3 dreg      : range( 8)) {
@@ -224,6 +301,16 @@ M68K::M68K() {
   { auto opcode = pattern("0000 1010 0111 1100");
 
     bind(opcode, EORI_TO_SR);
+  }
+
+  //JSR
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 1110 10-- ----") | mode << 3 | reg << 0;
+    if(mode <= 1 || mode == 3 || mode == 4 || (mode == 7 && reg >= 4)) continue;
+
+    EffectiveAddress target{mode, reg};
+    bind(opcode, JSR, target);
   }
 
   //LEA
