@@ -12,7 +12,7 @@ auto VDP::Enter() -> void {
 }
 
 auto VDP::main() -> void {
-  step(frequency);
+  step(system.colorburst() * 15.0 / 10.0);
 }
 
 auto VDP::step(uint clocks) -> void {

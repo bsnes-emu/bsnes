@@ -63,8 +63,8 @@ auto APU::main() -> void {
 }
 
 auto APU::tick() -> void {
-  clock += 12;
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  Thread::step(12);
+  synchronize(cpu);
 }
 
 auto APU::setIRQ() -> void {

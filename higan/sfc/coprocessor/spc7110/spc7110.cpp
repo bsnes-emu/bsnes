@@ -29,7 +29,7 @@ auto SPC7110::main() -> void {
 
 auto SPC7110::addClocks(uint clocks) -> void {
   step(clocks);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto SPC7110::init() -> void {
@@ -48,7 +48,7 @@ auto SPC7110::power() -> void {
 }
 
 auto SPC7110::reset() -> void {
-  create(SPC7110::Enter, 21477272);
+  create(SPC7110::Enter, 21'477'272);
 
   r4801 = 0x00;
   r4802 = 0x00;
@@ -105,7 +105,7 @@ auto SPC7110::reset() -> void {
 }
 
 auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
   addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f
@@ -189,7 +189,7 @@ auto SPC7110::read(uint24 addr, uint8 data) -> uint8 {
 }
 
 auto SPC7110::write(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   if((addr & 0xff0000) == 0x500000) addr = 0x4800;  //$50:0000-ffff == $4800
   if((addr & 0xff0000) == 0x580000) addr = 0x4808;  //$58:0000-ffff == $4808
   addr = 0x4800 | (addr & 0x3f);  //$00-3f,80-bf:4800-483f

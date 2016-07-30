@@ -3,6 +3,7 @@ struct S21FX : Expansion {
   ~S21FX();
 
   static auto Enter() -> void;
+  auto step(uint clocks) -> void;
   auto main() -> void;
 
   auto read(uint24 addr, uint8 data) -> uint8;

@@ -12,6 +12,7 @@ struct Boolean {
   inline operator bool() const { return data; }
   template<typename T> inline auto& operator=(const T& value) { data = value; return *this; }
 
+  inline auto flip() { return data ^= 1; }
   inline auto raise() { return data == 0 ? data = 1, true : false; }
   inline auto lower() { return data == 1 ? data = 0, true : false; }
 

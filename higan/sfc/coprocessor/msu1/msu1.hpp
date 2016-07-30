@@ -1,4 +1,4 @@
-struct MSU1 : Cothread {
+struct MSU1 : Thread {
   shared_pointer<Emulator::Stream> stream;
 
   static auto Enter() -> void;

@@ -8,14 +8,6 @@ SMP smp;
 #include "timing.cpp"
 #include "serialization.cpp"
 
-auto SMP::synchronizeCPU() -> void {
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
-}
-
-auto SMP::synchronizeDSP() -> void {
-  if(dsp.clock < 0 && !scheduler.synchronizing()) co_switch(dsp.thread);
-}
-
 auto SMP::Enter() -> void {
   while(true) scheduler.synchronize(), smp.main();
 }

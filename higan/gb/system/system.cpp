@@ -13,9 +13,9 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(cpu.thread);
-  scheduler.synchronize(ppu.thread);
-  scheduler.synchronize(apu.thread);
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(ppu);
+  scheduler.synchronize(apu);
 }
 
 auto System::init() -> void {
@@ -68,12 +68,13 @@ auto System::power() -> void {
     Emulator::audio.setInterface(interface);
   }
 
+  scheduler.reset();
   bus.power();
   cartridge.power();
   cpu.power();
   ppu.power();
   apu.power();
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
 
   _clocksExecuted = 0;
 }

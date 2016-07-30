@@ -49,6 +49,7 @@ Program::Program(string_vector args) {
   new SettingsManager;
   new CheatDatabase;
   new ToolsManager;
+  new AboutWindow;
 
   presentation->setFocused();
 

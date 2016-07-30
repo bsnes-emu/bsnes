@@ -5,11 +5,6 @@ struct CPU : Processor::R65816, Thread, PPUcounter {
 
   CPU();
 
-  auto synchronizeSMP() -> void;
-  auto synchronizePPU() -> void;
-  auto synchronizeCoprocessors() -> void;
-  auto synchronizePeripherals() -> void;
-
   auto readPort(uint2 port) const -> uint8;
   auto writePort(uint2 port, uint8 data) -> void;
 

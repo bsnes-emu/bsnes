@@ -27,8 +27,8 @@ auto PPU::step(uint clocks) -> void {
     if(io.ly == 261 && io.lx ==   0) io.nmiFlag = io.nmiHold;
     if(io.ly == 261 && io.lx ==   2) cpu.nmiLine(io.nmiEnable && io.nmiFlag);
 
-    clock += 4;
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+    Thread::step(4);
+    synchronize(cpu);
 
     io.lx++;
   }

@@ -12,7 +12,7 @@ ICD2 icd2;
 
 auto ICD2::Enter() -> void {
   while(true) {
-    if(scheduler.synchronizing()) GameBoy::system.runToSave();
+  //if(scheduler.synchronizing()) GameBoy::system.runToSave();
     scheduler.synchronize();
     icd2.main();
   }
@@ -27,7 +27,7 @@ auto ICD2::main() -> void {
     stream->sample(0.0, 0.0);
     step(2);  //two clocks per audio sample
   }
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto ICD2::init() -> void {
@@ -52,8 +52,9 @@ auto ICD2::power() -> void {
 }
 
 auto ICD2::reset(bool soft) -> void {
-  create(ICD2::Enter, cpu.frequency / 5);
-  if(!soft) stream = Emulator::audio.createStream(2, cpu.frequency / 10);
+  auto frequency = system.colorburst() * 6.0;
+  create(ICD2::Enter, frequency / 5);
+  if(!soft) stream = Emulator::audio.createStream(2, frequency / 10);
 
   r6003 = 0x00;
   r6004 = 0xff;

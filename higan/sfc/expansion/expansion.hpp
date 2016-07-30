@@ -1,4 +1,4 @@
-struct Expansion : Cothread {
+struct Expansion : Thread {
   Expansion();
   static auto Enter() -> void;
   virtual auto main() -> void;

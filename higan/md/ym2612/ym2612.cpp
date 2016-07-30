@@ -9,7 +9,7 @@ auto YM2612::Enter() -> void {
 }
 
 auto YM2612::main() -> void {
-  step(frequency);
+  step(system.colorburst() * 15.0 / 7.0);
 }
 
 auto YM2612::step(uint clocks) -> void {

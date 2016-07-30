@@ -17,19 +17,11 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
-  apu.clock -= clocks;
-  if(apu.clock < 0) co_switch(apu.thread);
-
-  ppu.clock -= clocks;
-  if(ppu.clock < 0) co_switch(ppu.thread);
-
-  cartridge.clock -= clocks;
-  if(cartridge.clock < 0) co_switch(cartridge.thread);
-
-  for(auto peripheral : peripherals) {
-    peripheral->clock -= clocks * (uint64)peripheral->frequency;
-    if(peripheral->clock < 0) co_switch(peripheral->thread);
-  }
+  Thread::step(clocks);
+  synchronize(apu);
+  synchronize(ppu);
+  synchronize(cartridge);
+  for(auto peripheral : peripherals) synchronize(*peripheral);
 }
 
 auto CPU::power() -> void {

@@ -1,24 +1,24 @@
 auto SuperFX::read(uint24 addr, uint8 data) -> uint8 {
   if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff,:8000-ffff
-    while(!regs.scmr.ron && !scheduler.synchronizing()) {
+    while(!regs.scmr.ron) {
       step(6);
-      synchronizeCPU();
+      synchronize(cpu);
     }
     return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & romMask);
   }
 
   if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
-    while(!regs.scmr.ron && !scheduler.synchronizing()) {
+    while(!regs.scmr.ron) {
       step(6);
-      synchronizeCPU();
+      synchronize(cpu);
     }
     return rom.read(addr & romMask);
   }
 
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
-    while(!regs.scmr.ran && !scheduler.synchronizing()) {
+    while(!regs.scmr.ran) {
       step(6);
-      synchronizeCPU();
+      synchronize(cpu);
     }
     return ram.read(addr & ramMask);
   }
@@ -28,9 +28,9 @@ auto SuperFX::read(uint24 addr, uint8 data) -> uint8 {
 
 auto SuperFX::write(uint24 addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
-    while(!regs.scmr.ran && !scheduler.synchronizing()) {
+    while(!regs.scmr.ran) {
       step(6);
-      synchronizeCPU();
+      synchronize(cpu);
     }
     return ram.write(addr & ramMask, data);
   }

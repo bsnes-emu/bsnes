@@ -1,4 +1,4 @@
-struct SA1 : Processor::R65816, Cothread {
+struct SA1 : Processor::R65816, Thread {
   //sa1.cpp
   static auto Enter() -> void;
   auto main() -> void;

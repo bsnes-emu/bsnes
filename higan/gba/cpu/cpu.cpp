@@ -83,11 +83,9 @@ auto CPU::step(uint clocks) -> void {
 }
 
 auto CPU::syncStep(uint clocks) -> void {
-  ppu.clock -= clocks;
-  if(ppu.clock < 0) co_switch(ppu.thread);
-
-  apu.clock -= clocks;
-  if(apu.clock < 0) co_switch(apu.thread);
+  Thread::step(clocks);
+  synchronize(ppu);
+  synchronize(apu);
 }
 
 auto CPU::keypadRun() -> void {

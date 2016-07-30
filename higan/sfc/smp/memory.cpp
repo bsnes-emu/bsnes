@@ -38,7 +38,7 @@ auto SMP::readBus(uint16 addr) -> uint8 {
   case 0xf5:  //CPUIO1
   case 0xf6:  //CPUIO2
   case 0xf7:  //CPUIO3
-    synchronizeCPU();
+    synchronize(cpu);
     return cpu.readPort(addr);
 
   case 0xf8:  //RAM0
@@ -96,7 +96,7 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
     if(data & 0x30) {
       //one-time clearing of APU port read registers,
       //emulated by simulating CPU writes of 0x00
-      synchronizeCPU();
+      synchronize(cpu);
       if(data & 0x20) {
         cpu.writePort(2, 0x00);
         cpu.writePort(3, 0x00);
@@ -140,7 +140,7 @@ auto SMP::writeBus(uint16 addr, uint8 data) -> void {
   case 0xf5:  //CPUIO1
   case 0xf6:  //CPUIO2
   case 0xf7:  //CPUIO3
-    synchronizeCPU();
+    synchronize(cpu);
     writePort(addr, data);
     break;
 

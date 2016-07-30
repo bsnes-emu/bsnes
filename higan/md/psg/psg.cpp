@@ -9,7 +9,7 @@ auto PSG::Enter() -> void {
 }
 
 auto PSG::main() -> void {
-  step(frequency);
+  step(system.colorburst());
 }
 
 auto PSG::step(uint clocks) -> void {

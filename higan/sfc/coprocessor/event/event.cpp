@@ -25,7 +25,7 @@ auto Event::main() -> void {
   }
 
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto Event::init() -> void {
@@ -47,6 +47,7 @@ auto Event::power() -> void {
 
 auto Event::reset() -> void {
   create(Event::Enter, 1);
+
   for(auto n : range(ram.size())) ram.write(n, 0x00);
   status = 0x00;
   select = 0x00;

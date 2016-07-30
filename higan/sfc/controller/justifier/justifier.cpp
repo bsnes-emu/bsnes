@@ -76,6 +76,7 @@ auto Justifier::main() -> void {
 
   prev = next;
   step(2);
+  synchronize(cpu);
 }
 
 auto Justifier::data() -> uint2 {

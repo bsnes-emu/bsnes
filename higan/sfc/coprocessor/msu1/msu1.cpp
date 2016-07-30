@@ -36,7 +36,7 @@ auto MSU1::main() -> void {
 
   stream->sample(left, right);
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto MSU1::init() -> void {
@@ -115,7 +115,7 @@ auto MSU1::audioOpen() -> void {
 }
 
 auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   addr = 0x2000 | (addr & 7);
 
   switch(addr) {
@@ -144,7 +144,7 @@ auto MSU1::readIO(uint24 addr, uint8) -> uint8 {
 }
 
 auto MSU1::writeIO(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   addr = 0x2000 | (addr & 7);
 
   switch(addr) {

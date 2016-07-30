@@ -14,13 +14,11 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(cpu.thread);
-  scheduler.synchronize(apu.thread);
-  scheduler.synchronize(ppu.thread);
-  scheduler.synchronize(cartridge.thread);
-  for(auto peripheral : cpu.peripherals) {
-    scheduler.synchronize(peripheral->thread);
-  }
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(apu);
+  scheduler.synchronize(ppu);
+  scheduler.synchronize(cartridge);
+  for(auto peripheral : cpu.peripherals) scheduler.synchronize(*peripheral);
 }
 
 auto System::load() -> bool {
@@ -65,11 +63,12 @@ auto System::reset() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
+  scheduler.reset();
   cartridge.reset();
   cpu.reset();
   apu.reset();
   ppu.reset();
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
   peripherals.reset();
 }
 

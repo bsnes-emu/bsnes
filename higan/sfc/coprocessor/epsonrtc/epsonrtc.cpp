@@ -27,7 +27,7 @@ auto EpsonRTC::main() -> void {
   }
 
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto EpsonRTC::init() -> void {
@@ -136,7 +136,7 @@ auto EpsonRTC::sync() -> void {
 }
 
 auto EpsonRTC::read(uint24 addr, uint8 data) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   addr &= 3;
 
   if(addr == 0) {
@@ -161,7 +161,7 @@ auto EpsonRTC::read(uint24 addr, uint8 data) -> uint8 {
 }
 
 auto EpsonRTC::write(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   addr &= 3, data &= 15;
 
   if(addr == 0) {

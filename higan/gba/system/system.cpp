@@ -24,13 +24,14 @@ auto System::power() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
+  scheduler.reset();
   bus.power();
   player.power();
   cpu.power();
   ppu.power();
   apu.power();
   cartridge.power();
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
 }
 
 auto System::load() -> bool {
@@ -66,9 +67,9 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(cpu.thread);
-  scheduler.synchronize(ppu.thread);
-  scheduler.synchronize(apu.thread);
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(ppu);
+  scheduler.synchronize(apu);
 }
 
 }

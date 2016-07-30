@@ -69,6 +69,7 @@ auto System::power() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
+  scheduler.reset();
   bus.power();
   iram.power();
   eeprom.power();
@@ -76,7 +77,7 @@ auto System::power() -> void {
   ppu.power();
   apu.power();
   cartridge.power();
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
 
   bus.map(this, 0x0060);
   bus.map(this, 0x00ba, 0x00be);
@@ -93,10 +94,10 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(cpu.thread);
-  scheduler.synchronize(ppu.thread);
-  scheduler.synchronize(apu.thread);
-  scheduler.synchronize(cartridge.thread);
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(ppu);
+  scheduler.synchronize(apu);
+  scheduler.synchronize(cartridge);
 }
 
 auto System::pollKeypad() -> void {

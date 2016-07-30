@@ -175,6 +175,7 @@ public:
 
   //core.hpp
   inline auto operator[](int) const -> const char&;
+  inline auto operator()(int, char) const -> char;
   template<typename... P> inline auto assign(P&&...) -> type&;
   template<typename T, typename... P> inline auto append(const T&, P&&...) -> type&;
   template<typename... P> inline auto append(const nall::string_format&, P&&...) -> type&;

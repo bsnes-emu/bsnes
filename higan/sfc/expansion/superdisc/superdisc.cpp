@@ -20,6 +20,7 @@ SuperDisc::SuperDisc() {
 }
 
 SuperDisc::~SuperDisc() {
+  scheduler.remove(*this);
   bus.unmap("00-3f,80-bf:21e0-21e5");
 }
 
@@ -41,7 +42,7 @@ auto SuperDisc::main() -> void {
   }
 
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto SuperDisc::read(uint24 addr, uint8 data) -> uint8 {

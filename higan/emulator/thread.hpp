@@ -4,24 +4,47 @@ namespace Emulator {
 
 struct Thread {
   virtual ~Thread() {
-    if(thread) co_delete(thread);
+    if(_handle) co_delete(_handle);
   }
 
-  auto create(auto (*entrypoint)() -> void, double frequency_) -> void {
-    if(thread) co_delete(thread);
-    thread = co_create(64 * 1024 * sizeof(void*), entrypoint);
-    frequency = frequency_ + 0.5;  //round to nearest whole number
-    clock = 0;
+  auto handle() const { return _handle; }
+  auto frequency() const { return _frequency; }
+  auto scalar() const { return _scalar; }
+  auto clock() const { return _clock; }
+
+  auto create(auto (*entrypoint)() -> void, double frequency, bool resetClock = true) -> void {
+    if(_handle) co_delete(_handle);
+    _handle = co_create(64 * 1024 * sizeof(void*), entrypoint);
+    if(resetClock) _clock = 0;
+    setFrequency(frequency);
+  }
+
+  auto setFrequency(double frequency) -> void {
+    _frequency = frequency;
+    _scalar = 1.0L / frequency * Constants::Time::Attosecond + 0.5L;
+  }
+
+  inline auto step(uint clocks) -> void {
+    _clock += _scalar * clocks;
+  }
+
+  inline auto synchronize(Thread& thread) -> void {
+    if(_clock > thread._clock) co_switch(thread._handle);
   }
 
   auto serialize(serializer& s) -> void {
-    s.integer(frequency);
-    s.integer(clock);
+    s.integer(_frequency);
+    s.integer(_scalar);
+    s.integer(_clock);
   }
 
-  cothread_t thread = nullptr;
-  uint frequency = 0;
-  int64 clock = 0;
+protected:
+  cothread_t _handle = nullptr;
+  uint64 _frequency = 0;
+  uint64 _scalar = 0;
+  uint64 _clock = 0;
+
+  friend class Scheduler;
 };
 
 }

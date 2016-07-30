@@ -14,8 +14,8 @@ auto SuperFX::step(uint clocks) -> void {
     }
   }
 
-  Cothread::step(clocks);
-  synchronizeCPU();
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 auto SuperFX::syncROMBuffer() -> void {

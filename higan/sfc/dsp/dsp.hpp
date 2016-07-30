@@ -6,7 +6,6 @@ struct DSP : Thread {
   DSP();
 
   alwaysinline auto step(uint clocks) -> void;
-  alwaysinline auto synchronizeSMP() -> void;
 
   auto mute() const -> bool;
   auto read(uint8 addr) -> uint8;

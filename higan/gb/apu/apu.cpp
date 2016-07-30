@@ -51,8 +51,8 @@ auto APU::main() -> void {
   }
   cycle++;
 
-  clock += cpu.frequency;
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  Thread::step(1);
+  synchronize(cpu);
 }
 
 //filter to remove DC bias

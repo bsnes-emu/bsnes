@@ -1,9 +1,6 @@
 //Sony CXP1100Q-1
 
 struct SMP : Processor::SPC700, Thread {
-  alwaysinline auto synchronizeCPU() -> void;
-  alwaysinline auto synchronizeDSP() -> void;
-
   auto readPort(uint2 port) const -> uint8;
   auto writePort(uint2 port, uint8 data) -> void;
 

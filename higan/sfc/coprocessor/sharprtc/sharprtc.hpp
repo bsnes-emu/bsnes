@@ -1,4 +1,4 @@
-struct SharpRTC : Cothread {
+struct SharpRTC : Thread {
   static auto Enter() -> void;
   auto main() -> void;
 

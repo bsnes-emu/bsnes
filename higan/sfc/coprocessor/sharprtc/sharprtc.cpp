@@ -15,7 +15,7 @@ auto SharpRTC::main() -> void {
   tickSecond();
 
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto SharpRTC::init() -> void {

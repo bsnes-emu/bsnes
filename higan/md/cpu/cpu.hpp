@@ -14,6 +14,8 @@ struct CPU : Processor::M68K, Thread {
 
 private:
   uint8 ram[64 * 1024];
+
+  uint cycles = 0;
 };
 
 extern CPU cpu;

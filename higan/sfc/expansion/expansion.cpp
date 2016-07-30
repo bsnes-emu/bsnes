@@ -3,7 +3,7 @@
 namespace SuperFamicom {
 
 Expansion::Expansion() {
-  if(!thread) create(Expansion::Enter, 1);
+  if(!handle()) create(Expansion::Enter, 1);
 }
 
 auto Expansion::Enter() -> void {
@@ -12,6 +12,7 @@ auto Expansion::Enter() -> void {
 
 auto Expansion::main() -> void {
   step(1);
+  synchronize(cpu);
 }
 
 }

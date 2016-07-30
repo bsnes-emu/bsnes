@@ -2,7 +2,7 @@
 //* Campus Challenge '92
 //* Powerfest '94
 
-struct Event : Cothread {
+struct Event : Thread {
   static auto Enter() -> void;
   auto main() -> void;
   auto init() -> void;

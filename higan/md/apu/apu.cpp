@@ -9,7 +9,7 @@ auto APU::Enter() -> void {
 }
 
 auto APU::main() -> void {
-  step(frequency);
+  step(system.colorburst());
 }
 
 auto APU::step(uint clocks) -> void {

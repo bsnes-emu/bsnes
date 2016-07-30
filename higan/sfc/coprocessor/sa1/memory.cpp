@@ -17,22 +17,22 @@ auto SA1::busRead(uint24 addr, uint8 data) -> uint8 {
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f,80-bf:0000-07ff
-    synchronizeCPU();
+    synchronize(cpu);
     return iram.read(addr & 2047, data);
   }
 
   if((addr & 0x40f800) == 0x003000) {  //$00-3f,80-bf:3000-37ff
-    synchronizeCPU();
+    synchronize(cpu);
     return iram.read(addr & 2047, data);
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    synchronizeCPU();
+    synchronize(cpu);
     return bwram.read(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    synchronizeCPU();
+    synchronize(cpu);
     return bitmapRead(addr & 0x0fffff, data);
   }
 
@@ -50,22 +50,22 @@ auto SA1::busWrite(uint24 addr, uint8 data) -> void {
   }
 
   if((addr & 0x40f800) == 0x000000) {  //$00-3f,80-bf:0000-07ff
-    synchronizeCPU();
+    synchronize(cpu);
     return iram.write(addr & 2047, data);
   }
 
   if((addr & 0x40f800) == 0x003000) {  //$00-3f,80-bf:3000-37ff
-    synchronizeCPU();
+    synchronize(cpu);
     return iram.write(addr & 2047, data);
   }
 
   if((addr & 0xf00000) == 0x400000) {  //$40-4f:0000-ffff
-    synchronizeCPU();
+    synchronize(cpu);
     return bwram.write(addr & (bwram.size() - 1), data);
   }
 
   if((addr & 0xf00000) == 0x600000) {  //$60-6f:0000-ffff
-    synchronizeCPU();
+    synchronize(cpu);
     return bitmapWrite(addr & 0x0fffff, data);
   }
 }
@@ -171,7 +171,7 @@ auto SA1::mmcromWrite(uint24 addr, uint8 data) -> void {
 
 auto SA1::mmcbwramRead(uint24 addr, uint8 data) -> uint8 {
   if(addr < 0x2000) {  //$00-3f,80-bf:6000-7fff
-    cpu.synchronizeCoprocessors();
+    cpu.synchronize(sa1);
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
     return cpubwram.read(addr);
   }
@@ -185,7 +185,7 @@ auto SA1::mmcbwramRead(uint24 addr, uint8 data) -> uint8 {
 
 auto SA1::mmcbwramWrite(uint24 addr, uint8 data) -> void {
   if(addr < 0x2000) {  //$00-3f,80-bf:6000-7fff
-    cpu.synchronizeCoprocessors();
+    cpu.synchronize(sa1);
     addr = bus.mirror(mmio.sbm * 0x2000 + (addr & 0x1fff), cpubwram.size());
     return cpubwram.write(addr, data);
   }
@@ -196,7 +196,7 @@ auto SA1::mmcbwramWrite(uint24 addr, uint8 data) -> void {
 }
 
 auto SA1::mmcSA1Read(uint addr, uint8 data) -> uint8 {
-  synchronizeCPU();
+  synchronize(cpu);
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
     addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());
@@ -209,7 +209,7 @@ auto SA1::mmcSA1Read(uint addr, uint8 data) -> uint8 {
 }
 
 auto SA1::mmcSA1Write(uint addr, uint8 data) -> void {
-  synchronizeCPU();
+  synchronize(cpu);
   if(mmio.sw46 == 0) {
     //$40-43:0000-ffff x  32 projection
     addr = bus.mirror((mmio.cbm & 0x1f) * 0x2000 + (addr & 0x1fff), bwram.size());

@@ -19,9 +19,10 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
-  clock += clocks;
-  if(clock >= frequency / 60) {
-    clock -= frequency / 60;
+  Thread::step(clocks);
+  cycles += clocks;
+  if(cycles >= frequency() / 60) {
+    cycles = 0;
     scheduler.exit(Scheduler::Event::Frame);
   }
 }
@@ -35,6 +36,7 @@ auto CPU::power() -> void {
 auto CPU::reset() -> void {
   M68K::reset();
   create(CPU::Enter, system.colorburst() * 15.0 / 7.0);
+  cycles = 0;
 }
 
 auto CPU::read(bool word, uint24 addr) -> uint16 {

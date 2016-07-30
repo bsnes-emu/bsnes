@@ -1,4 +1,6 @@
 #include "../tomoko.hpp"
+#include "about.cpp"
+unique_pointer<AboutWindow> aboutWindow;
 unique_pointer<Presentation> presentation;
 
 Presentation::Presentation() {
@@ -122,12 +124,7 @@ Presentation::Presentation() {
     invoke("http://doc.byuu.org/higan/");
   });
   about.setText("About ...").onActivate([&] {
-    MessageDialog().setParent(*this).setTitle("About higan ...").setText({
-      Emulator::Name, " v", Emulator::Version, "\n\n",
-      "Author: ", Emulator::Author, "\n",
-      "License: ", Emulator::License, "\n",
-      "Website: ", Emulator::Website
-    }).information();
+    aboutWindow->setVisible().setFocused();
   });
 
   statusBar.setFont(Font().setBold());

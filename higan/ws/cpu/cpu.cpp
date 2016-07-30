@@ -18,14 +18,10 @@ auto CPU::main() -> void {
 }
 
 auto CPU::step(uint clocks) -> void {
-  ppu.clock -= clocks;
-  if(ppu.clock < 0) co_switch(ppu.thread);
-
-  apu.clock -= clocks;
-  if(apu.clock < 0) co_switch(apu.thread);
-
-  cartridge.clock -= clocks;
-  if(cartridge.clock < 0) co_switch(cartridge.thread);
+  Thread::step(clocks);
+  synchronize(ppu);
+  synchronize(apu);
+  synchronize(cartridge);
 }
 
 auto CPU::wait(uint clocks) -> void {

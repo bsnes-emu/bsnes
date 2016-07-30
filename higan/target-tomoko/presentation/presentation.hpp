@@ -1,3 +1,13 @@
+struct AboutWindow : Window {
+  AboutWindow();
+
+  VerticalLayout layout{this};
+    Canvas canvas{&layout, Size{399, 95}, 15};
+    HorizontalLayout informationLayout{&layout, Size{~0, 0}};
+      Label informationLeft{&informationLayout, Size{~0, 0}, 3};
+      Label informationRight{&informationLayout, Size{~0, 0}};
+};
+
 struct Presentation : Window {
   Presentation();
   auto updateEmulator() -> void;
@@ -70,4 +80,5 @@ struct Presentation : Window {
   StatusBar statusBar{this};
 };
 
+extern unique_pointer<AboutWindow> aboutWindow;
 extern unique_pointer<Presentation> presentation;

@@ -1,5 +1,5 @@
 auto CPU::readAPU(uint24 addr, uint8 data) -> uint8 {
-  synchronizeSMP();
+  synchronize(smp);
   return smp.readPort(addr.bits(0,1));
 }
 
@@ -157,7 +157,7 @@ auto CPU::readDMA(uint24 addr, uint8 data) -> uint8 {
 }
 
 auto CPU::writeAPU(uint24 addr, uint8 data) -> void {
-  synchronizeSMP();
+  synchronize(smp);
   return writePort(addr.bits(0,1), data);
 }
 

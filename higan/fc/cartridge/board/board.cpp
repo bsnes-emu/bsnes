@@ -109,13 +109,13 @@ auto Board::mirror(uint addr, uint size) -> uint {
 }
 
 auto Board::main() -> void {
-  cartridge.clock += 12 * 4095;
+  cartridge.step(12 * 4095);
   tick();
 }
 
 auto Board::tick() -> void {
-  cartridge.clock += 12;
-  if(cartridge.clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  cartridge.step(12);
+  cartridge.synchronize(cpu);
 }
 
 auto Board::readCHR(uint addr) -> uint8 {

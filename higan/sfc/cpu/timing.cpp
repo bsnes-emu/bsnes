@@ -10,15 +10,8 @@ auto CPU::step(uint clocks) -> void {
     if(hcounter() & 2) pollInterrupts();
   }
 
-  smp.clock -= clocks * (uint64)smp.frequency;
-  ppu.clock -= clocks;
-  for(auto coprocessor : coprocessors) {
-    coprocessor->clock -= clocks * (uint64)coprocessor->frequency;
-  }
-  for(auto peripheral : peripherals) {
-    peripheral->clock -= clocks * (uint64)peripheral->frequency;
-  }
-  synchronizePeripherals();
+  Thread::step(clocks);
+  for(auto peripheral : peripherals) synchronize(*peripheral);
 
   status.autoJoypadClock += clocks;
   if(status.autoJoypadClock >= 256) {
@@ -44,9 +37,9 @@ auto CPU::scanline() -> void {
   status.lineClocks = lineclocks();
 
   //forcefully sync S-CPU to other processors, in case chips are not communicating
-  synchronizeSMP();
-  synchronizePPU();
-  synchronizeCoprocessors();
+  synchronize(smp);
+  synchronize(ppu);
+  for(auto coprocessor : coprocessors) synchronize(*coprocessor);
 
   if(vcounter() == 0) {
     //HDMA init triggers once every frame

@@ -199,7 +199,7 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
   has.HitachiDSP = true;
 
   hitachidsp.Frequency = node["frequency"].natural();
-  if(hitachidsp.Frequency == 0) hitachidsp.frequency = 20000000;
+  if(hitachidsp.Frequency == 0) hitachidsp.Frequency = 20'000'000;
   hitachidsp.Roms = roms;  //1 or 2
 
   loadMemory(hitachidsp.rom, node["rom"], File::Required);
@@ -224,8 +224,8 @@ auto Cartridge::loadHitachiDSP(Markup::Node node, uint roms) -> void {
 auto Cartridge::loadNECDSP(Markup::Node node) -> void {
   has.NECDSP = true;
 
-  necdsp.frequency = node["frequency"].natural();
-  if(necdsp.frequency == 0) necdsp.frequency = 8000000;
+  necdsp.Frequency = node["frequency"].natural();
+  if(necdsp.Frequency == 0) necdsp.Frequency = 8000000;
   necdsp.revision
   = node["model"].text() == "uPD7725"  ? NECDSP::Revision::uPD7725
   : node["model"].text() == "uPD96050" ? NECDSP::Revision::uPD96050

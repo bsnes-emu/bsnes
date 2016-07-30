@@ -1,6 +1,6 @@
 #if defined(SFC_SUPERGAMEBOY)
 
-struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Cothread {
+struct ICD2 : Emulator::Interface::Bind, GameBoy::Interface::Hook, Thread {
   shared_pointer<Emulator::Stream> stream;
 
   static auto Enter() -> void;
@@ -71,7 +71,7 @@ private:
 
 #else
 
-struct ICD2 : Coprocessor {
+struct ICD2 : Thread {
   auto init() -> void {}
   auto load() -> void {}
   auto unload() -> void {}

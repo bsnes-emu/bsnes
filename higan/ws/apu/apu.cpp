@@ -60,8 +60,8 @@ auto APU::dacRun() -> void {
 }
 
 auto APU::step(uint clocks) -> void {
-  clock += clocks;
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 auto APU::power() -> void {

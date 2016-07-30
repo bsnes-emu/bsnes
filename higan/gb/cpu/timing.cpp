@@ -16,11 +16,9 @@ auto CPU::step(uint clocks) -> void {
     if((status.div &  511) == 0)   timer8192hz();
     if((status.div & 1023) == 0)   timer4096hz();
 
-    ppu.clock -= ppu.frequency;
-    if(ppu.clock < 0) co_switch(ppu.thread);
-
-    apu.clock -= apu.frequency;
-    if(apu.clock < 0) co_switch(apu.thread);
+    Thread::step(1);
+    synchronize(ppu);
+    synchronize(apu);
   }
 
   if(system.sgb()) {

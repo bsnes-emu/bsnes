@@ -21,16 +21,14 @@
 
 namespace SuperFamicom {
   using File = Emulator::File;
-  using Thread = Emulator::Thread;
   using Scheduler = Emulator::Scheduler;
   using Cheat = Emulator::Cheat;
   extern Scheduler scheduler;
   extern Cheat cheat;
 
-  //dynamic thread bound to CPU (coprocessors and peripherals)
-  struct Cothread : Thread {
-    auto step(uint clocks) -> void;
-    auto synchronizeCPU() -> void;
+  struct Thread : Emulator::Thread {
+    auto create(auto (*entrypoint)() -> void, double frequency) -> void;
+    auto synchronize(Thread& thread) -> void;
   };
 
   #include <sfc/memory/memory.hpp>
@@ -51,13 +49,13 @@ namespace SuperFamicom {
   #include <sfc/memory/memory-inline.hpp>
   #include <sfc/ppu/counter/counter-inline.hpp>
 
-  inline auto Cothread::step(uint clocks) -> void {
-    clock += clocks * (uint64)cpu.frequency;
-    synchronizeCPU();
+  inline auto Thread::create(auto (*entrypoint)(), double frequency) -> void {
+    Emulator::Thread::create(entrypoint, frequency);
+    scheduler.append(*this);
   }
 
-  inline auto Cothread::synchronizeCPU() -> void {
-    if(clock >= 0 && !scheduler.synchronizing()) co_switch(cpu.thread);
+  inline auto Thread::synchronize(Thread& thread) -> void {
+    if(_clock > thread._clock) scheduler.resume(thread);
   }
 }
 

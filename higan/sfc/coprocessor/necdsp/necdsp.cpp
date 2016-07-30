@@ -12,11 +12,11 @@ auto NECDSP::Enter() -> void {
 auto NECDSP::main() -> void {
   exec();
   step(1);
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto NECDSP::read(uint24 addr, uint8) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   if(addr & 1) {
     return uPD96050::readSR();
   } else {
@@ -25,7 +25,7 @@ auto NECDSP::read(uint24 addr, uint8) -> uint8 {
 }
 
 auto NECDSP::write(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   if(addr & 1) {
     return uPD96050::writeSR(data);
   } else {
@@ -34,12 +34,12 @@ auto NECDSP::write(uint24 addr, uint8 data) -> void {
 }
 
 auto NECDSP::readRAM(uint24 addr, uint8) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   return uPD96050::readDP(addr);
 }
 
 auto NECDSP::writeRAM(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
   return uPD96050::writeDP(addr, data);
 }
 
@@ -56,7 +56,7 @@ auto NECDSP::power() -> void {
 }
 
 auto NECDSP::reset() -> void {
-  create(NECDSP::Enter, frequency);
+  create(NECDSP::Enter, Frequency);
   uPD96050::power();
 }
 

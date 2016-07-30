@@ -31,11 +31,7 @@ DSP::DSP() {
 /* timing */
 
 auto DSP::step(uint clocks) -> void {
-  clock += clocks;
-}
-
-auto DSP::synchronizeSMP() -> void {
-  if(clock >= 0 && !scheduler.synchronizing()) co_switch(smp.thread);
+  Thread::step(clocks);
 }
 
 auto DSP::Enter() -> void {
@@ -197,7 +193,7 @@ auto DSP::main() -> void {
 
 auto DSP::tick() -> void {
   step(3 * 8);
-  synchronizeSMP();
+  synchronize(smp);
 }
 
 /* register interface for S-SMP $00f2,$00f3 */

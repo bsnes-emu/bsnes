@@ -49,13 +49,14 @@ auto System::reset() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
+  scheduler.reset();
   cartridge.reset();
   cpu.reset();
   apu.reset();
   vdp.reset();
   psg.reset();
   ym2612.reset();
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
 }
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 /* Document Markup Language (DML) v1.0 parser
- * revision 0.03
+ * revision 0.04
  */
 
 #include <nall/location.hpp>
@@ -87,7 +87,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(state.sections++) state.output.append("</section>");
       state.output.append("<section>");
     }
-    auto content = lines.takeLeft().trimLeft("# ", 1L).split(" => ", 1L);
+    auto content = lines.takeLeft().trimLeft("# ", 1L).split("::", 1L);
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
     state.output.append("<header id=\"", name, "\">", data);
@@ -100,7 +100,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
 
   //header
   else if(auto depth = count(block, '=')) {
-    auto content = slice(lines.takeLeft(), depth + 1).split(" => ", 1L);
+    auto content = slice(lines.takeLeft(), depth + 1).split("::", 1L);
     auto data = markup(content[0]);
     auto name = escape(content(1, data.hash()));
     if(depth <= 6) {
@@ -121,7 +121,7 @@ auto DML::parseBlock(string& block, const string& pathname, uint depth) -> bool 
       if(auto depth = count(line, '-')) {
         while(level < depth) level++, state.output.append("<ul>\n");
         while(level > depth) level--, state.output.append("</ul>\n");
-        auto content = slice(line, depth + 1).split(" => ", 1L);
+        auto content = slice(line, depth + 1).split("::", 1L);
         auto data = markup(content[0]);
         auto name = escape(content(1, data.hash()));
         state.output.append("<li><a href=\"#", name, "\">", data, "</a></li>\n");
@@ -204,6 +204,7 @@ auto DML::escape(const string& text) -> string {
   return output;
 }
 
+/* //revision 0.03 parser
 auto DML::markup(const string& text) -> string {
   string output;
 
@@ -264,6 +265,68 @@ auto DML::markup(const string& text) -> string {
   }
 
   return output;
+} */
+
+auto DML::markup(const string& s) -> string {
+  string t;
+
+  boolean strong;
+  boolean emphasis;
+  boolean insertion;
+  boolean deletion;
+  boolean code;
+
+  natural link, linkBase;
+  natural embed, embedBase;
+
+  for(uint n = 0; n < s.size();) {
+    char a = s[n];
+    char b = s[n + 1];
+
+    if(!link && !embed) {
+      if(a == '*' && b == '*') { t.append(strong.flip() ? "<strong>" : "</strong>"); n += 2; continue; }
+      if(a == '/' && b == '/') { t.append(emphasis.flip() ? "<em>" : "</em>"); n += 2; continue; }
+      if(a == '_' && b == '_') { t.append(insertion.flip() ? "<ins>" : "</ins>"); n += 2; continue; }
+      if(a == '~' && b == '~') { t.append(deletion.flip() ? "<del>" : "</del>"); n += 2; continue; }
+      if(a == '|' && b == '|') { t.append(code.flip() ? "<code>" : "</code>"); n += 2; continue; }
+      if(a =='\\' && b =='\\') { t.append("<br>"); n += 2; continue; }
+    }
+
+    if(!embed) {
+      if(link == 0 && a == '[' && b == '[') { t.append("<a href=\""); link = 1; linkBase = n += 2; continue; }
+      if(link == 1 && a == ':' && b == ':') { t.append("\">"); link = 2; n += 2; continue; }
+      if(link == 1 && a == ']' && b == ']') { t.append("\">", slice(s, linkBase, n - linkBase), "</a>"); n += 2; link = 0; continue; }
+      if(link == 2 && a == ']' && b == ']') { t.append("</a>"); n += 2; link = 0; continue; }
+      if(link == 1 && a == '@' && b == '/') { t.append(settings.host); n += 2; continue; }
+    }
+
+    if(!link) {
+      if(embed == 0 && a == '{' && b == '{') { t.append("<img src=\""); embed = 1; embedBase = n += 2; continue; }
+      if(embed == 1 && a == ':' && b == ':') { t.append("\" alt=\""); embed = 2; n += 2; continue; }
+      if(embed != 0 && a == '}' && b == '}') { t.append("\">"); embed = 0; n += 2; continue; }
+      if(embed == 1 && a == '@' && b == '/') { t.append(settings.host); n += 2; continue; }
+    }
+
+    if(a =='\\') { t.append(b); n += 2; continue; }
+    if(a == '&') { t.append("&amp;"); n++; continue; }
+    if(a == '<') { t.append("&lt;"); n++; continue; }
+    if(a == '>') { t.append("&gt;"); n++; continue; }
+    if(a == '"') { t.append("&quot;"); n++; continue; }
+
+    t.append(a);
+    n++;
+  }
+
+  if(strong) t.append("</strong>");
+  if(emphasis) t.append("</em>");
+  if(insertion) t.append("</ins>");
+  if(deletion) t.append("</del>");
+  if(code) t.append("</code>");
+  if(link == 1) t.append("\">", slice(s, linkBase, s.size() - linkBase), "</a>");
+  if(link == 2) t.append("</a>");
+  if(embed != 0) t.append("\">");
+
+  return t;
 }
 
 }}

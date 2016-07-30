@@ -42,7 +42,7 @@ auto ArmDSP::main() -> void {
     print(disassembleRegisters(), "\n");
     print(disassembleInstructionARM(pipeline.execute.address), "\n");
     print("Executed: ", instructions, "\n");
-    while(true) step(frequency);
+    while(true) step(21'477'272);
   }
 
   stepARM();
@@ -50,8 +50,8 @@ auto ArmDSP::main() -> void {
 
 auto ArmDSP::step(uint clocks) -> void {
   if(bridge.timer && --bridge.timer == 0);
-  Cothread::step(clocks);
-  synchronizeCPU();
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 //MMIO: 00-3f,80-bf:3800-38ff
@@ -59,7 +59,7 @@ auto ArmDSP::step(uint clocks) -> void {
 //a0 ignored
 
 auto ArmDSP::read(uint24 addr, uint8) -> uint8 {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
 
   uint8 data = 0x00;
   addr &= 0xff06;
@@ -83,7 +83,7 @@ auto ArmDSP::read(uint24 addr, uint8) -> uint8 {
 }
 
 auto ArmDSP::write(uint24 addr, uint8 data) -> void {
-  cpu.synchronizeCoprocessors();
+  cpu.synchronize(*this);
 
   addr &= 0xff06;
 

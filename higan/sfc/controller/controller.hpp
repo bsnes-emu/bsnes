@@ -11,7 +11,7 @@
 //  6:    iobit    $4201.d6 write; $4213.d6 read    $4201.d7 write; $4213.d7 read
 //  7:    gnd
 
-struct Controller : Cothread {
+struct Controller : Thread {
   enum : bool { Port1 = 0, Port2 = 1 };
 
   Controller(bool port);

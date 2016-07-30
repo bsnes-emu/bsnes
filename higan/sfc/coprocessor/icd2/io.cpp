@@ -56,11 +56,12 @@ auto ICD2::writeIO(uint24 addr, uint8 data) -> void {
     if((r6003 & 0x80) == 0x00 && (data & 0x80) == 0x80) {
       reset(true);
     }
+    auto frequency = system.colorburst() * 6.0;
     switch(data & 3) {
-    case 0: frequency = cpu.frequency / 4; break;  //fast (glitchy, even on real hardware)
-    case 1: frequency = cpu.frequency / 5; break;  //normal
-    case 2: frequency = cpu.frequency / 7; break;  //slow
-    case 3: frequency = cpu.frequency / 9; break;  //very slow
+    case 0: setFrequency(frequency / 4); break;  //fast (glitchy, even on real hardware)
+    case 1: setFrequency(frequency / 5); break;  //normal
+    case 2: setFrequency(frequency / 7); break;  //slow
+    case 3: setFrequency(frequency / 9); break;  //very slow
     }
     r6003 = data;
     return;

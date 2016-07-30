@@ -15,14 +15,14 @@ auto HitachiDSP::main() -> void {
     for(auto n : range(mmio.dmaLength)) {
       write(mmio.dmaTarget + n, read(mmio.dmaSource + n));
       step(2);
+      synchronize(cpu);
     }
     mmio.dma = false;
   }
 
   exec(mmio.programOffset);
   step(1);
-
-  synchronizeCPU();
+  synchronize(cpu);
 }
 
 auto HitachiDSP::init() -> void {

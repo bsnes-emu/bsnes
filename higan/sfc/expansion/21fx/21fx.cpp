@@ -30,6 +30,7 @@ S21FX::S21FX() {
 }
 
 S21FX::~S21FX() {
+  scheduler.remove(*this);
   bus.unmap("00-3f,80-bf:2184-21ff");
   bus.unmap("00:fffc-fffd");
 
@@ -52,6 +53,11 @@ S21FX::~S21FX() {
 
 auto S21FX::Enter() -> void {
   while(true) scheduler.synchronize(), peripherals.expansionPort->main();
+}
+
+auto S21FX::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 auto S21FX::main() -> void {

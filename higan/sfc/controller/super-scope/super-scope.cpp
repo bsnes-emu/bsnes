@@ -66,6 +66,7 @@ auto SuperScope::main() -> void {
 
   prev = next;
   step(2);
+  synchronize(cpu);
 }
 
 auto SuperScope::data() -> uint2 {

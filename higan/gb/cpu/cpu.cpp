@@ -77,8 +77,8 @@ auto CPU::stop() -> bool {
   if(status.speedSwitch) {
     status.speedSwitch = 0;
     status.speedDouble ^= 1;
-    if(status.speedDouble == 0) frequency = 4 * 1024 * 1024;
-    if(status.speedDouble == 1) frequency = 8 * 1024 * 1024;
+    if(status.speedDouble == 0) setFrequency(4 * 1024 * 1024);
+    if(status.speedDouble == 1) setFrequency(8 * 1024 * 1024);
     return true;
   }
   return false;

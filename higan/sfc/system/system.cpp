@@ -15,16 +15,12 @@ auto System::run() -> void {
 }
 
 auto System::runToSave() -> void {
-  scheduler.synchronize(cpu.thread);
-  scheduler.synchronize(smp.thread);
-  scheduler.synchronize(ppu.thread);
-  scheduler.synchronize(dsp.thread);
-  for(auto coprocessor : cpu.coprocessors) {
-    scheduler.synchronize(coprocessor->thread);
-  }
-  for(auto peripheral : cpu.peripherals) {
-    scheduler.synchronize(peripheral->thread);
-  }
+  scheduler.synchronize(cpu);
+  scheduler.synchronize(smp);
+  scheduler.synchronize(ppu);
+  scheduler.synchronize(dsp);
+  for(auto coprocessor : cpu.coprocessors) scheduler.synchronize(*coprocessor);
+  for(auto peripheral : cpu.peripherals) scheduler.synchronize(*peripheral);
 }
 
 auto System::init() -> void {
@@ -170,6 +166,7 @@ auto System::reset() -> void {
   Emulator::audio.reset();
   Emulator::audio.setInterface(interface);
 
+  scheduler.reset();
   cpu.reset();
   smp.reset();
   dsp.reset();
@@ -205,7 +202,7 @@ auto System::reset() -> void {
   if(cartridge.has.SPC7110) cpu.coprocessors.append(&spc7110);
   if(cartridge.has.MSU1) cpu.coprocessors.append(&msu1);
 
-  scheduler.reset(cpu.thread);
+  scheduler.primary(cpu);
   peripherals.reset();
 }
 

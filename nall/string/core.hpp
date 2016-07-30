@@ -20,6 +20,11 @@ auto string::operator[](int position) const -> const char& {
   return data()[position];
 }
 
+auto string::operator()(int position, char fallback) const -> char {
+  if(position > size() + 1) return fallback;
+  return data()[position];
+}
+
 template<typename... P> auto string::assign(P&&... p) -> string& {
   resize(0);
   return append(forward<P>(p)...);
