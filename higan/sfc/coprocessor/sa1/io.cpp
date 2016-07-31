@@ -1,5 +1,5 @@
 auto SA1::readIO(uint24 addr, uint8) -> uint8 {
-  scheduler.active(cpu) ? cpu.synchronize(sa1) : synchronize(cpu);
+  cpu.active() ? cpu.synchronize(sa1) : synchronize(cpu);
 
   switch(0x2300 | addr.bits(0,7)) {
 
@@ -91,7 +91,7 @@ auto SA1::readIO(uint24 addr, uint8) -> uint8 {
 }
 
 auto SA1::writeIO(uint24 addr, uint8 data) -> void {
-  scheduler.active(cpu) ? cpu.synchronize(sa1) : synchronize(cpu);
+  cpu.active() ? cpu.synchronize(sa1) : synchronize(cpu);
 
   switch(0x2200 | addr.bits(0,7)) {
 

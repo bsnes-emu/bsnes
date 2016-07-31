@@ -58,12 +58,14 @@ template<uint Size> auto M68K::negative(uint32 result) -> bool {
 
 //
 
-template<uint Size> auto M68K::ADD(uint32 source, uint32 target) -> uint32 {
+template<uint Size, bool Extend> auto M68K::ADD(uint32 source, uint32 target) -> uint32 {
   uint64 result = (uint64)source + (uint64)target;
+  if(Extend) result += r.x;
 
   r.c = sign<Size>(result >> 1) < 0;
   r.v = sign<Size>(~(target ^ source) & (target ^ result)) < 0;
-  r.z = clip<Size>(result) == 0;
+  if(Extend == 0) r.z = clip<Size>(result) == 0;
+  if(Extend == 1) if(clip<Size>(result)) r.z = 0;
   r.n = sign<Size>(result) < 0;
   r.x = r.c;
 
@@ -102,6 +104,13 @@ template<uint Size> auto M68K::instructionADDQ(uint4 immediate, EffectiveAddress
   auto target = immediate;
   auto result = ADD<Size>(source, target);
   write<Size>(modify, result);
+}
+
+template<uint Size> auto M68K::instructionADDX(EffectiveAddress target_, EffectiveAddress source_) -> void {
+  auto source = read<Size>(source_);
+  auto target = read<Size>(target_);
+  auto result = ADD<Size, Extend>(source, target);
+  write<Size>(target, result);
 }
 
 template<uint Size> auto M68K::instructionANDI(EffectiveAddress ea) -> void {
@@ -591,17 +600,39 @@ auto M68K::instructionRTS() -> void {
   r.pc = pop<Long>();
 }
 
-template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void {
-  uint64 target = read<Size, NoUpdate>(ea);
-  uint64 source = immediate;
-  uint64 result = target - source;
-  write<Size>(ea, result);
+template<uint Size, bool Extend> auto M68K::SUB(uint32 source, uint32 target) -> uint32 {
+  uint64 result = source - target;
+  if(Extend) result -= r.x;
 
   r.c = sign<Size>(result >> 1) < 0;
   r.v = sign<Size>((target ^ source) & (target ^ result)) < 0;
-  r.z = clip<Size>(result) == 0;
+  if(Extend == 0) r.z = clip<Size>(result == 0);
+  if(Extend == 1) if(clip<Size>(result)) r.z = 0;
   r.n = sign<Size>(result) < 0;
   r.x = r.c;
+
+  return result;
+}
+
+template<uint Size> auto M68K::instructionSUB(EffectiveAddress source_, DataRegister target_) -> void {
+  auto source = read<Size>(source_);
+  auto target = read<Size>(target_);
+  auto result = SUB<Size>(source, target);
+  write<Size>(target_, result);
+}
+
+template<uint Size> auto M68K::instructionSUB(DataRegister source_, EffectiveAddress target_) -> void {
+  auto source = read<Size>(source_);
+  auto target = read<Size>(target_);
+  auto result = SUB<Size>(source, target);
+  write<Size>(target_, result);
+}
+
+template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void {
+  auto source = immediate;
+  auto target = read<Size, NoUpdate>(ea);
+  auto result = SUB<Size>(source, target);
+  write<Size>(ea, result);
 }
 
 template<uint Size> auto M68K::instructionTST(EffectiveAddress ea) -> void {

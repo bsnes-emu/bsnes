@@ -36,7 +36,7 @@ auto HitachiDSP::write(uint24 addr, uint8 data) -> void {
 }
 
 auto HitachiDSP::romRead(uint24 addr, uint8 data) -> uint8 {
-  if(scheduler.active(hitachidsp) || regs.halt) {
+  if(hitachidsp.active() || regs.halt) {
     addr = Bus::mirror(addr, rom.size());
   //if(Roms == 2 && mmio.r1f52 == 1 && addr >= (bit::round(rom.size()) >> 1)) return 0x00;
     return rom.read(addr, data);

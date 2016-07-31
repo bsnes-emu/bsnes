@@ -1,5 +1,5 @@
 auto SPC700::serialize(serializer& s) -> void {
-  s.integer(regs.pc);
+  s.integer(regs.pc.w);
   s.integer(regs.a);
   s.integer(regs.x);
   s.integer(regs.y);

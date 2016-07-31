@@ -12,7 +12,7 @@ ICD2 icd2;
 
 auto ICD2::Enter() -> void {
   while(true) {
-  //if(scheduler.synchronizing()) GameBoy::system.runToSave();
+    if(scheduler.synchronizing()) GameBoy::system.runToSave();
     scheduler.synchronize();
     icd2.main();
   }

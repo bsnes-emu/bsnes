@@ -27,9 +27,18 @@ namespace GameBoyAdvance {
   };
 
   struct Thread : Emulator::Thread {
-    auto create(auto (*entrypoint)() -> void, double frequency) -> void;
-    auto synchronize(Thread& thread) -> void;
-    auto step(uint clocks) -> void;
+    auto create(auto (*entrypoint)() -> void, double frequency) -> void {
+      Emulator::Thread::create(entrypoint, frequency);
+      scheduler.append(*this);
+    }
+
+    inline auto synchronize(Thread& thread) -> void {
+      if(clock() >= thread.clock()) scheduler.resume(thread);
+    }
+
+    inline auto step(uint clocks) -> void {
+      _clock += clocks;
+    }
   };
 
   #include <gba/memory/memory.hpp>
@@ -39,19 +48,6 @@ namespace GameBoyAdvance {
   #include <gba/cpu/cpu.hpp>
   #include <gba/ppu/ppu.hpp>
   #include <gba/apu/apu.hpp>
-
-  inline auto Thread::create(auto (*entrypoint)() -> void, double frequency) -> void {
-    Emulator::Thread::create(entrypoint, frequency);
-    scheduler.append(*this);
-  }
-
-  inline auto Thread::synchronize(Thread& thread) -> void {
-    if(_clock > thread._clock) scheduler.resume(thread);
-  }
-
-  inline auto Thread::step(uint clocks) -> void {
-    _clock += clocks;
-  }
 }
 
 #include <gba/interface/interface.hpp>

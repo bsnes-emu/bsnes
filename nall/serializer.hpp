@@ -11,6 +11,7 @@
 //- only plain-old-data can be stored. complex classes must provide serialize(serializer&);
 //- floating-point usage is not portable across different implementations
 
+#include <nall/range.hpp>
 #include <nall/stdint.hpp>
 #include <nall/traits.hpp>
 #include <nall/utility.hpp>
@@ -46,14 +47,14 @@ struct serializer {
   }
 
   template<typename T> auto floatingpoint(T& value) -> serializer& {
-    enum { size = sizeof(T) };
+    enum : uint { size = sizeof(T) };
     //this is rather dangerous, and not cross-platform safe;
     //but there is no standardized way to export FP-values
     auto p = (uint8_t*)&value;
     if(_mode == Save) {
-      for(uint n = 0; n < size; n++) _data[_size++] = p[n];
+      for(uint n : range(size)) _data[_size++] = p[n];
     } else if(_mode == Load) {
-      for(uint n = 0; n < size; n++) p[n] = _data[_size++];
+      for(uint n : range(size)) p[n] = _data[_size++];
     } else {
       _size += size;
     }
@@ -61,12 +62,13 @@ struct serializer {
   }
 
   template<typename T> auto integer(T& value) -> serializer& {
-    enum { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
+    enum : uint { size = std::is_same<bool, T>::value ? 1 : sizeof(T) };
     if(_mode == Save) {
-      for(uint n = 0; n < size; n++) _data[_size++] = (uintmax_t)value >> (n << 3);
+      T copy = value;
+      for(uint n : range(size)) _data[_size++] = copy, copy >>= 8;
     } else if(_mode == Load) {
       value = 0;
-      for(uint n = 0; n < size; n++) value |= (uintmax_t)_data[_size++] << (n << 3);
+      for(uint n : range(size)) value |= (T)_data[_size++] << (n << 3);
     } else if(_mode == Size) {
       _size += size;
     }
@@ -74,12 +76,12 @@ struct serializer {
   }
 
   template<typename T, int N> auto array(T (&array)[N]) -> serializer& {
-    for(uint n = 0; n < N; n++) operator()(array[n]);
+    for(uint n : range(N)) operator()(array[n]);
     return *this;
   }
 
   template<typename T> auto array(T array, uint size) -> serializer& {
-    for(uint n = 0; n < size; n++) operator()(array[n]);
+    for(uint n : range(size)) operator()(array[n]);
     return *this;
   }
 

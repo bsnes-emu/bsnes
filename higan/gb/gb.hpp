@@ -18,8 +18,14 @@ namespace GameBoy {
   extern Cheat cheat;
 
   struct Thread : Emulator::Thread {
-    auto create(auto (*entrypoint)() -> void, double frequency, bool resetClock) -> void;
-    auto synchronize(Thread& thread) -> void;
+    auto create(auto (*entrypoint)() -> void, double frequency) -> void {
+      Emulator::Thread::create(entrypoint, frequency);
+      scheduler.append(*this);
+    }
+
+    inline auto synchronize(Thread& thread) -> void {
+      if(clock() >= thread.clock()) scheduler.resume(thread);
+    }
   };
 
   #include <gb/memory/memory.hpp>
@@ -28,15 +34,6 @@ namespace GameBoy {
   #include <gb/cpu/cpu.hpp>
   #include <gb/ppu/ppu.hpp>
   #include <gb/apu/apu.hpp>
-
-  inline auto Thread::create(auto (*entrypoint)() -> void, double frequency, bool resetClock = true) -> void {
-    Emulator::Thread::create(entrypoint, frequency, resetClock);
-    scheduler.append(*this);
-  }
-
-  inline auto Thread::synchronize(Thread& thread) -> void {
-    if(_clock > thread._clock) scheduler.resume(thread);
-  }
 }
 
 #include <gb/interface/interface.hpp>

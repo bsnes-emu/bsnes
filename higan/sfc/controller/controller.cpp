@@ -19,8 +19,8 @@ Controller::~Controller() {
 auto Controller::Enter() -> void {
   while(true) {
     scheduler.synchronize();
-    if(scheduler.active(*peripherals.controllerPort1)) peripherals.controllerPort1->main();
-    if(scheduler.active(*peripherals.controllerPort2)) peripherals.controllerPort2->main();
+    if(peripherals.controllerPort1->active()) peripherals.controllerPort1->main();
+    if(peripherals.controllerPort2->active()) peripherals.controllerPort2->main();
   }
 }
 

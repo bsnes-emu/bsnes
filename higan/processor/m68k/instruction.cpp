@@ -94,6 +94,24 @@ M68K::M68K() {
     if(mode == 1) unbind(opcode | 0 << 6);
   }
 
+  //ADDX
+  for(uint3 treg : range(8))
+  for(uint3 sreg : range(8)) {
+    auto opcode = pattern("1101 ---1 ++00 ----") | treg << 9 | sreg << 0;
+
+    EffectiveAddress dataTarget{DataRegisterDirect, treg};
+    EffectiveAddress dataSource{DataRegisterDirect, sreg};
+    bind(opcode | 0 << 6 | 0 << 3, ADDX<Byte>, dataTarget, dataSource);
+    bind(opcode | 1 << 6 | 0 << 3, ADDX<Word>, dataTarget, dataSource);
+    bind(opcode | 2 << 6 | 0 << 3, ADDX<Long>, dataTarget, dataSource);
+
+    EffectiveAddress addressTarget{AddressRegisterIndirectWithPreDecrement, treg};
+    EffectiveAddress addressSource{AddressRegisterIndirectWithPreDecrement, sreg};
+    bind(opcode | 0 << 6 | 1 << 3, ADDX<Byte>, addressTarget, addressSource);
+    bind(opcode | 1 << 6 | 1 << 3, ADDX<Word>, addressTarget, addressSource);
+    bind(opcode | 2 << 6 | 1 << 3, ADDX<Long>, addressTarget, addressSource);
+  }
+
   //ANDI
   for(uint3 mode : range(8))
   for(uint3 reg  : range(8)) {
@@ -643,6 +661,36 @@ M68K::M68K() {
   { auto opcode = pattern("0100 1110 0111 0101");
 
     bind(opcode, RTS);
+  }
+
+  //SUB
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1001 ---0 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 7 && reg >= 5) continue;
+
+    EffectiveAddress source{mode, reg};
+    DataRegister target{dreg};
+    bind(opcode | 0 << 6, SUB<Byte>, source, target);
+    bind(opcode | 1 << 6, SUB<Word>, source, target);
+    bind(opcode | 2 << 6, SUB<Long>, source, target);
+
+    if(mode == 1) unbind(opcode | 0 << 6);
+  }
+
+  //SUB
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1001 ---1 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode <= 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister source{dreg};
+    EffectiveAddress target{mode, reg};
+    bind(opcode | 0 << 6, SUB<Byte>, source, target);
+    bind(opcode | 1 << 6, SUB<Word>, source, target);
+    bind(opcode | 2 << 6, SUB<Long>, source, target);
   }
 
   //SUBQ

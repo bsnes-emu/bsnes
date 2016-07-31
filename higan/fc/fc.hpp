@@ -18,8 +18,14 @@ namespace Famicom {
   extern Cheat cheat;
 
   struct Thread : Emulator::Thread {
-    auto create(auto (*entrypoint)() -> void, double frequency) -> void;
-    auto synchronize(Thread& thread) -> void;
+    auto create(auto (*entrypoint)() -> void, double frequency) -> void {
+      Emulator::Thread::create(entrypoint, frequency);
+      scheduler.append(*this);
+    }
+
+    inline auto synchronize(Thread& thread) -> void {
+      if(clock() >= thread.clock()) scheduler.resume(thread);
+    }
   };
 
   #include <fc/controller/controller.hpp>
@@ -29,15 +35,6 @@ namespace Famicom {
   #include <fc/cpu/cpu.hpp>
   #include <fc/apu/apu.hpp>
   #include <fc/ppu/ppu.hpp>
-
-  inline auto Thread::create(auto (*entrypoint)() -> void, double frequency) -> void {
-    Emulator::Thread::create(entrypoint, frequency);
-    scheduler.append(*this);
-  }
-
-  inline auto Thread::synchronize(Thread& thread) -> void {
-    if(_clock > thread._clock) scheduler.resume(thread);
-  }
 }
 
 #include <fc/interface/interface.hpp>

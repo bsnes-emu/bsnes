@@ -112,6 +112,10 @@ template<uint Size> auto M68K::disassembleADDQ(uint4 immediate, EffectiveAddress
   return {"addq", _suffix<Size>(), "  #", immediate, ",", _effectiveAddress<Size>(modify)};
 }
 
+template<uint Size> auto M68K::disassembleADDX(EffectiveAddress target, EffectiveAddress source) -> string {
+  return {"addx", _suffix<Size>(), "  ", _effectiveAddress<Size>(target), ",", _effectiveAddress<Size>(source)};
+}
+
 template<uint Size> auto M68K::disassembleANDI(EffectiveAddress ea) -> string {
   return {"andi", _suffix<Size>(), "  ", _immediate<Size>(), ",", _effectiveAddress<Size>(ea)};
 }
@@ -341,6 +345,14 @@ auto M68K::disassembleROXR(EffectiveAddress modify) -> string {
 
 auto M68K::disassembleRTS() -> string {
   return {"rts     "};
+}
+
+template<uint Size> auto M68K::disassembleSUB(EffectiveAddress source, DataRegister target) -> string {
+  return {"sub", _suffix<Size>(), "   ", _effectiveAddress<Size>(source), ",", _dataRegister(target)};
+}
+
+template<uint Size> auto M68K::disassembleSUB(DataRegister source, EffectiveAddress target) -> string {
+  return {"sub", _suffix<Size>(), "   ", _dataRegister(source), ",", _effectiveAddress<Size>(target)};
 }
 
 template<uint Size> auto M68K::disassembleSUBQ(uint4 immediate, EffectiveAddress ea) -> string {
