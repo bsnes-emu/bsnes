@@ -17,13 +17,7 @@ static void GB_ir_run(GB_gameboy_t *gb)
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
-    if (gb->dma_cycles > cycles){
-        gb->dma_cycles -= cycles;
-    }
-    else {
-        gb->dma_cycles = 0;
-    }
-
+    gb->dma_cycles += cycles;
     gb->div_cycles += cycles;
     gb->tima_cycles += cycles;
 
@@ -37,6 +31,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->apu_cycles += cycles;
     gb->cycles_since_ir_change += cycles;
     gb->cycles_since_input_ir_change += cycles;
+    GB_dma_run(gb);
     GB_hdma_run(gb);
     GB_timers_run(gb);
     GB_apu_run(gb);

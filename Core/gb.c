@@ -230,7 +230,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
 
     if (fwrite(GB_GET_SECTION(gb, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
     if (!DUMP_SECTION(gb, f, core_state)) goto error;
-    if (!DUMP_SECTION(gb, f, hdma      )) goto error;
+    if (!DUMP_SECTION(gb, f, dma       )) goto error;
     if (!DUMP_SECTION(gb, f, mbc       )) goto error;
     if (!DUMP_SECTION(gb, f, hram      )) goto error;
     if (!DUMP_SECTION(gb, f, timing    )) goto error;
@@ -297,7 +297,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
 
     if (fread(GB_GET_SECTION(&save, header), 1, GB_SECTION_SIZE(header), f) != GB_SECTION_SIZE(header)) goto error;
     if (!READ_SECTION(&save, f, core_state)) goto error;
-    if (!READ_SECTION(&save, f, hdma      )) goto error;
+    if (!READ_SECTION(&save, f, dma       )) goto error;
     if (!READ_SECTION(&save, f, mbc       )) goto error;
     if (!READ_SECTION(&save, f, hram      )) goto error;
     if (!READ_SECTION(&save, f, timing    )) goto error;

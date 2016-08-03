@@ -224,13 +224,18 @@ typedef struct GB_gameboy_s {
         bool infrared_input;
     );
 
-    /* HDMA */
-    GB_SECTION(hdma,
+    /* DMA and HDMA */
+    GB_SECTION(dma,
         bool hdma_on;
         bool hdma_on_hblank;
         uint8_t hdma_steps_left;
         uint16_t hdma_cycles;
         uint16_t hdma_current_src, hdma_current_dest;
+
+        uint8_t dma_steps_left;
+        uint8_t dma_current_dest;
+        uint16_t dma_current_src;
+        uint16_t dma_cycles;
     );
     
     /* MBC */
@@ -278,7 +283,7 @@ typedef struct GB_gameboy_s {
         uint32_t display_cycles;
         uint32_t div_cycles;
         uint32_t tima_cycles;
-        uint32_t dma_cycles;
+        GB_PADDING(uint32_t, dma_cycles);
         GB_aligned_double apu_cycles;
     );
 

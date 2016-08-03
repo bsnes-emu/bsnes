@@ -10,6 +10,36 @@
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 
+typedef enum {
+    GB_BUS_MAIN, /* In DMG: Cart and RAM. In CGB: Cart only */
+    GB_BUS_RAM, /* In CGB only. */
+    GB_BUS_VRAM,
+    GB_BUS_INTERNAL, /* Anything in highram. Might not be the most correct name. */
+} GB_bus_t;
+
+static GB_bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
+{
+    if (addr < 0x8000) {
+        return GB_BUS_MAIN;
+    }
+    if (addr < 0xA000) {
+        return GB_BUS_VRAM;
+    }
+    if (addr < 0xC000) {
+        return GB_BUS_MAIN;
+    }
+    if (addr < 0xFE00) {
+        return gb->is_cgb? GB_BUS_RAM : GB_BUS_MAIN;
+    }
+    return GB_BUS_INTERNAL;
+}
+
+static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
+{
+    if (!gb->dma_steps_left) return false;
+    return bus_for_addr(gb, addr) == bus_for_addr(gb, gb->dma_current_src);
+}
+
 static uint8_t read_rom(GB_gameboy_t *gb, uint16_t addr)
 {
     if (addr < 0x100 && !gb->boot_rom_finished) {
@@ -76,7 +106,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFEA0) {
-        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) {
+        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || gb->dma_steps_left) {
             return 0xFF;
         }
         return gb->oam[addr & 0xFF];
@@ -202,9 +232,8 @@ static GB_read_function_t * const read_map[] =
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
     GB_debugger_test_read_watchpoint(gb, addr);
-    if (addr < 0xFF00 && gb->dma_cycles) {
-        /* Todo: can we access IO registers during DMA? */
-        return 0xFF;
+    if (is_addr_in_dma_use(gb, addr)) {
+        addr = gb->dma_current_src;
     }
     return read_map[addr >> 12](gb, addr);
 }
@@ -297,7 +326,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (addr < 0xFEA0) {
-        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) {
+        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || gb->dma_steps_left) {
             return;
         }
         gb->oam[addr & 0xFF] = value;
@@ -371,13 +400,13 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_DMA:
                 if (value <= 0xF1) { /* According to Pan Docs */
-                    for (uint8_t i = 0xA0; i--;) {
-                        gb->oam[i] = GB_read_memory(gb, (value << 8) + i);
-                    }
+                    gb->dma_cycles = 0;
+                    gb->dma_current_dest = 0;
+                    gb->dma_current_src = value << 8;
+                    gb->dma_steps_left = 0xa0;
                 }
                 /* else { what? } */
-                /* Todo: measure this value */
-                gb->dma_cycles = 640;
+
                 return;
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
@@ -501,11 +530,23 @@ static GB_write_function_t * const write_map[] =
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     GB_debugger_test_write_watchpoint(gb, addr, value);
-    if (addr < 0xFF00 && gb->dma_cycles) {
-        /* Todo: can we access IO registers during DMA? */
+    if (is_addr_in_dma_use(gb, addr)) {
+        /* Todo: What should happen? Will this affect DMA? Will data be written? What and where? */
         return;
     }
     write_map[addr >> 12](gb, addr, value);
+}
+
+void GB_dma_run(GB_gameboy_t *gb)
+{
+    while (gb->dma_cycles >= 4 && gb->dma_steps_left) {
+        /* Todo: measure this value */
+        gb->dma_cycles -= 4;
+        gb->dma_steps_left--;
+        gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src);
+        /* dma_current_src must be the correct value during GB_read_memory */
+        gb->dma_current_src++;
+    }
 }
 
 void GB_hdma_run(GB_gameboy_t *gb)
