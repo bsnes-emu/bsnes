@@ -908,7 +908,7 @@ print_usage:
     uint16_t index = find_watchpoint(gb, result);
     if (index < gb->n_watchpoints && gb->watchpoints[index].key == key) {
         GB_log(gb, "Watchpoint already set at %s\n", debugger_value_to_string(gb, result, true));
-        if (!gb->watchpoints[index].flags != flags) {
+        if (gb->watchpoints[index].flags != flags) {
             GB_log(gb, "Modified watchpoint type\n");
             gb->watchpoints[index].flags = flags;
         }
