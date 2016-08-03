@@ -8,7 +8,7 @@ auto pKeyboard::poll() -> vector<bool> {
   #if defined(DISPLAY_XORG)
   XQueryKeymap(pApplication::display, state);
   #endif
-  for(auto& code : settings->keycodes) {
+  for(auto& code : settings.keycodes) {
     result.append(_pressed(state, code));
   }
   return result;
@@ -227,7 +227,7 @@ auto pKeyboard::initialize() -> void {
     lo = lo ? (uint8_t)XKeysymToKeycode(pApplication::display, lo) : 0;
     hi = hi ? (uint8_t)XKeysymToKeycode(pApplication::display, hi) : 0;
     #endif
-    settings->keycodes.append(lo | (hi << 8));
+    settings.keycodes.append(lo | (hi << 8));
   };
 
   #define map(name, ...) if(key == name) { append(__VA_ARGS__); continue; }

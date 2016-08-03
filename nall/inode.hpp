@@ -45,7 +45,7 @@ struct inode {
     return data.st_mode;
   }
 
-  static auto timestamp(const string& name, time mode = time::modify) -> time_t {
+  static auto timestamp(const string& name, time mode = time::modify) -> uint64_t {
     struct stat data = {0};
     stat(name, &data);
     switch(mode) { default:

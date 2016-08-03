@@ -41,9 +41,6 @@ auto pApplication::syncX() -> void {
 auto pApplication::initialize() -> void {
   display = XOpenDisplay(0);
 
-  settings = new Settings;
-  settings->load();
-
   static int argc = 1;
   static char* argv[] = {new char[8], nullptr};
   strcpy(argv[0], "hiro");

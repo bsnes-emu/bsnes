@@ -14,7 +14,7 @@ AboutWindow::AboutWindow() {
     "Website:"
   });
   informationRight.setFont(Font().setBold()).setAlignment(0.0).setText({
-    string{Emulator::Version}.replace("v", ""), "\n",
+    Emulator::Version, "\n",
     Emulator::Author, "\n",
     Emulator::License, "\n",
     Emulator::Website

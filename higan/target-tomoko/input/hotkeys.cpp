@@ -76,6 +76,8 @@ auto InputManager::appendHotkeys() -> void {
 }
 
 auto InputManager::pollHotkeys() -> void {
+  if(!presentation || !presentation->focused()) return;
+
   for(auto& hotkey : hotkeys) {
     int16 state = hotkey->poll();
     if(hotkey->state == 0 && state == 1 && hotkey->press) hotkey->press();

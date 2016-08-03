@@ -6,7 +6,7 @@ auto pKeyboard::poll() -> vector<bool> {
   vector<bool> result;
   char state[256];
   XQueryKeymap(pApplication::display, state);
-  for(auto& code : settings->keycodes) {
+  for(auto& code : settings.keycodes) {
     result.append(_pressed(state, code));
   }
   return result;
@@ -32,7 +32,7 @@ auto pKeyboard::initialize() -> void {
   auto append = [](unsigned lo, unsigned hi = 0) {
     lo = lo ? (uint8_t)XKeysymToKeycode(pApplication::display, lo) : 0;
     hi = hi ? (uint8_t)XKeysymToKeycode(pApplication::display, hi) : 0;
-    settings->keycodes.append(lo << 0 | hi << 8);
+    settings.keycodes.append(lo << 0 | hi << 8);
   };
 
   #define map(name, ...) if(key == name) { append(__VA_ARGS__); continue; }

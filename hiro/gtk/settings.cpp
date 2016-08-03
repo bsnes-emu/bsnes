@@ -1,26 +1,38 @@
 namespace hiro {
 
 Settings::Settings() {
-  geometry.append(geometry.frameX = 4, "FrameX");
-  geometry.append(geometry.frameY = 24, "FrameY");
-  geometry.append(geometry.frameWidth = 8, "FrameWidth");
-  geometry.append(geometry.frameHeight = 28, "FrameHeight");
-  geometry.append(geometry.menuHeight = 20, "MenuHeight");
-  geometry.append(geometry.statusHeight = 20, "StatusHeight");
-  append(geometry, "Geometry");
-  window.append(window.backgroundColor = 0xedeceb, "BackgroundColor");
-  append(window, "Window");
+  string path = {Path::local(), "hiro/"};
+  auto document = BML::unserialize(file::read({path, "gtk.bml"}));
+
+  auto get = [&](string_view name) {
+    return document[name];
+  };
+
+  geometry.frameX = get("Geometry/FrameX").integer();
+  geometry.frameY = get("Geometry/FrameY").integer();
+  geometry.frameWidth = get("Geometry/FrameWidth").integer();
+  geometry.frameHeight = get("Geometry/FrameHeight").integer();
+  geometry.menuHeight = get("Geometry/MenuHeight").integer();
+  geometry.statusHeight = get("Geometry/StatusHeight").integer();
 }
 
-auto Settings::load() -> void {
-  string path = {Path::config(), "hiro/"};
-  Configuration::Document::load({path, "gtk.bml"});
-}
-
-auto Settings::save() -> void {
-  string path = {Path::config(), "hiro/"};
+Settings::~Settings() {
+  string path = {Path::local(), "hiro/"};
   directory::create(path, 0755);
-  Configuration::Document::save({path, "gtk.bml"});
+
+  Markup::Node document;
+  auto set = [&](string_view name, string_view value) {
+    document(name).setValue(value);
+  };
+
+  set("Geometry/FrameX", geometry.frameX);
+  set("Geometry/FrameY", geometry.frameY);
+  set("Geometry/FrameWidth", geometry.frameWidth);
+  set("Geometry/FrameHeight", geometry.frameHeight);
+  set("Geometry/MenuHeight", geometry.menuHeight);
+  set("Geometry/StatusHeight", geometry.statusHeight);
+
+  file::write({path, "gtk.bml"}, BML::serialize(document));
 }
 
 }

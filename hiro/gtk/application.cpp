@@ -42,9 +42,6 @@ auto pApplication::initialize() -> void {
   display = XOpenDisplay(nullptr);
   #endif
 
-  settings = new Settings;
-  settings->load();
-
   //set WM_CLASS to Application::name()
   if(Application::state.name) gdk_set_program_class(Application::state.name);
 

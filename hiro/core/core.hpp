@@ -1,5 +1,4 @@
 #include <nall/platform.hpp>
-#include <nall/config.hpp>
 #include <nall/directory.hpp>
 #include <nall/function.hpp>
 #include <nall/image.hpp>

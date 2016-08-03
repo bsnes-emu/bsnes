@@ -144,6 +144,7 @@ auto InputMapping::deviceName() -> string {
 
 InputManager::InputManager() {
   inputManager = this;
+  latency = max(1u, settings["Input/Latency"].natural());
 
   for(auto& emulator : program->emulators) {
     auto& inputEmulator = emulators(emulators.size());
@@ -201,6 +202,11 @@ auto InputManager::bind() -> void {
 }
 
 auto InputManager::poll() -> void {
+  //polling actual hardware is very time-consuming: skip call if poll was called too recently
+  auto thisPoll = chrono::millisecond();
+  if(thisPoll - lastPoll < latency) return;
+  lastPoll = thisPoll;
+
   auto devices = input->poll();
   bool changed = devices.size() != this->devices.size();
   if(!changed) {
@@ -213,8 +219,6 @@ auto InputManager::poll() -> void {
     this->devices = devices;
     bind();
   }
-
-  if(presentation && presentation->focused()) pollHotkeys();
 }
 
 auto InputManager::onChange(shared_pointer<HID::Device> device, uint group, uint input, int16_t oldValue, int16_t newValue) -> void {

@@ -25,6 +25,79 @@ cartridge sha256:e678a29a93111cf2016c487ba9977b14de8f719040651a42c74bd74eea2d0d8
   :  name:     Death and Return of Superman, The
   :  title:    The Death and Return of Superman
 
+cartridge sha256:039beb46f81ad9e0844ecec420cc78bfdbf2b1ae940adb4fdf08dbf1b55ac7ed
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNSP-JG-NOE
+  :  board:    SHVC-1J3M-20
+  :  revision: 1.1
+  :  name:     Illusion of Time
+  :  title:    Illusion of Time
+
+cartridge sha256:c341668847170d36fa5cfb720568b0b1ecbb24fc426a821f665f1d3853a46a6d
+  :board region=pal
+  :  rom name=program.rom size=0x300000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNSP-AEOD-NOE
+  :  board:    SHVC-1J3M-20
+  :  revision: 1.0
+  :  name:     Secret of Evermore
+  :  title:    Secret of Evermore
+
+cartridge sha256:1444ab11f96f7750db992e9a4160532b27abede8a7054128c09f448300c91ebf
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNSP-K2-NOE
+  :  board:    SHVC-1J3M-11
+  :  revision: 1.0
+  :  name:     Secret of Mana
+  :  title:    Secret of Mana
+
+cartridge sha256:613cd1a31eaded18648168bd7453a57830ca9a6f3c10de5154625436fbd49556
+  :board region=pal
+  :  rom name=program.rom size=0x400000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNSP-AQTD-NOE
+  :  board:    SHVC-1J3M-20
+  :  revision: 1.1
+  :  name:     Terranigma
+  :  title:    Terranigma
+
+cartridge sha256:f1a75578e6711716340bb26ea93bf05d5762bc7da21dbc19576fc65de1e885b5
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AT-UKV
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Super Aleste
+  :  title:    Super Aleste
+
 cartridge sha256:2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
   :board region=ntsc
   :  rom name=program.rom size=0x200000
@@ -543,8 +616,8 @@ cartridge sha256:865919b25a9d241c907bcda18b380e3c704f33f4997ad44559046f0f08c4968
   :  serial:   SNS-8L-USA
   :  board:    SHVC-YA0N-01
   :  revision: 1.0
-  :  name:     Barbie Super Star
-  :  title:    Barbie Super Star
+  :  name:     Barbie Super Model
+  :  title:    Barbie Super Model
 
 cartridge sha256:fe1ad128313b2b9a47f89cf0d95d4c0cc2cb35a817ac5d915ee6c4d98d47d675
   :board region=ntsc
@@ -1759,6 +1832,19 @@ cartridge sha256:e6efb6361af04963f22c772f879a466543f56b3b6a084204fef2dcb4659d82d
   :  name:     David Crane's Amazing Tennis
   :  title:    David Crane's Amazing Tennis
 
+cartridge sha256:300c1937e4b68108302e9b0f49974d1ec6b6c45dd8da69dddc19443f9562ecf4
+  :board region=ntsc
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNS-9D-USA
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Death and Return of Superman, The
+  :  title:    The Death and Return of Superman
+
 cartridge sha256:752d24fab240f4dd1dfbfea5ec83438998316806ad44488bf8c84430ca5a2cd0
   :board region=ntsc
   :  rom name=program.rom size=0x200000
@@ -1885,6 +1971,21 @@ cartridge sha256:628147468c3539283197f58f03b94df49758a332831857481ea9cc31645f052
   :  revision: 1.2
   :  name:     Donkey Kong Country
   :  title:    Donkey Kong Country
+
+cartridge sha256:07ff03fa8c8e31d2f8277ef2a9785022edebf7f79b694c66a00c66d8e563bce5
+  :board region=ntsc
+  :  rom name=program.rom size=0x400000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x800
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNS-8E-USA
+  :  board:    SHVC-1J1M-20
+  :  revision: 1.0
+  :  name:     Donkey Kong Country - Competition Cartridge
+  :  title:    Donkey Kong Country: Competition Cartridge
 
 cartridge sha256:35421a9af9dd011b40b91f792192af9f99c93201d8d394026bdfb42cbf2d8633
   :board region=ntsc
@@ -5287,6 +5388,21 @@ cartridge sha256:2a2dc2ef84efd9a773d1e8231b7e3e57f0de7e4528968670963f2f1f358eef3
   :  name:     NHL '97
   :  title:    NHL '97
 
+cartridge sha256:0d933149242a2a5278b9ada9294481db5b30aaa134c660951dc340bf8ab441e8
+  :board region=ntsc
+  :  rom name=program.rom size=0x180000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNS-AH7E-USA
+  :  board:    SHVC-1J3M-20
+  :  revision: 1.1
+  :  name:     NHL '97
+  :  title:    NHL '97
+
 cartridge sha256:8113c2cedafc8fd5a56c8638ae340fb275f263ff5c5e18d04dc6c3ebc5cfffee
   :board region=ntsc
   :  rom name=program.rom size=0x200000
@@ -7268,6 +7384,22 @@ cartridge sha256:3857b5294ea8f7468849437bb2d8271564e8a0ff30774622e9c872bcbd53a84
   :  revision: 1.0
   :  name:     Star Fox
   :  title:    Star Fox
+
+cartridge sha256:2c0bac12a7866fad1cb306da768a201c12f2520332df1ef51cba1576db21ff06
+  :board region=ntsc
+  :  superfx
+  :    map address=00-3f,80-bf:3000-34ff
+  :    rom name=program.rom size=0x100000
+  :      map address=00-1f,80-9f:8000-ffff mask=0x8000
+  :    ram name=save.ram size=0x8000
+  :      map address=60-7d,e0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNS-FU-USA
+  :  board:    SHVC-1C0N
+  :  revision: 1.0
+  :  name:     Star Fox - Super Weekend
+  :  title:    Star Fox: Super Weekend
 
 cartridge sha256:3a16ad45ae3d89b13c9e53e21c2a4c725ff7cec7fbe7896d538d163f92cb4aac
   :board region=ntsc

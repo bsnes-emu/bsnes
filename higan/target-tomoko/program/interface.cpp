@@ -72,10 +72,10 @@ auto Program::videoRefresh(const uint32* data, uint pitch, uint width, uint heig
   }
 
   static uint frameCounter = 0;
-  static time_t previous, current;
+  static uint64 previous, current;
   frameCounter++;
 
-  time(&current);
+  current = chrono::timestamp();
   if(current != previous) {
     previous = current;
     statusText = {"FPS: ", frameCounter};
@@ -91,6 +91,7 @@ auto Program::audioSample(const double* samples, uint channels) -> void {
 
 auto Program::inputPoll(uint port, uint device, uint input) -> int16 {
   if(presentation->focused() || settings["Input/FocusLoss/AllowInput"].boolean()) {
+    inputManager->poll();
     auto& mapping = inputManager->emulator->ports[port].devices[device].mappings[input];
     return mapping.poll();
   }

@@ -62,7 +62,7 @@ template<typename T> struct stringify;
 //format.hpp
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
-template<typename T> inline auto numeral(T value, long precision = 0, char padchar = '0') -> string;
+template<typename T> inline auto pad(const T& value, long precision = 0, char padchar = ' ') -> string;
 inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
 inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
@@ -182,11 +182,6 @@ public:
   inline auto append() -> type&;
   template<typename T> inline auto _append(const stringify<T>&) -> string&;
   inline auto length() const -> uint;
-
-  //datetime.hpp
-  inline static auto date(time_t = 0) -> string;
-  inline static auto time(time_t = 0) -> string;
-  inline static auto datetime(time_t = 0) -> string;
 
   //find.hpp
   template<bool, bool> inline auto _find(int, string_view) const -> maybe<uint>;
@@ -316,7 +311,6 @@ struct string_format : vector<string> {
 #include <nall/string/compare.hpp>
 #include <nall/string/convert.hpp>
 #include <nall/string/core.hpp>
-#include <nall/string/datetime.hpp>
 #include <nall/string/find.hpp>
 #include <nall/string/format.hpp>
 #include <nall/string/list.hpp>

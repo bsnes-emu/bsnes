@@ -1,20 +1,21 @@
 namespace hiro {
 
-struct Settings : Configuration::Document {
+struct Settings {
+  Settings();
+  ~Settings();
+
   vector<uint16_t> keycodes;
 
-  struct Geometry : Configuration::Node {
-    signed frameX;
-    signed frameY;
-    signed frameWidth;
-    signed frameHeight;
-    signed menuHeight;
-    signed statusHeight;
+  struct Geometry {
+    int frameX = 4;
+    int frameY = 24;
+    int frameWidth = 8;
+    int frameHeight = 28;
+    int menuHeight = 20;
+    int statusHeight = 20;
   } geometry;
-
-  Settings();
-  auto load() -> void;
-  auto save() -> void;
 };
+
+static Settings settings;
 
 }

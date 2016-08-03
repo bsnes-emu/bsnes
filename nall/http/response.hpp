@@ -230,7 +230,7 @@ auto Response::setData(const vector<uint8_t>& value) -> type& {
 
 auto Response::setFile(const string& value) -> type& {
   _file = value;
-  string eTag = {"\"", string::datetime(file::timestamp(value, file::time::modify)), "\""};
+  string eTag = {"\"", chrono::utc::datetime(file::timestamp(value, file::time::modify)), "\""};
   header.assign("Content-Length", file::size(value));
   header.assign("Cache-Control", "public");
   header.assign("ETag", eTag);

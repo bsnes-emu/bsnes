@@ -75,6 +75,7 @@ Program::Program(string_vector args) {
 auto Program::main() -> void {
   updateStatusText();
   inputManager->poll();
+  inputManager->pollHotkeys();
 
   if(!emulator || !emulator->loaded() || pause || (!presentation->focused() && settings["Input/FocusLoss/Pause"].boolean())) {
     audio->clear();
