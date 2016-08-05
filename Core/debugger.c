@@ -695,7 +695,6 @@ static bool registers(GB_gameboy_t *gb, char *arguments)
     GB_log(gb, "SP = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_SP], false));
     GB_log(gb, "PC = %s\n", value_to_string(gb, gb->pc, false));
 
-    GB_log(gb, "TIMA = %d/%u\n", gb->io_registers[GB_IO_TIMA], gb->tima_cycles);
     GB_log(gb, "Display Controller: LY = %d/%u\n", gb->io_registers[GB_IO_LY], gb->display_cycles % 456);
     return true;
 }

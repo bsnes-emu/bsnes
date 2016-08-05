@@ -6,6 +6,7 @@
 #include "memory.h"
 #include "debugger.h"
 #include "mbc.h"
+#include "timing.h"
 
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
@@ -353,7 +354,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         /* Hardware registers */
         switch (addr & 0xFF) {
 
-            case GB_IO_TAC:
             case GB_IO_SCX:
             case GB_IO_IF:
             case GB_IO_TIMA:
@@ -374,6 +374,12 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[addr & 0xFF] = value;
                 return;
 
+            case GB_IO_TAC:
+                GB_emulate_timer_glitch(gb, gb->io_registers[GB_IO_TAC], value);
+                gb->io_registers[GB_IO_TAC] = value;
+                return;
+
+
             case GB_IO_LCDC:
                 if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     gb->display_cycles = 0;
@@ -391,7 +397,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DIV:
-                gb->div_cycles = 0;
+                GB_set_internal_div_counter(gb, 0);
                 gb->io_registers[GB_IO_DIV] = 0;
                 return;
 

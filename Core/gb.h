@@ -142,6 +142,7 @@ enum {
 #define LCDC_PERIOD 70224
 #define CPU_FREQUENCY 0x400000
 #define DIV_CYCLES (0x100)
+#define INTERNAL_DIV_CYCLES (0x400)
 #define FRAME_LENGTH 16742706 // in nanoseconds
 
 typedef enum {
@@ -283,7 +284,7 @@ typedef struct GB_gameboy_s {
         int64_t last_vblank;
         uint32_t display_cycles;
         uint32_t div_cycles;
-        uint32_t tima_cycles;
+        GB_PADDING(uint32_t, tima_cycles);
         GB_PADDING(uint32_t, dma_cycles);
         GB_aligned_double apu_cycles;
     );

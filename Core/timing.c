@@ -18,8 +18,10 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
     gb->dma_cycles += cycles;
-    gb->div_cycles += cycles;
-    gb->tima_cycles += cycles;
+
+    for (int i = 0; i < cycles; i += 4) {
+        GB_set_internal_div_counter(gb, gb->div_cycles + 4);
+    }
 
     if (gb->cgb_double_speed) {
         cycles >>=1;
@@ -33,30 +35,60 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->cycles_since_input_ir_change += cycles;
     GB_dma_run(gb);
     GB_hdma_run(gb);
-    GB_timers_run(gb);
     GB_apu_run(gb);
     GB_display_run(gb);
     GB_ir_run(gb);
 }
 
-void GB_timers_run(GB_gameboy_t *gb)
-{
-    /* Standard Timers */
-    static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
+/* Standard Timers */
+static const unsigned int GB_TAC_RATIOS[] = {1024, 16, 64, 256};
 
-    if (gb->div_cycles >= DIV_CYCLES) {
-        gb->div_cycles -= DIV_CYCLES;
+static void increase_tima(GB_gameboy_t *gb)
+{
+    gb->io_registers[GB_IO_TIMA]++;
+    if (gb->io_registers[GB_IO_TIMA] == 0) {
+        gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
+        gb->io_registers[GB_IO_IF] |= 4;
+    }
+}
+
+static bool counter_overflow_check(uint32_t old, uint32_t new, uint32_t max)
+{
+    return (old & (max >> 1)) && !(new & (max >> 1));
+}
+
+void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
+{
+    /* DIV and TIMA increase when a specific high-bit becomes a low-bit. */
+    value &= INTERNAL_DIV_CYCLES - 1;
+    if (counter_overflow_check(gb->div_cycles, value, DIV_CYCLES)) {
         gb->io_registers[GB_IO_DIV]++;
     }
+    if ((gb->io_registers[GB_IO_TAC] & 4) &&
+        counter_overflow_check(gb->div_cycles, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
+        increase_tima(gb);
+    }
+    gb->div_cycles = value;
+}
 
-    while (gb->tima_cycles >= GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3]) {
-        gb->tima_cycles -= GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3];
-        if (gb->io_registers[GB_IO_TAC] & 4) {
-            gb->io_registers[GB_IO_TIMA]++;
-            if (gb->io_registers[GB_IO_TIMA] == 0) {
-                gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
-                gb->io_registers[GB_IO_IF] |= 4;
-            }
+/* 
+   This glitch is based on the expected results of mooneye-gb rapid_toggle test.
+   This glitch happens because how TIMA is increased, see GB_set_internal_div_counter.
+   According to GiiBiiAdvance, GBC's behavior is different, but this was not tested or implemented.
+*/
+void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
+{
+    /* Glitch only happens when old_tac is enabled. */
+    if (!(old_tac & 4)) return;
+
+    unsigned int old_clocks = GB_TAC_RATIOS[old_tac & 3];
+    unsigned int new_clocks = GB_TAC_RATIOS[new_tac & 3];
+
+    /* The bit used for overflow testing must have been 1 */
+    if (gb->div_cycles & (old_clocks >> 1)) {
+        /* And now either the timer must be disabled, or the new bit used for overflow testing be 0. */
+        if (!(new_tac & 4) || gb->div_cycles & (new_clocks >> 1)) {
+            increase_tima(gb);
         }
     }
 }
