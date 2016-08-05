@@ -129,7 +129,21 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_STAT:
                 return gb->io_registers[GB_IO_STAT] | 0x80;
             case GB_IO_DMG_EMULATION_INDICATION:
+                if (!gb->is_cgb) {
+                    return 0xFF;
+                }
                 return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
+
+            case GB_IO_HDMA1:
+            case GB_IO_HDMA2:
+            case GB_IO_HDMA3:
+            case GB_IO_HDMA4:
+            case GB_IO_PCM_12:
+            case GB_IO_PCM_34:
+                if (!gb->is_cgb) {
+                    return 0xFF;
+                }
+                /* Fall through */
             case GB_IO_JOYP:
             case GB_IO_DIV:
             case GB_IO_TIMA:
@@ -144,15 +158,12 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_OBP1:
             case GB_IO_WY:
             case GB_IO_WX:
-            case GB_IO_HDMA1:
-            case GB_IO_HDMA2:
-            case GB_IO_HDMA3:
-            case GB_IO_HDMA4:
-            case GB_IO_PCM_12:
-            case GB_IO_PCM_34:
             case GB_IO_SB:
                 return gb->io_registers[addr & 0xFF];
             case GB_IO_HDMA5:
+                if (!gb->is_cgb) {
+                    return 0xFF;
+                }
                 return (gb->io_registers[GB_IO_HDMA5] & 0x80) | ((gb->hdma_steps_left - 1) & 0x7F);
             case GB_IO_SVBK:
                 if (!gb->cgb_mode) {
@@ -380,6 +391,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DIV:
+                gb->div_cycles = 0;
                 gb->io_registers[GB_IO_DIV] = 0;
                 return;
 
@@ -507,7 +519,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
     if (addr == 0xFFFF) {
         /* Interrupt mask */
-        gb->interrupt_enable = value & 0x1F;
+        gb->interrupt_enable = value;
         return;
     }
     
@@ -539,7 +551,9 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 void GB_dma_run(GB_gameboy_t *gb)
 {
-    while (gb->dma_cycles >= 4 && gb->dma_steps_left) {
+    /* + 1 as a compensation over the fact that DMA is never started in the first internal cycle of an opcode,
+       and SameBoy isn't sub-cycle accurate (yet?) . */
+    while (gb->dma_cycles >= 4 + 1 && gb->dma_steps_left) {
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
         gb->dma_steps_left--;
@@ -552,7 +566,9 @@ void GB_dma_run(GB_gameboy_t *gb)
 void GB_hdma_run(GB_gameboy_t *gb)
 {
     if (!gb->hdma_on) return;
-    while (gb->hdma_cycles >= 8) {
+    /* + 1 as a compensation over the fact that HDMA is never started in the first internal cycle of an opcode,
+     and SameBoy isn't sub-cycle accurate (yet?) . */
+    while (gb->hdma_cycles >= 8 + 1) {
         gb->hdma_cycles -= 8;
         // The CGB boot rom uses the dest in "absolute" space, while some games use it relative to VRAM.
         // This "normalizes" the dest to the CGB address space.

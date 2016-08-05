@@ -207,7 +207,7 @@ typedef struct GB_gameboy_s {
         /* Registers */
         uint16_t pc;
         uint16_t registers[GB_REGISTERS_16_BIT];
-        bool ime;
+        uint8_t ime;
         uint8_t interrupt_enable;
         uint8_t cgb_ram_bank;
 
@@ -218,6 +218,7 @@ typedef struct GB_gameboy_s {
         bool halted;
         bool stopped;
         bool boot_rom_finished;
+        bool ime_toggle; /* ei (and di in CGB) have delayed effects.*/
 
         /* Misc state*/
         /* IR */

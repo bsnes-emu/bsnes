@@ -61,9 +61,11 @@ static void ld_rr_d16(GB_gameboy_t *gb, uint8_t opcode)
 static void ld_drr_a(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
-    GB_advance_cycles(gb, 8);
-    register_id = (GB_read_memory(gb, gb->pc++) >> 4) + 1;
+    GB_advance_cycles(gb, 4);
+    register_id = (opcode >> 4) + 1;
+    gb->pc++;
     GB_write_memory(gb, gb->registers[register_id], gb->registers[GB_REGISTER_AF] >> 8);
+    GB_advance_cycles(gb, 4);
 }
 
 static void inc_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -183,10 +185,12 @@ static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
 static void ld_a_drr(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
-    GB_advance_cycles(gb, 8);
-    register_id = (GB_read_memory(gb, gb->pc++) >> 4) + 1;
+    register_id = (opcode >> 4) + 1;
+    GB_advance_cycles(gb, 4);
+    gb->pc++;
     gb->registers[GB_REGISTER_AF] &= 0xFF;
     gb->registers[GB_REGISTER_AF] |= GB_read_memory(gb, gb->registers[register_id]) << 8;
+    GB_advance_cycles(gb, 4);
 }
 
 static void dec_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -713,10 +717,13 @@ static void ret_cc(GB_gameboy_t *gb, uint8_t opcode)
 static void pop_rr(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
-    GB_advance_cycles(gb, 12);
-    register_id = ((GB_read_memory(gb, gb->pc++) >> 4) + 1) & 3;
-    gb->registers[register_id] = GB_read_memory(gb, gb->registers[GB_REGISTER_SP]) |
-    (GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
+    GB_advance_cycles(gb, 4);
+    register_id = ((opcode >> 4) + 1) & 3;
+    gb->pc++;
+    GB_advance_cycles(gb, 4);
+    gb->registers[register_id] = GB_read_memory(gb, gb->registers[GB_REGISTER_SP]);
+    GB_advance_cycles(gb, 4);
+    gb->registers[register_id] |= GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8;
     gb->registers[GB_REGISTER_AF] &= 0xFFF0; // Make sure we don't set impossible flags on F! See Blargg's PUSH AF test.
     gb->registers[GB_REGISTER_SP] += 2;
 }
@@ -725,8 +732,13 @@ static void jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->pc++;
     if (condition_code(gb, opcode)) {
-        GB_advance_cycles(gb, 16);
-        gb->pc = GB_read_memory(gb, gb->pc) | (GB_read_memory(gb, gb->pc + 1) << 8);
+        GB_advance_cycles(gb, 4);
+        uint16_t addr = GB_read_memory(gb, gb->pc);
+        GB_advance_cycles(gb, 4);
+        addr |= (GB_read_memory(gb, gb->pc + 1) << 8);
+        GB_advance_cycles(gb, 8);
+        gb->pc = addr;
+
     }
     else {
         GB_advance_cycles(gb, 12);
@@ -736,20 +748,30 @@ static void jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
 
 static void jp_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
-    GB_advance_cycles(gb, 16);
     gb->pc++;
-    gb->pc = GB_read_memory(gb, gb->pc) | (GB_read_memory(gb, gb->pc + 1) << 8);
-}
+    GB_advance_cycles(gb, 4);
+    uint16_t addr = GB_read_memory(gb, gb->pc);
+    GB_advance_cycles(gb, 4);
+    addr |= (GB_read_memory(gb, gb->pc + 1) << 8);
+    GB_advance_cycles(gb, 8);
+    gb->pc = addr;}
 
 static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->pc++;
     if (condition_code(gb, opcode)) {
-        GB_advance_cycles(gb, 24);
+        GB_advance_cycles(gb, 4);
         gb->registers[GB_REGISTER_SP] -= 2;
-        GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
+        uint16_t addr = GB_read_memory(gb, gb->pc);
+        GB_advance_cycles(gb, 4);
+        addr |= (GB_read_memory(gb, gb->pc + 1) << 8);
+        GB_advance_cycles(gb, 8);
         GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 2) >> 8);
-        gb->pc = GB_read_memory(gb, gb->pc) | (GB_read_memory(gb, gb->pc + 1) << 8);
+        GB_advance_cycles(gb, 4);
+        GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
+        GB_advance_cycles(gb, 4);
+        gb->pc = addr;
+
         GB_debugger_call_hook(gb);
     }
     else {
@@ -761,12 +783,14 @@ static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
 static void push_rr(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
-    GB_advance_cycles(gb, 16);
+    GB_advance_cycles(gb, 8);
     gb->pc++;
     register_id = ((opcode >> 4) + 1) & 3;
     gb->registers[GB_REGISTER_SP] -= 2;
-    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->registers[register_id]) & 0xFF);
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->registers[register_id]) >> 8);
+    GB_advance_cycles(gb, 4);
+    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->registers[register_id]) & 0xFF);
+    GB_advance_cycles(gb, 4);
 }
 
 static void add_a_d8(GB_gameboy_t *gb, uint8_t opcode)
@@ -910,10 +934,12 @@ static void cp_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void rst(GB_gameboy_t *gb, uint8_t opcode)
 {
-    GB_advance_cycles(gb, 16);
+    GB_advance_cycles(gb, 8);
     gb->registers[GB_REGISTER_SP] -= 2;
-    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 1) & 0xFF);
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 1) >> 8);
+    GB_advance_cycles(gb, 4);
+    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 1) & 0xFF);
+    GB_advance_cycles(gb, 4);
     gb->pc = opcode ^ 0xC7;
     GB_debugger_call_hook(gb);
 }
@@ -921,9 +947,11 @@ static void rst(GB_gameboy_t *gb, uint8_t opcode)
 static void ret(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_debugger_ret_hook(gb);
-    GB_advance_cycles(gb, 16);
-    gb->pc = GB_read_memory(gb, gb->registers[GB_REGISTER_SP]) |
-    (GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
+    GB_advance_cycles(gb, 4);
+    gb->pc = GB_read_memory(gb, gb->registers[GB_REGISTER_SP]);
+    GB_advance_cycles(gb, 4);
+    gb->pc |= GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8;
+    GB_advance_cycles(gb, 8);
     gb->registers[GB_REGISTER_SP] += 2;
 }
 
@@ -935,12 +963,18 @@ static void reti(GB_gameboy_t *gb, uint8_t opcode)
 
 static void call_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
-    GB_advance_cycles(gb, 24);
     gb->pc++;
+    GB_advance_cycles(gb, 4);
     gb->registers[GB_REGISTER_SP] -= 2;
-    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
+    uint16_t addr = GB_read_memory(gb, gb->pc);
+    GB_advance_cycles(gb, 4);
+    addr |= (GB_read_memory(gb, gb->pc + 1) << 8);
+    GB_advance_cycles(gb, 8);
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 2) >> 8);
-    gb->pc = GB_read_memory(gb, gb->pc) | (GB_read_memory(gb, gb->pc + 1) << 8);
+    GB_advance_cycles(gb, 4);
+    GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
+    GB_advance_cycles(gb, 4);
+    gb->pc = addr;
     GB_debugger_call_hook(gb);
 }
 
@@ -982,9 +1016,10 @@ static void add_sp_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
     int16_t offset;
     uint16_t sp = gb->registers[GB_REGISTER_SP];
-    GB_advance_cycles(gb, 16);
+    GB_advance_cycles(gb, 4);
     gb->pc++;
     offset = (int8_t) GB_read_memory(gb, gb->pc++);
+    GB_advance_cycles(gb, 12);
     gb->registers[GB_REGISTER_SP] += offset;
 
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
@@ -1030,23 +1065,30 @@ static void di(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_advance_cycles(gb, 4);
     gb->pc++;
-    gb->ime = false;
+
+    /* di is delayed in CGB */
+    if (!gb->is_cgb) {
+        gb->ime = false;
+    }
 }
 
 static void ei(GB_gameboy_t *gb, uint8_t opcode)
 {
+    /* ei is actually "disable interrupts for one instruction, then enable them". */
     GB_advance_cycles(gb, 4);
     gb->pc++;
-    gb->ime = true;
+    gb->ime = false;
+    gb->ime_toggle = true;
 }
 
 static void ld_hl_sp_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
     int16_t offset;
-    GB_advance_cycles(gb, 12);
+    GB_advance_cycles(gb, 4);
     gb->pc++;
     gb->registers[GB_REGISTER_AF] &= 0xFF00;
     offset = (int8_t) GB_read_memory(gb, gb->pc++);
+    GB_advance_cycles(gb, 8);
     gb->registers[GB_REGISTER_HL] = gb->registers[GB_REGISTER_SP] + offset;
 
     if ((gb->registers[GB_REGISTER_SP] & 0xF) + (offset & 0xF) > 0xF) {
@@ -1321,6 +1363,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
 
     if (gb->ime && interrupt) {
+        if (gb->ime_toggle) {
+            gb->ime = !gb->ime;
+            gb->ime_toggle = false;
+        }
         uint8_t interrupt_bit = 0;
         uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
         while (!(interrupt_queue & 1)) {
@@ -1329,12 +1375,17 @@ void GB_cpu_run(GB_gameboy_t *gb)
         }
         gb->io_registers[GB_IO_IF] &= ~(1 << interrupt_bit);
         gb->ime = false;
+        gb->ime_toggle = false;
         nop(gb, 0);
         gb->pc -= 2;
         /* Run pseudo instructions rst 40-60*/
         rst(gb, 0x87 + interrupt_bit * 8);
     }
     else if(!gb->halted && !gb->stopped) {
+        if (gb->ime_toggle) {
+            gb->ime = !gb->ime;
+            gb->ime_toggle = false;
+        }
         uint8_t opcode = GB_read_memory(gb, gb->pc);
         opcodes[opcode](gb, opcode);
     }
