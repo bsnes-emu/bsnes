@@ -1119,6 +1119,9 @@ static void di(GB_gameboy_t *gb, uint8_t opcode)
     if (!gb->is_cgb) {
         gb->ime = false;
     }
+    else if (gb->ime) {
+        gb->ime_toggle = true;
+    }
 }
 
 static void ei(GB_gameboy_t *gb, uint8_t opcode)
