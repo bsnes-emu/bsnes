@@ -1,10 +1,16 @@
 ifeq ($(shell uname -s),Darwin)
-default: cocoa
+DEFAULT := cocoa
 else
-default: sdl
+DEFAULT := sdl
 endif
 
 VERSION := 0.5
+default: $(DEFAULT)
+
+ifeq ($(MAKECMDGOALS),)
+MAKECMDGOALS := $(DEFAULT)
+endif
+
 
 BIN := build/bin
 OBJ := build/obj
@@ -50,8 +56,15 @@ SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 ALL_OBJECTS := $(CORE_OBJECTS) $(COCOA_OBJECTS) $(SDL_OBJECTS)
 
 # Automatic dependency generation
-
--include $(ALL_OBJECTS:.o=.dep)
+ifneq ($(MAKECMDGOALS),clean)
+-include $(CORE_OBJECTS:.o=.dep)
+ifneq ($(filter $(MAKECMDGOALS),sdl),)
+-include $(SDL_OBJECTS:.o=.dep)
+endif
+ifneq ($(filter $(MAKECMDGOALS),cocoa),)
+-include $(COCOA_OBJECTS:.o=.dep)
+endif
+endif
 
 $(OBJ)/%.dep: %
 	-@mkdir -p $(dir $@)
