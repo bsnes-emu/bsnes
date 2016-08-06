@@ -103,6 +103,9 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@mkdir -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit
+ifeq ($(CONF), release)
+	strip $@
+endif
 
 $(BIN)/Sameboy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
 	ibtool --compile $@ $^
@@ -110,6 +113,9 @@ $(BIN)/Sameboy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
 $(BIN)/sdl/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@mkdir -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
+ifeq ($(CONF), release)
+	strip $@
+endif
 	
 $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 	-@mkdir -p $(dir $@)
