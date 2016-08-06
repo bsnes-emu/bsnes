@@ -14,13 +14,31 @@ static void GB_ir_run(GB_gameboy_t *gb)
     }
 }
 
+static void advance_tima_state_machine(GB_gameboy_t *gb)
+{
+    if (gb->tima_reload_state == GB_TIMA_RELOADED) {
+        gb->tima_reload_state = GB_TIMA_RUNNING;
+    }
+    else if (gb->tima_reload_state == GB_TIMA_RELOADING) {
+        gb->tima_reload_state = GB_TIMA_RELOADED;
+    }
+}
+
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
+    advance_tima_state_machine(gb);
     for (int i = 0; i < cycles; i += 4) {
         GB_set_internal_div_counter(gb, gb->div_cycles + 4);
+    }
+
+    if (cycles > 4) {
+        advance_tima_state_machine(gb);
+        if (cycles > 8) {
+            advance_tima_state_machine(gb);
+        }
     }
 
     if (gb->cgb_double_speed) {
@@ -49,6 +67,7 @@ static void increase_tima(GB_gameboy_t *gb)
     if (gb->io_registers[GB_IO_TIMA] == 0) {
         gb->io_registers[GB_IO_TIMA] = gb->io_registers[GB_IO_TMA];
         gb->io_registers[GB_IO_IF] |= 4;
+        gb->tima_reload_state = GB_TIMA_RELOADING;
     }
 }
 

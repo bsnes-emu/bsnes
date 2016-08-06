@@ -147,7 +147,6 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 /* Fall through */
             case GB_IO_JOYP:
             case GB_IO_DIV:
-            case GB_IO_TIMA:
             case GB_IO_TMA:
             case GB_IO_LCDC:
             case GB_IO_SCY:
@@ -161,6 +160,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_WX:
             case GB_IO_SB:
                 return gb->io_registers[addr & 0xFF];
+            case GB_IO_TIMA:
+                if (gb->tima_reload_state == GB_TIMA_RELOADING) {
+                    return 0;
+                }
+                return gb->io_registers[GB_IO_TIMA];
             case GB_IO_HDMA5:
                 if (!gb->is_cgb) {
                     return 0xFF;
@@ -356,8 +360,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_SCX:
             case GB_IO_IF:
-            case GB_IO_TIMA:
-            case GB_IO_TMA:
             case GB_IO_SCY:
             case GB_IO_LYC:
             case GB_IO_BGP:
@@ -372,6 +374,19 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_SB:
             case GB_IO_DMG_EMULATION_INDICATION:
                 gb->io_registers[addr & 0xFF] = value;
+                return;
+                
+            case GB_IO_TIMA:
+                if (gb->tima_reload_state != GB_TIMA_RELOADED) {
+                    gb->io_registers[GB_IO_TIMA] = value;
+                }
+                return;
+
+            case GB_IO_TMA:
+                gb->io_registers[GB_IO_TMA] = value;
+                if (gb->tima_reload_state == GB_TIMA_RELOADED) {
+                    gb->io_registers[GB_IO_TIMA] = value;
+                }
                 return;
 
             case GB_IO_TAC:

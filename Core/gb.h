@@ -193,6 +193,12 @@ struct GB_watchpoint_s;
 /* Todo: We might want to typedef our own bool if this prevents SameBoy from working on specific platforms. */
 _Static_assert(sizeof(bool) == 1, "sizeof(bool) != 1");
 
+enum {
+    GB_TIMA_RUNNING = 0,
+    GB_TIMA_RELOADING = 1,
+    GB_TIMA_RELOADED = 2
+};
+
 typedef struct GB_gameboy_s {
     GB_SECTION(header,
         /* The magic makes sure a state file is:
@@ -287,6 +293,7 @@ typedef struct GB_gameboy_s {
         GB_PADDING(uint32_t, tima_cycles);
         GB_PADDING(uint32_t, dma_cycles);
         GB_aligned_double apu_cycles;
+        uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
     );
 
     /* APU */
