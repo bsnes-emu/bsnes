@@ -1,5 +1,44 @@
 # Change Log
 
+## Version 0.6
+
+### New/Improved Features
+ * Conditional r/w/rw debugger watchpoints
+ * Added the "!=" operator to the debugger
+ * Redefined the debugger input and output syntax, being more consistent with RGBDS
+ * Debugger now reads .sym files (Tested with 3 popular formats). It shows symbols when possible, and allows using them in expressions
+ * Debugger data types can now be either 16-bit values, or 25-bit full addresses that include a bank identifier
+ * Debugger commands and expressions support full addresses as parameters. This allows, for example, breaking on an address on a specific ROM bank, or reading a value from a specific MBC RAM bank.
+ * Some debugger commands may now run without breaking the debugger. (Similar to LLDB or GDB's async mode)
+ * SDL port now supports save states
+ * Improved performance by about 6% by enabling link-time optimizations
+ * Reduced file size by stripping executables
+ * Several Cocoa-only UX improvements:
+   * Prevented being paused "twice" (Both by the pause option and the debugger)
+   * Optional proportional resizing
+   * Proper fullscreen support
+   * Mouse cursor is now hidden while running
+
+### Accuracy Improvements/Fixes
+This version includes major accuracy improvements, which allow it to pass 54 tests out of [mooneye-gb](https://github.com/Gekkio/mooneye-gb)'s 58 acceptance tests (2 of which fail due to not including the original boot ROM); more than any other emulator.
+
+ * Rewritten MBC support, with MBC1M support (Fixing some N-in-1 cartridges)
+ * Major accuracy improvements to OAM DMA.
+ * Corrected a lot of instruction memory-access timings
+ * Corrected some IO register masks
+ * Major accuracy improvements to timers (TIMA/DIV)
+
+### Bug Fixes
+ * Corrected operator priorities in the debugger
+ * Fixed a bug where a breakpoint might have been ignored
+ * Reduced CPU usage when running games with a real time clock
+ * Handling ^C and ^D more sanely in SDL port
+ * Fixed memory leak in Cocoa
+ 
+### Misc Internal Changes
+ * Added infrared API, but it is not actually used by any of the GUIs
+ * Fixed build system bugs that caused needless dep file generation, and made the Cocoa build fail sometimes if SDL is not installed
+
 ## Version 0.5
 This version is not compatible with save states of older versions.
 

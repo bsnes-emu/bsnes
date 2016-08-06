@@ -4,13 +4,13 @@ else
 DEFAULT := sdl
 endif
 
-VERSION := 0.5
 default: $(DEFAULT)
 
 ifeq ($(MAKECMDGOALS),)
 MAKECMDGOALS := $(DEFAULT)
 endif
 
+VERSION := 0.6
 
 BIN := build/bin
 OBJ := build/obj
