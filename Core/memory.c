@@ -432,8 +432,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DMA:
-                if (value <= 0xF1) { /* According to Pan Docs */
-                    gb->dma_cycles = 0;
+                if (value <= 0xE0) {
+                    gb->dma_cycles = -7;
                     gb->dma_current_dest = 0;
                     gb->dma_current_src = value << 8;
                     gb->dma_steps_left = 0xa0;
@@ -574,7 +574,7 @@ void GB_dma_run(GB_gameboy_t *gb)
 {
     /* + 1 as a compensation over the fact that DMA is never started in the first internal cycle of an opcode,
        and SameBoy isn't sub-cycle accurate (yet?) . */
-    while (gb->dma_cycles >= 4 + 1 && gb->dma_steps_left) {
+    while (gb->dma_cycles >= 4 && gb->dma_steps_left) {
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
         gb->dma_steps_left--;
@@ -589,7 +589,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
     if (!gb->hdma_on) return;
     /* + 1 as a compensation over the fact that HDMA is never started in the first internal cycle of an opcode,
      and SameBoy isn't sub-cycle accurate (yet?) . */
-    while (gb->hdma_cycles >= 8 + 1) {
+    while (gb->hdma_cycles >= 8) {
         gb->hdma_cycles -= 8;
         // The CGB boot rom uses the dest in "absolute" space, while some games use it relative to VRAM.
         // This "normalizes" the dest to the CGB address space.
