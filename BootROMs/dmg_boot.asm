@@ -89,6 +89,15 @@ Start:
 ; Wait ~2.5 seconds
     ld b, 150
     call WaitBFrames
+    
+; Set registers to match the original DMG boot
+    ld hl, $01B0
+    push hl
+    pop af
+    ld hl, $014D
+    ld bc, $0013
+    ld de, $00D8
+    
 ; Boot the game
     jp BootGame
 
@@ -135,7 +144,6 @@ PlaySound:
 TrademarkSymbol:
 db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
-SECTION "BootGame", ROM0[$fc]
+SECTION "BootGame", ROM0[$fe]
 BootGame:
-    ld a, 1
     ldh [$50], a
