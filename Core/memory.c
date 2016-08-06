@@ -114,11 +114,15 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFF00) {
-        /* Unusable, simulate Gameboy Color */
+        /* Unusable. CGB results are verified, but DMG results were tested on a SGB2  */
         if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2) { /* Seems to be disabled in Modes 2 and 3 */
             return 0xFF;
         }
-        return (addr & 0xF0) | ((addr >> 4) & 0xF);
+        if (gb->is_cgb) {
+            return (addr & 0xF0) | ((addr >> 4) & 0xF);
+        }
+        return 0;
+
     }
 
     if (addr < 0xFF80) {
