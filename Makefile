@@ -121,7 +121,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm
 	-@mkdir -p $(dir $@)
 	cd BootROMs && rgbasm -o ../$@.tmp ../$<
 	rgblink -o $@.tmp2 $@.tmp
-	head -c $(if $(filter dmg,$(CC)), 256, 2309) $@.tmp2 > $@
+	head -c $(if $(findstring dmg,$@), 256, 2304) $@.tmp2 > $@
 	@rm $@.tmp $@.tmp2
 
 $(BIN)/sdl/%.bin: $(BIN)/BootROMs/%.bin
