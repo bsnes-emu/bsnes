@@ -32,7 +32,8 @@ endif
 ifeq ($(CONF),debug)
 CFLAGS += -g
 else ifeq ($(CONF), release)
-CFLAGS += -O3
+CFLAGS += -O3 -flto
+LDFLAGS += -flto
 else
 $(error Invalid value for CONF: $(CONF). Use "debug" or "release")
 endif
