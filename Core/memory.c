@@ -384,7 +384,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_TMA:
                 gb->io_registers[GB_IO_TMA] = value;
-                if (gb->tima_reload_state == GB_TIMA_RELOADED) {
+                if (gb->tima_reload_state != GB_TIMA_RUNNING) {
                     gb->io_registers[GB_IO_TIMA] = value;
                 }
                 return;
