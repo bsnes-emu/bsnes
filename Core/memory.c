@@ -216,6 +216,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return ret;
             }
+            case GB_IO_SC: /* Serial not supported yet */
+                return 0x7E;
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
                     return GB_apu_read(gb, addr & 0xFF);
