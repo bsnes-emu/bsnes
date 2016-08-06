@@ -244,6 +244,7 @@ typedef struct GB_gameboy_s {
         uint8_t dma_current_dest;
         uint16_t dma_current_src;
         int16_t dma_cycles;
+        bool is_dma_restarting;
     );
     
     /* MBC */

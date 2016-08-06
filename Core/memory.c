@@ -37,7 +37,7 @@ static GB_bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
 
 static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (!gb->dma_steps_left) return false;
+    if (!gb->dma_steps_left || (gb->dma_cycles < 0 && !gb->is_dma_restarting)) return false;
     return bus_for_addr(gb, addr) == bus_for_addr(gb, gb->dma_current_src);
 }
 
@@ -107,7 +107,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFEA0) {
-        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || gb->dma_steps_left) {
+        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
             return 0xFF;
         }
         return gb->oam[addr & 0xFF];
@@ -342,7 +342,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (addr < 0xFEA0) {
-        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || gb->dma_steps_left) {
+        if ((gb->io_registers[GB_IO_STAT] & 0x3) >= 2 || (gb->dma_steps_left && (gb->dma_cycles > 0 || gb->is_dma_restarting))) {
             return;
         }
         gb->oam[addr & 0xFF] = value;
@@ -433,6 +433,13 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_DMA:
                 if (value <= 0xE0) {
+                    if (gb->dma_steps_left) {
+                        /* This is not correct emulation, since we're not really delaying the second DMA.
+                           One write that should have happened in the first DMA will not happen. However,
+                           since that byte will be overwritten by the second DMA before it can actually be
+                           read, it doesn't actually matter. */
+                        gb->is_dma_restarting = true;
+                    }
                     gb->dma_cycles = -7;
                     gb->dma_current_dest = 0;
                     gb->dma_current_src = value << 8;
@@ -572,8 +579,6 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 void GB_dma_run(GB_gameboy_t *gb)
 {
-    /* + 1 as a compensation over the fact that DMA is never started in the first internal cycle of an opcode,
-       and SameBoy isn't sub-cycle accurate (yet?) . */
     while (gb->dma_cycles >= 4 && gb->dma_steps_left) {
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
@@ -581,14 +586,15 @@ void GB_dma_run(GB_gameboy_t *gb)
         gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src);
         /* dma_current_src must be the correct value during GB_read_memory */
         gb->dma_current_src++;
+        if (!gb->dma_steps_left) {
+            gb->is_dma_restarting = false;
+        }
     }
 }
 
 void GB_hdma_run(GB_gameboy_t *gb)
 {
     if (!gb->hdma_on) return;
-    /* + 1 as a compensation over the fact that HDMA is never started in the first internal cycle of an opcode,
-     and SameBoy isn't sub-cycle accurate (yet?) . */
     while (gb->hdma_cycles >= 8) {
         gb->hdma_cycles -= 8;
         // The CGB boot rom uses the dest in "absolute" space, while some games use it relative to VRAM.
