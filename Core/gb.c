@@ -112,6 +112,8 @@ void GB_init(GB_gameboy_t *gb)
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
+    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
+
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
 
@@ -136,6 +138,8 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->input_callback = default_input_callback;
     gb->async_input_callback = default_async_input_callback;
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
+
+    gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
 
     gb->io_registers[GB_IO_JOYP] = 0xF;
 }
