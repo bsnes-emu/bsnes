@@ -98,11 +98,15 @@ struct M68K {
   template<uint Size> auto negative(uint32 result) -> bool;
 
   template<uint Size, bool Extend = false> auto ADD(uint32 source, uint32 target) -> uint32;
-  template<uint Size> auto instructionADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> void;
+  template<uint Size> auto instructionADD(EffectiveAddress from, DataRegister with) -> void;
+  template<uint Size> auto instructionADD(DataRegister from, EffectiveAddress with) -> void;
   template<uint Size> auto instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionADDI(EffectiveAddress modify) -> void;
   template<uint Size> auto instructionADDQ(uint4 immediate, EffectiveAddress modify) -> void;
   template<uint Size> auto instructionADDX(EffectiveAddress target, EffectiveAddress source) -> void;
+  template<uint Size> auto AND(uint32 source, uint32 target) -> uint32;
+  template<uint Size> auto instructionAND(EffectiveAddress from, DataRegister with) -> void;
+  template<uint Size> auto instructionAND(DataRegister from, EffectiveAddress with) -> void;
   template<uint Size> auto instructionANDI(EffectiveAddress ea) -> void;
                       auto instructionANDI_TO_CCR() -> void;
                       auto instructionANDI_TO_SR() -> void;
@@ -124,6 +128,9 @@ struct M68K {
   template<uint Size> auto instructionCMPI(EffectiveAddress ea) -> void;
   template<uint Size> auto instructionCMPM(EffectiveAddress ax, EffectiveAddress ay) -> void;
                       auto instructionDBCC(uint4 condition, DataRegister dr) -> void;
+  template<uint Size> auto EOR(uint32 source, uint32 target) -> uint32;
+  template<uint Size> auto instructionEOR(DataRegister from, EffectiveAddress with) -> void;
+  template<uint Size> auto instructionEORI(EffectiveAddress with) -> void;
                       auto instructionEORI_TO_CCR() -> void;
                       auto instructionEORI_TO_SR() -> void;
                       auto instructionJSR(EffectiveAddress target) -> void;
@@ -145,6 +152,10 @@ struct M68K {
                       auto instructionMOVE_TO_SR(EffectiveAddress ea) -> void;
                       auto instructionMOVE_USP(uint1 direction, AddressRegister ar) -> void;
                       auto instructionNOP() -> void;
+  template<uint Size> auto OR(uint32 source, uint32 target) -> uint32;
+  template<uint Size> auto instructionOR(EffectiveAddress from, DataRegister with) -> void;
+  template<uint Size> auto instructionOR(DataRegister from, EffectiveAddress with) -> void;
+  template<uint Size> auto instructionORI(EffectiveAddress with) -> void;
                       auto instructionORI_TO_CCR() -> void;
                       auto instructionORI_TO_SR() -> void;
   template<uint Size> auto ROL(uint32 result, uint shift) -> uint32;
@@ -167,7 +178,10 @@ struct M68K {
   template<uint Size, bool Extend = false> auto SUB(uint32 source, uint32 target) -> uint32;
   template<uint Size> auto instructionSUB(EffectiveAddress source, DataRegister target) -> void;
   template<uint Size> auto instructionSUB(DataRegister source, EffectiveAddress target) -> void;
+  template<uint Size> auto instructionSUBA(AddressRegister to, EffectiveAddress from) -> void;
+  template<uint Size> auto instructionSUBI(EffectiveAddress with) -> void;
   template<uint Size> auto instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void;
+  template<uint Size> auto instructionSUBX(EffectiveAddress with, EffectiveAddress from) -> void;
   template<uint Size> auto instructionTST(EffectiveAddress ea) -> void;
 
   //disassembler.cpp
@@ -197,11 +211,14 @@ struct M68K {
 
 private:
   //disassembler.cpp
-  template<uint Size> auto disassembleADD(DataRegister dr, uint1 direction, EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleADD(EffectiveAddress from, DataRegister with) -> string;
+  template<uint Size> auto disassembleADD(DataRegister from, EffectiveAddress with) -> string;
   template<uint Size> auto disassembleADDA(AddressRegister ar, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleADDI(EffectiveAddress modify) -> string;
   template<uint Size> auto disassembleADDQ(uint4 immediate, EffectiveAddress modify) -> string;
   template<uint Size> auto disassembleADDX(EffectiveAddress target, EffectiveAddress source) -> string;
+  template<uint Size> auto disassembleAND(EffectiveAddress from, DataRegister with) -> string;
+  template<uint Size> auto disassembleAND(DataRegister from, EffectiveAddress with) -> string;
   template<uint Size> auto disassembleANDI(EffectiveAddress ea) -> string;
                       auto disassembleANDI_TO_CCR() -> string;
                       auto disassembleANDI_TO_SR() -> string;
@@ -220,6 +237,8 @@ private:
   template<uint Size> auto disassembleCMPI(EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleCMPM(EffectiveAddress ax, EffectiveAddress ay) -> string;
                       auto disassembleDBCC(uint4 condition, DataRegister dr) -> string;
+  template<uint Size> auto disassembleEOR(DataRegister from, EffectiveAddress with) -> string;
+  template<uint Size> auto disassembleEORI(EffectiveAddress with) -> string;
                       auto disassembleEORI_TO_CCR() -> string;
                       auto disassembleEORI_TO_SR() -> string;
                       auto disassembleJSR(EffectiveAddress target) -> string;
@@ -239,6 +258,9 @@ private:
                       auto disassembleMOVE_TO_SR(EffectiveAddress ea) -> string;
                       auto disassembleMOVE_USP(uint1 direction, AddressRegister ar) -> string;
                       auto disassembleNOP() -> string;
+  template<uint Size> auto disassembleOR(EffectiveAddress from, DataRegister with) -> string;
+  template<uint Size> auto disassembleOR(DataRegister from, EffectiveAddress with) -> string;
+  template<uint Size> auto disassembleORI(EffectiveAddress with) -> string;
                       auto disassembleORI_TO_CCR() -> string;
                       auto disassembleORI_TO_SR() -> string;
   template<uint Size> auto disassembleROL(uint4 shift, DataRegister modify) -> string;
@@ -256,7 +278,10 @@ private:
                       auto disassembleRTS() -> string;
   template<uint Size> auto disassembleSUB(EffectiveAddress source, DataRegister target) -> string;
   template<uint Size> auto disassembleSUB(DataRegister source, EffectiveAddress target) -> string;
+  template<uint Size> auto disassembleSUBA(AddressRegister to, EffectiveAddress from) -> string;
+  template<uint Size> auto disassembleSUBI(EffectiveAddress with) -> string;
   template<uint Size> auto disassembleSUBQ(uint4 immediate, EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleSUBX(EffectiveAddress with, EffectiveAddress from) -> string;
   template<uint Size> auto disassembleTST(EffectiveAddress ea) -> string;
 
   template<uint Size> auto _read(uint32 addr) -> uint32;

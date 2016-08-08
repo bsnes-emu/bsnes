@@ -6,8 +6,8 @@ auto SMP::step(uint clocks) -> void {
   synchronize(cpu);
   #else
   //forcefully sync S-SMP to S-CPU in case chips are not communicating
-  //sync if S-SMP is more than 24 samples ahead of S-CPU
-  if(clock() - cpu.clock() > frequency() * scalar() / (768 / 24)) synchronize(cpu);
+  //sync if S-SMP is more than 1ms ahead of S-CPU
+  if(clock() - cpu.clock() > Thread::Second / 1'000) synchronize(cpu);
   #endif
 }
 

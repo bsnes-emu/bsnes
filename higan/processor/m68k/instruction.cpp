@@ -37,20 +37,33 @@ M68K::M68K() {
     std::integral_constant<uint16_t, bit::test(s)>::value
 
   //ADD
-  for(uint3 dreg      : range(8))
-  for(uint1 direction : range(2))
-  for(uint3 mode      : range(8))
-  for(uint3 reg       : range(8)) {
-    auto opcode = pattern("1101 ---- ++-- ----") | dreg << 9 | direction << 8 | mode << 3 | reg << 0;
-    if(direction == 1 && (mode == 0 || mode == 1 || (mode == 7 && reg >= 2))) continue;
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1101 ---0 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 7 && reg >= 5) continue;
 
-    DataRegister dr{dreg};
-    EffectiveAddress ea{mode, reg};
-    bind(opcode | 0 << 6, ADD<Byte>, dr, direction, ea);
-    bind(opcode | 1 << 6, ADD<Word>, dr, direction, ea);
-    bind(opcode | 2 << 6, ADD<Long>, dr, direction, ea);
+    EffectiveAddress from{mode, reg};
+    DataRegister with{dreg};
+    bind(opcode | 0 << 6, ADD<Byte>, from, with);
+    bind(opcode | 1 << 6, ADD<Word>, from, with);
+    bind(opcode | 2 << 6, ADD<Long>, from, with);
 
-    if(direction == 0 && mode == 1) unbind(opcode | 0 << 6);
+    if(mode == 1) unbind(opcode | 0 << 6);
+  }
+
+  //ADD
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1101 ---1 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode <= 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister from{dreg};
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, ADD<Byte>, from, with);
+    bind(opcode | 1 << 6, ADD<Word>, from, with);
+    bind(opcode | 2 << 6, ADD<Long>, from, with);
   }
 
   //ADDA
@@ -110,6 +123,34 @@ M68K::M68K() {
     bind(opcode | 0 << 6 | 1 << 3, ADDX<Byte>, addressTarget, addressSource);
     bind(opcode | 1 << 6 | 1 << 3, ADDX<Word>, addressTarget, addressSource);
     bind(opcode | 2 << 6 | 1 << 3, ADDX<Long>, addressTarget, addressSource);
+  }
+
+  //AND
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1100 ---0 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 5)) continue;
+
+    EffectiveAddress from{mode, reg};
+    DataRegister with{dreg};
+    bind(opcode | 0 << 6, AND<Byte>, from, with);
+    bind(opcode | 1 << 6, AND<Word>, from, with);
+    bind(opcode | 2 << 6, AND<Long>, from, with);
+  }
+
+  //AND
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1100 ---1 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode <= 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister from{dreg};
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, AND<Byte>, from, with);
+    bind(opcode | 1 << 6, AND<Word>, from, with);
+    bind(opcode | 2 << 6, AND<Long>, from, with);
   }
 
   //ANDI
@@ -307,6 +348,32 @@ M68K::M68K() {
 
     DataRegister dr{dreg};
     bind(opcode, DBCC, condition, dr);
+  }
+
+  //EOR
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1011 ---1 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister from{dreg};
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, EOR<Byte>, from, with);
+    bind(opcode | 1 << 6, EOR<Word>, from, with);
+    bind(opcode | 2 << 6, EOR<Long>, from, with);
+  }
+
+  //EORI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 1010 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, EORI<Byte>, with);
+    bind(opcode | 1 << 6, EORI<Word>, with);
+    bind(opcode | 2 << 6, EORI<Long>, with);
   }
 
   //EORI_TO_CCR
@@ -509,6 +576,46 @@ M68K::M68K() {
     bind(opcode, NOP);
   }
 
+  //OR
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1000 ---0 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 5)) continue;
+
+    EffectiveAddress from{mode, reg};
+    DataRegister with{dreg};
+    bind(opcode | 0 << 6, OR<Byte>, from, with);
+    bind(opcode | 1 << 6, OR<Word>, from, with);
+    bind(opcode | 2 << 6, OR<Long>, from, with);
+  }
+
+  //OR
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1000 ---1 ++-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode <= 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister from{dreg};
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, OR<Byte>, from, with);
+    bind(opcode | 1 << 6, OR<Word>, from, with);
+    bind(opcode | 2 << 6, OR<Long>, from, with);
+  }
+
+  //ORI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 0000 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, ORI<Byte>, with);
+    bind(opcode | 1 << 6, ORI<Word>, with);
+    bind(opcode | 2 << 6, ORI<Long>, with);
+  }
+
   //ORI_TO_CCR
   { auto opcode = pattern("0000 0000 0011 1100");
 
@@ -693,6 +800,31 @@ M68K::M68K() {
     bind(opcode | 2 << 6, SUB<Long>, source, target);
   }
 
+  //SUBA
+  for(uint3 areg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("1001 ---+ 11-- ----") | areg << 9 | mode << 3 | reg << 0;
+    if(mode == 7 && reg >= 5) continue;
+
+    AddressRegister to{areg};
+    EffectiveAddress from{mode, reg};
+    bind(opcode | 0 << 8, SUBA<Word>, to, from);
+    bind(opcode | 1 << 8, SUBA<Long>, to, from);
+  }
+
+  //SUBI
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 0100 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, SUBI<Byte>, with);
+    bind(opcode | 1 << 6, SUBI<Word>, with);
+    bind(opcode | 2 << 6, SUBI<Long>, with);
+  }
+
   //SUBQ
   for(uint3 data : range(8))
   for(uint3 mode : range(8))
@@ -707,6 +839,24 @@ M68K::M68K() {
     bind(opcode | 2 << 6, SUBQ<Long>, immediate, ea);
 
     if(mode == 1) unbind(opcode | 0 << 6);
+  }
+
+  //SUBX
+  for(uint3 treg : range(8))
+  for(uint3 sreg : range(8)) {
+    auto opcode = pattern("1001 ---1 ++00 ----") | treg << 9 | sreg << 0;
+
+    EffectiveAddress dataTarget{DataRegisterDirect, treg};
+    EffectiveAddress dataSource{DataRegisterDirect, sreg};
+    bind(opcode | 0 << 6 | 0 << 3, SUBX<Byte>, dataTarget, dataSource);
+    bind(opcode | 1 << 6 | 0 << 3, SUBX<Word>, dataTarget, dataSource);
+    bind(opcode | 2 << 6 | 0 << 3, SUBX<Long>, dataTarget, dataSource);
+
+    EffectiveAddress addressTarget{AddressRegisterIndirectWithPreDecrement, treg};
+    EffectiveAddress addressSource{AddressRegisterIndirectWithPreDecrement, sreg};
+    bind(opcode | 0 << 6 | 1 << 3, SUBX<Byte>, addressTarget, addressSource);
+    bind(opcode | 1 << 6 | 1 << 3, SUBX<Word>, addressTarget, addressSource);
+    bind(opcode | 2 << 6 | 1 << 3, SUBX<Long>, addressTarget, addressSource);
   }
 
   //TST
