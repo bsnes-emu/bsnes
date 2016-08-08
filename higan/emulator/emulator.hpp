@@ -11,13 +11,13 @@ using namespace nall;
 
 namespace Emulator {
   static const string Name    = "higan";
-  static const string Version = "100.16";
+  static const string Version = "101";
   static const string Author  = "byuu";
   static const string License = "GPLv3";
   static const string Website = "http://byuu.org/";
 
   //incremented only when serialization format changes
-  static const string SerializerVersion = "100.15";
+  static const string SerializerVersion = "101";
 
   namespace Constants {
     namespace Colorburst {

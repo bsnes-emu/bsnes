@@ -44,19 +44,30 @@ static auto CALLBACK Label_windowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM
     BeginPaint(hwnd, &ps);
     RECT rc;
     GetClientRect(hwnd, &rc);
-    DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+    //todo: use DrawThemeParentBackground if Label is inside TabFrame
+    if(auto brush = window->self()->hbrush) {
+      FillRect(ps.hdc, &rc, brush);
+    } else {
+      DrawThemeParentBackground(hwnd, ps.hdc, &rc);
+    }
     SetBkMode(ps.hdc, TRANSPARENT);
     SelectObject(ps.hdc, label->self()->hfont);
-    unsigned length = GetWindowTextLength(hwnd);
+    uint length = GetWindowTextLength(hwnd);
     wchar_t text[length + 1];
     GetWindowText(hwnd, text, length + 1);
     text[length] = 0;
     DrawText(ps.hdc, text, -1, &rc, DT_CALCRECT | DT_END_ELLIPSIS);
-    unsigned height = rc.bottom;
+    uint height = rc.bottom;
     GetClientRect(hwnd, &rc);
     rc.top = (rc.bottom - height) / 2;
     rc.bottom = rc.top + height;
-    DrawText(ps.hdc, text, -1, &rc, DT_LEFT | DT_END_ELLIPSIS);
+    uint horizontalAlignment = DT_CENTER;
+    if(label->alignment().horizontal() < 0.333) horizontalAlignment = DT_LEFT;
+    if(label->alignment().horizontal() > 0.666) horizontalAlignment = DT_RIGHT;
+    uint verticalAlignment = DT_VCENTER;
+    if(label->alignment().vertical() < 0.333) verticalAlignment = DT_TOP;
+    if(label->alignment().vertical() > 0.666) verticalAlignment = DT_BOTTOM;
+    DrawText(ps.hdc, text, -1, &rc, DT_END_ELLIPSIS | horizontalAlignment | verticalAlignment);
     EndPaint(hwnd, &ps);
     return false;
   }

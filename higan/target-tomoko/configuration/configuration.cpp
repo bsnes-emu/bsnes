@@ -43,7 +43,7 @@ Settings::Settings() {
   set("Audio/Resampler", "Sinc");
 
   set("Input/Driver", ruby::Input::optimalDriver());
-  set("Input/Latency", 5);
+  set("Input/Frequency", 5);
   set("Input/FocusLoss/Pause", false);
   set("Input/FocusLoss/AllowInput", false);
 }

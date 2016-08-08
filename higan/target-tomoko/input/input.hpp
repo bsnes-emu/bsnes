@@ -64,8 +64,8 @@ struct InputManager {
   vector<InputHotkey*> hotkeys;
 
   InputEmulator* emulator = nullptr;  //points to InputEmulator that represents the currently active emulator
-  uint64 lastPoll;  //time in milliseconds since last call to poll()
-  uint64 latency;   //minimum time in milliseconds before poll() can be called again
+  uint64 lastPoll;   //time in milliseconds since last call to poll()
+  uint64 frequency;  //minimum time in milliseconds before poll() can be called again
 };
 
 extern unique_pointer<InputManager> inputManager;

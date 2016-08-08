@@ -144,7 +144,7 @@ auto InputMapping::deviceName() -> string {
 
 InputManager::InputManager() {
   inputManager = this;
-  latency = max(1u, settings["Input/Latency"].natural());
+  frequency = max(1u, settings["Input/Frequency"].natural());
 
   for(auto& emulator : program->emulators) {
     auto& inputEmulator = emulators(emulators.size());
@@ -204,7 +204,7 @@ auto InputManager::bind() -> void {
 auto InputManager::poll() -> void {
   //polling actual hardware is very time-consuming: skip call if poll was called too recently
   auto thisPoll = chrono::millisecond();
-  if(thisPoll - lastPoll < latency) return;
+  if(thisPoll - lastPoll < frequency) return;
   lastPoll = thisPoll;
 
   auto devices = input->poll();
