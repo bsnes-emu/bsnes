@@ -789,6 +789,7 @@ static void jp_a16(GB_gameboy_t *gb, uint8_t opcode)
 
 static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
+    uint16_t call_addr = gb->pc;
     gb->pc++;
     if (condition_code(gb, opcode)) {
         GB_advance_cycles(gb, 4);
@@ -803,7 +804,7 @@ static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
         GB_advance_cycles(gb, 4);
         gb->pc = addr;
 
-        GB_debugger_call_hook(gb);
+        GB_debugger_call_hook(gb, call_addr);
     }
     else {
         GB_advance_cycles(gb, 12);
@@ -973,6 +974,7 @@ static void cp_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void rst(GB_gameboy_t *gb, uint8_t opcode)
 {
+    uint16_t call_addr = gb->pc;
     GB_advance_cycles(gb, 8);
     gb->registers[GB_REGISTER_SP] -= 2;
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP] + 1, (gb->pc + 1) >> 8);
@@ -980,7 +982,7 @@ static void rst(GB_gameboy_t *gb, uint8_t opcode)
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 1) & 0xFF);
     GB_advance_cycles(gb, 4);
     gb->pc = opcode ^ 0xC7;
-    GB_debugger_call_hook(gb);
+    GB_debugger_call_hook(gb, call_addr);
 }
 
 static void ret(GB_gameboy_t *gb, uint8_t opcode)
@@ -1002,6 +1004,7 @@ static void reti(GB_gameboy_t *gb, uint8_t opcode)
 
 static void call_a16(GB_gameboy_t *gb, uint8_t opcode)
 {
+    uint16_t call_addr = gb->pc;
     gb->pc++;
     GB_advance_cycles(gb, 4);
     gb->registers[GB_REGISTER_SP] -= 2;
@@ -1014,7 +1017,7 @@ static void call_a16(GB_gameboy_t *gb, uint8_t opcode)
     GB_write_memory(gb, gb->registers[GB_REGISTER_SP], (gb->pc + 2) & 0xFF);
     GB_advance_cycles(gb, 4);
     gb->pc = addr;
-    GB_debugger_call_hook(gb);
+    GB_debugger_call_hook(gb, call_addr);
 }
 
 static void ld_da8_a(GB_gameboy_t *gb, uint8_t opcode)

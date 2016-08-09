@@ -1166,12 +1166,29 @@ static bool mbc(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
+static bool backtrace(GB_gameboy_t *gb, char *arguments)
+{
+    if (strlen(lstrip(arguments))) {
+        GB_log(gb, "Usage: backtrace\n");
+        return true;
+    }
+
+    GB_log(gb, "  1. %s\n", value_to_string(gb, gb->pc, true));
+    for (unsigned int i = gb->backtrace_size; i--;) {
+        GB_log(gb, "%3d. %s\n", gb->backtrace_size - i + 1, debugger_value_to_string(gb, (value_t){true, gb->backtrace_returns[i].bank, gb->backtrace_returns[i].addr}, true));
+    }
+
+    return true;
+}
+
 static bool help(GB_gameboy_t *gb, char *arguments);
 static const debugger_command_t commands[] = {
     {"continue", 1, cont, "Continue running until next stop"},
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
+    {"backtrace", 2, backtrace, "Display the current call stack"},
+    {"bt", 2, backtrace, NULL},
     {"sld", 3, stack_leak_detection, "Run until the current function returns, or a stack leak is detected (Experimental)"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
@@ -1185,6 +1202,7 @@ static const debugger_command_t commands[] = {
     {"eval", 2, print, NULL},
     {"examine", 2, examine, "Examine values at address"},
     {"x", 1, examine, NULL},
+
     {"help", 1, help, "List available commands"},
 };
 
@@ -1215,7 +1233,7 @@ static const debugger_command_t *find_command(const char *string)
     return NULL;
 }
 
-void GB_debugger_call_hook(GB_gameboy_t *gb)
+void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
 {
     /* Called just after the CPU calls a function/enters an interrupt/etc... */
 
@@ -1228,6 +1246,23 @@ void GB_debugger_call_hook(GB_gameboy_t *gb)
             gb->sp_for_call_depth[gb->debug_call_depth] = gb->registers[GB_REGISTER_SP];
             gb->addr_for_call_depth[gb->debug_call_depth] = gb->pc;
         }
+    }
+
+    if (gb->backtrace_size < sizeof(gb->backtrace_sps) / sizeof(gb->backtrace_sps[0])) {
+
+        while (gb->backtrace_size) {
+            if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->registers[GB_REGISTER_SP]) {
+                gb->backtrace_size--;
+            }
+            else {
+                break;
+            }
+        }
+
+        gb->backtrace_sps[gb->backtrace_size] = gb->registers[GB_REGISTER_SP];
+        gb->backtrace_returns[gb->backtrace_size].bank = bank_for_addr(gb, call_addr);
+        gb->backtrace_returns[gb->backtrace_size].addr = call_addr;
+        gb->backtrace_size++;
     }
 
     gb->debug_call_depth++;
@@ -1251,6 +1286,15 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
                                                             gb->sp_for_call_depth[gb->debug_call_depth]);
                 gb->debug_stopped = true;
             }
+        }
+    }
+
+    while (gb->backtrace_size) {
+        if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->registers[GB_REGISTER_SP]) {
+            gb->backtrace_size--;
+        }
+        else {
+            break;
         }
     }
 }

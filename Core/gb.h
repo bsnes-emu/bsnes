@@ -385,11 +385,19 @@ typedef struct GB_gameboy_s {
     uint16_t n_breakpoints;
     struct GB_breakpoint_s *breakpoints;
 
-    /* SLD */
+    /* SLD (Todo: merge with backtrace) */
     bool stack_leak_detection;
     int debug_call_depth;
     uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
     uint16_t addr_for_call_depth[0x200];
+
+    /* Backtrace */
+    unsigned int backtrace_size;
+    uint16_t backtrace_sps[0x200];
+    struct {
+        uint16_t bank;
+        uint16_t addr;
+    } backtrace_returns[0x200];
 
     /* Watchpoints */
     uint16_t n_watchpoints;
