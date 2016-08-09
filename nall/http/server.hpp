@@ -114,7 +114,7 @@ auto Server::ipv4_scan() -> bool {
   if(query.fd == fd4 && query.revents & POLLIN) {
     ++connections;
 
-    thread::create([&](uintptr_t) {
+    thread::create([&](uintptr) {
       thread::detach();
 
       signed clientfd = -1;
@@ -161,7 +161,7 @@ auto Server::ipv6_scan() -> bool {
   if(query.fd == fd6 && query.revents & POLLIN) {
     ++connections;
 
-    thread::create([&](uintptr_t) {
+    thread::create([&](uintptr) {
       thread::detach();
 
       signed clientfd = -1;

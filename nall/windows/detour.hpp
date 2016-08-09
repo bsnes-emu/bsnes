@@ -86,7 +86,7 @@ auto detour::insert(const string& moduleName, const string& functionName, void*&
   DWORD privileges;
   VirtualProtect((void*)mirrorData, 512, PAGE_EXECUTE_READWRITE, &privileges);
   VirtualProtect((void*)sourceData, 256, PAGE_EXECUTE_READWRITE, &privileges);
-  uintmax address = (uintmax)target - ((uintmax)sourceData + 5);
+  uint64_t address = (uint64_t)target - ((uint64_t)sourceData + 5);
   sourceData[0] = 0xe9;  //jmp target
   sourceData[1] = address >>  0;
   sourceData[2] = address >>  8;
@@ -157,11 +157,11 @@ auto detour::mirror(uint8* target, const uint8* source) -> uint {
       break;
     case RelNear: {
       source++;
-      uintmax sourceAddress = (uintmax)source + 1 + (int8)*source;
+      uint64_t sourceAddress = (uint64_t)source + 1 + (int8)*source;
       *target++ = opcode->modify;
       if(opcode->modify >> 8) *target++ = opcode->modify >> 8;
-      uintmax targetAddress = (uintmax)target + 4;
-      uintmax address = sourceAddress - targetAddress;
+      uint64_t targetAddress = (uint64_t)target + 4;
+      uint64_t address = sourceAddress - targetAddress;
       *target++ = address >>  0;
       *target++ = address >>  8;
       *target++ = address >> 16;
@@ -173,7 +173,7 @@ auto detour::mirror(uint8* target, const uint8* source) -> uint {
     size -= opcode->length;
   }
 
-  uintmax address = (entryPoint + detour::length(entryPoint)) - (target + 5);
+  uint64_t address = (entryPoint + detour::length(entryPoint)) - (target + 5);
   *target++ = 0xe9;  //jmp entryPoint
   *target++ = address >>  0;
   *target++ = address >>  8;

@@ -92,7 +92,7 @@ auto slice(string_view self, int offset, int length) -> string {
   return result;
 }
 
-auto fromInteger(char* result, intmax_t value) -> char* {
+auto fromInteger(char* result, intmax value) -> char* {
   bool negative = value < 0;
   if(negative) value = -value;
 
@@ -111,7 +111,7 @@ auto fromInteger(char* result, intmax_t value) -> char* {
   return result;
 }
 
-auto fromNatural(char* result, uintmax_t value) -> char* {
+auto fromNatural(char* result, uintmax value) -> char* {
   char buffer[64];
   uint size = 0;
 

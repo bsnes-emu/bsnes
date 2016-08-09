@@ -32,22 +32,22 @@ struct library {
   auto close() -> void;
 
 private:
-  uintptr_t handle = 0;
+  uintptr handle = 0;
 };
 
 #if defined(PLATFORM_LINUX) || defined(PLATFORM_BSD)
 inline auto library::open(const string& name, const string& path) -> bool {
   if(handle) close();
-  if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".so"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string(Path::user(), ".local/lib/lib", name, ".so"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".so"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string("lib", name, ".so"), RTLD_LAZY);
+  if(path) handle = (uintptr)dlopen(string(path, "lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string(Path::user(), ".local/lib/lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string("/usr/local/lib/lib", name, ".so"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string("lib", name, ".so"), RTLD_LAZY);
   return handle;
 }
 
 inline auto library::openAbsolute(const string& name) -> bool {
   if(handle) close();
-  handle = (uintptr_t)dlopen(name, RTLD_LAZY);
+  handle = (uintptr)dlopen(name, RTLD_LAZY);
   return handle;
 }
 
@@ -64,16 +64,16 @@ inline auto library::close() -> void {
 #elif defined(PLATFORM_MACOSX)
 inline auto library::open(const string& name, const string& path) -> bool {
   if(handle) close();
-  if(path) handle = (uintptr_t)dlopen(string(path, "lib", name, ".dylib"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string(Path::user(), ".local/lib/lib", name, ".dylib"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string("/usr/local/lib/lib", name, ".dylib"), RTLD_LAZY);
-  if(!handle) handle = (uintptr_t)dlopen(string("lib", name, ".dylib"), RTLD_LAZY);
+  if(path) handle = (uintptr)dlopen(string(path, "lib", name, ".dylib"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string(Path::user(), ".local/lib/lib", name, ".dylib"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string("/usr/local/lib/lib", name, ".dylib"), RTLD_LAZY);
+  if(!handle) handle = (uintptr)dlopen(string("lib", name, ".dylib"), RTLD_LAZY);
   return handle;
 }
 
 inline auto library::openAbsolute(const string& name) -> bool {
   if(handle) close();
-  handle = (uintptr_t)dlopen(name, RTLD_LAZY);
+  handle = (uintptr)dlopen(name, RTLD_LAZY);
   return handle;
 }
 
@@ -92,18 +92,18 @@ inline auto library::open(const string& name, const string& path) -> bool {
   if(handle) close();
   if(path) {
     string filepath = {path, name, ".dll"};
-    handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+    handle = (uintptr)LoadLibraryW(utf16_t(filepath));
   }
   if(!handle) {
     string filepath = {name, ".dll"};
-    handle = (uintptr_t)LoadLibraryW(utf16_t(filepath));
+    handle = (uintptr)LoadLibraryW(utf16_t(filepath));
   }
   return handle;
 }
 
 inline auto library::openAbsolute(const string& name) -> bool {
   if(handle) close();
-  handle = (uintptr_t)LoadLibraryW(utf16_t(name));
+  handle = (uintptr)LoadLibraryW(utf16_t(name));
   return handle;
 }
 

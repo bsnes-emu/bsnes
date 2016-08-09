@@ -3,7 +3,7 @@
 namespace Emulator {
 
 struct Thread {
-  enum : uintmax { Second = (uintmax)1 << (8 * sizeof(uintmax) - 1) };
+  enum : uintmax { Second = (uintmax)-1 >> 1 };
 
   virtual ~Thread() {
     if(_handle) co_delete(_handle);

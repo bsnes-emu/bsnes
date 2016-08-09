@@ -243,20 +243,64 @@ auto M68K::instructionBCC(uint4 condition, uint8 displacement) -> void {
   }
 }
 
-template<uint Size> auto M68K::instructionBTST(DataRegister dr, EffectiveAddress ea) -> void {
-  auto bit = read<Size>(dr);
-  auto test = read<Size>(ea);
-  bit &= bits<Size>() - 1;
-
-  r.z = test.bit(bit) == 0;
+template<uint Size> auto M68K::instructionBCHG(DataRegister bit, EffectiveAddress with) -> void {
+  auto index = read<Size>(bit) & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) ^= 1;
+  write<Size>(with, test);
 }
 
-template<uint Size> auto M68K::instructionBTST(EffectiveAddress ea) -> void {
-  auto bit = (uint8)readPC<Word>();
-  auto test = read<Size>(ea);
-  bit &= bits<Size>() - 1;
+template<uint Size> auto M68K::instructionBCHG(EffectiveAddress with) -> void {
+  auto index = readPC<Word>() & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) ^= 1;
+  write<Size>(with, test);
+}
 
-  r.z = test.bit(bit) == 0;
+template<uint Size> auto M68K::instructionBCLR(DataRegister bit, EffectiveAddress with) -> void {
+  auto index = read<Size>(bit) & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) = 0;
+  write<Size>(with, test);
+}
+
+template<uint Size> auto M68K::instructionBCLR(EffectiveAddress with) -> void {
+  auto index = readPC<Word>() & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) = 0;
+  write<Size>(with, test);
+}
+
+template<uint Size> auto M68K::instructionBSET(DataRegister bit, EffectiveAddress with) -> void {
+  auto index = read<Size>(bit) & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) = 1;
+  write<Size>(with, test);
+}
+
+template<uint Size> auto M68K::instructionBSET(EffectiveAddress with) -> void {
+  auto index = readPC<Word>() & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+  test.bit(index) = 1;
+  write<Size>(with, test);
+}
+
+template<uint Size> auto M68K::instructionBTST(DataRegister bit, EffectiveAddress with) -> void {
+  auto index = read<Size>(bit) & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
+}
+
+template<uint Size> auto M68K::instructionBTST(EffectiveAddress with) -> void {
+  auto index = readPC<Word>() & bits<Size>() - 1;
+  auto test = read<Size>(with);
+  r.z = test.bit(index) == 0;
 }
 
 template<uint Size> auto M68K::instructionCLR(EffectiveAddress ea) -> void {
@@ -348,6 +392,10 @@ auto M68K::instructionEORI_TO_SR() -> void {
 
   auto data = readPC<Word>();
   writeSR(readSR() ^ data);
+}
+
+auto M68K::instructionJMP(EffectiveAddress target) -> void {
+  r.pc = fetch<Long>(target);
 }
 
 auto M68K::instructionJSR(EffectiveAddress target) -> void {
@@ -491,17 +539,41 @@ auto M68K::instructionMOVE_TO_SR(EffectiveAddress ea) -> void {
   writeSR(data);
 }
 
-auto M68K::instructionMOVE_USP(uint1 direction, AddressRegister ar) -> void {
+auto M68K::instructionMOVE_FROM_USP(AddressRegister to) -> void {
   if(!supervisor()) return;
 
-  if(direction == 0) {
-    r.sp = read<Long>(ar);
-  } else {
-    write<Long>(ar, r.sp);
-  }
+  write<Long>(to, r.sp);
+}
+
+auto M68K::instructionMOVE_TO_USP(AddressRegister from) -> void {
+  if(!supervisor()) return;
+
+  r.sp = read<Long>(from);
+}
+
+template<uint Size> auto M68K::instructionNEG(EffectiveAddress with) -> void {
+  auto source = read<Size>(with);
+  auto result = SUB<Size>(0, source);
+  write<Size>(with, result);
+}
+
+template<uint Size> auto M68K::instructionNEGX(EffectiveAddress with) -> void {
+  auto source = read<Size>(with);
+  auto result = SUB<Size, Extend>(0, source);
+  write<Size>(with, result);
 }
 
 auto M68K::instructionNOP() -> void {
+}
+
+template<uint Size> auto M68K::instructionNOT(EffectiveAddress with) -> void {
+  auto result = ~read<Size>(with);
+  write<Size>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Size>(result) == 0;
+  r.n = sign<Size>(result) < 0;
 }
 
 template<uint Size> auto M68K::OR(uint32 source, uint32 target) -> uint32 {
@@ -678,8 +750,26 @@ auto M68K::instructionROXR(EffectiveAddress modify) -> void {
   write<Word>(modify, result);
 }
 
+auto M68K::instructionRTE() -> void {
+  if(!supervisor()) return;
+
+  auto sr = pop<Word>();
+  r.pc = pop<Long>();
+  writeSR(sr);
+}
+
+auto M68K::instructionRTR() -> void {
+  writeCCR(pop<Word>());
+  r.pc = pop<Long>();
+}
+
 auto M68K::instructionRTS() -> void {
   r.pc = pop<Long>();
+}
+
+auto M68K::instructionSCC(uint4 condition, EffectiveAddress to) -> void {
+  uint8 result = testCondition(condition) ? ~0 : 0;
+  write<Byte>(to, result);
 }
 
 template<uint Size, bool Extend> auto M68K::SUB(uint32 source, uint32 target) -> uint32 {

@@ -28,13 +28,14 @@
 
 //note: (u)intmax actually mean it: use as many bits as is possible
 #if defined(__SIZEOF_INT128__)
-  #define HAS_INT128
   using int128_t = signed __int128;
   using uint128_t = unsigned __int128;
 
+  #define INTMAX_BITS 128
   using intmax = int128_t;
   using uintmax = uint128_t;
 #else
+  #define INTMAX_BITS 64
   using intmax = intmax_t;
   using uintmax = uintmax_t;
 #endif

@@ -253,6 +253,78 @@ M68K::M68K() {
     bind(opcode, BCC, condition, displacement);
   }
 
+  //BCHG (register)
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 ---1 01-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister bit{dreg};
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BCHG<Long>, bit, with);
+    if(mode != 0) bind(opcode, BCHG<Byte>, bit, with);
+  }
+
+  //BCHG (immediate)
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 1000 01-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BCHG<Long>, with);
+    if(mode != 0) bind(opcode, BCHG<Byte>, with);
+  }
+
+  //BCLR (register)
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 ---1 10-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister bit{dreg};
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BCLR<Long>, bit, with);
+    if(mode != 0) bind(opcode, BCLR<Byte>, bit, with);
+  }
+
+  //BCLR (immediate)
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 1000 10-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BCLR<Long>, with);
+    if(mode != 0) bind(opcode, BCLR<Byte>, with);
+  }
+
+  //BSET (register)
+  for(uint3 dreg : range(8))
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 ---1 11-- ----") | dreg << 9 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    DataRegister bit{dreg};
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BSET<Long>, bit, with);
+    if(mode != 0) bind(opcode, BSET<Byte>, bit, with);
+  }
+
+  //BSET (immediate)
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0000 1000 11-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    if(mode == 0) bind(opcode, BSET<Long>, with);
+    if(mode != 0) bind(opcode, BSET<Byte>, with);
+  }
+
   //BTST (register)
   for(uint3 dreg : range(8))
   for(uint3 mode : range(8))
@@ -270,7 +342,7 @@ M68K::M68K() {
   for(uint3 mode : range(8))
   for(uint3 reg  : range(8)) {
     auto opcode = pattern("0000 1000 00-- ----") | mode << 3 | reg << 0;
-    if(mode == 1 || (mode == 7 && (reg == 2 || reg >= 5))) continue;
+    if(mode == 1 || (mode == 7 && reg >= 4)) continue;
 
     EffectiveAddress ea{mode, reg};
     if(mode == 0) bind(opcode, BTST<Long>, ea);
@@ -386,6 +458,16 @@ M68K::M68K() {
   { auto opcode = pattern("0000 1010 0111 1100");
 
     bind(opcode, EORI_TO_SR);
+  }
+
+  //JMP
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 1110 11-- ----") | mode << 3 | reg << 0;
+    if(mode <= 1 || mode == 3 || mode == 4 || (mode == 7 && reg >= 4)) continue;
+
+    EffectiveAddress target{mode, reg};
+    bind(opcode, JMP, target);
   }
 
   //JSR
@@ -561,19 +643,62 @@ M68K::M68K() {
     bind(opcode, MOVE_TO_SR, ea);
   }
 
-  //MOVE_USP
-  for(uint1 direction : range(2))
-  for(uint3 areg      : range(8)) {
-    auto opcode = pattern("0100 1110 0110 ----") | direction << 3 | areg << 0;
+  //MOVE_FROM_USP
+  for(uint3 areg : range(8)) {
+    auto opcode = pattern("0100 1110 0110 1---") | areg << 0;
 
-    AddressRegister ar{areg};
-    bind(opcode, MOVE_USP, direction, ar);
+    AddressRegister to{areg};
+    bind(opcode, MOVE_FROM_USP, to);
+  }
+
+  //MOVE_TO_USP
+  for(uint3 areg : range(8)) {
+    auto opcode = pattern("0100 1110 0110 0---") | areg << 0;
+
+    AddressRegister from{areg};
+    bind(opcode, MOVE_TO_USP, from);
+  }
+
+  //NEG
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 0100 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, NEG<Byte>, with);
+    bind(opcode | 1 << 6, NEG<Word>, with);
+    bind(opcode | 2 << 6, NEG<Long>, with);
+  }
+
+  //NEGX
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 0000 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, NEGX<Byte>, with);
+    bind(opcode | 1 << 6, NEGX<Word>, with);
+    bind(opcode | 2 << 6, NEGX<Long>, with);
   }
 
   //NOP
   { auto opcode = pattern("0100 1110 0111 0001");
 
     bind(opcode, NOP);
+  }
+
+  //NOT
+  for(uint3 mode : range(8))
+  for(uint3 reg  : range(8)) {
+    auto opcode = pattern("0100 0110 ++-- ----") | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, NOT<Byte>, with);
+    bind(opcode | 1 << 6, NOT<Word>, with);
+    bind(opcode | 2 << 6, NOT<Long>, with);
   }
 
   //OR
@@ -764,10 +889,33 @@ M68K::M68K() {
     bind(opcode, ROXR, modify);
   }
 
+  //RTE
+  { auto opcode = pattern("0100 1110 0111 0011");
+
+    bind(opcode, RTE);
+  }
+
+  //RTR
+  { auto opcode = pattern("0100 1110 0111 0111");
+
+    bind(opcode, RTR);
+  }
+
   //RTS
   { auto opcode = pattern("0100 1110 0111 0101");
 
     bind(opcode, RTS);
+  }
+
+  //SCC
+  for(uint4 condition : range(16))
+  for(uint3 mode      : range( 8))
+  for(uint3 reg       : range( 8)) {
+    auto opcode = pattern("0101 ---- 11-- ----") | condition << 8 | mode << 3 | reg << 0;
+    if(mode == 1 || (mode == 7 && reg >= 2)) continue;
+
+    EffectiveAddress to{mode, reg};
+    bind(opcode, SCC, condition, to);
   }
 
   //SUB

@@ -2,15 +2,15 @@
 
 namespace nall {
 
-auto string::integer() const -> intmax_t {
+auto string::integer() const -> intmax {
   return toInteger(data());
 }
 
-auto string::natural() const -> uintmax_t {
+auto string::natural() const -> uintmax {
   return toNatural(data());
 }
 
-auto string::hex() const -> uintmax_t {
+auto string::hex() const -> uintmax {
   return toHex(data());
 }
 

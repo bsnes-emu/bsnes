@@ -32,7 +32,7 @@ struct ManagedNode {
 protected:
   string _name;
   string _value;
-  uintptr_t _metadata = 0;
+  uintptr _metadata = 0;
   vector<SharedNode> _children;
 
   inline auto _evaluate(string query) const -> bool;
@@ -59,8 +59,8 @@ struct Node {
 
   auto text() const -> string { return value().strip(); }
   auto boolean() const -> bool { return text() == "true"; }
-  auto integer() const -> intmax_t { return text().integer(); }
-  auto natural() const -> uintmax_t { return text().natural(); }
+  auto integer() const -> intmax { return text().integer(); }
+  auto natural() const -> uintmax { return text().natural(); }
   auto real() const -> double { return text().real(); }
 
   auto setName(const string& name = "") -> Node& { shared->_name = name; return *this; }

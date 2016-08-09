@@ -63,11 +63,11 @@ template<typename T> struct stringify;
 template<typename... P> inline auto print(P&&...) -> void;
 template<typename... P> inline auto print(FILE*, P&&...) -> void;
 template<typename T> inline auto pad(const T& value, long precision = 0, char padchar = ' ') -> string;
-inline auto hex(uintmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto octal(uintmax_t value, long precision = 0, char padchar = '0') -> string;
-inline auto binary(uintmax_t value, long precision = 0, char padchar = '0') -> string;
+inline auto hex(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto octal(uintmax value, long precision = 0, char padchar = '0') -> string;
+inline auto binary(uintmax value, long precision = 0, char padchar = '0') -> string;
 template<typename T> inline auto pointer(const T* value, long precision = 0) -> string;
-inline auto pointer(uintptr_t value, long precision = 0) -> string;
+inline auto pointer(uintptr value, long precision = 0) -> string;
 
 //match.hpp
 inline auto tokenize(const char* s, const char* p) -> bool;
@@ -75,8 +75,8 @@ inline auto tokenize(string_vector& list, const char* s, const char* p) -> bool;
 
 //utility.hpp
 inline auto slice(string_view self, int offset = 0, int length = -1) -> string;
-inline auto fromInteger(char* result, intmax_t value) -> char*;
-inline auto fromNatural(char* result, uintmax_t value) -> char*;
+inline auto fromInteger(char* result, intmax value) -> char*;
+inline auto fromNatural(char* result, uintmax value) -> char*;
 inline auto fromReal(char* str, long double value) -> uint;
 
 struct string {
@@ -168,9 +168,9 @@ public:
   auto end() const -> const char* { return &data()[size()]; }
 
   //atoi.hpp
-  inline auto integer() const -> intmax_t;
-  inline auto natural() const -> uintmax_t;
-  inline auto hex() const -> uintmax_t;
+  inline auto integer() const -> intmax;
+  inline auto natural() const -> uintmax;
+  inline auto hex() const -> uintmax;
   inline auto real() const -> double;
 
   //core.hpp

@@ -61,7 +61,7 @@ struct file : inode, varint {
     return !(data.st_mode & S_IFDIR);
   }
 
-  static auto size(const string& filename) -> uintmax_t {
+  static auto size(const string& filename) -> uintmax {
     #if defined(API_POSIX)
     struct stat data;
     stat(filename, &data);
@@ -127,16 +127,16 @@ struct file : inode, varint {
     return buffer[(file_offset++) & buffer_mask];
   }
 
-  auto readl(uint length = 1) -> uintmax_t {
-    uintmax_t data = 0;
+  auto readl(uint length = 1) -> uintmax {
+    uintmax data = 0;
     for(int i = 0; i < length; i++) {
-      data |= (uintmax_t)read() << (i << 3);
+      data |= (uintmax)read() << (i << 3);
     }
     return data;
   }
 
-  auto readm(uint length = 1) -> uintmax_t {
-    uintmax_t data = 0;
+  auto readm(uint length = 1) -> uintmax {
+    uintmax data = 0;
     while(length--) {
       data <<= 8;
       data |= read();
@@ -164,14 +164,14 @@ struct file : inode, varint {
     if(file_offset > file_size) file_size = file_offset;
   }
 
-  auto writel(uintmax_t data, uint length = 1) -> void {
+  auto writel(uintmax data, uint length = 1) -> void {
     while(length--) {
       write(data);
       data >>= 8;
     }
   }
 
-  auto writem(uintmax_t data, uint length = 1) -> void {
+  auto writem(uintmax data, uint length = 1) -> void {
     for(int i = length - 1; i >= 0; i--) {
       write(data >> (i << 3));
     }
@@ -200,7 +200,7 @@ struct file : inode, varint {
     if(!fp) return;  //file not open
     buffer_flush();
 
-    intmax_t req_offset = file_offset;
+    intmax req_offset = file_offset;
     switch(index_) {
     case index::absolute: req_offset  = offset; break;
     case index::relative: req_offset += offset; break;

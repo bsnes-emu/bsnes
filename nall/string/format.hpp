@@ -84,9 +84,9 @@ template<typename T> auto pad(const T& value, long precision, char padchar) -> s
   return buffer;
 }
 
-auto hex(uintmax_t value, long precision, char padchar) -> string {
+auto hex(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 2);
+  buffer.resize(sizeof(uintmax) * 2);
   char* p = buffer.get();
 
   uint size = 0;
@@ -101,9 +101,9 @@ auto hex(uintmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto octal(uintmax_t value, long precision, char padchar) -> string {
+auto octal(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 3);
+  buffer.resize(sizeof(uintmax) * 3);
   char* p = buffer.get();
 
   uint size = 0;
@@ -117,9 +117,9 @@ auto octal(uintmax_t value, long precision, char padchar) -> string {
   return buffer;
 }
 
-auto binary(uintmax_t value, long precision, char padchar) -> string {
+auto binary(uintmax value, long precision, char padchar) -> string {
   string buffer;
-  buffer.resize(sizeof(uintmax_t) * 8);
+  buffer.resize(sizeof(uintmax) * 8);
   char* p = buffer.get();
 
   uint size = 0;
@@ -135,10 +135,10 @@ auto binary(uintmax_t value, long precision, char padchar) -> string {
 
 template<typename T> auto pointer(const T* value, long precision) -> string {
   if(value == nullptr) return "(nullptr)";
-  return {"0x", hex((uintptr_t)value, precision)};
+  return {"0x", hex((uintptr)value, precision)};
 }
 
-auto pointer(uintptr_t value, long precision) -> string {
+auto pointer(uintptr value, long precision) -> string {
   if(value == 0) return "(nullptr)";
   return {"0x", hex(value, precision)};
 }
