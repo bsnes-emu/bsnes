@@ -90,6 +90,10 @@ auto M68K::disassembleRegisters() -> string {
 
 //
 
+auto M68K::disassembleABCD(EffectiveAddress with, EffectiveAddress from) -> string {
+  return {"abcd    ", _effectiveAddress<Byte>(from), ",", _effectiveAddress<Byte>(with)};
+}
+
 template<uint Size> auto M68K::disassembleADD(EffectiveAddress from, DataRegister with) -> string {
   return {"add", _suffix<Size>(), "   ", _effectiveAddress<Size>(from), ",", _dataRegister(with)};
 }
@@ -197,6 +201,10 @@ template<uint Size> auto M68K::disassembleBTST(EffectiveAddress with) -> string 
   return {"btst", _suffix<Size>(), "  ", _immediate<Byte>(), ",", _effectiveAddress<Size>(with)};
 }
 
+auto M68K::disassembleCHK(DataRegister compare, EffectiveAddress maximum) -> string {
+  return {"chk", _suffix<Word>(), "   ", _effectiveAddress<Word>(maximum), ",", _dataRegister(compare)};
+}
+
 template<uint Size> auto M68K::disassembleCLR(EffectiveAddress ea) -> string {
   return {"clr", _suffix<Size>(), "   ", _effectiveAddress<Size>(ea)};
 }
@@ -223,6 +231,14 @@ auto M68K::disassembleDBCC(uint4 condition, DataRegister dr) -> string {
   return {"db", _condition(condition), "    ", _dataRegister(dr), ",$", hex(base + displacement, 6L)};
 }
 
+auto M68K::disassembleDIVS(DataRegister with, EffectiveAddress from) -> string {
+  return {"divs", _suffix<Word>(), "  ", _effectiveAddress<Word>(from), ",", _dataRegister(with)};
+}
+
+auto M68K::disassembleDIVU(DataRegister with, EffectiveAddress from) -> string {
+  return {"divu", _suffix<Word>(), "  ", _effectiveAddress<Word>(from), ",", _dataRegister(with)};
+}
+
 template<uint Size> auto M68K::disassembleEOR(DataRegister from, EffectiveAddress with) -> string {
   return {"eor", _suffix<Size>(), "   ", _dataRegister(from), ",", _effectiveAddress<Size>(with)};
 }
@@ -239,6 +255,26 @@ auto M68K::disassembleEORI_TO_SR() -> string {
   return {"eori    ", _immediate<Word>(), ",sr"};
 }
 
+auto M68K::disassembleEXG(DataRegister x, DataRegister y) -> string {
+  return {"exg     ", _dataRegister(x), ",", _dataRegister(y)};
+}
+
+auto M68K::disassembleEXG(AddressRegister x, AddressRegister y) -> string {
+  return {"exg     ", _addressRegister(x), ",", _addressRegister(y)};
+}
+
+auto M68K::disassembleEXG(DataRegister x, AddressRegister y) -> string {
+  return {"exg     ", _dataRegister(x), ",", _addressRegister(y)};
+}
+
+template<uint Size> auto M68K::disassembleEXT(DataRegister with) -> string {
+  return {"ext", _suffix<Size>(), "   ", _dataRegister(with)};
+}
+
+auto M68K::disassembleILLEGAL() -> string {
+  return {"illegal "};
+}
+
 auto M68K::disassembleJMP(EffectiveAddress target) -> string {
   return {"jmp     ", _effectiveAddress<Long>(target)};
 }
@@ -249,6 +285,10 @@ auto M68K::disassembleJSR(EffectiveAddress target) -> string {
 
 auto M68K::disassembleLEA(AddressRegister ar, EffectiveAddress ea) -> string {
   return {"lea     ", _address<Long>(ea), ",", _addressRegister(ar)};
+}
+
+auto M68K::disassembleLINK(AddressRegister with) -> string {
+  return {"link    ", _addressRegister(with), ",", _immediate<Word>()};
 }
 
 template<uint Size> auto M68K::disassembleLSL(uint4 immediate, DataRegister dr) -> string {
@@ -283,7 +323,7 @@ template<uint Size> auto M68K::disassembleMOVEA(AddressRegister ar, EffectiveAdd
   return {"movea   ", _effectiveAddress<Size>(ea), ",", _addressRegister(ar)};
 }
 
-template<uint Size> auto M68K::disassembleMOVEM(uint1 direction, EffectiveAddress ea) -> string {
+template<uint Size> auto M68K::disassembleMOVEM_TO_MEM(EffectiveAddress to) -> string {
   string op{"movem", _suffix<Size>(), " "};
 
   uint16 list = _readPC();
@@ -294,11 +334,29 @@ template<uint Size> auto M68K::disassembleMOVEM(uint1 direction, EffectiveAddres
   for(uint n : range(8)) if(list.bit(8 + n)) regs.append(_addressRegister(AddressRegister{n}), ",");
   regs.trimRight(",");
 
-  if(direction == 0) {
-    return {op, regs, ",", _effectiveAddress<Size>(ea)};
-  } else {
-    return {op, _effectiveAddress<Size>(ea), ",", regs};
-  }
+  return {op, regs, ",", _effectiveAddress<Size>(to)};
+}
+
+template<uint Size> auto M68K::disassembleMOVEM_TO_REG(EffectiveAddress from) -> string {
+  string op{"movem", _suffix<Size>(), " "};
+
+  uint16 list = _readPC();
+  string regs;
+  for(uint n : range(8)) if(list.bit(0 + n)) regs.append(_dataRegister(DataRegister{n}), ",");
+  regs.trimRight(",");
+  if(regs && list >> 8) regs.append("/");
+  for(uint n : range(8)) if(list.bit(8 + n)) regs.append(_addressRegister(AddressRegister{n}), ",");
+  regs.trimRight(",");
+
+  return {op, _effectiveAddress<Size>(from), ",", regs};
+}
+
+template<uint Size> auto M68K::disassembleMOVEP(DataRegister from, EffectiveAddress to) -> string {
+  return {"movep", _suffix<Size>(), " ", _dataRegister(from), ",", _effectiveAddress<Size>(to)};
+}
+
+template<uint Size> auto M68K::disassembleMOVEP(EffectiveAddress from, DataRegister to) -> string {
+  return {"movep", _suffix<Size>(), " ", _effectiveAddress<Size>(from), ",", _dataRegister(to)};
 }
 
 auto M68K::disassembleMOVEQ(DataRegister dr, uint8 immediate) -> string {
@@ -323,6 +381,18 @@ auto M68K::disassembleMOVE_FROM_USP(AddressRegister to) -> string {
 
 auto M68K::disassembleMOVE_TO_USP(AddressRegister from) -> string {
   return {"move    ", _addressRegister(from), ",usp"};
+}
+
+auto M68K::disassembleMULS(DataRegister with, EffectiveAddress from) -> string {
+  return {"muls", _suffix<Word>(), "  ", _effectiveAddress<Word>(from), ",", _dataRegister(with)};
+}
+
+auto M68K::disassembleMULU(DataRegister with, EffectiveAddress from) -> string {
+  return {"mulu", _suffix<Word>(), "  ", _effectiveAddress<Word>(from), ",", _dataRegister(with)};
+}
+
+auto M68K::disassembleNBCD(EffectiveAddress with) -> string {
+  return {"nbcd    ", _effectiveAddress<Byte>(with)};
 }
 
 template<uint Size> auto M68K::disassembleNEG(EffectiveAddress with) -> string {
@@ -359,6 +429,14 @@ auto M68K::disassembleORI_TO_CCR() -> string {
 
 auto M68K::disassembleORI_TO_SR() -> string {
   return {"ori     ", _immediate<Word>(), ",sr"};
+}
+
+auto M68K::disassemblePEA(EffectiveAddress from) -> string {
+  return {"pea     ", _effectiveAddress<Long>(from)};
+}
+
+auto M68K::disassembleRESET() -> string {
+  return {"reset   "};
 }
 
 template<uint Size> auto M68K::disassembleROL(uint4 shift, DataRegister modify) -> string {
@@ -421,8 +499,16 @@ auto M68K::disassembleRTS() -> string {
   return {"rts     "};
 }
 
+auto M68K::disassembleSBCD(EffectiveAddress with, EffectiveAddress from) -> string {
+  return {"sbcd    ", _effectiveAddress<Byte>(from), ",", _effectiveAddress<Byte>(with)};
+}
+
 auto M68K::disassembleSCC(uint4 condition, EffectiveAddress to) -> string {
   return {"s", _condition(condition), "     ", _effectiveAddress<Byte>(to)};
+}
+
+auto M68K::disassembleSTOP() -> string {
+  return {"stop    ", _immediate<Word>()};
 }
 
 template<uint Size> auto M68K::disassembleSUB(EffectiveAddress source, DataRegister target) -> string {
@@ -449,6 +535,26 @@ template<uint Size> auto M68K::disassembleSUBX(EffectiveAddress with, EffectiveA
   return {"subx", _suffix<Size>(), "  ", _effectiveAddress<Size>(with), ",", _effectiveAddress<Size>(from)};
 }
 
+auto M68K::disassembleSWAP(DataRegister with) -> string {
+  return {"swap    ", _dataRegister(with)};
+}
+
+auto M68K::disassembleTAS(EffectiveAddress with) -> string {
+  return {"tas     ", _effectiveAddress<Byte>(with)};
+}
+
+auto M68K::disassembleTRAP(uint4 vector) -> string {
+  return {"trap    #", vector};
+}
+
+auto M68K::disassembleTRAPV() -> string {
+  return {"trapv   "};
+}
+
 template<uint Size> auto M68K::disassembleTST(EffectiveAddress ea) -> string {
   return {"tst", _suffix<Size>(), "   ", _effectiveAddress<Size>(ea)};
+}
+
+auto M68K::disassembleUNLK(AddressRegister with) -> string {
+  return {"unlk    ", _addressRegister(with)};
 }

@@ -9,9 +9,9 @@ enum : bool { Reverse = 1 };
 #include "registers.cpp"
 #include "memory.cpp"
 #include "effective-address.cpp"
-#include "instruction.cpp"
 #include "instructions.cpp"
 #include "disassembler.cpp"
+#include "instruction.cpp"
 
 auto M68K::power() -> void {
 }
@@ -32,12 +32,20 @@ auto M68K::reset() -> void {
   r.i = 7;
   r.s = 1;
   r.t = 0;
+
+  r.stop = false;
+  r.reset = false;
 }
 
 auto M68K::supervisor() -> bool {
   if(r.s) return true;
-  //todo: raise TRAP exception
+
+  r.pc -= 2;
+  exception(Exception::Unprivileged, Vector::Unprivileged);
   return false;
+}
+
+auto M68K::exception(uint exception, uint vector) -> void {
 }
 
 }

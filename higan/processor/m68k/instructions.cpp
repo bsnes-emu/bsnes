@@ -48,15 +48,34 @@ template<> auto M68K::sign<Byte>(uint32 data) -> int32 { return  (int8)data; }
 template<> auto M68K::sign<Word>(uint32 data) -> int32 { return (int16)data; }
 template<> auto M68K::sign<Long>(uint32 data) -> int32 { return (int32)data; }
 
-template<uint Size> auto M68K::zero(uint32 result) -> bool {
-  return clip<Size>(result) == 0;
-}
-
-template<uint Size> auto M68K::negative(uint32 result) -> bool {
-  return sign<Size>(result) < 0;
-}
-
 //
+
+auto M68K::instructionABCD(EffectiveAddress with, EffectiveAddress from) -> void {
+  auto source = read<Byte>(from);
+  auto target = read<Byte, NoUpdate>(with);
+  auto result = source + target + r.x;
+  bool v = false;
+
+  if(((target ^ source ^ result) & 0x10) || (result & 0x0f) >= 0x0a) {
+    auto previous = result;
+    result += 0x06;
+    v |= ((~previous & 0x80) & (result & 0x80));
+  }
+
+  if(result >= 0xa0) {
+    auto previous = result;
+    result += 0x60;
+    v |= ((~previous & 0x80) & (result & 0x80));
+  }
+
+  write<Byte>(with, result);
+
+  r.c = sign<Byte>(result >> 1) < 0;
+  r.v = v;
+  r.z = clip<Byte>(result) == 0 ? 0 : r.z;
+  r.n = sign<Byte>(result) < 0;
+  r.x = r.c;
+}
 
 template<uint Size, bool Extend> auto M68K::ADD(uint32 source, uint32 target) -> uint32 {
   uint64 result = (uint64)source + (uint64)target;
@@ -143,11 +162,6 @@ template<uint Size> auto M68K::instructionANDI(EffectiveAddress ea) -> void {
   auto target = read<Size, NoUpdate>(ea);
   auto result = AND<Size>(source, target);
   write<Size>(ea, result);
-
-  r.c = 0;
-  r.v = 0;
-  r.z = zero<Size>(result);
-  r.n = negative<Size>(result);
 }
 
 auto M68K::instructionANDI_TO_CCR() -> void {
@@ -303,6 +317,22 @@ template<uint Size> auto M68K::instructionBTST(EffectiveAddress with) -> void {
   r.z = test.bit(index) == 0;
 }
 
+auto M68K::instructionCHK(DataRegister compare, EffectiveAddress maximum) -> void {
+  auto source = read<Word>(maximum);
+  auto target = read<Word>(compare);
+
+  r.z = clip<Word>(target) == 0;
+  r.n = sign<Word>(target) < 0;
+  if(r.n) return exception(Exception::BoundsCheck, Vector::BoundsCheck);
+
+  auto result = target - source;
+  r.c = sign<Word>(result >> 1) < 0;
+  r.v = sign<Word>((target ^ source) & (target ^ result)) < 0;
+  r.z = clip<Word>(result) == 0;
+  r.n = sign<Word>(result) < 0;
+  if(r.n == r.v && !r.z) return exception(Exception::BoundsCheck, Vector::BoundsCheck);
+}
+
 template<uint Size> auto M68K::instructionCLR(EffectiveAddress ea) -> void {
   read<Size>(ea);
   write<Size>(ea, 0);
@@ -357,6 +387,61 @@ auto M68K::instructionDBCC(uint4 condition, DataRegister dr) -> void {
   }
 }
 
+template<bool Sign> auto M68K::DIV(uint16 divisor, DataRegister with) -> void {
+  auto dividend = read<Long>(with);
+  bool negativeQuotient = false;
+  bool negativeRemainder = false;
+  bool overflow = false;
+
+  if(divisor == 0) return exception(Exception::DivisionByZero, Vector::DivisionByZero);
+
+  if(Sign) {
+    negativeQuotient = (dividend >> 31) ^ (divisor >> 15);
+    if(dividend >> 31) dividend = -dividend, negativeRemainder = true;
+    if(divisor >> 15) divisor = -divisor;
+  }
+
+  auto result = dividend;
+
+  for(auto _ : range(16)) {
+    bool lb = false;
+    if(result >= (uint32)divisor << 15) result -= divisor << 15, lb = true;
+
+    bool ob = result >> 31;
+    result = result << 1 | lb;
+
+    if(ob) overflow = true;
+  }
+
+  if(Sign) {
+    if((uint16)result > 0x7fff + negativeQuotient) overflow = true;
+  }
+
+  if(result >> 16 >= divisor) overflow = true;
+
+  if(Sign && !overflow) {
+    if(negativeQuotient) result = ((-result) & 0xffff) | (result & 0xffff0000);
+    if(negativeRemainder) result = (((-(result >> 16)) << 16) & 0xffff0000) | (result & 0xffff);
+  }
+
+  if(!overflow) write<Long>(with, result);
+
+  r.c = 0;
+  r.v = overflow;
+  r.z = clip<Word>(result) == 0;
+  r.n = sign<Word>(result) < 0;
+}
+
+auto M68K::instructionDIVS(DataRegister with, EffectiveAddress from) -> void {
+  auto divisor = read<Word>(from);
+  DIV<1>(divisor, with);
+}
+
+auto M68K::instructionDIVU(DataRegister with, EffectiveAddress from) -> void {
+  auto divisor = read<Word>(from);
+  DIV<0>(divisor, with);
+}
+
 template<uint Size> auto M68K::EOR(uint32 source, uint32 target) -> uint32 {
   uint32 result = target ^ source;
 
@@ -394,6 +479,49 @@ auto M68K::instructionEORI_TO_SR() -> void {
   writeSR(readSR() ^ data);
 }
 
+auto M68K::instructionEXG(DataRegister x, DataRegister y) -> void {
+  auto z = read<Long>(x);
+  write<Long>(x, read<Long>(y));
+  write<Long>(y, z);
+}
+
+auto M68K::instructionEXG(AddressRegister x, AddressRegister y) -> void {
+  auto z = read<Long>(x);
+  write<Long>(x, read<Long>(y));
+  write<Long>(y, z);
+}
+
+auto M68K::instructionEXG(DataRegister x, AddressRegister y) -> void {
+  auto z = read<Long>(x);
+  write<Long>(x, read<Long>(y));
+  write<Long>(y, z);
+}
+
+template<> auto M68K::instructionEXT<Word>(DataRegister with) -> void {
+  auto result = (int8)read<Byte>(with);
+  write<Word>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Word>(result) == 0;
+  r.n = sign<Word>(result) < 0;
+}
+
+template<> auto M68K::instructionEXT<Long>(DataRegister with) -> void {
+  auto result = (int16)read<Word>(with);
+  write<Long>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Long>(result) == 0;
+  r.n = sign<Long>(result) < 0;
+}
+
+auto M68K::instructionILLEGAL() -> void {
+  r.pc -= 2;
+  return exception(Exception::Illegal, Vector::Illegal);
+}
+
 auto M68K::instructionJMP(EffectiveAddress target) -> void {
   r.pc = fetch<Long>(target);
 }
@@ -405,6 +533,14 @@ auto M68K::instructionJSR(EffectiveAddress target) -> void {
 
 auto M68K::instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void {
   write<Long>(ar, fetch<Long>(ea));
+}
+
+auto M68K::instructionLINK(AddressRegister with) -> void {
+  auto displacement = (int16)readPC<Word>();
+  auto sp = AddressRegister{7};
+  push<Long>(read<Long>(with));
+  write<Long>(with, read<Long>(sp));
+  write<Long>(sp, read<Long>(sp) + displacement);
 }
 
 template<uint Size> auto M68K::LSL(uint32 result, uint shift) -> uint32 {
@@ -477,8 +613,8 @@ template<uint Size> auto M68K::instructionMOVE(EffectiveAddress to, EffectiveAdd
 
   r.c = 0;
   r.v = 0;
-  r.z = zero<Size>(data);
-  r.n = negative<Size>(data);
+  r.z = clip<Size>(data) == 0;
+  r.n = sign<Size>(data) < 0;
 }
 
 template<uint Size> auto M68K::instructionMOVEA(AddressRegister ar, EffectiveAddress ea) -> void {
@@ -486,31 +622,64 @@ template<uint Size> auto M68K::instructionMOVEA(AddressRegister ar, EffectiveAdd
   write<Long>(ar, data);
 }
 
-template<uint Size> auto M68K::instructionMOVEM(uint1 direction, EffectiveAddress ea) -> void {
-  auto list = readPC();
-  auto addr = fetch<Long>(ea);
+template<uint Size> auto M68K::instructionMOVEM_TO_MEM(EffectiveAddress to) -> void {
+  auto list = readPC<Word>();
+  auto addr = fetch<Long>(to);
 
   for(uint n : range(16)) {
     if(!list.bit(n)) continue;
-
     //pre-decrement mode traverses registers in reverse order {A7-A0, D7-D0}
-    uint index = ea.mode == AddressRegisterIndirectWithPreDecrement ? 15 - n : n;
+    uint index = to.mode == AddressRegisterIndirectWithPreDecrement ? 15 - n : n;
 
-    if(ea.mode == AddressRegisterIndirectWithPreDecrement) addr -= bytes<Size>();
-
-    if(direction == 0) {
-      auto data = index < 8 ? read<Size>(DataRegister{index}) : read<Size>(AddressRegister{index});
-      write<Size>(addr, data);
-    } else {
-      auto data = read<Size>(addr);
-      data = sign<Size>(data);
-      index < 8 ? write<Long>(DataRegister{index}, data) : write<Long>(AddressRegister{index}, data);
-    }
-
-    if(ea.mode == AddressRegisterIndirectWithPostIncrement) addr += bytes<Size>();
+    if(to.mode == AddressRegisterIndirectWithPreDecrement) addr -= bytes<Size>();
+    auto data = index < 8 ? read<Size>(DataRegister{index}) : read<Size>(AddressRegister{index});
+    write<Size>(addr, data);
+    if(to.mode == AddressRegisterIndirectWithPostIncrement) addr += bytes<Size>();
   }
 
-  flush<Long>(ea, addr);
+  flush<Long>(to, addr);
+}
+
+template<uint Size> auto M68K::instructionMOVEM_TO_REG(EffectiveAddress from) -> void {
+  auto list = readPC<Word>();
+  auto addr = fetch<Long>(from);
+
+  for(uint n : range(16)) {
+    if(!list.bit(n)) continue;
+    uint index = from.mode == AddressRegisterIndirectWithPreDecrement ? 15 - n : n;
+
+    if(from.mode == AddressRegisterIndirectWithPreDecrement) addr -= bytes<Size>();
+    auto data = read<Size>(addr);
+    data = sign<Size>(data);
+    index < 8 ? write<Long>(DataRegister{index}, data) : write<Long>(AddressRegister{index}, data);
+    if(from.mode == AddressRegisterIndirectWithPostIncrement) addr += bytes<Size>();
+  }
+
+  flush<Long>(from, addr);
+}
+
+template<uint Size> auto M68K::instructionMOVEP(DataRegister from, EffectiveAddress to) -> void {
+  auto address = fetch<Size>(to);
+  auto data = read<Long>(from);
+  uint shift = bits<Size>();
+  for(auto _ : range(bytes<Size>())) {
+    shift -= 8;
+    write<Byte>(address, data >> shift);
+    address += 2;
+  }
+}
+
+template<uint Size> auto M68K::instructionMOVEP(EffectiveAddress from, DataRegister to) -> void {
+  auto address = fetch<Size>(from);
+  auto data = read<Long>(to);
+  uint shift = bits<Size>();
+  for(auto _ : range(bytes<Size>())) {
+    shift -= 8;
+    data &= ~(0xff << shift);
+    data |= read<Byte>(address) << shift;
+    address += 2;
+  }
+  write<Long>(to, data);
 }
 
 auto M68K::instructionMOVEQ(DataRegister dr, uint8 immediate) -> void {
@@ -518,8 +687,8 @@ auto M68K::instructionMOVEQ(DataRegister dr, uint8 immediate) -> void {
 
   r.c = 0;
   r.v = 0;
-  r.z = zero<Byte>(immediate);
-  r.n = negative<Byte>(immediate);
+  r.z = clip<Byte>(immediate) == 0;
+  r.n = sign<Byte>(immediate) < 0;
 }
 
 auto M68K::instructionMOVE_FROM_SR(EffectiveAddress ea) -> void {
@@ -549,6 +718,59 @@ auto M68K::instructionMOVE_TO_USP(AddressRegister from) -> void {
   if(!supervisor()) return;
 
   r.sp = read<Long>(from);
+}
+
+auto M68K::instructionMULS(DataRegister with, EffectiveAddress from) -> void {
+  auto source = read<Word>(from);
+  auto target = read<Word>(with);
+  auto result = (int16)source * (int16)target;
+  write<Long>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Long>(result) == 0;
+  r.n = sign<Long>(result) < 0;
+}
+
+auto M68K::instructionMULU(DataRegister with, EffectiveAddress from) -> void {
+  auto source = read<Word>(from);
+  auto target = read<Word>(with);
+  auto result = source * target;
+  write<Long>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Long>(result) == 0;
+  r.n = sign<Long>(result) < 0;
+}
+
+auto M68K::instructionNBCD(EffectiveAddress with) -> void {
+  auto source = 0u;
+  auto target = read<Byte, NoUpdate>(with);
+  auto result = source - target - r.x;
+  bool v = false;
+
+  const bool adjustLo = (target ^ source ^ result) & 0x10;
+  const bool adjustHi = result & 0x100;
+
+  if(adjustLo) {
+    auto previous = result;
+    result -= 0x06;
+    v |= (previous & 0x80) & (~result & 0x80);
+  }
+
+  if(adjustHi) {
+    auto previous = result;
+    result -= 0x60;
+    v |= (previous & 0x80) & (~result & 0x80);
+  }
+
+  write<Byte>(with, result);
+
+  r.c = sign<Byte>(result >> 1) < 0;
+  r.v = v;
+  r.z = clip<Byte>(result) == 0 ? 0 : r.z;
+  r.n = sign<Byte>(result) < 0;
 }
 
 template<uint Size> auto M68K::instructionNEG(EffectiveAddress with) -> void {
@@ -618,6 +840,17 @@ auto M68K::instructionORI_TO_SR() -> void {
 
   auto data = readPC<Word>();
   writeSR(readSR() | data);
+}
+
+auto M68K::instructionPEA(EffectiveAddress from) -> void {
+  auto data = fetch<Long>(from);
+  push<Long>(data);
+}
+
+auto M68K::instructionRESET() -> void {
+  if(!supervisor()) return;
+
+  r.reset = true;
 }
 
 template<uint Size> auto M68K::ROL(uint32 result, uint shift) -> uint32 {
@@ -767,9 +1000,46 @@ auto M68K::instructionRTS() -> void {
   r.pc = pop<Long>();
 }
 
+auto M68K::instructionSBCD(EffectiveAddress with, EffectiveAddress from) -> void {
+  auto source = read<Byte>(from);
+  auto target = read<Byte, NoUpdate>(with);
+  auto result = target - source - r.x;
+  bool v = false;
+
+  const bool adjustLo = (target ^ source ^ result) & 0x10;
+  const bool adjustHi = result & 0x100;
+
+  if(adjustLo) {
+    auto previous = result;
+    result -= 0x06;
+    v |= (previous & 0x80) & (~result & 0x80);
+  }
+
+  if(adjustHi) {
+    auto previous = result;
+    result -= 0x60;
+    v |= (previous & 0x80) & (~result & 0x80);
+  }
+
+  write<Byte>(with, result);
+
+  r.c = sign<Byte>(result >> 1) < 0;
+  r.v = v;
+  r.z = clip<Byte>(result) == 0 ? 0 : r.z;
+  r.n = sign<Byte>(result) < 0;
+}
+
 auto M68K::instructionSCC(uint4 condition, EffectiveAddress to) -> void {
   uint8 result = testCondition(condition) ? ~0 : 0;
   write<Byte>(to, result);
+}
+
+auto M68K::instructionSTOP() -> void {
+  if(!supervisor()) return;
+
+  auto sr = readPC<Word>();
+  writeSR(sr);
+  r.stop = true;
 }
 
 template<uint Size, bool Extend> auto M68K::SUB(uint32 source, uint32 target) -> uint32 {
@@ -827,11 +1097,46 @@ template<uint Size> auto M68K::instructionSUBX(EffectiveAddress with, EffectiveA
   write<Size>(with, result);
 }
 
+auto M68K::instructionSWAP(DataRegister with) -> void {
+  auto result = read<Long>(with);
+  result = result >> 16 | result << 16;
+  write<Long>(with, result);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Long>(result) == 0;
+  r.n = sign<Long>(result) < 0;
+}
+
+auto M68K::instructionTAS(EffectiveAddress with) -> void {
+  auto data = read<Byte, NoUpdate>(with);
+  write<Byte>(with, data | 0x80);
+
+  r.c = 0;
+  r.v = 0;
+  r.z = clip<Byte>(data) == 0;
+  r.n = sign<Byte>(data) < 0;
+}
+
+auto M68K::instructionTRAP(uint4 vector) -> void {
+  exception(Exception::Trap, vector);
+}
+
+auto M68K::instructionTRAPV() -> void {
+  if(r.v) exception(Exception::Overflow, Vector::Overflow);
+}
+
 template<uint Size> auto M68K::instructionTST(EffectiveAddress ea) -> void {
   auto data = read<Size>(ea);
 
   r.c = 0;
   r.v = 0;
-  r.z = zero<Size>(data);
-  r.n = negative<Size>(data);
+  r.z = clip<Size>(data) == 0;
+  r.n = sign<Size>(data) < 0;
+}
+
+auto M68K::instructionUNLK(AddressRegister with) -> void {
+  auto sp = AddressRegister{7};
+  write<Long>(sp, read<Long>(with));
+  write<Long>(with, pop<Long>());
 }
