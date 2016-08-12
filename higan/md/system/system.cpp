@@ -6,10 +6,7 @@ System system;
 Scheduler scheduler;
 
 auto System::run() -> void {
-  if(scheduler.enter() == Scheduler::Event::Frame) {
-    static uint32 output[320 * 240] = {0};
-    Emulator::video.refresh(output, 320 * sizeof(uint32), 320, 240);
-  }
+  if(scheduler.enter() == Scheduler::Event::Frame) vdp.refresh();
 }
 
 auto System::load() -> bool {

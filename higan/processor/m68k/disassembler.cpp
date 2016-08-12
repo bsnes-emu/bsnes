@@ -1,9 +1,9 @@
 template<> auto M68K::_read<Byte>(uint32 addr) -> uint32 {
-  return read(0, addr);
+  return readByte(addr);
 }
 
 template<> auto M68K::_read<Word>(uint32 addr) -> uint32 {
-  return read(1, addr);
+  return readWord(addr);
 }
 
 template<> auto M68K::_read<Long>(uint32 addr) -> uint32 {
@@ -15,6 +15,19 @@ template<uint Size> auto M68K::_readPC() -> uint32 {
   auto data = _read<Size == Byte ? Word : Size>(_pc);
   _pc += Size == Long ? 4 : 2;
   return clip<Size>(data);
+}
+
+auto M68K::_readDisplacement(uint32 base) -> uint32 {
+  return base + (int16)_readPC<Word>();
+}
+
+auto M68K::_readIndex(uint32 base) -> uint32 {
+  auto extension = readPC<Word>();
+  auto index = extension & 0x8000
+  ? read(AddressRegister{extension >> 12})
+  : read(DataRegister{extension >> 12});
+  if(extension & 0x800) index = (int16)index;
+  return base + index + (int8)extension;
 }
 
 auto M68K::_dataRegister(DataRegister dr) -> string {
@@ -40,11 +53,14 @@ template<uint Size> auto M68K::_effectiveAddress(EffectiveAddress& ea) -> string
   if(ea.mode ==  2) return {"(", _addressRegister(AddressRegister{ea.reg}), ")"};
   if(ea.mode ==  3) return {"(", _addressRegister(AddressRegister{ea.reg}), ")+"};
   if(ea.mode ==  4) return {"-(", _addressRegister(AddressRegister{ea.reg}), ")"};
-  if(ea.mode ==  5) return {"($", hex(read(AddressRegister{ea.reg}) + (int16)_readPC(), 6L), ")"};
+  if(ea.mode ==  5) return {"($", hex(_readDisplacement(read(AddressRegister{ea.reg})), 6L), ")"};
+  if(ea.mode ==  6) return {"($", hex(_readIndex(read(AddressRegister{ea.reg})), 6L), ")"};
   if(ea.mode ==  7) return {"($", hex((int16)_readPC<Word>(), 6L), ")"};
   if(ea.mode ==  8) return {"($", hex(_readPC<Long>(), 6L), ")"};
+  if(ea.mode ==  9) return {"($", hex(_readDisplacement(_pc), 6L), ")"};
+  if(ea.mode == 10) return {"($", hex(_readIndex(_pc), 6L), ")"};
   if(ea.mode == 11) return {"#$", hex(_readPC<Size>(), 2 << Size)};
-  return "???";
+  return "???";  //should never occur
 }
 
 auto M68K::_branch(uint8 displacement) -> string {

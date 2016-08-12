@@ -10,8 +10,10 @@ struct Cartridge {
   auto power() -> void;
   auto reset() -> void;
 
-  auto read(bool word, uint24 addr) -> uint16;
-  auto write(bool word, uint24 addr, uint16 data) -> void;
+  auto readByte(uint24 addr) -> uint8;
+  auto readWord(uint24 addr) -> uint16;
+  auto writeByte(uint24 addr, uint8 data) -> void;
+  auto writeWord(uint24 addr, uint16 data) -> void;
 
   struct Information {
     uint pathID = 0;

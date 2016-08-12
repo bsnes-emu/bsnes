@@ -40,13 +40,17 @@ struct M68K {
     BoundsCheck = 6,
     Overflow = 7,
     Unprivileged = 8,
+    IllegalLineA = 10,
+    IllegalLineF = 11,
   };};
 
   M68K();
 
   virtual auto step(uint clocks) -> void = 0;
-  virtual auto read(bool word, uint24 addr) -> uint16 = 0;
-  virtual auto write(bool word, uint24 addr, uint16 data) -> void = 0;
+  virtual auto readByte(uint24 addr) -> uint8 = 0;
+  virtual auto readWord(uint24 addr) -> uint16 = 0;
+  virtual auto writeByte(uint24 addr, uint8 data) -> void = 0;
+  virtual auto writeWord(uint24 addr, uint16 data) -> void = 0;
 
   auto power() -> void;
   auto reset() -> void;
@@ -99,7 +103,6 @@ struct M68K {
   template<uint Size> auto flush(EffectiveAddress& ea, uint32 data) -> void;
 
   //instruction.cpp
-  auto trap() -> void;
   auto instruction() -> void;
 
   //instructions.cpp
@@ -245,10 +248,10 @@ struct M68K {
   auto disassembleRegisters() -> string;
 
   struct Registers {
-    uint32 d[8];
-    uint32 a[8];
-    uint32 sp;
-    uint32 pc;
+    uint32 d[8];  //data registers
+    uint32 a[8];  //address registers (a7 = s ? ssp : usp)
+    uint32 sp;    //inactive stack pointer (s ? usp : ssp)
+    uint32 pc;    //program counter
 
     bool c;   //carry
     bool v;   //overflow
@@ -384,6 +387,8 @@ private:
 
   template<uint Size> auto _read(uint32 addr) -> uint32;
   template<uint Size = Word> auto _readPC() -> uint32;
+  auto _readDisplacement(uint32 base) -> uint32;
+  auto _readIndex(uint32 base) -> uint32;
   auto _dataRegister(DataRegister dr) -> string;
   auto _addressRegister(AddressRegister ar) -> string;
   template<uint Size> auto _immediate() -> string;

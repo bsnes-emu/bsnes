@@ -9,10 +9,12 @@ auto APU::Enter() -> void {
 }
 
 auto APU::main() -> void {
-  step(system.colorburst());
+  step(1);
 }
 
 auto APU::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 auto APU::power() -> void {

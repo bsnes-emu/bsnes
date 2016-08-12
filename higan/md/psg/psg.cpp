@@ -9,10 +9,12 @@ auto PSG::Enter() -> void {
 }
 
 auto PSG::main() -> void {
-  step(system.colorburst());
+  step(1);
 }
 
 auto PSG::step(uint clocks) -> void {
+  Thread::step(clocks);
+  synchronize(cpu);
 }
 
 auto PSG::power() -> void {

@@ -10,8 +10,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::boot() -> void {
-  r.a[7] = read(1, 0) << 16 | read(1, 2) << 0;
-  r.pc   = read(1, 4) << 16 | read(1, 6) << 0;
+  r.a[7] = readWord(0) << 16 | readWord(2) << 0;
+  r.pc   = readWord(4) << 16 | readWord(6) << 0;
 }
 
 auto CPU::main() -> void {
@@ -20,11 +20,10 @@ auto CPU::main() -> void {
 
 auto CPU::step(uint clocks) -> void {
   Thread::step(clocks);
-  cycles += clocks;
-  if(cycles >= frequency() / 60) {
-    cycles = 0;
-    scheduler.exit(Scheduler::Event::Frame);
-  }
+  synchronize(apu);
+  synchronize(vdp);
+  synchronize(psg);
+  synchronize(ym2612);
 }
 
 auto CPU::power() -> void {
@@ -39,25 +38,34 @@ auto CPU::reset() -> void {
   cycles = 0;
 }
 
-auto CPU::read(bool word, uint24 addr) -> uint16 {
-  if(addr < 0x400000) return cartridge.read(word, addr);
-  if(addr < 0xe00000) return 0x0000;
-
-  uint16 data = ram[addr & 65535];
-  if(word) data = data << 8 | ram[addr + 1 & 65535];
-  return data;
+auto CPU::readByte(uint24 addr) -> uint8 {
+  if(addr < 0x400000) return cartridge.readByte(addr);
+  if(addr < 0xc00000) return 0x00;
+  if(addr < 0xe00000) return vdp.readByte(addr);
+  return ram[addr & 0xffff];
 }
 
-auto CPU::write(bool word, uint24 addr, uint16 data) -> void {
-  if(addr < 0x400000) return cartridge.write(word, addr, data);
-  if(addr < 0xe00000) return;
+auto CPU::readWord(uint24 addr) -> uint16 {
+  if(addr < 0x400000) return cartridge.readWord(addr);
+  if(addr < 0xc00000) return 0x0000;
+  if(addr < 0xe00000) return vdp.readWord(addr);
+  uint16 data = ram[addr + 0 & 65535] << 8;
+  return data | ram[addr + 1 & 65535] << 0;
+}
 
-  if(!word) {
-    ram[addr & 65535] = data;
-  } else {
-    ram[addr + 0 & 65535] = data >> 8;
-    ram[addr + 1 & 65535] = data >> 0;
-  }
+auto CPU::writeByte(uint24 addr, uint8 data) -> void {
+  if(addr < 0x400000) return cartridge.writeByte(addr, data);
+  if(addr < 0xc00000) return;
+  if(addr < 0xe00000) return vdp.writeByte(addr, data);
+  ram[addr & 0xffff] = data;
+}
+
+auto CPU::writeWord(uint24 addr, uint16 data) -> void {
+  if(addr < 0x400000) return cartridge.writeWord(addr, data);
+  if(addr < 0xc00000) return;
+  if(addr < 0xe00000) return vdp.writeWord(addr, data);
+  ram[addr + 0 & 0xffff] = data >> 8;
+  ram[addr + 1 & 0xffff] = data >> 0;
 }
 
 }

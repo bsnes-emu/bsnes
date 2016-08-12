@@ -1,16 +1,7 @@
-auto M68K::trap() -> void {
-  instructionsExecuted--;
-  r.pc -= 2;
-  print("[M68K] unimplemented instruction: ", hex(r.pc, 6L), " = ", hex(opcode, 4L), "\n");
-  print("[M68K] instructions executed: ", instructionsExecuted, "\n");
-  while(true) step(5);
-}
-
 auto M68K::instruction() -> void {
   instructionsExecuted++;
 
 //if(instructionsExecuted >= 2000010) trap();
-
 //if(instructionsExecuted >= 2000000) {
 //  print(disassembleRegisters(), "\n");
 //  print(disassemble(r.pc), "\n");
@@ -1264,16 +1255,13 @@ M68K::M68K() {
     bind(opcode, UNLK, with);
   }
 
+  //ILLEGAL
+  for(uint16 opcode : range(65536)) {
+    if(instructionTable[opcode]) continue;
+    bind(opcode, ILLEGAL);
+  }
+
   #undef bind
   #undef unbind
   #undef pattern
-
-  uint unimplemented = 0;
-  for(uint16 opcode : range(65536)) {
-    if(instructionTable[opcode]) continue;
-    instructionTable[opcode] = [=] { trap(); };
-    disassembleTable[opcode] = [=] { return string{"???"}; };
-    unimplemented++;
-  }
-  print("[M68K] unimplemented opcodes: ", unimplemented, "\n");
 }
