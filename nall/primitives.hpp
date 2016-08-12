@@ -59,6 +59,7 @@ template<uint Bits> struct Natural {
 
   struct Reference {
     inline Reference(Natural& source, uint lo, uint hi) : source(source), Lo(lo), Hi(hi) {}
+    inline auto& operator=(Reference& source) { return set(source.get()); }
 
     inline auto get() const -> type {
       const type RangeBits = Hi - Lo + 1;
@@ -162,6 +163,7 @@ template<uint Bits> struct Integer {
 
   struct Reference {
     inline Reference(Integer& source, uint lo, uint hi) : source(source), Lo(lo), Hi(hi) {}
+    inline auto& operator=(const Reference& source) { return set(source.get()); }
 
     inline auto get() const -> utype {
       const type RangeBits = Hi - Lo + 1;

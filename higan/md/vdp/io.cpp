@@ -1,10 +1,25 @@
+//todo: does data mirroring occur for all VDP addresses; or just data/control ports?
+
 auto VDP::readByte(uint24 addr) -> uint8 {
-  return 0x00;
+  auto data = readWord(addr & ~1);
+  return data << 8 | data << 0;
 }
+
+auto VDP::writeByte(uint24 addr, uint8 data) -> void {
+  return writeWord(addr & ~1, data << 8 | data << 0);
+}
+
+//
 
 auto VDP::readWord(uint24 addr) -> uint16 {
   switch(addr & 0xc0001f) {
 
+  //data port
+  case 0xc00000: case 0xc00002: {
+    return readDataPort();
+  }
+
+  //control port
   case 0xc00004: case 0xc00006: {
     return readControlPort();
   }
@@ -14,19 +29,19 @@ auto VDP::readWord(uint24 addr) -> uint16 {
   return 0x0000;
 }
 
-auto VDP::writeByte(uint24 addr, uint8 data) -> void {
-//print("[VDP] ", hex(addr, 6L), "=", hex(data, 2L), "\n");
-}
-
 auto VDP::writeWord(uint24 addr, uint16 data) -> void {
 //print("[VDP] ", hex(addr, 6L), "=", hex(data, 4L), "\n");
 
   switch(addr & 0xc0001f) {
 
+  //data port
+  case 0xc00000: case 0xc00002: {
+    return writeDataPort(data);
+  }
+
   //control port
   case 0xc00004: case 0xc00006: {
-    if(!data.bit(15)) return;
-    return writeControlPort(data.bits(8,14), data.bits(0,7));
+    return writeControlPort(data);
   }
 
   }
@@ -34,15 +49,99 @@ auto VDP::writeWord(uint24 addr, uint16 data) -> void {
 
 //
 
+auto VDP::readDataPort() -> uint16 {
+  io.commandPending = false;
+
+  //VRAM read
+  if(io.command.bits(0,3) == 0) {
+    return 0x0000;
+  }
+
+  //VSRAM read
+  if(io.command.bits(0,3) == 4) {
+    return 0x0000;
+  }
+
+  //CRAM read
+  if(io.command.bits(0,3) == 8) {
+    return 0x0000;
+  }
+}
+
+auto VDP::writeDataPort(uint16 data) -> void {
+  io.commandPending = false;
+
+  //DMA VRAM fill
+  if(io.command.bits(4,5) == 2) {
+    io.dmaActive = true;
+    io.dmaFillWord = data;
+    return;
+  }
+
+  //VRAM write
+  if(io.command.bits(0,3) == 1) {
+    auto address = io.address.bits(1,15);
+    if(io.address.bit(0)) data = data >> 8 | data << 8;
+    vram[address] = data;
+    io.address += io.dataIncrement;
+    return;
+  }
+
+  //VSRAM write
+  if(io.command.bits(0,3) == 5) {
+    auto address = io.address.bits(1,6);
+    if(address >= 40) return;
+    //data format: ---- --yy yyyy yyyy
+    vsram[address] = data.bits(0,9);
+    io.address += io.dataIncrement;
+    return;
+  }
+
+  //CRAM write
+  if(io.command.bits(0,3) == 3) {
+    auto address = io.address.bits(1,6);
+    //data format: ---- bbb- ggg- rrr-
+    cram[address] = data.bits(1,3) << 0 | data.bits(5,7) << 3 | data.bits(9,11) << 6;
+    io.address += io.dataIncrement;
+    return;
+  }
+}
+
+//
+
 auto VDP::readControlPort() -> uint16 {
+  io.commandPending = false;
+
   uint16 result = 0b0011'0100'0000'0000;
+  result |= io.dmaActive << 1;
   return result;
 }
 
-auto VDP::writeControlPort(uint7 addr, uint8 data) -> void {
-//print("[VDPC] ", hex(addr, 2L), "=", hex(data, 2L), "\n");
+auto VDP::writeControlPort(uint16 data) -> void {
+//print("[VDPC] ", hex(data, 4L), "\n");
 
-  switch(addr) {
+  //command write (lo)
+  if(io.commandPending) {
+    io.commandPending = false;
+
+    io.command.bits(2,5) = data.bits(4,7);
+    io.address.bits(14,15) = data.bits(0,1);
+
+    return;
+  }
+
+  //command write (hi)
+  if(data.bits(14,15) != 2) {
+    io.commandPending = true;
+
+    io.command.bits(0,1) = data.bits(14,15);
+    io.address.bits(0,13) = data.bits(0,13);
+    return;
+  }
+
+  //register write (d13 is ignored)
+  if(data.bits(14,15) == 2)
+  switch(data.bits(8,12)) {
 
   //mode register 1
   case 0x00: {
@@ -61,24 +160,27 @@ auto VDP::writeControlPort(uint7 addr, uint8 data) -> void {
     io.verticalBlankInterruptEnable = data.bit(5);
     io.displayEnable = data.bit(6);
     io.externalVRAM = data.bit(7);
+
+    if(!io.dmaEnable) io.command.bit(5) = 0;
+
     return;
   }
 
   //plane A name table location
   case 0x02: {
-    io.nametablePlaneA = data.bits(3,6);
+    planeA.io.nametableAddress = data.bits(3,6) << 12;
     return;
   }
 
   //window name table location
   case 0x03: {
-    io.nametableWindow = data.bits(1,6);
+    window.io.nametableAddress = data.bits(1,6) << 10;
     return;
   }
 
   //plane B name table location
   case 0x04: {
-    io.nametablePlaneB = data.bits(0,3);
+    planeB.io.nametableAddress = data.bits(0,3) << 12;
     return;
   }
 
@@ -96,18 +198,7 @@ auto VDP::writeControlPort(uint7 addr, uint8 data) -> void {
 
   //background color
   case 0x07: {
-    io.backgroundIndex = data.bits(0,3);
-    io.backgroundPalette = data.bits(4,5);
-    return;
-  }
-
-  //unused
-  case 0x08: {
-    return;
-  }
-
-  //unused
-  case 0x09: {
+    io.backgroundColor = data.bits(0,5);
     return;
   }
 
@@ -149,30 +240,64 @@ auto VDP::writeControlPort(uint7 addr, uint8 data) -> void {
     return;
   }
 
-  //VRAM auto-increment value
+  //data port auto-increment value
   case 0x0f: {
-    io.vramAutoIncrement = data.bits(0,7);
+    io.dataIncrement = data.bits(0,7);
     return;
   }
 
   //plane size
   case 0x10: {
-    io.horizontalPlaneSize = data.bits(0,1);
-    io.verticalPlaneSize = data.bits(4,5);
+    //0 = 32 tiles
+    //1 = 64 tiles
+    //2 = invalid (repeats first row for every scanline)
+    //3 = 128 tiles
+    static const uint shift[] = {5, 6, 0, 7};
+
+    planeA.io.nametableWidth = shift[data.bits(0,1)];
+    window.io.nametableWidth = shift[data.bits(0,1)];
+    planeB.io.nametableWidth = shift[data.bits(0,1)];
+
+    planeA.io.nametableHeight = shift[data.bits(4,5)];
+    window.io.nametableHeight = shift[data.bits(4,5)];
+    planeB.io.nametableHeight = shift[data.bits(4,5)];
+
     return;
   }
 
   //window plane horizontal position
   case 0x11: {
-    io.horizontalWindowPlanePosition = data.bits(0,4);
-    io.horizontalWindowPlaneRight = data.bit(7);
+    if(!data) {
+      //disable
+      io.windowHorizontalLo = ~0;
+      io.windowHorizontalHi = ~0;
+    } else if(data.bit(7) == 0) {
+      //left
+      io.windowHorizontalLo = 0;
+      io.windowHorizontalHi = (data.bits(0,4) << 4) - 1;
+    } else {
+      //right
+      io.windowHorizontalLo = (data.bits(0,4) << 4) - 1;
+      io.windowHorizontalHi = ~0;
+    }
     return;
   }
 
   //window plane vertical position
   case 0x12: {
-    io.verticalWindowPlanePosition = data.bits(0,4);
-    io.verticalWindowPlaneDown = data.bit(7);
+    if(!data) {
+      //disable
+      io.windowVerticalLo = ~0;
+      io.windowVerticalHi = ~0;
+    } else if(data.bit(7) == 0) {
+      //up
+      io.windowVerticalLo = 0;
+      io.windowVerticalHi = (data.bits(0,4) << 3) - 1;
+    } else {
+      //down
+      io.windowVerticalLo = (data.bits(0,4) << 3) - 1;
+      io.windowVerticalHi = ~0;
+    }
     return;
   }
 
@@ -204,6 +329,11 @@ auto VDP::writeControlPort(uint7 addr, uint8 data) -> void {
   case 0x17: {
     io.dmaSource.bits(16,21) = data.bits(0,5);
     io.dmaMode = data.bits(6,7);
+    return;
+  }
+
+  //unused
+  default: {
     return;
   }
 

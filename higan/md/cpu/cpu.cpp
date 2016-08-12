@@ -15,6 +15,12 @@ auto CPU::boot() -> void {
 }
 
 auto CPU::main() -> void {
+  #if 0
+  static file fp;
+  if(!fp) fp.open({Path::user(), "Desktop/trace.log"}, file::mode::write);
+  fp.print(pad(disassemble(r.pc), -60, ' '), " ", disassembleRegisters().replace("\n", " "), "\n");
+  #endif
+
   instruction();
 }
 

@@ -248,13 +248,10 @@ auto M68K::instructionASR(EffectiveAddress modify) -> void {
 
 auto M68K::instructionBCC(uint4 condition, uint8 displacement) -> void {
   auto extension = readPC<Word>();
+  if(displacement) r.pc -= 2;
+  if(condition >= 2 && !testCondition(condition)) return;
   if(condition == 1) push<Long>(r.pc);
-  if(condition >= 2 && !testCondition(condition)) {  //0 = BRA; 1 = BSR
-    if(displacement) r.pc -= 2;
-  } else {
-    r.pc -= 2;
-    r.pc += displacement ? sign<Byte>(displacement) : sign<Word>(extension);
-  }
+  r.pc += displacement ? (int8_t)displacement : (int16_t)extension - 2;
 }
 
 template<uint Size> auto M68K::instructionBCHG(DataRegister bit, EffectiveAddress with) -> void {

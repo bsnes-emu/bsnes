@@ -112,12 +112,12 @@ auto pCanvas::_paint() -> void {
   bmi.bmiHeader.biCompression = BI_RGB;
   bmi.bmiHeader.biWidth = width;
   bmi.bmiHeader.biHeight = -height;  //GDI stores bitmaps upside now; negative height flips bitmap
-  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32);
+  bmi.bmiHeader.biSizeImage = pixels.size() * sizeof(uint32_t);
   void* bits = nullptr;
   HBITMAP bitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, nullptr, 0);
   if(bits) {
-    auto source = (const uint8*)pixels.data();
-    auto target = (uint8*)bits;
+    auto source = (const uint8_t*)pixels.data();
+    auto target = (uint8_t*)bits;
     for(auto n : range(width * height)) {
       target[0] = (source[0] * source[3]) / 255;
       target[1] = (source[1] * source[3]) / 255;
@@ -155,7 +155,7 @@ auto pCanvas::_rasterize() -> void {
   pixels.resize(width * height);
 
   if(auto& icon = state().icon) {
-    memory::copy(pixels.data(), icon.data(), width * height * sizeof(uint32));
+    memory::copy(pixels.data(), icon.data(), width * height * sizeof(uint32_t));
   } else if(auto& gradient = state().gradient) {
     auto& colors = gradient.state.colors;
     image fill;
@@ -163,7 +163,7 @@ auto pCanvas::_rasterize() -> void {
     fill.gradient(colors[0].value(), colors[1].value(), colors[2].value(), colors[3].value());
     memory::copy(pixels.data(), fill.data(), fill.size());
   } else {
-    uint32 color = state().color.value();
+    uint32_t color = state().color.value();
     for(auto& pixel : pixels) pixel = color;
   }
 }

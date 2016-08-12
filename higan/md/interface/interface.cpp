@@ -61,9 +61,9 @@ auto Interface::videoColors() -> uint32 {
 }
 
 auto Interface::videoColor(uint32 color) -> uint64 {
-  uint B = color.bits(0,2);
+  uint R = color.bits(0,2);
   uint G = color.bits(3,5);
-  uint R = color.bits(6,8);
+  uint B = color.bits(6,8);
 
   uint64 r = image::normalize(R, 3, 16);
   uint64 g = image::normalize(G, 3, 16);

@@ -9,16 +9,67 @@ struct VDP : Thread {
   auto power() -> void;
   auto reset() -> void;
 
+  //io.cpp
   auto readByte(uint24 addr) -> uint8;
-  auto readWord(uint24 addr) -> uint16;
   auto writeByte(uint24 addr, uint8 data) -> void;
+
+  auto readWord(uint24 addr) -> uint16;
   auto writeWord(uint24 addr, uint16 data) -> void;
 
+  auto readDataPort() -> uint16;
+  auto writeDataPort(uint16 data) -> void;
+
   auto readControlPort() -> uint16;
-  auto writeControlPort(uint7 addr, uint8 data) -> void;
+  auto writeControlPort(uint16 data) -> void;
+
+  //dma.cpp
+  auto dmaRun() -> void;
+  auto dmaFillVRAM() -> void;
+
+  //render.cpp
+  auto scanline() -> void;
+  auto run() -> void;
+  auto outputPixel(uint9 color) -> void;
+
+  //background.cpp
+  struct Background {
+    auto scanline() -> void;
+    auto run(uint x, uint y) -> void;
+
+    auto power() -> void;
+    auto reset() -> void;
+
+    struct IO {
+      uint15 nametableAddress;
+      uint3 nametableWidth;   //1 << value
+      uint3 nametableHeight;  //1 << value
+    } io;
+
+    struct Output {
+      uint6 color;
+      boolean priority;
+    } output;
+  };
+  Background planeA;
+  Background window;
+  Background planeB;
+
+  uint16 vram[32768];
+  uint16 vramExpansion[32768];  //not present in stock Mega Drive hardware
+  uint9 cram[64];
+  uint10 vsram[40];
 
 private:
   struct IO {
+    //internal state
+    boolean dmaActive;
+    uint8 dmaFillWord;
+
+    //command
+    uint6 command;
+    uint16 address;
+    boolean commandPending;
+
     //$00  mode register 1
     uint1 displayOverlayEnable;
     uint1 counterLatch;
@@ -33,15 +84,6 @@ private:
     uint1 displayEnable;
     uint1 externalVRAM;
 
-    //$02  plane A name table location
-    uint4 nametablePlaneA;
-
-    //$03  window name table location
-    uint6 nametableWindow;
-
-    //$04  plane B name table location
-    uint4 nametablePlaneB;
-
     //$05  sprite attribute table location
     uint8 attrtableSprite;
 
@@ -49,8 +91,7 @@ private:
     uint1 nametableBaseSprite;
 
     //$07  background color
-    uint4 backgroundIndex;
-    uint2 backgroundPalette;
+    uint6 backgroundColor;
 
     //$0a  horizontal interrupt counter
     uint8 horizontalInterruptCounter;
@@ -75,20 +116,16 @@ private:
     uint1 nametableBasePatternA;
     uint1 nametableBasePatternB;
 
-    //$0f  VRAM auto-increment value
-    uint8 vramAutoIncrement;
-
-    //$10  plane size
-    uint2 horizontalPlaneSize;
-    uint2 verticalPlaneSize;
+    //$0f  data port auto-increment value
+    uint8 dataIncrement;
 
     //$11  window plane horizontal position
-    uint5 horizontalWindowPlanePosition;
-    uint1 horizontalWindowPlaneRight;
+    uint10 windowHorizontalLo;
+    uint10 windowHorizontalHi;
 
     //$12  window plane vertical position
-    uint5 verticalWindowPlanePosition;
-    uint1 verticalWindowPlaneDown;
+    uint10 windowVerticalLo;
+    uint10 windowVerticalHi;
 
     //$13-$14  DMA length
     uint16 dmaLength;
@@ -97,6 +134,12 @@ private:
     uint22 dmaSource;
     uint2 dmaMode;
   } io;
+
+  struct State {
+    uint32* output = nullptr;
+    uint x;
+    uint y;
+  } state;
 
   uint32 buffer[1280 * 480];
 };
