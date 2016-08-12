@@ -17,7 +17,7 @@ OBJ := build/obj
 
 CC := clang
 
-CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)"
+CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I.
 SDL_LDFLAGS := -lSDL
 LDFLAGS += -lc -lm
 CONF ?= debug
@@ -32,7 +32,7 @@ endif
 ifeq ($(CONF),debug)
 CFLAGS += -g
 else ifeq ($(CONF), release)
-CFLAGS += -O3 -flto
+CFLAGS += -O3 -flto -DNDEBUG
 LDFLAGS += -flto
 else
 $(error Invalid value for CONF: $(CONF). Use "debug" or "release")
@@ -46,7 +46,7 @@ CORE_SOURCES := $(shell echo Core/*.c)
 SDL_SOURCES := $(shell echo SDL/*.c)
 
 ifeq ($(shell uname -s),Darwin)
-COCOA_SOURCES := $(shell echo Cocoa/*.m)
+COCOA_SOURCES := $(shell echo Cocoa/*.m) $(shell echo HexFiend/*.m)
 SDL_SOURCES += $(shell echo SDL/*.m)
 endif
 
@@ -74,6 +74,11 @@ $(OBJ)/%.dep: %
 $(OBJ)/%.c.o: %.c
 	-@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
+	
+# HexFiend requires more flags
+$(OBJ)/HexFiend/%.m.o: HexFiend/%.m
+	-@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(OCFLAGS) -c $< -o $@ -fno-objc-arc -include HexFiend/HexFiend_2_Framework_Prefix.pch
 	
 $(OBJ)/%.m.o: %.m
 	-@mkdir -p $(dir $@)

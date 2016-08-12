@@ -4,6 +4,9 @@
 #include "AppDelegate.h"
 #include "gb.h"
 #include "debugger.h"
+#include "memory.h"
+#include "HexFiend/HexFiend.h"
+#include "GBMemoryByteArray.h"
 
 @interface Document ()
 {
@@ -14,6 +17,7 @@
     bool tooMuchLogs;
     bool fullScreen;
     bool in_sync_input;
+    HFController *hex_controller;
 
     NSString *lastConsoleInput;
 }
@@ -62,7 +66,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     volatile bool stopping;
     NSConditionLock *has_debugger_input;
     NSMutableArray *debugger_input_queue;
-    bool is_inited;
+    volatile bool is_inited;
 }
 
 - (instancetype)init {
@@ -122,9 +126,12 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     } andSampleRate:96000];
     self.view.mouseHidingEnabled = YES;
     [self.audioClient start];
+    NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
+    [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
     while (running) {
         GB_run(&gb);
     }
+    [hex_timer invalidate];
     [self.audioClient stop];
     self.audioClient = nil;
     self.view.mouseHidingEnabled = NO;
@@ -154,8 +161,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     bool was_cgb = gb.is_cgb;
     [self stop];
-    GB_free(&gb);
     is_inited = false;
+    GB_free(&gb);
     if (([sender tag] == 0 && was_cgb) || [sender tag] == 2) {
         [self initCGB];
     }
@@ -198,6 +205,51 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     [self.mainWindow setFrame:window_frame display:YES];
     [self start];
 
+}
+
+- (void) initMemoryView
+{
+    hex_controller = [[HFController alloc] init];
+    [hex_controller setBytesPerColumn:1];
+    [hex_controller setFont:[NSFont userFixedPitchFontOfSize:12]];
+    [hex_controller setEditMode:HFOverwriteMode];
+    
+    [hex_controller setByteArray:[[GBMemoryByteArray alloc] initWithDocument:self]];
+
+    /* Here we're going to make three representers - one for the hex, one for the ASCII, and one for the scrollbar.  To lay these all out properly, we'll use a fourth HFLayoutRepresenter. */
+    HFLayoutRepresenter *layoutRep = [[HFLayoutRepresenter alloc] init];
+    HFHexTextRepresenter *hexRep = [[HFHexTextRepresenter alloc] init];
+    HFStringEncodingTextRepresenter *asciiRep = [[HFStringEncodingTextRepresenter alloc] init];
+    HFVerticalScrollerRepresenter *scrollRep = [[HFVerticalScrollerRepresenter alloc] init];
+    HFLineCountingRepresenter *lineRep = [[HFLineCountingRepresenter alloc] init];
+    HFStatusBarRepresenter *statusRep = [[HFStatusBarRepresenter alloc] init];
+
+    lineRep.lineNumberFormat = HFLineNumberFormatHexadecimal;
+
+    /* Add all our reps to the controller. */
+    [hex_controller addRepresenter:layoutRep];
+    [hex_controller addRepresenter:hexRep];
+    [hex_controller addRepresenter:asciiRep];
+    [hex_controller addRepresenter:scrollRep];
+    [hex_controller addRepresenter:lineRep];
+    [hex_controller addRepresenter:statusRep];
+
+    /* Tell the layout rep which reps it should lay out. */
+    [layoutRep addRepresenter:hexRep];
+    [layoutRep addRepresenter:scrollRep];
+    [layoutRep addRepresenter:asciiRep];
+    [layoutRep addRepresenter:lineRep];
+    [layoutRep addRepresenter:statusRep];
+
+
+    [(NSView *)[hexRep view] setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
+
+    /* Grab the layout rep's view and stick it into our container. */
+    NSView *layoutView = [layoutRep view];
+    NSRect layoutViewFrame = self.memoryView.frame;
+    [layoutView setFrame:layoutViewFrame];
+    [layoutView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable | NSViewMaxYMargin];
+    [self.memoryView addSubview:layoutView];
 }
 
 + (BOOL)autosavesInPlace {
@@ -333,6 +385,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
     NSString *nsstring = @(string); // For ref-counting
     dispatch_async(dispatch_get_main_queue(), ^{
+        [hex_controller reloadData];
+
         NSFont *font = [NSFont userFixedPitchFontOfSize:12];
         NSUnderlineStyle underline = NSUnderlineStyleNone;
         if (attributes & GB_LOG_BOLD) {
@@ -450,6 +504,46 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (void)log:(const char *)log
 {
     [self log:log withAttributes:0];
+}
+
+- (uint8_t) readMemory:(uint16_t)addr
+{
+    while (!is_inited);
+    return GB_read_memory(&gb, addr);
+}
+
+- (void) writeMemory:(uint16_t)addr value:(uint8_t)value
+{
+    while (!is_inited);
+    GB_write_memory(&gb, addr, value);
+}
+
+- (void) performAtomicBlock: (void (^)())block
+{
+    while (!is_inited);
+    bool was_running = running;
+    if (was_running) {
+        [self stop];
+    }
+    block();
+    if (was_running) {
+        [self start];
+    }
+}
+
+- (void) reloadMemoryView
+{
+    if (self.memoryWindow.isVisible) {
+        [hex_controller reloadData];
+    }
+}
+
+- (IBAction) showMemory:(id)sender
+{
+    if (!hex_controller) {
+        [self initMemoryView];
+    }
+    [self.memoryWindow makeKeyAndOrderFront:sender];
 }
 
 @end

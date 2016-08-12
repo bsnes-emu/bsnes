@@ -10,6 +10,8 @@
                 <outlet property="consoleOutput" destination="doS-dM-hnl" id="Gn5-ju-Wb0"/>
                 <outlet property="consoleWindow" destination="21F-Ah-yHX" id="eQ4-ug-LsT"/>
                 <outlet property="mainWindow" destination="xOd-HO-29H" id="h8M-YB-vcC"/>
+                <outlet property="memoryView" destination="8hr-8o-3rN" id="fF0-rh-8ND"/>
+                <outlet property="memoryWindow" destination="mRm-dL-mCj" id="VPR-lu-vtI"/>
                 <outlet property="view" destination="uqf-pe-VAF" id="HMP-rf-Yqk"/>
                 <outlet property="window" destination="xOd-HO-29H" id="JIz-fz-R2o"/>
             </connections>
@@ -112,6 +114,18 @@
                 </subviews>
             </view>
             <point key="canvasLocation" x="348" y="-29"/>
+        </window>
+        <window title="Memory" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" hidesOnDeactivate="YES" oneShot="NO" releasedWhenClosed="NO" showsToolbarButton="NO" visibleAtLaunch="NO" animationBehavior="default" id="mRm-dL-mCj" customClass="NSPanel">
+            <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
+            <windowCollectionBehavior key="collectionBehavior" fullScreenAuxiliary="YES"/>
+            <windowPositionMask key="initialPositionMask" leftStrut="YES" rightStrut="YES" topStrut="YES" bottomStrut="YES"/>
+            <rect key="contentRect" x="272" y="172" width="528" height="320"/>
+            <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1417"/>
+            <view key="contentView" id="8hr-8o-3rN">
+                <rect key="frame" x="0.0" y="0.0" width="528" height="320"/>
+                <autoresizingMask key="autoresizingMask"/>
+            </view>
+            <point key="canvasLocation" x="-102" y="60"/>
         </window>
     </objects>
 </document>
