@@ -588,13 +588,15 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     return VALUE_16(literal);
 }
 
-typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments);
+struct debugger_command_s;
+typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments, const struct debugger_command_s *command);
 
-typedef struct {
+typedef struct debugger_command_s {
     const char *command;
     uint8_t min_length;
     debugger_command_imp_t *implementation;
     const char *help_string; // Null if should not appear in help
+    const char *arguments_format; // For usage message
 } debugger_command_t;
 
 static const char *lstrip(const char *str)
@@ -611,12 +613,22 @@ GB_log(gb, "Program is running. \n"); \
 return false; \
 }
 
-static bool cont(GB_gameboy_t *gb, char *arguments)
+static void print_usage(GB_gameboy_t *gb, const debugger_command_t *command)
+{
+    if (command->arguments_format) {
+        GB_log(gb, "Usage: %s %s\n", command->command, command->arguments_format);
+    }
+    else {
+        GB_log(gb, "Usage: %s\n", command->command);
+    }
+}
+
+static bool cont(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: continue\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -624,12 +636,12 @@ static bool cont(GB_gameboy_t *gb, char *arguments)
     return false;
 }
 
-static bool next(GB_gameboy_t *gb, char *arguments)
+static bool next(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: next\n");
+        print_usage(gb, command);
         return true;
     }
     
@@ -639,24 +651,24 @@ static bool next(GB_gameboy_t *gb, char *arguments)
     return false;
 }
 
-static bool step(GB_gameboy_t *gb, char *arguments)
+static bool step(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: step\n");
+        print_usage(gb, command);
         return true;
     }
 
     return false;
 }
 
-static bool finish(GB_gameboy_t *gb, char *arguments)
+static bool finish(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: finish\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -666,12 +678,12 @@ static bool finish(GB_gameboy_t *gb, char *arguments)
     return false;
 }
 
-static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
+static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     STOPPED_ONLY
     
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: sld\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -681,10 +693,10 @@ static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments)
     return false;
 }
 
-static bool registers(GB_gameboy_t *gb, char *arguments)
+static bool registers(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: registers\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -723,10 +735,10 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
     return (uint16_t) min;
 }
 
-static bool breakpoint(GB_gameboy_t *gb, char *arguments)
+static bool breakpoint(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Usage: breakpoint <expression>[ if <condition expression>]\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -788,21 +800,17 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool delete(GB_gameboy_t *gb, char *arguments)
+static bool delete(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Delete all breakpoints? ");
-        char *answer = gb->input_callback(gb);
-        if (answer[0] == 'Y' || answer[0] == 'y') {
-            for (unsigned i = gb->n_breakpoints; i--;) {
-                if (gb->breakpoints[i].condition) {
-                    free(gb->breakpoints[i].condition);
-                }
+        for (unsigned i = gb->n_breakpoints; i--;) {
+            if (gb->breakpoints[i].condition) {
+                free(gb->breakpoints[i].condition);
             }
-            free(gb->breakpoints);
-            gb->breakpoints = NULL;
-            gb->n_breakpoints = 0;
         }
+        free(gb->breakpoints);
+        gb->breakpoints = NULL;
+        gb->n_breakpoints = 0;
         return true;
     }
 
@@ -852,11 +860,11 @@ static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
     return (uint16_t) min;
 }
 
-static bool watch(GB_gameboy_t *gb, char *arguments)
+static bool watch(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
 print_usage:
-        GB_log(gb, "Usage: watch (r|w|rw) <expression>[ if <condition expression>]\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -944,21 +952,17 @@ print_usage:
     return true;
 }
 
-static bool unwatch(GB_gameboy_t *gb, char *arguments)
+static bool unwatch(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Delete all watchpoints? ");
-        char *answer = gb->input_callback(gb);
-        if (answer[0] == 'Y' || answer[0] == 'y') {
-            for (unsigned i = gb->n_watchpoints; i--;) {
-                if (gb->watchpoints[i].condition) {
-                    free(gb->watchpoints[i].condition);
-                }
+        for (unsigned i = gb->n_watchpoints; i--;) {
+            if (gb->watchpoints[i].condition) {
+                free(gb->watchpoints[i].condition);
             }
-            free(gb->watchpoints);
-            gb->watchpoints = NULL;
-            gb->n_watchpoints = 0;
         }
+        free(gb->watchpoints);
+        gb->watchpoints = NULL;
+        gb->n_watchpoints = 0;
         return true;
     }
 
@@ -986,10 +990,10 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool list(GB_gameboy_t *gb, char *arguments)
+static bool list(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: list\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -1069,10 +1073,10 @@ static bool should_break(GB_gameboy_t *gb, uint16_t addr)
     return _should_break(gb, full_addr);
 }
 
-static bool print(GB_gameboy_t *gb, char *arguments)
+static bool print(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Usage: print <expression>\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -1084,10 +1088,10 @@ static bool print(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool examine(GB_gameboy_t *gb, char *arguments)
+static bool examine(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
-        GB_log(gb, "Usage: examine <expression>\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -1118,17 +1122,17 @@ static bool examine(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool mbc(GB_gameboy_t *gb, char *arguments)
+static bool mbc(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: mbc\n");
+        print_usage(gb, command);
         return true;
     }
 
     const GB_cartridge_t *cartridge = gb->cartridge_type;
 
     if (cartridge->has_ram) {
-        GB_log(gb, "Cartrdige includes%s RAM: %x\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
+        GB_log(gb, "Cartrdige includes%s RAM: $%x bytes\n", cartridge->has_battery? " battery-backed": "", gb->mbc_ram_size);
     }
     else {
         GB_log(gb, "No cartridge RAM\n");
@@ -1166,10 +1170,10 @@ static bool mbc(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool backtrace(GB_gameboy_t *gb, char *arguments)
+static bool backtrace(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments))) {
-        GB_log(gb, "Usage: backtrace\n");
+        print_usage(gb, command);
         return true;
     }
 
@@ -1181,56 +1185,96 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments)
     return true;
 }
 
-static bool help(GB_gameboy_t *gb, char *arguments);
+static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command);
+
+#define HELP_NEWLINE "\n            "
+
+/* Commands without implementations are aliases of the previous non-alias commands */
 static const debugger_command_t commands[] = {
     {"continue", 1, cont, "Continue running until next stop"},
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
-    {"bt", 2, backtrace, NULL},
-    {"sld", 3, stack_leak_detection, "Run until the current function returns, or a stack leak is detected (Experimental)"},
+    {"bt", 2, }, /* Alias */
+    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected. (Experimental)"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
-    {"mbc", 3, mbc, NULL},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression. Can also modify the condition of existing breakpoints."},
-    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints"},
-    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression. Can also modify the condition and type of existing watchpoints."},
-    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints"},
+    {"mbc", 3, }, /* Alias */
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression." HELP_NEWLINE
+                                  "Can also modify the condition of existing breakpoints.",
+                                  "<expression>[ if <condition expression>]"},
+    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]"},
+    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
+                        "Can also modify the condition and type of existing watchpoints.",
+                        " (r|w|rw) <expression>[ if <condition expression>]"},
+    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]"},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
-    {"print", 1, print, "Evaluate and print an expression"},
-    {"eval", 2, print, NULL},
-    {"examine", 2, examine, "Examine values at address"},
-    {"x", 1, examine, NULL},
+    {"print", 1, print, "Evaluate and print an expression", "<expression>"},
+    {"eval", 2, }, /* Alias */
+    {"examine", 2, examine, "Examine values at address", "<expression>"},
+    {"x", 1, }, /* Alias */
 
-    {"help", 1, help, "List available commands"},
+    {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
+    {NULL,}, /* Null terminator */
 };
-
-static bool help(GB_gameboy_t *gb, char *arguments)
-{
-    /* Todo: command specific help */
-    const debugger_command_t *command = commands;
-    for (size_t i = sizeof(commands) / sizeof(*command); i--; command++) {
-        if (command->help_string) {
-            GB_attributed_log(gb, GB_LOG_BOLD, "%s", command->command);
-            GB_log(gb, ": %s\n", command->help_string);
-        }
-    }
-    return true;
-}
 
 static const debugger_command_t *find_command(const char *string)
 {
-    const debugger_command_t *command = commands;
     size_t length = strlen(string);
-    for (size_t i = sizeof(commands) / sizeof(*command); i--; command++) {
+    for (const debugger_command_t *command = commands; command->command; command++) {
         if (command->min_length > length) continue;
         if (memcmp(command->command, string, length) == 0) { /* Is a substring? */
+            /* Aliases */
+            while (!command->implementation) {
+                command--;
+            }
             return command;
         }
     }
 
     return NULL;
+}
+
+static void print_command_shortcut(GB_gameboy_t *gb, const debugger_command_t *command)
+{
+    GB_attributed_log(gb, GB_LOG_BOLD | GB_LOG_UNDERLINE, "%.*s", command->min_length, command->command);
+    GB_attributed_log(gb, GB_LOG_BOLD , "%s", command->command + command->min_length);
+}
+
+static void print_command_description(GB_gameboy_t *gb, const debugger_command_t *command)
+{
+    print_command_shortcut(gb, command);
+    GB_log(gb, ": ");
+    GB_log(gb, (const char *)&"          %s\n" + strlen(command->command), command->help_string);
+}
+
+static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *ignored)
+{
+    const debugger_command_t *command = find_command(arguments);
+    if (command) {
+        print_command_description(gb, command);
+        GB_log(gb, "\n");
+        print_usage(gb, command);
+
+        command++;
+        if (command->command && !command->implementation) { /* Command has aliases*/
+            GB_log(gb, "\nAliases: ");
+            do {
+                print_command_shortcut(gb, command);
+                GB_log(gb, " ");
+                command++;
+            } while (command->command && !command->implementation);
+            GB_log(gb, "\n");
+        }
+        return true;
+    }
+    for (const debugger_command_t *command = commands; command->command; command++) {
+        if (command->help_string) {
+            print_command_description(gb, command);
+        }
+    }
+    return true;
 }
 
 void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
@@ -1409,7 +1453,7 @@ bool GB_debugger_do_command(GB_gameboy_t *gb, char *input)
 
     const debugger_command_t *command = find_command(command_string);
     if (command) {
-        return command->implementation(gb, arguments);
+        return command->implementation(gb, arguments, command);
     }
     else {
         GB_log(gb, "%s: no such command.\n", command_string);
