@@ -41,7 +41,23 @@ auto pWidget::setFont(const Font& font) -> void {
 auto pWidget::setGeometry(Geometry geometry) -> void {
   if(!gtkWidget) return;
   if(gtkParent) gtk_fixed_move(GTK_FIXED(gtkParent), gtkWidget, geometry.x(), geometry.y());
-  gtk_widget_set_size_request(gtkWidget, max(1, geometry.width()), max(1, geometry.height()));
+  if(geometry.width()  < 1) geometry.setWidth (1);
+  if(geometry.height() < 1) geometry.setHeight(1);
+  gtk_widget_set_size_request(gtkWidget, geometry.width(), geometry.height());
+  if(gtk_widget_get_realized(gtkWidget)) {
+    static bool locked = false;
+    if(!locked) {
+      locked = true;
+      auto time = chrono::millisecond();
+      while(chrono::millisecond() - time < 20) {
+        gtk_main_iteration_do(false);
+        if(gtkWidget->allocation.width  != geometry.width ()) continue;
+        if(gtkWidget->allocation.height != geometry.height()) continue;
+        break;
+      }
+      locked = false;
+    }
+  }
   self().doSize();
 }
 

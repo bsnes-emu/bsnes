@@ -10,10 +10,7 @@ Interface::Interface() {
 
   information.manufacturer = "Bandai";
   information.name         = "WonderSwan";
-  information.width        = 224;  //note: technically 224x144; but screen can be rotated
-  information.height       = 224;  //by using a square size; this can be done in the core
   information.overscan     = false;
-  information.aspectRatio  = 1.0;
   information.resettable   = false;
 
   information.capability.states = true;
@@ -52,6 +49,17 @@ auto Interface::manifest() -> string {
 
 auto Interface::title() -> string {
   return cartridge.information.title;
+}
+
+auto Interface::videoSize() -> VideoSize {
+  return {224, 224};
+}
+
+auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
+  uint w = 224;
+  uint h = 224;
+  uint m = min(width / w, height / h);
+  return {w * m, h * m};
 }
 
 auto Interface::videoFrequency() -> double {

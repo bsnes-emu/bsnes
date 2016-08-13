@@ -1,4 +1,5 @@
 #include <nall/platform.hpp>
+#include <nall/chrono.hpp>
 #include <nall/directory.hpp>
 #include <nall/function.hpp>
 #include <nall/image.hpp>
@@ -203,6 +204,8 @@ struct Position {
 
   Position();
   Position(signed x, signed y);
+  template<typename X, typename Y>
+  Position(X x, Y y) : Position((signed)x, (signed)y) {}
 
   explicit operator bool() const;
   auto operator==(const Position& source) const -> bool;
@@ -230,6 +233,8 @@ struct Size {
 
   Size();
   Size(signed width, signed height);
+  template<typename W, typename H>
+  Size(W width, H height) : Size((signed)width, (signed)height) {}
 
   explicit operator bool() const;
   auto operator==(const Size& source) const -> bool;
@@ -261,6 +266,8 @@ struct Geometry {
   Geometry();
   Geometry(Position position, Size size);
   Geometry(signed x, signed y, signed width, signed height);
+  template<typename X, typename Y, typename W, typename H>
+  Geometry(X x, Y y, W width, H height) : Geometry((signed)x, (signed)y, (signed)width, (signed)height) {}
 
   explicit operator bool() const;
   auto operator==(const Geometry& source) const -> bool;

@@ -10,10 +10,7 @@ Interface::Interface() {
 
   information.manufacturer = "Sega";
   information.name         = "Mega Drive";
-  information.width        = 320;
-  information.height       = 240;
   information.overscan     = true;
-  information.aspectRatio  = 1.0;
   information.resettable   = true;
 
   information.capability.states = false;
@@ -50,6 +47,17 @@ auto Interface::manifest() -> string {
 
 auto Interface::title() -> string {
   return cartridge.title();
+}
+
+auto Interface::videoSize() -> VideoSize {
+  return {1280, 480};
+}
+
+auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
+  uint w = 320;
+  uint h = 240;
+  uint m = min(width / w, height / h);
+  return {w * m, h * m};
 }
 
 auto Interface::videoFrequency() -> double {

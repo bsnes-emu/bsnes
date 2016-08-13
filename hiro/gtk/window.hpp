@@ -44,8 +44,8 @@ struct pWindow : pObject {
   GtkWidget* gtkMenu = nullptr;
   GtkWidget* gtkStatus = nullptr;
   GtkAllocation lastAllocation = {0};
-  bool onSizePending = false;
   Geometry windowedGeometry{128, 128, 256, 256};
+  bool onSizePending = false;
 };
 
 }

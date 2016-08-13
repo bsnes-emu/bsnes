@@ -10,10 +10,7 @@ Interface::Interface() {
 
   information.manufacturer = "Nintendo";
   information.name         = "Famicom";
-  information.width        = 256;
-  information.height       = 240;
   information.overscan     = true;
-  information.aspectRatio  = 8.0 / 7.0;
   information.resettable   = true;
 
   information.capability.states = true;
@@ -52,6 +49,17 @@ auto Interface::manifest() -> string {
 
 auto Interface::title() -> string {
   return cartridge.title();
+}
+
+auto Interface::videoSize() -> VideoSize {
+  return {256, 240};
+}
+
+auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
+  uint w = 256 * (arc ? 8.0 / 7.0 : 1.0);
+  uint h = 240;
+  uint m = min(width / w, height / h);
+  return {w * m, h * m};
 }
 
 auto Interface::videoFrequency() -> double {

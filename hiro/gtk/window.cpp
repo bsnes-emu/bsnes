@@ -266,6 +266,8 @@ auto pWindow::setFullScreen(bool fullScreen) -> void {
     gtk_window_unfullscreen(GTK_WINDOW(widget));
     state().geometry = windowedGeometry;
   }
+  auto time = chrono::millisecond();
+  while(chrono::millisecond() - time < 20) gtk_main_iteration_do(false);
 }
 
 auto pWindow::setGeometry(Geometry geometry) -> void {
@@ -278,7 +280,12 @@ auto pWindow::setGeometry(Geometry geometry) -> void {
   gtk_window_set_geometry_hints(GTK_WINDOW(widget), GTK_WIDGET(widget), &geom, GDK_HINT_MIN_SIZE);
 
   gtk_widget_set_size_request(formContainer, geometry.width(), geometry.height());
+  auto time1 = chrono::millisecond();
+  while(chrono::millisecond() - time1 < 20) gtk_main_iteration_do(false);
+
   gtk_window_resize(GTK_WINDOW(widget), geometry.width(), geometry.height() + _menuHeight() + _statusHeight());
+  auto time2 = chrono::millisecond();
+  while(chrono::millisecond() - time2 < 20) gtk_main_iteration_do(false);
 }
 
 auto pWindow::setModal(bool modal) -> void {

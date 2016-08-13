@@ -6,10 +6,7 @@ struct Interface {
   struct Information {
     string manufacturer;
     string name;
-    uint width;
-    uint height;
     bool overscan;
-    double aspectRatio;
     bool resettable;
     struct Capability {
       bool states;
@@ -70,6 +67,9 @@ struct Interface {
   virtual auto title() -> string = 0;
 
   //video information
+  struct VideoSize { uint width, height; };
+  virtual auto videoSize() -> VideoSize = 0;
+  virtual auto videoSize(uint width, uint height, bool arc) -> VideoSize = 0;
   virtual auto videoFrequency() -> double = 0;
   virtual auto videoColors() -> uint32 = 0;
   virtual auto videoColor(uint32 color) -> uint64 = 0;

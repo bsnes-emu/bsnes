@@ -200,40 +200,37 @@ auto Presentation::updateEmulator() -> void {
 }
 
 auto Presentation::resizeViewport() -> void {
-  int width   = emulator ? emulator->information.width  : 256;
-  int height  = emulator ? emulator->information.height : 240;
-  double stretch = emulator ? emulator->information.aspectRatio : 1.0;
-  if(stretch != 1.0) {
-    //aspect correction is always enabled in fullscreen mode
-    if(!fullScreen() && !settings["Video/AspectCorrection"].boolean()) stretch = 1.0;
-  }
-
-  int scale = 2;
+  uint scale = 2;
   if(settings["Video/Scale"].text() == "Small" ) scale = 2;
   if(settings["Video/Scale"].text() == "Medium") scale = 3;
   if(settings["Video/Scale"].text() == "Large" ) scale = 4;
 
-  int windowWidth = 0, windowHeight = 0;
+  uint windowWidth = 0, windowHeight = 0;
+  bool aspectCorrection = true;
   if(!fullScreen()) {
     windowWidth  = 320 * scale;
     windowHeight = 240 * scale;
+    aspectCorrection = settings["Video/AspectCorrection"].boolean();
   } else {
     windowWidth  = geometry().width();
     windowHeight = geometry().height();
   }
-
-  int multiplier = min(windowWidth / (int)(width * stretch), windowHeight / height);
-  width = width * multiplier * stretch;
-  height = height * multiplier;
-
   if(!fullScreen()) setSize({windowWidth, windowHeight});
-  viewport.setGeometry({(windowWidth - width) / 2, (windowHeight - height) / 2, width, height});
 
-  if(!emulator) drawSplashScreen();
+  if(!emulator) {
+    viewport.setGeometry({0, 0, windowWidth, windowHeight});
+    draw(Resource::Logo::higan);
+  } else {
+    auto videoSize = emulator->videoSize(windowWidth, windowHeight, aspectCorrection);
+    viewport.setGeometry({
+      (windowWidth - videoSize.width) / 2, (windowHeight - videoSize.height) / 2,
+      videoSize.width, videoSize.height
+    });
+  }
 }
 
 auto Presentation::toggleFullScreen() -> void {
-  if(fullScreen() == false) {
+  if(!fullScreen()) {
     menuBar.setVisible(false);
     statusBar.setVisible(false);
     setResizable(true);
@@ -251,15 +248,33 @@ auto Presentation::toggleFullScreen() -> void {
   resizeViewport();
 }
 
-auto Presentation::drawSplashScreen() -> void {
+auto Presentation::draw(image logo) -> void {
   if(!video) return;
+
   uint32_t* output;
-  uint length;
-  if(video->lock(output, length, 256, 240)) {
-    for(auto y : range(240)) {
-      auto dp = output + y * (length >> 2);
-      for(auto x : range(256)) *dp++ = 0xff000000;
+  uint length = 0;
+  uint width = viewport.geometry().width();
+  uint height = viewport.geometry().height();
+  if(video->lock(output, length, width, height)) {
+    uint cx = (width - logo.width()) - 10;
+    uint cy = (height - logo.height()) - 10;
+
+    image backdrop;
+    backdrop.allocate(width, height);
+    if(logo && !program->hasQuit) {
+      backdrop.sphericalGradient(0xff0000bf, 0xff000000, logo.width(), logo.height() / 2, width, height);
+      backdrop.impose(image::blend::sourceAlpha, cx, cy, logo, 0, 0, logo.width(), logo.height());
+    } else {
+      backdrop.fill(0xff000000);
     }
+
+    auto data = (uint32_t*)backdrop.data();
+    for(auto y : range(height)) {
+      auto dp = output + y * (length >> 2);
+      auto sp = data + y * width;
+      for(auto x : range(width)) *dp++ = *sp++;
+    }
+
     video->unlock();
     video->refresh();
   }
