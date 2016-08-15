@@ -21,15 +21,49 @@ auto CPU::main() -> void {
   fp.print(pad(disassemble(r.pc), -60, ' '), " ", disassembleRegisters().replace("\n", " "), "\n");
   #endif
 
+  if(state.interruptPending) {
+    if(state.interruptPending.bit((uint)Interrupt::HorizontalBlank)) {
+      state.interruptPending.bit((uint)Interrupt::HorizontalBlank) = 0;
+      r.i = 4;
+      return exception(Exception::Interrupt, Vector::HorizontalBlank);
+    }
+
+    if(state.interruptPending.bit((uint)Interrupt::VerticalBlank)) {
+      state.interruptPending.bit((uint)Interrupt::VerticalBlank) = 0;
+      r.i = 6;
+      return exception(Exception::Interrupt, Vector::VerticalBlank);
+    }
+  }
+
   instruction();
 }
 
 auto CPU::step(uint clocks) -> void {
+  while(wait) {
+    Thread::step(1);
+    synchronize();
+  }
+
   Thread::step(clocks);
+  synchronize();
+}
+
+auto CPU::synchronize() -> void {
   synchronize(apu);
   synchronize(vdp);
   synchronize(psg);
   synchronize(ym2612);
+}
+
+auto CPU::raise(Interrupt interrupt) -> void {
+  if(!state.interruptLine.bit((uint)interrupt)) {
+    state.interruptLine.bit((uint)interrupt) = 1;
+    state.interruptPending.bit((uint)interrupt) = 1;
+  }
+}
+
+auto CPU::lower(Interrupt interrupt) -> void {
+  state.interruptLine.bit((uint)interrupt) = 0;
 }
 
 auto CPU::power() -> void {
@@ -41,7 +75,8 @@ auto CPU::power() -> void {
 auto CPU::reset() -> void {
   M68K::reset();
   create(CPU::Enter, system.colorburst() * 15.0 / 7.0);
-  cycles = 0;
+
+  memory::fill(&state, sizeof(State));
 }
 
 auto CPU::readByte(uint24 addr) -> uint8 {

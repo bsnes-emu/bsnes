@@ -10,6 +10,7 @@ VDP vdp;
 #include "dma.cpp"
 #include "render.cpp"
 #include "background.cpp"
+#include "sprite.cpp"
 
 auto VDP::Enter() -> void {
   while(true) scheduler.synchronize(), vdp.main();
@@ -18,14 +19,26 @@ auto VDP::Enter() -> void {
 auto VDP::main() -> void {
   scanline();
   if(state.y < 240) {
+    if(state.y == 0) {
+      cpu.lower(CPU::Interrupt::VerticalBlank);
+    }
+    cpu.lower(CPU::Interrupt::HorizontalBlank);
     for(uint x : range(320)) {
       run();
       step(1);
     }
+    if(io.horizontalBlankInterruptEnable) {
+      cpu.raise(CPU::Interrupt::HorizontalBlank);
+    }
+    step(22);
   } else {
+    if(state.y == 240) {
+      if(io.verticalBlankInterruptEnable) {
+        cpu.raise(CPU::Interrupt::VerticalBlank);
+      }
+    }
     step(342);
   }
-  step(22);
 }
 
 auto VDP::step(uint clocks) -> void {
@@ -44,6 +57,7 @@ auto VDP::power() -> void {
   planeA.power();
   window.power();
   planeB.power();
+  sprite.power();
 }
 
 auto VDP::reset() -> void {
@@ -54,6 +68,7 @@ auto VDP::reset() -> void {
   planeA.reset();
   window.reset();
   planeB.reset();
+  sprite.reset();
 }
 
 }

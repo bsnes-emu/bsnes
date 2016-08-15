@@ -3,6 +3,17 @@ auto VDP::scanline() -> void {
   if(++state.y >= 262) state.y = 0;
   if(state.y == 0) scheduler.exit(Scheduler::Event::Frame);
 
+  if(state.y == 0) {
+    sprite.frame();
+  }
+
+  if(state.y < 240) {
+    planeA.scanline(state.y);
+    window.scanline(state.y);
+    planeB.scanline(state.y);
+    sprite.scanline(state.y);
+  }
+
   state.output = buffer + (state.y * 2 + 0) * 1280;
 }
 
@@ -16,12 +27,15 @@ auto VDP::run() -> void {
 
   planeA.run(state.x, state.y);
   planeB.run(state.x, state.y);
+  sprite.run(state.x, state.y);
 
   auto output = io.backgroundColor;
   if(auto color = planeB.output.color) output = color;
   if(auto color = planeA.output.color) output = color;
+  if(auto color = sprite.output.color) output = color;
   if(planeB.output.priority) if(auto color = planeB.output.color) output = color;
   if(planeA.output.priority) if(auto color = planeA.output.color) output = color;
+  if(sprite.output.priority) if(auto color = sprite.output.color) output = color;
 
   outputPixel(cram[output]);
   state.x++;

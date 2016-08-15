@@ -11,9 +11,9 @@ struct AboutWindow : Window {
 struct Presentation : Window {
   Presentation();
   auto updateEmulator() -> void;
+  auto clearViewport() -> void;
   auto resizeViewport() -> void;
   auto toggleFullScreen() -> void;
-  auto draw(image logo = {}) -> void;
   auto loadShaders() -> void;
 
   MenuBar menuBar{this};

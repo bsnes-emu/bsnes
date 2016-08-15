@@ -199,7 +199,28 @@ auto Presentation::updateEmulator() -> void {
   emulator->set("Scanline Emulation", scanlineEmulation.checked());
 }
 
+auto Presentation::clearViewport() -> void {
+  if(!video) return;
+
+  uint32_t* output;
+  uint length = 0;
+  uint width = viewport.geometry().width();
+  uint height = viewport.geometry().height();
+  if(video->lock(output, length, width, height)) {
+    for(uint y : range(height)) {
+      auto dp = output + y * (length >> 2);
+      for(uint x : range(width)) *dp++ = 0xff000000;
+    }
+
+    video->unlock();
+    video->refresh();
+  }
+}
+
 auto Presentation::resizeViewport() -> void {
+  //clear video area before resizing to avoid seeing distorted video momentarily
+  clearViewport();
+
   uint scale = 2;
   if(settings["Video/Scale"].text() == "Small" ) scale = 2;
   if(settings["Video/Scale"].text() == "Medium") scale = 3;
@@ -219,7 +240,6 @@ auto Presentation::resizeViewport() -> void {
 
   if(!emulator) {
     viewport.setGeometry({0, 0, windowWidth, windowHeight});
-    draw(Resource::Logo::higan);
   } else {
     auto videoSize = emulator->videoSize(windowWidth, windowHeight, aspectCorrection);
     viewport.setGeometry({
@@ -227,6 +247,9 @@ auto Presentation::resizeViewport() -> void {
       videoSize.width, videoSize.height
     });
   }
+
+  //clear video area again to ensure entire viewport area has been painted in
+  clearViewport();
 }
 
 auto Presentation::toggleFullScreen() -> void {
@@ -243,41 +266,7 @@ auto Presentation::toggleFullScreen() -> void {
     menuBar.setVisible(true);
     statusBar.setVisible(settings["UserInterface/ShowStatusBar"].boolean());
   }
-
-  Application::processEvents();
   resizeViewport();
-}
-
-auto Presentation::draw(image logo) -> void {
-  if(!video) return;
-
-  uint32_t* output;
-  uint length = 0;
-  uint width = viewport.geometry().width();
-  uint height = viewport.geometry().height();
-  if(video->lock(output, length, width, height)) {
-    uint cx = (width - logo.width()) - 10;
-    uint cy = (height - logo.height()) - 10;
-
-    image backdrop;
-    backdrop.allocate(width, height);
-    if(logo && !program->hasQuit) {
-      backdrop.sphericalGradient(0xff0000bf, 0xff000000, logo.width(), logo.height() / 2, width, height);
-      backdrop.impose(image::blend::sourceAlpha, cx, cy, logo, 0, 0, logo.width(), logo.height());
-    } else {
-      backdrop.fill(0xff000000);
-    }
-
-    auto data = (uint32_t*)backdrop.data();
-    for(auto y : range(height)) {
-      auto dp = output + y * (length >> 2);
-      auto sp = data + y * width;
-      for(auto x : range(width)) *dp++ = *sp++;
-    }
-
-    video->unlock();
-    video->refresh();
-  }
 }
 
 auto Presentation::loadShaders() -> void {

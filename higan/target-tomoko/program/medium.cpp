@@ -29,7 +29,6 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
   }
   updateAudioDriver();
   updateAudioEffects();
-  presentation->draw();
   emulator->power();
 
   presentation->resizeViewport();
@@ -45,14 +44,13 @@ auto Program::loadMedium(Emulator::Interface& interface, const Emulator::Interfa
 auto Program::unloadMedium() -> void {
   if(!emulator) return;
 
-  presentation->draw();
+  presentation->clearViewport();
   toolsManager->cheatEditor.saveCheats();
   emulator->unload();
   emulator = nullptr;
   mediumPaths.reset();
 
   presentation->resizeViewport();
-  presentation->draw(Resource::Logo::higan);
   presentation->setTitle({"higan v", Emulator::Version});
   presentation->systemMenu.setVisible(false);
   presentation->toolsMenu.setVisible(false);

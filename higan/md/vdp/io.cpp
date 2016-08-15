@@ -72,8 +72,7 @@ auto VDP::writeDataPort(uint16 data) -> void {
   io.commandPending = false;
 
   //DMA VRAM fill
-  if(io.command.bits(4,5) == 2) {
-    io.dmaActive = true;
+  if(io.dmaFillWait.lower()) {
     io.dmaFillWord = data;
     return;
   }
@@ -113,7 +112,10 @@ auto VDP::readControlPort() -> uint16 {
   io.commandPending = false;
 
   uint16 result = 0b0011'0100'0000'0000;
-  result |= io.dmaActive << 1;
+  result |= 1 << 9;  //FIFO empty
+  result |= (state.y >= 240) << 3;  //vertical blank
+  result |= (state.y >= 240 || state.x >= 320) << 2;  //horizontal blank
+  result |= io.command.bit(5) << 1;  //DMA active
   return result;
 }
 
@@ -126,7 +128,7 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
     io.command.bits(2,5) = data.bits(4,7);
     io.address.bits(14,15) = data.bits(0,1);
-
+    io.dmaFillWait = io.dmaMode == 2 && io.command.bits(4,5) == 2;
     return;
   }
 
@@ -147,7 +149,7 @@ auto VDP::writeControlPort(uint16 data) -> void {
   case 0x00: {
     io.displayOverlayEnable = data.bit(0);
     io.counterLatch = data.bit(1);
-    io.horizontalInterruptEnable = data.bit(4);
+    io.horizontalBlankInterruptEnable = data.bit(4);
     io.leftColumnBlank = data.bit(5);
     return;
   }
@@ -186,13 +188,13 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //sprite attribute table location
   case 0x05: {
-    io.attrtableSprite = data.bits(0,7);
+    sprite.io.attributeAddress = data.bits(0,7) << 8;
     return;
   }
 
   //sprite pattern base address
   case 0x06: {
-    io.nametableBaseSprite = data.bit(5);
+    sprite.io.nametableAddressBase = data.bit(5);
     return;
   }
 

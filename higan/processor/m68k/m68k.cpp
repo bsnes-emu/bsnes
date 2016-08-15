@@ -46,6 +46,16 @@ auto M68K::supervisor() -> bool {
 }
 
 auto M68K::exception(uint exception, uint vector) -> void {
+  auto pc = r.pc;
+  auto sr = readSR();
+
+  r.s = 1;
+  r.t = 0;
+
+  push<Long>(pc);
+  push<Word>(sr);
+
+  r.pc = read<Long>(vector << 2);
 }
 
 }

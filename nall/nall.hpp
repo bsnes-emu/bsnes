@@ -15,6 +15,7 @@
 
 #include <nall/algorithm.hpp>
 #include <nall/any.hpp>
+#include <nall/array.hpp>
 #include <nall/atoi.hpp>
 #include <nall/bit.hpp>
 #include <nall/bit-field.hpp>

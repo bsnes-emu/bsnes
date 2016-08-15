@@ -32,16 +32,19 @@ struct M68K {
     Unprivileged,
 
     Trap,
+    Interrupt,
   };};
 
   struct Vector { enum : uint {
-    Illegal        =  4,
-    DivisionByZero =  5,
-    BoundsCheck    =  6,
-    Overflow       =  7,
-    Unprivileged   =  8,
-    IllegalLineA   = 10,
-    IllegalLineF   = 11,
+    Illegal         =  4,
+    DivisionByZero  =  5,
+    BoundsCheck     =  6,
+    Overflow        =  7,
+    Unprivileged    =  8,
+    IllegalLineA    = 10,
+    IllegalLineF    = 11,
+    HorizontalBlank = 28,
+    VerticalBlank   = 30,
   };};
 
   M68K();

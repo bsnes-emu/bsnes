@@ -1,4 +1,4 @@
-auto VDP::Background::scanline() -> void {
+auto VDP::Background::scanline(uint y) -> void {
 }
 
 auto VDP::Background::run(uint x, uint y) -> void {
@@ -17,9 +17,9 @@ auto VDP::Background::run(uint x, uint y) -> void {
   tileAddress += pixelY << 1 | pixelX >> 2;
 
   uint16 tileData = vdp.vram[tileAddress];
-  uint4 palette = tileData >> (((pixelX & 3) ^ 3) << 2);
-  if(palette) {
-    output.color = tileAttributes.bits(13,14) << 4 | palette;
+  uint4 color = tileData >> (((pixelX & 3) ^ 3) << 2);
+  if(color) {
+    output.color = tileAttributes.bits(13,14) << 4 | color;
     output.priority = tileAttributes.bit(15);
   }
 }

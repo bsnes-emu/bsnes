@@ -24,7 +24,9 @@ struct VDP : Thread {
 
   //dma.cpp
   auto dmaRun() -> void;
-  auto dmaFillVRAM() -> void;
+  auto dmaLoad() -> void;
+  auto dmaFill() -> void;
+  auto dmaCopy() -> void;
 
   //render.cpp
   auto scanline() -> void;
@@ -33,7 +35,7 @@ struct VDP : Thread {
 
   //background.cpp
   struct Background {
-    auto scanline() -> void;
+    auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
     auto power() -> void;
@@ -54,15 +56,51 @@ struct VDP : Thread {
   Background window;
   Background planeB;
 
+  //sprite.cpp
+  struct Sprite {
+    auto frame() -> void;
+    auto scanline(uint y) -> void;
+    auto run(uint x, uint y) -> void;
+
+    auto power() -> void;
+    auto reset() -> void;
+
+    struct IO {
+      uint15 attributeAddress;
+      uint1  nametableAddressBase;
+    } io;
+
+    struct Object {
+      uint10 x;
+      uint10 y;
+      uint   width;
+      uint   height;
+      bool   horizontalFlip;
+      bool   verticalFlip;
+      uint2  palette;
+      uint1  priority;
+      uint15 address;
+    };
+
+    struct Output {
+      uint6   color;
+      boolean priority;
+    } output;
+
+    array<Object, 80> oam;
+    array<Object, 20> object;
+  };
+  Sprite sprite;
+
+private:
   uint16 vram[32768];
   uint16 vramExpansion[32768];  //not present in stock Mega Drive hardware
   uint9 cram[64];
   uint10 vsram[40];
 
-private:
   struct IO {
     //internal state
-    boolean dmaActive;
+    boolean dmaFillWait;
     uint8 dmaFillWord;
 
     //command
@@ -73,7 +111,7 @@ private:
     //$00  mode register 1
     uint1 displayOverlayEnable;
     uint1 counterLatch;
-    uint1 horizontalInterruptEnable;
+    uint1 horizontalBlankInterruptEnable;
     uint1 leftColumnBlank;
 
     //$01  mode register 2
@@ -83,12 +121,6 @@ private:
     uint1 verticalBlankInterruptEnable;
     uint1 displayEnable;
     uint1 externalVRAM;
-
-    //$05  sprite attribute table location
-    uint8 attrtableSprite;
-
-    //$06  sprite pattern base address
-    uint1 nametableBaseSprite;
 
     //$07  background color
     uint6 backgroundColor;

@@ -31,7 +31,7 @@ Program::Program(string_vector args) {
   video->set(Video::Synchronize, settings["Video/Synchronize"].boolean());
   if(!video->init()) video = Video::create("None");
 
-  presentation->draw(Resource::Logo::higan);
+  presentation->clearViewport();
 
   audio = Audio::create(settings["Audio/Driver"].text());
   audio->set(Audio::Device, settings["Audio/Device"].text());
