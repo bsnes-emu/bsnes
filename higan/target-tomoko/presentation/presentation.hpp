@@ -18,8 +18,6 @@ struct Presentation : Window {
 
   MenuBar menuBar{this};
     Menu libraryMenu{&menuBar};
-      vector<MenuItem*> loadBootableMedia;
-      MenuSeparator librarySeparator;
     Menu systemMenu{&menuBar};
       MenuItem powerSystem{&systemMenu};
       MenuItem resetSystem{&systemMenu};

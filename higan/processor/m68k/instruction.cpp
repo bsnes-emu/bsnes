@@ -106,12 +106,16 @@ M68K::M68K() {
     if(mode == 7 && reg >= 2) continue;
 
     uint4 immediate = data ? (uint4)data : (uint4)8;
-    EffectiveAddress modify{mode, reg};
-    bind(opcode | 0 << 6, ADDQ<Byte>, immediate, modify);
-    bind(opcode | 1 << 6, ADDQ<Word>, immediate, modify);
-    bind(opcode | 2 << 6, ADDQ<Long>, immediate, modify);
-
-    if(mode == 1) unbind(opcode | 0 << 6);
+    if(mode != 1) {
+      EffectiveAddress with{mode, reg};
+      bind(opcode | 0 << 6, ADDQ<Byte>, immediate, with);
+      bind(opcode | 1 << 6, ADDQ<Word>, immediate, with);
+      bind(opcode | 2 << 6, ADDQ<Long>, immediate, with);
+    } else {
+      AddressRegister with{reg};
+      bind(opcode | 1 << 6, ADDQ<Word>, immediate, with);
+      bind(opcode | 2 << 6, ADDQ<Long>, immediate, with);
+    }
   }
 
   //ADDX
@@ -1178,12 +1182,16 @@ M68K::M68K() {
     if(mode == 7 && reg >= 2) continue;
 
     auto immediate = data ? (uint4)data : (uint4)8;
-    EffectiveAddress ea{mode, reg};
-    bind(opcode | 0 << 6, SUBQ<Byte>, immediate, ea);
-    bind(opcode | 1 << 6, SUBQ<Word>, immediate, ea);
-    bind(opcode | 2 << 6, SUBQ<Long>, immediate, ea);
-
-    if(mode == 1) unbind(opcode | 0 << 6);
+    if(mode != 1) {
+      EffectiveAddress with{mode, reg};
+      bind(opcode | 0 << 6, SUBQ<Byte>, immediate, with);
+      bind(opcode | 1 << 6, SUBQ<Word>, immediate, with);
+      bind(opcode | 2 << 6, SUBQ<Long>, immediate, with);
+    } else {
+      AddressRegister with{reg};
+      bind(opcode | 1 << 6, SUBQ<Word>, immediate, with);
+      bind(opcode | 2 << 6, SUBQ<Long>, immediate, with);
+    }
   }
 
   //SUBX

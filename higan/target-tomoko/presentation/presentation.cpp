@@ -7,13 +7,23 @@ Presentation::Presentation() {
   presentation = this;
 
   libraryMenu.setText("Library");
+  string_vector manufacturers;
   for(auto& emulator : program->emulators) {
-    for(auto& medium : emulator->media) {
-      auto item = new MenuItem{&libraryMenu};
-      item->setText({medium.name, " ..."}).onActivate([=] {
-        program->loadMedium(*emulator, medium);
-      });
-      loadBootableMedia.append(item);
+    if(!manufacturers.find(emulator->information.manufacturer)) {
+      manufacturers.append(emulator->information.manufacturer);
+    }
+  }
+  for(auto& manufacturer : manufacturers) {
+    Menu manufacturerMenu{&libraryMenu};
+    manufacturerMenu.setText(manufacturer);
+    for(auto& emulator : program->emulators) {
+      if(emulator->information.manufacturer != manufacturer) continue;
+      for(auto& medium : emulator->media) {
+        auto item = new MenuItem{&manufacturerMenu};
+        item->setText({medium.name, " ..."}).onActivate([=] {
+          program->loadMedium(*emulator, medium);
+        });
+      }
     }
   }
   //add icarus menu options -- but only if icarus binary is present

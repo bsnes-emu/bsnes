@@ -105,7 +105,7 @@ template<uint Size> auto M68K::instructionADD(DataRegister from, EffectiveAddres
 }
 
 template<uint Size> auto M68K::instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void {
-  auto source = read<Size>(ea);
+  auto source = sign<Size>(read<Size>(ea));
   auto target = read<Size>(ar);
   write<Long>(ar, source + target);
 }
@@ -117,11 +117,16 @@ template<uint Size> auto M68K::instructionADDI(EffectiveAddress modify) -> void 
   write<Size>(modify, result);
 }
 
-template<uint Size> auto M68K::instructionADDQ(uint4 immediate, EffectiveAddress modify) -> void {
-  auto source = read<Size, Hold>(modify);
-  auto target = immediate;
+template<uint Size> auto M68K::instructionADDQ(uint4 immediate, EffectiveAddress with) -> void {
+  auto source = immediate;
+  auto target = read<Size, Hold>(with);
   auto result = ADD<Size>(source, target);
-  write<Size>(modify, result);
+  write<Size>(with, result);
+}
+
+template<uint Size> auto M68K::instructionADDQ(uint4 immediate, AddressRegister with) -> void {
+  auto result = read<Size>(with) + immediate;
+  write<Long>(with, result);
 }
 
 template<uint Size> auto M68K::instructionADDX(EffectiveAddress with, EffectiveAddress from) -> void {
@@ -525,8 +530,9 @@ auto M68K::instructionJMP(EffectiveAddress target) -> void {
 }
 
 auto M68K::instructionJSR(EffectiveAddress target) -> void {
+  auto pc = fetch<Long>(target);
   push<Long>(r.pc);
-  r.pc = fetch<Long>(target);
+  r.pc = pc;
 }
 
 auto M68K::instructionLEA(AddressRegister ar, EffectiveAddress ea) -> void {
@@ -745,7 +751,7 @@ auto M68K::instructionMULU(DataRegister with, EffectiveAddress from) -> void {
 auto M68K::instructionNBCD(EffectiveAddress with) -> void {
   auto source = 0u;
   auto target = read<Byte, Hold>(with);
-  auto result = (uint64)target - source - r.x;
+  auto result = target - source - r.x;
   bool v = false;
 
   const bool adjustLo = (target ^ source ^ result) & 0x10;
@@ -1001,7 +1007,7 @@ auto M68K::instructionRTS() -> void {
 auto M68K::instructionSBCD(EffectiveAddress with, EffectiveAddress from) -> void {
   auto source = read<Byte>(from);
   auto target = read<Byte, Hold>(with);
-  auto result = (uint64)target - source - r.x;
+  auto result = target - source - r.x;
   bool v = false;
 
   const bool adjustLo = (target ^ source ^ result) & 0x10;
@@ -1080,11 +1086,16 @@ template<uint Size> auto M68K::instructionSUBI(EffectiveAddress with) -> void {
   write<Size>(with, result);
 }
 
-template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void {
+template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, EffectiveAddress with) -> void {
   auto source = immediate;
-  auto target = read<Size, Hold>(ea);
+  auto target = read<Size, Hold>(with);
   auto result = SUB<Size>(source, target);
-  write<Size>(ea, result);
+  write<Size>(with, result);
+}
+
+template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, AddressRegister with) -> void {
+  auto result = read<Size>(with) - immediate;
+  write<Size>(with, result);
 }
 
 template<uint Size> auto M68K::instructionSUBX(EffectiveAddress with, EffectiveAddress from) -> void {

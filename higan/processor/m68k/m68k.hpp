@@ -125,7 +125,8 @@ struct M68K {
   template<uint Size> auto instructionADD(DataRegister from, EffectiveAddress with) -> void;
   template<uint Size> auto instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionADDI(EffectiveAddress modify) -> void;
-  template<uint Size> auto instructionADDQ(uint4 immediate, EffectiveAddress modify) -> void;
+  template<uint Size> auto instructionADDQ(uint4 immediate, EffectiveAddress with) -> void;
+  template<uint Size> auto instructionADDQ(uint4 immediate, AddressRegister with) -> void;
   template<uint Size> auto instructionADDX(EffectiveAddress with, EffectiveAddress from) -> void;
   template<uint Size> auto AND(uint32 source, uint32 target) -> uint32;
   template<uint Size> auto instructionAND(EffectiveAddress from, DataRegister with) -> void;
@@ -237,7 +238,8 @@ struct M68K {
   template<uint Size> auto instructionSUB(DataRegister source, EffectiveAddress target) -> void;
   template<uint Size> auto instructionSUBA(AddressRegister to, EffectiveAddress from) -> void;
   template<uint Size> auto instructionSUBI(EffectiveAddress with) -> void;
-  template<uint Size> auto instructionSUBQ(uint4 immediate, EffectiveAddress ea) -> void;
+  template<uint Size> auto instructionSUBQ(uint4 immediate, EffectiveAddress with) -> void;
+  template<uint Size> auto instructionSUBQ(uint4 immediate, AddressRegister with) -> void;
   template<uint Size> auto instructionSUBX(EffectiveAddress with, EffectiveAddress from) -> void;
                       auto instructionSWAP(DataRegister with) -> void;
                       auto instructionTAS(EffectiveAddress with) -> void;
@@ -281,7 +283,8 @@ private:
   template<uint Size> auto disassembleADD(DataRegister from, EffectiveAddress with) -> string;
   template<uint Size> auto disassembleADDA(AddressRegister ar, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleADDI(EffectiveAddress modify) -> string;
-  template<uint Size> auto disassembleADDQ(uint4 immediate, EffectiveAddress modify) -> string;
+  template<uint Size> auto disassembleADDQ(uint4 immediate, EffectiveAddress with) -> string;
+  template<uint Size> auto disassembleADDQ(uint4 immediate, AddressRegister with) -> string;
   template<uint Size> auto disassembleADDX(EffectiveAddress with, EffectiveAddress from) -> string;
   template<uint Size> auto disassembleAND(EffectiveAddress from, DataRegister with) -> string;
   template<uint Size> auto disassembleAND(DataRegister from, EffectiveAddress with) -> string;
@@ -379,7 +382,8 @@ private:
   template<uint Size> auto disassembleSUB(DataRegister source, EffectiveAddress target) -> string;
   template<uint Size> auto disassembleSUBA(AddressRegister to, EffectiveAddress from) -> string;
   template<uint Size> auto disassembleSUBI(EffectiveAddress with) -> string;
-  template<uint Size> auto disassembleSUBQ(uint4 immediate, EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleSUBQ(uint4 immediate, EffectiveAddress with) -> string;
+  template<uint Size> auto disassembleSUBQ(uint4 immediate, AddressRegister with) -> string;
   template<uint Size> auto disassembleSUBX(EffectiveAddress with, EffectiveAddress from) -> string;
                       auto disassembleSWAP(DataRegister with) -> string;
                       auto disassembleTAS(EffectiveAddress with) -> string;

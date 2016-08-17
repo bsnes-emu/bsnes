@@ -20,9 +20,11 @@ Settings settings;
 
 #include "heuristics/famicom.cpp"
 #include "heuristics/super-famicom.cpp"
+#include "heuristics/master-system.cpp"
 #include "heuristics/mega-drive.cpp"
 #include "heuristics/game-boy.cpp"
 #include "heuristics/game-boy-advance.cpp"
+#include "heuristics/game-gear.cpp"
 #include "heuristics/wonderswan.cpp"
 #include "heuristics/bs-memory.cpp"
 #include "heuristics/sufami-turbo.cpp"
@@ -31,10 +33,12 @@ Settings settings;
 #include "core/core.cpp"
 #include "core/famicom.cpp"
 #include "core/super-famicom.cpp"
+#include "core/master-system.cpp"
 #include "core/mega-drive.cpp"
 #include "core/game-boy.cpp"
 #include "core/game-boy-color.cpp"
 #include "core/game-boy-advance.cpp"
+#include "core/game-gear.cpp"
 #include "core/wonderswan.cpp"
 #include "core/wonderswan-color.cpp"
 #include "core/bs-memory.cpp"
@@ -68,8 +72,21 @@ auto nall::main(string_vector args) -> void {
     if(string source = BrowserDialog()
     .setTitle("Load ROM Image")
     .setPath(settings["icarus/Path"].text())
-    .setFilters("ROM Files|*.fc:*.nes:*.sfc:*.smc:*.md:*.gb:*.gbc:*.gba:*.ws:*.wsc:*.bs:*.st:*.zip")
-    .openFile()) {
+    .setFilters("ROM Files|"
+      "*.fc:*.nes:"
+      "*.sfc:*.smc:"
+      "*.ms:*.sms:"
+      "*.md:*.smd:*.gen:"
+      "*.gb:"
+      "*.gbc:"
+      "*.gba:"
+      "*.gg:"
+      "*.ws:"
+      "*.wsc:"
+      "*.bs:"
+      "*.st:"
+      "*.zip"
+    ).openFile()) {
       if(string target = icarus.import(source)) {
         settings["icarus/Path"].setValue(Location::path(source));
         return print(target, "\n");

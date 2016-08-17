@@ -1,8 +1,5 @@
 #include <md/md.hpp>
 
-//256-width = colorburst * 15 / 10
-//320-width = colorburst * 15 /  8
-
 namespace MegaDrive {
 
 VDP vdp;
@@ -25,19 +22,19 @@ auto VDP::main() -> void {
     cpu.lower(CPU::Interrupt::HorizontalBlank);
     for(uint x : range(320)) {
       run();
-      step(1);
+      step(4);
     }
     if(io.horizontalBlankInterruptEnable) {
       cpu.raise(CPU::Interrupt::HorizontalBlank);
     }
-    step(22);
+    step(430);
   } else {
     if(state.y == 240) {
       if(io.verticalBlankInterruptEnable) {
         cpu.raise(CPU::Interrupt::VerticalBlank);
       }
     }
-    step(342);
+    step(1710);
   }
 }
 
@@ -61,7 +58,7 @@ auto VDP::power() -> void {
 }
 
 auto VDP::reset() -> void {
-  create(VDP::Enter, system.colorburst() * 15.0 / 10.0);
+  create(VDP::Enter, system.colorburst() * 15.0 / 2.0);
 
   memory::fill(&io, sizeof(IO));
 

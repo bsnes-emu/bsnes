@@ -22,6 +22,11 @@ struct Icarus {
   auto superFamicomManifestScan(vector<Markup::Node>& roms, Markup::Node node) -> void;
   auto superFamicomImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //master-system.cpp
+  auto masterSystemManifest(string location) -> string;
+  auto masterSystemManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto masterSystemImport(vector<uint8_t>& buffer, string location) -> string;
+
   //mega-drive.cpp
   auto megaDriveManifest(string location) -> string;
   auto megaDriveManifest(vector<uint8_t>& buffer, string location) -> string;
@@ -42,15 +47,10 @@ struct Icarus {
   auto gameBoyAdvanceManifest(vector<uint8_t>& buffer, string location) -> string;
   auto gameBoyAdvanceImport(vector<uint8_t>& buffer, string location) -> string;
 
-  //bs-memory.cpp
-  auto bsMemoryManifest(string location) -> string;
-  auto bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string;
-  auto bsMemoryImport(vector<uint8_t>& buffer, string location) -> string;
-
-  //sufami-turbo.cpp
-  auto sufamiTurboManifest(string location) -> string;
-  auto sufamiTurboManifest(vector<uint8_t>& buffer, string location) -> string;
-  auto sufamiTurboImport(vector<uint8_t>& buffer, string location) -> string;
+  //game-gear.cpp
+  auto gameGearManifest(string location) -> string;
+  auto gameGearManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto gameGearImport(vector<uint8_t>& buffer, string location) -> string;
 
   //wonderswan.cpp
   auto wonderSwanManifest(string location) -> string;
@@ -62,16 +62,28 @@ struct Icarus {
   auto wonderSwanColorManifest(vector<uint8_t>& buffer, string location) -> string;
   auto wonderSwanColorImport(vector<uint8_t>& buffer, string location) -> string;
 
+  //bs-memory.cpp
+  auto bsMemoryManifest(string location) -> string;
+  auto bsMemoryManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto bsMemoryImport(vector<uint8_t>& buffer, string location) -> string;
+
+  //sufami-turbo.cpp
+  auto sufamiTurboManifest(string location) -> string;
+  auto sufamiTurboManifest(vector<uint8_t>& buffer, string location) -> string;
+  auto sufamiTurboImport(vector<uint8_t>& buffer, string location) -> string;
+
 private:
   string errorMessage;
 
   struct {
     Markup::Node famicom;
     Markup::Node superFamicom;
+    Markup::Node masterSystem;
     Markup::Node megaDrive;
     Markup::Node gameBoy;
     Markup::Node gameBoyColor;
     Markup::Node gameBoyAdvance;
+    Markup::Node gameGear;
     Markup::Node wonderSwan;
     Markup::Node wonderSwanColor;
     Markup::Node bsMemory;
