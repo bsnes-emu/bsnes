@@ -58,7 +58,7 @@ struct VDP : Thread {
 
   //sprite.cpp
   struct Sprite {
-    auto frame() -> void;
+    auto write(uint9 addr, uint16 data) -> void;
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
@@ -80,6 +80,7 @@ struct VDP : Thread {
       uint2  palette;
       uint1  priority;
       uint15 address;
+      uint7  link;
     };
 
     struct Output {
@@ -101,7 +102,7 @@ private:
   struct IO {
     //internal state
     boolean dmaFillWait;
-    uint8 dmaFillWord;
+    uint8 dmaFillByte;
 
     //command
     uint6 command;

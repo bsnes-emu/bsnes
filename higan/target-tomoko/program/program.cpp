@@ -1,6 +1,7 @@
 #include "../tomoko.hpp"
 #include <fc/interface/interface.hpp>
 #include <sfc/interface/interface.hpp>
+#include <ms/interface/interface.hpp>
 #include <md/interface/interface.hpp>
 #include <gb/interface/interface.hpp>
 #include <gba/interface/interface.hpp>
@@ -17,6 +18,7 @@ Program::Program(string_vector args) {
 
   emulators.append(new Famicom::Interface);
   emulators.append(new SuperFamicom::Interface);
+  emulators.append(new MasterSystem::Interface);
   emulators.append(new MegaDrive::Interface);
   emulators.append(new GameBoy::Interface);
   emulators.append(new GameBoyAdvance::Interface);

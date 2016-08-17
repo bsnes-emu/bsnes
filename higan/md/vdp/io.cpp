@@ -73,8 +73,7 @@ auto VDP::writeDataPort(uint16 data) -> void {
 
   //DMA VRAM fill
   if(io.dmaFillWait.lower()) {
-    io.dmaFillWord = data;
-    return;
+    io.dmaFillByte = data >> 8;
   }
 
   //VRAM write
@@ -82,6 +81,9 @@ auto VDP::writeDataPort(uint16 data) -> void {
     auto address = io.address.bits(1,15);
     if(io.address.bit(0)) data = data >> 8 | data << 8;
     vram[address] = data;
+    if(address >= sprite.io.attributeAddress && address < sprite.io.attributeAddress + 320) {
+      sprite.write(address, data);
+    }
     io.address += io.dataIncrement;
     return;
   }

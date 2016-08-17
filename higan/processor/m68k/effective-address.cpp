@@ -68,7 +68,7 @@ template<uint Size> auto M68K::fetch(EffectiveAddress& ea) -> uint32 {
   return 0;
 }
 
-template<uint Size, bool Update> auto M68K::read(EffectiveAddress& ea) -> uint32 {
+template<uint Size, bool Hold> auto M68K::read(EffectiveAddress& ea) -> uint32 {
   ea.address = fetch<Size>(ea);
 
   switch(ea.mode) {
@@ -78,7 +78,7 @@ template<uint Size, bool Update> auto M68K::read(EffectiveAddress& ea) -> uint32
   }
 
   case AddressRegisterDirect: {
-    return clip<Size>(ea.address);
+    return sign<Size>(ea.address);
   }
 
   case AddressRegisterIndirect: {
@@ -87,13 +87,13 @@ template<uint Size, bool Update> auto M68K::read(EffectiveAddress& ea) -> uint32
 
   case AddressRegisterIndirectWithPostIncrement: {
     auto data = read<Size>(ea.address);
-    if(Update) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
+    if(!Hold) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
     return data;
   }
 
   case AddressRegisterIndirectWithPreDecrement: {
     auto data = read<Size>(ea.address - bytes<Size>());
-    if(Update) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
+    if(!Hold) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
     return data;
   }
 
@@ -130,7 +130,7 @@ template<uint Size, bool Update> auto M68K::read(EffectiveAddress& ea) -> uint32
   return 0;
 }
 
-template<uint Size, bool Update> auto M68K::write(EffectiveAddress& ea, uint32 data) -> void {
+template<uint Size, bool Hold> auto M68K::write(EffectiveAddress& ea, uint32 data) -> void {
   ea.address = fetch<Size>(ea);
 
   switch(ea.mode) {
@@ -149,13 +149,13 @@ template<uint Size, bool Update> auto M68K::write(EffectiveAddress& ea, uint32 d
 
   case AddressRegisterIndirectWithPostIncrement: {
     write<Size>(ea.address, data);
-    if(Update) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
+    if(!Hold) write(AddressRegister{ea.reg}, ea.address += bytes<Size>());
     return;
   }
 
   case AddressRegisterIndirectWithPreDecrement: {
     write<Size, Reverse>(ea.address - bytes<Size>(), data);
-    if(Update) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
+    if(!Hold) write(AddressRegister{ea.reg}, ea.address -= bytes<Size>());
     return;
   }
 

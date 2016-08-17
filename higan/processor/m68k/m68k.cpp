@@ -45,10 +45,11 @@ auto M68K::supervisor() -> bool {
   return false;
 }
 
-auto M68K::exception(uint exception, uint vector) -> void {
+auto M68K::exception(uint exception, uint vector, uint priority) -> void {
   auto pc = r.pc;
   auto sr = readSR();
 
+  r.i = priority;
   r.s = 1;
   r.t = 0;
 

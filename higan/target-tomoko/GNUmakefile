@@ -3,6 +3,7 @@ flags += -DSFC_SUPERGAMEBOY
 
 include fc/GNUmakefile
 include sfc/GNUmakefile
+include ms/GNUmakefile
 include md/GNUmakefile
 include gb/GNUmakefile
 include gba/GNUmakefile

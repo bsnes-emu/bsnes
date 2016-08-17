@@ -23,15 +23,17 @@ auto CPU::main() -> void {
 
   if(state.interruptPending) {
     if(state.interruptPending.bit((uint)Interrupt::HorizontalBlank)) {
-      state.interruptPending.bit((uint)Interrupt::HorizontalBlank) = 0;
-      r.i = 4;
-      return exception(Exception::Interrupt, Vector::HorizontalBlank);
+      if(4 > r.i) {
+        state.interruptPending.bit((uint)Interrupt::HorizontalBlank) = 0;
+        return exception(Exception::Interrupt, Vector::HorizontalBlank, 4);
+      }
     }
 
     if(state.interruptPending.bit((uint)Interrupt::VerticalBlank)) {
-      state.interruptPending.bit((uint)Interrupt::VerticalBlank) = 0;
-      r.i = 6;
-      return exception(Exception::Interrupt, Vector::VerticalBlank);
+      if(6 > r.i) {
+        state.interruptPending.bit((uint)Interrupt::VerticalBlank) = 0;
+        return exception(Exception::Interrupt, Vector::VerticalBlank, 6);
+      }
     }
   }
 
@@ -64,6 +66,7 @@ auto CPU::raise(Interrupt interrupt) -> void {
 
 auto CPU::lower(Interrupt interrupt) -> void {
   state.interruptLine.bit((uint)interrupt) = 0;
+  state.interruptPending.bit((uint)interrupt) = 0;
 }
 
 auto CPU::power() -> void {
@@ -81,14 +84,16 @@ auto CPU::reset() -> void {
 
 auto CPU::readByte(uint24 addr) -> uint8 {
   if(addr < 0x400000) return cartridge.readByte(addr);
-  if(addr < 0xc00000) return 0x00;
+  if(addr < 0xa00000) return 0x00;
+  if(addr < 0xc00000) return rand();
   if(addr < 0xe00000) return vdp.readByte(addr);
   return ram[addr & 0xffff];
 }
 
 auto CPU::readWord(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.readWord(addr);
-  if(addr < 0xc00000) return 0x0000;
+  if(addr < 0xa00000) return 0x0000;
+  if(addr < 0xc00000) return rand();
   if(addr < 0xe00000) return vdp.readWord(addr);
   uint16 data = ram[addr + 0 & 65535] << 8;
   return data | ram[addr + 1 & 65535] << 0;

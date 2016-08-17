@@ -115,21 +115,21 @@ M68K::M68K() {
   }
 
   //ADDX
-  for(uint3 treg : range(8))
-  for(uint3 sreg : range(8)) {
-    auto opcode = pattern("1101 ---1 ++00 ----") | treg << 9 | sreg << 0;
+  for(uint3 xreg : range(8))
+  for(uint3 yreg : range(8)) {
+    auto opcode = pattern("1101 ---1 ++00 ----") | xreg << 9 | yreg << 0;
 
-    EffectiveAddress dataTarget{DataRegisterDirect, treg};
-    EffectiveAddress dataSource{DataRegisterDirect, sreg};
-    bind(opcode | 0 << 6 | 0 << 3, ADDX<Byte>, dataTarget, dataSource);
-    bind(opcode | 1 << 6 | 0 << 3, ADDX<Word>, dataTarget, dataSource);
-    bind(opcode | 2 << 6 | 0 << 3, ADDX<Long>, dataTarget, dataSource);
+    EffectiveAddress dataWith{DataRegisterDirect, xreg};
+    EffectiveAddress dataFrom{DataRegisterDirect, yreg};
+    bind(opcode | 0 << 6 | 0 << 3, ADDX<Byte>, dataWith, dataFrom);
+    bind(opcode | 1 << 6 | 0 << 3, ADDX<Word>, dataWith, dataFrom);
+    bind(opcode | 2 << 6 | 0 << 3, ADDX<Long>, dataWith, dataFrom);
 
-    EffectiveAddress addressTarget{AddressRegisterIndirectWithPreDecrement, treg};
-    EffectiveAddress addressSource{AddressRegisterIndirectWithPreDecrement, sreg};
-    bind(opcode | 0 << 6 | 1 << 3, ADDX<Byte>, addressTarget, addressSource);
-    bind(opcode | 1 << 6 | 1 << 3, ADDX<Word>, addressTarget, addressSource);
-    bind(opcode | 2 << 6 | 1 << 3, ADDX<Long>, addressTarget, addressSource);
+    EffectiveAddress addressWith{AddressRegisterIndirectWithPreDecrement, xreg};
+    EffectiveAddress addressFrom{AddressRegisterIndirectWithPreDecrement, yreg};
+    bind(opcode | 0 << 6 | 1 << 3, ADDX<Byte>, addressWith, addressFrom);
+    bind(opcode | 1 << 6 | 1 << 3, ADDX<Word>, addressWith, addressFrom);
+    bind(opcode | 2 << 6 | 1 << 3, ADDX<Long>, addressWith, addressFrom);
   }
 
   //AND
@@ -166,10 +166,10 @@ M68K::M68K() {
     auto opcode = pattern("0000 0010 ++-- ----") | mode << 3 | reg << 0;
     if(mode == 1 || (mode == 7 && reg >= 2)) continue;
 
-    EffectiveAddress ea{mode, reg};
-    bind(opcode | 0 << 6, ANDI<Byte>, ea);
-    bind(opcode | 1 << 6, ANDI<Word>, ea);
-    bind(opcode | 2 << 6, ANDI<Long>, ea);
+    EffectiveAddress with{mode, reg};
+    bind(opcode | 0 << 6, ANDI<Byte>, with);
+    bind(opcode | 1 << 6, ANDI<Word>, with);
+    bind(opcode | 2 << 6, ANDI<Long>, with);
   }
 
   //ANDI_TO_CCR

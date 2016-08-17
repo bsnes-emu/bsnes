@@ -1,40 +1,54 @@
-auto VDP::Sprite::frame() -> void {
-  uint15 address = io.attributeAddress;
-  uint7 link = 0;
+auto VDP::Sprite::write(uint9 address, uint16 data) -> void {
+  if(address > 320) return;
 
-  oam.reset();
-  while(oam.size() < 80) {
-    uint64 attributes;
-    attributes |= (uint64)vdp.vram[address + (link << 2) + 0] << 48;
-    attributes |= (uint64)vdp.vram[address + (link << 2) + 1] << 32;
-    attributes |= (uint64)vdp.vram[address + (link << 2) + 2] << 16;
-    attributes |= (uint64)vdp.vram[address + (link << 2) + 3] <<  0;
+  auto& object = oam[address >> 2];
+  switch(address.bits(0,1)) {
 
-    auto& object = oam.append();
-    object.x              = attributes.bits( 0, 9) - 128;
-    object.address        = attributes.bits(16,26) << 4;
-    object.horizontalFlip = attributes.bit (27);
-    object.verticalFlip   = attributes.bit (28);
-    object.palette        = attributes.bits(29,30);
-    object.priority       = attributes.bit (31);
-    object.height         = attributes.bits(40,41) << 3;
-    object.width          = attributes.bits(42,43) << 3;
-    object.y              = attributes.bits(48,57) - 128;
+  case 0: {
+    object.y = data.bits(0,9) - 128;
+    break;
+  }
 
-    link = attributes.bits(32,38);
-    if(!link) break;
+  case 1: {
+    object.link = data.bits(0,6);
+    object.height = data.bits(8,9) << 3;
+    object.width = data.bits(10,11) << 3;
+    break;
+  }
+
+  case 2: {
+    object.address = data.bits(0,10) << 4;
+    object.horizontalFlip = data.bit(11);
+    object.verticalFlip = data.bit(12);
+    object.palette = data.bits(13,14);
+    object.priority = data.bit(15);
+    break;
+  }
+
+  case 3: {
+    object.x = data.bits(0,9) - 128;
+    break;
+  }
+
   }
 }
 
 auto VDP::Sprite::scanline(uint y) -> void {
   object.reset();
-  for(auto& o : oam) {
+
+  uint7 link = 0;
+  while(link) {
+    auto& o = oam[link];
+
     if((uint9)(o.y + o.height - 1) < y) continue;
     if((uint9)(y + o.height - 1) < o.y) continue;
     if(o.x == 0) break;
 
     object.append(o);
-    if(object.size() >= object.capacity()) break;
+    if(object.size() >= 20) break;
+
+    link = o.link;
+    if(!link || link >= 80) break;
   }
 }
 

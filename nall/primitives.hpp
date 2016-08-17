@@ -86,8 +86,8 @@ template<uint Bits> struct Natural {
     inline auto& operator *=(const type value) { return set(get()  * value); }
     inline auto& operator /=(const type value) { return set(get()  / value); }
     inline auto& operator %=(const type value) { return set(get()  % value); }
-    inline auto& operator++(int) { auto value = get(); set(value + 1); return value; }
-    inline auto& operator--(int) { auto value = get(); set(value - 1); return value; }
+    inline auto  operator++(int) { auto value = get(); set(value + 1); return value; }
+    inline auto  operator--(int) { auto value = get(); set(value - 1); return value; }
     inline auto& operator++() { return set(get() + 1); }
     inline auto& operator--() { return set(get() - 1); }
 
@@ -190,8 +190,8 @@ template<uint Bits> struct Integer {
     inline auto& operator *=(const utype value) { return set(get()  * value); }
     inline auto& operator /=(const utype value) { return set(get()  / value); }
     inline auto& operator %=(const utype value) { return set(get()  % value); }
-    inline auto& operator++(int) { auto value = get(); set(value + 1); return value; }
-    inline auto& operator--(int) { auto value = get(); set(value - 1); return value; }
+    inline auto  operator++(int) { auto value = get(); set(value + 1); return value; }
+    inline auto  operator--(int) { auto value = get(); set(value - 1); return value; }
     inline auto& operator++() { return set(get() + 1); }
     inline auto& operator--() { return set(get() - 1); }
 

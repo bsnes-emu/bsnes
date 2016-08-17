@@ -23,11 +23,11 @@ auto VDP::dmaLoad() -> void {
 auto VDP::dmaFill() -> void {
   if(io.dmaFillWait) return;
 
-  auto data = io.dmaFillWord;
-  writeDataPort(data);
+  auto data = io.dmaFillByte;
+  writeDataPort(data << 8 | data << 0);
 
-  io.dmaSource.bits(0,15) += 2;
-  if(--io.dmaLength == 0 || --io.dmaLength == 0) {
+  io.dmaSource.bits(0,15)++;
+  if(--io.dmaLength == 0) {
     io.command.bit(5) = 0;
   }
 }

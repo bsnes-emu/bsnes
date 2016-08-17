@@ -1,11 +1,6 @@
 auto VDP::scanline() -> void {
   state.x = 0;
   if(++state.y >= 262) state.y = 0;
-  if(state.y == 0) scheduler.exit(Scheduler::Event::Frame);
-
-  if(state.y == 0) {
-    sprite.frame();
-  }
 
   if(state.y < 240) {
     planeA.scanline(state.y);
@@ -13,6 +8,8 @@ auto VDP::scanline() -> void {
     planeB.scanline(state.y);
     sprite.scanline(state.y);
   }
+
+  if(state.y == 240) scheduler.exit(Scheduler::Event::Frame);
 
   state.output = buffer + (state.y * 2 + 0) * 1280;
 }

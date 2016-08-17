@@ -7,7 +7,7 @@ namespace Processor {
 struct M68K {
   enum : bool { User, Supervisor };
   enum : uint { Byte, Word, Long };
-  enum : bool { NoUpdate = 0, Reverse = 1, Extend = 1 };
+  enum : bool { Reverse = 1, Extend = 1, Hold = 1 };
 
   enum : uint {
     DataRegisterDirect,
@@ -58,7 +58,7 @@ struct M68K {
   auto power() -> void;
   auto reset() -> void;
   auto supervisor() -> bool;
-  auto exception(uint exception, uint vector) -> void;
+  auto exception(uint exception, uint vector, uint priority = 7) -> void;
 
   //registers.cpp
   struct DataRegister {
@@ -101,8 +101,8 @@ struct M68K {
   };
 
   template<uint Size> auto fetch(EffectiveAddress& ea) -> uint32;
-  template<uint Size, bool Update = 1> auto read(EffectiveAddress& ea) -> uint32;
-  template<uint Size, bool Update = 1> auto write(EffectiveAddress& ea, uint32 data) -> void;
+  template<uint Size, bool Hold = 0> auto read(EffectiveAddress& ea) -> uint32;
+  template<uint Size, bool Hold = 0> auto write(EffectiveAddress& ea, uint32 data) -> void;
   template<uint Size> auto flush(EffectiveAddress& ea, uint32 data) -> void;
 
   //instruction.cpp
@@ -126,11 +126,11 @@ struct M68K {
   template<uint Size> auto instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void;
   template<uint Size> auto instructionADDI(EffectiveAddress modify) -> void;
   template<uint Size> auto instructionADDQ(uint4 immediate, EffectiveAddress modify) -> void;
-  template<uint Size> auto instructionADDX(EffectiveAddress target, EffectiveAddress source) -> void;
+  template<uint Size> auto instructionADDX(EffectiveAddress with, EffectiveAddress from) -> void;
   template<uint Size> auto AND(uint32 source, uint32 target) -> uint32;
   template<uint Size> auto instructionAND(EffectiveAddress from, DataRegister with) -> void;
   template<uint Size> auto instructionAND(DataRegister from, EffectiveAddress with) -> void;
-  template<uint Size> auto instructionANDI(EffectiveAddress ea) -> void;
+  template<uint Size> auto instructionANDI(EffectiveAddress with) -> void;
                       auto instructionANDI_TO_CCR() -> void;
                       auto instructionANDI_TO_SR() -> void;
   template<uint Size> auto ASL(uint32 result, uint shift) -> uint32;
@@ -282,10 +282,10 @@ private:
   template<uint Size> auto disassembleADDA(AddressRegister ar, EffectiveAddress ea) -> string;
   template<uint Size> auto disassembleADDI(EffectiveAddress modify) -> string;
   template<uint Size> auto disassembleADDQ(uint4 immediate, EffectiveAddress modify) -> string;
-  template<uint Size> auto disassembleADDX(EffectiveAddress target, EffectiveAddress source) -> string;
+  template<uint Size> auto disassembleADDX(EffectiveAddress with, EffectiveAddress from) -> string;
   template<uint Size> auto disassembleAND(EffectiveAddress from, DataRegister with) -> string;
   template<uint Size> auto disassembleAND(DataRegister from, EffectiveAddress with) -> string;
-  template<uint Size> auto disassembleANDI(EffectiveAddress ea) -> string;
+  template<uint Size> auto disassembleANDI(EffectiveAddress with) -> string;
                       auto disassembleANDI_TO_CCR() -> string;
                       auto disassembleANDI_TO_SR() -> string;
   template<uint Size> auto disassembleASL(uint4 shift, DataRegister modify) -> string;
