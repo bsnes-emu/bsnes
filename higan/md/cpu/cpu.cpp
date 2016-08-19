@@ -17,7 +17,7 @@ auto CPU::boot() -> void {
 auto CPU::main() -> void {
   #if 0
   static file fp;
-  if(!fp) fp.open({Path::user(), "Desktop/trace.log"}, file::mode::write);
+  if(!fp) fp.open({Path::user(), "Desktop/tracer.log"}, file::mode::write);
   fp.print(pad(disassemble(r.pc), -60, ' '), " ", disassembleRegisters().replace("\n", " "), "\n");
   #endif
 
@@ -85,7 +85,7 @@ auto CPU::reset() -> void {
 auto CPU::readByte(uint24 addr) -> uint8 {
   if(addr < 0x400000) return cartridge.readByte(addr);
   if(addr < 0xa00000) return 0x00;
-  if(addr < 0xc00000) return rand();
+  if(addr < 0xc00000) return rand(), 0;
   if(addr < 0xe00000) return vdp.readByte(addr);
   return ram[addr & 0xffff];
 }
@@ -93,7 +93,7 @@ auto CPU::readByte(uint24 addr) -> uint8 {
 auto CPU::readWord(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.readWord(addr);
   if(addr < 0xa00000) return 0x0000;
-  if(addr < 0xc00000) return rand();
+  if(addr < 0xc00000) return rand(), 0;
   if(addr < 0xe00000) return vdp.readWord(addr);
   uint16 data = ram[addr + 0 & 65535] << 8;
   return data | ram[addr + 1 & 65535] << 0;

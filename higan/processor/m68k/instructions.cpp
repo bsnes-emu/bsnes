@@ -124,8 +124,9 @@ template<uint Size> auto M68K::instructionADDQ(uint4 immediate, EffectiveAddress
   write<Size>(with, result);
 }
 
+//Size is ignored: always uses Long
 template<uint Size> auto M68K::instructionADDQ(uint4 immediate, AddressRegister with) -> void {
-  auto result = read<Size>(with) + immediate;
+  auto result = read<Long>(with) + immediate;
   write<Long>(with, result);
 }
 
@@ -687,7 +688,7 @@ template<uint Size> auto M68K::instructionMOVEP(EffectiveAddress from, DataRegis
 }
 
 auto M68K::instructionMOVEQ(DataRegister dr, uint8 immediate) -> void {
-  write<Long>(dr, immediate);
+  write<Long>(dr, sign<Byte>(immediate));
 
   r.c = 0;
   r.v = 0;
@@ -1093,9 +1094,10 @@ template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, EffectiveAddress
   write<Size>(with, result);
 }
 
+//Size is ignored: always uses Long
 template<uint Size> auto M68K::instructionSUBQ(uint4 immediate, AddressRegister with) -> void {
-  auto result = read<Size>(with) - immediate;
-  write<Size>(with, result);
+  auto result = read<Long>(with) - immediate;
+  write<Long>(with, result);
 }
 
 template<uint Size> auto M68K::instructionSUBX(EffectiveAddress with, EffectiveAddress from) -> void {

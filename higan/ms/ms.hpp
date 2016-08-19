@@ -14,6 +14,11 @@ namespace MasterSystem {
   using Scheduler = Emulator::Scheduler;
   extern Scheduler scheduler;
 
+  enum class Model : uint {
+    MasterSystem,
+    GameGear,
+  };
+
   struct Thread : Emulator::Thread {
     auto create(auto (*entrypoint)() -> void, double frequency) -> void {
       Emulator::Thread::create(entrypoint, frequency);

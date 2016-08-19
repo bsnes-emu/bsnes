@@ -432,11 +432,11 @@ template<uint Size> auto M68K::disassembleNOT(EffectiveAddress with) -> string {
 }
 
 template<uint Size> auto M68K::disassembleOR(EffectiveAddress from, DataRegister with) -> string {
-  return {"eor", _suffix<Size>(), "   ", _effectiveAddress<Size>(from), ",", _dataRegister(with)};
+  return {"or", _suffix<Size>(), "    ", _effectiveAddress<Size>(from), ",", _dataRegister(with)};
 }
 
 template<uint Size> auto M68K::disassembleOR(DataRegister from, EffectiveAddress with) -> string {
-  return {"eor", _suffix<Size>(), "   ", _dataRegister(from), ",", _effectiveAddress<Size>(with)};
+  return {"or", _suffix<Size>(), "    ", _dataRegister(from), ",", _effectiveAddress<Size>(with)};
 }
 
 template<uint Size> auto M68K::disassembleORI(EffectiveAddress with) -> string {

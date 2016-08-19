@@ -10,10 +10,10 @@ auto VDP::dmaRun() -> void {
 auto VDP::dmaLoad() -> void {
   cpu.wait |= Wait::VDP_DMA;
 
-  auto data = cpu.readWord(io.dmaSource);
+  auto data = cpu.readWord(io.dmaMode.bit(0) << 23 | io.dmaSource << 1);
   writeDataPort(data);
 
-  io.dmaSource.bits(0,15) += 2;
+  io.dmaSource.bits(0,15)++;
   if(--io.dmaLength == 0) {
     io.command.bit(5) = 0;
     cpu.wait &=~ Wait::VDP_DMA;

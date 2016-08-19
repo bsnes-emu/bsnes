@@ -32,7 +32,7 @@ template<uint Size> auto M68K::fetch(EffectiveAddress& ea) -> uint32 {
     auto index = extension & 0x8000
     ? read(AddressRegister{extension >> 12})
     : read(DataRegister{extension >> 12});
-    if(extension & 0x800) index = (int16)index;
+    if(!(extension & 0x800)) index = (int16)index;
     return read(AddressRegister{ea.reg}) + index + (int8)extension;
   }
 
@@ -55,7 +55,7 @@ template<uint Size> auto M68K::fetch(EffectiveAddress& ea) -> uint32 {
     auto index = extension & 0x8000
     ? read(AddressRegister{extension >> 12})
     : read(DataRegister{extension >> 12});
-    if(extension & 0x800) index = (int16)index;
+    if(!(extension & 0x800)) index = (int16)index;
     return base + index + (int8)extension;
   }
 

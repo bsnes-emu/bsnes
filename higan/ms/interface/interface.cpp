@@ -32,25 +32,29 @@ Interface::Interface() {
     controllerPort1.devices.append(device);
     controllerPort2.devices.append(device);
   }
+
+  ports.append(move(controllerPort1));
+  ports.append(move(controllerPort2));
 }
 
 auto Interface::manifest() -> string {
-  return "";
+  return cartridge.manifest();
 }
 
 auto Interface::title() -> string {
-  return "";
+  return cartridge.title();
 }
 
 auto Interface::videoSize() -> VideoSize {
-  return {256, 192};
+  return {256, 240};
 }
 
 auto Interface::videoSize(uint width, uint height, bool arc) -> VideoSize {
+  auto a = arc ? 8.0 / 7.0 : 1.0;
   uint w = 256;
-  uint h = 192;
-  uint m = min(width / w, height / h);
-  return {w * m, h * m};
+  uint h = 240;
+  uint m = min(width / (w * a), height / h);
+  return {uint(w * a * m), uint(h * m)};
 }
 
 auto Interface::videoFrequency() -> double {
@@ -70,26 +74,33 @@ auto Interface::audioFrequency() -> double {
 }
 
 auto Interface::loaded() -> bool {
-  return false;
+  return system.loaded();
 }
 
 auto Interface::load(uint id) -> bool {
+  if(id == ID::MasterSystem) return system.load(Model::MasterSystem);
+  if(id == ID::GameGear) return system.load(Model::GameGear);
   return false;
 }
 
 auto Interface::save() -> void {
+  system.save();
 }
 
 auto Interface::unload() -> void {
+  system.unload();
 }
 
 auto Interface::power() -> void {
+  system.power();
 }
 
 auto Interface::reset() -> void {
+  system.reset();
 }
 
 auto Interface::run() -> void {
+  system.run();
 }
 
 auto Interface::serialize() -> serializer {
