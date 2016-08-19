@@ -10,6 +10,8 @@
                 <outlet property="consoleOutput" destination="doS-dM-hnl" id="Gn5-ju-Wb0"/>
                 <outlet property="consoleWindow" destination="21F-Ah-yHX" id="eQ4-ug-LsT"/>
                 <outlet property="mainWindow" destination="xOd-HO-29H" id="h8M-YB-vcC"/>
+                <outlet property="memoryBankInput" destination="rdV-q6-hc6" id="KBx-9T-2mX"/>
+                <outlet property="memoryBankItem" destination="bWC-FW-IYP" id="Lf2-dh-z32"/>
                 <outlet property="memoryView" destination="8hr-8o-3rN" id="fF0-rh-8ND"/>
                 <outlet property="memoryWindow" destination="mRm-dL-mCj" id="VPR-lu-vtI"/>
                 <outlet property="view" destination="uqf-pe-VAF" id="HMP-rf-Yqk"/>
@@ -69,10 +71,10 @@
                                     <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                     <color key="backgroundColor" red="0.14901960784313725" green="0.14901960784313725" blue="0.14901960784313725" alpha="1" colorSpace="calibratedRGB"/>
                                     <size key="minSize" width="600" height="376"/>
-                                    <size key="maxSize" width="600" height="10000000"/>
+                                    <size key="maxSize" width="1160" height="10000000"/>
                                     <color key="insertionPointColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                     <size key="minSize" width="600" height="376"/>
-                                    <size key="maxSize" width="600" height="10000000"/>
+                                    <size key="maxSize" width="1160" height="10000000"/>
                                     <allowedInputSourceLocales>
                                         <string>NSAllRomanInputSourcesLocaleIdentifier</string>
                                     </allowedInputSourceLocales>
@@ -84,7 +86,7 @@
                             <rect key="frame" x="-100" y="-100" width="87" height="18"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
-                        <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="cwi-6E-rbh">
+                        <scroller key="verticalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="cwi-6E-rbh">
                             <rect key="frame" x="584" y="0.0" width="16" height="376"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
@@ -125,7 +127,79 @@
                 <rect key="frame" x="0.0" y="0.0" width="528" height="320"/>
                 <autoresizingMask key="autoresizingMask"/>
             </view>
-            <point key="canvasLocation" x="-102" y="60"/>
+            <toolbar key="toolbar" implicitIdentifier="D857E961-E523-4295-83F8-0849316E827C" autosavesConfiguration="NO" allowsUserCustomization="NO" displayMode="iconAndLabel" sizeMode="regular" id="82v-uB-RPi">
+                <allowedToolbarItems>
+                    <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="WUk-8p-S6B"/>
+                    <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="E3z-um-6KG"/>
+                    <toolbarItem implicitItemIdentifier="4F6AAE25-1E9D-4111-9E5B-91F0792E56CD" label="Address Space" paletteLabel="Address Space" id="VTy-lj-K0H">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="100" height="25"/>
+                        <size key="maxSize" width="100" height="25"/>
+                        <popUpButton key="view" verticalHuggingPriority="750" id="vfJ-vu-gqJ">
+                            <rect key="frame" x="0.0" y="14" width="100" height="25"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bpD-j9-omo">
+                                <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                <font key="font" metaFont="menu"/>
+                                <menu key="menu" id="gTX-6Z-mOH">
+                                    <items>
+                                        <menuItem title="Entire Space" id="Zp5-J9-dd3"/>
+                                        <menuItem title="ROM" tag="1" id="ANn-pq-5SA"/>
+                                        <menuItem title="Video RAM" tag="2" id="m35-GY-cKE"/>
+                                        <menuItem title="Cartridge RAM" tag="3" id="AOc-Up-PNm"/>
+                                        <menuItem title="RAM" tag="4" id="dg4-zf-bo4"/>
+                                    </items>
+                                </menu>
+                                <connections>
+                                    <action selector="hexUpdateSpace:" target="-2" id="1xc-Wa-RGp"/>
+                                </connections>
+                            </popUpButtonCell>
+                        </popUpButton>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="D16C64D2-2F0D-4033-A1EC-A1E699522ECE" label="Bank" paletteLabel="Bank" id="bWC-FW-IYP">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="64" height="22"/>
+                        <size key="maxSize" width="64" height="22"/>
+                        <textField key="view" verticalHuggingPriority="750" id="rdV-q6-hc6">
+                            <rect key="frame" x="0.0" y="14" width="64" height="22"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" id="JCn-Y1-eHS">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                            <connections>
+                                <action selector="hexUpdateBank:" target="-2" id="Mx9-WI-wgO"/>
+                            </connections>
+                        </textField>
+                    </toolbarItem>
+                    <toolbarItem implicitItemIdentifier="F9723DA8-D79F-43AB-876B-783DD0204AA6" label="Go to" paletteLabel="Go to" id="rLO-D7-zRG">
+                        <nil key="toolTip"/>
+                        <size key="minSize" width="96" height="22"/>
+                        <size key="maxSize" width="128" height="22"/>
+                        <textField key="view" verticalHuggingPriority="750" id="EJd-jG-hmH">
+                            <rect key="frame" x="0.0" y="14" width="96" height="22"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" bezelStyle="round" id="vg5-Nn-abb">
+                                <font key="font" metaFont="system"/>
+                                <color key="textColor" name="textColor" catalog="System" colorSpace="catalog"/>
+                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                            </textFieldCell>
+                            <connections>
+                                <action selector="hexGoTo:" target="-2" id="7WG-8C-SK8"/>
+                            </connections>
+                        </textField>
+                    </toolbarItem>
+                </allowedToolbarItems>
+                <defaultToolbarItems>
+                    <toolbarItem reference="VTy-lj-K0H"/>
+                    <toolbarItem reference="bWC-FW-IYP"/>
+                    <toolbarItem reference="E3z-um-6KG"/>
+                    <toolbarItem reference="rLO-D7-zRG"/>
+                </defaultToolbarItems>
+            </toolbar>
+            <point key="canvasLocation" x="-185" y="61"/>
         </window>
+        <menuItem title="Cartridge RAM" id="ylM-ah-PNQ"/>
     </objects>
 </document>

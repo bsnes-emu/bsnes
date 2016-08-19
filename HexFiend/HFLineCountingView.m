@@ -368,7 +368,7 @@ static inline int common_prefix_length(const char *a, const char *b) {
     [self getLineNumberFormatString:formatString length:sizeof formatString];
     
     while (lineCount--) {
-        int charCount = sprintf(buffer + bufferIndex, formatString, lineValue);
+        int charCount = sprintf(buffer + bufferIndex, formatString, lineValue + self.representer.valueOffset);
         HFASSERT(charCount > 0);
         bufferIndex += charCount;
         buffer[bufferIndex++] = '\n';   

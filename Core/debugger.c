@@ -333,11 +333,11 @@ static struct {
 };
 
 value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
-                           unsigned int length, bool *error,
+                           size_t length, bool *error,
                            uint16_t *watchpoint_address, uint8_t *watchpoint_new_value);
 
 static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
-                                         unsigned int length, bool *error,
+                                         size_t length, bool *error,
                                          uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
 {
     *error = false;
@@ -410,19 +410,19 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
                 case 'p': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
             }
         }
-        GB_log(gb, "Unknown register: %.*s\n", length, string);
+        GB_log(gb, "Unknown register: %.*s\n", (unsigned int) length, string);
         *error = true;
         return (lvalue_t){0,};
     }
 
-    GB_log(gb, "Expression is not an lvalue: %.*s\n", length, string);
+    GB_log(gb, "Expression is not an lvalue: %.*s\n", (unsigned int) length, string);
     *error = true;
     return (lvalue_t){0,};
 }
 
 #define ERROR ((value_t){0,})
 value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
-                          unsigned int length, bool *error,
+                          size_t length, bool *error,
                           uint16_t *watchpoint_address, uint8_t *watchpoint_new_value)
 {
     *error = false;
@@ -567,7 +567,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
             return (value_t){true, symbol->bank, symbol->addr};
         }
 
-        GB_log(gb, "Unknown register or symbol: %.*s\n", length, string);
+        GB_log(gb, "Unknown register or symbol: %.*s\n", (unsigned int) length, string);
         *error = true;
         return ERROR;
     }
@@ -581,7 +581,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     }
     uint16_t literal = (uint16_t) (strtol(string, &end, base));
     if (end != string + length) {
-        GB_log(gb, "Failed to parse: %.*s\n", length, string);
+        GB_log(gb, "Failed to parse: %.*s\n", (unsigned int) length, string);
         *error = true;
         return ERROR;
     }
@@ -1558,4 +1558,18 @@ const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr)
     const GB_bank_symbol_t *symbol = GB_debugger_find_symbol(gb, addr);
     if (symbol && symbol->addr == addr) return symbol->name;
     return NULL;
+}
+
+/* The public version of debugger_evaluate */
+bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result, uint16_t *result_bank)
+{
+    bool error = false;
+    value_t value = debugger_evaluate(gb, string, strlen(string), &error, NULL, NULL);
+    if (result) {
+        *result = value.value;
+    }
+    if (result_bank) {
+        *result_bank = value.has_bank? value.value : -1;
+    }
+    return error;
 }

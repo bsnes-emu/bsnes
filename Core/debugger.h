@@ -11,4 +11,5 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path);
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
 const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr);
+bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result, uint16_t *result_bank); /* result_bank is -1 if unused. */
 #endif /* debugger_h */

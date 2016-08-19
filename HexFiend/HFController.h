@@ -367,7 +367,7 @@ You create an HFController via <tt>[[HFController alloc] init]</tt>.  After that
 - (unsigned long long)contentsLength;
 
 - (void) reloadData;
-
+- (void)_ensureVisibilityOfLocation:(unsigned long long)location;
 @end
 
 /*! A notification posted whenever any of the HFController's properties change.  The object is the HFController.  The userInfo contains one key, HFControllerChangedPropertiesKey, which contains an NSNumber with the changed properties as a HFControllerPropertyBits bitmask.  This is useful for external objects to be notified of changes.  HFRepresenters added to the HFController are notified via the controllerDidChange: message.

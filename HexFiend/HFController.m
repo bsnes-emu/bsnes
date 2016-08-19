@@ -1796,7 +1796,7 @@ static BOOL rangesAreInAscendingOrder(NSEnumerator *rangeEnumerator) {
     [cachedData release];
     cachedData = nil;
     [self _updateDisplayedRange];
-    [self _addPropertyChangeBits: HFControllerContentValue];
+    [self _addPropertyChangeBits: HFControllerContentValue | HFControllerContentLength];
     END_TRANSACTION();
 }
 

@@ -9,6 +9,9 @@
 @property (strong) IBOutlet NSWindow *mainWindow;
 @property (strong) IBOutlet NSView *memoryView;
 @property (strong) IBOutlet NSPanel *memoryWindow;
+@property (readonly) GB_gameboy_t *gameboy;
+@property (strong) IBOutlet NSTextField *memoryBankInput;
+@property (strong) IBOutlet NSToolbarItem *memoryBankItem;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

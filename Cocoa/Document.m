@@ -8,6 +8,8 @@
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 
+/* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
+
 @interface Document ()
 {
     /* NSTextViews freeze the entire app if they're modified too often and too quickly.
@@ -20,6 +22,7 @@
     HFController *hex_controller;
 
     NSString *lastConsoleInput;
+    HFLineCountingRepresenter *lineRep;
 }
 
 @property GBAudioClient *audioClient;
@@ -175,6 +178,12 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     }
     [self readFromFile:self.fileName ofType:@"gb"];
     [self start];
+
+    if (hex_controller) {
+        /* Verify bank sanity, especially when switching models. */
+        [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:0];
+        [self hexUpdateBank:self.memoryBankInput];
+    }
 }
 
 - (IBAction)togglePause:(id)sender
@@ -221,7 +230,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     HFHexTextRepresenter *hexRep = [[HFHexTextRepresenter alloc] init];
     HFStringEncodingTextRepresenter *asciiRep = [[HFStringEncodingTextRepresenter alloc] init];
     HFVerticalScrollerRepresenter *scrollRep = [[HFVerticalScrollerRepresenter alloc] init];
-    HFLineCountingRepresenter *lineRep = [[HFLineCountingRepresenter alloc] init];
+    lineRep = [[HFLineCountingRepresenter alloc] init];
     HFStatusBarRepresenter *statusRep = [[HFStatusBarRepresenter alloc] init];
 
     lineRep.lineNumberFormat = HFLineNumberFormatHexadecimal;
@@ -250,6 +259,8 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     [layoutView setFrame:layoutViewFrame];
     [layoutView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable | NSViewMaxYMargin];
     [self.memoryView addSubview:layoutView];
+
+    self.memoryBankItem.enabled = false;
 }
 
 + (BOOL)autosavesInPlace {
@@ -521,7 +532,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (void) performAtomicBlock: (void (^)())block
 {
     while (!is_inited);
-    bool was_running = running;
+    bool was_running = running && !gb.debug_stopped;
     if (was_running) {
         [self stop];
     }
@@ -544,6 +555,98 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
         [self initMemoryView];
     }
     [self.memoryWindow makeKeyAndOrderFront:sender];
+}
+
+- (IBAction)hexGoTo:(id)sender
+{
+    [self performAtomicBlock:^{
+        uint16_t addr;
+        if (GB_debugger_evaluate(&gb, [[sender stringValue] UTF8String], &addr, NULL)) {
+            NSBeep();
+            return;
+        }
+        addr -= lineRep.valueOffset;
+        if (addr >= hex_controller.byteArray.length) {
+            NSBeep();
+            return;
+        }
+        [hex_controller setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(addr, 0)]]];
+        [hex_controller _ensureVisibilityOfLocation:addr];
+        [self.memoryWindow makeFirstResponder:self.memoryView.subviews[0].subviews[0]];
+    }];
+}
+
+- (IBAction)hexUpdateBank:(NSControl *)sender
+{
+    [self performAtomicBlock:^{
+        uint16_t addr, bank;
+        if (GB_debugger_evaluate(&gb, [[sender stringValue] UTF8String], &addr, &bank)) {
+            NSBeep();
+            return;
+        }
+
+        if (bank == (uint16_t) -1) {
+            bank = addr;
+        }
+
+        uint16_t n_banks = 1;
+        switch ([(GBMemoryByteArray *)(hex_controller.byteArray) mode]) {
+            case GBMemoryROM:
+                n_banks = gb.rom_size / 0x4000;
+                break;
+            case GBMemoryVRAM:
+                n_banks = gb.is_cgb ? 2 : 1;
+                break;
+            case GBMemoryExternalRAM:
+                n_banks = gb.mbc_ram_size / 0x2000;
+                break;
+            case GBMemoryRAM:
+                n_banks = gb.is_cgb ? 8 : 1;
+                break;
+            case GBMemoryEntireSpace:
+                break;
+        }
+
+        bank %= n_banks;
+
+        [sender setStringValue:[NSString stringWithFormat:@"$%x", bank]];
+        [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:bank];
+        [hex_controller reloadData];
+    }];
+}
+
+- (IBAction)hexUpdateSpace:(NSPopUpButtonCell *)sender
+{
+    self.memoryBankItem.enabled = [sender indexOfSelectedItem] != GBMemoryEntireSpace;
+    GBMemoryByteArray *byteArray = (GBMemoryByteArray *)(hex_controller.byteArray);
+    [byteArray setMode:(GB_memory_mode_t)[sender indexOfSelectedItem]];
+    switch ((GB_memory_mode_t)[sender indexOfSelectedItem]) {
+        case GBMemoryEntireSpace:
+        case GBMemoryROM:
+            lineRep.valueOffset = 0;
+            byteArray.selectedBank = gb.mbc_rom_bank;
+            break;
+        case GBMemoryVRAM:
+            lineRep.valueOffset = 0x8000;
+            byteArray.selectedBank = gb.cgb_vram_bank;
+            break;
+        case GBMemoryExternalRAM:
+            lineRep.valueOffset = 0xA000;
+            byteArray.selectedBank = gb.mbc_ram_bank;
+            break;
+        case GBMemoryRAM:
+            lineRep.valueOffset = 0xC000;
+            byteArray.selectedBank = gb.cgb_ram_bank;
+            break;
+    }
+    [self.memoryBankInput setStringValue:[NSString stringWithFormat:@"$%x", byteArray.selectedBank]];
+    [hex_controller reloadData];
+    [self.memoryView setNeedsDisplay:YES];
+}
+
+- (GB_gameboy_t *) gameboy
+{
+    return &gb;
 }
 
 @end
