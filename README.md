@@ -28,7 +28,7 @@ Features currently supported only with the Cocoa version:
  * Several [scaling algorithms](SCALING.md) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
 
 ## Compatibility
-While SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), some games fail to run correctly. SameBoy is still relatively early in its development and accuracy and compatibility will be improved.
+SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), as well as most of [mooneye-gb's](https://github.com/Gekkio/mooneye-gb) acceptance tests. SameBoy should work with most games and demos, please report any broken ROM.
 
 ## Compilation
 SameBoy requires the following tools and libraries to build:
@@ -38,4 +38,11 @@ SameBoy requires the following tools and libraries to build:
  * SDL port: SDL.framework (OS X) or libsdl (Other platforms)
  * [rgbds](https://github.com/bentley/rgbds/releases/), for boot ROM compilation
 
-SameBoy was compiled and tested on OS X and Ubuntu.
+On Windows, SameBoy also requires:
+ * Visual Studio (For headers, etc.)
+ * [GnuWin](http://gnuwin32.sourceforge.net/)
+ * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, repsectively.
+
+To compile, simply run: <code>make [CONF=(release|debug)] (cocoa|sdl|bootroms)</code>
+
+SameBoy was compiled and tested on OS X, Ubuntu and Windows 7 32-bit.
