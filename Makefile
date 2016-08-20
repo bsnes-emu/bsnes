@@ -36,7 +36,7 @@ CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -
 SDL_LDFLAGS := -lSDL
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows
-LDFLAGS += -lmsvcrt -lSDLmain
+LDFLAGS += -lmsvcrt -lSDLmain -Wl,/MANIFESTFILE:NUL
 else
 LDFLAGS += -lc -lm
 endif
@@ -169,13 +169,20 @@ ifeq ($(CONF), release)
 endif
 
 # Windows version builds two, one with a conole and one without it
-$(BIN)/sdl/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+$(BIN)/sdl/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:windows
 
-$(BIN)/sdl/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+$(BIN)/sdl/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.o
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:console
+
+$(OBJ)/%.res: %.rc
+	-@$(MKDIR) -p $(dir $@)
+	rc /fo $@ /dVERSION=\"$(VERSION)\" $^ 
+
+%.o: %.res
+	cvtres /OUT:"$@" $^
 
 # We must provide SDL.dll with the Windows port. This is an AWFUL HACK to find it.
 SPACE :=

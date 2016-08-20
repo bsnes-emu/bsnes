@@ -1,0 +1,24 @@
+1 VERSIONINFO
+FILEOS 0x4
+FILETYPE 0x1
+{
+    BLOCK "StringFileInfo"
+    {
+        BLOCK "040904E4"
+        {
+            VALUE "CompanyName", "Lior Halphon"
+            VALUE "FileDescription", "SameBoy"
+            VALUE "FileVersion", VERSION
+            VALUE "LegalCopyright", "Copyright © 2015-2016 Lior Halphon"
+            VALUE "ProductName", "SameBoy"
+            VALUE "ProductVersion", VERSION
+            VALUE "WWW", "https://github.com/LIJI32/SameBoy"
+        }
+    }
+    BLOCK "VarFileInfo"
+    {
+        VALUE "Translation", 0x0409 0x04E4
+    }
+}
+
+IDI_ICON1 ICON DISCARDABLE "SameBoy.ico"
