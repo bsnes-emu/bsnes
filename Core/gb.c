@@ -73,6 +73,7 @@ static char *default_input_callback(GB_gameboy_t *gb)
 
 static char *default_async_input_callback(GB_gameboy_t *gb)
 {
+#ifndef _WIN32
     fd_set set;
     FD_ZERO(&set);
     FD_SET(STDIN_FILENO, &set);
@@ -84,6 +85,7 @@ static char *default_async_input_callback(GB_gameboy_t *gb)
         }
         return default_input_callback(gb);
     }
+#endif
     return NULL;
 }
 
@@ -94,10 +96,6 @@ void GB_init(GB_gameboy_t *gb)
     gb->version = GB_STRUCT_VERSION;
     gb->ram = malloc(gb->ram_size = 0x2000);
     gb->vram = malloc(gb->vram_size = 0x2000);
-
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    gb->last_vblank = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;;
 
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
@@ -126,10 +124,6 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->vram = malloc(gb->vram_size = 0x2000 * 2);
     gb->is_cgb = true;
     gb->cgb_mode = true;
-
-    struct timeval now;
-    gettimeofday(&now, NULL);
-    gb->last_vblank = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
 
     gb->mbc_rom_bank = 1;
     gb->last_rtc_second = time(NULL);
@@ -180,7 +174,7 @@ void GB_free(GB_gameboy_t *gb)
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path, "rb");
     if (!f) return errno;
     fread(gb->boot_rom, sizeof(gb->boot_rom), 1, f);
     fclose(f);
@@ -189,7 +183,7 @@ int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
 
 int GB_load_rom(GB_gameboy_t *gb, const char *path)
 {
-    FILE *f = fopen(path, "r");
+    FILE *f = fopen(path, "rb");
     if (!f) return errno;
     fseek(f, 0, SEEK_END);
     gb->rom_size = (ftell(f) + 0x3FFF) & ~0x3FFF; /* Round to bank */

@@ -1,4 +1,8 @@
-ifeq ($(shell uname -s),Darwin)
+# Set target, configuration, version and destination folders
+
+PLATFORM := $(shell uname -s)
+
+ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
 else
 DEFAULT := sdl
@@ -11,43 +15,79 @@ MAKECMDGOALS := $(DEFAULT)
 endif
 
 VERSION := 0.6
+CONF ?= debug
 
 BIN := build/bin
 OBJ := build/obj
 
+# Set tools
+
 CC := clang
+ifeq ($(PLATFORM),windows32)
+# To force use of the Unix version instead of the Windows version
+MKDIR := $(shell which mkdir)
+else
+MKDIR := mkdir
+endif
 
-CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I.
+# Set compilation and linkage flags based on target, platform and configuration
+
+CFLAGS += -Werror -Wall -std=gnu11 -ICore -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
 SDL_LDFLAGS := -lSDL
+ifeq ($(PLATFORM),windows32)
+CFLAGS += -IWindows
+LDFLAGS += -lmsvcrt -lSDLmain
+else
 LDFLAGS += -lc -lm
-CONF ?= debug
+endif
 
-ifeq ($(shell uname -s),Darwin)
+ifeq ($(PLATFORM),Darwin)
 CFLAGS += -F/Library/Frameworks
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(shell xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk -mmacosx-version-min=10.9
 LDFLAGS += -framework AppKit -framework Carbon
 SDL_LDFLAGS := -framework SDL
 endif
 
+ifeq ($(PLATFORM),windows32)
+CFLAGS += -Wno-deprecated-declarations # Seems like Microsoft deprecated every single LIBC function
+LDFLAGS += -Wl,/NODEFAULTLIB:libcmt
+endif
+
 ifeq ($(CONF),debug)
 CFLAGS += -g
+ifeq ($(PLATFORM),windows32)
+LDFLAGS += -Wl,/debug
+endif
 else ifeq ($(CONF), release)
-CFLAGS += -O3 -flto -DNDEBUG
+CFLAGS += -O3 -DNDEBUG
+ifneq ($(PLATFORM),windows32)
 LDFLAGS += -flto
+CFLAGS += -flto
+endif
 else
 $(error Invalid value for CONF: $(CONF). Use "debug" or "release")
 endif
 
+# Define our targets
+
+ifeq ($(PLATFORM),windows32)
+SDL_TARGET := $(BIN)/sdl/sameboy.exe $(BIN)/sdl/sameboy_debugger.exe $(BIN)/sdl/SDL.dll
+else
+SDL_TARGET := $(BIN)/sdl/sameboy
+endif
+
 cocoa: $(BIN)/Sameboy.app
-sdl: $(BIN)/sdl/sameboy $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE
+sdl: $(SDL_TARGET) $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
 
-CORE_SOURCES := $(shell echo Core/*.c)
-SDL_SOURCES := $(shell echo SDL/*.c)
+# Get a list of our source files and their respective object file targets
 
-ifeq ($(shell uname -s),Darwin)
-COCOA_SOURCES := $(shell echo Cocoa/*.m) $(shell echo HexFiend/*.m)
-SDL_SOURCES += $(shell echo SDL/*.m)
+CORE_SOURCES := $(shell ls Core/*.c)
+SDL_SOURCES := $(shell ls SDL/*.c)
+
+ifeq ($(PLATFORM),Darwin)
+COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m)
+SDL_SOURCES += $(shell ls SDL/*.m)
 endif
 
 CORE_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(CORE_SOURCES))
@@ -57,6 +97,7 @@ SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 ALL_OBJECTS := $(CORE_OBJECTS) $(COCOA_OBJECTS) $(SDL_OBJECTS)
 
 # Automatic dependency generation
+
 ifneq ($(MAKECMDGOALS),clean)
 -include $(CORE_OBJECTS:.o=.dep)
 ifneq ($(filter $(MAKECMDGOALS),sdl),)
@@ -68,28 +109,30 @@ endif
 endif
 
 $(OBJ)/%.dep: %
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) -MT $(OBJ)/$^.o -M $^ -c -o $@
 
+# Compilation rules
+
 $(OBJ)/%.c.o: %.c
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 	
 # HexFiend requires more flags
 $(OBJ)/HexFiend/%.m.o: HexFiend/%.m
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(OCFLAGS) -c $< -o $@ -fno-objc-arc -include HexFiend/HexFiend_2_Framework_Prefix.pch
 	
 $(OBJ)/%.m.o: %.m
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(OCFLAGS) -c $< -o $@
 
 # Cocoa Port
 
-Shaders:$(shell echo Shaders/*.fsh)
+Shaders:$(shell ls Shaders/*.fsh)
 
 $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
-					$(shell echo Cocoa/*.icns) \
+					$(shell ls Cocoa/*.icns) \
 					Cocoa/License.html \
 					Cocoa/info.plist \
 					$(BIN)/BootROMs/dmg_boot.bin \
@@ -98,15 +141,15 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Preferences.nib \
 					Shaders
-	mkdir -p $(BIN)/Sameboy.app/Contents/Resources
+	$(MKDIR) -p $(BIN)/Sameboy.app/Contents/Resources
 	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/info.plist > $(BIN)/Sameboy.app/Contents/info.plist
 	cp Cocoa/License.html $(BIN)/Sameboy.app/Contents/Resources/Credits.html
-	mkdir -p $(BIN)/Sameboy.app/Contents/Resources/Shaders
+	$(MKDIR) -p $(BIN)/Sameboy.app/Contents/Resources/Shaders
 	cp Shaders/*.fsh $(BIN)/Sameboy.app/Contents/Resources/Shaders
 
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit
 ifeq ($(CONF), release)
 	strip $@
@@ -115,27 +158,50 @@ endif
 $(BIN)/Sameboy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
 	ibtool --compile $@ $^
 	
+# SDL Port
+
+# Unix versions build only one binary
 $(BIN)/sdl/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS)
 ifeq ($(CONF), release)
 	strip $@
 endif
-	
-$(BIN)/BootROMs/%.bin: BootROMs/%.asm
-	-@mkdir -p $(dir $@)
-	cd BootROMs && rgbasm -o ../$@.tmp ../$<
-	rgblink -o $@.tmp2 $@.tmp
-	head -c $(if $(findstring dmg,$@), 256, 2304) $@.tmp2 > $@
-	@rm $@.tmp $@.tmp2
+
+# Windows version builds two, one with a conole and one without it
+$(BIN)/sdl/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:windows
+
+$(BIN)/sdl/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS) $(SDL_LDFLAGS) -Wl,/subsystem:console
+
+# We must provide SDL.dll with the Windows port. This is an AWFUL HACK to find it.
+SPACE :=
+SPACE +=
+$(BIN)/sdl/SDL.dll:
+	@$(eval POTENTIAL_MATCHES := $(subst @@@," ",$(patsubst %,%/SDL.dll,$(subst ;,$(SPACE),$(subst $(SPACE),@@@,$(lib))))))
+	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
+	cp "$(MATCH)" $@
 
 $(BIN)/sdl/%.bin: $(BIN)/BootROMs/%.bin
-	-@mkdir -p $(dir $@)
+	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	
 $(BIN)/sdl/LICENSE: LICENSE
 	cp -f $^ $@
 
+# Boot ROMs
+
+$(BIN)/BootROMs/%.bin: BootROMs/%.asm
+	-@$(MKDIR) -p $(dir $@)
+	cd BootROMs && rgbasm -o ../$@.tmp ../$<
+	rgblink -o $@.tmp2 $@.tmp
+	head -c $(if $(findstring dmg,$@), 256, 2304) $@.tmp2 > $@
+	@rm $@.tmp $@.tmp2
+
+# Clean
+
 clean:
 	rm -rf build
-	

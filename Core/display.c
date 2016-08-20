@@ -6,6 +6,10 @@
 #include <string.h>
 #include "gb.h"
 #include "display.h"
+#ifdef _WIN32
+#define _WIN32_WINNT 0x0500
+#include <Windows.h>
+#endif
 
 #pragma pack(push, 1)
 typedef struct {
@@ -161,17 +165,42 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     return gb->background_palletes_rgb[(attributes & 7) * 4 + background_pixel];
 }
 
+static int64_t get_nanoseconds(void)
+{
+#ifndef _WIN32
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
+#else
+    FILETIME time;
+	GetSystemTimeAsFileTime(&time);
+	return (((int64_t)time.dwHighDateTime << 32) | time.dwLowDateTime) * 100L;
+#endif
+}
+
+static void nsleep(uint64_t nanoseconds)
+{
+#ifndef _WIN32
+    struct timespec sleep = {0, nanoseconds};
+    nanosleep(&sleep, NULL);
+#else
+	HANDLE timer;
+	LARGE_INTEGER time;
+	timer = CreateWaitableTimer(NULL, true, NULL);
+	time.QuadPart = -(nanoseconds / 100L);
+	SetWaitableTimer(timer, &time, 0, NULL, NULL, false);
+	WaitForSingleObject(timer, INFINITE);
+	CloseHandle(timer);
+#endif
+}
+
 // Todo: FPS capping should not be related to vblank, as the display is not always on, and this causes "jumps"
 // when switching the display on and off.
 void display_vblank(GB_gameboy_t *gb)
 {
-    _Static_assert(CLOCKS_PER_SEC == 1000000, "CLOCKS_PER_SEC != 1000000");
-    
     /* Called every Gameboy vblank. Does FPS-capping and calls user's vblank callback if Turbo Mode allows. */
     if (gb->turbo) {
-        struct timeval now;
-        gettimeofday(&now, NULL);
-        int64_t nanoseconds = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
+        int64_t nanoseconds = get_nanoseconds();
         if (nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
             return;
         }
@@ -205,14 +234,9 @@ void display_vblank(GB_gameboy_t *gb)
 
     gb->vblank_callback(gb);
     if (!gb->turbo) {
-        struct timeval now;
-        struct timespec sleep = {0,};
-        gettimeofday(&now, NULL);
-        signed long nanoseconds = (now.tv_usec) * 1000 + now.tv_sec * 1000000000L;
+        int64_t nanoseconds = get_nanoseconds();
         if (labs((signed long)(nanoseconds - gb->last_vblank)) < FRAME_LENGTH ) {
-            sleep.tv_nsec = (FRAME_LENGTH  + gb->last_vblank - nanoseconds);
-            nanosleep(&sleep, NULL);
-
+            nsleep(FRAME_LENGTH  + gb->last_vblank - nanoseconds);
             gb->last_vblank += FRAME_LENGTH;
         }
         else {

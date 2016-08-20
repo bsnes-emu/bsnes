@@ -5,6 +5,15 @@
 #include <assert.h>
 #include <signal.h>
 #include <SDL/SDL.h>
+#ifndef _WIN32
+#define AUDIO_FREQUENCY 96000
+#else
+/* Windows (well, at least my VM) can't handle 96KHz sound well :( */
+#define AUDIO_FREQUENCY 44100
+#include <direct.h>
+#include <windows.h>
+#define snprintf _snprintf
+#endif
 
 #include "gb.h"
 #include "debugger.h"
@@ -14,7 +23,7 @@ static char *filename;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 GB_gameboy_t gb;
 
-void GB_update_keys_status(GB_gameboy_t *gb)
+static void GB_update_keys_status(GB_gameboy_t *gb)
 {
     static bool ctrl = false;
     static bool shift = false;
@@ -111,7 +120,7 @@ void GB_update_keys_status(GB_gameboy_t *gb)
     }
 }
 
-void vblank(GB_gameboy_t *gb)
+static void vblank(GB_gameboy_t *gb)
 {
     SDL_Surface *screen = gb->user_data;
     SDL_Flip(screen);
@@ -139,16 +148,24 @@ static const char *executable_folder(void)
     ssize_t length = readlink("/proc/self/exe", &path[0], sizeof(path) - 1);
     assert (length != -1);
 #else
-#warning Unsupported OS: sameboy will only run from CWD
+#ifdef _WIN32
+    HMODULE hModule = GetModuleHandle(NULL);
+    GetModuleFileName(hModule, path, sizeof(path) - 1);
+#else
     /* No OS-specific way, assume running from CWD */
     getcwd(&path[0], sizeof(path) - 1);
     return path;
 #endif
 #endif
+#endif
     size_t pos = strlen(path);
     while (pos) {
         pos--;
+#ifdef _WIN32
+        if (path[pos] == '\\') {
+#else
         if (path[pos] == '/') {
+#endif
             path[pos] = 0;
             break;
         }
@@ -256,6 +273,7 @@ usage:
 
     SDL_Init( SDL_INIT_EVERYTHING );
     screen = SDL_SetVideoMode(160, 144, 32, SDL_SWSURFACE );
+    SDL_WM_SetCaption("SameBoy v" xstr(VERSION), "SameBoy v" xstr(VERSION));
 #ifdef __APPLE__
     cocoa_disable_filtering();
 #endif
@@ -281,14 +299,14 @@ usage:
     /* Configure Audio */
     SDL_AudioSpec want, have;
     SDL_memset(&want, 0, sizeof(want));
-    want.freq = 96000;
+    want.freq = AUDIO_FREQUENCY;
     want.format = AUDIO_S16SYS;
     want.channels = 2;
     want.samples = 512;
     want.callback = audio_callback;
     want.userdata = &gb;
     SDL_OpenAudio(&want, &have);
-    GB_set_sample_rate(&gb, 96000);
+    GB_set_sample_rate(&gb, AUDIO_FREQUENCY);
     
     /* Start Audio */
     SDL_PauseAudio(0);

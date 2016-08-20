@@ -1,4 +1,7 @@
 #include "gb.h"
+#ifdef _WIN32
+typedef intptr_t ssize_t;
+#endif
 
 static size_t GB_map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
 {
