@@ -113,7 +113,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 
 - (void) vblank
 {
-    self.view.mouseHidingEnabled = YES;
+    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [self.view flip];
     GB_set_pixels_output(&gb, self.view.pixels);
 }
@@ -127,7 +127,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         GB_apu_copy_buffer(&gb, buffer, nFrames);
     } andSampleRate:96000];
-    self.view.mouseHidingEnabled = YES;
+    self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSFullScreenWindowMask) != 0;
     [self.audioClient start];
     NSTimer *hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:YES];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
@@ -347,11 +347,13 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (void) windowWillEnterFullScreen:(NSNotification *)notification
 {
     fullScreen = true;
+    self.view.mouseHidingEnabled = running;
 }
 
 - (void) windowWillExitFullScreen:(NSNotification *)notification
 {
     fullScreen = false;
+    self.view.mouseHidingEnabled = NO;
 }
 
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame
