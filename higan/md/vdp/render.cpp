@@ -20,7 +20,7 @@ auto VDP::run() -> void {
 
   bool windowed = false;  //todo: broken
   windowed &= state.x >= io.windowHorizontalLo && state.x <= io.windowHorizontalHi;
-  windowed &= state.y >= io.windowVerticalLo && state.y <= io.windowVerticalHi;
+  windowed &= state.y >= io.windowVerticalLo   && state.y <= io.windowVerticalHi;
   auto& planeA = windowed ? this->window : this->planeA;
 
   planeA.run(state.x, state.y);

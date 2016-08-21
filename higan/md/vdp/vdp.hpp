@@ -10,11 +10,8 @@ struct VDP : Thread {
   auto reset() -> void;
 
   //io.cpp
-  auto readByte(uint24 addr) -> uint8;
-  auto writeByte(uint24 addr, uint8 data) -> void;
-
-  auto readWord(uint24 addr) -> uint16;
-  auto writeWord(uint24 addr, uint16 data) -> void;
+  auto read(uint24 addr) -> uint16;
+  auto write(uint24 addr, uint16 data) -> void;
 
   auto readDataPort() -> uint16;
   auto writeDataPort(uint16 data) -> void;

@@ -11,8 +11,8 @@ auto VDP::Sprite::write(uint9 address, uint16 data) -> void {
 
   case 1: {
     object.link = data.bits(0,6);
-    object.height = data.bits(8,9) << 3;
-    object.width = data.bits(10,11) << 3;
+    object.height = 1 + data.bits(8,9) << 3;
+    object.width = 1 + data.bits(10,11) << 3;
     break;
   }
 
@@ -37,16 +37,18 @@ auto VDP::Sprite::scanline(uint y) -> void {
   objects.reset();
 
   uint7 link = 0;
+  uint tiles = 0;
   do {
     auto& object = oam[link];
     link = object.link;
 
     if(128 + y <  object.y) continue;
-    if(128 + y >= object.y + object.height - 1) continue;
+    if(128 + y >= object.y + object.height) continue;
     if(object.x == 0) break;
 
     objects.append(object);
-  } while(link && link < 80 && objects.size() < 20);
+    tiles += object.width >> 3;
+  } while(link && link < 80 && objects.size() < 20 && tiles < 40);
 }
 
 auto VDP::Sprite::run(uint x, uint y) -> void {
@@ -55,7 +57,7 @@ auto VDP::Sprite::run(uint x, uint y) -> void {
 
   for(auto& o : objects) {
     if(128 + x <  o.x) continue;
-    if(128 + x >= o.x + o.width - 1) continue;
+    if(128 + x >= o.x + o.width) continue;
 
     uint objectX = 128 + x - o.x;
     uint objectY = 128 + y - o.y;
@@ -64,7 +66,7 @@ auto VDP::Sprite::run(uint x, uint y) -> void {
 
     uint tileX = objectX >> 3;
     uint tileY = objectY >> 3;
-    uint tileNumber = tileX * (o.width >> 3) + tileY;
+    uint tileNumber = tileX * (o.height >> 3) + tileY;
     uint15 tileAddress = o.address + (tileNumber << 4);
     uint pixelX = objectX & 7;
     uint pixelY = objectY & 7;
@@ -75,6 +77,7 @@ auto VDP::Sprite::run(uint x, uint y) -> void {
     if(color) {
       output.color = o.palette << 4 | color;
       output.priority = o.priority;
+      break;
     }
   }
 }

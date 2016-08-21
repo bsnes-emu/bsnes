@@ -35,6 +35,8 @@ namespace MegaDrive {
     uint wait = 0;
   };
 
+  #include <md/controller/controller.hpp>
+
   #include <md/cpu/cpu.hpp>
   #include <md/apu/apu.hpp>
   #include <md/vdp/vdp.hpp>
@@ -43,6 +45,7 @@ namespace MegaDrive {
 
   #include <md/system/system.hpp>
   #include <md/cartridge/cartridge.hpp>
+  #include <md/bus/bus.hpp>
 }
 
 #include <md/interface/interface.hpp>

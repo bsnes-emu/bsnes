@@ -2,6 +2,7 @@
 
 namespace MegaDrive {
 
+#include "peripherals.cpp"
 System system;
 Scheduler scheduler;
 
@@ -25,6 +26,7 @@ auto System::save() -> void {
 }
 
 auto System::unload() -> void {
+  peripherals.unload();
   cartridge.unload();
 }
 
@@ -54,6 +56,8 @@ auto System::reset() -> void {
   psg.reset();
   ym2612.reset();
   scheduler.primary(cpu);
+
+  peripherals.reset();
 }
 
 }

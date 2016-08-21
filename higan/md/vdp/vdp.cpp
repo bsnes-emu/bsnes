@@ -15,7 +15,7 @@ auto VDP::Enter() -> void {
 
 auto VDP::main() -> void {
   scanline();
-  if(state.y < 240) {
+  if(state.y < screenHeight()) {
     if(state.y == 0) {
       cpu.lower(CPU::Interrupt::VerticalBlank);
     }
@@ -29,7 +29,7 @@ auto VDP::main() -> void {
     }
     step(430);
   } else {
-    if(state.y == 240) {
+    if(state.y == screenHeight()) {
       if(io.verticalBlankInterruptEnable) {
         cpu.raise(CPU::Interrupt::VerticalBlank);
       }

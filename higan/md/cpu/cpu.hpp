@@ -20,14 +20,14 @@ struct CPU : Processor::M68K, Thread {
   auto power() -> void;
   auto reset() -> void;
 
-  auto readByte(uint24 addr) -> uint8 override;
+  auto readByte(uint24 addr) -> uint16 override;
   auto readWord(uint24 addr) -> uint16 override;
-  auto writeByte(uint24 addr, uint8 data) -> void override;
+  auto writeByte(uint24 addr, uint16 data) -> void override;
   auto writeWord(uint24 addr, uint16 data) -> void override;
 
-private:
-  uint8 ram[64 * 1024];
+  vector<Thread*> peripherals;
 
+private:
   struct State {
     uint32 interruptLine;
     uint32 interruptPending;

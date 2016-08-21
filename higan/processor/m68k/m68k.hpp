@@ -50,9 +50,9 @@ struct M68K {
   M68K();
 
   virtual auto step(uint clocks) -> void = 0;
-  virtual auto readByte(uint24 addr) -> uint8 = 0;
+  virtual auto readByte(uint24 addr) -> uint16 = 0;
   virtual auto readWord(uint24 addr) -> uint16 = 0;
-  virtual auto writeByte(uint24 addr, uint8 data) -> void = 0;
+  virtual auto writeByte(uint24 addr, uint16 data) -> void = 0;
   virtual auto writeWord(uint24 addr, uint16 data) -> void = 0;
 
   auto power() -> void;
@@ -103,7 +103,6 @@ struct M68K {
   template<uint Size> auto fetch(EffectiveAddress& ea) -> uint32;
   template<uint Size, bool Hold = 0> auto read(EffectiveAddress& ea) -> uint32;
   template<uint Size, bool Hold = 0> auto write(EffectiveAddress& ea, uint32 data) -> void;
-  template<uint Size> auto flush(EffectiveAddress& ea, uint32 data) -> void;
 
   //instruction.cpp
   auto instruction() -> void;

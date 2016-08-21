@@ -1,6 +1,6 @@
 auto VDP::dmaRun() -> void {
   if(!io.dmaEnable) return;
-  if(io.command.bits(4,5) != 2) return;
+  if(!io.command.bit(5)) return;
 
   if(io.dmaMode <= 1) return dmaLoad();
   if(io.dmaMode == 2) return dmaFill();

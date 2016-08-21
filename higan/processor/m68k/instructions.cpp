@@ -106,7 +106,7 @@ template<uint Size> auto M68K::instructionADD(DataRegister from, EffectiveAddres
 
 template<uint Size> auto M68K::instructionADDA(AddressRegister ar, EffectiveAddress ea) -> void {
   auto source = sign<Size>(read<Size>(ea));
-  auto target = read<Size>(ar);
+  auto target = read<Long>(ar);
   write<Long>(ar, source + target);
 }
 
@@ -364,8 +364,8 @@ template<uint Size> auto M68K::instructionCMP(DataRegister dr, EffectiveAddress 
 
 template<uint Size> auto M68K::instructionCMPA(AddressRegister ar, EffectiveAddress ea) -> void {
   auto source = sign<Size>(read<Size>(ea));
-  auto target = read<Size>(ar);
-  CMP<Size>(source, target);
+  auto target = read<Long>(ar);
+  CMP<Long>(source, target);
 }
 
 template<uint Size> auto M68K::instructionCMPI(EffectiveAddress ea) -> void {
@@ -623,7 +623,7 @@ template<uint Size> auto M68K::instructionMOVE(EffectiveAddress to, EffectiveAdd
 }
 
 template<uint Size> auto M68K::instructionMOVEA(AddressRegister ar, EffectiveAddress ea) -> void {
-  auto data = read<Size>(ea);
+  auto data = sign<Size>(read<Size>(ea));
   write<Long>(ar, data);
 }
 
@@ -639,10 +639,12 @@ template<uint Size> auto M68K::instructionMOVEM_TO_MEM(EffectiveAddress to) -> v
     if(to.mode == AddressRegisterIndirectWithPreDecrement) addr -= bytes<Size>();
     auto data = index < 8 ? read<Size>(DataRegister{index}) : read<Size>(AddressRegister{index});
     write<Size>(addr, data);
-    if(to.mode == AddressRegisterIndirectWithPostIncrement) addr += bytes<Size>();
+    if(to.mode != AddressRegisterIndirectWithPreDecrement) addr += bytes<Size>();
   }
 
-  flush<Long>(to, addr);
+  AddressRegister with{to.reg};
+  if(to.mode == AddressRegisterIndirectWithPreDecrement ) write<Long>(with, addr);
+  if(to.mode == AddressRegisterIndirectWithPostIncrement) write<Long>(with, addr);
 }
 
 template<uint Size> auto M68K::instructionMOVEM_TO_REG(EffectiveAddress from) -> void {
@@ -657,10 +659,12 @@ template<uint Size> auto M68K::instructionMOVEM_TO_REG(EffectiveAddress from) ->
     auto data = read<Size>(addr);
     data = sign<Size>(data);
     index < 8 ? write<Long>(DataRegister{index}, data) : write<Long>(AddressRegister{index}, data);
-    if(from.mode == AddressRegisterIndirectWithPostIncrement) addr += bytes<Size>();
+    if(from.mode != AddressRegisterIndirectWithPreDecrement) addr += bytes<Size>();
   }
 
-  flush<Long>(from, addr);
+  AddressRegister with{from.reg};
+  if(from.mode == AddressRegisterIndirectWithPreDecrement ) write<Long>(with, addr);
+  if(from.mode == AddressRegisterIndirectWithPostIncrement) write<Long>(with, addr);
 }
 
 template<uint Size> auto M68K::instructionMOVEP(DataRegister from, EffectiveAddress to) -> void {
@@ -1074,7 +1078,7 @@ template<uint Size> auto M68K::instructionSUB(DataRegister source_, EffectiveAdd
 
 template<uint Size> auto M68K::instructionSUBA(AddressRegister to, EffectiveAddress from) -> void {
   auto source = sign<Size>(read<Size>(from));
-  auto target = read<Size>(to);
+  auto target = read<Long>(to);
   write<Long>(to, target - source);
 }
 

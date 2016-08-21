@@ -189,19 +189,3 @@ template<uint Size, bool Hold> auto M68K::write(EffectiveAddress& ea, uint32 dat
 
   }
 }
-
-template<uint Size> auto M68K::flush(EffectiveAddress& ea, uint32 data) -> void {
-  switch(ea.mode) {
-
-  case AddressRegisterIndirectWithPostIncrement: {
-    write<Size>(AddressRegister{ea.reg}, data);
-    return;
-  }
-
-  case AddressRegisterIndirectWithPreDecrement: {
-    write<Size>(AddressRegister{ea.reg}, data);
-    return;
-  }
-
-  }
-}

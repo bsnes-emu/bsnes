@@ -9,9 +9,11 @@ struct ID {
   struct Port { enum : uint {
     Controller1,
     Controller2,
+    Extension,
   };};
 
   struct Device { enum : uint {
+    None,
     Gamepad,
   };};
 };
@@ -37,6 +39,7 @@ struct Interface : Emulator::Interface {
   auto save() -> void override;
   auto unload() -> void override;
 
+  auto connect(uint port, uint device) -> void override;
   auto power() -> void override;
   auto reset() -> void override;
   auto run() -> void override;
@@ -50,6 +53,9 @@ struct Interface : Emulator::Interface {
 };
 
 struct Settings {
+  uint controllerPort1 = 0;
+  uint controllerPort2 = 0;
+  uint extensionPort = 0;
 };
 
 extern Interface* interface;

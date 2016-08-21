@@ -12,16 +12,14 @@ auto VDP::Background::run(uint x, uint y) -> void {
   output.priority = 0;
   output.color = 0;
 
-  static const uint tiles[] = {32, 64, 0, 128};
-  y -= vdp.vsram[(x >> 4) & (io.verticalScrollMode ? ~0u : 0u)];
-  y &= (tiles[io.nametableHeight] << 3) - 1;
+  static const uint tiles[] = {32, 64, 96, 128};
+  y += vdp.vsram[((x >> 4) & (io.verticalScrollMode ? ~0u : 0u)) * 2 + (this == &vdp.planeB)];
   x -= state.horizontalScroll;
-  x &= (tiles[io.nametableWidth] << 3) - 1;
 
-  uint tileX = x >> 3;
-  uint tileY = y >> 3;
+  uint tileX = x >> 3 & (tiles[io.nametableWidth ] - 1);
+  uint tileY = y >> 3 & (tiles[io.nametableHeight] - 1);
   uint15 nametableAddress = io.nametableAddress;
-  nametableAddress += tileY * tiles[io.nametableWidth] + tileX;
+  nametableAddress += (tileY * tiles[io.nametableWidth] + tileX) & 0x0fff;
 
   uint16 tileAttributes = vdp.vram[nametableAddress];
   uint15 tileAddress = tileAttributes.bits(0,10) << 4;

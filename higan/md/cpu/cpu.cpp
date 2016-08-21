@@ -55,6 +55,7 @@ auto CPU::synchronize() -> void {
   synchronize(vdp);
   synchronize(psg);
   synchronize(ym2612);
+  for(auto peripheral : peripherals) synchronize(*peripheral);
 }
 
 auto CPU::raise(Interrupt interrupt) -> void {
@@ -71,8 +72,6 @@ auto CPU::lower(Interrupt interrupt) -> void {
 
 auto CPU::power() -> void {
   M68K::power();
-
-  for(auto& byte : ram) byte = 0x00;
 }
 
 auto CPU::reset() -> void {
@@ -82,36 +81,9 @@ auto CPU::reset() -> void {
   memory::fill(&state, sizeof(State));
 }
 
-auto CPU::readByte(uint24 addr) -> uint8 {
-  if(addr < 0x400000) return cartridge.readByte(addr);
-  if(addr < 0xa00000) return 0x00;
-  if(addr < 0xc00000) return rand(), 0;
-  if(addr < 0xe00000) return vdp.readByte(addr);
-  return ram[addr & 0xffff];
-}
-
-auto CPU::readWord(uint24 addr) -> uint16 {
-  if(addr < 0x400000) return cartridge.readWord(addr);
-  if(addr < 0xa00000) return 0x0000;
-  if(addr < 0xc00000) return rand(), 0;
-  if(addr < 0xe00000) return vdp.readWord(addr);
-  uint16 data = ram[addr + 0 & 0xffff] << 8;
-  return data | ram[addr + 1 & 0xffff] << 0;
-}
-
-auto CPU::writeByte(uint24 addr, uint8 data) -> void {
-  if(addr < 0x400000) return cartridge.writeByte(addr, data);
-  if(addr < 0xc00000) return;
-  if(addr < 0xe00000) return vdp.writeByte(addr, data);
-  ram[addr & 0xffff] = data;
-}
-
-auto CPU::writeWord(uint24 addr, uint16 data) -> void {
-  if(addr < 0x400000) return cartridge.writeWord(addr, data);
-  if(addr < 0xc00000) return;
-  if(addr < 0xe00000) return vdp.writeWord(addr, data);
-  ram[addr + 0 & 0xffff] = data >> 8;
-  ram[addr + 1 & 0xffff] = data >> 0;
-}
+auto CPU::readByte(uint24 addr) -> uint16 { return bus.readByte(addr); }
+auto CPU::readWord(uint24 addr) -> uint16 { return bus.readWord(addr); }
+auto CPU::writeByte(uint24 addr, uint16 data) -> void { return bus.writeByte(addr, data); }
+auto CPU::writeWord(uint24 addr, uint16 data) -> void { return bus.writeWord(addr, data); }
 
 }
