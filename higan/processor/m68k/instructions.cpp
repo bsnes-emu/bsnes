@@ -779,14 +779,12 @@ auto M68K::instructionNBCD(EffectiveAddress with) -> void {
 }
 
 template<uint Size> auto M68K::instructionNEG(EffectiveAddress with) -> void {
-  auto source = read<Size, Hold>(with);
-  auto result = SUB<Size>(0, source);
+  auto result = SUB<Size>(read<Size, Hold>(with), 0);
   write<Size>(with, result);
 }
 
 template<uint Size> auto M68K::instructionNEGX(EffectiveAddress with) -> void {
-  auto source = read<Size, Hold>(with);
-  auto result = SUB<Size, Extend>(0, source);
+  auto result = SUB<Size, Extend>(read<Size, Hold>(with), 0);
   write<Size>(with, result);
 }
 

@@ -95,8 +95,8 @@ auto CPU::readWord(uint24 addr) -> uint16 {
   if(addr < 0xa00000) return 0x0000;
   if(addr < 0xc00000) return rand(), 0;
   if(addr < 0xe00000) return vdp.readWord(addr);
-  uint16 data = ram[addr + 0 & 65535] << 8;
-  return data | ram[addr + 1 & 65535] << 0;
+  uint16 data = ram[addr + 0 & 0xffff] << 8;
+  return data | ram[addr + 1 & 0xffff] << 0;
 }
 
 auto CPU::writeByte(uint24 addr, uint8 data) -> void {

@@ -5,7 +5,7 @@ auto VDP::Sprite::write(uint9 address, uint16 data) -> void {
   switch(address.bits(0,1)) {
 
   case 0: {
-    object.y = data.bits(0,9) - 128;
+    object.y = data.bits(0,8);
     break;
   }
 
@@ -26,7 +26,7 @@ auto VDP::Sprite::write(uint9 address, uint16 data) -> void {
   }
 
   case 3: {
-    object.x = data.bits(0,9) - 128;
+    object.x = data.bits(0,8);
     break;
   }
 
@@ -34,34 +34,31 @@ auto VDP::Sprite::write(uint9 address, uint16 data) -> void {
 }
 
 auto VDP::Sprite::scanline(uint y) -> void {
-  object.reset();
+  objects.reset();
 
   uint7 link = 0;
-  while(link) {
-    auto& o = oam[link];
+  do {
+    auto& object = oam[link];
+    link = object.link;
 
-    if((uint9)(o.y + o.height - 1) < y) continue;
-    if((uint9)(y + o.height - 1) < o.y) continue;
-    if(o.x == 0) break;
+    if(128 + y <  object.y) continue;
+    if(128 + y >= object.y + object.height - 1) continue;
+    if(object.x == 0) break;
 
-    object.append(o);
-    if(object.size() >= 20) break;
-
-    link = o.link;
-    if(!link || link >= 80) break;
-  }
+    objects.append(object);
+  } while(link && link < 80 && objects.size() < 20);
 }
 
 auto VDP::Sprite::run(uint x, uint y) -> void {
   output.priority = 0;
   output.color = 0;
 
-  for(auto& o : object) {
-    if((uint9)(o.x + o.width - 1) < x) continue;
-    if((uint9)(y + o.width - 1) < o.x) continue;
+  for(auto& o : objects) {
+    if(128 + x <  o.x) continue;
+    if(128 + x >= o.x + o.width - 1) continue;
 
-    auto objectX = (uint9)(x - o.x);
-    auto objectY = (uint9)(y - o.y);
+    uint objectX = 128 + x - o.x;
+    uint objectY = 128 + y - o.y;
     if(o.horizontalFlip) objectX = (o.width - 1) - objectX;
     if(o.verticalFlip) objectY = (o.height - 1) - objectY;
 

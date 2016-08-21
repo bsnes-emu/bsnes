@@ -2,7 +2,7 @@ auto VDP::scanline() -> void {
   state.x = 0;
   if(++state.y >= 262) state.y = 0;
 
-  if(state.y < 240) {
+  if(state.y < screenHeight()) {
     planeA.scanline(state.y);
     window.scanline(state.y);
     planeB.scanline(state.y);
@@ -16,6 +16,7 @@ auto VDP::scanline() -> void {
 
 auto VDP::run() -> void {
   if(!io.displayEnable) return outputPixel(0);
+  if(state.y >= screenHeight()) return outputPixel(0);
 
   bool windowed = false;  //todo: broken
   windowed &= state.x >= io.windowHorizontalLo && state.x <= io.windowHorizontalHi;

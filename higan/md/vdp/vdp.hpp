@@ -43,9 +43,16 @@ struct VDP : Thread {
 
     struct IO {
       uint15 nametableAddress;
-      uint3 nametableWidth;   //1 << value
-      uint3 nametableHeight;  //1 << value
+      uint2  nametableWidth;
+      uint2  nametableHeight;
+      uint15 horizontalScrollAddress;
+      uint2  horizontalScrollMode;
+      uint1  verticalScrollMode;
     } io;
+
+    struct State {
+      uint10 horizontalScroll;
+    } state;
 
     struct Output {
       uint6 color;
@@ -71,8 +78,8 @@ struct VDP : Thread {
     } io;
 
     struct Object {
-      uint10 x;
-      uint10 y;
+      uint9  x;
+      uint9  y;
       uint   width;
       uint   height;
       bool   horizontalFlip;
@@ -89,11 +96,14 @@ struct VDP : Thread {
     } output;
 
     array<Object, 80> oam;
-    array<Object, 20> object;
+    array<Object, 20> objects;
   };
   Sprite sprite;
 
 private:
+  auto screenWidth() const -> uint { return io.tileWidth ? 320 : 256; }
+  auto screenHeight() const -> uint { return io.overscan ? 240 : 224; }
+
   uint16 vram[32768];
   uint16 vramExpansion[32768];  //not present in stock Mega Drive hardware
   uint9 cram[64];
@@ -130,8 +140,6 @@ private:
     uint8 horizontalInterruptCounter;
 
     //$0b  mode register 3
-    uint2 horizontalScrollMode;
-    uint1 verticalScrollMode;
     uint1 externalInterruptEnable;
 
     //$0c  mode register 4
@@ -141,9 +149,6 @@ private:
     uint1 externalColorEnable;
     uint1 horizontalSync;
     uint1 verticalSync;
-
-    //$0d  horizontal scroll data location
-    uint7 horizontalScrollTable;
 
     //$0e  nametable pattern base address
     uint1 nametableBasePatternA;

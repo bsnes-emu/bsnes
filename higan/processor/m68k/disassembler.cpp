@@ -22,7 +22,7 @@ auto M68K::_readDisplacement(uint32 base) -> uint32 {
 }
 
 auto M68K::_readIndex(uint32 base) -> uint32 {
-  auto extension = readPC<Word>();
+  auto extension = _readPC<Word>();
   auto index = extension & 0x8000
   ? read(AddressRegister{extension >> 12})
   : read(DataRegister{extension >> 12});

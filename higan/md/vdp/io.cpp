@@ -217,8 +217,12 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //mode register 3
   case 0x0b: {
-    io.horizontalScrollMode = data.bits(0,1);
-    io.verticalScrollMode = data.bit(2);
+    planeA.io.horizontalScrollMode = data.bits(0,1);
+    window.io.horizontalScrollMode = data.bits(0,1);
+    planeB.io.horizontalScrollMode = data.bits(0,1);
+    planeA.io.verticalScrollMode = data.bit(2);
+    window.io.verticalScrollMode = data.bit(2);
+    planeB.io.verticalScrollMode = data.bit(2);
     io.externalInterruptEnable = data.bit(3);
     return;
   }
@@ -236,7 +240,9 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //horizontal scroll data location
   case 0x0d: {
-    io.horizontalScrollTable = data.bits(1,6);
+    planeA.io.horizontalScrollAddress = data.bits(0,6) << 9;
+    window.io.horizontalScrollAddress = data.bits(0,6) << 9;
+    planeB.io.horizontalScrollAddress = data.bits(0,6) << 9;
     return;
   }
 
@@ -255,20 +261,12 @@ auto VDP::writeControlPort(uint16 data) -> void {
 
   //plane size
   case 0x10: {
-    //0 = 32 tiles
-    //1 = 64 tiles
-    //2 = invalid (repeats first row for every scanline)
-    //3 = 128 tiles
-    static const uint shift[] = {5, 6, 0, 7};
-
-    planeA.io.nametableWidth = shift[data.bits(0,1)];
-    window.io.nametableWidth = shift[data.bits(0,1)];
-    planeB.io.nametableWidth = shift[data.bits(0,1)];
-
-    planeA.io.nametableHeight = shift[data.bits(4,5)];
-    window.io.nametableHeight = shift[data.bits(4,5)];
-    planeB.io.nametableHeight = shift[data.bits(4,5)];
-
+    planeA.io.nametableWidth = data.bits(0,1);
+    window.io.nametableWidth = data.bits(0,1);
+    planeB.io.nametableWidth = data.bits(0,1);
+    planeA.io.nametableHeight = data.bits(4,5);
+    window.io.nametableHeight = data.bits(4,5);
+    planeB.io.nametableHeight = data.bits(4,5);
     return;
   }
 

@@ -61,6 +61,7 @@ auto VDP::reset() -> void {
   create(VDP::Enter, system.colorburst() * 15.0 / 2.0);
 
   memory::fill(&io, sizeof(IO));
+  memory::fill(&state, sizeof(State));
 
   planeA.reset();
   window.reset();
