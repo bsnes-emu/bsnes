@@ -114,26 +114,26 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
 
 void GB_rtc_run(GB_gameboy_t *gb)
 {
-    if ((gb->rtc_high & 0x40) == 0) { /* is timer running? */
+    if ((gb->rtc_real.high & 0x40) == 0) { /* is timer running? */
         time_t current_time = time(NULL);
         while (gb->last_rtc_second < current_time) {
             gb->last_rtc_second++;
-            if (++gb->rtc_seconds == 60)
+            if (++gb->rtc_real.seconds == 60)
             {
-                gb->rtc_seconds = 0;
-                if (++gb->rtc_minutes == 60)
+                gb->rtc_real.seconds = 0;
+                if (++gb->rtc_real.minutes == 60)
                 {
-                    gb->rtc_minutes = 0;
-                    if (++gb->rtc_hours == 24)
+                    gb->rtc_real.minutes = 0;
+                    if (++gb->rtc_real.hours == 24)
                     {
-                        gb->rtc_hours = 0;
-                        if (++gb->rtc_days == 0)
+                        gb->rtc_real.hours = 0;
+                        if (++gb->rtc_real.days == 0)
                         {
-                            if (gb->rtc_high & 1) /* Bit 8 of days*/
+                            if (gb->rtc_real.high & 1) /* Bit 8 of days*/
                             {
-                                gb->rtc_high |= 0x80; /* Overflow bit */
+                                gb->rtc_real.high |= 0x80; /* Overflow bit */
                             }
-                            gb->rtc_high ^= 1;
+                            gb->rtc_real.high ^= 1;
                         }
                     }
                 }

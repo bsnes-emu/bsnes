@@ -306,15 +306,16 @@ typedef struct GB_gameboy_s {
     GB_SECTION(rtc,
         union {
             struct {
-                uint8_t rtc_seconds;
-                uint8_t rtc_minutes;
-                uint8_t rtc_hours;
-                uint8_t rtc_days;
-                uint8_t rtc_high;
+                uint8_t seconds;
+                uint8_t minutes;
+                uint8_t hours;
+                uint8_t days;
+                uint8_t high;
             };
-            uint8_t rtc_data[5];
-        };
+            uint8_t data[5];
+        } rtc_real, rtc_latched;
         time_t last_rtc_second;
+        bool rtc_latch;
     );
 
     /* Video Display */

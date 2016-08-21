@@ -369,7 +369,7 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
         return EIO;
     }
     if (gb->cartridge_type->has_rtc) {
-        if (fwrite(gb->rtc_data, 1, sizeof(gb->rtc_data), f) != sizeof(gb->rtc_data)) {
+        if (fwrite(&gb->rtc_real, 1, sizeof(gb->rtc_real), f) != sizeof(gb->rtc_real)) {
             fclose(f);
             return EIO;
         }
@@ -397,7 +397,7 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
         goto reset_rtc;
     }
 
-    if (fread(gb->rtc_data, 1, sizeof(gb->rtc_data), f) != sizeof(gb->rtc_data)) {
+    if (fread(&gb->rtc_real, 1, sizeof(gb->rtc_real), f) != sizeof(gb->rtc_real)) {
         goto reset_rtc;
     }
 
@@ -418,7 +418,7 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
     goto exit;
 reset_rtc:
     gb->last_rtc_second = time(NULL);
-    gb->rtc_high |= 0x80; /* This gives the game a hint that the clock should be reset. */
+    gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
 exit:
     fclose(f);
     return;
