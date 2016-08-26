@@ -43,6 +43,6 @@ On Windows, SameBoy also requires:
  * [GnuWin](http://gnuwin32.sourceforge.net/)
  * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, repsectively.
 
-To compile, simply run: `make [CONF=(release|debug)] (cocoa|sdl|bootroms)`
+To compile, simply run `make`. The targets are cocoa (Default for OS X), sdl (Default for everything else) and bootroms. You may also specify CONF=debug (default) or CONF=release to control optimization and symbols, and specify BOOTROMS_DIR=... to a directory containing precomiled dmg_boot.bin and cgb_boot.bin files, otherwise the build system will compile and use SameBoy's own boot ROMs.
 
 SameBoy was compiled and tested on OS X, Ubuntu and Windows 7 32-bit.

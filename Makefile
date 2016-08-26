@@ -1,3 +1,6 @@
+# Make hacks
+.INTERMEDIATE:
+
 # Set target, configuration, version and destination folders
 
 PLATFORM := $(shell uname -s)
@@ -19,6 +22,7 @@ CONF ?= debug
 
 BIN := build/bin
 OBJ := build/obj
+BOOTROMS_DIR ?= $(BIN)/BootROMs
 
 # Set tools
 
@@ -135,14 +139,14 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 					$(shell ls Cocoa/*.icns) \
 					Cocoa/License.html \
 					Cocoa/info.plist \
-					$(BIN)/BootROMs/dmg_boot.bin \
-					$(BIN)/BootROMs/cgb_boot.bin \
+					$(BIN)/Sameboy.app/Contents/Resources/dmg_boot.bin \
+					$(BIN)/Sameboy.app/Contents/Resources/cgb_boot.bin \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Document.nib \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/MainMenu.nib \
 					$(BIN)/Sameboy.app/Contents/Resources/Base.lproj/Preferences.nib \
 					Shaders
 	$(MKDIR) -p $(BIN)/Sameboy.app/Contents/Resources
-	cp Cocoa/*.icns $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/Sameboy.app/Contents/Resources/
+	cp Cocoa/*.icns $(BIN)/Sameboy.app/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < Cocoa/info.plist > $(BIN)/Sameboy.app/Contents/info.plist
 	cp Cocoa/License.html $(BIN)/Sameboy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/Sameboy.app/Contents/Resources/Shaders
@@ -192,7 +196,11 @@ $(BIN)/sdl/SDL.dll:
 	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
 	cp "$(MATCH)" $@
 
-$(BIN)/sdl/%.bin: $(BIN)/BootROMs/%.bin
+$(BIN)/sdl/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+	
+$(BIN)/Sameboy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	
