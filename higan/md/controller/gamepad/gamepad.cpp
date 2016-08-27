@@ -7,6 +7,8 @@ auto Gamepad::readData() -> uint8 {
   if(select == 0) {
     data.bit(0) = interface->inputPoll(port, ID::Device::Gamepad, Up);
     data.bit(1) = interface->inputPoll(port, ID::Device::Gamepad, Down);
+    data.bit(2) = 1;
+    data.bit(3) = 1;
     data.bit(4) = interface->inputPoll(port, ID::Device::Gamepad, A);
     data.bit(5) = interface->inputPoll(port, ID::Device::Gamepad, Start);
   } else {

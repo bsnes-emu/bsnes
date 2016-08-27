@@ -32,6 +32,17 @@ struct VDP : Thread {
 
   //background.cpp
   struct Background {
+    enum class ID : uint { PlaneA, Window, PlaneB } id;
+
+    auto isWindowed(uint x, uint y) -> bool;
+
+    auto updateHorizontalScroll(uint y) -> void;
+    auto updateVerticalScroll(uint x, uint y) -> void;
+
+    auto nametableAddress() -> uint15;
+    auto nametableWidth() -> uint;
+    auto nametableHeight() -> uint;
+
     auto scanline(uint y) -> void;
     auto run(uint x, uint y) -> void;
 
@@ -40,15 +51,24 @@ struct VDP : Thread {
 
     struct IO {
       uint15 nametableAddress;
+
+      //PlaneA, PlaneB
       uint2  nametableWidth;
       uint2  nametableHeight;
       uint15 horizontalScrollAddress;
       uint2  horizontalScrollMode;
       uint1  verticalScrollMode;
+
+      //Window
+      uint1  horizontalDirection;
+      uint10 horizontalOffset;
+      uint1  verticalDirection;
+      uint10 verticalOffset;
     } io;
 
     struct State {
       uint10 horizontalScroll;
+      uint10 verticalScroll;
     } state;
 
     struct Output {
@@ -56,9 +76,9 @@ struct VDP : Thread {
       boolean priority;
     } output;
   };
-  Background planeA;
-  Background window;
-  Background planeB;
+  Background planeA{Background::ID::PlaneA};
+  Background window{Background::ID::Window};
+  Background planeB{Background::ID::PlaneB};
 
   //sprite.cpp
   struct Sprite {
@@ -153,14 +173,6 @@ private:
 
     //$0f  data port auto-increment value
     uint8 dataIncrement;
-
-    //$11  window plane horizontal position
-    uint10 windowHorizontalLo;
-    uint10 windowHorizontalHi;
-
-    //$12  window plane vertical position
-    uint10 windowVerticalLo;
-    uint10 windowVerticalHi;
 
     //$13-$14  DMA length
     uint16 dmaLength;

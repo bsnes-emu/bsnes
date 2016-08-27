@@ -5,6 +5,7 @@ namespace Processor {
 
 #include "instruction.cpp"
 #include "instructions.cpp"
+#include "disassembler.cpp"
 
 auto Z80::power() -> void {
 }
@@ -20,6 +21,17 @@ auto Z80::reset() -> void {
   r.pc = 0x0000;
   r.i  = 0x00;
   r.r  = 0x00;
+
+  r.di = false;
+  r.ei = false;
+  r.im = 0;
+}
+
+auto Z80::parity(uint8_t value) const -> bool {
+  value ^= value >> 4;
+  value ^= value >> 2;
+  value ^= value >> 1;
+  return !(value & 1);
 }
 
 }

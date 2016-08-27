@@ -217,10 +217,8 @@ auto VDP::writeControlPort(uint16 data) -> void {
   //mode register 3
   case 0x0b: {
     planeA.io.horizontalScrollMode = data.bits(0,1);
-    window.io.horizontalScrollMode = data.bits(0,1);
     planeB.io.horizontalScrollMode = data.bits(0,1);
     planeA.io.verticalScrollMode = data.bit(2);
-    window.io.verticalScrollMode = data.bit(2);
     planeB.io.verticalScrollMode = data.bit(2);
     io.externalInterruptEnable = data.bit(3);
     return;
@@ -240,7 +238,6 @@ auto VDP::writeControlPort(uint16 data) -> void {
   //horizontal scroll data location
   case 0x0d: {
     planeA.io.horizontalScrollAddress = data.bits(0,6) << 9;
-    window.io.horizontalScrollAddress = data.bits(0,6) << 9;
     planeB.io.horizontalScrollAddress = data.bits(0,6) << 9;
     return;
   }
@@ -261,47 +258,23 @@ auto VDP::writeControlPort(uint16 data) -> void {
   //plane size
   case 0x10: {
     planeA.io.nametableWidth = data.bits(0,1);
-    window.io.nametableWidth = data.bits(0,1);
     planeB.io.nametableWidth = data.bits(0,1);
     planeA.io.nametableHeight = data.bits(4,5);
-    window.io.nametableHeight = data.bits(4,5);
     planeB.io.nametableHeight = data.bits(4,5);
     return;
   }
 
   //window plane horizontal position
   case 0x11: {
-    if(!data) {
-      //disable
-      io.windowHorizontalLo = ~0;
-      io.windowHorizontalHi = ~0;
-    } else if(data.bit(7) == 0) {
-      //left
-      io.windowHorizontalLo = 0;
-      io.windowHorizontalHi = (data.bits(0,4) << 4) - 1;
-    } else {
-      //right
-      io.windowHorizontalLo = (data.bits(0,4) << 4) - 1;
-      io.windowHorizontalHi = ~0;
-    }
+    window.io.horizontalDirection = data.bit(7);
+    window.io.horizontalOffset = data.bits(0,4) << 4;
     return;
   }
 
   //window plane vertical position
   case 0x12: {
-    if(!data) {
-      //disable
-      io.windowVerticalLo = ~0;
-      io.windowVerticalHi = ~0;
-    } else if(data.bit(7) == 0) {
-      //up
-      io.windowVerticalLo = 0;
-      io.windowVerticalHi = (data.bits(0,4) << 3) - 1;
-    } else {
-      //down
-      io.windowVerticalLo = (data.bits(0,4) << 3) - 1;
-      io.windowVerticalHi = ~0;
-    }
+    window.io.verticalDirection = data.bit(7);
+    window.io.verticalOffset = data.bits(0,4) << 3;
     return;
   }
 

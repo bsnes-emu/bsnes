@@ -26,6 +26,18 @@ auto VDP::refresh() -> void {
   Emulator::video.refresh(buffer, 256 * sizeof(uint32), 256, 240);
 }
 
+auto VDP::in(uint8 addr) -> uint8 {
+  switch(addr) {
+  }
+
+  return 0xb0;
+}
+
+auto VDP::out(uint8 addr, uint8 data) -> void {
+  switch(addr) {
+  }
+}
+
 auto VDP::power() -> void {
 }
 

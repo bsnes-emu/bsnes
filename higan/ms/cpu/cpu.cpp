@@ -24,14 +24,22 @@ auto CPU::wait() -> void {
 
 auto CPU::read(uint16 addr) -> uint8 {
   step(1);
-  if(addr < 0xc000) return cartridge.read(addr);
-  return ram[addr & 0x1fff];
+  return bus.read(addr);
 }
 
 auto CPU::write(uint16 addr, uint8 data) -> void {
   step(1);
-  if(addr < 0xc000) return cartridge.write(addr, data);
-  ram[addr & 0x1fff] = data;
+  return bus.write(addr, data);
+}
+
+auto CPU::in(uint8 addr) -> uint8 {
+  step(1);
+  return bus.in(addr);
+}
+
+auto CPU::out(uint8 addr, uint8 data) -> void {
+  step(1);
+  return bus.out(addr, data);
 }
 
 auto CPU::power() -> void {

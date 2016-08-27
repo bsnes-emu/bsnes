@@ -18,11 +18,7 @@ auto VDP::run() -> void {
   if(!io.displayEnable) return outputPixel(0);
   if(state.y >= screenHeight()) return outputPixel(0);
 
-  bool windowed = false;  //todo: broken
-  windowed &= state.x >= io.windowHorizontalLo && state.x <= io.windowHorizontalHi;
-  windowed &= state.y >= io.windowVerticalLo   && state.y <= io.windowVerticalHi;
-  auto& planeA = windowed ? this->window : this->planeA;
-
+  auto& planeA = window.isWindowed(state.x, state.y) ? window : this->planeA;
   planeA.run(state.x, state.y);
   planeB.run(state.x, state.y);
   sprite.run(state.x, state.y);

@@ -30,6 +30,13 @@ auto APU::write(uint16 addr, uint8 data) -> void {
   step(1);
 }
 
+auto APU::in(uint8 addr) -> uint8 {
+  return 0x00;
+}
+
+auto APU::out(uint8 addr, uint8 data) -> void {
+}
+
 auto APU::power() -> void {
 }
 
