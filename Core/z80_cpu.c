@@ -11,7 +11,7 @@ typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode);
 
 static void ill(GB_gameboy_t *gb, uint8_t opcode)
 {
-    GB_log(gb, "Illegal Opcode. Halting.");
+    GB_log(gb, "Illegal Opcode. Halting.\n");
     gb->interrupt_enable = 0;
     gb->halted = true;
 }

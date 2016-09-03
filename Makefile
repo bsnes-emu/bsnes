@@ -76,18 +76,23 @@ endif
 
 ifeq ($(PLATFORM),windows32)
 SDL_TARGET := $(BIN)/sdl/sameboy.exe $(BIN)/sdl/sameboy_debugger.exe $(BIN)/sdl/SDL.dll
+TESTER_TARGET := $(BIN)/tester/sameboy_tester.exe
 else
 SDL_TARGET := $(BIN)/sdl/sameboy
+TESTER_TARGET := $(BIN)/tester/sameboy_tester
 endif
 
 cocoa: $(BIN)/Sameboy.app
 sdl: $(SDL_TARGET) $(BIN)/sdl/dmg_boot.bin $(BIN)/sdl/cgb_boot.bin $(BIN)/sdl/LICENSE
 bootroms: $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/dmg_boot.bin
+tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin
+
 
 # Get a list of our source files and their respective object file targets
 
 CORE_SOURCES := $(shell ls Core/*.c)
 SDL_SOURCES := $(shell ls SDL/*.c)
+TESTER_SOURCES := $(shell ls Tester/*.c)
 
 ifeq ($(PLATFORM),Darwin)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m)
@@ -97,8 +102,7 @@ endif
 CORE_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(CORE_SOURCES))
 COCOA_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(COCOA_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
-
-ALL_OBJECTS := $(CORE_OBJECTS) $(COCOA_OBJECTS) $(SDL_OBJECTS)
+TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
 
 # Automatic dependency generation
 
@@ -106,6 +110,9 @@ ifneq ($(MAKECMDGOALS),clean)
 -include $(CORE_OBJECTS:.o=.dep)
 ifneq ($(filter $(MAKECMDGOALS),sdl),)
 -include $(SDL_OBJECTS:.o=.dep)
+endif
+ifneq ($(filter $(MAKECMDGOALS),tester),)
+-include $(TESTER_OBJECTS:.o=.dep)
 endif
 ifneq ($(filter $(MAKECMDGOALS),cocoa),)
 -include $(COCOA_OBJECTS:.o=.dep)
@@ -196,7 +203,20 @@ $(BIN)/sdl/SDL.dll:
 	@$(eval MATCH := $(shell ls $(POTENTIAL_MATCHES) 2> NUL | head -n 1))
 	cp "$(MATCH)" $@
 
-$(BIN)/sdl/%.bin: $(BOOTROMS_DIR)/%.bin
+# Tester
+
+$(BIN)/tester/sameboy_tester: $(CORE_OBJECTS) $(TESTER_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS)
+ifeq ($(CONF), release)
+	strip $@
+endif
+
+$(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
+
+$(BIN)/sdl/%.bin $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
 	

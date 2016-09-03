@@ -547,10 +547,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_apu_write(gb, addr & 0xFF, value);
                     return;
                 }
-                if (gb->io_registers[addr & 0xFF] != 0x37) {
-                    GB_log(gb, "Wrote %02x to %04x (HW Register)\n", value, addr);
-                }
-                gb->io_registers[addr & 0xFF] = 0x37;
+                GB_log(gb, "Wrote %02x to %04x (HW Register)\n", value, addr);
                 return;
         }
     }

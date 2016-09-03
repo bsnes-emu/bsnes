@@ -201,7 +201,7 @@ void display_vblank(GB_gameboy_t *gb)
     /* Called every Gameboy vblank. Does FPS-capping and calls user's vblank callback if Turbo Mode allows. */
     if (gb->turbo) {
         int64_t nanoseconds = get_nanoseconds();
-        if (nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
+        if (!gb->turbo_dont_skip && nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
             return;
         }
         gb->last_vblank = nanoseconds;
@@ -386,16 +386,18 @@ void GB_display_run(GB_gameboy_t *gb)
 
     /* Render. This  chunk is outside the Mode 3 if, because otherwise we might not render some pixels, since this
        function only runs between atomic CPU changes, and not every clock. */
-    int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
-    for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
-        if (gb->previous_lcdc_x >= 160) {
-            continue;
+    if (!gb->disable_rendering) {
+        int16_t current_lcdc_x = ((gb->display_cycles % LINE_LENGTH - MODE2_LENGTH) & ~7) - (gb->effective_scx & 0x7);
+        for (;gb->previous_lcdc_x < current_lcdc_x; gb->previous_lcdc_x++) {
+            if (gb->previous_lcdc_x >= 160) {
+                continue;
+            }
+            if (gb->previous_lcdc_x < 0) {
+                continue;
+            }
+            gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
+            get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
         }
-        if (gb->previous_lcdc_x < 0) {
-            continue;
-        }
-        gb->screen[gb->io_registers[GB_IO_LY] * 160 + gb->previous_lcdc_x] =
-        get_pixel(gb, gb->previous_lcdc_x, gb->io_registers[GB_IO_LY]);
     }
 
     if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH + MODE3_LENGTH) { /* Mode 3 */
