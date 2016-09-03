@@ -12,6 +12,7 @@
 
 #include "gb.h"
 #include "debugger.h"
+#include "memory.h"
 
 static bool running = false;
 static char *filename;
@@ -59,12 +60,31 @@ static void vblank(GB_gameboy_t *gb)
                 break;
         }
     }
+    
+    /* Detect common crashes and stop the test early */
+    if (frames < test_length - 1) {
+        if (gb->backtrace_size >= 0x80) {
+            GB_log(gb, "A stack overflow has probably occurred.\n");
+            frames = test_length - 1;
+        }
+        if (gb->pc == 0x38 && GB_read_memory(gb, 0x38) == 0xFF) {
+            GB_log(gb, "The game is probably stuck in an FF loop.\n");
+            frames = test_length - 1;
+        }
+        if (gb->halted && (!gb->ime || !gb->interrupt_enable)) {
+            GB_log(gb, "The game is deadlocked.\n");
+            frames = test_length - 1;
+        }
+    }
 
     if (frames == test_length) {
         FILE *f = fopen(bmp_filename, "wb");
         fwrite(&bmp_header, 1, sizeof(bmp_header), f);
         fwrite(&bitmap, 1, sizeof(bitmap), f);
         fclose(f);
+        if (!gb->boot_rom_finished) {
+            GB_log(gb, "Boot ROM did not finish.\n");
+        }
         running = false;
     }
     else if (frames == test_length - 1) {
@@ -215,7 +235,19 @@ int main(int argc, char **argv)
             if (fork() != 0) continue;
         }
 #endif
+        filename = argv[i];
+        size_t path_length = strlen(filename);
 
+        char bitmap_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .bmp + NULL */
+        replace_extension(filename, path_length, bitmap_path, ".bmp");
+        bmp_filename = &bitmap_path[0];
+        
+        char log_path[path_length + 5];
+        replace_extension(filename, path_length, log_path, ".log");
+        log_filename = &log_path[0];
+        
+        fprintf(stderr, "Testing ROM %s\n", filename);
+        
         if (dmg) {
             GB_init(&gb);
             if (GB_load_boot_rom(&gb, executable_relative_path("dmg_boot.bin"))) {
@@ -230,29 +262,16 @@ int main(int argc, char **argv)
                 exit(1);
             }
         }
-
-        filename = argv[i];
-        fprintf(stderr, "Testing ROM %s\n", filename);
-
-        if (GB_load_rom(&gb, filename)) {
-            perror("Failed to load ROM");
-            exit(1);
-        }
-
+        
         GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
         GB_set_pixels_output(&gb, &bitmap[0]);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_log_callback(&gb, log_callback);
-
-        size_t path_length = strlen(filename);
-
-        char bitmap_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .bmp + NULL */
-        replace_extension(filename, path_length, bitmap_path, ".bmp");
-        bmp_filename = &bitmap_path[0];
         
-        char log_path[path_length + 5];
-        replace_extension(filename, path_length, log_path, ".log");
-        log_filename = &log_path[0];
+        if (GB_load_rom(&gb, filename)) {
+            perror("Failed to load ROM");
+            exit(1);
+        }
 
         /* Run emulation */
         running = true;
