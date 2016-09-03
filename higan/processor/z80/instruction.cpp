@@ -1,10 +1,8 @@
-auto Z80::trap(uint8_t prefix, uint8_t opcode) -> void {
-  print("[Z80] unimplemented instruction: ", prefix ? pad(hex(prefix, 2L), ' ', -3) : "", hex(opcode, 2L), "\n");
+auto Z80::trap(uint8 prefix, uint8 code) -> void {
+  print("[Z80] unimplemented instruction: ", prefix ? pad(hex(prefix, 2L), -3L, ' ') : "", hex(code, 2L), "\n");
   print("[Z80] instructions executed: ", --instructionsExecuted, "\n");
   while(true) wait();
 }
-
-#define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
 
 auto Z80::instruction() -> void {
   #if 1
@@ -14,76 +12,116 @@ auto Z80::instruction() -> void {
 
   instructionsExecuted++;
 
-  r.r = (r.r & 0x80) | (r.r + 1 & 0x7f);
+  auto code = opcode();
+  if(code == 0xdd || code == 0xfd) {
+    r.prefix = code;
+    return;
+  }
+  instruction__(code);
+  r.prefix = 0x00;
+}
 
-  auto opcode = read(r.pc++);
-  switch(opcode) {
+#define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
+
+#define A r.a
+#define F r.f
+#define B r.b
+#define C r.c
+#define D r.d
+#define E r.e
+#define H r.prefix == 0xdd ? r.ixh : r.prefix == 0xfd ? r.iyh : r.h
+#define L r.prefix == 0xdd ? r.ixl : r.prefix == 0xfd ? r.iyl : r.l
+
+#define AF r.af
+#define BC r.bc
+#define DE r.de
+#define HL r.prefix == 0xdd ? r.ix : r.prefix == 0xfd ? r.iy : r.hl
+
+#define CF r.p.c
+#define NF r.p.n
+#define PF r.p.p
+#define VF r.p.v
+#define XF r.p.x
+#define HF r.p.h
+#define YF r.p.y
+#define ZF r.p.z
+#define SF r.p.s
+
+auto Z80::instruction__(uint8 code) -> void {
+  switch(code) {
   op(0x00, NOP)
-  op(0x18, JR_c, true)
-  op(0x20, JR_c, r.p.z == 0)
-  op(0x28, JR_c, r.p.z == 1)
-  op(0x30, JR_c, r.p.c == 0)
-  op(0x38, JR_c, r.p.c == 1)
-  op(0xb8, CP_r, r.b)
-  op(0xb9, CP_r, r.c)
-  op(0xba, CP_r, r.d)
-  op(0xbb, CP_r, r.e)
-  op(0xbc, CP_r, r.h)
-  op(0xbd, CP_r, r.l)
-  op(0xbe, CP_ihl)
-  op(0xbf, CP_r, r.a)
-  op(0xc2, JP_c_nn, r.p.z == 0)
-  op(0xc3, JP_c_nn, true)
-  op(0xca, JP_c_nn, r.p.z == 1)
-  op(0xd2, JP_c_nn, r.p.c == 0)
-  op(0xda, JP_c_nn, r.p.c == 1)
+  op(0x06, LD_r_n, B)
+  op(0x0e, LD_r_n, C)
+  op(0x16, LD_r_n, D)
+  op(0x18, JR_c_e, 1)
+  op(0x1e, LD_r_n, E)
+  op(0x20, JR_c_e, ZF == 0)
+  op(0x26, LD_r_n, H)
+  op(0x28, JR_c_e, ZF == 1)
+  op(0x2e, LD_r_n, L)
+  op(0x30, JR_c_e, CF == 0)
+  op(0x36, LD_irr_n, HL)
+  op(0x38, JR_c_e, CF == 1)
+  op(0x3e, LD_r_n, A)
+  op(0xc2, JP_c_nn, ZF == 0)
+  op(0xc3, JP_c_nn, 1)
+  op(0xca, JP_c_nn, ZF == 1)
+  op(0xcb, CB, opcode())
+  op(0xd2, JP_c_nn, CF == 0)
+  op(0xda, JP_c_nn, CF == 1)
   op(0xdb, IN_a_in)
-  op(0xdd, DD)
-  op(0xe2, JP_c_nn, r.p.p == 0)
-  op(0xe9, JP_rr, r.hl)
-  op(0xea, JP_c_nn, r.p.p == 1)
-  op(0xed, ED)
-  op(0xf2, JP_c_nn, r.p.s == 0)
+  op(0xe2, JP_c_nn, PF == 0)
+  op(0xea, JP_c_nn, PF == 1)
+  op(0xed, ED, opcode())
+  op(0xf2, JP_c_nn, SF == 0)
   op(0xf3, DI)
-  op(0xfa, JP_c_nn, r.p.s == 1)
-  op(0xfd, FD)
+  op(0xfa, JP_c_nn, SF == 1)
+  op(0xfb, EI)
   op(0xfe, CP_n)
   }
-  trap(0x00, opcode);
+
+  trap(0x00, code);
 }
 
-auto Z80::instructionDD() -> void {
-  auto opcode = read(r.pc++);
-  switch(opcode) {
-  op(0xe9, JP_rr, r.ix)
+auto Z80::instructionCB(uint8 code) -> void {
+  switch(code) {
   }
-  trap(0xdd, opcode);
+
+  trap(0xcb, code);
 }
 
-auto Z80::instructionED() -> void {
-  auto opcode = read(r.pc++);
-  switch(opcode) {
-  op(0x40, IN_r_ic, r.b)
-  op(0x46, IM, 0)
-  op(0x48, IN_r_ic, r.c)
-  op(0x50, IN_r_ic, r.d)
-  op(0x56, IM, 1)
-  op(0x58, IN_r_ic, r.e)
-  op(0x5e, IM, 2)
-  op(0x60, IN_r_ic, r.h)
-  op(0x68, IN_r_ic, r.l)
-  op(0x70, IN_r_ic, r.flag)
-  op(0x78, IN_r_ic, r.a)
+auto Z80::instructionED(uint8 code) -> void {
+  switch(code) {
+  op(0x46, IM_o, 0)
+  op(0x56, IM_o, 1)
+  op(0x5e, IM_o, 2)
   }
-  trap(0xed, opcode);
-}
 
-auto Z80::instructionFD() -> void {
-  auto opcode = read(r.pc++);
-  switch(opcode) {
-  op(0xe9, JP_rr, r.iy)
-  }
-  trap(0xfd, opcode);
+  trap(0xed, code);
 }
 
 #undef op
+
+#undef A
+#undef F
+#undef B
+#undef C
+#undef D
+#undef E
+#undef H
+#undef L
+
+#undef AF
+#undef BC
+#undef DE
+#undef HL
+
+#undef CF
+#undef NF
+#undef PF
+#undef VF
+#undef XF
+#undef HF
+#undef YF
+#undef ZF
+#undef SF

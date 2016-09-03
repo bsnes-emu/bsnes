@@ -5,45 +5,55 @@
 namespace Processor {
 
 struct Z80 {
-  virtual auto wait() -> void = 0;
-  virtual auto read(uint16 addr) -> uint8 = 0;
-  virtual auto write(uint16 addr, uint8 data) -> void = 0;
-  virtual auto in(uint8 addr) -> uint8 = 0;
-  virtual auto out(uint8 addr, uint8 data) -> void = 0;
+  struct Bus {
+    virtual auto read(uint16 addr) -> uint8 = 0;
+    virtual auto write(uint16 addr, uint8 data) -> void = 0;
+    virtual auto in(uint8 addr) -> uint8 = 0;
+    virtual auto out(uint8 addr, uint8 data) -> void = 0;
+  };
+
+  virtual auto step(uint clocks) -> void = 0;
 
   //z80.cpp
-  auto power() -> void;
+  auto power(Z80::Bus*) -> void;
   auto reset() -> void;
 
   auto parity(uint8_t) const -> bool;
 
+  //memory.cpp
+  auto wait(uint clocks = 1) -> void;
+  auto opcode() -> uint8;
+  auto operand() -> uint8;
+  auto read(uint16 addr) -> uint8;
+  auto write(uint16 addr, uint8 data) -> void;
+  auto in(uint8 addr) -> uint8;
+  auto out(uint8 addr, uint8 data) -> void;
+
   //instruction.cpp
-  auto trap(uint8_t prefix, uint8_t opcode) -> void;
+  auto trap(uint8 prefix, uint8 code) -> void;
   auto instruction() -> void;
-  auto instructionDD() -> void;
-  auto instructionED() -> void;
-  auto instructionFD() -> void;
+  auto instruction__(uint8 code) -> void;
+  auto instructionCB(uint8 code) -> void;
+  auto instructionED(uint8 code) -> void;
 
   //instructions.cpp
-  auto CP(uint8 x) -> void;
-  auto instructionCP_ihl() -> void;
+  auto CP(uint8) -> void;
   auto instructionCP_n() -> void;
-  auto instructionCP_r(uint8_t&) -> void;
   auto instructionDI() -> void;
-  auto instructionIM(uint) -> void;
+  auto instructionEI() -> void;
+  auto instructionIM_o(uint2) -> void;
   auto instructionIN_a_in() -> void;
-  auto instructionIN_r_ic(uint8_t&) -> void;
   auto instructionJP_c_nn(bool) -> void;
-  auto instructionJP_rr(uint16_t&) -> void;
-  auto instructionJR_c(bool) -> void;
+  auto instructionJR_c_e(bool) -> void;
+  auto instructionLD_irr_n(uint16_t&) -> void;
+  auto instructionLD_r_n(uint8_t&) -> void;
   auto instructionNOP() -> void;
 
   //disassembler.cpp
   auto disassemble(uint16 pc) -> string;
-  auto disassembleOpcode(uint16 pc) -> string;
-  auto disassembleOpcodeDD(uint16 pc) -> string;
-  auto disassembleOpcodeED(uint16 pc) -> string;
-  auto disassembleOpcodeFD(uint16 pc) -> string;
+  auto disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string;
+  auto disassembleCB(uint16 pc, uint8 prefix, uint8 code) -> string;
+  auto disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string;
 
   struct Registers {
     union {
@@ -77,22 +87,34 @@ struct Z80 {
       struct { uint8_t order_msb2(h, l); };
     };
 
-    uint16_t ix;
-    uint16_t iy;
+    union {
+      uint16_t ix;
+      struct { uint8_t order_msb2(ixh, ixl); };
+    };
+
+    union {
+      uint16_t iy;
+      struct { uint8_t order_msb2(iyh, iyl); };
+    };
+
+    union {
+      uint16_t ir;
+      struct { uint8_t order_msb2(i, r); };
+    };
+
     uint16_t sp;
     uint16_t pc;
 
-    uint8_t i;
-    uint8_t r;
+    boolean iff1;  //interrupt flip-flop 1
+    boolean iff2;  //interrupt flip-flop 2
+    uint2 im;      //interrupt mode (0-2)
 
-    boolean di;  //disable interrupt
-    boolean ei;  //enable interrupt
-    uint2 im;    //interrupt mode (0-2)
-
+    uint8_t prefix;
     uint8_t flag;
   } r;
 
 private:
+  Bus* bus = nullptr;
   uint64 instructionsExecuted = 0;
 };
 

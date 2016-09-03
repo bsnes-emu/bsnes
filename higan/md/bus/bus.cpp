@@ -3,6 +3,7 @@
 namespace MegaDrive {
 
 Bus bus;
+BusAPU busAPU;
 
 auto Bus::readByte(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.read(addr & ~1).byte(!addr.bit(0));
@@ -72,6 +73,22 @@ auto Bus::writeIO(uint24 addr, uint16 data) -> void {
   case 0xa1000a: return peripherals.controllerPort2->writeControl(data);
   case 0xa1000c: return peripherals.extensionPort->writeControl(data);
   }
+}
+
+//
+
+auto BusAPU::read(uint16 addr) -> uint8 {
+  return 0x00;
+}
+
+auto BusAPU::write(uint16 addr, uint8 data) -> void {
+}
+
+auto BusAPU::in(uint8 addr) -> uint8 {
+  return 0x00;
+}
+
+auto BusAPU::out(uint8 addr, uint8 data) -> void {
 }
 
 }
