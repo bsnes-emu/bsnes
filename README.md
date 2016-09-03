@@ -28,7 +28,7 @@ Features currently supported only with the Cocoa version:
  * Several [scaling algorithms](SCALING.md) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
 
 ## Compatibility
-SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), as well as most of [mooneye-gb's](https://github.com/Gekkio/mooneye-gb) acceptance tests. SameBoy should work with most games and demos, please report any broken ROM.
+SameBoy passes many of [blargg's test ROMs](http://gbdev.gg8.se/wiki/articles/Test_ROMs#Blargg.27s_tests), as well as most of [mooneye-gb's](https://github.com/Gekkio/mooneye-gb) acceptance tests. SameBoy should work with most games and demos, please report any broken ROM. The latest results for SameBoy's automatic tester are available [here](http://htmlpreview.github.io/?https://github.com/LIJI32/SameBoy/blob/automation_results/results.html).
 
 ## Compilation
 SameBoy requires the following tools and libraries to build:
