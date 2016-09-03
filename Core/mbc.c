@@ -101,6 +101,10 @@ void GB_configure_cart(GB_gameboy_t *gb)
 {
     gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
 
+    if (gb->rom[0x147] == 0xFF || (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0)) {
+        GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
+    }
+
     if (gb->cartridge_type->has_ram) {
         static const int ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
         gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
