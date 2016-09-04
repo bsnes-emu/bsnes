@@ -19,11 +19,12 @@ auto CPU::step(uint clocks) -> void {
 }
 
 auto CPU::power() -> void {
-  Processor::Z80::power(&MasterSystem::bus);
+  Z80::bus = &MasterSystem::bus;
+  Z80::power();
 }
 
 auto CPU::reset() -> void {
-  Processor::Z80::reset();
+  Z80::reset();
   create(CPU::Enter, system.colorburst());
 }
 

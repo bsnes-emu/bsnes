@@ -1,78 +1,78 @@
 template<> auto M68K::read<Byte>(uint32 addr) -> uint32 {
   step(4);
-  return readByte(addr);
+  return bus->readByte(addr);
 }
 
 template<> auto M68K::read<Word>(uint32 addr) -> uint32 {
   step(4);
-  return readWord(addr);
+  return bus->readWord(addr);
 }
 
 template<> auto M68K::read<Long>(uint32 addr) -> uint32 {
   step(4);
-  uint32 data = readWord(addr + 0) << 16;
+  uint32 data = bus->readWord(addr + 0) << 16;
   step(4);
-  return data | readWord(addr + 2) <<  0;
+  return data | bus->readWord(addr + 2) <<  0;
 }
 
 //
 
 template<> auto M68K::write<Byte>(uint32 addr, uint32 data) -> void {
   step(4);
-  return writeByte(addr, data);
+  return bus->writeByte(addr, data);
 }
 
 template<> auto M68K::write<Word>(uint32 addr, uint32 data) -> void {
   step(4);
-  return writeWord(addr, data);
+  return bus->writeWord(addr, data);
 }
 
 template<> auto M68K::write<Long>(uint32 addr, uint32 data) -> void {
   step(4);
-  writeWord(addr + 0, data >> 16);
+  bus->writeWord(addr + 0, data >> 16);
   step(4);
-  writeWord(addr + 2, data >>  0);
+  bus->writeWord(addr + 2, data >>  0);
 }
 
 template<> auto M68K::write<Byte, Reverse>(uint32 addr, uint32 data) -> void {
   step(4);
-  return writeByte(addr, data);
+  return bus->writeByte(addr, data);
 }
 
 template<> auto M68K::write<Word, Reverse>(uint32 addr, uint32 data) -> void {
   step(4);
-  return writeWord(addr, data);
+  return bus->writeWord(addr, data);
 }
 
 template<> auto M68K::write<Long, Reverse>(uint32 addr, uint32 data) -> void {
   step(4);
-  writeWord(addr + 2, data >>  0);
+  bus->writeWord(addr + 2, data >>  0);
   step(4);
-  writeWord(addr + 0, data >> 16);
+  bus->writeWord(addr + 0, data >> 16);
 }
 
 //
 
 template<> auto M68K::readPC<Byte>() -> uint32 {
   step(4);
-  auto data = readWord(r.pc);
+  auto data = bus->readWord(r.pc);
   r.pc += 2;
   return (uint8)data;
 }
 
 template<> auto M68K::readPC<Word>() -> uint32 {
   step(4);
-  auto data = readWord(r.pc);
+  auto data = bus->readWord(r.pc);
   r.pc += 2;
   return data;
 }
 
 template<> auto M68K::readPC<Long>() -> uint32 {
   step(4);
-  auto hi = readWord(r.pc);
+  auto hi = bus->readWord(r.pc);
   r.pc += 2;
   step(4);
-  auto lo = readWord(r.pc);
+  auto lo = bus->readWord(r.pc);
   r.pc += 2;
   return hi << 16 | lo << 0;
 }

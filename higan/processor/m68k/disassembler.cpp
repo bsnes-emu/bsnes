@@ -1,9 +1,9 @@
 template<> auto M68K::_read<Byte>(uint32 addr) -> uint32 {
-  return readByte(addr);
+  return bus->readByte(addr);
 }
 
 template<> auto M68K::_read<Word>(uint32 addr) -> uint32 {
-  return readWord(addr);
+  return bus->readWord(addr);
 }
 
 template<> auto M68K::_read<Long>(uint32 addr) -> uint32 {

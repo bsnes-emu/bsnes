@@ -5,6 +5,15 @@
 namespace Processor {
 
 struct M68K {
+  struct Bus {
+    virtual auto readByte(uint24 addr) -> uint16 = 0;
+    virtual auto readWord(uint24 addr) -> uint16 = 0;
+    virtual auto writeByte(uint24 addr, uint16 data) -> void = 0;
+    virtual auto writeWord(uint24 addr, uint16 data) -> void = 0;
+  };
+
+  virtual auto step(uint clocks) -> void = 0;
+
   enum : bool { User, Supervisor };
   enum : uint { Byte, Word, Long };
   enum : bool { Reverse = 1, Extend = 1, Hold = 1 };
@@ -48,13 +57,6 @@ struct M68K {
   };};
 
   M68K();
-
-  virtual auto step(uint clocks) -> void = 0;
-  virtual auto readByte(uint24 addr) -> uint16 = 0;
-  virtual auto readWord(uint24 addr) -> uint16 = 0;
-  virtual auto writeByte(uint24 addr, uint16 data) -> void = 0;
-  virtual auto writeWord(uint24 addr, uint16 data) -> void = 0;
-
   auto power() -> void;
   auto reset() -> void;
   auto supervisor() -> bool;
@@ -274,6 +276,7 @@ struct M68K {
   uint instructionsExecuted = 0;
 
   function<void ()> instructionTable[65536];
+  Bus* bus = nullptr;
 
 private:
   //disassembler.cpp

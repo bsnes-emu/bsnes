@@ -10,8 +10,8 @@ auto CPU::Enter() -> void {
 }
 
 auto CPU::boot() -> void {
-  r.a[7] = readWord(0) << 16 | readWord(2) << 0;
-  r.pc   = readWord(4) << 16 | readWord(6) << 0;
+  r.a[7] = bus->readWord(0) << 16 | bus->readWord(2) << 0;
+  r.pc   = bus->readWord(4) << 16 | bus->readWord(6) << 0;
 }
 
 auto CPU::main() -> void {
@@ -71,6 +71,7 @@ auto CPU::lower(Interrupt interrupt) -> void {
 }
 
 auto CPU::power() -> void {
+  M68K::bus = &busCPU;
   M68K::power();
 }
 
@@ -80,10 +81,5 @@ auto CPU::reset() -> void {
 
   memory::fill(&state, sizeof(State));
 }
-
-auto CPU::readByte(uint24 addr) -> uint16 { return bus.readByte(addr); }
-auto CPU::readWord(uint24 addr) -> uint16 { return bus.readWord(addr); }
-auto CPU::writeByte(uint24 addr, uint16 data) -> void { return bus.writeByte(addr, data); }
-auto CPU::writeWord(uint24 addr, uint16 data) -> void { return bus.writeWord(addr, data); }
 
 }

@@ -10,7 +10,7 @@ auto VDP::dmaRun() -> void {
 auto VDP::dmaLoad() -> void {
   cpu.wait |= Wait::VDP_DMA;
 
-  auto data = cpu.readWord(io.dmaMode.bit(0) << 23 | io.dmaSource << 1);
+  auto data = busCPU.readWord(io.dmaMode.bit(0) << 23 | io.dmaSource << 1);
   writeDataPort(data);
 
   io.dmaSource.bits(0,15)++;

@@ -1,11 +1,8 @@
-struct APU_Bus : Processor::Z80::Bus {
-};
-
-struct Bus {
-  auto readByte(uint24 addr) -> uint16;
-  auto readWord(uint24 addr) -> uint16;
-  auto writeByte(uint24 addr, uint16 data) -> void;
-  auto writeWord(uint24 addr, uint16 data) -> void;
+struct BusCPU : Processor::M68K::Bus {
+  auto readByte(uint24 addr) -> uint16 override;
+  auto readWord(uint24 addr) -> uint16 override;
+  auto writeByte(uint24 addr, uint16 data) -> void override;
+  auto writeWord(uint24 addr, uint16 data) -> void override;
 
   auto readIO(uint24 addr) -> uint16;
   auto writeIO(uint24 addr, uint16 data) -> void;
@@ -21,5 +18,5 @@ struct BusAPU : Processor::Z80::Bus {
   auto out(uint8 addr, uint8 data) -> void override;
 };
 
-extern Bus bus;
+extern BusCPU busCPU;
 extern BusAPU busAPU;

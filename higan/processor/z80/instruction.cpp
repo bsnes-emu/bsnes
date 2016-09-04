@@ -36,6 +36,7 @@ auto Z80::instruction() -> void {
 #define BC r.bc
 #define DE r.de
 #define HL r.prefix == 0xdd ? r.ix : r.prefix == 0xfd ? r.iy : r.hl
+#define SP r.sp
 
 #define CF r.p.c
 #define NF r.p.n
@@ -50,19 +51,39 @@ auto Z80::instruction() -> void {
 auto Z80::instruction__(uint8 code) -> void {
   switch(code) {
   op(0x00, NOP)
+  op(0x01, LD_rr_nn, BC)
   op(0x06, LD_r_n, B)
   op(0x0e, LD_r_n, C)
+  op(0x11, LD_rr_nn, DE)
   op(0x16, LD_r_n, D)
   op(0x18, JR_c_e, 1)
   op(0x1e, LD_r_n, E)
   op(0x20, JR_c_e, ZF == 0)
+  op(0x21, LD_rr_nn, HL)
   op(0x26, LD_r_n, H)
   op(0x28, JR_c_e, ZF == 1)
   op(0x2e, LD_r_n, L)
   op(0x30, JR_c_e, CF == 0)
+  op(0x31, LD_rr_nn, SP)
+  op(0x32, LD_inn_a)
   op(0x36, LD_irr_n, HL)
   op(0x38, JR_c_e, CF == 1)
   op(0x3e, LD_r_n, A)
+  op(0x70, LD_irr_r, HL, B)
+  op(0x71, LD_irr_r, HL, C)
+  op(0x72, LD_irr_r, HL, D)
+  op(0x73, LD_irr_r, HL, E)
+  op(0x74, LD_irr_r, HL, r.h)
+  op(0x75, LD_irr_r, HL, r.l)
+  op(0x77, LD_irr_r, HL, A)
+  op(0xb8, CP_r, B)
+  op(0xb9, CP_r, C)
+  op(0xba, CP_r, D)
+  op(0xbb, CP_r, E)
+  op(0xbc, CP_r, H)
+  op(0xbd, CP_r, L)
+  op(0xbe, CP_irr, HL)
+  op(0xbf, CP_r, A)
   op(0xc2, JP_c_nn, ZF == 0)
   op(0xc3, JP_c_nn, 1)
   op(0xca, JP_c_nn, ZF == 1)
@@ -115,6 +136,7 @@ auto Z80::instructionED(uint8 code) -> void {
 #undef BC
 #undef DE
 #undef HL
+#undef SP
 
 #undef CF
 #undef NF

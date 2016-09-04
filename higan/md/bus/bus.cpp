@@ -2,10 +2,10 @@
 
 namespace MegaDrive {
 
-Bus bus;
+BusCPU busCPU;
 BusAPU busAPU;
 
-auto Bus::readByte(uint24 addr) -> uint16 {
+auto BusCPU::readByte(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.read(addr & ~1).byte(!addr.bit(0));
   if(addr < 0xa00000) return 0x0000;
   if(addr < 0xa10000) return 0x0000;
@@ -15,7 +15,7 @@ auto Bus::readByte(uint24 addr) -> uint16 {
   return ram[addr & 0xffff];
 }
 
-auto Bus::readWord(uint24 addr) -> uint16 {
+auto BusCPU::readWord(uint24 addr) -> uint16 {
   if(addr < 0x400000) return cartridge.read(addr);
   if(addr < 0xa00000) return 0x0000;
   if(addr < 0xa10000) return 0x0000;
@@ -26,7 +26,7 @@ auto Bus::readWord(uint24 addr) -> uint16 {
   return data | ram[addr + 1 & 0xffff] << 0;
 }
 
-auto Bus::writeByte(uint24 addr, uint16 data) -> void {
+auto BusCPU::writeByte(uint24 addr, uint16 data) -> void {
   if(addr < 0x400000) return cartridge.write(addr & ~1, data << 8 | data << 0);
   if(addr < 0xa00000) return;
   if(addr < 0xa10000) return;
@@ -36,7 +36,7 @@ auto Bus::writeByte(uint24 addr, uint16 data) -> void {
   ram[addr & 0xffff] = data;
 }
 
-auto Bus::writeWord(uint24 addr, uint16 data) -> void {
+auto BusCPU::writeWord(uint24 addr, uint16 data) -> void {
   if(addr < 0x400000) return cartridge.write(addr, data);
   if(addr < 0xa00000) return;
   if(addr < 0xa10000) return;
@@ -49,7 +49,7 @@ auto Bus::writeWord(uint24 addr, uint16 data) -> void {
 
 //
 
-auto Bus::readIO(uint24 addr) -> uint16 {
+auto BusCPU::readIO(uint24 addr) -> uint16 {
   switch(addr & ~1) {
   case 0xa10002: return peripherals.controllerPort1->readData();
   case 0xa10004: return peripherals.controllerPort2->readData();
@@ -63,7 +63,7 @@ auto Bus::readIO(uint24 addr) -> uint16 {
   return 0x0000;
 }
 
-auto Bus::writeIO(uint24 addr, uint16 data) -> void {
+auto BusCPU::writeIO(uint24 addr, uint16 data) -> void {
   switch(addr & ~1) {
   case 0xa10002: return peripherals.controllerPort1->writeData(data);
   case 0xa10004: return peripherals.controllerPort2->writeData(data);

@@ -8,8 +8,7 @@ namespace Processor {
 #include "instructions.cpp"
 #include "disassembler.cpp"
 
-auto Z80::power(Z80::Bus* bus) -> void {
-  this->bus = bus;
+auto Z80::power() -> void {
 }
 
 auto Z80::reset() -> void {
@@ -30,7 +29,7 @@ auto Z80::reset() -> void {
   instructionsExecuted = 0;
 }
 
-auto Z80::parity(uint8_t value) const -> bool {
+auto Z80::parity(uint8 value) const -> bool {
   value ^= value >> 4;
   value ^= value >> 2;
   value ^= value >> 1;

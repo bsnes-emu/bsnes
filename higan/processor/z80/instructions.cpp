@@ -2,6 +2,7 @@
 //  a   = r.a
 //  e   = relative operand
 //  in  = (operand)
+//  inn = (operand-word)
 //  irr = (register-word)
 //  o   = opcode bits
 //  n   = operand
@@ -21,8 +22,17 @@ auto Z80::CP(uint8 x) -> void {
   r.p.s = y.bit(7);
 }
 
+auto Z80::instructionCP_irr(uint16& x) -> void {
+  auto addr = displace(x);
+  CP(read(addr));
+}
+
 auto Z80::instructionCP_n() -> void {
   CP(operand());
+}
+
+auto Z80::instructionCP_r(uint8& x) -> void {
+  CP(x);
 }
 
 auto Z80::instructionDI() -> void {
@@ -57,12 +67,30 @@ auto Z80::instructionJR_c_e(bool c) -> void {
   r.pc += (int8)e;
 }
 
-auto Z80::instructionLD_irr_n(uint16_t& x) -> void {
-  write(x, operand());
+auto Z80::instructionLD_inn_a() -> void {
+  auto lo = operand();
+  auto hi = operand();
+  write(hi << 8 | lo << 0, r.a);
 }
 
-auto Z80::instructionLD_r_n(uint8_t& x) -> void {
+auto Z80::instructionLD_irr_n(uint16& x) -> void {
+  auto addr = displace(x);
+  write(addr, operand());
+}
+
+auto Z80::instructionLD_irr_r(uint16& x, uint8& y) -> void {
+  auto addr = displace(x);
+  write(addr, y);
+}
+
+auto Z80::instructionLD_r_n(uint8& x) -> void {
   x = operand();
+}
+
+auto Z80::instructionLD_rr_nn(uint16& x) -> void {
+  auto lo = operand();
+  auto hi = operand();
+  x = hi << 8 | lo << 0;
 }
 
 auto Z80::instructionNOP() -> void {
