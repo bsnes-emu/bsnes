@@ -41,6 +41,18 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         }
     }
 
+    if (gb->serial_cycles) {
+        if (gb->serial_cycles <= cycles) {
+            gb->serial_cycles = 0;
+            gb->io_registers[GB_IO_SC] &= ~0x80;
+            gb->io_registers[GB_IO_SB] = 0xFF;
+            gb->io_registers[GB_IO_IF] |= 8;
+        }
+        else {
+            gb->serial_cycles -= cycles;
+        }
+    }
+
     if (gb->cgb_double_speed) {
         cycles >>=1;
     }

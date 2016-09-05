@@ -111,8 +111,8 @@ void GB_init(GB_gameboy_t *gb)
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
-
     gb->io_registers[GB_IO_JOYP] = 0xF;
+    gb->io_registers[GB_IO_SC] = 0x7E;
 }
 
 void GB_init_cgb(GB_gameboy_t *gb)
@@ -134,8 +134,8 @@ void GB_init_cgb(GB_gameboy_t *gb)
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
 
     gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = 0xFF;
-
     gb->io_registers[GB_IO_JOYP] = 0xF;
+    gb->io_registers[GB_IO_SC] = 0x7C;
 }
 
 void GB_free(GB_gameboy_t *gb)

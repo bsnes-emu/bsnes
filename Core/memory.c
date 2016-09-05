@@ -162,6 +162,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_OBP1:
             case GB_IO_WY:
             case GB_IO_WX:
+            case GB_IO_SC:
             case GB_IO_SB:
                 return gb->io_registers[addr & 0xFF];
             case GB_IO_TIMA:
@@ -220,8 +221,6 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return ret;
             }
-            case GB_IO_SC: /* Serial not supported yet */
-                return 0x7E;
             default:
                 if ((addr & 0xFF) >= GB_IO_NR10 && (addr & 0xFF) <= GB_IO_WAV_END) {
                     return GB_apu_read(gb, addr & 0xFF);
@@ -521,10 +520,19 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->hdma_cycles = 0;
                 return;
 
+            /*  Todo: what happens when starting a transfer during a transfer?
+                What happens when starting a transfer during external clock? 
+            */
             case GB_IO_SC:
+                if (!gb->cgb_mode) {
+                    value |= 2;
+                }
+                gb->io_registers[GB_IO_SC] = value | (~0x83);
                 if ((value & 0x80) && (value & 0x1) ) {
-                    gb->io_registers[GB_IO_SB] = 0xFF;
-                    gb->io_registers[GB_IO_IF] |= 0x8;
+                    gb->serial_cycles = gb->cgb_mode && (value & 2)? 128 : 4096;
+                }
+                else {
+                    gb->serial_cycles = 0;
                 }
                 return;
 
