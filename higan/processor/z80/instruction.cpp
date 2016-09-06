@@ -13,64 +13,78 @@ auto Z80::instruction() -> void {
   instructionsExecuted++;
 
   auto code = opcode();
-  if(code == 0xdd || code == 0xfd) {
-    r.prefix = code;
-    return;
-  }
+  if(code == 0xdd) { r.hlp = &r.ix; return; }
+  if(code == 0xfd) { r.hlp = &r.iy; return; }
   instruction__(code);
-  r.prefix = 0x00;
+  r.hlp = &r.hl;
 }
 
 #define op(id, name, ...) case id: return instruction##name(__VA_ARGS__);
-
-#define A  (uint8&)(r.a)
-#define F  (uint8&)(r.f)
-#define B  (uint8&)(r.b)
-#define C  (uint8&)(r.c)
-#define D  (uint8&)(r.d)
-#define E  (uint8&)(r.e)
-#define H  (uint8&)(r.prefix == 0xdd ? r.ixh : r.prefix == 0xfd ? r.iyh : r.h)
-#define L  (uint8&)(r.prefix == 0xdd ? r.ixl : r.prefix == 0xfd ? r.iyl : r.l)
-#define HD (uint8&)(r.h)
-#define LD (uint8&)(r.l)
-
-#define AF (uint16&)(r.af)
-#define BC (uint16&)(r.bc)
-#define DE (uint16&)(r.de)
-#define HL (uint16&)(r.prefix == 0xdd ? r.ix : r.prefix == 0xfd ? r.iy : r.hl)
-#define SP (uint16&)(r.sp)
-
-#define CF r.p.c
-#define NF r.p.n
-#define PF r.p.p
-#define VF r.p.v
-#define XF r.p.x
-#define HF r.p.h
-#define YF r.p.y
-#define ZF r.p.z
-#define SF r.p.s
 
 auto Z80::instruction__(uint8 code) -> void {
   switch(code) {
   op(0x00, NOP)
   op(0x01, LD_rr_nn, BC)
+  op(0x02, LD_irr_a, BC)
+  op(0x03, INC_rr, BC)
+  op(0x04, INC_r, B)
+  op(0x05, DEC_r, B)
   op(0x06, LD_r_n, B)
+  op(0x07, RLCA)
+  op(0x08, EX_rr_rr, AF, AF_)
+  op(0x09, ADD_rr_rr, HL, BC)
+  op(0x0a, LD_a_irr, BC)
+  op(0x0b, DEC_rr, BC)
+  op(0x0c, INC_r, C)
+  op(0x0d, DEC_r, C)
   op(0x0e, LD_r_n, C)
+  op(0x0f, RRCA)
   op(0x11, LD_rr_nn, DE)
+  op(0x12, LD_irr_a, DE)
+  op(0x13, INC_rr, DE)
+  op(0x14, INC_r, D)
+  op(0x15, DEC_r, D)
   op(0x16, LD_r_n, D)
+  op(0x17, RLA)
   op(0x18, JR_c_e, 1)
+  op(0x19, ADD_rr_rr, HL, DE)
+  op(0x1a, LD_a_irr, DE)
+  op(0x1b, DEC_rr, DE)
+  op(0x1c, INC_r, E)
+  op(0x1d, DEC_r, E)
   op(0x1e, LD_r_n, E)
+  op(0x1f, RRA)
   op(0x20, JR_c_e, ZF == 0)
   op(0x21, LD_rr_nn, HL)
+  op(0x22, LD_inn_rr, HL)
+  op(0x23, INC_rr, HL)
+  op(0x24, INC_r, H)
+  op(0x25, DEC_r, H)
   op(0x26, LD_r_n, H)
   op(0x28, JR_c_e, ZF == 1)
+  op(0x29, ADD_rr_rr, HL, HL)
+  op(0x2a, LD_rr_inn, HL)
+  op(0x2b, DEC_rr, HL)
+  op(0x2c, INC_r, L)
+  op(0x2d, DEC_r, L)
   op(0x2e, LD_r_n, L)
+  op(0x2f, CPL)
   op(0x30, JR_c_e, CF == 0)
   op(0x31, LD_rr_nn, SP)
   op(0x32, LD_inn_a)
+  op(0x33, INC_rr, SP)
+  op(0x34, INC_irr, HL)
+  op(0x35, DEC_irr, HL)
   op(0x36, LD_irr_n, HL)
+  op(0x37, SCF)
   op(0x38, JR_c_e, CF == 1)
+  op(0x39, ADD_rr_rr, HL, SP)
+  op(0x3a, LD_a_inn)
+  op(0x3b, DEC_rr, SP)
+  op(0x3c, INC_r, A)
+  op(0x3d, DEC_r, A)
   op(0x3e, LD_r_n, A)
+  op(0x3f, CCF)
   op(0x40, LD_r_r, B, B)
   op(0x41, LD_r_r, B, C)
   op(0x42, LD_r_r, B, D)
@@ -109,7 +123,7 @@ auto Z80::instruction__(uint8 code) -> void {
   op(0x63, LD_r_r, H, E)
   op(0x64, LD_r_r, H, H)
   op(0x65, LD_r_r, H, L)
-  op(0x66, LD_r_irr, HD, HL)
+  op(0x66, LD_r_irr, _H, HL)
   op(0x67, LD_r_r, H, A)
   op(0x68, LD_r_r, L, B)
   op(0x69, LD_r_r, L, C)
@@ -117,14 +131,14 @@ auto Z80::instruction__(uint8 code) -> void {
   op(0x6b, LD_r_r, L, E)
   op(0x6c, LD_r_r, L, H)
   op(0x6d, LD_r_r, L, L)
-  op(0x6e, LD_r_irr, LD, HL)
+  op(0x6e, LD_r_irr, _L, HL)
   op(0x6f, LD_r_r, L, A)
   op(0x70, LD_irr_r, HL, B)
   op(0x71, LD_irr_r, HL, C)
   op(0x72, LD_irr_r, HL, D)
   op(0x73, LD_irr_r, HL, E)
-  op(0x74, LD_irr_r, HL, HD)
-  op(0x75, LD_irr_r, HL, LD)
+  op(0x74, LD_irr_r, HL, _H)
+  op(0x75, LD_irr_r, HL, _L)
   op(0x76, HALT)
   op(0x77, LD_irr_r, HL, A)
   op(0x78, LD_r_r, A, B)
@@ -208,6 +222,7 @@ auto Z80::instruction__(uint8 code) -> void {
   op(0xdb, IN_a_in)
   op(0xe2, JP_c_nn, PF == 0)
   op(0xea, JP_c_nn, PF == 1)
+  op(0xeb, EX_rr_rr, DE, _HL)
   op(0xed, ED, opcode())
   op(0xf2, JP_c_nn, SF == 0)
   op(0xf3, DI)
@@ -237,30 +252,3 @@ auto Z80::instructionED(uint8 code) -> void {
 }
 
 #undef op
-
-#undef A
-#undef F
-#undef B
-#undef C
-#undef D
-#undef E
-#undef H
-#undef L
-#undef HD
-#undef LD
-
-#undef AF
-#undef BC
-#undef DE
-#undef HL
-#undef SP
-
-#undef CF
-#undef NF
-#undef PF
-#undef VF
-#undef XF
-#undef HF
-#undef YF
-#undef ZF
-#undef SF

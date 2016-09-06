@@ -23,12 +23,12 @@ auto Z80::disassemble(uint16 pc) -> string {
   s.append(pad(disassemble__(pc, prefix, code), -18L, ' '));
 
   finish:
-  s.append(" AF:", hex(r.af, 4L));
-  s.append(" BC:", hex(r.bc, 4L));
-  s.append(" DE:", hex(r.de, 4L));
-  s.append(" HL:", hex(r.hl, 4L));
-  s.append(" IX:", hex(r.ix, 4L));
-  s.append(" IY:", hex(r.iy, 4L));
+  s.append(" AF:", hex(r.af.word, 4L));
+  s.append(" BC:", hex(r.bc.word, 4L));
+  s.append(" DE:", hex(r.de.word, 4L));
+  s.append(" HL:", hex(r.hl.word, 4L));
+  s.append(" IX:", hex(r.ix.word, 4L));
+  s.append(" IY:", hex(r.iy.word, 4L));
   s.append(" SP:", hex(r.sp, 4L));
 
   return s;
@@ -50,16 +50,27 @@ auto Z80::disassemble(uint16 pc) -> string {
 #define E   "e"
 #define H   prefix == 0xdd ? "ixh" : prefix == 0xfd ? "iyh" : "h"
 #define L   prefix == 0xdd ? "ixl" : prefix == 0xfd ? "iyl" : "l"
-#define HD  "h"
-#define LD  "l"
+#define _H  "h"
+#define _L  "l"
+#define _HL "hl"
 
 #define AF  "af"
 #define BC  "bc"
 #define DE  "de"
 #define HL  prefix == 0xdd ? "ix" : prefix == 0xfd ? "iy" : "hl"
-#define SP  "sp"
 
+#define AF_ "af'"
+#define BC_ "bc'"
+#define DE_ "de'"
+#define HL_ "hl'"
+
+#define SP  "sp"
+#define PC  "pc"
+
+#define IBC "(bc)"
+#define IDE "(de)"
 #define IHL string{"(", HL, displace(), ")"}
+#define ISP "(sp)"
 
 auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   auto byte = [&] {
@@ -88,23 +99,66 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   switch(code) {
   op(0x00, "nop ")
   op(0x01, "ld  ", BC, NN)
+  op(0x02, "ld  ", IBC, A)
+  op(0x03, "inc ", BC)
+  op(0x04, "inc ", B)
+  op(0x05, "dec ", B)
   op(0x06, "ld  ", B, N)
+  op(0x07, "rlca")
+  op(0x08, "ex  ", AF, AF_)
+  op(0x09, "add ", HL, BC)
+  op(0x0a, "ld  ", A, IBC)
+  op(0x0b, "dec ", BC)
+  op(0x0c, "inc ", C)
+  op(0x0d, "dec ", C)
   op(0x0e, "ld  ", C, N)
+  op(0x0f, "rrca")
   op(0x11, "ld  ", DE, NN)
+  op(0x12, "ld  ", IDE, A)
+  op(0x13, "inc ", DE)
+  op(0x14, "inc ", D)
+  op(0x15, "dec ", D)
   op(0x16, "ld  ", E, N)
+  op(0x17, "rla ")
   op(0x18, "jr  ", R)
+  op(0x19, "add ", HL, DE)
+  op(0x1a, "ld  ", A, IDE)
+  op(0x1b, "dec ", DE)
+  op(0x1c, "inc ", E)
+  op(0x1d, "dec ", E)
   op(0x1e, "ld  ", E, N)
+  op(0x1f, "rra ")
   op(0x20, "jr  ", "nz", R)
   op(0x21, "ld  ", HL, NN)
+  op(0x22, "ld  ", INN, HL)
+  op(0x23, "inc ", HL)
+  op(0x24, "inc ", H)
+  op(0x25, "dec ", H)
   op(0x26, "ld  ", H, N)
   op(0x28, "jr  ", "z", R)
+  op(0x29, "add ", HL, HL)
+  op(0x2a, "ld  ", HL, INN)
+  op(0x2b, "dec ", HL)
+  op(0x2c, "inc ", L)
+  op(0x2d, "dec ", L)
   op(0x2e, "ld  ", L, N)
+  op(0x2f, "cpl ")
   op(0x30, "jr  ", "nc", R)
   op(0x31, "ld  ", SP, NN)
   op(0x32, "ld  ", INN, A)
+  op(0x33, "inc ", SP)
+  op(0x34, "inc ", IHL)
+  op(0x35, "dec ", IHL)
   op(0x36, "ld  ", IHL, N)
+  op(0x37, "scf ")
   op(0x38, "jr  ", "c", R)
+  op(0x39, "add ", HL, SP)
+  op(0x3a, "ld  ", A, INN)
+  op(0x3b, "dec ", SP)
+  op(0x3c, "inc ", A)
+  op(0x3d, "dec ", A)
   op(0x3e, "ld  ", A, N)
+  op(0x3f, "ccf ")
   op(0x40, "ld  ", B, B)
   op(0x41, "ld  ", B, C)
   op(0x42, "ld  ", B, D)
@@ -143,7 +197,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x63, "ld  ", H, E)
   op(0x64, "ld  ", H, H)
   op(0x65, "ld  ", H, L)
-  op(0x66, "ld  ", HD, IHL)
+  op(0x66, "ld  ", _H, IHL)
   op(0x67, "ld  ", H, A)
   op(0x68, "ld  ", L, B)
   op(0x69, "ld  ", L, C)
@@ -151,14 +205,14 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0x6b, "ld  ", L, E)
   op(0x6c, "ld  ", L, H)
   op(0x6d, "ld  ", L, L)
-  op(0x6e, "ld  ", LD, IHL)
+  op(0x6e, "ld  ", _L, IHL)
   op(0x6f, "ld  ", L, A)
   op(0x70, "ld  ", IHL, B)
   op(0x71, "ld  ", IHL, C)
   op(0x72, "ld  ", IHL, D)
   op(0x73, "ld  ", IHL, E)
-  op(0x74, "ld  ", IHL, HD)
-  op(0x75, "ld  ", IHL, LD)
+  op(0x74, "ld  ", IHL, _H)
+  op(0x75, "ld  ", IHL, _L)
   op(0x76, "halt")
   op(0x77, "ld  ", IHL, A)
   op(0x78, "ld  ", A, B)
@@ -242,6 +296,7 @@ auto Z80::disassemble__(uint16 pc, uint8 prefix, uint8 code) -> string {
   op(0xdb, "in  ", A, IN)
   op(0xe2, "jp  ", "po", NN)
   op(0xea, "jp  ", "pe", NN)
+  op(0xeb, "ex  ", DE, _HL)
   op(0xed, "ed: ")
   op(0xf2, "jp  ", "p", NN)
   op(0xf3, "di  ")
@@ -290,13 +345,24 @@ auto Z80::disassembleED(uint16 pc, uint8 prefix, uint8 code) -> string {
 #undef E
 #undef H
 #undef L
-#undef HD
-#undef LD
+#undef _H
+#undef _L
+#undef _HL
 
 #undef AF
 #undef BC
 #undef DE
 #undef HL
-#undef SP
 
+#undef AF_
+#undef BC_
+#undef DE_
+#undef HL_
+
+#undef SP
+#undef PC
+
+#undef IBC
+#undef IDE
 #undef IHL
+#undef ISP

@@ -18,7 +18,7 @@ auto Z80::operands() -> uint16 {
 }
 
 auto Z80::displace(uint16& x) -> uint16 {
-  if(!r.prefix) return x;
+  if(&x != &r.ix.word && &x != &r.iy.word) return x;
   auto d = read(x);
   wait(5);
   return x + (int8)d;
