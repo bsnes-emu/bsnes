@@ -22,6 +22,7 @@ auto Z80::reset() -> void {
   r.sp = 0x0000;
   r.pc = 0x0000;
 
+  r.halt = 0;
   r.iff1 = 0;
   r.iff2 = 0;
   r.im = 0;

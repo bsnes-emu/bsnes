@@ -24,6 +24,7 @@ struct Z80 {
   auto wait(uint clocks = 1) -> void;
   auto opcode() -> uint8;
   auto operand() -> uint8;
+  auto operands() -> uint16;
   auto displace(uint16&) -> uint16;
   auto read(uint16 addr) -> uint8;
   auto write(uint16 addr, uint8 data) -> void;
@@ -38,12 +39,24 @@ struct Z80 {
   auto instructionED(uint8 code) -> void;
 
   //instructions.cpp
-  auto CP(uint8) -> void;
-  auto instructionCP_irr(uint16& x) -> void;
-  auto instructionCP_n() -> void;
-  auto instructionCP_r(uint8& x) -> void;
+  auto ADD(uint8, uint8, bool = false) -> uint8;
+  auto AND(uint8, uint8) -> uint8;
+  auto OR (uint8, uint8) -> uint8;
+  auto SUB(uint8, uint8, bool = false) -> uint8;
+  auto XOR(uint8, uint8) -> uint8;
+
+  auto instructionADC_a_irr(uint16&) -> void;
+  auto instructionADC_a_r(uint8&) -> void;
+  auto instructionADD_a_irr(uint16&) -> void;
+  auto instructionADD_a_r(uint8&) -> void;
+  auto instructionAND_a_irr(uint16&) -> void;
+  auto instructionAND_a_r(uint8&) -> void;
+  auto instructionCP_a_irr(uint16& x) -> void;
+  auto instructionCP_a_n() -> void;
+  auto instructionCP_a_r(uint8& x) -> void;
   auto instructionDI() -> void;
   auto instructionEI() -> void;
+  auto instructionHALT() -> void;
   auto instructionIM_o(uint2) -> void;
   auto instructionIN_a_in() -> void;
   auto instructionJP_c_nn(bool) -> void;
@@ -52,8 +65,18 @@ struct Z80 {
   auto instructionLD_irr_n(uint16&) -> void;
   auto instructionLD_irr_r(uint16&, uint8&) -> void;
   auto instructionLD_r_n(uint8&) -> void;
+  auto instructionLD_r_irr(uint8&, uint16&) -> void;
+  auto instructionLD_r_r(uint8&, uint8&) -> void;
   auto instructionLD_rr_nn(uint16&) -> void;
   auto instructionNOP() -> void;
+  auto instructionOR_a_irr(uint16&) -> void;
+  auto instructionOR_a_r(uint8&) -> void;
+  auto instructionSBC_a_irr(uint16&) -> void;
+  auto instructionSBC_a_r(uint8&) -> void;
+  auto instructionSUB_a_irr(uint16&) -> void;
+  auto instructionSUB_a_r(uint8&) -> void;
+  auto instructionXOR_a_irr(uint16&) -> void;
+  auto instructionXOR_a_r(uint8&) -> void;
 
   //disassembler.cpp
   auto disassemble(uint16 pc) -> string;
@@ -63,8 +86,8 @@ struct Z80 {
 
   struct Registers {
     union {
-      castable<uint16, uint16_t> af;
-      struct { castable<uint8, uint8_t> order_msb2(a, f); };
+      uint16_t af;
+      struct { uint8_t order_msb2(a, f); };
       union {
         BooleanBitField<uint16_t, 0> c;  //carry
         BooleanBitField<uint16_t, 1> n;  //add / subtract
@@ -79,38 +102,39 @@ struct Z80 {
     };
 
     union {
-      castable<uint16, uint16_t> bc;
-      struct { castable<uint8, uint8_t> order_msb2(b, c); };
+      uint16_t bc;
+      struct { uint8_t order_msb2(b, c); };
     };
 
     union {
-      castable<uint16, uint16_t> de;
-      struct { castable<uint8, uint8_t> order_msb2(d, e); };
+      uint16_t de;
+      struct { uint8_t order_msb2(d, e); };
     };
 
     union {
-      castable<uint16, uint16_t> hl;
-      struct { castable<uint8, uint8_t> order_msb2(h, l); };
+      uint16_t hl;
+      struct { uint8_t order_msb2(h, l); };
     };
 
     union {
-      castable<uint16, uint16_t> ix;
-      struct { castable<uint8, uint8_t> order_msb2(ixh, ixl); };
+      uint16_t ix;
+      struct { uint8_t order_msb2(ixh, ixl); };
     };
 
     union {
-      castable<uint16, uint16_t> iy;
-      struct { castable<uint8, uint8_t> order_msb2(iyh, iyl); };
+      uint16_t iy;
+      struct { uint8_t order_msb2(iyh, iyl); };
     };
 
     union {
-      castable<uint16, uint16_t> ir;
-      struct { castable<uint8, uint8_t> order_msb2(i, r); };
+      uint16_t ir;
+      struct { uint8_t order_msb2(i, r); };
     };
 
-    uint16 sp;
-    uint16 pc;
+    uint16_t sp;
+    uint16_t pc;
 
+    boolean halt;  //HALT instruction executed
     boolean iff1;  //interrupt flip-flop 1
     boolean iff2;  //interrupt flip-flop 2
     uint2 im;      //interrupt mode (0-2)

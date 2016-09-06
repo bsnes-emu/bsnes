@@ -170,7 +170,8 @@ struct InputKeyboardRawInput {
     return true;
   }
 
-  void term() {
+  auto term() -> void {
+    rawinput.updateKeyboard.reset();
   }
 };
 

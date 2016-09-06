@@ -115,6 +115,7 @@ struct InputMouseRawInput {
   }
 
   auto term() -> void {
+    rawinput.updateMouse.reset();
     release();
   }
 };

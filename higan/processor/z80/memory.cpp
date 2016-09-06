@@ -12,6 +12,11 @@ auto Z80::operand() -> uint8 {
   return bus->read(r.pc++);
 }
 
+auto Z80::operands() -> uint16 {
+  uint16 data = operand() << 0;
+  return data | operand() << 8;
+}
+
 auto Z80::displace(uint16& x) -> uint16 {
   if(!r.prefix) return x;
   auto d = read(x);
