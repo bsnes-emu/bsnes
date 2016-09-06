@@ -169,6 +169,18 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     bool was_cgb = gb.is_cgb;
     [self stop];
     is_inited = false;
+
+    /* Back up user's breakpoints/watchpoints */
+    typeof(gb.breakpoints) breakpoints = gb.breakpoints;
+    typeof(gb.n_breakpoints) n_breakpoints = gb.n_breakpoints;
+    typeof(gb.watchpoints) watchpoints = gb.watchpoints;
+    typeof(gb.n_watchpoints) n_watchpoints = gb.n_watchpoints;
+
+    /* Reset them so they're not freed*/
+    gb.watchpoints = NULL;
+    gb.breakpoints = NULL;
+    gb.n_watchpoints = gb.n_breakpoints = 0;
+    
     GB_free(&gb);
     if (([sender tag] == 0 && was_cgb) || [sender tag] == 2) {
         [self initCGB];
@@ -176,6 +188,13 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     else {
         [self initDMG];
     }
+
+    /* Restore backpoints/watchpoints */
+    gb.breakpoints = breakpoints;
+    gb.n_breakpoints = n_breakpoints;
+    gb.watchpoints = watchpoints;
+    gb.n_watchpoints = n_watchpoints;
+
     if ([sender tag] != 0) {
         /* User explictly selected a model, save the preference */
         [[NSUserDefaults standardUserDefaults] setBool:!gb.is_cgb forKey:@"EmulateDMG"];
