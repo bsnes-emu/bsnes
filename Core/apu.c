@@ -271,7 +271,6 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
     static const double duties[] = {0.125, 0.25, 0.5, 0.75};
-    static uint16_t NRX3_X4_temp[3] = {0};
     uint8_t channel = 0;
 
     if (!gb->apu.global_enable && reg != GB_IO_NR52) {
@@ -336,8 +335,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR13:
         case GB_IO_NR23:
         case GB_IO_NR33:
-            NRX3_X4_temp[channel] = (NRX3_X4_temp[channel] & 0xFF00) | value;
-            gb->apu.wave_channels[channel].frequency =  131072.0 / (2048 - NRX3_X4_temp[channel]);
+            gb->apu.NRX3_X4_temp[channel] = (gb->apu.NRX3_X4_temp[channel] & 0xFF00) | value;
+            gb->apu.wave_channels[channel].frequency =  131072.0 / (2048 - gb->apu.NRX3_X4_temp[channel]);
             if (channel == 2) {
                 gb->apu.wave_channels[channel].frequency /= 2;
             }
@@ -353,8 +352,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.wave_channels[channel].cur_envelope_steps = gb->apu.wave_channels[channel].envelope_steps;
             }
 
-            NRX3_X4_temp[channel] = (NRX3_X4_temp[channel] & 0xFF) | ((value & 0x7) << 8);
-            gb->apu.wave_channels[channel].frequency =  131072.0 / (2048 - NRX3_X4_temp[channel]);
+            gb->apu.NRX3_X4_temp[channel] = (gb->apu.NRX3_X4_temp[channel] & 0xFF) | ((value & 0x7) << 8);
+            gb->apu.wave_channels[channel].frequency =  131072.0 / (2048 - gb->apu.NRX3_X4_temp[channel]);
             if (channel == 2) {
                 gb->apu.wave_channels[channel].frequency /= 2;
             }

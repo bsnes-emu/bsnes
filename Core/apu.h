@@ -53,6 +53,7 @@ typedef struct
     bool left_on[4];
     bool right_on[4];
     bool global_enable;
+    uint16_t NRX3_X4_temp[3];
 } GB_apu_t;
 
 void GB_apu_render(GB_gameboy_t *gb, unsigned int sample_rate, unsigned int n_samples, GB_sample_t *samples);
