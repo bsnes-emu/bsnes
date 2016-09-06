@@ -380,7 +380,7 @@ typedef struct GB_gameboy_s {
     size_t ir_queue_length;
 
     /*** Debugger ***/
-    volatile bool debug_stopped;
+    volatile bool debug_stopped, debug_disable;
     bool debug_fin_command, debug_next_command;
 
     /* Breakpoints */

@@ -153,6 +153,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (void) stop
 {
     if (!running) return;
+    gb.debug_disable = true;
     if (gb.debug_stopped) {
         gb.debug_stopped = false;
         [self consoleInput:nil];
@@ -160,6 +161,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     stopping = true;
     running = false;
     while (stopping);
+    gb.debug_disable = false;
 }
 
 - (IBAction)reset:(id)sender

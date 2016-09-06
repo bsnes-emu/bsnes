@@ -1463,6 +1463,8 @@ bool GB_debugger_do_command(GB_gameboy_t *gb, char *input)
 
 void GB_debugger_run(GB_gameboy_t *gb)
 {
+    if (gb->debug_disable) return;
+    
     char *input = NULL;
     if (gb->debug_next_command && gb->debug_call_depth <= 0) {
         gb->debug_stopped = true;
@@ -1482,7 +1484,7 @@ next_command:
         GB_log(gb, "Breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
-    if (gb->debug_stopped) {
+    if (gb->debug_stopped && !gb->debug_disable) {
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
         gb->stack_leak_detection = false;
