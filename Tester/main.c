@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a;
+static bool push_start_a, nekojara_fix;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -45,7 +45,7 @@ static void vblank(GB_gameboy_t *gb)
        screenshot to be taken while the LCD is off if the press makes the game
        load graphics. */
     if (push_start_a && frames < test_length - 120) { 
-        switch (frames % 40) {
+        switch (frames % (nekojara_fix? 60 : 40)) { /* Nekojara's first menu item is continue, so the normal hueristic won't work. */
             case 0:
                 gb->keys[7] = true; // Start down
                 break;
@@ -57,6 +57,12 @@ static void vblank(GB_gameboy_t *gb)
                 break;
             case 30:
                 gb->keys[4] = false; // A up
+                break;
+            case 40:
+                gb->keys[3] = true; // D-Pad Down down
+                break;
+            case 50:
+                gb->keys[3] = false; // D-Pad Down up
                 break;
         }
     }
@@ -71,7 +77,7 @@ static void vblank(GB_gameboy_t *gb)
             GB_log(gb, "The game is probably stuck in an FF loop.\n");
             frames = test_length - 1;
         }
-        if (gb->halted && (!gb->ime || !gb->interrupt_enable)) {
+        if (gb->halted && !gb->interrupt_enable) {
             GB_log(gb, "The game is deadlocked.\n");
             frames = test_length - 1;
         }
@@ -272,7 +278,7 @@ int main(int argc, char **argv)
             perror("Failed to load ROM");
             exit(1);
         }
-
+        nekojara_fix = strcmp((const char *)(gb.rom + 0x134), "NEKOJARA") == 0; /* It's OK. No overflow is possilbe here. */
         /* Run emulation */
         running = true;
         gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
