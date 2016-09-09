@@ -345,7 +345,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR24:
         case GB_IO_NR34:
             gb->apu.wave_channels[channel].stop_on_length = value & 0x40;
-            if (value & 0x80) {
+            if ((value & 0x80) && (channel != 2 || gb->apu.wave_enable)) {
                 gb->apu.wave_channels[channel].is_playing = true;
                 gb->apu.wave_channels[channel].phase = 0;
                 gb->apu.wave_channels[channel].amplitude = gb->apu.wave_channels[channel].start_amplitude;
@@ -360,6 +360,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             break;
         case GB_IO_NR30:
             gb->apu.wave_enable = value & 0x80;
+            gb->apu.wave_channels[2].is_playing &= gb->apu.wave_enable;
             break;
         case GB_IO_NR31:
             gb->apu.wave_channels[2].sound_length = (256 - value) / 256.0;
