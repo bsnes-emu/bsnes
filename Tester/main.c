@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, nekojara_fix;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -45,7 +45,11 @@ static void vblank(GB_gameboy_t *gb)
        screenshot to be taken while the LCD is off if the press makes the game
        load graphics. */
     if (push_start_a && frames < test_length - 120) { 
-        switch (frames % (nekojara_fix? 60 : 40)) { /* Nekojara's first menu item is continue, so the normal hueristic won't work. */
+        unsigned combo_length = 40;
+        if (start_is_not_first) combo_length = 60; /* The start item in the menu is not the first, so also push down */
+        else if (a_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
+
+        switch ((push_faster? frames * 2 : frames) % combo_length) {
             case 0:
                 gb->keys[7] = true; // Start down
                 break;
@@ -53,13 +57,15 @@ static void vblank(GB_gameboy_t *gb)
                 gb->keys[7] = false; // Start up
                 break;
             case 20:
-                gb->keys[4] = true; // A down
+                gb->keys[b_is_confirm? 5: 4] = true; // A down (or B)
                 break;
             case 30:
-                gb->keys[4] = false; // A up
+                gb->keys[b_is_confirm? 5: 4] = false; // A up (or B)
                 break;
             case 40:
-                gb->keys[3] = true; // D-Pad Down down
+                if (gb->boot_rom_finished) {
+                    gb->keys[3] = true; // D-Pad Down down
+                }
                 break;
             case 50:
                 gb->keys[3] = false; // D-Pad Down up
@@ -278,7 +284,15 @@ int main(int argc, char **argv)
             perror("Failed to load ROM");
             exit(1);
         }
-        nekojara_fix = strcmp((const char *)(gb.rom + 0x134), "NEKOJARA") == 0; /* It's OK. No overflow is possilbe here. */
+        
+        /* Game specific hacks for start attempt automations */
+        /* It's OK. No overflow is possible here. */
+        start_is_not_first = strcmp((const char *)(gb.rom + 0x134), "NEKOJARA") == 0 ||
+                             strcmp((const char *)(gb.rom + 0x134), "GINGA") == 0;
+        a_is_bad = strcmp((const char *)(gb.rom + 0x134), "DESERT STRIKE") == 0;
+        b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0;
+        push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
+
         /* Run emulation */
         running = true;
         gb.turbo = gb.turbo_dont_skip = gb.disable_rendering = true;
