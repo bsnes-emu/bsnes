@@ -52,4 +52,12 @@
     }
     [_preferencesWindow makeKeyAndOrderFront:self];
 }
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+    NSDocumentController *controller = [NSDocumentController sharedDocumentController];
+    if (![[controller documents] count]) {
+        [[NSDocumentController sharedDocumentController] openDocument:self];
+    }
+}
 @end
