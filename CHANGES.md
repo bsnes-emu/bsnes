@@ -1,5 +1,55 @@
 # Change Log
 
+## Version 0.7
+
+### New/Improved Features
+ * The debugger now includes a backtrace command to show the stacktrace
+ * Cocoa port now includes a Hex Editor/Viewer
+ * The debugger help command was improved
+ * General improvements to debugger usability
+ * The SDL port now compiles on Windows (Binaries included)
+ * Mouse hiding in Cocoa is now only enabled during full screen
+ * The Cocoa port now remembers the mute setting
+ * SameBoy now issues a warning when loading a game that uses an unsupported cartridge
+ * Cocoa port now remembers previous breakpoints/watchpoints after reset
+ * Cocoa port now automatically shows the open if needed
+
+### Accuracy Improvements/Fixes
+As of this version, SameBoy is regularly tested against 1405 DMG ROMs to make sure no accuracy regressions are made. [The latest results are available here](http://htmlpreview.github.io/?https://github.com/LIJI32/SameBoy/blob/automation_results/results.html).
+
+ * OBP0/1 are now initialized to the correct value (Fixes Mooneye's DMG hardware registers test).
+ * A disconnected serial cable is now emulated. Fixes:
+   * Baseball
+   * Faceball 2000
+   * Fighting Simulator
+   * Godzilla
+   * Hiryuu Gaiden
+   * In Your Face
+   * Lunar Lander
+   * Pinball Party
+   * Sneaky Snakes
+   * Super R.C. Pro-Am
+   * WWF Stars
+   * Yoshi's Egg
+ * Correctly emulating unused OAM RAM in DMG mode
+ * DMG boot ROM now finishes with the original register values (Fixes Mooneye's DMG boot registers test)
+ * RTC clock latching is now emulated.
+ * Fixed APU issues where simultaneously running games could affect eachother
+ * Fixed APU issue that could break some games. Fixes:
+   * Chiki Chiki Tengoku
+   * Moguranya/Mole Mania
+ * Fixed MBC RAM not being properly reset. Old save data must be deleted for this fix to apply. Fixes:
+   * Purikura Pocket 3
+   * Probably affects many other games
+ 
+### Bug Fixes
+ * Boot ROMs were not trimmed correctly
+ * Fixes several bugs that caused the Cocoa port to freeze when using the reset command during debugging
+ 
+### Misc Internal Changes
+ * SameBoy can now be compiled with precompiled (non-SameBoy) boot ROMs
+ * SameBoy includes an automated game ROM tester
+
 ## Version 0.6
 
 ### New/Improved Features
