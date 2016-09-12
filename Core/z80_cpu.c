@@ -1418,11 +1418,13 @@ void GB_cpu_run(GB_gameboy_t *gb)
         return;
     }
 
-    if (gb->ime && interrupt) {
-        if (gb->ime_toggle) {
-            gb->ime = !gb->ime;
-            gb->ime_toggle = false;
-        }
+    bool effecitve_ime = gb->ime;
+    if (gb->ime_toggle) {
+        gb->ime = !gb->ime;
+        gb->ime_toggle = false;
+    }
+
+    if (effecitve_ime && interrupt) {
         uint8_t interrupt_bit = 0;
         uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
         while (!(interrupt_queue & 1)) {
@@ -1431,17 +1433,12 @@ void GB_cpu_run(GB_gameboy_t *gb)
         }
         gb->io_registers[GB_IO_IF] &= ~(1 << interrupt_bit);
         gb->ime = false;
-        gb->ime_toggle = false;
         nop(gb, 0);
         gb->pc -= 2;
         /* Run pseudo instructions rst 40-60*/
         rst(gb, 0x87 + interrupt_bit * 8);
     }
     else if(!gb->halted && !gb->stopped) {
-        if (gb->ime_toggle) {
-            gb->ime = !gb->ime;
-            gb->ime_toggle = false;
-        }
         uint8_t opcode = GB_read_memory(gb, gb->pc);
         opcodes[opcode](gb, opcode);
     }
