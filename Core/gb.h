@@ -293,7 +293,7 @@ typedef struct GB_gameboy_s {
         uint32_t div_cycles;
         GB_PADDING(uint32_t, tima_cycles);
         GB_PADDING(uint32_t, dma_cycles);
-        GB_aligned_double apu_cycles;
+        GB_aligned_double apu_sample_cycles;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
         uint16_t serial_cycles;
     );
