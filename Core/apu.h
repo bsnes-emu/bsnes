@@ -19,21 +19,22 @@ typedef struct
 } GB_sample_t;
 
 /* Not all used on all channels */
+/* All lengths are in APU ticks */
 typedef struct
 {
-    uint64_t phase;
+    uint32_t phase;
     uint32_t wave_length;
-    GB_aligned_double duty;
-    GB_aligned_double sound_length; /* In seconds */
+    int32_t sound_length;
+    bool stop_on_length;
+    uint8_t duty;
     int16_t amplitude;
     int16_t start_amplitude;
-    bool stop_on_length;
     uint8_t envelope_steps;
     uint8_t cur_envelope_steps;
-    signed int envelope_direction;
+    int8_t envelope_direction;
     uint8_t sweep_steps;
     uint8_t cur_sweep_steps;
-    signed int sweep_direction;
+    int8_t sweep_direction;
     uint8_t sweep_shift;
     bool is_playing;
     uint16_t NRX3_X4_temp;
@@ -45,8 +46,8 @@ typedef struct
 {
     uint8_t apu_cycles;
     bool global_enable;
-    GB_aligned_double envelope_step_timer; /* In seconds */
-    GB_aligned_double sweep_step_timer; /* In seconds */
+    uint32_t envelope_step_timer;
+    uint32_t sweep_step_timer;
     int8_t wave_form[32];
     uint8_t wave_shift;
     bool wave_enable;
@@ -60,6 +61,7 @@ typedef struct
 void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count);
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
+void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *samples);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
 

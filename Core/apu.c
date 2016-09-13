@@ -18,10 +18,10 @@ _a < _b ? _a : _b; })
 
 #define APU_FREQUENCY 0x80000
 
-static int16_t generate_square(uint64_t phase, uint32_t wave_length, int16_t amplitude, double duty)
+static int16_t generate_square(uint64_t phase, uint32_t wave_length, int16_t amplitude, uint8_t duty)
 {
     if (!wave_length) return 0;
-    if (phase % wave_length > wave_length * duty) {
+    if (phase % wave_length > wave_length * duty / 8) {
         return amplitude;
     }
     return 0;
@@ -58,64 +58,66 @@ static int16_t step_lfsr(uint16_t lfsr, bool uses_7_bit)
     return lfsr;
 }
 
+void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *samples)
+{
+    samples->left = samples->right = 0;
+    if (!gb->apu.global_enable) {
+        return;
+    }
+
+    gb->io_registers[GB_IO_PCM_12] = 0;
+    gb->io_registers[GB_IO_PCM_34] = 0;
+
+    {
+        int16_t sample = generate_square(gb->apu.wave_channels[0].phase,
+                                         gb->apu.wave_channels[0].wave_length,
+                                         gb->apu.wave_channels[0].amplitude,
+                                         gb->apu.wave_channels[0].duty);
+        if (gb->apu.wave_channels[0].left_on ) samples->left  += sample;
+        if (gb->apu.wave_channels[0].right_on) samples->right += sample;
+        gb->io_registers[GB_IO_PCM_12] = ((int)sample) * 0xF / MAX_CH_AMP;
+    }
+
+    {
+        int16_t sample = generate_square(gb->apu.wave_channels[1].phase,
+                                         gb->apu.wave_channels[1].wave_length,
+                                         gb->apu.wave_channels[1].amplitude,
+                                         gb->apu.wave_channels[1].duty);
+        if (gb->apu.wave_channels[1].left_on ) samples->left  += sample;
+        if (gb->apu.wave_channels[1].right_on) samples->right += sample;
+        gb->io_registers[GB_IO_PCM_12] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
+    }
+
+    if (gb->apu.wave_enable)
+    {
+        int16_t sample = generate_wave(gb->apu.wave_channels[2].phase,
+                                       gb->apu.wave_channels[2].wave_length,
+                                       MAX_CH_AMP,
+                                       gb->apu.wave_form,
+                                       gb->apu.wave_shift);
+        if (gb->apu.wave_channels[2].left_on ) samples->left  += sample;
+        if (gb->apu.wave_channels[2].right_on) samples->right += sample;
+        gb->io_registers[GB_IO_PCM_34] = ((int)sample) * 0xF / MAX_CH_AMP;
+    }
+
+    {
+        int16_t sample = generate_noise(gb->apu.wave_channels[3].amplitude,
+                                        gb->apu.lfsr);
+        if (gb->apu.wave_channels[3].left_on ) samples->left  += sample;
+        if (gb->apu.wave_channels[3].right_on) samples->right += sample;
+        gb->io_registers[GB_IO_PCM_34] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
+    }
+
+    samples->left *= gb->apu.left_volume;
+    samples->right *= gb->apu.right_volume;
+}
+
 /* General Todo: The APU emulation seems to fail many accuracy tests. It might require a rewrite with
    these tests in mind. */
 
-void GB_apu_run_internal(GB_gameboy_t *gb, unsigned int n_cycles, GB_sample_t *samples)
+static void GB_apu_run_internal(GB_gameboy_t *gb)
 {
-    while (n_cycles--) {
-        if (n_cycles == 0) {
-            samples->left = samples->right = 0;
-            if (!gb->apu.global_enable) {
-                continue;
-            }
-
-            gb->io_registers[GB_IO_PCM_12] = 0;
-            gb->io_registers[GB_IO_PCM_34] = 0;
-
-            {
-                int16_t sample = generate_square(gb->apu.wave_channels[0].phase,
-                                                 gb->apu.wave_channels[0].wave_length,
-                                                 gb->apu.wave_channels[0].amplitude,
-                                                 gb->apu.wave_channels[0].duty);
-                if (gb->apu.wave_channels[0].left_on ) samples->left  += sample;
-                if (gb->apu.wave_channels[0].right_on) samples->right += sample;
-                gb->io_registers[GB_IO_PCM_12] = ((int)sample) * 0xF / MAX_CH_AMP;
-            }
-
-            {
-                int16_t sample = generate_square(gb->apu.wave_channels[1].phase,
-                                                 gb->apu.wave_channels[1].wave_length,
-                                                 gb->apu.wave_channels[1].amplitude,
-                                                 gb->apu.wave_channels[1].duty);
-                if (gb->apu.wave_channels[1].left_on ) samples->left  += sample;
-                if (gb->apu.wave_channels[1].right_on) samples->right += sample;
-                gb->io_registers[GB_IO_PCM_12] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
-            }
-
-            if (gb->apu.wave_enable)
-            {
-                int16_t sample = generate_wave(gb->apu.wave_channels[2].phase,
-                                               gb->apu.wave_channels[2].wave_length,
-                                               MAX_CH_AMP,
-                                               gb->apu.wave_form,
-                                               gb->apu.wave_shift);
-                if (gb->apu.wave_channels[2].left_on ) samples->left  += sample;
-                if (gb->apu.wave_channels[2].right_on) samples->right += sample;
-                gb->io_registers[GB_IO_PCM_34] = ((int)sample) * 0xF / MAX_CH_AMP;
-            }
-
-            {
-                int16_t sample = generate_noise(gb->apu.wave_channels[3].amplitude,
-                                                gb->apu.lfsr);
-                if (gb->apu.wave_channels[3].left_on ) samples->left  += sample;
-                if (gb->apu.wave_channels[3].right_on) samples->right += sample;
-                gb->io_registers[GB_IO_PCM_34] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
-            }
-
-            samples->left *= gb->apu.left_volume;
-            samples->right *= gb->apu.right_volume;
-        }
+    for (;gb->apu.apu_cycles >= CPU_FREQUENCY/APU_FREQUENCY; gb->apu.apu_cycles -= CPU_FREQUENCY/APU_FREQUENCY) {
 
         for (uint8_t i = 0; i < 4; i++) {
             /* Phase */
@@ -130,19 +132,19 @@ void GB_apu_run_internal(GB_gameboy_t *gb, unsigned int n_cycles, GB_sample_t *s
             /* Stop on Length */
             if (gb->apu.wave_channels[i].stop_on_length) {
                 if (gb->apu.wave_channels[i].sound_length > 0) {
-                    gb->apu.wave_channels[i].sound_length -= 1.0 / APU_FREQUENCY;
+                    gb->apu.wave_channels[i].sound_length -= 1;
                 }
                 if (gb->apu.wave_channels[i].sound_length <= 0) {
                     gb->apu.wave_channels[i].amplitude = 0;
                     gb->apu.wave_channels[i].is_playing = false;
-                    gb->apu.wave_channels[i].sound_length = i == 2? 1 : 0.25;
+                    gb->apu.wave_channels[i].sound_length = i == 2? APU_FREQUENCY : APU_FREQUENCY / 4;
                 }
             }
         }
 
-        gb->apu.envelope_step_timer += 1.0 / APU_FREQUENCY;
-        if (gb->apu.envelope_step_timer >= 1.0 / 64) {
-            gb->apu.envelope_step_timer -= 1.0 / 64;
+        gb->apu.envelope_step_timer += 1;
+        if (gb->apu.envelope_step_timer >= APU_FREQUENCY / 64) {
+            gb->apu.envelope_step_timer -= APU_FREQUENCY / 64;
             for (uint8_t i = 0; i < 4; i++) {
                 if (gb->apu.wave_channels[i].envelope_steps && !--gb->apu.wave_channels[i].cur_envelope_steps) {
                     gb->apu.wave_channels[i].amplitude = min(max(gb->apu.wave_channels[i].amplitude + gb->apu.wave_channels[i].envelope_direction * CH_STEP, 0), MAX_CH_AMP);
@@ -151,9 +153,9 @@ void GB_apu_run_internal(GB_gameboy_t *gb, unsigned int n_cycles, GB_sample_t *s
             }
         }
 
-        gb->apu.sweep_step_timer += 1.0 / APU_FREQUENCY;
-        if (gb->apu.sweep_step_timer >= 1.0 / 128) {
-            gb->apu.sweep_step_timer -= 1.0 / 128;
+        gb->apu.sweep_step_timer += 1;
+        if (gb->apu.sweep_step_timer >= APU_FREQUENCY / 128) {
+            gb->apu.sweep_step_timer -= APU_FREQUENCY / 128;
             if (gb->apu.wave_channels[0].sweep_steps && !--gb->apu.wave_channels[0].cur_sweep_steps) {
 
                 // Convert back to GB format
@@ -181,13 +183,8 @@ void GB_apu_run(GB_gameboy_t *gb)
     static bool should_log_overflow = true;
     while (gb->audio_copy_in_progress);
     double ticks_per_sample = (double) CPU_FREQUENCY / gb->sample_rate;
-    GB_sample_t sample = {0, };
 
-    if (gb->apu.apu_cycles >= CPU_FREQUENCY / APU_FREQUENCY) {
-        GB_apu_run_internal(gb, gb->apu.apu_cycles / (CPU_FREQUENCY / APU_FREQUENCY), &sample);
-        gb->apu.apu_cycles %= (CPU_FREQUENCY / APU_FREQUENCY);
-        gb->audio_buffer[gb->audio_position] = sample;
-    }
+    GB_apu_run_internal(gb);
 
     if (gb->apu_sample_cycles > ticks_per_sample) {
         gb->apu_sample_cycles -= ticks_per_sample;
@@ -200,7 +197,7 @@ void GB_apu_run(GB_gameboy_t *gb)
              */
         }
         else {
-            gb->audio_position++;
+            GB_apu_get_samples_and_update_pcm_regs(gb, &gb->audio_buffer[gb->audio_position++]);
             should_log_overflow = true;
         }
     }
@@ -231,7 +228,7 @@ void GB_apu_copy_buffer(GB_gameboy_t *gb, GB_sample_t *dest, unsigned int count)
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
-    gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 0.5;
+    gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 4;
     gb->apu.lfsr = 0x7FFF;
     gb->apu.left_volume = 1.0;
     gb->apu.right_volume = 1.0;
@@ -281,7 +278,7 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 {
-    static const double duties[] = {0.125, 0.25, 0.5, 0.75};
+    static const uint8_t duties[] = {1, 2, 4, 6}; /* Values are in 1/8 */
     uint8_t channel = 0;
 
     if (!gb->apu.global_enable && reg != GB_IO_NR52) {
@@ -326,7 +323,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR21:
         case GB_IO_NR41:
             gb->apu.wave_channels[channel].duty = duties[value >> 6];
-            gb->apu.wave_channels[channel].sound_length = (64 - (value & 0x3F)) / 256.0;
+            gb->apu.wave_channels[channel].sound_length = (64 - (value & 0x3F)) * (APU_FREQUENCY / 256);
             if (gb->apu.wave_channels[channel].sound_length == 0) {
                 gb->apu.wave_channels[channel].is_playing = false;
             }
@@ -374,7 +371,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.wave_channels[2].is_playing &= gb->apu.wave_enable;
             break;
         case GB_IO_NR31:
-            gb->apu.wave_channels[2].sound_length = (256 - value) / 256.0;
+            gb->apu.wave_channels[2].sound_length = (256 - value) * (APU_FREQUENCY / 256);
             if (gb->apu.wave_channels[2].sound_length == 0) {
                 gb->apu.wave_channels[2].is_playing = false;
             }

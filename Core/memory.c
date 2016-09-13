@@ -139,12 +139,14 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return gb->io_registers[GB_IO_DMG_EMULATION_INDICATION] | 0xFE;
 
+            case GB_IO_PCM_12:
+            case GB_IO_PCM_34:
+                GB_apu_get_samples_and_update_pcm_regs(gb, &gb->audio_buffer[gb->audio_position]);
             case GB_IO_HDMA1:
             case GB_IO_HDMA2:
             case GB_IO_HDMA3:
             case GB_IO_HDMA4:
-            case GB_IO_PCM_12:
-            case GB_IO_PCM_34:
+
                 if (!gb->is_cgb) {
                     return 0xFF;
                 }
