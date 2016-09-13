@@ -141,7 +141,10 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 
             case GB_IO_PCM_12:
             case GB_IO_PCM_34:
-                GB_apu_get_samples_and_update_pcm_regs(gb, &gb->audio_buffer[gb->audio_position]);
+            {
+                GB_sample_t dummy;
+                GB_apu_get_samples_and_update_pcm_regs(gb, &dummy);
+            }
             case GB_IO_HDMA1:
             case GB_IO_HDMA2:
             case GB_IO_HDMA3:

@@ -491,7 +491,7 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
         free(gb->audio_buffer);
     }
     gb->buffer_size = sample_rate / 25; // 40ms delay
-    gb->audio_buffer = malloc((gb->buffer_size + 1) * sizeof(*gb->audio_buffer));
+    gb->audio_buffer = malloc(gb->buffer_size * sizeof(*gb->audio_buffer));
     gb->sample_rate = sample_rate;
     gb->audio_position = 0;
 }
