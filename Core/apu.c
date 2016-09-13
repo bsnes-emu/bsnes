@@ -117,63 +117,62 @@ void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *sampl
 
 static void GB_apu_run_internal(GB_gameboy_t *gb)
 {
-    for (;gb->apu.apu_cycles >= CPU_FREQUENCY/APU_FREQUENCY; gb->apu.apu_cycles -= CPU_FREQUENCY/APU_FREQUENCY) {
+    uint32_t steps = gb->apu.apu_cycles / (CPU_FREQUENCY/APU_FREQUENCY);
+    gb->apu.apu_cycles %= (CPU_FREQUENCY/APU_FREQUENCY);
+    for (uint8_t i = 0; i < 4; i++) {
+        /* Phase */
+        gb->apu.wave_channels[i].phase += steps;
+        while (gb->apu.wave_channels[i].wave_length && gb->apu.wave_channels[i].phase >= gb->apu.wave_channels[i].wave_length) {
+            if (i == 3) {
+                gb->apu.lfsr = step_lfsr(gb->apu.lfsr, gb->apu.lfsr_7_bit);
+            }
 
+            gb->apu.wave_channels[i].phase -= gb->apu.wave_channels[i].wave_length;
+        }
+        /* Stop on Length */
+        if (gb->apu.wave_channels[i].stop_on_length) {
+            if (gb->apu.wave_channels[i].sound_length > 0) {
+                gb->apu.wave_channels[i].sound_length -= steps;
+            }
+            if (gb->apu.wave_channels[i].sound_length <= 0) {
+                gb->apu.wave_channels[i].amplitude = 0;
+                gb->apu.wave_channels[i].is_playing = false;
+                gb->apu.wave_channels[i].sound_length = i == 2? APU_FREQUENCY : APU_FREQUENCY / 4;
+            }
+        }
+    }
+
+    gb->apu.envelope_step_timer += steps;
+    while (gb->apu.envelope_step_timer >= APU_FREQUENCY / 64) {
+        gb->apu.envelope_step_timer -= APU_FREQUENCY / 64;
         for (uint8_t i = 0; i < 4; i++) {
-            /* Phase */
-            gb->apu.wave_channels[i].phase++;
-            if (gb->apu.wave_channels[i].wave_length && gb->apu.wave_channels[i].phase >= gb->apu.wave_channels[i].wave_length) {
-                if (i == 3) {
-                    gb->apu.lfsr = step_lfsr(gb->apu.lfsr, gb->apu.lfsr_7_bit);
-                }
-
-                gb->apu.wave_channels[i].phase %= gb->apu.wave_channels[i].wave_length;
-            }
-            /* Stop on Length */
-            if (gb->apu.wave_channels[i].stop_on_length) {
-                if (gb->apu.wave_channels[i].sound_length > 0) {
-                    gb->apu.wave_channels[i].sound_length -= 1;
-                }
-                if (gb->apu.wave_channels[i].sound_length <= 0) {
-                    gb->apu.wave_channels[i].amplitude = 0;
-                    gb->apu.wave_channels[i].is_playing = false;
-                    gb->apu.wave_channels[i].sound_length = i == 2? APU_FREQUENCY : APU_FREQUENCY / 4;
-                }
+            if (gb->apu.wave_channels[i].envelope_steps && !--gb->apu.wave_channels[i].cur_envelope_steps) {
+                gb->apu.wave_channels[i].amplitude = min(max(gb->apu.wave_channels[i].amplitude + gb->apu.wave_channels[i].envelope_direction * CH_STEP, 0), MAX_CH_AMP);
+                gb->apu.wave_channels[i].cur_envelope_steps = gb->apu.wave_channels[i].envelope_steps;
             }
         }
+    }
 
-        gb->apu.envelope_step_timer += 1;
-        if (gb->apu.envelope_step_timer >= APU_FREQUENCY / 64) {
-            gb->apu.envelope_step_timer -= APU_FREQUENCY / 64;
-            for (uint8_t i = 0; i < 4; i++) {
-                if (gb->apu.wave_channels[i].envelope_steps && !--gb->apu.wave_channels[i].cur_envelope_steps) {
-                    gb->apu.wave_channels[i].amplitude = min(max(gb->apu.wave_channels[i].amplitude + gb->apu.wave_channels[i].envelope_direction * CH_STEP, 0), MAX_CH_AMP);
-                    gb->apu.wave_channels[i].cur_envelope_steps = gb->apu.wave_channels[i].envelope_steps;
-                }
+    gb->apu.sweep_step_timer += steps;
+    while (gb->apu.sweep_step_timer >= APU_FREQUENCY / 128) {
+        gb->apu.sweep_step_timer -= APU_FREQUENCY / 128;
+        if (gb->apu.wave_channels[0].sweep_steps && !--gb->apu.wave_channels[0].cur_sweep_steps) {
+
+            // Convert back to GB format
+            uint16_t temp = 2048 - gb->apu.wave_channels[0].wave_length / (APU_FREQUENCY / 131072);
+
+            // Apply sweep
+            temp = temp + gb->apu.wave_channels[0].sweep_direction *
+                   (temp / (1 << gb->apu.wave_channels[0].sweep_shift));
+            if (temp > 2047) {
+                temp = 0;
             }
-        }
 
-        gb->apu.sweep_step_timer += 1;
-        if (gb->apu.sweep_step_timer >= APU_FREQUENCY / 128) {
-            gb->apu.sweep_step_timer -= APU_FREQUENCY / 128;
-            if (gb->apu.wave_channels[0].sweep_steps && !--gb->apu.wave_channels[0].cur_sweep_steps) {
-
-                // Convert back to GB format
-                uint16_t temp = 2048 - gb->apu.wave_channels[0].wave_length / (APU_FREQUENCY / 131072);
-
-                // Apply sweep
-                temp = temp + gb->apu.wave_channels[0].sweep_direction *
-                       (temp / (1 << gb->apu.wave_channels[0].sweep_shift));
-                if (temp > 2047) {
-                    temp = 0;
-                }
-
-                // Back to frequency
-                gb->apu.wave_channels[0].wave_length =  (2048 - temp) *  (APU_FREQUENCY / 131072);
+            // Back to frequency
+            gb->apu.wave_channels[0].wave_length =  (2048 - temp) *  (APU_FREQUENCY / 131072);
 
 
-                gb->apu.wave_channels[0].cur_sweep_steps = gb->apu.wave_channels[0].sweep_steps;
-            }
+            gb->apu.wave_channels[0].cur_sweep_steps = gb->apu.wave_channels[0].sweep_steps;
         }
     }
 }
