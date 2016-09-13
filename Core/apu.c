@@ -239,7 +239,6 @@ void GB_apu_init(GB_gameboy_t *gb)
 
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
 {
-    /* Todo: what happens when reading from the wave from while it's playing? */
     GB_apu_run_internal(gb);
 
     if (reg == GB_IO_NR52) {
@@ -271,7 +270,11 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
     };
 
     if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END && gb->apu.wave_channels[2].is_playing) {
-        return (uint8_t)((gb->display_cycles * 22695477 * reg) >> 8); // Semi-random but deterministic
+        if (gb->apu.wave_channels[2].wave_length == 0) {
+            return gb->apu.wave_form[0];
+        }
+        gb->apu.wave_channels[2].phase %= gb->apu.wave_channels[2].wave_length;
+        return gb->apu.wave_form[(int)(gb->apu.wave_channels[2].phase * 32 / gb->apu.wave_channels[2].wave_length)];
     }
 
     return gb->io_registers[reg] | read_mask[reg - GB_IO_NR10];
