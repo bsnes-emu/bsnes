@@ -1,20 +1,11 @@
 /*
-  libco
-  version: 0.17 (2015-06-18)
+  libco v18 (2016-09-14)
   author: byuu
   license: public domain
 */
 
 #ifndef LIBCO_H
 #define LIBCO_H
-
-#ifdef LIBCO_C
-  #ifdef LIBCO_MP
-    #define thread_local __thread
-  #else
-    #define thread_local
-  #endif
-#endif
 
 #ifdef __cplusplus
 extern "C" {

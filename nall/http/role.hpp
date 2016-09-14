@@ -10,18 +10,18 @@ namespace nall { namespace HTTP {
 
 struct Role {
   struct Settings {
-    signed connectionLimit =    1 * 1024;  //server
-    signed headSizeLimit   =   16 * 1024;  //client, server
-    signed bodySizeLimit   = 8192 * 1024;  //client, server
-    signed chunkSize       =   32 * 1024;  //client, server
-    signed threadStackSize =  128 * 1024;  //server
-    signed timeoutReceive  =   15 * 1000;  //server
-    signed timeoutSend     =   15 * 1000;  //server
+    int connectionLimit =    1 * 1024;  //server
+    int headSizeLimit   =   16 * 1024;  //client, server
+    int bodySizeLimit   = 8192 * 1024;  //client, server
+    int chunkSize       =   32 * 1024;  //client, server
+    int threadStackSize =  128 * 1024;  //server
+    int timeoutReceive  =   15 * 1000;  //server
+    int timeoutSend     =   15 * 1000;  //server
   } settings;
 
   inline auto configure(const string& parameters) -> bool;
-  inline auto download(signed fd, Message& message) -> bool;
-  inline auto upload(signed fd, const Message& message) -> bool;
+  inline auto download(int fd, Message& message) -> bool;
+  inline auto upload(int fd, const Message& message) -> bool;
 };
 
 auto Role::configure(const string& parameters) -> bool {
@@ -42,7 +42,7 @@ auto Role::configure(const string& parameters) -> bool {
   return true;
 }
 
-auto Role::download(signed fd, Message& message) -> bool {
+auto Role::download(int fd, Message& message) -> bool {
   auto& head = message._head;
   auto& body = message._body;
   string chunk;
@@ -55,9 +55,9 @@ auto Role::download(signed fd, Message& message) -> bool {
   bool chunked = false;
   bool chunkReceived = false;
   bool chunkFooterReceived = true;
-  signed length = 0;
-  signed chunkLength = 0;
-  signed contentLength = 0;
+  int length = 0;
+  int chunkLength = 0;
+  int contentLength = 0;
 
   while(true) {
     if(auto limit = settings.headSizeLimit) if(head.size() >= limit) return false;
@@ -116,7 +116,7 @@ auto Role::download(signed fd, Message& message) -> bool {
       p += length;
       length = 0;
     } else {
-      signed transferLength = min(length, chunkLength);
+      int transferLength = min(length, chunkLength);
       body.resize(body.size() + transferLength);
       memory::copy(body.get() + body.size() - transferLength, p, transferLength);
 
@@ -135,10 +135,10 @@ auto Role::download(signed fd, Message& message) -> bool {
   return true;
 }
 
-auto Role::upload(signed fd, const Message& message) -> bool {
-  auto transfer = [&](const uint8_t* data, unsigned size) -> bool {
+auto Role::upload(int fd, const Message& message) -> bool {
+  auto transfer = [&](const uint8_t* data, uint size) -> bool {
     while(size) {
-      signed length = send(fd, data, min(size, settings.chunkSize), MSG_NOSIGNAL);
+      int length = send(fd, data, min(size, settings.chunkSize), MSG_NOSIGNAL);
       if(length < 0) return false;
       data += length;
       size -= length;
@@ -146,8 +146,8 @@ auto Role::upload(signed fd, const Message& message) -> bool {
     return true;
   };
 
-  if(message.head([&](const uint8_t* data, unsigned size) -> bool { return transfer(data, size); })) {
-    if(message.body([&](const uint8_t* data, unsigned size) -> bool { return transfer(data, size); })) {
+  if(message.head([&](const uint8_t* data, uint size) -> bool { return transfer(data, size); })) {
+    if(message.body([&](const uint8_t* data, uint size) -> bool { return transfer(data, size); })) {
       return true;
     }
   }

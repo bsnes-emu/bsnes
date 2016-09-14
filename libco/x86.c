@@ -1,11 +1,12 @@
 /*
-  libco.x86 (2009-10-12)
+  libco.x86 (2016-09-14)
   author: byuu
   license: public domain
 */
 
 #define LIBCO_C
 #include "libco.h"
+#include "settings.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -26,8 +27,13 @@ static thread_local long co_active_buffer[64];
 static thread_local cothread_t co_active_handle = 0;
 static void (fastcall *co_swap)(cothread_t, cothread_t) = 0;
 
+#ifdef LIBCO_MPROTECT
+  alignas(4096)
+#else
+  section(text)
+#endif
 /* ABI: fastcall */
-static unsigned char co_swap_function[] = {
+static const unsigned char co_swap_function[4096] = {
   0x89, 0x22,        /* mov [edx],esp    */
   0x8b, 0x21,        /* mov esp,[ecx]    */
   0x58,              /* pop eax          */
@@ -45,19 +51,23 @@ static unsigned char co_swap_function[] = {
 #ifdef _WIN32
   #include <windows.h>
 
-  void co_init() {
+  static void co_init() {
+    #ifdef LIBCO_MPROTECT
     DWORD old_privileges;
-    VirtualProtect(co_swap_function, sizeof co_swap_function, PAGE_EXECUTE_READWRITE, &old_privileges);
+    VirtualProtect((void*)co_swap_function, sizeof co_swap_function, PAGE_EXECUTE_READ, &old_privileges);
+    #endif
   }
 #else
   #include <unistd.h>
   #include <sys/mman.h>
 
-  void co_init() {
+  static void co_init() {
+    #ifdef LIBCO_MPROTECT
     unsigned long addr = (unsigned long)co_swap_function;
     unsigned long base = addr - (addr % sysconf(_SC_PAGESIZE));
     unsigned long size = (addr - base) + sizeof co_swap_function;
-    mprotect((void*)base, size, PROT_READ | PROT_WRITE | PROT_EXEC);
+    mprotect((void*)base, size, PROT_READ | PROT_EXEC);
+    #endif
   }
 #endif
 

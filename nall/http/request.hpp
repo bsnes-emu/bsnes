@@ -9,14 +9,14 @@ namespace nall { namespace HTTP {
 struct Request : Message {
   using type = Request;
 
-  enum class RequestType : unsigned { None, Head, Get, Post };
+  enum class RequestType : uint { None, Head, Get, Post };
 
   explicit operator bool() const { return requestType() != RequestType::None; }
 
-  inline auto head(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool override;
+  inline auto head(const function<bool (const uint8_t* data, uint size)>& callback) const -> bool override;
   inline auto setHead() -> bool override;
 
-  inline auto body(const function<bool (const uint8_t* data, unsigned size)>& callback) const -> bool override;
+  inline auto body(const function<bool (const uint8_t* data, uint size)>& callback) const -> bool override;
   inline auto setBody() -> bool override;
 
   auto ipv4() const -> bool { return _ipv6 == false; }
@@ -40,7 +40,7 @@ struct Request : Message {
   string _path;
 };
 
-auto Request::head(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Request::head(const function<bool (const uint8_t*, uint)>& callback) const -> bool {
   if(!callback) return false;
   string output;
 
@@ -122,7 +122,7 @@ auto Request::setHead() -> bool {
   return true;
 }
 
-auto Request::body(const function<bool (const uint8_t*, unsigned)>& callback) const -> bool {
+auto Request::body(const function<bool (const uint8_t*, uint)>& callback) const -> bool {
   if(!callback) return false;
 
   if(_body) {

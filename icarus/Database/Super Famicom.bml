@@ -12,6 +12,128 @@ cartridge sha256:dd499445275fca6692c0487a8bd70a23f6c8e78e766df0e3c58fbbe53f8adb0
   :  name:     Legende de Zelda - La Triforce des Dieux, La
   :  title:    La Legende de Zelda: La Triforce des Dieux
 
+cartridge sha256:41084f83e269d46b9d589f11c802a15e84fede57d604c7986053f2858f757adc
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-ASDP-EUR
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Archer Maclean's Super Dropzone
+  :  title:    Archer Maclean's Super Dropzone
+
+cartridge sha256:6fe482f91a59a71992e14014a0a4e23fb866cf4e870c10d57c81b0c20ae6688e
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-3U-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: 1.0
+  :  name:     International Superstar Soccer
+  :  title:    International Superstar Soccer
+
+cartridge sha256:2516843fa405ab1aa1f242b57f19977519aefb68599474d2c7065aaef88ecb88
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AJGP-EUR
+  :  board:    SHVC-1A0N-30
+  :  revision: 1.0
+  :  name:     Jungle Strike
+  :  title:    Jungle Strike
+
+cartridge sha256:964f8391806bc8d674f24aa2f201b20982d2f2f3e3efb2f730c4a34a289c3007
+  :board region=pal
+  :  rom name=program.rom size=0x300000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-28-EUR
+  :  board:    SHVC-BJ0N-01
+  :  revision: 1.1
+  :  name:     Mortal Kombat 2
+  :  title:    Mortal Kombat II
+
+cartridge sha256:b7fa4b79590ecdef2d0303b5cbccf1e1a3af31fca289652acbdb3d5381137f24
+  :board region=pal
+  :  rom name=program.rom size=0x400000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-A3MP-EUR
+  :  board:    SHVC-1J0N-20
+  :  revision: 1.0
+  :  name:     Mortal Kombat 3
+  :  title:    Mortal Kombat 3
+
+cartridge sha256:166fe888ac03f88cce5759c1008021082bd81254aab8fea8203cdb13080709d7
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-APFP-EUR
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Pinball Fantasies
+  :  title:    Pinball Fantasies
+
+cartridge sha256:09fdef0c959e7275563f65d8267d95a20104f054e9438e9ac739ef7f46120a2d
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-JA-EUR
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Smash Tennis
+  :  title:    Smash Tennis
+
+cartridge sha256:9638d4daa7bc63fd178b77c4487c3b080def5b808c0b7ccc959101f33e221b42
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-AMCP-EUR
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Spider-Man & Venom - Maximum Carnage
+  :  title:    Spider-Man & Venom: Maximum Carnage
+
+cartridge sha256:abe8db202f9bd12d845a4c7ecb97d85fb149d7f17a608b3eae015d92f52f2c04
+  :board region=pal
+  :  superfx
+  :    map address=00-3f,80-bf:3000-34ff
+  :    rom name=program.rom size=0x100000
+  :      map address=00-3f,80-bf:8000-ffff mask=0x8000
+  :      map address=40-5f,c0-df:0000-ffff
+  :    ram name=save.ram size=0x10000
+  :      map address=00-3f,80-bf:6000-7fff size=0x2000
+  :      map address=70-71,f0-f1:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-CQ-FAH
+  :  board:    SHVC-1CA6B-01
+  :  revision: 1.0
+  :  name:     Stunt Race FX
+  :  title:    Stunt Race FX
+
 cartridge sha256:e678a29a93111cf2016c487ba9977b14de8f719040651a42c74bd74eea2d0d81
   :board region=ntsc
   :  rom name=program.rom size=0x200000
@@ -70,6 +192,35 @@ cartridge sha256:1444ab11f96f7750db992e9a4160532b27abede8a7054128c09f448300c91eb
   :  name:     Secret of Mana
   :  title:    Secret of Mana
 
+cartridge sha256:35c1d6623748f66e254843cf340121e3e268a8301951f35c7ba3ef666bc293bf
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-S2-NOE
+  :  board:    SHVC-1A0N-10
+  :  revision: 1.0
+  :  name:     Street Fighter II - The World Warrior
+  :  title:    Street Fighter II: The World Warrior
+
+cartridge sha256:4d7fc331a811b8dc630b469262fd6f45e289243cef83101f32038158967d1b28
+  :board region=pal
+  :  rom name=program.rom size=0x40000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :  icd2 revision=1
+  :    map address=00-3f,80-bf:6000-67ff,7000-7fff
+  :    rom name=sgb.boot.rom size=0x100
+  :
+  :information
+  :  serial:   SNSP-A-SG-NOE
+  :  board:    SGB-R-10
+  :  revision: 1.2
+  :  name:     Super Game Boy
+  :  title:    Super Game Boy
+
 cartridge sha256:613cd1a31eaded18648168bd7453a57830ca9a6f3c10de5154625436fbd49556
   :board region=pal
   :  rom name=program.rom size=0x400000
@@ -85,6 +236,202 @@ cartridge sha256:613cd1a31eaded18648168bd7453a57830ca9a6f3c10de5154625436fbd4955
   :  name:     Terranigma
   :  title:    Terranigma
 
+cartridge sha256:a1105819d48c04d680c8292bbfa9abbce05224f1bc231afd66af43b7e0a1fd4e
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-4L-NOE
+  :  board:    SHVC-1A3M-30
+  :  revision: 1.0
+  :  name:     Unirally
+  :  title:    Unirally
+
+cartridge sha256:0a49023824d812c64cd262db6e85ce9900c88af7ac6dab3e47078ab0dd1e546c
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-YN-UKV
+  :  board:    SHVC-2A0N-10
+  :  revision: 1.0
+  :  name:     Bubsy I - Claws Encounters of the Furred Kind
+  :  title:    Bubsy in Claws Encounters of the Furred Kind
+
+cartridge sha256:dddacae010766c1201f50810fcf15dff7c0f6d41ac1a1004c8eea4873a71db12
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x800
+  :    map address=70-7d,f0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-FZ-UKV
+  :  board:    SHVC-1A1B-05
+  :  revision: 1.0
+  :  name:     F-Zero
+  :  title:    F-Zero
+
+cartridge sha256:e9e2152411fec3bd10e8cd4587b62717169a25a4cd28f491f8e477b9aae2fcee
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-7N-UKV
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Fun & Games
+  :  title:    fun 'n games
+
+cartridge sha256:9d936f3b0b5bea0b7c4588e65fa147fff1108d0e630337dd75eb16133a55e317
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-8S-UKV
+  :  board:    SHVC-1A3M-20
+  :  revision: 1.1
+  :  name:     International Sensible Soccer - World Champions
+  :  title:    International Sensible Soccer: World Champions
+
+cartridge sha256:ddad4a3708b8cf760e520b784f42d7085154b0699f3824b8d722512ccab687cb
+  :board region=pal
+  :  rom name=program.rom size=0x400000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-AKLP-UKV
+  :  board:    SHVC-1J0N-20
+  :  revision: 1.0
+  :  name:     Killer Instinct
+  :  title:    Killer Instinct
+
+cartridge sha256:654183585e88abf965b19570c194f3d69ef209a7f2d32f71881eceaea6a3487e
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-ZL-UKV
+  :  board:    SHVC-1A3B-13
+  :  revision: 1.0
+  :  name:     Legend of Zelda - A Link to the Past, The
+  :  title:    The Legend of Zelda: A Link to the Past
+
+cartridge sha256:d147bfe392e8c2129fb887379410804d79be426bbffdd01cec7bd2332e03f39e
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-1f,80-9f:8000-ffff mask=0x8000
+  :  necdsp model=uPD7725 frequency=8000000
+  :    map address=30-3f,b0-bf:8000-ffff mask=0x3fff
+  :    prom name=dsp1b.program.rom size=0x1800
+  :    drom name=dsp1b.data.rom size=0x800
+  :    dram name=dsp1b.data.ram size=0x200 volatile
+  :
+  :information
+  :  serial:   SNSP-PW-UKV
+  :  board:    SHVC-1B0N-10
+  :  revision: 1.0
+  :  name:     Pilotwings
+  :  title:    Pilotwings
+
+cartridge sha256:5702fb6978229e398075cf0d20927b47a5881b572532813557e86b8e9cf63db0
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x2000
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :
+  :information
+  :  serial:   SNSP-K2-UKV
+  :  board:    SHVC-1J3M-20
+  :  revision: 1.1
+  :  name:     Secret of Mana
+  :  title:    Secret of Mana
+
+cartridge sha256:e95278ec68bf983111a52e38d5e6031c41141858e87e2cb8ef92fdfe17e41a15
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-8S-UKV
+  :  board:    SHVC-1A3M-20
+  :  revision: 1.0
+  :  name:     Sensible Soccer - European Champions
+  :  title:    Sensible Soccer: European Champions
+
+cartridge sha256:8c7a8aa1d16aeef31244b016ac951eab0b9ccd46daea61adbe890e5c5daa29c6
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-XN-UKV
+  :  board:    SHVC-1A0N-30
+  :  revision: 1.0
+  :  name:     Star Trek - The Next Generation - Future's Past
+  :  title:    Star Trek: The Next Generation - Future's Past
+
+cartridge sha256:80e7ba7c756c70eedd55ca4548c1965f84f9ef01d3a5ca91a2e5465a6930c49a
+  :board region=pal
+  :  superfx
+  :    map address=00-3f,80-bf:3000-34ff
+  :    rom name=program.rom size=0x100000
+  :      map address=00-1f,80-9f:8000-ffff mask=0x8000
+  :    ram name=save.ram size=0x8000
+  :      map address=60-7d,e0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-FO-UKV
+  :  board:    SNSP-1C0N5S-01
+  :  revision: 1.1
+  :  name:     Starwing
+  :  title:    Starwing
+
+cartridge sha256:b8ee1b5b9deae5c84fa209815515030109cc271b645a18de882aaf1b254cda1f
+  :board region=pal
+  :  rom name=program.rom size=0x280000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :
+  :information
+  :  serial:   SNSP-TI-UKV
+  :  board:    SHVC-BJ0N-01
+  :  revision: 1.0
+  :  name:     Street Fighter II Turbo - Hyper Fighting
+  :  title:    Street Fighter II Turbo: Hyper Fighting
+
+cartridge sha256:df43b3a4f511401a4d162ee6e7e3b08485533600dc44a29ee0a829b937b144d4
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-KE-UKV
+  :  board:    SHVC-1A0N-20
+  :  revision: 1.0
+  :  name:     Striker
+  :  title:    Striker
+
 cartridge sha256:f1a75578e6711716340bb26ea93bf05d5762bc7da21dbc19576fc65de1e885b5
   :board region=pal
   :  rom name=program.rom size=0x100000
@@ -97,6 +444,81 @@ cartridge sha256:f1a75578e6711716340bb26ea93bf05d5762bc7da21dbc19576fc65de1e885b
   :  revision: 1.0
   :  name:     Super Aleste
   :  title:    Super Aleste
+
+cartridge sha256:9760fb407282d91005044fb08f9c15dc3e0ae65063a02eedfbbd285566501fd0
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-4M-UKV
+  :  board:    SHVC-2A3M-01
+  :  revision: 1.0
+  :  name:     Super Mario All-Stars
+  :  title:    Super Mario All-Stars
+
+cartridge sha256:12d04359329bd646fc65c62db6121b4a7e4ece68556d68252e81ced421069f4c
+  :board region=pal
+  :  rom name=program.rom size=0x80000
+  :    map address=00-3f,80-bf:8000-ffff
+  :    map address=40-7d,c0-ff:0000-ffff
+  :  ram name=save.ram size=0x800
+  :    map address=20-3f,a0-bf:6000-7fff mask=0xe000
+  :  necdsp model=uPD7725 frequency=8000000
+  :    map address=00-1f,80-9f:6000-7fff mask=0xfff
+  :    prom name=dsp1.program.rom size=0x1800
+  :    drom name=dsp1.data.rom size=0x800
+  :    dram name=dsp1.data.ram size=0x200 volatile
+  :
+  :information
+  :  serial:   SNSP-MK-UKV
+  :  board:    SHVC-1K1B-01
+  :  revision: 1.0
+  :  name:     Super Mario Kart
+  :  title:    Super Mario Kart
+
+cartridge sha256:640acb63dae038ad6f0ae65e103416f5a1f84d4a37ddaeeab5046122def774d5
+  :board region=pal
+  :  rom name=program.rom size=0x300000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-RI-UKV
+  :  board:    SHVC-BA3M-10
+  :  revision: 1.0
+  :  name:     Super Metroid
+  :  title:    Super Metroid
+
+cartridge sha256:3438e78d35634d0ed7f58cb395c77da548fb601248725a18365edaed38a565d5
+  :board region=pal
+  :  rom name=program.rom size=0x200000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :  ram name=save.ram size=0x2000
+  :    map address=70-7d,f0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-4Q-UKV
+  :  board:    SHVC-1A3M-30
+  :  revision: 1.0
+  :  name:     Super Punch-Out!!
+  :  title:    Super Punch-Out!!
+
+cartridge sha256:7c7e90fb7c762769219234baf7b5fa6bf574fff7dc63b7134d49ec7c8b38ea7e
+  :board region=pal
+  :  rom name=program.rom size=0x100000
+  :    map address=00-7d,80-ff:8000-ffff mask=0x8000
+  :    map address=40-7d,c0-ff:0000-7fff mask=0x8000
+  :
+  :information
+  :  serial:   SNSP-SR-UKV
+  :  board:    SHVC-1A0N-02
+  :  revision: 1.0
+  :  name:     Super R-Type
+  :  title:    Super R-Type
 
 cartridge sha256:2ffe8828480f943056fb1ab5c3c84d48a0bf8cbe3ed7c9960b349b59adb07f3b
   :board region=ntsc

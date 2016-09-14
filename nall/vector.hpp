@@ -107,3 +107,8 @@ private:
 #include <nall/vector/modify.hpp>
 #include <nall/vector/iterator.hpp>
 #include <nall/vector/utility.hpp>
+
+namespace nall {
+  template<typename T> inline auto range(const vector<T>& value) { return range_t{0, (int)value.size(), 1}; }
+  template<typename T> inline auto rrange(const vector<T>& value) { return range_t{(int)value.size() - 1, -1, -1}; }
+}

@@ -329,3 +329,8 @@ struct string_format : vector<string> {
 #include <nall/string/markup/xml.hpp>
 #include <nall/string/transform/cml.hpp>
 #include <nall/string/transform/dml.hpp>
+
+namespace nall {
+//inline auto range(const string& value) { return range_t{0, (int)value.size(), 1}; }
+//inline auto rrange(const string& value) { return range_t{(int)value.size() - 1, -1, -1}; }
+}

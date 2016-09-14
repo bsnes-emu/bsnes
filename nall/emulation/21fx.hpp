@@ -4,6 +4,18 @@
 #include <nall/serial.hpp>
 using namespace nall;
 
+using  int8 = Integer< 8>;
+using int16 = Integer<16>;
+using int24 = Integer<24>;
+using int32 = Integer<32>;
+using int64 = Integer<64>;
+
+using  uint8 = Natural< 8>;
+using uint16 = Natural<16>;
+using uint24 = Natural<24>;
+using uint32 = Natural<32>;
+using uint64 = Natural<64>;
+
 struct FX {
   auto open(string_vector& args) -> bool;
   auto close() -> void;

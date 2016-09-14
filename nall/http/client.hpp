@@ -5,18 +5,18 @@
 namespace nall { namespace HTTP {
 
 struct Client : Role {
-  inline auto open(const string& hostname, unsigned port = 80) -> bool;
+  inline auto open(const string& hostname, uint port = 80) -> bool;
   inline auto upload(const Request& request) -> bool;
   inline auto download(const Request& request) -> Response;
   inline auto close() -> void;
   ~Client() { close(); }
 
 private:
-  signed fd = -1;
+  int fd = -1;
   addrinfo* info = nullptr;
 };
 
-auto Client::open(const string& hostname, unsigned port) -> bool {
+auto Client::open(const string& hostname, uint port) -> bool {
   addrinfo hint = {0};
   hint.ai_family = AF_UNSPEC;
   hint.ai_socktype = SOCK_STREAM;

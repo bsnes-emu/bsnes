@@ -1,11 +1,12 @@
 /*
-  libco.arm (2015-06-18)
+  libco.arm (2016-09-14)
   author: byuu
   license: public domain
 */
 
 #define LIBCO_C
 #include "libco.h"
+#include "settings.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -20,17 +21,24 @@ static thread_local unsigned long co_active_buffer[64];
 static thread_local cothread_t co_active_handle = 0;
 static void (*co_swap)(cothread_t, cothread_t) = 0;
 
-static unsigned long co_swap_function[] = {
+#ifdef LIBCO_MPROTECT
+  alignas(4096)
+#else
+  section(text)
+#endif
+static const unsigned long co_swap_function[1024] = {
   0xe8a16ff0,  /* stmia r1!, {r4-r11,sp,lr} */
   0xe8b0aff0,  /* ldmia r0!, {r4-r11,sp,pc} */
   0xe12fff1e,  /* bx lr                     */
 };
 
-void co_init() {
+static void co_init() {
+  #ifdef LIBCO_MPROTECT
   unsigned long addr = (unsigned long)co_swap_function;
   unsigned long base = addr - (addr % sysconf(_SC_PAGESIZE));
   unsigned long size = (addr - base) + sizeof co_swap_function;
-  mprotect((void*)base, size, PROT_READ | PROT_WRITE | PROT_EXEC);
+  mprotect((void*)base, size, PROT_READ | PROT_EXEC);
+  #endif
 }
 
 cothread_t co_active() {

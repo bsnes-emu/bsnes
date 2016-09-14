@@ -26,12 +26,4 @@ private:
   uint offset;
 };
 
-template<typename T> inline auto range(const vector<T>& container) {
-  return range_t{0, (int)container.size(), 1};
-}
-
-template<typename T> inline auto rrange(const vector<T>& container) {
-  return range_t{(int)container.size() - 1, -1, -1};
-}
-
 }
