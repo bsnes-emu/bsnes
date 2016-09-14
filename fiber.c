@@ -17,7 +17,7 @@ extern "C" {
 
 static thread_local cothread_t co_active_ = 0;
 
-static void __stdcall co_thunk(void *coentry) {
+static void __stdcall co_thunk(void* coentry) {
   ((void (*)(void))coentry)();
 }
 
