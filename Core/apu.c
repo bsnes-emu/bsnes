@@ -64,6 +64,8 @@ static int16_t step_lfsr(uint16_t lfsr, bool uses_7_bit)
 static void GB_apu_run_internal(GB_gameboy_t *gb)
 {
     uint32_t steps = gb->apu.apu_cycles / (CPU_FREQUENCY/APU_FREQUENCY);
+    if (!steps) return;
+
     gb->apu.apu_cycles %= (CPU_FREQUENCY/APU_FREQUENCY);
     for (uint8_t i = 0; i < 4; i++) {
         /* Phase */
