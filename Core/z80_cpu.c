@@ -731,7 +731,8 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
 static void ret_cc(GB_gameboy_t *gb, uint8_t opcode)
 {
     /* Todo: Verify timing */
-    if (condition_code(gb, GB_read_memory(gb, gb->pc++))) {
+    gb->pc++;
+    if (condition_code(gb, opcode)) {
         GB_debugger_ret_hook(gb);
         GB_advance_cycles(gb, 8);
         gb->pc = GB_read_memory(gb, gb->registers[GB_REGISTER_SP]);
