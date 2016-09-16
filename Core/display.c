@@ -278,10 +278,10 @@ void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index
  Todo: Mode lengths are not constants, see http://blog.kevtris.org/blogfiles/Nitty%20Gritty%20Gameboy%20VRAM%20Timing.txt
  */
 
-#define MODE2_LENGTH 80
-#define MODE3_LENGTH 172
-#define MODE1_LENGTH 204
-#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE1_LENGTH) // = 456
+#define MODE2_LENGTH (80)
+#define MODE3_LENGTH (172)
+#define MODE0_LENGTH (204)
+#define LINE_LENGTH (MODE2_LENGTH + MODE3_LENGTH + MODE0_LENGTH) // = 456
 
 void GB_display_run(GB_gameboy_t *gb)
 {
