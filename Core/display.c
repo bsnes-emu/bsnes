@@ -45,7 +45,22 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     uint8_t lowest_sprite_x = 0xFF;
     bool use_obp1 = false, priority = false;
     bool in_window = false;
-    if (gb->effective_window_enabled && (gb->io_registers[GB_IO_LCDC] & 0x20)) { /* Window Enabled */
+    bool window_enabled = (gb->io_registers[GB_IO_LCDC] & 0x20);
+    bool bg_enabled = true;
+    bool bg_behind = false;
+    if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
+        if (gb->cgb_mode) {
+            bg_behind = true;
+        }
+        else if (gb->is_cgb) { /* CGB in DMG mode*/
+            bg_enabled = window_enabled = false;
+        }
+        else {
+            /* DMG */
+            bg_enabled = false;
+        }
+    }
+    if (gb->effective_window_enabled && window_enabled) { /* Window Enabled */
         if (y >= gb->effective_window_y && x + 7 >= gb->io_registers[GB_IO_WX]) {
             in_window = true;
         }
@@ -118,7 +133,7 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
     }
 
     if (attributes & 0x80) {
-        priority = true;
+        priority = !bg_behind && bg_enabled;
     }
 
     if (!priority && sprite_pixel) {
@@ -127,6 +142,10 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
             sprite_palette = use_obp1;
         }
         return gb->sprite_palletes_rgb[sprite_palette * 4 + sprite_pixel];
+    }
+
+    if (!bg_enabled) {
+        return gb->background_palletes_rgb[0];
     }
 
     if (gb->io_registers[GB_IO_LCDC] & 0x10) {
