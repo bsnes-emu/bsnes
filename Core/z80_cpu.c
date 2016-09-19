@@ -1333,7 +1333,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
     bool interrupt = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
+    bool halt_bug = false;
+
     if (interrupt) {
+        halt_bug = gb->halted && !gb->is_cgb; /* Todo: Does this bug happen on a CGB? */
         gb->halted = false;
     }
 
@@ -1363,6 +1366,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     else if(!gb->halted && !gb->stopped) {
         uint8_t opcode = GB_read_memory(gb, gb->pc++);
+        if (halt_bug) {
+            gb->pc--;
+        }
         opcodes[opcode](gb, opcode);
     }
     else {
