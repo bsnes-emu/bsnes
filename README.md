@@ -17,13 +17,13 @@ Features common to both Cocoa and SDL versions:
  * Emulates LCD timing effects, supporting the Demotronic trick, [GBVideoPlayer](https://github.com/LIJI32/GBVideoPlayer) and other tech demos
  * Accurate instruction and memory timings
  * Real time clock emulation
+ * High quality 96KHz audio
+ * Battery save support
+ * Save states
 
 Features currently supported only with the Cocoa version:
  * Native Cocoa interface, with support for all system-wide features, such as drag-and-drop and smart titlebars
  * Retina display support, allowing a wider range of scaling factors without artifacts
- * High quality 96KHz audio
- * Battery save support
- * Save states
  * Optional frame blending
  * Several [scaling algorithms](SCALING.md) (Including exclusive algorithms like OmniScale and Anti-aliased Scale2x)
 
