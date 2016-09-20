@@ -9,7 +9,7 @@
 #include "symbol_hash.h"
 
 
-#define GB_STRUCT_VERSION 9
+#define GB_STRUCT_VERSION 10
 
 enum {
     GB_REGISTER_AF,
