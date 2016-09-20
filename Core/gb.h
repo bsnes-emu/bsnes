@@ -409,6 +409,9 @@ typedef struct GB_gameboy_s {
     GB_symbol_map_t *bank_symbols[0x200];
     GB_reversed_symbol_map_t reversed_symbol_map;
 
+    /* Ticks command */
+    unsigned long debugger_ticks;
+
     /* Misc */
     bool turbo;
     bool turbo_dont_skip;

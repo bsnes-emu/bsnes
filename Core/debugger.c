@@ -1185,6 +1185,21 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, const debugger_command_
     return true;
 }
 
+static bool ticks(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+{
+    STOPPED_ONLY
+
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+
+    GB_log(gb, "Ticks: %lu. (Resetting)\n", gb->debugger_ticks);
+    gb->debugger_ticks = 0;
+
+    return true;
+}
+
 static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command);
 
 #define HELP_NEWLINE "\n            "
@@ -1198,6 +1213,7 @@ static const debugger_command_t commands[] = {
     {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
     {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected. (Experimental)"},
+    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was used. "},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
