@@ -89,15 +89,29 @@ static void vblank(GB_gameboy_t *gb)
         }
     }
 
-    if (frames == test_length) {
-        FILE *f = fopen(bmp_filename, "wb");
-        fwrite(&bmp_header, 1, sizeof(bmp_header), f);
-        fwrite(&bitmap, 1, sizeof(bitmap), f);
-        fclose(f);
-        if (!gb->boot_rom_finished) {
-            GB_log(gb, "Boot ROM did not finish.\n");
+    if (frames >= test_length ) {
+        bool is_screen_blank = false;
+        if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) { /* LCD is off */
+            is_screen_blank = true;
         }
-        running = false;
+        else if(!gb->cgb_mode) { /* BG can't be disabled in CGB mode */
+            is_screen_blank =!(gb->io_registers[GB_IO_LCDC] & (gb->is_cgb? 3 : 0x23));
+        }
+        
+        /* Let the test run for an extra 8 frames if the screen is off/disabled */
+        if (!is_screen_blank || frames >= test_length + 8) {
+            FILE *f = fopen(bmp_filename, "wb");
+            fwrite(&bmp_header, 1, sizeof(bmp_header), f);
+            fwrite(&bitmap, 1, sizeof(bitmap), f);
+            fclose(f);
+            if (!gb->boot_rom_finished) {
+                GB_log(gb, "Boot ROM did not finish.\n");
+            }
+            if (is_screen_blank) {
+                GB_log(gb, "Game probably stuck with blank screen. \n");
+            }
+            running = false;
+        }
     }
     else if (frames == test_length - 1) {
         gb->disable_rendering = false;

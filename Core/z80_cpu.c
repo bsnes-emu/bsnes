@@ -1336,7 +1336,8 @@ void GB_cpu_run(GB_gameboy_t *gb)
     bool halt_bug = false;
 
     if (interrupt) {
-        halt_bug = gb->halted && !gb->is_cgb; /* Todo: Does this bug happen on a CGB? */
+        /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
+        halt_bug = gb->halted;
         gb->halted = false;
     }
 
