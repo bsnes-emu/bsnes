@@ -363,6 +363,7 @@ typedef struct GB_gameboy_s {
     unsigned int audio_position;
     bool audio_stream_started; // detects first copy request to minimize lag
     volatile bool audio_copy_in_progress;
+    volatile bool apu_lock;
 
     /* Callbacks */
     void *user_data;

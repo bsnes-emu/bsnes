@@ -63,8 +63,9 @@ static int16_t step_lfsr(uint16_t lfsr, bool uses_7_bit)
 
 static void GB_apu_run_internal(GB_gameboy_t *gb)
 {
+    while (!__sync_bool_compare_and_swap(&gb->apu_lock, false, true));
     uint32_t steps = gb->apu.apu_cycles / (CPU_FREQUENCY/APU_FREQUENCY);
-    if (!steps) return;
+    if (!steps) goto exit;
 
     gb->apu.apu_cycles %= (CPU_FREQUENCY/APU_FREQUENCY);
     for (uint8_t i = 0; i < 4; i++) {
@@ -123,6 +124,8 @@ static void GB_apu_run_internal(GB_gameboy_t *gb)
             gb->apu.wave_channels[0].cur_sweep_steps = gb->apu.wave_channels[0].sweep_steps;
         }
     }
+exit:
+    gb->apu_lock = false;
 }
 
 void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *samples)
