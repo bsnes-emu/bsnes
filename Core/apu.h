@@ -53,8 +53,8 @@ typedef struct
     bool wave_enable;
     uint16_t lfsr;
     bool lfsr_7_bit;
-    double left_volume;
-    double right_volume;
+    uint8_t left_volume;
+    uint8_t right_volume;
     GB_apu_channel_t wave_channels[4];
 } GB_apu_t;
 

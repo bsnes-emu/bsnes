@@ -177,8 +177,8 @@ void GB_apu_get_samples_and_update_pcm_regs(GB_gameboy_t *gb, GB_sample_t *sampl
         gb->io_registers[GB_IO_PCM_34] |= (((int)sample) * 0xF / MAX_CH_AMP) << 4;
     }
 
-    samples->left *= gb->apu.left_volume;
-    samples->right *= gb->apu.right_volume;
+    samples->left = (int) samples->left * gb->apu.left_volume / 7;
+    samples->right = (int) samples->right * gb->apu.right_volume / 7;
 }
 
 void GB_apu_run(GB_gameboy_t *gb)
@@ -232,8 +232,8 @@ void GB_apu_init(GB_gameboy_t *gb)
     memset(&gb->apu, 0, sizeof(gb->apu));
     gb->apu.wave_channels[0].duty = gb->apu.wave_channels[1].duty = 4;
     gb->apu.lfsr = 0x7FFF;
-    gb->apu.left_volume = 1.0;
-    gb->apu.right_volume = 1.0;
+    gb->apu.left_volume = 7;
+    gb->apu.right_volume = 7;
     for (int i = 0; i < 4; i++) {
         gb->apu.wave_channels[i].left_on = gb->apu.wave_channels[i].right_on = 1;
     }
@@ -410,8 +410,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             break;
 
         case GB_IO_NR50:
-            gb->apu.left_volume = (value & 7) / 7.0;
-            gb->apu.right_volume = ((value >> 4) & 7) / 7.0;
+            gb->apu.left_volume = (value & 7);
+            gb->apu.right_volume = ((value >> 4) & 7);
             break;
 
         case GB_IO_NR51:
