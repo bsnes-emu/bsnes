@@ -74,7 +74,7 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (!gb->mbc_ram_enable) return 0xFF;
+    if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return 0xFF;
     
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
@@ -314,7 +314,7 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (!gb->mbc_ram_enable) return;
+    if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return;
 
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
