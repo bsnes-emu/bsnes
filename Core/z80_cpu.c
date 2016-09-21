@@ -684,6 +684,11 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_advance_cycles(gb, 4);
     gb->halted = true;
+    /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
+    if (!gb->ime && (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0) {
+        gb->halted = false;
+        gb->halt_bug = true;
+    }
 }
 
 static void ret_cc(GB_gameboy_t *gb, uint8_t opcode)
@@ -1332,12 +1337,9 @@ static GB_opcode_t *opcodes[256] = {
 void GB_cpu_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
-    bool interrupt = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
-    bool halt_bug = false;
+    bool interrupt = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
 
     if (interrupt) {
-        /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
-        halt_bug = gb->halted;
         gb->halted = false;
     }
 
@@ -1354,7 +1356,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
 
     if (effecitve_ime && interrupt) {
         uint8_t interrupt_bit = 0;
-        uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF];
+        uint8_t interrupt_queue = gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F;
         while (!(interrupt_queue & 1)) {
             interrupt_queue >>= 1;
             interrupt_bit++;
@@ -1367,8 +1369,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     else if(!gb->halted && !gb->stopped) {
         uint8_t opcode = GB_read_memory(gb, gb->pc++);
-        if (halt_bug) {
+        if (gb->halt_bug) {
             gb->pc--;
+            gb->halt_bug = false;
         }
         opcodes[opcode](gb, opcode);
     }
