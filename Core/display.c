@@ -144,30 +144,28 @@ static uint32_t get_pixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
         return gb->sprite_palletes_rgb[sprite_palette * 4 + sprite_pixel];
     }
 
-    if (!bg_enabled) {
-        return gb->background_palletes_rgb[0];
-    }
+    if (bg_enabled) {
+        if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+            tile_address = tile * 0x10;
+        }
+        else {
+            tile_address = (int8_t) tile * 0x10 + 0x1000;
+        }
+        if (attributes & 0x8) {
+            tile_address += 0x2000;
+        }
 
-    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
-        tile_address = tile * 0x10;
-    }
-    else {
-        tile_address = (int8_t) tile * 0x10 + 0x1000;
-    }
-    if (attributes & 0x8) {
-        tile_address += 0x2000;
-    }
+        if (attributes & 0x20) {
+            x = ~x;
+        }
 
-    if (attributes & 0x20) {
-        x = ~x;
-    }
+        if (attributes & 0x40) {
+            y = ~y;
+        }
 
-    if (attributes & 0x40) {
-        y = ~y;
+        background_pixel = (((gb->vram[tile_address + (y & 7) * 2    ] >> ((~x)&7)) & 1 ) |
+                            ((gb->vram[tile_address + (y & 7) * 2 + 1] >> ((~x)&7)) & 1) << 1 );
     }
-
-    background_pixel = (((gb->vram[tile_address + (y & 7) * 2    ] >> ((~x)&7)) & 1 ) |
-                        ((gb->vram[tile_address + (y & 7) * 2 + 1] >> ((~x)&7)) & 1) << 1 );
 
     if (priority && sprite_pixel && !background_pixel) {
         if (!gb->cgb_mode) {
