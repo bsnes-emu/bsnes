@@ -226,6 +226,7 @@ typedef struct GB_gameboy_s {
         bool stopped;
         bool boot_rom_finished;
         bool ime_toggle; /* ei (and di in CGB) have delayed effects.*/
+        bool halt_bug;
 
         /* Misc state*/
         /* IR */
