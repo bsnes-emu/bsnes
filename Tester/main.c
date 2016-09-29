@@ -90,16 +90,16 @@ static void vblank(GB_gameboy_t *gb)
     }
 
     if (frames >= test_length ) {
-        bool is_screen_blank = false;
-        if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) { /* LCD is off */
-            is_screen_blank = true;
-        }
-        else if(!gb->cgb_mode) { /* BG can't be disabled in CGB mode */
-            is_screen_blank =!(gb->io_registers[GB_IO_LCDC] & (gb->is_cgb? 3 : 0x23));
+        bool is_screen_blank = true;
+        for (unsigned i = 160*144; i--;) {
+            if (bitmap[i] != bitmap[0]) {
+                is_screen_blank = false;
+                break;
+            }
         }
         
-        /* Let the test run for an extra 8 frames if the screen is off/disabled */
-        if (!is_screen_blank || frames >= test_length + 8) {
+        /* Let the test run for an extra second if the screen is off/disabled */
+        if (!is_screen_blank || frames >= test_length + 60) {
             FILE *f = fopen(bmp_filename, "wb");
             fwrite(&bmp_header, 1, sizeof(bmp_header), f);
             fwrite(&bitmap, 1, sizeof(bitmap), f);
