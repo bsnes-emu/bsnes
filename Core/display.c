@@ -216,9 +216,9 @@ static void nsleep(uint64_t nanoseconds)
 void display_vblank(GB_gameboy_t *gb)
 {
     /* Called every Gameboy vblank. Does FPS-capping and calls user's vblank callback if Turbo Mode allows. */
-    if (gb->turbo) {
+    if (gb->turbo && !gb->turbo_dont_skip) {
         int64_t nanoseconds = get_nanoseconds();
-        if (!gb->turbo_dont_skip && nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
+        if (nanoseconds <= gb->last_vblank + FRAME_LENGTH) {
             return;
         }
         gb->last_vblank = nanoseconds;
