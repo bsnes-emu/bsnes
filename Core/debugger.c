@@ -1406,7 +1406,7 @@ void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t 
 
 static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
 {
-    uint16_t index = find_breakpoint(gb, addr);
+    uint16_t index = find_watchpoint(gb, addr);
     uint32_t key = WP_KEY(addr);
 
     if (index < gb->n_watchpoints && gb->watchpoints[index].key == key) {
