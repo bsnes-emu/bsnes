@@ -98,8 +98,8 @@ static void vblank(GB_gameboy_t *gb)
             }
         }
         
-        /* Let the test run for an extra second if the screen is off/disabled */
-        if (!is_screen_blank || frames >= test_length + 60) {
+        /* Let the test run for extra four seconds if the screen is off/disabled */
+        if (!is_screen_blank || frames >= test_length + 60 * 4) {
             FILE *f = fopen(bmp_filename, "wb");
             fwrite(&bmp_header, 1, sizeof(bmp_header), f);
             fwrite(&bitmap, 1, sizeof(bitmap), f);
