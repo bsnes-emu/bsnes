@@ -79,10 +79,6 @@ static void vblank(GB_gameboy_t *gb)
             GB_log(gb, "A stack overflow has probably occurred.\n");
             frames = test_length - 1;
         }
-        if (gb->pc == 0x38 && GB_read_memory(gb, 0x38) == 0xFF) {
-            GB_log(gb, "The game is probably stuck in an FF loop.\n");
-            frames = test_length - 1;
-        }
         if (gb->halted && !gb->interrupt_enable) {
             GB_log(gb, "The game is deadlocked.\n");
             frames = test_length - 1;
@@ -313,6 +309,11 @@ int main(int argc, char **argv)
         frames = 0;
         while (running) {
             GB_run(&gb);
+            /* This early crash test must not run in vblank because PC might not point to the next instruction. */
+            if (gb.pc == 0x38 && frames < test_length - 1 && GB_read_memory(&gb, 0x38) == 0xFF) {
+                GB_log(&gb, "The game is probably stuck in an FF loop.\n");
+                frames = test_length - 1;
+            }
         }
         
         if (log_file) {
