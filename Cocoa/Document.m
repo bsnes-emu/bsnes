@@ -624,7 +624,7 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
                 n_banks = gb.is_cgb ? 2 : 1;
                 break;
             case GBMemoryExternalRAM:
-                n_banks = gb.mbc_ram_size / 0x2000;
+                n_banks = (gb.mbc_ram_size + 0x1FFF) / 0x2000;
                 break;
             case GBMemoryRAM:
                 n_banks = gb.is_cgb ? 8 : 1;

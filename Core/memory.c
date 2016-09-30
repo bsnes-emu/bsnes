@@ -86,7 +86,11 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         return 0xFF;
     }
 
-    return gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)];
+    uint8_t ret = gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)];
+    if (gb->cartridge_type->mbc_type == GB_MBC2) {
+        ret |= 0xF0;
+    }
+    return ret;
 }
 
 static uint8_t read_ram(GB_gameboy_t *gb, uint16_t addr)
@@ -278,8 +282,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_MBC2:
             switch (addr & 0xF000) {
-                /* Todo: is this correct? */
-                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value & 0x1; break;
+                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value == 10; break;
                 case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
             }
             break;
@@ -324,10 +327,6 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
         gb->rtc_latched.data[gb->mbc_ram_bank - 8] = gb->rtc_real.data[gb->mbc_ram_bank - 8] = value; /* Todo: does it really write both? */
-    }
-
-    if (gb->cartridge_type->mbc_type == GB_MBC2) {
-        value &= 0xF;
     }
 
     if (!gb->mbc_ram) {
