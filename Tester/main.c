@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -49,7 +49,7 @@ static void vblank(GB_gameboy_t *gb)
         if (start_is_not_first) combo_length = 60; /* The start item in the menu is not the first, so also push down */
         else if (a_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
 
-        switch ((push_faster? frames * 2 : frames) % combo_length) {
+        switch ((push_faster? frames * 2 : push_slower? frames / 2 : frames) % combo_length) {
             case 0:
                 gb->keys[7] = true; // Start down
                 break;
@@ -302,6 +302,8 @@ int main(int argc, char **argv)
         a_is_bad = strcmp((const char *)(gb.rom + 0x134), "DESERT STRIKE") == 0;
         b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0;
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
+        push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
+
 
         /* Run emulation */
         running = true;
