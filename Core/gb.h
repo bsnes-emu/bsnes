@@ -169,6 +169,10 @@ typedef struct {
         GB_MBC4, // Does this exist???
         GB_MBC5,
     } mbc_type;
+    enum {
+        GB_STANDARD_MBC,
+        GB_HUC1, /* Todo: HUC1 features are not emulated. Should be unified with the CGB IR sensor API. */
+    } mbc_subtype;
     bool has_ram;
     bool has_battery;
     bool has_rtc;

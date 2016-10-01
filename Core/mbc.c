@@ -5,46 +5,46 @@
 
 const GB_cartridge_t GB_cart_defs[256] = {
     // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type
-    /* MBC        RAM    BAT.   RTC    RUMB.    */
-    {  GB_NO_MBC, false, false, false, false}, // 00h  ROM ONLY
-    {  GB_MBC1  , false, false, false, false}, // 01h  MBC1
-    {  GB_MBC1  , true , false, false, false}, // 02h  MBC1+RAM
-    {  GB_MBC1  , true , true , false, false}, // 03h  MBC1+RAM+BATTERY
+    /* MBC        SUBTYPE          RAM    BAT.   RTC    RUMB.  EXTRA    */
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false, }, // 00h  ROM ONLY
+    {  GB_MBC1  , GB_STANDARD_MBC, false, false, false, false}, // 01h  MBC1
+    {  GB_MBC1  , GB_STANDARD_MBC, true , false, false, false}, // 02h  MBC1+RAM
+    {  GB_MBC1  , GB_STANDARD_MBC, true , true , false, false}, // 03h  MBC1+RAM+BATTERY
     [5] =
-    {  GB_MBC2  , true , false, false, false}, // 05h  MBC2
-    {  GB_MBC2  , true , true , false, false}, // 06h  MBC2+BATTERY
+    {  GB_MBC2  , GB_STANDARD_MBC, true , false, false, false}, // 05h  MBC2
+    {  GB_MBC2  , GB_STANDARD_MBC, true , true , false, false}, // 06h  MBC2+BATTERY
     [8] =
-    {  GB_NO_MBC, true , false, false, false}, // 08h  ROM+RAM
-    {  GB_NO_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
+    {  GB_NO_MBC, GB_STANDARD_MBC, true , false, false, false}, // 08h  ROM+RAM
+    {  GB_NO_MBC, GB_STANDARD_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
     [0xB] =
     // Todo: What are these?
-    {  GB_NO_MBC, false, false, false, false}, // 0Bh  MMM01
-    {  GB_NO_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
-    {  GB_NO_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Bh  MMM01
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
     [0xF] =
-    {  GB_MBC3  , false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
-    {  GB_MBC3  , true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
-    {  GB_MBC3  , false, false, false, false}, // 11h  MBC3
-    {  GB_MBC3  , true , false, false, false}, // 12h  MBC3+RAM
-    {  GB_MBC3  , true , true , false, false}, // 13h  MBC3+RAM+BATTERY
+    {  GB_MBC3  , GB_STANDARD_MBC, false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
+    {  GB_MBC3  , GB_STANDARD_MBC, true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
+    {  GB_MBC3  , GB_STANDARD_MBC, false, false, false, false}, // 11h  MBC3
+    {  GB_MBC3  , GB_STANDARD_MBC, true , false, false, false}, // 12h  MBC3+RAM
+    {  GB_MBC3  , GB_STANDARD_MBC, true , true , false, false}, // 13h  MBC3+RAM+BATTERY
     [0x15] =
     // Todo: Do these exist?
-    {  GB_MBC4  , false, false, false, false}, // 15h  MBC4
-    {  GB_MBC4  , true , false, false, false}, // 16h  MBC4+RAM
-    {  GB_MBC4  , true , true , false, false}, // 17h  MBC4+RAM+BATTERY
+    {  GB_MBC4  , GB_STANDARD_MBC, false, false, false, false}, // 15h  MBC4
+    {  GB_MBC4  , GB_STANDARD_MBC, true , false, false, false}, // 16h  MBC4+RAM
+    {  GB_MBC4  , GB_STANDARD_MBC, true , true , false, false}, // 17h  MBC4+RAM+BATTERY
     [0x19] =
-    {  GB_MBC5  , false, false, false, false}, // 19h  MBC5
-    {  GB_MBC5  , true , false, false, false}, // 1Ah  MBC5+RAM
-    {  GB_MBC5  , true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
-    {  GB_MBC5  , false, false, false, true }, // 1Ch  MBC5+RUMBLE
-    {  GB_MBC5  , true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
-    {  GB_MBC5  , true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
+    {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, false}, // 19h  MBC5
+    {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, false}, // 1Ah  MBC5+RAM
+    {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
+    {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, true }, // 1Ch  MBC5+RUMBLE
+    {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
+    {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
     [0xFC] =
     // Todo: What are these?
-    {  GB_NO_MBC, false, false, false, false}, // FCh  POCKET CAMERA
-    {  GB_NO_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
-    {  GB_NO_MBC, false, false, false, false}, // FEh  HuC3
-    {  GB_NO_MBC, true , true , false, false}, // FFh  HuC1+RAM+BATTERY
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FCh  POCKET CAMERA
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FEh  HuC3
+    {  GB_MBC1  , GB_HUC1        , true , true , false, false}, // FFh  HuC1+RAM+BATTERY
 };
 
 void GB_update_mbc_mappings(GB_gameboy_t *gb)
@@ -101,7 +101,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
 {
     gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
 
-    if (gb->rom[0x147] == 0xFF || (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0)) {
+    if (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0) {
         GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
     }
 
