@@ -1200,6 +1200,37 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, const debugger_command_t *c
     return true;
 }
 
+
+static bool palettes(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+{
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+
+    if (!gb->is_cgb) {
+        GB_log(gb, "Not available on a DMG.\n");
+        return true;
+    }
+
+    GB_log(gb, "Background palettes: \n");
+    for (unsigned i = 0; i < 32; i++) {
+        GB_log(gb, "%04x ", ((uint16_t *)&gb->background_palletes_data)[i]);
+        if (i % 4 == 3) {
+            GB_log(gb, "\n");
+        }
+    }
+
+    GB_log(gb, "Sprites palettes: \n");
+    for (unsigned i = 0; i < 32; i++) {
+        GB_log(gb, "%04x ", ((uint16_t *)&gb->sprite_palletes_data)[i]);
+        if (i % 4 == 3) {
+            GB_log(gb, "\n");
+        }
+    }
+
+    return true;
+}
 static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command);
 
 #define HELP_NEWLINE "\n            "
@@ -1217,6 +1248,7 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
+    {"palettes", 3, palettes, "Displays the current CGB palettes"},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression." HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints.",
                                   "<expression>[ if <condition expression>]"},
