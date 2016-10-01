@@ -675,4 +675,9 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return &gb;
 }
 
++ (BOOL)canConcurrentlyReadDocumentsOfType:(NSString *)typeName
+{
+    return YES;
+}
+
 @end
