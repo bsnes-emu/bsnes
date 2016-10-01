@@ -53,11 +53,10 @@
     [_preferencesWindow makeKeyAndOrderFront:self];
 }
 
-- (void)applicationDidBecomeActive:(NSNotification *)notification
+- (BOOL)applicationOpenUntitledFile:(NSApplication *)sender
 {
-    NSDocumentController *controller = [NSDocumentController sharedDocumentController];
-    if (![[controller documents] count]) {
-        [[NSDocumentController sharedDocumentController] openDocument:self];
-    }
+    [[NSDocumentController sharedDocumentController] openDocument:self];
+    return YES;
 }
+
 @end
