@@ -197,7 +197,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 
             case GB_IO_BGPI:
             case GB_IO_OBPI:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode && gb->boot_rom_finished) {
                     return 0xFF;
                 }
                 return gb->io_registers[addr & 0xFF] | 0x40;
@@ -205,7 +205,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_BGPD:
             case GB_IO_OBPD:
             {
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode && gb->boot_rom_finished) {
                     return 0xFF;
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
@@ -479,14 +479,16 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_BGPI:
             case GB_IO_OBPI:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode && gb->boot_rom_finished) {
                     return;
                 }
                 gb->io_registers[addr & 0xFF] = value;
                 return;
             case GB_IO_BGPD:
             case GB_IO_OBPD:
-                if (!gb->is_cgb) {
+                if (!gb->cgb_mode && gb->boot_rom_finished) {
+                    /* Todo: Due to the behavior of a broken Game & Watch Gallery 2 ROM on a real CGB. A proper test ROM
+                       is required. */
                     return;
                 }
                 uint8_t index_reg = (addr & 0xFF) - 1;
