@@ -41,7 +41,7 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
     [0xFC] =
     // Todo: What are these?
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FCh  POCKET CAMERA
+    {  GB_MBC5  , GB_CAMERA      , true,  true,  false, false}, // FCh  POCKET CAMERA
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FEh  HuC3
     {  GB_MBC1  , GB_HUC1        , true , true , false, false}, // FFh  HuC1+RAM+BATTERY

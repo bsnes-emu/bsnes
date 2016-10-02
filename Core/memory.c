@@ -74,12 +74,16 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return 0xFF;
+    if ((!gb->mbc_ram_enable || !gb->mbc_ram_size) && gb->cartridge_type->mbc_subtype != GB_CAMERA) return 0xFF;
     
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
         /* RTC read */
         gb->rtc_latched.high |= ~0xC1; /* Not all bytes in RTC high are used. */
         return gb->rtc_latched.data[gb->mbc_ram_bank - 8];
+    }
+
+    if (gb->camera_registers_mapped) {
+        return 0;
     }
 
     if (!gb->mbc_ram) {
@@ -282,7 +286,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_MBC2:
             switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value == 10; break;
+                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value == 0xA; break;
                 case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
             }
             break;
@@ -292,7 +296,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case 0x2000: case 0x3000: gb->mbc3.rom_bank  = value; break;
                 case 0x4000: case 0x5000: gb->mbc3.ram_bank  = value; break;
                 case 0x6000: case 0x7000:
-                    if (!gb->rtc_latch && (value & 1)) { /* Todo: verify condition is correct*/
+                    if (!gb->rtc_latch && (value & 1)) { /* Todo: verify condition is correct */
                         memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
                     }
                     gb->rtc_latch = value & 1;
@@ -304,7 +308,10 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case 0x0000: case 0x1000: gb->mbc_ram_enable      = (value & 0xF) == 0xA; break;
                 case 0x2000:              gb->mbc5.rom_bank_low   = value; break;
                 case 0x3000:              gb->mbc5.rom_bank_high  = value; break;
-                case 0x4000: case 0x5000: gb->mbc5.ram_bank       = value; break;
+                case 0x4000: case 0x5000:
+                    gb->mbc5.ram_bank = value;
+                    gb->camera_registers_mapped = (value & 0x10) && gb->cartridge_type->mbc_subtype == GB_CAMERA;
+                    break;
             }
             break;
     }
@@ -330,6 +337,10 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (!gb->mbc_ram) {
+        return;
+    }
+
+    if (gb->camera_registers_mapped) {
         return;
     }
 
