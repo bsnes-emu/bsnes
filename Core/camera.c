@@ -2,6 +2,10 @@
 
 uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr)
 {
+    if (gb->camera_registers[0]) {
+        /* Forbid reading the image while the camera is busy. */
+        return 0xFF;
+    }
     uint8_t tile_x = addr / 0x10 % 0x10;
     uint8_t tile_y = addr / 0x10 / 0x10;
 
