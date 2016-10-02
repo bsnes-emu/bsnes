@@ -29,7 +29,7 @@ uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr)
 
     for (uint8_t x = tile_x * 8; x < tile_x * 8 + 8; x++) {
 
-        int color = gb->camera_get_pixel_callback? ~gb->camera_get_pixel_callback(gb, x,y) : (rand() & 0xFF);
+        int color = gb->camera_get_pixel_callback? gb->camera_get_pixel_callback(gb, x,y) ^ 0xFF : (rand() & 0xFF);
 
         /* Dither using a deterministic random */
         color += dither_random(x, y);
