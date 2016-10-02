@@ -68,8 +68,8 @@ void GB_camera_write_register(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (addr == 0) {
         if ((value & 1) && gb->camera_update_request_callback) {
             /* If no callback is set, ignore the write as if the camera is instantly done */
-            gb->camera_update_request_callback(gb);
             gb->camera_registers[0] = 1;
+            gb->camera_update_request_callback(gb);
         }
     }
     else {
