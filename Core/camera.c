@@ -1,22 +1,5 @@
 #include "camera.h"
 
-static int8_t dither_random(uint8_t x, uint8_t y)
-{
-    static bool once = false;
-    static int8_t random[128*112];
-    if (!once) {
-        unsigned int r = 0x1337c0de;
-        for (int i = 0; i < sizeof(random); i++) {
-            random[i] = r % 85 - 42;
-            r += 11;
-            r *= 25214903917;
-        }
-        once = true;
-    }
-
-    return random[x + y * 128];
-}
-
 uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr)
 {
     uint8_t tile_x = addr / 0x10 % 0x10;
@@ -31,8 +14,8 @@ uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr)
 
         int color = gb->camera_get_pixel_callback? gb->camera_get_pixel_callback(gb, x,y) ^ 0xFF : (rand() & 0xFF);
 
-        /* Dither using a deterministic random */
-        color += dither_random(x, y);
+        /* Dither using a pattern */
+        color += ((x + y) & 1? 21 : -21) >> (y & 1);
         if (color > 255) {
             color = 255;
         }
