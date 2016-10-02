@@ -1,3 +1,4 @@
+#include <AVFoundation/AVFoundation.h>
 #include <CoreAudio/CoreAudio.h>
 #include "GBAudioClient.h"
 #include "Document.h"
@@ -5,6 +6,7 @@
 #include "gb.h"
 #include "debugger.h"
 #include "memory.h"
+#include "camera.h"
 #include "HexFiend/HexFiend.h"
 #include "GBMemoryByteArray.h"
 
@@ -23,6 +25,11 @@
 
     NSString *lastConsoleInput;
     HFLineCountingRepresenter *lineRep;
+
+    CVImageBufferRef cameraImage;
+    AVCaptureSession *cameraSession;
+    AVCaptureConnection *cameraConnection;
+    AVCaptureStillImageOutput *cameraOutput;
 }
 
 @property GBAudioClient *audioClient;
@@ -30,6 +37,8 @@
 - (void) log: (const char *) log withAttributes: (GB_log_attributes) attributes;
 - (const char *) getDebuggerInput;
 - (const char *) getAsyncDebuggerInput;
+- (void) cameraRequestUpdate;
+- (uint8_t) cameraGetPixelAtX:(uint8_t)x andY:(uint8_t)y;
 @end
 
 static void vblank(GB_gameboy_t *gb)
@@ -62,6 +71,18 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return (r << 0) | (g << 8) | (b << 16);
 }
 
+static void cameraRequestUpdate(GB_gameboy_t *gb)
+{
+    Document *self = (__bridge Document *)(gb->user_data);
+    [self cameraRequestUpdate];
+}
+
+static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
+{
+    Document *self = (__bridge Document *)(gb->user_data);
+    return [self cameraGetPixelAtX:x andY:y];
+}
+
 @implementation Document
 {
     GB_gameboy_t gb;
@@ -91,23 +112,26 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 {
     GB_init(&gb);
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"dmg_boot" ofType:@"bin"] UTF8String]);
-    GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
-    GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
-    GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
-    GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
-    GB_set_rgb_encode_callback(&gb, rgbEncode);
-    gb.user_data = (__bridge void *)(self);
+    [self initCommon];
 }
 
 - (void) initCGB
 {
     GB_init_cgb(&gb);
     GB_load_boot_rom(&gb, [[[NSBundle mainBundle] pathForResource:@"cgb_boot" ofType:@"bin"] UTF8String]);
+    [self initCommon];
+
+}
+
+- (void) initCommon
+{
     GB_set_vblank_callback(&gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(&gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&gb, (GB_input_callback_t) asyncConsoleInput);
     GB_set_rgb_encode_callback(&gb, rgbEncode);
+    GB_set_camera_get_pixel_callback(&gb, cameraGetPixel);
+    GB_set_camera_update_request_callback(&gb, cameraRequestUpdate);
     gb.user_data = (__bridge void *)(self);
 }
 
@@ -222,6 +246,9 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
 - (void)dealloc
 {
     GB_free(&gb);
+    if (cameraImage) {
+        CVBufferRelease(cameraImage);
+    }
 }
 
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController {
@@ -680,4 +707,74 @@ static uint32_t rgbEncode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return YES;
 }
 
+- (void)cameraRequestUpdate
+{
+    dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        @try {
+            if (!cameraSession) {
+                NSError *error;
+                AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
+                AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice: device error: &error];
+                CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions([[[device formats] firstObject] formatDescription]);
+
+                if (!input) {
+                    GB_camera_updated(&gb);
+                    return;
+                }
+
+                cameraOutput = [[AVCaptureStillImageOutput alloc] init];
+                /* Greyscale is not widely supported, so we use YUV, whose first element is the brightness. */
+                [cameraOutput setOutputSettings: @{(id)kCVPixelBufferPixelFormatTypeKey: @(kYUVSPixelFormat),
+                                                   (id)kCVPixelBufferWidthKey: @(MAX(128, 112 * dimensions.width / dimensions.height)),
+                                                   (id)kCVPixelBufferHeightKey: @(MAX(112, 128 * dimensions.height / dimensions.width)),}];
+
+
+                cameraSession = [AVCaptureSession new];
+                cameraSession.sessionPreset = AVCaptureSessionPresetPhoto;
+
+                [cameraSession addInput: input];
+                [cameraSession addOutput: cameraOutput];
+                /* ARC will stop the session when the window is closed. */
+                [cameraSession startRunning];
+                cameraConnection = [cameraOutput connectionWithMediaType: AVMediaTypeVideo];
+            }
+
+            [cameraOutput captureStillImageAsynchronouslyFromConnection: cameraConnection completionHandler: ^(CMSampleBufferRef sampleBuffer, NSError *error) {
+                if (error) {
+                    GB_camera_updated(&gb);
+                }
+                else {
+                    if (cameraImage) {
+                        CVBufferRelease(cameraImage);
+                        cameraImage = NULL;
+                    }
+                    cameraImage = CVBufferRetain(CMSampleBufferGetImageBuffer(sampleBuffer));
+                    /* We only need the actual buffer, no need to ever unlock it. */
+                    CVPixelBufferLockBaseAddress(cameraImage, 0);
+                }
+                
+                GB_camera_updated(&gb);
+            }];
+        }
+        @catch (NSException *exception) {
+            /* I have not tested camera support on many devices, so we catch exceptions just in case. */
+            GB_camera_updated(&gb);
+        }
+    });
+}
+
+- (uint8_t)cameraGetPixelAtX:(uint8_t)x andY:(uint8_t) y
+{
+    if (!cameraImage) {
+        return rand();
+    }
+
+    uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(cameraImage);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(cameraImage);
+    uint8_t offsetX = (CVPixelBufferGetWidth(cameraImage) - 128) / 2;
+    uint8_t offsetY = (CVPixelBufferGetHeight(cameraImage) - 112) / 2;
+    uint8_t ret = baseAddress[(x + offsetX) * 2 + (y + offsetY) * bytesPerRow];
+
+    return ret;
+}
 @end

@@ -161,7 +161,7 @@ $(BIN)/Sameboy.app: $(BIN)/Sameboy.app/Contents/MacOS/Sameboy \
 
 $(BIN)/Sameboy.app/Contents/MacOS/Sameboy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit
+	$(CC) $^ -o $@ $(LDFLAGS) -framework OpenGL -framework AudioUnit -framework AVFoundation -framework CoreVideo -framework CoreMedia
 ifeq ($(CONF), release)
 	strip $@
 endif
