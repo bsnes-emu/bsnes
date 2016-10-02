@@ -7,6 +7,7 @@
 #include "debugger.h"
 #include "mbc.h"
 #include "timing.h"
+#include "camera.h"
 
 typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
 typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
@@ -83,11 +84,15 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (gb->camera_registers_mapped) {
-        return 0;
+        return GB_camera_read_register(gb, addr);
     }
 
     if (!gb->mbc_ram) {
         return 0xFF;
+    }
+
+    if (gb->cartridge_type->mbc_subtype == GB_CAMERA && gb->mbc_ram_bank == 0 && addr >= 0xa100 && addr < 0xaf00) {
+        return GB_camera_read_image(gb, addr - 0xa100);
     }
 
     uint8_t ret = gb->mbc_ram[((addr & 0x1FFF) + gb->mbc_ram_bank * 0x2000) & (gb->mbc_ram_size - 1)];
@@ -329,6 +334,11 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    if (gb->camera_registers_mapped) {
+        GB_camera_write_register(gb, addr, value);
+        return;
+    }
+    
     if (!gb->mbc_ram_enable || !gb->mbc_ram_size) return;
 
     if (gb->cartridge_type->has_rtc && gb->mbc_ram_bank >= 8 && gb->mbc_ram_bank <= 0xC) {
@@ -337,10 +347,6 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (!gb->mbc_ram) {
-        return;
-    }
-
-    if (gb->camera_registers_mapped) {
         return;
     }
 
