@@ -2,6 +2,15 @@
 #define camera_h
 #include "gb.h"
 
+enum {
+    GB_CAMERA_FLAGS = 0,
+    GB_CAMERA_UNKNOWN_FLAGS = 1,
+    GB_CAMERA_MULTIPLIER_HIGH = 2,
+    GB_CAMERA_MULTIPLIER_LOW = 3,
+    GB_CAMERA_DITHERING_PATTERN_START = 6,
+    GB_CAMERA_DITHERING_PATTERN_END = 0x35,
+};
+
 uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr);
 
 void GB_set_camera_get_pixel_callback(GB_gameboy_t *gb, GB_camera_get_pixel_callback_t callback);
