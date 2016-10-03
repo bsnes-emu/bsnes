@@ -766,7 +766,7 @@ static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 - (uint8_t)cameraGetPixelAtX:(uint8_t)x andY:(uint8_t) y
 {
     if (!cameraImage) {
-        return rand();
+        return 0;
     }
 
     uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(cameraImage);

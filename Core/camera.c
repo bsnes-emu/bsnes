@@ -1,7 +1,27 @@
 #include "camera.h"
 
-/* This is not a completely emulation of the camera chip. Only the features used by the GameBoy Camera ROMs are supported. */
+static int noise_seed = 0;
 
+/* This is not a complete emulation of the camera chip. Only the features used by the GameBoy Camera ROMs are supported.
+    We also do not emulate the timing of the real cart, as it might be actually faster than the webcam. */
+
+static uint8_t generate_noise(uint8_t x, uint8_t y)
+{
+    int value = (x + y * 128 + noise_seed);
+    uint8_t *data = (uint8_t *) &value;
+    unsigned hash;
+
+    while ((int *) data != &value + 1) {
+        hash ^= (*data << 8);
+        if (hash & 0x8000) {
+            hash ^= 0x8a00;
+            hash ^= *data;
+        }
+        data++;
+        hash <<= 1;
+    }
+    return (hash >> 8);
+}
 
 static long get_processed_color(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
@@ -12,16 +32,17 @@ static long get_processed_color(GB_gameboy_t *gb, uint8_t x, uint8_t y)
         y = 0;
     }
 
-    long color = gb->camera_get_pixel_callback? gb->camera_get_pixel_callback(gb, x, y) : (rand() & 0xFF);
+    long color = gb->camera_get_pixel_callback? gb->camera_get_pixel_callback(gb, x, y) : (generate_noise(x, y));
 
-    static const double gain_values[] = {0.8809390, 0.9149149, 0.9457498, 0.9739758,
-        1.0000000, 1.0241412, 1.0466537, 1.0677433,
-        1.0875793, 1.1240310, 1.1568911, 1.1868043,
-        1.2142561, 1.2396208, 1.2743837, 1.3157323,
-        1.3525190, 1.3856512, 1.4157897, 1.4434309,
-        1.4689574, 1.4926697, 1.5148087, 1.5355703,
-        1.5551159, 1.5735801, 1.5910762, 1.6077008,
-        1.6235366, 1.6386550, 1.6531183, 1.6669808};
+    static const double gain_values[] =
+        {0.8809390, 0.9149149, 0.9457498, 0.9739758,
+         1.0000000, 1.0241412, 1.0466537, 1.0677433,
+         1.0875793, 1.1240310, 1.1568911, 1.1868043,
+         1.2142561, 1.2396208, 1.2743837, 1.3157323,
+         1.3525190, 1.3856512, 1.4157897, 1.4434309,
+         1.4689574, 1.4926697, 1.5148087, 1.5355703,
+         1.5551159, 1.5735801, 1.5910762, 1.6077008,
+         1.6235366, 1.6386550, 1.6531183, 1.6669808};
     /* Multiply color by gain value */
     color *= gain_values[gb->camera_registers[GB_CAMERA_GAIN_AND_EDGE_ENHACEMENT_FLAGS] & 0x1F];
 
@@ -45,9 +66,6 @@ uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr)
     uint8_t bit = addr & 1;
 
     uint8_t ret = 0;
-
-    /* This is not a complete emulation of the chip's image proccessing algorithm, it only emulates the features used by
-       the actual GameBoy Camera ROM. */
 
     for (uint8_t x = tile_x * 8; x < tile_x * 8 + 8; x++) {
 
@@ -107,6 +125,7 @@ void GB_camera_write_register(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     addr &= 0x7F;
     if (addr == GB_CAMERA_SHOOT_AND_1D_FLAGS) {
         value &= 0x7;
+        noise_seed = rand();
         if ((value & 1) && !(gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] & 1) && gb->camera_update_request_callback) {
             /* If no callback is set, ignore the write as if the camera is instantly done */
             gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] |= 1;
