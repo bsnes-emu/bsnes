@@ -9,7 +9,7 @@ static uint8_t generate_noise(uint8_t x, uint8_t y)
 {
     int value = (x + y * 128 + noise_seed);
     uint8_t *data = (uint8_t *) &value;
-    unsigned hash;
+    unsigned hash = 0;
 
     while ((int *) data != &value + 1) {
         hash ^= (*data << 8);
