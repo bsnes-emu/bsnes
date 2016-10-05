@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -44,7 +44,7 @@ static void vblank(GB_gameboy_t *gb)
     /* Do not press any buttons during the last two seconds, this might cause a
        screenshot to be taken while the LCD is off if the press makes the game
        load graphics. */
-    if (push_start_a && frames < test_length - 120) { 
+    if (push_start_a && (frames < test_length - 120 || do_not_stop)) { 
         unsigned combo_length = 40;
         if (start_is_not_first) combo_length = 60; /* The start item in the menu is not the first, so also push down */
         else if (a_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
@@ -299,11 +299,14 @@ int main(int argc, char **argv)
         /* It's OK. No overflow is possible here. */
         start_is_not_first = strcmp((const char *)(gb.rom + 0x134), "NEKOJARA") == 0 ||
                              strcmp((const char *)(gb.rom + 0x134), "GINGA") == 0;
-        a_is_bad = strcmp((const char *)(gb.rom + 0x134), "DESERT STRIKE") == 0;
+        a_is_bad = strcmp((const char *)(gb.rom + 0x134), "DESERT STRIKE") == 0 ||
+                    /* Restarting in Puzzle Boy/Kwirk (Start followed by A) leaks stack. */
+                   strcmp((const char *)(gb.rom + 0x134), "KWIRK") == 0 ||
+                   strcmp((const char *)(gb.rom + 0x134), "PUZZLE BOY") == 0;
         b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0;
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
-
+        do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
 
         /* Run emulation */
         running = true;
