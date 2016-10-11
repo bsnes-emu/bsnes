@@ -75,7 +75,7 @@ static void vblank(GB_gameboy_t *gb)
     
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {
-        if (gb->backtrace_size >= 0x80) {
+        if (gb->backtrace_size >= 0x300) {
             GB_log(gb, "A stack overflow has probably occurred.\n");
             frames = test_length - 1;
         }
