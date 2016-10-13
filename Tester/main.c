@@ -20,7 +20,7 @@ static char *bmp_filename;
 static char *log_filename;
 static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
-static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop;
+static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower, do_not_stop, push_a_twice;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -46,10 +46,13 @@ static void vblank(GB_gameboy_t *gb)
        load graphics. */
     if (push_start_a && (frames < test_length - 120 || do_not_stop)) { 
         unsigned combo_length = 40;
-        if (start_is_not_first) combo_length = 60; /* The start item in the menu is not the first, so also push down */
+        if (start_is_not_first || push_a_twice) combo_length = 60; /* The start item in the menu is not the first, so also push down */
         else if (a_is_bad) combo_length = 20; /* Pressing A has a negative effect (when trying to start the game). */
 
-        switch ((push_faster? frames * 2 : push_slower? frames / 2 : frames) % combo_length) {
+        switch ((push_faster ? frames * 2 :
+                 push_slower ? frames / 2 : 
+                 push_a_twice? frames / 4:
+                               frames) % combo_length) {
             case 0:
                 gb->keys[7] = true; // Start down
                 break;
@@ -63,11 +66,15 @@ static void vblank(GB_gameboy_t *gb)
                 gb->keys[b_is_confirm? 5: 4] = false; // A up (or B)
                 break;
             case 40:
-                if (gb->boot_rom_finished) {
+                if (push_a_twice) {
+                    gb->keys[b_is_confirm? 5: 4] = true; // A down (or B)
+                }
+                else if (gb->boot_rom_finished) {
                     gb->keys[3] = true; // D-Pad Down down
                 }
                 break;
             case 50:
+                gb->keys[b_is_confirm? 5: 4] = false; // A down (or B)
                 gb->keys[3] = false; // D-Pad Down up
                 break;
         }
@@ -307,6 +314,12 @@ int main(int argc, char **argv)
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0;
         push_slower = strcmp((const char *)(gb.rom + 0x134), "BAKENOU") == 0;
         do_not_stop = strcmp((const char *)(gb.rom + 0x134), "SPACE INVADERS") == 0;
+        
+        /* Pressing start while in the map in Tsuri Sensi will leak an internal screen-stack which
+           will eventually overflow, override an array of jump-table indexes, jump to a random
+           address, execute an invalid opcode, and crash. Pressing A twice while slowing down
+           will prevent this scenario. */
+        push_a_twice = strcmp((const char *)(gb.rom + 0x134), "TURI SENSEI V1") == 0;
 
         /* Run emulation */
         running = true;
