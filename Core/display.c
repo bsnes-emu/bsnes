@@ -368,7 +368,7 @@ void GB_display_run(GB_gameboy_t *gb)
         }
 
         // LY = 144 interrupt bug
-        if (gb->io_registers[GB_IO_LY] == 144) {
+        if (gb->io_registers[GB_IO_LY] == 144 && !gb->is_cgb) {
             /* User requests an interrupt on Mode 2 */
             if (gb->display_cycles % LINE_LENGTH < MODE2_LENGTH && gb->io_registers[GB_IO_STAT] & 0x20) { // Mode 2
                 gb->stat_interrupt_line = true;
