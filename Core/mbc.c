@@ -6,7 +6,7 @@
 const GB_cartridge_t GB_cart_defs[256] = {
     // From http://gbdev.gg8.se/wiki/articles/The_Cartridge_Header#0147_-_Cartridge_Type
     /* MBC        SUBTYPE          RAM    BAT.   RTC    RUMB.  EXTRA    */
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false, }, // 00h  ROM ONLY
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 00h  ROM ONLY
     {  GB_MBC1  , GB_STANDARD_MBC, false, false, false, false}, // 01h  MBC1
     {  GB_MBC1  , GB_STANDARD_MBC, true , false, false, false}, // 02h  MBC1+RAM
     {  GB_MBC1  , GB_STANDARD_MBC, true , true , false, false}, // 03h  MBC1+RAM+BATTERY
@@ -17,7 +17,7 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_NO_MBC, GB_STANDARD_MBC, true , false, false, false}, // 08h  ROM+RAM
     {  GB_NO_MBC, GB_STANDARD_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
     [0xB] =
-    // Todo: What are these?
+    /* Todo: Not supported yet */
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Bh  MMM01
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
@@ -27,30 +27,25 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_MBC3  , GB_STANDARD_MBC, false, false, false, false}, // 11h  MBC3
     {  GB_MBC3  , GB_STANDARD_MBC, true , false, false, false}, // 12h  MBC3+RAM
     {  GB_MBC3  , GB_STANDARD_MBC, true , true , false, false}, // 13h  MBC3+RAM+BATTERY
-    [0x15] =
-    // Todo: Do these exist?
-    {  GB_MBC4  , GB_STANDARD_MBC, false, false, false, false}, // 15h  MBC4
-    {  GB_MBC4  , GB_STANDARD_MBC, true , false, false, false}, // 16h  MBC4+RAM
-    {  GB_MBC4  , GB_STANDARD_MBC, true , true , false, false}, // 17h  MBC4+RAM+BATTERY
     [0x19] =
     {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, false}, // 19h  MBC5
     {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, false}, // 1Ah  MBC5+RAM
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, false}, // 1Bh  MBC5+RAM+BATTERY
+    /* Todo: Rumble supported yet */
     {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, true }, // 1Ch  MBC5+RUMBLE
     {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
     [0xFC] =
-    // Todo: What are these?
-    {  GB_MBC5  , GB_CAMERA      , true,  true,  false, false}, // FCh  POCKET CAMERA
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FEh  HuC3
-    {  GB_MBC1  , GB_HUC1        , true , true , false, false}, // FFh  HuC1+RAM+BATTERY
+    {  GB_MBC5  , GB_CAMERA      , true , true , false, false}, // FCh  POCKET CAMERA
+    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5 (Todo: Not supported)
+    {  GB_HUC3  , GB_STANDARD_MBC, true , true , false, false}, // FEh  HuC3 (Todo: Mapper support only)
+    {  GB_MBC1  , GB_HUC1        , true , true , false, false}, // FFh  HuC1+RAM+BATTERY (Todo: No IR bindings)
 };
 
 void GB_update_mbc_mappings(GB_gameboy_t *gb)
 {
     switch (gb->cartridge_type->mbc_type) {
-        case GB_NO_MBC: case GB_MBC4: return;
+        case GB_NO_MBC: return;
         case GB_MBC1:
             /* Todo: some obscure behaviors of MBC1 are not supported. See http://forums.nesdev.com/viewtopic.php?f=20&t=14099 */
             if (gb->mbc1.mode == 0) {
@@ -91,8 +86,12 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_rom_bank = gb->mbc5.rom_bank_low | (gb->mbc5.rom_bank_high << 8);
             gb->mbc_ram_bank = gb->mbc5.ram_bank;
             break;
+        case GB_HUC3:
+            gb->mbc_rom_bank = gb->huc3.rom_bank;
+            gb->mbc_ram_bank = gb->huc3.ram_bank;
+            break;
     }
-    if (gb->mbc_rom_bank == 0 && gb->cartridge_type->mbc_type != GB_MBC5) {
+    if (gb->mbc_rom_bank == 0 && gb->cartridge_type->mbc_type != GB_MBC5  && gb->cartridge_type->mbc_type != GB_HUC3) {
         gb->mbc_rom_bank = 1;
     }
 }

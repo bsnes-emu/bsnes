@@ -280,7 +280,7 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     switch (gb->cartridge_type->mbc_type) {
-        case GB_NO_MBC: case GB_MBC4: return;
+        case GB_NO_MBC: return;
         case GB_MBC1:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
@@ -291,7 +291,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
         case GB_MBC2:
             switch (addr & 0xF000) {
-                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = value == 0xA; break;
+                case 0x0000: case 0x1000: if (!(addr & 0x100)) gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
                 case 0x2000: case 0x3000: if (  addr & 0x100)  gb->mbc2.rom_bank  = value; break;
             }
             break;
@@ -317,6 +317,13 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->mbc5.ram_bank = value;
                     gb->camera_registers_mapped = (value & 0x10) && gb->cartridge_type->mbc_subtype == GB_CAMERA;
                     break;
+            }
+            break;
+        case GB_HUC3:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable = (value & 0xF) == 0xA; break;
+                case 0x2000: case 0x3000: gb->huc3.rom_bank  = value; break;
+                case 0x4000: case 0x5000: gb->huc3.ram_bank  = value; break;
             }
             break;
     }
