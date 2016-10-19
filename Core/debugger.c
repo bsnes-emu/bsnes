@@ -593,7 +593,7 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
 }
 
 struct debugger_command_s;
-typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments, const struct debugger_command_s *command);
+typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments, char *modifiers, const struct debugger_command_s *command);
 
 typedef struct debugger_command_s {
     const char *command;
@@ -601,6 +601,7 @@ typedef struct debugger_command_s {
     debugger_command_imp_t *implementation;
     const char *help_string; // Null if should not appear in help
     const char *arguments_format; // For usage message
+    const char *modifiers_format; // For usage message
 } debugger_command_t;
 
 static const char *lstrip(const char *str)
@@ -617,18 +618,30 @@ GB_log(gb, "Program is running. \n"); \
 return false; \
 }
 
-static void print_usage(GB_gameboy_t *gb, const debugger_command_t *command)
-{
-    if (command->arguments_format) {
-        GB_log(gb, "Usage: %s %s\n", command->command, command->arguments_format);
-    }
-    else {
-        GB_log(gb, "Usage: %s\n", command->command);
-    }
+#define NO_MODIFIERS \
+if (modifiers) { \
+print_usage(gb, command); \
+return true; \
 }
 
-static bool cont(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static void print_usage(GB_gameboy_t *gb, const debugger_command_t *command)
 {
+    GB_log(gb, "Usage: %s", command->command);
+
+    if (command->arguments_format) {
+        GB_log(gb, "[/%s]", command->modifiers_format);
+    }
+
+    if (command->arguments_format) {
+        GB_log(gb, " %s", command->arguments_format);
+    }
+
+    GB_log(gb, "\n");
+}
+
+static bool cont(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
@@ -640,8 +653,9 @@ static bool cont(GB_gameboy_t *gb, char *arguments, const debugger_command_t *co
     return false;
 }
 
-static bool next(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool next(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
@@ -655,8 +669,9 @@ static bool next(GB_gameboy_t *gb, char *arguments, const debugger_command_t *co
     return false;
 }
 
-static bool step(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool step(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
@@ -667,8 +682,9 @@ static bool step(GB_gameboy_t *gb, char *arguments, const debugger_command_t *co
     return false;
 }
 
-static bool finish(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool finish(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
@@ -682,8 +698,9 @@ static bool finish(GB_gameboy_t *gb, char *arguments, const debugger_command_t *
     return false;
 }
 
-static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     STOPPED_ONLY
     
     if (strlen(lstrip(arguments))) {
@@ -697,8 +714,9 @@ static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, const debugg
     return false;
 }
 
-static bool registers(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -739,8 +757,9 @@ static uint16_t find_breakpoint(GB_gameboy_t *gb, value_t addr)
     return (uint16_t) min;
 }
 
-static bool breakpoint(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments)) == 0) {
         print_usage(gb, command);
         return true;
@@ -804,8 +823,9 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, const debugger_command
     return true;
 }
 
-static bool delete(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool delete(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments)) == 0) {
         for (unsigned i = gb->n_breakpoints; i--;) {
             if (gb->breakpoints[i].condition) {
@@ -864,7 +884,7 @@ static uint16_t find_watchpoint(GB_gameboy_t *gb, value_t addr)
     return (uint16_t) min;
 }
 
-static bool watch(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool watch(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
 print_usage:
@@ -877,9 +897,13 @@ print_usage:
         return true;
     }
 
+    if (!modifiers) {
+        modifiers = "w";
+    }
+
     uint8_t flags = 0;
-    while (*arguments != ' ' && *arguments) {
-        switch (*arguments) {
+    while (*modifiers) {
+        switch (*modifiers) {
             case 'r':
                 flags |= GB_WATCHPOINT_R;
                 break;
@@ -889,7 +913,7 @@ print_usage:
             default:
                 goto print_usage;
         }
-        arguments++;
+        modifiers++;
     }
 
     if (!flags) {
@@ -956,8 +980,9 @@ print_usage:
     return true;
 }
 
-static bool unwatch(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool unwatch(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments)) == 0) {
         for (unsigned i = gb->n_watchpoints; i--;) {
             if (gb->watchpoints[i].condition) {
@@ -994,8 +1019,9 @@ static bool unwatch(GB_gameboy_t *gb, char *arguments, const debugger_command_t 
     return true;
 }
 
-static bool list(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -1077,9 +1103,17 @@ static bool should_break(GB_gameboy_t *gb, uint16_t addr)
     return _should_break(gb, full_addr);
 }
 
-static bool print(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool print(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
+        print_usage(gb, command);
+        return true;
+    }
+
+    if (!modifiers || !modifiers[0]) {
+        modifiers = "a";
+    }
+    else if (modifiers[1]) {
         print_usage(gb, command);
         return true;
     }
@@ -1087,12 +1121,43 @@ static bool print(GB_gameboy_t *gb, char *arguments, const debugger_command_t *c
     bool error;
     value_t result = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
     if (!error) {
-        GB_log(gb, "=%s\n", debugger_value_to_string(gb, result, false));
+        switch (modifiers[0]) {
+            case 'a':
+                GB_log(gb, "=%s\n", debugger_value_to_string(gb, result, false));
+                break;
+            case 'd':
+                GB_log(gb, "=%d\n", result.value);
+                break;
+            case 'x':
+                GB_log(gb, "=$%x\n", result.value);
+                break;
+            case 'o':
+                GB_log(gb, "=0%o\n", result.value);
+                break;
+            case 'b':
+            {
+                if (!result.value) {
+                    GB_log(gb, "=%%0\n");
+                    break;
+                }
+                char binary[17];
+                binary[16] = 0;
+                char *ptr = &binary[16];
+                while (result.value) {
+                    *(--ptr) = (result.value & 1)? '1' : '0';
+                    result.value >>= 1;
+                }
+                GB_log(gb, "=%%%s\n", ptr);
+                break;
+            }
+            default:
+                break;
+        }
     }
     return true;
 }
 
-static bool examine(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     if (strlen(lstrip(arguments)) == 0) {
         print_usage(gb, command);
@@ -1101,33 +1166,54 @@ static bool examine(GB_gameboy_t *gb, char *arguments, const debugger_command_t 
 
     bool error;
     value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t count = 32;
+
+    if (modifiers) {
+        char *end;
+        count = (uint16_t) (strtol(modifiers, &end, 10));
+        if (*end) {
+            print_usage(gb, command);
+            return true;
+        }
+    }
+
     if (!error) {
         if (addr.has_bank) {
             banking_state_t old_state;
             save_banking_state(gb, &old_state);
             switch_banking_state(gb, addr.bank);
 
-            GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
-            for (int i = 0; i < 16; i++) {
-                GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+            while (count) {
+                GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
+                for (int i = 0; i < 16 && count; i++) {
+                    GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+                    count--;
+                }
+                addr.value += 16;
+                GB_log(gb, "\n");
             }
-            GB_log(gb, "\n");
 
             restore_banking_state(gb, &old_state);
         }
         else {
-            GB_log(gb, "%04x: ", addr.value);
-            for (int i = 0; i < 16; i++) {
-                GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+            while (count) {
+                GB_log(gb, "%04x: ", addr.value);
+                for (int i = 0; i < 16 && count; i++) {
+                    GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+                    count--;
+                }
+                addr.value += 16;
+                GB_log(gb, "\n");
             }
-            GB_log(gb, "\n");
         }
     }
     return true;
 }
 
-static bool mbc(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
+
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -1181,8 +1267,10 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, const debugger_command_t *com
     return true;
 }
 
-static bool backtrace(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool backtrace(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
+
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -1196,8 +1284,9 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, const debugger_command_
     return true;
 }
 
-static bool ticks(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     STOPPED_ONLY
 
     if (strlen(lstrip(arguments))) {
@@ -1212,8 +1301,9 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, const debugger_command_t *c
 }
 
 
-static bool palettes(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command)
+static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
+    NO_MODIFIERS
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
@@ -1242,7 +1332,7 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, const debugger_command_t
 
     return true;
 }
-static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *command);
+static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
 #define HELP_NEWLINE "\n            "
 
@@ -1254,24 +1344,28 @@ static const debugger_command_t commands[] = {
     {"finish", 1, finish, "Run until the current function returns"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
-    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected. (Experimental)"},
-    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was used. "},
+    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected (Experimental)"},
+    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was used"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
     {"palettes", 3, palettes, "Displays the current CGB palettes"},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression." HELP_NEWLINE
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints.",
                                   "<expression>[ if <condition expression>]"},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]"},
     {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
-                        "Can also modify the condition and type of existing watchpoints.",
-                        " (r|w|rw) <expression>[ if <condition expression>]"},
+                        "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
+                        "Default watchpoint type is write-only.",
+                        "<expression>[ if <condition expression>]", "(r|w|rw)"},
     {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]"},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
-    {"print", 1, print, "Evaluate and print an expression", "<expression>"},
+    {"print", 1, print, "Evaluate and print an expression" HELP_NEWLINE
+                        "Use modifier to format as an address (a, default) or as a number in" HELP_NEWLINE
+                        "decimal (d), hexadecimal (x), octal (o) or binary (b).",
+                        "<expression>", "format"},
     {"eval", 2, }, /* Alias */
-    {"examine", 2, examine, "Examine values at address", "<expression>"},
+    {"examine", 2, examine, "Examine values at address", "<expression>", "count"},
     {"x", 1, }, /* Alias */
 
     {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
@@ -1308,7 +1402,7 @@ static void print_command_description(GB_gameboy_t *gb, const debugger_command_t
     GB_log(gb, (const char *)&"          %s\n" + strlen(command->command), command->help_string);
 }
 
-static bool help(GB_gameboy_t *gb, char *arguments, const debugger_command_t *ignored)
+static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *ignored)
 {
     const debugger_command_t *command = find_command(arguments);
     if (command) {
@@ -1512,9 +1606,16 @@ bool GB_debugger_do_command(GB_gameboy_t *gb, char *input)
         arguments = "";
     }
 
+    char *modifiers = strchr(command_string, '/');
+    if (modifiers) {
+        /* Actually "split" the string. */
+        modifiers[0] = 0;
+        modifiers++;
+    }
+
     const debugger_command_t *command = find_command(command_string);
     if (command) {
-        return command->implementation(gb, arguments, command);
+        return command->implementation(gb, arguments, modifiers, command);
     }
     else {
         GB_log(gb, "%s: no such command.\n", command_string);
