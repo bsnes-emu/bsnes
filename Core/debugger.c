@@ -1210,6 +1210,42 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
     return true;
 }
 
+static bool disassemble(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    if (strlen(lstrip(arguments)) == 0) {
+        arguments = "pc";
+    }
+
+    bool error;
+    value_t addr = debugger_evaluate(gb, arguments, (unsigned int)strlen(arguments), &error, NULL, NULL);
+    uint16_t count = 5;
+
+    if (modifiers) {
+        char *end;
+        count = (uint16_t) (strtol(modifiers, &end, 10));
+        if (*end) {
+            print_usage(gb, command);
+            return true;
+        }
+    }
+
+    if (!error) {
+        if (addr.has_bank) {
+            banking_state_t old_state;
+            save_banking_state(gb, &old_state);
+            switch_banking_state(gb, addr.bank);
+
+            GB_cpu_disassemble(gb, addr.value, count);
+
+            restore_banking_state(gb, &old_state);
+        }
+        else {
+            GB_cpu_disassemble(gb, addr.value, count);
+        }
+    }
+    return true;
+}
+
 static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
@@ -1367,6 +1403,8 @@ static const debugger_command_t commands[] = {
     {"eval", 2, }, /* Alias */
     {"examine", 2, examine, "Examine values at address", "<expression>", "count"},
     {"x", 1, }, /* Alias */
+    {"disassemble", 1, disassemble, "disassemble instructions at address", "<expression>", "count"},
+
 
     {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
     {NULL,}, /* Null terminator */
