@@ -1568,7 +1568,6 @@ static bool _GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, value_t addr, u
 void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     if (gb->debug_stopped) return;
-    if (!gb->n_watchpoints) return;
 
     /* Try any-bank breakpoint */
     value_t full_addr = (VALUE_16(addr));
@@ -1614,7 +1613,6 @@ static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
 void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->debug_stopped) return;
-    if (!gb->n_watchpoints) return;
 
     /* Try any-bank breakpoint */
     value_t full_addr = (VALUE_16(addr));
@@ -1679,7 +1677,7 @@ next_command:
     if (input) {
         free(input);
     }
-    if (!gb->debug_stopped && should_break(gb, gb->pc)) {
+    if (gb->breakpoints && !gb->debug_stopped && should_break(gb, gb->pc)) {
         gb->debug_stopped = true;
         GB_log(gb, "Breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
         GB_cpu_disassemble(gb, gb->pc, 5);

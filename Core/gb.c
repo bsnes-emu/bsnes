@@ -426,9 +426,13 @@ exit:
 
 void GB_run(GB_gameboy_t *gb)
 {
-    GB_update_joyp(gb);
     GB_debugger_run(gb);
     GB_cpu_run(gb);
+    if (gb->vblank_just_occured) {
+        GB_update_joyp(gb);
+        GB_rtc_run(gb);
+        GB_debugger_handle_async_commands(gb);
+    }
 }
 
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)

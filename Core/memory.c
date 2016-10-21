@@ -168,7 +168,6 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 /* Fall through */
             case GB_IO_JOYP:
-            case GB_IO_DIV:
             case GB_IO_TMA:
             case GB_IO_LCDC:
             case GB_IO_SCY:
@@ -188,6 +187,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                     return 0;
                 }
                 return gb->io_registers[GB_IO_TIMA];
+            case GB_IO_DIV:
+                return gb->div_cycles >> 8;
             case GB_IO_HDMA5:
                 if (!gb->is_cgb) {
                     return 0xFF;
@@ -270,7 +271,9 @@ static GB_read_function_t * const read_map[] =
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
-    GB_debugger_test_read_watchpoint(gb, addr);
+    if (gb->n_watchpoints) {
+        GB_debugger_test_read_watchpoint(gb, addr);
+    }
     if (is_addr_in_dma_use(gb, addr)) {
         addr = gb->dma_current_src;
     }
@@ -454,12 +457,12 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
             case GB_IO_DIV:
                 GB_set_internal_div_counter(gb, 0);
-                gb->io_registers[GB_IO_DIV] = 0;
                 return;
 
             case GB_IO_JOYP:
                 gb->io_registers[GB_IO_JOYP] &= 0x0F;
                 gb->io_registers[GB_IO_JOYP] |= value & 0xF0;
+                GB_update_joyp(gb);
                 return;
 
             case GB_IO_BIOS:
@@ -618,7 +621,9 @@ static GB_write_function_t * const write_map[] =
 
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    GB_debugger_test_write_watchpoint(gb, addr, value);
+    if (gb->n_watchpoints) {
+        GB_debugger_test_write_watchpoint(gb, addr, value);
+    }
     if (is_addr_in_dma_use(gb, addr)) {
         /* Todo: What should happen? Will this affect DMA? Will data be written? What and where? */
         return;

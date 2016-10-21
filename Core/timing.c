@@ -93,11 +93,8 @@ static bool counter_overflow_check(uint32_t old, uint32_t new, uint32_t max)
 
 void GB_set_internal_div_counter(GB_gameboy_t *gb, uint32_t value)
 {
-    /* DIV and TIMA increase when a specific high-bit becomes a low-bit. */
+    /* TIMA increases when a specific high-bit becomes a low-bit. */
     value &= INTERNAL_DIV_CYCLES - 1;
-    if (counter_overflow_check(gb->div_cycles, value, DIV_CYCLES)) {
-        gb->io_registers[GB_IO_DIV]++;
-    }
     if ((gb->io_registers[GB_IO_TAC] & 4) &&
         counter_overflow_check(gb->div_cycles, value, GB_TAC_RATIOS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);

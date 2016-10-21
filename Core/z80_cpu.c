@@ -515,39 +515,43 @@ static void set_src_value(GB_gameboy_t *gb, uint8_t opcode, uint8_t value)
     }
 }
 
-static void ld_r_r(GB_gameboy_t *gb, uint8_t opcode)
-{
-    uint8_t dst_register_id;
-    uint8_t dst_low;
-    uint8_t value;
-    GB_advance_cycles(gb, 4);
+/* The LD r,r instruction is extremely common and extremely simple. Decoding this opcode at runtime is a significent
+   performance hit, so we generate functions for every ld x,y couple (including [hl]) at compile time using macros. */
 
-    dst_register_id = ((opcode >> 4) + 1) & 3;
-    dst_low = opcode & 8;
-    value = get_src_value(gb, opcode);
+/* Todo: It's probably wise to do the same to all opcodes. */
 
-    if (dst_register_id == GB_REGISTER_AF) {
-        if (dst_low) {
-            gb->registers[GB_REGISTER_AF] &= 0xFF;
-            gb->registers[GB_REGISTER_AF] |= value << 8;
-        }
-        else {
-            GB_write_memory(gb, gb->registers[GB_REGISTER_HL], value);
-            GB_advance_cycles(gb, 4);
-        }
-    }
-    else {
-        if (dst_low) {
-            gb->registers[dst_register_id] &= 0xFF00;
-            gb->registers[dst_register_id] |= value;
-        }
-        else {
-            gb->registers[dst_register_id] &= 0xFF;
-            gb->registers[dst_register_id] |= value << 8;
-        }
-    }
-
+#define LD_X_Y(x, y) \
+static void ld_##x##_##y(GB_gameboy_t *gb, uint8_t opcode) \
+{ \
+    GB_advance_cycles(gb, 4); \
+    gb->x = gb->y;\
 }
+
+#define LD_X_DHL(x) \
+static void ld_##x##_##dhl(GB_gameboy_t *gb, uint8_t opcode) \
+{ \
+GB_advance_cycles(gb, 4); \
+gb->x = GB_read_memory(gb, gb->registers[GB_REGISTER_HL]); \
+GB_advance_cycles(gb, 4);\
+}
+
+#define LD_DHL_Y(y) \
+static void ld_##dhl##_##y(GB_gameboy_t *gb, uint8_t opcode) \
+{ \
+GB_advance_cycles(gb, 4); \
+GB_write_memory(gb, gb->registers[GB_REGISTER_HL], gb->y); \
+GB_advance_cycles(gb, 4);\
+}
+
+LD_X_Y(b,c) LD_X_Y(b,d) LD_X_Y(b,e) LD_X_Y(b,h) LD_X_Y(b,l)             LD_X_DHL(b) LD_X_Y(b,a)
+LD_X_Y(c,b)             LD_X_Y(c,d) LD_X_Y(c,e) LD_X_Y(c,h) LD_X_Y(c,l) LD_X_DHL(c) LD_X_Y(c,a)
+LD_X_Y(d,b) LD_X_Y(d,c)             LD_X_Y(d,e) LD_X_Y(d,h) LD_X_Y(d,l) LD_X_DHL(d) LD_X_Y(d,a)
+LD_X_Y(e,b) LD_X_Y(e,c) LD_X_Y(e,d)             LD_X_Y(e,h) LD_X_Y(e,l) LD_X_DHL(e) LD_X_Y(e,a)
+LD_X_Y(h,b) LD_X_Y(h,c) LD_X_Y(h,d) LD_X_Y(h,e)             LD_X_Y(h,l) LD_X_DHL(h) LD_X_Y(h,a)
+LD_X_Y(l,b) LD_X_Y(l,c) LD_X_Y(l,d) LD_X_Y(l,e) LD_X_Y(l,h)             LD_X_DHL(l) LD_X_Y(l,a)
+LD_DHL_Y(b) LD_DHL_Y(c) LD_DHL_Y(d) LD_DHL_Y(e) LD_DHL_Y(h) LD_DHL_Y(l)             LD_DHL_Y(a)
+LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL(a)
+
 
 static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
@@ -1308,14 +1312,14 @@ static GB_opcode_t *opcodes[256] = {
     jr_cc_r8,   add_hl_rr,  ld_a_dhli,  dec_rr,     inc_lr,     dec_lr,     ld_lr_d8,   cpl,
     jr_cc_r8,   ld_rr_d16,  ld_dhld_a,  inc_rr,     inc_dhl,    dec_dhl,    ld_dhl_d8,  scf,        /* 3X */
     jr_cc_r8,   add_hl_rr,  ld_a_dhld,  dec_rr,     inc_hr,     dec_hr,     ld_hr_d8,   ccf,
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     /* 4X */
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     /* 5X */
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     /* 6X */
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     halt,       ld_r_r,     /* 7X */
-    ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,     ld_r_r,
+    nop,        ld_b_c,     ld_b_d,     ld_b_e,     ld_b_h,     ld_b_l,     ld_b_dhl,   ld_b_a,     /* 4X */
+    ld_c_b,     nop,        ld_c_d,     ld_c_e,     ld_c_h,     ld_c_l,     ld_c_dhl,   ld_c_a,
+    ld_d_b,     ld_d_c,     nop,        ld_d_e,     ld_d_h,     ld_d_l,     ld_d_dhl,   ld_d_a,     /* 5X */
+    ld_e_b,     ld_e_c,     ld_e_d,     nop,        ld_e_h,     ld_e_l,     ld_e_dhl,   ld_e_a,
+    ld_h_b,     ld_h_c,     ld_h_d,     ld_h_e,     nop,        ld_h_l,     ld_h_dhl,   ld_h_a,     /* 6X */
+    ld_l_b,     ld_l_c,     ld_l_d,     ld_l_e,     ld_l_h,     nop,        ld_l_dhl,   ld_l_a,
+    ld_dhl_b,   ld_dhl_c,   ld_dhl_d,   ld_dhl_e,   ld_dhl_h,   ld_dhl_l,   halt,       ld_dhl_a,   /* 7X */
+    ld_a_b,     ld_a_c,     ld_a_d,     ld_a_e,     ld_a_h,     ld_a_l,     ld_a_dhl,   nop,
     add_a_r,    add_a_r,    add_a_r,    add_a_r,    add_a_r,    add_a_r,    add_a_r,    add_a_r,    /* 8X */
     adc_a_r,    adc_a_r,    adc_a_r,    adc_a_r,    adc_a_r,    adc_a_r,    adc_a_r,    adc_a_r,
     sub_a_r,    sub_a_r,    sub_a_r,    sub_a_r,    sub_a_r,    sub_a_r,    sub_a_r,    sub_a_r,    /* 9X */
@@ -1333,7 +1337,6 @@ static GB_opcode_t *opcodes[256] = {
     ld_a_da8,   pop_rr,     ld_a_dc,    di,         ill,        push_rr,    or_a_d8,    rst,        /* fX */
     ld_hl_sp_r8,ld_sp_hl,   ld_a_da16,  ei,         ill,        ill,        cp_a_d8,    rst,
 };
-
 void GB_cpu_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
@@ -1377,10 +1380,5 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     else {
         GB_advance_cycles(gb, 4);
-    }
-
-    if (gb->vblank_just_occured) {
-        GB_rtc_run(gb);
-        GB_debugger_handle_async_commands(gb);
     }
 }

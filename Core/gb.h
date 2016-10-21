@@ -142,7 +142,7 @@ enum {
 #define LCDC_PERIOD 70224
 #define CPU_FREQUENCY 0x400000
 #define DIV_CYCLES (0x100)
-#define INTERNAL_DIV_CYCLES (0x400)
+#define INTERNAL_DIV_CYCLES (0x40000)
 #define FRAME_LENGTH 16742706 // in nanoseconds
 
 typedef enum {
@@ -220,7 +220,32 @@ typedef struct GB_gameboy_s {
     GB_SECTION(core_state,
         /* Registers */
         uint16_t pc;
-        uint16_t registers[GB_REGISTERS_16_BIT];
+           union {
+               uint16_t registers[GB_REGISTERS_16_BIT];
+               struct {
+                   uint16_t af,
+                            bc,
+                            de,
+                            hl,
+                            sp;
+               };
+               struct {
+#if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+                   uint8_t a, f,
+                           b, c,
+                           d, e,
+                           h, l;
+#elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+                   uint8_t f, a,
+                           c, b,
+                           e, d,
+                           l, h;
+#else
+#error Unable to detect endianess
+#endif
+               };
+               
+           };
         uint8_t ime;
         uint8_t interrupt_enable;
         uint8_t cgb_ram_bank;

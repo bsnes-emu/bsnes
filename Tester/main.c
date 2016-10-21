@@ -39,6 +39,11 @@ const char bmp_header[] = {
 
 uint32_t bitmap[160*144];
 
+static char *async_input_callback(GB_gameboy_t *gb)
+{
+    return NULL;
+}
+
 static void vblank(GB_gameboy_t *gb)
 {
     /* Do not press any buttons during the last two seconds, this might cause a
@@ -296,6 +301,7 @@ int main(int argc, char **argv)
         GB_set_pixels_output(&gb, &bitmap[0]);
         GB_set_rgb_encode_callback(&gb, rgb_encode);
         GB_set_log_callback(&gb, log_callback);
+        GB_set_async_input_callback(&gb, async_input_callback);
         
         if (GB_load_rom(&gb, filename)) {
             perror("Failed to load ROM");
