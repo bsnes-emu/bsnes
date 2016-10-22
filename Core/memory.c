@@ -317,6 +317,15 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case 0x2000:              gb->mbc5.rom_bank_low   = value; break;
                 case 0x3000:              gb->mbc5.rom_bank_high  = value; break;
                 case 0x4000: case 0x5000:
+                    if (gb->cartridge_type->has_rumble) {
+                        if (!!(value & 8) != gb->rumble_state) {
+                            gb->rumble_state = !gb->rumble_state;
+                            if (gb->rumble_callback) {
+                                gb->rumble_callback(gb, gb->rumble_state);
+                            }
+                        }
+                        value &= 7;
+                    }
                     gb->mbc5.ram_bank = value;
                     gb->camera_registers_mapped = (value & 0x10) && gb->cartridge_type->mbc_subtype == GB_CAMERA;
                     break;

@@ -161,6 +161,7 @@ typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on, long cycles_since_last_update);
 typedef uint8_t (*GB_camera_get_pixel_callback_t)(GB_gameboy_t *gb, uint8_t x, uint8_t y);
 typedef void (*GB_camera_update_request_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, bool rumble_on);
 
 typedef struct {
     enum {
@@ -317,6 +318,7 @@ typedef struct GB_gameboy_s {
         uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
+        bool rumble_state;
     );
 
 
@@ -415,6 +417,7 @@ typedef struct GB_gameboy_s {
     GB_infrared_callback_t infrared_callback;
     GB_camera_get_pixel_callback_t camera_get_pixel_callback;
     GB_camera_update_request_callback_t camera_update_request_callback;
+    GB_rumble_callback_t rumble_callback;
 
     /* IR */
     long cycles_since_ir_change;
@@ -493,4 +496,5 @@ void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callb
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_previous_change);
+void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 #endif /* GB_h */

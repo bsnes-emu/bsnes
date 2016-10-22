@@ -350,6 +350,11 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
 
     memcpy(gb, &save, sizeof(save));
     errno = 0;
+
+    if (gb->cartridge_type->has_rumble && gb->rumble_callback) {
+        gb->rumble_callback(gb, gb->rumble_state);
+    }
+    
 error:
     fclose(f);
     return errno;
@@ -487,6 +492,11 @@ void GB_queue_infrared_input(GB_gameboy_t *gb, bool state, long cycles_after_pre
         return;
     }
     gb->ir_queue[gb->ir_queue_length++] = (GB_ir_queue_item_t){state, cycles_after_previous_change};
+}
+
+void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback)
+{
+    gb->rumble_callback = callback;
 }
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned int sample_rate)
